@@ -156,11 +156,7 @@ public class Inline {
 			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
 			cp = Runtime.getRuntime().exec("javac -classpath .;lmntal.jar MyInlineCode.java");
 		} catch (Exception e) {
-<<<<<<< Inline.java
-			Env.d("!!!!! "+e.getMessage()+e.getStackTrace());
-=======
 			Env.d("!!! "+e.getMessage()+Arrays.asList(e.getStackTrace()));
->>>>>>> 1.10
 		}
 		
 	}
