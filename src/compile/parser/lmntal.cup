@@ -48,6 +48,9 @@ FuncName	::=   ATOM_NAME:name
 				| STRING:name
 					{: RESULT = new SrcName(name.replaceAll("^\"|\"$","")
 												.replaceAll("\\\\n","\n")
+												.replaceAll("\\\\r","\r")
+												.replaceAll("\\\\t","\t")
+												.replaceAll("\\\\f","\f")
 												.replaceAll("\\\\\"","\"")
 												.replaceAll("\\\\\\\\","\\\\"),
 											SrcName.STRING); :}

@@ -6,12 +6,12 @@ package runtime;
  */
 public class Functor {
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
-	public static final Functor INSIDE_PROXY = new Functor("$in",2,null,".inside");
+	public static final Functor INSIDE_PROXY = new Functor("$in",2,null,"$in");
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
-	public static final Functor OUTSIDE_PROXY = new Functor("$out",2,null,".outside");
+	public static final Functor OUTSIDE_PROXY = new Functor("$out",2,null,"$out");
 	/** $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム
 	 * を表すファンクタ temporary_inside_proxy （通称:star）*/
-	public static final Functor STAR = new Functor("$transient_inside_proxy",2,null,".star");
+	public static final Functor STAR = new Functor("$transient_inside_proxy",2,null,"$star");
 	
 	/** シンボル名。このクラスのオブジェクトの場合は、名前の表示名が格納される。
 	 * 空文字列のときは、サブクラスのオブジェクトであることを表す。*/
@@ -26,15 +26,16 @@ public class Functor {
 	////////////////////////////////////////////////////////////////
 	
 	/** シンボルの表示名に対する内部名を取得する。
-	 * 現在の仕様では、内部名とは . がエスケープされた名前を表す。*/
+	 * 現在の仕様では、内部名とは . と $ がエスケープされた名前を表す。*/
 	public static String escapeName(String name) {
 		name = name.replaceAll("\\.","..");
+		name = name.replaceAll("\\$",".\\$");
 		return name;
 	}
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
 	public final String getQuotedFunctorName() {
 		String text = getAbbrName();
-		if (strFunctor.startsWith(".")) return text;	// 臨時
+		if (strFunctor.startsWith("$")) return text;	// 臨時
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 			text = quoteName(text);
 		}
@@ -61,6 +62,9 @@ public class Functor {
 		text = text.replaceAll("\\\\","\\\\\\\\");
 		text = text.replaceAll("\"","\\\\\"");
 		text = text.replaceAll("\n","\\\\n");
+		text = text.replaceAll("\t","\\\\t");
+		text = text.replaceAll("\f","\\\\f");
+		text = text.replaceAll("\r","\\\\r");
 		text = "\"" + text + "\"";
 		return text;
 	}
