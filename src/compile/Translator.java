@@ -46,22 +46,37 @@ public class Translator {
 	 */
 	public Translator(InterpretedRuleset ruleset) throws IOException{
 		className = "Ruleset" + ruleset.getId();
+//暫定対応
+		if (translated.contains(className)) {
+			return;
+		}
 		outputFile = new File(className + ".java");
 		writer = new BufferedWriter(new FileWriter(outputFile));
 		this.ruleset = ruleset;
 	}
+	private static HashSet translated = new HashSet();
 	/**
 	 * Javaソースを出力する。
 	 * @param genMain main 関数を生成する場合は true。初期データ生成ルールに対して利用する。
 	 * @throws IOException Java ソースの出力に失敗した場合
 	 */
 	public void translate(boolean genMain) throws IOException {
+//暫定対応
+		if (translated.contains(className)) {
+			return;
+		}
+		translated.add(className);
+		
 		writer.write("import runtime.*;\n");
 		writer.write("import java.util.*;\n");
 		writer.write("import java.io.*;\n");
 		writer.write("import daemon.IDConverter;\n");
 		writer.write("\n");
 		writer.write("public class " + className + " extends Ruleset {\n");
+		writer.write("	private static final " + className + " theInstance = new " + className + "();\n");
+		writer.write("	public static " + className + " getInstance() {\n");
+		writer.write("		return theInstance;\n");
+		writer.write("	}\n");
 		writer.write("	private int id = " + ruleset.getId() + ";\n");
 		writer.write("	private String globalRulesetID;\n");
 		writer.write("	public String getGlobalRulesetID() {\n");
@@ -130,7 +145,7 @@ public class Translator {
 		
 		if (genMain) {
 			writer.write("	public static void main(String[] args) {\n");
-			writer.write("		runtime.FrontEnd.run(new " + className + "());\n"); //todo 引数の処理
+			writer.write("		runtime.FrontEnd.run(" + className + ".getInstance());\n"); //todo 引数の処理
 			writer.write("	}\n");
 		}
 
@@ -700,7 +715,7 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-03
 				case Instruction.ISUNARY: // [atom]
-					writer.write(tabs + "Functor f = ((Atom)var" + inst.getIntArg1() + ").getFunctor();\n");
+					writer.write(tabs + "func = ((Atom)var" + inst.getIntArg1() + ").getFunctor();\n");
 					// まくを超えたリンクが unary かどうかが判断できない。OUTSIDE_PROXY を見てる
 					// DEREF も？
 					// (n-kato)
@@ -710,7 +725,7 @@ public class Translator {
 					// (n-kato) はい。失敗して下さい。ちなみに$in,$outのarityは2なので次の2行は省略しました。
 					//if(f.equals(Functor.OUTSIDE_PROXY)) return false;
 					//if(f.equals(Functor.INSIDE_PROXY)) return false;
-					writer.write(tabs + "if (!(f.getArity() != 1)) {\n");
+					writer.write(tabs + "if (!(func.getArity() != 1)) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum);
 					writer.write(tabs + "}\n");
 					break; // n-kato
@@ -1169,7 +1184,7 @@ public class Translator {
 							//TODO 重複防止
 							Translator t = new Translator((InterpretedRuleset)i.next());
 							t.translate(false);
-							writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(new " + t.className + "());\n");
+							writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(" + t.className + ".getInstance());\n");
 						}
 					}
 					break;
@@ -1212,7 +1227,7 @@ public class Translator {
 					InterpretedRuleset rs = (InterpretedRuleset)inst.getArg2();
 					Translator t = new Translator(rs);
 					t.translate(false);
-					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(new " + t.className + "());\n"); 
+					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(" + t.className + ".getInstance());\n"); 
 					break;
 				default:
 					throw new RuntimeException("Unsupported Instruction : " + inst);

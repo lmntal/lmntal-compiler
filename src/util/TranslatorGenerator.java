@@ -50,6 +50,8 @@ import java.util.regex.Pattern;
  *   return true; を追加
  * FINDATOM
  *   Atom a --> atom
+ * ISUNARY
+ *   Functor f --> func
  * 全体
  *   inst.getArg?() を適切に書き換える。
  *   文字列の場合、"\"" + escapeString((String)inst.getArg?()) + "\""
