@@ -86,8 +86,8 @@ class TestRemote{
 
 		//マッチング命令・ボディ命令を実行してみるテスト
 		//NEWROOT
-		//RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
-		//rt_banon.flush();
+		RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
+		rt_banon.flush();
 
 		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
 		//	rt_banon.flush();
