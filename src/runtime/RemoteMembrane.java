@@ -7,6 +7,7 @@ import java.net.Socket;
 
 /**
  * リモート計算ノード
+ * TODO staticなものをすべて「計算ノード管理クラス」に移管する
  * @author n-kato
  */
 final class RemoteMachine extends AbstractMachine {
@@ -16,7 +17,11 @@ final class RemoteMachine extends AbstractMachine {
 		this.runtimeid = runtimeid;
 	}
 	//
+	/** 計算ノード表（String -> AbstractMachine）*/
 	static HashMap runtimeids = new HashMap();
+	/** 計算ノード表を利用開始する */
+	public static void init() {}
+	/** 指定された物理マシンに接続し、計算ノード表に登録する */
 	public static AbstractMachine connectRuntime(String node) {
 		node = node.intern();
 		AbstractMachine ret = (AbstractMachine)runtimeids.get(node);
@@ -26,6 +31,16 @@ final class RemoteMachine extends AbstractMachine {
 		}
 		return ret;
 	}
+	/** 登録されている全ての物理マシンを終了し、計算ノード表の登録を削除する */
+	public static void terminateAll() {
+		Iterator it = runtimeids.keySet().iterator();
+		while (it.hasNext()) {
+			AbstractMachine machine = (AbstractMachine)runtimeids.get(it.next());
+			machine.terminate();
+		}
+		runtimeids.clear();
+	}
+	//
 	public AbstractTask newTask() {
 		// todo 下と同じ
 		return (AbstractTask)null;
@@ -33,6 +48,9 @@ final class RemoteMachine extends AbstractMachine {
 	public AbstractTask newTask(AbstractMembrane parent) {
 		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
 		return (AbstractTask)null;
+	}
+	public void terminate() {
+		//send("TERMINATE");
 	}
 }
 
@@ -47,7 +65,7 @@ final class RemoteTask extends AbstractTask {
 	String cmdbuffer;
 	int nextatomid;
 	int nextmemid;
-	RemoteTask() {}
+	RemoteTask(AbstractMachine runtime) { super(runtime); }
 	String getNextAtomID() {
 		return "NEW_" + nextatomid++;
 	}
@@ -121,7 +139,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	
 	// 操作2 - アトムの操作
 
-	/** 新しいアトムを作成し、この膜に追加し、この膜の実行スタックに入れる。 */
+	/** 新しいアトムを作成し、この膜に追加し、この膜の実行アトムスタックに入れる。 */
 	public Atom newAtom(Functor functor) {
 		Atom a = super.newAtom(functor);
 		String atomid = ((RemoteTask)task).getNextAtomID();
@@ -137,7 +155,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("REMOVEATOM",getAtomID(atom));
 		super.removeAtom(atom);
 	}
-	/** 指定されたアトムをこの膜の実行スタックに積む */
+	/** 指定されたアトムをこの膜の実行アトムスタックに積む */
 	public void enqueueAtom(Atom atom) {
 		// TODO リモートのアトムを積む場合があるが、実装可能かどうか調べる
 		//String atomid = getAtomID(atom);
@@ -223,20 +241,23 @@ final class RemoteMembrane extends AbstractMembrane {
 	
 	// 操作6 - ロックに関する操作
 	
-	synchronized public boolean lock(AbstractMembrane mem) {
+	synchronized public boolean lock() {
 		if (locked) {
-			//todo:キューに記録
-			//todo:locked==trueのとき、この計算ノードの誰がロックしたか分からないのを何とかする
 			return false;
 		} else {
-			//todo:計算ノードの記録、キャッシュの更新
+			//todo:キャッシュの更新
 			locked = true;
 			return true;
 		}
 	}
-	public boolean recursiveLock(AbstractMembrane mem) {
+	public boolean recursiveLock() {
 		//send("RECURSIVELOCK");
 		return false;
+	}
+	public void blockingLock() {
+		//todo:locked==trueのとき、この計算ノードの誰がロックしたか分からないのを何とかする
+		send("BLOCKINGLOCK");
+		//wait;
 	}
 	public void unlock() {
 		send("UNLOCK");
@@ -244,5 +265,4 @@ final class RemoteMembrane extends AbstractMembrane {
 	public void recursiveUnlock() {
 		//send("RECURSIVEUNLOCK");
 	}
-
 }

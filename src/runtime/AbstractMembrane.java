@@ -48,10 +48,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	protected List rulesets = new ArrayList();
 	/** trueならばこの膜以下に適用できるルールが無い */
 	protected boolean stable = false;
+	/** 永続フラグ（trueならばルール適用できなくてもstableにならない）*/
+	public boolean perpetual = false;
 	/** ロックされている時にtrue */
 	protected boolean locked = false;
-//	/** 最後にロックを取得した膜 */
-//	protected AbstractMembrane lastLockedMem;
 	/** この膜の名前（internされた文字列またはnull） */
 	String name;
 
@@ -95,7 +95,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	//
 	
 	/** この膜を管理するタスクの取得 */
-	AbstractTask getTask() {
+	public AbstractTask getTask() {
 		return task;
 	}
 	/** 親膜の取得 */
@@ -121,6 +121,18 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** stableフラグをONにする 10/26矢島 Task#exec()内で使う*/
 	void toStable(){
 		stable = true;
+	}
+	/** 永続フラグをONにする */
+	public void makePerpetual() {
+		perpetual = true;
+	}
+	/** 永続フラグをOFFにする */
+	public void makeNotPerpetual() {
+		AbstractMachine machine = getTask().getMachine();
+		synchronized(machine) {
+			perpetual = false;
+			machine.notify();
+		}
 	}
 	/** この膜にルールがあればtrue */
 	public boolean hasRules() {
@@ -209,16 +221,16 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atoms.add(atom);
 	}
 
-	/** 指定されたアトムをこの膜の実行スタックに積む。
+	/** 指定されたアトムをこの膜の実行アトムスタックに積む。
 	 * すでにスタックに積まれている場合の動作は未定義とする。*/
-	abstract public void enqueueAtom(Atom atom);
-	/** この膜が移動された後、アクティブアトムを実行スタックに入れるために呼び出される。
+	public abstract void enqueueAtom(Atom atom);
+	/** この膜が移動された後、アクティブアトムを実行アトムスタックに入れるために呼び出される。
 	 * <p>Ruby版ではmovedTo(task,dstMem)を再帰呼び出ししていたが、
 	 * キューし直すべきかどうかの判断の手間が掛かりすぎるため子孫の膜に対する処理は廃止された。 */
-	abstract public void enqueueAllAtoms();
+	public abstract void enqueueAllAtoms();
 
 	/** 指定されたアトムをこの膜から除去する。
-	 * <strike>実行スタックに入っている場合、実行スタックから取り除く。</strike>*/
+	 * <strike>実行アトムスタックに入っている場合、スタックから取り除く。</strike>*/
 	public void removeAtom(Atom atom) {
 		atoms.remove(atom);
 		atom.mem = null;
@@ -233,9 +245,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 
 //	/** 
-//	 * この膜にあるアトムatomがこの計算ノードが実行するタスクにある膜の実行スタック内にあれば、除去する。
-//	 * 他の計算ノードが実行するタスクにある膜の実行スタック内のとき（システムコール）は、この膜は
-//	 * ロックされていないので何もしないでよいが、その場合は実行スタック内にないので既に対応できている。*/
+//	 * この膜にあるアトムatomがこの計算ノードが実行するタスクにある膜の実行アトムスタック内にあれば、除去する。
+//	 * 他の計算ノードが実行するタスクにある膜の実行アトムスタック内のとき（システムコール）は、この膜は
+//	 * ロックされていないので何もしないでよいが、その場合は実行アトムスタック内にないので既に対応できている。*/
 //	public final void dequeueAtom(Atom atom) {
 //		if (atom.isQueued()) {
 //			atom.dequeue();
@@ -252,11 +264,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		mems.add(mem);
 		mem.parent = this;
 	}
-	/** 指定された膜をこの膜から除去する。実行膜スタックは操作しない。*/
+	/** 指定された子膜をこの膜から除去する。
+	 * <strike>実行膜スタックは操作しない。</strike>
+	 * 実行膜スタックに積まれていれば取り除く。 */
 	public void removeMem(AbstractMembrane mem) {
 		mems.remove(mem);
+		mem.dequeue();
 		mem.parent = null;
-	}	
+	}
 	/** 指定された計算ノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
 	 * @return 作成されたルート膜
 	 */
@@ -344,11 +359,11 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * </dl>*/
 	public abstract void activate();
 
-	/** この膜を親膜から除去する
-	 * @deprecated */
-	public void remove() {
-		parent.removeMem(this);
-	}
+//	/** この膜を親膜から除去する
+//	 * @deprecated */
+//	public void remove() {
+//		parent.removeMem(this);
+//	}
 
 	/** 除去された膜srcMemにある全てのアトムおよび膜をこの膜に移動する。
 	 * 膜srcMemの子孫のうちルート膜の手前までの全ての膜を、この膜と同じタスクの管理にする。
@@ -410,41 +425,28 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		}
 //		parent = mem;
 //	}
+
 	// 操作6 - ロックに関する操作
-	
 	/**
 	 * この膜をロックする。
-	 * @param mem ロックを要求しているルールがある膜
-	 * @return ロックに成功した場合はtrue
-	 */
-	synchronized public boolean lock(AbstractMembrane mem) {
-		if (locked) {
-			//todo:キューに記録
-			return false;
-		} else {
-			//todo:計算ノードの記録、キャッシュの更新
-			locked = true;
-			return true;
-		}
-	}
+	 * <p>ルールスレッドが膜のロックをするときに使用する。
+	 * @return ロックに成功した場合はtrue */
+	public abstract boolean lock();
 	/**
-	 * この膜とその子孫を再帰的にロックする
-	 * @param mem ルールのある膜
-	 * @return ロックに成功した場合はtrue
-	 */
-	public boolean recursiveLock(AbstractMembrane mem) {
-		// 実装する
-		return false;
-	}
-	/** ロックを解放する。
+	 * この膜とその子孫を再帰的にロックする。
+	 * todo プロセス文脈のコピーという使用目的から考えて、ブロッキングで行うべきであると思われる。
+	 * @return ロックに成功した場合はtrue */
+	public abstract boolean recursiveLock();
+	/**
+	 * この膜を管理するタスクのロックを取得した後、この膜のロックを取得する。
+	 * <p>ルールスレッド以外のスレッドが膜のロックを取得するときに使用する。*/
+	public abstract void blockingLock();
+	/**
+	 * ロックを解放する。
 	 * <p>ルート膜の場合、仮の実行膜スタックの内容を実行膜スタックの底に転送する。*/
-	public void unlock() {
-		locked = false;
-	}
-	public void recursiveUnlock() {
-		// 実装する
-	}
-	
+	public abstract void unlock();
+	public abstract void recursiveUnlock();
+
 	///////////////////////////////
 	// 自由リンク管理アトムの張り替えをするための操作（RemoteMembraneはオーバーライドしない）
 	//

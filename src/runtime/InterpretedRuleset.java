@@ -246,7 +246,7 @@ class InterpretiveReactor {
 				case Instruction.LOCALLOCKMEM :
 					// lockmem [-dstmem, freelinkatom]
 					mem = atoms[inst.getIntArg2()].mem;
-					if (mem.lock(mems[0])) {
+					if (mem.lock()) {
 						mems[inst.getIntArg1()] = mem;
 						if (interpret(insts, pc))
 							return true;
@@ -259,7 +259,7 @@ class InterpretiveReactor {
 					it = mems[inst.getIntArg2()].mems.iterator();
 					while (it.hasNext()) {
 						AbstractMembrane submem = (AbstractMembrane) it.next();
-						if (submem.lock(mems[0])) {
+						if (submem.lock()) {
 							mems[inst.getIntArg1()] = submem;
 							if (interpret(insts, pc))
 								return true;
@@ -270,7 +270,7 @@ class InterpretiveReactor {
 				case Instruction.LOCK :
 				case Instruction.LOCALLOCK : //[srcmem] 
 					mem = mems[inst.getIntArg1()];
-					if (mem.lock(mems[0])) {
+					if (mem.lock()) {
 						if (interpret(insts, pc))
 							return true;
 						mem.unlock();						
@@ -544,7 +544,7 @@ class InterpretiveReactor {
 
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
 				case Instruction.RECURSIVELOCK : //[srcmem]
-					if (!mems[inst.getIntArg1()].recursiveLock(mems[0])) return false;
+					if (!mems[inst.getIntArg1()].recursiveLock()) return false;
 					break; //n-kato
 				case Instruction.RECURSIVEUNLOCK : //[srcmem]
 					mems[inst.getIntArg1()].recursiveUnlock();
