@@ -578,7 +578,9 @@ public class LMNParser {
 		enumTypeConstraintNames(rule.guardMem, names);
 		enumBodyNames(rule.rightMem, names);
 		// todo リンク束を閉じる
-
+		
+		// todo プロセス文脈間で継承されたリンク束が同じ名前であることを確認する
+		
 		//
 		it = rule.leftMem.processContexts.iterator();
 		while (it.hasNext()) {

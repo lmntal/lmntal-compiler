@@ -769,7 +769,7 @@ public class RuleCompiler {
 				}
 				if (!(link.atom instanceof ProcessContext)) {
 					// 型付きプロセス文脈のリンク先がアトムのとき
-					if (lhsatoms.contains(link.atom)) { // ( buddy(X) :- $atom[X|] )
+					if (lhsatoms.contains(link.atom)) { // ( buddy(X) :- type($atom) | $atom[X|] )
 						if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE) {
 							body.add( new Instruction(Instruction.RELINK,
 								rhstypedcxtToPath(atom), 0,
@@ -777,7 +777,7 @@ public class RuleCompiler {
 								rhsmemToPath(atom.mem) ));
 						}
 					}
-					else if (rhsatoms.contains(link.atom)) { // ( :- buddy(X), $atom[X|] )
+					else if (rhsatoms.contains(link.atom)) { // ( :- type($atom) | buddy(X), $atom[X|] )
 						// PART1でnewlink済みなので、何もしない
 					}
 					else {
@@ -789,7 +789,7 @@ public class RuleCompiler {
 				ProcessContext buddypc = (ProcessContext)link.atom;
 				if (buddypc.mem.typedProcessContexts.contains(buddypc)) {
 					// リンク先が型付きプロセス文脈のとき、パッシブ型制限より、リンク先も右辺。
-					// ( :- $buddypc[X|], $atom[X|] )
+					// ( :- type($atom),type($buddypc) | $buddypc[X|], $atom[X|] )
 					if (rhstypedcxtToPath(atom) < rhstypedcxtToPath(buddypc)
 					 || (rhstypedcxtToPath(atom) == rhstypedcxtToPath(buddypc) && pos < link.pos)) {
 						if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE
@@ -803,7 +803,7 @@ public class RuleCompiler {
 				}
 				else {
 					// リンク先が型付きでないプロセス文脈のとき、PART1と同じ理由で$buddypcは右辺。
-					// ( org(Y,), $buddypc[Y,|] :- $buddypc[X,|], $atom[X|] )
+					// ( org(Y,), $buddypc[Y,|] :- type($atom) | $buddypc[X,|], $atom[X|] )
 					LinkOccurrence orglink = buddypc.buddy.args[pos].buddy; // org引数のYの出現
 					if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE) {
 						body.add( new Instruction(Instruction.RELINK,

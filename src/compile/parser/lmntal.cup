@@ -221,6 +221,10 @@ Rule		::=	  ProcessList:head RULE ProcessList:body
 
 ProcessContext	::= PROCVAR AtomName:name
 					 {: RESULT = new SrcProcessContext(name); :}
+				  | PROCVAR AtomName:name LBRACKET LinkList:list RBRACKET
+					 {: SrcProcessContext pc = new SrcProcessContext(name);
+						pc.args = list;
+						RESULT = pc; :}
 				  | PROCVAR AtomName:name LBRACKET LinkList:list GUARD Bundle:bundle  RBRACKET
 					 {: SrcProcessContext pc = new SrcProcessContext(name);
 						pc.args = list;
