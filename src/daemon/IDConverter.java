@@ -38,6 +38,12 @@ public class IDConverter {
 	public static void registerGlobalMembrane(String globalMemID, AbstractMembrane mem) {
 		memTable.put(globalMemID, mem);
 	}
+	/** 指定された膜を表から削除する */
+	public static void unregisterGlobalMembrane(String globalMemID) {
+		memTable.remove(globalMemID);
+	}
+	
+	
 	/** 指定されたglobalMemIDを持つ膜を探す
 	 * @return AbstractMembrane（見つからなかった場合はnull）*/
 	public static AbstractMembrane lookupGlobalMembrane(String globalMemID){

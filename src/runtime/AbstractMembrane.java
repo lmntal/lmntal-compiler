@@ -898,6 +898,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		removeAtoms(removeList);
 	}
 	
+	/** この膜を削除する */
+	public void free() {}
+	
 	/**
 	 * {} なしで出力する。
 	 * 

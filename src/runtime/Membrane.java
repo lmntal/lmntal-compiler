@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import util.Stack;
+import daemon.IDConverter;
 
 /**
  * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。
@@ -420,6 +421,11 @@ public final class Membrane extends AbstractMembrane {
 	/** アトムIDに対応するアトムを登録する */
 	public void registerAtom(String atomid, Atom atom) {
 		atomTable.put(atomid, atom);
+	}
+	
+	/** この膜を削除する */
+	public void free() {
+		IDConverter.unregisterGlobalMembrane(getGlobalMemID());
 	}
 }
 // todo 【検証】local-remote-local 問題が解決したかどうか調べる

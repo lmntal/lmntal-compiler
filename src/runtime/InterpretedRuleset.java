@@ -494,8 +494,8 @@ class InterpretiveReactor {
 				case Instruction.ENQUEUEALLATOMS : //[srcmem]
 					break;
 				case Instruction.FREEMEM : //[srcmem]
-					// mems[inst.getIntArg1()].free();
-					break; //n-kato
+					mems[inst.getIntArg1()].free();
+					break; //mizuno 2004-10-12, n-kato
 
 				case Instruction.ADDMEM :
 				case Instruction.LOCALADDMEM : //[dstmem, srcmem]
