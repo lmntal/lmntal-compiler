@@ -1624,30 +1624,35 @@ public class Instruction implements Cloneable {
 		String tmp = getInstructionString(kind);
 		
 		if( tmp.length() > 14 ) {
-			buffer.replace(0, 14, tmp.substring(0,14));
+			buffer.replace(0, 14, tmp.substring(0,12) + "..");
 		} else {
 			buffer.replace(0, tmp.length(), tmp);
 		}
-
-		if(tmp.equals("loop") && data.size() == 1 && data.get(0) instanceof ArrayList && ((ArrayList)data.get(0)).size() == 1) {
-			ArrayList list = (ArrayList)((ArrayList)data.get(0)).get(0);
-			if(list.size() == 0) {
-				buffer.append("[[[]]]");
-			} else {
-				buffer.append("[[[\n");
-				int i;
-				for(i = 0; i < list.size()-1; i++){
+		if (data.size() == 1
+		&& data.get(0) instanceof ArrayList) {
+			ArrayList arg1 = (ArrayList)data.get(0);
+			if (arg1.size() == 1
+			&& arg1.get(0) instanceof ArrayList) {
+				ArrayList insts = (ArrayList)arg1.get(0);
+				if(insts.size() == 0) {
+					buffer.append("[[]]");
+				} else {
+					buffer.append("[[\n");
+					int i;
+					for(i = 0; i < insts.size()-1; i++){
+						buffer.append("                  ");
+						buffer.append(insts.get(i));
+						buffer.append(", \n");
+					}
 					buffer.append("                  ");
-					buffer.append(list.get(i));
-					buffer.append(", \n");
+					buffer.append(insts.get(i));
+					buffer.append(" ]]");
+					return buffer.toString();
 				}
-				buffer.append("                  ");
-				buffer.append(list.get(i));
-				buffer.append("]]]");
 			}
-		} else {
-			buffer.append(data.toString());
 		}
+
+		buffer.append(data.toString());
 
 		//各要素を分解
 		//instanceOf
