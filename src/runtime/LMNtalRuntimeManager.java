@@ -128,7 +128,8 @@ public final class LMNtalRuntimeManager {
 			//(nakajima 2004-11-01) やっぱりいらないような気がします
 			//daemon.sendWaitUnregisterLocal();
 			
-			daemon.close();
+			daemon.close(); //TODO これが終わらない→DISCONNECT命令の実装が先
+			
 			if(true)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon(): the socket has closed.");
 			daemon = null;
 		}
