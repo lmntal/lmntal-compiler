@@ -21,7 +21,7 @@ class SlaveLMNtalRuntimeLauncher {
 			
 			Thread nodeThread = new Thread(node, "LMNtalRuntimeMessageProcessor");
 			nodeThread.start();
-			if (node.sendWaitRegisterLocal("REMOTE")) {
+			if (node.sendWaitRegisterLocal("SLAVE")) {
 				//LocalLMNtalRuntimeを起動				
 				LocalLMNtalRuntime runtime = new LocalLMNtalRuntime();
 				node.respondAsOK(callerMsgid);	// node.runtimeidを返す場合、このresの引数にする
