@@ -14,6 +14,28 @@ public final class Env {
 	public static Membrane rootMembrane = new Membrane(task);
 	
 	/**
+	 * Debug level.
+	 */
+	public static int debug = 0;
+	
+	/**
+	 * General error report
+	 * @param o
+	 */
+	public static void e(Object o) {
+		e(o, 0);
+	}
+	
+	/**
+	 * General error report with indent
+	 * @param o
+	 * @param depth インデントの深さ
+	 */
+	public static void e(Object o, int depth) {
+		System.err.println(getIndent(depth) + o);
+	}
+	
+	/**
 	 * General dumper
 	 * @param o Object to print
 	 */
@@ -27,7 +49,7 @@ public final class Env {
 	 * @param depth インデントの深さ
 	 */
 	public static void p(Object o, int depth) {
-		System.out.println(getIndent(depth) + o);
+		if(debug > 0) System.out.println(getIndent(depth) + o);
 	}
 	
 	/**

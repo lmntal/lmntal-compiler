@@ -102,7 +102,7 @@ List        ::=   LBRACKET RBRACKET
                 
 ListCdr     ::=   GUARD Atom:atom
                     {: RESULT = atom;  :}
-                | COMMA Atom:atom ListCdr:cdr
+               | COMMA Atom:atom ListCdr:cdr
                     {: LinkedList list = new LinkedList();
                        list.add(atom); list.add(cdr);
                        RESULT = new SrcAtom(".", list); :}

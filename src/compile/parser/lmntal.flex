@@ -85,10 +85,10 @@ EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 }
 
 <QUOTED> {
-	"]]"			{ yybegin(YYINITIAL); return symbol(sym.QUOTED_STRING, string.toString()); }
-	.				{ string.append( yytext() ); }
+	"]]"                { yybegin(YYINITIAL); return symbol(sym.QUOTED_STRING, string.toString()); }
+	.|{LineTerminator}  { string.append( yytext() ); }
 }
-	
+
 
 /* No token was found for the input so through an error.  Print out an
    Illegal character message with the illegal character that was found. */

@@ -54,7 +54,7 @@
 		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
 		<jar jarfile="${dist}/lmntal.jar" basedir="${build}">
 			<manifest>
-				<attribute name="Main-Class" value="compile.Main"/>
+				<attribute name="Main-Class" value="runtime.FrontEnd"/>
 			</manifest>
 		</jar>
 	</target>

@@ -11,7 +11,11 @@ import java.util.*;
  * インラインの方針<BR>
  * 
  * <UL>
- * <LI>"/＊inline＊/" で始まるファンクタ名を持つアトムをインラインとして扱う。
+ * <LI>"/＊inline＊/" で始まるファンクタ名を持つアトムをインラインコードとして扱う。
+ * 
+ * <LI>"/＊inline_define＊/" で始まるファンクタ名を持つアトムをインライン宣言コードとして扱う。
+ * 
+ * <LI>インライン宣言コードは、まとめて大域的に宣言される。クラス宣言など、宣言的なものはここに書ける。
  * 
  * <LI>あるインラインコードの実行は、
  * そのコードが右辺に含まれるルールを適用した直後のタイミングで実行される。
@@ -41,6 +45,9 @@ public class Inline {
 	/** Hash { インラインコード文字列 -> 一意な連番 } */
 	public static Map code = new HashMap(); 
 	
+	/** List インライン宣言コード文字列 */
+	public static List defs = new ArrayList(); 
+	
 	/** 一意な連番 */
 	static int codeCount = 0;
 	
@@ -62,7 +69,14 @@ public class Inline {
 				Env.p("Compile result :  "+cp.exitValue());
 				cp = null;
 			}
-			inlineCode = (InlineCode)Class.forName("MyInlineCode").newInstance();
+			// jar で処理系を起動すると、勝手なファイルからクラスをロードすることができないみたい。
+			ClassLoader cl = new FileClassLoader();
+			Object o = cl.loadClass("MyInlineCode").newInstance();
+			if (o instanceof InlineCode) {
+				inlineCode = (InlineCode)o;
+			}
+			//inlineCode = (InlineCode)Class.forName("MyInlineCode").newInstance();
+			//Env.p(Class.forName("MyInlineCode").getField("version"));
 		} catch (Exception e) {
 			Env.p(e);
 		}
@@ -92,6 +106,11 @@ public class Inline {
 			//登録
 			Env.p("Register inlineCode : "+src);
 			code.put(src, new Integer(codeCount++));
+		} else if(src.startsWith("/*inline_define*/")) {
+		//if(src.startsWith("a")) {
+			//登録
+			Env.p("Register inlineDefineCode : "+src);
+			defs.add(src);
 		}
 	}
 	
@@ -101,18 +120,26 @@ public class Inline {
 	 */
 	public static void makeCode() {
 		try {
+			if(code.isEmpty()) return;
+			Iterator i;
+			
 			PrintWriter p = new PrintWriter(new FileOutputStream("MyInlineCode.java"));
 			Env.p("make inline code "+code);
 			
-			if(code.isEmpty()) return;
-			
 			//p.println("package runtime;");
 			p.println("import runtime.*;");
+			
+			i = defs.iterator();
+			while(i.hasNext()) {
+				String s = (String)i.next();
+				p.println(s);
+			}
 			p.println("public class MyInlineCode implements InlineCode {");
+			p.println("\tpublic static String version=\"static string.\";");
 			p.println("\tpublic void run(Atom me, int codeID) {");
 			p.println("\t\t//Env.p(a);");
 			p.println("\t\tswitch(codeID) {");
-			Iterator i = code.keySet().iterator();
+			i = code.keySet().iterator();
 			while(i.hasNext()) {
 				String s = (String)i.next();
 				int codeID = ((Integer)(code.get(s))).intValue();
@@ -128,7 +155,7 @@ public class Inline {
 			p.close();
 			
 			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
-			cp = Runtime.getRuntime().exec("javac MyInlineCode.java");
+			cp = Runtime.getRuntime().exec("javac -classpath .;lmntal.jar MyInlineCode.java");
 		} catch (Exception e) {
 			Env.p("!!! "+e.getMessage()+e.getStackTrace());
 		}

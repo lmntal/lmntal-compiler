@@ -53,6 +53,7 @@ public class FrontEnd {
 					switch(args[i].charAt(1)){
 					case 'd':
 						System.out.println("debug mode");
+						Env.debug = 1;
 						break;
 					case 'e':
 						// lmntal -e 'a,(a:-b)'
@@ -116,7 +117,7 @@ public class FrontEnd {
 				Env.p( Dumper.dump(rootmem) );
 				Env.p( rootmem );
 			} catch (ParseException e) {
-				Env.p(e.getMessage()+"\n"+e.getStackTrace());
+				Env.e(e.getMessage()+"\n"+e.getStackTrace());
 			}
 		}
 	}
