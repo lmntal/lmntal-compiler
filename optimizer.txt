@@ -1,3 +1,7 @@
+注意事項（特にループ化時）
+リンクオブジェクトが、(↓以外の場合に)副作用で変化しないか
+ある２つの自由リンクが実は同じリンクであった場合に正しく動作するか
+
 条件
 生成・取得されたリンクオブジェクトは、ちょうど１回unifylinkの引数に出現する。(?)
 
@@ -47,7 +51,7 @@ getlink		l1, a1, pos1
 dereflink	a2, l1, pos2
 
 ・命令列の並び替え
-ガード命令、freemem/freeatom、getrules, getcell
+ガード命令、freemem/freeatom、getrules, getcell、getlink
 
 
 膜の再利用
@@ -144,7 +148,7 @@ atom主導命令中のbranch命令の中から、ループ化に適したものを１つ選び、それに基づい
 ガード・ボディ部分をループ化し、全てのマッチングに対するボディ命令として利用する。
 そのため、マッチング命令列中のjump命令の展開は、ループ化後に行う。
 
-アトム再利用・膜再利用によって、主導するアトムが同じ膜内（再利用or本間区）で
+アトム再利用・膜再利用によって、主導するアトムが同じ膜内（再利用or本膜）で
 再利用されているものを元にループ化する。
 
 --atommatch
@@ -225,13 +229,38 @@ newatom		a1, _, f1
 D2
 proceed
 
+makelink	l1, a1, pos1
 unifylink		l1, l2
 loop [
-	getlink		l3, (l1 or l2のmakelink元)    (optional)
-	unifylink	l1, l2'
+//下は前の最適化でなくなっているはず
+//	getlink		l3, (l1 or l2のmakelink元)    (もしあれば)
+	makelink	l1', a1, pos1
+	unifylink	l1', l2'
 ]
 ↓
 loop [
-	(3 -> l2 or l1)
+	(l3 -> l2 or l1)
+	makelink	l1', a1, pos1
 ]
 unifylink	l1, l2
+
+getlink		l1, a1, pos1
+loop [
+	dereflink	a2, l1, pos2
+	makelink	a1, pos1, a2, pos2
+]
+↓
+getlink		l1, a1, pos1
+loop [
+	dereflink	a2, l1, pos2
+]
+
+dequeueatom		a1
+loop [
+	enqueueatom		a1
+	dequeueatom		a1
+]
+↓
+loop [
+]
+dequeueatom		a1
