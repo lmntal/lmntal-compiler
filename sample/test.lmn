@@ -320,7 +320,7 @@ go. % ==> e,e,e,result(3.14)
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,C,B)} % ==> e(g)
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,D,E),h(B,C,D,E)} % ==> g(h(e,C,C))
 
-p(A,B,C,D,E) :- A=B,C=D,g(E).  e(A),p(A,B,B,C,C). % ==> e(g)
+p(A,B,C,D,E) :- A=B,C=D,g(E).  e(A),p(A,B,B,C,C). % ==> e(g) ¡ÚUPDATELINKS¤Çgetlink¤ËÉûºîÍÑ¤¬¤¢¤ë¡©¥Ð¥°¡Û
 
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N), $p[A,A,B,B,C],g(C).  {e(A),f(A,B,B,C,C)} % ==> ¡ÚNull¡Û
 
