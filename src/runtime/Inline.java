@@ -100,7 +100,7 @@ public class Inline {
 		}
 		
 		//епо©
-		if(!inlineSet.containsKey(funcName)) inlineSet.put(unitName, new InlineUnit(unitName));
+		if(!inlineSet.containsKey(unitName)) inlineSet.put(unitName, new InlineUnit(unitName));
 		((InlineUnit)inlineSet.get(unitName)).register(funcName, type);
 	}
 	
@@ -131,6 +131,7 @@ public class Inline {
 				if(!u.isCached()) {
 					srcs.append(InlineUnit.srcFile(u.name));
 					srcs.append(" ");
+					InlineUnit.classFile(u.name).delete();
 					do_compile = true;
 				}
 			}

@@ -43,8 +43,8 @@ public class InlineUnit {
 		File src = new File(name);
 		// ?.class
 		File dst = classFile(name);
-//		System.out.println(src+" "+src.lastModified());
-//		System.out.println(dst+" "+dst.lastModified());
+//		System.out.println(src.lastModified()+" "+src);
+//		System.out.println(dst.lastModified()+" "+dst);
 		
 		// src が無いのは、"-" のとき
 		if(!dst.exists() || !src.exists()) return false;
