@@ -474,8 +474,8 @@ final class Machine extends AbstractMachine {
 			return;
 		}
 		// 実行膜スタックが空でない
-		Membrane mem = memStack.peek();
-		if(!mem.lock()) return; // ロック失敗
+		Membrane mem = (Membrane)memStack.peek();
+		if(!mem.lock(mem)) return; // ロック失敗
 		
 		Atom a;
 		for(int i=0; i < maxLoop && mem == memStack.peek(); i++){
@@ -483,32 +483,36 @@ final class Machine extends AbstractMachine {
 			
 			a = mem.popReadyAtom();
 			Iterator it = mem.rulesetIterator();
-			
+			boolean flag;
 			if(a != null){ // 実行膜スタックが空でないとき
+				flag = false;
 				while(it.hasNext()){ // 本膜のもつルールをaに適用
-					// 適用できたら最初に戻る
-					if(((Ruleset)it.next()).react(mem, a)) goto NEXT;
+					if(((Ruleset)it.next()).react(mem, a)) flag = true;
 				}
-				// 適用できなかった時
-				if(!mem.isRoot()) mem.getMem().enqueueAtom(a);
+				if(flag == false){ // ルールが適用できなかった時
+					if(!mem.isRoot()) mem.getMem().enqueueAtom(a);
+				}
 				else {}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行膜スタックが空の時
+				flag = false;
 				while(it.hasNext()){ // 膜主導テストを行う
-					if(((Ruleset)it.next()).react(mem)) goto NEXT;
+					if(((Ruleset)it.next()).react(mem)) flag = true;
 				}
-				// 適用できなかった時
-				memStack.pop(); // 本膜をpop
-				// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
-				if(mem.isRoot() && mem.getMem() != null)
-					mem.getMem().activate();
-				it = mem.memIterator();
-				// 子膜が全てstableなら、この膜をstableにする。
-				while(it.hasNext()){
-					if(((Membrane)it.next()).isStable() == false) goto NEXT;
+				if(flag == false){ // ルールが適用できなかった時
+					memStack.pop(); // 本膜をpop
+					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
+					if(mem.isRoot() && mem.getMem() != null)
+						((Membrane)mem.getMem()).activate();
+					it = mem.memIterator();
+					// 子膜が全てstableなら、この膜をstableにする。
+					flag = false;
+					while(it.hasNext()){
+						if(((Membrane)it.next()).isStable() == false)
+								flag = true;
+					}
+					if(flag == false) mem.toStable();
 				}
-				mem.toStable();
 			}
-NEXT:
 		}
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
 		mem.unlock();
