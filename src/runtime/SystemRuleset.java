@@ -2,7 +2,14 @@ package runtime;
 import java.util.List;
 
 /** システムルールセット
- * <p>todo インスタンスを誰が生成するのか決める
+ * <p>todo インスタンスを誰が生成するのか決める</p>
+ * 
+ * システムルールセットのモジュール化：
+ * system_ruleset アトムがある膜の直属のルールセットはシステムルールセットであることにする。
+ * 
+ * {system_ruleset, (a:-b)}, {{{{{{a}}}}}}    ==> {{{{{{b}}}}}} 
+ * 
+ * @author n-kato, hara
  */
 public final class SystemRuleset extends Ruleset {
 	public static InterpretedRuleset ruleset;

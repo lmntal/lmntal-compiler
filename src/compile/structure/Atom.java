@@ -44,6 +44,8 @@ public class Atom {
 		this.functor = functor;
 		args = new LinkOccurrence[functor.getArity()];
 		Inline.add(functor.getName());
+		// ここでいいのかな hara
+		if(functor.getName().equals("system_ruleset")) mem.is_system_ruleset=true;
 	}
 
 	/**

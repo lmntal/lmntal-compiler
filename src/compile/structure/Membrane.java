@@ -17,6 +17,9 @@ public final class Membrane {
 	public Membrane mem = null;
 	/** 終了フラグがセットされているかどうかを表す */
 	public boolean stable = false;
+	
+	/** システムルールセットとして使うなら真 */
+	public boolean is_system_ruleset = false;
 
 	/** アトム(compile.structure.Atom)のリスト */
 	public List atoms = new LinkedList();

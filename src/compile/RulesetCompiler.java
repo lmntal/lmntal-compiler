@@ -6,6 +6,8 @@ package compile;
 
 import java.util.*;
 import runtime.Env;
+import runtime.Rule;
+import runtime.SystemRuleset;
 import compile.structure.*;
 import runtime.InterpretedRuleset;
 
@@ -69,17 +71,18 @@ public class RulesetCompiler {
 			rules.add(rc.theRule);
 		}
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
+		InterpretedRuleset ruleset;
 		if (!rules.isEmpty()) {
 			if (Env.fRandom) {
 				it = rules.iterator();
 				while (it.hasNext()) {
-					InterpretedRuleset ruleset = new InterpretedRuleset();
+					ruleset = new InterpretedRuleset();
 					ruleset.rules.add(it.next());
 					//ruleset.compile();
 					mem.rulesets.add(ruleset);
 				}
 			} else {
-				InterpretedRuleset ruleset = new InterpretedRuleset();
+				ruleset = new InterpretedRuleset();
 				it = rules.iterator();
 				while (it.hasNext()) {
 					ruleset.rules.add(it.next());
@@ -87,6 +90,19 @@ public class RulesetCompiler {
 				//ruleset.compile();
 				mem.rulesets.add(ruleset);
 			}
-		}	
+		}
+		// 必要ならシステムルールセットに登録
+		if(mem.is_system_ruleset) {
+			Env.p("Use system_ruleset "+mem);
+			Iterator ri = mem.rulesets.iterator();
+			while(ri.hasNext()) {
+				InterpretedRuleset ir = (InterpretedRuleset)ri.next();
+				Iterator rii = ir.rules.iterator();
+				while(rii.hasNext()) {
+					Rule r = (Rule)rii.next();
+					SystemRuleset.ruleset.rules.add(r);
+				}
+			}
+		}
 	}
 }
