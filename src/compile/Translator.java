@@ -12,6 +12,7 @@ import java.util.List;
 
 import runtime.Env;
 import runtime.Functor;
+import runtime.Inline;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.IntegerFunctor;
@@ -793,7 +794,13 @@ public class Translator {
 					//====型検査のためのガード命令====ここまで====
 					//====組み込み機能に関する命令====ここから====
 //未実装
-//				case Instruction.INLINE : //[atom, inlineref]
+				case Instruction.INLINE : //[atom, inlineref]
+					writer.write(tabs + "do{ Atom me = (Atom)var" + inst.getIntArg1() + ";\n");
+					writer.write(tabs + "  mem = (AbstractMembrane)var0;\n");
+					writer.write(tabs + Inline.getCode(inst.getIntArg1(), (String)inst.getArg2(), inst.getIntArg3()));
+					writer.write(tabs + "}while(false);\n"); // インラインコードは switch の中にある前提で書かれている。
+					
+					break;
 //					writer.write(tabs + "Inline.callInline( ((Atom)var" + inst.getIntArg1() + "), \"" + escapeString((String)inst.getArg2()) + "\", " + inst.getIntArg3() + " );\n");
 //					break; //hara
 					//====組み込み機能に関する命令====ここまで====

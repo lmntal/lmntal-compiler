@@ -827,6 +827,11 @@ class InterpretiveReactor {
 					//====組み込み機能に関する命令====ここから====
 				case Instruction.INLINE : //[atom, inlineref]
 					Inline.callInline( atoms[inst.getIntArg1()], (String)inst.getArg2(), inst.getIntArg3() );
+					/// // このコードを使ってください。＞TranslatorGeneratorさん
+					///writer.write(tabs + "do{ Atom me = (Atom)var" + inst.getIntArg1() + ";\n");
+					///writer.write(tabs + "  mem = (AbstractMembrane)var0;\n");
+					///writer.write(tabs + Inline.getCode(inst.getIntArg1(), (String)inst.getArg2(), inst.getIntArg3()));
+					///writer.write(tabs + "}while(false);\n"); // インラインコードは switch の中にある前提で書かれている。
 					break; //hara
 //				case Instruction.BUILTIN: //[class, atom]
 //					add(A,B,C) :- int(A),int(B),$builtin:iadd(A,B,C), 
