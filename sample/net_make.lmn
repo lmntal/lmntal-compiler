@@ -1,0 +1,12 @@
+a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free).
+
+%a(free,free),a(free,free) :- a(free,X   ),a(free,X   ).
+%a(A1  ,free),a(free,free) :- a(A1  ,X   ),a(free,X   ).
+%a(A1  ,free),a(A2  ,free) :- a(A1  ,X   ),a(A2  ,X   ).
+%a(free,A1):-a(A1,free).
+
+
+free(A),free(B),a(A,C),a(D,B):-a(X,C),a(D,X).
+%a(A,free):-a(free,A).
+
+% 1:free(A),3:free(B),2:a(A,C),4:a(D,B):-a(X,C),a(D,X).
