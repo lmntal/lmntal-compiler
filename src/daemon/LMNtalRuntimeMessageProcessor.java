@@ -432,13 +432,15 @@ class InstructionBlockProcessor implements Runnable {
 
 				String memid = command[1];
 				AbstractMembrane m = lookupMembrane(memid);
-				if(DEBUG){
-					if(m == null){
-						System.out.println("LMNtalRuntimeMessageProcessor.run(): m is null");
-					} else {
-						System.out.println("LMNtalRuntimeMessageProcessor.run(): m is " + m);
-					}
-				}
+				
+				//(nakajima 2004-10-18) なぜかぬるぽが出る
+//				if(DEBUG){
+//					if(m == null){
+//						System.out.println("LMNtalRuntimeMessageProcessor.run(): m is null");
+//					} else {
+//						System.out.println("LMNtalRuntimeMessageProcessor.run(): m is " + m);
+//					}
+//				}
 
 				if (m == null) {
 					// 未知の膜の場合、擬似膜の作成を試みる
