@@ -28,6 +28,10 @@ public final class Atom extends QueuedEntity {
 	/** このアトムのローカルID */
 	private int id;
 	
+	static void gc() {
+		lastId = 0;
+	}
+	
 	///////////////////////////////
 	// コンストラクタ
 

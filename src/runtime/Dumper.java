@@ -69,21 +69,28 @@ public class Dumper {
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	public static String dump(AbstractMembrane mem) {
 		Unlexer buf = new Unlexer();
-		List predAtoms[] = {new LinkedList(),new LinkedList(),new LinkedList(),new LinkedList(),
-			new LinkedList()};
-		//Set atoms = new HashSet(mem.getAtomCount());
-		Set atoms = new HashSet(mem.atoms.size()); // 今はproxyを表示しているため。いずれ上に戻す
 		boolean commaFlag = false;
 		
 		// #1 - アトムの出力
 		
+		//Set atoms = new HashSet(mem.getAtomCount());
+		Set atoms = new HashSet(mem.atoms.size()); // 今はproxyを表示しているため。いずれ上に戻す
+
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
 			Atom a = (Atom)it.next();
 			atoms.add(a);
 		}
-
-		if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {
+		if (Env.verbose >= Env.VERBOSE_EXPANDATOMS) {
+			it = mem.atomIterator();
+			while (it.hasNext()) {
+				if(commaFlag) buf.append(", "); else commaFlag = true;
+				buf.append(dumpAtomGroup((Atom)it.next(), atoms));
+			}
+		}
+		else {
+			List predAtoms[] = {new LinkedList(),new LinkedList(),new LinkedList(),new LinkedList(),
+				new LinkedList()};
 			
 			// 起点にするアトムとその優先順位:
 			//  0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
@@ -92,7 +99,7 @@ public class Dumper {
 			//  3. 通常のシンボル名で最終引数のリンク先が最終引数の2引数以上のアトム
 			//  4. 第3引数のリンク先が最終引数のconsアトム
 			
-			// 起点にしないアトム
+			// 通常でないアトム名（起点にしないアトムの名前）:
 			//  - $in,$out,[],整数,実数,およびA-Zで始まるアトム
 			
 			it = mem.atomIterator();
@@ -123,6 +130,7 @@ public class Dumper {
 					}
 				}
 			}
+			
 			//predAtoms内のアトムを起点に出力
 			for (int phase = 0; phase < predAtoms.length; phase++) {
 				it = predAtoms[phase].iterator();
@@ -130,8 +138,9 @@ public class Dumper {
 					Atom a = (Atom)it.next();
 					if (atoms.contains(a)) { // まだ出力されていない場合
 						if(commaFlag) buf.append(", "); else commaFlag = true;
-						// consは演算子と同じ表示的な扱い
+						// 3引数演算子の強制 s=t 表示は、演算子展開表示しないときのみ行う
 						if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
+							// consは演算子と同じ表示的な扱い
 							if (a.getFunctor().equals(FUNC_CONS)
 							 || (a.getArity() == 3 && isInfixOperator(a.getName()))) {
 								buf.append(dumpLink(a.getLastArg(), atoms, 700));
@@ -144,40 +153,51 @@ public class Dumper {
 					}
 				}
 			}
-		}
+			
+			// todo このchangedループもpredAtomsに統合する
 		
-		//閉路がある場合にはまだ残っているので、適当な所から出力。
-		//閉路の部分を探した方がいいが、とりあえずこのまま。
-		boolean changed;
-		do {
-			changed = false;
-			it = atoms.iterator();
-			while (it.hasNext()) {
-				Atom a = (Atom)it.next();
-				if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
-					// todo コードが気持ち悪いのでなんとかする (2)
-					if (!a.getFunctor().isSymbol()) continue;
-					if (a.getName().matches("^[A-Z].*")) continue;
-					if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
-					if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
-					if (a.getFunctor().equals(FUNC_NIL)) continue;
+			//閉路がある場合にはまだ残っているので、適当な所から出力。
+			//閉路の部分を探した方がいいが、とりあえずこのまま。
+			boolean changed;
+			do {
+				changed = false;
+				it = atoms.iterator();
+				while (it.hasNext()) {
+					Atom a = (Atom)it.next();
+					// 演算子表示できるときは、データができるだけ引数に来るようにする
+					if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
+						// todo コードが気持ち悪いのでなんとかする (2)
+						if (!a.getFunctor().isSymbol()) continue;
+						if (a.getName().matches("^[A-Z].*")) continue;
+						if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
+						if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
+						if (a.getFunctor().equals(FUNC_NIL)) continue;
+					}
+					// プロキシを省略できるときは、プロキシができるだけ引数に来るようにする
+					if (Env.verbose < Env.VERBOSE_EXPANDPROXIES) {
+						if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
+						if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
+					}
+					// ここまで残った1引数のアトムはデータの可能性が高いので、できるだけ引数に来るようにする
+					if (a.getArity() == 1) continue;
+					//
+					if(commaFlag) buf.append(", "); else commaFlag = true;
+					buf.append(dumpAtomGroup(a, atoms));
+					changed = true;
+					break;
 				}
-				if(commaFlag) buf.append(", "); else commaFlag = true;
-				buf.append(dumpAtomGroup(a, atoms));
-				changed = true;
-				break;
 			}
-		}
-		while (changed);
-		
-		// 残ったアトムを s=t の形式で出力する（verbose < EXPANDOPS のときのみ）
-		while (!atoms.isEmpty()) {
-			it = atoms.iterator();
-			Atom a = (Atom)it.next();
-			if(commaFlag) buf.append(", "); else commaFlag = true;
-			buf.append(dumpAtomGroupWithoutLastArg(a, atoms, 700));
-			buf.append("=");
-			buf.append(dumpAtomGroupWithoutLastArg(a.getLastArg().getAtom(), atoms, 700));
+			while (changed);
+			
+			// 残ったアトムを s=t の形式で出力する
+			while (!atoms.isEmpty()) {
+				it = atoms.iterator();
+				Atom a = (Atom)it.next();
+				if(commaFlag) buf.append(", "); else commaFlag = true;
+				buf.append(dumpAtomGroupWithoutLastArg(a, atoms, 700));
+				buf.append("=");
+				buf.append(dumpAtomGroupWithoutLastArg(a.getLastArg().getAtom(), atoms, 700));
+			}
 		}
 
 		// #2 - 子膜の出力		
@@ -221,6 +241,10 @@ public class Dumper {
 		int arity = func.getArity() - reducedArgCount;
 		if (arity == 0) {
 			return func.getQuotedAtomName(); // func.getAbbrName();
+		}
+		if (Env.verbose < Env.VERBOSE_EXPANDPROXIES && arity == 1
+		 && ( func.equals(Functor.INSIDE_PROXY) || func.equals(Functor.OUTSIDE_PROXY) )) {
+		 	return dumpLink(a.args[0], atoms, outerprio);
 		}
 		Unlexer buf = new Unlexer();
 		if (Env.verbose < Env.VERBOSE_EXPANDOPS) {

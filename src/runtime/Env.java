@@ -26,21 +26,25 @@ public final class Env {
 	 */
 	public static int optimize = 0;
 	
-	/** 無指定時の冗長表示レベル */
-	public static final int VERBOSE_INIT = 2;
-	/** ルールセットの内容を展開する冗長表示レベル */
-	public static final int VERBOSE_EXPANDRULES = 3;
-	/** 演算子を展開する冗長表示レベル <pre> X+Y --> '+'(X,Y) </pre> */
+	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/
+	public static final int VERBOSE_SHOWRULES = 3;
+	/** 自由リンク管理アトムを表示する冗長表示レベル（EXPANDATOMS未満に限る）*/
+	public static final int VERBOSE_EXPANDPROXIES = 3;
+	/** 演算子を展開する冗長表示レベル（EXPANDATOMS未満に限る） <pre> X+Y --> '+'(X,Y) </pre> */
 	public static final int VERBOSE_EXPANDOPS = 4;
 	/** アトム引数を展開する冗長表示レベル <pre> a(b) --> a(_2),b(_2) </pre> */
 	public static final int VERBOSE_EXPANDATOMS = 5;
+	/** ルールセットの内容を展開する冗長表示レベル */
+	public static final int VERBOSE_EXPANDRULES = 6;
 
+	/** -vオプション無指定時の冗長表示レベル */
+	public static final int VERBOSE_INIT = 2;
+	/** -vオプション指定時のデフォルトの冗長表示レベル */
+	public static final int VERBOSE_DEFAULT = 5;
 	/**
 	 * verbose level.
 	 */
 	public static int verbose = VERBOSE_INIT;
-	/** -vオプション指定時のデフォルトの冗長表示レベル */
-	public static final int VERBOSE_DEFAULT = 5;
 	
 	/**
 	 * ランダム実行

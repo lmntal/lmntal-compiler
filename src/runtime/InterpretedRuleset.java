@@ -94,7 +94,8 @@ public final class InterpretedRuleset extends Ruleset {
 	}
 
 	public void showDetail() {
-		Env.d("Compiled Ruleset @" + id + dumpRules());
+		if (Env.verbose >= Env.VERBOSE_SHOWRULES)
+			Env.p("Compiled Ruleset @" + id + dumpRules());
 		Iterator l;
 		l = rules.listIterator();
 		while (l.hasNext()) {

@@ -20,6 +20,11 @@ public final class Link implements Cloneable {
 
 	private static int lastId = 0;
 	private int id;
+	
+	static void gc() {
+		lastId = 0;
+	}
+	
 	///////////////////////////////
 	// コンストラクタ
 	
