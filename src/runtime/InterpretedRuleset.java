@@ -405,7 +405,8 @@ class InterpretiveReactor {
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break; //n-kato
-				case Instruction.UNIFY: //[atom1, pos1, atom2, pos2]
+				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
+				case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
 					mems[0].unifyAtomArgs(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );

@@ -579,7 +579,7 @@ public class Instruction implements Cloneable {
 	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalunifyが使用できる。*/
 	public static final int UNIFY = 67;
 
-	/** localunify [atom1, pos1, atom2, pos2]
+	/** localunify [atom1, pos1, atom2, pos2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * unifyと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALUNIFY = LOCAL + UNIFY;
