@@ -120,7 +120,7 @@ public class FrontEnd {
 			compile.structure.Membrane root = RulesetCompiler.runStartWithNull(m);
 			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
 			Env.d( "After compile : "+ir );
-			root.showAllRule();
+			root.showAllRules();
 			
 			// ผยนิ
 			LMNtalRuntime rt = new LMNtalRuntime();
@@ -130,13 +130,10 @@ public class FrontEnd {
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}
 			rt.exec();
-				
-			Membrane rootmem = (Membrane)rt.getGlobalRoot();
 			if (!Env.fTrace) {
 				Env.d( "After execute : " );
-				Env.p( Dumper.dump(rootmem) );
+				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}
-			//Env.p( rootmem );
 		} catch (Exception e) {
 			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}

@@ -7,7 +7,7 @@ import java.util.*;
  * @author hara, nakajima, n-kato
  */
 public final class InterpretedRuleset extends Ruleset {
-	/** ルールセット番号 */
+	/** このルールセットのローカルID */
 	private int id;
 	private static int lastId = 600;
 
@@ -32,7 +32,7 @@ public final class InterpretedRuleset extends Ruleset {
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
 			Rule r = (Rule) it.next();
-			if (r.atomMatch.size() == 1) continue; // debug抑制用
+			if (r.atomMatch.size() == 1) continue; // debug表示抑制用
 			if (matchTest(mem, atom, r.atomMatch)) {
 				result = true;
 				//if (!mem.isCurrent()) return true;
@@ -80,12 +80,17 @@ public final class InterpretedRuleset extends Ruleset {
 		return ir.interpret(matchInsts, 0);
 	}
 	public String toString() {
-		StringBuffer s = new StringBuffer("");
-		Iterator l;
-		l = rules.iterator();
-		while (l.hasNext())
-			s.append(((Rule) l.next()).toString() + " ");
-		return "@" + id + "  " + s;
+		String ret = "@" + id;
+		if (true) {
+			StringBuffer s = new StringBuffer("");
+			Iterator it = rules.iterator();
+			while (it.hasNext()) {
+				s.append(" ");
+				s.append((Rule)it.next());
+			}
+			ret += s;
+		}
+		return ret;
 	}
 
 	public void showDetail() {

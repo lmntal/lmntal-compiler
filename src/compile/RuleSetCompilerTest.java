@@ -63,7 +63,7 @@ public class RuleSetCompilerTest {
 			Env.d("");
 			Env.d("Compiled Membrane :");
 			root.showAllRuleset();
-			root.showAllRule();
+			root.showAllRules();
 			
 			return ir;
 			

@@ -3,9 +3,9 @@ package runtime;
 import java.util.*;
 
 public final class Rule {
-	// 中身は Instruction
+	// Instruction のリスト
+	public List atomMatch;
 	public List memMatch;
-	public List atomMatch; //?
 	public List body;
 	private String text;
 	
@@ -14,9 +14,9 @@ public final class Rule {
 	 *
 	 */
 	public Rule() {
-		memMatch    = new ArrayList();
 		atomMatch = new ArrayList();
-		body        = new ArrayList();
+		memMatch  = new ArrayList();
+		body      = new ArrayList();
 	}
 	/**
 	 * ルール文字列つきコンストラクタ
@@ -32,7 +32,7 @@ public final class Rule {
 	 */
 	public void showDetail() {
 		Iterator l;
-		Env.d("Rule.showDetail  this = "+this);
+		Env.d("Rule.showDetail " + this);
 		
 		/*
 		l = atomMatch.listIterator();
