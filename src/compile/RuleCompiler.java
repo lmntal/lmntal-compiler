@@ -372,10 +372,11 @@ public class RuleCompiler {
 		enqueueRHSAtoms();
 		addInline();
 		addRegAndLoadModules();
+		freeLHSSingletonProcessContexts();
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
 		freeLHSTypedProcesses();
-		freeLHSSingletonProcessContexts();
+//		freeLHSSingletonProcessContexts(); // freememに先行させるため3行上に移動した n-kato 2005.1.13
 		recursiveUnlockLHSNonlinearProcessContextMems();
 		unlockReusedOrNewRootMem(rs.rightMem);
 		//
@@ -574,9 +575,11 @@ public class RuleCompiler {
 		Iterator it = rs.processContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
-			if (def.rhsOccs.size() != 1) { // TODO 再利用したときのみ recursiveunlock する
-				body.add(new Instruction( Instruction.RECURSIVEUNLOCK,
-					lhsmemToPath(def.lhsOcc.mem) ));
+			if (def.rhsOccs.size() != 1) {
+				if (false) { // 再利用したときのみ recursiveunlock する
+					body.add(new Instruction( Instruction.RECURSIVEUNLOCK,
+						lhsmemToPath(def.lhsOcc.mem) ));
+				}
 			}
 		}
 	}
@@ -1241,7 +1244,6 @@ public class RuleCompiler {
 			Membrane submem = (Membrane)it.next();
 			freeLHSMem(submem);
 			// 再利用された場合freeしてはいけない
-			// TODO dropmemされたらfreeしてはいけない
 			body.add(new Instruction(Instruction.FREEMEM, lhsmemToPath(submem)));
 		}
 	}
