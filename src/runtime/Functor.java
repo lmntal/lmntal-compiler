@@ -29,6 +29,13 @@ public class Functor {
 	public int getArity() {
 		return arity;
 	}
+	/**
+	 * この名前がアクティブならtrue
+	 */
+	boolean isActive() {
+		//とりあえず全部アクティブ
+		return true;
+	}
 	public String toString() {
 		return strFunctor;
 	}

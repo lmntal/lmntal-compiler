@@ -49,13 +49,6 @@ class Atom extends QueuedEntity {
 	///////////////////////////////
 	// 情報の取得
 
-	/**
-	 * このアトムがアクティブならtrue
-	 */
-	boolean isActive() {
-		//とりあえず全部アクティブ
-		return true;
-	}
 	public String toString() {
 		return functor.getName();
 	}

@@ -135,7 +135,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	Atom newAtom(Functor functor) {
 		Atom a = new Atom(this, functor);
 		atoms.add(a);
-		if (a.isActive()) {
+		if (functor.isActive()) {
 			enqueueAtom(a);
 		}
 //		atomCount++;
