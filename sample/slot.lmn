@@ -1,0 +1,562 @@
+[[/*inline_define*/
+ import java.lang.*;
+ import java.net.*;
+ import java.awt.*;
+ import java.awt.event.*;
+ import javax.swing.*;
+ 
+ //ドラム1列分のパネル
+ class Drum extends JPanel implements ActionListener{
+  Membrane mem;
+  JButton stop;
+  JLabel slot_mark[];
+  ImageIcon cherry_ic,unknown_ic,bell_ic,suika_ic,bar_ic,seven_ic;
+  String slot[];
+  boolean rolling;
+  
+  public Drum(Membrane targetMem){
+   this.mem = targetMem;
+   setSize(120,250); 
+   slot = new String[3];
+   for(int i=0; i<3; i++) slot[i]="";
+   rolling = false;
+
+   stop = new JButton("STOP");
+   
+   setLayout(null);
+   Color cl = new Color(100,100,200);
+   setBackground(cl);
+   
+   //画像の読み込み
+   try{
+    URL url1 = new URL("http://www.ueda.info.waseda.ac.jp/~sakurai/image/slot_cherry.JPG");
+    URL url2 = new URL("http://www.ueda.info.waseda.ac.jp/~sakurai/image/slot_unknown.JPG");
+    URL url3 = new URL("http://www.ueda.info.waseda.ac.jp/~sakurai/image/slot_bell.JPG");
+    URL url4 = new URL("http://www.ueda.info.waseda.ac.jp/~sakurai/image/slot_suika.JPG");
+    URL url5 = new URL("http://www.ueda.info.waseda.ac.jp/~sakurai/image/slot_bar.JPG");
+    URL url6 = new URL("http://www.ueda.info.waseda.ac.jp/~sakurai/image/slot_seven.JPG");
+    cherry_ic = new ImageIcon(url1);
+    unknown_ic = new ImageIcon(url2);
+    bell_ic = new ImageIcon(url3);
+    suika_ic = new ImageIcon(url4);
+    bar_ic = new ImageIcon(url5);
+    seven_ic = new ImageIcon(url6);
+   }catch(MalformedURLException e){}
+  
+   slot_mark = new JLabel[3];
+   for(int i=0;i<3;i++){
+    slot_mark[i] = new JLabel(cherry_ic);
+   }
+   stop.setBounds(20,205,80,30);
+   for(int i=0;i<3;i++)
+    slot_mark[i].setBounds(20,65*(i),80,70);
+   
+   add(stop);
+   add(slot_mark[0]); add(slot_mark[1]); add(slot_mark[2]); 
+  
+   stop.addActionListener(this);
+  }
+  
+  public void setRolling(){
+   rolling = true;
+  }
+  
+  public boolean nowRolling(){
+   return rolling;
+  }
+  
+  //rollアトムを消費してドラムを回転、その絵柄を変化させる
+  //絵柄更新後、3つのドラムの同期をとるためのrolledアトムを生成
+  public void drumRoll(Membrane targetMem,String s1,String s2,String s3){
+   this.mem = targetMem;
+   slot[0] = s1;
+   slot[1] = s2;
+   slot[2] = s3;
+   for(int i=0;i<3;i++){
+    if(slot[i].equals("cherry")) slot_mark[i].setIcon(cherry_ic); 
+    else if(slot[i].equals("unknown")) slot_mark[i].setIcon(unknown_ic);
+    else if(slot[i].equals("bell")) slot_mark[i].setIcon(bell_ic);
+    else if(slot[i].equals("suika")) slot_mark[i].setIcon(suika_ic);
+    else if(slot[i].equals("bar")) slot_mark[i].setIcon(bar_ic);
+    else if(slot[i].equals("seven")) slot_mark[i].setIcon(seven_ic);
+   }
+   //mem.asyncLock();
+   mem.newAtom(new Functor("rolled",0));
+   //mem.asyncUnlock();
+  }
+  
+  //ドラムが止まった時の最終的な絵柄をセット
+  //処理終了時にドラムが完全に止まったことを表すstoppedアトムを生成
+  public void drumStop(Membrane targetMem,String s1,String s2,String s3){
+   this.mem = targetMem;
+   slot[0] = s1;
+   slot[1] = s2;
+   slot[2] = s3;
+   for(int i=0;i<3;i++){
+    if(slot[i].equals("cherry")) slot_mark[i].setIcon(cherry_ic); 
+    else if(slot[i].equals("unknown")) slot_mark[i].setIcon(unknown_ic);
+    else if(slot[i].equals("bell")) slot_mark[i].setIcon(bell_ic);
+    else if(slot[i].equals("suika")) slot_mark[i].setIcon(suika_ic);
+    else if(slot[i].equals("bar")) slot_mark[i].setIcon(bar_ic);
+    else if(slot[i].equals("seven")) slot_mark[i].setIcon(seven_ic);
+   }
+   //mem.asyncLock();
+   mem.newAtom(new Functor("stopped",0));
+   //mem.asyncUnlock();
+  } 
+  
+  public void actionPerformed(ActionEvent e){
+   //stopボタン
+   //回転中にしか反応しない
+   //ドラムを止めるstopアトムを生成
+   if(e.getSource()==stop && rolling==true){
+     mem.asyncLock();
+     mem.newAtom(new Functor("stop",0));
+     mem.asyncUnlock();   
+     rolling=false;
+   }
+  }
+ }
+ 
+ //メインフレーム
+ //3つのDrumクラスを貼り付けて1つのスロットマシンとする
+ class LMNtalFrame extends JFrame implements ActionListener{
+  final Membrane mem;
+  Container MainPanel;
+  JLabel coin_screen,message_screen;
+  JButton start,retry,exit;
+  Drum screen1,screen2,screen3;
+  int coin;
+  boolean checking;
+
+  public LMNtalFrame(Membrane targetMem,Drum sl1,Drum sl2,Drum sl3){
+   this.mem = targetMem;
+   setBounds( 10, 10, 450, 500);
+   setTitle("Slot Machine");
+   
+   //終了処理
+   //親膜にterminateアトムを生成
+   addWindowListener(new WindowAdapter(){
+      public void windowClosing(WindowEvent e) {
+        mem.asyncLock();
+        mem.newAtom(new Functor("terminate",0));
+        mem.asyncUnlock();
+      }
+    });
+   
+   coin = 50;  
+   checking = false;
+   
+   MainPanel = getContentPane();
+   MainPanel.setLayout(null);
+   
+   screen1 = sl1;
+   screen2 = sl2;
+   screen3 = sl3;
+   
+   coin_screen = new JLabel("COIN:"+coin);
+   coin_screen.setFont(new Font("Monospaced", Font.BOLD, 20));
+   message_screen = new JLabel("1PLAY 5COINS");
+   message_screen.setFont(new Font("Monospaced", Font.BOLD, 20));
+   start = new JButton("START");
+   retry = new JButton("RETRY");
+   exit = new JButton("EXIT");   
+   
+   coin_screen.setBounds(20,20,150,50);
+   message_screen.setBounds(200,20,200,50);
+   start.setBounds(30,400,100,30);
+   retry.setBounds(165,400,100,30);
+   exit.setBounds(300,400,100,30);
+   screen1.setLocation(30,100);
+   screen2.setLocation(155,100);
+   screen3.setLocation(280,100);
+   
+   MainPanel.add(coin_screen); MainPanel.add(message_screen);
+   MainPanel.add(start); MainPanel.add(retry); MainPanel.add(exit);
+   MainPanel.add(screen1); MainPanel.add(screen2); MainPanel.add(screen3); 
+   setVisible(true);
+ 
+   start.addActionListener(this);
+   retry.addActionListener(this);
+   exit.addActionListener(this);
+ }
+ 
+ //リトライ時の処理
+ //コインの枚数を初期化するだけ
+ public void init(){
+  coin = 50;
+  coin_screen.setText("COIN:"+coin);
+  message_screen.setText("1PLAY 5COINS");
+ }
+ 
+ //絵柄sが揃った時の処理
+ //同時に呼ばれる可能性があるとマズイので
+ //逐次的に使用されるよう呼ぶ際には,呼び出し後waitアトムを生成
+ //waitアトムはbingoメソッドを呼ぶルールの否定条件
+ //処理終了時にあらためてwaitアトムを消すためのcheckedアトムを生成
+ public void bingo(String s){
+  int coin_plus = 0;
+  int i = 0;
+  checking = true;
+  if(s.equals("cherry")) coin_plus=5;
+  else if(s.equals("unknown")) coin_plus=25;
+  else if(s.equals("bell")) coin_plus=75;
+  else if(s.equals("suika")) coin_plus=185;
+  else if(s.equals("bar")) coin_plus=625;
+  else if(s.equals("seven")) coin_plus=5000;
+  message_screen.setText("BINGO!! "+s);
+  while(i<coin_plus){
+   i++;
+   coin++;
+   coin_screen.setText("COIN:"+coin);
+   }
+  //mem.asyncLock();
+  mem.newAtom(new Functor("checked",0));
+  //mem.asyncUnlock();
+  checking = false;
+ }
+ 
+ //ボタンの処理
+ public void actionPerformed(ActionEvent e){
+  //startボタンの処理
+  //全てのドラムが止まっている時にしか反応しない
+  //また絵柄のチェック時、コイン不足時にも反応しない
+  //押した際には子膜のstartOkもしくはstoppedアトムを
+  //rollアトムに変えるstartアトムを生成
+  if(e.getSource()==start){
+   if(!(screen1.nowRolling()) && 
+      !(screen2.nowRolling()) && 
+      !(screen3.nowRolling()) &&
+      coin>=5 && checking==false){
+    coin -= 5;
+    coin_screen.setText("COIN:"+coin);
+    mem.asyncLock();
+    mem.newAtom(new Functor("start",0));
+    mem.asyncUnlock();
+    screen1.setRolling();
+    screen2.setRolling();
+    screen3.setRolling();
+   }
+  }
+  //retryボタンの処理
+  if(e.getSource()==retry){
+   if(!(screen1.nowRolling()) && 
+      !(screen2.nowRolling()) && 
+      !(screen3.nowRolling()) && checking == false)
+    init();
+  }
+  //exitボタンの処理
+  //親膜にアプリケーションを終了させるterminateアトムを生成
+  if(e.getSource()==exit){
+   mem.asyncLock();
+   mem.newAtom(new Functor("terminate",0));
+   mem.asyncUnlock();
+  }
+ }
+ 
+} 
+]].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%これ以下は主にLMNtal
+%構造としてはメインフレーム(frame)のある親膜に
+%Drumクラス(drum)を1つずつ持つ子膜3つが入っている
+%各々の子膜の識別子としてfirst,second,thirdが入っている
+%{frame,{first,drum,...},{second,drum,...},{third,drum,...},...}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+{
+ %子膜の生成 全部で26個のアトムが連なった環状の構造でドラムを表現
+ %display1,display2,display3につながるアトムがドラムの上段,中段,下段に当たる
+ %integerモジュールのrndを使用して絵柄の識別子を入力する
+ %まずはdisplayのついたアトムを3つ生成 sl(リンク1,(display||nil),識別子,リンク2)
+ {first,count(0),
+  sl(nil,display1,integer.rnd(26),R),
+  sl(R,display2,integer.rnd(26),L),sl(L,display3,integer.rnd(26),nil)}.
+ {second,count(0),
+  sl(nil,display1,integer.rnd(26),R),
+  sl(R,display2,integer.rnd(26),L),sl(L,display3,integer.rnd(26),nil)}.
+ {third,count(0),
+  sl(nil,display1,integer.rnd(26),R),
+  sl(R,display2,integer.rnd(26),L),sl(L,display3,integer.rnd(26),nil)}.
+ 
+ %display3を待つアトムに続くアトムを23個生成
+ {count(N),sl(L,D,V,nil),$p[L,D,V],@p} :- 
+  int(N),N<23 | {count(N+1),sl(L,D,V,X),sl(X,nil,integer.rnd(26),nil),$p[L,D,V],@p}.
+ 
+ %display1を持つアトムと26個目のアトムをつないで環状構造完成
+ %終了後,絵柄決定の進行状況を表すset(N)アトムを生成
+ {count(23),sl(nil,D1,V1,R),sl(L,D2,V2,nil),$p[D1,V1,R,L,D2,V2],@p} :- 
+  {sl(X,D1,V1,R),sl(L,D2,V2,X),$p[D1,V1,R,L,D2,V2],@p,set(0)}.
+ 
+ %識別子により絵柄を決定
+ %cherry : unknown : bell : suika : bar : seven = 10 : 6 : 4 : 3 : 2 : 1
+ %26個全て終了したらDrumクラスを生成する準備ができたことを表すmakeDrumアトムを生成
+ {set(N),sl(L,D,V,R),$p[L,D,R],@p} :- int(N),int(V),0=<V,V<10 | 
+  {set(N+1),sl(L,D,cherry,R),$p[L,D,R],@p}. 
+ {set(N),sl(L,D,V,R),$p[L,D,R],@p} :- int(N),int(V),10=<V,V<16 | 
+  {set(N+1),sl(L,D,unknown,R),$p[L,D,R],@p}.
+ {set(N),sl(L,D,V,R),$p[L,D,R],@p} :- int(N),int(V),16=<V,V<20 | 
+  {set(N+1),sl(L,D,bell,R),$p[L,D,R],@p}.
+ {set(N),sl(L,D,V,R),$p[L,D,R],@p} :- int(N),int(V),20=<V,V<23 | 
+  {set(N+1),sl(L,D,suika,R),$p[L,D,R],@p}.
+ {set(N),sl(L,D,V,R),$p[L,D,R],@p} :- int(N),int(V),23=<V,V<25 | 
+  {set(N+1),sl(L,D,bar,R),$p[L,D,R],@p}.
+ {set(N),sl(L,D,V,R),$p[L,D,R],@p} :- int(N),int(V),V=25 | 
+  {set(N+1),sl(L,D,seven,R),$p[L,D,R],@p}. 
+ {set(N),$p,@p} :- int(N),N=26 | {makeDrum,$p,@p}.
+ 
+ %子膜内にDrumクラスを生成
+ %終了後,子膜生成完了を表すmakeEndアトムを生成
+ {makeDrum,$p,@p} :-
+           {makeEnd,$p,@p,
+            [[/*inline*/
+             Drum drum = new Drum((Membrane)mem);
+             Atom a = mem.newAtom(new Functor("drum",1));
+             Atom b = mem.newAtom(new ObjectFunctor(drum));
+             mem.newLink(a,0,b,0);
+             mem.removeAtom(me);
+             mem.makePerpetual();
+            ]]}.
+ 
+ %3つの子膜全てでDrumクラスの生成まで完了していたらメインフレームの生成を行う
+ %メインフレームを生成後,ドラムの回転準備が整ったことを表すstartOkアトムを子膜に追加
+ %また,スロットを止めたときに絵柄の揃ったラインが無いかチェックする必要があるので,
+ %親膜にcheck1(0),check2(0),check3(0),check4(0),check5(0)追加
+ %check(N)に引数があるのは重複して同じラインをチェックしないようにするため
+ {first,drum(D1),makeEnd,$p,@p},
+ {second,drum(D2),makeEnd,$q,@q},
+ {third,drum(D3),makeEnd,$r,@r} :-
+           class(D1,"Drum"),class(D2,"Drum"),class(D3,"Drum") |
+           {first,drum(D1),startOk,$p,@p},
+           {second,drum(D2),startOk,$q,@q},
+           {third,drum(D3),startOk,$r,@r},
+           [[/*inline*/
+            ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+            Drum d1 = (Drum)framefunc.getObject();
+            ObjectFunctor framefunc2 = (ObjectFunctor)me.nthAtom(1).getFunctor();
+            Drum d2 = (Drum)framefunc2.getObject();
+            ObjectFunctor framefunc3 = (ObjectFunctor)me.nthAtom(2).getFunctor();
+            Drum d3 = (Drum)framefunc3.getObject();
+            LMNtalFrame frame = new LMNtalFrame((Membrane)mem,d1,d2,d3);
+            Atom a = mem.newAtom(new Functor("frame",1));
+            Atom b = mem.newAtom(new ObjectFunctor(frame));
+            mem.newLink(a,0,b,0);
+            mem.makePerpetual();
+            mem.removeAtom(me.nthAtom(0));
+            mem.removeAtom(me.nthAtom(1));
+            mem.removeAtom(me.nthAtom(2));
+            mem.removeAtom(me);
+           ]](D1,D2,D3),check1(0),check2(0),check3(0),check4(0),check5(0).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%ここまででメインとなる画面の生成が完了
+%以下が各々のボタンを押した際の処理
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ %フレーム生成完了後,初めてstartボタンを押した際の処理
+ %3つの子膜全てにstartOkアトムが無ければならない
+ %マッチするとstartOKがrollになる
+ start,frame(F),
+ {first,startOk,$p,@p},
+ {second,startOk,$q,@q},
+ {third,startOk,$r,@r} :-
+  class(F,"LMNtalFrame") |
+  frame(F),
+  {first,roll,$p,@p},{second,roll,$q,@q},{third,roll,$r,@r}.
+ 
+ %2回目以降にstartボタンを押した際の処理
+ %stoppedアトムをrollアトムにする
+ %またcheckを初期化する
+ start,frame(F),check1(N1),check2(N2),check3(N3),check4(N4),check5(N5),
+ {first,stopped,$p,@p},{second,stopped,$q,@q},{third,stopped,$r,@r} :-
+  \+($p=(wait,$pp)),class(F,"LMNtalFrame"),int(N1),int(N2),int(N3),int(N4),int(N5) |
+  frame(F),check1(0),check2(0),check3(0),check4(0),check5(0),
+  {first,roll,$p,@p},{second,roll,$q,@q},{third,roll,$r,@r}.  
+ 
+ %回転処理
+ %1コマ回るのにrollアトム1個消費
+ %stopがある時は回転しない
+ %絵柄を書き換えるとdrumRollメソッドにより回転終了の確認をするrolledアトムが生成される
+ {roll,
+  sl(L0,nil,X0,R1),sl(R1,display1,X1,L1),sl(L1,display2,X2,R2),sl(R2,display3,X3,L2),
+  drum(D),$p[L0,L2],@p} :- 
+  \+($p=(stop,$pp)),class(D,"Drum"),
+  unary(X0),unary(X1),unary(X2),unary(X3) |
+      {
+      [[/*inline*/
+       String x1 = me.nth(0);
+       String x2 = me.nth(1);
+       String x3 = me.nth(2);
+       ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(3).getFunctor();
+       Drum drum = (Drum)framefunc.getObject();
+       Membrane nowMem = (Membrane)me.getMem();
+       drum.drumRoll(nowMem,x1,x2,x3);
+       mem.removeAtom(me.nthAtom(0));
+       mem.removeAtom(me.nthAtom(1));
+       mem.removeAtom(me.nthAtom(2));
+       mem.removeAtom(me.nthAtom(3));
+       mem.removeAtom(me);
+      ]](X1,X2,X3,D),
+      sl(L0,display1,X0,R1),sl(R1,display2,X1,L1),sl(L1,display3,X2,R2),sl(R2,nil,X3,L2),
+      drum(D),$p[L0,L2],@p}.
+ 
+ %stopとroll,rolled,が共存する場合はstopを消す
+ {stop,roll,$p,@p} :- {stop,$p,@p}.
+ {stop,rolled,$p,@p} :- {stop,$p,@p}.
+
+ %3つのドラムの同期を取る
+ %3つとも動いている場合
+ {rolled,$p,@p},{rolled,$q,@q},{rolled,$r,@r} :-
+  \+($p=(stop,$pp)),\+($q=(stop,$qq)),\+($r=(stop,$rr)) |
+  {roll,$p,@p},{roll,$q,@q},{roll,$r,@r}.
+ %2つ動いている場合
+ {rolled,$p,@p},{rolled,$q,@q},{stopped,$r,@r} :-
+  \+($p=(stop,$pp)),\+($q=(stop,$qq)) |
+  {roll,$p,@p},{roll,$q,@q},{stopped,$r,@r}.
+ %1つだけ動いている場合
+ {rolled,$p,@p},{stopped,$q,@q},{stopped,$r,@r} :-
+  \+($p=(stop,$pp)) |
+  {roll,$p,@p},{stopped,$q,@q},{stopped,$r,@r}.
+  
+ %stopボタンを押して止まった時点での絵柄に更新する
+ %処理後,drumStopメソッドにより完全に止まったことを表すstoppedアトムが生成される
+ {stop,
+  sl(R1,display1,X1,L1),sl(L1,display2,X2,R2),sl(R2,display3,X3,L2),
+  drum(D),$p[R1,L2],@p} :- 
+  \+($p=(roll,$pp)),class(D,"Drum"),
+  unary(X1),unary(X2),unary(X3) |
+      {
+       [[/*inline*/
+        String x1 = me.nth(0);
+        String x2 = me.nth(1);
+        String x3 = me.nth(2);
+        ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(3).getFunctor();
+        Drum drum = (Drum)framefunc.getObject();
+        Membrane nowMem = (Membrane)me.getMem();
+        drum.drumStop(nowMem,x1,x2,x3);
+        mem.removeAtom(me.nthAtom(0));
+        mem.removeAtom(me.nthAtom(1));
+        mem.removeAtom(me.nthAtom(2));
+        mem.removeAtom(me.nthAtom(3));
+        mem.removeAtom(me);
+       ]](X1,X2,X3,D),
+       sl(R1,display1,X1,L1),sl(L1,display2,X2,R2),sl(R2,display3,X3,L2),
+       drum(D),$p[R1,L2],@p}.
+  
+ %以下,絵柄が揃った時の処理
+ %あるラインiがチェックされるとchecki(1)となり,重複してチェックはされない
+ %i=1:上段 i=2:中段 i=3:下段 i=4:左上から右下 i=5:左下から右上
+ %また,bingoメソッドを利用する際,firstのある子膜にwaitを生成
+ %bingoメソッドの終了時に生成されるcheckedアトムによってwaitアトムは消える
+ %waitが否定条件になっているのでこれらの処理は1つずつ実行される
+ frame(F),check1(0),     
+ {stopped,first,sl(L1,display1,X1,R1),$p[L1,R1],@p},
+ {stopped,second,sl(L2,display1,X2,R2),$q[L2,R2],@q},
+ {stopped,third,sl(L3,display1,X3,R3),$r[L3,R3],@r} :-
+  \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
+       frame(F),check1(1),
+       [[/*inline*/
+         String x = me.nth(0);
+         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
+         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+         frame.bingo(x);
+         mem.removeAtom(me.nthAtom(0));
+         mem.removeAtom(me.nthAtom(1));
+         mem.removeAtom(me);
+       ]](X1,F),
+       {stopped,first,wait,sl(L1,display1,X1,R1),$p[L1,R1],@p},
+       {stopped,second,sl(L2,display1,X2,R2),$q[L2,R2],@q},
+       {stopped,third,sl(L3,display1,X3,R3),$r[L3,R3],@r}.
+ 
+ frame(F),check2(0),
+ {stopped,first,sl(L1,display2,X1,R1),$p[L1,R1],@p},
+ {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
+ {stopped,third,sl(L3,display2,X3,R3),$r[L3,R3],@r} :-
+  \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
+       frame(F),check2(1),
+       [[/*inline*/
+        String x = me.nth(0);
+        ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
+        LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+        frame.bingo(x);
+        mem.removeAtom(me.nthAtom(0));
+        mem.removeAtom(me.nthAtom(1));
+        mem.removeAtom(me);
+       ]](X1,F),
+       {stopped,first,wait,sl(L1,display2,X1,R1),$p[L1,R1],@p},
+       {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
+       {stopped,third,sl(L3,display2,X3,R3),$r[L3,R3],@r}.
+
+ frame(F),check3(0),
+ {stopped,first,sl(L1,display3,X1,R1),$p[L1,R1],@p},
+ {stopped,second,sl(L2,display3,X2,R2),$q[L2,R2],@q},
+ {stopped,third,sl(L3,display3,X3,R3),$r[L3,R3],@r} :-
+  \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
+       frame(F),check3(1),
+       [[/*inline*/
+        String x = me.nth(0);
+        ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
+        LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+        frame.bingo(x);
+        Atom a = mem.newAtom(new Functor("frame",1));
+        Atom b = mem.newAtom(new ObjectFunctor(frame));
+        mem.removeAtom(me.nthAtom(0));
+        mem.removeAtom(me.nthAtom(1));
+        mem.removeAtom(me);
+       ]](X1,F),
+       {stopped,first,wait,sl(L1,display3,X1,R1),$p[L1,R1],@p},
+       {stopped,second,sl(L2,display3,X2,R2),$q[L2,R2],@q},
+       {stopped,third,sl(L3,display3,X3,R3),$r[L3,R3],@r}.
+       
+ frame(F),check4(0),
+ {stopped,first,sl(L1,display1,X1,R1),$p[L1,R1],@p},
+ {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
+ {stopped,third,sl(L3,display3,X3,R3),$r[L3,R3],@r} :-
+  \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
+       frame(F),check4(1),
+       [[/*inline*/
+        String x = me.nth(0);
+        ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
+        LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+        frame.bingo(x);
+        mem.removeAtom(me.nthAtom(0));
+        mem.removeAtom(me.nthAtom(1));
+        mem.removeAtom(me);
+       ]](X1,F),
+       {stopped,first,wait,sl(L1,display1,X1,R1),$p[L1,R1],@p},
+       {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
+       {stopped,third,sl(L3,display3,X3,R3),$r[L3,R3],@r}.
+       
+ frame(F),check5(0),
+ {stopped,first,sl(L1,display3,X1,R1),$p[L1,R1],@p},
+ {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
+ {stopped,third,sl(L3,display1,X3,R3),$r[L3,R3],@r} :-
+  \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
+       frame(F),check5(1),
+       [[/*inline*/
+        String x = me.nth(0);
+        ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
+        LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+        frame.bingo(x);
+        mem.removeAtom(me.nthAtom(0));
+        mem.removeAtom(me.nthAtom(1));
+        mem.removeAtom(me);
+       ]](X1,F),
+       {stopped,first,wait,sl(L1,display3,X1,R1),$p[L1,R1],@p},
+       {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
+       {stopped,third,sl(L3,display1,X3,R3),$r[L3,R3],@r}.
+ 
+ %1ラインをチェックしたらwaitを消す 
+checked,{first,wait,$p,@p} :- {first,$p,@p}.
+ 
+}.
+ 
+{terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") | {[[/*inline*/
+    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+    frame.setVisible(false);
+    frame.dispose();
+    mem.removeAtom(me.nthAtom(0));
+    mem.removeAtom(me);
+  ]](F),$p,@p}.
