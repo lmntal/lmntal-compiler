@@ -1,6 +1,8 @@
 package compile.structure;
 
 import java.util.*;
+
+import runtime.Functor;
 import runtime.InterpretedRuleset;
 
 import runtime.Env;
@@ -56,6 +58,16 @@ public final class Membrane {
 	 */
 	public Membrane(Membrane mem) {
 		this.mem = mem;
+	}
+	
+	public int getNormalAtomCount() {
+		Iterator it = atoms.iterator();
+		int c=0;
+		while(it.hasNext()) {
+			Atom a = (Atom)it.next();
+			if(!(a.functor.equals(Functor.INSIDE_PROXY) || a.functor.equals(Functor.OUTSIDE_PROXY))) c++;
+		}
+		return c;
 	}
 	
 	/**

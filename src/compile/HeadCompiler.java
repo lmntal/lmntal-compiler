@@ -228,7 +228,8 @@ public class HeadCompiler {
 			}
 			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
 			if (submem.processContexts.isEmpty()) {
-				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
+//				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
+				match.add(new Instruction(Instruction.NATOMS, submempath, submem.getNormalAtomCount()));
 				match.add(new Instruction(Instruction.NMEMS,  submempath, submem.mems.size()));
 			}
 			if (submem.ruleContexts.isEmpty()) {
