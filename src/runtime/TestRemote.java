@@ -106,6 +106,7 @@ class TestRemote{
 		Atom atom_fuga_banon = rm_banon.newAtom(new Functor("fuga", 1));
 		Atom atom_moge_banon = rm_banon.newAtom(new Functor("moge", 1));
 		//rt_banon.flush();
+		rm_banon.remote.flush();
 		
 		//ALTERATOMFUNCTOR
 		//rm_banon.alterAtomFunctor(atom_hoge_banon, new Functor("hoge2", 1));
