@@ -11,8 +11,6 @@ import java.util.Random;
 import java.util.Set;
 import java.io.*;
 
-//TODO 実装
-
 /**
  * 物理的な計算機の境界にあって、LMNtalRuntimeインスタンスとリモートノードの対応表を保持する。
  * @author nakajima
