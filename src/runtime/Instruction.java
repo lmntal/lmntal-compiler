@@ -25,6 +25,8 @@ public class Instruction {
     /**
      * どの命令なのかを保持する
      */
+
+    /** ルールID */	
     private int id;
 
     /** 未定義の命令 */	
@@ -387,6 +389,17 @@ public class Instruction {
     /** 命令の数。新命令はこれより小さな数字にすること。*/
     private static final int END_OF_INSTRUCTION = 100;
 	
+
+    ////////////////////////////////////////////////////////////////
+    /**
+     * IDを取得する
+     * @return int
+     */
+    public int getID(){
+	return id;
+    }
+
+
     ////////////////////////////////////////////////////////////////
 
     /**

@@ -3,6 +3,7 @@ package runtime;
 import java.util.*;
 
 // TODO 【重要】マッチング検査の途中で取得したロックを全て解放する必要がある
+// memo：ロックを開放する単位がリストになるように修正
 
 /**
  * compile.RuleCompiler によって生成される。
@@ -56,14 +57,15 @@ public final class InterpretedRuleset extends Ruleset {
      *
      * 
      */
-    //    private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
-    private void body(Rule rule, AbstractMembrane[] memArgs, Atom[] atomArgs) {
-	Iterator i = rule.body.iterator();
+    private void body(List rulebody, AbstractMembrane[] memArgs, Atom[] atomArgs) {
+	Iterator it = rulebody.iterator();
 
-	while(i.hasNext()){
+	while(it.hasNext()){
 	    hoge = (Instruction)i.next();
 
-	switch (hoge){
+
+	    //ここ以下のswitchは移動予定 bodyとguardを両方扱うメソッドを定義する予定
+	switch (hoge.getID()){
 	case Instruction.DEREF:
 	    //deref [-dstatom, +srcatom, +srcpos, +dstpos]
 	    //if (atomArgs[1].args[srcpos] == atomArgs[1].args[dstpos]) {
@@ -166,15 +168,6 @@ public final class InterpretedRuleset extends Ruleset {
 		    //同一の膜を参照
 		}
 	    } 
-	    break;
-
-	    //廃止
-	    //	case Instruction.LOCK:
-	    //	    break;
-
-	case Instruction.UNLOCK:
-	    //unlock [srcmem]
-
 	    break;
 
 	case Instruction.REMOVEATOM:
