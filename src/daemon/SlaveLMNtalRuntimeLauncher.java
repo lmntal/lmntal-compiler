@@ -9,7 +9,9 @@ import java.net.Socket;
 import runtime.LocalLMNtalRuntime;
 
 class SlaveLMNtalRuntimeLauncher {
-	LocalLMNtalRuntime runtime;
+	static boolean DEBUG = true;
+	
+	static LocalLMNtalRuntime runtime;
 	
 	public static void main(String[] args){
 		try {
@@ -28,24 +30,33 @@ class SlaveLMNtalRuntimeLauncher {
 			//REGSITERLOCAL rgid
 			String command = new String("registerlocal " + rgid + "\n");
 
-			System.out.println("DummyRemoteRuntime.run(): now omitting: " + command);
+			if(DEBUG)System.out.println("DummyRemoteRuntime.run(): now omitting: " + command);
 
 			out.write(command);
 			out.flush();
 
 			String input;
-			while(true){
-				input = in.readLine();
+
+			//最初の1回。
+			input = in.readLine();
 				
-				if(input.equalsIgnoreCase("ok")){
-					//connectを発行した元に対してres msgid okを返す
-					command = "res " + callerMsgid + " ok\n";
-					out.write(command);
-					out.flush();
-				} 
+			if(input.equalsIgnoreCase("ok")){
+				//connectを発行した元に対してres msgid okを返す
+				command = "res " + callerMsgid + " ok\n";
+				out.write(command);
+				out.flush();
+			} else {
+				//TODO この部分実装
 			}
+			
+			//LocalLMNtalRuntimeを起動
+			runtime = new LocalLMNtalRuntime();
+			
+			//TODO この先何をすればいいのか
+				
 		} catch (Exception e) {
 			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());
+			e.printStackTrace();
 		}
 	}
 }

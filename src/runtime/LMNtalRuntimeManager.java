@@ -27,6 +27,8 @@ final class LMNtalRuntimeManager{
 			//localhostなら  自分自身を返す
 			return Env.theRuntime;
 		}
+		
+		//TODO 実装
 		//remote
 		RemoteLMNtalRuntime ret = (RemoteLMNtalRuntime)runtimeids.get(node);			
 
@@ -35,7 +37,7 @@ final class LMNtalRuntimeManager{
 			runtimeids.put(node,ret);
 		}
 		
-		//生きているか検査		
+		//TODO 生きているか検査		
 		if (ret.connect()){
 			//生きていたら
 		} else {
