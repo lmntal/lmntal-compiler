@@ -85,9 +85,9 @@ class TestRemote{
 		
 		
 		//終了処理
-//		LMNtalRuntimeManager.disconnectFromDaemon();
-		LMNtalRuntimeManager.terminateAllNeighbors();	
-		
+//		LMNtalRuntimeManager.disconnectFromDaemon(); //これだと遠隔ノードへのコネクション張りっぱなし、slave runtimeあがりっぱなし
+		LMNtalRuntimeManager.terminateAllNeighbors();	 //もっといい方法ないかな
+		System.out.println("terminateAllNaighbours() success");
 
 		/*
 		 *  試しに実行してみるコード。
