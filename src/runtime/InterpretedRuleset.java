@@ -322,7 +322,7 @@ class InterpreterReactor {
 					//TODO funcrefと$funcって何が違うのですか？
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.alterAtomFunctor(atom,(Functor)inst.getArg2());
-					break;
+					break; //nakajima 2003-12-27
 					//====アトムを操作する基本ボディ命令====ここまで====
 
 					//====アトムを操作する型付き拡張用命令====ここから====
