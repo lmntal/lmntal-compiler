@@ -5,8 +5,8 @@ r=get(put(put(put(map.new, jack, enigma), nina, myers), jack, bauer), jack, jack
 //map.put(m1, koji, imada).
 //map.put(m1, kojing, harang).
 //map.put(m1, hong, kong).
-//map.put(m1, sleepy, [[tired and wanting to sleep]]).
-//map.put(m1, sleep,  [[to be in the state of rest when your eyes are closed, your body is not active, and your mind is unconscious]]).
+//map.put(m1, sleepy, [:tired and wanting to sleep:]).
+//map.put(m1, sleep,  [:to be in the state of rest when your eyes are closed, your body is not active, and your mind is unconscious:]).
 //
 //map.get(m1, kojing, io.print).
 //map.get(m1, hong, io.print).

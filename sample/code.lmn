@@ -1,4 +1,4 @@
-[[/*inline_define*/
+[:/*inline_define*/
  import javax.swing.*;
  import java.awt.*;
  import java.awt.event.*;
@@ -237,7 +237,7 @@
   }
   
 }
-]].
+:].
 
 {
 
@@ -253,17 +253,17 @@
 
 
 start.
-start :- [[/*inline*/
+start :- [:/*inline*/
           LMNtalFrame frame = new LMNtalFrame((Membrane)mem);
           Atom a = mem.newAtom(new Functor("frame",1));
           Atom b = mem.newAtom(new ObjectFunctor(frame));
           mem.newLink(a,0,b,0);
           mem.removeAtom(me);
           mem.makePerpetual();
-        ]],setanswer.
+        :],setanswer.
 
 setanswer,frame(F) :- class(F,"LMNtalFrame") | 
-         frame(F),[[/*inline*/
+         frame(F),[:/*inline*/
          ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
          LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
          int answer_num[] = new int[4];
@@ -282,42 +282,42 @@ setanswer,frame(F) :- class(F,"LMNtalFrame") |
          frame.setAnswer(answer_num[3],answer_num[2],answer_num[1],answer_num[0]);
          mem.removeAtom(me.nthAtom(0));
          mem.removeAtom(me); 
-	]](F).
+	:](F).
 
 retry,frame(F):- class(F,"LMNtalFrame") | 
-         frame(F),setanswer,[[/*inline*/
+         frame(F),setanswer,[:/*inline*/
          ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
          LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
          frame.init();
          mem.removeAtom(me.nthAtom(0));
          mem.removeAtom(me); 
-	]](F).
+	:](F).
 
 next,frame(F):- class(F,"LMNtalFrame") | 
-         frame(F),[[/*inline*/
+         frame(F),[:/*inline*/
          ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
          LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
          frame.turnEnd();
          mem.removeAtom(me.nthAtom(0));
          mem.removeAtom(me); 
-	]](F).
+	:](F).
 
 over,frame(F):- class(F,"LMNtalFrame") | 
-         frame(F),[[/*inline*/
+         frame(F),[:/*inline*/
          ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
          LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
          frame.waitInput();
          mem.removeAtom(me.nthAtom(0));
          mem.removeAtom(me); 
-	]](F).
+	:](F).
 }.
 
-{terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") |  {[[/*inline*/
+{terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") |  {[:/*inline*/
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
     frame.setVisible(false);
     frame.dispose();
     mem.removeAtom(me.nthAtom(0));
     mem.removeAtom(me);
-  ]](F),$p }.
+  :](F),$p }.
 

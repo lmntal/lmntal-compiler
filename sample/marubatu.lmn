@@ -163,7 +163,7 @@ state(showed_end),{done(S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner),data,
 %%%%%%%%%%%%%
 {rule_show_stage,
 ( show_stage(BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33):-
-[[/*inline*/
+[:/*inline*/
 	String str="";
         for(int j=0,i=0;j<9;j++,i=(j%3)*3+(j/3))
           str+="["+((me.nth(i).equals("m"))?"O":
@@ -174,13 +174,13 @@ state(showed_end),{done(S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner),data,
         null,str,"m = maru , b = batu , e = empty",
         javax.swing.JOptionPane.INFORMATION_MESSAGE);
 	me.setName("done");
-	]](BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33) )
+	:](BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33) )
 }.
 
 {rule_show_stage_end,
 ( show_stage_end(
 BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33,Winner):-
-[[/*inline*/
+[:/*inline*/
 	String str="";
         for(int j=0,i=0;j<9;j++,i=(j%3)*3+(j/3))
           str+="["+((me.nth(i).equals("m"))?"O":
@@ -194,10 +194,10 @@ BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33,Winner):-
         null,str,"m = maru , b = batu , e = empty",
         javax.swing.JOptionPane.INFORMATION_MESSAGE);
 	me.setName("done");
-	]](BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33,Winner) )
+	:](BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33,Winner) )
 }.
 
-H=input_integer(Message) :- H= [[/*inline*/
+H=input_integer(Message) :- H= [:/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
 	me.setName("done");
 	int n=0;
@@ -217,4 +217,4 @@ H=input_integer(Message) :- H= [[/*inline*/
 	mem.relink(result,0,me,1);
 	me.nthAtom(0).remove();
 	me.remove();
-	]](Message).
+	:](Message).

@@ -20,7 +20,7 @@ c(R11, C3, R12).    c(R22, C3, R23).
 goal1(R12).         goal2(R23).         goal3(R31).
 
 // Main program
-io.input([[This is amidakuji. Where to start today? Input start1, start2 or start3.]], input_str).
+io.input([:This is amidakuji. Where to start today? Input start1, start2 or start3.:], input_str).
 input_str(done(You)) :- amidakuji.start_at(You).
 amidakuji.done($goal) :- unary($goal) | io.popup($goal).
 

@@ -31,7 +31,7 @@ module(string).
  * r=string.times("ab", 5)  ==>  r="ababababab"
  */
 H=string.times(String, Times) :-
-	unary(String), int(Times) | H=[[/*inline*/
+	unary(String), int(Times) | H=[:/*inline*/
 	StringBuffer b = new StringBuffer(me.nth(0));
 	StringBuffer r = new StringBuffer("");
 	int times = Integer.parseInt(me.nth(1));
@@ -43,7 +43,7 @@ H=string.times(String, Times) :-
 	me.nthAtom(0).remove();
 	me.nthAtom(1).remove();
 	me.remove();
-	]](String, Times).
+	:](String, Times).
 
 /**
  * replace : String -> String -> String -> String
@@ -51,7 +51,7 @@ H=string.times(String, Times) :-
  * パターン文字列が変だったときは元の文字列を返す
  */
 H=string.replace(String, Regexp, Replacement) :-
-	unary(String), unary(Regexp), unary(Replacement) | H=[[/*inline*/
+	unary(String), unary(Regexp), unary(Replacement) | H=[:/*inline*/
 	String s=null;
 	try {
 		s = me.nth(0).replaceAll(me.nth(1), me.nth(2));
@@ -63,7 +63,7 @@ H=string.replace(String, Regexp, Replacement) :-
 	me.nthAtom(1).remove();
 	me.nthAtom(2).remove();
 	me.remove();
-	]](String, Regexp, Replacement).
+	:](String, Regexp, Replacement).
 
 /**
  * match : String -> String -> Bool
@@ -73,7 +73,7 @@ H=string.replace(String, Regexp, Replacement) :-
  * パターン文字列が変だったときは false
  */
 H=string.match(String, Regexp) :-
-	unary(String), unary(Regexp) | H=[[/*inline*/
+	unary(String), unary(Regexp) | H=[:/*inline*/
 	boolean b=false;
 	try {
 		b = java.util.regex.Pattern.compile(me.nth(1)).matcher(me.nth(0)).find();
@@ -83,14 +83,14 @@ H=string.match(String, Regexp) :-
 	me.nthAtom(0).remove();
 	me.nthAtom(1).remove();
 	me.remove();
-	]](String, Regexp).
+	:](String, Regexp).
 
 /**
  * split : String -> String -> List
  * 
- * H=split([[\s+]], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
+ * H=split([:\s+:], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
  */
-H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[[/*inline*/
+H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[:/*inline*/
 	String r[] = me.nth(1).split(me.nth(0));
 	
 	util.Util.makeList(me.getArg(2), java.util.Arrays.asList(r));
@@ -98,14 +98,14 @@ H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[[/*inline*/
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me.nthAtom(1));
 	mem.removeAtom(me);
-	]](Regexp, S).
+	:](Regexp, S).
 
 /**
  * join : String -> List -> String
  * 
  * H=join("_", [1,2,3])  ==>  H="1_2_3"
  */
-H=string.concat(Glue0,string.join(Glue1, [])) :- unary(Glue0), unary(Glue1) | H=[[]].
+H=string.concat(Glue0,string.join(Glue1, [])) :- unary(Glue0), unary(Glue1) | H=[::].
 H=string.join(Glue, [CAR|CDR]) :- unary(Glue) |
 	H=string.concat(CAR, string.concat(Glue, string.join(Glue, CDR))).
 
@@ -115,14 +115,14 @@ H=string.join(Glue, [CAR|CDR]) :- unary(Glue) |
  * 
  * H='^'("abc", "de")  ==>  H="abcde"
  */
-H=string.concat(S1, S2) :- unary(S1), unary(S2) | H=[[/*inline*/
+H=string.concat(S1, S2) :- unary(S1), unary(S2) | H=[:/*inline*/
 	Atom cat = mem.newAtom(new Functor(me.nth(0) + me.nth(1), 1));
 	mem.relinkAtomArgs(cat, 0, me, 2);
 	
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me.nthAtom(1));
 	mem.removeAtom(me);
-	]](S1, S2).
+	:](S1, S2).
 
 }.
 

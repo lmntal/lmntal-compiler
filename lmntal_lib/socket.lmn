@@ -31,7 +31,7 @@ USAGE
 
 */
 
-[[/*inline_define*/
+[:/*inline_define*/
 import java.net.*;
 import java.io.*;
 
@@ -125,14 +125,14 @@ L:
 		}
 	}
 }
-]].
+:].
 
 {
 module(socket).
 
 socket.create(Port,C) :- int(Port) |
 	socket.serversocket(O,C),
-	O=[[/*inline*/
+	O=[:/*inline*/
 		try {
 			ServerSocket ss = new ServerSocket(Integer.parseInt(me.nth(0)));
 			Atom o = mem.newAtom(new ObjectFunctor(ss));
@@ -143,22 +143,22 @@ socket.create(Port,C) :- int(Port) |
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	]](Port).
+	:](Port).
 
 socket.serversocket(O,[accept(A)|C]) :-
 	socket.serversocket(O2,[socket.accepting(A)|C]),
-	O2=[[/*inline*/
+	O2=[:/*inline*/
 		ServerSocket ss = (ServerSocket)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 		AcceptThread t = new AcceptThread(ss,me.nthAtom(1));
 		mem.makePerpetual();
 		t.start();
 		mem.unifyAtomArgs(me, 0, me, 1);
 		me.remove();
-	]](O).
+	:](O).
 
 socket.serversocket(O,[close|C]) :-
 	C=closed,
-	[[/*inline*/
+	[:/*inline*/
 		ServerSocket ss = (ServerSocket)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 		try {
 			ss.close();
@@ -167,11 +167,11 @@ socket.serversocket(O,[close|C]) :-
 		}
 		me.nthAtom(0).remove();
 		me.remove();
-	]](O).
+	:](O).
 		
 S=socket.connect(Addr,Port) :- unary(Addr),int(Port) | 
 	S=socket.socket(SO,nil,[]),
-	SO=[[/*inline*/
+	SO=[:/*inline*/
 		try {
 			String addr = me.nth(0);
 			int port = Integer.parseInt(me.nth(1));
@@ -188,23 +188,23 @@ S=socket.connect(Addr,Port) :- unary(Addr),int(Port) |
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-	]](Addr,Port).
+	:](Addr,Port).
 
 socket.socket(SO,nil,Out,[is(IS)|C]) :- 
 	socket.socket(SS,IS,Out,C),
-	SS=[[/*inline*/
+	SS=[:/*inline*/
 		ReadThread sr = (ReadThread)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 		sr.start();
 		mem.unifyAtomArgs(me, 0, me, 1);
 		me.remove();
-	]](SO).
+	:](SO).
 
 socket.socket(SO,In,[],[os(OS)|C]) :-
 	socket.socket(SO,In,OS,C).
 		
 socket.socket(SO,In,[D|Out],C) :- string(D) |
 	socket.socket(SS,In,Out,C),
-	SS=[[/*inline*/
+	SS=[:/*inline*/
 		try {
 			String data = (String)((StringFunctor)me.nthAtom(0).getFunctor()).getObject();
 			Socket soc = ((ReadThread)((ObjectFunctor)me.nthAtom(1).getFunctor()).getObject()).socket;
@@ -219,20 +219,20 @@ socket.socket(SO,In,[D|Out],C) :- string(D) |
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	]](D,SO).
+	:](D,SO).
 
 socket.socket(SO,In,[],[close_is|C]) :-
 	socket.socket(SS,In,[],C),
-	SS=[[/*inline*/
+	SS=[:/*inline*/
 		ReadThread sr = (ReadThread)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 		sr.flgClosing = true;
 		mem.unifyAtomArgs(me, 0, me, 1);
 		me.remove();
-	]](SO).
+	:](SO).
 	
 socket.socket(SO,nil,[],[close|C]) :-
 	C=closed,
-	[[/*inline*/
+	[:/*inline*/
 		ReadThread sr = (ReadThread)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 		Socket soc = sr.socket;
 		try {
@@ -242,5 +242,5 @@ socket.socket(SO,nil,[],[close|C]) :-
 		}
 		me.nthAtom(0).remove();
 		me.remove();
-	]](SO).
+	:](SO).
 }.

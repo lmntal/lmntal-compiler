@@ -1,13 +1,13 @@
 {
 client1.
-socket.connect([[localhost]],1234,S).
+socket.connect([:localhost:],1234,S).
 S= [os([ c11,c12,c13,c14 ]), is(in)|cmd].
 
 }.
 
 {
 client2.
-socket.connect([[localhost]],1234,S).
+socket.connect([:localhost:],1234,S).
 S= [os([ c21,c22,c23,c24 ]), is(in)|cmd].
 }.
 

@@ -3,18 +3,18 @@
 % どうコード展開されるかは、生成された MyInlineCode.java をみてね
 % 
 
-[[/*inline_define*/
+[:/*inline_define*/
 	import java.util.*;
 	
 	class Sample {
 		public static String data = "static text";
 		public static Stack stack = new Stack();
 	}
-]],
-(push(X) :- [[/*inline*/
+:],
+(push(X) :- [:/*inline*/
 	Sample.stack.push( ""+me.getArg(0).getAtom() );
 	System.out.println( "現在、棚は"+Sample.stack );
-]](X)),
+:](X)),
 
 
 push(hey), push(foo)

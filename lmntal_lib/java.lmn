@@ -19,7 +19,7 @@ HISTORY
 {
 module(java).
 
-[[/*inline_define*/
+[:/*inline_define*/
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 class Java {
@@ -92,7 +92,7 @@ class Java {
 		return r;
 	}
 }
-]].
+:].
 
 /**
  * new : String -> List of Object -> Object
@@ -100,7 +100,7 @@ class Java {
  * 指定したクラスの新しいインスタンスを返す
  */
 H=java.new(Class) :- H=java.new(Class, []).
-H=java.new(Class, List) :- unary(Class) | H=[[/*inline*/
+H=java.new(Class, List) :- unary(Class) | H=[:/*inline*/
 //	System.out.println(me.nth(0));
 	Object obj = Java.doNew(me.nth(0), util.Util.arrayOfList(me.getArg(1)));
 //	System.out.println(obj);
@@ -110,7 +110,7 @@ H=java.new(Class, List) :- unary(Class) | H=[[/*inline*/
 	mem.relink(n, 0, me, 2);
 	me.nthAtom(0).remove();
 	me.remove();
-	]](Class, List).
+	:](Class, List).
 
 /**
  * invoke : Object -> String -> List of Object -> Object
@@ -118,7 +118,7 @@ H=java.new(Class, List) :- unary(Class) | H=[[/*inline*/
  * 指定したオブジェクトのメソッドを呼び出し、結果を返す
  */
 H=java.invoke(Object, Method) :- H=java.invoke(Object, Method, []).
-H=java.invoke(Object, Method, List) :- unary(Method), unary(Object) | H=[[/*inline*/
+H=java.invoke(Object, Method, List) :- unary(Method), unary(Object) | H=[:/*inline*/
 //		System.out.println(me.nth(0));
 	Object obj = me.nthAtom(0).getFunctor().getValue();
 	Object res = Java.doInvoke(obj, me.nth(1), util.Util.arrayOfList(me.getArg(2)));
@@ -130,6 +130,6 @@ H=java.invoke(Object, Method, List) :- unary(Method), unary(Object) | H=[[/*inli
 	me.nthAtom(0).remove();
 	me.nthAtom(1).remove();
 	me.remove();
-	]](Object, Method, List).
+	:](Object, Method, List).
 
 }.

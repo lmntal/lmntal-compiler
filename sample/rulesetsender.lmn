@@ -1,9 +1,9 @@
-[[/*inline_define*/
+[:/*inline_define*/
 import java.io.*;
 import java.net.*;
-]].
+:].
 
-[[/*inline*/
+[:/*inline*/
 try {
 	Socket socket = new Socket("localhost", 1234);
 	DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -24,6 +24,6 @@ try {
 } catch (Exception e) {
 	e.printStackTrace();
 }
-]].
+:].
 a.
 a :- b, (b :- c).

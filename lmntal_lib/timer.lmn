@@ -10,11 +10,11 @@ module(timer).
 %	timer:benchmark(Link,-Float),{'+'(Link), ... }
 
 	timer:gettime(Time) :-
-		[[/*inline*/me.getMem().alterAtomFunctor( me,
-			new ObjectFunctor(new Long(System.currentTimeMillis())) );]](Time).
+		[:/*inline*/me.getMem().alterAtomFunctor( me,
+			new ObjectFunctor(new Long(System.currentTimeMillis())) );:](Time).
 			
 	timer:subtract(Time1,Time2,Res) :- class(Time1,"java.lang.Long"), class(Time2,"java.lang.Long") |
-		[[/*inline*/
+		[:/*inline*/
 			AbstractMembrane mem = me.getMem();
 			mem.removeAtom(me);
 			mem.removeAtom(me.getArg(0).getAtom());
@@ -23,7 +23,7 @@ module(timer).
 			long time2 = ((Long)((ObjectFunctor)me.getArg(1).getAtom().getFunctor()).getObject()).longValue();
 			double res = (time1 - time2) / 1000.0;
 			Atom resatom = mem.newAtom(new FloatingFunctor(res));
-			mem.relinkAtomArgs(resatom,0,me,2);]](Time1,Time2,Res).
+			mem.relinkAtomArgs(resatom,0,me,2);:](Time1,Time2,Res).
 
 	timer:benchmark(X,Res) :- timer:gettime(Start), timer:benchmark2(X,Start,Res).
 	timer:benchmark2(X,Start,Res), {+X,$p,@p} :- class(Start,"java.lang.Long") |

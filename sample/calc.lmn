@@ -1,4 +1,4 @@
-[[/*inline_define*/
+[:/*inline_define*/
 import java.util.*;
 import javax.swing.*;
 import java.awt.*;
@@ -95,11 +95,11 @@ class LMNtalFrame extends JFrame implements ActionListener {
     }
   }
 }
-]].
+:].
 
 {
   createFrame.
-  createFrame :- [[/*inline*/
+  createFrame :- [:/*inline*/
 //    Membrane mem = (Membrane)me.getMem();
     LMNtalFrame frame = new LMNtalFrame((Membrane)mem);
     Atom a = mem.newAtom(new Functor("frame",1));
@@ -107,7 +107,7 @@ class LMNtalFrame extends JFrame implements ActionListener {
     mem.newLink(a,0,b,0);
     mem.removeAtom(me);
     mem.makePerpetual();
-  ]].
+  :].
   allClear.
   allClear :- update,lastOp(0.0,"="),screen(0.0),state(fresh).
 
@@ -126,17 +126,17 @@ class LMNtalFrame extends JFrame implements ActionListener {
     update,lastOp(V,OP),screen(V),state(fresh).
   cmd(control,off) :- terminate.
 
-  update, frame(F) :- class(F,"LMNtalFrame") | frame(F), [[/*inline*/
+  update, frame(F) :- class(F,"LMNtalFrame") | frame(F), [:/*inline*/
 //    Membrane mem = (Membrane)me.getMem();
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
     frame.update();
     mem.removeAtom(me.nthAtom(0));
     mem.removeAtom(me);
-  ]](F).
+  :](F).
 }.
 
-{terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") | { [[/*inline*/
+{terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") | { [:/*inline*/
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
 //    Membrane mem = (Membrane)me.getMem();
@@ -144,4 +144,4 @@ class LMNtalFrame extends JFrame implements ActionListener {
     frame.dispose();
     mem.removeAtom(me.nthAtom(0));
     mem.removeAtom(me);
-  ]](F),$p }.
+  :](F),$p }.

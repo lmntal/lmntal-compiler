@@ -38,11 +38,11 @@ r=lwt.frame({show, $p, @r}, O) :- unary(O) |
  * exitOnClose
  */
 r=lwt.frame({exitOnClose, $p, @r}, O) :- unary(O) |
-	r=lwt.frame({$p, @r}, O), [[/*inline*/
+	r=lwt.frame({$p, @r}, O), [:/*inline*/
 	javax.swing.JFrame f = (javax.swing.JFrame)((ObjectFunctor)me.nthAtom(0).getFunctor()).getValue();
 	f.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
 	me.setName("nil");
-	]](O).
+	:](O).
 
 /**
  * center
@@ -51,11 +51,11 @@ r=lwt.frame({add=Component, $p, @r}, O) :- unary(O), unary(Component) |
 	r=lwt.frame({$p, @r}, O), 
 	nil=java.invoke(java.invoke(O, "getContentPane"), "add", [Component]).
 
-//	[[/*inline*/
+//	[:/*inline*/
 //		Atom a = mem.newAtom(new ObjectFunctor((Object)BorderLayout.CENTER));
 //		mem.relink(a, 0, me, 0);
 //		me.remove();
-//		]]
+//		:]
 
 
 

@@ -20,35 +20,35 @@ module(sys).
  * 
  * Dump this membrane
  */
-sys.dump :- [[/*inline*/
+sys.dump :- [:/*inline*/
 	me.setName("nil");
 	System.out.println(Dumper.dump(mem));
-	]].
+	:].
 
-sys.trace(on) :- [[/*inline*/
+sys.trace(on) :- [:/*inline*/
 	Env.fTrace=true;
 	me.setName("nil");
-	]].
-sys.trace(off) :- [[/*inline*/
+	:].
+sys.trace(off) :- [:/*inline*/
 	Env.fTrace=false;
 	me.setName("nil");
-	]].
+	:].
 
 /**
  * sys.argv : unit -> List
  * 
  * Return argv
  */
-H=sys.argv :- H=[[/*inline*/
+H=sys.argv :- H=[:/*inline*/
 	util.Util.makeList(me.getArg(0), Env.argv);
 	me.remove();
-	]].
+	:].
 
 /**
  * sys.exec : String -> List of String -> Process
  * 
  */
-H=sys.exec(Cmd, Argv) :- unary(Cmd) | H=[[/*inline*/
+H=sys.exec(Cmd, Argv) :- unary(Cmd) | H=[:/*inline*/
 	try {
 		Atom p = mem.newAtom(new ObjectFunctor(
 			Runtime.getRuntime().exec( me.nth(0), util.Util.arrayOfList(me.getArg(1), "str") )));
@@ -60,17 +60,17 @@ H=sys.exec(Cmd, Argv) :- unary(Cmd) | H=[[/*inline*/
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
-	]](Cmd, Argv).
+	:](Cmd, Argv).
 
 /**
  * sys.perpetual : unit -> unit
  * 
  * Return argv
  */
-sys.perpetual(on) :- [[/*inline*/
+sys.perpetual(on) :- [:/*inline*/
 	mem.makePerpetual();
 	me.setName("nil");
-	]].
+	:].
 
 
 }.

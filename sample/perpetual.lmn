@@ -1,5 +1,5 @@
 ({end,$p,@p} :- {o,$p}). % 注意: @pを継承しないので、膜を再利用する場合は永続フラグの再設定が必要
-[[/*inline_define*/
+[:/*inline_define*/
 	class ThreadTest implements Runnable {
 		AbstractMembrane mem;
 		public ThreadTest(AbstractMembrane mem) {
@@ -22,13 +22,13 @@
 			mem.asyncUnlock();
 		}
 	}
-]].
+:].
 {
-	go :- [[/*inline*/
+	go :- [:/*inline*/
 		//AbstractMembrane mem = me.getMem();
 		new Thread(new ThreadTest(mem)).start();
 		mem.makePerpetual();
-		]].
+		:].
 	p(X) :- q(X).
 	q(2) :- gen(80). % <--- 
 	

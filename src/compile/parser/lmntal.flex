@@ -115,7 +115,7 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	"]"					{ return symbol(sym.RBRACKET); }
 	"mod" 				{ return symbol(sym.MOD); }
 	"\\+"				{ return symbol(sym.NEGATIVE); }
-	"[[" 				{ string.setLength(0); yybegin(QUOTED); }
+	"[:" 				{ string.setLength(0); yybegin(QUOTED); }
 	"\""				{ string.setLength(0); yybegin(STRING); }
 	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext()); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME,		yytext()); }
@@ -128,7 +128,7 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 }
 
 <QUOTED> {
-	"]]"                { yybegin(YYINITIAL); return symbol(sym.QUOTED_STRING, string.toString()); }
+	":]"                { yybegin(YYINITIAL); return symbol(sym.QUOTED_STRING, string.toString()); }
 	.|{LineTerminator}  { string.append( yytext() ); }
 }
 

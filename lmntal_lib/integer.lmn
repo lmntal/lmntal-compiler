@@ -115,7 +115,7 @@ H = '>>'(A, 0) :- H=A.
  * & ビット演算&
  *
  */
-H = '&'(A,B) :- int(A),int(B) | H=[[/*inline*/
+H = '&'(A,B) :- int(A),int(B) | H=[:/*inline*/
  int a = 
   ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   int b =
@@ -125,13 +125,13 @@ H = '&'(A,B) :- int(A),int(B) | H=[[/*inline*/
   me.nthAtom(0).remove();
   me.nthAtom(1).remove();
   me.remove();
- ]](A,B).
+ :](A,B).
 
 /*
  * | ビット演算|
  *
  */
-H = '|'(A,B) :- int(A),int(B) | H=[[/*inline*/
+H = '|'(A,B) :- int(A),int(B) | H=[:/*inline*/
  int a = 
   ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   int b =
@@ -141,13 +141,13 @@ H = '|'(A,B) :- int(A),int(B) | H=[[/*inline*/
   me.nthAtom(0).remove();
   me.nthAtom(1).remove();
   me.remove();
- ]](A,B).
+ :](A,B).
 
 /*
  * ^ ビット演算^
  *
  */
-H = '^'(A,B) :- int(A),int(B) | H=[[/*inline*/
+H = '^'(A,B) :- int(A),int(B) | H=[:/*inline*/
  int a = 
   ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   int b =
@@ -157,14 +157,14 @@ H = '^'(A,B) :- int(A),int(B) | H=[[/*inline*/
   me.nthAtom(0).remove();
   me.nthAtom(1).remove();
   me.remove();
- ]](A,B).
+ :](A,B).
 
   
 /*
  * power AのN準E
  *
  */
-H = integer.power(A, N) :- int(A),int(N) | H=[[/*inline*/
+H = integer.power(A, N) :- int(A),int(N) | H=[:/*inline*/
   int a = 
   ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   int n =
@@ -176,14 +176,14 @@ H = integer.power(A, N) :- int(A),int(N) | H=[[/*inline*/
   me.nthAtom(0).remove();
   me.nthAtom(1).remove();
   me.remove();
- ]](A,N).
+ :](A,N).
 
 /*
  * rnd(N) 0からN-1の整数をランダムで返す。
  *
  *
  */
-H = integer.rnd(N) :- int(N) | H=[[/*inline*/
+H = integer.rnd(N) :- int(N) | H=[:/*inline*/
   int n = 
   ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   Random rand = new Random();
@@ -192,6 +192,6 @@ H = integer.rnd(N) :- int(N) | H=[[/*inline*/
   mem.relink(result, 0, me, 1);
   me.nthAtom(0).remove();
   me.remove();
-  ]](N).
+  :](N).
   
 }.

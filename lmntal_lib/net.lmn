@@ -1,12 +1,12 @@
-[[/*inline_define*/
+[:/*inline_define*/
 import java.net.*;
 import java.io.*;
-]].
+:].
 
 {
 module(net).
 
-	( H=net.get(S) :- unary(S) | H=[[/*inline*/
+	( H=net.get(S) :- unary(S) | H=[:/*inline*/
 		try {
 			URL url = new URL(me.nth(0));
 			HttpURLConnection hc = (HttpURLConnection)url.openConnection();
@@ -29,16 +29,16 @@ module(net).
 				, 1);
 		} catch (Exception e) {
 		}
-		]](S) ).
+		:](S) ).
 }.
 
 sports_news : {
-	( H=sports_news.get() :- H=net.get([[http://news.mobile.yahoo.co.jp/fc/sports/?k=]]) ).
+	( H=sports_news.get() :- H=net.get([:http://news.mobile.yahoo.co.jp/fc/sports/?k=:]) ).
 }.
 
 //s(H).
-//H=net.get([[http://google.co.jp]]).
-//H=net.get([[http://news.mobile.yahoo.co.jp/fc/sports/]]).
+//H=net.get([:http://google.co.jp:]).
+//H=net.get([:http://news.mobile.yahoo.co.jp/fc/sports/:]).
 
 
 //H=sports_news.get.

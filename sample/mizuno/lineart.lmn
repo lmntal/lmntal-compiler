@@ -66,7 +66,7 @@ Ret=next_color(c(R,G,B)) :- R=255, G=  0, B>  0 | Ret=c(R   ,G   ,B-51).
 %%%%%%%%%%%%
 % インラインコード
 
-[[/*inline_define*/
+[:/*inline_define*/
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.Timer;
@@ -125,10 +125,10 @@ class LineArtFrame extends Frame implements WindowListener {
 	public void windowActivated(WindowEvent e) {}
 	public void windowDeactivated(WindowEvent e) {}
 }
-]].
+:].
 
 Ret=newFrame(W, H), back_color(c(R,G,B)) :- int(W), int(H), int(R),int(G),int(B) | 
-	Ret=[[/*inline*/
+	Ret=[:/*inline*/
 		Atom w = me.nthAtom(0), h = me.nthAtom(1);
 		Atom r = me.nthAtom(2), g = me.nthAtom(3), b = me.nthAtom(4);
 		int width = ((IntegerFunctor)w.getFunctor()).intValue();
@@ -146,9 +146,9 @@ Ret=newFrame(W, H), back_color(c(R,G,B)) :- int(W), int(H), int(R),int(G),int(B)
 		mem.removeAtom(g);
 		mem.removeAtom(b);
 		mem.removeAtom(me);
-	]](W,H,R,G,B), back_color(c(R,G,B)).
+	:](W,H,R,G,B), back_color(c(R,G,B)).
 drawLine(F,X1,Y1,X2,Y2,c(R,G,B)) :- int(X1),int(Y1),int(X2),int(Y2),int(R),int(G),int(B) |
-	[[/*inline*/
+	[:/*inline*/
 		Atom af = me.nthAtom(0);
 		Atom ax1 = me.nthAtom(1);
 		Atom ay1 = me.nthAtom(2);
@@ -176,19 +176,19 @@ drawLine(F,X1,Y1,X2,Y2,c(R,G,B)) :- int(X1),int(Y1),int(X2),int(Y2),int(R),int(G
 		Atom a = mem.newAtom(new Functor("frame", 1));
 		mem.relinkAtomArgs(a, 0, me, 0);
 		mem.removeAtom(me);
-	]](F,X1,Y1,X2,Y2,R,G,B).
+	:](F,X1,Y1,X2,Y2,R,G,B).
 %dispose(F) :- 
-%	[[/*inline*/
+%	[:/*inline*/
 %		Atom af = me.nthAtom(0);
 %		LineArtFrame frame = (LineArtFrame)((ObjectFunctor)af.getFunctor()).getObject();
 %		frame.setVisible(false);
 %		frame.dispose();
 %		mem.removeAtom(af);
 %		mem.removeAtom(me);
-%	]](F).
+%	:](F).
 
 Ret=newTimer(Delay) :- int(Delay) |
-	Ret=[[/*inline*/
+	Ret=[:/*inline*/
 		Atom a = me.nthAtom(0);
 		int delay = ((IntegerFunctor)a.getFunctor()).intValue();
 		TimerListener listener = new TimerListener();
@@ -199,15 +199,15 @@ Ret=newTimer(Delay) :- int(Delay) |
 		mem.relinkAtomArgs(at, 0, me, 1);
 		mem.removeAtom(a);
 		mem.removeAtom(me);
-	]](Delay).
+	:](Delay).
 stop(Timer) :- unary(Timer) |
-	[[/*inline*/
+	[:/*inline*/
 		Atom a = me.nthAtom(0);
 		Timer t = (Timer)((ObjectFunctor)a.getFunctor()).getObject();
 		t.stop();
 		mem.removeAtom(a);
 		mem.removeAtom(me);
-	]](Timer).
+	:](Timer).
 %終了処理
 exit,wait(T) :- stop(T), terminate.
 }.

@@ -1,4 +1,4 @@
-[[/*inline_define*/
+[:/*inline_define*/
  import java.lang.*;
  import java.net.*;
  import java.awt.*;
@@ -255,7 +255,7 @@
  }
  
 } 
-]].
+:].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %これ以下は主にLMNtal
@@ -310,14 +310,14 @@
  %終了後,子膜生成完了を表すmakeEndアトムを生成
  {makeDrum,$p,@p} :-
            {makeEnd,$p,@p,
-            [[/*inline*/
+            [:/*inline*/
              Drum drum = new Drum((Membrane)mem);
              Atom a = mem.newAtom(new Functor("drum",1));
              Atom b = mem.newAtom(new ObjectFunctor(drum));
              mem.newLink(a,0,b,0);
              mem.removeAtom(me);
              mem.makePerpetual();
-            ]]}.
+            :]}.
  
  %3つの子膜全てでDrumクラスの生成まで完了していたらメインフレームの生成を行う
  %メインフレームを生成後,ドラムの回転準備が整ったことを表すstartOkアトムを子膜に追加
@@ -331,7 +331,7 @@
            {first,drum(D1),startOk,$p,@p},
            {second,drum(D2),startOk,$q,@q},
            {third,drum(D3),startOk,$r,@r},
-           [[/*inline*/
+           [:/*inline*/
             ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
             Drum d1 = (Drum)framefunc.getObject();
             ObjectFunctor framefunc2 = (ObjectFunctor)me.nthAtom(1).getFunctor();
@@ -347,7 +347,7 @@
             mem.removeAtom(me.nthAtom(1));
             mem.removeAtom(me.nthAtom(2));
             mem.removeAtom(me);
-           ]](D1,D2,D3),check1(0),check2(0),check3(0),check4(0),check5(0).
+           :](D1,D2,D3),check1(0),check2(0),check3(0),check4(0),check5(0).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ここまででメインとなる画面の生成が完了
@@ -384,7 +384,7 @@
   \+($p=(stop,$pp)),class(D,"Drum"),
   unary(X0),unary(X1),unary(X2),unary(X3) |
       {
-      [[/*inline*/
+      [:/*inline*/
        String x1 = me.nth(0);
        String x2 = me.nth(1);
        String x3 = me.nth(2);
@@ -397,7 +397,7 @@
        mem.removeAtom(me.nthAtom(2));
        mem.removeAtom(me.nthAtom(3));
        mem.removeAtom(me);
-      ]](X1,X2,X3,D),
+      :](X1,X2,X3,D),
       sl(L0,display1,X0,R1),sl(R1,display2,X1,L1),sl(L1,display3,X2,R2),sl(R2,nil,X3,L2),
       drum(D),$p[L0,L2],@p}.
  
@@ -427,7 +427,7 @@
   \+($p=(roll,$pp)),class(D,"Drum"),
   unary(X1),unary(X2),unary(X3) |
       {
-       [[/*inline*/
+       [:/*inline*/
         String x1 = me.nth(0);
         String x2 = me.nth(1);
         String x3 = me.nth(2);
@@ -440,7 +440,7 @@
         mem.removeAtom(me.nthAtom(2));
         mem.removeAtom(me.nthAtom(3));
         mem.removeAtom(me);
-       ]](X1,X2,X3,D),
+       :](X1,X2,X3,D),
        sl(R1,display1,X1,L1),sl(L1,display2,X2,R2),sl(R2,display3,X3,L2),
        drum(D),$p[R1,L2],@p}.
   
@@ -456,7 +456,7 @@
  {stopped,third,sl(L3,display1,X3,R3),$r[L3,R3],@r} :-
   \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
        frame(F),check1(1),
-       [[/*inline*/
+       [:/*inline*/
          String x = me.nth(0);
          ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
          LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
@@ -464,7 +464,7 @@
          mem.removeAtom(me.nthAtom(0));
          mem.removeAtom(me.nthAtom(1));
          mem.removeAtom(me);
-       ]](X1,F),
+       :](X1,F),
        {stopped,first,wait,sl(L1,display1,X1,R1),$p[L1,R1],@p},
        {stopped,second,sl(L2,display1,X2,R2),$q[L2,R2],@q},
        {stopped,third,sl(L3,display1,X3,R3),$r[L3,R3],@r}.
@@ -475,7 +475,7 @@
  {stopped,third,sl(L3,display2,X3,R3),$r[L3,R3],@r} :-
   \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
        frame(F),check2(1),
-       [[/*inline*/
+       [:/*inline*/
         String x = me.nth(0);
         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
@@ -483,7 +483,7 @@
         mem.removeAtom(me.nthAtom(0));
         mem.removeAtom(me.nthAtom(1));
         mem.removeAtom(me);
-       ]](X1,F),
+       :](X1,F),
        {stopped,first,wait,sl(L1,display2,X1,R1),$p[L1,R1],@p},
        {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
        {stopped,third,sl(L3,display2,X3,R3),$r[L3,R3],@r}.
@@ -494,7 +494,7 @@
  {stopped,third,sl(L3,display3,X3,R3),$r[L3,R3],@r} :-
   \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
        frame(F),check3(1),
-       [[/*inline*/
+       [:/*inline*/
         String x = me.nth(0);
         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
@@ -504,7 +504,7 @@
         mem.removeAtom(me.nthAtom(0));
         mem.removeAtom(me.nthAtom(1));
         mem.removeAtom(me);
-       ]](X1,F),
+       :](X1,F),
        {stopped,first,wait,sl(L1,display3,X1,R1),$p[L1,R1],@p},
        {stopped,second,sl(L2,display3,X2,R2),$q[L2,R2],@q},
        {stopped,third,sl(L3,display3,X3,R3),$r[L3,R3],@r}.
@@ -515,7 +515,7 @@
  {stopped,third,sl(L3,display3,X3,R3),$r[L3,R3],@r} :-
   \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
        frame(F),check4(1),
-       [[/*inline*/
+       [:/*inline*/
         String x = me.nth(0);
         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
@@ -523,7 +523,7 @@
         mem.removeAtom(me.nthAtom(0));
         mem.removeAtom(me.nthAtom(1));
         mem.removeAtom(me);
-       ]](X1,F),
+       :](X1,F),
        {stopped,first,wait,sl(L1,display1,X1,R1),$p[L1,R1],@p},
        {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
        {stopped,third,sl(L3,display3,X3,R3),$r[L3,R3],@r}.
@@ -534,7 +534,7 @@
  {stopped,third,sl(L3,display1,X3,R3),$r[L3,R3],@r} :-
   \+($p=(wait,$pp)),class(F,"LMNtalFrame"),unary(X1),unary(X2),unary(X3),X1=X2,X2=X3 |
        frame(F),check5(1),
-       [[/*inline*/
+       [:/*inline*/
         String x = me.nth(0);
         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
@@ -542,7 +542,7 @@
         mem.removeAtom(me.nthAtom(0));
         mem.removeAtom(me.nthAtom(1));
         mem.removeAtom(me);
-       ]](X1,F),
+       :](X1,F),
        {stopped,first,wait,sl(L1,display3,X1,R1),$p[L1,R1],@p},
        {stopped,second,sl(L2,display2,X2,R2),$q[L2,R2],@q},
        {stopped,third,sl(L3,display1,X3,R3),$r[L3,R3],@r}.
@@ -552,11 +552,11 @@ checked,{first,wait,$p,@p} :- {first,$p,@p}.
  
 }.
  
-{terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") | {[[/*inline*/
+{terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") | {[:/*inline*/
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
     frame.setVisible(false);
     frame.dispose();
     mem.removeAtom(me.nthAtom(0));
     mem.removeAtom(me);
-  ]](F),$p,@p}.
+  :](F),$p,@p}.

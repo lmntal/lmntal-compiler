@@ -104,7 +104,7 @@ player_changed :- turn_end.
      {stone,x(X2),y(Y2),{arm,dir(1),hand(HN2,H2),$a2},$q},H2=n :-
   int(X1),int(X2),int(Y1),int(Y2),int(HN1),int(HN2),
   X1=X2,Y2-Y1=HN2-HN1|
-  [[/*inline*/
+  [:/*inline*/
     int x1=((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
     int x2=((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
     int y1=((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
@@ -119,7 +119,7 @@ player_changed :- turn_end.
     me.nthAtom(4).remove();
     me.nthAtom(5).remove();
     me.remove();
-  ]](X1,X2,Y1,Y2,HN1,HN2),
+  :](X1,X2,Y1,Y2,HN1,HN2),
   ns={stone,x(X1),y(Y1),{arm,dir(1),hand(HN1,X ),$a1},$p},
      {stone,x(X2),y(Y2),{arm,dir(1),hand(HN2,X ),$a2},$q}.
 
@@ -329,7 +329,7 @@ com_thinking,{dust,$dust},{thinking,input(X,Y),{data,$p},@r,$o}/ :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %以下、inlineによる入出力。 in Java
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[[/*inline_define*/
+[:/*inline_define*/
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -526,29 +526,29 @@ class Stone{
     }
 }
 
-]].
+:].
 
 start.
-start :- [[/*inline*/
+start :- [:/*inline*/
     FiveStoneFrame frame = new FiveStoneFrame((Membrane)mem);
     Atom a= mem.newAtom(new Functor("frame",1));
     Atom b= mem.newAtom(new ObjectFunctor(frame));
     mem.newLink(a,0,b,0);
     mem.removeAtom(me);
     mem.makePerpetual();
-]],wait.
+:],wait.
 
 wait,frame(F) :- class(F,"FiveStoneFrame") |
-    frame(F),[[/*inline*/
+    frame(F),[:/*inline*/
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     FiveStoneFrame frame = (FiveStoneFrame)framefunc.getObject();
     frame.waiting();
     mem.removeAtom(me.nthAtom(0));
     mem.removeAtom(me);
-  ]](F).
+  :](F).
 
 end,frame(F) :- class(F,"FiveStoneFrame") |
-    [[/*inline*/
+    [:/*inline*/
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     FiveStoneFrame frame = (FiveStoneFrame)framefunc.getObject();
     frame.setVisible(false);
@@ -556,10 +556,10 @@ end,frame(F) :- class(F,"FiveStoneFrame") |
     frame.dispose();
     mem.removeAtom(me.nthAtom(0));
     mem.removeAtom(me);
-]](F),terminated.
+:](F),terminated.
 
 update,frame(F),{for_update,{stone,x(X),y(Y),color(C),$q},$p},{data,$r} :-
-int(X),int(Y),int(C),class(F,"FiveStoneFrame") | [[/*inline*/
+int(X),int(Y),int(C),class(F,"FiveStoneFrame") | [:/*inline*/
     int x=((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
     int y=((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
     int c=((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
@@ -572,14 +572,14 @@ int(X),int(Y),int(C),class(F,"FiveStoneFrame") | [[/*inline*/
     me.nthAtom(2).remove();
     me.nthAtom(3).remove();
     me.remove();
-    ]](X,Y,C,F),frame(F),
+    :](X,Y,C,F),frame(F),
     update,{for_update,$p},{data,{stone,x(X),y(Y),color(C),$q},$r}.
 
 update,{for_update,$p} :- \+($p = ({stone,$q},$pp))|
 %    redraw,{for_update,$p}.
     drawed,{for_update,$p}.
 
-%redraw,frame(F) :- class(F,"FiveStoneFrame") | [[/*inline*/
+%redraw,frame(F) :- class(F,"FiveStoneFrame") | [:/*inline*/
 %    ObjectFunctor framefunc=(ObjectFunctor)me.nthAtom(0).getFunctor();
 %    FiveStoneFrame frame = (FiveStoneFrame)framefunc.getObject();
 %    synchronized(frame){
@@ -587,10 +587,10 @@ update,{for_update,$p} :- \+($p = ({stone,$q},$pp))|
 %    }
 %    me.nthAtom(0).remove();
 %    me.remove();
-%]](F),frame(F),drawed.
+%:](F),frame(F),drawed.
 
 show_result,frame(F),{win(C),$p} :-
-  class(F,"FiveStoneFrame"),int(C) | [[/*inline*/
+  class(F,"FiveStoneFrame"),int(C) | [:/*inline*/
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     FiveStoneFrame frame = (FiveStoneFrame)framefunc.getObject();
     int winner=((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
@@ -599,11 +599,11 @@ show_result,frame(F),{win(C),$p} :-
     me.nthAtom(0).remove();
     me.nthAtom(1).remove();
     me.remove();
-    ]](F,C),frame(F),{winning,$p},{winning_showed},show_line.
+    :](F,C),frame(F),{winning,$p},{winning_showed},show_line.
 
 show_line,{winning,{li,x(X),y(Y),color(C),$o},$p},
   {winning_showed,$q},frame(F):-
-  class(F,"FiveStoneFrame"),int(X),int(Y),int(C)|[[/*inline*/
+  class(F,"FiveStoneFrame"),int(X),int(Y),int(C)|[:/*inline*/
     int x=((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
     int y=((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
     int c=((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
@@ -615,7 +615,7 @@ show_line,{winning,{li,x(X),y(Y),color(C),$o},$p},
     me.nthAtom(2).remove();
     me.nthAtom(3).remove();
     me.remove();
-    ]](X,Y,C,F),frame(F),{winning,$p},
+    :](X,Y,C,F),frame(F),{winning,$p},
     {winning_showed,{li,x(X),y(Y),color(C),$o},$q},show_line.
     
 show_line,{winning,$p} :- \+($p = ({li,$q},$pp))|show_other,{winning,$p}.
@@ -623,7 +623,7 @@ show_line,{winning,$p} :- \+($p = ({li,$q},$pp))|show_other,{winning,$p}.
 show_other,{winning,{x(X),y(Y),color(C),stone,$o},$p},
   {winning_showed,$q},frame(F):-
   class(F,"FiveStoneFrame"),int(X),int(Y),int(C)|
-    [[/*inline*/
+    [:/*inline*/
     int x=((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
     int y=((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
     int c=((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
@@ -635,12 +635,12 @@ show_other,{winning,{x(X),y(Y),color(C),stone,$o},$p},
     me.nthAtom(2).remove();
     me.nthAtom(3).remove();
     me.remove();
-    ]](X,Y,C,F),frame(F),{winning,$p},
+    :](X,Y,C,F),frame(F),{winning,$p},
     {winning_showed,{stone,x(X),y(Y),color(C),$o},$q},show_other.
 
 show_other,{winning,$p},frame(F) :- \+($p= ({stone,$q},$pp)),
   class(F,"FiveStoneFrame")|frame(F),
-  [[/*inline*/
+  [:/*inline*/
     ObjectFunctor framefunc=(ObjectFunctor)me.nthAtom(0).getFunctor();
     FiveStoneFrame frame = (FiveStoneFrame)framefunc.getObject();
     //synchronized(frame){
@@ -648,7 +648,7 @@ show_other,{winning,$p},frame(F) :- \+($p= ({stone,$q},$pp)),
     //}
     me.nthAtom(0).remove();
     me.remove();
-  ]](F),wait,{winning,$p}.
+  :](F),wait,{winning,$p}.
   
 }.
 

@@ -1,16 +1,16 @@
-//[[/*inline_define*/
-//]],
-//io.print([[
+//[:/*inline_define*/
+//:],
+//io.print([:
 //
 //abcdefg
 //
 //end
 //
-//]]).
+//:]).
 //
 //a.
-//(a :- b, io.fopen(h1, [[tmp_a]])).
-//(b :- c, io.fprint(h1, [[hahahahahahaha]])).
+//(a :- b, io.fopen(h1, [:tmp_a:])).
+//(b :- c, io.fprint(h1, [:hahahahahahaha:])).
 //(c :-    io.fclose(h1)).
 //
 

@@ -13,7 +13,7 @@ p('a''b')              % ==> 変わらず
 
 p([1,2,3|X],[4,5],[],result(X)) % ==> 変わらず
 
-(a(X) :- string(X) | ok(X)). a(1),a('2'),a("3"),a([[4]]) % ==> a(1),a(2),ok("3"),ok("4")
+(a(X) :- string(X) | ok(X)). a(1),a('2'),a("3"),a([:4:]) % ==> a(1),a(2),ok("3"),ok("4")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - 基本テスト
@@ -30,7 +30,7 @@ append([1,2,3],[4,5],result).
 Z=append([],Y) :- Y=Z.
 Z=append([A|X],Y) :- Z=[A|append(X,Y)].
 
-[[/*inline*/System.out.println(me.nth(0));]]("Linked\n\tMultisets of\n\t\tNodes")
+[:/*inline*/System.out.println(me.nth(0));:]("Linked\n\tMultisets of\n\t\tNodes")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - アトム主導コンパイルのテスト（作成中）

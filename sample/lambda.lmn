@@ -1,4 +1,4 @@
-[[
+[:
 
 
 LAMBDA_EXPR ::= TERM | (lambda TERM LAMBDA_EXPR) | (LAMBDA_EXPR LAMBDA_EXPR)
@@ -60,7 +60,7 @@ C P Q R -> P R Q
 	mult 5 I 5
 	mult 5 5
 
-]].
+:].
 //-----------------------------------------------------------------------------------------------
 
 

@@ -21,7 +21,7 @@ module(double).
  * >
  * 
  */
-H= '>'(A,B) :- float(A),float(B) | H = [[/*inline*/		
+H= '>'(A,B) :- float(A),float(B) | H = [:/*inline*/		
 
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -36,13 +36,13 @@ H= '>'(A,B) :- float(A),float(B) | H = [[/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	
-	]](A,B).
+	:](A,B).
 
 /**
  * <
  * 
  */
-H= '<'(A,B) :- float(A),float(B) | H = [[/*inline*/		
+H= '<'(A,B) :- float(A),float(B) | H = [:/*inline*/		
 
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -57,13 +57,13 @@ H= '<'(A,B) :- float(A),float(B) | H = [[/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	
-	]](A,B).
+	:](A,B).
 
 /**
  * =<
  * 
  */
-H= '=<'(A,B) :- float(A),float(B) | H = [[/*inline*/		
+H= '=<'(A,B) :- float(A),float(B) | H = [:/*inline*/		
 
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -78,13 +78,13 @@ H= '=<'(A,B) :- float(A),float(B) | H = [[/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	
-	]](A,B).
+	:](A,B).
 
 /**
  * >=
  * 
  */
-H= '>='(A,B) :- float(A),float(B) | H = [[/*inline*/		
+H= '>='(A,B) :- float(A),float(B) | H = [:/*inline*/		
 
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -99,13 +99,13 @@ H= '>='(A,B) :- float(A),float(B) | H = [[/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	
-	]](A,B).
+	:](A,B).
 
 /**
  * ==
  *
  */
-H= '=='(A,B) :- float(A),float(B) | H= [[/*inline*/
+H= '=='(A,B) :- float(A),float(B) | H= [:/*inline*/
 
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -120,13 +120,13 @@ H= '=='(A,B) :- float(A),float(B) | H= [[/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	
-	]](A,B).
+	:](A,B).
 	
 /**
  * !=
  *
  */
-H= '!='(A,B) :- float(A),float(B) | H= [[/*inline*/
+H= '!='(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -138,26 +138,26 @@ H= '!='(A,B) :- float(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * abs
  *
  */
-H= abs(A) :- float(A) | H= [[/*inline*/
+H= abs(A) :- float(A) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		Atom result = mem.newAtom(new FloatingFunctor((a0 >= 0 )?a0:-a0));
 		mem.relink(result, 0, me, 1);
 		me.nthAtom(0).remove();
 		me.remove();
-	]](A).
+	:](A).
 
 /**
  * + (float , float)
  *
  */
-H= '+'(A,B) :- float(A),float(B) | H= [[/*inline*/
+H= '+'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -167,13 +167,13 @@ H= '+'(A,B) :- float(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * + (float, int)
  *
  */
-H= '+'(A,B) :- float(A),int(B) | H= [[/*inline*/
+H= '+'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -183,13 +183,13 @@ H= '+'(A,B) :- float(A),int(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * + (int , float)
  *
  */
-H= '+'(A,B) :- int(A),float(B) | H= [[/*inline*/
+H= '+'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		double a0=
 		((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 		double a1=
@@ -199,13 +199,13 @@ H= '+'(A,B) :- int(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * - (float , float)
  *
  */
-H= '-'(A,B) :- float(A),float(B) | H= [[/*inline*/
+H= '-'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -215,13 +215,13 @@ H= '-'(A,B) :- float(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * - (float, int)
  *
  */
-H= '-'(A,B) :- float(A),int(B) | H= [[/*inline*/
+H= '-'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -231,13 +231,13 @@ H= '-'(A,B) :- float(A),int(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * - (int , float)
  *
  */
-H= '-'(A,B) :- int(A),float(B) | H= [[/*inline*/
+H= '-'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		double a0=
 		((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 		double a1=
@@ -247,13 +247,13 @@ H= '-'(A,B) :- int(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * * (float , float)
  *
  */
-H= '*'(A,B) :- float(A),float(B) | H= [[/*inline*/
+H= '*'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -263,13 +263,13 @@ H= '*'(A,B) :- float(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * * (float, int)
  *
  */
-H= '*'(A,B) :- float(A),int(B) | H= [[/*inline*/
+H= '*'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -279,13 +279,13 @@ H= '*'(A,B) :- float(A),int(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * * (int , float)
  *
  */
-H= '*'(A,B) :- int(A),float(B) | H= [[/*inline*/
+H= '*'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		double a0=
 		((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 		double a1=
@@ -295,13 +295,13 @@ H= '*'(A,B) :- int(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 	
 /**
  * / (float , float)
  *
  */
-H= '/'(A,B) :- float(A),float(B) | H= [[/*inline*/
+H= '/'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -311,13 +311,13 @@ H= '/'(A,B) :- float(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * / (float, int)
  *
  */
-H= '/'(A,B) :- float(A),int(B) | H= [[/*inline*/
+H= '/'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		double a1=
@@ -327,13 +327,13 @@ H= '/'(A,B) :- float(A),int(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 /**
  * / (int , float)
  *
  */
-H= '/'(A,B) :- int(A),float(B) | H= [[/*inline*/
+H= '/'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		double a0=
 		((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 		double a1=
@@ -343,6 +343,6 @@ H= '/'(A,B) :- int(A),float(B) | H= [[/*inline*/
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
 		me.remove();
-	]](A,B).
+	:](A,B).
 
 }

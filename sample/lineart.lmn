@@ -106,26 +106,26 @@ points = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|REST] :-
 	int(PHPX), int(PHPY), int(PTPX), int(PTPY)|
 run2,
        anchor = {headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $a},
-points_after = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[lastafter]], points = REST.
+points_after = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[lastafter:], points = REST.
 
 run2, % リストの中身を更新(一つずつ前にずらす(後ろの要素から貰う))
 points = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|REST],
-     X = [{headp(x(OHPX), y(OHPY)), tailp(x(OTPX), y(OTPY)), $o}|[lastafter]] :-
+     X = [{headp(x(OHPX), y(OHPY)), tailp(x(OTPX), y(OTPY)), $o}|[lastafter:] :-
 	int(PHPX), int(PHPY), int(PTPX), int(PTPY),
 	int(OHPX), int(OHPY), int(OTPX), int(OTPY)|
 run2,
      X = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $o},
-          {headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[lastafter]], points = REST.
+          {headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[lastafter:], points = REST.
 
 run2, points = [last], points_after = LIST, X = lastafter :- run3, points = LIST, X = last.
 
 run3, % リストの末尾を更新(リーダーから貰う)
-    P = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[last]],
+    P = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[last:],
 leader = {headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), $l} :-
 	int(PHPX), int(PHPY), int(PTPX), int(PTPY),
 	int(LHPX), int(LHPY), int(LTPX), int(LTPY)|
 run4,
-    P = [{headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), $p}|[last]],
+    P = [{headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), $p}|[last:],
 leader = {headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), $l}.
 
 run4,
@@ -217,7 +217,7 @@ recolored, color_phase(CP) :- CP <  30 | draw, color_phase(CP).
 % Java Inline Code
 %
 
-[[/*inline_define*/
+[:/*inline_define*/
 
 import javax.swing.*;
 import java.awt.*;
@@ -318,11 +318,11 @@ class LineArtFrame extends JFrame implements MouseListener{
 
 }
 
-]].
+:].
 
 start.
 
-start, screen_width(W), screen_height(H) :- int(W), int(H) | [[/*inline*/
+start, screen_width(W), screen_height(H) :- int(W), int(H) | [:/*inline*/
 	int width = Integer.parseInt(me.nth(0));
 	int height = Integer.parseInt(me.nth(1));
 	LineArtFrame frame = new LineArtFrame((Membrane)mem, width, height);
@@ -333,16 +333,16 @@ start, screen_width(W), screen_height(H) :- int(W), int(H) | [[/*inline*/
 	mem.removeAtom(me.nthAtom(1));
 	mem.removeAtom(me);
 	mem.makePerpetual();
-]](W, H), initialize_leader, screen_width(W), screen_height(H).
+:](W, H), initialize_leader, screen_width(W), screen_height(H).
 
 wait, frame(F) :- class(F, "LineArtFrame") |
-	frame(F), [[/*inline*/
+	frame(F), [:/*inline*/
 	ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
 	LineArtFrame frame = (LineArtFrame)framefunc.getObject();
 	frame.waiting();
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
-]](F).
+:](F).
 
 % リーダーとアンカーを描画する.
 draw, frame(F), leader = {headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), color(R,G,B), $l},
@@ -351,7 +351,7 @@ draw, frame(F), leader = {headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), colo
 	int(LHPX), int(LHPY), int(LTPX), int(LTPY),
 	int(AHPX), int(AHPY), int(ATPX), int(ATPY),
 	int(R), int(G), int(B) |
-	frame(F),[[/*inline*/
+	frame(F),[:/*inline*/
 	ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
 	LineArtFrame frame = (LineArtFrame)framefunc.getObject();
 	int lhx = Integer.parseInt(me.nth(1));
@@ -380,20 +380,20 @@ draw, frame(F), leader = {headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), colo
 	mem.removeAtom(me.nthAtom(10));
 	mem.removeAtom(me.nthAtom(11));
 	mem.removeAtom(me);
-	]](F, LHPX, LHPY, LTPX, LTPY, AHPX, AHPY, ATPX, ATPY, R, G, B),wait,
+	:](F, LHPX, LHPY, LTPX, LTPY, AHPX, AHPY, ATPX, ATPY, R, G, B),wait,
 	leader = {headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), color(R, G, B), $l},
 	anchor = {headp(x(AHPX), y(AHPY)), tailp(x(ATPX), y(ATPY)),$a}.
 
 % 終了.
 exit, frame(F) :- class(F, "LineArtFrame") |
-	[[/*inline*/
+	[:/*inline*/
 	ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
 	LineArtFrame frame = (LineArtFrame)framefunc.getObject();
 	frame.setVisible(false);
 	frame.dispose();
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
-	]](F),terminated.
+	:](F),terminated.
 
 }.
 
