@@ -87,6 +87,10 @@ public class Dumper {
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
 			Atom a = (Atom)it.next();
+			if (Env.hideProxy && !a.isVisible()) {
+				// PROXYを表示させない 2005/02/03 T.Nagata
+				continue;
+			}
 			atoms.add(a);
 		}
 		if (Env.verbose >= Env.VERBOSE_EXPANDATOMS) {
@@ -339,6 +343,16 @@ public class Dumper {
 		return dumpLink(l,atoms,999);
 	}
 	private static String dumpLink(Link l, Set atoms, int outerprio) {
+		// PROXYを表示しない 2005/02/03 T.Nagata
+		if (Env.hideProxy && !l.getAtom().isVisible()) {
+			Atom tmp_a = l.getAtom();
+			Link tmp_l = l;
+			while(!tmp_a.isVisible()) {
+				tmp_l = tmp_a.args[tmp_l.getPos()==0 ? 1: 0];
+				tmp_a = tmp_l.getAtom();
+			}
+			return l.toString().compareTo(tmp_l.getBuddy().toString()) >=0 ? l.toString(): tmp_l.getBuddy().toString();
+		}
 		if (Env.verbose < Env.VERBOSE_EXPANDATOMS && l.isFuncRef() && atoms.contains(l.getAtom())) {
 			return dumpAtomGroupWithoutLastArg(l.getAtom(), atoms, outerprio);
 		} else {
