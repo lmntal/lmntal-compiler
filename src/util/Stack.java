@@ -10,6 +10,10 @@ public final class Stack {
 		head.next = tail.next = tail;
 	}
 	public void push(QueuedEntity entity) {
+		if (entity.isQueued()) {
+			System.out.println("SYSTEM ERROR: enqueued entity is already in a queue");
+			entity.dequeue();
+		}
 		entity.prev = tail.prev;
 		entity.next = tail;
 		entity.prev.next = entity;
@@ -49,8 +53,7 @@ public final class Stack {
 	}
 	/** スタックが空ならtrue */
 	public boolean isEmpty(){
-		if(tail.prev == head) return true;
-		else return false;
+		return tail.prev == head;
 	}
 //	QueuedEntity.removeがあるので使わない
 /*	public void remove(QueuedEntity entity) {
