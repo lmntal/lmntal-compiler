@@ -38,10 +38,14 @@ public class Functor {
 		int pos = name.indexOf('.');
 		if(pos!=-1) {
 			this.path = name.substring(0, pos);
-			name = name.substring(pos+1);
+			if(path.indexOf('\n')!=-1 || path.indexOf('/')!=-1 || path.indexOf('*')!=-1) pathFree=true;
 		} else {
-			this.pathFree = true;
+			pathFree = true;
+		}
+		if(pathFree) {
 			if(m!=null) this.path = m.name;
+		} else {
+			name = name.substring(pos+1);
 		}
 		this.name = name;
 		//Env.p("new Fun "+path+"  "+name+" "+m);

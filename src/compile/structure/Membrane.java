@@ -135,4 +135,21 @@ public final class Membrane {
 		it = mems.iterator();
 		while(it.hasNext()) ((Membrane)it.next()).showAllRules();
 	}
+	
+	/**
+	 * 与えられた膜の中身をこの膜に追加する。
+	 * @param m
+	 */
+	public void add(Membrane m) {
+		atoms.addAll(m.atoms);
+		mems.addAll(m.mems);
+		rules.addAll(m.rules);
+		aggregates.addAll(m.aggregates);
+		processContexts.addAll(m.processContexts);
+		ruleContexts.addAll(m.ruleContexts);
+		typedProcessContexts.addAll(m.typedProcessContexts);
+		freeLinks.putAll(m.freeLinks);
+		rulesets.addAll(m.rulesets);
+	}
+	
 }

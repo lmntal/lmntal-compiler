@@ -4,12 +4,16 @@
  */
 package compile;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 import runtime.Functor;
 import runtime.Instruction;
 import runtime.InterpretedRuleset;
 import runtime.Env;
+import compile.parser.LMNParser;
 import compile.structure.*;
 
 /**
@@ -62,7 +66,17 @@ import compile.structure.*;
  *
  */
 public class Module {
+	public static String libPath = "../lmntal_lib/";
 	public static Map memNameTable = new HashMap();
+	
+	/**
+	 * よきにとりはからう
+	 * @param m
+	 */
+	public static void run(Membrane m) {
+		resolveModules(m);
+		genInstruction(m);
+	}
 	
 	/**
 	 * 膜を名表に登録する。
@@ -70,6 +84,71 @@ public class Module {
 	 */
 	public static void regMemName(String name, Membrane m) {
 		memNameTable.put(name, m);
+	}
+	
+	/**
+	 * 指定したモジュールを指定した膜に読み込む
+	 * @param m         読み込まれる膜
+	 * @param mod_name  モジュール名
+	 */
+	public static void loadModule(Membrane m, String mod_name) {
+		String filename = libPath+mod_name+".lmn";
+		StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" ...");
+		try {
+			LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(filename))));
+			Membrane nm = RulesetCompiler.runStartWithNull(lp.parse());
+//			Env.p("MOD compiled "+nm);
+			//m.add(nm);
+			sb.append(" [ OK ] ");
+		} catch (Exception e) {
+			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+			sb.append(" [ FAILED ] ");
+		}
+		Env.d(sb.toString());
+	}
+	
+	/**
+	 * 指定した膜について、未定義モジュールを解決する。
+	 * @param m
+	 */
+	public static void resolveModules(Membrane m) {
+		List need = new ArrayList();
+		getNeedModules(m, need);
+		Iterator i = need.iterator();
+		while(i.hasNext()) {
+			loadModule(m, (String)i.next());
+		}
+	}
+	
+	/**
+	 * 指定した膜について、必要なモジュール一覧をつくる。
+	 * @param m
+	 * @param need 出力引数。モジュール一覧が入る。
+	 */
+	static void getNeedModules(Membrane m, List need) {
+		Iterator i;
+		i = m.atoms.listIterator();
+		while(i.hasNext()) {
+			Atom a = (Atom)i.next();
+			Functor f = a.functor;
+			if(f.path==null) continue;
+			if(f.path.equals(m.name)) continue;
+//			Env.p("Check module existence "+f.path);
+			if(!memNameTable.containsKey(f.path)) {
+//				Env.p("TODO: search lib file : "+f.path);
+				need.add(f.path);
+			}
+		}
+		i = m.rules.listIterator();
+		while(i.hasNext()) {
+			RuleStructure rs = (RuleStructure)i.next();
+			getNeedModules(rs.leftMem, need);
+			getNeedModules(rs.rightMem, need);
+		}
+		i = m.mems.listIterator();
+		while(i.hasNext()) {
+			getNeedModules((Membrane)i.next(), need);
+		}
 	}
 	
 	/**
@@ -82,18 +161,6 @@ public class Module {
 		//Env.p(memNameTable);
 		
 		Iterator i;
-		i = m.atoms.listIterator();
-		while(i.hasNext()) {
-			Atom a = (Atom)i.next();
-			Functor f = a.functor;
-			if(f.path==null) continue;
-			if(f.path.equals(m.name)) continue;
-			Env.p("Check module existence "+f.path);
-			if(!memNameTable.containsKey(f.path)) {
-				//TODO search lib file
-				Env.p("TODO: search lib file : "+f.path);
-			}
-		}
 		Iterator it0 = m.rulesets.iterator();
 		while (it0.hasNext()){
 			i = ((InterpretedRuleset)it0.next()).rules.listIterator();

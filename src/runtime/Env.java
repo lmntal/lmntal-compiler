@@ -10,9 +10,6 @@ import java.util.*;
  * @author hara
  */
 public final class Env {
-	public static Task task = new Task();
-	public static Membrane rootMembrane = new Membrane(task);
-	
 	/**
 	 * Debug level.
 	 */

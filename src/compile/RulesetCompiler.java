@@ -32,7 +32,7 @@ public class RulesetCompiler {
 		rs.rightMem = m;
 		root.rules.add(rs);
 		processMembrane(root);
-		Module.genInstruction(root);
+		Module.run(root);
 		return root;
 	}
 	
