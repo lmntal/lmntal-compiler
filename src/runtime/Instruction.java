@@ -294,8 +294,8 @@ newlink n,1,o,1 を行う。
 	table.put("UNLOCK", new Integer(UNLOCK));
 	table.put("REMOVEATOM", new Integer(REMOVEATOM));
 	table.put("REMOVEMEM", new Integer(REMOVEMEM));
-	table.put("ADDPROXY", new Integer(ADDPROXY));
-	table.put("REMOVEPROXY", new Integer(REMOVEPROXY));
+	table.put("INSERTPROXY", new Integer(INSERTPROXIES));
+	table.put("REMOVEPROXY", new Integer(REMOVEPROXIES));
 	table.put("NEWATOM", new Integer(NEWATOM));
 	table.put("NEWMEM", new Integer(NEWMEM));
 	table.put("NEWLINK", new Integer(NEWLINK));
@@ -349,8 +349,8 @@ newlink n,1,o,1 を行う。
 	hoge[UNLOCK] = new String("UNLOCK");
 	hoge[REMOVEATOM] = new String("REMOVEATOM");
 	hoge[REMOVEMEM] = new String("REMOVEMEM");
-	hoge[ADDPROXY] = new String("ADDPROXY");
-	hoge[REMOVEPROXY] = new String("REMOVEPROXY");
+	hoge[INSERTPROXIES] = new String("INSERTPROXIES");
+	hoge[REMOVEPROXIES] = new String("REMOVEPROXIES");
 	hoge[NEWATOM] = new String("NEWATOM");
 	hoge[NEWMEM] = new String("NEWMEM");
 	hoge[NEWLINK] = new String("NEWLINK");
