@@ -356,7 +356,9 @@ class InstructionBlockProcessor implements Runnable {
 				//InterpretedRulsetのコードが使えるので、そうする？
 				
 				AbstractMembrane mem = idconv.lookupMembrane(command[1]);
-				
+				Membrane lmem = null;
+				if (mem instanceof Membrane) lmem = (Membrane)mem;
+								
 				if (command[0].equals("END")) {
 					//糸冬
 					break;
@@ -381,12 +383,12 @@ class InstructionBlockProcessor implements Runnable {
 					Functor func = Functor.deserialize(command[3]);
 					idconv.registerNewAtom(command[2], mem.newAtom(func));
 				} else if (command[0].equals("ALTERATOMFUNCTOR")) {
-					Atom atom = idconv.lookupAtom(mem, command[2]);
+					Atom atom = idconv.lookupAtom(lmem, command[2]);
 					mem.alterAtomFunctor(atom,Functor.deserialize(command[3]));
 				} else if (command[0].equals("REMOTEATOM")) {
-					mem.removeAtom(idconv.lookupAtom(mem, command[2]));
+					mem.removeAtom(idconv.lookupAtom(lmem, command[2]));
 				} else if (command[0].equals("ENQUEUEATOM")) {
-					mem.enqueueAtom(idconv.lookupAtom(mem, command[2]));
+					mem.enqueueAtom(idconv.lookupAtom(lmem, command[2]));
 	// [3] 子膜の操作
 				} else if (command[0].equals("NEWMEM")) {
 					idconv.registerNewMembrane(command[2],mem.newMem());
@@ -408,9 +410,9 @@ class InstructionBlockProcessor implements Runnable {
 				} else if (command[0].equals("NEWLINK")
 						 || command[0].equals("RELINKATOMARGS")
 						 || command[0].equals("UNIFYATOMARGS")) {
-					Atom atom1 = idconv.lookupAtom(mem,command[2]);
+					Atom atom1 = idconv.lookupAtom(lmem,command[2]);
 					int pos1 = Integer.parseInt(command[3]);
-					Atom atom2 = idconv.lookupAtom(mem,command[4]);
+					Atom atom2 = idconv.lookupAtom(lmem,command[4]);
 					int pos2 = Integer.parseInt(command[5]);
 					if (command[0].equals("NEWLINK")) {
 						mem.newLink(atom1,pos1,atom2,pos2);
