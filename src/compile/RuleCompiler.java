@@ -180,6 +180,7 @@ public class RuleCompiler {
 		updateLinks();
 		enqueueRHSAtoms();
 		addInline();
+		addLoadModules();
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
 		body.add(new Instruction(Instruction.PROCEED));
@@ -406,6 +407,18 @@ public class RuleCompiler {
 			int codeID = Inline.getCodeID(atom.functor.getName());
 			if(codeID==-1) continue;
 			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
+		}
+	}
+	/** モジュールを読み込む */
+	private void addLoadModules() {
+		Iterator it = rhsatoms.iterator();
+		while(it.hasNext()) {
+			Atom atom = (Atom)it.next();
+			if(atom.functor.getArity()==1 && atom.functor.getName().equals("use")) {
+				// この時点では解決できないモジュールがあるので名前にしておく
+				body.add( new Instruction(Instruction.LOADRULESET, rhsmemToPath(atom.mem),
+					 atom.args[0].buddy.atom.functor.getName()));
+			}
 		}
 	}
 	/** 左辺の膜を廃棄する */

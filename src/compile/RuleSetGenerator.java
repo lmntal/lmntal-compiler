@@ -6,6 +6,7 @@ package compile;
 
 import java.util.*;
 import runtime.Env;
+import runtime.Instruction;
 import runtime.InterpretedRuleset;
 import compile.structure.*;
 
@@ -35,6 +36,7 @@ public class RuleSetGenerator {
 		root.rules.add(rs);
 		processMembrane(root);
 		listupModules(root);
+		fixupLoadRuleset(root);
 		Env.d("\n=== Modules = \n"+modules+"\n\n");
 		return root;
 	}
@@ -86,7 +88,7 @@ public class RuleSetGenerator {
 			Atom a = (Atom)i.next();
 			if(a.functor.equals(f)) {
 				Env.d("Module found : "+a.args[0].atom);
-				modules.put(a.args[0].atom.mem, a.args[0].buddy.atom.toString());
+				modules.put(a.args[0].buddy.atom.functor.getName(), a.args[0].atom.mem);
 			}
 		}
 		i = m.rules.listIterator();
@@ -101,6 +103,29 @@ public class RuleSetGenerator {
 		i = m.mems.listIterator();
 		while(i.hasNext()) {
 			listupModules((Membrane)i.next());
+		}
+	}
+	public static void fixupLoadRuleset(Membrane m) {
+		//Env.d("fixupLoadRuleset");
+		
+		Iterator i;
+		i = ((InterpretedRuleset)m.ruleset).rules.listIterator();
+		while(i.hasNext()) {
+			runtime.Rule rule = (runtime.Rule)i.next();
+			ListIterator ib = rule.body.listIterator();
+			while(ib.hasNext()) {
+				Instruction inst = (Instruction)ib.next();
+				// きたない。
+				if(inst.getKind()==Instruction.LOADRULESET && inst.getArg2() instanceof String) {
+					//Env.p("module solved : "+modules.get(inst.getArg2()));
+					ib.set(new Instruction(Instruction.LOADRULESET, inst.getIntArg1(), 
+						((Membrane)modules.get(inst.getArg2())).ruleset ));
+				}
+			}
+		}
+		i = m.mems.listIterator();
+		while(i.hasNext()) {
+			fixupLoadRuleset((Membrane)i.next());
 		}
 	}
 }

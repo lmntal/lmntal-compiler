@@ -78,7 +78,7 @@ public class Inline {
 			//inlineCode = (InlineCode)Class.forName("MyInlineCode").newInstance();
 			//Env.d(Class.forName("MyInlineCode").getField("version"));
 		} catch (Exception e) {
-			Env.d(e);
+			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 		Env.d("inline = "+inlineCode);
 	}

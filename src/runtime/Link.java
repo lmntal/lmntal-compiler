@@ -23,7 +23,7 @@ public final class Link implements Cloneable {
 	///////////////////////////////
 	// コンストラクタ
 	
-	Link(Atom atom, int pos) {
+	public Link(Atom atom, int pos) {
 		set(atom, pos);
 		id = lastId++;
 	}

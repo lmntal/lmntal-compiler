@@ -18,7 +18,7 @@ public final class Atom extends QueuedEntity {
 	/** ファンクタ（名前とリンク数） */
 	private Functor functor;
 	/** リンク */
-	Link[] args;
+	public Link[] args;
 	
 	private static int lastId = 0;
 	private int id;
@@ -90,7 +90,7 @@ public final class Atom extends QueuedEntity {
 		return args[pos];
 	}
 	/** 所属膜の取得 */
-	AbstractMembrane getMem() {
+	public AbstractMembrane getMem() {
 		return mem;
 	}
 //	/** 所属膜を設定する。AbstractMembraneとそのサブクラスのみ呼び出してよい。*/
