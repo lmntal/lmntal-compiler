@@ -8,7 +8,7 @@ import runtime.Functor;
 /*
  * キャッシュ機構。
  * 
- * 廃止の予定
+ * todo 廃止（キャッシュ機構はRemoteMembrane.javaに書いてあります)
  * 
  * @author nakajima
  *
