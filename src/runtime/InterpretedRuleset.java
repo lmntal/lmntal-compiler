@@ -24,6 +24,10 @@ private class InterpretedReactor {
 		while (pc < insts.size()) {
 			Instruction inst = (Instruction)insts.get(pc++);
 			switch (inst.getKind()) {
+
+				//メモ：LOCALHOGEはHOGEと同じコードでいい。
+				//nakajima: 2003-12-12
+
 			case Instruction.REACT:
 				Rule rule = (Rule)inst.getArg1();
 				List bodyInsts = (List)rule.body;
