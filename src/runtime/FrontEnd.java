@@ -70,12 +70,17 @@ public class FrontEnd {
 					System.exit(-1);					
 				}else{ // オプション解釈部
 					switch(args[i].charAt(1)){
+					case 'L':
+						// インラインコードのコンパイル時に -classpath オプションになる部分を追加することができる。
+						Inline.classPath.add(0, args[++i]);
+						break;
 					case 'I':
+						// LMNtal ライブラリの検索パスを追加することができる。
 						compile.Module.libPath.add(args[++i]);
 						break;
 					case 'c':
 						if (args[i].equals("-cgi")) {
-							System.out.println("Content-type: text/html\n");
+							Env.fCGI = true;
 						}
 						break;
 					case 'd':
@@ -156,6 +161,10 @@ public class FrontEnd {
 			REPL.processLine(Env.REPL);
 			return;
 //			System.exit(-1);
+		}
+		if(Env.fCGI) {
+			System.setErr(System.out);
+			System.out.println("Content-type: text/html\n");
 		}
 		
 		// ソースなしならREPL, ありならソースを解釈実行。

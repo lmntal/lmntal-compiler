@@ -153,8 +153,8 @@ public class Module {
 	static {
 		//libPath.add("hoge");
 		//libPath.add("FOO");
-		libPath.add("./lmntal_lib/");
-		libPath.add("../lmntal_lib/");
+		libPath.add("./lmntal_lib");
+		libPath.add("../lmntal_lib");
 		libPath.add(".");
 	}
 	
@@ -177,8 +177,8 @@ public class Module {
 		Iterator it = libPath.iterator();
 		while(it.hasNext()) {
 			String thePath = (String)it.next();
-			String filename = thePath+mod_name+".lmn";
-			StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" from "+thePath+" ...");
+			String filename = thePath+"/"+mod_name+".lmn";
+			StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" from "+filename+" ...");
 			try {
 				LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(filename))));
 				runtime.Ruleset rs = RulesetCompiler.compileMembrane(lp.parse());

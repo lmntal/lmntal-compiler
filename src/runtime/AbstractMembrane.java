@@ -299,6 +299,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
 		atom2.args[pos2].getBuddy().set(atom1, pos1);
 	}
+	public void relink(Atom atom1, int pos1, Atom atom2, int pos2) {
+		relinkAtomArgs(atom1, pos1, atom2, pos2);
+	}
 	/** atom1の第pos1引数のリンク先と、atom2の第pos2引数のリンク先を接続する。
 	 */
 	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {

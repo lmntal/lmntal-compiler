@@ -51,6 +51,12 @@ public class Inline {
 	/** 一意な連番 */
 	static int codeCount = 0;
 	
+	static List classPath = new ArrayList();
+	static {
+		classPath.add(".");
+		classPath.add("lmntal.jar");
+	}
+	
 	/**
 	 * インラインを使うための初期化。実行時に呼ぶ。
 	 *
@@ -159,7 +165,16 @@ public class Inline {
 			
 			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
 			// OS とかによってクラスパスの区切り文字が ; だったり : だったりするので動的に取得
-			cp = Runtime.getRuntime().exec("javac -classpath ."+System.getProperty("path.separator")+"lmntal.jar MyInlineCode.java");
+			StringBuffer path = new StringBuffer("");
+			String sep = System.getProperty("path.separator");
+			Iterator it=classPath.iterator();
+			while(it.hasNext()) {
+				path.append(it.next());
+				path.append(sep);
+			}
+			String cmd = "javac -classpath "+path+" MyInlineCode.java";
+			Env.d("Compile command line: "+cmd);
+			cp = Runtime.getRuntime().exec(cmd);
 		} catch (Exception e) {
 			Env.d("!!! "+e+Arrays.asList(e.getStackTrace()));
 		}

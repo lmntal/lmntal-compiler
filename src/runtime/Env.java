@@ -96,6 +96,11 @@ public final class Env {
 	public static boolean fGUI = false;
 	public static LMNtalFrame gui;
 	
+	/**
+	 * CGI モード
+	 */
+	public static boolean fCGI = false;
+	
 	/** アトム名の表示する長さ */
 	public static int printLength = 14;
 	
