@@ -153,6 +153,8 @@ public final class Env {
 	
 	////////////////////////////////////////////////////////////////
 	
+	// PROXY を表示させない 2005/02/03 T.Nagata オプション --hideproxy
+	public static boolean hideProxy = false;
 	
 	/**
 	 * General error report

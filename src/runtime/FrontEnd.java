@@ -233,6 +233,9 @@ public class FrontEnd {
 						} else if (args[i].equals("--pp0")) {
 							// 暫定オプション
 							Env.preProcess0 = true;
+						} else if(args[i].equals("--hideproxy")){
+							// 暫定オプション PROXYを表示しない 2005/02/03 T.Nagata
+							Env.hideProxy = true;
 						} else {
 							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
