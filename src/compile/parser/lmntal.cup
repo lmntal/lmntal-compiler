@@ -231,9 +231,14 @@ WorldProcessList ::= /* epsilon */
 NonemptyWorldProcessList ::=
 				  NonemptyProcessList:p
 					{: RESULT = p; :}
+//				| NonemptyProcessList:p COMMA
+//					{: RESULT = p; :}
 				| Rule:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
 				| NonemptyWorldProcessList:list PERIOD Rule:p
 					{: list.add(p); RESULT = list; :}
 				| NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
-					{: list.addAll(p); RESULT = list; :};
+					{: list.addAll(p); RESULT = list; :}
+//				| NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p COMMA
+//					{: list.addAll(p); RESULT = list; :}
+				;
