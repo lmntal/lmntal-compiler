@@ -1205,61 +1205,52 @@ public class Instruction implements Cloneable {
 	
 
 	/**
-	 * 与えられた対応表よって、ボディ命令列中のアトムIDを書き換える。<br>
-	 * 命令列中のアトムIDが、対応表のキーに出現する場合、対応する値に書き換えます。
+	 * 与えられた対応表によって、ボディ命令列中の変数を書き換える。<br>
+	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
 	 * 
 	 * @param list 書き換える命令列
-	 * @param map アトムIDの対応表。
+	 * @param map 変数の対応表。
 	 */
-	public static void changeAtomId(List list, Map map) {
+	public static void changeVar(List list, Map map) {
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
 			switch (inst.getKind()) { // TODO ガード命令や、出力変数も書き換える
+				case Instruction.DEREF:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
 				case Instruction.FUNC:
 					changeArg(inst, 1, map);
 					break;
 				case Instruction.NEWATOM:
+				case Instruction.LOCALNEWATOM:
+				case Instruction.NEWATOMINDIRECT:
+				case Instruction.LOCALNEWATOMINDIRECT:
 					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
 					break;
 				case Instruction.NEWLINK:
 				case Instruction.LOCALNEWLINK:
 					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
 					changeArg(inst, 3, map);
+//					changeArg(inst, 5, map);
 					break;
 				case Instruction.GETLINK:
+					changeArg(inst, 1, map);
 					changeArg(inst, 2, map);
 					break;
 				case Instruction.INHERITLINK:
 				case Instruction.LOCALINHERITLINK:
 					changeArg(inst, 1, map);
+					changeArg(inst, 4, map);
 					break;
 				case Instruction.ENQUEUEATOM:
 					changeArg(inst, 1, map);
 					break;
-			}
-		}
-	}
-	/**
-	 * 与えられた対応表よって、ボディ命令列中の膜IDを書き換える。<br>
-	 * 命令列中のアトムIDが、対応表のキーに出現する場合、対応する値に書き換えます。
-	 *
-	 * @param list 書き換える命令列
-	 * @param map アトムIDの対応表。
-	 */
-	public static void changeMemId(List list, Map map) {
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
-			switch (inst.getKind()) {
 				case Instruction.REMOVEATOM:
 				case Instruction.LOCALREMOVEATOM:
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.NEWATOM:
-				case Instruction.NEWATOMINDIRECT:
-				case Instruction.LOCALNEWATOM:
-				case Instruction.LOCALNEWATOMINDIRECT:
 					changeArg(inst, 2, map);
 					break;
 				case Instruction.COPYATOM:
@@ -1334,15 +1325,9 @@ public class Instruction implements Cloneable {
 					changeArg(inst, 1, map);
 					break;
 			//
-				case NEWLINK:
-				case LOCALNEWLINK:
 				case RELINK:
 				case LOCALRELINK:
 					changeArg(inst, 5, map);
-					break;
-				case INHERITLINK:
-				case LOCALINHERITLINK:
-					changeArg(inst, 4, map);
 					break;
 			}
 		}
