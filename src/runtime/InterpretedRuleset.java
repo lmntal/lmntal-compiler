@@ -131,11 +131,15 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		super.serialize(out);
 		out.writeObject(rules);
 	}
-	protected void deserializeInstance(ObjectInputStream in) throws IOException, ClassNotFoundException {
+	protected void deserializeInstance(ObjectInputStream in) throws IOException {
 		super.deserializeInstance(in);
 		// todo idの振り方を考える。→このidは捨てられてglobalidのみで管理される
 		id = ++lastId;
-		rules = (List)in.readObject();
+		try {
+			rules = (List)in.readObject();
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Unexpected Error in deserialization");
+		}
 	}
 }
 
