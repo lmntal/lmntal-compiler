@@ -518,6 +518,8 @@ public class HeadCompiler {
 			}
 			// eq.mem.ruleContexts は無視される					
 		}
+		// todo ロックした膜はunlockする。
+		// todo 膜がロックできなかったからといって膜が存在しないわけではないバグを何とかする
 		// todo 自由リンク
 		match.add(new Instruction(Instruction.PROCEED));	// 旧STOP
 		//matchLabel.updateLocals(varcount);
