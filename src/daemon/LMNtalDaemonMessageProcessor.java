@@ -160,9 +160,15 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 									/* 登録されていない時 */
 									
 									//新規にランタイムを作る。
+									String classpath = System.getProperty("java.class.path");
 									String newCmdLine =
 										new String(
-											"java daemon/SlaveLMNtalRuntimeLauncher "
+												"java -classpath"
+												+ " "
+												+ classpath
+												+ " "
+												+"daemon.SlaveLMNtalRuntimeLauncher"
+												+ " "
 												+ msgid
 												+ " "
 												+ rgid);
