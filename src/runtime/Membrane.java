@@ -43,9 +43,9 @@ public final class Membrane extends AbstractMembrane {
 	}
 	/** 
 	 * 指定されたアトムを実行スタックに追加する。
-	 * @param atom 実行スタックに追加するアトム。アクティブアトムでなければならない。
+	 * @param atom 実行スタックに追加するアトム
 	 */
-	protected void enqueueAtom(Atom atom) {
+	public void enqueueAtom(Atom atom) {
 		ready.push(atom);
 	}
 
@@ -90,7 +90,7 @@ public final class Membrane extends AbstractMembrane {
 	 * 移動された後、この膜のアクティブアトムを実行スタックに入れるために呼び出される。
 	 * <p><b>注意</b>　Ruby版のmovedtoと異なり、子孫の膜にあるアトムに対しては何もしない。
 	 */
-	protected void enqueueAllAtoms() {
+	public void enqueueAllAtoms() {
 		Iterator i = atoms.functorIterator();
 		while (i.hasNext()) {
 			Functor f = (Functor)i.next();

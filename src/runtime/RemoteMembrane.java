@@ -138,14 +138,15 @@ final class RemoteMembrane extends AbstractMembrane {
 		super.removeAtom(atom);
 	}
 	/** 指定されたアトムをこの膜の実行スタックに積む */
-	protected void enqueueAtom(Atom atom) {
-		String atomid = getAtomID(atom);
-		if (atomid != null) { // AbstractMembrane#addAtomからの呼び出しは無視する
-			send("ENQUEUEATOM",atomid);
-		}
+	public void enqueueAtom(Atom atom) {
+		// TODO リモートのアトムを積む場合があるが、実装可能かどうか調べる
+		//String atomid = getAtomID(atom);
+		//if (atomid != null) { // AbstractMembrane#addAtomからの呼び出しは無視する
+		//	send("ENQUEUEATOM",atomid);
+		//}
 	}
 	/** リモートのmoveCellsFromで行われるため何もしなくてよい */
-	protected void enqueueAllAtoms() {}
+	public void enqueueAllAtoms() {}
 
 	// 操作3 - 子膜の操作
 	

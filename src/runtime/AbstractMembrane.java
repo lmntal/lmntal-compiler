@@ -209,12 +209,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atoms.add(atom);
 	}
 
-	/** 指定されたアトムをこの膜の実行スタックに積む */
-	abstract protected void enqueueAtom(Atom atom);
+	/** 指定されたアトムをこの膜の実行スタックに積む。
+	 * すでにスタックに積まれている場合の動作は未定義とする。*/
+	abstract public void enqueueAtom(Atom atom);
 	/** この膜が移動された後、アクティブアトムを実行スタックに入れるために呼び出される。
 	 * <p>Ruby版ではmovedTo(task,dstMem)を再帰呼び出ししていたが、
 	 * キューし直すべきかどうかの判断の手間が掛かりすぎるため子孫の膜に対する処理は廃止された。 */
-	abstract protected void enqueueAllAtoms();
+	abstract public void enqueueAllAtoms();
 
 	/** 指定されたアトムをこの膜から除去する。
 	 * <strike>実行スタックに入っている場合、実行スタックから取り除く。</strike>*/
