@@ -3,6 +3,16 @@ NAME
 	Queue module (ring)
 
 SYNOPSIS
+	$ java runtime.FrontEnd -e 'r(shift(push(push(queue.new, [abc,def]),123),v1)).' -t
+	r(shift(push(push(queue.new,[abc,def]),123),v1)), @602
+	 ==>
+	r(shift(push(push(queue.new(_22,_22),[abc,def]),123),v1)), @602
+	 ==>
+	r(shift(push(queue.new([[abc,def]|_26],_26),123),v1)), @602
+	 ==>
+	r(shift(queue.new([[abc,def],123|_32],_32),v1)), @602
+	 ==>
+	v1([abc,def]), r(queue.new([123|_33],_33)), @602
 
 AUTHOR
 	Koji Hara
@@ -24,26 +34,27 @@ H=queue.new :- H=queue.new(Head, Tail), Head=Tail.
  * unshift
  * 
  */
-H=unshift(queue.new(Head, Tail), Obj) :- H=queue.new(c(Obj, Head), Tail).
+H=unshift(queue.new(Head, Tail), Obj) :- H=queue.new('.'(Obj, Head), Tail).
 
 /**
  * shift
  * 
  */
-H=shift(queue.new(c(Obj, Head), Tail), Return) :- H=queue.new(Head, Tail), Return=Obj.
+H=shift(queue.new('.'(Obj, Head), Tail), Return) :- H=queue.new(Head, Tail), Return=Obj.
 H=shift(queue.new(Head, Head), Return) :- H=queue.new(Head, Head), Return=nil.
 
 /**
  * push
  * 
  */
-H=push(queue.new(Head, Tail), Obj) :- H=queue.new(Head, Tail2), c(Obj, Tail2, Tail).
+H=push(queue.new(Head, Tail), Obj) :- H=queue.new(Head, Tail2), '.'(Obj, Tail2, Tail).
+
 
 /**
  * pop
  * 
  */
-H=pop(queue.new(Head, Tail), Return), c(Obj, Tail, Tail2) :- H=queue.new(Head, Tail2), Return=Obj.
+H=pop(queue.new(Head, Tail), Return), '.'(Obj, Tail, Tail2) :- H=queue.new(Head, Tail2), Return=Obj.
 H=pop(queue.new(Head, Head), Return) :- H=queue.new(Head, Head), Return=nil.
 
 
