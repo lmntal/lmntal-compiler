@@ -97,18 +97,23 @@ final class Task extends AbstractTask {
 				}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行膜スタックが空の時
 				flag = false;
-				while(it.hasNext()){ // 膜主導テストを行う
-					if(((Ruleset)it.next()).react(mem)) {
-						flag = true;
-						//if (memStack.peek() != mem) break;
-						break; // ルールセットが変わっているかもしれないため
-					}
-				}
-				if (flag == false) {
+				// アトム主導が無い現在、足し算を先に行うために、順番を変えてみた。
+				// 本来はアトム主導により、+ がdequeueされた直後に、再帰呼び出しがdequeueされる。
+				// 理想では、組み込みの + はインライン展開されるべきである。
+				{
 					int debugvalue = Env.debug; // todo spy機能を実装する
 					if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
 					flag = SystemRuleset.getInstance().react(mem);
 					Env.debug = debugvalue;
+				}
+				if (flag == false) {				
+					while(it.hasNext()){ // 膜主導テストを行う
+						if(((Ruleset)it.next()).react(mem)) {
+							flag = true;
+							//if (memStack.peek() != mem) break;
+							break; // ルールセットが変わっているかもしれないため
+						}
+					}
 				}
 				if(flag == false){ // ルールが適用できなかった時
 					memStack.pop(); // 本膜をpop

@@ -884,14 +884,15 @@ public class RuleCompiler {
 	}
 	/** 右辺のアトムを実行スタックに積む */
 	private void enqueueRHSAtoms() {
+		int index = body.size(); // 末尾再帰最適化の効果を最大化するため、逆順に積む（コードがセコい）
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
 			if (!atom.functor.equals(Functor.INSIDE_PROXY)
 			 && !atom.functor.equals(Functor.OUTSIDE_PROXY) 
 			 && atom.functor.isSymbol() ) {
-				body.add( new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
-			 }
+				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
+			}
 		}
 	}
 	/** インラインコードを実行する命令を生成する */

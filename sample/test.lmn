@@ -127,6 +127,7 @@ p(1.0/.(-4.0/.0.0)), (p(0.0) :- err) % ==> p(-0.0)
 
 (gen(1) :- X=X),(gen(N) :- N>1 | p(N),gen(N-1)), gen(50), (p(A),p(B) :- B=(B/A)*A | p(A)) 
 (gen(1) :- X=X),(gen(N) :- N>1 | p(N),gen(N-1)), gen(50), (p(A),p(B) :- B mod A =:= 0 | p(A)) 
+(gen(1) :- X=X),(gen(N) :- N>1 | p(N),gen(N-1)), gen(200), (p(A),p(B) :- B mod A =:= 0 | p(A)) 
 
 %
 

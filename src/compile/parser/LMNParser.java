@@ -609,7 +609,7 @@ public class LMNParser {
 				if (pc.def.isTyped()) {
 					it.remove();
 					if (pc.args.length != 1) {
-						error("SYNTAX ERROR: Typed process context occurring in body must have exactly one explicit free link argument: " + pc);
+						error("SYNTAX ERROR: typed process context occurring in body must have exactly one explicit free link argument: " + pc);
 						continue;
 					}
 					mem.typedProcessContexts.add(pc);
@@ -694,7 +694,7 @@ public class LMNParser {
 				}
 			}
 			if (def.rhsOccs.size() == 1) {
-				if (def.src != null) {	// ガードのとき。意味が無いのでdef.srcは仕様変更か廃止したい
+				if (def.src != null) {	// ガードでないとき。紛らわしい。TODO def.srcはdef.lhsoccに名称変更する
 					Context rhsocc = ((Context)def.rhsOccs.get(0));
 					rhsocc.buddy = def.src;
 					def.src.buddy = rhsocc;
