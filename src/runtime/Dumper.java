@@ -68,6 +68,14 @@ public class Dumper {
 	
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	public static String dump(AbstractMembrane mem) {
+		boolean locked = false;
+		if (mem.getLockThread() != Thread.currentThread()) {
+			if (!mem.lock()) {
+				return "...";
+			}
+			locked = true;
+		}
+
 		Unlexer buf = new Unlexer();
 		boolean commaFlag = false;
 		
@@ -236,6 +244,10 @@ public class Dumper {
 		while (it.hasNext()) {
 			if(commaFlag) buf.append(", "); else commaFlag = true;
 			buf.append(((Ruleset)it.next()).toString());
+		}
+		
+		if (locked) {
+			mem.quietUnlock();
 		}
 
 		return buf.toString();

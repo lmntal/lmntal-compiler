@@ -237,6 +237,11 @@ public final class RemoteMembrane extends AbstractMembrane {
 	
 	// - ボディ命令
 	
+	public void quietUnlock() {
+		remote.send("QUIETUNLOCK",this); //TODO メッセージ処理の実装
+		onUnlock(false);
+	}
+	
 	public void unlock() {
 		if (false && isRoot() && remote.cmdbuffer.length() == 0) {
 			fUnlockDeferred = true;
@@ -279,6 +284,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 
 	private void onLock(boolean signal) {
 		locked = true;
+		lockThread = Thread.currentThread();
 		if (signal || isRoot()) {
 			if (signal || parent == null || parent.remote == null) {
 				remote = (RemoteTask)task;

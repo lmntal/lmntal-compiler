@@ -74,8 +74,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	protected boolean stable = false;
 	/** 永続フラグ（trueならばルール適用できなくてもstableにならない）*/
 	public boolean perpetual = false;
-	/** ロックされている時にtrue */
+	/** ロックされている時にtrue。 */
 	protected boolean locked = false;
+	/** locked = trueの時には、この膜をロックしているスレッドが入っている。*/
+	protected Thread lockThread = null;
 	/** リモート（リモート膜のときにボディ命令メソッド呼び出しの転送先となるリモートタスクまたはnull）
 	 * <p>ロック期間中のみ有効。ロック取得時に設定され、ロック解放時にnullに設定される。
 	 * ロックを必要とするランタイムのみが使用し、転送するランタイムは使用しない。*/
@@ -617,6 +619,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される
 	
+	/**
+	 * 現在この膜をロックしているスレッドを取得する。
+	 */
+	public Thread getLockThread() {
+		return lockThread;
+	}
+	
 	// - ガード命令
 	
 	/**
@@ -626,6 +635,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <p>dumperは、ロック解放にはquietUnlock()を使用する。
 	 * @return ロックの取得に成功したかどうか */
 	public abstract boolean lock();
+
 	/**
 	 * この膜のロック取得を試みる。
 	 * 失敗した場合、この膜を管理するタスクのルールスレッドに停止要求を送る。その後、
@@ -657,7 +667,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 実行膜スタックは操作しない。
 	 * ルート膜の場合、この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。
 	 */
-//	public abstract void quietUnlock();
+	public abstract void quietUnlock();
 
 	/**
 	 * 取得したこの膜のロックを解放する。ルート膜の場合、

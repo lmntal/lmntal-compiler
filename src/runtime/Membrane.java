@@ -220,6 +220,7 @@ public final class Membrane extends AbstractMembrane {
 			return false;
 		} else {
 			locked = true;
+			lockThread = Thread.currentThread();
 			if (parent != null) remote = parent.remote;
 			return true;
 		}
@@ -296,6 +297,20 @@ public final class Membrane extends AbstractMembrane {
 	}
 
 	// - ボディ命令
+
+	/**
+	 * 取得したこの膜のロックを解放する。
+	 * 実行膜スタックは操作しない。
+	 * ルート膜の場合、この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。
+	 */
+	public void quietUnlock() {
+		Task task = (Task)getTask();
+		locked = false;
+		if (isRoot()) {
+			// このタスクのルールスレッドまたはその停止を待ってブロックしているスレッドを再開する。
+			task.signal();
+		}
+	}
 	
 	/**
 	 * 取得したこの膜のロックを解放する。ルート膜の場合、
@@ -310,11 +325,7 @@ public final class Membrane extends AbstractMembrane {
 			}
 			task.idle = false;
 		}
-		locked = false;
-		if (isRoot()) {
-			// このタスクのルールスレッドまたはその停止を待ってブロックしているスレッドを再開する。
-			task.signal();
-		}
+		quietUnlock();
 	}
 	public void forceUnlock() {
 		unlock();
