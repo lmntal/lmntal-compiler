@@ -164,19 +164,43 @@ public class LMNParser {
 		boolean alllinks   = true;
 		boolean allbundles = true;
 		LinkedList p = sAtom.getProcess();
-		SrcName name = sAtom.getName();
 		int arity = p.size();
-		Functor func;
-		func = new runtime.Functor(name.getName(), arity);
-		if (name.getType() == SrcName.PLAIN && arity == 1) {
-			try {
-				func = new runtime.IntegerFunctor(Integer.parseInt(name.getName()));
-			}
-			catch (NumberFormatException e) {		
+		
+		// [1]ファンクタを決定する
+		SrcName srcname = sAtom.getName();
+		String name = srcname.getName();
+		
+		// GUIからの動的な生成に対応する場合にそなえて AtomFactory のようなものがあった方がよい。
+		// runtime.*Functor の多さが、現状の不自然さを物語る。
+		
+		Functor func = new runtime.Functor(name, arity);
+		if (arity == 1) {
+			if (srcname.getType() == SrcName.PLAIN || srcname.getType() == SrcName.SYMBOL) {
+				try {
+					func = new runtime.IntegerFunctor(Integer.parseInt(name));
+				}
+				catch (NumberFormatException e) {
+					try {
+						func = new runtime.FloatingFunctor(Double.parseDouble(name));
+					}
+					catch (NumberFormatException e2) {
+						//
+					}
+				}
 			}
 		}
+		String path = null;
+		if (srcname.getType() == SrcName.PATHED) {
+			int pos = name.indexOf('.');
+			path = name.substring(0, pos);
+		}
+		
+		// [2] アトム構造を生成する
 		Atom atom = new Atom(mem, func);
+		atom.path = path;
 		atom.setSourceLocation(sAtom.line, sAtom.column);
+		
+		// [3] 引数の構造を生成する		
 		for (int i = 0; i < arity; i++) {
 			Object obj = p.get(i);
 			// リンク
@@ -201,7 +225,8 @@ public class LMNParser {
 				throw new ParseException("Illegal object in an atom argument: " + obj);
 			}
 		}
-		// アトムとアトム集団を識別する
+		
+		// [4] アトムとアトム集団を識別する
 		if (arity > 0 && allbundles) 
 			mem.aggregates.add(atom);
 		else if (arity == 0 || alllinks )

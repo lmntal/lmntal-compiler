@@ -1,6 +1,8 @@
 package compile.parser;
 import java.util.LinkedList;
 
+// このファイルは廃止する予定
+
 /**
  * ガード中に出現する比較アトム
  */

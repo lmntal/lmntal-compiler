@@ -38,33 +38,43 @@ LineTerminator = \r|\n|\r\n
 InputCharacter = ([^\r\n]|Character)
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
-Inline = "[[" [^*] ~"]]"
-
 LinkName       = [A-Z][A-Za-z_0-9]*
+
+////////////////////////////////////////////////////////////////
+//
+// アトム名関係
 
 /* これだと [[ と ]] がアトム名に含まれちゃうので一時的に退避 hara */
 /* なんかいい方法ないすかねー */
 /*AtomNameNormal = {Inline} | [a-z0-9][A-Za-z_0-9]* */
 //AtomNameNormal = [a-z0-9][A-Za-z_0-9]* (\.[a-z0-9][A-Za-z_0-9]*)?
 
-PathedAtomName = [a-z0-9][A-Za-z_0-9]* \.[a-z0-9][A-Za-z_0-9]*
 AtomName = [a-z0-9][A-Za-z_0-9]*
 
-NumberName = -[0-9]+ | [+-][0-9]*\.[0-9]*([Ee][+-]?[0-9]+)?
+// AtomNameに加えて0引数でアトム名となる文字列その１
+NumberName = -[0-9]+ | [+-]?[0-9]*\.[0-9]*([Ee][+-]?[0-9]+)?
 
+// AtomNameに加えて0引数でアトム名となる文字列その２、仮。
+// （:の構文解析が決定するまでの間、:もここで取り込む。:は直ちに.に置換される）
+// （注意）モジュール名の先頭文字は a-z に限定してあります
+PathedAtomName = [a-z][A-Za-z_0-9]* [\.:] [a-z0-9][A-Za-z_0-9]*
 // 仮
 SymbolName = "'" [^'\r\n]+ "'" | "'" [^'\r\n]* ("''" [^'\r\n]*)+ "'"
 // 仮
 String = "\"" [^\"\r\n]* ("\\\"" [^\"\r\n]*)* "\""
 
+Inline = "[[" [^*] ~"]]"
+
+%state QUOTED
+
+////////////////////////////////////////////////////////////////
+
+RelativeOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
+
 Comment = {TraditionalComment} | {EndOfLineComment}
 
 TraditionalComment = "/*" [^*] ~"*/"
 EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
-
-RelativeOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
-
-%state QUOTED
 
 %% 
 

@@ -426,24 +426,25 @@ public class RuleCompiler {
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
 			int atomID = rhsatomToPath(atom);
-			int codeID = Inline.getCodeID(atom.functor.getInternalName());
+			int codeID = Inline.getCodeID(atom.functor.getName());
 			if(codeID == -1) continue;
 			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
 		}
 	}
+	static final Functor FUNC_USE = new Functor("use",1);
 	/** モジュールを読み込む */
 	private void addLoadModules() {
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
-			if(atom.functor.getInternalName().equals("use") && atom.functor.getArity()==1) {
+			if (atom.functor.equals(FUNC_USE)) {
 				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
-				atom.args[0].buddy.atom.functor.getInternalName()) );
+					atom.args[0].buddy.atom.functor.getName()) );
 			}
-			if(atom.functor.path!=null && !atom.functor.path.equals(atom.mem.name)) {
+			String path = atom.getPath(); // .functor.path;
+			if(path!=null && !path.equals(atom.mem.name)) {
 				// この時点では解決できないモジュールがあるので名前にしておく
-				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
-					 atom.functor.path));
+				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem), path));
 			}
 		}
 	}

@@ -1,0 +1,16 @@
+package runtime;
+
+/** 浮動小数点数アトム用の1引数ファンクタを表すクラス
+ * @author n-kato */
+
+public class FloatingFunctor extends Functor {
+	double value;
+	public FloatingFunctor(double value) { super("",1);  this.value = value; }
+	public String toString() { return "" + value; }
+	public String getName() { return toString(); }
+	public int hashCode() { return (int)Double.doubleToLongBits(value); }
+	public double floatValue() { return value; }
+	public boolean equals(Object o) {
+		return (o instanceof IntegerFunctor) && ((IntegerFunctor)o).value == value;
+	}
+}

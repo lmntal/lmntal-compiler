@@ -18,13 +18,16 @@ public class Functor {
 	private int arity;
 	/** 各種メソッドで使うために保持しておく。整合性要注意 */
 	private String strFunctor;
-	
-	/**
-	 * ファンクタ表記中の所属膜名。ソースコードで明示的に指定されたらそれ。
-	 * 指定されなかったら、デフォルトとしてそのファンクタが実際に所属する膜。
-	 */
-	public String path;
-	
+//	/** ファンクタ表記中の所属膜名（明示的に指定されていない場合はnull）*/
+//	public String path = null;
+
+//	/**
+//	 * ファンクタ表記中の所属膜名。ソースコードで明示的に指定されたらそれ。
+//	 * 指定されなかったら、デフォルトとしてそのファンクタが実際に所属する膜。
+//	 * @deprecated
+//	 */
+//	public String path;
+//
 //	/**
 //	 * 所属膜が明示的に指定されなかった時に真。
 //	 */
@@ -34,11 +37,12 @@ public class Functor {
 //		this(name, arity, null);
 //	}
 //	public Functor(String name, int arity, compile.structure.Membrane m) {
-		int pos = name.indexOf('.');
-		if(pos!=-1) {
-			this.path = name.substring(0, pos);
-			if(path.indexOf('\n')!=-1 || path.indexOf('/')!=-1 || path.indexOf('*')!=-1) this.path=null;
-		}
+
+//		int pos = name.indexOf('.');
+//		if(pos!=-1) {
+//			this.path = name.substring(0, pos);
+//			if(path.indexOf('\n')!=-1 || path.indexOf('/')!=-1 || path.indexOf('*')!=-1) this.path=null;
+//		}
 		this.name = name;
 		this.arity = arity;
 		// == で比較できるようにするためにinternしておく。
@@ -49,11 +53,12 @@ public class Functor {
 		String full = getName();
 		return full.length() > 10 ? full.substring(0, 10) : full;
 	}
-	/** 名前の内部名を返す */
+	/** 名前の内部名を取得する。
+	 * @return nameフィールドの値。サブクラスならば空文字列が返る。*/
 	public final String getInternalName() {
 		return name;
 	}
-	/** 名前の表示名を返す */
+	/** 名前の表示名を取得する。サブクラスは空文字列が出力されないようにオーバーライドすること。*/
 	public String getName() {
 		return name;
 	}
@@ -77,9 +82,6 @@ public class Functor {
 		// コンストラクタでinternしているので、==で比較できる。
 		// 引数oがFunctorのサブクラスの場合、falseを返す。
 		return ((Functor)o).strFunctor == this.strFunctor;
-	}
-	public static IntegerFunctor newIntegerFunctor(int value) {
-		return new IntegerFunctor(value);
 	}
 }
 

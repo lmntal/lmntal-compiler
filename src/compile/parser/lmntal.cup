@@ -49,7 +49,7 @@ FuncName	::=   ATOM_NAME:name
 											.replaceAll("\\\\","\\"),
 											SrcName.STRING); :}
 				| PATHED_ATOM_NAME:name
-					{: RESULT = new SrcName(name, SrcName.PATHED); :};
+					{: RESULT = new SrcName(name.replace(':','.'), SrcName.PATHED); :};
 
 AtomName    ::= ATOM_NAME:name
 					{: RESULT = name.toString(); :};

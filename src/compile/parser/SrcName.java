@@ -5,25 +5,24 @@ package compile.parser;
  * <p>このクラスは現在、プロセス文脈名およびルール文脈名では使用されない。
  * <p>
  * '-1'(X)と書きたいことがあるため、処理系の方針として、
- * 12と'12'は区別せず、1引数ならば整数とみなすように仮決定した。
+ * 12と'12'は区別せず、1引数ならばどちらも整数とみなすように仮決定した。
+ * <p>
  * 12 という名前のシンボルは [[12]] と記述する。
  * 12]]33 という名前のシンボルは '12]]33' と記述する。
- * <p>
- * ★ SYMBOL の値を1にすると、これらが区別されるようになる。
  */
 class SrcName {
-	/** 名前トークンを構成する文字列 */
+	/** 名前トークンが表す文字列 */
 	protected String name;	
 	/** 名前トークンの種類 */
 	protected int type;
 
 	// typeの値
 	static final int PLAIN   = 0;		// aaa 12 -12 3.14 -3.14e-1
-	static final int SYMBOL  = 0;//★ // 'aaa' 'AAA' '12' '-12' '3.14' '-3.14e-1'
+	static final int SYMBOL  = 1; 	// 'aaa' 'AAA' '12' '-12' '3.14' '-3.14e-1'
 	static final int STRING  = 2;		// "aaa" "AAA" "12" "-12" "3.14" "-3.14e-1"
 	static final int QUOTED  = 3;		// [[aaa]] [[AAA]] [[12]] [[-12]] [[3.14]] [[-3.14e-1]]
-	static final int PATHED  = 4;		// aaa.bbb
-
+	static final int PATHED  = 4;		// module.p module:p
+	
 	/** 標準の名前トークンの表現を生成する。
 	 * @param name 名前 */
 	public SrcName(String name) {
@@ -35,7 +34,7 @@ class SrcName {
 		this.name = name;
 		this.type = type;
 	}
-	/** ソースファイル中の名前の表現を返す */
+	/** この名前トークンが表す文字列を取得する */
 	public String getName() {
 		return name;
 	}

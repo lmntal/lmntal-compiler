@@ -9,7 +9,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import runtime.Functor;
+//import runtime.Functor;
 import runtime.Env;
 import compile.parser.LMNParser;
 import compile.structure.*;
@@ -59,7 +59,7 @@ import compile.structure.*;
  *      【下を参照】この区別はルールコンパイラが行うのであるため、コンパイル時データ構造のみが識別する必要があり、実行時には不要。(n-kato)
  * </ul>
  * 
- * TODO 【原君は、これを確認してください】
+ * 【原君は、これを確認してください】
  * 
  * ■ 名前 m.p に対して、モジュール名をワイルドカードにしてマッチングが取れるようにする場合
  * 
@@ -210,13 +210,13 @@ public class Module {
 		i = m.atoms.listIterator();
 		while(i.hasNext()) {
 			Atom a = (Atom)i.next();
-			Functor f = a.functor;
-			if(f.path==null) continue;
-			if(f.path.equals(m.name)) continue;
-//			Env.p("Check module existence "+f.path);
-			if(!memNameTable.containsKey(f.path)) {
-//				Env.p("TODO: search lib file : "+f.path);
-				need.add(f.path);
+			String path = a.getPath();
+			if(path == null) continue;
+			if(path.equals(m.name)) continue;
+//			Env.p("Check module existence "+path);
+			if(!memNameTable.containsKey(path)) {
+//				Env.p("TODO: search lib file : " + path);
+				need.add(path);
 			}
 		}
 		i = m.rules.listIterator();

@@ -14,7 +14,7 @@ public class Atom {
 	/** 所属膜 */
 	public Membrane mem = null;
 	/** 明示的に指定されたモジュール名（明示的に指定されていない場合はnull）*/
-	public String path;
+	public String path = null;
 	/** アトムのファンクタ */
 	public Functor functor;
 	/** アトムのリンク列（またはアトム集団のリンク束列） */
@@ -44,7 +44,7 @@ public class Atom {
 		this.mem = mem;
 		this.functor = functor;
 		args = new LinkOccurrence[functor.getArity()];
-		Inline.add(functor.getInternalName());
+		Inline.add(functor.getName());
 	}
 
 	/**
@@ -75,7 +75,6 @@ public class Atom {
 		this.line = line;
 		this.column = column;
 	}
-	
 	public String toString() {
 		if (args.length == 0) return functor.getAbbrName();
 		String argstext = Arrays.asList(args).toString();
@@ -83,4 +82,8 @@ public class Atom {
 		argstext = argstext.replaceAll(", ",",");
 		return functor.getAbbrName() + "(" + argstext + ")";
 	}
+	public String getPath() {
+		return path;
+	}
+	
 }
