@@ -3,6 +3,15 @@
  */
 package runtime;
 
+import java.io.FileInputStream;
+import java.io.SequenceInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.Reader;
+import java.io.FileNotFoundException;
+import java.lang.SecurityException;
+
 /**
  * LMNtal のメイン
  * 
@@ -26,13 +35,66 @@ public class FrontEnd {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		FrontEnd fe = new FrontEnd();
+		FrontEnd fe = new FrontEnd(); //TODO ＞原君　これどこで使うの？
+		FileInputStream fis = null;
+		InputStream is = null;
+		Reader src = null;
+		
 		/**
 		 * TODO コマンドライン引数があったらファイルの中身を解釈実行
 		 */
+		for(int i = 0; i < args.length;i++){
+			// 必ずlength>0, '-'ならオプション
+			if(args[i].charAt(0) == '-'){
+				if(args[i].length() < 2){ // '-'のみの時
+					System.out.println("不明なオプション:" + args[i]);
+					System.exit(-1);					
+				}else{ // オプション解釈部
+					switch(args[i].charAt(1)){
+					case 'd':
+						System.out.println("debug mode");
+						break;
+					case '-': // 文字列オプション
+						if(args[i].equals("--help")){
+							System.out.println("usage: FrontEnd [-d] filename");
+						}else{
+							System.out.println("不明なオプション:" + args[i]);
+							System.exit(-1);
+						}
+						break;
+					default:
+						System.out.println("不明なオプション:" + args[i]);
+						System.exit(-1);						
+					}							
+				}
+			}else{ // '-'以外で始まるものはファイルとみなす
+				try{
+					fis = new FileInputStream(args[i]);
+				}catch(FileNotFoundException e){
+					System.out.println("ファイルが見つかりません:" + args[i]);
+					System.exit(-1);
+				}catch(SecurityException e){
+					System.out.println("ファイルが開けません:" + args[i]);
+					System.exit(-1);
+				}
+				if(is == null) is = fis;
+				else is = new SequenceInputStream(is, fis); // ソースファイルを連結
+			}
+		}
 		
-		//指定がなければこれを呼ぶ
-		REPL repl = new REPL();
-		repl.run();
+		if(is == null){
+			/* こうできるといいなぁと妄想
+			src = new REPL();
+			 */
+			//file指定がなければこれを呼ぶ
+			REPL repl = new REPL();
+			repl.run();
+		}else{
+			src = new BufferedReader(new InputStreamReader(is));
+		}
+		
+		// srcを構文解析に渡す。
+		
+		// 計算ノードに、得られた初期化ルールを渡して呼び出す
 	}
 }
