@@ -23,11 +23,11 @@ public class HeadCompiler {
 	 */
 	public List freemems = new ArrayList();
 	
-	public Map mempaths = new HashMap();
 	public boolean visited[];
-	public List atomidpath = new ArrayList();
-	public List match = new ArrayList();
-	public Map atomids = new HashMap();
+	public Map  mempaths      = new HashMap();
+	public List atomidpath    = new ArrayList();
+	public List match         = new ArrayList();
+	public Map  atomids       = new HashMap();
 	
 	public int varcount;
 	
@@ -171,16 +171,21 @@ public class HeadCompiler {
 	public void compile_mem(Membrane mem) {
 		Env.c("compile_mem");
 		
-		for(int i=0;i<mem.atoms.size();i++) {
-			Atom atom = (Atom)(mem.atoms.get(i));
+		Iterator l;
+		l = mem.atoms.iterator();
+		while(l.hasNext()) {
+			Atom atom = (Atom)(l.next());
 			
 			// 仮引数番号
 			int targetid = ((Integer)(atomids.get(atom))).intValue();
 			if(atomidpath.get(targetid) == null) {
 				atomidpath.set(targetid, new Integer(++varcount));
 				match.add( Instruction.findatom(varcount, (List)(mempaths.get(mem)), atom.functor) );
-				for(int j=0;j<mem.atoms.size();j++) {
-					Atom otheratom = (Atom)(mem.atoms.get(j));
+				
+				Iterator l2=mem.atoms.iterator();
+				while(l2.hasNext()) {
+					Atom otheratom = (Atom)(l2.next());
+					
 					int z = ((Integer)( atomidpath.get( ((Integer)(atomids.get(otheratom))).intValue() ) )).intValue();
 					if(z==0) continue;
 					if(! otheratom.functor.equals(atom.functor)) continue;
@@ -190,19 +195,25 @@ public class HeadCompiler {
 			}
 			compile_group(targetid);
 		}
-		for(ListIterator li=mem.mems.listIterator();li.hasNext();) {
-			Membrane submem=(Membrane)(li.next());
+		
+		l = mem.mems.iterator();
+		while(l.hasNext()) {
+			Membrane submem=(Membrane)(l.next());
+			
 			if(! mempaths.containsValue(submem) ) {
 				mempaths.put(submem, new Integer(++varcount));
 				match.add( Instruction.anymem(varcount, ((Integer)mempaths.get(submem.mem)).intValue()) );
 				
-				for(ListIterator li2=mem.mems.listIterator();li2.hasNext();) {
-					Membrane othermem=(Membrane)(li2.next());
+				Iterator l2=mem.mems.iterator();
+				while(l2.hasNext()) {
+					Membrane othermem=(Membrane)(l2.next());
+					
 					if(null == mempaths.get(othermem)) continue;
 					if(othermem.equals(submem)) continue;
 					match.add( Instruction.dummy("[:neq, ["+varcount+"], "+mempaths.get(othermem.mem)) );
 				}
 			}
+			// プロセス文脈がないときは、数が一致する必要がある。
 			if(0==submem.processContexts.size()) {
 				match.add( Instruction.dummy("[:ieq, "+submem.atoms.size()+", [:natoms, "+mempaths.get(submem)) );
 				match.add( Instruction.dummy("[:ieq, "+submem.mems.size()+", [:nmems, "+mempaths.get(submem)) );

@@ -26,7 +26,7 @@ public class RuleSetGeneratorTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String src = "v, ( v :- w)";
+		String src = "v, {}, ( {}, v :- w)";
 		try {
 			// thnx to 永田書記長
 			LMNParser lp = new LMNParser(new StringReader(src));

@@ -114,6 +114,10 @@ public class RuleCompiler {
 		RuleSetGenerator.processMembrane(rs.rightMem);
 	}
 	
+	/**
+	 * 左辺膜をコンパイルする。
+	 *
+	 */
 	private void compile_l() {
 		Env.c("compile_l");
 		for(int firstid=0; firstid<=hc.atoms.size(); firstid++) {
@@ -154,6 +158,10 @@ public class RuleCompiler {
 		}
 	}
 	
+	/**
+	 * 右辺膜をコンパイルする
+	 *
+	 */
 	private void compile_r() {
 		Env.c("compile_r");
 		
@@ -184,12 +192,20 @@ public class RuleCompiler {
 		update_links();
 	}
 	
+	/**
+	 * ルールの左辺・右辺について = を繋げる処理をする。
+	 *
+	 */
 	public void simplify() {
 		Env.c("RuleCompiler::simplify");
 		static_unify(rs.leftMem);
 		static_unify(rs.rightMem);
 	}
 	
+	/**
+	 * 指定膜について = を繋げる処理をする。
+	 * @param mem
+	 */
 	public void static_unify(Membrane mem) {
 		Env.c("RuleCompiler::static_unify");
 		/*
@@ -219,13 +235,16 @@ public class RuleCompiler {
 		
 		Membrane mem = null;
 		int atomid;
+		Iterator l;
 		
 		List rootmems = new ArrayList();
 		lhsmempaths = new HashMap();
 		lhsatomidpath = new HashMap();
 		
-		for(int i=0;i<lhsatoms.size();i++) {
-			Atom atom = (Atom)(lhsatoms.get(i));
+		l = lhsatoms.iterator();
+		while(l.hasNext()) {
+			Atom atom = (Atom)(l.next());
+			
 			atomid = ((Integer)(lhsatomids.get( (Object)atom) )).intValue();
 			lhsatomidpath.put(new Integer(atomid), new Integer(atomid + 1));
 			if(lhsmempaths.get(atom.mem)!=null) {
@@ -235,9 +254,11 @@ public class RuleCompiler {
 				rootmems.add(atom.mem);
 			}
 		}
-		for(int i=0;i<lhsfreemems.size();i++) {
-			mem = (Membrane)(lhsfreemems.get(i));
-			lhsmempaths.put(mem, new Integer(i + lhsatoms.size() + 1));
+		int i=0;
+		l = lhsfreemems.iterator();
+		while(l.hasNext()) {
+			mem = (Membrane)(l.next());
+			lhsmempaths.put(mem, new Integer(i++ + lhsatoms.size() + 1));
 			rootmems.add(mem);
 		}
 		if(mem != null)
@@ -255,17 +276,21 @@ public class RuleCompiler {
 	
 	private void remove_lhsatoms() {
 		Env.c("RuleCompiler::remove_lhsatoms");
-		for(int i=0;i<lhsatoms.size();i++) {
-			Atom atom = (Atom)(lhsatoms.get(i));
+		Iterator l = lhsatoms.iterator();
+		int i=0;
+		while(l.hasNext()) {
+			Atom atom = (Atom)(l.next());
 			body.add( Instruction.dummy("[:removeatom, "+(i+1)+", "+atom.functor) );
 			body.add( Instruction.dummy("[:freeatom, "+(i+1)+", "+atom.functor) );
+			i++;
 		}
 	}
 	
 	private void remove_lhsmem(Membrane mem) {
 		Env.c("RuleCompiler::remove_lhsmem");
-		for(int i=0;i<mem.mems.size();i++) {
-			Membrane m = (Membrane)(mem.mems.get(i));
+		Iterator l = mem.mems.iterator();
+		while(l.hasNext()) {
+			Membrane m = (Membrane)(l.next());
 			
 			remove_lhsmem(m);
 			body.add( Instruction.dummy("[:removemem"+lhsmempaths.get(m)) );
@@ -274,15 +299,19 @@ public class RuleCompiler {
 	
 	private void build_rhsmem(Membrane mem) {
 		Env.c("RuleCompiler::build_rhsmem");
-		for(int i=0;i<mem.mems.size();i++) {
-			Membrane m = (Membrane)(mem.mems.get(i));
+		Iterator l;
+		
+		l=mem.mems.iterator();
+		while(l.hasNext()) {
+			Membrane m = (Membrane)(l.next());
 			
 			rhsmempaths.put(m, new Integer(++varcount));
 			body.add( Instruction.dummy("[:newmem"+varcount+", "+rhsmempaths.get(m)) );
 			build_rhsmem(m); //inside must be enqueued first
 		}
-		for(int i=0;i<mem.processContexts.size();i++) {
-			ProcessContext p = (ProcessContext)(mem.processContexts.get(i));
+		l=mem.processContexts.iterator();
+		while(l.hasNext()) {
+			ProcessContext p = (ProcessContext)(l.next());
 			
 			if(rhsmempaths.get(mem).equals(lhsmempaths.get(p.lhsMem))) continue;
 			body.add( Instruction.dummy("[:pour"+rhsmempaths.get(mem)+", "+lhsmempaths.get(p.lhsMem)) );
@@ -291,12 +320,16 @@ public class RuleCompiler {
 	
 	private void inherit_rhsrules(Membrane mem) {
 		Env.c("RuleCompiler::inherit_rhsrules");
-		for(int i=0;i<mem.mems.size();i++) {
-			Membrane m = (Membrane)(mem.mems.get(i));
+		Iterator l;
+		
+		l=mem.mems.iterator();
+		while(l.hasNext()) {
+			Membrane m = (Membrane)(l.next());
 			inherit_rhsrules(m);
 		}
-		for(int i=0;i<mem.ruleContexts.size();i++) {
-			RuleContext r = (RuleContext)(mem.ruleContexts.get(i));
+		l=mem.ruleContexts.iterator();
+		while(l.hasNext()) {
+			RuleContext r = (RuleContext)(l.next());
 			
 			if(rhsmempaths.get(mem).equals(lhsmempaths.get(r.lhsMem))) continue;
 			body.add( Instruction.dummy("[:inheritrules"+rhsmempaths.get(mem)+", "+lhsmempaths.get(r.lhsMem)) );
@@ -305,30 +338,32 @@ public class RuleCompiler {
 	
 	private void inherit_builtins(Membrane mem) {
 		Env.c("RuleCompiler::inherit_builtins");
-		for(int i=0;i<mem.mems.size();i++) {
-			Membrane m = (Membrane)(mem.mems.get(i));
+		Iterator l;
+		l=mem.mems.iterator();
+		while(l.hasNext()) {
+			Membrane m = (Membrane)(l.next());
 			inherit_builtins(m);
 		}
-		for(int i=0;i<mem.rules.size();i++) {
-			RuleStructure r = (RuleStructure)(mem.rules.get(i));
+		l=mem.rules.iterator();
+		while(l.hasNext()) {
+			RuleStructure r = (RuleStructure)(l.next());
 			
 			body.add( Instruction.dummy("[:loadruleset"+rhsmempaths.get(mem)+", "+r) );
 		}
-		/*
-		mem.rulesets.each do | ruleset |
-			@body.push [:loadruleset, @rhsmempaths[mem], ruleset.rulesetid]
-		end
-		 */
 	}
 	
 	private void build_rhsatoms(Membrane mem) {
 		Env.c("RuleCompiler::build_rhsatoms");
-		for(int i=0;i<mem.mems.size();i++) {
-			Membrane m = (Membrane)(mem.mems.get(i));
+		Iterator l;
+		
+		l=mem.mems.iterator();
+		while(l.hasNext()) {
+			Membrane m = (Membrane)(l.next());
 			build_rhsatoms(m);
 		}
-		for(int i=0;i<mem.atoms.size();i++) {
-			Atom atom = (Atom)(mem.atoms.get(i));
+		l=mem.atoms.iterator();
+		while(l.hasNext()) {
+			Atom atom = (Atom)(l.next());
 			
 			if(atom.functor.equals(FUNC_UNIFY)) {
 				LinkOccurrence link1 = atom.args[0];
@@ -347,8 +382,9 @@ public class RuleCompiler {
 	
 	private void free_lhsmem(Membrane mem) {
 		Env.c("RuleCompiler::free_lhsmem");
-		for(int i=0;i<mem.mems.size();i++) {
-			Membrane m = (Membrane)(mem.mems.get(i));
+		Iterator l = mem.mems.iterator();
+		while(l.hasNext()) {
+			Membrane m = (Membrane)(l.next());
 			free_lhsmem(m);
 			body.add( Instruction.dummy("[:freemem, "+lhsmempaths.get(m)) );
 		}
@@ -356,8 +392,9 @@ public class RuleCompiler {
 	
 	private void update_links() {
 		Env.c("RuleCompiler::update_links");
-		for(int i=0;i<rhsatoms.size();i++) {
-			Atom atom = (Atom)(rhsatoms.get(i));
+		Iterator l=rhsatoms.iterator();
+		while(l.hasNext()) {
+			Atom atom = (Atom)(l.next());
 			
 			for(int pos=1; pos <= atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos];
