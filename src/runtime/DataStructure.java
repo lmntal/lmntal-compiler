@@ -49,6 +49,13 @@ class Atom extends QueuedEntity {
 	///////////////////////////////
 	// 情報の取得
 
+	/**
+	 * このアトムがアクティブならtrue
+	 */
+	boolean isActive() {
+		//とりあえず全部アクティブ
+		return true;
+	}
 	public String toString() {
 		return functor.getName();
 	}
@@ -89,7 +96,7 @@ class Atom extends QueuedEntity {
  * リンクの接続先を、アトムと引数番号の組として表す。LMNtalのリンクには方向が無いので、
  * １つのリンクに対してこのクラスのインスタンスを２つ使用する。
  */
-final class Link {
+final class Link implements Cloneable{
 	/** リンク先のアトム */
 	private Atom atom;
 	/** リンク先が第何引数か */
@@ -103,6 +110,10 @@ final class Link {
 	Link(Atom atom, int pos) {
 		set(atom, pos);
 		id = lastId++;
+	}
+
+	public Object clone() {
+		return new Link(atom, pos);
 	}
 
 	///////////////////////////////

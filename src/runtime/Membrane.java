@@ -135,7 +135,9 @@ abstract class AbstractMembrane extends QueuedEntity {
 	Atom newAtom(Functor functor) {
 		Atom a = new Atom(this, functor);
 		atoms.add(a);
-		enqueueAtom(a);
+		if (a.isActive()) {
+			enqueueAtom(a);
+		}
 //		atomCount++;
 		return a;
 	}
@@ -180,7 +182,12 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 指定されたアトムをこの膜から除去する。 */
 	void removeAtom(Atom atom) {
 		atoms.remove(atom);
+		if (atom.isQueued()) {
+			dequeueAtom(atom);
+		}
 	}
+	abstract protected void dequeueAtom(Atom atom);
+
 	void removeAtoms(ArrayList atomlist) {
 		// atoms.removeAll(atomlist);
 		Iterator it = atomlist.iterator();
@@ -421,15 +428,15 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 * atom1の第pos1引数と、atom2の第pos2引数のリンク先を接続する。
 	 */
 	void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		atom1.args[pos1] = atom2.args[pos2];
-		atom2.args[pos2].set(atom1, pos1);
+		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
+		atom2.args[pos2].getBuddy().set(atom1, pos1);
 	}
 	/**
 	 * atom1の第pos1引数のリンク先と、atom2の第pos2引数のリンク先を接続する。
 	 */
 	void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		atom1.args[pos1].set(atom2.args[pos2]);
-		atom2.args[pos2].set(atom1.args[pos1]);
+		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
+		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
 	}
 }
 
@@ -470,6 +477,9 @@ final class Membrane extends AbstractMembrane {
 			((Membrane)parent).activate();
 		}
 		((Machine)machine).memStack.push(this);
+	}
+	protected void dequeueAtom(Atom atom) {
+		atom.dequeue();
 	}
 	/** 
 	 * 指定されたアトムを実行スタックに追加する。
