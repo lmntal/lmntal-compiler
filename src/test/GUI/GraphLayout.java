@@ -6,6 +6,16 @@ import java.util.Vector;
 
 public class GraphLayout implements Runnable {
 
+	public static Color colors[] = {
+		Color.BLACK,
+		Color.BLUE,
+		Color.CYAN,
+		Color.GREEN,
+		Color.MAGENTA,
+		Color.ORANGE,
+		Color.RED
+	};
+	
 	private Vector nodes = new Vector();
 	private Thread th = null;
 	private static final int DELAY = 50;

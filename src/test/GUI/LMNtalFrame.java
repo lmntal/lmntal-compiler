@@ -72,6 +72,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	}
 	
 	public void waitBusy() {
+		busy = true;
 		while(busy) {
 			try {
 				this.wait(100);
@@ -82,7 +83,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	public void onTrace() {
 		if(Env.fGUI) {
-			Env.gui.lmnPanel.setMembrane((runtime.Membrane)Env.theRuntime.getGlobalRoot());
+//			Env.gui.lmnPanel.setMembrane((runtime.Membrane)Env.theRuntime.getGlobalRoot());
 			Env.gui.waitBusy();
 		}
 	}

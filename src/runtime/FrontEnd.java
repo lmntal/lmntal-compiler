@@ -154,7 +154,6 @@ public class FrontEnd {
 			}
 		}
 		
-		Env.initGUI();
 		if(Env.oneLiner==null) {
 			if(!Env.argv.isEmpty()) {
 				String srcFile = (String)Env.argv.remove(0);
@@ -195,13 +194,13 @@ public class FrontEnd {
 	public static void run(Reader src) {
 		try {
 			LMNParser lp = new LMNParser(src);
-				
+			
 			compile.structure.Membrane m = lp.parse();
 //			if (Env.debug >= Env.DEBUG_SYSDEBUG) {
 //				Env.d("");
 //				Env.d( "Parse Result: " + m.toStringWithoutBrace() );
 //			}
-
+			
 			Ruleset rs = RulesetCompiler.compileMembrane(m);
 			Inline.makeCode();
 			((InterpretedRuleset)rs).showDetail();
@@ -211,8 +210,11 @@ public class FrontEnd {
 			RemoteMachine.init();
 			LMNtalRuntime rt = new LMNtalRuntime();
 			Membrane root = (Membrane)rt.getGlobalRoot();
+			Env.initGUI(root);
 			//root.blockingLock();
 			rs.react(root); // TODO 初期配置で子タスクを作った場合にどうなるか考える
+			Env.gui.lmnPanel.getGraphLayout().calc();
+			Env.gui.onTrace();
 			//root.blockingUnlock();
 			((Task)root.getTask()).execAsMasterTask();
 			RemoteMachine.terminateAll();

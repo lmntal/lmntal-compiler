@@ -13,7 +13,7 @@ import compile.structure.*;
 
 public class LMNGraphPanel extends GraphPanel {
 	LMNtalFrame frame;
-	GraphNode movingNode;
+	Node movingNode;
 	
 	public LMNGraphPanel(LMNtalFrame f) {
 		super();
@@ -28,7 +28,8 @@ public class LMNGraphPanel extends GraphPanel {
 		});
 		addMouseMotionListener(new MouseMotionAdapter() {
 			public void mouseDragged(MouseEvent arg0) {
-				movingNode.pos = arg0.getPoint();
+				if(movingNode==null) return;
+				movingNode.setPosition(arg0.getPoint());
 			}
 
 		}

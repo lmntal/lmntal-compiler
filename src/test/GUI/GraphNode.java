@@ -13,9 +13,21 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Dimension;
 
-public class GraphNode {
+public class GraphNode implements Node {
 	
 	List linkedNodes = new ArrayList();
+	
+	public void initNode() {
+	}
+	public String getName() {
+		return label;
+	}
+	public Node getNthNode(int index) {
+		return (Node)linkedNodes.get(index);
+	}
+	public int getEdgeCount() {
+		return linkedNodes.size();
+	}
 	
 	/**
 	 * 現在位置
@@ -44,7 +56,7 @@ public class GraphNode {
 	
 	public void addLinkedNode(GraphNode e) {
 		if(this==e) return;
-		GraphEdge ie = new GraphEdge(this, e);
+		Edge ie = new Edge(this, e);
 		linkedNodes.add(ie);
 //		System.out.println("add "+e);
 	}
@@ -72,6 +84,9 @@ public class GraphNode {
 	public Point getPosition() {
 		return this.pos;
 	}
+	public void setPosition(Point p) {
+		this.pos = p;
+	}
 	
 	public void move(Rectangle area) {
 		if (isFixed()) return;
@@ -97,7 +112,7 @@ public class GraphNode {
 	public void paintEdge(Graphics g) {
 		Iterator it = linkedNodes.iterator();
 		while(it.hasNext()) {
-			GraphEdge ie = (GraphEdge)it.next();
+			Edge ie = (Edge)it.next();
 			if(ie.from.hashCode() < ie.to.hashCode()) continue;
 			g.drawLine((int)ie.from.getPosition().getX(), (int)ie.from.getPosition().getY(),
 				(int)ie.to.getPosition().getX(), (int)ie.to.getPosition().getY());

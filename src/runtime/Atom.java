@@ -188,16 +188,6 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		}
 	}
 	
-	Color colors[] = {
-		Color.BLACK,
-		Color.BLUE,
-		Color.CYAN,
-		Color.GREEN,
-		Color.MAGENTA,
-		Color.ORANGE,
-		Color.RED
-	};
-	
 	public void paintNode(Graphics g) {
 		String label = getName();
 		FontMetrics fm = g.getFontMetrics();
@@ -207,7 +197,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		Dimension size = new Dimension(16, 16);
 //		g.setColor(new Color(64,128,255));
 		// 適当に色分けする！
-		g.setColor(colors[ Math.abs(label.hashCode()) % colors.length ]);
+		g.setColor(test.GUI.GraphLayout.colors[ Math.abs(label.hashCode()) % test.GUI.GraphLayout.colors.length ]);
 		
 		g.fillOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
 		

@@ -237,7 +237,7 @@ class Task extends AbstractTask implements Runnable {
 						Env.p( Dumper.dump(getRoot()) );
 					}
 					Env.guiTrace();
-				}					
+				}
 			}
 		}
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了

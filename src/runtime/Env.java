@@ -210,9 +210,10 @@ public final class Env {
 		return indent;
 	}
 	
-	public static void initGUI() {
+	public static void initGUI(Membrane root) {
 		if(!Env.fGUI) return;
 		gui = new LMNtalFrame();
+		gui.lmnPanel.getGraphLayout().setRootMem(root);
 	}
 	
 	// GUI からみる

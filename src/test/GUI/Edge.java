@@ -5,10 +5,10 @@ package test.GUI;
  * 
  * @author 
  */
-class GraphEdge implements Comparable {
-	GraphNode from, to;
+class Edge implements Comparable {
+	Node from, to;
 	
-	GraphEdge(GraphNode f, GraphNode t) {
+	Edge(Node f, Node t) {
 		from = f;
 		to = t;
 	}
@@ -34,16 +34,16 @@ class GraphEdge implements Comparable {
 	
 	// ソートするのにつかう
 	public int compareTo(Object o) {
-		GraphEdge ie = (GraphEdge)o;
+		Edge ie = (Edge)o;
 		return ie.getAngle() < this.getAngle() ? 1 : -1;
 	}
 	
 	public double getVx() {
-		return to.pos.getX() - from.pos.getX();
+		return to.getPosition().getX() - from.getPosition().getX();
 	}
 	
 	public double getVy() {
-		return to.pos.getY() - from.pos.getY();
+		return to.getPosition().getY() - from.getPosition().getY();
 	}
 	
 	public double getStdLen() {

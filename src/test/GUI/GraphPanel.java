@@ -1,10 +1,7 @@
 package test.GUI;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.*;
+import java.awt.event.*;
 
 import javax.swing.*;
 
@@ -17,7 +14,13 @@ public class GraphPanel extends JPanel implements Runnable {
 	
 	public GraphPanel() {
 		super();
-		
+		addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				OSI = createImage((int) getSize().getWidth(), (int) getSize().getHeight());
+				OSG = OSI.getGraphics();			
+			}
+
+		});
 		gLayout = new GraphLayout(this);
 	}
 	
@@ -61,11 +64,11 @@ public class GraphPanel extends JPanel implements Runnable {
 		}
 	}
 	
-	public Rectangle getPreferredArea() {
-		return gLayout.getPreferredArea();
-	}
+//	public Rectangle getPreferredArea() {
+//		return gLayout.getPreferredArea();
+//	}
 	
-	public Dimension getPreferredSize() {
-		return getPreferredArea().getSize(); 	
-	}
+//	public Dimension getPreferredSize() {
+//		return getPreferredArea().getSize(); 	
+//	}
 }
