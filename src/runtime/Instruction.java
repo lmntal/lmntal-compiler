@@ -36,6 +36,18 @@ import java.lang.reflect.Field;
 public class Instruction implements Cloneable {
 	/** 命令毎の引数情報を入れるテーブル */
 	private static HashMap argTypeTable = new HashMap();
+	/**アトム*/
+	public static final int ARG_ATOM = 0;
+	/**膜*/
+	public static final int ARG_MEM = 1;
+	/**アトム・膜以外の変数*/
+	public static final int ARG_VAR = 2;
+	/**整数*/
+	public static final int ARG_INT = 3;
+	/**命令列*/
+	public static final int ARG_INST = 4;
+	/**その他オブジェクト(ルールなど)*/
+	public static final int ARG_OBJ = 5;
 	
     /** 命令の種類を保持する。*/	
     private int kind;
@@ -72,7 +84,7 @@ public class Instruction implements Cloneable {
      * リンク先のアトムへの参照を$dstatomに代入する。*/
 	public static final int DEREF = 1;
 	// LOCALDEREFは不要
-	static {setArgType(DEREF, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.INT, ArgType.INT));}
+	static {setArgType(DEREF, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_INT, ARG_INT));}
 
 	/** derefatom [-dstatom, srcatom, srcpos]
 	 * <br>出力する失敗しない最適化用＋型付き拡張用ガード命令<br>
@@ -81,7 +93,7 @@ public class Instruction implements Cloneable {
 	 * マッチするかどうか検査する場合に使用することができる。*/
 	public static final int DEREFATOM = 2;
 	// LOCALDEREFATOMは不要
-	static {setArgType(DEREFATOM, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.INT));}
+	static {setArgType(DEREFATOM, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_INT));}
 
     /** dereflink [-dstatom, srclink, dstpos]
      * <br>出力する最適化用ガード命令<br>
@@ -89,14 +101,14 @@ public class Instruction implements Cloneable {
      * リンク先のアトムへの参照を$dstatomに代入する。*/
 	public static final int DEREFLINK = 3;
 	// LOCALDEREFLINKは不要
-	static {setArgType(DEREFLINK, new ArgType(true, ArgType.ATOM, ArgType.VAR, ArgType.INT));}
+	static {setArgType(DEREFLINK, new ArgType(true, ARG_ATOM, ARG_VAR, ARG_INT));}
 
 	/** findatom [-dstatom, srcmem, funcref]
 	 * <br>反復するガード命令<br>
 	 * 膜$srcmemにあってファンクタfuncrefを持つアトムへの参照を次々に$dstatomに代入する。*/
 	public static final int FINDATOM = 4; // by mizuno
 	// LOCALFINDATOMは不要
-	static {setArgType(FINDATOM, new ArgType(true, ArgType.ATOM, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(FINDATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
 
 	// 膜に関係する出力する基本ガード命令 (5--9)
 	// [local]lockmem    [-dstmem, freelinkatom]
@@ -118,13 +130,13 @@ public class Instruction implements Cloneable {
      * @see testmem
      * @see getmem */
     public static final int LOCKMEM = 5;
-	static {setArgType(LOCKMEM, new ArgType(true, ArgType.MEM, ArgType.ATOM));}
+	static {setArgType(LOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
     
     /** locallockmem [-dstmem, freelinkatom]
      * <br>ロック取得する最適化用ガード命令<br>
      * lockmemと同じ。ただし$freelinkatomはこの計算ノードに存在する。*/
 	public static final int LOCALLOCKMEM = LOCAL + LOCKMEM;
-	static {setArgType(LOCALLOCKMEM, new ArgType(true, ArgType.MEM, ArgType.ATOM));}
+	static {setArgType(LOCALLOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
 
     /** anymem [-dstmem, srcmem] 
      * <br>反復するロック取得するガード命令<br>
@@ -134,13 +146,13 @@ public class Instruction implements Cloneable {
      * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
      * <p><b>注意</b>　ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。*/
 	public static final int ANYMEM = 6;
-	static {setArgType(ANYMEM, new ArgType(true, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(ANYMEM, new ArgType(true, ARG_MEM, ARG_MEM));}
 	
 	/** localanymem [-dstmem, srcmem]
      * <br>反復するロック取得する最適化用ガード命令<br>
 	 * anymemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定されない。*/
 	public static final int LOCALANYMEM = LOCAL + ANYMEM;
-	static {setArgType(LOCALANYMEM, new ArgType(true, ArgType.MEM, ArgType.ATOM));}
+	static {setArgType(LOCALANYMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
 
 	/** lock [srcmem]
 	 * <br>ロック取得するガード命令<br>
@@ -150,13 +162,13 @@ public class Instruction implements Cloneable {
 	 * @see lockmem
 	 * @see getmem */
 	public static final int LOCK = 7;
-	static {setArgType(LOCK, new ArgType(false, ArgType.MEM));}
+	static {setArgType(LOCK, new ArgType(false, ARG_MEM));}
 	
 	/** locallock [srcmem]
 	 * <br>ロック取得する最適化用ガード命令<br>
 	 * lockと同じ。ただし$srcmemはこの計算ノードに存在する。*/
 	public static final int LOCALLOCK = LOCAL + LOCK;
-	static {setArgType(LOCALLOCK, new ArgType(false, ArgType.MEM));}
+	static {setArgType(LOCALLOCK, new ArgType(false, ARG_MEM));}
 
 	/** getmem [-dstmem, srcatom]
 	 * <br>ガード命令<br>
@@ -165,7 +177,7 @@ public class Instruction implements Cloneable {
 	 * @see lock */
 	public static final int GETMEM = 8;
 	// LOCALGETMEMは不要
-	static {setArgType(GETMEM, new ArgType(true, ArgType.MEM, ArgType.ATOM));}
+	static {setArgType(GETMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
 	
 	/** getparent [-dstmem, srcmem]
 	 * <br>ガード命令<br>
@@ -173,7 +185,7 @@ public class Instruction implements Cloneable {
 	 * <p>アトム主導テストで使用される。*/
 	public static final int GETPARENT = 9;
 	// LOCALGETPARENTは不要
-	static {setArgType(GETPARENT, new ArgType(true, ArgType.MEM));}
+	static {setArgType(GETPARENT, new ArgType(true, ARG_MEM));}
 
     // 膜に関係する出力しない基本ガード命令 (10--19)
 	//  ----- testmem    [dstmem, srcatom]
@@ -192,35 +204,35 @@ public class Instruction implements Cloneable {
      * @see lockmem */
 	public static final int TESTMEM = 10;
 	// LOCALTESTMEMは不要
-	static {setArgType(TESTMEM, new ArgType(false, ArgType.MEM, ArgType.ATOM));}
+	static {setArgType(TESTMEM, new ArgType(false, ARG_MEM, ARG_ATOM));}
 
     /** norules [srcmem] 
      * <br>ガード命令<br>
      * 膜$srcmemにルールが存在しないことを確認する。*/
     public static final int NORULES = 11;
     // LOCALNORULESは不要
-	static {setArgType(NORULES, new ArgType(false, ArgType.MEM));}
+	static {setArgType(NORULES, new ArgType(false, ARG_MEM));}
 
     /** nfreelinks [srcmem, count]
      * <br>ガード命令<br>
      * 膜$srcmemの自由リンク数がcountであることを確認する。*/
     public static final int NFREELINKS = 12;
 	// LOCALNFREELINKSは不要
-	static {setArgType(NFREELINKS, new ArgType(false, ArgType.MEM, ArgType.INT));}
+	static {setArgType(NFREELINKS, new ArgType(false, ARG_MEM, ARG_INT));}
 
 	/** natoms [srcmem, count]
 	 * <br>ガード命令<br>
 	 * 膜$srcmemの自由リンク管理アトム以外のアトム数がcountであることを確認する。*/
 	public static final int NATOMS = 13;
 	// LOCALNATOMSは不要
-	static {setArgType(NATOMS, new ArgType(false, ArgType.MEM, ArgType.INT));}
+	static {setArgType(NATOMS, new ArgType(false, ARG_MEM, ARG_INT));}
 
     /** nmems [srcmem, count]
      * <br>ガード命令<br>
      * 膜$srcmemの子膜の数がcountであることを確認する。*/
     public static final int NMEMS = 14;
 	// LOCALNMEMSは不要
-	static {setArgType(NMEMS, new ArgType(false, ArgType.MEM, ArgType.INT));}
+	static {setArgType(NMEMS, new ArgType(false, ARG_MEM, ARG_INT));}
 
 	// 15は予約 see isground
 
@@ -230,7 +242,7 @@ public class Instruction implements Cloneable {
      * <p><b>注意</b> Ruby版のeqから分離 */
     public static final int EQMEM = 16;
 	// LOCALEQMEMは不要
-	static {setArgType(EQMEM, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(EQMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 	
     /** neqmem [mem1, mem2]
      * <br>ガード命令<br>
@@ -239,14 +251,14 @@ public class Instruction implements Cloneable {
      * <p><font color=red><b>この命令は不要かも知れない</b></font> */
     public static final int NEQMEM = 17;
 	// LOCALNEQMEMは不要
-	static {setArgType(NEQMEM, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(NEQMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** stable [srcmem]
 	 * <br>ガード命令<br>
 	 * 膜$srcmemとその子孫の全ての膜の実行が停止していることを確認する。*/
 	public static final int STABLE = 18;
 	// LOCALSTABLEは不要
-	static {setArgType(STABLE, new ArgType(false, ArgType.MEM));}
+	static {setArgType(STABLE, new ArgType(false, ARG_MEM));}
     
 	// アトムに関係する出力しない基本ガード命令 (20-24)
 	//  -----  func    [srcatom, funcref]
@@ -260,7 +272,7 @@ public class Instruction implements Cloneable {
 	 * <p>getfunc[tmp,srcatom];loadfunc[func,funcref];eqfunc[tmp,func] と同じ。*/
 	public static final int FUNC = 20;
 	// LOCALFUNCは不要
-	static {setArgType(FUNC, new ArgType(false, ArgType.ATOM, ArgType.OBJ));}
+	static {setArgType(FUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
 
 	/** notfunc [srcatom, funcref]
 	 * <br>ガード命令<br>
@@ -269,7 +281,7 @@ public class Instruction implements Cloneable {
 	 * <p>getfunc[tmp,srcatom];loadfunc[func,funcref];neqfunc[tmp,func] と同じ。*/
 	public static final int NOTFUNC = 21;
 	// LOCALNOTFUNCは不要
-	static {setArgType(NOTFUNC, new ArgType(false, ArgType.ATOM, ArgType.OBJ));}
+	static {setArgType(NOTFUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
 
 	/** eqatom [atom1, atom2]
 	 * <br>ガード命令<br>
@@ -277,7 +289,7 @@ public class Instruction implements Cloneable {
 	 * <p><b>注意</b> Ruby版のeqから分離 */
 	public static final int EQATOM = 22;
 	// LOCALEQATOMは不要
-	static {setArgType(EQATOM, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(EQATOM, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
 	/** neqatom [atom1, atom2]
 	 * <br>ガード命令<br>
@@ -285,7 +297,7 @@ public class Instruction implements Cloneable {
 	 * <p><b>注意</b> Ruby版のneqから分離 */
 	public static final int NEQATOM = 23;
 	// LOCALNEQATOMは不要
-	static {setArgType(NEQATOM, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(NEQATOM, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
 	// ファンクタに関係する命令 (25--29)	
 	//  -----  dereffunc [-dstfunc, srcatom, srcpos]
@@ -302,35 +314,35 @@ public class Instruction implements Cloneable {
 	 * <p>derefatom[dstatom,srcatom,srcpos];getfunc[dstfunc,dstatom]と同じなので廃止？*/
 	public static final int DEREFFUNC = 25;
 	// LOCALDEREFFUNCは不要
-	static {setArgType(DEREFFUNC, new ArgType(true, ArgType.VAR, ArgType.ATOM, ArgType.INT));}
+	static {setArgType(DEREFFUNC, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));}
 
 	/** getfunc [-func, atom]
 	 * <br>出力する失敗しない拡張ガード命令<br>
 	 * アトム$atomのファンクタへの参照を$funcに代入する。*/
 	public static final int GETFUNC = 26;
 	// LOCALGETFUNCは不要
-	static {setArgType(GETFUNC, new ArgType(true, ArgType.VAR, ArgType.ATOM));}
+	static {setArgType(GETFUNC, new ArgType(true, ARG_VAR, ARG_ATOM));}
 
 	/** loadfunc [-func, funcref]
 	 * <br>出力する失敗しない拡張ガード命令<br>
 	 * ファンクタfuncrefへの参照を$funcに代入する。*/
 	public static final int LOADFUNC = 27;
 	// LOCALLOADFUNCは不要
-	static {setArgType(LOADFUNC, new ArgType(true, ArgType.VAR, ArgType.OBJ));} //TODO func/funcrefはVAR? OBJ?
+	static {setArgType(LOADFUNC, new ArgType(true, ARG_VAR, ARG_OBJ));} //TODO func/funcrefはVAR? OBJ?
 
 	/** eqfunc [func1, func2]
 	 * <br>型付き拡張用ガード命令<br>
 	 * ファンクタ$func1と$func2が等しいことを確認する。*/
 	public static final int EQFUNC = 28;
 	// LOCALEQFUNCは不要
-	static {setArgType(EQFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
+	static {setArgType(EQFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
 
 	/** neqfunc [func1, func2]
 	 * <br>型付き拡張用ガード命令<br>
 	 * ファンクタ$func1と$func2が異なることを確認する。*/
 	public static final int NEQFUNC = 29;
 	// LOCALEQFUNCは不要
-	static {setArgType(NEQFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
+	static {setArgType(NEQFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
 
     // アトムを操作する基本ボディ命令 (30--39)    
 	// [local]removeatom                  [srcatom, srcmem, funcref]
@@ -348,13 +360,13 @@ public class Instruction implements Cloneable {
      * 実行スタックは操作しない。
      * @see dequeueatom */
 	public static final int REMOVEATOM = 30;
-	static {setArgType(REMOVEATOM, new ArgType(false, ArgType.ATOM, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(REMOVEATOM, new ArgType(false, ARG_ATOM, ARG_MEM, ARG_OBJ));}
 	
 	/** localremoveatom [srcatom, srcmem, funcref]
      * <br>最適化用ボディ命令<br>
      * removeatomと同じ。ただし$srcatomはこの計算ノードに存在する。*/
 	public static final int LOCALREMOVEATOM = LOCAL + REMOVEATOM;
-	static {setArgType(LOCALREMOVEATOM, new ArgType(false, ArgType.ATOM, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(LOCALREMOVEATOM, new ArgType(false, ARG_ATOM, ARG_MEM, ARG_OBJ));}
 
     /** newatom [-dstatom, srcmem, funcref]
      * <br>ボディ命令<br>
@@ -362,13 +374,13 @@ public class Instruction implements Cloneable {
      * アトムはまだ実行スタックには積まれない。
      * @see enqueueatom */
     public static final int NEWATOM = 31;
-	static {setArgType(NEWATOM, new ArgType(true, ArgType.MEM, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(NEWATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
     
 	/** localnewatom [-dstatom, srcmem, funcref]
 	 * <br>最適化用ボディ命令<br>
 	 * newatomと同じ。ただし$srcmemはこの計算ノードに存在する。*/
 	public static final int LOCALNEWATOM = LOCAL + NEWATOM;
-	static {setArgType(LOCALNEWATOM, new ArgType(true, ArgType.ATOM, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(LOCALNEWATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
 
 	/** newatomindirect [-dstatom, srcmem, func]
 	 * <br>型付き拡張用ボディ命令<br>
@@ -376,13 +388,13 @@ public class Instruction implements Cloneable {
 	 * アトムはまだ実行スタックには積まれない。
 	 * @see newatom */
 	public static final int NEWATOMINDIRECT = 32;
-	static {setArgType(NEWATOMINDIRECT, new ArgType(true, ArgType.ATOM, ArgType.MEM, ArgType.VAR));}
+	static {setArgType(NEWATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_VAR));}
 	
 	/** localnewatomindirect [-dstatom, srcmem, func]
 	 * <br>型付き拡張用最適化用ボディ命令<br>
 	 * newatomindirectと同じ。ただし$srcmemはこの計算ノードに存在する。*/
 	public static final int LOCALNEWATOMINDIRECT = LOCAL + NEWATOMINDIRECT;
-	static {setArgType(LOCALNEWATOMINDIRECT, new ArgType(true, ArgType.ATOM, ArgType.MEM, ArgType.VAR));}
+	static {setArgType(LOCALNEWATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_VAR));}
 
 	/** enqueueatom [srcatom]
      * <br>ボディ命令<br>
@@ -391,13 +403,13 @@ public class Instruction implements Cloneable {
      * <p>アトム$srcatomがシンボルファンクタを持たない場合の動作も未定義とする。
      * <p>アクティブかどうかは関係ない。むしろこの命令で積まれるアトムがアクティブである。*/
     public static final int ENQUEUEATOM = 33;
-	static {setArgType(ENQUEUEATOM, new ArgType(false, ArgType.ATOM));}
+	static {setArgType(ENQUEUEATOM, new ArgType(false, ARG_ATOM));}
     
 	/** localenqueueatom [srcatom]
 	 * <br>最適化用ボディ命令<br>
 	 * enqueueatomと同じ。ただし$srcatomは<B>本膜と同じタスクが管理する膜に存在する</B>。*/
 	public static final int LOCALENQUEUEATOM = LOCAL + ENQUEUEATOM;
-	static {setArgType(LOCALENQUEUEATOM, new ArgType(false, ArgType.ATOM));}
+	static {setArgType(LOCALENQUEUEATOM, new ArgType(false, ARG_ATOM));}
 
     /** dequeueatom [srcatom]
      * <br>最適化用ボディ命令<br>
@@ -408,7 +420,7 @@ public class Instruction implements Cloneable {
      * <p>この命令は、Runtime.Atom.dequeueを呼び出す。*/
     public static final int DEQUEUEATOM = 34;
 	// LOCALDEQUEUEATOMは最適化の効果が無いため却下
-	static {setArgType(DEQUEUEATOM, new ArgType(false, ArgType.ATOM));}
+	static {setArgType(DEQUEUEATOM, new ArgType(false, ARG_ATOM));}
 
 	/** freeatom [srcatom]
 	 * <br>最適化用ボディ命令<br>
@@ -417,32 +429,32 @@ public class Instruction implements Cloneable {
 	 * TODO アトムを他の計算ノードで積んでいる場合、輸出表の整合性は大丈夫か調べる。*/
 	public static final int FREEATOM = 35;
 	// LOCALFREEATOMは不要
-	static {setArgType(FREEATOM, new ArgType(false, ArgType.ATOM));}
+	static {setArgType(FREEATOM, new ArgType(false, ARG_ATOM));}
 
 	/** alterfunc [atom, funcref]
 	 * <br>最適化用ボディ命令<br>
 	 * （所属膜を持つ）アトム$atomのファンクタをfuncrefにする。
 	 * 引数の個数が異なる場合の動作は未定義とする。*/
 	public static final int ALTERFUNC = 36;
-	static {setArgType(ALTERFUNC, new ArgType(false, ArgType.ATOM, ArgType.OBJ));}
+	static {setArgType(ALTERFUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
 
 	/** localalterfunc [atom, funcref]
 	 * <br>最適化用ボディ命令<br>
 	 * alterfuncと同じ。ただし$atomはこの計算ノードに存在する。*/
 	public static final int LOCALALTERFUNC = LOCAL + ALTERFUNC;
-	static {setArgType(LOCALALTERFUNC, new ArgType(false, ArgType.ATOM, ArgType.OBJ));}
+	static {setArgType(LOCALALTERFUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
 
 	/** alterfuncindirect [atom, func]
 	 * <br>最適化用ボディ命令<br>
 	 * alterfuncと同じ。ただしファンクタは$funcにする。*/
 	public static final int ALTERFUNCINDIRECT = 37;
-	static {setArgType(ALTERFUNCINDIRECT, new ArgType(false, ArgType.ATOM, ArgType.VAR));}
+	static {setArgType(ALTERFUNCINDIRECT, new ArgType(false, ARG_ATOM, ARG_VAR));}
 	
 	/** localalterfuncindirect [atom, func]
 	 * <br>最適化用ボディ命令<br>
 	 * alterfuncindirectと同じ。ただし$atomはこの計算ノードに存在する。*/
 	public static final int LOCALALTERFUNCINDIRECT = LOCAL + ALTERFUNCINDIRECT;
-	static {setArgType(LOCALALTERFUNCINDIRECT, new ArgType(false, ArgType.ATOM, ArgType.VAR));}
+	static {setArgType(LOCALALTERFUNCINDIRECT, new ArgType(false, ARG_ATOM, ARG_VAR));}
 
 	// アトムを操作する型付き拡張用命令 (40--49)
 	//  ----- allocatom         [-dstatom, funcref]
@@ -456,7 +468,7 @@ public class Instruction implements Cloneable {
 	 * <p>ガード検査で使われる定数アトムを生成するために使用される。*/
 	public static final int ALLOCATOM = 40;
 	// LOCALALLOCATOMは不要
-	static {setArgType(ALLOCATOM, new ArgType(true, ArgType.ATOM, ArgType.OBJ));}
+	static {setArgType(ALLOCATOM, new ArgType(true, ARG_ATOM, ARG_OBJ));}
 
 	/** allocatomindirect [-dstatom, func]
 	 * <br>型付き拡張用最適化用命令<br>
@@ -464,7 +476,7 @@ public class Instruction implements Cloneable {
 	 * <p>ガード検査で使われる定数アトムを生成するために使用される。*/
 	public static final int ALLOCATOMINDIRECT = 41;
 	// LOCALALLOCATOMINDIRECTは不要
-	static {setArgType(ALLOCATOMINDIRECT, new ArgType(true, ArgType.ATOM, ArgType.VAR));}
+	static {setArgType(ALLOCATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_VAR));}
 
 	/** copyatom [-dstatom, mem, srcatom]
 	 * <br>型付き拡張用ボディ命令
@@ -474,13 +486,13 @@ public class Instruction implements Cloneable {
 	 * <p>getfunc[func,srcatom];newatomindirect[dstatom,mem,func]と同じ。よって廃止？
 	 * copygroundtermに移行すべきかもしれない。*/
 	public static final int COPYATOM = 42;
-	static {setArgType(COPYATOM, new ArgType(true, ArgType.ATOM, ArgType.MEM, ArgType.ATOM));}
+	static {setArgType(COPYATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_ATOM));}
 
 	/** localcopyatom [-dstatom, mem, srcatom]
 	 * <br>最適化用ボディ命令<br>
 	 * copyatomと同じ。ただし$memはこの計算ノードに存在する。*/
 	public static final int LOCALCOPYATOM = LOCAL + COPYATOM;
-	static {setArgType(LOCALCOPYATOM, new ArgType(true, ArgType.ATOM, ArgType.MEM, ArgType.ATOM));}
+	static {setArgType(LOCALCOPYATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_ATOM));}
 
 	/** localaddatom [dstmem, atom]
 	 * <br>最適化用ボディ命令<br>
@@ -488,7 +500,7 @@ public class Instruction implements Cloneable {
 	 * ただし$dstmemはこの計算ノードに存在する。*/
 	public static final int LOCALADDATOM = LOCAL + 43;
 	// 一般の ADDATOM は存在しない。
-	static {setArgType(LOCALADDATOM, new ArgType(false, ArgType.MEM, ArgType.ATOM));}
+	static {setArgType(LOCALADDATOM, new ArgType(false, ARG_MEM, ARG_ATOM));}
 	
 	// 膜を操作する基本ボディ命令 (50--59)    
 	// [local]removemem                [srcmem, parentmem]
@@ -508,13 +520,13 @@ public class Instruction implements Cloneable {
 	 * 膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。
 	 * @see removeproxies */
 	public static final int REMOVEMEM = 50;
-	static {setArgType(REMOVEMEM, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(REMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** localremovemem [srcmem, parentmem]
 	 * <br>最適化用ボディ命令<br>
 	 * removememと同じ。ただし$srcmemの親膜（$parentmem）はこの計算ノードに存在する。*/
 	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
-	static {setArgType(LOCALREMOVEMEM, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(LOCALREMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** newmem [-dstmem, srcmem]
 	 * <br>ボディ命令<br>
@@ -523,20 +535,20 @@ public class Instruction implements Cloneable {
 	 * @see newroot
 	 * @see addmem */
 	public static final int NEWMEM = 51;
-	static {setArgType(NEWMEM, new ArgType(true, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(NEWMEM, new ArgType(true, ARG_MEM, ARG_MEM));}
 
 	/** localnewmem [-dstmem, srcmem]
 	* <br>最適化用ボディ命令<br>
 	* newmemと同じ。ただし$srcmemは<B>本膜と同じタスクによって管理される</B>。*/
 	public static final int LOCALNEWMEM = LOCAL + NEWMEM;
-	static {setArgType(LOCALNEWMEM, new ArgType(true, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(LOCALNEWMEM, new ArgType(true, ARG_MEM, ARG_MEM));}
 
 	/** allocmem [-dstmem]
 	 * <br>最適化用ボディ命令<br>
 	 * 親膜を持たない新しい膜を作成し、参照を$dstmemに代入する。*/
 	public static final int ALLOCMEM = 52;
 	// LOCALALLOCMEMは不要
-	static {setArgType(ALLOCMEM, new ArgType(true, ArgType.MEM));}
+	static {setArgType(ALLOCMEM, new ArgType(true, ARG_MEM));}
 
 	/** newroot [-dstmem, srcmem, node]
 	 * <br>（予約された）ボディ命令<br>
@@ -547,7 +559,7 @@ public class Instruction implements Cloneable {
 	 * @see unlockmem */
 	public static final int NEWROOT = 53;
 	// LOCALNEWROOTは最適化の効果が無いため却下
-	static {setArgType(NEWROOT, new ArgType(true, ArgType.MEM, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(NEWROOT, new ArgType(true, ARG_MEM, ARG_MEM, ARG_OBJ));}
 	
 	/** movecells [dstmem, srcmem]
 	 * <br>ボディ命令<br>
@@ -559,7 +571,7 @@ public class Instruction implements Cloneable {
 	 * @see enqueueallatoms */
 	public static final int MOVECELLS = 54;
 	// LOCALMOVECELLSは最適化の効果が無いため却下？あるいはさらに特化した仕様にする。
-	static {setArgType(MOVECELLS, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(MOVECELLS, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** enqueueallatoms [srcmem]
 	 * <br>（予約された）ボディ命令<br>
@@ -569,7 +581,7 @@ public class Instruction implements Cloneable {
 	 * @see enqueueatom */
 	public static final int ENQUEUEALLATOMS = 55;
 	// LOCALENQUEUEALLATOMSは最適化の効果が無いため却下
-	static {setArgType(ENQUEUEALLATOMS, new ArgType(false, ArgType.MEM));}
+	static {setArgType(ENQUEUEALLATOMS, new ArgType(false, ARG_MEM));}
 
 	/** freemem [srcmem]
 	 * <br>最適化用ボディ命令<br>
@@ -578,7 +590,7 @@ public class Instruction implements Cloneable {
 	 * @see freeatom */
 	public static final int FREEMEM = 56;
 	// LOCALFREEMEMは不要
-	static {setArgType(FREEMEM, new ArgType(false, ArgType.MEM));}
+	static {setArgType(FREEMEM, new ArgType(false, ARG_MEM));}
 
 	/** addmem [dstmem, srcmem]
 	 * <br>ボディ命令<br>
@@ -589,13 +601,13 @@ public class Instruction implements Cloneable {
 	 * <p>newmemと違い、$srcmemのロックは明示的に解放しなければならない。
 	 * @see unlockmem */
 	public static final int ADDMEM = 57;
-	static {setArgType(ADDMEM, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(ADDMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** localaddmem [dstmem, srcmem]
 	 * <br>最適化用ボディ命令<br>
 	 * addmemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定しない。*/
 	public static final int LOCALADDMEM = LOCAL + ADDMEM;
-	static {setArgType(LOCALADDMEM, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(LOCALADDMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** unlockmem [srcmem]
 	 * <br>ボディ命令<br>
@@ -605,26 +617,26 @@ public class Instruction implements Cloneable {
 	 * ルート膜に対して、（子孫から順番に）必ず呼ばれる。
 	 * <p>実行後、$srcmemへの参照は廃棄しなければならない。*/
 	public static final int UNLOCKMEM = 58;
-	static {setArgType(UNLOCKMEM, new ArgType(false, ArgType.MEM));}
+	static {setArgType(UNLOCKMEM, new ArgType(false, ARG_MEM));}
 
 	/** localunlockmem [srcmem]
 	 * <br>最適化用ボディ命令<br>
 	 * unlockmemと同じ。ただし$srcmemはこの計算ノードに存在する。*/
 	public static final int LOCALUNLOCKMEM = LOCAL + UNLOCKMEM;
-	static {setArgType(LOCALUNLOCKMEM, new ArgType(false, ArgType.MEM));}
+	static {setArgType(LOCALUNLOCKMEM, new ArgType(false, ARG_MEM));}
 
 	/** setmemname [dstmem, name]
 	 * <br>ボディ命令<br>
 	 * 膜$dstmemの名前を文字列（またはnull）nameに設定する。
 	 * <p>現在、膜の名前の使用目的は表示用のみ。いずれ、膜名に対するマッチングができるようになるはず。*/
 	public static final int SETMEMNAME = 59;
-	static {setArgType(SETMEMNAME, new ArgType(false, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(SETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));}
 
 	/** localsetmemname [dstmem, name]
 	 * <br>最適化用ボディ命令<br>
 	 * setmemnameと同じ。ただし$dstmemはこの計算ノードに存在する。*/
 	public static final int LOCALSETMEMNAME = LOCAL + SETMEMNAME;
-	static {setArgType(LOCALSETMEMNAME, new ArgType(false, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(LOCALSETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));}
 
 	// 予約 (60--62)
 
@@ -639,7 +651,7 @@ public class Instruction implements Cloneable {
 	 * <p>典型的には、$atomはルールヘッドに存在する。*/
 	public static final int GETLINK = 63;
 	// LOCALGETLINKは不要
-	static {setArgType(GETLINK, new ArgType(true, ArgType.VAR, ArgType.ATOM, ArgType.INT));}
+	static {setArgType(GETLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));}
 
 	/** alloclink [-link, atom, pos]
 	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
@@ -647,7 +659,7 @@ public class Instruction implements Cloneable {
 	 * <p>典型的には、$atomはルールボディに存在する。*/
 	public static final int ALLOCLINK = 64;
 	// LOCALGETLINKは不要
-	static {setArgType(ALLOCLINK, new ArgType(true, ArgType.VAR, ArgType.ATOM, ArgType.INT));}
+	static {setArgType(ALLOCLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));}
 
 //	/** dereflink [atom, link]
 //	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
@@ -670,13 +682,13 @@ public class Instruction implements Cloneable {
 	 * <p><b>注意</b>　Ruby版の片方向から仕様変更された。
 	 * <p>alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]と同じ。*/
 	public static final int NEWLINK = 65;
-	static {setArgType(NEWLINK, new ArgType(false, ArgType.ATOM, ArgType.INT, ArgType.ATOM, ArgType.INT, ArgType.MEM));}
+	static {setArgType(NEWLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
 	/** localnewlink [atom1, pos1, atom2, pos2 (,mem1)]
 	 * <br>最適化用ボディ命令<br>
 	 * newlinkと同じ。ただし膜$mem1はこの計算ノードに存在する。*/
 	public static final int LOCALNEWLINK = LOCAL + NEWLINK;
-	static {setArgType(LOCALNEWLINK, new ArgType(false, ArgType.ATOM, ArgType.INT, ArgType.ATOM, ArgType.INT, ArgType.MEM));}
+	static {setArgType(LOCALNEWLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
 	/** relink [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
@@ -688,13 +700,13 @@ public class Instruction implements Cloneable {
 	 * <p>getlink[link2,atom2,pos2];inheritlinks[atom1,pos1,link2,mem]と同じ。
 	 * <p>alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
 	public static final int RELINK = 66;
-	static {setArgType(RELINK, new ArgType(false, ArgType.ATOM, ArgType.INT, ArgType.ATOM, ArgType.INT, ArgType.MEM));}
+	static {setArgType(RELINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
 	/** localrelink [atom1, pos1, atom2, pos2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * relinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALRELINK = LOCAL + RELINK;
-	static {setArgType(LOCALRELINK, new ArgType(false, ArgType.ATOM, ArgType.INT, ArgType.ATOM, ArgType.INT, ArgType.MEM));}
+	static {setArgType(LOCALRELINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
 	/** unify [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
@@ -704,13 +716,13 @@ public class Instruction implements Cloneable {
 	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalunifyが使用できる。
 	 * <p>getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
 	public static final int UNIFY = 67;
-	static {setArgType(UNIFY, new ArgType(false, ArgType.ATOM, ArgType.INT, ArgType.ATOM, ArgType.INT, ArgType.MEM));}
+	static {setArgType(UNIFY, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
 	/** localunify [atom1, pos1, atom2, pos2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * unifyと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALUNIFY = LOCAL + UNIFY;
-	static {setArgType(LOCALUNIFY, new ArgType(false, ArgType.ATOM, ArgType.INT, ArgType.ATOM, ArgType.INT, ArgType.MEM));}
+	static {setArgType(LOCALUNIFY, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
 	/** inheritlink [atom1, pos1, link2, mem]
 	 * <br>最適化用ボディ命令<br>
@@ -722,13 +734,13 @@ public class Instruction implements Cloneable {
 	 * <p>alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem]と同じ。
 	 * @see getlink */
 	public static final int INHERITLINK = 68;
-	static {setArgType(INHERITLINK, new ArgType(false, ArgType.ATOM, ArgType.INT, ArgType.VAR, ArgType.MEM));}
+	static {setArgType(INHERITLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_VAR, ARG_MEM));}
 
 	/** localinheritlink [atom1, pos1, link2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * inheritlinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALINHERITLINK = LOCAL + INHERITLINK;
-	static {setArgType(LOCALINHERITLINK, new ArgType(false, ArgType.ATOM, ArgType.INT, ArgType.VAR, ArgType.MEM));}
+	static {setArgType(LOCALINHERITLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_VAR, ARG_MEM));}
 
 	/** unifylinks [link1, link2, mem]
 	 * <br>ボディ命令<br>
@@ -737,13 +749,13 @@ public class Instruction implements Cloneable {
 	 * <p>実行後$link1および$link2は無効なリンクオブジェクトとなるため、参照を使用してはならない。
 	 * <p>基底項データ型のコンパイルで使用される。*/
 	public static final int UNIFYLINKS = 69;
-	static {setArgType(UNIFYLINKS, new ArgType(false, ArgType.VAR, ArgType.VAR, ArgType.MEM));}
+	static {setArgType(UNIFYLINKS, new ArgType(false, ARG_VAR, ARG_VAR, ARG_MEM));}
 
 	/** localunifylinks [link1, link2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * unifylinksと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALUNIFYLINKS = LOCAL + UNIFYLINKS;
-	static {setArgType(LOCALUNIFYLINKS, new ArgType(false, ArgType.VAR, ArgType.VAR, ArgType.MEM));}
+	static {setArgType(LOCALUNIFYLINKS, new ArgType(false, ARG_VAR, ARG_VAR, ARG_MEM));}
 
     // 自由リンク管理アトム自動処理のためのボディ命令 (70--74)
 	//  -----  removeproxies          [srcmem]
@@ -757,7 +769,7 @@ public class Instruction implements Cloneable {
      * <p>removememの直後に同じ膜に対して呼ばれる。*/
     public static final int REMOVEPROXIES = 70;
     // LOCALREMOVEPROXIESは最適化の効果が無いため却下
-	static {setArgType(REMOVEPROXIES, new ArgType(false, ArgType.MEM));}
+	static {setArgType(REMOVEPROXIES, new ArgType(false, ARG_MEM));}
 
     /** removetoplevelproxies [srcmem]
      * <br>ボディ命令<br>
@@ -765,7 +777,7 @@ public class Instruction implements Cloneable {
 	 * <p>removeproxiesが全て終わった後で呼ばれる。*/
     public static final int REMOVETOPLEVELPROXIES = 71;
 	// LOCALREMOVETOPLEVELPROXIESは最適化の効果が無いため却下
-	static {setArgType(REMOVETOPLEVELPROXIES, new ArgType(false, ArgType.MEM));}
+	static {setArgType(REMOVETOPLEVELPROXIES, new ArgType(false, ARG_MEM));}
 
     /** insertproxies [parentmem,childmem]
      * <br>ボディ命令<br>
@@ -773,7 +785,7 @@ public class Instruction implements Cloneable {
      * <p>addmemが全て終わった後で呼ばれる。*/
     public static final int INSERTPROXIES = 72;
 	// LOCALINSERTPROXIESは最適化の効果が無いため却下
-	static {setArgType(INSERTPROXIES, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(INSERTPROXIES, new ArgType(false, ARG_MEM, ARG_MEM));}
 	
     /** removetemporaryproxies [srcmem]
      * <br>ボディ命令<br>
@@ -781,7 +793,7 @@ public class Instruction implements Cloneable {
      * <p>insertproxiesが全て終わった後で呼ばれる。*/
     public static final int REMOVETEMPORARYPROXIES = 73;
 	// LOCALREMOVETEMPORARYPROXIESは最適化の効果が無いため却下
-	static {setArgType(REMOVETEMPORARYPROXIES, new ArgType(false, ArgType.MEM));}
+	static {setArgType(REMOVETEMPORARYPROXIES, new ArgType(false, ARG_MEM));}
 
 	// ルールを操作するボディ命令 (75--79)
 	// [local]loadruleset [dstmem, ruleset]
@@ -794,45 +806,45 @@ public class Instruction implements Cloneable {
 	 * <p>この膜のアクティブアトムは再エンキューすべきである。
 	 * @see enqueueallatoms */
 	public static final int LOADRULESET = 75;
-	static {setArgType(LOADRULESET, new ArgType(false, ArgType.MEM, ArgType.OBJ));}//TODO OBJ?
+	static {setArgType(LOADRULESET, new ArgType(false, ARG_MEM, ARG_OBJ));}//TODO OBJ?
 
 	/** localloadruleset [dstmem, ruleset]
 	 * <br>最適化用ボディ命令<br>
 	 * loadrulesetと同じ。ただし$dstmemはこの計算ノードに存在する。*/
 	public static final int LOCALLOADRULESET = LOCAL + LOADRULESET;
-	static {setArgType(LOCALLOADRULESET, new ArgType(false, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(LOCALLOADRULESET, new ArgType(false, ARG_MEM, ARG_OBJ));}
 
 	/** copyrules [dstmem, srcmem]
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemにある全てのルールを膜$dstmemにコピーする。
 	 * <p><b>注意</b>　Ruby版のinheritrulesから名称変更 */
 	public static final int COPYRULES = 76;
-	static {setArgType(COPYRULES, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(COPYRULES, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** localcopyrules [dstmem, srcmem]
 	 * <br>最適化用ボディ命令<br>
 	 * copyrulesと同じ。ただし$dstmemはこの計算ノードに存在する。$srcmemについては何も仮定しない。*/
 	public static final int LOCALCOPYRULES = LOCAL + COPYRULES;
-	static {setArgType(LOCALCOPYRULES, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(LOCALCOPYRULES, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** clearrules [dstmem]
 	 * <br>ボディ命令<br>
 	 * 膜$dstmemにある全てのルールを消去する。*/
 	public static final int CLEARRULES = 77;
-	static {setArgType(CLEARRULES, new ArgType(false, ArgType.MEM));}
+	static {setArgType(CLEARRULES, new ArgType(false, ARG_MEM));}
 	
 	/** localclearrules [dstmem]
 	 * <br>最適化用ボディ命令<br>
 	 * clearrulesと同じ。ただし$dstmemはこの計算ノードに存在する。*/
 	public static final int LOCALCLEARRULES = LOCAL + CLEARRULES;
-	static {setArgType(LOCALCLEARRULES, new ArgType(false, ArgType.MEM));}
+	static {setArgType(LOCALCLEARRULES, new ArgType(false, ARG_MEM));}
 
 	/** loadmodule [dstmem, ruleset]
 	 * <br>ボディ命令<br>
 	 * ルールセットrulesetを膜$dstmemにコピーする。
 	 */
 	public static final int LOADMODULE = 78;
-	static {setArgType(LOADMODULE, new ArgType(false, ArgType.MEM, ArgType.OBJ));}
+	static {setArgType(LOADMODULE, new ArgType(false, ARG_MEM, ARG_OBJ));}
 
     // 型付きでないプロセス文脈をコピーまたは廃棄するための命令 (80--89)
 	//  ----- recursivelock            [srcmem]
@@ -849,7 +861,7 @@ public class Instruction implements Cloneable {
      * </b></font>*/
     public static final int RECURSIVELOCK = 80;
 	// LOCALRECURSIVELOCKは最適化の効果が無いため却下
-	static {setArgType(RECURSIVELOCK, new ArgType(false, ArgType.MEM));}
+	static {setArgType(RECURSIVELOCK, new ArgType(false, ARG_MEM));}
 
     /** recursiveunlock [srcmem]
      * <br>（予約された）ボディ命令<br>
@@ -859,7 +871,7 @@ public class Instruction implements Cloneable {
      * @see unlockmem */
     public static final int RECURSIVEUNLOCK = 81;
 	// LOCALRECURSIVEUNLOCKは最適化の効果が無いため却下
-	static {setArgType(RECURSIVEUNLOCK, new ArgType(false, ArgType.MEM));}
+	static {setArgType(RECURSIVEUNLOCK, new ArgType(false, ARG_MEM));}
 
     /** copymem [-dstmem, srcmem]
      * <br>（予約された）ボディ命令<br>
@@ -868,7 +880,7 @@ public class Instruction implements Cloneable {
      * 他の計算ノードには初期化を通知しない。*/
     public static final int COPYMEM = 82;
 	// LOCALCOPYMEMは最適化の効果が無いため却下
-	static {setArgType(COPYMEM, new ArgType(true, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(COPYMEM, new ArgType(true, ARG_MEM, ARG_MEM));}
 
 	/** dropmem [srcmem]
 	 * <br>（予約された）ボディ命令<br>
@@ -876,7 +888,7 @@ public class Instruction implements Cloneable {
 	 * この膜や子孫の膜をルート膜とするタスクは強制終了する。*/
 	public static final int DROPMEM = 83;
 	// LOCALDROPMEMは最適化の効果が無いため却下
-	static {setArgType(DROPMEM, new ArgType(false, ArgType.MEM));}
+	static {setArgType(DROPMEM, new ArgType(false, ARG_MEM));}
 
 //	/** * [srcatom,pos]
 //	 * <br>（予約された）ボディ命令<br>
@@ -914,14 +926,14 @@ public class Instruction implements Cloneable {
      * ルールrulerefに対するマッチングが成功したことを表す。
      * 処理系はこのルールのボディを呼び出さなければならない。*/
     public static final int REACT = 200;
-	static {setArgType(REACT, new ArgType(false, ArgType.OBJ, ArgType.OBJ, ArgType.OBJ));}
+	static {setArgType(REACT, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
 
 	/** inlinereact [ruleref, [memargs...], [atomargs...]]
 	 * <br>無視される<br>
      * ルールrulerefに対するマッチングが成功したことを表す。
      * <p>トレース用。*/
 	public static final int INLINEREACT = 201;
-	static {setArgType(INLINEREACT, new ArgType(false, ArgType.OBJ, ArgType.OBJ, ArgType.OBJ));}
+	static {setArgType(INLINEREACT, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
 
 	/** resetvars [[memargs...], [atomargs...], [varargs...]]
 	 * <br>失敗しないガード命令および最適化用ボディ命令<br>
@@ -930,7 +942,7 @@ public class Instruction implements Cloneable {
 	 * <p>（仕様検討中の未使用命令）
 	 */
 	public static final int RESETVARS = 202;
-	static {setArgType(RESETVARS, new ArgType(false, ArgType.OBJ, ArgType.OBJ, ArgType.OBJ));}
+	static {setArgType(RESETVARS, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
 
 	/** changevars [[memargs...], [atomargs...], [varargs...]]
 	 * <br>失敗しないガード命令および最適化用ボディ命令<br>
@@ -942,7 +954,7 @@ public class Instruction implements Cloneable {
 	 * <p>（仕様検討中の未使用命令）
 	 */
 	public static final int CHANGEVARS = 1202;
-	static {setArgType(CHANGEVARS, new ArgType(false, ArgType.OBJ, ArgType.OBJ, ArgType.OBJ));}
+	static {setArgType(CHANGEVARS, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
 
     /** spec [formals, locals]
      * <br><strike>
@@ -950,7 +962,7 @@ public class Instruction implements Cloneable {
      * <br>無視される<br>
      * 仮引数と局所変数の個数を宣言する。*/
     public static final int SPEC = 203;
-	static {setArgType(SPEC, new ArgType(false, ArgType.INT, ArgType.INT));}
+	static {setArgType(SPEC, new ArgType(false, ARG_INT, ARG_INT));}
 
 	/** proceed
 	 * <br>ボディ命令<br>
@@ -976,7 +988,7 @@ public class Instruction implements Cloneable {
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、branchの次の命令に進む。
      * 引数実行中にproceed命令を実行した場合、ここで終了する。*/
     public static final int BRANCH = 206;
-	static {setArgType(BRANCH, new ArgType(false, ArgType.INST));}
+	static {setArgType(BRANCH, new ArgType(false, ARG_INST));}
 
 	/** loop [[instructions...]]
 	 * <br>構造化命令<br>
@@ -984,7 +996,7 @@ public class Instruction implements Cloneable {
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、loopの次の命令に進む。
      * 引数実行中にproceed命令を実行した場合、このloop命令の実行を繰り返す。*/
 	public static final int LOOP = 207;
-	static {setArgType(LOOP, new ArgType(false, ArgType.INST));}
+	static {setArgType(LOOP, new ArgType(false, ARG_INST));}
 
 	/** run [[instructions...]]
 	 * <br>（予約された）構造化命令<br>
@@ -993,7 +1005,7 @@ public class Instruction implements Cloneable {
 	 * 引数実行中にproceed命令を実行した場合、次の命令に進む。
 	 * <p>将来、明示的な引数付きのプロセス文脈のコンパイルに使用するために予約。*/
 	public static final int RUN = 208;
-	static {setArgType(RUN, new ArgType(false, ArgType.INST));}
+	static {setArgType(RUN, new ArgType(false, ARG_INST));}
 
 	/** not [[instructions...]]
 	 * <br>（予約された）構造化命令<br>
@@ -1002,7 +1014,7 @@ public class Instruction implements Cloneable {
 	 * 引数実行中にproceed命令を実行した場合、この命令が失敗する。
 	 * <p>将来、否定条件のコンパイルに使用するために予約。*/
 	public static final int NOT = 209;
-	static {setArgType(NOT, new ArgType(false, ArgType.INST));}
+	static {setArgType(NOT, new ArgType(false, ARG_INST));}
 
 	// 組み込み機能に関する命令（仮） (210--219)
 	//  -----  inline  [atom, inlineref]
@@ -1014,7 +1026,7 @@ public class Instruction implements Cloneable {
 	 * <p>inlinerefには現在、インライン番号を渡すことになっているが、
 	 * <p>ボディで呼ばれる場合、典型的には、全てのリンクを張り直した直後に呼ばれる。*/
 	public static final int INLINE = 210;
-	static {setArgType(INLINE, new ArgType(false, ArgType.ATOM, ArgType.INT));}
+	static {setArgType(INLINE, new ArgType(false, ARG_ATOM, ARG_INT));}
 
 	/** builtin [class, method, [links...]]
 	 * <br>（予約された）ボディ命令
@@ -1025,7 +1037,7 @@ public class Instruction implements Cloneable {
 	 * ヘッドとボディに1回ずつ出現するリンクは、ヘッドでのリンク出現が渡される。
 	 * ボディに2回出現するリンクは、X=Xで初期化された後、各出現をヘッドでの出現と見なして渡される。*/
 	public static final int BUILTIN = 211;
-	static {setArgType(BUILTIN, new ArgType(false, ArgType.OBJ, ArgType.OBJ, ArgType.OBJ));} //TODO あってる?
+	static {setArgType(BUILTIN, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));} //TODO あってる?
 
 	///////////////////////////////////////////////////////////////////////
 
@@ -1037,7 +1049,7 @@ public class Instruction implements Cloneable {
 	 * それらが同じ形状の基底項プロセスであることを確認する。
 	 * @see isground */
 	public static final int EQGROUND = 216;
-	static {setArgType(EQGROUND, new ArgType(false, ArgType.VAR, ArgType.VAR));}
+	static {setArgType(EQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
     	
 	// 型検査のためのガード命令 (220--229)	
 
@@ -1053,15 +1065,15 @@ public class Instruction implements Cloneable {
      * しかし本膜がロックしたかどうかを調べるメカニズムが今は備わっていないため、保留。
      * <p>仕様検討中。*/
 	public static final int ISGROUND = 220;
-	static {setArgType(ISGROUND, new ArgType(true, ArgType.VAR, ArgType.VAR));}
+	static {setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR));}
 	
 	/** isunary [atom]
 	 * <br>ガード命令<br>
 	 * アトム$atomが1引数のアトムであることを確認する。*/
 	public static final int ISUNARY     = 221;
 	public static final int ISUNARYFUNC = ISUNARY + OPT;
-	static {setArgType(ISUNARY, new ArgType(false, ArgType.ATOM));}
-	static {setArgType(ISUNARYFUNC, new ArgType(false, ArgType.ATOM));}
+	static {setArgType(ISUNARY, new ArgType(false, ARG_ATOM));}
+	static {setArgType(ISUNARYFUNC, new ArgType(false, ARG_ATOM));}
 
 	/** isint [atom]
 	 * <br>ガード命令<br>
@@ -1069,9 +1081,9 @@ public class Instruction implements Cloneable {
 	public static final int ISINT    = 225;
 	public static final int ISFLOAT  = 226;
 	public static final int ISSTRING = 227;
-	static {setArgType(ISINT, new ArgType(false, ArgType.ATOM));}
-	static {setArgType(ISFLOAT, new ArgType(false, ArgType.ATOM));}
-	static {setArgType(ISSTRING, new ArgType(false, ArgType.ATOM));}
+	static {setArgType(ISINT, new ArgType(false, ARG_ATOM));}
+	static {setArgType(ISFLOAT, new ArgType(false, ARG_ATOM));}
+	static {setArgType(ISSTRING, new ArgType(false, ARG_ATOM));}
 
 	/** isintfunc [func]
 	 * <br>最適化用ガード命令<br>
@@ -1079,9 +1091,9 @@ public class Instruction implements Cloneable {
 	public static final int ISINTFUNC    = ISINT    + OPT;
 	public static final int ISFLOATFUNC  = ISFLOAT  + OPT;
 	public static final int ISSTRINGFUNC = ISSTRING + OPT;
-	static {setArgType(ISINTFUNC, new ArgType(false, ArgType.VAR));}
-	static {setArgType(ISFLOATFUNC, new ArgType(false, ArgType.VAR));}
-	static {setArgType(ISSTRINGFUNC, new ArgType(false, ArgType.VAR));}
+	static {setArgType(ISINTFUNC, new ArgType(false, ARG_VAR));}
+	static {setArgType(ISFLOATFUNC, new ArgType(false, ARG_VAR));}
+	static {setArgType(ISSTRINGFUNC, new ArgType(false, ARG_VAR));}
 
 	// 整数用の組み込みボディ命令 (400--419+OPT)
 	/** iadd [-dstintatom, intatom1, intatom2]
@@ -1098,32 +1110,32 @@ public class Instruction implements Cloneable {
 	public static final int IAND = 411;
 	public static final int IOR  = 412;
 	public static final int IXOR = 413;
-	static {setArgType(IADD, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(ISUB, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IMUL, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IDIV, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(INEG, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IMOD, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(INOT, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IAND, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IOR, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IXOR, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(IADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(ISUB, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IMUL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IDIV, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(INEG, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IMOD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IAND, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IXOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	
 	/** isal [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
 	 * $intatom1を$intatom2ビット分符号つき(算術)左シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
 	public static final int ISAL = 414;
-	static {setArgType(ISAL, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(ISAL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	/** isar [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
 	 * $intatom1を$intatom2ビット分符号つき(算術)右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
 	public static final int ISAR = 415;
-	static {setArgType(ISAR, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(ISAR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	/** ishr [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
 	 * $intatom1を$intatom2ビット分論理右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
 	public static final int ISHR = 416;
-	static {setArgType(ISHR, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(ISHR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 
 	/** iaddfunc [-dstintfunc, intfunc1, intfunc2]
 	 * <br>整数用の最適化用組み込み命令<br>
@@ -1142,19 +1154,19 @@ public class Instruction implements Cloneable {
 	public static final int ISALFUNC = ISAL + OPT;
 	public static final int ISARFUNC = ISAR + OPT;
 	public static final int ISHRFUNC = ISHR + OPT;
-	static {setArgType(IADDFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(ISUBFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(IMULFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(IDIVFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(INEGFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(IMODFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(INOTFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(IANDFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(IORFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(IXORFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(ISALFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(ISARFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(ISHRFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
+	static {setArgType(IADDFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(ISUBFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(IMULFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(IDIVFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(INEGFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(IMODFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(INOTFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(IANDFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(IORFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(IXORFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(ISALFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(ISARFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(ISHRFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
 
 	// 整数用の組み込みガード命令 (420--429+OPT)
 
@@ -1167,12 +1179,12 @@ public class Instruction implements Cloneable {
 	public static final int IGE = 423;	
 	public static final int IEQ = 424;	
 	public static final int INE = 425;	
-	static {setArgType(ILT, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(ILE, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IGT, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IGE, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(IEQ, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(INE, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(ILT, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(ILE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IGT, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IGE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(IEQ, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(INE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
 	/** iltfunc [intfunc1, intfunc2]
 	 * <br>整数用の最適化用組み込みガード命令<br>
@@ -1181,10 +1193,10 @@ public class Instruction implements Cloneable {
 	public static final int ILEFUNC = ILE + OPT;
 	public static final int IGTFUNC = IGT + OPT;
 	public static final int IGEFUNC = IGE + OPT;
-	static {setArgType(ILTFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(ILEFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(IGTFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(IGEFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
+	static {setArgType(ILTFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(ILEFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(IGTFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(IGEFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
 
 	// 浮動小数点数用の組み込みボディ命令 (600--619+OPT)
 	public static final int FADD = 600;
@@ -1192,22 +1204,22 @@ public class Instruction implements Cloneable {
 	public static final int FMUL = 602;
 	public static final int FDIV = 603;
 	public static final int FNEG = 604;
-	static {setArgType(FADD, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FSUB, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FMUL, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FDIV, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FNEG, new ArgType(true, ArgType.ATOM, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(FADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FSUB, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FMUL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FDIV, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FNEG, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	
 	public static final int FADDFUNC = FADD + OPT;
 	public static final int FSUBFUNC = FSUB + OPT;
 	public static final int FMULFUNC = FMUL + OPT;
 	public static final int FDIVFUNC = FDIV + OPT;
 	public static final int FNEGFUNC = FNEG + OPT;
-	static {setArgType(FADDFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(FSUBFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(FMULFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(FDIVFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(FNEGFUNC, new ArgType(true, ArgType.VAR, ArgType.VAR, ArgType.VAR));}
+	static {setArgType(FADDFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(FSUBFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(FMULFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(FDIVFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(FNEGFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
 	
 	// 浮動小数点数用の組み込みガード命令 (620--629+OPT)
 	public static final int FLT = 620;
@@ -1216,27 +1228,27 @@ public class Instruction implements Cloneable {
 	public static final int FGE = 623;	
 	public static final int FEQ = 624;	
 	public static final int FNE = 625;	
-	static {setArgType(FLT, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FLE, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FGT, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FGE, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FEQ, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
-	static {setArgType(FNE, new ArgType(false, ArgType.ATOM, ArgType.ATOM));}
+	static {setArgType(FLT, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FLE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FGT, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FGE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FEQ, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(FNE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
 	public static final int FLTFUNC = FLT + OPT;
 	public static final int FLEFUNC = FLE + OPT;
 	public static final int FGTFUNC = FGT + OPT;
 	public static final int FGEFUNC = FGE + OPT;
-	static {setArgType(FLTFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(FLEFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(FGTFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
-	static {setArgType(FGEFUNC, new ArgType(false, ArgType.VAR, ArgType.VAR));}
+	static {setArgType(FLTFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(FLEFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(FGTFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(FGEFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
 
 	// ここもBUILTIN 命令にすべきである。
 	public static final int FLOAT2INT = 630;
 	public static final int INT2FLOAT = 631;
-	static {setArgType(FLOAT2INT, new ArgType(true, ArgType.ATOM, ArgType.ATOM));} //TODO あってる?
-	static {setArgType(INT2FLOAT, new ArgType(true, ArgType.ATOM, ArgType.ATOM));} //TODO あってる?
+	static {setArgType(FLOAT2INT, new ArgType(true, ARG_ATOM, ARG_ATOM));} //TODO あってる?
+	static {setArgType(INT2FLOAT, new ArgType(true, ARG_ATOM, ARG_ATOM));} //TODO あってる?
 	
 
 	// TODO BUILTIN 命令を使う方がよいと思われる
@@ -1526,18 +1538,6 @@ public class Instruction implements Cloneable {
 		argTypeTable.put(new Integer(kind), argtype);
 	}
 	private static class ArgType {
-		/**アトム*/
-		static final int ATOM = 0;
-		/**膜*/
-		static final int MEM = 1;
-		/**アトム・膜以外の変数*/
-		static final int VAR = 2;
-		/**整数*/
-		static final int INT = 3;
-		/**命令列*/
-		static final int INST = 4;
-		/**その他オブジェクト(ルールなど)*/
-		static final int OBJ = 5;
 		
 		private boolean output;
 		private int[] type;
@@ -1580,19 +1580,34 @@ public class Instruction implements Cloneable {
 			Instruction inst = (Instruction)it.next();
 			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
 			if (argtype.type.length != inst.data.size()) {
-				System.err.println("WARNING: length of arg is different from table data");
+				if (inst.getKind() != Instruction.REMOVEATOM) {
+					System.err.println("WARNING: length of arg is different from table data : " + inst);
+				}
 			}
 			for (int i = 0; i < inst.data.size(); i++) {
 				switch (argtype.type[i]) {
-					case ArgType.ATOM:
-					case ArgType.MEM:
-					case ArgType.VAR:
+					case ARG_ATOM:
+					case ARG_MEM:
+					case ARG_VAR:
 						changeArg(inst, i+1, map);
 						break;
 				}
 			}
 		}
 	}
+	/**
+	 * この命令が出力命令の場合、出力の種類を返す。
+	 * そうでない場合、-1を返す。
+	 */
+	public int getOutputType() {
+		ArgType argtype = (ArgType)argTypeTable.get(new Integer(kind));
+		if (argtype.output) {
+			return argtype.type[0];
+		} else {
+			return -1;
+		}
+	}
+
 //	/**
 //	 * 与えられた対応表によって、ボディ命令列中の変数を書き換える。<br>
 //	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
@@ -1804,6 +1819,7 @@ public class Instruction implements Cloneable {
 				Field f = fields[i];
 				// 追加。hara
 				if(! f.getType().isPrimitive()) continue;
+				if (f.getName().startsWith("ARG_")) continue; //added by mizuno
 				int kind = f.getInt(inst);
 				if (kind != LOCAL
 				 && f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {

@@ -669,9 +669,9 @@ public class Optimizer {
 	 *  <li>ボディ実行仮引数と実引数が同じである。
 	 *  <li>spec命令以外の最初の命令がfindatomで、その第二引数は0である。
 	 *  <li>はじめのfindatom命令によって取得されたアトムが再利用されている。
+	 *  <li>derefatom,dereffuncを利用していない
 	 * </ul>
-	 * 一つ目の条件が満たされない場合の動作は定義されない。（TODO これは何とかする。）
-	 * それ以外の条件が満たされない場合は何もしない。
+	 * 条件が満たされない場合は何もしない。
 	 * @param head 膜主導マッチング命令列
 	 * @param body ボディ命令列
 	 */	
@@ -723,7 +723,25 @@ public class Optimizer {
 		ListIterator lit = body.listIterator();
 		while (lit.hasNext()) {
 			inst = (Instruction)lit.next();
+			switch (inst.getOutputType()) {
+				case Instruction.ARG_ATOM:
+					atomvars.add(inst.getArg1());
+					break;
+				case Instruction.ARG_MEM:
+					memvars.add(inst.getArg1());
+					break;
+				case Instruction.ARG_VAR:
+					memvars.add(inst.getArg1());
+					break;
+				case -1:
+					break;
+				default:
+					throw new RuntimeException("invalid output type : " + inst);
+			}
 			switch (inst.getKind()) {
+				case Instruction.DEREFATOM:
+				case Instruction.DEREFFUNC:
+					return;
 				case Instruction.REMOVEATOM:
 //				case Instruction.FREEATOM:
 					if (inst.getArg1().equals(firstAtom)) {
@@ -744,30 +762,31 @@ public class Optimizer {
 				case Instruction.NEWATOM:
 				case Instruction.LOCALNEWATOM:
 					functor.put(inst.getArg1(), inst.getArg3());
-					atomvars.add(inst.getArg1());
+//					atomvars.add(inst.getArg1());
 					break;
 				case Instruction.GETLINK:
 					linkGetFrom.put(inst.getArg1(), new Link(inst.getIntArg2(), inst.getIntArg3()));
-					othervars.add(inst.getArg1());
+//					othervars.add(inst.getArg1());
 					break;
-				case Instruction.NEWATOMINDIRECT:
-				case Instruction.LOCALNEWATOMINDIRECT:
-				case Instruction.ALLOCATOM:
-				case Instruction.ALLOCATOMINDIRECT:
-				case Instruction.COPYATOM:
-				case Instruction.LOCALCOPYATOM:
-					atomvars.add(inst.getArg1());
-					break;
-				case Instruction.NEWMEM:
-				case Instruction.LOCALNEWMEM:
-				case Instruction.ALLOCMEM:
-				case Instruction.NEWROOT:
-//				case Instruction.COPYMEM:
-					memvars.add(inst.getArg1());
-					break;
-				case Instruction.ALLOCLINK:
-					othervars.add(inst.getArg1());
-					break;
+//				case Instruction.NEWATOMINDIRECT:
+//				case Instruction.LOCALNEWATOMINDIRECT:
+//				case Instruction.ALLOCATOM:
+//				case Instruction.ALLOCATOMINDIRECT:
+//				case Instruction.COPYATOM:
+//				case Instruction.LOCALCOPYATOM:
+//					atomvars.add(inst.getArg1());
+//					break;
+//				case Instruction.NEWMEM:
+//				case Instruction.LOCALNEWMEM:
+//				case Instruction.ALLOCMEM:
+//				case Instruction.NEWROOT:
+////				case Instruction.COPYMEM:
+//					memvars.add(inst.getArg1());
+//					break;
+//				case Instruction.ALLOCLINK:
+//					othervars.add(inst.getArg1());
+//					break;
+
 //TODO ヘッド中の命令を検査
 //				case Instruction.FINDATOM:
 //					functor.put(inst.getArg1(), inst.getArg3());
