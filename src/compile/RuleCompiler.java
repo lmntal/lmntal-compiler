@@ -141,13 +141,13 @@ public class RuleCompiler {
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
 			hc.compileMembrane(rs.leftMem);
-			hc.match.add(0, Instruction.spec(hc.varcount,0));	// とりあえずここに追加（仮）
+			hc.match.add(0, Instruction.spec((hc.match == memMatch) ? 1 : 2, hc.varcount));	// とりあえずここに追加（仮）
 			// hc.match.add( hc.getResetVarsInstruction() );
 			// hc.match.add( Instruction.react(theRule) );
 			hc.match.add( Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals()) );
 			if (maxvarcount < hc.varcount) maxvarcount = hc.varcount;
 		}
-		atomMatch.add(0, Instruction.spec(maxvarcount,0));	// とりあえずここに追加（仮）
+		atomMatch.add(0, Instruction.spec(2,maxvarcount));	// とりあえずここに追加（仮）
 	}
 	
 	

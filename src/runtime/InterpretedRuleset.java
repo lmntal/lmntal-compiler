@@ -67,11 +67,15 @@ public final class InterpretedRuleset extends Ruleset {
 	private boolean matchTest(Membrane mem, Atom atom, List matchInsts) {
 		Instruction spec = (Instruction)matchInsts.get(0);
 		int formals = spec.getIntArg1();
-		
+		int locals  = spec.getIntArg2();
+		if (locals == 0) {
+			System.out.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
+			locals = formals;
+		}
 // ArrayIndexOutOfBoundsException がでたので一時的に変更
 //if (formals < 10) formals = 10;
 		
-		InterpretiveReactor ir = new InterpretiveReactor(formals);
+		InterpretiveReactor ir = new InterpretiveReactor(locals);
 		ir.mems[0] = mem;
 		if (atom != null) { ir.atoms[1] = atom; }
   		return ir.interpret(matchInsts, 0);
@@ -562,7 +566,7 @@ class InterpretiveReactor {
 					List bodyInsts = (List) rule.body;
 					Instruction spec = (Instruction) bodyInsts.get(0);
 					int formals = spec.getIntArg1();
-					int locals = spec.getIntArg2();
+					int locals  = spec.getIntArg2();
 
 // // ArrayIndexOutOfBoundsException がでたので一時的に変更
 // if (locals < 10) locals = 10;

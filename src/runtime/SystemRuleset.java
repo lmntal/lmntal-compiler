@@ -42,7 +42,7 @@ public final class SystemRuleset extends Ruleset {
 		Rule rule = new Rule();
 		List insts = rule.memMatch;
 		// match
-		insts.add(new Instruction(Instruction.SPEC,        6,0));
+		insts.add(new Instruction(Instruction.SPEC,        1,6));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(Instruction.LOCKMEM,   3,2));
@@ -65,7 +65,7 @@ public final class SystemRuleset extends Ruleset {
 		rule = new Rule();
 		insts = rule.memMatch;
 		// match		
-		insts.add(new Instruction(Instruction.SPEC,        6,0));
+		insts.add(new Instruction(Instruction.SPEC,        1,6));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,1));
 		insts.add(new Instruction(Instruction.FUNC,        2,Functor.OUTSIDE_PROXY));
@@ -103,7 +103,7 @@ public final class SystemRuleset extends Ruleset {
 		Rule rule = new Rule();
 		List insts = rule.memMatch;
 		// match		
-		insts.add(new Instruction(Instruction.SPEC,        5,0));
+		insts.add(new Instruction(Instruction.SPEC,        1,5));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,3)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(typechecker,             2));
@@ -131,7 +131,7 @@ public final class SystemRuleset extends Ruleset {
 		Rule rule = new Rule();
 		List insts = rule.memMatch;
 		// match		
-		insts.add(new Instruction(Instruction.SPEC,        4,0));
+		insts.add(new Instruction(Instruction.SPEC,        1,4));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,2)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(typechecker,             2));
@@ -172,7 +172,7 @@ public final class SystemRuleset extends Ruleset {
 		rule = new Rule();
 		insts = rule.memMatch;
 		// match		
-		insts.add(new Instruction(Instruction.SPEC,        4,0));
+		insts.add(new Instruction(Instruction.SPEC,        1,4));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor("cp",3)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(Instruction.ISUNARY,     2));

@@ -952,9 +952,7 @@ public class Instruction implements Cloneable {
 	static {setArgType(CHANGEVARS, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
 
     /** spec [formals, locals]
-     * <br><strike>
-     * spec [memformals,atomformals,memlocals,atomlocals,linklocals,funclocals]</strike>
-     * <br>無視される<br>
+     * <br>無視される制御命令<br>
      * 仮引数と局所変数の個数を宣言する。*/
     public static final int SPEC = 203;
 	static {setArgType(SPEC, new ArgType(false, ARG_INT, ARG_INT));}
