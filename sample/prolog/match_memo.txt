@@ -43,10 +43,9 @@ binding = [[X | coffer]]
 次にリスト同士のパターンマッチグを行うルール"match"を定義。
 変数は大文字で表現。マッチングが成功した場合には yes となり、変数に値を
 代入。
-　match([father, naoyuki, hyogo], [father, naoyuki, hyogo] )  => yes, []
-　match([father, naoyuki, hyogo], [father, saburo, naoyuki])  => no,  []
-　match([father, naoyuki, X    ], [father, naoyuki, hyogo] )  => yes,
-[[X, hyogo]]
+　unify([father, naoyuki, hyogo], [father, naoyuki, hyogo] )  => yes, []
+　unify([father, naoyuki, hyogo], [father, saburo, naoyuki])  => no,  []
+　unify([father, naoyuki, X    ], [father, naoyuki, hyogo] )  => yes, [[X, hyogo]]
 
 第一引数にクエリを入れ、第二引数にルールリスト(rules膜？)から1つずつルー
 ルを取ってきて比較（予定）
@@ -59,7 +58,7 @@ binding = [[X | coffer]]
     F = naoyuki ? 
     yes
 ==>
-　match([father, F, hyogo], 『rulesのどれか』) -> yes, [[F, naoyuki]]
+　unify([father, F, hyogo], 『rulesのどれか』) -> yes, [[F, naoyuki]]
 
 rules = {
 	[father, naoyuki, hyogo  ],
