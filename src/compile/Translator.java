@@ -316,18 +316,18 @@ public class Translator {
 					writer.write(tabs + "if (mem.lock()) {\n");
 					writer.write(tabs + "	var" + inst.getIntArg1() + " = mem;\n");
 					translate(it, tabs + "\t", iteratorNo, varnum, breakLabel);
-					writer.write(tabs + "	mem.unlock();\n");
+					writer.write(tabs + "	((AbstractMembrane)var" + inst.getIntArg1() + ").unlock();\n"); //失敗する場合は、resetvars命令を実行する事はない
 					writer.write(tabs + "}\n");
 					break;
 				case Instruction.ANYMEM :
 				case Instruction.LOCALANYMEM : // anymem [-dstmem, srcmem] 
 					writer.write(tabs + "Iterator it" + iteratorNo + " = ((AbstractMembrane)var" + inst.getIntArg2() + ").memIterator();\n");
 					writer.write(tabs + "while (it" + iteratorNo + ".hasNext()) {\n");
-					writer.write(tabs + "	AbstractMembrane submem = (AbstractMembrane) it" + iteratorNo + ".next();\n");
-					writer.write(tabs + "	if (submem.lock()) {\n");
-					writer.write(tabs + "		var" + inst.getIntArg1() + " = submem;\n");
+					writer.write(tabs + "	mem = (AbstractMembrane) it" + iteratorNo + ".next();\n");
+					writer.write(tabs + "	if (mem.lock()) {\n");
+					writer.write(tabs + "		var" + inst.getIntArg1() + " = mem;\n");
 					translate(it, tabs + "		", iteratorNo + 1, varnum, breakLabel);
-					writer.write(tabs + "		submem.unlock();\n");
+					writer.write(tabs + "		((AbstractMembrane)var" + inst.getIntArg1() + ").unlock();\n");
 					writer.write(tabs + "	}\n");
 					writer.write(tabs + "}\n");
 					break;
@@ -336,7 +336,7 @@ public class Translator {
 					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg1() + ");\n");
 					writer.write(tabs + "if (mem.lock()) {\n");
 					translate(it, tabs + "\t", iteratorNo, varnum, breakLabel);
-					writer.write(tabs + "	mem.unlock();						\n");
+					writer.write(tabs + "	((AbstractMembrane)var" + inst.getIntArg1() + ").unlock();\n");
 					writer.write(tabs + "}\n");
 					break;
 				case Instruction.GETMEM : //[-dstmem, srcatom]
