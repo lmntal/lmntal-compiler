@@ -703,19 +703,39 @@ class InterpretiveReactor {
 					vars.set(inst.getIntArg1(), func);
 					break; //nakajima 2003-01-05
 				case Instruction.INOTFUNC : //[-dstintfunc, intfunc]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					vars.set(inst.getIntArg1(), new IntegerFunctor(~x));
+					break; //nakajima 2003-01-21
 				case Instruction.IANDFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x & y));				
+					break; //nakajima 2003-01-21
 				case Instruction.IORFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x | y));				
+					break; //nakajima 2003-01-21
 				case Instruction.IXORFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x ^ y));				
+					break; //nakajima 2003-01-21
 				case Instruction.ISHLFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x << y));				
+					break; //nakajima 2003-01-21
 				case Instruction.ISHRFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x >> y));				
+					break; //nakajima 2003-01-21
 				case Instruction.ISARFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x >>> y));				
+					break; //nakajima 2003-01-21
 					//====整数用の組み込みボディ命令====ここまで====
 
 					//====整数用の組み込みガード命令====ここから====
