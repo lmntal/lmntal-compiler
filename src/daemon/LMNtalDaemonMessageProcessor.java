@@ -3,6 +3,9 @@ package daemon;
 import java.io.IOException;
 import java.net.Socket;
 
+import runtime.Env;
+import util.StreamDumper;
+
 //import runtime.Env;
 //import runtime.Membrane;
 
@@ -99,7 +102,8 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				String type  = parsedInput[1];
 				String msgid = parsedInput[2];
 				String rgid  = parsedInput[3];
-				// TODO （中島君）ここはすでに登録されていたらFAILを返すのが正しいみたいですので直さないでください。
+				// todo （中島君）ここはすでに登録されていたらFAILを返すのが正しいみたいですので直さないでください。
+				//(nakajima 2004-10-13) 了解しました。
 				boolean result = LMNtalDaemon.registerRuntimeGroup(rgid, this);
 				respond(msgid, result);
 				continue;
@@ -166,7 +170,12 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 
 									if (DEBUG) System.out.println(newCmdLine);
 
+									//TODO (nakajima)debug
 									Process slave = Runtime.getRuntime().exec(newCmdLine);
+									Thread dumpErr = new Thread(new StreamDumper("slave runtime.error", slave.getErrorStream()));
+									Thread dumpOut = new Thread(new StreamDumper("slave runtime.stdout", slave.getInputStream()));
+									dumpErr.start();
+									dumpOut.start();
 									
 									//OK返すのは生成されたランタイムがする。
 									continue;
