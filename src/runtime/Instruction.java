@@ -397,6 +397,32 @@ public class Instruction {
 		return i;
 	}
 	
+	/**
+	 * getmem 命令を生成する。
+	 * @param ret
+	 * @param atom
+	 * @return
+	 */
+	public static Instruction getmem(int ret, int atom) {
+		Instruction i = new Instruction(GETMEM);
+		i.add(ret);
+		i.add(atom);
+		return i;
+	}
+	
+	/**
+	 * removeatom 命令を生成する。
+	 * @param atom
+	 * @param func
+	 * @return
+	 */
+	public static Instruction removeatom(int atom, Functor func) {
+		Instruction i = new Instruction(REMOVEATOM);
+		i.add(atom);
+		i.add(func);
+		return i;
+	}
+	
 	
 	
     /**

@@ -49,6 +49,13 @@ public class FrontEnd {
 					case 'd':
 						System.out.println("debug mode");
 						break;
+					case 'e':
+						// lmntal -e 'a,(a:-b)'
+						// 形式で実行できるようにする。like perl
+						// この書き方は汚い気がするけど...。by Hara
+						REPL.processLine(args[i+1]);
+						System.exit(-1);
+						break;
 					case '-': // 文字列オプション
 						if(args[i].equals("--help")){
 							System.out.println("usage: FrontEnd [-d] filename");
@@ -82,8 +89,7 @@ public class FrontEnd {
 			src = new REPL();
 			 */
 			//file指定がなければこれを呼ぶ
-			REPL repl = new REPL();
-			repl.run();
+			REPL.run();
 			// srcがnullなのであとでエラーが
 		}else{
 			src = new BufferedReader(new InputStreamReader(is));

@@ -24,7 +24,7 @@ public class REPL {
 	 * LMNtal-REPL を実行する。
 	 * REPL から抜けるコマンドが入力されると、戻ってくる。
 	 */
-	public void run() {
+	public static void run() {
 		String line;
 		try {
 			//Readline.load(ReadlineLibrary.Getline);
@@ -71,15 +71,20 @@ public class REPL {
 	 * 
 	 * @param line     LMNtal statement (one liner)
 	 */
-	private void processLine(String line) {
+	public static void processLine(String line) {
 		try {
 			// 字句解析　構文解析　意味解析
 			LMNParser lp = new LMNParser(new StringReader(line));
 			
 			// ルールセット生成
 			compile.structure.Membrane m = lp.parse();
+			Env.p("");
+			Env.p( "After parse   : "+m );
+			
 			compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
 			InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
+			Env.p( "After compile : "+ir );
+			root.showAllRule();
 			
 			// 実行
 			LMNtalRuntime rt = new LMNtalRuntime(ir);
@@ -87,10 +92,6 @@ public class REPL {
 			Membrane result = (Membrane)rt.getRootMem();
 			
 			
-			Env.p("");
-			Env.p( "After parse   : "+m );
-			Env.p( "After compile : "+ir );
-			m.showAllRule();
 			Env.p( "After execute : " );
 			Env.p( Dumper.dump(result) );
 			Env.p( result );

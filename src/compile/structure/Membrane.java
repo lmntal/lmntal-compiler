@@ -87,6 +87,10 @@ public final class Membrane {
 		return "{ " + toStringWithoutBrace() + " }";
 	}
 	
+	/**
+	 * この膜に含まれる全てのルールセットを表示する。
+	 *
+	 */
 	public void showAllRuleset() {
 		Env.p( ((InterpretedRuleset)ruleset) );
 		

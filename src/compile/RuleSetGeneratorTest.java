@@ -29,13 +29,13 @@ public class RuleSetGeneratorTest {
 	public static void main(String[] args) {
 		//test("v");
 		//test("v,v,w");
-		//test("{}");
+		test("{}");
 		//test("{v}");
 		//test("a(X), b(X), c(d)");
 		//test("a(X,Y), b(X,Y)");
 		//test("(a:-b)");
 		//test("(a:-b), (c:-d)");
-		test("a(X), { b(X) }");
+		//test("a(X), { b(X) }");
 	}
 	
 	/**

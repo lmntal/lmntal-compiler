@@ -262,7 +262,7 @@ public class RuleCompiler {
 			if(lhsmempaths.get(atom.mem)==null) {
 				varcount++;
 				lhsmempaths.put((Object)(atom.mem), new Integer(varcount));
-				body.add( Instruction.dummy("[:getmem, @varcount, atomid + 1]") );
+				body.add( Instruction.getmem(varcount, atomid + 1) );
 				rootmems.add(atom.mem);
 			}
 		}
@@ -293,8 +293,9 @@ public class RuleCompiler {
 		int i=0;
 		while(l.hasNext()) {
 			Atom atom = (Atom)(l.next());
-			body.add( Instruction.dummy("[:removeatom, "+(i+1)+", "+atom.functor) );
-			body.add( Instruction.dummy("[:freeatom, "+(i+1)+", "+atom.functor) );
+			body.add( Instruction.removeatom(i+1, atom.functor) );
+			//ÇÑ»ß¡©
+			//body.add( Instruction.dummy("[:freeatom, "+(i+1)+", "+atom.functor) );
 			i++;
 		}
 	}
