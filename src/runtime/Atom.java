@@ -13,17 +13,19 @@ import java.lang.Integer;
  * @author Mizuno
  */
 public final class Atom extends QueuedEntity {
-	/** 所属膜。AbstractMembraneとそのサブクラスが自由に変更してよい。nullが入ることもある。*/
+	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
+	 * ただし値を変更するときはindexも同時に更新すること。(null,-1)は所属膜なしを表す。*/
 	AbstractMembrane mem;
+	/** 所属膜のAtomSet内でのインデックス */
+	int index = -1;
+
 	/** ファンクタ（名前とリンク数） */
 	private Functor functor;
 	/** リンク */
 	public Link[] args;
-	
-	/** 所属膜のAtomSet内でのインデックス */
-	int index = -1;
 
 	private static int lastId = 0;
+	/** このアトムのローカルID */
 	private int id;
 	
 	///////////////////////////////
