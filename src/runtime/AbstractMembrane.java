@@ -323,6 +323,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * @return 作成されたルート膜 */
 	public AbstractMembrane newRoot(String nodedesc) {
 		if(Env.debug > 0)System.out.println("AbstraceMembrane.newRoot(" + nodedesc + ")");
+		daemon.IDConverter.registerGlobalMembrane(this.getGlobalMemID(),this);
 		// ↓TODO (効率改善)connectRuntimeはガードですでに呼ばれているので冗長かもしれないのを何とかする？
 		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(nodedesc);
 		return machine.newTask(this).getRoot();
