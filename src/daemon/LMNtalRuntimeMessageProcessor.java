@@ -226,10 +226,24 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 
 				String[] command = parsedInput[4].split(" ", 3);
 				
-				if (command[0].equalsIgnoreCase("TERMINATE")) {
+				if (command[0].equalsIgnoreCase("TERMINATE")) {  //TODO dead lock
 					// TERMINATE
-					LMNtalRuntimeManager.terminateAll();
-					respondAsOK(msgid);
+					
+					//execute terminate on different thread
+					new Thread(){
+						String msgid = "";
+						
+						public void setMsgid(String msgid){
+							this.msgid = msgid;
+							this.start();
+						}
+						
+						public void run(){
+							LMNtalRuntimeManager.terminateAll();
+							respondAsOK(msgid);
+						}
+					}.setMsgid(msgid);
+										
 					//return;
 					continue; //(nakajima 2004-10-25)
 				} else if (command[0].equalsIgnoreCase("CONNECT")) {
