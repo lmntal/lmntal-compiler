@@ -6,6 +6,8 @@ package compile;
 
 import java.io.StringReader;
 
+import javax.swing.JOptionPane;
+
 import runtime.Env;
 import runtime.InterpretedRuleset;
 
@@ -21,6 +23,9 @@ import compile.structure.*;
  */
 public class RuleSetGeneratorTest {
 	
+	public static void gui() {
+		Env.p( JOptionPane.showInputDialog(null, "Hello, Verno") );
+	}
 	/**
 	 * テスト用めいん
 	 * 
@@ -29,13 +34,14 @@ public class RuleSetGeneratorTest {
 	public static void main(String[] args) {
 		//test("v");
 		//test("v,v,w");
-		test("{}");
+		//test("{}");
 		//test("{v}");
 		//test("a(X), b(X), c(d)");
 		//test("a(X,Y), b(X,Y)");
 		//test("(a:-b)");
 		//test("(a:-b), (c:-d)");
 		//test("a(X), { b(X) }");
+		gui();
 	}
 	
 	/**
