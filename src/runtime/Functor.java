@@ -33,7 +33,7 @@ public class Functor {
 	}
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
 	public final String getQuotedFunctorName() {
-		String text = getName();
+		String text = getAbbrName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 			text = text.replaceAll("'","''");
 			text = "'" + text + "'";
@@ -43,7 +43,7 @@ public class Functor {
 	}
 	/** 引数をもたないアトムの名前として表示名を印字するための文字列を返す */
 	public final String getQuotedAtomName() {
-		String text = getName();
+		String text = getAbbrName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\]|[=!<>]+)$")) {
 			if (!text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.[0-9]*([Ee][+-]?[0-9]+)?)$")) {
 				text = text.replaceAll("'","''");
