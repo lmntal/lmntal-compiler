@@ -93,20 +93,23 @@ public final class RemoteTask extends AbstractTask {
 		if (result.length() >= 4 && result.substring(0, 4).equalsIgnoreCase("FAIL")) {
 			throw new RuntimeException("RemoteTask.flush: failure");
 		}
+
 		// BEGINメッセージに対する返答を解釈する
-		String[] binds = result.split(";");
-		for (int i = 0; i < binds.length; i++) {
-			String[] args = binds[i].split("=",2);
-			String tmpid = args[0];
-			String newid = args[1];
-			// todo もう少し拡張性の高い識別方法を考える。おそらくNEW_を分化させればよいはず。
-			if (newid.indexOf(':') >= 0) {
-				RemoteMembrane mem = (RemoteMembrane)memTable.get(tmpid);
-				if (mem != null) IDConverter.registerGlobalMembrane(newid, mem);
-			}
-			else {
-				Atom atom = (Atom)atomTable.get(tmpid);
-				if (atom != null) atom.remoteid = newid;
+		if(result.length() > 0){
+			String[] binds = result.split(";");
+			for (int i = 0; i < binds.length; i++) {
+				String[] args = binds[i].split("=",2);
+				String tmpid = args[0];
+				String newid = args[1];
+				// todo もう少し拡張性の高い識別方法を考える。おそらくNEW_を分化させればよいはず。
+				if (newid.indexOf(':') >= 0) {
+					RemoteMembrane mem = (RemoteMembrane)memTable.get(tmpid);
+					if (mem != null) IDConverter.registerGlobalMembrane(newid, mem);
+				}
+				else {
+					Atom atom = (Atom)atomTable.get(tmpid);
+					if (atom != null) atom.remoteid = newid;
+				}
 			}
 		}
 		//
