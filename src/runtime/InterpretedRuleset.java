@@ -722,6 +722,7 @@ class InterpretiveReactor {
 					vars.set(inst.getIntArg1(), new IntegerFunctor(x ^ y));				
 					break; //nakajima 2003-01-21
 				case Instruction.ISHLFUNC : //[-dstintfunc, intfunc1, intfunc2]
+					// TODO javaでは>>は符号つき右シフト、<<が符号つき左シフト、>>>は符号なし右シフトですのでここはそれぞれISALFUNC, ISARFUNC, ISHRFUNCにしたほうがいいんじゃないですか？
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
 					vars.set(inst.getIntArg1(), new IntegerFunctor(x << y));				
