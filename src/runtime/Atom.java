@@ -64,9 +64,8 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, Serializa
 		args = new Link[functor.getArity()];
 		id = lastId++;
 		
-		if (Env.gui != null) {
+		if(Env.fGUI) {
 			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
-//			Rectangle r = Env.gui.lmnPanel.getBounds();
 			pos = new DoublePoint(Math.random()*r.width + r.x, Math.random()*r.height + r.y);
 		}
 	}
@@ -168,10 +167,15 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, Serializa
 	
 	///////////////////////////////////////////////////////////////
 	
+	/* *** *** *** *** *** BEGIN GUI *** *** *** *** *** */
+	
 	DoublePoint pos;
 	double vx, vy;
 	public void initNode() {
 		pos = new DoublePoint();
+	}
+	public boolean isVisible() {
+		return !(functor.equals(Functor.INSIDE_PROXY) || functor.equals(Functor.OUTSIDE_PROXY));
 	}
 	public DoublePoint getPosition() {
 		return pos;
@@ -180,10 +184,21 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, Serializa
 		pos = p;
 	}
 	public Node getNthNode(int index) {
-		return args[index].getAtom();
+		Atom a = nthAtom(index);
+		if(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
+//			System.out.println(a.nthAtom(0).nthAtom(0));
+//			System.out.println(a.nthAtom(0).nthAtom(1));
+			a = a.nthAtom(0).nthAtom(1);
+		}
+//		System.out.println(this+" 's "+index+"th atom is "+a);
+		return a;
 	}
 	public int getEdgeCount() {
-		return functor.getArity();
+		int v=0;
+		for(int i=0;i<functor.getArity();i++) {
+			if(!(functor.equals(Functor.INSIDE_PROXY) || functor.equals(Functor.OUTSIDE_PROXY))) v++;
+		}
+		return v;
 	}
 	public void setMoveDelta(double dx, double dy) {
 		vx += dx;
@@ -245,6 +260,8 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, Serializa
 		g.drawOval((int)(pos.x - size.width/2), (int)(pos.y - size.height/ 2), size.width, size.height);
 		g.drawString(label, (int)(pos.x - (w-10)/2), (int)(pos.y - (h-4)/2) + fm.getAscent()+size.height);
 	}
+	
+	/* *** *** *** *** *** END GUI *** *** *** *** *** */
 	
 	/**
 	 * このアトムを直列化してストリームに書き出します。

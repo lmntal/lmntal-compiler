@@ -8,16 +8,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.awt.*;
 
+import runtime.AbstractMembrane;
+
 public class GraphLayout implements Runnable {
-//	public static Color colors[] = {
-//		Color.BLACK,
-//		Color.BLUE,
-//		Color.CYAN,
-//		Color.GREEN,
-//		Color.MAGENTA,
-//		Color.ORANGE,
-//		Color.RED
-//	};
 	
 	private Vector nodes = new Vector();
 	private Thread th = null;
@@ -49,18 +42,42 @@ public class GraphLayout implements Runnable {
 		nodes.removeAllElements();
 	}
 	
+	class D_N_tuple {
+		double d = Double.MAX_VALUE;
+		Node n   = null;
+	}
+	
+	/**
+	 * PROXY を除く全アトムのうち p に最も近い Node を返す。
+	 * @param p
+	 * @return Node
+	 */
 	public Node getNearestNode(Point p) {
-		double min=Double.MAX_VALUE;
-		Node minn=null;
-		for(Iterator i=rootMem.atomIterator();i.hasNext();) {
+		D_N_tuple t = new D_N_tuple();
+		getNearestNode(p, rootMem, t);
+		return t.n;
+	}
+	
+	/**
+	 * 膜 m 内にある Node と t.n のうち p に最も近い Node を t.n に代入する。t.d にはその距離を代入する。
+	 * @param p
+	 * @param m
+	 * @param t
+	 */
+	public void getNearestNode(Point p, runtime.AbstractMembrane m, D_N_tuple t) {
+		for(Iterator i=m.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
+			if(!n.isVisible()) continue;
 			double d = p.distance(n.getPosition().toPoint());
-			if(min>d) {
-				min = d;
-				minn = n;
+			if(t.d>d) {
+				t.d = d;
+				t.n = n;
 			}
 		}
-		return minn;
+		Object[] mems = m.getMemArray();
+		for(int i=0;i<mems.length;i++) {
+			getNearestNode(p, (AbstractMembrane)mems[i], t);
+		}
 	}
 	
 	public void start() {
@@ -130,11 +147,28 @@ public class GraphLayout implements Runnable {
 	public synchronized boolean getAllowRelax() {
 		return allowRelax;
 	}
+	
+	/**
+	 * すべてのアトムについて力を作用させる。
+	 *
+	 */
 	protected synchronized void relax() {
 		if(!getAllowRelax()) return;
-		if(rootMem==null) return;
+		relax(rootMem);
+		Object[] mems = rootMem.getMemArray();
+		for(int i=0;i<mems.length;i++) {
+			relax((AbstractMembrane)mems[i]);
+		}
+	}
+	
+	/**
+	 * 膜 m にあるアトムについて力を作用させる。
+	 * @param m
+	 */
+	protected void relax(runtime.AbstractMembrane m) {
+		if(m==null) return;
 		
-		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
+		for (Iterator i=m.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
 			double dx = 0;
 			double dy = 0;
@@ -145,6 +179,7 @@ public class GraphLayout implements Runnable {
 			Edge ie[] = new Edge[me.getEdgeCount()];
 			for(int j=0;j<ie.length;j++) {
 				ie[j]=new Edge(me, me.getNthNode(j));
+//				System.out.println(ie[j]);
 			}
 			Arrays.sort(ie);
 			
@@ -203,133 +238,66 @@ public class GraphLayout implements Runnable {
 			}
 		}
 		// 実際に移動する
-		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
+		for (Iterator i=m.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
 			if(me==((LMNGraphPanel)parent).movingNode) continue;
 			me.move(parent.getBounds());
 		}
 	}
 	
-//	protected synchronized void relax_old() {
-//		for (int i=0;i<nodes.size();i++) {
-//			GraphNode node1 = (GraphNode)nodes.get(i);
-//			double dx = 0;
-//			double dy = 0;
-//		
-////				System.out.println(i+" "+node1.label);
-//		
-//			// angle でソート
-//			Edge ie[] = new Edge[node1.linkedNodes.size()];
-//			ie = (Edge[])(node1.linkedNodes.toArray(ie));
-//			Arrays.sort(ie);
-//		
-//			for (int j=0;j<ie.length;j++) {
-//				Edge edge = ie[j];
-//			
-//				// デフォルトの長さに伸縮する
-//				if(edge.from.hashCode() < edge.to.hashCode()){
-//					double f = (edge.getStdLen() - edge.getLen()) / (edge.getStdLen() * 1);
-//					double ddx = f * edge.getVx();
-//					double ddy = f * edge.getVy();
-//				
-//					edge.from.setMoveDelta(-ddx,-ddy);
-//					edge.to.setMoveDelta(ddx,ddy);
-//				}
-//			
-//				if(node1.linkedNodes.size()<=1) continue;
-//			
-//				// cur にかかる力を計算する
-//				{
-//					Edge cur = ie[j];
-//	//				System.out.println(cur);
-//					GraphNode node2 = cur.to;
-//				
-//					Edge prev = ie[(j-1+ie.length)%ie.length];
-//					Edge next = ie[(j+1)%ie.length];
-//	//				System.out.println("  p : "+ prev);
-//	//				System.out.println("  n : "+ next);
-//				
-//					double a_p = regulate(cur.getAngle() - prev.getAngle());
-//					double a_n = regulate(next.getAngle() - cur.getAngle());
-//					double a_r = a_n-a_p;
-//	//				System.out.println("  a_p : "+ a_p*180/Math.PI);
-//	//				System.out.println("  a_n : "+ a_n*180/Math.PI);
-//	//				System.out.println("   a_r : "+ a_r*180/Math.PI);
-//				
-//					double vx = cur.to.getPosition().getX() - node1.getPosition().getX();
-//					double vy = cur.to.getPosition().getY() - node1.getPosition().getY();
-//				
-//					// next 周りを正にした、動かす対象と自分を結ぶ線分に垂直で長さ１のベクトル
-//					double tx = -vy;
-//					double ty =  vx;
-//	//				System.out.println("   tx : "+ tx);
-//	//				System.out.println("   ty : "+ ty);
-//				
-//					double len = Math.sqrt(tx*tx+ty*ty);
-//				
-//					// move = t times diff
-//					dx = 5 * tx / len * a_r;
-//					dy = 5 * ty / len * a_r;
-//				
-//					cur.from.setMoveDelta(-dx,-dy);
-//					cur.to.setMoveDelta(dx,dy);
-//				}
-//			}
-//		}
-
-//		for (int i=0;i<nodes.size();i++) {
-//			GraphNode node1 = (GraphNode)nodes.get(i);
-//			double dx = 0;
-//			double dy = 0;
-//			
-//			for (int j=0;j<nodes.size();j++) {
-//				if (i==j) continue;
-//				GraphNode node2 = (GraphNode)nodes.get(j);
-//				double vx = node1.getPosition().getX() - node2.getPosition().getX();
-//				double vy = node1.getPosition().getY() - node2.getPosition().getY();
-//				double len = vx*vx+vy*vy;
-//				if (len == 0) {
-//					dx += Math.random();
-//					dy += Math.random();
-//				} else if (len < 10000){
-//					dx += vx/len;
-//					dy += vy/len;
-//				}
-//			}
-//			double dlen = dx*dx+dy*dy;
-//			if (dlen > 0) {
-//				dlen = Math.sqrt(dlen) / 2;
-//				node1.setMoveDelta(dx/dlen,dy/dlen);
-//			}
-//		}
-		
-//		for (int i=0;i<nodes.size();i++) {
-//			GraphNode node = (GraphNode)nodes.get(i);
-//			node.move(area);
-//		}
-//	}
-	
+	/**
+	 * [0, 2PI) に正規化してかえす。mod 2PI みたいなかんじ。
+	 * @param a
+	 * @return
+	 */
 	static double regulate(double a) {
 		while(a<0.0) a+= Math.PI*2;
-		while(a>2*Math.PI) a-= Math.PI*2;
+		while(a>=2*Math.PI) a-= Math.PI*2;
 		return a;
 	}
 	
+	/**
+	 * すべてのアトムと膜を描画する。
+	 * @param g
+	 */
 	public void paint(Graphics g) {
 		if(!getAllowRelax()) return;
 		if(rootMem==null) return;
 		g.setColor(Color.BLACK);
 		
+		paintMem(g, rootMem);
+	}
+	
+	/**
+	 * 膜 m に属するすべてのアトムと膜を描画する。
+	 * @param g
+	 * @param m
+	 */
+	public void paintMem(Graphics g, AbstractMembrane m) {
 		// 同時アクセスで java.util.ConcurrentModificationException がでるので Iterator やめた
 		// ここでの用途は readonly
-		Node[] nodes = (Node[])rootMem.getAtomArray();
-		for (int i=0;i<nodes.length;i++) {
+		Node[] nodes = (Node[])m.getAtomArray();
+		m.rect.setRect(0.0, 0.0, 0.0, 0.0);
+		for(int i=0;i<nodes.length;i++) {
+			if(!nodes[i].isVisible()) continue;
+			final double MARGIN = 15.0;
+			if(m.rect.x==0.0 && m.rect.y==0.0) m.rect.setRect(nodes[i].getPosition().x-MARGIN, nodes[i].getPosition().y-MARGIN, MARGIN*2, MARGIN*2);
+			else                               m.rect.add(nodes[i].getPosition().x, nodes[i].getPosition().y);
 			nodes[i].paintEdge(g);
 		}
-		for (int i=0;i<nodes.length;i++) {
+		for(int i=0;i<nodes.length;i++) {
+			if(!nodes[i].isVisible()) continue;
 			nodes[i].paintNode(g);
 		}
-//		for (int i=0;i<nodes.size();i++) ((GraphNode)nodes.get(i)).paintEdge(g);
-//		for (int i=0;i<nodes.size();i++) ((GraphNode)nodes.get(i)).paintNode(g);
+		// 子膜
+		Object[] mems = m.getMemArray();
+		for(int i=0;i<mems.length;i++) {
+			AbstractMembrane mm = (AbstractMembrane)mems[i];
+			paintMem(g, mm);
+			if(m.rect.x==0.0 && m.rect.y==0.0) m.rect.setRect(mm.rect);
+			else                               m.rect.add(mm.rect);
+//			System.out.println(m.rect);
+		}
+		if(!m.equals(rootMem)) g.drawRoundRect((int)m.rect.x, (int)m.rect.y, (int)m.rect.width, (int)m.rect.height, 10, 10);
 	}
 }

@@ -1,11 +1,15 @@
 package runtime;
 
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import test.GUI.DoublePoint;
 import util.QueuedEntity;
 import util.RandomIterator;
 
@@ -95,6 +99,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		this.task = task;
 		this.parent = parent;
 		id = nextId++;
+		
+		if(Env.gui!=null) {
+			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
+			rect = new Rectangle2D.Double(Math.random()*r.width + r.x, Math.random()*r.height + r.y, 10.0, 10.0);
+//			System.out.println(rect);
+		}
 	}
 //	/**
 //	 * 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。
@@ -176,6 +186,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	public Object[] getAtomArray() {
 		return atoms.toArray();
+	}
+	public Object[] getMemArray() {
+		return mems.toArray();
 	}
 	/** この膜にあるアトムの反復子を取得する */
 	public Iterator atomIterator() {
@@ -765,4 +778,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return "{ " + toStringWithoutBrace() + " }";
 	}
 	
+	/* *** *** *** *** *** BEGIN GUI *** *** *** *** *** */
+	public java.awt.geom.Rectangle2D.Double rect;
+	
+	
+	
+	/* *** *** *** *** *** END GUI *** *** *** *** *** */
 }

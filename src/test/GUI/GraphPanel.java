@@ -45,7 +45,7 @@ public class GraphPanel extends JPanel implements Runnable {
 		Thread me = Thread.currentThread();
 		while (me == th) {
 			try {
-				Thread.sleep(50);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 			}
 			repaint();

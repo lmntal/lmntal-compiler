@@ -3,9 +3,12 @@
  */
 package runtime;
 
+import java.awt.geom.Rectangle2D;
 import java.io.*;
 import java.lang.SecurityException;
 import java.util.*;
+
+import test.GUI.LMNtalFrame;
 
 import compile.*;
 import compile.parser.*;
@@ -187,10 +190,10 @@ public class FrontEnd {
 				else         is = new SequenceInputStream(is, fis);
 			}
 		} catch(FileNotFoundException e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 			System.exit(-1);
 		} catch(SecurityException e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 			System.exit(-1);
 		}
 		// 複数のファイルのときはファイル名が１つに決められない。
@@ -229,7 +232,10 @@ public class FrontEnd {
 			LMNtalRuntimeManager.init();
 
 			Membrane root = rt.getGlobalRoot();
-			Env.initGUI(root);
+			if(Env.fGUI) Env.gui = new LMNtalFrame();
+			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
+
+			Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
 			//root.blockingLock();
 			rs.react(root); // TODO 【検証】初期配置で子タスクを作った場合にどうなるか考える→LMNParserを修正することにした
 			if (Env.gui != null) {
@@ -250,7 +256,8 @@ public class FrontEnd {
 			LMNtalRuntimeManager.disconnectFromDaemon();
 			
 		} catch (Exception e) {
-			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+			e.printStackTrace();
+//			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 	}
 }
