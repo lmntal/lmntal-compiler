@@ -166,9 +166,9 @@ state(showed_end),{done(S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner),data,
 [[/*inline*/
 	String str="";
         for(int j=0,i=0;j<9;j++,i=(j%3)*3+(j/3))
-          str+="["+((me.nth(i).equals("m"))?"¡û":
-                   ((me.nth(i).equals("b"))?"¡ß":
-                                            "¡¡"))+"]"
+          str+="["+((me.nth(i).equals("m"))?"O":
+                   ((me.nth(i).equals("b"))?"X":
+                                            " "))+"]"
                +((j%3==2)?"\n":" ");
 	javax.swing.JOptionPane.showMessageDialog(
         null,str,"m = maru , b = batu , e = empty",
@@ -183,9 +183,9 @@ BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33,Winner):-
 [[/*inline*/
 	String str="";
         for(int j=0,i=0;j<9;j++,i=(j%3)*3+(j/3))
-          str+="["+((me.nth(i).equals("m"))?"¡û":
-                   ((me.nth(i).equals("b"))?"¡ß":
-                                            "¡¡"))+"]"
+          str+="["+((me.nth(i).equals("m"))?"O":
+                   ((me.nth(i).equals("b"))?"X":
+                                            " "))+"]"
                +((j%3==2)?"\n":" ");
         str+="\n"+((me.nth(9).equals("draw"))
              ?"draw game."
