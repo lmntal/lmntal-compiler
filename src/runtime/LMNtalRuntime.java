@@ -6,24 +6,24 @@ import java.util.List;
 
 import util.Stack;
 
-/** 抽象計算ノードクラス */
+/** 抽象物理マシンクラス */
 abstract class AbstractLMNtalRuntime {
 	protected String runtimeid;
-	/** この計算ノードに（親膜を持たない）ルート膜を作成する。
+	/** この物理マシンに（親膜を持たない）ルート膜を作成する。
 	 * <p>
 	 * ルート膜の親膜またはnullを引数に取るようにした方がよいかも知れない。
-	 * 詳細は、「タスク（旧Machine）」を生成する構文を決定する頃に決める */
-	abstract AbstractMachine newMachine();
+	 * 詳細は、タスクを生成する構文を決定する頃に決める */
+	abstract AbstractTask newTask();
 }
 
-/** 抽象マシンクラス */
-abstract class AbstractMachine {
-	/** 計算ノード */
+/** 抽象タスククラス */
+abstract class AbstractTask {
+	/** 物理マシン */
 	protected AbstractLMNtalRuntime runtime;
 	/** ルート膜 */
 	protected AbstractMembrane root;
 	
-	/** 計算ノードの取得 */
+	/** 物理マシンの取得 */
 	AbstractLMNtalRuntime getRuntime() {
 		return runtime;
 	}
@@ -34,18 +34,16 @@ abstract class AbstractMachine {
 }
 
 /**
- * TODO 「タスク」に名前変更
  * TODO システムルールセットのマッチテスト・ボディ実行
- * TODO マシン間の上下関係の実装、《newMachineをマシンが持つようにする》←？
- *
+ * TODO タスク間の上下関係の実装をする？
  */
-final class Machine extends AbstractMachine {
+final class Task extends AbstractTask {
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
 	boolean idle;
 	static final int maxLoop = 10;
 	
-	Machine() {
+	Task() {
 		root = new Membrane(this);
 		memStack.push(root);
 		idle = false;
@@ -106,17 +104,17 @@ final class Machine extends AbstractMachine {
 	}
 }
 
-/** 計算ノード */
+/** 物理マシン */
 final class LMNtalRuntime extends AbstractLMNtalRuntime {
-	List machines = new ArrayList();
+	List Tasks = new ArrayList();
 	AbstractMembrane rootMem;
 	
-	/** 計算ノードが持つマシン全てがidleになるまで実行。<br>
-	 *  machinesに積まれた順に実行する。親マシン優先にするためには
-	 *  マシンが木構造になっていないと出来ない。優先度はしばらく未実装。
+	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
+	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
+	 *  タスクが木構造になっていないと出来ない。優先度はしばらく未実装。
 	 */
 	LMNtalRuntime(Ruleset init){
-		Machine root = (Machine)newMachine();
+		Task root = (Task)newTask();
 		rootMem = root.getRoot();
 		init.react((Membrane)rootMem);
 	}
@@ -128,24 +126,24 @@ final class LMNtalRuntime extends AbstractLMNtalRuntime {
 	void exec() {
 		boolean allIdle;
 		Iterator it;
-		Machine m;
+		Task m;
 		do{
-			allIdle = true; // idleでないマシンが見つかったらfalseになる。
-			it = machines.iterator();
+			allIdle = true; // idleでないタスクが見つかったらfalseになる。
+			it = Tasks.iterator();
 			while(it.hasNext()){
-				m = (Machine)it.next();
-				if(!m.isIdle()){ // idleでないマシンがあったら
+				m = (Task)it.next();
+				if(!m.isIdle()){ // idleでないタスクがあったら
 					m.exec(); // ひとしきり実行
-					allIdle = false; // idleでないマシンがある
+					allIdle = false; // idleでないタスクがある
 					break;
 				}
 			}
 		}while(!allIdle);
 	}
 	
-	AbstractMachine newMachine() {
-		Machine m = new Machine();
-		machines.add(m);
+	AbstractTask newTask() {
+		Task m = new Task();
+		Tasks.add(m);
 		return m;
 	}
 }
