@@ -19,8 +19,6 @@ import runtime.LMNtalRuntimeManager;
  * @author nakajima, n-kato
  */
 public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnable {
-	static boolean DEBUG = true; //todo Env.debugを使うようにする
-	
 	/** このVMで実行するLMNtalRuntimeが所属するruntimeGroupID（コンストラクタで設定）*/
 	protected String rgid;
 	
@@ -48,7 +46,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定のホストにメッセージを送信し、返答を待つ。
 	 * @return 返答がOKかどうか */
 	public boolean sendWait(String fqdn, String command){
-		if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.sendWait()");
+		if(Env.debug > 0)System.out.println("LMNtalRuntimeMessageProcessor.sendWait()");
 		Object obj = sendWaitObject(fqdn, command);
 		if (obj instanceof String) {
 			return ((String)obj).equalsIgnoreCase("OK");
@@ -82,17 +80,17 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定したメッセージに対する返答を待ってブロックする。
 	 * @return 返答が格納されたオブジェクト */
 	synchronized public Object waitForResponseObject(String msgid) {
-		if(DEBUG)System.out.println("waitForResponseObject()");
+		if(Env.debug > 0)System.out.println("waitForResponseObject()");
 		while (!messagePool.containsKey(msgid)) { 
 			//todo registlocal時にこのwhileが無限ループになる
 			//済 2004-08-21 nakajima  while条件文を変更して対処
 			
 			try {
-				if(DEBUG)System.out.println("waitForResponseObject(): waiting...");
+				if(Env.debug > 0)System.out.println("waitForResponseObject(): waiting...");
 				wait(); 
 			} catch (InterruptedException e) {	}
 		}
-		if(DEBUG)System.out.println("waitForResponseObject(): loop quit");
+		if(Env.debug > 0)System.out.println("waitForResponseObject(): loop quit");
 		return messagePool.remove(msgid);
 	}	
 	/** 指定したメッセージに対する返答を待ってブロックする。
@@ -124,21 +122,21 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run()");
+		if (Env.debug > 0) System.out.println("LMNtalRuntimeMessageProcessor.run()");
 		String input;
 		while (true) {
 			try {
 				input = readLine();
 			} catch (IOException e) {
 				System.out.println("LMNtalRuntimeMessageProcessor: ERROR:このスレッドには書けません!");
-				e.printStackTrace();
+				e.printStackTrace(); 
 				break;
 			}
 			if (input == null) {
 				System.out.println("LMNtalRuntimeMessageProcessor: （　´∀｀）＜　inputがぬる");
 				break;
 			}
-			if (DEBUG) System.out.println("LMNtalRuntimeMessageProcessor: in.readLine(): " + input);
+			if (Env.debug > 0) System.out.println("LMNtalRuntimeMessageProcessor.in.readLine(): " + input);
 
 			/* メッセージ:
 			 *   RES msgid 返答
@@ -447,7 +445,7 @@ class InstructionBlockProcessor implements Runnable {
 				} else if (command[0].equals("RECURSIVEUNLOCK")) {
 					mem.recursiveUnlock();
 				} else { //未知の命令
-					System.out.println("unknown body method: " + command[0]);
+					System.out.println("InstructionBlockProcesso.run(): unknown body method: " + command[0]);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
