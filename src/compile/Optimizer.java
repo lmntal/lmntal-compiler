@@ -31,9 +31,9 @@ public class Optimizer {
 					removeUnnecessaryRelink(body);
 				}
 			}
-			if (Env.optimize >= 7) {
-				makeLoop(head, body); //まだ問題だらけ
-			}
+//			if (Env.optimize >= 7) {
+//				makeLoop(head, body); //まだ問題だらけ
+//			}
 		}
 	}
 
