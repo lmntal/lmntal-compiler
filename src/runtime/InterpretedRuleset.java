@@ -52,8 +52,15 @@ class InterpretedReactor {
 			case Instruction.DEREFATOM: //[-dstatom, srcatom, srcpos]
 				break;
 
-			case Instruction.FINDATOM: //[-dstatom, srcmem, funcref]
-				break;
+			case Instruction.FINDATOM: // findatom [-dstatom, srcmem, funcref]
+				func = (Functor)inst.getArg3();
+				it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
+				while (it.hasNext()){
+					Atom a = (Atom)it.next();
+					atoms[inst.getIntArg1()] = a;					
+					if (interpret(insts,pc)) return true;
+				}
+				return false; //n-kato
 
 			case Instruction.GETLINK: //[-link, atom, pos]
 				break;
@@ -61,11 +68,28 @@ class InterpretedReactor {
 
 				//====膜に関係する出力する基本ガード命令 ====ここから====
 			case Instruction.LOCKMEM:
-			case Instruction.LOCALLOCKMEM: //[-dstmem, freelinkatom]
-				break;
+			case Instruction.LOCALLOCKMEM: // lockmem [-dstmem, freelinkatom]
+				AbstractMembrane mem = atoms[inst.getIntArg2()].mem;
+				if (mem.lock(mems[0])) {
+					mems[inst.getIntArg1()] = mem;					
+					if (interpret(insts,pc)) return true;
+					mem.unlock();
+				}
+				return false; //n-kato
+
 			case Instruction.ANYMEM:
-			case Instruction.LOCALANYMEM: //[-dstmem, srcmem] 
-				break;
+			case Instruction.LOCALANYMEM: // anymem [-dstmem, srcmem] 
+				it = mems[inst.getIntArg2()].mems.iterator();
+				while (it.hasNext()){
+					AbstractMembrane submem = (AbstractMembrane)it.next();
+					if (submem.lock(mems[0])) {
+						mems[inst.getIntArg1()] = submem;
+						if (interpret(insts,pc)) return true;
+						submem.unlock();
+					}
+				}
+				return false; //n-kato
+
 			case Instruction.GETMEM: //[-dstmem, srcatom]
 				break;
 			case Instruction.GETPARENT: //[-dstmem, srcmem]
@@ -135,42 +159,99 @@ class InterpretedReactor {
 				break;
 			case Instruction.FREEATOM: //[srcatom]
 				break;
-			case Instruction.ALTERFUNC: //[atom, funcref]
+			case Instruction.ALTERFUNC:
+			case Instruction.LOCALALTERFUNC: //[atom, funcref]
 				break;
-			case Instruction.ALTERFUNCINDIRECT: //[atom, func]
+			case Instruction.ALTERFUNCINDIRECT:
+			case Instruction.LOCALALTERFUNCINDIRECT: //[atom, func]
 				break;
 				//====アトムを操作する基本ボディ命令====ここまで====
 
+				//====アトムを操作する型付き拡張用命令====ここから====
+			case Instruction.ALLOCATOM: //[-dstatom, funcref]
+				break;
+
+			case Instruction.ALLOCATOMINDIRECT: //[-dstatom, func]
+				break;
+
+			case Instruction.COPYATOM:
+			case Instruction.LOCALCOPYATOM: //[-dstatom, mem, srcatom]
+				break;
+
+			case Instruction.ADDATOM:
+			case Instruction.LOCALADDATOM: //[dstmem, atom]
+				break;
+				//====アトムを操作する型付き拡張用命令====ここまで====
+
+				//====膜を操作する基本ボディ命令====ここから====
+			case Instruction.REMOVEMEM:
+			case Instruction.LOCALREMOVEMEM: //[srcmem]
+				break;
+
+			case Instruction.NEWMEM:
+			case Instruction.LOCALNEWMEM: //[-dstmem, srcmem]
+				break;
+
+			case Instruction.NEWROOT: //[-dstmem, srcmem, node]
+				break;
+			case Instruction.MOVECELLS: //[dstmem, srcmem]
+				break;
+			case Instruction.ENQUEUEALLATOMS: //[srcmem]
+				break;
+			case Instruction.FREEMEM: //[srcmem]
+				break;
+
+			case Instruction.ADDMEM:
+			case Instruction.LOCALADDMEM: //[dstmem, srcmem]
+				break;
+
+			case Instruction.UNLOCKMEM:
+			case Instruction.LOCALUNLOCKMEM: //[srcmem]
+				break;
+				//====膜を操作する基本ボディ命令====ここまで====
+
+				//====リンクを操作するボディ命令====ここから====
+			case Instruction.NEWLINK:
+			case Instruction.LOCALNEWLINK: //[atom1, pos1, atom2, pos2]
+				break;
+
+			case Instruction.RELINK:
+			case Instruction.LOCALRELINK: //[atom1, pos1, atom2, pos2]
+				break;
+
+			case Instruction.UNIFYK:
+			case Instruction.LOCALUNIFY: //[atom1, pos1, atom2, pos2]
+				break;
+
+			case Instruction.INHERITLINK:
+			case Instruction.LOCALINHERITLINK: //[atom1, pos1, link2]
+				break;
+				//====リンクを操作するボディ命令====ここまで====
+
+				//====自由リンク管理アトム自動処理のためのボディ命令====ここから====
+			case Instruction.REMOVEPROXIES: //[srcmem]
+				break;
+			case Instruction.REMOVETOPLEVELPROXIES: //[srcmem]
+				break;
+			case Instruction.INSERTPROXIES: //[parentmem,childmem]
+				break;
+			case Instruction.REMOVETEMPORARYPROXIES: //[srcmem]
+				break;
+				//====自由リンク管理アトム自動処理のためのボディ命令====ここまで====
+
+				//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
+			case Instruction.RECURSIVELOCK: //[srcmem]
+				break;
+			case Instruction.RECURSIVEUNLOCK: //[srcmem]
+				break;
+			case Instruction.COPYMEM: //[-dstmem, srcmem]
+				break;
+			case Instruction.DROPMEM: //[srcmem]
+				break;
+				//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
+
 
 				
-			case Instruction.ANYMEM: // anymem [-dstmem, srcmem] 
-				it = mems[inst.getIntArg2()].mems.iterator();
-				while (it.hasNext()){
-					AbstractMembrane submem = (AbstractMembrane)it.next();
-					if (submem.lock(mems[0])) {
-						mems[inst.getIntArg1()] = submem;
-						if (interpret(insts,pc)) return true;
-						submem.unlock();
-					}
-				}
-				return false;
-			case Instruction.FINDATOM: // findatom [-dstatom, srcmem, funcref]
-					func = (Functor)inst.getArg3();
-					it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
-					while (it.hasNext()){
-						Atom a = (Atom)it.next();
-						atoms[inst.getIntArg1()] = a;					
-						if (interpret(insts,pc)) return true;
-					}
-					return false;
-			case Instruction.LOCKMEM: // lockmem [-dstmem, freelinkatom]
-					AbstractMembrane mem = atoms[inst.getIntArg2()].mem;
-					if (mem.lock(mems[0])) {
-						mems[inst.getIntArg1()] = mem;					
-						if (interpret(insts,pc)) return true;
-						mem.unlock();
-					}
-					return false;
 
 
 				//====制御命令====ここから====
@@ -192,11 +273,7 @@ class InterpretedReactor {
 				}
 				InterpretedReactor ir = new InterpretedReactor(bodymems, bodyatoms, new ArrayList());
 				ir.interpret(bodyInsts,0);
-				return true;
-
-				//case Instruction.INLINEREACT:
-
-				//case Instruction.SPEC:
+				return true; //n-kato
 
 			case Instruction.PROCEED:
 				return true;	
@@ -205,20 +282,116 @@ class InterpretedReactor {
 				List subinsts = (List)((List)inst.getArg1()).get(0);
 				//InterpretedReactor iir = new InterpretedReactor(mems,atoms,vars,subinsts);
 				if (interpret(subinsts,0)) return true;
-				break;
+				break; //nakajima
 
 			case Instruction.LOOP:
 				List subinsts = (List)((List)inst.getArg1()).get(0);
 				if (interpret(subinsts, 0)) {
 					//todo: 意味を聞く:「引数列を最後まで実行した場合、このloop命令の実行を繰り返す。」
 				}
-				break;
+				break; //nakajima
 
 			case Instrucion.RUN:
 				List subinsts = (List)((List)inst.getArg1()).get(0);
 				interpret(subinsts, 0);
-				break;
+				break; //nakajima
+
 				//====制御命令====ここまで====
+
+				//====型検査のためのガード命令====ここから====
+			case Instruction.ISGROUND: //[link]
+				break;
+
+			case Instruction.ISINT: //[atom]
+				break;
+			case Instruction.ISFLOAT: //[atom]
+				break;
+			case Instruction.ISSTRING: //[atom]
+				break;
+			case Instruction.ISINTFUNC: //[func]
+				break;
+			case Instruction.ISFLOATFUNC: //[func]
+				break;
+			case Instruction.ISSTRINGFUNC: //[func]
+				break;
+				//====型検査のためのガード命令====ここまで====
+
+				//====整数用の組み込みボディ命令====ここから====
+			case Instruction.IADD: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.ISUB: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.IMUL: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.IDIV: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.INEG: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.IMOD: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.INOT: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.IAND: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.IOR: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.IXOR: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.ISHL: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.ISHR: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.ISAR: //[-dstintatom, intatom1, intatom2]
+				break;
+			case Instruction.IADDFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.ISUBFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.IMULFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.IDIVFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.INEGFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.IMODFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.INOTFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.IANDFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.IORFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.IXORFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.ISHLFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.ISHRFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+			case Instruction.ISARFUNC: //[-dstintfunc, intfunc1, intfunc2]
+				break;
+				//====整数用の組み込みボディ命令====ここまで====
+
+
+				//====整数用の組み込みガード命令====ここから====
+			case Instruction.ILT: //[intatom1, intatom2]
+				break;
+			case Instruction.ILE: //[intatom1, intatom2]
+				break;
+			case Instruction.IGT: //[intatom1, intatom2]
+				break;
+			case Instruction.IGE: //[intatom1, intatom2]
+				break;
+			case Instruction.ILTFUNC: //[intfunc1, intfunc2]
+				break;
+			case Instruction.ILEFUNC: //[intfunc1, intfunc2]
+				break;
+			case Instruction.IGTFUNC: //[intfunc1, intfunc2]
+				break;
+			case Instruction.IGEFUNC: //[intfunc1, intfunc2]
+				break;
+				//====整数用の組み込みガード命令====ここまで====
+
+
 
 			default:
 				System.out.println("Invalid rule");
