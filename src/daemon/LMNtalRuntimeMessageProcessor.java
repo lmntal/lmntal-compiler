@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import runtime.*;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -33,7 +34,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	
 	/** ローカルデーモンに対して REGISTERLOCAL を発行し、返答を待つ */
 	public boolean sendWaitRegisterLocal(String type) {
-		// REGSITERLOCAL MASTER/SLAVE msgid rgid
+		// REGSITERLOCAL (MASTER|SLAVE) msgid rgid
 		String msgid = LMNtalDaemon.makeID();
 		String command = "registerlocal " + type + " " + msgid + " " + rgid + "\n";
 		if (!sendMessage(command)) return false;
@@ -53,12 +54,17 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定のホストにメッセージを送信し、返答を待つ。
 	 * @return 返答がOKかどうか */
 	public boolean sendWait(String fqdn, String command){
-		if(Env.debug > 0)System.out.println("LMNtalRuntimeMessageProcessor.sendWait()");
+		return sendWaitText(fqdn, command).equalsIgnoreCase("OK");
+	}
+	/** 指定のホストにメッセージを送信し、返答を待つ。
+	 * @return 返答に含まれる文字列 */
+	public String sendWaitText(String fqdn, String command){
+		if(Env.debug > 0)System.out.println("LMNtalRuntimeMessageProcessor.sendWaitText()");
 		Object obj = sendWaitObject(fqdn, command);
 		if (obj instanceof String) {
-			return ((String)obj).equalsIgnoreCase("OK");
+			return (String)obj;
 		}
-		return false;
+		return "FAIL";
 	}
 	/** 指定のホストにメッセージを送信し、返答を待つ。
 	 * @return 返答に含まれるオブジェクト */
@@ -89,9 +95,6 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	synchronized public Object waitForResponseObject(String msgid) {
 		if(Env.debug > 0)System.out.println("waitForResponseObject()");
 		while (!messagePool.containsKey(msgid)) { 
-			//todo registlocal時にこのwhileが無限ループになる
-			//済 2004-08-21 nakajima  while条件文を変更して対処
-			
 			try {
 				if(Env.debug > 0)System.out.println("waitForResponseObject(): waiting...");
 				wait(); 
@@ -167,34 +170,34 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				// RES msgid (OK | FAIL | UNCHANGED | RAW bytes \n data)
 				String msgid = parsedInput[1];
 				String content = parsedInput[2];
+				Object res;
 				if (content.equalsIgnoreCase("RAW")) {
 					try {
 						int bytes = Integer.parseInt(parsedInput[3]);
 						byte[] data = readBytes(bytes);
 						readLine();	// 改行文字を読み飛ばす
-						messagePool.put(msgid, data);
+						res = data;
 					} catch (Exception e) {
-						messagePool.put(msgid, "FAIL");
-						continue;
+						res = "FAIL";
 					}
 				}
-				else messagePool.put(msgid, content);
-				//if(DEBUG)System.out.println(messagePool.toString());
-				
-//				Object suspended = blockingObjects.remove(msgid);
-//				if (suspended == null) {
-//					System.out.println(
-//						"ERROR: no objects waiting for message id = " + msgid);
-//					continue;
-//				}
+				else res = content;
 				synchronized(this) {	
-					//if(DEBUG)System.out.println("notifyALL");
+					messagePool.put(msgid, res);
+					//if (Env.debug > 0) System.out.println(res.toString());
+					//if (Env.debug > 0) System.out.println(messagePool.toString());
+					
+//					Object suspended = blockingObjects.remove(msgid);
+//					if (suspended == null) {
+//						System.out.println(
+//							"ERROR: no objects waiting for message id = " + msgid);
+//						continue;
+//					}
+					
+					//if (Env.debug > 0) System.out.println("notifyALL");
 					notifyAll();
 				}
 				continue;
-			//} else if (parsedInput[0].equalsIgnoreCase("REGISTERLOCAL")) {  //「合致しない時」に移動 2004-08-21 nakajima
-			//	System.out.println("invalid message: registerlocal");
-				//continue;
 			} else if (parsedInput[0].equalsIgnoreCase("DUMPHASH")) {
 				// DUMPHASH
 				LMNtalDaemon.dumpHashMap();
@@ -243,7 +246,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 						}
 						InstructionBlockProcessor ibp;
 						ibp = new InstructionBlockProcessor(this, msgid, insts);						
-						new Thread(ibp).run();
+						new Thread(ibp,"ibp").run();
 					} catch (IOException e) {
 						e.printStackTrace();
 						respondAsFail(msgid);
@@ -293,17 +296,6 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				}
 				return;
 			}
-//		} else if (command[0].equalsIgnoreCase("UNLOCK")
-//				 || command[0].equalsIgnoreCase("ASYNCUNLOCK")
-//				 || command[0].equalsIgnoreCase("RECURSIVEUNLOCK")) {
-//			// UNLOCK          globalmemid # ローカルの膜をロック解放	
-//			// ASYNCUNLOCK     globalmemid # ローカルの膜をロック解放
-//			// RECURSIVEUNLOCK globalmemid # ローカルの膜の全世界の子孫膜を再帰的にロック解放
-//			if (command[0].equalsIgnoreCase("UNLOCK"))          mem.unlock();
-//			if (command[0].equalsIgnoreCase("ASYNCUNLOCK"))     mem.asyncUnlock();
-//			if (command[0].equalsIgnoreCase("RECURSIVEUNLOCK")) mem.recursiveUnlock();
-//			respondAsOK(msgid);
-//			return;
 		} else if (command[0].equalsIgnoreCase("RECURSIVELOCK")) {
 			// RECURSIVELOCK globalmemid
 			// ロックしたローカルの膜の全世界の子孫膜を再帰的にロック（キャッシュは更新しない）
@@ -330,6 +322,47 @@ class InstructionBlockProcessor implements Runnable {
 		this.msgid = msgid;
 		this.insts = insts;
 	}
+	//
+	
+	/** リモート（設計中）*/
+	HashSet remoteset = new HashSet();
+
+	////////////////////////////////////////////////////////////////	
+
+	/** グローバル膜ID (String) -> AbstractMembrane */
+	HashMap newMemTable = new HashMap();
+//	/** ローカルアトムIDまたはNEW_ (String) -> Atom */
+//	HashMap newAtomTable = new HashMap();
+
+	/** 指定された膜を表に登録する */
+	public void registerNewMembrane(String globalMemID, AbstractMembrane mem) {
+		newMemTable.put(globalMemID, mem);
+	}
+	/** グローバル膜IDまたはNEW_に対応する膜を探す
+	 * @return Membrane（見つからなかった場合はnull）*/
+	public AbstractMembrane lookupMembrane(String memid) {
+		Object obj = newMemTable.get(memid);
+		if (obj instanceof AbstractMembrane) return (AbstractMembrane)obj;
+		return IDConverter.lookupGlobalMembrane(memid);
+	}
+
+//	/** 指定されたアトムを表に登録する */
+//	public void registerNewAtom(String atomID, Atom atom) {
+//		newAtomTable.put(atomID, atom);
+//	}
+//	/** アトムIDに対応するアトムを探す
+//	 * @param mem 所属膜
+//	 * @return Atom（見つからなかった場合はnull）*/
+//	public Atom lookupAtom(AbstractMembrane mem, String atomid) {
+//		Object obj = newAtomTable.get(atomid);
+//		if (obj instanceof Atom) return (Atom)obj;
+//		if (mem instanceof Membrane) {
+//			return (Atom)((Membrane)mem).lookupAtom(atomid);
+//		}
+//		return null;
+//	}
+	
+	//
 	public void run() {
 		/* ボディ命令:
 		 * 
@@ -338,7 +371,8 @@ class InstructionBlockProcessor implements Runnable {
 		 *   LOADRULESET      dstmemid rulesetid
 		 * 
 		 * [2] アトムの操作
-		 *   NEWATOM          srcmemid NEW_atomid
+		 *   NEWATOM          srcmemid NEW_atomid func
+		 *   NEWFREELINK      srcmemid NEW_atomid
 		 *   ALTERATOMFUNCTOR srcmemid atomid func
 		 *   ENQUEUEATOM      srcmemid atomid
 		 *   REMOVEATOM       srcmemid atomid
@@ -364,8 +398,7 @@ class InstructionBlockProcessor implements Runnable {
 		 *   RECURSIVEUNLOCK  srcmemid
 		 */
 		
-		IDConverter idconv = new IDConverter();
-		boolean result = true;
+		String result = "";	// 新しい子膜およびinside_proxyに対するID代入列を積み込む
 		Iterator it = insts.iterator();
 		while (it.hasNext()) {
 			String input = (String)it.next();
@@ -373,24 +406,66 @@ class InstructionBlockProcessor implements Runnable {
 				String[] command = input.split(" ",6); // RemoteMembrane.send()の引数の個数を参照せよ
 				command[0] = command[0].toUpperCase();
 		
-				//todo （将来） ここで命令を書くのではなくて、Instruction.javaの命令番号を引いてくる。
-				//そして変換表もひける。
-				//案: new InstructionListをする。
-				
-				//案：BEGINからENDまで出てくる引数の中でNEWがつかないものを動的に仮引数リストにいれてやると
-				//InterpretedRulsetのコードが使えるので、そうする？
+//				//todo （将来） ここで命令を書くのではなくて、Instruction.javaの命令番号を引いてくる。
+//				//そして変換表もひける。
+//				//案: new InstructionListをする。
+//				
+//				//案：BEGINからENDまで出てくる引数の中でNEWがつかないものを動的に仮引数リストにいれてやると
+//				//InterpretedRulsetのコードが使えるので、そうする？
 
 				String memid = command[1];
-				AbstractMembrane mem = idconv.lookupMembrane(memid);
-				if (mem == null) {
+				AbstractMembrane m = lookupMembrane(memid);
+				if (m == null) {
+					// 未知の膜の場合、擬似膜の作成を試みる
 					String fqdn = memid.split(":",2)[0];
 					AbstractLMNtalRuntime rt = LMNtalRuntimeManager.connectRuntime(fqdn);
 					if (rt instanceof RemoteLMNtalRuntime) {
 						RemoteLMNtalRuntime rrt = (RemoteLMNtalRuntime)rt;
-						mem = rrt.createPseudoMembrane();
-						idconv.registerNewMembrane(memid,mem);
+						m = rrt.createPseudoMembrane();
+						registerNewMembrane(memid,m);
+					}
+					if (m == null) {
+						throw new RuntimeException("cannot lookup membrane: " + memid);
 					}
 				}
+				
+	// === リモート膜に対するボディ命令の場合 ===
+	
+//[編集中] (n-kato)2004-08-27
+//				if (m instanceof RemoteMembrane) {
+//					// いくつかの例外を除き、その膜のホストに転送するだけ。
+//					// [例外1] このホストに対するNEWROOT命令
+//					if (command[0].equals("NEWROOT") && m.remote == null) {
+//						String nodedesc = command[3];
+//						String fqdn = LMNtalRuntimeManager.nodedescToFQDN(nodedesc);
+//						if (LMNtalNode.isMyself(fqdn)) {
+//							String tmpID = command[2];
+//							AbstractMembrane newmem = m.newRoot(nodedesc);
+//							registerNewMembrane(tmpID,newmem);
+//							result += tmpID + "=" + newmem.getGlobalMemID() + ";";
+//							continue;
+//						}
+//					}
+//					
+//					// 転送先を取得する
+//					if (m.getParent() != null) {
+//						m.remote = m.getParent().remote;
+//					}
+//					else {
+//						m.remote = (RemoteTask)m.getTask();
+//						m.remote.init();
+//						remoteset.add(m.remote);
+//					}
+//				}
+//				// この方式ではローカルの膜も転送する
+//				if (m.remote != null) {
+//					m.remote.send(input);
+//					continue;
+//				}
+
+				Membrane mem = (Membrane)m;
+
+	// === ローカル膜に対するボディ命令の場合 ===
 
 				if (command[0].equals("END")) {
 					//糸冬
@@ -407,35 +482,49 @@ class InstructionBlockProcessor implements Runnable {
 						if (obj instanceof byte[]) {
 							rs = Ruleset.deserialize((byte[])obj);
 						}
-						if (rs == null) throw new RuntimeException("cannot lookup ruleset");
+						if (rs == null) {
+							throw new RuntimeException("cannot lookup ruleset: " + rulesetid);
+						}
 						IDConverter.registerRuleset(rulesetid, rs);
 					}
 					mem.loadRuleset(rs);
 	// [2] アトムの操作
 				} else if (command[0].equals("NEWATOM")) {
+					String tmpID = command[2];
 					Functor func = Functor.deserialize(command[3]);
-					idconv.registerNewAtom(command[2], mem.newAtom(func));
+					Atom newatom = mem.newAtom(func);
+					mem.registerAtom(tmpID,newatom);
+					//idconv.registerNewAtom(tmpID,newatom);
+					if (func.equals(Functor.INSIDE_PROXY)) {
+						result += tmpID + "=" + mem.getAtomID(newatom) + ";";
+					}
 				} else if (command[0].equals("ALTERATOMFUNCTOR")) {
-					Atom atom = idconv.lookupAtom(mem, command[2]);
+					Atom atom = mem.lookupAtom(command[2]);
 					mem.alterAtomFunctor(atom,Functor.deserialize(command[3]));
 				} else if (command[0].equals("REMOTEATOM")) {
-					mem.removeAtom(idconv.lookupAtom(mem, command[2]));
+					mem.removeAtom(mem.lookupAtom(command[2]));
 				} else if (command[0].equals("ENQUEUEATOM")) {
-					mem.enqueueAtom(idconv.lookupAtom(mem, command[2]));
+					mem.enqueueAtom(mem.lookupAtom(command[2]));
 	// [3] 子膜の操作
 				} else if (command[0].equals("NEWMEM")) {
-					idconv.registerNewMembrane(command[2],mem.newMem());
+					String tmpID = command[2];
+					AbstractMembrane newmem = mem.newMem();
+					registerNewMembrane(tmpID,newmem);
+					result += tmpID + "=" + newmem.getGlobalMemID() + ";";
 				} else if (command[0].equals("REMOVEMEM")) {
-					mem.removeMem(idconv.lookupMembrane(command[2]));
+					mem.removeMem(lookupMembrane(command[2]));
 				} else if (command[0].equals("NEWROOT")) {
-					idconv.registerNewMembrane(command[2], mem.newRoot(command[3]));
+					String tmpID = command[2];
+					AbstractMembrane newmem = mem.newRoot(command[3]);
+					registerNewMembrane(tmpID,newmem);
+					result += tmpID + "=" + newmem.getGlobalMemID() + ";";
 	// [4] リンクの操作
 				} else if (command[0].equals("NEWLINK")
 						 || command[0].equals("RELINKATOMARGS")
 						 || command[0].equals("UNIFYATOMARGS")) {
-					Atom atom1 = idconv.lookupAtom(mem,command[2]);
+					Atom atom1 = mem.lookupAtom(command[2]);
 					int pos1 = Integer.parseInt(command[3]);
-					Atom atom2 = idconv.lookupAtom(mem,command[4]);
+					Atom atom2 = mem.lookupAtom(command[4]);
 					int pos2 = Integer.parseInt(command[5]);
 					if (command[0].equals("NEWLINK")) {
 						mem.newLink(atom1,pos1,atom2,pos2);
@@ -445,12 +534,14 @@ class InstructionBlockProcessor implements Runnable {
 						mem.unifyAtomArgs(atom1,pos1,atom2,pos2);
 					}
 	// [5] 膜自身や移動に関する操作 
-				} else if (command[0].equals("ACTIVATE")) { // ENQUEUEMEMボディ命令に対応
+				} else if (command[0].equals("ACTIVATE")) { // ENQUEUEMEMボディ命令に対応（todo 名称変更？）
 					mem.activate();
 				} else if (command[0].equals("MOVECELLSFROM")) {
-					mem.moveCellsFrom(idconv.lookupMembrane(command[2]));
+					// todo 【実装】command[2]がリモート膜の場合、内容を取得しなければならない。
+					mem.moveCellsFrom(lookupMembrane(command[2]));
 				} else if (command[0].equals("MOVETO")) {
-					mem.moveTo(idconv.lookupMembrane(command[2]));
+					mem.moveTo(lookupMembrane(command[2]));
+					// todo 【検証】flushの前後関係が正しいかどうか確認する
 	// [6] ロック解放操作
 				} else if (command[0].equals("UNLOCK")) {
 					mem.unlock();
@@ -459,14 +550,28 @@ class InstructionBlockProcessor implements Runnable {
 				} else if (command[0].equals("RECURSIVEUNLOCK")) {
 					mem.recursiveUnlock();
 				} else { //未知の命令
-					System.out.println("InstructionBlockProcesso.run(): unknown body method: " + command[0]);
+					System.out.println("InstructionBlockProcessor.run(): unknown body method: "
+						+ command[0] + "\n\tin CMD = " + input);
+					result = "FAIL;" + result;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println("CMD = " + input);
-				result = false;
+				result = "FAIL;" + result;
 			}
 		}
+		flush();
+		// 返答
+		if (result.length() > 0) result = result.substring(0, result.length() - 1);
 		remote.respond(msgid,result);
+	}
+	/** リモートに命令ブロックを転送し、返答が来るまでブロックする */
+	void flush() {
+		Iterator it = remoteset.iterator();
+		while (it.hasNext()) {
+			RemoteTask innerremote = (RemoteTask)it.next();
+			innerremote.flush();
+		}
+		remoteset.clear();
 	}
 }

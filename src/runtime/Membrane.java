@@ -13,8 +13,18 @@ import util.Stack;
 public final class Membrane extends AbstractMembrane {
 	/** 実行アトムスタック */
 	private Stack ready = new Stack();
-	/** アトムID (String) -> Atom */
-	private HashMap atomTable = new HashMap();
+	
+	/** リモートホストとの通信でこの膜のアトムを同定するときに使用されるatomidの表。
+	 * <p>atomid (String) -> Atom
+	 * <p>この膜のキャッシュ送信後、この膜の連続するロック期間中のみ有効。
+	 * キャッシュ送信時に初期化され、引き続くリモートホストからの要求を解釈するために使用される。
+	 * リモートホストからの要求で新しくアトムが作成されると、受信したNEW_をキーとするエントリが追加される。
+	 * $inside_proxyアトムの場合、命令ブロックの返答のタイミングでローカルIDで上書きされる。
+	 * $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
+	 * @see Atom.remoteid */
+	protected HashMap atomTable = new HashMap();
+
+	//
 	
 	/** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
 	private Membrane(AbstractTask task, AbstractMembrane parent) {
@@ -34,41 +44,41 @@ public final class Membrane extends AbstractMembrane {
 
 	// ボディ操作1 - ルールの操作
 	
-	/** ルールを全て消去する */
-	public void clearRules() {
-		if (task.remote == null) super.clearRules();
-		else task.remote.send("CLEARRULES",this);
-	}
-	/** srcMemにあるルールをこの膜にコピーする。 */
-	public void copyRulesFrom(AbstractMembrane srcMem) {
-		if (task.remote == null) super.copyRulesFrom(srcMem);
-		else task.remote.send("COPYRULESFROM",this,srcMem.getGlobalMemID());
-		// todo RemoteMembraneのやり方（最初の段階でLOADRULESETに展開する方式）に合わせる
-	}
-	/** ルールセットを追加 */
-	public void loadRuleset(Ruleset srcRuleset) {
-		if (task.remote == null) super.loadRuleset(srcRuleset);
-		else task.remote.send("LOADRULESET",this,srcRuleset.getGlobalRulesetID());
-	}
+//	/** ルールを全て消去する */
+//	public void clearRules() {
+//		if (remote == null) super.clearRules();
+//		else remote.send("CLEARRULES",this);
+//	}
+//	/** srcMemにあるルールをこの膜にコピーする。 */
+//	public void copyRulesFrom(AbstractMembrane srcMem) {
+//		if (remote == null) super.copyRulesFrom(srcMem);
+//		else remote.send("COPYRULESFROM",this,srcMem.getGlobalMemID());
+//		// todo RemoteMembraneのやり方（最初の段階でLOADRULESETに展開する方式）に合わせる
+//	}
+//	/** ルールセットを追加 */
+//	public void loadRuleset(Ruleset srcRuleset) {
+//		if (remote == null) super.loadRuleset(srcRuleset);
+//		else remote.send("LOADRULESET",this,srcRuleset.getGlobalRulesetID());
+//	}
 
 	// ボディ操作2 - アトムの操作
 
-	/** 新しいアトムを作成し、この膜に追加する。*/
-	public Atom newAtom(Functor functor) {
-		if (task.remote == null) return super.newAtom(functor);
-		else task.remote.send("NEWATOM",this,functor.toString());
-		return null;	// todo なんとかする（local-remote-local 問題）
-	}
-	/** （所属膜を持たない）アトムをこの膜に追加する。*/
-	public void addAtom(Atom atom) {
-		if (task.remote == null) super.addAtom(atom);
-		else task.remote.send("ADDATOM", this);
-	}
-	/** 指定されたアトムの名前を変える */
-	public void alterAtomFunctor(Atom atom, Functor func) {
-		if (task.remote == null) super.alterAtomFunctor(atom,func);
-		else task.remote.send("ALTERATOMFUNCTOR", this, atom + " " + func.serialize());
-	}
+//	/** 新しいアトムを作成し、この膜に追加する。*/
+//	public Atom newAtom(Functor functor) {
+//		if (remote == null) return super.newAtom(functor);
+//		else remote.send("NEWATOM",this,functor.toString());
+//		return null;	// todo なんとかする（local-remote-local 問題）
+//	}
+//	/** （所属膜を持たない）アトムをこの膜に追加する。*/
+//	public void addAtom(Atom atom) {
+//		if (remote == null) super.addAtom(atom);
+//		else remote.send("ADDATOM", this);
+//	}
+//	/** 指定されたアトムの名前を変える */
+//	public void alterAtomFunctor(Atom atom, Functor func) {
+//		if (remote == null) super.alterAtomFunctor(atom,func);
+//		else remote.send("ALTERATOMFUNCTOR", this, atom + " " + func.serialize());
+//	}
 
 	/** 
 	 * 指定されたアトムをこの膜の実行アトムスタックに追加する。
@@ -108,8 +118,6 @@ public final class Membrane extends AbstractMembrane {
 		atoms.remove(atom);
 		atom.mem = null;
 	}
-	
-
 
 	/** この膜をdstMemに移動し、活性化する。*/
 	public void moveTo(AbstractMembrane dstMem) {
@@ -125,10 +133,10 @@ public final class Membrane extends AbstractMembrane {
 
 	/** 新しい子膜を作成し、活性化する */
 	public AbstractMembrane newMem() {
-		if (task.remote != null) {
-			task.remote.send("NEWMEM",this);
-			return null; // todo
-		}
+//		if (remote != null) {
+//			remote.send("NEWMEM",this);
+//			return null; // todo
+//		}
 		Membrane m = new Membrane(task, this);
 		mems.add(m);
 		// 親膜と同じ実行膜スタックに積む
@@ -150,22 +158,22 @@ public final class Membrane extends AbstractMembrane {
 		return m;		
 	}
 	
-	/** 指定された子膜をこの膜から除去する。
-	 * <strike>実行膜スタックは操作しない。</strike>
-	 * 実行膜スタックに積まれていれば取り除く。 */
-	public void removeMem(AbstractMembrane mem) {
-		if (task.remote == null) super.removeMem(mem);
-		else task.remote.send("REMOVEMEM", this, mem.getGlobalMemID());
-	}
-	/** 指定されたノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
-	 * @param node ノード名を表す文字列
-	 * @return 作成されたルート膜
-	 */
-	public AbstractMembrane newRoot(String node) {
-		if (task.remote == null) return super.newRoot(node);
-		else task.remote.send("NEWROOT", this, node);
-		return null;	// todo なんとかする（local-remote-local 問題）
-	}
+//	/** 指定された子膜をこの膜から除去する。
+//	 * <strike>実行膜スタックは操作しない。</strike>
+//	 * 実行膜スタックに積まれていれば取り除く。 */
+//	public void removeMem(AbstractMembrane mem) {
+//		if (remote == null) super.removeMem(mem);
+//		else remote.send("REMOVEMEM", this, mem.getGlobalMemID());
+//	}
+//	/** 指定されたノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
+//	 * @param node ノード名を表す文字列
+//	 * @return 作成されたルート膜
+//	 */
+//	public AbstractMembrane newRoot(String node) {
+//		if (remote == null) return super.newRoot(node);
+//		else remote.send("NEWROOT", this, node);
+//		return null;	// todo なんとかする（local-remote-local 問題）
+//	}
 	
 	// ボディ操作5 - 膜自身や移動に関する操作
 
@@ -199,20 +207,15 @@ public final class Membrane extends AbstractMembrane {
 	/**
 	 * この膜のロック取得を試みる。
 	 * <p>ルールスレッドがこの膜のロックを取得するときに使用する。
+	 * <p>成功したら親膜のリモートを継承する。
+	 * したがってルールスレッドは、本膜をロックした場合ただちにリモートをnullに設定すること。
 	 * @return ロックの取得に成功したかどうか */
 	synchronized public boolean lock() {
 		if (locked) {
 			return false;
 		} else {
-//			if (isRoot() && parent != null) {
-//				if (parent.task.remote == null) {
-//					task.remote = (RemoteTask)task;
-//				}
-//				else {
-//					task.remote = parent.task.remote;
-//				}
-//			}
 			locked = true;
+			if (parent != null) remote = parent.remote;
 			return true;
 		}
 	}
@@ -221,6 +224,7 @@ public final class Membrane extends AbstractMembrane {
 	 * 失敗した場合、この膜を管理するタスクのルールスレッドに停止要求を送る。その後、
 	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
 	 * <p>ルールスレッド以外のスレッドが2つ目以降のロックとしてこの膜のロックを取得するときに使用する。
+	 * <p>成功したら親膜のリモートを継承する。
 	 * @return つねにtrue */
 	public boolean blockingLock() {
 		if (lock()) return true;
@@ -240,10 +244,12 @@ public final class Membrane extends AbstractMembrane {
 	/**
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックを取得し、実行膜スタックから除去する。
 	 * <p>ルールスレッド以外のスレッドが最初のロックとしてこの膜のロックを取得するときに使用する。
+	 * <p>成功したらリモートをnullに設定する。
 	 * @return つねにtrue */
 	public boolean asyncLock() {
 		if (!isRoot()) parent.asyncLock();
 		blockingLock();
+		remote = null;
 		if (isRoot()) {
 			// task.async = new Async();
 		}
@@ -279,7 +285,7 @@ public final class Membrane extends AbstractMembrane {
 		}
 		return false;
 	}
-	
+
 	// - ボディ命令
 	
 	/**
@@ -328,7 +334,7 @@ public final class Membrane extends AbstractMembrane {
 	}
 
 	///////////////////////////////	
-	// LocalMembrane で定義されるメソッド
+	// Membrane で定義されるメソッド
 	
 //	// 本膜かどうか
 //	boolean isCurrent() { return getTask().memStack.peek() == this; }
@@ -351,17 +357,30 @@ public final class Membrane extends AbstractMembrane {
 	/** この膜のキャッシュを表すバイト列を取得する。
 	 * @see RemoteMembrane#updateCache() */
 	public byte[] cache() {
-		return new byte[0];	// TODO 【実装】（有志A）1/2
-		// （初期の案）以下をカンマで連結する
-		// アトム      -> atomid:functortext( リンク先atomid:pos, ... )
-		// 子膜        -> globalMemID:{ inside_proxyのatomid, ... }
-		// ルールセット -> globalRulesetID
 		
-		// このタイミングで、atomTableを更新する。子膜の自由リンクについては要検討
+		// atomTableを更新する // 子膜の自由リンクについては要検討
+		atomTable.clear();
+		Iterator it = atomIterator();
+		while (it.hasNext()) {
+			Atom atom = (Atom)it.next();
+			atomTable.put(atom.getLocalID(), atom);
+		}
+		
+		return new byte[0];	// TODO 【実装】（有志A）1/2
+		// （次の案）以下をカンマで連結する
+		// アトム      -> atomid:functortext( リンク先atomid:pos, ... )
+		// 子膜        -> [host:]localmemid:{ inside_proxyのatomid, ... }
+		// ルールセット -> globalRulesetID
+		// host:localmemid が globalmemid。host:はルート膜のときのみ付加される。
+		
 	}
 	/** アトムIDに対応するアトムを取得する */
 	public Atom lookupAtom(String atomid) {
 		return (Atom)atomTable.get(atomid);
 	}
+	/** アトムIDに対応するアトムを登録する */
+	public void registerAtom(String atomid, Atom atom) {
+		atomTable.put(atomid, atom);
+	}
 }
-// TODO local-remote-local 問題を解決する
+// todo 【検証】local-remote-local 問題が解決したかどうか調べる

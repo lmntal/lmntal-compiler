@@ -66,7 +66,10 @@ class Task extends AbstractTask implements Runnable {
 	protected Thread thread = new Thread(this, "Task");
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
+	/** 仮の実行膜スタック */
 	Stack bufferedStack = new Stack();
+	/** 本膜が存在しないかまたは本膜のロックが取得できないため、
+	 * ルールスレッドがルールを適用できないときにtrue */
 	boolean idle = false;
 	static final int maxLoop = 100;
 	/** タスクの優先度（正確には、このタスクのルールスレッドの優先度）
@@ -82,13 +85,14 @@ class Task extends AbstractTask implements Runnable {
 		memStack.push(root);
 	}
 
-	/** 指定した親膜を持つ新しいルート膜および対応するタスク（スレーブタスク）を作成する
+	/** 指定した親膜を持つ新しいロックされたルート膜および対応するタスク（スレーブタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）
 	 * @param parent 親膜 */
 	Task(AbstractLMNtalRuntime runtime, AbstractMembrane parent) {
 		super(runtime);
 		root = new Membrane(this);
-		root.lock();
+		root.locked = true;
+		root.remote = parent.remote;
 		root.activate(); 		// 仮の実行膜スタックに積む
 		parent.addMem(root);	// タスクは膜の作成時に設定した
 		thread.run();
@@ -130,6 +134,7 @@ class Task extends AbstractTask implements Runnable {
 				idle = true;
 				return;
 			}
+			mem.remote = null;
 		}
 		// 実行
 		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){

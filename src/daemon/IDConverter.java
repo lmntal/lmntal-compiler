@@ -8,8 +8,6 @@ import runtime.*;
 /**
  * グローバルID -> ローカルのobject という変換をするクラス（設計中）
  * 
- * <p>NEW_->objectの変換は、別途行う。
- * 
  * @author nakajima, n-kato
  *
  */
@@ -46,50 +44,7 @@ public class IDConverter {
 		return (AbstractMembrane)memTable.get(globalMemID);
 	}
 
-	////////////////////////////////////////////////////////////////	
-	
-	/** グローバル膜ID (String) -> AbstractMembrane */
-	HashMap newMemTable = new HashMap();
-	/** ローカルアトムIDまたはNEW_ (String) -> Atom */
-	HashMap newAtomTable = new HashMap();
-	
-	////////////////////////////////////////////////////////////////
 
-//	void clear() {
-//		newMemTable.clear();
-//		newAtomTable.clear();
-//	}
-	
-	////////////////////////////////////////////////////////////////
-
-	/** 指定された膜を表に登録する */
-	public void registerNewMembrane(String globalMemID, AbstractMembrane mem) {
-		newMemTable.put(globalMemID, mem);
-	}
-	/** グローバル膜IDまたはNEW_に対応する膜を探す
-	 * @return Membrane（見つからなかった場合はnull）*/
-	public AbstractMembrane lookupMembrane(String memid) {
-		Object obj = newMemTable.get(memid);
-		if (obj instanceof AbstractMembrane) return (AbstractMembrane)obj;
-		return (AbstractMembrane)memTable.get(memid);
-	}
-
-	/** 指定されたアトムを表に登録する */
-	public void registerNewAtom(String atomID, Atom atom) {
-		newAtomTable.put(atomID, atom);
-	}
-	/** アトムIDに対応するアトムを探す
-	 * @param mem 所属膜
-	 * @return Atom（見つからなかった場合はnull）*/
-	public Atom lookupAtom(AbstractMembrane mem, String atomid) {
-		Object obj = newAtomTable.get(atomid);
-		if (obj instanceof Atom) return (Atom)obj;
-		if (mem instanceof Membrane) {
-			return (Atom)((Membrane)mem).lookupAtom(atomid);
-		}
-		return null;
-	}
-	
 	////////////////////////////////////////////////////////////////
 	
 	/*

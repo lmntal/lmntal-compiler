@@ -29,8 +29,13 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	/** このアトムのローカルID */
 	private int id;
 	
-	/** リモートにおけるこのアトムのローカルID（リモートが存在しない場合は未定義）
-	 * <p>リモート ＝ mem.task.remote */
+	/** リモートホストとの通信で使用されるこのアトムのID。リモート膜に所属するときのみ使用される。
+	 * <p>所属膜のキャッシュ受信後、所属膜の連続するロック期間中のみ有効。
+	 * キャッシュ受信時に初期化され、引き続くリモートホストへの要求を構築するために使用される。
+	 * リモートホストへの要求で新しくアトムが作成されると、ローカルでNEW_が代入される。
+	 * $inside_proxyアトムの場合、命令ブロックの返答を受けてリモート側のローカルIDで上書きされる。
+	 * $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
+	 * @see Membrane.atomTable */
 	protected String remoteid;
 
 	///////////////////////////////

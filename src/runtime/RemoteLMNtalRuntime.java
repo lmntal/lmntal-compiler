@@ -37,17 +37,15 @@ public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	public AbstractTask newTask(AbstractMembrane parent) {
 		if(Env.debug > 0 )System.out.println("RemoteLMNtalRuntime.newTask()");
 		RemoteTask task = new RemoteTask(this, parent);
-		if (parent.task.remote == null) {
-			task.remote = task;
+		RemoteMembrane newroot = (RemoteMembrane)task.getRoot();
+		if (newroot.remote == null) {
+			// 新しいタスクをしばらく転送先として使用するために初期化する
+			newroot.remote = task;
 			task.init();
 		}
-		else {
-			task.remote = parent.task.remote;
-		}
-		String newmemid = task.remote.generateNewID();
-		((RemoteMembrane)task.root).globalid = newmemid;
-		//String parentmemid = daemon.IDConverter.getGlobalMembraneID(parent);
-		task.remote.send("NEWROOT",newmemid,parent,hostname);
+		String newmemid = newroot.remote.generateNewID();
+		newroot.globalid = newmemid;
+		newroot.remote.send("NEWROOT",newmemid,parent,hostname); // 親膜への命令を子ホストに送る
 		return task;
 	}
 	

@@ -10,13 +10,15 @@ import java.util.Iterator;
  * @author n-kato
  */
 public final class RemoteMembrane extends AbstractMembrane {
-	/** この膜のグローバルIDまたはNEW_n（ルート膜でない場合、親膜のロック取得時のみ有効）*/
+	/** この膜のグローバルIDまたはNEW_n
+	 * （ルート膜や擬似膜でない場合、親膜の連続するロック取得期間中のみ有効）
+	 * <p>Atomのremoteid に対応している */
 	protected String globalid;
 	
 //	/** この膜のアトムからリモートIDまたはNEW_nへの写像 (Atom -> String) */
-//	protected HashMap atomids = new HashMap();
+//	protected HashMap atomids = new HashMap();	// Atom.remoteid に移管
 //	/** この膜の子膜からリモートIDへの写像 (AbstractMembrane -> String) */
-//	protected HashMap memids = new HashMap();
+//	protected HashMap memids = new HashMap();	// Membrane.globalid に移管
 
 	/** 仮ロック状態かどうか。簡単のため、ルート膜のみが仮ロック状態になれるものとする。
 	 * （リモートではロックされていると見なし、ローカルではロック解放されているとみなす状態のこと）*/
@@ -61,7 +63,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 	// ボディ操作1 - ルールの操作
 
 	public void clearRules() {
-		task.remote.send("CLEARRULES",this);
+		remote.send("CLEARRULES",this);
 		super.clearRules();
 	}
 
@@ -69,13 +71,13 @@ public final class RemoteMembrane extends AbstractMembrane {
 		Iterator it = srcMem.rulesetIterator();
 		while (it.hasNext()) {
 			Ruleset rs = (Ruleset) it.next();
-			task.remote.send("LOADRULESET", this, rs.getGlobalRulesetID());
+			remote.send("LOADRULESET", this, rs.getGlobalRulesetID());
 		}
 		super.copyRulesFrom(srcMem);
 	}
 	/** ルールセットを追加 */
 	public void loadRuleset(Ruleset srcRuleset) {
-		task.remote.send("LOADRULESET", this, srcRuleset.getGlobalRulesetID());
+		remote.send("LOADRULESET", this, srcRuleset.getGlobalRulesetID());
 		super.loadRuleset(srcRuleset);
 	}
 
@@ -84,25 +86,26 @@ public final class RemoteMembrane extends AbstractMembrane {
 	/** 新しいアトムを作成し、この膜に追加し、この膜の実行アトムスタックに入れる。 */
 	public Atom newAtom(Functor func) {
 		Atom atom = super.newAtom(func);
-		String atomid = task.remote.generateNewID();
+		String atomid = remote.generateNewID();
 		//atomids.put(atom,atomid);
 		atom.remoteid = atomid;
-		task.remote.send("NEWATOM", atomid, this, func.serialize());
+		remote.send("NEWATOM", atomid, this, func.serialize());
+		if (func.equals(Functor.INSIDE_PROXY)) remote.registerAtom(atomid, atom);
 		return atom;
 	}
 	public void alterAtomFunctor(Atom atom, Functor func) {
-		task.remote.send("ALTERATOMFUNCTOR", this, getAtomID(atom) + " " + func.serialize());
+		remote.send("ALTERATOMFUNCTOR", this, getAtomID(atom) + " " + func.serialize());
 		super.alterAtomFunctor(atom, func);
 	}
 	public void removeAtom(Atom atom) {
-		task.remote.send("REMOVEATOM", this, getAtomID(atom));
+		remote.send("REMOVEATOM", this, getAtomID(atom));
 		super.removeAtom(atom);
 	}
 	/** 指定されたアトムをこの膜の実行アトムスタックに積む */
 	public void enqueueAtom(Atom atom) {
 		String atomid = getAtomID(atom);
 		if (atomid != null) { // AbstractMembrane#addAtomからの呼び出しは無視する
-			task.remote.send("ENQUEUEATOM", this, atomid);
+			remote.send("ENQUEUEATOM", this, atomid);
 		}
 	}
 	/** リモートのmoveCellsFromで行われるため何もしなくてよい */
@@ -113,48 +116,48 @@ public final class RemoteMembrane extends AbstractMembrane {
 
 	/** 新しい子膜を作成する */
 	public AbstractMembrane newMem() {
-		String newglobalid = task.remote.generateNewID();
+		String newglobalid = remote.generateNewID();
 		RemoteMembrane submem = new RemoteMembrane((RemoteTask)task, this, newglobalid);
 		//memids.put(submem.globalid, newglobalid);
 		mems.add(submem);
-		task.remote.send("NEWMEM", newglobalid, this);
-		//task.registerMem(newglobalid, submem.globalid);//←転送先が行うのであるから不要
+		remote.send("NEWMEM", newglobalid, this);
+		remote.registerMem(newglobalid, submem);
 		return submem;
 	}
 
 	public void removeMem(AbstractMembrane mem) {
-		task.remote.send("REMOVEMEM", this, mem.getGlobalMemID());
+		remote.send("REMOVEMEM", this, mem.getGlobalMemID());
 		super.removeMem(mem);
 	}
 
 	// ボディ操作4 - リンクの操作
 
 	public void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
-		task.remote.send("NEWLINK", this,
+		remote.send("NEWLINK", this,
 			getAtomID(atom1), pos1,
 			getAtomID(atom2), pos2);
 		super.newLink(atom1, pos1, atom2, pos2);
 	}
 	public void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		task.remote.send("RELINKATOMARGS", this,
+		remote.send("RELINKATOMARGS", this,
 			getAtomID(atom1), pos1,
 			getAtomID(atom2), pos2);
 		super.relinkAtomArgs(atom1, pos1, atom2, pos2);
 	}
 	public void inheritLink(Atom atom1, int pos1, Link link2) {
-		task.remote.send("INHERITLINK", this,
+		remote.send("RELINKATOMARGS", this,
 			getAtomID(atom1), pos1,
 			getAtomID(link2.getAtom()), link2.getPos());
 		super.inheritLink(atom1, pos1, link2);
 	}
 	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		task.remote.send("UNIFYATOMARGS", this,
+		remote.send("UNIFYATOMARGS", this,
 			getAtomID(atom1), pos1,
 			getAtomID(atom2), pos2);
 		super.unifyAtomArgs(atom1, pos1, atom2, pos2);
 	}
 	public void unifyLinkBuddies(Link link1, Link link2) {
-		task.remote.send("UNIFYLINKBUDDIES", this,
+		remote.send("UNIFYATOMARGS", this,
 			getAtomID(link1.getAtom()), link1.getPos(),
 			getAtomID(link2.getAtom()), link2.getPos());
 		super.unifyLinkBuddies(link1, link2);
@@ -163,23 +166,28 @@ public final class RemoteMembrane extends AbstractMembrane {
 	// ボディ操作5 - 膜自身や移動に関する操作
 
 	public void activate() {
-		task.remote.send("ACTIVATE",this);
+		remote.send("ACTIVATE",this);
 	}
 
 	public void moveCellsFrom(AbstractMembrane srcMem) {
+		//todo 実装
+		
 		if (srcMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site remote process fusion not implemented");
 		}
-		task.remote.send("MOVECELLSFROM", this, srcMem.getGlobalMemID());
+		remote.send("MOVECELLSFROM", this, srcMem.getGlobalMemID());
+		remote.flush();
 	}
 
 	/** dstMemに移動 */
 	public void moveTo(AbstractMembrane dstMem) {
+		//todo 実装
+		
 		if (dstMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site remote process migration not implemented");
 		}
 		// remote call of a local process migration
-		task.remote.send("MOVETO", this, dstMem.getGlobalMemID());
+		remote.send("MOVETO", this, dstMem.getGlobalMemID());
 		super.moveTo(dstMem);
 	}
 
@@ -206,7 +214,8 @@ public final class RemoteMembrane extends AbstractMembrane {
 		// 優先度無限大と見なすのでロックは解放できないことになっているので大丈夫。
 		if (!doLock("BLOCKINGLOCK")) return false;
 		onLock(false);
-		return true;	}
+		return true;
+	}
 	/** 非同期的にロックする。ルート膜の親膜を活性化するときなどに使用される。
 	 * 先祖膜のキャッシュは更新しない。*/
 	public boolean asyncLock() {
@@ -221,24 +230,24 @@ public final class RemoteMembrane extends AbstractMembrane {
 	// - ボディ命令
 	
 	public void unlock() {
-		if (false && isRoot() && task.remote.cmdbuffer.length() == 0) {
+		if (false && isRoot() && remote.cmdbuffer.length() == 0) {
 			fUnlockDeferred = true;
 		}
 		else {
-			task.remote.send("UNLOCK",this);
+			remote.send("UNLOCK",this);
 			onUnlock(false);
 		}
 	}
 	public void forceUnlock() {
-		task.remote.send("UNLOCK",this);
+		remote.send("UNLOCK",this);
 		onUnlock(false);
 	}
 	public void asyncUnlock() {
-		task.remote.send("ASYNCUNLOCK",this);
+		remote.send("ASYNCUNLOCK",this);
 		onUnlock(true);
 	}
 	public void recursiveUnlock() {
-		task.remote.send("RECURSIVEUNLOCK",this);
+		remote.send("RECURSIVEUNLOCK",this);
 	}
 
 	///////////////////////////////	
@@ -263,17 +272,20 @@ public final class RemoteMembrane extends AbstractMembrane {
 	private void onLock(boolean signal) {
 		locked = true;
 		if (signal || isRoot()) {
-			if (parent == null || parent.task.remote == null) {
-				task.remote = (RemoteTask)task;
-				task.remote.init();							// 命令ブロックの積み上げを開始する
+			if (signal || parent == null || parent.remote == null) {
+				remote = (RemoteTask)task;
+				remote.init();							// 命令ブロックの積み上げを開始する
 			}
+		} else {
+			remote = parent.remote;
 		}
 	}
 	private void onUnlock(boolean signal) {
 		if (signal || isRoot()) {
-			if (task.remote == task) task.remote.flush();	// 命令ブロックの積み上げを終了する
-			task.remote = null;
+			if (remote == task) remote.flush();	// 命令ブロックの積み上げを終了する
 		}
+		remote = null;
+		locked = false;
 	}
 	/** キャッシュを更新する
 	 * @see Membrane#cache() */
@@ -294,6 +306,12 @@ public final class RemoteMembrane extends AbstractMembrane {
 		String host = task.runtime.hostname;
 		String msg = cmd + " " + getGlobalMemID();
 		return LMNtalRuntimeManager.daemon.sendWait(host,msg);
+	}
+	/** メッセージを直接送信し、返答を待ってブロックする。（仮）*/
+	String sendWaitText(String cmd) {
+		String host = task.runtime.hostname;
+		String msg = cmd + " " + getGlobalMemID();
+		return LMNtalRuntimeManager.daemon.sendWaitText(host,msg);
 	}
 	/** メッセージを直接送信し、返答を待ってブロックする。（仮）*/
 	Object sendWaitObject(String cmd) {

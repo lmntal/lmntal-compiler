@@ -1,12 +1,12 @@
 package runtime;
 
-//import java.util.HashMap;
+import java.util.HashMap;
+
+import daemon.IDConverter;
 
 /**
  * リモートタスククラス
  * <p>命令ブロックを管理する。
- * <p>
- * 済20040707 nakajima コネクションの管理はRemoteMachineにまかせる。
  * @author n-kato
  */
 public final class RemoteTask extends AbstractTask {
@@ -17,10 +17,15 @@ public final class RemoteTask extends AbstractTask {
 //	// 受信用
 //	HashMap memTable;
 
-	/** 通常のコンストラクタ */
+	/** 通常のコンストラクタ。
+	 * <p>指定した親膜を持つ新しいロックされたリモートのルート膜および対応するリモートタスクを作成する
+	 * @param runtime 作成したタスクを実行するランタイムに対応するリモートランタイム
+	 * @param parent 親膜 */
 	RemoteTask(RemoteLMNtalRuntime runtime, AbstractMembrane parent){
 		super(runtime);
 		root = new RemoteMembrane(this, parent);
+		root.locked = true;
+		root.remote = parent.remote;
 		parent.addMem(root);	// タスクは膜の作成時に設定した
 	}
 	/** 擬似タスク作成用のコンストラクタ（擬似タスクはroot=null）
@@ -45,13 +50,15 @@ public final class RemoteTask extends AbstractTask {
 	}
 
 	/** 命令ブロック送信用バッファを初期化する */
-	void init() {
+	public void init() {
 		cmdbuffer = "";
 		nextid = 0;
+		memTable.clear();
+		atomTable.clear();
 	}
 
 	/**	命令ブロック送信用バッファにボディ命令を追加する */
-	void send(String cmd) {
+	public void send(String cmd) {
 		cmdbuffer += cmd + "\n";
 	}
 	
@@ -76,23 +83,50 @@ public final class RemoteTask extends AbstractTask {
 	/**
 	 * 命令ブロック送信用バッファの内容をリモートに送信する
 	 * <p>
-	 * (n-kato) synchronizedはなぜ付いているのか？
-	 * (nakajima)不要ですね。cmdは複数スレッドによって書き込まれるかと思っていましたが、その可能性はないので消しました 2004-08-25
-	 * 
 	 * @throws RuntimeException 通信失敗（fatal）
 	 */
-	void flush() {
-		String cmd = "BEGIN\n" + cmdbuffer + "END"; 
-		boolean result = LMNtalRuntimeManager.daemon.sendWait(runtime.hostname, cmd);
-		if (!result) {
-			throw new RuntimeException("RemoteTask: error in flush()");
+	// synchronized (n-kato) synchronizedはなぜ付いていたのか？
+	public void flush() {
+		String cmd = "BEGIN\n" + cmdbuffer + "END";
+		String result = LMNtalRuntimeManager.daemon.sendWaitText(runtime.hostname, cmd);
+		if (result.substring(4).equalsIgnoreCase("FAIL")) {
+			throw new RuntimeException("RemoteTask.flush(): failed in remote method call");
 		}
+		// BEGINメッセージに対する返答を解釈する
+		String[] binds = result.split(";");
+		for (int i = 0; i < binds.length; i++) {
+			String[] args = binds[i].split("=",2);
+			String tmpid = args[0];
+			String newid = args[1];
+			// todo もう少し拡張性の高い識別方法を考える。おそらくNEW_を分化させればよいはず。
+			if (newid.charAt(':') >= 0) {
+				RemoteMembrane mem = (RemoteMembrane)memTable.get(tmpid);
+				if (mem != null) IDConverter.registerGlobalMembrane(newid, mem);
+			}
+			else {
+				Atom atom = (Atom)atomTable.get(tmpid);
+				if (atom != null) atom.remoteid = newid;
+			}
+		}
+		//
+		cmdbuffer = "";	// nextidは初期化しない
 	}
 
-	// ロック
-	// nakajima20040719: RemoteMembraneにあるのでいらないような気がする
-	// n-kato  20040815: ルート膜のロックを取得/解放するときのフックを考えていたのだと思う
+	///////////////////////////////
+	// NEW_ （説明はいずれ）
+	
+	/** NEW_memid (String) -> AbstractMembrane */
+	HashMap memTable = new HashMap();
+	/** NEW_atomid (String) -> Atom */
+	HashMap atomTable = new HashMap();
 
+	void registerMem(String memid, RemoteMembrane mem) {
+		memTable.put(memid, mem);
+	}
+	void registerAtom(String atomid, Atom atom) {
+		atomTable.put(atomid, atom);
+	}
+	
 	///////////////////////////////
 	// 受信用
 

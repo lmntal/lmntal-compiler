@@ -229,7 +229,8 @@ public class Functor implements Serializable {
 	/**（仮）*/
 	public static Functor build(String name, int arity) {
 		// todo compile.parser.LMNParser.addSrcAtomToMem と統合する
-		if (arity == 1) {
+		switch (arity) {
+		case 1:
 			try {
 				return new IntegerFunctor(Integer.parseInt(name));
 			}
@@ -241,6 +242,11 @@ public class Functor implements Serializable {
 					//
 				}
 			}
+			break;
+		case 2:
+			if (name.equals("$in"))  return Functor.INSIDE_PROXY;
+			if (name.equals("$out")) return Functor.OUTSIDE_PROXY;
+			break;
 		}
 		return new Functor(name,arity);
 	}

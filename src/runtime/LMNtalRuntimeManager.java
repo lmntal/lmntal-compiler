@@ -23,6 +23,10 @@ public final class LMNtalRuntimeManager {
 	/** 計算ノード表を利用開始する */
 	public static void init() {}
 	
+	/** ノード識別子をfqdnに変換する（仮）*/
+	public static String nodedescToFQDN(String nodedesc) {
+		return nodedesc;
+	}
 	/** 指定されたホストに接続し、計算ノード表に登録する。
 	 *  すでに登録されている場合は生存を確認する。生存を確認できない場合はnullを返す。
 	 *  初めての分散呼び出しならば、ローカルのデーモンに接続する。
@@ -32,7 +36,7 @@ public final class LMNtalRuntimeManager {
 	 * @param nodedesc ノード識別子（現在はfqdnのみ） */
 	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
 		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime()");
-		String fqdn = nodedesc;
+		String fqdn = nodedescToFQDN(nodedesc);
 		//宛て先がlocalhostなら  自分自身を返す
 		if(LMNtalNode.isMyself(fqdn)){
 			//if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime(): 宛て先がlocalhostだから自分自身を返す");
@@ -101,7 +105,9 @@ public final class LMNtalRuntimeManager {
 	public static void disconnectFromDaemon() {
 		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon()");
 		if (daemon != null) {
+			// TODO 【質問】(n-kato) unregisterlocalを使わずに問答無用で切ればいいと思っていたんですけど、ダメなんですか？ 切れたらdaemon側で勝手にMASTER表から除去して向こうのスレッドが終わるという風に。2004-08-27
 			daemon.sendWaitUnregisterLocal();
+
 			daemon.close(); 
 			if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon(): the socket has closed.");
 			daemon = null;

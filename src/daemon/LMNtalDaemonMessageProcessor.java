@@ -47,7 +47,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 
 			/* メッセージ:
 			 *   RES msgid 返答
-			 *   REGISTERLOCAL MASTER/SLAVE msgid rgid
+			 *   REGISTERLOCAL (MASTER|SLAVE) msgid rgid
 			 *   DUMPHASH
 			 *   CMD msgid fqdn rgid コマンド
 			 *     - fqdn が自分宛 
@@ -76,7 +76,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 						content += data; // todo 文字列結合でいいのか調べる
 					}
 					catch (Exception e) {
-						content = "RES " + msgid + " FAIL";
+						content = "RES " + msgid + " FAIL\n";
 					}
 				}
 				
@@ -95,7 +95,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 					continue;
 				}
 			} else if (parsedInput[0].equalsIgnoreCase("REGISTERLOCAL")) {
-				// REGISTERLOCAL MASTER/SLAVE msgid rgid
+				// REGISTERLOCAL (MASTER|SLAVE) msgid rgid
 				// rgidとLMNtalNodeを登録
 				String type  = parsedInput[1];
 				String msgid = parsedInput[2];
@@ -103,7 +103,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				boolean result = LMNtalDaemon.registerRuntimeGroup(rgid, this);
 				respond(msgid, result);
 				continue;
-			}  else if (parsedInput[0].equalsIgnoreCase("UNREGISTERLOCAL")){
+			} else if (parsedInput[0].equalsIgnoreCase("UNREGISTERLOCAL")){
 				//UNREGISTERLOCAL rgid
 				
 				//rgid を削除
@@ -126,9 +126,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 
 				//メッセージを登録
 				LMNtalNode returnNode = this;
-				boolean result = LMNtalDaemon.registerMessage(msgid, returnNode);
-				
-				if (result == true) {
+				if (LMNtalDaemon.registerMessage(msgid, returnNode)) {
 					//メッセージ登録成功
 					try {
 						String[] command = parsedInput[4].split(" ", 3);
@@ -138,7 +136,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 						if (command[0].equalsIgnoreCase("BEGIN")) {
 							StringBuffer buf = new StringBuffer(content);
 							// endが来るまで積み込む
-							while(true){ //TODO BEGINだけきてその後が来ないとbreakしない
+							while(true){ // BEGINだけきてその後が来ないとbreakしない→それは仕様ですので
 								String inputline = readLine();
 								if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run(): after BEGIN:  " + inputline);
 								if (inputline == null) break;
@@ -176,7 +174,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 									// 既に登録済みの時
 									targetNode = LMNtalDaemon.getRuntimeGroupNode(rgid);
 								}
-							}	else { //他ノード宛ならconnectをそのまま転送する
+							} else { //他ノード宛ならconnectをそのまま転送する
 								LMNtalDaemon.makeRemoteConnection(fqdn); // TODO（効率改善）ブロックしないようにする
 								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
 							}

@@ -57,10 +57,10 @@ public class LMNtalDaemon implements Runnable {
 	 * メッセージの表: msgid (String) -> LMNtalNode
 	 */
 	static HashMap msgTable = new HashMap();
-	/**
-	 * msgid (String) -> tag (String)
-	 */
-	static HashMap msgTagTable = new HashMap();
+//	/**
+//	 * msgid (String) -> tag (String)
+//	 */
+//	static HashMap msgTagTable = new HashMap();
 
 	/*
 	 * idを作るのに使うランダムオブジェクト
@@ -323,15 +323,15 @@ public class LMNtalDaemon implements Runnable {
 
 		return true;
 	}
-	/** タグ付きでmsgTableに登録する */
-	public static boolean registerMessageWithTag(String msgid, LMNtalNode node, String tag) {
-		synchronized(msgTagTable) {
-			if (msgTagTable.containsKey(msgid)) return false;
-			if (!registerMessage(msgid,node)) return false;
-			msgTagTable.put(msgid, tag);
-			return true;
-		}
-	}
+//	/** タグ付きでmsgTableに登録する */
+//	public static boolean registerMessageWithTag(String msgid, LMNtalNode node, String tag) {
+//		synchronized(msgTagTable) {
+//			if (msgTagTable.containsKey(msgid)) return false;
+//			if (!registerMessage(msgid,node)) return false;
+//			msgTagTable.put(msgid, tag);
+//			return true;
+//		}
+//	}
 
 	/**
 	 * メッセージmsgidの返却先を取得する
@@ -359,12 +359,12 @@ public class LMNtalDaemon implements Runnable {
 		}
 	}
 
-	public static String getTagForMsgId(String msgid) {
-		synchronized (msgTagTable) {
-			if (!msgTagTable.containsKey(msgid)) return null;
-			return (String)msgTagTable.remove(msgid);
-		}
-	}
+//	public static String getTagForMsgId(String msgid) {
+//		synchronized (msgTagTable) {
+//			if (!msgTagTable.containsKey(msgid)) return null;
+//			return (String)msgTagTable.remove(msgid);
+//		}
+//	}
 
 	////////////////////////////////////////////////////////////////
 
