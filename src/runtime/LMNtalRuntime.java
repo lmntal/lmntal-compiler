@@ -76,7 +76,11 @@ final class Task extends AbstractTask {
 			if(a != null){ // 実行膜スタックが空でないとき
 				flag = false;
 				while(it.hasNext()){ // 本膜のもつルールをaに適用
-					if(((Ruleset)it.next()).react(mem, a)) flag = true;
+					if (((Ruleset)it.next()).react(mem, a)) {
+						flag = true;
+						//if (memStack.peek() != mem) break;
+						break; // ルールセットが変わっているかもしれないため
+					}
 				}
 				if(flag == false){ // ルールが適用できなかった時
 					if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
@@ -87,7 +91,8 @@ final class Task extends AbstractTask {
 				while(it.hasNext()){ // 膜主導テストを行う
 					if(((Ruleset)it.next()).react(mem)) {
 						flag = true;
-						if (memStack.peek() != mem) break;
+						//if (memStack.peek() != mem) break;
+						break; // ルールセットが変わっているかもしれないため
 					}
 				}
 

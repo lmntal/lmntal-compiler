@@ -296,12 +296,12 @@ public class RuleCompiler {
 		it = mem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
-			if (pc.lhsMem == null) {
-				System.out.println("SYSTEM ERROR: ProcessContext.lhsMem is not set");
+			if (pc.src.mem == null) {
+				System.out.println("SYSTEM ERROR: ProcessContext.src.mem is not set");
 			}
-			if (rhsmemToPath(mem) != lhsmemToPath(pc.lhsMem)) {
+			if (rhsmemToPath(mem) != lhsmemToPath(pc.src.mem)) {
 				body.add(new Instruction(Instruction.MOVECELLS,
-					rhsmemToPath(mem), lhsmemToPath(pc.lhsMem) ));
+					rhsmemToPath(mem), lhsmemToPath(pc.src.mem) ));
 			}
 		}
 		return procvarcount;
@@ -317,8 +317,8 @@ public class RuleCompiler {
 		it = mem.ruleContexts.iterator();
 		while (it.hasNext()) {
 			RuleContext rc = (RuleContext)it.next();			
-			if (rhsmemToPath(mem) == lhsmemToPath(rc.lhsMem)) continue;
-			body.add(new Instruction( Instruction.COPYRULES, rhsmemToPath(mem), lhsmemToPath(rc.lhsMem) ));
+			if (rhsmemToPath(mem) == lhsmemToPath(rc.src.mem)) continue;
+			body.add(new Instruction( Instruction.COPYRULES, rhsmemToPath(mem), lhsmemToPath(rc.src.mem) ));
 		}
 	}
 	/** 右辺の膜内のルールの内容を生成する */	

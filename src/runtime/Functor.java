@@ -6,9 +6,9 @@ package runtime;
 public class Functor {
 	//TODO 自由リンク管理アトムの名前が通常アトムと同じにならないようにする
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
-	public static final Functor INSIDE_PROXY = new Functor("$inside_proxy", 2);
+	public static final Functor INSIDE_PROXY = new Functor("$inside", 2);
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
-	public static final Functor OUTSIDE_PROXY = new Functor("$outside_proxy", 2);
+	public static final Functor OUTSIDE_PROXY = new Functor("$outside", 2);
 	/** $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム
 	 * を表すファンクタ temporary_inside_proxy （通称:star）*/
 	public static final Functor STAR = new Functor("$transient_inside_proxy", 2);
