@@ -22,8 +22,8 @@ public class DaemonThreadTest2 {
 		Thread t2 = new Thread(new DaemonHontai2(60001));
 		t2.start();
 		
-		Thread r1 = new Thread(new TmpRuntime(100));
-		r1.start();
+//		Thread r1 = new Thread(new TmpRuntime(100));
+//		r1.start();
 	}
 }
 
@@ -41,6 +41,8 @@ class DaemonHontai2 implements Runnable {
 
 	ServerSocket servSocket = null;
 	HashMap nodeTable = new HashMap();
+	static HashMap registedRuntimeTable = new HashMap();
+	static HashMap msgTable = new HashMap();
 
 	public DaemonHontai2() {
 		try {
@@ -79,12 +81,12 @@ class DaemonHontai2 implements Runnable {
 					new BufferedWriter(
 						new OutputStreamWriter(tmpSocket.getOutputStream()));
 
-				if (regist(tmpSocket,
+				if (register(tmpSocket,
 					new LMNtalNode(tmpInStream, tmpOutStream))) {
 					//登録成功。
 					Thread t2 =
 						new Thread(
-							new LMNtalDaemonThread2(tmpInStream, tmpOutStream));
+							new LMNtalDaemonThread2(tmpSocket, tmpInStream, tmpOutStream));
 					t2.start();
 				} else {
 					//登録失敗。糸冬
@@ -101,7 +103,9 @@ class DaemonHontai2 implements Runnable {
 		}
 	}
 
-	public boolean regist(Socket socket, LMNtalNode node) {
+	boolean register(Socket socket, LMNtalNode node) {
+		System.out.println("register(" + socket.toString() + ", " + node.toString() + ")");
+		
 		synchronized(nodeTable){
 			if (nodeTable.containsKey(socket)) {
 				return false;
@@ -109,6 +113,33 @@ class DaemonHontai2 implements Runnable {
 
 			nodeTable.put(socket, node);
 		}
+		return true;
+	}
+
+	public static boolean registerLocal(Integer rgid, Socket socket){
+		System.out.println("registerLocal(" + rgid + ", " + socket.toString() + ")");
+		
+		synchronized(registedRuntimeTable){
+			if (registedRuntimeTable.containsKey(rgid)) {
+				return false;
+			}
+
+			registedRuntimeTable.put(rgid, socket);
+		}
+		return true;
+	}
+	
+	public static boolean registerMessage(Integer msgid, String msg){
+		System.out.println("registerLocal(" + msgid + ", " + msg + ")");
+		
+		synchronized(msgTable){
+			if (msgTable.containsKey(msgid)) {
+				return false;
+			}
+
+			registedRuntimeTable.put(msgid, msg);
+		}
+		
 		return true;
 	}
 
@@ -132,10 +163,12 @@ class DaemonHontai2 implements Runnable {
 class LMNtalDaemonThread2 implements Runnable {
 	BufferedReader in;
 	BufferedWriter out;
+	Socket socket;
 
-	public LMNtalDaemonThread2(BufferedReader inTmp, BufferedWriter outTmp) {
+	public LMNtalDaemonThread2(Socket tmpSocket, BufferedReader inTmp, BufferedWriter outTmp) {
 		in = inTmp;
 		out = outTmp;
+		socket = tmpSocket;
 	}
 
 	public void run() {
@@ -151,26 +184,78 @@ class LMNtalDaemonThread2 implements Runnable {
 					break;
 				}
 
-				int msgid;
-				int rgid;
+				//ここからメッセージ処理部分
+				Integer msgid;
+				Integer rgid;
+				boolean result;
 				String command;
 				String[] tmpString = new String[3];
 				
 				tmpString = input.split(" ", 3);
 				
-				if (tmpString[1].equalsIgnoreCase("RES")){
-					//RESの処理
-				} else if(tmpString[1].equalsIgnoreCase("REGISTERLOCAL")){
-					//REGSITERLOCAL rgid
-
+				if (tmpString[0].equalsIgnoreCase("res")){
+					//res msgid 結果
+					//直接戻せばよい
 					
 					
+				} else if(tmpString[0].equalsIgnoreCase("registerlocal")){
+					//registerlocal rgid
+					//rgidとソケットを登録
+					rgid = new Integer(tmpString[1]);
+					result = DaemonHontai2.registerLocal(rgid, socket);
+					if(result == true){
+						//成功
+						out.write("ok\n");
+						out.flush();
+					} else {
+						//失敗
+						out.write("fail\n");
+						out.flush();
+					}
 				} else  {
 					//msgidとみなす
-					//msgid "localhost" rgid メッセージ
-					msgid = Integer.parseInt(tmpString[0]);
+					//msgid "FQDN" rgid メッセージ
+					msgid = new Integer(tmpString[0]);
 					
-					Communicator.connect(tmpString[1], tmpString[2]);
+					
+					//メッセージを登録
+					result = DaemonHontai2.registerMessage(msgid, input);
+					
+					if(result == true){
+						//登録成功
+						
+						//接続しに行く
+						String fqdnNoQuote;
+
+						StringTokenizer tokens = new StringTokenizer(tmpString[1], "\"");
+						fqdnNoQuote = tokens.nextToken();
+						System.out.println("fqdnNoQuote: " + fqdnNoQuote);
+
+						try {
+							Socket socket =
+								new Socket(fqdnNoQuote, GlobalConstants.LMNTAL_DAEMON_PORT);
+
+							//出力stream
+							BufferedWriter out =
+								new BufferedWriter(
+									new OutputStreamWriter(socket.getOutputStream()));
+
+							out.write(input);
+							out.flush();
+							out.close();
+						} catch (Exception e) {
+							System.out.println("ERROR in connect処理: " + e.toString());
+						}
+						
+					} else {
+						//既にmsgTableに登録されている時（とみなしていいのかな？）
+						//FQDN == 自分自身 の時？
+						
+						//登録済みという事を返す
+					}
+					
+
+					
 					
 					
 				}
@@ -182,7 +267,8 @@ class LMNtalDaemonThread2 implements Runnable {
 			} catch (ArrayIndexOutOfBoundsException ae){
 				//送られてきたメッセージが短かすぎるとき（＝不正な時
 				//'hoge' とかそういう時
-				System.out.println("Invalid Message " + ae.toString());
+				System.out.println("Invalid Message: " + ae.toString());
+				break;
 			}
 		}
 	}
@@ -196,41 +282,6 @@ class LMNtalNode {
 	LMNtalNode(BufferedReader in, BufferedWriter out) {
 		tmpInStream = in;
 		tmpOutStream = out;
-	}
-}
-
-class Communicator {
-
-	static void connect(String remoteNodeFQDN, String command) {
-		/* 
-		 * 命令列：
-		 * "banon" runtimegroupid connect
-		 */
-		System.out.println(
-			"now in Communicator: " + remoteNodeFQDN + " " + command);
-
-		String fqdnNoQuote;
-
-		StringTokenizer tokens = new StringTokenizer(remoteNodeFQDN, "\"");
-		fqdnNoQuote = tokens.nextToken();
-		System.out.println("fqdnNoQuote: " + fqdnNoQuote);
-
-		try {
-			Socket socket =
-				new Socket(fqdnNoQuote, GlobalConstants.LMNTAL_DAEMON_PORT);
-
-			//出力stream
-			BufferedWriter out =
-				new BufferedWriter(
-					new OutputStreamWriter(socket.getOutputStream()));
-
-			out.write(command);
-			out.flush();
-			out.close();
-
-		} catch (Exception e) {
-
-		}
 	}
 }
 
@@ -255,9 +306,9 @@ class TmpRuntime implements Runnable {
 			
 			connect(out);
 			
-			Thread.sleep(10000);
+			Thread.sleep(1000);
 			
-			System.out.println(in.toString());
+			System.out.println(in.readLine());
 			
 		} catch (Exception e){
 			System.out.println("ERROR in TmpRuntime.run()" + e.toString());
@@ -268,7 +319,9 @@ class TmpRuntime implements Runnable {
 	
 	void regist(BufferedWriter out){
 		//REGSITERLOCAL rgid
-		String command = new String("REGISTERLOCAL " + rgid);
+		String command = new String("registerlocal " + rgid);
+
+		System.out.println("TmpRuntime.regist(): now omitting: " + command);
 		try{
 			out.write(command);
 			out.flush();
@@ -282,6 +335,8 @@ class TmpRuntime implements Runnable {
 		int msgid = 10000;
 		
 		String command = new String(msgid + " \"localhost\" " + rgid + " connect");
+		
+		System.out.println("TmpRuntime.connect(): now omitting: " + command);
 		try{
 			out.write(command);
 			out.flush();
