@@ -1,8 +1,5 @@
 package util;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 public final class Stack {
 	private QueuedEntity head, tail;
 	

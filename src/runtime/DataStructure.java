@@ -276,7 +276,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 //		activateAtom(atom);
 //	}
 	/** –Œ‚Ì’Ç‰Á */
-	private void addMem(AbstractMembrane mem) {
+	protected void addMem(AbstractMembrane mem) {
 		mems.add(mem);
 	}
 	/** dstMem‚ÉˆÚ“® */
@@ -471,7 +471,9 @@ final class LMNtalRuntime {
 	void exec() {
 	}
 	Machine newMachine() {
-		return new Machine();
+		Machine m = new Machine();
+		machines.add(m);
+		return m;
 	}
 }
 

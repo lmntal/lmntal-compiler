@@ -14,7 +14,8 @@ public class Tester extends TestCase {
 		junit.textui.TestRunner.run(Tester.class);
 	}
 	public void testAppend() {
-		Machine machine = new Machine();
+		LMNtalRuntime runtime = new LMNtalRuntime();
+		Machine machine = runtime.newMachine();
 		Membrane root = (Membrane)machine.getRoot();
 		
 		Atom append = root.newAtom("append", 3);
