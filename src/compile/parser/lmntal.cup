@@ -43,11 +43,11 @@ Link		::=   LINK_NAME:name
 					{: RESULT = new SrcLink(name); :};
 					
 UnitAtom	::=	  ATOM_NAME:name
-					{: RESULT = new SrcAtom(name); :}
+					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
 				| ATOM_NAME:name LPAREN RPAREN
-					{: RESULT = new SrcAtom(name); :}
+					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
 				| ATOM_NAME:name LPAREN ProcessList:list RPAREN
-					{: RESULT = new SrcAtom(name, list); :}
+					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
 				| List:list
 					{: RESULT = list; :}
 				| LPAREN Atom:atom RPAREN
