@@ -105,6 +105,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			rect = new Rectangle2D.Double(Math.random()*r.width + r.x, Math.random()*r.height + r.y, 10.0, 10.0);
 //			System.out.println(rect);
 		}
+		
+		//(nakajima 2004-10-25) （仮）分散用に登録する。効率悪いが正しい。要最適化。
+		daemon.IDConverter.registerGlobalMembrane(this.getGlobalMemID(),this);
 	}
 //	/**
 //	 * 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。
@@ -323,7 +326,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * @return 作成されたルート膜 */
 	public AbstractMembrane newRoot(String nodedesc) {
 		if(Env.debug > 0)System.out.println("AbstraceMembrane.newRoot(" + nodedesc + ")");
-		daemon.IDConverter.registerGlobalMembrane(this.getGlobalMemID(),this);
+		
+		//(nakajima 2004-10-25) 分散。とりあえずコンストラクタで登録する時にしたのでコメントアウト。
+		//daemon.IDConverter.registerGlobalMembrane(this.getGlobalMemID(),this);
+		
 		// ↓TODO (効率改善)connectRuntimeはガードですでに呼ばれているので冗長かもしれないのを何とかする？
 		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(nodedesc);
 		return machine.newTask(this).getRoot();
