@@ -2,19 +2,18 @@
 NAME
 	Integer module
 
-SYNOPSIS
+SYNOPSIS  +,-,*,/,mod,abs,>,<,>=,=<,==,!=
+          <<,>>,¥Ó¥Ã¥È±é»»(&,|,^),power(X¤ÎN¾è)
 	
 AUTHOR
 	Taro Ogawa
 	Koji Hara
+	Ken Sakurai
 
 HISTORY
 	2004/06/04(Fri)
 
 */
-
-/*µ¡Ç½°ìÍ÷*/
-/* +,-,*,/,mod,abs,>,<,>=,=<,==,!=,<<,>>,¥Ó¥Ã¥È±é»»(&,|,^),power(¡Á¤Î¡Á¾è)*/
 
 {
 module(integer).
