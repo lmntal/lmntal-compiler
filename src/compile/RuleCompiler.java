@@ -358,7 +358,7 @@ public class RuleCompiler {
 		Iterator it = rs.processContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
-			if (def.rhsOccs.size() == 0) {
+			if (def.rhsOccs.size() != 1) { // 非線型のとき1つだけ再利用するようにしたら size == 0 に直せる
 				body.add(new Instruction( Instruction.DROPMEM,
 					lhsmemToPath(def.lhsOcc.mem) ));
 			}
