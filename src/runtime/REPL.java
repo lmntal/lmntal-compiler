@@ -33,18 +33,20 @@ public class REPL {
 		} catch (UnsatisfiedLinkError ignore_me) {
 			System.err.println("couldn't load readline lib. Using simple stdin.");
 		}
-
+		
 		Readline.initReadline("LMNtal");
-
-		Runtime.getRuntime()                       // if your version supports
-		  .addShutdownHook(new Thread() {          // addShutdownHook (since 1.3)
-			 public void run() {
-			   Readline.cleanup();
-			 }
+		
+		//if your version supports
+		//addShutdownHook (since 1.3)
+		Runtime.getRuntime().addShutdownHook(
+			new Thread() {
+				public void run() {
+					Readline.cleanup();
+				}
 			});
-
+		
 		System.out.println("        LMNtal version 0.02");
-			System.out.println("");
+		System.out.println("");
 		System.out.println("[TIPS] Type q to quit.");
 		System.out.println("");
 		while (true) {
