@@ -92,20 +92,20 @@ class TestRemote{
 */
 
 		//マッチング命令・ボディ命令を実行してみるテスト
-		//NEWROOT → これはorz
+		//NEWROOT → これはorz (see InstrctionBlockProcessor.java
 		//RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem); 
 		//rt_banon.flush();
 		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
 		//	rt_banon.flush();
 
-		//CONNECT  && NEWROOT
+		//CONNECT
 		RemoteMembrane rm_banon = (RemoteMembrane)rootMem.newRoot("banon.ueda.info.waseda.ac.jp");
 
 		//NEWATOM
-		//Atom atom_hoge_banon = rm_banon.newAtom(new Functor("hoge", 1));
-		//Atom atom_fuga_banon = rm_banon.newAtom(new Functor("fuga", 1));
-		//Atom atom_moge_banon = rm_banon.newAtom(new Functor("moge", 1));
-		//	rt_banon.flush();
+		Atom atom_hoge_banon = rm_banon.newAtom(new Functor("hoge", 1));
+		Atom atom_fuga_banon = rm_banon.newAtom(new Functor("fuga", 1));
+		Atom atom_moge_banon = rm_banon.newAtom(new Functor("moge", 1));
+		//rt_banon.flush();
 		
 		//ALTERATOMFUNCTOR
 		//rm_banon.alterAtomFunctor(atom_hoge_banon, new Functor("hoge2", 1));
