@@ -63,8 +63,8 @@ public final class InterpretedRuleset extends Ruleset {
 		Env.p("atomMatch."+matchInsts);
 		int formals = spec.getIntArg1();
 		int locals  = spec.getIntArg2();
-		AbstractMembrane[] mems  = new AbstractMembrane[locals];
-		Atom[]             atoms = new Atom[locals];
+		AbstractMembrane[] mems  = new AbstractMembrane[formals];
+		Atom[]             atoms = new Atom[formals];
 		mems[0]  = mem;
 		atoms[1] = atom;
 		
@@ -75,7 +75,17 @@ public final class InterpretedRuleset extends Ruleset {
 			switch (inst.getKind()){
 			//case Instruction.....:
 			case Instruction.REACT:
-				body(((Rule)inst.getArg1()).body, mems, atoms);
+				AbstractMembrane[] bodymems  = new AbstractMembrane[locals];
+				Atom[]             bodyatoms = new Atom[locals];
+				List memformals  = (List)inst.getArg2();
+				List atomformals = (List)inst.getArg3();
+				for (int i = 0; i < memformals.size(); i++) {
+					bodymems[i]  = mems[((Integer)memformals.get(i)).intValue()];
+				}
+				for (int i = 0; i < atomformals.size(); i++) {
+					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
+				}
+				body(((Rule)inst.getArg1()).body, bodymems, bodyatoms);
 			}
 		}
 		return false;
