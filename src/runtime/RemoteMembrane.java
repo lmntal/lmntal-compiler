@@ -13,8 +13,6 @@ import compile.parser.LMNParser;
 
 import daemon.IDConverter;
 
-//import daemon.IDConverter;
-
 /**
  * リモート膜クラス
  * @author n-kato
@@ -333,7 +331,19 @@ public final class RemoteMembrane extends AbstractMembrane {
 				RemoteLMNtalRuntime r;
 				r = (RemoteLMNtalRuntime)LMNtalRuntimeManager.runtimeids.get(hostname);
 				if (r == null) {
-					r = (RemoteLMNtalRuntime)LMNtalRuntimeManager.connectRuntime(hostname);
+					AbstractLMNtalRuntime ar;
+					ar = (AbstractLMNtalRuntime)LMNtalRuntimeManager.connectRuntime(hostname);
+					if (ar instanceof LocalLMNtalRuntime) {
+						AbstractMembrane am = IDConverter.lookupGlobalMembrane(hostname + ":" + memid);
+						if (am == null) { // 起こらないと思うけどどうだろう
+							throw new RuntimeException("SYSTEM ERROR: unknown local membrane id");
+						}
+						else {
+							addMem(am);
+						}							
+						continue;
+					}
+					r = (RemoteLMNtalRuntime)ar;
 				}
 				//
 				RemoteTask t;
@@ -346,11 +356,10 @@ public final class RemoteMembrane extends AbstractMembrane {
 				else {
 					t = (RemoteTask)getTask();
 					m = new RemoteMembrane(t, this, memid);
-					mems.add(m);
 					addMem(m);
 				}
 				// GlobalMemIDの正しい作成方法は？→さっさとメソッドにした方がいいですね
-				String globalid = r.hostname + ":" + memid;
+				String globalid = hostname + ":" + memid;
 				IDConverter.registerGlobalMembrane(globalid, m);
 			}
 

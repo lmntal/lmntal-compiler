@@ -291,9 +291,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/** 新しい子膜を作成し、活性化する */
 	public abstract AbstractMembrane newMem();
-	/** 指定された（親膜の無い）膜をこの膜の子膜として追加する。
+	/** [final] 指定された（親膜の無い）膜をこの膜の子膜として追加する。
 	 * 実行膜スタックは操作しない。子膜のタスクについては何もしない。*/
-	public void addMem(AbstractMembrane mem) {
+	public final void addMem(AbstractMembrane mem) {
 		mems.add(mem);
 		mem.parent = this;
 	}
