@@ -66,7 +66,12 @@ public final class InterpretedRuleset extends Ruleset {
      */
     private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
 	switch (ruleid){
-
+	case Instruction.DEREF:
+	    //deref [-dstatom, +srcatom, +srcpos, +dstpos]
+	    if (atomArgs[1].args[srcpos] == atomArgs[1].args[dstpos]) {
+		//リンク先のアトムをdstatomに代入する。
+	    }
+	    break;
 
 	case Instruction.GETMEM:
 	    //getmem [dstmem, srcatom]
@@ -80,33 +85,85 @@ public final class InterpretedRuleset extends Ruleset {
 	    memArgs[0] = memArgs[1].mem;
 	    break;
 
-	case Instruction.NEWMEM:
-	    //newmem [dstmem, srcmem] 
-	    memArgs[1] = new Membrane(memArgs[0]);
-	    memArgs[0].mems.add(memArgs[1]);
+	case Instruction.ANYMEM:
 	    break;
 
+	case Instruction.FINDATOM:
+	    break;
+
+	case Instruction.FUNC:
+	    break;
+
+	case Instruction.NORULES:
+	    break;
+
+	case Instruction.NATOMS:
+	    break;
+
+	case Instruction.NFREELINKS:
+	    break;
+
+	case Instruction.NMEMS:
+	    break;
+
+	case Instruction.EQ:
+	    break;
+
+	case Instruction.NEQ:
+	    break;
+	case Instruction.LOCK:
+	    break;
+	case Instruction.UNLOCK:
+	    break;
+	case Instruction.REMOVEATOM:
+	    break;
+	case Instruction.REMOVEMEM :
+	    break;
+	case Instruction.INSERTPROXIES:
+	    break;
+	case Instruction.REMOVEPROXIES:
+	    break;
 	case Instruction.NEWATOM:
 	    //newatom [dstatom, srcmem, func] 
 	    memArgs[1].atoms.add(atomArgs[1]);
 	    atomArgs[0] = atomArgs[1];
 	    break;
 
-	case Instruction.REMOVEATOM:
-
+	case Instruction.NEWMEM:
+	    //newmem [dstmem, srcmem] 
+	    memArgs[1] = new Membrane(memArgs[0]);
+	    memArgs[0].mems.add(memArgs[1]);
 	    break;
 
-	case Instruction.REMOVEMEM:
-
+	case Instruction.NEWLINK:
+	    break;
+	case Instruction.RELINK:
+	    break;
+	case Instruction.UNIFY:
+	    break;
+	case Instruction.DEQUEUEATOM:
+	    break;
+	case Instruction.DEQUEUEMEM:
+	    break;
+	case Instruction.MOVEMEM:
+	    break;
+	case Instruction.RECURSIVELOCK:
+	    break;
+	case Instruction.RECURSIVEUNLOCK:
+	    break;
+	case Instruction.COPY:
+	    break;
+	case Instruction.NOT:
+	    break;
+	case Instruction.STOP:
+	    break;
+	case Instruction.REACT:
 	    break;
 
  	default:
 	    System.out.println("Invalid rule");
 	    break;
 	}
-
-
-
     }
 	
     public void showDetail() {
