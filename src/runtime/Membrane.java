@@ -418,5 +418,12 @@ public final class Membrane extends AbstractMembrane {
 	public void free() {
 		IDConverter.unregisterGlobalMembrane(getGlobalMemID());
 	}
+	
+	
+	/** インライン用マクロ Any=_old/1 :- Any=_new/1 */
+	public void replace1by1(Atom _old, Atom _new) {
+		relink(_old, 0, _new, 0);
+		removeAtom(_old);
+	}
 }
 // todo 【検証】local-remote-local 問題が解決したかどうか調べる
