@@ -4,21 +4,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/** 抽象物理マシン（抽象計算ノード）クラス */
+/** 抽象ランタイム（旧：抽象物理マシン、旧々：抽象計算ノード）クラス。
+ * このクラスのサブクラスのインスタンスは、1つの Java VM につき高々1つしか存在しない。
+ * TODO AbstractMachine は AbstractRuntime に名称変更する。*/
 abstract class AbstractMachine {
 	protected String runtimeid;
-	/** この物理マシンに親膜を持たないロックされていないルート膜を作成し、仮でない実行膜スタックに積む。*/
-//	abstract AbstractTask newTask();
-//	/** この物理マシンに指定の親膜を持つロックされたルート膜を作成し、仮の実行膜スタックに積む。*/
+	/** このランタイムに親膜を持たないロックされていないルート膜を作成し、仮でない実行膜スタックに積む。*/
 	abstract AbstractTask newTask(AbstractMembrane parent);
-	/** この物理マシンの実行を終了する */
+	/** このランタイムの実行を終了する */
 	abstract public void terminate();
 	
-//	/** この計算ノードのルールスレッドに対して再実行を要求する。*/
+//	/** ランタイムのルールスレッドに対して再実行を要求する。*/
 //	abstract public void awake();
 }
 
-/** 物理マシン */
+/** ランタイム（旧：物理マシン、旧々：計算ノード）
+ * TODO LMNtalRuntime を MasterLMNtalRuntime に名称変更した後、Machine は LMNtalRuntime に名称変更する。*/
 class Machine extends AbstractMachine /*implements Runnable */{
 	List tasks = new ArrayList();
 //	protected Thread thread = new Thread(this);
@@ -29,16 +30,9 @@ class Machine extends AbstractMachine /*implements Runnable */{
 		tasks.add(t);
 		return t;
 	}
-//	/** この物理マシンのルールスレッドの再実行が要求されたかどうか */
-//	protected boolean awakened = false;
-	/** （マスター計算ノードによって）この物理マシンの終了が要求されたかどうか */
+	/** （マスタタスクによって）このランタイムの終了が要求されたかどうか */
 	protected boolean terminated = false;
-//	/** この物理マシンのルールスレッドの再実行を要求する */
-//	synchronized public void awake() {
-//		awakened = true;
-//		notify();
-//	}
-	/** この物理マシンの終了を要求する。
+	/** このランタイムの終了を要求する。
 	 * 具体的には、この物理マシンのterminatedフラグをONにし、
 	 * 各タスクのルールスレッドに終わるように言う */
 	synchronized public void terminate() {
@@ -47,70 +41,44 @@ class Machine extends AbstractMachine /*implements Runnable */{
 		while (it.hasNext()) {
 			((Task)it.next()).signal();
 		}
+		// TODO joinする
+		// スレーブランタイムならば、VMを終了する。
+		// if (!(this instanceof LMNtalRuntime)) System.exit(0);
 	}
-	/** この物理マシンの終了が要求されたかどうか */
+	/** このランタイムの終了が要求されたかどうか */
 	public boolean isTerminated() {
 		return terminated;
 	}
-	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
-	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
-	 *  タスクが木構造になっていないと出来ない。優先度はしばらく未実装。
-	 */
-	protected void localExec() {
-		boolean allIdle;
-		do {
-			allIdle = true; // idleでないタスクが見つかったらfalseになる。
-			Iterator it = tasks.iterator();
-			while (it.hasNext()) {
-				Task task = (Task)it.next();
-				if (!task.isIdle()) { // idleでないタスクがあったら
-					task.exec(); // ひとしきり実行
-					allIdle = false; // idleでないタスクがある
-				//	break;
-				}
-			}
-		} while(!allIdle);
-	}
-//	/** スレーブ計算ノードとして実行する */
-//	public void run() {
-//		while (true) {
-//			localExec();
-//			synchronized(this) {
-//				if (terminated) break;
-//				if (awakened) {
-//					awakened = false;
-//					continue;
+//	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
+//	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
+//	 *  タスクが木構造になっていないと出来ない。優先度はしばらく未実装。
+//	 */
+//	protected void localExec() {
+//		boolean allIdle;
+//		do {
+//			allIdle = true; // idleでないタスクが見つかったらfalseになる。
+//			Iterator it = tasks.iterator();
+//			while (it.hasNext()) {
+//				Task task = (Task)it.next();
+//				if (!task.isIdle()) { // idleでないタスクがあったら
+//					task.exec(); // ひとしきり実行
+//					allIdle = false; // idleでないタスクがある
+//				//	break;
 //				}
-//				try {
-//					wait();
-//				}
-//				catch (InterruptedException e) {}
-//				awakened = false;
 //			}
-//		}
-//	}
-//	/** この物理マシンを実行する */
-//	public void exec() {
-//		thread.start();
-//		try {
-//			thread.join();
-//		}
-//		catch (InterruptedException e) {}
+//		} while(!allIdle);
 //	}
 }
 
-/** グローバルルートを管理する物理マシン */
+/** ランタイムグループおよびグローバルルート膜を生成し、管理するランタイムのクラス
+ * TODO LMNtalRuntime は MasterLMNtalRuntime に名称変更し、ファイル名を変える。*/
 public final class LMNtalRuntime extends Machine {
-	protected Membrane globalRoot;
-	
-	AbstractTask newTask() {
-		Task t = new MasterTask(this);
-		tasks.add(t);
-		return t;
-	}
+	private Membrane globalRoot;	// masterTaskへの参照を持つ方が分かりやすいかもしれない
+
 	public LMNtalRuntime(){
-		AbstractTask t = newTask();
-		globalRoot = (Membrane)t.getRoot();
+		Task masterTask = new Task(this);
+		tasks.add(masterTask);
+		globalRoot = (Membrane)masterTask.getRoot();
 		// Inline
 		Inline.initInline();
 		Env.theRuntime = this;
@@ -125,14 +93,13 @@ public final class LMNtalRuntime extends Machine {
 //		r.react(globalRoot);
 //	}
 	
-	public Membrane getGlobalRoot(){
+	public final Membrane getGlobalRoot(){
 		return globalRoot;
 	}
-//	/**@deprecated*/
-//	public Membrane getRoot(){
-//		return globalRoot;
-//	}
-//	/** マスター計算ノードとして実行する */
+	public final Task getMasterTask(){
+		return (Task)globalRoot.getTask();
+	}
+//	/** マスタランタイムとして実行する */
 //	public void run() {
 //		RemoteMachine.init();
 //		while (true) {

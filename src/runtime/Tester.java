@@ -47,7 +47,7 @@ public class Tester extends TestCase {
 		};
 //		Membrane mem = new Membrane();
 		LMNtalRuntime r = new LMNtalRuntime();
-		AbstractTask t = r.newTask();
+		AbstractTask t = r.getMasterTask();
 		AbstractMembrane mem = t.getRoot();
 		for (int i = 0; i < 4; i++) {
 			mem.addAtom(atom[i]);

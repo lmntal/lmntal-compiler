@@ -122,7 +122,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	}
 	void send(String cmd, String arg1, String arg2, String arg3, String arg4) {
 		((RemoteTask)task).send(cmd + " " + remoteid + " " + arg1 + " " + arg2
-														   + " " + arg3 + " " + arg4);
+													 + " " + arg3 + " " + arg4);
 	}
 	///////////////////////////////
 	// 情報の取得
@@ -139,18 +139,17 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("CLEARRULES");
 		super.clearRules();
 	}
-	/** TODO Ruleset#getGlobalRulesetID()のようなメソッドを作る。 */
 	public void copyRulesFrom(AbstractMembrane srcMem) {
 		Iterator it = srcMem.rulesetIterator();
 		while (it.hasNext()) {
 			Ruleset rs = (Ruleset)it.next();
-			send("LOADRULESET"/*,rs.getGlobalRulesetID()*/);
+			send("LOADRULESET",rs.getGlobalRulesetID());
 		}
 		super.copyRulesFrom(srcMem);
 	}
 	/** ルールセットを追加 */
 	public void loadRuleset(Ruleset srcRuleset) {
-		send("LOADRULESET"/*,srcRuleset.getGlobalRulesetID()*/);
+		send("LOADRULESET",srcRuleset.getGlobalRulesetID());
 		super.loadRuleset(srcRuleset);
 	}
 	

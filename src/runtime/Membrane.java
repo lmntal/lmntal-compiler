@@ -64,7 +64,7 @@ public final class Membrane extends AbstractMembrane {
 		Task t = (Task)task;
 		if (!isRoot()) {
 			((Membrane)parent).activate();
-			synchronized(task.getMachine()) { // ←？？？？？？？？？？？？？？？？？？？？？
+			synchronized(task) {
 				if (t.bufferedStack.isEmpty()) {
 					t.memStack.push(this);
 				}
@@ -118,7 +118,8 @@ public final class Membrane extends AbstractMembrane {
 		}		
 		return m;
 	}
-	/** newMemと同じ。ただし親膜（メソッドが呼ばれたこの膜）は仮でない実行膜スタックに積まれている。 */
+	/** newMemと同じ。ただし親膜（メソッドが呼ばれたこの膜）は仮でない実行膜スタックに積まれている。
+	 * <p>最適化用。しかし実際には最適化の効果は無い気がする。*/
 	public AbstractMembrane newLocalMembrane() {
 		Membrane m = new Membrane(task, this);
 		mems.add(m);
@@ -148,10 +149,9 @@ public final class Membrane extends AbstractMembrane {
 	 * この膜のロック取得を試みる。
 	 * 失敗した場合、この膜を管理するタスクのルールスレッドに停止要求を送る。その後、
 	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
-	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。*/
+	 * <p>ルールスレッド以外のスレッドが2つ目以降のロックとしてこの膜のロックを取得するときに使用する。*/
 	public void blockingLock() {
 		if (lock()) return;
-		//AbstractMachine mach = task.getMachine();
 		synchronized(task) {
 			((Task)task).requestLock();
 			do {
@@ -166,7 +166,7 @@ public final class Membrane extends AbstractMembrane {
 	}
 	/**
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックを取得し、実行膜スタックから除去する。
-	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。*/
+	 * <p>ルールスレッド以外のスレッドが最初のロックとしてこの膜のロックを取得するときに使用する。*/
 	public void asyncLock() {
 		if (!isRoot()) parent.asyncLock();
 		blockingLock();
@@ -177,7 +177,8 @@ public final class Membrane extends AbstractMembrane {
 	 * 取得したこの膜のロックを解放する。
 	 * ルート膜の場合またはsignal引数がtrueの場合、
 	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
-	 * この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。*/
+	 * この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。
+	 * <p>lockおよびblockingLockの呼び出しに対応する。asyncLockにはasyncUnlockが対応する。*/
 	public void unlock(boolean signal) {
 		if (isRoot()) signal = true;
 		if (signal) {

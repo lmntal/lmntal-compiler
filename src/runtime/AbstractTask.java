@@ -11,11 +11,11 @@ abstract public class AbstractTask {
 	/** ルート膜 */
 	protected AbstractMembrane root;
 	/** コンストラクタ
-	 * @param runtime 実行される物理マシン */
+	 * @param runtime 所属するランタイム */
 	AbstractTask(AbstractMachine runtime) {
 		this.runtime = runtime;
 	}
-	/** 物理マシンの取得 */
+	/** ランタイムの取得 */
 	public AbstractMachine getMachine() {
 		return runtime;
 	}
@@ -24,18 +24,16 @@ abstract public class AbstractTask {
 		return root;
 	}
 	
-	/** この物理マシンのルールスレッドの再実行が要求されたかどうか */
+	/** この抽象タスクのルールスレッドの再実行が要求されたかどうか */
 	protected boolean awakened = false;
 
 	/** このタスクに対してシグナルを発行する。
 	 * すなわち、このタスクのルート膜のロックの取得をするためにブロックしているスレッドが存在するならば
 	 * そのスレッドを再開してロックの取得を試みることを要求し、
-	 * 存在しないならばこのタスクのルールスレッドの再実行を要求する。
-	 * <p>実際には、ルールスレッドに対してawakeメソッドを発行する。*/
+	 * 存在しないならばこのタスクのルールスレッドの再実行を要求する。*/
 	synchronized public final void signal() {
 		awakened = true;
 		notify();
-		//getMachine().awake();
 	}
 }
 
@@ -60,7 +58,8 @@ abstract public class AbstractTask {
  * <p>
  * ルール適用を行うためのスレッドをルールスレッドと呼ぶ。
  * タスクはちょうど1つのルールスレッドによって実行される。
- * 現状ではルールスレッドは物理マシンごとに1つ存在し、タスクによって共有されている。
+ * <strike>現状ではルールスレッドは物理マシンごとに1つ存在し、タスクによって共有されている。</strike>
+ * 現在、各タスクが固有のルールスレッドを持つようになっている。
  * <p>
  * 各スレッドは、ルールスレッドに対して停止要求を発行し解除することができる。
  * ルールスレッドは、停止要求中のスレッドが存在するときはルール適用を行わない。
@@ -103,15 +102,16 @@ class Task extends AbstractTask implements Runnable {
 	Stack bufferedStack = new Stack();
 	boolean idle = false;
 	static final int maxLoop = 100;
-	/** 親膜を持たない新しいルート膜および対応するタスクを作成する
-	 * @param runtime 作成したタスクを実行する物理マシン */
-	protected Task(AbstractMachine runtime) {
+	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
+	 * @param runtime 作成したタスクを実行するランタイム */
+	Task(AbstractMachine runtime) {
 		super(runtime);
 		root = new Membrane(this);
 		memStack.push(root);
 	}
-	/** 指定した親膜を持つ新しいルート膜および対応するタスクを作成する
-	 * @param runtime 作成したタスクを実行する物理マシン
+
+	/** 指定した親膜を持つ新しいルート膜および対応するタスク（スレーブタスク）を作成する
+	 * @param runtime 作成したタスクを実行するランタイム
 	 * @param parent 親膜 */
 	Task(AbstractMachine runtime, AbstractMembrane parent) {
 		super(runtime);
@@ -132,7 +132,7 @@ class Task extends AbstractTask implements Runnable {
 
 	/** このタスクのルールスレッドを実行する。
 	 * 実行が終了するまで戻らない。
-	 * マスタタスクのルールスレッドを実行するために使用される。*/
+	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
 	public void execAsMasterTask() {
 		thread.start();
 		try {
@@ -140,7 +140,7 @@ class Task extends AbstractTask implements Runnable {
 		}
 		catch (InterruptedException e) {}
 	}
-	/** このタスクを実行する */
+	/** このタスクの本膜のルールを実行する */
 	void exec() {
 		Membrane mem;
 		synchronized(this) {
@@ -248,32 +248,34 @@ class Task extends AbstractTask implements Runnable {
 			}
 		}
 	}
+	/** このタスク固有のルールスレッドが実行する処理 */
 	public void run() {
-		if (runtime instanceof LMNtalRuntime) { 	
-			if (Env.fTrace) {
-				Env.p( Dumper.dump( ((LMNtalRuntime)runtime).getGlobalRoot() ));
-			}
-		}
+		Membrane root = null;
+		if (runtime instanceof LMNtalRuntime) root = ((LMNtalRuntime)runtime).getGlobalRoot();
 		while (true) {
-			while (!isIdle()) {
-				exec();
-			}
-			if (((Machine)runtime).isTerminated()) break;
-			synchronized(this) {
-				if (awakened) {
-					awakened = false;
-					continue;
-				}
-				try {
-					wait();
-				}
-				catch (InterruptedException e) {}
-				awakened = false;
-			}
-			if (runtime instanceof LMNtalRuntime) { 	
+			if (root != null) { 	
 				if (Env.fTrace) {
-					Env.p( Dumper.dump( ((LMNtalRuntime)runtime).getGlobalRoot() ));
+					Env.p( Dumper.dump(root) );
 				}
+			}
+			while (true) {
+				while (!isIdle()) {
+					exec();
+				}
+				if (((Machine)runtime).isTerminated()) return;
+				if (root != null && root.isStable()) return;
+				synchronized(this) {
+					if (awakened) {
+						awakened = false;
+						continue;
+					}
+					try {
+						wait();
+					}
+					catch (InterruptedException e) {}
+					awakened = false;
+				}
+				break;
 			}
 		}	
 	}
@@ -298,44 +300,13 @@ class Task extends AbstractTask implements Runnable {
 
 }
 
-class MasterTask extends Task {
-	/** 親膜を持たない新しいルート膜および対応するタスクを作成する
-	 * @param runtime 作成したタスクを実行する物理マシン */
-	MasterTask(LMNtalRuntime runtime) {
-		super(runtime);
-		root = new Membrane(this);
-		memStack.push(root);
-	}
-	
-	public void run() {
-		RemoteMachine.init();
-		if (Env.fTrace) {
-			Env.p( Dumper.dump( ((LMNtalRuntime)runtime).getGlobalRoot() ));
-		}
-		while (true) {
-			while (!isIdle()) {
-				exec();
-			}
-			if (root.isStable()) {
-				RemoteMachine.terminateAll();
-				break;
-			}
-			if (((Machine)runtime).isTerminated()) break;
-			synchronized(this) {
-				if (awakened) {
-					awakened = false;
-					continue;
-				}
-				try {	
-					wait();
-				}
-				catch (InterruptedException e) {}
-				awakened = false; // ?
-			}
-			if (Env.fTrace) {
-				Env.p( Dumper.dump( ((LMNtalRuntime)runtime).getGlobalRoot() ));
-			}
-		}	
-	}
-}
+//class MasterTask extends Task {
+//	/** 親膜を持たない新しいルート膜および対応するタスクを作成する
+//	 * @param runtime 作成したタスクを実行する物理マシン */
+//	MasterTask(LMNtalRuntime runtime) {
+//		super(runtime);
+//		root = new Membrane(this);
+//		memStack.push(root);
+//	}
+//}
 

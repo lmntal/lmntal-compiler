@@ -181,9 +181,10 @@ public class FrontEnd {
 			LMNtalRuntime rt = new LMNtalRuntime();
 			Membrane root = (Membrane)rt.getGlobalRoot();
 			//root.blockingLock();
-			rs.react(root);
+			rs.react(root); // TODO 初期配置で子タスクを作った場合にどうなるか考える
 			//root.blockingUnlock();
 			((Task)root.getTask()).execAsMasterTask();
+			RemoteMachine.terminateAll();
 			
 			//rt.exec();
 			if (!Env.fTrace && Env.verbose > 0) {
