@@ -60,6 +60,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			 *   BEGIN \n ボディ命令... END
 			 *   CONNECT dst_nodedesc src_nodedesc
 			 *   TERMINATE
+			 *   SETENV variable value  //TODO SETENV
 			 *   ...
 			 */
 
