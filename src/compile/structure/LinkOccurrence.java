@@ -37,6 +37,6 @@ public final class LinkOccurrence {
 	}
 	
 	public String toString() {
-		return name+" "+pos;
+		return name;
 	}
 }
