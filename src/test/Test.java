@@ -5,6 +5,7 @@
 package test;
 
 
+import java.awt.Button;
 import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +18,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
+
+import javax.swing.JFrame;
 
 import runtime.Env;
 
@@ -36,9 +39,16 @@ public class Test {
 //		e();
 //		f();
 //		g();
-		h();
+//		h();
+		i();
 	}
 	
+	public static void i() {
+		JFrame fr = new JFrame("test");
+		fr.setSize(200,300);
+		fr.getContentPane().add(new Button("hello"));
+		fr.show();
+	}
 	public static void h() {
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out));
 		pw.println("hello");

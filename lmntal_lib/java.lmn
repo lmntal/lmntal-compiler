@@ -31,23 +31,40 @@ class Java {
 		if(argv==null) argv=new Object[0];
 		Class cl[] = new Class[argv.length];
 		
-		try {
-			// 必要に応じて追加する
-			Class IntegerClass = Class.forName("java.lang.Integer");
-			// メソッドを識別するためにクラスの配列をつくる
-			for(int i=0;i<cl.length;i++) {
-				cl[i] = argv[i].getClass();
-				if(cl[i].equals(IntegerClass)) cl[i] = Integer.TYPE;
-//				System.out.println(argv[i].getClass());
+		if(false) { // 速いけどだめな方法。add(Button) が add(Component) にマッチしない
+			try {
+				// 必要に応じて追加する
+				Class IntegerClass = Class.forName("java.lang.Integer");
+				// メソッドを識別するためにクラスの配列をつくる
+				for(int i=0;i<cl.length;i++) {
+					cl[i] = argv[i].getClass();
+					if(cl[i].equals(IntegerClass)) cl[i] = Integer.TYPE;
+//					System.out.println(argv[i].getClass());
+				}
+			} catch (Exception e) {
 			}
-		} catch (Exception e) {
-		}
 		
-		try {
-			Method m = obj.getClass().getMethod(methodName, cl);
-			r = m.invoke(obj, argv);
-		} catch (Exception e) {
-			e.printStackTrace();
+			try {
+//				Method mm[] = obj.getClass().getMethods();
+//				for(int j=0;j<mm.length;j++) System.out.println(mm[j].getName());
+				Method m = obj.getClass().getMethod(methodName, cl);
+				r = m.invoke(obj, argv);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else { // 遅いけどよさそうな方法
+			Method mm[] = obj.getClass().getMethods();
+			for(int j=0;j<mm.length;j++) {
+				try {
+					if(!mm[j].getName().equals(methodName)) continue;
+					if(mm[j].getParameterTypes().length != argv.length) continue;
+					System.out.println("----------"+ mm[j]);
+					r = mm[j].invoke(obj, argv);
+					break;
+				} catch (Exception e) {
+//					e.printStackTrace();
+				}
+			}
 		}
 		return r;
 	}
