@@ -275,7 +275,7 @@ public class RuleCompiler {
 	HashMap typedcxtdatatypes = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型のパターンを表す定数オブジェクト */
 	HashMap typedcxttypes = new HashMap();
-	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現の変数番号（def.src は現在未使用） */
+	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号 */
 	HashMap typedcxtsrcs  = new HashMap();
 	/** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
 	HashMap rhstypedcxtpaths = new HashMap();
@@ -365,47 +365,19 @@ public class RuleCompiler {
 		if (guard == null) return;
 		int formals = varcount;
 		fixTypedProcesses();
-		compileNegatives(rs.guardNegatives);
+		compileNegatives();
 		guard.add( 0, Instruction.spec(formals,varcount) );
 		guard.add( Instruction.jump(theRule.bodyLabel, gc_getMemActuals(),
 			gc_getAtomActuals(), gc_getVarActuals()) );
 	}
 //
-	void compileNegatives(LinkedList negatives) {
-		Iterator it = negatives.iterator();
+	private void compileNegatives() {
+		Iterator it = rs.guardNegatives.iterator();
 		while (it.hasNext()) {
 			LinkedList eqs = (LinkedList)it.next();
 			HeadCompiler negcmp = hc.getNormalizedHeadCompiler();
-			int formals = negcmp.varcount;
-			//negcmp.matchLabel.setFormals(formals);
-			Iterator it2 = eqs.iterator();
-			while (it2.hasNext()) {
-				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
-				negcmp.enumFormals(eq.mem);
-			}
-			it2 = eqs.iterator();
-			while (it2.hasNext()) {
-				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
-				negcmp.mempaths.put(eq.mem, negcmp.mempaths.get(eq.def.lhsOcc.mem));
-			}
+			negcmp.compileNegativeCondition(eqs);
 			guard.add(new Instruction(Instruction.NOT, negcmp.matchLabel));
-			it2 = eqs.iterator();
-			while (it2.hasNext()) {
-				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
-				negcmp.compileMembrane(eq.mem);
-				if (eq.mem.processContexts.isEmpty()) {
-					// TODO 単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(2)
-					negcmp.match.add(new Instruction(Instruction.NATOMS, negcmp.mempaths.get(eq.mem),
-						  eq.def.lhsOcc.mem.getNormalAtomCount() + eq.def.lhsOcc.mem.typedProcessContexts.size()
-						+ eq.mem.getNormalAtomCount() + eq.mem.typedProcessContexts.size() ));
-					negcmp.match.add(new Instruction(Instruction.NMEMS, negcmp.mempaths.get(eq.mem),
-						eq.def.lhsOcc.mem.mems.size() + eq.mem.mems.size() ));
-				}
-				// eq.mem.ruleContexts は無視される					
-			}
-			// todo 自由リンク
-			negcmp.match.add(new Instruction(Instruction.PROCEED));	// 旧STOP
-			//negcmp.matchLabel.updateLocals(negcmp.varcount);
 			if (varcount < negcmp.varcount)  varcount = negcmp.varcount;
 		}
 	}

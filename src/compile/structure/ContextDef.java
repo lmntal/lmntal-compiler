@@ -32,7 +32,7 @@ public class ContextDef {
 	public boolean isTyped() {
 		return typed;
 	}
-	/** ソース出現（左辺での出現）またはnull。
+	/** 左辺での出現またはnull。
 	 * <strike>右辺での生成時に使うオリジナルへの参照。
 	 * nullのとき、ルールコンパイラはガード出現を代入してよい。</strike> */
 	public Context lhsOcc = null;

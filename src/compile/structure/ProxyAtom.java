@@ -14,10 +14,10 @@ import runtime.Functor;
 final public class ProxyAtom extends Atom {
 
 	/** 自由リンク出力管理ファンクタ */
-	public final static Functor INSIDE_PROXY_NAME = runtime.Functor.INSIDE_PROXY;
+	public final static Functor INSIDE_PROXY = runtime.Functor.INSIDE_PROXY;
 	
 	/** 自由リンク入力管理ファンクタ */
-	public final static Functor OUTSIDE_PROXY_NAME = runtime.Functor.OUTSIDE_PROXY;
+	public final static Functor OUTSIDE_PROXY = runtime.Functor.OUTSIDE_PROXY;
 	
 	/**
 	 * コンストラクタ

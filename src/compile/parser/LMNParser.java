@@ -327,34 +327,29 @@ public class LMNParser {
 		expander.expandRuleAbbreviations(sRule);
 		// todo 左辺のルールを構文エラーとして除去する
 		
-		// 構造の生成
+		// 左辺およびガード型制約に対して、構造を生成し、リンク以外の名前を解決する
 		addProcessToMem(sRule.getHead(), rule.leftMem);		
 		addProcessToMem(sRule.getGuard(), rule.guardMem);
-		addProcessToMem(sRule.getBody(), rule.rightMem);
-		
-		// 左辺およびガード型制約に対して、リンク以外の名前を解決する
 		HashMap names = resolveHeadContextNames(rule);
-		// ガード否定条件の構造を生成する
+		// ガード否定条件および右辺に対して、構造を生成し、リンク以外の名前を解決する
 		addGuardNegatives(sRule.getGuardNegatives(), rule, names);
-		// ガード否定条件および右辺に対して、リンク以外の名前を解決する
+		addProcessToMem(sRule.getBody(), rule.rightMem);
 		resolveContextNames(rule, names);
-		
 		// プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する
 		addProxies(rule.leftMem);
 		coupleLinks(rule.guardMem);
 		addProxies(rule.rightMem);
 		addProxiesToGuardNegatives(rule);
-		// ガード否定条件のリンクを接続する
-		coupleGuardNegativeLocalLinks(rule);
-		// 右辺と左辺の自由リンクを接続する
-		coupleInheritedLinks(rule);
+		coupleGuardNegativeLinks(rule);		// ガード否定条件のリンクを接続する
+		coupleInheritedLinks(rule);			// 右辺と左辺の自由リンクを接続する
 		//
 		mem.rules.add(rule);
 	}
 
 	/** ガード否定条件の中間形式に対応する構造を生成する
-	 *  @param sNegatives ガード否定条件の中間形式のリスト[in]
-	 *  @param rule ルール構造[in,out] */
+	 *  @param sNegatives ガード否定条件の中間形式[$p,[Q]]のリスト[in]
+	 *  @param rule ルール構造[in,out]
+	 *  @param names 左辺およびガード型制約に出現した$p（と*X）からその定義（と出現）へのマップ[in] */
 	private void addGuardNegatives(LinkedList sNegatives, RuleStructure rule, HashMap names) throws ParseException {
 		Iterator it = sNegatives.iterator();
 		while (it.hasNext()) {
@@ -387,6 +382,7 @@ public class LMNParser {
 	/** 子膜に対して再帰的にプロキシを追加する。
 	 * @return この膜の更新された自由リンクマップ mem.freeLinks */
 	private HashMap addProxies(Membrane mem) {
+		HashSet proxyLinkNames = new HashSet();	// memとその子膜の間に作成した膜間リンク名の集合
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
@@ -396,9 +392,23 @@ public class LMNParser {
 			Iterator it2 = freeLinks.keySet().iterator();
 			while (it2.hasNext()) {
 				LinkOccurrence freeLink = (LinkOccurrence)freeLinks.get(it2.next());
-				String proxyLinkName = PROXY_LINK_NAME_PREFIX + freeLink.name;
+				// 子膜の自由リンク名 freeLink.name に対して、膜間リンク名 proxyLinkName を決定する。
+				// 通常はXに対して、1^Xとする。
+				// Xがmemの局所リンクであり、1^Xをmem内ですでに使用した場合は、1^^Xとする。
+				// Xがsubmemの子膜への直通リンクであり、そこでの膜間リンク名が1^Xの場合は、2^Xとする。
+				String index = "1";
+				if (freeLink.atom.functor.equals(ProxyAtom.OUTSIDE_PROXY)
+				 && freeLink.atom.args[0].name.startsWith("1") ) {
+				 	index = "2";
+				}
+				String proxyLinkName = index + PROXY_LINK_NAME_PREFIX + freeLink.name;
+				if (proxyLinkNames.contains(proxyLinkName)) {
+					proxyLinkName = index + PROXY_LINK_NAME_PREFIX
+						+ PROXY_LINK_NAME_PREFIX + freeLink.name;
+				}
+				proxyLinkNames.add(proxyLinkName);
 				// 子膜にinside_proxyを追加
-				ProxyAtom inside = new ProxyAtom(submem, ProxyAtom.INSIDE_PROXY_NAME);
+				ProxyAtom inside = new ProxyAtom(submem, ProxyAtom.INSIDE_PROXY);
 				inside.args[0] = new LinkOccurrence(proxyLinkName, inside, 0); // 外側
 				inside.args[1] = new LinkOccurrence(freeLink.name, inside, 1); // 内側
 				inside.args[1].buddy = freeLink;
@@ -407,7 +417,7 @@ public class LMNParser {
 				// 新しい自由リンク名を新しい自由リンク一覧に追加する
 				newFreeLinks.put(proxyLinkName, inside.args[0]);			
 				// この膜にoutside_proxyを追加
-				ProxyAtom outside = new ProxyAtom(mem, ProxyAtom.OUTSIDE_PROXY_NAME);
+				ProxyAtom outside = new ProxyAtom(mem, ProxyAtom.OUTSIDE_PROXY);
 				outside.args[0] = new LinkOccurrence(proxyLinkName, outside, 0); // 内側
 				outside.args[1] = new LinkOccurrence(freeLink.name, outside, 1); // 外側
 				outside.args[0].buddy = inside.args[0];
@@ -444,13 +454,31 @@ public class LMNParser {
 			while (it.hasNext()) {
 				Atom a = (Atom)it.next();
 				for (int j = 0; j < a.args.length; j++) {
-					if (a.args[j].buddy == null) addLinkOccurrence(links, a.args[j]);
+					if (a.args[j].buddy == null) { // outside_proxyの第1引数はすでに非nullになっている
+						addLinkOccurrence(links, a.args[j]);
+					}
 				}
 			}
 		}
 		removeClosedLinks(links);
 		mem.freeLinks = links;
 		return links;
+	}
+
+	private HashMap enumGuardNegativeLinks(RuleStructure rule ) {
+//		
+//		Iterator it = rule.guardNegatives.iterator();
+//		while (it.hasNext()) {
+//			Iterator it2 = ((LinkedList)it.next()).iterator();
+//			while (it2.hasNext()) {
+//				
+//				eq.mem
+//			}
+//			removeClosedLinks(links);
+//			//mem.freeLinks = links;
+//		}
+//		return links;
+		return null;
 	}
 	
 	/** 閉じたリンクをlinksから除去する */
@@ -474,6 +502,7 @@ public class LMNParser {
 			if (lnk.name.startsWith(SrcLinkBundle.PREFIX_TAG))
 				linkname = SrcLinkBundle.PREFIX_TAG + linkname;
 			lnk.name = linkname;
+			links.put(lnk.name, lnk);
 		}
 		// 1回目の出現
 		if (links.get(lnk.name) == null) {
@@ -502,37 +531,75 @@ public class LMNParser {
 		coupleLinks(mem);
 	}
 	/** ルールのガード否定条件のトップレベルのリンクをつなぐ。
-	 * <p>rule.leftMem.freeLinksの計算後、coupleInheritedLinks(rule)の前に呼ぶこと。
-	 * <p>ガードコンパイルで実際に使うときには、自由リンク管理アトムの鎖を適宜補うこと。*/
-	void coupleGuardNegativeLocalLinks(RuleStructure rule) {
+	 * <p>各膜のfreeLinksの計算後、coupleInheritedLinks(rule)の前に呼ぶこと。
+	 * <p>本メソッド終了後、否定条件中の等式内のリンク出現は次のいずれかになる：
+	 * <ol>
+	 * <li>同じ等式右辺への局所リンク（通常の双方向リンク）- 本メソッド呼び出し時にすでに閉じている
+	 * <li>同じ否定条件内の他の等式右辺への「等式間リンク」（双方向直接リンク）
+	 * <li>その等式左辺$pがルール左辺で出現する膜にあるアトム/型付き$pへの「上書きリンク」（片方向リンク）
+	 *     （ただし現状では型付きアトムが1引数のみであるため、パッシブ型制限にかかるため型付きへのリンクは無い）
+	 * <li>nullを指すガード「匿名リンク」（正確には$ppの明示的なリンク引数との通常の双方向リンク）
+	 * </ul>
+	 * <p>ガードコンパイルで実際に使うときには、等式間リンクに対して、自由リンク管理アトムの鎖を適宜補うこと。*/
+	void coupleGuardNegativeLinks(RuleStructure rule) {
 		Iterator it = rule.guardNegatives.iterator();
 		while (it.hasNext()) {
-			HashMap links = new HashMap();
+			HashMap interlinks = new HashMap();	// 等式間リンクおよびガード匿名リンクの一覧
 			Iterator it2 = ((LinkedList)it.next()).iterator();
 			while (it2.hasNext()) {
-				Membrane mem = ((ProcessContextEquation)it2.next()).mem;
-				HashMap freeLinks = mem.freeLinks;
-				Iterator it3 = freeLinks.keySet().iterator();
-				while (it3.hasNext()) {
-					String linkname = (String)it3.next();
-					if (freeLinks.get(linkname) == CLOSED_LINK) continue;
-					LinkOccurrence lnk = (LinkOccurrence)freeLinks.get(linkname);
-					addLinkOccurrence(links, lnk);
-				}
-			}
-			removeClosedLinks(links);
-			if (!links.isEmpty()) {
-				Iterator it3 = links.keySet().iterator();
-				while (it3.hasNext()) {
-					String linkname = (String)it3.next();
-					LinkOccurrence lnk = (LinkOccurrence)links.get(linkname);
-					if (rule.leftMem.freeLinks.containsKey(linkname)) {
-						// ヘッドへのリンク
-						lnk.buddy = (LinkOccurrence)rule.leftMem.freeLinks.get(linkname);
+				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
+				// 等式右辺の自由リンク出現の一覧を取得する
+				Membrane mem = eq.mem;
+				HashMap rhsfreelinks = mem.freeLinks;
+				// 等式左辺の自由リンク出現の一覧を取得し、右辺の一覧と対応を取る
+				ProcessContext a = (ProcessContext)eq.def.lhsOcc;
+				HashMap rhscxtfreelinks = new HashMap();	// この等式右辺トップレベル$ppの自由リンク集合
+				for (int i = 0; i < a.args.length; i++) {
+					LinkOccurrence lhslnk = a.args[i];
+					String linkname = lhslnk.name;
+					if (rhsfreelinks.containsKey(lhslnk.name)) {
+						// 両辺に出現する場合: ( {$p[X]} :- \+($p=(a(X),$pp)) | ... )
+						LinkOccurrence rhslnk = (LinkOccurrence)rhsfreelinks.get(lhslnk.name);
+						rhslnk.buddy = lhslnk.buddy;	// 一方向のみのbuddy設定を行う
+						rhsfreelinks.put(lhslnk.name, CLOSED_LINK);
 					}
 					else {
-						// ガード匿名変数
+						// 左辺にのみ出現する場合: ( {$p[X]} :- \+($p=(a,$pp)) | ... )
+						rhscxtfreelinks.put(lhslnk.name, lhslnk);
 					}
+				}
+				removeClosedLinks(rhsfreelinks);
+				Iterator it3 = rhsfreelinks.keySet().iterator();
+				while (it3.hasNext()) {
+					String linkname = (String)it3.next();
+					LinkOccurrence lnk = (LinkOccurrence)rhsfreelinks.get(linkname);
+					// 右辺にのみ出現する場合:
+					// ( ... :- \+($p=a(X),$q=b(X)) | ... ) => 等式間リンクは、2回目の出現のとき閉じられる
+					// ( ... :- \+($p=(a(X),$pp)  ) | ... ) => ガード匿名リンク（トップレベル$ppの自由リンク）
+					addLinkOccurrence(interlinks, lnk);
+					// todo lnkが3回目以降の出現のとき、リンク名が変わったため、rhsfreelinksの修正が必要
+				}
+			}
+			removeClosedLinks(interlinks);
+
+			// ガード匿名リンクを処理する（$ppの剰余項が[]でない限り重要ではない）
+			Iterator it3 = interlinks.keySet().iterator();
+			anonymouslink:
+			while (it3.hasNext()) {
+				String linkname = (String)it3.next();
+				LinkOccurrence lnk = (LinkOccurrence)interlinks.get(linkname);
+				if (lnk.atom.mem.processContexts.isEmpty()) {
+					warning("WARNING: unsatisfiable negative condition because of free link: " + lnk.name);
+				}
+				else {
+					ProcessContext pc = (ProcessContext)lnk.atom.mem.processContexts.get(0);
+					LinkOccurrence[] newargs = new LinkOccurrence[pc.args.length + 1];
+					for (int i = 0; i < pc.args.length; i++) {
+						if (pc.args[i].name.equals(lnk.name)) continue anonymouslink;
+						newargs[i] = pc.args[i];
+					}
+					newargs[pc.args.length] = new LinkOccurrence(lnk.name, pc, pc.args.length);
+					pc.args = newargs;
 				}
 			}
 		}
@@ -545,14 +612,12 @@ public class LMNParser {
 		Iterator it = lhsFreeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			String linkname = (String)it.next();
-			if (lhsFreeLinks.get(linkname) == CLOSED_LINK) continue;
 			LinkOccurrence lhsocc = (LinkOccurrence)lhsFreeLinks.get(linkname);
 			addLinkOccurrence(links, lhsocc);
 		}
 		it = rhsFreeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			String linkname = (String)it.next();
-			if (rhsFreeLinks.get(linkname) == CLOSED_LINK) continue;
 			LinkOccurrence rhsocc = (LinkOccurrence)rhsFreeLinks.get(linkname);
 			addLinkOccurrence(links, rhsocc);
 		}
@@ -596,16 +661,9 @@ public class LMNParser {
 			if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
 		}
 	}
-
-//	/** プロセス文脈、型付きプロセス文脈、およびルール文脈の左辺での出現を登録する */
-//	private void registerLHSOccsOfContexts(HashMap names) {
-//		Iterator it = names.keySet().iterator();
-//		while (it.hasNext()) {
-//			it.next();
-//		}
-//	}
 	
 	/** ヘッドのプロセス文脈、型付きプロセス文脈、ルール文脈、リンク束のリストを作成する。
+	 * 型なしプロセス文脈の明示的な引数が互いに異なることを確認する。
 	 * @param mem 左辺膜、またはガード否定条件内等式制約右辺の構造を保持する膜
 	 * @param names コンテキストの限定名 (String) から ContextDef への写像 [in,out]
 	 * @param isLHS 左辺かどうか（def.lhsOccに追加するかどうかの判定に使用される）*/
@@ -645,8 +703,22 @@ public class LMNParser {
 					continue;
 				}
 			}
-			if (isLHS)  pc.def.lhsOcc = pc;	// ソース出現を登録
+			if (isLHS)  pc.def.lhsOcc = pc;	// 左辺での出現を登録
 			if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
+			//
+			if (!pc.def.isTyped()) {
+				HashSet explicitfreelinks = new HashSet();
+				for (int i = 0; i < pc.args.length; i++) {
+					LinkOccurrence lnk = pc.args[i];
+					if (explicitfreelinks.contains(lnk.name)) {
+						error("SYNTAX ERROR: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
+						lnk.name = lnk.name + generateNewLinkName();
+					}
+					else {
+						explicitfreelinks.add(lnk.name);
+					}
+				}			
+			}
 		}
 		it = mem.ruleContexts.iterator();
 		while (it.hasNext()) {
@@ -675,7 +747,7 @@ public class LMNParser {
 			it = mem.processContexts.iterator();
 			while (it.hasNext()) {
 				ProcessContext pc = (ProcessContext)it.next();
-				if (pc.def.lhsOcc == pc)  pc.def.lhsOcc = null; // ソース出現の登録を取り消す
+				if (pc.def.lhsOcc == pc)  pc.def.lhsOcc = null; // 左辺での出現の登録を取り消す
 				it.remove(); // namesには残る
 			}
 		}
@@ -683,7 +755,7 @@ public class LMNParser {
 			error("SYNTAX ERROR: head membrane cannot contain more than one rule context");
 			while (it.hasNext()) {
 				RuleContext rc = (RuleContext)it.next();
-				if (rc.def.lhsOcc == rc)  rc.def.lhsOcc = null; // ソース出現の登録を取り消す
+				if (rc.def.lhsOcc == rc)  rc.def.lhsOcc = null; // 左辺での出現の登録を取り消す
 				it.remove(); // namesには残る
 			}
 		}
@@ -772,7 +844,7 @@ public class LMNParser {
 			ProcessContext pc = (ProcessContext)it.next();
 			error("SYNTAX ERROR: untyped head process context requires an enclosing membrane: " + pc);
 			names.remove(pc.def.getName());
-			pc.def.lhsOcc = null;	// ソース出現の登録を取り消す
+			pc.def.lhsOcc = null;	// 左辺での出現の登録を取り消す
 			it.remove();
 		}
 		return names;

@@ -17,6 +17,7 @@ final public class ProcessContext extends Context {
 	public void setBundleName(String bundleName) {
 		bundle = new LinkOccurrence(bundleName, this, -1);
 	}
+	/** $p[A,B|*Z]のような文字列表現を返す。自動補完された$p[...|*p]のときは$pを返す。 */
 	public String toString() {
 		String argstext = "";
 		if (bundle == null || bundle.name.matches("\\*[A-Z_].*")) { // todo (buddy!=null)かどうかで判定すべきである
