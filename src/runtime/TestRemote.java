@@ -83,12 +83,11 @@ class TestRemote{
 		}
 		System.out.println("connectRuntime success");
 		
-		LMNtalRuntimeManager.disconnectFromDaemon();
 		
-		//RemoteTask banonTask1 = (RemoteTask) banon.newTask(rootMem);
-
-		//System.out.println("Membrane ID:" +  ((RemoteMembrane)banonTask1.root).getMemID());
-
+		//終了処理
+//		LMNtalRuntimeManager.disconnectFromDaemon();
+		LMNtalRuntimeManager.terminateAllNeighbors();	
+		
 
 		/*
 		 *  試しに実行してみるコード。
@@ -129,14 +128,5 @@ Compiled Rule ( a a :- b )
 		proceed        []
 		 * 
 		 */
-		
-		
-		//RemoteMembrane rmem = (RemoteMembrane)RemoteMembrane.newRoot(rr);
-		//
-		//
-		//
-
-
-		
 	}
 }
