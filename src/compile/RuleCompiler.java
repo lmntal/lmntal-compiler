@@ -68,7 +68,7 @@ public class RuleCompiler {
 	 */
 	RuleCompiler(RuleStructure rs) {
 		//Env.n("RuleCompiler");
-		//Env.p(rs);
+		//Env.d(rs);
 		this.rs = rs;
 	}
 	
@@ -175,9 +175,9 @@ public class RuleCompiler {
 		int toplevelmemid = lhsmemToPath(rs.leftMem);
 		rhsmempath.put(rs.rightMem, new Integer(toplevelmemid));
 		
-		//Env.p("rs.leftMem -> "+rs.leftMem);
-		//Env.p("lhsmempaths.get(rs.leftMem) -> "+lhsmempaths.get(rs.leftMem));
-		//Env.p("rhsmempaths -> "+rhsmempaths);
+		//Env.d("rs.leftMem -> "+rs.leftMem);
+		//Env.d("lhsmempaths.get(rs.leftMem) -> "+lhsmempaths.get(rs.leftMem));
+		//Env.d("rhsmempaths -> "+rhsmempaths);
 		
 		removeLHSAtoms();
 		if (removeLHSMem(rs.leftMem) >= 2) {
@@ -255,7 +255,7 @@ public class RuleCompiler {
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			lhsatompath.put(lhsatoms.get(i), new Integer( lhsfreemems.size() + i ));
 		}
-		//Env.p("lhsmempaths"+lhsmempaths);
+		//Env.d("lhsmempaths"+lhsmempaths);
 	}
 	
 	private void optimize() {
@@ -378,7 +378,7 @@ public class RuleCompiler {
 			Atom atom = (Atom)it.next();			
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
-				//Env.p(atom+"("+pos+")"+" buddy -> "+link.buddy.atom+" link.atom="+link.atom);
+				//Env.d(atom+"("+pos+")"+" buddy -> "+link.buddy.atom+" link.atom="+link.atom);
 				if (link == null) {
 					System.out.println("SYSTEM ERROR: buddy not set");
 				}
@@ -433,16 +433,16 @@ public class RuleCompiler {
 	private void showInstructions() {
 		Iterator it;
 		it = atomMatch.listIterator();
-		Env.p("--atomMatches :");
-		while(it.hasNext()) Env.p((Instruction)it.next());
+		Env.d("--atomMatches :");
+		while(it.hasNext()) Env.d((Instruction)it.next());
 		
 		it = memMatch.listIterator();
-		Env.p("--memMatch :");
-		while(it.hasNext()) Env.p((Instruction)it.next());
+		Env.d("--memMatch :");
+		while(it.hasNext()) Env.d((Instruction)it.next());
 		
 		it = body.listIterator();
-		Env.p("--body :");
-		while(it.hasNext()) Env.p((Instruction)it.next());
+		Env.d("--body :");
+		while(it.hasNext()) Env.d((Instruction)it.next());
 	}
 }
 

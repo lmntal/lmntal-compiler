@@ -23,6 +23,10 @@ public class Functor {
 		// == で比較できるようにするためにinternしておく。
 		strFunctor = (name + "_" + arity).intern();
 	}
+	/** 適切に省略された名前を取得 */
+	public String getAbbrName() {
+		return name.length() > 10 ? name.substring(0, 10) : name;
+	}
 	public String getName() {
 		return name;
 	}
@@ -37,7 +41,7 @@ public class Functor {
 		return true;
 	}
 	public String toString() {
-		return strFunctor;
+		return strFunctor.length() > 10 ? strFunctor.substring(0, 10) : strFunctor;
 	}
 	public int hashCode() {
 		return strFunctor.hashCode();

@@ -93,7 +93,7 @@ public final class Membrane {
 	 *
 	 */
 	public void showAllRuleset() {
-		Env.p( ((InterpretedRuleset)ruleset) );
+		Env.d( ((InterpretedRuleset)ruleset) );
 		
 		Iterator l;
 		

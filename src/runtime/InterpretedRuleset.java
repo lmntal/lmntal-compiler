@@ -36,7 +36,7 @@ class InterpreterReactor {
 		Functor func;
 		while (pc < insts.size()) {
 			Instruction inst = (Instruction) insts.get(pc++);
-			Env.p("Do " + inst);
+			Env.d("Do " + inst);
 			switch (inst.getKind()) {
 
 				//メモ：LOCALHOGEはHOGEと同じコードでいい。
@@ -783,7 +783,7 @@ if (formals < 10) formals = 10;
 	}
 
 	public void showDetail() {
-		Env.p("InterpretedRuleset.showDetail " + this);
+		Env.d("InterpretedRuleset.showDetail " + this);
 		Iterator l;
 		l = rules.listIterator();
 		while (l.hasNext()) {

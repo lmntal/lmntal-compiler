@@ -68,7 +68,7 @@ public class Dumper {
 	}
 	private static String dumpAtomGroup(Atom a, Set atoms) {
 		StringBuffer buf = new StringBuffer();
-		buf.append(a.getName());
+		buf.append(a.getAbbrName());
 		atoms.remove(a);
 		int arity = a.getArity();
 		if (arity > 0) {
@@ -84,7 +84,7 @@ public class Dumper {
 	}
 	private static String dumpAtomGroupWithoutLastArg(Atom a, Set atoms) {
 		StringBuffer buf = new StringBuffer();
-		buf.append(a.getName());
+		buf.append(a.getAbbrName());
 		atoms.remove(a);
 		int arity = a.getArity();
 		if (arity > 1) {

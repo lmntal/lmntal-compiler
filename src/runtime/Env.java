@@ -36,6 +36,23 @@ public final class Env {
 	}
 	
 	/**
+	 * General dumper for debug
+	 * @param o Object to print
+	 */
+	public static void d(Object o) {
+		d(o, 0);
+	}
+	
+	/**
+	 * General dumper for debug with indent
+	 * @param o
+	 * @param depth インデントの深さ
+	 */
+	public static void d(Object o, int depth) {
+		if(debug > 0) System.out.println(getIndent(depth) + o);
+	}
+	
+	/**
 	 * General dumper
 	 * @param o Object to print
 	 */
@@ -49,7 +66,7 @@ public final class Env {
 	 * @param depth インデントの深さ
 	 */
 	public static void p(Object o, int depth) {
-		if(debug > 0) System.out.println(getIndent(depth) + o);
+		System.out.println(getIndent(depth) + o);
 	}
 	
 	/**
@@ -57,14 +74,14 @@ public final class Env {
 	 * @param o method name
 	 */
 	public static void c(Object o) {
-		//p(">>> "+o);
+		//d(">>> "+o);
 	}
 	/**
 	 * Debug output when new some object: write at constructor.
 	 * @param o Class name
 	 */
 	public static void n(Object o) {
-		p(">>> new "+o);
+		d(">>> new "+o);
 	}
 	
 	/**

@@ -6,10 +6,7 @@ package runtime;
 
 import java.io.EOFException;
 import java.io.StringReader;
-import java.util.Arrays;
 
-import compile.*;
-import compile.parser.*;
 import org.gnu.readline.Readline;
 import org.gnu.readline.ReadlineLibrary;
 
@@ -75,33 +72,7 @@ public class REPL {
 	 * @param line     LMNtal statement (one liner)
 	 */
 	public static void processLine(String line) {
-		try {
-			// 字句解析　構文解析　意味解析
-			LMNParser lp = new LMNParser(new StringReader(line));
-			
-			// ルールセット生成
-			compile.structure.Membrane m = lp.parse();
-			Env.p("");
-			Env.p( "After parse   : "+m );
-			
-			compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
-			InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
-			Env.p( "After compile : "+ir );
-			root.showAllRule();
-			
-			// 実行
-			LMNtalRuntime rt = new LMNtalRuntime();
-			ir.react(rt.getGlobalRoot());
-			rt.exec();
-				
-			Membrane rootmem = (Membrane)rt.getGlobalRoot();
-			Env.p( "After execute : " );
-			Env.p( Dumper.dump(rootmem) );
-			Env.p( rootmem );
-		} catch (Exception e) {
-			Env.p("!! catch in REPL !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
-		}
-		
+		FrontEnd.run(new StringReader(line));
 		//System.out.println(line+"  =>  {a, b, {c}}, ({b, $p}:-{c, $p})");
 	}
 }

@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.FileNotFoundException;
 import java.lang.SecurityException;
+import java.util.*;
 
 import compile.*;
 import compile.parser.*;
@@ -94,31 +95,38 @@ public class FrontEnd {
 		if(is == null){
 			REPL.run();
 		}else{			
-			try{
-				src = new BufferedReader(new InputStreamReader(is));
-				LMNParser lp = new LMNParser(src);
+			run( new BufferedReader(new InputStreamReader(is)) );
+		}
+	}
+	
+	/**
+	 * 与えられたソースについて、一連の実行を行う。
+	 * @param src Reader 型で表されたソース
+	 */
+	public static void run(Reader src) {
+		try{
+			LMNParser lp = new LMNParser(src);
 				
-				compile.structure.Membrane m = lp.parse();
-				Env.p("");
-				Env.p( "After parse   : "+m );
+			compile.structure.Membrane m = lp.parse();
+			Env.d("");
+			Env.d( "After parse   : "+m );
 			
-				compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
-				InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
-				Env.p( "After compile : "+ir );
-				root.showAllRule();
+			compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
+			InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
+			Env.d( "After compile : "+ir );
+			root.showAllRule();
 			
-				// 実行
-				LMNtalRuntime rt = new LMNtalRuntime();
-				ir.react(rt.getGlobalRoot());
-				rt.exec();
+			// 実行
+			LMNtalRuntime rt = new LMNtalRuntime();
+			ir.react(rt.getGlobalRoot());
+			rt.exec();
 				
-				Membrane rootmem = (Membrane)rt.getGlobalRoot();
-				Env.p( "After execute : " );
-				Env.p( Dumper.dump(rootmem) );
-				Env.p( rootmem );
-			} catch (ParseException e) {
-				Env.e(e.getMessage()+"\n"+e.getStackTrace());
-			}
+			Membrane rootmem = (Membrane)rt.getGlobalRoot();
+			Env.d( "After execute : " );
+			Env.p( Dumper.dump(rootmem) );
+			//Env.p( rootmem );
+		} catch (ParseException e) {
+			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 	}
 }

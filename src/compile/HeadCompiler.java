@@ -94,9 +94,9 @@ public class HeadCompiler {
 		//if(mem.atoms.size() + mem.mems.size() == 0) {
 		//freemems.add(mem);
 		//}
-		//Env.p("atomids = "+atomids);
-		//Env.p("atoms = "+atoms);
-		//Env.p("freemems = "+freemems);
+		//Env.d("atomids = "+atomids);
+		//Env.d("atoms = "+atoms);
+		//Env.d("freemems = "+freemems);
 	}
 	
 	public void prepare() {

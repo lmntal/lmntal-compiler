@@ -24,7 +24,7 @@ import compile.structure.*;
 public class RuleSetGeneratorTest {
 	
 	public static void gui() {
-		Env.p( JOptionPane.showInputDialog(null, "Hello, Verno") );
+		Env.d( JOptionPane.showInputDialog(null, "Hello, Verno") );
 	}
 	/**
 	 * テスト用めいん
@@ -56,23 +56,23 @@ public class RuleSetGeneratorTest {
 			
 			//Membrane m = getTestStructure1();
 			//Membrane m = getTestStructure2();
-			Env.p(m);
+			Env.d(m);
 			Membrane root = RuleSetGenerator.runStartWithNull(m);
 			InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
 			
-			Env.p("");
-			Env.p("Compiled Membrane :");
+			Env.d("");
+			Env.d("Compiled Membrane :");
 			root.showAllRuleset();
 			root.showAllRule();
 			
 			return ir;
 			
-			//Env.p("");
-			//Env.p("Generated InterpretedRuleset :");
-			//Env.p(ir);
+			//Env.d("");
+			//Env.d("Generated InterpretedRuleset :");
+			//Env.d(ir);
 			//ir.showDetail();
 		} catch (ParseException e) {
-			Env.p(e);
+			Env.d(e);
 		}
 		return null;
 	}

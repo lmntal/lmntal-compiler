@@ -66,7 +66,7 @@ public class Inline {
 					System.err.println(el);
 				}
 				cp.waitFor();
-				Env.p("Compile result :  "+cp.exitValue());
+				Env.d("Compile result :  "+cp.exitValue());
 				cp = null;
 			}
 			// jar で処理系を起動すると、勝手なファイルからクラスをロードすることができないみたい。
@@ -76,11 +76,11 @@ public class Inline {
 				inlineCode = (InlineCode)o;
 			}
 			//inlineCode = (InlineCode)Class.forName("MyInlineCode").newInstance();
-			//Env.p(Class.forName("MyInlineCode").getField("version"));
+			//Env.d(Class.forName("MyInlineCode").getField("version"));
 		} catch (Exception e) {
-			Env.p(e);
+			Env.d(e);
 		}
-		Env.p("inline = "+inlineCode);
+		Env.d("inline = "+inlineCode);
 	}
 	
 	/**
@@ -104,12 +104,12 @@ public class Inline {
 		if(src.startsWith("/*inline*/")) {
 		//if(src.startsWith("a")) {
 			//登録
-			Env.p("Register inlineCode : "+src);
+			Env.d("Register inlineCode : "+src);
 			code.put(src, new Integer(codeCount++));
 		} else if(src.startsWith("/*inline_define*/")) {
 		//if(src.startsWith("a")) {
 			//登録
-			Env.p("Register inlineDefineCode : "+src);
+			Env.d("Register inlineDefineCode : "+src);
 			defs.add(src);
 		}
 	}
@@ -124,7 +124,7 @@ public class Inline {
 			Iterator i;
 			
 			PrintWriter p = new PrintWriter(new FileOutputStream("MyInlineCode.java"));
-			Env.p("make inline code "+code);
+			Env.d("make inline code "+code);
 			
 			//p.println("package runtime;");
 			p.println("import runtime.*;");
@@ -137,7 +137,7 @@ public class Inline {
 			p.println("public class MyInlineCode implements InlineCode {");
 			p.println("\tpublic static String version=\"static string.\";");
 			p.println("\tpublic void run(Atom me, int codeID) {");
-			p.println("\t\t//Env.p(a);");
+			p.println("\t\t//Env.d(a);");
 			p.println("\t\tswitch(codeID) {");
 			i = code.keySet().iterator();
 			while(i.hasNext()) {
@@ -157,7 +157,7 @@ public class Inline {
 			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
 			cp = Runtime.getRuntime().exec("javac -classpath .;lmntal.jar MyInlineCode.java");
 		} catch (Exception e) {
-			Env.p("!!! "+e.getMessage()+e.getStackTrace());
+			Env.d("!!! "+e.getMessage()+e.getStackTrace());
 		}
 		
 	}
@@ -167,9 +167,9 @@ public class Inline {
 	 * @param atom 実行すべきアトム名を持つアトム
 	 */
 	public static void callInline(Atom atom, int codeID) {
-		//Env.p(atom+" "+codeID);
+		//Env.d(atom+" "+codeID);
 		if(inlineCode==null) return;
-		//Env.p("=> call Inline "+atom.getName());
+		//Env.d("=> call Inline "+atom.getName());
 		inlineCode.run(atom, codeID);
 	}
 }
