@@ -23,12 +23,20 @@ final class RemoteTask extends AbstractTask {
 	/*
 	 * コンストラクタ。
 	 */
-	RemoteTask(AbstractLMNtalRuntime runtime) {
-		super(runtime);
+//	RemoteTask(AbstractLMNtalRuntime runtime) {
+//		super(runtime);
+//
+//		//runtimeはRemoteLMNtalRuntimeのはず
+//		remoteNode = ((RemoteLMNtalRuntime) runtime).lmnNode;
+//	}
 
-		//runtimeはRemoteLMNtalRuntimeのはず
-		remoteNode = ((RemoteLMNtalRuntime) runtime).lmnNode;
-	}
+	/*
+	 * コンストラクタ。
+	 */
+	 RemoteTask(RemoteLMNtalRuntime runtime){
+	 	super((AbstactLMNtalRuntime)runtime);
+	 	remoteNode = runtime.lmnNode;
+	 }
 
 	//	String getNextAtomID() {
 	//		return "NEW_" + nextatomid++;
@@ -93,6 +101,8 @@ final class RemoteTask extends AbstractTask {
 
 	// ロック
 	public void lock() {
+		//リモートのルート膜にlock命令を送る
+		
 		//TODO 実装
 		throw new RuntimeException("not implemented");
 	}

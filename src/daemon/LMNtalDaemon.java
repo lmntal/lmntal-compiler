@@ -143,7 +143,7 @@ public class LMNtalDaemon implements Runnable {
 						new OutputStreamWriter(tmpSocket.getOutputStream()));
 
 				//登録する
-				if (register(tmpSocket,
+				if (registerNode(tmpSocket,
 					new LMNtalNode(
 						tmpSocket.getInetAddress(),
 						tmpInStream,
@@ -180,7 +180,7 @@ public class LMNtalDaemon implements Runnable {
 	 * 
 	 * @return socketというキーが既に存在していたらfalse
 	 */
-	static boolean register(Socket socket, LMNtalNode node) {
+	static boolean registerNode(Socket socket, LMNtalNode node) {
 		if (DEBUG)System.out.println("register(" + socket.toString() + ", " + node.toString() + ")");
 
 		synchronized (nodeTable) {
@@ -366,6 +366,7 @@ public class LMNtalDaemon implements Runnable {
 	 * 
 	 * @param fqdn ホスト名。Fully Qualified Domain Nameである事。 
 	 * @return ソケットが開けてregister(socket,node)が成功したらtrue。それ以外はfalse。
+	 * 既に登録済みの場合は、メッセージを送って生きているか検査する。返事がきたらtrue、来なかったらfalse。
 	 */
 	public static boolean connect(String fqdn) {
 		System.out.println("now in LMNtalDaemon.connect(" + fqdn + ")");
@@ -422,7 +423,7 @@ public class LMNtalDaemon implements Runnable {
 				t.start();
 
 				LMNtalNode node = new LMNtalNode(ip, in, out);
-				return register(socket, node);
+				return registerNode(socket, node);
 			} catch (Exception e) {
 				System.out.println(
 					"ERROR in LMNtalDaemon.connect(" + fqdn + ")");

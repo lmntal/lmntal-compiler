@@ -165,20 +165,20 @@ final class RemoteMembrane extends AbstractMembrane {
 	 *  (non-Javadoc)
 	 * @see runtime.AbstractMembrane#newRoot(null)
 	 */
-	public AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
-		// TODO 実装する
-
+	public AbstractMembrane newRoot(RemoteLMNtalRuntime runtime) {
 		//RemoteTaskを作る
-		//RemoteTask newtask = new RemoteTask(runtime);
-
-		//RemoteMembrane同時生成
+		//RemoteTask newtask = (RemoteTask)runtime.newTask(this);
 
 		//リモートで膜を作る命令を発行する
-		//send("NEWROOT",""+ remoteid ); //引数はこれでいいのかな
+		//send("NEWROOT"); //引数はこれでいいのかな
 
-		//RemoteTask.rootを返す	
-		//return newtask.getRoot();
-
+		//返事を待つ
+		
+		//OKだったら
+			//RemoteTask.rootを返す	
+			//return newtask.getRoot();
+		
+		//ダメだったら
 		return null;
 	}
 

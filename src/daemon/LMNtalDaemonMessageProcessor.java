@@ -24,10 +24,6 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 	BufferedWriter out;
 	Socket socket;
 
-	//あげたLocalLMNtalRuntimeのID
-	Integer slaveRuntimeRgid;
-
-
 
 	/*
 	 * コンストラクタ。
@@ -61,6 +57,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 		}
 	}
 
+	/*
+	 *  (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		if (DEBUG) {
 			System.out.println("LMNtalDaemonMessageProcessor.run()");
@@ -207,9 +207,11 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 							 * lock
 							 * blockinglock
 							 * asynclock
-							 * unlock
-							 * asyncunlock
 							 * recursivelock
+							 * 
+							 * unlock
+							 * blockingunlock
+							 * asyncunlock
 							 * recursiveunlock
 							 * 
 							 * terminate
@@ -230,7 +232,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//新規にラインタイムを作る。
 								//OK返すのは生成されたランタイムがする。
 
-								slaveRuntimeRgid =
+								Integer slaveRuntimeRgid =
 									new Integer(LMNtalDaemon.makeID());
 
 								String newCmdLine =
@@ -284,9 +286,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								 * moveto srcmem dstmem
 								 * 
 								 * 仮称
-								 * requireruleset
-								 * setparent
-								 * newroot
+								 * requireruleset globalRulesetID
+								 * newroot mem
 								 */
 								
 								String[] commandInsideBegin = new String[5]; //RemoteMembrane.send()の引数の個数を参照せよ
@@ -393,7 +394,16 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										out.flush();
 
 										continue beginEndLoop;
-									//} else if (commandInsideBegin[0].equalsIgnoreCase("newroot")){
+									} else if (commandInsideBegin[0].equalsIgnoreCase("newroot")){
+										srcmem = commandInsideBegin[1];
+										
+										//TODO 実装
+										//AbstractTask task = (IDConverter.getMem(srcmem)).task.runtime.newTask(this);
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("newlink")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
@@ -469,8 +479,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										out.flush();
 
 										continue beginEndLoop;
-									//} else if (commandInsideBegin[0].equalsIgnoreCase("setparent")){
-									///} else if (commandInsideBegin[0].equalsIgnoreCase("requireruleset")){
+									//} else if (commandInsideBegin[0].equalsIgnoreCase("requireruleset")){
+										//TODO 実装
 									} else {
 										//未知の命令
 										out.write("not implemented yet\n");
@@ -536,8 +546,6 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								out.flush();
 								continue;
 							} else if (command[0].equalsIgnoreCase("blockingunlock")) {
-								//TODO 実装：
-								
 								//IDConverter.getMem(command[1]).blockingUnlock();
 								
 								out.write("not implemented yet\n");

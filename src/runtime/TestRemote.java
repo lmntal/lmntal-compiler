@@ -30,8 +30,15 @@ class TestRemote{
 
 		RemoteLMNtalRuntime rr = (RemoteLMNtalRuntime)(LMNtalRuntimeManager.connectRuntime("banon.ueda.info.waseda.ac.jp"));
 		
+		if(rr==null){
+			//ÀÜÂ³¼ºÇÔ
+			System.out.println("failed to connect");
+			System.exit(0);
+		}
 		
+		//RemoteMembrane rmem = (RemoteMembrane)RemoteMembrane.newRoot(rr);
 		
+
 
 		
 	}

@@ -8,6 +8,8 @@ import runtime.Functor;
 /*
  * キャッシュ機構。
  * 
+ * TODO 実装
+ * 
  * @author nakajima
  *
  */
