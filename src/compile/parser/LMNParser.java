@@ -166,8 +166,8 @@ public class LMNParser {
 		LinkedList p = sAtom.getProcess();
 		int arity = p.size();
 		
-		// [1]ファンクタを決定する
-		// GUIからの動的な生成に対応する場合にそなえて AtomFactory のようなものがあった方がよい。
+		// [1] ファンクタを生成する
+		// GUIからの動的な生成に対応する場合にそなえて FunctorFactory のようなものがあった方がよい。
 		// runtime.*Functor の多さが、現状の不自然さを物語る。
 
 		SrcName srcname = sAtom.getName();
@@ -176,10 +176,10 @@ public class LMNParser {
 		if (srcname.getType() == SrcName.PATHED) {
 			int pos = name.indexOf('.');
 			path = name.substring(0, pos);
+			name = name.substring(pos + 1);
 		}
-		
 		Functor func = new runtime.Functor(name, arity, path);
-		if (arity == 1) {
+		if (arity == 1 && path == null) {
 			if (srcname.getType() == SrcName.PLAIN || srcname.getType() == SrcName.SYMBOL) {
 				try {
 					func = new runtime.IntegerFunctor(Integer.parseInt(name));

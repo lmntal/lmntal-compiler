@@ -20,7 +20,7 @@ public class Functor {
 	private int arity;
 	/** 各種メソッドで使うために保持しておく。整合性要注意 */
 	private String strFunctor;
-	/** ファンクタ表記中のモジュール名（明示的に指定されていない場合はnull）*/
+	/** ファンクタが所属するモジュール名（明示的に指定されていない場合はnull）*/
 	private String path = null;
 	
 	////////////////////////////////////////////////////////////////
