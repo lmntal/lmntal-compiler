@@ -31,7 +31,7 @@ public class OptimizerTest extends TestCase {
 		Functor append = new Functor("append", 3);
 		Functor cons = new Functor("cons", 3);
 		
-		List list = new ArrayList();
+		ArrayList list = new ArrayList();
 		System.out.println("( append(X0, Y, Z), cons(A, X, X0) :- cons(A, X1, Z), append(X, Y, X1) )");
 		
 //		//head
@@ -61,28 +61,14 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.FREEATOM, 2));
 		list.add(new Instruction(Instruction.PROCEED));
 		
-		System.out.println("Before Optimization:");
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			System.out.println(it.next());
-		}
-		
-		//optimize
-		Optimizer.optimize(list);
-		
-		System.out.println("After Optimization:");
-		it = list.iterator();
-		while (it.hasNext()) {
-			System.out.println(it.next());
-		}
-		System.out.println();
+		doTest(list);
 	}
 
 	public static void testAppendWithRelink() {
 		Functor append = new Functor("append", 3);
 		Functor cons = new Functor("cons", 3);
 		
-		List list = new ArrayList();
+		ArrayList list = new ArrayList();
 		System.out.println("( append(X0, Y, Z), cons(A, X, X0) :- cons(A, X1, Z), append(X, Y, X1) )");
 		System.out.println("use relink instruction");
 
@@ -101,21 +87,7 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.FREEATOM, 2));
 		list.add(new Instruction(Instruction.PROCEED));
 		
-		System.out.println("Before Optimization:");
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			System.out.println(it.next());
-		}
-		
-		//optimize
-		Optimizer.optimize(list);
-		
-		System.out.println("After Optimization:");
-		it = list.iterator();
-		while (it.hasNext()) {
-			System.out.println(it.next());
-		}
-		System.out.println();
+		doTest(list);
 	}
 	
 	public static void testReuseMem() {
@@ -137,8 +109,8 @@ public class OptimizerTest extends TestCase {
 		list.add(Instruction.newmem(6, 0));
 		list.add(new Instruction(Instruction.MOVECELLS, 6, 1));
 		list.add(new Instruction(Instruction.MOVECELLS, 5, 2));
-		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 5));
 		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 6));
+		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 5));
 		list.add(Instruction.newatom(7, 5, a));
 		list.add(Instruction.newatom(8, 6, b));
 
@@ -147,6 +119,59 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.FREEATOM, 3));
 		list.add(new Instruction(Instruction.FREEATOM, 4));
 		list.add(new Instruction(Instruction.PROCEED));
+		
+		doTest(list);
+	}
+
+	public static void testReuseMem2() {
+		ArrayList list = new ArrayList();
+
+		System.out.println("( {$p}, {$q} :- {$q, $p} )");
+
+		list.add(Instruction.spec(3, 4));
+		list.add(new Instruction(Instruction.REMOVEMEM, 1, 0));
+		list.add(new Instruction(Instruction.REMOVEPROXIES, 1));
+		list.add(new Instruction(Instruction.REMOVEMEM, 2, 0));
+		list.add(new Instruction(Instruction.REMOVEPROXIES, 2));
+		list.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, 0));
+		list.add(Instruction.newmem(3, 0));
+		list.add(new Instruction(Instruction.MOVECELLS, 3, 1));
+		list.add(new Instruction(Instruction.MOVECELLS, 3, 2));
+		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 3));
+		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 3));
+
+		list.add(new Instruction(Instruction.FREEMEM, 1));
+		list.add(new Instruction(Instruction.FREEMEM, 2));
+		list.add(new Instruction(Instruction.PROCEED));
+		
+		doTest(list);
+	}
+	
+	public static void testReuseMem3() {
+		ArrayList list = new ArrayList();
+
+		System.out.println("( {$p, {$q}} :- {$q, {$p}} )");
+		
+		list.add(Instruction.spec(3, 5));
+		list.add(new Instruction(Instruction.REMOVEMEM, 2, 1));
+		list.add(new Instruction(Instruction.REMOVEPROXIES, 2));
+		list.add(new Instruction(Instruction.REMOVEMEM, 1, 0));
+		list.add(new Instruction(Instruction.REMOVEPROXIES, 1));
+		list.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, 0));
+		list.add(Instruction.newmem(3, 0));
+		list.add(Instruction.newmem(4, 3));
+		list.add(new Instruction(Instruction.MOVECELLS, 4, 1));
+		list.add(new Instruction(Instruction.MOVECELLS, 3, 2));
+		list.add(new Instruction(Instruction.INSERTPROXIES, 3, 4));
+		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 3));
+		
+		list.add(new Instruction(Instruction.FREEMEM, 2));
+		list.add(new Instruction(Instruction.FREEMEM, 1));
+		list.add(new Instruction(Instruction.PROCEED));
+		
+		doTest(list);
+	}
+	private static void doTest(ArrayList list) { 
 		
 		System.out.println("Before Optimization:");
 		Iterator it = list.iterator();
@@ -164,4 +189,5 @@ public class OptimizerTest extends TestCase {
 		}
 		System.out.println();
 	}
+
 }

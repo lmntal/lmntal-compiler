@@ -51,6 +51,15 @@ public class Optimizer {
 					it.add(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId));
 					nextId++;
 					break;
+				case Instruction.LOCALRELINK:
+					if (nextId < 0) {
+						throw new RuntimeException("SYSTEM ERROR: relink before spec instruction");
+					}
+					it.remove();
+					it.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
+					it.add(new Instruction(Instruction.LOCALINHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId));
+					nextId++;
+					break;
 			}
 		}
 	}
@@ -76,13 +85,17 @@ public class Optimizer {
 //				case Instruction.NEWMEM:
 //					break;
 				case Instruction.MOVECELLS:
-					reuseMap.put(inst.getArg1(), inst.getArg2());
-					reuseMems.add(inst.getArg2());
-					break;
+					//すでに再利用で生成する事が決まっている膜でなければ、再利用で生成する
+					if (!reuseMap.containsKey(inst.getArg1())) {
+						reuseMap.put(inst.getArg1(), inst.getArg2());
+						reuseMems.add(inst.getArg2());
+						break;
+					}
 			}
 		}
 		
 		//命令列を書き換える
+		//TODO insertproxies命令の順番・回数を適切に変更する
 		ListIterator lit = list.listIterator();
 		while (lit.hasNext()) {
 			Instruction inst = (Instruction)lit.next();
@@ -96,8 +109,9 @@ public class Optimizer {
 					}
 					break;
 				case Instruction.MOVECELLS:
-					if (reuseMap.containsKey(inst.getArg1())) {
+					if (reuseMems.contains(inst.getArg2())) {
 						//addmem命令で移動が完了しているため除去
+						//※ある膜が、2つ以上の膜の再利用の根拠となることはない
 						lit.remove();
 					}
 					break;
