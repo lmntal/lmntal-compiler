@@ -731,7 +731,7 @@ public class Optimizer {
 					memvars.add(inst.getArg1());
 					break;
 				case Instruction.ARG_VAR:
-					memvars.add(inst.getArg1());
+					othervars.add(inst.getArg1());
 					break;
 				case -1:
 					break;
