@@ -101,7 +101,7 @@ public class HeadCompiler {
 	
 	public void prepare() {
 		Env.c("prepare");
-		varcount = 0;
+		varcount = 1;	// [0]は本膜
 		mempath.clear();
 		atompath.clear();
 		visited = new boolean[atoms.size()];
@@ -139,7 +139,7 @@ public class HeadCompiler {
 						if (b == t && buddylink.pos < pos) continue;
 					}
 				}
-				int buddyatompath = ++varcount;
+				int buddyatompath = varcount++;
 				match.add( new Instruction(Instruction.DEREF,
 					buddyatompath, atomIDToPath(targetid), pos, buddylink.pos ));
 					
@@ -164,7 +164,7 @@ public class HeadCompiler {
 						match.add(new Instruction( Instruction.TESTMEM, buddymempath, buddyatompath ));
 					}
 					else {
-						buddymempath = ++varcount;
+						buddymempath = varcount++;
 						mempath.put(buddymem, new Integer(buddymempath));
 						match.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath ));
 					// // GETMEM時代のコード
@@ -190,7 +190,7 @@ public class HeadCompiler {
 			int targetid = atomToID(atom); // 仮引数ID
 			if (atomIDToPath(targetid) == UNBOUND) {
 				// 見つかったアトムを変数に取得する
-				int atompath = ++varcount;
+				int atompath = varcount++;
 				match.add(Instruction.findatom(atompath, thismempath, atom.functor));
 				// すでに取得しているアトムとの非同一性を検査する
 				Iterator it2 = mem.atoms.iterator();
@@ -212,7 +212,7 @@ public class HeadCompiler {
 			int submempath = memToPath(submem);
 			if (submempath == UNBOUND) {
 				// 子膜を変数に取得する
-				submempath = ++varcount;
+				submempath = varcount++;
 				match.add(Instruction.anymem(submempath, thismempath));
 				Iterator it2 = mem.mems.iterator();
 				while (it2.hasNext()) {

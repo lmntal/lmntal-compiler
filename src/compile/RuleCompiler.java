@@ -121,7 +121,7 @@ public class RuleCompiler {
 				atomMatch.add(new Instruction(Instruction.BRANCH, brancharg));
 				hc.mempath.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 				hc.atomidpath.set(firstid, new Integer(1));	// 主導するアトムの変数番号は 1
-				hc.varcount = 1;
+				hc.varcount = 2;
 				Atom atom = (Atom)hc.atoms.get(firstid);
 				hc.match.add(new Instruction(Instruction.FUNC, 1, atom.functor));
 				Membrane mem = atom.mem;
@@ -129,16 +129,16 @@ public class RuleCompiler {
 					hc.match.add(new Instruction(Instruction.TESTMEM, 0, 1));
 				}
 				else {
-					hc.match.add(new Instruction(Instruction.GETMEM, varcount+1, 1));
-					hc.mempath.put(mem, new Integer(++varcount));
+					hc.match.add(new Instruction(Instruction.GETMEM, varcount, 1));
+					hc.mempath.put(mem, new Integer(varcount++));
 					do {
-						hc.match.add(new Instruction(Instruction.GETPARENT,varcount+1,varcount));
-						hc.mempath.put(mem, new Integer(++varcount));
+						hc.match.add(new Instruction(Instruction.GETPARENT,varcount,varcount-1));
+						hc.mempath.put(mem, new Integer(varcount++));
 						mem = mem.mem;
 					}	
 					while (mem != rs.leftMem);
-					hc.match.add(new Instruction(Instruction.EQMEM, 0, varcount));
-					for (int i = varcount; --i >= 2; ) {
+					hc.match.add(new Instruction(Instruction.EQMEM, 0, varcount-1));
+					for (int i = varcount-1; --i >= 2; ) {
 						hc.match.add(new Instruction(Instruction.LOCK,i));
 					}
 				}
@@ -278,7 +278,7 @@ public class RuleCompiler {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
-			int submempath = ++varcount;
+			int submempath = varcount++;
 			rhsmempath.put(submem, new Integer(submempath));
 			body.add( Instruction.newmem(submempath, rhsmemToPath(submem)));
 			buildRHSMem(submem);
@@ -340,7 +340,7 @@ public class RuleCompiler {
 					lhsatomToPath(link1.atom), link1.pos,
 					lhsatomToPath(link2.atom), link2.pos ));
 			} else {
-				int atomid = ++varcount;
+				int atomid = varcount++;
 				rhsatompath.put(atom, new Integer(atomid));
 				rhsatoms.add(atom);
 				body.add(Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
