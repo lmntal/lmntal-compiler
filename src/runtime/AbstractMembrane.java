@@ -83,7 +83,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return id;
 	}
 	/** この膜のローカルIDを取得する */
-	String getLocalID() {
+	public String getLocalID() {  //publicなのはLMNtalDaemonから呼んでいるから
 		return Integer.toString(id);
 	}
 	/** この膜が所属する計算ノードにおける、この膜のIDを取得する */

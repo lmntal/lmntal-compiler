@@ -10,6 +10,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import runtime.AbstractMembrane;
+
 /**
  * 物理的な計算機の境界にあって、LMNtalRuntimeインスタンスとリモートノードの対応表を保持する。
  * 通信部分の処理を行う。
@@ -91,6 +93,11 @@ public class LMNtalDaemon implements Runnable {
 	 * 起動されたLocalLMNtalRuntimeの表
 	 */
 	//static HashMap slaveRuntimeTable = new HashMap();
+
+	/*
+	 * この計算機にある膜のグローバルなIDを管理
+	 */
+	static HashMap localMemTable = new HashMap();
 
 	/*
 	 * idを作るのに使うランダム
@@ -515,5 +522,32 @@ public class LMNtalDaemon implements Runnable {
 	 */
 	public static int makeID() {
 		return r.nextInt();
+	}
+
+/*
+ * グローバルな膜IDを作成して、同時に表に登録する。
+ * 
+ * @return グローバルな膜ID。中身はInetAddress.getLocalHost() + ":" + AbstractMembrane.getID()。getLocalHost()に失敗したらnullが帰る。
+ * @param mem グローバルなIDを振りたい膜
+ */	
+	public static String getGlobalMembraneID(AbstractMembrane mem){
+		//もう登録済みなら登録されているIDを返す
+		if(localMemTable.get(mem) != null){
+			return (String)(localMemTable.get(mem)); 
+		}
+		
+		String newid;
+		try {
+			//IDを生成する
+			newid = InetAddress.getLocalHost().toString() + ":" + mem.getLocalID();
+			//ID登録
+			localMemTable.put(mem,newid);
+			return newid;
+		} catch (Exception e){
+			//ID生成失敗
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }
