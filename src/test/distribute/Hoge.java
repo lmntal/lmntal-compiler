@@ -20,9 +20,9 @@ class Hoge {
 		//DumpHashMapNeat();
 //		RuntimeBootTest();
 //		privateIPhanteiTest();
-		privateIPhanteiTest2();
+		//privateIPhanteiTest2();
 	}
-	
+
 	/**
 	 * 
 	 */

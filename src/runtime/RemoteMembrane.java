@@ -1,20 +1,26 @@
 package runtime;
 
-//import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.net.Socket;
+
+import daemon.LMNtalDaemon;
+import daemon.LMNtalNode;
 
 /**
  * リモート計算ノード
- * TODO staticなものをすべて「計算ノード管理クラス」に移管する
+ * 
  * @author n-kato
+ * 
+ * メッセージ処理はLMNtalDaemonMessageProcessorに全部丸投げ？
  */
 final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
-	protected String runtimeid;
-	protected Socket socket;
-	protected RemoteLMNtalRuntime(String runtimeid) {
-		this.runtimeid = runtimeid;
+
+	protected String hostname;
+	protected LMNtalNode lmnNode; 
+	protected RemoteLMNtalRuntime(String hostname) {
+		//runtimeidの中にはfqdnが入っている
+
+		this.hostname = hostname;
 	}
 
 	public AbstractTask newTask() {
@@ -31,7 +37,16 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 	public void awake() {
 		//send("AWAKE");
 	}
-
+	
+	public boolean connect(){
+		boolean connectResult = LMNtalDaemon.connect(hostname);
+		lmnNode = LMNtalDaemon.getLMNtalNodeFromFQDN(hostname);
+		if(lmnNode != null && connectResult == true){
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
 
 
@@ -56,6 +71,7 @@ final class RemoteTask extends AbstractTask {
 		cmdbuffer += cmd + "\n";
 	}
 	void flush() {
+		//TODO 実装:RemoteLMNtalRuntimeに制御を移して命令列をあて先に流す
 		System.out.println("SYSTEM ERROR: remote call not implemented");
 	}
 

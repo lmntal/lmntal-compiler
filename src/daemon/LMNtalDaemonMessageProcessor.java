@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-class LMNtalDaemonMessageProcessor implements Runnable {
+public class LMNtalDaemonMessageProcessor implements Runnable {
 	BufferedReader in;
 	BufferedWriter out;
 	Socket socket;
@@ -19,6 +19,15 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 		in = inTmp;
 		out = outTmp;
 		socket = tmpSocket;
+	}
+
+	public static boolean isMyself(String fqdn){
+		try {
+			return InetAddress.getLocalHost().getHostAddress().equals(InetAddress.getByName(fqdn).getHostAddress());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public void run() {
@@ -141,30 +150,23 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 					//メッセージ登録成功
 
 					//自分自身宛かどうか判断
-					try {
-						if (InetAddress
-							.getLocalHost()
-							.getHostAddress()
-							.equals(
-								InetAddress
-									.getByName(fqdn)
-									.getHostAddress())) {
+				try{
+					if (isMyself(fqdn)) {
+						System.out.println(
+							"This message is for me: "
+								+ InetAddress
+									.getLocalHost()
+									.getHostAddress());
 
-							System.out.println(
-								"This message is for me: "
-									+ InetAddress
-										.getLocalHost()
-										.getHostAddress());
+						//自分自身宛なら、自分自身で処理する
 
-							//自分自身宛なら、自分自身で処理する
-
-							/* ここで処理される命令一覧
-							 * 
-							 *  begin
-							 *  connect
-							 *  lock taskid
-							 *  terminate
-							 */
+						/* ここで処理される命令一覧
+						 * 
+						 *  begin
+						 *  connect
+						 *  lock taskid
+						 *  terminate
+						 */
 
 							String command = (parsedInput[3].split(" ", 3))[0];
 
@@ -240,10 +242,6 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 								}
 							}
 						}
-					} catch (UnknownHostException e1) {
-						e1.printStackTrace();
-						//continue;
-						break;
 					} catch (IOException e1) {
 						e1.printStackTrace();
 						//continue;

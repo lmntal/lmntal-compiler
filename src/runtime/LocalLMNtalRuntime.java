@@ -11,7 +11,9 @@ import java.util.List;
 public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runnable */{
 	List tasks = new ArrayList();
 //	protected Thread thread = new Thread(this);
-	
+	LocalLMNtalRuntime(){
+		Env.theRuntime = this;
+	}
 
 	AbstractTask newTask(AbstractMembrane parent) {
 		Task t = new Task(this,parent);
