@@ -709,7 +709,7 @@ class TerminateProcessor implements Runnable {
 		if(LMNtalRuntimeManager.terminateAll()){
 			node.respondAsOK(msgid);
 		} else {
-			node.respondAsFail(msgid);
+			//node.respondAsFail(msgid);
 		}
 	}
 }
