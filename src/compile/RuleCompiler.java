@@ -812,6 +812,8 @@ public class RuleCompiler {
 		it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
+			//
+			Module.regMemName(submem.name, submem);
 			int submempath = varcount++;
 			rhsmempath.put(submem, new Integer(submempath));
 			body.add( Instruction.newmem(submempath, rhsmemToPath(mem) ) );
