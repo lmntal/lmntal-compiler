@@ -1115,13 +1115,18 @@ class InterpretiveReactor {
 					break; // n-kato
 
 
-
-
-
-
-
-
-
+				case Instruction.GROUP:
+					subinsts = ((InstructionList)inst.getArg1()).insts;
+					if(!interpret(subinsts, 0)){
+						//現状では必ずここに入る
+						//GROUP内の命令が成功することはない
+						//System.out.println("failed");
+						return false;
+					}
+					break;
+					//現状ではまともに動かない。
+					//sakurai
+					
 
 
 

@@ -35,6 +35,8 @@ public final class Env {
 	/** Optimization level. */
 	public static int optimize = 0;
 	
+	/** 暫定的最適化オプション　ガード,グループ関係 sakurai**/
+	public static int zoptimize = 0;
 	////////////////////////////////////////////////////////////////
 	
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/

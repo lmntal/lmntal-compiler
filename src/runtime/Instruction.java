@@ -582,6 +582,14 @@ public class Instruction implements Cloneable, Serializable {
 	/** movecells [dstmem, srcmem]
 	 * <br>ボディ命令<br>
 	 * （親膜を持たない）膜$srcmemにある全てのアトムと子膜（ロックを取得していない）を膜$dstmemに移動する。
+	 * 子膜はルート膜の直前の膜まで再帰的に移動される。
+	 * 実行膜スタックおよび実行アトムスタックは操作しない。TODO ←仕様バグ？
+	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない（ルールセットに限りは参照してもよい）。
+	 * （親膜を持たない）膜$srcmemにある全てのアトムと子膜（ロックを取得していない）を膜$dstmemに移動する。
+	 * 子膜はルート膜の直前の膜まで再帰的に移動される。ホスト間移動した膜は活性化される。
+	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない
+	 * <strike>（内容物のルールセットに限り参照してよい？）</strike>
+	 * （親膜を持たない）膜$srcmemにある全てのアトムと子膜（ロックを取得していない）を膜$dstmemに移動する。
 	 * 子膜はルート膜の直前の膜まで再帰的に移動される。ホスト間移動した膜は活性化される。
 	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない
 	 * <strike>（内容物のルールセットに限り参照してよい？）</strike>
@@ -1348,7 +1356,16 @@ public class Instruction implements Cloneable, Serializable {
 //	public static final int FSIN = 640;
 //	public static final int FCOS = 641;
 //	public static final int FTAN = 642;
-
+    
+    /** group [[Instructions...]]
+     * ヘッド命令列をアトムグループごとに区切る
+     * 細かい予定は未定
+     * 現在はヘッド命令列がどんな感じでグループ化しているかを
+     * 確認するくらいしかできない
+     * sakurai
+     */
+    public static final int GROUP = 2000;
+    static {setArgType(GROUP, new ArgType(false, ARG_INSTS));}
 	////////////////////////////////////////////////////////////////
 
     /** 命令の種類を取得する。*/

@@ -154,6 +154,17 @@ public class FrontEnd {
 							System.exit(-1);
 						}
 						break;
+					//暫定的最適化オプション ガード、グループ関係 sakurai
+					case 'Z':
+					    if(args[i].length() == 2){
+					    	Env.zoptimize = 0;	
+					    } else if(args[i].matches("-Z[0-9]")){
+					    	Env.zoptimize = args[i].charAt(2) - '0';
+					    } else {
+					    	System.out.println("不明なオプション:" + args[i]);
+					    	System.exit(-1);
+					    }
+					    break;
 					case '-': // 文字列オプション
 						if(args[i].equals("--help")){
 							/// --help

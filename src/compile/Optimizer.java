@@ -20,7 +20,9 @@ public class Optimizer {
 	public static void optimizeRule(Rule rule) {
 		if (Env.optimize == 9) Compactor.compactRule(rule); else // （テスト用）		
 		if (Env.optimize == 1) inlineExpandTailJump(rule.memMatch); else	// TODO 最適化器を統合する
+		if (Env.zoptimize >= 1) GuardOptimizer.guardMove(rule.memMatch, rule.guard); // ガード最適化テスト
 		optimize(rule.memMatch, rule.body);
+		if (Env.zoptimize >= 4) Grouping.atomGroup(rule.memMatch); //アトムグループ化。まだテスト段階
 	}
 	/**	
 	 * 渡された命令列を、現在の最適化レベルに応じて最適化する。<br>
@@ -1216,5 +1218,6 @@ public class Optimizer {
 			spec.updateSpec(spec.getIntArg1(), nextArg);
 		}
 	}
+	
 
 }
