@@ -12,7 +12,7 @@ import compile.structure.*;
 /**
  * ルールセットを生成して返す。
  * @author hara
- *
+ * 
  */
 public class RuleSetGenerator {
 	
