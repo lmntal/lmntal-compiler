@@ -34,9 +34,10 @@ LMNtal 処理系にかかわるデータの流れとデータに加えられる処理
 
     ◆◆◆以下は Java コードにコンパイルするときだけ◆◆◆
 	↓　ルールオブジェクトから Java コードへの変換器（原）
-	トップレベルに対応する Java ソース（static final void main）
+	トップレベルに対応する Java ソース（static final void main が呼ぶ）
 	および
-	新しいルールセットクラス（＜runtime.Ruleset_nnn）の Java ソース
+	新しいルールセットクラス Ruleset_nnn（runtime.Rulesetのサブクラス）
+	の Java ソース
 	↓	トップレベルに対応する Java ソースを javac, 適切なファイルを jar
 	バイトコードが含まれる jar ファイル
 
