@@ -32,6 +32,7 @@ public final class InterpretedRuleset extends Ruleset {
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
 			Rule r = (Rule) it.next();
+			if (r.atomMatch.size() == 1) continue; // debugÍÞÀ©ÍÑ
 			if (matchTest(mem, atom, r.atomMatch)) {
 				result = true;
 				//if (!mem.isCurrent()) return true;

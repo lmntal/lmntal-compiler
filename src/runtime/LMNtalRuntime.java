@@ -102,7 +102,10 @@ final class Task extends AbstractTask {
 					}
 				}
 				if (flag == false) {
+					int debugvalue = Env.debug; // todo spy機能を実装する
+					Env.debug = 0;
 					flag = SystemRuleset.getInstance().react(mem);
+					Env.debug = debugvalue;
 				}
 				if(flag == false){ // ルールが適用できなかった時
 					memStack.pop(); // 本膜をpop
