@@ -7,6 +7,7 @@ import java.util.Vector;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import runtime.AbstractMembrane;
 
@@ -276,13 +277,14 @@ public class GraphLayout implements Runnable {
 	public void paintMem(Graphics g, AbstractMembrane m) {
 		// 同時アクセスで java.util.ConcurrentModificationException がでるので Iterator やめた
 		// ここでの用途は readonly
+		final double MARGIN = 15.0;
+		
 		Node[] nodes = (Node[])m.getAtomArray();
 		m.rect.setRect(0.0, 0.0, 0.0, 0.0);
 		for(int i=0;i<nodes.length;i++) {
 			if(!nodes[i].isVisible()) continue;
-			final double MARGIN = 15.0;
 			if(m.rect.x==0.0 && m.rect.y==0.0) m.rect.setRect(nodes[i].getPosition().x-MARGIN, nodes[i].getPosition().y-MARGIN, MARGIN*2, MARGIN*2);
-			else                               m.rect.add(nodes[i].getPosition().x, nodes[i].getPosition().y);
+			else                               m.rect.add(new Rectangle2D.Double(nodes[i].getPosition().x-MARGIN, nodes[i].getPosition().y-MARGIN, MARGIN*2, MARGIN*2));
 			nodes[i].paintEdge(g);
 		}
 		for(int i=0;i<nodes.length;i++) {
@@ -294,10 +296,12 @@ public class GraphLayout implements Runnable {
 		for(int i=0;i<mems.length;i++) {
 			AbstractMembrane mm = (AbstractMembrane)mems[i];
 			paintMem(g, mm);
-			if(m.rect.x==0.0 && m.rect.y==0.0) m.rect.setRect(mm.rect);
-			else                               m.rect.add(mm.rect);
+			if(m.rect.x==0.0 && m.rect.y==0.0) m.rect.setRect(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2);
+			else                               m.rect.add(new Rectangle2D.Double(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2));
 //			System.out.println(m.rect);
 		}
-		if(!m.equals(rootMem)) g.drawRoundRect((int)m.rect.x, (int)m.rect.y, (int)m.rect.width, (int)m.rect.height, 10, 10);
+		if(!m.equals(rootMem)) {
+			g.drawRoundRect((int)m.rect.x, (int)m.rect.y, (int)m.rect.width, (int)m.rect.height, 10, 10);
+		}
 	}
 }
