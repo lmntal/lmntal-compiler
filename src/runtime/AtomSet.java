@@ -28,7 +28,7 @@ final class AtomSet implements Set{
 	}
 	/** 与えられたアトムがこの集合内にある場合はtrue。 */
 	public boolean contains(Object o) {
-		Functor f = ((AbstractAtom)o).getFunctor();
+		Functor f = ((Atom)o).getFunctor();
 		Set s = (Set)atoms.get(f);
 		if (s == null) {
 			return false;
@@ -75,7 +75,7 @@ final class AtomSet implements Set{
 	 * 返される配列の実行時の型はAbstractAtom[]です。
 	 */
 	public Object[] toArray() {
-		Object[] ret = new AbstractAtom[size];
+		Object[] ret = new Atom[size];
 		int index = 0;
 		Iterator it = iterator();
 		while (it.hasNext()) {
@@ -109,7 +109,7 @@ final class AtomSet implements Set{
 	 * @return この集合が変更された場合はtrue
 	 */
 	public boolean add(Object o) {
-		Functor f = ((AbstractAtom)o).getFunctor();
+		Functor f = ((Atom)o).getFunctor();
 		Set s = (Set)atoms.get(f);
 		if (s == null) {
 			s = new HashSet();
@@ -129,7 +129,7 @@ final class AtomSet implements Set{
 	 * @return この集合が変更された場合はtrue
 	 */
 	public boolean remove(Object o) {
-		Functor f = ((AbstractAtom)o).getFunctor();
+		Functor f = ((Atom)o).getFunctor();
 		Set s = (Set)atoms.get(f);
 		if (s == null) {
 			return false;

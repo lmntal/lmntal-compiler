@@ -23,7 +23,7 @@ public final class InterpretedRuleset extends Ruleset {
 	 * アトム主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
 	 */
-	boolean react(Membrane mem, AbstractAtom atom) {
+	boolean react(Membrane mem, Atom atom) {
 		return false;
 	}
 	/**
@@ -40,6 +40,6 @@ public final class InterpretedRuleset extends Ruleset {
 	 * @param memArgs 実引数のうち、膜であるもの
 	 * @param atomArgs 実引数のうち、アトムであるもの
 	 */
-	private void body(int ruleid, AbstractMembrane[] memArgs, AbstractAtom[] atomArgs) {
+	private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
 	}
 }

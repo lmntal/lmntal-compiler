@@ -11,7 +11,7 @@ abstract public class Ruleset {
 	 * アトム主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
 	 */
-	abstract boolean react(Membrane mem, AbstractAtom atom);
+	abstract boolean react(Membrane mem, Atom atom);
 	/**
 	 * 膜主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
