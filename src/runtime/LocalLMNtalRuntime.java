@@ -1,17 +1,17 @@
 package runtime;
 
-import java.util.ArrayList;
-//import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 import daemon.LMNtalDaemon;
 
 /** このVMで実行するランタイム（旧：物理マシン、旧々：計算ノード）
- * このクラスのサブクラスのインスタンスは、1つの Java VM につき高々1つしか存在しない。
+ * このクラス（またはサブクラス）のインスタンスは、1つの Java VM につき高々1つしか存在しない。
  * @author n-kato, nakajima
  */
-public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
+public class LocalLMNtalRuntime extends AbstractLMNtalRuntime implements Runnable {
+	/** 全てのタスク */
 	List tasks = new ArrayList();
 	
 	////////////////////////////////////////////////////////////////	
@@ -39,29 +39,25 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 	
 	////////////////////////////////////////////////////////////////
 	
-	/** （マスタタスクによって）このランタイムの終了が要求されたかどうか */
+	/** （マスタランタイムなどによって）このランタイムの終了が要求されたかどうか */
 	protected boolean terminated = false;
 	/** このランタイムの終了が要求されたかどうか */
 	public boolean isTerminated() {
 		return terminated;
 	}
 	/** このランタイムの終了を要求する。
-	 * 具体的には、この物理マシンのterminatedフラグをONにし、
-	 * 各タスクのルールスレッドが終わるまで待つ。*/
+	 * 具体的には、このランタイムのterminatedフラグをONにし、
+	 * ルールスレッドが停止するまで待つ。*/
 	synchronized public void terminate() {
 //		if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate()");
 		terminated = true;
-		Iterator it = tasks.iterator();
-		while (it.hasNext()) {
-			Task task = (Task)it.next();
-//			if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate(): sending signal to " + task); //todo Env
-			task.signal();
-			try {
-//				if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate(): now going to wait for thread " + task); //todo Env
-				task.thread.join();
-//				if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate(): " + task + " has finished!"); //todo Env
-			} catch (InterruptedException e) {}
-		}
+//		if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate(): sending signal");
+		interrupted = true;
+		try {
+//			if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate(): wait for thread");
+			thread.join();
+//			if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate(): joined");
+		} catch (InterruptedException e) {}
 		tasks.clear();	// 追加 n-kato 2004-10-30
 	}
 
@@ -78,23 +74,82 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 //		}
 //	}
 	
-//	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
-//	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
-//	 *  タスクが木構造になっていないと出来ない。優先度はしばらく未実装。
-//	 */
-//	protected void localExec() {
-//		boolean allIdle;
-//		do {
-//			allIdle = true; // idleでないタスクが見つかったらfalseになる。
-//			Iterator it = tasks.iterator();
-//			while (it.hasNext()) {
-//				Task task = (Task)it.next();
-//				if (!task.isIdle()) { // idleでないタスクがあったら
-//					task.exec(); // ひとしきり実行
-//					allIdle = false; // idleでないタスクがある
-//				//	break;
-//				}
-//			}
-//		} while(!allIdle);
-//	}
+	////////////////////////////////////////////////////////////////
+	// ルールスレッド（ランタイムにつき1つ）
+	
+	/** このランタイムのルールスレッド */
+	Thread thread = new Thread(this,"RuleThread");
+	/** このランタイムのルールスレッドの再実行が要求されたかどうか。
+	 * 読み取りおよびfalseの書き込みはsynchronized(this)内に限る。*/
+	protected boolean awakened = false;	
+	/** （他のスレッドによって）このランタイムのルールスレッドの実行停止が要求されたかどうか。
+	 * falseの書き込みはこのランタイムのルールスレッドに限る。*/
+	protected boolean interrupted = false;
+	/** asyncUnlockされたときにtrueになる（trueならばシグナルで復帰時にトレースdumpする）*/
+	protected boolean asyncFlag = false;
+	/** タスクキュー。synchronized(this)内で読み書きすること。
+	 * TODO 優先度付きFIFOキューに移行（要求に符合するクラスが無いので新規に作るのか？） */
+	LinkedList taskQueue = new LinkedList();
+	
+	/** 指定のタスクをタスクキューに入れる。
+	 * すでに入っているときは何もしないのが理想だが、現在の実装では重複して入り、かつ正しく動作する。*/
+	synchronized public void activateTask(Task task) {
+		taskQueue.addLast(task);
+		awakened = true;
+		notify();
+	}
+	/** タスクキューが空かどうかを返す。呼出し後に空でなくなることもあるので注意すること。*/
+	synchronized public boolean isIdle() {
+		return taskQueue.isEmpty();
+	}
+	/** タスクキューの先頭の要素を取り除いて返す。空のときはnullが戻るようにしたいが現在は例外が発生。*/
+	synchronized public Task getNextTask() {
+		return (Task)taskQueue.removeFirst();
+	}
+	
+	/** ルールスレッドの実行コード */
+	public void run() {
+		Membrane root = null; // マスタランタイムのときのみ世界的ルート膜が入る。それ以外はnull
+		if (this instanceof MasterLMNtalRuntime) {
+			root = ((MasterLMNtalRuntime)this).getGlobalRoot();
+		}
+		if (root != null) { 	
+			if (Env.fTrace) {
+				Env.p( Dumper.dump(root) );
+			}
+		}
+		while (true) {
+			while (!interrupted) {
+				if (isTerminated()) return;
+				if (isIdle()) break;
+				Task task = getNextTask();
+				task.exec();
+				if (!task.isIdle()) taskQueue.addLast(task);
+			}
+			interrupted = false;
+			if (root != null && root.isStable()) return;
+			if (isTerminated()) return;
+			synchronized(this) {
+				if (awakened) {
+					awakened = false;
+					continue;
+				}
+				try {
+					//System.out.println("RuleThread suspended");
+					wait();
+					//System.out.println("RuleThread resumed");
+				}
+				catch (InterruptedException e) {}
+				awakened = false;
+			}
+			if (root != null) { 	
+				if (Env.fTrace) {
+					if (asyncFlag) {
+						asyncFlag = false;
+						Env.p( " ==>* \n" + Dumper.dump(root) );
+					}
+				}
+			}	
+		}
+	}
 }

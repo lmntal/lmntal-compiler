@@ -74,9 +74,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	protected boolean stable = false;
 	/** 永続フラグ（trueならばルール適用できなくてもstableにならない）*/
 	public boolean perpetual = false;
-//	/** ロックされている時にtrue。 */
-//	protected boolean locked = false;
-	/** locked = trueの時には、この膜をロックしているスレッドが入っている。*/
+	/** この膜をロックしているスレッド。ロックされていないときはnullが入っている。*/
 	protected Thread lockThread = null;
 	/** リモート（リモート膜のときにボディ命令メソッド呼び出しの転送先となるリモートタスクまたはnull）
 	 * <p>ロック期間中のみ有効。ロック取得時に設定され、ロック解放時にnullに設定される。
@@ -368,10 +366,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 *     <li>この膜のoutside_proxy（atom1）と子膜のinside_proxy（atom2）
 	 * </ol>
 	 * の2通りに限られる。
-	 * <p>
-	 * <b>注意</b>　
-	 * newLinkはRuby版では片方向ずつリンクを生成する命令であったが、
-	 * Java版では両方向を一度に生成するように仕様が変更されている。
 	 */
 	public void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = new Link(atom2, pos2);
@@ -519,6 +513,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			// ローカル膜のリモート膜への移動
 			AbstractMembrane mem = dstMem.newMem();
 			mem.moveCellsFrom(this);
+			// thisは廃棄すべきである。下の TO-DO (A) の解決法はこのような新膜作成とmoveCellsFromらしい
 			return mem;
 		}
 //		activate();
@@ -534,7 +529,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		while (it.hasNext()) {
 			((AbstractMembrane)it.next()).setTask(newTask);
 		}
-		// TODO ホスト間移動時にGlobalMembraneIDは変更しなくて大丈夫か調べる
+		// TODO (A) ホスト間移動時にGlobalMembraneIDは変更しなくて大丈夫か調べる
 	}
 //	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
 //	 * <p>いずれ、

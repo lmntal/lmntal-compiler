@@ -22,7 +22,7 @@ public final class RemoteTask extends AbstractTask {
 	 * @param runtime 作成したタスクを実行するランタイムに対応するリモートランタイム
 	 * @param parent 親膜 */
 	RemoteTask(RemoteLMNtalRuntime runtime, AbstractMembrane parent){
-		super(runtime);
+		super(runtime, Task.ROOT_PRIORITY);
 		root = new RemoteMembrane(this, parent);
 //		root.locked = true;
 		root.lockThread = Thread.currentThread();
@@ -32,7 +32,7 @@ public final class RemoteTask extends AbstractTask {
 	/** 擬似タスク作成用のコンストラクタ（擬似タスクはroot=null）
 	 * @see RemoteLMNtalRuntime#createPseudoMembrane() */
 	RemoteTask(RemoteLMNtalRuntime runtime) {
-		super(runtime);
+		super(runtime, Task.PSEUDOTASK_PRIORITY);
 	}
 
 	//

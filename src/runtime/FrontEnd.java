@@ -384,17 +384,18 @@ public class FrontEnd {
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
 			
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
-			//root.blockingLock();
-			rs.react(root); // TODO 【検証】初期配置で子タスクを作った場合にどうなるか考える→LMNParserを修正することにした
-
+			root.asyncLock();
+			rs.react(root);
+			root.asyncUnlock();
+			rt.asyncFlag = false;
+			
 			boolean ready = true;
 			if (Env.gui != null) {
 				Env.gui.lmnPanel.getGraphLayout().calc();
 				if (!Env.gui.onTrace())  ready = false;
 			}
 			if (ready) {
-				//root.blockingUnlock();
-				((Task)root.getTask()).execAsMasterTask();
+				rt.exec(); // ((Task)root.getTask()).execAsMasterTask();
 
 				if (!Env.fTrace && Env.verbose > 0) {
 					Env.d( "Execution Result:" );
@@ -421,4 +422,3 @@ public class FrontEnd {
 	}
 }
 // TODO 初期配置で子タスクを作る
-// TODO dumperをマルチスレッド対応にする
