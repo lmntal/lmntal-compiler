@@ -317,11 +317,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		mem.parent = null;
 	}
 	/** 指定されたノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
-	 * @param node ノード名を表す文字列
+	 * @param nodedesc ノード名を表す文字列
 	 * @return 作成されたルート膜 */
-	public AbstractMembrane newRoot(String node) {
-		if(Env.debug > 0)System.out.println("AbstraceMembrane.newRoot(" + node + ")");
-		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(node);
+	public AbstractMembrane newRoot(String nodedesc) {
+		if(Env.debug > 0)System.out.println("AbstraceMembrane.newRoot(" + nodedesc + ")");
+		// ↓TODO (効率改善)connectRuntimeはガードですでに呼ばれているので冗長かもしれないのを何とかする？
+		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(nodedesc);
 		return machine.newTask(this).getRoot();
 	}
 	
