@@ -21,16 +21,4 @@ abstract public class AbstractTask {
 	public AbstractMembrane getRoot() {
 		return root;
 	}
-	
-	/** この抽象タスクのルールスレッドの再実行が要求されたかどうか */
-	protected boolean awakened = false;
-
-	/** このタスクに対してシグナルを発行する。
-	 * すなわち、このタスクのルート膜のロックの取得をするためにブロックしているスレッドが存在するならば
-	 * そのスレッドを再開してロックの取得を試みることを要求し、
-	 * 存在しないならばこのタスクのルールスレッドの再実行を要求する。*/
-	synchronized public final void signal() {
-		awakened = true;
-		notify();
-	}
 }

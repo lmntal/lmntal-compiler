@@ -101,7 +101,9 @@ class Task extends AbstractTask implements Runnable {
 	boolean isIdle(){
 		return idle;
 	}
-
+	
+	////////////////////////////////////////////////////////////////
+	
 	/** このタスクのルールスレッドを実行する。
 	 * 実行が終了するまで戻らない。
 	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
@@ -251,7 +253,9 @@ class Task extends AbstractTask implements Runnable {
 			}
 		}	
 	}
-		
+
+	////////////////////////////////////////////////////////////////
+
 	// タスクのルールスレッドに対する停止要求
 
 	/** このタスクのルールスレッドに対して停止要求を発行しているスレッドの個数
@@ -269,5 +273,18 @@ class Task extends AbstractTask implements Runnable {
 		lockRequestCount--;
 	}
 	
+	////////////////////////////////////////////////////////////////
+	
+	/** この抽象タスクのルールスレッドの再実行が要求されたかどうか */
+	protected boolean awakened = false;
+
+	/** このタスクに対してシグナルを発行する。
+	 * すなわち、このタスクのルート膜のロックの取得をするためにブロックしているスレッドが存在するならば
+	 * そのスレッドを再開してロックの取得を試みることを要求し、
+	 * 存在しないならばこのタスクのルールスレッドの再実行を要求する。*/
+	synchronized public final void signal() {
+		awakened = true;
+		notify();
+	}
 
 }
