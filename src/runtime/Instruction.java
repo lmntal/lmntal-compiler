@@ -23,7 +23,7 @@ public class Instruction {
      */
     private int id;
 	
-    //基本命令
+    //マッチング命令
     /** deref [-dstatom, +srcatom, +srcpos, +dstpos] 
      * <BR>ガード命令<BR>
      * アトムsrcatomの第srcpos引数のリンク先が第dstpos引数に接続していることを確認したら、リンク先のアトムをdstatomに代入する。
@@ -108,6 +108,7 @@ public class Instruction {
     public static final int NEQ = 12;
 
 
+    //ボディ命令
     /** lock [srcmem]
      * <BR>ガード命令<BR>
      * 膜srcmemに対するノンブロッキングでのロック取得を試みる。
