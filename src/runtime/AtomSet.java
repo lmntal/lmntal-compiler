@@ -199,10 +199,7 @@ public final class AtomSet implements Set{
 		boolean ret = false;
 		Iterator it = c.iterator();
 		while (it.hasNext()) {
-			if (remove(it.next())) {
-				size--;
-				ret = true;
-			}
+			ret |= remove(it.next());
 		}
 		return ret;
 	}
