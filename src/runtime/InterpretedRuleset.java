@@ -108,8 +108,8 @@ public final class InterpretedRuleset extends Ruleset {
 		}
 	}
 	
-	public int getGlobalRulesetID(){
-		return id;
+	public String getGlobalRulesetID(){
+		return "<runtimeid>" + id;
 	}
 }
 

@@ -24,5 +24,5 @@ abstract public class Ruleset {
 	 * 
 	 * 
 	 */
-	abstract public int getGlobalRulesetID();
+	abstract public String getGlobalRulesetID();
 }
