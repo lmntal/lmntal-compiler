@@ -132,7 +132,9 @@ public class HeadCompiler {
 				if (atomIDToPath(buddyid) != UNBOUND) { // リンク先のアトムをすでに取得している場合
 					// lhs(>)->lhs(<) または neg(>)->sameneg(<) ならば、
 					// すでに同一性を確認するコードを出力しているため、何もしない
-					if (buddyatom.mem == m && atom.mem == m) {
+					if (true 
+					 || (buddyatom.mem == m && atom.mem == m) // 否定条件コンパイル時にdebug予定
+					   ) { 
 						int b = atomIDToPath(buddyid);
 						int t = atomIDToPath(targetid);
 						if (b < t) continue;
