@@ -1,8 +1,6 @@
 /*
  * 作成日: 2003/10/21
  *
- * この生成されたコメントの挿入されるテンプレートを変更するため
- * ウィンドウ > 設定 > Java > コード生成 > コードとコメント
  */
 package test;
 
@@ -10,10 +8,8 @@ import runtime.*;
 import junit.framework.TestCase;
 
 /**
- * @author pa
+ * @author hara
  *
- * この生成されたコメントの挿入されるテンプレートを変更するため
- * ウィンドウ > 設定 > Java > コード生成 > コードとコメント
  */
 public class InstructionTest extends TestCase {
 	Instruction inst;
