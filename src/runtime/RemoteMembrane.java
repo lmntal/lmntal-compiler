@@ -392,11 +392,16 @@ public final class RemoteMembrane extends AbstractMembrane {
 				//todo これはIDConverterの中でやる事？→たぶん外でやった方がよいと思うけど根拠はない
 				if (r == null) {
 					//r = (Ruleset)sendWaitObject("REQUIRERULESET " + id);  //膜のメソッドじゃなくて直にデーモンに要求しないといけない
-					Object hoge;
-					hoge = LMNtalRuntimeManager.daemon.sendWaitObject(this.task.runtime.hostname, "REQUIRERULESET " +id); //todo あやしい
-					if(true)System.out.println("RemoteMembrane.updateCache(): we did REQUIRERULESET and got: " + hoge); //todo Env.debug
-					r = (Ruleset)hoge;
-					if(true)System.out.println("RemoteMembrane.updateCache(): we did REQUIRERULESET and got and casted: " + r); //todo Env.debug
+					Object res_rawdata;
+					res_rawdata = LMNtalRuntimeManager.daemon.sendWaitObject(this.task.runtime.hostname, "REQUIRERULESET " +id); //todo あやしい
+					//if(true)System.out.println("RemoteMembrane.updateCache(): we did REQUIRERULESET and got: " + hoge); //todo Env.debug
+					if(res_rawdata instanceof byte[]){
+						r = Ruleset.deserialize((byte[]) res_rawdata);
+					} else if(res_rawdata instanceof String){
+						throw new RuntimeException("cannot load rulset " + id + ", instead we got: " + r);
+					} else {}
+					
+					//if(true)System.out.println("RemoteMembrane.updateCache(): we did REQUIRERULESET and got and casted: " + r); //todo Env.debug
 				}
 				rulesets.add(r);
 			}
