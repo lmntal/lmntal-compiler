@@ -26,10 +26,29 @@ public class Compactor {
 		int varcount = spec.getIntArg2();
 		//varcount = expandBody(rule.body, varcount);	// 展開（RISC化）
 		varcount = compactBody(rule.body, varcount);	// 圧縮 (CISC化）
+		//genTest(rule);
+		//varcount = renumberLocals(rule.body, varcount);	// 局所変数を振りなおす
 
 		// todo: make use of InstructionList.updateLocals()
 		spec.updateSpec(formals, varcount);
 	}
+	
+	//（テスト命令列生成用） for f(X,Y):-X=Y
+	static void genTest(Rule rule) {		
+		 if (rule.body.size() > 6) {
+			 HashMap map = new HashMap();
+			 map.put(new Integer(2), new Integer(4));
+			 Instruction.applyVarRewriteMap(rule.body, map);
+			 map.clear();
+			 map.put(new Integer(3), new Integer(2));
+			 Instruction.applyVarRewriteMap(rule.body, map);
+			 map.clear();
+			 map.put(new Integer(4), new Integer(3));
+			 Instruction.applyVarRewriteMap(rule.body, map);
+		 }
+	}
+	
+	/** ボディ命令列の命令をRISC化する */
 	public static int expandBody(List body, int varcount) {
 		int size = body.size();
 		for (int i = 0; i < size; i++) {
@@ -105,6 +124,7 @@ public class Compactor {
 		}
 		return varcount;
 	}
+	/** ボディ命令列の命令をCISC化する */
 	public static int compactBody(List body, int varcount) {
 		int size = body.size() - 2;
 		for (int i = 0; i < size; i++) {
@@ -166,5 +186,31 @@ public class Compactor {
 
 		}
 		return varcount;
+	}
+	/** （ボディ命令列の）変数番号を振りなおす */
+	public static int renumberLocals(List body, int varcount) {
+		int size = body.size();
+		Instruction spec = (Instruction)body.get(0);
+		int locals = spec.getIntArg1();	// 最初の局所変数の番号は、仮引数の個数にする
+		for (int i = 1; i < size; i++) {
+			Instruction inst = (Instruction)body.get(i);
+			if (inst.getOutputType() == -1) continue;
+			if (inst.getIntArg1() != locals) {
+				Integer src = (Integer)inst.getArg1();
+				Integer dst = new Integer(locals);
+				Integer tmp = new Integer(varcount);
+				HashMap map1 = new HashMap();
+				HashMap map2 = new HashMap();
+				HashMap map3 = new HashMap();
+				map1.put(src, tmp);
+				map2.put(dst, src);
+				map3.put(tmp, dst);
+				Instruction.applyVarRewriteMapFrom(body,map1,i);
+				Instruction.applyVarRewriteMapFrom(body,map2,i);
+				Instruction.applyVarRewriteMapFrom(body,map3,i);
+			}
+			locals++;
+		}
+		return locals;
 	}
 }

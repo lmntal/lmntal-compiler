@@ -1785,12 +1785,19 @@ public class Instruction implements Cloneable, Serializable {
 					case ARG_VAR:
 						changeArg(inst, i+1, map);
 						break;
-				}
+					case ARG_INSTS:
+					case ARG_LABEL:
+						// TODO いずれ正しく実装すること(1)
+						break;				}
 			}
 			if (inst.getKind() == RESETVARS || inst.getKind() == CHANGEVARS) break;
 		}
 	}
-
+	/** 命令列後半部分に対して変数番号を付け替える */
+	public static void applyVarRewriteMapFrom(List list, Map map, int start) {
+		applyVarRewriteMap( list.subList(start, list.size()), map );
+	}
+	
 	/**
 	 * この命令が出力命令の場合、出力の種類を返す。
 	 * そうでない場合、-1を返す。
@@ -1838,7 +1845,7 @@ public class Instruction implements Cloneable, Serializable {
 					break;
 				case ARG_INSTS:
 				case ARG_LABEL:
-					// TODO いずれ正しく実装すること
+					// TODO いずれ正しく実装すること(2)
 					break;
 				}
 			}
@@ -1851,7 +1858,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * @param start  開始位置
 	 * @see getVarUseCount */
 	public static int getVarUseCountFrom(List list, Integer varnum, int start) {
-		return getVarUseCount( list.subList(start, list.size() - 1), varnum );
+		return getVarUseCount( list.subList(start, list.size()), varnum );
 	}
 	
 	//////////////////////////////////
