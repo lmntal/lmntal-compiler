@@ -43,13 +43,13 @@ public class REPL {
 			 }
 			});
 
-		System.out.println("        LMNtal version 0.01");
-		System.out.println("");
+		System.out.println("        LMNtal version 0.02");
+			System.out.println("");
 		System.out.println("[TIPS] Type q to quit.");
 		System.out.println("");
 		while (true) {
 			try {
-				line = Readline.readline("LMNtal> ");
+				line = Readline.readline("# ");
 				if (line == null) {
 					//System.out.println("no input");
 				} else if(line.equals("q")) {
