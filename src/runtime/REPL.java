@@ -57,7 +57,7 @@ public class REPL {
 		
 		Readline.initReadline("LMNtal");
 		
-		System.out.println("        LMNtal version 0.65.20041015");
+		System.out.println("        LMNtal version 0.65.20041022");
 		System.out.println("");
 		System.out.println("Type h to see help.");
 		System.out.println("Type q to quit.");
