@@ -101,7 +101,33 @@ public class GuardCompiler extends HeadCompiler {
 		return gc;
 	}
 	//
-	
+
+	/**
+	 * プロセス文脈のない膜やstableな膜の検査を行う。
+	 * RISC化に伴い、ヘッドコンパイラから移動してきた。 by mizuno
+	 */
+	void checkMembraneStatus() {
+		// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
+		for (int i = 0; i < mems.size(); i++) {
+			Membrane mem = (Membrane)mems.get(i);
+			int mempath = memToPath(mem);
+			if (mempath == 0) continue; //本膜に対しては何もしない
+			if (mem.processContexts.isEmpty()) {
+	//				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
+				// TODO （機能拡張）単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(1)
+				match.add(new Instruction(Instruction.NATOMS, mempath,
+					mem.getNormalAtomCount() + mem.typedProcessContexts.size() ));
+				match.add(new Instruction(Instruction.NMEMS,  mempath, mem.mems.size()));
+			}
+			//
+			if (mem.ruleContexts.isEmpty()) {
+				match.add(new Instruction(Instruction.NORULES, mempath));
+			}
+			if (mem.stable) {
+				match.add(new Instruction(Instruction.STABLE, mempath));
+			}
+		}
+	}
 	/** 型付きプロセス文脈が表すプロセスを一意に決定する。*/
 	void fixTypedProcesses() {
 		// STEP 0 - 引数に渡されたアトムのリンクに対してgelinkを行い、変数番号を登録する。(RISC化)

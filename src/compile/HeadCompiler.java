@@ -369,22 +369,7 @@ public class HeadCompiler {
 //				}
 				mempaths.put(submem, new Integer(submempath));
 			}
-			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
-			// （ガードコンパイラに移動する予定）
-			if (submem.processContexts.isEmpty()) {
-//				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
-				// TODO （機能拡張）単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(1)
-				match.add(new Instruction(Instruction.NATOMS, submempath,
-					submem.getNormalAtomCount() + submem.typedProcessContexts.size() ));
-				match.add(new Instruction(Instruction.NMEMS,  submempath, submem.mems.size()));
-			}
-			//
-			if (submem.ruleContexts.isEmpty()) {
-				match.add(new Instruction(Instruction.NORULES, submempath));
-			}
-			if (submem.stable) {
-				match.add(new Instruction(Instruction.STABLE, submempath));
-			}
+			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 			compileMembrane(submem);
 		}
 		// $p等式右辺膜以外の場合は、自由リンクに関する検査を行う

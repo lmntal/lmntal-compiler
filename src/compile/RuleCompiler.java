@@ -85,7 +85,9 @@ public class RuleCompiler {
 		hc = new HeadCompiler();//rs.leftMem;
 		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
 		
-		if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty()) {
+		//とりあえず常にガードコンパイラを呼ぶ事にしてしまう by mizuno
+//		if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty()) {
+		if (true) {
 			theRule.guardLabel = new InstructionList();
 			guard = theRule.guardLabel.insts;
 		}
@@ -307,6 +309,7 @@ public class RuleCompiler {
 		gc = new GuardCompiler(this, hc);
 		if (guard == null) return;
 		int formals = gc.varcount;
+		gc.checkMembraneStatus();
 		gc.fixTypedProcesses();
 		//RISC化で、暫定処置としてガードでgetlinkした物をボディに渡さない事にしたので、
 		//ガード命令列の局所変数の数とボディ命令列の引数の数が一致しなくなった。by mizuno
