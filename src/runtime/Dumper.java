@@ -40,7 +40,7 @@ public class Dumper {
 			}
 			else if (a.getLastArg().isFuncRef()
 			 // && !a.getName().equals("")
-				&& !a.getName().matches("-?[0-9]+")) {
+				&& !a.getName().matches("-?[0-9]+|^[A-Z]")) {
 				predAtoms[a.getArity() == 1 ? 2 : 3].add(a);
 			}
 		}
