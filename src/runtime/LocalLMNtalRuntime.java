@@ -18,7 +18,8 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 
 	public LocalLMNtalRuntime(){
 		Env.theRuntime = this;
-		this.runtimeid = LMNtalDaemon.makeID();	// ここで生成する  //TODO NICがあがってないとここで死ぬ（分散使いたくない時）
+		this.runtimeid = LMNtalDaemon.makeID();	// ここで生成する
+			// NICがあがってないとここで死ぬ（分散使いたくない時）→ 回避済 2004-11-12
 		this.hostname = LMNtalDaemon.getLocalHostName();
 	}
 

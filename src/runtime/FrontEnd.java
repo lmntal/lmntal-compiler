@@ -404,4 +404,3 @@ public class FrontEnd {
 	}
 }
 // TODO 初期配置で子タスクを作る
-// TODO dumperをマルチスレッド対応にする
