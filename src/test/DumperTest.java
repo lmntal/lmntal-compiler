@@ -1,7 +1,6 @@
 package test;
 
-import runtime.LMNtalRuntime;
-import runtime.Dumper;
+import runtime.*;
 import runtime.Ruleset;
 import test.SampleInitRuleset;
 /**
@@ -18,11 +17,12 @@ public class DumperTest {
 		System.out.println("before init:");
 		Ruleset rule = new SampleInitRuleset();
 		LMNtalRuntime mm = new LMNtalRuntime();
-		mm.applyRulesetOnce(rule);
+		Membrane m = mm.getGlobalRoot();
+		rule.react(m);
 		System.out.println("before exec:");
-		Dumper.dump(mm.getRoot());
+		System.out.println(Dumper.dump(m));
 		mm.exec();
 		System.out.println("after exec:");
-		Dumper.dump(mm.getRoot());
+		System.out.println(Dumper.dump(m));
 	}
 }

@@ -13,7 +13,6 @@ public class Dumper {
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
 
-
 			Atom a = (Atom)it.next();
 			atoms.add(a);
 			//これらのアトムを起点にする。
