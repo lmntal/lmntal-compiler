@@ -112,6 +112,12 @@ public class Inline {
 		if(cp!=null) cp.destroy();
 	}
 	
+	public static String getCode(int atomID, String unitName, int codeID) {
+		if(!Inline.inlineSet.containsKey(unitName)) return null;
+		InlineUnit iu = (InlineUnit)Inline.inlineSet.get(unitName);
+		return iu.getCode(codeID);
+	}
+	
 	static List compileCommand = new ArrayList();
 	/**
 	 * 必要に応じてコードの生成とコンパイルを行う。

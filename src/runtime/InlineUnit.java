@@ -20,6 +20,8 @@ public class InlineUnit {
 	
 	/** Hash { インラインコード文字列 => 一意な連番 } */
 	public Map codes = new HashMap(); 
+	/** codes の逆 */
+	public List code_of_id = new ArrayList(); 
 	
 	/** List インライン宣言コード文字列 */
 	public List defs = new ArrayList(); 
@@ -65,6 +67,14 @@ public class InlineUnit {
 	}
 	
 	/**
+	 * ID に対応するコードを返す。
+	 */
+	public String getCode(int id) {
+		if(id<0 || code_of_id.size() <= id) return null;
+		return (String)code_of_id.get(id);
+	}
+	
+	/**
 	 * インラインアトムを登録しる。
 	 * @param code アトム名
 	 * @param type インライン実行アトム => EXEC ,  インライン宣言アトム => DEFINE
@@ -73,7 +83,9 @@ public class InlineUnit {
 		switch(type) {
 		case EXEC:
 			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineCode to "+name+" : "+code);
-			codes.put(code, new Integer(codeCount++));
+			codes.put(code, new Integer(codeCount));
+			code_of_id.add(code);
+			codeCount++;
 			break;
 		case DEFINE:
 			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineDefineCode to "+name+" : "+code);
