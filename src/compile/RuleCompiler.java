@@ -73,6 +73,7 @@ public class RuleCompiler {
 	 */
 	public Rule compile() {
 		Env.c("compile");
+		liftupActiveAtoms(rs.leftMem);
 		simplify();
 		theRule = new Rule(rs.toString());
 		//@ruleid = rule.ruleid		
@@ -96,6 +97,28 @@ public class RuleCompiler {
 		return theRule;
 	}
 	
+	/** 膜階層下にあるアクティブアトムを各膜内で先頭方向にスライド移動する。*/
+	private static void liftupActiveAtoms(Membrane mem) {
+		Iterator it = mem.mems.iterator();
+		while (it.hasNext()) {
+			liftupActiveAtoms((Membrane)it.next());
+		}
+		LinkedList atomlist = new LinkedList();
+		it = mem.atoms.iterator();
+		while (it.hasNext()) {
+			atomlist.add(it.next());
+		}
+		mem.atoms.clear();
+		it = atomlist.iterator();
+		while (it.hasNext()) {
+			Atom a = (Atom)it.next();
+			if (a.functor.isActive()) {
+				mem.atoms.add(a);
+				it.remove();
+			}
+		}
+		mem.atoms.addAll(atomlist);	
+	}
 	/** 左辺膜をコンパイルする */
 	private void compile_l() {
 		Env.c("compile_l");
@@ -105,7 +128,6 @@ public class RuleCompiler {
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化			
 			if (firstid < hc.atoms.size()) {			
-				//if (true) continue; // 臨時【注意：外してもよいが、アトム主導は現在未テスト】
 				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS) continue;
 				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
 				
@@ -329,6 +351,20 @@ public class RuleCompiler {
 					int atomid1 = loadUnaryAtom(def1);
 					guard.add(new Instruction(Instruction.ISUNARY, atomid1));
 				}
+// NSAMEFUNC を作るか？
+//				else if (func.equals(new Functor("\\=",2))) {
+//					if (!identifiedCxtdefs.contains(def1)) continue;
+//					if (!identifiedCxtdefs.contains(def2)) continue;
+//					int atomid1 = loadUnaryAtom(def1);
+//					int atomid2 = loadUnaryAtom(def2);
+//					guard.add(new Instruction(Instruction.ISUNARY, atomid1));
+//					guard.add(new Instruction(Instruction.ISUNARY, atomid2));
+//					int funcid1 = varcount++;
+//					int funcid2 = varcount++;
+//					guard.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
+//					guard.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+//					guard.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
+//				}
 				else if (func.getSymbolFunctorID().equals("class_2")) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);

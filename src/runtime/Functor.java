@@ -131,12 +131,11 @@ public class Functor {
 	public int getArity() {
 		return arity;
 	}
-	/**
-	 * この名前がアクティブならtrue
-	 */
-	boolean isActive() {
-		//とりあえず全部アクティブ
-		return true;
+	/** このファンクタがアクティブかどうかを取得する。*/
+	public boolean isActive() {
+		// （仮）
+		if (getSymbolFunctorID().equals("n_1")) return false;
+		return getSymbolFunctorID().matches("^[a-z].*$");
 	}
 	/** このクラスのオブジェクトかどうかを調べる。*/
 	public boolean isSymbol() {
