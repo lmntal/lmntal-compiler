@@ -83,12 +83,12 @@ class TestRemote{
 		}
 		System.out.println("connectRuntime success");
 		
-		//Thread[] t = new Thread[Thread.activeCount()];
-		//Thread.enumerate(t);
-//		for (int i = 0; i < t.length; i++) {
-			//System.out.println(t[i]);
-//			t[i].getThreadGroup().list();
-//	}
+		Thread[] t = new Thread[Thread.activeCount()];
+		Thread.enumerate(t);
+		for (int i = 0; i < t.length; i++) {
+			System.out.println(t[i].getName());
+			//t[i].getThreadGroup().list();
+	}
 
 		Thread.currentThread().getThreadGroup().list();
 		
