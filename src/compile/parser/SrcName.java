@@ -9,20 +9,22 @@ package compile.parser;
  * <p>
  * 12 という名前の1引数のシンボルは [[12]] と記述する。
  * 12]]33 という名前のシンボルは '12]]33' と記述する。
+ * <p>
+ * runtime.Functorから参照するためにpublicクラスに変更してみた。
  */
-class SrcName {
+public class SrcName {
 	/** 名前トークンが表す文字列 */
 	protected String name;	
 	/** 名前トークンの種類 */
 	protected int type;
 
 	// typeの値
-	static final int PLAIN   = 0;		// aaa 12 -12 3.14 -3.14e-1
-	static final int SYMBOL  = 1; 	// 'aaa' 'AAA' '12' '-12' '3.14' '-3.14e-1'
-	static final int STRING  = 2;		// "aaa" "AAA" "12" "-12" "3.14" "-3.14e-1"
-	static final int QUOTED  = 3;		// [[aaa]] [[AAA]] [[12]] [[-12]] [[3.14]] [[-3.14e-1]]
-	static final int PATHED  = 4;		// module.p module:p
-	
+	public static final int PLAIN  = 0; // aaa 12 -12 3.14 -3.14e-1 ＜クオータなしの名前トークン＞
+	public static final int SYMBOL = 1; // 'aaa' 'AAA' '12' '-12' '3.14' '-3.14e-1'
+	public static final int STRING = 2; // "aaa" "AAA" "12" "-12" "3.14" "-3.14e-1"
+	public static final int QUOTED = 3; // [[aaa]] [[AAA]] [[12]] [[-12]] [[3.14]] [[-3.14e-1]]
+	public static final int PATHED = 4; // module.p module:p
+
 	/** 標準の名前トークンの表現を生成する。
 	 * @param name 名前 */
 	public SrcName(String name) {

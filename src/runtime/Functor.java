@@ -2,6 +2,8 @@ package runtime;
 
 import java.io.*;
 
+import compile.parser.SrcName;
+
 
 /**
  * Stringの名前とリンク数の組からなるアトムのFunctor。
@@ -211,6 +213,9 @@ public class Functor implements Serializable {
 	}
 	
 	////////////////////////////////////////////////////////////////
+	//
+	// serialize/deserialize/build
+	//
 	
 	// todo pathやStringFunctorを考慮に入れる
 	
@@ -225,31 +230,41 @@ public class Functor implements Serializable {
 			name = text.substring(0,loc);
 			arity = Integer.parseInt(text.substring(loc + 1));
 		} catch (Exception e) {}
-		return build(name,arity);
-	}
-	/**（仮）*/
-	public static Functor build(String name, int arity) {
-		// todo compile.parser.LMNParser.addSrcAtomToMem と統合する
-		switch (arity) {
-		case 1:
-			try {
-				return new IntegerFunctor(Integer.parseInt(name));
-			}
-			catch (NumberFormatException e) {
-				try {
-					return new runtime.FloatingFunctor(Double.parseDouble(name));
-				}
-				catch (NumberFormatException e2) {
-					//
-				}
-			}
-			break;
-		case 2:
+		if (arity == 2) {
 			if (name.equals("$in"))  return Functor.INSIDE_PROXY;
 			if (name.equals("$out")) return Functor.OUTSIDE_PROXY;
-			break;
 		}
-		return new Functor(name,arity);
+		return build(name,arity,SrcName.PLAIN);
+	}
+	
+	/** 指定されたファンクタを生成する。（仮）
+	 * <p>compile.parser.LMNParser.addSrcAtomToMemから移動してきた。
+	 * @param name 名前トークンの表す文字列
+	 * @param arity ファンクタのアリティ
+	 * @param nametype 名前トークンの種類（compile.parser.SrcNameで定義される定数のいずれか）*/
+	public static Functor build(String name, int arity, int nametype) {
+		String path = null;
+		if (nametype == SrcName.PATHED) {
+			int pos = name.indexOf('.');
+			path = name.substring(0, pos);
+			name = name.substring(pos + 1);
+		}
+		if (arity == 1 && path == null) {
+			if (nametype == SrcName.PLAIN || nametype == SrcName.SYMBOL) {
+				try {
+					return new IntegerFunctor(Integer.parseInt(name));
+				}
+				catch (NumberFormatException e) {}
+				try {
+					return new FloatingFunctor(Double.parseDouble(name));
+				}
+				catch (NumberFormatException e2) {}
+			}
+			else if (nametype == SrcName.STRING || nametype == SrcName.QUOTED) {
+				return new StringFunctor(name); // new runtime.ObjectFunctor(name);
+			}
+		}
+		return new Functor(name, arity, path);
 	}
 }
 

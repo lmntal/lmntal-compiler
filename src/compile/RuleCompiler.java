@@ -142,12 +142,12 @@ public class RuleCompiler {
 					hc.match.add(new Instruction(Instruction.GETMEM, hc.varcount, 1));
 					hc.match.add(new Instruction(Instruction.LOCK,   hc.varcount));
 					hc.mempaths.put(mem, new Integer(hc.varcount++));
-					mem = mem.mem;
+					mem = mem.parent;
 					while (mem != rs.leftMem) {
 						hc.match.add(new Instruction(Instruction.GETPARENT,hc.varcount,hc.varcount-1));
 						hc.match.add(new Instruction(Instruction.LOCK,     hc.varcount));
 						hc.mempaths.put(mem, new Integer(hc.varcount++));
-						mem = mem.mem;
+						mem = mem.parent;
 					}
 					hc.match.add(new Instruction(Instruction.GETPARENT,hc.varcount,hc.varcount-1));
 					hc.match.add(new Instruction(Instruction.EQMEM, 0, hc.varcount++));
@@ -722,7 +722,7 @@ public class RuleCompiler {
 				LinkOccurrence link = atom.args[pos].buddy;
 				Membrane targetmem = atom.mem;
 				if (atom.functor.equals(Functor.INSIDE_PROXY) && pos == 0) {
-					targetmem = targetmem.mem;	// $inの第1引数は親膜が管理する
+					targetmem = targetmem.parent;	// $inの第1引数は親膜が管理する
 				}
 				if (link.atom instanceof ProcessContext) {
 					// アトムのリンク先がプロセス文脈/型付きプロセス文脈のとき

@@ -7,9 +7,7 @@ import runtime.Functor;
  * @author Takahiko Nagata
  * @date 2003/10/28
  */
-public class Atom extends Atomic{
-//	/** 明示的に指定されたモジュール名（明示的に指定されていない場合はnull）*/
-//	public String path = null;
+public class Atom extends Atomic {
 	/** アトムのファンクタ */
 	public Functor functor;
 
@@ -21,9 +19,10 @@ public class Atom extends Atomic{
 	public Atom(Membrane mem, Functor functor) {
 		super(mem, functor.getArity());
 		this.functor = functor;
-		// ここでいいのかな hara
-		if(functor.getName().equals("system_ruleset")) mem.is_system_ruleset=true;
-		// todo 「モジュール機能」を使って表現した方がいいと思います。
+//		// ここでいいのかな hara
+//		if(functor.getName().equals("system_ruleset")) mem.is_system_ruleset=true;
+//		// todo 「モジュール機能」を使って表現した方がいいと思います。
+// RulesetCompiler.processMembraneに仮移動しました n-kato
 	}
 	
 	/**

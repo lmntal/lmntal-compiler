@@ -13,8 +13,8 @@ import runtime.Env;
  * 各要素はListとして保持される。
  */
 public final class Membrane {
-	/** 親膜 <p> todo いずれmemはparentに名称変更する */
-	public Membrane mem = null;
+	/** 親膜 */
+	public Membrane parent = null;
 	/** 終了フラグがセットされているかどうかを表す */
 	public boolean stable = false;
 	/** ＠指定またはnull
@@ -24,9 +24,10 @@ public final class Membrane {
 	 * <br>[要注意]例外的に、引数の長さおよびbundleは0にセットされる。
 	 * @see ContextDef.lhsMem */
 	public ProcessContext pragmaAtHost = null;
+//	/** システムルールセットとして使うなら真 */
+//	public boolean is_system_ruleset = false;
 	
-	/** システムルールセットとして使うなら真 */
-	public boolean is_system_ruleset = false;
+	public String name;
 
 	/** アトム(compile.structure.Atom)のリスト */
 	public List atoms = new LinkedList();
@@ -59,8 +60,6 @@ public final class Membrane {
 	/** ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。*/
 //	public runtime.Ruleset ruleset = new InterpretedRuleset();
 	public List rulesets = new LinkedList();
-	 	
-	public String name;
 	
 	////////////////////////////////////////////////////////////////
 
@@ -69,7 +68,7 @@ public final class Membrane {
 	 * @param mem 親膜
 	 */
 	public Membrane(Membrane mem) {
-		this.mem = mem;
+		this.parent = mem;
 	}
 	
 	public int getNormalAtomCount() {

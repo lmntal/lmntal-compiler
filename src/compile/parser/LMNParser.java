@@ -66,7 +66,7 @@ public class LMNParser {
 		expander.incorporateSignSymbols(srcProcess);
 		expander.incorporateModuleNames(srcProcess);
 		expander.expandAtoms(srcProcess);
-		//expander.correctPragma(srcProcess); TODO ガードが無いので書けない
+//		expander.correctPragma(new LinkedList(), srcProcess, "connectRuntime"); // TODO ガードが無いので書けない
 		expander.correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = addProxies(mem);
@@ -187,18 +187,19 @@ public class LMNParser {
 		Membrane submem = new Membrane(mem);
 		submem.stable = sMem.stable;
 		if (sMem.pragma instanceof SrcProcessContext) {
-			SrcProcessContext sProc = (SrcProcessContext)sMem.pragma;			
+			SrcProcessContext sProc = (SrcProcessContext)sMem.pragma;
 			String name = sProc.getQualifiedName();
 			ProcessContext pc = new ProcessContext(mem, name, 0);
 			submem.pragmaAtHost = pc;
 			// todo 【コード整理】直接ContextDefを代入できるようにする(1)
 		}
 		if (sMem.pragma != null && submem.pragmaAtHost == null) {
-			warning("WARNING: unregognized pragma, ignored: " + sMem.pragma);
+			warning("WARNING: unrecognized pragma, ignored: " + sMem.pragma );
 		}
 		addProcessToMem(sMem.getProcess(), submem);
 		mem.mems.add(submem);
 	}
+
 	/**
 	 * アトム構文を膜に追加
 	 * @param sAtom 追加したいアトム構文
@@ -211,36 +212,7 @@ public class LMNParser {
 		int arity = p.size();
 		
 		// [1] ファンクタを生成する
-		// GUIからの動的な生成に対応する場合にそなえて FunctorFactory のようなものがあった方がよい。
-		// runtime.*Functor の多さが、現状の不自然さを物語る。
-
-		int nametype = sAtom.getNameType();
-		String name = sAtom.getName();
-		String path = null;
-		if (nametype == SrcName.PATHED) {
-			int pos = name.indexOf('.');
-			path = name.substring(0, pos);
-			name = name.substring(pos + 1);
-		}
-		Functor func = new runtime.Functor(name, arity, path);
-		if (arity == 1 && path == null) {
-			if (nametype == SrcName.PLAIN || nametype == SrcName.SYMBOL) {
-				try {
-					func = new runtime.IntegerFunctor(Integer.parseInt(name));
-				}
-				catch (NumberFormatException e) {
-					try {
-						func = new runtime.FloatingFunctor(Double.parseDouble(name));
-					}
-					catch (NumberFormatException e2) {
-						//
-					}
-				}
-			}
-			else if (nametype == SrcName.STRING || nametype == SrcName.QUOTED) {
-				func = new runtime.StringFunctor(name); // new runtime.ObjectFunctor(name);
-			}
-		}
+		Functor func = Functor.build(sAtom.getName(), arity, sAtom.getNameType());
 		
 		// [2] アトム構造を生成する
 		Atom atom = new Atom(mem, func);
@@ -284,7 +256,7 @@ public class LMNParser {
 		else if (arity == 0 || alllinks )
 			mem.atoms.add(atom);
 		else {
-			error("SYNTAX ERROR: arguments of an atom contain both links and bundles");
+			error("SYNTAX ERROR: arguments of an atom contain both of links and bundles");
 		}
 	}
 
@@ -857,7 +829,7 @@ public class LMNParser {
 			pc.def = (ContextDef)names.get(name);
 			if (pc.def == null) {
 				error("SYSTEM ERROR: contextdef not set for pragma " + name);
-			}			
+			}	
 			// todo 【コード整理】直接ContextDefを代入できるようにする(2)
 		}
 	}
@@ -1505,7 +1477,7 @@ class SyntaxExpander {
 	 * (2) {..}@Hに対して、ガード型制約 cmd(H) を追加する。
 	 * <p>左辺の場合のpragmaフィールドへの登録は、addProcessToMemで行う。
 	 * @param cmd 右辺ならば"connectRuntime"を、左辺ならば"string"を渡すこと。(2)で使用される。*/
-	private void correctPragma(LinkedList typeConstraints, LinkedList process, String cmd) {
+	void correctPragma(LinkedList typeConstraints, LinkedList process, String cmd) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
@@ -1541,7 +1513,7 @@ class SyntaxExpander {
 					}
 				}
 				if (sMem.pragma == null) continue;
-				error("SYNTAX ERROR: illegal pragma, ignored: " + obj);
+				error("SYNTAX ERROR: illegal pragma, ignored: " + sMem.pragma);
 				sMem.pragma = null;
 			}
 		}
@@ -1608,7 +1580,12 @@ class SyntaxExpander {
 				}
 			}
 			else if (obj instanceof SrcMembrane) {
-				correctWorld(((SrcMembrane)obj).getProcess());
+				SrcMembrane sMem = (SrcMembrane)obj;
+				if (sMem.pragma != null) {
+					warning("FEATURE NOT IMPLEMENTED: pragma outside rule, ignored: " + sMem.pragma);
+					sMem.pragma = null;
+				}
+				correctWorld(sMem.getProcess());
 			}
 			else if (obj instanceof SrcRule) {}
 			else if (obj instanceof SrcLink) {

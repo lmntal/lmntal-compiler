@@ -87,4 +87,6 @@ class SrcAtom {
 	 * @return 子プロセスのリスト
 	 */
 	public LinkedList getProcess() { return process; }
+	
+	public String toString() { return SrcDumper.dumpAtom(this,0); }
 }

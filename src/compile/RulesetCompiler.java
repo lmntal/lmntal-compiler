@@ -115,7 +115,15 @@ public class RulesetCompiler {
 			}
 		}
 		// 必要ならシステムルールセットに登録
-		if(mem.is_system_ruleset) {
+		boolean is_system_ruleset = false;
+		it = mem.atoms.iterator();
+		while (it.hasNext()) {
+			if (((Atom)it.next()).functor.getName().equals("system_ruleset")) {
+				is_system_ruleset = true;
+				break;
+			}
+		}
+		if (is_system_ruleset) {
 			//Env.p("Use system_ruleset "+mem);
 			Iterator ri = mem.rulesets.iterator();
 			while(ri.hasNext()) {

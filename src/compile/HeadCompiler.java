@@ -172,7 +172,7 @@ public class HeadCompiler {
 					// neg(等式右辺トップレベル)->lhs(左辺の非トップレベル)のとき
 					if (proccxteqMap.containsKey(atom.mem)
 					 && !proccxteqMap.containsKey(buddyatom.mem)
-					 && buddyatom.mem.mem != null) {
+					 && buddyatom.mem.parent != null) {
 						// just skip
 					}
 					else {
@@ -206,12 +206,12 @@ public class HeadCompiler {
 					Membrane mem = ((ProcessContextEquation)proccxteqMap.get(buddyatom.mem)).def.lhsOcc.mem;
 					while (mem != null) {
 						buddySupermems.addFirst(mem);
-						mem = mem.mem;
+						mem = mem.parent;
 					}
 					mem = ((ProcessContextEquation)proccxteqMap.get(atom.mem)).def.lhsOcc.mem;
 					while (mem != null) {
 						atomSupermems.addFirst(mem);
-						mem = mem.mem;
+						mem = mem.parent;
 					}
 					// 広義先祖膜列の共通部分削除
 					// atomSupermems = {}; buddySupermems = {2}
