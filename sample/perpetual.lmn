@@ -25,7 +25,7 @@
 ]].
 {
 	go :- [[/*inline*/
-		AbstractMembrane mem = me.getMem();
+		//AbstractMembrane mem = me.getMem();
 		new Thread(new ThreadTest(mem)).start();
 		mem.makePerpetual();
 		]].
