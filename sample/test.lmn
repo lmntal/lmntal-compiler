@@ -285,15 +285,17 @@ go. % ==> e,e,e,result(3.14)
 
 % UpdateLinks のテスト
 
-% ( :- type($pc) | atom(X), $pc[X] )
-% ( { org(Y,), $pc[Y,|] } :- atom(X), $pc[X,|] )
-% ( buddy(X) :- atom(X) )	
-% ( :- buddy(X), atom(X) )
-% ( buddy(X) :- type($atom) | $atom[X|] )
-% ( :- type($atom),type($buddypc) | $buddypc[X|], $atom[X|] )
-% ( {org(Y,), $buddypc[Y,|]} :- type($atom) | $buddypc[X,|], $atom[X|] )
-% ( {src(Z,),$atom[Z,|]},buddy(X) :- $atom[X,|] )
-% ( {org(Y,),$buddypc[Y,|]},{src(Z,),$atom[Z,|]} :- $buddypc[X,|],$atom[X,|] )				
+                          go :- 4($pc)   |               atom(X), $pc[X] % NEWLINK
+          { org(Y), $pc[Y] } :-                          atom(X), $pc[X] % RELINK
+                                            buddy(X) :-  atom(X)         % RELINK
+                          go :-             buddy(X),    atom(X)         % NEWLINK
+              buddy(X)       :- 4($atom) |              $atom[X]         % RELINK
+              go :- 5($buddypc),4($atom) | $buddypc[X], $atom[X]         % NEWLINK
+{org(Y), $buddypc[Y]}        :- 4($atom) | $buddypc[X], $atom[X]         % RELINK
+                      {src(Z),$atom[Z]},    buddy(X) :- $atom[X]         % (LOCAL)UNIFY
+{org(Y), $buddypc[Y]},{src(Z),$atom[Z]} :- $buddypc[X], $atom[X]         % UNIFY
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 {$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,Z),g(X,Z)} % ==> g(A,A),g(B,B)
 {$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,Z),g(X,Z)} % ==> g(A,A)
@@ -302,7 +304,8 @@ go. % ==> e,e,e,result(3.14)
 
 {$p[X,Y]} :- $p[A,B],$p[A,B].  {f(X,Y)},g(X,Y)
 
-{$p[X,Y,Z],f(X),f(Y),f(Z)} :- $p[V,V,W],g(W).   {f(A),f(A),f(C),f(C)}
+{$p[X,Y,Z],f(X),f(Y),f(Z)} :- $p[V,V,W],g(W).   {f(A),f(A),f(C),f(C)} % ==> f(g)
+{$p[X,Y,Z],f(X,$x),f(Y,$y),f(Z,$z)} :- int($x),int($y),int($z) | $p[V,V,W],g(W).   {f(A,1),f(A,2),f(C,3),f(C,4)} % ==> f(g,1) or ... or f(g,4)
 
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,B,C,C)} % ==> e(g)
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,C,B)} % ==> e(g)
