@@ -106,16 +106,15 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				respond(msgid, result);
 				continue;
 			}  else if (parsedInput[0].equalsIgnoreCase("UNREGISTERLOCAL")){
-				//UNREGISTERLOCAL msgid rgid
+				//UNREGISTERLOCAL rgid
 				
 				//rgid を削除
-				String msgid = parsedInput[1];
-				String rgid  = parsedInput[2];
+				String rgid  = parsedInput[1];
 				if(LMNtalDaemon.unregisterRuntimeGroup(rgid)){
 					//	自分自身にある、マスタランタイム(LMNtalRuntimeMessageProcessor)との通信路を切る
 					close();
 				}
-				continue;
+				return;
 			} else if (parsedInput[0].equalsIgnoreCase("DUMPHASH")) {
 				// DUMPHASH
 				LMNtalDaemon.dumpHashMap();
