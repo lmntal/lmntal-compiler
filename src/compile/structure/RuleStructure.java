@@ -47,7 +47,7 @@ public final class RuleStructure {
 	public String toString() {
 		String text = "( " + leftMem.toStringWithoutBrace() + " :- ";
 		if (!guardMem.atoms.isEmpty())
-			text += guardMem.toStringWithoutBrace() + " | ";
+			text += guardMem.toStringAsGuard() + " | ";
 		return text + rightMem.toStringWithoutBrace() + " )";
 	}
 }

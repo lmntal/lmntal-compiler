@@ -9,7 +9,8 @@ final class Unlexer {
 		if (!last.matches(".*['\"\\[\\]|,(){} ]")
 		 && !text.matches("['\"\\[\\]|,(){} ].*")
 		 &&  last.matches(".*[0-9A-Za-z_]") == text.matches("[0-9A-Za-z_].*")) {
-		 	buf.append(" ");
+//		 	if (! (last.matches(".*=") && text.matches("\\$.*")) )
+		 		buf.append(" ");
 		}
 		buf.append(text); 
 		last = text;

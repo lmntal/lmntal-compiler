@@ -81,20 +81,28 @@ public final class Membrane {
 	 * @return String 
 	 */
 	public String toStringWithoutBrace() {
-		return 
-		(atoms.isEmpty() ? "" : ""+Env.parray(atoms))+
-		(mems.isEmpty() ? "" : " "+Env.parray(mems))+
-		(rules.isEmpty() ? "" : " "+Env.parray(rules))+
-		(processContexts.isEmpty() ? "" : " "+Env.parray(processContexts))+
-		(ruleContexts.isEmpty() ? "" : " "+Env.parray(ruleContexts))+
-		(typedProcessContexts.isEmpty() ? "" : " "+Env.parray(typedProcessContexts))+
-		"";
+		LinkedList list = new LinkedList();
+		list.addAll(atoms);
+		list.addAll(mems);
+		list.addAll(rules);
+		list.addAll(processContexts);
+		list.addAll(ruleContexts);
+		list.addAll(typedProcessContexts);
 		
+		//return list.toString().replaceAll("^.|.$","");
+		return Env.parray(list).toString();
 	}
 	public String toString() {
 		return "{ " + toStringWithoutBrace() + " }" + (stable ? "/" : "");
 	}
-	
+	public String toStringAsGuard() {
+		Iterator it = atoms.iterator();
+		String text = "";
+		while (it.hasNext()) {
+			text += "," + ((Atom)it.next()).toStringAsTypeConstraint();
+		}
+		return text.substring(1);
+	}
 	/**
 	 * この膜に含まれる全てのルールセットを表示する。
 	 */

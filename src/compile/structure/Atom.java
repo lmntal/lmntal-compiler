@@ -81,6 +81,14 @@ public class Atom {
 		argstext = argstext.replaceAll(", ",",");
 		return functor.getQuotedFunctorName() + "(" + argstext + ")";
 	}
+	public String toStringAsTypeConstraint() {
+		if (args.length == 0) return functor.getQuotedAtomName();
+		String argstext = "";
+		for (int i = 0; i < args.length; i++) {
+			argstext += "," + ((ProcessContext)args[i].buddy.atom).getQualifiedName();
+		}
+		return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
+	}
 	public String getPath() {
 		return functor.getPath();
 	}

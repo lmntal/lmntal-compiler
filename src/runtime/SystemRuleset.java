@@ -126,7 +126,7 @@ final class SystemRuleset extends Ruleset {
 		Rule rule = new Rule();
 		List insts = rule.memMatch;
 		// match		
-		insts.add(new Instruction(Instruction.SPEC,        5,0));
+		insts.add(new Instruction(Instruction.SPEC,        4,0));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,2)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(typechecker,             2));
@@ -148,16 +148,16 @@ final class SystemRuleset extends Ruleset {
 		Rule rule;
 		List insts;		
 		
-		ruleset.rules.add(buildBinOpRule("+",Instruction.ISINT,Instruction.IADD));
-		ruleset.rules.add(buildBinOpRule("-",Instruction.ISINT,Instruction.ISUB));
-		ruleset.rules.add(buildBinOpRule("*",Instruction.ISINT,Instruction.IMUL));
-		ruleset.rules.add(buildBinOpRule("/",Instruction.ISINT,Instruction.IDIV));
-		ruleset.rules.add(buildBinOpRule("mod",Instruction.ISINT,Instruction.IMOD));
+		ruleset.rules.add(buildBinOpRule("+",	Instruction.ISINT,Instruction.IADD));
+		ruleset.rules.add(buildBinOpRule("-",	Instruction.ISINT,Instruction.ISUB));
+		ruleset.rules.add(buildBinOpRule("*",	Instruction.ISINT,Instruction.IMUL));
+		ruleset.rules.add(buildBinOpRule("/",	Instruction.ISINT,Instruction.IDIV));
+		ruleset.rules.add(buildBinOpRule("mod",	Instruction.ISINT,Instruction.IMOD));
 
-		ruleset.rules.add(buildBinOpRule("+.",Instruction.ISFLOAT,Instruction.FADD));
-		ruleset.rules.add(buildBinOpRule("-.",Instruction.ISFLOAT,Instruction.FSUB));
-		ruleset.rules.add(buildBinOpRule("*.",Instruction.ISFLOAT,Instruction.FMUL));
-		ruleset.rules.add(buildBinOpRule("/.",Instruction.ISFLOAT,Instruction.FDIV));
+		ruleset.rules.add(buildBinOpRule("+.",	Instruction.ISFLOAT,Instruction.FADD));
+		ruleset.rules.add(buildBinOpRule("-.",	Instruction.ISFLOAT,Instruction.FSUB));
+		ruleset.rules.add(buildBinOpRule("*.",	Instruction.ISFLOAT,Instruction.FMUL));
+		ruleset.rules.add(buildBinOpRule("/.",	Instruction.ISFLOAT,Instruction.FDIV));
 
 		ruleset.rules.add(buildUnaryOpRule("int",  Instruction.ISFLOAT,Instruction.FLOAT2INT));
 		ruleset.rules.add(buildUnaryOpRule("float",Instruction.ISINT,  Instruction.INT2FLOAT));
@@ -177,6 +177,7 @@ final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.COPYATOM,  3,0,2));
 		insts.add(new Instruction(Instruction.RELINK,    2,0,1,1));
 		insts.add(new Instruction(Instruction.RELINK,    3,0,1,2));
+		insts.add(new Instruction(Instruction.FREEATOM,    1));
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 	}
