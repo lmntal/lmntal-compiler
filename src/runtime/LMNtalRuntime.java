@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 /** 抽象ランタイム（旧：抽象物理マシン、旧々：抽象計算ノード）クラス。
- * このクラスのサブクラスのインスタンスは、1つの Java VM につき高々1つしか存在しない。
  * TODO AbstractMachine は AbstractRuntime に名称変更する。*/
 abstract class AbstractMachine {
 	protected String runtimeid;
@@ -18,7 +17,8 @@ abstract class AbstractMachine {
 //	abstract public void awake();
 }
 
-/** ランタイム（旧：物理マシン、旧々：計算ノード）
+/** このVMで実行するランタイム（旧：物理マシン、旧々：計算ノード）
+ * このクラスのサブクラスのインスタンスは、1つの Java VM につき高々1つしか存在しない。
  * TODO LMNtalRuntime を MasterLMNtalRuntime に名称変更した後、Machine は LMNtalRuntime に名称変更する。*/
 class Machine extends AbstractMachine /*implements Runnable */{
 	List tasks = new ArrayList();
