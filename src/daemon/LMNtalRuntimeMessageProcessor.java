@@ -275,7 +275,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	}
 	
 	void onCmd(String msgid, String[] command) {
-		AbstractMembrane obj = IDConverter.lookupGlobalMembrane(command[1]);
+		AbstractMembrane obj = IDConverter.lookupGlobalMembrane(command[1]); //TODO globalidを作成する時に間違ったIDを作成している？  or 登録されていない？（こっちを先に調べる）
 		if (!(obj instanceof Membrane)) {
 			respondAsFail(msgid);
 			if(true)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is not found!)"); //TODO Env.debug
@@ -346,6 +346,7 @@ class InstructionBlockProcessor implements Runnable {
 	/** 指定された膜を表に登録する */
 	public void registerNewMembrane(String globalMemID, AbstractMembrane mem) {
 		newMemTable.put(globalMemID, mem);
+		
 	}
 	/** グローバル膜IDまたはNEW_に対応する膜を探す
 	 * @return Membrane（見つからなかった場合はnull）*/
@@ -451,6 +452,7 @@ class InstructionBlockProcessor implements Runnable {
 						RemoteLMNtalRuntime rrt = (RemoteLMNtalRuntime)rt;
 						m = rrt.createPseudoMembrane(memid);
 						registerNewMembrane(memid,m);
+						IDConverter.registerGlobalMembrane(memid,m);
 					}
 					if (m == null) {
 						throw new RuntimeException("cannot lookup membrane: " + memid);
@@ -473,6 +475,7 @@ class InstructionBlockProcessor implements Runnable {
 							String tmpID = command[2];
 							AbstractMembrane newmem = m.newRoot(nodedesc);
 							registerNewMembrane(tmpID,newmem);
+							IDConverter.registerGlobalMembrane(newmem.getGlobalMemID(),newmem);
 							result += tmpID + "=" + newmem.getGlobalMemID() + ";";
 							continue;
 						}
@@ -557,6 +560,7 @@ class InstructionBlockProcessor implements Runnable {
 					String tmpID = command[2];
 					AbstractMembrane newmem = mem.newMem();
 					registerNewMembrane(tmpID,newmem);
+					IDConverter.registerGlobalMembrane(newmem.getGlobalMemID(), newmem);
 					result += tmpID + "=" + newmem.getGlobalMemID() + ";";
 				} else if (command[0].equals("REMOVEMEM")) {
 					mem.removeMem(lookupMembrane(command[2]));
