@@ -29,7 +29,7 @@ public class LMNGraphPanel extends GraphPanel {
 		addMouseMotionListener(new MouseMotionAdapter() {
 			public void mouseDragged(MouseEvent arg0) {
 				if(movingNode==null) return;
-				movingNode.setPosition(arg0.getPoint());
+				movingNode.setPosition(new DoublePoint(arg0.getPoint()));
 			}
 
 		}
@@ -67,7 +67,7 @@ public class LMNGraphPanel extends GraphPanel {
 			Point p = new Point(30 + col * 0 + (int)(Math.random()*200), 60 + row * 0 + (int)(Math.random()*300));
 //			Point p = new Point(30 + (int)(Math.random()*200) + (int)(Math.random()*3), 30 + (int)(Math.random()*600) + (int)(Math.random()*3));
 //			Point p = new Point(150+(int)(Math.random()*20), 100+(int)(Math.random()*20));
-			n = new GraphNode(atom.getName(), p);
+			n = new GraphNode(atom.getName(), new DoublePoint(p));
 			atoms.put(atom, n);
 			getGraphLayout().addNode(n);
 			if(col++ >10) { row++; col=0; }
@@ -79,7 +79,7 @@ public class LMNGraphPanel extends GraphPanel {
 		GraphNode n = (GraphNode)atoms.get(atom);
 		if(n==null) {
 			Point p = new Point(30 + atom.column * 20 + (int)(Math.random()*3), 30 + atom.line * 40 + (int)(Math.random()*3));
-			n = new GraphNode(atom.functor.getName() , p);
+			n = new GraphNode(atom.functor.getName(), new DoublePoint(p));
 			atoms.put(atom, n);
 			getGraphLayout().addNode(n);
 		}

@@ -24,9 +24,13 @@ public class Test {
 //		b();
 //		c();
 //		d();
-		e();
+//		e();
+		f();
 	}
 	
+	public static void f() {
+		System.out.println((int)1.3);
+	}
 	public static void e() {
 		System.out.println(get("http://yahoo.co.jp"));
 	}

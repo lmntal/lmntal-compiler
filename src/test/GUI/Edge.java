@@ -39,11 +39,11 @@ class Edge implements Comparable {
 	}
 	
 	public double getVx() {
-		return to.getPosition().getX() - from.getPosition().getX();
+		return to.getPosition().x - from.getPosition().x;
 	}
 	
 	public double getVy() {
-		return to.getPosition().getY() - from.getPosition().getY();
+		return to.getPosition().y - from.getPosition().y;
 	}
 	
 	public double getStdLen() {

@@ -57,15 +57,6 @@ public class REPL {
 		
 		Readline.initReadline("LMNtal");
 		
-		//if your version supports
-		//addShutdownHook (since 1.3)
-		Runtime.getRuntime().addShutdownHook(
-			new Thread() {
-				public void run() {
-					Readline.cleanup();
-				}
-			});
-		
 		System.out.println("        LMNtal version 0.64.20040528");
 		System.out.println("");
 		System.out.println("Type h to see help.");

@@ -9,7 +9,6 @@ import java.util.*;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Dimension;
 
@@ -32,7 +31,7 @@ public class GraphNode implements Node {
 	/**
 	 * 現在位置
 	 */
-	protected Point pos = null;
+	protected DoublePoint pos = null;
 	
 	/**
 	 * ノードのラベル
@@ -67,7 +66,7 @@ public class GraphNode implements Node {
 	 * @param pos 初期位置
 	 * @param area 移動可能範囲
 	 */
-	public GraphNode(String label, Point pos) {
+	public GraphNode(String label, DoublePoint pos) {
 		this.label = label;
 		this.pos = pos;
 	}
@@ -81,10 +80,10 @@ public class GraphNode implements Node {
 		return false;
 	}
 	
-	public Point getPosition() {
+	public DoublePoint getPosition() {
 		return this.pos;
 	}
-	public void setPosition(Point p) {
+	public void setPosition(DoublePoint p) {
 		this.pos = p;
 	}
 	
@@ -114,8 +113,8 @@ public class GraphNode implements Node {
 		while(it.hasNext()) {
 			Edge ie = (Edge)it.next();
 			if(ie.from.hashCode() < ie.to.hashCode()) continue;
-			g.drawLine((int)ie.from.getPosition().getX(), (int)ie.from.getPosition().getY(),
-				(int)ie.to.getPosition().getX(), (int)ie.to.getPosition().getY());
+			g.drawLine((int)ie.from.getPosition().x, (int)ie.from.getPosition().y,
+				(int)ie.to.getPosition().x, (int)ie.to.getPosition().y);
 		}
 	}
 	
@@ -138,11 +137,11 @@ public class GraphNode implements Node {
 		// 適当に色分けする！
 		g.setColor(colors[ Math.abs(label.hashCode()) % colors.length ]);
 		
-		g.fillOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
+		g.fillOval((int)(pos.x - size.width/2), (int)(pos.y - size.height/ 2), size.width, size.height);
 		
 		g.setColor(Color.BLACK);
-		g.drawOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
-		g.drawString(this.label, pos.x - (w-10)/2, (pos.y - (h-4)/2) + fm.getAscent()+size.height);
+		g.drawOval((int)(pos.x - size.width/2), (int)(pos.y - size.height/ 2), size.width, size.height);
+		g.drawString(this.label, (int)(pos.x - (w-10)/2), (int)(pos.y - (h-4)/2) + fm.getAscent()+size.height);
 	}
 	
 	public String toString() {

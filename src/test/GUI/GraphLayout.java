@@ -51,7 +51,7 @@ public class GraphLayout implements Runnable {
 		Node minn=null;
 		for(Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
-			double d = p.distance(n.getPosition());
+			double d = p.distance(n.getPosition().toPoint());
 			if(min>d) {
 				min = d;
 				minn = n;
@@ -97,7 +97,7 @@ public class GraphLayout implements Runnable {
 		Rectangle r = new Rectangle(parent.getWidth()/m, parent.getHeight()/m, parent.getWidth()/m*2, parent.getHeight()/m*2);
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
-			Point p = n.getPosition();
+			Point p = n.getPosition().toPoint();
 //			System.out.println(r+" "+p);
 			if(!r.contains(p)) {
 				r.add(p);
@@ -111,10 +111,11 @@ public class GraphLayout implements Runnable {
 		return r;
 	}
 	
-	public boolean allowRelax;
+	public volatile boolean allowRelax;
 	protected synchronized void relax() {
 		if(!allowRelax) return;
 		if(rootMem==null) return;
+		
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
 			double dx = 0;
@@ -134,12 +135,13 @@ public class GraphLayout implements Runnable {
 				
 				// デフォルトの長さに伸縮する
 				if(me.hashCode() < edge.to.hashCode()){
-					double f = (edge.getStdLen() - edge.getLen()) / (edge.getStdLen() * 1);
-					double ddx = f * edge.getVx();
-					double ddy = f * edge.getVy();
+					double l = edge.getLen();
+					double f = (l - edge.getStdLen());// / (edge.getStdLen() * 1);
+					double ddx = 0.1 * f * edge.getVx()/l;
+					double ddy = 0.1 * f * edge.getVy()/l;
 					
-					edge.from.setMoveDelta(-ddx,-ddy);
-					edge.to.setMoveDelta(ddx,ddy);
+					edge.from.setMoveDelta(ddx, ddy);
+					edge.to.setMoveDelta(-ddx, -ddy);
 				}
 				
 				if(me.getEdgeCount()<=1) continue;
@@ -155,27 +157,27 @@ public class GraphLayout implements Runnable {
 	//				System.out.println("  p : "+ prev);
 	//				System.out.println("  n : "+ next);
 					
+					// 次の辺との角度
 					double a_p = regulate(cur.getAngle() - prev.getAngle());
+					// 前の辺との角度
 					double a_n = regulate(next.getAngle() - cur.getAngle());
 					double a_r = a_n-a_p;
 	//				System.out.println("  a_p : "+ a_p*180/Math.PI);
 	//				System.out.println("  a_n : "+ a_n*180/Math.PI);
 	//				System.out.println("   a_r : "+ a_r*180/Math.PI);
 					
-					double vx = you.getPosition().getX() - me.getPosition().getX();
-					double vy = you.getPosition().getY() - me.getPosition().getY();
+					double l = cur.getLen();
 					
-					// next 周りを正にした、動かす対象と自分を結ぶ線分に垂直で長さ１のベクトル
-					double tx = -vy;
-					double ty =  vx;
+					// 時計周りを正にした、動かす対象と自分を結ぶ線分に垂直で長さ１のベクトル
+					// これが you に働く力の単位ベクトルになる
+					double tx = -cur.getVy() / l;
+					double ty =  cur.getVx() / l;
 	//				System.out.println("   tx : "+ tx);
 	//				System.out.println("   ty : "+ ty);
 					
-					double len = Math.sqrt(tx*tx+ty*ty);
-					
 					// move = t times diff
-					dx = 5 * tx / len * a_r;
-					dy = 5 * ty / len * a_r;
+					dx = 1.5 * tx * a_r;
+					dy = 1.5 * ty * a_r;
 					
 					me.setMoveDelta(-dx,-dy);
 					you.setMoveDelta(dx,dy);
@@ -298,13 +300,14 @@ public class GraphLayout implements Runnable {
 		if(rootMem==null) return;
 		g.setColor(Color.BLACK);
 		
-		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
-			Node n = (Node)i.next();
-			n.paintEdge(g);
+		// 同時アクセスで java.util.ConcurrentModificationException がでるので Iterator やめた
+		// ここでの用途は readonly
+		Node[] nodes = (Node[])rootMem.getAtomArray();
+		for (int i=0;i<nodes.length;i++) {
+			nodes[i].paintEdge(g);
 		}
-		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
-			Node n = (Node)i.next();
-			n.paintNode(g);
+		for (int i=0;i<nodes.length;i++) {
+			nodes[i].paintNode(g);
 		}
 //		for (int i=0;i<nodes.size();i++) ((GraphNode)nodes.get(i)).paintEdge(g);
 //		for (int i=0;i<nodes.size();i++) ((GraphNode)nodes.get(i)).paintNode(g);

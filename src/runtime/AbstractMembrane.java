@@ -143,6 +143,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	// 反復子
 	
+	public Object[] getAtomArray() {
+		return atoms.toArray();
+	}
 	/** この膜にあるアトムの反復子を取得する */
 	public Iterator atomIterator() {
 		return atoms.iterator();

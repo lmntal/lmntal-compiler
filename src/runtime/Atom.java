@@ -5,7 +5,7 @@ package runtime;
 //import java.util.List;
 
 import java.awt.*;
-import test.GUI.Node;
+import test.GUI.*;
 import util.QueuedEntity;
 //import util.Stack;
 
@@ -49,7 +49,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		
 		if (Env.gui != null) {
 			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
-			pos = new Point((int)(Math.random()*r.width + r.x), (int)(Math.random()*r.height + r.y));
+			pos = new DoublePoint(Math.random()*r.width + r.x, Math.random()*r.height + r.y);
 		}
 	}
 
@@ -148,15 +148,15 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	
 	///////////////////////////////////////////////////////////////
 	
-	Point pos;
+	DoublePoint pos;
 	double vx, vy;
 	public void initNode() {
-		pos = new Point();
+		pos = new DoublePoint();
 	}
-	public Point getPosition() {
+	public DoublePoint getPosition() {
 		return pos;
 	}
-	public void setPosition(Point p) {
+	public void setPosition(DoublePoint p) {
 		pos = p;
 	}
 	public Node getNthNode(int index) {
@@ -171,8 +171,9 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	}
 	public void move(Rectangle area) {
 		//if (n.isFixed()) return;
-		pos.x += Math.max(-5, Math.min(5, vx));
-		pos.y += Math.max(-5, Math.min(5, vy));
+		final int M = 100;
+		pos.x += Math.max(-M, Math.min(M, vx));
+		pos.y += Math.max(-M, Math.min(M, vy));
 		
 		if (pos.x < area.getMinX())		pos.x = (int)area.getMinX();
 		else if (pos.x > area.getMaxX())	pos.x = (int)area.getMaxX();
@@ -180,7 +181,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		if (pos.y < area.getMinY())		pos.y = (int)area.getMinY();
 		else if (pos.y > area.getMaxY())	pos.y = (int)area.getMaxY();
 		
-//		dx=dy=0;
+//		vx=vy=0;
 		vx /= 2;
 		vy /= 2;
 	}
@@ -189,7 +190,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		for(int i=0;i<getEdgeCount();i++) {
 			Node n2 = getNthNode(i);
 			if(this.hashCode() < n2.hashCode()) continue;
-			g.drawLine(this.getPosition().x, this.getPosition().y, n2.getPosition().x, n2.getPosition().y);
+			g.drawLine((int)getPosition().x, (int)getPosition().y, (int)n2.getPosition().x, (int)n2.getPosition().y);
 		}
 	}
 	
@@ -204,10 +205,10 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		// 適当に色分けする！
 		g.setColor(test.GUI.GraphLayout.colors[ Math.abs(label.hashCode()) % test.GUI.GraphLayout.colors.length ]);
 		
-		g.fillOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
+		g.fillOval((int)(pos.x - size.width/2), (int)(pos.y - size.height/ 2), size.width, size.height);
 		
 		g.setColor(Color.BLACK);
-		g.drawOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
-		g.drawString(label, pos.x - (w-10)/2, (pos.y - (h-4)/2) + fm.getAscent()+size.height);
+		g.drawOval((int)(pos.x - size.width/2), (int)(pos.y - size.height/ 2), size.width, size.height);
+		g.drawString(label, (int)(pos.x - (w-10)/2), (int)(pos.y - (h-4)/2) + fm.getAscent()+size.height);
 	}
 }

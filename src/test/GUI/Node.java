@@ -4,8 +4,8 @@ import java.awt.*;
 public interface Node {
 	public void initNode();
 	public String getName();
-	public Point getPosition();
-	public void setPosition(Point p);
+	public DoublePoint getPosition();
+	public void setPosition(DoublePoint p);
 	public int getEdgeCount();
 	public Node getNthNode(int index);
 	
