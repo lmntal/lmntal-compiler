@@ -362,6 +362,22 @@ public class Instruction {
 		return i;
 	}
 	
+	/**
+	 * newlink 命令を生成する。
+	 * @param atom1
+	 * @param pos1
+	 * @param atom2
+	 * @param pos2
+	 * @return
+	 */
+	public static Instruction newlink(int atom1, int pos1, int atom2, int pos2) {
+		Instruction i = new Instruction(NEWLINK);
+		i.add(atom1);
+		i.add(pos1);
+		i.add(atom2);
+		i.add(pos2);
+		return i;
+	}
 	
 	
 	
