@@ -278,7 +278,6 @@ public class RuleCompiler {
 					// 出現しない場合はコンパイルエラーとする。
 					// 【注意】左辺のアトムに限るという制限は、型は非アクティブなデータを表すことを想定しているため。
 					// つまり、( 2(X) :- found(X) ) や ( 2(3) :- sour ) で2や3を$pで表すことはできない。
-					// このため、ヘッドに出現する$pは0引数であってはならないことになる。
 					// なお、プログラミングの観点から、右辺の型付きプロセス文脈の明示的な自由リンクの先は任意としている。
 					if (!lhsatompath.containsKey(def.src.args[0])) {
 						error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
@@ -716,29 +715,24 @@ public class RuleCompiler {
 					// アトムのリンク先がプロセス文脈/型付きプロセス文脈のとき
 					ProcessContext pc = (ProcessContext)link.atom;
 					if (pc.mem.typedProcessContexts.contains(pc)) {
+						// 左辺の型付きプロセス文脈の明示的な引数は左辺のアトムに制限しているため、
+						// リンク先の型付きプロセス文脈は右辺に限られる。( :- t($pc) | atom(X), $pc[X|] )
 						if (typedcxttypes.get(pc.def) == UNARY_ATOM_TYPE) {
-							if (rhstypedcxtpaths.containsKey(pc)) {
-								// リンク先が右辺の型付きプロセス文脈のとき // ( :- atom(X), $buddy[X] )
-								body.add( Instruction.newlink(
-												rhsatomToPath(atom), pos,
-												rhstypedcxtToPath(pc), 0,
-												rhsmemToPath(atom.mem) ));
-							}
-							else if (typedcxtsrcs.get(pc.def) == pc) {
-								// リンク先が左辺の型付きプロセス文脈のとき // ( $p[X]
-								body.add( new Instruction( Instruction.RELINK,
-												rhsatomToPath(atom), pos,
-												typedcxtToSrcPath(pc.def), 0,
-												rhsmemToPath(atom.mem) ));
-							}
+							body.add( Instruction.newlink(
+											rhsatomToPath(atom), pos,
+											rhstypedcxtToPath(pc), 0,
+											rhsmemToPath(atom.mem) ));
 						}
-					} else { // 型付きでない場合
-						// ( $buddy[X|] :- atom(X) ) --> relink
-						// ( :- atom(X), $buddy[X|] ) --> newlink
-//						body.add( Instruction.newlink(
-//											rhsatomToPath(atom), pos,
-//											rhstypedcxtToPath(pc), 0,
-//											rhsmemToPath(atom.mem) ));
+					} else { // 型付きでないとき
+						// 左辺の型なしプロセス文脈はトップレベルに無く、左辺子膜内とは直接リンクできないため、
+						// リンク先の型なしプロセス文脈は右辺に限られる。そして、そのプロセス文脈の
+						// 左辺での出現における対応する自由リンクは、左辺のアトムに接続している。
+						// ( { org(Y,), $pc[Y,|] } :- atom(X), $pc[X,|] )
+						LinkOccurrence orglink = pc.buddy.args[link.pos].buddy; // orgの引数のYの出現
+							body.add( new Instruction(Instruction.RELINK,
+											rhsatomToPath(atom), pos,
+											lhsatomToPath(orglink.atom), orglink.pos,
+											rhsmemToPath(atom.mem) ));
 					}
 					continue;
 				}
@@ -766,7 +760,7 @@ public class RuleCompiler {
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
 				if (link == null) {
-					error("SYSTEM ERROR: buddy not set 2");
+					error("SYSTEM ERROR: buddy of process context explicit free link is not set");
 				}
 				if (!(link.atom instanceof ProcessContext)) {
 					if (lhsatoms.contains(link.atom)) { // RELINK する

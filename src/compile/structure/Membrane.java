@@ -71,7 +71,17 @@ public final class Membrane {
 		}
 		return c;
 	}
-	
+	/** この膜にあるinside_proxyアトムの個数を取得する */
+	public int getFreeLinkAtomCount() {
+		Iterator it = atoms.iterator();
+		int c=0;
+		while(it.hasNext()) {
+			Atom a = (Atom)it.next();
+			if(a.functor.equals(Functor.INSIDE_PROXY)) c++;
+		}
+		return c;
+	}
+
 	/**
 	 * {} なしで出力する。
 	 * 
