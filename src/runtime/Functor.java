@@ -6,12 +6,12 @@ package runtime;
  */
 public class Functor {
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
-	public static final Functor INSIDE_PROXY = new Functor("$in",2,null,"$in");
+	public static final Functor INSIDE_PROXY = new Functor("$in",2,null,"$in_2");
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
-	public static final Functor OUTSIDE_PROXY = new Functor("$out",2,null,"$out");
+	public static final Functor OUTSIDE_PROXY = new Functor("$out",2,null,"$out_2");
 	/** $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム
-	 * を表すファンクタ temporary_inside_proxy （通称:star）*/
-	public static final Functor STAR = new Functor("$transient_inside_proxy",2,null,"$star");
+	 * を表すファンクタ transient_inside_proxy （通称:star）*/
+	public static final Functor STAR = new Functor("$star",2,null,"$star_2");
 	
 	/** シンボル名。このクラスのオブジェクトの場合は、名前の表示名が格納される。
 	 * 空文字列のときは、サブクラスのオブジェクトであることを表す。*/

@@ -44,15 +44,9 @@ public class REPL {
 				}
 			});
 		
-		System.out.println("        LMNtal version 0.05.20040115");
+		System.out.println("        LMNtal version 0.06.20040116");
 		System.out.println("");
-//		System.out.println("[TIPS] Type q to quit.");
-		System.out.println("Commands:");
-		System.out.println("  [no]debug    [0-9] - set debug level");
-		System.out.println("  [no]shuffle        - set shuffle mode");
-		System.out.println("  [no]trace          - set trace mode");
-		System.out.println("  [no]optimize [0-9] - set optimize level"); //書き方変えた方がよい？
-		System.out.println("  q                  - quit");
+		System.out.println("Type h to see help.");
 		System.out.println("");
 		while (true) {
 			try {
@@ -61,6 +55,15 @@ public class REPL {
 					//System.out.println("no input");
 				} else if(line.equals("q")) {
 					break;
+				} else if(line.equals("h")) {
+					System.out.println("Commands:");
+					System.out.println("  [no]debug    [0-9] - set debug level");
+					System.out.println("  [no]optimize [0-9] - set optimize level"); //書き方変えた方がよい？
+					System.out.println("  [no]shuffle        - set shuffle mode");
+					System.out.println("  [no]trace          - set trace mode");					
+					System.out.println("  h                  - help");
+					System.out.println("  q                  - quit");
+					continue;
 				} else if(line.matches("nodebug|debug( [0-9])?")) {
 					if (line.length() == 5) Env.debug = Env.DEBUG_DEFAULT;
 					else if (line.charAt(0) == 'n') Env.debug = 0;
