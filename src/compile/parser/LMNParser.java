@@ -19,8 +19,8 @@ import compile.structure.*;
 
 public class LMNParser {
 
-	private static final String PREFIX_LINK_NAME = "L::";
-	private static final String PREFIX_PROXY_LINK_NAME = "P::";
+	private static final String PREFIX_LINK_NAME = "";
+	private static final String PREFIX_PROXY_LINK_NAME = "^";
 	static final LinkOccurrence CLOSED_LINK = new LinkOccurrence("",null,0);
 
 	private /*static*/ int nLinkNumber = 0;
@@ -69,16 +69,7 @@ public class LMNParser {
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = coupleLinks(mem);
 		if (!freeLinks.isEmpty()) {
-			Iterator it = freeLinks.keySet().iterator();
-			while (it.hasNext()) {
-				LinkOccurrence link = (LinkOccurrence)freeLinks.get(it.next());
-				System.out.println("WARNING: Global singleton link: " + link.name);
-				LinkedList process = new LinkedList();
-				process.add(new SrcLink(link.name));
-				SrcAtom sAtom = new SrcAtom(link.name, process);
-				addSrcAtomToMem(sAtom, mem);
-			}
-			coupleLinks(mem);
+			closeFreeLinks(mem, "WARNING: Global singleton link: ");
 		}
 		Inline.makeCode();
 		return mem;
@@ -100,7 +91,7 @@ public class LMNParser {
 			Atom a = (Atom)mem.atoms.get(i);
 			// リンクの取り出し
 			for (int j = 0; j < a.args.length; j++) {
-				addLinkOccurrence(links, a.args[j]);
+				if (a.args[j].buddy == null) addLinkOccurrence(links, a.args[j]);
 			}
 		}
 		removeClosedLinks(links);
@@ -138,6 +129,20 @@ public class LMNParser {
 			buddy.buddy = lnk;
 			links.put(lnk.name, CLOSED_LINK);
 		}
+	}
+	
+	/** 膜memの自由リンクを膜内で閉じる（構文エラーからの復帰用） */
+	public void closeFreeLinks(Membrane mem, String prefix) throws ParseException {
+		Iterator it = mem.freeLinks.keySet().iterator();
+		while (it.hasNext()) {
+			LinkOccurrence link = (LinkOccurrence)mem.freeLinks.get(it.next());
+			System.out.println(prefix  + link.name);
+			LinkedList process = new LinkedList();
+			process.add(new SrcLink(link.name));
+			SrcAtom sAtom = new SrcAtom(link.name, process);
+			addSrcAtomToMem(sAtom, mem);
+		}
+		coupleLinks(mem);
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -263,7 +268,6 @@ public class LMNParser {
 	 */
 	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
 		RuleStructure rule = new RuleStructure(mem);
-		HashMap ruleLinks = new HashMap();
 
 		// TODO 簡略記法の展開 sRuleの中身を置き換え
 		
@@ -279,7 +283,7 @@ public class LMNParser {
 		HashMap rhsFreeLinks = coupleLinks(rule.rightMem);
 		
 		// 右辺と左辺の自由リンクを接続する
-		coupleInheritedLinks(ruleLinks, lhsFreeLinks, rhsFreeLinks);
+		coupleInheritedLinks(rule);
 		
 		// todo プロセス文脈を接続する
 		
@@ -287,23 +291,29 @@ public class LMNParser {
 	}
 	
 	/** 左辺と右辺の自由リンクをつなぐ */
-	static void coupleInheritedLinks(HashMap links, HashMap lhsfreelinks, HashMap rhsfreelinks) throws ParseException {
-		HashMap linkNameTable = new HashMap();
-		Iterator it = lhsfreelinks.keySet().iterator();
+	void coupleInheritedLinks(RuleStructure rule) throws ParseException {
+		HashMap lhsFreeLinks = rule.leftMem.freeLinks;
+		HashMap rhsFreeLinks = rule.rightMem.freeLinks;
+		HashMap links = new HashMap();
+		Iterator it = lhsFreeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			String linkname = (String)it.next();
-			if (lhsfreelinks.get(linkname) == CLOSED_LINK) continue;
-			LinkOccurrence lhsocc = (LinkOccurrence)lhsfreelinks.get(linkname);
+			if (lhsFreeLinks.get(linkname) == CLOSED_LINK) continue;
+			LinkOccurrence lhsocc = (LinkOccurrence)lhsFreeLinks.get(linkname);
 			addLinkOccurrence(links, lhsocc);
 		}
-		it = rhsfreelinks.keySet().iterator();
+		it = rhsFreeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			String linkname = (String)it.next();
-			if (rhsfreelinks.get(linkname) == CLOSED_LINK) continue;
-			LinkOccurrence rhsocc = (LinkOccurrence)rhsfreelinks.get(linkname);
+			if (rhsFreeLinks.get(linkname) == CLOSED_LINK) continue;
+			LinkOccurrence rhsocc = (LinkOccurrence)rhsFreeLinks.get(linkname);
 			addLinkOccurrence(links, rhsocc);
 		}
-		// TODO 片方にしか出現しない自由リンクをエラー報告とする
+		removeClosedLinks(links);
+		if (!links.isEmpty()) {
+			closeFreeLinks(rule.leftMem, "SYNTAX ERROR: rule head contains free variable: ");
+			closeFreeLinks(rule.rightMem,"SYNTAX ERROR: rule body contains free variable: ");
+		}
 	}
 	
 
