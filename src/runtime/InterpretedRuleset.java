@@ -821,17 +821,32 @@ class InterpretiveReactor {
 					atoms[inst.getIntArg1()] = new Atom(null, func);				
 					break; // n-kato
 				case Instruction.FNEG : //[-dstfloatatom, floatatom]
+					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new FloatingFunctor(-u));
 					break; //nakajima 2004-01-23
-
 				case Instruction.FADDFUNC : //[-dstfloatfunc, floatfunc1, floatfunc2]
+					u = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					v = ((FloatingFunctor)vars.get(inst.getIntArg3())).floatValue();
+					vars.set(inst.getIntArg1(), new FloatingFunctor(u + v));	
 					break; //nakajima 2004-01-23			
 				case Instruction.FSUBFUNC : //[-dstfloatfunc, floatfunc1, floatfunc2]
+					u = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					v = ((FloatingFunctor)vars.get(inst.getIntArg3())).floatValue();
+					vars.set(inst.getIntArg1(), new FloatingFunctor(u - v));		
 					break; //nakajima 2004-01-23
 				case Instruction.FMULFUNC : //[-dstfloatfunc, floatfunc1, floatfunc2]
+					u = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					v = ((FloatingFunctor)vars.get(inst.getIntArg3())).floatValue();
+					vars.set(inst.getIntArg1(), new FloatingFunctor(u * v));	
 					break; //nakajima 2004-01-23
 				case Instruction.FDIVFUNC : //[-dstfloatfunc, floatfunc1, floatfunc2]
+					u = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					v = ((FloatingFunctor)vars.get(inst.getIntArg3())).floatValue();
+					vars.set(inst.getIntArg1(), new FloatingFunctor(u / v));		
 					break; //nakajima 2004-01-23
 				case Instruction.FNEGFUNC : //[-dstfloatfunc, floatfunc]
+					u = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					vars.set(inst.getIntArg1(), new FloatingFunctor(-u));	
 					break; //nakajima 2004-01-23
 					//====浮動小数点数用の組み込みボディ命令====ここまで====
 					
