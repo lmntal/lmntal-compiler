@@ -85,7 +85,7 @@ class TestRemote{
 		System.out.println("connectRuntime success");
 
 		//マッチング命令・ボディ命令を実行してみるテスト
-		/*
+		
 		//NEWROOT
 		RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
 		
@@ -95,7 +95,7 @@ class TestRemote{
 		Atom atom_hoge_banon = rm_banon.newAtom(new Functor("hoge", 1));
 		Atom atom_fuga_banon = rm_banon.newAtom(new Functor("fuga", 1));
 		Atom atom_moge_banon = rm_banon.newAtom(new Functor("moge", 1));
-				
+		/*		
 		//ALTERATOMFUNCTOR
 		rm_banon.alterAtomFunctor(atom_hoge_banon, new Functor("hoge2", 1));
 		
