@@ -4,80 +4,80 @@ Date: Tue, 07 Oct 2003 16:03:23 +0900 (JST)
 To: lang@ueda.info.waseda.ac.jp
 X-Mailer: Mew version 2.2 on Emacs 20.7 / Mule 4.1 (AOI)
 --------
-‰Á“¡‚Å‚·B
+²ÃÆ£¤Ç¤¹¡£
 
-11ŒŽ––‚Ü‚Å‚ÉA•û–@4‚Ì’€ŽŸˆ—Œn‚ðLMNtal”Ç—LŽu‚Å•ª’S‚µ‚Ä
-ì‚é‚±‚Æ‚É‚È‚è‚Ü‚µ‚½BŽÀ‘•Œ¾Œê‚ÍA‘²˜_¶‚ÆM1‚ªŽè‚ð‰Á‚¦‚â‚·‚¢
-‚Æ‚¢‚¤——R‚ÅJava‚ð—\’è‚µ‚Ä‚¢‚Ü‚·B
+11·îËö¤Þ¤Ç¤Ë¡¢ÊýË¡4¤ÎÃà¼¡½èÍý·Ï¤òLMNtalÈÉÍ­»Ö¤ÇÊ¬Ã´¤·¤Æ
+ºî¤ë¤³¤È¤Ë¤Ê¤ê¤Þ¤·¤¿¡£¼ÂÁõ¸À¸ì¤Ï¡¢Â´ÏÀÀ¸¤ÈM1¤¬¼ê¤ò²Ã¤¨¤ä¤¹¤¤
+¤È¤¤¤¦ÍýÍ³¤ÇJava¤òÍ½Äê¤·¤Æ¤¤¤Þ¤¹¡£
 
-¡Œã‚ÌÅ“K‰»‚â•ªŽU‰»‚ð‰Â”\‚É‚µ‚È‚ª‚çA‚Æ‚è‚ ‚¦‚¸’€ŽŸ‚Å“®‚­‚à‚Ì‚ð
-ì‚é‚±‚Æ‚ª–Ú•W‚Å‚·AˆÈ‰º‚Ì‚æ‚¤‚ÉŒv‰æ‚µ‚Ä‚¢‚Ü‚·B
+º£¸å¤ÎºÇÅ¬²½¤äÊ¬»¶²½¤ò²ÄÇ½¤Ë¤·¤Ê¤¬¤é¡¢¤È¤ê¤¢¤¨¤ºÃà¼¡¤ÇÆ°¤¯¤â¤Î¤ò
+ºî¤ë¤³¤È¤¬ÌÜÉ¸¤Ç¤¹¡¢°Ê²¼¤Î¤è¤¦¤Ë·×²è¤·¤Æ¤¤¤Þ¤¹¡£
 
-¡ ŠT—v
+¢£ ³µÍ×
 
-[ŽÀsŽžƒf[ƒ^\‘¢]
-EŒvŽZƒm[ƒh,ƒ}ƒVƒ“,–Œ,ƒAƒgƒ€,ƒŠƒ“ƒN,–¼‘O,ƒ‹[ƒ‹ƒZƒbƒg
-E–ŒƒvƒƒLƒV,ƒAƒgƒ€ƒvƒƒLƒV,ƒŠƒ“ƒNƒvƒƒLƒV
-    i‚±‚ê‚ç‚ÌÚ×‚Í–¢’èBì‚ç‚È‚¢‚©‚à’m‚ê‚È‚¢j
+[¼Â¹Ô»þ¥Ç¡¼¥¿¹½Â¤]
+¡¦·×»»¥Î¡¼¥É,¥Þ¥·¥ó,Ëì,¥¢¥È¥à,¥ê¥ó¥¯,Ì¾Á°,¥ë¡¼¥ë¥»¥Ã¥È
+¡¦Ëì¥×¥í¥­¥·,¥¢¥È¥à¥×¥í¥­¥·,¥ê¥ó¥¯¥×¥í¥­¥·
+    ¡Ê¤³¤ì¤é¤Î¾ÜºÙ¤ÏÌ¤Äê¡£ºî¤é¤Ê¤¤¤«¤âÃÎ¤ì¤Ê¤¤¡Ë
 
-[ƒRƒ“ƒpƒCƒ‰]
-E\•¶‰ðÍŠíiƒeƒLƒXƒgƒtƒ@ƒCƒ‹ ¨ ’ŠÛ\•¶–Øj
-EˆÓ–¡‰ðÍŠíi’ŠÛ\•¶–Ø ¨ ƒRƒ“ƒpƒCƒ‹ŽžƒvƒƒZƒXƒf[ƒ^\‘¢j
-Eƒ‹[ƒ‹ƒRƒ“ƒpƒCƒ‰iƒRƒ“ƒpƒCƒ‹ŽžƒvƒƒZƒXƒf[ƒ^\‘¢ ¨ ƒ‹[ƒ‹ƒIƒuƒWƒFƒNƒgj
+[¥³¥ó¥Ñ¥¤¥é]
+¡¦¹½Ê¸²òÀÏ´ï¡Ê¥Æ¥­¥¹¥È¥Õ¥¡¥¤¥ë ¢ª Ãê¾Ý¹½Ê¸ÌÚ¡Ë
+¡¦°ÕÌ£²òÀÏ´ï¡ÊÃê¾Ý¹½Ê¸ÌÚ ¢ª ¥³¥ó¥Ñ¥¤¥ë»þ¥×¥í¥»¥¹¥Ç¡¼¥¿¹½Â¤¡Ë
+¡¦¥ë¡¼¥ë¥³¥ó¥Ñ¥¤¥é¡Ê¥³¥ó¥Ñ¥¤¥ë»þ¥×¥í¥»¥¹¥Ç¡¼¥¿¹½Â¤ ¢ª ¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¡Ë
 
-[ƒ‹[ƒ‹ƒIƒuƒWƒFƒNƒgƒNƒ‰ƒX]
-Eƒƒ“ƒo•Ï”‚Æ‚µ‚ÄA–ŒŽå“±ŽÀs—p‚Ìƒ}ƒbƒ`ƒ“ƒO–½—ß—ñ
-Eƒƒ“ƒo•Ï”‚Æ‚µ‚ÄAƒ{ƒfƒB–½—ß—ñ
-Eƒƒ\ƒbƒh‚Æ‚µ‚ÄA‚±‚ê‚ç‚ÌƒCƒ“ƒ^ƒvƒŠƒ^
+[¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¥¯¥é¥¹]
+¡¦¥á¥ó¥ÐÊÑ¿ô¤È¤·¤Æ¡¢Ëì¼çÆ³¼Â¹ÔÍÑ¤Î¥Þ¥Ã¥Á¥ó¥°Ì¿ÎáÎó
+¡¦¥á¥ó¥ÐÊÑ¿ô¤È¤·¤Æ¡¢¥Ü¥Ç¥£Ì¿ÎáÎó
+¡¦¥á¥½¥Ã¥É¤È¤·¤Æ¡¢¤³¤ì¤é¤Î¥¤¥ó¥¿¥×¥ê¥¿
 
-[ƒRƒ“ƒpƒCƒ‹ŽžƒvƒƒZƒXƒf[ƒ^\‘¢]
-E–Œ,ƒAƒgƒ€,ƒŠƒ“ƒN,ƒvƒƒZƒX•¶–¬,ƒ‹[ƒ‹•¶–¬,ƒ‹[ƒ‹
+[¥³¥ó¥Ñ¥¤¥ë»þ¥×¥í¥»¥¹¥Ç¡¼¥¿¹½Â¤]
+¡¦Ëì,¥¢¥È¥à,¥ê¥ó¥¯,¥×¥í¥»¥¹Ê¸Ì®,¥ë¡¼¥ëÊ¸Ì®,¥ë¡¼¥ë
 
-¡ “ú’öŒv‰æ
+¢£ ÆüÄø·×²è
 
-10/13(ŒŽ)`10/17(‹à) ‘æ1T
-10/20(ŒŽ)`10/24(‹à) ‘æ2T
-10/27(ŒŽ)`10/31(‹à) ‘æ3T
-11/ 3(ŒŽ)`11/ 7(‹à) ƒŒƒrƒ…[
-11/10(ŒŽ)`11/14(‹à) ‘æ4T
-11/17(ŒŽ)`11/21(‹à) ‘æ5T
-11/24(ŒŽ)`11/28(‹à) ‘æ6T
+10/13(·î)¢·10/17(¶â) Âè1½µ
+10/20(·î)¢·10/24(¶â) Âè2½µ
+10/27(·î)¢·10/31(¶â) Âè3½µ
+11/ 3(·î)¢·11/ 7(¶â) ¥ì¥Ó¥å¡¼
+11/10(·î)¢·11/14(¶â) Âè4½µ
+11/17(·î)¢·11/21(¶â) Âè5½µ
+11/24(·î)¢·11/28(¶â) Âè6½µ
 
-T   ’S“–  “à—e
+½µ   Ã´Åö  ÆâÍÆ
 
-1    ----  —LŽuƒƒ“ƒo[iB4‚ÆM1‚Å‡Œv4`5l’ö“xj‚ÌŒˆ’è
-1    ‘Sˆõ  ƒRƒ“ƒpƒCƒ‹Žž/ŽÀsŽžƒf[ƒ^\‘¢ƒNƒ‰ƒX‚¨‚æ‚Ñƒ‹[ƒ‹ƒNƒ‰ƒX‚ÌÝŒv‚ÌŒˆ’è
+1    ----  Í­»Ö¥á¥ó¥Ð¡¼¡ÊB4¤ÈM1¤Ç¹ç·×4¢·5¿ÍÄøÅÙ¡Ë¤Î·èÄê
+1    Á´°÷  ¥³¥ó¥Ñ¥¤¥ë»þ/¼Â¹Ô»þ¥Ç¡¼¥¿¹½Â¤¥¯¥é¥¹¤ª¤è¤Ó¥ë¡¼¥ë¥¯¥é¥¹¤ÎÀß·×¤Î·èÄê
 
-1    Œ´    ƒ}ƒbƒ`ƒ“ƒO–½—ß/ƒ{ƒfƒB–½—ßƒNƒ‰ƒX‚ÌÝŒv
-1    …–ì  ƒRƒ“ƒpƒCƒ‹ŽžƒvƒƒZƒXƒf[ƒ^\‘¢ƒNƒ‰ƒX‚ÌƒRƒA•”•ª‚ÌŽÀ‘•
-1`2 …–ì  ŽÀsŽžƒf[ƒ^\‘¢ƒNƒ‰ƒX‚ÌƒRƒA•”•ª‚ÌŽÀ‘•
-1`2 –î“‡  ŽÀsŽžˆ—ŒnƒRƒA•”•ª‚ÌŽÀ‘•
-1`4 ‰i“c  \•¶‰ðÍŠí‚¨‚æ‚ÑˆÓ–¡‰ðÍŠí‚Ìƒvƒƒgƒ^ƒCƒvŽÀ‘•
+1    ¸¶    ¥Þ¥Ã¥Á¥ó¥°Ì¿Îá/¥Ü¥Ç¥£Ì¿Îá¥¯¥é¥¹¤ÎÀß·×
+1    ¿åÌî  ¥³¥ó¥Ñ¥¤¥ë»þ¥×¥í¥»¥¹¥Ç¡¼¥¿¹½Â¤¥¯¥é¥¹¤Î¥³¥¢ÉôÊ¬¤Î¼ÂÁõ
+1¢·2 ¿åÌî  ¼Â¹Ô»þ¥Ç¡¼¥¿¹½Â¤¥¯¥é¥¹¤Î¥³¥¢ÉôÊ¬¤Î¼ÂÁõ
+1¢·2 ÌðÅç  ¼Â¹Ô»þ½èÍý·Ï¥³¥¢ÉôÊ¬¤Î¼ÂÁõ
+1¢·4 ±ÊÅÄ  ¹½Ê¸²òÀÏ´ï¤ª¤è¤Ó°ÕÌ£²òÀÏ´ï¤Î¥×¥í¥È¥¿¥¤¥×¼ÂÁõ
 
-2    —LŽuA ƒ}ƒbƒ`ƒ“ƒO–½—ß/ƒ{ƒfƒB–½—ßƒNƒ‰ƒX‚ÌƒfƒoƒbƒO—p•\Ž¦ƒƒ\ƒbƒh‚ÌŽÀ‘•
-2    —LŽuB ƒRƒ“ƒpƒCƒ‹ŽžƒvƒƒZƒXƒf[ƒ^\‘¢‚ÌƒTƒ“ƒvƒ‹ƒf[ƒ^‚Ìì¬
-2`3 —LŽuC ƒRƒ“ƒpƒCƒ‹Žž/ŽÀsŽžƒf[ƒ^\‘¢ƒNƒ‰ƒX‚ÌƒfƒoƒbƒO—p•\Ž¦ƒƒ\ƒbƒh‚ÌŽÀ‘•
+2    Í­»ÖA ¥Þ¥Ã¥Á¥ó¥°Ì¿Îá/¥Ü¥Ç¥£Ì¿Îá¥¯¥é¥¹¤Î¥Ç¥Ð¥Ã¥°ÍÑÉ½¼¨¥á¥½¥Ã¥É¤Î¼ÂÁõ
+2    Í­»ÖB ¥³¥ó¥Ñ¥¤¥ë»þ¥×¥í¥»¥¹¥Ç¡¼¥¿¹½Â¤¤Î¥µ¥ó¥×¥ë¥Ç¡¼¥¿¤ÎºîÀ®
+2¢·3 Í­»ÖC ¥³¥ó¥Ñ¥¤¥ë»þ/¼Â¹Ô»þ¥Ç¡¼¥¿¹½Â¤¥¯¥é¥¹¤Î¥Ç¥Ð¥Ã¥°ÍÑÉ½¼¨¥á¥½¥Ã¥É¤Î¼ÂÁõ
 
-3`4 —LŽuA ƒ‹[ƒ‹ƒIƒuƒWƒFƒNƒg‚ÌƒTƒ“ƒvƒ‹ƒf[ƒ^‚Ìì¬
-3`6 Œ´    ƒ‹[ƒ‹ƒRƒ“ƒpƒCƒ‰‚Ìƒvƒƒgƒ^ƒCƒvŽÀ‘•
-4`5 —LŽuA ƒ}ƒbƒ`ƒ“ƒO–½—ß/ƒ{ƒfƒB–½—ßƒNƒ‰ƒX‚ÌƒCƒ“ƒ^ƒvƒŠƒ^‚Ìì¬
-4`5 —LŽuC ˆ—Œn‚Ì“üo—Í•”•ª‚ÌŽÀ‘•
+3¢·4 Í­»ÖA ¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¤Î¥µ¥ó¥×¥ë¥Ç¡¼¥¿¤ÎºîÀ®
+3¢·6 ¸¶    ¥ë¡¼¥ë¥³¥ó¥Ñ¥¤¥é¤Î¥×¥í¥È¥¿¥¤¥×¼ÂÁõ
+4¢·5 Í­»ÖA ¥Þ¥Ã¥Á¥ó¥°Ì¿Îá/¥Ü¥Ç¥£Ì¿Îá¥¯¥é¥¹¤Î¥¤¥ó¥¿¥×¥ê¥¿¤ÎºîÀ®
+4¢·5 Í­»ÖC ½èÍý·Ï¤ÎÆþ½ÐÎÏÉôÊ¬¤Î¼ÂÁõ
 
-5`9 ‰i“c? \•¶‰ðÍŠí‚¨‚æ‚ÑˆÓ–¡‰ðÍŠí‚ÌŽÀ‘•
-6`9 Œ´?   ƒ‹[ƒ‹ƒRƒ“ƒpƒCƒ‰‚ÌŽÀ‘•
+5¢·9 ±ÊÅÄ? ¹½Ê¸²òÀÏ´ï¤ª¤è¤Ó°ÕÌ£²òÀÏ´ï¤Î¼ÂÁõ
+6¢·9 ¸¶?   ¥ë¡¼¥ë¥³¥ó¥Ñ¥¤¥é¤Î¼ÂÁõ
 
-‘ˆî“c‘åŠw—HŠw•”‚b‚rŠw‰È ã“cŒ¤‹†Žº •Žè  ‰Á“¡ ‹I•v
+Áá°ðÅÄÂç³ØÍý¹©³ØÉô£Ã£Ó³Ø²Ê ¾åÅÄ¸¦µæ¼¼ ½õ¼ê  ²ÃÆ£ µªÉ×
 
 
 
 
 
 [Develop members]
-static final String —LŽuA = "’†“‡";
-static final String —LŽuB = "‰i“c";
-static final String —LŽuC = "–î“‡";
+static final String Í­»ÖA = "ÃæÅç";
+static final String Í­»ÖB = "±ÊÅÄ";
+static final String Í­»ÖC = "ÌðÅç";
 
 String[] members 
-   = {"‰i“c", "–î“‡", "…–ì", "Œ´", 
-       —LŽuA,  —LŽuB, —LŽuC};
+   = {"±ÊÅÄ", "ÌðÅç", "¿åÌî", "¸¶", 
+       Í­»ÖA,  Í­»ÖB, Í­»ÖC};
 
