@@ -46,6 +46,8 @@ public final class Membrane {
 //	public runtime.Ruleset ruleset = new InterpretedRuleset();
 	public List rulesets = new ArrayList();
 	 	
+	public String name;
+	
 	////////////////////////////////////////////////////////////////
 
 	/**

@@ -69,9 +69,11 @@ public class Dumper {
 		// #2 - 子膜の出力		
 		it = mem.memIterator();
 		while (it.hasNext()) {
+			Membrane m = (Membrane)it.next();
 			if(commaFlag) buf.append(", "); else commaFlag = true;
+			if(m.name!=null) buf.append(m.name+":");
 			buf.append("{");
-			buf.append(dump((Membrane)it.next()));
+			buf.append(dump(m));
 			buf.append("}");
 		}
 		

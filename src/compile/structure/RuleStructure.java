@@ -34,6 +34,10 @@ public final class RuleStructure {
 	 */
 	public RuleStructure(Membrane mem) {
 		this.parent = mem;
+		// io:{(print:-inline)} の print は io.print にしたい。
+		// が、print は io 膜直属ではなくルール左辺の膜に所属するのでルールの膜も同じ名前をつけておく。
+		leftMem.name = mem.name;
+		rightMem.name = mem.name;
 	}
 
 	public String toString() {

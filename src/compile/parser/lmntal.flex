@@ -44,7 +44,8 @@ LinkName       = [A-Z][A-Za-z_0-9]*
 /* これだと [[ と ]] がアトム名に含まれちゃうので一時的に退避 hara */
 /* なんかいい方法ないすかねー */
 /*AtomNameNormal = {Inline} | [a-z0-9][A-Za-z_0-9]* */
-AtomNameNormal = [a-z0-9][A-Za-z_0-9]*
+AtomNameNormal = [a-z0-9][A-Za-z_0-9]* (\.[a-z0-9][A-Za-z_0-9]*)?
+MemName        = [a-z0-9][A-Za-z_0-9]*
 
 Comment = {TraditionalComment} | {EndOfLineComment}
 
@@ -64,6 +65,7 @@ EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 	")"				{ return symbol(sym.RPAREN); }
 	"{"				{ return symbol(sym.LBREATH); }
 	"}"				{ return symbol(sym.RBREATH); }
+	":"				{ return symbol(sym.COLON); }
 	":-"			{ return symbol(sym.RULE); }
 	"="				{ return symbol(sym.UNIFY); }
 	"."				{ return symbol(sym.PERIOD); }
@@ -85,6 +87,7 @@ EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 	"[["			{ string.setLength(0); yybegin(QUOTED); }
 	"\\+"			{ return symbol(sym.NEGATIVE); }
 	{LinkName}		{ return symbol(sym.LINK_NAME, yytext()); }
+//	{MemName}		{ return symbol(sym.MEM_NAME, yytext()); }
 	{AtomNameNormal}		{ return symbol(sym.ATOM_NAME_NORMAL, yytext()); }
 	{WhiteSpace}	{ /* just skip */ }
 	{Comment}		{ /* just skip */ }

@@ -53,7 +53,7 @@ public class Atom {
 	 */	
 	public Atom(Membrane mem, String name, int arity, int line, int column){
 		this.mem = mem;
-		functor = new Functor(name, arity);
+		functor = new Functor(name, arity, mem);
 		args = new LinkOccurrence[arity];
 		this.line = line;
 		this.column = column;

@@ -1,5 +1,6 @@
 package runtime;
 
+
 /**
  * Stringの名前とリンク数の組からなるアトムのFunctor。
  */
@@ -30,14 +31,28 @@ public class Functor {
 	public boolean pathFree;
 	
 	public Functor(String name, int arity) {
-		this.name = name;
+		this(name, arity, null);
+	}
+	public Functor(String name, int arity, compile.structure.Membrane m) {
+		// 名前空間
+		int pos = name.indexOf('.');
+		if(pos!=-1) {
+			this.path = name.substring(0, pos);
+			this.name = name.substring(pos+1);
+		} else {
+			this.pathFree = true;
+			if(m!=null) this.path = m.name;
+			this.name = name;
+		}
+		//Env.p("new Fun "+path+"  "+name+" "+m);
 		this.arity = arity;
 		// == で比較できるようにするためにinternしておく。
 		strFunctor = (name + "_" + arity).intern();
 	}
 	/** 適切に省略された名前を取得 */
 	public String getAbbrName() {
-		return name.length() > 10 ? name.substring(0, 10) : name;
+		String full = path==null ? name : path+"."+name;
+		return full.length() > 10 ? full.substring(0, 10) : full;
 	}
 	public String getName() {
 		return name;

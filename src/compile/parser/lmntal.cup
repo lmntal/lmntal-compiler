@@ -6,13 +6,13 @@ import java.util.LinkedList;
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
 terminal		NULL, COMMA, LPAREN, RPAREN, LBREATH, RBREATH,
-				RULE, UNIFY, PERIOD, GUARD, PROCVAR, RULEVAR, 
+				RULE, COLON, UNIFY, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE,
 				LT, LE, GT, GE, EQ, NE,
 				ASTERISK, SLASH, PLUS, MINAS,
 				QUOTED_STRING;
 				
-terminal String	LINK_NAME, ATOM_NAME_NORMAL;
+terminal String	LINK_NAME, ATOM_NAME_NORMAL, MEM_NAME;
 
 non terminal SrcLink			Link;
 non terminal String				AtomName;
@@ -49,7 +49,6 @@ AtomName	::=   QUOTED_STRING:name
 					{: RESULT = name.toString(); :}
 				| ATOM_NAME_NORMAL:name
 					{: RESULT = name.toString(); :};
-
 
 UnitAtom	::=	  AtomName:name
 					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
@@ -110,8 +109,12 @@ ListCdr     ::=   GUARD Atom:atom
                     {: RESULT = new SrcAtom("[]"); :};
 
 
-Membrane	::=	  LBREATH RBREATH
+Membrane	::=	  ATOM_NAME_NORMAL:name COLON LBREATH RBREATH
+					{: RESULT = new SrcMembrane(name); :}
+				| LBREATH RBREATH
 					{: RESULT = new SrcMembrane(); :}
+				| ATOM_NAME_NORMAL:name COLON LBREATH ProcessList:list RBREATH
+					{: RESULT = new SrcMembrane(name, list); :}
 				| LBREATH ProcessList:list RBREATH
 					{: RESULT = new SrcMembrane(list); :};
 
