@@ -295,6 +295,8 @@ public class LMNParser {
 		createProxy(rule.leftMem);
 		addProcessToMem(sRule.getBody(), rule.rightMem);
 		createProxy(rule.rightMem);
+		// TODO ヘッド、ボディ同士の自由リンクを双方向に張る？
+		
 		mem.rules.add(rule);
 		rule.parent = mem;       // RuleStructure.parent を追加したので追加 by Hara
 	}
