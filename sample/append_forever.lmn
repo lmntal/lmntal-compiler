@@ -1,0 +1,8 @@
+// append の自動デモ用   hara
+
+// java -cp bin runtime.FrontEnd -g --demo append_forever.lmn
+
+res=list.append([a,b,c],[d,e,f,g]).
+
+res=[a|Z],X=[c,d|Y]:-res=list.append([a|Z],[d|Y]),X=[c].'
+
