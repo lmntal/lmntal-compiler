@@ -237,6 +237,7 @@ public class RuleCompiler {
 //			}
 //		}
 //	}
+
 	private List computeRHSLinks() {
 		List rhslinks = new ArrayList();
 		rhslinkpath = new HashMap();
@@ -282,24 +283,22 @@ public class RuleCompiler {
 			while (it2.hasNext()) {
 				ProcessContext atom = (ProcessContext)it2.next();
 				for (int pos = 0; pos < atom.getArity(); pos++) {
-					LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy;
-//					f,fp¤Ø¤Îlink = lhsOcc.args[pos].buddy
-//					getlink(f,fp)
-					int srclinkid;
-					if(!lhslinkpath.containsKey(srclink)){
-						srclinkid = varcount++;
-						body.add( new Instruction(Instruction.GETLINK,srclinkid, 
-													lhsatomToPath(srclink.atom), srclink.pos));
-						lhslinkpath.put(srclink,new Integer(srclinkid));
-					}
-					srclinkid = lhslinkToPath(srclink);
-					if (!(fUseMoveCells && atom.def.rhsOccs.size() == 1)) {							
-						int copiedlink = varcount++;
-						body.add( new Instruction(Instruction.LOOKUPLINK,
-										copiedlink, rhspcToMapPath(atom), srclinkid));
-						srclinkid = copiedlink;
-					}
-					rhslinkpath.put(atom.args[pos],new Integer(srclinkid));
+//					LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy;
+//					int srclinkid;
+//					if(!lhslinkpath.containsKey(srclink)){
+//						srclinkid = varcount++;
+//						body.add( new Instruction(Instruction.GETLINK,srclinkid, 
+//													lhsatomToPath(srclink.atom), srclink.pos));
+//						lhslinkpath.put(srclink,new Integer(srclinkid));
+//					}
+//					srclinkid = lhslinkToPath(srclink);
+//					if (!(fUseMoveCells && atom.def.rhsOccs.size() == 1)) {							
+//						int copiedlink = varcount++;
+//						body.add( new Instruction(Instruction.LOOKUPLINK,
+//										copiedlink, rhspcToMapPath(atom), srclinkid));
+//						srclinkid = copiedlink;
+//					}
+//					rhslinkpath.put(atom.args[pos],new Integer(srclinkid));
 					if(!rhslinks.contains(atom.args[pos].buddy))rhslinks.add(rhslinkindex++,atom.args[pos]);
 				}
 			}
@@ -310,7 +309,20 @@ public class RuleCompiler {
 	private int getLinkPath(LinkOccurrence link){
 		if(rhslinkpath.containsKey(link)){
 			return ((Integer)rhslinkpath.get(link)).intValue();
-		}else{
+		}
+		else if (link.atom instanceof ProcessContext && !((ProcessContext)link.atom).def.typed){
+			LinkOccurrence srclink = ((ProcessContext)link.atom).def.lhsOcc.args[link.pos].buddy;
+			int linkpath = varcount++;
+			body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(srclink.atom),srclink.pos));
+			if(!(fUseMoveCells && ((ProcessContext)link.atom).def.rhsOccs.size() == 1)) {
+				int copiedlink = varcount++;
+				body.add( new Instruction(Instruction.LOOKUPLINK,
+								copiedlink, rhspcToMapPath(((ProcessContext)link.atom)), linkpath));
+				return copiedlink;
+			}
+			return linkpath;
+		}
+		else{
 			if(!lhslinkpath.containsKey(link)){
 				int linkpath = varcount++;
 				body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(link.atom),link.pos));
