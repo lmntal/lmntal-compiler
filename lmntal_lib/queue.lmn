@@ -1,0 +1,51 @@
+/*
+NAME
+	Queue module (ring)
+
+SYNOPSIS
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/05/17(Mon)
+
+*/
+
+queue : {
+
+/**
+ * new : unit -> Queue
+ * 
+ */
+H=queue.new :- H=queue.new(Head, Tail), Head=Tail.
+
+/**
+ * unshift
+ * 
+ */
+H=unshift(queue.new(Head, Tail), Obj) :- H=queue.new(c(Obj, Head), Tail).
+
+/**
+ * shift
+ * 
+ */
+H=shift(queue.new(c(Obj, Head), Tail), Return) :- H=queue.new(Head, Tail), Return=Obj.
+H=shift(queue.new(Head, Head), Return) :- H=queue.new(Head, Head), Return=nil.
+
+/**
+ * push
+ * 
+ */
+H=push(queue.new(Head, Tail), Obj) :- H=queue.new(Head, Tail2), c(Obj, Tail2, Tail).
+
+/**
+ * pop
+ * 
+ */
+H=pop(queue.new(Head, Tail), Return), c(Obj, Tail, Tail2) :- H=queue.new(Head, Tail2), Return=Obj.
+H=pop(queue.new(Head, Head), Return) :- H=queue.new(Head, Head), Return=nil.
+
+
+}
+
