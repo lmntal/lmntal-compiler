@@ -10,6 +10,23 @@ import util.QueuedEntity;
 import util.Stack;
 
 /**
+ * ？？？の解決法
+ * [1] 親計算ノードが、自由リンク出力管理アトムのグローバルIDを付ける方法
+ *  - newFreeLink命令を作る方法
+ *      命令の種類が増える
+ *  - newFreeLink命令を作らない場合
+ *      newAtom時に毎回functorを検査→遅い？
+ * [2] 親計算ノードが、自由リンク出力管理アトムのグローバルIDを付けない方法
+ *  - コミット時に新規アトムの仮IDを破棄する場合
+ *    作成した自由リンク出力管理アトムの識別ができなくなる→NG
+ *  - コミット時に新規アトムの仮IDを破棄しない場合
+ *    次回のキャッシュ更新時に仮IDを正しいグローバルIDに変更するメッセージを送信する→遅いけど正しい
+ * 
+ * 結論：newFreeLink命令は廃止。
+ */
+
+
+/**
  * 抽象膜クラス。ローカル膜クラスおよびリモート膜クラスの親クラス
  * @author Mizuno
  */
@@ -280,6 +297,19 @@ abstract class AbstractMembrane extends QueuedEntity {
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
 	}
 
+	/** atom2の第pos2引数に格納されたリンクオブジェクトへの参照を取得する。
+	 */
+	Link getAtomArg(Atom atom2, int pos2) {
+		return atom2.args[pos2];
+	}
+	/** atom1の第pos1引数と、リンクlink2のリンク先を接続する。
+	 * <p>link2は再利用されるため、実行後link2の参照を使用してはならない。
+	 */
+	void inheritAtomArg(Atom atom1, int pos1, Link link2) {
+		link2.getBuddy().set(atom1, pos1);
+		atom1.args[pos1] = link2;
+	}
+	
 	// TODO relinkLocalAtomArgsとunifyLocalAtomArgsはLocalでないメソッドと同じなので何とかする
 
 	/** relinkAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。
