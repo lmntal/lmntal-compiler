@@ -23,9 +23,23 @@ public final class AtomSet implements Set{
 	/** 実際にアトムの集合を管理している変数 */
 	private Map atoms = new HashMap();
 
-	/** アトム数の取得 */	
+	/** アトム数の取得 */
 	public int size() {
 		return size;
+	}
+	/** 自由リンク管理アトム以外のアトムの数の取得 */
+	public int getNormalAtomCount() {
+		return size - getAtomCountOfFunctor(Functor.INSIDE_PROXY) -
+						getAtomCountOfFunctor(Functor.OUTSIDE_PROXY);
+	}
+	/** 指定されたFunctorのアトムの数の取得 */
+	public int getAtomCountOfFunctor(Functor f) {
+		Set s = (Set)atoms.get(f);
+		if (f == null) {
+			return 0;
+		} else {
+			return s.size();
+		}
 	}
 	/** 空の場合にtrue */
 	public boolean isEmpty() {

@@ -25,9 +25,9 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 子膜の集合 */
 	protected Set mems = new HashSet();
 	/** この膜にあるproxy以外のアトムの数。 */
-	protected int atomCount = 0;
+//	protected int atomCount = 0;
 	/** このセルの自由リンクの数 */
-	protected int freeLinkCount = 0;
+//	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
 	protected List rulesets = new ArrayList();
 	/** trueならばこの膜以下に適用できるルールが無い */
@@ -76,11 +76,11 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 	/** proxy以外のアトムの数を取得 */
 	int getAtomCount() {
-		return atomCount;
+		return atoms.getNormalAtomCount();
 	}
 	/** このセルの自由リンクの数を取得 */
 	int getFreeLinkCount() {
-		return freeLinkCount;
+		return atoms.getAtomCountOfFunctor(Functor.OUTSIDE_PROXY);
 	}
 	/** この膜とその子孫に適用できるルールがない場合にtrue */
 	boolean isStable() {
@@ -138,7 +138,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 		Atom a = new Atom(this, functor);
 		atoms.add(a);
 		enqueueAtom(a);
-		atomCount++;
+//		atomCount++;
 		return a;
 	}
 	Atom newAtom(String name, int arity) {
@@ -270,10 +270,10 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 指定されたアトムをこの膜から除去する。 */
 	void removeAtom(Atom atom) {
 		atoms.remove(atom);
-		atomCount--;
-		if (atomCount < 0) {
-			Util.systemError("Membrane.atomCount is pisitive value");
-		}
+//		atomCount--;
+//		if (atomCount < 0) {
+//			Util.systemError("Membrane.atomCount is pisitive value");
+//		}
 	}
 	/** 指定された膜をこの膜から除去する */
 	void removeMem(AbstractMembrane mem) {
