@@ -203,6 +203,8 @@ public class GuardCompiler extends HeadCompiler {
 						ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
 						if (!identifiedCxtdefs.contains(def2)) continue;
 					}
+					boolean checkNeeded = (typedcxttypes.get(def1) != UNARY_ATOM_TYPE
+										 && typedcxttypes.get(def2) != UNARY_ATOM_TYPE);
 					int atomid2 = loadUnaryAtom(def2);
 					if (!identifiedCxtdefs.contains(def1)) {
 						// todo 複製された参照を実装する
@@ -215,7 +217,10 @@ public class GuardCompiler extends HeadCompiler {
 						identifiedCxtdefs.add(def1);
 						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
 					}
-					else bindToUnaryAtom(def1, atomid2);
+					else {
+						if (checkNeeded) match.add(new Instruction(Instruction.ISUNARY, atomid2));
+						bindToUnaryAtom(def1, atomid2);
+					}
 					//
 					Object newdatatype = typedcxtdatatypes.get(def2);
 					if (newdatatype == null) newdatatype = typedcxtdatatypes.get(def1);
@@ -225,7 +230,10 @@ public class GuardCompiler extends HeadCompiler {
 				else if (func.equals(new Functor("==",2))) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
+					boolean checkNeeded = (typedcxttypes.get(def1) != UNARY_ATOM_TYPE
+										 && typedcxttypes.get(def2) != UNARY_ATOM_TYPE);
 					int atomid2 = loadUnaryAtom(def2);
+					if (checkNeeded) match.add(new Instruction(Instruction.ISUNARY, atomid2));
 					bindToUnaryAtom(def1, atomid2);
 					//
 					Object newdatatype = typedcxtdatatypes.get(def1);
