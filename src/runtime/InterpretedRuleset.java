@@ -36,9 +36,10 @@ class InterpretedReactor {
 
 				//====その他====ここから====
 			case Instruction.DUMMY:
-				break;
-			case Instruction.UNDEF:
-				break;
+				System.out.println("SYSTEM ERROR: dummy instruction remains: " + inst);
+				break; 
+			//case Instruction.UNDEF:
+			//	break; //n-kato
 				//====その他====ここまで====
 
 				//====アトムに関係する出力する基本ガード命令====ここから====
@@ -95,7 +96,8 @@ class InterpretedReactor {
 
 				//====膜に関係する出力しない基本ガード命令====ここから====
 			case Instruction.TESTMEM: //[dstmem, freelinkatom]
-				break;
+				if (mems[inst.getIntArg1()] != atoms[inst.getIntArg2()].mem) return false;
+				break; //n-kato
 			case Instruction.NORULES: //[srcmem] 
 				break;
 			case Instruction.NATOMS: //[srcmem, count]
@@ -154,7 +156,7 @@ class InterpretedReactor {
 			case Instruction.DEQUEUEATOM: //[srcatom]
 				break;
 			case Instruction.FREEATOM: //[srcatom]
-				break;
+				break; //n-kato
 			case Instruction.ALTERFUNC:
 			case Instruction.LOCALALTERFUNC: //[atom, funcref]
 				break;
@@ -195,7 +197,7 @@ class InterpretedReactor {
 			case Instruction.ENQUEUEALLATOMS: //[srcmem]
 				break;
 			case Instruction.FREEMEM: //[srcmem]
-				break;
+				break;//n-kato
 
 			case Instruction.ADDMEM:
 			case Instruction.LOCALADDMEM: //[dstmem, srcmem]
@@ -391,7 +393,7 @@ class InterpretedReactor {
 				//====整数用の組み込みガード命令====ここまで====
 
 			default:
-				System.out.println("Invalid rule");
+				System.out.println("SYSTEM ERROR: Invalid instruction: " + inst);
 				break;
 			}
 		}
