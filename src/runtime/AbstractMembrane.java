@@ -308,6 +308,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * @param node ノード名を表す文字列
 	 * @return 作成されたルート膜 */
 	public AbstractMembrane newRoot(String node) {
+		if(Env.debug > 0)System.out.println("AbstraceMembrane.newRoot(" + node + ")");
 		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(node);
 		return machine.newTask(this).getRoot();
 	}

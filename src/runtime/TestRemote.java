@@ -76,6 +76,8 @@ class TestRemote{
 		}
 		System.out.println("connectToDaemon success");
 
+/*		
+        //CONNECT → ○
 		RemoteLMNtalRuntime banon = (RemoteLMNtalRuntime)LMNtalRuntimeManager.connectRuntime("banon.ueda.info.waseda.ac.jp");
 
 		if(banon == null){
@@ -83,15 +85,18 @@ class TestRemote{
 			System.exit(1);
 		}
 		System.out.println("connectRuntime success");
+*/
 
 		//マッチング命令・ボディ命令を実行してみるテスト
-		//NEWROOT
-		RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
-		rt_banon.flush();
-
+		//NEWROOT → これはorz
+		//RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem); 
+		//rt_banon.flush();
 		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
 		//	rt_banon.flush();
-		
+
+		//CONNECT
+		RemoteMembrane rm_banon = (RemoteMembrane)rootMem.newRoot("banon.ueda.info.waseda.ac.jp");
+
 		//NEWATOM
 		//Atom atom_hoge_banon = rm_banon.newAtom(new Functor("hoge", 1));
 		//Atom atom_fuga_banon = rm_banon.newAtom(new Functor("fuga", 1));
