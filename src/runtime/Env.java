@@ -87,6 +87,11 @@ public final class Env {
 	public static List argv = new ArrayList();
 	
 	/**
+	 * 解釈実行
+	 */
+	public static boolean fInterpret = true;
+	
+	/**
 	 * トレース実行
 	 */
 	public static boolean fTrace = false;

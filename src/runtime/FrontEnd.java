@@ -365,8 +365,24 @@ public class FrontEnd {
 			}
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
-			
-			
+
+//			if (false) {
+			if (Env.fInterpret) {
+				run(rs);
+			} else {
+				new Translator((InterpretedRuleset)rs).translate(true);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+//			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+		}
+	}
+	/**
+	 * 与えられた初期データ生成ルールセットを元に、一連の実行を行う。
+	 * @param rs (:-m) というルール１つだけからなるルールセット
+	 */
+	public static void run(Ruleset rs) {
+		try {
 			// 実行
 			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
 			LMNtalRuntimeManager.init();

@@ -30,6 +30,10 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	/** グローバルルールセットID（未定義の場合はnull）*/
 	private String globalRulesetID;
 
+	/**このルールセットのローカルIDを取得する。*/
+	public int getId() {
+		return id;
+	}
 	/**（仮）*/
 	public String getGlobalRulesetID() {
 		// todo ランタイムIDの有効期間を見直す
