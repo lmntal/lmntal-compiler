@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import daemon.LMNtalNode;
-import daemon.LMNtalDaemon;
 import daemon.LMNtalRuntimeMessageProcessor;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -216,6 +215,8 @@ public final class LMNtalRuntimeManager {
 class TerminateAllProcessor implements Runnable {
 	boolean result;
 	public void run(){
+		System.out.println("TerminateAllProcessor.run() entered");
 		result = LMNtalRuntimeManager.terminateAll();
+		System.out.println("TerminateAllProcessor.run(): result is " + result + " and now quitting...");
 	}
 }
