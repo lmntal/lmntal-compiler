@@ -6,7 +6,8 @@ abstract public class AbstractTask {
 	protected AbstractLMNtalRuntime runtime;
 	/** ルート膜 */
 	protected AbstractMembrane root;
-	/** ayncUnlockされたときにtrueになる*/
+	/** asyncUnlockされたときにtrueになる
+	 * （trueならばシグナルで復帰時にトレースdumpする）*/
 	protected boolean asyncFlag = false;
 	
 	/** コンストラクタ

@@ -572,10 +572,12 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(ALLOCMEM, new ArgType(true, ARG_MEM));}
 
 	/** newroot [-dstmem, srcmem, nodeatom]
-	 * <br>（予約された）ボディ命令<br>
+	 * <br>ボディ命令<br>
 	 * 膜$srcmemの子膜にアトム$nodeatomの名前で指定された計算ノードで実行される新しいロックされた
 	 * ルート膜を作成し、参照を$dstmemに代入し、（ロックしたまま）活性化する。
 	 * この場合の活性化は、仮の実行膜スタックに積むことを意味する。
+	 * <p>ただし上記の仕様は計算ノード指定が空文字列でないときのみ。
+	 * 空文字列の場合は、newmemと同じだがロックされた状態で作られる。
 	 * <p>newmemと違い、このルート膜のロックは明示的に解放しなければならない。
 	 * @see unlockmem */
 	public static final int NEWROOT = 53;
@@ -1173,6 +1175,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * <br>失敗しない分散拡張用ガード命令<br>
 	 * 膜$srcmem（を管理するタスク）が所属するノードを表す文字列ファンクタを持つ
 	 * 所属膜を持たない文字列アトムを生成し、$dstatomに代入する。
+	 * ただし上記の仕様はルート膜のときのみ。ルート膜でない膜に対しては空文字列が得られる。
 	 * <p>ルールの左辺に{..}@Hがあるときに使用される。文字列を使うのは仮仕様だがおそらく変えない。*/
 	public static final int GETRUNTIME = 230;
 	static {setArgType(GETRUNTIME, new ArgType(true, ARG_ATOM, ARG_MEM));}
@@ -1181,6 +1184,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * <br>分散拡張用ガード命令<br>
 	 * アトム$srcatomが文字列ファンクタを持つことを確認し、
 	 * その文字列が表すノードに接続できることを確認する。
+	 * <p>文字列が空のときはつねに成功する。
 	 * <p>ルールの右辺に{..}@Hがあるときに使用される。文字列を使うのは仮仕様だがおそらく変えない。*/
 	public static final int CONNECTRUNTIME = 231;
 	static {setArgType(CONNECTRUNTIME, new ArgType(false, ARG_ATOM));}

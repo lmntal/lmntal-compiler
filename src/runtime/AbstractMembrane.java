@@ -329,10 +329,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public AbstractMembrane newRoot(String nodedesc) {
 		if(Env.debug > 0)System.out.println("AbstraceMembrane.newRoot(" + nodedesc + ")");
 		
+		if (nodedesc.equals("")) {
+			AbstractMembrane mem = newMem();
+			mem.lock();
+			return mem;
+		}
 		//(nakajima 2004-10-25) 分散。とりあえずコンストラクタで登録する時にしたのでコメントアウト。
 		//daemon.IDConverter.registerGlobalMembrane(this.getGlobalMemID(),this);
 		
-		// ↓TODO (効率改善)connectRuntimeはガードですでに呼ばれているので冗長かもしれないのを何とかする？
+		// ↓TODO (効率改善【除去可能であることを確かめる】)connectRuntimeはガードですでに呼ばれているので冗長かもしれない
 		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(nodedesc);
 		return machine.newTask(this).getRoot();
 	}
@@ -373,7 +378,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	// 拡張
 	
-	/**@deprecated*/
+	/** deprecated */
 	public void relink(Atom atom1, int pos1, Atom atom2, int pos2) {
 		relinkAtomArgs(atom1, pos1, atom2, pos2);
 	}

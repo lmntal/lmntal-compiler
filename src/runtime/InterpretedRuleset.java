@@ -791,10 +791,13 @@ class InterpretiveReactor {
 					func = atoms[inst.getIntArg1()].getFunctor();
 					if (!(func instanceof ObjectFunctor)) return false;
 					if (!(((ObjectFunctor)func).getObject() instanceof String)) return false;
+					if (func.getName().equals("")) break; // 空文字列の場合はつねに成功とする
 					if (LMNtalRuntimeManager.connectRuntime(func.getName()) == null) return false;
 					break; //n-kato
 				case Instruction.GETRUNTIME: //[-dstatom,srcmem] // todo StringFunctorに変える（ISSTRINGも）
-					String hostname = mems[inst.getIntArg2()].getTask().getMachine().hostname;
+					String hostname = "";
+					if (mems[inst.getIntArg2()].isRoot())
+						hostname = mems[inst.getIntArg2()].getTask().getMachine().hostname;
 					atoms[inst.getIntArg1()] = new Atom(null, new StringFunctor(hostname));
 					break; //n-kato
 					//====分散拡張用の命令====ここまで====
