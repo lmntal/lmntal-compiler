@@ -1662,8 +1662,8 @@ public class Instruction implements Cloneable, Serializable {
 	}
 	private static class ArgType {
 		
-		private boolean output;
-		private int[] type;
+		boolean output;
+		int[] type;
 		ArgType(boolean output) {
 			this.output = output;
 			type = new int[0];
