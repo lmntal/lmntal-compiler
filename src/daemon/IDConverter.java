@@ -81,10 +81,13 @@ public class IDConverter {
 	/** アトムIDに対応するアトムを探す
 	 * @param mem 所属膜
 	 * @return Atom（見つからなかった場合はnull）*/
-	public Atom lookupAtom(Membrane mem, String atomid) {
+	public Atom lookupAtom(AbstractMembrane mem, String atomid) {
 		Object obj = newAtomTable.get(atomid);
 		if (obj instanceof Atom) return (Atom)obj;
-		return (Atom)mem.lookupAtom(atomid);
+		if (mem instanceof Membrane) {
+			return (Atom)((Membrane)mem).lookupAtom(atomid);
+		}
+		return null;
 	}
 	
 	////////////////////////////////////////////////////////////////

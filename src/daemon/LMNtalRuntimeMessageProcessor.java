@@ -354,11 +354,19 @@ class InstructionBlockProcessor implements Runnable {
 				
 				//案：BEGINからENDまで出てくる引数の中でNEWがつかないものを動的に仮引数リストにいれてやると
 				//InterpretedRulsetのコードが使えるので、そうする？
+
+				String memid = command[1];
+				AbstractMembrane mem = idconv.lookupMembrane(memid);
+				if (mem == null) {
+					String fqdn = memid.split(":",2)[0];
+					AbstractLMNtalRuntime rt = LMNtalRuntimeManager.connectRuntime(fqdn);
+					if (rt instanceof RemoteLMNtalRuntime) {
+						RemoteLMNtalRuntime rrt = (RemoteLMNtalRuntime)rt;
+						mem = rrt.createPseudoMembrane();
+						idconv.registerNewMembrane(memid,mem);
+					}
+				}
 				
-				AbstractMembrane mem = idconv.lookupMembrane(command[1]);
-				Membrane lmem = null;
-				if (mem instanceof Membrane) lmem = (Membrane)mem;
-								
 				if (command[0].equals("END")) {
 					//糸冬
 					break;
@@ -383,36 +391,26 @@ class InstructionBlockProcessor implements Runnable {
 					Functor func = Functor.deserialize(command[3]);
 					idconv.registerNewAtom(command[2], mem.newAtom(func));
 				} else if (command[0].equals("ALTERATOMFUNCTOR")) {
-					Atom atom = idconv.lookupAtom(lmem, command[2]);
+					Atom atom = idconv.lookupAtom(mem, command[2]);
 					mem.alterAtomFunctor(atom,Functor.deserialize(command[3]));
 				} else if (command[0].equals("REMOTEATOM")) {
-					mem.removeAtom(idconv.lookupAtom(lmem, command[2]));
+					mem.removeAtom(idconv.lookupAtom(mem, command[2]));
 				} else if (command[0].equals("ENQUEUEATOM")) {
-					mem.enqueueAtom(idconv.lookupAtom(lmem, command[2]));
+					mem.enqueueAtom(idconv.lookupAtom(mem, command[2]));
 	// [3] 子膜の操作
 				} else if (command[0].equals("NEWMEM")) {
 					idconv.registerNewMembrane(command[2],mem.newMem());
 				} else if (command[0].equals("REMOVEMEM")) {
 					mem.removeMem(idconv.lookupMembrane(command[2]));
 				} else if (command[0].equals("NEWROOT")) {
-					if (mem == null) {
-						String parentmemid = command[1];
-						String fqdn = parentmemid.split(":",2)[0];
-						AbstractLMNtalRuntime rt = LMNtalRuntimeManager.connectRuntime(fqdn);
-						if (rt instanceof RemoteLMNtalRuntime) {
-							RemoteLMNtalRuntime rrt = (RemoteLMNtalRuntime)rt;
-							mem = rrt.createPseudoMembrane();
-							idconv.registerNewMembrane(parentmemid,mem);
-						}
-					}
 					idconv.registerNewMembrane(command[2], mem.newRoot(command[3]));
 	// [4] リンクの操作
 				} else if (command[0].equals("NEWLINK")
 						 || command[0].equals("RELINKATOMARGS")
 						 || command[0].equals("UNIFYATOMARGS")) {
-					Atom atom1 = idconv.lookupAtom(lmem,command[2]);
+					Atom atom1 = idconv.lookupAtom(mem,command[2]);
 					int pos1 = Integer.parseInt(command[3]);
-					Atom atom2 = idconv.lookupAtom(lmem,command[4]);
+					Atom atom2 = idconv.lookupAtom(mem,command[4]);
 					int pos2 = Integer.parseInt(command[5]);
 					if (command[0].equals("NEWLINK")) {
 						mem.newLink(atom1,pos1,atom2,pos2);
@@ -422,7 +420,7 @@ class InstructionBlockProcessor implements Runnable {
 						mem.unifyAtomArgs(atom1,pos1,atom2,pos2);
 					}
 	// [5] 膜自身や移動に関する操作 
-				} else if (command[0].equals("ACTIVATE")) { // ENQUEUMEMボディ命令に対応
+				} else if (command[0].equals("ACTIVATE")) { // ENQUEUEMEMボディ命令に対応
 					mem.activate();
 				} else if (command[0].equals("MOVECELLSFROM")) {
 					mem.moveCellsFrom(idconv.lookupMembrane(command[2]));
