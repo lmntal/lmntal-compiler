@@ -167,7 +167,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					}
 				}
 				else messagePool.put(msgid, content);
-				if(DEBUG)System.out.println(messagePool.toString());
+				//if(DEBUG)System.out.println(messagePool.toString());
 				
 //				Object suspended = blockingObjects.remove(msgid);
 //				if (suspended == null) {
@@ -180,9 +180,9 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					notifyAll();
 				}
 				continue;
-			} else if (parsedInput[0].equalsIgnoreCase("REGISTERLOCAL")) {
-				System.out.println("invalid message: registerlocal");
-				continue;
+			//} else if (parsedInput[0].equalsIgnoreCase("REGISTERLOCAL")) {  //「合致しない時」に移動 2004-08-21 nakajima
+			//	System.out.println("invalid message: registerlocal");
+				//continue;
 			} else if (parsedInput[0].equalsIgnoreCase("DUMPHASH")) {
 				// DUMPHASH
 				LMNtalDaemon.dumpHashMap();
@@ -246,6 +246,10 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					}
 					respondAsFail(msgid);
 				} else onCmd(msgid, command);
+			} else {
+				//どれにも合致しない時
+				System.out.println("LMNtalRuntimeMessageProcessor.run(): invalid message: " + parsedInput[0]);
+				continue;
 			}
 		}
 	}
@@ -375,7 +379,7 @@ class InstructionBlockProcessor implements Runnable {
 						idconv.registerNewMembrane(memid,mem);
 					}
 				}
-				
+
 				if (command[0].equals("END")) {
 					//糸冬
 					break;
