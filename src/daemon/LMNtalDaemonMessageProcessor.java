@@ -37,7 +37,7 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 
 			System.out.println("in.readLine(): " + input);
 			if (input == null) {
-				System.out.println("　 ∧＿∧ 　　\n 　（　´∀｀）＜　inputがぬる");
+				System.out.println("（　´∀｀）＜　inputがぬる");
 				break;
 			}
 
@@ -73,7 +73,7 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 				//戻す先
 				LMNtalNode returnNode = LMNtalDaemon.getNodeFromMsgId(msgid);
 
-				//System.out.println("res: returnNode is: " + returnNode.toString());
+				System.out.println("res: returnNode is: " + returnNode.toString());
 				if (returnNode == null) {
 					//戻し先がnull
 					try {
@@ -87,9 +87,9 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 				} else {
 					//System.out.println(returnNode.getOutputStream().toString());
 					//System.out.println(input);
-					try {
-						returnNode.getOutputStream().write(input + "\n");
-						returnNode.getOutputStream().flush();
+					try {					
+						returnNode.out.write(input + "\n");
+						returnNode.out.flush();
 						continue;
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -211,7 +211,13 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 									targetNode =
 										LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
 
-									LMNtalDaemon.sendMessage(targetNode, input);
+									if(targetNode == null){
+										out.write("fail\n");
+										out.flush();
+										continue;
+									} else {
+										LMNtalDaemon.sendMessage(targetNode, input + "\n");
+									}
 
 									continue;
 								} else {
@@ -223,7 +229,7 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 							} else {
 								//宛先ノードが既知の場合
 								if (LMNtalDaemon
-									.sendMessage(targetNode, input)) {
+									.sendMessage(targetNode, input + "\n")) {
 									//OKを返すのは、転送先がやるのでここではOKを返さない
 									continue;
 								} else {
@@ -243,7 +249,7 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 						//continue;
 						break;
 					}  catch (NullPointerException nurupo){
-						System.out.println("　 ∧＿∧ 　　\n 　（　´∀｀）＜　ぬるぽ");
+						System.out.println("（　´∀｀）＜　ぬるぽ");
 						nurupo.printStackTrace();	
 						//continue;
 						break;
