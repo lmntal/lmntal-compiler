@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 
 //TODO 終了するようにする
+//TODO TmpRuntimeのテスト
 
 public class DaemonThreadTest2 {
 	public static void main(String args[]) {
@@ -100,7 +101,7 @@ class DaemonHontai2 implements Runnable {
 		}
 	}
 
-	boolean regist(Socket socket, LMNtalNode node) {
+	public boolean regist(Socket socket, LMNtalNode node) {
 		synchronized(nodeTable){
 			if (nodeTable.containsKey(socket)) {
 				return false;
@@ -161,14 +162,17 @@ class LMNtalDaemonThread2 implements Runnable {
 					//RESの処理
 				} else if(tmpString[1].equalsIgnoreCase("REGISTERLOCAL")){
 					//REGSITERLOCAL rgid
-					//ノード表にrgidとソケットを登録して、OK/FAILを返す
+
 					
 					
 				} else  {
 					//msgidとみなす
+					//msgid "localhost" rgid メッセージ
 					msgid = Integer.parseInt(tmpString[0]);
 					
 					Communicator.connect(tmpString[1], tmpString[2]);
+					
+					
 				}
 				
 
@@ -178,7 +182,7 @@ class LMNtalDaemonThread2 implements Runnable {
 			} catch (ArrayIndexOutOfBoundsException ae){
 				//送られてきたメッセージが短かすぎるとき（＝不正な時
 				//'hoge' とかそういう時
-				System.out.println("メッセージが不正です " + ae.toString());
+				System.out.println("Invalid Message " + ae.toString());
 			}
 		}
 	}
