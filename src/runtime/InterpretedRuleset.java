@@ -355,7 +355,9 @@ class InterpreterReactor {
 					break; //n-kato
 				case Instruction.NEWMEM :
 				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
-					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newMem();
+					mem = mems[inst.getIntArg2()].newMem();
+					mems[inst.getIntArg1()] = mem;
+					mem.activate();
 					break; //n-kato
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
 					//TODO AbstactMachineクラスが存在しない＜命令の仕様をよく読むこと＞
