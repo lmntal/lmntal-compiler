@@ -114,9 +114,11 @@ public class LMNParser {
 		// 親膜があり、対応がないものは自由リンクとして登録
 		if (mem.mem != null) {
 			while (enumLinkName.hasMoreElements()) {
+				String linkname = (String)enumLinkName.nextElement();
+				if (linkNameTable.get(linkname) == Boolean.TRUE) continue;
 				// プロキシを通した先のリンクを取得
 				LinkOccurrence freeLink = 
-					addProxyToMem((LinkOccurrence)linkNameTable.get(enumLinkName.nextElement()), mem, ProxyAtom.INSIDE_PROXY);
+					addProxyToMem((LinkOccurrence)linkNameTable.get(linkname), mem, ProxyAtom.INSIDE_PROXY);
 				mem.freeLinks.add(freeLink);
 			}
 		}
