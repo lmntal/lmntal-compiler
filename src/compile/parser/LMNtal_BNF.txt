@@ -1,5 +1,5 @@
 /**
- * LMNtalソースファイル =(1)=> 解析木 =(2)=> (compile.struct.*)
+ * LMNtalソースファイル =(1)=> 解析木 =(2)=> 意味解析 =(3)=> ルールオブジェクト
  * (1) 構文解析器
  *   @ ソースファイルをそのままJavaのオブジェクトへと変換する。
  *     compile.parser.*
@@ -7,12 +7,29 @@
  *   @ 簡略記法も対応する
  *   @ ルールでしか出現しないもの(RuleContext)がデータ部分に出ている
  *     ようなことはチェックしていない
+ *      P と T の区別はしていない
  *
  * (2) 意味解析器
- *   @ 
+ *   @ compile.struture.*
  *   @ リンクの貼り付け
  *   @ アトム中のアトムなどの簡略記法を展開する
  *   @ 膜を通過するリンクのプロキシーを生成する
+ * 
+ * (3) ルールコンパイラー (compile.RuleCompiler)
+ *   @ プログラム中のルール部分をルールオブジェクトに変換する
+ *     compile.Rule
+ * 
+ *
+ * <LMNtalの構文>
+ * P ::= 0 | p(X1, ... ,Xm) | P, P | { P } | (T :- G | T)
+ * T ::= 0 | p(X1, ... ,Xm) | T, T | { T } | (T :- G | T)
+ *     | @p | $p[X1, ... ,Xm|A] | p(*X1, ... , *Xm)
+ * A ::= [] | *X
+ * G ::= 0 | G, G | \+($p1=(T1), ..., $pn=(Tn))
+ * <構文条件>
+ * @ プロセスのルール外に同じリンクが2回を越えて出現してはならない
+ * @ ルールはルールの左辺またはガードに出現してはならない
+ * @ ルールの左辺に出現する @p $p は膜の内側に出現しなければならない
  */
 
 <LinkName>      =   [A-Z][a-zA-Z0-9]*
@@ -30,10 +47,9 @@
 <Rule>          =   '(' <ProcessList> ':-' <ProcessList> ')'
                 =   '(' <ProcessList> ':-' <NagateList> <ProcessList> ')'
 
-<ProcessCotext> =   '@' <AtomName>
-                  | '+' <LinkName>
+<ProcessCotext> =   '$' <AtomName>
 
-<RuleContext>   =   '$' <AtomName>
+<RuleContext>   =   '@' <AtomName>
 
 <Context>       =   <ProcessContext>
                   | <RuleContext>
