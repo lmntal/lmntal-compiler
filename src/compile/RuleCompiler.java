@@ -30,15 +30,24 @@ import compile.structure.*;
  */
 public class RuleCompiler {
 	/**
-	 * 繋がってるとみなすファンクタ
+	 * 繋がってるとみなすファンクタ。=/2
 	 */
 	public static final Functor FUNC_UNIFY = new Functor("=", 2);
 	
+	/**
+	 * コンパイルされるルール
+	 */
 	public RuleStructure rs;
+	
+	/**
+	 * コンパイルされるルールに対応するルールオブジェクト。
+	 */
+	public Rule theRule;
+	
 	public List atommatches = new ArrayList();
 	public List memmatch = new ArrayList();
-	public int varcount;
 	public List body;
+	public int varcount;
 	
 	public List lhsfreemems;
 	
@@ -55,10 +64,8 @@ public class RuleCompiler {
 	
 	HeadCompiler hc;
 	
-	public Rule theRule;
-	
 	/**
-	 * rs 用のルールコンパイラをつくる
+	 * 指定された RuleStructure 用のルールコンパイラをつくる
 	 * 
 	 * @param rs ルール
 	 */
@@ -69,9 +76,8 @@ public class RuleCompiler {
 	}
 	
 	/**
-	 * コンパイルする。
-	 * 
-	 * @return InterpretedRuleset
+	 * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルし、
+	 * 所属膜のルールセットに追加する。
 	 */
 	public void compile() {
 		Env.c("compile");
@@ -82,15 +88,11 @@ public class RuleCompiler {
 		
 		theRule = new Rule(rs.toString());
 		
-		//r.text = "( "+l.toString()+" :- "+r.toString()+" )";
 		//@ruleid = rule.ruleid
 		
 		hc = new HeadCompiler(rs.leftMem);
 		hc.enumformals(rs.leftMem);
-		// ちょっとかえて、enumformals 内でやるようにした。 
-		//if(false /* @lhs.natoms + @lhs.nmems == 0 */) {
-		//	hc.freemems.add(rs.leftMem);
-		//}
+		
 		compile_l();
 		compile_r();
 		
