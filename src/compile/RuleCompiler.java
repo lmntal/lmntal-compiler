@@ -231,7 +231,6 @@ public class RuleCompiler {
 	}
 	private List computeRHSLinks() {
 		List rhslinks = new ArrayList();
-		List tmprhslinks = new ArrayList();
 		rhslinkpath = new HashMap();
 		int rhslinkindex = 0;
 		// アトムの引数のリンク出現
@@ -247,7 +246,7 @@ public class RuleCompiler {
 				varcount++;
 			}
 		}
-		//rhslinks.addAll(tmprhslinks);
+
 		// unary型付プロセス文脈のリンク出現
 		it = rhstypedcxtpaths.keySet().iterator();
 		while(it.hasNext()){
@@ -266,15 +265,12 @@ public class RuleCompiler {
 			while (it2.hasNext()) {
 				ProcessContext atom = (ProcessContext)it2.next();
 				for (int pos = 0; pos < atom.getArity(); pos++) {
-					LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy; // src引数のZの出現
+					LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy;
 //					f,fpへのlink = lhsOcc.args[pos].buddy
 //					getlink(f,fp)
 					int srclinkid = varcount++;
-
 					body.add( new Instruction(Instruction.GETLINK,srclinkid, 
 												lhsatomToPath(srclink.atom), srclink.pos));
-					
-					
 					if (!(fUseMoveCells && atom.def.rhsOccs.size() == 1)) {							
 						int copiedlink = varcount++;
 						body.add( new Instruction(Instruction.LOOKUPLINK,
@@ -289,7 +285,7 @@ public class RuleCompiler {
 		return rhslinks;
 	}
 	
-	int getLinkPath(LinkOccurrence link){
+	private int getLinkPath(LinkOccurrence link){
 		if(rhslinkpath.containsKey(link)){
 			return ((Integer)rhslinkpath.get(link)).intValue();
 		}else{
