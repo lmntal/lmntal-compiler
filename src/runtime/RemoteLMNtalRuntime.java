@@ -67,9 +67,11 @@ public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 * <br>擬似タスク ＝ ルート膜を持たないリモートタスク
 	 * <br>擬似膜 ＝ 擬似タスクが管理するリモート膜（親膜を持たない）
 	 * @return 作成した擬似膜 */
-	public RemoteMembrane createPseudoMembrane() {
+	public RemoteMembrane createPseudoMembrane(String globalid) {
 		RemoteTask task = new RemoteTask(this);	// 擬似タスクを作成
-		return new RemoteMembrane(task);
+		RemoteMembrane mem = new RemoteMembrane(task);
+		mem.globalid= globalid;
+		return mem;
 	}
 
 }
