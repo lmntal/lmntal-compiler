@@ -40,7 +40,7 @@ class SrcMembrane {
 	public SrcMembrane(String name, LinkedList process) {
 		this.name = name;
 		this.process = process;
-		runtime.Env.p("Membran name = "+name);
+		//runtime.Env.p("Membran name = "+name);
 	}
 	
 	/**
