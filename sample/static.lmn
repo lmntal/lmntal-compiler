@@ -1,14 +1,17 @@
-{
-	io.print(call(m, m.incr)).
-}.
-{
-	io.print(call(m, m.incr)).
-}.
+{{
+	{mv(m), m.incr, handle(X)}. io.print(param(value)).
+	res(X), {shrink(X),value($n)} :- unary($n)|io.print($n).
+}}.
+{{{{
+	{mv(m), m.incr, handle(X)}. res(X).
+	res(X), {shrink(X),value($n)} :- unary($n)|io.print($n).
+}}}}.
 m : {
-	static.load.
 	name(m).
-	m.incr(ready).
+	static.load.
 	id(0).
-	( m.incr(msg(X)), id($o) :- int($o),$n=$o+1 | cp($n, C1, C2), id(C1), X=C2, m.incr(ready) ).
+	{m.incr, handle(X), @r}, id($o)
+		:- int($o),$n=$o+1
+		| id($n), {shrink(X), value($n)}.
 }.
 
