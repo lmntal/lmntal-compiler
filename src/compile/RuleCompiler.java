@@ -280,7 +280,7 @@ public class RuleCompiler {
 			Membrane submem = (Membrane)it.next();
 			int submempath = varcount++;
 			rhsmempath.put(submem, new Integer(submempath));
-			body.add( Instruction.newmem(submempath, rhsmemToPath(submem)));
+			body.add( Instruction.newmem(submempath, rhsmemToPath(mem)));
 			buildRHSMem(submem);
 			body.add(new Instruction(Instruction.INSERTPROXIES,
 				rhsmemToPath(mem), rhsmemToPath(submem)));
