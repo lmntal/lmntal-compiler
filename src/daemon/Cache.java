@@ -1,5 +1,10 @@
 package daemon;
 
+import java.util.HashMap;
+
+import runtime.Atom;
+import runtime.Functor;
+
 /*
  * キャッシュ機構。
  * 
@@ -7,6 +12,12 @@ package daemon;
  *
  */
 class Cache{
+	//アトム表
+	HashMap atomTable = new HashMap();
+	//ファンクタ表
+	HashMap functorTable = new HashMap();
+	
+	
 	/*
 	 * コンストラクタ。
 	 * 
@@ -35,7 +46,32 @@ class Cache{
 	  * @author nakajima
 	  *
 	  */
-	 void refresh(){
+	 void update(){
 		//キャッシュ更新の時にinsideproxy以外はremove（膜の構成要素から剥がす）する
 	 }
+	 
+	 /*
+	  * atom id -> atom object
+	  */
+	 Atom getAtom(String atomid){
+	 	Atom a = (Atom)atomTable.get(atomid);
+	 	if(a == null){
+	 		return null;
+	 	} else {
+	 		return a;
+	 	}
+	 }
+	 
+	/*
+	 * fucntor id -> functor object
+	 */
+	Functor getFunctor(String functorid){
+	   Functor f = (Functor)functorTable.get(functorid);
+	   if(f == null){
+		   return null;
+	   } else {
+		   return f;
+	   }
+	}
+	 
 }

@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 
 import runtime.AbstractMembrane;
+import runtime.Membrane;
 
 /*
  * グローバルID -> ローカルID, object という変換をするクラス
@@ -14,28 +15,47 @@ import runtime.AbstractMembrane;
 public class IDConverter{
 	//グローバル膜ID -> 膜オブジェクト
 	HashMap memTable = new HashMap();
-	//ローカルID -> 
+
 	
 	
 	/*
 	 * グローバル膜ID -> 膜オブジェクト
-	 * @return 登録されていればAbstractMembrane, されてなければnull
+	 * @return 登録されていればMembrane, されてなければnull
 	 */
-	AbstractMembrane getMem(String globalMemID){
-		return (AbstractMembrane)memTable.get(globalMemID);
+	Membrane getMem(String globalMemID){
+		return (Membrane)memTable.get(globalMemID);
 	}
+
+
 	
 	/*
 	 * グローバル膜ID -> ローカル膜ID を登録する
 	 */
-	boolean registerMemID(String globalMemID, String localMemID){
-		if(memTable.get(globalMemID)!= null){
-			//登録済みならtrue
+//	boolean registerMemID(String globalMemID, String localMemID){
+//		if(memTable.get(globalMemID)== null){
+//			//登録されていなければ登録する
+//			memTable.put(globalMemID, localMemID);
+//			return true;
+//		} else {
+//			//登録済みなら現在登録されているのがlocalMemIDと同じか調べる
+//			if(((String)memTable.get(globalMemID)).equalsIgnoreCase(localMemID)){
+//				return true;
+//			} else {
+//				//違っていたらfalse
+//				return false;
+//			}
+//		}
+//	}
+
+	/*
+	 * グローバル膜ID -> 膜オブジェクト を登録する
+	 */
+	boolean registerMem(String globalMemID, Membrane memobj){
+		if(memTable.get(globalMemID)==null){
+			memTable.put(globalMemID, memobj);
 			return true;
 		} else {
-			//登録されていなければ登録する
-			memTable.put(globalMemID, localMemID);
-			return true;			
+			return false;
 		}
 	}
 

@@ -7,8 +7,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import runtime.AbstractMembrane;
 import runtime.Env;
+import runtime.Membrane;
 
 /*
  * メッセージの中身を見て処理する。基本的にLMNtalDaemonのソケットが開かれると、
@@ -218,9 +218,13 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 							//TODO 分散と関係ない命令はどうしよう？InterpretedRuleset.interpret()に食わせるか？
 
-							String command = (parsedInput[3].split(" ", 3))[0];
+							String[] command = new String[3];
+							command = parsedInput[3].split(" ", 3);
+							String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
+							Membrane realMem;
 
-							if (command.equalsIgnoreCase("connect")) {
+
+							if (command[0].equalsIgnoreCase("connect")) {
 								//TODO すでにランタイムがる場合はどうしよう？生きているかを確認する命令を作成する？
 
 								//新規にラインタイムを作る。
@@ -249,7 +253,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									out.flush();
 								}
 								continue;
-							} else if (command.equalsIgnoreCase("begin")) {
+							} else if (command[0].equalsIgnoreCase("begin")) {
 								/*
 								 * ここで処理される命令：
 								 * (最新版はRemoteMembraneクラス参照。)
@@ -291,8 +295,6 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									input = in.readLine();
 									commandInsideBegin = input.split(" ",5);
 
-									String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
-									AbstractMembrane realMem;
 
 									if(commandInsideBegin[0].equalsIgnoreCase("end")){
 										//糸冬
@@ -301,8 +303,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										dstmem = commandInsideBegin[1];
 										
 										//dstmem.clearRules()を呼ぶ
-										//(IDConverter.getMem()).clearRules();
-										
+										//(IDConverter.getMem(dstmem)).clearRules();
+
 										out.write("not implemented yet\n");
 										out.flush();
 
@@ -312,8 +314,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										ruleset = commandInsideBegin[2];
 
 										//mem.loadRulesest(Ruleset)を呼ぶ
-										//(IDConverter.getMem()).loadRuleset(Env.theRuntime.getRuleset(ruleset));
-										
+										//(IDConverter.getMem(dstmem)).loadRuleset(Env.theRuntime.getRuleset(ruleset));
+																				
 										out.write("not implemented yet\n");
 										out.flush();
 
@@ -323,10 +325,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										atom1 = commandInsideBegin[2]; //NEW_1とか 
 										
 										//NEW_1をatomidに変換
-										
 										//キャッシュからatomidに対応するAtomオブジェクトをもってくる
-										
+
 										//srcmem.addAtom(atom1)呼び出し
+										//(IDConverter.getMem(srcmem)).addAtom(Cache.getAtom(atom1));
 										
 										out.write("not implemented yet\n");
 										out.flush();
@@ -337,6 +339,9 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										atom1 = commandInsideBegin[2];
 										func = commandInsideBegin[3];
 										
+										//(IDConverter.getMem(srcmem)).alterAtomFunctor(Cache.getAtom(atom1),Cache.getFunctor(func));
+										
+										
 										out.write("not implemented yet\n");
 										out.flush();
 
@@ -344,6 +349,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									} else if (commandInsideBegin[0].equalsIgnoreCase("removeatom")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
+										
+										//(IDConverter.getMem(srcmem)).removeAtom(Cache.getAtom(atom1));
 										
 										out.write("not implemented yet\n");
 										out.flush();
@@ -353,6 +360,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
 										
+										//(IDConverter.getMem(srcmem)).enqueueAtom(Cache.getAtom(atom1));
+										
 										out.write("not implemented yet\n");
 										out.flush();
 
@@ -360,6 +369,15 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									} else if (commandInsideBegin[0].equalsIgnoreCase("newmem")){
 										srcmem = commandInsideBegin[1];
 										dstmem = commandInsideBegin[2];
+										
+										//realMem = IDConverter.getMem(srcmem).newMem();
+										//if(IDConverter.registerMem(dstmem,realMem)){
+										//	continue beginEndLoop;
+										//} else {
+										//     //todo: 失敗時になにかする
+										//     //System.out.println("failed to register new membrane");
+										//     continue beginEndLoop;
+										//}
 										
 										out.write("not implemented yet\n");
 										out.flush();
@@ -369,22 +387,21 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										srcmem = commandInsideBegin[1];
 										parentmem = commandInsideBegin[2];
 										
+										//IDConverter.getMem(parentmem).removeMem(IDConverter.getMem(srcmem));
+										
 										out.write("not implemented yet\n");
 										out.flush();
 
 										continue beginEndLoop;
 									//} else if (commandInsideBegin[0].equalsIgnoreCase("newroot")){
-										
-										//out.write("not implemented yet\n");
-										//out.flush();
-
-										//continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("newlink")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
 										pos1  = commandInsideBegin[3];
 										atom2 = commandInsideBegin[4];
 										pos2  = commandInsideBegin[5];
+										
+										//Cache.getAtom(atom1).mem.newLink(Cache.getAtom(atom1),pos1,Cache.getAtom(atom2),pos2);
 										
 										out.write("not implemented yet\n");
 										out.flush();
@@ -397,6 +414,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										atom2 = commandInsideBegin[4];
 										pos2  = commandInsideBegin[5];
 										
+										//Cache.getAtom(atom1).mem.relinkAtomArgs(Cache.getAtom(atom1),pos1,Cache.getAtom(atom2),pos2);
+										
 										out.write("not implemented yet\n");
 										out.flush();
 
@@ -408,6 +427,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										atom2 = commandInsideBegin[4];
 										pos2  = commandInsideBegin[5];
 										
+										//IDConverter.getMem(srcmem).uniftyAtomArgs(Cache.getAtom(atom1),pos1,Cache.getAtom(atom2),pos2);
+										
 										out.write("not implemented yet\n");
 										out.flush();
 
@@ -416,6 +437,24 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										dstmem = commandInsideBegin[1];
 										srcmem = commandInsideBegin[2];
 										
+										//Membrane dstmemobj = IDConverter.getMem(dstmem);
+										//Membrane srcmemobj = IDConverter.getMem(srcmem);
+//
+//										if (dstmemobj == srcmemobj) continue beginEndLoop;
+//
+//										dstmemobj.mems.addAll(srcmemobj.mems);
+//										Iterator it = srcmemobj.atomIterator();
+//										while (it.hasNext()) {
+//											dstmemobj.addAtom((Atom)it.next());
+//										}
+//										it = srcmemobj.memIterator();
+//										while (it.hasNext()) {
+//											((Membrane)it.next()).parent = dstmemobj;
+//										}
+//										if (srcmemobj.task != dstmemobj.task) {
+//											srcmemobj.setTask(dstmemobj.task);
+//										}
+										
 										out.write("not implemented yet\n");
 										out.flush();
 
@@ -423,6 +462,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									} else if (commandInsideBegin[0].equalsIgnoreCase("moveto")){
 										srcmem = commandInsideBegin[1];
 										dstmem = commandInsideBegin[2];
+										
+										//IDConverter.getMem(srcmem).moveTo(IDConverter.getMem(dstmem));
 										
 										out.write("not implemented yet\n");
 										out.flush();
@@ -436,19 +477,22 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										out.flush();
 										continue beginEndLoop;
 									}
-									
-									//グローバル膜ID→NEW_4の処理		
 								}
-							} else if (command.equalsIgnoreCase("lock")) {
+							} else if (command[0].equalsIgnoreCase("lock")) {
 								//TODO 実装
 								
 								//ロック対象膜をロック
-								
-								//ロック成功
+								//realMem = IDConverter.getMem(command[1]);
+								//if(realMem.lock()){
+								////ロック成功
+								//
 								////キャッシュ更新チェック
+								//   キャッシュオブジェクト.update(); 
+								//
+								//
 								
 								//////更新されていたらキャッシュを返信する
-								
+
 								//////更新されていなかったら「更新されていませんメッセージ」
 								
 								//ロック失敗
@@ -458,42 +502,79 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("blockinglock")) {
-								//TODO 実装
+							} else if (command[0].equalsIgnoreCase("blockinglock")) {
+								//IDConverter.getMem(command[1]).blockingLock();
+
+								//キャッシュ更新
+
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("asynclock")) {
-								//TODO 実装
+							} else if (command[0].equalsIgnoreCase("asynclock")) {
+
+								//IDConverter.getMem(command[1]).asyncLock();
+
+								//キャッシュ更新
+																
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("unlock")) {
-								//TODO 実装
+							} else if (command[0].equalsIgnoreCase("unlock")) {
+								
+								//if(IDConverter.getMem(command[1]).unlock()){
+								    //unlock成功
+									//continue;
+								//} else {
+								    //不成功
+								    //System.out.println("UNLOCK failed");
+								    //out.write("res " + msgid.toString() + " fail\n");
+								    //out.flush();
+								    //continue;
+								//}
+								
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("blockingunlock")) {
-								//TODO 実装
+							} else if (command[0].equalsIgnoreCase("blockingunlock")) {
+								//TODO 実装：
+								
+								//IDConverter.getMem(command[1]).blockingUnlock();
+								
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("asyncunlock")) {
-								//TODO 実装
+							} else if (command[0].equalsIgnoreCase("asyncunlock")) {
+
+								//if(IDConverter.getMem(command[1]).asyncUnlock()){
+									//unlock成功
+									//continue;
+								//} else {
+									//不成功
+									//System.out.println("ASYNCUNLOCK failed");
+									//out.write("res " + msgid.toString() + " fail\n");
+									//out.flush();
+									//continue;
+								//}
+
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("recursivelock")) {
-								//TODO 実装
+							} else if (command[0].equalsIgnoreCase("recursivelock")) {
+								//IDConverter.getMem(command[1]).recursiveLock();
+
+								//キャッシュ更新
+																
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("recursiveunlock")) {
+							} else if (command[0].equalsIgnoreCase("recursiveunlock")) {
+								
+								//IDConverter.getMem(command[1]).recursiveUnlock();
+								
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("terminate")) {
-								//TODO 実装
+							} else if (command[0].equalsIgnoreCase("terminate")) {
 								//「terminateだけ変」(by n-kato)
 								//
 								//やるべきことはEnv.theRuntimeのterminate
