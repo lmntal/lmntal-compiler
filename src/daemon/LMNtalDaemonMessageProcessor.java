@@ -175,7 +175,9 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 												+ " "
 												+ msgid
 												+ " "
-												+ rgid);
+												+ rgid
+												+ " "
+												+Env.debugDaemon);
 
 									if (Env.debugDaemon > 0) System.out.println(newCmdLine);
 
