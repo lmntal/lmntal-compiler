@@ -4,8 +4,8 @@ import java.util.List;
 /** システムルールセット
  * <p>todo インスタンスを誰が生成するのか決める
  */
-final class SystemRuleset extends Ruleset {
-	static InterpretedRuleset ruleset;
+public final class SystemRuleset extends Ruleset {
+	public static InterpretedRuleset ruleset;
 	public String toString() {
 		return "System Ruleset Object";
 	}
