@@ -112,6 +112,9 @@ public final class LMNtalRuntime extends Machine {
 	public LMNtalRuntime(){
 		AbstractTask t = newTask();
 		globalRoot = (Membrane)t.getRoot();
+		
+		// Inline
+		Inline.initInline();
 	}
 
 	/**

@@ -70,7 +70,7 @@ public final class Atom extends QueuedEntity {
 		return functor;
 	}
 	/** 名前を取得 */
-	String getName() {
+	public String getName() {
 		return functor.getName();
 	}
 	/** リンク数を取得 */

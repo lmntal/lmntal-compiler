@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
+import runtime.Inline;
 import compile.structure.*;
 
 public class LMNParser {
@@ -64,6 +65,7 @@ public class LMNParser {
 		Membrane mem = new Membrane(null);
 		addProcessToMem(src, mem);
 		createProxy(mem);
+		Inline.makeCode();
 		return mem;
 	}
 	

@@ -1,6 +1,7 @@
 package compile.structure;
 
 import runtime.Functor;
+import runtime.Inline;
 import java.util.Arrays;
 
 /**
@@ -64,6 +65,9 @@ public class Atom {
 		args = new LinkOccurrence[arity];
 		this.line = line;
 		this.column = column;
+		
+		//Inline
+		Inline.add(name);
 	}
 	
 	public String toString() {

@@ -97,8 +97,8 @@ public class REPL {
 			Env.p( "After execute : " );
 			Env.p( Dumper.dump(rootmem) );
 			Env.p( rootmem );
-		} catch (ParseException e) {
-			Env.p(e);
+		} catch (Exception e) {
+			Env.p("!!! "+e);
 		}
 		
 		//System.out.println(line+"  =>  {a, b, {c}}, ({b, $p}:-{c, $p})");
