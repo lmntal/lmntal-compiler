@@ -1,17 +1,17 @@
 package util;
 import java.io.*;
-import java.util.StringTokenizer;
 
 public class HybridInputStream {
 	InputStream in;
-	StringTokenizer bufTokenizer;
-
+	String[] lines;
+	int nextLine, lineCount;
+	
 	public HybridInputStream(InputStream in) throws IOException {
 		this.in = in;
 	}
 	
 	public Object readObject() throws IOException, ClassNotFoundException {
-		if (bufTokenizer != null && bufTokenizer.hasMoreTokens()) {
+		if (lines != null && nextLine < lineCount) {
 			//未読み込みの文字列データが残っている
 			throw new IOException();
 		}
@@ -25,10 +25,15 @@ public class HybridInputStream {
 	}
 	
 	public String readLine() throws IOException {
-		if (bufTokenizer == null || !bufTokenizer.hasMoreTokens()) {
-			bufTokenizer = new StringTokenizer(new String(readBytes()), "\r\n");
+		if (lines == null || nextLine == lineCount) {
+			lines = new String(readBytes()).split("\n", -1);
+			lineCount = lines.length;
+			if (lines[lineCount-1].equals("")) {
+				//改行で終わっている場合、最後の改行の後は無視
+				lineCount--;
+			}
 		}
-		return bufTokenizer.nextToken();
+		return lines[nextLine++];
 	}
 	
 	public byte[] readBytes() throws IOException {
