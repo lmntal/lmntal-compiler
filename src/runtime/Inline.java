@@ -18,7 +18,7 @@ public class Inline {
 	static Process cp;
 	
 	/** Hash { インラインコード文字列 -> 一意な連番 } */
-	static Map code = new HashMap(); 
+	public static Map code = new HashMap(); 
 	/** 一意な連番 */
 	static int codeCount = 0;
 	
@@ -61,9 +61,9 @@ public class Inline {
 			//p.println("package runtime;");
 			p.println("import runtime.*;");
 			p.println("public class MyInlineCode implements InlineCode {");
-			p.println("\tpublic void run(Atom a) {");
+			p.println("\tpublic void run(Atom a, int codeID) {");
 			p.println("\t\tEnv.p(a);");
-			p.println("\t\tswitch(a.getName().hashCode()) {");
+			p.println("\t\tswitch(codeID) {");
 			Iterator i = code.keySet().iterator();
 			while(i.hasNext()) {
 				String s = (String)i.next();
@@ -98,6 +98,7 @@ public class Inline {
 	 * @param atom 実行すべきアトム名を持つアトム
 	 */
 	public static void callInline(Atom atom, int codeID) {
+		Env.p(atom+" "+codeID);
 		if(inlineCode==null) return;
 		//Env.p("=> call Inline "+atom.getName());
 		inlineCode.run(atom, codeID);
