@@ -284,7 +284,7 @@ public class RuleCompiler {
 					// つまり、( 2(X) :- found(X) ) や ( 2(3) :- ok ) で2や3を$pで表すことはできない。
 					// しかし実際には処理系側の都合による制限である。
 					// なお、プログラミングの観点から、右辺の型付きプロセス文脈の明示的な自由リンクの先は任意としている。
-					if (!lhsatompath.containsKey(def.src.args[0])) {
+					if (!lhsatompath.containsKey(def.src.args[0].buddy.atom)) {
 						error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
 						corrupted();
 						guard.add(new Instruction(Instruction.LOCK, 0));

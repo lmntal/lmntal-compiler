@@ -18,7 +18,7 @@ class SrcProcessContext extends SrcContext {
 		super(name);
 //		// プロセス文脈名をエスケープする。
 //		// ＜いずれ文脈名にquote記法の使用を禁止すれば不要になる。＞→禁止したので廃止した
-//		// $_X $_7 や *p などを内部予約としているためにquoteが必要となっている。
+//		// $X $_7 や *p などを内部予約としているためにquoteが必要となっている。
 //		if (name.matches("^[A-Z_].*")) { this.name = "_" + name; }
 	}
 	/** 内部予約名を持つプロセスコンテキストを作成する。
