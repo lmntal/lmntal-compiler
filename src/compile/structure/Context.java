@@ -1,7 +1,7 @@
 package compile.structure;
 
 /**
- * ソースコード中のプロセス文脈出現またはルール文脈出現を表す抽象クラス。
+ * ソースコード中のプロセス文脈出現、型付きプロセス文脈出現、またはルール文脈出現を表す抽象クラス。
  * todo リンクが張られるためAtomのサブクラスになっているが、不自然なのでいずれ修正すべきである。*/
 
 public abstract class Context extends Atom {

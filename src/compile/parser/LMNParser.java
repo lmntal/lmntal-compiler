@@ -217,6 +217,7 @@ public class LMNParser {
 //				addSrcAtomToMem((SrcAtom)obj, mem);
 //				setLinkToAtomArg(new SrcLink(newlinkname), atom, i);
 //			}
+
 			// プロセス文脈
 			else if (obj instanceof SrcProcessContext) {
 				throw new ParseException("Untyped process context in an atom argument: " + obj);
@@ -778,10 +779,11 @@ public class LMNParser {
 	}
 	
 	/** アトム展開後のプロセス構造（子ルール外）のアトム引数に出現する型付きプロセス文脈を展開する。
+	 * @param typedNames 型付きプロセス文脈の限定名 "$X" (String) をキーとする写像
 	 * <pre> p(s1,$p,sn) → p(s1,X,sn), $p[X]
 	 * </pre> */
 	private void expandTypedProcessContexts(LinkedList process, HashMap typedNames) {
-		Iterator it = process.iterator();
+		ListIterator it = process.listIterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
 			if (obj instanceof SrcAtom) {
@@ -795,7 +797,10 @@ public class LMNParser {
 							String newlinkname = generateNewLinkName();
 							sAtom.getProcess().set(i, new SrcLink(newlinkname));
 							((SrcAtom)obj).process.add(new SrcLink(newlinkname));
-							process.add(srcProcessContext);
+							it.add(srcProcessContext);
+							// アトム引数に$p[...]を許すように構文拡張された場合のみ args!=null となる
+							if (srcProcessContext.args == null)
+								srcProcessContext.args = new LinkedList();
 							srcProcessContext.args.add(new SrcLink(newlinkname));
 						}
 					}
