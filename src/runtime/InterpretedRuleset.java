@@ -6,12 +6,12 @@ class InterpretedReactor {
 	AbstractMembrane[] mems;
 	Atom[] atoms;
 	List vars;
-	List insts;
-	InterpretedReactor(AbstractMembrane[] mems, Atom[] atoms, List vars, List insts) {
+	//List insts;
+	InterpretedReactor(AbstractMembrane[] mems, Atom[] atoms, List vars/*, List insts*/) {
 		this.mems = mems;
 		this.atoms = atoms;
 		this.vars = vars;
-		this.insts = insts;
+		//this.insts = insts;
 	}
 
 	/** 命令列を解釈する。
@@ -22,7 +22,7 @@ class InterpretedReactor {
 	 * @param pc    命令列中のプログラムカウンタ
 	 * @return 命令列の実行が成功したかどうかを返す
 	 */
-	boolean interpret(int pc) {
+	boolean interpret(List insts, int pc) {
 		Iterator it;
 		Functor func;
 		while (pc < insts.size()) {
@@ -48,8 +48,8 @@ class InterpretedReactor {
 				for (int i = 0; i < atomformals.size(); i++) {
 					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
 				}
-				InterpretedReactor ir = new InterpretedReactor(bodymems, bodyatoms, new ArrayList(), bodyInsts);
-				ir.interpret(0);
+				InterpretedReactor ir = new InterpretedReactor(bodymems, bodyatoms, new ArrayList());
+				ir.interpret(bodyInsts,0);
 				return true;
 			case Instruction.ANYMEM: // anymem [-dstmem, srcmem] 
 				it = mems[inst.getIntArg2()].mems.iterator();
@@ -57,7 +57,7 @@ class InterpretedReactor {
 					AbstractMembrane submem = (AbstractMembrane)it.next();
 					if (submem.lock(mems[0])) {
 						mems[inst.getIntArg1()] = submem;
-						if (interpret(pc)) return true;
+						if (interpret(insts,pc)) return true;
 						submem.unlock();
 					}
 				}
@@ -68,7 +68,7 @@ class InterpretedReactor {
 				while (it.hasNext()){
 					Atom a = (Atom)it.next();
 					atoms[inst.getIntArg1()] = a;					
-					if (interpret(pc)) return true;
+					if (interpret(insts,pc)) return true;
 				}
 				break;
 			case Instruction.NEWATOM: // newatom [-dstatom, srcmem, funcref]
@@ -79,8 +79,8 @@ class InterpretedReactor {
 				return true;	
 			case Instruction.BRANCH:
 				List subinsts = (List)((List)inst.getArg1()).get(0);
-				InterpretedReactor iir = new InterpretedReactor(mems,atoms,vars,subinsts);
-				if (iir.interpret(0)) return true;
+				//InterpretedReactor iir = new InterpretedReactor(mems,atoms,vars,subinsts);
+				if (interpret(subinsts,0)) return true;
 				break;	
 			default:
 				System.out.println("Invalid rule");
@@ -157,8 +157,8 @@ public final class InterpretedRuleset extends Ruleset {
 		Atom[]             atoms = new Atom[formals];
 		mems[0]  = mem;
 		atoms[1] = atom;
-		InterpretedReactor ir = new InterpretedReactor(mems,atoms,new ArrayList(),matchInsts);
-		return ir.interpret(0);
+		InterpretedReactor ir = new InterpretedReactor(mems,atoms,new ArrayList());
+		return ir.interpret(matchInsts,0);
 	}
 
 	
