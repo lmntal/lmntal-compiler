@@ -414,7 +414,7 @@ public class RuleCompiler {
 			//if (pc != null) { // ヘッドのときのみ
 				if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
 					body.add(new Instruction( Instruction.FREEATOM,
-						typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
+						typedcxtToSrcPath(def) ));
 				}
 			//}
 		}
