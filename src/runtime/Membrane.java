@@ -4,23 +4,8 @@ import java.util.Iterator;
 import util.Stack;
 
 /**
- * ？？？の解決法
- * [1] 親計算ノードが、自由リンク出力管理アトムのグローバルIDを付ける方法
- *  - newFreeLink命令を作る方法
- *      命令の種類が増える
- *  - newFreeLink命令を作らない場合
- *      newAtom時に毎回functorを検査→遅い？
- * [2] 親計算ノードが、自由リンク出力管理アトムのグローバルIDを付けない方法
- *  - コミット時に新規アトムの仮IDを破棄する場合
- *    作成した自由リンク出力管理アトムの識別ができなくなる→NG
- *  - コミット時に新規アトムの仮IDを破棄しない場合
- *    次回のキャッシュ更新時に仮IDを正しいグローバルIDに変更するメッセージを送信する→遅いけど正しい
- * 
- * 結論：newFreeLink命令は廃止。
- */
-
-/**
  * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。
+ * TODO 最適化用に、子孫にルート膜を持つことができない（実行時エラーを出す）「データ膜」クラスを作る。
  * @author Mizuno
  */
 public final class Membrane extends AbstractMembrane {
@@ -66,6 +51,16 @@ public final class Membrane extends AbstractMembrane {
 			((Membrane)parent).activate();
 		}
 		((Task)task).memStack.push(this);
+	}
+
+	/** dstMemに移動 */
+	public void moveTo(AbstractMembrane dstMem) {
+		if (dstMem.task.getMachine() != task.getMachine()) {
+			parent = dstMem;
+			//((RemoteMembrane)dstMem).send("ADDMEM",getMemID());
+			throw new RuntimeException("cross-site process migration not implemented");
+		}
+		super.moveTo(dstMem);
 	}
 	/** 
 	 * 移動された後、この膜のアクティブアトムを実行スタックに入れるために呼び出される。

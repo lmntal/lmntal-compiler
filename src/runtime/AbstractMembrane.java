@@ -162,8 +162,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	// 操作2 - アトムの操作
 
 	/** 新しいアトムを作成し、この膜に追加する。
-	 * TODO 実行スタックに自動的には詰まれないように仕様変更してもよいかもしれない。
-	 * ただしその場合は、newatom命令の次にenqueueatomボディ命令が必要になる。
+	 * TODO 実行スタックに自動的には詰まれないように仕様変更する。
 	 */
 	public Atom newAtom(Functor functor) {
 		Atom a = new Atom(this, functor);
@@ -215,7 +214,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	/** 指定されたアトムをこの膜から除去する。
 	 * 実行スタックに入っている場合、実行スタックから取り除く。
-	 * TODO enqueueatom同様dequeueatomボディ命令を独立させる方法もある。
+	 * TODO enqueueatom同様dequeueatomボディ命令を独立させる。
 	 * AbstractMembrane#dequeueAtomはその場合のみabstractメソッドにする意味がある。
 	 * 逆に、独立させないならdequeueAtomはマクロ（private final）でよい。 */
 	public void removeAtom(Atom atom) {
@@ -248,17 +247,17 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	// 操作3 - 子膜の操作
 	
-	/** 新しい子膜を作成する */
+	/** 新しい子膜を作成し、活性化する */
 	public abstract AbstractMembrane newMem();
-	/** 指定された膜をこの膜の子膜として追加するための内部命令 */
+	/** 指定された膜をこの膜の子膜として追加するための内部命令。実行膜スタックは操作しない。*/
 	protected final void addMem(AbstractMembrane mem) {
 		mems.add(mem);
 	}
-	/** 指定された膜をこの膜から除去する */
+	/** 指定された膜をこの膜から除去する。実行膜スタックは操作しない。 */
 	public void removeMem(AbstractMembrane mem) {
 		mems.remove(mem);
 	}	
-	/** 指定された計算ノードで実行されるルート膜を作成し、この膜の子膜にする。
+	/** 指定された計算ノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
 	 * このメソッドは使わないかもしれないが、一応作っておく。
 	 * @return 作成されたルート膜
 	 */
@@ -284,9 +283,11 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	/** atom1の第pos1引数と、atom2の第pos2引数のリンク先を接続する。
 	 * 実行後、atom2の第pos2引数は廃棄しなければならない。
+	 * <p><font color=red><b>
+	 * cloneは使わないくてよいはず。ただし当面はデバッグを容易にするためこのままでよい。
+	 * </b></font>
 	 */
 	public void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		// TODO cloneは使わないくてよいはず。ただし当面はデバッグを容易にするためこのままでよい。
 		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
 		atom2.args[pos2].getBuddy().set(atom1, pos1);
 	}
@@ -327,13 +328,22 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	// 操作5 - 膜自身や移動に関する操作
 	
-	/** 活性化 */
+	/** 活性化する。
+	 * <dl>
+	 * <dt><b>ルート膜の場合</b>:<dd>
+	 * すでにスタックに積まれていれば何もしない。
+	 * スタックに詰まれていないならば、そのタスクの仮の実行膜スタックの唯一の要素として積む。
+	 * <dt><b>ルート膜でない場合</b>:<dd>
+	 * 親膜を活性化した後、親膜と同じスタックに入れる。
+	 * すなわち、仮の実行膜スタックが空でなければ仮の実行膜スタックに積み、
+	 * 空ならば実行膜スタックに積む。
+	 * </dl>*/
 	public abstract void activate();
 	/** この膜を親膜から除去する */
 	public void remove() {
 		parent.removeMem(this);
 		parent = null;
-		removeProxies();
+		// removeProxies();
 	}
 
 	/** 除去された膜srcMemにある全てのアトムおよび膜をこの膜に移動する。
@@ -362,18 +372,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/** この膜をdstMemに移動する。parent!=nullを仮定する。 */
 	public void moveTo(AbstractMembrane dstMem) {
-		if (dstMem.task.getMachine() != task.getMachine()) {
-			parent = dstMem;
-			//((RemoteMembrane)dstMem).send("ADDROOT",getMemID());
-			throw new RuntimeException("cross-site process migration not implemented");
-		}
 		parent.removeMem(this);
 		dstMem.addMem(this);
 		parent = dstMem;
 		if (dstMem.task != task) {
 			setTask(dstMem.task);
 		}
-		enqueueAllAtoms();
+		//enqueueAllAtoms();
 	}
 	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
 	private void setTask(AbstractTask newTask) {
@@ -437,7 +442,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	// キューはLinkedListオブジェクトとし、react内を生存期間とし、star関連のメソッドの引数に渡される。
 	// $pを含む全ての膜の本膜からの相対関係がルール適用で不変な場合、
 	// $pの先祖の全ての膜をうまく再利用することによって、star関連の処理を全く呼ぶ必要がなくなる。
-	// ただしこれを行う場合、removeProxiesはremoveから分離した単独のボディ命令にする必要がある。
 	
 	/** この膜がremoveされた直後に呼ばれる。
 	 * なおremoveは、ルール左辺に書かれたアトムを除去した後、
@@ -455,7 +459,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * </ul>
 	 */
 	public void removeProxies() {
-		// TODO atomsへの操作が必要になるので、Setのクローンを取得してその反復子を使った方が
+		// NOTE atomsへの操作が必要になるので、Setのクローンを取得してその反復子を使った方が
 		//      読みやすい＆効率が良いかもしれない
 		ArrayList changeList = new ArrayList();	// star化するアトムのリスト
 		ArrayList removeList = new ArrayList();
