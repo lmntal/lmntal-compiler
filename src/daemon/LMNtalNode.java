@@ -83,22 +83,39 @@ public class LMNtalNode {
 			+ out.toString()
 			+ "]";
 	}
-		
+
 	/**
 	 * ホストfqdnが自分自身か判定。
 	 * 
-	 * @param fqdn Fully Qualified Domain Name
+	 * @author nakajima
+	 * @param fqdn hostname  
 	 * @return 自分自身に割り振られているIPアドレスからホスト名を引いて、fqdnと文字列比較した結果
+	 * @version 1.1
 	 */
-	public static boolean isMyself(String fqdn) {
+//	public static boolean isMyself(String fqdn) {
+//		try {
+//			String hostaddr = InetAddress.getByName(fqdn).getHostAddress();
+//			if (hostaddr.equals("127.0.0.1")) return true;
+//			return InetAddress.getLocalHost().getHostAddress().equals(hostaddr);
+//		} catch (java.net.UnknownHostException e) {
+//			e.printStackTrace();
+//			return false;
+//		}
+//	}
+	public static boolean isMyself(String ipstr) {
+		//if(true)System.out.println("LMNtalNode.isMyself(" + ipstr + ")");
+		
+		boolean result = false; 
+		
+		if (ipstr.equals("127.0.0.1")) result = true;
 		try {
-			String hostaddr = InetAddress.getByName(fqdn).getHostAddress();
-			if (hostaddr.equals("127.0.0.1")) return true;
-			return InetAddress.getLocalHost().getHostAddress().equals(hostaddr);
+			if(InetAddress.getLocalHost().getHostAddress().equals(ipstr)) result = true;
 		} catch (java.net.UnknownHostException e) {
 			e.printStackTrace();
-			return false;
 		}
+		
+		if(true)System.out.println("LMNtalNode.isMyself(" + ipstr + ") is " + result);
+		return result;
 	}
 	
 	////////////////////////////////
