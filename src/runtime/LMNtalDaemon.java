@@ -101,7 +101,7 @@ class LMNtalDaemonThread implements Runnable {
 					new OutputStreamWriter(socket.getOutputStream()));
 
 			//1¼þÌÜ
-			outStream.write("");
+			outStream.write("LMNtalDaemon @ " + InetAddress.getLocalHost().toString());
 			outStream.write("enter 'quit' to terminate the programme.\n");
 			outStream.flush();
 
