@@ -105,25 +105,25 @@ final class Task extends AbstractTask {
 	}
 }
 
-public final class LMNtalRuntime extends Machine{
-	AbstractMembrane grobalRoot;
+public final class LMNtalRuntime extends Machine {
+	Membrane globalRoot;
 	
-	public MasterMachine(){
+	public LMNtalRuntime(){
 		AbstractTask t = newTask();
-		grobalRoot = t.getRoot();
+		globalRoot = t.getRoot();
 	}
 
 	/**
-	 * １回だけ適用するルールを適用するメソッド。
-	 * 初期化ルール、およびREPLが１行入力毎に生成するルールを
-	 * grobalRoot膜に適用する。
+	 * １回だけ適用するルールをglobalRoot膜に適用する。
+	 * 初期化ルール、およびREPLが１行入力毎に生成するルールを適用するために使用する。
+	 * @deprecated
 	 */
 	public void applyRulesetOnce(Ruleset r){
-		r.react(grobalRoot);
+		r.react(globalRoot);
 	}
 	
-	public AbstractMembrane getRoot(){
-		return grobalRoot;
+	public Membrane getGlobalRoot(){
+		return globalRoot;
 	}
 }
 
