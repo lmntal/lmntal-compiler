@@ -707,7 +707,7 @@ class TerminateProcessor implements Runnable {
 
 	public void run(){
 		System.out.println("TerminateProcessor.run(): now starting LMNtalRuntimeManager.termnateAll()");
-		if(LMNtalRuntimeManager.terminateAll()){
+		if(LMNtalRuntimeManager.terminateAll()){  //TODO ←終わらない
 			System.out.println("TerminateProcessor.run(): LMNtalRuntimeManager.termnateAll() succeded");
 			node.respondAsOK(msgid);
 		} else {
