@@ -188,17 +188,21 @@ public class Dumper {
 			}
 			while (changed);
 			
-			// 残った1引数のアトム（データだと思って保留していた整数など）を起点にして出力する
+			// 残った1引数のアトム（データだと思って保留していた整数など）を起点にして出力する。
+			// ただしリンク先が自由リンク管理アトムのときに限る
 			do {
 				changed = false;
 				it = atoms.iterator();
 				while (it.hasNext()) {
 					Atom a = (Atom)it.next();
 					if (a.getArity() == 1) {
-						if(commaFlag) buf.append(", "); else commaFlag = true;
-						buf.append(dumpAtomGroup(a, atoms));
-						changed = true;
-						break;
+						if (a.getLastArg().getAtom().getFunctor() == Functor.INSIDE_PROXY
+						 || a.getLastArg().getAtom().getFunctor() == Functor.OUTSIDE_PROXY) {
+							if(commaFlag) buf.append(", "); else commaFlag = true;
+							buf.append(dumpAtomGroup(a, atoms));
+							changed = true;
+							break;
+						}
 					}
 				}
 			}
