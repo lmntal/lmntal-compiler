@@ -806,19 +806,19 @@ public class Instruction {
 	public static final int NOT = 209;
 
 	// 組み込み機能に関する命令（仮） (210--219)
-	//  -----  inline  [[links...] text]
+	//  -----  inline  [atom]
 	//  -----  builtin [class, method, [links...]]
 
-	/** inline [[links...] text]
-	 * <br>（予約された）ボディ命令
-	 * 文字列textで指定されたJavaコードをエミットする。
-	 * コード中の%0は本膜への参照で置換される。
-	 * コード中の%1から%nはリンク参照$(links[i])で置換される。
-	 * <p>Javaソースを出力しない処理系環境では例外を発生する。*/
+	/** inline [atom, inlineref]
+	 * <br>ガード命令、ボディ命令<br>
+	 * アトム$atomに対して、inlinerefが指定するインライン命令を適用し、成功することを確認する。
+	 * <p>inlinerefには現在、$atomのファンクタへの参照を渡すことになっているが、将来変更する予定。
+	 * 処理系はinlinerefを無視して$atomのファンクタからインライン命令を決定してよい。
+	 * <p>ボディで呼ばれる場合典型的には、引数のリンクを張った後に呼ばれる。*/
 	public static final int INLINE = 210;
 
 	/** builtin [class, method, [links...]]
-	 * <br>（予約された）ボディ命令
+	 * <br>（予約された）ボディ命令<br>
 	 * リンク参照$(links[i])の配列を唯一の引数としてJavaのクラスメソッドを呼び出す。
 	 * <p>インタプリタ動作するときに組み込み機能を提供するために使用する。
 	 * <p>通常は、$builtin(class,method):(X1,…,Xn)に対応し、引数の種類によって次のものが渡される。
