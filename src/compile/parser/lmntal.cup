@@ -8,11 +8,10 @@ import java.util.LinkedList;
 terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE,
-				RELOP,
-				ASTERISK, SLASH, PLUS, MINUS,
-				QUOTED_STRING;
-				
-terminal String LINK_NAME, NUMBER_NAME, ATOM_NAME, PATHED_ATOM_NAME;
+				ASTERISK, SLASH, PLUS, MINUS;
+terminal		QUOTED_STRING;
+terminal String RELOP, STRING;
+terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
 
 non terminal SrcLink			Link;
 non terminal SrcName			FuncName;
@@ -38,13 +37,19 @@ start with ProcessList;
 Link		::=   LINK_NAME:name
 					{: RESULT = new SrcLink(name); :};
 
-// added by hara
-FuncName	::=   QUOTED_STRING:name
+FuncName	::=   ATOM_NAME:name
+					{: RESULT = new SrcName(name); :}
+				| QUOTED_STRING:name
 					{: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
-				| ATOM_NAME:name
-					{: RESULT = new SrcName(name.toString()); :}
+				| SYMBOL_NAME:name
+					{: RESULT = new SrcName(name.replaceAll("^'|'$","").replaceAll("''","'"),
+											SrcName.SYMBOL); :}
+				| STRING:name
+					{: RESULT = new SrcName(name.replaceAll("^\"|\"$","").replaceAll("\\n","\n")
+											.replaceAll("\\\\","\\"),
+											SrcName.STRING); :}
 				| PATHED_ATOM_NAME:name
-					{: RESULT = new SrcName(name.toString(), SrcName.PATHED); :};
+					{: RESULT = new SrcName(name, SrcName.PATHED); :};
 
 AtomName    ::= ATOM_NAME:name
 					{: RESULT = name.toString(); :};
@@ -92,7 +97,7 @@ Atom		::=   Atom500:atom
 				| Atom500:atom1 RELOP:op Atom500:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom(op.toString(), list); :};
+					   RESULT = new SrcAtom(op, list); :};
 
 List        ::=   LBRACKET RBRACKET
 					{: RESULT = new SrcAtom("[]"); :}

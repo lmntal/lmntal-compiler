@@ -52,10 +52,15 @@ AtomName = [a-z0-9][A-Za-z_0-9]*
 
 NumberName = -[0-9]+ | [+-][0-9]*\.[0-9]*([Ee][+-]?[0-9]+)?
 
+// ²¾
+SymbolName = "'" [^'\r\n]+ "'" | "'" [^'\r\n]* ("''" [^'\r\n]*)+ "'"
+// ²¾
+String = "\"" [^\"\r\n]* ("\\\"" [^\"\r\n]*)* "\""
+
 Comment = {TraditionalComment} | {EndOfLineComment}
 
 TraditionalComment = "/*" [^*] ~"*/"
-EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
+EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
 
 RelativeOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
 
@@ -88,6 +93,8 @@ RelativeOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	{LinkName}			{ return symbol(sym.LINK_NAME, yytext()); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME, yytext()); }
+	{SymbolName}		{ return symbol(sym.SYMBOL_NAME, yytext()); }
+	{String}			{ return symbol(sym.STRING, yytext()); }
 	{PathedAtomName}	{ return symbol(sym.PATHED_ATOM_NAME, yytext()); }
 	{AtomName}			{ return symbol(sym.ATOM_NAME, yytext()); }
 	{WhiteSpace}		{ /* just skip */ }
