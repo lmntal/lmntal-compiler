@@ -32,12 +32,12 @@ final class LMNtalRuntimeManager{
 
 		if (ret == null) {
 			ret = new RemoteLMNtalRuntime(node);
+			runtimeids.put(node,ret);
 		}
 		
 		//生きているか検査		
 		if (ret.connect()){
 			//生きていたら
-			runtimeids.put(node,ret);
 		} else {
 			//失敗したらnull
 			return null;
