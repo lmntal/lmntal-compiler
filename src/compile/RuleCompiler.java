@@ -182,7 +182,7 @@ public class RuleCompiler {
 				hc.switchToUntypedCompilation();
 				hc.compileMembrane(rs.leftMem);
 			}
-			hc.checkFreeLinkCount(rs.leftMem); // 言語仕様変更により呼ばなくてよくなった
+			hc.checkFreeLinkCount(rs.leftMem); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
 			if (hc.match == memMatch) {
 				hc.match.add(0, Instruction.spec(1, hc.varcount));
 			}
