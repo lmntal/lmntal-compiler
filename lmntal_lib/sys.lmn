@@ -33,5 +33,15 @@ sys.trace(off) :- [[/*inline*/
 	me.setName("nil");
 	]].
 
+/**
+ * sys.argv : unit -> List
+ * 
+ * Return argv
+ */
+H=sys.argv :- H=[[/*inline*/
+	util.Util.makeList(me.getArg(0), Env.argv);
+	me.remove();
+	]].
+
 }.
 

@@ -79,7 +79,9 @@ public final class Env {
 	public static int shuffle = SHUFFLE_INIT;
 	
 	////////////////////////////////////////////////////////////////
-
+	
+	public static List argv = new ArrayList();
+	
 	/**
 	 * トレース実行
 	 */

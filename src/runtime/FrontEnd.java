@@ -63,7 +63,7 @@ public class FrontEnd {
 				if(args[i].length() < 2){ // '-'のみの時
 					System.out.println("不明なオプション:" + args[i]);
 					System.exit(-1);
-				}else{ // オプション解釈部
+				} else { // オプション解釈部
 					switch(args[i].charAt(1)){
 					case 'x':
 						// ユーザー定義オプション。書式： -x <name> <value>
@@ -141,25 +141,28 @@ public class FrontEnd {
 					default:
 						System.out.println("不明なオプション:" + args[i]);
 						System.exit(-1);						
-					}							
+					}
 				}
-			}else{ // '-'以外で始まるものはファイルとみなす
-				try{
-					fis = new FileInputStream(args[i]);
-				}catch(FileNotFoundException e){
-					System.out.println("ファイルが見つかりません:" + args[i]);
-					System.exit(-1);
-				}catch(SecurityException e){
-					System.out.println("ファイルが開けません:" + args[i]);
-					System.exit(-1);
-				}
-				if(is == null) is = fis;
-				else is = new SequenceInputStream(is, fis); // ソースファイルを連結
+			}else{ // '-'以外で始まるものは (実行ファイル名, argv[0], arg[1], ...) とみなす
+				Env.argv.add(args[i]);
 			}
 		}
 		
 		Env.initGUI();
-		if(Env.REPL!=null) {
+		if(Env.REPL==null) {
+			String srcFile = (String)Env.argv.remove(0);
+			try{
+				fis = new FileInputStream(srcFile);
+			} catch(FileNotFoundException e) {
+				System.out.println("ファイルが見つかりません:" + srcFile);
+				System.exit(-1);
+			} catch(SecurityException e) {
+				System.out.println("ファイルが開けません:" + srcFile);
+				System.exit(-1);
+			}
+			if(is == null) is = fis;
+			else is = new SequenceInputStream(is, fis); // ソースファイルを連結
+		} else {
 			REPL.processLine(Env.REPL);
 			return;
 //			System.exit(-1);
