@@ -261,10 +261,11 @@ public class Instruction implements Cloneable {
 	static {setArgType(STABLE, new ArgType(false, ARG_MEM));}
     
 	// アトムに関係する出力しない基本ガード命令 (20-24)
-	//  -----  func    [srcatom, funcref]
-	//  -----  notfunc [srcatom, funcref]
-	//  -----  eqatom  [atom1, atom2]
-	//  -----  neqatom [atom1, atom2]
+	//  -----  func     [srcatom, funcref]
+	//  -----  notfunc  [srcatom, funcref]
+	//  -----  eqatom   [atom1, atom2]
+	//  -----  neqatom  [atom1, atom2]
+	//  -----  samefunc [atom1, atom2]
 
 	/** func [srcatom, funcref]
 	 * <br>ガード命令<br>
@@ -298,6 +299,14 @@ public class Instruction implements Cloneable {
 	public static final int NEQATOM = 23;
 	// LOCALNEQATOMは不要
 	static {setArgType(NEQATOM, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+
+	/** samefunc [atom1, atom2]
+	 * <br>ガード命令<br>
+	 * $atom1と$atom2が同じファンクタを持つことを確認する。
+	 * <p>getfunc[func1,atom1];getfunc[func2,atom2];eqfunc[func1,func2]と同じ。*/
+	public static final int SAMEFUNC = 24;
+	// LOCALSAMEFUNCは不要
+	static {setArgType(SAMEFUNC, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
 	// ファンクタに関係する命令 (25--29)	
 	//  -----  dereffunc [-dstfunc, srcatom, srcpos]

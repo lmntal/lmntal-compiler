@@ -462,11 +462,12 @@ public class RuleCompiler {
 					loadedatomid, lhsatomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(loadedatomid));
 			}
-			int funcid1 = varcount++;
-			int funcid2 = varcount++;
-			guard.add(new Instruction(Instruction.GETFUNC, funcid1, atomid));
-			guard.add(new Instruction(Instruction.GETFUNC, funcid2, loadedatomid));
-			guard.add(new Instruction(Instruction.EQFUNC,  funcid1, funcid2));
+			guard.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
+//			int funcid1 = varcount++;
+//			int funcid2 = varcount++;
+//			guard.add(new Instruction(Instruction.GETFUNC, funcid1, atomid));
+//			guard.add(new Instruction(Instruction.GETFUNC, funcid2, loadedatomid));
+//			guard.add(new Instruction(Instruction.EQFUNC,  funcid1, funcid2));
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 	}

@@ -330,6 +330,9 @@ class InterpretiveReactor {
 				case Instruction.NEQATOM : //[atom1, atom2]
 					if (atoms[inst.getIntArg1()] == atoms[inst.getIntArg2()]) return false;
 					break; //n-kato
+				case Instruction.SAMEFUNC: //[atom1, atom2]
+					if (!atoms[inst.getIntArg1()].getFunctor().equals(atoms[inst.getIntArg2()].getFunctor())) return false;
+					break; //n-kato
 					//====アトムに関係する出力しない基本ガード命令====ここまで====
 
 					//====ファンクタに関係する命令====ここから====
