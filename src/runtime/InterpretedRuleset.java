@@ -67,14 +67,13 @@ public final class InterpretedRuleset extends Ruleset {
 		Atom[]             atoms = new Atom[formals];
 		mems[0]  = mem;
 		atoms[1] = atom;
-		return matchTestStep(mems,atoms,matchInsts,0);
+		return step(mems,atoms,matchInsts,0);
 	}
-	private boolean matchTestStep(AbstractMembrane[] mems, Atom[] atoms,
-									List matchInsts, int pc) {
-		while (pc < matchInsts.size()) {
-			Instruction inst = (Instruction)matchInsts.get(pc++);
-			switch (inst.getKind()){
-			//case Instruction.....:
+	private boolean step(AbstractMembrane[] mems, Atom[] atoms, List insts, int pc) {
+		Iterator it;
+		while (pc < insts.size()) {
+			Instruction inst = (Instruction)insts.get(pc++);
+			switch (inst.getKind()) {
 			case Instruction.REACT:
 				Rule rule = (Rule)inst.getArg1();
 				List bodyInsts = (List)rule.body;
@@ -91,16 +90,31 @@ public final class InterpretedRuleset extends Ruleset {
 				for (int i = 0; i < atomformals.size(); i++) {
 					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
 				}
-				body(bodyInsts, bodymems, bodyatoms);
+				step(bodymems, bodyatoms,bodyInsts,1);
 				return true;
+			case Instruction.ANYMEM: // anymem [-dstmem, srcmem] 
+				it = mems[inst.getIntArg2()].mems.iterator();
+				while (it.hasNext()){
+					AbstractMembrane submem = (AbstractMembrane)it.next();
+					if (submem.lock(mems[0])) {
+						mems[inst.getIntArg1()] = submem;
+						if (step(mems,atoms,insts,pc)) return true;
+						submem.unlock();
+					}
+				}
+				break;
 			case Instruction.FINDATOM: // findatom [-dstatom, srcmem, funcref]
 				Functor func = (Functor)inst.getArg3();
-				Iterator it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
+				it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
 				while (it.hasNext()){
 					Atom a = (Atom)it.next();
 					atoms[inst.getIntArg1()] = a;					
-					if (matchTestStep(mems,atoms,matchInsts,pc)) return true;
+					if (step(mems,atoms,insts,pc)) return true;
 				}
+				break;
+			
+			default:
+				System.out.println("Invalid rule");
 				break;
 			}
 		}
@@ -114,7 +128,7 @@ public final class InterpretedRuleset extends Ruleset {
 	 * @param memArgs 実引数のうち、膜であるもの
 	 * @param atomArgs 実引数のうち、アトムであるもの
 	 * @author nakajima
-	 *
+	 * @deprecated
 	 * 
 	 */
 	private void body(List rulebody, AbstractMembrane[] mems, Atom[] atoms) {
