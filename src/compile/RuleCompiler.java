@@ -41,7 +41,7 @@ public class RuleCompiler {
 	Map  rhsatompath;		// 右辺のアトム (Atomic) -> 変数番号 (Integer)
 	Map  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)	
 	Map  rhslinkpath;		// 右辺のリンク出現(LinkOccurence) -> 変数番号(Integer)
-	//List rhslinks;			// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ）
+	//List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り血にした
 	List lhsatoms;
 	List lhsmems;
 	Map  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
@@ -256,6 +256,15 @@ public class RuleCompiler {
 			if(!rhslinks.contains(atom.args[0].buddy))rhslinks.add(rhslinkindex++,atom.args[0]);
 			varcount++;
 		}
+		
+		// ground型付プロセス文脈のリンク出現
+		it = rhsgroundpaths.keySet().iterator();
+		while(it.hasNext()){
+			ProcessContext atom = (ProcessContext)it.next();
+			int linkpath = rhsgroundToPath(atom);
+			rhslinkpath.put(atom.args[0],new Integer(linkpath));
+			if(!rhslinks.contains(atom.args[0].buddy))rhslinks.add(rhslinkindex++,atom.args[0]);
+		}
 
 		// 型なし
 		it = rs.processContexts.values().iterator();
@@ -371,6 +380,7 @@ public class RuleCompiler {
 		// typedcxtdefs = gc.typedcxtdefs;
 		// varcount = lhsatoms.size() + lhsmems.size() + rs.typedProcessContexts.size();
 		getLHSLinks();
+		genGroundLinkPaths();
 	}
 
 //	private void inc_head(HeadCompiler hc) {
@@ -389,9 +399,9 @@ public class RuleCompiler {
 		gc = new GuardCompiler(this, hc);
 		if (guard == null) return;
 		int formals = gc.varcount;
-		gc.checkMembraneStatus();
 		gc.getLHSLinks();
 		gc.fixTypedProcesses();
+		gc.checkMembraneStatus();
 		varcount = gc.varcount;
 		compileNegatives();
 		guard.add( 0, Instruction.spec(formals,varcount) );
@@ -419,15 +429,27 @@ public class RuleCompiler {
 	GuardCompiler gc;
 	/** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
 	HashMap rhstypedcxtpaths = new HashMap();
+	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkを指す)変数番号 */
+	HashMap rhsgroundpaths = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時） */
 	HashMap typedcxtsrcs  = new HashMap();
+	/** ground型付きプロセス文脈定義(ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時） */
+	HashMap groundsrcs = new HashMap();
 	/** Body実行時なので、UNBOUNDにはならない */
 	int typedcxtToSrcPath(ContextDef def) {
 		return ((Integer)typedcxtsrcs.get(def)).intValue();
 	}
+	/** Body実行時なので、UNBOUNDにはならない */
+	int groundToSrcPath(ContextDef def) {
+		return ((Integer)groundsrcs.get(def)).intValue();
+	}
 	/***/
 	int rhstypedcxtToPath(Context cxt) {
 		return ((Integer)rhstypedcxtpaths.get(cxt)).intValue();
+	}
+	/***/
+	int rhsgroundToPath(Context cxt) {
+		return ((Integer)rhsgroundpaths.get(cxt)).intValue();
 	}
 
 	private void genTypedProcessContextPaths() {
@@ -436,6 +458,15 @@ public class RuleCompiler {
 			ContextDef def = (ContextDef)it.next();
 			if (gc.typedcxttypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
 				typedcxtsrcs.put( def, new Integer(varcount++) );
+			}
+		}
+	}
+	private void genGroundLinkPaths() {
+		Iterator it = gc.groundsrcs.keySet().iterator();
+		while(it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			if(gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
+				groundsrcs.put(def,new Integer(lhslinkToPath(def.lhsOcc.args[0].buddy)));
 			}
 		}
 	}
@@ -456,6 +487,10 @@ public class RuleCompiler {
 					body.add(new Instruction( Instruction.REMOVEATOM,
 						typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
+				else if (gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
+					body.add(new Instruction( Instruction.REMOVEGROUND,
+						groundToSrcPath(def), lhsmemToPath(pc.mem) ));
+				}
 			}
 		}
 	}	
@@ -466,6 +501,9 @@ public class RuleCompiler {
 			if (gc.typedcxttypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
 				body.add(new Instruction( Instruction.FREEATOM,
 					typedcxtToSrcPath(def) ));
+			}
+			else if (gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
+				body.add(new Instruction( Instruction.FREEGROUND,groundToSrcPath(def)));
 			}
 		}
 	}	
@@ -521,6 +559,13 @@ public class RuleCompiler {
 						typedcxtToSrcPath(pc.def) ));
 					rhstypedcxtpaths.put(pc, new Integer(atompath));
 				}
+				else if(gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
+					int groundpath = varcount++;
+					body.add(new Instruction( Instruction.COPYGROUND, groundpath,
+						groundToSrcPath(pc.def), // groundの場合はリンクを指す変数番号
+						rhsmemToPath(pc.mem) ));
+					rhsgroundpaths.put(pc, new Integer(groundpath));
+				}
 			}
 		}
 	}	
@@ -556,6 +601,22 @@ public class RuleCompiler {
 		if (rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning) {
 			Env.warning("WARNING: rule with empty head: " + rs);
 		}
+		// その他 unary =/== ground の順番に並べ替える
+		List typeConstraints = rs.guardMem.atoms;
+		LinkedList lists[] = {new LinkedList(),new LinkedList(),new LinkedList()};
+		Iterator it = typeConstraints.iterator();
+		while (it.hasNext()) {
+			Atom cstr = (Atom)it.next();
+			Functor func = cstr.functor;
+			if (func.equals(new Functor("unary",1)))  { lists[0].add(cstr); it.remove(); }
+			if (func.equals(new Functor("=",2)))      { lists[1].add(cstr); it.remove(); }
+			if (func.equals(new Functor("==",2)))     { lists[1].add(cstr); it.remove(); }
+			if (func.equals(new Functor("ground",1))) { lists[2].add(cstr); it.remove(); }
+		}
+		typeConstraints.addAll(lists[0]);
+		typeConstraints.addAll(lists[1]);
+		typeConstraints.addAll(lists[2]);
+
 	}
 	
 	/** 指定された膜とその子孫に存在する冗長な =（todo および自由リンク管理アトム）を除去する */
