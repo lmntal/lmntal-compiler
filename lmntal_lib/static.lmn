@@ -1,22 +1,53 @@
+/*
+NAME
+	static module
+
+SYNOPSIS
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/??/??(???)
+
+*/
 
 {
-	system_ruleset.
-	
-	// FIND UP
-	{{mv($m),$p,@q},$r,@s}:-unary($m)|{$r,@s},{mv($m),$p,@q}.
-	
-	// FIND DOWN
-	{mv($m1),$p,@q},{name($m2),$r,@s}:-$m1=$m2|{name($m2),{$p,@q},$r,@s}.
-	
-	// SHRINK UP
-	{{shrink(X),$p,@r},$q,@s} :- {shrink(X),$p,@r},{$q,@s}.
-	
-	// SHRINK DOWN
-	{shrink(X),$p,@r},{$q[X],@s} :- {{shrink(X),$p,@r},$q[X],@s}.
-	
-	//param(X,$name,R), {$p[X],$name1($v)} :- $name=$name1, unary($v) | R=$v, killed(X),{$p[X],$name1($v)}.
-	//({find_and_link($m1,X),ready($m2), $p, @q}:-$m1==$m2|{msg(X,$m2), $p, @q}).
-	//({call($m,$method),$p}:-unary($m),unary($method)|{call($m).{$method=$arg.}).
+system_ruleset.
+
+/**
+ * FIND UP
+ * 
+ * モジュール $m に向かって膜を移動させる。階層をあがっていく。
+ */
+{{mv($m),$p,@q},$r,@s}:-unary($m)|{$r,@s},{mv($m),$p,@q}.
+
+/**
+ * FIND DOWN
+ * 
+ * モジュール $m に向かって膜を移動させる。トップレベルから直下にあるモジュール $m をさがす。
+ * 名前を頼りに探すので直下にあることを仮定している。
+ */
+{mv($m1),$p,@q},{module($m2),$r,@s}:-$m1=$m2|{module($m2),{$p,@q},$r,@s}.
+
+/**
+ * SHRINK UP
+ * 
+ * リンク X のもう一端がある膜に shrink がある膜を移動させる。階層を上にたどる。
+ */
+{{shrink(X),$p,@r},$q,@s} :- {shrink(X),$p,@r},{$q,@s}.
+
+/**
+ * SHRINK DOWN
+ * 
+ * リンク X のもう一端がある膜に shrink がある膜を移動させる。階層を下にたどる。
+ * リンクでつながってるので何階層でも下がれる。
+ */
+{shrink(X),$p,@r},{$q[X],@s} :- {{shrink(X),$p,@r},$q[X],@s}.
+
+//param(X,$name,R), {$p[X],$name1($v)} :- $name=$name1, unary($v) | R=$v, killed(X),{$p[X],$name1($v)}.
+//({find_and_link($m1,X),ready($m2), $p, @q}:-$m1==$m2|{msg(X,$m2), $p, @q}).
+//({call($m,$method),$p}:-unary($m),unary($method)|{call($m).{$method=$arg.}).
 }.
 
 {

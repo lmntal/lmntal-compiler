@@ -1,13 +1,33 @@
+/*
+NAME
+	共有資源にアクセスして影響をおよぼすサンプル
+	static モジュールをつかう。
+
+SYNOPSIS
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/??/??(???)
+
+*/
+
+// 共有資源にアクセスするユーザ壱
 {{
-	{mv(m), m.incr, handle(X)}. io.print(param(value)).
+	{mv(m), m.incr, handle(X)}. res(X).
 	res(X), {shrink(X),value($n)} :- unary($n)|io.print($n).
 }}.
+
+//共有資源にアクセスするユーザ弐
 {{{{
 	{mv(m), m.incr, handle(X)}. res(X).
 	res(X), {shrink(X),value($n)} :- unary($n)|io.print($n).
 }}}}.
-m : {
-	name(m).
+
+// 共有資源
+{
+	module(m).
 	static.load.
 	id(0).
 	{m.incr, handle(X), @r}, id($o)

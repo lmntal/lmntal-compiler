@@ -5,7 +5,8 @@ NAME
 SYNOPSIS
 	r0=java.new("java.awt.Frame", ["test"]).
 	r0=H :- unary(H) | r1=H, s=java.invoke(H, show).
-	
+	r1=H :- unary(H) | r2=H, s=java.invoke(H, setSize, [200, 300]).
+
 AUTHOR
 	Koji Hara
 
