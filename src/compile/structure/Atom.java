@@ -75,11 +75,11 @@ public class Atom {
 		this.column = column;
 	}
 	public String toString() {
-		if (args.length == 0) return functor.getAbbrName();
+		if (args.length == 0) return functor.getQuotedAtomName();
 		String argstext = Arrays.asList(args).toString();
 		argstext = argstext.substring(1, argstext.length() - 1);
 		argstext = argstext.replaceAll(", ",",");
-		return functor.getAbbrName() + "(" + argstext + ")";
+		return functor.getQuotedFunctorName() + "(" + argstext + ")";
 	}
 	public String getPath() {
 		return functor.getPath();

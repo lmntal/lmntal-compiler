@@ -89,9 +89,7 @@ public class LMNParser {
 		correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = addProxies(mem);
-		if (!freeLinks.isEmpty()) {
-			closeFreeLinks(mem, "WARNING: Global singleton link: ");
-		}
+		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
 		Inline.makeCode();
 		return mem;
 	}
@@ -339,11 +337,11 @@ public class LMNParser {
 	}
 	
 	/** 膜memの自由リンクを膜内で閉じる（構文エラーからの復帰用） */
-	public void closeFreeLinks(Membrane mem, String prefix) throws ParseException {
+	public void closeFreeLinks(Membrane mem) throws ParseException {
 		Iterator it = mem.freeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			LinkOccurrence link = (LinkOccurrence)mem.freeLinks.get(it.next());
-			System.out.println(prefix + link.name);
+			warning("WARNING: Global singleton link: " + link.name);
 			LinkedList process = new LinkedList();
 			process.add(new SrcLink(link.name));
 			SrcAtom sAtom = new SrcAtom(link.name, process);
@@ -624,8 +622,17 @@ public class LMNParser {
 		}
 		removeClosedLinks(links);
 		if (!links.isEmpty()) {
-			closeFreeLinks(rule.leftMem, "SYNTAX ERROR: rule head contains free variable: ");
-			closeFreeLinks(rule.rightMem,"SYNTAX ERROR: rule body contains free variable: ");
+			it = links.keySet().iterator();
+			while (it.hasNext()) {
+				LinkOccurrence link = (LinkOccurrence)links.get(it.next());
+				error("SYNTAX ERROR: rule contains free variable: "+ link.name);
+				LinkedList process = new LinkedList();
+				process.add(new SrcLink(link.name));
+				SrcAtom sAtom = new SrcAtom(link.name, process);
+				addSrcAtomToMem(sAtom, link.atom.mem);
+			}
+			coupleLinks(rule.leftMem);
+			coupleLinks(rule.rightMem);
 		}
 	}
 
