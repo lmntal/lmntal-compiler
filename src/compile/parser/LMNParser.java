@@ -9,7 +9,7 @@ import java_cup.runtime.Scanner;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
 
@@ -86,7 +86,7 @@ public class LMNParser {
 		expandAtoms(srcProcess);
 		correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
-		Hashtable freeLinks = addProxies(mem);
+		HashMap freeLinks = addProxies(mem);
 		if (!freeLinks.isEmpty()) {
 			closeFreeLinks(mem, "WARNING: Global singleton link: ");
 		}
@@ -244,13 +244,13 @@ public class LMNParser {
 	
 	/** 子膜に対して再帰的にプロキシを追加する。
 	 * @return この膜の更新された自由リンクマップ mem.freeLinks */
-	private Hashtable addProxies(Membrane mem) throws ParseException {
+	private HashMap addProxies(Membrane mem) throws ParseException {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
-			Hashtable freeLinks = addProxies(submem);
+			HashMap freeLinks = addProxies(submem);
 			// 子膜の自由リンクに対してプロキシを追加する
-			Hashtable newFreeLinks = new Hashtable();
+			HashMap newFreeLinks = new HashMap();
 			Iterator it2 = freeLinks.keySet().iterator();
 			while (it2.hasNext()) {
 				LinkOccurrence freeLink = (LinkOccurrence)freeLinks.get(it2.next());
@@ -278,14 +278,14 @@ public class LMNParser {
 	}
 
 	/**
-	 * 指定された膜にあるアトムの引数に対して、リンクの結合を行い、自由リンクのHashtableを返す。
+	 * 指定された膜にあるアトムの引数に対して、リンクの結合を行い、自由リンクのHashMapを返す。
 	 * <p>子膜に対してリンクの結合およびプロキシの作成が行われた後で呼び出される。
 	 * <p>副作用として、メソッドの戻り値を mem.freeLinks にセットする。
 	 * @throws ParseException
-	 * @return リンク名から自由リンク出現へのHashtable
+	 * @return リンク名から自由リンク出現へのHashMap
 	 */
-	private static Hashtable coupleLinks(Membrane mem) throws ParseException {
-		Hashtable links = new Hashtable();
+	private static HashMap coupleLinks(Membrane mem) throws ParseException {
+		HashMap links = new HashMap();
 		// 同じ膜レベルのリンク結合を行う
 		for (int i = 0; i < mem.atoms.size(); i++) {
 			Atom a = (Atom)mem.atoms.get(i);
@@ -300,7 +300,7 @@ public class LMNParser {
 	}
 	
 	/** 閉じたリンクをlinksから除去する */
-	private static void removeClosedLinks(Hashtable links) {
+	private static void removeClosedLinks(HashMap links) {
 		Iterator it = links.keySet().iterator();
 		while (it.hasNext()) {
 			String linkName = (String)it.next();
@@ -313,7 +313,7 @@ public class LMNParser {
 	 * @param lnk 記録するリンク出現
 	 * @throws ParseException 2回より多くリンク名が出現した場合
 	 */
-	private static void addLinkOccurrence(Hashtable links, LinkOccurrence lnk) throws ParseException {
+	private static void addLinkOccurrence(HashMap links, LinkOccurrence lnk) throws ParseException {
 		// 3回以上の出現
 		if (links.get(lnk.name) == CLOSED_LINK) {
 			throw new ParseException("Link " + lnk.name + " appears more than twice.");
@@ -352,7 +352,7 @@ public class LMNParser {
 	//
 	
 	/** ヘッドのプロセス文脈、ルール文脈のマップを作成 */
-	private void enumHeadNames(Membrane mem, Hashtable names) throws ParseException {
+	private void enumHeadNames(Membrane mem, HashMap names) throws ParseException {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
@@ -390,7 +390,7 @@ public class LMNParser {
 	}
 
 	/** ボディのプロセス文脈、ルール文脈のリストを作成 */
-	private void enumBodyNames(Membrane mem, Hashtable names) throws ParseException {
+	private void enumBodyNames(Membrane mem, HashMap names) throws ParseException {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
@@ -459,16 +459,16 @@ public class LMNParser {
 		correctTypeConstraints(typeConstraints);
 
 		// - 型制約に出現するリンク名Xに対して、ルール内の全てのXを$_Xに置換する
-		Hashtable typedNames = new Hashtable();
+		HashMap typedNames = new HashMap();
 		enumNames(typeConstraints, typedNames);
 
-		Hashtable typedLinkNames = new Hashtable();
+		HashMap typedLinkNames = new HashMap();
 		Iterator it = typedNames.keySet().iterator();
 		while (it.hasNext()) {
-			Object obj = ((LinkedList)typedNames.get((String)it.next())).getFirst();
+			String name = (String)it.next();
+			Object obj = ((LinkedList)typedNames.get(name)).getFirst();
 			if (obj instanceof SrcLink) {
-				String name = ((SrcLink)obj).getName();
-				typedLinkNames.put(name, new SrcProcessContext("_" + name, true));
+				typedLinkNames.put(name, new SrcProcessContext("_" + ((SrcLink)obj).getName(), true));
 			}
 		}
 		unabbreviateTypedLinks(sRule.getHead(), typedLinkNames);
@@ -489,7 +489,7 @@ public class LMNParser {
 		
 
 		// - 型付きプロセス文脈構文の展開
-		typedNames = new Hashtable();
+		typedNames = new HashMap();
 		enumNames(typeConstraints, typedNames);
 		expandTypedProcessContexts(sRule.getHead(), typedNames);
 		expandTypedProcessContexts(sRule.getBody(), typedNames);
@@ -513,7 +513,7 @@ public class LMNParser {
 		correctBody(rule.rightMem);
 		
 		// プロセス文脈およびルール文脈を接続する
-		Hashtable names = new Hashtable();
+		HashMap names = new HashMap();
 		enumHeadNames(rule.leftMem, names);
 		enumBodyNames(rule.rightMem, names);
 		
@@ -527,9 +527,9 @@ public class LMNParser {
 	
 	/** 左辺と右辺の自由リンクをつなぐ */
 	void coupleInheritedLinks(RuleStructure rule) throws ParseException {
-		Hashtable lhsFreeLinks = rule.leftMem.freeLinks;
-		Hashtable rhsFreeLinks = rule.rightMem.freeLinks;
-		Hashtable links = new Hashtable();
+		HashMap lhsFreeLinks = rule.leftMem.freeLinks;
+		HashMap rhsFreeLinks = rule.rightMem.freeLinks;
+		HashMap links = new HashMap();
 		Iterator it = lhsFreeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			String linkname = (String)it.next();
@@ -716,7 +716,7 @@ public class LMNParser {
 	}
 	/** アトム展開後のプロセス構造（子ルール外）に出現するリンク名およびコンテキスト名を枚挙する。
 	 * @param names 限定名 (String) からコンテキスト出現のLinkedListへの写像 [in,out] */
-	private void enumNames(LinkedList process, Hashtable names) {
+	private void enumNames(LinkedList process, HashMap names) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
@@ -740,7 +740,7 @@ public class LMNParser {
 			}
 		}
 	}
-	private void addNameOccurrence(SrcContext sContext, Hashtable names) {
+	private void addNameOccurrence(SrcContext sContext, HashMap names) {
 		String name = sContext.getQualifiedName();
 		if (!names.containsKey(name)) {
 			names.put(name, new LinkedList());
@@ -750,11 +750,11 @@ public class LMNParser {
 
 	/** アトム展開後のプロセス構造（子ルール外）に出現する全てのtypedLinkNames内のリンク名を
 	 * プロセス文脈構文に置換する。
-	 * @param typedLinkNames 型付きリンク名 X (String) から、
+	 * @param typedLinkNames 型付きリンクの限定名 " X" (String) から、
 	 * 対応する型付きプロセス文脈構文 $p_X (SrcProcessContext) への写像
 	 * <pre> p(s1,X,sn) → p(s1,$p_X,sn)
 	 * </pre>*/
-	private void unabbreviateTypedLinks(LinkedList process, Hashtable typedLinkNames) {
+	private void unabbreviateTypedLinks(LinkedList process, HashMap typedLinkNames) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
@@ -764,7 +764,7 @@ public class LMNParser {
 					Object subobj = sAtom.getProcess().get(i);
 					if (subobj instanceof SrcLink) {
 						SrcLink srcLink = (SrcLink)subobj;
-						String name = srcLink.getName();
+						String name = srcLink.getQualifiedName();
 						if (typedLinkNames.containsKey(name)) {
 							sAtom.getProcess().set(i, typedLinkNames.get(name));
 						}
@@ -780,7 +780,7 @@ public class LMNParser {
 	/** アトム展開後のプロセス構造（子ルール外）のアトム引数に出現する型付きプロセス文脈を展開する。
 	 * <pre> p(s1,$p,sn) → p(s1,X,sn), $p[X]
 	 * </pre> */
-	private void expandTypedProcessContexts(LinkedList process, Hashtable typedNames) {
+	private void expandTypedProcessContexts(LinkedList process, HashMap typedNames) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
@@ -790,14 +790,13 @@ public class LMNParser {
 					Object subobj = sAtom.getProcess().get(i);
 					if (subobj instanceof SrcProcessContext) {
 						SrcProcessContext srcProcessContext = (SrcProcessContext)subobj;
-						String name = srcProcessContext.getName();
+						String name = srcProcessContext.getQualifiedName();
 						if (typedNames.containsKey(name)) {							
 							String newlinkname = generateNewLinkName();
 							sAtom.getProcess().set(i, new SrcLink(newlinkname));
 							((SrcAtom)obj).process.add(new SrcLink(newlinkname));
 							process.add(srcProcessContext);
 							srcProcessContext.args.add(new SrcLink(newlinkname));
-							sAtom.getProcess().set(i, typedNames.get(name));
 						}
 					}
 				}

@@ -42,7 +42,7 @@ public final class Membrane {
 	////////////////////////////////////////////////////////////////
 	
 	/** 膜の自由リンク名(String)からそのリンク出現(compile.struct.LinkOccurrence)への写像 */
-	public Hashtable freeLinks = new Hashtable();
+	public HashMap freeLinks = new HashMap();
 	
 	/** ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。*/
 //	public runtime.Ruleset ruleset = new InterpretedRuleset();
