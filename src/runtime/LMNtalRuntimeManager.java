@@ -76,7 +76,7 @@ public final class LMNtalRuntimeManager {
 	
 	/** リモートホストから接続があったときに呼ばれる。
 	 * 対応するRemoteLMNtalRuntimeが存在しなければ作成する。
-	 * @param nodedesc リモートホストが名乗ったノード識別子（現在はfqdnのみ） */
+	 * @param nodedesc リモートホストが名乗ったノード識別子（現在はfqdnのみ）*/
 	public static AbstractLMNtalRuntime connectedFromRemoteRuntime(String nodedesc) {
 		RemoteLMNtalRuntime ret = (RemoteLMNtalRuntime)runtimeids.get(nodedesc);
 		if (ret == null) {
@@ -158,14 +158,13 @@ public final class LMNtalRuntimeManager {
 		return tap.result;
 	}
 	
-	
-	private static Object terminateLock = "";
 	/** 登録されている全てのRemoteLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
-	 *  Env.theRuntime も terminate する (n-kato) 2004-09-17 */
+	 *  <p>Env.theRuntime も terminate する (n-kato) 2004-09-17
+	 *  <p>すでに呼ばれた場合、何もせずにfalseを返す */
 	public static boolean terminateAll() {
 //		System.out.println("LMNtalRuntimeManager.terminateAll() entered");
 		
-		synchronized(terminateLock) { // 重複転送防止のため（仮）		
+		synchronized(childNode) { // 重複転送防止のため		
 			if(Env.theRuntime.isTerminated()){
 //				System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime.isTerminated() is true");
 				return false;
@@ -190,7 +189,6 @@ public final class LMNtalRuntimeManager {
 				childNode.add(machine);
 			}
 		}
-		runtimeids.clear();
 		
 //		System.out.println("LMNtalRuntimeManager.terminateAll(): everything finished and returning true");
 		return true;
@@ -208,6 +206,7 @@ public final class LMNtalRuntimeManager {
 		}
 		daemon.sendMessage("UNREGISTERLOCAL");
 		childNode.clear();
+		runtimeids.clear();
 	}
 }
 
