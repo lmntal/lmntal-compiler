@@ -516,6 +516,9 @@ public class LMNParser {
 		incorporateSignSymbols(typeConstraints);
 		incorporateSignSymbols(sRule.getBody());
 
+		// - 型制約の = を除去する
+		// todo
+		
 		// - アトム展開（アトム引数の再帰的な展開）
 		expandAtoms(sRule.getHead());
 		expandAtoms(typeConstraints);
@@ -524,7 +527,7 @@ public class LMNParser {
 		// - 型制約の構文エラーを訂正し、アトム引数にリンクかプロセス文脈のみが存在するようにする
 		correctTypeConstraints(typeConstraints);
 
-		// - 型制約に出現するリンク名Xに対して、ルール内の全てのXを$_Xに置換する
+		// - 型制約に出現するリンク名Xに対して、ルール内の全てのXを$Xに置換する
 		HashMap typedLinkNameMap = computeTypedLinkNameMap(typeConstraints);
 		unabbreviateTypedLinks(sRule.getHead(), typedLinkNameMap);
 		unabbreviateTypedLinks(typeConstraints, typedLinkNameMap);

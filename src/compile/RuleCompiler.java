@@ -111,7 +111,7 @@ public class RuleCompiler {
 				List singletonListArgToBranch = new ArrayList();
 				singletonListArgToBranch.add(hc.match);
 				atomMatch.add(new Instruction(Instruction.BRANCH, singletonListArgToBranch));
-				hc.mempath.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
+				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 				hc.atomidpath.set(firstid, new Integer(1));	// 主導するアトムの変数番号は 1
 				hc.varcount = 2;
 				Atom atom = (Atom)hc.atoms.get(firstid);
@@ -122,10 +122,10 @@ public class RuleCompiler {
 				}
 				else {
 					hc.match.add(new Instruction(Instruction.GETMEM, varcount, 1));
-					hc.mempath.put(mem, new Integer(varcount++));
+					hc.mempaths.put(mem, new Integer(varcount++));
 					do {
 						hc.match.add(new Instruction(Instruction.GETPARENT,varcount,varcount-1));
-						hc.mempath.put(mem, new Integer(varcount++));
+						hc.mempaths.put(mem, new Integer(varcount++));
 						mem = mem.mem;
 					}	
 					while (mem != rs.leftMem);
@@ -138,7 +138,7 @@ public class RuleCompiler {
 			} else {
 				// 膜主導
 				memMatch = hc.match;
-				hc.mempath.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
+				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
 			hc.compileMembrane(rs.leftMem);
 			hc.match.add(0, Instruction.spec(hc.varcount,0));	// とりあえずここに追加（仮）
@@ -155,7 +155,7 @@ public class RuleCompiler {
 		
 		// ヘッドの取り込み
 		lhsatoms = hc.atoms;
-		lhsfreemems = hc.freemems;
+		lhsfreemems = hc.mems;
 		genLHSPaths();
 		varcount = lhsatoms.size() + lhsfreemems.size();
 		int formals = varcount;
@@ -275,9 +275,10 @@ public class RuleCompiler {
 				else {
 					identifiedCxtdefs.add(def);
 					// 左辺の型付きプロセス文脈の明示的な自由リンクの先が、左辺のアトムに出現することを確認する。
-					// 出現しない場合はコンパイルエラーとする。
-					// 【注意】左辺のアトムに限るという制限は、型は非アクティブなデータを表すことを想定しているため。
+					// 出現しない場合はコンパイルエラーとする。この制限を「パッシブ型制限」と呼ぶことにする。
+					// 【注意】パッシブ型制限は、型は非アクティブなデータを表すことを想定することにより正当化される。
 					// つまり、( 2(X) :- found(X) ) や ( 2(3) :- sour ) で2や3を$pで表すことはできない。
+					// しかし実際には処理系実行の都合による制限である。
 					// なお、プログラミングの観点から、右辺の型付きプロセス文脈の明示的な自由リンクの先は任意としている。
 					if (!lhsatompath.containsKey(def.src.args[0])) {
 						error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
@@ -715,8 +716,8 @@ public class RuleCompiler {
 					// アトムのリンク先がプロセス文脈/型付きプロセス文脈のとき
 					ProcessContext pc = (ProcessContext)link.atom;
 					if (pc.mem.typedProcessContexts.contains(pc)) {
-						// 左辺の型付きプロセス文脈の明示的な引数は左辺のアトムに制限しているため、
-						// リンク先の型付きプロセス文脈は右辺に限られる。( :- t($pc) | atom(X), $pc[X|] )
+						// パッシブ型制限より、右辺のアトムのリンク先の型付きプロセス文脈は右辺に限られる。
+						// ( :- t($pc) | atom(X), $pc[X|] )
 						if (typedcxttypes.get(pc.def) == UNARY_ATOM_TYPE) {
 							body.add( Instruction.newlink(
 											rhsatomToPath(atom), pos,
@@ -763,7 +764,8 @@ public class RuleCompiler {
 					error("SYSTEM ERROR: buddy of process context explicit free link is not set");
 				}
 				if (!(link.atom instanceof ProcessContext)) {
-					if (lhsatoms.contains(link.atom)) { // RELINK する
+					// 型付きプロセス文脈のリンク先がアトムのとき
+					if (lhsatoms.contains(link.atom)) { // ( buddy(X) :- $atom[X|] )
 						if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE) {
 							body.add( new Instruction(Instruction.RELINK,
 								rhstypedcxtToPath(atom), 0,
@@ -771,26 +773,42 @@ public class RuleCompiler {
 								rhsmemToPath(atom.mem) ));
 						}
 					}
-					else if (rhsatoms.contains(link.atom)) { // PART1でnewlink済みなので、何もしない
+					else if (rhsatoms.contains(link.atom)) { // ( :- buddy(X), $atom[X|] )
+						// PART1でnewlink済みなので、何もしない
 					}
 					else {
 						error("SYSTEM ERROR: unknown buddy of body typed process context");
+						corrupted();
 					}
 					continue;
 				}
 				ProcessContext buddypc = (ProcessContext)link.atom;
-				if (rhstypedcxtToPath(atom) < rhstypedcxtToPath(buddypc)
-				 || (rhstypedcxtToPath(atom) == rhstypedcxtToPath(buddypc) && pos < link.pos)) {
-					if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE
-					 && typedcxttypes.get(buddypc.def) == UNARY_ATOM_TYPE) {
-					 	body.add( new Instruction(Instruction.NEWLINK,
-							rhstypedcxtToPath(atom), 0,
-							rhstypedcxtToPath(buddypc), 0,
-							rhsmemToPath(atom.mem) ));
+				if (buddypc.mem.typedProcessContexts.contains(buddypc)) {
+					// リンク先が型付きプロセス文脈のとき
+					// パッシブ型制限より、リンク先も右辺。( :- $buddypc[X|], $atom[X|] )
+					if (rhstypedcxtToPath(atom) < rhstypedcxtToPath(buddypc)
+					 || (rhstypedcxtToPath(atom) == rhstypedcxtToPath(buddypc) && pos < link.pos)) {
+						if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE
+						 && typedcxttypes.get(buddypc.def) == UNARY_ATOM_TYPE) {
+						 	body.add( new Instruction(Instruction.NEWLINK,
+								rhstypedcxtToPath(atom), 0,
+								rhstypedcxtToPath(buddypc), 0,
+								rhsmemToPath(atom.mem) ));
+						}
 					}
+				}
+				else {
+					// リンク先が型付きでないプロセス文脈のとき
+					// PART1と同じ理由で$buddypcは右辺。( :- $pc[X,|], $atom[X|] )
+					
+					// todo 実装する
+					
 				}
 			}
 		}
+		// PART 3 - 右辺の型付きでないプロセス文脈に出現するリンク
+		// todo 実装する - 反対側も型付きでないときのみ
+		
 	}
 	/** 右辺のアトムを実行スタックに積む */
 	private void enqueueRHSAtoms() {

@@ -19,7 +19,6 @@ import compile.structure.*;
  * この廃止に伴って、仮引数IDでループする部分は全てatoms.iterator()を使うように変更する。
  * 
  * TODO pathという命名が現状を正しく表していない。実際はvarnum
- * TODO freememsという命名が現状を正しく表していない。実際はmems
  * 
  * <p><b>現状</b>　
  * 現在マッチング命令列では、本膜の変数番号を0、主導するアトムの変数番号を1にしている。これは今後も変えない。
@@ -34,13 +33,13 @@ public class HeadCompiler {
 	 * OBSOLETE: 実引数リスト内で、任意の空膜は任意のアトムより後ろに来る。
 	 * メモ: 空膜と言っても{$p}なども含まれる
 	 */
-	public List freemems      = new ArrayList();	// 出現する膜のリスト。[0]がm。memsに名称変更予定
+	public List mems          = new ArrayList();	// 出現する膜のリスト。[0]がm
 	public List atoms         = new ArrayList();	// 出現するアトムのリスト
 	
 	public boolean visited[];
 
-	public Map  mempath       = new HashMap();	// Membrane -> 変数番号
-	public Map  atompath      = new HashMap();	// Atom -> 変数番号。いずれatomids/atomidpathに取って代わる
+	public Map  mempaths      = new HashMap();	// Membrane -> 変数番号
+	public Map  atompaths     = new HashMap();	// Atom -> 変数番号。いずれatomids/atomidpathに取って代わる
 	
 	public Map  atomids       = new HashMap();	// Atom -> 仮引数ID
 	public List atomidpath    = new ArrayList();	// 仮引数ID -> 変数番号。いずれ配列にする。
@@ -56,7 +55,7 @@ public class HeadCompiler {
 
 	final boolean isAtomLoaded(Atom atom) { return isAtomIDLoaded(atomToID(atom)); }
 	final boolean isAtomIDLoaded(int id) { return atomidpath.get(id) != null; }
-	final boolean isMemLoaded(Membrane mem) { return mempath.containsKey(mem); }
+	final boolean isMemLoaded(Membrane mem) { return mempaths.containsKey(mem); }
 
 	final int atomIDToPath(int id) {
 		if (!isAtomIDLoaded(id)) return UNBOUND;
@@ -64,7 +63,7 @@ public class HeadCompiler {
 	}
 	final int memToPath(Membrane mem) {
 		 if (!isMemLoaded(mem)) return UNBOUND;
-		 return ((Integer)mempath.get(mem)).intValue();
+		 return ((Integer)mempaths.get(mem)).intValue();
 	}
 	static final int UNBOUND = -1;
 	
@@ -84,7 +83,7 @@ public class HeadCompiler {
 			atomids.put(atom, new Integer(atoms.size()));
 			atoms.add(atom);
 		}
-		freemems.add(mem);	// 本膜はfreemems[0]
+		mems.add(mem);	// 本膜はfreemems[0]
 		it = mem.mems.iterator();
 		while (it.hasNext()) {
 			enumFormals((Membrane)it.next());
@@ -103,8 +102,8 @@ public class HeadCompiler {
 	public void prepare() {
 		Env.c("prepare");
 		varcount = 1;	// [0]は本膜
-		mempath.clear();
-		atompath.clear();
+		mempaths.clear();
+		atompaths.clear();
 		visited = new boolean[atoms.size()];
 		atomidpath = new ArrayList();
 		for (int i = 0; i < atoms.size(); i++) atomidpath.add(null);
@@ -168,7 +167,7 @@ public class HeadCompiler {
 					}
 					else {
 						buddymempath = varcount++;
-						mempath.put(buddymem, new Integer(buddymempath));
+						mempaths.put(buddymem, new Integer(buddymempath));
 						match.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath ));
 					// // GETMEM時代のコード
 					//	Iterator it = buddymem.mem.mems.iterator();
@@ -227,7 +226,7 @@ public class HeadCompiler {
 //					//if (othermem == submem) continue;
 //					match.add(new Instruction(Instruction.NEQMEM, submempath, other));
 //				}
-				mempath.put(submem, new Integer(submempath));
+				mempaths.put(submem, new Integer(submempath));
 			}
 			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
 			// （ガードコンパイラに移動する予定）
@@ -262,20 +261,18 @@ public class HeadCompiler {
 			}
 		}
 	}
-	/**@deprecated*/
-	public List getactuals() {
-		Env.c("HeadCompiler::getactuals");
-		
+/*	public Instruction generateResetInstruction() {
+		Instruction inst = new Instruction(Instruction.
 		List args = new ArrayList();
 		
 		for(int i=0;i<atoms.size();i++) {
 			args.add( atomidpath.get(i) );
 		}
-		for(int i=0;i<freemems.size();i++) {
-			args.add( mempath.get(freemems.get(i)) );
+		for(int i=0;i<mems.size();i++) {
+			args.add( mempaths.get(mems.get(i)) );
 		}
 		return args;
-	}
+	}*/
 	public List getAtomActuals() {
 		List args = new ArrayList();		
 		for (int i = 0; i < atoms.size(); i++) {
@@ -285,8 +282,8 @@ public class HeadCompiler {
 	}		
 	public List getMemActuals() {
 		List args = new ArrayList();		
-		for (int i = 0; i < freemems.size(); i++) {
-			args.add( mempath.get(freemems.get(i)) );
+		for (int i = 0; i < mems.size(); i++) {
+			args.add( mempaths.get(mems.get(i)) );
 		}
 		return args;
 	}

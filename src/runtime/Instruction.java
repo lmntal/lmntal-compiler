@@ -333,18 +333,18 @@ public class Instruction implements Cloneable {
      * アトムはまだ実行スタックには積まれない。
      * @see enqueueatom */
     public static final int NEWATOM = 31;
+    
+	/** localnewatom [-dstatom, srcmem, funcref]
+	 * <br>最適化用ボディ命令<br>
+	 * newatomと同じ。ただし$srcmemはこの計算ノードに存在する。*/
+	public static final int LOCALNEWATOM = LOCAL + NEWATOM;
 
 	/** newatomindirect [-dstatom, srcmem, func]
 	 * <br>型付き拡張用ボディ命令<br>
 	 * 膜$srcmemにファンクタ$funcを持つ新しいアトム作成し、参照を$dstatomに代入する。
 	 * アトムはまだ実行スタックには積まれない。
 	 * @see newatom */
-	public static final int NEWATOMINDIRECT = 32;    
-    
-    /** localnewatom [-dstatom, srcmem, funcref]
-     * <br>最適化用ボディ命令<br>
-     * newatomと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-	public static final int LOCALNEWATOM = LOCAL + NEWATOM;
+	public static final int NEWATOMINDIRECT = 32;
 	
 	/** localnewatomindirect [-dstatom, srcmem, func]
 	 * <br>型付き拡張用最適化用ボディ命令<br>
@@ -768,13 +768,13 @@ public class Instruction implements Cloneable {
      * <p>トレース用。*/
 	public static final int INLINEREACT = 201;
 
-	/** reloadvars [[memargs...], [atomargs...], [varargs...]]
+	/** resetvars [[memargs...], [atomargs...], [varargs...]]
 	 * <br>失敗しないガード命令および最適化用ボディ命令<br>
 	 * 変数ベクタの内容を再定義する。新しい変数番号は、膜、アトム、その他の順番で0から振り直される。
 	 * <b>注意</b>　memargs[0]は本膜が予約しているため変更してはならない。
 	 * <p>（仕様検討中の未使用命令）
 	 */
-	public static final int RELOADVARS = 202;
+	public static final int RESETVARS = 202;
 
     /** spec [formals, locals]
      * <br><strike>
@@ -906,17 +906,17 @@ public class Instruction implements Cloneable {
 	public static final int IAND = 411;
 	public static final int IOR  = 412;
 	public static final int IXOR = 413;
-	/** iadd [-dstintatom, intatom1, intatom2]
+	/** isal [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
-	 * intatom1をintatom2ビット分符号つき(算術)左シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
+	 * $intatom1を$intatom2ビット分符号つき(算術)左シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
 	public static final int ISAL = 414;
-	/** iadd [-dstintatom, intatom1, intatom2]
+	/** isar [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
-	 * intatom1をintatom2ビット分符号つき(算術)右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
+	 * $intatom1を$intatom2ビット分符号つき(算術)右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
 	public static final int ISAR = 415;
-	/** iadd [-dstintatom, intatom1, intatom2]
+	/** ishr [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
-	 * intatom1をintatom2ビット分論理右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
+	 * $intatom1を$intatom2ビット分論理右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
 	public static final int ISHR = 416;
 
 	/** iaddfunc [-dstintfunc, intfunc1, intfunc2]
@@ -1117,9 +1117,9 @@ public class Instruction implements Cloneable {
 		i.add(atomactuals);
 		return i;
     }
-    /** reloadvars 命令を生成する */
-    public static Instruction reloadvars(List memargs, List atomargs, List varargs) {
-    	Instruction i = new Instruction(RELOADVARS);
+    /** resetvars 命令を生成する */
+    public static Instruction resetvars(List memargs, List atomargs, List varargs) {
+    	Instruction i = new Instruction(RESETVARS);
     	i.add(memargs);
     	i.add(atomargs);
     	i.add(varargs);

@@ -522,7 +522,7 @@ class InterpretiveReactor {
 					if (Env.debug == 9) Env.p("info: body execution failed");
 					return false; //n-kato
 
-				case Instruction.RELOADVARS :
+				case Instruction.RESETVARS :
 					ir = reloadVars(vars.size(), (List)inst.getArg1(),
 							(List)inst.getArg2(), (List)inst.getArg3());
 					return ir.interpret(insts, pc); //n-kato
