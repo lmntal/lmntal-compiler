@@ -43,6 +43,13 @@ H=unshift('.'(Value, Next), Obj) :- H='.'(Obj, '.'(Value, Next)).
 H=shift([], Return) :- H=[], Return=nil.
 H=shift('.'(Value, Next), Return) :- H=Next, Return=Value.
 
+/**
+ * append
+ * 
+ */
+H=append([], B) :- H=B.
+H=append([Value|Next], B) :- H=[Value|append(Next, B)].
+
 
 /**
  * of_queue
