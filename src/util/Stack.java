@@ -50,7 +50,7 @@ public final class Stack {
 	/** スタックが空ならtrue */
 	public boolean isEmpty(){
 		if(tail.prev == head) return true;
-		else false;
+		else return false;
 	}
 //	QueuedEntity.removeがあるので使わない
 /*	public void remove(QueuedEntity entity) {
