@@ -223,8 +223,16 @@ public class RuleCompiler {
 			int atompath = lhsatomToPath(atom);
 			int arity = atom.functor.getArity();
 			for (int j = 0; j < arity; j++) {
-				int linkpath = varcount++;
-				body.add(new Instruction(Instruction.GETLINK, linkpath, atompath, j));
+				int linkpath;
+				// リンク先がgroundの場合、既にGETLINKは発行されている(getGroundLinkPaths)
+				if(!(atom.args[j].buddy.atom instanceof Context &&
+					groundsrcs.containsKey(((Context)atom.args[j].buddy.atom).def))){
+					linkpath = varcount++;
+					body.add(new Instruction(Instruction.GETLINK, linkpath, atompath, j));
+				}
+				else{
+					linkpath = ((Integer)groundsrcs.get(((Context)atom.args[j].buddy.atom).def)).intValue();
+				}
 				lhslinkpath.put(atom.args[j],new Integer(linkpath));
 			}
 		}
@@ -335,6 +343,7 @@ public class RuleCompiler {
 		buildRHSTypedProcesses();
 		buildRHSAtoms(rs.rightMem);
 		// ここでvarcountの最終値が確定することになっている。変更時は適切に下に移動すること。
+		getLHSLinks();
 		updateLinks();
 		enqueueRHSAtoms();
 		addInline();
@@ -379,8 +388,8 @@ public class RuleCompiler {
 		genTypedProcessContextPaths();
 		// typedcxtdefs = gc.typedcxtdefs;
 		// varcount = lhsatoms.size() + lhsmems.size() + rs.typedProcessContexts.size();
-		getLHSLinks();
-		genGroundLinkPaths();
+		//getLHSLinks();
+		getGroundLinkPaths();
 	}
 
 //	private void inc_head(HeadCompiler hc) {
@@ -461,12 +470,15 @@ public class RuleCompiler {
 			}
 		}
 	}
-	private void genGroundLinkPaths() {
+	// ground型付きプロセス文脈定義について、ソースとなるリンクを取得する
+	private void getGroundLinkPaths() {
 		Iterator it = gc.groundsrcs.keySet().iterator();
 		while(it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
 			if(gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
-				groundsrcs.put(def,new Integer(lhslinkToPath(def.lhsOcc.args[0].buddy)));
+				int linkpath = varcount++;
+				body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[0].buddy.atom),def.lhsOcc.args[0].buddy.pos));
+				groundsrcs.put(def,new Integer(linkpath));
 			}
 		}
 	}
