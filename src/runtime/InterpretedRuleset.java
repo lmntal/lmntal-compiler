@@ -355,6 +355,9 @@ class InterpretiveReactor {
 				case Instruction.NATOMS : //[srcmem, count]
 					if (mems[inst.getIntArg1()].atoms.getNormalAtomCount() != inst.getIntArg2()) return false;
 					break; //n-kato
+				case Instruction.NATOMSINDIRECT : //[srcmem, countfunc]
+					if (mems[inst.getIntArg1()].atoms.getNormalAtomCount() != ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue()) return false;
+					break; //kudo 2004-12-08
 				case Instruction.NMEMS : //[srcmem, count]
 					if (mems[inst.getIntArg1()].mems.size() != inst.getIntArg2()) return false;
 					break; //n-kato
@@ -722,11 +725,13 @@ class InterpretiveReactor {
 					if(!eqground_ret)return false;
 					break; //kudo 2004-12-03
 				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
-					vars.add(inst.getIntArg1(),((AbstractMembrane)vars.get(inst.getIntArg3())).copyGroundFrom(((Link)vars.get(inst.getIntArg2())),new HashMap()));
+					vars.add(inst.getIntArg1(),mems[inst.getIntArg3()].copyGroundFrom(((Link)vars.get(inst.getIntArg2())),new HashMap()));
 					break; //kudo 2004-12-03
-				case Instruction.DROPGROUND : //[srclink, srcmem]
-					((AbstractMembrane)vars.get(inst.getIntArg2())).dropGround(((Link)vars.get(inst.getIntArg1())),new HashSet());
-					break; //kudo 2004-12-03
+				case Instruction.REMOVEGROUND : //[srclink,srcmem]
+					mems[inst.getIntArg2()].removeGround(((Link)vars.get(inst.getIntArg1())),new HashSet());
+					break; //kudo 2004-12-08
+				case Instruction.FREEGROUND : //[srclink]
+					break; //kudo 2004-12-08
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 
 					//====型検査のためのガード命令====ここから====
@@ -805,6 +810,15 @@ class InterpretiveReactor {
 					atoms[inst.getIntArg1()] = new Atom(null, new StringFunctor(hostname));
 					break; //n-kato
 					//====分散拡張用の命令====ここまで====
+					
+					//====アトムセットを操作するための命令====ここから====
+				case Instruction.NEWSET : //[-dstset]
+					vars.set(inst.getIntArg1(),new HashSet());
+					break; //kudo 2004-12-08
+				case Instruction.ADDATOMTOSET : //[srcset,atom]
+					((Set)vars.get(inst.getIntArg1())).add(atoms[inst.getIntArg2()]);
+					break; //kudo 2004-12-08
+					//====アトムセットを操作するための命令====ここまで====
 					
 					//====整数用の組み込みボディ命令====ここから====
 				case Instruction.IADD : //[-dstintatom, intatom1, intatom2]
