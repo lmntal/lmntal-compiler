@@ -1,10 +1,7 @@
 package test.GUI;
 
 import java.util.*;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Vector;
 
 public class GraphLayout implements Runnable {
@@ -29,6 +26,20 @@ public class GraphLayout implements Runnable {
 	
 	public Rectangle getPreferredArea() {
 		return this.area;
+	}
+	
+	public GraphNode getNearestNode(Point p) {
+		double min=Double.MAX_VALUE;
+		GraphNode minn=null;
+		for(Iterator i=nodes.iterator();i.hasNext();) {
+			GraphNode n = (GraphNode)i.next();
+			double d = p.distance(n.getPosition());
+			if(min>d) {
+				min = d;
+				minn = n;
+			}
+		}
+		return minn;
 	}
 	
 	public void start() {

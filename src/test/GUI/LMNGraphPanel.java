@@ -3,16 +3,36 @@ package test.GUI;
 import java.io.StringReader;
 import java.util.*;
 import java.awt.*;
+import java.awt.event.*;
+
+import javax.swing.*;
+import javax.swing.border.*;
 
 import compile.parser.*;
 import compile.structure.*;
 
 public class LMNGraphPanel extends GraphPanel {
 	LMNtalFrame frame;
+	GraphNode movingNode;
 	
 	public LMNGraphPanel(LMNtalFrame f) {
 		super();
 		frame = f;
+		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+		addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent arg0) {
+				//determine nearest node
+				movingNode = getGraphLayout().getNearestNode(arg0.getPoint());
+			}
+		});
+		addMouseMotionListener(new MouseMotionAdapter() {
+			public void mouseDragged(MouseEvent arg0) {
+				movingNode.pos = arg0.getPoint();
+			}
+
+		}
+		);
 	}
 	
 	public void setSource(String src) throws ParseException {

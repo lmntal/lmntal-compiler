@@ -12,8 +12,6 @@ public class GraphPanel extends JPanel implements Runnable {
 
 	private GraphLayout gLayout = null;
 	private Thread th = null;
-	private final int NODE_MAX = 10;
-	private final int EDGE_MAX = 10;
 	private Image OSI = null;
 	private Graphics OSG = null;
 	
