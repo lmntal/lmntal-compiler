@@ -522,7 +522,7 @@ class InstructionBlockProcessor implements Runnable {
 					result += tmpID + "=" + newmem.getGlobalMemID() + ";";
 				} else if (command[0].equals("REMOVEMEM")) {
 					mem.removeMem(lookupMembrane(command[2]));
-				} else if (command[0].equals("NEWROOT")) { 
+				} else if (command[0].equals("NEWROOT")) {  //TODO (nakajima)自分自身へのＮＥＷＲＯＯＴをなんとかする
 					String tmpID = command[2];
 					AbstractMembrane newmem = mem.newRoot(command[3]);
 					registerNewMembrane(tmpID,newmem);

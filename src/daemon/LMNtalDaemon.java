@@ -108,8 +108,8 @@ public class LMNtalDaemon implements Runnable {
 	 *
 	 */
 	public static void main(String args[]) {
-		Thread t = new Thread(new LMNtalDaemon(), "LMNtalDaemon");
 		Env.debug = 1; //Env.DEBUG_DEFAULTは見えないので
+		Thread t = new Thread(new LMNtalDaemon(), "LMNtalDaemon");
 		t.start();
 	}
 
