@@ -12,8 +12,8 @@ symbols = {
 	% no ルールで使う
 	{ null       }
 },
-% 述語
-predicates = {
+% 述語に対する事実
+facts = {
 	father(N1_1, N2_1), % father(naoyuki, hyogo)
 	father(N3_1, N1_2), % father(saburo, naoyuki)
 	father(N3_2, N4_1), % father(saburo, shinji)
@@ -32,7 +32,7 @@ predicates = {
 		{ p(Q2), p(D2), $r2 },
 		$r3
 	},
-	predicates = {
+	facts = {
 		father(D1, D2),
 		$r4
 	}
@@ -43,7 +43,7 @@ predicates = {
 		{ p(D2), $r2 },
 		$r3
 	},
-	predicates = {
+	facts = {
 		father(D1, D2),
 		$r4
 	}
@@ -76,7 +76,7 @@ predicates = {
 		{        p(D2), $r2 },
 		$r3
 	},
-	predicates = {
+	facts = {
 		father(D1, D2),
 		$r4
 	}
@@ -87,7 +87,7 @@ predicates = {
 		{ p(Q2), p(F), p(D2), $r2 },
 		$r3
 	},
-	predicates = {
+	facts = {
 		father(D1, D2),
 		$r4
 	}
@@ -100,7 +100,7 @@ predicates = {
 		{ p(Q2), p(D2), $r2 },
 		$r3
 	},
-	predicates = {
+	facts = {
 		father(D1, D2),
 		$r4
 	}
@@ -111,7 +111,7 @@ predicates = {
 		{ p(Q2),       p(D2), $r2 },
 		$r3
 	},
-	predicates = {
+	facts = {
 		father(D1, D2),
 		$r4
 	}
