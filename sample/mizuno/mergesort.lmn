@@ -3,7 +3,7 @@ ret=sort(gen(100)).
 R=gen(N) :- N > 0 | R=[integer.rnd(100)|gen(N-1)].
 R=gen(N) :- N = 0 | R=[].
 
-R=sort(L) :- R=sort2(gen_lists(L)).
+R=sort(L) :- R=f(sort2(gen_lists(L))).
 
 R=gen_lists([D|L]) :- int(D) | R=[ [D]|gen_lists(L)].
 R=gen_lists([]) :- R=[].
@@ -16,3 +16,5 @@ R=merge([D1|L1],[D2|L2]) :- D1 <  D2 | R=[D1|merge(L1,[D2|L2])].
 R=merge([D1|L1],[D2|L2]) :- D1 >= D2 | R=[D2|merge([D1|L1],L2)].
 R=merge(L,[]) :- R=L.
 R=merge([],L) :- R=L.
+
+R=f([D]) :- R=D

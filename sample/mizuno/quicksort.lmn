@@ -1,0 +1,13 @@
+% appendを利用しているのでちょっと遅い。
+
+ret=sort(gen(100)).
+
+R=gen(N) :- N > 0 | R=[integer.rnd(100)|gen(N-1)].
+R=gen(N) :- N = 0 | R=[].
+
+R=sort([D|L]) :- int(D) | devide(L,D,L1,L2), R=list.append(sort(L1),[D|sort(L2)]).
+R=sort([])    :- R=[].
+
+devide([D|L],B,L1,L2) :- D <  B | devide(L,B,LL1,L2), L1=[D|LL1].
+devide([D|L],B,L1,L2) :- D >= B | devide(L,B,L1,LL2), L2=[D|LL2].
+devide([],   B,L1,L2) :- int(B) | L1=[], L2=[].
