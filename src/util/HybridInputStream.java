@@ -27,6 +27,7 @@ public class HybridInputStream {
 	public String readLine() throws IOException {
 		if (lines == null || nextLine == lineCount) {
 			lines = new String(readBytes()).split("\n", -1);
+			nextLine = 0;
 			lineCount = lines.length;
 			if (lines[lineCount-1].equals("")) {
 				//改行で終わっている場合、最後の改行の後は無視
