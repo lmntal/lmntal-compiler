@@ -9,5 +9,5 @@ package runtime;
  * Window>Preferences>Java>Code Generation.
  */
 public class BodyInstruction {
-
+String a = "CVS Test";
 }
