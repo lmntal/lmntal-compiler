@@ -6,7 +6,9 @@ AUTHOR
 	Mizuno Ken
 
 HISTORY
-	2004/07/12(Mon)
+    2004/07/21(Thu) データを文字列アトムに変更
+    2004/07/21(Thu) 大幅変更
+	2004/07/12(Mon) 新規作成
 
 USAGE
 	socket.connect(<Host>,<Port>,<Commands>)
@@ -27,13 +29,6 @@ USAGE
 	　　　　　　　　　　　　　　　　　その後は、上と同じように操作する。
 	close : サーバーソケットをとじる。
 
-EXAMPLE 1
-	socket.connect([[localhost]],1234,in,[hoge,moge,zubang])
-
-EXAMPLE 2
-	socket.connect([[localhost]],1234,in,out).
-	write. write. write.
-	write, out(O) :- O=[hoge,moge|out].
 */
 
 [[/*inline_define*/
@@ -110,7 +105,7 @@ L:
 				AbstractMembrane mem = me.getMem();
 				mem.asyncLock();
 				Atom socAtom = me.nthAtom(0);
-				Atom dataAtom = mem.newAtom(new Functor(data, 1));
+				Atom dataAtom = mem.newAtom(new StringFunctor(data));
 				Atom dot = mem.newAtom(new Functor(".", 3));
 				mem.newLink(dot, 0, dataAtom, 0);
 				mem.relink(dot, 2, socAtom, 1);
@@ -207,11 +202,11 @@ socket.socket(SO,nil,Out,[is(IS)|C]) :-
 socket.socket(SO,In,[],[os(OS)|C]) :-
 	socket.socket(SO,In,OS,C).
 		
-socket.socket(SO,In,[D|Out],C) :- unary(D) |
+socket.socket(SO,In,[D|Out],C) :- string(D) |
 	socket.socket(SS,In,Out,C),
 	SS=[[/*inline*/
 		try {
-			String data = me.nth(0);
+			String data = (String)((StringFunctor)me.nthAtom(0).getFunctor()).getObject();
 			Socket soc = ((ReadThread)((ObjectFunctor)me.nthAtom(1).getFunctor()).getObject()).socket;
 			BufferedWriter writer = new BufferedWriter(
 					new OutputStreamWriter(soc.getOutputStream()));
