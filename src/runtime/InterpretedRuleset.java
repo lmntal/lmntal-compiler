@@ -646,6 +646,7 @@ class InterpretiveReactor {
 					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
 					break; //kudo 2004-10-10
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
+					Functor FUNC_UNIFY = new Functor("=",2);
 					List linklist=(List)inst.getArg2();
 					Set insset=new HashSet();
 					AbstractMembrane srcmem=mems[inst.getIntArg3()];
@@ -654,11 +655,13 @@ class InterpretiveReactor {
 							Link a=(Link)vars.get(((Integer)linklist.get(i)).intValue());
 							Link b=(Link)vars.get(((Integer)linklist.get(j)).intValue());
 							if(a==b.getBuddy()){
-								Atom eq=srcmem.newAtom(new Functor("=",2));
-								a.getAtom().args[a.getPos()]=new Link(eq,0);
-								b.getAtom().args[b.getPos()]=new Link(eq,1);
-								eq.args[0]=a;
-								eq.args[1]=b;
+								Atom eq=srcmem.newAtom(FUNC_UNIFY);
+								srcmem.unifyLinkBuddies(a,new Link(eq,0));
+								srcmem.unifyLinkBuddies(b,new Link(eq,1));
+//								a.getAtom().args[a.getPos()]=new Link(eq,0);
+//								b.getAtom().args[b.getPos()]=new Link(eq,1);
+//								eq.args[0]=a;
+//								eq.args[1]=b;
 								insset.add(eq);
 							}
 						}
@@ -672,8 +675,9 @@ class InterpretiveReactor {
 					while(it.hasNext()){
 						Atom orig=(Atom)it.next();
 						Atom copy=(Atom)delmap.get(new Integer(orig.id));
-						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
-						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
+						srcmem.unifyLinkBuddies(copy.args[0], copy.args[1]);
+//						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
+//						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
 						srcmem.removeAtom(copy);
 					}
 					break; //kudo 2004-12-29
