@@ -187,6 +187,7 @@ public class Functor implements Serializable {
 		// （仮）
 		if (getSymbolFunctorID().equals("n_1")) return false;
 		if (getSymbolFunctorID().equals("c_3")) return false;
+		if (arity == 0) return true;
 		return getSymbolFunctorID().matches("^[a-z].*$");
 	}
 	/** このクラスのオブジェクトかどうかを調べる。*/

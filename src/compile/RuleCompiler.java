@@ -163,6 +163,21 @@ public class RuleCompiler {
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
 			hc.compileMembrane(rs.leftMem);
+			// 自由出現したデータアトムがないか検査する
+			if (!hc.fFindDataAtoms) {
+				if (Env.debug >= 1) {
+					Iterator it = hc.atoms.iterator();
+					while (it.hasNext()) {
+						Atom atom = (Atom)it.next();
+						if (!hc.isAtomLoaded(atom)) {
+							error("TYPE WARNING: Rule head contains free data atom: " + atom);
+						}
+					}
+				}
+				hc.switchToUntypedCompilation();
+				hc.compileMembrane(rs.leftMem);
+			}
+			// hc.checkFreeLinkCount(rs.leftMem); // 言語仕様変更により呼ばなくてよくなった
 			if (hc.match == memMatch) {
 				hc.match.add(0, Instruction.spec(1, hc.varcount));
 			}

@@ -42,6 +42,9 @@ public class HeadCompiler {
 	private Map atomids		= new HashMap();	// Atom -> atoms内のindex（廃止の方向で検討する）
 	private HashSet visited	= new HashSet();	// Atom -> boolean, マッチング命令を生成したかどうか
 	private HashSet memVisited	= new HashSet();	// Membrane -> boolean, compileMembraneを呼んだかどうか
+
+	boolean fFindDataAtoms;						// データアトムをfindatomしてよいかどうか
+	boolean UNTYPED_COMPILE	= false;			// fFindDataAtomsの初期値
 	
 	int varcount;	// いずれアトムと膜で分けるべきだと思う
 	
@@ -126,6 +129,7 @@ public class HeadCompiler {
 		match = matchLabel.insts;
 		varcount = 1;	// [0]は本膜
 //		mempaths.put(mems.get(0), new Integer(0));	// 本膜の変数番号は 0
+		fFindDataAtoms = UNTYPED_COMPILE;
 	}
 
 	/**
@@ -318,11 +322,30 @@ public class HeadCompiler {
 			}
 		}
 		// 見つかった新しい子膜にあるアトムを優先的に検査する。
-		// TODO （効率改善）アクティブアトムがある膜を優先すべきである。これは膜主導のときの最初のアトム選択と共通の課題
+		// ただしアクティブアトムがある膜を優先する。
 		Iterator it = newmemlist.iterator();
+		nextmem:
+		while (it.hasNext()) {
+			Membrane mem = (Membrane)it.next();
+			Iterator it2 = mem.atoms.iterator();
+			while (it2.hasNext()) {
+				Atom atom = (Atom)it2.next();
+				if (!isAtomLoaded(atom) && atom.functor.isActive()) {
+					compileMembrane(mem);
+					it.remove();
+					continue nextmem;
+				}					
+			}
+		}
+		it = newmemlist.iterator();
 		while (it.hasNext()) {
 			compileMembrane((Membrane)it.next());
 		}
+	}
+	/** 引き続きこのヘッドを型なしでコンパイルするための準備をする。*/
+	public void switchToUntypedCompilation() {
+		fFindDataAtoms = true;
+		memVisited.clear();
 	}
 	/** 膜および子孫の膜に対してマッチングを行う */
 	public void compileMembrane(Membrane mem) {
@@ -335,6 +358,7 @@ public class HeadCompiler {
 		Iterator it = mem.atoms.iterator();
 		while (it.hasNext()) {
 			Atom atom = (Atom)it.next();
+			if (!atom.functor.isActive() && !fFindDataAtoms) continue;
 			if (atomToPath(atom) == UNBOUND) {
 				// 見つかったアトムを変数に取得する
 				int atompath = varcount++;
@@ -386,11 +410,14 @@ public class HeadCompiler {
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 			compileMembrane(submem);
 		}
-		// $p等式右辺膜以外の場合は、自由リンクに関する検査を行う。
-		// 現在 redex "Tθ" に = を含んでもよい言語仕様になっているため、この検査は実は不要。
-		// したがって省略した。(n-kato 2004.11.24)
-		if (false)
-		if (!mem.processContexts.isEmpty() && !proccxteqMap.containsKey(mem)) {
+	}
+	/** 膜および子孫の膜に対して自由リンクの個数を調べる。
+	 * <p>かつて$p等式右辺膜以外の場合は、自由リンクに関する検査を行う必要があった。
+	 * しかし現在 redex "Tθ" に = を含んでもよい言語仕様になっているため、この検査は実は不要。
+	 * したがってこのメソッドは呼ばれない。(n-kato 2004.11.24--2004.11.26) */
+	public void checkFreeLinkCount(Membrane mem) {
+		if (!mem.processContexts.isEmpty()) {
+			int thismempath = memToPath(mem);
 			ProcessContext pc = (ProcessContext)mem.processContexts.get(0); // 左辺膜の$p（必ず非トップ膜）
 			// 明示的なリンク先（必ず非トップ膜のアトム（自由リンク管理アトムを含む））が
 			// 自由リンク出力管理アトムでないことを確認する
@@ -406,6 +433,11 @@ public class HeadCompiler {
 				match.add(new Instruction(Instruction.NFREELINKS, thismempath,
 					mem.getFreeLinkAtomCount()));					
 			}
+		}
+		Iterator it = mem.mems.iterator();
+		while (it.hasNext()) {
+			Membrane submem = (Membrane)it.next();
+			checkFreeLinkCount(submem);
 		}
 	}
 //	public Instruction getResetVarsInstruction() {
