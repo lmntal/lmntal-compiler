@@ -29,6 +29,9 @@ public class LMNParser {
 	private int nLinkNumber = 0;
 	private Scanner lex = null;
 	
+	/** キャッシュ文字列の構文解析器かどうか（アクセッサメソッドはまだ無い）*/
+	public boolean fCacheParser = false;
+	
 	private int nErrors = 0;
 	private int nWarnings = 0;
 	
@@ -81,6 +84,40 @@ public class LMNParser {
 		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
 		return mem;
 	}
+	
+	/**
+	 * parseの代わりに呼ぶ。【未実装】
+	 * <p>
+	 * <b>キャッシュ文字列の定義</b>
+	 * アトム       → p(リンク...)
+	 * 自由リンク   → $in_(insideproxyアトムの親膜計算機でのLocalID)[リンク]
+	 * ルールセット → $rs_(ルールセットのGlobalID)
+	 * 子膜        → { $mem_(子膜のGlobalID), 自由リンク... }
+	 * <b>例</b>
+	 * <pre>
+	 * $in_11[_1], $in_22[_2], f(_1,_3), g(_3,_4), $rs_1111_611, $rs_1111_612,
+	 *   { $mem_3333_7, $in_33[_2], $in_44[_4] }
+	 * </pre>
+	 * <p>
+	 * キャッシュ文字列を解析し、プロセス構造が入った膜構造を生成する。
+	 * @return キャッシュ文字列全体が表すプロセス構造が入った膜構造（詳細未定）
+	 * @throws ParseException
+	 */
+	public Membrane parseCacheText() throws ParseException {
+		fCacheParser = true;
+		LinkedList srcProcess = parseSrc();
+		Membrane mem = new Membrane(null);
+		expander.incorporateSignSymbols(srcProcess);
+		expander.incorporateModuleNames(srcProcess);
+		expander.expandAtoms(srcProcess);
+		expander.correctWorld(srcProcess);
+		addProcessToMem(srcProcess, mem);
+		// todo 実装する
+		HashMap freeLinks = addProxies(mem);
+		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
+		return mem;
+	}
+	
 	
 	/**	
 		解析の結果を LinkedList とする解析木として返します。
@@ -1511,6 +1548,12 @@ class SyntaxExpander {
 			else if (obj instanceof SrcLink) {
 				error("SYNTAX ERROR: top-level variable occurrence: " + ((SrcLink)obj).getName());
 				it.remove();
+			}
+			else if (obj instanceof SrcContext) {
+				if (!parser.fCacheParser) {
+					error("SYNTAX ERROR: process/rule context must occur in a rule: " + obj);
+					it.remove();
+				}
 			}
 			else {
 				error("SYNTAX ERROR: illegal object outside a rule: " + obj);
