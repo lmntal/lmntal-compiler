@@ -725,7 +725,7 @@ class InterpretiveReactor {
 					if(!eqground_ret)return false;
 					break; //kudo 2004-12-03
 				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
-					vars.add(inst.getIntArg1(),mems[inst.getIntArg3()].copyGroundFrom(((Link)vars.get(inst.getIntArg2())),new HashMap()));
+					vars.set(inst.getIntArg1(),mems[inst.getIntArg3()].copyGroundFrom(((Link)vars.get(inst.getIntArg2())),new HashMap()));
 					break; //kudo 2004-12-03
 				case Instruction.REMOVEGROUND : //[srclink,srcmem]
 					mems[inst.getIntArg2()].removeGround(((Link)vars.get(inst.getIntArg1())),new HashSet());
@@ -738,7 +738,7 @@ class InterpretiveReactor {
 				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
 					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround(new HashSet(),((Set)vars.get(inst.getIntArg3())));
 					if(isground_ret == -1)return false;
-					vars.add(inst.getIntArg1(),new IntegerFunctor(isground_ret));
+					vars.set(inst.getIntArg1(),new IntegerFunctor(isground_ret));
 					break; //kudo 2004-12-03
 					
 				case Instruction.ISUNARY: // [atom]
