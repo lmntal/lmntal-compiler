@@ -18,6 +18,33 @@ HISTORY
 {
 module(string).
 
+//H=string.t(String, Times) :- unary(String), int(Times) |
+//	t_s0(String, Times, 1, "").
+//H=t_s0(String, Times, I, Result) :- int(Times), I0=I*2 |
+//	t_s1(string.t(String, 2), Times, I0, Result).
+//H=t_s1(String, Times, I, Result) :- int(Times), I0=I*2 |
+//	t_s1(string.t(String, 2), Times, I0, Result).
+
+/**
+ * times : String -> Int -> String
+ * 
+ * r=string.times("ab", 5)  ==>  r="ababababab"
+ */
+H=string.times(String, Times) :-
+	unary(String), int(Times) | H=[[/*inline*/
+	StringBuffer b = new StringBuffer(me.nth(0));
+	StringBuffer r = new StringBuffer("");
+	int times = Integer.parseInt(me.nth(1));
+	for(int i=1;i<=times;i<<=1, b.append(b)) {
+		if((i&times)>0) r.append(b);
+	}
+	Atom result = mem.newAtom(new Functor(r.toString(), 1));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	]](String, Times).
+
 /**
  * replace : String -> String -> String -> String
  * 
@@ -37,6 +64,26 @@ H=string.replace(String, Regexp, Replacement) :-
 	me.nthAtom(2).remove();
 	me.remove();
 	]](String, Regexp, Replacement).
+
+/**
+ * match : String -> String -> Bool
+ * 
+ * 部分的にマッチするかどうかをかえす。
+ * （String.match は全体とマッチするかどうかなので微妙に違う。）
+ * パターン文字列が変だったときは false
+ */
+H=string.match(String, Regexp) :-
+	unary(String), unary(Regexp) | H=[[/*inline*/
+	boolean b=false;
+	try {
+		b = java.util.regex.Pattern.compile(me.nth(1)).matcher(me.nth(0)).find();
+	} catch(Exception e) {e.printStackTrace();}
+	Atom result = mem.newAtom(new Functor(b?"true":"false", 1));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	]](String, Regexp).
 
 /**
  * split : String -> String -> List
