@@ -4,6 +4,7 @@ import java.util.*;
 import runtime.Env;
 import runtime.InterpretedRuleset;
 import runtime.Instruction;
+import runtime.Functor;
 
 /*
  * 作成日: 2003/10/24
@@ -26,6 +27,11 @@ import runtime.Instruction;
  * @author hara(working)
  */
 public class RuleCompiler {
+	/**
+	 * 繋がってるとみなすファンクタ
+	 */
+	public static final Functor FUNC_UNIFY = new Functor("=", 2);
+	
 	public RuleStructure rs;
 	public List atommatches = new ArrayList();
 	public List memmatch = new ArrayList();
@@ -33,16 +39,17 @@ public class RuleCompiler {
 	public List body;
 	
 	public List lhsfreemems;
-	public Map lhsatomids;
 	
 	public List rhsatoms;
-	public Map rhsatompath;
-	public Map rhsmempaths;
+	public Map  rhsatompath;
+	public Map  rhsmempaths;
 	
 	public List lhsatoms;
-	public Map lhsatompath;
+	public Map  lhsatompath;
+	public Map  lhsmempaths;
+	
+	public Map lhsatomids;
 	public Map lhsatomidpath;
-	public Map lhsmempaths;
 	
 	HeadCompiler hc;
 	
@@ -70,15 +77,18 @@ public class RuleCompiler {
 		//@ruleid = rule.ruleid
 		
 		hc = new HeadCompiler(rs.leftMem);
-		hc.enumformals();
-		if(false /* @lhs.natoms + @lhs.nmems == 0 */) {
-			hc.freemems.add(rs.leftMem);
-		}
+		hc.enumformals(rs.leftMem);
+		// ちょっとかえて、enumformals 内でやるようにした。 
+		//if(false /* @lhs.natoms + @lhs.nmems == 0 */) {
+		//	hc.freemems.add(rs.leftMem);
+		//}
 		compile_l();
 		compile_r();
 		
 		//optimize if $optlevel > 0
 		optimize();
+		
+		Env.p(memmatch);
 		
 		//rule.register(@atommatches,@memmatch,@body)
 		Rule[] rr = new Rule[rules.size()];
@@ -91,19 +101,20 @@ public class RuleCompiler {
 	private void compile_l() {
 		Env.c("compile_l");
 		for(int firstid=0; firstid<=hc.atoms.size(); firstid++) {
+			// 初期化。
 			hc.prepare();
+			
 			if(firstid < hc.atoms.size()) {
 				atommatches.addAll(hc.match);
 				hc.atomidpath.set(firstid, new Integer(1));
 				hc.varcount = 1;
 				Membrane mem = ((Atom)(hc.atoms.get(firstid))).mem;
-				hc.match.add( new Instruction(/* [:execlevel, mem.memlevel] */) );
-				hc.match.add( new Instruction(/* [:func,1,@lhscmp.atoms[firstid].func */) );
+				hc.match.add( "[:execlevel, mem.memlevel]" );
+				hc.match.add( "[:func,1,@lhscmp.atoms[firstid].func" );
 				
 				hc.mempaths.put(mem, "[:memof,1]");
 				// 親膜をたどる
 				while(mem.mem != null) {
-					//@lhscmp.mempaths[mem.mem] = @lhscmp.mempaths[mem].dup.unshift :memof
 					List l = ((List)(hc.mempaths.get(mem)));
 					List ll = new ArrayList();
 					for(ListIterator li=l.listIterator();li.hasNext();) {
@@ -123,73 +134,38 @@ public class RuleCompiler {
 			}
 			hc.compile_mem(rs.leftMem);
 			// 反応しろという命令
-			hc.match.add( new Instruction( /*[:react, @ruleid, @lhscmp.getactuals]*/ ) );
+			hc.match.add( "[:react, @ruleid, " + hc.getactuals() );
 		}
-		/*
-		for firstid in 0..(@lhscmp.atoms.length)
-			@lhscmp.prepare
-			if firstid < @lhscmp.atoms.length
-				@atommatches.push @lhscmp.match
-				
-				@lhscmp.atomidpath[firstid] = @lhscmp.varcount = 1
-				mem = @lhscmp.atoms[firstid].mem
-				@lhscmp.match.push [:execlevel, mem.memlevel]
-				@lhscmp.match.push [:func,1,@lhscmp.atoms[firstid].func]
-				@lhscmp.mempaths[mem] = [:memof,1]
-				while mem.mem != nil
-					@lhscmp.mempaths[mem.mem] = @lhscmp.mempaths[mem].dup.unshift :memof
-					mem = mem.mem
-				end
-				@lhscmp.compile_group firstid
-			else
-				@memmatch = @lhscmp.match
-				@lhscmp.mempaths[@lhs] = [@lhscmp.varcount = 0]
-			end
-			
-			# 
-			@lhscmp.compile_mem  @lhs
-			@lhscmp.compile_negs @negs
-			# 反応しろという命令
-			@lhscmp.match.push [:react, @ruleid, @lhscmp.getactuals]
-		end
-		 */
 	}
 	
 	private void compile_r() {
 		Env.c("compile_r");
+		
 		lhsatoms = hc.atoms;
 		lhsfreemems = hc.freemems;
 		lhsatomids = hc.atomids;
 		varcount = lhsatoms.size() + lhsfreemems.size();
+		body = new ArrayList();
+		body.add("[:spec,@varcount]");
+		
+		genlhsmempaths();
+		rhsatoms = new ArrayList();
 		rhsatompath = new HashMap();
 		rhsmempaths = new HashMap();
 		rhsmempaths.put(rs.rightMem, lhsmempaths.get(rs.leftMem));
-		genlhsmempaths();
-		/*
-		@lhsatoms 	 = @lhscmp.atoms
-		@lhsfreemems = @lhscmp.freemems
-		@lhsatomids  = @lhscmp.atomids
-		@varcount = @lhsatoms.length + @lhsfreemems.length
-		@body = [[:spec,@varcount]]
-		genlhsmempaths
-		@rhsatoms 	 = []
-		@rhsatompath = {}
-		@rhsmempaths = {}
-		@rhsmempaths[@rhs] = @lhsmempaths[@lhs]
 		
-		remove_lhsatoms
-		remove_lhsmem 			@lhs
+		remove_lhsatoms();
+		remove_lhsmem(rs.leftMem);
+		build_rhsmem(rs.rightMem);
+		inherit_rhsrules(rs.rightMem);
+		inherit_builtins(rs.rightMem);
 		
-		build_rhsmem				@rhs
-		inherit_rhsrules		@rhs
-		inherit_builtins		@rhs
+		build_rhsatoms(rs.rightMem);
+		free_lhsmem(rs.leftMem);
 		
-		build_rhsatoms			@rhs
-		free_lhsmem 				@lhs
-		
-		@body.first.push @varcount
-		update_links
-		 */
+		// spec の引数を追加している。命令クラスの仕様にのっとって書く。
+		//body.first.push @varcount
+		update_links();
 	}
 	
 	public void simplify() {
@@ -225,7 +201,7 @@ public class RuleCompiler {
 	private void genlhsmempaths() {
 		Env.c("RuleCompiler::genlhsmempaths");
 		
-		Membrane mem;
+		Membrane mem = null;
 		int atomid;
 		
 		List rootmems = new ArrayList();
@@ -248,48 +224,136 @@ public class RuleCompiler {
 			lhsmempaths.put(mem, new Integer(i + lhsatoms.size() + 1));
 			rootmems.add(mem);
 		}
+		if(mem != null)
 		while( mem.mem != null && ! lhsmempaths.containsValue(mem.mem) ) {
 			varcount++;
 			lhsmempaths.put((Object)(mem.mem), new Integer(varcount));
 			body.add( "[:getparent, @varcount, @lhsmempaths[mem]]" );
 			mem = mem.mem;
 		}
-		/*
-		rootmems = []
-		@lhsmempaths	 = {} # elements are integers such as 4
-		@lhsatomidpath = {}
-		@lhsatoms.each do | atom |
-			atomid = @lhsatomids[atom]
-			@lhsatomidpath[atomid] = atomid + 1
-			
-			unless @lhsmempaths[atom.mem]
-				@lhsmempaths[atom.mem] = (@varcount += 1)
-				@body.push [:getmem, @varcount, atomid + 1]
-				rootmems.push atom.mem
-			end
-		end
-		@lhsfreemems.length.times do | index |
-			mem = @lhsfreemems[index]
-			@lhsmempaths[mem] = (index + @lhsatoms.length + 1)
-			rootmems.push mem
-		end
-		rootmems.each do | mem |
-# 		 while mem.mem and (not @lhsmempaths.include? mem.mem or
-# 				 @lhsmempaths[mem].length + 1 < @lhsmempaths[mem.mem].length)
-# 			 @lhsmempaths[mem.mem] = @lhsmempaths[mem].dup.unshift :memof
-# 			 mem = mem.mem
-# 		 end
-			while mem.mem and not @lhsmempaths.include? mem.mem
-				@lhsmempaths[mem.mem] = (@varcount += 1)
-				@body.push [:getparent, @varcount, @lhsmempaths[mem]]
-				mem = mem.mem
-			end
-		end
-		 */
 	}
 	
 	private void optimize() {
 		Env.c("optimize");
+	}
+	
+	private void remove_lhsatoms() {
+		Env.c("RuleCompiler::remove_lhsatoms");
+		for(int i=0;i<lhsatoms.size();i++) {
+			Atom atom = (Atom)(lhsatoms.get(i));
+			body.add("[:removeatom, "+(i+1)+", "+atom.functor);
+			body.add("[:freeatom, "+(i+1)+", "+atom.functor);
+		}
+	}
+	
+	private void remove_lhsmem(Membrane mem) {
+		Env.c("RuleCompiler::remove_lhsmem");
+		for(int i=0;i<mem.mems.size();i++) {
+			Membrane m = (Membrane)(mem.mems.get(i));
+			
+			remove_lhsmem(m);
+			body.add("[:removemem"+lhsmempaths.get(m));
+		}
+	}
+	
+	private void build_rhsmem(Membrane mem) {
+		Env.c("RuleCompiler::build_rhsmem");
+		for(int i=0;i<mem.mems.size();i++) {
+			Membrane m = (Membrane)(mem.mems.get(i));
+			
+			rhsmempaths.put(m, new Integer(++varcount));
+			body.add("[:newmem"+varcount+", "+rhsmempaths.get(m));
+			build_rhsmem(m); //inside must be enqueued first
+		}
+		for(int i=0;i<mem.processContexts.size();i++) {
+			ProcessContext p = (ProcessContext)(mem.processContexts.get(i));
+			
+			if(rhsmempaths.get(mem).equals(lhsmempaths.get(p.lhsmem))) continue;
+			body.add("[:pour"+rhsmempaths.get(mem)+", "+lhsmempaths.get(p.lhsmem));
+		}
+	}
+	
+	private void inherit_rhsrules(Membrane mem) {
+		Env.c("RuleCompiler::inherit_rhsrules");
+		for(int i=0;i<mem.mems.size();i++) {
+			Membrane m = (Membrane)(mem.mems.get(i));
+			inherit_rhsrules(m);
+		}
+		for(int i=0;i<mem.ruleContexts.size();i++) {
+			RuleContext r = (RuleContext)(mem.ruleContexts.get(i));
+			
+			if(rhsmempaths.get(mem).equals(lhsmempaths.get(r.lhsmem))) continue;
+			body.add("[:inheritrules"+rhsmempaths.get(mem)+", "+lhsmempaths.get(r.lhsmem));
+		}
+	}
+	
+	private void inherit_builtins(Membrane mem) {
+		Env.c("RuleCompiler::inherit_builtins");
+		for(int i=0;i<mem.mems.size();i++) {
+			Membrane m = (Membrane)(mem.mems.get(i));
+			inherit_builtins(m);
+		}
+		for(int i=0;i<mem.rules.size();i++) {
+			RuleStructure r = (RuleStructure)(mem.rules.get(i));
+			
+			body.add("[:loadruleset"+rhsmempaths.get(mem)+", "+r);
+		}
+		/*
+		mem.rulesets.each do | ruleset |
+			@body.push [:loadruleset, @rhsmempaths[mem], ruleset.rulesetid]
+		end
+		 */
+	}
+	
+	private void build_rhsatoms(Membrane mem) {
+		Env.c("RuleCompiler::build_rhsatoms");
+		for(int i=0;i<mem.mems.size();i++) {
+			Membrane m = (Membrane)(mem.mems.get(i));
+			build_rhsatoms(m);
+		}
+		for(int i=0;i<mem.atoms.size();i++) {
+			Atom atom = (Atom)(mem.atoms.get(i));
+			
+			if(atom.functor.equals(FUNC_UNIFY)) {
+				LinkOccurrence link1 = atom.args[0];
+				LinkOccurrence link2 = atom.args[1];
+				body.add("[:unify, "
+					+lhsatomidpath.get(lhsatomids.get(link1.atom))+", "+link1.pos
+					+lhsatomidpath.get(lhsatomids.get(link2.atom))+", "+link2.pos
+				);
+			} else {
+				rhsatompath.put(atom, new Integer(++varcount));
+				rhsatoms.add(atom);
+				body.add("[:newatom, "+varcount+", "+rhsmempaths.get(mem)+", "+atom.functor);
+			}
+		}
+	}
+	
+	private void free_lhsmem(Membrane mem) {
+		Env.c("RuleCompiler::free_lhsmem");
+		for(int i=0;i<mem.mems.size();i++) {
+			Membrane m = (Membrane)(mem.mems.get(i));
+			free_lhsmem(m);
+			body.add("[:freemem, "+lhsmempaths.get(m));
+		}
+	}
+	
+	private void update_links() {
+		Env.c("RuleCompiler::update_links");
+		for(int i=0;i<rhsatoms.size();i++) {
+			Atom atom = (Atom)(rhsatoms.get(i));
+			
+			for(int pos=1; pos <= atom.functor.getArity(); pos++) {
+				LinkOccurrence link = atom.args[pos];
+				if(link.atom.mem.mems.get(0).equals(rs.leftMem)) {
+					body.add("[:relink, "+rhsatompath.get(atom)+", "+pos+", "
+						+lhsatomidpath.get(lhsatomids.get(link.atom))+", "+link.pos);
+				} else {
+					body.add("[:newlink, "+rhsatompath.get(atom)+", "+pos+", "
+						+rhsatompath.get(link.atom)+", "+link.pos);
+				}
+			}
+		}
 	}
 }
 

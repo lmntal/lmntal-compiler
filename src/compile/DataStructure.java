@@ -71,8 +71,8 @@ final class Membrane {
 /** ソースコード中のリンクの各出現を表すクラス */
 final class LinkOccurrence {
 	String name;
-	Atom atom;
-	int pos;
+	public Atom atom;
+	public int pos;
 	/**
 	 * ルール中のどの場所に出現しているかを現す。
 	 * 定数HEADかBODYのいずれかの値が入る。
@@ -132,9 +132,9 @@ abstract class Context {
 		return name;
 	}
 	/** 左辺での所属膜 */
-	Membrane lhsMem;
+	Membrane lhsmem;
 	/** 右辺での所属膜の配列 */
-	List rhsMems;
+	List rhsmems;
 	/** 現在の状態。ST_で始まる定数のいずれかの値をとる */
 	int status = ST_FRESH;
 	/** 初期状態 */
@@ -162,6 +162,7 @@ final class ProcessContext extends Context{
 	 * TODO 専用のクラスを作る？
 	 */
 	private LinkOccurrence bundle;
+	
 	ProcessContext(String name) {
 		super(name);
 	}
