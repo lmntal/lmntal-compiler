@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 import runtime.Env;
 import util.HybridInputStream;
@@ -99,15 +98,6 @@ public class LMNtalNode {
 		} catch (java.net.UnknownHostException e) {
 			e.printStackTrace();
 			return false;
-		}
-	}
-	
-	public static String getLocalHostName() {
-		try {
-			return InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return "???"; // どうせ通信できないので(?)放置しておく
 		}
 	}
 	

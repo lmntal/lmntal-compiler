@@ -99,6 +99,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				String type  = parsedInput[1];
 				String msgid = parsedInput[2];
 				String rgid  = parsedInput[3];
+				// TODO （中島君）ここはすでに登録されていたらFAILを返すのが正しいみたいですので直さないでください。
 				boolean result = LMNtalDaemon.registerRuntimeGroup(rgid, this);
 				respond(msgid, result);
 				continue;

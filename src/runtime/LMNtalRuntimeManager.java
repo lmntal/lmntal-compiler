@@ -7,6 +7,7 @@ import daemon.LMNtalNode;
 import daemon.LMNtalDaemon;
 import daemon.LMNtalRuntimeMessageProcessor;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 /**
@@ -23,9 +24,15 @@ public final class LMNtalRuntimeManager {
 	/** 計算ノード表を利用開始する */
 	public static void init() {}
 	
-	/** ノード識別子をfqdnに変換する（仮）*/
+	/** ノード識別子nodedescを通信用ノード名（現在はglobalIPAddressのテキスト表現）に変換する。
+	 * 失敗した場合nullを返す。*/
 	public static String nodedescToFQDN(String nodedesc) {
-		return nodedesc;
+		try {
+			String fqdn = java.net.InetAddress.getByName(nodedesc).getHostAddress();
+			return fqdn;
+		} catch (UnknownHostException e) {
+			return null;
+		}
 	}
 	/** 指定されたホストに接続し、計算ノード表に登録する。
 	 *  すでに登録されている場合は生存を確認する。生存を確認できない場合はnullを返す。
@@ -37,6 +44,7 @@ public final class LMNtalRuntimeManager {
 	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
 		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime()");
 		String fqdn = nodedescToFQDN(nodedesc);
+		if (fqdn == null) return null;
 		//宛て先がlocalhostなら  自分自身を返す
 		if(LMNtalNode.isMyself(fqdn)){
 			//if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime(): 宛て先がlocalhostだから自分自身を返す");

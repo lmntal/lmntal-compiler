@@ -59,7 +59,7 @@ public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	public boolean connect() {
 		return LMNtalRuntimeManager.daemon.sendWait(hostname,
 			"CONNECT \"" + hostname + "\" \""
-				+ daemon.LMNtalDaemonMessageProcessor.getLocalHostName() + "\"" );
+				+ daemon.LMNtalDaemon.getLocalHostName() + "\"" );
 	}
 	
 	/** このリモートランタイム（ローカル内のみ）に擬似タスクおよび擬似膜を作成して返す。

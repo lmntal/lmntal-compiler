@@ -87,7 +87,6 @@ public class LMNtalDaemon implements Runnable {
 		this.portnum = portnum;
 		try {
 			servSocket = new ServerSocket(portnum);
-//			myhostname = InetAddress.getLocalHost().toString();
 		} catch (IOException e) {
 			System.out.println(
 				"ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
@@ -98,6 +97,7 @@ public class LMNtalDaemon implements Runnable {
 		try {
 			myhostname = InetAddress.getLocalHost().getHostAddress();//Canonical
 		} catch (Exception e) {
+			myhostname =  "???";	// とりあえず放置
 			e.printStackTrace();
 		}
 	}
