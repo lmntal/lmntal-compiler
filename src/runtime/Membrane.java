@@ -42,15 +42,30 @@ public final class Membrane extends AbstractMembrane {
 	protected void enqueueAtom(Atom atom) {
 		ready.push(atom);
 	}
+	/** 膜の活性化。ただしこの膜はルート膜ではなく、スタックに積まれておらず、
+	 * しかも親膜は仮でない実行膜スタックに積まれている。*/
+	public void activateThis() {
+		activate();
+	}
 	/** 膜の活性化 */
 	public void activate() {
-		if (!isQueued()) {
+		if (isQueued()) {
 			return;
 		}
+		Task t = (Task)task;
 		if (!isRoot()) {
 			((Membrane)parent).activate();
+			if (t.bufferedStack.isEmpty()) {
+				t.memStack.push(this);
+			}
+			else {
+				t.bufferedStack.push(this);
+			}			
 		}
-		((Task)task).memStack.push(this);
+		else {
+			// ASSERT(t.bufferedStack.isEmpty());
+			t.bufferedStack.push(this);
+		}
 	}
 
 	/** dstMemに移動 */
@@ -89,6 +104,13 @@ public final class Membrane extends AbstractMembrane {
 		AbstractTask task = runtime.newTask();
 		task.getRoot().setParent(this);
 		return task.getRoot();
+	}
+	public void unlock() {
+		if (isRoot()) {
+			Task t = (Task)task;
+			t.memStack.moveFrom(t.bufferedStack);
+		}
+		super.unlock();
 	}
 }
 

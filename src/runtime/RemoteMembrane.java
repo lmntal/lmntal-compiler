@@ -125,16 +125,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("NEWATOM",atomid);
 		return a;
 	}
-//	/** 指定された子膜に新しいinside_proxyアトムを追加する 
-//	 * @deprecated */
-//	public Atom newFreeLink(AbstractMembrane submem) {
-//		Atom a = submem.newAtom(Functor.INSIDE_PROXY);
-//		if (submem.task.getMachine() != task.getMachine()) {
-//			send("ADDFREELINK",submem.getAtomID(a));
-//		}
-//		return a;
-//	}
-	void alterAtomFunctor(Atom atom, Functor func) {
+	public void alterAtomFunctor(Atom atom, Functor func) {
 		send("ALTERATOMFUNCTOR",getAtomID(atom),func.toString());
 		super.alterAtomFunctor(atom,func);
 	}
@@ -159,7 +150,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		String newremoteid = ((RemoteTask)task).getNextMemID();
 		RemoteMembrane m = new RemoteMembrane((RemoteTask)task, this, newremoteid);
 		m.remoteid = newremoteid;
-		addMem(m);
+		mems.add(m);
 		send("NEWMEM",newremoteid);
 		return m;
 	}
@@ -190,8 +181,9 @@ final class RemoteMembrane extends AbstractMembrane {
 
 	// 操作5 - 膜自身や移動に関する操作
 	
-	/** ロックが解放されたときに再活性化されるため、何もしなくてよい */
-	public void activate() {}
+	public void activate() {
+		send("ACTIVATE");
+	}
 	public void remove() {
 		send("REMOVE");
 		super.remove();

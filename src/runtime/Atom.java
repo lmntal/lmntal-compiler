@@ -39,7 +39,7 @@ public final class Atom extends QueuedEntity {
 	}
 
 	///////////////////////////////
-	// 操作
+	// 操作 AbstractMembraneのみが呼ぶことができる。
 	void changeFunctor(Functor newFunctor) {
 		if (functor.getArity() != newFunctor.getArity()) {
 			// TODO SystemError用の例外クラスを投げる
@@ -65,11 +65,11 @@ public final class Atom extends QueuedEntity {
 		return Integer.toString(id);
 	}
 
-	/** ファンクタの取得 */
+	/** ファンクタを取得 */
 	Functor getFunctor(){
 		return functor;
 	}
-	/** 名前の取得 */
+	/** 名前を取得 */
 	String getName() {
 		return functor.getName();
 	}
@@ -77,8 +77,13 @@ public final class Atom extends QueuedEntity {
 	int getArity() {
 		return functor.getArity();
 	}
+	/** 最終引数を取得 */
 	Link getLastArg() {
 		return args[getArity() - 1];
+	}
+	/** 第pos引数に格納されたリンクオブジェクトを取得 */
+	public Link getArg(int pos) {
+		return args[pos];
 	}
 	/** 所属膜の取得 */
 	AbstractMembrane getMem() {

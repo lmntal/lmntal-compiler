@@ -27,7 +27,7 @@ import util.QueuedEntity;
 
 /**
  * 抽象膜クラス。ローカル膜クラスおよびリモート膜クラスの親クラス
- * @author Mizuno
+ * @author Mizuno, n-kato
  */
 abstract public class AbstractMembrane extends QueuedEntity {
 	/** この膜を管理するタスク */
@@ -163,37 +163,29 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	/** 新しいアトムを作成し、この膜に追加する。*/
 	public Atom newAtom(Functor functor) {
-		Atom a = new Atom(this, functor);
-		addAtom(a);
-		return a;
+		Atom atom = new Atom(this, functor);
+		onAddAtom(atom);
+		return atom;
 	}
 	/** 1引数のnewAtomを呼び出すマクロ */
 	final Atom newAtom(String name, int arity) {
 		return newAtom(new Functor(name, arity));
 	}	
-	/** この膜にアトムを追加するための内部命令。
-	 * <strike>アクティブアトムの場合には実行スタックに追加する。
-	 * pourでも使用される予定。</strike> */
-	protected final void addAtom(Atom atom) {
+	/** この膜にアトムを追加するための内部命令 */
+	protected final void onAddAtom(Atom atom) {
 		atoms.add(atom);
 //		if (atom.getFunctor().isActive()) {
 //			enqueueAtom(atom);
 //		} 
 //		atomCount++;
 	}
-	/** アトムをこの膜に追加する。*/
-	public final void localAddAtom(Atom atom) {
+	/** （所属膜を持たない）アトムをこの膜に追加する。*/
+	public void addAtom(Atom atom) {
 		atom.mem = this;
-		addAtom(atom);
+		onAddAtom(atom);
 	}
-
-//	/** 指定された子膜に新しいinside_proxyアトムを追加する
-//	 * @deprecated */
-//	Atom newFreeLink(AbstractMembrane mem) {
-//		return mem.newAtom(Functor.INSIDE_PROXY);
-//	}
 	/** 指定されたアトムの名前を変える */
-	void alterAtomFunctor(Atom atom, Functor func) {
+	public void alterAtomFunctor(Atom atom, Functor func) {
 		atoms.remove(atom);
 		atom.changeFunctor(func);
 		atoms.add(atom);
@@ -235,13 +227,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/** 新しい子膜を作成し、活性化する */
 	public abstract AbstractMembrane newMem();
-	/** 指定された膜をこの膜の子膜として追加するための内部命令。実行膜スタックは操作しない。*/
-	protected final void addMem(AbstractMembrane mem) {
+	/** 指定された（親膜の無い）膜をこの膜の子膜として追加する。実行膜スタックは操作しない。*/
+	public void addMem(AbstractMembrane mem) {
 		mems.add(mem);
+		mem.parent = this;
 	}
 	/** 指定された膜をこの膜から除去する。実行膜スタックは操作しない。*/
 	public void removeMem(AbstractMembrane mem) {
 		mems.remove(mem);
+		mem.parent = null;
 	}	
 	/** 指定された計算ノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
 	 * このメソッドは使わないかもしれないが、一応作っておく。
@@ -313,20 +307,20 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	// 操作5 - 膜自身や移動に関する操作
 	
 	/** 活性化する。
-	 * <dl>
+	 * <p>すでにスタックに積まれていれば何もしない。
+	 * スタックに詰まれていないならば、<dl>
 	 * <dt><b>ルート膜の場合</b>:<dd>
-	 * すでにスタックに積まれていれば何もしない。
-	 * スタックに詰まれていないならば、そのタスクの仮の実行膜スタックの唯一の要素として積む。
+	 * このタスクの仮の実行膜スタックの唯一の要素として積む。
 	 * <dt><b>ルート膜でない場合</b>:<dd>
 	 * 親膜を活性化した後、親膜と同じスタックに入れる。
 	 * すなわち、仮の実行膜スタックが空でなければ仮の実行膜スタックに積み、
 	 * 空ならば実行膜スタックに積む。
 	 * </dl>*/
 	public abstract void activate();
-	/** この膜を親膜から除去する */
+	/** この膜を親膜から除去する
+	 * @reprecated */
 	public void remove() {
 		parent.removeMem(this);
-		parent = null;
 	}
 
 	/** 除去された膜srcMemにある全てのアトムおよび膜をこの膜に移動する。
@@ -360,7 +354,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			parent.removeMem(this);
 		} 
 		dstMem.addMem(this);
-		parent = dstMem;
 		if (dstMem.task != task) {
 			setTask(dstMem.task);
 		}
@@ -375,12 +368,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			((AbstractMembrane)it.next()).setTask(newTask);
 		}
 	}
-	/** この膜（ルート膜）の親膜を変更する。
+	/** この膜（ルート膜）の親膜を変更する。Machine（計算ノード）のみが呼ぶことができる。
 	 * <p>いずれ、
 	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
 	 * AbstractMembrane#moveToを使って親膜を変更することにより、
 	 * TODO この問題のあるメソッドは廃止しなければならない */
-	public void setParent(AbstractMembrane mem) {
+	void setParent(AbstractMembrane mem) {
 		if (!isRoot()) {
 			throw new RuntimeException("setParent requires this be a root membrane");
 		}
@@ -412,12 +405,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		// 実装する
 		return false;
 	}
-	/** ロックを解放する */
+	/** ロックを解放する。
+	 * <p>ルート膜の場合、仮の実行膜スタックの内容を実行膜スタックの底に転送する。*/
 	public void unlock() {
 		locked = false;
-		// TODO 実装する
 	}
-	public void recursive() {
+	public void recursiveUnlock() {
 		// 実装する
 	}
 	
