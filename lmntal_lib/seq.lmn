@@ -1,0 +1,3 @@
+{module(seq). 
+ seq.run(Data,[A|RES]),{+A. @p},{+Data. $p. @r}/
+  :- {+Data. $p. @p},seq.run(Data,RES)}.
