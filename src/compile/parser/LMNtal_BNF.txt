@@ -3,9 +3,11 @@
  * (1) 構文解析器
  *   @ ソースファイルをそのままJavaのオブジェクトへと変換する。
  *     compile.parser.*
- *   @ JFlex, JavaCUPを使用
- *     ant flex_compile
- *     ant bison_compile
+ *   @ JFlex, Java CUPを使用
+ *     JFlex (http://jflex.de/) Ver 1.4 pre5
+ *         ant flex_compile
+ *     Java CUP (http://www.cs.princeton.edu/~appel/modern/java/CUP/) Ver 0.10k
+ *         ant bison_compile
  *   @ 簡略記法も対応する
  *   @ ルールでしか出現しないもの(RuleContext)がデータ部分に出ている
  *     ようなことはチェックしていない
