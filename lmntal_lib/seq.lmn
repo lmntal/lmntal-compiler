@@ -30,7 +30,7 @@ module(seq).
  * seq.run : Membrane(data) -> List of Membrane(rules) -> Membrane(data)
  * 
  */
-H=seq.run({$p, @r}/, [ {@p} | Rest ]) :- H=seq.run({$p, @p}, Rest).
+H=seq.run({$p, @r}/, [ {$z, @p} | Rest ]) :- H=seq.run({$p, $z, @p}, Rest).
 
 H=seq.run({@p. $p.}, []) :- H={@p, $p}.
 

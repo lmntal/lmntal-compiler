@@ -1,0 +1,50 @@
+/*
+
+----------------------------------------------------------------------
+cnf parser                          Koji Hara 2004/12/19(Sun) 03:50:09
+----------------------------------------------------------------------
+
+標準入力から
+
+p cnf 2 2
+-1 -2 0
+1 -2 1 0
+
+を受け取って
+
+c(1, {notx(1),notx(2)        }).
+c(2, {   x(1),notx(2),   x(1)}).
+m(2).   % 節の数
+var(2). % 変数の数
+gen_var(2).
+
+に変換する。
+
+$ java -cp bin runtime.FrontEnd sample/sat_read.lmn < data.cnf
+
+*/
+
+r=seq.run({
+	io.use.
+	h=readline(l1).
+	co=1.
+}, [
+	{
+		l1(L) :- unary(L)|l2=string.split([:\s:], L).
+		l2=[p, cnf, V, C] :- unary(V), unary(C) | var(V), m(int_of_str(C)), go_next.
+	},
+	{
+		// seq.run はルールを除去してしまうので io のルールを再び読み込む
+		// io.use は io.stdin を生成する。これは１こだけあるべきなのでここでは import としている。（ややこしい!）
+		io.import.
+		go_next :- h=readline(l1).
+		// 今のところ int_of_str は string モジュール内に定義されているので string.use する
+		co=N, l1(L) :- int(N)|l2=string.split([:\s:], L), co=N, c(N, {string.use. x(N) :- N<0, M=-1*N | notx(M). x(0):-.}).
+		co=CO, c(C, {$p,@q}), l2=[N|R] :- unary(N),int(CO),CO=C | l2=R, co=CO, c(C, {x(int_of_str(N)), $p,@q}).
+		m(M), co=CO, l2=[] :- CO1=CO+1, CO<M | m(M), go_next, co=CO1.
+		// ここまでループ。TODO 逐次フロー関連は seq モジュールにもっとあるべき。while({COND}, {BODY}) とか
+	}
+]).
+
+
+
