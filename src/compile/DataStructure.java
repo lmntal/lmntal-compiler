@@ -1,6 +1,6 @@
 package compile;
 
-import java.util.List;
+import java.util.*;
 
 import runtime.Functor;
 
@@ -15,6 +15,9 @@ final class Atom {
 		functor = new Functor(name, arity);
 		args = new LinkOccurrence[arity];
 	}
+	public String toString() {
+		return "Atom("+functor+")("+Arrays.asList(args)+")";
+	}
 }
 
 /** ソースコード中の膜の構造を表すクラス */
@@ -23,16 +26,26 @@ final class Membrane {
 	Membrane mem;
 	
 	//memo:全て1つの配列に入れる方法もある。
-	List atoms;
+	public List atoms = new ArrayList();
 	/** 子膜 */
-	List mems;
-	List rules;
-	List processContexts;
-	List ruleContexts;
-	List typedProcessContexts;
+	public List mems = new ArrayList();
+	public List rules = new ArrayList();
+	public List processContexts = new ArrayList();
+	public List ruleContexts = new ArrayList();
+	public List typedProcessContexts = new ArrayList();
 	
 	Membrane(Membrane mem) {
 		this.mem = mem;
+	}
+	public String toString() {
+		return
+		(atoms.isEmpty() ? "" : "atoms  : "+atoms)+
+		(mems.isEmpty() ? "" : "mems   : "+mems)+
+		(rules.isEmpty() ? "" : "rules  : "+rules)+
+		(processContexts.isEmpty() ? "" : "processContexts  : "+processContexts)+
+		(ruleContexts.isEmpty() ? "" : "ruleContexts  : "+ruleContexts)+
+		(typedProcessContexts.isEmpty() ? "" : "typedProcessContexts  : "+typedProcessContexts)
+		;
 	}
 }
 
@@ -76,10 +89,18 @@ final class LinkOccurrence {
 		pos = 1;
 		atom.args[0] = this;
 	}
+	public String toString() {
+		return "LinkO( "+name+":"+atom+":"+pos+":"+
+		(place==HEAD?"HEAD":"BODY")+":"+buddy+" )";
+	}
 }
 /** ソースコード中のルールの構造を表すクラス */
 final class RuleStructure {
-	Membrane leftMem, rightMem;
+	public Membrane leftMem = new Membrane(null);
+	public Membrane rightMem = new Membrane(null);
+	public String toString() {
+		return "Rule( "+leftMem+" :- "+rightMem+" )";
+	}
 }
 
 /** ProcessContextとRuleContextの親となる抽象クラス */
