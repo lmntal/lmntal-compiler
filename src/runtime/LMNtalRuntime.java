@@ -124,6 +124,9 @@ public final class LMNtalRuntime extends Machine {
 	public void run() {
 		RemoteMachine.init();
 		while (true) {
+			if (Env.fTrace) {
+				Env.p( Dumper.dump(getGlobalRoot()) );
+			}
 			localExec();
 			if (globalRoot.isStable()) break;
 			synchronized(this) {

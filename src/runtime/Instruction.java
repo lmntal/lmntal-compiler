@@ -925,7 +925,7 @@ public class Instruction implements Cloneable {
 	//  -----  spec        [formals,locals]
 	//  -----  proceed
 	//  -----  stop 
-	//  -----  branch      [[instructions...]]
+	//  -----  branch      [instructionlist]
 	//  -----  loop        [[instructions...]]
 	//  -----  run         [[instructions...]]
 	//  -----  not         [[instructions...]]
@@ -1007,13 +1007,13 @@ public class Instruction implements Cloneable {
 	public static final int STOP = 205;
 	static {setArgType(STOP, new ArgType(false));}
 
-    /** branch [[instructions...]]
+    /** branch [instructionlist]
      * <br>構造化命令<br>
      * 引数の命令列を実行することを表す。
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、branchの次の命令に進む。
      * 引数実行中にproceed命令を実行した場合、ここで終了する。*/
     public static final int BRANCH = 206;
-	static {setArgType(BRANCH, new ArgType(false, ARG_INSTS));}
+	static {setArgType(BRANCH, new ArgType(false, ARG_LABEL));}
 
 	/** loop [[instructions...]]
 	 * <br>構造化命令<br>
@@ -1905,6 +1905,24 @@ public class Instruction implements Cloneable {
 					buffer.append(" ]]");
 					return buffer.toString();
 				}
+			}
+		}
+		if (data.size() == 1 && data.get(0) instanceof InstructionList) {
+			List insts = ((InstructionList)data.get(0)).insts;
+			if(insts.size() == 0) {
+				buffer.append("[]");
+			} else {
+				buffer.append("[\n");
+				int i;
+				for(i = 0; i < insts.size()-1; i++){
+					buffer.append("                  ");
+					buffer.append(insts.get(i));
+					buffer.append(", \n");
+				}
+				buffer.append("                  ");
+				buffer.append(insts.get(i));
+				buffer.append(" ]");
+				return buffer.toString();
 			}
 		}
 

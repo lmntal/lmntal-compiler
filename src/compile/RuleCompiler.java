@@ -78,27 +78,23 @@ public class RuleCompiler {
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
 		theRule = new Rule(rs.toString());
-		//@ruleid = rule.ruleid		
 		
 		hc = new HeadCompiler(rs.leftMem);
 		hc.enumFormals(rs.leftMem);	// ヘッドに対する仮引数リストを作る
 		
 		if (!rs.typedProcessContexts.isEmpty()) {
 			theRule.guardLabel = new InstructionList();
-			contLabel = theRule.guardLabel;
 			guard = theRule.guardLabel.insts;
 		}
 		else guard = null;
 		theRule.bodyLabel = new InstructionList();
 		body = theRule.bodyLabel.insts;
-
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);		
 		
 		compile_l();
 		compile_g();
 		compile_r();
-		
-		//rule.register(@atomMatches,@memMatch,@body)
+
 		theRule.memMatch  = memMatch;
 		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;
@@ -106,7 +102,6 @@ public class RuleCompiler {
 		
 		optimize();	// optimize if $optlevel > 0
 		
-		//theRule.showDetail();
 		return theRule;
 	}
 	
@@ -136,7 +131,9 @@ public class RuleCompiler {
 	private void compile_l() {
 		Env.c("compile_l");
 		
-		atomMatch = new ArrayList();
+		theRule.atomMatchLabel = new InstructionList();
+		atomMatch = theRule.atomMatchLabel.insts;
+		
 		int maxvarcount = 2;	// アトム主導用（仮）
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化			
@@ -145,9 +142,10 @@ public class RuleCompiler {
 				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
 				
 				// アトム主導
-				List singletonListArgToBranch = new ArrayList();
-				singletonListArgToBranch.add(hc.match);
-				atomMatch.add(new Instruction(Instruction.BRANCH, singletonListArgToBranch));
+				InstructionList tmplabel = new InstructionList();
+				tmplabel.insts = hc.match;
+				atomMatch.add(new Instruction(Instruction.BRANCH, tmplabel));
+				
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 				Atom atom = (Atom)hc.atoms.get(firstid);
 				hc.atompaths.put(atom, new Integer(1));	// 主導するアトムの変数番号は 1
@@ -173,6 +171,7 @@ public class RuleCompiler {
 				hc.compileLinkedGroup((Atom)hc.atoms.get(firstid));
 			} else {
 				// 膜主導
+				theRule.memMatchLabel = hc.matchLabel;
 				memMatch = hc.match;
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
@@ -181,7 +180,7 @@ public class RuleCompiler {
 				hc.match.add(0, Instruction.spec(1, hc.varcount));
 			}
 			else {
-				// hc.match.add(0, Instruction.spec(2, hc.varcount));
+				hc.match.add(0, Instruction.spec(2, hc.varcount));
 			}
 			// jump命令群の生成
 			List memActuals  = hc.getMemActuals();
@@ -247,6 +246,7 @@ public class RuleCompiler {
 		freeLHSTypedProcesses();
 		//
 		body.add(0, Instruction.spec(formals, varcount));
+		
 //		if (rs.rightMem.mems.isEmpty() && rs.rightMem.ruleContexts.isEmpty()
 //		 && rs.rightMem.processContexts.isEmpty() && rs.rightMem.rulesets.isEmpty()) {
 //			body.add(new Instruction(Instruction.CONTINUE));

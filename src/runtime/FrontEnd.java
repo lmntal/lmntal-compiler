@@ -169,9 +169,6 @@ public class FrontEnd {
 				InterpretedRuleset ir = (InterpretedRuleset)it.next();
 				ir.react(rt.getGlobalRoot());
 			}
-			if (Env.fTrace) {
-				Env.p( Dumper.dump(rt.getGlobalRoot()) );
-			}
 			rt.exec();
 			if (!Env.fTrace && Env.verbose > 0) {
 				Env.d( "Execution Result:" );

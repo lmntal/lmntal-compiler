@@ -8,6 +8,7 @@ import java.util.*;
 import runtime.Env;
 import runtime.Functor;
 import runtime.Instruction;
+import runtime.InstructionList;
 import compile.structure.*;
 
 /**
@@ -32,7 +33,9 @@ public class HeadCompiler {
 	 * OBSOLETE: 実引数リスト内で、任意の空膜は任意のアトムより後ろに来る。
 	 * メモ: 空膜と言っても{$p}なども含まれる
 	 */
-	public List match			= new ArrayList();	// マッチング命令列
+	public InstructionList matchLabel;
+	public List match;								// マッチング命令列
+	
 	public List mems			= new ArrayList();	// 出現する膜のリスト。[0]がm
 	public List atoms			= new ArrayList();	// 出現するアトムのリスト	
 	public Map  mempaths		= new HashMap();	// Membrane -> 変数番号
@@ -85,7 +88,8 @@ public class HeadCompiler {
 		mempaths.clear();
 		atompaths.clear();
 		visited.clear();
-		match = new ArrayList();
+		matchLabel = new InstructionList();
+		match = matchLabel.insts;
 	}
 	
 	public void compileLinkedGroup(Atom firstatom) {

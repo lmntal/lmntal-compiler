@@ -78,8 +78,8 @@ public final class InterpretedRuleset extends Ruleset {
 		InterpretiveReactor ir = new InterpretiveReactor(locals);
 		ir.mems[0] = mem;
 		if (atom != null) { ir.atoms[1] = atom; }
-  		return ir.interpret(matchInsts, 1);	// [0]はspecなのでスキップする
-	}
+  		return ir.interpret(matchInsts, 0);
+  	}
 	public String toString() {
 		String ret = "@" + id;
 		if (Env.verbose >= Env.VERBOSE_EXPANDRULES) {
@@ -597,7 +597,7 @@ class InterpretiveReactor {
 					InterpretiveReactor ir = new InterpretiveReactor(locals);
 					ir.reloadVars(this, locals, (List)inst.getArg2(),
 						(List)inst.getArg3(), (List)inst.getArg4());
-					if (ir.interpret(bodyInsts, 1)) return true; // [0]はspecなのでスキップする
+					if (ir.interpret(bodyInsts, 0)) return true;
 					if (Env.debug == 9) Env.p("info: body execution failed");
 					return false; //n-kato
 					}
@@ -610,7 +610,7 @@ class InterpretiveReactor {
 					InterpretiveReactor ir = new InterpretiveReactor(locals);
 					ir.reloadVars(this, locals, (List)inst.getArg2(),
 						(List)inst.getArg3(), (List)inst.getArg4());
-					if (ir.interpret(bodyInsts, 1)) return true; // [0]はspecなのでスキップする
+					if (ir.interpret(bodyInsts, 0)) return true;
 					return false; //n-kato
 					}
 				case Instruction.RESETVARS :
@@ -632,10 +632,10 @@ class InterpretiveReactor {
 
 				case Instruction.BRANCH :
 					List subinsts;
-					subinsts = (List) ((List) inst.getArg1()).get(0);
+					subinsts = ((InstructionList)inst.getArg1()).insts;
 					if (interpret(subinsts, 0))
 						return true;
-					break; //nakajima
+					break; //nakajima, n-kato
 
 				case Instruction.LOOP :
 					subinsts = (List) ((List) inst.getArg1()).get(0); // reverted by n-kato: remove ".get(0)" by mizuno

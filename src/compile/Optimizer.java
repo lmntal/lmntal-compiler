@@ -50,10 +50,9 @@ public class Optimizer {
 	
 	/** 命令列の末尾のjump命令をインライン展開する。
 	 * <pre>
-	 *     [ spec[X,Y];  C;jump[L;A1..Am] ] where L:[spec[m,m+n];D]
-	 * ==> [ spec[X,Y+n];C; D{1..m->A1..Am, m+1..m+n->Y+1..Y+n } ]
-	 * </pre>
-	 * */
+	 *     [ spec[X,Y];  C;jump[L,A1..Am] ] where L:[spec[m,m+n];D]
+	 * ==> [ spec[X,Y+n];C; D{ 1..m->A1..Am, m+1..m+n->Y+1..Y+n } ]
+	 * </pre> */
 	public static void inlineExpandTailJump(List insts) {
 		if (insts.isEmpty()) return;
 		Instruction spec = (Instruction)insts.get(0);
@@ -72,7 +71,7 @@ public class Optimizer {
 		//
 		InstructionList label = (InstructionList)jump.getArg1();
 		List subinsts = InstructionList.cloneInstructions(label.insts);
-		Instruction spec = (Instruction)subinsts.get(0);
+		Instruction subspec = (Instruction)subinsts.get(0);
 
 		HashMap map = new HashMap();
 		// 仮引数は、実引数番号で置換する。
@@ -86,8 +85,8 @@ public class Optimizer {
 		for (int i = 0; i < otherargs.size(); i++)
 			map.put( new Integer(memargs.size() + atomargs.size() + i), otherargs.get(i) );
 		// 局所変数は、新鮮な変数番号で置換する。
-		int subformals = spec.getIntArg1();
-		int sublocals  = spec.getIntArg2();
+		int subformals = subspec.getIntArg1();
+		int sublocals  = subspec.getIntArg2();
 		for (int i = subformals; i < sublocals; i++) {
 			map.put( new Integer(i), new Integer(varcount++) );
 		}
@@ -313,8 +312,9 @@ public class Optimizer {
 		}
 
 		//specの変更
-		body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
-
+//		body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
+		spec.updateSpec(spec.getIntArg1(), nextArg);
+		
 		Instruction.changeMemVar(body, reuseMap);
 	}
 	private static void addUnlockInst(ListIterator lit, HashMap reuseMap, Integer mem, HashMap children) {
@@ -473,7 +473,8 @@ public class Optimizer {
 					break;
 			}
 		}
-		list.set(0, Instruction.spec(spec.getIntArg1(), nextId));
+//		list.set(0, Instruction.spec(spec.getIntArg1(), nextId));
+		spec.updateSpec(spec.getIntArg1(), nextId);
 		list.addAll(1, moveInsts);
 //		spec.data.set(1, new Integer(nextId)); //ローカル変数の数を変更
 		return true;
@@ -1202,7 +1203,8 @@ public class Optimizer {
 		
 		//spec命令の変更
 		if (nextArg > spec.getIntArg1()) {
-			body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
+//			body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
+			spec.updateSpec(spec.getIntArg1(), nextArg);
 		}
 	}
 

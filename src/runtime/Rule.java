@@ -5,15 +5,24 @@ import java.util.*;
 public final class Rule {
 	// Instruction のリスト
 	
-	/** アトム主導ルール適用の命令列。先頭の命令はspec[2,*]でなければならない。*/
+	/** アトム主導ルール適用の命令列（atomMatchLabel.insts）
+	 * 先頭の命令はspec[2,*]でなければならない。*/
 	public List atomMatch;
-	/** 膜主導ルール適用の命令列。先頭の命令はspec[1,*]でなければならない。*/
+	/** 膜主導ルール適用の命令列（memMatchLabel.insts）
+	 * 先頭の命令はspec[1,*]でなければならない。*/
 	public List memMatch;
 	
-	/** ガード命令列（guardLabel.insts）またはnull */
+	/** ガード命令列（guardLabel.insts）またはnull。
+	 * 先頭の命令はspec[*,*]でなければならない。*/
 	public List guard;
-	/** ボディ命令列（bodyLabel.insts）またはnull */
+	/** ボディ命令列（bodyLabel.insts）またはnull。
+	 * 先頭の命令はspec[*,*]でなければならない。*/
 	public List body;
+	
+	/** ラベル付きアトム主導ルール適用命令列 */
+	public InstructionList atomMatchLabel;
+	/** ラベル付き膜主導ルール適用命令列 */
+	public InstructionList memMatchLabel;	
 	/** ラベル付きガード命令列またはnull */
 	public InstructionList guardLabel;
 	/** ラベル付きボディ命令列またはnull */
@@ -28,8 +37,12 @@ public final class Rule {
 	 *
 	 */
 	public Rule() {
-		atomMatch = new ArrayList();
-		memMatch  = new ArrayList();
+//		atomMatch = new ArrayList();
+//		memMatch  = new ArrayList();
+		atomMatchLabel = new InstructionList();
+		memMatchLabel = new InstructionList();
+		atomMatch = atomMatchLabel.insts;
+		memMatch = memMatchLabel.insts;
 	}
 	/**
 	 * ルール文字列つきコンストラクタ
