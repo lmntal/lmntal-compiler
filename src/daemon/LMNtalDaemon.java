@@ -469,10 +469,3 @@ public class LMNtalDaemon implements Runnable {
 		return myhostaddress;
 	}
 }
-
-class MakeRemoteConnectionThread implements Runnable{
-
-	public void run(){
-	
-	}
-}
