@@ -625,7 +625,7 @@ class InterpretiveReactor {
 					else func = new IntegerFunctor(x % y);
 					atoms[inst.getIntArg1()] = new Atom(null, func);						
 					break; //nakajima 2004-01-05
-				case Instruction.INOT : //[-dstintatom, intatom1, intatom2]
+				case Instruction.INOT : //[-dstintatom, intatom]
 					break;
 				case Instruction.IAND : //[-dstintatom, intatom1, intatom2]
 					break;
@@ -633,11 +633,11 @@ class InterpretiveReactor {
 					break;
 				case Instruction.IXOR : //[-dstintatom, intatom1, intatom2]
 					break;
-				case Instruction.ISHL : //[-dstintatom, intatom1, intatom2]
+				case Instruction.ISHL : //[-dstintatom, intatom1, intatom2] 左シフト
 					break;
-				case Instruction.ISHR : //[-dstintatom, intatom1, intatom2]
+				case Instruction.ISHR : //[-dstintatom, intatom1, intatom2] 右シフト
 					break;
-				case Instruction.ISAR : //[-dstintatom, intatom1, intatom2]
+				case Instruction.ISAR : //[-dstintatom, intatom1, intatom2] 符号付
 					break;
 				case Instruction.IADDFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
@@ -672,7 +672,7 @@ class InterpretiveReactor {
 					else func = new IntegerFunctor(x % y);
 					vars.set(inst.getIntArg1(), func);
 					break; //nakajima 2003-01-05
-				case Instruction.INOTFUNC : //[-dstintfunc, intfunc1, intfunc2]
+				case Instruction.INOTFUNC : //[-dstintfunc, intfunc]
 					break;
 				case Instruction.IANDFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					break;
