@@ -379,6 +379,9 @@ public class RuleCompiler {
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
 				//Env.p(atom+"("+pos+")"+" buddy -> "+link.buddy.atom+" link.atom="+link.atom);
+				if (link == null) {
+					System.out.println("SYSTEM ERROR: buddy not set");
+				}
 				if (link.atom.mem == rs.leftMem) {
 					body.add( new Instruction(Instruction.RELINK,
 						rhsatomToPath(atom), pos,
