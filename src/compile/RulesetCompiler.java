@@ -6,6 +6,7 @@ package compile;
 
 import java.util.*;
 import runtime.Env;
+import runtime.InlineUnit;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRuleset;
@@ -27,11 +28,11 @@ public class RulesetCompiler {
 	 * @return (:-m)というルール1つだけからなるルールセット
 	 */
 	public static Ruleset compileMembrane(Membrane m, String unitName) {
-		return (Ruleset)compileMembraneToGeneratingMembrane(m).rulesets.get(0);
+		return (Ruleset)compileMembraneToGeneratingMembrane(m, unitName).rulesets.get(0);
 	}
 	
 	public static Ruleset compileMembrane(Membrane m) {
-		return compileMembrane(m, "-");
+		return compileMembrane(m, InlineUnit.DEFAULT_UNITNAME);
 	}
 	
 	/**
@@ -43,6 +44,9 @@ public class RulesetCompiler {
 	 * @return 生成したルールセットを持つ膜構造
 	 */
 	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m) {
+		return compileMembraneToGeneratingMembrane(m, InlineUnit.DEFAULT_UNITNAME);
+	}
+	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m, String unitName) {
 		Env.c("RulesetGenerator.runStartWithNull");
 		// 世界を生成する
 		Membrane root = new Membrane(null);
@@ -50,20 +54,10 @@ public class RulesetCompiler {
 		rs.leftMem  = new Membrane(null);
 		rs.rightMem = m;
 		root.rules.add(rs);
-		processMembrane(root);
+		processMembrane(root, unitName);
 		Module.resolveModules(root);
 		return root;
 	}
-	/** @deprecated
-	 * @see compileMembrane */
-	public static Membrane runStartWithNull(Membrane m) {
-		return compileMembraneToGeneratingMembrane(m);
-	}
-//	public static InterpretedRuleset run(Membrane m) {
-//		Env.c("RulesetCompiler.run");
-//		processMembrane(m);
-//		return (InterpretedRuleset)m.ruleset;
-//	}
 	
 	/**
 	 * 与えられた膜の階層下にある全ての RuleStructure について、
@@ -72,6 +66,9 @@ public class RulesetCompiler {
 	 * @param mem 対象となる膜
 	 */
 	public static void processMembrane(Membrane mem) {
+		processMembrane(mem, InlineUnit.DEFAULT_UNITNAME);
+	}
+	public static void processMembrane(Membrane mem, String unitName) {
 		Env.c("RulesetCompiler.processMembrane");
 		// 子膜にあるルールをルールセットにコンパイルする
 		Iterator it = mem.mems.listIterator();
@@ -88,7 +85,7 @@ public class RulesetCompiler {
 			processMembrane(rs.leftMem); // 一応左辺も
 			processMembrane(rs.rightMem);
 			//
-			RuleCompiler rc = new RuleCompiler(rs);
+			RuleCompiler rc = new RuleCompiler(rs, unitName);
 			rc.compile();
 			rules.add(rc.theRule);
 		}

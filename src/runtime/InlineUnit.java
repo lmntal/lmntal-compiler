@@ -11,8 +11,9 @@ import java.io.*;
  *
  */
 public class InlineUnit {
-	/** 識別名（ファイル名） */
+	/** 識別名（ファイルならファイル名、出所不明の時は "-"） */
 	String name;
+	public static final String DEFAULT_UNITNAME = "-";
 	
 	/** インラインクラスが使用可能の時、そのオブジェクトが入る。*/
 	public static InlineCode inlineCode;
@@ -40,6 +41,7 @@ public class InlineUnit {
 	
 	InlineUnit(String name) {
 		this.name = name;
+		System.out.println(">>> new InlineUnit "+name);
 	}
 	
 	/**
@@ -73,7 +75,7 @@ public class InlineUnit {
 			
 			String className = Inline.className_of_lmntalFilename(name);
 			PrintWriter p = new PrintWriter(new FileOutputStream(className+".java"));
-			Env.d("make inline code "+codes);
+			Env.d("make inline code "+name);
 			
 			//p.println("package runtime;");
 			p.println("import runtime.*;");
@@ -111,15 +113,33 @@ public class InlineUnit {
 	
 	/****** 実行時に使う ******/
 	
+	public void attach() {
+		// jar で処理系を起動すると、勝手なファイルからクラスをロードすることができないみたい。
+		String cname = Inline.className_of_lmntalFilename(name);
+		ClassLoader cl = new FileClassLoader();
+		try {
+			Object o = cl.loadClass(cname).newInstance();
+			if (o instanceof InlineCode) {
+				inlineCode = (InlineCode)o;
+			}
+		} catch (Exception e) {
+			//Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+		}
+		if (inlineCode != null) {
+			Env.d(cname+" Loaded");
+		} else {
+			Env.d("Failed in loading "+cname);
+		}
+	}
+	
 	/**
 	 * インライン命令を実行する。
 	 * @param atom 実行すべきアトム名を持つアトム
 	 */
 	public void callInline(Atom atom, int codeID) {
 		//Env.d(atom+" "+codeID);
+		Env.d(" => call Inline "+atom.getName()+" "+codeID);
 		if(inlineCode==null) return;
-		//Env.d("=> call Inline "+atom.getName());
 		inlineCode.run(atom, codeID);
 	}
-	
 }

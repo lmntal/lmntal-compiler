@@ -723,7 +723,7 @@ class InterpretiveReactor {
 
 					//====組み込み機能に関する命令====ここから====
 				case Instruction.INLINE : //[atom, inlineref]
-					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
+					Inline.callInline( atoms[inst.getIntArg1()], (String)inst.getArg2(), inst.getIntArg3() );
 					break; //hara
 					//====組み込み機能に関する命令====ここまで====
 //				case Instruction.BUILTIN: //[class, atom]

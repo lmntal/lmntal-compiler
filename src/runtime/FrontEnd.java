@@ -198,6 +198,7 @@ public class FrontEnd {
 //			}
 
 			Ruleset rs = RulesetCompiler.compileMembrane(m);
+			Inline.makeCode();
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
 			

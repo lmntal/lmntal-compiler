@@ -39,9 +39,6 @@ public class Inline {
 	// InlineUnit.name -> InlineUnit
 	public static Map inlineSet = new HashMap();
 	
-	/** インラインクラスが使用可能の時、そのオブジェクトが入る。*/
-	public static InlineCode inlineCode;
-	
 	/** コンパイルプロセス。 */
 	static Process cp;
 	
@@ -70,19 +67,14 @@ public class Inline {
 				Env.d("Compile result :  "+cp.exitValue());
 				cp = null;
 			}
-			// jar で処理系を起動すると、勝手なファイルからクラスをロードすることができないみたい。
-			ClassLoader cl = new FileClassLoader();
-			Object o = cl.loadClass("MyInlineCode").newInstance();
-			if (o instanceof InlineCode) {
-				inlineCode = (InlineCode)o;
-			}
-			//inlineCode = (InlineCode)Class.forName("MyInlineCode").newInstance();
-			//Env.d(Class.forName("MyInlineCode").getField("version"));
 		} catch (Exception e) {
-			//Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
-		if (inlineCode != null) { Env.d("MyInlineCode Loaded"); }
-		else if (inlineCode == null) { Env.d("Failed in loading MyInlineCode"); }
+		Iterator ui = inlineSet.values().iterator();
+		while(ui.hasNext()) {
+			InlineUnit u = (InlineUnit)ui.next();
+			u.attach();
+		}
 	}
 	
 	/**
@@ -98,7 +90,7 @@ public class Inline {
 		o = o.replaceAll("\\.lmn$", "");
 		// クラス名に使えない文字を削除
 		o = o.replaceAll("\\-", "");
-		o = "Inline"+o;
+		o = "SomeInlineCode"+o;
 		return o;
 	}
 	/**
@@ -139,9 +131,6 @@ public class Inline {
 		return (InlineUnit)inlineSet.get(unitName);
 	}
 	
-	public static void compile() {
-	}
-	
 	/**
 	 * コードを生成する。
 	 * TODO java ファイルの名前を、コンパイルするファイル名と同じにする。oneLiner や REPL の時は "-"
@@ -168,7 +157,9 @@ public class Inline {
 			StringBuffer srcs = new StringBuffer("");
 			Iterator ik = inlineSet.keySet().iterator();
 			while(ik.hasNext()) {
-				InlineUnit u = getUnit((String)ik.next());
+				String unitName = (String)ik.next();
+				if(!inlineSet.containsKey(unitName)) continue;
+				InlineUnit u = (InlineUnit)inlineSet.get(unitName);
 				if(!u.isCached()) srcs.append(className_of_lmntalFilename(u.name)+".java ");
 			}
 			String cmd = "javac -classpath "+path+" "+srcs;
@@ -177,7 +168,6 @@ public class Inline {
 		} catch (Exception e) {
 			Env.d("!!! "+e+Arrays.asList(e.getStackTrace()));
 		}
-		
 	}
 	
 	/**
@@ -185,6 +175,10 @@ public class Inline {
 	 * @param atom 実行すべきアトム名を持つアトム
 	 */
 	public static void callInline(Atom atom, String unitName, int codeID) {
-		getUnit(unitName).callInline(atom, codeID);
+		Env.d("=> call Inline "+unitName);
+//		System.out.println(inlineSet);
+		if(inlineSet.containsKey(unitName)) {
+			((InlineUnit)inlineSet.get(unitName)).callInline(atom, codeID);
+		}
 	}
 }

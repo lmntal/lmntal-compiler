@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.ListIterator;
 
 import runtime.Functor;
-import runtime.Inline;
 //import runtime.Env;
 import compile.Module;
 import compile.structure.*;
@@ -79,7 +78,6 @@ public class LMNParser {
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = addProxies(mem);
 		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
-		Inline.makeCode();
 		return mem;
 	}
 	

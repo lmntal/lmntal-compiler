@@ -1580,6 +1580,12 @@ public class Instruction implements Cloneable {
 		add(arg2);
 		add(arg3);
 	}
+	public Instruction(int kind, int arg1, Object arg2, int arg3) {
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+	}
 	public Instruction(int kind, int arg1, int arg2, Object arg3) {
 		this.kind = kind;
 		add(arg1);

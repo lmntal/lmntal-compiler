@@ -4,6 +4,7 @@ import java.util.*;
 import runtime.Env;
 import runtime.Rule;
 //import runtime.InterpretedRuleset;
+import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.Functor;
@@ -60,12 +61,17 @@ public class RuleCompiler {
 	final int lhsatomToPath(Atom atom) { return ((Integer)lhsatompath.get(atom)).intValue(); } 
 	final int rhsatomToPath(Atom atom) { return ((Integer)rhsatompath.get(atom)).intValue(); } 
 	
+	public String unitName;
 	/**
 	 * 指定された RuleStructure 用のルールをつくる
 	 */
 	RuleCompiler(RuleStructure rs) {
+		this(rs, InlineUnit.DEFAULT_UNITNAME);
+	}
+	RuleCompiler(RuleStructure rs, String unitName) {
 		//Env.n("RuleCompiler");
 		//Env.d(rs);
+		this.unitName = unitName;
 		this.rs = rs;
 	}
 	/** ヘッドのマッチング終了後の継続命令列のラベル */
@@ -1049,9 +1055,10 @@ public class RuleCompiler {
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
 			int atomID = rhsatomToPath(atom);
-			int codeID = Inline.getCodeID(atom.functor.getName());
+			Inline.add(unitName, atom.functor.getName());
+			int codeID = Inline.getCodeID(unitName, atom.functor.getName());
 			if(codeID == -1) continue;
-			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
+			body.add( new Instruction(Instruction.INLINE, atomID, unitName, codeID));
 		}
 	}
 	static final Functor FUNC_USE = new Functor("use",1);

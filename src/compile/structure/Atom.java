@@ -1,7 +1,6 @@
 package compile.structure;
 
 import runtime.Functor;
-import runtime.Inline;
 import java.util.Arrays;
 
 /**
@@ -43,12 +42,11 @@ public class Atom {
 		this.mem = mem;
 		this.functor = functor;
 		args = new LinkOccurrence[functor.getArity()];
-		Inline.add(functor.getName());
 		// ここでいいのかな hara
 		if(functor.getName().equals("system_ruleset")) mem.is_system_ruleset=true;
 		// TODO 「モジュール機能」を使って表現した方がいいと思います。
 	}
-
+	
 	/**
 	 * コンストラクタ
 	 * @param mem このアトムの所属膜
