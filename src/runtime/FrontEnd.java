@@ -234,8 +234,8 @@ public class FrontEnd {
 			Membrane root = rt.getGlobalRoot();
 			if(Env.fGUI) Env.gui = new LMNtalFrame();
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
-
-			Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
+			
+			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
 			//root.blockingLock();
 			rs.react(root); // TODO 【検証】初期配置で子タスクを作った場合にどうなるか考える→LMNParserを修正することにした
 			if (Env.gui != null) {
