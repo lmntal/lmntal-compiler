@@ -29,7 +29,7 @@ class Atom extends QueuedEntity {
 
 	/**
 	 * 指定された名前とリンク数を持つアトムを作成する。
-	 * 親膜の状態は未定。実際に使用する前に親膜をmem変数に明示的に代入する必要がある。
+	 * AbstractMembraneのnewAtomメソッド内で呼ばれる。
 	 * @param mem 親膜
 	 * @param name アトムの名前
 	 * @param arity リンク数
@@ -82,9 +82,16 @@ final class Membrane extends AbstractMembrane {
 	private Stack ready = new Stack();
 	/**
 	 * 指定されたマシンに所属する膜を作成する。
+	 * newMemメソッド内で呼ばれる。
 	 */
-	Membrane(AbstractMachine machine, AbstractMembrane mem) {
+	private Membrane(AbstractMachine machine, AbstractMembrane mem) {
 		super(machine, mem);
+	}
+	/**
+	 * 指定されたマシンのルート膜を作成する。
+	 */
+	Membrane(Machine machine) {
+		super(machine, null);
 	}
 
 	///////////////////////////////
@@ -104,12 +111,11 @@ final class Membrane extends AbstractMembrane {
 		}
 		((Machine)machine).memStack.push(this);
 	}
-	protected void activateAtom(Atom atom) {
+	protected void enqueueAtom(Atom atom) {
 		ready.push(atom);
 	}
 	/** 
 	 * 移動された後、アクティブアトムを実行スタックに入れるために呼び出される。
-	 * AbstractMembraneクラスで宣言されている抽象メソッドの実装です。
 	 */
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
 	protected void enqueueAllAtoms() {
@@ -123,6 +129,14 @@ final class Membrane extends AbstractMembrane {
 				}
 			}
 		}
+	}
+	/**
+	 * 子膜を生成する。
+	 */
+	AbstractMembrane newMem() {
+		Membrane m = new Membrane(machine, this);
+		mems.add(m);
+		return m;
 	}
 }
 /**
@@ -139,11 +153,13 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 子膜の集合 */
 	protected Set mems = new HashSet();
 	/** この膜にあるproxy以外のアトムの数。 */
-	protected int natom = 0;
+	protected int atomCount = 0;
+	/** このセルの自由リンクの数 */
+	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
 	protected List rulesets = new ArrayList();
 	/** この膜以下に適用できるルールが無いときにtrue */
-	boolean stable = false;
+	protected boolean stable = false;
 	/** ロックされている時にtrue */
 	protected boolean locked = false;
 //	/** 最後にロックした計算ノード */
@@ -158,7 +174,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/**
 	 * 指定されたマシンに所属する膜を作成する。
 	 */
-	AbstractMembrane(AbstractMachine machine, AbstractMembrane mem) {
+	protected AbstractMembrane(AbstractMachine machine, AbstractMembrane mem) {
 		this.machine = machine;
 		this.mem = mem;
 		id = lastId++;
@@ -188,7 +204,15 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 	/** proxy以外のアトムの数を取得 */
 	int getAtomCount() {
-		return natom;
+		return atomCount;
+	}
+	/** このセルの自由リンクの数を取得 */
+	int getFreeLinkCount() {
+		return freeLinkCount;
+	}
+	/** この膜とその子孫に適用できるルールがない場合にtrue */
+	boolean isStable() {
+		return stable;
 	}
 	/** この膜にルールがあればtrue */
 	boolean hasRule() {
@@ -231,15 +255,27 @@ abstract class AbstractMembrane extends QueuedEntity {
 	void loadRuleset(Ruleset srcRuleset) {
 		rulesets.add(srcRuleset);
 	}
-	/** アトムの追加。アクティブアトムの場合には実行スタックに追加する。 */
-	void addAtom(Atom atom) {
-		atoms.add(atom);
-		activateAtom(atom);
+	/** アトムの追加 */
+	Atom newAtom(String name, int arity) {
+		Atom a = new Atom(this, name, arity);
+		atoms.add(a);
+		enqueueAtom(a);
+		atomCount++;
+		return a;
 	}
-	abstract protected void activateAtom(Atom atom);
-	
+	/** 指定されたアトムを実行スタックに積む */
+	abstract protected void enqueueAtom(Atom atom);
+//	/** 膜の追加 */
+	abstract AbstractMembrane newMem();
+
+//	廃止。newAtom/newMemを使用する。
+// 	/** アトムの追加。アクティブアトムの場合には実行スタックに追加する。 */
+//	void addAtom(Atom atom) {
+//		atoms.add(atom);
+//		activateAtom(atom);
+//	}
 	/** 膜の追加 */
-	void addMem(AbstractMembrane mem) {
+	private void addMem(AbstractMembrane mem) {
 		mems.add(mem);
 	}
 	/** dstMemに移動 */
@@ -264,6 +300,10 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 指定されたアトムをこの膜から除去する。 */
 	void removeAtom(Atom atom) {
 		atoms.remove(atom);
+		atomCount--;
+		if (atomCount < 0) {
+			Util.systemError("Membrane.atomCount is pisitive value");
+		}
 	}
 	/** 指定された膜をこの膜から除去する */
 	void removeMem(AbstractMembrane mem) {
@@ -407,7 +447,7 @@ final class Machine extends AbstractMachine {
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
 	Machine() {
-		root = new Membrane(this, null);
+		root = new Membrane(this);
 		memStack.push(root);
 	}
 	

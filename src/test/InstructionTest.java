@@ -4,8 +4,8 @@
  */
 package test;
 
+import runtime.*;
 import junit.framework.TestCase;
-import runtime.Instruction;
 
 /**
  * @author hara

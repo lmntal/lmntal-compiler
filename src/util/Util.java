@@ -9,4 +9,8 @@ import java.util.Iterator;
  */
 abstract public class Util {
 	public static final Iterator NULL_ITERATOR = (new ArrayList()).iterator();
+	public static void systemError(String msg) {
+		System.err.println(msg);
+		System.exit(-1);
+	}
 }

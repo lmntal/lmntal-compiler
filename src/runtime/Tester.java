@@ -17,18 +17,13 @@ public class Tester extends TestCase {
 		Machine machine = new Machine();
 		Membrane root = (Membrane)machine.getRoot();
 		
-		Atom append = new Atom(root, "append", 3);
-		root.addAtom(append);
-		Atom cons = new Atom(root, "cons", 3);
-		root.addAtom(cons);
-		Atom nil1 = new Atom(root, "nil", 1);
-		root.addAtom(nil1);
-		Atom nil2 = new Atom(root, "nil", 1);
-		root.addAtom(nil2);
-		Atom one = new Atom(root, "1", 1);
-		root.addAtom(one);
-		Atom result = new Atom(root, "result", 1);
-		root.addAtom(result);
+		Atom append = root.newAtom("append", 3);
+		Atom cons = root.newAtom("cons", 3);
+		Atom nil1 = root.newAtom("nil", 1);
+		Atom nil2 = root.newAtom("nil", 1);
+		Atom one = root.newAtom("1", 1);
+		Atom result = root.newAtom("result", 1);
+		
 		root.newLink(result, 0, append, 2);
 		root.newLink(append, 0, nil1, 0);
 		root.newLink(append, 1, cons, 2);

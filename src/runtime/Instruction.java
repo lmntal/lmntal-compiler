@@ -3,7 +3,7 @@
  *
  */
 package runtime;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * 1 ‚Â‚Ì–½—ß‚ğ•Û‚·‚éB
