@@ -786,6 +786,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * リンク$link1の指すアトム引数とリンク$link2の指すアトム引数との間に双方向のリンクを張る。
 	 * ただし$link1は膜$memのアトムを指しているか、または所属膜の無いアトムを指している。
 	 * 後者の場合、何もしないで終わってもよいことになっている。
+	 * <p>todo 命令の解釈時にmem引数が使われることはないので、引数に含めないようにした方がよい。
 	 * <p>実行後$link1および$link2は無効なリンクオブジェクトとなるため、参照を使用してはならない。
 	 * <p>基底項データ型のコンパイルで使用される。*/
 	public static final int UNIFYLINKS = 69;
