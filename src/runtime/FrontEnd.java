@@ -94,7 +94,9 @@ public class FrontEnd {
 			try{
 				src.close();
 			}catch(IOException e){
-				System.out.println("ファイルがクローズできません");
+				// javadoc が生成できなかったので１バイト文字に変更してみました
+				System.out.println("Failed to close file");
+				//System.out.println("ファイルがクローズできません");
 				System.exit(-1);
 			}
 			// 計算ノードに、得られた初期化ルールを渡して呼び出す
