@@ -1,6 +1,16 @@
-/*boolean module*/
-/*‹@”\ˆê——*/
-/* not,&&,||,^*/
+NAME
+	Boolean module
+
+SYNOPSIS not,&&,||,^
+	
+AUTHOR
+	Ken Sakurai
+
+HISTORY
+	2004/06/29(Mon)
+
+*/
+
 
 {
 module(bool).
