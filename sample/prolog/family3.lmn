@@ -1,28 +1,3 @@
-% 記号
-symbols = {
-	% 名前の表現
-	{ naoyuki  , p(N1_1), p(N1_2), p(N1_3) },
-	{ hyougo   , p(N2_1), p(N2_2) },
-	{ saburo   , p(N3_1), p(N3_2), p(Q3_1) },
-	{ shinji   , p(N4_1), p(N4_2) },
-	{ yoshihisa, p(N5_1) },
-	{ hisako   , p(N6_1), p(N6_2), p(N6_3) },
-	{ yoko     , p(N7_1), p(N7_2)  },
-	{ nobuko   , p(N8_1) }
-	% no ルールで使う
-	{ null       }
-},
-% 述語に対する事実
-facts = {
-	father(N1_1, N2_1), % father(naoyuki, hyogo)
-	father(N3_1, N1_2), % father(saburo, naoyuki)
-	father(N3_2, N4_1), % father(saburo, shinji)
-	father(N5_1, N6_1), % father(yoshihisa, hisako)
-	mother(N6_2, N2_2), % mother(hisako, hyogo)
-	mother(N7_1, N1_3), % mother(yoko, naoyuki)
-	mother(N7_2, N4_2), % mother(yoko, shinji)
-	mother(N8_1, N6_3)  % mother(nobuko, hisako)
-},
 % ルール father
 (
 	% ルール father :- yes
@@ -150,8 +125,45 @@ facts = {
 		$r3
 	}
 ),
+% 述語に対する事実
+facts = {
+	father(N1_1, N2_1), % father(naoyuki, hyogo)
+	father(N3_1, N1_2), % father(saburo, naoyuki)
+	father(N3_2, N4_1), % father(saburo, shinji)
+	father(N5_1, N6_1), % father(yoshihisa, hisako)
+	mother(N6_2, N2_2), % mother(hisako, hyogo)
+	mother(N7_1, N1_3), % mother(yoko, naoyuki)
+	mother(N7_2, N4_2), % mother(yoko, shinji)
+	mother(N8_1, N6_3)  % mother(nobuko, hisako)
+},
+% 記号
+symbols = {
+	% 名前の表現
+	{ naoyuki  , p(N1_1), p(N1_2), p(N1_3) },
+	{ hyougo   , p(N2_1), p(N2_2) },
+	{ saburo   , p(N3_1), p(N3_2), p(Q3_1) },
+	{ shinji   , p(N4_1), p(N4_2) },
+	{ yoshihisa, p(N5_1) },
+	{ hisako   , p(N6_1), p(N6_2), p(N6_3) },
+	{ yoko     , p(N7_1), p(N7_2)  },
+	{ nobuko   , p(N8_1) }
+	% no ルールで使う
+	{ null       }
+},
 % クエリ
 /*
+    | ?- father(naoyuki, hyogo).
+    yes
+    | ?- father(saburo, hyogo).
+    no
+
+    | ?- father(F, hyogo).
+    F = naoyuki ? 
+    yes
+    | ?- father(F, saburo).
+    no
+
+% まだ未実装
     | ?- father(saburo, C).
     C = naoyuki ? ;
     C = shinji ? ;
