@@ -13,6 +13,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.SecurityException;
 
+import compile.*;
+import compile.parser.*;
+
 /**
  * LMNtal のメイソ
  * 
@@ -88,46 +91,35 @@ public class FrontEnd {
 			}
 		}
 		
+		// ソースなしならREPL, ありならソースを解釈実行。
 		if(is == null){
-			/* こうできるといいなぁと妄想
-			src = new REPL();
-			 */
-			//file指定がなければこれを呼ぶ
 			REPL.run();
-			// srcがnullなのであとでエラーが
-		}else{
-			src = new BufferedReader(new InputStreamReader(is));
-		
-			// srcを構文解析に渡す。
-			Ruleset initRuleset;
-			initRuleset = koubun_kaiseki(src); // ダミー
+		}else{			
 			try{
-				src.close();
-			}catch(IOException e){
-				System.out.println("ファイルがクローズできません");
-				System.exit(-1);
-			}
-			// 計算ノードに、得られた初期化ルールを渡して呼び出す
+				src = new BufferedReader(new InputStreamReader(is));
+				LMNParser lp = new LMNParser(src);
+				
+				compile.structure.Membrane m = lp.parse();
+				Env.p("");
+				Env.p( "After parse   : "+m );
 			
-			LMNtalRuntime buturimachine = new LMNtalRuntime(initRuleset);
-			buturimachine.exec(); //実行
-			System.out.println(Dumper.dump(buturimachine.getRootMem()));
-		}
-	}
-	
-	static Ruleset koubun_kaiseki(Reader src){
-		// ソースをダンプするだけ
-		int i;
-		while(true){
-			try{
-				i = src.read();
-				if(i == -1) break;
-				System.out.write(i);
-			}catch(IOException e){
-				System.out.println("file dump error");
-				System.exit(-1);
+				compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
+				InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
+				Env.p( "After compile : "+ir );
+				root.showAllRule();
+			
+				// 実行
+				LMNtalRuntime rt = new LMNtalRuntime(ir);
+				rt.exec();
+				Membrane result = (Membrane)rt.getRootMem();
+			
+			
+				Env.p( "After execute : " );
+				Env.p( Dumper.dump(result) );
+				Env.p( result );
+			} catch (ParseException e) {
+				Env.p(e);
 			}
 		}
-		return new SampleInitRuleset();
 	}
 }
