@@ -78,7 +78,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 	/** このセルの自由リンクの数を取得 */
 	int getFreeLinkCount() {
-		return atoms.getAtomCountOfFunctor(Functor.OUTSIDE_PROXY);
+		return atoms.getAtomCountOfFunctor(Functor.INSIDE_PROXY);
 	}
 	/** この膜とその子孫に適用できるルールがない場合にtrue */
 	boolean isStable() {
@@ -290,15 +290,19 @@ abstract class AbstractMembrane extends QueuedEntity {
 				//この膜にあるそれ以外のoutside_proxyアトムのうち
 				//子膜のinside_proxyに接続していないものの名前をstarに変える
 				a = outside.args[0].getAtom();
-				if (!a.getFunctor().equals(Functor.INSIDE_PROXY) ||
-					 a.getMem().getParent() != this) { //TODO この条件は常に真？
+				if (!a.getFunctor().equals(Functor.INSIDE_PROXY) /* ||
+					 a.getMem().getParent() != this */ ) { 
+					//TODO 次にinside_proxyをstarに変えるようにしたため<br>
+					// ||の前が偽ならば||の後も常に偽になります。<br>
+					// したがって方法4の文書は上記コードのように修正しておいて下さい。<br>
+					// その後、上のコメントアウト部分は消去して下さい＞水野君
+					
 					//TODO アトムを再利用
 					Atom star = newAtom(Functor.STAR); //atomsに追加されるがitには影響なし
-					//TODO リンクの張替え方法はこれで大丈夫？
-					newLink(star, 1, outside.args[0].getAtom(), outside.args[0].getPos());
-					newLink(star, 0, outside.args[1].getAtom(), outside.args[1].getPos());
-					removeList.add(a);
-
+					// リンクの張替え方法はこれで大丈夫？→修正しました (n-kato)
+					relinkAtomArgs(star, 0, outside, 0);
+					relinkAtomArgs(star, 1, outside, 1);
+					removeList.add(outside);
 				}
 			}
 		}
@@ -310,10 +314,11 @@ abstract class AbstractMembrane extends QueuedEntity {
 		while (it.hasNext()) {
 			Atom inside = (Atom)it.next();
 			Atom star = newAtom(Functor.STAR);
-			newLink(star, 0, inside.args[0].getAtom(), inside.args[0].getPos());
-			newLink(star, 1, inside.args[1].getAtom(), inside.args[1].getPos());
+			newLink(star, 0, inside, 0);
+			newLink(star, 1, inside, 1);
 			removeList.add(inside);
 		}
+		atoms.removeAll(removeList);
 	}
 	/**
 	 * srcMemの内容を全て移動する。
@@ -328,14 +333,17 @@ abstract class AbstractMembrane extends QueuedEntity {
 		while (it.hasNext()) {
 			Atom star = (Atom)it.next(); // n
 			Atom inside = newAtom(Functor.INSIDE_PROXY); //これもn（名前変更後）
-			newLink(inside, 1, star.args[1].getAtom(), star.args[1].getPos());
+			relinkAtomArgs(inside, 0, star, 0);
+			relinkAtomArgs(inside, 1, star, 1);
 			removeList.add(star);
 			if (star.args[0].getAtom().getMem() != this /* M */) {
 				Atom outside = newAtom(Functor.OUTSIDE_PROXY); // o
-				Atom star2 = newAtom(Functor.STAR); //m
-				newLink(outside, 1, star2, 1);
-				relinkAtomArgs(star2, 0, star, 0);
-				newLink(inside, 0, outside, 0);
+				Atom newstar = newAtom(Functor.STAR); //m
+				newLink(outside, 1, newstar, 1);
+				newLink(newstar, 1, outside, 1);
+				relinkAtomArgs(newstar, 0, inside, 0);
+				newLink(inside,  0, outside, 0);
+				newLink(outside, 0, inside,  0);
 			}
 		}
 		atoms.removeAll(removeList);
@@ -383,20 +391,22 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 * atom1の第pos1引数と、atom2の第pos2引数を接続する。
 	 * 接続するアトムは、
 	 * <ol><li>この膜のアトム同士
-	 *     <li>この膜のproxy_outと親膜のproxy_in
-	 *     <li>この膜のproxy_inと子膜のproxy_out
+	 *     <li>この膜のinside_proxyと親膜のoutside_proxy
+	 *     <li>この膜のoutside_proxyと子膜のinside_proxy
 	 * </ol>
 	 * の3通りの場合がある。
+	 * <br>
+	 * newLinkは片方向ずつ行う方が便利だったので修正しました (n-kato)
 	 */
 	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = new Link(atom2, pos2);
-		atom2.args[pos2] = new Link(atom1, pos1);
+		//atom2.args[pos2] = new Link(atom1, pos1);
 	}
 	/**
 	 * atom1の第pos1引数と、atom2の第pos2引数のリンク先を接続する。
 	 */
 	void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		atom1.args[pos1].set(atom2.args[pos2]);
+		atom1.args[pos1] = atom2.args[pos2];
 		atom2.args[pos2].set(atom1, pos1);
 	}
 	/**
