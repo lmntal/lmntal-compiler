@@ -1,7 +1,10 @@
 package util;
 
 public final class Stack {
-	private QueuedEntity head, tail;
+	/** 底 */
+	private QueuedEntity head;
+	/** トップ */
+	private QueuedEntity tail;
 	
 	public Stack() {
 		head = new QueuedEntity();
@@ -31,6 +34,19 @@ public final class Stack {
 //		last.next = tail;
 //		tail.prev = last;
 //	}
+	/** スタックstackの内容をこのスタックの底に移動する */
+	public void moveFrom(Stack stack) {
+		if (stack.isEmpty()) return;
+		QueuedEntity oldFirst = head.next;
+		QueuedEntity addedLast = stack.tail.prev;
+		head.next = stack.head.next;
+		stack.head.next.prev = head;
+		addedLast.next = oldFirst;
+		oldFirst.prev = addedLast;
+		stack.head.next = stack.tail;
+		stack.tail.prev = stack.head;
+	}
+	/** このメソッドは使わないかもしれない */
 	public void pushToBottom(QueuedEntity entity) {
 		entity.prev = head;
 		entity.next = head.next;
