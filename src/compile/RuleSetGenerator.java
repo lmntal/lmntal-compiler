@@ -4,7 +4,7 @@
  */
 package compile;
 
-import java.util.Iterator;
+import java.util.*;
 import runtime.Env;
 import runtime.InterpretedRuleset;
 import compile.structure.*;
@@ -35,6 +35,7 @@ public class RuleSetGenerator {
 		rs.parent = root;
 		processMembrane(root);
 		listupModules(root);
+		Env.p("\n=== Modules = \n"+modules+"\n\n");
 		return root;
 	}
 	
@@ -60,6 +61,7 @@ public class RuleSetGenerator {
 		}
 	}
 	
+	public static Map modules = new HashMap();
 	public static void listupModules(Membrane m) {
 		Env.p("listupModules");
 		Iterator i;
@@ -69,6 +71,7 @@ public class RuleSetGenerator {
 			runtime.Functor f = new runtime.Functor("name", 1);
 			if(a.functor.equals(f)) {
 				Env.p("Module found : "+a.args[0].atom);
+				modules.put(a.args[0].atom.mem, a.args[0].atom.toString());
 			}
 		}
 		i = m.rules.listIterator();
