@@ -51,7 +51,7 @@ public class REPL {
 		StringBuffer lb = new StringBuffer();
 		while (true) {
 			try {
-				line = Readline.readline( lb.length() == 0 ? "# " : "" );
+				line = Readline.readline( lb.length() == 0 ? "# " : "  " );
 				if (line == null) {
 					//System.out.println("no input");
 					processLine(lb.toString());
