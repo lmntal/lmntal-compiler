@@ -94,7 +94,7 @@ public class GraphLayout implements Runnable {
 	
 	public Rectangle getAtomsBound() {
 		final int m=1;
-		Rectangle r = new Rectangle(parent.getWidth()/m, parent.getHeight()/m, parent.getWidth()/m*2, parent.getHeight()/m*2);
+		Rectangle r = new Rectangle((parent.getWidth() - parent.getWidth()/m)/2, (parent.getHeight() - parent.getHeight()/m)/2, parent.getWidth()/m, parent.getHeight()/m);
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
 			Point p = n.getPosition().toPoint();
@@ -103,7 +103,7 @@ public class GraphLayout implements Runnable {
 				r.add(p);
 			}
 		}
-		int w = r.width, h = r.height;
+//		int w = r.width, h = r.height;
 //		r.x += w/4;
 //		r.y += h/4;
 //		r.width -= w/2;
