@@ -650,21 +650,17 @@ class InterpretiveReactor {
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x ^ y));	
 					break; //nakajima 2004-01-21
-				case Instruction.ISHL : //[-dstintatom, intatom1, intatom2]
-					// TODO javaでは>>は符号つき右シフト、<<が符号つき左シフト、>>>は符号なし右シフトですのでここはそれぞれISAL, ISAR, ISHRにしたほうがいいんじゃないですか？
-					//intatom1をintatom2ビット分符号つき(算術)左シフト
+				case Instruction.ISAL : //[-dstintatom, intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x << y));	
 					break; //nakajima 2004-01-21
-				case Instruction.ISHR : //[-dstintatom, intatom1, intatom2] 
-					//intatom1をintatom2ビット分符号つき(算術)右シフト
+				case Instruction.ISAR : //[-dstintatom, intatom1, intatom2] 
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x >> y));	
 					break; //nakajima 2004-01-21					
-				case Instruction.ISAR : //[-dstintatom, intatom1, intatom2] 
-					//intatom1をintatom2ビット分論理右シフト
+				case Instruction.ISHR : //[-dstintatom, intatom1, intatom2] 
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x >>> y));	
@@ -721,18 +717,17 @@ class InterpretiveReactor {
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
 					vars.set(inst.getIntArg1(), new IntegerFunctor(x ^ y));				
 					break; //nakajima 2003-01-21
-				case Instruction.ISHLFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					// TODO javaでは>>は符号つき右シフト、<<が符号つき左シフト、>>>は符号なし右シフトですのでここはそれぞれISALFUNC, ISARFUNC, ISHRFUNCにしたほうがいいんじゃないですか？
+				case Instruction.ISALFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
 					vars.set(inst.getIntArg1(), new IntegerFunctor(x << y));				
 					break; //nakajima 2003-01-21
-				case Instruction.ISHRFUNC : //[-dstintfunc, intfunc1, intfunc2]
+				case Instruction.ISARFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
 					vars.set(inst.getIntArg1(), new IntegerFunctor(x >> y));				
 					break; //nakajima 2003-01-21
-				case Instruction.ISARFUNC : //[-dstintfunc, intfunc1, intfunc2]
+				case Instruction.ISHRFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();	
 					vars.set(inst.getIntArg1(), new IntegerFunctor(x >>> y));				

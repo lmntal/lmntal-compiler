@@ -898,9 +898,18 @@ public class Instruction implements Cloneable {
 	public static final int IAND = 241;
 	public static final int IOR  = 242;
 	public static final int IXOR = 243;
-	public static final int ISHL = 244;
-	public static final int ISHR = 245;
-	public static final int ISAR = 246;
+	/** iadd [-dstintatom, intatom1, intatom2]
+	 * <br>整数用の組み込み命令<br>
+	 * intatom1をintatom2ビット分符号つき(算術)左シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
+	public static final int ISAL = 244;
+	/** iadd [-dstintatom, intatom1, intatom2]
+	 * <br>整数用の組み込み命令<br>
+	 * intatom1をintatom2ビット分符号つき(算術)右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
+	public static final int ISAR = 245;
+	/** iadd [-dstintatom, intatom1, intatom2]
+	 * <br>整数用の組み込み命令<br>
+	 * intatom1をintatom2ビット分論理右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
+	public static final int ISHR = 246;
 
 	/** iaddfunc [-dstintfunc, intfunc1, intfunc2]
 	 * <br>整数用の最適化用組み込み命令<br>
@@ -915,9 +924,9 @@ public class Instruction implements Cloneable {
 	public static final int IANDFUNC = IAND + OPT;
 	public static final int IORFUNC  = IOR  + OPT;
 	public static final int IXORFUNC = IXOR + OPT;
-	public static final int ISHLFUNC = ISHL + OPT;
-	public static final int ISHRFUNC = ISHR + OPT;
+	public static final int ISALFUNC = ISAL + OPT;
 	public static final int ISARFUNC = ISAR + OPT;
+	public static final int ISHRFUNC = ISHR + OPT;
 
 	// 整数用の組み込みガード命令 (250--259)
 
