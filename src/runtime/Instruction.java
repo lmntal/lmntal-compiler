@@ -27,25 +27,36 @@ public class Instruction {
 	public List data = new ArrayList();
 	
 	public Instruction() {
+	    //deprecated by NAKAJIMA: 古いデータ形式
 		// たとえば [react, [1, 2, 5]]
-		ArrayList sl = new ArrayList();
-		sl.add(new Integer(1));
-		sl.add(new Integer(2));
-		sl.add(new Integer(5));
-		data.add("react");
-		data.add(sl);
-		System.out.println(data);
+// 		ArrayList sl = new ArrayList();
+// 		sl.add(new Integer(1));
+// 		sl.add(new Integer(2));
+// 		sl.add(new Integer(5));
+// 		data.add("react");
+// 		data.add(sl);
+// 		System.out.println(data);
+
+	    //新しいデータ形式
+ 		ArrayList sl = new ArrayList();
+ 		sl.add(new Integer(1));
+ 		sl.add(new Integer(2));
+ 		sl.add(new Integer(5));
+ 		data.add(new Integer(0)); // 0->deref命令
+ 		data.add(sl);
+ 		System.out.println(data);
 	}
 
     /**
      * デバッグ用表示メソッド。
      * 命令の数字(int)を与えると、該当する命令のStringを返してくれる
+     *
      * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
      * @return String
      * 
      */
 
-     public static String getInstrcutionString(int instrcutionNum){
+     public static String getInstructionString(int instrcutionNum){
 	 /* see http://www.ueda.info.waseda.ac.jp/~mizuno/lmntal/method4.html
 	  *
 	  * マッチングの実行
@@ -132,7 +143,7 @@ public class Instruction {
 	 } catch (ArrayIndexOutOfBoundsException e){
 	     //	     answer = "　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n";
 
-	     answer = "1 名前：仕様書無しさん 03/09/21 00:23\n　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n2 名前：仕様書無しさん ：03/09/21 00:24\n　　Λ＿Λ　　＼＼ \n　 （　・∀・）　　　|　|　ｶﾞｯ\n　と　　　　）　 　 |　| \n　　 Ｙ　/ノ　　　 人 \n　　　 /　）　 　 < 　>__Λ∩ \n　 ＿/し'　／／. Ｖ｀Д´）/ ←>>おまえ\n　（＿フ彡　　　　　 　　/ \n\n";
+	     answer = "1 名前：仕様書無しさん 03/09/21 00:23\n　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n2 名前：仕様書無しさん ：03/09/21 00:24\n　　Λ＿Λ　　＼＼ \n　 （　・∀・）　　　|　|　ｶﾞｯ\n　と　　　　）　 　 |　| \n　　 Ｙ　/ノ　　　 人 \n　　　 /　）　 　 < 　>__Λ∩ \n　 ＿/し'　／／. Ｖ｀Д´）/\n　（＿フ彡　　　　　 　　/ \n\n";
 	 } catch (Exception e){
 	     //本当にヤヴァイ場合
 	     System.out.println(e);
@@ -154,9 +165,22 @@ public class Instruction {
      *
      */
     public String toString(){
-	StringBuffer buffer = new StringB2ufffer("");
+	StringBuffer buffer = new StringBuffer("");
 
-	
+	if(data.isEmpty()){
+	    buffer.append(" No Instructions! ");
+	} else {
+	    for (int i = 0; i < data.size()-1; i+=2){
+		buffer.append("[");
+
+		buffer.append("Command: ");
+		buffer.append(this.getInstructionString(((Integer)data.get(i)).intValue()));
+		buffer.append(" Arguments: ");
+		buffer.append(data.get(i+1));
+		
+		buffer.append("]");
+	    }
+	}
 
 	return buffer.toString();
     }
