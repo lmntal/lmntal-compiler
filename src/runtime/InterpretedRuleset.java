@@ -327,14 +327,19 @@ class InterpreterReactor {
 
 					//====アトムを操作する型付き拡張用命令====ここから====
 				case Instruction.ALLOCATOM : //[-dstatom, funcref]
-					break;
+					atoms[inst.getIntArg1()] = new Atom(null, (Functor)inst.getArg2());
+					break; //nakajima 2003-12-27
 
 				case Instruction.ALLOCATOMINDIRECT : //[-dstatom, func]
+					// TODO funcrefと$funcって何が違うのですか？
+					atoms[inst.getIntArg1()] = new Atom(null, (Functor)inst.getArg2());
 					break;
 
 				case Instruction.COPYATOM :
 				case Instruction.LOCALCOPYATOM : //[-dstatom, mem, srcatom]
-					break;
+					//TODO Functorのarityは2でいいのか？
+					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(atoms[inst.getIntArg3()].getName(), 2);
+					break; //nakajima 2003-12-27
 
 					//case Instruction.ADDATOM:
 				case Instruction.LOCALADDATOM : //[dstmem, atom]
