@@ -26,8 +26,9 @@ public class Optimizer {
 				reuseMem(body);
 			}
 			if (Env.optimize >= 2) {
-				changeOrder(body);
-				reuseAtom(body);
+				if (changeOrder(body)) {
+					reuseAtom(body);
+				}
 			}
 			if (Env.optimize >= 7) {
 				makeLoop(head, body); //まだ問題だらけ
@@ -41,11 +42,12 @@ public class Optimizer {
 	 * getlink/unify命令をボディ命令列の先頭に移動する。
 	 * 先頭の命令はspecでなければならない。
 	 * @param list 変換する命令列
+	 * @return 変換に成功した場合はtrue
 	 */
-	public static void changeOrder(List list) {
+	public static boolean changeOrder(List list) {
 		Instruction spec = (Instruction)list.get(0);
 		if (spec.getKind() != Instruction.SPEC) {
-			throw new RuntimeException("SYSTEM ERROR: first instruction must be spec");
+			return false;
 		}
 		int nextId = spec.getIntArg2();
 		
@@ -74,6 +76,7 @@ public class Optimizer {
 		list.set(0, Instruction.spec(spec.getIntArg1(), nextId));
 		list.addAll(1, moveInsts);
 //		spec.data.set(1, new Integer(nextId)); //ローカル変数の数を変更
+		return true;
 	}
 
 	private static class Link {

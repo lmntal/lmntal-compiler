@@ -1,33 +1,38 @@
-/*
- * 作成日: 2003/11/30
- *
- * この生成されたコメントの挿入されるテンプレートを変更するため
- * ウィンドウ > 設定 > Java > コード生成 > コードとコメント
- */
 package test;
 
-import compile.Optimizer;
-import runtime.Instruction;
-import runtime.Functor;
-
 import java.util.*;
+import java.io.*;
+import java.lang.reflect.*;
 
-import junit.framework.TestCase;
+import compile.*;
+import compile.parser.*;
+import runtime.*;
 
 /**
  * @author Mizuno
  *
  */
-public class OptimizerTest extends TestCase {
-	public OptimizerTest(String arg0) {
-		super(arg0);
-	}
+public class OptimizerTest {
 
-	public static void main(String[] args) {
-		junit.textui.TestRunner.run(OptimizerTest.class);
-	}
+	public static void main(String[] args) throws Exception {	
+		LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(System.in)));
+					
+		compile.structure.Membrane m = lp.parse();
+		compile.structure.Membrane root = RulesetCompiler.runStartWithNull(m);
+		InterpretedRuleset initIr = (InterpretedRuleset)root.rulesets.get(0);
+		Rule initRule = (Rule)initIr.rules.get(0);
+		Instruction loadrulesetInst = (Instruction)initRule.body.get(1);
+		InterpretedRuleset ir = (InterpretedRuleset)loadrulesetInst.getArg2();
+		List rules = ir.rules;
 
-	public static void testAppend() {
+		ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(System.out));
+		out.writeObject(rules);
+		out.close();
+	}
+	
+	public static void main2(String[] args) throws Exception {
+		/////////////////////////////////////////////////////////
+		// append 1
 		Functor append = new Functor("append", 3);
 		Functor cons = new Functor("cons", 3);
 		
@@ -62,15 +67,14 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.FREEATOM, 1));
 		list.add(new Instruction(Instruction.FREEATOM, 2));
 		list.add(new Instruction(Instruction.PROCEED));
-		
-		doTest(list);
-	}
 
-	public static void testAppendWithRelink() {
-		Functor append = new Functor("append", 3);
-		Functor cons = new Functor("cons", 3);
+				
+		doTest(list);
+
+		/////////////////////////////////////////////////////////
+		// append 2
 		
-		ArrayList list = new ArrayList();
+		list = new ArrayList();
 		System.out.println("( append(X0, Y, Z), cons(A, X, X0) :- cons(A, X1, Z), append(X, Y, X1) )");
 		System.out.println("use relink instruction");
 
@@ -92,12 +96,13 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.PROCEED));
 		
 		doTest(list);
-	}
-	
-	public static void testReuseMem() {
+
+		/////////////////////////////////////////////////////////
+		// mem 1
+
 		Functor a = new Functor("a", 0);
 		Functor b = new Functor("b", 0);
-		ArrayList list = new ArrayList();
+		list = new ArrayList();
 
 		System.out.println("( {a, $p}, {b, $q} :- {a, $q}, {a, b, $p} )");
 
@@ -129,10 +134,12 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.PROCEED));
 		
 		doTest(list);
-	}
 
-	public static void testReuseMem2() {
-		ArrayList list = new ArrayList();
+
+		/////////////////////////////////////////////////////////
+		// mem 2
+
+		list = new ArrayList();
 
 		System.out.println("( {$p}, {$q} :- {$q, $p} )");
 
@@ -152,10 +159,12 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.PROCEED));
 		
 		doTest(list);
-	}
-	
-	public static void testReuseMem3() {
-		ArrayList list = new ArrayList();
+
+
+		/////////////////////////////////////////////////////////
+		// mem 3
+
+		list = new ArrayList();
 
 		System.out.println("( {$p, {$q}} :- {$q, {$p}} )");
 		
@@ -177,7 +186,24 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.PROCEED));
 		
 		doTest(list);
+		
+		///////////////////////////////////////////////////////////
+		// mem4
+		
+		list = new ArrayList();
+		System.out.println("( { change, {a,$p} } :- { {b,$p} } )");
+
+		Functor change = new Functor("change", 0);
+		
+		list.add(Instruction.spec(5,8));
+		list.add(Instruction.dequeueatom(3));
+		list.add(Instruction.dequeueatom(4));
+		list.add(Instruction.removeatom(3, 1, change));
+		list.add(Instruction.removeatom(4, 2, a));
+		list.add(new Instruction(Instruction.REMOVEMEM, 2, 1));
 	}
+	
+	
 	private static void doTest(ArrayList list) { 
 		
 		System.out.println("Before Optimization:");
@@ -187,7 +213,7 @@ public class OptimizerTest extends TestCase {
 		}
 		
 		//optimize
-		Optimizer.optimize(list);
+		Optimizer.optimize(null, list);
 		
 		System.out.println("After Optimization:");
 		it = list.iterator();
