@@ -293,6 +293,7 @@ public class FrontEnd {
 			REPL.run();
 		} else {
 			run(Env.argv);
+			if(Env.fREMAIN) REPL.run();
 		}
 	}
 	

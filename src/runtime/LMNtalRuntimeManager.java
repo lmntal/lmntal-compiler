@@ -149,7 +149,7 @@ public final class LMNtalRuntimeManager {
 		synchronized(t){
 			try {
 				t.join();
-				System.out.println("terminateAllThreaded(): after thread.join");
+//				System.out.println("terminateAllThreaded(): after thread.join");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -163,19 +163,19 @@ public final class LMNtalRuntimeManager {
 	/** 登録されている全てのRemoteLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
 	 *  Env.theRuntime も terminate する (n-kato) 2004-09-17 */
 	public static boolean terminateAll() {
-		System.out.println("LMNtalRuntimeManager.terminateAll() entered");
+//		System.out.println("LMNtalRuntimeManager.terminateAll() entered");
 		
 		synchronized(terminateLock) { // 重複転送防止のため（仮）		
 			if(Env.theRuntime.isTerminated()){
-				System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime.isTerminated() is true");
+//				System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime.isTerminated() is true");
 				return false;
 			} else {
-				System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime.isTerminated() is false");
+//				System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime.isTerminated() is false");
 				Env.theRuntime.terminate();
 			}
 		}
 
-		System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime is terminated");
+//		System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime is terminated");
 		
 
 		
@@ -184,7 +184,7 @@ public final class LMNtalRuntimeManager {
 		while (it.hasNext()) {
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
 
-			System.out.println("LMNtalRuntimeManager.terminateAll(): now sending TERMINATE to " + machine.hostname);
+//			System.out.println("LMNtalRuntimeManager.terminateAll(): now sending TERMINATE to " + machine.hostname);
 			
 			if(daemon.sendWait(machine.hostname,"TERMINATE")){  //TODO (nakajima)ここでデッドロックな模様
 				childNode.add(machine);
@@ -192,7 +192,7 @@ public final class LMNtalRuntimeManager {
 		}
 		runtimeids.clear();
 		
-		System.out.println("LMNtalRuntimeManager.terminateAll(): everything finished and returning true");
+//		System.out.println("LMNtalRuntimeManager.terminateAll(): everything finished and returning true");
 		return true;
 	}
 	
@@ -219,8 +219,8 @@ public final class LMNtalRuntimeManager {
 class TerminateAllProcessor implements Runnable {
 	boolean result;
 	public void run(){
-		System.out.println("TerminateAllProcessor.run() entered");
+//		System.out.println("TerminateAllProcessor.run() entered");
 		result = LMNtalRuntimeManager.terminateAll();
-		System.out.println("TerminateAllProcessor.run(): result is " + result + " and now quitting...");
+//		System.out.println("TerminateAllProcessor.run(): result is " + result + " and now quitting...");
 	}
 }
