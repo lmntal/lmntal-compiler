@@ -40,7 +40,7 @@ final class Task extends AbstractTask {
 	Stack memStack = new Stack();
 	Stack bufferedStack = new Stack();
 	boolean idle = false;
-	static final int maxLoop = 10;
+	static final int maxLoop = 100;
 	
 	Task() {
 		root = new Membrane(this);
