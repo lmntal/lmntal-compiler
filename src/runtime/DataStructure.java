@@ -43,6 +43,9 @@ class Atom extends QueuedEntity {
 	String getName() {
 		return functor.getName();
 	}
+	public String toString() {
+		return functor.getName();
+	}
 	/** リンク数を取得 */
 	int getArity() {
 		return functor.getArity();
@@ -308,17 +311,30 @@ final class Link {
 	private Atom atom;
 	/** リンク先が第何引数か */
 	private int pos;
-	
+
+	private static int lastId = 0;
+	private int id;
 	///////////////////////////////
 	// コンストラクタ
 	
 	Link(Atom atom, int pos) {
 		set(atom, pos);
+		id = lastId++;
 	}
 
 	///////////////////////////////
 	// 情報の取得
-		
+
+	public String toString() {
+		int i;
+		if (this.id < atom.args[pos].id) {
+			i = this.id;
+		} else {
+			i = atom.args[pos].id;
+		}
+		return "_" + i;
+	}
+				
 	/** リンク先のアトムを取得する */
 	Atom getAtom() {
 		return atom;

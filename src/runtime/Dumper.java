@@ -5,31 +5,51 @@ import java.util.*;
 class Dumper {
 	static String dump(AbstractMembrane mem) {
 		StringBuffer buf = new StringBuffer();
-		//まだ出力されていないアトムの集合
-		Set atoms = new HashSet();
+		List predAtoms = new ArrayList();
+		Set atoms = new HashSet(mem.getAtomCount());
 
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
-			atoms.add(it.next());
+			Atom a = (Atom)it.next();
+			atoms.add(a);
+			if (a.getArity() == 0 ||
+				a.getLastArg().getAtom().getMem() != mem ||
+				a.getLastArg().isFuncRef() ) {
+				
+				predAtoms.add(a);
+			}
 		}
 		
+		it = predAtoms.iterator();
+		while (it.hasNext()) {
+			Atom a = (Atom)it.next();
+			if (atoms.contains(a)) {
+				buf.append(dumpAtomGroup(a, atoms));
+				buf.append(", ");
+			}
+		}
 		while (true) {
 			it = atoms.iterator();
-			while (true) {
-				Atom a = (Atom)it.next();
-				if (a.getArity() == 0 ||
-					a.getLastArg().getAtom().getMem() != mem ||
-					a.getLastArg().isFuncRef()) {
-
-					buf.append(dumpAtomGroup(a, atoms));
-					break;
-				}
-			}
-			if (atoms.isEmpty()) {
+			if (!it.hasNext()) {
 				break;
 			}
+			buf.append(dumpAtomGroup((Atom)it.next(), atoms));
 			buf.append(", ");
 		}
+		
+		it = mem.memIterator();
+		while (it.hasNext()) {
+			buf.append("{");
+			buf.append(dump((Membrane)it.next()));
+			buf.append("}, ");
+		}
+		
+		it = mem.rulesetIterator();
+		while (it.hasNext()) {
+			buf.append((Ruleset)it.next());
+			buf.append(", ");
+		}
+
 		return buf.toString();
 	}
 	private static String dumpAtomGroup(Atom a, Set atoms) {
@@ -65,25 +85,11 @@ class Dumper {
 		}
 		return buf.toString();
 	}
-	private static int lastLinkID;
-	private static Map linkID;
-	public static void resetId() {
-		lastLinkID = 0;
-		linkID = new HashMap();
-	}
 	private static String dumpLink(Link l, Set atoms) {
-		if (l.isFuncRef()) {
+		if (l.isFuncRef() && atoms.contains(l.getAtom())) {
 			return dumpAtomGroupWithoutLastArg(l.getAtom(), atoms);
 		} else {
-			int id;
-			Integer ido = (Integer)linkID.get(l);
-			if (ido == null) {
-				id = lastLinkID++;
-				linkID.put(l, new Integer(id));
-			} else {
-				id = ido.intValue();
-			}
-			return "_" + id;
+			return l.toString();
 		}
 	}
 }

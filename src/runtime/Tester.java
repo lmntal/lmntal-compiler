@@ -21,17 +21,16 @@ public class Tester {
 		root.addAtom(nil1);
 		Atom nil2 = new Atom(root, "nil", 1);
 		root.addAtom(nil2);
-		Atom nil3 = new Atom(root, "nil", 1);
-		root.addAtom(nil3);
+		Atom one = new Atom(root, "1", 1);
+		root.addAtom(one);
 		Atom result = new Atom(root, "result", 1);
 		root.addAtom(result);
 		root.newLink(result, 0, append, 2);
 		root.newLink(append, 0, nil1, 0);
 		root.newLink(append, 1, cons, 2);
-		root.newLink(cons, 0, nil2, 0);
-		root.newLink(cons, 1, nil3, 0);
+		root.newLink(cons, 0, one, 0);
+		root.newLink(cons, 1, nil2, 0);
 		
-		Dumper.resetId();
 		System.out.println(Dumper.dump(root));
 	}
 }
