@@ -1230,11 +1230,16 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(GETRUNTIME, new ArgType(true, ARG_ATOM, ARG_MEM));}
 	
 	/** connectruntime [srcatom]
-	 * <br>分散拡張用ガード命令<br>
+	 * 	 	 * <br>分散拡張用ガード命令<br>
 	 * アトム$srcatomが文字列ファンクタを持つことを確認し、
 	 * その文字列が表すノードに接続できることを確認する。
 	 * <p>文字列が空のときはつねに成功する。
-	 * <p>ルールの右辺に{..}@Hがあるときに使用される。文字列を使うのは仮仕様だがおそらく変えない。*/
+	 * <p>ルールの右辺に{..}@Hがあるときに使用される。文字列を使うのは仮仕様だがおそらく変えない。
+	 *
+	 * 追記(nakajima: 2004-01-12) 
+	 * 方法7（分散版）では、指定ホストにVMが無かったら作る。あったら生存確認。
+	 * 新方式1では、生存確認のみ。新規作成はボディ命令に移動。
+	 * */
 	public static final int CONNECTRUNTIME = 231;
 	static {setArgType(CONNECTRUNTIME, new ArgType(false, ARG_ATOM));}
 
