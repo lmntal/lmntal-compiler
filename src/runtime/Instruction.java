@@ -965,7 +965,8 @@ public class Instruction implements Cloneable {
 	// 整数用の組み込みボディ命令 (400--419+OPT)
 	/** iadd [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
-	 * 整数アトムの加算結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
+	 * 整数アトムの加算結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。
+	 * <p>idivおよびimodに限り失敗する。*/
 	public static final int IADD = 400;
 	public static final int ISUB = 401;
 	public static final int IMUL = 402;
@@ -991,7 +992,8 @@ public class Instruction implements Cloneable {
 
 	/** iaddfunc [-dstintfunc, intfunc1, intfunc2]
 	 * <br>整数用の最適化用組み込み命令<br>
-	 * 整数ファンクタの加算結果を表す整数ファンクタを生成し、$dstintfuncに代入する。*/
+	 * 整数ファンクタの加算結果を表す整数ファンクタを生成し、$dstintfuncに代入する。
+	 * <p>idivfuncおよびimodfuncに限り失敗する。*/
 	public static final int IADDFUNC = IADD + OPT;
 	public static final int ISUBFUNC = ISUB + OPT;
 	public static final int IMULFUNC = IMUL + OPT;

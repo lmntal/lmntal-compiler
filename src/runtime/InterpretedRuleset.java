@@ -691,6 +691,7 @@ class InterpretiveReactor {
 				case Instruction.IDIV : //[-dstintatom, intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					if (y == 0) return false;
 					if (y == 0) func = new Functor("NaN",1);
 					else func = new IntegerFunctor(x / y);
 					atoms[inst.getIntArg1()] = new Atom(null, func);				
@@ -702,6 +703,7 @@ class InterpretiveReactor {
 				case Instruction.IMOD : //[-dstintatom, intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					if (y == 0) return false;
 					if (y == 0) func = new Functor("NaN",1);
 					else func = new IntegerFunctor(x % y);
 					atoms[inst.getIntArg1()] = new Atom(null, func);						
