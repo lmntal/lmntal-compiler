@@ -22,7 +22,17 @@ io.popup(String) :- unary(String)|[[/*inline*/
 	]](String).
 
 /**
- * Constructor : () -> java::BufferedReader
+ * io.file : String -> Queue of String
+ * 
+ */
+H=io.file(Filename) :- H=file_s0(io.fileReader(Filename), queue.new).
+H=file_s0(Obj, Queue) :- class(Obj,"java.io.BufferedReader") |
+	H=file_s0(readline(Obj, String), push(Queue, String)).
+H=file_s0(nil, Queue) :- H=Queue.
+
+
+/**
+ * Constructor : String -> java::BufferedReader
  * 
  */
 H=io.fileReader(Filename) :- unary(Filename) | H=[[/*inline*/
@@ -44,7 +54,7 @@ H=readline(Object, Result) :- class(Object, "java.io.BufferedReader") |
 		try {
 			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			String s = br.readLine();
-			Atom result = mem.newAtom(new Functor(s, 1));
+			Atom result = mem.newAtom(new Functor(s==null?"":s, 1));
 			mem.relink(result, 0, me, 1);
 			Atom obj = me.nthAtom(0);
 			if(s==null) {
@@ -53,7 +63,7 @@ H=readline(Object, Result) :- class(Object, "java.io.BufferedReader") |
 			}
 			mem.relink(obj, 0, me, 2);
 			me.remove();
-		} catch(Exception e) {Env.d(e);}
+		} catch(Exception e) {Env.e(e);}
 	]](Object, Result).
 
 // Sample

@@ -120,6 +120,9 @@ public final class Env {
 	public static void e(Object o, int depth) {
 		System.err.println(getIndent(depth) + o);
 	}
+	public static void e(Exception e) {
+		e.printStackTrace(System.err);
+	}
 	
 	/**
 	 * General dumper for debug

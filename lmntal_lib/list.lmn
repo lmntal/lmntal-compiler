@@ -43,15 +43,73 @@ H=shift([], Return) :- H=[], Return=nil.
 H=shift('.'(Value, Next), Return) :- H=Next, Return=Value.
 
 
+/**
+ * of_queue
+ * 
+ * Queue -> List
+ */
+H=list.of_queue(queue.new(Head, Head)) :- H=[].
+H=list.of_queue(queue.new(Head, Tail)) :-
+	H=[El | list.of_queue(shift(queue.new(Head, Tail), El))].
+
+
+/**
+ * map
+ * 
+ * Functor -> List -> List
+ */
+H=list.map(F, List) :- H=list.fold(F, [], List).
+
+/**
+ * fold
+ * 
+ * Functor -> Functor -> List -> List
+ */
+H=list.fold(F, I, []) :- unary(F), unary(I) | H=I.
+H=list.fold(F, I, [CAR|CDR]) :- unary(F), unary(I) | H=[ [F, CAR] | list.fold(F, I, CDR)].
+
+/**
+ * unfold
+ * 
+ * (Seed -> Boolean)
+ *  -> (Seed -> Value)
+ *  -> (Seed -> NewSeed)
+ *  -> Seed
+ *  -> (Seed -> TailValue)
+ *  -> List
+ * 
+ * @see Gauche http://www.shiro.dreamhost.com/scheme/gauche/man/gauche-refj_216.html#SEC239
+ */
+H=list.unfold(P, F, G, Seed, Tailgen) :-
+	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
+	H=list.unfold_s0(P, F, G, Seed, Tailgen, [P,Seed]).
+
+H=list.unfold_s0(P, F, G, Seed, Tailgen, true) :-
+	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
+	H=[ [F,Seed] | list.unfold_s0(P, F, G, [G,Seed], Tailgen, [P,Seed]) ].
+
+H=list.unfold_s0(P, F, G, Seed, Tailgen, false) :-
+	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
+	H=[ [F,Seed] ].
+
+// << Sample of unfold >>
+// r=list.unfold(p,f,g,0,f).
+// H=[p,N]:-10>N|H=true.
+// H=[p,N]:-N=10|H=false.
+// H=[g,N]:-M=N+1|H=M.
+// H=[f,N]:-H=N.
+// ==> r([0,1,2,3,4,5,6,7,8,9,10,11]), @601, @603
+
+// r=list.fold("+", 0, [1,2,3]). (H=[ ["+",A]|B] :- A+B=C | H=C).
+
+Res=list.flatten(nil, R) :- Res=R.
+Res=list.flatten(int(N), R) :- Res=cons(int(N), R).
+Res=list.flatten(cons(A, B), R) :- Res=list.flatten(A, list.flatten(B, R)).
 
 
 
 
-	Res=list.flatten(nil, R) :- Res=R.
-	Res=list.flatten(int(N), R) :- Res=cons(int(N), R).
-	Res=list.flatten(cons(A, B), R) :- Res=list.flatten(A, list.flatten(B, R)).
 }.
-
 //res = list.flatten(cons(cons(int(1),cons(int(2),int(3))), int(4)), nil).
 
 // TODO inline から楽にリストを作れるようにする

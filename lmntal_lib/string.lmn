@@ -35,8 +35,13 @@ H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[[/*inline*/
  * 
  * H=join("_", [1,2,3])  ==>  H="1_2_3"
  */
-H=string.join(Glue, [CAR|[]]) :- unary(Glue) | H=CAR.
-H=string.join(Glue, [CAR|CDR]) :- unary(Glue) | H=string.concat(CAR, string.concat(Glue, string.join(Glue, CDR))).
+H='.'(Glue0, string.join(Glue1, [])) :- unary(Glue0), unary(Glue1) | H=[].
+H=string.join(Glue, [CAR|CDR]) :- unary(Glue) |
+	H=[CAR, Glue | string.join(Glue, CDR)].
+
+//H=string.join(Glue, [CAR|[]]) :- unary(Glue) | H=CAR.
+//H=string.join(Glue, [CAR|CDR]) :- unary(Glue) | H=string.concat(CAR, string.concat(Glue, string.join(Glue, CDR))).
+
 
 //H=string.join(Glue, List) :- unary(Glue) | H=list.fold(string.concat, "", List).
 
