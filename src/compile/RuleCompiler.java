@@ -250,6 +250,7 @@ public class RuleCompiler {
 	
 	private void optimize() {
 		Env.c("optimize");
+		Optimizer.optimize(memMatch, body);
 	}	
 	/** 左辺のアトムを所属膜から除去する。*/
 	private void removeLHSAtoms() {
@@ -282,7 +283,7 @@ public class RuleCompiler {
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
 			int subcount = removeLHSMem(submem);
-			body.add(new Instruction(Instruction.REMOVEMEM, lhsmemToPath(submem)));
+			body.add(new Instruction(Instruction.REMOVEMEM, lhsmemToPath(submem), lhsmemToPath(mem))); //第2引数追加 by mizuno
 			if (subcount > 0) {
 				body.add(new Instruction(Instruction.REMOVEPROXIES, lhsmemToPath(submem)));
 			}
