@@ -165,6 +165,7 @@ public class RuleCompiler {
 					hc.match.add(new Instruction(Instruction.GETMEM, hc.varcount, 1));
 					hc.match.add(new Instruction(Instruction.LOCK,   hc.varcount));
 					hc.mempaths.put(mem, new Integer(hc.varcount++));
+					mem = mem.mem;
 					while (mem != rs.leftMem) {
 						hc.match.add(new Instruction(Instruction.GETPARENT,hc.varcount,hc.varcount-1));
 						hc.match.add(new Instruction(Instruction.LOCK,     hc.varcount));
@@ -812,8 +813,6 @@ public class RuleCompiler {
 		it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
-			//
-			Module.regMemName(submem.name, submem);
 			int submempath = varcount++;
 			rhsmempath.put(submem, new Integer(submempath));
 			body.add( Instruction.newmem(submempath, rhsmemToPath(mem) ) );

@@ -106,7 +106,7 @@ public class HeadCompiler {
 				if (buddylink == null) continue; // ガード匿名リンクは無視
 				
 				Atom buddyatom = buddylink.atom;
-				if (!atomids.containsKey(buddyatom)) continue; // 右辺（や型付き$p）へのリンクは無視
+				if (!atomids.containsKey(buddyatom)) continue; // 右辺や$pへのリンクは無視
 				
 				if (atomToPath(buddyatom) != UNBOUND) { // リンク先のアトムをすでに取得している場合
 					// lhs(>)->lhs(<) または neg(>)->sameneg(<) ならば、
@@ -131,15 +131,15 @@ public class HeadCompiler {
 					continue;
 				}
 				else { // リンク先のアトムをまだ取得していない場合
-					// リンク先の引数位置が自由であり、かつ同じファンクタを持つどのアトムとも
-					// 異なることを確かめなければならない。(2004.6.4)
+					// リンク先の引数位置が右辺または$pへのリンクであり、かつ同じファンクタを持つ
+					// ようなどのアトムとも異なることを確かめなければならない。(2004.6.4)
 					Iterator it = buddyatom.mem.atoms.iterator();
 					while (it.hasNext()) {
 						Atom otheratom = (Atom)it.next();					
 						int other = atomToPath(otheratom);
 						if (other == UNBOUND) continue;
 						if (!otheratom.functor.equals(buddyatom.functor)) continue;
-						// if (!atomids.contains(otheratom.args[buddylink.pos]))
+						if (atomids.containsKey(otheratom.args[buddylink.pos].buddy.atom)) continue;
 						match.add(new Instruction(Instruction.NEQATOM, buddyatompath, other));
 					}
 				}
