@@ -14,6 +14,7 @@ public class HybridOutputStream {
 		oout.writeObject(o);
 		oout.close();
 		writeBytes(bout.toByteArray());
+		out.write('\n');
 	}
 	
 	public void write(String str) throws IOException {

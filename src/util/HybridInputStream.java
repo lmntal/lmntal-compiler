@@ -19,6 +19,9 @@ public class HybridInputStream {
 		if (bytes == null) {
 			return null;
 		}
+		if (in.read() != '\n') {
+			throw new RuntimeException("\\n is expected after Object data");
+		}
 		ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
 		ObjectInputStream oin = new ObjectInputStream(bin);
 		return oin.readObject();
@@ -60,7 +63,7 @@ public class HybridInputStream {
 	private int readInt() throws IOException {
 		int a1 = in.read();
 		if (a1 == -1) {
-System.out.println("end of stream");
+			//このめそっどで読むデータはバイト数を表す値なので、負になる事はない
 			return -1;
 		}
 		int a2 = in.read();
