@@ -39,11 +39,11 @@ public final class Atom extends QueuedEntity {
 	}
 
 	///////////////////////////////
-	// 操作 AbstractMembraneのみが呼ぶことができる。
-	void changeFunctor(Functor newFunctor) {
-		if (functor.getArity() != newFunctor.getArity()) {
+	// 操作
+	void setFunctor(Functor newFunctor) {
+		if (newFunctor.getArity() > args.length) {
 			// TODO SystemError用の例外クラスを投げる
-			throw new RuntimeException("SYSTEM ERROR: cannot change arity");
+			throw new RuntimeException("SYSTEM ERROR: insufficient link vector length");
 		}
 		functor = newFunctor;
 	}
