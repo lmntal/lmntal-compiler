@@ -257,6 +257,8 @@ public class LMNtalDaemon implements Runnable {
 			e.printStackTrace();
 			//todo  SocketTimeoutExceptionのときはここでsocketを閉じるべきか？
 			//"If the timeout expires, a java.net.SocketTimeoutException is raised, though the Socket is still valid." (1.4.1 api specitifation.)
+			
+			return false;
 		}
 	}	
 

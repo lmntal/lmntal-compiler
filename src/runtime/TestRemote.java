@@ -1,5 +1,8 @@
 package runtime;
 
+import java.net.Socket;
+import java.net.SocketException;
+
 /*
  * 分散処理のテスト用
  *
@@ -49,7 +52,21 @@ class TestRemote{
 		} else {
 			System.out.println("orz");
 		}*/
-		
+
+		/* 
+		 * デフォルトのtimeout値を調べてみた。default == 0 のようです。
+		 * （つまりtimeoutしない）  
+		 * 
+		Socket s = new Socket();
+		try {
+			System.out.println(s.getSoTimeout());
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.exit(0);
+		*/
+	
 		LMNtalRuntimeManager.init();
 		MasterLMNtalRuntime masterRuntime = new MasterLMNtalRuntime();
 		
@@ -59,15 +76,20 @@ class TestRemote{
 			System.out.println("orz");
 			System.exit(1);
 		}
-			
+
 		//System.out.println("success");
 		RemoteLMNtalRuntime banon = (RemoteLMNtalRuntime)LMNtalRuntimeManager.connectRuntime("banon.ueda.info.waseda.ac.jp");
 
-		RemoteTask banonTask1 = (RemoteTask) banon.newTask(rootMem);
+		if(banon == null){
+			System.out.println("orz");
+			System.exit(1);
+		}
 
-		System.out.println("Membrane ID:" +  ((RemoteMembrane)banonTask1.root).getMemID());
+		//RemoteTask banonTask1 = (RemoteTask) banon.newTask(rootMem);
 
-		
+		//System.out.println("Membrane ID:" +  ((RemoteMembrane)banonTask1.root).getMemID());
+
+
 		/*
 		 *  試しに実行してみるコード。
 		 * a, a:-b.
