@@ -24,7 +24,7 @@ abstract class AbstractTask {
 	protected AbstractMembrane root;
 	
 	/** 物理マシンの取得 */
-	AbstractMachine getRuntime() {
+	AbstractMachine getMachine() {
 		return runtime;
 	}
 	/** ルート膜の取得 */
@@ -110,7 +110,7 @@ public final class LMNtalRuntime extends Machine {
 	
 	public LMNtalRuntime(){
 		AbstractTask t = newTask();
-		globalRoot = t.getRoot();
+		globalRoot = (Membrane)t.getRoot();
 	}
 
 	/**
@@ -123,6 +123,10 @@ public final class LMNtalRuntime extends Machine {
 	}
 	
 	public Membrane getGlobalRoot(){
+		return globalRoot;
+	}
+	/**@deprecated*/
+	public Membrane getRoot(){
 		return globalRoot;
 	}
 }
@@ -151,9 +155,9 @@ class Machine extends AbstractMachine {
 		newTask();
 	}
 */	
-	AbstractMembrane getRootMem(){
-		return rootMem;
-	}
+//	AbstractMembrane getRootMem(){
+//		return rootMem;
+//	}
 	
 	public void exec() {
 		boolean allIdle;
