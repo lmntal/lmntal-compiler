@@ -3,7 +3,12 @@ package runtime;
 /**
  * Stringの名前とリンク数の組からなるアトムのFunctor。
  */
-public class Functor{
+public class Functor {
+	/** 自由リンク管理アトム */
+	public static final Functor INSIDE_PROXY = new Functor("inside_proxy", 2);
+	/** 自由リンク管理アトム */
+	public static final Functor OUTSIDE_PROXY = new Functor("outside_proxy", 2);
+	
 	private String name;
 	private int arity;
 	/** 各種メソッドで使うために保持しておく。整合性要注意 */

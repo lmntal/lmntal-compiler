@@ -40,10 +40,10 @@ public class Tester extends TestCase {
 		AtomSet atomSet = new AtomSet();
 		HashSet hashSet = new HashSet();
 		Atom[] atom = {
-			new Atom(null, "a", 1), 
-			new Atom(null, "a", 1), 
-			new Atom(null, "a", 2), 
-			new Atom(null, "b", 1)
+			new Atom(null, new Functor("a", 1)), 
+			new Atom(null, new Functor("a", 1)), 
+			new Atom(null, new Functor("a", 2)), 
+			new Atom(null, new Functor("b", 1))
 		};
 
 		//add/containsのテスト		

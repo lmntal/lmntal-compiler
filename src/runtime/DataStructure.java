@@ -32,13 +32,11 @@ class Atom extends QueuedEntity {
 	 * 指定された名前とリンク数を持つアトムを作成する。
 	 * AbstractMembraneのnewAtomメソッド内で呼ばれる。
 	 * @param mem 親膜
-	 * @param name アトムの名前
-	 * @param arity リンク数
 	 */
-	Atom(AbstractMembrane mem, String name, int arity) {
+	Atom(AbstractMembrane mem, Functor functor) {
 		this.mem = mem;
-		functor = new Functor(name, arity);
-		args = new Link[arity];
+		this.functor = functor;
+		args = new Link[functor.getArity()];
 		id = lastId++;
 	}
 
@@ -71,6 +69,11 @@ class Atom extends QueuedEntity {
 	}
 	AbstractMembrane getMem() {
 		return mem;
+	}
+	
+	void remove() {
+		mem.removeAtom(this);
+		mem = null;
 	}
 }
 
@@ -112,6 +115,10 @@ final class Membrane extends AbstractMembrane {
 		}
 		((Machine)machine).memStack.push(this);
 	}
+	/** 
+	 * 指定されたアトムを実行スタックに追加する。
+	 * @param atom 実行スタックに追加するアトム。アクティブアトムでなければならない。
+	 */
 	protected void enqueueAtom(Atom atom) {
 		ready.push(atom);
 	}
@@ -263,12 +270,15 @@ abstract class AbstractMembrane extends QueuedEntity {
 		rulesets.add(srcRuleset);
 	}
 	/** アトムの追加 */
-	Atom newAtom(String name, int arity) {
-		Atom a = new Atom(this, name, arity);
+	Atom newAtom(Functor functor) {
+		Atom a = new Atom(this, functor);
 		atoms.add(a);
 		enqueueAtom(a);
 		atomCount++;
 		return a;
+	}
+	Atom newAtom(String name, int arity) {
+		return newAtom(new Functor(name, arity));
 	}
 	/** 指定されたアトムを実行スタックに積む */
 	abstract protected void enqueueAtom(Atom atom);
@@ -281,10 +291,6 @@ abstract class AbstractMembrane extends QueuedEntity {
 //		atoms.add(atom);
 //		activateAtom(atom);
 //	}
-	/** 膜の追加 */
-	protected void addMem(AbstractMembrane mem) {
-		mems.add(mem);
-	}
 	/** dstMemに移動 */
 	void moveTo(AbstractMembrane dstMem) {
 		mem.removeMem(this);
@@ -293,15 +299,67 @@ abstract class AbstractMembrane extends QueuedEntity {
 //		movedTo(machine, dstMem);
 		enqueueAllAtoms();
 	}
+	/** 膜の追加 */
+	protected void addMem(AbstractMembrane mem) {
+		mems.add(mem);
+	}
 	/** 移動された後、アクティブアトムを実行スタックに入れるために呼び出される */
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
 	abstract protected void enqueueAllAtoms();
+
+	///////////////////
+	// 案1
+	/**
+	 * この膜を親膜から除去する。
+	 * その際、baseMemまでの膜にある自由リンク管理アトムを除去する。
+	 */
+	void remove(Membrane baseMem) {
+		remove();
+		Iterator it = atomIteratorOfFunctor(Functor.INSIDE_PROXY);
+		while (it.hasNext()) {
+			Atom outside = ((Atom)it.next()).args[0].getAtom();
+			Atom inside;
+			while (outside.getMem() != baseMem) {
+				inside = outside.args[1].getAtom();
+				outside = inside.args[0].getAtom();
+				inside.remove();
+				outside.remove();
+			}
+		}
+	}
 	
+	/**
+	 * srcMemの内容を全て移動する。
+	 * その際、baseMemまでの膜に自由リンク管理アトムを追加する。
+	 */
+	void pour(AbstractMembrane srcMem, Membrane baseMem) {
+		pour(srcMem);
+		Iterator it = atomIteratorOfFunctor(Functor.INSIDE_PROXY);
+		while (it.hasNext()) {
+			AbstractMembrane m = mem;
+			Atom inside = (Atom)it.next();
+			Atom outside = m.newAtom(Functor.OUTSIDE_PROXY);
+			m.newLink(inside, 0, outside, 0);
+			while (m != baseMem) {
+				inside = m.newAtom(Functor.INSIDE_PROXY);
+				m.newLink(outside, 1, inside, 1);
+				m = m.mem;
+				outside = m.newAtom(Functor.OUTSIDE_PROXY);
+				m.newLink(inside, 0, outside, 0);
+			}
+		}
+	}
+
+    // 案1ここまで
+    //////////////////////
+    
+	/** dstMemに移動 */
 	/** srcMemの内容を全て移動する */
 	void pour(AbstractMembrane srcMem) {
 		atoms.addAll(srcMem.atoms);
 		mems.addAll(srcMem.mems);
 	}
+
 	
 	/** 指定されたアトムをこの膜から除去する。 */
 	void removeAtom(Atom atom) {
@@ -314,6 +372,10 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 指定された膜をこの膜から除去する */
 	void removeMem(AbstractMembrane mem) {
 		mems.remove(mem);
+	}
+	void remove() {
+		mem.removeMem(this);
+		mem = null;
 	}
 	
 	/**
