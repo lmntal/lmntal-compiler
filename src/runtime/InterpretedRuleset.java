@@ -3,7 +3,7 @@ package runtime;
 import java.util.*;
 
 /**
- * compile.RuleCompiler によって生成される。
+ * compile.RulesetCompiler によって生成される。
  * @author hara, nakajima, n-kato
  */
 public final class InterpretedRuleset extends Ruleset {
@@ -492,9 +492,11 @@ class InterpretiveReactor {
 					
 					AbstractMembrane[] bodymems = new AbstractMembrane[locals];
 					Atom[] bodyatoms = new Atom[locals];
-					// vars.setメソッド呼び出し時にIndexOutOfBoundsExceptionが出るので暫定対応 by mizuno
-					Vector bodyvars = new Vector(locals);
-					bodyvars.setSize(locals);
+					// vars.setメソッド呼び出し時にIndexOutOfBoundsExceptionが出るので対応 by mizuno
+					ArrayList bodyvars = new ArrayList(locals);
+					for (int i = 0; i < locals; i++) {
+						bodyvars.add(null);
+					}
 					List memformals = (List) inst.getArg2();
 					List atomformals = (List) inst.getArg3();
 					for (int i = 0; i < memformals.size(); i++) {
