@@ -23,6 +23,8 @@ public class RuleCompilerTest {
 	public static void main(String[] args) {
 		Membrane m = getTestStructure();
 		Env.p(m);
+		RuleCompiler rc = new RuleCompiler(m);
+		rc.compile();
 	}
 	
 	/**
