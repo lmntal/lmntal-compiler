@@ -55,6 +55,7 @@ import compile.structure.*;
  * 		<li>!func.pathFree の場合は、name, arity, package が等しいもの
  * 		<li> func.pathFree の場合は、name, arity が等しいもの（従来どおり）
  * 		</ul>
+ *      TODO この区別はルールコンパイラが行うのであるため、コンパイル時データ構造のみが識別する必要があり、実行時には不要。(n-kato)
  * </ul>
  * 
  * @author hara
