@@ -17,6 +17,18 @@ public class Functor {
 	private int arity;
 	/** 各種メソッドで使うために保持しておく。整合性要注意 */
 	private String strFunctor;
+	
+	/**
+	 * ファンクタ表記中の所属膜名。ソースコードで明示的に指定されたらそれ。
+	 * 指定されなかったら、デフォルトとしてそのファンクタが実際に所属する膜。
+	 */
+	public String   path;
+	
+	/**
+	 * 所属膜が明示的に指定されなかった時に真。
+	 */
+	public boolean pathFree;
+	
 	public Functor(String name, int arity) {
 		this.name = name;
 		this.arity = arity;
