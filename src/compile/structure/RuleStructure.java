@@ -18,6 +18,11 @@ public final class RuleStructure {
 	 */
 	public Membrane rightMem = new Membrane(null);
 	
+	/**
+	 * ガードルールを格納する膜
+	 */
+	public Membrane guardMem = new Membrane(null);
+	
 	public String toString() {
 		return "( "+leftMem.toStringWithoutBrace()+" :- "+rightMem.toStringWithoutBrace()+" )";
 	}
