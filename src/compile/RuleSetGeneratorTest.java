@@ -26,7 +26,7 @@ public class RuleSetGeneratorTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String src = "v, w, ( v :- w, w )";
+		String src = "v, ( v :- w)";
 		try {
 			// thnx to 永田書記長
 			LMNParser lp = new LMNParser(new StringReader(src));
@@ -38,9 +38,13 @@ public class RuleSetGeneratorTest {
 			InterpretedRuleset ir = RuleSetGenerator.run(m);
 			
 			Env.p("");
-			Env.p("Generated InterpretedRuleset :");
-			Env.p(ir);
-			ir.showDetail();
+			Env.p("Compiled Membrane :");
+			m.showAllRule();
+			
+			//Env.p("");
+			//Env.p("Generated InterpretedRuleset :");
+			//Env.p(ir);
+			//ir.showDetail();
 		} catch (ParseException e) {
 			Env.p(e);
 		}

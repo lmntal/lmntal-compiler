@@ -1,7 +1,6 @@
 package compile.structure;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import runtime.InterpretedRuleset;
 
 import runtime.Env;
@@ -86,5 +85,32 @@ public final class Membrane {
 	}
 	public String toString() {
 		return "{ " + toStringWithoutBrace() + " }";
+	}
+	
+	/**
+	 * この膜の中にあるルールを全て表示する。
+	 * 
+	 * <pre>
+	 * 「この膜の中にあるルール」とは、以下の３種類。
+	 * 　[1]この膜のルールセットに含まれる全てのルール
+	 * 　[2] [1]の左辺膜の中にあるルール
+	 * 　[3] [1]の右辺膜の中にあるルール
+	 * </pre>
+	 */
+	public void showAllRule() {
+		((InterpretedRuleset)ruleset).showDetail();
+		
+		Iterator l;
+		
+		// 直属のルールそれぞれについて、その左辺膜と右辺膜のルールセットを表示
+		l = rules.listIterator();
+		while(l.hasNext()) {
+			RuleStructure rs = (RuleStructure)l.next();
+			rs.leftMem.showAllRule();
+			rs.rightMem.showAllRule();
+		} 
+		// 子膜それぞれ
+		l = mems.listIterator();
+		while(l.hasNext()) ((Membrane)l.next()).showAllRule();
 	}
 }

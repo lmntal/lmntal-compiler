@@ -16,9 +16,15 @@ import compile.structure.*;
 public class HeadCompiler {
 	public Membrane m;
 	public List atoms = new ArrayList();
+	
+	/**
+	 * 空の膜を保持する。実引数リストは通常アトムから成るが、空膜にマッチさせる時は空膜自身が実引数となる。
+	 * 実引数リスト内で、任意の空膜は任意のアトムより後ろに来る。
+	 */
 	public List freemems = new ArrayList();
+	
 	public Map mempaths = new HashMap();
-	public List visited = new ArrayList();
+	public boolean visited[];
 	public List atomidpath = new ArrayList();
 	public List match = new ArrayList();
 	public Map atomids = new HashMap();
@@ -61,7 +67,7 @@ public class HeadCompiler {
 		Env.c("prepare");
 		varcount = 0;
 		mempaths.clear();
-		visited.clear();
+		visited = new boolean[atoms.size()];
 		atomidpath = new ArrayList();
 		for(int i=0;i<atoms.size();i++) atomidpath.add(null);
 		match.clear();
@@ -77,9 +83,12 @@ public class HeadCompiler {
 		Membrane targetmem, buddymem;
 		
 		targetidstack.add(new Integer(targetid));
-		while( 0 != (targetid = ((Integer)(targetidstack.removeFirst())).intValue()) ) {
-			if( ((Boolean)(visited.get(targetid))).booleanValue() ) continue;
-			visited.set(targetid, new Boolean(true));
+		while( ! targetidstack.isEmpty() ) {
+			targetid = ((Integer)targetidstack.removeFirst()).intValue();
+			
+			if( visited[targetid] ) continue;
+			visited[targetid] = true;
+			
 			atom = (Atom)(atoms.get(targetid));
 			for(int pos=1; pos <= atom.functor.getArity(); pos++) {
 				buddylink = atom.args[pos];
