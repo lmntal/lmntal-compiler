@@ -1,7 +1,5 @@
 package daemon;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.net.Socket;
 
 import runtime.LocalLMNtalRuntime;
@@ -47,7 +45,7 @@ class LocalLMNtalRuntimeSessionManager {
 		String inputParsed[] = new String[3];
 		
 		while(true){ 
-			 //TODO 接続元がコネクションを切るまでまわりつづける(停止判定をする)
+			 //todo 接続元がコネクションを切るまでまわりつづける(停止判定をする)
 			
 			try {
 				input = in.readLine();
