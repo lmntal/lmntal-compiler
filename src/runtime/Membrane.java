@@ -410,7 +410,7 @@ public final class Membrane extends AbstractMembrane {
 			return bout.toByteArray();
 		} catch (IOException e) {
 			//ByteArrayOutputStreamなので、発生するはずがない
-			throw new RuntimeException("Unwxpected Exception", e);
+			throw new RuntimeException("Unexpected Exception", e);
 		}
 	}
 

@@ -39,7 +39,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, Serializa
 	
 	private static int lastId = 0;
 	/** このアトムのローカルID */
-	private int id;
+	int id;
 	
 	/** リモートホストとの通信で使用されるこのアトムのID。リモート膜に所属するときのみ使用される。
 	 * <p>所属膜のキャッシュ受信後、所属膜の連続するロック期間中のみ有効。

@@ -500,7 +500,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 						idMem[memvarcount++] = atoml.mem;
 					}
 					glmemid[o] = ((Integer)memId.get(atoml.mem)).intValue();
-					glatomid[o] = atoml.hashCode(); 
+					glatomid[o] = atoml.id; 
 					linkatom[o].add(i,null);
 					linkpos[o].add(i,new Integer(atomo.getArg(i).getPos()));
 				}else{//親膜ないしどこにも繋がっていない
@@ -553,7 +553,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 						int lp = ((Integer) linkpos[i].get(j)).intValue();
 						newLink(idAtomCopied[i],j,na,lp);
 					}else{//親膜ないしどこにも繋がっていない、mapに追加
-						retHashMap.put(new Integer(idAtom[i].hashCode()),idAtomCopied[i]);
+						retHashMap.put(new Integer(idAtom[i].id),idAtomCopied[i]);
 					}
 				}
 			}
@@ -573,7 +573,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		}
 		it = memIterator();
 		while(it.hasNext()){
-			((AbstractMembrane)it.next()).drop();
+			AbstractMembrane mem = (AbstractMembrane)it.next();
+			mem.drop();
+			mem.free();
 		}
 	}
 

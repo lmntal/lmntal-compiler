@@ -912,7 +912,7 @@ public class Instruction implements Cloneable, Serializable {
 	// LOCALDROPMEMは最適化の効果が無いため却下
 	static {setArgType(DROPMEM, new ArgType(false, ARG_MEM));}
 
-	/** getlinkfrommap [-dstlink, srcmap, srclink]
+	/** lookuplink [-dstlink, srcmap, srclink]
 	 * srclinkのリンク先のアトムのコピーをsrcmapより得て、
 	 * そのアトムをリンク先とする-dstlinkを作って返す。
 	 */

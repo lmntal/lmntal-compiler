@@ -957,7 +957,7 @@ public class LMNParser {
 //					def.lhsOcc.buddy = rhsocc;
 //				}
 //			}
-			if( def.lhsOcc != null) {
+			if( def.lhsOcc != null) {	// ガードでないとき
 				for(int i=0;i<def.rhsOccs.size();i++){
 					Context rhsocc = ((Context)def.rhsOccs.get(i));
 					rhsocc.buddy = def.lhsOcc;
@@ -967,11 +967,11 @@ public class LMNParser {
 		}
 		
 		// （非線型プロセス文脈が実装されるまでの仮措置として）線型でなく剰余引数が[]でない型なし$pを取り除く
-/*		it = rule.processContexts.values().iterator();
+		it = rule.processContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
-			//if (def.rhsOccs.size() != 1 && ((ProcessContext)def.lhsOcc).bundle != null) {
-			//	error("FEATURE NOT IMPLEMENTED: untyped process context must be linear unless its bundle is null: " + def.getName());
+			if (def.rhsOccs.size() != 1 && ((ProcessContext)def.lhsOcc).bundle != null) {
+				error("FEATURE NOT IMPLEMENTED: untyped process context must be linear unless its bundle is null: " + def.getName());
 				int len = def.lhsOcc.args.length;
 				Iterator it2 = def.rhsOccs.iterator();
 				while (it2.hasNext()) {
@@ -1002,8 +1002,8 @@ public class LMNParser {
 				def.lhsOcc.buddy = rhsocc;
 				rhsocc.def = def;
 				def.rhsOccs.add(rhsocc);
-			//}
-		}*/
+			}
+		}
 	}
 }
 

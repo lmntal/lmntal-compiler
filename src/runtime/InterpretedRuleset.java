@@ -97,8 +97,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		InterpretiveReactor ir = new InterpretiveReactor(locals);
 		ir.mems[0] = mem;
 		if (atom != null) { ir.atoms[1] = atom; }
-  		return ir.interpret(matchInsts, 0);
-  	}
+		return ir.interpret(matchInsts, 0);
+	}
 	public String toString() {
 		String ret = "@" + id;
 		if (Env.verbose >= Env.VERBOSE_EXPANDRULES) {
@@ -616,8 +616,8 @@ class InterpretiveReactor {
 					break;//nakajima 2004-01-04, n-kato
 
 				case Instruction.COPYMEM : //[-dstmap, -dstmem, srcmem]
-					// 自由リンクを持たない膜（その子膜とのリンクはOK）のみ
-					vars.set(inst.getIntArg1(),mems[inst.getIntArg2()].copyFrom(mems[inst.getIntArg3()]));
+					// <strike>自由リンクを持たない膜（その子膜とのリンクはOK）のみ</strike>
+					vars.set(inst.getIntArg1(), mems[inst.getIntArg2()].copyFrom(mems[inst.getIntArg3()]));
 					break; //kudo 2004-09-29
 				case Instruction.DROPMEM : //[srcmem]
 					mems[inst.getIntArg1()].drop();
@@ -626,7 +626,7 @@ class InterpretiveReactor {
 					HashMap srcmap = (HashMap)vars.get(inst.getIntArg2());
 					//Link srclink = atoms[inst.getIntArg3()].getArg(inst.getIntArg4());
 					Link srclink = (Link)vars.get(inst.getIntArg3());
-					Atom la = (Atom) srcmap.get(new Integer(srclink.getAtom().hashCode()));
+					Atom la = (Atom) srcmap.get(new Integer(srclink.getAtom().id)); // hashCode()をidに変更 (2004-10-12) n-kato
 					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
 					break; //kudo 2004-10-10
 //				case Instruction.LINKS : //[link, atom, pos]
