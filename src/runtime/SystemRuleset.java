@@ -71,7 +71,7 @@ final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  3,4,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,4,Functor.OUTSIDE_PROXY));
-		insts.add(new Instruction(Instruction.UNIFY,       3,1,5,1,4));
+		insts.add(new Instruction(Instruction.UNIFY,       3,1,5,1,4)); // memo: 本質的にリモートのUNIFY
 		insts.add(new Instruction(Instruction.UNLOCKMEM,   4)); // ここでは子膜の活性化が必要
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
@@ -80,11 +80,9 @@ final class SystemRuleset extends Ruleset {
 		//
 		// ガードがコンパイルできるようになるまでの当分の間、
 		// このタイミングで組み込みモジュールをロードさせてもらう。
-		//
-		// 【注意】整数演算などの組み込み機能を無効にするオプションがあってもよい。		
 		
 		if (true) {
-			loadIntegerRules(ruleset);
+			loadBuiltInRules(ruleset);
 		}			
 		//ruleset.compile();
 	}
@@ -144,7 +142,7 @@ final class SystemRuleset extends Ruleset {
 	}
 	
 	
-	static void loadIntegerRules(InterpretedRuleset ruleset) {
+	static void loadBuiltInRules(InterpretedRuleset ruleset) {
 		Rule rule;
 		List insts;		
 		
