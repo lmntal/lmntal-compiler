@@ -625,7 +625,7 @@ public class RuleCompiler {
 				lhsmemToPath(atom.mem), atom.functor ));
 		}
 	}
-	/** 左辺のアトムを実行スタックから除去する。*/
+	/** 左辺のアトムを実行アトムスタックから除去する。*/
 	private void dequeueLHSAtoms() {
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			Atom atom = (Atom)lhsatoms.get(i);
@@ -904,7 +904,7 @@ public class RuleCompiler {
 			}
 		}
 	}
-	/** 右辺のアトムを実行スタックに積む */
+	/** 右辺のアトムを実行アトムスタックに積む */
 	private void enqueueRHSAtoms() {
 		int index = body.size(); // 末尾再帰最適化の効果を最大化するため、逆順に積む（コードがセコい）
 		Iterator it = rhsatoms.iterator();

@@ -320,6 +320,7 @@ public class LMNParser {
 		RuleStructure rule = new RuleStructure(mem);
 		// 略記法の展開		
 		expandRuleAbbreviations(sRule);
+		// todo 左辺のルールを構文エラーとして除去する
 		// 構造の生成
 		LinkedList typeConstraints = sRule.getGuard();
 		addProcessToMem(sRule.getHead(), rule.leftMem);		

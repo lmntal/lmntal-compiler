@@ -18,7 +18,7 @@ import java.lang.reflect.Field;
  * 本膜が実行中なので、新しい膜が実行されることはない。
  * このルールの適用終了前にロックは解放するが、何も起こらない。
  * このルールの適用が終了すると、子膜の実行が開始される。
- * <li>活性化する膜がリモート膜や他のタスクの膜の場合、一時的な実行スタックを作り、
+ * <li>活性化する膜がリモート膜や他のタスクの膜の場合、一時的な「仮の」実行膜スタックを作り、
  * そこに親膜側から積んでいく。
  * リモートのルート膜のロックが解放されると、実行膜スタックの先頭に丸ごと移動される。
  * これによって実行膜スタックに全ての膜がアトミックに積まれることになる。
@@ -367,7 +367,7 @@ public class Instruction implements Cloneable {
     /** removeatom [srcatom, srcmem, funcref]
      * <br>ボディ命令<br>
      * （膜$srcmemにあってファンクタ$funcを持つ）アトム$srcatomを現在の膜から取り出す。
-     * 実行スタックは操作しない。
+     * 実行アトムスタックは操作しない。
      * @see dequeueatom */
 	public static final int REMOVEATOM = 30;
 	static {setArgType(REMOVEATOM, new ArgType(false, ARG_ATOM, ARG_MEM, ARG_OBJ));}
@@ -381,7 +381,7 @@ public class Instruction implements Cloneable {
     /** newatom [-dstatom, srcmem, funcref]
      * <br>ボディ命令<br>
      * 膜$srcmemにファンクタfuncrefを持つ新しいアトム作成し、参照を$dstatomに代入する。
-     * アトムはまだ実行スタックには積まれない。
+     * アトムはまだ実行アトムスタックには積まれない。
      * @see enqueueatom */
     public static final int NEWATOM = 31;
 	static {setArgType(NEWATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
@@ -395,7 +395,7 @@ public class Instruction implements Cloneable {
 	/** newatomindirect [-dstatom, srcmem, func]
 	 * <br>型付き拡張用ボディ命令<br>
 	 * 膜$srcmemにファンクタ$funcを持つ新しいアトム作成し、参照を$dstatomに代入する。
-	 * アトムはまだ実行スタックには積まれない。
+	 * アトムはまだ実行アトムスタックには積まれない。
 	 * @see newatom */
 	public static final int NEWATOMINDIRECT = 32;
 	static {setArgType(NEWATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_VAR));}
@@ -408,10 +408,11 @@ public class Instruction implements Cloneable {
 
 	/** enqueueatom [srcatom]
      * <br>ボディ命令<br>
-     * アトム$srcatomを所属膜の実行スタックに積む。
-     * <p>すでに実行スタックに積まれていた場合の動作は未定義とする。
+     * アトム$srcatomを所属膜の実行アトムスタックに積む。
+     * <p>すでに実行アトムスタックに積まれていた場合の動作は未定義とする。
      * <p>アトム$srcatomがシンボルファンクタを持たない場合の動作も未定義とする。
-     * <p>アクティブかどうかは関係ない。むしろこの命令で積まれるアトムがアクティブである。*/
+     * <p>アクティブかどうかによって命令の動作は変わらない。
+     * むしろこの命令で積まれるアトムがアクティブである。*/
     public static final int ENQUEUEATOM = 33;
 	static {setArgType(ENQUEUEATOM, new ArgType(false, ARG_ATOM));}
     
@@ -423,10 +424,10 @@ public class Instruction implements Cloneable {
 
     /** dequeueatom [srcatom]
      * <br>最適化用ボディ命令<br>
-     * アトム$srcatomがこの計算ノードにある実行スタックに入っていれば、実行スタックから取り出す。
+     * アトム$srcatomがこの計算ノードにある実行アトムスタックに入っていれば、スタックから取り出す。
      * <p><b>注意</b>　この命令は、メモリ使用量のオーダを削減するために任意に使用することができる。
      * アトムを再利用するときは、因果関係に注意すること。
-     * <p>なお、他の計算ノードにある実行スタックの内容を取得/変更する命令は存在しない。
+     * <p>なお、他の計算ノードにある実行アトムスタックの内容を取得/変更する命令は存在しない。
      * <p>この命令は、Runtime.Atom.dequeueを呼び出す。*/
     public static final int DEQUEUEATOM = 34;
 	// LOCALDEQUEUEATOMは最適化の効果が無いため却下
@@ -435,7 +436,7 @@ public class Instruction implements Cloneable {
 	/** freeatom [srcatom]
 	 * <br>最適化用ボディ命令<br>
 	 * 何もしない。
-	 * <p>$srcatomがどの膜にも属さず、かつこの計算ノード内の実行スタックに積まれていないことを表す。
+	 * <p>$srcatomがどの膜にも属さず、かつこの計算ノード内の実行アトムスタックに積まれていないことを表す。
 	 * TODO アトムを他の計算ノードで積んでいる場合、輸出表の整合性は大丈夫か調べる。*/
 	public static final int FREEATOM = 35;
 	// LOCALFREEATOMは不要
@@ -491,7 +492,7 @@ public class Instruction implements Cloneable {
 	/** copyatom [-dstatom, mem, srcatom]
 	 * <br>型付き拡張用ボディ命令
 	 * アトム$srcatomと同じ名前のアトムを膜$memに生成し、$dstatomに代入して返す。
-	 * 実行スタックは操作しない。
+	 * 実行アトムスタックは操作しない。
 	 * <p>マッチングで得た型付きアトムをコピーするために使用する。
 	 * <p>getfunc[func,srcatom];newatomindirect[dstatom,mem,func]と同じ。よって廃止？
 	 * copygroundtermに移行すべきかもしれない。*/
@@ -527,7 +528,8 @@ public class Instruction implements Cloneable {
 	/** removemem [srcmem, parentmem]
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemを親膜（$parentmem）から取り出す。
-	 * 膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。
+	 * <strike>膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。</strike>
+	 * 実行膜スタックに積まれている場合は除去する。
 	 * @see removeproxies */
 	public static final int REMOVEMEM = 50;
 	static {setArgType(REMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
@@ -574,7 +576,7 @@ public class Instruction implements Cloneable {
 	/** movecells [dstmem, srcmem]
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemにある全てのアトムと子膜（ロックを取得していない）を膜$dstmemに移動する。
-	 * 実行膜スタックおよび実行スタックは操作しない。
+	 * 実行膜スタックおよび実行アトムスタックは操作しない。
 	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない（ルールセットに限りは参照してもよい）。
 	 * <p>実行後、膜$dstmemの全てのアクティブアトムをエンキューし直すべきである。
 	 * <p><b>注意</b>　Ruby版のpourから名称変更
@@ -585,7 +587,7 @@ public class Instruction implements Cloneable {
 
 	/** enqueueallatoms [srcmem]
 	 * <br>（予約された）ボディ命令<br>
-	 * 何もしない。または、膜$srcmemにある全てのアクティブアトムをこの膜の実行スタックに積む。
+	 * 何もしない。または、膜$srcmemにある全てのアクティブアトムをこの膜の実行アトムスタックに積む。
 	 * <p>アトムがアクティブかどうかを判断するには、
 	 * ファンクタを動的検査する方法と、2つのグループのアトムがあるとして所属膜が管理する方法がある。
 	 * @see enqueueatom */
