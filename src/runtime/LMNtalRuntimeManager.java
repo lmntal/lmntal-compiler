@@ -25,7 +25,6 @@ final class LMNtalRuntimeManager{
 		//あて先はどこ？
 		if(LMNtalDaemonMessageProcessor.isMyself(node)){
 			//localhostなら  自分自身を返す
-			//とりあえずぬるぽ
 			return Env.theRuntime;
 		}
 		//remote

@@ -32,6 +32,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 		return (AbstractTask)null;
 	}
 	public void terminate() {
+		//TODO ¼ÂÁõ@LMNtalDaemon(or MessageProcessor
 		//send("TERMINATE");
 	}
 	public void awake() {

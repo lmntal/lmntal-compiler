@@ -18,6 +18,9 @@ import java.io.*;
  * @author nakajima
  *
  */
+
+//TODO 耐故障性　セキュリティ
+
 public class LMNtalDaemon implements Runnable {
 	/*
 	 * 例(略記):    a :- { b }@"banon" 

@@ -190,6 +190,14 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								continue;
 							} else if (command.equalsIgnoreCase("terminate")) {
 								//仮
+								//TODO 実装
+								
+								//terminateだけ変
+								//
+								//やるべきことはEnv.theRuntimeのterminate
+								//でも呼べないからどうしよう？
+								//LocalLMNtalRuntime.terminate();
+								
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
