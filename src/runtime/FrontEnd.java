@@ -70,10 +70,14 @@ public class FrontEnd {
 					System.exit(-1);					
 				}else{ // オプション解釈部
 					switch(args[i].charAt(1)){
+					case 'I':
+						compile.Module.libPath.add(args[++i]);
+						break;
 					case 'c':
 						if (args[i].equals("-cgi")) {
 							System.out.println("Content-type: text/html\n");
 						}
+						break;
 					case 'd':
 						if (args[i].matches("-d[0-9]")) {
 							Env.debug = args[i].charAt(2) - '0';
