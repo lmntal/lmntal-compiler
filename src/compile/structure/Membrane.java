@@ -99,7 +99,7 @@ public final class Membrane {
 		Iterator it = atoms.iterator();
 		String text = "";
 		while (it.hasNext()) {
-			text += "," + ((Atom)it.next()).toStringAsTypeConstraint();
+			text += " " + ((Atom)it.next()).toStringAsTypeConstraint();
 		}
 		return text.substring(1);
 	}
