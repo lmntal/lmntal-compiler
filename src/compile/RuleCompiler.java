@@ -166,6 +166,7 @@ public class RuleCompiler {
 		//Env.d("rhsmempaths -> "+rhsmempaths);
 		
 		removeLHSAtoms();
+		dequeueLHSAtoms();
 		if (removeLHSMem(rs.leftMem) >= 2) {
 			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
 		}
@@ -258,6 +259,15 @@ public class RuleCompiler {
 				lhsmemToPath(atom.mem), atom.functor ));
 		}
 	}
+	private void dequeueLHSAtoms() {
+		Env.c("RuleCompiler::dequeueLHSAtoms");
+		for (int i = 0; i < lhsatoms.size(); i++) {
+			Atom atom = (Atom)lhsatoms.get(i);
+			body.add( Instruction.dequeueatom(
+				lhsatomToPath(atom) // ← lhsfreemems.size() + i に一致する
+				));
+		}
+	}
 	/** 左辺の膜を子膜側から再帰的に除去する。
 	 * @return 膜memの内部に出現したプロセス文脈の個数 */
 	private int removeLHSMem(Membrane mem) {
@@ -329,9 +339,12 @@ public class RuleCompiler {
 		while (it.hasNext()) {
 			loadRulesets((Membrane)it.next());
 		}
-		if (!mem.rules.isEmpty()) {
-			body.add(Instruction.loadruleset(rhsmemToPath(mem), mem.ruleset));
-		} 
+		it = mem.rulesets.iterator();
+		while (it.hasNext()) {
+//			if (!mem.rules.isEmpty()) {
+				body.add(Instruction.loadruleset(rhsmemToPath(mem), (runtime.Ruleset)it.next()));
+//			} 
+		}
 	}
 	/** 右辺の膜内のアトムを生成する。
 	 * 単一化アトムならばUNIFY命令を生成し、
@@ -407,18 +420,6 @@ public class RuleCompiler {
 			int codeID = Inline.getCodeID(atom.functor.getName());
 			if(codeID==-1) continue;
 			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
-		}
-	}
-	/** モジュールを読み込む */
-	private void addLoadModules() {
-		Iterator it = rhsatoms.iterator();
-		while(it.hasNext()) {
-			Atom atom = (Atom)it.next();
-			if(atom.functor.getArity()==1 && atom.functor.getName().equals("use")) {
-				// この時点では解決できないモジュールがあるので名前にしておく
-				body.add( new Instruction(Instruction.LOADRULESET, rhsmemToPath(atom.mem),
-					 atom.args[0].buddy.atom.functor.getName()));
-			}
 		}
 	}
 	/** 左辺の膜を廃棄する */

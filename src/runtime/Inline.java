@@ -78,7 +78,7 @@ public class Inline {
 			//inlineCode = (InlineCode)Class.forName("MyInlineCode").newInstance();
 			//Env.d(Class.forName("MyInlineCode").getField("version"));
 		} catch (Exception e) {
-			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+			Env.d(e);
 		}
 		Env.d("inline = "+inlineCode);
 	}
@@ -156,7 +156,7 @@ public class Inline {
 			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
 			cp = Runtime.getRuntime().exec("javac -classpath .;lmntal.jar MyInlineCode.java");
 		} catch (Exception e) {
-			Env.d("!!! "+e.getMessage()+e.getStackTrace());
+			Env.d("!!! "+e.getMessage()+Arrays.asList(e.getStackTrace()));
 		}
 		
 	}

@@ -20,6 +20,9 @@ public final class Atom extends QueuedEntity {
 	/** リンク */
 	public Link[] args;
 	
+	/** 所属膜のAtomSet内でのインデックス */
+	int index = -1;
+
 	private static int lastId = 0;
 	private int id;
 	

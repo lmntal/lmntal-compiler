@@ -56,6 +56,12 @@ public class FrontEnd {
 						System.out.println("debug mode");
 						Env.debug = 1;
 						break;
+					case 't':
+						Env.fTrace = true;
+						break;
+					case 's':
+						Env.fRandom = true;
+						break;
 					case 'e':
 						// lmntal -e 'a,(a:-b)'
 						// 形式で実行できるようにする。like perl
@@ -112,18 +118,24 @@ public class FrontEnd {
 			Env.d( "After parse   : "+m );
 			
 			compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
-			InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
+			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
 			Env.d( "After compile : "+ir );
 			root.showAllRule();
 			
 			// 実行
 			LMNtalRuntime rt = new LMNtalRuntime();
 			ir.react(rt.getGlobalRoot());
+			if (Env.fTrace) {
+				Env.d( "Before execute : " );
+				Env.p( Dumper.dump(rt.getGlobalRoot()) );
+			}
 			rt.exec();
 				
 			Membrane rootmem = (Membrane)rt.getGlobalRoot();
-			Env.d( "After execute : " );
-			Env.p( Dumper.dump(rootmem) );
+			if (!Env.fTrace) {
+				Env.d( "After execute : " );
+				Env.p( Dumper.dump(rootmem) );
+			}
 			//Env.p( rootmem );
 		} catch (Exception e) {
 			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
