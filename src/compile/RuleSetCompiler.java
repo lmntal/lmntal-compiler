@@ -6,8 +6,6 @@ package compile;
 
 import java.util.*;
 import runtime.Env;
-import runtime.Instruction;
-import runtime.InterpretedRuleset;
 import compile.structure.*;
 
 /**
@@ -35,9 +33,8 @@ public class RuleSetCompiler {
 		rs.rightMem = m;
 		root.rules.add(rs);
 		processMembrane(root);
-		listupModules(root);
-		fixupLoadRuleset(root);
-		Env.d("\n=== Modules = \n"+modules+"\n\n");
+		Module.listupModules(root);
+		Module.fixupLoadRuleset(root);
 		return root;
 	}
 	
@@ -99,66 +96,4 @@ public class RuleSetCompiler {
 		// ruleset.compile();
 	}
 	
-	public static Map modules = new HashMap();
-	public static void listupModules(Membrane m) {
-		//Env.d("listupModules");
-		runtime.Functor f = new runtime.Functor("name", 1);
-		
-		Iterator i;
-		i = m.atoms.listIterator();
-		while(i.hasNext()) {
-			Atom a = (Atom)i.next();
-			if(a.functor.equals(f)) {
-				Env.d("Module found : "+a.args[0].atom);
-				modules.put(a.args[0].buddy.atom.functor.getName(), a.args[0].atom.mem);
-			}
-		}
-		i = m.rules.listIterator();
-		while(i.hasNext()) {
-			RuleStructure rs = (RuleStructure)i.next();
-			//Env.d("");
-			//Env.d("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
-			listupModules(rs.leftMem);
-			//Env.d("About rule structure (LEFT): "+rs.rightMem+" of "+rs);
-			listupModules(rs.rightMem);
-		}
-		i = m.mems.listIterator();
-		while(i.hasNext()) {
-			listupModules((Membrane)i.next());
-		}
-	}
-	public static void fixupLoadRuleset(Membrane m) {
-		//Env.d("fixupLoadRuleset");
-		
-		Iterator it0 = m.rulesets.iterator();
-		while (it0.hasNext()){
-			Iterator i = ((InterpretedRuleset)it0.next()).rules.listIterator();
-			while(i.hasNext()) {
-				runtime.Rule rule = (runtime.Rule)i.next();
-				ListIterator ib = rule.body.listIterator();
-				while(ib.hasNext()) {
-					Instruction inst = (Instruction)ib.next();
-					// きたない。
-					// TODO この用途での LOADRULESET は LOADMODULE に名称変更し、Interpreterでロードする
-					if(inst.getKind()==Instruction.LOADRULESET && inst.getArg2() instanceof String) {
-						//Env.p("module solved : "+modules.get(inst.getArg2()));
-						ib.remove();
-						Iterator it3 = ((Membrane)modules.get(inst.getArg2())).rulesets.iterator();
-						while (it3.hasNext()) {
-							ib.add(new Instruction(Instruction.LOADRULESET, inst.getIntArg1(),
-								(runtime.Ruleset)it3.next()));
-						}
-						
-	//					ib.set(new Instruction(Instruction.LOADRULESET, inst.getIntArg1(), 
-	//						((Membrane)modules.get(inst.getArg2())).ruleset ));
-						
-					}
-				}
-			}
-		}
-		Iterator i = m.mems.listIterator();
-		while(i.hasNext()) {
-			fixupLoadRuleset((Membrane)i.next());
-		}
-	}
 }

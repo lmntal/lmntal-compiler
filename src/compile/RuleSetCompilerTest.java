@@ -21,7 +21,7 @@ import compile.structure.*;
  * @author hara
  *
  */
-public class RuleSetGeneratorTest {
+public class RuleSetCompilerTest {
 	
 	public static void gui() {
 		Env.d( JOptionPane.showInputDialog(null, "Hello, Verno") );
