@@ -1,0 +1,214 @@
+{
+%定数
+
+width(640).
+height(480).
+max_v(15).
+min_v(3).
+back_color(c(0, 0, 0)).
+
+/*
+data(H,T,X1,Y1,X2,Y2)
+HとTが、削除すべき線のリストの先頭と末尾につながっている。
+X1,Y1,X2,Y2が、端点の状態を、次の座標と速度の組で表している。
+fore_colorに次の線の色が入っている。これだけdataと繋がっていないが、特に意味はない。(^^;
+*/
+%初期状態生成
+init.
+fore_color(c(255, 0, 0)).
+init, width(Width), height(Height) :- int(Width), int(Height) |
+	data(H,T,a(integer.rnd(Width),rand_v),a(integer.rnd(Height),rand_v),
+	         a(integer.rnd(Width),rand_v),a(integer.rnd(Height),rand_v)),
+	gen_nil_list(H,T,15),
+	frame=newFrame(Width, Height),
+	wait(newTimer(1)),
+	width(Width), height(Height),
+	sys.perpetual(on).
+
+%空リストの生成
+gen_nil_list(H,T,N) :- N=0 | H=T.
+gen_nil_list(H,T,N) :- N>0 | H=[nil|H2], gen_nil_list(H2,T,N-1).
+
+%速度をランダムに決定
+Ret=rand_v, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
+	Ret=integer.rnd(MaxV-MinV+1)+MinV, min_v(MinV), max_v(MaxV).
+
+%移動
+data([D|H],T,a(X1,VX1),a(Y1,VY1),a(X2,VX2),a(Y2,VY2)),move(Timer),width(Width),height(Height)
+ :- int(X1),int(Y1),int(X2),int(Y2),int(VX1),int(VY1),int(VX2),int(VY2),int(Width),int(Height) | 
+	delete(D),draw(l(X1,Y1,X2,Y2)),width(Width),height(Height),
+	data(H,T2,next(X1,VX1,Width),next(Y1,VY1,Height),next(X2,VX2,Width),next(Y2,VY2,Height)),
+	T=[l(X1,Y1,X2,Y2)|T2],
+	wait(Timer).
+
+%跳ね返り判定
+Ret=next(C,V,Max) :- N=C+V, N>=0, N=<Max  | Ret=a(N,V).
+Ret=next(C,V,Max) :- N=C+V, N>Max,        | Ret=a(Max,0-rand_v).
+Ret=next(C,V,Max) :- N=C+V, N<0, int(Max) | Ret=a(0,rand_v).
+
+%描画
+draw(l(X1,Y1,X2,Y2)),frame(F),fore_color(c(R,G,B))
+ :- int(X1),int(Y1),int(X2),int(Y2),int(R),int(G),int(B) |
+ 	drawLine(F,X1,Y1,X2,Y2,c(R,G,B)),fore_color(next_color(c(R,G,B))).
+delete(nil) :- ().
+delete(l(X1,Y1,X2,Y2)),frame(F),back_color(c(R,G,B))
+ :- int(X1),int(Y1),int(X2),int(Y2),int(R),int(G),int(B) |
+	drawLine(F,X1,Y1,X2,Y2,c(R,G,B)),back_color(c(R,G,B)).
+
+%次の色の決定
+Ret=next_color(c(R,G,B)) :- R=255, G<255, B=  0 | Ret=c(R   ,G+51,B   ).
+Ret=next_color(c(R,G,B)) :- R>  0, G=255, B=  0 | Ret=c(R-51,G   ,B   ).
+Ret=next_color(c(R,G,B)) :- R=  0, G=255, B<255 | Ret=c(R   ,G   ,B+51).
+Ret=next_color(c(R,G,B)) :- R=  0, G>  0, B=255 | Ret=c(R   ,G-51,B   ).
+Ret=next_color(c(R,G,B)) :- R<255, G=  0, B=255 | Ret=c(R+51,G   ,B   ).
+Ret=next_color(c(R,G,B)) :- R=255, G=  0, B>  0 | Ret=c(R   ,G   ,B-51).
+
+%%%%%%%%%%%%
+% インラインコード
+
+[[/*inline_define*/
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.Timer;
+
+class TimerListener implements ActionListener {
+	Atom me;
+	private static final Functor MOVE = new Functor("move", 1);
+	private static final Functor WAIT = new Functor("wait", 1);
+	public void actionPerformed(ActionEvent e) {
+		AbstractMembrane mem = me.getMem();
+		mem.asyncLock();
+		Atom wait = me.nthAtom(0);
+		if (wait.getFunctor().equals(WAIT)) {
+			Atom move = mem.newAtom(MOVE);
+			mem.newLink(me, 0, move, 0);
+			mem.removeAtom(wait);
+		}
+		mem.asyncUnlock();
+	}
+}
+class LineArtFrame extends Frame implements WindowListener {
+	private final AbstractMembrane mem;
+	Atom me;
+	private Canvas canvas;
+	LineArtFrame(AbstractMembrane m, int width, int height, Color backColor) {
+		mem = m;
+
+		addWindowListener(this);
+		canvas = new Canvas();
+		canvas.setSize(width, height);
+		canvas.setBackground(backColor);
+		add(canvas);
+		pack();
+		show();
+	}
+	void drawLine(int x1, int y1, int x2, int y2, Color c) {
+		Graphics graphics = canvas.getGraphics();
+		graphics.setColor(c);
+		graphics.drawLine(x1, y1, x2, y2);
+		graphics.dispose();
+	}
+	public void windowClosing(WindowEvent e) {
+		mem.asyncLock();
+		//LMntal側からFrameをdisposeしようとすると、デッドロックする。(もしかしたら嘘かも)
+		this.dispose();
+		mem.newAtom(new Functor("exit", 0));
+		Atom frame = me.nthAtom(0);
+		mem.removeAtom(frame);
+		mem.removeAtom(me);
+		mem.asyncUnlock();
+	}
+	public void windowOpened(WindowEvent e) {}
+	public void windowClosed(WindowEvent e) {}
+	public void windowIconified(WindowEvent e) {}
+	public void windowDeiconified(WindowEvent e) {}
+	public void windowActivated(WindowEvent e) {}
+	public void windowDeactivated(WindowEvent e) {}
+}
+]].
+
+Ret=newFrame(W, H), back_color(c(R,G,B)) :- int(W), int(H), int(R),int(G),int(B) | 
+	Ret=[[/*inline*/
+		Atom w = me.nthAtom(0), h = me.nthAtom(1);
+		Atom r = me.nthAtom(2), g = me.nthAtom(3), b = me.nthAtom(4);
+		int width = ((IntegerFunctor)w.getFunctor()).intValue();
+		int height = ((IntegerFunctor)h.getFunctor()).intValue();
+		int red = ((IntegerFunctor)r.getFunctor()).intValue();
+		int green = ((IntegerFunctor)g.getFunctor()).intValue();
+		int blue = ((IntegerFunctor)b.getFunctor()).intValue();
+		LineArtFrame frame = new LineArtFrame(mem, width, height, new Color(red, blue, green));
+		Atom a = mem.newAtom(new ObjectFunctor(frame));
+		frame.me = a;
+		mem.relinkAtomArgs(a, 0, me, 5);
+		mem.removeAtom(w);
+		mem.removeAtom(h);
+		mem.removeAtom(r);
+		mem.removeAtom(g);
+		mem.removeAtom(b);
+		mem.removeAtom(me);
+	]](W,H,R,G,B), back_color(c(R,G,B)).
+drawLine(F,X1,Y1,X2,Y2,c(R,G,B)) :- int(X1),int(Y1),int(X2),int(Y2),int(R),int(G),int(B) |
+	[[/*inline*/
+		Atom af = me.nthAtom(0);
+		Atom ax1 = me.nthAtom(1);
+		Atom ay1 = me.nthAtom(2);
+		Atom ax2 = me.nthAtom(3);
+		Atom ay2 = me.nthAtom(4);
+		Atom ar = me.nthAtom(5);
+		Atom ag = me.nthAtom(6);
+		Atom ab = me.nthAtom(7);
+		LineArtFrame frame = (LineArtFrame)((ObjectFunctor)af.getFunctor()).getObject();
+		int x1 = ((IntegerFunctor)ax1.getFunctor()).intValue();
+		int y1 = ((IntegerFunctor)ay1.getFunctor()).intValue();
+		int x2 = ((IntegerFunctor)ax2.getFunctor()).intValue();
+		int y2 = ((IntegerFunctor)ay2.getFunctor()).intValue();
+		int r = ((IntegerFunctor)ar.getFunctor()).intValue();
+		int g = ((IntegerFunctor)ag.getFunctor()).intValue();
+		int b = ((IntegerFunctor)ab.getFunctor()).intValue();
+		frame.drawLine(x1, y1, x2, y2, new Color(r, g, b));
+		mem.removeAtom(ax1);
+		mem.removeAtom(ay1);
+		mem.removeAtom(ax2);
+		mem.removeAtom(ay2);
+		mem.removeAtom(ar);
+		mem.removeAtom(ag);
+		mem.removeAtom(ab);
+		Atom a = mem.newAtom(new Functor("frame", 1));
+		mem.relinkAtomArgs(a, 0, me, 0);
+		mem.removeAtom(me);
+	]](F,X1,Y1,X2,Y2,R,G,B).
+%dispose(F) :- 
+%	[[/*inline*/
+%		Atom af = me.nthAtom(0);
+%		LineArtFrame frame = (LineArtFrame)((ObjectFunctor)af.getFunctor()).getObject();
+%		frame.setVisible(false);
+%		frame.dispose();
+%		mem.removeAtom(af);
+%		mem.removeAtom(me);
+%	]](F).
+
+Ret=newTimer(Delay) :- int(Delay) |
+	Ret=[[/*inline*/
+		Atom a = me.nthAtom(0);
+		int delay = ((IntegerFunctor)a.getFunctor()).intValue();
+		TimerListener listener = new TimerListener();
+		Timer t = new Timer(delay, listener);
+		t.start();
+		Atom at = mem.newAtom(new ObjectFunctor(t));
+		listener.me = at;
+		mem.relinkAtomArgs(at, 0, me, 1);
+		mem.removeAtom(a);
+		mem.removeAtom(me);
+	]](Delay).
+stop(Timer) :- unary(Timer) |
+	[[/*inline*/
+		Atom a = me.nthAtom(0);
+		Timer t = (Timer)((ObjectFunctor)a.getFunctor()).getObject();
+		t.stop();
+		mem.removeAtom(a);
+		mem.removeAtom(me);
+	]](Timer).
+%終了処理
+exit,wait(T) :- stop(T), terminate.
+}.
+{terminate, $p, @p} :- $p, @p.
