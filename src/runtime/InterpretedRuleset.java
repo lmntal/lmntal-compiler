@@ -78,7 +78,7 @@ public final class InterpretedRuleset extends Ruleset {
 	}
 	public String toString() {
 		String ret = "@" + id;
-		if (true) {
+		if (Env.debug > 0) {
 			StringBuffer s = new StringBuffer("");
 			Iterator it = rules.iterator();
 			while (it.hasNext()) {
