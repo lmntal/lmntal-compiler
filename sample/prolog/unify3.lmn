@@ -339,7 +339,7 @@ unify([V1_1, V1_2], [S1_1, S1_2], QUERY, FACT, BINDING),
 %% [X, Y, Y], [a, a, X]
 %unify([V1_1, V2_1, V2_2], [S1_1, S1_2, V1_2], QUERY, FACT, BINDING),
 %% [X, X], [a, Y]
-unify([V1_1, V1_2], [S1_1, V2_1], QUERY, FACT, BINDING),
+%unify([V1_1, V1_2], [S1_1, V2_1], QUERY, FACT, BINDING),
 %% [X, Y], [a, X]
 %unify([V1_1, V2_1], [S1_1, V1_2], QUERY, FACT, BINDING),
 %% [X, X] [Y, a]
