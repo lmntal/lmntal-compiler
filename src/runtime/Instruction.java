@@ -9,11 +9,12 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Field;
 
 /*
- * 中島君へ：Eclipseのデフォルトに合わせてタブ幅4で編集して下さい。
- * 
- * TODO memof は廃止する方向で検討する。
  * TODO ルール実行中の5つの配列はそれぞれ0から詰めて使用するのか決める。または、
  * ルール実行中の5つの配列は3つ、あるいは1つに併合した方がよい？
+ * <ul>
+ * <li>現在は5つの配列を生成し、互いに変数番号が重複しないように使用している。
+ * <li>配列にするかArrayListにするかも決める必要がある。
+ * </ul>
  * 
  * <p><b>注意</b>　方法4の文書に対して、「ロックしたまま実行膜スタックに積む」という操作
  * およびその結果の「ロックされた、かつ実行膜スタックにも積まれた」状態が追加された。
@@ -714,29 +715,29 @@ public class Instruction {
 	// 200番以降の命令にはLOCAL修飾版は存在しない
 	
 	// 制御命令 (200--209)
-	//  -----  react       [ruleref, [atomargs...], [memargs...]]
-	//  -----  inlinereact [ruleref, [atomargs...], [memargs...]]
-	//  -----  spec        [atomformals,memformals,atomlocals,memls,linkls,funcls]
+	//  -----  react       [ruleref, [memargs...], [atomargs...]]
+	//  -----  inlinereact [ruleref, [memargs...], [atomargs...]]
+	//  -----  spec        [memformals,atomformals,memlocals,atomlocals,linklocals,funclocals]
 	//  -----  proceed
 	//  -----  stop 
 	//  -----  branch      [[instructions...]]
 	//  -----  loop        [[instructions...]]
 	//  -----  run         [[instructions...]]
 
-    /** react [ruleref, [atomargs...], [memargs...]]
+    /** react [ruleref, [memargs...], [atomargs...]]
      * <br>失敗しないガード命令<br>
      * ルールrulerefに対するマッチングが成功したことを表す。
      * 処理系はこのルールのボディを呼び出さなければならない。*/
     public static final int REACT = 200;
 
-	/** inlinereact [ruleref, [atomargs...], [memargs...]]
+	/** inlinereact [ruleref, [memargs...], [atomargs...]]
 	 * <br>無視される<br>
      * ルールrulerefに対するマッチングが成功したことを表す。
      * <p>トレース用。*/
 	public static final int INLINEREACT = 201;
 
     /** <strike>spec [formals, locals]</strike>
-     *  spec [atomformals,memformals,atomlocals,memlocals,linklocals,funclocals]
+     *  spec [memformals,atomformals,memlocals,atomlocals,linklocals,funclocals]
      * <br>無視される<br>
      * 仮引数と局所変数の個数を宣言する。*/
     public static final int SPEC = 203;
@@ -938,7 +939,7 @@ public class Instruction {
 		i.add(s);
 		return i;
     }
-	
+    
     /**
      * react 命令を生成する。
      * @param r 反応できるルールオブジェクト
@@ -949,6 +950,19 @@ public class Instruction {
 		Instruction i = new Instruction(REACT);
 		i.add(r);
 		i.add(actual);
+		return i;
+    }
+    /**
+     * react 命令を生成する。
+     * @param r 反応できるルールオブジェクト
+     * @param memactuals 膜実引数のリスト。膜の変数番号からなる。
+     * @param atomactuals アトム実引数のリスト。アトムの変数番号からなる。
+     */
+    public static Instruction react(Rule r, List memactuals, List atomactuals) {
+		Instruction i = new Instruction(REACT);
+		i.add(r);
+		i.add(memactuals);
+		i.add(atomactuals);
 		return i;
     }
     /** @deprecated */
