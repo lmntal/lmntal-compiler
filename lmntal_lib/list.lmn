@@ -47,8 +47,8 @@ H=shift('.'(Value, Next), Return) :- H=Next, Return=Value.
  * append
  * 
  */
-H=append([], B) :- H=B.
-H=append([Value|Next], B) :- H=[Value|append(Next, B)].
+H=list.append([], B) :- H=B.
+H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
 
 
 /**

@@ -1,0 +1,3 @@
+#!/home/hara/lmn
+
+io.print([[Hello, world]]).
