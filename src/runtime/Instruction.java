@@ -11,6 +11,10 @@ import java.lang.reflect.Field;
 /*
  * TODO memof は廃止する方向で検討する。
  * TODO 右辺の全ての膜を生成してから、活性化を行うようにする。そのためにactivatemem命令を呼ぶ。
+ * TODO ルール実行中の5つの配列はそれぞれ0から詰めて使用するのか決める。
+ * TODO ルール実行中の5つの配列は3つ、あるいは1つに併合した方がよい？
+ * 
+ * 中島君へ：Eclipseのデフォルトに合わせてタブ幅4で編集して下さい。
  */
 
 /**
@@ -23,15 +27,27 @@ import java.lang.reflect.Field;
 public class Instruction {
 	
     /**
-     * どの命令なのかを保持する
-     */
-
-    /** ルールID */	
+     * 命令の種類を保持する。<strike>ルールID</strike> */	
     private int id;
 
+	/**
+	 * 命令の引数を保持する。
+	 * 命令の種類によって引数の型が決まっている。
+	 */
+	public List data = new ArrayList();
+	
+	//////////
+	// 定数
+
+	/** 対象の膜がローカルの計算ノードに存在することを保証する修飾子 */
+	public static final int LOCAL = 100;
+	/** ダミーの命令 */	
+	public static final int DUMMY = -1;
     /** 未定義の命令 */	
     public static final int UNDEF = 0;
-	
+	/** 命令の最大種類数。全ての命令の種類を表す値はこれより小さな数字にすること。*/
+	private static final int END_OF_INSTRUCTION = 256;	
+
     // 出力する基本ガード命令 (1--9)
     
     /** deref [-dstatom, srcatom, srcpos, dstpos]
@@ -39,7 +55,12 @@ public class Instruction {
      * アトムsrcatomの第srcpos引数のリンク先が第dstpos引数に接続していることを確認したら、
      * リンク先のアトムへの参照をdstatomに代入する。
      */
-    public static final int DEREF = 1;
+	public static final int DEREF = 1;
+
+	/** findatom [-dstatom, srcmem, func]
+	 * <br>反復するガード命令<br>
+	 * 膜srcmemにあってファンクタfuncを持つアトムへの参照を次々にdstatomに代入する。*/
+	public static final int FINDATOM = 2;
 
     /** lockmem [-dstmem, srcfreelinkatom]
      * <br>ロック取得するガード命令<br>
@@ -53,7 +74,13 @@ public class Instruction {
      * <p>膜の外からのリンクで初めて特定された膜への参照を取得するために使用される。
      * @see testmem
      * @see getmem */
-    public static final int LOCKMEM = 2;
+    public static final int LOCKMEM = 3;
+    
+    /** locallockmem [-dstmem, srcfreelinkatom]
+     * <br>最適化用のロック取得するガード命令<br>
+     * lockmemと同じ。ただしsrcfreelinkatomはこの計算ノードに存在する。
+     * @see lockmem */
+	public static final int LOCALLOCKMEM = LOCAL + LOCKMEM;
 
     /** anymem [-dstmem, srcmem] 
      * <br>反復するロック取得するガード命令<br>
@@ -62,12 +89,13 @@ public class Instruction {
      * そして、ロック取得に成功した各子膜への参照をdstmemに代入する。
      * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
      * <p><b>注意</b>　ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。*/
-    public static final int ANYMEM = 3;
-
-    /** findatom [-dstatom, srcmem, func]
-     * <br>反復するガード命令<br>
-     * 膜srcmemにあってファンクタfuncを持つアトムへの参照を次々にdstatomに代入する。*/
-    public static final int FINDATOM = 4;
+	public static final int ANYMEM = 4;
+	
+	/** localanymem [-dstmem, srcmem]
+     * <br>最適化用の反復するロック取得するガード命令<br>
+	 * anymemと同じ。ただしsrcmemはこの計算ノードに存在する。dstmemについては何も仮定しない。
+	 * @see anymem */
+	public static final int LOCALANYMEM = LOCAL + ANYMEM;
 
     // 出力しない基本ガード命令 (10--24)
 
@@ -128,14 +156,14 @@ public class Instruction {
      * <P>TODO この命令は不要かも知れない */
     public static final int NEQMEM = 19;
 
-    //    /** lock [srcmem]
-    //     * <br>（廃止された）ガード命令<br>
-    //     * 膜srcmemに対するノンブロッキングでのロック取得を試みる。
-    //     * ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
-    //     * <p>srcmemにmemof記法が廃止されたため、ロックはlockmemで行う。したがってlockは廃止された。*/
-    //    public static final int LOCK = 20;
+//    /** lock [srcmem]
+//     * <br>（廃止された）ガード命令<br>
+//     * 膜srcmemに対するノンブロッキングでのロック取得を試みる。
+//     * ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
+//     * <p>srcmemにmemof記法が廃止されたため、ロックはlockmemで行う。したがってlockは廃止された。*/
+//    public static final int LOCK = err;
 
-    // 出力する基本ボディ命令 (25--29)
+    // ヘッド命令から移管されたボディ命令 (25--29)
 
     /** getmem [-dstmem, srcatom]
      * <br>ボディ命令<br>
@@ -150,35 +178,48 @@ public class Instruction {
      * <p><b>注意</b>　ガード命令としては廃止された。*/
     public static final int GETPARENT = 26;
 
-    // 出力しない基本ボディ命令 (30--44)    
+    // 基本ボディ命令 (30--44)    
 
     /** removeatom [srcatom]
      * <br>ボディ命令<br>
-     * アトムsrcatomを現在の膜から取り出す。
-     * <p><strike>実行スタックに入っていれば実行スタックから除去される。</strike>*/
-    public static final int REMOVEATOM = 30;
+     * アトムsrcatomを現在の膜から取り出す。実行スタックは操作しない。
+     * @see dequeueatom */
+	public static final int REMOVEATOM = 30;
+	public static final int LOCALREMOVEATOM = LOCAL + REMOVEATOM;
 
     /** removemem [srcmem]
      * <br>ボディ命令<br>
-     * 膜srcmemを現在の膜から取り出す。*/
-    public static final int REMOVEMEM = 31;
+     * 膜srcmemを現在の膜から取り出す。
+     * 膜srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。*/
+	public static final int REMOVEMEM = 31;
+	/** localremovemem [srcmem]
+     * <br>最適化用ボディ命令<br>
+	 * removememと同じ。ただしsrcmemの親膜はこの計算ノードに存在する。*/
+	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
 
     /** newatom [-dstatom, srcmem, func]
      * <br>ボディ命令<br>
      * 膜srcmemにファンクタfuncを持つ新しいアトム作成し、参照をdstatomに代入する。
-     * <p>アクティブアトムならば膜srcmemの実行スタックに積む。*/
+     * アトムはまだ実行スタックには積まれない。
+     * @see enqueueatom */
     public static final int NEWATOM = 32;
+    
+    /** localnewatom [-dstatom, srcmem, func]
+     * <br>最適化用ボディ命令<br>
+     * newatomと同じ。ただしsrcmemはこの計算ノードに存在する。*/
+	public static final int LOCALNEWATOM = LOCAL + NEWATOM;
 
     /** newmem [-dstmem, srcmem]
      * <br>ボディ命令<br>
-     * 膜srcmemに新しい子膜を作成し、dstmemに代入する。*/
-    public static final int NEWMEM = 33;
+     * 膜srcmemに新しい子膜を作成し、dstmemに代入する。
+     * 子膜はまだ実行膜スタックには積まれない。
+     * @see enqueuemem */
+	public static final int NEWMEM = 33;
 
-    /** newfreelink [-dstfreelinkatom, srcmem]
-     * <br>（予約された）ボディ命令<br>
-     * 膜srcmemに新しい自由リンク出力管理アトムを作成し、参照をdstfreelinkatomに代入する。
-     * <p>この命令は廃案になった。*/
-    public static final int NEWFREELINK = 34;
+	/** localnewmem [-dstmem, srcmem]
+	* <br>最適化用ボディ命令<br>
+	* newmemと同じ。ただしsrcmemはこの計算ノードに存在する。*/
+	public static final int LOCALNEWMEM = LOCAL + NEWMEM;
 
     /** newroot [-dstmem, srcmem, node]
      * <br>（予約された）ボディ命令<br>
@@ -187,25 +228,39 @@ public class Instruction {
 
     /** enqueueatom [srcatom]
      * <br>ボディ命令<br>
-     * アトムsrcatomを所属膜の実行スタックに入れる。*/
+     * 所属膜の実行スタックに積む。
+     * TODO ※水野君[　] srcatomがアクティブかどうかは判定しない仕様にすべきですね？ */
     public static final int ENQUEUEATOM = 36;
+    
+	/** localenqueueatom [srcatom]
+	 * <br>最適化用ボディ命令<br>
+	 * enqueueatomと同じ。ただしsrcatomの所属膜はこの計算ノードに存在する。*/
+	public static final int LOCALENQUEUEATOM = LOCAL + ENQUEUEATOM;
 
     /** dequeueatom [srcatom]
-     * <br>（予約された）ボディ命令<br>
-     * アトムsrcatomを実行スタックから取り出す。*/
-    public static final int DEQUEUEATOM = 36;
+     * <br>最適化用ボディ命令<br>
+     * アトムsrcatomが実行スタックに入っていれば、実行スタックから取り出す。
+     * <p><b>注意</b>　メモリ使用量のオーダを削減するために使う。アトム再利用のとき、因果関係に注意。*/
+    public static final int DEQUEUEATOM = 37;
 
+    /** localdequeueatom [srcatom]
+     * dequeueatomと同じ。ただしsrcatomはこの計算ノードに存在する。*/
+	public static final int LOCALDEQUEUEATOM = LOCAL + DEQUEUEATOM;
+
+	// ここまで確認した
+	
     /** dequeuemem [srcmem]
      * <br>（予約された）ボディ命令<br>
      * 膜srcmemを再帰的に実行膜スタックから取り出す。*/
-    public static final int DEQUEUEMEM = 37;
+    public static final int DEQUEUEMEM = 38;
 
     /** activatemem [srcmem]
      * <br>ボディ命令<br>
      * 膜srcmemを管理するマシンの実行膜スタックに膜srcmemを積む。
      * <p>実行後、srcmemへの参照は廃棄しなければならない。
-     * @see activatemem */
-    public static final int ACTIVATEMEM = 38;
+     * @see unlockmem */
+	public static final int ACTIVATEMEM = 39;
+	public static final int LOCALACTIVATEMEM = LOCAL + ACTIVATEMEM;
 
     // ルールを操作するボディ命令 (45--49)
 	
@@ -322,7 +377,7 @@ public class Instruction {
      * 膜srcmemの全ての子膜に対して再帰的にロックを解放する。*/
     public static final int RECURSIVEUNLOCK = 71;
 
-    /** copymem [dstmem, srcmem]
+    /** copymem [-dstmem, srcmem]
      * <br>（予約された）ボディ命令<br>
      * 再帰的にロックされた膜srcmemの内容のコピーを作成し、膜dstmemに入れる。
      * ただし自由リンク管理アトムの第1引数の状態は定義されない。*/
@@ -336,41 +391,29 @@ public class Instruction {
 
     // 予約 (75--79)
 	
-    // 制御命令 (80--99)
+    // 制御命令 (200--219)
 	
     /** react [ruleid, [atomargs...], [memargs...]]
      * <br>失敗しないガード命令<br>
      * ruleidが参照するルールに対するマッチが成功したことを表す。*/
-    public static final int REACT = 80;
+    public static final int REACT = 200;
 
     /** not [[instructions...]]
      * <br>（予約された）ガード命令<br>
-     * 否定条件を指定する。*/
-    public static final int NOT = 81;
+     * 否定条件を指定する。
+     * @see branch */
+    public static final int NOT = 201;
 
     /** stop 
      * <br>（予約された）失敗しないガード命令<br>
      * 否定条件にマッチしたことを表す。
      */
-    public static final int STOP = 82;
+    public static final int STOP = 202;
 
-    /** inline [[args...] text]
-     * <br>（予約された）ボディ命令
-     * 文字列textで指定されたJavaコードをエミットする。
-     * コード中の%0は本膜への参照で置換される。
-     * コード中の%1から%nは詳細が未定の引数argsの各要素が表すリンクへの参照で置換される。
-     * <p>Javaソースを出力しない処理系環境では例外を発生する。*/
-    public static final int INLINE = 83;
-
-    /** builtin [...]
-     * <br>（予約された）ボディ命令
-     * 指定された引数でJavaのクラスメソッドを呼び出す。詳細は未定。*/
-    public static final int BUILTIN = 84;
-	
     /** spec [formals, locals]
      * <br>無視される<br>
      * 仮引数と一時変数の個数を宣言する。*/
-    public static final int SPEC = 85;
+    public static final int SPEC = 205;
 
     /** loop [[instructions...]]
      * <br>構造化命令<br>
@@ -383,22 +426,36 @@ public class Instruction {
      * 引数の命令列を実行することを表す。
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、
      * 典型的にはこのbranchの次の命令に進む。
-     * 引数列を最後まで実行した場合、ここで終了する（TODO またはhalt命令を作る）*/
+     * 引数列を最後まで実行した場合、ここで終了する（TODO またはhalt命令を作る）
+     * @see not */
     public static final int BRANCH = 92;
 
-    /** 命令の数。新命令はこれより小さな数字にすること。*/
-    private static final int END_OF_INSTRUCTION = 100;
+	// 組み込み機能に関する命令 (210--239)
+
+	/** inline [[args...] text]
+	 * <br>（予約された）ボディ命令
+	 * 文字列textで指定されたJavaコードをエミットする。
+	 * コード中の%0は本膜への参照で置換される。
+	 * コード中の%1から%nは詳細が未定の引数argsの各要素が表すリンクへの参照で置換される。
+	 * <p>Javaソースを出力しない処理系環境では例外を発生する。*/
+	public static final int INLINE = 210;
+
+	/** builtin [class, method, [args...]]
+	 * <br>（予約された）ボディ命令
+	 * 指定された引数でJavaのクラスメソッドを呼び出す。
+	 * インタプリタのときに組み込み機能を提供するために使用する。詳細は未定。*/
+	public static final int BUILTIN = 211;
 	
 
     ////////////////////////////////////////////////////////////////
     /**
      * IDを取得する
      * @return int
+     * TODO ※中島君[　]原君[　] idをkindに名称変更します。確認したら何か書いて下さい。
      */
-    public int getID(){
-	return id;
-    }
-
+    public int getID() {
+		return id;
+	}
 
     ////////////////////////////////////////////////////////////////
 
@@ -414,127 +471,89 @@ public class Instruction {
      */
     private final void add(int n) { data.add(new Integer(n)); }
 	
+	////////////////////////////////////////////////////////////////
+
     /**
      * ダミー命令を生成する。
      * さしあたって生成メソッドがまだできてない命令はこれを使う
      * @param s 説明用の文字列
      */
     public static Instruction dummy(String s) {
-	Instruction i = new Instruction(-1);
-	i.add(s);
-	return i;
+		Instruction i = new Instruction(-1);
+		i.add(s);
+		return i;
     }
 	
     /**
      * react 命令を生成する。
-     * 
      * @param r 反応できるルールオブジェクト
-     * @param actual 引数
-     * @return
+     * @param actual 実引数
+     * TODO reactの引数の仕様を決める
      */
     public static Instruction react(Rule r, List actual) {
-	Instruction i = new Instruction(REACT);
-	i.add(r);
-	i.add(actual);
-	return i;
-    }
-	
-    /** findatom 命令を生成する */
+		Instruction i = new Instruction(REACT);
+		i.add(r);
+		i.add(actual);
+		return i;
+    }	
+    /** @deprecated */
     public static Instruction findatom(int dstatom, List srcmem, Functor func) {
-	Instruction i = new Instruction(FINDATOM);
-	i.add(dstatom);
-	i.add(srcmem);
-	i.add(func);
-	return i;
-    }
-	
+		Instruction i = new Instruction(FINDATOM);
+		i.add(dstatom);
+		i.add(srcmem);
+		i.add(func);
+		return i;
+    }	
+    
+    //
+    
+	/** findatom 命令を生成する */
+	public static Instruction findatom(int dstatom, int srcmem, Functor func) {
+		return new Instruction(FINDATOM,dstatom,srcmem,func);
+	}	
     /** anymem 命令を生成する */
     public static Instruction anymem(int dstmem, int srcmem) {
-	Instruction i = new Instruction(ANYMEM);
-	i.add(dstmem);
-	i.add(srcmem);
-	return i;
+		return new Instruction(ANYMEM,dstmem,srcmem);
     }
-	
-	
-    /**
-     * newatom 命令を生成する。
-     * 
-     * @param dstatom
-     * @param srcmem
-     * @param func
-     * @return
-     */
+    /** newatom 命令を生成する */
     public static Instruction newatom(int dstatom, int srcmem, Functor func) {
-	Instruction i = new Instruction(NEWATOM);
-	i.add(dstatom);
-	i.add(srcmem);
-	i.add(func);
-	return i;
-    }
-	
+		return new Instruction(NEWATOM,dstatom,srcmem,func);
+    }	
     /** spec 命令を生成する */
     public static Instruction spec(int formals, int locals) {
-	Instruction i = new Instruction(SPEC);
-	i.add(formals);
-	i.add(locals);
-	return i;
+		Instruction i = new Instruction(SPEC);
+		i.add(formals);
+		i.add(locals);
+		return i;
     }
-	
     /** newmem 命令を生成する */
     public static Instruction newmem(int ret, int srcmem) {
-	return new Instruction(NEWMEM,ret,srcmem);
+		return new Instruction(NEWMEM,ret,srcmem);
     }
     /** newlink 命令を生成する */
     public static Instruction newlink(int atom1, int pos1, int atom2, int pos2) {
-	return new Instruction(NEWLINK,atom1,pos1,atom2,pos2);
+		return new Instruction(NEWLINK,atom1,pos1,atom2,pos2);
     }
     /** loadruleset 命令を生成する */
     public static Instruction loadruleset(int mem, Ruleset rs) {
-	Instruction i = new Instruction(LOADRULESET);
-	i.add(mem);
-	i.add(rs);
-	return i;
+		return new Instruction(LOADRULESET,mem,rs);
     }
-	
-    /**
-     * getmem 命令を生成する。
-     * @param ret
-     * @param atom
-     * @return
-     */
+    /** getmem 命令を生成する */
     public static Instruction getmem(int ret, int atom) {
-	Instruction i = new Instruction(GETMEM);
-	i.add(ret);
-	i.add(atom);
-	return i;
-    }
+		return new Instruction(GETMEM,ret,atom);
+    }	
+    /** removeatom 命令を生成する */
+	public static Instruction removeatom(int atom) {
+		return new Instruction(REMOVEATOM,atom);
+	}	
+	/** @deprecated */
+	public static Instruction removeatom(int atom, Functor func) {
+		return new Instruction(REMOVEATOM,atom,func);
+	}	
+    
+	// コンストラクタ
 	
-    /**
-     * removeatom 命令を生成する。
-     * @param atom
-     * @param func
-     * @return
-     */
-    public static Instruction removeatom(int atom, Functor func) {
-	Instruction i = new Instruction(REMOVEATOM);
-	i.add(atom);
-	i.add(func);
-	return i;
-    }
-	
-	
-	
-    /**
-     * 命令の引数を保持する。
-     * 命令によって引数の型が決まっている。
-     */
-    public List data = new ArrayList();
-	
-    /**
-     * 無名命令を作る。
-     *
-     */
+    /** 無名命令を作る。*/
     public Instruction() {
     }
 	
@@ -544,51 +563,45 @@ public class Instruction {
      */
     public Instruction(int id) {
     	this.id = id;
-
-	//deprecated by NAKAJIMA: 古いデータ形式
-	//by HARA
-	// たとえば [react, [1, 2, 5]]
-	// 		ArrayList sl = new ArrayList();
-	// 		sl.add(new Integer(1));
-	// 		sl.add(new Integer(2));
-	// 		sl.add(new Integer(5));
-	// 		data.add("react");
-	// 		data.add(sl);
-	// 		System.out.println(data);
-
-	//新しいデータ形式
-	/*
-	  ArrayList sl = new ArrayList();
-	  sl.add(new Integer(1));
-	  sl.add(new Integer(2));
-	  sl.add(new Integer(5));
-	  data.add(new Integer(0)); // 0->deref命令
-	  data.add(sl);
-	  System.out.println(data);
-	*/
     }
     private Instruction(int id, int arg1) {
-	this.id = id;
-	add(arg1);
+		this.id = id;
+		add(arg1);
     }
-    private Instruction(int id, int arg1, int arg2) {
-	this.id = id;
-	add(arg1);
-	add(arg2);
-    }
-    private Instruction(int id, int arg1, int arg2, int arg3) {
-	this.id = id;
-	add(arg1);
-	add(arg2);
-	add(arg2);
-    }
+	private Instruction(int id, int arg1, int arg2) {
+		this.id = id;
+		add(arg1);
+		add(arg2);
+	}
+	private Instruction(int id, int arg1, Object arg2) {
+		this.id = id;
+		add(arg1);
+		add(arg2);
+	}
+	private Instruction(int id, int arg1, int arg2, int arg3) {
+		this.id = id;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+	}
+	private Instruction(int id, int arg1, int arg2, Object arg3) {
+		this.id = id;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+	}
     private Instruction(int id, int arg1, int arg2, int arg3, int arg4) {
-	this.id = id;
-	add(arg1);
-	add(arg2);
-	add(arg3);
-	add(arg4);
+		this.id = id;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+		add(arg4);
     }
+    
+	//////////////////////////////////
+	//
+	// デバッグ用表示メソッド
+	//
 
 
     /**
@@ -612,43 +625,43 @@ public class Instruction {
 // 	return answer;
 //     }
 
-    static String[] hoge = new String[END_OF_INSTRUCTION]; // 命令の種類の数	
-		
+	/** Integerでラップされた命令番号から命令名へのハッシュ。
+	 * 処理系開発が収束した頃に、もっと効率のよい別の構造で置き換えてもよい。 */
+	static Hashtable instructionTable = new Hashtable();
     {
-	hoge[DEREF] = "deref";
+		try {
+			Instruction inst = new Instruction();
+			Field[] fields = inst.getClass().getDeclaredFields();
+			for (int i = 0; i < fields.length; i++) {
+				Field f = fields[i];
+				if (f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {
+					Integer idobj = new Integer(f.getInt(inst));
+					if (instructionTable.containsKey(idobj)) {
+						System.out.println("WARNING: ID collision detected on instruction ID = " 
+							+ idobj.intValue());
+					}
+					instructionTable.put(idobj, f.getName().toLowerCase());
+				}
+			}
+		}
+		catch(java.lang.SecurityException e)		{ e.printStackTrace(); }
+		catch(java.lang.IllegalAccessException e)	{ e.printStackTrace(); }
     }
 
-    /**
-     * デバッグ用表示メソッド。
-     * 命令の数字(int)を与えると、該当する命令のStringを返してくれる。
-     *
-     * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
-     * @return String
-     * 
-     */
-    public static String getInstructionString(int instrcutionNum){
-	String answer = "";
 
-	Hashtable table = new Hashtable();
-
-	try {
-	    Instruction hoge = new Instruction();
-	    Field[] fields = Class.forName("Instruction").getDeclaredFields();
-	    for (int i = 0; i < fields.length; i++) {
-		Field f = fields[i];
-		if (f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {
-		    table.put(new Integer(f.getInt(hoge)), f.getName().toLowerCase());
-		}
-	    }			
-	}
-	catch(java.lang.SecurityException e)
-	    {
+	/**
+	 * デバッグ用表示メソッド。
+	 * 命令のid (int)を与えると、該当する命令のStringを返してくれる。
+	 *
+	 * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
+	 * @return String
+	 * 
+	 */
+	public static String getInstructionString(int id){
+		String answer = "";
+		answer = (String)instructionTable.get(new Integer(id));
+		return answer;
 		
-	    }
-
-	answer = (String)table.get(new Integer(instrcutionNum));
-
-	return answer;
 
 	/* 
 	   try {
@@ -681,7 +694,7 @@ public class Instruction {
      *
      */
     public String toString() {
-	return getInstructionString(id)+" "+data.toString();
+		return getInstructionString(id)+" "+data.toString();
 
 	//	StringBuffer buffer = new StringBuffer("");
 	//
