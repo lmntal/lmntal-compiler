@@ -75,8 +75,10 @@ UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = list; :}
 				| LPAREN Rule:rule RPAREN
 					{: RESULT = rule; :}
-//				| LPAREN Atom:atom RPAREN
-//					{: RESULT = atom; :}
+				| Context:p
+					{:  RESULT = p; :}
+				| LPAREN Atom:atom RPAREN
+					{: RESULT = atom; :}
 				| Link:link
 					{: RESULT = link; :}
 				;
@@ -172,11 +174,11 @@ Context		::=   ProcessContext:p
 Process		::=   Atom:p
 					{:  RESULT = p; :}
 				| Membrane:p
-					{:  RESULT = p; :}
+					{:  RESULT = p; :};
 //				| Rule:p
 //					{:  RESULT = p; :}
-				| Context:p
-					{:  RESULT = p; :};
+//				| Context:p
+//					{:  RESULT = p; :};
 
 ProcessList ::= /* epsilon */
 					{: RESULT = new LinkedList(); :}

@@ -2,7 +2,7 @@ package test;
 
 import java.util.*;
 import java.io.*;
-import java.lang.reflect.*;
+//import java.lang.reflect.*;
 
 import compile.*;
 import compile.parser.*;
