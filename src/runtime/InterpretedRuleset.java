@@ -2,6 +2,86 @@ package runtime;
 
 import java.util.*;
 
+private class InterpretedReactor {
+	InterpretedReactor(
+		AbstractMembrane[] mems;
+		Atom[] atoms;
+		List vars;
+		List insts;
+		);
+
+	/** 命令列を解釈する。
+	 * @param mems  膜変数のベクタ
+	 * @param atoms アトム変数のベクタ
+	 * @param vars  その他の変数のベクタ（memsやatomsは廃止してvarsに統合する？）
+	 * @param insts 命令列
+	 * @param pc    命令列中のプログラムカウンタ
+	 * @return 命令列の実行が成功したかどうかを返す
+	 */
+	private boolean interpret(int pc) {
+		Iterator it;
+		Functor func;
+		while (pc < insts.size()) {
+			Instruction inst = (Instruction)insts.get(pc++);
+			switch (inst.getKind()) {
+			case Instruction.REACT:
+				Rule rule = (Rule)inst.getArg1();
+				List bodyInsts = (List)rule.body;
+				Instruction spec = (Instruction)bodyInsts.get(0);
+				int formals = spec.getIntArg1();
+				int locals  = spec.getIntArg2();
+				AbstractMembrane[] bodymems  = new AbstractMembrane[locals];
+				Atom[]             bodyatoms = new Atom[locals];
+				List memformals  = (List)inst.getArg2();
+				List atomformals = (List)inst.getArg3();
+				for (int i = 0; i < memformals.size(); i++) {
+					bodymems[i]  = mems[((Integer)memformals.get(i)).intValue()];
+				}
+				for (int i = 0; i < atomformals.size(); i++) {
+					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
+				}
+				InterpretedReactor ir = new InterpretedReactor(bodymems, bodyatoms, new ArrayList(), bodyInsts);
+				ir.interpret(0);
+				return true;
+			case Instruction.ANYMEM: // anymem [-dstmem, srcmem] 
+				it = mems[inst.getIntArg2()].mems.iterator();
+				while (it.hasNext()){
+					AbstractMembrane submem = (AbstractMembrane)it.next();
+					if (submem.lock(mems[0])) {
+						mems[inst.getIntArg1()] = submem;
+						if (interpret(pc)) return true;
+						submem.unlock();
+					}
+				}
+				break;
+			case Instruction.FINDATOM: // findatom [-dstatom, srcmem, funcref]
+				func = (Functor)inst.getArg3();
+				it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
+				while (it.hasNext()){
+					Atom a = (Atom)it.next();
+					atoms[inst.getIntArg1()] = a;					
+					if (interpret(pc)) return true;
+				}
+				break;
+			case Instruction.NEWATOM: // newatom [-dstatom, srcmem, funcref]
+				func = (Functor)inst.getArg3();
+				atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
+				break;
+			case Instruction.PROCEED:
+				return true;	
+
+
+
+			default:
+				System.out.println("Invalid rule");
+				break;
+			}
+		}
+		return false;
+	}
+}
+
+
 // TODO 【重要】マッチング検査の途中で取得したロックを全て解放する必要がある
 // memo：ロックを開放する単位がリストになるように修正
 
@@ -67,73 +147,10 @@ public final class InterpretedRuleset extends Ruleset {
 		Atom[]             atoms = new Atom[formals];
 		mems[0]  = mem;
 		atoms[1] = atom;
-		return interpret(mems,atoms,new ArrayList(),matchInsts,0);
+		InterpretedReactor ir = new InterpretedReactor(mems,atoms,new ArrayList(),matchInsts);
+		return ir.interpret(0);
 	}
-	/** 命令列を解釈する。
-	 * @param mems  膜変数のベクタ
-	 * @param atoms アトム変数のベクタ
-	 * @param vars  その他の変数のベクタ（memsやatomsは廃止してvarsに統合する？）
-	 * @param insts 命令列
-	 * @param pc    命令列中のプログラムカウンタ
-	 * @return 命令列の実行が成功したかどうかを返す
-	 */
-	private boolean interpret(AbstractMembrane[] mems, Atom[] atoms, List vars, List insts, int pc) {
-		Iterator it;
-		Functor func;
-		while (pc < insts.size()) {
-			Instruction inst = (Instruction)insts.get(pc++);
-			switch (inst.getKind()) {
-			case Instruction.REACT:
-				Rule rule = (Rule)inst.getArg1();
-				List bodyInsts = (List)rule.body;
-				Instruction spec = (Instruction)bodyInsts.get(0);
-				int formals = spec.getIntArg1();
-				int locals  = spec.getIntArg2();
-				AbstractMembrane[] bodymems  = new AbstractMembrane[locals];
-				Atom[]             bodyatoms = new Atom[locals];
-				List memformals  = (List)inst.getArg2();
-				List atomformals = (List)inst.getArg3();
-				for (int i = 0; i < memformals.size(); i++) {
-					bodymems[i]  = mems[((Integer)memformals.get(i)).intValue()];
-				}
-				for (int i = 0; i < atomformals.size(); i++) {
-					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
-				}
-				interpret(bodymems, bodyatoms, new ArrayList(), bodyInsts,0);
-				return true;
-			case Instruction.ANYMEM: // anymem [-dstmem, srcmem] 
-				it = mems[inst.getIntArg2()].mems.iterator();
-				while (it.hasNext()){
-					AbstractMembrane submem = (AbstractMembrane)it.next();
-					if (submem.lock(mems[0])) {
-						mems[inst.getIntArg1()] = submem;
-						if (interpret(mems,atoms,vars,insts,pc)) return true;
-						submem.unlock();
-					}
-				}
-				break;
-			case Instruction.FINDATOM: // findatom [-dstatom, srcmem, funcref]
-				func = (Functor)inst.getArg3();
-				it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
-				while (it.hasNext()){
-					Atom a = (Atom)it.next();
-					atoms[inst.getIntArg1()] = a;					
-					if (interpret(mems,atoms,vars,insts,pc)) return true;
-				}
-				break;
-			case Instruction.NEWATOM: // newatom [-dstatom, srcmem, funcref]
-				func = (Functor)inst.getArg3();
-				atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
-				break;
-			case Instruction.PROCEED:
-				return true;	
-			default:
-				System.out.println("Invalid rule");
-				break;
-			}
-		}
-		return false;
-	}
+
 	
 	/**
 	 * ルールを適用する。<br>

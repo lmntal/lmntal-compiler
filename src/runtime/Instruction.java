@@ -51,15 +51,15 @@ public class Instruction {
 	 */
 	public List data = new ArrayList();
 	
-	//////////
-	// 定数
+    //////////
+    // 定数
 
-	/** 対象の膜がローカルの計算ノードに存在することを保証する修飾子（一部他の用途で使用） */
-	public static final int LOCAL = 100;
-	/** 型付きアトムに対する命令がリンクではなく、ファンクタを対象にしていることを表す修飾子 */
-	public static final int OPT = 100;
-	/** ダミーの命令 */	
-	public static final int DUMMY = -1;
+    /** 対象の膜がローカルの計算ノードに存在することを保証する修飾子（一部他の用途で使用） */
+    public static final int LOCAL = 100;
+    /** 型付きアトムに対する命令がリンクではなく、ファンクタを対象にしていることを表す修飾子 */
+    public static final int OPT = 100;
+    /** ダミーの命令 */	
+    public static final int DUMMY = -1;
     /** 未定義の命令 */	
     public static final int UNDEF = 0;
 //	/** 命令の最大種類数。命令の種類を表す値はこれより小さな数にすること。*/
