@@ -34,6 +34,7 @@ public class LMNtalDaemon implements Runnable {
 	 * 凡例： rgid  … runtime group id
 	 */
 
+	//todo Envのdebugと連動させたいな。とりあえず放置。
 	static boolean DEBUG = true;
 	
 	public static final int DEFAULT_PORT = 60000;
@@ -75,7 +76,7 @@ public class LMNtalDaemon implements Runnable {
 	static String myhostname;
 	
 	/**
-	 * コンストラクタ。 tcp60000番にServerSocketを開くだけ。
+	 * コンストラクタ。 DEFAULT_PORTで指定されたポート番号にServerSocketを開くだけ。
 	 */
 	public LMNtalDaemon() {
 		this(DEFAULT_PORT);
@@ -122,10 +123,10 @@ public class LMNtalDaemon implements Runnable {
 
 		while (true) {
 			try {
-				Socket tmpSocket = servSocket.accept(); //コネクションがくるまで待つ
+				Socket socket = servSocket.accept(); //コネクションがくるまで待つ
 
-				if (DEBUG)System.out.println("accepted socket: " + tmpSocket);
-				LMNtalDaemonMessageProcessor node = new LMNtalDaemonMessageProcessor(tmpSocket);
+				if (DEBUG)System.out.println("accepted socket: " + socket);
+				LMNtalDaemonMessageProcessor node = new LMNtalDaemonMessageProcessor(socket);
 				
 				//登録する
 				if (registerRemoteHostNode(node)) {
@@ -133,18 +134,17 @@ public class LMNtalDaemon implements Runnable {
 					Thread t2 = new Thread(node);
 					t2.start();
 				} else {
-					//登録失敗。糸冬
+					//登録失敗。糸冬了
 					node.close();
 				}
 			} catch (IOException e) {
-				System.out.println(
-					"ERROR in LMNtalDaemon.run() " + e.toString());
+				System.out.println("ERROR in LMNtalDaemon.run(): ");
 				e.printStackTrace();
 				break;
 			}
 		}
 	}
-	
+
 	////////////////////////////////////////////////////////////////
 	
 	/**
@@ -233,11 +233,15 @@ public class LMNtalDaemon implements Runnable {
 	public static boolean makeRemoteConnection(String fqdn) {
 		//「ブロックしないようにする」
 		//todo firewallにひっかかってパケットが消滅した時をどうするか？
+		//↑とりあえずsetSoTimeout()する。nakajima 2004-08-19
 
 		if (isHostRegistered(fqdn)) return true;
+		
+		Socket socket;
 		try {
 			//新規接続の場合
-			Socket socket = new Socket(fqdn, DEFAULT_PORT);
+			socket = new Socket(fqdn, DEFAULT_PORT);
+			socket.setSoTimeout(180000); //とりあえず3分
 			LMNtalDaemonMessageProcessor node = new LMNtalDaemonMessageProcessor(socket);
 			if (registerRemoteHostNode(node)) {
 				Thread t = new Thread(node);
@@ -249,8 +253,10 @@ public class LMNtalDaemon implements Runnable {
 		} catch (Exception e) {
 			System.out.println(
 				"ERROR in LMNtalDaemon.makeRemoteConnection(" + fqdn + ")");
+			System.out.println("If java.net.SocketTimeoutException has raised, open TCP " + DEFAULT_PORT);
 			e.printStackTrace();
-			return false;
+			//todo  SocketTimeoutExceptionのときはここでsocketを閉じるべきか？
+			//"If the timeout expires, a java.net.SocketTimeoutException is raised, though the Socket is still valid." (1.4.1 api specitifation.)
 		}
 	}	
 

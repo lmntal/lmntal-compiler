@@ -59,11 +59,11 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		try {
 			BufferedWriter out = getOutputStream();
 			String msgid = LMNtalDaemon.makeID();
-			out.write(msgid + " \"" + fqdn + "\" " + rgid + " " + command + "\n");
+			out.write("cmd " + msgid + " \"" + fqdn + "\" " + rgid + " " + command + "\n");
 			out.flush();
 			return waitForResponseObject(msgid);
 		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.send()");
+			System.out.println("ERROR in LMNtalRuntimeMessageProcessor.sendWaitObject(): ");
 			e.printStackTrace();
 			return null;
 		}
