@@ -393,6 +393,20 @@ public class HeadCompiler {
 			Membrane submem = (Membrane)it.next();
 			int submempath = memToPath(submem);
 			if (submempath == UNBOUND) {
+				// !fFindDataAtomsのとき、アクティブアトムを含まない子膜の取得を後回しにする
+				if (!fFindDataAtoms) {
+					Iterator it2 = submem.atoms.iterator();
+					boolean exists = false;
+					while (it2.hasNext()) {
+						Atom atom = (Atom)it2.next();
+						if (atom.functor.isActive()) {
+							exists = true;
+							break;
+						}
+					}
+					if (!exists) continue;
+				}		
+		
 				// 子膜を変数に取得する
 				submempath = varcount++;
 				match.add(Instruction.anymem(submempath, thismempath));
