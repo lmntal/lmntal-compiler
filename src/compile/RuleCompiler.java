@@ -147,7 +147,7 @@ public class RuleCompiler {
 	/** ガードをコンパイルする（仮） */
 	private void compile_g() {
 		HashSet identified = new HashSet(); // ソース出現が特定された型付きプロセス文脈定義のセット
-		HashSet loaded     = new HashSet(); // ソース出現を変数に読み込んだプロセス文脈定義のセット
+		//HashSet loaded   = new HashSet(); // ソース出現を変数に読み込んだプロセス文脈定義のセット//typedcxtsrcsに統合した
 
 		// ヘッド出現する型付きプロセス文脈を特定されたものとしてマークする
 		Iterator it = rs.typedProcessContexts.keySet().iterator();
@@ -172,8 +172,7 @@ public class RuleCompiler {
 					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
 					if (!identified.contains(def1)) continue;
 					int atomid;
-					if (!loaded.contains(def1)) {
-						loaded.add(def1);
+					if (!typedcxtsrcs.containsKey(def1)) {
 						LinkOccurrence srclink = def1.src.args[0].buddy;
 						atomid = varcount++;
 						guard.add(new Instruction(Instruction.DEREFATOM,
@@ -195,8 +194,7 @@ public class RuleCompiler {
 					if (!identified.contains(def2)) continue;
 
 					int atomid1;
-					if (!loaded.contains(def1)) {
-						loaded.add(def1);
+					if (!typedcxtsrcs.containsKey(def1)) {
 						LinkOccurrence srclink = def1.src.args[0].buddy;
 						atomid1 = varcount++;
 						guard.add(new Instruction(Instruction.DEREFATOM,
@@ -210,8 +208,7 @@ public class RuleCompiler {
 					guard.add(new Instruction(Instruction.ISINT, atomid1));
 
 					int atomid2;
-					if (!loaded.contains(def2)) {
-						loaded.add(def2);
+					if (!typedcxtsrcs.containsKey(def2)) {
 						LinkOccurrence srclink = def2.src.args[0].buddy;
 						atomid2 = varcount++;
 						guard.add(new Instruction(Instruction.DEREFATOM,
@@ -229,11 +226,60 @@ public class RuleCompiler {
 					lit.remove();
 					changed = true;
 				}
+				else if (cstr.functor.equals(new Functor("=",2))) {
+					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
+					ContextDef def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
+					if (!identified.contains(def2)) continue;
+
+					int atomid2;
+					if (!typedcxtsrcs.containsKey(def2)) {
+						LinkOccurrence srclink = def2.src.args[0].buddy;
+						atomid2 = varcount++;
+						guard.add(new Instruction(Instruction.DEREFATOM,
+							atomid2, lhsatomToPath(srclink.atom), srclink.pos));
+						typedcxtsrcs.put(def2, new Integer(atomid2));
+					}
+					else {
+						atomid2 = typedcxtToSrcPath(def2);
+					}
+					typedcxttypes.put(def2, UNARY_ATOM_TYPE);
+					
+					if (!identified.contains(def1)) {
+						// todo 複製された参照を実装する
+						int funcid2 = varcount++;
+						guard.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+						identified.add(def1);
+						int atomid1 = varcount++;
+						guard.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
+						typedcxtsrcs.put(def1, new Integer(atomid1));
+					}
+					else {
+						int atomid1;
+						if (!typedcxtsrcs.containsKey(def1)) {
+							LinkOccurrence srclink = def1.src.args[0].buddy;
+							atomid1 = varcount++;
+							guard.add(new Instruction(Instruction.DEREFATOM,
+								atomid1, lhsatomToPath(srclink.atom), srclink.pos));
+							typedcxtsrcs.put(def1, new Integer(atomid1));
+						}
+						else {
+							atomid1 = typedcxtToSrcPath(def1);
+						}
+						int funcid1 = varcount++;
+						int funcid2 = varcount++;
+						guard.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
+						guard.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+						guard.add(new Instruction(Instruction.EQFUNC,  funcid1, funcid2));
+					}
+					typedcxttypes.put(def1, UNARY_ATOM_TYPE);
+					
+					lit.remove();
+					changed = true;
+				}
 				else if (cstr.functor instanceof runtime.IntegerFunctor) {
 					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
 					if (!identified.contains(def1)) {
 						identified.add(def1);
-						loaded.add(def1);
 						int atomid = varcount++;
 						guard.add(new Instruction(Instruction.ALLOCATOM, atomid, cstr.functor));
 						typedcxtsrcs.put(def1, new Integer(atomid));
@@ -241,8 +287,7 @@ public class RuleCompiler {
 					}
 					else {
 						int atomid;
-						if (!loaded.contains(def1)) {
-							loaded.add(def1);
+						if (!typedcxtsrcs.containsKey(def1)) {
 							LinkOccurrence srclink = def1.src.args[0].buddy;
 							atomid = varcount++;
 							guard.add(new Instruction(Instruction.DEREFATOM,

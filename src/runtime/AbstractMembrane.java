@@ -314,7 +314,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/** 活性化する。
 	 * <p>すでにスタックに積まれていれば何もしない。
-	 * スタックに詰まれていないならば、<dl>
+	 * スタックに積まれていないならば、<dl>
 	 * <dt><b>ルート膜の場合</b>:<dd>
 	 * このタスクの仮の実行膜スタックの唯一の要素として積む。
 	 * <dt><b>ルート膜でない場合</b>:<dd>
