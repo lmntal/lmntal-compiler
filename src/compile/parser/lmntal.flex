@@ -36,6 +36,7 @@ LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
+NameChars = [A-Za-z_0-9]
 LinkName = [A-Z][A-Za-z_0-9]*
 AtomName = [a-z0-9][A-Za-z_0-9]*
 
@@ -55,9 +56,15 @@ EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 	"{"				{ return symbol(sym.LBREATH); }
 	"}"				{ return symbol(sym.RBREATH); }
 	":-"			{ return symbol(sym.RULE); }
-	"="				{ return symbol(sym.EQUALS); }
+	"="				{ return symbol(sym.UNIFY); }
 	"."				{ return symbol(sym.PERIOD); }
 	"|"				{ return symbol(sym.GUARD); }
+	"<"             { return symbol(sym.LT); }
+	">"             { return symbol(sym.GT); }
+	"=="            { return symbol(sym.EQ); }
+	"!="            { return symbol(sym.NE); }
+	"<="            { return symbol(sym.LE); }
+	">="            { return symbol(sym.GE); }
 	"$"				{ return symbol(sym.PROCVAR); }
 	"@"				{ return symbol(sym.RULEVAR); }
 	"*"				{ return symbol(sym.WILDCARD); }
