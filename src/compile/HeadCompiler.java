@@ -17,7 +17,6 @@ import compile.structure.*;
  * Ruby版では仮引数IDがそのままボディ命令列の仮引数番号を表していたが、今は違うので、仮引数ID自身には意味が無くなったため。
  * この廃止に伴って、仮引数IDでループする部分は全てatoms.iterator()を使うように変更する。
  * 
- * TODO 【未実装部分】アトムや膜の未取得時には UNBOUND が返るようにする。または、isAtomLoadedマクロなどを作る。UNBOUNDの値を-1にする。
  * TODO pathという命名が現状を正しく表していない。実際はvarnum
  * TODO freememsという命名が現状を正しく表していない。実際はmems
  * 
@@ -48,14 +47,25 @@ public class HeadCompiler {
 	public List match         = new ArrayList();
 	
 	int varcount;	// いずれアトムと膜で分けるべきだと思う
-		
+	
+	// いずれこれらのマクロは統廃合する
+
 	final int atomToID(Atom atom) { return ((Integer)atomids.get(atom)).intValue(); }
-	final int atomIDToPath(int id) { return ((Integer)atomidpath.get(id)).intValue();}
 	final int atomToPath(Atom atom) { return atomIDToPath(atomToID(atom)); }
 
-	final int memToPath(Membrane mem) { return ((Integer)mempath.get(mem)).intValue(); }
-	
-	static final int UNBOUND = 0;
+	final boolean isAtomLoaded(Atom atom) { return isAtomIDLoaded(atomToID(atom)); }
+	final boolean isAtomIDLoaded(int id) { return atomidpath.get(id) != null; }
+	final boolean isMemLoaded(Membrane mem) { return mempath.containsKey(mem); }
+
+	final int atomIDToPath(int id) {
+		if (!isAtomIDLoaded(id)) return UNBOUND;
+		return ((Integer)atomidpath.get(id)).intValue();
+	}
+	final int memToPath(Membrane mem) {
+		 if (!isMemLoaded(mem)) return UNBOUND;
+		 return ((Integer)mempath.get(mem)).intValue();
+	}
+	static final int UNBOUND = -1;
 	
 	HeadCompiler(Membrane m) {
 		Env.n("HeadCompiler");
