@@ -167,11 +167,7 @@ class InterpretedReactor {
 							mems[inst.getIntArg2()].newAtom(func);
 
 					//インラインのてすと
-					Env.p(a+" "+Inline.code);
-					try {
-						Inline.callInline(a, ((Integer)Inline.code.get(a.getName())).intValue());
-					} catch (Exception e) {
-					}
+//					Inline.callInline(a);
 					break;
 
 				case Instruction.NEWATOMINDIRECT :
@@ -238,19 +234,29 @@ class InterpretedReactor {
 
 					//====リンクを操作するボディ命令====ここから====
 				case Instruction.NEWLINK :
-				case Instruction.LOCALNEWLINK : //[atom1, pos1, atom2, pos2]
+				case Instruction.LOCALNEWLINK: //[atom1, pos1, atom2, pos2]
+					atoms[inst.getIntArg1()].mem.newLink(
+						(Atom)atoms[inst.getIntArg1()], inst.getIntArg2(),
+						(Atom)atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break;
-
 				case Instruction.RELINK :
 				case Instruction.LOCALRELINK : //[atom1, pos1, atom2, pos2]
+					atoms[inst.getIntArg1()].mem.relinkAtomArgs(
+						(Atom)atoms[inst.getIntArg1()], inst.getIntArg2(),
+						(Atom)atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break;
-
 				case Instruction.UNIFY :
 				case Instruction.LOCALUNIFY : //[atom1, pos1, atom2, pos2]
+					atoms[inst.getIntArg1()].mem.unifyAtomArgs(
+						(Atom)atoms[inst.getIntArg1()], inst.getIntArg2(),
+						(Atom)atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break;
 
 				case Instruction.INHERITLINK :
 				case Instruction.LOCALINHERITLINK : //[atom1, pos1, link2]
+					atoms[inst.getIntArg1()].mem.inheritLink(
+						(Atom)atoms[inst.getIntArg1()], inst.getIntArg2(),
+						(Link)vars.get(inst.getIntArg3()) );
 					break;
 					//====リンクを操作するボディ命令====ここまで====
 
@@ -295,8 +301,8 @@ class InterpretedReactor {
 					int formals = spec.getIntArg1();
 					int locals = spec.getIntArg2();
 					
-// ArrayIndexOutOfBoundsException がでたので一時的に変更
-if (locals < 10) locals = 10;
+// // ArrayIndexOutOfBoundsException がでたので一時的に変更
+// if (locals < 10) locals = 10;
 					
 					AbstractMembrane[] bodymems = new AbstractMembrane[locals];
 					Atom[] bodyatoms = new Atom[locals];
