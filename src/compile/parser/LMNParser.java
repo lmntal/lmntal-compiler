@@ -998,8 +998,6 @@ public class LMNParser {
 					rhsocc.setBundleName(SrcLinkBundle.PREFIX_TAG + generateNewLinkName());
 					// add to names;
 				}
-				rhsocc.def.lhsOcc = def.lhsOcc;
-				//def.lhsOcc.buddy = rhsocc;
 				rhsocc.def = def;
 				def.rhsOccs.add(rhsocc);
 			}
