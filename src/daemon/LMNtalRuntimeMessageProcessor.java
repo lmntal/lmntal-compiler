@@ -413,7 +413,14 @@ class InstructionBlockProcessor implements Runnable {
 			try {
 				String[] command = input.split(" ",6); // RemoteMembrane.send()の引数の個数を参照せよ
 				command[0] = command[0].toUpperCase();
-		
+				
+				if(DEBUG){
+					System.out.println("InstructionBlockProcessor.run(): command is : ");
+					for(int i = 0; i < command.length; i ++){
+						System.out.println(command[i]);
+					}
+				}
+				
 //				//todo （将来） ここで命令を書くのではなくて、Instruction.javaの命令番号を引いてくる。
 //				//そして変換表もひける。
 //				//案: new InstructionListをする。
