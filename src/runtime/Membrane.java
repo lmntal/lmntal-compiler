@@ -314,8 +314,8 @@ abstract class AbstractMembrane extends QueuedEntity {
 		while (it.hasNext()) {
 			Atom inside = (Atom)it.next();
 			Atom star = newAtom(Functor.STAR);
-			newLink(star, 0, inside, 0);
-			newLink(star, 1, inside, 1);
+			relinkAtomArgs(star, 0, inside, 0);
+			relinkAtomArgs(star, 1, inside, 1);
 			removeList.add(inside);
 		}
 		atoms.removeAll(removeList);
@@ -396,7 +396,15 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 * </ol>
 	 * の3通りの場合がある。
 	 * <br>
-	 * newLinkは片方向ずつ行う方が便利だったので修正しました (n-kato)
+	 * newLinkはRuby版では片方向ずつ行う方が生成が便利だったので
+	 * 片方向ずつ分けており、ここもそれに合わせて修正しておきました (n-kato)
+	 * newLinkの仕様を両方向一度に生成するように変更してもいいと思います。
+	 * その場合、ボディ命令の仕様と同時に変更する必要がありますので、
+	 * 原君と中島君に連絡してください。＞水野君
+	 * <br>
+	 * これに関連して、方法4の文書のinsertproxiesの部分でnewlinkがリンクにつき
+	 * 1回しか呼ばれていませんが、これは現状の仕様では2回でなければなりません。
+	 * 仕様変更しない場合は逆向きも書いて修正しておいてください。＞水野君
 	 */
 	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = new Link(atom2, pos2);
