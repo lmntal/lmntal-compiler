@@ -35,13 +35,9 @@ class InterpretedReactor {
 				//nakajima: 2003-12-12
 
 				//====その他====ここから====
-			case Instruction.LOCAL:
-				break; 
-			case Instruction.OPT:
-				break;
 			case Instruction.DUMMY:
 				break;
-			case Instrucion.UNDEF:
+			case Instruction.UNDEF:
 				break;
 				//====その他====ここまで====
 
@@ -132,9 +128,9 @@ class InterpretedReactor {
 				break;
 			case Instruction.LOADFUNC: //[-func, funcref]
 				break;
-			case Instruction.EQFFUNC: //[func1, func2]
+			case Instruction.EQFUNC: //[func1, func2]
 				break;
-			case Instruction.NEQFFUNC: //[func1, func2]
+			case Instruction.NEQFUNC: //[func1, func2]
 				break;
 				//====ファンクタに関係する命令====ここまで====
 
@@ -178,7 +174,7 @@ class InterpretedReactor {
 			case Instruction.LOCALCOPYATOM: //[-dstatom, mem, srcatom]
 				break;
 
-			case Instruction.ADDATOM:
+			//case Instruction.ADDATOM:
 			case Instruction.LOCALADDATOM: //[dstmem, atom]
 				break;
 				//====アトムを操作する型付き拡張用命令====ここまで====
@@ -219,7 +215,7 @@ class InterpretedReactor {
 			case Instruction.LOCALRELINK: //[atom1, pos1, atom2, pos2]
 				break;
 
-			case Instruction.UNIFYK:
+			case Instruction.UNIFY:
 			case Instruction.LOCALUNIFY: //[atom1, pos1, atom2, pos2]
 				break;
 
@@ -279,22 +275,25 @@ class InterpretedReactor {
 				return true;	
 
 			case Instruction.BRANCH:
-				List subinsts = (List)((List)inst.getArg1()).get(0);
-				//InterpretedReactor iir = new InterpretedReactor(mems,atoms,vars,subinsts);
+				List subinsts;
+				subinsts = (List)((List)inst.getArg1()).get(0);
 				if (interpret(subinsts,0)) return true;
 				break; //nakajima
 
 			case Instruction.LOOP:
-				List subinsts = (List)((List)inst.getArg1()).get(0);
-				if (interpret(subinsts, 0)) {
-					//todo: 意味を聞く:「引数列を最後まで実行した場合、このloop命令の実行を繰り返す。」
-				}
-				break; //nakajima
+				subinsts = (List)((List)inst.getArg1()).get(0);
+				while (interpret(subinsts, 0)) {}
+				break; //nakajima, n-kato
 
-			case Instrucion.RUN:
-				List subinsts = (List)((List)inst.getArg1()).get(0);
+			case Instruction.RUN:
+				subinsts = (List)((List)inst.getArg1()).get(0);
 				interpret(subinsts, 0);
 				break; //nakajima
+
+			case Instruction.NOT:
+				subinsts = (List)((List)inst.getArg1()).get(0);
+				if (interpret(subinsts, 0)) return false;
+				break; //n-kato
 
 				//====制御命令====ここまで====
 
