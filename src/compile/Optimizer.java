@@ -5,6 +5,7 @@ package compile;
 
 import java.util.*;
 import runtime.Instruction;
+import runtime.InstructionList;
 import runtime.Functor;
 import runtime.Env;
 
@@ -17,6 +18,7 @@ import runtime.Rule;
 public class Optimizer {
 	/** ルールオブジェクトを最適化する */
 	public static void optimizeRule(Rule rule) {
+		if (Env.optimize == 1) inlineExpandTailJump(rule.memMatch); else	// TODO 最適化器を統合する
 		optimize(rule.memMatch, rule.body);
 	}
 	/**	
@@ -42,6 +44,62 @@ public class Optimizer {
 			}
 		}
 	}
+	///////////////////////////////////////////////////////
+	// @author n-kato
+	// TODO spec命令の身分を考える
+	
+	/** 命令列の末尾のjump命令をインライン展開する。
+	 * <pre>
+	 *     [ spec[X,Y];  C;jump[L;A1..Am] ] where L:[spec[m,m+n];D]
+	 * ==> [ spec[X,Y+n];C; D{1..m->A1..Am, m+1..m+n->Y+1..Y+n } ]
+	 * </pre>
+	 * */
+	public static void inlineExpandTailJump(List insts) {
+		if (insts.isEmpty()) return;
+		Instruction spec = (Instruction)insts.get(0);
+		if (spec.getKind() != Instruction.SPEC) return;
+		int formals = spec.getIntArg1();
+		int locals  = spec.getIntArg2();
+		locals = inlineExpandTailJump(insts, locals);
+		spec.updateSpec(formals, locals);
+	}
+	/** 命令列の末尾のjump命令をインライン展開する。specはまだ更新されない。*/
+	public static int inlineExpandTailJump(List insts, int varcount) {
+		if (insts.isEmpty()) return varcount;
+		int size = insts.size();
+		Instruction jump = (Instruction)insts.get(size - 1);
+		if (jump.getKind() != Instruction.JUMP) return varcount;
+		//
+		InstructionList label = (InstructionList)jump.getArg1();
+		List subinsts = InstructionList.cloneInstructions(label.insts);
+		Instruction spec = (Instruction)subinsts.get(0);
+
+		HashMap map = new HashMap();
+		// 仮引数は、実引数番号で置換する。
+		List memargs   = (List)jump.getArg2();
+		List atomargs  = (List)jump.getArg3();
+		List otherargs = (List)jump.getArg4();
+		for (int i = 0; i < memargs.size(); i++)
+			map.put( new Integer(i), memargs.get(i) );
+		for (int i = 0; i < atomargs.size(); i++)
+			map.put( new Integer(memargs.size() + i), atomargs.get(i) );
+		for (int i = 0; i < otherargs.size(); i++)
+			map.put( new Integer(memargs.size() + atomargs.size() + i), otherargs.get(i) );
+		// 局所変数は、新鮮な変数番号で置換する。
+		int subformals = spec.getIntArg1();
+		int sublocals  = spec.getIntArg2();
+		for (int i = subformals; i < sublocals; i++) {
+			map.put( new Integer(i), new Integer(varcount++) );
+		}
+		//
+		Instruction.applyVarRewriteMap(subinsts,map);
+		subinsts.remove(0);		// specを除去
+		insts.remove(size - 1);	// jump命令を除去
+		insts.addAll(subinsts);
+		return varcount;
+	}
+	
+	// n-kato
 
 	///////////////////////////////////////////////////////
 	// 膜最適化関連
@@ -813,7 +871,7 @@ public class Optimizer {
 
 		ArrayList loop = new ArrayList(); //ループ内の命令列
 		//マッチング命令列
-		lit = head.subList(2, head.size() - 1).listIterator(); //spec,findatom,react/callを除去
+		lit = head.subList(2, head.size() - 1).listIterator(); //spec,findatom,react/jumpを除去
 		while (lit.hasNext()) {
 			loop.add(((Instruction)lit.next()).clone());
 		}
@@ -822,7 +880,7 @@ public class Optimizer {
 			return;
 		}
 		//ボディ命令列に変数を合わせる
-		Instruction.changeAllVar(loop, varInBody);
+		Instruction.applyVarRewriteMap(loop, varInBody);
 		//ボディ命令列
 		lit = body.listIterator(1); //specを除去
 		while (lit.hasNext()) {
@@ -1139,7 +1197,7 @@ public class Optimizer {
 		looparg.add(loop);
 		body.add(body.size() - 1, new Instruction(Instruction.LOOP, looparg));
 		//最後に1回実行する命令を挿入
-		Instruction.changeAllVar(moveInsts, outToBeforeVar);
+		Instruction.applyVarRewriteMap(moveInsts, outToBeforeVar);
 		body.addAll(body.size() - 1, moveInsts);
 		
 		//spec命令の変更

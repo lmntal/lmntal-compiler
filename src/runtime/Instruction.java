@@ -1724,7 +1724,7 @@ public class Instruction implements Cloneable {
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void changeAllVar(List list, Map map) {
+	public static void applyVarRewriteMap(List list, Map map) {
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
@@ -1738,6 +1738,7 @@ public class Instruction implements Cloneable {
 						break;
 				}
 			}
+			if (inst.getKind() == RESETVARS || inst.getKind() == CHANGEVARS) break;
 		}
 	}
 
@@ -2134,4 +2135,12 @@ public class Instruction implements Cloneable {
     // 	    System.out.println(e);
     // 	}
     //     }
+    
+    /** spec命令の引数値を新しい値に更新する（暫定的措置）*/
+    public void updateSpec(int formals, int locals) {
+    	if (getKind() == SPEC) {
+			data.set(0,new Integer(formals));
+			data.set(1,new Integer(locals));
+    	}
+    }
 }

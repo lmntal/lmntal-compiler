@@ -21,7 +21,7 @@ public final class Rule {
 	/** このルールの表示用文字列 */
 	private String text;
 	
-	//
+	// todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 	
 	/**
 	 * ふつうのコンストラクタ。

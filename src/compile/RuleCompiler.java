@@ -180,15 +180,16 @@ public class RuleCompiler {
 			if (hc.match == memMatch) {
 				hc.match.add(0, Instruction.spec(1, hc.varcount));
 			}
+			else {
+				// hc.match.add(0, Instruction.spec(2, hc.varcount));
+			}
 			// jump命令群の生成
 			List memActuals  = hc.getMemActuals();
 			List atomActuals = hc.getAtomActuals();
 			List varActuals  = hc.getVarActuals();
 			// - コード#1
-//			hc.match.add( Instruction.react(theRule, memActuals, atomActuals, varActuals) );
-			// - コード#2
 			hc.match.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
-			// - コード#3
+			// - コード#2
 //			hc.match.add( Instruction.inlinereact(theRule, memActuals, atomActuals, varActuals) );
 //			int formals = memActuals.size() + atomActuals.size() + varActuals.size();
 //			hc.match.add( Instruction.spec(formals, formals) );

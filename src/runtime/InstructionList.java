@@ -10,7 +10,11 @@ import java.util.ArrayList;
 
 /**
  * ラベル付き命令列を表すクラス。
- * 当分の間、先頭の命令はspec命令であることにするが、いずれメンバ変数にすべきである。
+ * <p>
+ * 当分の間先頭の命令はspec命令であることにしておく。
+ * いずれspecの引数値はこのクラスのメンバ変数にすべきである。
+ * その際、InterpretedRuleset.javaの「[0]はspecなのでスキップする」を廃止すること。
+ * 
  * @author n-kato
  */
 public class InstructionList implements Cloneable {
@@ -29,11 +33,20 @@ public class InstructionList implements Cloneable {
 	}
 	public Object clone() {
 		InstructionList c = new InstructionList();
+		c.insts = cloneInstructions(insts);
+		return c;
+	}
+	/** 指定された命令列（InstructionのList）のクローンを作成する。
+	 * @param insts クローンを作成する命令列
+	 * @return 作成したクローン */
+	public static List cloneInstructions(List insts) {
+		List ret = new ArrayList();
 		Iterator it = insts.iterator();
 		while (it.hasNext()) {
-			c.insts.add(it.next());
+			Instruction inst = (Instruction)it.next();
+			ret.add(inst.clone());
 		}
-		return c;
+		return ret;
 	}
 	public String toString() {
 		return label;
