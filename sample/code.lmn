@@ -1,0 +1,325 @@
+[[/*inline_define*/
+ import java.util.*;
+ import java.lang.*;
+ import javax.swing.*;
+ import java.awt.*;
+ import java.awt.event.*;
+
+ class LMNtalFrame extends JFrame implements ActionListener{
+   final Membrane mem;
+   Container MainPanel;
+   JTextField input;
+   JLabel index,turn_info[],message[];
+   int turn;
+   int input_number[],answer_number[];
+   int hit[],blow[];
+   boolean flag,end;
+   String number_text,rireki[];
+  
+  /*メインフレーム*/
+  public LMNtalFrame(Membrane targetMem){
+   this.mem = targetMem;
+   setTitle("Code Breaker");
+   setBounds( 10, 10, 400, 300);
+  
+  /*終了処理*/
+   addWindowListener(new WindowAdapter(){
+      public void windowClosing(WindowEvent e) {
+        mem.asyncLock();
+        mem.newAtom(new Functor("terminate",0));
+        mem.asyncUnlock();
+      }
+    });
+   
+   turn = 1;
+   flag = false;
+   end = false;
+   turn_info = new JLabel[6];
+   message = new JLabel[5];
+   input_number = new int[4];
+   answer_number = new int[4];
+   for(int i=0; i<4; i++){
+    input_number[i] = 0;
+    answer_number[i] = 0;
+   }
+   number_text = "";
+   hit = new int[6];
+   blow = new int[6];
+   rireki = new String[6];
+   for(int i=0; i<6;i++){
+    hit[i] = 0;
+    blow[i] = 0;
+    rireki[i] = "****";
+   }
+
+   /*レイアウト*/
+   GridLayout layout = new GridLayout(7,1);
+   MainPanel = getContentPane();
+   MainPanel.setLayout(layout);
+
+   input = new JTextField("",4);
+   input.setHorizontalAlignment(JTextField.RIGHT);
+   index = new JLabel("前回入力     HIT   BLOW");
+   for(int i=0;i<6;i++)
+    turn_info[i] = new JLabel(i+":"+rireki[i]+"          "+hit[i]+"             "+blow[i]);
+   message[0] = new JLabel("4桁の数を入力.ダブりなし");
+   message[1] = new JLabel("type r → リトライ");
+   message[2] = new JLabel("type q → 終了");
+   message[3] = new JLabel("現在:0/6"+"ターン終了");
+   message[4] = new JLabel("");
+
+   MainPanel.add(index); MainPanel.add(input);
+   MainPanel.add(turn_info[0]); MainPanel.add(message[0]);
+   MainPanel.add(turn_info[1]); MainPanel.add(message[1]);
+   MainPanel.add(turn_info[2]); MainPanel.add(message[2]);
+   MainPanel.add(turn_info[3]); MainPanel.add(message[3]);
+   MainPanel.add(turn_info[4]); MainPanel.add(message[4]);
+   MainPanel.add(turn_info[5]);
+
+   setVisible(true);
+   input.addActionListener(this);
+ }
+  
+  /*初期化。リトライ時の処理*/
+  public void init(){
+   flag = false;
+   end = false;
+   turn = 1;
+   for(int i=0; i<4; i++){
+    input_number[i] = 0;
+    answer_number[i] = 0;
+   }
+
+   number_text = "";
+
+  for(int i=0; i<6;i++){
+    hit[i] = 0;
+    blow[i] = 0;
+    rireki[i] = "****";
+   }
+   input.setText("");
+   for(int i=0;i<6;i++)
+    turn_info[i].setText(i+":"+rireki[i]+"          "+hit[i]+"            "+blow[i]);
+   message[3].setText("現在:0/6"+"ターン終了");
+   message[4].setText("");
+  }
+
+  /*正解の入力*/
+  public void setAnswer(int x4,int x3,int x2,int x1){
+   answer_number[0] = x1;
+   answer_number[1] = x2;
+   answer_number[2] = x3;
+   answer_number[3] = x4;
+   /*nextアトムを本膜に追加することで先の処理に進めるようになる*/
+   mem.newAtom(new Functor("next",0));
+  }
+
+  /*ターンの終了処理*/
+  public void turnEnd(){
+   /*テキストフィールドから正しい入力を待つ*/
+   while(flag==false){}
+   flag = false;
+   hit[turn-1] = checkHit();
+   blow[turn-1] = checkBlow();
+   rireki[turn-1] = number_text;
+
+   /*表示する情報の更新*/
+   message[3].setText("現在:"+turn+"/6"+"ターン終了");
+   turn_info[turn-1].setText(turn+":"+rireki[turn-1]+"          "+hit[turn-1]+"            "+blow[turn-1]);
+
+   /*4ヒットなら勝利*/
+   if(hit[turn-1]==4) win();
+   /*6ターン経過しても4ヒットにならなければ敗北*/
+   else if(turn==6 && end==false) lose();
+   /*まだゲームが続く場合*/
+   else if(turn<6 && end==false) {
+          mem.newAtom(new Functor("next",0));
+          input.setText("");
+          turn++;
+        }
+  }
+
+  /*ヒット数のチェック*/
+  public int checkHit(){
+   int h = 0; 
+   for(int i=0;i<4;i++)
+    if(answer_number[i]==input_number[i]) h++;
+   return h;
+  }
+
+  /*ブロー数のチェック*/
+  public int checkBlow(){
+   int b = 0; 
+   boolean bb = false;
+   for(int i=0;i<4;i++){
+    for(int j=0;j<4;j++){
+     if(input_number[i]==answer_number[j] && i!=j) bb=true;
+    }
+    if(bb==true){
+     b++;
+     bb=false;
+    }
+   }
+   return b;
+  }
+
+  /*勝利*/
+  public void win(){
+    message[3].setText("YOU WIN!");
+    mem.newAtom(new Functor("over",0));
+    end = true;
+  }
+
+  /*敗北*/
+  public void lose(){
+   message[3].setText("YOU LOSE...");
+   message[4].setText("ANSWER:"+answer_number[3]+answer_number[2]+answer_number[1]+answer_number[0]);
+   mem.newAtom(new Functor("over",0));
+   end = true;
+  }
+
+  /*6ターン経過後、リトライするかやめるかの入力を待つ*/
+  public void waitInput(){
+   while(flag==false){}
+   flag = false;
+  }
+
+  public void actionPerformed(ActionEvent e){
+   /*テキストフィールドへの入力処理*/
+   if(e.getSource() == input){
+    flag = true;
+    String command = input.getText();
+    
+    /*リトライ処理。本膜にretryアトムを生成*/
+    if(command.equals("r")){
+     mem.newAtom(new Functor("retry",0));
+     end = true;
+    }
+
+    /*終了処理。terminateアトムを生成*/
+    else if(command.equals("q")){
+     mem.newAtom(new Functor("terminate",0));
+     end = true;
+    }
+
+    /*整数入力*/
+    else if(end == false){  /*6ターン終了後は整数入力は受け付けない*/
+     int num = Integer.parseInt(command);
+     if(num>=0 && num<=9999){
+      number_text = command;
+      int check_num[] = new int[10];
+      for(int i=0;i<10;i++) check_num[i] = 0;
+      input_number[3] = num/1000;
+      input_number[2] = (num%1000)/100;
+      input_number[1] = (num%100)/10;
+      input_number[0] = num%10;
+      
+      
+      /*重複チェック*/
+       for(int i=0;i<4;i++){
+       int j = input_number[i];
+       check_num[j]++;
+      }
+      for(int i=0;i<10;i++)
+       if(check_num[i]>=2){
+        message[3].setText("重複はダメです");
+        flag = false;
+        break;
+       }
+     }
+
+     /*例外的な整数入力に対する処理*/
+     else {
+      message[3].setText("4桁の整数を入力して下さい");
+      flag = false;
+     }
+    }
+    else flag = false; /*6ターン以降に整数入力がある場合*/
+   }
+  }
+  
+}
+]].
+
+{
+
+/*アトム
+ start : ゲームスタート
+ setanswer : 答えとなる4桁の整数を生成,重複はなし
+ frame : メインフレーム
+ next : ゲーム続行時には1ターンに1つずつ消費,整数入力時に1つ生成
+ retry : リトライ処理をする,r入力時にnextの代わりに生成
+ terminate : ゲーム終了,q入力時にnextの代わりに生成
+ over : 5ターン経過後nextの代わりに生成,リトライか終了の命令を待つ
+*/
+
+
+start.
+start :- [[/*inline*/
+          LMNtalFrame frame = new LMNtalFrame((Membrane)mem);
+          Atom a = mem.newAtom(new Functor("frame",1));
+          Atom b = mem.newAtom(new ObjectFunctor(frame));
+          mem.newLink(a,0,b,0);
+          mem.removeAtom(me);
+          mem.makePerpetual();
+        ]],setanswer.
+
+setanswer,frame(F) :- class(F,"LMNtalFrame") | 
+         frame(F),[[/*inline*/
+         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+         int answer_num[] = new int[4];
+         boolean check_num[] = new boolean[10]; 
+         for(int i=0;i<4;i++) answer_num[i]=0;
+         for(int i=0;i<10;i++) check_num[i]=false;
+
+         Random rnd = new Random();
+         int r = rnd.nextInt(10);
+         for(int i=0;i<4;i++){
+          while(check_num[r]) r = rnd.nextInt(10);
+     	  check_num[r] = true;
+          answer_num[i] = r;
+         }
+         
+         frame.setAnswer(answer_num[3],answer_num[2],answer_num[1],answer_num[0]);
+         mem.removeAtom(me.nthAtom(0));
+         mem.removeAtom(me); 
+	]](F).
+
+retry,frame(F):- class(F,"LMNtalFrame") | 
+         frame(F),setanswer,[[/*inline*/
+         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+         frame.init();
+         mem.removeAtom(me.nthAtom(0));
+         mem.removeAtom(me); 
+	]](F).
+
+next,frame(F):- class(F,"LMNtalFrame") | 
+         frame(F),[[/*inline*/
+         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+         frame.turnEnd();
+         mem.removeAtom(me.nthAtom(0));
+         mem.removeAtom(me); 
+	]](F).
+
+over,frame(F):- class(F,"LMNtalFrame") | 
+         frame(F),[[/*inline*/
+         ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+         LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+         frame.waitInput();
+         mem.removeAtom(me.nthAtom(0));
+         mem.removeAtom(me); 
+	]](F).
+}.
+
+{terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") |  {[[/*inline*/
+    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+    frame.setVisible(false);
+    frame.dispose();
+    mem.removeAtom(me.nthAtom(0));
+    mem.removeAtom(me);
+  ]](F),$p }.
+
