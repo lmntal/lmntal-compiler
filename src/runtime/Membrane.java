@@ -172,7 +172,9 @@ abstract class AbstractMembrane extends QueuedEntity {
 	// TODO $pの移動のためのメソッドの仕様を選ぶ
 	// 案1：remove/pourで自由リンク管理アトムを追加・削除
 	// 案2：自由リンク管理アトム追加・削除のための専用メソッドの追加
-	
+	// 案3：「removememで削除＆★化/pourで移動のみ/afterpourで追加」に分けて行う（by n-kato）
+	//		afterpour m,n ボディ命令は内側から再帰的に呼ばれ、一段ずつ追加する
+	//		（案3の詳細はレビューの時に、またはメールで）
 	///////////////////
 	// 案1
 	/**
