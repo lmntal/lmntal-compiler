@@ -42,7 +42,7 @@ public final class LMNtalRuntimeManager {
 	 * 
 	 * @param nodedesc ノード識別子 */
 	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
-		if(true)System.out.println("LMNtalRuntimeManager.connectRuntime()"); //todo use Env
+		if(true)System.out.println("LMNtalRuntimeManager.connectRuntime(" + nodedesc +")"); //todo use Env
 		
 		String fqdn = nodedescToFQDN(nodedesc);
 		if (fqdn == null) return null;
