@@ -1,7 +1,7 @@
 package runtime;
 
-//import java.net.Socket;
-//import java.net.SocketException;
+import java.net.Socket;
+import java.net.SocketException;
 
 /*
  * 分散処理のテスト用
@@ -76,15 +76,16 @@ class TestRemote{
 			System.out.println("orz");
 			System.exit(1);
 		}
+		System.out.println("connectToDaemon success");
 
-		//System.out.println("success");
 		RemoteLMNtalRuntime banon = (RemoteLMNtalRuntime)LMNtalRuntimeManager.connectRuntime("banon.ueda.info.waseda.ac.jp");
 
 		if(banon == null){
 			System.out.println("orz");
 			System.exit(1);
 		}
-
+		System.out.println("connectRuntime success");
+		
 		//RemoteTask banonTask1 = (RemoteTask) banon.newTask(rootMem);
 
 		//System.out.println("Membrane ID:" +  ((RemoteMembrane)banonTask1.root).getMemID());
