@@ -935,9 +935,9 @@ public class Instruction implements Cloneable {
 	 * ルールrulerefに対するマッチングが成功したことを表す。
 	 * 処理系はこのルールのボディを呼び出さなければならない。
 	 * <p>spec        [formals, locals];
-	 *    resetvars   [memargs...], [atomargs...], [varargs...];
+	 *    resetvars   [[memargs...], [atomargs...], [varargs...]];
 	 *    branch      [body] と同じ。
-	 * ただしbodyはrulerefのボディ命令列で、先頭の命令はspec[formals,locals]。
+	 * ただしbodyはrulerefのボディ命令列で、先頭の命令はspec[formals,locals]
 	 * <p>（未使用命令）*/
 	public static final int REACT = 1200;
 	static {setArgType(REACT, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
@@ -949,7 +949,7 @@ public class Instruction implements Cloneable {
      * 指定した命令列の実行に失敗すると、この命令が失敗する。
      * 指定した命令列の実行に成功すると、ここで終了する。
      * <p>spec        [formals, locals];
-     *    resetvars   [memargs...], [atomargs...], [varargs...];
+     *    resetvars   [[memargs...], [atomargs...], [varargs...]];
      *    branch      [body] と同じ。
      * ただしbodyはinstructionlistの命令列で、先頭の命令はspec[formals,locals]*/
     public static final int JUMP = 200;

@@ -40,7 +40,7 @@ public class InstructionList implements Cloneable {
 	}
 	public String dump() {
 		StringBuffer buffer = new StringBuffer();
-		for(int i = 0; i < insts.size()-1; i++){
+		for(int i = 0; i < insts.size(); i++){
 			buffer.append(insts.get(i));
 			buffer.append("\n");
 		}
