@@ -4,8 +4,13 @@
  */
 package compile;
 
+import java.io.StringReader;
+
 import runtime.Env;
 import runtime.InterpretedRuleset;
+
+import compile.parser.*;
+import compile.structure.*;
 
 /**
  * 実行時データ構造からルールセットを得るテスト
@@ -21,15 +26,24 @@ public class RuleSetGeneratorTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Membrane m = getTestStructure1();
-		//Membrane m = getTestStructure2();
-		Env.p(m);
-		InterpretedRuleset ir = RuleSetGenerator.run(m);
-		
-		Env.p("");
-		Env.p("Generated InterpretedRuleset :");
-		Env.p(ir);
-		ir.showDetail();
+		String src = "v, w, ( v :- w, w )";
+		try {
+			// thnx to 永田書記長
+			LMNParser lp = new LMNParser(new StringReader(src));
+			Membrane m = lp.parse();
+			
+			//Membrane m = getTestStructure1();
+			//Membrane m = getTestStructure2();
+			Env.p(m);
+			InterpretedRuleset ir = RuleSetGenerator.run(m);
+			
+			Env.p("");
+			Env.p("Generated InterpretedRuleset :");
+			Env.p(ir);
+			ir.showDetail();
+		} catch (ParseException e) {
+			Env.p(e);
+		}
 	}
 	
 	/**

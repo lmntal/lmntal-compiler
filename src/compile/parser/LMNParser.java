@@ -57,7 +57,7 @@ public class LMNParser {
 	/**
 	 * ソースファイルを解析します
 	 * 解析後はリンクの貼り付け、プロキシーの作成が行われています
-	 * @return ソースファイル全体
+	 * @return ソースファイル全体（を生成するルールが１個だけ含まれる膜）
 	 * @throws ParseException
 	 */
 	public Membrane parse() throws ParseException {
@@ -65,7 +65,15 @@ public class LMNParser {
 		Membrane mem = new Membrane(null);
 		addProcessToMem(src, mem);
 		createProxy(mem);
-		return mem;
+		
+		// 世界を生成する
+		Membrane root = new Membrane(null);
+		RuleStructure rs = new RuleStructure();
+		rs.leftMem  = new Membrane(null);
+		rs.rightMem = mem;
+		root.rules.add(rs);
+		rs.parent = root;
+		return root;
 	}
 	
 	/**
@@ -295,6 +303,7 @@ public class LMNParser {
 		addProcessToMem(sRule.getBody(), rule.rightMem);
 		createProxy(rule.rightMem);
 		mem.rules.add(rule);
+		rule.parent = mem;       // RuleStructure.parent を追加したので追加 by Hara
 	}
 
 	/**

@@ -7,6 +7,7 @@ package compile;
 import java.util.Iterator;
 import runtime.Env;
 import runtime.InterpretedRuleset;
+import compile.structure.*;
 
 /**
  * ルールセットを生成して返す。

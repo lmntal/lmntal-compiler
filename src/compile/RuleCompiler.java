@@ -6,6 +6,7 @@ import runtime.Rule;
 import runtime.InterpretedRuleset;
 import runtime.Instruction;
 import runtime.Functor;
+import compile.structure.*;
 
 /*
  * ºîÀ®Æü: 2003/10/24
@@ -281,8 +282,8 @@ public class RuleCompiler {
 		for(int i=0;i<mem.processContexts.size();i++) {
 			ProcessContext p = (ProcessContext)(mem.processContexts.get(i));
 			
-			if(rhsmempaths.get(mem).equals(lhsmempaths.get(p.lhsmem))) continue;
-			body.add( Instruction.dummy("[:pour"+rhsmempaths.get(mem)+", "+lhsmempaths.get(p.lhsmem)) );
+			if(rhsmempaths.get(mem).equals(lhsmempaths.get(p.lhsMem))) continue;
+			body.add( Instruction.dummy("[:pour"+rhsmempaths.get(mem)+", "+lhsmempaths.get(p.lhsMem)) );
 		}
 	}
 	
@@ -295,8 +296,8 @@ public class RuleCompiler {
 		for(int i=0;i<mem.ruleContexts.size();i++) {
 			RuleContext r = (RuleContext)(mem.ruleContexts.get(i));
 			
-			if(rhsmempaths.get(mem).equals(lhsmempaths.get(r.lhsmem))) continue;
-			body.add( Instruction.dummy("[:inheritrules"+rhsmempaths.get(mem)+", "+lhsmempaths.get(r.lhsmem)) );
+			if(rhsmempaths.get(mem).equals(lhsmempaths.get(r.lhsMem))) continue;
+			body.add( Instruction.dummy("[:inheritrules"+rhsmempaths.get(mem)+", "+lhsmempaths.get(r.lhsMem)) );
 		}
 	}
 	

@@ -2,6 +2,7 @@ package compile.structure;
 
 import java.util.ArrayList;
 import java.util.List;
+import runtime.InterpretedRuleset;
 
 import runtime.Env;
 
@@ -50,6 +51,11 @@ public final class Membrane {
 	 * 膜内の自由リンク(compile.struct.LinkOccurrence)へのポインタ
 	 */
 	public List freeLinks = new ArrayList();
+	
+	/**
+	 * ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。
+	 */
+	public runtime.Ruleset ruleset = new InterpretedRuleset();
 	
 	/**
 	 * コンストラクタ

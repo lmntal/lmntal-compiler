@@ -5,6 +5,10 @@ package compile.structure;
  */
 public final class RuleStructure {
 	/**
+	 * 所属膜。コンパイル時につかうので予めセットしてください
+	 */
+	public Membrane parent;
+	/**
 	 * Headルールを格納する膜
 	 */
 	public Membrane leftMem = new Membrane(null);

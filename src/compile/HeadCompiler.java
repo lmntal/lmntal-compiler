@@ -7,6 +7,7 @@ package compile;
 import java.util.*;
 import runtime.Env;
 import runtime.Instruction;
+import compile.structure.*;
 
 /**
  * @author pa
