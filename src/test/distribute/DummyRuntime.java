@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import daemon.LMNtalDaemon;
+
 class DummyRuntime implements Runnable {
 	//テスト用ランタイムもどき
 	//デーモンにつなぐだけ
@@ -14,9 +16,7 @@ class DummyRuntime implements Runnable {
 
 	DummyRuntime(int tmpRgid) {
 		rgid = tmpRgid;
-	}
-
-	
+	}	
 
 	public void run() {
 		try {
@@ -95,7 +95,7 @@ class DummyRuntime implements Runnable {
 
 	void connectHost(BufferedWriter out, String fqdn) {
 		//eg. msgid "cure.ueda.info.waseda.ac.jp" rgid connect
-		int msgid = 10000;
+		int msgid = LMNtalDaemon.makeID();
 
 		String command =
 			new String(msgid + " \"" + fqdn + "\" " + rgid + " connect\n");

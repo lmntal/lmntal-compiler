@@ -247,7 +247,7 @@ public class LMNtalDaemon implements Runnable {
 				InetAddress ip = InetAddress.getByName(fqdn);
 				String ipstr = ip.getHostAddress();
 				LMNtalNode node;
-				
+
 				while(it.hasNext()){
 					node = (LMNtalNode)(it.next());
 					
@@ -257,10 +257,10 @@ public class LMNtalDaemon implements Runnable {
 					}
 				}
 			} catch (UnknownHostException e) {
-				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
 
+			System.out.println("LMNtalDaemon.isRegisted("  + fqdn + ") is false!" );
 			return null;
 		}
 
@@ -276,14 +276,11 @@ public class LMNtalDaemon implements Runnable {
 			boolean isRegisted = isRegisted(fqdn);
 
 			try {
-
-			
 				if(isRegisted){
 					//既に登録済みの場合は、そのホストに"connect"を送って生死を判定する
 					LMNtalNode remoteNode = getLMNtalNodeFromFQDN(fqdn);
 
-
-			
+					remoteNode.out.write(makeID() + " \"" + fqdn + "\" " + makeID() + " connect\n");
 				} else {
 					//新規接続の場合
 					InetAddress ip = InetAddress.getByName(fqdn);
@@ -302,8 +299,8 @@ public class LMNtalDaemon implements Runnable {
 					LMNtalNode node = new LMNtalNode(ip, in, out);
 					if (register(socket, node)){
 						//connectを送る
-										
-					
+						out.write(makeID() + " \"" + fqdn + "\" " + makeID() + " connect\n" );
+						out.flush();
 					} else {
 						result = false;
 					}
@@ -316,21 +313,35 @@ public class LMNtalDaemon implements Runnable {
 			return result;
 		}
 
-		public static boolean sendMessage(String fqdn, String message){
-			LMNtalNode target = getLMNtalNodeFromFQDN(fqdn);
+//		public static boolean sendMessage(String fqdn, String message){
+//			LMNtalNode target = getLMNtalNodeFromFQDN(fqdn);
+//
+//			try{
+//				BufferedWriter out = target.out;
+//				
+//				out.write(message);
+//				out.flush();
+//				return true;
+//			} catch (Exception e){
+//				System.out.println("ERROR in LMNtalDaemon.sendMessage: " + e.toString());
+//			}
+//		
+//			return false;
+//		}
 
-			try{
-				BufferedWriter out = target.out;
+	public static boolean sendMessage(LMNtalNode target, String message){
+		try{
+			BufferedWriter out = target.out;
 				
-				out.write(message);
-				out.flush();
-				return true;
-			} catch (Exception e){
-				System.out.println("ERROR in LMNtalDaemon.sendMessage: " + e.toString());
-			}
-		
-			return false;
+			out.write(message);
+			out.flush();
+			return true;
+		} catch (Exception e){
+			System.out.println("ERROR in LMNtalDaemon.sendMessage: " + e.toString());
 		}
+		
+		return false;
+	}
 
 
 		boolean disconnect(Socket socket) {

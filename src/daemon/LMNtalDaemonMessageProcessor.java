@@ -112,12 +112,15 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 //							System.out.println("----------------------------\n" + "hogehoge");
 //						}
 						
-						InetAddress i = InetAddress.getLocalHost();
-						System.out.println(i.getHostAddress());
-						System.out.println(InetAddress.getByName(fqdn).getHostAddress());
-						System.exit(0);
+//						InetAddress i = InetAddress.getLocalHost();
+//						System.out.println(i.getHostAddress());
+//						System.out.println(InetAddress.getByName(fqdn).getHostAddress());
+//						System.exit(0);
 						
-						if (socket.getInetAddress().isAnyLocalAddress()){
+						//if (socket.getInetAddress().isAnyLocalAddress()){
+						if (InetAddress.getLocalHost().getHostAddress().equals(InetAddress.getByName(fqdn).getHostAddress())){
+							System.out.println("This message is for me: " + InetAddress.getLocalHost().getHostAddress());
+							
 							//自分自身宛なら、自分自身で処理する
 							
 							/* ここで処理される命令一覧
@@ -156,12 +159,25 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 							}						
 						} else {
 							//他ノード宛ならメッセージをいじらずにそのまま転送する
-							if (LMNtalDaemon.sendMessage( (tmpString[1].split("\"", 3))[1]  , input  )){
-								//OKを返すのは、転送先がやるのでここではOKを返さない
+							
+							//宛先ノードは既知か？
+							LMNtalNode targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+							if(targetNode == null){
+								//宛先ノードへ接続するのが初めての場合
+								LMNtalDaemon.connect(fqdn);
+								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+
+								LMNtalDaemon.sendMessage( targetNode  , input  );
+								
 							} else {
-								//転送失敗
-								out.write("fail\n");
-								out.flush();
+								//宛先ノードが既知の場合
+								if (LMNtalDaemon.sendMessage( targetNode  , input  )){
+									//OKを返すのは、転送先がやるのでここではOKを返さない
+								} else {
+									//転送失敗
+									out.write("fail\n");
+									out.flush();
+								}
 							}
 						}
 					} else {
@@ -179,6 +195,10 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 				//送られてきたメッセージが短かすぎるとき（＝不正な時
 				//'hoge' とかそういう時
 				System.out.println("Invalid Message: " + ae.toString());
+				ae.printStackTrace();
+				break;
+			} catch (Exception e){
+				e.printStackTrace();
 				break;
 			}
 		}
