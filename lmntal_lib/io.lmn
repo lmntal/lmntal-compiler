@@ -20,6 +20,47 @@ io.input :- [[/*inline*/
 io.popup(String) :- unary(String)|[[/*inline*/
 	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
 	]](String).
+
+/**
+ * Constructor : () -> java::BufferedReader
+ * 
+ */
+H=io.fileReader(Filename) :- unary(Filename) | H=[[/*inline*/
+	try {
+		Atom br = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.FileReader(me.nth(0)))));
+//		System.out.println("FILE="+me.nth(0));
+		mem.relink(br, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+	} catch(Exception e) {}
+	]](Filename).
+
+/**
+ * readLine : ?
+ * 
+ */
+H=readline(Object, Result) :- class(Object, "java.io.BufferedReader") |
+	H=[[/*inline*/
+		try {
+			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			String s = br.readLine();
+			Atom result = mem.newAtom(new Functor(s, 1));
+			mem.relink(result, 0, me, 1);
+			Atom obj = me.nthAtom(0);
+			if(s==null) {
+				obj.remove();
+				obj = mem.newAtom(new Functor("nil", 1));
+			}
+			mem.relink(obj, 0, me, 2);
+			me.remove();
+		} catch(Exception e) {Env.d(e);}
+	]](Object, Result).
+
+// Sample
+// r=io.fileReader([[build.xml]]).
+// r(O):-class(O,"java.io.BufferedReader")|r(readline(O,io.print)).
+
+
 //io.fopen(Handle, String) :- unary(Handle), unary(String)|[[/*inline*/
 //	try {
 //		PrintWriter pw = new PrintWriter(new FileOutputStream(me.nth(1)));
@@ -36,40 +77,16 @@ io.popup(String) :- unary(String)|[[/*inline*/
 }.
 
 
-fileReader : {
-
-/**
- * Constructor : () -> java::BufferedReader
- * 
- */
-H=fileReader.new(Filename) :- unary(Filename) | H=[[/*inline*/
-	try {
-		Atom br = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.FileReader(me.nth(0)))));
-		System.out.println("FILE="+me.nth(0));
-		mem.relink(br, 0, me, 1);
-		me.nthAtom(0).remove();
-		me.remove();
-	} catch(Exception e) {}
-	]](Filename).
+//	inputString("How much?", Answer).
 
 //H=[Object, fileReader.readLine(Result)|Rest] :- H=[Object|Rest], kill(Result).
-
-
-/**
- * readLine : ?
- * 
- */
-H=[fileReader.readLine(Result), Object] :- class(Object, "java.io.BufferedReader") |
-	H=[Object], [[/*inline*/
-		try {
-			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(1).getFunctor()).getObject();
-			String s = br.readLine();
-			me.nthAtom(1).remove();
-			me.set(s, 1);
-		} catch(Exception e) {System.out.println(e);}
-	]](Result, Object).
-
-}.
-
-
-//	inputString("How much?", Answer).
+//H=[readLine(Result), Object] :- class(Object, "java.io.BufferedReader") |
+//H=[Object], [[/*inline*/
+//	  try {
+//		  java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(1).getFunctor()).getObject();
+//		  String s = br.readLine();
+//		  me.nthAtom(1).remove();
+//		  me.set(s, 1);
+//	  } catch(Exception e) {System.out.println(e);}
+//]](Result, Object).
+//
