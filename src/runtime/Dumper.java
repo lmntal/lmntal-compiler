@@ -3,38 +3,56 @@ package runtime;
 import java.util.*;
 
 public class Dumper {
+	/** todo このクラスにあるのはおかしいので適切な場所に移動する */
+	static boolean isInfixOperator(String name) {
+		return name.equals("=");
+	}
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	public static String dump(AbstractMembrane mem) {
 		StringBuffer buf = new StringBuffer();
-		List predAtoms = new ArrayList();
+		List predAtoms[] = {new ArrayList(),new ArrayList(),new ArrayList(),new ArrayList()};
 		Set atoms = new HashSet(mem.getAtomCount());
-		boolean commaFlag;
+		boolean commaFlag = false;
 		
-		commaFlag = false;
+		// #1 - アトムの出力
 		
-		// アトムの出力
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
-
 			Atom a = (Atom)it.next();
 			atoms.add(a);
-			//これらのアトムを起点にする。
-			//最終引数同士がつながっている場合、arityが1の物を優先した方がいいかも。
-			if (a.getArity() == 0 ||						//リンクのない場合
-				a.getLastArg().getAtom().getMem() != mem ||	//最終引数が膜の自由リンクの場合
-				a.getLastArg().isFuncRef() ) {				//最終引数同士がつながっている場合
-				predAtoms.add(a);
-			}
 		}
+		
+		// 起点にするアトムとその優先順位:
+		//  0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
+		//  1. 2引数演算子のアトム
+		//  2. 整数以外の1引数でリンク先が最終引数のアトム
+		//  3. 整数以外でリンク先が最終引数のアトム
 
-		//predAtoms内のアトムを起点に出力
-		it = predAtoms.iterator();
+		it = mem.atomIterator();
 		while (it.hasNext()) {
 			Atom a = (Atom)it.next();
-			//すでに出力されてしまっている場合もある
-			if (atoms.contains(a)) {
-				if(commaFlag) buf.append(", "); else commaFlag = true;
-				buf.append(dumpAtomGroup(a, atoms));
+			if (a.getArity() == 0 ||
+				a.getLastArg().getAtom().getMem() != mem) {
+				predAtoms[0].add(a);
+			}
+			else if (a.getArity() == 2 && isInfixOperator(a.getName())) {
+				predAtoms[1].add(a);
+			}
+			else if (a.getLastArg().isFuncRef()
+			 // && !a.getName().equals("")
+				&& !a.getName().matches("-?[0-9]+")) {
+				predAtoms[a.getArity() == 1 ? 2 : 3].add(a);
+			}
+		}
+		//predAtoms内のアトムを起点に出力
+		for (int phase = 0; phase < predAtoms.length; phase++) {
+			it = predAtoms[phase].iterator();
+			while (it.hasNext()) {
+				Atom a = (Atom)it.next();
+				if (atoms.contains(a)) { // まだ出力されていない場合
+					if(commaFlag) buf.append(", "); else commaFlag = true;
+					buf.append(dumpAtomGroup(a, atoms));
+				}
 			}
 		}
 		//閉路がある場合にはまだ残っているので、適当な所から出力。
@@ -48,7 +66,7 @@ public class Dumper {
 			buf.append(dumpAtomGroup((Atom)it.next(), atoms));
 		}
 
-		//子膜の出力		
+		// #2 - 子膜の出力		
 		it = mem.memIterator();
 		while (it.hasNext()) {
 			if(commaFlag) buf.append(", "); else commaFlag = true;
@@ -57,7 +75,7 @@ public class Dumper {
 			buf.append("}");
 		}
 		
-		//ルールの出力
+		// #3 - ルールの出力
 		it = mem.rulesetIterator();
 		while (it.hasNext()) {
 			if(commaFlag) buf.append(", "); else commaFlag = true;
