@@ -60,17 +60,26 @@ public final class InterpretedRuleset extends Ruleset {
 	 * @return ルールを適用した場合はtrue
 	 */
 	private boolean matchTest(Membrane mem, Atom atom, List matchInsts, Instruction spec) {
-		Env.p("atomMatch."+matchInsts);
+		Env.p("match."+matchInsts);
 		int formals = spec.getIntArg1();
 		int locals  = spec.getIntArg2();
 		AbstractMembrane[] mems  = new AbstractMembrane[formals];
 		Atom[]             atoms = new Atom[formals];
 		mems[0]  = mem;
 		atoms[1] = atom;
-		return step(mems,atoms,matchInsts,0);
+		return interpret(mems,atoms,new ArrayList(),matchInsts,0);
 	}
-	private boolean step(AbstractMembrane[] mems, Atom[] atoms, List insts, int pc) {
+	/** 命令列を解釈する。
+	 * @param mems  膜変数のベクタ
+	 * @param atoms アトム変数のベクタ
+	 * @param vars  その他の変数のベクタ（memsやatomsは廃止してvarsに統合する？）
+	 * @param insts 命令列
+	 * @param pc    命令列中のプログラムカウンタ
+	 * @return 命令列の実行が成功したかどうかを返す
+	 */
+	private boolean interpret(AbstractMembrane[] mems, Atom[] atoms, List vars, List insts, int pc) {
 		Iterator it;
+		Functor func;
 		while (pc < insts.size()) {
 			Instruction inst = (Instruction)insts.get(pc++);
 			switch (inst.getKind()) {
@@ -90,7 +99,7 @@ public final class InterpretedRuleset extends Ruleset {
 				for (int i = 0; i < atomformals.size(); i++) {
 					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
 				}
-				step(bodymems, bodyatoms,bodyInsts,1);
+				interpret(bodymems, bodyatoms, new ArrayList(), bodyInsts,0);
 				return true;
 			case Instruction.ANYMEM: // anymem [-dstmem, srcmem] 
 				it = mems[inst.getIntArg2()].mems.iterator();
@@ -98,21 +107,26 @@ public final class InterpretedRuleset extends Ruleset {
 					AbstractMembrane submem = (AbstractMembrane)it.next();
 					if (submem.lock(mems[0])) {
 						mems[inst.getIntArg1()] = submem;
-						if (step(mems,atoms,insts,pc)) return true;
+						if (interpret(mems,atoms,vars,insts,pc)) return true;
 						submem.unlock();
 					}
 				}
 				break;
 			case Instruction.FINDATOM: // findatom [-dstatom, srcmem, funcref]
-				Functor func = (Functor)inst.getArg3();
+				func = (Functor)inst.getArg3();
 				it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
 				while (it.hasNext()){
 					Atom a = (Atom)it.next();
 					atoms[inst.getIntArg1()] = a;					
-					if (step(mems,atoms,insts,pc)) return true;
+					if (interpret(mems,atoms,vars,insts,pc)) return true;
 				}
 				break;
-			
+			case Instruction.NEWATOM: // newatom [-dstatom, srcmem, funcref]
+				func = (Functor)inst.getArg3();
+				atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
+				break;
+			case Instruction.PROCEED:
+				return true;	
 			default:
 				System.out.println("Invalid rule");
 				break;
@@ -132,7 +146,7 @@ public final class InterpretedRuleset extends Ruleset {
 	 * 
 	 */
 	private void body(List rulebody, AbstractMembrane[] mems, Atom[] atoms) {
-		Iterator it = rulebody.iterator();
+	/*	Iterator it = rulebody.iterator();
 		while(it.hasNext()){
 			Instruction hoge = (Instruction)it.next();
 
@@ -308,7 +322,7 @@ public final class InterpretedRuleset extends Ruleset {
 			System.out.println("Invalid rule");
 			break;
 		}
-	}
+	}*/
 
 
 	}
@@ -337,19 +351,8 @@ public final class InterpretedRuleset extends Ruleset {
 4種類のデータに対応するArrayListを保持する。
 とりあえず最初はメソッド内の局所変数としてでよい。
 
-命令引数が変数番号のときはgetやsetを使ってリスト内を間接参照する。
-
-命令が失敗したら、ロックした膜を逆順に解放する。
-
-proceed命令では自動解放せずにそのままreturnする。
-
-spec命令の仕様はとりあえず無視して何となく作って下さい。
-2引数の仕様を仮定する場合は4つのリストを全部varcountの長さで初期化すれば
-大丈夫です。いずれ、この3/4が無駄になっているデータ保持方法を改めます。
 
 **********
-
-まずはbodyから作って下さい。
 
 メソッドへの入力は配列でなくArrayListにして、
 それを局所変数用にも使い回すようにするためにサイズ変更しても結構です。
