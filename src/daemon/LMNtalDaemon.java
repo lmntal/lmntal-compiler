@@ -80,7 +80,7 @@ public class LMNtalDaemon implements Runnable {
 	 * コンストラクタ。 DEFAULT_PORTで指定されたポート番号にServerSocketを開くだけ。
 	 */
 	public LMNtalDaemon() {
-		this(DEFAULT_PORT);
+		this(Env.daemonListenPort);
 	}
 	
 	/**
@@ -294,7 +294,7 @@ public class LMNtalDaemon implements Runnable {
 		Socket socket;
 		try {
 			//新規接続の場合
-			socket = new Socket(fqdn, DEFAULT_PORT);
+			socket = new Socket(fqdn, Env.daemonListenPort);
 			//socket.setSoTimeout(180000); //とりあえず3分
 			//↑一旦つないで3分通信がないときもtimeoutが発生するのでとりあえずコメントアウト(2004-08-22 nakajima
 			//todo 「接続しようとしたときからn分だめだったらtimeout」にする
@@ -309,7 +309,7 @@ public class LMNtalDaemon implements Runnable {
 		} catch (Exception e) {
 			System.out.println(
 				"ERROR in LMNtalDaemon.makeRemoteConnection(" + fqdn + ")");
-			System.out.println("If java.net.SocketTimeoutException has raised, open TCP " + DEFAULT_PORT);
+			System.out.println("If java.net.SocketTimeoutException has raised, open TCP " + Env.daemonListenPort);
 			e.printStackTrace();
 			//todo  SocketTimeoutExceptionのときはここでsocketを閉じるべきか？
 			//"If the timeout expires, a java.net.SocketTimeoutException is raised, though the Socket is still valid." (1.4.1 api specitifation.)

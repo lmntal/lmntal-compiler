@@ -94,7 +94,7 @@ public final class LMNtalRuntimeManager {
 		if (daemon != null) return true;
 		try {
 			// このVMはマスタノードである
-			Socket socket = new Socket("localhost", LMNtalDaemon.DEFAULT_PORT);
+			Socket socket = new Socket("localhost", Env.daemonListenPort);
 			String rgid = Env.theRuntime.runtimeid;
 			daemon = new LMNtalRuntimeMessageProcessor(socket,rgid);
 			Thread t = new Thread(daemon, "LMNtalRuntimeMessageProcessor");
@@ -134,6 +134,30 @@ public final class LMNtalRuntimeManager {
 			daemon = null;
 		}
 	}
+
+	/**
+	 * 
+	 */
+	public static boolean terminateAllThreaded(){
+		//	TODO (nakajima)空のときはスレッドつくらないでreturn
+		
+		TerminateAllProcessor tap = new TerminateAllProcessor(); 
+		
+		Thread t = new Thread(tap, "TerminateAllProcessor");
+		t.start();
+		
+		synchronized(t){
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return tap.result;
+	}
+	
+	
 	private static Object terminateLock = "";
 	/** 登録されている全てのRemoteLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
 	 *  Env.theRuntime も terminate する (n-kato) 2004-09-17 */
@@ -152,14 +176,16 @@ public final class LMNtalRuntimeManager {
 
 		System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime is terminated");
 		
+
+		
 		childNode.clear();
-		Iterator it = runtimeids.keySet().iterator();
+		Iterator it = runtimeids.keySet().iterator(); 
 		while (it.hasNext()) {
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
 
 			System.out.println("LMNtalRuntimeManager.terminateAll(): now sending TERMINATE to " + machine.hostname);
 			
-			if(daemon.sendWait(machine.hostname,"TERMINATE")){
+			if(daemon.sendWait(machine.hostname,"TERMINATE")){  //TODO (nakajima)ここでデッドロックな模様
 				childNode.add(machine);
 			}
 		}
@@ -179,5 +205,17 @@ public final class LMNtalRuntimeManager {
 		}
 		daemon.sendMessage("UNREGISTERLOCAL");
 		childNode.clear();
+	}
+}
+
+/**
+ * terminateAllThreadedの中の人
+ * @author nakajima
+ *
+ */
+class TerminateAllProcessor implements Runnable {
+	boolean result;
+	public void run(){
+		result = LMNtalRuntimeManager.terminateAll();
 	}
 }

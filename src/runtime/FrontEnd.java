@@ -174,7 +174,8 @@ public class FrontEnd {
 							Env.startDaemon = true;			
 						} else if(args[i].matches("--port")){
 							/// --port portnumber
-							/// Specifies the port number that LMNtalDaemon listens on. The default is 60000. Only dynamic and private ports defined by IANA is usable: port 49152 through 65535. 
+							/// Specifies the port number that LMNtalDaemon listens on. The default is 60000. 
+							/// Only dynamic and private ports defined by IANA is usable: port 49152 through 65535. 
 							
 							if (args[i+1].matches("\\d*")) {
 								try{ 
@@ -374,7 +375,8 @@ public class FrontEnd {
 				}
 			}
 			if (Env.gui != null)  Env.gui = null;
-			LMNtalRuntimeManager.terminateAll();
+//			LMNtalRuntimeManager.terminateAll();
+			LMNtalRuntimeManager.terminateAllThreaded();
 			//if(true) System.out.println("FrontEnd: terminateAll() finished!");
 			LMNtalRuntimeManager.disconnectFromDaemon();
 			

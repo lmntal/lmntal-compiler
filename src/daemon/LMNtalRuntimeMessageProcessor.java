@@ -244,7 +244,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				} else if (command[0].equalsIgnoreCase("DISCONNECTRUNTIME")) { 
 					//DISCONNECTRUNTIME
 					
-					Thread t1 = new Thread(new DisconnectProcessor());
+					Thread t1 = new Thread(new DisconnectRuntimeProcessor());
 					t1.start();
 					
 				} else if (command[0].equalsIgnoreCase("CONNECT")) {
@@ -707,7 +707,7 @@ class TerminateProcessor implements Runnable {
 
 	public void run(){
 		//System.out.println("TerminateProcessor.run(): now starting LMNtalRuntimeManager.termnateAll()");
-		if(LMNtalRuntimeManager.terminateAll()){  //TODO ←終わらない(nakajima)
+		if(LMNtalRuntimeManager.terminateAll()){
 			System.out.println("TerminateProcessor.run(): LMNtalRuntimeManager.termnateAll() succeded");
 			node.respondAsOK(msgid);
 		} else {
@@ -721,7 +721,7 @@ class TerminateProcessor implements Runnable {
  * @author nakajima
  *
  */
-class DisconnectProcessor implements Runnable {
+class DisconnectRuntimeProcessor implements Runnable {
 	public void run(){
 		LMNtalRuntimeManager.disconnectAll();
 	}
