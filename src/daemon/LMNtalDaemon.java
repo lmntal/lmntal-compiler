@@ -161,36 +161,68 @@ public class LMNtalDaemon implements Runnable {
 		}
 		return true;
 	}
-	
+
 	/* 
-	 *  fqdn上のLMNtalDaemonが既に登録されているかどうか確認する
-	 *  @param fqdn Fully Qualified Domain Nameなホスト名
+	 *  IPv4アドレス ip を持つ計算機上で動作しているLMNtalDaemonが既に登録されているかどうか確認する。
+	 * 
+	 *  @author nakajima
+	 *  @version 2004-10-20
+	 *  @param ip ipv4 address (String)
 	 *  @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらtrue。それ以外はfalse。
 	 */
-	public static boolean isHostRegistered(String fqdn) {
-		// return (getLMNtalNodeFromFQDN(fqdn) != null);
+	public static boolean isHostRegistered(String ip) {
+		//if (Env.debug > 0) System.out.println("now in LMNtalDaemon.isHostRegisted(" + ip + ")");
 		
-		if (Env.debug > 0) System.out.println("now in LMNtalDaemon.isRegisted(" + fqdn + ")");
-		
-
 		Collection c = remoteHostTable.values();
 		Iterator it = c.iterator();
 
 		while (it.hasNext()) {
 			if (((LMNtalNode) (it.next()))
 				.getInetAddress()
-//			.getCanonicalHostName()
-			.getHostName()
-				.equalsIgnoreCase(fqdn)) {
-				if (Env.debug > 0) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is true!");
+				.getHostName()
+				.equalsIgnoreCase(ip)) {
+				if (Env.debug > 0) System.out.println("LMNtalDaemon.isHostRegisted(" + ip + ") is true!");
 				return true;
 			}
 		}
 
-		if (Env.debug > 0) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is false!");
+		if (Env.debug > 0) System.out.println("LMNtalDaemon.isHostRegisted(" + ip + ") is false!");
 
 		return false;
 	}
+	
+	
+	/* 
+	 *  fqdn上のLMNtalDaemonが既に登録されているかどうか確認する
+	 *  @param fqdn Fully Qualified Domain Nameなホスト名
+	 *  @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらtrue。それ以外はfalse。
+	 * 
+	 * (nakajima 2004-10-20) 登録はホスト名じゃなくてIPアドレスで行う事になったので廃止
+	 */
+//	public static boolean isHostRegistered(String fqdn) {
+//		// return (getLMNtalNodeFromFQDN(fqdn) != null);
+//		
+//		if (Env.debug > 0) System.out.println("now in LMNtalDaemon.isRegisted(" + fqdn + ")");
+//		
+//
+//		Collection c = remoteHostTable.values();
+//		Iterator it = c.iterator();
+//
+//		while (it.hasNext()) {
+//			if (((LMNtalNode) (it.next()))
+//				.getInetAddress()
+////			.getCanonicalHostName()
+//			.getHostName()
+//				.equalsIgnoreCase(fqdn)) {
+//				if (Env.debug > 0) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is true!");
+//				return true;
+//			}
+//		}
+//
+//		if (Env.debug > 0) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is false!");
+//
+//		return false;
+//	}
 	
 	/**
 	 * Fully Qualified Domain Name fqdnに対応するLMNtalNodeを探す。
