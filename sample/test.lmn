@@ -268,6 +268,8 @@ a:-{b,b,b,b,b. b:-c}@"localhost". a,a,a,a. {$p,@p}:-$p
   A=f(f(f(f(A)))),    c,c, ( c, X=f(Y) :- X=g(Y) )                      % ==>   f(g(g(f(A))),A)
 { A=f(f(f(f(A)))) },  c,c, ( c,{X=f(Y),$p[X,Y]} :- { X=g(Y),$p[X,Y] } ) % ==> { f(g(g(f(A))),A) }
 
+{$p[X]}:-$p[X],$p[Y],n(Y). {a(X)},e(X) % ==>¡ÚNullPointerException¡Û
+
 { pi(X), res(X), ( pi(X) :- X=3.14 ) }, ( {res($p),@r} :- result=$p ) % ==> result(3.14)
 
 ( go :- { pi(X), res(X), ( pi(X) :- X=3.14 ) }@"localhost" ),
@@ -279,6 +281,38 @@ go. % ==> e,e,e,result(3.14)
 
 {$p[X]}:-$p[X].
 
-c
+% UpdateLinks ¤Î¥Æ¥¹¥È
+
+% ( :- type($pc) | atom(X), $pc[X] )
+% ( { org(Y,), $pc[Y,|] } :- atom(X), $pc[X,|] )
+% ( buddy(X) :- atom(X) )	
+% ( :- buddy(X), atom(X) )
+% ( buddy(X) :- type($atom) | $atom[X|] )
+% ( :- type($atom),type($buddypc) | $buddypc[X|], $atom[X|] )
+% ( {org(Y,), $buddypc[Y,|]} :- type($atom) | $buddypc[X,|], $atom[X|] )
+% ( {src(Z,),$atom[Z,|]},buddy(X) :- $atom[X,|] )
+% ( {org(Y,),$buddypc[Y,|]},{src(Z,),$atom[Z,|]} :- $buddypc[X,|],$atom[X,|] )				
+
+{$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,Z),g(X,Z)} % ==> g(A,A),g(B,B)
+{$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,Z),g(X,Z)} % ==> g(A,A)
+{$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,X)}        % ==> g(A,A),g(B,B)
+{$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,X)}        % ==> ()
+
+
+{$p[X,Y,Z],f(X),f(Y),f(Z)} :- $p[V,V,W],g(W).   {f(A),f(A),f(C),f(C)}
+
+A=B,f(C), g(C),A=B --> f(g)
+A=B,f(C), g(A),A=C --> f(g)
+A=B,f(C), g(B),A=C --> f(g)
+
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,B,C,C)} % ==> e(g)
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,C,B)} % ==> e(g)
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,D,E),h(B,C,D,E)} % ==> g(h(e,C,C))
+
+p(A,B,C,D,E) :- A=B,C=D,g(E).  e(A),p(A,B,B,C,C). % ==> e(g)
+
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N), $p[A,A,B,B,C],g(C).  {e(A),f(A,B,B,C,C)} % ==> ¡ÚNullPointerException¡ÛdebugÃæ n-kato
+
+rule with empty head due to syntax error -> must stop!
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -444,8 +444,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 
 	// kudo
-	/** この膜の複製を生成する 自由リンクが無いものと仮定(子膜にも。)
-	 *  pMemの子膜として作成
+	/** この膜の複製を生成する <strike>自由リンクが無いものと仮定(子膜にも。)
+	 *  pMemの子膜として作成</strile>
 	 * */
 	public HashMap copyFrom(AbstractMembrane srcMem) {
 		int atomsize = srcMem.atoms.size(); //アトムの数
@@ -458,7 +458,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			linkpos[i] = new LinkedList();
 		}
 
-		//子膜に繋がるリンクに関して（$outのみか）。下で振った番号で使えるようにしておく。
+		//子膜に繋がるリンクに関して（$outのみか→Yes (n-kato 2004-10-24)）。下で振った番号で使えるようにしておく。
 		//どの子膜の、どのアトムに繋がっているのかを示す。id番号。
 		int  glmemid[] = new int[atomsize];
 		int glatomid[] = new int[atomsize];
@@ -578,11 +578,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			mem.free();
 		}
 	}
-
-	//	/** この膜の複製を生成する */
-	//	Membrane copy() {
-	//		
-	//	}
 
 	/** この膜をdstMemに移動し、活性化する。parent==nullを仮定する。*/
 	public void moveTo(AbstractMembrane dstMem) {

@@ -731,6 +731,8 @@ public class Instruction implements Cloneable, Serializable {
 	 * <br>ボディ命令<br>
 	 * アトム$atom1の第pos1引数のリンク先（膜$memにある）の引数と、
 	 * アトム$atom2の第pos2引数のリンク先（膜$memにある）の引数を接続する。
+	 * ただし$atom1および$atom2のリンク先がどちらも所属膜を持たない場合も許されており、
+	 * この場合、何もしないで終わってもよいことになっている。これは f(A,A),(f(X,Y):-X=Y) の書き換えなどで起こる。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。
 	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalunifyが使用できる。
 	 * <p>getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
@@ -764,7 +766,8 @@ public class Instruction implements Cloneable, Serializable {
 	/** unifylinks [link1, link2, mem]
 	 * <br>ボディ命令<br>
 	 * リンク$link1の指すアトム引数とリンク$link2の指すアトム引数との間に双方向のリンクを張る。
-	 * ただし$link1は膜$memのアトムを指している。
+	 * ただし$link1は膜$memのアトムを指しているか、または所属膜の無いアトムを指している。
+	 * 後者の場合、何もしないで終わってもよいことになっている。
 	 * <p>実行後$link1および$link2は無効なリンクオブジェクトとなるため、参照を使用してはならない。
 	 * <p>基底項データ型のコンパイルで使用される。*/
 	public static final int UNIFYLINKS = 69;

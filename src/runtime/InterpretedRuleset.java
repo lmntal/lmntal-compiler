@@ -544,9 +544,15 @@ class InterpretiveReactor {
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
 				case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
-					mems[0].unifyAtomArgs(
-						atoms[inst.getIntArg1()], inst.getIntArg2(),
-						atoms[inst.getIntArg3()], inst.getIntArg4() );
+					// mem = mems[0]; // 昔のコード
+					// mem = (AbstractMembrane)inst.getArg5(); // 正規のコード
+					mem = atoms[inst.getIntArg1()].args[inst.getIntArg2()]
+							.getAtom().getMem(); // 代用コード
+					if (mem != null) {
+						mem.unifyAtomArgs(
+							atoms[inst.getIntArg1()], inst.getIntArg2(),
+							atoms[inst.getIntArg3()], inst.getIntArg4() );
+					}
 					break; //n-kato
 
 				case Instruction.INHERITLINK:		 //[atom1, pos1, link2, mem]
@@ -558,9 +564,13 @@ class InterpretiveReactor {
 
 				case Instruction.UNIFYLINKS:		//[link1, link2, mem]
 				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
-					((Link)vars.get(inst.getIntArg1())).getAtom().getMem().unifyLinkBuddies(
-						((Link)vars.get(inst.getIntArg1())),
-						((Link)vars.get(inst.getIntArg2())));
+					// mem = (AbstractMembrane)inst.getArg3(); // 正規のコード
+					mem = ((Link)vars.get(inst.getIntArg1())).getAtom().getMem(); // 代用コード
+					if (mem != null) {
+						mem.unifyLinkBuddies(
+							((Link)vars.get(inst.getIntArg1())),
+							((Link)vars.get(inst.getIntArg2())));
+					}
 					break; //n-kato
 
 					//====リンクを操作するボディ命令====ここまで====
