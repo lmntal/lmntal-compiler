@@ -140,7 +140,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 							// endが来るまで積み込む
 							while(true){ //TODO BEGINだけきてその後が来ないとbreakしない
 								String inputline = readLine();
-								if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run(): after BEGIN:  " + inputline);
+								if (DEBUG) System.out.println("wafter BEGIN:  " + inputline);
 								if (inputline == null) break;
 								if (inputline.equalsIgnoreCase("END")) break;
 								buf.append(inputline);
@@ -176,8 +176,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 									// 既に登録済みの時
 									targetNode = LMNtalDaemon.getRuntimeGroupNode(rgid);
 								}
-							}
-							else { //他ノード宛ならconnectをそのまま転送する
+							}	else { //他ノード宛ならconnectをそのまま転送する
 								LMNtalDaemon.makeRemoteConnection(fqdn); // TODO（効率改善）ブロックしないようにする
 								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
 							}
@@ -192,6 +191,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 							}
 						}
 						if (targetNode != null && targetNode.sendMessage(content)) {
+							if(DEBUG)System.out.println("LMNtalDaemonMessageProcessor.run(): target node is " + targetNode.toString() + " and now sending: " + content);
 							continue;
 						}
 						// 転送失敗したら下に抜ける
