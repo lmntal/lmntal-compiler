@@ -88,7 +88,7 @@ class TestRemote{
 		//NEWROOT
 		RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
 		rt_banon.flush();
-		
+
 		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
 		//	rt_banon.flush();
 		

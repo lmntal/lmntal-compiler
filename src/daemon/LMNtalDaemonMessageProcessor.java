@@ -3,6 +3,8 @@ package daemon;
 import java.io.IOException;
 import java.net.Socket;
 
+import runtime.Env;
+
 //import runtime.Env;
 //import runtime.Membrane;
 
@@ -17,8 +19,6 @@ import java.net.Socket;
  * @author nakajima, n-kato
  */
 public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable {
-	static boolean DEBUG = true;
-
 	public LMNtalDaemonMessageProcessor(Socket socket) {
 		super(socket);
 	}
@@ -29,7 +29,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run()");
+		if (Env.debug > 0) System.out.println("LMNtalDaemonMessageProcessor.run()");
 		String input;
 		while (true) {
 			try {
@@ -40,10 +40,10 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				break;
 			}
 			if (input == null) {
-				System.out.println("in.readLine(): （　´∀｀）＜　inputがぬる");
+				System.out.println("LMNtalDaemonMessageProcessor.run(): in.readLine(): （　´∀｀）＜　inputがぬる");
 				break;
 			}
-			if (DEBUG) System.out.println("in.readLine(): " + input);
+			if (Env.debug > 0) System.out.println("LMNtalDaemonMessageProcessor.run(): in.readLine(): " + input);
 
 			/* メッセージ:
 			 *   RES msgid 返答
@@ -83,7 +83,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				//戻す先
 				LMNtalNode returnNode = LMNtalDaemon.unregisterMessage(msgid);
 				
-				if (DEBUG) System.out.println("res: returnNode is: " + returnNode);
+				if (Env.debug > 0) System.out.println("res: returnNode is: " + returnNode);
 
 				if (returnNode == null) {
 					//戻し先がnull
@@ -138,8 +138,9 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 						if (command[0].equalsIgnoreCase("BEGIN")) {
 							StringBuffer buf = new StringBuffer(content);
 							// endが来るまで積み込む
-							while(true){
+							while(true){ //TODO BEGINだけきてその後が来ないとbreakしない
 								String inputline = readLine();
+								if (Env.debug > 0) System.out.println("LMNtalDaemonMessageProcessor.run(): after BEGIN:  " + inputline);
 								if (inputline == null) break;
 								if (inputline.equalsIgnoreCase("END")) break;
 								buf.append(inputline);
@@ -165,7 +166,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 												+ " "
 												+ rgid);
 
-									if (DEBUG) System.out.println(newCmdLine);
+									if (Env.debug > 0) System.out.println(newCmdLine);
 
 									Process slave = Runtime.getRuntime().exec(newCmdLine);
 									
