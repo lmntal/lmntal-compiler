@@ -85,7 +85,7 @@ class TestRemote{
 		
 		Thread[] t = new Thread[Thread.activeCount()];
 		Thread.enumerate(t);
-		for (int i = 0; i < t.hashCode(); i++) 
+		for (int i = 0; i < t.length; i++) 
 			System.out.println(t[i]);
 		
 		//½ªÎ»½èÍý
