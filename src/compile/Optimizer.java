@@ -22,17 +22,58 @@ public class Optimizer {
 	 */
 	public static void optimize(List head, List body) {
 		if (Env.optimize > 0) {
-			Instruction.normalize(body);
 			if (Env.optimize >= 4) {
 				reuseMem(body);
 			}
 			if (Env.optimize >= 2) {
+				changeOrder(body);
 				reuseAtom(body);
 			}
 			if (Env.optimize >= 7) {
 				makeLoop(head, body); //まだ問題だらけ
 			}
 		}
+	}
+
+
+	/**
+	 * relink命令をgetlink/inheritlink命令に変換し、
+	 * getlink/unify命令をボディ命令列の先頭に移動する。
+	 * 先頭の命令はspecでなければならない。
+	 * @param list 変換する命令列
+	 */
+	public static void changeOrder(List list) {
+		Instruction spec = (Instruction)list.get(0);
+		if (spec.getKind() != Instruction.SPEC) {
+			throw new RuntimeException("SYSTEM ERROR: first instruction must be spec");
+		}
+		int nextId = spec.getIntArg2();
+		
+		ArrayList moveInsts = new ArrayList();
+		
+		ListIterator it = list.listIterator(1);
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			switch (inst.getKind()) {
+				case Instruction.UNIFY:
+					moveInsts.add(inst);
+					it.remove();
+					break;
+				case Instruction.RELINK:
+					moveInsts.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
+					it.set(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
+					nextId++;
+					break;
+				case Instruction.LOCALRELINK:
+					moveInsts.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
+					it.set(new Instruction(Instruction.LOCALINHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
+					nextId++;
+					break;
+			}
+		}
+		list.set(0, Instruction.spec(spec.getIntArg1(), nextId));
+		list.addAll(1, moveInsts);
+//		spec.data.set(1, new Integer(nextId)); //ローカル変数の数を変更
 	}
 
 	private static class Link {
@@ -481,10 +522,10 @@ public class Optimizer {
 					mem = (Integer)inst.getArg2();
 					createdAtoms.add(mem, functor, atom);
 					break;
-				case Instruction.GETLINK:
-					//後で場所を移動する
-					getlinkInsts.put(inst.getArg1(), inst);
-					break;
+//				case Instruction.GETLINK:
+//					//後で場所を移動する
+//					getlinkInsts.put(inst.getArg1(), inst);
+//					break;
 			}
 		}
 		
@@ -532,16 +573,16 @@ public class Optimizer {
 		//
 
 										
-		// アトム再利用をするとgetlink命令の前にinherit命令が来る事があるので、
-		// getlink命令をspec命令の後に移動する。
-		// TODO 適切な移動場所を見つける
-		it = getlinkInsts.values().iterator();
-		while (it.hasNext()) {
-			list.add(1, it.next());
-		}
+//		// アトム再利用をするとgetlink命令の前にinherit命令が来る事があるので、
+//		// getlink命令をspec命令の後に移動する。
+//		// TODO 適切な移動場所を見つける
+//		it = getlinkInsts.values().iterator();
+//		while (it.hasNext()) {
+//			list.add(1, it.next());
+//		}
 
 		//不要になったremoveatom/freeatom/newatom命令を除去
-		ListIterator lit = list.listIterator(getlinkInsts.size() + 1);
+		ListIterator lit = list.listIterator(/*getlinkInsts.size() + */1);
 		while (lit.hasNext()) {
 			Instruction inst = (Instruction)lit.next();
 			switch (inst.getKind()) {
@@ -558,16 +599,20 @@ public class Optimizer {
 						lit.remove();
 					}
 					break;
-				case Instruction.GETLINK:
-					//先頭に移動したので除去
-					lit.remove();
-					break;
+//				case Instruction.GETLINK:
+//					//先頭に移動したので除去
+//					lit.remove();
+//					break;
 			}
 		}
 		//TODO enqueueatom命令を生成
 
 		Instruction.changeAtomId(list, reuseMap);
 
+		it = list.iterator();
+		while (it.hasNext()) {
+			System.out.println(it.next());
+		}
 		removeUnnecessaryRelink(list);
 	}
 

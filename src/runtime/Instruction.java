@@ -1197,38 +1197,6 @@ public class Instruction implements Cloneable {
 	// 最適化器が使う、命令列書き換えのためのクラスメソッド
 	// @author Mizuno
 	
-	/**
-	 * relink命令を、getlink/inheritlink命令に変換する。
-	 * 先頭の命令はspecでなければならない。
-	 * @param list 変換する命令列
-	 */
-	public static void normalize(List list) {
-		Instruction spec = (Instruction)list.get(0);
-		if (spec.getKind() != SPEC) {
-			throw new RuntimeException("SYSTEM ERROR: first instruction must be spec");
-		}
-		int nextId = spec.getIntArg2();
-		
-		ListIterator it = list.listIterator(1);
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
-			switch (inst.getKind()) {
-				case Instruction.RELINK:
-					it.remove();
-					it.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
-					it.add(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
-					nextId++;
-					break;
-				case Instruction.LOCALRELINK:
-					it.remove();
-					it.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
-					it.add(new Instruction(Instruction.LOCALINHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
-					nextId++;
-					break;
-			}
-		}
-		spec.data.set(1, new Integer(nextId)); //ローカル変数の数を変更
-	}
 
 	/**
 	 * 与えられた対応表よって、ボディ命令列中のアトムIDを書き換える。<br>
