@@ -1,19 +1,23 @@
 package test.GUI;
 
-import java.util.*;
-import java.awt.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Iterator;
 import java.util.Vector;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.awt.*;
 
 public class GraphLayout implements Runnable {
-	public static Color colors[] = {
-		Color.BLACK,
-		Color.BLUE,
-		Color.CYAN,
-		Color.GREEN,
-		Color.MAGENTA,
-		Color.ORANGE,
-		Color.RED
-	};
+//	public static Color colors[] = {
+//		Color.BLACK,
+//		Color.BLUE,
+//		Color.CYAN,
+//		Color.GREEN,
+//		Color.MAGENTA,
+//		Color.ORANGE,
+//		Color.RED
+//	};
 	
 	private Vector nodes = new Vector();
 	private Thread th = null;
@@ -91,9 +95,13 @@ public class GraphLayout implements Runnable {
 		}
 	}
 	
+	public List removedAtomPos = Collections.synchronizedList(new LinkedList());
 	public Rectangle getAtomsBound() {
 		final int m=1;
 		Rectangle r=null;
+		if(!removedAtomPos.isEmpty()) {
+			return new Rectangle(((DoublePoint)removedAtomPos.remove(0)).toPoint());
+		}
 		r = new Rectangle((parent.getWidth() - parent.getWidth()/m)/2, (parent.getHeight() - parent.getHeight()/m)/2, parent.getWidth()/m, parent.getHeight()/m);
 //		if(rootMem.getAtomCount()==0) {
 //		} else {
@@ -147,8 +155,8 @@ public class GraphLayout implements Runnable {
 				if(me.hashCode() < edge.to.hashCode()){
 					double l = edge.getLen();
 					double f = (l - edge.getStdLen());// / (edge.getStdLen() * 1);
-					double ddx = 0.1 * f * edge.getVx()/l;
-					double ddy = 0.1 * f * edge.getVy()/l;
+					double ddx = 0.5 * f * edge.getVx()/l;
+					double ddy = 0.5 * f * edge.getVy()/l;
 					
 					edge.from.setMoveDelta(ddx, ddy);
 					edge.to.setMoveDelta(-ddx, -ddy);

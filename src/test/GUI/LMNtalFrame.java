@@ -18,7 +18,6 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		initComponents();
 		setSize(800,600);
 		setVisible(true);
-		lmnPanel.start();
 	}
 	
 	public void keyPressed(KeyEvent e) {
@@ -86,8 +85,10 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	public void onTrace() {
 		if(Env.fGUI) {
+			lmnPanel.start();
 //			Env.gui.lmnPanel.setMembrane((runtime.Membrane)Env.theRuntime.getGlobalRoot());
 			Env.gui.waitBusy();
+			lmnPanel.stop();
 		}
 	}
 }

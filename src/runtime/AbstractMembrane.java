@@ -229,6 +229,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** 指定されたアトムをこの膜から除去する。
 	 * <strike>実行アトムスタックに入っている場合、スタックから取り除く。</strike>*/
 	public void removeAtom(Atom atom) {
+		if(Env.fGUI) {
+			Env.gui.lmnPanel.getGraphLayout().removedAtomPos.add(atom.getPosition());
+		}
 		atoms.remove(atom);
 		atom.mem = null;
 	}

@@ -38,13 +38,14 @@ public class GraphPanel extends JPanel implements Runnable {
 	
 	public void stop() {
 		th = null;
+		gLayout.stop();
 	}
 	
 	public void run() {
 		Thread me = Thread.currentThread();
 		while (me == th) {
 			try {
-				Thread.sleep(30);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 			}
 			repaint();

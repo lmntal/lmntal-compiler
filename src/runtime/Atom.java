@@ -19,12 +19,12 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	AbstractMembrane mem;
 	/** 所属膜のAtomSet内でのインデックス */
 	int index = -1;
-
+	
 	/** ファンクタ（名前とリンク数） */
 	private Functor functor;
 	/** リンク */
 	Link[] args;
-
+	
 	private static int lastId = 0;
 	/** このアトムのローカルID */
 	private int id;
@@ -207,7 +207,14 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		Dimension size = new Dimension(16, 16);
 //		g.setColor(new Color(64,128,255));
 		// 適当に色分けする！
-		g.setColor(test.GUI.GraphLayout.colors[ Math.abs(label.hashCode()) % test.GUI.GraphLayout.colors.length ]);
+		
+		// [0, 7] -> [128, 255] for eash R G B
+		int ir = 0x7F - ((label.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;
+		int ig = 0x7F - ((label.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
+		int ib = 0x7F - ((label.hashCode() & 0x00F) >> 0) * 0x08 + 0x7F;
+		
+//		System.out.println(label + "  " + ir + "  " + ig + "  " + ib);
+		g.setColor(new Color(ir, ig, ib));
 		
 		g.fillOval((int)(pos.x - size.width/2), (int)(pos.y - size.height/ 2), size.width, size.height);
 		
