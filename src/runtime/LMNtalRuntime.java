@@ -10,8 +10,6 @@ import util.Stack;
 abstract class AbstractMachine {
 	/** ルート膜 */
 	protected AbstractMembrane root;
-	/** ルート膜の親膜 */
-	protected AbstractMembrane supermem;
 	
 	/** ルート膜の取得 */
 	AbstractMembrane getRoot() {
@@ -73,8 +71,8 @@ final class Machine extends AbstractMachine {
 				if(flag == false){ // ルールが適用できなかった時
 					memStack.pop(); // 本膜をpop
 					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
-					if(mem.isRoot() && supermem != null) {
-						supermem.activate();
+					if(mem.isRoot() && mem.getParent() != null) {
+						mem.getParent().activate();
 					}
 					// 子膜が全てstableなら、この膜をstableにする。
 					it = mem.memIterator();
