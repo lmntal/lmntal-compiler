@@ -31,6 +31,7 @@ public class RuleCompiler {
 	
 	public List atomMatch;
 	public List memMatch;
+	public List guard;
 	public List body;
 	
 	public int varcount;
@@ -143,6 +144,134 @@ public class RuleCompiler {
 		atomMatch.add(0, Instruction.spec(maxvarcount,0));	// とりあえずここに追加（仮）
 	}
 	
+	/** ガードをコンパイルする（仮） */
+	private void compile_g() {
+		HashSet identified = new HashSet(); // ソース出現が特定された型付きプロセス文脈定義のセット
+		HashSet loaded     = new HashSet(); // ソース出現を変数に読み込んだプロセス文脈定義のセット
+
+		// ヘッド出現する型付きプロセス文脈を特定されたものとしてマークする
+		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)rs.typedProcessContexts.get(it.next());
+			if (def.src != null) {
+				if (def.src.mem == rs.guardMem) { def.src = null; } // 再呼び出しに対応（仮）
+				else identified.add(def);
+			}
+		}
+		// 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
+		LinkedList cstrs = new LinkedList();
+		it = rs.guardMem.atoms.iterator();
+		while (it.hasNext()) cstrs.add(it.next());
+		boolean changed;
+		do {
+			changed = false;
+			ListIterator lit = cstrs.listIterator();
+			while (lit.hasNext()) {
+				Atom cstr = (Atom)lit.next();
+				if (cstr.functor.getSymbolFunctorID().equals("int_1")) {
+					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
+					if (!identified.contains(def1)) continue;
+					int atomid;
+					if (!loaded.contains(def1)) {
+						loaded.add(def1);
+						LinkOccurrence srclink = def1.src.args[0].buddy;
+						atomid = varcount++;
+						guard.add(new Instruction(Instruction.DEREFATOM,
+							atomid, lhsatomToPath(srclink.atom), srclink.pos));
+						typedcxtsrcs.put(def1, new Integer(atomid));
+					}
+					else {
+						atomid = typedcxtToSrcPath(def1);
+					}
+					typedcxttypes.put(def1, UNARY_ATOM_TYPE);
+					guard.add(new Instruction(Instruction.ISINT, atomid));
+					lit.remove();
+					changed = true;
+				}
+				else if (cstr.functor.equals(new Functor("<",2))) {
+					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
+					if (!identified.contains(def1)) continue;
+					ContextDef def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
+					if (!identified.contains(def2)) continue;
+
+					int atomid1;
+					if (!loaded.contains(def1)) {
+						loaded.add(def1);
+						LinkOccurrence srclink = def1.src.args[0].buddy;
+						atomid1 = varcount++;
+						guard.add(new Instruction(Instruction.DEREFATOM,
+							atomid1, lhsatomToPath(srclink.atom), srclink.pos));
+						typedcxtsrcs.put(def1, new Integer(atomid1));
+					}
+					else {
+						atomid1 = typedcxtToSrcPath(def1);
+					}
+					typedcxttypes.put(def1, UNARY_ATOM_TYPE);
+					guard.add(new Instruction(Instruction.ISINT, atomid1));
+
+					int atomid2;
+					if (!loaded.contains(def2)) {
+						loaded.add(def2);
+						LinkOccurrence srclink = def2.src.args[0].buddy;
+						atomid2 = varcount++;
+						guard.add(new Instruction(Instruction.DEREFATOM,
+							atomid2, lhsatomToPath(srclink.atom), srclink.pos));
+						typedcxtsrcs.put(def2, new Integer(atomid2));
+					}
+					else {
+						atomid2 = typedcxtToSrcPath(def2);
+					}
+					typedcxttypes.put(def2, UNARY_ATOM_TYPE);
+					guard.add(new Instruction(Instruction.ISINT, atomid2));
+					
+					guard.add(new Instruction(Instruction.ILT, atomid1, atomid2));
+					
+					lit.remove();
+					changed = true;
+				}
+				else if (cstr.functor instanceof runtime.IntegerFunctor) {
+					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
+					if (!identified.contains(def1)) {
+						identified.add(def1);
+						loaded.add(def1);
+						int atomid = varcount++;
+						guard.add(new Instruction(Instruction.ALLOCATOM, atomid, cstr.functor));
+						typedcxtsrcs.put(def1, new Integer(atomid));
+						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
+					}
+					else {
+						int atomid;
+						if (!loaded.contains(def1)) {
+							loaded.add(def1);
+							LinkOccurrence srclink = def1.src.args[0].buddy;
+							atomid = varcount++;
+							guard.add(new Instruction(Instruction.DEREFATOM,
+								atomid, lhsatomToPath(srclink.atom), srclink.pos));
+							typedcxtsrcs.put(def1, new Integer(atomid));
+						}
+						else {
+							atomid = typedcxtToSrcPath(def1);
+						}
+						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
+						guard.add(new Instruction(Instruction.FUNC, atomid, cstr.functor));
+					}
+					lit.remove();
+					changed = true;
+				}
+				else {
+					System.out.println("unrecognized guard type constraint name: " + cstr);
+					guard.add(new Instruction(Instruction.LOCKMEM, 0));
+					return;
+				}
+			}
+			if (cstrs.isEmpty()) return;
+		}
+		while (changed);
+		// 型付け失敗
+		guard.add(new Instruction(Instruction.LOCKMEM, 0));
+		System.out.println("Compile Error: never proceeding guard type constraints: " + cstrs);
+	}
+	
 	/** 右辺膜をコンパイルする */
 	private void compile_r() {
 		Env.c("compile_r");
@@ -153,9 +282,15 @@ public class RuleCompiler {
 		genLHSPaths();
 		varcount = lhsatoms.size() + lhsfreemems.size();
 		int formals = varcount;
-		
 		//
 		body = new ArrayList();
+		
+		// [ガードのコンパイル]
+		// react命令は本来ガード終了後に発行するため、reactはreloadvars/inlinereactに分割すべき
+		guard = body;
+		compile_g();
+		// ここでinlinereactを発行する。最終的にはinilnereactをreactに名称変更する？
+		
 		rhsatoms    = new ArrayList();
 		rhsatompath = new HashMap();
 		rhsmempath  = new HashMap();
@@ -168,6 +303,7 @@ public class RuleCompiler {
 		
 		dequeueLHSAtoms();
 		removeLHSAtoms();
+		removeLHSTypedProcesses();
 		if (removeLHSMem(rs.leftMem) >= 2) {
 			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
 		}
@@ -177,6 +313,7 @@ public class RuleCompiler {
 		}
 		copyRules(rs.rightMem);
 		loadRulesets(rs.rightMem);		
+		buildRHSTypedProcesses();
 		buildRHSAtoms(rs.rightMem);
 		body.add(0, Instruction.spec(formals, varcount));
 		updateLinks();
@@ -185,9 +322,71 @@ public class RuleCompiler {
 		addLoadModules();
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
+		freeLHSTypedProcesses();
 		body.add(new Instruction(Instruction.PROCEED));
 	}
 	
+	Object UNARY_ATOM_TYPE = "1";
+
+	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表す定数オブジェクト */
+	HashMap typedcxttypes = new HashMap();
+	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現の変数番号（def.src は現在未使用） */
+	HashMap typedcxtsrcs  = new HashMap();
+	/** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
+	HashMap rhstypedcxtpaths = new HashMap();
+	
+	int typedcxtToSrcPath(ContextDef def) {
+		return ((Integer)typedcxtsrcs.get(def)).intValue();
+	}
+	int rhstypedcxtToPath(Context cxt) {
+		return ((Integer)rhstypedcxtpaths.get(cxt)).intValue();
+	}
+	
+	private void removeLHSTypedProcesses() {
+		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)(rs.typedProcessContexts.get(it.next()));
+			Context pc = def.src;
+			if (pc != null) { // ヘッドのときのみ
+				if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
+					body.add(new Instruction( Instruction.REMOVEATOM,
+						typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
+				}
+			}
+		}
+	}	
+	private void freeLHSTypedProcesses() {
+		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)(rs.typedProcessContexts.get(it.next()));
+			Context pc = def.src;
+			if (pc != null) { // ヘッドのときのみ
+				if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
+					body.add(new Instruction( Instruction.FREEATOM,
+						typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
+				}
+			}
+		}
+	}	
+
+	private void buildRHSTypedProcesses() {
+		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)(rs.typedProcessContexts.get(it.next()));
+			Iterator it2 = def.rhsOccs.iterator();
+			while (it2.hasNext()) {
+				ProcessContext pc = (ProcessContext)it2.next();
+				if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
+					int atompath = varcount++;
+					body.add(new Instruction( Instruction.COPYATOM, atompath,
+						rhsmemToPath(pc.mem),
+						typedcxtToSrcPath(pc.def) ));
+					rhstypedcxtpaths.put(pc, new Integer(atompath));
+				}
+			}
+		}
+	}	
+
 	/** ルールの左辺と右辺に対してstaticUnifyを呼ぶ */
 	public void simplify() {
 		staticUnify(rs.leftMem);
@@ -268,7 +467,8 @@ public class RuleCompiler {
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			Atom atom = (Atom)lhsatoms.get(i);
 			if (!atom.functor.equals(Functor.INSIDE_PROXY)
-			 && !atom.functor.equals(Functor.OUTSIDE_PROXY)) {
+			 && !atom.functor.equals(Functor.OUTSIDE_PROXY)
+			 && atom.functor.isSymbol() ) {
 				body.add( Instruction.dequeueatom(
 					lhsatomToPath(atom) // ← lhsfreemems.size() + i に一致する
 					));
@@ -301,12 +501,16 @@ public class RuleCompiler {
 		Iterator it = mem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
-			if (pc.src.mem == null) {
-				System.out.println("SYSTEM ERROR: ProcessContext.src.mem is not set");
+			if (pc.def.src.mem == null) {
+				System.out.println("SYSTEM ERROR: ProcessContext.def.src.mem is not set");
 			}
-			if (rhsmemToPath(mem) != lhsmemToPath(pc.src.mem)) {
-				body.add(new Instruction(Instruction.MOVECELLS,
-					rhsmemToPath(mem), lhsmemToPath(pc.src.mem) ));
+			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.src.mem)) {
+				if (pc.def.rhsOccs.get(0) == pc) {
+					body.add(new Instruction(Instruction.MOVECELLS,
+						rhsmemToPath(mem), lhsmemToPath(pc.def.src.mem) ));
+				} else {
+					System.out.println("FEATURE NOT IMPLEMENTED: process context must be linear: " + pc);
+				}
 			}
 		}
 		it = mem.mems.iterator();
@@ -335,8 +539,8 @@ public class RuleCompiler {
 		it = mem.ruleContexts.iterator();
 		while (it.hasNext()) {
 			RuleContext rc = (RuleContext)it.next();			
-			if (rhsmemToPath(mem) == lhsmemToPath(rc.src.mem)) continue;
-			body.add(new Instruction( Instruction.COPYRULES, rhsmemToPath(mem), lhsmemToPath(rc.src.mem) ));
+			if (rhsmemToPath(mem) == lhsmemToPath(rc.def.src.mem)) continue;
+			body.add(new Instruction( Instruction.COPYRULES, rhsmemToPath(mem), lhsmemToPath(rc.def.src.mem) ));
 		}
 	}
 	/** 右辺の膜内のルールの内容を生成する */	
@@ -391,7 +595,16 @@ public class RuleCompiler {
 				LinkOccurrence link = atom.args[pos].buddy;
 				//Env.d(atom+"("+pos+")"+" buddy -> "+link.buddy.atom+" link.atom="+link.atom);
 				if (link == null) {
-					System.out.println("SYSTEM ERROR: buddy not set");
+					System.out.println("SYSTEM ERROR: buddy not set: " + atom + ", " + pos);
+				}
+				if (link.atom instanceof ProcessContext) {
+					if (typedcxttypes.get(((ProcessContext)link.atom).def) == UNARY_ATOM_TYPE) {
+						body.add( new Instruction(Instruction.NEWLINK,
+											rhsatomToPath(atom), pos,
+											rhstypedcxtToPath((ProcessContext)link.atom), 0,
+											rhsmemToPath(atom.mem) ));
+					}
+					continue;
 				}
 				if (link.atom.mem == rs.leftMem) {
 					body.add( new Instruction(Instruction.RELINK,
@@ -409,6 +622,29 @@ public class RuleCompiler {
 				}
 			}
 		}
+		//
+		it = rhstypedcxtpaths.keySet().iterator();
+		while (it.hasNext()) {
+			ProcessContext atom = (ProcessContext)it.next();
+			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
+				LinkOccurrence link = atom.args[pos].buddy;
+				if (link == null) {
+					System.out.println("SYSTEM ERROR: buddy not set 2");
+				}
+				if (!(link.atom instanceof ProcessContext)) continue;
+				ProcessContext buddypc = (ProcessContext)link.atom;
+				if (rhstypedcxtToPath(atom) < rhstypedcxtToPath(buddypc)
+				 || (rhstypedcxtToPath(atom) == rhstypedcxtToPath(buddypc) && pos < link.pos)) {
+					if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE
+					 && typedcxttypes.get(buddypc.def) == UNARY_ATOM_TYPE) {
+					 	body.add( new Instruction(Instruction.NEWLINK,
+							rhstypedcxtToPath(atom), 0,
+							rhstypedcxtToPath(buddypc), 0,
+							rhsmemToPath(atom.mem) ));
+					 }
+				}
+			}
+		}
 	}
 	/** 右辺のアトムを実行スタックに積む */
 	private void enqueueRHSAtoms() {
@@ -416,7 +652,8 @@ public class RuleCompiler {
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
 			if (!atom.functor.equals(Functor.INSIDE_PROXY)
-			 && !atom.functor.equals(Functor.OUTSIDE_PROXY) ) {
+			 && !atom.functor.equals(Functor.OUTSIDE_PROXY) 
+			 && atom.functor.isSymbol() ) {
 				body.add( new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
 			 }
 		}

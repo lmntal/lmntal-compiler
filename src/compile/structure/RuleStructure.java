@@ -1,7 +1,7 @@
 package compile.structure;
 
 import java.util.HashMap;
-import java.util.LinkedList;
+//import java.util.LinkedList;
 
 /** 
  * ソースコード中のルールの構造を表すクラス
@@ -17,11 +17,11 @@ public final class RuleStructure {
 	/** Bodyを格納する膜 */
 	public Membrane rightMem = new Membrane(null);
 	
-//	/** ガードを格納する膜 */
-//	public Membrane guardMem = new Membrane(null);
+	/** ガードを格納する膜 */
+	public Membrane guardMem = new Membrane(null);
 
-	/** ガードの型制約 (TypeConstraint) のリスト */
-	public LinkedList typeConstraints = new LinkedList();
+//	/** ガードの型制約 (TypeConstraint) のリスト */
+//	public LinkedList typeConstraints = new LinkedList();
 	
 	/** プロセス文脈の限定名 -> ContextDef */
 	public HashMap processContexts = new HashMap();
@@ -45,6 +45,9 @@ public final class RuleStructure {
 	}
 
 	public String toString() {
-		return "( "+leftMem.toStringWithoutBrace()+" :- "+rightMem.toStringWithoutBrace()+" )";
+		String text = "( " + leftMem.toStringWithoutBrace() + " :- ";
+		if (!guardMem.atoms.isEmpty())
+			text += guardMem.toStringWithoutBrace() + " | ";
+		return text + rightMem.toStringWithoutBrace() + " )";
 	}
 }

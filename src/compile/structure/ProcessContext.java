@@ -19,8 +19,9 @@ final public class ProcessContext extends Context {
 	}
 	public String toString() {
 		String argstext = "";
-		if (bundle.name.matches("\\*[A-Z_].*")) { // todo (buddy!=null)かどうかで判定すべきである
-			argstext = "[" + java.util.Arrays.asList(args).toString();
+		if (bundle == null || bundle.name.matches("\\*[A-Z_].*")) { // todo (buddy!=null)かどうかで判定すべきである
+			argstext = "[" + java.util.Arrays.asList(args).toString()
+				.replaceAll("^.|.$","").replaceAll(", ",",");
 			if (bundle != null) argstext += "|" + bundle;
 			argstext += "]";		
 		}

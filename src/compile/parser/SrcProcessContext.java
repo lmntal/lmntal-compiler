@@ -23,7 +23,8 @@ class SrcProcessContext extends SrcContext {
 	}
 	/** 内部予約名を持つプロセスコンテキストを作成する。
 	 * @param name コンテキスト名（_で始まる内部予約名を渡すことができる）
-	 * @param dummy trueを渡すこと */
+	 * @param dummy trueを渡すこと
+	 * <p>文脈名でのquote記法の使用を禁止したので、このメソッドは廃止してよい。*/
 	public SrcProcessContext(String name, boolean dummy) {
 		super(name);
 	}

@@ -738,6 +738,7 @@ public class Instruction implements Cloneable {
 	// 制御命令 (200--209)
 	//  -----  react       [ruleref, [memargs...], [atomargs...]]
 	//  -----  inlinereact [ruleref, [memargs...], [atomargs...]]
+	//  -----  resetvars   [[memargs...], [atomargs...], [varargs...]]
 	//  -----  spec        [formals,locals]
 	//  -----  proceed
 	//  -----  stop 
@@ -757,6 +758,14 @@ public class Instruction implements Cloneable {
      * ルールrulerefに対するマッチングが成功したことを表す。
      * <p>トレース用。*/
 	public static final int INLINEREACT = 201;
+
+	/** reloadvars [[memargs...], [atomargs...], [varargs...]]
+	 * <br>失敗しないガード命令および最適化用ボディ命令<br>
+	 * 変数ベクタの内容を再定義する。新しい変数番号は、膜、アトム、その他の順番で0から振り直される。
+	 * <b>注意</b>　memargs[0]は本膜が予約しているため変更してはならない。
+	 * <p>（仕様検討中の未使用命令）
+	 */
+	public static final int RELOADVARS = 202;
 
     /** spec [formals, locals]
      * <br><strike>
@@ -1013,6 +1022,7 @@ public class Instruction implements Cloneable {
      * ダミー命令を生成する。
      * さしあたって生成メソッドがまだできてない命令はこれを使う
      * @param s 説明用の文字列
+     * @deprecated
      */
     public static Instruction dummy(String s) {
 		Instruction i = new Instruction(DUMMY);
@@ -1479,7 +1489,7 @@ public class Instruction implements Cloneable {
      *
      */
     public String toString() {
-		return getInstructionString(kind)+" "+data.toString();
+		return getInstructionString(kind)+"\t"+data.toString();
 
 	//	StringBuffer buffer = new StringBuffer("");
 	//

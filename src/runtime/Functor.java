@@ -3,6 +3,7 @@ package runtime;
 
 /**
  * Stringの名前とリンク数の組からなるアトムのFunctor。
+ * TODO SymbolFunctorというサブクラスを作ったほうがいいかもしれない。
  */
 public class Functor {
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
@@ -18,7 +19,7 @@ public class Functor {
 	private String name;
 	/** アリティ（引数の個数）*/
 	private int arity;
-	/** 各種メソッドで使うために保持しておく。整合性要注意 */
+	/** シンボルファンクタとしてのID。各種メソッドで使うために保持しておく。整合性要注意 */
 	private String strFunctor;
 	/** ファンクタが所属するモジュール名（明示的に指定されていない場合はnull）*/
 	private String path = null;
@@ -105,8 +106,13 @@ public class Functor {
 	}
 	/** シンボル名を取得する。
 	 * @return nameフィールドの値。サブクラスのオブジェクトのときそのときに限り空文字列が返る。*/
-	public final String getInternalName() {
+	public final String getSymbolName() {
 		return name;
+	}
+	/** シンボルファンクタとしてのIDを取得する。
+	 * @return strFunctorフィールドの値。*/
+	public final String getSymbolFunctorID() {
+		return strFunctor;
 	}
 	/** 名前の表示名を取得する。サブクラスは空文字列が出力されないようにオーバーライドすること。*/
 	public String getName() {

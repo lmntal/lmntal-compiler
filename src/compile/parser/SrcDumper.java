@@ -56,6 +56,8 @@ public class SrcDumper {
 		String s = (dumpIndent(indent)+"("+BR);
 		s += (dumpLinkedList(rule.getHead(),indent+1));
 		s += (dumpIndent(indent+1)+":-"+BR);
+		s += (dumpLinkedList(rule.getGuard(),indent+1));
+		s += (dumpIndent(indent+1)+"|"+BR);
 		s += (dumpLinkedList(rule.getBody(),indent+1));
 		s += (dumpIndent(indent)+")"+BR);
 		return s;

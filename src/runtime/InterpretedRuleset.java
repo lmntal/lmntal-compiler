@@ -71,13 +71,10 @@ public final class InterpretedRuleset extends Ruleset {
 // ArrayIndexOutOfBoundsException がでたので一時的に変更
 //if (formals < 10) formals = 10;
 		
-		AbstractMembrane[] mems = new AbstractMembrane[formals];
-		Atom[] atoms = new Atom[formals];
-		List vars = new ArrayList();
-		mems[0] = mem;
-		if (atom != null) { atoms[1] = atom; }
-		InterpretiveReactor ir = new InterpretiveReactor(mems, atoms, vars);
-		return ir.interpret(matchInsts, 0);
+		InterpretiveReactor ir = new InterpretiveReactor(formals);
+		ir.mems[0] = mem;
+		if (atom != null) { ir.atoms[1] = atom; }
+  		return ir.interpret(matchInsts, 0);
 	}
 	public String toString() {
 		String ret = "@" + id;
@@ -120,18 +117,34 @@ class InterpretiveReactor {
 	Atom[] atoms;
 	/** その他の変数のベクタ（memsやatomsは廃止してvarsに統合する？）*/
 	List vars;
-	//List insts;
 	
-	InterpretiveReactor(
-		AbstractMembrane[] mems,
-		Atom[] atoms,
-		List vars /*, List insts*/
-	) {
-		Env.n("InterpretiveReactor");
-		this.mems = mems;
-		this.atoms = atoms;
-		this.vars = vars;
-		//this.insts = insts;
+	InterpretiveReactor(int size) {
+		this.mems  = new AbstractMembrane[size];
+		this.atoms = new Atom[size];
+		this.vars  = new ArrayList();
+		ArrayList newvars = new ArrayList(size);
+		for (int i = 0; i < size; i++) {
+			this.vars.add(null);
+		}
+	}
+	
+	private InterpretiveReactor reloadVars(int size, List memargs, List atomargs, List varargs) {
+		InterpretiveReactor ir = new InterpretiveReactor(size);
+		int memcount  = memargs.size();
+		int atomcount = atomargs.size();
+		for (int i = 0; i < memcount; i++) {
+			ir.mems[i] =
+			   mems[((Integer) memargs.get(i)).intValue()];
+		}
+		for (int i = 0; i < atomcount; i++) {
+			ir.atoms[i + memcount] =
+			   atoms[((Integer) atomargs.get(i)).intValue()];
+		}
+		for (int i = 0; i < varargs.size(); i++) {
+			ir.vars.set(i + memcount + atomcount,
+				   vars.get(((Integer) varargs.get(i)).intValue()));
+		}
+		return ir;
 	}
 
 	/** 引数に与えられた命令列を解釈する。
@@ -482,39 +495,29 @@ class InterpretiveReactor {
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 
 					//====制御命令====ここから====
+				case Instruction.INLINEREACT :
+					break;
 				case Instruction.REACT :
 					Rule rule = (Rule) inst.getArg1();
 					List bodyInsts = (List) rule.body;
 					Instruction spec = (Instruction) bodyInsts.get(0);
 					int formals = spec.getIntArg1();
 					int locals = spec.getIntArg2();
+
 // // ArrayIndexOutOfBoundsException がでたので一時的に変更
 // if (locals < 10) locals = 10;
 					
-					AbstractMembrane[] bodymems = new AbstractMembrane[locals];
-					Atom[] bodyatoms = new Atom[locals];
-					// vars.setメソッド呼び出し時にIndexOutOfBoundsExceptionが出るので対応 by mizuno
-					ArrayList bodyvars = new ArrayList(locals);
-					for (int i = 0; i < locals; i++) {
-						bodyvars.add(null);
-					}
-					List memformals = (List) inst.getArg2();
-					List atomformals = (List) inst.getArg3();
-					for (int i = 0; i < memformals.size(); i++) {
-						bodymems[i] =
-							mems[((Integer) memformals.get(i)).intValue()];
-					}
-					for (int i = 0; i < atomformals.size(); i++) {
-						bodyatoms[i + memformals.size()] =
-							atoms[((Integer) atomformals.get(i)).intValue()];
-					}
-					InterpretiveReactor ir =
-						new InterpretiveReactor(
-							bodymems,
-							bodyatoms,
-							bodyvars);
-					ir.interpret(bodyInsts, 0);
-					return true; //n-kato
+					InterpretiveReactor ir;
+					ir = reloadVars(locals, (List)inst.getArg2(),
+						(List)inst.getArg3(), new ArrayList());
+					if (ir.interpret(bodyInsts, 0)) return true;
+					if (Env.debug == 9) Env.p("info: body execution failed");
+					return false; //n-kato
+
+				case Instruction.RELOADVARS :
+					ir = reloadVars(vars.size(), (List)inst.getArg1(),
+							(List)inst.getArg2(), (List)inst.getArg3());
+					return ir.interpret(insts, pc); //n-kato
 
 				case Instruction.PROCEED:
 					return true; //n-kato

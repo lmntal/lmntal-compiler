@@ -7,10 +7,10 @@ package compile.structure;
 public abstract class Context extends Atom {
 	/** コンテキストの限定名 */
 	protected String qualifiedName;	
-	/** コンテキストのソース出現 */
-	public Context src = null;
-	/** ちょうど2回出現する場合に、もう片方の出現を保持する */
+	/** ヘッドとボディでちょうど2回出現する場合に、もう片方の出現を保持する */
 	public Context buddy = null;
+	/** コンテキスト名の情報 */
+	public ContextDef def;
 	
 	/** コンストラクタ
 	 * @param mem 所属膜
