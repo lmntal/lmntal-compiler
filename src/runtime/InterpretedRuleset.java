@@ -461,8 +461,8 @@ class InterpreterReactor {
 					mems[inst.getIntArg1()].mems.addAll(mems[inst.getIntArg2()].mems);
 					break;
 				case Instruction.DROPMEM : //[srcmem]
-				
-					break;
+					mems[inst.getIntArg1()] = null;
+					break; //nakajima 2004-01-05
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 
 					//====制御命令====ここから====
@@ -530,6 +530,7 @@ class InterpreterReactor {
 
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[groundlink1,groundlink2]
+					
 					break;
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 
