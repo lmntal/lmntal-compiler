@@ -109,7 +109,7 @@ public class LMNtalNode {
 		
 		if (ipstr.equals("127.0.0.1")) result = true;
 		try {
-			if(InetAddress.getLocalHost().getHostAddress().equals(ipstr)) result = true;
+			if(InetAddress.getLocalHost().getHostAddress().equals(ipstr)) result = true;  //TODO (nakajima)NATÂÐ±þ
 		} catch (java.net.UnknownHostException e) {
 			e.printStackTrace();
 		}
