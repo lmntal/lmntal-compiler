@@ -46,8 +46,10 @@ FuncName	::=   ATOM_NAME:name
 					{: RESULT = new SrcName(name.replaceAll("^'|'$","").replaceAll("''","'"),
 											SrcName.SYMBOL); :}
 				| STRING:name
-					{: RESULT = new SrcName(name.replaceAll("^\"|\"$","").replaceAll("\\\\n","\n")
-											.replaceAll("\\\\\\\\","\\\\"),
+					{: RESULT = new SrcName(name.replaceAll("^\"|\"$","")
+												.replaceAll("\\\\n","\n")
+												.replaceAll("\\\\\"","\"")
+												.replaceAll("\\\\\\\\","\\\\"),
 											SrcName.STRING); :}
 				| PATHED_ATOM_NAME:name
 					{: RESULT = new SrcName(name.replace(':','.'), SrcName.PATHED); :};

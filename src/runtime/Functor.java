@@ -35,8 +35,7 @@ public class Functor {
 	public final String getQuotedFunctorName() {
 		String text = getAbbrName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
-			text = text.replaceAll("'","''");
-			text = "'" + text + "'";
+			text = quoteName(text);
 		}
 		if (path != null) text = path + "." + text;
 		return text;
@@ -46,11 +45,22 @@ public class Functor {
 		String text = getAbbrName();
 		if (!text.matches("^([A-Za-z0-9_]*|\\[\\]|[=!<>]+)$")) {
 			if (!text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
-				text = text.replaceAll("'","''");
-				text = "'" + text + "'";
+				text = quoteName(text);
 			}
 		}
 		if (path != null) text = path + "." + text;
+		return text;
+	}
+	final String quoteName(String text) {
+		if (text.indexOf('\n') == -1) {
+			text = text.replaceAll("'","''");
+			text = "'" + text + "'";
+			return text;
+		}
+		text = text.replaceAll("\\\\","\\\\\\\\");
+		text = text.replaceAll("\"","\\\\\"");
+		text = text.replaceAll("\n","\\\\n");
+		text = "\"" + text + "\"";
 		return text;
 	}
 	////////////////////////////////////////////////////////////////
