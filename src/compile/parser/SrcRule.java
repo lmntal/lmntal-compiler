@@ -31,6 +31,12 @@ class SrcRule {
 		this.body = body;
 	}
 
+	/**
+	 * ヘッドを設定する
+	 */
+	public void setHead(LinkedList head) {
+		this.head = head;
+	}
 	
 	/**
 	 * ルールのヘッドを取得します

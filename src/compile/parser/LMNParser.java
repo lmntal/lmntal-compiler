@@ -138,11 +138,15 @@ public class LMNParser {
 	////////////////////////////////////////////////////////////////
 	
 	/**
-	 * 膜にアトム、子膜、ルールなどを膜に登録する
-	 * @param list 登録したいプロセスのリスト
+	 * 膜にリスト内の構文オブジェクトを追加する
+	 * @param list 登録する構文オブジェクトのリスト
+	 * @param mem 追加先の膜
 	 */
 	void addProcessToMem(LinkedList list, Membrane mem) throws ParseException {
-		for (int i = 0; i < list.size(); i++) addObjectToMem(list.get(i), mem);
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			addObjectToMem(it.next(), mem);
+		}
 	}
 	/**
 	 * 膜にアトム、子膜、ルールなどの構文オブジェクトを追加
@@ -150,8 +154,15 @@ public class LMNParser {
 	 * @param mem 追加先の膜
 	 */
 	private void addObjectToMem(Object obj, Membrane mem) throws ParseException {
+		// リスト
+		if (obj instanceof LinkedList) {
+			Iterator it = ((LinkedList)obj).iterator();
+			while (it.hasNext()) {
+				addObjectToMem(it.next(), mem);
+			}
+		}
 		// アトム
-		if (obj instanceof SrcAtom) {
+		else if (obj instanceof SrcAtom) {
 			addSrcAtomToMem((SrcAtom)obj, mem);
 		}
 		// 膜
@@ -866,17 +877,22 @@ public class LMNParser {
 	/** プロセス構造（子ルール外）をアトム展開する。
 	 * すなわち、アトム引数に出現する全てのアトム構造と膜構造を再帰的に展開する。
 	 * <pre>
-	 * f(s1,g(t1,tn),sm) → f(s1,X,sm), g(t1,tn,X)
-	 * f(s1, {t1,tn},sm) → f(s1,X,sm), {+X,t1,tm}
+	 * f(s1,g(t1,,tn),sm) → f(s1,X,sm), g(t1,,tn,X)
+	 * f(s1, {t1,,tn},sm) → f(s1,X,sm), {+X,t1,,tm}
+	 * f(s1, (t1,,tn),sm) → f(s1,X,sm), ','(t1,(t2,,tn),X)
 	 * </pre>
 	 */
 	private void expandAtoms(LinkedList process) {
 		LinkedList srcprocess = (LinkedList)process.clone();
 		process.clear();
-		Iterator it = srcprocess.iterator();
+		ListIterator it = srcprocess.listIterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
-			if (obj instanceof SrcAtom) {
+			if (obj instanceof LinkedList) {
+				LinkedList list = (LinkedList)obj;
+				expandAtoms(list);
+			}
+			else if (obj instanceof SrcAtom) {
 				expandAtom((SrcAtom)obj, process);
 			}
 			else if (obj instanceof SrcMembrane) {
@@ -885,12 +901,47 @@ public class LMNParser {
 			process.add(obj);
 		}
 	}
+	/** アトムの各引数に対してアトム展開を行う。
+	 * @param sAtom アトム展開するアトム。戻るときには破壊される。
+	 * @param result アトム展開結果のオブジェクト列を追加するリストオブジェクト（プロセス構造）
+	 */
 	private void expandAtom(SrcAtom sAtom, LinkedList result) {
 		LinkedList process = sAtom.getProcess();
 		for (int i = 0; i < process.size(); i++) {
 			Object obj = process.get(i);
+			// 項組（仮）
+			if (obj instanceof LinkedList) {
+				LinkedList list = (LinkedList)obj;
+				if (list.isEmpty()) {				
+					SrcAtom subatom = new SrcAtom("()");
+					//
+					String newlinkname = generateNewLinkName();
+					process.set(i, new SrcLink(newlinkname));
+					subatom.getProcess().add(new SrcLink(newlinkname));
+					//
+					expandAtom(subatom, result);
+					result.add(subatom);
+				}
+				else {
+					SrcAtom subatom = new SrcAtom(",");
+					//
+					String newlinkname = generateNewLinkName();
+					process.set(i, new SrcLink(newlinkname));
+					subatom.getProcess().add(list.removeFirst());
+					if (list.size() == 1) {
+						subatom.getProcess().add(list.getFirst());
+					}
+					else {
+						subatom.getProcess().add(list);
+					}
+					subatom.getProcess().add(new SrcLink(newlinkname));
+					//
+					expandAtom(subatom, result);
+					result.add(subatom);
+				}
+			}
 			// アトム
-			if (obj instanceof SrcAtom) {
+			else if (obj instanceof SrcAtom) {
 				SrcAtom subatom = (SrcAtom)obj;
 				//
 				String newlinkname = generateNewLinkName();
@@ -900,7 +951,7 @@ public class LMNParser {
 				expandAtom(subatom, result);
 				result.add(subatom);
 			}
-			// 膜（廃止してもよい。実際、現在、構文解析器生成器の都合上、構文的に廃止している）
+			// 膜
 			else if (obj instanceof SrcMembrane) {
 				SrcMembrane submem = (SrcMembrane)obj;
 				SrcAtom subatom = new SrcAtom("+");
@@ -1091,7 +1142,11 @@ public class LMNParser {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
-			if (obj instanceof SrcAtom) {
+			if (obj instanceof LinkedList) {
+				LinkedList list = (LinkedList)obj;
+				correctWorld(list);				
+			}
+			else if (obj instanceof SrcAtom) {
 				SrcAtom sAtom = (SrcAtom)obj;
 				for (int i = 0; i < sAtom.getProcess().size(); i++) {
 					Object subobj = sAtom.getProcess().get(i);

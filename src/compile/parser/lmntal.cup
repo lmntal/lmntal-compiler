@@ -54,6 +54,7 @@ non terminal SrcProcessContext	ProcessContext;
 non terminal SrcRuleContext		RuleContext;
 non terminal SrcContext			Context;
 non terminal Object				Process;
+non terminal SrcRule			ProcessListContinuation;
 non terminal LinkedList			ProcessList;
 non terminal LinkedList			NonemptyProcessList;
 non terminal LinkedList			WorldProcessList;
@@ -82,15 +83,7 @@ FuncName	::=   ATOM_NAME:name
 					{: RESULT = new SrcName(name.replaceAll("^'|'$","").replaceAll("''","'"),
 											SrcName.SYMBOL); :}
 				| STRING:name
-					{: RESULT = new SrcName(name.replaceAll("^\"|\"$","")
-												.replaceAll("\\\\\r?\n","")
-												.replaceAll("\\\\n","\n")
-												.replaceAll("\\\\r","\r")
-												.replaceAll("\\\\t","\t")
-												.replaceAll("\\\\f","\f")
-												.replaceAll("\\\\\"","\"")
-												.replaceAll("\\\\\\\\","\\\\"),
-											SrcName.STRING); :}
+					{: RESULT = new SrcName(name, SrcName.STRING); :}
 				| PATHED_ATOM_NAME:name
 					{: RESULT = new SrcName(name.replace(':','.'), SrcName.PATHED); :};
 
@@ -109,14 +102,27 @@ UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
 				| List:list
 					{: RESULT = list; :}
-				| LPAREN Rule:rule RPAREN
-					{: RESULT = rule; :}
+//				| LPAREN Rule:rule RPAREN
+//					{: RESULT = rule; :}
+				| LPAREN ProcessList:list ProcessListContinuation:rule
+					{: if (rule == null) {
+					     if (list.size() == 1) {
+					     	RESULT = list.getFirst();
+					     }
+					     else {
+					     	RESULT = list;
+					     }
+					   }
+					   else {
+						 rule.setHead(list);
+						 RESULT = rule;
+					   } :}
 				| LPAREN QuotedOperatorAtom:atom RPAREN
 					{: RESULT = atom; :}
 				| Context:p
 					{: RESULT = p; :}
-				| LPAREN Atom:atom RPAREN
-					{: RESULT = atom; :}
+//				| LPAREN Atom:atom RPAREN
+//					{: RESULT = atom; :}
 				| Link:link
 					{: RESULT = link; :}
 				| Membrane:mem
@@ -210,7 +216,7 @@ Atom800		::=   Atom700:atom
 Atom		::=   Atom800:atom
 					{: RESULT = atom; :};
 
-// ( ) で囲って演算子がついていない単独の項にできる演算子
+// ( ) で囲って演算子が付いていない単独の項にできる演算子
 QuotedOperatorAtom ::=
 				  PLUS			{: RESULT = new SrcAtom("+");	:}
 				| MINUS			{: RESULT = new SrcAtom("-");	:}
@@ -243,6 +249,7 @@ ListCdr     ::=   GUARD Process:atom
                 |  
                     {: RESULT = new SrcAtom("[]"); :};
 
+// Atomをカンマで区切った列。現在未使用
 AtomList     ::=  Atom:atom AtomList:atomlist
 					{: if (atomlist == null) { RESULT = atom; }
 					   else {
@@ -276,6 +283,14 @@ Rule		::=	  ProcessList:head RULE ProcessList:body
 					{: RESULT = new SrcRule(head, body); :}
 			    | ProcessList:head RULE ProcessList:guard GUARD ProcessList:body 
 					{: RESULT = new SrcRule(head, guard, body); :};
+
+// 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
+ProcessListContinuation ::= RPAREN
+					{: RESULT = null; :}
+				| RULE ProcessList:body RPAREN
+					{: RESULT = new SrcRule(null, body); :}
+				| RULE ProcessList:guard GUARD ProcessList:body RPAREN
+					{: RESULT = new SrcRule(null, guard, body); :};
 
 ProcessContext	::= PROCVAR AtomName:name
 					 {: RESULT = new SrcProcessContext(name); :}
@@ -319,11 +334,10 @@ NonemptyLinkList ::=  Link:link
 				
 Process		::=   Atom:p
 					{:  RESULT = p; :}
-//				| NEGATIVE Atom:atom
-//					{: LinkedList list = new LinkedList();
-//					   list.add(atom);
-//					   RESULT = new SrcAtom(new SrcName("\\+"), list, atomleft, atomright); :}
-//
+				| NEGATIVE Atom:atom
+					{: LinkedList list = new LinkedList();
+					   list.add(atom);
+					   RESULT = new SrcAtom(new SrcName("\\+"), list, atomleft, atomright); :}
 //				| NEGATIVE LPAREN AtomList:atomlist
 //					{: LinkedList list = new LinkedList();
 //					   list.add(atomlist);

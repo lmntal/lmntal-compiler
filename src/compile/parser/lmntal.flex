@@ -52,20 +52,20 @@ NumberName = [0-9]*\.[0-9]+ | [0-9]*\.?[0-9]+ [Ee][+-]?[0-9]+
 CharCodeLiteral = "#\"" . "\""
 
 // AtomNameに加えて0引数でアトム名となる文字列その２、仮。
-// （:の構文解析が決定するまでの間、:もここで取り込む。:は直ちに.に置換される）
+// （:の構文解析が決定するまでの間、:もここで取り込む。:は直ちに.に置換される→決定したので:取り込みは廃止）
 // （注意）モジュール名の先頭文字は a-z に限定してあります
 
-//PathedAtomName = [a-z][A-Za-z_0-9]* [\.:] [a-z0-9][A-Za-z_0-9]*
 PathedAtomName = [a-z][A-Za-z_0-9]* [\.] [a-z0-9][A-Za-z_0-9]*
 
 // 仮
 SymbolName = "'" [^'\r\n]+ "'" | "'" [^'\r\n]* ("''" [^'\r\n]*)+ "'"
-// 仮
-String = "\"" ("\\\"" | [^\"\r\n]* | "\\"[\r]?"\n" )* "\""
 
+// ↓Stringは<STRING>に移管したため廃止
+// String = "\"" ("\\\"" | [^\"\r\n]* | "\\"[\r]?"\n" )* "\""
+// ↓Inlineは<QUOTEd>に移管したため廃止
 // Inline = "[[" [^*] ~"]]"
 
-%state QUOTED COMMENT
+%state QUOTED STRING COMMENT
 
 ////////////////////////////////////////////////////////////////
 
@@ -112,15 +112,15 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	"["					{ return symbol(sym.LBRACKET); }
 	"]"					{ return symbol(sym.RBRACKET); }
 	"mod" 				{ return symbol(sym.MOD); }
-	"[[" 				{ string.setLength(0); yybegin(QUOTED); }
 	"\\+"				{ return symbol(sym.NEGATIVE); }
-	{LinkName}			{ return symbol(sym.LINK_NAME, yytext()); }
-	{NumberName}		{ return symbol(sym.NUMBER_NAME, yytext()); }
-	{CharCodeLiteral}	{ return symbol(sym.CHAR_CODE_LITERAL, yytext()); }
-	{SymbolName}		{ return symbol(sym.SYMBOL_NAME, yytext()); }
-	{String}			{ return symbol(sym.STRING, yytext()); }
-	{PathedAtomName}	{ return symbol(sym.PATHED_ATOM_NAME, yytext()); }
-	{AtomName}			{ return symbol(sym.ATOM_NAME, yytext()); }
+	"[[" 				{ string.setLength(0); yybegin(QUOTED); }
+	"\""				{ string.setLength(0); yybegin(STRING); }
+	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext()); }
+	{NumberName}		{ return symbol(sym.NUMBER_NAME,		yytext()); }
+	{CharCodeLiteral}	{ return symbol(sym.CHAR_CODE_LITERAL,	yytext()); }
+	{SymbolName}		{ return symbol(sym.SYMBOL_NAME,		yytext()); }
+	{PathedAtomName}	{ return symbol(sym.PATHED_ATOM_NAME,	yytext()); }
+	{AtomName}			{ return symbol(sym.ATOM_NAME,			yytext()); }
 	{WhiteSpace}		{ /* just skip */ }
 	{Comment}			{ /* just skip */ }
 }
@@ -130,6 +130,19 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	.|{LineTerminator}  { string.append( yytext() ); }
 }
 
+<STRING> {
+	"\""                { yybegin(YYINITIAL); return symbol(sym.STRING, string.toString()); }
+	"\\\\"				{ string.append("\\"); }
+	"\\"[\r]?"\n"		{ /* just skip */ }			// 行末の \ および引き続く改行は無視する
+	"\\\""				{ string.append("\""); }
+	"\\r"				{ string.append("\r"); }
+	"\\n"				{ string.append("\n"); }
+	"\\f"				{ string.append("\f"); }
+	"\\t"				{ string.append("\t"); }
+	{LineTerminator}	{ /* just skip */ }			// 改行は無視する。仮仕様なので必要ならば変更してよい
+	.					{ string.append( yytext() ); }
+}												
+												
 <COMMENT> {
 	[^*\n]*             {}
 	[^*\n]*\n           {}
