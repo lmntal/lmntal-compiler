@@ -213,6 +213,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//TODO 実装
 								
 								//beginの後はendがくるまで命令が連続でくる...
+								//どう処理しようか。
 								
 
 								
@@ -227,7 +228,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 							} else if (command.equalsIgnoreCase("terminate")) {
 								//TODO 実装
 
-								//terminateだけ変
+								//「terminateだけ変」(by n-kato)
 								//
 								//やるべきことはEnv.theRuntimeのterminate
 								//でも呼べないからどうしよう？
