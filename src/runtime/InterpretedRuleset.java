@@ -77,9 +77,11 @@ class InterpretedReactor {
 				break;
 			case Instruction.PROCEED:
 				return true;	
-
-
-
+			case Instruction.BRANCH:
+				List subinsts = (List)((List)inst.getArg1()).get(0);
+				InterpretedReactor iir = new InterpretedReactor(mems,atoms,vars,subinsts);
+				if (iir.interpret(0)) return true;
+				break;	
 			default:
 				System.out.println("Invalid rule");
 				break;
@@ -369,19 +371,3 @@ public final class InterpretedRuleset extends Ruleset {
 		} 
 	}
 }
-/* 
- 
-[最も簡単な実装方法]
-
-4種類のデータに対応するArrayListを保持する。
-とりあえず最初はメソッド内の局所変数としてでよい。
-
-
-**********
-
-メソッドへの入力は配列でなくArrayListにして、
-それを局所変数用にも使い回すようにするためにサイズ変更しても結構です。
-
-*/
-
-
