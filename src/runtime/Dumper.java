@@ -2,8 +2,24 @@ package runtime;
 
 import java.util.*;
 
+final class Unlexer {
+	private StringBuffer buf = new StringBuffer();
+	private String last = " ";
+	public void append(String text) {
+		if (!last.matches(".*['\"\\[\\]|,(){} ]")
+		 && !text.matches("['\"\\[\\]|,(){} ].*")
+		 &&  last.matches(".*[0-9A-Za-z_]") == text.matches("[0-9A-Za-z_].*")) {
+		 	buf.append(" ");
+		}
+		buf.append(text); 
+		last = text;
+	}
+	public String toString() {
+		return buf.toString();
+	}
+}
+
 public class Dumper {
-	/** todo このクラスにあるのはおかしいので適切な場所に移動する */
 	static HashMap binops = new HashMap();
 	static final int xfy = 0;
 	static final int yfx = 1;
@@ -48,7 +64,7 @@ public class Dumper {
 	
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	public static String dump(AbstractMembrane mem) {
-		StringBuffer buf = new StringBuffer();
+		Unlexer buf = new Unlexer();
 		List predAtoms[] = {new LinkedList(),new LinkedList(),new LinkedList(),new LinkedList(),
 			new LinkedList()};
 		//Set atoms = new HashSet(mem.getAtomCount());
@@ -63,7 +79,7 @@ public class Dumper {
 			atoms.add(a);
 		}
 
-		if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {		
+		if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {
 			
 			// 起点にするアトムとその優先順位:
 			//  0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
@@ -73,7 +89,7 @@ public class Dumper {
 			//  4. リンク先が最終引数のconsアトム
 			
 			// 起点にしないアトム
-			//  - $in,$out,[],A-Zで始まるアトム
+			//  - $in,$out,[],およびA-Zで始まるアトム
 			
 			it = mem.atomIterator();
 			while (it.hasNext()) {
@@ -90,14 +106,14 @@ public class Dumper {
 					if (a.getName().matches("^[A-Z].*")) continue; // 補完された自由リンクは引数に置きたい
 					if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
 					if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
-					if (a.getFunctor().equals(FUNC_NIL) ) continue;
+					if (a.getFunctor().equals(FUNC_NIL) ) continue; // []は整数と同じ表示的な扱い
 					if (a.getArity() == 1) {
 						predAtoms[2].add(a);
 					}
 					else if (!a.getFunctor().equals(FUNC_CONS)) {
 						predAtoms[3].add(a);
 					}
-					else {
+					else { // consはできるだけデータとして扱う
 						predAtoms[4].add(a);
 					}
 				}
@@ -109,7 +125,8 @@ public class Dumper {
 					Atom a = (Atom)it.next();
 					if (atoms.contains(a)) { // まだ出力されていない場合
 						if(commaFlag) buf.append(", "); else commaFlag = true;
-						if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {
+						// consは演算子と同じ表示的な扱い
+						if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
 							if (a.getFunctor().equals(FUNC_CONS)) {
 								buf.append(dumpLink(a.getLastArg(), atoms, 700));
 								buf.append("=");
@@ -131,8 +148,9 @@ public class Dumper {
 			it = atoms.iterator();
 			while (it.hasNext()) {
 				Atom a = (Atom)it.next();
-				if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {
+				if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
 					// todo コードが気持ち悪いのでなんとかする (2)
+					if (!a.getFunctor().isSymbol()) continue;
 					if (a.getName().matches("^[A-Z].*")) continue;
 					if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
 					if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
@@ -171,7 +189,7 @@ public class Dumper {
 		it = mem.rulesetIterator();
 		while (it.hasNext()) {
 			if(commaFlag) buf.append(", "); else commaFlag = true;
-			buf.append((Ruleset)it.next());
+			buf.append(((Ruleset)it.next()).toString());
 		}
 
 		return buf.toString();
@@ -198,8 +216,8 @@ public class Dumper {
 		if (arity == 0) {
 			return func.getQuotedAtomName(); // func.getAbbrName();
 		}
-		StringBuffer buf = new StringBuffer();
-		if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {
+		Unlexer buf = new Unlexer();
+		if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
 			if (arity == 2 && isInfixOperator(func.getName())) {
 				int type = getBinopType(func.getName());
 				int prio = getBinopPrio(func.getName());
@@ -208,9 +226,7 @@ public class Dumper {
 				boolean needpar = (outerprio < innerleftprio || outerprio < innerrightprio);
 				if (needpar) buf.append("(");
 				buf.append(dumpLink(a.args[0], atoms, innerleftprio));
-				buf.append(" ");
 				buf.append(func.getName());
-				buf.append(" ");
 				buf.append(dumpLink(a.args[1], atoms, innerrightprio));
 				if (needpar) buf.append(")");
 				return buf.toString();
@@ -234,7 +250,7 @@ public class Dumper {
 		return buf.toString();
 	}
 	private static String dumpListCdr(Link l, Set atoms) {
-		StringBuffer buf = new StringBuffer();
+		Unlexer buf = new Unlexer();
 		while (true) {		
 			if (!( l.isFuncRef() && atoms.contains(l.getAtom()) )) break;
 			Atom a = l.getAtom();

@@ -28,11 +28,14 @@ public final class Env {
 	/** デフォルトの冗長表示レベル */
 	public static final int VERBOSE_DEFAULT = 2;
 	/**
-	 * アトム引数を展開する冗長表示レベル */
-	public static final int VERBOSE_EXPANDATOMS = 3;
+	 * 演算子を展開する冗長表示レベル <pre> X+Y --> '+'(X,Y) </pre> */
+	public static final int VERBOSE_EXPANDOPS = 3;
+	/**
+	 * アトム引数を展開する冗長表示レベル <pre> a(b) --> a(_2),b(_2) </pre> */
+	public static final int VERBOSE_EXPANDATOMS = 4;
 	/**
 	 * ルールセットの内容を展開する冗長表示レベル */
-	public static final int VERBOSE_EXPANDRULES = 4;
+	public static final int VERBOSE_EXPANDRULES = 5;
 	/**
 	 * verbose level.
 	 */

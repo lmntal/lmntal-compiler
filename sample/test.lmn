@@ -16,6 +16,8 @@ p('a''b')
 
 append(c(1,c(2,c(3,n))),c(4,c(5,n)),result), ( append(X,Y,Z), n(X) :- Y=Z ), ( append(X,Y,Z), c(A,X1,X) :- c(A,Z1,Z), append(X1,Y,Z1) )
 
+append([1,2,3],[4,5],result), ( Z=append([],Y) :- Y=Z ), ( Z=append([A|X],Y) :- Z=[A|append(X,Y)] )
+
 p([1,2,3|X],[4,5],[],result(X))
 
 [[/*inline*/System.out.println(me.nth(0));]]("Linked\n\tMultisets of\n\t\tNodes")
