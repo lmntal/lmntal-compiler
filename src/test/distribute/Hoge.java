@@ -21,6 +21,31 @@ class Hoge {
 //		RuntimeBootTest();
 //		privateIPhanteiTest();
 		//privateIPhanteiTest2();
+		testLabel();
+	}
+
+	/**
+	 * 
+	 */
+	private static void testLabel() {
+		boolean flag = false;
+		
+		loop0:while(true){
+			flag = true;
+			
+			loop1:while(true){
+				flag = false;
+								
+				loop2:while(true){
+					flag = true;
+					
+					if(flag){
+						continue loop1;
+					}
+				}
+			}
+		}
+		
 	}
 
 	/**
