@@ -40,6 +40,7 @@ abstract class AbstractTask {
 final class Task extends AbstractTask {
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
+	Stack bufferedStack = new Stack();
 	boolean idle;
 	static final int maxLoop = 10;
 	
