@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 class SrcLinkUnify extends SrcAtom {
 
-	private static final String LINK_UNIFY = "builtin::unify";
+	private static final String LINK_UNIFY = "="; // "builtin::unify";
 	
 	/**
 	 * 指定されたリンクの単一化を表すアトムを作成します

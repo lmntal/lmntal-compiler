@@ -9,7 +9,7 @@ public final class LinkUnify extends Atom {
 	/**
 	 * リンク単一化をあらわすアトム名
 	 */
-	public static final String LINK_UNIFY_NAME = "builtin::unify";
+	public static final String LINK_UNIFY_NAME = "="; // "builtin::unify";
 	
 	/**
 	 * リンクの単一化を表す
