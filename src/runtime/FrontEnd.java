@@ -41,7 +41,7 @@ public class FrontEnd {
 		FileInputStream fis = null;
 		InputStream is = null;
 		Reader src = null;
-		
+		boolean sampleflag = false;
 		/**
 		 * コマンドライン引数があったらファイルの中身を解釈実行
 		 */
@@ -66,6 +66,8 @@ public class FrontEnd {
 					case '-': // 文字列オプション
 						if(args[i].equals("--help")){
 							System.out.println("usage: FrontEnd [-d] filename");
+}else if(args[i].equals("--sample")){
+	sampleflag = true;
 						}else{
 							System.out.println("不明なオプション:" + args[i]);
 							System.exit(-1);
@@ -109,7 +111,9 @@ public class FrontEnd {
 				root.showAllRule();
 			
 				// 実行
-				LMNtalRuntime rt = new LMNtalRuntime(ir);
+				LMNtalRuntime rt;
+if(sampleflag) rt = new LMNtalRuntime(new SampleInitRuleset()); else
+				rt = new LMNtalRuntime(ir);
 				rt.exec();
 				Membrane result = (Membrane)rt.getRootMem();
 			
