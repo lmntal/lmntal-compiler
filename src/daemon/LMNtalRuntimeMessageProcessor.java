@@ -67,7 +67,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定のホストにメッセージを送信し、返答を待つ。
 	 * @return 返答に含まれる文字列 */
 	public String sendWaitText(String fqdn, String command){
-		if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.sendWaitText()");
+		//if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.sendWaitText()");
 		Object obj = sendWaitObject(fqdn, command);
 		if (obj instanceof String) {
 			return (String)obj;
