@@ -234,80 +234,76 @@ public class LMNParser {
 */
 	
 	/**
-	 * 膜にアトム、子膜、ルールなどを追加
-	 * @param obj アトム、子膜、ルールなどのオブジェクト
-	 * @param mem 追加したい膜
-	 * @throws ParseException objが未知なオブジェクトの場合
+	 * 膜にアトム、子膜、ルールなどの構文オブジェクトを追加
+	 * @param obj 追加する構文オブジェクト
+	 * @param mem 追加先の膜
+	 * @throws ParseException objが未知なオブジェクトの場合など
 	 */
 	private void addObjectToMem(Object obj, Membrane mem) throws ParseException {
 		// アトム
 		if (obj instanceof SrcAtom) {
-			addAtomToMem((SrcAtom)obj, mem);
+			addSrcAtomToMem((SrcAtom)obj, mem);
 		}
 		// 膜
 		else if (obj instanceof SrcMembrane) {
-			SrcMembrane sMem = (SrcMembrane)obj;
-			Membrane p = new Membrane(mem);
-			addProcessToMem(sMem.getProcess(), p);
-			// リンクの貼り付け プロキシーの生成
-			createProxy(p);
-			mem.mems.add(p); 
+			addSrcMemToMem((SrcMembrane)obj, mem);; 
 		}
 		// ルール
 		else if (obj instanceof SrcRule) {
-			addRuleToMem((SrcRule)obj, mem);
+			addSrcRuleToMem((SrcRule)obj, mem);
 		}
 		// プロセスコンテキスト
 		else if (obj instanceof SrcProcessContext) {
-			addProcessContextToMem((SrcProcessContext)obj, mem);
+			addSrcProcessContextToMem((SrcProcessContext)obj, mem);
 		}
 		// ルールコンテキスト
 		else if (obj instanceof SrcRuleContext) {
-			addRuleContextToMem((SrcRuleContext)obj, mem);
+			addSrcRuleContextToMem((SrcRuleContext)obj, mem);
 		}
 		// リンク単一化
 		else if (obj instanceof SrcLinkUnify) {
-			addLinkUnifyToMem((SrcLinkUnify)obj, mem);
+			addSrcLinkUnifyToMem((SrcLinkUnify)obj, mem);
 		}
 		// その他 
 		else {
 			throw new ParseException("Unknown Object to add membrane:"+obj);
 		}
 	}
-	
+
 	/**
-	 * アトムを膜に追加
-	 * @param sAtom 追加したいアトム
+	 * 膜構文を膜に追加
+	 * @param sMem 追加する膜構文
 	 * @param mem 追加先の膜
 	 * @throws ParseException
 	 */
-	private void addAtomToMem(SrcAtom sAtom, Membrane mem) throws ParseException {
-		addAtomToMem(sAtom, mem, null);
+	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) throws ParseException {
+		Membrane submem = new Membrane(mem);
+		addProcessToMem(sMem.getProcess(), submem);
+		createProxy(submem); // リンクの貼り付け プロキシーの生成
+		mem.mems.add(submem);
 	}
 	
 	/**
-	 * アトムを膜に追加
-	 * @param sAtom 追加したいアトム
+	 * アトム構文を膜に追加
+	 * @param sAtom 追加したいアトム構文
 	 * @param mem 追加先の膜
-	 * @param lastLink 簡略化されているリンク
-	 * @throws ParseException アトムのリンクに未知なオブジェクトがある場合
+	 * @throws ParseException アトムのリンクに未知なオブジェクトがある場合など
 	 */
-	private void addAtomToMem(SrcAtom sAtom, Membrane mem, SrcLink lastLink) throws ParseException {
-		if (lastLink != null) sAtom.process.add(lastLink);
+	private void addSrcAtomToMem(SrcAtom sAtom, Membrane mem) throws ParseException {
 		LinkedList p = sAtom.getProcess();
 		Atom atom = new Atom(mem, sAtom.getName(), p.size(), sAtom.line, sAtom.column);
-		// リンクの編集
-		for (int i=0;i<p.size();i++) {
+		for (int i = 0; i < p.size(); i++) {
 			Object obj = p.get(i);
 			// 通常リンク
 			if (obj instanceof SrcLink) {
-				addLinkToAtom((SrcLink)obj, atom, i);
+				setLinkToAtomArg((SrcLink)obj, atom, i);
 			}
 			// アトム
 			else if (obj instanceof SrcAtom) {
-				SrcLink link = createNewLink();
-				addAtomToMem((SrcAtom)obj, mem, new SrcLink(link.getName()));
-				addLinkToAtom(link, atom, i);
+				SrcLink link = createNewSrcLink();
+				((SrcAtom)obj).process.add(new SrcLink(link.getName()));
+				addSrcAtomToMem((SrcAtom)obj, mem);
+				setLinkToAtomArg(link, atom, i);
 			}
 			// その他
 			else {
@@ -318,34 +314,34 @@ public class LMNParser {
 	}
 	
 	/**
-	 * 簡略化されているリンクに名前をつけて作成
-	 * @return ユニークなリンク名
+	 * ユニークな名前の新しいリンク構文を作成する
+	 * @return 作成したリンク構文
 	 */
-	private SrcLink createNewLink() {
+	private SrcLink createNewSrcLink() {
 		nLinkNumber++;
-		return new SrcLink(PREFIX_LINK_NAME+nLinkNumber);
+		return new SrcLink(PREFIX_LINK_NAME + nLinkNumber);
 	}
 	
 	/**
-	 * アトムにリンクを追加する
-	 * @param link 追加したいリンク
-	 * @param atom 追加先のアトム
-	 * @param pos 追加先のアトムでの場所
-	 * @throws ParseException 追加先の場所がアトムに存在しない場合
+	 * アトムの引数にリンクをセットする
+	 * @param link セットしたいリンク
+	 * @param atom セット先のアトム
+	 * @param pos セット先のアトムでの場所
+	 * @throws ParseException セット先の場所がアトムに存在しない場合
 	 */
-	private void addLinkToAtom(SrcLink link, Atom atom, int pos) throws ParseException {
+	private void setLinkToAtomArg(SrcLink link, Atom atom, int pos) throws ParseException {
 		if (pos >= atom.args.length) throw new ParseException("Out of Atom args length:"+pos);
 		atom.args[pos] = new LinkOccurrence(link.getName(), atom, pos);
 	}
 
 	/**
-	 * ルールを膜に追加する
-	 * @param sRule 追加したいルール
+	 * ルール構文を膜に追加する
+	 * @param sRule 追加したいルール構文
 	 * @param mem 追加先の膜
 	 * @throws ParseException
 	 */
-	private void addRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
-		RuleStructure rule = new RuleStructure();
+	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
+		RuleStructure rule = new RuleStructure(mem);
 		// TODO 簡略記法の展開 sRuleの中身を置き換え
 		
 		// ヘッド
@@ -364,25 +360,24 @@ public class LMNParser {
 		coupleInheritedLinks(lhsfreelinks, rhsfreelinks);	
 		
 		mem.rules.add(rule);
-		rule.parent = mem;       // RuleStructure.parent を追加したので追加 by Hara
 	}
 
 	/**
-	 * プロセス変数を膜に追加
-	 * @param sProc 追加したいプロセス変数
+	 * プロセス文脈構文を膜に追加
+	 * @param sProc 追加したいプロセス文脈構文
 	 * @param mem 追加先の膜
 	 */
-	private void addProcessContextToMem(SrcProcessContext sProc, Membrane mem) {
+	private void addSrcProcessContextToMem(SrcProcessContext sProc, Membrane mem) {
 		ProcessContext p = new ProcessContext(sProc.getName());
 		mem.processContexts.add(p);
 	}
 	
 	/**
-	 * ルール変数を膜に追加
-	 * @param sRule 追加したいルール変数
+	 * ルール文脈構文を膜に追加
+	 * @param sRule 追加したいルール文脈構文
 	 * @param mem 追加先の膜
 	 */
-	private void addRuleContextToMem(SrcRuleContext sRule, Membrane mem) {
+	private void addSrcRuleContextToMem(SrcRuleContext sRule, Membrane mem) {
 		RuleContext p = new RuleContext(sRule.getName());
 		mem.ruleContexts.add(p);
 	}
@@ -393,9 +388,9 @@ public class LMNParser {
 	 * @param mem 追加先の膜
 	 * @throws ParseException
 	 */
-	private void addLinkUnifyToMem(SrcLinkUnify sUnify, Membrane mem) throws ParseException {
+	private void addSrcLinkUnifyToMem(SrcLinkUnify sUnify, Membrane mem) throws ParseException {
 		LinkUnify unify = new LinkUnify(mem);
-		addLinkToAtom((SrcLink)sUnify.getProcess().get(0), unify, 0);
-		addLinkToAtom((SrcLink)sUnify.getProcess().get(1), unify, 1);
+		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(0), unify, 0);
+		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(1), unify, 1);
 	}
 }

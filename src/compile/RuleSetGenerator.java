@@ -11,6 +11,7 @@ import compile.structure.*;
 
 /**
  * ルールセットを生成して返す。
+ * TODO RuleSetGeneratorはいずれRulesetCompilerに名称変更する
  * @author hara
  * 
  */
@@ -28,11 +29,10 @@ public class RuleSetGenerator {
 		Env.c("RuleSetGenerator.runStartWithNull");
 		// 世界を生成する
 		Membrane root = new Membrane(null);
-		RuleStructure rs = new RuleStructure();
+		RuleStructure rs = new RuleStructure(root);
 		rs.leftMem  = new Membrane(null);
 		rs.rightMem = m;
 		root.rules.add(rs);
-		rs.parent = root;
 		processMembrane(root);
 		listupModules(root);
 		Env.d("\n=== Modules = \n"+modules+"\n\n");
@@ -46,19 +46,33 @@ public class RuleSetGenerator {
 	}
 	
 	/**
-	 * 与えられた膜直属の全ての RuleStructure について、
+	 * 与えられた膜の階層下にある全ての RuleStructure について、
 	 * 対応する Rule を生成してその膜のルールセットに追加する。
-	 * @param m 対象となる膜
+	 * @param mem 対象となる膜
 	 */
-	public static void processMembrane(Membrane m) {
+	public static void processMembrane(Membrane mem) {
 		Env.c("RuleSetGenerator.processMembrane");
-		
-		Iterator i = m.rules.listIterator();
-		while(i.hasNext()) {
-			RuleStructure rs = (RuleStructure)i.next();
+		// 子膜にあるルールをルールセットにコンパイルする
+		Iterator it = mem.mems.listIterator();
+		while (it.hasNext()) {
+			Membrane submem = (Membrane)it.next();
+			processMembrane(submem);
+		}
+		// この膜にあるルールをルールセットにコンパイルする
+		runtime.Ruleset ruleset = mem.ruleset;
+		it = mem.rules.listIterator();
+		while (it.hasNext()) {
+			RuleStructure rs = (RuleStructure)it.next();
+			// ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
+			processMembrane(rs.leftMem); // 一応左辺も
+			processMembrane(rs.rightMem);
+			//
 			RuleCompiler rc = new RuleCompiler(rs);
 			rc.compile();
+			// ↓ いずれ ruleset.add(rc.theRule); にした方がよい
+			((runtime.InterpretedRuleset)ruleset).rules.add(rc.theRule);
 		}
+		// ruleset.compile();
 	}
 	
 	public static Map modules = new HashMap();

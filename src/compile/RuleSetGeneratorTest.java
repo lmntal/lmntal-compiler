@@ -86,8 +86,7 @@ public class RuleSetGeneratorTest {
 	 */
 	static Membrane getTestStructure1() {
 		// ルート膜の親膜は null
-		RuleStructure rs = new RuleStructure();
-		rs.parent = new Membrane(null);
+		RuleStructure rs = new RuleStructure(new Membrane(null));
 		
 		Membrane m = new Membrane(null);
 		
@@ -131,11 +130,11 @@ public class RuleSetGeneratorTest {
 	 */
 	static RuleStructure getTestRule() {
 		// ルート膜の親膜は null
-		RuleStructure rs = new RuleStructure();
+		RuleStructure rs = new RuleStructure(null);
 		Membrane m = new Membrane(null);
 		
 		// ルール
-		RuleStructure r = new RuleStructure();
+		RuleStructure r = new RuleStructure(null);
 		r.leftMem.atoms.add( new Atom(m, "v", 0) );
 		r.rightMem.atoms.add( new Atom(m, "w", 0) );
 		r.rightMem.atoms.add( new Atom(m, "w", 0) );

@@ -4,7 +4,8 @@ package compile.structure;
  * ソースコード中のルールの構造を表すクラス
  */
 public final class RuleStructure {
-	/** 所属膜。コンパイル時につかうので予めセットしてください */
+	/** 所属膜。コンパイル時につかう
+	 * todo parentはいずれmemに名称変更する */
 	public Membrane parent;
 
 	/** Headを格納する膜 */
@@ -15,7 +16,15 @@ public final class RuleStructure {
 	
 	/** ガードを格納する膜 */
 	public Membrane guardMem = new Membrane(null);
-	
+
+	/**
+	 * コンストラクタ
+	 * @param mem 所属膜
+	 */
+	public RuleStructure(Membrane mem) {
+		this.parent = mem;
+	}
+
 	public String toString() {
 		return "( "+leftMem.toStringWithoutBrace()+" :- "+rightMem.toStringWithoutBrace()+" )";
 	}

@@ -74,10 +74,9 @@ public class RuleCompiler {
 	}
 	
 	/**
-	 * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルし、
-	 * 所属膜のルールセットに追加する。
+	 * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルする
 	 */
-	public void compile() {
+	public Rule compile() {
 		Env.c("compile");
 		simplify();
 		theRule = new Rule(rs.toString());
@@ -99,15 +98,7 @@ public class RuleCompiler {
 		theRule.body      = body;
 		
 		theRule.showDetail();
-		
-		// TODO 以下の3行は、RulesetCompilerが行うべきである。また、整合性検査の都合上、ルール内ルールの方から先にコンパイルすべきである。
-		// compiler.structure.Membrane::rulesetの参照を外側ルールのコンパイルで使用するのは構わない。
-		
-		((runtime.InterpretedRuleset)rs.parent.ruleset).rules.add(theRule);
-
-		// ルールの右辺膜以下にルールがあるかもしれないので再帰的に走査
-		RuleSetGenerator.processMembrane(rs.leftMem); // 一応左辺も
-		RuleSetGenerator.processMembrane(rs.rightMem);
+		return theRule;
 	}
 	
 	/** 左辺膜をコンパイルする */
