@@ -587,6 +587,7 @@ class InterpretiveReactor {
 
 					//====制御命令====ここから====
 				case Instruction.COMMIT :
+					// トレーサをよぶ
 					break;//
 				case Instruction.REACT : {
 					Rule rule = (Rule) inst.getArg1();
