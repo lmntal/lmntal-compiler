@@ -69,9 +69,11 @@ public class FrontEnd {
 					switch(args[i].charAt(1)){
 					case 'x':
 						// ユーザー定義オプション。書式： -x <name> <value>
-						String name  = i+1<args.length ? args[i+1] : "";
-						String value = i+2<args.length ? args[i+2] : "";
-						Env.extendedOption.put(name, value);
+						if (i + 2 < args.length) {
+							String name  = i+1<args.length ? args[i+1] : "";
+							String value = i+2<args.length ? args[i+2] : "";
+							Env.extendedOption.put(name, value);
+						}
 						i+=2;
 						break;
 					case 'L':
@@ -120,7 +122,7 @@ public class FrontEnd {
 					case 'e':
 						// lmntal -e 'a,(a:-b)'
 						// 形式で実行できるようにする。like perl
-						Env.oneLiner = args[++i];
+						if (++i < args.length)  Env.oneLiner = args[i];
 						break;
 					case 'O':
 						if (args[i].length() == 2) {
