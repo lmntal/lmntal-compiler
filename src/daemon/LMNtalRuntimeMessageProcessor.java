@@ -306,25 +306,18 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		Membrane mem = (Membrane)obj;
 		if(true)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is found.)"); //TODO Env.debug
 		
+		
+		//TODO ロック系の命令はひとつひとつに専用のクラスを定義し、thread化したいけど、
+		//          とりあえずLOCK BLOCKINGLOCK ASYNCLOCK をまとめてひとつのクラスにする
+		
+		
+				
+				
 		if (command[0].equalsIgnoreCase("LOCK")
 		 || command[0].equalsIgnoreCase("BLOCKINGLOCK")
 		 || command[0].equalsIgnoreCase("ASYNCLOCK")) {
-			// LOCK globalmemid
-			// ローカルの膜をロック
-			boolean result = false;
-			if (command[0].equalsIgnoreCase("LOCK"))         result = mem.lock();
-			if (command[0].equalsIgnoreCase("BLOCKINGLOCK")) result = mem.blockingLock();
-			if (command[0].equalsIgnoreCase("ASYNCLOCK"))    result = mem.asyncLock();
-			if (result) { // ロック取得成功
-				if (true) { // キャッシュ再送信チェック
-					byte[] data = mem.cache();
-					respondRawData(msgid,data);
-				}
-				else {
-					respond(msgid, "UNCHANGED");
-				}
-				return;
-			} //下に抜ける
+			Thread t1 = new Thread(new LockProcessor(command[0], this, mem, msgid));
+			t1.start();
 		} else if (command[0].equalsIgnoreCase("RECURSIVELOCK")) {
 			// RECURSIVELOCK globalmemid
 			// ロックしたローカルの膜の全世界の子孫膜を再帰的にロック（キャッシュは更新しない）
@@ -333,6 +326,10 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				return;
 			}
 		}
+		
+		
+		
+		
 		respondAsFail(msgid);
 	}
 }
@@ -651,5 +648,42 @@ class InstructionBlockProcessor implements Runnable {
 		remoteTable.clear();
 
 		// m.remoteがnullに初期化されないのが問題かもしれない
+	}
+}
+
+/**
+ * ロックを処理するスレッド
+ * 
+ * @author nakajima
+ * 
+ */
+class LockProcessor implements Runnable{
+	String command;
+	LMNtalNode node;
+	Membrane mem;
+	String msgid;
+	
+	LockProcessor(String command, LMNtalNode node, Membrane mem, String msgid){
+		this.command = command;
+		this.node = node;
+		this.mem = mem;
+		this.msgid = msgid;
+	}	
+	
+	public void run() {
+		// LOCK globalmemid
+		// ローカルの膜をロック
+		boolean result = false;
+		if (command.equalsIgnoreCase("LOCK"))         result = mem.lock();
+		if (command.equalsIgnoreCase("BLOCKINGLOCK")) result = mem.blockingLock();
+		if (command.equalsIgnoreCase("ASYNCLOCK"))    result = mem.asyncLock();
+		if (result) { // ロック取得成功
+			if (true) { // キャッシュ再送信チェック
+				byte[] data = mem.cache();
+				node.respondRawData(msgid,data);
+			}	else {
+				node.respond(msgid, "UNCHANGED");
+			}
+		}
 	}
 }
