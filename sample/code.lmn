@@ -61,7 +61,7 @@
    input.setHorizontalAlignment(JTextField.RIGHT);
    index = new JLabel("前回入力     HIT   BLOW");
    for(int i=0;i<6;i++)
-    turn_info[i] = new JLabel(i+":"+rireki[i]+"          "+hit[i]+"             "+blow[i]);
+    turn_info[i] = new JLabel(i+1+":"+rireki[i]+"          "+hit[i]+"             "+blow[i]);
    message[0] = new JLabel("4桁の数を入力.ダブりなし");
    message[1] = new JLabel("type r → リトライ");
    message[2] = new JLabel("type q → 終了");
@@ -99,7 +99,7 @@
    }
    input.setText("");
    for(int i=0;i<6;i++)
-    turn_info[i].setText(i+":"+rireki[i]+"          "+hit[i]+"            "+blow[i]);
+    turn_info[i].setText(i+1+":"+rireki[i]+"          "+hit[i]+"            "+blow[i]);
    message[3].setText("現在:0/6"+"ターン終了");
    message[4].setText("");
   }
