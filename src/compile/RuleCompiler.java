@@ -422,6 +422,19 @@ public class RuleCompiler {
 			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
 		}
 	}
+	/** モジュールを読み込む */
+	private void addLoadModules() {
+		Iterator it = rhsatoms.iterator();
+		while(it.hasNext()) {
+			Atom atom = (Atom)it.next();
+			if(atom.functor.getArity()==1 && atom.functor.getName().equals("use")) {
+				// この時点では解決できないモジュールがあるので名前にしておく
+				// TODO LOADRULESET -> LOADMODULE
+				body.add( new Instruction(Instruction.LOADRULESET, rhsmemToPath(atom.mem),
+					 atom.args[0].buddy.atom.functor.getName()));
+			}
+		}
+	}
 	/** 左辺の膜を廃棄する */
 	private void freeLHSMem(Membrane mem) {
 		Env.c("RuleCompiler::freeLHSMem");

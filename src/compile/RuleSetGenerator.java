@@ -130,22 +130,33 @@ public class RuleSetGenerator {
 	public static void fixupLoadRuleset(Membrane m) {
 		//Env.d("fixupLoadRuleset");
 		
-		Iterator i;
-		i = ((InterpretedRuleset)m.ruleset).rules.listIterator();
-		while(i.hasNext()) {
-			runtime.Rule rule = (runtime.Rule)i.next();
-			ListIterator ib = rule.body.listIterator();
-			while(ib.hasNext()) {
-				Instruction inst = (Instruction)ib.next();
-				// きたない。
-				if(inst.getKind()==Instruction.LOADRULESET && inst.getArg2() instanceof String) {
-					//Env.p("module solved : "+modules.get(inst.getArg2()));
-					ib.set(new Instruction(Instruction.LOADRULESET, inst.getIntArg1(), 
-						((Membrane)modules.get(inst.getArg2())).ruleset ));
+		Iterator it0 = m.rulesets.iterator();
+		while (it0.hasNext()){
+			Iterator i = ((InterpretedRuleset)it0.next()).rules.listIterator();
+			while(i.hasNext()) {
+				runtime.Rule rule = (runtime.Rule)i.next();
+				ListIterator ib = rule.body.listIterator();
+				while(ib.hasNext()) {
+					Instruction inst = (Instruction)ib.next();
+					// きたない。
+					// TODO この用途での LOADRULESET は LOADMODULE に名称変更し、Interpreterでロードする
+					if(inst.getKind()==Instruction.LOADRULESET && inst.getArg2() instanceof String) {
+						//Env.p("module solved : "+modules.get(inst.getArg2()));
+						ib.remove();
+						Iterator it3 = ((Membrane)modules.get(inst.getArg2())).rulesets.iterator();
+						while (it3.hasNext()) {
+							ib.add(new Instruction(Instruction.LOADRULESET, inst.getIntArg1(),
+								(runtime.Ruleset)it3.next()));
+						}
+						
+	//					ib.set(new Instruction(Instruction.LOADRULESET, inst.getIntArg1(), 
+	//						((Membrane)modules.get(inst.getArg2())).ruleset ));
+						
+					}
 				}
 			}
 		}
-		i = m.mems.listIterator();
+		Iterator i = m.mems.listIterator();
 		while(i.hasNext()) {
 			fixupLoadRuleset((Membrane)i.next());
 		}
