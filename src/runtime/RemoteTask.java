@@ -82,7 +82,7 @@ public final class RemoteTask extends AbstractTask {
 	 * @throws RuntimeException 通信失敗（fatal）
 	 */
 	void flush() {
-		String cmd = "BEGIN\n" + cmdbuffer + "END";
+		String cmd = "BEGIN\n" + cmdbuffer + "\nEND";
 		boolean result = LMNtalRuntimeManager.daemon.sendWait(runtime.hostname, cmd);
 		if (!result) {
 			throw new RuntimeException("RemoteTask: error in flush()");

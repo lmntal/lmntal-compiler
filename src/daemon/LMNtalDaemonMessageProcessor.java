@@ -3,8 +3,6 @@ package daemon;
 import java.io.IOException;
 import java.net.Socket;
 
-import runtime.Env;
-
 //import runtime.Env;
 //import runtime.Membrane;
 

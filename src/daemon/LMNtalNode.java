@@ -106,6 +106,7 @@ public class LMNtalNode {
 		try {
 			return InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e) {
+			e.printStackTrace();
 			return "???";
 		}
 	}
