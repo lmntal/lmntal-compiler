@@ -33,6 +33,11 @@ non terminal LinkedList			WorldProcessList;
 non terminal LinkedList			NonemptyWorldProcessList;
 non terminal Object				List;
 non terminal Object				ListCdr;
+non terminal LinkedList			BundleList;
+non terminal LinkedList			LinkList;
+non terminal LinkedList			NonemptyLinkList;
+non terminal SrcLinkBundle		Bundle;
+non terminal SrcAtom			Aggregate;
 
 start with WorldProcessList;
 
@@ -67,8 +72,6 @@ UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
 				| FuncName:name
 					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
-//				| FuncName:name LPAREN RPAREN
-//					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
 				| FuncName:name LPAREN ProcessList:list RPAREN
 					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
 				| List:list
@@ -161,7 +164,12 @@ Rule		::=	  ProcessList:head RULE ProcessList:body
 					{: RESULT = new SrcRule(head, guard, body); :};
 
 ProcessContext	::= PROCVAR AtomName:name
-						{: RESULT = new SrcProcessContext(name); :};
+					 {: RESULT = new SrcProcessContext(name); :}
+				  | PROCVAR AtomName:name LBRACKET LinkList:list GUARD Bundle:bundle  RBRACKET
+					 {: SrcProcessContext pc = new SrcProcessContext(name);
+						pc.args = list;
+						pc.bundle = bundle;
+						RESULT = pc; :};
 
 RuleContext	::=   RULEVAR AtomName:name
 					{: RESULT = new SrcRuleContext(name); :};
@@ -171,7 +179,29 @@ Context		::=   ProcessContext:p
 				| RuleContext:r
 					{: RESULT = r; :};
 
+Bundle		::= ASTERISK LINK_NAME:name
+					{: RESULT = new SrcLinkBundle(name); :};
+
+BundleList	::=   Bundle:bundle
+					{: LinkedList list = new LinkedList(); list.add(bundle); RESULT = list; :}
+				| BundleList:list COMMA Bundle:bundle
+					{: list.add(bundle); RESULT = list; :};
+				
+Aggregate	::= FuncName:name LPAREN BundleList:list RPAREN
+					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :};
+
+LinkList	::=   /* epsilon */
+					{: RESULT = new LinkedList(); :}
+				| NonemptyLinkList:list
+					{: RESULT = list; :};
+NonemptyLinkList ::=  Link:link
+					{: LinkedList list = new LinkedList(); list.add(link); RESULT = list; :}
+				| NonemptyLinkList:list COMMA Link:link
+					{: list.add(link); RESULT = list; :};
+				
 Process		::=   Atom:p
+					{:  RESULT = p; :}
+				| Aggregate:p
 					{:  RESULT = p; :}
 				| Membrane:p
 					{:  RESULT = p; :};
@@ -207,40 +237,3 @@ NonemptyWorldProcessList ::=
 					{: list.add(p); RESULT = list; :}
 				| NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
 					{: list.addAll(p); RESULT = list; :};
-
-
-/*
-TypedProcessContext ::= PROCVAR AtomName:name LBRACKET LINK_NAME:link RBRACKET
-							{: RESULT = new SrcTypedProcessContext(name, link); :};
-LinkUnify	::=   Link:left UNIFY Link:right
-					{: RESULT = new SrcLinkUnify(left, right); :};
-
-CompareAtom ::=   Process:left LT Process:right
-                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.LT, left, right); :}
-                | Process:left LE Process:right
-                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.LE, left, right); :}
-                | Process:left GT Process:right
-                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.GT, left, right); :}
-                | Process:left GE Process:right
-                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.GE, left, right); :}
-                | Process:left EQ Process:right
-                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.EQ, left, right); :}
-                | Process:left NE Process:right
-                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.NE, left, right); :};
-
-GuardProcess ::=  Process:p
-					{:  RESULT = p; :}
-			    | CompareAtom:p
-			        {:  RESULT = p; :};
-
-GuardProcessList ::=   GuardProcess:p
-					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
-				| GuardProcessList:list COMMA GuardProcess:p
-					{: list.add(p); RESULT = list; :};
-
-
-non terminal Object				GuardProcess;
-non terminal LinkedList         GuardProcessList;
-non terminal SrcLinkUnify		LinkUnify;
-non terminal SrcCompareAtom     CompareAtom;
-*/
