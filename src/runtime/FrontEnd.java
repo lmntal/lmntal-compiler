@@ -7,6 +7,8 @@ import java.io.*;
 import java.lang.SecurityException;
 import java.util.*;
 
+import util.StreamDumper;
+
 import compile.*;
 import compile.parser.*;
 
@@ -166,6 +168,14 @@ public class FrontEnd {
 							/// --demo
 							/// Demo mode.  Draw atoms and text larger.
 							Env.fDEMO = true;
+						} else if(args[i].equals("--start-daemon")){
+							/// --distributed
+							/// Start LMNtalDaemon
+							Env.startDaemon = true;			
+						} else if(args[i].equals("--debug-daemon")){
+							/// --debug-daemon
+							/// dump debug message of LMNtalDaemon
+							Env.debugDaemon = Env.DEBUG_DEFAULT;
 						} else {
 							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
@@ -194,6 +204,32 @@ public class FrontEnd {
 			REPL.processLine(Env.oneLiner);
 			return;
 		}
+		
+		//start LMNtalDaemon
+		if(Env.startDaemon){
+			String classpath = System.getProperty("java.class.path");
+			String newCmdLine =
+				new String(
+						"java -classpath"
+						+ " "
+						+ classpath
+						+ " "
+						+"daemon.LMNtalDaemon"); 		//TODO Env渡す
+			//System.out.println(newCmdLine);
+			try {
+				Process daemon = Runtime.getRuntime().exec(newCmdLine);
+				if(Env.debugDaemon > 0){
+					Thread dumpErr = new Thread(new StreamDumper("LMNtalDaemon.stderr", daemon.getErrorStream()));
+					Thread dumpOut = new Thread(new StreamDumper("LMNtalDaemon.stdout", daemon.getInputStream()));
+					dumpErr.start();
+					dumpOut.start();
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				System.exit(-1);
+			}
+		}
+		
 		// ソースありならソースを解釈実行、なしなら REPL。
 		if(Env.argv.isEmpty()) {
 			REPL.run();
