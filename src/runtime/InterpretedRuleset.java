@@ -529,7 +529,7 @@ class InterpretiveReactor {
 					break; //nakajima
 
 				case Instruction.LOOP :
-					subinsts = (List) ((List) inst.getArg1()); // remove ".get(0)" by mizuno
+					subinsts = (List) ((List) inst.getArg1()).get(0); // reverted by n-kato: remove ".get(0)" by mizuno
 					while (interpret(subinsts, 0)) {
 					}
 					break; //nakajima, n-kato
