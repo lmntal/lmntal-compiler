@@ -1,7 +1,7 @@
 package test.GUI;
 
 /**
- * 有効グラフの辺。
+ * 有向グラフの辺。
  * 
  * @author 
  */
