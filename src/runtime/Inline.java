@@ -41,8 +41,9 @@ public class Inline {
 	/** LMntal ライブラリを探すパス */
 	static List classPath = new ArrayList();
 	static {
-		classPath.add(new File("."));
-		classPath.add(new File("lmntal.jar"));
+		classPath.add(new File(System.getProperty("java.class.path")));
+//		classPath.add(new File("."));
+//		classPath.add(new File("lmntal.jar"));
 	}
 	
 	/****** コンパイル時に使う ******/
