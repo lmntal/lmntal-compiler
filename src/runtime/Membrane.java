@@ -231,18 +231,17 @@ public final class Membrane extends AbstractMembrane {
 	 * <p>成功したら親膜のリモートを継承する。
 	 * @return つねにtrue */
 	public boolean blockingLock() {
-		if (lock()) return true;
-		//(mizuno) TODO ここでロックが解放されると、デッドロックする。
+		//(mizuno) ここでロックが解放されると、デッドロックする。
 		//         上の分をsynchronizedの中に入れると大丈夫なようだが、それでよいのか？
+		//(n-kato) 修正しました。
 		synchronized(task) {
 			((Task)task).requestLock();
-			do {
+			while (!lock()) {
 				try {
 					task.wait();
 				}
 				catch (InterruptedException e) {}
 			}
-			while (!lock());
 			((Task)task).retractLock();
 		}
 		return true;
