@@ -33,6 +33,8 @@ public class LMNtalDaemon{
 	 * COPYFREELINK
 	 * COPYATOM
 	 * 
+	 *
+	 * 
 	 */
 }
 /*【n-katoからのコメント】
