@@ -822,7 +822,7 @@ public class RuleCompiler {
 			 }
 		}
 	}
-	/** インライン命令を実行する */
+	/** インライン命令を生成する */
 	private void addInline() {
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {
