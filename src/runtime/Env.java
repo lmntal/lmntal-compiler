@@ -12,21 +12,17 @@ import test.GUI.*;
  * @author hara
  */
 public final class Env {
-	/**
-	 * Debug level.
-	 */
-	public static int debug = 0;
-	
-	/** システムルールセットの命令列実行を表示する */
-	static final int DEBUG_SYSTEMRULESET = 7;
-	/** -dオプションして維持のデフォルトのデバッグレベル */
+
+	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
 	/** 内部命令の実行をトレースするデバッグレベル */
 	static final int DEBUG_TRACE = 2;
-	/**
-	 * Optimization level.
-	 */
-	public static int optimize = 0;
+	/** システムルールセットの命令列実行を表示するデバッグレベル（仮） */
+	static final int DEBUG_SYSTEMRULESET = 7;
+	/** Debug level. */
+	public static int debug = 0;
+
+	////////////////////////////////////////////////////////////////
 
 	/** 命令列のインライニングを行う最適化レベル */
 	public static final int OPTIMIZE_INLINING = 1;
@@ -34,6 +30,8 @@ public final class Env {
 	public static final int OPTIMIZE_RE = 1;
 	/** 検査命令を持ち上げる最適化レベル */
 	public static final int OPTIMIZE_FF = 1;
+	/** Optimization level. */
+	public static int optimize = 0;
 	
 	////////////////////////////////////////////////////////////////
 	
@@ -57,14 +55,27 @@ public final class Env {
 
 	////////////////////////////////////////////////////////////////
 
+	/** 実行アトムスタックを使わないランダム実行レベル */
 	public static final int SHUFFLE_DONTUSEATOMSTACKS = 1;
+	/** ルールにマッチするアトムの選択をランダムにするランダム実行レベル */
 	public static final int SHUFFLE_ATOMS = 2;
+	/** ルールにマッチする膜の選択をランダムにするランダム実行レベル */
+	public static final int SHUFFLE_MEMS = 2;
+	/** 膜内のルールの選択をランダムにするランダム実行レベル */
 	public static final int SHUFFLE_RULES = 3;
-	public static final int SHUFFLE_MEMS = 4;
+	// ** 全ての膜をルート膜にするランダム実行レベル（未実装。SHUFFLE_TASKS参照）
+	//public static final int SHUFFLE_EVERYMEMISROOT = 4;
+	// ** タスクをシャッフルするランダム実行レベル。
+	// * 全ての膜がルート膜ならば、ルールを探しに行く膜の選択がランダムになる。
+	// * しかし、各膜にあるルールの数を考慮に入れないと、ルールの選択はランダムにはならない。
+	// *（未実装。というか、どのように実装すべきか不明）
+	//public static final int SHUFFLE_TASKS = 5;
 
+	/** -sオプション無指定時のランダム実行レベル */
 	public static final int SHUFFLE_INIT  = 1;
+	/** -sオプション指定時のデフォルトのランダム実行レベル */
 	public static final int SHUFFLE_DEFAULT = 3;
-	/** ランダム実行（レベル）*/
+	/** ランダム実行レベル */
 	public static int shuffle = SHUFFLE_INIT;
 
 	////////////////////////////////////////////////////////////////
