@@ -90,11 +90,10 @@ final class SystemRuleset extends Ruleset {
 	}
 	/**
 	 * 仮メソッド。
-	 * 指定されたInterpretedRulesetに対して、integerモジュール相当の内容を追加する。
+	 * 指定されたInterpretedRulesetに対して、integerモジュール相当の内容を追加するために使用される。
 	 * 【注意】整数演算を無効にするオプションがあってもよい。		
-	 * TODO 【水野君】RemoveAtom でファンクタの値が分からない場合があることを確認して下さい
 	 */
-	static Rule createIntegerBinopRule(String name, int op) {
+	static Rule buildBinopRule(String name, int typechecker, int op) {
 		// 1:'+'(X,Y,Res), 2:$x[X], 3:$y[Y] :- int($x),int($y), (4:$z)=$x+$y | 5:$z[Res].
 		Rule rule = new Rule();
 		List insts = rule.memMatch;
@@ -102,9 +101,9 @@ final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.SPEC,        5,0));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,3)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
-		insts.add(new Instruction(Instruction.ISINT,       2));
+		insts.add(new Instruction(typechecker,             2));
 		insts.add(new Instruction(Instruction.DEREFATOM, 3,1,1));
-		insts.add(new Instruction(Instruction.ISINT,       3));
+		insts.add(new Instruction(typechecker,             3));
 		insts.add(new Instruction(op,                    4,2,3));
 		// react
 		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
@@ -120,11 +119,16 @@ final class SystemRuleset extends Ruleset {
 		Rule rule;
 		List insts;		
 		
-		ruleset.rules.add(createIntegerBinopRule("+",Instruction.IADD));
-		ruleset.rules.add(createIntegerBinopRule("-",Instruction.ISUB));
-		ruleset.rules.add(createIntegerBinopRule("*",Instruction.IMUL));
-		ruleset.rules.add(createIntegerBinopRule("/",Instruction.IDIV));
-		ruleset.rules.add(createIntegerBinopRule("%",Instruction.IMOD));
+		ruleset.rules.add(buildBinopRule("+",Instruction.ISINT,Instruction.IADD));
+		ruleset.rules.add(buildBinopRule("-",Instruction.ISINT,Instruction.ISUB));
+		ruleset.rules.add(buildBinopRule("*",Instruction.ISINT,Instruction.IMUL));
+		ruleset.rules.add(buildBinopRule("/",Instruction.ISINT,Instruction.IDIV));
+		ruleset.rules.add(buildBinopRule("%",Instruction.ISINT,Instruction.IMOD));
+
+		ruleset.rules.add(buildBinopRule("+.",Instruction.ISFLOAT,Instruction.FADD));
+		ruleset.rules.add(buildBinopRule("-.",Instruction.ISFLOAT,Instruction.FSUB));
+		ruleset.rules.add(buildBinopRule("*.",Instruction.ISFLOAT,Instruction.FMUL));
+		ruleset.rules.add(buildBinopRule("/.",Instruction.ISFLOAT,Instruction.FDIV));
 		
 		// 1:cp(A,B,C), 2:$n[A] :- int($n) | $3:$n[B], $4:$n[C].
 		// reuse { 2->4 }

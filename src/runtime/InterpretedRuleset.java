@@ -777,6 +777,65 @@ class InterpretiveReactor {
 					break; // n-kato
 					//====整数用の組み込みガード命令====ここまで====
 
+
+
+
+				case Instruction.FADD : //[-dstfloatatom, floatatom1, floatatom2]
+					double u,v;
+					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new FloatingFunctor(u+v));
+					break; //n-kato
+				case Instruction.FSUB : //[-dstfloatatom, floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new FloatingFunctor(u-v));	
+					break; //nakajima 2004-01-05
+				case Instruction.FMUL : //[-dstfloatatom, floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new FloatingFunctor(u * v));	
+					break; //nakajima 2004-01-05
+				case Instruction.FDIV : //[-dstfloatatom, floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
+					//if (v == 0.0) func = new Functor("NaN",1);
+					//else
+					func = new FloatingFunctor(u / v);
+					atoms[inst.getIntArg1()] = new Atom(null, func);				
+					break; //nakajima 2004-01-05, n-kato
+				case Instruction.FLT : //[floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
+					if (!(u < v)) return false;
+					break; // n-kato
+				case Instruction.FLE : //[floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
+					if (!(u <= v)) return false;
+					break; // n-kato
+				case Instruction.FGT : //[floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
+					if (!(u > v)) return false;
+					break; // n-kato
+				case Instruction.FGE : //[floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
+					if (!(u >= v)) return false;
+					break; // n-kato
+
+
+
+
+
+
+
+
+
+
+
+
 				default :
 					System.out.println(
 						"SYSTEM ERROR: Invalid instruction: " + inst);

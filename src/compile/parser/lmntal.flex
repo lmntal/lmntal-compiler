@@ -38,16 +38,11 @@ LineTerminator = \r|\n|\r\n
 InputCharacter = ([^\r\n]|Character)
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
-LinkName       = [A-Z][A-Za-z_0-9]*
+LinkName       = [A-Z_][A-Za-z_0-9]*
 
 ////////////////////////////////////////////////////////////////
 //
 // アトム名関係
-
-/* これだと [[ と ]] がアトム名に含まれちゃうので一時的に退避 hara */
-/* なんかいい方法ないすかねー */
-/*AtomNameNormal = {Inline} | [a-z0-9][A-Za-z_0-9]* */
-//AtomNameNormal = [a-z0-9][A-Za-z_0-9]* (\.[a-z0-9][A-Za-z_0-9]*)?
 
 AtomName = [a-z0-9][A-Za-z_0-9]*
 
@@ -58,6 +53,7 @@ NumberName = [0-9]*\.[0-9]+ | [0-9]*\.?[0-9]+ [Ee][+-]?[0-9]+
 // （:の構文解析が決定するまでの間、:もここで取り込む。:は直ちに.に置換される）
 // （注意）モジュール名の先頭文字は a-z に限定してあります
 PathedAtomName = [a-z][A-Za-z_0-9]* [\.:] [a-z0-9][A-Za-z_0-9]*
+
 // 仮
 SymbolName = "'" [^'\r\n]+ "'" | "'" [^'\r\n]* ("''" [^'\r\n]*)+ "'"
 // 仮
@@ -69,7 +65,9 @@ String = "\"" [^\"\r\n]* ("\\\"" [^\"\r\n]*)* "\""
 
 ////////////////////////////////////////////////////////////////
 
-RelativeOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
+RelativeOp = "=" | "==" | "!=" | "::" | {IntegerRelativeOp} | {FloatingRelativeOp}
+IntegerRelativeOp  = "<" | ">" | ">=" | "=<" | "=:=" | "=\\="
+FloatingRelativeOp = "<."| ">."| ">=."| "=<."| "=:=."| "=\\=."
 
 Comment = {TraditionalComment} | {EndOfLineComment}
 
@@ -91,6 +89,10 @@ EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
 	"."					{ return symbol(sym.PERIOD); }
 	"|"					{ return symbol(sym.GUARD); }
 	{RelativeOp}		{ return symbol(sym.RELOP, yytext()); }
+	"*."				{ return symbol(sym.ASTERISK_DOT); }
+	"/."				{ return symbol(sym.SLASH_DOT); }
+	"-."				{ return symbol(sym.MINUS_DOT); }
+	"+."				{ return symbol(sym.PLUS_DOT); }
 	"$"					{ return symbol(sym.PROCVAR); }
 	"@"					{ return symbol(sym.RULEVAR); }
 	"*"					{ return symbol(sym.ASTERISK); }
@@ -99,7 +101,7 @@ EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
 	"-"					{ return symbol(sym.MINUS); }
 	"["					{ return symbol(sym.LBRACKET); }
 	"]"					{ return symbol(sym.RBRACKET); }
-	"[["				{ string.setLength(0); yybegin(QUOTED); }
+	"[[" ~"]]"			{ string.setLength(0); yybegin(QUOTED); }
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	{LinkName}			{ return symbol(sym.LINK_NAME, yytext()); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME, yytext()); }

@@ -8,6 +8,7 @@ import java.util.LinkedList;
 terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE,
+				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
 				ASTERISK, SLASH, PLUS, MINUS;
 terminal		QUOTED_STRING;
 terminal String RELOP, STRING;
@@ -100,6 +101,14 @@ UnaryOpAtom	::=	  UnitAtom:atom
 
 Atom400		::=   UnaryOpAtom:atom
 					{: RESULT = atom; :}
+				| Atom400:atom1 ASTERISK_DOT UnaryOpAtom:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("*.", list); :}
+				| Atom400:atom1 SLASH_DOT UnaryOpAtom:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("/.", list); :}
 				| Atom400:atom1 ASTERISK UnaryOpAtom:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
@@ -111,6 +120,14 @@ Atom400		::=   UnaryOpAtom:atom
 
 Atom500		::=   Atom400:atom
 					{: RESULT = atom; :}
+				| Atom500:atom1 MINUS_DOT Atom400:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("-.", list); :}
+				| Atom500:atom1 PLUS_DOT Atom400:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("+.", list); :}
 				| Atom500:atom1 MINUS Atom400:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
