@@ -1,0 +1,18 @@
+// unary map
+// can be ground map if ground() implemented
+map : {
+	map.new($self)
+	 :- unary($self)|{name($self)}.
+	 
+	// override exist key
+	map.put($self, $k, $v), {name($name), assoc($ok, $ov), $p}
+	 :- unary($k),unary($v),$name=$self,$ok=$k,unary($ov) | {name($name), assoc($k, $v), $p}.
+	
+	// add new key
+	map.put($self, $k, $v), {name($name), $p}
+	 :- unary($k),unary($v),$name=$self | {name($name), assoc($k, $v), $p}.
+	
+	map.get($self, $k, V), {name($name), assoc($mk, $mv), $p}
+	 :- unary($k),$name=$self,$k=$mk,unary($mv) | V=$mv, {name($name), assoc($mk, $mv), $p}.
+}.
+
