@@ -85,12 +85,11 @@ public final class RemoteTask extends AbstractTask {
 	 * <p>
 	 * @throws RuntimeException 通信失敗（fatal）
 	 */
-	// synchronized (n-kato) synchronizedはなぜ付いていたのか？
 	public void flush() {
 		String cmd = "BEGIN\n" + cmdbuffer + "END";
 		String result = LMNtalRuntimeManager.daemon.sendWaitText(runtime.hostname, cmd);
 		if (result.substring(4).equalsIgnoreCase("FAIL")) {
-			throw new RuntimeException("RemoteTask.flush(): failed in remote method call");
+			throw new RuntimeException("RemoteTask.flush: failure");
 		}
 		// BEGINメッセージに対する返答を解釈する
 		String[] binds = result.split(";");
