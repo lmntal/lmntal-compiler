@@ -170,56 +170,56 @@ public class RandomSet implements Set {
 			data[i] = new Integer(i);
 		}
 		
-		assert(h.size() == r.size());
-		assert(h.isEmpty() == r.isEmpty());
-		assert(h.contains(data[0]) == r.contains(data[0]));
-		assert(h.contains(null) == r.contains(null));
+		assertTrue(h.size() == r.size());
+		assertTrue(h.isEmpty() == r.isEmpty());
+		assertTrue(h.contains(data[0]) == r.contains(data[0]));
+		assertTrue(h.contains(null) == r.contains(null));
 		for (int i = 0; i < N; i++) {
-			assert(h.add(data[i]) == r.add(data[i]));
+			assertTrue(h.add(data[i]) == r.add(data[i]));
 		}
-		assert(h.add(data[0]) == r.add(data[0]));
+		assertTrue(h.add(data[0]) == r.add(data[0]));
 		for (int i = 0; i < N; i++) {
-			assert(h.contains(data[i]) == r.contains(data[i]));
+			assertTrue(h.contains(data[i]) == r.contains(data[i]));
 		}
-		assert(h.contains(null) == r.contains(null));
-		assert(h.add(null) == r.add(null));
-		assert(h.contains(null) == r.contains(null));
+		assertTrue(h.contains(null) == r.contains(null));
+		assertTrue(h.add(null) == r.add(null));
+		assertTrue(h.contains(null) == r.contains(null));
 		int i = 0;
 		Iterator it = r.iterator();
 		while (it.hasNext()) {
 			i++;
-			assert(r.contains(it.next()));
+			assertTrue(r.contains(it.next()));
 		}
-		assert(i == N+1); //nullを追加したから。
-		assert(h.size() == r.size());
-		assert(h.isEmpty() == r.isEmpty());
-		assert(h.containsAll(Arrays.asList(data)) == r.containsAll(Arrays.asList(data)));
-		assert(h.remove(data[0]) == r.remove(data[0]));
+		assertTrue(i == N+1); //nullを追加したから。
+		assertTrue(h.size() == r.size());
+		assertTrue(h.isEmpty() == r.isEmpty());
+		assertTrue(h.containsAll(Arrays.asList(data)) == r.containsAll(Arrays.asList(data)));
+		assertTrue(h.remove(data[0]) == r.remove(data[0]));
 		Object o = new Object();
-		assert(h.remove(new Object()) == r.remove(new Object()));
-		assert(r.containsAll(h));
-		assert(h.containsAll(Arrays.asList(data)) == r.containsAll(Arrays.asList(data)));
-		assert(h.addAll(Arrays.asList(data)) == r.addAll(Arrays.asList(data)));
-		assert(r.equals(h));
-		assert(h.hashCode() == r.hashCode());
-		assert(r.verify());
+		assertTrue(h.remove(new Object()) == r.remove(new Object()));
+		assertTrue(r.containsAll(h));
+		assertTrue(h.containsAll(Arrays.asList(data)) == r.containsAll(Arrays.asList(data)));
+		assertTrue(h.addAll(Arrays.asList(data)) == r.addAll(Arrays.asList(data)));
+		assertTrue(r.equals(h));
+		assertTrue(h.hashCode() == r.hashCode());
+		assertTrue(r.verify());
 		r.clear();
 		h.clear();
-		assert(r.size() == 0);
-		assert(h.add(o) == r.add(o));
-		assert(h.remove(o) == r.remove(o));
-		assert(h.remove(o) == r.remove(o));
-		assert(r.equals(h));
+		assertTrue(r.size() == 0);
+		assertTrue(h.add(o) == r.add(o));
+		assertTrue(h.remove(o) == r.remove(o));
+		assertTrue(h.remove(o) == r.remove(o));
+		assertTrue(r.equals(h));
 		r.add(o);
-		assert(!r.equals(h));
+		assertTrue(!r.equals(h));
 		h.add(o);
-		assert(r.equals(h));
+		assertTrue(r.equals(h));
 		h.add(data[0]);
-		assert(!r.equals(h));
-		assert(r.verify());
+		assertTrue(!r.equals(h));
+		assertTrue(r.verify());
 		System.out.println("ok");
 	}
-	private static void assert(boolean b) {
+	private static void assertTrue(boolean b) {
 		if (!b) {
 			throw new RuntimeException();
 		}
