@@ -18,8 +18,8 @@ import runtime.Env;
 public class Test {
 
 	public static void main(String[] args) {
-//		a();
-		b();
+		a();
+//		b();
 	}
 	
 	public static void b() {

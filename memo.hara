@@ -1,3 +1,8 @@
+/mnt/raid/home09/koichi/j2/j2sdk1.4.1_02/bin/java -jar /home/hara/lmntal/devel/dist/lmntal.jar -cgi -v0 -L /home/hara/lmntal/devel/dist/lmntal.jar -I /home/hara/lmntal/devel/lmntal_lib $@ -x query_string "$QUERY_STRING"
+
+
+scp ~/lmntal/dist/lmntal.jar hara@banon:lmntal/devel/dist/
+
 LMNtal 処理系にかかわるデータの流れとデータに加えられる処理
 
 ----------------------------------------------------------------------

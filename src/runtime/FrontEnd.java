@@ -64,12 +64,20 @@ public class FrontEnd {
 		 */
 		for(int i = 0; i < args.length;i++){
 			// 必ずlength>0, '-'ならオプション
-			if(args[i].charAt(0) == '-'){
+			// -> 引数を "" にすると長さ 0 になるのでチェックする。
+			if(args[i].length()>0 && args[i].charAt(0) == '-'){
 				if(args[i].length() < 2){ // '-'のみの時
 					System.out.println("不明なオプション:" + args[i]);
-					System.exit(-1);					
+					System.exit(-1);
 				}else{ // オプション解釈部
 					switch(args[i].charAt(1)){
+					case 'x':
+						// ユーザー定義オプション。書式： -x <name> <value>
+						String name  = i+1<args.length ? args[i+1] : "";
+						String value = i+2<args.length ? args[i+2] : "";
+						Env.extendedOption.put(name, value);
+						i+=2;
+						break;
 					case 'L':
 						// インラインコードのコンパイル時に -classpath オプションになる部分を追加することができる。
 						Inline.classPath.add(0, args[++i]);

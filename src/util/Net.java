@@ -70,7 +70,8 @@ public class Net {
 			String res;
 			while(null!=(res = br.readLine())) {
 				recvHandler(res);
-				buf.append(res).append("\n");
+				buf.append(res);
+				buf.append("\n");
 				//Env.p("<<< " + res);
 			}
 			return buf.toString();

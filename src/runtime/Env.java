@@ -77,7 +77,7 @@ public final class Env {
 	public static final int SHUFFLE_DEFAULT = 3;
 	/** ランダム実行レベル */
 	public static int shuffle = SHUFFLE_INIT;
-
+	
 	////////////////////////////////////////////////////////////////
 
 	/**
@@ -208,5 +208,14 @@ public final class Env {
 	public static void guiTrace() {
 		if(gui==null) return;
 		gui.onTrace();
+	}
+	
+	/**
+	 * 拡張コマンドライン引数をこれに格納する
+	 */
+	public static Map extendedOption = new HashMap();
+	public static String getExtendedOption(Object key) {
+		if(!extendedOption.containsKey(key)) return "";
+		return extendedOption.get(key).toString();
 	}
 }

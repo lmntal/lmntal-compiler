@@ -136,6 +136,7 @@ public class Inline {
 			
 			//p.println("package runtime;");
 			p.println("import runtime.*;");
+			p.println("import java.util.*;");
 			
 			i = defs.iterator();
 			while(i.hasNext()) {

@@ -15,7 +15,7 @@ HISTORY
 cgi : {
 
 /**
- * parse_query
+ * parse_query : unit -> Map
  * 
  */
 H=cgi.parse_query :- nil=queue.of_list([[/*inline*/

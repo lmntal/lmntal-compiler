@@ -23,20 +23,7 @@ string : {
 H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[[/*inline*/
 	String r[] = me.nth(1).split(me.nth(0));
 	
-	Atom parent = me.nthAtom(2);
-	for(int i=0;i<r.length;i++) {
-		Atom c = mem.newAtom(new Functor(".", 3));  // .(value child parent)
-		Atom v = mem.newAtom(new Functor(r[i], 1)); // value(parent)
-		mem.newLink(c, 0, v, 0);
-		if(i==0) {
-			mem.relinkAtomArgs(c, 2, me, 2);
-		} else {
-			mem.newLink(c, 2, parent, 1);
-		}
-		parent = c;
-	}
-	Atom nil = mem.newAtom(new Functor("[]", 1));
-	mem.newLink(nil, 0, parent, 1);
+	util.Util.makeList(me.getArg(2), java.util.Arrays.asList(r));
 	
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me.nthAtom(1));
