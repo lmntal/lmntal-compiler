@@ -13,7 +13,7 @@ import java.lang.Integer;
  * @author Mizuno
  */
 public final class Atom extends QueuedEntity {
-	/** 所属膜。MembraneクラスのaddAtomメソッド内で更新する。 */
+	/** 所属膜。MembraneクラスのaddAtomメソッド内で更新する。nullが入ることもある。*/
 	private AbstractMembrane mem;
 	/** 名前とリンク数 */
 	private Functor functor;
