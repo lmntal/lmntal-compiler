@@ -105,7 +105,10 @@ public final class RemoteTask extends AbstractTask {
 				// todo もう少し拡張性の高い識別方法を考える。おそらくNEW_を分化させればよいはず。
 				if (newid.indexOf(':') >= 0) {
 					RemoteMembrane mem = (RemoteMembrane)memTable.get(tmpid);
-					if (mem != null) IDConverter.registerGlobalMembrane(newid, mem);
+					if (mem != null) {
+						IDConverter.registerGlobalMembrane(newid, mem);
+						mem.globalid = newid; 
+					}
 				}
 				else {
 					Atom atom = (Atom)atomTable.get(tmpid);
