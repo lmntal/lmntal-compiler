@@ -93,7 +93,7 @@ public class RulesetCompiler {
 		}
 		// 必要ならシステムルールセットに登録
 		if(mem.is_system_ruleset) {
-			Env.p("Use system_ruleset "+mem);
+			//Env.p("Use system_ruleset "+mem);
 			Iterator ri = mem.rulesets.iterator();
 			while(ri.hasNext()) {
 				InterpretedRuleset ir = (InterpretedRuleset)ri.next();

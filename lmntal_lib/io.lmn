@@ -1,30 +1,29 @@
 [[/*inline_define*/
 ]],
 io:{
-	// TODO use unary |
-	( io.print(String) :- [[/*inline*/
+	( io.print(String) :- unary(String)|[[/*inline*/
 		System.out.println(me.nth(0));
 		]](String)
-	),
+	).
 	( io.input(Message) :- [[/*inline*/
 		String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
 		me.changeName(s);
 		me.nthAtom(0).changeName("done");
-		]](Message) ),
+		]](Message) ).
 	( io.input(Message, X) :- [[/*inline*/
 		String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
 		me.changeName(s);
 		me.nthAtom(0).changeName("done");
-		]](Message, X) ),
+		]](Message, X) ).
 	( io.input :- [[/*inline*/
 		String s = javax.swing.JOptionPane.showInputDialog(null, "Input text.");
 		me.changeName(s);
-		]] ),
+		]] ).
 	// TODO
 	( io.inputInt(X) :- [[/*inline*/
 		//String s = javax.swing.JOptionPane.showInputDialog(null, "");
 		me.setFunctor(new IntegerFunctor(3));
-		]](X) )
+		]](X) ).
 }
 
 //	inputString("How much?", Answer).

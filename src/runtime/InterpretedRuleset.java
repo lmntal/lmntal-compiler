@@ -577,7 +577,15 @@ class InterpretiveReactor {
 					break; //nakajima 2004-01-05
 					
 				case Instruction.ISUNARY: // [atom]
-					if (atoms[inst.getIntArg1()].getFunctor().getArity() != 1) return false;
+					Functor f = atoms[inst.getIntArg1()].getFunctor();
+					// まくを超えたリンクが unary かどうかが判断できない。仕様？？
+//					if(f.equals(Functor.OUTSIDE_PROXY)) {
+//						f = atoms[inst.getIntArg1()].args[0].getAtom().args[1].getAtom().getFunctor();
+//					}
+//					else if(f.equals(Functor.INSIDE_PROXY)) {
+//						f = atoms[inst.getIntArg1()].args[0].getAtom().args[1].getAtom().getFunctor();
+//					}
+					if (f.getArity() != 1) return false;
 					break; // n-kato
 				case Instruction.ISUNARYFUNC: // [func]
 					break;
