@@ -151,6 +151,24 @@ class InterpretiveReactor {
 		return ir;
 	}
 
+	private InterpretiveReactor changeVars(List memargs, List atomargs, List varargs) {
+		int size = memargs.size();
+		if (size < atomargs.size()) size = atomargs.size();
+		if (size < varargs.size())  size = varargs.size();
+		InterpretiveReactor ir = new InterpretiveReactor(size);
+		for (int i = 0; i < size; i++) {
+			if (memargs.get(i) != null)
+				ir.mems[i]  = mems[((Integer) memargs.get(i)).intValue()];
+			else if (atomargs.get(i) != null)
+				ir.atoms[i] = atoms[((Integer) atomargs.get(i)).intValue()];
+			else
+				ir.vars.set(i, vars.get(((Integer) varargs.get(i)).intValue()));
+		}
+		return ir;
+	}
+	
+
+
 	/** 引数に与えられた命令列を解釈する。
 	 * @param insts 命令列
 	 * @param pc    命令列中のプログラムカウンタ
@@ -202,10 +220,6 @@ class InterpretiveReactor {
 							return true;
 					}
 					return false; //n-kato
-				case Instruction.GETLINK : //[-link, atom, pos]
-					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
-					vars.set(inst.getIntArg1(),link); //3->1 by mizuno
-					break; //n-kato
 					//====アトムに関係する出力する基本ガード命令====ここまで====
 
 					//====膜に関係する出力する基本ガード命令 ====ここから====
@@ -260,15 +274,15 @@ class InterpretiveReactor {
 				case Instruction.NORULES : //[srcmem] 
 					if (mems[inst.getIntArg1()].hasRules()) return false;
 					break; //n-kato
-				case Instruction.NATOMS : //[srcmem, count]
-					if (mems[inst.getIntArg1()].atoms.getNormalAtomCount() != inst.getIntArg2()) return false;
-					break; //n-kato
 				case Instruction.NFREELINKS : //[srcmem, count]
 					// TODO 何か変
 					mem = mems[inst.getIntArg1()];
 					if (mem.atoms.size() - mem.atoms.getNormalAtomCount() != inst.getIntArg2())
 						return false;
 					break;
+				case Instruction.NATOMS : //[srcmem, count]
+					if (mems[inst.getIntArg1()].atoms.getNormalAtomCount() != inst.getIntArg2()) return false;
+					break; //n-kato
 				case Instruction.NMEMS : //[srcmem, count]
 					if (mems[inst.getIntArg1()].mems.size() != inst.getIntArg2()) return false;
 					break; //n-kato
@@ -413,6 +427,17 @@ class InterpretiveReactor {
 					break; //n-kato
 					//====膜を操作する基本ボディ命令====ここまで====
 
+					//====リンクに関係する出力するガード命令====ここから====
+				case Instruction.GETLINK : //[-link, atom, pos]
+					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
+					vars.set(inst.getIntArg1(),link); //3->1 by mizuno
+					break; //n-kato
+				case Instruction.ALLOCLINK : //[-link, atom, pos]
+					link = new Link(atoms[inst.getIntArg2()], inst.getIntArg3());
+					vars.set(inst.getIntArg1(),link);
+					break; //n-kato
+					//====リンクに関係する出力するガード命令====ここまで====
+
 					//====リンクを操作するボディ命令====ここから====
 				case Instruction.NEWLINK:		 //[atom1, pos1, atom2, pos2, mem1]
 				case Instruction.LOCALNEWLINK:	 //[atom1, pos1, atom2, pos2 (,mem1)]
@@ -524,6 +549,11 @@ class InterpretiveReactor {
 
 				case Instruction.RESETVARS :
 					ir = reloadVars(vars.size(), (List)inst.getArg1(),
+							(List)inst.getArg2(), (List)inst.getArg3());
+					return ir.interpret(insts, pc); //n-kato
+
+				case Instruction.CHANGEVARS :
+					ir = changeVars((List)inst.getArg1(),
 							(List)inst.getArg2(), (List)inst.getArg3());
 					return ir.interpret(insts, pc); //n-kato
 

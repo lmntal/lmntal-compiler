@@ -49,7 +49,7 @@ public class Instruction implements Cloneable {
 
     /** 対象の膜がローカルの計算ノードに存在することを保証する修飾子（一部他の用途で使用） */
     public static final int LOCAL = 100;
-    /** 型付きアトムに対する命令がリンクではなく、ファンクタを対象にしていることを表す修飾子 */
+    /** 型付きアトムに対する命令がアトムではなく、ファンクタを対象にしていることを表す修飾子 */
     public static final int OPT = 100;
     /** ダミーの命令 */	
     public static final int DUMMY = -1;
@@ -62,7 +62,6 @@ public class Instruction implements Cloneable {
 	//  -----  deref     [-dstatom, srcatom, srcpos, dstpos]
 	//  -----  derefatom [-dstatom, srcatom, srcpos]
 	//  -----  findatom  [-dstatom, srcmem, funcref]
-	//	-----  getlink   [-link,    atom, pos]
 
     /** deref [-dstatom, srcatom, srcpos, dstpos]
      * <br><strong><font color="#ff0000">出力するガード命令</font></strong><br>
@@ -84,19 +83,6 @@ public class Instruction implements Cloneable {
 	 * 膜$srcmemにあってファンクタfuncrefを持つアトムへの参照を次々に$dstatomに代入する。*/
 	public static final int FINDATOM = 3;
 	// LOCALFINDATOMは不要
-
-	/** getlink [-link, atom, pos]
-	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
-	 * アトム$atomの第pos引数に格納されたリンクオブジェクトへの参照を$linkに代入する。
-	 * <p>典型的には、$atomはルールヘッドに存在する。*/
-	public static final int GETLINK = 4;
-	// LOCALGETLINKは不要
-
-//	/** dereflink [atom, link]
-//	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
-//	 * リンク$linkが指すアトムへの参照を$atomに代入する。*/
-//	public static final int DEREFLINK = err;
-//	// LOCALDEREFLINKは不要
 
 	// 膜に関係する出力する基本ガード命令 (5--9)
 	// [local]lockmem    [-dstmem, freelinkatom]
@@ -170,8 +156,8 @@ public class Instruction implements Cloneable {
     // 膜に関係する出力しない基本ガード命令 (10--19)
 	//  ----- testmem    [dstmem, srcatom]
 	//  ----- norules    [srcmem] 
-	//  ----- natoms     [srcmem, count]
 	//  ----- nfreelinks [srcmem, count]
+	//  ----- natoms     [srcmem, count]
 	//  ----- nmems      [srcmem, count]
 	//  ----- eqmem      [mem1, mem2]
 	//  ----- neqmem     [mem1, mem2]
@@ -191,17 +177,17 @@ public class Instruction implements Cloneable {
     public static final int NORULES = 11;
     // LOCALNORULESは不要
 
-    /** natoms [srcmem, count]
-     * <br>ガード命令<br>
-     * 膜$srcmemの自由リンク管理アトム以外のアトム数がcountであることを確認する。*/
-    public static final int NATOMS = 12;
-	// LOCALNATOMSは不要
-
     /** nfreelinks [srcmem, count]
      * <br>ガード命令<br>
      * 膜$srcmemの自由リンク数がcountであることを確認する。*/
-    public static final int NFREELINKS = 13;
+    public static final int NFREELINKS = 12;
 	// LOCALNFREELINKSは不要
+
+	/** natoms [srcmem, count]
+	 * <br>ガード命令<br>
+	 * 膜$srcmemの自由リンク管理アトム以外のアトム数がcountであることを確認する。*/
+	public static final int NATOMS = 13;
+	// LOCALNATOMSは不要
 
     /** nmems [srcmem, count]
      * <br>ガード命令<br>
@@ -209,11 +195,13 @@ public class Instruction implements Cloneable {
     public static final int NMEMS = 14;
 	// LOCALNMEMSは不要
 
+	// 15は予約 see isground
+
     /** eqmem [mem1, mem2]
      * <br>ガード命令<br>
      * $mem1と$mem2が同一の膜を参照していることを確認する。
      * <p><b>注意</b> Ruby版のeqから分離 */
-    public static final int EQMEM = 15;
+    public static final int EQMEM = 16;
 	// LOCALEQMEMは不要
 	
     /** neqmem [mem1, mem2]
@@ -221,13 +209,13 @@ public class Instruction implements Cloneable {
      * $mem1と$mem2が異なる膜を参照していることを確認する。
      * <p><b>注意</b> Ruby版のneqから分離
      * <p><font color=red><b>この命令は不要かも知れない</b></font> */
-    public static final int NEQMEM = 16;
+    public static final int NEQMEM = 17;
 	// LOCALNEQMEMは不要
 
 	/** stable [srcmem]
 	 * <br>ガード命令<br>
 	 * 膜$srcmemとその子孫の全ての膜の実行が停止していることを確認する。*/
-	public static final int STABLE = 17;
+	public static final int STABLE = 18;
 	// LOCALSTABLEは不要
     
 	// アトムに関係する出力しない基本ガード命令 (20-24)
@@ -355,6 +343,7 @@ public class Instruction implements Cloneable {
      * <br>ボディ命令<br>
      * アトム$srcatomを所属膜の実行スタックに積む。
      * <p>すでに実行スタックに積まれていた場合の動作は未定義とする。
+     * <p>アトム$srcatomがシンボルファンクタを持たない場合の動作も未定義とする。
      * <p>アクティブかどうかは関係ない。むしろこの命令で積まれるアトムがアクティブである。*/
     public static final int ENQUEUEATOM = 33;
     
@@ -446,6 +435,7 @@ public class Instruction implements Cloneable {
 	// 膜を操作する基本ボディ命令 (50--59)    
 	// [local]removemem                [srcmem, parentmem]
 	// [local]newmem          [-dstmem, srcmem]
+	//  ----- allocmem        [-dstmem]
 	//  ----- newroot         [-dstmem, srcmem, node]
 	//  ----- movecells                [dstmem, srcmem]
 	//  ----- enqueueallatoms          [srcmem]
@@ -478,6 +468,12 @@ public class Instruction implements Cloneable {
 	* newmemと同じ。ただし$srcmemは<B>本膜と同じタスクによって管理される</B>。*/
 	public static final int LOCALNEWMEM = LOCAL + NEWMEM;
 
+	/** allocmem [-dstmem]
+	 * <br>最適化用ボディ命令<br>
+	 * 親膜を持たない新しい膜を作成し、参照を$dstmemに代入する。*/
+	public static final int ALLOCMEM = 52;
+	// LOCALALLOCMEMは不要
+
 	/** newroot [-dstmem, srcmem, node]
 	 * <br>（予約された）ボディ命令<br>
 	 * 膜$srcmemの子膜に文字列nodeで指定された計算ノードで実行される新しいロックされたルート膜を作成し、
@@ -485,18 +481,18 @@ public class Instruction implements Cloneable {
 	 * この場合の活性化は、仮の実行膜スタックに積むことを意味する。
 	 * <p>newmemと違い、このルート膜のロックは明示的に解放しなければならない。
 	 * @see unlockmem */
-	public static final int NEWROOT = 52;
+	public static final int NEWROOT = 53;
 	// LOCALNEWROOTは最適化の効果が無いため却下
 	
 	/** movecells [dstmem, srcmem]
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemにある全てのアトムと子膜（ロックを取得していない）を膜$dstmemに移動する。
 	 * 実行膜スタックおよび実行スタックは操作しない。
-	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない。
+	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない（ルールセットに限りは参照してもよい）。
 	 * <p>実行後、膜$dstmemの全てのアクティブアトムをエンキューし直すべきである。
 	 * <p><b>注意</b>　Ruby版のpourから名称変更
 	 * @see enqueueallatoms */
-	public static final int MOVECELLS = 53;
+	public static final int MOVECELLS = 54;
 	// LOCALMOVECELLSは最適化の効果が無いため却下？あるいはさらに特化した仕様にする。
 
 	/** enqueueallatoms [srcmem]
@@ -505,7 +501,7 @@ public class Instruction implements Cloneable {
 	 * <p>アトムがアクティブかどうかを判断するには、
 	 * ファンクタを動的検査する方法と、2つのグループのアトムがあるとして所属膜が管理する方法がある。
 	 * @see enqueueatom */
-	public static final int ENQUEUEALLATOMS = 54;
+	public static final int ENQUEUEALLATOMS = 55;
 	// LOCALENQUEUEALLATOMSは最適化の効果が無いため却下
 
 	/** freemem [srcmem]
@@ -513,7 +509,7 @@ public class Instruction implements Cloneable {
 	 * 何もしない。
 	 * <p>$srcmemがどの膜にも属さず、かつスタックに積まれていないことを表す。
 	 * @see freeatom */
-	public static final int FREEMEM = 55;
+	public static final int FREEMEM = 56;
 	// LOCALFREEMEMは不要
 
 	/** addmem [dstmem, srcmem]
@@ -524,7 +520,7 @@ public class Instruction implements Cloneable {
 	 * <p>膜$srcmemを再利用するために使用される。
 	 * <p>newmemと違い、$srcmemのロックは明示的に解放しなければならない。
 	 * @see unlockmem */
-	public static final int ADDMEM = 56;
+	public static final int ADDMEM = 57;
 
 	/** localaddmem [dstmem, srcmem]
 	 * <br>最適化用ボディ命令<br>
@@ -538,27 +534,54 @@ public class Instruction implements Cloneable {
 	 * <p>addmemによって再利用された膜、およびnewrootによってルールで新しく生成された
 	 * ルート膜に対して、（子孫から順番に）必ず呼ばれる。
 	 * <p>実行後、$srcmemへの参照は廃棄しなければならない。*/
-	public static final int UNLOCKMEM = 57;
+	public static final int UNLOCKMEM = 58;
 
 	/** localunlockmem [srcmem]
 	 * <br>最適化用ボディ命令<br>
 	 * unlockmemと同じ。ただし$srcmemはこの計算ノードに存在する。*/
 	public static final int LOCALUNLOCKMEM = LOCAL + UNLOCKMEM;
 
-	// 予約 (60--64)
+	// 予約 (60--62)
+
+	// リンクに関係する出力するガード命令 (63--64)
 	
+	//	-----  getlink   [-link,atom,pos]
+	//	-----  alloclink [-link,atom,pos]
+
+	/** getlink [-link, atom, pos]
+	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
+	 * アトム$atomの第pos引数に格納されたリンクオブジェクトへの参照を$linkに代入する。
+	 * <p>典型的には、$atomはルールヘッドに存在する。*/
+	public static final int GETLINK = 63;
+	// LOCALGETLINKは不要
+
+	/** alloclink [-link, atom, pos]
+	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
+	 * アトム$atomの第pos引数を指すリンクオブジェクトを生成し、参照を$linkに代入する。
+	 * <p>典型的には、$atomはルールボディに存在する。*/
+	public static final int ALLOCLINK = 64;
+	// LOCALGETLINKは不要
+
+//	/** dereflink [atom, link]
+//	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
+//	 * リンク$linkが指すアトムへの参照を$atomに代入する。*/
+//	public static final int DEREFLINK = err;
+//	// LOCALDEREFLINKは不要
+
 	// リンクを操作するボディ命令 (65--69)
 	// [local]newlink     [atom1, pos1, atom2, pos2, mem1]
 	// [local]relink      [atom1, pos1, atom2, pos2, mem]
 	// [local]unify       [atom1, pos1, atom2, pos2]
 	// [local]inheritlink [atom1, pos1, link2, mem]
+	// [local]unifylinks  [link1, link2, mem]
 
 	/** newlink [atom1, pos1, atom2, pos2, mem1]
 	 * <br>ボディ命令<br>
 	 * アトム$atom1（膜$mem1にある）の第pos1引数と、
 	 * アトム$atom2の第pos2引数の間に両方向リンクを張る。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールボディに存在する。
-	 * <p><b>注意</b>　Ruby版の片方向から仕様変更された */
+	 * <p><b>注意</b>　Ruby版の片方向から仕様変更された。
+	 * <p>alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]と同じ。*/
 	public static final int NEWLINK = 65;
 
 	/** localnewlink [atom1, pos1, atom2, pos2 (,mem1)]
@@ -572,7 +595,9 @@ public class Instruction implements Cloneable {
 	 * アトム$atom2の第pos2引数のリンク先（膜$memにある）の引数を接続する。
 	 * <p>典型的には、$atom1はルールボディに、$atom2はルールヘッドに存在する。
 	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalrelinkが使用できる。
-	 * <p>実行後、$atom2[pos2]の内容は無効になる。*/
+	 * <p>実行後、$atom2[pos2]の内容は無効になる。
+	 * <p>getlink[link2,atom2,pos2];inheritlinks[atom1,pos1,link2,mem]と同じ。
+	 * <p>alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
 	public static final int RELINK = 66;
 
 	/** localrelink [atom1, pos1, atom2, pos2 (,mem)]
@@ -585,7 +610,8 @@ public class Instruction implements Cloneable {
 	 * アトム$atom1の第pos1引数のリンク先（膜$memにある）の引数と、
 	 * アトム$atom2の第pos2引数のリンク先（膜$memにある）の引数を接続する。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。
-	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalunifyが使用できる。*/
+	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalunifyが使用できる。
+	 * <p>getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
 	public static final int UNIFY = 67;
 
 	/** localunify [atom1, pos1, atom2, pos2 (,mem)]
@@ -598,8 +624,9 @@ public class Instruction implements Cloneable {
 	 * アトム$atom1（膜$memにある）の第pos1引数と、
 	 * リンク$link2のリンク先（膜$memにある）を接続する。
 	 * <p>典型的には、$atom1はルールボディに存在し、$link2はルールヘッドに存在する。relinkの代用。
-	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでinheritrelinkが使用できる。
+	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalinheritrelinkが使用できる。
 	 * <p>$link2は再利用されるため、実行後は$link2は廃棄しなければならない。
+	 * <p>alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem]と同じ。
 	 * @see getlink */
 	public static final int INHERITLINK = 68;
 
@@ -607,6 +634,19 @@ public class Instruction implements Cloneable {
 	 * <br>最適化用ボディ命令<br>
 	 * inheritlinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALINHERITLINK = LOCAL + INHERITLINK;
+
+	/** unifylinks [link1, link2, mem]
+	 * <br>ボディ命令<br>
+	 * リンク$link1の指すアトム引数とリンク$link2の指すアトム引数との間に双方向のリンクを張る。
+	 * ただし$link1は膜$memのアトムを指している。
+	 * <p>実行後$link1および$link2は無効なリンクオブジェクトとなるため、参照を使用してはならない。
+	 * <p>基底項データ型のコンパイルで使用される。*/
+	public static final int UNIFYLINKS = 69;
+
+	/** localunifylinks [link1, link2 (,mem)]
+	 * <br>最適化用ボディ命令<br>
+	 * unifylinksと同じ。ただし膜$memはこの計算ノードに存在する。*/
+	public static final int LOCALUNIFYLINKS = LOCAL + UNIFYLINKS;
 
     // 自由リンク管理アトム自動処理のためのボディ命令 (70--74)
 	//  -----  removeproxies          [srcmem]
@@ -748,6 +788,7 @@ public class Instruction implements Cloneable {
 	//  -----  react       [ruleref, [memargs...], [atomargs...]]
 	//  -----  inlinereact [ruleref, [memargs...], [atomargs...]]
 	//  -----  resetvars   [[memargs...], [atomargs...], [varargs...]]
+	//  -----  resetvars2  [[memargs...], [atomargs...], [varargs...]]
 	//  -----  spec        [formals,locals]
 	//  -----  proceed
 	//  -----  stop 
@@ -775,6 +816,17 @@ public class Instruction implements Cloneable {
 	 * <p>（仕様検討中の未使用命令）
 	 */
 	public static final int RESETVARS = 202;
+
+	/** changevars [[memargs...], [atomargs...], [varargs...]]
+	 * <br>失敗しないガード命令および最適化用ボディ命令<br>
+	 * 変数ベクタの内容および長さを再定義する。
+	 * 新しい変数番号は、膜、アトム、その他のいずれも0から振り直される。
+	 * ただしnullが入っている要素は無視される。
+	 * 同じ番号に異なる種類のオブジェクトが振られないように注意すること。
+	 * <b>注意</b>　memargs[0]は本膜が予約しているため変更してはならない。
+	 * <p>（仕様検討中の未使用命令）
+	 */
+	public static final int CHANGEVARS = 1202;
 
     /** spec [formals, locals]
      * <br><strike>
@@ -857,7 +909,7 @@ public class Instruction implements Cloneable {
 	// 型付きプロセス文脈を扱うための追加命令 (216--219)	
 
 	/** eqground [groundlink1,groundlink2]
-	 * <br>（予約された）型付き拡張用ガード命令<br>
+	 * <br>（予約された）拡張ガード命令<br>
 	 * 基底項プロセスを指す2つのリンクlink1とlink2に対して、
 	 * それらが同じ形状の基底項プロセスであることを確認する。
 	 * @see isground */
@@ -865,28 +917,34 @@ public class Instruction implements Cloneable {
     	
 	// 型検査のためのガード命令 (220--229)	
 
-	/** isground [link]
-	 * <br>（予約された）型付き拡張用ガード命令<br>
+	/** isground [-natoms, link]
+	 * <br>（予約された）ロック取得する拡張ガード命令<br>
 	 * リンク$linkの指す先が基底項プロセスであることを確認する。
-	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこの膜に存在していることを確認する。
-	 * @see getlink */
+	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこのセルに存在していることを確認する。
+	 * 見つかった基底項プロセスにつながった子膜は再帰的にロックする。
+     * 取得したロックは、後続の命令列が失敗したときに解放される。
+	 * 見つかった基底項プロセスを構成するこの膜のアトムの個数（をラップしたInteger）を$natomsに格納する。
+     * <p>natomsとnmemsと統合した命令を作り、$natomsの総和を引数に渡すようにする。
+     * 子膜の個数の照合は、本膜がロックしていない子膜の個数が0個かどうか調べればよい。
+     * しかし本膜がロックしたかどうかを調べるメカニズムが今は備わっていないため、保留。
+     * <p>仕様検討中。*/
 	public static final int ISGROUND = 220;
 	
 	/** isunary [atom]
-	 * <br>型付き拡張用ガード命令<br>
+	 * <br>ガード命令<br>
 	 * アトム$atomが1引数のアトムであることを確認する。*/
 	public static final int ISUNARY     = 221;
 	public static final int ISUNARYFUNC = ISUNARY + OPT;
 
 	/** isint [atom]
-	 * <br>型付き拡張用ガード命令<br>
+	 * <br>ガード命令<br>
 	 * アトム$atomが整数アトムであることを確認する。*/
 	public static final int ISINT    = 225;
 	public static final int ISFLOAT  = 226;
 	public static final int ISSTRING = 227;
 
 	/** isintfunc [func]
-	 * <br>型付き拡張用最適化用ガード命令<br>
+	 * <br>最適化用ガード命令<br>
 	 * ファンクタ$funcが整数ファンクタであることを確認する。*/
 	public static final int ISINTFUNC    = ISINT    + OPT;
 	public static final int ISFLOATFUNC  = ISFLOAT  + OPT;

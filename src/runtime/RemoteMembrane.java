@@ -184,8 +184,13 @@ final class RemoteMembrane extends AbstractMembrane {
 		super.inheritLink(atom1,pos1,link2);
 	}
 	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		send("UNIFYATOMARGS",""+getAtomID(atom1)+pos1+getAtomID(atom2)+pos2);
+		send("UNIFYATOMARGS",""+getAtomID(atom1)+" "+pos1+" "+getAtomID(atom2)+" "+pos2);
 		super.unifyAtomArgs(atom1,pos1,atom2,pos2);
+	}
+	public void unifyLinkBuddies(Link link1, Link link2) {
+		send("NEWLINK",""+getAtomID(link1.getAtom())+" "+link1.getPos()+" "
+						+getAtomID(link2.getAtom())+" "+link2.getPos());
+		super.unifyLinkBuddies(link1,link2);
 	}
 
 	// 操作5 - 膜自身や移動に関する操作

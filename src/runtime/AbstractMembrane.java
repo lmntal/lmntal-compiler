@@ -289,6 +289,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
 	}
+	/** link1の指すアトム引数とlink2の指すアトム引数の間に、双方向のリンクを張る。
+	 * <p>実行後link1およびlink2自身は無効なリンクオブジェクトになるため、参照を使用してはならない。
+	 */
+	public void unifyLinkBuddies(Link link1, Link link2) {
+		link1.getBuddy().set(link2);
+		link2.getBuddy().set(link1);
+	}
 
 	/** atom2の第pos2引数に格納されたリンクオブジェクトへの参照を取得する。
 	 */
