@@ -277,7 +277,7 @@ public class FrontEnd {
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}
 			if (Env.gui != null) {
-				while(true) Env.gui.onTrace();
+//				while(true) Env.gui.onTrace();
 			}
 			LMNtalRuntimeManager.terminateAll();
 			LMNtalRuntimeManager.disconnectFromDaemon();
