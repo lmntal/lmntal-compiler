@@ -102,12 +102,13 @@ public class LMNtalDaemon implements Runnable {
 		try {
 			myhostname = InetAddress.getLocalHost().getHostAddress();//Canonical
 		} catch (Exception e) {
-			myhostname =  "???";	// とりあえず放置
+			myhostname =  "DEFERRED";	// とりあえず放置
 			e.printStackTrace();
 		}
 		
-		if(myhostname.equals("127.0.0.1")){ //TODO 分散を使うか使わないかにかかわらず、NICがあがってないとここで死んでしまう
-			throw new RuntimeException("cannot resolve hostname. contact your system adminitrator and configure your DNS settings");
+		if(myhostname.equals("127.0.0.1")){
+			//throw new RuntimeException("cannot resolve hostname. contact your system adminitrator and configure your DNS settings");
+			myhostname =  "DEFERRED";	// とりあえず放置
 		}
 	}
 	
