@@ -179,7 +179,7 @@ public class ParserTest extends JFrame implements ActionListener {
 		DefaultMutableTreeNode nodeRuleBody = new DefaultMutableTreeNode("<Body>");
 		
 		addMembrane(rule.leftMem,nodeRuleHead);
-		addMembrane(rule.guardMem,nodeRuleGuard);
+//		addMembrane(rule.guardMem,nodeRuleGuard);
 		addMembrane(rule.rightMem,nodeRuleBody);
 		
 		nodeRule.add(nodeRuleHead);
