@@ -146,7 +146,7 @@ public class LMNtalNode {
 	}
 	protected byte[] readBytes(int bytes) throws IOException {
 		byte[] data = {};
-		//data = in.readBytes(bytes); // TODO バイト列をソケットで送信する
+		//data = in.readBytes(bytes); // TODO 【実装】（有志B）バイト列をソケットで送信する
 		return data;
 	}
 

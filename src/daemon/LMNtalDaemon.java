@@ -19,7 +19,7 @@ import java.net.UnknownHostException;
  *
  */
 
-//TODO 耐故障性　セキュリティ
+//todo 耐故障性　セキュリティ
 
 /**
  * このスレッドがデーモンとして物理的な計算機の境界にあり、
@@ -54,7 +54,7 @@ public class LMNtalDaemon implements Runnable {
 	 */
 	static HashMap runtimeGroupTable = new HashMap();
 
-	// TODO msgTable と msgTagTable は LMNtalNode に移管する
+	// todo msgTable と msgTagTable は LMNtalNode に移管する
 	
 	/**
 	 * メッセージの表: msgid (String) -> LMNtalNode

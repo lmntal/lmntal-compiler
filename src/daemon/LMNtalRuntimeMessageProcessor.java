@@ -15,7 +15,7 @@ import runtime.LMNtalRuntimeManager;
  * ランタイムが生成するオブジェクト。
  * デーモンとのコネクションに対して生成され、メッセージの受信を行う。
  * 
- * TODO LMNtalDaemonMessageProcessorと共通の処理をLMNtalNodeに移管する。
+ * todo LMNtalDaemonMessageProcessorと共通の処理をLMNtalNodeに移管する。
  * @author nakajima, n-kato
  */
 public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnable {
@@ -348,7 +348,7 @@ class InstructionBlockProcessor implements Runnable {
 				String[] command = input.split(" ",6); // RemoteMembrane.send()の引数の個数を参照せよ
 				command[0] = command[0].toUpperCase();
 		
-				//TODO ここで命令を書くのではなくて、Instruction.javaの命令番号を引いてくる。
+				//todo （将来） ここで命令を書くのではなくて、Instruction.javaの命令番号を引いてくる。
 				//そして変換表もひける。
 				//案: new InstructionListをする。
 				
@@ -367,12 +367,13 @@ class InstructionBlockProcessor implements Runnable {
 					String rulesetid = command[2];
 					Ruleset rs = IDConverter.lookupRuleset(rulesetid);
 					if (rs == null) {
-						String fqdn = rulesetid.split(":",2)[0]; // TODO 依頼元に取りにいくようにする
+						String fqdn = rulesetid.split(":",2)[0]; // TODO （効率改善）依頼元に取りにいくようにする
 						Object obj = remote.sendWaitObject(fqdn, "REQUIRERULESET " + rulesetid);
 						if (obj instanceof byte[]) {
 							rs = Ruleset.deserialize((byte[])obj);
 						}
 						if (rs == null) throw new RuntimeException("cannot lookup ruleset");
+						IDConverter.registerRuleset(rulesetid, rs);
 					}
 					mem.loadRuleset(rs);
 	// [2] アトムの操作

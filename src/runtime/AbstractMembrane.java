@@ -502,12 +502,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	///////////////////////////////
 	// 自由リンク管理アトムの張り替えをするための操作（RemoteMembraneはオーバーライドしない）
 	//
-	// TODO starをキューで管理することにより、alterAtomFunctorの回数を減らすとよいかも知れない。
+	// TODO （効率改善）starをキューで管理することにより、alterAtomFunctorの回数を減らすとよいかも知れない。
 	// キューはLinkedListオブジェクトとし、react内を生存期間とし、star関連のメソッドの引数に渡される。
 	// $pを含む全ての膜の本膜からの相対関係がルール適用で不変な場合、
 	// $pの先祖の全ての膜をうまく再利用することによって、star関連の処理を全く呼ぶ必要がなくなる。
 	
-	// todo LinkedListオブジェクトに対してcontainsを呼んでいるのを何とかする
+	// todo （効率改善）LinkedListオブジェクトに対してcontainsを呼んでいるのを何とかする
 	
 	/** この膜がremoveされた直後に呼ばれる。
 	 * なおremoveProxiesは、ルール左辺に書かれたアトムを除去した後、

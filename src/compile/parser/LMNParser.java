@@ -86,6 +86,8 @@ public class LMNParser {
 	}
 	
 	/**
+	 * これは古いので使わない (n-kato) 20040820
+	 * <p>
 	 * parseの代わりに呼ぶ。【未実装】
 	 * <p>
 	 * <b>キャッシュ文字列の定義</b>
@@ -1577,4 +1579,4 @@ class SyntaxExpander {
 	}
 }
 
-// TODO ( {p($t)} :- ground($t) | end ) をコンパイルするための内部命令が足りない
+// TODO （機能拡張）( {p($t)} :- ground($t) | end ) をコンパイルするための内部命令が足りない

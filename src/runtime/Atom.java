@@ -58,7 +58,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	// 操作
 	public void setFunctor(Functor newFunctor) {
 		if (newFunctor.getArity() > args.length) {
-			// TODO SystemError用の例外クラスを投げる
+			// todo SystemError用の例外クラスを投げる
 			throw new RuntimeException("SYSTEM ERROR: insufficient link vector length");
 		}
 		functor = newFunctor;

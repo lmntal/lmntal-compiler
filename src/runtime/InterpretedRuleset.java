@@ -133,7 +133,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	}
 	protected void deserializeInstance(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		super.deserializeInstance(in);
-		//TODO idの振り方を考える。
+		// todo idの振り方を考える。→このidは捨てられてglobalidのみで管理される
 		id = ++lastId;
 		rules = (List)in.readObject();
 	}

@@ -87,7 +87,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 
 				if (returnNode == null) {
 					//戻し先がnull
-					// TODO (n-kato) 失敗は無視する。または、msgidでない別の新しいmsgidを作り失敗をoutに通知する
+					// todo (n-kato) 失敗は無視する。または、msgidでない別の新しいmsgidを作り失敗をoutに通知する
 					respondAsFail(msgid);
 					continue;
 				} else {
@@ -167,7 +167,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 								}
 							}
 							else { //他ノード宛ならconnectをそのまま転送する
-								LMNtalDaemon.makeRemoteConnection(fqdn); // TODO ブロックしないようにする
+								LMNtalDaemon.makeRemoteConnection(fqdn); // TODO（効率改善）ブロックしないようにする
 								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
 							}
 						} else {

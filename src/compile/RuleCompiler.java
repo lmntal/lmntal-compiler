@@ -589,7 +589,7 @@ public class RuleCompiler {
 	}
 	
 	/** リンクの張り替えと生成を行う
-	 * TODO コードを整理する */
+	 * todo コードを整理する */
 	private void updateLinks() {
 		Env.c("RuleCompiler::updateLinks");
 		

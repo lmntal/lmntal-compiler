@@ -231,7 +231,7 @@ public class FrontEnd {
 			Membrane root = rt.getGlobalRoot();
 			Env.initGUI(root);
 			//root.blockingLock();
-			rs.react(root); // TODO 初期配置で子タスクを作った場合にどうなるか考える
+			rs.react(root); // TODO 【検証】初期配置で子タスクを作った場合にどうなるか考える
 			if (Env.gui != null) {
 				Env.gui.lmnPanel.getGraphLayout().calc();
 				Env.gui.onTrace();

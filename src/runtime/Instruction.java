@@ -24,7 +24,7 @@ import java.io.*;
  * リモートのルート膜のロックが解放されると、実行膜スタックの先頭に丸ごと移動される。
  * これによって実行膜スタックに全ての膜がアトミックに積まれることになる。
  * </ul>
- * TODO コンパイラは次のコードを出力する：addmemやnewrootした膜は、ルール実行終了時に（子膜側から順番に）unlockmemを実行する。
+ * コンパイラは次のコードを出力する：addmemやnewrootした膜は、ルール実行終了時に（子膜側から順番に）unlockmemを実行する。
  */
  
 /**
@@ -441,7 +441,8 @@ public class Instruction implements Cloneable, Serializable {
 	 * <br>最適化用ボディ命令<br>
 	 * 何もしない。
 	 * <p>$srcatomがどの膜にも属さず、かつこの計算ノード内の実行アトムスタックに積まれていないことを表す。
-	 * TODO アトムを他の計算ノードで積んでいる場合、輸出表の整合性は大丈夫か調べる。*/
+	 * アトムを他の計算ノードで積んでいる場合、輸出表の整合性は大丈夫か調べる。
+	 * → 輸出表は作らないことにしたので大丈夫。*/
 	public static final int FREEATOM = 35;
 	// LOCALFREEATOMは不要
 	static {setArgType(FREEATOM, new ArgType(false, ARG_ATOM));}
@@ -1304,7 +1305,7 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(INT2FLOATFUNC, new ArgType(true, ARG_VAR, ARG_VAR));}
 	
 
-	// TODO BUILTIN 命令を使う方がよいと思われる
+	// TODO （拡張性向上）BUILTIN 命令を使う方がよいと思われる
 //	public static final int FSIN = 640;
 //	public static final int FCOS = 641;
 //	public static final int FTAN = 642;
@@ -1631,7 +1632,7 @@ public class Instruction implements Cloneable, Serializable {
 	// 最適化器が使う、命令列書き換えのためのクラスメソッド
 	// @author Mizuno
 	
-	// TODO argtype は signature に名称変更するとよい
+	// todo argtype は signature に名称変更するとよい
 	
 	private static void setArgType(int kind, ArgType argtype) {	
 		if (argTypeTable.containsKey(new Integer(kind))) {

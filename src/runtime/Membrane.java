@@ -6,7 +6,7 @@ import util.Stack;
 
 /**
  * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。
- * TODO 最適化用に、子孫にルート膜を持つことができない（実行時エラーを出す）「データ膜」クラスを作る。
+ * todo （効率改善） 最適化用に、子孫にルート膜を持つことができない（実行時エラーを出す）「データ膜」クラスを作る。
  * @author Mizuno, n-kato
  */
 public final class Membrane extends AbstractMembrane {
@@ -16,7 +16,7 @@ public final class Membrane extends AbstractMembrane {
 	/** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
 	private Membrane(AbstractTask task, AbstractMembrane parent) {
 		super(task, parent);
-		daemon.IDConverter.registerGlobalMembrane(getGlobalMemID(), this); // TODO free時に消す
+		daemon.IDConverter.registerGlobalMembrane(getGlobalMemID(), this); // TODO （効率改善）free時に消す
 	}
 	/** 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。*/
 	protected Membrane(Task task) {
@@ -54,7 +54,7 @@ public final class Membrane extends AbstractMembrane {
 	public Atom newAtom(Functor functor) {
 		if (task.remote == null) return super.newAtom(functor);
 		else task.remote.send("NEWATOM",this,functor.toString());
-		return null;	// TODO なんとかする
+		return null;	// todo なんとかする（local-remote-local 問題）
 	}
 	/** （所属膜を持たない）アトムをこの膜に追加する。*/
 	public void addAtom(Atom atom) {
@@ -64,7 +64,7 @@ public final class Membrane extends AbstractMembrane {
 	/** 指定されたアトムの名前を変える */
 	public void alterAtomFunctor(Atom atom, Functor func) {
 		if (task.remote == null) super.alterAtomFunctor(atom,func);
-		else task.remote.send("ALTERATOMFUNCTOR", this, atom + " " + func);	// TODO 修正
+		else task.remote.send("ALTERATOMFUNCTOR", this, atom + " " + func.serialize());
 	}
 
 	/** 
@@ -161,7 +161,7 @@ public final class Membrane extends AbstractMembrane {
 	public AbstractMembrane newRoot(String node) {
 		if (task.remote == null) return super.newRoot(node);
 		else task.remote.send("NEWROOT", this, node);
-		return null;	// TODO なんとかする
+		return null;	// todo なんとかする（local-remote-local 問題）
 	}
 	
 	// ボディ操作5 - 膜自身や移動に関する操作
@@ -348,10 +348,11 @@ public final class Membrane extends AbstractMembrane {
 	/** この膜のキャッシュを表すバイト列を取得する。
 	 * @see RemoteMembrane#updateCache() */
 	public byte[] cache() {
-		return new byte[0];	// TODO 実装
+		return new byte[0];	// TODO 【実装】（有志A）1/2
 		// （初期の案）以下をカンマで連結する
 		// アトム      -> atomid:functortext( リンク先atomid:pos, ... )
 		// 子膜        -> globalMemID:{ inside_proxyのatomid, ... }
 		// ルールセット -> globalRulesetID
 	}
 }
+// TODO local-remote-local 問題を解決する

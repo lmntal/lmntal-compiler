@@ -24,7 +24,7 @@ public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 * @param hostname 計算ノードが存在するホスト名（fqdn）
 	 */
 	protected RemoteLMNtalRuntime(String hostname) {
-//		this.runtimeid = runtimeid;  //TODO 接続先からIDを受け取って代入する（今は未使用なので問題が発生しない）
+//		this.runtimeid = runtimeid;  // todo 接続先からIDを受け取って代入する（今は未使用なので問題が発生しない）
 		this.hostname = hostname;
 	}
 

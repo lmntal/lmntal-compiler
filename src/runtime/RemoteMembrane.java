@@ -205,7 +205,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 		//todo:locked==trueのとき、この計算ノードの誰がロックしたか分からないのを何とかする
 		// [ロック解放要求の処理方法]
 		// * 仮ロックされた本膜のロックを解放してもらうときに必要。
-		// ルールスレッドがロックしていた場合、タスクのIDをリモートに渡す？【TODO 本当に必要か？】
+		// ルールスレッドがロックしていた場合、タスクのIDをリモートに渡す？【todo 本当に必要か？】
 		// 非ルールスレッドがロックしていた場合、タスクは存在しないが、
 		// 優先度無限大と見なすのでロックは解放できないことになっているので大丈夫。
 		if (!doLock("BLOCKINGLOCK")) return false;
@@ -282,7 +282,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 	/** キャッシュを更新する
 	 * @see Membrane#cache() */
 	protected void updateCache(byte[] data) {
-		// TODO 実装
+		// TODO 【実装】（有志A）2/2
 		
 		// アトム      ->
 		// 子膜        -> daemon.IDConverter.registerGlobalMembrane()；自由リンクを接続

@@ -58,7 +58,7 @@ public final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  4,3,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,0,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.LOCALUNIFY,  1,1,5,1,0));
-		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // TODO 子膜を活性化しないようにする
+		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // TODO （効率改善）子膜を活性化しないようにする
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 		//

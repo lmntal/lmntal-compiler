@@ -5,7 +5,7 @@ import java.io.*;
 
 /**
  * Stringの名前とリンク数の組からなるアトムのFunctor。
- * TODO SymbolFunctorというサブクラスを作ったほうがいいかもしれない。
+ * todo SymbolFunctorというサブクラスを作ったほうがいいかもしれない。
  */
 public class Functor implements Serializable {
 	//**注意**：特殊なFunctorを追加した場合、readObjectメソッドを変更する事。

@@ -19,7 +19,7 @@ import compile.structure.*;
  * Ruby版では仮引数IDがそのままボディ命令列の仮引数番号を表していたが、今は違うので、仮引数ID自身には意味が無くなったため。
  * この廃止に伴って、仮引数IDでループする部分は全てatoms.iterator()を使うように変更する。
  * 
- * TODO pathという命名が現状を正しく表していない。実際はvarnumだが、長いのでidにしようかとも思っている
+ * todo pathという命名が現状を正しく表していない。実際はvarnumだが、長いのでidにしようかとも思っている
  * 
  * <p><b>現状</b>　
  * 現在マッチング命令列では、本膜の変数番号を0、主導するアトムの変数番号を1にしている。これは今後も変えない。
@@ -281,7 +281,7 @@ public class HeadCompiler {
 			}
 		}
 		// 見つかった新しい子膜にあるアトムを優先的に検査する。
-		// TODO アクティブアトムがある膜を優先すべきである。これは膜主導のときの最初のアトム選択と共通の課題
+		// TODO （効率改善）アクティブアトムがある膜を優先すべきである。これは膜主導のときの最初のアトム選択と共通の課題
 		Iterator it = newmemlist.iterator();
 		while (it.hasNext()) {
 			compileMembrane((Membrane)it.next());
@@ -348,7 +348,7 @@ public class HeadCompiler {
 			// （ガードコンパイラに移動する予定）
 			if (submem.processContexts.isEmpty()) {
 //				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
-				// TODO 単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(1)
+				// TODO （機能拡張）単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(1)
 				match.add(new Instruction(Instruction.NATOMS, submempath,
 					submem.getNormalAtomCount() + submem.typedProcessContexts.size() ));
 				match.add(new Instruction(Instruction.NMEMS,  submempath, submem.mems.size()));
@@ -415,7 +415,7 @@ public class HeadCompiler {
 			compileMembrane(eq.mem);
 			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
 			if (eq.mem.processContexts.isEmpty()) {
-				// TODO 単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(2)
+				// TODO （機能拡張）単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(2)
 				match.add(new Instruction(Instruction.NATOMS, mempaths.get(eq.mem),
 					  eq.def.lhsOcc.mem.getNormalAtomCount() + eq.def.lhsOcc.mem.typedProcessContexts.size()
 					+ eq.mem.getNormalAtomCount() + eq.mem.typedProcessContexts.size() ));
@@ -425,7 +425,7 @@ public class HeadCompiler {
 			else {
 				ProcessContext pc = (ProcessContext)eq.mem.processContexts.get(0);
 				if (pc.bundle == null) {
-					// TODO 自由リンクの個数を検査する。ただし実装する前に$ppの明示的な自由リンクの集合を明らかにしなければならない。
+					// TODO （機能拡張）自由リンクの個数を検査する。ただし実装する前に$ppの明示的な自由リンクの集合を明らかにしなければならない。
 				}
 			}
 			// eq.mem.ruleContexts は無視される					
@@ -435,4 +435,4 @@ public class HeadCompiler {
 		//matchLabel.updateLocals(varcount);
 	}
 }
-// TODO ガード否定条件の中の型付きプロセス文脈をコンパイルする
+// TODO （機能拡張）ガード否定条件の中の型付きプロセス文脈をコンパイルする

@@ -35,7 +35,7 @@ abstract public class Ruleset {
 	
 	/** (n-kato)このメソッドを使わないように書き換えてもよい（仮）*/
 	public byte[] serialize() {
-		return new byte[0]; // TODO 実装（水野君） - ただしバイナリ転送問題の解決が先
+		return new byte[0]; // TODO 【実装】（水野君） - ただしバイナリ転送問題の解決が先
 	}
 	/** (n-kato)このメソッドを使わないように書き換えてもよい（仮）*/
 	public static Ruleset deserialize(byte[] data) {
