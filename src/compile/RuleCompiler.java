@@ -628,7 +628,7 @@ public class RuleCompiler {
 					body.add(new Instruction(Instruction.MOVECELLS,
 						rhsmemToPath(mem), lhsmemToPath(pc.def.src.mem) ));
 				} else {
-					error("FEATURE NOT IMPLEMENTED: process context must be linear: " + pc);
+					error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + pc);
 					corrupted();
 				}
 			}

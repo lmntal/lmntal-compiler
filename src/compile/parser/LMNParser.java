@@ -591,7 +591,7 @@ public class LMNParser {
 			ProcessContext pc = (ProcessContext)it.next();
 			String name = pc.getQualifiedName();
 			if (!names.containsKey(name)) {
-				error("SYNTAX ERROR: process context not appeared in head: " + pc.getQualifiedName());
+				error("SYNTAX ERROR: untyped process context not appeared in head: " + pc.getQualifiedName());
 				it.remove();
 				continue;
 			}
@@ -600,7 +600,7 @@ public class LMNParser {
 				if (pc.def.src != null) {
 					if (pc.args.length != pc.def.src.args.length
 					 || ((pc.bundle == null) != (((ProcessContext)pc.def.src).bundle == null)) ) {
-						error("SYNTAX ERROR: Unmatched length of free link list of process context: " + pc);
+						error("SYNTAX ERROR: unmatched length of free link list of process context: " + pc);
 						it.remove();
 						continue;
 					}

@@ -105,6 +105,7 @@ public class REPL {
 					continue;
 				} else {
 					lb.append(line);
+					lb.append("\n");
 				}
 			} catch (EOFException e) {
 				break;
