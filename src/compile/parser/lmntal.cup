@@ -17,6 +17,7 @@ non terminal SrcLink			Link;
 non terminal SrcName			FuncName;
 non terminal String				AtomName;
 non terminal Object				UnitAtom;
+non terminal Object				UnaryOpAtom;
 non terminal Object				Atom400;
 non terminal Object				Atom500;
 non terminal Object				Atom;
@@ -70,13 +71,25 @@ UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = link; :}
 				;
 
-Atom400		::=   UnitAtom:atom
+UnaryOpAtom	::=	  UnitAtom:atom
 					{: RESULT = atom; :}
-				| Atom400:atom1 ASTERISK UnitAtom:atom2
+				| PLUS UnitAtom:atom
+					{: LinkedList list = new LinkedList();
+					   list.add(atom);
+					   RESULT = new SrcAtom("+", list); :}
+				| MINUS UnitAtom:atom
+					{: LinkedList list = new LinkedList();
+					   list.add(atom);
+					   RESULT = new SrcAtom("-", list); :}
+				;
+
+Atom400		::=   UnaryOpAtom:atom
+					{: RESULT = atom; :}
+				| Atom400:atom1 ASTERISK UnaryOpAtom:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("*", list); :}
-				| Atom400:atom1 SLASH UnitAtom:atom2
+				| Atom400:atom1 SLASH UnaryOpAtom:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("/", list); :};
