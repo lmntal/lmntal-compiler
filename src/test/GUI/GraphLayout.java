@@ -187,6 +187,7 @@ public class GraphLayout implements Runnable {
 		// 実際に移動する
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
+			if(me==((LMNGraphPanel)parent).movingNode) continue;
 			me.move(parent.getBounds());
 		}
 	}
