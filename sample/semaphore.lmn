@@ -1,3 +1,6 @@
+//Semaphore example
+
+//Make new semaphore
 call(sem, sem.new, sem1).
 {
 	call(sem, sem.up,    sem1).
