@@ -372,6 +372,7 @@
 ),
 /*
 	choiceがあるheadとクエリーのunify (active -> trial)
+	binding resultの追加
 */
 (
 	{ choice(CH), head(FACT_IN), $p1 },
