@@ -318,6 +318,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		 || command[0].equalsIgnoreCase("ASYNCLOCK")) {
 			Thread t1 = new Thread(new LockProcessor(command[0], this, mem, msgid));
 			t1.start();
+			return; //TODO いずれ直すべし
 		} else if (command[0].equalsIgnoreCase("RECURSIVELOCK")) {
 			// RECURSIVELOCK globalmemid
 			// ロックしたローカルの膜の全世界の子孫膜を再帰的にロック（キャッシュは更新しない）
@@ -684,6 +685,8 @@ class LockProcessor implements Runnable{
 			}	else {
 				node.respond(msgid, "UNCHANGED");
 			}
+		} else {
+			node.respondAsFail(msgid);
 		}
 	}
 }
