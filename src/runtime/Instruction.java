@@ -1101,29 +1101,44 @@ public class Instruction implements Cloneable, Serializable {
 
 	// 型付きプロセス文脈を扱うための追加命令 (216--219)	
 
-	/** eqground [groundlink1,groundlink2]
+	/** eqground [link1,link2]
 	 * <br>（予約された）拡張ガード命令<br>
-	 * 基底項プロセスを指す2つのリンクlink1とlink2に対して、
+	 * （どちらかが基底項プロセスを指すとわかっている）
+	 * 2つのリンクlink1とlink2に対して、
 	 * それらが同じ形状の基底項プロセスであることを確認する。
 	 * @see isground */
 	public static final int EQGROUND = 216;
 	static {setArgType(EQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
+
+	/** copyground [-dstlink, srclink, dstmem]
+	 * （基底項プロセスを指す）リンク$srclinkを$dstmemに複製し、$dstlinkに格納する。
+	 * @see isground */
+	public static final int COPYGROUND = 217;
+	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	
+	/** dropground [srclink, srcmem]
+	 * $srcmemに属する（基底項プロセスを指す）リンク$srclinkを破棄する。
+	 * @see isground */
+	public static final int DROPGROUND = 218;
+	static {setArgType(DROPGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
 	
 	// 型検査のためのガード命令 (220--229)	
 
-	/** isground [-natoms, link]
+	/** isground [-natomsfunc, link, srcset]
 	 * <br>（予約された）ロック取得する拡張ガード命令<br>
 	 * リンク$linkの指す先が基底項プロセスであることを確認する。
-	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこのセルに存在していることを確認する。
-	 * 見つかった基底項プロセスにつながった子膜は再帰的にロックする。
-     * 取得したロックは、後続の命令列が失敗したときに解放される。
+	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこの膜に存在していることを確認する。
+	 * ただし、$srcsetに登録されたアトムに到達したら失敗する。
 	 * 見つかった基底項プロセスを構成するこの膜のアトムの個数（をラップしたInteger）を$natomsに格納する。
+     * 
      * <p>natomsとnmemsと統合した命令を作り、$natomsの総和を引数に渡すようにする。
      * 子膜の個数の照合は、本膜がロックしていない子膜の個数が0個かどうか調べればよい。
      * しかし本膜がロックしたかどうかを調べるメカニズムが今は備わっていないため、保留。
-     * <p>仕様検討中。*/
+     * 
+     * groundには膜は含まれないことになったので、上記は不要
+     * */
 	public static final int ISGROUND = 220;
-	static {setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR));}
+	static {setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
 	
 	/** isunary [atom]
 	 * <br>ガード命令<br>
