@@ -1591,26 +1591,61 @@ public class Instruction implements Cloneable {
 	}
 
 	/**
-	 * 与えられた対応表によって、ボディ命令列中の変数を書き換える。<br>
+	 * 与えられた対応表によって、ボディ命令列中のアトム変数を書き換える。<br>
 	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
 	 * 
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void changeVar(List list, Map map) {
+	public static void changeAtomVar(List list, Map map) {
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
 			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
-			if (argtype.type.length != inst.data.size()) {
-				if (inst.getKind() != Instruction.REMOVEATOM) {
-					System.err.println("WARNING: length of arg is different from table data : " + inst);
-				}
-			}
 			for (int i = 0; i < inst.data.size(); i++) {
 				switch (argtype.type[i]) {
 					case ARG_ATOM:
+						changeArg(inst, i+1, map);
+						break;
+				}
+			}
+		}
+	}
+	/**
+	 * 与えられた対応表によって、ボディ命令列中の膜変数を書き換える。<br>
+	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
+	 * 
+	 * @param list 書き換える命令列
+	 * @param map 変数の対応表。
+	 */
+	public static void changeMemVar(List list, Map map) {
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
+			for (int i = 0; i < inst.data.size(); i++) {
+				switch (argtype.type[i]) {
 					case ARG_MEM:
+						changeArg(inst, i+1, map);
+						break;
+				}
+			}
+		}
+	}
+	/**
+	 * 与えられた対応表によって、ボディ命令列中のアトム・膜以外の変数を書き換える。<br>
+	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
+	 * 
+	 * @param list 書き換える命令列
+	 * @param map 変数の対応表。
+	 */
+	public static void changeOtherVar(List list, Map map) {
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
+			for (int i = 0; i < inst.data.size(); i++) {
+				switch (argtype.type[i]) {
 					case ARG_VAR:
 						changeArg(inst, i+1, map);
 						break;
@@ -1618,6 +1653,30 @@ public class Instruction implements Cloneable {
 			}
 		}
 	}
+	/**
+	 * 与えられた対応表によって、ボディ命令列中のすべての変数を書き換える。<br>
+	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
+	 * 
+	 * @param list 書き換える命令列
+	 * @param map 変数の対応表。
+	 */
+	public static void changeAllVar(List list, Map map) {
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
+			for (int i = 0; i < inst.data.size(); i++) {
+				switch (argtype.type[i]) {
+					case ARG_MEM:
+					case ARG_ATOM:
+					case ARG_VAR:
+						changeArg(inst, i+1, map);
+						break;
+				}
+			}
+		}
+	}
+
 	/**
 	 * この命令が出力命令の場合、出力の種類を返す。
 	 * そうでない場合、-1を返す。
