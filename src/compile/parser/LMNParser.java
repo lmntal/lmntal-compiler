@@ -98,7 +98,9 @@ public class LMNParser {
 			Membrane childMem = (Membrane)mem.mems.get(i);
 			// 自由リンクの取り出し
 			for (int j=0;j<childMem.freeLinks.size();j++) {
-				connectLink((LinkOccurrence)childMem.freeLinks.get(i), linkNameTable, true, mem);
+				LinkOccurrence freeLink = 
+					addProxyToMem((LinkOccurrence)childMem.freeLinks.get(j), mem, ProxyAtom.OUTSIDE_PROXY);
+				connectLink(freeLink, linkNameTable);
 			}
 		}
 
@@ -108,7 +110,7 @@ public class LMNParser {
 			while (enumLinkName.hasMoreElements()) {
 				// プロキシを通した先のリンクを取得
 				LinkOccurrence freeLink = 
-					addProxyToMem((LinkOccurrence)linkNameTable.get(enumLinkName.nextElement()), mem);
+					addProxyToMem((LinkOccurrence)linkNameTable.get(enumLinkName.nextElement()), mem, ProxyAtom.INSIDE_PROXY);
 				mem.freeLinks.add(freeLink);
 			}
 		}
@@ -122,20 +124,34 @@ public class LMNParser {
 	 * アトムにプロキシーを追加
 	 * @param freeLink プロキシーを通して外に出る自由リンク
 	 * @param mem 追加先の膜
+	 * @param プロキシのタイプ
 	 * @return プロキシーの先のリンクオブジェクト
 	 */
-	private LinkOccurrence addProxyToMem(LinkOccurrence freeLink, Membrane mem) {
-		ProxyAtom proxy = new ProxyAtom(mem);
-		proxy.args[0] = new LinkOccurrence(freeLink.name, proxy, 0); // 外側
-		proxy.args[1] = new LinkOccurrence(PREFIX_PROXY_LINK_NAME+freeLink.name, proxy, 1); // 内側
-		// 内側の結合
-		proxy.args[1].buddy = freeLink;
-		freeLink.buddy = proxy.args[1];
-		freeLink.name = proxy.args[1].name;
-		// プロキシの追加
-		mem.atoms.add(proxy);
-		
-		return proxy.args[0];
+	private LinkOccurrence addProxyToMem(LinkOccurrence freeLink, Membrane mem, int type) {
+		ProxyAtom proxy = new ProxyAtom(type, mem);
+		if (type == ProxyAtom.INSIDE_PROXY) {
+			proxy.args[0] = new LinkOccurrence(freeLink.name, proxy, 0); // 外側
+			proxy.args[1] = new LinkOccurrence(PREFIX_PROXY_LINK_NAME+freeLink.name, proxy, 1); // 内側
+			// 内側の結合
+			proxy.args[1].buddy = freeLink;
+			freeLink.buddy = proxy.args[1];
+			freeLink.name = proxy.args[1].name;
+			// プロキシの追加
+			mem.atoms.add(proxy);
+			return proxy.args[0];
+		} else if (type == ProxyAtom.OUTSIDE_PROXY) {
+			proxy.args[0] = new LinkOccurrence(PREFIX_PROXY_LINK_NAME+freeLink.name, proxy, 0); // 内側
+			proxy.args[1] = new LinkOccurrence(freeLink.name, proxy, 1); // 外側
+			// 内側の結合
+			proxy.args[0].buddy = freeLink;
+			freeLink.buddy = proxy.args[0];
+			freeLink.name = proxy.args[0].name;
+			// プロキシの追加
+			mem.atoms.add(proxy);
+			return proxy.args[1];
+		} else {
+			return null;
+		}
 	}
 	
 	
@@ -146,18 +162,6 @@ public class LMNParser {
 	 * @throws ParseException 2回より多くリンク名が出現した場合
 	 */
 	private void connectLink(LinkOccurrence lnk, Hashtable linkNameTable) throws ParseException {
-		connectLink(lnk, linkNameTable, false, null);
-	}
-	
-	/**
-	 * リンクの結合を行う
-	 * @param lnk 結合を行いたい
-	 * @param linkNameTable リンク名にリンクオブジェクトを対応づけたテーブル
-	 * @param isOverMembrane 膜を通過するリンクか
-	 * @param mem 追加先の膜
-	 * @throws ParseException 2回より多くリンク名が出現した場合
-	 */
-	private void connectLink(LinkOccurrence lnk, Hashtable linkNameTable, boolean isOverMembrane, Membrane mem) throws ParseException {
 		// 3回以上の出現
 		if (linkNameTable.get(lnk.name) == Boolean.TRUE) {
 			throw new ParseException("Link Name '" + lnk.name + "' appear more than 3.");
@@ -169,12 +173,39 @@ public class LMNParser {
 		// 2回目の出現
 		else {
 			LinkOccurrence buddy = (LinkOccurrence)linkNameTable.get(lnk.name);
-			if (isOverMembrane) buddy = addProxyToMem(buddy, mem);
 			lnk.buddy = buddy;
 			buddy.buddy = lnk;
 			linkNameTable.put(lnk.name, Boolean.TRUE);
 		}
 	}
+	
+	/**
+	 * リンクの結合を行う
+	 * @param lnk 結合を行いたい
+	 * @param linkNameTable リンク名にリンクオブジェクトを対応づけたテーブル
+	 * @param isOverMembrane 膜を通過するリンクか
+	 * @param mem 追加先の膜
+	 * @throws ParseException 2回より多くリンク名が出現した場合
+	 */
+/*	private void connectLink(LinkOccurrence lnk, Hashtable linkNameTable, boolean isOverMembrane, Membrane mem) throws ParseException {
+		// 3回以上の出現
+		if (linkNameTable.get(lnk.name) == Boolean.TRUE) {
+			throw new ParseException("Link Name '" + lnk.name + "' appear more than 3.");
+		}
+		// 1回目の出現
+		else if (linkNameTable.get(lnk.name) == null) {
+			linkNameTable.put(lnk.name, lnk);
+		}
+		// 2回目の出現
+		else {
+			LinkOccurrence buddy = (LinkOccurrence)linkNameTable.get(lnk.name);
+//			if (isOverMembrane) buddy = addProxyToMem(buddy, mem, ProxyAtom.OUTSIDE_PROXY);
+			lnk.buddy = buddy;
+			buddy.buddy = lnk;
+			linkNameTable.put(lnk.name, Boolean.TRUE);
+		}
+	}
+*/
 	
 	/**
 	 * 膜にアトム、子膜、ルールなどを追加
