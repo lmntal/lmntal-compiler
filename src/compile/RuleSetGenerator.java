@@ -34,6 +34,7 @@ public class RuleSetGenerator {
 		root.rules.add(rs);
 		rs.parent = root;
 		processMembrane(root);
+		listupModules(root);
 		return root;
 	}
 	
@@ -56,6 +57,32 @@ public class RuleSetGenerator {
 			RuleStructure rs = (RuleStructure)i.next();
 			RuleCompiler rc = new RuleCompiler(rs);
 			rc.compile();
+		}
+	}
+	
+	public static void listupModules(Membrane m) {
+		Env.p("listupModules");
+		Iterator i;
+		i = m.atoms.listIterator();
+		while(i.hasNext()) {
+			Atom a = (Atom)i.next();
+			runtime.Functor f = new runtime.Functor("name", 1);
+			if(a.functor.equals(f)) {
+				Env.p("Module found : "+a.args[0].atom);
+			}
+		}
+		i = m.rules.listIterator();
+		while(i.hasNext()) {
+			RuleStructure rs = (RuleStructure)i.next();
+			//Env.p("");
+			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
+			listupModules(rs.leftMem);
+			//Env.p("About rule structure (LEFT): "+rs.rightMem+" of "+rs);
+			listupModules(rs.rightMem);
+		}
+		i = m.mems.listIterator();
+		while(i.hasNext()) {
+			listupModules((Membrane)i.next());
 		}
 	}
 }
