@@ -48,7 +48,7 @@ public class LMNtalNode {
 	//
 	
 	public void close() {
-		if(Env.debug > 0)System.out.println(socket);
+		if(Env.debug > 0)System.out.println("LMNtalNode.close(): "+ socket);
 		try {
 			in.close();
 			out.close();
