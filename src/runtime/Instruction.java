@@ -952,28 +952,17 @@ public class Instruction implements Cloneable {
 	public static final int FMUL = 602;
 	public static final int FDIV = 603;
 	public static final int FNEG = 604;
-	public static final int FMOD = 605;
-	public static final int FNOT = 610;
-	public static final int FAND = 611;
-	public static final int FOR  = 612;
-	public static final int FXOR = 613;
-	public static final int FSAL = 614;
-	public static final int FSAR = 615;
-	public static final int FSHR = 616;
+
+	// TODO BUILTIN 命令を使う方がよいと思われる
+//	public static final int FSIN = 610;
+//	public static final int FCOS = 611;
+//	public static final int FTAN = 612;
 	
 	public static final int FADDFUNC = FADD + OPT;
 	public static final int FSUBFUNC = FSUB + OPT;
 	public static final int FMULFUNC = FMUL + OPT;
 	public static final int FDIVFUNC = FDIV + OPT;
 	public static final int FNEGFUNC = FNEG + OPT;
-	public static final int FMODFUNC = FMOD + OPT;
-	public static final int FNOTFUNC = FNOT + OPT;
-	public static final int FANDFUNC = FAND + OPT;
-	public static final int FORFUNC  = FOR  + OPT;
-	public static final int FXORFUNC = FXOR + OPT;
-	public static final int FSALFUNC = FSAL + OPT;
-	public static final int FSARFUNC = FSAR + OPT;
-	public static final int FSHRFUNC = FSHR + OPT;
 	
 	// 浮動小数点数用の組み込みガード命令 (620--629+OPT)
 	public static final int FLT = 620;
