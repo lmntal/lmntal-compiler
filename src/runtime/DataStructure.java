@@ -247,6 +247,8 @@ abstract class AbstractMembrane extends QueuedEntity {
 	///////////////////////////////
 	// 操作
 
+	abstract void activate();
+	
 	/** ルールを全てクリアする */
 	void clearRules() {
 		rulesets.clear();
