@@ -1,0 +1,43 @@
+/*boolean module*/
+/*‹@”\ˆê——*/
+/* not,&&,||,^*/
+
+{
+module(bool).
+
+/*
+ * not
+ *
+ */
+H='not'(true) :- H=false.
+H='not'(false) :- H=true.
+
+/*
+ * &&
+ *
+ */
+H='&&'(true, true) :- H=true.
+H='&&'(true, false) :- H=false.
+H='&&'(false, true) :- H=false.
+H='&&'(false, false) :- H=false.
+
+
+/*
+ * ||
+ *
+ */
+H='||'(true, true) :- H=true.
+H='||'(true, false) :- H=true.
+H='||'(false, true) :- H=true.
+H='||'(false, false) :- H=false.
+
+
+/*
+ * ^(XOR)
+ *
+ */
+H='^'(true, true) :- H=false.
+H='^'(true, false) :- H=true.
+H='^'(false, true) :- H=true.
+H='^'(false, false) :- H=false.
+}.
