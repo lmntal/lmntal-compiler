@@ -60,10 +60,11 @@ nowplayer(1).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ルール:入力に対するチェック
 {rule_input_checker.
-  input_check(Xi,Yi),
-  {stone,x(X),y(Y),$s} :-
-    int(X),int(Y),int(Xi),int(Yi),X=Xi,Y=Yi|
-    {stone,x(X),y(Y),$s},input_fault(Xi,Yi).
+%  input_check(Xi,Yi),
+%  {stone,x(X),y(Y),$s} :-
+%    int(X),int(Y),int(Xi),int(Yi),X=Xi,Y=Yi|
+%    {stone,x(X),y(Y),$s},input_fault(Xi,Yi).
+a :- b.
 }.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -80,9 +81,7 @@ input_checking,{data,input_fault(Xi,Yi),$d,@r}/ :- int(Xi),int(Yi)|
 
 input_ok(X,Y),nowplayer(C),{data,$p} :- int(X),int(Y),int(C) |
   {data,
-    ns(N),
-    {+N,
-      stone,
+   ns={stone,
       {arm,dir(1),hand(1,L1),hand(2,R1)},
       {arm,dir(2),hand(1,L2),hand(2,R2)},
       {arm,dir(3),hand(1,L3),hand(2,R3)},
@@ -96,59 +95,54 @@ player_change,nowplayer(1):- player_changed,nowplayer(2).
 player_change,nowplayer(2):- player_changed,nowplayer(1).
 
 player_changed :- link.
+
+player_changed :- turn_end.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {rule_linker.
-  ns(N),
-  {+N,stone,x(X1),y(Y1),{arm,dir(1),hand(HN1,H1),$a1},$p},H1=n,
-  {   stone,x(X2),y(Y2),{arm,dir(1),hand(HN2,H2),$a2},$q},H2=n :-
+
+  ns={stone,x(X1),y(Y1),{arm,dir(1),hand(HN1,H1),$a1},$p},H1=n,
+     {stone,x(X2),y(Y2),{arm,dir(1),hand(HN2,H2),$a2},$q},H2=n :-
   int(X1),int(X2),int(Y1),int(Y2),int(HN1),int(HN2),
   X1=X2,Y2-Y1=HN2-HN1|
-%  [[/*inline*/
-%%    int x1=((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
-%    int x2=((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
-%    int y1=((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
-%    int y2=((IntegerFunctor)me.nthAtom(3).getFunctor()).intValue();
-%    int hn1=((IntegerFunctor)me.nthAtom(4).getFunctor()).intValue();
-%    int hn2=((IntegerFunctor)me.nthAtom(5).getFunctor()).intValue();
-%    System.out.println("link ("+ x1+","+y1+"):"+hn1+",("+x2+","+y2+"):"+hn2+".");
-%    me.nthAtom(0).remove();
-%    me.nthAtom(1).remove();
-%    me.nthAtom(2).remove();
-%    me.nthAtom(3).remove();
-%    me.nthAtom(4).remove();
-%%    me.nthAtom(5).remove();
-%    me.remove();
-%  ]](X1,X2,Y1,Y2,HN1,HN2),
-  ns(N),
-  {+N,stone,x(X1),y(Y1),{arm,dir(1),hand(HN1,X ),$a1},$p},
-  {   stone,x(X2),y(Y2),{arm,dir(1),hand(HN2,X ),$a2},$q}.
+  [[/*inline*/
+    int x1=((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+    int x2=((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+    int y1=((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
+    int y2=((IntegerFunctor)me.nthAtom(3).getFunctor()).intValue();
+    int hn1=((IntegerFunctor)me.nthAtom(4).getFunctor()).intValue();
+    int hn2=((IntegerFunctor)me.nthAtom(5).getFunctor()).intValue();
+    System.out.println("link ("+ x1+","+y1+"):"+hn1+",("+x2+","+y2+"):"+hn2+".");
+    me.nthAtom(0).remove();
+    me.nthAtom(1).remove();
+    me.nthAtom(2).remove();
+    me.nthAtom(3).remove();
+    me.nthAtom(4).remove();
+    me.nthAtom(5).remove();
+    me.remove();
+  ]](X1,X2,Y1,Y2,HN1,HN2),
+  ns={stone,x(X1),y(Y1),{arm,dir(1),hand(HN1,X ),$a1},$p},
+     {stone,x(X2),y(Y2),{arm,dir(1),hand(HN2,X ),$a2},$q}.
 
-  ns(N),
-  {+N,stone,x(X1),y(Y1),{arm,dir(3),hand(HN1,H1),$a1},$p},H1=n,
-  {   stone,x(X2),y(Y2),{arm,dir(3),hand(HN2,H2),$a2},$q},H2=n :-
+  ns={stone,x(X1),y(Y1),{arm,dir(3),hand(HN1,H1),$a1},$p},H1=n,
+     {stone,x(X2),y(Y2),{arm,dir(3),hand(HN2,H2),$a2},$q},H2=n :-
   int(X1),int(X2),int(Y1),int(Y2),int(HN1),int(HN2),
   Y1=Y2,X2-X1=HN2-HN1|
-  ns(N),
-  {+N,stone,x(X1),y(Y1),{arm,dir(3),hand(HN1,X ),$a1},$p},
-  {   stone,x(X2),y(Y2),{arm,dir(3),hand(HN2,X ),$a2},$q}.
+  ns={stone,x(X1),y(Y1),{arm,dir(3),hand(HN1,X ),$a1},$p},
+     {stone,x(X2),y(Y2),{arm,dir(3),hand(HN2,X ),$a2},$q}.
 
-  ns(N),
-  {+N,stone,x(X1),y(Y1),{arm,dir(2),hand(HN1,H1),$a1},$p},H1=n,
-  {   stone,x(X2),y(Y2),{arm,dir(2),hand(HN2,H2),$a2},$q},H2=n :-
+  ns={stone,x(X1),y(Y1),{arm,dir(2),hand(HN1,H1),$a1},$p},H1=n,
+     {stone,x(X2),y(Y2),{arm,dir(2),hand(HN2,H2),$a2},$q},H2=n :-
   int(X1),int(X2),int(Y1),int(Y2),int(HN1),int(HN2),
   X1+Y1=X2+Y2,X2-X1=HN2-HN1|
-  ns(N),
-  {+N,stone,x(X1),y(Y1),{arm,dir(2),hand(HN1,X ),$a1},$p},
-  {   stone,x(X2),y(Y2),{arm,dir(2),hand(HN2,X ),$a2},$q}.
+  ns={stone,x(X1),y(Y1),{arm,dir(2),hand(HN1,X ),$a1},$p},
+     {stone,x(X2),y(Y2),{arm,dir(2),hand(HN2,X ),$a2},$q}.
 
-  ns(N),
-  {+N,stone,x(X1),y(Y1),{arm,dir(4),hand(HN1,H1),$a1},$p},H1=n,
-  {   stone,x(X2),y(Y2),{arm,dir(4),hand(HN2,H2),$a2},$q},H2=n :-
+  ns={stone,x(X1),y(Y1),{arm,dir(4),hand(HN1,H1),$a1},$p},H1=n,
+     {stone,x(X2),y(Y2),{arm,dir(4),hand(HN2,H2),$a2},$q},H2=n :-
   int(X1),int(X2),int(Y1),int(Y2),int(HN1),int(HN2),
   X1-Y1=X2-Y2,X2-X1=HN2-HN1|
-  ns(N),
-  {+N,stone,x(X1),y(Y1),{arm,dir(4),hand(HN1,X ),$a1},$p},
-  {   stone,x(X2),y(Y2),{arm,dir(4),hand(HN2,X ),$a2},$q}.
+  ns={stone,x(X1),y(Y1),{arm,dir(4),hand(HN1,X ),$a1},$p},
+     {stone,x(X2),y(Y2),{arm,dir(4),hand(HN2,X ),$a2},$q}.
 
 }.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -161,8 +155,7 @@ linked :- judge.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {rule_judger.
   
-  ns(N),
-  {+N,stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),$p1},
+  ns={stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),$p1},
      {stone,{arm,dir(D2),hand(HN21,L2),hand(HN22,L1),$a2},color(C2),$p2},
      {stone,{arm,dir(D3),hand(HN31,L3),hand(HN32,L2),$a3},color(C3),$p3},
      {stone,{arm,dir(D4),hand(HN41,L4),hand(HN42,L3),$a4},color(C4),$p4},
@@ -171,16 +164,14 @@ linked :- judge.
   int(D1),int(D2),int(D3),int(D4),int(D5),D1=D2,D2=D3,D3=D4,D4=D5,
   int(HN11),int(HN21),int(HN31),int(HN41),
   int(HN22),int(HN32),int(HN42),int(HN52)|
-  ns(N),
-  {+N,stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),li,$p1},
+  ns={stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),li,$p1},
      {stone,{arm,dir(D2),hand(HN21,L2),hand(HN22,L1),$a2},color(C2),li,$p2},
      {stone,{arm,dir(D3),hand(HN31,L3),hand(HN32,L2),$a3},color(C3),li,$p3},
      {stone,{arm,dir(D4),hand(HN41,L4),hand(HN42,L3),$a4},color(C4),li,$p4},
      {stone,{arm,dir(D5),              hand(HN52,L4),$a5},color(C5),li,$p5},win(C1).
 
-  ns(N),
      {stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),$p1},
-  {+N,stone,{arm,dir(D2),hand(HN21,L2),hand(HN22,L1),$a2},color(C2),$p2},
+  ns={stone,{arm,dir(D2),hand(HN21,L2),hand(HN22,L1),$a2},color(C2),$p2},
      {stone,{arm,dir(D3),hand(HN31,L3),hand(HN32,L2),$a3},color(C3),$p3},
      {stone,{arm,dir(D4),hand(HN41,L4),hand(HN42,L3),$a4},color(C4),$p4},
      {stone,{arm,dir(D5),              hand(HN52,L4),$a5},color(C5),$p5},data :-
@@ -188,27 +179,24 @@ linked :- judge.
   int(D1),int(D2),int(D3),int(D4),int(D5),D1=D2,D2=D3,D3=D4,D4=D5,
   int(HN11),int(HN21),int(HN31),int(HN41),
   int(HN22),int(HN32),int(HN42),int(HN52)|
-  ns(N),
      {stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),li,$p1},
-  {+N,stone,{arm,dir(D2),hand(HN21,L2),hand(HN22,L1),$a2},color(C2),li,$p2},
+  ns={stone,{arm,dir(D2),hand(HN21,L2),hand(HN22,L1),$a2},color(C2),li,$p2},
      {stone,{arm,dir(D3),hand(HN31,L3),hand(HN32,L2),$a3},color(C3),li,$p3},
      {stone,{arm,dir(D4),hand(HN41,L4),hand(HN42,L3),$a4},color(C4),li,$p4},
      {stone,{arm,dir(D5),              hand(HN52,L4),$a5},color(C5),li,$p5},win(C1).
 
-  ns(N),
      {stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),$p1},
      {stone,{arm,dir(D2),hand(HN21,L2),hand(HN22,L1),$a2},color(C2),$p2},
-  {+N,stone,{arm,dir(D3),hand(HN31,L3),hand(HN32,L2),$a3},color(C3),$p3},
+  ns={stone,{arm,dir(D3),hand(HN31,L3),hand(HN32,L2),$a3},color(C3),$p3},
      {stone,{arm,dir(D4),hand(HN41,L4),hand(HN42,L3),$a4},color(C4),$p4},
      {stone,{arm,dir(D5),              hand(HN52,L4),$a5},color(C5),$p5},data :-
   int(C1),int(C2),int(C3),int(C4),int(C5),C1=C2,C2=C3,C3=C4,C4=C5,
   int(D1),int(D2),int(D3),int(D4),int(D5),D1=D2,D2=D3,D3=D4,D4=D5,
   int(HN11),int(HN21),int(HN31),int(HN41),
   int(HN22),int(HN32),int(HN42),int(HN52)|
-  ns(N),
      {stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),li,$p1},
      {stone,{arm,dir(D2),hand(HN21,L2),hand(HN22,L1),$a2},color(C2),li,$p2},
-  {+N,stone,{arm,dir(D3),hand(HN31,L3),hand(HN32,L2),$a3},color(C3),li,$p3},
+  ns={stone,{arm,dir(D3),hand(HN31,L3),hand(HN32,L2),$a3},color(C3),li,$p3},
      {stone,{arm,dir(D4),hand(HN41,L4),hand(HN42,L3),$a4},color(C4),li,$p4},
      {stone,{arm,dir(D5),              hand(HN52,L4),$a5},color(C5),li,$p5},win(C1).
 
@@ -224,7 +212,7 @@ judging,{win(C),$p,@r}/ :- int(C)| show_result,{win(C),$p}.
 judged :- ns_delete.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {rule_ns_deleter.
-  ns(N),{+N,$p} :-{$p}.
+  ns={$p} :-{$p}.
 }.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ns_delete,{rule_ns_deleter,@r},{data,$p} :-
@@ -243,6 +231,8 @@ update_ready,{data,$p} :-
 drawed :- turn_end.
 
 turn_end,nowplayer(2) :- com_think,nowplayer(2).
+
+turn_end,nowplayer(2) :- wait,nowplayer(2).
 
 turn_end,nowplayer(1) :- wait,nowplayer(1).
 
@@ -280,6 +270,7 @@ com_thinking,{dust,$dust},{thinking,input(X,Y),{data,$p},@r,$o}/ :-
       L4=n,
       input,x(X4+X4-X3),y(Y4+Y4-Y3) )
     }.
+
   {think1(C),$p,@p}/ :- int(C)| {$p,think2(C),
     ( think2(C),
       {stone,{arm,dir(D1),hand(HN11,L1),              $a1},color(C1),$p1},
@@ -303,6 +294,7 @@ com_thinking,{dust,$dust},{thinking,input(X,Y),{data,$p},@r,$o}/ :-
       L4=n,
       input,x(X4+X4-X3),y(Y4+Y4-Y3) )
     }.
+
   {think2(C),$p,@p}/ :- int(C)| {$p,think3(C),
     ( think3(C),
       {stone,{arm,dir(D1),hand(HN11,L1),         $a1},color(C1),$p1},
@@ -322,6 +314,7 @@ com_thinking,{dust,$dust},{thinking,input(X,Y),{data,$p},@r,$o}/ :-
       L3=n,
       input,x(X3+X3-X2),y(Y3+Y3-Y2) )
     }.
+
   {think_randam,$p}:-
     {rnd,randamX(integer.rnd(19)),randamY(integer.rnd(19))},
     {thinking_randam,$p}.
