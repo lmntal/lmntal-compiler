@@ -133,7 +133,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	/** この膜にある子膜の反復子を取得する */
 	public Iterator memIterator() {
-		return mems.iterator();
+// todo 膜をシャッフルするようにする
+//		if (Env.fRandom) {
+//			return new RandomIterator(mems);
+//		} else {
+			return mems.iterator();
+//		}
 	}
 	/** 名前funcを持つアトムの反復子を取得する */
 	public Iterator atomIteratorOfFunctor(Functor functor) {
