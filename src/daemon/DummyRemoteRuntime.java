@@ -6,19 +6,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-class DummyRemoteRuntime implements Runnable {
-	int rgid;
-
-	public DummyRemoteRuntime(int tmpRgid) {
-		rgid = tmpRgid;
-	}
-
-	public int getRgid(){
-		return rgid;
-	}
-
-	public void run() {
+class DummyRemoteRuntime{
+	public static void main(String[] args){
 		try {
+			int rgid = Integer.parseInt(args[0]);
+			
 			Socket socket = new Socket("localhost", 60000);
 
 			BufferedWriter out =
@@ -35,10 +27,20 @@ class DummyRemoteRuntime implements Runnable {
 
 			out.write(command);
 			out.flush();
-			
-			
-			
-			
+
+			String input;
+			while(true){
+				input = in.readLine();
+								
+				
+				if(input.equalsIgnoreCase("ok")){
+					
+				} else if(input.equalsIgnoreCase("res")){
+										
+				}
+				
+				
+			}
 		} catch (Exception e) {
 			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());
 		}

@@ -2,6 +2,8 @@ package test.distribute;
 
 
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -13,9 +15,38 @@ class Hoge {
 //		TestStringSplit();
 //		TestStringSplit2();
 //		DumpHashMap();
-		DumpHashMapNeat();			
+		//DumpHashMapNeat();
+		RuntimeBootTest();			
 	}
 	
+	/**
+	 * 
+	 */
+	private static void RuntimeBootTest() {
+		Process hoge;
+		String tmp;
+
+		try{
+//			hoge = Runtime.getRuntime().exec("java -version");
+//			hoge = Runtime.getRuntime().exec("echo hoge\n");
+			//hoge = Runtime.getRuntime().exec("dir");
+			hoge = Runtime.getRuntime().exec("help");
+			BufferedReader in = new BufferedReader(new InputStreamReader(hoge.getInputStream()));
+
+			while(true){
+				tmp = in.readLine();
+				if(tmp == null){
+					break;
+				} else {
+					System.out.println(tmp);
+				}
+			}
+			
+		} catch (Exception e){
+			System.out.println(e.toString());
+		}
+	}
+
 	static void DumpHashMapNeat(){
 		HashMap map = new HashMap();
 

@@ -120,11 +120,11 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 								//connectがきたら、ランタイムを生成する。
 								//TODO rgidの決め方どうしよう？
 
+								Process remoteRuntime;
+								remoteRuntime = Runtime.getRuntime().exec("java DummyRemoteRuntime 100");
 
-
+								
 								//OK返すのは生成されたライタイムが登録されてから。
-								
-								
 							} else if(command.equalsIgnoreCase("begin")){
 								//仮
 								out.write("not implemented yet\n");
