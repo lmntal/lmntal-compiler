@@ -332,7 +332,11 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		}
 		atoms.addAll(srcMem.atoms);
 		mems.addAll(srcMem.mems);
-		Iterator it = srcMem.memIterator();
+		Iterator it = srcMem.atomIterator();
+		while (it.hasNext()) {
+			((Atom)it.next()).mem = this;
+		}
+		it = srcMem.memIterator();
 		while (it.hasNext()) {
 			((AbstractMembrane)it.next()).parent = this;
 		}
