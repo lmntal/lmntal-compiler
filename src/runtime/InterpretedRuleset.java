@@ -208,7 +208,7 @@ public final class InterpretedRuleset extends Ruleset {
 
 	case Instruction.NEWLINK:
 	    //newlink [atom1, pos1, atom2, pos2]
-	    atomArgs[0].
+	    //atomArgs[0].
 	    break;
 
 	case Instruction.RELINK:
