@@ -224,6 +224,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				 *   BEGIN \n ボディ命令... END -> OK
 				 *   CONNECT        dst_nodedesc src_nodedesc -> OK | FAIL
 				 *   TERMINATE -> OK
+				 *  DISCONNECTRUNTIME
 				 *   REQUIRERULESET globalrulesetid  ->             RAW bytes \n data | FAIL
 				 *   LOCK           globalmemid prio -> UNCHANGED | RAW bytes \n data | FAIL
 				 *   BLOCKINGLOCK   globalmemid prio -> UNCHANGED | RAW bytes \n data | FAIL
@@ -233,26 +234,19 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 
 				String[] command = parsedInput[4].split(" ", 3);
 				
-				if (command[0].equalsIgnoreCase("TERMINATE")) {  //TODO dead lock
+				if (command[0].equalsIgnoreCase("TERMINATE")) {  
 					// TERMINATE
 					
-					//execute terminate on different thread
-					new Thread(){
-						String msgid = "";
-						
-						public void setMsgid(String msgid){
-							this.msgid = msgid;
-							this.start();
-						}
-						
-						public void run(){
-							LMNtalRuntimeManager.terminateAll();
-							respondAsOK(msgid);
-						}
-					}.setMsgid(msgid);
+					Thread t1 = new Thread(new TerminateProcessor(msgid, this));
+					t1.start();
 										
-					//return;
-					continue; //(nakajima 2004-10-25)
+					continue;
+				} else if (command[0].equalsIgnoreCase("DISCONNECTRUNTIME")) { 
+					//DISCONNECTRUNTIME
+					
+					Thread t1 = new Thread(new DisconnectProcessor());
+					t1.start();
+					
 				} else if (command[0].equalsIgnoreCase("CONNECT")) {
 					// CONNECT dst_nodedesc src_nodedesc
 					String nodedesc = command[2];
@@ -306,9 +300,6 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		Membrane mem = (Membrane)obj;
 		if(true)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is found.)"); //TODO Env.debug
 		
-		
-		//TODO ロック系の命令はひとつひとつに専用のクラスを定義し、thread化したいけど、
-		//          とりあえずLOCK BLOCKINGLOCK ASYNCLOCK をまとめてひとつのクラスにする
 		if (command[0].equalsIgnoreCase("LOCK")
 		 || command[0].equalsIgnoreCase("BLOCKINGLOCK")
 		 || command[0].equalsIgnoreCase("ASYNCLOCK")) {
@@ -418,6 +409,7 @@ class InstructionBlockProcessor implements Runnable {
 		 *   UNLOCK           srcmemid
 		 *   ASYNCUNLOCK      srcmemid
 		 *   RECURSIVEUNLOCK  srcmemid
+		 *  QUIETUNLOCK srcmemid
 		 */
 		
 		String result = "";	// 新しい子膜およびinside_proxyに対するID代入列を積み込む
@@ -444,15 +436,6 @@ class InstructionBlockProcessor implements Runnable {
 
 				String memid = command[1];
 				AbstractMembrane m = lookupMembrane(memid);
-				
-				//(nakajima 2004-10-18) なぜかぬるぽが出る
-//				if(DEBUG){
-//					if(m == null){
-//						System.out.println("LMNtalRuntimeMessageProcessor.run(): m is null");
-//					} else {
-//						System.out.println("LMNtalRuntimeMessageProcessor.run(): m is " + m);
-//					}
-//				}
 
 				if (m == null) {
 					// 未知の膜の場合、擬似膜の作成を試みる
@@ -613,6 +596,8 @@ class InstructionBlockProcessor implements Runnable {
 					mem.asyncUnlock();
 				} else if (command[0].equals("RECURSIVEUNLOCK")) {
 					mem.recursiveUnlock();
+				} else if (command[0].equals("QUIETUNLOCK")) {
+					mem.quietUnlock();
 				} else { //未知の命令
 					System.out.println("InstructionBlockProcessor.run(): unknown body method: "
 						+ command[0] + "\n\tin CMD = " + input);
@@ -643,11 +628,9 @@ class InstructionBlockProcessor implements Runnable {
 }
 
 /**
- * LOCK, ASYNCLOCK, BLOCKINGLOCKを処理するスレッド
- * 
- * @author nakajima
- * 
- */
+ * LOCK, ASYNCLOCK, BLOCKINGLOCKの中の人
+  * @author nakajima
+  */
 class LockProcessor implements Runnable{
 	String command;
 	LMNtalNode node;
@@ -682,7 +665,7 @@ class LockProcessor implements Runnable{
 }
 
 /**
- * RECURSIVELOCKを処理するスレッド
+ * RECURSIVELOCKの中の人
  * @author nakajima
  *
  */
@@ -705,5 +688,39 @@ class RecursiveLockProcessor implements Runnable{
 		} else {
 			node.respondAsFail(msgid);			
 		}
+	}
+}
+
+/**
+ * TERMINATEの中の人
+ * @author nakajima
+ *
+ */
+class TerminateProcessor implements Runnable {
+	String msgid;
+	LMNtalNode node;
+	
+	TerminateProcessor(String msgid, LMNtalNode node){
+		this.msgid = msgid;
+		this.node = node;
+	}
+
+	public void run(){
+		if(LMNtalRuntimeManager.terminateAll()){
+			node.respondAsOK(msgid);
+		} else {
+			node.respondAsFail(msgid);
+		}
+	}
+}
+
+/**
+ * DISCONNECTRUNTIMEの中の人
+ * @author nakajima
+ *
+ */
+class DisconnectProcessor implements Runnable {
+	public void run(){
+		LMNtalRuntimeManager.disconnectAll();
 	}
 }
