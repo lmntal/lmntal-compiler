@@ -604,7 +604,5 @@ class InstructionBlockProcessor implements Runnable {
 			innerremote.flush();
 		}
 		remoteTable.clear();
-
-		// m.remoteがnullに初期化されないのが問題かもしれない
 	}
 }
