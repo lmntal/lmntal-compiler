@@ -64,24 +64,31 @@ public class Instruction {
 
 	try {
 	    buffer.append("[ ");
-	    buffer.append(hoge[0]);
 
-	    for (int i = 1; i < hoge.length-1; i+=2) {
+	    //命令のためのループ
+	    for (int i = 0; i < hoge.length-1; i+=2) {
+		buffer.appnend(hoge[i]);
 		buffer.append(", ");
 		
 		buffer.append("[");
+
+		//引数のためのループ
 		fuga = hoge[i+1].toArray();
 		for (int j = 0; j < fuga.length; j++) {
 		    buffer.append(fuga[j]);
 		}
 		buffer.append("]");
 	    }
+
+	    buffer.append(" ]");
+
 	} catch (Exception e){
 	    //想定される場合：
 	    //ArrayList dataが空→命令が入ってない
-	    //それ以外→？
+	    //ArrayList data[i]が空→引数無し
+	    //それ以外→なんかある？
 
-	    return "No instructions!!\n\n";
+	    return "No instruction or argument!!\n\n";
 	}
 
 	return (buffer.toString());
