@@ -11,17 +11,17 @@ io.print(String) :- unary(String)|[[/*inline*/
 	]](String).
 io.input(Message) :- [[/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
-	me.changeName(s);
-	me.nthAtom(0).changeName("done");
+	me.setName(s);
+	me.nthAtom(0).setName("done");
 	]](Message).
 io.input(Message, X) :- [[/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
-	me.changeName("done");
-	me.nthAtom(0).changeName(s);
+	me.setName("done");
+	me.nthAtom(0).setName(s);
 	]](Message, X).
 io.input :- [[/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, "Input text.");
-	me.changeName(s);
+	me.setName(s);
 	]].
 io.popup(String) :- unary(String)|[[/*inline*/
 	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
