@@ -7,6 +7,7 @@ package compile;
 import java.util.*;
 import runtime.Env;
 import compile.structure.*;
+import runtime.InterpretedRuleset;
 
 /**
  * ルールセットを生成して返す。
@@ -32,7 +33,7 @@ public class RulesetCompiler {
 		rs.rightMem = m;
 		root.rules.add(rs);
 		processMembrane(root);
-		Module.genInstruction(root);
+//		Module.genInstruction(root);
 		return root;
 	}
 	
@@ -55,9 +56,8 @@ public class RulesetCompiler {
 			Membrane submem = (Membrane)it.next();
 			processMembrane(submem);
 		}
-		// この膜にあるルールをルールセットにコンパイルする
+		// この膜にあるルール構造をルールオブジェクトにコンパイルする
 		ArrayList rules = new ArrayList();
-//		runtime.Ruleset ruleset = mem.ruleset;
 		it = mem.rules.listIterator();
 		while (it.hasNext()) {
 			RuleStructure rs = (RuleStructure)it.next();
@@ -67,31 +67,27 @@ public class RulesetCompiler {
 			//
 			RuleCompiler rc = new RuleCompiler(rs);
 			rc.compile();
-			// ↓ いずれ ruleset.add(rc.theRule); にした方がよい
 			rules.add(rc.theRule);
-//			((runtime.InterpretedRuleset)ruleset).rules.add(rc.theRule);
 		}
-		if (Env.fRandom) {
-			it = rules.iterator();
-			while (it.hasNext()) {
-				runtime.Ruleset ruleset = new runtime.InterpretedRuleset();
-				((runtime.InterpretedRuleset)ruleset).rules.add(it.next());
-				//ruleset.compile();
-				mem.rulesets.add(ruleset);
-			}
-		} else {
-			if (rules.size() > 0) {
-				runtime.Ruleset ruleset = new runtime.InterpretedRuleset();
+		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
+		if (!rules.isEmpty()) {
+			if (Env.fRandom) {
 				it = rules.iterator();
 				while (it.hasNext()) {
-					((runtime.InterpretedRuleset)ruleset).rules.add(it.next());
+					InterpretedRuleset ruleset = new InterpretedRuleset();
+					ruleset.rules.add(it.next());
+					//ruleset.compile();
+					mem.rulesets.add(ruleset);
+				}
+			} else {
+				InterpretedRuleset ruleset = new InterpretedRuleset();
+				it = rules.iterator();
+				while (it.hasNext()) {
+					ruleset.rules.add(it.next());
 				}
 				//ruleset.compile();
 				mem.rulesets.add(ruleset);
 			}
-		}
-			
-		// ruleset.compile();
+		}	
 	}
-	
 }
