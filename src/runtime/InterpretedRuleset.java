@@ -63,14 +63,23 @@ class InterpretedReactor {
 				}
 				break;
 			case Instruction.FINDATOM: // findatom [-dstatom, srcmem, funcref]
-				func = (Functor)inst.getArg3();
-				it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
-				while (it.hasNext()){
-					Atom a = (Atom)it.next();
-					atoms[inst.getIntArg1()] = a;					
-					if (interpret(insts,pc)) return true;
-				}
-				break;
+					func = (Functor)inst.getArg3();
+					it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
+					while (it.hasNext()){
+						Atom a = (Atom)it.next();
+						atoms[inst.getIntArg1()] = a;					
+						if (interpret(insts,pc)) return true;
+					}
+					break;
+			case Instruction.LOCKMEM: // lockmem [-dstmem, freelinkatom]
+					AbstractMembrane mem = atoms[inst.getIntArg2()].mem;
+					if (mem.lock(mems[0])) {
+						mems[inst.getIntArg1()] = mem;					
+						if (interpret(insts,pc)) return true;
+						mem.unlock();
+						return false;
+					}
+					break;
 			case Instruction.NEWATOM: // newatom [-dstatom, srcmem, funcref]
 				func = (Functor)inst.getArg3();
 				atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
