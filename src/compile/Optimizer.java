@@ -48,7 +48,7 @@ public class Optimizer {
 					}
 					it.remove();
 					it.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
-					it.add(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId));
+					it.add(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
 					nextId++;
 					break;
 				case Instruction.LOCALRELINK:
@@ -57,7 +57,7 @@ public class Optimizer {
 					}
 					it.remove();
 					it.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
-					it.add(new Instruction(Instruction.LOCALINHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId));
+					it.add(new Instruction(Instruction.LOCALINHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
 					nextId++;
 					break;
 			}
