@@ -265,7 +265,7 @@ class Task extends AbstractTask implements Runnable {
 				exec();
 				if (((LocalLMNtalRuntime)runtime).isTerminated()) return;
 				if (root != null && root.isStable()) return;
-				if (isIdle()) continue;
+				if (!isIdle()) continue;
 				synchronized(this) {
 					if (awakened) {
 						awakened = false;
