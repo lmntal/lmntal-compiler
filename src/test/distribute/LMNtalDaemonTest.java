@@ -142,6 +142,7 @@ class LMNtalDaemon implements Runnable {
 		System.out.println("registerLocal succeeded");
 		return true;
 	}
+	
 
 	public static boolean registerMessage(Integer msgid, LMNtalNode node) {
 		System.out.println(
@@ -190,42 +191,93 @@ class LMNtalDaemon implements Runnable {
 		return false;
 	}
 
+	public static LMNtalNode getLMNtalNodeFromFQDN(String fqdn){
+		System.out.println("now in LMNtalDaemon.getLMNtalNodeFromFQDN(" + fqdn + ")");
+		
+		//TODO 単体テスト
+		Collection c = nodeTable.values();
+		Iterator it = c.iterator();
+
+		while (it.hasNext()) {
+			if (((LMNtalNode) (it.next()))
+				.getInetAddress()
+				.getCanonicalHostName()
+				.equalsIgnoreCase(fqdn)) {
+					System.out.println("LMNtalDaemon.isRegisted("  + fqdn + ") is true!" );
+					return (LMNtalNode)(it.next());
+			}
+		}
+	
+		return null;
+	}
+
+
 	/*
 	 *  fqdn上のLMNtalDaemonを登録する＆登録してもらう
 	 */
 	public static boolean connect(String fqdn) {
 		System.out.println("now in LMNtalDaemon.connect(" + fqdn + ")");
-
-		//TODO コネクションがfirewallにひっかかってパケットが消滅した時をどうするか？
+		//TODO firewallにひっかかってパケットが消滅した時をどうするか？
 		
 		boolean result = false;
-
-		if (isRegisted(fqdn)) {
-			return result;
-		}
+		boolean isRegisted = isRegisted(fqdn);
 
 		try {
-			InetAddress ip = InetAddress.getByName(fqdn);
 
-			Socket socket =
-				new Socket(fqdn, GlobalConstants.LMNTAL_DAEMON_PORT);
+			
+			if(isRegisted){
+				//既に登録済みの場合は、そのホストに"connect"を送って生死を判定する
+				LMNtalNode remoteNode = getLMNtalNodeFromFQDN(fqdn);
 
-			BufferedReader in =
-				new BufferedReader(
-					new InputStreamReader(socket.getInputStream()));
 
-			BufferedWriter out =
-				new BufferedWriter(
-					new OutputStreamWriter(socket.getOutputStream()));
+			
+			} else {
+				//新規接続の場合
+				InetAddress ip = InetAddress.getByName(fqdn);
 
-			LMNtalNode node = new LMNtalNode(ip, in, out);
-			result = register(socket, node);
+				Socket socket =
+					new Socket(fqdn, GlobalConstants.LMNTAL_DAEMON_PORT);
+
+				BufferedReader in =
+					new BufferedReader(
+						new InputStreamReader(socket.getInputStream()));
+
+				BufferedWriter out =
+					new BufferedWriter(
+						new OutputStreamWriter(socket.getOutputStream()));
+
+				LMNtalNode node = new LMNtalNode(ip, in, out);
+				if (register(socket, node)){
+					//connectを送る
+										
+					
+				} else {
+					result = false;
+				}
+			}
 		} catch (Exception e) {
-			System.out.println("ERROR in connect処理: " + e.toString());
+			System.out.println("ERROR in LMNtalDaemon.connect(" + fqdn + "): " + e.toString());
+			result = false;
 		}
 
 		return result;
 	}
+
+	public static boolean sendMessage(String fqdn, String message){
+		LMNtalNode target = getLMNtalNodeFromFQDN(fqdn);
+		BufferedWriter out = target.out;
+		
+		try{
+			out.write(message);
+			out.flush();
+			return true;
+		} catch (Exception e){
+			System.out.println("ERROR in LMNtalDaemon.sendMessage: " + e.toString());
+		}
+		
+		return false;
+	}
+
 
 	boolean disconnect(Socket socket) {
 		LMNtalNode node = (LMNtalNode) nodeTable.get(socket);
@@ -326,8 +378,16 @@ class LMNtalDaemonThread2 implements Runnable {
 				}
 
 				//ここからメッセージ処理部分
+				/* ここで処理される命令一覧。これ以外のは下スクロールしてね
+				 *  res
+				 *  registerlocal
+				 *  (dumphash)
+				 *  
+				 */
+							
 				Integer msgid;
 				Integer rgid;
+				String fqdn;
 				boolean result;
 				String[] tmpString = new String[3];
 
@@ -366,31 +426,65 @@ class LMNtalDaemonThread2 implements Runnable {
 					//msgidからつづく命令列とみなす
 					//msgid "FQDN" rgid メッセージ
 					msgid = new Integer(tmpString[0]);
-
+					fqdn = (tmpString[1].split("\"", 3))[1];
+					
 					//メッセージを登録
 					LMNtalNode returnNode =
 						new LMNtalNode(socket.getInetAddress(), in, out);
 					result = LMNtalDaemon.registerMessage(msgid, returnNode);
 
 					if (result == true) {
-						//登録成功
-						boolean result2;
-
-						//接続しに行く
-						result2 =
-							LMNtalDaemon.connect(
-								(tmpString[1].split("\"", 3))[1]);
-
+						//メッセージ登録成功
 						
+						//自分自身宛かどうか判断
+						if (socket.getInetAddress().isAnyLocalAddress()){
+							//自分自身宛なら、自分自身で処理する
+							
+							/* ここで処理される命令一覧
+							 * 
+							 *  begin
+							 *  connect
+							 *  lock taskid
+							 *  terminate
+							 */
+							
+							String command =  (tmpString[2].split(" ", 3))[0];
+							if(command.equalsIgnoreCase("connect")){
+								//connectがきたら、ランタイムを生成して ok を返す
+								
+								Thread remoteRuntime = new Thread(new DummyRemoteRuntime());
+								remoteRuntime.start();
 
-						if (result2 == true) {
-							//接続成功
-							out.write("OK\n");
-							out.flush();
+
+
+								out.write("ok\n");
+								out.flush();
+							} else if(command.equalsIgnoreCase("begin")){
+								//仮
+								out.write("not implemented yet\n");
+								out.flush();							 
+							} else if(command.equalsIgnoreCase("lock")){
+								//仮
+								out.write("not implemented yet\n");
+								out.flush();
+							} else if(command.equalsIgnoreCase("terminate")){
+								//仮
+								out.write("not implemented yet\n");
+								out.flush();
+							} else {
+								//未知のコマンド or それ以外の何か
+								out.write("fail\n");
+								out.flush();	
+							}						
 						} else {
-							//接続失敗
-							out.write("fail\n");
-							out.flush();
+							//他ノード宛ならメッセージをいじらずにそのまま転送する
+							if (LMNtalDaemon.sendMessage( (tmpString[1].split("\"", 3))[1]  , input  )){
+								out.write("ok\n");
+								out.flush();
+							} else {
+								out.write("fail\n");
+								out.flush();
+							}
 						}
 					} else {
 						//既にmsgTableに登録されている時 or 通信失敗時
