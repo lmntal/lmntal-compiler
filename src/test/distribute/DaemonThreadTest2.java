@@ -15,10 +15,17 @@ import java.util.StringTokenizer;
 
 public class DaemonThreadTest2 {
 	public static void main(String args[]) {
-		Thread t1 = new Thread(new DaemonHontai2());
+		Thread t1 = new Thread(new DaemonHontai2(60000));
 		t1.start();
+		
+		Thread t2 = new Thread(new DaemonHontai2(60001));
+		t2.start();
+		
+		Thread r1 = new Thread(new TmpRuntime(100));
+		r1.start();
 	}
 }
+
 
 class GlobalConstants {
 	public static int LMNTAL_DAEMON_PORT = 60000;
@@ -37,6 +44,15 @@ class DaemonHontai2 implements Runnable {
 	public DaemonHontai2() {
 		try {
 			servSocket = new ServerSocket(GlobalConstants.LMNTAL_DAEMON_PORT);
+		} catch (Exception e) {
+			System.out.println(
+				"ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
+		}
+	}
+	
+	public DaemonHontai2(int portnum) {
+		try {
+			servSocket = new ServerSocket(portnum);
 		} catch (Exception e) {
 			System.out.println(
 				"ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
@@ -85,12 +101,13 @@ class DaemonHontai2 implements Runnable {
 	}
 
 	boolean regist(Socket socket, LMNtalNode node) {
-		if (nodeTable.containsKey(socket)) {
-			return false;
+		synchronized(nodeTable){
+			if (nodeTable.containsKey(socket)) {
+				return false;
+			}
+
+			nodeTable.put(socket, node);
 		}
-
-		nodeTable.put(socket, node);
-
 		return true;
 	}
 
@@ -133,32 +150,6 @@ class LMNtalDaemonThread2 implements Runnable {
 					break;
 				}
 
-//				StringTokenizer tokens = new StringTokenizer(input, " ");
-//
-//				String currentToken;
-//				int msgid;
-//				int rgid;
-//				String remoteNodeFQDN;
-//				StringBuffer command = new StringBuffer("");
-//
-//				currentToken = tokens.nextToken();
-//
-//				//来るコマンドを解釈
-//				if (currentToken.equals("RES")) {
-//					//RESの処理
-//				} else {
-//					//msgidとみなす
-//					msgid = Integer.parseInt(currentToken);
-//					remoteNodeFQDN = tokens.nextToken();
-//
-//					while (tokens.hasMoreTokens()) {
-//						command.append(tokens.nextToken());
-//						command.append(" ");
-//					}
-//
-//					Communicator.connect(remoteNodeFQDN, command.toString());
-//				}
-
 				int msgid;
 				int rgid;
 				String command;
@@ -166,9 +157,14 @@ class LMNtalDaemonThread2 implements Runnable {
 				
 				tmpString = input.split(" ", 3);
 				
-				if (tmpString[1].equals("RES")){
+				if (tmpString[1].equalsIgnoreCase("RES")){
 					//RESの処理
-				} else {
+				} else if(tmpString[1].equalsIgnoreCase("REGISTERLOCAL")){
+					//REGSITERLOCAL rgid
+					//ノード表にrgidとソケットを登録して、OK/FAILを返す
+					
+					
+				} else  {
 					//msgidとみなす
 					msgid = Integer.parseInt(tmpString[0]);
 					
@@ -179,6 +175,10 @@ class LMNtalDaemonThread2 implements Runnable {
 			} catch (IOException e) {
 				System.out.println("ERROR:このスレッドには書けません! " + e.toString());
 				break;
+			} catch (ArrayIndexOutOfBoundsException ae){
+				//送られてきたメッセージが短かすぎるとき（＝不正な時
+				//'hoge' とかそういう時
+				System.out.println("メッセージが不正です " + ae.toString());
 			}
 		}
 	}
@@ -226,6 +226,63 @@ class Communicator {
 
 		} catch (Exception e) {
 
+		}
+	}
+}
+
+
+class TmpRuntime implements Runnable {
+	//テスト用ランタイムもどき
+	//デーモンにつなぐだけ
+	int rgid;
+	
+	TmpRuntime(int tmpRgid){
+		rgid = tmpRgid;
+	}
+	
+	public void run(){
+		try{
+			Socket socket = new Socket("localhost", GlobalConstants.LMNTAL_DAEMON_PORT);
+			
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			
+			regist(out);
+			
+			connect(out);
+			
+			Thread.sleep(10000);
+			
+			System.out.println(in.toString());
+			
+		} catch (Exception e){
+			System.out.println("ERROR in TmpRuntime.run()" + e.toString());
+		}
+		
+		System.out.println("TmpRuntime.run() ーーーーーーー糸冬ーーーーーーー");
+	}
+	
+	void regist(BufferedWriter out){
+		//REGSITERLOCAL rgid
+		String command = new String("REGISTERLOCAL " + rgid);
+		try{
+			out.write(command);
+			out.flush();
+		} catch (Exception e){
+			System.out.println("ERROR in TmpRuntime.regist()" + e.toString());
+		}
+	}
+	
+	void connect(BufferedWriter out){
+		//msgid "localhost" rgid connect
+		int msgid = 10000;
+		
+		String command = new String(msgid + " \"localhost\" " + rgid + " connect");
+		try{
+			out.write(command);
+			out.flush();
+		} catch (Exception e){
+			System.out.println("ERROR in TmpRuntime.connect()" + e.toString());
 		}
 	}
 }
