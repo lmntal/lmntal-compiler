@@ -2,6 +2,7 @@
 ----------------------------------------------------------------------
 Lambda calculus simulator
                                               Koji Hara
+                                              2004/12/26(Sun) 06:48:03
                                               2004/12/21(Tue) 21:26:18
 ----------------------------------------------------------------------
 
@@ -11,8 +12,7 @@ Lambda calculus simulator
 ----------------------------------------------------------------------
 ラムダ計算の定義そのまま。
 
-束縛変数は参照で表すので書き換え時にコピーは不要。
-ただし、組み込み関数などによって式が unary になったらコピーしている。
+束縛変数はコピーされる。（要groundガード命令）
 
 ----------------------------------------------------------------------
 内部表現
@@ -20,49 +20,80 @@ Lambda calculus simulator
 
 LAMBDA_EXPR ::= 
         Var
-      | [LAMBDA_EXPR, LAMBDA_EXPR]
+      | apply(LAMBDA_EXPR, LAMBDA_EXPR)
       | lambda(Term, LAMBDA_EXPR)
 
 Var ::= 
-        自由変数       : アトム
-      | 束縛変数の定義 : { c(R0), c(R1), ..., c(Rn) }
-      | 束縛変数の出現 : c(R0), c(R1), ..., c(Rn)
+        自由変数       : (unary) atom
+      | 束縛変数の定義 : [R0, R1, ..., Rn]
+      | 束縛変数の出現 : ref(R0), ref(R1), ..., ref(Rn)
 
 ----------------------------------------------------------------------
 TODO
 ----------------------------------------------------------------------
-apply の順番がランダム。これはいいんだろうか。
+-定義する : if ! fib plus mult power differential...
+-変換器（文字列表現 <==> 内部表現） : 束縛変数の管理が厄介そう
+--ここは手で書くとしたら ground を使わないグラフリダクションのやつ(_old)も書けたっぽい
 
 */
 
 // ----------------------------------------------------------------------
 // Lambda 計算のルール
 // ----------------------------------------------------------------------
-// apply
-H=[lambda(arg({$p}), M) | Expr] :- {$p, value=V}, val(Expr, V), H=M.
-
-// apply(M, empty) == M  ... 適用は apply(Expr, Expr) で表すべきだが、[Expr, Expr] で表してるため単位元が [Expr] になってしまう。これを変換。
-val([Expr], V) :- val(Expr, V).
-
-// unay になったときだけ参照を解決（値のコピー）
-H=ref(R), {c(R), value=V, $p}, val(Expr, V) :- unary(Expr) | H=Expr, {value=V, $p}, val(Expr, V).
-
-// ----------------------------------------------------------------------
-// 「組み込み関数」
-// ----------------------------------------------------------------------
-integer.use.
-// mult
-H=[mult, A, B] :- H='*'(A, B).
-
+{
+	module(lambda).
+	H=apply(lambda([A|R], M), Expr), E=ref(A) :- ground(Expr) | H=apply(lambda(R, M), Expr), E=Expr.
+	H=apply(lambda([   ], M), Expr)           :- ground(Expr) | H=M.
+}
 
 // ----------------------------------------------------------------------
 // サンプルコード
 // ----------------------------------------------------------------------
 
-// (lambda x . mult x x) 5   =>  25
-//r=[lambda(arg({c(A),c(B)}), [mult, ref(A), ref(B)]), 5].
+{ lambda.use.
+	// (lambda y . y y) x => x x
+	r=apply(lambda([A,B], apply(ref(A), ref(B))), x).
+}
 
-// (lambda x . mult x x) (lambda x . mult x x) 5   =>  625
-r=[lambda(arg({c(A),c(B)}), [mult, ref(A), ref(B)]), lambda(arg({c(C),c(D)}), [mult, ref(C), ref(D)]), 5].
+{ lambda.use.
+	// (lambda x . x x) (lambda x . x x) => self => self ...
+	// とまらないので注意 
+//	r=apply(lambda([A,B], apply(ref(A), ref(B))), lambda([C,D], apply(ref(C), ref(D)))).
+}
+
+{ lambda.use.
+	// (lambda f . (lambda x . f (f x) ) ) succ 0 => succ (succ 0)
+	r=apply(apply(lambda([A,B], lambda([C], apply(ref(A), apply(ref(B), ref(C))))), succ), 0).
+}
+
+/**
+ * let square = fun x -> mult x x in
+ *     let mult = fun x -> fun y -> * x y in
+ *         square 5
+ * 
+ * (lambda mult . (lambda square . square 5) (lambda x . mult x x) ) (lambda x . (lambda y . * x y) ) 
+ */
+{
+	integer.use. lambda.use.
+	
+	r=apply(lambda([MULT], 
+		apply(lambda([SQUARE], M), 
+			lambda([C, D], apply(apply(ref(MULT), ref(C)), ref(D)))
+		)), lambda([A], lambda([B], '*'(ref(A), ref(B))))
+		).
+	M=apply(ref(SQUARE), 5).
+}
+/**
+ * let mult = fun x -> fun y -> * x y in mult 5 6
+ * 
+ * (lambda mult . mult 5 6) (lambda x . (lambda y . x*y) )
+ */
+{
+	integer.use. lambda.use.
+	
+	r=apply(lambda([MULT], M1), 
+		lambda([A], lambda([B], '*'(ref(A), ref(B)))) ).
+	M1=apply(apply(ref(MULT), 5), 6).
+}
 
 
