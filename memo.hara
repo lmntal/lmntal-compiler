@@ -1,0 +1,313 @@
+/**
+ * コンパイル時データ構造をルールオブジェクトに変換する。
+ * ルールオブジェクトは命令列を持つ。
+ * 
+ * ので、機能はデータ構造（インスタンスの木） -> 命令列
+ * 
+ * @author hara(working)
+ */
+public class RuleCompiler {
+	public Membrane l, r;
+	
+	RuleCompiler() {
+		Env.n("RuleCompiler");
+		l = new Membrane(Env.machine);
+		r = new Membrane(Env.machine);
+	}
+	/**
+	 * 膜 mem に abterms を読み込む。
+	 * 
+	 * @param mem
+	 * @param ab
+	 */
+	Map loadProc(Membrane mem, List ab) {
+		Env.c("loadProc "+mem+"\n"+ab);
+		Map links = new HashMap();
+		List rules = new ArrayList();
+		
+		while(! ab.isEmpty()) {
+			List term = (List)(ab.remove(0)); // <==> ab.shift
+			
+			Env.p("ab.shift "+term);
+			switch( ((Integer)(term.get(0))).intValue() ) {
+			case Instruction.NULL:
+				break;
+			case Instruction.MEM:
+				break;
+			case Instruction.VAR:
+				break;
+			case Instruction.NAME:
+				break;
+			case Instruction.AT:
+				break;
+			case Instruction.METAVAR:
+				break;
+			}
+		}
+		if(! rules.isEmpty()) {
+			//Ruleset は abstract じゃなくていいんじゃないか？
+			//ひとまずあとまわし
+			//mem.loadruleset( new Ruleset(rules) );
+		}
+		return coupleLinks(links);
+		/*
+			while term = abterms.shift
+				debug("abterms.shift", term.inspect);
+				case term.first
+				when :null
+				when :mem
+					submem = mem.newmem
+					
+					freelinks = load_proc(submem, term[1], procvarhash)
+					merge_links links, freelinks
+					submem.stable = true if term.last == :stable
+				when :var
+					$nerrors += 1
+					print "Syntax error: "
+					print "variable appeared in process position: #{term[1]}\n"
+				when :name
+					arity = term.length - 2
+					debug("term[1]", term[1].inspect)
+					case term[1]
+					when "@"
+						if arity == 2
+							print "Syntax warning: pragma ignored: "
+							dump_abterm term
+							abterms.unshift term[2]
+							next
+						end
+					when ":-"
+						if arity == 1
+							arity = 2
+							term = [:name,":-",[:null],term[2]]
+						end
+						if arity == 2
+							lhsterms	 = linearize(term[2])
+							guardterms = []
+							term			 = term[3]
+							if term.length == 4 and term[0] == :name and term[1] == "|"
+								guardterms = linearize(term[2])
+								term			 = term[3]
+							end
+							rules.push compile_rule(lhsterms,guardterms,linearize(term))
+							next
+						end
+					when "|"
+						if arity == 2
+							$nerrors += 1
+							print "Syntax error: unexpected guard operator: "
+							dump_abterm term
+							next
+						end
+					when '\+'
+						$nerrors += 1
+						print "Syntax error: unexpected negative condition operator: "
+						dump_abterm term
+						next
+					when ':'
+						if arity == 2 and term[2][0] == :name and term[2].length == 2
+							ruleset = $modules[term[2][1]]
+							if ruleset
+								mem.loadruleset ruleset
+								term = term[3]
+							else
+								$nerrors += 1
+								print "Link error: unknown module: "
+								dump_abterm term
+								next
+							end
+						end
+					end
+					load_term mem, term, links
+					
+				#----------------------------------------------------------------------
+				# プロセス・ルール変数
+				#----------------------------------------------------------------------
+				when :metavar
+					kind = term[1]
+					var = kind + term[2]
+					if procvarhash
+						if not procvarhash.include?(var)
+							procvarhash[var] = ProcVar.new(var,mem)
+						else
+							procvarhash[var].rhsmems.push mem
+						end
+						mem.procvars.push procvarhash[var] if kind == "$"
+						mem.rulevars.push procvarhash[var] if kind == "@"
+					else
+						$nerrors += 1
+						print "Syntax error: process/rule variable outside a rule: #{var}\n"
+					end
+				end
+			end
+			mem.loadruleset RuleSet.new(rules) unless rules.empty?
+			return couplelinks(links)
+		 */
+	}
+	
+	/**
+	 *  = を除去する。
+	 */
+	public void simplify() {
+		static_unify(l);
+		static_unify(r);
+	}
+	public Rule compile() {
+		Env.c("compile");
+		Rule r = new Rule();
+		r.text = "( "+l.toString()+" :- "+r.toString()+" )";
+		//@ruleid = rule.ruleid
+		
+		HeadCompiler hc = new HeadCompiler(l);
+		hc.enumformals();
+		if(false /* @lhs.natoms + @lhs.nmems == 0 */) {
+			hc.freemems.add(l);
+		}
+		compile_l();
+		compile_r();
+		
+		//optimize if $optlevel > 0
+		if(false) optimize();
+		
+		//rule.register(@atommatches,@memmatch,@body)
+		return r;
+	}
+	
+	private void compile_l() {
+		Env.c("compile_l");
+		/*
+		@atommatches = []
+		for firstid in 0..(@lhscmp.atoms.length)
+			@lhscmp.prepare
+			if firstid < @lhscmp.atoms.length
+				@atommatches.push @lhscmp.match
+				@lhscmp.atomidpath[firstid] = @lhscmp.varcount = 1
+				mem = @lhscmp.atoms[firstid].mem
+				@lhscmp.match.push [:execlevel, mem.memlevel]
+				@lhscmp.match.push [:func,1,@lhscmp.atoms[firstid].func]
+				@lhscmp.mempaths[mem] = [:memof,1]
+				while mem.mem != nil
+					@lhscmp.mempaths[mem.mem] = @lhscmp.mempaths[mem].dup.unshift :memof
+					mem = mem.mem
+				end
+				@lhscmp.compile_group firstid
+			else
+				@memmatch = @lhscmp.match
+				@lhscmp.mempaths[@lhs] = [@lhscmp.varcount = 0]
+			end
+			
+			# 
+			@lhscmp.compile_mem  @lhs
+			@lhscmp.compile_negs @negs
+			# 反応しろという命令
+			@lhscmp.match.push [:react, @ruleid, @lhscmp.getactuals]
+		end
+		 */
+	}
+	
+	private void compile_r() {
+		Env.c("compile_r");
+		/*
+		@lhsatoms 	 = @lhscmp.atoms
+		@lhsfreemems = @lhscmp.freemems
+		@lhsatomids  = @lhscmp.atomids
+		@varcount = @lhsatoms.length + @lhsfreemems.length
+		@body = [[:spec,@varcount]]
+		genlhsmempaths
+		@rhsatoms 	 = []
+		@rhsatompath = {}
+		@rhsmempaths = {}
+		@rhsmempaths[@rhs] = @lhsmempaths[@lhs]
+		
+		remove_lhsatoms
+		remove_lhsmem 			@lhs
+		
+		build_rhsmem				@rhs
+		inherit_rhsrules		@rhs
+		inherit_builtins		@rhs
+		
+		build_rhsatoms			@rhs
+		free_lhsmem 				@lhs
+		
+		@body.first.push @varcount
+		update_links
+		 */
+	}
+	
+	private void optimize() {
+	}
+	
+	private void static_unify(Membrane m) {
+		/*
+			mem.each_mem do | submem | static_unify submem end
+			removedatoms = []
+			mem.each_atomoffunc($FUNC_UNIFY) do | atom |
+				link1 = atom.args[1]
+				link2 = atom.args[2]
+				if link1.atom.mem.getmem(0) != mem.getmem(0) and \
+					 link2.atom.mem.getmem(0) != mem.getmem(0)
+					if mem.getmem(0) == @lhs
+						$nerrors += 1
+						print "Compile error: head contains body unification\n"
+					end
+					next
+				end
+				link1.relink link2
+				link2.relink link1
+				removedatoms.push atom
+			end
+			removedatoms.each do | atom | atom.remove end
+		 */
+	}
+	
+	private Map coupleLinks(Map links) {
+		/*
+		tmp = {}
+		links.each do | var,varlinks |
+			case varlinks.length
+			when 2
+				link1, link2 = varlinks
+				link1.atom.args[link1.pos] = link2
+				link2.atom.args[link2.pos] = link1
+			when 1
+				tmp[var] = varlinks
+			else
+				$nerrors += 1
+				print "Syntax error: variable occurring more than twice: #{var}\n"
+				varlinks.each do |link|
+					link.terminate link.atom.mem
+				end
+			end
+		end
+		
+		return tmp
+		 */
+		return links;
+	}
+}
+
+class HeadCompiler {
+	public Membrane m;
+	public ArrayList freemems = new ArrayList();
+	
+	HeadCompiler(Membrane m) {
+		this.m = m;
+	}
+	
+	/**
+	 * head の仮引数リストをつくっている。何番目がどのアトム。
+	 */
+	public void enumformals() {
+		/*
+		mem.each_atom do | atom |
+			# ハッシュ。アトム番号をいれる。
+			@atomids[atom] = @atoms.length
+			@atoms.push atom
+		end
+		mem.each_mem do | submem |
+			enumformals submem
+			@freemems.push submem if submem.natoms + submem.nmems == 0
+		end
+		*/
+	}
+}

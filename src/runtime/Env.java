@@ -3,6 +3,7 @@
  *
  */
 package runtime;
+import java.util.*;
 
 /**
  * 環境。デバッグ用。
@@ -23,6 +24,14 @@ public final class Env {
 	/** Debug output when new object */
 	public static void n(Object o) {
 		p(">>> new "+o);
+	}
+	/** Better list dumper */
+	public static String parray(List l) {
+		StringBuffer s = new StringBuffer();
+		for(ListIterator li=l.listIterator();li.hasNext();) {
+			s.append( li.next().toString()+(li.hasNext() ? " ":"") );
+		}
+		return s.toString();
 	}
 	public static String getIndent(int indents) {
 		String indent="";

@@ -3,6 +3,7 @@ package compile;
 import java.util.*;
 
 import runtime.Functor;
+import runtime.Env;
 
 /** ソースコード中のアトムの構造を表すクラス */
 final class Atom {
@@ -16,7 +17,7 @@ final class Atom {
 		args = new LinkOccurrence[arity];
 	}
 	public String toString() {
-		return "Atom("+functor+")("+Arrays.asList(args)+")";
+		return functor+(args.length==0 ? "" : "("+Arrays.asList(args)+")");
 	}
 }
 
@@ -37,15 +38,28 @@ final class Membrane {
 	Membrane(Membrane mem) {
 		this.mem = mem;
 	}
+	
+	/**
+	 * {} なしで出力する。
+	 * 
+	 * ルールの出力の際、{} アリだと
+	 * (a:-b) が ({a}:-{b}) になっちゃうから。
+	 *  
+	 * @return String
+	 */
+	public String toStringWithoutBrace() {
+		return 
+		(atoms.isEmpty() ? "" : ""+Env.parray(atoms))+
+		(mems.isEmpty() ? "" : " "+Env.parray(mems))+
+		(rules.isEmpty() ? "" : " "+Env.parray(rules))+
+		(processContexts.isEmpty() ? "" : " "+Env.parray(processContexts))+
+		(ruleContexts.isEmpty() ? "" : " "+Env.parray(ruleContexts))+
+		(typedProcessContexts.isEmpty() ? "" : " "+Env.parray(typedProcessContexts))+
+		"";
+		
+	}
 	public String toString() {
-		return
-		(atoms.isEmpty() ? "" : "atoms  : "+atoms)+
-		(mems.isEmpty() ? "" : "mems   : "+mems)+
-		(rules.isEmpty() ? "" : "rules  : "+rules)+
-		(processContexts.isEmpty() ? "" : "processContexts  : "+processContexts)+
-		(ruleContexts.isEmpty() ? "" : "ruleContexts  : "+ruleContexts)+
-		(typedProcessContexts.isEmpty() ? "" : "typedProcessContexts  : "+typedProcessContexts)
-		;
+		return "{ " + toStringWithoutBrace() + " }";
 	}
 }
 
@@ -99,7 +113,7 @@ final class RuleStructure {
 	public Membrane leftMem = new Membrane(null);
 	public Membrane rightMem = new Membrane(null);
 	public String toString() {
-		return "Rule( "+leftMem+" :- "+rightMem+" )";
+		return "( "+leftMem.toStringWithoutBrace()+" :- "+rightMem.toStringWithoutBrace()+" )";
 	}
 }
 
