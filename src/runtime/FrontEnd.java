@@ -69,8 +69,20 @@ public class FrontEnd {
 				}else{ // オプション解釈部
 					switch(args[i].charAt(1)){
 					case 'd':
-						System.out.println("debug mode");
-						Env.debug = 1;
+						if (args[i].matches("-d[0-9]")) {
+							Env.debug = args[i].charAt(2) - '0';
+						} else {
+							Env.debug = Env.DEBUG_DEFAULT;
+						}
+//						System.out.println("debug level " + Env.debug);
+						break;
+					case 'v':
+						if (args[i].matches("-v[0-9]")) {
+							Env.verbose = args[i].charAt(2) - '0';
+						} else {
+							Env.verbose = Env.VERBOSE_DEFAULT;
+						}
+//						System.out.println("verbose level " + Env.verbose);
 						break;
 					case 't':
 						Env.fTrace = true;
@@ -97,7 +109,7 @@ public class FrontEnd {
 						break;
 					case '-': // 文字列オプション
 						if(args[i].equals("--help")){
-							System.out.println("usage: FrontEnd [-d] filename");
+							System.out.println("usage: FrontEnd [options...] [filenames...]");
 						}else{
 							System.out.println("不明なオプション:" + args[i]);
 							System.exit(-1);

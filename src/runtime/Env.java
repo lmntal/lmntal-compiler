@@ -17,7 +17,7 @@ public final class Env {
 	
 	/** システムルールセットの命令列実行を表示する */
 	static final int DEBUG_SYSTEMRULESET = 7;
-	/** デフォルトのデバッグレベル */
+	/** デフォルトのデバッグレベル（ONのとき） */
 	static final int DEBUG_DEFAULT = 1;
 	
 	/**
@@ -25,12 +25,13 @@ public final class Env {
 	 */
 	public static int optimize = 0;
 	
+	/** デフォルトの冗長表示レベル */
 	public static final int VERBOSE_DEFAULT = 2;
 	/**
-	 * アトム引数を展開する冗長レベル */
+	 * アトム引数を展開する冗長表示レベル */
 	public static final int VERBOSE_EXPANDATOMS = 3;
 	/**
-	 * ルールセットの内容を展開する冗長レベル */
+	 * ルールセットの内容を展開する冗長表示レベル */
 	public static final int VERBOSE_EXPANDRULES = 4;
 	/**
 	 * verbose level.
