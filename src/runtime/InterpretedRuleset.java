@@ -725,7 +725,7 @@ class InterpretiveReactor {
 					vars.add(inst.getIntArg1(),((AbstractMembrane)vars.get(inst.getIntArg3())).copyGroundFrom(((Link)vars.get(inst.getIntArg2())),new HashMap()));
 					break; //kudo 2004-12-03
 				case Instruction.DROPGROUND : //[srclink, srcmem]
-					((AbstractMembrane)vars.get(inst.getIntArg(2))).dropGround(((Link)vars.get(inst.getIntArg1())),new HashSet());
+					((AbstractMembrane)vars.get(inst.getIntArg2())).dropGround(((Link)vars.get(inst.getIntArg1())),new HashSet());
 					break; //kudo 2004-12-03
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 
