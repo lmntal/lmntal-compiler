@@ -1456,8 +1456,17 @@ public class Instruction implements Cloneable {
      *
      */
     public String toString() {
-		return getInstructionString(kind)+"\t"+data.toString();
 
+	//nakajima版2004-01-21
+	StringBuffer buffer = new StringBuffer("                    ");
+	buffer.insert(0,getInstructionString(kind));
+	buffer.append(data.toString());
+	return buffer.toString();
+
+	//n-kato版2004-01-21まで使ってました
+	//return getInstructionString(kind)+"\t"+data.toString();
+
+	//古い（2003年のいつか）nakajima版のコード
 	//	StringBuffer buffer = new StringBuffer("");
 	//
 	//	if(data.isEmpty()){
