@@ -783,7 +783,7 @@ public class RuleCompiler {
 				} 
 				else {
 					int rethashmap = varcount++;
-					body.add(new Instruction(Instruction.COPYMEM,
+					body.add(new Instruction(Instruction.COPYCELLS,
 						rethashmap, rhsmemToPath(mem), lhsmemToPath(pc.def.lhsOcc.mem) ));
 					rhsmappaths.put(pc,new Integer(rethashmap));
 					//else {

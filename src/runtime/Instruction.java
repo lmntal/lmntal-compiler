@@ -914,16 +914,17 @@ public class Instruction implements Cloneable, Serializable {
 	// LOCALRECURSIVEUNLOCKは最適化の効果が無いため却下
 	static {setArgType(RECURSIVEUNLOCK, new ArgType(false, ARG_MEM));}
 
-    /** copymem [-dstmap, dstmem, srcmem]
+    /** copycells [-dstmap, dstmem, srcmem]
      * <br>（予約された）ボディ命令<br>
-     * 再帰的にロックされた膜$srcmemの内容のコピーを作成し、膜$dstmemに入れる。
+     * 再帰的にロックされた膜$srcmemの内容のコピーを作成し,膜$dstmemに入れる.
      * その際、リンク先がこの膜の(子膜を含めて)中に無いアトムの情報を
-     * コピーされるアトムのid -> コピーされたアトムオブジェクト
-     * というHashMapオブジェクトとして、dstmapに入れる。
+     * コピーされるアトムオブジェクト -> コピーされたアトムオブジェクト
+     * (2005/01/13 従来のAtom.idからの参照を変更)
+     * というMapオブジェクトとして,dstmapに入れる.
      **/
-    public static final int COPYMEM = 82;
+    public static final int COPYCELLS = 82;
 	// LOCALCOPYMEMは最適化の効果が無いため却下
-	static {setArgType(COPYMEM, new ArgType(true, ARG_VAR, ARG_MEM, ARG_MEM));}
+	static {setArgType(COPYCELLS, new ArgType(true, ARG_VAR, ARG_MEM, ARG_MEM));}
 
 	/** dropmem [srcmem]
 	 * <br>（予約された）ボディ命令<br>
@@ -934,7 +935,7 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(DROPMEM, new ArgType(false, ARG_MEM));}
 
 	/** lookuplink [-dstlink, srcmap, srclink]
-	 * srclinkのリンク先のアトムのコピーをsrcmapより得て、
+	 * srclinkのリンク先のアトムのコピーを$srcmapより得て、
 	 * そのアトムをリンク先とする-dstlinkを作って返す。
 	 */
 	public static final int LOOKUPLINK = 84;

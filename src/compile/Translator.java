@@ -634,7 +634,7 @@ public class Translator {
 				case Instruction.RECURSIVEUNLOCK : //[srcmem]
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").recursiveUnlock();\n");
 					break;//nakajima 2004-01-04, n-kato
-				case Instruction.COPYMEM : //[-dstmap, -dstmem, srcmem]
+				case Instruction.COPYCELLS : //[-dstmap, -dstmem, srcmem]
 					// <strike>自由リンクを持たない膜（その子膜とのリンクはOK）のみ</strike>
 					writer.write(tabs + "var" + inst.getIntArg1() + " =  ((AbstractMembrane)var" + inst.getIntArg2() + ").copyFrom(((AbstractMembrane)var" + inst.getIntArg3() + "));\n");
 					break; //kudo 2004-09-29
