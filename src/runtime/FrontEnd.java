@@ -117,7 +117,7 @@ public class FrontEnd {
 			Env.d("");
 			Env.d( "After parse   : "+m );
 			
-			compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
+			compile.structure.Membrane root = RuleSetCompiler.runStartWithNull(m);
 			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
 			Env.d( "After compile : "+ir );
 			root.showAllRule();

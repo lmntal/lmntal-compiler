@@ -10,7 +10,6 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 import runtime.Env;
-import runtime.InterpretedRuleset;
 
 import compile.parser.*;
 import compile.structure.*;
@@ -58,7 +57,7 @@ public class RuleSetGeneratorTest {
 			//Membrane m = getTestStructure1();
 			//Membrane m = getTestStructure2();
 			Env.d(m);
-			Membrane root = RuleSetGenerator.runStartWithNull(m);
+			Membrane root = RuleSetCompiler.runStartWithNull(m);
 			List ir = root.rulesets;
 			
 			Env.d("");

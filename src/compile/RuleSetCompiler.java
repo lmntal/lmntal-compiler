@@ -16,7 +16,7 @@ import compile.structure.*;
  * @author hara
  * 
  */
-public class RuleSetGenerator {
+public class RuleSetCompiler {
 	
 	/**
 	 * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。

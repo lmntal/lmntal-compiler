@@ -16,6 +16,7 @@ import runtime.Env;
  */
 public class Net {
 	static final int default_port = 10001;
+	protected Socket sock;
 	
 	/**
 	 * デフォルトポートに送信する。
@@ -23,7 +24,7 @@ public class Net {
 	 * @param addr サーバのアドレス
 	 * @param s    送る内容
 	 */
-	public static void send(String addr, String s) {
+	public void send(String addr, String s) {
 		send(addr, default_port, s);
 	}
 	/**
@@ -33,9 +34,9 @@ public class Net {
 	 * @param port サーバのポート
 	 * @param s    送る内容
 	 */
-	public static void send(String addr, int port, String s) {
+	public void send(String addr, int port, String s) {
 		try {
-			Socket sock = new Socket(addr, port);
+			sock = new Socket(addr, port);
 			PrintWriter pw = new PrintWriter(sock.getOutputStream());
 			pw.print(s);
 			pw.close();
@@ -49,7 +50,7 @@ public class Net {
 	 * 
 	 * @return
 	 */
-	public static String recv() {
+	public String recv() {
 		return recv(default_port);
 	}
 	
@@ -59,30 +60,28 @@ public class Net {
 	 * @param port 待ちうけポート
 	 * @return
 	 */
-	public static String recv(int port) {
+	public String recv(int port) {
 		StringBuffer buf = new StringBuffer();
 		try {
 			ServerSocket ss = new ServerSocket(port);
-//			Env.p("Waiting at " + ss);
-			Socket sock = ss.accept();
+			sock = ss.accept();
 			BufferedReader br = new BufferedReader(
 				new InputStreamReader(sock.getInputStream()));
 			String res;
 			while(null!=(res = br.readLine())) {
+				recvHandler(res);
 				buf.append(res).append("\n");
-//				Env.p("<<< " + res);
+				//Env.p("<<< " + res);
 			}
 			return buf.toString();
 		} catch(Exception e) {
 			Env.e(e);
 		}
-		return "";
+		return buf.toString();
 	}
-//	public static void main(String argv[]) {
-//		if(argv.length>0) {
-//			send("localhost", argv[0]);
-//		} else {
-//			Env.p("received : "+recv());
-//		}
-//	}
+	
+	/** u can override */
+	public void recvHandler(String line) {
+	}
 }
+
