@@ -1,7 +1,7 @@
 [[/*inline_define*/
 ]],
 io : {
-	( print(String) :- [[/*inline*/
+	( io.print(String) :- [[/*inline*/
 		System.out.println(me.nth(0));
 		]](String)
 	)
