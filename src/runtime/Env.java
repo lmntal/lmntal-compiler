@@ -5,7 +5,7 @@
 package runtime;
 import java.util.*;
 
-import test.GUI.LMNGraphPanel;
+import test.GUI.*;
 
 /**
  * 環境。デバッグ用。
@@ -74,10 +74,15 @@ public final class Env {
 	public static boolean fTrace = false;
 	
 	/**
+	 * REPL
+	 */
+	public static String REPL;
+	
+	/**
 	 * GUI 有効。仮仮仮仮
 	 */
 	public static boolean fGUI = false;
-	public static LMNGraphPanel gui;
+	public static LMNtalFrame gui;
 	
 	/** アトム名の表示する長さ */
 	public static int printLength = 14;
@@ -174,4 +179,12 @@ public final class Env {
 		}
 		return indent;
 	}
+	
+	public static void initGUI() {
+		if(!Env.fGUI) return;
+		gui = new LMNtalFrame();
+	}
+	
+	// GUI からみる
+	public static LMNtalRuntime theRuntime;
 }

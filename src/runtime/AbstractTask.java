@@ -161,11 +161,8 @@ final class Task extends AbstractTask {
 					if (Env.fTrace) {
 						Env.p( " ==> " );
 						Env.p( Dumper.dump(getRoot()) );
-						if(Env.fGUI) {
-							// TODO GUI と接続する。
-							//Env.gui.setMembrane(getRoot());
-						}
 					}
+					Env.gui.onTrace();
 				}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行アトムスタックが空の時
 				flag = false;
@@ -218,6 +215,7 @@ final class Task extends AbstractTask {
 						Env.p( " ==> " );
 						Env.p( Dumper.dump(getRoot()) );
 					}
+					Env.gui.onTrace();
 				}					
 			}
 		}

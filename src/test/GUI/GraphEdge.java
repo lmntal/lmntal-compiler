@@ -47,7 +47,7 @@ class GraphEdge implements Comparable {
 	}
 	
 	public double getStdLen() {
-		return 30.0;
+		return 50.0;
 	}
 	
 	public double getLen() {

@@ -8,6 +8,6 @@ package test.GUI;
 public class Main {
 
 	public static void main(String[] args) {
-		GraphTest app = new GraphTest();
+		LMNtalFrame app = new LMNtalFrame();
 	}
 }

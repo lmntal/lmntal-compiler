@@ -8,9 +8,11 @@ import compile.parser.*;
 import compile.structure.*;
 
 public class LMNGraphPanel extends GraphPanel {
-
-	public LMNGraphPanel() {
+	LMNtalFrame frame;
+	
+	public LMNGraphPanel(LMNtalFrame f) {
 		super();
+		frame = f;
 	}
 	
 	public void setSource(String src) throws ParseException {
@@ -21,6 +23,15 @@ public class LMNGraphPanel extends GraphPanel {
 	}
 	
 	public void setMembrane(Membrane mem) {
+		frame.busy = true;
+		GraphLayout layout = getGraphLayout();
+		layout.removeAllNodes();
+		addMembrane(mem);
+		layout.calc();
+	}
+	
+	public void setMembrane(runtime.Membrane mem) {
+		frame.busy = true;
 		GraphLayout layout = getGraphLayout();
 		layout.removeAllNodes();
 		addMembrane(mem);
@@ -30,7 +41,7 @@ public class LMNGraphPanel extends GraphPanel {
 	GraphNode node_of_atom(runtime.Atom atom, Map atoms) {
 		GraphNode n = (GraphNode)atoms.get(atom);
 		if(n==null) {
-			Point p = new Point(30 + (int)(Math.random()*40) + (int)(Math.random()*3), 30 + (int)(Math.random()*40) + (int)(Math.random()*3));
+			Point p = new Point(30 + (int)(Math.random()*200) + (int)(Math.random()*3), 30 + (int)(Math.random()*600) + (int)(Math.random()*3));
 			n = new GraphNode(atom.getName(), p);
 			atoms.put(atom, n);
 			getGraphLayout().addNode(n);

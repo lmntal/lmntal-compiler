@@ -102,6 +102,7 @@ public final class LMNtalRuntime extends Machine {
 		globalRoot = (Membrane)t.getRoot();
 		// Inline
 		Inline.initInline();
+		Env.theRuntime = this;
 	}
 
 //	/**

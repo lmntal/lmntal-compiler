@@ -33,6 +33,7 @@ public class FrontEnd {
 	 *   -e [LMNtal oneliner]       → [LMNtal oneliner] （１行文）を実行して終わる
 	 *   -d                         → デバッグモード
 	 *   --help                     → ヘルプを表示
+	 *   -g                         → GUI で途中経過を表示しる
 	 * </pre>
 	 * 
 	 * @param args
@@ -57,6 +58,7 @@ public class FrontEnd {
 		FileInputStream fis = null;
 		InputStream is = null;
 		Reader src = null;
+		
 		/**
 		 * コマンドライン引数があったらファイルの中身を解釈実行
 		 */
@@ -96,9 +98,7 @@ public class FrontEnd {
 					case 'e':
 						// lmntal -e 'a,(a:-b)'
 						// 形式で実行できるようにする。like perl
-						// この書き方は汚い気がするけど...。by Hara
-						REPL.processLine(args[i+1]);
-						System.exit(-1);
+						Env.REPL = args[++i];
 						break;
 					case 'O':
 						if (args[i].length() == 2) {
@@ -136,6 +136,13 @@ public class FrontEnd {
 				if(is == null) is = fis;
 				else is = new SequenceInputStream(is, fis); // ソースファイルを連結
 			}
+		}
+		
+		Env.initGUI();
+		if(Env.REPL!=null) {
+			REPL.processLine(Env.REPL);
+			return;
+//			System.exit(-1);
 		}
 		
 		// ソースなしならREPL, ありならソースを解釈実行。
