@@ -116,12 +116,24 @@ public final class Env {
 	/** アトム名の表示する長さ */
 	public static int printLength = 14;
 	
-	/**
-	 * 分散
-	 */
+	////////////////////////////////////////////////////////////////
+	// 分散
+	
+	/** start LMNtalDaemon.*/
 	public static boolean startDaemon = false;
+	
+	/**The debug level of LMNtalDaemon.*/
 	public static int debugDaemon = 0;
-		
+	
+	/** The default port number that LMNtalDaemon listens on.*/
+	static final int DAEMON_DEFAULT_LISTENPORT = 60000;
+	
+	/** The port number that LMNtalDaemon listens on.*/
+	public static int daemonListenPort = DAEMON_DEFAULT_LISTENPORT;
+	
+	////////////////////////////////////////////////////////////////
+	
+	
 	/**
 	 * General error report
 	 * @param o
