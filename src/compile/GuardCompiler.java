@@ -251,6 +251,10 @@ public class GuardCompiler extends HeadCompiler {
 //					bindToFunctor(def1, func);
 //					typedcxtdatatypes.put(def1, new Integer(ISSTRING));
 //				}
+				else if (cstr.isSelfEvaluated && func.getArity() == 1) {
+					bindToFunctor(def1, func);
+					// typedcxtdatatypes.put(def1, new Integer(Instruction.ISUNARY));
+				}
 				else if (func.equals(RuleCompiler.FUNC_UNIFY)) { // (-X = +Y)
 					if (!identifiedCxtdefs.contains(def2)) { // (+X = -Y) は (-Y = +X) として処理する
 						ContextDef swaptmp=def1; def1=def2; def2=swaptmp;

@@ -10,7 +10,8 @@ import runtime.Functor;
 public class Atom extends Atomic {
 	/** アトムのファンクタ */
 	public Functor functor;
-
+	/** 型制約の場合：名前トークンの種類(定数単項アトム(unary)型の制約かどうかの判定に使う) */
+	public boolean isSelfEvaluated = false;
 	/**
 	 * コンストラクタ
 	 * @param mem このアトムの所属膜

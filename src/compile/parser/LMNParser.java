@@ -217,7 +217,9 @@ public class LMNParser {
 		// [2] アトム構造を生成する
 		Atom atom = new Atom(mem, func);
 		atom.setSourceLocation(sAtom.line, sAtom.column);
-		
+		if(sAtom.getNameType() == SrcName.SYMBOL){
+			atom.isSelfEvaluated = true;
+		}
 		// [3] 引数の構造を生成する		
 		for (int i = 0; i < arity; i++) {
 			Object obj = p.get(i);
