@@ -456,10 +456,8 @@ class InterpretiveReactor {
 					break; //n-kato
 
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
-					// 仕様検討中
-					AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime((String)inst.getArg3());
-					mems[inst.getIntArg1()] = machine.newTask(mems[inst.getIntArg2()]).getRoot();
-					break;
+					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newRoot((String)inst.getArg3());
+					break; //n-kato 2004-07-24
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
 					mems[inst.getIntArg1()].moveCellsFrom(mems[inst.getIntArg2()]);
 					break; //nakajima 2004-01-04, n-kato

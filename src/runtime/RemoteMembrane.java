@@ -157,31 +157,6 @@ final class RemoteMembrane extends AbstractMembrane {
 		return m;
 	}
 
-	/*
-	 * ルート膜をリモート側に作る
-	 * 
-	 * @return 成功したらAbstractMembane, 失敗したらnull
-	 * 
-	 *  (non-Javadoc)
-	 * @see runtime.AbstractMembrane#newRoot(null)
-	 */
-	public AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
-		//RemoteTaskを作る
-		//RemoteTask newtask = (RemoteTask)runtime.newTask(this);
-
-		//リモートで膜を作る命令を発行する
-		//send("NEWROOT"); //引数はこれでいいのかな
-
-		//返事を待つ
-		
-		//OKだったら
-			//RemoteTask.rootを返す	
-			//return newtask.getRoot();
-		
-		//ダメだったら
-		return null;
-	}
-
 	public void removeMem(AbstractMembrane mem) {
 		send("REMOVEMEM", mem.getMemID());
 		super.removeMem(mem);

@@ -272,11 +272,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		mem.dequeue();
 		mem.parent = null;
 	}
-	/** 指定された計算ノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
+	/** 指定されたノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
+	 * @param node ノード名を表す文字列
 	 * @return 作成されたルート膜
 	 */
-	public abstract AbstractMembrane newRoot(AbstractLMNtalRuntime runtime);
-
+	public AbstractMembrane newRoot(String node) {
+		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(node);
+		return machine.newTask(this).getRoot();
+					
+	}
 	// 操作4 - リンクの操作
 	
 	/**
