@@ -126,7 +126,7 @@ public final class Membrane extends AbstractMembrane {
 		((Task)task).memStack.push(m);
 		return m;		
 	}
-	public AbstractMembrane newRoot(AbstractMachine runtime) {
+	public AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
 		AbstractTask task = runtime.newTask(this);
 		return task.getRoot();
 	}

@@ -217,7 +217,7 @@ public final class Env {
 	}
 	
 	// GUI からみる
-	public static LMNtalRuntime theRuntime;
+	public static MasterLMNtalRuntime theRuntime;
 	
 	public static void guiTrace() {
 		if(gui==null) return;

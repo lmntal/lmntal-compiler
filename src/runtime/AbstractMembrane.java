@@ -127,7 +127,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 //	/** 永続フラグをOFFにする */
 //	public void makeNotPerpetual() {
-//		AbstractMachine machine = getTask().getMachine();
+//		AbstractLMNtalRuntime machine = getTask().getMachine();
 //		synchronized(machine) {
 //			perpetual = false;
 //			machine.notify();
@@ -275,7 +275,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** 指定された計算ノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
 	 * @return 作成されたルート膜
 	 */
-	public abstract AbstractMembrane newRoot(AbstractMachine runtime);
+	public abstract AbstractMembrane newRoot(AbstractLMNtalRuntime runtime);
 
 	// 操作4 - リンクの操作
 	
@@ -418,7 +418,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			((AbstractMembrane)it.next()).setTask(newTask);
 		}
 	}
-//	/** この膜（ルート膜）の親膜を変更する。Machine（計算ノード）のみが呼ぶことができる。
+//	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
 //	 * <p>いずれ、
 //	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
 //	 * AbstractMembrane#moveToを使って親膜を変更することにより、

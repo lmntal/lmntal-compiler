@@ -10,23 +10,23 @@ import java.net.Socket;
  * TODO staticなものをすべて「計算ノード管理クラス」に移管する
  * @author n-kato
  */
-final class RemoteMachine extends AbstractMachine {
+final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	protected String runtimeid;
 	protected Socket socket;
-	protected RemoteMachine(String runtimeid) {
+	protected RemoteLMNtalRuntime(String runtimeid) {
 		this.runtimeid = runtimeid;
 	}
 	//
-	/** 計算ノード表（String -> AbstractMachine）*/
+	/** 計算ノード表（String -> AbstractLMNtalRuntime）*/
 	static HashMap runtimeids = new HashMap();
 	/** 計算ノード表を利用開始する */
 	public static void init() {}
 	/** 指定された物理マシンに接続し、計算ノード表に登録する */
-	public static AbstractMachine connectRuntime(String node) {
+	public static AbstractLMNtalRuntime connectRuntime(String node) {
 		node = node.intern();
-		AbstractMachine ret = (AbstractMachine)runtimeids.get(node);
+		AbstractLMNtalRuntime ret = (AbstractLMNtalRuntime)runtimeids.get(node);
 		if (ret == null) {
-			ret = new RemoteMachine(node);
+			ret = new RemoteLMNtalRuntime(node);
 			runtimeids.put(node,ret);
 		}
 		return ret;
@@ -35,7 +35,7 @@ final class RemoteMachine extends AbstractMachine {
 	public static void terminateAll() {
 		Iterator it = runtimeids.keySet().iterator();
 		while (it.hasNext()) {
-			AbstractMachine machine = (AbstractMachine)runtimeids.get(it.next());
+			AbstractLMNtalRuntime machine = (AbstractLMNtalRuntime)runtimeids.get(it.next());
 			machine.terminate();
 		}
 		runtimeids.clear();
@@ -69,7 +69,7 @@ final class RemoteTask extends AbstractTask {
 	String cmdbuffer;
 	int nextatomid;
 	int nextmemid;
-	RemoteTask(AbstractMachine runtime) { super(runtime); }
+	RemoteTask(AbstractLMNtalRuntime runtime) { super(runtime); }
 	String getNextAtomID() {
 		return "NEW_" + nextatomid++;
 	}
@@ -193,7 +193,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("NEWMEM",newremoteid);
 		return m;
 	}
-	public AbstractMembrane newRoot(AbstractMachine runtime) {
+	public AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
 		// TODO 実装する
 		return null;
 	}

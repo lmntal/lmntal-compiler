@@ -207,8 +207,8 @@ public class FrontEnd {
 			m.showAllRules();
 			
 			// ผยนิ
-			RemoteMachine.init();
-			LMNtalRuntime rt = new LMNtalRuntime();
+			RemoteLMNtalRuntime.init();
+			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
 			Membrane root = (Membrane)rt.getGlobalRoot();
 			Env.initGUI(root);
 			//root.blockingLock();
@@ -219,7 +219,7 @@ public class FrontEnd {
 			}
 			//root.blockingUnlock();
 			((Task)root.getTask()).execAsMasterTask();
-			RemoteMachine.terminateAll();
+			RemoteLMNtalRuntime.terminateAll();
 			
 			//rt.exec();
 			if (!Env.fTrace && Env.verbose > 0) {

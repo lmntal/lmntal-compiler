@@ -14,8 +14,8 @@
 //		junit.textui.TestRunner.run(Tester.class);
 //	}
 ////	public void testAppend() {
-////		Machine machine = new Machine();
-////		Task task = new MasterTask((LMNtalRuntime)machine);
+////		LocalLMNtalRuntime machine = new LocalLMNtalRuntime();
+////		Task task = new MasterTask((MasterLMNtalRuntime)machine);
 ////		Membrane root = (Membrane)task.getRoot();
 ////		
 ////		Atom append = root.newAtom("append", 3);
@@ -46,7 +46,7 @@
 //			new Atom(null, new Functor("b", 1))
 //		};
 ////		Membrane mem = new Membrane();
-//		LMNtalRuntime r = new LMNtalRuntime();
+//		MasterLMNtalRuntime r = new MasterLMNtalRuntime();
 //		AbstractTask t = r.getMasterTask();
 //		AbstractMembrane mem = t.getRoot();
 //		for (int i = 0; i < 4; i++) {

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/** 抽象ランタイム（旧：抽象物理マシン、旧々：抽象計算ノード）クラス。
- * TODO AbstractMachine は AbstractRuntime に名称変更する。*/
-abstract class AbstractMachine {
+/** 抽象ランタイム（旧：抽象物理マシン、旧々：抽象計算ノード）クラス。*/
+
+abstract class AbstractLMNtalRuntime {
 	protected String runtimeid;
 	/** このランタイムに親膜を持たないロックされていないルート膜を作成し、仮でない実行膜スタックに積む。*/
 	abstract AbstractTask newTask(AbstractMembrane parent);
@@ -19,8 +19,8 @@ abstract class AbstractMachine {
 
 /** このVMで実行するランタイム（旧：物理マシン、旧々：計算ノード）
  * このクラスのサブクラスのインスタンスは、1つの Java VM につき高々1つしか存在しない。
- * TODO LMNtalRuntime を MasterLMNtalRuntime に名称変更した後、Machine は LMNtalRuntime に名称変更する。*/
-class Machine extends AbstractMachine /*implements Runnable */{
+*/
+class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runnable */{
 	List tasks = new ArrayList();
 //	protected Thread thread = new Thread(this);
 	
@@ -43,7 +43,7 @@ class Machine extends AbstractMachine /*implements Runnable */{
 		}
 		// TODO joinする
 		// スレーブランタイムならば、VMを終了する。
-		// if (!(this instanceof LMNtalRuntime)) System.exit(0);
+		// if (!(this instanceof MasterLMNtalRuntime)) System.exit(0);
 	}
 	/** このランタイムの終了が要求されたかどうか */
 	public boolean isTerminated() {
@@ -70,12 +70,12 @@ class Machine extends AbstractMachine /*implements Runnable */{
 //	}
 }
 
-/** ランタイムグループおよびグローバルルート膜を生成し、管理するランタイムのクラス
- * TODO LMNtalRuntime は MasterLMNtalRuntime に名称変更し、ファイル名を変える。*/
-public final class LMNtalRuntime extends Machine {
+/** ランタイムグループおよびグローバルルート膜を生成し、管理するランタイムのクラス */
+
+public final class MasterLMNtalRuntime extends LocalLMNtalRuntime {
 	private Membrane globalRoot;	// masterTaskへの参照を持つ方が分かりやすいかもしれない
 
-	public LMNtalRuntime(){
+	public MasterLMNtalRuntime(){
 		Task masterTask = new Task(this);
 		tasks.add(masterTask);
 		globalRoot = (Membrane)masterTask.getRoot();
@@ -101,7 +101,7 @@ public final class LMNtalRuntime extends Machine {
 	}
 //	/** マスタランタイムとして実行する */
 //	public void run() {
-//		RemoteMachine.init();
+//		RemoteLMNtalRuntime.init();
 //		while (true) {
 //			if (Env.fTrace) {
 //				Env.p( Dumper.dump(getGlobalRoot()) );
@@ -116,7 +116,7 @@ public final class LMNtalRuntime extends Machine {
 //				catch (InterruptedException e) {}
 //			}
 //		}
-//		RemoteMachine.terminateAll();
+//		RemoteLMNtalRuntime.terminateAll();
 //	}
 }
 

@@ -7,16 +7,16 @@ import util.Stack;
 /** 抽象タスク */
 abstract public class AbstractTask {
 	/** 物理マシン */
-	protected AbstractMachine runtime;
+	protected AbstractLMNtalRuntime runtime;
 	/** ルート膜 */
 	protected AbstractMembrane root;
 	/** コンストラクタ
 	 * @param runtime 所属するランタイム */
-	AbstractTask(AbstractMachine runtime) {
+	AbstractTask(AbstractLMNtalRuntime runtime) {
 		this.runtime = runtime;
 	}
 	/** ランタイムの取得 */
-	public AbstractMachine getMachine() {
+	public AbstractLMNtalRuntime getMachine() {
 		return runtime;
 	}
 	/** ルート膜の取得 */
@@ -104,7 +104,7 @@ class Task extends AbstractTask implements Runnable {
 	static final int maxLoop = 100;
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム */
-	Task(AbstractMachine runtime) {
+	Task(AbstractLMNtalRuntime runtime) {
 		super(runtime);
 		root = new Membrane(this);
 		memStack.push(root);
@@ -113,7 +113,7 @@ class Task extends AbstractTask implements Runnable {
 	/** 指定した親膜を持つ新しいルート膜および対応するタスク（スレーブタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム
 	 * @param parent 親膜 */
-	Task(AbstractMachine runtime, AbstractMembrane parent) {
+	Task(AbstractLMNtalRuntime runtime, AbstractMembrane parent) {
 		super(runtime);
 		root = new Membrane(this);
 		root.lock();
@@ -251,7 +251,7 @@ class Task extends AbstractTask implements Runnable {
 	/** このタスク固有のルールスレッドが実行する処理 */
 	public void run() {
 		Membrane root = null;
-		if (runtime instanceof LMNtalRuntime) root = ((LMNtalRuntime)runtime).getGlobalRoot();
+		if (runtime instanceof MasterLMNtalRuntime) root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
 		while (true) {
 			if (root != null) { 	
 				if (Env.fTrace) {
@@ -262,7 +262,7 @@ class Task extends AbstractTask implements Runnable {
 				while (!isIdle()) {
 					exec();
 				}
-				if (((Machine)runtime).isTerminated()) return;
+				if (((LocalLMNtalRuntime)runtime).isTerminated()) return;
 				if (root != null && root.isStable()) return;
 				synchronized(this) {
 					if (awakened) {
@@ -303,7 +303,7 @@ class Task extends AbstractTask implements Runnable {
 //class MasterTask extends Task {
 //	/** 親膜を持たない新しいルート膜および対応するタスクを作成する
 //	 * @param runtime 作成したタスクを実行する物理マシン */
-//	MasterTask(LMNtalRuntime runtime) {
+//	MasterTask(MasterLMNtalRuntime runtime) {
 //		super(runtime);
 //		root = new Membrane(this);
 //		memStack.push(root);
