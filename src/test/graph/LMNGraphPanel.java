@@ -54,8 +54,8 @@ public class LMNGraphPanel extends GraphPanel {
 			Point p = new Point((int)(Math.random()*getPreferredArea().getWidth()), (int)(Math.random()*getPreferredArea().getHeight()));
 			GraphNode node = new GraphNode("Mem@"+child.hashCode() , p);
 			getGraphLayout().addNode(node);
-			for (int j=0;j<child.freeLinks.size();j++) {
-				LinkOccurrence link = (LinkOccurrence)child.freeLinks.get(j);
+			for (Iterator it = child.freeLinks.keySet().iterator(); it.hasNext(); ) {
+				LinkOccurrence link = (LinkOccurrence)child.freeLinks.get(it.next());
 				if ((link.buddy != null)
 				 && (link.hashCode() > link.buddy.hashCode())) {
 					table_link.put(link,link);

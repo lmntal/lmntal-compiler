@@ -12,7 +12,8 @@ import runtime.Env;
  */
 public final class Membrane {
 	/** 
-	 * 親膜 
+	 * 親膜
+	 * <p>todo いずれmemはparentに名称変更する
 	 */
 	public Membrane mem = null;
 	
@@ -47,10 +48,9 @@ public final class Membrane {
 	public List typedProcessContexts = new ArrayList();
 	
 	/**
-	 * 膜内の自由リンク(compile.struct.LinkOccurrence)へのポインタ
-	 * TODO O(1)で自由リンクであるかどうかわかる形式にする Hashset?
+	 * 膜の自由リンク名(String)からそのリンク出現(compile.struct.LinkOccurrence)への写像
 	 */
-	public List freeLinks = new ArrayList();
+	public HashMap freeLinks = new HashMap();
 	
 	/**
 	 * ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。
