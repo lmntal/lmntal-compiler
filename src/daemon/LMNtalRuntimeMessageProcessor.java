@@ -309,26 +309,19 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		
 		//TODO ロック系の命令はひとつひとつに専用のクラスを定義し、thread化したいけど、
 		//          とりあえずLOCK BLOCKINGLOCK ASYNCLOCK をまとめてひとつのクラスにする
-		
-		
-				
-				
 		if (command[0].equalsIgnoreCase("LOCK")
 		 || command[0].equalsIgnoreCase("BLOCKINGLOCK")
 		 || command[0].equalsIgnoreCase("ASYNCLOCK")) {
 			Thread t1 = new Thread(new LockProcessor(command[0], this, mem, msgid));
 			t1.start();
 			return;
-		} else if (command[0].equalsIgnoreCase("RECURSIVELOCK")) { //TODO これも専用クラス化
+		} else if (command[0].equalsIgnoreCase("RECURSIVELOCK")) { 
 			// RECURSIVELOCK globalmemid
 			// ロックしたローカルの膜の全世界の子孫膜を再帰的にロック（キャッシュは更新しない）
-			if (mem.recursiveLock()) {
-				respondAsOK(msgid);
-				return;
-			}
+			Thread t1 = new Thread(new RecursiveLockProcessor(command[0],this,mem,msgid));
+			t1.start();
+			return;
 		}
-
-		respondAsFail(msgid);
 	}
 }
 
@@ -684,6 +677,28 @@ class LockProcessor implements Runnable{
 			}
 		} else {
 			node.respondAsFail(msgid);
+		}
+	}
+}
+
+class RecursiveLockProcessor implements Runnable{
+	String command;
+	LMNtalNode node;
+	Membrane mem;
+	String msgid;	
+
+	RecursiveLockProcessor(String command, LMNtalNode node, Membrane mem, String msgid){
+		this.command = command;
+		this.node = node;
+		this.mem = mem;
+		this.msgid = msgid;
+	}
+	
+	public void run(){
+		if (mem.recursiveLock()) {
+			node.respondAsOK(msgid);
+		} else {
+			node.respondAsFail(msgid);			
 		}
 	}
 }
