@@ -13,8 +13,11 @@ import java.util.List;
 import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
+import runtime.IntegerFunctor;
 import runtime.InterpretedRuleset;
+import runtime.ObjectFunctor;
 import runtime.Rule;
+import runtime.StringFunctor;
 
 /**
  * 中間命令列からJavaへの変換を行うクラス。
@@ -53,6 +56,7 @@ public class Translator {
 	public void translate(boolean genMain) throws IOException {
 		writer.write("import runtime.*;\n");
 		writer.write("import java.util.*;\n");
+		writer.write("import java.io.*;\n");
 		writer.write("import daemon.IDConverter;\n");
 		writer.write("\n");
 		writer.write("public class " + className + " extends Ruleset {\n");
@@ -110,8 +114,22 @@ public class Translator {
 		it = funcVarMap.keySet().iterator();
 		while (it.hasNext()) {
 			Functor func = (Functor)it.next();
-			writer.write("	private static final Functor " + funcVarMap.get(func)
-					+ " = new Functor(\"" + func.getName() + "\", " + func.getArity() + ");\n");
+			writer.write("	private static final Functor " + funcVarMap.get(func));
+			if (func instanceof StringFunctor) {
+				System.out.println(func.getValue());
+				String data = ((String)func.getValue()).replaceAll("\\\\", "\\\\\\\\"); // \ -> \\
+				data = data.replaceAll("\"", "\\\\\"");									// " -> \"			
+				writer.write(" = new StringFunctor(\"" + data + "\");\n");
+			} else if (func instanceof ObjectFunctor) {
+				throw new RuntimeException("ObjectFunctor is not supported");
+			} else if (func instanceof IntegerFunctor) {
+				writer.write(" = new IntegerFunctor(" + ((IntegerFunctor)func).getValue() + ");\n");
+			} else {
+				System.out.println(func.getName());
+				String name = func.getName().replaceAll("\\\\", "\\\\\\\\"); // \ -> \\
+				name = name.replaceAll("\"", "\\\\\"");						 // " -> \"			
+				writer.write(" = new Functor(\"" + name + "\", " + func.getArity() + ");\n");
+			}
 		}
 		
 		if (genMain) {
@@ -166,6 +184,8 @@ public class Translator {
 		writer.write("		Functor func;\n");
 		writer.write("		Link link;\n");
 		writer.write("		AbstractMembrane mem;\n");
+		writer.write("		int x, y;\n");
+		writer.write("		double u, v;\n");
 		
 		Iterator it = instList.insts.iterator();
 		if (!translate(it, "		", 1, locals)) {
