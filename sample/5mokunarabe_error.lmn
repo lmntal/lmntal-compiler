@@ -1,0 +1,174 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% 5 moku narabe           by KUDO SHINTARO
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% 1:black 2:white
+%
+% {stone,
+%  x( int ),y( int ),color( int ),
+%  {arm,dir(1),hand(N,L1),hand(N,R1)},
+%  {arm,dir(2),,},
+%  {arm,dir(3),,},
+%  {arm,dir(4),,},
+%  [ns],[ch],[up],[li]
+% }
+%
+% 1      2      3      4
+%
+% R       R           L
+% |      /     L-R     \
+% L     L               R
+%
+% 1:left  2:right
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% state : 
+% start -> wait
+% wait < click left > -> input
+% input -> input_checking
+% input_checking -> turn_end
+% input_checking -> input_ok -> player_change
+%  player_change -> player_changed -> link
+%  link -> linking -> linked -> judge
+%  judge -> judging
+%  judging -> show_result
+%   judging -> judged -> new_stone_delete
+%   new_stone_delete -> new_stone_deleting -> new_stone_deleted 
+%   new_stone_deleted -> update_ready
+%   [ update_ready -> update_ready ] -> [ update -> update ]
+%   update -> redraw -> drawed -> turn_end
+% turn_end -> wait
+% turn_end -> com_think
+% com_think -> com_thinking -> input
+% 
+% show_result -> show_line
+% [show_line -> show_line ] -> [ show_other -> show_other]
+% show_other -> wait
+%
+% wait < click right > -> terminated
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+{
+
+{data}.
+%{for_update}.
+%{dust}.
+nowplayer(1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ルール:入力に対するチェック
+{rule_input_checker.
+%  input_check(Xi,Yi),
+%  {stone,x(X),y(Y),$s} :-
+%    int(X),int(Y),int(Xi),int(Yi),X=Xi,Y=Yi|
+%    {stone,x(X),y(Y),$s},input_fault(Xi,Yi).
+a :- b.
+}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+input(X,Y),{data,$d},{rule_input_checker,$r,@r} :-
+  int(X),int(Y)|
+  {data,input_check(X,Y),$d,@r},{rule_input_checker,$r,@r},
+  input_checking.
+
+input_checking,{data,input_check(Xi,Yi),$d,@r}/ :- int(Xi),int(Yi)|
+  input_ok(Xi,Yi),{data,$d}.
+
+turn_end :- wait.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%以下、inlineによる入出力。 in Java
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[[/*inline_define*/
+import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+class FiveStoneFrame extends JFrame implements MouseListener{
+    final Membrane mem;
+    volatile boolean flgWait;
+    int gameState;
+    final int screen_w=500;
+    final int screen_h=500;
+    final int begin_x = 25;
+    final int begin_y = 25+25;
+    final int stage_w = 19;
+    final int stage_h = 19;
+    final int box_w=25;
+    final int box_h=25;
+    final int stone_w = 24;
+    final int stone_h = 24;
+    final int space_top = 25;
+    final int space_left= 0;
+    public FiveStoneFrame(Membrane targetMem){
+        this.mem = targetMem;
+        setTitle("5 stone pazzle");
+        setBounds(100,100,screen_w+space_left,screen_h+space_top);
+        addMouseListener(this);
+        setVisible(true);
+        setResizable(false);
+        flgWait=true;
+        gameState=0;
+    }
+
+    public void mousePressed(MouseEvent e){}
+    public void mouseReleased(MouseEvent e){}
+    public void mouseClicked(MouseEvent e){
+       System.out.println("mouse clicked");
+       switch(e.getButton()){
+       case MouseEvent.BUTTON1:
+           flgWait=false;
+           int x=((e.getX()+stone_w/2-begin_x) / box_w);
+           int y=((e.getY()+stone_h/2-begin_y) / box_h);
+                   mem.asyncLock();
+                   Atom ax=mem.newAtom(new IntegerFunctor(x));
+                   Atom ay=mem.newAtom(new IntegerFunctor(y));
+                   Atom input=mem.newAtom(new Functor("input",2));
+                   mem.newLink(input,0,ax,0);
+                   mem.newLink(input,1,ay,0);
+                   mem.asyncUnlock();
+                   System.out.println("input atom created.");
+       }
+    }
+    public void mouseEntered(MouseEvent e){}
+    public void mouseExited(MouseEvent e){}
+
+    public void waiting(){
+        flgWait=true;
+        repaint();
+        while(flgWait){
+            try{
+                Thread.sleep(100);
+            }catch(InterruptedException e){}
+        }
+        System.out.println("loop out");
+    }
+}
+
+]].
+
+start.
+start :- [[/*inline*/
+    FiveStoneFrame frame = new FiveStoneFrame((Membrane)mem);
+    Atom a= mem.newAtom(new Functor("frame",1));
+    Atom b= mem.newAtom(new ObjectFunctor(frame));
+    mem.newLink(a,0,b,0);
+    mem.removeAtom(me);
+    mem.makePerpetual();
+]],wait.
+
+wait,frame(F) :- class(F,"FiveStoneFrame") |
+    frame(F),[[/*inline*/
+    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    FiveStoneFrame frame = (FiveStoneFrame)framefunc.getObject();
+    frame.waiting();
+    mem.removeAtom(me.nthAtom(0));
+    mem.removeAtom(me);
+  ]](F).
+
+}.
+
+{terminated,$p,@p} :- {$p}.
