@@ -70,12 +70,16 @@ class TestRemote{
 		
 		Membrane rootMem = (Membrane)masterRuntime.getGlobalRoot();
 		
-		if(!LMNtalRuntimeManager.connectToDaemon()){
-			System.out.println("orz");
-			System.exit(1);
-		}
-		System.out.println("connectToDaemon success");
+		
+		
+// connectToDaemon()単体テスト。結果は○
+//		if(!LMNtalRuntimeManager.connectToDaemon()){
+//			System.out.println("orz");
+//			System.exit(1);
+//		}
+//		System.out.println("connectToDaemon success");
 
+		
 /*		
         //CONNECT → ○
 		RemoteLMNtalRuntime banon = (RemoteLMNtalRuntime)LMNtalRuntimeManager.connectRuntime("banon.ueda.info.waseda.ac.jp");
@@ -94,7 +98,7 @@ class TestRemote{
 		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
 		//	rt_banon.flush();
 
-		//CONNECT
+		//CONNECT  && NEWROOT
 		RemoteMembrane rm_banon = (RemoteMembrane)rootMem.newRoot("banon.ueda.info.waseda.ac.jp");
 
 		//NEWATOM
