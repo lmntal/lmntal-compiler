@@ -165,7 +165,7 @@ public class LMNtalDaemon implements Runnable {
 	public static void createRemoteRuntime(int msgid) {
 		String cmdLine =
 			new String(
-				"java daemon/SlaveLMNtalRuntime "
+				"java daemon/SlaveLMNtalRuntimeLauncher "
 					+ LMNtalDaemon.makeID()
 					+ " "
 					+ msgid);

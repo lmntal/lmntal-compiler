@@ -6,7 +6,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-class SlaveLMNtalRuntime{
+import runtime.LocalLMNtalRuntime;
+
+class SlaveLMNtalRuntimeLauncher {
+	LocalLMNtalRuntime runtime;
+	
 	public static void main(String[] args){
 		try {
 			int rgid = Integer.parseInt(args[0]);

@@ -456,7 +456,7 @@ class InterpretiveReactor {
 
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
 					// 仕様検討中
-					AbstractLMNtalRuntime machine = RemoteLMNtalRuntime.connectRuntime((String)inst.getArg3());
+					AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime((String)inst.getArg3());
 					mems[inst.getIntArg1()] = machine.newTask(mems[inst.getIntArg2()]).getRoot();
 					break;
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
