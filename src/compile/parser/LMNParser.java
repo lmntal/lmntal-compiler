@@ -10,6 +10,7 @@ import java.io.Reader;
 //import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -30,6 +31,8 @@ public class LMNParser {
 	
 	private int nErrors = 0;
 	private int nWarnings = 0;
+	
+	private SyntaxExpander expander = new SyntaxExpander(this);
 	
 	public void corrupted() throws ParseException {
 		error("SYSTEM ERROR: error recovery for the previous error is not implemented");
@@ -69,10 +72,10 @@ public class LMNParser {
 	public Membrane parse() throws ParseException {
 		LinkedList srcProcess = parseSrc();
 		Membrane mem = new Membrane(null);
-		incorporateSignSymbols(srcProcess);
-		incorporateModuleNames(srcProcess);
-		expandAtoms(srcProcess);
-		correctWorld(srcProcess);
+		expander.incorporateSignSymbols(srcProcess);
+		expander.incorporateModuleNames(srcProcess);
+		expander.expandAtoms(srcProcess);
+		expander.correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = addProxies(mem);
 		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
@@ -101,23 +104,14 @@ public class LMNParser {
 	}
 
 	////////////////////////////////////////////////////////////////
-	
-	/**
-	 * ユニークな名前の新しいリンク構文を作成する
-	 * @return 作成したリンク構文
-	 * @deprecated
-	 */
-	private SrcLink createNewSrcLink() {
-		return new SrcLink(generateNewLinkName());
-	}
-	
+
 	/** ユニークな新しいリンク名を生成する */
-	private String generateNewLinkName() {
+	String generateNewLinkName() {
 		nLinkNumber++;
 		return LINK_NAME_PREFIX + nLinkNumber;	
 	}
 	/** ユニークな新しいプロセス文脈名を生成する */
-	private String generateNewProcessContextName() {
+	String generateNewProcessContextName() {
 		nLinkNumber++;
 		return PROCESS_CONTEXT_NAME_PREFIX + nLinkNumber;	
 	}
@@ -129,11 +123,14 @@ public class LMNParser {
 	 * @param pos セット先のアトムでの場所
 	 */
 	private void setLinkToAtomArg(SrcLink link, Atom atom, int pos) {
-		//if (pos >= atom.args.length) error("SYSTEM ERROR: Out of Atom args length:"+pos);
+		//if (pos >= atom.args.length) error("SYSTEM ERROR: out of Atom arg length:"+pos);
 		atom.args[pos] = new LinkOccurrence(link.getName(), atom, pos);
 	}
 	
 	////////////////////////////////////////////////////////////////
+	//
+	// 構文オブジェクトを膜構造オブジェクトに追加するメソッド群
+	//
 	
 	/**
 	 * 膜にリスト内の構文オブジェクトを追加する
@@ -262,14 +259,14 @@ public class LMNParser {
 
 //			// プロセス文脈
 //			else if (obj instanceof SrcProcessContext) {
-//				error("SYNTAX ERROR: Untyped process context in an atom argument: " + obj);
+//				error("SYNTAX ERROR: untyped process context in an atom argument: " + obj);
 //				setLinkToAtomArg(new SrcLink(generateNewLinkName()), atom, i);
 //				allbundles = false;
 //			}
 
 			// その他
 			else {
-				error("SYNTAX ERROR: Illegal object in an atom argument: " + obj);
+				error("SYNTAX ERROR: illegal object in an atom argument: " + obj);
 				setLinkToAtomArg(new SrcLink(generateNewLinkName()), atom, i);
 				allbundles = false;
 			}
@@ -287,6 +284,7 @@ public class LMNParser {
 
 	/**
 	 * プロセス文脈構文を膜に追加
+	 * <p>引数なしの$pは$p[|*p]という内部名*pを使った構造に自動的に置換される
 	 * @param sProc 追加したいプロセス文脈構文
 	 * @param mem 追加先の膜
 	 */
@@ -326,55 +324,61 @@ public class LMNParser {
 	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
 		RuleStructure rule = new RuleStructure(mem);
 		// 略記法の展開		
-		expandRuleAbbreviations(sRule);
+		expander.expandRuleAbbreviations(sRule);
 		// todo 左辺のルールを構文エラーとして除去する
+		
 		// 構造の生成
-		LinkedList typeConstraints = sRule.getGuard();
 		addProcessToMem(sRule.getHead(), rule.leftMem);		
-		addProcessToMem(typeConstraints, rule.guardMem);
+		addProcessToMem(sRule.getGuard(), rule.guardMem);
 		addProcessToMem(sRule.getBody(), rule.rightMem);
-		// リンク以外の名前の接続
-		resolveContextNames(rule);
+		
+		// 左辺およびガード型制約に対して、リンク以外の名前を解決する
+		HashMap names = resolveHeadContextNames(rule);
+		// ガード否定条件の構造を生成する
+		addGuardNegatives(sRule.getGuardNegatives(), rule, names);
+		// ガード否定条件および右辺に対して、リンク以外の名前を解決する
+		resolveContextNames(rule, names);
+		
 		// プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する
 		addProxies(rule.leftMem);
 		coupleLinks(rule.guardMem);
 		addProxies(rule.rightMem);
-		// ガード否定条件の構造を生成する
-		addGuardNegatives(sRule.getGuardNegatives(), rule);
+		addProxiesToGuardNegatives(rule);
+		// ガード否定条件のリンクを接続する
+		coupleGuardNegativeLocalLinks(rule);
 		// 右辺と左辺の自由リンクを接続する
 		coupleInheritedLinks(rule);
 		//
 		mem.rules.add(rule);
 	}
-	/** ガード否定条件の構造を生成する
+
+	/** ガード否定条件の中間形式に対応する構造を生成する
 	 *  @param sNegatives ガード否定条件の中間形式のリスト[in]
 	 *  @param rule ルール構造[in,out] */
-	private void addGuardNegatives(LinkedList sNegatives, RuleStructure rule) throws ParseException {
-		List negatives = rule.guardNegatives;
+	private void addGuardNegatives(LinkedList sNegatives, RuleStructure rule, HashMap names) throws ParseException {
 		Iterator it = sNegatives.iterator();
 		while (it.hasNext()) {
 			LinkedList neg = new LinkedList();
-			LinkedList sNeg = (LinkedList)it.next();
-			ListIterator it2 = sNeg.listIterator();
+			ListIterator it2 = ((LinkedList)it.next()).listIterator();
 			while (it2.hasNext()) {
 				LinkedList sPair = (LinkedList)it2.next();
 				String cxtname = ((SrcProcessContext)sPair.getFirst()).getQualifiedName();
-				if (!rule.processContexts.containsKey(cxtname)) {
-					error("SYNTAX ERROR: Constrained process context must appear in rule head: " + cxtname);
-					it2.remove();
+				if (!names.containsKey(cxtname)) {
+					error("SYNTAX ERROR: fresh variable constrained in a negative condition: " + cxtname);
 				}
 				else {
-					ContextDef def = (ContextDef)rule.processContexts.get(cxtname);
-					Membrane mem = new Membrane(null);
-					addProcessToMem((LinkedList)sPair.getLast(),mem);
-					neg.add(new ProcessContextEquation(def,mem));
-					warning("FEATURE NOT IMPLEMENTED: process context equations are not yet supported");
+					ContextDef def = (ContextDef)names.get(cxtname);
+					if (def.lhsOcc != null) {
+						Membrane mem = new Membrane(null);
+						addProcessToMem((LinkedList)sPair.getLast(),mem);
+						neg.add(new ProcessContextEquation(def,mem));
+					}
 				}
 			}
-			negatives.add(neg);
+			rule.guardNegatives.add(neg);
 		}
 	}
-	
+
 	////////////////////////////////////////////////////////////////
 	//
 	// リンクとプロキシ
@@ -414,7 +418,17 @@ public class LMNParser {
 		}
 		return coupleLinks(mem);
 	}
-
+	/** ガード否定条件に対してaddProxiesを呼ぶ */
+	private void addProxiesToGuardNegatives(RuleStructure rule) {
+		Iterator it = rule.guardNegatives.iterator();
+		while (it.hasNext()) {
+			Iterator it2 = ((LinkedList)it.next()).iterator();
+			while (it2.hasNext()) {
+				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
+				addProxies(eq.mem);
+			}
+		}
+	}
 	/**
 	 * 指定された膜にあるアトムの引数に対して、リンクの結合を行い、自由リンクのHashMapを返す。
 	 * <p>子膜に対してリンクの結合およびプロキシの作成が行われた後で呼び出される。
@@ -455,7 +469,7 @@ public class LMNParser {
 	private void addLinkOccurrence(HashMap links, LinkOccurrence lnk) {
 		// 3回以上の出現
 		if (links.get(lnk.name) == CLOSED_LINK) {
-			error("SYNTAX ERROR: Link " + lnk.name + " appears more than twice.");
+			error("SYNTAX ERROR: link " + lnk.name + " appears more than twice.");
 			String linkname = lnk.name + generateNewLinkName();
 			if (lnk.name.startsWith(SrcLinkBundle.PREFIX_TAG))
 				linkname = SrcLinkBundle.PREFIX_TAG + linkname;
@@ -479,7 +493,7 @@ public class LMNParser {
 		Iterator it = mem.freeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			LinkOccurrence link = (LinkOccurrence)mem.freeLinks.get(it.next());
-			warning("WARNING: Global singleton link: " + link.name);
+			warning("WARNING: global singleton link: " + link.name);
 			LinkedList process = new LinkedList();
 			process.add(new SrcLink(link.name));
 			SrcAtom sAtom = new SrcAtom(link.name, process);
@@ -487,7 +501,42 @@ public class LMNParser {
 		}
 		coupleLinks(mem);
 	}
-
+	/** ルールのガード否定条件のトップレベルのリンクをつなぐ。
+	 * <p>rule.leftMem.freeLinksの計算後、coupleInheritedLinks(rule)の前に呼ぶこと。
+	 * <p>ガードコンパイルで実際に使うときには、自由リンク管理アトムの鎖を適宜補うこと。*/
+	void coupleGuardNegativeLocalLinks(RuleStructure rule) {
+		Iterator it = rule.guardNegatives.iterator();
+		while (it.hasNext()) {
+			HashMap links = new HashMap();
+			Iterator it2 = ((LinkedList)it.next()).iterator();
+			while (it2.hasNext()) {
+				Membrane mem = ((ProcessContextEquation)it2.next()).mem;
+				HashMap freeLinks = mem.freeLinks;
+				Iterator it3 = freeLinks.keySet().iterator();
+				while (it3.hasNext()) {
+					String linkname = (String)it3.next();
+					if (freeLinks.get(linkname) == CLOSED_LINK) continue;
+					LinkOccurrence lnk = (LinkOccurrence)freeLinks.get(linkname);
+					addLinkOccurrence(links, lnk);
+				}
+			}
+			removeClosedLinks(links);
+			if (!links.isEmpty()) {
+				Iterator it3 = links.keySet().iterator();
+				while (it3.hasNext()) {
+					String linkname = (String)it3.next();
+					LinkOccurrence lnk = (LinkOccurrence)links.get(linkname);
+					if (rule.leftMem.freeLinks.containsKey(linkname)) {
+						// ヘッドへのリンク
+						lnk.buddy = (LinkOccurrence)rule.leftMem.freeLinks.get(linkname);
+					}
+					else {
+						// ガード匿名変数
+					}
+				}
+			}
+		}
+	}
 	/** 左辺と右辺の自由リンクをつなぐ */
 	void coupleInheritedLinks(RuleStructure rule) {
 		HashMap lhsFreeLinks = rule.leftMem.freeLinks;
@@ -523,6 +572,7 @@ public class LMNParser {
 		}
 	}
 
+	
 	////////////////////////////////////////////////////////////////
 	//
 	// プロセス文脈、型付きプロセス文脈、ルール文脈、リンク束
@@ -546,14 +596,24 @@ public class LMNParser {
 			if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
 		}
 	}
+
+//	/** プロセス文脈、型付きプロセス文脈、およびルール文脈の左辺での出現を登録する */
+//	private void registerLHSOccsOfContexts(HashMap names) {
+//		Iterator it = names.keySet().iterator();
+//		while (it.hasNext()) {
+//			it.next();
+//		}
+//	}
 	
 	/** ヘッドのプロセス文脈、型付きプロセス文脈、ルール文脈、リンク束のリストを作成する。
-	 * @param names コンテキストの限定名 (String) から ContextDef への写像 [in,out] */
-	private void enumHeadNames(Membrane mem, HashMap names) throws ParseException {
+	 * @param mem 左辺膜、またはガード否定条件内等式制約右辺の構造を保持する膜
+	 * @param names コンテキストの限定名 (String) から ContextDef への写像 [in,out]
+	 * @param isLHS 左辺かどうか（def.lhsOccに追加するかどうかの判定に使用される）*/
+	private void enumHeadNames(Membrane mem, HashMap names, boolean isLHS) throws ParseException {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
-			enumHeadNames(submem, names);
+			enumHeadNames(submem, names, isLHS);
 		}
 		//
 		it = mem.processContexts.iterator();
@@ -565,35 +625,42 @@ public class LMNParser {
 				names.put(name, pc.def);
 			}
 			else {
-				it.remove(); // 少なくとも型なしプロセス文脈ではないため取り除く
+				it.remove(); // 少なくとも型なしプロセス文脈ではない（型付きまたはエラーとなる）ため取り除く
 				pc.def = (ContextDef)names.get(name);
 				if (pc.def.isTyped()) {
-					if (pc.def.src != null) {
-						// 展開を実装すれば不要になる
+					if (pc.def.lhsOcc != null) {
+						// 展開を実装すれば不要になる（ガード否定条件のときはどうしても書けないが放置）
 						error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name: " + name);
-						corrupted();
+						continue;
 					}
 					if (pc.args.length != 1) {
-						error("SYNTAX ERROR: Typed process context occurring in head must have exactly one explicit free link argument: " + pc);
+						error("SYNTAX ERROR: typed process context occurring in head must have exactly one explicit free link argument: " + pc);
 						continue;
 					}
 					mem.typedProcessContexts.add(pc);
 				}
 				else {
-					// 構造比較への変換を実装すれば不要になる
+					// 構造比較への変換を実装すれば不要になる（ガード否定条件のときはどうしても書けないが放置）
 					error("FEATURE NOT IMPLEMENTED: untyped process context name appeared more than once in a head: " + name);
-					corrupted();
+					continue;
 				}
 			}
-			pc.def.src = pc;	// ソース出現を登録
+			if (isLHS)  pc.def.lhsOcc = pc;	// ソース出現を登録
 			if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
 		}
 		it = mem.ruleContexts.iterator();
 		while (it.hasNext()) {
 			RuleContext rc = (RuleContext)it.next();
-			rc.def = new ContextDef(rc.getQualifiedName());
-			rc.def.src = rc;
-			names.put(rc.getQualifiedName(), rc.def);
+			String name = rc.getQualifiedName();
+			if (!names.containsKey(name)) {
+				rc.def = new ContextDef(name);
+				if (isLHS)  rc.def.lhsOcc = rc;
+				names.put(name, rc.def);
+			}
+			else {
+				error("SYNTAX ERROR: head contains more than one occurrence of a rule context: " + name);
+				it.remove();
+			}
 		}
 		it = mem.aggregates.iterator();
 		while (it.hasNext()) {
@@ -604,17 +671,19 @@ public class LMNParser {
 		}
 		//
 		if (mem.processContexts.size() > 1) {
-			error("SYNTAX ERROR: Head membrane cannot contain more than one untyped process context");
+			error("SYNTAX ERROR: head membrane cannot contain more than one untyped process context");
 			it = mem.processContexts.iterator();
 			while (it.hasNext()) {
-				((ProcessContext)it.next()).def.src = null; // ソース出現の登録を取り消す
+				ProcessContext pc = (ProcessContext)it.next();
+				if (pc.def.lhsOcc == pc)  pc.def.lhsOcc = null; // ソース出現の登録を取り消す
 				it.remove(); // namesには残る
 			}
 		}
 		if (mem.ruleContexts.size() > 1) {
-			error("SYNTAX ERROR: Head membrane cannot contain more than one rule context");
+			error("SYNTAX ERROR: head membrane cannot contain more than one rule context");
 			while (it.hasNext()) {
-				((RuleContext)it.next()).def.src = null; // ソース出現の登録を取り消す
+				RuleContext rc = (RuleContext)it.next();
+				if (rc.def.lhsOcc == rc)  rc.def.lhsOcc = null; // ソース出現の登録を取り消す
 				it.remove(); // namesには残る
 			}
 		}
@@ -639,9 +708,9 @@ public class LMNParser {
 			}
 			else {
 				pc.def = (ContextDef)names.get(name);
-				if (pc.def.src != null) {
-					if (pc.args.length != pc.def.src.args.length
-					 || ((pc.bundle == null) != (((ProcessContext)pc.def.src).bundle == null)) ) {
+				if (pc.def.lhsOcc != null) {
+					if (pc.args.length != pc.def.lhsOcc.args.length
+					 || ((pc.bundle == null) != (((ProcessContext)pc.def.lhsOcc).bundle == null)) ) {
 						error("SYNTAX ERROR: unmatched length of free link list of process context: " + pc);
 						it.remove();
 						continue;
@@ -656,8 +725,8 @@ public class LMNParser {
 					mem.typedProcessContexts.add(pc);
 				}
 				else {
-					if (pc.def.src == null) {
-						// 構文エラーによりヘッド出現が取り消された型なし$pは、ボディ出現が無言で取り除かれる
+					if (pc.def.lhsOcc == null) {
+						// 構文エラーによりヘッド出現が取り消された型なし$pは、ボディ出現が無言で取り除かれる。
 						it.remove();
 						continue;
 					}
@@ -687,30 +756,60 @@ public class LMNParser {
 		}
 	}
 
-	/** ルール構造に対して、プロセス文脈およびルール文脈の接続を行う */
-	private void resolveContextNames(RuleStructure rule) throws ParseException {
+	/** 左辺およびガード型制約に対して、プロセス文脈およびルール文脈の名前解決を行う。
+	 *  名前解決により発見された構文エラーを訂正する。
+	 *  @return 左辺およびガードに出現する限定名(String) -> ContextDef / LinkOccurrence(Bundles) */
+	private HashMap resolveHeadContextNames(RuleStructure rule) throws ParseException {
+		HashMap names = new HashMap();
+		enumTypedNames(rule.guardMem, names);
+		enumHeadNames(rule.leftMem, names, true);
+		// todo リンク束が左辺で閉じていないことを確認する
+		// ---リンク束が2回出現したかどうかを調べればよいだけ。
+		
+		// 左辺トップレベルのプロセス文脈を削除する
+		Iterator it = rule.leftMem.processContexts.iterator();
+		while (it.hasNext()) {
+			ProcessContext pc = (ProcessContext)it.next();
+			error("SYNTAX ERROR: untyped head process context requires an enclosing membrane: " + pc);
+			names.remove(pc.def.getName());
+			pc.def.lhsOcc = null;	// ソース出現の登録を取り消す
+			it.remove();
+		}
+		return names;
+	}
+
+	/** ガード否定条件および右辺に対して、プロセス文脈およびルール文脈の名前解決を行う。
+	 *  名前解決により発見された構文エラーを訂正する。*/
+	private void resolveContextNames(RuleStructure rule, HashMap names) throws ParseException {
 
 		// 同じ名前のプロセス文脈の引数パターンを同じにする。
 		// 型付きは明示的な自由リンクの個数を1にする。
 
 		Iterator it;
-		HashMap names = new HashMap();
-		enumTypedNames(rule.guardMem, names);
-		enumHeadNames(rule.leftMem, names);
-		// todo リンク束が左辺で閉じていないことを確認する
 		
-		// - 左辺トップレベルのプロセス文脈を削除する
-		it = rule.leftMem.processContexts.iterator();
+		// ガード否定条件
+		it = rule.guardNegatives.iterator();
 		while (it.hasNext()) {
-			ProcessContext pc = (ProcessContext)it.next();
-			error("SYNTAX ERROR: untyped head process context requires an enclosing membrane: " + pc);
-			names.remove(pc.def.getName());
-			pc.def.src = null;	// ソース出現の登録を取り消す
-			it.remove();
+			Iterator it2 = ((LinkedList)it.next()).iterator();
+			HashMap tmpnames = (HashMap)names.clone();	// 他の条件やボディとは関係ないため
+			HashSet cxtnames = new HashSet();
+			while (it2.hasNext()) {
+				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
+				String cxtname = eq.def.getName();
+				if (cxtnames.contains(cxtname)) {
+					error("SYNTAX ERROR: process context constrained more than once in a negative condition: " + cxtname);
+					it2.remove();
+				}
+				else {
+					cxtnames.add(cxtname);
+					enumHeadNames(eq.mem, tmpnames, false);
+				}
+			}
 		}
-		
-		//
+				
+		// 右辺
 		enumBodyNames(rule.rightMem, names);
+		
 		// todo リンク束を閉じる
 		
 		// todo プロセス文脈間で継承されたリンク束が同じ名前であることを確認する
@@ -726,24 +825,24 @@ public class LMNParser {
 			if (def.isTyped()) {
 				rule.typedProcessContexts.put(name, def);
 			}
-			else { // 型付きでない場合、src!=nullとなっている
-				if (def.src instanceof ProcessContext) {
+			else { // 型付きでない場合、lhsOcc!=nullとなっている
+				if (def.lhsOcc instanceof ProcessContext) {
 					rule.processContexts.put(name, def);
 				}
-				else if (def.src instanceof RuleContext) {
+				else if (def.lhsOcc instanceof RuleContext) {
 					rule.ruleContexts.put(name, def);
 				}
 			}
 			if (def.rhsOccs.size() == 1) {
-				if (def.src != null) {	// ガードでないとき。紛らわしい。TODO def.srcはdef.lhsoccに名称変更する
+				if (def.lhsOcc != null) {	// ガードでないとき
 					Context rhsocc = ((Context)def.rhsOccs.get(0));
-					rhsocc.buddy = def.src;
-					def.src.buddy = rhsocc;
+					rhsocc.buddy = def.lhsOcc;
+					def.lhsOcc.buddy = rhsocc;
 				}
-			}			
+			}
 		}
 		
-		// （非線型プロセス文脈が実装されるまでの仮措置として）線型でないものを取り除く
+		// （非線型プロセス文脈が実装されるまでの仮措置として）線型でない型なし$pを取り除く
 		it = rule.processContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
@@ -753,6 +852,18 @@ public class LMNParser {
 			}
 		}
 	}
+}
+
+////////////////////////////////////////////////////////////////
+//
+// 構文的な書き換えを行うメソッドを保持するクラス
+//
+
+class SyntaxExpander {
+	private LMNParser parser;
+	SyntaxExpander(LMNParser parser) {
+		this.parser = parser;
+	}	
 	
 	////////////////////////////////////////////////////////////////
 	//
@@ -760,7 +871,7 @@ public class LMNParser {
 	//
 
 	/** ルール構文に対して略記法の展開を行う */
-	private void expandRuleAbbreviations(SrcRule sRule) throws ParseException {
+	void expandRuleAbbreviations(SrcRule sRule) throws ParseException {
 
 		// ガードを型制約と否定条件に分類する
 		flatten(sRule.getGuard());
@@ -824,7 +935,7 @@ public class LMNParser {
 		// 型制約に出現せず、Bodyでの出現が1回でない$pに対してガードにground($p)を追加する
 		// todo 実装する
 		
-		// - 型付きプロセス文脈構文の展開
+		// - アトム引数にプロセス文脈が書ける構文（いわゆる「型付きプロセス文脈構文」）の展開
 		// todo $pを強制的に$p[X]に展開すると$p[X|*V]に展開できる可能性を制限しているのを何とかする
 		expandTypedProcessContexts(sRule.getHead());
 		expandTypedProcessContexts(typeConstraints);
@@ -861,7 +972,7 @@ public class LMNParser {
 						Object lhs = sAtom.getProcess().getFirst();
 						if (lhs instanceof SrcProcessContext) {
 							if (((SrcProcessContext)lhs).args != null) {
-								warning("WARNING: Argument of constrained process context is ignored: "
+								warning("WARNING: argument of constrained process context is ignored: "
 									+ SrcDumper.dump(lhs,0).replaceAll("\n",""));
 								((SrcProcessContext)lhs).args = null;
 							}
@@ -876,7 +987,7 @@ public class LMNParser {
 						}
 					}
 				}
-				error("SYNTAX ERROR: Process context equation expected rather than: "
+				error("SYNTAX ERROR: process context equation expected rather than: "
 					+ SrcDumper.dump(obj2,0).replaceAll("\n",""));
 			}
 		}
@@ -888,7 +999,7 @@ public class LMNParser {
 	 * '-'(x) → '-x'
 	 * </pre>
 	 */
-	private void incorporateSignSymbols(LinkedList process) {
+	void incorporateSignSymbols(LinkedList process) {
 		ListIterator it = process.listIterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
@@ -897,9 +1008,9 @@ public class LMNParser {
 				if (atom.getProcess().size() == 1
 				 && (atom.getName().equals("+") || atom.getName().equals("-"))
 				 && atom.getProcess().get(0) instanceof SrcAtom) {
-				 	SrcAtom inneratom = (SrcAtom)atom.getProcess().get(0);
-				 	if (inneratom.getProcess().size() == 0
-				 	 && inneratom.getName().matches("([0-9]+|[0-9]*\\.[0-9]*)([Ee][+-]?[0-9]+)?")) {
+					SrcAtom inneratom = (SrcAtom)atom.getProcess().get(0);
+					if (inneratom.getProcess().size() == 0
+					 && inneratom.getName().matches("([0-9]+|[0-9]*\\.[0-9]*)([Ee][+-]?[0-9]+)?")) {
 						it.remove();
 						it.add(new SrcAtom( atom.getName()
 							+ ((SrcAtom)atom.getProcess().get(0)).getName() ));
@@ -920,7 +1031,7 @@ public class LMNParser {
 	 * ':'(m,p(t1..tn)) → 'm.p'(t1..tn)
 	 * </pre>
 	 */
-	private void incorporateModuleNames(LinkedList process) {
+	void incorporateModuleNames(LinkedList process) {
 		ListIterator it = process.listIterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
@@ -934,7 +1045,7 @@ public class LMNParser {
 					SrcAtom bodyatom = (SrcAtom)atom.getProcess().get(1);
 					if (pathatom.getProcess().size() == 0
 					 && pathatom.getNameType() == SrcName.PLAIN) {
-					 	it.remove();
+						it.remove();
 						it.add(bodyatom);
 						bodyatom.srcname = new SrcName(pathatom.getName() + "." + bodyatom.getName(), SrcName.PATHED);
 						incorporateModuleNames(bodyatom.getProcess());
@@ -1004,7 +1115,7 @@ public class LMNParser {
 	 * f(s1, (t1,,tn),sm) → f(s1,X,sm), ','(t1,(t2,,tn),X)
 	 * </pre>
 	 */
-	private void expandAtoms(LinkedList process) {
+	void expandAtoms(LinkedList process) {
 		LinkedList srcprocess = (LinkedList)process.clone();
 		process.clear();
 		ListIterator it = srcprocess.listIterator();
@@ -1177,7 +1288,8 @@ public class LMNParser {
 	/** アトム展開後のプロセス構造（子ルール外）のアトム引数に出現するプロセス文脈を展開する。
 	 * <pre> p(s1,$p,sn) → p(s1,X,sn), $p[X]
 	 * </pre>
-	 * todo $p[X|*p] に展開すべき場合もあるはず
+	 * <p>メソッドの名前とは異なり、型付きでないプロセス文脈も展開する仕様になっている。
+	 * <p>todo $p[X|*p] に展開すべき場合もあるはず
 	 */
 	private void expandTypedProcessContexts(LinkedList process) {
 		ListIterator it = process.listIterator();
@@ -1248,12 +1360,12 @@ public class LMNParser {
 					else {
 						String proccxtname = generateNewProcessContextName();
 						sAtom.getProcess().set(i, new SrcProcessContext(proccxtname, true));
-						error("SYNTAX ERROR: Illegal object in guard atom argument: " + subobj);
+						error("SYNTAX ERROR: illegal object in guard atom argument: " + subobj);
 					}
 				}
 			}
 			else {
-				error("SYNTAX ERROR: Illegal object in guard: " + obj);
+				error("SYNTAX ERROR: illegal object in guard: " + obj);
 				it.remove();
 			}
 		}
@@ -1262,7 +1374,7 @@ public class LMNParser {
 	/** アトム展開後のプロセス構造（ソースファイル）（ルール外）に対して、
 	 * プロセス文脈やルール文脈やリンク束が出現したらコンパイルエラーとする。
 	 * アトム引数での出現は無名のリンクで置換する。*/
-	private void correctWorld(LinkedList process) {
+	void correctWorld(LinkedList process) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
@@ -1278,7 +1390,7 @@ public class LMNParser {
 					else {
 						String linkname = generateNewLinkName();
 						sAtom.getProcess().set(i, new SrcLink(linkname));
-						error("SYNTAX ERROR: Illegal object in an atom argument: " + subobj);
+						error("SYNTAX ERROR: illegal object in an atom argument: " + subobj);
 					}
 				}
 			}
@@ -1287,10 +1399,24 @@ public class LMNParser {
 			}
 			else if (obj instanceof SrcRule) {}
 			else {
-				error("SYNTAX ERROR: Illegal object outside a rule: " + obj);
+				error("SYNTAX ERROR: illegal object outside a rule: " + obj);
 				it.remove();
 			}
 		}
+	}
+	private void error(String text) {
+		parser.error(text);
+	}
+	private void warning(String text) {
+		parser.warning(text);
+	}
+	/** ユニークな新しいリンク名を生成する */
+	private String generateNewLinkName() {
+		return parser.generateNewLinkName();
+	}
+	/** ユニークな新しいプロセス文脈名を生成する */
+	private String generateNewProcessContextName() {
+		return parser.generateNewProcessContextName();
 	}
 }
 

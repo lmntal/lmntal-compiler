@@ -32,10 +32,10 @@ public class ContextDef {
 	public boolean isTyped() {
 		return typed;
 	}
-	/** ソース出現（右辺での生成時に使うオリジナルへの参照）またはnull。
-	 * 左辺の出現がある場合は、それが格納されることになっている。
-	 * nullのとき、ルールコンパイラはガード出現を代入してよい。*/
-	public Context src = null;
+	/** ソース出現（左辺での出現）またはnull。
+	 * <strike>右辺での生成時に使うオリジナルへの参照。
+	 * nullのとき、ルールコンパイラはガード出現を代入してよい。</strike> */
+	public Context lhsOcc = null;
 	
 	/** 右辺でのコンテキスト出現 (Context) のリスト */
 	public List rhsOccs = new ArrayList();

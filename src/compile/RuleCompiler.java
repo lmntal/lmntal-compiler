@@ -398,9 +398,10 @@ public class RuleCompiler {
 		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
-			if (def.src != null) {
-				if (def.src.mem == rs.guardMem) { def.src = null; } // 再呼び出しに対応（仮）
-				else {
+			if (def.lhsOcc != null) {
+//				if (def.lhsOcc.mem == rs.guardMem) { def.lhsOcc = null; } // 再呼び出しに対応（仮）→lhsOccにはガード出現を入れないと決めたためコードを廃棄した
+//				else 
+				{
 					identifiedCxtdefs.add(def);
 					// 左辺の型付きプロセス文脈の明示的な自由リンクの先が、左辺のアトムに出現することを確認する。
 					// 出現しない場合はコンパイルエラーとする。この制限を「パッシブ型制限」と呼ぶことにする。
@@ -408,7 +409,7 @@ public class RuleCompiler {
 					// つまり、( 2(X) :- found(X) ) や ( 2(3) :- ok ) で2や3を$pで表すことはできない。
 					// しかし実際には処理系側の都合による制限である。
 					// なお、プログラミングの観点から、右辺の型付きプロセス文脈の明示的な自由リンクの先は任意としている。
-					if (!lhsatompath.containsKey(def.src.args[0].buddy.atom)) {
+					if (!lhsatompath.containsKey(def.lhsOcc.args[0].buddy.atom)) {
 						error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
 						corrupted();
 						guard.add(new Instruction(Instruction.LOCK, 0));
@@ -585,7 +586,7 @@ public class RuleCompiler {
 		else {
 			int atomid = typedcxtToSrcPath(def);
 			if (atomid == UNBOUND) {
-				LinkOccurrence srclink = def.src.args[0].buddy; // defのソース出現を指すアトム側の引数
+				LinkOccurrence srclink = def.lhsOcc.args[0].buddy; // defのソース出現を指すアトム側の引数
 				atomid = varcount++;
 				guard.add(new Instruction(Instruction.DEREFATOM,
 					atomid, lhsatomToPath(srclink.atom), srclink.pos));
@@ -606,7 +607,7 @@ public class RuleCompiler {
 		else {
 			int loadedatomid = typedcxtToSrcPath(def);
 			if (loadedatomid == UNBOUND) {
-				LinkOccurrence srclink = def.src.args[0].buddy;
+				LinkOccurrence srclink = def.lhsOcc.args[0].buddy;
 				loadedatomid = varcount++;
 				guard.add(new Instruction(Instruction.DEREFATOM,
 					loadedatomid, lhsatomToPath(srclink.atom), srclink.pos));
@@ -629,7 +630,7 @@ public class RuleCompiler {
 	private int loadUnaryAtom(ContextDef def) {
 		int atomid = typedcxtToSrcPath(def);
 		if (atomid == UNBOUND) {
-			LinkOccurrence srclink = def.src.args[0].buddy;
+			LinkOccurrence srclink = def.lhsOcc.args[0].buddy;
 			atomid = varcount++;
 			guard.add(new Instruction(Instruction.DEREFATOM,
 				atomid, lhsatomToPath(srclink.atom), srclink.pos));
@@ -644,7 +645,7 @@ public class RuleCompiler {
 		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
-			Context pc = def.src;
+			Context pc = def.lhsOcc;
 			if (pc != null) { // ヘッドのときのみ
 				if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
 					body.add(new Instruction( Instruction.REMOVEATOM,
@@ -796,13 +797,13 @@ public class RuleCompiler {
 		Iterator it = mem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
-			if (pc.def.src.mem == null) {
-				error("SYSTEM ERROR: ProcessContext.def.src.mem is not set");
+			if (pc.def.lhsOcc.mem == null) {
+				error("SYSTEM ERROR: ProcessContext.def.lhsOcc.mem is not set");
 			}
-			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.src.mem)) {
+			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.lhsOcc.mem)) {
 				if (pc.def.rhsOccs.get(0) == pc) {
 					body.add(new Instruction(Instruction.MOVECELLS,
-						rhsmemToPath(mem), lhsmemToPath(pc.def.src.mem) ));
+						rhsmemToPath(mem), lhsmemToPath(pc.def.lhsOcc.mem) ));
 				} 
 				//else {
 				//	error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + pc);
@@ -838,8 +839,8 @@ public class RuleCompiler {
 		it = mem.ruleContexts.iterator();
 		while (it.hasNext()) {
 			RuleContext rc = (RuleContext)it.next();			
-			if (rhsmemToPath(mem) == lhsmemToPath(rc.def.src.mem)) continue;
-			body.add(new Instruction( Instruction.COPYRULES, rhsmemToPath(mem), lhsmemToPath(rc.def.src.mem) ));
+			if (rhsmemToPath(mem) == lhsmemToPath(rc.def.lhsOcc.mem)) continue;
+			body.add(new Instruction( Instruction.COPYRULES, rhsmemToPath(mem), lhsmemToPath(rc.def.lhsOcc.mem) ));
 		}
 	}
 	/** 右辺の膜内のルールの内容を生成する */	

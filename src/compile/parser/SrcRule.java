@@ -56,7 +56,7 @@ class SrcRule {
 		return this.guard;
 	}
 	/**
-	 * ガード型制約を取得する
+	 * ガード否定条件を取得する
 	 */
 	public LinkedList getGuardNegatives() {
 		return this.guardNegatives;
