@@ -6,11 +6,27 @@ import java.util.List;
 
 import util.Stack;
 
+/** 抽象計算ノードクラス */
+abstract class AbstractLMNtalRuntime {
+	protected String runtimeid;
+	/** この計算ノードに（親膜を持たない）ルート膜を作成する。
+	 * <p>
+	 * ルート膜の親膜またはnullを引数に取るようにした方がよいかも知れない。
+	 * 詳細は、「タスク（旧Machine）」を生成する構文を決定する頃に決める */
+	abstract AbstractMachine newMachine();
+}
+
 /** 抽象マシンクラス */
 abstract class AbstractMachine {
+	/** 計算ノード */
+	protected AbstractLMNtalRuntime runtime;
 	/** ルート膜 */
 	protected AbstractMembrane root;
 	
+	/** 計算ノードの取得 */
+	AbstractLMNtalRuntime getRuntime() {
+		return runtime;
+	}
 	/** ルート膜の取得 */
 	AbstractMembrane getRoot() {
 		return root;
@@ -20,7 +36,7 @@ abstract class AbstractMachine {
 /**
  * TODO 「タスク」に名前変更
  * TODO システムルールセットのマッチテスト・ボディ実行
- * TODO マシン間の上下関係の実装、newMachineをマシンが持つようにする
+ * TODO マシン間の上下関係の実装、《newMachineをマシンが持つようにする》←？
  *
  */
 final class Machine extends AbstractMachine {
@@ -91,7 +107,7 @@ final class Machine extends AbstractMachine {
 }
 
 /** 計算ノード */
-final class LMNtalRuntime {
+final class LMNtalRuntime extends AbstractLMNtalRuntime {
 	List machines = new ArrayList();
 	AbstractMembrane rootMem;
 	
@@ -100,7 +116,7 @@ final class LMNtalRuntime {
 	 *  マシンが木構造になっていないと出来ない。優先度はしばらく未実装。
 	 */
 	LMNtalRuntime(Ruleset init){
-		Machine root = newMachine();
+		Machine root = (Machine)newMachine();
 		rootMem = root.getRoot();
 		init.react((Membrane)rootMem);
 	}
@@ -127,7 +143,7 @@ final class LMNtalRuntime {
 		}while(!allIdle);
 	}
 	
-	Machine newMachine() {
+	AbstractMachine newMachine() {
 		Machine m = new Machine();
 		machines.add(m);
 		return m;
