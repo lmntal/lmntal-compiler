@@ -1,7 +1,6 @@
 package runtime;
 
 import java.awt.Rectangle;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import test.GUI.DoublePoint;
 import util.QueuedEntity;
 import util.RandomIterator;
 
