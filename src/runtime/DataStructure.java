@@ -307,6 +307,10 @@ abstract class AbstractMembrane extends QueuedEntity {
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
 	abstract protected void enqueueAllAtoms();
 
+	// TODO $pの移動のためのメソッドの仕様を選ぶ
+	// 案1：remove/pourで自由リンク管理アトムを追加・削除
+	// 案2：自由リンク管理アトム追加・削除のための専用メソッドの追加
+	
 	///////////////////
 	// 案1
 	/**
@@ -353,8 +357,10 @@ abstract class AbstractMembrane extends QueuedEntity {
     // 案1ここまで
     //////////////////////
     
-	/** dstMemに移動 */
-	/** srcMemの内容を全て移動する */
+	/**
+	 * srcMemの内容を全て移動する。
+	 * 案1ではおそらく不要
+	 */
 	void pour(AbstractMembrane srcMem) {
 		atoms.addAll(srcMem.atoms);
 		mems.addAll(srcMem.mems);
