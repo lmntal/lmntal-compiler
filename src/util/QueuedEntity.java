@@ -20,5 +20,7 @@ public class QueuedEntity {
 	public void dequeue() {
 		next.prev = prev;
 		prev.next = next;
+		prev = null;
+		next = null;
 	}
 }
