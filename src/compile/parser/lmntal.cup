@@ -5,9 +5,11 @@ package compile.parser;
 import java.util.LinkedList;
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
-terminal		NULL, COMMA, LPAREN, RPAREN, LBREATH, RBREATH, 
-				RULE, EQUALS, PERIOD, GUARD, PROCVAR, RULEVAR, 
-				WILDCARD, LBRACET, RBRACET, NEGATIVE;
+terminal		NULL, COMMA, LPAREN, RPAREN, LBREATH, RBREATH,
+				RULE, UNIFY, PERIOD, GUARD, PROCVAR, RULEVAR, 
+				WILDCARD, LBRACET, RBRACET, NEGATIVE,
+				LT, LE, GT, GE, EQ, NE;
+				
 terminal String	LINK_NAME, ATOM_NAME;
 
 non terminal SrcLink			Link;
@@ -17,9 +19,14 @@ non terminal SrcRule			Rule;
 non terminal SrcProcessContext	ProcessContext;
 non terminal SrcRuleContext		RuleContext;
 non terminal SrcContext			Context;
-non terminal SrcLinkUnify		LinkUnify;
 non terminal Object				Process;
 non terminal LinkedList			ProcessList;
+non terminal Object				GuardProcess;
+/*
+non terminal LinkedList         GuardProcessList;
+*/
+non terminal SrcLinkUnify		LinkUnify;
+non terminal SrcCompareAtom     CompareAtom;
 
 start with ProcessList;
 
@@ -41,7 +48,9 @@ Membrane	::=	  LBREATH RBREATH
 					{: RESULT = new SrcMembrane(list); :};
 
 Rule		::=	  LPAREN ProcessList:head RULE ProcessList:body RPAREN
-					{: RESULT = new SrcRule(head, body); :};
+					{: RESULT = new SrcRule(head, body); :}
+			    | LPAREN ProcessList:head RULE ProcessList:guard GUARD ProcessList:body RPAREN
+					{: RESULT = new SrcRule(head, guard, body); :};
 
 ProcessContext	::=   PROCVAR ATOM_NAME:name
 					{: RESULT = new SrcProcessContext(name); :};
@@ -54,8 +63,21 @@ Context		::=   ProcessContext:p
 				| RuleContext:r
 					{: RESULT = r; :};
 
-LinkUnify	::=   Link:left EQUALS Link:right
+LinkUnify	::=   Link:left UNIFY Link:right
 					{: RESULT = new SrcLinkUnify(left, right); :};
+
+CompareAtom ::=   Process:left LT Process:right
+                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.LT, left, right); :}
+                | Process:left LE Process:right
+                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.LE, left, right); :}
+                | Process:left GT Process:right
+                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.GT, left, right); :}
+                | Process:left GE Process:right
+                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.GE, left, right); :}
+                | Process:left EQ Process:right
+                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.EQ, left, right); :}
+                | Process:left NE Process:right
+                    {: RESULT = new SrcCompareAtom(SrcCompareAtom.NE, left, right); :};
 
 Process		::=   Atom:p
 					{:  RESULT = p; :}
@@ -70,7 +92,19 @@ Process		::=   Atom:p
 				| LinkUnify:p
 					{:  RESULT = p; :};
 
-ProcessList	::=   Process:p
+GuardProcess ::=  Process:p
+					{:  RESULT = p; :}
+			    | CompareAtom:p
+			        {:  RESULT = p; :};
+
+ProcessList	::=   GuardProcess:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
-				| ProcessList:list COMMA Process:p
+				| ProcessList:list COMMA GuardProcess:p
 					{: list.add(p); RESULT = list; :};
+				
+/*
+GuardProcessList ::=   GuardProcess:p
+					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
+				| GuardProcessList:list COMMA GuardProcess:p
+					{: list.add(p); RESULT = list; :};
+*/
