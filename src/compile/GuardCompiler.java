@@ -9,8 +9,8 @@ import compile.structure.*;
 
 public class GuardCompiler extends HeadCompiler {
 	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
-	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
+//	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
 
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
 	HashMap typedcxtdatatypes = new HashMap();
@@ -102,8 +102,9 @@ public class GuardCompiler extends HeadCompiler {
 	}
 	//
 	
+	/** 型付きプロセス文脈が表すプロセスを一意に決定する。*/
 	void fixTypedProcesses() {
-		// 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
+		// STEP 1 - 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
 		identifiedCxtdefs = new HashSet();
 		Iterator it = typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
@@ -136,7 +137,7 @@ public class GuardCompiler extends HeadCompiler {
 				}
 			}
 		}
-		// 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
+		// STEP 2 - 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
 		LinkedList cstrs = new LinkedList();
 		it = typeConstraints.iterator();
 		while (it.hasNext()) cstrs.add(it.next());
@@ -198,50 +199,19 @@ public class GuardCompiler extends HeadCompiler {
 //					bindToFunctor(def1, func);
 //					typedcxtdatatypes.put(def1, new Integer(ISSTRING));
 //				}
-				else if (func.equals(RuleCompiler.FUNC_UNIFY)) {
-					if (!identifiedCxtdefs.contains(def2)) {
+				else if (func.equals(RuleCompiler.FUNC_UNIFY)) { // (-X = +Y)
+					if (!identifiedCxtdefs.contains(def2)) { // (+X = -Y) は (-Y = +X) として処理する
 						ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
 						if (!identifiedCxtdefs.contains(def2)) continue;
 					}
-					boolean checkNeeded = (typedcxttypes.get(def1) != UNARY_ATOM_TYPE
-										 && typedcxttypes.get(def2) != UNARY_ATOM_TYPE);
-					int atomid2 = loadUnaryAtom(def2);
-					if (!identifiedCxtdefs.contains(def1)) {
-						// todo 複製された参照を実装する
-						int funcid2 = varcount++;
-						match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
-						int atomid1 = varcount++;
-						match.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
-						typedcxtsrcs.put(def1, new Integer(atomid1));
-						typedcxtdefs.add(def1);
-						identifiedCxtdefs.add(def1);
-						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
-					}
-					else {
-						if (checkNeeded) match.add(new Instruction(Instruction.ISUNARY, atomid2));
-						bindToUnaryAtom(def1, atomid2);
-					}
-					//
-					Object newdatatype = typedcxtdatatypes.get(def2);
-					if (newdatatype == null) newdatatype = typedcxtdatatypes.get(def1);
-					typedcxtdatatypes.put(def1,newdatatype);
-					typedcxtdatatypes.put(def2,newdatatype);
+					processEquivalenceConstraint(def1,def2);
 				}
-				else if (func.equals(new Functor("==",2))) {
+				else if (func.equals(new Functor("==",2))) { // (+X == +Y)
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
-					boolean checkNeeded = (typedcxttypes.get(def1) != UNARY_ATOM_TYPE
-										 && typedcxttypes.get(def2) != UNARY_ATOM_TYPE);
-					int atomid2 = loadUnaryAtom(def2);
-					if (checkNeeded) match.add(new Instruction(Instruction.ISUNARY, atomid2));
-					bindToUnaryAtom(def1, atomid2);
-					//
-					Object newdatatype = typedcxtdatatypes.get(def1);
-					if (newdatatype == null) newdatatype = typedcxtdatatypes.get(def2);
-					typedcxtdatatypes.put(def1,newdatatype);
-					typedcxtdatatypes.put(def2,newdatatype);
+					processEquivalenceConstraint(def1,def2);
 				}
-				else if (guardLibrary1.containsKey(func)) {
+				else if (guardLibrary1.containsKey(func)) { // 1入力制約
 					int[] desc = (int[])guardLibrary1.get(func);
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
@@ -249,17 +219,17 @@ public class GuardCompiler extends HeadCompiler {
 						match.add(new Instruction(desc[0], atomid1));
 						typedcxtdatatypes.put(def1, new Integer(desc[0]));
 					}
-					if (func.getArity() == 1) {
+					if (func.getArity() == 1) { // {t1,inst} --> p(+X1)
 						if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
 					}
-					else {
+					else { // {t1,inst,t2} --> p(+X1,-X2)
 						int atomid2 = varcount++;
 						match.add(new Instruction(desc[1], atomid2, atomid1));
 						bindToUnaryAtom(def2, atomid2);
 						typedcxtdatatypes.put(def2, new Integer(desc[2]));
 					}
 				}
-				else if (guardLibrary2.containsKey(func)) {
+				else if (guardLibrary2.containsKey(func)) { // 2入力制約
 					int[] desc = (int[])guardLibrary2.get(func);
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
@@ -273,10 +243,10 @@ public class GuardCompiler extends HeadCompiler {
 						match.add(new Instruction(desc[1], atomid2));
 						typedcxtdatatypes.put(def1, new Integer(desc[1]));
 					}
-					if (func.getArity() == 2) {
+					if (func.getArity() == 2) { // {t1,t2,inst} --> p(+X1,+X2)
 						match.add(new Instruction(desc[2], atomid1, atomid2));
 					}
-					else {
+					else { // desc={t1,t2,inst,t3} --> p(+X1,+X2,-X3)
 						int atomid3 = varcount++;
 						match.add(new Instruction(desc[2], atomid3, atomid1, atomid2));
 						bindToUnaryAtom(def3, atomid3);
@@ -293,7 +263,7 @@ public class GuardCompiler extends HeadCompiler {
 			if (cstrs.isEmpty()) return;
 		}
 		while (changed);
-		// 型付け失敗
+		// STEP 3 - 型付け失敗
 		ListIterator lit = cstrs.listIterator();
 		String text = "";
 		while (lit.hasNext()) {
@@ -304,6 +274,43 @@ public class GuardCompiler extends HeadCompiler {
 		}
 		rc.error("COMPILE ERROR: never proceeding type constraint: " + text);
 	}
+	/** 制約 X=Y または X==Y を処理する。ただしdef2は特定されていなければならない。*/
+	private void processEquivalenceConstraint(ContextDef def1, ContextDef def2) {
+		boolean checkNeeded = (typedcxttypes.get(def1) == null
+							 && typedcxttypes.get(def2) == null); // 型付きであることの検査が必要かどうか
+		boolean GROUND_ALLOWED = false;
+		// GROUND_ALLOWED のとき (unary = ?) は (? = unary) として処理する（ただし?はgroundまたはnull）
+		if (GROUND_ALLOWED && typedcxttypes.get(def2) != UNARY_ATOM_TYPE) {
+			if (typedcxttypes.get(def1) == UNARY_ATOM_TYPE) {
+				ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
+			}
+		}
+		if (GROUND_ALLOWED && typedcxttypes.get(def2) != UNARY_ATOM_TYPE) { // (? = ground)
+			// todo 実装
+		}
+		else {
+			int atomid2 = loadUnaryAtom(def2);
+			if (checkNeeded) match.add(new Instruction(Instruction.ISUNARY, atomid2));
+			if (!identifiedCxtdefs.contains(def1)) { // (未特定の$p1)=(特定済の$p2) 
+				// todo 同じ変数を共有した方がよい。できるか？
+				int funcid2 = varcount++;
+				match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+				int atomid1 = varcount++;
+				match.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
+				typedcxtsrcs.put(def1, new Integer(atomid1));
+				typedcxtdefs.add(def1);
+				identifiedCxtdefs.add(def1);
+				typedcxttypes.put(def1, UNARY_ATOM_TYPE);
+			}
+			else bindToUnaryAtom(def1, atomid2);
+			//
+			Object newdatatype = typedcxtdatatypes.get(def2);
+			if (newdatatype == null) newdatatype = typedcxtdatatypes.get(def1);
+			typedcxtdatatypes.put(def1,newdatatype);
+			typedcxtdatatypes.put(def2,newdatatype);
+		}
+	}
+	
 	/** 型制約を廃棄する。エラー復帰用メソッド */
 	private void discardTypeConstraint(Atom cstr) {
 		match.add(new Instruction(Instruction.LOCK, 0));
