@@ -146,7 +146,12 @@ public class Grouping {
 									case Instruction.IDIV:
 									case Instruction.IMOD:	
 										int atomid = insth2b.getIntArg1();
-										if(atomid == atom1 || atomid == atom2){
+										if(atomid == atom1 && atomid == atom2){
+											subinstssize += 1;
+											hid2b = hid;	
+											break;	
+										}
+										else if(atomid == atom1 || atomid == atom2){
 											if(!flag1) flag1 = true;
 											else {
 												flag2 = true;
