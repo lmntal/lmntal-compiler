@@ -44,7 +44,7 @@ public class REPL {
 				}
 			});
 		
-		System.out.println("        LMNtal version 0.06.20040120");
+		System.out.println("        LMNtal version 0.70.20040121");
 		System.out.println("");
 		System.out.println("Type h to see help.");
 		System.out.println("Type q to quit.");
@@ -59,7 +59,7 @@ public class REPL {
 				} else if(line.equals("h")) {
 					System.out.println("Commands:");
 					System.out.println("  [no]debug    [0-9] - set debug level");
-					System.out.println("  [no]optimize [0-9] - set optimization level"); //書き方変えた方がよい？
+					System.out.println("  [no]optimize [0-9] - set optimization level");
 					System.out.println("  [no]verbose  [0-9] - set verbose level");
 					System.out.println("  [no]shuffle        - set shuffle mode");
 					System.out.println("  [no]trace          - set trace mode");					
