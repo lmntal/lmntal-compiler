@@ -11,7 +11,8 @@ public class Dumper {
 	public static String dump(AbstractMembrane mem) {
 		StringBuffer buf = new StringBuffer();
 		List predAtoms[] = {new ArrayList(),new ArrayList(),new ArrayList(),new ArrayList()};
-		Set atoms = new HashSet(mem.getAtomCount());
+		//Set atoms = new HashSet(mem.getAtomCount());
+		Set atoms = new HashSet(mem.atoms.size()); // 今はproxyを表示しているため。いずれ上に戻す
 		boolean commaFlag = false;
 		
 		// #1 - アトムの出力
