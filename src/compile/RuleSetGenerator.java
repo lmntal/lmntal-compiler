@@ -41,11 +41,11 @@ public class RuleSetGenerator {
 		return root;
 	}
 	
-	public static InterpretedRuleset run(Membrane m) {
-		Env.c("RuleSetGenerator.run");
-		processMembrane(m);
-		return (InterpretedRuleset)m.ruleset;
-	}
+//	public static InterpretedRuleset run(Membrane m) {
+//		Env.c("RuleSetGenerator.run");
+//		processMembrane(m);
+//		return (InterpretedRuleset)m.ruleset;
+//	}
 	
 	/**
 	 * 与えられた膜の階層下にある全ての RuleStructure について、
@@ -61,7 +61,8 @@ public class RuleSetGenerator {
 			processMembrane(submem);
 		}
 		// この膜にあるルールをルールセットにコンパイルする
-		runtime.Ruleset ruleset = mem.ruleset;
+		ArrayList rules = new ArrayList();
+//		runtime.Ruleset ruleset = mem.ruleset;
 		it = mem.rules.listIterator();
 		while (it.hasNext()) {
 			RuleStructure rs = (RuleStructure)it.next();
@@ -72,8 +73,29 @@ public class RuleSetGenerator {
 			RuleCompiler rc = new RuleCompiler(rs);
 			rc.compile();
 			// ↓ いずれ ruleset.add(rc.theRule); にした方がよい
-			((runtime.InterpretedRuleset)ruleset).rules.add(rc.theRule);
+			rules.add(rc.theRule);
+//			((runtime.InterpretedRuleset)ruleset).rules.add(rc.theRule);
 		}
+		if (Env.fRandom) {
+			it = rules.iterator();
+			while (it.hasNext()) {
+				runtime.Ruleset ruleset = new runtime.InterpretedRuleset();
+				((runtime.InterpretedRuleset)ruleset).rules.add(it.next());
+				//ruleset.compile();
+				mem.rulesets.add(ruleset);
+			}
+		} else {
+			if (rules.size() > 0) {
+				runtime.Ruleset ruleset = new runtime.InterpretedRuleset();
+				it = rules.iterator();
+				while (it.hasNext()) {
+					((runtime.InterpretedRuleset)ruleset).rules.add(it.next());
+				}
+				//ruleset.compile();
+				mem.rulesets.add(ruleset);
+			}
+		}
+			
 		// ruleset.compile();
 	}
 	
