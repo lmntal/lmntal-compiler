@@ -322,7 +322,8 @@ public class FrontEnd {
 			}
 			if (Env.gui != null)  Env.gui = null;
 			LMNtalRuntimeManager.terminateAll();
-			LMNtalRuntimeManager.disconnectFromDaemon();
+			if(true) System.out.println("FrontEnd: terminateAll() finished!");
+			//LMNtalRuntimeManager.disconnectFromDaemon();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
