@@ -104,7 +104,43 @@ import compile.structure.*;
  *    これを考えることが卒論のメインテーマだったはずです。これに比べたら残りはただの作業です。
  * 
  *    inlineを使ってごまかすのは、どうしてもできなかった時だけにしたいのですが。
- * 
+ *
+
+>>>1
+システムルールセット（すべての膜にあることにする）
+
+上にもちあげるルール。上に行く方法は１通りなので、移動でいい。
+({{up,$p,@q},$s,@t}:-{$s,@t},{up,$p,@q})
+#, {{up,1},2,3}
+
+下げる方法は複数あるのでdownをコピーしないといけない。
+もう{down}があったときはなにもしない。
+({down,$p,@q},{$r,@s}:- ! ($r match {down, $t}) | {down,$p,@q}, {{down,$p,@q},$r,@s})
+#,  {down,1},{2,3},{4,5}
+
+>>>2
+( { find_and_link($Name1, X) }, $Name2, decl :- $Name1 eq $Name2 | $name2(X), decl )
+
+## { find_and_link(m, X) }, m, decl :- m(X), decl    for all {m | String(m)}
+## decl は、モジュール宣言の膜だけにあるとする。（これで、使用者のアトムと区別される）
+
+>>>3
+( $a(X) :- static($a) |  { up, down, find_and_link($a, X) } )
+
+1, 2, 3 があると、スタティックなものへのアクセスは次のように記述できる。
+
+{{{ io.print(m.incr) }}}, m:{ decl, m.incr, id(0), ( m.incr(X), id(N) :- cp(s(N), Cp1, Cp2), id(Cp1), X=Cp2, m.incr )  }
+-> {{{ io.print(X), { up, down, find_and_link(m.incr, X) }, m.incr(X) }}}, m:{...}
+-> {{{ io.print(X) }, { up, down, find_and_link(m.incr, X) } }}, m:{...}
+-> {{{ io.print(X) }}, { up, down, find_and_link(m.incr, X) } }, m:{...}
+-> {{{ io.print(X) }}}, { up, down, find_and_link(m.incr, X) }, m:{...}
+-> {{{ io.print(X) }}}, m:{ decl, m.incr, id, { up, down, find_and_link(m.incr, X) }, (... :- ...) }
+-> {{{ io.print(X) }}}, m:{ decl, id, m.incr(X), (... :- ...) }
+-> {{{ io.print(X) }}}, m:{ decl, id(1), 1(X), m.incr, (... :- ...) }
+
+きょうはここでおしまい
+
+
  * @author hara
  *
  */
