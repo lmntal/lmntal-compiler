@@ -347,21 +347,25 @@ public class FrontEnd {
 	 */
 	public static void run(Reader src, String unitName) {
 		try {
-			LMNParser lp = new LMNParser(src);
-			boolean ready = true;
-			
-			compile.structure.Membrane m = lp.parse();
-//			if (Env.debug >= Env.DEBUG_SYSDEBUG) {
-//				Env.d("");
-//				Env.d( "Parse Result: " + m.toStringWithoutBrace() );
-//			}
-			
+			compile.structure.Membrane m;
+			Env.clearErrors();
+			try {
+				LMNParser lp = new LMNParser(src);
+				m = lp.parse();
+			}	
+			catch (ParseException e) {
+				Env.p("Compilation Failed");
+				return;			
+			}
 			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
 			Inline.makeCode();
+			if (Env.nErrors > 0) {
+				Env.p("Compilation Failed");
+				return;
+			}
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
 			
-			// if (Env.nerrors > 0)  ready = false;
 			
 			// 実行
 			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
@@ -382,6 +386,8 @@ public class FrontEnd {
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
 			//root.blockingLock();
 			rs.react(root); // TODO 【検証】初期配置で子タスクを作った場合にどうなるか考える→LMNParserを修正することにした
+
+			boolean ready = true;
 			if (Env.gui != null) {
 				Env.gui.lmnPanel.getGraphLayout().calc();
 				if (!Env.gui.onTrace())  ready = false;

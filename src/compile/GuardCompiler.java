@@ -1,7 +1,7 @@
 package compile;
 
 import java.util.*;
-//import runtime.Env;
+import runtime.Env;
 import runtime.Instruction;
 //import runtime.InstructionList;
 import runtime.Functor;
@@ -67,7 +67,7 @@ public class GuardCompiler extends HeadCompiler {
 	}
 	
 	//
-	RuleCompiler rc;			// エラー出力用
+	RuleCompiler rc;			// rc.rs用
 	List typeConstraints;		// 型制約のリスト
 	Map  typedProcessContexts;	// 型付きプロセス文脈名から定義へのマップ
 	
@@ -148,7 +148,7 @@ public class GuardCompiler extends HeadCompiler {
 	}
 	
 	/** 型付きプロセス文脈が表すプロセスを一意に決定する。*/
-	void fixTypedProcesses() {
+	void fixTypedProcesses() throws CompileException {
 		// STEP 1 - 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
 		identifiedCxtdefs = new HashSet();
 		Iterator it = typedProcessContexts.values().iterator();
@@ -163,10 +163,7 @@ public class GuardCompiler extends HeadCompiler {
 				// しかし実際には処理系側の都合による制限である。
 				// なお、プログラミングの観点から、右辺の型付きプロセス文脈の明示的な自由リンクの先は任意としている。
 				if (!atompaths.containsKey(def.lhsOcc.args[0].buddy.atom)) {
-					rc.error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
-					rc.corrupted();
-					match.add(Instruction.fail());
-					return;
+					error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
 				}
 			}
 			else if (def.lhsMem != null) {
@@ -299,8 +296,8 @@ public class GuardCompiler extends HeadCompiler {
 					}
 				}
 				else {
-					rc.error("COMPILE ERROR: unrecognized type constraint: " + cstr);
-					discardTypeConstraint(cstr);
+					error("COMPILE ERROR: unrecognized type constraint: " + cstr);
+					discardTypeConstraint(cstr); // ここには来ない
 				}
 				lit.remove();
 				changed = true;
@@ -317,7 +314,7 @@ public class GuardCompiler extends HeadCompiler {
 			if (text.length() > 0)  text += ", ";
 			text += cstr.toStringAsTypeConstraint();
 		}
-		rc.error("COMPILE ERROR: never proceeding type constraint: " + text);
+		error("COMPILE ERROR: never proceeding type constraint: " + text);
 	}
 	/** 制約 X=Y または X==Y を処理する。ただしdef2は特定されていなければならない。*/
 	private void processEquivalenceConstraint(ContextDef def1, ContextDef def2) {
@@ -456,4 +453,12 @@ public class GuardCompiler extends HeadCompiler {
 		}
 		return args;
 	}
+	
+	//
+	
+	void error(String text) throws CompileException {
+		Env.error(text);
+		throw new CompileException("COMPILE ERROR");
+	}
+
 }

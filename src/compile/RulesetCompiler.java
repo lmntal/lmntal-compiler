@@ -41,11 +41,9 @@ public class RulesetCompiler {
 	 * 実装するルールセットを唯一のルールセットとして持つ膜構造を生成する。
 	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
 	 * @param m 膜構造
+	 * @param unitName
 	 * @return 生成したルールセットを持つ膜構造
 	 */
-	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m) {
-		return compileMembraneToGeneratingMembrane(m, InlineUnit.DEFAULT_UNITNAME);
-	}
 	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m, String unitName) {
 		Env.c("RulesetGenerator.runStartWithNull");
 		// 世界を生成する
@@ -86,9 +84,15 @@ public class RulesetCompiler {
 			processMembrane(rs.leftMem, unitName); // 一応左辺も
 			processMembrane(rs.rightMem, unitName);
 			//
-			RuleCompiler rc = new RuleCompiler(rs, unitName);
-			rc.compile();
-			rules.add(rc.theRule);
+			try {
+				RuleCompiler rc = new RuleCompiler(rs, unitName);
+				rc.compile();				
+//				rc.theRule.showDetail();
+				rules.add(rc.theRule);
+			}
+			catch (CompileException e) {
+				Env.p("    in " + rs.toString() + "\n");
+			}
 		}
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
 		if (!rules.isEmpty()) {

@@ -188,7 +188,8 @@ public final class LMNtalRuntimeManager {
 				childNode.add(machine);
 			}
 		}
-		System.out.println(childNode); //TODO (nakajima)なんでnullなの、ここ...
+		
+		if(Env.debugDaemon > 0) System.out.println(childNode); //TODO (nakajima)なんでnullなの、ここ...
 		
 		if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeManager.terminateAll(): everything finished and returning true");
 		return true;

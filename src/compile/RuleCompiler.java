@@ -76,7 +76,7 @@ public class RuleCompiler {
 	/**
 	 * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルする
 	 */
-	public Rule compile() {
+	public Rule compile() throws CompileException {
 		Env.c("compile");
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
@@ -170,7 +170,7 @@ public class RuleCompiler {
 					while (it.hasNext()) {
 						Atom atom = (Atom)it.next();
 						if (!hc.isAtomLoaded(atom)) {
-							error("TYPE WARNING: Rule head contains free data atom: " + atom);
+							Env.warning("TYPE WARNING: Rule head contains free data atom: " + atom);
 						}
 					}
 				}
@@ -228,7 +228,7 @@ public class RuleCompiler {
 	}
 
 	/** 右辺膜をコンパイルする */
-	private void compile_r() {
+	private void compile_r() throws CompileException {
 		Env.c("compile_r");
 		int formals = varcount;
 		body.add( Instruction.commit(theRule) );
@@ -316,7 +316,7 @@ public class RuleCompiler {
 //	}
 
 	/** ガードをコンパイルする */
-	private void compile_g() {
+	private void compile_g() throws CompileException {
 		lhsmems  = hc.mems;
 		lhsatoms = hc.atoms;
 		genLHSPaths();
@@ -484,16 +484,16 @@ public class RuleCompiler {
 		mem.atoms.addAll(atomlist);	
 	}
 	/** ルールの左辺と右辺に対してstaticUnifyを呼ぶ */
-	public void simplify() {
+	public void simplify() throws CompileException {
 		staticUnify(rs.leftMem);
 		staticUnify(rs.rightMem);
 		if (rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning) {
-			warning("WARNING: rule with empty head: " + rs);
+			Env.warning("WARNING: rule with empty head: " + rs);
 		}
 	}
 	
 	/** 指定された膜とその子孫に存在する冗長な =（todo および自由リンク管理アトム）を除去する */
-	public void staticUnify(Membrane mem) {
+	public void staticUnify(Membrane mem) throws CompileException {
 		Env.c("RuleCompiler::staticUnify");
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
@@ -600,14 +600,14 @@ public class RuleCompiler {
 
 	/** 膜の階層構造およびプロセス文脈の内容を親膜側から再帰的に生成する。
 	 * @return 膜memの内部に出現したプロセス文脈の個数 */
-	private int buildRHSMem(Membrane mem) {
+	private int buildRHSMem(Membrane mem) throws CompileException {
 		Env.c("RuleCompiler::buildRHSMem" + mem);
 		int procvarcount = mem.processContexts.size();
 		Iterator it = mem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
 			if (pc.def.lhsOcc.mem == null) {
-				error("SYSTEM ERROR: ProcessContext.def.lhsOcc.mem is not set");
+				systemError("SYSTEM ERROR: ProcessContext.def.lhsOcc.mem is not set");
 			}
 			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.lhsOcc.mem)) {
 				if (fUseMoveCells && /*pc.def.rhsOccs.get(0) == pc*/ pc.def.rhsOccs.size() == 1) {
@@ -620,8 +620,7 @@ public class RuleCompiler {
 						rethashmap, rhsmemToPath(mem), lhsmemToPath(pc.def.lhsOcc.mem) ));
 					rhsmappaths.put(pc,new Integer(rethashmap));
 					//else {
-					//	error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + pc);
-					//	corrupted();
+					//	systemError("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + pc);
 					//}
 				}
 			}
@@ -633,8 +632,7 @@ public class RuleCompiler {
 			rhsmempath.put(submem, new Integer(submempath));
 			if (submem.pragmaAtHost != null) { // 右辺で＠指定されている場合
 				if (submem.pragmaAtHost.def == null) {
-					error("SYSTEM ERROR: pragmaAtHost.def is not set: " + submem.pragmaAtHost.getQualifiedName());
-					corrupted();
+					systemError("SYSTEM ERROR: pragmaAtHost.def is not set: " + submem.pragmaAtHost.getQualifiedName());
 				}
 				int nodedescatomid = typedcxtToSrcPath(submem.pragmaAtHost.def);
 				body.add( new Instruction(Instruction.NEWROOT, submempath, rhsmemToPath(mem),
@@ -713,7 +711,7 @@ public class RuleCompiler {
 	
 	/** リンクの張り替えと生成を行う
 	 * todo コードを整理する */
-	private void updateLinks() {
+	private void updateLinks() throws CompileException {
 		Env.c("RuleCompiler::updateLinks");
 		
 		// PART 1 - 右辺のアトムに出現するリンク
@@ -793,7 +791,7 @@ public class RuleCompiler {
 			for (int pos = 0; pos < atom.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
 				if (link == null) {
-					error("SYSTEM ERROR: buddy of process context explicit free link is not set");
+					systemError("SYSTEM ERROR: buddy of process context explicit free link is not set");
 				}
 				if (!(link.atom instanceof ProcessContext)) {
 					// 型付きプロセス文脈のリンク先がアトムのとき
@@ -809,8 +807,7 @@ public class RuleCompiler {
 						// PART1でnewlink済みなので、何もしない
 					}
 					else {
-						error("SYSTEM ERROR: unknown buddy of body typed process context");
-						corrupted();
+						systemError("SYSTEM ERROR: unknown buddy of body typed process context");
 					}
 					continue;
 				}
@@ -883,8 +880,7 @@ public class RuleCompiler {
 							// PART1でnewlink済みなので、何もしない
 						}
 						else {
-							error("SYSTEM ERROR: unknown buddy of body typed process context");
-							corrupted();
+							systemError("SYSTEM ERROR: unknown buddy of body typed process context");
 						}
 						continue;
 					}
@@ -1045,16 +1041,10 @@ public class RuleCompiler {
 	}
 
 	////////////////////////////////////////////////////////////////
-	// 仮。LMNParserのものと統合し、おそらくEnvに移動する予定
-	
-	public void corrupted() {
-		error("SYSTEM ERROR: error recovery for the previous error is not implemented");
-	}
-	public void error(String text) {
-		System.out.println(text);
-	}
-	public void warning(String text) {
-		System.out.println(text);
+
+	public void systemError(String text) throws CompileException {
+		Env.error(text);
+		throw new CompileException("SYSTEM ERROR");
 	}
 }
 

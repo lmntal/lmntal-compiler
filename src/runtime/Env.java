@@ -13,7 +13,7 @@ import test.GUI.*;
  */
 public final class Env {
 
-	static final String LMNTAL_VERSION = "0.65.20041025";
+	static final String LMNTAL_VERSION = "0.65.20041126";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
@@ -262,5 +262,22 @@ public final class Env {
 	public static String getExtendedOption(Object key) {
 		if(!extendedOption.containsKey(key)) return "";
 		return extendedOption.get(key).toString();
+	}
+	
+	////////////////////////////////////////////////////////////////
+	
+	public static int nErrors = 0;
+	public static int nWarnings = 0;
+	public static void clearErrors() {
+		nErrors = 0;
+		nWarnings = 0;
+	}
+	public static void error(String text) {
+		System.out.println(text);
+		nErrors++;
+	}
+	public static void warning(String text) {
+		System.out.println(text);
+		nWarnings++;
 	}
 }

@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.ListIterator;
 
 import runtime.Functor;
-//import runtime.Env;
+import runtime.Env;
 import compile.structure.*;
 
 public class LMNParser {
@@ -29,25 +29,13 @@ public class LMNParser {
 	private int nLinkNumber = 0;
 	private Scanner lex = null;
 	
-	/** キャッシュ文字列の構文解析器かどうか（アクセッサメソッドはまだ無い）*/
-	public boolean fCacheParser = false;
-	
-	private int nErrors = 0;
-	private int nWarnings = 0;
-	
 	private SyntaxExpander expander = new SyntaxExpander(this);
 	
-	public void corrupted() throws ParseException {
-		error("SYSTEM ERROR: error recovery for the previous error is not implemented");
-		throw new ParseException("Rule compilation aborted");
-	}
 	public void error(String text) {
-		System.out.println(text);
-		nErrors++;
+		Env.error(text);
 	}
 	public void warning(String text) {
-		System.out.println(text);
-		nWarnings++;
+		Env.warning(text);
 	}
 	
 	
@@ -973,34 +961,35 @@ public class LMNParser {
 			ContextDef def = (ContextDef)it.next();
 			if (def.rhsOccs.size() != 1 && ((ProcessContext)def.lhsOcc).bundle != null) {
 				error("FEATURE NOT IMPLEMENTED: untyped process context must be linear unless its bundle is null: " + def.getName());
-				int len = def.lhsOcc.args.length;
-				Iterator it2 = def.rhsOccs.iterator();
-				while (it2.hasNext()) {
-					ProcessContext pc = (ProcessContext)it2.next();
-					pc.mem.processContexts.remove(pc);
-					Atom atom = new Atom(pc.mem, def.getName(), len);
-					for (int i = 0; i < len; i++) {
-						atom.args[i] = new LinkOccurrence(pc.args[i].name, atom, i);
-					}
-					// if (pc.bundle != null) { remove from names; }
-					pc.mem.atoms.add(atom);
-					it2.remove();
-				}
-				ProcessContext rhsocc = new ProcessContext(rule.rightMem, def.getName(), len);
-				rule.rightMem.processContexts.add(rhsocc);
-				for (int i = 0; i < len; i++) {
-					String linkname = generateNewLinkName();
-					rhsocc.args[i] = new LinkOccurrence(linkname, rhsocc, i);
-					Atom atom = new Atom(rule.rightMem, linkname, 1);
-					atom.args[0] = new LinkOccurrence(linkname, atom, 0);
-					rule.rightMem.atoms.add(atom);
-				}
-				if (((ProcessContext)def.lhsOcc).bundle != null) {
-					rhsocc.setBundleName(SrcLinkBundle.PREFIX_TAG + generateNewLinkName());
-					// add to names;
-				}
-				rhsocc.def = def;
-				def.rhsOccs.add(rhsocc);
+				throw new ParseException("");
+//				int len = def.lhsOcc.args.length;
+//				Iterator it2 = def.rhsOccs.iterator();
+//				while (it2.hasNext()) {
+//					ProcessContext pc = (ProcessContext)it2.next();
+//					pc.mem.processContexts.remove(pc);
+//					Atom atom = new Atom(pc.mem, def.getName(), len);
+//					for (int i = 0; i < len; i++) {
+//						atom.args[i] = new LinkOccurrence(pc.args[i].name, atom, i);
+//					}
+//					// if (pc.bundle != null) { remove from names; }
+//					pc.mem.atoms.add(atom);
+//					it2.remove();
+//				}
+//				ProcessContext rhsocc = new ProcessContext(rule.rightMem, def.getName(), len);
+//				rule.rightMem.processContexts.add(rhsocc);
+//				for (int i = 0; i < len; i++) {
+//					String linkname = generateNewLinkName();
+//					rhsocc.args[i] = new LinkOccurrence(linkname, rhsocc, i);
+//					Atom atom = new Atom(rule.rightMem, linkname, 1);
+//					atom.args[0] = new LinkOccurrence(linkname, atom, 0);
+//					rule.rightMem.atoms.add(atom);
+//				}
+//				if (((ProcessContext)def.lhsOcc).bundle != null) {
+//					rhsocc.setBundleName(SrcLinkBundle.PREFIX_TAG + generateNewLinkName());
+//					// add to names;
+//				}
+//				rhsocc.def = def;
+//				def.rhsOccs.add(rhsocc);
 			}
 		}
 	}
@@ -1627,10 +1616,8 @@ class SyntaxExpander {
 				it.remove();
 			}
 			else if (obj instanceof SrcContext) {
-				if (!parser.fCacheParser) {
-					error("SYNTAX ERROR: process/rule context must occur in a rule: " + obj);
-					it.remove();
-				}
+				error("SYNTAX ERROR: process/rule context must occur in a rule: " + obj);
+				it.remove();
 			}
 			else {
 				error("SYNTAX ERROR: illegal object outside a rule: " + obj);
@@ -1653,5 +1640,3 @@ class SyntaxExpander {
 		return parser.generateNewProcessContextName();
 	}
 }
-
-// TODO （機能拡張）( {p($t)} :- ground($t) | end ) をコンパイルするための内部命令が足りない
