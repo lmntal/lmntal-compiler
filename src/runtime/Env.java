@@ -113,6 +113,12 @@ public final class Env {
 	 */
 	public static boolean fCGI = false;
 	
+	/**
+	 * REMAIN モード
+	 */
+	public static boolean fREMAIN = false;
+	public static MasterLMNtalRuntime remainedRuntime;
+	
 	/** アトム名の表示する長さ */
 	public static int printLength = 14;
 	

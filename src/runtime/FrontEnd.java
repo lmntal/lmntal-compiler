@@ -168,6 +168,10 @@ public class FrontEnd {
 							/// --demo
 							/// Demo mode.  Draw atoms and text larger.
 							Env.fDEMO = true;
+						} else if(args[i].equals("--remain")){
+							/// --remain
+							/// Processes are remain.
+							Env.fREMAIN = true;
 						} else if(args[i].equals("--start-daemon")){
 							/// --start-daemon
 							/// Start LMNtalDaemon
@@ -277,7 +281,7 @@ public class FrontEnd {
 				System.exit(-1);
 			}
 		}
-
+		
 		if(Env.oneLiner!=null) {
 			// 一行実行の場合はそれを優先
 			REPL.processLine(Env.oneLiner);
@@ -352,6 +356,14 @@ public class FrontEnd {
 			LMNtalRuntimeManager.init();
 
 			Membrane root = rt.getGlobalRoot();
+			
+			if(Env.fREMAIN) {
+				if(Env.remainedRuntime!=null) {
+					root.moveCellsFrom(Env.remainedRuntime.getGlobalRoot());
+					root.rulesets.addAll(Env.remainedRuntime.getGlobalRoot().rulesets);
+				}
+			}
+			
 			Env.initGUI();
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
 			
@@ -374,6 +386,10 @@ public class FrontEnd {
 					while(Env.gui.running) Env.gui.onTrace();
 				}
 			}
+			if(Env.fREMAIN) {
+				Env.remainedRuntime = rt;
+			}
+			
 			if (Env.gui != null)  Env.gui = null;
 //			LMNtalRuntimeManager.terminateAll();
 			LMNtalRuntimeManager.terminateAllThreaded();
