@@ -682,6 +682,8 @@ public class RuleCompiler {
 	/** リンクの張り替えと生成を行う */
 	private void updateLinks() {
 		Env.c("RuleCompiler::updateLinks");
+		
+		// PART 1 - 右辺のアトムに出現するリンク
 		Iterator it = rhsatoms.iterator();
 		while (it.hasNext()) {
 			Atom atom = (Atom)it.next();			
@@ -716,7 +718,7 @@ public class RuleCompiler {
 				}
 			}
 		}
-		//
+		// PART 2 - 右辺の型付きプロセス文脈に出現するリンク
 		it = rhstypedcxtpaths.keySet().iterator();
 		while (it.hasNext()) {
 			ProcessContext atom = (ProcessContext)it.next();
@@ -725,7 +727,22 @@ public class RuleCompiler {
 				if (link == null) {
 					System.out.println("SYSTEM ERROR: buddy not set 2");
 				}
-				if (!(link.atom instanceof ProcessContext)) continue;
+				if (!(link.atom instanceof ProcessContext)) {
+					if (lhsatoms.contains(link.atom)) { // RELINK する
+						if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE) {
+							body.add( new Instruction(Instruction.RELINK,
+								rhstypedcxtToPath(atom), 0,
+								lhsatomToPath(link.atom), link.pos,
+								rhsmemToPath(atom.mem) ));
+						}
+					}
+					else if (rhsatoms.contains(link.atom)) { // PART1でnewlink済みなので、何もしない
+					}
+					else {
+						System.out.println("SYSTEM ERROR: unknown buddy of body typed process context");
+					}
+					continue;
+				}
 				ProcessContext buddypc = (ProcessContext)link.atom;
 				if (rhstypedcxtToPath(atom) < rhstypedcxtToPath(buddypc)
 				 || (rhstypedcxtToPath(atom) == rhstypedcxtToPath(buddypc) && pos < link.pos)) {
@@ -735,7 +752,7 @@ public class RuleCompiler {
 							rhstypedcxtToPath(atom), 0,
 							rhstypedcxtToPath(buddypc), 0,
 							rhsmemToPath(atom.mem) ));
-					 }
+					}
 				}
 			}
 		}
