@@ -276,7 +276,7 @@ class InterpreterReactor {
 					break; //nakajima 2003-12-21, n-kato
 				case Instruction.LOADFUNC : //[-func, funcref]
 					vars.set(inst.getIntArg1(), (Functor)inst.getArg2());
-					break;//nakajima 2003-12-21, -kato
+					break;//nakajima 2003-12-21, n-kato
 				case Instruction.EQFUNC : //[func1, func2]
 					if (!vars.get(inst.getIntArg1()).equals(vars.get(inst.getIntArg2()))) return false;
 					break; //nakajima, n-kato
@@ -298,7 +298,9 @@ class InterpreterReactor {
 					break; //n-kato
 				case Instruction.NEWATOMINDIRECT :
 				case Instruction.LOCALNEWATOMINDIRECT : //[-dstatom, srcmem, func]
-					break;
+					//TODO NEWATOMとほぼ同じコードになっちゃったけどいいの？funcとfuncrefって違うし…。
+					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom((Functor)inst.getArg3());
+					break; //nakajima 2003-12-27
 				case Instruction.ENQUEUEATOM :
 				case Instruction.LOCALENQUEUEATOM : //[srcatom]
 					atom = atoms[inst.getIntArg1()];
@@ -317,6 +319,9 @@ class InterpreterReactor {
 					break; //n-kato
 				case Instruction.ALTERFUNCINDIRECT :
 				case Instruction.LOCALALTERFUNCINDIRECT : //[atom, func]
+					//TODO funcrefと$funcって何が違うのですか？
+					atom = atoms[inst.getIntArg1()];
+					atom.mem.alterAtomFunctor(atom,(Functor)inst.getArg2());
 					break;
 					//====アトムを操作する基本ボディ命令====ここまで====
 
