@@ -44,9 +44,14 @@ public class REPL {
 				}
 			});
 		
-		System.out.println("        LMNtal version 0.02");
+		System.out.println("        LMNtal version 0.03.20040111");
 		System.out.println("");
-		System.out.println("[TIPS] Type q to quit.");
+//		System.out.println("[TIPS] Type q to quit.");
+		System.out.println("Commands:");
+		System.out.println("  [no]debug    - set debug mode");
+		System.out.println("  [no]shuffle  - set shuffle mode");
+		System.out.println("  [no]trace    - set trace mode");
+		System.out.println("  q            - quit");
 		System.out.println("");
 		while (true) {
 			try {
