@@ -38,6 +38,15 @@ class Atom extends QueuedEntity {
 	}
 
 	///////////////////////////////
+	// 操作
+	void changeFunctor(Functor newFunctor) {
+		if (functor.getArity() != newFunctor.getArity()) {
+			// TODO SystemError用の例外クラスを投げる
+			throw new RuntimeException("SYSTEM ERROR: cannot change arity");
+		}
+		functor = newFunctor;
+	}
+	///////////////////////////////
 	// 情報の取得
 
 	public String toString() {
