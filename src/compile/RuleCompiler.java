@@ -101,7 +101,7 @@ public class RuleCompiler {
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化			
 			if (firstid < hc.atoms.size()) {			
-				if (true) continue; // 臨時【注意：外してもよいいが、アトム主導は現在未テスト】
+				if (true) continue; // 臨時【注意：外してもよいが、アトム主導は現在未テスト】
 				if (Env.fRandom) continue; // ルールの反応確率を優先するためアトム主導テストは行わない
 				// アトム主導
 				List singletonListArgToBranch = new ArrayList();
@@ -144,178 +144,6 @@ public class RuleCompiler {
 		atomMatch.add(0, Instruction.spec(maxvarcount,0));	// とりあえずここに追加（仮）
 	}
 	
-	/** ガードをコンパイルする（仮） */
-	private void compile_g() {
-		HashSet identified = new HashSet(); // ソース出現が特定された型付きプロセス文脈定義のセット
-		//HashSet loaded   = new HashSet(); // ソース出現を変数に読み込んだプロセス文脈定義のセット//typedcxtsrcsに統合した
-
-		// ヘッド出現する型付きプロセス文脈を特定されたものとしてマークする
-		Iterator it = rs.typedProcessContexts.keySet().iterator();
-		while (it.hasNext()) {
-			ContextDef def = (ContextDef)rs.typedProcessContexts.get(it.next());
-			if (def.src != null) {
-				if (def.src.mem == rs.guardMem) { def.src = null; } // 再呼び出しに対応（仮）
-				else identified.add(def);
-			}
-		}
-		// 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
-		LinkedList cstrs = new LinkedList();
-		it = rs.guardMem.atoms.iterator();
-		while (it.hasNext()) cstrs.add(it.next());
-		boolean changed;
-		do {
-			changed = false;
-			ListIterator lit = cstrs.listIterator();
-			while (lit.hasNext()) {
-				Atom cstr = (Atom)lit.next();
-				if (cstr.functor.getSymbolFunctorID().equals("int_1")) {
-					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
-					if (!identified.contains(def1)) continue;
-					int atomid;
-					if (!typedcxtsrcs.containsKey(def1)) {
-						LinkOccurrence srclink = def1.src.args[0].buddy;
-						atomid = varcount++;
-						guard.add(new Instruction(Instruction.DEREFATOM,
-							atomid, lhsatomToPath(srclink.atom), srclink.pos));
-						typedcxtsrcs.put(def1, new Integer(atomid));
-					}
-					else {
-						atomid = typedcxtToSrcPath(def1);
-					}
-					typedcxttypes.put(def1, UNARY_ATOM_TYPE);
-					guard.add(new Instruction(Instruction.ISINT, atomid));
-					lit.remove();
-					changed = true;
-				}
-				else if (cstr.functor.equals(new Functor("<",2))) {
-					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
-					if (!identified.contains(def1)) continue;
-					ContextDef def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
-					if (!identified.contains(def2)) continue;
-
-					int atomid1;
-					if (!typedcxtsrcs.containsKey(def1)) {
-						LinkOccurrence srclink = def1.src.args[0].buddy;
-						atomid1 = varcount++;
-						guard.add(new Instruction(Instruction.DEREFATOM,
-							atomid1, lhsatomToPath(srclink.atom), srclink.pos));
-						typedcxtsrcs.put(def1, new Integer(atomid1));
-					}
-					else {
-						atomid1 = typedcxtToSrcPath(def1);
-					}
-					typedcxttypes.put(def1, UNARY_ATOM_TYPE);
-					guard.add(new Instruction(Instruction.ISINT, atomid1));
-
-					int atomid2;
-					if (!typedcxtsrcs.containsKey(def2)) {
-						LinkOccurrence srclink = def2.src.args[0].buddy;
-						atomid2 = varcount++;
-						guard.add(new Instruction(Instruction.DEREFATOM,
-							atomid2, lhsatomToPath(srclink.atom), srclink.pos));
-						typedcxtsrcs.put(def2, new Integer(atomid2));
-					}
-					else {
-						atomid2 = typedcxtToSrcPath(def2);
-					}
-					typedcxttypes.put(def2, UNARY_ATOM_TYPE);
-					guard.add(new Instruction(Instruction.ISINT, atomid2));
-					
-					guard.add(new Instruction(Instruction.ILT, atomid1, atomid2));
-					
-					lit.remove();
-					changed = true;
-				}
-				else if (cstr.functor.equals(new Functor("=",2))) {
-					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
-					ContextDef def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
-					if (!identified.contains(def2)) continue;
-
-					int atomid2;
-					if (!typedcxtsrcs.containsKey(def2)) {
-						LinkOccurrence srclink = def2.src.args[0].buddy;
-						atomid2 = varcount++;
-						guard.add(new Instruction(Instruction.DEREFATOM,
-							atomid2, lhsatomToPath(srclink.atom), srclink.pos));
-						typedcxtsrcs.put(def2, new Integer(atomid2));
-					}
-					else {
-						atomid2 = typedcxtToSrcPath(def2);
-					}
-					typedcxttypes.put(def2, UNARY_ATOM_TYPE);
-					
-					if (!identified.contains(def1)) {
-						// todo 複製された参照を実装する
-						int funcid2 = varcount++;
-						guard.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
-						identified.add(def1);
-						int atomid1 = varcount++;
-						guard.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
-						typedcxtsrcs.put(def1, new Integer(atomid1));
-					}
-					else {
-						int atomid1;
-						if (!typedcxtsrcs.containsKey(def1)) {
-							LinkOccurrence srclink = def1.src.args[0].buddy;
-							atomid1 = varcount++;
-							guard.add(new Instruction(Instruction.DEREFATOM,
-								atomid1, lhsatomToPath(srclink.atom), srclink.pos));
-							typedcxtsrcs.put(def1, new Integer(atomid1));
-						}
-						else {
-							atomid1 = typedcxtToSrcPath(def1);
-						}
-						int funcid1 = varcount++;
-						int funcid2 = varcount++;
-						guard.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
-						guard.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
-						guard.add(new Instruction(Instruction.EQFUNC,  funcid1, funcid2));
-					}
-					typedcxttypes.put(def1, UNARY_ATOM_TYPE);
-					
-					lit.remove();
-					changed = true;
-				}
-				else if (cstr.functor instanceof runtime.IntegerFunctor) {
-					ContextDef def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
-					if (!identified.contains(def1)) {
-						identified.add(def1);
-						int atomid = varcount++;
-						guard.add(new Instruction(Instruction.ALLOCATOM, atomid, cstr.functor));
-						typedcxtsrcs.put(def1, new Integer(atomid));
-						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
-					}
-					else {
-						int atomid;
-						if (!typedcxtsrcs.containsKey(def1)) {
-							LinkOccurrence srclink = def1.src.args[0].buddy;
-							atomid = varcount++;
-							guard.add(new Instruction(Instruction.DEREFATOM,
-								atomid, lhsatomToPath(srclink.atom), srclink.pos));
-							typedcxtsrcs.put(def1, new Integer(atomid));
-						}
-						else {
-							atomid = typedcxtToSrcPath(def1);
-						}
-						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
-						guard.add(new Instruction(Instruction.FUNC, atomid, cstr.functor));
-					}
-					lit.remove();
-					changed = true;
-				}
-				else {
-					System.out.println("unrecognized guard type constraint name: " + cstr);
-					guard.add(new Instruction(Instruction.LOCK, 0));
-					return;
-				}
-			}
-			if (cstrs.isEmpty()) return;
-		}
-		while (changed);
-		// 型付け失敗
-		guard.add(new Instruction(Instruction.LOCK, 0));
-		System.out.println("Compile Error: never proceeding guard type constraints: " + cstrs);
-	}
 	
 	/** 右辺膜をコンパイルする */
 	private void compile_r() {
@@ -371,7 +199,13 @@ public class RuleCompiler {
 		body.add(new Instruction(Instruction.PROCEED));
 	}
 	
-	Object UNARY_ATOM_TYPE = "1";
+	////////////////////////////////////////////////////////////////
+	//
+	// ガード関係
+	//
+	
+	
+	static final Object UNARY_ATOM_TYPE = "1";
 
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表す定数オブジェクト */
 	HashMap typedcxttypes = new HashMap();
@@ -379,12 +213,184 @@ public class RuleCompiler {
 	HashMap typedcxtsrcs  = new HashMap();
 	/** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
 	HashMap rhstypedcxtpaths = new HashMap();
-	
+	/** ソース出現が特定された型付きプロセス文脈定義のセット
+	 * <p>identifiedCxtdefs.contains(x) は、左辺に出現するかまたはloadedであること。*/
+	HashSet identifiedCxtdefs = new HashSet(); 
+		
+	static final int UNBOUND = -1;
+		
 	int typedcxtToSrcPath(ContextDef def) {
+		if (!typedcxtsrcs.containsKey(def)) return UNBOUND;
 		return ((Integer)typedcxtsrcs.get(def)).intValue();
 	}
 	int rhstypedcxtToPath(Context cxt) {
 		return ((Integer)rhstypedcxtpaths.get(cxt)).intValue();
+	}
+	
+	static final int ISINT = Instruction.ISINT;
+	static HashMap guardLibrary2 = new HashMap();
+	static {
+		guardLibrary2.put(new Functor("<", 2),	new int[]{ISINT,ISINT, Instruction.ILT});
+		guardLibrary2.put(new Functor("=<",2),	new int[]{ISINT,ISINT, Instruction.ILE});
+		guardLibrary2.put(new Functor(">", 2),	new int[]{ISINT,ISINT, Instruction.IGT});
+		guardLibrary2.put(new Functor(">=",2),	new int[]{ISINT,ISINT, Instruction.IGE});
+		guardLibrary2.put(new Functor("+",3),	new int[]{ISINT,ISINT, Instruction.IADD});
+		guardLibrary2.put(new Functor("-",3),	new int[]{ISINT,ISINT, Instruction.ISUB});
+		guardLibrary2.put(new Functor("*",3),	new int[]{ISINT,ISINT, Instruction.IMUL});
+		guardLibrary2.put(new Functor("/",3),	new int[]{ISINT,ISINT, Instruction.IDIV});
+	}
+	/** ガードをコンパイルする（仮） */
+	private void compile_g() {
+
+		// ヘッド出現する型付きプロセス文脈を特定されたものとしてマークする
+		identifiedCxtdefs = new HashSet();
+		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)rs.typedProcessContexts.get(it.next());
+			if (def.src != null) {
+				if (def.src.mem == rs.guardMem) { def.src = null; } // 再呼び出しに対応（仮）
+				else identifiedCxtdefs.add(def);
+			}
+		}
+		// 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
+		LinkedList cstrs = new LinkedList();
+		it = rs.guardMem.atoms.iterator();
+		while (it.hasNext()) cstrs.add(it.next());
+		boolean changed;
+		do {
+			changed = false;
+			ListIterator lit = cstrs.listIterator();
+			while (lit.hasNext()) {
+				Atom cstr = (Atom)lit.next();
+				Functor func = cstr.functor;
+				ContextDef def1 = null;
+				ContextDef def2 = null;
+				ContextDef def3 = null;
+				if (func.getArity() > 0)  def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
+				if (func.getArity() > 1)  def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
+				if (func.getArity() > 2)  def3 = ((ProcessContext)cstr.args[2].buddy.atom).def;
+				if (func.getSymbolFunctorID().equals("int_1")) {
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					int atomid1 = loadUnaryAtom(def1);
+					guard.add(new Instruction(Instruction.ISINT, atomid1));
+				}
+				else if (func.getSymbolFunctorID().equals("unary_1")) {
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					int atomid1 = loadUnaryAtom(def1);
+					guard.add(new Instruction(Instruction.ISUNARY, atomid1));
+				}
+				else if (func instanceof runtime.IntegerFunctor) {
+					bindToFunctor(def1, func);
+				}
+				else if (func instanceof runtime.FloatingFunctor) {
+					bindToFunctor(def1, func);
+				}
+				else if (func.equals(new Functor("=",2))) {
+					if (!identifiedCxtdefs.contains(def2)) {
+						ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
+						if (!identifiedCxtdefs.contains(def2)) continue;
+					}
+					int atomid2 = loadUnaryAtom(def2);
+					if (!identifiedCxtdefs.contains(def1)) {
+						// todo 複製された参照を実装する
+						int funcid2 = varcount++;
+						guard.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+						int atomid1 = varcount++;
+						guard.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
+						typedcxtsrcs.put(def1, new Integer(atomid1));
+						identifiedCxtdefs.add(def1);
+						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
+					}
+					else bindToUnaryAtom(def1, atomid2);
+				}
+				else if (guardLibrary2.containsKey(func)) {
+					int[] desc = (int[])guardLibrary2.get(func);
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					if (!identifiedCxtdefs.contains(def2)) continue;
+					int atomid1 = loadUnaryAtom(def1);
+					int atomid2 = loadUnaryAtom(def2);
+					guard.add(new Instruction(desc[0], atomid1));
+					guard.add(new Instruction(desc[1], atomid2));
+					if (func.getArity() == 2) {
+						guard.add(new Instruction(desc[2], atomid1, atomid2));
+					}
+					else {
+						int atomid3 = varcount++;
+						guard.add(new Instruction(desc[2], atomid3, atomid1, atomid2));
+						bindToUnaryAtom(def3, atomid3);
+					}
+				}
+				else {
+					System.out.println("unrecognized guard type constraint name: " + cstr);
+					guard.add(new Instruction(Instruction.LOCK, 0));
+					return;
+				}
+				lit.remove();
+				changed = true;
+			}
+			if (cstrs.isEmpty()) return;
+		}
+		while (changed);
+		// 型付け失敗
+		guard.add(new Instruction(Instruction.LOCK, 0));
+		System.out.println("Compile Error: never proceeding guard type constraints: " + cstrs);
+	}
+	/** 型付きプロセス文脈defを1引数ファンクタfuncで束縛する */
+	private void bindToFunctor(ContextDef def, Functor func) {
+		if (!identifiedCxtdefs.contains(def)) {
+			identifiedCxtdefs.add(def);
+			int atomid = varcount++;
+			typedcxtsrcs.put(def, new Integer(atomid));
+			guard.add(new Instruction(Instruction.ALLOCATOM, atomid, func));			
+		}
+		else {
+			int atomid = typedcxtToSrcPath(def);
+			if (atomid == UNBOUND) {
+				LinkOccurrence srclink = def.src.args[0].buddy; // defのソース出現を指すアトム側の引数
+				atomid = varcount++;
+				guard.add(new Instruction(Instruction.DEREFATOM,
+					atomid, lhsatomToPath(srclink.atom), srclink.pos));
+				typedcxtsrcs.put(def, new Integer(atomid));
+			}
+			guard.add(new Instruction(Instruction.FUNC, atomid, func));
+		}
+		typedcxttypes.put(def, UNARY_ATOM_TYPE);
+	}
+	/** 型付きプロセス文脈defを1引数アトム$atomidのファンクタで束縛する */
+	private void bindToUnaryAtom(ContextDef def, int atomid) {
+		if (!identifiedCxtdefs.contains(def)) {
+			identifiedCxtdefs.add(def);
+			typedcxtsrcs.put(def, new Integer(atomid));
+		}
+		else {
+			int loadedatomid = typedcxtToSrcPath(def);
+			if (loadedatomid == UNBOUND) {
+				LinkOccurrence srclink = def.src.args[0].buddy;
+				loadedatomid = varcount++;
+				guard.add(new Instruction(Instruction.DEREFATOM,
+					loadedatomid, lhsatomToPath(srclink.atom), srclink.pos));
+				typedcxtsrcs.put(def, new Integer(loadedatomid));
+			}
+			int funcid1 = varcount++;
+			int funcid2 = varcount++;
+			guard.add(new Instruction(Instruction.GETFUNC, funcid1, atomid));
+			guard.add(new Instruction(Instruction.GETFUNC, funcid2, loadedatomid));
+			guard.add(new Instruction(Instruction.EQFUNC,  funcid1, funcid2));
+		}
+		typedcxttypes.put(def, UNARY_ATOM_TYPE);
+	}
+	/** 型付きプロセス文脈defの内容を取得する。1引数であることを仮定する。 */
+	private int loadUnaryAtom(ContextDef def) {
+		int atomid = typedcxtToSrcPath(def);
+		if (atomid == UNBOUND) {
+			LinkOccurrence srclink = def.src.args[0].buddy;
+			atomid = varcount++;
+			guard.add(new Instruction(Instruction.DEREFATOM,
+				atomid, lhsatomToPath(srclink.atom), srclink.pos));
+			typedcxtsrcs.put(def, new Integer(atomid));
+		}
+		typedcxttypes.put(def, UNARY_ATOM_TYPE);
+		return atomid;
 	}
 	
 	private void removeLHSTypedProcesses() {
@@ -431,6 +437,8 @@ public class RuleCompiler {
 			}
 		}
 	}	
+
+	////////////////////////////////////////////////////////////////
 
 	/** ルールの左辺と右辺に対してstaticUnifyを呼ぶ */
 	public void simplify() {

@@ -858,17 +858,23 @@ public class Instruction implements Cloneable {
 
 	/** isground [link]
 	 * <br>（予約された）型付き拡張用ガード命令<br>
-	 * リンクlinkの指す先が基底項プロセスであることを確認する。
+	 * リンク$linkの指す先が基底項プロセスであることを確認する。
 	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこの膜に存在していることを確認する。
 	 * @see getlink */
 	public static final int ISGROUND = 220;
+	
+	/** isunary [atom]
+	 * <br>型付き拡張用ガード命令<br>
+	 * アトム$atomが1引数のアトムであることを確認する。*/
+	public static final int ISUNARY     = 221;
+	public static final int ISUNARYFUNC = ISUNARY + OPT;
 
 	/** isint [atom]
 	 * <br>型付き拡張用ガード命令<br>
 	 * アトム$atomが整数アトムであることを確認する。*/
-	public static final int ISINT    = 221;
-	public static final int ISFLOAT  = 222;
-	public static final int ISSTRING = 223;
+	public static final int ISINT    = 225;
+	public static final int ISFLOAT  = 226;
+	public static final int ISSTRING = 227;
 
 	/** isintfunc [func]
 	 * <br>型付き拡張用最適化用ガード命令<br>
@@ -1008,13 +1014,13 @@ public class Instruction implements Cloneable {
      * 引数を追加するマクロ。
      * @param o オブジェクト型の引数
      */
-    private final void add(Object o) { data.add(o); }
+	public final void add(Object o) { data.add(o); }
 	
     /**
      * 引数を追加するマクロ。
      * @param n int 型の引数
      */
-    private final void add(int n) { data.add(new Integer(n)); }
+    public final void add(int n) { data.add(new Integer(n)); }
 	
 	////////////////////////////////////////////////////////////////
 
