@@ -53,6 +53,7 @@ public class LMNtalNode {
 			in.close();
 			out.close();
 			socket.close();
+			if(Env.debug > 0)System.out.println("LMNtalNode.close(): socket has closed.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -154,5 +155,13 @@ public class LMNtalNode {
 		//data = in.readBytes(bytes); // TODO 【実装】（有志B）バイト列をソケットで送受信する
 		return data;
 	}
-
+	
+/*
+ *  @author nakajima
+ *  @return true if the socket has been closed 
+ */
+	protected boolean isSocketClosed() {
+		return socket.isClosed();
+	}
+	
 }

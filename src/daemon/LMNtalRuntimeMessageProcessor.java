@@ -125,9 +125,15 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		if (Env.debug > 0) System.out.println("LMNtalRuntimeMessageProcessor.run()");
 		String input;
 		while (true) {
+			if(isSocketClosed()){
+				return;
+			}
+
 			try {
 				input = readLine();
 			} catch (IOException e) {
+				//todo disconnectFromDaemon()する時に、必ずこの例外が発生するのを防ぐ
+				//済 2004-08-24 nakajima
 				System.out.println("LMNtalRuntimeMessageProcessor: ERROR:このスレッドには書けません!");
 				e.printStackTrace(); 
 				break;

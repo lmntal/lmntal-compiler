@@ -85,12 +85,35 @@ class TestRemote{
 		System.out.println("connectRuntime success");
 
 		//マッチング命令・ボディ命令を実行してみるテスト
-		
+		/*
 		//NEWROOT
-		//RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
+		RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
 		
+		RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
 		
-		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
+		//NEWATOM
+		Atom atom_hoge_banon = rm_banon.newAtom(new Functor("hoge", 1));
+		Atom atom_fuga_banon = rm_banon.newAtom(new Functor("fuga", 1));
+		Atom atom_moge_banon = rm_banon.newAtom(new Functor("moge", 1));
+				
+		//ALTERATOMFUNCTOR
+		rm_banon.alterAtomFunctor(atom_hoge_banon, new Functor("hoge2", 1));
+		
+		//REMOVEATOM
+		rm_banon.removeAtom(atom_hoge_banon);
+		
+		//ENQUEUEATOM
+		//rm_banon.enqueueAtom(atom_hoge_banon);
+		
+		//NEWMEM
+		RemoteMembrane komaku_01_banon = (RemoteMembrane)rm_banon.newMem();
+		
+		//REMOVEMEM
+		rm_banon.removeMem(komaku_01_banon);
+		
+		//NEWLINK
+		*/
+		
 		
 		//終了処理
 //		LMNtalRuntimeManager.disconnectFromDaemon(); //これだと遠隔ノードへのコネクション張りっぱなし、slave runtimeあがりっぱなし
