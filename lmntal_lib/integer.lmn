@@ -3,7 +3,7 @@ NAME
 	Integer module
 
 SYNOPSIS  +,-,*,/,mod,abs,>,<,>=,=<,==,!=
-          <<,>>,ビット演算(&,|,^),power(XのN乗)
+          <<,>>,ビット演算(&,|,^),power(XのN乗),rnd
 	
 AUTHOR
 	Koji Hara
@@ -179,4 +179,20 @@ H = power(A, N) :- int(A),int(N) | H=[[/*inline*/
   me.remove();
  ]](A,N).
 
+/*
+ * rnd(N) 0からN-1の整数をランダムで返す。
+ *
+ *
+ */
+H = rnd(N) :- int(N) | H=[[/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  Random rand = new Random();
+  int rn = (int)(n*Math.random());
+  Atom result = mem.newAtom(new IntegerFunctor(rn));
+  mem.relink(result, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+  ]](N).
+  
 }.
