@@ -10,10 +10,22 @@ public class GraphLayout implements Runnable {
 	private Thread th = null;
 	private static final int DELAY = 50;
 	private Component parent = null;
-	private Rectangle area = new Rectangle(25,25,400,400);
+	private Rectangle area;// = new Rectangle(25,25,400,400);
+	runtime.Membrane rootMem;
 	
 	public GraphLayout(Component parent) {
 		this.parent = parent;
+		area = parent.getBounds();
+//		System.out.println("area = "+area);
+	}
+	
+	public void setRootMem(runtime.Membrane rootMem) {
+		this.rootMem = rootMem;
+//		System.out.println("setRootMem"+rootMem);
+	}
+	
+	public Rectangle getPreferredArea() {
+		return this.area;
 	}
 	
 	public void addNode(GraphNode node) {
@@ -24,15 +36,11 @@ public class GraphLayout implements Runnable {
 		nodes.removeAllElements();
 	}
 	
-	public Rectangle getPreferredArea() {
-		return this.area;
-	}
-	
-	public GraphNode getNearestNode(Point p) {
+	public Node getNearestNode(Point p) {
 		double min=Double.MAX_VALUE;
-		GraphNode minn=null;
-		for(Iterator i=nodes.iterator();i.hasNext();) {
-			GraphNode n = (GraphNode)i.next();
+		Node minn=null;
+		for(Iterator i=rootMem.atomIterator();i.hasNext();) {
+			Node n = (Node)i.next();
 			double d = p.distance(n.getPosition());
 			if(min>d) {
 				min = d;
@@ -74,23 +82,26 @@ public class GraphLayout implements Runnable {
 	}
 	
 	protected synchronized void relax() {
-		for (int i=0;i<nodes.size();i++) {
-			GraphNode node1 = (GraphNode)nodes.get(i);
+		if(rootMem==null) return;
+		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
+			Node me = (Node)i.next();
 			double dx = 0;
 			double dy = 0;
 			
-//			System.out.println(i+" "+node1.label);
+//			System.out.println(i+" "+me.getName());
 			
 			// angle でソート
-			GraphEdge ie[] = new GraphEdge[node1.linkedNodes.size()];
-			ie = (GraphEdge[])(node1.linkedNodes.toArray(ie));
+			Edge ie[] = new Edge[me.getEdgeCount()];
+			for(int j=0;j<ie.length;j++) {
+				ie[j]=new Edge(me, me.getNthNode(j));
+			}
 			Arrays.sort(ie);
 			
 			for (int j=0;j<ie.length;j++) {
-				GraphEdge edge = ie[j];
+				Edge edge = ie[j];
 				
 				// デフォルトの長さに伸縮する
-				if(edge.from.hashCode() < edge.to.hashCode()){
+				if(me.hashCode() < edge.to.hashCode()){
 					double f = (edge.getStdLen() - edge.getLen()) / (edge.getStdLen() * 1);
 					double ddx = f * edge.getVx();
 					double ddy = f * edge.getVy();
@@ -99,16 +110,16 @@ public class GraphLayout implements Runnable {
 					edge.to.setMoveDelta(ddx,ddy);
 				}
 				
-				if(node1.linkedNodes.size()<=1) continue;
+				if(me.getEdgeCount()<=1) continue;
 				
-				// cur にかかる力を計算する
+				// cur.to にかかる力を計算する
 				{
-					GraphEdge cur = ie[j];
+					Edge cur = ie[j];
 	//				System.out.println(cur);
-					GraphNode node2 = cur.to;
+					Node you = cur.to;
 					
-					GraphEdge prev = ie[(j-1+ie.length)%ie.length];
-					GraphEdge next = ie[(j+1)%ie.length];
+					Edge prev = ie[(j-1+ie.length)%ie.length];
+					Edge next = ie[(j+1)%ie.length];
 	//				System.out.println("  p : "+ prev);
 	//				System.out.println("  n : "+ next);
 					
@@ -119,8 +130,8 @@ public class GraphLayout implements Runnable {
 	//				System.out.println("  a_n : "+ a_n*180/Math.PI);
 	//				System.out.println("   a_r : "+ a_r*180/Math.PI);
 					
-					double vx = cur.to.getPosition().getX() - node1.getPosition().getX();
-					double vy = cur.to.getPosition().getY() - node1.getPosition().getY();
+					double vx = you.getPosition().getX() - me.getPosition().getX();
+					double vy = you.getPosition().getY() - me.getPosition().getY();
 					
 					// next 周りを正にした、動かす対象と自分を結ぶ線分に垂直で長さ１のベクトル
 					double tx = -vy;
@@ -134,12 +145,85 @@ public class GraphLayout implements Runnable {
 					dx = 5 * tx / len * a_r;
 					dy = 5 * ty / len * a_r;
 					
-					cur.from.setMoveDelta(-dx,-dy);
-					cur.to.setMoveDelta(dx,dy);
+					me.setMoveDelta(-dx,-dy);
+					you.setMoveDelta(dx,dy);
 				}
 			}
 		}
-		
+		// 実際に移動する
+		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
+			Node me = (Node)i.next();
+			me.move(parent.getBounds());
+		}
+	}
+	
+//	protected synchronized void relax_old() {
+//		for (int i=0;i<nodes.size();i++) {
+//			GraphNode node1 = (GraphNode)nodes.get(i);
+//			double dx = 0;
+//			double dy = 0;
+//		
+////				System.out.println(i+" "+node1.label);
+//		
+//			// angle でソート
+//			Edge ie[] = new Edge[node1.linkedNodes.size()];
+//			ie = (Edge[])(node1.linkedNodes.toArray(ie));
+//			Arrays.sort(ie);
+//		
+//			for (int j=0;j<ie.length;j++) {
+//				Edge edge = ie[j];
+//			
+//				// デフォルトの長さに伸縮する
+//				if(edge.from.hashCode() < edge.to.hashCode()){
+//					double f = (edge.getStdLen() - edge.getLen()) / (edge.getStdLen() * 1);
+//					double ddx = f * edge.getVx();
+//					double ddy = f * edge.getVy();
+//				
+//					edge.from.setMoveDelta(-ddx,-ddy);
+//					edge.to.setMoveDelta(ddx,ddy);
+//				}
+//			
+//				if(node1.linkedNodes.size()<=1) continue;
+//			
+//				// cur にかかる力を計算する
+//				{
+//					Edge cur = ie[j];
+//	//				System.out.println(cur);
+//					GraphNode node2 = cur.to;
+//				
+//					Edge prev = ie[(j-1+ie.length)%ie.length];
+//					Edge next = ie[(j+1)%ie.length];
+//	//				System.out.println("  p : "+ prev);
+//	//				System.out.println("  n : "+ next);
+//				
+//					double a_p = regulate(cur.getAngle() - prev.getAngle());
+//					double a_n = regulate(next.getAngle() - cur.getAngle());
+//					double a_r = a_n-a_p;
+//	//				System.out.println("  a_p : "+ a_p*180/Math.PI);
+//	//				System.out.println("  a_n : "+ a_n*180/Math.PI);
+//	//				System.out.println("   a_r : "+ a_r*180/Math.PI);
+//				
+//					double vx = cur.to.getPosition().getX() - node1.getPosition().getX();
+//					double vy = cur.to.getPosition().getY() - node1.getPosition().getY();
+//				
+//					// next 周りを正にした、動かす対象と自分を結ぶ線分に垂直で長さ１のベクトル
+//					double tx = -vy;
+//					double ty =  vx;
+//	//				System.out.println("   tx : "+ tx);
+//	//				System.out.println("   ty : "+ ty);
+//				
+//					double len = Math.sqrt(tx*tx+ty*ty);
+//				
+//					// move = t times diff
+//					dx = 5 * tx / len * a_r;
+//					dy = 5 * ty / len * a_r;
+//				
+//					cur.from.setMoveDelta(-dx,-dy);
+//					cur.to.setMoveDelta(dx,dy);
+//				}
+//			}
+//		}
+
 //		for (int i=0;i<nodes.size();i++) {
 //			GraphNode node1 = (GraphNode)nodes.get(i);
 //			double dx = 0;
@@ -166,12 +250,11 @@ public class GraphLayout implements Runnable {
 //			}
 //		}
 		
-		// 実際に移動する
-		for (int i=0;i<nodes.size();i++) {
-			GraphNode node = (GraphNode)nodes.get(i);
-			node.move(area);
-		}
-	}
+//		for (int i=0;i<nodes.size();i++) {
+//			GraphNode node = (GraphNode)nodes.get(i);
+//			node.move(area);
+//		}
+//	}
 	
 	static double regulate(double a) {
 		while(a<0.0) a+= Math.PI*2;
@@ -182,7 +265,15 @@ public class GraphLayout implements Runnable {
 	public void paint(Graphics g) {
 		g.setColor(Color.BLACK);
 		
-		for (int i=0;i<nodes.size();i++) ((GraphNode)nodes.get(i)).paintEdge(g);
-		for (int i=0;i<nodes.size();i++) ((GraphNode)nodes.get(i)).paintNode(g);
+		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
+			Node n = (Node)i.next();
+			n.paintEdge(g);
+		}
+		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
+			Node n = (Node)i.next();
+			n.paintNode(g);
+		}
+//		for (int i=0;i<nodes.size();i++) ((GraphNode)nodes.get(i)).paintEdge(g);
+//		for (int i=0;i<nodes.size();i++) ((GraphNode)nodes.get(i)).paintNode(g);
 	}
 }

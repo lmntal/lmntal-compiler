@@ -4,15 +4,16 @@ package runtime;
 //import java.util.Iterator;
 //import java.util.List;
 
+import java.awt.*;
+import test.GUI.Node;
 import util.QueuedEntity;
-import java.lang.Integer;
 //import util.Stack;
 
 /**
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
  * @author Mizuno
  */
-public final class Atom extends QueuedEntity {
+public final class Atom extends QueuedEntity implements test.GUI.Node {
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
 	 * ただし値を変更するときはindexも同時に更新すること。(null,-1)は所属膜なしを表す。*/
 	AbstractMembrane mem;
@@ -139,4 +140,79 @@ public final class Atom extends QueuedEntity {
 //	public void dequeue() {
 //		super.dequeue();
 //	}
+	
+	///////////////////////////////////////////////////////////////
+	
+	Point pos = new Point((int)(Math.random()*Env.gui.getSize().width), (int)(Math.random()*Env.gui.getSize().height));
+	double vx, vy;
+	public void initNode() {
+		pos = new Point();
+	}
+	public Point getPosition() {
+		return pos;
+	}
+	public void setPosition(Point p) {
+		pos = p;
+	}
+	public Node getNthNode(int index) {
+		return args[index].getAtom();
+	}
+	public int getEdgeCount() {
+		return functor.getArity();
+	}
+	public void setMoveDelta(double dx, double dy) {
+		vx += dx;
+		vy += dy;
+	}
+	public void move(Rectangle area) {
+		//if (n.isFixed()) return;
+		pos.x += Math.max(-5, Math.min(5, vx));
+		pos.y += Math.max(-5, Math.min(5, vy));
+		
+		if (pos.x < area.getMinX())		pos.x = (int)area.getMinX();
+		else if (pos.x > area.getMaxX())	pos.x = (int)area.getMaxX();
+		
+		if (pos.y < area.getMinY())		pos.y = (int)area.getMinY();
+		else if (pos.y > area.getMaxY())	pos.y = (int)area.getMaxY();
+		
+//		dx=dy=0;
+		vx /= 2;
+		vy /= 2;
+	}
+	public void paintEdge(Graphics g) {
+		g.setColor(Color.BLACK);
+		for(int i=0;i<getEdgeCount();i++) {
+			Node n2 = getNthNode(i);
+			if(this.hashCode() < n2.hashCode()) continue;
+			g.drawLine(this.getPosition().x, this.getPosition().y, n2.getPosition().x, n2.getPosition().y);
+		}
+	}
+	
+	Color colors[] = {
+		Color.BLACK,
+		Color.BLUE,
+		Color.CYAN,
+		Color.GREEN,
+		Color.MAGENTA,
+		Color.ORANGE,
+		Color.RED
+	};
+	
+	public void paintNode(Graphics g) {
+		String label = getName();
+		FontMetrics fm = g.getFontMetrics();
+		int w = fm.stringWidth(label);
+		int h = fm.getHeight();
+		
+		Dimension size = new Dimension(16, 16);
+//		g.setColor(new Color(64,128,255));
+		// 適当に色分けする！
+		g.setColor(colors[ Math.abs(label.hashCode()) % colors.length ]);
+		
+		g.fillOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
+		
+		g.setColor(Color.BLACK);
+		g.drawOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
+		g.drawString(label, pos.x - (w-10)/2, (pos.y - (h-4)/2) + fm.getAscent()+size.height);
+	}
 }
