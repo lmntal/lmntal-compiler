@@ -170,7 +170,7 @@ class Task extends AbstractTask implements Runnable {
 								Env.p( " --> \n" + Dumper.dump( memToDump ) );
 						}
 					}
-					Env.guiTrace();
+					if (!Env.guiTrace()) break;
 				}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行アトムスタックが空の時
 				flag = false;
@@ -217,7 +217,7 @@ class Task extends AbstractTask implements Runnable {
 								Env.p( " ==> \n" + Dumper.dump( memToDump ) );
 						}
 					}
-					Env.guiTrace();
+					if (!Env.guiTrace()) break;
 				}
 			}
 		}
@@ -262,11 +262,10 @@ class Task extends AbstractTask implements Runnable {
 		}
 		while (true) {
 			while (true) {
-				while (!isIdle()) {
-					exec();
-				}
+				exec();
 				if (((LocalLMNtalRuntime)runtime).isTerminated()) return;
 				if (root != null && root.isStable()) return;
+				if (isIdle()) continue;
 				synchronized(this) {
 					if (awakened) {
 						awakened = false;

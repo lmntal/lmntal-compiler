@@ -242,6 +242,7 @@ public class FrontEnd {
 	public static void run(Reader src, String unitName) {
 		try {
 			LMNParser lp = new LMNParser(src);
+			boolean ready = true;
 			
 			compile.structure.Membrane m = lp.parse();
 //			if (Env.debug >= Env.DEBUG_SYSDEBUG) {
@@ -253,6 +254,8 @@ public class FrontEnd {
 			Inline.makeCode();
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
+			
+			// if (Env.nerrors > 0)  ready = false;
 			
 			// 実行
 			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
@@ -267,18 +270,21 @@ public class FrontEnd {
 			rs.react(root); // TODO 【検証】初期配置で子タスクを作った場合にどうなるか考える→LMNParserを修正することにした
 			if (Env.gui != null) {
 				Env.gui.lmnPanel.getGraphLayout().calc();
-				Env.gui.onTrace();
+				if (!Env.gui.onTrace())  ready = false;
 			}
-			//root.blockingUnlock();
-			((Task)root.getTask()).execAsMasterTask();
+			if (ready) {
+				//root.blockingUnlock();
+				((Task)root.getTask()).execAsMasterTask();
 
-			if (!Env.fTrace && Env.verbose > 0) {
-				Env.d( "Execution Result:" );
-				Env.p( Dumper.dump(rt.getGlobalRoot()) );
+				if (!Env.fTrace && Env.verbose > 0) {
+					Env.d( "Execution Result:" );
+					Env.p( Dumper.dump(rt.getGlobalRoot()) );
+				}
+				if (Env.gui != null) {
+					while(Env.gui.running) Env.gui.onTrace();
+				}
 			}
-			if (Env.gui != null) {
-				while(Env.gui.running) Env.gui.onTrace();
-			}
+			if (Env.gui != null)  Env.gui = null;
 			LMNtalRuntimeManager.terminateAll();
 			LMNtalRuntimeManager.disconnectFromDaemon();
 			

@@ -60,6 +60,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 				if(DEBUG)System.out.println("LocalLMNtalRuntime.terminate(): " + task + " has finished!"); //todo Env
 			} catch (InterruptedException e) {}
 		}
+		tasks.clear();	// 追加 n-kato 2004-10-30
 	}
 
 //	/** terminateフラグがONになるまで待つ。

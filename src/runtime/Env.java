@@ -223,9 +223,10 @@ public final class Env {
 	/** LocalLMNtalRuntimeのインスタンス */
 	public static LocalLMNtalRuntime theRuntime;
 
-	public static void guiTrace() {
-		if(gui==null) return;
-		gui.onTrace();
+	/** @return ルールスレッドの実行を継続してよいかどうか */
+	public static boolean guiTrace() {
+		if(gui==null) return true;
+		return gui.onTrace();
 	}
 	
 	/**

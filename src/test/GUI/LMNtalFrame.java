@@ -39,6 +39,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				running = busy = false;
+				runtime.LMNtalRuntimeManager.terminateAll();	// 追加 n-kato 2004-10-30
 			}
 		});
 		initComponents();
@@ -116,13 +117,15 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		lmnPanel.getGraphLayout().setAllowRelax(false);
 	}
 	
-	public void onTrace() {
+	/** @return ルールスレッドの実行を継続してよいかどうか */
+	public boolean onTrace() {
 		if(Env.fGUI) {
 			lmnPanel.start();
 //			Env.gui.lmnPanel.setMembrane((runtime.Membrane)Env.theRuntime.getGlobalRoot());
 			Env.gui.waitBusy();
 			lmnPanel.stop();
 		}
+		return Env.gui.running;
 	}
 }
 
