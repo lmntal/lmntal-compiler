@@ -8,11 +8,19 @@ package daemon;
  */
 class Cache{
 	/*
+	 * コンストラクタ。
+	 * 
+	 * 各ルート膜がキャッシュオブジェクトを持つ？
+	 * それとも各LocalLMNtalRuntimeが持つ？
+	 */
+	Cache(){
+	}
+	
+	/*
 	 * キャッシュ文字列をくみたてる
 	 * @author nakajima
 	 */
 	 void encode(){
-	 	
 	 }
 
 	 /*
@@ -20,7 +28,6 @@ class Cache{
 	  * @author nakajima
 	  */
 	 void decode(){
-	  	
 	 }
 	 
 	 /*

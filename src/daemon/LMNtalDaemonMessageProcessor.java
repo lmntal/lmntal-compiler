@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 
 import runtime.AbstractMembrane;
 import runtime.Env;
@@ -28,8 +27,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 	//あげたLocalLMNtalRuntimeのID
 	Integer slaveRuntimeRgid;
 
-	//グローバルな膜IDの表
-	HashMap memTable = new HashMap();
+
 
 	/*
 	 * コンストラクタ。
@@ -70,7 +68,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 		String input = "";
 
-		while (true) {
+		outsideloop:while (true) {
 			try {
 				input = in.readLine();
 			} catch (IOException e) {
@@ -289,7 +287,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								
 								String[] commandInsideBegin = new String[5]; //RemoteMembrane.send()の引数の個数を参照せよ
 
-								while(true){
+								beginEndLoop:while(true){
 									input = in.readLine();
 									commandInsideBegin = input.split(" ",5); //ぬるぽに注意
 
@@ -298,72 +296,145 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 									if(commandInsideBegin[0].equalsIgnoreCase("end")){
 										//糸冬
-										break;
+										continue outsideloop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("clearrules")){
 										dstmem = commandInsideBegin[1];
 										
 										
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("loadruleset")){
 										dstmem = commandInsideBegin[1];
 										ruleset = commandInsideBegin[2];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("newatom")){
-										srcmem = commandInsideBegin[1];
+										srcmem = commandInsideBegin[1]; //グローバル膜ID
+										atom1 = commandInsideBegin[2]; //NEW_1とか 
+										
+										//NEW_1をatomidに変換
+										
+										//キャッシュからatomidに対応するAtomオブジェクトをもってくる
+										
+										//srcmem.addAtom(atom1)呼び出し
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("alteratomfunctor")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
 										func = commandInsideBegin[3];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("removeatom")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("enqueueatom")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("newmem")){
 										srcmem = commandInsideBegin[1];
 										dstmem = commandInsideBegin[2];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("removemem")){
 										srcmem = commandInsideBegin[1];
 										parentmem = commandInsideBegin[2];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									//} else if (commandInsideBegin[0].equalsIgnoreCase("newroot")){
+										
+										//out.write("not implemented yet\n");
+										//out.flush();
+
+										//continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("newlink")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
 										pos1  = commandInsideBegin[3];
 										atom2 = commandInsideBegin[4];
 										pos2  = commandInsideBegin[5];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("relinkatomargs")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
 										pos1  = commandInsideBegin[3];
 										atom2 = commandInsideBegin[4];
 										pos2  = commandInsideBegin[5];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("unifyatomargs")){
 										srcmem = commandInsideBegin[1];
 										atom1 = commandInsideBegin[2];
 										pos1  = commandInsideBegin[3];
 										atom2 = commandInsideBegin[4];
 										pos2  = commandInsideBegin[5];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("movecells")){
 										dstmem = commandInsideBegin[1];
 										srcmem = commandInsideBegin[2];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("moveto")){
 										srcmem = commandInsideBegin[1];
 										dstmem = commandInsideBegin[2];
+										
+										out.write("not implemented yet\n");
+										out.flush();
+
+										continue beginEndLoop;
 									//} else if (commandInsideBegin[0].equalsIgnoreCase("setparent")){
 									///} else if (commandInsideBegin[0].equalsIgnoreCase("requireruleset")){
 									} else {
 										//未知の命令
 										out.write("not implemented yet\n");
 										out.flush();
-										continue;
+										continue beginEndLoop;
 									}
 									
 									//グローバル膜ID→NEW_4の処理		
 								}
-								
-								out.write("not implemented yet\n");
-								out.flush();
-								continue;
 							} else if (command.equalsIgnoreCase("lock")) {
 								//TODO 実装
 								

@@ -3,6 +3,7 @@ package runtime;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import daemon.IDConverter;
 import daemon.LMNtalDaemon;
 import daemon.LMNtalNode;
 
@@ -216,7 +217,8 @@ final class RemoteMembrane extends AbstractMembrane {
 	 */
 	public RemoteMembrane(RemoteTask task, RemoteMembrane parent) {
 		super(task, parent);
-		this.remoteid = LMNtalDaemon.getGlobalMembraneID(this);
+//		this.remoteid = LMNtalDaemon.getGlobalMembraneID(this);
+		this.remoteid = IDConverter.getGlobalMembraneID(this);
 	}
 
 	/*

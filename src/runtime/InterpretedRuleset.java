@@ -109,6 +109,7 @@ public final class InterpretedRuleset extends Ruleset {
 	}
 	
 	public String getGlobalRulesetID(){
+		//TODO 本当にglobalなIDにする
 		return "<runtimeid>" + id;
 	}
 }
