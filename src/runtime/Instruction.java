@@ -58,11 +58,13 @@ public class Instruction {
 
 	//まともな方法
 	//[命令, [引数], 命令, [引数], …]を全てStringに変換
-	Object[] hoge = data.toArray();
+	Object[] hoge; 
 	Object[] fuga;
 	StringBuffer buffer = new StringBuffer();
 
 	try {
+	    hoge = data.toArray();
+
 	    buffer.append("[ ");
 
 	    //命令のためのループ
