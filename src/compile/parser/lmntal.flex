@@ -65,7 +65,7 @@ String = "\"" ("\\\"" | [^\"\r\n]* | "\\"[\r]?"\n" )* "\""
 
 // Inline = "[[" [^*] ~"]]"
 
-%state QUOTED
+%state QUOTED COMMENT
 
 ////////////////////////////////////////////////////////////////
 
@@ -73,9 +73,10 @@ RelativeOp = "=" | "==" | "!=" | "\\=" | "::" | "?" | {IntegerRelativeOp} | {Flo
 IntegerRelativeOp  = "<" | ">" | ">=" | "=<" | "=:=" | "=\\="
 FloatingRelativeOp = "<."| ">."| ">=."| "=<."| "=:=."| "=\\=."
 
-Comment = {TraditionalComment} | {EndOfLineComment}
+//Comment = {TraditionalComment} | {EndOfLineComment}
+Comment = {EndOfLineComment}
 
-TraditionalComment = "/*" [^*] ~"*/"
+//TraditionalComment = "/*" [^*] ~"*/"
 EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 
 %% 
@@ -83,6 +84,7 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 /* ------------------------Lexical Rules Section---------------------- */
 
 <YYINITIAL> {
+	"/*"                { yybegin(COMMENT); }
 	","					{ return symbol(sym.COMMA); }
 	"("					{ return symbol(sym.LPAREN); }
 	")"					{ return symbol(sym.RPAREN); }
@@ -127,6 +129,14 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	.|{LineTerminator}  { string.append( yytext() ); }
 }
 
+<COMMENT> {
+	[^*\n]*             {}
+	[^*\n]*\n           {}
+	"*"+[^*/\n]*        {}
+	"*"+[^*/\n]*\n      {}
+	<<EOF>>      { throw new Error("EOF in comment"); }
+	"*/"         { yybegin(YYINITIAL); }
+}
 
 /* No token was found for the input so through an error.  Print out an
    Illegal character message with the illegal character that was found. */

@@ -56,7 +56,7 @@ public final class Link implements Cloneable {
 		return atom;
 	}
 	/** リンク先の引数番号を取得する */
-	int getPos() {
+	public int getPos() {
 		return pos;
 	}
 	/** このリンクと対をなす逆向きのリンクを取得する */
