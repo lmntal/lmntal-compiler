@@ -439,3 +439,12 @@ public class RuleCompilerTest {
 	}
 }
 */
+
+
+            n(N).
+w(W).    c(N,E,S,W).  e(E).
+            s(S).
+
+c(n,e,s,c(n,e,s)).
+
+res(cons(int(1),cons(int(2),cons(int(3),cons(int(4),nil)))))
