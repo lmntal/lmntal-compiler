@@ -115,10 +115,11 @@ public class LMNParser {
 		else if (obj instanceof SrcRuleContext) {
 			addSrcRuleContextToMem((SrcRuleContext)obj, mem);
 		}
-		// リンク単一化
-		else if (obj instanceof SrcLinkUnify) {
-			addSrcLinkUnifyToMem((SrcLinkUnify)obj, mem);
-		}
+//		// リンク単一化
+//		else if (obj instanceof SrcLinkUnify) {
+//			addSrcLinkUnifyToMem((SrcLinkUnify)obj, mem);
+//			System.out.println("foo");
+//		}
 		// その他 
 		else {
 			throw new ParseException("Illegal Object to add to a membrane: "+obj);
@@ -175,9 +176,9 @@ public class LMNParser {
 			}
 		}
 		// アトムとアトム集団を識別する
-		if (p.size() > 0 && allbundles && !alllinks) 
+		if (p.size() > 0 && allbundles) 
 			mem.aggregates.add(atom);
-		else if (p.size() == 0 || (!allbundles && alllinks) )
+		else if (p.size() == 0 || alllinks )
 			mem.atoms.add(atom);
 		else {
 			System.out.println("SYNTAX ERROR: arguments of an atom contain both links and bundles");
@@ -526,11 +527,11 @@ public class LMNParser {
 		mem.ruleContexts.add(p);
 	}
 	
-	private void addSrcLinkUnifyToMem(SrcLinkUnify sUnify, Membrane mem) throws ParseException {
-		Atom unify = new Atom(mem,"=",2);
-		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(0), unify, 0);
-		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(1), unify, 1);
-	}
+//	private void addSrcLinkUnifyToMem(SrcLinkUnify sUnify, Membrane mem) throws ParseException {
+//		Atom unify = new Atom(mem,"=",2);
+//		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(0), unify, 0);
+//		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(1), unify, 1);
+//	}
 	
 	////////////////////////////////////////////////////////////////
 	

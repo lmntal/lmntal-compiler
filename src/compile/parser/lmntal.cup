@@ -17,10 +17,10 @@ terminal String LINK_NAME, ATOM_NAME, PATHED_ATOM_NAME;
 non terminal SrcLink			Link;
 non terminal String				FuncName;
 non terminal String				AtomName;
-non terminal SrcAtom			UnitAtom;
-non terminal SrcAtom			Atom400;
-non terminal SrcAtom			Atom500;
-non terminal SrcAtom			Atom;
+non terminal Object				UnitAtom;
+non terminal Object				Atom400;
+non terminal Object				Atom500;
+non terminal Object				Atom;
 non terminal SrcMembrane		Membrane;
 non terminal SrcRule			Rule;
 non terminal SrcProcessContext	ProcessContext;
@@ -28,8 +28,8 @@ non terminal SrcRuleContext		RuleContext;
 non terminal SrcContext			Context;
 non terminal Object				Process;
 non terminal LinkedList			ProcessList;
-non terminal SrcAtom			List;
-non terminal SrcAtom			ListCdr;
+non terminal Object				List;
+non terminal Object				ListCdr;
 
 start with ProcessList;
 
@@ -59,6 +59,8 @@ UnitAtom	::=	  FuncName:name
 					{: RESULT = list; :}
 				| LPAREN Atom:atom RPAREN
 					{: RESULT = atom; :}
+				| Link:link
+					{: RESULT = link; :}
 				;
 
 Atom400		::=   UnitAtom:atom
@@ -139,8 +141,6 @@ Process		::=   Atom:p
 				| Rule:p
 					{:  RESULT = p; :}
 				| Context:p
-					{:  RESULT = p; :}
-				| Link:p
 					{:  RESULT = p; :};
 
 ProcessList ::= Process:p

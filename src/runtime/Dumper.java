@@ -32,8 +32,7 @@ public class Dumper {
 		it = mem.atomIterator();
 		while (it.hasNext()) {
 			Atom a = (Atom)it.next();
-			if (a.getArity() == 0 ||
-				a.getLastArg().getAtom().getMem() != mem) {
+			if (a.getArity() == 0 || a.getLastArg().getAtom().getMem() != mem) {
 				predAtoms[0].add(a);
 			}
 			else if (a.getArity() == 2 && isInfixOperator(a.getName())) {
