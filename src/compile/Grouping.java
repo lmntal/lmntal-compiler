@@ -52,11 +52,11 @@ public class Grouping {
 						//FINDATOMかJUMPを見つけたらGROUP終わり
 						case Instruction.FINDATOM:
 						case Instruction.JUMP:
-						hid2 = headsize; //無理矢理forループから脱出
+							hid2 = headsize; //無理矢理forループから脱出
 						break; //ちなみにこのbreakはswitch文用。
 						
 						//2引数以上のガード命令の場合グループを跨るかチェックする必要がある
-						//とりあえずこれだけ
+						//まずは四則演算や比較演算系
 						case Instruction.FADD: expflag = true;
 						case Instruction.FSUB: expflag = true;
 						case Instruction.FMUL: expflag = true;
@@ -78,6 +78,7 @@ public class Grouping {
 						case Instruction.INE:
 						case Instruction.FEQ:
 						case Instruction.FNE:
+						case Instruction.SAMEFUNC:
 							//例：FADD[resultvar,atom1,atom2]
 							//    FLT[atom1,atom2]
 							int atom1 = 0;
@@ -104,6 +105,7 @@ public class Grouping {
 								Instruction insth2b = (Instruction)head.get(hid2b);
 								switch(insth2b.getKind()){
 									case Instruction.ALLOCATOM:
+									case Instruction.ALLOCATOMINDIRECT:
 									case Instruction.FADD:
 									case Instruction.FSUB:
 									case Instruction.FMUL:
@@ -123,9 +125,7 @@ public class Grouping {
 										} 
 										break;
 									
-									default: 
-										hid2b = firstgrouppoint; //forループから脱出
-										break;
+									default: break;
 								}
 							}
 
@@ -133,6 +133,7 @@ public class Grouping {
 							for(int hid2b=hid2-1; hid2b>=hid; hid2b--){
 								Instruction insth2b = (Instruction)head.get(hid2b);
 								switch(insth2b.getKind()){
+									case Instruction.ALLOCATOMINDIRECT:
 									case Instruction.ISINT:
 									case Instruction.ISFLOAT:
 									case Instruction.FADD:
@@ -167,7 +168,64 @@ public class Grouping {
 								hid2 -= 1;
 							}
 							break;
+							//====四則演算･比較演算系はここまで====//
 							
+							//GETFUNC命令の場合同じグループ内に
+							//GETFUNC命令の第2引数を第1引数に持つ命令(IADD等)があればいい
+							case Instruction.GETFUNC:
+								flag2 = false;
+								for(int hid2b=hid2-1; hid2b>=hid; hid2b--){
+									Instruction insth2b = (Instruction)head.get(hid2b);
+									switch(insth2b.getKind()){
+										case Instruction.ALLOCATOMINDIRECT:
+										case Instruction.FADD:
+										case Instruction.FSUB:
+										case Instruction.FMUL:
+										case Instruction.FDIV:
+										case Instruction.IADD:
+										case Instruction.ISUB:
+										case Instruction.IMUL:
+										case Instruction.IDIV:
+										case Instruction.IMOD:
+											if(insth2b.getIntArg1() == insth2.getIntArg2()){
+												subinstssize += 1;
+												hid2b = hid;
+												flag2 = true;	
+												break;											
+											}
+										default: break;
+									}
+								}
+								if(!flag2){
+									outinsts.add(insth2);
+									head.remove(hid2);
+									headsize -= 1;
+									hid2 -= 1;
+								}
+								break;
+							//====GETFUNC命令はここまで====//
+							
+							//ALLOCATOMINDIRECTはGETFUNCとセットで動かしてもいいかもしれない
+							case Instruction.ALLOCATOMINDIRECT:
+								flag2 = false;
+								for(int hid2b=hid2-1; hid2b<hid; hid2b--){
+									Instruction insth2b = (Instruction)head.get(hid2b);
+									if(insth2b.getKind() == Instruction.GETFUNC
+									   && insth2b.getIntArg1() == insth2.getIntArg2()){
+									   		subinstssize += 1;
+									   		flag2 = true;
+									   		break;
+									   }
+								}
+								if(!flag2){
+									outinsts.add(insth2);
+									head.remove(hid2);
+									headsize -= 1;
+									hid2 -= 1;
+								}
+								break;
+							//====ALLOCATOMINDIRECTはここまで====//
+								
 							//GROUP内の命令の追加
 							default:
 								subinstssize += 1;
