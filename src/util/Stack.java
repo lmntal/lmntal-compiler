@@ -34,6 +34,8 @@ public final class Stack {
 		entity.next.prev = entity;
 	}
 	public QueuedEntity pop() {
+		if(isEmpty()) return null;
+		
 		QueuedEntity ret = tail.prev;
 		tail.prev = ret.prev;
 		ret.prev.next = tail;
@@ -42,7 +44,13 @@ public final class Stack {
 		return ret;
 	}
 	public QueuedEntity peek() {
+		if(isEmpty()) return null;
 		return tail.prev;
+	}
+	/** スタックが空ならtrue */
+	public boolean isEmpty(){
+		if(tail.prev == head) return true;
+		else false;
 	}
 //	QueuedEntity.removeがあるので使わない
 /*	public void remove(QueuedEntity entity) {

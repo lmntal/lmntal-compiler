@@ -215,6 +215,10 @@ abstract class AbstractMembrane extends QueuedEntity {
 	boolean isStable() {
 		return stable;
 	}
+	/** stableフラグをONにする 10/26矢島 machine.exec()内で使う*/
+	void toStable(){
+		stable = true;
+	}
 	/** この膜にルールがあればtrue */
 	boolean hasRule() {
 		return rulesets.size() > 0;
@@ -452,18 +456,68 @@ final class Link {
 final class Machine extends AbstractMachine {
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
+	boolean idle;
+	static final int maxLoop = 10;
+	
 	Machine() {
 		root = new Membrane(this);
 		memStack.push(root);
+		idle = false;
 	}
 	
+	boolean isIdle(){
+		return idle;
+	}
 	void exec() {
+		if(memStack.isEmpty()){ // 空ならidleにする。
+			idle = true;
+			return;
+		}
+		// 実行膜スタックが空でない
+		Membrane mem = memStack.peek();
+		if(!mem.lock()) return; // ロック失敗
 		
+		Atom a;
+		for(int i=0; i < maxLoop && mem == memStack.peek(); i++){
+			// 本膜が変わらない間 & ループ回数を越えない間
+			
+			a = mem.popReadyAtom();
+			Iterator it = mem.rulesetIterator();
+			
+			if(a != null){ // 実行膜スタックが空でないとき
+				while(it.hasNext()){ // 本膜のもつルールをaに適用
+					// 適用できたら最初に戻る
+					if(((Ruleset)it.next()).react(mem, a)) goto NEXT;
+				}
+				// 適用できなかった時
+				if(mem.isRoot()) mem.getMem().enqueueAtom(a);
+				else {}// システムコールアトムなら親膜につみ、親膜を活性化
+			}else{ // 実行膜スタックが空の時
+				while(it.hasNext()){ // 膜主導テストを行う
+					if(((Ruleset)it.next()).react(mem)) goto NEXT;
+				}
+				// 適用できなかった時
+				memStack.pop(); // 本膜をpop
+				// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
+				if(mem.isRoot() && mem.getMem() != null)
+					mem.getMem().activate();
+				it = mem.memIterator();
+				// 子膜が全てstableなら、この膜をstableにする。
+				while(it.hasNext()){
+					if(((Membrane)it.next()).isStable() == false) goto NEXT;
+				}
+				mem.toStable();
+			}
+NEXT:
+		}
+		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
+		mem.unlock();
 	}
 }
 abstract class AbstractMachine {
 	/** ルート膜 */
 	protected AbstractMembrane root;
+	
 	/** ルート膜の取得 */
 	AbstractMembrane getRoot() {
 		return root;
@@ -473,8 +527,29 @@ abstract class AbstractMachine {
 /** 計算ノード */
 final class LMNtalRuntime {
 	List machines = new ArrayList();
+	
+	/** 計算ノードが持つマシン全てがidleになるまで実行。<br>
+	 *  machinesに積まれた順に実行する。親マシン優先にするためには
+	 *  マシンが木構造になっていないと出来ない。優先度はしばらく未実装。
+	 */
 	void exec() {
+		boolean allIdle;
+		Iterator it;
+		Machine m;
+		do{
+			allIdle = true; // idleでないマシンが見つかったらfalseになる。
+			it = machines.iterator();
+			while(it.hasNext()){
+				m = (Machine)it.next();
+				if(!m.isIdle()){ // idleでないマシンがあったら
+					m.exec(); // ひとしきり実行
+					allIdle = false; // idleでないマシンがある
+					break;
+				}
+			}
+		}while(allIdle);
 	}
+	
 	Machine newMachine() {
 		Machine m = new Machine();
 		machines.add(m);
