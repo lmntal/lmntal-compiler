@@ -6,8 +6,6 @@ package runtime;
 
 import java.io.EOFException;
 import java.io.StringReader;
-import java.util.Arrays;
-
 import org.gnu.readline.Readline;
 import org.gnu.readline.ReadlineLibrary;
 
@@ -49,11 +47,14 @@ public class REPL {
 		System.out.println("Type h to see help.");
 		System.out.println("Type q to quit.");
 		System.out.println("");
+		StringBuffer lb = new StringBuffer();
 		while (true) {
 			try {
 				line = Readline.readline("# ");
 				if (line == null) {
 					//System.out.println("no input");
+					processLine(lb.toString());
+					lb.setLength(0);
 				} else if(line.equals("q")) {
 					break;
 				} else if(line.equals("h")) {
@@ -102,7 +103,7 @@ public class REPL {
 					Env.fRandom = false;
 					continue;
 				} else {
-					processLine(line);
+					lb.append(line);
 				}
 			} catch (EOFException e) {
 				break;

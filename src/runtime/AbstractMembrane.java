@@ -168,6 +168,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	/** ルールセットを追加 */
 	public void loadRuleset(Ruleset srcRuleset) {
+		if(rulesets.contains(srcRuleset)) return;
 		rulesets.add(srcRuleset);
 	}
 
