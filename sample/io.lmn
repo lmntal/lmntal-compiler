@@ -7,7 +7,7 @@ io : {
 	)
 }
 ,
-use(io), print([[
+io.print([[
 
 abcdefg
 
