@@ -230,7 +230,8 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					// TERMINATE
 					LMNtalRuntimeManager.terminateAll();
 					respondAsOK(msgid);
-					return;
+					//return;
+					continue; //(nakajima 2004-10-25)
 				} else if (command[0].equalsIgnoreCase("CONNECT")) {
 					// CONNECT dst_nodedesc src_nodedesc
 					String nodedesc = command[2];
