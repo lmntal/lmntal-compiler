@@ -717,20 +717,24 @@ class InterpretiveReactor {
 					//====制御命令====ここまで====
 
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
-				case Instruction.EQGROUND : //[groundlink1,groundlink2]
-					//if(vars.get(inst.getIntArg1()).equals(vars.get(inst.getIntArg2()))){
-					//	return true;
-					//}
-					break; //nakajima 2004-01-05
+				case Instruction.EQGROUND : //[link1,link2]
+					boolean eqground_ret = ((Link)vars.get(inst.getIntArg1())).eqGround(((Link)vars.get(inst.getIntArg2())),new HashMap());
+					if(!eqground_ret)return false;
+					break; //kudo 2004-12-03
+				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
+					vars.add(inst.getIntArg1(),((AbstractMembrane)vars.get(inst.getIntArg3())).copyGroundFrom(((Link)vars.get(inst.getIntArg2())),new HashMap()));
+					break; //kudo 2004-12-03
+				case Instruction.DROPGROUND : //[srclink, srcmem]
+					((AbstractMembrane)vars.get(inst.getIntArg(2))).dropGround(((Link)vars.get(inst.getIntArg1())),new HashSet());
+					break; //kudo 2004-12-03
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 
 					//====型検査のためのガード命令====ここから====
-				case Instruction.ISGROUND : //[link]
-					//atom = ((Link)vars.get(inst.getIntArg1())).getAtom();
-					//if (atom.getMem().equals(mems[0])){
-					//	return true;
-					//}
-					break; //nakajima 2004-01-05
+				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
+					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround(new HashSet(),((Set)vars.get(inst.getIntArg3())));
+					if(isground_ret == -1)return false;
+					vars.add(inst.getIntArg1(),new IntegerFunctor(isground_ret));
+					break; //kudo 2004-12-03
 					
 				case Instruction.ISUNARY: // [atom]
 					Functor f = atoms[inst.getIntArg1()].getFunctor();
