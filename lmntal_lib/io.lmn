@@ -9,12 +9,24 @@ AUTHOR
 	Koji Hara
 
 HISTORY
+	2004/07/19(Sun) io.stdin(Object) ついか。これの初期化のために io.use する必要がある。またはモジュール内のデータもコピーするようにする。
 	2004/05/22(Sat)
 
 */
 
 {
 module(io).
+
+/**
+ * initializer
+ * 
+ */
+io.use :-
+	io.stdin=[[/*inline*/
+		Atom stdin = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.InputStreamReader(System.in))));
+		mem.relink(stdin, 0, me, 0);
+		me.remove();
+		]].
 
 
 io.print(String) :- unary(String)|[[/*inline*/
@@ -103,13 +115,19 @@ H=close(Object) :- class(Object, "java.io.PrintWriter") |
 	]](Object).
 
 /**
- * io.fromFile : String -> List of String
+ * io.list_of_stdin : unit -> List of String
  * 
  */
-H=io.fromFile(Filename) :- H=fromFile_s0(io.fileReader(Filename), []).
-H=fromFile_s0(Obj, List) :- class(Obj, "java.io.BufferedReader") |
-	H=[String|fromFile_s0(readline(Obj, String), List)].
-H=fromFile_s0(nil, List) :- H=List.
+H=io.list_of_stdin, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, []), io.stdin(STDIN).
+
+/**
+ * io.list_of_file : unit -> List of String
+ * 
+ */
+H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), []).
+H=list_of_dev_s0(Obj, List) :- class(Obj, "java.io.BufferedReader") |
+	H=[String|list_of_dev_s0(readline(Obj, String), List)].
+H=list_of_dev_s0(nil, List) :- H=List.
 
 
 /**
@@ -130,6 +148,9 @@ H=io.fileReader(Filename) :- unary(Filename) | H=[[/*inline*/
  * readLine : ?
  * 
  */
+H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
+	H=readline(STDIN, Result), io.stdin(STDIN).
+
 H=readline(Object, Result) :- class(Object, "java.io.BufferedReader") |
 	H=[[/*inline*/
 		try {
