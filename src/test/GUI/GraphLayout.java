@@ -71,6 +71,7 @@ public class GraphLayout implements Runnable {
 	}
 	
 	public void calc() {
+		if(true) return;
 		setAllowRelax(true);
 		for(int i=0;i<100;i++) {
 			relax();
@@ -303,6 +304,7 @@ public class GraphLayout implements Runnable {
 	}
 	
 	public void paint(Graphics g) {
+		if(!getAllowRelax()) return;
 		if(rootMem==null) return;
 		g.setColor(Color.BLACK);
 		
