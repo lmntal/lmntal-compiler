@@ -213,8 +213,10 @@ public class FrontEnd {
 			Env.initGUI(root);
 			//root.blockingLock();
 			rs.react(root); // TODO 初期配置で子タスクを作った場合にどうなるか考える
-			Env.gui.lmnPanel.getGraphLayout().calc();
-			Env.gui.onTrace();
+			if (Env.gui != null) {
+				Env.gui.lmnPanel.getGraphLayout().calc();
+				Env.gui.onTrace();
+			}
 			//root.blockingUnlock();
 			((Task)root.getTask()).execAsMasterTask();
 			RemoteMachine.terminateAll();

@@ -46,6 +46,10 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		this.functor = functor;
 		args = new Link[functor.getArity()];
 		id = lastId++;
+		
+		if (Env.gui != null) {
+			pos = new Point((int)(Math.random()*Env.gui.getSize().width), (int)(Math.random()*Env.gui.getSize().height));
+		}
 	}
 
 	///////////////////////////////
@@ -143,7 +147,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	
 	///////////////////////////////////////////////////////////////
 	
-	Point pos = new Point((int)(Math.random()*Env.gui.getSize().width), (int)(Math.random()*Env.gui.getSize().height));
+	Point pos;
 	double vx, vy;
 	public void initNode() {
 		pos = new Point();
