@@ -19,27 +19,27 @@ public final class Env {
 	static final int DEBUG_SYSTEMRULESET = 7;
 	/** デフォルトのデバッグレベル（ONのとき） */
 	static final int DEBUG_DEFAULT = 1;
-	
+	/** 内部命令の実行をトレースするデバッグレベル */
+	static final int DEBUG_TRACE = 2;
 	/**
 	 * Optimization level.
 	 */
 	public static int optimize = 0;
 	
-	/** デフォルトの冗長表示レベル */
-	public static final int VERBOSE_DEFAULT = 2;
-	/**
-	 * 演算子を展開する冗長表示レベル <pre> X+Y --> '+'(X,Y) </pre> */
-	public static final int VERBOSE_EXPANDOPS = 3;
-	/**
-	 * アトム引数を展開する冗長表示レベル <pre> a(b) --> a(_2),b(_2) </pre> */
-	public static final int VERBOSE_EXPANDATOMS = 4;
-	/**
-	 * ルールセットの内容を展開する冗長表示レベル */
-	public static final int VERBOSE_EXPANDRULES = 5;
+	/** 無指定時の冗長表示レベル */
+	public static final int VERBOSE_INIT = 2;
+	/** ルールセットの内容を展開する冗長表示レベル */
+	public static final int VERBOSE_EXPANDRULES = 3;
+	/** 演算子を展開する冗長表示レベル <pre> X+Y --> '+'(X,Y) </pre> */
+	public static final int VERBOSE_EXPANDOPS = 4;
+	/** アトム引数を展開する冗長表示レベル <pre> a(b) --> a(_2),b(_2) </pre> */
+	public static final int VERBOSE_EXPANDATOMS = 5;
 	/**
 	 * verbose level.
 	 */
-	public static int verbose = VERBOSE_DEFAULT;
+	public static int verbose = VERBOSE_INIT;
+	/** デフォルトの冗長表示レベル */
+	public static final int VERBOSE_DEFAULT = 3;
 	
 	/**
 	 * ランダム実行

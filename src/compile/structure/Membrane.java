@@ -98,7 +98,7 @@ public final class Membrane {
 	/**
 	 * この膜に含まれる全てのルールセットを表示する。
 	 */
-	public void showAllRuleset() {
+	public void showAllRulesets() {
 		Iterator it = rulesets.iterator();
 		while (it.hasNext()) {
 			Env.d( ((InterpretedRuleset)it.next()) );
@@ -110,12 +110,12 @@ public final class Membrane {
 		l = rules.listIterator();
 		while(l.hasNext()) {
 			RuleStructure rs = (RuleStructure)l.next();
-			rs.leftMem.showAllRuleset();
-			rs.rightMem.showAllRuleset();
+			rs.leftMem.showAllRulesets();
+			rs.rightMem.showAllRulesets();
 		} 
 		// 子膜それぞれ
 		l = mems.listIterator();
-		while(l.hasNext()) ((Membrane)l.next()).showAllRuleset();
+		while(l.hasNext()) ((Membrane)l.next()).showAllRulesets();
 	}
 	
 	/**

@@ -83,7 +83,7 @@ public class Dumper {
 			
 			// 起点にするアトムとその優先順位:
 			//  0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
-			//  1. 2引数演算子のアトム
+			//  1. 結合度が = 以下の2引数演算子のアトム
 			//  2. 通常のシンボル名でリンク先が最終引数の1引数アトム
 			//  3. 通常のシンボル名でリンク先が最終引数の2引数以上のアトム
 			//  4. リンク先が最終引数のconsアトム
@@ -97,7 +97,8 @@ public class Dumper {
 				if (a.getArity() == 0 || a.getLastArg().getAtom().getMem() != mem) {
 					predAtoms[0].add(a);
 				}
-				else if (a.getArity() == 2 && isInfixOperator(a.getName())) {
+				else if (a.getArity() == 2 && isInfixOperator(a.getName()) 
+				 && getBinopPrio(a.getName()) >= 700 ) {
 					predAtoms[1].add(a);
 				}
 				else if (a.getLastArg().isFuncRef()) {

@@ -80,7 +80,8 @@ public class Inline {
 		} catch (Exception e) {
 			//Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
-		Env.d("inline = "+inlineCode);
+		if (inlineCode != null) { Env.d("MyInlineCode Loaded"); }
+		else if (inlineCode == null) { Env.d("Failed in loading MyInlineCode"); }
 	}
 	
 	/**

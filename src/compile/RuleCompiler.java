@@ -88,7 +88,7 @@ public class RuleCompiler {
 		theRule.atomMatch = atomMatch;
 		theRule.body      = body;
 		
-		theRule.showDetail();
+		//theRule.showDetail();
 		return theRule;
 	}
 	
@@ -794,15 +794,15 @@ public class RuleCompiler {
 	private void showInstructions() {
 		Iterator it;
 		it = atomMatch.listIterator();
-		Env.d("--atomMatches :");
+		Env.d("--atomMatches:");
 		while(it.hasNext()) Env.d((Instruction)it.next());
 		
 		it = memMatch.listIterator();
-		Env.d("--memMatch :");
+		Env.d("--memMatch:");
 		while(it.hasNext()) Env.d((Instruction)it.next());
 		
 		it = body.listIterator();
-		Env.d("--body :");
+		Env.d("--body:");
 		while(it.hasNext()) Env.d((Instruction)it.next());
 	}
 }

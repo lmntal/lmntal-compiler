@@ -79,19 +79,22 @@ public final class InterpretedRuleset extends Ruleset {
 	public String toString() {
 		String ret = "@" + id;
 		if (Env.verbose >= Env.VERBOSE_EXPANDRULES) {
-			StringBuffer s = new StringBuffer("");
-			Iterator it = rules.iterator();
-			while (it.hasNext()) {
-				s.append(" ");
-				s.append((Rule)it.next());
-			}
-			ret += s;
+			ret += dumpRules();
 		}
 		return ret;
 	}
+	public String dumpRules() {
+		StringBuffer s = new StringBuffer("");
+		Iterator it = rules.iterator();
+		while (it.hasNext()) {
+			s.append(" ");
+			s.append((Rule)it.next());
+		}
+		return s.toString();
+	}
 
 	public void showDetail() {
-		Env.d("InterpretedRuleset.showDetail " + this);
+		Env.d("Compiled Ruleset @" + id + dumpRules());
 		Iterator l;
 		l = rules.listIterator();
 		while (l.hasNext()) {
@@ -161,7 +164,7 @@ class InterpretiveReactor {
 		Functor func;
 		while (pc < insts.size()) {
 			Instruction inst = (Instruction) insts.get(pc++);
-			Env.d("Do " + inst);
+			if (Env.debug >= Env.DEBUG_TRACE) Env.d("Do " + inst);
 			switch (inst.getKind()) {
 
 				//メモ：LOCALHOGEはHOGEと同じコードでいい。
@@ -578,7 +581,8 @@ class InterpretiveReactor {
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof IntegerFunctor)) return false;
 					break; //n-kato
 				case Instruction.ISFLOAT : //[atom]
-					break;
+					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof FloatingFunctor)) return false;
+					break; //n-kato
 				case Instruction.ISSTRING : //[atom]
 					break;
 				case Instruction.ISINTFUNC : //[func]

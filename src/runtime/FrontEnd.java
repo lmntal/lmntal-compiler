@@ -152,24 +152,24 @@ public class FrontEnd {
 			LMNParser lp = new LMNParser(src);
 				
 			compile.structure.Membrane m = lp.parse();
-			Env.d("");
-			Env.d( "After parse   : "+m );
-			
+			if (Env.debug >= Env.DEBUG_TRACE) {
+				Env.d("");
+				Env.d( "Parse Result: " + m.toStringWithoutBrace() );
+			}
 			compile.structure.Membrane root = RulesetCompiler.runStartWithNull(m);
 			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
-			Env.d( "After compile : "+ir );
+//			Env.d( "After compile : "+ir );
 			root.showAllRules();
 			
 			// ผยนิ
 			LMNtalRuntime rt = new LMNtalRuntime();
 			ir.react(rt.getGlobalRoot());
 			if (Env.fTrace) {
-				Env.d( "Before execute : " );
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}
 			rt.exec();
 			if (!Env.fTrace && Env.verbose > 0) {
-				Env.d( "After execute : " );
+				Env.d( "Execution Result:" );
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}
 		} catch (Exception e) {
