@@ -1,0 +1,30 @@
+% 完全二分木でないヒープを使っているので、-sオプションをつけないと挿入ソートになる。
+% -sオブションをつければ完全二分木に近づくので、ヒープソートっぽくなる。
+
+ret=sort(gen(100)).
+
+R=gen(N) :- N > 0 | R=[integer.rnd(100)|gen(N-1)].
+R=gen(N) :- N = 0 | R=[].
+
+R=sort([D|L]), heap({$p,@p}) :- int(D) | R=sort(L), heap({insert(D),$p,@p}).
+R=sort([]   ), heap({$p,@p}) :- R=sort2, heap({$p,@p}).
+R=sort2,       heap({$p,@p}) :- R=[remove({$p,@p})|sort2].
+R=[remove({root(nil),@p}/)|sort2] :- R=[].
+
+% 以下ヒープもどき
+
+R=remove({root(c(C1,C2,VT)), c(nil,nil,VL,P), $p[C1,C2,P|*X], @p}/)
+	:- int(VT), int(VL) | R=VT, heap({root(c(C1,C2,VL)), P=nil, $p[C1,C2,P|*X], @p}).
+R=remove({root(c(nil,nil,VT)), @p}/)
+	:- int(VT), | R=VT, heap({root(nil), @p}).
+
+heap({
+% c(Child1, Child2, Value, Parent)
+root(nil).
+c(C1,c(C2,C3,V2),V1,P) :- V2 < V1 | c(C1,c(C2,C3,V1),V2,P).
+c(c(C2,C3,V2),C1,V1,P) :- V2 < V1 | c(c(C2,C3,V1),C1,V2,P).
+
+insert(V), root(nil) :- root(c(nil, nil, V)).
+insert(V), c(nil, C2, V1, P) :- c( c(nil, nil, V), C2, V1, P).
+insert(V), c(C1, nil, V1, P) :- c( C1, c(nil, nil, V), V1, P).
+}).
