@@ -417,7 +417,7 @@ public class RuleCompiler {
 	}
 	private void freeLHSAtoms() {
 		for (int i = 0; i < lhsatoms.size(); i++) {
-			body.add( new Instruction(Instruction.FREEATOM, i+1) );
+			body.add( new Instruction(Instruction.FREEATOM, lhsfreemems.size() + i ));
 		}
 	}
 
