@@ -1,0 +1,50 @@
+/*
+NAME
+	LMNtal Window Toolkit(lwt) module
+
+SYNOPSIS
+
+	r=lwt.newFrame({width=300,height=400,show}), sys.perpetual(on)
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/07/23(Fri)
+
+*/
+
+{
+module(lwt).
+
+/**
+ * new
+ */
+r=lwt.newFrame({$p}) :- r=lwt.frame({$p}, java.new("javax.swing.JFrame")).
+
+/**
+ * width height
+ */
+r=lwt.frame({width=W, height=H, $p}, O) :- unary(O), unary(W), unary(H) |
+	r=lwt.frame({$p}, O), nil=java.invoke(O, "setSize", [W, H]).
+
+/**
+ * show
+ */
+r=lwt.frame({show, $p}, O) :- unary(O) |
+	r=lwt.frame({$p}, O), nil=java.invoke(O, "show").
+
+/**
+ * exitOnClose
+ */
+r=lwt.frame({exitOnClose, $p}, O) :- unary(O) |
+	r=lwt.frame({$p}, O), [[/*inline*/
+	javax.swing.JFrame f = (javax.swing.JFrame)((ObjectFunctor)me.nthAtom(0).getFunctor()).getValue();
+	f.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+	me.setName("nil");
+	]](O).
+
+
+
+
+}
