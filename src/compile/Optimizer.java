@@ -43,7 +43,8 @@ public class Optimizer {
 				}
 			}
 			if (Env.optimize >= 7) {
-				makeLoop(head, body);
+				//ガード付きのルールに対応していないので、無効化
+//				makeLoop(head, body);
 			}
 		}
 	}
