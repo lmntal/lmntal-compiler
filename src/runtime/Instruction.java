@@ -717,12 +717,13 @@ public class Instruction {
 	// 制御命令 (200--209)
 	//  -----  react       [ruleref, [memargs...], [atomargs...]]
 	//  -----  inlinereact [ruleref, [memargs...], [atomargs...]]
-	//  -----  spec        [memformals,atomformals,memlocals,atomlocals,linklocals,funclocals]
+	//  -----  spec        [formals,locals]
 	//  -----  proceed
 	//  -----  stop 
 	//  -----  branch      [[instructions...]]
 	//  -----  loop        [[instructions...]]
 	//  -----  run         [[instructions...]]
+	//  -----  not         [[instructions...]]
 
     /** react [ruleref, [memargs...], [atomargs...]]
      * <br>失敗しないガード命令<br>
@@ -736,47 +737,58 @@ public class Instruction {
      * <p>トレース用。*/
 	public static final int INLINEREACT = 201;
 
-    /** <strike>spec [formals, locals]</strike>
-     *  spec [memformals,atomformals,memlocals,atomlocals,linklocals,funclocals]
+    /** spec [formals, locals]
+     * <br><strike>
+     * spec [memformals,atomformals,memlocals,atomlocals,linklocals,funclocals]</strike>
      * <br>無視される<br>
      * 仮引数と局所変数の個数を宣言する。*/
     public static final int SPEC = 203;
 
 	/** proceed
-	 * <br>制御命令<br>
-	 * ルールの適用が終わり、再利用された全ての膜のロックを解放したことを表す。
-	 * <p><b>注意</b>　Ruby版では、リスト終端によって表現していたが、
-	 * 今回は atommatches を単一の命令列にしたため、明示化しなければならなくなった。*/
+	 * <br>ボディ命令<br>
+	 * このproceed命令が所属する命令列の実行が成功したことを表す。
+	 * <p>トップレベル命令列で使用された場合、ルールの適用が終わり、
+	 * 再利用された全ての膜のロックを解放し、生成した全ての膜を活性化したことを表す。
+	 * <p><b>注意</b>　proceedなしで命令列の終端まで進んだ場合、
+	 * その命令列の実行は失敗したものとする仕様が採用された。*/
 	public static final int PROCEED = 204;
 
 	/** stop 
 	 * <br>（予約された）失敗しないガード命令<br>
-	 * 否定条件にマッチしたことを表す。
-	 * 命令列の最後とは異なるらしい。
-	 * 最後→Ruleset#reactはreturnするが、
-	 * stop→Ruleset#reactはreturnしない。
+	 * proceedと同じ。マッチングとボディの命令が統合されたことに伴って廃止される予定。
+	 * <p>典型的には、否定条件にマッチしたことを表すために使用される。
 	 */
 	public static final int STOP = 205;
 
     /** branch [[instructions...]]
      * <br>構造化命令<br>
      * 引数の命令列を実行することを表す。
-     * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、
-     * 典型的にはこのbranchの次の命令に進む。
-     * 引数列中の PROCEED 命令を実行した場合、ここで終了する。*/
+     * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、次の命令に進む。
+     * 引数実行中にproceed命令を実行した場合、ここで終了する。*/
     public static final int BRANCH = 206;
 
 	/** loop [[instructions...]]
 	 * <br>構造化命令<br>
 	 * 引数の命令列を実行することを表す。
-	 * 引数列を最後まで実行した場合、このloop命令の実行を繰り返す。*/
+     * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、次の命令に進む。
+     * 引数実行中にproceed命令を実行した場合、このloop命令の実行を繰り返す。*/
 	public static final int LOOP = 207;
 
 	/** run [[instructions...]]
 	 * <br>（予約された）構造化命令<br>
-	 * 引数の命令列を実行することを表す。
-	 * 引数列で失敗しても次の命令に移る？ */
+	 * 引数の命令列を実行することを表す。引数列はロックを取得してはならない。
+	 * 引数実行中に失敗した場合、次の命令に進む。
+	 * 引数実行中にproceed命令を実行した場合、次の命令に進む。
+	 * <p>将来、明示的な引数付きのプロセス文脈のコンパイルに使用するために予約。*/
 	public static final int RUN = 208;
+
+	/** not [[instructions...]]
+	 * <br>（予約された）構造化命令<br>
+	 * 引数の命令列を実行することを表す。引数列はロックを取得してはならない。
+	 * 引数実行中に失敗した場合、次の命令に進む。
+	 * 引数実行中にproceed命令を実行した場合、この命令が失敗する。
+	 * <p>将来、否定条件のコンパイルに使用するために予約。*/
+	public static final int NOT = 209;
 
 	// 組み込み機能に関する命令（仮） (210--219)
 	//  -----  inline  [[links...] text]
