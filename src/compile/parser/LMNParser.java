@@ -908,7 +908,7 @@ public class LMNParser {
 		}
 	}
 	
-	/** アトム展開後のプロセス構造（子ルール外）のアトム引数に出現する型付きプロセス文脈を展開する。
+	/** アトム展開後のプロセス構造（子ルール外）のアトム引数に出現する<strike>型付き</strike>プロセス文脈を展開する。
 	 * @param typedNames 型付きプロセス文脈の限定名 "$p" (String) をキーとする写像
 	 * <pre> p(s1,$p,sn) → p(s1,X,sn), $p[X]
 	 * </pre> */
@@ -923,7 +923,7 @@ public class LMNParser {
 					if (subobj instanceof SrcProcessContext) {
 						SrcProcessContext srcProcessContext = (SrcProcessContext)subobj;
 						String name = srcProcessContext.getQualifiedName();
-						if (typedNames.containsKey(name)) {							
+						if (true || typedNames.containsKey(name)) {							
 							String newlinkname = generateNewLinkName();
 							sAtom.getProcess().set(i, new SrcLink(newlinkname));
 							it.add(srcProcessContext);

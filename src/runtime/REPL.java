@@ -46,11 +46,12 @@ public class REPL {
 		System.out.println("");
 		System.out.println("Type h to see help.");
 		System.out.println("Type q to quit.");
+		System.out.println("Enter an empty line to run the input.");
 		System.out.println("");
 		StringBuffer lb = new StringBuffer();
 		while (true) {
 			try {
-				line = Readline.readline("# ");
+				line = Readline.readline( lb.length() == 0 ? "# " : "  " );
 				if (line == null) {
 					//System.out.println("no input");
 					processLine(lb.toString());
