@@ -16,7 +16,7 @@ import java.util.Set;
 
 //TODO 終了するようにする
 
-public class DaemonThreadTest2 {
+public class LMNtalDaemonTest {
 	public static void main(String args[]) {
 		Thread t1 = new Thread(new LMNtalDaemon(60000));
 		t1.start();
@@ -38,14 +38,14 @@ class GlobalConstants {
  * @author nakajima
  *
  */
-class DaemonHontai2 implements Runnable {
+class LMNtalDaemon implements Runnable {
 
 	ServerSocket servSocket = null;
 	static HashMap nodeTable = new HashMap();
 	static HashMap registedRuntimeTable = new HashMap();
 	static HashMap msgTable = new HashMap();
 
-	public DaemonHontai2() {
+	public LMNtalDaemon() {
 		try {
 			servSocket = new ServerSocket(GlobalConstants.LMNTAL_DAEMON_PORT);
 
@@ -55,7 +55,7 @@ class DaemonHontai2 implements Runnable {
 		}
 	}
 
-	public DaemonHontai2(int portnum) {
+	public LMNtalDaemon(int portnum) {
 		try {
 			servSocket = new ServerSocket(portnum);
 		} catch (Exception e) {
@@ -65,6 +65,8 @@ class DaemonHontai2 implements Runnable {
 	}
 
 	public void run() {
+		System.out.println("LMNtalDaemon.run()");
+		
 		Socket tmpSocket;
 		BufferedReader tmpInStream;
 		BufferedWriter tmpOutStream;
@@ -72,6 +74,7 @@ class DaemonHontai2 implements Runnable {
 		while (true) {
 			try {
 				tmpSocket = servSocket.accept();
+				System.out.println("accepted socket: " + tmpSocket);
 
 				//入力stream			
 				tmpInStream =
@@ -268,6 +271,10 @@ class LMNtalNode {
 	InetAddress getInetAddress(){
 		return ip;
 	}
+	
+	public String toString(){
+		return "LMNtalNode[IP:" + ip + ", " + in.toString() + ", " + out.toString() + "]";
+	}
 }
 
 class LMNtalDaemonThread2 implements Runnable {
@@ -418,7 +425,6 @@ class TmpRuntime implements Runnable {
 			
 			//hashmapの中身を吐く
 			LMNtalDaemon.dumpHashMap();
-
 		} catch (Exception e) {
 			System.out.println("ERROR in TmpRuntime.run()" + e.toString());
 		}
