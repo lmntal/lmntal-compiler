@@ -238,7 +238,7 @@ class InterpretiveReactor {
 							return true;
 						mem.unlock();						
 					}
-					break; //n-kato
+					return false; //n-kato
 
 				case Instruction.GETMEM : //[-dstmem, srcatom]
 					mems[inst.getIntArg1()] = atoms[inst.getIntArg2()].mem;
