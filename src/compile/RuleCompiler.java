@@ -44,7 +44,7 @@ public class RuleCompiler {
 	 */
 	public Rule theRule;
 	
-	public List atommatches = new ArrayList();
+	public List atommatches;
 	public List memmatch = new ArrayList();
 	public List body;
 	public int varcount;
@@ -120,32 +120,44 @@ public class RuleCompiler {
 	 */
 	private void compile_l() {
 		Env.c("compile_l");
+		
+		atommatches = new ArrayList();
 		for(int firstid=0; firstid<=hc.atoms.size(); firstid++) {
 			// 初期化。
 			hc.prepare();
 			
 			if(firstid < hc.atoms.size()) {
-				atommatches.addAll(hc.match);
+				// アトム主導
+				/*
+				atommatches.add(hc.match);
 				hc.atomidpath.set(firstid, new Integer(1));
 				hc.varcount = 1;
 				Membrane mem = ((Atom)(hc.atoms.get(firstid))).mem;
 				hc.match.add( Instruction.dummy("[:execlevel, mem.memlevel]") );
 				hc.match.add( Instruction.dummy("[:func,1,@lhscmp.atoms[firstid].func") );
 				
-				hc.mempaths.put(mem, "[:memof,1]");
+				{
+					List l = new LinkedList();
+					l.add("memof");
+					l.add(new Integer(1));
+					hc.mempaths.put(mem, l);
+				}
 				// 親膜をたどる
 				while(mem.mem != null) {
 					List l = ((List)(hc.mempaths.get(mem)));
-					List ll = new ArrayList();
-					for(ListIterator li=l.listIterator();li.hasNext();) {
-						ll.add(li.next());
-					}
+					List ll = new LinkedList();
+					
+					Iterator li=l.iterator();
+					while(li.hasNext()) ll.add(li.next());
+					
 					ll.add(0, ":memof");
 					hc.mempaths.put(mem.mem, ll);
 					mem = mem.mem;
 				}
+				*/
 				hc.compile_group(firstid);
 			} else {
+				// 膜主導
 				memmatch = hc.match;
 				hc.varcount = 0;
 				List tmp = new ArrayList();
@@ -170,7 +182,7 @@ public class RuleCompiler {
 		lhsatomids = hc.atomids;
 		varcount = lhsatoms.size() + lhsfreemems.size();
 		body = new ArrayList();
-		body.add( Instruction.dummy("[:spec,"+varcount) );
+		int formals = varcount;
 		
 		genlhsmempaths();
 		rhsatoms = new ArrayList();
@@ -187,8 +199,7 @@ public class RuleCompiler {
 		build_rhsatoms(rs.rightMem);
 		free_lhsmem(rs.leftMem);
 		
-		// spec の引数を追加している。命令クラスの仕様にのっとって書く。
-		//body.first.push @varcount
+		body.add(0, Instruction.spec(formals, varcount));
 		update_links();
 	}
 	
@@ -268,6 +279,7 @@ public class RuleCompiler {
 			body.add( Instruction.dummy("[:getparent, @varcount, @lhsmempaths[mem]]") );
 			mem = mem.mem;
 		}
+		Env.p("lhsmempaths"+lhsmempaths);
 	}
 	
 	private void optimize() {
@@ -298,7 +310,7 @@ public class RuleCompiler {
 	}
 	
 	private void build_rhsmem(Membrane mem) {
-		Env.c("RuleCompiler::build_rhsmem");
+		Env.c("RuleCompiler::build_rhsmem"+mem);
 		Iterator l;
 		
 		l=mem.mems.iterator();
@@ -306,7 +318,7 @@ public class RuleCompiler {
 			Membrane m = (Membrane)(l.next());
 			
 			rhsmempaths.put(m, new Integer(++varcount));
-			body.add( Instruction.dummy("[:newmem"+varcount+", "+rhsmempaths.get(m)) );
+			body.add( Instruction.newmem(varcount, ((Integer)rhsmempaths.get(mem)).intValue()) );
 			build_rhsmem(m); //inside must be enqueued first
 		}
 		l=mem.processContexts.iterator();
@@ -375,7 +387,7 @@ public class RuleCompiler {
 			} else {
 				rhsatompath.put(atom, new Integer(++varcount));
 				rhsatoms.add(atom);
-				body.add( Instruction.dummy("[:newatom, "+varcount+", "+rhsmempaths.get(mem)+", "+atom.functor) );
+				body.add( Instruction.newatom(varcount, ((Integer)rhsmempaths.get(mem)).intValue(), atom.functor) );
 			}
 		}
 	}
@@ -396,9 +408,9 @@ public class RuleCompiler {
 		while(l.hasNext()) {
 			Atom atom = (Atom)(l.next());
 			
-			for(int pos=1; pos <= atom.functor.getArity(); pos++) {
+			for(int pos=0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos];
-				if(link.atom.mem.mems.get(0).equals(rs.leftMem)) {
+				if(link.atom.mem.equals(rs.leftMem)) {
 					body.add( Instruction.dummy("[:relink, "+rhsatompath.get(atom)+", "+pos+", "
 						+lhsatomidpath.get(lhsatomids.get(link.atom))+", "+link.pos) );
 				} else {

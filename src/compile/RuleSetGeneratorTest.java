@@ -20,13 +20,25 @@ import compile.structure.*;
  *
  */
 public class RuleSetGeneratorTest {
+	
 	/**
 	 * テスト用めいん
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String src = "v, {}, ( {}, v :- w)";
+		//test("v");
+		//test("v,v,w");
+		//test("{}");
+		//test("{v}");
+		test("a(X), b(X)");
+	}
+	
+	/**
+	 * テストする
+	 * @param src
+	 */
+	public static void test(String src) {
 		try {
 			// thnx to 永田書記長
 			LMNParser lp = new LMNParser(new StringReader(src));

@@ -25,7 +25,7 @@ public final class Env {
 	 * @param o method name
 	 */
 	public static void c(Object o) {
-		p(">>> "+o);
+		//p(">>> "+o);
 	}
 	/**
 	 * Debug output when new some object: write at constructor.

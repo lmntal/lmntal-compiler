@@ -34,7 +34,10 @@ public final class Rule {
 		Iterator l;
 		l = atomMatches.listIterator();
 		Env.p("--atommatches :");
-		while(l.hasNext()) Env.p((Instruction)l.next());
+		while(l.hasNext()) {
+			Iterator ll = ((List)l.next()).iterator();
+			Env.p((Instruction)ll.next());
+		} 
 		
 		l = memMatch.listIterator();
 		Env.p("--memmatch :");

@@ -34,14 +34,14 @@ public class Instruction {
      */
     public static final int GETMEM = 1;
 
-    /** getparent [-dstmem, srcmem]
+	/** getparent [-dstmem, srcmem]
      * <br>失敗しないガード命令、ボディ命令<br>
      * 膜srcmemの親膜への参照を取得する。
      * <p>自由リンク管理アトムがあるので不要？→そうでもないらしい
      */
     public static final int GETPARENT = 2;
 
-    /** anymem [-dstmem, srcmem] 
+	/** anymem [-dstmem, srcmem] 
      * <br>ガード命令<br>
      * 膜srcmemの子膜のうちまだロックを取得していない膜に対して次々に、ノンブロッキングでのロック取得を試みる。
      * ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
@@ -69,10 +69,10 @@ public class Instruction {
      */
     public static final int NORULES = 6;
 
-    /** natoms [srcmem, count]
-     * <br>ガード命令<br>
-     * 膜srcmemの自由リンクアトム以外のアトム数がcountであることを確認する
-     */
+	/** natoms [srcmem, count]
+	 * <br>ガード命令<br>
+	 * 膜srcmemの自由リンクアトム以外のアトム数がcountであることを確認する
+	 */
     public static final int NATOMS = 8;
 
     /** nfreelinks [srcmem, count]
@@ -233,14 +233,24 @@ public class Instruction {
      */
     public static final int STOP = 32;
 
-    /** react [ruleid, args...]
-     * アトムsrcatomの名前がfuncであることを確認する。 
-     */
-    public static final int REACT = 33;
+	/** react [ruleid, args...]
+	 * アトムsrcatomの名前がfuncであることを確認する。 
+	 */
+	public static final int REACT = 33;
 
     /* control instructions */
     ///** [inline, text]*/
     //    public static final int INLINE = 34;
+	
+	/** spec [formals, locals]
+	 * declare the number of formals and locals 
+	 */
+	public static final int SPEC = 35;
+	
+	/**
+	 * 命令の数。新命令はこれより小さな数字にすること。
+	 */
+	private static final int END_OF_INSTRUCTION = 100;
 	
     /**
      * 引数を追加する。マクロの役割。
@@ -255,32 +265,32 @@ public class Instruction {
     private void add(int n) { data.add(new Integer(n)); }
 	
     /**
-     * ダミー命令を生成する.
+     * ダミー命令を生成する。
      * さしあたって生成メソッドがまだできてない命令はこれを使う
      * @param s 説明用の文字列
      */
     public static Instruction dummy(String s) {
-	Instruction i = new Instruction(-1);
-	i.add(s);
-	return i;
+		Instruction i = new Instruction(-1);
+		i.add(s);
+		return i;
     }
 	
     /**
-     * react 命令を生成する
+     * react 命令を生成する。
      * 
      * @param r 反応できるルールオブジェクト
      * @param actual 引数
      * @return
      */
     public static Instruction react(Rule r, List actual) {
-	Instruction i = new Instruction(REACT);
-	i.add(r);
-	i.add(actual);
-	return i;
+		Instruction i = new Instruction(REACT);
+		i.add(r);
+		i.add(actual);
+		return i;
     }
 	
     /**
-     * findatom 命令を生成する
+     * findatom 命令を生成する。
      * 
      * @param dstatom
      * @param srcmem
@@ -288,33 +298,78 @@ public class Instruction {
      * @return Instruction
      */
     public static Instruction findatom(int dstatom, List srcmem, Functor func) {
-	Instruction i = new Instruction(FINDATOM);
-	i.add(dstatom);
-	i.add(srcmem);
-	i.add(func);
-	return i;
+		Instruction i = new Instruction(FINDATOM);
+		i.add(dstatom);
+		i.add(srcmem);
+		i.add(func);
+		return i;
     }
 	
     /**
-     * anymem 命令を生成する
+     * anymem 命令を生成する。
      * 
      * @param dstmem
      * @param srcmem
      * @return
      */
     public static Instruction anymem(int dstmem, int srcmem) {
-	Instruction i = new Instruction(ANYMEM);
-	i.add(dstmem);
-	i.add(srcmem);
-	return i;
+		Instruction i = new Instruction(ANYMEM);
+		i.add(dstmem);
+		i.add(srcmem);
+		return i;
     }
 	
 	
+	/**
+	 * newatom 命令を生成する。
+	 * 
+	 * @param dstatom
+	 * @param srcmem
+	 * @param func
+	 * @return
+	 */
+	public static Instruction newatom(int dstatom, int srcmem, Functor func) {
+		Instruction i = new Instruction(NEWATOM);
+		i.add(dstatom);
+		i.add(srcmem);
+		i.add(func);
+		return i;
+	}
+	
+	/**
+	 * spec 命令を生成する。
+	 * @param formals
+	 * @param locals
+	 * @return
+	 */
+	public static Instruction spec(int formals, int locals) {
+		Instruction i = new Instruction(SPEC);
+		i.add(formals);
+		i.add(locals);
+		return i;
+	}
+	
+	/**
+	 * newmem 命令を生成する。
+	 * @param ret
+	 * @param mem
+	 * @return
+	 */
+	public static Instruction newmem(int ret, int mem) {
+		Instruction i = new Instruction(NEWMEM);
+		i.add(ret);
+		i.add(mem);
+		return i;
+	}
 	
 	
 	
 	
-    //引数無しだと初期容量は10(by api仕様書)
+	
+    /**
+     * 命令の引数を保持する。
+     * 命令によって引数の型が決まっている。
+     */
     public List data = new ArrayList();
 	
     /**
@@ -398,6 +453,7 @@ public class Instruction {
 	table.put("NOT", new Integer(NOT));
 	table.put("STOP", new Integer(STOP));
 	table.put("REACT", new Integer(REACT));
+	table.put("SPEC", new Integer(SPEC));
 
 	try {
 	    answer = ((Integer)table.get(instructionString.toUpperCase())).intValue();
@@ -421,8 +477,8 @@ public class Instruction {
     public static String getInstructionString(int instrcutionNum){
 	String answer = "";
 
-	int maxNum = REACT+1; //命令の種類の数
-	String[] hoge = new String[maxNum];
+	//命令の種類の数
+	String[] hoge = new String[END_OF_INSTRUCTION];
 	hoge[DEREF] = new String("DEREF");
 	hoge[GETMEM] = new String("GETMEM");
 	hoge[GETPARENT] = new String("GETPARENT");
@@ -453,6 +509,7 @@ public class Instruction {
 	hoge[NOT] = new String("NOT");
 	hoge[STOP] = new String("STOP");
 	hoge[REACT] = new String("REACT");
+	hoge[SPEC] = new String("SPEC");
 
 	try {
 	    answer = hoge[instrcutionNum];
