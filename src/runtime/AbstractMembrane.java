@@ -434,7 +434,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public void moveCellsFrom(AbstractMembrane srcMem) {
 		if (this == srcMem) return;
 		if (srcMem.task.getMachine() != task.getMachine()) {
-			throw new RuntimeException("cross-site process fusion not implemented");
+			throw new RuntimeException("cross-site process fusion not implemented"); //TODO ¼ÂÁõ
 		}
 		mems.addAll(srcMem.mems);
 		Iterator it = srcMem.atomIterator();
