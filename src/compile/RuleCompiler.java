@@ -53,7 +53,7 @@ public class RuleCompiler {
 	public Map  lhsatompath;
 	public Map  lhsmempath;
 	
-	private List newatoms = new ArrayList();
+//	private List newatoms = new ArrayList();	// rhsatomsと同じなので統合
 	
 	HeadCompiler hc;
 	
@@ -115,13 +115,13 @@ public class RuleCompiler {
 		
 		atomMatch = new ArrayList();
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
-			hc.prepare(); // 変数番号を初期化
-			
-			if (firstid < hc.atoms.size()) {
+			hc.prepare(); // 変数番号を初期化			
+			if (firstid < hc.atoms.size()) {			
+				if (true) continue; // 臨時
 				// アトム主導
-				List brancharg = new ArrayList();
-				brancharg.add(hc.match);
-				atomMatch.add(new Instruction(Instruction.BRANCH, brancharg));
+				List singletonListArgToBranch = new ArrayList();
+				singletonListArgToBranch.add(hc.match);
+				atomMatch.add(new Instruction(Instruction.BRANCH, singletonListArgToBranch));
 				hc.mempath.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 				hc.atomidpath.set(firstid, new Integer(1));	// 主導するアトムの変数番号は 1
 				hc.varcount = 2;
@@ -180,10 +180,13 @@ public class RuleCompiler {
 		//Env.p("rhsmempaths -> "+rhsmempaths);
 		
 		removeLHSAtoms();
-		removeLHSMem(rs.leftMem);
-		body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
+		if (removeLHSMem(rs.leftMem) >= 2) {
+			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
+		}
 		buildRHSMem(rs.rightMem);
-		body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
+		if (!rs.rightMem.processContexts.isEmpty()) {
+			body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
+		}
 		copyRules(rs.rightMem);
 		loadRulesets(rs.rightMem);		
 		buildRHSAtoms(rs.rightMem);
@@ -264,30 +267,41 @@ public class RuleCompiler {
 			body.add( new Instruction(Instruction.REMOVEATOM, i+1) );
 		}
 	}
-	/** 膜を子膜側から再帰的に除去する */
-	private void removeLHSMem(Membrane mem) {
+	/** 左辺の膜を子膜側から再帰的に除去する。
+	 * @return 膜memの内部に出現したプロセス文脈の個数 */
+	private int removeLHSMem(Membrane mem) {
 		Env.c("RuleCompiler::removeLHSMem");
+		int procvarcount = mem.processContexts.size();
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
-			removeLHSMem(submem);
+			int subcount = removeLHSMem(submem);
 			body.add(new Instruction(Instruction.REMOVEMEM, lhsmemToPath(submem)));
-			body.add(new Instruction(Instruction.REMOVEPROXIES, lhsmemToPath(submem)));
+			if (subcount > 0) {
+				body.add(new Instruction(Instruction.REMOVEPROXIES, lhsmemToPath(submem)));
+			}
+			procvarcount += subcount;
 		}
+		return procvarcount;
 	}	
 
-	/** 膜の階層構造およびプロセス文脈の内容を親膜側から再帰的に生成する */
-	private void buildRHSMem(Membrane mem) {
+	/** 膜の階層構造およびプロセス文脈の内容を親膜側から再帰的に生成する。
+	 * @return */
+	private int buildRHSMem(Membrane mem) {
 		Env.p("RuleCompiler::buildRHSMem" + mem);
+		int procvarcount = mem.processContexts.size();
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
 			int submempath = varcount++;
 			rhsmempath.put(submem, new Integer(submempath));
-			body.add( Instruction.newmem(submempath, rhsmemToPath(mem)));
-			buildRHSMem(submem);
-			body.add(new Instruction(Instruction.INSERTPROXIES,
-				rhsmemToPath(mem), rhsmemToPath(submem)));
+			body.add( Instruction.newmem(submempath, rhsmemToPath(mem)) );
+			int subcount = buildRHSMem(submem);
+			if (subcount > 0) {
+				body.add(new Instruction(Instruction.INSERTPROXIES,
+					rhsmemToPath(mem), rhsmemToPath(submem)));
+			}
+			procvarcount += subcount;
 		}
 		it = mem.processContexts.iterator();
 		while (it.hasNext()) {
@@ -297,7 +311,7 @@ public class RuleCompiler {
 					rhsmemToPath(mem), lhsmemToPath(pc.lhsMem) ));
 			}
 		}
-		//Env.p("rhsmempaths -> "+rhsmempaths);
+		return procvarcount;
 	}
 	
 	/** 右辺の膜内のルール文脈の内容を生成する */
@@ -347,9 +361,9 @@ public class RuleCompiler {
 				int atomid = varcount++;
 				rhsatompath.put(atom, new Integer(atomid));
 				rhsatoms.add(atom);
-				// NEWATOM した分を覚えておく
-				newatoms.add(atom);
-				body.add(Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
+//				// NEWATOM した分を覚えておく
+//				newatoms.add(atom);
+				body.add( Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
 			}
 		}
 	}
@@ -377,7 +391,19 @@ public class RuleCompiler {
 			}
 		}
 	}
-
+	/**
+	 * インライン命令を生成する。
+	 */
+	private void addInline() {
+		Iterator it = rhsatoms.iterator();
+		while(it.hasNext()) {
+			Atom atom = (Atom)it.next();
+			int atomID = rhsatomToPath(atom);
+			int codeID = Inline.getCodeID(atom.functor.getName());
+			if(codeID==-1) continue;
+			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
+		}
+	}
 	/** 左辺の膜を除去する */
 	private void freeLHSMem(Membrane mem) {
 		Env.c("RuleCompiler::freeLHSMem");
@@ -392,21 +418,6 @@ public class RuleCompiler {
 	private void freeLHSAtoms() {
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			body.add( new Instruction(Instruction.FREEATOM, i+1) );
-		}
-	}
-	
-	/**
-	 * インライン命令を生成する。
-	 *
-	 */
-	private void addInline() {
-		Iterator i = newatoms.iterator();
-		while(i.hasNext()) {
-			Atom atom = (Atom)i.next();
-			int atomID = ((Integer)rhsatompath.get(atom)).intValue();
-			int codeID = Inline.getCodeID(atom.functor.getName());
-			if(codeID==-1) continue;
-			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
 		}
 	}
 
