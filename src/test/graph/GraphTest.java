@@ -27,7 +27,7 @@ public class GraphTest extends JFrame {
 		}
 		setTitle("GraphTest");
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(p, BorderLayout.CENTER);
+		getContentPane().add(new JScrollPane(p), BorderLayout.CENTER);
 	}
 	
 	public static void main(String[] args) {

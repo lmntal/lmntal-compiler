@@ -10,6 +10,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Dimension;
 
 public class GraphNode {
 	
@@ -29,7 +30,7 @@ public class GraphNode {
 	protected int dx = 0;
 	protected int dy = 0;
 	
-	protected Rectangle area = null;
+	protected Dimension size = new Dimension(16,16);
 	
 	/**
 	 * 現在位置、ラベル、移動範囲を指定して初期化します
@@ -37,9 +38,8 @@ public class GraphNode {
 	 * @param pos 初期位置
 	 * @param area 移動可能範囲
 	 */
-	public GraphNode(String label, Point pos, Rectangle area) {
+	public GraphNode(String label, Point pos) {
 		this.label = label;
-		this.area = area;
 		this.pos = pos;
 	}
 	
@@ -56,7 +56,7 @@ public class GraphNode {
 		return this.pos;
 	}
 	
-	public void move() {
+	public void move(Rectangle area) {
 		if (isFixed()) return;
 		this.pos.x += Math.max(-5, Math.min(5, this.dx));
 		this.pos.y += Math.max(-5, Math.min(5, this.dy));
@@ -78,12 +78,12 @@ public class GraphNode {
 	
 	public void paint(Graphics g) {
 		FontMetrics fm = g.getFontMetrics();
-		int w = fm.stringWidth(label) + 10;
-		int h = fm.getHeight() + 4;
-		g.setColor(new Color(128,200,255));
-		g.fillRect(pos.x - w/2, pos.y - h / 2, w, h);
+		int w = fm.stringWidth(label);
+		int h = fm.getHeight();
+		g.setColor(new Color(64,128,255));
+		g.fillOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
 		g.setColor(Color.black);
-		g.drawRect(pos.x - w/2, pos.y - h / 2, w-1, h-1);
-		g.drawString(this.label, pos.x - (w-10)/2, (pos.y - (h-4)/2) + fm.getAscent());
+		g.drawOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
+		g.drawString(this.label, pos.x - (w-10)/2, (pos.y - (h-4)/2) + fm.getAscent()+size.height);
 	}
 }

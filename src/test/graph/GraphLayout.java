@@ -7,6 +7,7 @@ package test.graph;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.Vector;
 
 public class GraphLayout implements Runnable {
@@ -16,6 +17,7 @@ public class GraphLayout implements Runnable {
 	private Thread th = null;
 	private static final int DELAY = 100;
 	private Component parent = null;
+	private Rectangle area = new Rectangle(25,25,400,400);
 	
 	public GraphLayout(Component parent) {
 		this.parent = parent;
@@ -35,6 +37,10 @@ public class GraphLayout implements Runnable {
 	
 	public void removeAllEdges() {
 		edges.removeAllElements();
+	}
+	
+	public Rectangle getPreferredArea() {
+		return this.area;
 	}
 	
 	public void start() {
@@ -109,7 +115,7 @@ public class GraphLayout implements Runnable {
 		// 移動する
 		for (int i=0;i<nodes.size();i++) {
 			GraphNode node = (GraphNode)nodes.get(i);
-			node.move();
+			node.move(area);
 		}
 	}
 

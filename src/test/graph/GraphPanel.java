@@ -1,8 +1,10 @@
 package test.graph;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Rectangle;
 
 import javax.swing.*;
 
@@ -59,5 +61,13 @@ public class GraphPanel extends JPanel implements Runnable {
 			gLayout.paint(OSG);
 			g.drawImage(OSI,0,0,this);
 		}
+	}
+	
+	public Rectangle getPreferredArea() {
+		return gLayout.getPreferredArea();
+	}
+	
+	public Dimension getPreferredSize() {
+		return getPreferredArea().getSize(); 	
 	}
 }

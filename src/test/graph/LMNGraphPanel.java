@@ -21,10 +21,6 @@ public class LMNGraphPanel extends GraphPanel {
 		setMembrane(mem);
 	}
 	
-	public Dimension getPreferredSize() {
-		return new Dimension(400,300);
-	}
-	
 	public void setMembrane(Membrane mem) {
 		GraphLayout layout = getGraphLayout();
 		layout.removeAllNodes();
@@ -36,12 +32,11 @@ public class LMNGraphPanel extends GraphPanel {
 		Hashtable table_atom = new Hashtable();
 		Hashtable table_link = new Hashtable();
 		
-		Rectangle area = new Rectangle(0,0, 600, 400);
 		// atom
 		for (int i=0; i<mem.atoms.size();i++) {
 			Atom atom = (Atom)mem.atoms.get(i);
-			Point p = new Point((int)(Math.random()*area.getWidth()), (int)(Math.random()*area.getHeight()));
-			GraphNode node = new GraphNode(atom.functor.getName() , p, area);
+			Point p = new Point((int)(Math.random()*getPreferredArea().getWidth()), (int)(Math.random()*getPreferredArea().getHeight()));
+			GraphNode node = new GraphNode(atom.functor.getName() , p);
 			getGraphLayout().addNode(node);
 			for (int j=0;j<atom.args.length;j++) {
 				LinkOccurrence link = atom.args[j];
@@ -56,8 +51,8 @@ public class LMNGraphPanel extends GraphPanel {
 		// child mem
 		for (int i=0; i<mem.mems.size();i++) {
 			Membrane child = (Membrane)mem.mems.get(i);
-			Point p = new Point((int)(Math.random()*area.getWidth()), (int)(Math.random()*area.getHeight()));
-			GraphNode node = new GraphNode("Mem@"+child.hashCode() , p, area);
+			Point p = new Point((int)(Math.random()*getPreferredArea().getWidth()), (int)(Math.random()*getPreferredArea().getHeight()));
+			GraphNode node = new GraphNode("Mem@"+child.hashCode() , p);
 			getGraphLayout().addNode(node);
 			for (int j=0;j<child.freeLinks.size();j++) {
 				LinkOccurrence link = (LinkOccurrence)child.freeLinks.get(j);

@@ -45,13 +45,20 @@ public class ParserTest extends JFrame implements ActionListener {
 		rootTree = new DefaultMutableTreeNode("LMNtal Source");
 		tree = new JTree(rootTree);
 		pLog.add(new JScrollPane(tree), BorderLayout.CENTER);
-		pLog.add(new JLabel("Log output"), BorderLayout.NORTH);
+		pLog.add(new JLabel("Analyzed Tree"), BorderLayout.NORTH);
 		
 		// メインウィンドウ
 		JSplitPane main = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pSrc, pLog);
 		main.setDividerSize(2);
-		getContentPane().add(main, BorderLayout.CENTER);
+//		getContentPane().add(main, BorderLayout.CENTER);
 		main.setDividerLocation(400);
+		
+		pLMN = new LMNGraphPanel();
+		JSplitPane main2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, main, new JScrollPane(pLMN));
+//		getContentPane().add(new JScrollPane(pLMN), BorderLayout.SOUTH);
+		main2.setDividerSize(2);
+		main2.setDividerLocation(300);
+		getContentPane().add(main2, BorderLayout.CENTER);
 		
 		// オペレーションパネル
 		JPanel pOpe = new JPanel();
@@ -64,11 +71,6 @@ public class ParserTest extends JFrame implements ActionListener {
 		pOpe.add(btnRun);
 		
 		getContentPane().add(pOpe, BorderLayout.NORTH);
-		
-		pLMN = new LMNGraphPanel();
-		
-		getContentPane().add(new JScrollPane(pLMN), BorderLayout.SOUTH);
-		
 	}
 	
 	public static void main(String args[]) {
