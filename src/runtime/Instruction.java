@@ -64,7 +64,7 @@ public class Instruction {
 //	/** 命令の最大種類数。命令の種類を表す値はこれより小さな数にすること。*/
 //	private static final int END_OF_INSTRUCTION = 1024;
 
-    // アトムに関係する出力する基本ガード命令 (1--6)
+    // アトムに関係する出力する基本ガード命令 (1--5)
 	//  -----  deref     [-dstatom, srcatom, srcpos, dstpos]
 	//  -----  derefatom [-dstatom, srcatom, srcpos]
 	//  -----  findatom  [-dstatom, srcmem, funcref]
@@ -118,7 +118,7 @@ public class Instruction {
      * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
      * <p>
      * ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
-     * （この検査はRuby版ではnmemeq命令で行っていた）。
+     * （この検査はRuby版ではneqmem命令で行っていた）。
      * <p>膜の外からのリンクで初めて特定された膜への参照を取得するために使用される。
      * @see testmem
      * @see getmem */
@@ -803,21 +803,21 @@ public class Instruction {
 	// 型検査のためのガード命令 (220--229)	
 
 	/** isground [link]
-	 * <br>ガード命令
+	 * <br>（予約された）型付き拡張用ガード命令<br>
 	 * リンクlinkの指す先が基底項プロセスであることを確認する。
 	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこの膜に存在していることを確認する。
 	 * @see getlink */
 	public static final int ISGROUND = 220;
 
 	/** isint [atom]
-	 * <br>型付き拡張用ガード命令
+	 * <br>型付き拡張用ガード命令<br>
 	 * アトム$atomが整数アトムであることを確認する。*/
 	public static final int ISINT    = 221;
 	public static final int ISFLOAT  = 222;
 	public static final int ISSTRING = 223;
 
 	/** isintfunc [func]
-	 * <br>型付き拡張用最適化用ガード命令
+	 * <br>型付き拡張用最適化用ガード命令<br>
 	 * ファンクタ$funcが整数ファンクタであることを確認する。*/
 	public static final int ISINTFUNC    = ISINT    + OPT;
 	public static final int ISFLOATFUNC  = ISFLOAT  + OPT;
@@ -943,7 +943,7 @@ public class Instruction {
      * react 命令を生成する。
      * @param r 反応できるルールオブジェクト
      * @param actual 実引数
-     * TODO reactの引数の仕様を決める
+     * @deprecated
      */
     public static Instruction react(Rule r, List actual) {
 		Instruction i = new Instruction(REACT);
