@@ -61,6 +61,7 @@ public class Instruction implements Cloneable {
     // アトムに関係する出力する基本ガード命令 (1--5)
 	//  -----  deref     [-dstatom, srcatom, srcpos, dstpos]
 	//  -----  derefatom [-dstatom, srcatom, srcpos]
+	//  -----  dereflink [-dstatom, srclink, dstpos]
 	//  -----  findatom  [-dstatom, srcmem, funcref]
 
     /** deref [-dstatom, srcatom, srcpos, dstpos]
@@ -78,10 +79,17 @@ public class Instruction implements Cloneable {
 	public static final int DEREFATOM = 2;
 	// LOCALDEREFATOMは不要
 
+    /** dereflink [-dstatom, srclink, dstpos]
+     * <br>出力する最適化用ガード命令<br>
+     * リンク$srclinkが第dstpos引数に接続していることを確認したら、
+     * リンク先のアトムへの参照を$dstatomに代入する。*/
+	public static final int DEREFLINK = 3;
+	// LOCALDEREFLINKは不要
+
 	/** findatom [-dstatom, srcmem, funcref]
 	 * <br>反復するガード命令<br>
 	 * 膜$srcmemにあってファンクタfuncrefを持つアトムへの参照を次々に$dstatomに代入する。*/
-	public static final int FINDATOM = 3;
+	public static final int FINDATOM = 4; // by mizuno
 	// LOCALFINDATOMは不要
 
 	// 膜に関係する出力する基本ガード命令 (5--9)
@@ -1351,6 +1359,10 @@ public class Instruction implements Cloneable {
 			Instruction inst = (Instruction)it.next();
 			switch (inst.getKind()) { // TODO ガード命令や、出力変数も書き換える
 				case Instruction.DEREF:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.DEREFLINK:
 					changeArg(inst, 1, map);
 					changeArg(inst, 2, map);
 					break;

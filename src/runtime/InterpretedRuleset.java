@@ -220,6 +220,11 @@ class InterpretiveReactor {
 					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
 					atoms[inst.getIntArg1()] = link.getAtom();
 					break; //n-kato
+				case Instruction.DEREFLINK : //[-dstatom, srclink, dstpos]
+					link = (Link)vars.get(inst.getIntArg2());
+					if (link.getPos() != inst.getIntArg3()) return false;
+					atoms[inst.getIntArg1()] = link.getAtom();
+					break; //mizuno
 				case Instruction.FINDATOM : // [-dstatom, srcmem, funcref]
 					func = (Functor) inst.getArg3();
 					it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
