@@ -448,6 +448,9 @@ class InterpretiveReactor {
 					mems[inst.getIntArg1()].clearRules();
 					break; //n-kato
 				case Instruction.LOADMODULE: //[dstmem, ruleset]
+					// TODO 【引数がルールセットなら、LOADRULESET命令と同じになってしまう】
+					// 最初の意図は、文字列で指定されたモジュールのルールセットをロードする命令のつもりだった。
+					// 同一ソースファイル中にあれば、旧fixupModulesのタイミングでLOADRULESETに置換してもよいけど。
 					mems[inst.getIntArg1()].loadRuleset((Ruleset)inst.getArg2() );
 					break;
 					//====ルールを操作するボディ命令====ここまで====

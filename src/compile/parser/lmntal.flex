@@ -41,16 +41,21 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
 Inline = "[[" [^*] ~"]]"
 
 LinkName       = [A-Z][A-Za-z_0-9]*
+
 /* これだと [[ と ]] がアトム名に含まれちゃうので一時的に退避 hara */
 /* なんかいい方法ないすかねー */
 /*AtomNameNormal = {Inline} | [a-z0-9][A-Za-z_0-9]* */
-AtomNameNormal = [a-z0-9][A-Za-z_0-9]* (\.[a-z0-9][A-Za-z_0-9]*)?
-MemName        = [a-z0-9][A-Za-z_0-9]*
+//AtomNameNormal = [a-z0-9][A-Za-z_0-9]* (\.[a-z0-9][A-Za-z_0-9]*)?
+
+PathedAtomName = [a-z0-9][A-Za-z_0-9]* \.[a-z0-9][A-Za-z_0-9]*
+AtomName = [a-z0-9][A-Za-z_0-9]*
 
 Comment = {TraditionalComment} | {EndOfLineComment}
 
 TraditionalComment = "/*" [^*] ~"*/"
 EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
+
+RelOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
 
 %state QUOTED
 
@@ -59,36 +64,29 @@ EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 /* ------------------------Lexical Rules Section---------------------- */
 
 <YYINITIAL> {
-	"nil"			{ return symbol(sym.NULL); }
 	","				{ return symbol(sym.COMMA); }
 	"("				{ return symbol(sym.LPAREN); }
 	")"				{ return symbol(sym.RPAREN); }
-	"{"				{ return symbol(sym.LBREATH); }
-	"}"				{ return symbol(sym.RBREATH); }
+	"{"				{ return symbol(sym.LBRACE); }
+	"}"				{ return symbol(sym.RBRACE); }
 	":"				{ return symbol(sym.COLON); }
 	":-"			{ return symbol(sym.RULE); }
-	"="				{ return symbol(sym.UNIFY); }
 	"."				{ return symbol(sym.PERIOD); }
 	"|"				{ return symbol(sym.GUARD); }
-	"<"             { return symbol(sym.LT); }
-	">"             { return symbol(sym.GT); }
-	"=="            { return symbol(sym.EQ); }
-	"!="            { return symbol(sym.NE); }
-	"<="            { return symbol(sym.LE); }
-	">="            { return symbol(sym.GE); }
+	{RelOp}	        { return symbol(sym.RELOP, yytext()); }
 	"$"				{ return symbol(sym.PROCVAR); }
 	"@"				{ return symbol(sym.RULEVAR); }
 	"*"				{ return symbol(sym.ASTERISK); }
 	"/"				{ return symbol(sym.SLASH); }
 	"+"				{ return symbol(sym.PLUS); }
-	"-"				{ return symbol(sym.MINAS); }
+	"-"				{ return symbol(sym.MINUS); }
 	"["				{ return symbol(sym.LBRACKET); }
 	"]"				{ return symbol(sym.RBRACKET); }
 	"[["			{ string.setLength(0); yybegin(QUOTED); }
 	"\\+"			{ return symbol(sym.NEGATIVE); }
 	{LinkName}		{ return symbol(sym.LINK_NAME, yytext()); }
-//	{MemName}		{ return symbol(sym.MEM_NAME, yytext()); }
-	{AtomNameNormal}		{ return symbol(sym.ATOM_NAME_NORMAL, yytext()); }
+	{PathedAtomName} { return symbol(sym.PATHED_ATOM_NAME, yytext()); }
+	{AtomName}		{ return symbol(sym.ATOM_NAME, yytext()); }
 	{WhiteSpace}	{ /* just skip */ }
 	{Comment}		{ /* just skip */ }
 }

@@ -5,16 +5,17 @@ package compile.parser;
 import java.util.LinkedList;
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
-terminal		NULL, COMMA, LPAREN, RPAREN, LBREATH, RBREATH,
-				RULE, COLON, UNIFY, PERIOD, GUARD, PROCVAR, RULEVAR, 
+terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE,
+				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE,
-				LT, LE, GT, GE, EQ, NE,
-				ASTERISK, SLASH, PLUS, MINAS,
+				RELOP,
+				ASTERISK, SLASH, PLUS, MINUS,
 				QUOTED_STRING;
 				
-terminal String	LINK_NAME, ATOM_NAME_NORMAL, MEM_NAME;
+terminal String LINK_NAME, ATOM_NAME, PATHED_ATOM_NAME;
 
 non terminal SrcLink			Link;
+non terminal String				FuncName;
 non terminal String				AtomName;
 non terminal SrcAtom			UnitAtom;
 non terminal SrcAtom			Atom400;
@@ -23,17 +24,10 @@ non terminal SrcAtom			Atom;
 non terminal SrcMembrane		Membrane;
 non terminal SrcRule			Rule;
 non terminal SrcProcessContext	ProcessContext;
-non terminal SrcTypedProcessContext TypedProcessContext;
 non terminal SrcRuleContext		RuleContext;
 non terminal SrcContext			Context;
 non terminal Object				Process;
 non terminal LinkedList			ProcessList;
-non terminal Object				GuardProcess;
-/*
-non terminal LinkedList         GuardProcessList;
-*/
-non terminal SrcLinkUnify		LinkUnify;
-non terminal SrcCompareAtom     CompareAtom;
 non terminal SrcAtom			List;
 non terminal SrcAtom			ListCdr;
 
@@ -43,18 +37,23 @@ start with ProcessList;
 
 Link		::=   LINK_NAME:name
 					{: RESULT = new SrcLink(name); :};
-					
+
 // added by hara
-AtomName	::=   QUOTED_STRING:name
+FuncName	::=   QUOTED_STRING:name
 					{: RESULT = name.toString(); :}
-				| ATOM_NAME_NORMAL:name
+				| ATOM_NAME:name
+					{: RESULT = name.toString(); :}
+				| PATHED_ATOM_NAME:name
 					{: RESULT = name.toString(); :};
 
-UnitAtom	::=	  AtomName:name
+AtomName    ::= ATOM_NAME:name
+					{: RESULT = name.toString(); :};
+
+UnitAtom	::=	  FuncName:name
 					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
-				| AtomName:name LPAREN RPAREN
+				| FuncName:name LPAREN RPAREN
 					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
-				| AtomName:name LPAREN ProcessList:list RPAREN
+				| FuncName:name LPAREN ProcessList:list RPAREN
 					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
 				| List:list
 					{: RESULT = list; :}
@@ -62,7 +61,6 @@ UnitAtom	::=	  AtomName:name
 					{: RESULT = atom; :}
 				;
 
-					
 Atom400		::=   UnitAtom:atom
 					{: RESULT = atom; :}
 				| Atom400:atom1 ASTERISK UnitAtom:atom2
@@ -76,7 +74,7 @@ Atom400		::=   UnitAtom:atom
 
 Atom500		::=   Atom400:atom
 					{: RESULT = atom; :}
-				| Atom500:atom1 MINAS Atom400:atom2
+				| Atom500:atom1 MINUS Atom400:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("-", list); :}
@@ -84,13 +82,13 @@ Atom500		::=   Atom400:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("+", list); :};
-					
+
 Atom		::=   Atom500:atom
 					{: RESULT = atom; :}
-				| Atom500:atom1 UNIFY Atom500:atom2
+				| Atom500:atom1 RELOP:op Atom500:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("=", list); :};
+					   RESULT = new SrcAtom(op.toString(), list); :};
 
 List        ::=   LBRACKET RBRACKET
 					{: RESULT = new SrcAtom("[]"); :}
@@ -98,7 +96,7 @@ List        ::=   LBRACKET RBRACKET
                     {: LinkedList list = new LinkedList();
                        list.add(atom); list.add(cdr);
                        RESULT = new SrcAtom(".", list); :};
-                
+
 ListCdr     ::=   GUARD Atom:atom
                     {: RESULT = atom;  :}
                | COMMA Atom:atom ListCdr:cdr
@@ -109,13 +107,13 @@ ListCdr     ::=   GUARD Atom:atom
                     {: RESULT = new SrcAtom("[]"); :};
 
 
-Membrane	::=	  ATOM_NAME_NORMAL:name COLON LBREATH RBREATH
+Membrane	::=	  AtomName:name COLON LBRACE RBRACE
 					{: RESULT = new SrcMembrane(name); :}
-				| LBREATH RBREATH
+				| LBRACE RBRACE
 					{: RESULT = new SrcMembrane(); :}
-				| ATOM_NAME_NORMAL:name COLON LBREATH ProcessList:list RBREATH
+				| AtomName:name COLON LBRACE ProcessList:list RBRACE
 					{: RESULT = new SrcMembrane(name, list); :}
-				| LBREATH ProcessList:list RBREATH
+				| LBRACE ProcessList:list RBRACE
 					{: RESULT = new SrcMembrane(list); :};
 
 Rule		::=	  LPAREN ProcessList:head RULE ProcessList:body RPAREN
@@ -123,13 +121,8 @@ Rule		::=	  LPAREN ProcessList:head RULE ProcessList:body RPAREN
 			    | LPAREN ProcessList:head RULE ProcessList:guard GUARD ProcessList:body RPAREN
 					{: RESULT = new SrcRule(head, guard, body); :};
 
-ProcessContext	::=   PROCVAR AtomName:name
+ProcessContext	::= PROCVAR AtomName:name
 						{: RESULT = new SrcProcessContext(name); :};
-
-/*
-TypedProcessContext ::= PROCVAR AtomName:name LBRACKET LINK_NAME:link RBRACKET
-							{: RESULT = new SrcTypedProcessContext(name, link); :};
-*/
 
 RuleContext	::=   RULEVAR AtomName:name
 					{: RESULT = new SrcRuleContext(name); :};
@@ -139,6 +132,25 @@ Context		::=   ProcessContext:p
 				| RuleContext:r
 					{: RESULT = r; :};
 
+Process		::=   Atom:p
+					{:  RESULT = p; :}
+				| Membrane:p
+					{:  RESULT = p; :}
+				| Rule:p
+					{:  RESULT = p; :}
+				| Context:p
+					{:  RESULT = p; :}
+				| Link:p
+					{:  RESULT = p; :};
+
+ProcessList ::= Process:p
+					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
+				| ProcessList:list COMMA Process:p
+					{: list.add(p); RESULT = list; :} ;
+
+/*
+TypedProcessContext ::= PROCVAR AtomName:name LBRACKET LINK_NAME:link RBRACKET
+							{: RESULT = new SrcTypedProcessContext(name, link); :};
 LinkUnify	::=   Link:left UNIFY Link:right
 					{: RESULT = new SrcLinkUnify(left, right); :};
 
@@ -155,34 +167,19 @@ CompareAtom ::=   Process:left LT Process:right
                 | Process:left NE Process:right
                     {: RESULT = new SrcCompareAtom(SrcCompareAtom.NE, left, right); :};
 
-Process		::=   Atom:p
-					{:  RESULT = p; :}
-				| Membrane:p
-					{:  RESULT = p; :}
-				| Rule:p
-					{:  RESULT = p; :}
-				| Context:p
-					{:  RESULT = p; :}
-				| Link:p
-					{:  RESULT = p; :}
-				| LinkUnify:p
-					{:  RESULT = p; :};
-
 GuardProcess ::=  Process:p
 					{:  RESULT = p; :}
 			    | CompareAtom:p
 			        {:  RESULT = p; :};
 
-ProcessList	::=   GuardProcess:p
-					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
-				| ProcessList:list COMMA GuardProcess:p
-					{: list.add(p); RESULT = list; :}
-				| ProcessList:list PERIOD GuardProcess:p
-					{: list.add(p); RESULT = list; :};
-					
-/*
 GuardProcessList ::=   GuardProcess:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
 				| GuardProcessList:list COMMA GuardProcess:p
 					{: list.add(p); RESULT = list; :};
+
+
+non terminal Object				GuardProcess;
+non terminal LinkedList         GuardProcessList;
+non terminal SrcLinkUnify		LinkUnify;
+non terminal SrcCompareAtom     CompareAtom;
 */
