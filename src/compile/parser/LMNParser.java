@@ -920,7 +920,36 @@ public class LMNParser {
 			ContextDef def = (ContextDef)it.next();
 			if (def.rhsOccs.size() != 1) {
 				error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + def.getName());
-				corrupted();
+				int len = def.lhsOcc.args.length;
+				Iterator it2 = def.rhsOccs.iterator();
+				while (it2.hasNext()) {
+					ProcessContext pc = (ProcessContext)it2.next();
+					pc.mem.processContexts.remove(pc);
+					Atom atom = new Atom(pc.mem, def.getName(), len);
+					for (int i = 0; i < len; i++) {
+						atom.args[i] = new LinkOccurrence(pc.args[i].name, atom, i);
+					}
+					// if (pc.bundle != null) { remove from names; }
+					pc.mem.atoms.add(atom);
+					it2.remove();
+				}
+				ProcessContext rhsocc = new ProcessContext(rule.rightMem, def.getName(), len);
+				rule.rightMem.processContexts.add(rhsocc);
+				for (int i = 0; i < len; i++) {
+					String linkname = generateNewLinkName();
+					rhsocc.args[i] = new LinkOccurrence(linkname, rhsocc, i);
+					Atom atom = new Atom(rule.rightMem, linkname, 1);
+					atom.args[0] = new LinkOccurrence(linkname, atom, 0);
+					rule.rightMem.atoms.add(atom);
+				}
+				if (((ProcessContext)def.lhsOcc).bundle != null) {
+					rhsocc.setBundleName(SrcLinkBundle.PREFIX_TAG + generateNewLinkName());
+					// add to names;
+				}
+				rhsocc.buddy = def.lhsOcc;
+				def.lhsOcc.buddy = rhsocc;
+				rhsocc.def = def;
+				def.rhsOccs.add(rhsocc);
 			}
 		}
 	}
