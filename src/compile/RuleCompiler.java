@@ -336,7 +336,7 @@ public class RuleCompiler {
 		varcount = gc.getMemActuals().size() + gc.getAtomActuals().size() 
 					+ gc.getVarActuals().size();
 	}
-	void compileNegatives() {
+	void compileNegatives() throws CompileException{
 		Iterator it = rs.guardNegatives.iterator();
 		while (it.hasNext()) {
 			LinkedList eqs = (LinkedList)it.next();

@@ -470,7 +470,7 @@ public class HeadCompiler {
 	////////////////////////////////////////////////////////////////
 	
 	/** ガード否定条件をコンパイルする */
-	void compileNegativeCondition(LinkedList eqs) {
+	void compileNegativeCondition(LinkedList eqs) throws CompileException{
 		//int formals = varcount;
 		//matchLabel.setFormals(formals);
 		Iterator it = eqs.iterator();
