@@ -99,7 +99,7 @@ public class RuleCompiler {
 		// TODO 以下の3行は、RulesetCompiilerが行うべきである。また、整合性検査の都合上、ルール内ルールの方から先にコンパイルすべきである。
 		// compiler.structure.Membrane::rulesetの参照を外側ルールのコンパイルで使用するのは構わない。
 		
-		rs.parent.ruleset.rules.add(theRule);
+		((runtime.InterpretedRuleset)rs.parent.ruleset).rules.add(theRule);
 
 		// ルールの右辺膜以下にルールがあるかもしれないので再帰的に走査
 		RuleSetGenerator.processMembrane(rs.leftMem); // 一応左辺も
