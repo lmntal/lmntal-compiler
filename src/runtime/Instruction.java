@@ -232,6 +232,7 @@ public class Instruction implements Cloneable {
     
 	// アトムに関係する出力しない基本ガード命令 (20-24)
 	//  -----  func    [srcatom, funcref]
+	//  -----  notfunc [srcatom, funcref]
 	//  -----  eqatom  [atom1, atom2]
 	//  -----  neqatom [atom1, atom2]
 
@@ -242,18 +243,26 @@ public class Instruction implements Cloneable {
 	public static final int FUNC = 20;
 	// LOCALFUNCは不要
 
+	/** notfunc [srcatom, funcref]
+	 * <br>ガード命令<br>
+	 * アトム$srcatomがファンクタfuncrefを持たないことを確認する。
+	 * <p>典型的には、プロセス文脈の明示的な自由リンクの出現アトムが$inside_proxyでないことを確認するために使われる。
+	 * <p>getfunc[tmp,srcatom];loadfunc[func,funcref];neqfunc[tmp,func] と同じ。*/
+	public static final int NOTFUNC = 21;
+	// LOCALNOTFUNCは不要
+
 	/** eqatom [atom1, atom2]
 	 * <br>ガード命令<br>
 	 * $atom1と$atom2が同一のアトムを参照していることを確認する。
 	 * <p><b>注意</b> Ruby版のeqから分離 */
-	public static final int EQATOM = 21;
+	public static final int EQATOM = 22;
 	// LOCALEQATOMは不要
 
 	/** neqatom [atom1, atom2]
 	 * <br>ガード命令<br>
 	 * $atom1と$atom2が異なるアトムを参照していることを確認する。
 	 * <p><b>注意</b> Ruby版のneqから分離 */
-	public static final int NEQATOM = 22;
+	public static final int NEQATOM = 23;
 	// LOCALNEQATOMは不要
 
 	// ファンクタに関係する命令 (25--29)	

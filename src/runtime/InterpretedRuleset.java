@@ -288,6 +288,10 @@ class InterpretiveReactor {
 					if (!atoms[inst.getIntArg1()].getFunctor().equals((Functor)inst.getArg2()))
 						return false;
 					break; //n-kato
+				case Instruction.NOTFUNC : //[srcatom, funcref]
+					if (atoms[inst.getIntArg1()].getFunctor().equals((Functor)inst.getArg2()))
+						return false;
+					break; //n-kato
 				case Instruction.EQATOM : //[atom1, atom2]
 					if (atoms[inst.getIntArg1()] != atoms[inst.getIntArg2()]) return false;
 					break; //n-kato
