@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import runtime.Env;
 import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
@@ -17,6 +18,7 @@ import runtime.IntegerFunctor;
 import runtime.InterpretedRuleset;
 import runtime.ObjectFunctor;
 import runtime.Rule;
+import runtime.Ruleset;
 import runtime.StringFunctor;
 
 /**
@@ -79,7 +81,7 @@ public class Translator {
 		while (it.hasNext()) {
 			Rule rule = (Rule) it.next();
 			writer.write("		if (exec" + rule.atomMatchLabel.label + "(mem, atom)) {\n");
-			writer.write("			result = true;\n");
+			//writer.write("			result = true;\n");
 			writer.write("			return true;\n");
 			//writer.write("			if (!mem.isCurrent()) return true;\n");
 			writer.write("		}\n");
@@ -92,7 +94,7 @@ public class Translator {
 		while (it.hasNext()) {
 			Rule rule = (Rule) it.next();
 			writer.write("		if (exec" + rule.memMatchLabel.label + "(mem)) {\n");
-			writer.write("			result = true;\n");
+			//writer.write("			result = true;\n");
 			writer.write("			return true;\n");
 			//writer.write("			if (!mem.isCurrent()) return true;\n");
 			writer.write("		}\n");
@@ -116,19 +118,13 @@ public class Translator {
 			Functor func = (Functor)it.next();
 			writer.write("	private static final Functor " + funcVarMap.get(func));
 			if (func instanceof StringFunctor) {
-				System.out.println(func.getValue());
-				String data = ((String)func.getValue()).replaceAll("\\\\", "\\\\\\\\"); // \ -> \\
-				data = data.replaceAll("\"", "\\\\\"");									// " -> \"			
-				writer.write(" = new StringFunctor(\"" + data + "\");\n");
+				writer.write(" = new StringFunctor(\"" + escapeString((String)func.getValue()) + "\");\n");
 			} else if (func instanceof ObjectFunctor) {
 				throw new RuntimeException("ObjectFunctor is not supported");
 			} else if (func instanceof IntegerFunctor) {
 				writer.write(" = new IntegerFunctor(" + ((IntegerFunctor)func).getValue() + ");\n");
 			} else {
-				System.out.println(func.getName());
-				String name = func.getName().replaceAll("\\\\", "\\\\\\\\"); // \ -> \\
-				name = name.replaceAll("\"", "\\\\\"");						 // " -> \"			
-				writer.write(" = new Functor(\"" + name + "\", " + func.getArity() + ");\n");
+				writer.write(" = new Functor(\"" + escapeString(func.getName()) + "\", " + func.getArity() + ");\n");
 			}
 		}
 		
@@ -152,6 +148,18 @@ public class Translator {
 		}
 		instLists.add(instList);
 		instListsToTranslate.add(instList);
+	}
+	/**
+	 * 文字列リテラル用にエスケープ処理をする。
+	 * @param data 処理する文字列
+	 * @return エスケープした文字列
+	 */
+	private String escapeString(String data) {
+		data = data.replaceAll("\r", "\\\\r");
+		data = data.replaceAll("\n", "\\\\n");
+		data = data.replaceAll("\\\\", "\\\\\\\\"); // \ -> \\
+		data = data.replaceAll("\"", "\\\\\"");		// " -> \"
+		return data;
 	}
 
 	/**
@@ -476,7 +484,7 @@ public class Translator {
 					break; //nakajima 2004-01-04, n-kato, n-kato 2004-11-10
 				case Instruction.ENQUEUEMEM:
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").activate();\n");
-//					mems[inst.getIntArg1()].enqueueAllAtoms();
+					//mems[inst.getIntArg1()].enqueueAllAtoms();
 					break;
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
@@ -484,7 +492,7 @@ public class Translator {
 					break; //n-kato
 				case Instruction.LOCALSETMEMNAME: //[dstmem, name]
 				case Instruction.SETMEMNAME: //[dstmem, name]
-					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").setName((String)inst.getArg2());\n");
+					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").setName(\"" + escapeString((String)inst.getArg2()) + "\");\n");
 					break; //n-kato
 					//====膜を操作する基本ボディ命令====ここまで====
 					//====リンクに関係する出力するガード命令====ここから====
@@ -554,6 +562,7 @@ public class Translator {
 					break; //nakajima 2004-01-04, n-kato
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここまで====
 					//====ルールを操作するボディ命令====ここから====
+//下で手動生成
 //				case Instruction.LOADRULESET:
 //				case Instruction.LOCALLOADRULESET: //[dstmem, ruleset]
 //					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset((Ruleset)inst.getArg2() );\n");
@@ -566,12 +575,12 @@ public class Translator {
 				case Instruction.LOCALCLEARRULES:  //[dstmem]
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").clearRules();\n");
 					break; //n-kato
-//未実装
+//下で手動生成
 //				case Instruction.LOADMODULE: //[dstmem, module_name]
 //					// モジュール膜直属のルールセットを全部読み込む
-//					writer.write(tabs + "compile.structure.Membrane m = (compile.structure.Membrane)compile.Module.memNameTable.get(inst.getArg2());\n");
+//					writer.write(tabs + "compile.structure.Membrane m = (compile.structure.Membrane)compile.Module.memNameTable.get(\"" + escapeString((String)inst.getArg2()) + "\");\n");
 //					writer.write(tabs + "if(m==null) {\n");
-//					writer.write(tabs + "	Env.e(\"Undefined module \"+inst.getArg2());\n");
+//					writer.write(tabs + "	Env.e(\"Undefined module " + escapeString((String)inst.getArg2()) + "\");\n");
 //					writer.write(tabs + "} else {\n");
 //					writer.write(tabs + "	Iterator i = m.rulesets.iterator();\n");
 //					writer.write(tabs + "	while (i.hasNext()) {\n");
@@ -745,12 +754,8 @@ public class Translator {
 					//====組み込み機能に関する命令====ここから====
 //未実装
 //				case Instruction.INLINE : //[atom, inlineref]
-//					writer.write(tabs + "Inline.callInline( ((Atom)var" + inst.getIntArg1() + "), (String)inst.getArg2(), " + inst.getIntArg3() + " );\n");
+//					writer.write(tabs + "Inline.callInline( ((Atom)var" + inst.getIntArg1() + "), \"" + escapeString((String)inst.getArg2()) + "\", " + inst.getIntArg3() + " );\n");
 //					break; //hara
-//				case Instruction.BUILTIN: //[class, atom]
-//					add(A,B,C) :- int(A),int(B),$builtin:iadd(A,B,C), 
-//					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
-//					break;
 					//====組み込み機能に関する命令====ここまで====
 //分散機能は未実装
 //					//====分散拡張用の命令====ここから====
@@ -784,7 +789,6 @@ public class Translator {
 					//====アトムセットを操作するための命令====ここまで====
 					//====整数用の組み込みボディ命令====ここから====
 				case Instruction.IADD : //[-dstintatom, intatom1, intatom2]
-					writer.write(tabs + "int x,y;\n");
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var" + inst.getIntArg2() + ").getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var" + inst.getIntArg3() + ").getFunctor()).intValue();\n");
 					writer.write(tabs + "var" + inst.getIntArg1() + " = new Atom(null, new IntegerFunctor(x+y));\n");
@@ -1006,7 +1010,6 @@ public class Translator {
 					//====整数用の組み込みガード命令====ここまで====
 					//====浮動小数点数用の組み込みボディ命令====ここから====
 				case Instruction.FADD : //[-dstfloatatom, floatatom1, floatatom2]
-					writer.write(tabs + "double u,v;\n");
 					writer.write(tabs + "u = ((FloatingFunctor)((Atom)var" + inst.getIntArg2() + ").getFunctor()).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)((Atom)var" + inst.getIntArg3() + ").getFunctor()).floatValue();\n");
 					writer.write(tabs + "var" + inst.getIntArg1() + " = new Atom(null, new FloatingFunctor(u+v));\n");
@@ -1155,6 +1158,21 @@ public class Translator {
 //					writer.write(tabs + "}\n");
 
 //以下は手動生成コード
+				case Instruction.LOADMODULE:
+					// モジュール膜直属のルールセットを全部読み込む
+					compile.structure.Membrane m = (compile.structure.Membrane)compile.Module.memNameTable.get(inst.getArg2());
+					if(m==null) {
+						Env.e("Undefined module "+inst.getArg2());
+					} else {
+						Iterator i = m.rulesets.iterator();
+						while (i.hasNext()) {
+							//TODO 重複防止
+							Translator t = new Translator((InterpretedRuleset)i.next());
+							t.translate(false);
+							writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(new " + t.className + "());\n");
+						}
+					}
+					break;
 				case Instruction.JUMP:
 					label = (InstructionList)inst.getArg1();
 					add(label);
@@ -1196,6 +1214,8 @@ public class Translator {
 					t.translate(false);
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(new " + t.className + "());\n"); 
 					break;
+				default:
+					throw new RuntimeException("Unsupported Instruction : " + inst);
 					
 /*
 			case Instruction.SPEC:
@@ -1272,8 +1292,6 @@ public class Translator {
 				t.translate(false);
 				writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(new " + t.className + "());\n"); 
 				break;
-			default:
-				throw new RuntimeException("Unsupported Instruction : " + inst);
 */
 			}
 		}

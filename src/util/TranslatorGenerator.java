@@ -31,12 +31,15 @@ import java.util.regex.Pattern;
  *   代入文をif文の中に移動
  *   GETCLASSは、ローカル変数があるのでブロックで囲む
  *   DIV/MODの「else」は削除
+ * IADD 	FADD
+ *   ローカル変数宣言の削除
  * LOADMODULE
  * INLINE
  * CONNECTRUNTIME
  * GETRUNTIME
  * GROUP
  *   コメントアウト（未対応）
+ * LOADMODULE
  * LOADRULESET
  * REACT
  * JUMP
@@ -47,6 +50,9 @@ import java.util.regex.Pattern;
  *   return true; を追加
  * FINDATOM
  *   Atom a --> atom
+ * 全体
+ *   inst.getArg?() を適切に書き換える。
+ *   文字列の場合、"\"" + escapeString((String)inst.getArg?()) + "\""
  */
 public class TranslatorGenerator {
 	public static void main(String[] args) throws IOException {
