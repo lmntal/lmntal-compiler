@@ -240,7 +240,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/** 新しい子膜を作成し、活性化する */
 	public abstract AbstractMembrane newMem();
-	/** 指定された（親膜の無い）膜をこの膜の子膜として追加する。実行膜スタックは操作しない。*/
+	/** 指定された（親膜の無い）膜をこの膜の子膜として追加する。
+	 * 実行膜スタックは操作しない。子膜のタスクについては何もしない。*/
 	public void addMem(AbstractMembrane mem) {
 		mems.add(mem);
 		mem.parent = this;
@@ -386,7 +387,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
 	private void setTask(AbstractTask newTask) {
 		if (isRoot()) return;
-		this.task = newTask;
+		task = newTask;
 		Iterator it = memIterator();
 		while (it.hasNext()) {
 			((AbstractMembrane)it.next()).setTask(newTask);

@@ -22,7 +22,7 @@ public final class Membrane extends AbstractMembrane {
 		super(task, parent);
 	}
 	/**
-	 * 親膜を持たない膜を作成し、指定されたタスクのルート膜にする。
+	 * 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。
 	 */
 	Membrane(Task task) {
 		super(task, null);
@@ -119,7 +119,7 @@ public final class Membrane extends AbstractMembrane {
 		}		
 		return m;
 	}
-	/** newMemと同じ。ただし親膜は仮でない実行膜スタックに積まれている。 */
+	/** newMemと同じ。ただし親膜（メソッドが呼ばれたこの膜）は仮でない実行膜スタックに積まれている。 */
 	public AbstractMembrane newLocalMembrane() {
 		Membrane m = new Membrane(task, this);
 		mems.add(m);

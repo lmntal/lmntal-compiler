@@ -615,6 +615,7 @@ public class LMNParser {
 				}
 				else {
 					if (pc.def.src == null) {
+						// 構文エラーによりヘッド出現が取り消された型なし$pは、ボディ出現が無言で取り除かれる
 						it.remove();
 						continue;
 					}
@@ -650,7 +651,6 @@ public class LMNParser {
 		// 同じ名前のプロセス文脈の引数パターンを同じにする。
 		// 型付きは明示的な自由リンクの個数を1にする。
 
-		// - 型付きの名前を定義する
 		Iterator it;
 		HashMap names = new HashMap();
 		enumTypedNames(rule.guardMem, names);
@@ -672,7 +672,8 @@ public class LMNParser {
 		// todo リンク束を閉じる
 		
 		// todo プロセス文脈間で継承されたリンク束が同じ名前であることを確認する
-
+		// todo 右辺のアトム集団のリンク先が全て同じプロセス文脈名を持つことを確認する
+		
 		// rule.processContexts/ruleContexts/typedProcessContexts を生成する
 		it = names.keySet().iterator();
 		while (it.hasNext()) {
@@ -831,7 +832,7 @@ public class LMNParser {
 				expandAtom(subatom, result);
 				result.add(subatom);
 			}
-			// 膜（廃止してもよい）
+			// 膜（廃止してもよい。実際、現在、構文解析器生成器の都合上、構文的に廃止している）
 			else if (obj instanceof SrcMembrane) {
 				SrcMembrane submem = (SrcMembrane)obj;
 				SrcAtom subatom = new SrcAtom("+");

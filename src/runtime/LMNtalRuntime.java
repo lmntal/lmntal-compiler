@@ -49,8 +49,12 @@ final class Task extends AbstractTask {
 	Task(AbstractMembrane parent) {
 		root = new Membrane(this);
 		root.lock(root);
-		root.activate(); // 仮の実行膜スタックに積む
-		parent.addMem(root);
+		root.activate(); 		// 仮の実行膜スタックに積む
+		parent.addMem(root);	// タスクは膜の作成時に設定した
+	}
+	/** 親膜の無い膜を作成し、このタスクが管理する膜にする。 */
+	Membrane createFreeMembrane() {
+		return new Membrane(this);
 	}
 	
 	boolean isIdle(){

@@ -404,6 +404,11 @@ class InterpretiveReactor {
 					mem = ((Membrane)mems[inst.getIntArg2()]).newLocalMembrane();
 					mems[inst.getIntArg1()] = mem;
 					break; //n-kato
+				case Instruction.ALLOCMEM: //[-dstmem]
+					mem = ((Task)mems[0].getTask()).createFreeMembrane();
+					mems[inst.getIntArg1()] = mem;
+					break; //n-kato
+
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
 					//AbstractMachine remotenode = new AbstractMachine(  );
 					//mems[inst.getIntArg2()].newRoot(    )
