@@ -6,7 +6,7 @@ package compile;
 import java.util.*;
 import runtime.Instruction;
 import runtime.InstructionList;
-import runtime.Functor;
+//import runtime.Functor;
 //import runtime.Env;
 
 //import runtime.Rule;
@@ -52,10 +52,9 @@ public class GuardOptimizer {
 		
 		//ヘッド命令列のjump命令の引数
 		//最後に更新する
-		//ガードのjumpも更新が必要?
 		InstructionList headlabel = (InstructionList)headjump.getArg1(); 
 		List headmemargs = (List)headjump.getArg2();
-		List headatomargs =(List)headjump.getArg3();
+		List headatomargs = (List)headjump.getArg3();
 		List headvarargs = (List)headjump.getArg4();
 		
 		//ガードにX<Y,X+Y<Zのような式を書くとisintやisfloatが重複するので余分な命令を削除
@@ -98,36 +97,25 @@ public class GuardOptimizer {
                 
                 //DEREFATOMを移動させる場所を決める
                 //DEREFATOMは必ずヘッド側に移動させる
-                //TODO ここは未完成。膜が絡んだ場合は検査していない。自分でも意味不明になってきた･･･
+                //TODO 一応膜にも対応させたが怪しいのでうまく行かない例を模索中
                 case Instruction.DEREFATOM:
                 	//DEREFATOMの第1引数。この値をキーとするアトムを新たにヘッド命令列で扱う
                 	int atomvar = instg.getIntArg1();
                 	//DEREFATOMの第2引数。このDEREFATOMの接続先のアトムを示す。
                 	//このアトムの付近にDEREFATOMを移動させたい
            	        int srcatom = instg.getIntArg2();
-           	        //見つけたFINDATOMの第1引数。1つ前のFINDATOM命令も参照したいので2つ用意
-           	        int finddstatom = 0;
-           	        int finddstatom2 = 0;
-           	        //FINDATOM命令の出現位置。この値+1の位置にDEREFATOMを移動させる
-           	        int findpoint = 0;
-           	        int findpoint2 = 0;
-                    //FINDATOMの第1引数とDEREFATOMの第2引数を比べることでDEREFATOMを移動させるのだが、
-                    //この対応関係はイマイチ分からない。
-                    //とりあえずlinknum,jointlinknumで調整しつつマッチングを図る
-                    //linknum,jointlinknumはFUNC命令を見つけたとき値を増やす
-                    int linknum = 0; 
-           	        int jointlinknum = 0;
+           	        //ルールに出現する膜の数。番号0の膜は数に入れないでおく
+           	        int memnum = headmemargs.size() - 1;
+           	        //targetを第1引数に持つFINDATOMまたはDEREF(FUNCでも可?)を探す
+ 		   	        //ヘッド命令列中のアトムリストから取得
+           	        int target = headatomargs.get(srcatom-memnum-1).hashCode();
+     	        
                     for(int hid=1; hid<headsize; hid++){
                 		Instruction insth = (Instruction)head.get(hid);
                 		switch(insth.getKind()){
-                			/*
-                			単純にDEREFATOMの第2引数を第1引数に持つFINDATOMもしくは
-                			DEREFの下に移動させる場合
-                			例：a(10,20,30,X),b(40,Y) :- X<Yで変な位置に移動
-                				2引数以上のアトムの扱いに対応できないらしい
                 			case Instruction.FINDATOM:
                 			case Instruction.DEREF:
-                				if(insth.getIntArg1() == srcatom){
+                				if(insth.getIntArg1() == target){
 									head.add(hid+1, instg);
 									headvarcount += 1;
 									headatomargs.add(new Integer(atomvar));
@@ -139,76 +127,6 @@ public class GuardOptimizer {
 									break;                    					
                 				}
                 				break;
-                			*/
-                			
-                			case Instruction.FINDATOM:
-                			    /*
-                			     * ここが最も怪しい。というか途中です。
-                			     * findpoint   FINDATOM!) [finddstatom,,,,]
-                			     * 	  ･        この間にあるDEREF命令をを見てlinknum,jointlinknum
-                			     *    ･ 	   をカウントする。
-                			     * 	  ･		    finddstatom=srcatom-jointlinknumならfindpoint
-                			     * 	　･			finddstatom=srcatom || findstatom=srcatom+linknumならfindpoint2に
-                			     * 	　･			DEREFATOMを移動させる。
-                			     * finpoint2   FINDATOM!) [finddstatom2,,,,]
-                			     * 
-                			    */
-                				findpoint2 = hid;
-                				finddstatom2 = insth.getIntArg1();
-                				//今回見つけたFINDATOMとのマッチング
-                				 if(//finddstatom2 == srcatom ||
-                				    finddstatom2 == srcatom + linknum){
-							 		  head.add(findpoint2+1, instg);
-									  headvarcount += 1;
-									  headatomargs.add(new Integer(atomvar));
-									  headsize += 1;
-									  guard.remove(gid);
-									  guardsize -= 1;
-									  gid -= 1;
-									  hid = headsize;
-									  break;                				
-									}
-								 //1つ前に見つけたFINDATOMとのマッチング
-								 //これらは同時に条件を満たすことがあるがどちらを優先すればいいのか不明
-								 //この順でないとうまく行かない例:a(X,10),b(Y,20),c(Z,30) :- X+Y<Z | ok.
-								 else if(finddstatom == srcatom - jointlinknum){
-								 	head.add(findpoint+1, instg);
-								 	headvarcount += 1;
-									 headatomargs.add(new Integer(atomvar));
-									 headsize += 1;
-									 guard.remove(gid);
-									 guardsize -= 1;
-									 gid -= 1;
-									 hid = headsize;
-									 break;                				
-								 } 
-								 findpoint = hid;
-								 finddstatom = insth.getIntArg1();
-                				break;
-                			
-                			case Instruction.FUNC:
-                			 	//FUNCの第2引数に着目
-                				//引数1のリンクの場合linknumを
-                				//引数2以上のリンク(繋ぎ役のようなリンク)の場合jointlinknumを+1
-                				if(((Functor)insth.getArg2()).getArity() == 1) linknum+=1;
-                				else jointlinknum += 1;
-                				break;
-                				
-                			
-                			//上の方のFINDATOM付近に移動できないままヘッド命令の最後まで来てしまったら
-                			//最後に見つけたFINDATOM付近に移動させる
-                			//DEREFATOMは何が何でもヘッド側に移動してもらわないと困る
-                			case Instruction.JUMP:
-                				head.add(findpoint+1, instg);
-                				headvarcount += 1;
-                				headatomargs.add(new Integer(atomvar));
-                				headsize += 1;
-                				guard.remove(gid);
-                				guardsize -= 1;
-                				gid -= 1;
-                				hid = headsize;
-                				break;
-                				
                 				
                 			default: break;
                 		}
@@ -309,7 +227,21 @@ public class GuardOptimizer {
 							case Instruction.ISINT:
 							case Instruction.ISFLOAT:
 								int dstatom = insth.getIntArg1();
-								if(dstatom == atomvar1 || dstatom == atomvar2){
+								//X*X<Yのような命令があった場合atomvar1=atomvar2となる
+								if(dstatom == atomvar1 && dstatom == atomvar2) {
+									head.add(hid+1, instg);
+									headsize += 1;
+									if(expflag){
+										headvarcount += 1;
+										headatomargs.add(new Integer(resultvar));
+									}
+									guard.remove(gid);
+									guardsize -= 1;
+									gid -= 1;
+									hid = headsize;
+									break;									
+								}
+								else if(dstatom == atomvar1 || dstatom == atomvar2){
 									if(!flag){
 										flag = true;
 										break;
