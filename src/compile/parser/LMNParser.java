@@ -227,6 +227,9 @@ public class LMNParser {
 					}
 				}
 			}
+			else if (nametype == SrcName.STRING || nametype == SrcName.QUOTED) {
+				func = new runtime.ObjectFunctor(name);
+			}
 		}
 		
 		// [2] アトム構造を生成する

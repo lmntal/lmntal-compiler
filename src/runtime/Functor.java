@@ -34,7 +34,7 @@ public class Functor {
 		return name;
 	}
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
-	public final String getQuotedFunctorName() {
+	public String getQuotedFunctorName() {
 		String text = getAbbrName();
 		if (strFunctor.startsWith("$")) return text;	// 臨時
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
@@ -44,7 +44,7 @@ public class Functor {
 		return text;
 	}
 	/** 引数をもたないアトムの名前として表示名を印字するための文字列を返す */
-	public final String getQuotedAtomName() {
+	public String getQuotedAtomName() {
 		String text = getAbbrName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\])$")) {
 			if (!text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
@@ -54,13 +54,22 @@ public class Functor {
 		if (path != null) text = path + "." + text;
 		return text;
 	}
-	final String quoteName(String text) {
+	/** 指定された文字列を表すシンボルリテラルのテキスト表現を取得する。
+	 * 例えば a'b を渡すと 'a''b' が返る。*/
+	static final String quoteName(String text) {
 		if (text.equals("")) return "\"\"";
 		if (text.indexOf('\n') == -1) {
 			text = text.replaceAll("'","''");
 			text = "'" + text + "'";
 			return text;
 		}
+		// "..." や [[...]] がObjectFunctorのオブジェクトになったため、ここに来ることはもはやないはず
+		return getStringLiteralText(text);
+	}
+	/** 指定された文字列を表す文字列リテラルのテキスト表現を取得する。
+	 * 例えば a"b を渡すと "a\"b" が返る。
+	 * <p>StringFunctorクラスのクラスメソッドにするのが正しい。*/
+	static final String getStringLiteralText(String text) {
 		text = text.replaceAll("\\\\","\\\\\\\\");
 		text = text.replaceAll("\"","\\\\\"");
 		text = text.replaceAll("\n","\\\\n");
@@ -134,8 +143,9 @@ public class Functor {
 	public boolean isSymbol() {
 		return !name.equals("");
 	}
+	/** オーバーライドしない限りgetAbbrName()と同じ。*/
 	public String toString() {
-		return strFunctor.length() > 10 ? strFunctor.substring(0, 10) : strFunctor;
+		return getAbbrName();
 	}
 	public int hashCode() {
 		return strFunctor.hashCode();

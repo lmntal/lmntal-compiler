@@ -6,8 +6,7 @@ package runtime;
 public class FloatingFunctor extends Functor {
 	double value;
 	public FloatingFunctor(double value) { super("",1);  this.value = value; }
-	public String toString() { return "" + value; }
-	public String getName() { return toString(); }
+	public String getName() { return "" + value; }
 	public int hashCode() { return (int)(Double.doubleToLongBits(value) >> 32); }
 	public double floatValue() { return value; }
 	public boolean equals(Object o) {

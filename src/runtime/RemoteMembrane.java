@@ -130,7 +130,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		return a;
 	}
 	public void alterAtomFunctor(Atom atom, Functor func) {
-		send("ALTERATOMFUNCTOR",getAtomID(atom),func.toString());
+		send("ALTERATOMFUNCTOR",getAtomID(atom),func.getName()); // getNameでは、正確な転送は期待できない
 		super.alterAtomFunctor(atom,func);
 	}
 	public void removeAtom(Atom atom) {

@@ -270,10 +270,11 @@ public class RuleCompiler {
 		guardLibrary2.put(new Functor("*",    3), new int[]{ISINT,  ISINT,   Instruction.IMUL, ISINT});
 		guardLibrary2.put(new Functor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV, ISINT});
 		guardLibrary2.put(new Functor("mod",  3), new int[]{ISINT,  ISINT,   Instruction.IMOD, ISINT});
-		guardLibrary1.put(new Functor("int",  1), new int[]{ISINT});
-		guardLibrary1.put(new Functor("float",1), new int[]{ISINT});
-		guardLibrary1.put(new Functor("int",  2), new int[]{ISINT,           Instruction.INT2FLOAT, ISFLOAT});
-		guardLibrary1.put(new Functor("float",2), new int[]{ISFLOAT,         Instruction.FLOAT2INT, ISINT});
+		guardLibrary1.put(new Functor("int",   1), new int[]{ISINT});
+		guardLibrary1.put(new Functor("string",1), new int[]{Instruction.ISSTRING});
+		guardLibrary1.put(new Functor("float", 1), new int[]{ISFLOAT});
+		guardLibrary1.put(new Functor("int",   2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
+		guardLibrary1.put(new Functor("float", 2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
 	}	
 	/** ガードをコンパイルする（仮） */
 	private void compile_g() {
