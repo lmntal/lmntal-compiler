@@ -216,14 +216,15 @@ public class HeadCompiler {
 				// 子膜を変数に取得する
 				submempath = varcount++;
 				match.add(Instruction.anymem(submempath, thismempath));
-				Iterator it2 = mem.mems.iterator();
-				while (it2.hasNext()) {
-					Membrane othermem = (Membrane)it2.next();
-					int other = memToPath(othermem);
-					if (other == UNBOUND) continue;
-					//if (othermem == submem) continue;
-					match.add(new Instruction(Instruction.NEQMEM, submempath, other));
-				}
+// NEQMEM は不要になっているが、参考のためにコードは残しておく。
+//				Iterator it2 = mem.mems.iterator();
+//				while (it2.hasNext()) {
+//					Membrane othermem = (Membrane)it2.next();
+//					int other = memToPath(othermem);
+//					if (other == UNBOUND) continue;
+//					//if (othermem == submem) continue;
+//					match.add(new Instruction(Instruction.NEQMEM, submempath, other));
+//				}
 				mempath.put(submem, new Integer(submempath));
 			}
 			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する

@@ -297,7 +297,18 @@ public class RuleCompiler {
 	private int buildRHSMem(Membrane mem) {
 		Env.c("RuleCompiler::buildRHSMem" + mem);
 		int procvarcount = mem.processContexts.size();
-		Iterator it = mem.mems.iterator();
+		Iterator it = mem.processContexts.iterator();
+		while (it.hasNext()) {
+			ProcessContext pc = (ProcessContext)it.next();
+			if (pc.src.mem == null) {
+				System.out.println("SYSTEM ERROR: ProcessContext.src.mem is not set");
+			}
+			if (rhsmemToPath(mem) != lhsmemToPath(pc.src.mem)) {
+				body.add(new Instruction(Instruction.MOVECELLS,
+					rhsmemToPath(mem), lhsmemToPath(pc.src.mem) ));
+			}
+		}
+		it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
 			int submempath = varcount++;
@@ -309,17 +320,6 @@ public class RuleCompiler {
 					rhsmemToPath(mem), rhsmemToPath(submem)));
 			}
 			procvarcount += subcount;
-		}
-		it = mem.processContexts.iterator();
-		while (it.hasNext()) {
-			ProcessContext pc = (ProcessContext)it.next();
-			if (pc.src.mem == null) {
-				System.out.println("SYSTEM ERROR: ProcessContext.src.mem is not set");
-			}
-			if (rhsmemToPath(mem) != lhsmemToPath(pc.src.mem)) {
-				body.add(new Instruction(Instruction.MOVECELLS,
-					rhsmemToPath(mem), lhsmemToPath(pc.src.mem) ));
-			}
 		}
 		return procvarcount;
 	}
