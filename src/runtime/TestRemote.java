@@ -85,8 +85,11 @@ class TestRemote{
 		
 		Thread[] t = new Thread[Thread.activeCount()];
 		Thread.enumerate(t);
-		for (int i = 0; i < t.length; i++) 
-			System.out.println(t[i]);
+		for (int i = 0; i < t.length; i++) {
+			//System.out.println(t[i]);
+			t[i].getThreadGroup().list();
+		}
+
 		
 		//終了処理
 //		LMNtalRuntimeManager.disconnectFromDaemon(); //これだと遠隔ノードへのコネクション張りっぱなし、slave runtimeあがりっぱなし
