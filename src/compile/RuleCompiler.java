@@ -96,7 +96,7 @@ public class RuleCompiler {
 		
 		theRule.showDetail();
 		
-		// TODO 以下の3行は、RulesetCompiilerが行うべきである。また、整合性検査の都合上、ルール内ルールの方から先にコンパイルすべきである。
+		// TODO 以下の3行は、RulesetCompilerが行うべきである。また、整合性検査の都合上、ルール内ルールの方から先にコンパイルすべきである。
 		// compiler.structure.Membrane::rulesetの参照を外側ルールのコンパイルで使用するのは構わない。
 		
 		((runtime.InterpretedRuleset)rs.parent.ruleset).rules.add(theRule);
@@ -248,7 +248,7 @@ public class RuleCompiler {
 			lhsmempath.put(lhsfreemems.get(i), new Integer(i));
 		}
 		for (int i = 0; i < lhsatoms.size(); i++) {
-			lhsatompath.put(lhsatoms.get(i), new Integer( lhsfreemems.size() + 1 ));
+			lhsatompath.put(lhsatoms.get(i), new Integer( lhsfreemems.size() + i ));
 		}
 		//Env.p("lhsmempaths"+lhsmempaths);
 	}
