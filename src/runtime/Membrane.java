@@ -232,6 +232,8 @@ public final class Membrane extends AbstractMembrane {
 	 * @return つねにtrue */
 	public boolean blockingLock() {
 		if (lock()) return true;
+		//(mizuno) TODO ここでロックが解放されると、デッドロックする。
+		//         上の分をsynchronizedの中に入れると大丈夫なようだが、それでよいのか？
 		synchronized(task) {
 			((Task)task).requestLock();
 			do {
