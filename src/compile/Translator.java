@@ -73,6 +73,18 @@ public class Translator {
 		writer.write("import java.io.*;\n");
 		writer.write("import daemon.IDConverter;\n");
 		writer.write("\n");
+		{
+			Iterator il0 = Inline.inlineSet.values().iterator();
+			while(il0.hasNext()) {
+				runtime.InlineUnit iu = (runtime.InlineUnit)il0.next();
+				Iterator il1 = iu.defs.iterator();
+				while(il1.hasNext()) {
+					writer.write((String)il1.next());
+					writer.write("\n");
+				}
+			}
+		}
+		writer.write("\n");
 		writer.write("public class " + className + " extends Ruleset {\n");
 		writer.write("	private static final " + className + " theInstance = new " + className + "();\n");
 		writer.write("	public static " + className + " getInstance() {\n");
