@@ -41,6 +41,7 @@ public class Compactor {
 			if (eliminateCommonSubexpressions(insts))  changed = true;
 			if (eliminateRedundantInstructions(insts))  changed = true;
 		}
+		packUnifyLinks(insts);
 		varcount = compactBody(insts, varcount);	// 圧縮 (CISC化）
 		varcount = renumberLocals(insts, varcount);	// 局所変数を振りなおす
 		spec.updateSpec(formals,varcount);
@@ -101,7 +102,7 @@ public class Compactor {
 				continue;
 
 			// newlink[atom1,pos1,atom2,pos2,mem1]
-			// ==> alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];alloclinks[link1,link2,mem1]
+			// ==> alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
 			case Instruction.LOCALNEWLINK:
 			case Instruction.NEWLINK:
 				insts.remove(i);
@@ -211,6 +212,24 @@ public class Compactor {
 				size -= 2;
 				continue;
 			}
+
+			// getlink[!link1,atom1,pos1];alloclink[!link2,atom2,pos2];unifylinks[!link2,!link1(,mem2)]
+			// ==> relink[atom2,pos2,atom1,pos1(,mem2)]
+			if (inst0.getKind() == Instruction.GETLINK
+			 && inst1.getKind() == Instruction.ALLOCLINK
+			 && inst2.getKind() == Instruction.UNIFYLINKS
+			 && inst0.getIntArg1() == inst2.getIntArg2() && inst1.getIntArg1() == inst2.getIntArg1() 
+			 && Instruction.getVarUseCountFrom(insts, (Integer)inst0.getArg1(), i + 3) == 0
+			 && Instruction.getVarUseCountFrom(insts, (Integer)inst1.getArg1(), i + 3) == 0) {
+				insts.remove(i); insts.remove(i); insts.remove(i);
+				inst = new Instruction(Instruction.RELINK,
+								inst1.getIntArg2(), inst1.getIntArg3(),
+								inst0.getIntArg2(), inst0.getIntArg3() );
+				insts.add(i,inst);
+				if (inst2.data.size() == 3) inst.add(inst2.getArg3());
+				size -= 2;
+				continue;
+			}
 			
 			// getfunc[!func1,atom1];getfunc[!func2,atom2];eqfunc[!func1,!func2]
 			// ==> samefunc[atom1,atom2]
@@ -258,7 +277,66 @@ public class Compactor {
 	}
 	
 	////////////////////////////////////////////////////////////////
+	// CISC化用
+
+	/** UnifyLinks命令の引数に渡されるリンクの取得をできるだけ遅延する（仮）
+	 * <p>とりあえず取得命令がALLOCLINKまたはLOOKUPLINKのときのみ機能する。*/
+	public static void packUnifyLinks(List insts) {
+		for (int i = insts.size(); --i >= 1; ) {
+			Instruction inst = (Instruction)insts.get(i);
+			if (inst.getKind() == Instruction.UNIFYLINKS) {
+				int stopper = i;
+				for (int k = i; --k >= 1; ) {
+					Instruction inst2 = (Instruction)insts.get(k);
+					switch (inst2.getKind()) {
+					case Instruction.ALLOCLINK:
+					case Instruction.LOOKUPLINK:
+						if ( inst2.getIntArg1() == inst.getIntArg1()
+						  || inst2.getIntArg1() == inst.getIntArg2() ) {
+							delayAllocLinkInstruction(insts,k,stopper);
+							// 1回目のinst2がinstの第2引数リンク生成であり、inst直前に移動できた場合、
+							// 2回目のinst2は1回目のinst2を追い越さないようにする
+							if (inst2.getIntArg1() == inst.getIntArg2() && insts.get(stopper - 1) == inst2)
+								stopper--;
+						}
+					}	
+				}
+			}
+		}
+	}
+	/** insts[i]のALLOCLINK/LOOKUPLINK命令をできるだけ遅延する。ただしinsts[stopper]は追い越さない。*/
+	public static void delayAllocLinkInstruction(List insts, int i, int stopper) {
+		Instruction inst = (Instruction)insts.get(i);
+		while (++i < stopper) {
+			// insts[i - 1]はALLOCLINK/LOOKUPLINK命令
+			Instruction inst2 = (Instruction)insts.get(i);
+			
+			//     ALLOCLINK[link0,...];alloclink[link1,atom1,pos1]
+			// ==> alloclink[link1,atom1,pos1];ALLOCLINK[link0,...]
+			if (inst2.getKind() == Instruction.ALLOCLINK) {}
+			//	   ALLOCLINK[link0,...];unifylinks[link1,link2(,mem1)]
+			// ==> unifylinks[link1,link2(,mem1)];ALLOCLINK[link0,...]
+			// if link0 != link1 && link0 != link2
+			else if (inst2.getKind() == Instruction.UNIFYLINKS
+			 && inst.getIntArg1() != inst2.getIntArg1()
+			 && inst.getIntArg1() != inst2.getIntArg2() ) {}
+			//	   ALLOCLINK[link0,...];getlink[link1,atom1,pos1]
+			// ==> getlink[link1,atom1,pos1];ALLOCLINK[link0,...]
+			else if (inst2.getKind() == Instruction.GETLINK) {}
+			//	   ALLOCLINK[link0,...];lookuplink[link2,set1,link1]
+			// ==> lookuplink[link2,set1,link1];ALLOCLINK[link0,...]
+			// if link0 != link1
+			else if (inst2.getKind() == Instruction.LOOKUPLINK
+			 && inst.getIntArg1() != inst2.getIntArg3() ) {}
+			else break;
+			
+			insts.remove(i - 1);
+			insts.add(i, inst);
+		}
+	}
 	
+	////////////////////////////////////////////////////////////////
+
 	/** 共通部分式を除去する
 	 * @return changed */
 	public static boolean eliminateCommonSubexpressions(List insts) {
