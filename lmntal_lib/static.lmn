@@ -1,0 +1,7 @@
+static : {
+	system_ruleset.
+	({mv($m1),$p,@q},{name($m2),$r,@s}:-$m1=$m2|{name($m2),$p,@q,$r,@s}).
+	({{mv($m),$p,@q},$r,@s}:-unary($m)|{$r,@s},{mv($m),$p,@q}).
+	({find_and_link($m1,X),ready($m2), $p, @q}:-$m1=$m2|{msg(X,$m2), $p, @q}).
+	(call($m,$method,X):-unary($m),unary($method)|{mv($m).find_and_link($method,X).}).
+}.

@@ -1,0 +1,22 @@
+// Semaphore
+
+sem : {
+	name(sem).
+	static.load.
+	
+	// public static method interface defs.
+	sem.new(ready).
+	sem.up(ready).
+	
+	sem.new(msg($self))
+	 :- unary($self)|{sem($self), state(notbusy)}, sem.new(ready).
+	
+	// up -> state(busy) if state(notbusy)
+	sem.up(msg($self)), {sem($name), state(notbusy)}
+	 :- $self==$name | {sem($name), state(busy)}, allowed($self), sem.up(ready).
+	
+	// down -> state(notbusy)
+	sem.down(msg($self)), {sem($name), state(busy)}
+	 :- $self==$name | {sem($name), state(notbusy)}, sem.down(ready).
+}.
+

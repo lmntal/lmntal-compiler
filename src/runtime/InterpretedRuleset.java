@@ -613,7 +613,7 @@ class InterpretiveReactor {
 					
 				case Instruction.ISUNARY: // [atom]
 					Functor f = atoms[inst.getIntArg1()].getFunctor();
-					// まくを超えたリンクが unary かどうかが判断できない。仕様？？
+					// TODO 中島さん まくを超えたリンクが unary かどうかが判断できない。OUTSIDE_PROXY を見てる
 //					if(f.equals(Functor.OUTSIDE_PROXY)) {
 //						f = atoms[inst.getIntArg1()].args[0].getAtom().args[1].getAtom().getFunctor();
 //					}

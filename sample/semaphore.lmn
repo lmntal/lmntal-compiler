@@ -1,0 +1,7 @@
+call(sem, sem.new, sem1).
+{
+	call(sem, sem.up,    sem1).
+	allowed(sem1) :- 
+	call(sem, sem.down,  sem1).
+}
+
