@@ -508,4 +508,4 @@ L2=null,
 	query(QUERY),
 	active,
 	choice(null) % Choice Point
-}, QUERY=[S4_3, V1_1, S1_3] % [hoge, a, X]
+}, QUERY=[S4_3, S1_3, V1_1] % [hoge, a, X]
