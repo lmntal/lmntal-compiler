@@ -1,16 +1,15 @@
 package daemon;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 
-import java.io.IOException;
-import java.net.Socket;
-
 import runtime.Env;
+import util.HybridInputStream;
+import util.HybridOutputStream;
 
 /** ソケット通信路を表すクラス。
  * <p>LMNtalDaemonMessageProcessor および LMNtalRuntimeMessageProcessor の親クラス。
@@ -19,8 +18,8 @@ import runtime.Env;
 public class LMNtalNode {
 	private Socket socket = null;
 	private InetAddress ip = null;
-	private BufferedReader in;
-	private BufferedWriter out;
+	private HybridInputStream in;
+	private HybridOutputStream out;
 	
 //	public static LMNtalNode connect(String hostname, int port) {
 //		try {
@@ -39,8 +38,8 @@ public class LMNtalNode {
 	public LMNtalNode(Socket socket, InetAddress ip) {
 		try {
 			this.ip = ip;
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			in = new HybridInputStream(new BufferedInputStream(socket.getInputStream()));
+			out = new HybridOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			this.socket = socket;
 		} catch (Exception e) {}
 	}
@@ -63,10 +62,10 @@ public class LMNtalNode {
 	////////////////////////////////////////////////////////////////
 	// 情報の取得
 	
-	public BufferedReader getInputStream() {
+	public HybridInputStream getInputStream() {
 		return in;
 	}
-	public BufferedWriter getOutputStream() {
+	public HybridOutputStream getOutputStream() {
 		return out;
 	}
 	public Socket getSocket() {
@@ -152,10 +151,8 @@ public class LMNtalNode {
 	protected String readLine() throws IOException {
 		return in.readLine();
 	}
-	protected byte[] readBytes(int bytes) throws IOException {
-		byte[] data = {};
-		//data = in.readBytes(bytes); // TODO 【実装】（有志B）バイト列をソケットで送受信する
-		return data;
+	protected byte[] readBytes() throws IOException {
+		return in.readBytes();
 	}
 	
 /*

@@ -70,10 +70,11 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				String content = input + "\n";
 				if (parsedInput[2].equalsIgnoreCase("RAW")) {
 					try {
-						int bytes = Integer.parseInt(parsedInput[3]);
-						byte[] data = readBytes(bytes);
-						readLine();	// 改行文字を読み飛ばす
-						content += data; // todo 文字列結合でいいのか調べる
+						//バイト数指定や、末尾の改行記号はreadBytes内で処理
+						byte[] data = readBytes();
+						//文字列結合の場合はバイト数をとっておく必要がある。
+						//todo バイト数の結合方法がこんなのでよいか調べる(…たぶんだめ。)
+						content += data.length + " " + data; // todo 文字列結合でいいのか調べる
 					}
 					catch (Exception e) {
 						content = "RES " + msgid + " FAIL\n";

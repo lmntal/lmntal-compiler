@@ -1,16 +1,23 @@
 package daemon;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-//import java.net.InetAddress;
 import java.net.Socket;
-
-import runtime.*;
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+
+import runtime.AbstractLMNtalRuntime;
+import runtime.AbstractMembrane;
+import runtime.Atom;
+import runtime.Env;
+import runtime.Functor;
 import runtime.LMNtalRuntimeManager;
+import runtime.Membrane;
+import runtime.RemoteLMNtalRuntime;
+import runtime.RemoteTask;
+import runtime.Ruleset;
+import util.HybridOutputStream;
 
 /**
  * ランタイムが生成するオブジェクト。
@@ -72,7 +79,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	 * @return 返答に含まれるオブジェクト */
 	public Object sendWaitObject(String fqdn, String command){
 		try {
-			BufferedWriter out = getOutputStream();
+			HybridOutputStream out = getOutputStream();
 			String msgid = LMNtalDaemon.makeID();
 			out.write("CMD " + msgid + " \"" + fqdn + "\" " + rgid + " " + command + "\n");
 			out.flush();
@@ -175,10 +182,8 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				Object res;
 				if (content.equalsIgnoreCase("RAW")) {
 					try {
-						int bytes = Integer.parseInt(parsedInput[3]);
-						byte[] data = readBytes(bytes);
-						readLine();	// 改行文字を読み飛ばす
-						res = data;
+						//バイト数指定や、末尾の改行記号はreadBytes内で処理
+						res = readBytes();
 					} catch (Exception e) {
 						res = "FAIL";
 					}
