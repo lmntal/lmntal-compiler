@@ -649,8 +649,9 @@ class InterpretiveReactor {
 					// すべて仕様です。というか、リンク先は親膜にあるかもしれないわけですし、
 					// 本膜の親膜にあるアトムを調べることは許されていません。
 					// (hara) じゃそういうときは「失敗」ということでいいですかねぇ
-					if(f.equals(Functor.OUTSIDE_PROXY)) return false;
-					if(f.equals(Functor.INSIDE_PROXY)) return false;
+					// (n-kato) はい。失敗して下さい。ちなみに$in,$outのarityは2なので次の2行は省略しました。
+					//if(f.equals(Functor.OUTSIDE_PROXY)) return false;
+					//if(f.equals(Functor.INSIDE_PROXY)) return false;
 					if (f.getArity() != 1) return false;
 					break; // n-kato
 //				case Instruction.ISUNARYFUNC: // [func]

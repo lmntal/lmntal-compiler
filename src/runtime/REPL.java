@@ -6,8 +6,32 @@ package runtime;
 
 import java.io.EOFException;
 import java.io.StringReader;
-import org.gnu.readline.Readline;
-import org.gnu.readline.ReadlineLibrary;
+
+//import org.gnu.readline.Readline;
+//import org.gnu.readline.ReadlineLibrary;
+
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+class Readline {
+	static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+	static void load(int dummy) {}
+	static void initReadline(String dummy) {}
+	static String readline(String prompt) throws IOException {
+		System.out.print(prompt);
+		try {
+			String line = in.readLine();
+			if (line.length() == 0) return null;
+			return line;
+		}
+		catch (NullPointerException e) {}
+		throw new EOFException();
+	}
+	static void cleanup() {}
+}
+class ReadlineLibrary {
+	static final int PureJava = 0;
+}
 
 /**
  * インタラクティブモード。(Read-Eval-Print-Loop)
@@ -42,7 +66,7 @@ public class REPL {
 				}
 			});
 		
-		System.out.println("        LMNtal version 0.61.20040130");
+		System.out.println("        LMNtal version 0.61.20040206");
 		System.out.println("");
 		System.out.println("Type h to see help.");
 		System.out.println("Type q to quit.");
