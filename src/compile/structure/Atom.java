@@ -9,7 +9,7 @@ import java.util.Arrays;
  * @author Takahiko Nagata
  * @date 2003/10/28
  */
-public final class Atom {
+public class Atom {
 	/**
 	 * ¿ÆËì
 	 */
