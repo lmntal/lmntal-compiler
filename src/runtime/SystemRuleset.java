@@ -244,5 +244,6 @@ public final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 	}
+	public int getId() { return -1; }
 	public String getGlobalRulesetID() { return "version+$systemruleset"; }
 }

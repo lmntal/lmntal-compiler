@@ -4,14 +4,20 @@
  */
 package compile;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import runtime.Env;
 import runtime.InlineUnit;
+import runtime.InterpretedRuleset;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRuleset;
-import compile.structure.*;
-import runtime.InterpretedRuleset;
+
+import compile.structure.Atom;
+import compile.structure.Membrane;
+import compile.structure.RuleStructure;
 
 /**
  * ルールセットを生成して返す。
@@ -54,7 +60,10 @@ public class RulesetCompiler {
 		rs.rightMem = m;
 		root.rules.add(rs);
 		processMembrane(root, unitName);
-		Module.resolveModules(root);
+		// TODO 安定してきたら、解釈実行する場合でもライブラリは Java に変換したものを利用するようにする。
+		if (Env.fInterpret) {
+			Module.resolveModules(root);
+		}
 		return root;
 	}
 	
@@ -138,6 +147,13 @@ public class RulesetCompiler {
 	}
 	public static Ruleset compileRuleset(InterpretedRuleset rs) {
 		// todo ここでグローバルルールセットIDを生成するとよいはず
-		return rs;
+		if (!Env.fInterpret) {
+			try {
+				new Translator(rs).translate();
+			} catch (IOException e) {
+				Env.e("Failed to write Translated File. " + e.getLocalizedMessage());
+			}
+		}
+		return rs; //返すルールセットはそのまま。どうするのが良いのだろうか？
 	}
 }

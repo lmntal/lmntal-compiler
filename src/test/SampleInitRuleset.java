@@ -44,6 +44,7 @@ public final class SampleInitRuleset extends Ruleset {
 
 		return true;
 	}
+	public int getId() { return 0; }
 	public String getGlobalRulesetID() { return ""; }	
 	
 }
@@ -80,5 +81,6 @@ final class SampleRuleset extends Ruleset {
 		mem.newAtom(new Functor("y", 0));
 		return true;
 	}
+	public int getId() { return 1; }
 	public String getGlobalRulesetID() { return ""; }	
 }

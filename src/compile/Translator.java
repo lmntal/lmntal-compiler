@@ -1,7 +1,10 @@
 package compile;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,10 +12,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import runtime.Env;
 import runtime.Functor;
 import runtime.Inline;
+import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.IntegerFunctor;
@@ -40,38 +48,273 @@ public class Translator {
 	/**この Ruleset 内で利用している Functor についての、Functor -> 変数名*/
 	private HashMap funcVarMap = new HashMap();
 
+	/** 作業用一時ディレクトリ*/
+	private static File baseDir;
+	/** モジュールクラスを生成するディレクトリ */
+	private static File moduleDir;
+	/** 変換したファイルをおくディレクトリ */
+	private static File dir;
+	/** LMNtalソースファイル名 */
+	private static String sourceName;
+
+	//////////////////////////////////////////////////////////////////
+	// static メソッド
+	
+	/**
+	 * 指定されたルールセットに対応するクラス名を取得する。
+	 * @param ruleset ルールセット
+	 * @return 変換後のクラス名
+	 */
+	public static String getClassName(Ruleset ruleset) {
+		return "Ruleset" + ruleset.getId();
+	}
+	
+	/**
+	 * Translator を初期化する。
+	 * 同一のソースに対する一連の Translator の前に呼び出す必要がある。
+	 * @param unitName LMNtalソースファイル名
+	 */
+	public static void init(String unitName) throws IOException {
+		if (unitName.equals(InlineUnit.DEFAULT_UNITNAME)) {
+			sourceName = "a";
+		} else {
+			sourceName = new File(unitName).getName();
+			if (sourceName.startsWith(".")) {
+				sourceName = sourceName.substring(1);
+			}
+			int pos = sourceName.indexOf('.');
+			if (pos >= 0) {
+				sourceName = sourceName.substring(0, pos);
+			}
+		}
+		//作業用ディレクトリ作成
+		String s = System.getProperty("java.io.tmpdir") + "lmn_translate";
+		int i = 1;
+		while (true) {
+			baseDir = new File(s + i).getCanonicalFile();
+			if (baseDir.mkdir()) {
+				break;
+			}
+			i++;
+		}
+		moduleDir = new File(baseDir, "translated");
+		moduleDir.mkdir();
+		if (Env.fLibrary) {
+			dir = new File(moduleDir, sourceName);
+			dir.mkdir();
+		} else {
+			dir = moduleDir;
+		}
+	}
+	/**
+	 * メイン関数を生成する。
+	 * @param initialRuleset 初期データ生成ルールセット
+	 * @throws IOException IOエラーが発生した場合
+	 */
+	public static void genMain(Ruleset initialRuleset) throws IOException {
+		if (Env.fLibrary) return;
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(baseDir, "Main.java")));
+		writer.write("public class Main {\n");
+		writer.write("	public static void main(String[] args) {\n");
+		writer.write("		runtime.FrontEnd.run(translated." + getClassName(initialRuleset) + ".getInstance());\n"); //todo 引数の処理
+		writer.write("	}\n");
+		writer.write("}\n");
+		writer.close();
+	}
+	/**
+	 * モジュールクラスを生成する。
+	 * @throws IOException IOエラーが発生した場合
+	 */
+	public static void genModules() throws IOException {
+		Iterator moduleIterator = Module.memNameTable.keySet().iterator();
+		while (moduleIterator.hasNext()) {
+			String moduleName = (String)moduleIterator.next();
+			if (Env.fLibrary && !moduleName.equals(sourceName)) {
+				continue;
+			}
+			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(moduleDir, "Module_" + moduleName + ".java")));
+			writer.write("package translated;\n");
+			if (Env.fLibrary) {
+				writer.write("import translated." + sourceName + ".*;\n");
+			}
+			writer.write("import runtime.Ruleset;\n");
+			writer.write("public class Module_" + moduleName + "{\n");
+			writer.write("	private static Ruleset[] rulesets = {");
+			boolean first = true;
+			Iterator rulesetIterator = ((compile.structure.Membrane)Module.memNameTable.get(moduleName)).rulesets.iterator();
+			while (rulesetIterator.hasNext()) {
+				if (!first) writer.write(", ");
+				writer.write(getClassName((Ruleset)rulesetIterator.next()) + ".getInstance()");
+			}
+			writer.write("};\n");
+			writer.write("	public static Ruleset[] getRulesets() {\n");
+			writer.write("		return rulesets;\n");
+			writer.write("	}\n");
+			writer.write("}\n");
+			writer.close();
+		}
+	}
+
+	/**
+	 * 変換した Java ソースファイルをコンパイルし、JARファイルを生成する。
+	 * @throws IOException IOエラーが発生した場合
+	 */
+	public static void genJAR() throws IOException {
+		//コンパイル
+		if (!Env.fLibrary) {
+			if (!compile(new File(baseDir, "Main.java"))) {
+				return;
+			}
+		}
+		Iterator moduleIterator = Module.memNameTable.keySet().iterator();
+		while (moduleIterator.hasNext()) {
+			String moduleName = (String)moduleIterator.next();
+			if (Env.fLibrary && !moduleName.equals(sourceName)) {
+				continue;
+			}
+			if (!compile(new File(moduleDir, "Module_" + moduleName + ".java"))) {
+				return;
+			}
+		}
+
+		//JARの生成
+		Manifest mf = new Manifest();
+		Attributes att = mf.getMainAttributes();
+		att.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+		JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream("a.jar")), mf);
+		putToJar(out, "", baseDir);
+		out.close();
+		
+		//一時ファイルの削除
+		if (!delete(baseDir)) {
+			Env.warning("failed to delete temprary files");
+		}
+	}
+//	/**
+//	 * 指定されたディレクトリから再帰的に .java ファイルを探し、それがまだコンパイルされていなければコンパイルする。
+//	 * @param directory .java ファイルを探すディレクトリ
+//	 * @return 全ての .java ファイルのコンパイルに成功した場合 true
+//	 * @throws IOException IOエラーが発生した場合
+//	 */
+//	private static boolean compileDir(File directory) throws IOException {
+//		String[] files = directory.list();
+//		for (int i = 0; i < files.length; i++) {
+//			File f = new File(directory, files[i]);
+//			if (f.isDirectory()) {
+//				if (!compileDir(f)) {
+//					return false;
+//				}
+//			} else	if (files[i].endsWith(".java")) {
+//				String classFileName = files[i].substring(0, files[i].length() - 5) + ".class";
+//				File classFile = new File(directory, classFileName);
+//				if (!classFile.exists()) {
+//					if (!compile(f)) {
+//						return false;
+//					}
+//				}
+//			}
+//		}
+//		return true;
+//	}
+	/**
+	 * 変換したファイルをコンパイルする。
+	 * @param file コンパイルするファイル
+	 * @throws IOException IOエラーが発生した場合
+	 * @return コンパイルに成功した場合true
+	 */
+	private static boolean compile(File file) throws IOException {
+		String classpath = System.getProperty("java.class.path");
+		//TODO クラスパスに空白が含まれている場合への対処
+		String command = "javac -cp " + classpath + " -sourcepath \"" + baseDir + "\" \"" + file.getCanonicalPath() + "\"";
+		Env.d(command);
+		Process javac = Runtime.getRuntime().exec(command);
+		javac.getInputStream().close();
+		javac.getErrorStream().close();
+		try {
+			if (javac.waitFor() != 0) {
+				Env.e("Failed to compile the translated files."); 
+				return false;
+			}
+			return true;
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	/**
+	 * ディレクトリ内のファイル Jar ファイルに出力する。ディレクトリは再帰的に処理される。
+	 * @param out 出力する JarOutputStream
+	 * @param relativeDir "/"で区切られた、相対パス。Jar への出力に利用する。
+	 * @param directory 処理するディレクトリを表す File インスタンス。
+	 * @throws IOException IOエラーが発生した場合
+	 */
+	private static void putToJar(JarOutputStream out, String relativeDir, File directory) throws IOException {
+		String[] files = directory.list();
+		byte[] buf = new byte[8192];
+		for (int i = 0; i < files.length; i++) {
+			File f = new File(directory, files[i]);
+			if (f.isDirectory()) {
+				out.putNextEntry(new JarEntry(relativeDir + files[i] + "/"));
+				putToJar(out, relativeDir + files[i] + "/", f);
+			} else {
+				out.putNextEntry(new JarEntry(relativeDir + files[i]));
+				FileInputStream in = new FileInputStream(f);
+				int size;
+				while ((size = in.read(buf)) != -1) {
+					out.write(buf, 0, size);
+				}
+				in.close();
+			}
+		}
+	}
+	/**
+	 * 指定したディレクトリを削除する。
+	 * 子ディレクトリ・ファイルをすべて削除してから、このディレクトリを削除する。
+	 * @param directory 削除するディレクトリ
+	 * @return 削除に成功した場合は true
+	 */
+	private static boolean delete(File directory) {
+		String[] files = directory.list();
+		for (int i = 0; i < files.length; i++) {
+			File f = new File(directory, files[i]);
+			if (f.isDirectory()) {
+				delete(f);
+			} else {
+				f.delete();
+			}
+		}
+		return directory.delete();
+	}
+	
+	////////////////////////////////////////////////////////////////////////
+	// インスタンスメソッド
+	
 	/**
 	 * 指定された InterpretedRuleset を Java に変換するためのインスタンスを生成する。
 	 * @param ruleset 変換するルールセット
 	 * @throws IOException Java ソースの出力に失敗した場合
 	 */
 	public Translator(InterpretedRuleset ruleset) throws IOException{
-		className = "Ruleset" + ruleset.getId();
-//暫定対応
-		if (translated.contains(className)) {
-			return;
-		}
-		outputFile = new File(className + ".java");
+		className = getClassName(ruleset);
+		outputFile = new File(dir, className + ".java");
 		writer = new BufferedWriter(new FileWriter(outputFile));
 		this.ruleset = ruleset;
 	}
-	private static HashSet translated = new HashSet();
 	/**
 	 * Javaソースを出力する。
-	 * @param genMain main 関数を生成する場合は true。初期データ生成ルールに対して利用する。
 	 * @throws IOException Java ソースの出力に失敗した場合
 	 */
-	public void translate(boolean genMain) throws IOException {
-//暫定対応
-		if (translated.contains(className)) {
-			return;
+	public void translate() throws IOException {
+		if (Env.fLibrary) {
+			writer.write("package translated." + sourceName + ";\n");
+		} else {
+			writer.write("package translated;\n");
 		}
-		translated.add(className);
-		
 		writer.write("import runtime.*;\n");
 		writer.write("import java.util.*;\n");
 		writer.write("import java.io.*;\n");
 		writer.write("import daemon.IDConverter;\n");
+		writer.write("import module.*;\n");
 		writer.write("\n");
 		{
 			Iterator il0 = Inline.inlineSet.values().iterator();
@@ -91,6 +334,9 @@ public class Translator {
 		writer.write("		return theInstance;\n");
 		writer.write("	}\n");
 		writer.write("	private int id = " + ruleset.getId() + ";\n");
+		writer.write("	public int getId() {\n");
+		writer.write("		return id;\n");
+		writer.write("	}\n");
 		writer.write("	private String globalRulesetID;\n");
 		writer.write("	public String getGlobalRulesetID() {\n");
 		writer.write("		if (globalRulesetID == null) {\n");
@@ -152,19 +398,18 @@ public class Translator {
 			} else if (func instanceof IntegerFunctor) {
 				writer.write(" = new IntegerFunctor(" + ((IntegerFunctor)func).getValue() + ");\n");
 			} else {
-				writer.write(" = new Functor(\"" + escapeString(func.getName()) + "\", " + func.getArity() + ");\n");
+				String path = "null";
+				if (func.getPath() != null) {
+					path = "\"" + escapeString(func.getPath()) + "\"";
+				}
+				writer.write(" = new Functor(\"" + escapeString(func.getName()) + "\", " + func.getArity() + ", " + path + ");\n");
 			}
 		}
 		
-		if (genMain) {
-			writer.write("	public static void main(String[] args) {\n");
-			writer.write("		runtime.FrontEnd.run(" + className + ".getInstance());\n"); //todo 引数の処理
-			writer.write("	}\n");
-		}
-
 		writer.write("}\n");
 		writer.close();
 	}
+
 	/**
 	 * 変換すべき InstructionList を追加する。
 	 * 同じインスタンスに対して複数回呼び出した場合は、２回目以降は何もしない。
@@ -214,7 +459,12 @@ public class Translator {
 		for (int i = formals; i < locals; i++) {
 			writer.write("		Object var" + i + ";\n");
 		}
-		
+
+		//以下の変数は、変換したソース内で自由に利用できる。
+		//ローカル変数名の衝突を避けるため、最初に1回だけ定義して利用することにしている。
+		//利用する場合は、必ず値を代入してから使うこと。
+		//また、translateメソッドの再起呼び出しをすると、変数の値が書き換えられていることがあるので
+		//再起呼び出しの後には（再度代入せずに）利用してはいけない。
 		writer.write("		Atom atom;\n");
 		writer.write("		Functor func;\n");
 		writer.write("		Link link;\n");
@@ -267,19 +517,7 @@ public class Translator {
 			writer.write("// " + a + "\n");
 
 			switch (inst.getKind()) {
-				//メモ：LOCALHOGEはHOGEと同じコードでいい。
-				//nakajima: 2003-12-12
-				//メモ：コメントは引数
-				//nakajima: 2003-12-12
-				//====その他====ここから====
-				case Instruction.DUMMY :
-					writer.write(tabs + "System.out.println(\n");
-					writer.write(tabs + "	\"SYSTEM ERROR: dummy instruction remains: \" + inst);\n");
-					break;
-					//case Instruction.UNDEF:
-					//	break; //n-kato
-					//====その他====ここまで====
-					//====アトムに関係する出力する基本ガード命令====ここから====
+				//====アトムに関係する出力する基本ガード命令====ここから====
 				case Instruction.DEREF : //[-dstatom, srcatom, srcpos, dstpos]
 					writer.write(tabs + "link = ((Atom)var" + inst.getIntArg2() + ").getArg(" + inst.getIntArg3() + ");\n");
 					writer.write(tabs + "if (!(link.getPos() != " + inst.getIntArg4() + ")) {\n");
@@ -1251,19 +1489,28 @@ public class Translator {
 
 //以下は手動生成コード
 				case Instruction.LOADMODULE:
-					// モジュール膜直属のルールセットを全部読み込む
-					compile.structure.Membrane m = (compile.structure.Membrane)compile.Module.memNameTable.get(inst.getArg2());
-					if(m==null) {
-						Env.e("Undefined module "+inst.getArg2());
-					} else {
-						Iterator i = m.rulesets.iterator();
-						while (i.hasNext()) {
-							//TODO 重複防止
-							Translator t = new Translator((InterpretedRuleset)i.next());
-							t.translate(false);
-							writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(" + t.className + ".getInstance());\n");
-						}
-					}
+					writer.write(tabs + "	try {\n");
+					writer.write(tabs + "		Class c = Class.forName(\"translated.Module_" + inst.getArg2() + "\");\n");
+					writer.write(tabs + "		java.lang.reflect.Method method = c.getMethod(\"getRulesets\", null);\n");
+					writer.write(tabs + "		Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);\n");
+					writer.write(tabs + "		for (int i = 0; i < rulesets.length; i++) {\n");
+					writer.write(tabs + "			((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(rulesets[i]);\n");
+					writer.write(tabs + "		}\n");
+					writer.write(tabs + "	} catch (ClassNotFoundException e) {\n");
+					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
+					writer.write(tabs + "	} catch (NoSuchMethodException e) {\n");
+					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
+					writer.write(tabs + "	} catch (IllegalAccessException e) {\n");
+					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
+					writer.write(tabs + "	} catch (java.lang.reflect.InvocationTargetException e) {\n");
+					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
+					writer.write(tabs + "	}\n");
+//					writer.write(tabs + "{\n");
+//					writer.write(tabs + "	Ruleset[] rulesets = Module" + inst.getArg2() + ".getRulesets();\n");
+//					writer.write(tabs + "	for (int i = 0; i < rulesets.length; i++) {\n");
+//					writer.write(tabs + "		((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(rulesets[i]);\n");
+//					writer.write(tabs + "	}\n");
+//					writer.write(tabs + "}\n");
 					break;
 				case Instruction.JUMP:
 					label = (InstructionList)inst.getArg1();
@@ -1329,12 +1576,13 @@ public class Translator {
 				case Instruction.LOADRULESET:
 				case Instruction.LOCALLOADRULESET:
 					InterpretedRuleset rs = (InterpretedRuleset)inst.getArg2();
-					Translator t = new Translator(rs);
-					t.translate(false);
-					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(" + t.className + ".getInstance());\n"); 
+//					Translator t = new Translator(rs);
+//					t.translate();
+					String name = getClassName(rs);
+					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(" + name + ".getInstance());\n"); 
 					break;
 				default:
-					throw new RuntimeException("Unsupported Instruction : " + inst);
+					Env.e("Unsupported Instruction : " + inst);
 			}
 		}
 //		return false;

@@ -226,6 +226,10 @@ public class FrontEnd {
 						} else if (args[i].equals("--translate")) {
 							// 暫定オプション
 							Env.fInterpret = false;
+						} else if (args[i].equals("--library")) {
+							/// --library
+							/// Generate library.
+							Env.fLibrary = true;
 						} else {
 							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
@@ -358,10 +362,22 @@ public class FrontEnd {
 			}	
 			catch (ParseException e) {
 				Env.p("Compilation Failed");
-				return;			
+				return;	
+			}
+			if (!Env.fInterpret) {
+				Translator.init(unitName);
 			}
 			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
 			Inline.makeCode();
+			if (!Env.fInterpret) {
+				try {
+					Translator.genModules();
+					Translator.genMain(rs);
+					Translator.genJAR();
+				} catch (IOException e) {
+					Env.e("Failed to write Translated File. " + e.getLocalizedMessage());
+				}
+			}
 			if (Env.nErrors > 0) {
 				Env.p("Compilation Failed");
 				return;
@@ -371,9 +387,10 @@ public class FrontEnd {
 
 			if (Env.fInterpret) {
 				run(rs);
-			} else {
-				new Translator((InterpretedRuleset)rs).translate(true);
 			}
+//			else {
+//				new Translator((InterpretedRuleset)rs).translate(true);
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));

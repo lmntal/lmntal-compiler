@@ -1,7 +1,19 @@
 package runtime;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import daemon.IDConverter;
 
 /**
@@ -614,8 +626,23 @@ class InterpretiveReactor {
 					// モジュール膜直属のルールセットを全部読み込む
 					compile.structure.Membrane m = (compile.structure.Membrane)compile.Module.memNameTable.get(inst.getArg2());
 					if(m==null) {
+						//ライブラリモジュールの読み込み
+						try {
+							Class c = Class.forName("translated.Module_" + inst.getArg2());
+							Method method = c.getMethod("getRulesets", null);
+							Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+							for (int i = 0; i < rulesets.length; i++) {
+								mems[inst.getIntArg1()].loadRuleset(rulesets[i]);
+							}
+							break;
+						} catch (ClassNotFoundException e) {
+						} catch (NoSuchMethodException e) {
+						} catch (IllegalAccessException e) {
+						} catch (InvocationTargetException e) {	}
+						//例外が発生した場合
 						Env.e("Undefined module "+inst.getArg2());
 					} else {
+						//同一ソース内でモジュール膜を定義している場合
 						Iterator i = m.rulesets.iterator();
 						while (i.hasNext()) {
 							mems[inst.getIntArg1()].loadRuleset((Ruleset)i.next() );

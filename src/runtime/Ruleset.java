@@ -30,6 +30,9 @@ abstract public class Ruleset {
 	//abstract
 	public Ruleset fillHoles(Functor[] holes) { return null; }
 	
+	/**このルールセットのローカルIDを取得する。*/
+	abstract public int getId();
+	
 	/**
 	 * グローバルルールセットIDを取得する
 	 * @author nakajima */
