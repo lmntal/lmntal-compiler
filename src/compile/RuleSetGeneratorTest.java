@@ -21,14 +21,15 @@ public class RuleSetGeneratorTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Membrane m = getTestStructure1();
-		//RuleStructure rs = getTestStructure2();
+		//Membrane m = getTestStructure1();
+		Membrane m = getTestStructure2();
 		Env.p(m);
-		RuleSetGenerator.run(m);
+		InterpretedRuleset ir = RuleSetGenerator.run(m);
 		
-		Env.p("Membrane with RuleSet.");
-		Env.p(m);
-		//r.showDetail();
+		Env.p("");
+		Env.p("Generated InterpretedRuleset :");
+		Env.p(ir);
+		ir.showDetail();
 	}
 	
 	/**
@@ -46,7 +47,7 @@ public class RuleSetGeneratorTest {
 		Membrane m = new Membrane(null);
 		
 		// ルール
-		RuleStructure r = getTestStructure2();
+		RuleStructure r = getTestRule();
 		
 		m.atoms.add( new Atom(m, "v", 0) );
 		m.atoms.add( new Atom(m, "w", 0) );
@@ -61,13 +62,29 @@ public class RuleSetGeneratorTest {
 	}
 	
 	/**
+	 * デバッグ用データ構造をつくる。
+	 * 
+	 * v, w, ( v :- w, w )
+	 * 
+	 * @return RuleStructure
+	 */
+	static Membrane getTestStructure2() {
+		// ルール
+		RuleStructure rs = getTestRule();
+		rs.parent = new Membrane(null);
+		
+		rs.parent.rules.add(rs);
+		return rs.parent;
+	}
+	
+	/**
 	 * デバッグ用データ構造をつくる。2
 	 * 
 	 * ( v :- w, w )
 	 * 
 	 * @return RuleStructure
 	 */
-	static RuleStructure getTestStructure2() {
+	static RuleStructure getTestRule() {
 		// ルート膜の親膜は null
 		RuleStructure rs = new RuleStructure();
 		Membrane m = new Membrane(null);

@@ -7,11 +7,15 @@ public final class Rule {
 	public List memMatch;
 	public List atomMatches; //?
 	public List body;
+	private String text;
 	
 	public Rule() {
 		memMatch    = new ArrayList();
 		atomMatches = new ArrayList();
 		body        = new ArrayList();
+	}
+	public Rule(String text) {
+		this.text = text;
 	}
 	
 	/**
@@ -31,5 +35,9 @@ public final class Rule {
 		l = body.listIterator();
 		Env.p("--body :");
 		while(l.hasNext()) Env.p((Instruction)l.next());
+	}
+	
+	public String toString() {
+		return text;
 	}
 }

@@ -58,4 +58,10 @@ public final class InterpretedRuleset extends Ruleset {
 	 */
 	private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
 	}
+	
+	public void showDetail() {
+		Iterator l;
+		l = rules.listIterator();
+		while(l.hasNext()) ((Rule)l.next()).showDetail();
+	}
 }

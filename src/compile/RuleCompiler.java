@@ -79,7 +79,7 @@ public class RuleCompiler {
 		
 		List rules = new ArrayList();
 		
-		theRule = new Rule();
+		theRule = new Rule(rs.toString());
 		
 		//r.text = "( "+l.toString()+" :- "+r.toString()+" )";
 		//@ruleid = rule.ruleid
