@@ -889,7 +889,7 @@ public class Instruction {
 		return getKind();
 	}
 	public int getIntArg(int arg) {
-		return ((Integer)data.get(arg - 1)).intValue();
+		return ((Integer)data.get(arg)).intValue();
 	}
 	public int getIntArg1() {
 		return ((Integer)data.get(0)).intValue();
@@ -904,7 +904,7 @@ public class Instruction {
 		return ((Integer)data.get(3)).intValue();
 	}
 	public Object getArg(int arg) {
-		return data.get(arg - 1);
+		return data.get(arg);
 	}
 	public Object getArg1() {
 		return data.get(0);
