@@ -101,6 +101,11 @@ final class RemoteMembrane extends AbstractMembrane {
 	protected String remoteid;
 	/** この膜のアトムのローカルIDからリモートIDへの写像 */
 	protected HashMap atomids = new HashMap();
+	
+	/** 仮ロック状態かどうか。
+	 * （リモートではロックされていると見なし、ローカルではロック解放されているとみなす状態のこと）*/
+	protected boolean fUnlockDeferred = false;
+	
 	public RemoteMembrane(RemoteTask task, RemoteMembrane parent, String remoteid) {
 		super(task,parent);
 		this.remoteid = remoteid;
@@ -257,13 +262,31 @@ final class RemoteMembrane extends AbstractMembrane {
 		if (locked) {
 			return false;
 		} else {
-			//todo:キャッシュの更新
+			if (fUnlockDeferred) {
+				locked = true;
+				fUnlockDeferred = false;	// ?
+			}
+			else {
+				send("LOCK");
+				//wait();
+				if (true) { // ロック取得成功
+					//todo:キャッシュの更新
+				}
+				else { // ロック取得失敗
+					return false;
+				}
+			}
 			locked = true;
 			return true;
 		}
 	}
 	public void blockingLock() {
 		//todo:locked==trueのとき、この計算ノードの誰がロックしたか分からないのを何とかする
+		// [ロック解放要求の処理方法]
+		// * 仮ロックされた本膜のロックを解放してもらうときに必要。
+		// ルールスレッドがロックしていた場合、タスクのIDをリモートに渡す？【TODO 本当に必要か？】
+		// 非ルールスレッドがロックしていた場合、タスクは存在しないが、
+		// 優先度無限大と見なすのでロックは解放できないことになっているので大丈夫。
 		send("BLOCKINGLOCK");
 		//wait;
 		// todo:キャッシュの更新
@@ -272,7 +295,11 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("ASYNCLOCK");
 	}
 	public void unlock(boolean signal) {
-		send("UNLOCK",""+signal);
+		fUnlockDeferred = true;
+		//send("");
+	}
+	public void forceUnlock() {
+		send("UNLOCK",""+false); // あとでよく考えること
 	}
 	public void asyncUnlock() {
 		send("ASYNCUNLOCK");

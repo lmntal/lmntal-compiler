@@ -442,10 +442,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 取得したこの膜のロックを解放する。ルート膜の場合、
 	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
 	 * この膜を管理するタスクに対してシグナルを発行する。
+	 * TODO unlock は weakUnlock に名称変更する
 	 * <p>unlock(false);を実行するマクロ */
 	public final void unlock() {
 		unlock(false);
 	}
+	/** この膜がリモート膜のとき、この膜のロックを解放する */
+	public abstract void forceUnlock();
+	
 	/** 取得したこの膜のロックを解放する。
 	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
 	 * この膜を管理するタスクに対してシグナルを発行する。

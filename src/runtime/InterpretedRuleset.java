@@ -465,6 +465,7 @@ class InterpretiveReactor {
 				case Instruction.ENQUEUEALLATOMS : //[srcmem]
 					break;
 				case Instruction.FREEMEM : //[srcmem]
+					// mems[inst.getIntArg1()].free();
 					break; //n-kato
 
 				case Instruction.ADDMEM :
@@ -474,7 +475,7 @@ class InterpretiveReactor {
 
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
-					mems[inst.getIntArg1()].unlock();
+					mems[inst.getIntArg1()].forceUnlock();
 					break; //n-kato
 
 				case Instruction.LOCALSETMEMNAME: //[dstmem, name]

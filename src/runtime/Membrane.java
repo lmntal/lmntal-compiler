@@ -193,6 +193,9 @@ public final class Membrane extends AbstractMembrane {
 			getTask().signal();
 		}
 	}
+	public void forceUnlock() {
+		unlock();
+	}
 	/** この膜からこの膜を管理するタスクのルート膜までの全ての膜の取得したロックを解放し、この膜を活性化する。
 	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。
 	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。*/
