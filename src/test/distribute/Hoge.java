@@ -3,7 +3,10 @@ package test.distribute;
 
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Iterator;
@@ -22,7 +25,64 @@ class Hoge {
 //		privateIPhanteiTest();
 		//privateIPhanteiTest2();
 		//testLabel();
-		testProperty();
+		//testProperty();
+		//testChildProcessStream();
+		testInetAddress();
+	}
+
+	/**
+	 * InetAddressを比較する方法はどれが一番いいか
+	 * 
+	 */
+	private static void testInetAddress() {
+		//InetAddress.equals()の動作を調べる。
+		
+		try {
+			String ip1 = InetAddress.getLocalHost().getHostAddress();
+			
+			String ip2 =  "192.168.1.209";
+			
+			if(ip1.equals(ip2)){
+				System.out.println("使える");
+			} else {
+				System.out.println("使えねー");
+			}
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	/**
+	 * 子プロセスをあげて、それに対してgetOutputStream, getInputStream, getErrorStreamをやってみる。
+	 */
+	private static void testChildProcessStream() {
+		try {
+			Process childProcess = Runtime.getRuntime().exec("java test/distribute/HogeChild");
+
+			InputStream childIn = childProcess.getInputStream();
+			OutputStream childOut = childProcess.getOutputStream();
+			InputStream childErr = childProcess.getErrorStream();
+ 
+			System.out.println("fuga");
+			
+			int buffErr;
+			int buffIn;
+			while(true){
+				//buff =  childIn.read(); //buff is -1 or 0-255(byteのint表現)
+				buffErr = childErr.read();
+				buffIn = childIn.read();
+				if (buffErr == -1 && buffIn == -1){
+					break;
+				} else {
+					System.out.print((char)buffErr);
+					System.out.print((char)buffIn);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	/**
