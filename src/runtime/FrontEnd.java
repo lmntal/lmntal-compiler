@@ -102,7 +102,7 @@ public class FrontEnd {
 			LMNtalRuntime buturimachine = new LMNtalRuntime(initRuleset);
 			buturimachine.exec(); //ผยนิ]
 			Dumper dp = new Dumper();
-			dp.dump(buturimachine.getRootMem());
+			System.out.println(dp.dump(buturimachine.getRootMem()));
 		}
 	}
 	

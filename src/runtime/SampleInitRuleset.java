@@ -1,5 +1,8 @@
 package runtime;
 
+import java.util.Iterator;
+import util.Util;
+
 final class SampleInitRuleset extends Ruleset {
 	public String toString() {
 		return "Ruleset Sample";
@@ -29,6 +32,50 @@ final class SampleInitRuleset extends Ruleset {
 		mem.newLink(b, 1, c, 0);
 		mem.newLink(c, 0, b, 1);
 		
+		mem.newAtom(new Functor("x", 0));
+		mem.newAtom(new Functor("x", 0));
+		mem.newAtom(new Functor("x", 0));
+
+		mem.loadRuleset(new SampleRuleset());
+		
+		System.out.println("Sample init ruleset generated:");
+		System.out.println("a(X), b(X,Y), {c(Y)}, x, x, x, (x :- y)\n");		
+
+		return true;
+	}
+	
+}
+
+final class SampleRuleset extends Ruleset {
+	public String toString() {
+		return "(x :- y)";
+	}
+	/**
+	 * アトム主導テストを行い、マッチすれば適用する
+	 * @return ルールを適用した場合はtrue
+	 */
+	boolean react(Membrane mem, Atom atom) {
+		return false;
+	}
+	/**
+	 * x() :- y()
+	 * @return ルールを適用した場合はtrue
+	 */
+	boolean react(Membrane mem) {
+		Iterator it = mem.atomIteratorOfFunctor(new Functor("x", 0));
+		if(it == Util.NULL_ITERATOR) return false;
+		
+		Atom a = null;
+					
+		while(it.hasNext()){
+			a = (Atom)it.next();
+			break;
+		}
+		if(a == null) return false;
+		
+		// x()を消してy()を追加
+		mem.removeAtom(a);
+		mem.newAtom(new Functor("y", 0));
 		return true;
 	}
 	

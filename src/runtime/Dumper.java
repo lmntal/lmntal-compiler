@@ -8,11 +8,11 @@ class Dumper {
 		StringBuffer buf = new StringBuffer();
 		List predAtoms = new ArrayList();
 		Set atoms = new HashSet(mem.getAtomCount());
-System.out.println("dump start");
+
 		// アトムの出力
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
-System.out.println("atom hakkeso");
+
 
 			Atom a = (Atom)it.next();
 			atoms.add(a);
