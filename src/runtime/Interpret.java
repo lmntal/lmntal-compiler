@@ -1,5 +1,6 @@
 package runtime;
 
+// TODO このクラスは廃止？
 
 /*
  * LMNtalのインタプリタ。
