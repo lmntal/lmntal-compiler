@@ -68,13 +68,17 @@ public class LMNParser {
 		Membrane mem = new Membrane(null);
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = coupleLinks(mem);
-		Iterator it = freeLinks.keySet().iterator();
-		while (it.hasNext()) {
-			LinkOccurrence link = (LinkOccurrence)it.next();
-			System.out.println("WARNING: Global singleton link: " + link.name);
-			//addAtomToMem(mem.add link.closeLink();
-			//				addSrcAtomToMem((SrcAtom)obj, mem);
-			// setLinkToAtomArg(link, atom, i);
+		if (!freeLinks.isEmpty()) {
+			Iterator it = freeLinks.keySet().iterator();
+			while (it.hasNext()) {
+				LinkOccurrence link = (LinkOccurrence)freeLinks.get(it.next());
+				System.out.println("WARNING: Global singleton link: " + link.name);
+				LinkedList process = new LinkedList();
+				process.add(new SrcLink(link.name));
+				SrcAtom sAtom = new SrcAtom(link.name, process);
+				addSrcAtomToMem(sAtom, mem);
+			}
+			coupleLinks(mem);
 		}
 		Inline.makeCode();
 		return mem;
@@ -277,7 +281,8 @@ public class LMNParser {
 		// 右辺と左辺の自由リンクを接続する
 		coupleInheritedLinks(ruleLinks, lhsFreeLinks, rhsFreeLinks);
 		
-		//
+		// todo プロセス文脈を接続する
+		
 		mem.rules.add(rule);
 	}
 	
