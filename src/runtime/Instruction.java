@@ -115,13 +115,13 @@ public class Instruction {
 	
 	for (int i = 0; i < hoge.length-1 ; i+=2){
 	    System.out.print("Command: ");
-	    System.out.print(hoge[0].toString());
+	    System.out.print(hoge[i].toString());
 
 	    System.out.print("\t");
 	    System.out.print("Arguments: ");
 
-	    fuga = hoge[i].toArray();
-	    for (int j = 1; j < fuga.length; j++){
+	    fuga = hoge[i+1].toArray();
+	    for (int j = 0; j < fuga.length; j++){
 		System.out.print(fuga[j].toString());
 		System.out.print(" ");
 	    }
