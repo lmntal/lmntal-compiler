@@ -106,26 +106,26 @@ points = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|REST] :-
 	int(PHPX), int(PHPY), int(PTPX), int(PTPY)|
 run2,
        anchor = {headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $a},
-points_after = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[lastafter:], points = REST.
+points_after = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[lastafter]], points = REST.
 
 run2, % リストの中身を更新(一つずつ前にずらす(後ろの要素から貰う))
 points = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|REST],
-     X = [{headp(x(OHPX), y(OHPY)), tailp(x(OTPX), y(OTPY)), $o}|[lastafter:] :-
+     X = [{headp(x(OHPX), y(OHPY)), tailp(x(OTPX), y(OTPY)), $o}|[lastafter]] :-
 	int(PHPX), int(PHPY), int(PTPX), int(PTPY),
 	int(OHPX), int(OHPY), int(OTPX), int(OTPY)|
 run2,
      X = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $o},
-          {headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[lastafter:], points = REST.
+          {headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[lastafter]], points = REST.
 
 run2, points = [last], points_after = LIST, X = lastafter :- run3, points = LIST, X = last.
 
 run3, % リストの末尾を更新(リーダーから貰う)
-    P = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[last:],
+    P = [{headp(x(PHPX), y(PHPY)), tailp(x(PTPX), y(PTPY)), $p}|[last]],
 leader = {headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), $l} :-
 	int(PHPX), int(PHPY), int(PTPX), int(PTPY),
 	int(LHPX), int(LHPY), int(LTPX), int(LTPY)|
 run4,
-    P = [{headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), $p}|[last:],
+    P = [{headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), $p}|[last]],
 leader = {headp(x(LHPX), y(LHPY)), tailp(x(LTPX), y(LTPY)), $l}.
 
 run4,
