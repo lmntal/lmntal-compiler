@@ -14,21 +14,21 @@ import runtime.InterpretedRuleset;
  * @author hara
  *
  */
-public class RuleCompilerTest {
+public class RuleSetGeneratorTest {
 	/**
 	 * テスト用めいん
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		RuleStructure rs = getTestStructure2();
-		Env.p(rs);
-		RuleCompiler rc = new RuleCompiler(rs);
-		rc.simplify();
-		InterpretedRuleset r = rc.compile();
+		Membrane m = getTestStructure1();
+		//RuleStructure rs = getTestStructure2();
+		Env.p(m);
+		RuleSetGenerator.run(m);
 		
-		Env.p("This is InterpretedRuleset.");
-		r.showDetail();
+		Env.p("Membrane with RuleSet.");
+		Env.p(m);
+		//r.showDetail();
 	}
 	
 	/**
@@ -38,9 +38,11 @@ public class RuleCompilerTest {
 	 * 
 	 * @return RuleStructure
 	 */
-	static RuleStructure getTestStructure1() {
+	static Membrane getTestStructure1() {
 		// ルート膜の親膜は null
 		RuleStructure rs = new RuleStructure();
+		rs.parent = new Membrane(null);
+		
 		Membrane m = new Membrane(null);
 		
 		// ルール
@@ -49,10 +51,13 @@ public class RuleCompilerTest {
 		m.atoms.add( new Atom(m, "v", 0) );
 		m.atoms.add( new Atom(m, "w", 0) );
 		m.rules.add(r);
+		r.parent = m;
 		
 		rs.leftMem = new Membrane(null);
 		rs.rightMem = m;
-		return rs;
+		
+		rs.parent.rules.add(rs);
+		return rs.parent;
 	}
 	
 	/**

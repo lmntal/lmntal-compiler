@@ -1,41 +1,36 @@
 package runtime;
 
-import java.util.Iterator;
-import java.util.Arrays;
+import java.util.*;
 
+
+/**
+ * compile.RuleCompiler によって生成される。
+ *
+ */
 public final class InterpretedRuleset extends Ruleset {
-	/** とりあえずルールの配列として実装 */
+	/** ルールセット番号 */
 	private int id;
 	private static int lastId=600;
 	
 	
-	/** 膜主導実行用命令列。１つ目の添え字はルール番号 */
-	public Instruction[] memMatch;
-	/** アトム主導実行用命令列。Mapにすべき？ */
-	public Instruction[] atomMatches;
-	/** ボディ実行用命令列。１つ目の添え字はルール番号 */
-	public Instruction[] body;
+	/** とりあえずルールの配列として実装 */
+	public List rules;
 	
+//	/** 膜主導実行用命令列。１つ目の添え字はルール番号 */
+//	public Instruction[] memMatch;
+//	/** アトム主導実行用命令列。Mapにすべき？ */
+//	public Instruction[] atomMatches;
+//	/** ボディ実行用命令列。１つ目の添え字はルール番号 */
+//	public Instruction[] body;
+	
+	/**
+	 * RuleCompiler では、まず生成してからデータを入れ込む。ので、特になにもしない
+	 */
 	public InterpretedRuleset() {
+		rules = new ArrayList();
 		id = ++lastId;
 	}
 	
-	public void showDetail() {
-		Iterator l;
-		l = Arrays.asList( atomMatches ).listIterator();
-		Env.p("--atommatches :");
-		while(l.hasNext()) Env.p((Instruction)l.next());
-		
-		l = Arrays.asList( memMatch ).listIterator();
-		Env.p("--memmatch :");
-		while(l.hasNext()) Env.p((Instruction)l.next());
-		
-		l = Arrays.asList( body ).listIterator();
-		Env.p("--body :");
-		while(l.hasNext()) Env.p((Instruction)l.next());
-		
-		Env.p(toString());
-	}
 	
 	public String toString() {
 		return "@" + id;

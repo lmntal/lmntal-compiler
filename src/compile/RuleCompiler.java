@@ -2,6 +2,7 @@ package compile;
 
 import java.util.*;
 import runtime.Env;
+import runtime.Rule;
 import runtime.InterpretedRuleset;
 import runtime.Instruction;
 import runtime.Functor;
@@ -13,14 +14,14 @@ import runtime.Functor;
 
 /**
  * <pre>
- * コンパイル時データ構造をルールオブジェクトに変換する。
- * ルールオブジェクトは命令列を持つ。
+ * コンパイル時データ構造（膜）にルールセットを付加する。
  * 
- * ので、機能はデータ構造（インスタンスの木） -> 命令列
+ * 具体的には、Membrane -> RuleSet が付加された Membrane
  * 
- * 外部からは、( :- WORLD ) の形式で呼ばれることになる。
- * WORLD にはルールが含まれる場合もあるので再帰的に
- * ルールをコンパイルすることになる。
+ * 外部からは、{ ( :- WORLD ) } の形式で呼ばれることになる。
+ * WORLD にはルールが含まれる場合もあるので、
+ * 見つかったルールからルールオブジェクトを生成してその膜のルールセットに追加する
+ * という作業を再帰的にやることになる。
  * 
  * </pre>
  * 
@@ -53,7 +54,7 @@ public class RuleCompiler {
 	
 	HeadCompiler hc;
 	
-	public InterpretedRuleset iRuleset;
+	public Rule theRule;
 	
 	/**
 	 * rs 用のルールコンパイラをつくる
@@ -71,11 +72,14 @@ public class RuleCompiler {
 	 * 
 	 * @return InterpretedRuleset
 	 */
-	public InterpretedRuleset compile() {
+	public void compile() {
 		Env.c("compile");
+		
+		simplify();
+		
 		List rules = new ArrayList();
 		
-		iRuleset = new InterpretedRuleset();
+		theRule = new Rule();
 		
 		//r.text = "( "+l.toString()+" :- "+r.toString()+" )";
 		//@ruleid = rule.ruleid
@@ -95,30 +99,12 @@ public class RuleCompiler {
 		//showInstructions();
 		
 		//rule.register(@atommatches,@memmatch,@body)
-		iRuleset.memMatch    = new Instruction[memmatch.size()];
-		iRuleset.atomMatches = new Instruction[atommatches.size()];
-		iRuleset.body        = new Instruction[body.size()];
+		theRule.memMatch     = memmatch;
+		theRule.atomMatches  = atommatches;
+		theRule.body         = body;
 		
-		{
-			int i;
-			Iterator l;
-			
-			l = memmatch.listIterator(); i=0;
-			while(l.hasNext()) {
-				iRuleset.memMatch[i++] = (Instruction)l.next();
-			}
-			l = atommatches.listIterator(); i=0;
-			while(l.hasNext()) {
-				iRuleset.atomMatches[i++] = (Instruction)l.next();
-			}
-			l = body.listIterator(); i=0;
-			while(l.hasNext()) {
-				iRuleset.body[i++] = (Instruction)l.next();
-			}
-		}
-		//iRuleset.showDetail();
-		
-		return iRuleset;
+		theRule.showDetail();
+		((InterpretedRuleset)rs.parent.ruleset).rules.add(theRule);
 	}
 	
 	private void compile_l() {
@@ -157,7 +143,7 @@ public class RuleCompiler {
 			}
 			hc.compile_mem(rs.leftMem);
 			// 反応しろという命令
-			hc.match.add( Instruction.react(iRuleset, hc.getactuals()) );
+			hc.match.add( Instruction.react(theRule, hc.getactuals()) );
 		}
 	}
 	
@@ -169,7 +155,7 @@ public class RuleCompiler {
 		lhsatomids = hc.atomids;
 		varcount = lhsatoms.size() + lhsfreemems.size();
 		body = new ArrayList();
-		body.add( Instruction.dummy("[:spec,@varcount]") );
+		body.add( Instruction.dummy("[:spec,"+varcount) );
 		
 		genlhsmempaths();
 		rhsatoms = new ArrayList();

@@ -13,19 +13,28 @@ public final class Env {
 	public static Machine machine = new Machine();
 	public static Membrane rootMembrane = new Membrane(machine);
 	
-	/** General dumper */
+	/**
+	 * General dumper
+	 * @param o Object to print
+	 */
 	public static void p(Object o) {
 		System.out.println(o);
 	}
-	/** Debug output when method called */
+	/**
+	 * Debug output when some method called
+	 * @param o method name
+	 */
 	public static void c(Object o) {
 		p(">>> "+o);
 	}
-	/** Debug output when new object */
+	/**
+	 * Debug output when new some object: write at constructor.
+	 * @param o Class name
+	 */
 	public static void n(Object o) {
 		p(">>> new "+o);
 	}
-	/** Better list dumper */
+	/** Better list dumper : No comma */
 	public static String parray(List l) {
 		StringBuffer s = new StringBuffer();
 		for(ListIterator li=l.listIterator();li.hasNext();) {

@@ -273,9 +273,9 @@ newlink n,1,o,1 を行う。
 	 * @param actual 引数
 	 * @return
 	 */
-	public static Instruction react(InterpretedRuleset ir, List actual) {
+	public static Instruction react(Rule r, List actual) {
 		Instruction i = new Instruction(REACT);
-		i.add(ir);
+		i.add(r);
 		i.add(actual);
 		return i;
 	}

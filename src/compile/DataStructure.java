@@ -4,6 +4,7 @@ import java.util.*;
 
 import runtime.Functor;
 import runtime.Env;
+import runtime.InterpretedRuleset;
 
 /** ソースコード中のアトムの構造を表すクラス */
 final class Atom {
@@ -33,8 +34,10 @@ final class Membrane {
 	public List mems = new ArrayList();
 	public List rules = new ArrayList();
 	
-	// とちゅうで必要になるらしい
-	public runtime.Ruleset ruleset = null;
+	/**
+	 * ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。
+	 */
+	public runtime.Ruleset ruleset = new InterpretedRuleset();
 	
 	public List processContexts = new ArrayList();
 	public List ruleContexts = new ArrayList();
@@ -115,6 +118,8 @@ final class LinkOccurrence {
 }
 /** ソースコード中のルールの構造を表すクラス */
 final class RuleStructure {
+	/** 所属膜 */
+	public Membrane parent;
 	public Membrane leftMem = new Membrane(null);
 	public Membrane rightMem = new Membrane(null);
 	public String toString() {
