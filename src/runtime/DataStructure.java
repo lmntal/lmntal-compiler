@@ -219,10 +219,10 @@ final class Machine extends AbstractMachine {
 }
 abstract class AbstractMachine {
 	/** ルート膜 */
-	protected Membrane root;
+	protected AbstractMembrane root;
 	
 	/** ルート膜の取得 */
-	Membrane getRoot() {
+	AbstractMembrane getRoot() {
 		return root;
 	}
 }
@@ -237,7 +237,7 @@ final class LMNtalRuntime {
 	 */
 	LMNtalRuntime(Ruleset init){
 		Machine rootm = newMachine();
-		init.react(rootm.getRoot());
+		init.react((Membrane)rootm.getRoot());
 	}
 	
 	void exec() {
