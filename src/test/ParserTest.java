@@ -173,10 +173,15 @@ public class ParserTest extends JFrame implements ActionListener {
 	private void addRule(RuleStructure rule, DefaultMutableTreeNode node) {
 		DefaultMutableTreeNode nodeRule = new DefaultMutableTreeNode("<Rule>");
 		DefaultMutableTreeNode nodeRuleHead = new DefaultMutableTreeNode("<Head>");
+		DefaultMutableTreeNode nodeRuleGuard = new DefaultMutableTreeNode("<Guard>");
 		DefaultMutableTreeNode nodeRuleBody = new DefaultMutableTreeNode("<Body>");
+		
 		addMembrane(rule.leftMem,nodeRuleHead);
+		addMembrane(rule.guardMem,nodeRuleGuard);
 		addMembrane(rule.rightMem,nodeRuleBody);
+		
 		nodeRule.add(nodeRuleHead);
+		nodeRule.add(nodeRuleGuard);
 		nodeRule.add(nodeRuleBody);
 		
 		node.add(nodeRule);
