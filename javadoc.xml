@@ -5,8 +5,9 @@
             nonavbar="false" noindex="false" splitindex="true"
             author="true" version="true" nodeprecatedlist="false"
             nodeprecated="false"
-            packagenames="org.gnu.readline,compile,runtime,test,util"
+            packagenames="compile.structure,org.gnu.readline,compile,compile.parser,runtime,test,java_cup.runtime,util"
             sourcepath="src"
-            classpath="bin;C:\p\eclipse\plugins\org.junit_3.8.1\junit.jar" doctitle="LMNtal"/>
+            classpath="bin;C:\p\eclipse\plugins\org.junit_3.8.1\junit.jar"
+            doctitle="LMNtal" additionalparam="-encoding EUCJIS"/>
     </target>
 </project>

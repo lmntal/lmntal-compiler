@@ -259,6 +259,7 @@ newlink n,1,o,1 を行う。
 	/**
 	 * ダミー命令を生成する.
 	 * さしあたって生成メソッドがまだできてない命令はこれを使う
+	 * @param s 説明用の文字列
 	 */
 	public static Instruction dummy(String s) {
 		Instruction i = new Instruction(-1);
@@ -269,7 +270,7 @@ newlink n,1,o,1 を行う。
 	/**
 	 * react 命令を生成する
 	 * 
-	 * @param ir 反応できるルールセットオブジェクト
+	 * @param r 反応できるルールオブジェクト
 	 * @param actual 引数
 	 * @return
 	 */
@@ -318,9 +319,17 @@ newlink n,1,o,1 を行う。
     //引数無しだと初期容量は10(by api仕様書)
     public List data = new ArrayList();
 	
+	/**
+	 * 無名命令を作る。
+	 *
+	 */
 	public Instruction() {
 	}
 	
+	/**
+	 * 指定された命令をつくる
+	 * @param id
+	 */
     public Instruction(int id) {
     	this.id = id;
 

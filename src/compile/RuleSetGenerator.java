@@ -9,6 +9,7 @@ import runtime.Env;
 import runtime.InterpretedRuleset;
 
 /**
+ * ルールセットを生成して返す。
  * @author hara
  *
  */
@@ -18,7 +19,7 @@ public class RuleSetGenerator {
 	 * 与えられた膜直属の全ての RuleStructure について、
 	 * 対応する Rule を生成してその膜のルールセットに追加する。
 	 * 
-	 * @param root_mem
+	 * @param m 対象となる膜
 	 * @return 指定した膜のルールセット
 	 */
 	public static InterpretedRuleset run(Membrane m) {
@@ -30,7 +31,7 @@ public class RuleSetGenerator {
 	/**
 	 * 与えられた膜直属の全ての RuleStructure について、
 	 * 対応する Rule を生成してその膜のルールセットに追加する。
-	 * @param m 注目する膜
+	 * @param m 対象となる膜
 	 */
 	public static void processMembrane(Membrane m) {
 		Env.c("RuleSetGenerator.processMembrane");

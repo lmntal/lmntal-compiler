@@ -1,4 +1,7 @@
 compile
+compile.parser
+compile.structure
+java_cup.runtime
 org.gnu.readline
 runtime
 test

@@ -9,11 +9,19 @@ public final class Rule {
 	public List body;
 	private String text;
 	
+	/**
+	 * ふつうのコンストラクタ。
+	 *
+	 */
 	public Rule() {
 		memMatch    = new ArrayList();
 		atomMatches = new ArrayList();
 		body        = new ArrayList();
 	}
+	/**
+	 * ルール文字列つきコンストラクタ
+	 * @param text ルールの文字列表現
+	 */
 	public Rule(String text) {
 		this.text = text;
 	}
