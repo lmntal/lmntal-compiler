@@ -16,16 +16,16 @@ public class InlineUnit {
 	public static final String DEFAULT_UNITNAME = "-";
 	
 	/** インラインクラスが使用可能の時、そのオブジェクトが入る。*/
-	public static InlineCode inlineCode;
+	public InlineCode inlineCode;
 	
 	/** Hash { インラインコード文字列 => 一意な連番 } */
-	public static Map codes = new HashMap(); 
+	public Map codes = new HashMap(); 
 	
 	/** List インライン宣言コード文字列 */
-	public static List defs = new ArrayList(); 
+	public List defs = new ArrayList(); 
 	
 	/** 一意な連番。インラインコード文字列と1対1 */
-	static int codeCount = 0;
+	int codeCount = 0;
 	
 	/** インライン実行アトム */
 	static final int EXEC   = 0;
@@ -72,11 +72,11 @@ public class InlineUnit {
 	public void register(String code, int type) {
 		switch(type) {
 		case EXEC:
-			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineCode : "+code);
+			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineCode to "+name+" : "+code);
 			codes.put(code, new Integer(codeCount++));
 			break;
 		case DEFINE:
-			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineDefineCode : "+code);
+			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineDefineCode to "+name+" : "+code);
 			defs.add(code);
 			break;
 		}
@@ -142,10 +142,12 @@ public class InlineUnit {
 	public void attach() {
 		// jar で処理系を起動すると、勝手なファイルからクラスをロードすることができないみたい。
 		String cname = className(name);
+		FileClassLoader.addPath(srcPath(name));
 		FileClassLoader cl = new FileClassLoader();
-		Env.d("Try loading "+classFile(name));
+		Env.d("Try loading "+className(name));
 		try {
-			Object o = cl.loadClass(name).newInstance();
+			Object o = cl.loadClass(className(name)).newInstance();
+//			Object o = cl.loadClass(name).newInstance();
 			if (o instanceof InlineCode) {
 				inlineCode = (InlineCode)o;
 			}

@@ -55,10 +55,6 @@ public class FrontEnd {
 			}
 		});
 		
-		FileInputStream fis = null;
-		InputStream is = null;
-		Reader src = null;
-		
 		/**
 		 * コマンドライン引数があったらファイルの中身を解釈実行
 		 */
@@ -154,44 +150,64 @@ public class FrontEnd {
 			}
 		}
 		
-		if(Env.oneLiner==null) {
-			if(!Env.argv.isEmpty()) {
-				String srcFile = (String)Env.argv.remove(0);
-				try{
-					fis = new FileInputStream(srcFile);
-				} catch(FileNotFoundException e) {
-					System.out.println("ファイルが見つかりません:" + srcFile);
-					System.exit(-1);
-				} catch(SecurityException e) {
-					System.out.println("ファイルが開けません:" + srcFile);
-					System.exit(-1);
-				}
-				if(is == null) is = fis;
-				else is = new SequenceInputStream(is, fis); // ソースファイルを連結
-			}
-		} else {
-			REPL.processLine(Env.oneLiner);
-			return;
-//			System.exit(-1);
-		}
 		if(Env.fCGI) {
 			System.setErr(System.out);
 			System.out.println("Content-type: text/html\n");
 		}
 		
-		// ソースなしならREPL, ありならソースを解釈実行。
-		if(is == null){
+		/// 実行
+		
+		if(Env.oneLiner!=null) {
+			// 一行実行の場合はそれを優先
+			REPL.processLine(Env.oneLiner);
+			return;
+		}
+		// ソースありならソースを解釈実行、なしなら REPL。
+		if(Env.argv.isEmpty()) {
 			REPL.run();
-		}else{			
-			run( new BufferedReader(new InputStreamReader(is)) );
+		} else {
+			run(Env.argv);
 		}
 	}
 	
+	/**
+	 * 与えられた名前のファイルたちをくっつけたソースについて、一連の実行を行う。
+	 * 
+	 * @param files ソースファイル
+	 */
+	public static void run(List files) {
+		InputStream is = null;
+		try{
+			for(Iterator i=files.iterator();i.hasNext();) {
+				String filename = (String)i.next();
+				FileInputStream fis = new FileInputStream(filename);
+				if(is==null) is = fis;
+				else         is = new SequenceInputStream(is, fis);
+			}
+		} catch(FileNotFoundException e) {
+			System.out.println(e.getMessage());
+			System.exit(-1);
+		} catch(SecurityException e) {
+			System.out.println(e.getMessage());
+			System.exit(-1);
+		}
+		// 複数のファイルのときはファイル名が１つに決められない。
+		String unitName = files.size()==1 ? (String)files.get(0) : InlineUnit.DEFAULT_UNITNAME;
+		run( new BufferedReader(new InputStreamReader(is)), unitName );
+	}
 	/**
 	 * 与えられたソースについて、一連の実行を行う。
 	 * @param src Reader 型で表されたソース
 	 */
 	public static void run(Reader src) {
+		run(src, InlineUnit.DEFAULT_UNITNAME);
+	}
+	/**
+	 * 与えられたソースについて、一連の実行を行う。
+	 * @param src Reader 型で表されたソース
+	 * @param unitName String ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
+	 */
+	public static void run(Reader src, String unitName) {
 		try {
 			LMNParser lp = new LMNParser(src);
 			
@@ -201,7 +217,7 @@ public class FrontEnd {
 //				Env.d( "Parse Result: " + m.toStringWithoutBrace() );
 //			}
 			
-			Ruleset rs = RulesetCompiler.compileMembrane(m);
+			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
 			Inline.makeCode();
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();

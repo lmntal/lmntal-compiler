@@ -103,7 +103,6 @@ public class Inline {
 		} else {
 			return;
 		}
-		
 		//епо©
 		if(!inlineSet.containsKey(unitName)) inlineSet.put(unitName, new InlineUnit(unitName));
 		((InlineUnit)inlineSet.get(unitName)).register(funcName, type);
