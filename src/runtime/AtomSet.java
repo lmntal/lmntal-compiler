@@ -3,12 +3,14 @@ package runtime;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
 
 import util.Util;
+import util.RandomIterator;
 
 /**
  * アトムの集合を管理するためのクラス。
@@ -34,7 +36,7 @@ public final class AtomSet implements Set{
 	}
 	/** 指定されたFunctorを持つアトムの数の取得 */
 	public int getAtomCountOfFunctor(Functor f) {
-		Set s = (Set)atoms.get(f);
+		List s = (List)atoms.get(f);
 		if (s == null) {
 			return 0;
 		} else {
@@ -47,13 +49,14 @@ public final class AtomSet implements Set{
 	}
 	/** 与えられたアトムがこの集合内にあるかどうかを返す */
 	public boolean contains(Object o) {
-		Functor f = ((Atom)o).getFunctor();
-		Set s = (Set)atoms.get(f);
-		if (s == null) {
-			return false;
-		} else {
-			return s.contains(o);
-		}
+		return ((Atom)o).mem.atoms == this;
+//		Functor f = ((Atom)o).getFunctor();
+//		Set s = (Set)atoms.get(f);
+//		if (s == null) {
+//			return false;
+//		} else {
+//			return s.contains(o);
+//		}
 	}
 
 	/** この集合内にあるアトムの反復子を返す */
@@ -62,11 +65,15 @@ public final class AtomSet implements Set{
 	}
 	/** 与えられた名前を持つアトムの反復子を返す */
 	public Iterator iteratorOfFunctor(Functor functor) {
-		Set s = (Set)atoms.get(functor);
+		List s = (List)atoms.get(functor);
 		if (s == null) {
 			return Util.NULL_ITERATOR;
 		} else {
-			return s.iterator();
+			if (Env.fRandom) {
+				return new RandomIterator(s);
+			} else {
+				return s.iterator();
+			}
 		}
 	}
 	/** 
@@ -118,18 +125,22 @@ public final class AtomSet implements Set{
 	 */
 	public boolean add(Object o) {
 		Functor f = ((Atom)o).getFunctor();
-		Set s = (Set)atoms.get(f);
+		List s = (List)atoms.get(f);
 		if (s == null) {
-			s = new HashSet();
+			s = new ArrayList();
+			((Atom)o).index = 0;
 			s.add(o);
 			atoms.put(f, s);
 			size++;
 			return true;
-		} else if (s.add(o)) {
+		} else {
+//			if (contains(o) && ((Atom)o).index != -1) {
+//				return false;
+//			}
+			((Atom)o).index = s.size();
+			s.add(o);
 			size++;
 			return true;
-		} else {
-			return false;
 		}
 	}
 	/**
@@ -138,14 +149,17 @@ public final class AtomSet implements Set{
 	 */
 	public boolean remove(Object o) {
 		Functor f = ((Atom)o).getFunctor();
-		Set s = (Set)atoms.get(f);
-		if (s == null) {
+		List s = (List)atoms.get(f);
+		if (!contains(o)) {
 			return false;
-		} else if (s.remove(o)) {
+		} else {
+			Atom a = (Atom)s.get(s.size() - 1);
+			s.set(((Atom)o).index, a);
+			s.remove(s.size() - 1);
+			a.index = ((Atom)o).index;
+			((Atom)o).index = -1;
 			size--;
 			return true;
-		} else {
-			return false;
 		}
 	}
 	/**
@@ -198,6 +212,10 @@ public final class AtomSet implements Set{
 	}
 	/** 全ての要素を除去する */
 	public void clear() {
+		Iterator it = iterator();
+		while (it.hasNext()) {
+			((Atom)it.next()).index = -1;
+		}
 		atoms.clear();
 		size = 0;
 	}
@@ -207,9 +225,18 @@ public final class AtomSet implements Set{
 		int n = 0;
 		Iterator it = atoms.values().iterator();
 		while (it.hasNext()) {
-			n += ((Set)it.next()).size();
+			n += ((List)it.next()).size();
 		}
 		return size == n;
+	}
+	/**デバッグ用出力*/
+	public void print() {
+		System.out.println("AtomSet: ");
+		Iterator it = iterator();
+		while (it.hasNext()) {
+			System.out.println(it.next());
+		}
+		System.out.println("result of verify() is " + verify());
 	}
 }
 
@@ -227,7 +254,7 @@ final class AtomIterator implements Iterator {
 		this.atoms = atoms;
 		atomSetIterator = atoms.values().iterator();
 		if (atomSetIterator.hasNext()) {
-			atomIterator = ((Set)atomSetIterator.next()).iterator();
+			atomIterator = ((List)atomSetIterator.next()).iterator();
 		} else {
 			atomIterator = Util.NULL_ITERATOR;
 		}
@@ -237,14 +264,14 @@ final class AtomIterator implements Iterator {
 			if (atomSetIterator.hasNext() == false) {
 				return false;
 			}
-			atomIterator = ((Set)atomSetIterator.next()).iterator();
+			atomIterator = ((List)atomSetIterator.next()).iterator();
 		}
 		return true;
 	}
 	public Object next() {
 		while (atomIterator.hasNext() == false) {
 			// 最後まで来ていた場合、ここでNoSuchElementExceptionが発生する
-			atomIterator = ((Set)atomSetIterator.next()).iterator();
+			atomIterator = ((List)atomSetIterator.next()).iterator();
 		}
 		return atomIterator.next();
 	}
@@ -252,4 +279,5 @@ final class AtomIterator implements Iterator {
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
+	
 }

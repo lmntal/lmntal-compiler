@@ -43,8 +43,9 @@ public final class Membrane {
 	public HashMap freeLinks = new HashMap();
 	
 	/** ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。*/
-	public runtime.Ruleset ruleset = new InterpretedRuleset();
-	
+//	public runtime.Ruleset ruleset = new InterpretedRuleset();
+	public List rulesets = new ArrayList();
+	 	
 	////////////////////////////////////////////////////////////////
 
 	/**
@@ -82,7 +83,10 @@ public final class Membrane {
 	 * この膜に含まれる全てのルールセットを表示する。
 	 */
 	public void showAllRuleset() {
-		Env.d( ((InterpretedRuleset)ruleset) );
+		Iterator it = rulesets.iterator();
+		while (it.hasNext()) {
+			Env.d( ((InterpretedRuleset)it.next()) );
+		}
 		
 		Iterator l;
 		
@@ -110,7 +114,10 @@ public final class Membrane {
 	 */
 	public void showAllRule() {
 		Env.c("Membrane.showAllRule mem="+this);
-		((InterpretedRuleset)ruleset).showDetail();
+		Iterator it = rulesets.iterator();
+		while (it.hasNext()) {
+			((InterpretedRuleset)it.next()).showDetail();
+		}
 		
 		Iterator l;
 		

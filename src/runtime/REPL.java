@@ -6,6 +6,7 @@ package runtime;
 
 import java.io.EOFException;
 import java.io.StringReader;
+import java.util.Arrays;
 
 import org.gnu.readline.Readline;
 import org.gnu.readline.ReadlineLibrary;
@@ -60,6 +61,7 @@ public class REPL {
 			} catch (EOFException e) {
 				break;
 			} catch (Exception e) {
+				System.err.println(Arrays.asList(e.getStackTrace()));
 				//doSomething();
 			}
 		}

@@ -1,0 +1,8 @@
+ArrayList は解決できないか、型ではありません。ArrayList は解決できないか、型ではありません。Iterator は解決できないか、型ではありません。RandomIterator は解決できないか、型ではありません。キーワード "import" に構文エラーがあります。正しくは "interface", "class" です。キーワード "import" に構文エラーがあります。正しくは "interface", "class" です。import java.util.*;import util.*;java.util.ArrayList list = new java.util.ArrayList();
+for (int i = 0; i < 10; i++) {
+	list.add(new Integer(i));
+}
+java.util.Iterator it = new util.RandomIterator(list);
+while (it.hasNext()) {
+	System.out.print(it.next());
+}System.out.println();

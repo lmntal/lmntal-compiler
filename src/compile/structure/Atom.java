@@ -17,7 +17,7 @@ public class Atom {
 	public Functor functor;
 	/** アトムのリンク列（またはアトム集団のリンク束列） */
 	public LinkOccurrence[] args;
-	
+
 	/**
 	 * デバッグ情報:ソースコード中での出現位置(行)
 	 * 情報が無いときは-1を代入

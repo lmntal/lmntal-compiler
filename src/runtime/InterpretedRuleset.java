@@ -75,7 +75,7 @@ public final class InterpretedRuleset extends Ruleset {
 		List vars = new ArrayList();
 		mems[0] = mem;
 		if (atom != null) { atoms[1] = atom; }
-		InterpreterReactor ir = new InterpreterReactor(mems, atoms, vars);
+		InterpretiveReactor ir = new InterpretiveReactor(mems, atoms, vars);
 		return ir.interpret(matchInsts, 0);
 	}
 	public String toString() {
@@ -107,7 +107,7 @@ public final class InterpretedRuleset extends Ruleset {
  * @author hara,nakajima,n-kato
  */
 
-class InterpreterReactor {
+class InterpretiveReactor {
 	/** 膜変数のベクタ */
 	AbstractMembrane[] mems;
 	/** アトム変数のベクタ */
@@ -116,7 +116,7 @@ class InterpreterReactor {
 	List vars;
 	//List insts;
 	
-	InterpreterReactor(
+	InterpretiveReactor(
 		AbstractMembrane[] mems,
 		Atom[] atoms,
 		List vars /*, List insts*/
@@ -488,8 +488,8 @@ class InterpreterReactor {
 						bodyatoms[i + memformals.size()] =
 							atoms[((Integer) atomformals.get(i)).intValue()];
 					}
-					InterpreterReactor ir =
-						new InterpreterReactor(
+					InterpretiveReactor ir =
+						new InterpretiveReactor(
 							bodymems,
 							bodyatoms,
 							new ArrayList());

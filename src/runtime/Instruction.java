@@ -1091,6 +1091,10 @@ public class Instruction {
 	public static Instruction removeatom(int atom, int mem, Functor func) {
 		return new Instruction(REMOVEATOM,atom,mem,func);
 	}
+	/** dequeueatom 命令を生成する*/
+	public static Instruction dequeueatom(int atom) {
+		return new Instruction(DEQUEUEATOM,atom);
+	}
     
 	// コンストラクタ
 	

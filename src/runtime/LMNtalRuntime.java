@@ -73,6 +73,7 @@ final class Task extends AbstractTask {
 			Atom a = mem.popReadyAtom();
 			Iterator it = mem.rulesetIterator();
 			boolean flag;
+//			mem.atoms.print();
 			if(a != null){ // 実行膜スタックが空でないとき
 				flag = false;
 				while(it.hasNext()){ // 本膜のもつルールをaに適用
@@ -85,7 +86,12 @@ final class Task extends AbstractTask {
 				if(flag == false){ // ルールが適用できなかった時
 					if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
 				}
-				else {}// システムコールアトムなら親膜につみ、親膜を活性化
+				else {
+					if (Env.fTrace) {
+						Env.p( " --> " );
+						Env.p( Dumper.dump(getRoot()) );
+					}
+				}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行膜スタックが空の時
 				flag = false;
 				while(it.hasNext()){ // 膜主導テストを行う
@@ -110,7 +116,12 @@ final class Task extends AbstractTask {
 							flag = true;
 					}
 					if(flag == false) mem.toStable();
-				}
+				} else {
+					if (Env.fTrace) {
+						Env.p( " --> " );
+						Env.p( Dumper.dump(getRoot()) );
+					}
+				}					
 			}
 		}
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了

@@ -17,7 +17,17 @@ public final class Env {
 	 * Debug level.
 	 */
 	public static int debug = 0;
-	
+
+	/**
+	 * ランダム実行
+	 */
+	public static boolean fRandom = false;
+
+	/**
+	 * トレース実行
+	 */
+	public static boolean fTrace = false;
+		
 	/**
 	 * General error report
 	 * @param o

@@ -5,6 +5,7 @@
 package compile;
 
 import java.io.StringReader;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -48,7 +49,7 @@ public class RuleSetGeneratorTest {
 	 * テストする
 	 * @param src
 	 */
-	public static InterpretedRuleset test(String src) {
+	public static List test(String src) {
 		try {
 			// thnx to 永田書記長
 			LMNParser lp = new LMNParser(new StringReader(src));
@@ -58,7 +59,7 @@ public class RuleSetGeneratorTest {
 			//Membrane m = getTestStructure2();
 			Env.d(m);
 			Membrane root = RuleSetGenerator.runStartWithNull(m);
-			InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
+			List ir = root.rulesets;
 			
 			Env.d("");
 			Env.d("Compiled Membrane :");

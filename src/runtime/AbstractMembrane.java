@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import util.QueuedEntity;
+import util.RandomIterator;
 
 /**
  * ？？？の解決法
@@ -138,7 +139,11 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	/** この膜にあるルールセットの反復子を返す */
 	public Iterator rulesetIterator() {
-		return rulesets.iterator();
+		if (Env.fRandom) {
+			return new RandomIterator(rulesets);
+		} else {
+			return rulesets.iterator();
+		}
 	}
 
 	///////////////////////////////
@@ -588,4 +593,5 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public String toString() {
 		return "{ " + toStringWithoutBrace() + " }";
 	}
+	
 }
