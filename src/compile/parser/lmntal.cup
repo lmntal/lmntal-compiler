@@ -4,6 +4,21 @@ package compile.parser;
 
 import java.util.LinkedList;
 
+parser code {: 
+	public void report_error(String message, Object info) {
+		System.err.print(message);
+		if (info instanceof java_cup.runtime.Symbol)
+			if (((java_cup.runtime.Symbol)info).left > 0)
+				System.err.print(" at line " + ((java_cup.runtime.Symbol)info).left);
+		System.err.println("");
+    }
+    public void unrecovered_syntax_error(java_cup.runtime.Symbol cur_token) throws Exception {
+    	report_fatal_error("Couldn't repair and continue parse", null);
+	}
+    
+:};
+
+
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
 terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 

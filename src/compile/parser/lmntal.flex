@@ -44,7 +44,7 @@ LinkName       = [A-Z_][A-Za-z_0-9]*
 //
 // アトム名関係
 
-AtomName = [a-z0-9][A-Za-z_0-9]*
+AtomName = [a-z][A-Za-z_0-9]* | [0-9]+
 
 // AtomNameに加えて0引数でアトム名となる文字列その１（AtomNameと排他的でなければならない）
 NumberName = [0-9]*\.[0-9]+ | [0-9]*\.?[0-9]+ [Ee][+-]?[0-9]+
@@ -130,4 +130,4 @@ EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
 
 /* No token was found for the input so through an error.  Print out an
    Illegal character message with the illegal character that was found. */
-[^]                    { throw new Error("Illegal character <"+yytext()+"> at line:"+yyline); }
+[^]                    { throw new Error("Illegal character <"+yytext()+"> at line "+yyline); }
