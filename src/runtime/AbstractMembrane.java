@@ -529,8 +529,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	//////////////////////////////////////////////////////////////
 	// kudo
 	
-	/** この膜の複製を生成する <strike>自由リンクが無いものと仮定(子膜にも。)
-	 *  pMemの子膜として作成</strile>
+	/** この膜の複製を生成する <strike>明示的でない自由リンクが無いものと仮定</strile>
 	 * */
 	public HashMap copyFrom(AbstractMembrane srcMem) {
 		int atomsize = srcMem.atoms.size(); //アトムの数
@@ -656,6 +655,41 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			mem.drop();
 			mem.free();
 		}
+	}
+	
+	/**
+	 * by kudo
+	 * 基底項プロセスを複製する(検査は済んでいる)
+	 * @param srcGround コピー元の基底項プロセス
+	 * @param srcMap コピー元のアトムからコピー先のアトムへのマップ
+	 * @return 成功したらコピー先のリンクを返す。失敗したらnullを返す
+	 */
+	public Link copyGroundFrom(Link srcGround,Map srcMap){
+		if(!srcMap.containsKey(srcGround.getAtom())){
+			Atom cpAtom = newAtom(srcGround.getAtom().getFunctor());
+			srcMap.put(srcGround.getAtom(),cpAtom);
+			for(int i=0;i<cpAtom.getArity();i++){
+				if(i==srcGround.getPos())continue;
+				cpAtom.args[i] = copyGroundFrom(srcGround.getAtom().getArg(i),srcMap);
+				cpAtom.getArg(i).getAtom().args[srcGround.getAtom().getArg(i).getPos()] = new Link(cpAtom,i);
+			}
+		}
+		return new Link(((Atom)srcMap.get(srcGround.getAtom())),srcGround.getPos());
+	}
+	
+	/**
+	 * by kudo
+	 * 基底項プロセスを破棄する(検査は済んでいる)
+	 * @param srcGround 破棄する基底項プロセス
+	 */
+	public void dropGround(Link srcGround, Set srcSet){
+		if(srcSet.contains(srcGround.getAtom()))return;
+		srcSet.add(srcGround.getAtom());
+		for(int i=0;i<srcGround.getAtom().getArity();i++){
+			if(i==srcGround.getPos())continue;
+			dropGround(srcGround.getAtom().getArg(i),srcSet);
+		}
+		srcGround.getAtom().dequeue();
 	}
 	
 	////////////////////////////////////////////////////////////////
