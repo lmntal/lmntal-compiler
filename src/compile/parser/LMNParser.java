@@ -585,7 +585,7 @@ public class LMNParser {
 		it = rule.leftMem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
-			error("SYNTAX ERROR: head process context requires an enclosing membrane: " + pc);
+			error("SYNTAX ERROR: untyped head process context requires an enclosing membrane: " + pc);
 			// todo 復帰する
 			corrupted();
 		}
@@ -911,7 +911,9 @@ public class LMNParser {
 	/** アトム展開後のプロセス構造（子ルール外）のアトム引数に出現する<strike>型付き</strike>プロセス文脈を展開する。
 	 * @param typedNames 型付きプロセス文脈の限定名 "$p" (String) をキーとする写像
 	 * <pre> p(s1,$p,sn) → p(s1,X,sn), $p[X]
-	 * </pre> */
+	 * </pre>
+	 * <p>todo typedNames引数を廃止する
+	 */
 	private void expandTypedProcessContexts(LinkedList process, HashMap typedNames) {
 		ListIterator it = process.listIterator();
 		while (it.hasNext()) {
