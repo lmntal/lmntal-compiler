@@ -1,0 +1,220 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% O X GAME ( 3 x 3 )     by KUDO SHINTARO
+%
+% 使い方：
+%
+% 基本的に、
+% (1)ステージ表示、
+% (2)x座標入力(1~3)、
+% (3)y座標入力(1~3)、
+% の繰り返し.
+% x,y座標の入力が両方すんでから判定が行われ、
+% 1~3の整数以外を入力すると、x座標から入力やり直しに.
+% 勝ち負けの判定はしてくれるが、ゲームの相手はしてくれない.
+% つまり、人間対人間用.
+%
+% 座標入力の際、"exit"と入力すると(x,yどちらでも)、
+% y座標まで入力された後、止まります。
+%
+% プログラムについて：
+% 
+% 入出力はinlineで書いていますが、
+% メッセージボックスを使っているだけなので、
+% とても使いにくい
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% m : maru , b : batu , e : empty
+
+%%%%%%%%% data %%%%%%%%%%%%%%%%%
+{data,
+box(1,1,e),box(1,2,e),box(1,3,e),
+box(2,1,e),box(2,2,e),box(2,3,e),
+box(3,1,e),box(3,2,e),box(3,3,e)
+,playing}.
+
+now_player(m). % now player
+
+state(show).   % state
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%state :   show    -> showed
+%       -> input_x -> input_y -> inputed (-> show... )
+%       -> judge   -> judging -> judged  (-> show... )
+%       -> end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{rule_judge,
+( box(X1,Y1,m),box(X2,Y2,m),box(X3,Y3,m),playing :-
+  int(X1),int(X2),int(X3),X1=X2,X2=X3|
+  box(X1,Y1,m),box(X2,Y2,m),box(X3,Y3,m),win(m)),
+
+( box(X1,Y1,b),box(X2,Y2,b),box(X3,Y3,b),playing :-
+  int(X1),int(X2),int(X3),X1=X2,X2=X3|
+  box(X1,Y1,b),box(X2,Y2,b),box(X3,Y3,b),win(b)),
+
+( box(X1,Y1,m),box(X2,Y2,m),box(X3,Y3,m),playing :-
+  int(Y1),int(Y2),int(Y3),Y1=Y2,Y2=Y3|
+  box(X1,Y1,m),box(X2,Y2,m),box(X3,Y3,m),win(m)),
+
+( box(X1,Y1,b),box(X2,Y2,b),box(X3,Y3,b),playing :-
+  int(Y1),int(Y2),int(Y3),Y1=Y2,Y2=Y3|
+  box(X1,Y1,b),box(X2,Y2,b),box(X3,Y3,b),win(b)),
+
+( box(1,1,m),box(2,2,m),box(3,3,m),playing :-
+  box(1,1,m),box(2,2,m),box(3,3,m),win(m)),
+( box(1,1,b),box(2,2,b),box(3,3,b),playing :-
+  box(1,1,b),box(2,2,b),box(3,3,b),win(b)),
+( box(1,3,m),box(2,2,m),box(3,1,m),playing :-
+  box(1,3,m),box(2,2,m),box(3,1,m),win(m)),
+( box(1,3,b),box(2,2,b),box(3,1,b),playing :-
+  box(1,3,b),box(2,2,b),box(3,1,b),win(b))
+
+}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+state(show),{data,box(1,1,S1),box(1,2,S2),box(1,3,S3),
+                  box(2,1,S4),box(2,2,S5),box(2,3,S6),
+                  box(3,1,S7),box(3,2,S8),box(3,3,S9),
+            $p[S1,S2,S3,S4,S5,S6,S7,S8,S9]},{rule_show_stage,@rs}:-
+    state(showed),{data,show_stage(S1,S2,S3,S4,S5,S6,S7,S8,S9),
+    $p[S1,S2,S3,S4,S5,S6,S7,S8,S9],@rs},{rule_show_stage,@rs}.
+
+state(showed),{done(S1,S2,S3,S4,S5,S6,S7,S8,S9),data,
+                 $p[S1,S2,S3,S4,S5,S6,S7,S8,S9],@p} :-
+              {data,box(1,1,S1),box(1,2,S2),box(1,3,S3),
+                    box(2,1,S4),box(2,2,S5),box(2,3,S6),
+                    box(3,1,S7),box(3,2,S8),box(3,3,S9),
+    $p[S1,S2,S3,S4,S5,S6,S7,S8,S9]},
+    state(input_x).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+state(input_x),now_player(m) :-
+    x(input_integer("you are maru. x=?")),state(input_y),now_player(m).
+state(input_y),now_player(m) :-
+    y(input_integer("you are maru. y=?")),state(inputed),now_player(m).
+state(input_x),now_player(b) :-
+    x(input_integer("you are batu. x=?")),state(input_y),now_player(b).
+state(input_y),now_player(b) :-
+    y(input_integer("you are batu. y=?")),state(inputed),now_player(b).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+state(inputed),x(X1),y(Y1),now_player(m),{data,box(X,Y,e),$p} :-
+   int(X1),int(Y1),int(X),int(Y),X1=X,Y1=Y|
+   {data,box(X,Y,m),$p},now_player(b),state(judge).
+state(inputed),x(X1),y(Y1),now_player(b),{data,box(X,Y,e),$p} :-
+   int(X1),int(Y1),int(X),int(Y),X1=X,Y1=Y|
+   {data,box(X,Y,b),$p},now_player(m),state(judge).
+
+state(inputed),x(X1),y(Y1),{data,box(X,Y,m),$p} :-
+   int(X1),int(Y1),int(X),int(Y),X1=X,Y1=Y|
+   state(input_x),{data,box(X,Y,m),$p}.
+
+state(inputed),x(X1),y(Y1),{data,box(X,Y,b),$p} :-
+   int(X1),int(Y1),int(X),int(Y),X1=X,Y1=Y|
+   state(input_x),{data,box(X,Y,b),$p}.
+
+state(inputed),x(X1) ,y(Y1)  :- int(X1),int(Y1),X1<1|state(show).
+state(inputed),x(X1) ,y(Y1)  :- int(X1),int(Y1),X1>3|state(show).
+state(inputed),x(X1) ,y(Y1)  :- int(X1),int(Y1),Y1<1|state(show).
+state(inputed),x(X1) ,y(Y1)  :- int(X1),int(Y1),Y1>3|state(show).
+state(inputed),x(nil),y(Y1)  :- int(Y1)             |state(show).
+state(inputed),x(X1) ,y(nil) :- int(X1)             |state(show).
+state(inputed),x(nil),y(nil) :-                      state(show).
+
+state(inputed),x(exit) :- state(end).
+state(inputed),y(exit) :- state(end).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+state(judge),{data,$d,@d},{rule_judge,$j,@j}:-
+    state(judging),{data,$d,@j},{rule_judge,$j,@j}.
+
+state(judging),{data,$p,@j}/ :-
+    state(judge_draw),{data,$p}.
+
+state(judge_draw),{data,playing,$p} :- \+($p = (box(X,Y,e),$pp[X,Y]))|
+    state(judged),{data,win(draw),$p}.
+state(judge_draw),{data,playing,box(X,Y,e),$p[X,Y]} :-
+    state(judged),{data,playing,box(X,Y,e),$p[X,Y]}.
+state(judge_draw),{data,win(X),$p[X]} :-
+    state(judged),{data,win(X),$p[X]}.
+
+state(judged),{data,$p} :- 
+    \+( $p=(win(X),$pp[X]) ) | state(show),{data,$p}.
+state(judged),{data,win(X),$p[X]} :- state(show_end),{data,win(X),$p[X]}.
+%state(judged),{data,draw_game,$p} :- state(show_end),{data,draw_game}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+state(show_end),{data,box(1,1,S1),box(1,2,S2),box(1,3,S3),
+                      box(2,1,S4),box(2,2,S5),box(2,3,S6),
+                      box(3,1,S7),box(3,2,S8),box(3,3,S9),
+                      win(Winner),
+            $p[S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner]},{rule_show_stage_end,@rs}:-
+           {$p[S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner],@rs,
+            data,show_stage_end(S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner)},
+            {rule_show_stage_end,@rs},
+            state(showed_end).
+
+state(showed_end),{done(S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner),data,
+                     $p[S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner],@p} :-
+              {data,box(1,1,S1),box(1,2,S2),box(1,3,S3),
+                    box(2,1,S4),box(2,2,S5),box(2,3,S6),
+                    box(3,1,S7),box(3,2,S8),box(3,3,S9),
+                    win(Winner),
+            $p[S1,S2,S3,S4,S5,S6,S7,S8,S9,Winner]},
+            state(end).
+
+%%%%%%%%%%%%%
+{rule_show_stage,
+( show_stage(BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33):-
+[[/*inline*/
+	String str="";
+        for(int j=0,i=0;j<9;j++,i=(j%3)*3+(j/3))
+          str+="["+((me.nth(i).equals("m"))?"○":
+                   ((me.nth(i).equals("b"))?"×":
+                                            "　"))+"]"
+               +((j%3==2)?"\n":" ");
+	javax.swing.JOptionPane.showMessageDialog(
+        null,str,"m = maru , b = batu , e = empty",
+        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+	me.setName("done");
+	]](BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33) )
+}.
+
+{rule_show_stage_end,
+( show_stage_end(
+BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33,Winner):-
+[[/*inline*/
+	String str="";
+        for(int j=0,i=0;j<9;j++,i=(j%3)*3+(j/3))
+          str+="["+((me.nth(i).equals("m"))?"○":
+                   ((me.nth(i).equals("b"))?"×":
+                                            "　"))+"]"
+               +((j%3==2)?"\n":" ");
+        str+="\n"+((me.nth(9).equals("draw"))
+             ?"draw game."
+             :"the game is won by " + me.nth(9)+".");
+	javax.swing.JOptionPane.showMessageDialog(
+        null,str,"m = maru , b = batu , e = empty",
+        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+	me.setName("done");
+	]](BOX11,BOX12,BOX13,BOX21,BOX22,BOX23,BOX31,BOX32,BOX33,Winner) )
+}.
+
+H=input_integer(Message) :- H= [[/*inline*/
+	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
+	me.setName("done");
+	int n=0;
+	boolean flgOK=true;
+        Atom result;
+        if(s==null){ // ユーザが入力を取り消した場合
+            result=mem.newAtom(new Functor("nil",1));
+        }else if(s.equals("exit")){
+            result=mem.newAtom(new Functor("exit",1));
+        }else{
+            try{n= Integer.parseInt(s);}
+	    catch(NumberFormatException e){flgOK=false;}
+	    result=flgOK?
+	    mem.newAtom(new IntegerFunctor(n)):
+	    mem.newAtom(new Functor("nil",1));
+        }
+	mem.relink(result,0,me,1);
+	me.nthAtom(0).remove();
+	me.remove();
+	]](Message).
