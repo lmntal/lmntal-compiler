@@ -1207,6 +1207,7 @@ public class Instruction {
 					break;
 			}
 		}
+		spec.data.set(1, new Integer(nextId)); //ローカル変数の数を変更
 	}
 
 	/**

@@ -37,16 +37,17 @@ public class Optimizer {
 	 * @param body
 	 */	
 	private static void makeLoop(List head, List body) {
-		Iterator it = head.iterator();
-		Instruction inst = (Instruction)it.next();
+		Instruction inst = (Instruction)head.get(0);
 		if (inst.getKind() != Instruction.SPEC) {
 			return;
 		}
-		inst = (Instruction)it.next();
+		inst = (Instruction)head.get(1);
 		if (inst.getKind() != Instruction.FINDATOM || inst.getIntArg2() != 0) {
 			return;
 		}
 		Integer firstAtom = (Integer)inst.getArg1();
+
+		Iterator it = body.iterator();
 		while (it.hasNext()) {
 			inst = (Instruction)it.next();
 			switch (inst.getKind()) {
@@ -65,7 +66,8 @@ public class Optimizer {
 		loop.addAll(head.subList(2, head.size() - 1)); //spec,findatom,reactを除去
 		loop.addAll(body.subList(1, body.size())); //specを除去
 
-		body.add(new Instruction(Instruction.LOOP, loop));		
+		//proceed命令の前に挿入
+		body.add(body.size() - 1, new Instruction(Instruction.LOOP, loop));		
 	}
 
 	/**
