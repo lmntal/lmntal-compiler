@@ -645,6 +645,38 @@ class InterpretiveReactor {
 					Atom la = (Atom) srcmap.get(new Integer(srclink.getAtom().id)); // hashCode()をidに変更 (2004-10-12) n-kato
 					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
 					break; //kudo 2004-10-10
+				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
+					List linklist=(List)inst.getArg2();
+					Set insset=new HashSet();
+					AbstractMembrane srcmem=mems[inst.getIntArg3()];
+					for(int i=0;i<linklist.size();i++)
+						for(int j=i+1;j<linklist.size();j++){
+							Link a=(Link)vars.get(((Integer)linklist.get(i)).intValue());
+							Link b=(Link)vars.get(((Integer)linklist.get(j)).intValue());
+							if(a==b.getBuddy()){
+								Atom eq=srcmem.newAtom(new Functor("=",2));
+								a.getAtom().args[a.getPos()]=new Link(eq,0);
+								b.getAtom().args[b.getPos()]=new Link(eq,1);
+								eq.args[0]=a;
+								eq.args[1]=b;
+								insset.add(eq);
+							}
+						}
+					vars.set(inst.getIntArg1(),insset);
+					break; //kudo 2004-12-29
+				case Instruction.DELETECONNECTORS : //[srcset,srcmap,srcmem]
+					Set delset = (Set)vars.get(inst.getIntArg1());
+					Map delmap = (Map)vars.get(inst.getIntArg2());
+					srcmem = mems[inst.getIntArg3()];
+					it = delset.iterator();
+					while(it.hasNext()){
+						Atom orig=(Atom)it.next();
+						Atom copy=(Atom)delmap.get(new Integer(orig.id));
+						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
+						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
+						srcmem.removeAtom(copy);
+					}
+					break; //kudo 2004-12-29
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 
 					//====制御命令====ここから====
@@ -659,7 +691,7 @@ class InterpretiveReactor {
 					int locals  = spec.getIntArg2();
 
 // // ArrayIndexOutOfBoundsException がでたので一時的に変更
-// if (locals < 10) locals = 10;
+// if (locals < 10) locals = 1 ;
 					
 					InterpretiveReactor ir = new InterpretiveReactor(locals);
 					ir.reloadVars(this, locals, (List)inst.getArg2(),

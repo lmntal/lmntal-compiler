@@ -356,6 +356,7 @@ public class RuleCompiler {
 			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
 		}
 		recursiveLockLHSNonlinearProcessContextMems();
+		insertconnectors();
 		buildRHSMem(rs.rightMem);
 		if (!rs.rightMem.processContexts.isEmpty()) {
 			body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
@@ -367,6 +368,7 @@ public class RuleCompiler {
 		// ここでvarcountの最終値が確定することになっている。変更時は適切に下に移動すること。
 		//getLHSLinks();
 		updateLinks();
+		deleteconnectors();
 		enqueueRHSAtoms();
 		addInline();
 		addRegAndLoadModules();
@@ -492,6 +494,7 @@ public class RuleCompiler {
 			}
 		}
 	}
+	
 	// ground型付きプロセス文脈定義について、ソースとなるリンクを取得する
 	private void getGroundLinkPaths() {
 		Iterator it = gc.groundsrcs.keySet().iterator();
@@ -866,6 +869,58 @@ public class RuleCompiler {
 				rhsatompath.put(atom, new Integer(atomid));
 				rhsatoms.add(atom);
 				body.add( Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
+			}
+		}
+	}
+	
+	HashMap cxtlinksetpaths = new HashMap();
+	
+	/** コピーする$pについて、そのリンクオブジェクトへの参照を取得し、
+	 * そのリストを引数にinsertconnectors命令を発行する。
+	 * 得たsetオブジェクトへの参照が代入された変数を覚えておき、
+	 * プロセス文脈定義->setの変数番号
+	 * というマップに登録する。
+	 */
+	private void insertconnectors(){
+		Iterator it = rs.processContexts.values().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			if (def.rhsOccs.size() > 1) {
+				List linklist = new ArrayList();
+				int setpath=varcount++;
+				for(int i=0;i<def.lhsOcc.args.length;i++){
+					if(!lhslinkpath.containsKey(def.lhsOcc.args[i])){
+						int linkpath = varcount++;
+						body.add(new Instruction(Instruction.GETLINK,linkpath,
+							lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
+						lhslinkpath.put(def.lhsOcc.args[i],new Integer(linkpath));
+					}
+					int srclink = lhslinkToPath(def.lhsOcc.args[i]);
+					linklist.add(new Integer(srclink));
+				}
+				body.add(new Instruction( Instruction.INSERTCONNECTORS,
+					setpath,linklist,lhsmemToPath(def.lhsOcc.mem) ));
+				cxtlinksetpaths.put(def,new Integer(setpath));
+			}
+		}
+	}
+	
+	/** 上で作られたマップから引いてきたsetと、あとコピー時に作ったマップを
+	 * 引数にして、deleteconnectors命令を発行する。
+	 *
+	 */
+	private void deleteconnectors(){
+		Iterator it = rs.processContexts.values().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			Iterator it2 = def.rhsOccs.iterator();
+			if(def.rhsOccs.size() <2)continue;
+			while (it2.hasNext()) {
+				ProcessContext pc = (ProcessContext)it2.next();
+				body.add(new Instruction(Instruction.DELETECONNECTORS,
+				((Integer)cxtlinksetpaths.get(def)).intValue(),
+				rhspcToMapPath(pc),
+				rhsmemToPath(pc.mem)));
 			}
 		}
 	}

@@ -940,6 +940,25 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int LOOKUPLINK = 84;
 	static {setArgType(LOOKUPLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
 
+	/** insertconnectors[-dstset,linklist,mem]
+	 * $linklistリストの各変数番号にはリンクオブジェクトが格納されている。
+	 * それらのリンクオブジェクトのリンク先は$mem内のアトムである。
+	 * それらのリンクオブジェクトの全ての組み合わせに対し、buddyの関係にあるかどうかを検査し、
+	 * その場合には'='アトムを挿入する。
+	 * 挿入したアトムを$dstsetに追加する。
+	 */
+	public static final int INSERTCONNECTORS = 85;
+	static {setArgType(INSERTCONNECTORS, new ArgType(true, ARG_VAR, ARG_VARS, ARG_MEM));}
+	
+	/** deleteconnectors[srcset,srcmap,srcmem]
+	 * $srcsetに含まれる'='アトムをコピーしたアトムを$srcmapから得て、
+	 * 削除し、リンクをつなぎなおす。$srcmemはコピー先の膜。
+	 * 
+	 * (単に$srcmemに含まれる'='を削除するようにすればよいか？)
+	 */
+	public static final int DELETECONNECTORS = 86;
+	static {setArgType(DELETECONNECTORS, new ArgType(false, ARG_VAR,ARG_VAR,ARG_MEM));}
+
 //	/** * [srcatom,pos]
 //	 * <br>（予約された）ボディ命令<br>
 //	 * アトムsrcatomの第1引数のリンク先のリンク先のアトムの第pos引数と、
