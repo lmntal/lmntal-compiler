@@ -13,4 +13,25 @@ package runtime;
  *
  */
 public class LMNtalDaemon{
+	/*
+	 * とりあえず考えてみたプロトコル
+	 * LMNtalDaemonがやりとりしなきゃいけないのはこれぐらいかなぁ…
+	 * 
+	 * 登録関係
+	 * HELO …（ノﾟДﾟ）おはよう
+	 * READY …ack
+	 * REGISTLOCAL runtimeid …ローカルにあるマスタランタイムを登録
+	 * OK … 成功
+	 * FAIL … 失敗
+	 * REGISTREMOTE runtimeid …手元に登録してあるマスタランタイムを相手に送る
+	 * REGISTFINISHED …黒を作成できたことをマスタランタイムがある計算機のdaemonに送る
+	 * 
+	 * 実行関係
+	 * COPYRULESET …ルールセットを全て送る
+	 * COPYRULE …ルールを一つ送る
+	 * COPYPROCESSCONTEXT …$pを送る
+	 * COPYFREELINK
+	 * COPYATOM
+	 * 
+	 */
 }
