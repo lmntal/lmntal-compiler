@@ -8,6 +8,7 @@ import java.util.Set;
 
 import util.QueuedEntity;
 import util.Stack;
+import util.Util;
 
 /**
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
