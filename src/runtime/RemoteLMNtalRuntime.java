@@ -35,7 +35,7 @@ public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 * @return AbstractTask
 	 */
 	public AbstractTask newTask(AbstractMembrane parent) {
-		if(Env.debug > 0 )System.out.println("RemoteLMNtalRuntime.newTask()");
+		if(true)System.out.println("RemoteLMNtalRuntime.newTask()"); //todo use Env
 		RemoteTask task = new RemoteTask(this, parent);
 		RemoteMembrane newroot = (RemoteMembrane)task.getRoot();
 		if (newroot.remote == null) {
@@ -46,6 +46,9 @@ public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 		String newmemid = newroot.remote.generateNewID();
 		newroot.globalid = newmemid;
 		newroot.remote.send("NEWROOT",newmemid,parent,hostname); // 親膜への命令を子ホストに送る
+
+		newroot.remote.registerMem(newmemid,newroot); //(nakajima 2004-10-25)
+		
 		return task;
 	}
 	
