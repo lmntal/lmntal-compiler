@@ -26,8 +26,8 @@ import compile.structure.*;
  * ボディ命令列の仮引数では、先にmemsを枚挙してから、その続きの変数番号にatomsを枚挙している。
  */
 public class HeadCompiler {
-	/** 左辺膜 */
-	public Membrane m;
+//	/** 左辺膜 */
+//	public Membrane lhsmem;//m;
 	/** マッチング命令列（のラベル）*/
 	public InstructionList matchLabel;
 	/** matchLabel.insts */
@@ -58,32 +58,38 @@ public class HeadCompiler {
 	}
 	static final int UNBOUND = -1;
 	
-	HeadCompiler(Membrane m) {
-		//Env.n("HeadCompiler");
-		this.m = m;
-	}
-	/** ガード否定条件のコンパイルで使うためにthisに対する正規化されたHeadCompilerを作成して返す。
+	HeadCompiler() {}
+	
+	/** ガード否定条件およびボディのコンパイルで使うために、
+	 * thisを指定されたhcに対する正規化されたHeadCompilerとする。
 	 * 正規化とは、左辺の全てのアトムおよび膜に対して、ガード/ボディ用の仮引数番号を
 	 * 変数番号として左辺のマッチングを取り終わった内部状態を持つようにすることを意味する。*/
-	final HeadCompiler getNormalizedHeadCompiler() {
-		HeadCompiler nhc = new HeadCompiler(m);
-		nhc.matchLabel = new InstructionList();
-		nhc.match = nhc.matchLabel.insts;
-		nhc.mems.addAll(mems);
-		nhc.atoms.addAll(atoms);
-		nhc.varcount = 0;
+	final void initNormalizedCompiler(HeadCompiler hc) {
+		matchLabel = new InstructionList();
+		match = matchLabel.insts;
+		mems.addAll(hc.mems);
+		atoms.addAll(hc.atoms);
+		varcount = 0;
 		Iterator it = mems.iterator();
 		while (it.hasNext()) {
-			nhc.mempaths.put(it.next(), new Integer(nhc.varcount++));
+			mempaths.put(it.next(), new Integer(varcount++));
 		}
 		it = atoms.iterator();
 		while (it.hasNext()) {
 			Atom atom = (Atom)it.next();
-			nhc.atompaths.put(atom, new Integer(nhc.varcount));
-			nhc.atomids.put(atom, new Integer(nhc.varcount++));
-			nhc.visited.add(atom);
+			atompaths.put(atom, new Integer(varcount));
+			atomids.put(atom, new Integer(varcount++));
+			visited.add(atom);
 		}
-		return nhc;
+	}
+	
+	/** ガード否定条件のコンパイルで使うためにthisに対する正規化されたHeadCompilerを作成して返す。
+	 * 正規化とは、左辺の全てのアトムおよび膜に対して、ガード/ボディ用の仮引数番号を
+	 * 変数番号として左辺のマッチングを取り終わった内部状態を持つようにすることを意味する。*/
+	final HeadCompiler getNormalizedHeadCompiler() {
+		HeadCompiler hc = new HeadCompiler();
+		hc.initNormalizedCompiler(this);
+		return hc;
 	}
 	/** 膜memの子孫の全てのアトムと膜を、それぞれリストatomsとmemsに追加する。
 	 * リスト内の追加された位置がそのアトムおよび膜の仮引数IDになる。*/
@@ -105,12 +111,13 @@ public class HeadCompiler {
 	
 	public void prepare() {
 		Env.c("prepare");
-		varcount = 1;	// [0]は本膜
 		mempaths.clear();
 		atompaths.clear();
 		visited.clear();
 		matchLabel = new InstructionList();
 		match = matchLabel.insts;
+		varcount = 1;	// [0]は本膜
+//		mempaths.put(mems.get(0), new Integer(0));	// 本膜の変数番号は 0
 	}
 	/** リンクでつながったアトムおよびその所属膜に対してマッチングを行う */
 	public void compileLinkedGroup(Atom firstatom) {
@@ -358,13 +365,6 @@ public class HeadCompiler {
 //	public Instruction getResetVarsInstruction() {
 //		return Instruction.resetvars(getMemActuals(), getAtomActuals(), getVarActuals());
 //	}
-	public List getAtomActuals() {
-		List args = new ArrayList();		
-		for (int i = 0; i < atoms.size(); i++) {
-			args.add( atompaths.get(atoms.get(i)) );
-		}
-		return args;
-	}		
 	public List getMemActuals() {
 		List args = new ArrayList();		
 		for (int i = 0; i < mems.size(); i++) {
@@ -372,6 +372,13 @@ public class HeadCompiler {
 		}
 		return args;
 	}
+	public List getAtomActuals() {
+		List args = new ArrayList();		
+		for (int i = 0; i < atoms.size(); i++) {
+			args.add( atompaths.get(atoms.get(i)) );
+		}
+		return args;
+	}		
 	public List getVarActuals() {
 		return new ArrayList();
 	}

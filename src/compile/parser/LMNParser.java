@@ -359,11 +359,14 @@ public class LMNParser {
 				LinkedList sPair = (LinkedList)it2.next();
 				String cxtname = ((SrcProcessContext)sPair.getFirst()).getQualifiedName();
 				if (!names.containsKey(cxtname)) {
-					error("SYNTAX ERROR: fresh variable constrained in a negative condition: " + cxtname);
+					error("SYNTAX ERROR: fresh process context constrained in a negative condition: " + cxtname);
 				}
 				else {
 					ContextDef def = (ContextDef)names.get(cxtname);
-					if (def.lhsOcc != null) {
+					if (def.typed) {
+						error("SYNTAX ERROR: typed process context constrained in a negative condition: " + cxtname);
+					}
+					else if (def.lhsOcc != null) {
 						Membrane mem = new Membrane(null);
 						addProcessToMem((LinkedList)sPair.getLast(),mem);
 						neg.add(new ProcessContextEquation(def,mem));

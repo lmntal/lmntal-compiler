@@ -51,6 +51,7 @@ public class RulesetCompiler {
 		// 世界を生成する
 		Membrane root = new Membrane(null);
 		RuleStructure rs = new RuleStructure(root);
+		rs.fSuppressEmptyHeadWarning = true;
 		rs.leftMem  = new Membrane(null);
 		rs.rightMem = m;
 		root.rules.add(rs);

@@ -11,6 +11,9 @@ public final class RuleStructure {
 	/** 所属膜。コンパイル時につかう
 	 * <p>todo parentはいずれmemに名称変更する */
 	public Membrane parent;
+	
+	/** 左辺が空のときの警告を抑制するかどうか */
+	public boolean fSuppressEmptyHeadWarning = false;
 
 	/** Headを格納する膜 */
 	public Membrane leftMem = new Membrane(null);

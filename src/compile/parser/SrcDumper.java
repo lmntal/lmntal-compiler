@@ -10,7 +10,7 @@ public class SrcDumper {
 //	private static final String INDENT_STRING = "    ";
 //	private static final String BR = "\n";
 	private static final String INDENT_STRING = "";
-	private static final String BR = "";
+	private static final String BR = " ";
 	
 	protected SrcDumper() {
 			
