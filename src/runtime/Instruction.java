@@ -14,7 +14,14 @@ import java.util.*;
  *
  */
 public class Instruction {
-	public ArrayList data = new ArrayList();
+	public static final int NULL      = 0;
+	public static final int MEM       = 1;
+	public static final int VAR       = 2;
+	public static final int NAME      = 3;
+	public static final int AT        = 4;
+	public static final int METAVAR   = 5;
+	
+	public List data = new ArrayList();
 	
 	public Instruction() {
 		// ‚½‚Æ‚¦‚Î [react, [1, 2, 5]]
