@@ -88,9 +88,13 @@ public class Instruction {
 	    //想定される場合：
 	    //ArrayList dataが空→命令が入ってない
 	    //ArrayList data[i]が空→引数無し
+	    //未知のバグ→とりあえずexceptionをprint
+
 	    //それ以外→なんかある？
 
-	    return "No instruction or argument!!\n\n";
+	    System.out.println(e);
+
+	    return "General Protection Fault\n\n";
 	}
 
 	return (buffer.toString());
