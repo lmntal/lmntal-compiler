@@ -1,0 +1,83 @@
+/*
+http://www.geocities.jp/m_hiroi/rakup/match01.html#chap3
+ マッチングと代入
+ 束縛リストを返す
+*/
+%%%%% マッチングのルール
+% true
+(
+	BINDING = match([], [])
+		:-
+	BINDING = [], true
+),
+% false
+(
+	BINDING = match([], B)
+		:-
+	BINDING = [], false, null(B) % TODO: 消す
+),
+(
+	BINDING = match(A, [])
+		:-
+	BINDING = [], false, null(A)
+),
+% 再帰ルール
+% シンボルが同じ
+(
+	BINDING = match([A | L], [B | M]),
+	symbols = {
+		{ p(A), p(B), $r1 }, $r2
+	}
+		:-
+	BINDING = match(L, M),
+	symbols = {
+		{             $r1 }, $r2
+	}
+),
+% シンボルが違う
+(
+	BINDING = match([A | L], [B | M]),
+	symbols = {
+		{ p(A), $r1 },
+		{ p(B), $r2 }, $r3
+	}
+		:-
+	BINDING = [], false, null(L), null(M),
+	symbols = {
+		{ $r1 },
+		{ $r2 }, $r3
+	}
+),
+% 変数にバインディング
+(
+	BINDING = match([var(V) | L], [B | M]),
+	symbols = {
+		{ p(B), $r1 }, $r2
+	}
+		:-
+	BINDING = [[V | BIND] | match(L, M)],
+	symbols = {
+		{ p(BIND), $r1 }, $r2
+	}
+),
+(
+	BINDING = match([A | L], [var(V) | M]),
+	symbols = {
+		{ p(A), $r1 }, $r2
+	}
+		:-
+	BINDING = [[V | BIND] | match(L, M)],
+	symbols = {
+		{ p(BIND), $r1 }, $r2
+	}
+),
+% テストデータ
+symbols = {
+//	{ a, p(A1) },
+//	{ b, p(B1) }
+	{ taro,     p(S1_1), p(S1_2) },
+	{ like,              p(S2_2) },
+	{ coffer,   p(S3_1) }
+},
+binding = match([S1_1, var(x), S3_1], [S1_2, S2_2, var(y)])
+//binding = match([var(x), var(y) ], [A1, B1])
