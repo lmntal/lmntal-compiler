@@ -447,6 +447,9 @@ class InterpretiveReactor {
 				case Instruction.LOCALCLEARRULES:  //[dstmem]
 					mems[inst.getIntArg1()].clearRules();
 					break; //n-kato
+				case Instruction.LOADMODULE: //[dstmem, ruleset]
+					mems[inst.getIntArg1()].loadRuleset((Ruleset)inst.getArg2() );
+					break;
 					//====ルールを操作するボディ命令====ここまで====
 
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====

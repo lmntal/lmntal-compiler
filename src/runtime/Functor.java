@@ -38,12 +38,12 @@ public class Functor {
 		int pos = name.indexOf('.');
 		if(pos!=-1) {
 			this.path = name.substring(0, pos);
-			this.name = name.substring(pos+1);
+			name = name.substring(pos+1);
 		} else {
 			this.pathFree = true;
 			if(m!=null) this.path = m.name;
-			this.name = name;
 		}
+		this.name = name;
 		//Env.p("new Fun "+path+"  "+name+" "+m);
 		this.arity = arity;
 		// == で比較できるようにするためにinternしておく。

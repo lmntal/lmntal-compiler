@@ -435,11 +435,14 @@ public class RuleCompiler {
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
-			if(atom.functor.getArity()==1 && atom.functor.getName().equals("use")) {
+			if(atom.functor.getName().equals("use") && atom.functor.getArity()==1) {
+				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
+				atom.args[0].buddy.atom.functor.getName()) );
+			}
+			if(atom.functor.path!=null && !atom.functor.path.equals(atom.mem.name)) {
 				// この時点では解決できないモジュールがあるので名前にしておく
-				// TODO LOADRULESET -> LOADMODULE
-				body.add( new Instruction(Instruction.LOADRULESET, rhsmemToPath(atom.mem),
-					 atom.args[0].buddy.atom.functor.getName()));
+				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
+					 atom.functor.path));
 			}
 		}
 	}

@@ -671,6 +671,12 @@ public class Instruction {
 	 * clearrulesと同じ。ただし$dstmemはこの計算ノードに存在する。*/
 	public static final int LOCALCLEARRULES = LOCAL + CLEARRULES;
 
+	/** loadmodule [dstmem, ruleset]
+	 * <br>ボディ命令<br>
+	 * ルールセットrulesetを膜$dstmemにコピーする。
+	 */
+	public static final int LOADMODULE = 78;
+
     // 型付きでないプロセス文脈をコピーまたは廃棄するための命令 (80--89)
 	//  ----- recursivelock            [srcmem]
 	//  ----- recursiveunlock          [srcmem]

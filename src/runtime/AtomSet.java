@@ -63,9 +63,29 @@ public final class AtomSet {
 	public Iterator iterator() {
 		return new AtomIterator(atoms);
 	}
+	
+	/** 与えられた名前を持つアトムの反復子を返す。所属膜指定を無視する版 */
+//	public Iterator ignorePathIterator(Functor f) {
+//		return new AtomIgnorePathIterator(this, f);
+//	}
+	
 	/** 与えられた名前を持つアトムの反復子を返す */
 	public Iterator iteratorOfFunctor(Functor functor) {
 		List s = (List)atoms.get(functor);
+		if(!functor.pathFree) {
+			// モジュールのための追加 by hara。効率悪いけどいいや。
+			List t = new ArrayList();
+			if (s != null) {
+				Iterator i = s.iterator();
+				while(i.hasNext()) {
+					Atom a=(Atom)i.next();
+					if(functor.path!=null && a.getFunctor().path.equals(functor.path)) {
+						t.add(a);
+					}
+				}
+			}
+			s = t;
+		}
 		if (s == null) {
 			return Util.NULL_ITERATOR;
 		} else {
@@ -279,3 +299,26 @@ final class AtomIterator implements Iterator {
 	}
 	
 }
+
+//final class AtomIgnorePathIterator implements Iterator {
+//	Iterator it;
+//	Atom next;
+//	Functor f;
+//	
+//	AtomIgnorePathIterator(AtomSet as, Functor f) {
+//		it = as.iterator();
+//		this.f = f;
+//	}
+//	public Object next() {
+//		
+//	}
+//	public boolean hasNext() {
+//		while(it.hasNext()) {
+//			next = (Atom)it.next();
+//			if(next.getFunctor())
+//		}
+//	}
+//	public void remove() {
+//		throw new UnsupportedOperationException();
+//	}
+//}

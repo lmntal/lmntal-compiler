@@ -27,7 +27,6 @@ import compile.structure.*;
  * <li> 「モジュールを使う」とは、現在の膜内にモジュールのルールを読み込んで、勝手に反応させることである。
  * 		たいてい、モジュールのルールの左辺に含まれるアトムを書くことで反応させることになる。
  * <li> module_name : { ... } により、膜に名前をつける。これがモジュール名となる。
- * 		ただし、現状は name(X) が含まれる膜に対して X につながるアトムのファンクタ名と同じ名前をつける。 
  * </ul><br>
  * 
  * 内部の仕組み
@@ -50,10 +49,10 @@ import compile.structure.*;
  * 		解決順序は、現在のコンパイル済み構造→ライブラリパスから「モジュール名.lmn」を探してコンパイルした構造。
  * 		(TODO)
  * <li> LOADMODULE命令とは、指定したモジュールのルールセットを指定した膜に読み込む中間命令だ。
- * <li> FINDATOM 命令の動作を変更する。（TODO AtomSet を変えることになるかな）
+ * <li> FINDATOM 命令の動作を変更する。（AtomSet を変えることになるかな）
  * 		func を探すとき、マッチするファンクタ集合は以下のもの。
  * 		<ul>
- * 		<li>!func.pathFree の場合は、name, arity, package が等しいもの
+ * 		<li>!func.pathFree の場合は、name, arity, path が等しいもの
  * 		<li> func.pathFree の場合は、name, arity が等しいもの（従来どおり）
  * 		</ul>
  *      TODO この区別はルールコンパイラが行うのであるため、コンパイル時データ構造のみが識別する必要があり、実行時には不要。(n-kato)
@@ -95,6 +94,33 @@ public class Module {
 				Env.p("TODO: search lib file : "+f.path);
 			}
 		}
+		Iterator it0 = m.rulesets.iterator();
+		while (it0.hasNext()){
+			i = ((InterpretedRuleset)it0.next()).rules.listIterator();
+			while(i.hasNext()) {
+				runtime.Rule rule = (runtime.Rule)i.next();
+				ListIterator ib = rule.body.listIterator();
+				while(ib.hasNext()) {
+					Instruction inst = (Instruction)ib.next();
+					// きたない。
+					if(inst.getKind()==Instruction.LOADMODULE) {
+						//Env.p("module solved : "+modules.get(inst.getArg2()));
+						ib.remove();
+						// モジュール膜直属のルールセットを全部読み込む
+						Membrane mem = (Membrane)memNameTable.get(inst.getArg2());
+						if(mem==null) {
+							Env.e("Undefined module "+inst.getArg2());
+						} else {
+							Iterator it3 = mem.rulesets.iterator();
+							while (it3.hasNext()) {
+								ib.add(new Instruction(Instruction.LOADMODULE, inst.getIntArg1(),
+									(runtime.Ruleset)it3.next()));
+							}
+						}
+					}
+				}
+			}
+		}
 		i = m.rules.listIterator();
 		while(i.hasNext()) {
 			RuleStructure rs = (RuleStructure)i.next();
@@ -105,31 +131,5 @@ public class Module {
 		while(i.hasNext()) {
 			genInstruction((Membrane)i.next());
 		}
-//		Iterator it0 = m.rulesets.iterator();
-//		while (it0.hasNext()){
-//			Iterator i = ((InterpretedRuleset)it0.next()).rules.listIterator();
-//			while(i.hasNext()) {
-//				runtime.Rule rule = (runtime.Rule)i.next();
-//				ListIterator ib = rule.body.listIterator();
-//				while(ib.hasNext()) {
-//					Instruction inst = (Instruction)ib.next();
-//					// きたない。
-//					// TODO この用途での LOADRULESET は LOADMODULE に名称変更し、Interpreterでロードする
-//					if(inst.getKind()==Instruction.LOADRULESET && inst.getArg2() instanceof String) {
-//						//Env.p("module solved : "+modules.get(inst.getArg2()));
-//						ib.remove();
-//						Iterator it3 = ((Membrane)memNameTable.get(inst.getArg2())).rulesets.iterator();
-//						while (it3.hasNext()) {
-//							ib.add(new Instruction(Instruction.LOADRULESET, inst.getIntArg1(),
-//								(runtime.Ruleset)it3.next()));
-//						}
-//					}
-//				}
-//			}
-//		}
-//		Iterator i = m.mems.listIterator();
-//		while(i.hasNext()) {
-//			genInstruction((Membrane)i.next());
-//		}
 	}
 }
