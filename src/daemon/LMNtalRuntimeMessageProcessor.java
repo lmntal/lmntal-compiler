@@ -643,7 +643,7 @@ class InstructionBlockProcessor implements Runnable {
 }
 
 /**
- * ロックを処理するスレッド
+ * LOCK, ASYNCLOCK, BLOCKINGLOCKを処理するスレッド
  * 
  * @author nakajima
  * 
@@ -681,6 +681,11 @@ class LockProcessor implements Runnable{
 	}
 }
 
+/**
+ * RECURSIVELOCKを処理するスレッド
+ * @author nakajima
+ *
+ */
 class RecursiveLockProcessor implements Runnable{
 	String command;
 	LMNtalNode node;
