@@ -33,7 +33,6 @@ abstract class AbstractTask {
 }
 
 /**
- * TODO システムルールセットのマッチテスト・ボディ実行
  * TODO タスク間の上下関係の実装をする？
  */
 final class Task extends AbstractTask {
