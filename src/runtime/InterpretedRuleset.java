@@ -127,7 +127,7 @@ class InterpretiveReactor {
 		Atom[] atoms,
 		List vars /*, List insts*/
 	) {
-		Env.n("InterpreterReactor");
+		Env.n("InterpretiveReactor");
 		this.mems = mems;
 		this.atoms = atoms;
 		this.vars = vars;

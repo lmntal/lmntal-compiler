@@ -162,7 +162,9 @@ public class Optimizer {
 		Instruction.changeMemId(loop, varMap);
 		
 		//proceed命令の前に挿入
-		body.add(body.size() - 1, new Instruction(Instruction.LOOP, loop));		
+		ArrayList looparg = new ArrayList();
+		looparg.add(loop);
+		body.add(body.size() - 1, new Instruction(Instruction.LOOP, looparg));		
 	}
 
 	/**
