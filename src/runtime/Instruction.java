@@ -12,28 +12,26 @@ import java.lang.reflect.Field;
  * 中島君へ：Eclipseのデフォルトに合わせてタブ幅4で編集して下さい。
  * 
  * TODO memof は廃止する方向で検討する。
- * TODO ルール実行中の5つの配列はそれぞれ0から詰めて使用するのか決める。
- * TODO ルール実行中の5つの配列は3つ、あるいは1つに併合した方がよい？
+ * TODO ルール実行中の5つの配列はそれぞれ0から詰めて使用するのか決める。または、
+ * ルール実行中の5つの配列は3つ、あるいは1つに併合した方がよい？
  * 
- * [実行膜スタックに積むタイミング]
- *  - 底のほうに積むの実現にはStackの結合を使う。unlockmemのタイミングで結合する
- *  - ※現状では、ルート膜が除去されると、次のルート膜までの部分を移動先で実行するようにしている。
- *
  * <p><b>注意</b>　方法4の文書に対して、「ロックしたまま実行膜スタックに積む」という操作
- * およびその結果の「ロックしたまま実行膜スタックにも積まれた」状態が追加されました。
+ * およびその結果の「ロックされた、かつ実行膜スタックにも積まれた」状態が追加された。
+ * 
+ * <p>ボディ実行の流れは次の通り。生成と活性化を親膜側から行った後、ロックを子膜側から解放する。
  * <ul>
- * <li>ローカルの膜の場合、親膜側から実際に実行膜スタックに積みます。
- * 本膜がロックされているため、新しい膜が実行されることはありません。
- * この
- * 本膜のロックを解放すると、アトミックにロックが解放された状態になります。
- * <li>リモートの膜の場合、一時的な実行スタックを作り、そこに親膜側から積んでいきます。
- * リモートのルート膜のロックが解放されると、実行膜スタックの先頭に丸ごと移動されます。
- * これによってアトミックにロックが解放された状態になります。
+ * <li>活性化する膜が本膜と同じタスクの膜の場合、親膜側から実際に実行膜スタックに積む。
+ * 本膜が実行中なので、新しい膜が実行されることはない。
+ * このルールの適用終了前にロックは解放するが、何も起こらない。
+ * このルールの適用が終了すると、子膜の実行が開始される。
+ * <li>活性化する膜がリモート膜や他のタスクの膜の場合、一時的な実行スタックを作り、
+ * そこに親膜側から積んでいく。
+ * リモートのルート膜のロックが解放されると、実行膜スタックの先頭に丸ごと移動される。
+ * これによって実行膜スタックに全ての膜がアトミックに積まれることになる。
  * </ul>
- * TODO addmemやnewrootした膜は、ルール実行終了時に（子膜側から順番に）unlockmemを実行する。
+ * TODO コンパイラは次のコードを出力する：addmemやnewrootした膜は、ルール実行終了時に（子膜側から順番に）unlockmemを実行する。
  */
  
-
 /**
  * 1 つの命令を保持する。通常は、InstructionのArrayListとして保持する。
  * 
@@ -69,10 +67,9 @@ public class Instruction {
     // アトムに関係する出力する基本ガード命令 (1--6)
 	//  -----  deref     [-dstatom, srcatom, srcpos, dstpos]
 	//  -----  derefatom [-dstatom, srcatom, srcpos]
-	//  -----  dereffunc [-dstfunc, srcatom, srcpos]
 	//  -----  findatom  [-dstatom, srcmem, funcref]
-	//  -----  getlink   [-link, atom, pos]
-    
+	//	-----  getlink   [-link,    atom, pos]
+
     /** deref [-dstatom, srcatom, srcpos, dstpos]
      * <br><strong><font color="#ff0000">出力するガード命令</font></strong><br>
      * アトム$srcatomの第srcpos引数のリンク先が第dstpos引数に接続していることを確認したら、
@@ -88,26 +85,17 @@ public class Instruction {
 	public static final int DEREFATOM = 2;
 	// LOCALDEREFATOMは不要
 
-	/** dereffunc [-dstfunc, srcatom, srcpos]
-	 * <br>出力する失敗しない拡張ガード命令
-	 * アトム$srcatomの第srcpos引数のリンク先のアトムのファンクタを取得し、$dstfuncに代入する。
-	 * <p>引き続き、型付き単項アトムのマッチングを行うために使用される。
-	 * <p>単項アトムでない型付きプロセス文脈は、リンクオブジェクトを使って操作する。
-	 * @see derefnocheck */
-	public static final int DEREFFUNC = 3;
-	// LOCALDEREFFUNCは不要
-
 	/** findatom [-dstatom, srcmem, funcref]
 	 * <br>反復するガード命令<br>
 	 * 膜$srcmemにあってファンクタfuncrefを持つアトムへの参照を次々に$dstatomに代入する。*/
-	public static final int FINDATOM = 4;
+	public static final int FINDATOM = 3;
 	// LOCALFINDATOMは不要
 
 	/** getlink [-link, atom, pos]
 	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
 	 * アトム$atomの第pos引数に格納されたリンクオブジェクトへの参照を$linkに代入する。
 	 * <p>典型的には、$atomはルールヘッドに存在する。*/
-	public static final int GETLINK = 5;
+	public static final int GETLINK = 4;
 	// LOCALGETLINKは不要
 
 //	/** dereflink [atom, link]
@@ -116,9 +104,11 @@ public class Instruction {
 //	public static final int DEREFLINK = err;
 //	// LOCALDEREFLINKは不要
 
-	// 膜に関係する出力する基本ガード命令 (8--9)
+	// 膜に関係する出力する基本ガード命令 (6--9)
 	// [local]lockmem    [-dstmem, freelinkatom]
 	// [local]anymem     [-dstmem, srcmem] 
+	//  ----- getmem     [-dstmem, srcatom]
+	//  ----- getparent  [-dstmem, srcmem]
 
     /** lockmem [-dstmem, freelinkatom]
      * <br>ロック取得するガード命令<br>
@@ -132,7 +122,7 @@ public class Instruction {
      * <p>膜の外からのリンクで初めて特定された膜への参照を取得するために使用される。
      * @see testmem
      * @see getmem */
-    public static final int LOCKMEM = 8;
+    public static final int LOCKMEM = 6;
     
     /** locallockmem [-dstmem, freelinkatom]
      * <br>ロック取得する最適化用ガード命令<br>
@@ -146,12 +136,27 @@ public class Instruction {
      * そして、ロック取得に成功した各子膜への参照を$dstmemに代入する。
      * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
      * <p><b>注意</b>　ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。*/
-	public static final int ANYMEM = 9;
+	public static final int ANYMEM = 7;
 	
 	/** localanymem [-dstmem, srcmem]
      * <br>反復するロック取得する最適化用ガード命令<br>
 	 * anymemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定されない。*/
 	public static final int LOCALANYMEM = LOCAL + ANYMEM;
+
+	/** getmem [-dstmem, srcatom]
+	 * <br>（推奨されない）ボディ命令<br>
+	 * アトム$srcatomの所属膜への参照を$dstmemに代入する。
+	 * <p><b>注意</b>　ガード命令としては廃止された。
+	 * @see lockmem */
+	public static final int GETMEM = 8;
+	// LOCALGETMEMは不要
+	
+	/** getparent [-dstmem, srcmem]
+	 * <br>（推奨されない）ボディ命令<br>
+	 * 膜$srcmemの親膜への参照を$dstmemに代入する。
+	 * <p><b>注意</b>　ガード命令としては廃止された。*/
+	public static final int GETPARENT = 9;
+	// LOCALGETPARENTは不要
 
     // 膜に関係する出力しない基本ガード命令 (10--24)
 	//  ----- testmem    [dstmem, freelinkatom]
@@ -216,19 +221,10 @@ public class Instruction {
 	public static final int STABLE = 17;
 	// LOCALSTABLEは不要
 
-//    /** lock [srcmem]
-//     * <br>（廃止された）ガード命令<br>
-//     * 膜$srcmemに対するノンブロッキングでのロック取得を試みる。
-//     * ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
-//     * <p>srcmemにmemof記法が廃止されたため、ロックはlockmemで行う。したがってlockは廃止された。*/
-//    public static final int LOCK = err;
-
 	// アトムに関係する出力しない基本ガード命令 (20-24)
 	//  -----  func    [srcatom, funcref]
 	//  -----  eqatom  [atom1, atom2]
 	//  -----  neqatom [atom1, atom2]
-	//  -----  eqfunc  [func1, func2]
-	//  -----  neqfunc [func1, func2]
 
 	/** func [srcatom, funcref]
 	 * <br>ガード命令<br>
@@ -251,37 +247,45 @@ public class Instruction {
 	public static final int NEQATOM = 22;
 	// LOCALNEQATOMは不要
 
+	// ファンクタに関係する命令 (25--29)	
+	//  -----  dereffunc [-dstfunc, srcatom, srcpos]
+	//  -----  getfunc   [-func,    atom]
+	//  -----  loadfunc  [-func,    funcref]
+	//  -----  eqfunc              [func1, func2]
+	//  -----  neqfunc             [func1, func2]
+
+	/** dereffunc [-dstfunc, srcatom, srcpos]
+	 * <br>出力する失敗しない拡張ガード命令
+	 * アトム$srcatomの第srcpos引数のリンク先のアトムのファンクタを取得し、$dstfuncに代入する。
+	 * <p>引き続き、型付き単項アトムのマッチングを行うために使用される。
+	 * <p>単項アトムでない型付きプロセス文脈は、リンクオブジェクトを使って操作する。
+	 * <p>derefatom[dstatom,srcatom,srcpos];getfunc[dstfunc,dstatom]と同じなので廃止？*/
+	public static final int DEREFFUNC = 25;
+	// LOCALDEREFFUNCは不要
+
+	/** getfunc [-func, atom]
+	 * <br>出力する失敗しない拡張ガード命令<br>
+	 * アトム$atomのファンクタへの参照を$funcに代入する。*/
+	public static final int GETFUNC = 26;
+	// LOCALGETFUNCは不要
+
+	/** loadfunc [-func, funcref]
+	 * <br>出力する失敗しない拡張ガード命令<br>
+	 * ファンクタfuncrefへの参照を$funcに代入する。*/
+	public static final int LOADFUNC = 27;
+	// LOCALLOADFUNCは不要
 
 	/** eqfunc [func1, func2]
 	 * <br>型付き拡張用ガード命令<br>
 	 * ファンクタ$func1と$func2が等しいことを確認する。*/
-	public static final int EQFUNC = 23;
+	public static final int EQFUNC = 28;
 	// LOCALEQFUNCは不要
 
 	/** neqfunc [func1, func2]
 	 * <br>型付き拡張用ガード命令<br>
 	 * ファンクタ$func1と$func2が異なることを確認する。*/
-	public static final int NEQFUNC = 24;
+	public static final int NEQFUNC = 29;
 	// LOCALEQFUNCは不要
-
-    // ヘッドから移管されたボディ命令 (25--29)
-	//  -----  getmem         [-dstmem, srcatom]
-	//  -----  getparent      [-dstmem, srcmem]
-
-    /** getmem [-dstmem, srcatom]
-     * <br>ボディ命令<br>
-     * アトム$srcatomの所属膜への参照を$dstmemに代入する。
-     * <p><b>注意</b>　ガード命令としては廃止された。
-     * @see lockmem */
-    public static final int GETMEM = 25;
-	// LOCALGETMEMは不要
-	
-    /** getparent [-dstmem, srcmem]
-     * <br>ボディ命令<br>
-     * 膜$srcmemの親膜への参照を$dstmemに代入する。
-     * <p><b>注意</b>　ガード命令としては廃止された。*/
-    public static final int GETPARENT = 26;
-	// LOCALGETPARENTは不要
 
     // アトムを操作する基本ボディ命令 (30--39)    
 	// [local]removeatom                  [srcatom]
@@ -292,8 +296,6 @@ public class Instruction {
 	//  ----- freeatom                    [srcatom]
 	// [local]alterfunc                   [atom, funcref]
 	// [local]alterfuncindirect           [atom, func]
-	// [local]copyatom          [-dstatom, mem, srcatom]
-	//  local addatom                     [dstmem, atom]
 
     /** removeatom [srcatom]
      * <br>ボディ命令<br>
@@ -380,13 +382,35 @@ public class Instruction {
 	 * <br>最適化用ボディ命令<br>
 	 * alterfuncindirectと同じ。ただし$atomはこの計算ノードに存在する。*/
 	public static final int LOCALALTERFUNCINDIRECT = LOCAL + ALTERFUNCINDIRECT;
-	
+
+	// アトムを操作する型付き拡張用命令 (40--49)
+	//  ----- allocatom         [-dstatom, funcref]
+	//  ----- allocatomindirect [-dstatom, func]
+	// [local]copyatom          [-dstatom, mem, srcatom]
+	//  local addatom                     [dstmem, atom]
+
+	/** allocatom [-dstatom, funcref]
+	 * <br>型付き拡張用命令<br>
+	 * ファンクタfuncrefを持つ所属膜を持たない新しいアトム作成し、参照を$dstatomに代入する。
+	 * <p>ガード検査で使われる定数アトムを生成するために使用される。*/
+	public static final int ALLOCATOM = 40;
+	// LOCALALLOCATOMは不要
+
+	/** allocatomindirect [-dstatom, func]
+	 * <br>型付き拡張用最適化用命令<br>
+	 * ファンクタ$funcを持つ所属膜を持たない新しいアトムを作成し、参照を$dstatomに代入する。
+	 * <p>ガード検査で使われる定数アトムを生成するために使用される。*/
+	public static final int ALLOCATOMINDIRECT = 41;
+	// LOCALALLOCATOMINDIRECTは不要
+
 	/** copyatom [-dstatom, mem, srcatom]
 	 * <br>型付き拡張用ボディ命令
 	 * アトム$srcatomと同じ名前のアトムを膜$memに生成し、$dstatomに代入して返す。
 	 * 実行スタックは操作しない。
-	 * <p>マッチングで得た型付きアトムをコピーするために使用する。*/
-	public static final int COPYATOM = 38;
+	 * <p>マッチングで得た型付きアトムをコピーするために使用する。
+	 * <p>getfunc[func,srcatom];newatomindirect[dstatom,mem,func]と同じ。よって廃止？
+	 * copygroundtermに移行すべきかもしれない。*/
+	public static final int COPYATOM = 42;
 
 	/** localcopyatom [-dstatom, mem, srcatom]
 	 * <br>最適化用ボディ命令<br>
@@ -397,25 +421,25 @@ public class Instruction {
 	 * <br>最適化用ボディ命令<br>
 	 * （所属膜を持たない）アトム$atomを膜$dstmemに所属させる。
 	 * ただし$dstmemはこの計算ノードに存在する。*/
-	public static final int LOCALADDATOM = LOCAL + 39;
+	public static final int LOCALADDATOM = LOCAL + 43;
 	// 一般の ADDATOM は存在しない。
-    
-	// 膜を操作する基本ボディ命令 (40--49)    
+	
+	// 膜を操作する基本ボディ命令 (50--59)    
 	// [local]removemem                [srcmem]
 	// [local]newmem          [-dstmem, srcmem]
 	//  ----- newroot         [-dstmem, srcmem, node]
 	//  ----- movecells                [dstmem, srcmem]
 	//  ----- enqueueallatoms          [srcmem]
+	//  ----- freemem                  [srcmem]
 	// [local]addmem                   [dstmem, srcmem]
 	// [local]unlockmem                [srcmem]
-	//  ----- freemem                  [mem]
 
 	/** removemem [srcmem]
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemを現在の膜から取り出す。
 	 * 膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。
 	 * @see removeproxies */
-	public static final int REMOVEMEM = 40;
+	public static final int REMOVEMEM = 50;
 
 	/** localremovemem [srcmem]
 	 * <br>最適化用ボディ命令<br>
@@ -428,7 +452,7 @@ public class Instruction {
 	 * この場合の活性化は、$srcmemと同じ実行膜スタックに積むことを意味する。
 	 * @see newroot
 	 * @see addmem */
-	public static final int NEWMEM = 41;
+	public static final int NEWMEM = 51;
 
 	/** localnewmem [-dstmem, srcmem]
 	* <br>最適化用ボディ命令<br>
@@ -442,7 +466,7 @@ public class Instruction {
 	 * この場合の活性化は、仮の実行膜スタックに積むことを意味する。
 	 * <p>newmemと違い、このルート膜のロックは明示的に解放しなければならない。
 	 * @see unlockmem */
-	public static final int NEWROOT = 42;
+	public static final int NEWROOT = 52;
 	// LOCALNEWROOTは最適化の効果が無いため却下
 	
 	/** movecells [dstmem, srcmem]
@@ -453,7 +477,7 @@ public class Instruction {
 	 * <p>実行後、膜$dstmemの全てのアクティブアトムをエンキューし直すべきである。
 	 * <p><b>注意</b>　Ruby版のpourから名称変更
 	 * @see enqueueallatoms */
-	public static final int MOVECELLS = 44;
+	public static final int MOVECELLS = 53;
 	// LOCALMOVECELLSは最適化の効果が無いため却下？あるいはさらに特化した仕様にする。
 
 	/** enqueueallatoms [srcmem]
@@ -462,8 +486,16 @@ public class Instruction {
 	 * <p>アトムがアクティブかどうかを判断するには、
 	 * ファンクタを動的検査する方法と、2つのグループのアトムがあるとして所属膜が管理する方法がある。
 	 * @see enqueueatom */
-	public static final int ENQUEUEALLATOMS = 45;
+	public static final int ENQUEUEALLATOMS = 54;
 	// LOCALENQUEUEALLATOMSは最適化の効果が無いため却下
+
+	/** freemem [srcmem]
+	 * <br>最適化用ボディ命令<br>
+	 * 何もしない。
+	 * <p>$srcmemがどの膜にも属さず、かつスタックに積まれていないことを表す。
+	 * @see freeatom */
+	public static final int FREEMEM = 55;
+	// LOCALFREEMEMは不要
 
 	/** addmem [dstmem, srcmem]
 	 * <br>ボディ命令<br>
@@ -473,7 +505,7 @@ public class Instruction {
 	 * <p>膜$srcmemを再利用するために使用される。
 	 * <p>newmemと違い、$srcmemのロックは明示的に解放しなければならない。
 	 * @see unlockmem */
-	public static final int ADDMEM = 46;
+	public static final int ADDMEM = 56;
 
 	/** localaddmem [dstmem, srcmem]
 	 * <br>最適化用ボディ命令<br>
@@ -487,24 +519,16 @@ public class Instruction {
 	 * <p>addmemによって再利用された膜、およびnewrootによってルールで新しく生成された
 	 * ルート膜に対して、（子孫から順番に）必ず呼ばれる。
 	 * <p>実行後、$srcmemへの参照は廃棄しなければならない。*/
-	public static final int UNLOCKMEM = 47;
+	public static final int UNLOCKMEM = 57;
 
 	/** localunlockmem [srcmem]
 	 * <br>最適化用ボディ命令<br>
 	 * unlockmemと同じ。ただし$srcmemはこの計算ノードに存在する。*/
 	public static final int LOCALUNLOCKMEM = LOCAL + UNLOCKMEM;
 
-	/** freemem [mem]
-	 * <br>最適化用ボディ命令<br>
-	 * 何もしない。
-	 * <p>$memがどの膜にも属さず、かつスタックに積まれていないことを表す。
-	 * @see freeatom */
-	public static final int FREEMEM = 48;
-	// LOCALFREEMEMは不要
-
-	// 予約 (50--54)
+	// 予約 (60--64)
 	
-	// リンクを操作するボディ命令 (55--59)
+	// リンクを操作するボディ命令 (65--69)
 	// [local]newlink     [atom1, pos1, atom2, pos2]
 	// [local]relink      [atom1, pos1, atom2, pos2]
 	// [local]unify       [atom1, pos1, atom2, pos2]
@@ -515,7 +539,7 @@ public class Instruction {
 	 * アトム$atom1の第pos1引数と、アトム$atom2の第pos2引数の間に両方向リンクを張る。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールボディに存在する。
 	 * <p><b>注意</b>　Ruby版の片方向から仕様変更された */
-	public static final int NEWLINK = 55;
+	public static final int NEWLINK = 65;
 
 	/** localnewlink [atom1, pos1, atom2, pos2]
 	 * <br>最適化用ボディ命令<br>
@@ -527,7 +551,7 @@ public class Instruction {
 	 * アトム$atom1の第pos1引数と、アトム$atom2の第pos2引数のリンク先を接続する。
 	 * <p>典型的には、$atom1はルールボディに、$atom2はルールヘッドに存在する。
 	 * <p>実行後、$atom2[pos2]の内容は無効になる。*/
-	public static final int RELINK = 56;
+	public static final int RELINK = 66;
 
 	/** localrelink [atom1, pos1, atom2, pos2]
 	 * <br>最適化用ボディ命令<br>
@@ -538,7 +562,7 @@ public class Instruction {
 	 * <br>ボディ命令<br>
 	 * アトム$atom1の第pos1引数のリンク先の引数と、アトム$atom2の第pos2引数のリンク先の引数を接続する。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。*/
-	public static final int UNIFY = 57;
+	public static final int UNIFY = 67;
 
 	/** localunify [atom1, pos1, atom2, pos2]
 	 * <br>最適化用ボディ命令<br>
@@ -552,14 +576,14 @@ public class Instruction {
 	 * <p>典型的には、$atom1はルールボディに存在し、$link2はルールヘッドに存在する。relinkの代用。
 	 * <p>$link2は再利用されるため、実行後は$link2は廃棄しなければならない。
 	 * @see getlink */
-	public static final int INHERITLINK = 58;
+	public static final int INHERITLINK = 68;
 
 	/** localinheritlink [atom1, pos1, link2]
 	 * <br>最適化用ボディ命令<br>
 	 * inheritlinkと同じ。ただし$atom1はこの計算ノードに存在する。*/
 	public static final int LOCALINHERITLINK = LOCAL + INHERITLINK;
 
-    // 自由リンク管理アトム自動処理のためのボディ命令 (60--64)
+    // 自由リンク管理アトム自動処理のためのボディ命令 (70--74)
 	//  -----  removeproxies          [srcmem]
 	//  -----  removetoplevelproxies  [srcmem]
 	//  -----  insertproxies          [parentmem,childmem]
@@ -569,31 +593,31 @@ public class Instruction {
      * <br>ボディ命令<br>
      * $srcmemを通る無関係な自由リンク管理アトムを自動削除する。
      * <p>removememの直後に同じ膜に対して呼ばれる。*/
-    public static final int REMOVEPROXIES = 60;
+    public static final int REMOVEPROXIES = 70;
     // LOCALREMOVEPROXIESは最適化の効果が無いため却下
 
     /** removetoplevelproxies [srcmem]
      * <br>ボディ命令<br>
      * 膜$srcmem（本膜）を通過している無関係な自由リンク管理アトムを除去する。
 	 * <p>removeproxiesが全て終わった後で呼ばれる。*/
-    public static final int REMOVETOPLEVELPROXIES = 61;
+    public static final int REMOVETOPLEVELPROXIES = 71;
 	// LOCALREMOVETOPLEVELPROXIESは最適化の効果が無いため却下
 
     /** insertproxies [parentmem,childmem]
      * <br>ボディ命令<br>
      * 指定された膜間に自由リンク管理アトムを自動挿入する。
      * <p>addmemが全て終わった後で呼ばれる。*/
-    public static final int INSERTPROXIES = 62;
+    public static final int INSERTPROXIES = 72;
 	// LOCALINSERTPROXIESは最適化の効果が無いため却下
 	
     /** removetemporaryproxies [srcmem]
      * <br>ボディ命令<br>
      * 膜$srcmem（本膜）に残された"star"アトムを除去する。
      * <p>insertproxiesが全て終わった後で呼ばれる。*/
-    public static final int REMOVETEMPORARYPROXIES = 63;
+    public static final int REMOVETEMPORARYPROXIES = 73;
 	// LOCALREMOVETEMPORARYPROXIESは最適化の効果が無いため却下
 
-	// ルールを操作するボディ命令 (65--69)
+	// ルールを操作するボディ命令 (75--79)
 	// [local]loadruleset [dstmem, ruleset]
 	// [local]copyrules   [dstmem, srcmem]
 	// [local]clearrules  [dstmem]
@@ -603,7 +627,7 @@ public class Instruction {
 	 * ルールセットrulesetを膜$dstmemにコピーする。
 	 * <p>この膜のアクティブアトムは再エンキューすべきである。
 	 * @see enqueueallatoms */
-	public static final int LOADRULESET = 65;
+	public static final int LOADRULESET = 75;
 
 	/** localloadruleset [dstmem, ruleset]
 	 * <br>最適化用ボディ命令<br>
@@ -614,7 +638,7 @@ public class Instruction {
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemにある全てのルールを膜$dstmemにコピーする。
 	 * <p><b>注意</b>　Ruby版のinheritrulesから名称変更 */
-	public static final int COPYRULES = 66;
+	public static final int COPYRULES = 76;
 
 	/** localcopyrules [dstmem, srcmem]
 	 * <br>最適化用ボディ命令<br>
@@ -624,14 +648,14 @@ public class Instruction {
 	/** clearrules [dstmem]
 	 * <br>ボディ命令<br>
 	 * 膜$dstmemにある全てのルールを消去する。*/
-	public static final int CLEARRULES = 67;
+	public static final int CLEARRULES = 77;
 	
 	/** localclearrules [dstmem]
 	 * <br>最適化用ボディ命令<br>
 	 * clearrulesと同じ。ただし$dstmemはこの計算ノードに存在する。*/
 	public static final int LOCALCLEARRULES = LOCAL + CLEARRULES;
 
-    // プロセス文脈をコピーまたは廃棄するための命令 (70--79)
+    // 型付きでないプロセス文脈をコピーまたは廃棄するための命令 (80--89)
 	//  ----- recursivelock            [srcmem]
 	//  ----- recursiveunlock          [srcmem]
 	//  ----- copymem         [-dstmem, srcmem]
@@ -644,7 +668,7 @@ public class Instruction {
      * <p><font color=red><b>
      * デッドロックが起こらないことを保証できれば、この命令はブロッキングで行うべきである。
      * </b></font>*/
-    public static final int RECURSIVELOCK = 70;
+    public static final int RECURSIVELOCK = 80;
 	// LOCALRECURSIVELOCKは最適化の効果が無いため却下
 
     /** recursiveunlock [srcmem]
@@ -653,7 +677,7 @@ public class Instruction {
      * 膜はそれを管理するタスクの実行膜スタックに再帰的に積まれる。
      * <p>再帰的に積む方法は、今後考える。
      * @see unlockmem */
-    public static final int RECURSIVEUNLOCK = 71;
+    public static final int RECURSIVEUNLOCK = 81;
 	// LOCALRECURSIVEUNLOCKは最適化の効果が無いため却下
 
     /** copymem [-dstmem, srcmem]
@@ -661,14 +685,14 @@ public class Instruction {
      * 再帰的にロックされた膜$srcmemの内容のコピーを作成し、膜$dstmemに入れる。
      * $dstmemの自由リンク管理アトムの第1引数は、対応する$srcmemの第1引数を指すリンクで初期化するが、
      * 他の計算ノードには初期化を通知しない。*/
-    public static final int COPYMEM = 72;
+    public static final int COPYMEM = 82;
 	// LOCALCOPYMEMは最適化の効果が無いため却下
 
 	/** dropmem [srcmem]
 	 * <br>（予約された）ボディ命令<br>
 	 * 再帰的にロックされた膜$srcmemを破棄する。
 	 * この膜や子孫の膜をルート膜とするタスクは強制終了する。*/
-	public static final int DROPMEM = 73;
+	public static final int DROPMEM = 83;
 	// LOCALDROPMEMは最適化の効果が無いため却下
 
 //	/** * [srcatom,pos]
@@ -680,42 +704,10 @@ public class Instruction {
 
 	// アトム集団のコンパイルには、findatomとrunを使うといいかもしれないが、できないかもしれない。
 
-	// プロセス文脈の明示的な引数列は、膜に一時的なアトムを作って管理する。
+	// TODO プロセス文脈の明示的な引数列は、膜に一時的なアトムを作って管理する。
 	// コピーした後でrelinkする。
 
-	// 予約 (80--89)
-	
-	// 型付きアトムを操作するための組み込み命令 (90--99)
-	//  -----  getfunc           [-func,    atom]
-	//  -----  loadfunc          [-func,    funcref]
-	//  -----  allocatom         [-dstatom, funcref]
-	//  -----  allocatomindirect [-dstatom, func]
-
-	/** getfunc [-func, atom]
-	 * <br>出力する失敗しない拡張ガード命令<br>
-	 * アトム$atomのファンクタへの参照を$funcに代入する。*/
-	public static final int GETFUNC = 90;
-	// LOCALGETFUNCは不要
-
-	/** loadfunc [-func, funcref]
-	 * <br>出力する失敗しない拡張ガード命令<br>
-	 * ファンクタfuncrefへの参照を$funcに代入する。*/
-	public static final int LOADFUNC = 91;
-	// LOCALLOADFUNCは不要
-
-	/** allocatom [-dstatom, funcref]
-	 * <br>型付き拡張用命令<br>
-	 * ファンクタfuncrefを持つ所属膜を持たない新しいアトム作成し、参照を$dstatomに代入する。
-	 * <p>ガード検査で使われる定数アトムを生成するために使用される。*/
-	public static final int ALLOCATOM = 92;
-	// LOCALALLOCATOMは不要
-
-	/** allocatomindirect [-dstatom, func]
-	 * <br>型付き拡張用最適化用命令<br>
-	 * ファンクタ$funcを持つ所属膜を持たない新しいアトムを作成し、参照を$dstatomに代入する。
-	 * <p>ガード検査で使われる定数アトムを生成するために使用される。*/
-	public static final int ALLOCATOMINDIRECT = 93;
-	// LOCALALLOCATOMINDIRECTは不要
+	// 予約 (90--99)
 
 	//////////////////////////////////////////////////////////////////
 	
@@ -1363,3 +1355,14 @@ public class Instruction {
     // 	}
     //     }
 }
+
+//以下、廃止された命令の墓場
+
+//* lock [srcmem]
+//* <br>（廃止された）ガード命令<br>
+//* 膜$srcmemに対するノンブロッキングでのロック取得を試みる。
+//* ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
+//* <p>srcmemにmemof記法が廃止されたため、ロックはlockmemで行う。したがってlockは廃止された。*/
+//public static final int LOCK = err;
+
+
