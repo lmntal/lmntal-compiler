@@ -21,6 +21,7 @@ import runtime.InstructionList;
  * ISINT,ISFLOAT,ISSTRING,ISUNARY
  * FADD,FSUB,FMUL,FDIV,IADD,ISUB,IMUL,IDIV,IMOD
  * FLT,FLE,FGT,FGE,ILT,ILE,IGT,IGE,FEQ,FNQ,IEQ,INQ
+ * SAMEFUNC,GETFUNC,ALLOCATOMINDIRECT
  */
 public class GuardOptimizer {
 	/** アトムグループをまたがないガード命令を、
@@ -52,12 +53,14 @@ public class GuardOptimizer {
 		//ヘッド命令列のjump命令の引数
 		//最後に更新する
 		//ガードのjumpも更新が必要?
+		InstructionList headlabel = (InstructionList)headjump.getArg1(); 
 		List headmemargs = (List)headjump.getArg2();
 		List headatomargs =(List)headjump.getArg3();
+		List headvarargs = (List)headjump.getArg4();
 		
 		//ガードにX<Y,X+Y<Zのような式を書くとisintやisfloatが重複するので余分な命令を削除
 		//無い場合かなり無駄になるのでなんとかならないものか･･･
-		for(int gid=0; gid<guardsize; gid++){
+		for(int gid=1; gid<guardsize-1; gid++){
 			Instruction instg = (Instruction)guard.get(gid);
 			int instid = instg.getKind();
 			if(instid == Instruction.ISINT 
@@ -76,7 +79,7 @@ public class GuardOptimizer {
 			 }
 		}
 		
-		for(int gid=0; gid<guardsize; gid++){
+		for(int gid=1; gid<guardsize-1; gid++){
 			Instruction instg = (Instruction)guard.get(gid);
 			boolean expflag = false;
 			switch(instg.getKind()){
@@ -199,16 +202,23 @@ public class GuardOptimizer {
 					atomvar = instg.getIntArg1();
 					//atomvarを第1引数にとるDEREFATOMの下に移動させる
 					//この時点で対となるDEREFATOMはヘッド側に移動しているはず
-					for(int hid=0; hid<headsize; hid++){
+					//どうやらDEREFATOMの他にもALLOCATOMINDIRECTも移動先の候補になりそう
+					for(int hid=1; hid<headsize-1; hid++){
 						Instruction insth = (Instruction)head.get(hid);
-						if(insth.getKind() == Instruction.DEREFATOM
-						   && insth.getIntArg1() == atomvar){
-						   	head.add(hid+1, instg);
-						   	headsize += 1;
-						   	guard.remove(gid);
-						   	guardsize -= 1;
-						   	gid -= 1;
-						   }
+						switch(insth.getKind()){
+							case Instruction.DEREFATOM:
+							case Instruction.ALLOCATOMINDIRECT:
+								if(insth.getIntArg1() == atomvar){
+									head.add(hid+1, instg);
+									headsize += 1;
+									guard.remove(gid);
+									guardsize -= 1;
+									gid -= 1;
+									hid = headsize; //forループから脱出
+									break;
+								}
+							default: break;
+						}
 					}
 					break;
 				//====ISINT,ISFLOAT,ISSTRING,ISUNARYはここまで====//
@@ -223,8 +233,8 @@ public class GuardOptimizer {
 				case Instruction.ISUB: expflag = true;
 				case Instruction.IMUL: expflag = true;
 				case Instruction.IDIV: expflag = true;
-				case Instruction.IMOD: expflag = true;	
-								
+				case Instruction.IMOD: expflag = true;
+				
 				case Instruction.FLT:
 				case Instruction.FLE:
 				case Instruction.FGT:
@@ -236,7 +246,7 @@ public class GuardOptimizer {
 				case Instruction.IEQ:
 				case Instruction.INE:
 				case Instruction.FEQ:
-				case Instruction.FNE:	
+				case Instruction.FNE:
 				
      				//命令の第1引数と第2引数を取得
                	    //例:FLT [atomvar1, atomvar2]
@@ -256,54 +266,153 @@ public class GuardOptimizer {
 					boolean flag = false;
                 	//DEREFATOM,ALLOCATOM,四則演算命令の検索
 					//すでにヘッド側に移動しているとみていいはず
-					//DEREFATOMを見つけた場合その前にあるFINDATOMまたはDEREFを検索することになる
-					//その都合上後ろから検索した方が良さそう
-					for(int hid=0; hid<headsize-1; hid++){
+					for(int hid=1; hid<headsize-1; hid++){
 						Instruction insth = (Instruction)head.get(hid);
 						int instid = insth.getKind();
 						//四則演算命令は結局定数のアトムを生むのでここでのALLOCATOMと扱いは同じ
 						//これらは第1引数をatomvar1,atomvar2と比べるという処理において違いはない
-						if(instid == Instruction.ALLOCATOM
-						   || instid == Instruction.FADD
-						   || instid == Instruction.FSUB
-						   || instid == Instruction.FMUL
-					   	   || instid == Instruction.FDIV
-					   	   || instid == Instruction.IADD
-					   	   || instid == Instruction.ISUB
-					   	   || instid == Instruction.IMUL
-					       || instid == Instruction.IDIV
-					       || instid == Instruction.IMOD
-					       || instid == Instruction.ISINT
-					       || instid == Instruction.ISFLOAT
-					       || instid == Instruction.ISUNARY
-					       || instid == Instruction.ISSTRING){
-							int dstatom = insth.getIntArg1();
-							//検索対象の命令の第1引数はatomvar1かatomuvar2
-							if(dstatom == atomvar1 || dstatom == atomvar2){
-                        	    if(!flag) {
-                        	    	flag = true;
-                        	    	continue;
-                        	    } 
-							//検索対象のアトムの内1つを見つけている場合後で見つかった方の次に命令を移動
-								else {
-									head.add(hid+1, instg);
-									headsize += 1;
-									if(expflag){
-										headvarcount += 1;
-										headatomargs.add(new Integer(resultvar));
+						switch(insth.getKind()){
+							case Instruction.ALLOCATOM:
+							case Instruction.ALLOCATOMINDIRECT:
+							case Instruction.FADD:
+							case Instruction.FSUB:
+							case Instruction.FMUL:
+							case Instruction.FDIV:
+							case Instruction.IADD:
+							case Instruction.ISUB:
+							case Instruction.IMUL:
+							case Instruction.IDIV:
+							case Instruction.IMOD:
+							case Instruction.ISINT:
+							case Instruction.ISFLOAT:
+								int dstatom = insth.getIntArg1();
+								if(dstatom == atomvar1 || dstatom == atomvar2){
+									if(!flag){
+										flag = true;
+										break;
+									} else {
+										head.add(hid+1, instg);
+										headsize += 1;
+										if(expflag){
+											headvarcount += 1;
+											headatomargs.add(new Integer(resultvar));
+										}
+										guard.remove(gid);
+										guardsize -= 1;
+										gid -= 1;
+										hid = headsize;
+										break;
 									}
-									guard.remove(gid);
-									guardsize -= 1;
-									gid -= 1;
-									break;
 								}
-							}
+								break;
+							default: break;
 						}
 					}
 					break;		
 				//====FLT,FLE,FGT,FGE,ILT,ILE,IGT,IGE,IEQ,INE,FEQ,FNE====//
 				//====FADD,FSUB,FMUL,FDIV,IADD,ISUB,IMUL,IDIV,IMODはここまで====//
 				
+				case Instruction.SAMEFUNC:
+					//探すのはヘッド側に移動したDEREFATOM,ALLOCATOM,ALLOCATOMINDIRECT
+					atomvar1 = instg.getIntArg1();
+					atomvar2 = instg.getIntArg2();
+					flag = false;
+					for(int hid = 1; hid<headsize-1; hid++){
+						Instruction insth = (Instruction)head.get(hid);
+						switch(insth.getKind()){
+							case Instruction.DEREFATOM:
+							case Instruction.ALLOCATOM:
+							case Instruction.ALLOCATOMINDIRECT:
+								int dstatom = insth.getIntArg1();
+								if(dstatom == atomvar1 || dstatom == atomvar2){
+									if(!flag) flag = true;
+									else {
+										head.add(hid+1, instg);
+										headsize += 1;
+										guard.remove(gid);
+										guardsize -= 1;
+										gid -= 1;
+										hid = headsize;
+										break;
+									}
+								}
+							default: break;
+						}
+					}
+					break;
+				//====SAMEFUNCはここまで====//
+				
+				//GETFUNCはガードの中で一時的な変数を使う時に利用される
+				//例：a(X),b(Y) :- A=X+Y,A<10 | ok.
+				//GETFUNCとALLOCATOMINDIRECTはセットのようにも思えるがとりあえず分けて移動させる
+				case Instruction.GETFUNC:
+					atomvar1 = instg.getIntArg1();
+					atomvar2 = instg.getIntArg2();
+					flag = true;
+					//探すのはALLOCATOM 例:a(X) :- A=4,X<A | ok. (意味無さそうだが･･･)
+					//ALLOCATOMINDIRECT a(X) :- A=X,B=A,B<3 | ok.
+					//DEREFATOM 例：a(X) :- A=X,A<4 | ok.
+					//四則演算系の命令　例：a(X) :- A=X+5,A<10 | ok.
+					//他にありますか?
+					//どれにしろ参照するのは第1引数
+					for(int hid = 1; hid<headsize-1; hid++){
+						Instruction insth = (Instruction)head.get(hid);
+						switch(insth.getKind()){
+							case Instruction.ALLOCATOM:
+							case Instruction.ALLOCATOMINDIRECT:
+							case Instruction.DEREFATOM:
+							case Instruction.FADD:
+							case Instruction.FSUB:
+							case Instruction.FMUL:
+							case Instruction.FDIV:
+							case Instruction.IADD:
+							case Instruction.ISUB:
+							case Instruction.IMUL:
+							case Instruction.IDIV:
+							case Instruction.IMOD:
+								int dstatom = insth.getIntArg1();
+								if(dstatom == atomvar1 || dstatom == atomvar2){
+									if(!flag) flag = true;
+									else {
+										head.add(hid+1, instg);
+										headsize += 1;
+										headvarcount += 1; //アトムは生成しないが変数は増える?
+										guard.remove(gid);
+										guardsize -= 1;
+										gid -= 1;
+										hid = headsize;
+										break;																				
+									}
+								}
+								break;
+							default: break;
+						}
+					}
+					break;
+					//====GETFUNCはここまで====//
+					
+					//ALLOCATOMINDIRECTはGETFUNCとセット?
+					//だとすればGETFUNC移動の際に一緒に持っていった方が速い
+					case Instruction.ALLOCATOMINDIRECT:
+						atomvar1 = instg.getIntArg1(); //移動後にこの番号のアトムを追加する
+						atomvar2 = instg.getIntArg2(); //この値を第1引数に持つGETFUNCの直後に移動
+						for(int hid=1; hid<headsize-1; hid++){
+							Instruction insth = (Instruction)head.get(hid);
+							if(insth.getKind() == Instruction.GETFUNC
+							  && insth.getIntArg1() == atomvar2){
+								head.add(hid+1, instg);
+								headsize += 1;
+								headvarcount += 1;
+								headatomargs.add(new Integer(atomvar1));
+								guard.remove(gid);
+								guardsize -= 1;
+								gid -= 1;
+								break;			
+							  }
+						}
+						break;
+					//====ALLOCATOMINDIRECTはここまで====//
+					
 				default: break;
 			}
 
@@ -311,20 +420,18 @@ public class GuardOptimizer {
 		
 		//spec命令の更新
 		headspec.updateSpec(headformal, headvarcount);
+		
 		//jump命令の更新
-		headjump.setArg2(headmemargs); //警告が気になる･･･
-		headjump.setArg3(headatomargs);
         //ガード命令列がSPECとJUMPだけになった場合
         //jump先をボディ命令列にする
 		if(guardsize == 2) {
-			InstructionList insts = (InstructionList)guardjump.getArg1();
-			headjump.setArg1(insts);
+			headlabel = (InstructionList)guardjump.getArg1();
 			//guard.remove(0);
 			//guard.remove(0);
 			//SPEC,JUMPは消すべき?
 		}
 		head.set(0, headspec);
-		head.set(headsize-1, headjump);
+		head.set(headsize-1, Instruction.jump(headlabel,headmemargs,headatomargs,headvarargs));
 	}
 	
 }
