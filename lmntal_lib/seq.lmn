@@ -1,7 +1,42 @@
-//seq.run(Data,[F1,F2...]).
-//DataにF1,F2...を順番に適用する
-{module(seq). 
- seq.run(Data,[A|RES]),{+A. @p},{+Data. $p. @r}/
-  :- {+Data. $p. @p},seq.run(Data,RES).
- seq.run(Data,[]),{+Data. @p. $p.} :- $p.
+/*
+NAME
+	Sequential module
+
+SYNOPSIS
+	r=seq.run({a}, [{a:-b}, {b:-c. a:-never.}, {c:-d. b:-never.}]).
+	===>
+	r(_60), {d, '+'(_60), @605, @604}, @607, @608
+	
+DESCRIPTION
+	ルールを逐次適用していく。
+	リストの要素はルールが入った膜である。
+	データ膜の反応が止まったらリストの次の膜に含まれるルールが投入される。
+	同じ膜のルールは並行適用される。
+	
+	//seq.run(Data,[F1,F2...]).
+	//DataにF1,F2...を順番に適用する
+
+AUTHOR
+	Sakurai, Hara
+
+HISTORY
+	2004/06/11(Fri)
+
+*/
+{
+module(seq). 
+
+/**
+ * seq.run : Membrane(data) -> List of Membrane(rules) -> Membrane(data)
+ * 
+ */
+H=seq.run({$p, @r}/, [ {@p} | Rest ]) :- H=seq.run({$p, @p}, Rest).
+
+H=seq.run({@p. $p.}, []) :- H={@p, $p}.
+
+// 省略しないで書くと
+// H=seq.run(Data, [Cur|Rest]), {+Cur. @p}, {+Data, $p, @r}/
+//     :- H=seq.run(Data, Rest), {+Data, $p, @p}.
+// H=seq.run(Data, []), {+Data, @p, $p} :- H=Data, {+Data, @p, $p}.
+
 }
