@@ -51,8 +51,8 @@ H='mod'(A, B) :- int(A),int(B),A mod B = C | H=C.
  * abs
  *
  */
-H='abs'(N) :- int(N),N<0 | H=-1*N.
-H='abs'(N) :- int(N),N>=0 | H=N.
+H=abs(N) :- int(N),N<0 | H=-1*N.
+H=abs(N) :- int(N),N>=0 | H=N.
 
 /*
  * >
@@ -165,7 +165,7 @@ H = '^'(A,B) :- int(A),int(B) | H=[[/*inline*/
  * power A¤ÎN¾è
  *
  */
-H = 'power'(A, N) :- int(A),int(N) | H=[[/*inline*/
+H = power(A, N) :- int(A),int(N) | H=[[/*inline*/
   int a = 
   ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   int n =
