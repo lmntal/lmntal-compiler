@@ -36,7 +36,7 @@ public class IDConverter {
 
 	/** 指定された膜を表に登録する */
 	public static void registerGlobalMembrane(String globalMemID, AbstractMembrane mem) {
-		if(true) System.out.println("IDConverter.registerGlobalMembrane(" + globalMemID + ", " + mem.toString() + ")"); //todo use Env
+		if(Env.debug > 0) System.out.println("IDConverter.registerGlobalMembrane(" + globalMemID + ", " + mem.toString() + ")"); //todo use Env
 		memTable.put(globalMemID, mem);
 	}
 	/** 指定された膜を表から削除する */
