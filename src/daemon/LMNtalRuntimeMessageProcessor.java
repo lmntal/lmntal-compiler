@@ -32,7 +32,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	
 	/** このVMで実行するLMNtalRuntimeのruntimeid（未使用）*/
 	protected String runtimeid;
-	
+
 	/** 通常のコンストラクタ */
 	public LMNtalRuntimeMessageProcessor(Socket socket, String rgid) {
 		super(socket);
@@ -94,7 +94,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		try{
 			HybridOutputStream out = getOutputStream();
 			String msgid = LMNtalDaemon.makeID();
-			out.write("CMD " + msgid + " \"" + fqdn + "\" " + rgid + " " + "DISCONNECT" + "\n");
+			out.write("CMD " + msgid + " \"" + fqdn + "\" " + rgid + " " + "DISCONNECTRUNTIME" + "\n");
 			out.flush();
 		} catch (Exception e){
 			System.out.println("ERROR in LMNtalRuntimeMessageProcessor.sendDisconnect(): ");
@@ -303,7 +303,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	}
 	
 	void onCmd(String msgid, String[] command) {
-		AbstractMembrane obj = IDConverter.lookupGlobalMembrane(command[1]); //TODO globalidを作成する時に間違ったIDを作成している？  or 登録されていない？（こっちを先に調べる）
+		AbstractMembrane obj = IDConverter.lookupGlobalMembrane(command[1]); //TODO (nakajima)globalidを作成する時に間違ったIDを作成している？  or 登録されていない？（こっちを先に調べる）
 		if (!(obj instanceof Membrane)) {
 			respondAsFail(msgid);
 			if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is not found!)");
