@@ -101,6 +101,7 @@ public class RuleCompiler {
 			hc.prepare(); // 変数番号を初期化			
 			if (firstid < hc.atoms.size()) {			
 				if (true) continue; // 臨時【注意：外してもよいいが、アトム主導は現在未テスト】
+				if (Env.fRandom) continue; // ルールの反応確立を優先するためアトム主導テストは行わない
 				// アトム主導
 				List singletonListArgToBranch = new ArrayList();
 				singletonListArgToBranch.add(hc.match);
