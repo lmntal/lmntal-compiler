@@ -252,7 +252,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 						}
 						InstructionBlockProcessor ibp;
 						ibp = new InstructionBlockProcessor(this, msgid, insts);						
-						new Thread(ibp,"ibp").run();
+						new Thread(ibp,"ibp").start();
 					} catch (IOException e) {
 						e.printStackTrace();
 						respondAsFail(msgid);

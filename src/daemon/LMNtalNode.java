@@ -119,9 +119,22 @@ public class LMNtalNode {
 	 * @param message メッセージ
 	 */
 	public boolean sendMessage(String message) {
+		return sendMessage(message, null);
+	}
+	/**
+	 * このLMNtalNodeが表すホストにメッセージを送信する
+	 * @param message メッセージ
+	 * @param rawData バイナリデータ。messageの後に続けて送信される。
+	 */
+	public boolean sendMessage(String message, byte[] rawData) {
 		try {
-			out.write(message);
-			out.flush();
+			synchronized(out) { //間に他のスレッドのメッセージが入らないようにする。
+				out.write(message);
+				if (rawData != null) {
+					out.writeBytes(rawData);
+				}
+				out.flush();
+			}
 			return true;
 		} catch (IOException e) {
 			System.out.println("ERROR in LMNtalNode.sendMessage()");
@@ -130,8 +143,12 @@ public class LMNtalNode {
 		return false;
 	}
 
+	void respond(String msgid, String message, byte[] rawData) {
+		sendMessage("RES " + msgid + " " + message + "\n", rawData);
+	}
 	void respond(String msgid, String message){
-		sendMessage("RES " + msgid + " " + message + "\n");
+//		sendMessage("RES " + msgid + " " + message + "\n");
+		respond(msgid, message, null);
 	}
 	void respond(String msgid, boolean value) {
 		respond(msgid, value ? "OK" : "FAIL");
@@ -144,7 +161,8 @@ public class LMNtalNode {
 	}
 	/** (n-kato)このメソッドを使わないように書き換えてもよい（仮）*/
 	void respondRawData(String msgid, byte[] data) {
-		respond(msgid, "RAW " + data.length + "\n" + data); // TODO 文字列結合していいのか調べる
+//		respond(msgid, "RAW " + data.length + "\n" + data); // TODO 文字列結合していいのか調べる
+		respond(msgid, "RAW", data);
 	}
 	////////////////////////////////
 	// 受信用

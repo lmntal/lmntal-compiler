@@ -1,7 +1,12 @@
 package daemon;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.text.DecimalFormat;
+
+import runtime.Env;
 
 //import runtime.Env;
 //import runtime.Membrane;
@@ -68,13 +73,11 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				String msgid = parsedInput[1];
 				//転送する内容を取得する
 				String content = input + "\n";
+				byte[] rawData = null;
 				if (parsedInput[2].equalsIgnoreCase("RAW")) {
 					try {
 						//バイト数指定や、末尾の改行記号はreadBytes内で処理
-						byte[] data = readBytes();
-						//文字列結合の場合はバイト数をとっておく必要がある。
-						//todo バイト数の結合方法がこんなのでよいか調べる(…たぶんだめ。)
-						content += data.length + " " + data; // todo byte[]であるdataに対して、文字列結合を使ってよいか調べる
+						rawData = readBytes();
 					}
 					catch (Exception e) {
 						content = "RES " + msgid + " FAIL\n";
@@ -92,7 +95,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 					respondAsFail(msgid);
 					continue;
 				} else {
-					returnNode.sendMessage(content);
+					returnNode.sendMessage(content, rawData);
 					continue;
 				}
 			} else if (parsedInput[0].equalsIgnoreCase("REGISTERLOCAL")) {

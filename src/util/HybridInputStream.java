@@ -29,7 +29,7 @@ public class HybridInputStream {
 	 * @throws IOException 入出力エラーが発生した場合。読み取ったデータが文字列だった場合を含む。
 	 * @throws ClassNotFoundException 読み取ったオブジェクトのクラスが見つからなかった場合。
 	 */
-	public Object readObject() throws IOException, ClassNotFoundException {
+	public synchronized Object readObject() throws IOException, ClassNotFoundException {
 		if (lines != null && nextLine < lineCount) {
 			//未読み込みの文字列データが残っている
 			throw new IOException();
@@ -50,7 +50,7 @@ public class HybridInputStream {
 	 * ストリームを閉じます。
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		in.close();
 	}
 
@@ -59,7 +59,7 @@ public class HybridInputStream {
 	 * @return 読み取ったデータ。ストリームの終わりに達していた場合はnull
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
-	public String readLine() throws IOException {
+	public synchronized String readLine() throws IOException {
 		if (lines == null || nextLine == lineCount) {
 			byte[] bytes = readBytes();
 			if (bytes == null) {
@@ -82,7 +82,7 @@ public class HybridInputStream {
 	 * @return 読み取ったバイト列
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
-	public byte[] readBytes() throws IOException {
+	public synchronized byte[] readBytes() throws IOException {
 		if (lines != null && nextLine < lineCount) {
 			//未読み込みの文字列データが残っている
 			throw new IOException();
@@ -92,13 +92,18 @@ public class HybridInputStream {
 			return null;
 		}
 		byte[] data = new byte[size];
-		int count = in.read(data);
-		if (count != size) {
-			throw new RuntimeException("failed to read all data");
+		//in.readは読み込みがブロックすると途中で戻ってきてしまうので、
+		//最後まで読むためにループをまわす必要がある。
+		int index = 0;
+		while (size != 0) {
+			int count = in.read(data, index, size);
+			size -= count;
+			index += count;
 		}
 		return data;
 	}
-	private int readInt() throws IOException {
+	/* readBytesの中でのみ呼ぶのでsyncronizedでなくても良いはずだが、念のため*/
+	private synchronized int readInt() throws IOException {
 		int a1 = in.read();
 		if (a1 == -1) {
 			//このメソッドで読むデータはバイト数を表す値なので、負になる事はない

@@ -89,7 +89,8 @@ public final class RemoteTask extends AbstractTask {
 		if (cmdbuffer.equals("")) return;
 		String cmd = "BEGIN\n" + cmdbuffer + "END";
 		String result = LMNtalRuntimeManager.daemon.sendWaitText(runtime.hostname, cmd);
-		if (result.substring(4).equalsIgnoreCase("FAIL")) {
+
+		if (result.substring(0, 4).equalsIgnoreCase("FAIL")) {
 			throw new RuntimeException("RemoteTask.flush: failure");
 		}
 		// BEGINメッセージに対する返答を解釈する
@@ -99,7 +100,7 @@ public final class RemoteTask extends AbstractTask {
 			String tmpid = args[0];
 			String newid = args[1];
 			// todo もう少し拡張性の高い識別方法を考える。おそらくNEW_を分化させればよいはず。
-			if (newid.charAt(':') >= 0) {
+			if (newid.indexOf(':') >= 0) {
 				RemoteMembrane mem = (RemoteMembrane)memTable.get(tmpid);
 				if (mem != null) IDConverter.registerGlobalMembrane(newid, mem);
 			}

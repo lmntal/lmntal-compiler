@@ -23,7 +23,7 @@ public class HybridOutputStream {
 	 * @param o 書き込むオブジェクト
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
-	public void writeObject(Object o) throws IOException {
+	public synchronized void writeObject(Object o) throws IOException {
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		ObjectOutputStream oout = new ObjectOutputStream(bout);
 		oout.writeObject(o);
@@ -45,14 +45,14 @@ public class HybridOutputStream {
 	 * ストリームをフラッシュします。
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
-	public void flush() throws IOException {
+	public synchronized void flush() throws IOException {
 		out.flush();
 	}
 	/**
 	 * ストリームを閉じます。
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		out.close();
 	}
 	/**
@@ -60,12 +60,13 @@ public class HybridOutputStream {
 	 * @param data 書き込むバイト列
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
-	public void writeBytes(byte[] data) throws IOException {
+	public synchronized void writeBytes(byte[] data) throws IOException {
 		writeInt(data.length);
 		out.write(data);
 	}
 	
-	private void writeInt(int val) throws IOException {
+	/* writeBytesのなかでのみ呼ばれるのでsyncrhronizedはなくても良いはずだが、念のため*/
+	private synchronized void writeInt(int val) throws IOException {
 		//out.write()では、上位24ビットは無視される
 		out.write(val >> 24);
 		out.write(val >> 16);
