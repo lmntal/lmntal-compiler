@@ -166,8 +166,8 @@ public class RuleCompiler {
 		//Env.d("lhsmempaths.get(rs.leftMem) -> "+lhsmempaths.get(rs.leftMem));
 		//Env.d("rhsmempaths -> "+rhsmempaths);
 		
-		removeLHSAtoms();
 		dequeueLHSAtoms();
+		removeLHSAtoms();
 		if (removeLHSMem(rs.leftMem) >= 2) {
 			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
 		}
@@ -251,8 +251,9 @@ public class RuleCompiler {
 	private void optimize() {
 		Env.c("optimize");
 	}	
+	/** 左辺のアトムを所属膜から除去する。*/
 	private void removeLHSAtoms() {
-		Env.c("RuleCompiler::removeLHSAtoms");
+		//Env.c("RuleCompiler::removeLHSAtoms");
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			Atom atom = (Atom)lhsatoms.get(i);
 			body.add( Instruction.removeatom(
@@ -260,19 +261,22 @@ public class RuleCompiler {
 				lhsmemToPath(atom.mem), atom.functor ));
 		}
 	}
+	/** 左辺のアトムを実行スタックから除去する。*/
 	private void dequeueLHSAtoms() {
-		Env.c("RuleCompiler::dequeueLHSAtoms");
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			Atom atom = (Atom)lhsatoms.get(i);
-			body.add( Instruction.dequeueatom(
-				lhsatomToPath(atom) // ← lhsfreemems.size() + i に一致する
-				));
+			if (atom.functor != Functor.INSIDE_PROXY
+			 && atom.functor != Functor.OUTSIDE_PROXY) {
+				body.add( Instruction.dequeueatom(
+					lhsatomToPath(atom) // ← lhsfreemems.size() + i に一致する
+					));
+			}
 		}
 	}
 	/** 左辺の膜を子膜側から再帰的に除去する。
 	 * @return 膜memの内部に出現したプロセス文脈の個数 */
 	private int removeLHSMem(Membrane mem) {
-		Env.c("RuleCompiler::removeLHSMem");
+		//Env.c("RuleCompiler::removeLHSMem");
 		int procvarcount = mem.processContexts.size();
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
@@ -404,12 +408,15 @@ public class RuleCompiler {
 			}
 		}
 	}
-	/** アトムを実行スタックに積む */
+	/** 右辺のアトムを実行スタックに積む */
 	private void enqueueRHSAtoms() {
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
-			body.add( new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
+			if (atom.functor != Functor.INSIDE_PROXY
+			 && atom.functor != Functor.OUTSIDE_PROXY) {
+				body.add( new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
+			 }
 		}
 	}
 	/** インライン命令を実行する */
@@ -419,7 +426,7 @@ public class RuleCompiler {
 			Atom atom = (Atom)it.next();
 			int atomID = rhsatomToPath(atom);
 			int codeID = Inline.getCodeID(atom.functor.getName());
-			if(codeID==-1) continue;
+			if(codeID == -1) continue;
 			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
 		}
 	}

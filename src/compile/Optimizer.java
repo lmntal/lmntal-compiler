@@ -122,6 +122,7 @@ public class Optimizer {
 					}
 			}
 		}
+		// TODO addmemした膜に対して、子膜側から順番に unlockmem を発行する
 		Instruction.changeMemId(list, reuseMap);
 	}
 	
