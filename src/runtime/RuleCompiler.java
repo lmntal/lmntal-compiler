@@ -15,6 +15,10 @@ import java.util.*;
  * 
  * 原作業中
  * 
+ * TODO loadProc は Membrane のメソッドであるべきかも。
+ * もういっかしょでつかわれる loadProc をみて検証すること。
+ * 
+ * 
  * @author hara
  */
 public class RuleCompiler {
