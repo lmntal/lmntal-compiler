@@ -7,6 +7,7 @@ package runtime;
 import java.util.*;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Field;
+import java.io.*;
 
 /*
  * <p><b>注意</b>　方法4の文書に対して、「ロックしたまま実行膜スタックに積む」という操作
@@ -33,7 +34,7 @@ import java.lang.reflect.Field;
  *
  * @author hara, nakajima, n-kato
  */
-public class Instruction implements Cloneable {
+public class Instruction implements Cloneable, Serializable {
 	/** 命令毎の引数情報を入れるテーブル */
 	private static HashMap argTypeTable = new HashMap();
 	/**アトム*/
@@ -2175,4 +2176,33 @@ public class Instruction implements Cloneable {
 			data.set(1,new Integer(locals));
     	}
     }
+    
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException{
+		out.writeInt(kind);
+		out.writeInt(data.size());
+		Iterator it = data.iterator();
+		while (it.hasNext()) {
+			Object o = it.next();
+			if (o instanceof Ruleset) {
+				out.writeObject("Ruleset");
+				((Ruleset)o).serialize(out);
+			} else {
+				out.writeObject("Other");
+				out.writeObject(o);
+			}
+		}
+	}
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+		kind = in.readInt();
+		data = new ArrayList();
+		int size = in.readInt();
+		for (int i = 0; i < size; i++) {
+			String argtype = (String)in.readObject();
+			if (argtype.equals("Ruleset")) {
+				data.add(Ruleset.deserialize(in));
+			} else {
+				data.add(in.readObject());
+			}
+		}
+	}
 }

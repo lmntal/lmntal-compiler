@@ -1,8 +1,9 @@
 package runtime;
 
 import java.util.*;
+import java.io.*;
 
-public final class Rule {
+public final class Rule implements Serializable {
 	// Instruction のリスト
 	
 	/** アトム主導ルール適用の命令列（atomMatchLabel.insts）

@@ -1,11 +1,14 @@
 package runtime;
 
+import java.io.*;
+
 
 /**
  * Stringの名前とリンク数の組からなるアトムのFunctor。
  * TODO SymbolFunctorというサブクラスを作ったほうがいいかもしれない。
  */
-public class Functor {
+public class Functor implements Serializable {
+	//**注意**：特殊なFunctorを追加した場合、readObjectメソッドを変更する事。
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
 	public static final Functor INSIDE_PROXY = new Functor("$in",2,null,"$in_2");
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
@@ -109,6 +112,51 @@ public class Functor {
 		this.strFunctor = strFunctor;
 	}
 
+	/**
+	 * 直列化時に呼ばれる。
+	 * @param out
+	 * @throws IOException
+	 */
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException{
+		if (this == INSIDE_PROXY) {
+			out.writeObject("INSIDE_PROXY");
+		} else if (this == OUTSIDE_PROXY) {
+			out.writeObject("OUTSIDE_PROXY");
+		} else if (this == STAR) {
+			out.writeObject("STAR");
+		} else {
+			out.writeObject("NORMAL");
+			out.defaultWriteObject();
+		}
+	}
+
+	/**
+	 * フィールドの値をコピーする。readObject内で利用。
+	 * @param src コピー元
+	 */
+	private void copyFrom(Functor src) {
+		name = src.name;
+		arity = src.arity;
+		path = src.path;
+		strFunctor = src.strFunctor;
+	}
+	/**
+	 * 直列化復元時に呼ばれる。
+	 * author mizuno
+	 */
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		String type = (String)in.readObject();
+		if (type.equals("INSIDE_PROXY")) {
+			copyFrom(INSIDE_PROXY);
+		} else if (type.equals("OUTSIDE_PROXY")) {
+			copyFrom(OUTSIDE_PROXY);
+		} else if (type.equals("STAR")) {
+			copyFrom(STAR);
+		} else {
+			in.defaultReadObject();
+			strFunctor = strFunctor.intern();
+		}
+	}
 	////////////////////////////////////////////////////////////////
 
 	/** 適切に省略された表示名を取得 */

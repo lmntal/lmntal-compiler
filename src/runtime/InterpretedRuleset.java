@@ -1,12 +1,12 @@
 package runtime;
 
+import java.io.*;
 import java.util.*;
-
 /**
  * compile.RulesetCompiler によって生成される。
  * @author hara, nakajima, n-kato
  */
-public final class InterpretedRuleset extends Ruleset {
+public final class InterpretedRuleset extends Ruleset implements Serializable {
 	/** このルールセットのローカルID */
 	private int id;
 	private static int lastId = 600;
@@ -111,6 +111,17 @@ public final class InterpretedRuleset extends Ruleset {
 	public String getGlobalRulesetID(){
 		//TODO 本当にglobalなIDにする
 		return "<runtimeid>" + id;
+	}
+	
+	public void serialize(ObjectOutputStream out) throws IOException {
+		super.serialize(out);
+		out.writeObject(rules);
+	}
+	protected void deserializeInstance(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		super.deserializeInstance(in);
+		//TODO idの振り方を考える。
+		id = ++lastId;
+		rules = (List)in.readObject();
 	}
 }
 

@@ -1,5 +1,7 @@
 package runtime;
 
+import java.io.*;
+
 /**
  * ルールの集合。
  * 現在はルールの配列として表現しているが、将来的には複数のルールのマッチングを
@@ -31,4 +33,33 @@ abstract public class Ruleset {
 	 * 
 	 */
 	abstract public String getGlobalRulesetID();
+	
+	/**
+	 * このインスタンスの内容をストリームに書き込む。
+	 * 子クラスでオーバーライドする場合は、最初にこのメソッドの返り値をバイト列の先頭に追加する必要がある。
+	 * @return バイト列
+	 */
+	public void serialize(ObjectOutputStream out) throws IOException {
+		out.writeObject(getClass());
+		out.writeObject(holes);
+	}
+	
+	/**
+	 * バイト列からRulesetを復元する。
+	 * @param out バイト列
+	 * @return 復元したオブジェクト
+	 */
+	public static Ruleset deserialize(ObjectInputStream in) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+		Class c = (Class)in.readObject();
+		Ruleset ret = (Ruleset)c.newInstance();
+		ret.deserializeInstance(in);
+		return ret;
+	}
+	/**
+	 * ストリームから、このインスタンスの内容を復元する。子クラスでオーバーライドする場合は、最初にこのメソッドを呼び出す必要がある。
+	 * @param out 読み込むストリーム
+	 */
+	protected void deserializeInstance(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		holes = (Functor[])in.readObject();
+	}
 }

@@ -4,9 +4,8 @@
  */
 package runtime;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
+import java.io.*;
+import java.util.*;
 
 /**
  * ラベル付き命令列を表すクラス。
@@ -14,7 +13,7 @@ import java.util.ArrayList;
  * 
  * @author n-kato
  */
-public class InstructionList implements Cloneable {
+public class InstructionList implements Cloneable, Serializable {
 	/** ラベル生成用整数値 */
 	private static int nextId = 100;
 	/** ラベル */
