@@ -26,11 +26,11 @@ class SlaveLMNtalRuntimeLauncher {
 				LocalLMNtalRuntime runtime = new LocalLMNtalRuntime();
 				node.respondAsOK(callerMsgid);	// node.runtimeidを返す場合、このresの引数にする
 				nodeThread.join(); //socketが切断するまで待つ
-				LMNtalRuntimeManager.terminateAll();
-				LMNtalRuntimeManager.disconnectFromDaemon();
+				//LMNtalRuntimeManager.terminateAll(); //TODO (nakajima)なんかあやしい
+				//LMNtalRuntimeManager.disconnectFromDaemon();
 			}
 		} catch (Exception e) {
-			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());
+			System.out.println("ERROR in SlaveLMNtalRuntimeLauncher.run()" + e.toString());
 			e.printStackTrace();
 		}
 	}
