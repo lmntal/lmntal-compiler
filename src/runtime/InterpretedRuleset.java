@@ -655,7 +655,7 @@ class InterpretiveReactor {
 					break; //nakajima
 
 				case Instruction.NOT :
-					subinsts = (List) ((List) inst.getArg1()).get(0);
+					subinsts = ((InstructionList)inst.getArg1()).insts;
 					if (interpret(subinsts, 0))
 						return false;
 					break; //n-kato

@@ -27,10 +27,10 @@ public class InstructionList implements Cloneable {
 	public List insts = new ArrayList();
 //	/** 親命令列またはnull */
 //	public InstructionList parent;
-	
+	/** 未使用メソッド。*/
 	public void setFormals(int formals) {
 	}
-	/** 局所変数の個数を更新する。*/
+	/** 未使用メソッド。局所変数の個数を更新する。*/
 	public void updateLocals(int locals) {
 		if (this.locals < locals) this.locals = locals;
 //		if (parent != null) parent.updateLocals(locals);

@@ -26,23 +26,20 @@ import compile.structure.*;
  * ボディ命令列の仮引数では、先にmemsを枚挙してから、その続きの変数番号にatomsを枚挙している。
  */
 public class HeadCompiler {
+	/** 左辺膜 */
 	public Membrane m;
-	
-	/**
-	 * OBSOLETE: 空の膜を保持する。実引数リストは通常アトムから成るが、空膜にマッチさせる時は空膜自身が実引数となる。
-	 * OBSOLETE: 実引数リスト内で、任意の空膜は任意のアトムより後ろに来る。
-	 * メモ: 空膜と言っても{$p}なども含まれる
-	 */
+	/** マッチング命令列（のラベル）*/
 	public InstructionList matchLabel;
-	public List match;								// マッチング命令列
-	
+	/** matchLabel.insts */
+	public List match;
+
 	public List mems			= new ArrayList();	// 出現する膜のリスト。[0]がm
 	public List atoms			= new ArrayList();	// 出現するアトムのリスト	
 	public Map  mempaths		= new HashMap();	// Membrane -> 変数番号
 	public Map  atompaths		= new HashMap();	// Atom -> 変数番号
 	
 	private Map atomids		= new HashMap();	// Atom -> atoms内のindex（廃止の方向で検討する）
-	private HashSet visited	= new HashSet();	// Atoms -> boolean, マッチング命令を生成したかどうか
+	private HashSet visited	= new HashSet();	// Atom -> boolean, マッチング命令を生成したかどうか
 	
 	int varcount;	// いずれアトムと膜で分けるべきだと思う
 	
@@ -63,7 +60,26 @@ public class HeadCompiler {
 		//Env.n("HeadCompiler");
 		this.m = m;
 	}
-	
+	final HeadCompiler getNormalizedHeadCompiler() {
+		HeadCompiler nhc = new HeadCompiler(m);
+		nhc.matchLabel = new InstructionList();
+		nhc.match = nhc.matchLabel.insts;
+		nhc.mems.addAll(mems);
+		nhc.atoms.addAll(atoms);
+		nhc.varcount = 0;
+		Iterator it = mems.iterator();
+		while (it.hasNext()) {
+			nhc.mempaths.put(it.next(), new Integer(nhc.varcount++));
+		}
+		it = atoms.iterator();
+		while (it.hasNext()) {
+			Atom atom = (Atom)it.next();
+			nhc.atompaths.put(atom, new Integer(nhc.varcount));
+			nhc.atomids.put(atom, new Integer(nhc.varcount++));
+			nhc.visited.add(atom);
+		}
+		return nhc;
+	}
 	/** 膜memの子孫の全てのアトムと膜を、それぞれリストatomsとmemsに追加する。
 	 * リスト内の追加された位置がそのアトムおよび膜の仮引数IDになる。*/
 	public void enumFormals(Membrane mem) {
@@ -223,9 +239,9 @@ public class HeadCompiler {
 			// （ガードコンパイラに移動する予定）
 			if (submem.processContexts.isEmpty()) {
 //				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
-				// TODO 単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする
+				// TODO 単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(1)
 				match.add(new Instruction(Instruction.NATOMS, submempath,
-					submem.getNormalAtomCount() + submem.typedProcessContexts.size()));
+					submem.getNormalAtomCount() + submem.typedProcessContexts.size() ));
 				match.add(new Instruction(Instruction.NMEMS,  submempath, submem.mems.size()));
 			}
 			//
@@ -272,4 +288,5 @@ public class HeadCompiler {
 	public List getVarActuals() {
 		return new ArrayList();
 	}
+
 }

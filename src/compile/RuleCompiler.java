@@ -88,7 +88,7 @@ public class RuleCompiler {
 		hc = new HeadCompiler(rs.leftMem);
 		hc.enumFormals(rs.leftMem);	// ヘッドに対する仮引数リストを作る
 		
-		if (!rs.typedProcessContexts.isEmpty()) {
+		if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty()) {
 			theRule.guardLabel = new InstructionList();
 			guard = theRule.guardLabel.insts;
 		}
@@ -365,9 +365,49 @@ public class RuleCompiler {
 		if (guard == null) return;
 		int formals = varcount;
 		fixTypedProcesses();
+		compileNegatives(rs.guardNegatives);
 		guard.add( 0, Instruction.spec(formals,varcount) );
 		guard.add( Instruction.jump(theRule.bodyLabel, gc_getMemActuals(),
 			gc_getAtomActuals(), gc_getVarActuals()) );
+	}
+//
+	void compileNegatives(LinkedList negatives) {
+		Iterator it = negatives.iterator();
+		while (it.hasNext()) {
+			LinkedList eqs = (LinkedList)it.next();
+			HeadCompiler negcmp = hc.getNormalizedHeadCompiler();
+			int formals = negcmp.varcount;
+			//negcmp.matchLabel.setFormals(formals);
+			Iterator it2 = eqs.iterator();
+			while (it2.hasNext()) {
+				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
+				negcmp.enumFormals(eq.mem);
+			}
+			it2 = eqs.iterator();
+			while (it2.hasNext()) {
+				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
+				negcmp.mempaths.put(eq.mem, negcmp.mempaths.get(eq.def.lhsOcc.mem));
+			}
+			guard.add(new Instruction(Instruction.NOT, negcmp.matchLabel));
+			it2 = eqs.iterator();
+			while (it2.hasNext()) {
+				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
+				negcmp.compileMembrane(eq.mem);
+				if (eq.mem.processContexts.isEmpty()) {
+					// TODO 単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(2)
+					negcmp.match.add(new Instruction(Instruction.NATOMS, negcmp.mempaths.get(eq.mem),
+						  eq.def.lhsOcc.mem.getNormalAtomCount() + eq.def.lhsOcc.mem.typedProcessContexts.size()
+						+ eq.mem.getNormalAtomCount() + eq.mem.typedProcessContexts.size() ));
+					negcmp.match.add(new Instruction(Instruction.NMEMS, negcmp.mempaths.get(eq.mem),
+						eq.def.lhsOcc.mem.mems.size() + eq.mem.mems.size() ));
+				}
+				// eq.mem.ruleContexts は無視される					
+			}
+			// todo 自由リンク
+			negcmp.match.add(new Instruction(Instruction.PROCEED));	// 旧STOP
+			//negcmp.matchLabel.updateLocals(negcmp.varcount);
+			if (varcount < negcmp.varcount)  varcount = negcmp.varcount;
+		}
 	}
 	public List gc_getMemActuals() {
 		List args = new ArrayList();		
@@ -891,9 +931,13 @@ public class RuleCompiler {
 		// PART 1 - 右辺のアトムに出現するリンク
 		Iterator it = rhsatoms.iterator();
 		while (it.hasNext()) {
-			Atom atom = (Atom)it.next();			
+			Atom atom = (Atom)it.next();
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
+				Membrane targetmem = atom.mem;
+				if (atom.functor.equals(Functor.INSIDE_PROXY) && pos == 0) {
+					targetmem = targetmem.mem;	// $inの第1引数は親膜が管理する
+				}
 				if (link.atom instanceof ProcessContext) {
 					// アトムのリンク先がプロセス文脈/型付きプロセス文脈のとき
 					ProcessContext pc = (ProcessContext)link.atom;
@@ -902,9 +946,9 @@ public class RuleCompiler {
 						// ( :- type($pc) | atom(X), $pc[X|] )
 						if (typedcxttypes.get(pc.def) == UNARY_ATOM_TYPE) {
 							body.add( Instruction.newlink(
-											rhsatomToPath(atom), pos,
-											rhstypedcxtToPath(pc), 0,
-											rhsmemToPath(atom.mem) ));
+										rhsatomToPath(atom), pos,
+										rhstypedcxtToPath(pc), 0,
+										rhsmemToPath(targetmem) ));
 						}
 					} else { // 型付きでないとき
 						// 左辺の型なしプロセス文脈はトップレベルに無く、左辺子膜内とは直接リンクできないため、
@@ -912,10 +956,10 @@ public class RuleCompiler {
 						// 左辺での出現における対応する自由リンクは、左辺のアトムに接続している。
 						// ( { org(Y,), $pc[Y,|] } :- atom(X), $pc[X,|] )
 						LinkOccurrence orglink = pc.buddy.args[link.pos].buddy; // org引数のYの出現
-							body.add( new Instruction(Instruction.RELINK,
-											rhsatomToPath(atom), pos,
-											lhsatomToPath(orglink.atom), orglink.pos,
-											rhsmemToPath(atom.mem) ));
+						body.add( new Instruction(Instruction.RELINK,
+										rhsatomToPath(atom), pos,
+										lhsatomToPath(orglink.atom), orglink.pos,
+										rhsmemToPath(targetmem) ));
 					}
 					continue;
 				}
@@ -924,14 +968,14 @@ public class RuleCompiler {
 					body.add( new Instruction(Instruction.RELINK,//LOCALRELINKに修正予定
 						rhsatomToPath(atom), pos,
 						lhsatomToPath(link.atom), link.pos,
-						rhsmemToPath(atom.mem) ));
+						rhsmemToPath(targetmem) ));
 				} else { // ( :- buddy(X), atom(X) )
 					if (rhsatomToPath(atom) < rhsatomToPath(link.atom)
 					|| (rhsatomToPath(atom) == rhsatomToPath(link.atom) && pos < link.pos)) {
 						body.add( new Instruction(Instruction.NEWLINK,
-							rhsatomToPath(atom), pos,
-							rhsatomToPath(link.atom), link.pos,
-							rhsmemToPath(atom.mem) ));
+										rhsatomToPath(atom), pos,
+										rhsatomToPath(link.atom), link.pos,
+										rhsmemToPath(targetmem) ));
 					}
 				}
 			}
@@ -1000,16 +1044,16 @@ public class RuleCompiler {
 			while (it2.hasNext()) {
 				ProcessContext atom = (ProcessContext)it2.next();
 				for (int pos = 0; pos < atom.functor.getArity(); pos++) {
-					LinkOccurrence link = atom.args[pos].buddy;
+					LinkOccurrence link = atom.args[pos].buddy;	// 明示的な自由リンクのリンク先のリンク出現
 					if (!(link.atom instanceof ProcessContext)) {
 						// 型付きでないプロセス文脈のリンク先がアトムのとき
 						if (lhsatoms.contains(link.atom)) { // リンク先は左辺のトップレベル
 							// ( {src(Z,),$atom[Z,|]},buddy(X) :- $atom[X,|] )
 							LinkOccurrence srclink = atom.buddy.args[pos].buddy; // src引数のZの出現
 							body.add( new Instruction(Instruction.LOCALUNIFY,
-								lhsatomToPath(link.atom), link.pos,
-								lhsatomToPath(srclink.atom), srclink.pos,
-								rhsmemToPath(atom.mem) )); // 本膜
+												lhsatomToPath(link.atom), link.pos,
+												lhsatomToPath(srclink.atom), srclink.pos,
+												rhsmemToPath(atom.mem) )); // 本膜
 						}
 						else if (rhsatoms.contains(link.atom)) { // ( :- buddy(X), $atom[X,|] )
 							// PART1でnewlink済みなので、何もしない
@@ -1022,15 +1066,22 @@ public class RuleCompiler {
 					}
 					else {
 						ProcessContext buddypc = (ProcessContext)link.atom;
-						if (!buddypc.mem.typedProcessContexts.contains(buddypc)) {
+						if (buddypc.mem.typedProcessContexts.contains(buddypc)) {
+							// PART2でrelink済みなので、何もしない
+						}
+						else {
 							// リンク先が型付きでないプロセス文脈のとき、PART1と同じ理由で$buddypcは右辺。
 							// ( {org(Y,),$buddypc[Y,|]},{src(Z,),$atom[Z,|]} :- $buddypc[X,|],$atom[X,|] )
 							LinkOccurrence orglink = buddypc.buddy.args[link.pos].buddy; // org引数のYの出現
-							LinkOccurrence srclink = atom.   buddy.args[link.pos].buddy; // src引数のZの出現
-							body.add( new Instruction(Instruction.UNIFY,
-														lhsatomToPath(srclink.atom), srclink.pos,
-														lhsatomToPath(orglink.atom), orglink.pos,
-														rhsmemToPath(atom.mem) ));
+							LinkOccurrence srclink = atom.   buddy.args[pos     ].buddy; // src引数のZの出現
+							if ( lhsatomToPath(orglink.atom) < lhsatomToPath(srclink.atom)
+							  || ( lhsatomToPath(orglink.atom) == lhsatomToPath(srclink.atom)
+								&& orglink.pos < srclink.pos )) {
+								body.add( new Instruction(Instruction.UNIFY,
+												lhsatomToPath(srclink.atom), srclink.pos,
+												lhsatomToPath(orglink.atom), orglink.pos,
+												rhsmemToPath(atom.mem) ));
+							}
 						}
 					}
 				}
