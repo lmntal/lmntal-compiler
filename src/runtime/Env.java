@@ -117,6 +117,12 @@ public final class Env {
 	public static int printLength = 14;
 	
 	/**
+	 * Ê¬»¶
+	 */
+	public static boolean startDaemon = false;
+	public static int debugDaemon = 0;
+		
+	/**
 	 * General error report
 	 * @param o
 	 */
