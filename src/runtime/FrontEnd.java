@@ -16,11 +16,6 @@ import java.lang.SecurityException;
  * LMNtal のメイン
  * 
  * <pre>
- * TODO for 親愛なる矢島さん 
- * コマンドライン引数の処理
- * （ファイル名が指定されていたらそれを解釈実行
- * 　指定されてなかったら runREPL() 実行）
- * 
  * TODO 名前は FrontEnd でいいんだろうか。
  *       案：FrontEnd
  *           素直に Main
@@ -35,7 +30,6 @@ public class FrontEnd {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		FrontEnd fe = new FrontEnd(); //TODO ＞原君　これどこで使うの？
 		FileInputStream fis = null;
 		InputStream is = null;
 		Reader src = null;
