@@ -44,6 +44,7 @@ public class RuleCompiler {
 	List lhsmems;
 	Map  lhsatompath;		// 左辺のアトム (Atom) -> 変数番号 (Integer)
 	Map  lhsmempath;		// 左辺の膜 (Membrane) -> 変数番号 (Integer)
+	Map  lhslinkpath;		// 左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])
 	
 	HeadCompiler hc;
 	
@@ -51,6 +52,10 @@ public class RuleCompiler {
 	final int rhsmemToPath(Membrane mem) { return ((Integer)rhsmempath.get(mem)).intValue(); }
 	final int lhsatomToPath(Atom atom) { return ((Integer)lhsatompath.get(atom)).intValue(); } 
 	final int rhsatomToPath(Atom atom) { return ((Integer)rhsatompath.get(atom)).intValue(); } 
+	final int lhslinkToPath(Atom atom, int pos) {
+		int atompath = lhsatomToPath(atom);
+		return ((int[])lhslinkpath.get(new Integer(atompath)))[pos];
+	}
 	
 	public String unitName;
 	/** ヘッドのマッチング終了後の継続命令列のラベル */
@@ -146,6 +151,7 @@ public class RuleCompiler {
 					hc.match.add(new Instruction(Instruction.GETPARENT,hc.varcount,hc.varcount-1));
 					hc.match.add(new Instruction(Instruction.EQMEM, 0, hc.varcount++));
 				}
+				hc.getLinks(1, atom.functor.getArity()); //リンクの一括取得(RISC化) by mizuno
 				Atom firstatom = (Atom)hc.atoms.get(firstid);
 				hc.compileLinkedGroup(firstatom);
 				hc.compileMembrane(firstatom.mem);
@@ -185,6 +191,26 @@ public class RuleCompiler {
 	
 	// todo spec命令を外側に持ち上げる最適化器を実装する
 	
+	/**
+	 * 左辺のアトムのリンクに対してgelinkを行い、変数番号を登録する。(RISC化)
+	 * 将来的にはリンクを引数に渡すようにする予定。
+	 */
+	private void getLHSLinks() {
+		lhslinkpath = new HashMap();
+		for (int i = 0; i < lhsatoms.size(); i++) {
+			Atom atom = (Atom)lhsatoms.get(i);
+			int atompath = lhsatomToPath(atom);
+			int arity = atom.functor.getArity();
+			int[] paths = new int[arity];
+			for (int j = 0; j < arity; j++) {
+				paths[j] = varcount;
+				body.add(new Instruction(Instruction.GETLINK, varcount, atompath, j));
+				varcount++;
+			}
+			lhslinkpath.put(new Integer(atompath), paths);
+		}
+	}
+
 	/** 右辺膜をコンパイルする */
 	private void compile_r() {
 		Env.c("compile_r");
@@ -203,6 +229,7 @@ public class RuleCompiler {
 		//Env.d("rhsmempaths -> "+rhsmempaths);
 
 		recursiveLockLHSNonlinearProcessContextMems();
+		getLHSLinks();
 		dequeueLHSAtoms();
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
@@ -281,9 +308,13 @@ public class RuleCompiler {
 		if (guard == null) return;
 		int formals = gc.varcount;
 		gc.fixTypedProcesses();
-		varcount = gc.varcount;
+		//RISC化で、暫定処置としてガードでgetlinkした物をボディに渡さない事にしたので、
+		//ガード命令列の局所変数の数とボディ命令列の引数の数が一致しなくなった。by mizuno
+//		varcount = gc.varcount;
+		varcount = gc.getMemActuals().size() + gc.getAtomActuals().size() 
+					+ gc.getVarActuals().size();
 		compileNegatives();
-		guard.add( 0, Instruction.spec(formals,varcount) );
+		guard.add( 0, Instruction.spec(formals,gc.varcount) );
 		guard.add( Instruction.jump(theRule.bodyLabel, gc.getMemActuals(),
 			gc.getAtomActuals(), gc.getVarActuals()) );
 	}
@@ -701,11 +732,12 @@ public class RuleCompiler {
 						}
 						else {
 							LinkOccurrence orglink = pc.def.lhsOcc.args[link.pos].buddy; // org引数のYの出現
-							int srclink = varcount++;
+//							int srclink = varcount++;
+							int srclink = lhslinkToPath(orglink.atom, orglink.pos);
 							int copiedlink = varcount++;
 							int atomlink = varcount++;
-							body.add( new Instruction(Instruction.GETLINK,
-											srclink, lhsatomToPath(orglink.atom), orglink.pos ));
+//							body.add( new Instruction(Instruction.GETLINK,
+//											srclink, lhsatomToPath(orglink.atom), orglink.pos ));
 							body.add( new Instruction(Instruction.LOOKUPLINK,
 											copiedlink, rhspcToMapPath(pc),
 											srclink));
@@ -812,15 +844,17 @@ public class RuleCompiler {
 							}
 							else {
 								LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy; // src引数のZの出現
-								int srclinkid  = varcount++;
+//								int srclinkid  = varcount++;
+								int srclinkid  = lhslinkToPath(srclink.atom, srclink.pos); 
 								int copiedlink = varcount++;
-								int buddylink  = varcount++;
-								body.add( new Instruction(Instruction.GETLINK,
-												srclinkid, lhsatomToPath(srclink.atom), srclink.pos ));
+//								int buddylink  = varcount++;
+								int buddylink  = lhslinkToPath(link.atom, link.pos); 
+//								body.add( new Instruction(Instruction.GETLINK,
+//												srclinkid, lhsatomToPath(srclink.atom), srclink.pos ));
 								body.add( new Instruction(Instruction.LOOKUPLINK,
 												copiedlink, rhspcToMapPath(atom), srclinkid));
-								body.add( new Instruction(Instruction.GETLINK,
-												buddylink, lhsatomToPath(link.atom), link.pos ));
+//								body.add( new Instruction(Instruction.GETLINK,
+//												buddylink, lhsatomToPath(link.atom), link.pos ));
 								body.add( new Instruction(Instruction.UNIFYLINKS,
 												copiedlink, buddylink, rhsmemToPath(atom.mem) ));
 							}
@@ -868,19 +902,21 @@ public class RuleCompiler {
 													rhsmemToPath(atom.mem) ));
 								}
 								else {
-									int buddylink       = varcount++;
+//									int buddylink       = varcount++;
+									int buddylink       = lhslinkToPath(srclink.atom, srclink.pos); 
 									int buddycopiedlink = buddylink;
-									body.add( new Instruction(Instruction.GETLINK,
-													buddylink, lhsatomToPath(srclink.atom), srclink.pos ));
+//									body.add( new Instruction(Instruction.GETLINK,
+//													buddylink, lhsatomToPath(srclink.atom), srclink.pos ));
 									if (buddypc.def.rhsOccs.size() != 1) {
 										buddycopiedlink = varcount++;
 										body.add( new Instruction(Instruction.LOOKUPLINK,
 														buddycopiedlink, rhspcToMapPath(buddypc), buddylink ));
 									}							
-									int atomlink       = varcount++;
+//									int atomlink       = varcount++;
+									int atomlink       = lhslinkToPath(orglink.atom, orglink.pos); 
 									int atomcopiedlink = atomlink;
-									body.add( new Instruction(Instruction.GETLINK,
-													atomlink, lhsatomToPath(orglink.atom), orglink.pos ));
+//									body.add( new Instruction(Instruction.GETLINK,
+//													atomlink, lhsatomToPath(orglink.atom), orglink.pos ));
 									if (atom.def.rhsOccs.size() != 1) {
 										atomcopiedlink = varcount++;
 										body.add( new Instruction(Instruction.LOOKUPLINK,

@@ -104,6 +104,21 @@ public class GuardCompiler extends HeadCompiler {
 	
 	/** 型付きプロセス文脈が表すプロセスを一意に決定する。*/
 	void fixTypedProcesses() {
+		// STEP 0 - 引数に渡されたアトムのリンクに対してgelinkを行い、変数番号を登録する。(RISC化)
+		//          将来的にはリンクを引数に渡すようにする予定。
+		for (int i = 0; i < atoms.size(); i++) {
+			Atom atom = (Atom)atoms.get(i);
+			int atompath = atomToPath(atom);
+			int arity = atom.functor.getArity();
+			int[] paths = new int[arity];
+			for (int j = 0; j < arity; j++) {
+				paths[j] = varcount;
+				match.add(new Instruction(Instruction.GETLINK, varcount, atompath, j));
+				varcount++;
+			}
+			linkpaths.put(new Integer(atompath), paths);
+		}
+
 		// STEP 1 - 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
 		identifiedCxtdefs = new HashSet();
 		Iterator it = typedProcessContexts.values().iterator();
@@ -337,8 +352,11 @@ public class GuardCompiler extends HeadCompiler {
 					atomid, atomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(atomid));
 				typedcxtdefs.add(def);
+				match.add(new Instruction(Instruction.FUNC, atomid, func));
+				getLinks(atomid, 1);
+			} else {
+				match.add(new Instruction(Instruction.FUNC, atomid, func));
 			}
-			match.add(new Instruction(Instruction.FUNC, atomid, func));
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 	}
@@ -358,8 +376,11 @@ public class GuardCompiler extends HeadCompiler {
 					loadedatomid, atomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(loadedatomid));
 				typedcxtdefs.add(def);
+				match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
+				getLinks(loadedatomid, 1);
+			} else {
+				match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
 			}
-			match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
 //			int funcid1 = varcount++;
 //			int funcid2 = varcount++;
 //			match.add(new Instruction(Instruction.GETFUNC, funcid1, atomid));
@@ -381,6 +402,7 @@ public class GuardCompiler extends HeadCompiler {
 				atomid, atomToPath(srclink.atom), srclink.pos));
 			typedcxtsrcs.put(def, new Integer(atomid));
 			typedcxtdefs.add(def);
+			getLinks(atomid, 1);
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 		return atomid;

@@ -37,6 +37,7 @@ public class HeadCompiler {
 	public List atoms			= new ArrayList();	// 出現するアトムのリスト	
 	public Map  mempaths		= new HashMap();	// Membrane -> 変数番号
 	public Map  atompaths		= new HashMap();	// Atom -> 変数番号
+	public Map  linkpaths		= new HashMap();	// Atomの変数番号 -> リンクの変数番号の配列
 	
 	private Map atomids		= new HashMap();	// Atom -> atoms内のindex（廃止の方向で検討する）
 	private HashSet visited	= new HashSet();	// Atom -> boolean, マッチング命令を生成したかどうか
@@ -57,6 +58,11 @@ public class HeadCompiler {
 		 if (!isMemLoaded(mem)) return UNBOUND;
 		 return ((Integer)mempaths.get(mem)).intValue();
 	}
+	final int linkToPath(int atomid, int pos) {
+		if (!linkpaths.containsKey(new Integer(atomid))) return UNBOUND;
+		return ((int[])linkpaths.get(new Integer(atomid)))[pos];
+	}
+	
 	static final int UNBOUND = -1;
 	
 	HeadCompiler() {}
@@ -121,6 +127,21 @@ public class HeadCompiler {
 		varcount = 1;	// [0]は本膜
 //		mempaths.put(mems.get(0), new Integer(0));	// 本膜の変数番号は 0
 	}
+
+	/**
+	 * 指定されたアトムに対してgetlinkを行い、変数番号をlinkpathsに登録する。
+	 * RISC化に伴い追加(mizuno)
+	 */
+	public final void getLinks(int atompath, int arity) {
+		int[] paths = new int[arity];
+		for (int i = 0; i < arity; i++) {
+			paths[i] = varcount;
+			match.add(new Instruction(Instruction.GETLINK, varcount, atompath, i));
+			varcount++;
+		}
+		linkpaths.put(new Integer(atompath), paths);
+	}
+	
 	/** リンクでつながったアトムおよびその所属膜に対してマッチングを行う。
 	 * また、途中で見つかった「新しい膜」のそれぞれに対して、compileMembraneを呼ぶ。
 	 */
@@ -278,6 +299,8 @@ public class HeadCompiler {
 					//	}
 					}
 				}
+				//リンクの一括取得(RISC化) by mizuno
+				getLinks(buddyatompath, buddyatom.functor.getArity());
 			}
 		}
 		// 見つかった新しい子膜にあるアトムを優先的に検査する。
@@ -321,6 +344,8 @@ public class HeadCompiler {
 					}
 				}
 				atompaths.put(atom, new Integer(atompath));
+				//リンクの一括取得(RISC化) by mizuno
+				getLinks(atompath, atom.functor.getArity());
 				compileLinkedGroup(atom);
 			}
 //			compileLinkedGroup(atom);	// 2行上に移動してみた n-kato (2004.7.16)
