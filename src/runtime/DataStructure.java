@@ -219,10 +219,10 @@ final class Machine extends AbstractMachine {
 }
 abstract class AbstractMachine {
 	/** ルート膜 */
-	protected AbstractMembrane root;
+	protected Membrane root;
 	
 	/** ルート膜の取得 */
-	AbstractMembrane getRoot() {
+	Membrane getRoot() {
 		return root;
 	}
 }
@@ -235,6 +235,11 @@ final class LMNtalRuntime {
 	 *  machinesに積まれた順に実行する。親マシン優先にするためには
 	 *  マシンが木構造になっていないと出来ない。優先度はしばらく未実装。
 	 */
+	LMNtalRuntime(Ruleset init){
+		Machine rootm = newMachine();
+		init.react(rootm.getRoot());
+	}
+	
 	void exec() {
 		boolean allIdle;
 		Iterator it;
