@@ -9,8 +9,8 @@ import java_cup.runtime.Scanner;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Hashtable;
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 
 //import java_cup.runtime.Symbol;
 import runtime.Inline;
@@ -18,13 +18,13 @@ import runtime.Env;
 import compile.structure.*;
 
 public class LMNParser {
-	
-	private Scanner lex = null;
-	
-	private static int nLinkNumber = 0;
-	
+
 	private static final String PREFIX_LINK_NAME = "L::";
 	private static final String PREFIX_PROXY_LINK_NAME = "P::";
+	static final LinkOccurrence CLOSED_LINK = new LinkOccurrence("",null,0);
+
+	private /*static*/ int nLinkNumber = 0;
+	private Scanner lex = null;
 	
 	/**
 	   字句解析器と入力を指定して初期化
@@ -60,181 +60,92 @@ public class LMNParser {
 	/**
 	 * ソースファイルを解析します
 	 * 解析後はリンクの貼り付け、プロキシーの作成が行われています
-	 * @return ソースファイル全体（を生成するルールが１個だけ含まれる膜）
+	 * @return ソースファイル全体を生成するルールが１個だけ含まれる膜
 	 * @throws ParseException
 	 */
 	public Membrane parse() throws ParseException {
-		LinkedList src = parseSrc();
+		LinkedList srcProcess = parseSrc();
 		Membrane mem = new Membrane(null);
-		addProcessToMem(src, mem);
-		createProxy(mem);
+		addProcessToMem(srcProcess, mem);
+		HashMap freeLinks = coupleLinks(mem);
+		Iterator it = freeLinks.keySet().iterator();
+		while (it.hasNext()) {
+			LinkOccurrence link = (LinkOccurrence)it.next();
+			System.out.println("WARNING: Global singleton link: " + link.name);
+			//addAtomToMem(mem.add link.closeLink();
+			//				addSrcAtomToMem((SrcAtom)obj, mem);
+			// setLinkToAtomArg(link, atom, i);
+		}
 		Inline.makeCode();
 		return mem;
 	}
+
+	////////////////////////////////////////////////////////////////
+	
+	/**
+	 * 指定された膜にあるアトムの引数に対して、リンクの結合を行い、自由リンクのHashMapを返す。
+	 * <p>子膜に対してリンクの結合およびプロキシの作成が行われた後で呼び出される。
+	 * <p>副作用として、メソッドの戻り値を mem.freeLinks にセットする。
+	 * @throws ParseException
+	 * @return リンク名から自由リンク出現へのHashMap
+	 */
+	private static HashMap coupleLinks(Membrane mem) throws ParseException {
+		HashMap links = new HashMap();
+		// 同じ膜レベルのリンク結合を行う
+		for (int i = 0; i < mem.atoms.size(); i++) {
+			Atom a = (Atom)mem.atoms.get(i);
+			// リンクの取り出し
+			for (int j = 0; j < a.args.length; j++) {
+				addLinkOccurrence(links, a.args[j]);
+			}
+		}
+		removeClosedLinks(links);
+		mem.freeLinks = links;
+		return links;
+	}
+	
+	/** 閉じたリンクをlinksから除去する */
+	private static void removeClosedLinks(HashMap links) {
+		Iterator it = links.keySet().iterator();
+		while (it.hasNext()) {
+			String linkName = (String)it.next();
+			if (links.get(linkName) == CLOSED_LINK) it.remove();
+		}
+	}
+	
+	/**
+	 * 指定されたリンク出現を記録する。同じ名前で2回目の出現ならばリンクの結合を行う。
+	 * @param lnk 記録するリンク出現
+	 * @throws ParseException 2回より多くリンク名が出現した場合
+	 */
+	private static void addLinkOccurrence(HashMap links, LinkOccurrence lnk) throws ParseException {
+		// 3回以上の出現
+		if (links.get(lnk.name) == CLOSED_LINK) {
+			throw new ParseException("Link " + lnk.name + " appears more than twice.");
+		}
+		// 1回目の出現
+		else if (links.get(lnk.name) == null) {
+			links.put(lnk.name, lnk);
+		}
+		// 2回目の出現
+		else {
+			LinkOccurrence buddy = (LinkOccurrence)links.get(lnk.name);
+			lnk.buddy = buddy;
+			buddy.buddy = lnk;
+			links.put(lnk.name, CLOSED_LINK);
+		}
+	}
+
+	////////////////////////////////////////////////////////////////
 	
 	/**
 	 * 膜にアトム、子膜、ルールなどを膜に登録する
 	 * @param list 登録したいプロセスのリスト
-	 * @param mem 登録先の膜
 	 * @throws ParseException
 	 */
-	private void addProcessToMem(LinkedList list, Membrane mem) throws ParseException {
-		for (int i=0;i<list.size();i++) addObjectToMem(list.get(i), mem);
+	void addProcessToMem(LinkedList list, Membrane mem) throws ParseException {
+		for (int i = 0; i < list.size(); i++) addObjectToMem(list.get(i), mem);
 	}
-	
-	/**
-	 * プロキシーの作成とリンクの結合
-	 * 子膜は全てリンクの結合、プロキシの作成は行われているとする
-	 * @param mem リンク処理を行いたい膜
-	 * @throws ParseException
-	 * @return リンク名から自由リンク出現へのハッシュ
-	 */
-	private Hashtable createProxy(Membrane mem) throws ParseException {
-		Hashtable linkNameTable = new Hashtable();
-		// 同じ膜レベルのリンク結合を行う
-		for (int i=0;i<mem.atoms.size();i++) {
-			Atom a = (Atom)mem.atoms.get(i);
-			// リンクの取り出し
-			for (int j=0;j<a.args.length;j++) {
-				connectLink(a.args[j], linkNameTable);
-			}
-		}
-		// 子膜から自由リンクの取り出し＆結合
-		for (int i=0;i<mem.mems.size();i++) {
-			Membrane childMem = (Membrane)mem.mems.get(i);
-			// 自由リンクの取り出し
-			for (int j=0;j<childMem.freeLinks.size();j++) {
-				LinkOccurrence freeLink = 
-					addProxyToMem((LinkOccurrence)childMem.freeLinks.get(j), mem, ProxyAtom.OUTSIDE_PROXY);
-				connectLink(freeLink, linkNameTable);
-			}
-		}
-
-		Enumeration enumLinkName = linkNameTable.keys();
-		// 親膜があり、対応がないものは自由リンクとして登録
-		if (mem.mem != null) {
-			while (enumLinkName.hasMoreElements()) {
-				String linkname = (String)enumLinkName.nextElement();
-				if (linkNameTable.get(linkname) == Boolean.TRUE) continue;
-				// プロキシを通した先のリンクを取得
-				LinkOccurrence freeLink = 
-					addProxyToMem((LinkOccurrence)linkNameTable.get(linkname), mem, ProxyAtom.INSIDE_PROXY);
-				mem.freeLinks.add(freeLink);
-			}
-		}
-		// 親膜がなくて自由リンクがある場合
-		else {
-			
-		}
-		return linkNameTable;
-	}
-	/** 左辺と右辺の自由リンクをつなぐ（n-katoによる仮のコード） */
-	private void coupleInheritedLinks(Hashtable lhsfreelinks, Hashtable rhsfreelinks) throws ParseException {
-		Hashtable linkNameTable = new Hashtable();
-		Enumeration lhsenum = lhsfreelinks.keys();
-		while (lhsenum.hasMoreElements()) {
-			String linkname = (String)lhsenum.nextElement();
-			if (lhsfreelinks.get(linkname) == Boolean.TRUE) continue;
-			LinkOccurrence lhsocc = (LinkOccurrence)lhsfreelinks.get(linkname);
-			connectLink(lhsocc, linkNameTable);
-		}
-		Enumeration rhsenum = rhsfreelinks.keys();
-		while (rhsenum.hasMoreElements()) {
-			String linkname = (String)rhsenum.nextElement();
-			if (rhsfreelinks.get(linkname) == Boolean.TRUE) continue;
-			LinkOccurrence rhsocc = (LinkOccurrence)rhsfreelinks.get(linkname);
-			connectLink(rhsocc, linkNameTable);
-		}
-		// TODO 片方にしか出現しない自由リンクをエラー報告とする
-	}
-	
-	/**
-	 * アトムにプロキシーを追加
-	 * @param freeLink プロキシーを通して外に出る自由リンク
-	 * @param mem 追加先の膜
-	 * @param プロキシのタイプ
-	 * @return プロキシーの先のリンクオブジェクト
-	 */
-	private LinkOccurrence addProxyToMem(LinkOccurrence freeLink, Membrane mem, int type) {
-		ProxyAtom proxy = new ProxyAtom(type, mem);
-		if (type == ProxyAtom.INSIDE_PROXY) {
-			proxy.args[0] = new LinkOccurrence(freeLink.name, proxy, 0); // 外側
-			proxy.args[1] = new LinkOccurrence(PREFIX_PROXY_LINK_NAME+freeLink.name, proxy, 1); // 内側
-			// 内側の結合
-			proxy.args[1].buddy = freeLink;
-			freeLink.buddy = proxy.args[1];
-			freeLink.name = proxy.args[1].name;
-			// プロキシの追加
-			mem.atoms.add(proxy);
-			return proxy.args[0];
-		} else if (type == ProxyAtom.OUTSIDE_PROXY) {
-			proxy.args[0] = new LinkOccurrence(PREFIX_PROXY_LINK_NAME+freeLink.name, proxy, 0); // 内側
-			proxy.args[1] = new LinkOccurrence(freeLink.name, proxy, 1); // 外側
-			// 内側の結合
-			proxy.args[0].buddy = freeLink;
-			freeLink.buddy = proxy.args[0];
-			freeLink.name = proxy.args[0].name;
-			// プロキシの追加
-			mem.atoms.add(proxy);
-			return proxy.args[1];
-		} else {
-			return null;
-		}
-	}
-	
-	
-	/**
-	 * リンクの結合を行う(同じ膜に存在する場合)
-	 * @param lnk 結合を行いたい
-	 * @param linkNameTable リンク名にリンクオブジェクトを対応づけたテーブル
-	 * @throws ParseException 2回より多くリンク名が出現した場合
-	 */
-	private void connectLink(LinkOccurrence lnk, Hashtable linkNameTable) throws ParseException {
-		// 3回以上の出現
-		if (linkNameTable.get(lnk.name) == Boolean.TRUE) {
-			throw new ParseException("Link Name '" + lnk.name + "' appear more than 3.");
-		}
-		// 1回目の出現
-		else if (linkNameTable.get(lnk.name) == null) {
-			linkNameTable.put(lnk.name, lnk);
-		}
-		// 2回目の出現
-		else {
-			LinkOccurrence buddy = (LinkOccurrence)linkNameTable.get(lnk.name);
-			lnk.buddy = buddy;
-			buddy.buddy = lnk;
-			linkNameTable.put(lnk.name, Boolean.TRUE);
-		}
-	}
-	
-	/**
-	 * リンクの結合を行う
-	 * @param lnk 結合を行いたい
-	 * @param linkNameTable リンク名にリンクオブジェクトを対応づけたテーブル
-	 * @param isOverMembrane 膜を通過するリンクか
-	 * @param mem 追加先の膜
-	 * @throws ParseException 2回より多くリンク名が出現した場合
-	 */
-/*	private void connectLink(LinkOccurrence lnk, Hashtable linkNameTable, boolean isOverMembrane, Membrane mem) throws ParseException {
-		// 3回以上の出現
-		if (linkNameTable.get(lnk.name) == Boolean.TRUE) {
-			throw new ParseException("Link Name '" + lnk.name + "' appear more than 3.");
-		}
-		// 1回目の出現
-		else if (linkNameTable.get(lnk.name) == null) {
-			linkNameTable.put(lnk.name, lnk);
-		}
-		// 2回目の出現
-		else {
-			LinkOccurrence buddy = (LinkOccurrence)linkNameTable.get(lnk.name);
-//			if (isOverMembrane) buddy = addProxyToMem(buddy, mem, ProxyAtom.OUTSIDE_PROXY);
-			lnk.buddy = buddy;
-			buddy.buddy = lnk;
-			linkNameTable.put(lnk.name, Boolean.TRUE);
-		}
-	}
-*/
-	
 	/**
 	 * 膜にアトム、子膜、ルールなどの構文オブジェクトを追加
 	 * @param obj 追加する構文オブジェクト
@@ -248,7 +159,7 @@ public class LMNParser {
 		}
 		// 膜
 		else if (obj instanceof SrcMembrane) {
-			addSrcMemToMem((SrcMembrane)obj, mem);; 
+			addSrcMemToMem((SrcMembrane)obj, mem);
 		}
 		// ルール
 		else if (obj instanceof SrcRule) {
@@ -281,7 +192,32 @@ public class LMNParser {
 	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) throws ParseException {
 		Membrane submem = new Membrane(mem);
 		addProcessToMem(sMem.getProcess(), submem);
-		createProxy(submem); // リンクの貼り付け プロキシーの生成
+		HashMap freeLinks = coupleLinks(submem);
+		
+		// 子膜の自由リンクに対してプロキシを追加する
+		HashMap newFreeLinks = new HashMap();
+		Iterator it = freeLinks.keySet().iterator();
+		while (it.hasNext()) {
+			LinkOccurrence freeLink = (LinkOccurrence)freeLinks.get(it.next());
+			String proxyLinkName = PREFIX_PROXY_LINK_NAME + freeLink.name;
+			// 子膜にinside_proxyを追加
+			ProxyAtom inside = new ProxyAtom(ProxyAtom.INSIDE_PROXY, submem);
+			inside.args[0] = new LinkOccurrence(proxyLinkName, inside, 0); // 外側
+			inside.args[1] = new LinkOccurrence(freeLink.name, inside, 1); // 内側
+			inside.args[1].buddy = freeLink;
+			freeLink.buddy = inside.args[1];
+			submem.atoms.add(inside);
+			// 新しい自由リンク名を新しい自由リンク一覧に追加する
+			newFreeLinks.put(proxyLinkName, inside.args[0]);			
+			// この膜にoutside_proxyを追加
+			ProxyAtom outside = new ProxyAtom(ProxyAtom.OUTSIDE_PROXY, mem);
+			outside.args[0] = new LinkOccurrence(proxyLinkName, outside, 0); // 内側
+			outside.args[1] = new LinkOccurrence(freeLink.name, outside, 1); // 外側
+			outside.args[0].buddy = inside.args[0];
+			inside.args[0].buddy = outside.args[0];
+			mem.atoms.add(outside);
+		}
+		submem.freeLinks = newFreeLinks;
 		mem.mems.add(submem);
 	}
 	
@@ -309,31 +245,10 @@ public class LMNParser {
 			}
 			// その他
 			else {
-				throw new ParseException("Unknown Object to add Link:"+obj);
+				throw new ParseException("Unknown object in an atom argument: "+obj);
 			}
 		}
 		mem.atoms.add(atom);
-	}
-	
-	/**
-	 * ユニークな名前の新しいリンク構文を作成する
-	 * @return 作成したリンク構文
-	 */
-	private SrcLink createNewSrcLink() {
-		nLinkNumber++;
-		return new SrcLink(PREFIX_LINK_NAME + nLinkNumber);
-	}
-	
-	/**
-	 * アトムの引数にリンクをセットする
-	 * @param link セットしたいリンク
-	 * @param atom セット先のアトム
-	 * @param pos セット先のアトムでの場所
-	 * @throws ParseException セット先の場所がアトムに存在しない場合
-	 */
-	private void setLinkToAtomArg(SrcLink link, Atom atom, int pos) throws ParseException {
-		if (pos >= atom.args.length) throw new ParseException("Out of Atom args length:"+pos);
-		atom.args[pos] = new LinkOccurrence(link.getName(), atom, pos);
 	}
 
 	/**
@@ -344,25 +259,48 @@ public class LMNParser {
 	 */
 	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
 		RuleStructure rule = new RuleStructure(mem);
+		HashMap ruleLinks = new HashMap();
+
 		// TODO 簡略記法の展開 sRuleの中身を置き換え
 		
 		// ヘッド
 		addProcessToMem(sRule.getHead(), rule.leftMem);
-		Hashtable lhsfreelinks = createProxy(rule.leftMem);
+		HashMap lhsFreeLinks = coupleLinks(rule.leftMem);
 		
 		// ガード
 		addProcessToMem(sRule.getGuard(), rule.guardMem);
-		createProxy(rule.guardMem);
 
 		// ボディ
 		addProcessToMem(sRule.getBody(), rule.rightMem);
-		Hashtable rhsfreelinks = createProxy(rule.rightMem);
+		HashMap rhsFreeLinks = coupleLinks(rule.rightMem);
 		
 		// 右辺と左辺の自由リンクを接続する
-		coupleInheritedLinks(lhsfreelinks, rhsfreelinks);	
+		coupleInheritedLinks(ruleLinks, lhsFreeLinks, rhsFreeLinks);
 		
+		//
 		mem.rules.add(rule);
 	}
+	
+	/** 左辺と右辺の自由リンクをつなぐ */
+	static void coupleInheritedLinks(HashMap links, HashMap lhsfreelinks, HashMap rhsfreelinks) throws ParseException {
+		HashMap linkNameTable = new HashMap();
+		Iterator it = lhsfreelinks.keySet().iterator();
+		while (it.hasNext()) {
+			String linkname = (String)it.next();
+			if (lhsfreelinks.get(linkname) == CLOSED_LINK) continue;
+			LinkOccurrence lhsocc = (LinkOccurrence)lhsfreelinks.get(linkname);
+			addLinkOccurrence(links, lhsocc);
+		}
+		it = rhsfreelinks.keySet().iterator();
+		while (it.hasNext()) {
+			String linkname = (String)it.next();
+			if (rhsfreelinks.get(linkname) == CLOSED_LINK) continue;
+			LinkOccurrence rhsocc = (LinkOccurrence)rhsfreelinks.get(linkname);
+			addLinkOccurrence(links, rhsocc);
+		}
+		// TODO 片方にしか出現しない自由リンクをエラー報告とする
+	}
+	
 
 	/**
 	 * プロセス文脈構文を膜に追加
@@ -394,5 +332,28 @@ public class LMNParser {
 		LinkUnify unify = new LinkUnify(mem);
 		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(0), unify, 0);
 		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(1), unify, 1);
+	}
+	
+	////////////////////////////////////////////////////////////////
+	
+	/**
+	 * ユニークな名前の新しいリンク構文を作成する
+	 * @return 作成したリンク構文
+	 */
+	private SrcLink createNewSrcLink() {
+		nLinkNumber++;
+		return new SrcLink(PREFIX_LINK_NAME + nLinkNumber);
+	}
+	
+	/**
+	 * アトムの引数にリンクをセットする
+	 * @param link セットしたいリンク
+	 * @param atom セット先のアトム
+	 * @param pos セット先のアトムでの場所
+	 * @throws ParseException セット先の場所がアトムに存在しない場合
+	 */
+	private void setLinkToAtomArg(SrcLink link, Atom atom, int pos) throws ParseException {
+		if (pos >= atom.args.length) throw new ParseException("Out of Atom args length:"+pos);
+		atom.args[pos] = new LinkOccurrence(link.getName(), atom, pos);
 	}
 }
