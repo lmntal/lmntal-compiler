@@ -48,15 +48,16 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 	 * 具体的には、この物理マシンのterminatedフラグをONにし、
 	 * 各タスクのルールスレッドが終わるまで待つ。*/
 	synchronized public void terminate() {
+		boolean DEBUG = false;
 		terminated = true;
 		Iterator it = tasks.iterator();
 		while (it.hasNext()) {
 			Task task = (Task)it.next();
 			task.signal();
 			try {
-				if(true)System.out.println("LocalLMNtalRuntime.terminate(): now going to wait for thread " + task); //todo Env
+				if(DEBUG)System.out.println("LocalLMNtalRuntime.terminate(): now going to wait for thread " + task); //todo Env
 				task.thread.join();
-				if(true)System.out.println("LocalLMNtalRuntime.terminate(): " + task + " has finished!"); //todo Env
+				if(DEBUG)System.out.println("LocalLMNtalRuntime.terminate(): " + task + " has finished!"); //todo Env
 			} catch (InterruptedException e) {}
 		}
 	}
