@@ -1,7 +1,7 @@
 package runtime;
 
-import java.net.Socket;
-import java.net.SocketException;
+//import java.net.Socket;
+//import java.net.SocketException;
 
 /*
  * 分散処理のテスト用
@@ -61,7 +61,7 @@ class TestRemote{
 		try {
 			System.out.println(s.getSoTimeout());
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
+			// todo Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.exit(0);
