@@ -62,11 +62,11 @@ public class IDConverter {
 	
 	////////////////////////////////////////////////////////////////
 
-	/** 指定されたローカル膜を表に登録する */
+	/** 指定された膜を表に登録する */
 	public void registerNewMembrane(String globalMemID, AbstractMembrane mem) {
 		newMemTable.put(globalMemID, mem);
 	}
-	/** グローバル膜IDまたはNEW_ -> 膜オブジェクト
+	/** グローバル膜IDまたはNEW_に対応する膜を探す
 	 * @return Membrane（見つからなかった場合はnull）*/
 	public AbstractMembrane lookupMembrane(String memid) {
 		Object obj = newMemTable.get(memid);
@@ -74,18 +74,17 @@ public class IDConverter {
 		return (AbstractMembrane)memTable.get(memid);
 	}
 
-	/** 指定されたローカル膜を表に登録する */
+	/** 指定されたアトムを表に登録する */
 	public void registerNewAtom(String atomID, Atom atom) {
 		newAtomTable.put(atomID, atom);
 	}
 	/** アトムIDに対応するアトムを探す
 	 * @param mem 所属膜
 	 * @return Atom（見つからなかった場合はnull）*/
-	public Atom lookupAtom(AbstractMembrane mem, String atomid) {
+	public Atom lookupAtom(Membrane mem, String atomid) {
 		Object obj = newAtomTable.get(atomid);
 		if (obj instanceof Atom) return (Atom)obj;
-//		return (Atom)mem.getAtomID(atomid);
-		return null;
+		return (Atom)mem.lookupAtom(atomid);
 	}
 	
 	////////////////////////////////////////////////////////////////

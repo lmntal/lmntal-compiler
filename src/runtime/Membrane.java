@@ -2,6 +2,7 @@ package runtime;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.HashMap;
 import util.Stack;
 
 /**
@@ -12,6 +13,8 @@ import util.Stack;
 public final class Membrane extends AbstractMembrane {
 	/** 実行アトムスタック */
 	private Stack ready = new Stack();
+	/** アトムID (String) -> Atom */
+	private HashMap atomTable = new HashMap();
 	
 	/** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
 	private Membrane(AbstractTask task, AbstractMembrane parent) {
@@ -353,6 +356,12 @@ public final class Membrane extends AbstractMembrane {
 		// アトム      -> atomid:functortext( リンク先atomid:pos, ... )
 		// 子膜        -> globalMemID:{ inside_proxyのatomid, ... }
 		// ルールセット -> globalRulesetID
+		
+		// このタイミングで、atomTableを更新する。子膜の自由リンクについては要検討
+	}
+	/** アトムIDに対応するアトムを取得する */
+	public Atom lookupAtom(String atomid) {
+		return (Atom)atomTable.get(atomid);
 	}
 }
 // TODO local-remote-local 問題を解決する
