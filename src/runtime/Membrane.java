@@ -251,9 +251,12 @@ public final class Membrane extends AbstractMembrane {
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックを取得し、実行膜スタックから除去する。
 	 * <p>ルールスレッド以外のスレッドが最初のロックとしてこの膜のロックを取得するときに使用する。
 	 * <p>成功したらリモートをnullに設定する。
-	 * @return つねにtrue */
+	 * @return この膜がルート膜かルート膜の子孫ならば（要するにremoveされていなければ）つねにtrue */
 	public boolean asyncLock() {
-		if (!isRoot()) parent.asyncLock();
+		if (!isRoot()) {
+			if (parent == null) return false;
+			if (!parent.asyncLock()) return false;
+		}
 		blockingLock();
 		remote = null;
 		if (isRoot()) {

@@ -230,7 +230,10 @@ class Task extends AbstractTask implements Runnable {
 			if (memStack.isEmpty()) idle = true;
 		}
 		//System.out.println(mem.getAtomCount() + ": exec3");
-		//
+		
+		// この膜のロック解放前に親膜を活性化しても、親膜のルールがこの膜に適用できずに
+		// 親膜が再び安定状態に入ることがあるため、この膜のロック解放後に親膜を活性化する。
+		// そのとき、親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
 		if (memToActivate != null) {
 			new Thread() {
 				AbstractMembrane mem;
@@ -240,7 +243,7 @@ class Task extends AbstractTask implements Runnable {
 				}
 				public void activate(AbstractMembrane mem) {
 					this.mem = mem;
-					run();
+					start();
 				}
 			}.activate(memToActivate);
 		}
