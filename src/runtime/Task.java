@@ -69,8 +69,9 @@ class Task extends AbstractTask implements Runnable {
 	Stack bufferedStack = new Stack();
 	boolean idle = false;
 	static final int maxLoop = 100;
+	
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
-	 * @param runtime 作成したタスクを実行するランタイム */
+	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）*/
 	Task(AbstractLMNtalRuntime runtime) {
 		super(runtime);
 		root = new Membrane(this);
@@ -78,7 +79,7 @@ class Task extends AbstractTask implements Runnable {
 	}
 
 	/** 指定した親膜を持つ新しいルート膜および対応するタスク（スレーブタスク）を作成する
-	 * @param runtime 作成したタスクを実行するランタイム
+	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）
 	 * @param parent 親膜 */
 	Task(AbstractLMNtalRuntime runtime, AbstractMembrane parent) {
 		super(runtime);
@@ -86,7 +87,7 @@ class Task extends AbstractTask implements Runnable {
 		root.lock();
 		root.activate(); 		// 仮の実行膜スタックに積む
 		parent.addMem(root);	// タスクは膜の作成時に設定した
-		thread.run();		// 追加
+		thread.run();
 	}
 	/** 親膜の無い膜を作成し、このタスクが管理する膜にする。 */
 	Membrane createFreeMembrane() {
@@ -154,8 +155,8 @@ class Task extends AbstractTask implements Runnable {
 				}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行アトムスタックが空の時
 				flag = false;
-				// アトム主導が無い現在、足し算を先に行うために、順番を変えてみた。
-				// 本来はアトム主導により、+ がdequeueされた直後に、再帰呼び出しがdequeueされる。
+				// アトム主導テストしないときに足し算を先に行うために、順番を変えてみた。
+				// アトム主導テストするときは、+ を先に実行した後、再帰呼び出しが実行される。
 				// 理想では、組み込みの + はインライン展開されるべきである。
 				{
 					int debugvalue = Env.debug; // todo spy機能を実装する
@@ -266,13 +267,3 @@ class Task extends AbstractTask implements Runnable {
 	
 
 }
-
-//class MasterTask extends Task {
-//	/** 親膜を持たない新しいルート膜および対応するタスクを作成する
-//	 * @param runtime 作成したタスクを実行する物理マシン */
-//	MasterTask(MasterLMNtalRuntime runtime) {
-//		super(runtime);
-//		root = new Membrane(this);
-//		memStack.push(root);
-//	}
-//}

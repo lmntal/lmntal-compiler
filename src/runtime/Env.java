@@ -216,7 +216,7 @@ public final class Env {
 		gui.lmnPanel.getGraphLayout().setRootMem(root);
 	}
 	
-	// GUI からみる
+	/** LocalLMNtalRuntimeのインスタンス */
 	public static LocalLMNtalRuntime theRuntime;
 	
 	public static void guiTrace() {

@@ -2,8 +2,8 @@ package test.distribute;
 
 import daemon.LMNtalDaemon;
 
-//TODO 終了するようにする
-//TODO negotiationを設計・実装
+//todo 終了するようにする
+//todo negotiationを設計・実装
 
 public class LMNtalDaemonTest {
 	public static void main(String args[]) {

@@ -66,6 +66,7 @@ class Cache{
 	 
 	/*
 	 * fucntor id -> functor object
+	 * <p><b>注意</b>　通常のファンクタはID管理しない。
 	 */
 	Functor getFunctor(String functorid){
 	   Functor f = (Functor)functorTable.get(functorid);

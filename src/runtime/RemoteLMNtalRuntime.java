@@ -1,5 +1,6 @@
 package runtime;
 
+//import daemon.Cache;
 import daemon.LMNtalDaemon;
 import daemon.LMNtalNode;
 
@@ -9,36 +10,35 @@ import daemon.LMNtalNode;
  * 手元にあって、リモート側（ネットワークの向こう側）の代理人として存在する。
  * やってる事は命令をリモートへ転送する役目。
  * 
- * @author n-kato
+ * @author n-kato, nakajima
  * 
  */
 final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	boolean result;
 
-	/*
+	/**
 	 * リモート側のホスト名。Fully Qualified Domain Nameである必要がある。
 	 */
 	protected String hostname;
 	
-	/*
+	/**
 	 * hostnameに対応するLMNtalNode。実際はLMNtalDaemon.getLMNtalNodeFromFQDN()でとってきてるだけ。
 	 */
 	protected LMNtalNode lmnNode;
 
-	/*
+	/**
 	 * コンストラクタ
 	 * 
 	 * @param hostname つなげたいホストのホスト名。Fully Qualified Domain Nameである必要がある。
 	 */
 	protected RemoteLMNtalRuntime(String hostname) {
 		//hostnameの中にはfqdnが入っている（とみなす）
-		this.runtimeid = LMNtalDaemon.makeID();  //TODO 仮実装。
+		this.runtimeid = LMNtalDaemon.makeID();  //TODO 接続先からIDを受け取って代入する
 		this.hostname = hostname;
 	}
 
 	public AbstractTask newTask() {
-		// todo 下と同じ
-		return (AbstractTask) null;
+		throw new RuntimeException("Attempted to create a global root in a remote host");
 	}
 
 	/*
@@ -51,6 +51,9 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	public AbstractTask newTask(AbstractMembrane parent) {
 		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
 
+		//send("NEWTASK " + daemon.IDConverter.getGlobalMembraneID(parent));
+		//join
+		// new RemoteTask
 		return (AbstractTask) null;
 	}
 

@@ -6,18 +6,19 @@ import java.util.Iterator;
 import daemon.LMNtalDaemonMessageProcessor;
 
 
-/*
- * 「計算ノード管理クラス」
+/**
+ * 計算ノード管理クラス
+ * @author n-kato, nakajima
  */
 
-final class LMNtalRuntimeManager{
+public final class LMNtalRuntimeManager {
 
 	/** 計算ノード表（String -> AbstractLMNtalRuntime）*/
 	static HashMap runtimeids = new HashMap();
 	/** 計算ノード表を利用開始する */
 	public static void init() {}
 	
-	/** 指定された物理マシンに接続し、計算ノード表に登録する
+	/** 指定されたホストに接続し、計算ノード表に登録する
 	 *  すでに登録されている場合は生存を確認する。生存を確認できない場合はnullを返す。*/
 	public static AbstractLMNtalRuntime connectRuntime(String node) {
 		node = node.intern();
@@ -45,7 +46,7 @@ final class LMNtalRuntimeManager{
 		}
 	}
 
-	/** 登録されている全ての物理マシンを終了し、計算ノード表の登録を削除する
+	/** 登録されている全てのLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
 	 * TODO Env.theRuntime は terminate しなくてよいのかどうかを明らかにする */
 	public static void terminateAll() {
 		Iterator it = runtimeids.keySet().iterator();

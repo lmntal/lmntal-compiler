@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.net.InetAddress;
 
+/** @author nakajima */
 public class LMNtalNode {
 	InetAddress ip;
 	BufferedReader in;

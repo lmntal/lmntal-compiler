@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import runtime.LocalLMNtalRuntime;
+//import runtime.LMNtalRuntimeManager;
 
 class SlaveLMNtalRuntimeLauncher {
 	//TODO 名称変更。ここはLocalLMNtalRuntimeとLMNtalDaemonの間にいて、ローカルホスト内TCP通信の面倒を接続元がソケットを閉じるまで見続ける。
@@ -52,16 +53,10 @@ class SlaveLMNtalRuntimeLauncher {
 				
 				//LocalLMNtalRuntimeを起動
 				runtime = new LocalLMNtalRuntime();
-
-				//TODO この先何をすればいいのか
-				//タスクを作る
-				
-				//膜を作る
-				
-				//ルールセットを作る
-
+		
 				//メッセージ待ちに入る。
 				//processMessage(in, out);
+				//LMNtalRuntimeManager.terminateAll();
 			} else {
 				//connectを発行した元に対してres msgid failを返す
 				command = "res " + callerMsgid + " fail\n";
@@ -75,7 +70,7 @@ class SlaveLMNtalRuntimeLauncher {
 		}
 	}
 	
-	void processMessage(BufferedReader in, BufferedWriter out){
+	static void processMessage(BufferedReader in, BufferedWriter out){
 		String input = "";
 		String inputParsed[] = new String[3];
 		

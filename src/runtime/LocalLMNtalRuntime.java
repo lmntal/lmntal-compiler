@@ -8,8 +8,9 @@ import java.util.List;
 
 /** このVMで実行するランタイム（旧：物理マシン、旧々：計算ノード）
  * このクラスのサブクラスのインスタンスは、1つの Java VM につき高々1つしか存在しない。
-*/
-public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runnable */{
+ * @author n-kato, nakajima
+ */
+public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 	List tasks = new ArrayList();
 //	protected Thread thread = new Thread(this);
 
@@ -23,11 +24,14 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 		Env.theRuntime = this;
 	}
 
-/*
- * タスク生成。
- * 
- * @param parent ルート膜
- */
+	public static LocalLMNtalRuntime getInstance() {
+		return Env.theRuntime;
+	}
+	
+	/**
+	 * タスク生成。
+	 * @param parent ルート膜
+	 */
 	AbstractTask newTask(AbstractMembrane parent) {
 		Task t = new Task(this,parent);
 		tasks.add(t);
@@ -36,6 +40,10 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 
 	/** （マスタタスクによって）このランタイムの終了が要求されたかどうか */
 	protected boolean terminated = false;
+	/** このランタイムの終了が要求されたかどうか */
+	public boolean isTerminated() {
+		return terminated;
+	}
 	/** このランタイムの終了を要求する。
 	 * 具体的には、この物理マシンのterminatedフラグをONにし、
 	 * 各タスクのルールスレッドに終わるように言う */
@@ -50,9 +58,18 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 		// スレーブランタイムならば、VMを終了する。
 		// if (!(this instanceof MasterLMNtalRuntime)) System.exit(0);
 	}
-	/** このランタイムの終了が要求されたかどうか */
-	public boolean isTerminated() {
-		return terminated;
+	
+	/** terminateフラグがONになるまで待つ。
+	 * <p>スレーブランタイムとして実行するときに使用する。*/
+	public void waitForTermination() {
+		while (!terminated) {
+			try {
+				synchronized(this) {
+					wait();
+				}
+			}
+			catch (InterruptedException e) {}
+		}
 	}
 	
 //	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
@@ -75,8 +92,9 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 //		} while(!allIdle);
 //	}
 
-	/*
-	 * global rulset id --> ルールセットオブジェクトな表に登録
+	/**
+	 * global ruleset id --> ルールセットオブジェクトな表に登録
+	 * @deprecated
 	 */
 	boolean registerRuleset(Ruleset rs){
 		String globalid = rs.getGlobalRulesetID();
@@ -89,8 +107,8 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 		return false;
 	}
 
-	/*
-	 * global rulset id --> rulset object
+	/**
+	 * global ruleset id --> rulset object
 	 */
 	Ruleset getRulset(String globalRulesetID){
 		Ruleset rs = (Ruleset)rulesetIDMap.get(globalRulesetID);

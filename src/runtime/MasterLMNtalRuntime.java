@@ -1,9 +1,10 @@
 package runtime;
 
-/** ランタイムグループおよびグローバルルート膜を生成し、管理するランタイムのクラス */
+/** ランタイムグループおよびグローバルルート膜を生成し、管理するランタイムのクラス。
+ * @author n-kato */
 
 public final class MasterLMNtalRuntime extends LocalLMNtalRuntime {
-	private Membrane globalRoot;	// masterTaskへの参照を持つ方が分かりやすいかもしれない
+	private Membrane globalRoot;
 
 	public MasterLMNtalRuntime(){
 		Task masterTask = new Task(this);

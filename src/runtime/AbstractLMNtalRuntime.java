@@ -1,7 +1,8 @@
 package runtime;
 
-/** 抽象ランタイム（旧：抽象物理マシン、旧々：抽象計算ノード）クラス。*/
-
+/** 抽象ランタイム（旧：抽象物理マシン、旧々：抽象計算ノード）クラス。
+ * @author n-kato
+ */
 abstract class AbstractLMNtalRuntime {
 	protected String runtimeid;
 	/** このランタイムに親膜を持たないロックされていないルート膜を作成し、仮でない実行膜スタックに積む。*/
