@@ -187,7 +187,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** 指定されたアトムの名前を変える */
 	public void alterAtomFunctor(Atom atom, Functor func) {
 		atoms.remove(atom);
-		atom.changeFunctor(func);
+		atom.setFunctor(func);
 		atoms.add(atom);
 	}
 
@@ -286,7 +286,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** atom1の第pos1引数と、リンクlink2のリンク先を接続する。
 	 * <p>link2は再利用されるため、実行後link2の参照を使用してはならない。
 	 */
-	public void inheritAtomArg(Atom atom1, int pos1, Link link2) {
+	public void inheritLink(Atom atom1, int pos1, Link link2) {
 		link2.getBuddy().set(atom1, pos1);
 		atom1.args[pos1] = link2;
 	}
@@ -511,7 +511,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <ol>
 	 * <li>名前をinside_proxyに変え
 	 * <li>自由リンクの反対側の出現がこの膜のstarアトムならば、
-	 *     後者の名前をoutside_proxyに変える。
+	 *     後者の名前をoutside_proxyに変える（最初のstarアトムに対応させる）。
 	 *     また、分散実行のために、このリンクを張りなおす。
 	 * <li>自由リンクの反対側の出現がこの膜（本膜）に残ったoutside_proxyアトムならば、何もしない。
 	 * <li>自由リンクの反対側の出現がこの膜以外にあるアトムならば、
@@ -528,8 +528,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			changeList.add(star);
 			// 自由リンクの反対側の出現がこの膜のアトムならば、後者の名前をoutside_proxyに変える。
 			// このときstarが消えるかもしれないので、starをキューで実装するときはバグに注意。
-			if (star.args[0].getAtom().getMem() == this) {
-				alterAtomFunctor(star.args[0].getAtom(), Functor.OUTSIDE_PROXY);
+			Atom oldstar = star.args[0].getAtom();
+			if (oldstar.getMem() == this) {
+				alterAtomFunctor(oldstar, Functor.OUTSIDE_PROXY);
+				newLink(oldstar, 0, star, 0);
 			} else {
 				Atom outside = newAtom(Functor.OUTSIDE_PROXY); // o
 				Atom newstar = newAtom(Functor.STAR); // m
