@@ -2,9 +2,7 @@
 ]],
 io:{
 	( io.print(String) :- [[/*inline*/
-		if(me.args[0].getAtom().args.length==1) {
-			System.out.println(me.nth(0));
-		}
+		System.out.println(me.nth(0));
 		]](String)
 	)
 }
