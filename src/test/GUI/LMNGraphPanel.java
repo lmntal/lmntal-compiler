@@ -26,6 +26,7 @@ public class LMNGraphPanel extends GraphPanel {
 				movingNode = getGraphLayout().getNearestNode(e.getPoint());
 			}
 			public void mouseReleased(MouseEvent e) {
+				if(movingNode==null) return;
 				movingNode.initMoveDelta();
 				movingNode = null;
 			}
