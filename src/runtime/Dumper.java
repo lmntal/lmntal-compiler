@@ -2,9 +2,9 @@ package runtime;
 
 import java.util.*;
 
-class Dumper {
+public class Dumper {
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
-	static String dump(AbstractMembrane mem) {
+	public static String dump(AbstractMembrane mem) {
 		StringBuffer buf = new StringBuffer();
 		List predAtoms = new ArrayList();
 		Set atoms = new HashSet(mem.getAtomCount());

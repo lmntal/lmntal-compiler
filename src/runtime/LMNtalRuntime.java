@@ -7,7 +7,7 @@ import java.util.List;
 import util.Stack;
 
 /** 抽象物理マシンクラス */
-abstract class AbstractLMNtalRuntime {
+abstract class AbstractMachine {
 	protected String runtimeid;
 	/** この物理マシンに（親膜を持たない）ルート膜を作成する。
 	 * <p>
@@ -19,12 +19,12 @@ abstract class AbstractLMNtalRuntime {
 /** 抽象タスククラス */
 abstract class AbstractTask {
 	/** 物理マシン */
-	protected AbstractLMNtalRuntime runtime;
+	protected AbstractMachine runtime;
 	/** ルート膜 */
 	protected AbstractMembrane root;
 	
 	/** 物理マシンの取得 */
-	AbstractLMNtalRuntime getRuntime() {
+	AbstractMachine getRuntime() {
 		return runtime;
 	}
 	/** ルート膜の取得 */
@@ -52,6 +52,7 @@ final class Task extends AbstractTask {
 	boolean isIdle(){
 		return idle;
 	}
+	
 	void exec() {
 		if(memStack.isEmpty()){ // 空ならidleにする。
 			idle = true;
@@ -104,26 +105,57 @@ final class Task extends AbstractTask {
 	}
 }
 
+public final class LMNtalRuntime extends Machine{
+	AbstractMembrane grobalRoot;
+	
+	public MasterMachine(){
+		AbstractTask t = newTask();
+		grobalRoot = t.getRoot();
+	}
+
+	/**
+	 * １回だけ適用するルールを適用するメソッド。
+	 * 初期化ルール、およびREPLが１行入力毎に生成するルールを
+	 * grobalRoot膜に適用する。
+	 */
+	public void applyRulesetOnce(Ruleset r){
+		r.react(grobalRoot);
+	}
+	
+	public AbstractMembrane getRoot(){
+		return grobalRoot;
+	}
+}
+
 /** 物理マシン */
-final class LMNtalRuntime extends AbstractLMNtalRuntime {
+class Machine extends AbstractMachine {
 	List tasks = new ArrayList();
-	AbstractMembrane rootMem;
 	
 	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
 	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
 	 *  タスクが木構造になっていないと出来ない。優先度はしばらく未実装。
 	 */
-	LMNtalRuntime(Ruleset init){
-		Task root = (Task)newTask();
-		rootMem = root.getRoot();
-		init.react((Membrane)rootMem);
+
+	/**
+	 * 	このマシンにタスクを作る。これを呼んだ後、ルート膜のmembrane.setParent()が呼ばれる？
+	 * これをやめて、Taskのコンストラクタに親膜を渡すようにしたほうがいい？
+	 */
+	AbstractTask newTask() {
+		Task t = new Task();
+		tasks.add(t);
+		return t;
 	}
-	
+
+/* TODO　消去。Master以外では、タスクを最初に作る必要はない。
+	public Machine(){
+		newTask();
+	}
+*/	
 	AbstractMembrane getRootMem(){
 		return rootMem;
 	}
 	
-	void exec() {
+	public void exec() {
 		boolean allIdle;
 		Iterator it;
 		Task m;
@@ -140,10 +172,6 @@ final class LMNtalRuntime extends AbstractLMNtalRuntime {
 			}
 		}while(!allIdle);
 	}
-	
-	AbstractTask newTask() {
-		Task m = new Task();
-		tasks.add(m);
-		return m;
-	}
 }
+
+

@@ -16,12 +16,13 @@ public class DumperTest {
 	 */
 	public static void main(String[] args) {
 		System.out.println("before init:");
-				Ruleset rule = new SampleInitRuleset();
-		/*		LMNtalRuntime rt = new LMNtalRuntime(rule);
-			System.out.println("before exec:");
-		Dumper.dump(rt.getRootMem());
-		rt.exec();
+		Ruleset rule = new SampleInitRuleset();
+		LMNtalRuntime mm = new LMNtalRuntime();
+		mm.applyRulesetOnce(rule);
+		System.out.println("before exec:");
+		Dumper.dump(mm.getRoot());
+		mm.exec();
 		System.out.println("after exec:");
-		Dumper.dump(rt.getRootMem());
-*/	}
+		Dumper.dump(mm.getRoot());
+	}
 }

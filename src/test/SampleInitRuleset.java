@@ -4,7 +4,7 @@ import runtime.*;
 import java.util.Iterator;
 import util.Util;
 
-final class SampleInitRuleset extends Ruleset {
+public final class SampleInitRuleset extends Ruleset {
 	public String toString() {
 		return "Ruleset Sample";
 	}
