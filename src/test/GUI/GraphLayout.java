@@ -189,8 +189,10 @@ public class GraphLayout implements Runnable {
 				if(me.hashCode() < edge.to.hashCode()){
 					double l = edge.getLen();
 					double f = (l - edge.getStdLen());// / (edge.getStdLen() * 1);
-					// TODO 0.5のところを、1/arityの最大値 にすると振動しない。
-					//                      1/(2 * arityの最大値)だとなおよい。
+					// TODO 0.5のところを、1/arity[の最大値] にすると振動しない。
+					//                      1/(2 * arity[の最大値])だとなおよい。
+					// [の最大値]を消してもよい。
+					// その場合、アリティがアトムの質量のようなものとして計算される
 					double ddx = 0.5 * f * edge.getVx()/l;
 					double ddy = 0.5 * f * edge.getVy()/l;
 					
@@ -199,7 +201,7 @@ public class GraphLayout implements Runnable {
 				}
 				
 				if(me.getEdgeCount()<=1) continue;
-/*				
+				
 				// cur.to にかかる力を計算する
 				{
 					Edge cur = ie[j];
@@ -236,10 +238,10 @@ public class GraphLayout implements Runnable {
 					me.setMoveDelta(-dx,-dy);
 					you.setMoveDelta(dx,dy);
 				}
-*/
+
 			}
 		}
-/*		
+		
 		for(Iterator i1 = m.atomIterator();i1.hasNext();){
 			double teisuu = 1;
 			double dx = 0;
@@ -261,7 +263,7 @@ public class GraphLayout implements Runnable {
 			}
 				
 		}
-*/
+
 		// 実際に移動する
 		for (Iterator i=m.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
