@@ -33,7 +33,7 @@ public class Compactor {
 		Instruction spec = (Instruction)insts.get(0);
 		int formals = spec.getIntArg1();
 		int varcount = spec.getIntArg2();
-		//varcount = expandBody(insts, varcount);	// 展開（RISC化）
+		varcount = expandBody(insts, varcount);	// 展開（RISC化）
 		boolean changed = true;
 		while (changed) {
 			changed = false;
@@ -163,7 +163,7 @@ public class Compactor {
 			if (inst0.getKind() == Instruction.GETLINK
 			 && inst1.getKind() == Instruction.GETLINK
 			 && inst2.getKind() == Instruction.UNIFYLINKS
-			 && inst0.getArg1() == inst2.getArg1() && inst1.getArg2() == inst2.getArg2()
+			 && inst0.getIntArg1() == inst2.getIntArg1() && inst1.getIntArg1() == inst2.getIntArg2()
 			 && Instruction.getVarUseCountFrom(insts, (Integer)inst0.getArg1(), i + 3) == 0
 			 && Instruction.getVarUseCountFrom(insts, (Integer)inst1.getArg1(), i + 3) == 0) {
 				insts.remove(i); insts.remove(i); insts.remove(i);
@@ -181,7 +181,7 @@ public class Compactor {
 			if (inst0.getKind() == Instruction.ALLOCLINK
 			 && inst1.getKind() == Instruction.ALLOCLINK
 			 && inst2.getKind() == Instruction.UNIFYLINKS
-			 && inst0.getArg1() == inst2.getArg1() && inst1.getArg2() == inst2.getArg2()
+			 && inst0.getIntArg1() == inst2.getIntArg1() && inst1.getIntArg1() == inst2.getIntArg2()
 			 && Instruction.getVarUseCountFrom(insts, (Integer)inst0.getArg1(), i + 3) == 0
 			 && Instruction.getVarUseCountFrom(insts, (Integer)inst1.getArg1(), i + 3) == 0) {
 				insts.remove(i); insts.remove(i); insts.remove(i);
@@ -199,7 +199,7 @@ public class Compactor {
 			if (inst0.getKind() == Instruction.ALLOCLINK
 			 && inst1.getKind() == Instruction.GETLINK
 			 && inst2.getKind() == Instruction.UNIFYLINKS
-			 && inst0.getArg1() == inst2.getArg1() && inst1.getArg2() == inst2.getArg2()
+			 && inst0.getIntArg1() == inst2.getIntArg1() && inst1.getIntArg1() == inst2.getIntArg2()
 			 && Instruction.getVarUseCountFrom(insts, (Integer)inst0.getArg1(), i + 3) == 0
 			 && Instruction.getVarUseCountFrom(insts, (Integer)inst1.getArg1(), i + 3) == 0) {
 				insts.remove(i); insts.remove(i); insts.remove(i);
@@ -217,7 +217,7 @@ public class Compactor {
 			if (inst0.getKind() == Instruction.GETFUNC
 			 && inst1.getKind() == Instruction.GETFUNC
 			 && inst2.getKind() == Instruction.EQFUNC
-			 && inst0.getArg1() == inst2.getArg1() && inst1.getArg2() == inst2.getArg2()
+			 && inst0.getIntArg1() == inst2.getIntArg1() && inst1.getIntArg1() == inst2.getIntArg2()
 			 && Instruction.getVarUseCountFrom(insts, (Integer)inst0.getArg1(), i + 3) == 0
 			 && Instruction.getVarUseCountFrom(insts, (Integer)inst1.getArg1(), i + 3) == 0) {
 				insts.remove(i); insts.remove(i); insts.remove(i);
