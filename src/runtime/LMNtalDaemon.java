@@ -35,3 +35,10 @@ public class LMNtalDaemon{
 	 * 
 	 */
 }
+/*【n-katoからのコメント】
+ * - REGIST は REGISTER が正しい。
+ * - REGISTREMOTE は、runtimegroupid（＝マスタランタイムの(runtime)id）を送る必要がある。
+ * - REGISTFINISHED は、マスタランタイムがある計算機ではなく、REGISTREMOTEを発行した計算機に送り返す。
+ *   したがって、runtimegroupid を引数に持つ必要がある。
+ * - TERMINATE runtimegroupid が必要。受信したら自分が知っている全てのランタイムに同じメッセージを送る。
+ */
