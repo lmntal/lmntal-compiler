@@ -72,10 +72,11 @@ public class GraphLayout implements Runnable {
 	}
 	
 	public void calc() {
-//		if(true) return;
+		allowRelax = true;
 		for(int i=0;i<100;i++) {
 			relax();
 		}
+		allowRelax = false;
 	}
 	
 	public void run() {
@@ -91,7 +92,21 @@ public class GraphLayout implements Runnable {
 		}
 	}
 	
+	public Rectangle getAtomsBound() {
+		Rectangle r = new Rectangle();
+		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
+			Node n = (Node)i.next();
+			Point p = n.getPosition();
+			if(!r.contains(p)) {
+				r.add(p);
+			}
+		}
+		return r;
+	}
+	
+	public boolean allowRelax;
 	protected synchronized void relax() {
+		if(!allowRelax) return;
 		if(rootMem==null) return;
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();

@@ -48,7 +48,8 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 		id = lastId++;
 		
 		if (Env.gui != null) {
-			pos = new Point((int)(Math.random()*Env.gui.getSize().width), (int)(Math.random()*Env.gui.getSize().height));
+			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
+			pos = new Point((int)(Math.random()*r.width + r.x), (int)(Math.random()*r.height + r.y));
 		}
 	}
 

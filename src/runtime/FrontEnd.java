@@ -226,6 +226,9 @@ public class FrontEnd {
 				Env.d( "Execution Result:" );
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}
+			if (Env.gui != null) {
+				while(true) Env.gui.onTrace();
+			}
 		} catch (Exception e) {
 			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
