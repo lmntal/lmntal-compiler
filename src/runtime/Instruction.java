@@ -105,9 +105,10 @@ public class Instruction {
 //	public static final int DEREFLINK = err;
 //	// LOCALDEREFLINKは不要
 
-	// 膜に関係する出力する基本ガード命令 (6--9)
+	// 膜に関係する出力する基本ガード命令 (5--9)
 	// [local]lockmem    [-dstmem, freelinkatom]
 	// [local]anymem     [-dstmem, srcmem] 
+	// [local]lock       [srcmem]
 	//  ----- getmem     [-dstmem, srcatom]
 	//  ----- getparent  [-dstmem, srcmem]
 
@@ -123,7 +124,7 @@ public class Instruction {
      * <p>膜の外からのリンクで初めて特定された膜への参照を取得するために使用される。
      * @see testmem
      * @see getmem */
-    public static final int LOCKMEM = 6;
+    public static final int LOCKMEM = 5;
     
     /** locallockmem [-dstmem, freelinkatom]
      * <br>ロック取得する最適化用ガード命令<br>
@@ -137,12 +138,26 @@ public class Instruction {
      * そして、ロック取得に成功した各子膜への参照を$dstmemに代入する。
      * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
      * <p><b>注意</b>　ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。*/
-	public static final int ANYMEM = 7;
+	public static final int ANYMEM = 6;
 	
 	/** localanymem [-dstmem, srcmem]
      * <br>反復するロック取得する最適化用ガード命令<br>
 	 * anymemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定されない。*/
 	public static final int LOCALANYMEM = LOCAL + ANYMEM;
+
+	/** lock [srcmem]
+	 * <br>ロック取得するガード命令<br>
+	 * 膜$srcmemに対して、ノンブロッキングでのロックを取得を試みる。
+	 * 取得したロックは、後続の命令列が失敗したときに解放される。
+	 * <p>アトム主導テストで、主導するアトムによって特定された膜のロックを取得するために使用される。
+	 * @see lockmem
+	 * @see getmem */
+	public static final int LOCK = 7;
+	
+	/** locallock [srcmem]
+	 * <br>ロック取得する最適化用ガード命令<br>
+	 * lockと同じ。ただし$srcmemはこの計算ノードに存在する。*/
+	public static final int LOCALLOCK = LOCAL + LOCK;
 
 	/** getmem [-dstmem, srcatom]
 	 * <br>ガード命令<br>
@@ -168,7 +183,6 @@ public class Instruction {
 	//  ----- eqmem      [mem1, mem2]
 	//  ----- neqmem     [mem1, mem2]
 	//  ----- stable     [srcmem]
-	// [local]lock       [srcmem]
 
     /** testmem [dstmem, srcatom]
      * <br>ガード命令<br>
@@ -222,20 +236,6 @@ public class Instruction {
 	 * 膜$srcmemとその子孫の全ての膜の実行が停止していることを確認する。*/
 	public static final int STABLE = 17;
 	// LOCALSTABLEは不要
-
-	/** lock [srcmem]
-	 * <br>ロック取得するガード命令<br>
-	 * 膜$srcmemに対して、ノンブロッキングでのロックを取得を試みる。
-	 * 取得したロックは、後続の命令列が失敗したときに解放される。
-	 * <p>アトム主導テストで、主導するアトムによって特定された膜のロックを取得するために使用される。
-	 * @see lockmem
-	 * @see getmem */
-	public static final int LOCK = 18;
-	
-	/** locallock [srcmem]
-	 * <br>ロック取得する最適化用ガード命令<br>
-	 * lockと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-	public static final int LOCALLOCK = LOCAL + LOCK;
     
 	// アトムに関係する出力しない基本ガード命令 (20-24)
 	//  -----  func    [srcatom, funcref]

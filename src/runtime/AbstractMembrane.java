@@ -115,7 +115,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		stable = true;
 	}
 	/** この膜にルールがあればtrue */
-	public boolean hasRule() {
+	public boolean hasRules() {
 		return rulesets.size() > 0;
 	}
 	public boolean isRoot() {
