@@ -73,17 +73,20 @@ public class Optimizer {
 	private static void reuseMem(List list) {
 		HashMap reuseMap = new HashMap();
 		HashSet reuseMems = new HashSet(); // 再利用される膜のIDの集合
+		HashMap parent = new HashMap();
 		
 		//再利用する膜の組み合わせを決定する
+		//TODO プロセス文脈を持たない膜の再利用
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
 			switch (inst.getKind()) {
-//TODO プロセス文脈を持たない膜の再利用
-//				case Instruction.REMOVEMEM:
-//					break;
-//				case Instruction.NEWMEM:
-//					break;
+				case Instruction.REMOVEMEM:
+					parent.put(inst.getArg1(), inst.getArg2());
+					break;
+				case Instruction.NEWMEM:
+					parent.put(inst.getArg1(), inst.getArg2());
+					break;
 				case Instruction.MOVECELLS:
 					//すでに再利用で生成する事が決まっている膜でなければ、再利用で生成する
 					if (!reuseMap.containsKey(inst.getArg1())) {
@@ -95,17 +98,42 @@ public class Optimizer {
 		}
 		
 		//命令列を書き換える
-		//TODO insertproxies命令の順番・回数を適切に変更する
+		//その際、冗長なremovemem/addmem命令を除去する
+		HashSet set = new HashSet(); //removemem/addmem命令の不要な膜再利用に関わる膜
+		it = reuseMap.keySet().iterator();
+		while (it.hasNext()) {
+			Integer i1 = (Integer)it.next();
+			Integer i2 = (Integer)reuseMap.get(i1);
+			if (parent.get(i1).equals(parent.get(i2))) { //親が同じだったら
+				set.add(i1);
+				set.add(i2);
+			}
+		}
+		
+		//TODO removeproxies/insertproxies命令を適切に変更する
 		ListIterator lit = list.listIterator();
 		while (lit.hasNext()) {
 			Instruction inst = (Instruction)lit.next();
 			switch (inst.getKind()) {
-				case Instruction.NEWMEM:
-					if (reuseMap.containsKey(inst.getArg1())) {
-						//addmem命令に変更
+				case Instruction.REMOVEMEM:
+					if (set.contains(inst.getArg1())) {
 						lit.remove();
-						int m = ((Integer)reuseMap.get(inst.getArg1())).intValue();
-						lit.add(new Instruction(Instruction.ADDMEM, inst.getIntArg2(), m)); 
+					}
+					break;
+				case Instruction.REMOVEPROXIES:
+					if (set.contains(inst.getArg1())) {
+						lit.remove();
+					}
+					break;
+				case Instruction.NEWMEM:
+					Integer arg1 = (Integer)inst.getArg1();
+					if (reuseMap.containsKey(arg1)) {
+						lit.remove();
+						if (!set.contains(arg1)) {
+							//addmem命令に変更
+							int m = ((Integer)reuseMap.get(arg1)).intValue();
+							lit.add(new Instruction(Instruction.ADDMEM, inst.getIntArg2(), m)); 
+						}
 					}
 					break;
 				case Instruction.MOVECELLS:
@@ -126,8 +154,7 @@ public class Optimizer {
 		
 	/**	
 	 * アトム再利用を行うコードを生成する。<br>
-	 * 分散環境の事は考えていない。
-	 * また、引数に渡される命令列は、次の条件を満たしている必要がある。
+	 * 引数に渡される命令列は、次の条件を満たしている必要がある。
 	 * <ul>
 	 *  <li>1引数のremoveatom命令を使用していない
 	 *  <li>getlink命令を使用していない
