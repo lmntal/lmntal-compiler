@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.net.Socket;
 
+import runtime.Env;
+
 /** ソケット通信路を表すクラス。
  * <p>LMNtalDaemonMessageProcessor および LMNtalRuntimeMessageProcessor の親クラス。
  * @author nakajima, n-kato */
@@ -46,11 +48,14 @@ public class LMNtalNode {
 	//
 	
 	public void close() {
+		if(Env.debug > 0)System.out.println(socket);
 		try {
 			in.close();
 			out.close();
 			socket.close();
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	////////////////////////////////////////////////////////////////
