@@ -28,7 +28,7 @@ class InterpreterReactor {
 	 * @return 命令列の実行が成功したかどうかを返す
 	 */
 	boolean interpret(List insts, int pc) {
-		Env.p("interpret : " + insts);
+		//Env.p("interpret : " + insts);
 		Iterator it;
 		Functor func;
 		while (pc < insts.size()) {
@@ -207,12 +207,13 @@ class InterpreterReactor {
 					//====膜を操作する基本ボディ命令====ここから====
 				case Instruction.REMOVEMEM :
 				case Instruction.LOCALREMOVEMEM : //[srcmem]
+					mem = mems[inst.getIntArg1()];
+					mem.parent.removeMem(mem);
 					break;
-
 				case Instruction.NEWMEM :
 				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
+					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newMem();
 					break;
-
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
 					break;
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
