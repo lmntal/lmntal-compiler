@@ -19,6 +19,8 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 	
 	protected String hostname;
 	protected LMNtalNode lmnNode; 
+	
+	
 	protected RemoteLMNtalRuntime(String hostname) {
 		//runtimeidの中にはfqdnが入っている（とみなす）
 

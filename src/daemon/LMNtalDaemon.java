@@ -286,9 +286,16 @@ public class LMNtalDaemon implements Runnable {
 
 		if (isRegisted(fqdn)) {
 			//すでに接続済みの場合
+						
+			//TODO 実装：生きているかを確認する
 			
+			//Socketをとってくる
 			
-			//TODO ちゃんと生きているかを確認する
+			//connectを送る
+			
+			//OKがきたらtrueを返す
+			
+			//返事がなかったらfalseを返す
 			
 			
 			return true;
