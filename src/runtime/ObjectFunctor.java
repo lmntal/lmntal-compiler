@@ -11,7 +11,4 @@ public class ObjectFunctor extends Functor {
 		return o.getClass() == getClass() && data.equals(((ObjectFunctor)o).data);
 	}
 	public String getName() { return data.toString(); }
-	// 以下2つは、本来はStringFunctor固有の出力方法のはず。やはりFunctorFactoryを作ろう。
-	public String getQuotedFuncName() { return getStringLiteralText(data.toString()); }
-	public String getQuotedAtomName() { return getStringLiteralText(data.toString()); }
 }

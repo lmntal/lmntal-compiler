@@ -228,7 +228,7 @@ public class LMNParser {
 				}
 			}
 			else if (nametype == SrcName.STRING || nametype == SrcName.QUOTED) {
-				func = new runtime.ObjectFunctor(name);
+				func = new runtime.StringFunctor(name); // new runtime.ObjectFunctor(name);
 			}
 		}
 		

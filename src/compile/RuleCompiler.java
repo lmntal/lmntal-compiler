@@ -334,6 +334,15 @@ public class RuleCompiler {
 					bindToFunctor(def1, func);
 					typedcxtdatatypes.put(def1, new Integer(ISFLOAT));
 				}
+				else if (func instanceof runtime.StringFunctor) {
+					bindToFunctor(def1, func);
+					typedcxtdatatypes.put(def1, new Integer(Instruction.ISSTRING));
+				}
+//				else if (func instanceof runtime.ObjectFunctor
+//				&& ((runtime.ObjectFunctor)func).getObject() instanceof String) {
+//					bindToFunctor(def1, func);
+//					typedcxtdatatypes.put(def1, new Integer(Instruction.ISSTRING));
+//				}
 				else if (func.equals(FUNC_UNIFY)) {
 					if (!identifiedCxtdefs.contains(def2)) {
 						ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
