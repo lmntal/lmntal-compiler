@@ -753,7 +753,6 @@ public class Optimizer {
 		if (inst.getKind() != Instruction.FINDATOM || inst.getIntArg2() != 0) {
 			return;
 		}
-
 		Integer firstAtom = (Integer)inst.getArg1();
 
 		//¾ò·ï¤Ë¹çÃ×¤¹¤ë¤«¸¡ºº¡Ü¾ðÊó¼ý½¸
@@ -782,13 +781,15 @@ public class Optimizer {
 			varInBody.put(memlist.get(i), new Integer(i));
 		}
 		List atomlist = (List)react.getArg3();
+		Integer newFirstAtom = firstAtom;
 		for (int i = 0; i < atomlist.size(); i++) {
 			atomvars.add(new Integer(memlist.size() + i));
 			if (firstAtom.equals(atomlist.get(i))) {
-				firstAtom = new Integer(memlist.size() + i);
+				newFirstAtom = new Integer(memlist.size() + i);
 			}
 			varInBody.put(atomlist.get(i), new Integer(memlist.size() + i));
 		}
+		firstAtom = newFirstAtom;
 // added by <<n-kato
 		List otherlist = (List)react.getArg4();
 		for (int i = 0; i < otherlist.size(); i++) {
