@@ -58,7 +58,7 @@ public final class Membrane extends AbstractMembrane {
 		ready.push(atom);
 	}
 	/** 膜の活性化 */
-	void activate() {
+	public void activate() {
 		if (!isQueued()) {
 			return;
 		}
@@ -85,12 +85,12 @@ public final class Membrane extends AbstractMembrane {
 			}
 		}
 	}
-	AbstractMembrane newMem() {
+	public AbstractMembrane newMem() {
 		Membrane m = new Membrane(task, this);
 		mems.add(m);
 		return m;
 	}
-	AbstractMembrane newRoot(AbstractMachine runtime) {
+	public AbstractMembrane newRoot(AbstractMachine runtime) {
 		AbstractTask task = runtime.newTask();
 		task.getRoot().setParent(this);
 		return task.getRoot();

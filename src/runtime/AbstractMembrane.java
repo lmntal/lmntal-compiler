@@ -92,18 +92,18 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return task;
 	}
 	/** 親膜の取得 */
-	AbstractMembrane getParent() {
+	public AbstractMembrane getParent() {
 		return parent;
 	}
-	int getMemCount() {
+	public int getMemCount() {
 		return mems.size();
 	}
 	/** proxy以外のアトムの数を取得 */
-	int getAtomCount() {
+	public int getAtomCount() {
 		return atoms.getNormalAtomCount();
 	}
 	/** このセルの自由リンクの数を取得 */
-	int getFreeLinkCount() {
+	public int getFreeLinkCount() {
 		return atoms.getAtomCountOfFunctor(Functor.INSIDE_PROXY);
 	}
 	/** この膜とその子孫に適用できるルールがない場合にtrue */
@@ -115,29 +115,29 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		stable = true;
 	}
 	/** この膜にルールがあればtrue */
-	boolean hasRule() {
+	public boolean hasRule() {
 		return rulesets.size() > 0;
 	}
-	boolean isRoot() {
+	public boolean isRoot() {
 		return task.getRoot() == this;
 	}
 	
 	// 反復子
 	
 	/** この膜にあるアトムの反復子を取得する */
-	Iterator atomIterator() {
+	public Iterator atomIterator() {
 		return atoms.iterator();
 	}
 	/** この膜にある子膜の反復子を取得する */
-	Iterator memIterator() {
+	public Iterator memIterator() {
 		return mems.iterator();
 	}
 	/** 名前funcを持つアトムの反復子を取得する */
-	Iterator atomIteratorOfFunctor(Functor functor) {
+	public Iterator atomIteratorOfFunctor(Functor functor) {
 		return atoms.iteratorOfFunctor(functor);
 	}
 	/** この膜にあるルールセットの反復子を返す */
-	Iterator rulesetIterator() {
+	public Iterator rulesetIterator() {
 		return rulesets.iterator();
 	}
 
@@ -147,15 +147,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	// 操作1 - ルールの操作
 	
 	/** ルールを全て消去する */
-	void clearRules() {
+	public void clearRules() {
 		rulesets.clear();
 	}
 	/** srcMemにあるルールをこの膜にコピーする。 */
-	void inheritRules(AbstractMembrane srcMem) {
+	public void inheritRules(AbstractMembrane srcMem) {
 		rulesets.addAll(srcMem.rulesets);
 	}
 	/** ルールセットを追加 */
-	void loadRuleset(Ruleset srcRuleset) {
+	public void loadRuleset(Ruleset srcRuleset) {
 		rulesets.add(srcRuleset);
 	}
 
@@ -165,7 +165,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * TODO 実行スタックに自動的には詰まれないように仕様変更してもよいかもしれない。
 	 * ただしその場合は、newatom命令の次にenqueueatomボディ命令が必要になる。
 	 */
-	Atom newAtom(Functor functor) {
+	public Atom newAtom(Functor functor) {
 		Atom a = new Atom(this, functor);
 // #if (VERSION != 1.16_mizuno)
 		addAtom(a);
@@ -194,7 +194,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		atomCount++;
 	}
 
-	/** 指定された子膜に新しいinside_proxyアトムを追加する */
+	/** 指定された子膜に新しいinside_proxyアトムを追加する
+	 * @deprecated */
 	Atom newFreeLink(AbstractMembrane mem) {
 		return mem.newAtom(Functor.INSIDE_PROXY);
 	}
@@ -217,7 +218,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * TODO enqueueatom同様dequeueatomボディ命令を独立させる方法もある。
 	 * AbstractMembrane#dequeueAtomはその場合のみabstractメソッドにする意味がある。
 	 * 逆に、独立させないならdequeueAtomはマクロ（private final）でよい。 */
-	void removeAtom(Atom atom) {
+	public void removeAtom(Atom atom) {
 		atoms.remove(atom);
 		//if (atom.isQueued()) { // dequeueAtom内に移動しました→水野君は確認後コメントを消して下さい
 			dequeueAtom(atom);
@@ -248,20 +249,20 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	// 操作3 - 子膜の操作
 	
 	/** 新しい子膜を作成する */
-	abstract AbstractMembrane newMem();
+	public abstract AbstractMembrane newMem();
 	/** 指定された膜をこの膜の子膜として追加するための内部命令 */
 	protected final void addMem(AbstractMembrane mem) {
 		mems.add(mem);
 	}
 	/** 指定された膜をこの膜から除去する */
-	void removeMem(AbstractMembrane mem) {
+	public void removeMem(AbstractMembrane mem) {
 		mems.remove(mem);
 	}	
 	/** 指定された計算ノードで実行されるルート膜を作成し、この膜の子膜にする。
 	 * このメソッドは使わないかもしれないが、一応作っておく。
 	 * @return 作成されたルート膜
 	 */
-	abstract AbstractMembrane newRoot(AbstractMachine runtime);
+	public abstract AbstractMembrane newRoot(AbstractMachine runtime);
 
 	// 操作4 - リンクの操作
 	
@@ -277,34 +278,34 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * newLinkはRuby版では片方向ずつリンクを生成する命令であったが、
 	 * Java版では両方向を一度に生成するように仕様が変更されている。
 	 */
-	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
+	public void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = new Link(atom2, pos2);
 		atom2.args[pos2] = new Link(atom1, pos1);
 	}
 	/** atom1の第pos1引数と、atom2の第pos2引数のリンク先を接続する。
 	 * 実行後、atom2の第pos2引数は廃棄しなければならない。
 	 */
-	void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+	public void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		// TODO cloneは使わないくてよいはず。ただし当面はデバッグを容易にするためこのままでよい。
 		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
 		atom2.args[pos2].getBuddy().set(atom1, pos1);
 	}
 	/** atom1の第pos1引数のリンク先と、atom2の第pos2引数のリンク先を接続する。
 	 */
-	void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
 	}
 
 	/** atom2の第pos2引数に格納されたリンクオブジェクトへの参照を取得する。
 	 */
-	Link getAtomArg(Atom atom2, int pos2) {
+	public Link getAtomArg(Atom atom2, int pos2) {
 		return atom2.args[pos2];
 	}
 	/** atom1の第pos1引数と、リンクlink2のリンク先を接続する。
 	 * <p>link2は再利用されるため、実行後link2の参照を使用してはならない。
 	 */
-	void inheritAtomArg(Atom atom1, int pos1, Link link2) {
+	public void inheritAtomArg(Atom atom1, int pos1, Link link2) {
 		link2.getBuddy().set(atom1, pos1);
 		atom1.args[pos1] = link2;
 	}
@@ -327,9 +328,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	// 操作5 - 膜自身や移動に関する操作
 	
 	/** 活性化 */
-	abstract void activate();
+	public abstract void activate();
 	/** この膜を親膜から除去する */
-	void remove() {
+	public void remove() {
 		parent.removeMem(this);
 		parent = null;
 		removeProxies();
@@ -339,7 +340,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 膜srcMemの子孫のうちルート膜の手前までの全ての膜を、この膜と同じタスクの管理にする。
 	 * srcMemはこのメソッド実行後、このまま廃棄しなければならない。
 	 */
-	void pour(AbstractMembrane srcMem) {
+	public void pour(AbstractMembrane srcMem) {
 		if (srcMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site process fusion not implemented");
 		}
@@ -360,7 +361,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //	}
 	
 	/** この膜をdstMemに移動する。parent!=nullを仮定する。 */
-	void moveTo(AbstractMembrane dstMem) {
+	public void moveTo(AbstractMembrane dstMem) {
 		if (dstMem.task.getMachine() != task.getMachine()) {
 			parent = dstMem;
 			//((RemoteMembrane)dstMem).send("ADDROOT",getMemID());
@@ -388,7 +389,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
 	 * AbstractMembrane#moveToを使って親膜を変更することにより、
 	 * TODO この問題のあるメソッドは廃止しなければならない */
-	void setParent(AbstractMembrane mem) {
+	public void setParent(AbstractMembrane mem) {
 		if (!isRoot()) {
 			throw new RuntimeException("setParent requires this be a root membrane");
 		}
@@ -401,7 +402,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * @param mem ロックを要求しているルールがある膜
 	 * @return ロックに成功した場合はtrue
 	 */
-	synchronized boolean lock(AbstractMembrane mem) {
+	synchronized public boolean lock(AbstractMembrane mem) {
 		if (locked) {
 			//todo:キューに記録
 			return false;
@@ -416,16 +417,16 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * @param mem ルールのある膜
 	 * @return ロックに成功した場合はtrue
 	 */
-	boolean recursiveLock(AbstractMembrane mem) {
+	public boolean recursiveLock(AbstractMembrane mem) {
 		// 実装する
 		return false;
 	}
 	/** ロックを解放する */
-	void unlock() {
+	public void unlock() {
 		locked = false;
 		// TODO 実装する
 	}
-	void recursive() {
+	public void recursive() {
 		// 実装する
 	}
 	
@@ -453,7 +454,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 *     このうち後者は、removeToplevelProxiesで除去される。
 	 * </ul>
 	 */
-	void removeProxies() {
+	public void removeProxies() {
 		// TODO atomsへの操作が必要になるので、Setのクローンを取得してその反復子を使った方が
 		//      読みやすい＆効率が良いかもしれない
 		ArrayList changeList = new ArrayList();	// star化するアトムのリスト
@@ -504,7 +505,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 本膜に対して呼ぶことができる（呼ばなくてもよい）。
 	 * <p>この膜を通過して無関係な膜に入っていくリンクを除去する。
 	 */
-	void removeToplevelProxies() {
+	public void removeToplevelProxies() {
 		ArrayList removeList = new ArrayList();
 		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
 		while (it.hasNext()) {
@@ -536,7 +537,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * </ol>
 	 * @param childMemWithStar （自由リンクを持つ）子膜
 	 */
-	void insertProxies(AbstractMembrane childMemWithStar) {
+	public void insertProxies(AbstractMembrane childMemWithStar) {
 		ArrayList changeList = new ArrayList();	// inside_proxy化するアトムのリスト
 		Iterator it = childMemWithStar.atomIteratorOfFunctor(Functor.STAR);
 		while (it.hasNext()) {
@@ -563,7 +564,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <p>この膜にあるstarに対して、
 	 * 反対側の出現であるoutside_proxyとともに除去し第2引数同士を直結する。
 	 */
-	void removeTemporaryProxies() {
+	public void removeTemporaryProxies() {
 		ArrayList removeList = new ArrayList();
 		Iterator it = atomIteratorOfFunctor(Functor.STAR);
 		while (it.hasNext()) {

@@ -9,10 +9,10 @@ import java.net.Socket;
  * リモート計算ノード
  * @author n-kato
  */
-final class RemoteLMNtalRuntime extends AbstractMachine {
+final class RemoteMachine extends AbstractMachine {
 	protected String runtimeid;
 	protected Socket socket;
-	protected RemoteLMNtalRuntime(String runtimeid) {
+	protected RemoteMachine(String runtimeid) {
 		this.runtimeid = runtimeid;
 	}
 	//
@@ -21,7 +21,7 @@ final class RemoteLMNtalRuntime extends AbstractMachine {
 		node = node.intern();
 		AbstractMachine ret = (AbstractMachine)runtimeids.get(node);
 		if (ret == null) {
-			ret = new RemoteLMNtalRuntime(node);
+			ret = new RemoteMachine(node);
 			runtimeids.put(node,ret);
 		}
 		return ret;
@@ -35,7 +35,7 @@ final class RemoteLMNtalRuntime extends AbstractMachine {
 
 /**
  * リモートタスククラス
- * TODO コネクションの管理はRemoteLMNtalRuntimeにまかせる。
+ * TODO コネクションの管理はRemoteMachineにまかせる。
  *       しかしnextatom(mem)idはsynchronizedにしなければならなくなる。
  * @author n-kato
  */
@@ -96,12 +96,12 @@ final class RemoteMembrane extends AbstractMembrane {
 
 	// 操作1 - ルールの操作
 
-	void clearRules() {
+	public void clearRules() {
 		send("CLEARRULES");
 		super.clearRules();
 	}
 	/** TODO Ruleset#getGlobalRulesetID()のようなメソッドを作る。 */
-	void inheritRules(AbstractMembrane srcMem) {
+	public void inheritRules(AbstractMembrane srcMem) {
 		Iterator it = srcMem.rulesetIterator();
 		while (it.hasNext()) {
 			Ruleset rs = (Ruleset)it.next();
@@ -110,7 +110,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		super.inheritRules(srcMem);
 	}
 	/** ルールセットを追加 */
-	void loadRuleset(Ruleset srcRuleset) {
+	public void loadRuleset(Ruleset srcRuleset) {
 		send("LOADRULESET"/*,srcRuleset.getGlobalRulesetID()*/);
 		super.loadRuleset(srcRuleset);
 	}
@@ -118,17 +118,18 @@ final class RemoteMembrane extends AbstractMembrane {
 	// 操作2 - アトムの操作
 
 	/** 新しいアトムを作成し、この膜に追加し、この膜の実行スタックに入れる。 */
-	Atom newAtom(Functor functor) {
+	public Atom newAtom(Functor functor) {
 		Atom a = super.newAtom(functor);
 		String atomid = ((RemoteTask)task).getNextAtomID();
 		atomids.put(a,atomid);
 		send("NEWATOM",atomid);
 		return a;
 	}
-	/** 指定された子膜に新しいinside_proxyアトムを追加する */
-	Atom newFreeLink(AbstractMembrane submem) {
+	/** 指定された子膜に新しいinside_proxyアトムを追加する 
+	 * @deprecated */
+	public Atom newFreeLink(AbstractMembrane submem) {
 		Atom a = submem.newAtom(Functor.INSIDE_PROXY);
-		if (submem.task.getRuntime() != task.getRuntime()) {
+		if (submem.task.getMachine() != task.getMachine()) {
 			send("ADDFREELINK",submem.getAtomID(a));
 		}
 		return a;
@@ -137,7 +138,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("ALTERATOMFUNCTOR",getAtomID(atom),func.toString());
 		super.alterAtomFunctor(atom,func);
 	}
-	void removeAtom(Atom atom) {
+	public void removeAtom(Atom atom) {
 		send("REMOVEATOM",getAtomID(atom));
 		super.removeAtom(atom);
 	}
@@ -158,7 +159,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	// 操作3 - 子膜の操作
 	
 	/** 新しい子膜を作成する */
-	AbstractMembrane newMem() {
+	public AbstractMembrane newMem() {
 		String newremoteid = ((RemoteTask)task).getNextMemID();
 		RemoteMembrane m = new RemoteMembrane((RemoteTask)task, this, newremoteid);
 		m.remoteid = newremoteid;
@@ -166,27 +167,27 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("NEWMEM",newremoteid);
 		return m;
 	}
-	AbstractMembrane newRoot(AbstractMachine runtime) {
+	public AbstractMembrane newRoot(AbstractMachine runtime) {
 		// TODO 実装する
 		return null;
 	}
 
-	void removeMem(AbstractMembrane mem) {
+	public void removeMem(AbstractMembrane mem) {
 		send("REMOVEMEM",mem.getMemID());
 		super.removeMem(mem);
 	}
 
 	// 操作4 - リンクの操作
 
-	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
+	public void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
 		send("NEWLINK",""+getAtomID(atom1)+pos1+getAtomID(atom2)+pos2);
 		super.newLink(atom1,pos1,atom2,pos2);
 	}
-	void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+	public void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		send("RELINKATOMARGS",""+getAtomID(atom1)+pos1+getAtomID(atom2)+pos2);
 		super.relinkAtomArgs(atom1,pos1,atom2,pos2);
 	}
-	void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		send("UNIFYATOMARGS",""+getAtomID(atom1)+pos1+getAtomID(atom2)+pos2);
 		super.unifyAtomArgs(atom1,pos1,atom2,pos2);
 	}
@@ -194,22 +195,22 @@ final class RemoteMembrane extends AbstractMembrane {
 	// 操作5 - 膜自身や移動に関する操作
 	
 	/** ロックが解放されたときに再活性化されるため、何もしなくてよい */
-	void activate() {}
-	void remove() {
+	public void activate() {}
+	public void remove() {
 		send("REMOVE");
 		super.remove();
 	}
 
-	void pour(AbstractMembrane srcMem) {
-		if (srcMem.task.getRuntime() != task.getRuntime()) {
+	public void pour(AbstractMembrane srcMem) {
+		if (srcMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site remote process fusion not implemented");
 		}
 		send("POUR",srcMem.getMemID());
 	}
 	
 	/** dstMemに移動 */
-	void moveTo(AbstractMembrane dstMem) {
-		if (dstMem.task.getRuntime() != task.getRuntime()) {
+	public void moveTo(AbstractMembrane dstMem) {
+		if (dstMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site remote process migration not implemented");
 		}
 		// remote call of a local process migration
@@ -219,7 +220,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	
 	// 操作6 - ロックに関する操作
 	
-	synchronized boolean lock(AbstractMembrane mem) {
+	synchronized public boolean lock(AbstractMembrane mem) {
 		if (locked) {
 			//todo:キューに記録
 			//todo:locked==trueのとき、この計算ノードの誰がロックしたか分からないのを何とかする
@@ -230,14 +231,14 @@ final class RemoteMembrane extends AbstractMembrane {
 			return true;
 		}
 	}
-	boolean recursiveLock(AbstractMembrane mem) {
+	public boolean recursiveLock(AbstractMembrane mem) {
 		//send("RECURSIVELOCK");
 		return false;
 	}
-	void unlock() {
+	public void unlock() {
 		send("UNLOCK");
 	}
-	void recursiveUnlock() {
+	public void recursiveUnlock() {
 		//send("RECURSIVEUNLOCK");
 	}
 
