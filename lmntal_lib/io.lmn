@@ -57,14 +57,18 @@ io.popup(String) :- unary(String)|[[/*inline*/
 	]](String).
 
 /**
- * io.toFile : String -> List of String -> unit
+ * io.fileReader : String -> java::BufferedReader
  * 
- * @example r=io.toFile(b, io.fromFile(a))
  */
-H=io.toFile(Filename, List) :- unary(Filename) | H=toFile_s0(io.fileWriter(Filename), List).
-H=toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=toFile_s0(print(Obj, CAR), CDR).
-H=toFile_s0(Obj, []) :- H=close(Obj).
-
+H=io.fileReader(Filename) :- unary(Filename) | H=[[/*inline*/
+	try {
+		Atom br = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.FileReader(me.nth(0)))));
+//		System.out.println("FILE="+me.nth(0));
+		mem.relink(br, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+	} catch(Exception e) {}
+	]](Filename).
 
 /**
  * io.fileWriter : String -> java.io.PrintWriter
@@ -80,6 +84,27 @@ H=io.fileWriter(Filename) :- unary(Filename) | H=[[/*inline*/
 		me.remove();
 	} catch(Exception e) {}
 	]](Filename).
+
+/**
+ * readLine : ?
+ * 
+ */
+H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
+	H=readline(STDIN, Result), io.stdin(STDIN).
+
+H=readline(Object, Result) :- class(Object, "java.io.BufferedReader") |
+	H=[[/*inline*/
+		try {
+			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			String s = br.readLine();
+			Atom result = mem.newAtom(new Functor(s==null?"":s, 1));
+			mem.relink(result, 0, me, 1);
+			Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
+			mem.relink(res, 0, me, 2);
+			me.nthAtom(0).remove();
+			me.remove();
+		} catch(Exception e) {Env.e(e);}
+	]](Object, Result).
 
 /**
  * print : String -> unit
@@ -131,48 +156,16 @@ H=list_of_dev_s0(Obj, List) :- class(Obj, "java.io.BufferedReader") |
 	H=[String|list_of_dev_s0(readline(Obj, String), List)].
 H=list_of_dev_s0(nil, List) :- H=List.
 
-
 /**
- * io.fileReader : String -> java::BufferedReader
+ * io.toFile : String -> List of String -> unit
  * 
+ * @example r=io.toFile(b, io.fromFile(a))
  */
-H=io.fileReader(Filename) :- unary(Filename) | H=[[/*inline*/
-	try {
-		Atom br = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.FileReader(me.nth(0)))));
-//		System.out.println("FILE="+me.nth(0));
-		mem.relink(br, 0, me, 1);
-		me.nthAtom(0).remove();
-		me.remove();
-	} catch(Exception e) {}
-	]](Filename).
+H=io.toFile(Filename, List) :- unary(Filename) | H=toFile_s0(io.fileWriter(Filename), List).
+H=toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=toFile_s0(print(Obj, CAR), CDR).
+H=toFile_s0(Obj, []) :- H=close(Obj).
 
-/**
- * readLine : ?
- * 
- */
-H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
-	H=readline(STDIN, Result), io.stdin(STDIN).
 
-H=readline(Object, Result) :- class(Object, "java.io.BufferedReader") |
-	H=[[/*inline*/
-		try {
-			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
-			String s = br.readLine();
-			Atom result = mem.newAtom(new Functor(s==null?"":s, 1));
-			mem.relink(result, 0, me, 1);
-			Atom obj = me.nthAtom(0);
-			Atom res;
-			obj.remove();
-			if(s==null) {
-				res = mem.newAtom(new Functor("nil", 1));
-			} else {
-				res = mem.newAtom(new Functor("done", 1));
-			}
-			mem.relink(res, 0, me, 2);
-//			mem.relink(obj, 0, me, 2);
-			me.remove();
-		} catch(Exception e) {Env.e(e);}
-	]](Object, Result).
 
 // Sample
 // r=io.fileReader([[build.xml]]).
