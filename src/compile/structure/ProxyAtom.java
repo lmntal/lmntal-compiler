@@ -9,6 +9,7 @@ package compile.structure;
  * とする
  * @author Takahiko Nagata
  * @date 2003/11/05
+ * TODO typeは廃止して文字列から直接生成した方がよい。またはruntime.Functor内の定義を使い、このファイルを廃止する
  */
 final public class ProxyAtom extends Atom {
 	
