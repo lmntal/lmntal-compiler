@@ -189,6 +189,8 @@ public final class LMNtalRuntimeManager {
 			}
 		}
 		runtimeids.clear();
+		
+		System.out.println("LMNtalRuntimeManager.terminateAll(): everything finished and returning true");
 		return true;
 	}
 	
