@@ -1045,13 +1045,13 @@ public class Instruction implements Cloneable {
 	//  -----  inline  [atom, inlineref]
 	//  -----  builtin [class, method, [links...]]
 
-	/** inline [atom, inlineref]
+	/** inline [atom, string, inlineref]
 	 * <br>ガード命令、ボディ命令<br>
 	 * アトム$atomに対して、inlinerefが指定するインライン命令を適用し、成功することを確認する。
 	 * <p>inlinerefには現在、インライン番号を渡すことになっているが、
 	 * <p>ボディで呼ばれる場合、典型的には、全てのリンクを張り直した直後に呼ばれる。*/
 	public static final int INLINE = 210;
-	static {setArgType(INLINE, new ArgType(false, ARG_ATOM, ARG_INT));}
+	static {setArgType(INLINE, new ArgType(false, ARG_ATOM, ARG_OBJ, ARG_INT));}
 
 	/** builtin [class, method, [links...]]
 	 * <br>（予約された）ボディ命令
