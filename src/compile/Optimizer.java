@@ -18,13 +18,56 @@ public class Optimizer {
 	 * 命令列中には、1引数のremoveatom/removemem命令が現れていてはいけない。
 	 * @param list 最適化したい命令列。今のところボディ命令列が渡されることを仮定している。
 	 */
-	public static void optimize(List list) {
-		Instruction.normalize(list);
-		reuseMem(list);
-		reuseAtom(list);
-		removeUnnecessaryRelink(list);
+	public static void optimize(List head, List body) {
+		Instruction.normalize(body);
+		reuseMem(body);
+		reuseAtom(body);
+		removeUnnecessaryRelink(body);
+		makeLoop(head, body);
 	}
-	
+
+	/**
+	 * 同一ルールの複数回同時適用<br>
+	 * とりあえず、次の条件を満たしている場合にのみ処理を行う。
+	 * <ul>
+	 *  <li>spec命令以外の最初の命令がfindatomで、その第二引数は0である。
+	 *  <li>はじめのfindatom命令によって取得されたアトムが再利用されている。
+	 * </ul>
+	 * @param head
+	 * @param body
+	 */	
+	private static void makeLoop(List head, List body) {
+		Iterator it = head.iterator();
+		Instruction inst = (Instruction)it.next();
+		if (inst.getKind() != Instruction.SPEC) {
+			return;
+		}
+		inst = (Instruction)it.next();
+		if (inst.getKind() != Instruction.FINDATOM || inst.getIntArg2() != 0) {
+			return;
+		}
+		Integer firstAtom = (Integer)inst.getArg1();
+		while (it.hasNext()) {
+			inst = (Instruction)it.next();
+			switch (inst.getKind()) {
+				case Instruction.REMOVEATOM:
+//				case Instruction.FREEATOM:
+					if (inst.getArg1().equals(firstAtom)) {
+						return;
+					}
+			}
+		}
+		HashMap changeMap = new HashMap();
+
+		ArrayList loop = new ArrayList(); //ループ内の命令列
+		
+		//ループ内命令列の生成
+		loop.addAll(head.subList(2, head.size() - 1)); //spec,findatom,reactを除去
+		loop.addAll(body.subList(1, body.size())); //specを除去
+
+		body.add(new Instruction(Instruction.LOOP, loop));		
+	}
+
 	/**
 	 * 膜の再利用を行うコードを生成する。<br>
 	 * 命令列中には、1引数のremovemem命令が現れていてはいけない。
@@ -63,20 +106,19 @@ public class Optimizer {
 //					}
 					addToMap(pourMap, inst.getArg1(), inst.getArg2());
 					pourMems.add(inst.getArg2());
-					System.out.println("add to pourMap " + inst.getArg1() + "," + inst.getArg2());
 			}
 		}
 
 		createReuseMap(reuseMap, reuseMems, parent, removedChildren, createdChildren,
 					   pourMap, pourMems, new Integer(0));
 		
-		//再利用方法の表示（デバッグ用）
-		System.out.println("result of reusing mem");
-		it = reuseMap.keySet().iterator();
-		while (it.hasNext()) {
-			Object key = it.next();
-			System.out.println(key + " " + reuseMap.get(key));
-		}
+//		//再利用方法の表示（デバッグ用）
+//		System.out.println("result of reusing mem");
+//		it = reuseMap.keySet().iterator();
+//		while (it.hasNext()) {
+//			Object key = it.next();
+//			System.out.println(key + " " + reuseMap.get(key));
+//		}
 
 		//命令列を書き換える
 		//その際、冗長なremovemem/addmem命令を除去する
@@ -187,20 +229,16 @@ public class Optimizer {
 		while (it.hasNext()) {
 			Integer mem = (Integer)it.next();
 			//memの再利用元を決める
-			System.out.println("start processing mem " + mem);
 			 
 			Integer candidate = null; //pour命令による再利用候補を１つ保持しておく
 			Integer result = null; //決定した再利用先を入れる
 			ArrayList list2 = (ArrayList)pourMap.get(mem);
 			if (list2 != null) {
-				System.out.println("list2 is not null " + list2.size());
 				Iterator it2 = list2.iterator();
 				while (it2.hasNext()) {
 					Integer mem2 = (Integer)it2.next();
-					System.out.println("try mem " + mem2);
 					//すでに再利用することが決まっている場合は無視
 					if (reuseMems.contains(mem2)) {
-						System.out.println("already used");
 						continue;
 					}
 					
@@ -208,7 +246,6 @@ public class Optimizer {
 					candidate = mem2;
 					
 					if (parent.get(mem2).equals(start2)) {
-						System.out.println("use this");
 						//親膜が同じ膜からのpour命令がある場合は、それを優先
 						result = mem2;
 						break;
@@ -220,7 +257,6 @@ public class Optimizer {
 				if (candidate == null) {
 					//共通の親膜を持つ、プロセス文脈のない膜の中から適当に決定。
 					//該当する膜がなければ再利用しない
-					System.out.println("reuse without process context");
 					ArrayList list3 = (ArrayList)removedChildren.get(start2);
 					if (list3 != null) {
 						Iterator it3 = list3.iterator();
@@ -234,7 +270,6 @@ public class Optimizer {
 					}
 				} else {
 					//pour命令がある中から適当に決定
-					System.out.println("reuse with process context " + candidate);
 					result = candidate;
 				}
 			}
@@ -384,13 +419,13 @@ public class Optimizer {
 		
 		//TODO 膜・アトム名が異なるものの再利用の組み合わせを決定するコードをここに書く
 
-		//再利用方法の表示（デバッグ用）
-		
-		it = reuseMap.keySet().iterator();
-		while (it.hasNext()) {
-			Object key = it.next();
-			System.out.println(key + " " + reuseMap.get(key));
-		}
+//		//再利用方法の表示（デバッグ用）
+//		
+//		it = reuseMap.keySet().iterator();
+//		while (it.hasNext()) {
+//			Object key = it.next();
+//			System.out.println(key + " " + reuseMap.get(key));
+//		}
 		
 		//////////////////////////////////////////////////
 		//
