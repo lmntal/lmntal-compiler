@@ -42,10 +42,15 @@ public class Dumper {
 	static int getBinopPrio(String name) {
 		return ((int[])binops.get(name))[1];
 	}
+	
+	static Functor FUNC_CONS = new Functor(".",3);
+	static Functor FUNC_NIL  = new Functor("[]",1);
+	
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	public static String dump(AbstractMembrane mem) {
 		StringBuffer buf = new StringBuffer();
-		List predAtoms[] = {new ArrayList(),new ArrayList(),new ArrayList(),new ArrayList()};
+		List predAtoms[] = {new LinkedList(),new LinkedList(),new LinkedList(),new LinkedList(),
+			new LinkedList()};
 		//Set atoms = new HashSet(mem.getAtomCount());
 		Set atoms = new HashSet(mem.atoms.size()); // 今はproxyを表示しているため。いずれ上に戻す
 		boolean commaFlag = false;
@@ -57,55 +62,98 @@ public class Dumper {
 			Atom a = (Atom)it.next();
 			atoms.add(a);
 		}
-		
-		// 起点にするアトムとその優先順位:
-		//  0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
-		//  1. 2引数演算子のアトム
-		//  2. 整数以外の1引数でリンク先が最終引数のアトム
-		//  3. 整数以外でリンク先が最終引数のアトム
-		
-		// 起点にしないアトム（EXPANDATOMS無指定時のみ）
-		//  - 現在は無し
-		
-		it = mem.atomIterator();
-		while (it.hasNext()) {
-			Atom a = (Atom)it.next();
-			if (a.getArity() == 0 || a.getLastArg().getAtom().getMem() != mem) {
-				predAtoms[0].add(a);
-			}
-			else if (a.getArity() == 2 && isInfixOperator(a.getName())) {
-				predAtoms[1].add(a);
-			}
-			else if (a.getLastArg().isFuncRef()
-				// todo コードが気持ち悪いのでなんとかする
-			    && a.getFunctor().isSymbol()					// 通常のファンクタを起点にしたい
-			//	&& !a.getName().matches("-?[0-9]+|^[A-Z]")) {	// IntegerFunctor未使用時の古いコード
-				&& !a.getName().matches("^[A-Z].*")				// 補完された自由リンクは引数に置きたい
-				&& !a.getFunctor().equals(Functor.INSIDE_PROXY)
-				&& !a.getFunctor().equals(Functor.OUTSIDE_PROXY) ) {
-				predAtoms[a.getArity() == 1 ? 2 : 3].add(a);
-			}
-		}
-		//predAtoms内のアトムを起点に出力
-		for (int phase = 0; phase < predAtoms.length; phase++) {
-			it = predAtoms[phase].iterator();
+
+		if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {		
+			
+			// 起点にするアトムとその優先順位:
+			//  0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
+			//  1. 2引数演算子のアトム
+			//  2. 通常のシンボル名でリンク先が最終引数の1引数アトム
+			//  3. 通常のシンボル名でリンク先が最終引数の2引数以上のアトム
+			//  4. リンク先が最終引数のconsアトム
+			
+			// 起点にしないアトム
+			//  - $in,$out,[],A-Zで始まるアトム
+			
+			it = mem.atomIterator();
 			while (it.hasNext()) {
 				Atom a = (Atom)it.next();
-				if (atoms.contains(a)) { // まだ出力されていない場合
-					if(commaFlag) buf.append(", "); else commaFlag = true;
-					buf.append(dumpAtomGroup(a, atoms));
+				if (a.getArity() == 0 || a.getLastArg().getAtom().getMem() != mem) {
+					predAtoms[0].add(a);
+				}
+				else if (a.getArity() == 2 && isInfixOperator(a.getName())) {
+					predAtoms[1].add(a);
+				}
+				else if (a.getLastArg().isFuncRef()) {
+					// todo コードが気持ち悪いのでなんとかする (1)
+				    if (!a.getFunctor().isSymbol()) continue; // 通常のファンクタを起点にしたい
+					if (a.getName().matches("^[A-Z].*")) continue; // 補完された自由リンクは引数に置きたい
+					if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
+					if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
+					if (a.getFunctor().equals(FUNC_NIL) ) continue;
+					if (a.getArity() == 1) {
+						predAtoms[2].add(a);
+					}
+					else if (!a.getFunctor().equals(FUNC_CONS)) {
+						predAtoms[3].add(a);
+					}
+					else {
+						predAtoms[4].add(a);
+					}
+				}
+			}
+			//predAtoms内のアトムを起点に出力
+			for (int phase = 0; phase < predAtoms.length; phase++) {
+				it = predAtoms[phase].iterator();
+				while (it.hasNext()) {
+					Atom a = (Atom)it.next();
+					if (atoms.contains(a)) { // まだ出力されていない場合
+						if(commaFlag) buf.append(", "); else commaFlag = true;
+						if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {
+							if (a.getFunctor().equals(FUNC_CONS)) {
+								buf.append(dumpLink(a.getLastArg(), atoms, 700));
+								buf.append("=");
+								buf.append(dumpAtomGroupWithoutLastArg(a, atoms, 700));
+								continue;
+							}
+						}
+						buf.append(dumpAtomGroup(a, atoms));
+					}
 				}
 			}
 		}
+		
 		//閉路がある場合にはまだ残っているので、適当な所から出力。
 		//閉路の部分を探した方がいいが、とりあえずこのまま。
-		while (true) {
+		boolean changed;
+		do {
+			changed = false;
 			it = atoms.iterator();
-			if (!it.hasNext()) {
+			while (it.hasNext()) {
+				Atom a = (Atom)it.next();
+				if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {
+					// todo コードが気持ち悪いのでなんとかする (2)
+					if (a.getName().matches("^[A-Z].*")) continue;
+					if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
+					if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
+					if (a.getFunctor().equals(FUNC_NIL)) continue;
+				}
+				if(commaFlag) buf.append(", "); else commaFlag = true;
+				buf.append(dumpAtomGroup(a, atoms));
+				changed = true;
 				break;
 			}
+		}
+		while (changed);
+		
+		// 残ったアトムを s=t の形式で出力する
+		while (!atoms.isEmpty()) {
+			it = atoms.iterator();
+			Atom a = (Atom)it.next();
 			if(commaFlag) buf.append(", "); else commaFlag = true;
-			buf.append(dumpAtomGroup((Atom)it.next(), atoms));
+			buf.append(dumpAtomGroupWithoutLastArg(a, atoms, 700));
+			buf.append("=");
+			buf.append(dumpAtomGroupWithoutLastArg(a.getLastArg().getAtom(), atoms, 700));
 		}
 
 		// #2 - 子膜の出力		
@@ -151,27 +199,29 @@ public class Dumper {
 			return func.getQuotedAtomName(); // func.getAbbrName();
 		}
 		StringBuffer buf = new StringBuffer();
-		if (arity == 2 && isInfixOperator(func.getName())) {
-			int type = getBinopType(func.getName());
-			int prio = getBinopPrio(func.getName());
-			int innerleftprio  = prio + ( type == yfx ? 1 : 0 );
-			int innerrightprio = prio + ( type == xfy ? 1 : 0 );
-			boolean needpar = (outerprio < innerleftprio || outerprio < innerrightprio);
-			if (needpar) buf.append("(");
-			buf.append(dumpLink(a.args[0], atoms, innerleftprio));
-			buf.append(" ");
-			buf.append(func.getName());
-			buf.append(" ");
-			buf.append(dumpLink(a.args[1], atoms, innerrightprio));
-			if (needpar) buf.append(")");
-			return buf.toString();
-		}
-		if (arity == 2 && func.equals(new Functor(".",3))) {
-			buf.append("[");
-			buf.append(dumpLink(a.args[0], atoms, outerprio));
-			buf.append(dumpListCdr(a.args[1], atoms));
-			buf.append("]");
-			return buf.toString();
+		if (Env.verbose < Env.VERBOSE_EXPANDATOMS) {
+			if (arity == 2 && isInfixOperator(func.getName())) {
+				int type = getBinopType(func.getName());
+				int prio = getBinopPrio(func.getName());
+				int innerleftprio  = prio + ( type == yfx ? 1 : 0 );
+				int innerrightprio = prio + ( type == xfy ? 1 : 0 );
+				boolean needpar = (outerprio < innerleftprio || outerprio < innerrightprio);
+				if (needpar) buf.append("(");
+				buf.append(dumpLink(a.args[0], atoms, innerleftprio));
+				buf.append(" ");
+				buf.append(func.getName());
+				buf.append(" ");
+				buf.append(dumpLink(a.args[1], atoms, innerrightprio));
+				if (needpar) buf.append(")");
+				return buf.toString();
+			}
+			if (arity == 2 && func.getName().equals(".")) {
+				buf.append("[");
+				buf.append(dumpLink(a.args[0], atoms, outerprio));
+				buf.append(dumpListCdr(a.args[1], atoms));
+				buf.append("]");
+				return buf.toString();
+			}
 		}
 		buf.append(func.getQuotedFunctorName());
 		buf.append("(");
@@ -188,13 +238,13 @@ public class Dumper {
 		while (true) {		
 			if (!( l.isFuncRef() && atoms.contains(l.getAtom()) )) break;
 			Atom a = l.getAtom();
-			if (!a.getFunctor().equals(new Functor(".",3))) break;
+			if (!a.getFunctor().equals(FUNC_CONS)) break;
 			atoms.remove(a);
 			buf.append(",");
 			buf.append(dumpLink(a.args[0], atoms));
 			l = a.args[1];
 		}
-		if (l.getAtom().getFunctor().equals(new Functor("[]",1))) {
+		if (l.getAtom().getFunctor().equals(FUNC_NIL)) {
 			atoms.remove(l.getAtom());
 		} else {
 			buf.append("|");
