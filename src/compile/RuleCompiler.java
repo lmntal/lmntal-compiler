@@ -46,7 +46,7 @@ public class RuleCompiler {
 	List lhsmems;
 	Map  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
 	Map  lhsmempath;		// 左辺の膜 (Membrane) -> 変数番号 (Integer)
-	Map  lhslinkpath;		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
+	Map  lhslinkpath = new HashMap();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
 		// ＜左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])　＞から変更
 	
 	HeadCompiler hc;
@@ -216,27 +216,27 @@ public class RuleCompiler {
 	 * 左辺のアトムのリンクに対してgetlinkを行い、変数番号を登録する。(RISC化)
 	 * 将来的にはリンクオブジェクトをボディ命令列の引数に渡すようにするかもしれない。
 	 */
-	private void getLHSLinks() {
-		lhslinkpath = new HashMap();
-		for (int i = 0; i < lhsatoms.size(); i++) {
-			Atom atom = (Atom)lhsatoms.get(i);
-			int atompath = lhsatomToPath(atom);
-			int arity = atom.functor.getArity();
-			for (int j = 0; j < arity; j++) {
-				int linkpath;
-				// リンク先がgroundの場合、既にGETLINKは発行されている(getGroundLinkPaths)
-				if(!(atom.args[j].buddy.atom instanceof Context &&
-					groundsrcs.containsKey(((Context)atom.args[j].buddy.atom).def))){
-					linkpath = varcount++;
-					body.add(new Instruction(Instruction.GETLINK, linkpath, atompath, j));
-				}
-				else{
-					linkpath = ((Integer)groundsrcs.get(((Context)atom.args[j].buddy.atom).def)).intValue();
-				}
-				lhslinkpath.put(atom.args[j],new Integer(linkpath));
-			}
-		}
-	}
+//	private void getLHSLinks() {
+//		lhslinkpath = new HashMap();
+//		for (int i = 0; i < lhsatoms.size(); i++) {
+//			Atom atom = (Atom)lhsatoms.get(i);
+//			int atompath = lhsatomToPath(atom);
+//			int arity = atom.functor.getArity();
+//			for (int j = 0; j < arity; j++) {
+//				int linkpath;
+//				// リンク先がgroundの場合、既にGETLINKは発行されている(getGroundLinkPaths)
+//				if(!(atom.args[j].buddy.atom instanceof Context &&
+//					groundsrcs.containsKey(((Context)atom.args[j].buddy.atom).def))){
+//					linkpath = varcount++;
+//					body.add(new Instruction(Instruction.GETLINK, linkpath, atompath, j));
+//				}
+//				else{
+//					linkpath = ((Integer)groundsrcs.get(((Context)atom.args[j].buddy.atom).def)).intValue();
+//				}
+//				lhslinkpath.put(atom.args[j],new Integer(linkpath));
+//			}
+//		}
+//	}
 	private List computeRHSLinks() {
 		List rhslinks = new ArrayList();
 		rhslinkpath = new HashMap();
@@ -285,9 +285,14 @@ public class RuleCompiler {
 					LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy;
 //					f,fpへのlink = lhsOcc.args[pos].buddy
 //					getlink(f,fp)
-					int srclinkid = varcount++;
-					body.add( new Instruction(Instruction.GETLINK,srclinkid, 
-												lhsatomToPath(srclink.atom), srclink.pos));
+					int srclinkid;
+					if(!lhslinkpath.containsKey(srclink)){
+						srclinkid = varcount++;
+						body.add( new Instruction(Instruction.GETLINK,srclinkid, 
+													lhsatomToPath(srclink.atom), srclink.pos));
+						lhslinkpath.put(srclink,new Integer(srclinkid));
+					}
+					srclinkid = lhslinkToPath(srclink);
 					if (!(fUseMoveCells && atom.def.rhsOccs.size() == 1)) {							
 						int copiedlink = varcount++;
 						body.add( new Instruction(Instruction.LOOKUPLINK,
@@ -306,6 +311,11 @@ public class RuleCompiler {
 		if(rhslinkpath.containsKey(link)){
 			return ((Integer)rhslinkpath.get(link)).intValue();
 		}else{
+			if(!lhslinkpath.containsKey(link)){
+				int linkpath = varcount++;
+				body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(link.atom),link.pos));
+				lhslinkpath.put(link,new Integer(linkpath));
+			}
 			return lhslinkToPath(link);
 		}
 	}
@@ -343,7 +353,7 @@ public class RuleCompiler {
 		buildRHSTypedProcesses();
 		buildRHSAtoms(rs.rightMem);
 		// ここでvarcountの最終値が確定することになっている。変更時は適切に下に移動すること。
-		getLHSLinks();
+		//getLHSLinks();
 		updateLinks();
 		enqueueRHSAtoms();
 		addInline();
@@ -861,7 +871,7 @@ public class RuleCompiler {
 				Membrane mem = link.atom.mem;
 				int mempath = rhsmemToPath(mem);
 				body.add(new Instruction(Instruction.UNIFYLINKS,linkpath,buddypath,mempath));
-			}	
+			}
 		}
 		
 //		// PART 1 - 右辺のアトムに出現するリンク
