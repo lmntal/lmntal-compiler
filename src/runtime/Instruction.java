@@ -69,7 +69,7 @@ public class Instruction {
 
 	    //命令のためのループ
 	    for (int i = 0; i < hoge.length-1; i+=2) {
-		buffer.appnend(hoge[i]);
+		buffer.append(hoge[i]);
 		buffer.append(", ");
 		
 		buffer.append("[");
@@ -92,6 +92,10 @@ public class Instruction {
 
 	    //それ以外→なんかある？
 
+	    //例：ArrayStoreException - a の実行時の型がリスト内の
+	    //    各要素の実行時の型のスーパーセットでない場合
+	    //    (by API仕様書のArrayListクラスtoArrayメソッドの解説)
+
 	    System.out.println(e);
 
 	    return "General Protection Fault\n\n";
@@ -108,27 +112,29 @@ public class Instruction {
      * @return void
      * @param List
      *
+     * NAKJAIMA:2003-10-26:いらないっかなー
+     *
      */
-    public static void Dump(List listToBeDumped){
-	Object[] hoge = listToBeDumped.toArray();
-	Object[] fuga;
+//     public static void Dump(List listToBeDumped){
+// 	Object[] hoge = listToBeDumped.toArray();
+// 	Object[] fuga;
 	
-	for (int i = 0; i < hoge.length-1 ; i+=2){
-	    System.out.print("Command: ");
-	    System.out.print(hoge[i].toString());
+// 	for (int i = 0; i < hoge.length-1 ; i+=2){
+// 	    System.out.print("Command: ");
+// 	    System.out.print(hoge[i].toString());
 
-	    System.out.print("\t");
-	    System.out.print("Arguments: ");
+// 	    System.out.print("\t");
+// 	    System.out.print("Arguments: ");
 
-	    fuga = hoge[i+1].toArray();
-	    for (int j = 0; j < fuga.length; j++){
-		System.out.print(fuga[j].toString());
-		System.out.print(" ");
-	    }
-	    System.out.println();
-	}
-	System.out.println();
-    }
+// 	    fuga = hoge[i+1].toArray();
+// 	    for (int j = 0; j < fuga.length; j++){
+// 		System.out.print(fuga[j].toString());
+// 		System.out.print(" ");
+// 	    }
+// 	    System.out.println();
+// 	}
+// 	System.out.println();
+//     }
 
     /**
      * デバッグ用表示メソッド。Instruction
@@ -152,6 +158,7 @@ public class Instruction {
 
     /**
      * デバッグ用表示メソッド。
+     * [命令, [引数], 命令, [引数], …]を全てprintする。
      * 
      * Listの先頭はcommandと見なす。
      * commandの次は、引数のArrayListと見なす。
@@ -161,23 +168,46 @@ public class Instruction {
      * @return void
      */
     public void Dump(){
-	Object[] hoge = data.toArray();
+	//[命令, [引数], 命令, [引数], …]を全てprintする
+	Object[] hoge; 
 	Object[] fuga;
-	
-	for (int i = 0; i < hoge.length-1 ; i+=2){
-	    System.out.print("Command: ");
-	    System.out.print(hoge[0].toString());
 
-	    System.out.print("\t");
-	    System.out.print("Arguments: ");
+	try {
+	    hoge = data.toArray();
 
-	    fuga = hoge[i].toArray();
-	    for (int j = 1; j < fuga.length; j++){
-		System.out.print(fuga[j].toString());
-		System.out.print(" ");
+	    System.out.print("[ ");
+
+	    //命令のためのループ
+	    for (int i = 0; i < hoge.length-1; i+=2) {
+		System.out.print("Command: ");
+		System.out.print(hoge[i]);
+
+		System.out.print("\t");
+		System.out.print("Arguments: ");
+
+		//引数のためのループ
+		fuga = hoge[i+1].toArray();
+		for (int j = 0; j < fuga.length; j++) {
+		    System.out.print(fuga[j]);
+		    System.out.print(" ");
+		}
 	    }
-	    System.out.println();
+
+	    System.out.println(" ]");
+
+	} catch (Exception e){
+	    //想定される場合：
+	    //ArrayList dataが空→命令が入ってない
+	    //ArrayList data[i]が空→引数無し
+	    //未知のバグ→とりあえずexceptionをprint
+
+	    //それ以外→なんかある？
+
+	    //例：ArrayStoreException - a の実行時の型がリスト内の
+	    //    各要素の実行時の型のスーパーセットでない場合
+	    //    (by API仕様書のArrayListクラスtoArrayメソッドの解説)
+
+	    System.out.println(e);
 	}
-	System.out.println();
     }
 }
