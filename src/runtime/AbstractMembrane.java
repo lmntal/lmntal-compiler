@@ -621,8 +621,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/**
 	 * この膜のロック取得を試みる。
-	 * <p>ルールスレッドがこの膜のロックを取得するときに使用する。
-	 * <p>ロック解放にはunlock()を使用する。
+	 * <p>ルールスレッドまたはdumperがこの膜のロックを取得するときに使用する。
+	 * <p>ルールスレッドは、ロック解放にはunlock()を使用する。
+	 * <p>dumperは、ロック解放にはquietUnlock()を使用する。
 	 * @return ロックの取得に成功したかどうか */
 	public abstract boolean lock();
 	/**
@@ -651,6 +652,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	// - ボディ命令
 	
+	/**
+	 * 取得したこの膜のロックを解放する。
+	 * 実行膜スタックは操作しない。
+	 * ルート膜の場合、この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。
+	 */
+//	public abstract void quietUnlock();
+
 	/**
 	 * 取得したこの膜のロックを解放する。ルート膜の場合、
 	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
