@@ -36,7 +36,7 @@ public final class InterpretedRuleset extends Ruleset {
 		Iterator it = rules.iterator();
 		while(it.hasNext()) {
 			Rule r = (Rule)it.next();
-			result |= matchTest(mem, atom, r.atomMatches);
+			result |= matchTest(mem, atom, r.atomMatch);
 		}
 		return result;
 	}
@@ -50,35 +50,17 @@ public final class InterpretedRuleset extends Ruleset {
 		Iterator it = rules.iterator();
 		while(it.hasNext()) {
 			Rule r = (Rule)it.next();
-			result |= matchTest(mem, r.atomMatches);
+			result |= matchTest(mem, null, r.memMatch);
 		}
 		return result;
 	}
 	
 	/**
-	 * アトム主導テストを行い、マッチすれば適用する
+	 * 膜主導かアトム主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
 	 */
 	private boolean matchTest(Membrane mem, Atom atom, List matchInstructions) {
 		Env.p("atomMatch."+matchInstructions);
-		
-		Iterator it = matchInstructions.iterator();
-		while(it.hasNext()) {
-			// TODO マッチテストなかじま
-			Instruction hoge = (Instruction)it.next();
-			switch (hoge.getID()){
-			//case Instruction.....:
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * 膜主導テストを行い、マッチすれば適用する
-	 * @return ルールを適用した場合はtrue
-	 */
-	private boolean matchTest(Membrane mem, List matchInstructions) {
-		Env.p("memMatch."+matchInstructions);
 		
 		Iterator it = matchInstructions.iterator();
 		while(it.hasNext()) {

@@ -5,7 +5,7 @@ import java.util.*;
 public final class Rule {
 	// Ãæ¿È¤Ï Instruction
 	public List memMatch;
-	public List atomMatches; //?
+	public List atomMatch; //?
 	public List body;
 	private String text;
 	
@@ -15,7 +15,7 @@ public final class Rule {
 	 */
 	public Rule() {
 		memMatch    = new ArrayList();
-		atomMatches = new ArrayList();
+		atomMatch = new ArrayList();
 		body        = new ArrayList();
 	}
 	/**
@@ -32,7 +32,7 @@ public final class Rule {
 	 */
 	public void showDetail() {
 		Iterator l;
-		l = atomMatches.listIterator();
+		l = atomMatch.listIterator();
 		Env.p("Rule.showDetail  this = "+this);
 		
 		/*

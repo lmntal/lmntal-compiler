@@ -91,7 +91,7 @@ public class RuleCompiler {
 		
 		//rule.register(@atommatches,@memmatch,@body)
 		theRule.memMatch     = memmatch;
-		theRule.atomMatches  = atommatches;
+		theRule.atomMatch  = atommatches;
 		theRule.body         = body;
 		
 		theRule.showDetail();
