@@ -681,7 +681,7 @@ public class RuleCompiler {
 						// リンク先の型なしプロセス文脈は右辺に限られる。そして、そのプロセス文脈の
 						// 左辺での出現における対応する自由リンクは、左辺のアトムに接続している。
 						// ( { org(Y,), $pc[Y,|] } :- atom(X), $pc[X,|] )
-						if (false && pc.def.rhsOccs.size() == 1) {
+						if (pc.def.rhsOccs.size() == 1) {
 							LinkOccurrence orglink = pc.def.lhsOcc.args[link.pos].buddy; // org引数のYの出現
 							body.add( new Instruction(Instruction.RELINK,
 											rhsatomToPath(atom), pos,
@@ -817,7 +817,7 @@ public class RuleCompiler {
 							// ( {org(Y,),$buddypc[Y,|]},{src(Z,),$atom[Z,|]} :- $buddypc[X,|],$atom[X,|] )
 							LinkOccurrence orglink = buddypc.def.lhsOcc.args[link.pos].buddy; // org引数のYの出現
 							LinkOccurrence srclink = atom.   def.lhsOcc.args[pos     ].buddy; // src引数のZの出現
-							if (false && buddypc.def.rhsOccs.size() == 1) {
+							if (buddypc.def.rhsOccs.size() == 1) {
 								if ( lhsatomToPath(orglink.atom) < lhsatomToPath(srclink.atom)
 								  || ( lhsatomToPath(orglink.atom) == lhsatomToPath(srclink.atom)
 									&& orglink.pos < srclink.pos )) {
