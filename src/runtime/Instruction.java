@@ -46,7 +46,7 @@ public class Instruction implements Cloneable {
 	public static final int ARG_INT = 3;
 	/**命令列*/
 	public static final int ARG_INST = 4;
-	/**その他オブジェクト(ルールなど)*/
+	/**その他オブジェクト(ルールなど)への参照*/
 	public static final int ARG_OBJ = 5;
 	
     /** 命令の種類を保持する。*/	
@@ -328,8 +328,9 @@ public class Instruction implements Cloneable {
 	 * ファンクタfuncrefへの参照を$funcに代入する。*/
 	public static final int LOADFUNC = 27;
 	// LOCALLOADFUNCは不要
-	static {setArgType(LOADFUNC, new ArgType(true, ARG_VAR, ARG_OBJ));} //TODO func/funcrefはVAR? OBJ?
-
+	static {setArgType(LOADFUNC, new ArgType(true, ARG_VAR, ARG_OBJ));}
+	// func/funcrefはVAR? OBJ? -> (n-kato) func=VAR, funcref=OBJ
+	
 	/** eqfunc [func1, func2]
 	 * <br>型付き拡張用ガード命令<br>
 	 * ファンクタ$func1と$func2が等しいことを確認する。*/
@@ -806,8 +807,8 @@ public class Instruction implements Cloneable {
 	 * <p>この膜のアクティブアトムは再エンキューすべきである。
 	 * @see enqueueallatoms */
 	public static final int LOADRULESET = 75;
-	static {setArgType(LOADRULESET, new ArgType(false, ARG_MEM, ARG_OBJ));}//TODO OBJ?
-
+	static {setArgType(LOADRULESET, new ArgType(false, ARG_MEM, ARG_OBJ));}
+	
 	/** localloadruleset [dstmem, ruleset]
 	 * <br>最適化用ボディ命令<br>
 	 * loadrulesetと同じ。ただし$dstmemはこの計算ノードに存在する。*/
@@ -1037,7 +1038,7 @@ public class Instruction implements Cloneable {
 	 * ヘッドとボディに1回ずつ出現するリンクは、ヘッドでのリンク出現が渡される。
 	 * ボディに2回出現するリンクは、X=Xで初期化された後、各出現をヘッドでの出現と見なして渡される。*/
 	public static final int BUILTIN = 211;
-	static {setArgType(BUILTIN, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));} //TODO あってる?
+	static {setArgType(BUILTIN, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));} // あってる。
 
 	///////////////////////////////////////////////////////////////////////
 
@@ -1247,8 +1248,12 @@ public class Instruction implements Cloneable {
 	// ここもBUILTIN 命令にすべきである。
 	public static final int FLOAT2INT = 630;
 	public static final int INT2FLOAT = 631;
-	static {setArgType(FLOAT2INT, new ArgType(true, ARG_ATOM, ARG_ATOM));} //TODO あってる?
-	static {setArgType(INT2FLOAT, new ArgType(true, ARG_ATOM, ARG_ATOM));} //TODO あってる?
+	static {setArgType(FLOAT2INT, new ArgType(true, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(INT2FLOAT, new ArgType(true, ARG_ATOM, ARG_ATOM));}
+	public static final int FLOAT2INTFUNC = FLOAT2INT + OPT;
+	public static final int INT2FLOATFUNC = INT2FLOAT + OPT;
+	static {setArgType(FLOAT2INT, new ArgType(true, ARG_VAR, ARG_VAR));}
+	static {setArgType(INT2FLOAT, new ArgType(true, ARG_VAR, ARG_VAR));}
 	
 
 	// TODO BUILTIN 命令を使う方がよいと思われる
@@ -1530,10 +1535,12 @@ public class Instruction implements Cloneable {
 	//////////////////////////////////
 	// 最適化器が使う、命令列書き換えのためのクラスメソッド
 	// @author Mizuno
-
+	
+	// TODO argtype は signature に名称変更するとよい
+	
 	private static void setArgType(int kind, ArgType argtype) {	
 		if (argTypeTable.containsKey(new Integer(kind))) {
-			throw new RuntimeException("setArgType for '" + kind + "' is called more than once");
+			throw new RuntimeException("setArgType for '" + kind + "' was called more than once");
 		}
 		argTypeTable.put(new Integer(kind), argtype);
 	}
