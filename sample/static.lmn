@@ -1,10 +1,21 @@
-({mv($m1),$p,@q},{name($m2),$r,@s}:-$m1=$m2|{name($m2),$p,@q,$r,@s}).
-({{mv($m),$p,@q},$r,@s}:-unary($m)|{$r,@s},{mv($m),$p,@q}).
-({find_and_link($m1,X),ready($m2), $p, @q}:-$m1=$m2|{$m2=X, $p, @q}).
+{
+	system_ruleset.
+	({mv($m1),$p,@q},{name($m2),$r,@s}:-$m1=$m2|{name($m2),$p,@q,$r,@s}).
+	({{mv($m),$p,@q},$r,@s}:-unary($m)|{$r,@s},{mv($m),$p,@q}).
+	({find_and_link($m1,X),ready($m2), $p, @q}:-$m1=$m2|{msg(X,$m2), $p, @q}).
+	(call($m,$method,X):-unary($m),unary($method)|{mv($m).find_and_link($method,X).}).
+}.
 
 {
-	print(X).
-	{ mv(m). find_and_link(m_incr, X). }.
+	io.print(call(m, m.incr)).
 }.
-{name(m).m_incr(ready)}.
+{
+	io.print(call(m, m.incr)).
+}.
+{
+	name(m).
+	m.incr(ready).
+	id(0).
+	( m.incr(msg(X)), id($o) :- int($o),$n=$o+1 | cp($n, C1, C2), id(C1), X=C2, m.incr ).
+}.
 
