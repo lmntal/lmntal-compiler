@@ -1246,8 +1246,8 @@ public class Instruction implements Cloneable {
 	static {setArgType(INT2FLOAT, new ArgType(true, ARG_ATOM, ARG_ATOM));}
 	public static final int FLOAT2INTFUNC = FLOAT2INT + OPT;
 	public static final int INT2FLOATFUNC = INT2FLOAT + OPT;
-	static {setArgType(FLOAT2INT, new ArgType(true, ARG_VAR, ARG_VAR));}
-	static {setArgType(INT2FLOAT, new ArgType(true, ARG_VAR, ARG_VAR));}
+	static {setArgType(FLOAT2INTFUNC, new ArgType(true, ARG_VAR, ARG_VAR));}
+	static {setArgType(INT2FLOATFUNC, new ArgType(true, ARG_VAR, ARG_VAR));}
 	
 
 	// TODO BUILTIN 命令を使う方がよいと思われる
@@ -1886,17 +1886,19 @@ public class Instruction implements Cloneable {
 		//nakajima版2004-01-21
 		StringBuffer buffer = new StringBuffer("               ");
 		String tmp = getInstructionString(kind);
-		
-		if( tmp.length() > 14 ) {
-			buffer.replace(0, 14, tmp.substring(0,12) + "..");
+		ArgType argtype = (ArgType)argTypeTable.get(new Integer(kind));
+		int indent = 14;
+		if (argtype.output) {
+			indent -= data.get(0).toString().length() + 2;
+		}
+		if( tmp.length() > indent ) {
+			buffer.replace(0, indent, tmp.substring(0, indent - 2) + "..");
 		} else {
 			buffer.replace(0, tmp.length(), tmp);
 		}
-		if (data.size() == 1
-		&& data.get(0) instanceof ArrayList) {
+		if (data.size() == 1 && data.get(0) instanceof ArrayList) {
 			ArrayList arg1 = (ArrayList)data.get(0);
-			if (arg1.size() == 1
-			&& arg1.get(0) instanceof ArrayList) {
+			if (arg1.size() == 1 && arg1.get(0) instanceof ArrayList) {
 				ArrayList insts = (ArrayList)arg1.get(0);
 				if(insts.size() == 0) {
 					buffer.append("[[]]");
