@@ -1,8 +1,13 @@
 package runtime;
 
+/*
+ * 分散処理のテスト用
+ *
+ * @author nakajima
+ *
+ */
 class TestRemote{
 	public static void main(String args[]){
-
 		/*参考コード from FrontEnd.java*/		
 		//LMNParser lp = new LMNParser(src);
 			
@@ -28,16 +33,86 @@ class TestRemote{
 //		LMNtalRuntimeManager.terminateAll();
 		/*ここまで：参考コード from FrontEnd.java*/		
 
-		RemoteLMNtalRuntime rr = (RemoteLMNtalRuntime)(LMNtalRuntimeManager.connectRuntime("banon.ueda.info.waseda.ac.jp"));
+		//↓のコードはEnv.theRuntime.runtimeidがnullなのでぬるぽ   
+		//RemoteLMNtalRuntime rr = (RemoteLMNtalRuntime)(LMNtalRuntimeManager.connectRuntime("banon.ueda.info.waseda.ac.jp"));
+		//		if(rr==null){
+//			//接続失敗
+//			System.out.println("failed to connect");
+//			System.exit(0);
+//		}
 		
-		if(rr==null){
-			//接続失敗
-			System.out.println("failed to connect");
-			System.exit(0);
+/*
+ * ↓のコードはEnv.theRuntime.runtimeidがnullなのでぬるぽ   
+ *  
+ * 		if(LMNtalRuntimeManager.connectToDaemon()){
+			System.out.println("success");
+		} else {
+			System.out.println("orz");
+		}*/
+		
+		LMNtalRuntimeManager.init();
+		MasterLMNtalRuntime masterRuntime = new MasterLMNtalRuntime();
+		
+		Membrane rootMem = (Membrane)masterRuntime.getGlobalRoot();
+		
+		if(!LMNtalRuntimeManager.connectToDaemon()){
+			System.out.println("orz");
+			System.exit(1);
 		}
+			
+		//System.out.println("success");
+		RemoteLMNtalRuntime banon = (RemoteLMNtalRuntime)LMNtalRuntimeManager.connectRuntime("banon.ueda.info.waseda.ac.jp");
+
+		RemoteTask banonTask1 = (RemoteTask) banon.newTask(rootMem);
+
+		System.out.println("Membrane ID:" +  ((RemoteMembrane)banonTask1.root).getMemID());
+
 		
-		RemoteMembrane rmem = (RemoteMembrane)RemoteMembrane.newRoot(rr);
+		/*
+		 *  試しに実行してみるコード。
+		 * a, a:-b.
+		 * 
+ Compiled Rule (  :- ( a a :- b ) )
+	--atommatch:
+		spec           [2, 2]
+	--memmatch:
+		spec           [1, 1]
+		jump           [L165, [0], [], []]
+	--body:L165:
+		spec           [1, 1]
+		commit         [(  :- ( a a :- b ) )]
+		loadruleset    [0, @609]
+		proceed        []
+
+Compiled Rule ( a a :- b )
+	--atommatch:
+		spec           [2, 3]
+	--memmatch:
+		spec           [1, 3]
+		findatom    [1, 0, a_0]
+		findatom    [2, 0, a_0]
+		neqatom        [2, 1]
+		jump           [L159, [0], [1, 2], []]
+	--body:L159:
+		spec           [3, 4]
+		commit         [( a a :- b )]
+		dequeueatom    [1]
+		dequeueatom    [2]
+		removeatom     [1, 0, a_0]
+		removeatom     [2, 0, a_0]
+		newatom     [3, 0, b_0]
+		enqueueatom    [3]
+		freeatom       [1]
+		freeatom       [2]
+		proceed        []
+		 * 
+		 */
 		
+		
+		//RemoteMembrane rmem = (RemoteMembrane)RemoteMembrane.newRoot(rr);
+		//
+		//
+		//
 
 
 		
