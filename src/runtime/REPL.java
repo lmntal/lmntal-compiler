@@ -42,7 +42,7 @@ public class REPL {
 				}
 			});
 		
-		System.out.println("        LMNtal version 0.61.20040124");
+		System.out.println("        LMNtal version 0.61.20040130");
 		System.out.println("");
 		System.out.println("Type h to see help.");
 		System.out.println("Type q to quit.");
@@ -63,7 +63,7 @@ public class REPL {
 					System.out.println("  [no]debug    [0-9] - set debug level");
 					System.out.println("  [no]optimize [0-9] - set optimization level");
 					System.out.println("  [no]verbose  [0-9] - set verbose level");
-					System.out.println("  [no]shuffle        - set shuffle mode");
+					System.out.println("  [no]shuffle  [0-3] - set shuffle level");
 					System.out.println("  [no]trace          - set trace mode");					
 					System.out.println("  h                  - help");
 					System.out.println("  q                  - quit");
@@ -76,16 +76,23 @@ public class REPL {
 					continue;
 				} else if(line.matches("noverbose|verbose( [0-9])?")) {
 					int old = Env.verbose;
-					if (line.length() == 7) Env.verbose = Env.VERBOSE_DEFAULT;
-					else if (line.charAt(0) == 'n') Env.verbose = 0;
+					if (line.charAt(0) == 'n') Env.verbose = 0;
+					else if (line.charAt(line.length() - 1) == 'e') Env.verbose = Env.VERBOSE_DEFAULT;
 					else Env.verbose = line.charAt(line.length() - 1) - '0';
 					Env.p("verbose level set to " + Env.verbose + " (previously " + old + ")");
 					continue;
 				} else if(line.matches("nooptimize|optimize( [0-9])?")) {
-					if (line.length() == 8) Env.optimize = 5;
-					else if (line.charAt(0) == 'n') Env.optimize = 0;
+					if (line.charAt(0) == 'n') Env.optimize = 0;
+					else if (line.charAt(line.length() - 1) == 'e') Env.optimize = 5;
 					else Env.optimize = line.charAt(line.length() - 1) - '0';
 					Env.p("optimization level " + Env.optimize);
+					continue;
+				} else if(line.matches("noshuffle|shuffle( [0-9])?")) {
+					int old = Env.shuffle;
+					if (line.charAt(0) == 'n') Env.shuffle = Env.SHUFFLE_INIT;
+					else if (line.charAt(line.length() - 1) == 'e') Env.shuffle = Env.SHUFFLE_DEFAULT;
+					else Env.shuffle = line.charAt(line.length() - 1) - '0';
+					Env.p("shuffle level " + Env.shuffle + " (previously " + old + ")");
 					continue;
 				} else if(line.equals("trace")) {
 					Env.p("trace mode on");
@@ -94,14 +101,6 @@ public class REPL {
 				} else if(line.equals("notrace")) {
 					Env.p("trace mode off");
 					Env.fTrace = false;
-					continue;
-				} else if(line.equals("shuffle")) {
-					Env.p("shuffle mode on");
-					Env.fRandom = true;
-					continue;
-				} else if(line.equals("noshuffle")) {
-					Env.p("shuffle mode off");
-					Env.fRandom = false;
 					continue;
 				} else {
 					lb.append(line);

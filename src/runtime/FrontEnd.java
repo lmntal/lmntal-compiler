@@ -88,7 +88,7 @@ public class FrontEnd {
 						Env.fTrace = true;
 						break;
 					case 's':
-						Env.fRandom = true;
+						Env.shuffle = Env.SHUFFLE_DEFAULT;
 						break;
 					case 'e':
 						// lmntal -e 'a,(a:-b)'

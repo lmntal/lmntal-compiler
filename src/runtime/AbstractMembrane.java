@@ -139,7 +139,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** この膜にある子膜の反復子を取得する */
 	public Iterator memIterator() {
 // TODO 膜をシャッフルするようにする
-//		if (Env.fRandom) {
+//		if (Env.shuffle) {
 //			return new RandomIterator(mems);
 //		} else {
 			return mems.iterator();
@@ -151,7 +151,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	/** この膜にあるルールセットの反復子を返す */
 	public Iterator rulesetIterator() {
-		if (Env.fRandom) {
+		if (Env.shuffle >= Env.SHUFFLE_RULES) {
 			return new RandomIterator(rulesets);
 		} else {
 			return rulesets.iterator();

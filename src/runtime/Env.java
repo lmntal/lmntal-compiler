@@ -26,6 +26,8 @@ public final class Env {
 	 */
 	public static int optimize = 0;
 	
+	////////////////////////////////////////////////////////////////
+	
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/
 	public static final int VERBOSE_SHOWRULES = 3;
 	/** 自由リンク管理アトムを表示する冗長表示レベル（EXPANDATOMS未満に限る）*/
@@ -41,15 +43,21 @@ public final class Env {
 	public static final int VERBOSE_INIT = 2;
 	/** -vオプション指定時のデフォルトの冗長表示レベル */
 	public static final int VERBOSE_DEFAULT = 5;
-	/**
-	 * verbose level.
-	 */
+	/** verbose level. */
 	public static int verbose = VERBOSE_INIT;
-	
-	/**
-	 * ランダム実行
-	 */
-	public static boolean fRandom = false;
+
+	////////////////////////////////////////////////////////////////
+
+	public static final int SHUFFLE_DONTUSEATOMSTACKS = 1;
+	public static final int SHUFFLE_ATOMS = 2;
+	public static final int SHUFFLE_RULES = 3;
+
+	public static final int SHUFFLE_INIT  = 1;
+	public static final int SHUFFLE_DEFAULT = 3;
+	/** ランダム実行（レベル）*/
+	public static int shuffle = SHUFFLE_INIT;
+
+	////////////////////////////////////////////////////////////////
 
 	/**
 	 * トレース実行

@@ -105,8 +105,10 @@ public class RuleCompiler {
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化			
 			if (firstid < hc.atoms.size()) {			
-				if (true) continue; // 臨時【注意：外してもよいが、アトム主導は現在未テスト】
-				if (Env.fRandom) continue; // ルールの反応確率を優先するためアトム主導テストは行わない
+				//if (true) continue; // 臨時【注意：外してもよいが、アトム主導は現在未テスト】
+				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS) continue;
+				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
+				
 				// アトム主導
 				List singletonListArgToBranch = new ArrayList();
 				singletonListArgToBranch.add(hc.match);

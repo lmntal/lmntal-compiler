@@ -75,7 +75,7 @@ public final class AtomSet {
 		if (s == null) {
 			return Util.NULL_ITERATOR;
 		} else {
-			if (Env.fRandom) {
+			if (Env.shuffle >= Env.SHUFFLE_ATOMS) {
 				return new RandomIterator(s);
 			} else {
 				return s.iterator();

@@ -73,7 +73,7 @@ public class RulesetCompiler {
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
 		InterpretedRuleset ruleset;
 		if (!rules.isEmpty()) {
-			if (Env.fRandom) {
+			if (Env.shuffle >= Env.SHUFFLE_RULES) {
 				it = rules.iterator();
 				while (it.hasNext()) {
 					ruleset = new InterpretedRuleset();
