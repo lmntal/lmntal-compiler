@@ -131,6 +131,8 @@ public final class Env {
 	public static boolean fREMAIN = false;
 	public static MasterLMNtalRuntime remainedRuntime;
 	
+	public static boolean preProcess0 = false;
+	
 	/** アトム名の表示する長さ */
 	public static int printLength = 14;
 	

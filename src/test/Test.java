@@ -40,9 +40,13 @@ public class Test {
 //		f();
 //		g();
 //		h();
-		i();
+//		i();
+		j();
 	}
 	
+	public static void j() {
+		System.out.println("aHIJc___123".replaceAll("a(.*?)c", ":$1:$1:$1:"));
+	}
 	public static void i() {
 		JFrame fr = new JFrame("test");
 		fr.setSize(200,300);

@@ -226,10 +226,9 @@ public class FrontEnd {
 						} else if (args[i].equals("--translate")) {
 							// 暫定オプション
 							Env.fInterpret = false;
-						} else if (args[i].equals("--library")) {
-							/// --library
-							/// Generate library.
-							Env.fLibrary = true;
+						} else if (args[i].equals("--pp0")) {
+							// 暫定オプション
+							Env.preProcess0 = true;
 						} else {
 							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
@@ -353,31 +352,19 @@ public class FrontEnd {
 	 * @param unitName String ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
 	 */
 	public static void run(Reader src, String unitName) {
+		if(Env.preProcess0) src = preProcess0(src);
 		try {
 			compile.structure.Membrane m;
 			Env.clearErrors();
 			try {
 				LMNParser lp = new LMNParser(src);
 				m = lp.parse();
-			}	
-			catch (ParseException e) {
+			} catch (ParseException e) {
 				Env.p("Compilation Failed");
 				return;	
 			}
-			if (!Env.fInterpret) {
-				Translator.init(unitName);
-			}
 			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
 			Inline.makeCode();
-			if (!Env.fInterpret) {
-				try {
-					Translator.genModules();
-					Translator.genMain((InterpretedRuleset)rs);
-					Translator.genJAR();
-				} catch (IOException e) {
-					Env.e("Failed to write Translated File. " + e.getLocalizedMessage());
-				}
-			}
 			if (Env.nErrors > 0) {
 				Env.p("Compilation Failed");
 				return;
@@ -387,10 +374,9 @@ public class FrontEnd {
 
 			if (Env.fInterpret) {
 				run(rs);
+			} else {
+				new Translator((InterpretedRuleset)rs).translate(true);
 			}
-//			else {
-//				new Translator((InterpretedRuleset)rs).translate(true);
-//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
@@ -454,6 +440,56 @@ public class FrontEnd {
 			e.printStackTrace();
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
+	}
+	
+	/**
+	 * プリプロセッサ0
+	 * 
+	 * リンク<u> ... :- ...  ==> リンク ... :- unary(リンク) | ...
+	 * 
+	 * 同様に、
+	 *   u -> unary
+	 *   g -> ground
+	 *   s -> string
+	 *   i -> int
+	 * 
+	 * 例：
+	 *   a(Hah<u>), b(A<g>):-rhs.
+	 *  ==>
+	 *   a(Hah), b(A):-ground(A), unary(Hah), |rhs.
+	 * 
+	 * @param r
+	 * @return
+	 */
+	static Reader preProcess0(Reader r) {
+		try {
+			BufferedReader br = new BufferedReader(r);
+			String s;
+			StringBuffer sb=new StringBuffer();
+			while((s=br.readLine())!=null) {
+				sb.append(s);
+			}
+			s = sb.toString();
+			s = s.replaceAll(":\\-([^|.]*)\\.", ":-|$1.");
+//			System.out.println(s);
+			
+			String b=s, a;
+			{
+				for(a=b;;b=a) {
+					a = a.replaceAll("([A-Z][0-9a-zA-Z]*)<u>(.*?)\\:\\-(.*?)\\|", "$1$2:-unary($1), $3|");
+					a = a.replaceAll("([A-Z][0-9a-zA-Z]*)<s>(.*?)\\:\\-(.*?)\\|", "$1$2:-string($1), $3|");
+					a = a.replaceAll("([A-Z][0-9a-zA-Z]*)<i>(.*?)\\:\\-(.*?)\\|", "$1$2:-int($1), $3|");
+					a = a.replaceAll("([A-Z][0-9a-zA-Z]*)<g>(.*?)\\:\\-(.*?)\\|", "$1$2:-ground($1), $3|");
+					if(b.equals(a)) break; // "stable"
+//					System.out.println(a);
+				}
+			}
+			System.out.println(a);
+			return new StringReader(a);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
 // TODO 初期配置で子タスクを作る
