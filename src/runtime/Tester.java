@@ -15,7 +15,7 @@ public class Tester extends TestCase {
 	}
 	public void testAppend() {
 		Machine machine = new Machine();
-		Task task = new Task(machine);
+		Task task = new MasterTask((LMNtalRuntime)machine);
 		Membrane root = (Membrane)task.getRoot();
 		
 		Atom append = root.newAtom("append", 3);

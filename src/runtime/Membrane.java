@@ -64,7 +64,7 @@ public final class Membrane extends AbstractMembrane {
 		Task t = (Task)task;
 		if (!isRoot()) {
 			((Membrane)parent).activate();
-			synchronized(task.getMachine()) {
+			synchronized(task.getMachine()) { // ←？？？？？？？？？？？？？？？？？？？？？
 				if (t.bufferedStack.isEmpty()) {
 					t.memStack.push(this);
 				}
@@ -151,12 +151,12 @@ public final class Membrane extends AbstractMembrane {
 	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。*/
 	public void blockingLock() {
 		if (lock()) return;
-		AbstractMachine mach = task.getMachine();
-		synchronized(mach) {
+		//AbstractMachine mach = task.getMachine();
+		synchronized(task) {
 			((Task)task).requestLock();
 			do {
 				try {
-					mach.wait();
+					task.wait();
 				}
 				catch (InterruptedException e) {}
 			}

@@ -177,9 +177,15 @@ public class FrontEnd {
 			m.showAllRules();
 			
 			// ผยนิ
+			RemoteMachine.init();
 			LMNtalRuntime rt = new LMNtalRuntime();
-			rs.react(rt.getGlobalRoot());
-			rt.exec();
+			Membrane root = (Membrane)rt.getGlobalRoot();
+			//root.blockingLock();
+			rs.react(root);
+			//root.blockingUnlock();
+			((Task)root.getTask()).execAsMasterTask();
+			
+			//rt.exec();
 			if (!Env.fTrace && Env.verbose > 0) {
 				Env.d( "Execution Result:" );
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );

@@ -23,13 +23,19 @@ abstract public class AbstractTask {
 	public AbstractMembrane getRoot() {
 		return root;
 	}
+	
+	/** この物理マシンのルールスレッドの再実行が要求されたかどうか */
+	protected boolean awakened = false;
+
 	/** このタスクに対してシグナルを発行する。
 	 * すなわち、このタスクのルート膜のロックの取得をするためにブロックしているスレッドが存在するならば
 	 * そのスレッドを再開してロックの取得を試みることを要求し、
 	 * 存在しないならばこのタスクのルールスレッドの再実行を要求する。
 	 * <p>実際には、ルールスレッドに対してawakeメソッドを発行する。*/
-	public final void signal() {
-		getMachine().awake();
+	synchronized public final void signal() {
+		awakened = true;
+		notify();
+		//getMachine().awake();
 	}
 }
 
@@ -88,7 +94,10 @@ abstract public class AbstractTask {
  * ただし子膜の取得がブロッキングになるようにタスクに優先度を設ける必要があるはずである。
  * システムコールは現在はまだ実装されていない。
  */
-final class Task extends AbstractTask {
+
+class Task extends AbstractTask implements Runnable {
+	/** このタスクのルールスレッド */
+	protected Thread thread = new Thread(this);
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
 	Stack bufferedStack = new Stack();
@@ -96,7 +105,7 @@ final class Task extends AbstractTask {
 	static final int maxLoop = 100;
 	/** 親膜を持たない新しいルート膜および対応するタスクを作成する
 	 * @param runtime 作成したタスクを実行する物理マシン */
-	Task(AbstractMachine runtime) {
+	protected Task(AbstractMachine runtime) {
 		super(runtime);
 		root = new Membrane(this);
 		memStack.push(root);
@@ -110,6 +119,7 @@ final class Task extends AbstractTask {
 		root.lock();
 		root.activate(); 		// 仮の実行膜スタックに積む
 		parent.addMem(root);	// タスクは膜の作成時に設定した
+		thread.run();		// 追加
 	}
 	/** 親膜の無い膜を作成し、このタスクが管理する膜にする。 */
 	Membrane createFreeMembrane() {
@@ -118,6 +128,17 @@ final class Task extends AbstractTask {
 	
 	boolean isIdle(){
 		return idle;
+	}
+
+	/** このタスクのルールスレッドを実行する。
+	 * 実行が終了するまで戻らない。
+	 * マスタタスクのルールスレッドを実行するために使用される。*/
+	public void execAsMasterTask() {
+		thread.start();
+		try {
+			thread.join();
+		}
+		catch (InterruptedException e) {}
 	}
 	/** このタスクを実行する */
 	void exec() {
@@ -159,10 +180,10 @@ final class Task extends AbstractTask {
 				}
 				else {
 					if (Env.fTrace) {
-						Env.p( " ==> " );
+						Env.p( " --> " );
 						Env.p( Dumper.dump(getRoot()) );
 					}
-					Env.gui.onTrace();
+					Env.guiTrace();
 				}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行アトムスタックが空の時
 				flag = false;
@@ -227,7 +248,36 @@ final class Task extends AbstractTask {
 			}
 		}
 	}
-	
+	public void run() {
+		if (runtime instanceof LMNtalRuntime) { 	
+			if (Env.fTrace) {
+				Env.p( Dumper.dump( ((LMNtalRuntime)runtime).getGlobalRoot() ));
+			}
+		}
+		while (true) {
+			while (!isIdle()) {
+				exec();
+			}
+			if (((Machine)runtime).isTerminated()) break;
+			synchronized(this) {
+				if (awakened) {
+					awakened = false;
+					continue;
+				}
+				try {
+					wait();
+				}
+				catch (InterruptedException e) {}
+				awakened = false;
+			}
+			if (runtime instanceof LMNtalRuntime) { 	
+				if (Env.fTrace) {
+					Env.p( Dumper.dump( ((LMNtalRuntime)runtime).getGlobalRoot() ));
+				}
+			}
+		}	
+	}
+		
 	// タスクのルールスレッドに対する停止要求
 
 	/** このタスクのルールスレッドに対して停止要求を発行しているスレッドの個数
@@ -244,4 +294,48 @@ final class Task extends AbstractTask {
 	synchronized public void retractLock() {
 		lockRequestCount--;
 	}
+	
+
 }
+
+class MasterTask extends Task {
+	/** 親膜を持たない新しいルート膜および対応するタスクを作成する
+	 * @param runtime 作成したタスクを実行する物理マシン */
+	MasterTask(LMNtalRuntime runtime) {
+		super(runtime);
+		root = new Membrane(this);
+		memStack.push(root);
+	}
+	
+	public void run() {
+		RemoteMachine.init();
+		if (Env.fTrace) {
+			Env.p( Dumper.dump( ((LMNtalRuntime)runtime).getGlobalRoot() ));
+		}
+		while (true) {
+			while (!isIdle()) {
+				exec();
+			}
+			if (root.isStable()) {
+				RemoteMachine.terminateAll();
+				break;
+			}
+			if (((Machine)runtime).isTerminated()) break;
+			synchronized(this) {
+				if (awakened) {
+					awakened = false;
+					continue;
+				}
+				try {	
+					wait();
+				}
+				catch (InterruptedException e) {}
+				awakened = false; // ?
+			}
+			if (Env.fTrace) {
+				Env.p( Dumper.dump( ((LMNtalRuntime)runtime).getGlobalRoot() ));
+			}
+		}	
+	}
+}
+

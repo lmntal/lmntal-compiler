@@ -21,7 +21,7 @@ public class DumperTest {
 		rule.react(m);
 		System.out.println("before exec:");
 		System.out.println(Dumper.dump(m));
-		mm.exec();
+//		mm.exec(); // ²¾
 		System.out.println("after exec:");
 		System.out.println(Dumper.dump(m));
 	}
