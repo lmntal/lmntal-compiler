@@ -154,16 +154,13 @@ public final class Membrane extends AbstractMembrane {
 		AbstractMachine mach = task.getMachine();
 		synchronized(mach) {
 			((Task)task).requestLock();
-			try {
-				mach.wait();
-			}
-			catch (InterruptedException e) {}
-			while (!lock()) {
+			do {
 				try {
 					mach.wait();
 				}
 				catch (InterruptedException e) {}
 			}
+			while (!lock());
 			((Task)task).retractLock();
 		}
 	}
@@ -228,7 +225,3 @@ public final class Membrane extends AbstractMembrane {
 		}
 	}
 }
-// 仮の実行膜スタックに積まれた親膜が、別の非同期スレッドによってロックされ除去された場合にどうなるか調べる
-// 仮の実行膜スタックを2つのスレッドが同時に操作している気がする。
-// 仮の実行膜スタックはスレッドローカルストレージかも知れない。
-
