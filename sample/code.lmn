@@ -1,6 +1,4 @@
 [[/*inline_define*/
- import java.util.*;
- import java.lang.*;
  import javax.swing.*;
  import java.awt.*;
  import java.awt.event.*;
@@ -57,7 +55,7 @@
    MainPanel = getContentPane();
    MainPanel.setLayout(layout);
 
-   input = new JTextField("",4);
+   input = new JTextField("");
    input.setHorizontalAlignment(JTextField.RIGHT);
    index = new JLabel("‘O‰ñ“ü—Í     HIT   BLOW");
    for(int i=0;i<6;i++)
