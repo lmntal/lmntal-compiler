@@ -257,6 +257,7 @@ public class Compactor {
 		for (int i = 1; i < size; i++) {
 			Instruction inst = (Instruction)insts.get(i);
 			if (inst.getOutputType() == -1) continue;
+			// TODO 命令が命令列を引数に持つ場合再帰呼び出しする。localsの最大値を返すようにする
 			if (inst.getIntArg1() != locals) {
 				Integer src = (Integer)inst.getArg1();
 				Integer dst = new Integer(locals);
