@@ -35,7 +35,7 @@ public final class AtomSet implements Set{
 	/** 指定されたFunctorのアトムの数の取得 */
 	public int getAtomCountOfFunctor(Functor f) {
 		Set s = (Set)atoms.get(f);
-		if (f == null) {
+		if (s == null) {
 			return 0;
 		} else {
 			return s.size();
