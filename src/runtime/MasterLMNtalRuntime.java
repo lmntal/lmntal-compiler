@@ -10,7 +10,7 @@ public final class MasterLMNtalRuntime extends LocalLMNtalRuntime {
 		tasks.add(masterTask);
 		globalRoot = (Membrane)masterTask.getRoot();
 		// Inline
-		Inline.initInline();
+		Inline.initInline(); // TODO 適切な場所に移動する
 	}
 
 //	/**

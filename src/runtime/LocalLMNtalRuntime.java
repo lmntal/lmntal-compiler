@@ -1,7 +1,7 @@
 package runtime;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,13 +13,8 @@ import daemon.LMNtalDaemon;
  */
 public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 	List tasks = new ArrayList();
-//	protected Thread thread = new Thread(this);
-
-	/*
-	 * global ruleset id --> ruleset objectな表
-	 */
-	HashMap rulesetIDMap = new HashMap();
-
+	
+	////////////////////////////////////////////////////////////////	
 
 	public LocalLMNtalRuntime(){
 		Env.theRuntime = this;
@@ -40,7 +35,9 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 		tasks.add(t);
 		return t;
 	}
-
+	
+	////////////////////////////////////////////////////////////////
+	
 	/** （マスタタスクによって）このランタイムの終了が要求されたかどうか */
 	protected boolean terminated = false;
 	/** このランタイムの終了が要求されたかどうか */
@@ -49,31 +46,31 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 	}
 	/** このランタイムの終了を要求する。
 	 * 具体的には、この物理マシンのterminatedフラグをONにし、
-	 * 各タスクのルールスレッドに終わるように言う。*/
+	 * 各タスクのルールスレッドが終わるまで待つ。*/
 	synchronized public void terminate() {
 		terminated = true;
 		Iterator it = tasks.iterator();
 		while (it.hasNext()) {
-			((Task)it.next()).signal();
+			Task task = (Task)it.next();
+			task.signal();
+			try {
+				task.thread.join();
+			} catch (InterruptedException e) {}
 		}
-		// TODO ルールスレッドに対してjoinする（以下のコードは仮）
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {}
 	}
 
-	/** terminateフラグがONになるまで待つ。
-	 * <p>スレーブランタイムとして実行するときに使用する。*/
-	public void waitForTermination() {
-		while (!terminated) {
-			try {
-				synchronized(this) {
-					wait();
-				}
-			}
-			catch (InterruptedException e) {}
-		}
-	}
+//	/** terminateフラグがONになるまで待つ。
+//	 * <p>スレーブランタイムとして実行するときに使用する。*/
+//	public void waitForTermination() {
+//		while (!terminated) {
+//			try {
+//				synchronized(this) {
+//					wait();
+//				}
+//			}
+//			catch (InterruptedException e) {}
+//		}
+//	}
 	
 //	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
 //	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
@@ -94,30 +91,4 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 //			}
 //		} while(!allIdle);
 //	}
-
-	/**
-	 * global ruleset id --> ルールセットオブジェクトな表に登録
-	 * @deprecated
-	 */
-	boolean registerRuleset(Ruleset rs){
-		String globalid = rs.getGlobalRulesetID();
-		
-		if(globalid != null) {
-			rulesetIDMap.put(rs.getGlobalRulesetID(), rs);
-			return true;
-		}
-		
-		return false;
-	}
-
-	/**
-	 * global ruleset id --> rulset object
-	 */
-	Ruleset getRulset(String globalRulesetID){
-		Ruleset rs = (Ruleset)rulesetIDMap.get(globalRulesetID);
-		
-		if(rs != null) return rs;
-		
-		return null;
-	}
 }

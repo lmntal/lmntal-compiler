@@ -1,40 +1,94 @@
 package daemon;
 
-import java.net.InetAddress;
+//import java.net.InetAddress;
 import java.util.HashMap;
 
-import runtime.AbstractMembrane;
-import runtime.Membrane;
+import runtime.*;
 
 /**
- * グローバルID -> ローカルのobject という変換をするクラス
+ * グローバルID -> ローカルのobject という変換をするクラス（設計中）
  * 
  * <p>NEW_->objectの変換は、別途行う。
  * 
  * @author nakajima, n-kato
  *
  */
-public class IDConverter{
-	//グローバル膜ID (String) -> 膜オブジェクト (AbstractMembrane)
-	HashMap memTable = new HashMap();
+public class IDConverter {
+	/** グローバルルールセットID (String) -> Ruleset */
+	static HashMap rulesetTable = new HashMap();
+	/** グローバル膜ID (String) -> AbstractMembrane */
+	static HashMap memTable = new HashMap();
 
-	static HashMap localMemTable = new HashMap();
-	
-	
-	/*
-	 * グローバル膜ID -> 膜オブジェクト
-	 * @return 登録されていればMembrane, されてなければnull
-	 */
-	AbstractMembrane getMem(String globalMemID){
+	////////////////////////////////////////////////////////////////	
+
+//	static void init() {
+//		rulesetTable.clear();
+//		memTable.clear();
+//	}
+
+	/** 指定されたルールセットを表に登録する */
+	public static void registerRuleset(String globalid, Ruleset rs){
+		rulesetTable.put(globalid, rs);
+	}
+	/** 指定されたglobalRulesetIDを持つルールセットを探す
+	 * @return Ruleset（見つからなかった場合はnull）*/
+	public static Ruleset lookupRuleset(String globalRulesetID){
+		return (Ruleset)rulesetTable.get(globalRulesetID);
+	}
+
+	/** 指定された膜を表に登録する */
+	public static void registerGlobalMembrane(String globalMemID, AbstractMembrane mem) {
+		memTable.put(globalMemID, mem);
+	}
+	/** 指定されたglobalMemIDを持つ膜を探す
+	 * @return AbstractMembrane（見つからなかった場合はnull）*/
+	public static AbstractMembrane lookupGlobalMembrane(String globalMemID){
 		return (AbstractMembrane)memTable.get(globalMemID);
 	}
+
+	////////////////////////////////////////////////////////////////	
 	
-	public static Membrane lookupLocalMembrane(String localMemID) {
-		return (Membrane)localMemTable.get(localMemID);
+	/** グローバル膜ID (String) -> AbstractMembrane */
+	HashMap newMemTable = new HashMap();
+	/** ローカルアトムIDまたはNEW_ (String) -> Atom */
+	HashMap newAtomTable = new HashMap();
+	
+	////////////////////////////////////////////////////////////////
+
+//	void clear() {
+//		newMemTable.clear();
+//		newAtomTable.clear();
+//	}
+	
+	////////////////////////////////////////////////////////////////
+
+	/** 指定されたローカル膜を表に登録する */
+	public void registerNewMembrane(String globalMemID, AbstractMembrane mem) {
+		newMemTable.put(globalMemID, mem);
 	}
-	public static void registerLocalMembrane(String localMemID, Membrane mem) {
-		localMemTable.put(localMemID, mem);
+	/** グローバル膜IDまたはNEW_ -> 膜オブジェクト
+	 * @return Membrane（見つからなかった場合はnull）*/
+	public AbstractMembrane lookupMembrane(String memid) {
+		Object obj = newMemTable.get(memid);
+		if (obj instanceof AbstractMembrane) return (AbstractMembrane)obj;
+		return (AbstractMembrane)memTable.get(memid);
 	}
+
+	/** 指定されたローカル膜を表に登録する */
+	public void registerNewAtom(String atomID, Atom atom) {
+		newAtomTable.put(atomID, atom);
+	}
+	/** アトムIDに対応するアトムを探す
+	 * @param mem 所属膜
+	 * @return Atom（見つからなかった場合はnull）*/
+	public Atom lookupAtom(AbstractMembrane mem, String atomid) {
+		Object obj = newAtomTable.get(atomid);
+		if (obj instanceof Atom) return (Atom)obj;
+//		return (Atom)mem.getAtomID(atomid);
+		return null;
+	}
+	
+	////////////////////////////////////////////////////////////////
 	
 	/*
 	 * グローバル膜ID -> ローカル膜ID を登録する
@@ -54,46 +108,14 @@ public class IDConverter{
 //			}
 //		}
 //	}
-
-	/*
-	 * グローバル膜ID -> 膜オブジェクト を登録する
-	 */
-	boolean registerMem(String globalMemID, AbstractMembrane memobj){
-		if(memTable.get(globalMemID)==null){
-			memTable.put(globalMemID, memobj);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/*
-	 * 膜ID表を初期化
-	 */
-	void clearMemIDTable(){
-		memTable.clear();
-	}
-
-	/*
-	 * グローバルな膜IDを生成する。
-	 *
-	 * @return グローバルな膜ID。中身はInetAddress.getLocalHost() + ":" + AbstractMembrane.getID()。getLocalHost()に失敗したらnullが帰る。
-	 * @param mem グローバルなIDを振りたい膜
-	 */
-	public static String getGlobalMembraneID(AbstractMembrane mem){
-		 String newid;
-		 try {
-			 //IDを生成する
-			 newid = InetAddress.getLocalHost().toString() + ":" + mem.getLocalID();
-			 return newid;
-		 } catch (Exception e){
-			 //ID生成失敗
-			 e.printStackTrace();
-		 }
-		
-		 return null;
-	}
-
+//
+//	/*
+//	 * 膜ID表を初期化
+//	 */
+//	void clearMemIDTable(){
+//		memTable.clear();
+//	}
+//
 	/*
 	 * グローバルな膜IDを作成して、同時に表に登録する。
 	 * 
@@ -102,8 +124,8 @@ public class IDConverter{
 	 */	
 //		public static String getGlobalMembraneID(AbstractMembrane mem){
 //			//もう登録済みなら登録されているIDを返す
-//			if(localMemTable.get(mem) != null){
-//				return (String)(localMemTable.get(mem)); 
+//			if(memTable.get(mem) != null){
+//				return (String)(memTable.get(mem)); 
 //			}
 //		
 //			String newid;
@@ -111,7 +133,7 @@ public class IDConverter{
 //				//IDを生成する
 //				newid = InetAddress.getLocalHost().toString() + ":" + mem.getLocalID();
 //				//ID登録
-//				localMemTable.put(mem,newid);
+//				memTable.put(mem,newid);
 //				return newid;
 //			} catch (Exception e){
 //				//ID生成失敗

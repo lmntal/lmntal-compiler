@@ -232,8 +232,7 @@ public class LMNtalDaemon implements Runnable {
 	 */
 	public static boolean makeRemoteConnection(String fqdn) {
 		//「ブロックしないようにする」
-		//todo firewallにひっかかってパケットが消滅した時をどうするか？
-		//↑とりあえずsetSoTimeout()する。nakajima 2004-08-19
+		//todo 3分間誰も通信できなくなるのを回避するために専用スレッドを作る（後回しでよい） n-kato 2004-08-20
 
 		if (isHostRegistered(fqdn)) return true;
 		

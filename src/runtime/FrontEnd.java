@@ -225,8 +225,9 @@ public class FrontEnd {
 			m.showAllRules();
 			
 			// ผยนิ
-			LMNtalRuntimeManager.init();
 			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
+			LMNtalRuntimeManager.init();
+
 			Membrane root = rt.getGlobalRoot();
 			Env.initGUI(root);
 			//root.blockingLock();
@@ -237,7 +238,6 @@ public class FrontEnd {
 			}
 			//root.blockingUnlock();
 			((Task)root.getTask()).execAsMasterTask();
-			LMNtalRuntimeManager.terminateAllNeighbors();
 
 			if (!Env.fTrace && Env.verbose > 0) {
 				Env.d( "Execution Result:" );
@@ -246,6 +246,10 @@ public class FrontEnd {
 			if (Env.gui != null) {
 				while(true) Env.gui.onTrace();
 			}
+			
+			LMNtalRuntimeManager.terminateAllNeighbors();
+			LMNtalRuntimeManager.disconnectFromDaemon();
+			
 		} catch (Exception e) {
 			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}

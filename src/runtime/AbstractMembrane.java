@@ -71,6 +71,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		this.parent = parent;
 		id = nextId++;
 	}
+//	/**
+//	 * 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。
+//	 */
+//	Membrane(Task task) {
+//		super(task, null);
+//	}
 
 	///////////////////////////////
 	// 情報の取得
@@ -224,7 +230,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom.mem = null;
 	}
 	
-	//
+	// 以下は AbstractMembrane の final メソッド
 	
 	/** [final] 1引数のnewAtomを呼び出すマクロ */
 	final Atom newAtom(String name, int arity) {
@@ -282,7 +288,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public AbstractMembrane newRoot(String node) {
 		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(node);
 		return machine.newTask(this).getRoot();
-					
 	}
 	// ボディ操作4 - リンクの操作
 	
@@ -331,7 +336,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	/** atom2の第pos2引数に格納されたリンクオブジェクトへの参照を取得する。
 	 */
-	public Link getAtomArg(Atom atom2, int pos2) {
+	public final Link getAtomArg(Atom atom2, int pos2) {
 		return atom2.args[pos2];
 	}
 	/** atom1の第pos1引数と、リンクlink2のリンク先を接続する。
@@ -416,6 +421,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		activate();
 		//enqueueAllAtoms();
 	}
+	
 	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
 	private void setTask(AbstractTask newTask) {
 		if (isRoot()) return;
@@ -438,10 +444,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //	}
 
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される
-
+	
+	// - ガード命令
+	
 	/**
 	 * この膜のロック取得を試みる。
 	 * <p>ルールスレッドがこの膜のロックを取得するときに使用する。
+	 * <p>ロック解放にはunlock()を使用する。
 	 * @return ロックの取得に成功したかどうか */
 	public abstract boolean lock();
 	/**
@@ -449,54 +458,44 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 失敗した場合、この膜を管理するタスクのルールスレッドに停止要求を送る。その後、
 	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
 	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。
+	 * <p>ロック解放にはunlock()を使用する。
+	 * <p>ローカル膜の場合、ロック取得に成功するまで戻らない。
 	 * @return ロックの取得に成功したかどうか */
 	public abstract boolean blockingLock();
 	/**
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックをブロッキングで取得し、
 	 * 実行膜スタックから除去する。ルート膜ならばblockingLock()と同じになる。
 	 * <p>ルールスレッド以外のスレッドが最初のロックとしてこの膜のロックを取得するときに使用する。
+	 * <p>ロック解放にはasyncUnlock()を使用する。
+	 * <p>ローカル膜の場合、ロック取得に成功するまで戻らない。
 	 * @return ロックの取得に成功したかどうか */
 	public abstract boolean asyncLock();
 
-	/**
-	 * 取得したこの膜のロックを解放する。ルート膜の場合またはsignal引数がtrueの場合、
-	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
-	 * この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。
- 	 * <p>
-	 * ただしこの膜がリモート膜の場合は仮解放するだけで何もしないかも知れない。
-	 * TODO unlock は weakUnlock に名称変更する */
-	public abstract void unlock(boolean signal);
+	/** このロックした膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。
+	 * キャッシュは更新しない。
+	 * <p>ロック解放にはrecursiveUnlock()を使用する。
+	 * @return ロックの取得に成功したかどうか */
+	public abstract boolean recursiveLock();
+	
+	// - ボディ命令
 	
 	/**
 	 * 取得したこの膜のロックを解放する。ルート膜の場合、
 	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
-	 * この膜を管理するタスクに対してシグナルを発行する。
-	 * <p>
-	 * ただしこの膜がリモート膜の場合は仮解放するだけで何もしないかも知れない。
-	 * <p>unlock(false);を実行するマクロ */
-	public final void unlock() {
-		unlock(false);
-	}	
-	/** 取得したこの膜のロックを解放する。
-	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
-	 * この膜を管理するタスクに対してシグナルを発行する。
-	 * <p>ルールスレッド以外のスレッドが取得した膜のロックを解放するときに使用する。
-	 * <p>unlock(true);を実行するマクロ */
-	public final void blockingUnlock() {
-		unlock(true);
-	}
-	/** この膜のロックを強制的に解放する。リモート膜の場合も仮解法しない。
+	 * この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。
+	 * <p>ただしこの膜がリモート膜の場合は仮解放するだけで何もしないかも知れない。
+	 * <p><strike>todo unlock は weakUnlock に名称変更する</strike> */
+	public abstract void unlock();
+	
+	/** この膜のロックを強制的に解放する。リモート膜の場合も仮解放しない。
 	 * ローカル膜の場合はunlock()と同じ。*/
 	public abstract void forceUnlock();
 
 	/** この膜からこの膜を管理するタスクのルート膜までの全ての膜の取得したロックを解放し、この膜を活性化する。
-	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。ルート膜ならばblockingUnlock()と同じになる。
+	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。ルート膜の場合はunlock()と同じになる。
 	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。*/
 	public abstract void asyncUnlock();
-	
-	/** このロックした膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。キャッシュは更新しない。
-	 * @return ロックの取得に成功したかどうか */
-	public abstract boolean recursiveLock();
+
 	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/
 	public abstract void recursiveUnlock();
 

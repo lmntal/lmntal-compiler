@@ -9,7 +9,7 @@ package runtime;
  * 済20040707 nakajima コネクションの管理はRemoteMachineにまかせる。
  * @author n-kato
  */
-final class RemoteTask extends AbstractTask {
+public final class RemoteTask extends AbstractTask {
 	// 送信用
 	String cmdbuffer;	// 命令ブロック送信用バッファ
 	int nextid;		// 次のNEW_変数番号
@@ -23,14 +23,24 @@ final class RemoteTask extends AbstractTask {
 		root = new RemoteMembrane(this, parent);
 		parent.addMem(root);	// タスクは膜の作成時に設定した
 	}
+	/** 擬似タスク作成用のコンストラクタ（擬似タスクはroot=null）
+	 * @see RemoteLMNtalRuntime#createPseudoMembrane() */
+	RemoteTask(RemoteLMNtalRuntime runtime) {
+		super(runtime);
+	}
+
+	//
+	
+	/** 親膜の無い膜を作成し、このタスクが管理する膜にする。 */
+	public RemoteMembrane createFreeMembrane() {
+		return new RemoteMembrane(this);
+	}
+
 
 	///////////////////////////////
 	// 送信用
 
-	String getNextAtomID() {
-		return "NEW_" + nextid++;
-	}
-	String getNextMemID() {
+	String generateNewID() {
 		return "NEW_" + nextid++;
 	}
 
@@ -57,10 +67,10 @@ final class RemoteTask extends AbstractTask {
 			+ arg1 + " " + arg2 + " " + arg3 + " " + arg4;
 	}
 	void send(String cmd, String outarg, AbstractMembrane mem) {
-		cmdbuffer += cmd + " " + outarg + " " + mem.getGlobalMemID();
+		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + outarg;
 	}
 	void send(String cmd, String outarg, AbstractMembrane mem, String args) {
-		cmdbuffer += cmd + " " + outarg + " " + mem.getGlobalMemID() + " " + args;
+		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + outarg + " " + args;
 	}
 
 	/**

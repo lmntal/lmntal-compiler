@@ -2,6 +2,8 @@ package runtime;
 
 import java.io.*;
 import java.util.*;
+import daemon.IDConverter;
+
 /**
  * compile.RulesetCompiler によって生成される。
  * @author hara, nakajima, n-kato
@@ -22,6 +24,23 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		rules = new ArrayList();
 		id = ++lastId;
 	}
+	
+	////////////////////////////////////////////////////////////////
+
+	/** グローバルルールセットID（未定義の場合はnull）*/
+	private String globalRulesetID;
+
+	/**（仮）*/
+	public String getGlobalRulesetID() {
+		// todo ランタイムIDの有効期間を見直す
+		if (globalRulesetID == null) {
+			globalRulesetID = Env.theRuntime.getRuntimeID() + ":" + id;
+			IDConverter.registerRuleset(globalRulesetID, this);
+		}
+		return globalRulesetID;
+	}
+	
+	////////////////////////////////////////////////////////////////
 
 	/**
 	 * あるルールについてアトム主導テストを行い、マッチすれば適用する
@@ -106,10 +125,6 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			Rule r = ((Rule) l.next());
 			r.showDetail();
 		}
-	}
-	
-	public String getGlobalRulesetID() {
-		return Env.theRuntime.getRuntimeID() + ":" + id;
 	}
 	
 	public void serialize(ObjectOutputStream out) throws IOException {

@@ -26,14 +26,14 @@ public final class LMNtalRuntimeManager {
 	/** 指定されたホストに接続し、計算ノード表に登録する。
 	 *  すでに登録されている場合は生存を確認する。生存を確認できない場合はnullを返す。
 	 *  初めての分散呼び出しならば、ローカルのデーモンに接続する。
-	 *  <p>現在の実装では、確認中にブロックする。
+	 *  <p>現在の実装では、生存の確認中にブロックする。
 	 * しかしルールスレッドが長期間ブロックするのでよくないという本質的な問題がある。
 	 * 
 	 * @param nodedesc ノード識別子（現在はfqdnのみ） */
 	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
 		String fqdn = nodedesc;
 		//宛て先がlocalhostなら  自分自身を返す
-		if(LMNtalNode.isMyself(fqdn)){
+		if (LMNtalNode.isMyself(fqdn)){
 			return Env.theRuntime;
 		}
 		//以下は宛て先がremoteにある場合
@@ -91,7 +91,12 @@ public final class LMNtalRuntimeManager {
 			return false;
 		}
 	}
-	
+	public static void disconnectFromDaemon() {
+		if (daemon != null) {
+			daemon.close();
+			daemon = null;
+		}
+	}
 	private static Object terminateLock = "";
 	/** 登録されている全てのRemoteLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
 	 *  Env.theRuntime は terminate しない。*/

@@ -208,6 +208,42 @@ public class Functor implements Serializable {
 	public String getPath() {
 		return path;
 	}
+	
+	////////////////////////////////////////////////////////////////
+	
+	// todo pathやStringFunctorを考慮に入れる
+	
+	public String serialize() {
+		return getName() + "_" + getArity(); // todo 将来は、直列化を使う
+	}
+	public static Functor deserialize(String text) {
+		int loc = text.lastIndexOf('_');
+		String name = "err";
+		int arity = 0;
+		try {
+			name = text.substring(0,loc);
+			arity = Integer.parseInt(text.substring(loc + 1));
+		} catch (Exception e) {}
+		return build(name,arity);
+	}
+	/**（仮）*/
+	public static Functor build(String name, int arity) {
+		// todo compile.parser.LMNParser.addSrcAtomToMem と統合する
+		if (arity == 1) {
+			try {
+				return new IntegerFunctor(Integer.parseInt(name));
+			}
+			catch (NumberFormatException e) {
+				try {
+					return new runtime.FloatingFunctor(Double.parseDouble(name));
+				}
+				catch (NumberFormatException e2) {
+					//
+				}
+			}
+		}
+		return new Functor(name,arity);
+	}
 }
 
 //////////////////////////////

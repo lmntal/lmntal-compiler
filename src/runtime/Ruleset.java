@@ -25,14 +25,22 @@ abstract public class Ruleset {
 	 * @return 新しいRuleset */
 	//abstract
 	public Ruleset fillHoles(Functor[] holes) { return null; }
+	
 	/**
-	 * ルールセットのIDを返す
-	 * @author nakajima
-	 * @return ルールセットID
-	 * 
-	 * 
-	 */
+	 * グローバルルールセットIDを取得する
+	 * @author nakajima */
 	abstract public String getGlobalRulesetID();
+	
+	////////////////////////////////////////////////////////////////
+	
+	/** (n-kato)このメソッドを使わないように書き換えてもよい（仮）*/
+	public byte[] serialize() {
+		return new byte[0]; // TODO 実装（水野君） - ただしバイナリ転送問題の解決が先
+	}
+	/** (n-kato)このメソッドを使わないように書き換えてもよい（仮）*/
+	public static Ruleset deserialize(byte[] data) {
+		return null; // todo 実装（水野君） - ただしバイナリ転送問題の解決が先
+	}
 	
 	/**
 	 * このインスタンスの内容をストリームに書き込む。
@@ -43,7 +51,6 @@ abstract public class Ruleset {
 		out.writeObject(getClass());
 		out.writeObject(holes);
 	}
-	
 	/**
 	 * バイト列からRulesetを復元する。
 	 * @param out バイト列

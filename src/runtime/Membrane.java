@@ -13,18 +13,13 @@ public final class Membrane extends AbstractMembrane {
 	/** 実行アトムスタック */
 	private Stack ready = new Stack();
 	
-	/**
-	 * 指定されたタスクに所属する膜を作成する。
-	 * newMem/newRoot メソッド内で呼ばれる。
-	 */
+	/** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
 	private Membrane(AbstractTask task, AbstractMembrane parent) {
 		super(task, parent);
-		daemon.IDConverter.registerLocalMembrane(getLocalID(), this); // TODO free時に消す
+		daemon.IDConverter.registerGlobalMembrane(getGlobalMemID(), this); // TODO free時に消す
 	}
-	/**
-	 * 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。
-	 */
-	Membrane(Task task) {
+	/** 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。*/
+	protected Membrane(Task task) {
 		super(task, null);
 	}
 
@@ -45,6 +40,7 @@ public final class Membrane extends AbstractMembrane {
 	public void copyRulesFrom(AbstractMembrane srcMem) {
 		if (task.remote == null) super.copyRulesFrom(srcMem);
 		else task.remote.send("COPYRULESFROM",this,srcMem.getGlobalMemID());
+		// todo RemoteMembraneのやり方（最初の段階でLOADRULESETに展開する方式）に合わせる
 	}
 	/** ルールセットを追加 */
 	public void loadRuleset(Ruleset srcRuleset) {
@@ -195,6 +191,8 @@ public final class Membrane extends AbstractMembrane {
 	
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される
 	
+	// - ガード命令
+	
 	/**
 	 * この膜のロック取得を試みる。
 	 * <p>ルールスレッドがこの膜のロックを取得するときに使用する。
@@ -203,14 +201,14 @@ public final class Membrane extends AbstractMembrane {
 		if (locked) {
 			return false;
 		} else {
-			if (isRoot() && parent != null) {
-				if (parent.task.remote == null) {
-					task.remote = (RemoteTask)task;
-				}
-				else {
-					task.remote = parent.task.remote;
-				}
-			}
+//			if (isRoot() && parent != null) {
+//				if (parent.task.remote == null) {
+//					task.remote = (RemoteTask)task;
+//				}
+//				else {
+//					task.remote = parent.task.remote;
+//				}
+//			}
 			locked = true;
 			return true;
 		}
@@ -243,36 +241,68 @@ public final class Membrane extends AbstractMembrane {
 	public boolean asyncLock() {
 		if (!isRoot()) parent.asyncLock();
 		blockingLock();
+		if (isRoot()) {
+			// task.async = new Async();
+		}
 		dequeue();
 		return true;
 	}
 
+	/** このロックした膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。
+	 * @return ロックの取得に成功したかどうか */
+	public boolean recursiveLock() {
+		Iterator it = memIterator();
+		LinkedList lockedmems = new LinkedList();
+		boolean result = true;
+		while (it.hasNext()) {
+			AbstractMembrane mem = (AbstractMembrane)it.next();
+			if (!mem.blockingLock()) {
+				result = false;
+				break;
+			}
+			if (!mem.recursiveLock()) {
+				mem.unlock();
+				result = false;
+				break;
+			}
+			lockedmems.add(mem);
+		}
+		if (result) return true;
+		it = lockedmems.iterator();
+		while (it.hasNext()) {
+			AbstractMembrane mem = (AbstractMembrane)it.next();
+			mem.recursiveUnlock();
+			mem.unlock();
+		}
+		return false;
+	}
+	
+	// - ボディ命令
+	
 	/**
-	 * 取得したこの膜のロックを解放する。
-	 * ルート膜の場合またはsignal引数がtrueの場合、
+	 * 取得したこの膜のロックを解放する。ルート膜の場合、
 	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
 	 * この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。
 	 * <p>lockおよびblockingLockの呼び出しに対応する。asyncLockにはasyncUnlockが対応する。*/
-	public void unlock(boolean signal) {
-		if (isRoot()) signal = true;
-		if (signal) {
-			Task t = (Task)task;
+	public void unlock() {
+		Task task = (Task)getTask();
+		if (isRoot()) {
 			synchronized(task) {
-				t.memStack.moveFrom(t.bufferedStack);
+				task.memStack.moveFrom(task.bufferedStack);
 			}
-			t.idle = false;
+			task.idle = false;
 		}
 		locked = false;
-		if (signal) {
+		if (isRoot()) {
 			// このタスクのルールスレッドまたはその停止を待ってブロックしているスレッドを再開する。
-			((Task)getTask()).signal();
+			task.signal();
 		}
 	}
 	public void forceUnlock() {
 		unlock();
 	}
 	/** この膜からこの膜を管理するタスクのルート膜までの全ての膜の取得したロックを解放し、この膜を活性化する。
-	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。
+	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。ルート膜の場合はunlock()と同じになる。
 	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。*/
 	public void asyncUnlock() {
 		activate();
@@ -281,36 +311,8 @@ public final class Membrane extends AbstractMembrane {
 			mem.locked = false;
 			mem = mem.parent;
 		}
+		// task.async = null;
 		mem.unlock();
-	}
-	
-	/** このロックした膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。
-	 * @return ロックの取得に成功したかどうか */
-	public boolean recursiveLock() {
-		Iterator it = memIterator();
-		LinkedList lockedmems = new LinkedList();
-		boolean ok = true;
-		while (it.hasNext()) {
-			AbstractMembrane mem = (AbstractMembrane)it.next();
-			if (!mem.blockingLock()) {
-				ok = false;
-				break;
-			}
-			if (!mem.recursiveLock()) {
-				mem.blockingUnlock();
-				ok = false;
-				break;
-			}
-			lockedmems.add(mem);
-		}
-		if (ok) return true;
-		it = lockedmems.iterator();
-		while (it.hasNext()) {
-			AbstractMembrane mem = (AbstractMembrane)it.next();
-			mem.recursiveUnlock();
-			mem.unlock();
-		}
-		return false;
 	}
 	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/
 	public void recursiveUnlock() {
@@ -343,8 +345,13 @@ public final class Membrane extends AbstractMembrane {
 //		((Task)task).memStack.push(this);
 //	}
 
-	/** この膜のキャッシュを表すバイト列を取得する */
+	/** この膜のキャッシュを表すバイト列を取得する。
+	 * @see RemoteMembrane#updateCache() */
 	public byte[] cache() {
 		return new byte[0];	// TODO 実装
+		// （初期の案）以下をカンマで連結する
+		// アトム      -> atomid:functortext( リンク先atomid:pos, ... )
+		// 子膜        -> globalMemID:{ inside_proxyのatomid, ... }
+		// ルールセット -> globalRulesetID
 	}
 }

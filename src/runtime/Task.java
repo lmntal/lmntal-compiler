@@ -94,7 +94,7 @@ class Task extends AbstractTask implements Runnable {
 		thread.run();
 	}
 	/** 親膜の無い膜を作成し、このタスクが管理する膜にする。 */
-	Membrane createFreeMembrane() {
+	public Membrane createFreeMembrane() {
 		return new Membrane(this);
 	}
 	
@@ -186,8 +186,8 @@ class Task extends AbstractTask implements Runnable {
 						new Thread() {
 							AbstractMembrane mem;
 							public void run() {
-								mem.getParent().asyncLock();
-								mem.getParent().asyncUnlock();
+								if (mem.getParent().asyncLock())
+									mem.getParent().asyncUnlock();
 							}
 							public void activate(AbstractMembrane mem) {
 								this.mem = mem;

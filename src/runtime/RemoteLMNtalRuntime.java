@@ -12,7 +12,7 @@ package runtime;
  * @author n-kato, nakajima
  * 
  */
-final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
+public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 //	/**
 //	 * リモート側のホスト名。Fully Qualified Domain Nameである必要がある。
 //	 */
@@ -43,10 +43,10 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 		else {
 			task.remote = parent.task.remote;
 		}
-		String newmemid = parent.task.remote.getNextMemID();
+		String newmemid = task.remote.generateNewID();
 		((RemoteMembrane)task.root).globalid = newmemid;
 		//String parentmemid = daemon.IDConverter.getGlobalMembraneID(parent);
-		task.remote.send("NEWTASK",newmemid,parent);
+		task.remote.send("NEWROOT",newmemid,parent,hostname);
 		return task;
 	}
 	
@@ -62,4 +62,15 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 			"CONNECT \"" + hostname + "\" \""
 				+ daemon.LMNtalDaemonMessageProcessor.getLocalHostName() + "\"" );
 	}
+	
+	/** このランタイムに擬似タスクおよび擬似膜を作成して返す。
+	 * 擬似膜は、あるルート膜の親膜のプロキシとして使用される。
+	 * <br>擬似タスク ＝ ルート膜を持たないリモートタスク
+	 * <br>擬似膜 ＝ 擬似タスクが管理するリモート膜（親膜を持たない）
+	 * @return 作成した擬似膜 */
+	public RemoteMembrane createPseudoMembrane() {
+		RemoteTask task = new RemoteTask(this);	// 擬似タスクを作成
+		return new RemoteMembrane(task);
+	}
+
 }

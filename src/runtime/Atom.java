@@ -29,13 +29,10 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	/** このアトムのローカルID */
 	private int id;
 	
-	/** リモートにおけるこのアトムのローカルID（リモートが存在しない場合は未定義）*/
+	/** リモートにおけるこのアトムのローカルID（リモートが存在しない場合は未定義）
+	 * <p>リモート ＝ mem.task.remote */
 	protected String remoteid;
-		
-	static void gc() {
-		lastId = 0;
-	}
-	
+
 	///////////////////////////////
 	// コンストラクタ
 

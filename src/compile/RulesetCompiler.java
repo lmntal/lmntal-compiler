@@ -91,23 +91,22 @@ public class RulesetCompiler {
 			rules.add(rc.theRule);
 		}
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
-		InterpretedRuleset ruleset;
 		if (!rules.isEmpty()) {
 			if (Env.shuffle >= Env.SHUFFLE_RULES) {
 				it = rules.iterator();
 				while (it.hasNext()) {
-					ruleset = new InterpretedRuleset();
+					InterpretedRuleset ruleset = new InterpretedRuleset();
 					ruleset.rules.add(it.next());
-					//ruleset.compile();
+					Ruleset compiledRuleset = compileRuleset(ruleset);
 					mem.rulesets.add(ruleset);
 				}
 			} else {
-				ruleset = new InterpretedRuleset();
+				InterpretedRuleset ruleset = new InterpretedRuleset();
 				it = rules.iterator();
 				while (it.hasNext()) {
 					ruleset.rules.add(it.next());
 				}
-				//ruleset.compile();
+				Ruleset compiledRuleset = compileRuleset(ruleset);
 				mem.rulesets.add(ruleset);
 			}
 		}
@@ -124,5 +123,9 @@ public class RulesetCompiler {
 				}
 			}
 		}
+	}
+	public static Ruleset compileRuleset(InterpretedRuleset rs) {
+		// todo ここでグローバルルールセットIDを生成するとよいはず
+		return rs;
 	}
 }
