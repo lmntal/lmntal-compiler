@@ -68,7 +68,7 @@ H=close(Object) :- class(Object, "java.io.PrintWriter") |
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			pw.close();
-			mem.relink(me.nthAtmo(0), 0, me, 2);
+			mem.relink(me.nthAtom(0), 0, me, 2);
 			me.remove();
 		} catch(Exception e) {Env.e(e);}
 	]](Object).
