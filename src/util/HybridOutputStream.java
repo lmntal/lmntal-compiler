@@ -1,13 +1,28 @@
 package util;
 import java.io.*;
 
+/**
+ * バイト列と文字列の両方を１つのストリームに書き込むためのクラス。
+ * 
+ * @author Mizuno
+ */
 public class HybridOutputStream {
 	OutputStream out;
 
+	/**
+	 * 指定されたストリームにデータを書き込むためのインスタンスを生成します。
+	 * @param out データを書き込むOutputStream
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public HybridOutputStream(OutputStream out) throws IOException {
 		this.out = out;
 	}
 	
+	/**
+	 * ストリームにオブジェクトを書き込みます。
+	 * @param o 書き込むオブジェクト
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public void writeObject(Object o) throws IOException {
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		ObjectOutputStream oout = new ObjectOutputStream(bout);
@@ -16,17 +31,35 @@ public class HybridOutputStream {
 		writeBytes(bout.toByteArray());
 		out.write('\n');
 	}
-	
+
+	/**
+	 * ストリームに文字列データを書き込みます。
+	 * @param str 書き込む文字列。
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public void write(String str) throws IOException {
 		writeBytes(str.getBytes());
 	}
 
+	/**
+	 * ストリームをフラッシュします。
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public void flush() throws IOException {
 		out.flush();
 	}
+	/**
+	 * ストリームを閉じます。
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public void close() throws IOException {
 		out.close();
 	}
+	/**
+	 * ストリームにバイト列を書き込みます。
+	 * @param data 書き込むバイト列
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public void writeBytes(byte[] data) throws IOException {
 		writeInt(data.length);
 		out.write(data);
@@ -39,7 +72,13 @@ public class HybridOutputStream {
 		out.write(val >> 8);
 		out.write(val);
 	}
-	
+
+	/**
+	 * テスト用エントリポイント。
+	 * @param args
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		HybridOutputStream writer = new HybridOutputStream(new BufferedOutputStream(bout));

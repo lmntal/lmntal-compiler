@@ -1,15 +1,34 @@
 package util;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 
+/**
+ * バイト列と文字列の両方を１つのストリームから読み取るためのクラス。
+ * 
+ * @author Mizuno
+ */
 public class HybridInputStream {
-	InputStream in;
-	String[] lines;
-	int nextLine, lineCount;
-	
+	private InputStream in;
+	private String[] lines;
+	private int nextLine, lineCount;
+
+	/**
+	 * 指定されたストリームからデータを読み込むためのインスタンスを生成します。
+	 * @param in データを読み込むInputStream
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public HybridInputStream(InputStream in) throws IOException {
 		this.in = in;
 	}
-	
+
+	/**
+	 * ストリームからオブジェクトを読み取ります。
+	 * @return 読み取ったオブジェクト
+	 * @throws IOException 入出力エラーが発生した場合。読み取ったデータが文字列だった場合を含む。
+	 * @throws ClassNotFoundException 読み取ったオブジェクトのクラスが見つからなかった場合。
+	 */
 	public Object readObject() throws IOException, ClassNotFoundException {
 		if (lines != null && nextLine < lineCount) {
 			//未読み込みの文字列データが残っている
@@ -20,17 +39,26 @@ public class HybridInputStream {
 			return null;
 		}
 		if (in.read() != '\n') {
-			throw new RuntimeException("\\n is expected after Object data");
+			throw new IOException("\\n is expected after Object data");
 		}
 		ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
 		ObjectInputStream oin = new ObjectInputStream(bin);
 		return oin.readObject();
 	}
-	
+
+	/**
+	 * ストリームを閉じます。
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public void close() throws IOException {
 		in.close();
 	}
-	
+
+	/**
+	 * ストリームから、１行分の文字列データを読み取ります。
+	 * @return 読み取ったデータ。ストリームの終わりに達していた場合はnull
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public String readLine() throws IOException {
 		if (lines == null || nextLine == lineCount) {
 			byte[] bytes = readBytes();
@@ -47,8 +75,18 @@ public class HybridInputStream {
 		}
 		return lines[nextLine++];
 	}
-	
+
+	/**
+	 * ストリームから、１つのデータを表すバイト列を読み込みます。
+	 * 「１つのデータ」とは、HybridOutputStreamクラスのwrite, writeObject, writeBytesのいずれかのメソッドを用いて１回で書き込んだデータです。
+	 * @return 読み取ったバイト列
+	 * @throws IOException 入出力エラーが発生した場合。
+	 */
 	public byte[] readBytes() throws IOException {
+		if (lines != null && nextLine < lineCount) {
+			//未読み込みの文字列データが残っている
+			throw new IOException();
+		}
 		int size = readInt();
 		if (size == -1) {
 			return null;
@@ -63,7 +101,7 @@ public class HybridInputStream {
 	private int readInt() throws IOException {
 		int a1 = in.read();
 		if (a1 == -1) {
-			//このめそっどで読むデータはバイト数を表す値なので、負になる事はない
+			//このメソッドで読むデータはバイト数を表す値なので、負になる事はない
 			return -1;
 		}
 		int a2 = in.read();
