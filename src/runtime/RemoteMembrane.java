@@ -176,27 +176,28 @@ public final class RemoteMembrane extends AbstractMembrane {
 	public void activate() {
 		remote.send("ACTIVATE",this);
 	}
-
+	/** srcMemのアトムと子膜をこの膜に移動する。
+	 * <b>ただしこの膜のキャッシュは更新されない（大丈夫か？）</b> */
 	public void moveCellsFrom(AbstractMembrane srcMem) {
-		//TODO 実装
-		
-		if (srcMem.task.getMachine() != task.getMachine()) {
-			throw new RuntimeException("cross-site remote process fusion not implemented");
-		}
 		remote.send("MOVECELLSFROM", this, srcMem.getGlobalMemID());
-		remote.flush();
+		//remote.flush();
 	}
-
-	/** dstMemに移動 */
+	/** この膜をdstMemに移動する。
+	 * <b>ただしdstMemのキャッシュは更新されないことがある（大丈夫か？）</b> */
 	public AbstractMembrane moveTo(AbstractMembrane dstMem) {
-		//todo 実装
-		
-		if (dstMem.task.getMachine() != task.getMachine()) {
-			throw new RuntimeException("cross-site remote process migration not implemented");
-		}
-		// remote call of a local process migration
 		remote.send("MOVETO", this, dstMem.getGlobalMemID());
-		return super.moveTo(dstMem);
+		if (!isRoot() && dstMem.task.getMachine() instanceof LocalLMNtalRuntime) {
+			AbstractMembrane mem = dstMem.newMem(); // memはMembrane
+			mem.setTask(dstMem.task);
+			mem.setName(getName());
+			mem.moveCellsFrom(this);
+			return mem;
+		}
+		else {
+			dstMem.addMem(this);
+			if (dstMem.task != task) setTask(dstMem.task);
+			return this;
+		}
 	}
 
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される

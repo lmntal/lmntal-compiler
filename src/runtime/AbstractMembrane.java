@@ -442,12 +442,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		}
 		
 		// 子膜の移動
-		if (srcMem.task.getMachine() == task.getMachine()) {
-			// ローカル膜からローカル膜への移動
+		if (srcMem.task.getMachine() instanceof LocalLMNtalRuntime) {
+			// ローカル膜からの移動
 			mems.addAll(srcMem.mems);
 		}
 		else {
-			// リモート膜からローカル膜への移動
+			// リモート膜から（ローカル膜へ）の移動
 			it = srcMem.memIterator();
 			while (it.hasNext()) {
 				AbstractMembrane subSrcMem = (AbstractMembrane)it.next();
@@ -470,9 +470,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		while (it.hasNext()) {
 			AbstractMembrane subSrcMem = (AbstractMembrane)it.next();
 			subSrcMem.parent = this;
-			if (subSrcMem.task != task) {
-				subSrcMem.setTask(task);
-			}
+			if (subSrcMem.task != task) subSrcMem.setTask(task);
 		}
 	}
 
@@ -507,13 +505,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令。
 	 * ただしルート膜以下のタスクは変更しない。つまりルート膜に対して呼ばれた場合は何もしない。*/
-	private void setTask(AbstractTask newTask) {
+	protected void setTask(AbstractTask newTask) {
 		if (isRoot()) return;
 		task = newTask;
 		Iterator it = memIterator();
 		while (it.hasNext()) {
 			((AbstractMembrane)it.next()).setTask(newTask);
 		}
+		// TODO ホスト間移動時にGlobalMembraneIDは変更しなくて大丈夫か調べる
 	}
 //	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
 //	 * <p>いずれ、
