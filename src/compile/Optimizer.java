@@ -680,14 +680,15 @@ public class Optimizer {
 		if (inst.getKind() != Instruction.SPEC) {
 			return;
 		}
-		if (!inst.getArg2().equals(new Integer(0))) {
-			//マッチング命令列にローカル変数がある場合
-			return;
-		}
+//		if (!inst.getArg2().equals(new Integer(0))) {
+//			//マッチング命令列にローカル変数がある場合
+//			return;
+//		}
 		inst = (Instruction)head.get(1);
 		if (inst.getKind() != Instruction.FINDATOM || inst.getIntArg2() != 0) {
 			return;
 		}
+
 		Integer firstAtom = (Integer)inst.getArg1();
 
 		//条件に合致するか検査＋情報収集
@@ -759,10 +760,12 @@ public class Optimizer {
 			switch (inst.getKind()) {
 				case Instruction.DEREFATOM:
 				case Instruction.DEREFFUNC:
+//					System.out.println(inst);
 					return;
 				case Instruction.REMOVEATOM:
 //				case Instruction.FREEATOM:
 					if (inst.getArg1().equals(firstAtom)) {
+//						System.out.println(inst);
 						return;
 					}
 					break;
@@ -802,6 +805,7 @@ public class Optimizer {
 			loop.add(((Instruction)lit.next()).clone());
 		}
 		if (react.getKind() != Instruction.REACT) {
+//			System.out.println(react);
 			return;
 		}
 		//ボディ命令列に変数を合わせる
@@ -911,6 +915,7 @@ public class Optimizer {
 									break; //削除したので後の処理はしない
 								} else {
 									//絶対失敗するのでループ化しない
+//									System.out.println(inst);
 									return;
 								}
 							}
@@ -951,6 +956,7 @@ public class Optimizer {
 							if (functor.containsKey(atom)) {
 								if (!functor.get(atom).equals(inst.getArg2())) {
 									//絶対失敗するので複数回同時適用は行わない
+//									System.out.println(inst);
 									return;
 								}
 								//絶対成功するので除去	
