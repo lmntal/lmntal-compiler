@@ -20,7 +20,7 @@ parser code {:
 
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
-terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE,
+terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE, RBRACE_SLASH,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
@@ -36,7 +36,6 @@ non terminal String				AtomName;
 non terminal Object				QuotedOperatorAtom;
 non terminal Object				UnitAtom;
 non terminal Object				UnaryOpAtom;
-non terminal Object				Atom90;
 non terminal Object				Atom200;
 non terminal Object				Atom300;
 non terminal Object				Atom400;
@@ -44,6 +43,11 @@ non terminal Object				Atom500;
 non terminal Object				Atom700;
 non terminal Object				Atom800;
 non terminal Object				Atom;
+
+// 現状: (a,b)と(a,b:-c)で衝突するため、項内でのAtomListの採用が保留となっている。
+non terminal Object				AtomList;
+non terminal Object				AtomListRest;
+
 non terminal SrcMembrane		Membrane;
 non terminal SrcRule			Rule;
 non terminal SrcProcessContext	ProcessContext;
@@ -90,7 +94,7 @@ FuncName	::=   ATOM_NAME:name
 				| PATHED_ATOM_NAME:name
 					{: RESULT = new SrcName(name.replace(':','.'), SrcName.PATHED); :};
 
-// [a-z0-9][A-Za-z0-9_]*
+// [a-z][A-Za-z_0-9]* | [0-9]+
 AtomName    ::= ATOM_NAME:name
 					{: RESULT = name.toString(); :};
 
@@ -115,6 +119,8 @@ UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = atom; :}
 				| Link:link
 					{: RESULT = link; :}
+				| Membrane:mem
+					{: RESULT = mem; :}
 				;
 
 UnaryOpAtom	::=	  UnitAtom:atom
@@ -192,6 +198,7 @@ Atom700		::=   Atom500:atom
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom(op, list); :};
 
+// :の左側には ([a-z][A-Za-z_0-9]* | [0-9]+) のみを記述できる
 Atom800		::=   Atom700:atom
 					{: RESULT = atom; :}
 				| AtomName:name COLON Atom800:atom
@@ -199,6 +206,7 @@ Atom800		::=   Atom700:atom
 					   list.add(new SrcAtom(new SrcName(name))); list.add(atom);
 					   RESULT = new SrcAtom(":", list); :};
 
+// アトムや膜などから帰納的に構成される式。Atomという名称はもはや正しくない
 Atom		::=   Atom800:atom
 					{: RESULT = atom; :};
 
@@ -219,38 +227,51 @@ QuotedOperatorAtom ::=
 				| COLON			{: RESULT = new SrcAtom(":");	:}
 				| ASTERISK_ASTERISK	{: RESULT = new SrcAtom("**");	:}
 				;
-
+					   
 List        ::=   LBRACKET RBRACKET
 					{: RESULT = new SrcAtom("[]"); :}
-                | LBRACKET Atom:atom ListCdr:cdr RBRACKET
+                | LBRACKET Process:atom ListCdr:cdr RBRACKET
                     {: LinkedList list = new LinkedList();
                        list.add(atom); list.add(cdr);
                        RESULT = new SrcAtom(".", list); :};
-
-ListCdr     ::=   GUARD Atom:atom
+ListCdr     ::=   GUARD Process:atom
                     {: RESULT = atom;  :}
-               | COMMA Atom:atom ListCdr:cdr
+               | COMMA Process:atom ListCdr:cdr
                     {: LinkedList list = new LinkedList();
                        list.add(atom); list.add(cdr);
                        RESULT = new SrcAtom(".", list); :}
                 |  
                     {: RESULT = new SrcAtom("[]"); :};
 
+AtomList     ::=  Atom:atom AtomList:atomlist
+					{: if (atomlist == null) { RESULT = atom; }
+					   else {
+					     LinkedList list = new LinkedList();
+                         list.add(atom); list.add(atomlist);
+                         RESULT = new SrcAtom(",", list);
+                       } :};
+AtomListRest ::=  RPAREN
+					{: RESULT = null; :}
+                | COMMA Atom:atom AtomListRest:atomlist
+                    {: LinkedList list = new LinkedList();
+                       list.add(atom); list.add(atomlist);
+                       RESULT = new SrcAtom(",", list); :};
 
-Membrane	::=	  AtomName:name COLON LBRACE WorldProcessList:list RBRACE SLASH
-					{: SrcMembrane sMem = new SrcMembrane(name, list);
-					   sMem.stable = true;
-					   RESULT = sMem; :}
-				| AtomName:name COLON LBRACE WorldProcessList:list RBRACE
-					{: RESULT = new SrcMembrane(name, list); :}
-				| LBRACE WorldProcessList:list RBRACE SLASH
+Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
+				//	{: SrcMembrane sMem = new SrcMembrane(name, list);
+				//	   sMem.stable = true;
+				//	   RESULT = sMem; :}
+				//| AtomName:name COLON LBRACE WorldProcessList:list RBRACE
+				//	{: RESULT = new SrcMembrane(name, list); :}
+				//|
+				   LBRACE WorldProcessList:list RBRACE_SLASH
 					{: SrcMembrane sMem = new SrcMembrane(list);
 					   sMem.stable = true;
 					   RESULT = sMem; :}
 				| LBRACE WorldProcessList:list RBRACE
 					{: RESULT = new SrcMembrane(list); :};
 					
-
+// 丸カッコなしのルール構文
 Rule		::=	  ProcessList:head RULE ProcessList:body 
 					{: RESULT = new SrcRule(head, body); :}
 			    | ProcessList:head RULE ProcessList:guard GUARD ProcessList:body 
@@ -298,15 +319,27 @@ NonemptyLinkList ::=  Link:link
 				
 Process		::=   Atom:p
 					{:  RESULT = p; :}
+//				| NEGATIVE Atom:atom
+//					{: LinkedList list = new LinkedList();
+//					   list.add(atom);
+//					   RESULT = new SrcAtom(new SrcName("\\+"), list, atomleft, atomright); :}
+//
+//				| NEGATIVE LPAREN AtomList:atomlist
+//					{: LinkedList list = new LinkedList();
+//					   list.add(atomlist);
+//					   RESULT = new SrcAtom(new SrcName("\\+"), list, atomleft, atomright); :}
 				| Aggregate:p
 					{:  RESULT = p; :}
-				| Membrane:p
-					{:  RESULT = p; :};
+//				| Membrane:p
+//					{:  RESULT = p; :}
 //				| Rule:p
 //					{:  RESULT = p; :}
 //				| Context:p
-//					{:  RESULT = p; :};
+//					{:  RESULT = p; :}
+				;
 
+// Processをカンマで区切った列。
+// （現在、構文エラーを減らすために、膜の前のカンマは省略できるという特別扱いが採用されている）
 ProcessList ::= /* epsilon */
 					{: RESULT = new LinkedList(); :}
 				| NonemptyProcessList:list
@@ -321,6 +354,7 @@ NonemptyProcessList ::=
 				| NonemptyProcessList:list COMMA Process:p
 					{: list.add(p); RESULT = list; :};
 
+// ProcessListおよびRuleをピリオドで区切った列。末尾に1つのピリオドを追加しても受理する。
 WorldProcessList ::= /* epsilon */
 					{: RESULT = new LinkedList(); :}
 				| NonemptyWorldProcessList:list
@@ -330,14 +364,9 @@ WorldProcessList ::= /* epsilon */
 NonemptyWorldProcessList ::=
 				  NonemptyProcessList:p
 					{: RESULT = p; :}
-//				| NonemptyProcessList:p COMMA
-//					{: RESULT = p; :}
 				| Rule:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
 				| NonemptyWorldProcessList:list PERIOD Rule:p
 					{: list.add(p); RESULT = list; :}
 				| NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
-					{: list.addAll(p); RESULT = list; :}
-//				| NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p COMMA
-//					{: list.addAll(p); RESULT = list; :}
-				;
+					{: list.addAll(p); RESULT = list; :};
