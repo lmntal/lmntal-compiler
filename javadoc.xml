@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="LMNtal" default="javadoc">
+    <target name="javadoc">
+        <javadoc destdir="doc" access="public" use="true" notree="false"
+            nonavbar="false" noindex="false" splitindex="true"
+            author="true" version="true" nodeprecatedlist="false"
+            nodeprecated="false"
+            packagenames="org.gnu.readline,compile,runtime,test,util"
+            sourcepath="src"
+            classpath="bin;C:\p\eclipse\plugins\org.junit_3.8.1\junit.jar" doctitle="LMNtal"/>
+    </target>
+</project>

@@ -1,6 +1,7 @@
 package compile;
 
-import java.util.*;
+import java.util.List;
+
 import runtime.Functor;
 
 /** ソースコード中のアトムの構造を表すクラス */

@@ -1,7 +1,7 @@
 package compile;
 
-import runtime.HeadInstruction;
 import runtime.BodyInstruction;
+import runtime.HeadInstruction;
 
 public final class Rule {
 	public HeadInstruction[] memMatch;

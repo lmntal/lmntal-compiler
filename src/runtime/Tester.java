@@ -1,6 +1,9 @@
 package runtime;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import junit.framework.TestCase;
 
 public class Tester extends TestCase {

@@ -1,10 +1,14 @@
 package runtime;
 
-import java.util.*;
 import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-
-import util.*;
+import util.Util;
 
 /**
  * アトムの集合を管理するためのクラス。

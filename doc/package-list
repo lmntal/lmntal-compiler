@@ -1,4 +1,5 @@
 compile
+org.gnu.readline
 runtime
-runtime.stack
+test
 util

@@ -1,6 +1,10 @@
 package runtime;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 class Dumper {
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
