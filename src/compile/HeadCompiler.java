@@ -10,220 +10,222 @@ import runtime.Instruction;
 import compile.structure.*;
 
 /**
- * @author pa
- *
+ * 膜に対するマッチング命令列を出力する
+ * @author n-kato, pa
+ * 
+ * TODO 簡単のため、いずれ仮引数IDを廃止する。
+ * Ruby版では仮引数IDがそのままボディ命令列の仮引数番号を表していたが、今は違うので、仮引数ID自身には意味が無くなったため。
+ * この廃止に伴って、仮引数IDでループする部分は全てatoms.iterator()を使うように変更する。
+ * 
+ * TODO 【未実装部分】アトムや膜の未取得時には UNBOUND が返るようにする。または、isAtomLoadedマクロなどを作る。UNBOUNDの値を-1にする。
+ * TODO pathという命名が現状を正しく表していない。実際はvarnum
+ * TODO freememsという命名が現状を正しく表していない。実際はmems
+ * 
+ * <p><b>現状</b>　
+ * 現在マッチング命令列では、本膜の変数番号を0、主導するアトムの変数番号を1にしている。これは今後も変えない。
+ * ボディ命令列の仮引数では、先にfreememsを枚挙してから、その続きの変数番号にatomsを枚挙している。
+ * 本膜の仮引数IDが0である。この制約は今後、仮引数IDがなくなると同時になくなる。
  */
 public class HeadCompiler {
 	public Membrane m;
-	public List atoms = new ArrayList();
 	
 	/**
-	 * 空の膜を保持する。実引数リストは通常アトムから成るが、空膜にマッチさせる時は空膜自身が実引数となる。
-	 * 実引数リスト内で、任意の空膜は任意のアトムより後ろに来る。
+	 * OBSOLETE: 空の膜を保持する。実引数リストは通常アトムから成るが、空膜にマッチさせる時は空膜自身が実引数となる。
+	 * OBSOLETE: 実引数リスト内で、任意の空膜は任意のアトムより後ろに来る。
+	 * メモ: 空膜と言っても{$p}なども含まれる
 	 */
-	public List freemems = new ArrayList();
+	public List freemems      = new ArrayList();	// 出現する膜のリスト。[0]がm。memsに名称変更予定
+	public List atoms         = new ArrayList();	// 出現するアトムのリスト
 	
 	public boolean visited[];
-	public Map  mempaths      = new HashMap();
-	public List atomidpath    = new ArrayList();
-	public List match         = new ArrayList();
-	public Map  atomids       = new HashMap();
+
+	public Map  mempath       = new HashMap();	// Membrane -> 変数番号
+	public Map  atompath      = new HashMap();	// Atom -> 変数番号。いずれatomids/atomidpathに取って代わる
 	
-	public int varcount;
+	public Map  atomids       = new HashMap();	// Atom -> 仮引数ID
+	public List atomidpath    = new ArrayList();	// 仮引数ID -> 変数番号。いずれ配列にする。
+	
+	public List match         = new ArrayList();
+	
+	int varcount;	// いずれアトムと膜で分けるべきだと思う
+		
+	final int atomToID(Atom atom) { return ((Integer)atomids.get(atom)).intValue(); }
+	final int atomIDToPath(int id) { return ((Integer)atomidpath.get(id)).intValue();}
+	final int atomToPath(Atom atom) { return atomIDToPath(atomToID(atom)); }
+
+	final int memToPath(Membrane mem) { return ((Integer)mempath.get(mem)).intValue(); }
+	
+	static final int UNBOUND = 0;
 	
 	HeadCompiler(Membrane m) {
 		Env.n("HeadCompiler");
 		this.m = m;
 	}
 	
-	/**
-	 * head の仮引数リストをつくっている。何番目がどのアトム。
-	 */
-	public void enumformals(Membrane mem) {
-		Env.c("enumformals");
-		for(int i=0;i<mem.atoms.size();i++) {
-			Atom atom = (Atom)(mem.atoms.get(i));
-			
-			// アトム番号をいれる。
+	/** 膜memの子孫の全てのアトムと膜を、それぞれリストatomsとfreememsに追加する。
+	 * リスト内の追加された位置がそのアトムおよび膜の仮引数IDになる。*/
+	public void enumFormals(Membrane mem) {
+		Env.c("enumFormals");
+		Iterator it = mem.atoms.iterator();
+		while (it.hasNext()) {
+			// アトムの仮引数IDを登録する
+			Atom atom = (Atom)it.next();
 			atomids.put(atom, new Integer(atoms.size()));
 			atoms.add(atom);
 		}
-		for(int i=0;i<mem.mems.size();i++) {
-			Membrane submem = (Membrane)(mem.mems.get(i));
-			
-			enumformals(submem);
+		freemems.add(mem);	// 本膜はfreemems[0]
+		it = mem.mems.iterator();
+		while (it.hasNext()) {
+			enumFormals((Membrane)it.next());
 		}
-		// 子膜それぞれにやってたのを、自分に関して調べるように変更。
-		// これで大元の膜に対してこれを書く必要がなくなった（とおもう）
-		if(mem.atoms.size() + mem.mems.size() == 0) {
-			freemems.add(mem);
-		}
-		Env.p("atomids = "+atomids);
-		Env.p("atoms = "+atoms);
-		Env.p("freemems = "+freemems);
+		// OBSOLETE: 子膜それぞれにやってたのを、自分に関して調べるように変更。
+		// OBSOLETE: これで大元の膜に対してこれを書く必要がなくなった（とおもう）
+		// // bodyでのgetparentを廃止するために条件判定を除去。本膜を[0]にするため上に移動。
+		//if(mem.atoms.size() + mem.mems.size() == 0) {
+		//freemems.add(mem);
+		//}
+		//Env.p("atomids = "+atomids);
+		//Env.p("atoms = "+atoms);
+		//Env.p("freemems = "+freemems);
 	}
 	
 	public void prepare() {
 		Env.c("prepare");
 		varcount = 0;
-		mempaths.clear();
+		mempath.clear();
+		atompath.clear();
 		visited = new boolean[atoms.size()];
 		atomidpath = new ArrayList();
-		for(int i=0;i<atoms.size();i++) atomidpath.add(null);
-		match.clear();
+		for (int i = 0; i < atoms.size(); i++) atomidpath.add(null);
+		match = new ArrayList();
 	}
 	
-	public void compile_group(int targetid) {
-		Env.c("compile_group");
-		
-		LinkedList targetidstack = new LinkedList();
-		Atom atom, buddyatom;
-		LinkOccurrence buddylink;
-		int buddyid, buddyatompath;
-		Membrane targetmem, buddymem;
-		
-		targetidstack.add(new Integer(targetid));
-		while( ! targetidstack.isEmpty() ) {
-			targetid = ((Integer)targetidstack.removeFirst()).intValue();
+	public void compileLinkedGroup(int atomid) {
+		Env.c("compileLinkedGroup");
+		LinkedList targetidqueue = new LinkedList();
+		targetidqueue.add(new Integer(atomid));
+		while( ! targetidqueue.isEmpty() ) {
+			int targetid = ((Integer)targetidqueue.removeFirst()).intValue();
 			
-			if( visited[targetid] ) continue;
+			if (visited[targetid]) continue;
 			visited[targetid] = true;
 			
-			atom = (Atom)(atoms.get(targetid));
-			for(int pos=1; pos <= atom.functor.getArity(); pos++) {
-				buddylink = atom.args[pos];
-				if(buddylink.buddy.equals(buddylink)) continue;
-				buddyatom = buddylink.atom;
-				buddyid = ((Integer)(atomids.get(buddyatom))).intValue();
-				if(buddyid==0) continue;
+			Atom atom = (Atom)atoms.get(targetid);
+			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
+				LinkOccurrence buddylink = atom.args[pos].buddy;
+				if (buddylink == null) continue; // ガード匿名リンクは無視
 				
-				if( ((Integer)(atomidpath.get(buddyid))).intValue() != 0 ) {
-					if( buddyatom.mem.mems.get(0).equals(atom.mem.mems.get(0)) ) {
-						int b = ((Integer)(atomidpath.get(buddyid))).intValue();
-						int t = ((Integer)(atomidpath.get(targetid))).intValue();
-						if(b<t) continue;
-						if(b==t && atom.args[pos].pos < pos) continue;
+				Atom buddyatom = buddylink.atom;
+				int buddyid = atomToID(buddyatom);
+				if (buddyid == 0) continue; // 右辺へのリンクは無視
+				
+				if (atomIDToPath(buddyid) != UNBOUND) { // リンク先のアトムをすでに取得している場合
+					// lhs(>)->lhs(<) または neg(>)->sameneg(<) ならば、
+					// すでに同一性を確認するコードを出力しているため、何もしない
+					if (buddyatom.mem == m && atom.mem == m) {
+						int b = atomIDToPath(buddyid);
+						int t = atomIDToPath(targetid);
+						if (b < t) continue;
+						if (b == t && buddylink.pos < pos) continue;
 					}
 				}
-				buddyatompath = varcount += 1;
-				match.add( Instruction.dummy("[:deref, buddyatompath, @atomidpath[targetid],  pos, atom.args[pos].pos]") );
-				if( ((Integer)(atomidpath.get(buddyid))).intValue() != 0 ) {
-					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs
-					match.add( Instruction.dummy("[:eq, buddyatompath, @atomidpath[buddyid]]") );
+				int buddyatompath = ++varcount;
+				match.add( new Instruction(Instruction.DEREF,
+					buddyatompath, atomIDToPath(targetid), pos, buddylink.pos ));
+					
+				if( atomIDToPath(buddyid) != UNBOUND ) { // リンク先のアトムをすでに取得している場合
+					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs なのでリンク先のアトムの同一性を確認
+					match.add(new Instruction(Instruction.EQATOM,
+						buddyatompath, atomIDToPath(buddyid) ));
 					continue;
 				}
+				
+				// リンク先のアトムを変数に取得する
+				
 				atomidpath.set(buddyid, new Integer(buddyatompath));
-				targetidstack.addLast( new Integer(buddyid) );
-				targetmem = atom.mem;
-				buddymem  = buddyatom.mem;
+				targetidqueue.addLast( new Integer(buddyid) );
+				match.add(new Instruction(Instruction.FUNC, buddyatompath, buddyatom.functor));
 				
-//				if( buddymem.mems.get(0).equals(targetmem.mems.get(0)) ) {
-//					// lhs->lhs, neg->sameneg
-//					while( targetmem.memlevel > buddymem.memlevel ) {
-//						targetmem = targetmem.mem;
-//					}
-//				}
-			}
-		}
-		/*
-#
-				if buddymem.getmem(0) == targetmem.getmem(0) # lhs->lhs, neg->sameneg
-					while targetmem.memlevel > buddymem.memlevel
-						targetmem = targetmem.mem
-					end
-					targetmemlevel = targetmem.memlevel
-				else # neg->anotherneg
-					targetmem = nil
-					targetmemlevel = 0
-				end
-				@match.push [:func, buddyatompath, buddyatom.func]
-				buddypath = [:memof,buddyatompath]
-				while buddymem.memlevel > targetmemlevel
-					@mempaths[buddymem] = buddypath.dup
-					buddypath.unshift :memof
-					buddymem = buddymem.mem
-				end
-				if targetmem
-					until buddymem == targetmem
-						targetmem = targetmem.mem
-						if @mempaths[buddymem]
-							break
-						else
-							buddymem.mem.each_mem do | othermem |
-								if othermem != buddymem and @mempaths[othermem]
-									@match.push [:neq, buddypath, @mempaths[othermem]]
-								end
-							end
-						end
-						@mempaths[buddymem] = buddypath
-						buddypath = buddypath.dup
-						buddypath.unshift :memof
-						buddymem = buddymem.mem
-					end
-				end
-				targetpath = @mempaths[buddymem]
-				@match.push [:eq, targetpath, buddypath]
-			end
-		end
-	end
-		 */
-	}
-	public void compile_mem(Membrane mem) {
-		Env.c("compile_mem");
-		
-		Iterator l;
-		l = mem.atoms.iterator();
-		while(l.hasNext()) {
-			Atom atom = (Atom)(l.next());
-			
-			// 仮引数番号
-			int targetid = ((Integer)(atomids.get(atom))).intValue();
-			if(atomidpath.get(targetid) == null) {
-				atomidpath.set(targetid, new Integer(++varcount));
-				match.add( Instruction.findatom(varcount, (List)(mempaths.get(mem)), atom.functor) );
-				
-				Iterator l2=mem.atoms.iterator();
-				while(l2.hasNext()) {
-					Atom otheratom = (Atom)(l2.next());
-					
-					int z = ((Integer)( atomidpath.get( ((Integer)(atomids.get(otheratom))).intValue() ) )).intValue();
-					if(z==0) continue;
-					if(! otheratom.functor.equals(atom.functor)) continue;
-					if(otheratom.equals(atom)) continue;
-					match.add( Instruction.dummy("[:neq"+varcount+", "+atomidpath+", "+z) );
+				if (atom.functor.getName() == ProxyAtom.OUTSIDE_PROXY_NAME && pos == 0) {
+					// 子膜へのリンクの場合
+					Membrane buddymem = buddyatom.mem;								
+					int buddymempath = memToPath(buddyatom.mem);
+					if (buddymempath != UNBOUND) {
+						match.add(new Instruction( Instruction.TESTMEM, buddymempath, buddyatompath ));
+					}
+					else {
+						buddymempath = ++varcount;
+						mempath.put(buddymem, new Integer(buddymempath));
+						match.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath ));
+					// // GETMEM時代のコード
+					//	Iterator it = buddymem.mem.mems.iterator();
+					//	while (it.hasNext()) {
+					//		Membrane othermem = it.getNext();
+					//		if (othermem != buddymem && memToPath(othermem) != UNBOUND) {
+					//			match.add(new Instruction( Instruction.NEQMEM,
+					//				buddymempath, memIDPath(othermem) ));
+					//		}
+					//	}
+					}
 				}
 			}
-			compile_group(targetid);
-		}
-		
-		l = mem.mems.iterator();
-		while(l.hasNext()) {
-			Membrane submem=(Membrane)(l.next());
-			
-			if(! mempaths.containsValue(submem) ) {
-				mempaths.put(submem, new Integer(++varcount));
-				match.add( Instruction.anymem(varcount, ((Integer)mempaths.get(submem.mem)).intValue()) );
-				
-				Iterator l2=mem.mems.iterator();
-				while(l2.hasNext()) {
-					Membrane othermem=(Membrane)(l2.next());
-					
-					if(null == mempaths.get(othermem)) continue;
-					if(othermem.equals(submem)) continue;
-					match.add( Instruction.dummy("[:neq, ["+varcount+"], "+mempaths.get(othermem.mem)) );
-				}
-			}
-			// プロセス文脈がないときは、数が一致する必要がある。
-			if(0==submem.processContexts.size()) {
-				match.add( Instruction.dummy("[:ieq, "+submem.atoms.size()+", [:natoms, "+mempaths.get(submem)) );
-				match.add( Instruction.dummy("[:ieq, "+submem.mems.size()+", [:nmems, "+mempaths.get(submem)) );
-			}
-			if(0==submem.ruleContexts.size()) {
-				match.add( Instruction.dummy("[:norules, "+mempaths.get(submem)) );
-			}
-			compile_mem(submem);
 		}
 	}
+	public void compileMembrane(Membrane mem) {
+		Env.c("compileMembrane");
+		int thismempath = memToPath(mem);
+		Iterator it = mem.atoms.iterator();
+		while (it.hasNext()) {
+			Atom atom = (Atom)it.next();
+			int targetid = atomToID(atom); // 仮引数ID
+			if (atomIDToPath(targetid) == UNBOUND) {
+				// 見つかったアトムを変数に取得する
+				int atompath = ++varcount;
+				match.add(Instruction.findatom(atompath, thismempath, atom.functor));
+				// すでに取得しているアトムとの非同一性を検査する
+				Iterator it2 = mem.atoms.iterator();
+				while (it2.hasNext()) {
+					Atom otheratom = (Atom)it2.next();					
+					int other = atomToPath(otheratom);
+					if (other == UNBOUND) continue;
+					if (!otheratom.functor.equals(atom.functor)) continue;
+					//if (otheratom == atom) continue;
+					match.add(new Instruction(Instruction.NEQATOM, atompath, other));
+				}
+				atomidpath.set(targetid, new Integer(atompath));
+			}
+			compileLinkedGroup(targetid);
+		}
+		it = mem.mems.iterator();
+		while (it.hasNext()) {
+			Membrane submem = (Membrane)it.next();
+			int submempath = memToPath(submem);
+			if (submempath == UNBOUND) {
+				// 子膜を変数に取得する
+				submempath = ++varcount;
+				match.add(Instruction.anymem(submempath, thismempath));
+				Iterator it2 = mem.mems.iterator();
+				while (it2.hasNext()) {
+					Membrane othermem = (Membrane)it2.next();
+					int other = memToPath(othermem);
+					if (other == UNBOUND) continue;
+					//if (othermem == submem) continue;
+					match.add(new Instruction(Instruction.NEQMEM, submempath, other));
+				}
+				mempath.put(submem, new Integer(submempath));
+			}
+			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
+			if (submem.processContexts.isEmpty()) {
+				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
+				match.add(new Instruction(Instruction.NMEMS,  submempath, submem.mems.size()));
+			}
+			if (submem.ruleContexts.isEmpty()) {
+				match.add(new Instruction(Instruction.NORULES, submempath));
+			}
+			compileMembrane(submem);
+		}
+	}
+	/**@deprecated*/
 	public List getactuals() {
 		Env.c("HeadCompiler::getactuals");
 		
@@ -233,7 +235,21 @@ public class HeadCompiler {
 			args.add( atomidpath.get(i) );
 		}
 		for(int i=0;i<freemems.size();i++) {
-			args.add( mempaths.get(freemems.get(i)) );
+			args.add( mempath.get(freemems.get(i)) );
+		}
+		return args;
+	}
+	public List getAtomActuals() {
+		List args = new ArrayList();		
+		for (int i = 0; i < atoms.size(); i++) {
+			args.add( atomidpath.get(i) );
+		}
+		return args;
+	}		
+	public List getMemActuals() {
+		List args = new ArrayList();		
+		for (int i = 0; i < freemems.size(); i++) {
+			args.add( mempath.get(freemems.get(i)) );
 		}
 		return args;
 	}
