@@ -13,12 +13,11 @@ public final class InterpretedRuleset extends Ruleset {
 	/** ルールセット番号 */
 	private int id;
 	private static int lastId=600;
-        
-        
+	
 	/** とりあえずルールの配列として実装 */
 	public List rules;
-        
-        
+	
+	
 	/**
 	 * RuleCompiler では、まず生成してからデータを入れ込む。
 	 * ので、特になにもしない
@@ -27,7 +26,7 @@ public final class InterpretedRuleset extends Ruleset {
 		rules = new ArrayList();
 		id = ++lastId;
 	}
-        
+	
 	/**
 	 * あるルールについてアトム主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
@@ -301,28 +300,4 @@ public final class InterpretedRuleset extends Ruleset {
 		} 
 	}
 }
-/* 
- 
-[最も簡単な実装方法]
 
-4種類のデータに対応するArrayListを保持する。
-とりあえず最初はメソッド内の局所変数としてでよい。
-
-命令引数が変数番号のときはgetやsetを使ってリスト内を間接参照する。
-
-命令が失敗したら、ロックした膜を逆順に解放する。
-
-proceed命令では自動解放せずにそのままreturnする。
-
-spec命令の仕様はとりあえず無視して何となく作って下さい。
-2引数の仕様を仮定する場合は4つのリストを全部varcountの長さで初期化すれば
-大丈夫です。いずれ、この3/4が無駄になっているデータ保持方法を改めます。
-
-**********
-
-まずはbodyから作って下さい。
-
-メソッドへの入力は配列でなくArrayListにして、
-それを局所変数用にも使い回すようにするためにサイズ変更しても結構です。
-
-*/
