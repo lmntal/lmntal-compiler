@@ -9,6 +9,7 @@ public class IntegerFunctor extends Functor {
 	public String getName() { return "" + value; }
 	public int hashCode() { return value; }
 	public int intValue() { return value; }
+	public Object getValue() { return new Integer(value); }
 	public boolean equals(Object o) {
 		return (o instanceof IntegerFunctor) && ((IntegerFunctor)o).value == value;
 	}

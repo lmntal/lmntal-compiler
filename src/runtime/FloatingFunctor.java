@@ -9,6 +9,7 @@ public class FloatingFunctor extends Functor {
 	public String getName() { return "" + value; }
 	public int hashCode() { return (int)(Double.doubleToLongBits(value) >> 32); }
 	public double floatValue() { return value; }
+	public Object getValue() { return new Float(value); }
 	public boolean equals(Object o) {
 		return (o instanceof FloatingFunctor) && ((FloatingFunctor)o).value == value;
 	}

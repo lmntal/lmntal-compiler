@@ -44,5 +44,16 @@ H=sys.argv :- H=[[/*inline*/
 	me.remove();
 	]].
 
+/**
+ * sys.perpetual : unit -> unit
+ * 
+ * Return argv
+ */
+sys.perpetual(on) :- [[/*inline*/
+	mem.makePerpetual();
+	me.setName("nil");
+	]].
+
+
 }.
 

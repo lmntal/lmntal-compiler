@@ -8,6 +8,7 @@ public class ObjectFunctor extends Functor {
 	public ObjectFunctor(Object data) { super("",1);  this.data = data; }
 	public int hashCode() { return data.hashCode(); }
 	public Object getObject() { return data; }
+	public Object getValue() { return data; }
 	public boolean equals(Object o) {
 		return o.getClass() == getClass() && data.equals(((ObjectFunctor)o).data);
 	}

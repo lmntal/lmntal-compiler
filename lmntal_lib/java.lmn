@@ -1,0 +1,117 @@
+/*
+NAME
+	Java module
+
+SYNOPSIS
+	r0=java.new("java.awt.Frame", ["test"]).
+	r0=H :- unary(H) | r1=H, s=java.invoke(H, show).
+	
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/07/15(Thu)
+
+*/
+
+
+{
+module(java).
+
+[[/*inline_define*/
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+class Java {
+	static Object doInvoke(Object obj, String methodName) {
+		return doInvoke(obj, methodName, null);
+	}
+	static Object doInvoke(Object obj, String methodName, Object argv[]) {
+		Object r = null;
+		if(argv==null) argv=new Object[0];
+		Class cl[] = new Class[argv.length];
+		
+		try {
+			// 必要に応じて追加する
+			Class IntegerClass = Class.forName("java.lang.Integer");
+			// メソッドを識別するためにクラスの配列をつくる
+			for(int i=0;i<cl.length;i++) {
+				cl[i] = argv[i].getClass();
+				if(cl[i].equals(IntegerClass)) cl[i] = Integer.TYPE;
+//				System.out.println(argv[i].getClass());
+			}
+		} catch (Exception e) {
+		}
+		
+		try {
+			Method m = obj.getClass().getMethod(methodName, cl);
+			r = m.invoke(obj, argv);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return r;
+	}
+	static Object doNew(String className) {
+		return doNew(className, null);
+	}
+	static Object doNew(String className, Object argv[]) {
+		Object r = null;
+		if(argv==null) argv=new Object[0];
+		try {
+			Class cl = Class.forName(className);
+			Constructor cn[] = cl.getConstructors();
+			for(int i=0;i<cn.length;i++) {
+				try {
+//					System.out.println("-----------------------\n"+cn[i]);
+					r = cn[i].newInstance(argv);
+					break;
+				} catch (Exception e) {
+//					e.printStackTrace();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return r;
+	}
+}
+]].
+
+/**
+ * new : String -> List of Object -> Object
+ * 
+ * 指定したクラスの新しいインスタンスを返す
+ */
+H=java.new(Class) :- H=java.new(Class, []).
+H=java.new(Class, List) :- unary(Class) | H=[[/*inline*/
+//	System.out.println(me.nth(0));
+	Object obj = Java.doNew(me.nth(0), util.Util.arrayOfList(me.getArg(1)));
+//	System.out.println(obj);
+	Atom n = mem.newAtom(new ObjectFunctor(obj));
+	Atom nil = mem.newAtom(new Functor("nil", 1));
+	mem.relink(nil, 0, me, 1);
+	mem.relink(n, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.remove();
+	]](Class, List).
+
+/**
+ * invoke : Object -> String -> List of Object -> Object
+ * 
+ * 指定したオブジェクトのメソッドを呼び出し、結果を返す
+ */
+H=java.invoke(Object, Method) :- H=java.invoke(Object, Method, []).
+H=java.invoke(Object, Method, List) :- unary(Method), unary(Object) | H=[[/*inline*/
+//		System.out.println(me.nth(0));
+	Object obj = me.nthAtom(0).getFunctor().getValue();
+	Object res = Java.doInvoke(obj, me.nth(1), util.Util.arrayOfList(me.getArg(2)));
+	if(res==null) res = "nil";
+	Atom n = mem.newAtom(new ObjectFunctor(res));
+	Atom nil = mem.newAtom(new Functor("nil", 1));
+	mem.relink(nil, 0, me, 2);
+	mem.relink(n, 0, me, 3);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	]](Object, Method, List).
+
+}.

@@ -5,9 +5,16 @@
 package test;
 
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import java.awt.Frame;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import runtime.Env;
 
@@ -19,15 +26,46 @@ import runtime.Env;
  */
 public class Test {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 //		a();
 //		b();
 //		c();
 //		d();
 //		e();
-		f();
+//		f();
+		g();
 	}
 	
+	public static void g() throws Exception {
+		if(false) {
+			Frame fr = new Frame("test");
+			fr.setSize(200,300);
+			fr.show();
+		}
+		if(true) {
+			Class cl = Class.forName("java.awt.Frame");
+			Method[] m = cl.getMethods();
+			Class[] cls = new Class[2];
+			cls[0] = cls[1] = Integer.TYPE;
+			Method tm = cl.getMethod("setSize", cls);
+			System.out.println(tm);
+			for(int i=0;i<m.length;i++) {
+				System.out.println(m[i]);
+				Class[] pt = m[i].getParameterTypes();
+				for(int j=0;j<pt.length;j++) {
+					System.out.print(" "+pt[j]);
+				}
+			}
+		}
+		
+		if(false) {
+			Object arg[] = new Object[1];
+			arg[0] = "Hello";
+			Object o = Java.doNew("java.awt.Frame", arg);
+			System.out.println("GENERATED : "+o);
+			Java.doInvoke(o, "show", null);
+		}
+	}
 	public static void f() {
 		System.out.println((int)1.3);
 	}
@@ -81,5 +119,47 @@ public class Test {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+}
+
+class Java {
+	static Object doInvoke(Object obj, String methodName) {
+		return doInvoke(obj, methodName, null);
+	}
+	static Object doInvoke(Object obj, String methodName, Object argv[]) {
+		Object r = null;
+		if(argv==null) argv=new Object[0];
+		Class cl[] = new Class[argv.length];
+		for(int i=0;i<cl.length;i++) cl[i] = argv.getClass();
+		try {
+			Method m = obj.getClass().getMethod(methodName, cl);
+			r = m.invoke(obj, argv);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return r;
+	}
+	static Object doNew(String className) {
+		return doNew(className, null);
+	}
+	static Object doNew(String className, Object argv[]) {
+		Object r = null;
+		if(argv==null) argv=new Object[0];
+		try {
+			Class cl = Class.forName(className);
+			Constructor cn[] = cl.getConstructors();
+			for(int i=0;i<cn.length;i++) {
+				try {
+//					System.out.println("-----------------------\n"+cn[i]);
+					r = cn[i].newInstance(argv);
+					break;
+				} catch (Exception e) {
+//					e.printStackTrace();
+				}
+			}
+		} catch (Exception e) {
+//			e.printStackTrace();
+		}
+		return r;
 	}
 }

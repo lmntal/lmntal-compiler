@@ -78,6 +78,9 @@ public class Functor {
 		text = "\"" + text + "\"";
 		return text;
 	}
+	public Object getValue() {
+		return name;
+	}
 	////////////////////////////////////////////////////////////////
 	
 	/** モジュール名なしのファンクタを生成する。
