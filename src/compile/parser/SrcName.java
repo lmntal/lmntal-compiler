@@ -34,8 +34,7 @@ class SrcName {
 		this.name = name;
 		this.type = type;
 	}
-	/** この名前トークンが表す文字列を取得する 
-	 * @deprecate*/
+	/** この名前トークンが表す文字列を取得する */
 	public String getName() {
 		return name;
 	}

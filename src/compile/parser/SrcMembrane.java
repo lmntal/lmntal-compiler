@@ -7,7 +7,7 @@ class SrcMembrane {
 	/** 膜の内容プロセスの表現 */
 	LinkedList process = null;
 	/** 終了フラグの有無 */
-	boolean stable = false;
+	public boolean stable = false;
 	/** 名前 */
 	public String name;
 	

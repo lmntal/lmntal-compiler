@@ -1,11 +1,10 @@
 package compile.parser;
-import java.util.LinkedList;
+//import java.util.LinkedList;
 
 // このファイルは廃止する予定
 
 /**
  * ガード中に出現する比較アトム
- */
 
 class SrcCompareAtom extends SrcAtom {
 
@@ -23,7 +22,7 @@ class SrcCompareAtom extends SrcAtom {
 	 * @param type 比較の種類
 	 * @param left 左プロセス
 	 * @param right 右プロセス
-	 */
+	 *
 	public SrcCompareAtom(int type, Object left, Object right) {
 		super(getTypeString(type));
 		this.type = type;
@@ -37,7 +36,7 @@ class SrcCompareAtom extends SrcAtom {
 	 * 比較の種類から名前を得ます
 	 * @param type 比較の種類
 	 * @return 指定された種類に対応した文字列、なければnull
-	 */
+	 *
 	public static String getTypeString(int type) {
 		switch (type) {
 			case LT: return "<";
@@ -50,3 +49,4 @@ class SrcCompareAtom extends SrcAtom {
 		return null;
 	}
 }
+*/
