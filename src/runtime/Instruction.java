@@ -44,6 +44,7 @@ public class Instruction {
      * @return String
      *
      * メモ：Instructionの中は、Listの中にArrayListが入れ子になって入っている。
+     * つまり、[命令, [引数], 命令, [引数], …]
      *
      */
     public String toString(){
@@ -51,14 +52,44 @@ public class Instruction {
 	//	return "not implemented\n";
 
 	//手抜きな方法その2
-	Object hoge;
-	hoge = (Object)data;
-	return hoge.toString();
+	/*	Object hoge;
+	 *	hoge = (Object)data;
+	*/	return hoge.toString();
+
+	//まともな方法
+	//[命令, [引数], 命令, [引数], …]を全てStringに変換
+	Object[] hoge = data.toArray();
+	Object[] fuga;
+	StringBuffer buffer = new StringBuffer();
+
+	try {
+	    buffer.append("[ ");
+	    buffer.append(hoge[0]);
+
+	    for (int i = 1;i < hoge.length;i++) {
+		buffer.append(", ");
+		
+		buffer.append("[");
+		fuga = hoge[i].toArray();
+		for (int j = 0; j < fuga.length; j++) {
+		    buffer.append(fuga[j]);
+		}
+		buffer.append("]");
+	    }
+	} catch (Exception e){
+	    //想定される場合：
+	    //ArrayList dataが空→命令が入ってない
+	    //それ以外→？
+
+	    return "No instructions!!\n\n";
+	}
+
+	return (buffer.toString());
     }
 
 
     /**
-     * デバッグ用表示メソッド。与えられたListをObject[]に変換し、それぞれの要素に対してtoString()を呼ぶ。
+     * デバッグ用表示メソッド。与えられたListをObject[]に変換し、それぞれの要素に対してtoString()を呼んでstdoutに垂れ流す。
      *
      * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
      * @return void
@@ -66,17 +97,22 @@ public class Instruction {
      *
      */
     public static void Dump(List listToBeDumped){
-	Object[] tmp = listToBeDumped.toArray();
+	Object[] hoge = listToBeDumped.toArray();
+	Object[] fuga;
+	
+	for (int i = 0; i < hoge.length-1 ; i+=2){
+	    System.out.print("Command: ");
+	    System.out.print(hoge[0].toString());
 
-	System.out.print("Command: ");
-	System.out.print(tmp[0].toString());
+	    System.out.print("\t");
+	    System.out.print("Arguments: ");
 
-	System.out.print("\t");
-	System.out.print("Arguments: ");
-
-	for (int i = 1; i < tmp.length; i++){
-	    System.out.print(tmp[i].toString());
-	    System.out.print(", ");
+	    fuga = hoge[i].toArray();
+	    for (int j = 1; j < fuga.length; j++){
+		System.out.print(fuga[j].toString());
+		System.out.print(" ");
+	    }
+	    System.out.println();
 	}
 	System.out.println();
     }
