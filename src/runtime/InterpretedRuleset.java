@@ -31,26 +31,118 @@ class InterpretedReactor {
 
 				//メモ：LOCALHOGEはHOGEと同じコードでいい。
 				//nakajima: 2003-12-12
+				//メモ：コメントは引数
+				//nakajima: 2003-12-12
 
-			case Instruction.REACT:
-				Rule rule = (Rule)inst.getArg1();
-				List bodyInsts = (List)rule.body;
-				Instruction spec = (Instruction)bodyInsts.get(0);
-				int formals = spec.getIntArg1();
-				int locals  = spec.getIntArg2();
-				AbstractMembrane[] bodymems  = new AbstractMembrane[locals];
-				Atom[]             bodyatoms = new Atom[locals];
-				List memformals  = (List)inst.getArg2();
-				List atomformals = (List)inst.getArg3();
-				for (int i = 0; i < memformals.size(); i++) {
-					bodymems[i]  = mems[((Integer)memformals.get(i)).intValue()];
-				}
-				for (int i = 0; i < atomformals.size(); i++) {
-					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
-				}
-				InterpretedReactor ir = new InterpretedReactor(bodymems, bodyatoms, new ArrayList());
-				ir.interpret(bodyInsts,0);
-				return true;
+				//====その他====ここから====
+			case Instruction.LOCAL:
+				break; 
+			case Instruction.OPT:
+				break;
+			case Instruction.DUMMY:
+				break;
+			case Instrucion.UNDEF:
+				break;
+				//====その他====ここまで====
+
+				//====アトムに関係する出力する基本ガード命令====ここから====
+			case Instruction.DEREF: //[-dstatom, srcatom, srcpos, dstpos]
+				break;
+
+			case Instruction.DEREFATOM: //[-dstatom, srcatom, srcpos]
+				break;
+
+			case Instruction.FINDATOM: //[-dstatom, srcmem, funcref]
+				break;
+
+			case Instruction.GETLINK: //[-link, atom, pos]
+				break;
+				//====アトムに関係する出力する基本ガード命令====ここまで====
+
+				//====膜に関係する出力する基本ガード命令 ====ここから====
+			case Instruction.LOCKMEM:
+			case Instruction.LOCALLOCKMEM: //[-dstmem, freelinkatom]
+				break;
+			case Instruction.ANYMEM:
+			case Instruction.LOCALANYMEM: //[-dstmem, srcmem] 
+				break;
+			case Instruction.GETMEM: //[-dstmem, srcatom]
+				break;
+			case Instruction.GETPARENT: //[-dstmem, srcmem]
+				break;
+
+				//====膜に関係する出力する基本ガード命令====ここまで====
+
+				//====膜に関係する出力しない基本ガード命令====ここから====
+			case Instruction.TESTMEM: //[dstmem, freelinkatom]
+				break;
+			case Instruction.NORULES: //[srcmem] 
+				break;
+			case Instruction.NATOMS: //[srcmem, count]
+				break;
+			case Instruction.NFREELINKS: //[srcmem, count]
+				break;
+			case Instruction.NMEMS: //[srcmem, count]
+				break;
+			case Instruction.EQMEM: //[mem1, mem2]
+				break;
+			case Instruction.NEQMEM: //[mem1, mem2]
+				break;
+			case Instruction.STABLE: //[srcmem] 
+				break;
+				//====膜に関係する出力しない基本ガード命令====ここまで====
+
+				//====アトムに関係する出力しない基本ガード命令====ここから====
+			case Instruction.FUNC: //[srcatom, funcref]
+				break;
+			case Instruction.EQATOM: //[atom1, atom2]
+				break;
+			case Instruction.NEQATOM: //[atom1, atom2]
+				break;
+				//====アトムに関係する出力しない基本ガード命令====ここまで====
+
+				//====ファンクタに関係する命令====ここから====
+			case Instruction.DEREFFUNC: //[-dstfunc, srcatom, srcpos]
+				break;
+			case Instruction.GETFUNC: //[-func, atom]
+				break;
+			case Instruction.LOADFUNC: //[-func, funcref]
+				break;
+			case Instruction.EQFFUNC: //[func1, func2]
+				break;
+			case Instruction.NEQFFUNC: //[func1, func2]
+				break;
+				//====ファンクタに関係する命令====ここまで====
+
+				//====アトムを操作する基本ボディ命令====ここから====
+			case Instruction.REMOVEATOM:
+			case Instruction.LOCALREMOVEATOM: //[srcatom]
+				break;
+
+			case Instruction.NEWATOM:
+			case Instruction.LOCALNEWATOM: //[-dstatom, srcmem, funcref]
+				func = (Functor)inst.getArg3();
+				atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
+				break;
+
+			case Instruction.NEWATOMINDIRECT:
+			case Instruction.LOCALNEWATOMINDIRECT: //[-dstatom, srcmem, func]
+				break;
+			case Instruction.ENQUEUEATOM:
+			case Instruction.LOCALENQUEUEATOM: //[srcatom]
+				break;
+			case Instruction.DEQUEUEATOM: //[srcatom]
+				break;
+			case Instruction.FREEATOM: //[srcatom]
+				break;
+			case Instruction.ALTERFUNC: //[atom, funcref]
+				break;
+			case Instruction.ALTERFUNCINDIRECT: //[atom, func]
+				break;
+				//====アトムを操作する基本ボディ命令====ここまで====
+
+
+				
 			case Instruction.ANYMEM: // anymem [-dstmem, srcmem] 
 				it = mems[inst.getIntArg2()].mems.iterator();
 				while (it.hasNext()){
@@ -79,17 +171,55 @@ class InterpretedReactor {
 						mem.unlock();
 					}
 					return false;
-			case Instruction.NEWATOM: // newatom [-dstatom, srcmem, funcref]
-				func = (Functor)inst.getArg3();
-				atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
-				break;
+
+
+				//====制御命令====ここから====
+			case Instruction.REACT:
+				Rule rule = (Rule)inst.getArg1();
+				List bodyInsts = (List)rule.body;
+				Instruction spec = (Instruction)bodyInsts.get(0);
+				int formals = spec.getIntArg1();
+				int locals  = spec.getIntArg2();
+				AbstractMembrane[] bodymems  = new AbstractMembrane[locals];
+				Atom[]             bodyatoms = new Atom[locals];
+				List memformals  = (List)inst.getArg2();
+				List atomformals = (List)inst.getArg3();
+				for (int i = 0; i < memformals.size(); i++) {
+					bodymems[i]  = mems[((Integer)memformals.get(i)).intValue()];
+				}
+				for (int i = 0; i < atomformals.size(); i++) {
+					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
+				}
+				InterpretedReactor ir = new InterpretedReactor(bodymems, bodyatoms, new ArrayList());
+				ir.interpret(bodyInsts,0);
+				return true;
+
+				//case Instruction.INLINEREACT:
+
+				//case Instruction.SPEC:
+
 			case Instruction.PROCEED:
 				return true;	
+
 			case Instruction.BRANCH:
 				List subinsts = (List)((List)inst.getArg1()).get(0);
 				//InterpretedReactor iir = new InterpretedReactor(mems,atoms,vars,subinsts);
 				if (interpret(subinsts,0)) return true;
-				break;	
+				break;
+
+			case Instruction.LOOP:
+				List subinsts = (List)((List)inst.getArg1()).get(0);
+				if (interpret(subinsts, 0)) {
+					//todo: 意味を聞く:「引数列を最後まで実行した場合、このloop命令の実行を繰り返す。」
+				}
+				break;
+
+			case Instrucion.RUN:
+				List subinsts = (List)((List)inst.getArg1()).get(0);
+				interpret(subinsts, 0);
+				break;
+				//====制御命令====ここまで====
+
 			default:
 				System.out.println("Invalid rule");
 				break;
