@@ -283,6 +283,18 @@ public class LMNtalDaemon implements Runnable {
 		return true;
 	}
 
+	public static boolean unregisterRuntimeGroup(String rgid){
+		if (Env.debug > 0)System.out.println("unregisterRuntimeGroup(" + rgid +  ")");
+		
+		synchronized(runtimeGroupTable){
+			if(runtimeGroupTable.containsKey(rgid)){
+				runtimeGroupTable.remove(rgid);
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static LMNtalNode getRuntimeGroupNode(String rgid){
 		return (LMNtalNode)runtimeGroupTable.get(rgid);
 	}

@@ -101,6 +101,7 @@ public final class LMNtalRuntimeManager {
 	public static void disconnectFromDaemon() {
 		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon()");
 		if (daemon != null) {
+			daemon.sendWaitUnregisterLocal();
 			daemon.close(); 
 			if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon(): the socket has closed.");
 			daemon = null;

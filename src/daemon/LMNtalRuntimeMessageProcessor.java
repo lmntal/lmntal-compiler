@@ -40,6 +40,13 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		return waitForResult(msgid);
 	}
 	
+	/** ローカルデーモンに対してUN REGISTERLOCAL を発行する。（現状のUNREGISTERLOCALの実装では返事はこない）*/
+	public void sendWaitUnregisterLocal() {
+		// UNREGSITERLOCAL rgid
+		String command = "UNREGISTERLOAL " + rgid + "\n";
+		sendMessage(command);
+	}
+	
 	////////////////////////////////
 	// 送信用
 	
@@ -125,9 +132,10 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		if (Env.debug > 0) System.out.println("LMNtalRuntimeMessageProcessor.run()");
 		String input;
 		while (true) {
-			if(isSocketClosed()){
+			//ソケットを閉じるとき、この段階で閉じらていれるよりreadLine()まで行って待っている場合のほうが考えられる。
+/*			if(isSocketClosed()){
 				return;
-			}
+			}*/
 
 			try {
 				input = readLine();
