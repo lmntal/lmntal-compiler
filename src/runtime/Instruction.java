@@ -238,7 +238,8 @@ public class Instruction {
     /** newroot [-dstmem, srcmem, node]
      * <br>（予約された）ボディ命令<br>
      * 膜srcmemの子膜に文字列nodeで指定された計算ノードで実行される新しいロックされたルート膜を作成し、
-     * 参照をdstmemに代入し、ロックしたまま（仮の）実行膜スタックに積む。*/
+     * 参照をdstmemに代入し、ロックしたまま（仮の）実行膜スタックに積む。
+     * TODO 【水野君へ】仮から本物の実行膜スタックに移動するタイミングを検討する */
     public static final int NEWROOT = 35;
 
 //	/** localnewroot [-dstmem, srcmem, node]
@@ -264,7 +265,7 @@ public class Instruction {
      * アトムsrcatomがこの計算ノードにある実行スタックに入っていれば、実行スタックから取り出す。
      * <p><b>注意</b>　この命令は、メモリ使用量のオーダを削減するために任意に使用することができる。
      * アトムを再利用するときは、因果関係に注意すること。
-     * なお、他の計算ノードにある実行スタックの内容を取得/変更する命令は存在しない。*/
+     * <p>なお、他の計算ノードにある実行スタックの内容を取得/変更する命令は存在しない。*/
     public static final int DEQUEUEATOM = 37;
 
     /** localdequeueatom [srcatom]
