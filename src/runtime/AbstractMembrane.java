@@ -652,6 +652,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		while(it.hasNext()){
 			Atom atom = (Atom)it.next();
 			atom.dequeue();
+			// atom.free();
 			// it.remove();
 		}
 		it = memIterator();
@@ -667,7 +668,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 基底項プロセスを複製する(検査は済んでいる)
 	 * @param srcGround コピー元の基底項プロセス
 	 * @param srcMap コピー元のアトムからコピー先のアトムへのマップ
-	 * @return 成功したらコピー先のリンクを返す。失敗したらnullを返す
+	 * @return コピー先のリンク
 	 */
 	public Link copyGroundFrom(Link srcGround,Map srcMap){
 		if(!srcMap.containsKey(srcGround.getAtom())){
@@ -1011,7 +1012,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		removeAtoms(removeList);
 	}
 	
-	/** この膜を削除する */
+	/** この膜を削除する (子膜が無い時にのみ呼んで良い)*/
 	public void free() {}
 	
 	/**

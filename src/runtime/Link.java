@@ -102,7 +102,7 @@ public final class Link implements Cloneable, Serializable {
 	/**
 	 * by kudo
 	 * 再帰的に同じ構造を持った基底項プロセスかどうか検査する
-	 * groundかどうかの検査は済んでいるものとする
+	 * どちらか片方についてgroundかどうかの検査は済んでいるものとする
 	 * @param srcLink 比較対象のリンク
 	 * @param srcMap 比較元アトムから比較先アトムへのmap
 	 * @return
