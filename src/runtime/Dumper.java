@@ -188,7 +188,23 @@ public class Dumper {
 			}
 			while (changed);
 			
-			// 残ったアトムを s=t の形式で出力する
+			// 残った1引数のアトム（データだと思って保留していた整数など）を起点にして出力する
+			do {
+				changed = false;
+				it = atoms.iterator();
+				while (it.hasNext()) {
+					Atom a = (Atom)it.next();
+					if (a.getArity() == 1) {
+						if(commaFlag) buf.append(", "); else commaFlag = true;
+						buf.append(dumpAtomGroup(a, atoms));
+						changed = true;
+						break;
+					}
+				}
+			}
+			while (changed);
+
+			// 残ったアトムを s=t の形式で出力する。
 			while (!atoms.isEmpty()) {
 				it = atoms.iterator();
 				Atom a = (Atom)it.next();

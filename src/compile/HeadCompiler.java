@@ -6,6 +6,7 @@ package compile;
 
 import java.util.*;
 import runtime.Env;
+import runtime.Functor;
 import runtime.Instruction;
 import compile.structure.*;
 
@@ -245,6 +246,20 @@ public class HeadCompiler {
 				match.add(new Instruction(Instruction.STABLE, submempath));
 			}
 			compileMembrane(submem);
+		}
+		if (!mem.processContexts.isEmpty()) {
+			ProcessContext pc = (ProcessContext)mem.processContexts.get(0);
+			for (int i = 0; i < pc.args.length; i++) {
+				int freelinktestedatompath = varcount++;
+				match.add(new Instruction(Instruction.DEREFATOM, freelinktestedatompath,
+					atomToPath(pc.args[i].buddy.atom), pc.args[i].buddy.pos));
+				match.add(new Instruction(Instruction.NOTFUNC, freelinktestedatompath,
+					Functor.INSIDE_PROXY));
+			}
+			if (pc.bundle == null) {
+				match.add(new Instruction(Instruction.NFREELINKS, thismempath,
+					mem.getFreeLinkAtomCount()));					
+			}
 		}
 	}
 	/**@deprecated*/
