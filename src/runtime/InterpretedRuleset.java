@@ -77,7 +77,6 @@ class InterpretedReactor {
 						mems[inst.getIntArg1()] = mem;					
 						if (interpret(insts,pc)) return true;
 						mem.unlock();
-						return false;
 					}
 					break;
 			case Instruction.NEWATOM: // newatom [-dstatom, srcmem, funcref]
