@@ -304,7 +304,6 @@ class InterpreterReactor {
 					break; //n-kato
 				case Instruction.NEWATOMINDIRECT :
 				case Instruction.LOCALNEWATOMINDIRECT : //[-dstatom, srcmem, func]
-					//TODO NEWATOMとほぼ同じコードになっちゃったけどいいの？funcとfuncrefって違うし…。＜ダメ。仕様をよく読むこと＞
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom((Functor)(vars.get(inst.getIntArg3())));
 					break; //nakajima 2003-12-27, 2004-01-03
 				case Instruction.ENQUEUEATOM :
@@ -325,7 +324,6 @@ class InterpreterReactor {
 					break; //n-kato
 				case Instruction.ALTERFUNCINDIRECT :
 				case Instruction.LOCALALTERFUNCINDIRECT : //[atom, func]
-					//TODO funcrefと$funcって何が違うのですか？＜funcはint、funcrefはFunctor＞
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.alterAtomFunctor(atom,(Functor)(vars.get(inst.getIntArg2())));
 					break; //nakajima 2003-12-27, 2004-01-03
@@ -337,7 +335,6 @@ class InterpreterReactor {
 					break; //nakajima 2003-12-27
 
 				case Instruction.ALLOCATOMINDIRECT : //[-dstatom, func]
-					// TODO funcrefと$funcって何が違うのですか？＜上＞
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)(vars.get(inst.getIntArg2())));
 					break; //nakajima 2003-12-27, 2004-01-03
 
@@ -449,12 +446,22 @@ class InterpreterReactor {
 
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
 				case Instruction.RECURSIVELOCK : //[srcmem]
-					break;
+					if (mems[inst.getIntArg1()].recursiveLock(mems[0]) ){
+						return true;
+					}
+					break; //nakajima 2004-01-04
 				case Instruction.RECURSIVEUNLOCK : //[srcmem]
-					break;
+					mems[inst.getIntArg1()].recursiveUnlock();
+					break;//nakajima 2004-01-04
 				case Instruction.COPYMEM : //[-dstmem, srcmem]
+					//TODO proxyに関する処理をまだ書いてない
+					//「内容」とは子膜・アトム・ルール
+					mems[inst.getIntArg1()].copyRulesFrom(mems[inst.getIntArg2()]);
+					mems[inst.getIntArg1()].atoms.addAll(mems[inst.getIntArg2()].atoms);
+					mems[inst.getIntArg1()].mems.addAll(mems[inst.getIntArg2()].mems);
 					break;
 				case Instruction.DROPMEM : //[srcmem]
+				
 					break;
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 
