@@ -19,61 +19,26 @@ public class Optimizer {
 	 * @param list 最適化したい命令列。今のところボディ命令列が渡されることを仮定している。
 	 */
 	public static void optimize(List list) {
-		normalize(list);
+		Instruction.normalize(list);
 		reuseMem(list);
 		reuseAtom(list);
 		removeUnnecessaryRelink(list);
 	}
 	
 	/**
-	 * relink命令を、getlink/inheritlink命令に変換する。
-	 * @param list 変換する命令列
-	 */
-	private static void normalize(List list) {
-		int nextId = -1;
-		
-		ListIterator it = list.listIterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
-			switch (inst.getKind()) {
-				case Instruction.SPEC:
-					if (nextId >= 0) {
-						throw new RuntimeException("SYSTEM ERROR: more than one spec instruction");
-					}
-					nextId = inst.getIntArg2();
-					break;
-				case Instruction.RELINK:
-					if (nextId < 0) {
-						throw new RuntimeException("SYSTEM ERROR: relink before spec instruction");
-					}
-					it.remove();
-					it.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
-					it.add(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
-					nextId++;
-					break;
-				case Instruction.LOCALRELINK:
-					if (nextId < 0) {
-						throw new RuntimeException("SYSTEM ERROR: relink before spec instruction");
-					}
-					it.remove();
-					it.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
-					it.add(new Instruction(Instruction.LOCALINHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
-					nextId++;
-					break;
-			}
-		}
-	}
-
-	/**
 	 * 膜の再利用を行うコードを生成する。<br>
 	 * 命令列中には、1引数のremovemem命令が現れていてはいけない。
 	 * 
-	 * @param list
+	 * @param list ボディ命令列
 	 */
 	private static void reuseMem(List list) {
 		HashMap reuseMap = new HashMap();
 		HashSet reuseMems = new HashSet(); // 再利用される膜のIDの集合
 		HashMap parent = new HashMap();
+		HashMap removedChildren = new HashMap(); // map -> list of children
+		HashMap createdChildren = new HashMap(); // map -> list of children
+		HashMap pourMap = new HashMap();
+		HashSet pourMems = new HashSet(); // pour命令の第２引数に含まれる膜
 		
 		//再利用する膜の組み合わせを決定する
 		//TODO プロセス文脈を持たない膜の再利用
@@ -83,19 +48,27 @@ public class Optimizer {
 			switch (inst.getKind()) {
 				case Instruction.REMOVEMEM:
 					parent.put(inst.getArg1(), inst.getArg2());
+					addToMap(removedChildren, inst.getArg2(), inst.getArg1());
 					break;
 				case Instruction.NEWMEM:
 					parent.put(inst.getArg1(), inst.getArg2());
+					addToMap(createdChildren, inst.getArg2(), inst.getArg1());
 					break;
 				case Instruction.MOVECELLS:
-					//すでに再利用で生成する事が決まっている膜でなければ、再利用で生成する
-					if (!reuseMap.containsKey(inst.getArg1())) {
-						reuseMap.put(inst.getArg1(), inst.getArg2());
-						reuseMems.add(inst.getArg2());
-						break;
-					}
+//					//すでに再利用で生成する事が決まっている膜でなければ、再利用で生成する
+//					if (!reuseMap.containsKey(inst.getArg1())) {
+//						reuseMap.put(inst.getArg1(), inst.getArg2());
+//						reuseMems.add(inst.getArg2());
+//						break;
+//					}
+					addToMap(pourMap, inst.getArg1(), inst.getArg2());
+					pourMems.add(inst.getArg2());
+					System.out.println("add to pourMap " + inst.getArg1() + "," + inst.getArg2());
 			}
 		}
+
+		createReuseMap(reuseMap, reuseMems, parent, removedChildren, createdChildren,
+					   pourMap, pourMems, new Integer(0));
 		
 		//命令列を書き換える
 		//その際、冗長なremovemem/addmem命令を除去する
@@ -152,6 +125,113 @@ public class Optimizer {
 		Instruction.changeMemId(list, reuseMap);
 	}
 	
+	/**
+	 * Listを値とするようなマップに値を追加する。
+	 * 指摘されたキーがすでに存在する場合は値のリストにvalueを追加する。
+	 * 存在しない場合は新しくリストを登録し、マップに追加する。
+	 * @param map マップ
+	 * @param key キー
+	 * @param value 値
+	 */
+	private static void addToMap(HashMap map, Object key, Object value) {
+		ArrayList list = (ArrayList)map.get(key);
+		if (list == null) {
+			list = new ArrayList();
+			map.put(key, list);
+		}
+		list.add(value);
+	}
+
+	/**
+	 * 再利用する膜を決定します。
+	 * startで指定された膜内にある膜について、再帰呼び出しを行います。
+	 * @param reuseMap 再利用方法を入れるためのマップ
+	 * @param reuseMems 再利用される膜の集合を入れるためのセット
+	 * @param parent 親膜へのマップ
+	 * @param children 子膜集合へのマップ
+	 * @param pourMap pour命令の対応を入れたマップ
+	 * @param pourMems pour命令の第２引数に含まれる膜のセット
+	 * @param start この膜内の膜の再利用を決定する。
+	 */
+	private static void createReuseMap(HashMap reuseMap, HashSet reuseMems, HashMap parent,
+										 HashMap removedChildren, HashMap createdChildren,
+										 HashMap pourMap, HashSet pourMems, Integer start) {
+
+		ArrayList list = (ArrayList)createdChildren.get(start);
+		if (list == null || list.size() == 0) {
+			return;
+		}
+
+		Integer start2; //startの、再利用後の変数番号
+		if (reuseMap.containsKey(start)) {
+			start2 = (Integer)reuseMap.get(start);
+		} else {
+			start2 = start;
+		}
+				
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Integer mem = (Integer)it.next();
+			//memの再利用元を決める
+			System.out.println("start processing mem " + mem);
+			 
+			Integer candidate = null; //pour命令による再利用候補を１つ保持しておく
+			Integer result = null; //決定した再利用先を入れる
+			ArrayList list2 = (ArrayList)pourMap.get(mem);
+			if (list2 != null) {
+				System.out.println("list2 is not null " + list2.size());
+				Iterator it2 = list2.iterator();
+				while (it2.hasNext()) {
+					Integer mem2 = (Integer)it2.next();
+					System.out.println("try mem " + mem2);
+					//すでに再利用の根拠になっている場合は無視
+					if (reuseMems.contains(mem2)) {
+						System.out.println("already used");
+						continue;
+					}
+					
+					//候補に登録
+					candidate = mem2;
+					
+					if (parent.get(mem2).equals(start2)) {
+						System.out.println("use this");
+						//親膜が同じ膜からのpour命令がある場合は、それを優先
+						result = mem2;
+						break;
+					}
+				}
+			}
+			if (result == null) {
+				//上の方法で決まらなかった場合
+				if (candidate == null) {
+					//共通の親膜を持つ、プロセス文脈のない膜の中から適当に決定。
+					//該当する膜がなければ再利用しない
+					System.out.println("reuse without process context");
+					ArrayList list3 = (ArrayList)removedChildren.get(start2);
+					if (list3 != null) {
+						Iterator it3 = list3.iterator();
+						while (it3.hasNext()) {
+							Integer m = (Integer)it3.next();
+							if (!pourMems.contains(m)) {
+								result = m;
+								break;
+							}
+						}
+					}
+				} else {
+					//pour命令がある中から適当に決定
+					System.out.println("reuse with process context " + candidate);
+					result = candidate;
+				}
+			}
+			reuseMap.put(mem, result);
+			reuseMems.add(result);
+			//再帰呼び出し
+			createReuseMap(reuseMap, reuseMems, parent, removedChildren, createdChildren,
+						   pourMap, pourMems, mem);
+		}
+	}
+
 	/**
 	 * 膜・ファンクタ毎にアトムの集合を管理するためのクラス。
 	 * アトム再利用コードを生成する際にアトムを管理するために使用する。
@@ -338,23 +418,6 @@ public class Optimizer {
 		//アトムIDの付け替え
 		Instruction.changeAtomId(list, reuseMap);
 	}
-
-	/**
-	 * HashMapの値が、複数の値の集合を表すHashSetであるものに対して値を追加する
-	 * @param map 値を追加するHashMap
-	 * @param key キー
-	 * @param value 追加したい値
-	 */
-	private static void addToMap(HashMap map, Object key, Object value) {
-		HashSet set = (HashSet)map.get(key);
-		if (set == null) {
-			set = new HashSet();
-			set.add(value);
-			map.put(key, set);
-		} else {
-			set.add(value);
-		}
-	}			
 
 	/**
 	 * 冗長なrelink/inheritlink命令を除去します。

@@ -57,6 +57,8 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.GETLINK, 8, 1, 1));
 		list.add(new Instruction(Instruction.INHERITLINK, 4, 1, 8, 0));
 
+		list.add(new Instruction(Instruction.ENQUEUEATOM, 3));
+		list.add(new Instruction(Instruction.ENQUEUEATOM, 4));
 		list.add(new Instruction(Instruction.FREEATOM, 1));
 		list.add(new Instruction(Instruction.FREEATOM, 2));
 		list.add(new Instruction(Instruction.PROCEED));
@@ -83,6 +85,8 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.RELINK, 4, 0, 2, 1, 0));
 		list.add(new Instruction(Instruction.RELINK, 4, 1, 1, 1, 0));
 
+		list.add(new Instruction(Instruction.ENQUEUEATOM, 3));
+		list.add(new Instruction(Instruction.ENQUEUEATOM, 4));
 		list.add(new Instruction(Instruction.FREEATOM, 1));
 		list.add(new Instruction(Instruction.FREEATOM, 2));
 		list.add(new Instruction(Instruction.PROCEED));
@@ -106,15 +110,18 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.REMOVEPROXIES, 2));
 		list.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, 0));
 		list.add(Instruction.newmem(5, 0));
+		list.add(new Instruction(Instruction.MOVECELLS, 5, 2));
+		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 5));
 		list.add(Instruction.newmem(6, 0));
 		list.add(new Instruction(Instruction.MOVECELLS, 6, 1));
-		list.add(new Instruction(Instruction.MOVECELLS, 5, 2));
 		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 6));
-		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 5));
 		list.add(Instruction.newatom(7, 5, a));
 		list.add(Instruction.newatom(8, 6, a));
 		list.add(Instruction.newatom(9, 6, b));
 
+		list.add(new Instruction(Instruction.ENQUEUEATOM, 7));
+		list.add(new Instruction(Instruction.ENQUEUEATOM, 8));
+		list.add(new Instruction(Instruction.ENQUEUEATOM, 9));
 		list.add(new Instruction(Instruction.FREEMEM, 1));
 		list.add(new Instruction(Instruction.FREEMEM, 2));
 		list.add(new Instruction(Instruction.FREEATOM, 3));
@@ -139,7 +146,6 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.MOVECELLS, 3, 1));
 		list.add(new Instruction(Instruction.MOVECELLS, 3, 2));
 		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 3));
-		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 3));
 
 		list.add(new Instruction(Instruction.FREEMEM, 1));
 		list.add(new Instruction(Instruction.FREEMEM, 2));
@@ -162,8 +168,8 @@ public class OptimizerTest extends TestCase {
 		list.add(Instruction.newmem(3, 0));
 		list.add(Instruction.newmem(4, 3));
 		list.add(new Instruction(Instruction.MOVECELLS, 4, 1));
-		list.add(new Instruction(Instruction.MOVECELLS, 3, 2));
 		list.add(new Instruction(Instruction.INSERTPROXIES, 3, 4));
+		list.add(new Instruction(Instruction.MOVECELLS, 3, 2));
 		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 3));
 		
 		list.add(new Instruction(Instruction.FREEMEM, 2));
