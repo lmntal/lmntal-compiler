@@ -7,7 +7,7 @@ import javax.swing.*;
 import runtime.Env;
 import compile.parser.ParseException;
 
-public class LMNtalFrame extends JFrame {
+public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	public LMNGraphPanel lmnPanel = null;
 	JTextArea jt;
@@ -21,6 +21,17 @@ public class LMNtalFrame extends JFrame {
 		lmnPanel.start();
 	}
 	
+	public void keyPressed(KeyEvent e) {
+	}
+	
+	public void keyReleased(KeyEvent e) {
+	}
+	
+	public void keyTyped(KeyEvent e) {
+		System.out.println(e.getKeyChar());
+	}
+
+	
 	protected void initComponents() {
 		lmnPanel = new LMNGraphPanel(this);
 		JButton bt;
@@ -31,21 +42,21 @@ public class LMNtalFrame extends JFrame {
 //		} catch (ParseException e) {
 //			e.printStackTrace();
 //		}
-		setTitle("GraphTest");
+		setTitle("It's LMNtal");
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(jt=new JTextArea(5, 80), BorderLayout.NORTH);
+//		getContentPane().add(jt=new JTextArea(5, 80), BorderLayout.NORTH);
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
 		getContentPane().add(bt=new JButton("Go ahead ¡²|¡±|¡û"), BorderLayout.SOUTH);
-		getContentPane().addKeyListener(new MyKeyAdapter(this));
-		
 		bt.addActionListener(new ActionAdapter(this));
+//		getContentPane().addKeyListener(new MyKeyAdapter(this));
 		
-		jt.addKeyListener(new KeyAdapter() {
-			public void keyTyped(KeyEvent e) {
-				setSource(jt.getText());
-			}
-		}
-		);
+//		addKeyListener(this);
+		
+//		jt.addKeyListener(new KeyAdapter() {
+//			public void keyTyped(KeyEvent e) {
+//				setSource(jt.getText());
+//			}
+//		});
 	}
 	
 	/**

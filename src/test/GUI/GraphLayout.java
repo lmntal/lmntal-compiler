@@ -43,6 +43,7 @@ public class GraphLayout implements Runnable {
 	}
 	
 	public void calc() {
+//		if(true) return;
 		for(int i=0;i<100;i++) {
 			relax();
 		}
@@ -119,9 +120,9 @@ public class GraphLayout implements Runnable {
 					double len = Math.sqrt(tx*tx+ty*ty);
 					
 					// move = t times diff
-					dx = 1*tx / len * a_r;
-					dy = 1*ty / len * a_r;
-	
+					dx = 2 * tx / len * a_r;
+					dy = 2 * ty / len * a_r;
+					
 					cur.to.setMoveDelta(dx,dy);
 				}
 			}

@@ -34,17 +34,22 @@ public class LMNGraphPanel extends GraphPanel {
 		frame.busy = true;
 		GraphLayout layout = getGraphLayout();
 		layout.removeAllNodes();
+		col=row=0;
 		addMembrane(mem);
 		layout.calc();
 	}
 	
+	static int col, row=2;
 	GraphNode node_of_atom(runtime.Atom atom, Map atoms) {
 		GraphNode n = (GraphNode)atoms.get(atom);
 		if(n==null) {
-			Point p = new Point(30 + (int)(Math.random()*200) + (int)(Math.random()*3), 30 + (int)(Math.random()*600) + (int)(Math.random()*3));
+			Point p = new Point(30 + col * 0 + (int)(Math.random()*200), 60 + row * 0 + (int)(Math.random()*300));
+//			Point p = new Point(30 + (int)(Math.random()*200) + (int)(Math.random()*3), 30 + (int)(Math.random()*600) + (int)(Math.random()*3));
+//			Point p = new Point(150+(int)(Math.random()*20), 100+(int)(Math.random()*20));
 			n = new GraphNode(atom.getName(), p);
 			atoms.put(atom, n);
 			getGraphLayout().addNode(n);
+			if(col++ >10) { row++; col=0; }
 		}
 		return n;
 	}

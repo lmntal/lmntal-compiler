@@ -89,6 +89,7 @@ public class GraphNode {
 		} else if (this.pos.y > area.getMaxY()) {
 			this.pos.y = (int)area.getMaxY();
 		}
+//		dx=dy=0;
 		this.dx /= 2;
 		this.dy /= 2;
 	}
@@ -102,13 +103,29 @@ public class GraphNode {
 				(int)ie.to.getPosition().getX(), (int)ie.to.getPosition().getY());
 		}
 	}
+	
+	Color colors[] = {
+		Color.BLACK,
+		Color.BLUE,
+		Color.CYAN,
+		Color.GREEN,
+		Color.MAGENTA,
+		Color.ORANGE,
+		Color.RED
+	};
+	
 	public void paintNode(Graphics g) {
 		FontMetrics fm = g.getFontMetrics();
 		int w = fm.stringWidth(label);
 		int h = fm.getHeight();
-		g.setColor(new Color(64,128,255));
+		
+//		g.setColor(new Color(64,128,255));
+		// 適当に色分けする！
+		g.setColor(colors[ Math.abs(label.hashCode()) % colors.length ]);
+		
 		g.fillOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
-		g.setColor(Color.black);
+		
+		g.setColor(Color.BLACK);
 		g.drawOval(pos.x - size.width/2, pos.y - size.height/ 2, size.width, size.height);
 		g.drawString(this.label, pos.x - (w-10)/2, (pos.y - (h-4)/2) + fm.getAscent()+size.height);
 	}
