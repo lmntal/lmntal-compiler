@@ -111,7 +111,7 @@ public class Functor {
 	/** 適切に省略された表示名を取得 */
 	public String getAbbrName() {
 		String full = getName();
-		return full.length() > 16 ? full.substring(0, 14) + ".." : full;
+		return full.length() > 14 ? full.substring(0, 12) + ".." : full;
 	}
 	/** シンボル名を取得する。
 	 * @return nameフィールドの値。サブクラスのオブジェクトのときそのときに限り空文字列が返る。*/
