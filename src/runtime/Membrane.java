@@ -175,6 +175,12 @@ abstract class AbstractMembrane extends QueuedEntity {
 //	// 案3：「removememで削除＆★化/pourで移動のみ/afterpourで追加」に分けて行う（by n-kato）
 //	//		afterpour m,n ボディ命令は内側から再帰的に呼ばれ、一段ずつ追加する
 
+	/** アトムの名前を変える */
+	void alterAtomFunctor(Atom atom, Functor func) {
+		atoms.remove(atom);
+		atom.changeFunctor(func);
+		atoms.add(atom);
+	}
 	/** 指定されたアトムをこの膜から除去する。 */
 	void removeAtom(Atom atom) {
 		atoms.remove(atom);
@@ -193,99 +199,149 @@ abstract class AbstractMembrane extends QueuedEntity {
 		//案3
 		removeProxies();
 	}
+	/** この膜がremoveされた直後に呼ばれる。
+	 * なおremoveは、ルール左辺に書かれたアトムを除去した後、
+	 * ルール左辺に書かれた膜に対して内側の膜から呼ばれる。
+	 * <p>この膜に対して
+	 * <ol>
+	 * <li>この膜の自由/局所リンクでないにもかかわらずこの膜内を通過しているリンクを除去し
+	 * <li>この膜の自由リンクが出現するアトムの名前をstarに変える。
+	 * </ol>
+	 * <p>すべてのremoveProxiesの呼び出しが終了すると
+	 * <ul>
+	 * <li>$pにマッチしたプロセスの自由リンクは$pが書かれた膜のstarアトムに出現するようになり、
+	 * <li>starアトムのリンク先は、starアトムまたは本膜のoutside_proxyの第1引数になっている。
+	 *     このうち後者は、removeToplevelProxiesで除去される。
+	 * </ul>
+	 */
 	protected void removeProxies() {
 		// TODO atomsへの操作が必要になるので、Setのクローンを取得してその反復子を使った方が
 		//      読みやすい＆効率が良いかもしれない
-		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
+		ArrayList changeList = new ArrayList();	// star化するアトムのリスト
 		ArrayList removeList = new ArrayList();
-		ArrayList changeList = new ArrayList();
+		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
 		while (it.hasNext()) {
 			Atom outside = (Atom)it.next();
-			//この膜にあって第2引数同士が直接つながっているoutside_proxyアトムとinside_proxyアトムを除去
-			Atom a = outside.args[1].getAtom();
-			if (a.getFunctor().equals(Functor.INSIDE_PROXY)) {
-				unifyAtomArgs(outside, 0, a, 0);
-				removeList.add(outside);
-				removeList.add(a);
-			} else {
-				//この膜にあるそれ以外のoutside_proxyアトムのうち
-				//子膜のinside_proxyに接続していないものの名前をstarに変える
-				a = outside.args[0].getAtom();
-				if (!a.getFunctor().equals(Functor.INSIDE_PROXY)) { 
-//					//TODO アトムを再利用
-//					Atom star = newAtom(Functor.STAR); //atomsに追加されるがitには影響なし
-//					// リンクの張替え方法はこれで大丈夫？→修正しました (n-kato)
-//					relinkAtomArgs(star, 0, outside, 0);
-//					relinkAtomArgs(star, 1, outside, 1);
-//					removeList.add(outside);
-					// itを使っているのでoutsideはまだ除去できない
-					changeList.add(outside);
+			Atom a0 = outside.args[0].getAtom();
+			// outsideのリンク先が子膜でない場合			
+			if (a0.getMem().getParent() != this) {
+				Atom a1 = outside.args[1].getAtom();
+				// この膜を通過して親膜に出ていくリンクを除去
+				if (a1.getFunctor().equals(Functor.INSIDE_PROXY)) {
+					unifyAtomArgs(outside, 0, a1, 0);
+					removeList.add(outside);
+					removeList.add(a1);
+				}
+				else {
+					// この膜を通過して無関係な膜に入っていくリンクを除去
+					if (a1.getFunctor().equals(Functor.OUTSIDE_PROXY)
+					 && a1.args[0].getAtom().getMem().getParent() != this) {
+						if (!removeList.contains(outside)) {
+							unifyAtomArgs(outside, 0, a1, 0);
+							removeList.add(outside);
+							removeList.add(a1);
+						}
+					}
+					// それ以外のリンクは、この膜の自由リンクなので名前をstarに変える
+					else {
+						changeList.add(outside);
+					}
 				}
 			}
 		}
 		atoms.removeAll(removeList);
-		
-		//この膜のinside_proxyアトムの名前をstarに変える
-//		removeList.clear();
+		// この膜のinside_proxyアトムの名前をstarに変える
 		it = atoms.iteratorOfFunctor(Functor.INSIDE_PROXY);
 		while (it.hasNext()) {
-//			Atom inside = (Atom)it.next();
-//			Atom star = newAtom(Functor.STAR);
-//			relinkAtomArgs(star, 0, inside, 0);
-//			relinkAtomArgs(star, 1, inside, 1);
-//			removeList.add(inside);
 			changeList.add(it.next());
 		}
-//		atoms.removeAll(removeList);
-
-		//名前の変更
+		// star化を実行する
 		it = changeList.iterator();
 		while (it.hasNext()) {
-			Atom a = (Atom)it.next();
-			atoms.remove(a);
-			a.changeFunctor(Functor.STAR);
-			atoms.add(a);
+			alterAtomFunctor((Atom)it.next(), Functor.STAR);
 		}
 	}
+	/** 左辺に$pが2個以上あるルールで、左辺の全てのremoveProxiesが呼ばれた後に
+	 * 本膜に対して呼ぶことができる（呼ばなくてもよい）。
+	 * <p>この膜を通過して無関係な膜に入っていくリンクを除去する。
+	 */
+	void removeToplevelProxies() {
+		ArrayList removeList = new ArrayList();
+		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
+		while (it.hasNext()) {
+			Atom outside = (Atom)it.next();
+			// outsideのリンク先が子膜でない場合			
+			if (outside.args[0].getAtom().getMem().getParent() != this) {
+				if (!removeList.contains(outside)) {
+					Atom a1 = outside.args[1].getAtom();
+					unifyAtomArgs(outside, 0, a1, 0);
+					removeList.add(outside);
+					removeList.add(a1);
+				}
+			}
+		}
+		atoms.removeAll(removeList);
+	}
 	/**
-	 * srcMemの内容を全て移動する。
+	 * srcMemの全ての内容をこの膜に移動する。
+	 * TODO このままだとリモート膜のローカルキャッシュに対する処理のときに、
+	 *       《「コミット」時にリモートにローカルキャッシュの内容をすべて転送しない限り》
+	 *       正しく動作しない。これはaddAllを使うにあたっての全般的な問題でもある。
 	 */
 	void pour(AbstractMembrane srcMem) {
 		atoms.addAll(srcMem.atoms);
 		mems.addAll(srcMem.mems);
 	}
-	void insertProxies(AbstractMembrane childMemWithStar/* N */) {
+	/** 右辺の膜構造および$pの内容を配置した後で、
+	 * ルール右辺に書かれた膜と本膜に対して内側の膜から呼ばれる。
+	 * <p>子膜childMemWithStarにあるstarアトム（子膜の自由リンクがつながっている）に対して
+	 * <ol>
+	 * <li>名前をinside_proxyに変え
+	 * <li>自由リンクの反対側の出現がこの膜のstarアトムならば、
+	 *     後者の名前をoutside_proxyに変える。
+	 * <li>自由リンクの反対側の出現がこの膜（本膜）に残ったoutside_proxyアトムならば、何もしない。
+	 * <li>自由リンクの反対側の出現がこの膜以外にあるアトムならば、
+	 *     自由リンクがこの膜を通過するようにする。
+	 *     このとき、この膜に作成するoutside_proxyでない方のアトムの名前はstarにする。
+	 * </ol>
+	 * @param childMemWithStar （自由リンクを持つ）子膜
+	 */
+	void insertProxies(AbstractMembrane childMemWithStar) {
+		ArrayList changeList = new ArrayList();	// inside_proxy化するアトムのリスト
 		Iterator it = childMemWithStar.atomIteratorOfFunctor(Functor.STAR);
-//		ArrayList removeList = new ArrayList();
-		ArrayList changeList = new ArrayList();
 		while (it.hasNext()) {
-//			//TODO 名前変更のメソッドを作る
-//			Atom star = (Atom)it.next(); // n
-//			Atom inside = newAtom(Functor.INSIDE_PROXY); //これもn（名前変更後）
-//			relinkAtomArgs(inside, 0, star, 0);
-//			relinkAtomArgs(inside, 1, star, 1);
-//			removeList.add(star);
-			Atom inside = (Atom)it.next(); //n 名前は今はstar
+			Atom inside = (Atom)it.next(); // n
 			changeList.add(inside);
-//			if (star.args[0].getAtom().getMem() != this /* M */) {
-			if (inside.args[0].getAtom().getMem() != this /* M */) {
+			if (inside.args[0].getAtom().getMem() == this) {
+				alterAtomFunctor(inside.args[0].getAtom(), Functor.OUTSIDE_PROXY);
+			} else {
 				Atom outside = newAtom(Functor.OUTSIDE_PROXY); // o
-				Atom newstar = newAtom(Functor.STAR); //m
-				newLink(outside, 1, newstar, 1);
-//				newLink(newstar, 1, outside, 1);
-				relinkAtomArgs(newstar, 0, inside, 0);
-				newLink(inside,  0, outside, 0);
-//				newLink(outside, 0, inside,  0);
+				Atom newstar = newAtom(Functor.STAR); // m
+				newLink(newstar, 1, outside, 1);
+				relinkAtomArgs(newstar, 0, inside, 0);	// inside[0]が無効になる
+				newLink(inside, 0, outside, 0);
 			}
 		}
-//		atoms.removeAll(removeList);
 		it = changeList.iterator();
 		while (it.hasNext()) {
-			Atom a = (Atom)it.next();
-			atoms.remove(a);
-			a.changeFunctor(Functor.INSIDE_PROXY);
-			atoms.add(a);
+			alterAtomFunctor((Atom)it.next(), Functor.INSIDE_PROXY);
 		}
+	}
+	/** 右辺のトップレベルに$pがあるルールの実行時、最後に本膜に残ったstarを処理するために呼ばれる。
+	 * <p>この膜にあるstarに対して、
+	 * 反対側の出現であるoutside_proxyとともに除去し第2引数同士を直結する。
+	 */
+	void removeToplevelStars() {
+		ArrayList removeList = new ArrayList();
+		Iterator it = atomIteratorOfFunctor(Functor.STAR);
+		while (it.hasNext()) {
+			Atom star = (Atom)it.next();
+			Atom outside = star.args[0].getAtom();
+			unifyAtomArgs(star,1,outside,1);
+			removeList.add(star);
+			removeList.add(outside);
+		}
+		atoms.removeAll(removeList);
 	}
 	
 	/**
