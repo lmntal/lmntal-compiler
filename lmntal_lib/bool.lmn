@@ -1,7 +1,8 @@
+/*
 NAME
 	Boolean module
 
-SYNOPSIS not,&&,||,^
+SYNOPSIS not,&&,||
 	
 AUTHOR
 	Ken Sakurai
@@ -41,13 +42,4 @@ H='||'(true, false) :- H=true.
 H='||'(false, true) :- H=true.
 H='||'(false, false) :- H=false.
 
-
-/*
- * ^(XOR)
- *
- */
-H='^'(true, true) :- H=false.
-H='^'(true, false) :- H=true.
-H='^'(false, true) :- H=true.
-H='^'(false, false) :- H=false.
 }.
