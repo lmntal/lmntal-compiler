@@ -8,22 +8,116 @@ import runtime.Instruction;
 import runtime.Functor;
 
 /**
+ * 最適化を行うクラスメソッドを持つクラス。
  * @author Mizuno
- *
+ * TODO 命令列の仕様を確認
  */
 public class Optimizer {
 	/**	
-	 * 渡された命令列を最適化する。
+	 * 渡された命令列を最適化する。<br>
+	 * 命令列中には、1引数のremoveatom/removemem命令が現れていてはいけない。
 	 * @param list 最適化したい命令列。今のところボディ命令列が渡されることを仮定している。
 	 */
 	public static void optimize(List list) {
-		//TODO relink命令を、getlink/inheritlink命令に変換する？
+		normalize(list);
+		reuseMem(list);
 		reuseAtom(list);
 		removeUnnecessaryRelink(list);
 	}
 	
+	/**
+	 * relink命令を、getlink/inheritlink命令に変換する。
+	 * @param list 変換する命令列
+	 */
+	private static void normalize(List list) {
+		int nextId = -1;
+		
+		ListIterator it = list.listIterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			switch (inst.getKind()) {
+				case Instruction.SPEC:
+					if (nextId >= 0) {
+						throw new RuntimeException("SYSTEM ERROR: more than one spec instruction");
+					}
+					nextId = inst.getIntArg2();
+					break;
+				case Instruction.RELINK:
+					if (nextId < 0) {
+						throw new RuntimeException("SYSTEM ERROR: relink before spec instruction");
+					}
+					it.remove();
+					it.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
+					it.add(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId));
+					nextId++;
+					break;
+			}
+		}
+	}
+
+	/**
+	 * 膜の再利用を行うコードを生成する。<br>
+	 * 命令列中には、1引数のremovemem命令が現れていてはいけない。
+	 * 
+	 * @param list
+	 */
+	private static void reuseMem(List list) {
+		HashMap reuseMap = new HashMap();
+		HashSet reuseMems = new HashSet(); // 再利用される膜のIDの集合
+		
+		//再利用する膜の組み合わせを決定する
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			switch (inst.getKind()) {
+//TODO プロセス文脈を持たない膜の再利用
+//				case Instruction.REMOVEMEM:
+//					break;
+//				case Instruction.NEWMEM:
+//					break;
+				case Instruction.MOVECELLS:
+					reuseMap.put(inst.getArg1(), inst.getArg2());
+					reuseMems.add(inst.getArg2());
+					break;
+			}
+		}
+		
+		//命令列を書き換える
+		ListIterator lit = list.listIterator();
+		while (lit.hasNext()) {
+			Instruction inst = (Instruction)lit.next();
+			switch (inst.getKind()) {
+				case Instruction.NEWMEM:
+					if (reuseMap.containsKey(inst.getArg1())) {
+						//addmem命令に変更
+						lit.remove();
+						int m = ((Integer)reuseMap.get(inst.getArg1())).intValue();
+						lit.add(new Instruction(Instruction.ADDMEM, inst.getIntArg2(), m)); 
+					}
+					break;
+				case Instruction.MOVECELLS:
+					if (reuseMap.containsKey(inst.getArg1())) {
+						//addmem命令で移動が完了しているため除去
+						lit.remove();
+					}
+					break;
+				case Instruction.FREEMEM:
+					if (reuseMems.contains(inst.getArg1())) {
+						lit.remove();
+					}
+			}
+		}
+		Instruction.changeMemId(list, reuseMap);
+	}
+		
 	/**	
-	 * アトム再利用を行う。
+	 * アトム再利用を行うコードを生成する。<br>
+	 * 分散環境の事は考えていない。
+	 * また、引数に渡される命令列は、次の条件を満たしている必要がある。
+	 * <ul>
+	 *  <li>1引数のremoveatom命令を使用していない
+	 *  <li>getlink命令を使用していない
+	 * </ul>
 	 * @param list 最適化したい命令列。今のところボディ命令列が渡されることを仮定している。
 	 */
 	private static void reuseAtom(List list) {
@@ -107,39 +201,38 @@ public class Optimizer {
 
 										
 		// アトム再利用をするとgetlink命令の前にinherit命令が来る事があるので、
-		// getlink命令を命令列の先頭に移動する。
+		// getlink命令をspec命令の後に移動する。
 		// TODO 適切な移動場所を見つける
 		it = getlinkInsts.values().iterator();
 		while (it.hasNext()) {
-			list.add(0, it.next());
+			list.add(1, it.next());
 		}
 
-		//不要になったremoveatom/newatom命令を除去
-		ListIterator lit = list.listIterator(getlinkInsts.size());
+		//不要になったremoveatom/freeatom/newatom命令を除去
+		ListIterator lit = list.listIterator(getlinkInsts.size() + 1);
 		while (lit.hasNext()) {
 			Instruction inst = (Instruction)lit.next();
 			switch (inst.getKind()) {
-				case Instruction.REMOVEATOM: {
+				case Instruction.REMOVEATOM:
+				case Instruction.FREEATOM:
 					Integer atomId = (Integer)inst.getArg1();
 					if (reuseAtoms.contains(atomId)) {
 						lit.remove();
 					}
 					break;
-				}
-				case Instruction.NEWATOM: {
-					Integer atomId = (Integer)inst.getArg1();
+				case Instruction.NEWATOM:
+					atomId = (Integer)inst.getArg1();
 					if (reuseMap.containsKey(atomId)) {
 						lit.remove();
 					}
 					break;
-				}
-				case Instruction.GETLINK: {
+				case Instruction.GETLINK:
 					//先頭に移動したので除去
 					lit.remove();
 					break;
-				}
 			}
 		}
+		//TODO enqueueatom命令を生成
 
 		//アトムIDの付け替え
 		Instruction.changeAtomId(list, reuseMap);

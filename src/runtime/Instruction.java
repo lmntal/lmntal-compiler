@@ -9,6 +9,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Field;
 
 /*
+ * ルール実行中の5つの配列は、1つに併合した方がよいかもしれない。
+ * 現在は5つの配列を生成し、互いに変数番号が重複しないように使用している。
+ * 
  * <p><b>注意</b>　方法4の文書に対して、「ロックしたまま実行膜スタックに積む」という操作
  * およびその結果の「ロックされた、かつ実行膜スタックにも積まれた」状態が追加された。
  * 
@@ -297,7 +300,7 @@ public class Instruction {
 	// LOCALEQFUNCは不要
 
     // アトムを操作する基本ボディ命令 (30--39)    
-	// [local]removeatom                  [srcatom, srcmem, funcref]
+	// [local]removeatom                  [srcatom, srcmem, func]
 	// [local]newatom           [-dstatom, srcmem, funcref]
 	// [local]newatomindirect   [-dstatom, srcmem, func]
     // [local]enqueueatom                 [srcatom]
@@ -306,14 +309,13 @@ public class Instruction {
 	// [local]alterfunc                   [atom, funcref]
 	// [local]alterfuncindirect           [atom, func]
 
-    /** removeatom [srcatom, srcmem, funcref]
+    /** removeatom [srcatom, srcmem, func]
      * <br>ボディ命令<br>
-     * （膜$srcmemにあってファンクタ$funcを持つ）アトム$srcatomを現在の膜から取り出す。
-     * 実行スタックは操作しない。
+     * $srcmemにある、名前$funcを持つアトム$srcatomを現在の膜から取り出す。実行スタックは操作しない。
      * @see dequeueatom */
 	public static final int REMOVEATOM = 30;
 	
-	/** localremoveatom [srcatom, srcmem, funcref]
+	/** localremoveatom [srcatom]
      * <br>最適化用ボディ命令<br>
      * removeatomと同じ。ただし$srcatomはこの計算ノードに存在する。*/
 	public static final int LOCALREMOVEATOM = LOCAL + REMOVEATOM;
@@ -446,14 +448,14 @@ public class Instruction {
 
 	/** removemem [srcmem, parentmem]
 	 * <br>ボディ命令<br>
-	 * 膜$srcmemを親膜（$parentmem）から取り出す。
+	 * 膜$srcmemを膜$parentmemから取り出す。
 	 * 膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。
 	 * @see removeproxies */
 	public static final int REMOVEMEM = 50;
 
 	/** localremovemem [srcmem, parentmem]
 	 * <br>最適化用ボディ命令<br>
-	 * removememと同じ。ただし$srcmemの親膜（$parentmem）はこの計算ノードに存在する。*/
+	 * removememと同じ。ただし$srcmemの親膜はこの計算ノードに存在する。*/
 	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
 
 	/** newmem [-dstmem, srcmem]
@@ -1077,10 +1079,10 @@ public class Instruction {
 	public static Instruction removeatom(int atom, int mem, Functor func) {
 		return new Instruction(REMOVEATOM,atom,mem,func);
 	}
-//	/** @deprecated */
-//	public static Instruction removeatom(int atom, Functor func) {
-//		return new Instruction(REMOVEATOM,atom,func);
-//	}
+	/** @deprecated */
+	public static Instruction removeatom(int atom, Functor func) {
+		return new Instruction(REMOVEATOM,atom,func);
+	}
     
 	// コンストラクタ
 	
@@ -1139,11 +1141,11 @@ public class Instruction {
     }
 
 	//////////////////////////////////
-	// 最適化器が使う、アトムID書き換えのためのクラスメソッド
+	// 最適化器が使う、ID書き換えのためのクラスメソッド
 	// @author Mizuno
 	
 	/**
-	 * 与えられた対応表よって、命令列中のアトムIDを書き換える。<br>
+	 * 与えられた対応表よって、ボディ命令列中のアトムIDを書き換える。<br>
 	 * 命令列中のアトムIDが、対応表のキーに出現する場合、対応する値に書き換えます。
 	 *
 	 * @param list 書き換える命令列
@@ -1154,19 +1156,114 @@ public class Instruction {
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
 			switch (inst.getKind()) {
-				case Instruction.NEWLINK: {
+				case Instruction.NEWLINK:
+				case Instruction.LOCALNEWLINK:
 					changeArg(inst, 1, map);
 					changeArg(inst, 3, map);
 					break;
-				}
-				case Instruction.GETLINK: {
+				case Instruction.GETLINK:
 					changeArg(inst, 2, map);
 					break;
-				}
-				case Instruction.INHERITLINK: {
+				case Instruction.INHERITLINK:
+				case Instruction.LOCALINHERITLINK:
 					changeArg(inst, 1, map);
 					break;
-				}
+			}
+		}
+	}
+	/**
+	 * 与えられた対応表よって、ボディ命令列中の膜IDを書き換える。<br>
+	 * 命令列中のアトムIDが、対応表のキーに出現する場合、対応する値に書き換えます。
+	 *
+	 * @param list 書き換える命令列
+	 * @param map アトムIDの対応表。
+	 */
+	public static void changeMemId(List list, Map map) {
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			switch (inst.getKind()) {
+				case Instruction.REMOVEATOM:
+				case Instruction.LOCALREMOVEATOM:
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.NEWATOM:
+				case Instruction.NEWATOMINDIRECT:
+				case Instruction.LOCALNEWATOM:
+				case Instruction.LOCALNEWATOMINDIRECT:
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.COPYATOM:
+				case Instruction.LOCALCOPYATOM:
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.LOCALADDATOM:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.REMOVEMEM:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.NEWMEM:
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.NEWROOT:
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.MOVECELLS:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.ENQUEUEALLATOMS:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.FREEMEM:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.ADDMEM:
+				case Instruction.LOCALADDMEM:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.UNLOCKMEM:
+				case Instruction.LOCALUNLOCKMEM:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.REMOVEPROXIES:
+				case Instruction.REMOVETOPLEVELPROXIES:
+				case Instruction.REMOVETEMPORARYPROXIES:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.INSERTPROXIES:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.LOADRULESET:
+				case Instruction.LOCALLOADRULESET:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.COPYRULES:
+				case Instruction.LOCALCOPYRULES:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.CLEARRULES:
+				case Instruction.LOCALCLEARRULES:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.RECURSIVELOCK:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.RECURSIVEUNLOCK:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.COPYMEM:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.DROPMEM:
+					changeArg(inst, 1, map);
+					break;
 			}
 		}
 	}
