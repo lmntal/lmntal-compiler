@@ -17,12 +17,6 @@ public final class InterpretedRuleset extends Ruleset {
     /** とりあえずルールの配列として実装 */
     public List rules;
 	
-    //	/** 膜主導実行用命令列。１つ目の添え字はルール番号 */
-    //	public Instruction[] memMatch;
-    //	/** アトム主導実行用命令列。Mapにすべき？ */
-    //	public Instruction[] atomMatches;
-    //	/** ボディ実行用命令列。１つ目の添え字はルール番号 */
-    //	public Instruction[] body;
 	
     /**
      * RuleCompiler では、まず生成してからデータを入れ込む。
@@ -62,13 +56,19 @@ public final class InterpretedRuleset extends Ruleset {
      *
      * 
      */
-    private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
-	switch (ruleid){
+    //    private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
+    private void body(Rule rule, AbstractMembrane[] memArgs, Atom[] atomArgs) {
+	Iterator i = rule.body.iterator();
+
+	while(i.hasNext()){
+	    hoge = (Instruction)i.next();
+
+	switch (hoge){
 	case Instruction.DEREF:
 	    //deref [-dstatom, +srcatom, +srcpos, +dstpos]
-	    if (atomArgs[1].args[srcpos] == atomArgs[1].args[dstpos]) {
+	    //if (atomArgs[1].args[srcpos] == atomArgs[1].args[dstpos]) {
 		//リンク先のアトムをdstatomに代入する。
-	    }
+	    //	    }
 	    break;
 
 	case Instruction.GETMEM:
@@ -210,7 +210,7 @@ public final class InterpretedRuleset extends Ruleset {
 
 	case Instruction.NEWLINK:
 	    //newlink [atom1, pos1, atom2, pos2]
-	    //atomArgs[0].
+	    //atomArgs[0].args[pos1]    atomArgs[1].args[pos2]
 	    break;
 
 	case Instruction.RELINK:
