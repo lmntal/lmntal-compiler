@@ -124,7 +124,7 @@ final class LMNtalRuntime {
 					break;
 				}
 			}
-		}while(allIdle);
+		}while(!allIdle);
 	}
 	
 	Machine newMachine() {

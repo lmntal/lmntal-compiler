@@ -14,7 +14,7 @@ public class QueuedEntity {
 	}
 	/** スタックに積まれている場合はtrue。 */
 	public boolean isQueued() {
-		return next == null && prev == null;
+		return next != null;
 	}
 	/** スタックから除去 */
 	public void dequeue() {
