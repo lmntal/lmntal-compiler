@@ -6,12 +6,12 @@ package runtime;
  */
 public class Functor {
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
-	public static final Functor INSIDE_PROXY = new Functor("$inside",2,null,"$inside");
+	public static final Functor INSIDE_PROXY = new Functor("$inside",2,null,".inside");
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
-	public static final Functor OUTSIDE_PROXY = new Functor("$outside",2,null,"$outside");
+	public static final Functor OUTSIDE_PROXY = new Functor("$outside",2,null,".outside");
 	/** $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム
 	 * を表すファンクタ temporary_inside_proxy （通称:star）*/
-	public static final Functor STAR = new Functor("$transient_inside_proxy",2,null,"$star");
+	public static final Functor STAR = new Functor("$transient_inside_proxy",2,null,".star");
 	
 	/** シンボル名。このクラスのオブジェクトの場合は、名前の表示名が格納される。
 	 * 空文字列のときは、サブクラスのオブジェクトであることを表す。*/
@@ -25,14 +25,14 @@ public class Functor {
 	
 	////////////////////////////////////////////////////////////////
 	
-	/** 表示名に対する内部名を取得する */
+	/** シンボルの表示名に対する内部名を取得する。
+	 * 現在の仕様では、内部名とは . がエスケープされた名前を表す。*/
 	public static String escapeName(String name) {
-		name = name.replaceAll("\\$","\\$\\$");
-		name = name.replaceAll("\\.","\\$.");
+		name = name.replaceAll("\\.","..");
 		return name;
 	}
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
-	public String getQuotedFunctorName() {
+	public final String getQuotedFunctorName() {
 		String text = getName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 			text = text.replaceAll("'","''");
@@ -42,11 +42,13 @@ public class Functor {
 		return text;
 	}
 	/** 引数をもたないアトムの名前として表示名を印字するための文字列を返す */
-	public String getQuotedAtomName() {
+	public final String getQuotedAtomName() {
 		String text = getName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\]|[=!<>]+)$")) {
-			text = text.replaceAll("'","''");
-			text = "'" + text + "'";
+			if (!text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.[0-9]*([Ee][+-]?[0-9]+)?)$")) {
+				text = text.replaceAll("'","''");
+				text = "'" + text + "'";
+			}
 		}
 		if (path != null) text = path + "." + text;
 		return text;
@@ -68,7 +70,7 @@ public class Functor {
 		this.arity = arity;
 		this.path  = path;
 		name = escapeName(name);
-		if (path != null) name = escapeName(path) + "$" + name;
+		if (path != null) name = escapeName(path) + "." + name;
 		// == で比較できるようにするためにinternしておく。
 		strFunctor = (name + "_" + arity).intern();
 	}
