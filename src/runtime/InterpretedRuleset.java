@@ -447,11 +447,17 @@ class InterpretiveReactor {
 				case Instruction.LOCALCLEARRULES:  //[dstmem]
 					mems[inst.getIntArg1()].clearRules();
 					break; //n-kato
-				case Instruction.LOADMODULE: //[dstmem, ruleset]
-					// TODO 【引数がルールセットなら、LOADRULESET命令と同じになってしまう】
-					// 最初の意図は、文字列で指定されたモジュールのルールセットをロードする命令のつもりだった。
-					// 同一ソースファイル中にあれば、旧fixupModulesのタイミングでLOADRULESETに置換してもよいけど。
-					mems[inst.getIntArg1()].loadRuleset((Ruleset)inst.getArg2() );
+				case Instruction.LOADMODULE: //[dstmem, module_name]
+					// モジュール膜直属のルールセットを全部読み込む
+					compile.structure.Membrane m = (compile.structure.Membrane)compile.Module.memNameTable.get(inst.getArg2());
+					if(m==null) {
+						Env.e("Undefined module "+inst.getArg2());
+					} else {
+						Iterator i = m.rulesets.iterator();
+						while (i.hasNext()) {
+							mems[inst.getIntArg1()].loadRuleset((Ruleset)i.next() );
+						}
+					}
 					break;
 					//====ルールを操作するボディ命令====ここまで====
 

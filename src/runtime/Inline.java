@@ -115,7 +115,8 @@ public class Inline {
 	
 	/**
 	 * コードを生成する。
-	 *
+	 * TODO java ファイルの名前を、コンパイルするファイル名と同じにする。oneLiner や REPL の時は "-"
+	 * TODO 更新されてたときだけコンパイルする。
 	 */
 	public static void makeCode() {
 		try {
