@@ -18,6 +18,7 @@ import runtime.Rule;
 public class Optimizer {
 	/** ルールオブジェクトを最適化する */
 	public static void optimizeRule(Rule rule) {
+		if (Env.optimize == 9) Compactor.compactRule(rule); else // （テスト用）		
 		if (Env.optimize == 1) inlineExpandTailJump(rule.memMatch); else	// TODO 最適化器を統合する
 		optimize(rule.memMatch, rule.body);
 	}

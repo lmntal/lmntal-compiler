@@ -650,7 +650,7 @@ public class RuleCompiler {
 				LinkOccurrence link2 = atom.args[1].buddy;
 				body.add(new Instruction( Instruction.UNIFY,
 					lhsatomToPath(link1.atom), link1.pos,
-					lhsatomToPath(link2.atom), link2.pos));
+					lhsatomToPath(link2.atom), link2.pos, rhsmemToPath(mem) ));
 			} else {
 				int atomid = varcount++;
 				rhsatompath.put(atom, new Integer(atomid));

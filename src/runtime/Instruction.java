@@ -716,7 +716,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * <p>典型的には、$atom1はルールボディに、$atom2はルールヘッドに存在する。
 	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalrelinkが使用できる。
 	 * <p>実行後、$atom2[pos2]の内容は無効になる。
-	 * <p>getlink[link2,atom2,pos2];inheritlinks[atom1,pos1,link2,mem]と同じ。
+	 * <p>getlink[link2,atom2,pos2];inheritlink[atom1,pos1,link2,mem]と同じ。
 	 * <p>alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
 	public static final int RELINK = 66;
 	static {setArgType(RELINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
@@ -1817,6 +1817,43 @@ public class Instruction implements Cloneable, Serializable {
 		}
 	}
 
+	/** 指定された命令列中で変数が参照される回数を返す（代入は含まない）
+	 * @param list   命令列
+	 * @param varnum 変数番号
+	 * @author n-kato */
+	public static int getVarUseCount(List list, Integer varnum) {
+		int count = 0;
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
+			int i = 0;
+			if (argtype.output) i++;
+			for (; i < inst.data.size(); i++) {
+				switch (argtype.type[i]) {
+				case ARG_MEM:
+				case ARG_ATOM:
+				case ARG_VAR:
+					if (inst.data.get(i).equals(varnum)) count++;
+					break;
+				case ARG_INSTS:
+				case ARG_LABEL:
+					// TODO いずれ正しく実装すること
+					break;
+				}
+			}
+		}
+		return count;
+	}
+	/** 指定された命令列後半部分で変数が参照される回数を返す（代入は含まない）
+	 * @param list   命令列
+	 * @param varnum 変数番号
+	 * @param start  開始位置
+	 * @see getVarUseCount */
+	public static int getVarUseCountFrom(List list, Integer varnum, int start) {
+		return getVarUseCount( list.subList(start, list.size() - 1), varnum );
+	}
+	
 	//////////////////////////////////
 	//
 	// デバッグ用表示メソッド
