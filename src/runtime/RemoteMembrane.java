@@ -8,10 +8,9 @@ import daemon.LMNtalNode;
 
 /**
  * リモート計算ノード
- * 計算の発行元にあって、リモート側（ネットワークの向こう側）の代理人として存在する。
- * やってる事は命令をリモートへ転送する役目。
  * 
- * TODO この解説が正しいか確認
+ * 手元にあって、リモート側（ネットワークの向こう側）の代理人として存在する。
+ * やってる事は命令をリモートへ転送する役目。
  * 
  * @author n-kato
  * 
@@ -55,13 +54,12 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 	public AbstractTask newTask(AbstractMembrane parent) {
 		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
 
-		//RemoteTask r = new RemoteTask((AbstractLMNtalRuntime)this);
-		
+		RemoteTask r = new RemoteTask((AbstractLMNtalRuntime)this);
 		
 		send("NEWTASK");
-		//return (AbstractTask)r;
+		return (AbstractTask)r;
 		
-		return (AbstractTask)null;
+		//return (AbstractTask)null;
 	}
 	
 	/*

@@ -51,6 +51,11 @@ class SlaveLMNtalRuntimeLauncher {
 				runtime = new LocalLMNtalRuntime();
 
 				//TODO この先何をすればいいのか
+				//タスクを作る
+				
+				//膜を作る
+				
+				//ルールセットを作る
 
 
 			} else {
