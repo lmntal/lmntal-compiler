@@ -38,8 +38,10 @@ LineTerminator = \r|\n|\r\n
 InputCharacter = ([^\r\n]|Character)
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
+Inline = "[[" [^*] ~"]]"
+
 LinkName       = [A-Z][A-Za-z_0-9]*
-AtomNameNormal = [a-z0-9][A-Za-z_0-9]*
+AtomNameNormal = {Inline} | [a-z0-9][A-Za-z_0-9]*
 
 Comment = {TraditionalComment} | {EndOfLineComment}
 
