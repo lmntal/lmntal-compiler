@@ -26,4 +26,7 @@ abstract class SrcContext {
 	}
 	/** コンテキストの限定名（種類と名前の組に対する一意な識別子として使用できる文字列）を返す。*/
 	abstract public String getQualifiedName();
+	public String toString() {
+		return getQualifiedName();
+	}
 }
