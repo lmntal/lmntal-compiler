@@ -51,7 +51,7 @@ public class HybridInputStream {
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
 	public synchronized void close() throws IOException {
-		System.out.println("HybridInputStream.close() entered");
+		//System.out.println("HybridInputStream.close() entered");
 		in.close();
 	}
 
