@@ -10,6 +10,9 @@ AUTHOR
 HISTORY
 	2004/05/23(Sun)
 
+TODO
+	query_string を取得する部分だけを inline で書けば、他はライブラリを使ってかける。かく。
+
 */
 
 {
