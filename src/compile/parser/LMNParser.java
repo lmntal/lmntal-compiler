@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
-import java_cup.runtime.Symbol;
+//import java_cup.runtime.Symbol;
 import runtime.Inline;
 import runtime.Env;
 import compile.structure.*;
@@ -87,8 +87,9 @@ public class LMNParser {
 	 * 子膜は全てリンクの結合、プロキシの作成は行われているとする
 	 * @param mem リンク処理を行いたい膜
 	 * @throws ParseException
+	 * @return リンク名から自由リンク出現へのハッシュ
 	 */
-	private void createProxy(Membrane mem) throws ParseException {
+	private Hashtable createProxy(Membrane mem) throws ParseException {
 		Hashtable linkNameTable = new Hashtable();
 		// 同じ膜レベルのリンク結合を行う
 		for (int i=0;i<mem.atoms.size();i++) {
@@ -123,6 +124,18 @@ public class LMNParser {
 		else {
 			
 		}
+		return linkNameTable;
+	}
+	/** 左辺と右辺の自由リンクをつなぐ（n-katoによる仮のコード） */
+	private void coupleInheritedLinks(Hashtable lhsfreelinks, Hashtable rhsfreelinks) throws ParseException {
+		Hashtable linkNameTable = lhsfreelinks;
+		Enumeration rhsenum = rhsfreelinks.keys();
+		while (rhsenum.hasMoreElements()) {
+			String linkname = (String)rhsenum.nextElement();
+			LinkOccurrence rhsocc = (LinkOccurrence)rhsfreelinks.get(linkname);
+			connectLink(rhsocc, linkNameTable);
+		}
+		// TODO 片方にしか出現しない自由リンクをエラー報告とする
 	}
 	
 	/**
@@ -329,7 +342,7 @@ public class LMNParser {
 		
 		// ヘッド
 		addProcessToMem(sRule.getHead(), rule.leftMem);
-		createProxy(rule.leftMem);
+		Hashtable lhsfreelinks = createProxy(rule.leftMem);
 		
 		// ガード
 		addProcessToMem(sRule.getGuard(), rule.guardMem);
@@ -337,7 +350,10 @@ public class LMNParser {
 
 		// ボディ
 		addProcessToMem(sRule.getBody(), rule.rightMem);
-		createProxy(rule.rightMem);
+		Hashtable rhsfreelinks = createProxy(rule.rightMem);
+		
+		// 右辺と左辺の自由リンクを接続する
+		coupleInheritedLinks(lhsfreelinks, rhsfreelinks);	
 		
 		mem.rules.add(rule);
 		rule.parent = mem;       // RuleStructure.parent を追加したので追加 by Hara
