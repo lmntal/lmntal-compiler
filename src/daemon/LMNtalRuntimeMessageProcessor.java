@@ -418,6 +418,7 @@ class InstructionBlockProcessor implements Runnable {
 				String memid = command[1];
 				AbstractMembrane m = lookupMembrane(memid);
 				if (m == null) {
+					if(Env.debug>0)System.out.println("LMNtalRuntimeMessageProcessor.run(): m is null");
 					// 未知の膜の場合、擬似膜の作成を試みる
 					String fqdn = memid.split(":",2)[0];
 					AbstractLMNtalRuntime rt = LMNtalRuntimeManager.connectRuntime(fqdn);
@@ -515,7 +516,7 @@ class InstructionBlockProcessor implements Runnable {
 					result += tmpID + "=" + newmem.getGlobalMemID() + ";";
 				} else if (command[0].equals("REMOVEMEM")) {
 					mem.removeMem(lookupMembrane(command[2]));
-				} else if (command[0].equals("NEWROOT")) {
+				} else if (command[0].equals("NEWROOT")) { 
 					String tmpID = command[2];
 					AbstractMembrane newmem = mem.newRoot(command[3]);
 					registerNewMembrane(tmpID,newmem);
