@@ -1,17 +1,15 @@
 [[/*inline_define*/
 ]],
-io : {
-	( io.print(String) :- [[/*inline*/
-		System.out.println(me.nth(0));
-		]](String)
-	)
-}
-,
 io.print([[
 
 abcdefg
 
 end
 
-]])
+]]).
+
+a.
+(a :- b, io.fopen(h1, [[tmp_a]])).
+(b :- c, io.fprint(h1, [[hahahahahahaha]])).
+(c :-    io.fclose(h1)).
 
