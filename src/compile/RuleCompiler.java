@@ -219,8 +219,8 @@ public class RuleCompiler {
 						// ( p(X,Y) :- X=Y ) はUNIFYボディ命令を出力するのでここでは何もしない
 					}
 				} else {
-					link1.atom.args[link1.pos] = link2;
-					link2.atom.args[link2.pos] = link1;
+					//link1.atom.args[link1.pos] = link2;
+					//link2.atom.args[link2.pos] = link1;
 					link1.buddy = link2;
 					link2.buddy = link1;
 					removedAtoms.add(atom);
