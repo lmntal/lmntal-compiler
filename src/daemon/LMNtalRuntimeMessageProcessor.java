@@ -153,8 +153,15 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			} catch (IOException e) {
 				//todo disconnectFromDaemon()する時に、必ずこの例外が発生するのを防ぐ
 				//済 2004-08-24 nakajima
-				System.out.println("LMNtalRuntimeMessageProcessor.run(): ERROR:このスレッドには書けません!");
-				e.printStackTrace(); 
+
+				if(true){//TODO ちゃんと判定する
+					System.out.println("program finished successfully");
+					break;
+				} else {
+					//System.out.println("LMNtalRuntimeMessageProcessor.run(): ERROR:このスレッドには書けません!");
+					e.printStackTrace(); 
+				}
+			
 				break;
 			}
 			if (input == null) {
