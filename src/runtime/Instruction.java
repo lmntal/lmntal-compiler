@@ -514,7 +514,7 @@ public class Instruction implements Cloneable {
 	 * <br>最適化用ボディ命令<br>
 	 * removememと同じ。ただし$srcmemの親膜（$parentmem）はこの計算ノードに存在する。*/
 	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
-	static {setArgType(LOCALREMOVEATOM, new ArgType(false, ArgType.MEM, ArgType.MEM));}
+	static {setArgType(LOCALREMOVEMEM, new ArgType(false, ArgType.MEM, ArgType.MEM));}
 
 	/** newmem [-dstmem, srcmem]
 	 * <br>ボディ命令<br>
@@ -1520,6 +1520,9 @@ public class Instruction implements Cloneable {
 	// @author Mizuno
 
 	private static void setArgType(int kind, ArgType argtype) {	
+		if (argTypeTable.containsKey(new Integer(kind))) {
+			throw new RuntimeException("setArgType for '" + kind + "' is called more than once");
+		}
 		argTypeTable.put(new Integer(kind), argtype);
 	}
 	private static class ArgType {
@@ -1575,152 +1578,178 @@ public class Instruction implements Cloneable {
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
-			switch (inst.getKind()) { // TODO ガード命令や、出力変数も書き換える
-				case Instruction.DEREF:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.DEREFLINK:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.FUNC:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.FINDATOM:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.ANYMEM:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.NATOMS:
-				case Instruction.NMEMS:
-					changeArg(inst, 1, map);
-					break;	
-				case Instruction.NORULES:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.LOCKMEM:
-				case Instruction.TESTMEM:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.NEWATOM:
-				case Instruction.LOCALNEWATOM:
-				case Instruction.NEWATOMINDIRECT:
-				case Instruction.LOCALNEWATOMINDIRECT:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.NEWLINK:
-				case Instruction.LOCALNEWLINK:
-					changeArg(inst, 1, map);
-					changeArg(inst, 3, map);
-//					changeArg(inst, 5, map);
-					break;
-				case Instruction.GETLINK:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.INHERITLINK:
-				case Instruction.LOCALINHERITLINK:
-					changeArg(inst, 1, map);
-					changeArg(inst, 3, map);
-					changeArg(inst, 4, map);
-					break;
-				case Instruction.ENQUEUEATOM:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.DEQUEUEATOM:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.REMOVEATOM:
-				case Instruction.LOCALREMOVEATOM:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.COPYATOM:
-				case Instruction.LOCALCOPYATOM:
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.LOCALADDATOM:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.REMOVEMEM:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.NEWMEM:
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.NEWROOT:
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.MOVECELLS:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.ENQUEUEALLATOMS:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.FREEATOM:
-				case Instruction.FREEMEM:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.ADDMEM:
-				case Instruction.LOCALADDMEM:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.UNLOCKMEM:
-				case Instruction.LOCALUNLOCKMEM:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.REMOVEPROXIES:
-				case Instruction.REMOVETOPLEVELPROXIES:
-				case Instruction.REMOVETEMPORARYPROXIES:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.INSERTPROXIES:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.LOADRULESET:
-				case Instruction.LOCALLOADRULESET:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.COPYRULES:
-				case Instruction.LOCALCOPYRULES:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.CLEARRULES:
-				case Instruction.LOCALCLEARRULES:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.RECURSIVELOCK:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.RECURSIVEUNLOCK:
-					changeArg(inst, 1, map);
-					break;
-				case Instruction.COPYMEM:
-					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
-					break;
-				case Instruction.DROPMEM:
-					changeArg(inst, 1, map);
-					break;
-				case RELINK:
-				case LOCALRELINK:
-					changeArg(inst, 5, map);
-					break;
-					
+			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
+			if (argtype.type.length != inst.data.size()) {
+				System.err.println("WARNING: length of arg is different from table data");
+			}
+			for (int i = 0; i < inst.data.size(); i++) {
+				switch (argtype.type[i]) {
+					case ArgType.ATOM:
+					case ArgType.MEM:
+					case ArgType.VAR:
+						changeArg(inst, i+1, map);
+						break;
+				}
 			}
 		}
 	}
+//	/**
+//	 * 与えられた対応表によって、ボディ命令列中の変数を書き換える。<br>
+//	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
+//	 * 
+//	 * @param list 書き換える命令列
+//	 * @param map 変数の対応表。
+//	 */
+//	public static void changeVar(List list, Map map) {
+//		Iterator it = list.iterator();
+//		while (it.hasNext()) {
+//			Instruction inst = (Instruction)it.next();
+//			switch (inst.getKind()) { // TODO ガード命令や、出力変数も書き換える
+//				case Instruction.DEREF:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.DEREFLINK:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.FUNC:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.FINDATOM:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.ANYMEM:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.NATOMS:
+//				case Instruction.NMEMS:
+//					changeArg(inst, 1, map);
+//					break;	
+//				case Instruction.NORULES:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.LOCKMEM:
+//				case Instruction.TESTMEM:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.NEWATOM:
+//				case Instruction.LOCALNEWATOM:
+//				case Instruction.NEWATOMINDIRECT:
+//				case Instruction.LOCALNEWATOMINDIRECT:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.NEWLINK:
+//				case Instruction.LOCALNEWLINK:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 3, map);
+////					changeArg(inst, 5, map);
+//					break;
+//				case Instruction.GETLINK:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.INHERITLINK:
+//				case Instruction.LOCALINHERITLINK:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 3, map);
+//					changeArg(inst, 4, map);
+//					break;
+//				case Instruction.ENQUEUEATOM:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.DEQUEUEATOM:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.REMOVEATOM:
+//				case Instruction.LOCALREMOVEATOM:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.COPYATOM:
+//				case Instruction.LOCALCOPYATOM:
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.LOCALADDATOM:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.REMOVEMEM:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.NEWMEM:
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.NEWROOT:
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.MOVECELLS:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.ENQUEUEALLATOMS:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.FREEATOM:
+//				case Instruction.FREEMEM:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.ADDMEM:
+//				case Instruction.LOCALADDMEM:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.UNLOCKMEM:
+//				case Instruction.LOCALUNLOCKMEM:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.REMOVEPROXIES:
+//				case Instruction.REMOVETOPLEVELPROXIES:
+//				case Instruction.REMOVETEMPORARYPROXIES:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.INSERTPROXIES:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.LOADRULESET:
+//				case Instruction.LOCALLOADRULESET:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.COPYRULES:
+//				case Instruction.LOCALCOPYRULES:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.CLEARRULES:
+//				case Instruction.LOCALCLEARRULES:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.RECURSIVELOCK:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.RECURSIVEUNLOCK:
+//					changeArg(inst, 1, map);
+//					break;
+//				case Instruction.COPYMEM:
+//					changeArg(inst, 1, map);
+//					changeArg(inst, 2, map);
+//					break;
+//				case Instruction.DROPMEM:
+//					changeArg(inst, 1, map);
+//					break;
+//				case RELINK:
+//				case LOCALRELINK:
+//					changeArg(inst, 5, map);
+//					break;
+//					
+//			}
+//		}
+//	}
 	/**
 	 * 対応表によって引数を書き換える。
 	 * @param inst 書き換える命令
