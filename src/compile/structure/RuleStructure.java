@@ -1,11 +1,13 @@
 package compile.structure;
 
+import java.util.HashMap;
+
 /** 
  * ソースコード中のルールの構造を表すクラス
  */
 public final class RuleStructure {
 	/** 所属膜。コンパイル時につかう
-	 * todo parentはいずれmemに名称変更する */
+	 * <p>todo parentはいずれmemに名称変更する */
 	public Membrane parent;
 
 	/** Headを格納する膜 */
@@ -16,6 +18,15 @@ public final class RuleStructure {
 	
 	/** ガードを格納する膜 */
 	public Membrane guardMem = new Membrane(null);
+	
+	/** プロセス文脈の限定名 -> ContextDef */
+	public HashMap processContexts = new HashMap();
+
+	/** ルール文脈の限定名 -> ContextDef */
+	public HashMap ruleContexts = new HashMap();
+
+	/** 型付きプロセス文脈の限定名 -> ContextDef */
+	public HashMap typedProcessContexts = new HashMap();
 
 	/**
 	 * コンストラクタ

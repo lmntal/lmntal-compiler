@@ -6,57 +6,47 @@ import runtime.InterpretedRuleset;
 import runtime.Env;
 
 /** 
- * ソースコード中の膜の構造を表すクラス
- * memo:全て1つの配列に入れる方法もある。
+ * ソースコード中の膜の構造を表すクラス<br>
+ * memo:全て1つの配列に入れる方法もある。<br>
  * 各要素はListとして保持される。
  */
 public final class Membrane {
-	/** 
-	 * 親膜
-	 * <p>todo いずれmemはparentに名称変更する
-	 */
+	/** 親膜 <p> todo いずれmemはparentに名称変更する */
 	public Membrane mem = null;
 	
-	/**
-	 * アトム(compile.structure.Atom)のリスト
-	 */
+	/** アトム(compile.structure.Atom)のリスト */
 	public List atoms = new ArrayList();
 
-	/** 
-	 * 子膜(compile.structure.Membrane)のリスト
-	 */
+	/** 子膜(compile.structure.Membrane)のリスト */
 	public List mems = new ArrayList();
 	
-	/**
-	 * ルール(compile.structure.RuleStructure)のリスト
-	 */
+	/** ルール(compile.structure.RuleStructure)のリスト */
 	public List rules = new ArrayList();
-	
-	/**
-	 * プロセス変数(compile.structure.ProcessContext)のリスト
-	 */
+
+	////////////////////////////////////////////////////////////////
+
+	/** アトム集団(compile.structure.Atom)のリスト */
+	public List aggregates = new ArrayList();
+
+	/** プロセス文脈出現(compile.structure.ProcessContext)のリスト */
 	public List processContexts = new ArrayList();
 	
-	/**
-	 * ルール変数(compile.struct.RuleContext)のリスト
-	 */
+	/** ルール文脈出現(compile.struct.RuleContext)のリスト */
 	public List ruleContexts = new ArrayList();
 	
-	/**
-	 * 型付プロセス文脈(compile.struct.TypedProcessContext)のリスト
-	 */
+	/** 型付きプロセス文脈出現(compile.struct.ProcessContext)のリスト */
 	public List typedProcessContexts = new ArrayList();
 	
-	/**
-	 * 膜の自由リンク名(String)からそのリンク出現(compile.struct.LinkOccurrence)への写像
-	 */
+	////////////////////////////////////////////////////////////////
+	
+	/** 膜の自由リンク名(String)からそのリンク出現(compile.struct.LinkOccurrence)への写像 */
 	public HashMap freeLinks = new HashMap();
 	
-	/**
-	 * ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。
-	 */
+	/** ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。*/
 	public runtime.Ruleset ruleset = new InterpretedRuleset();
 	
+	////////////////////////////////////////////////////////////////
+
 	/**
 	 * コンストラクタ
 	 * @param mem 親膜
@@ -90,7 +80,6 @@ public final class Membrane {
 	
 	/**
 	 * この膜に含まれる全てのルールセットを表示する。
-	 *
 	 */
 	public void showAllRuleset() {
 		Env.d( ((InterpretedRuleset)ruleset) );

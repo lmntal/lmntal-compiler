@@ -1,7 +1,7 @@
 package compile.structure;
 
 /** 
- * ソースコード中のリンクの各出現を表すクラス。<br>
+ * ソースコード中のリンクまたはリンク束の各出現を表すクラス。<br>
  * runtime.Link と違って、LinkOccurrence.atom はこちら側のアトムオブジェクトが入っている。
  * 
  */

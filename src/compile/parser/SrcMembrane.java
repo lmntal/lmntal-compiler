@@ -1,13 +1,13 @@
-/**
- * ソース中での膜表現
- */
-
 package compile.parser;
 import java.util.LinkedList;
 
+/** ソースファイル中の膜表現 */
+
 class SrcMembrane {
-	
-	private LinkedList process = null;
+	/** 膜の内容プロセスの表現 */
+	LinkedList process = null;
+	/** 終了フラグの有無 */
+	boolean stable = false;
 	
 	/**
 	 * 空の膜を作成します 

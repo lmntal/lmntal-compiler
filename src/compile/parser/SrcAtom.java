@@ -1,10 +1,7 @@
-/**
- * ソースファイル中でのアトム表現
- */
 package compile.parser;
-
 import java.util.LinkedList;
 
+/** ソースファイル中のアトム表現 */
 class SrcAtom {
 
 	protected LinkedList process = null;

@@ -5,25 +5,17 @@ import runtime.Inline;
 import java.util.Arrays;
 
 /**
- * ソースコード中のアトムの構造を表すクラス
- * データ構造のみを持つ
+ * ソースコード中のアトム（またはアトム集団）の構造を表すクラス。
+ * データ構造のみを持つ。
  * @author Takahiko Nagata
  * @date 2003/10/28
  */
 public class Atom {
-	/**
-	 * 親膜
-	 */
+	/** 所属膜 */
 	public Membrane mem = null;
-	
-	/**
-	 * アトムの名前
-	 */
+	/** アトムのファンクタ */
 	public Functor functor;
-	
-	/**
-	 * アトムのリンク構造
-	 */
+	/** アトムのリンク列（またはアトム集団のリンク束列） */
 	public LinkOccurrence[] args;
 	
 	/**
@@ -42,7 +34,7 @@ public class Atom {
 
 	/**
 	 * コンストラクタ
-	 * @param mem このアトムの親膜
+	 * @param mem このアトムの所属膜
 	 * @param name アトム名を表す文字列
 	 * @param arity リンクの数
 	 */
@@ -53,7 +45,7 @@ public class Atom {
 	/**
 	 * デバッグ情報を保持するコンストラクタ
 	 * @author Tomohito Makino
-	 * @param mem このアトムの親膜
+	 * @param mem このアトムの所属膜
 	 * @param name アトム名を表す文字列
 	 * @param arity リンクの数
 	 * @param line ソースコード上での出現位置(行)

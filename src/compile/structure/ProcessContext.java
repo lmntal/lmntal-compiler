@@ -1,27 +1,29 @@
 package compile.structure;
 
-/**
- * ソースコード中のプロセス文脈の構造を表すクラス
- * <br>TODO 型付きプロセス文脈の扱いは？
- */
-final public class ProcessContext extends Context{
-	/**
-	 * 引数のリンク束
-	 * <br>TODO コンストラクタで設定するのか、メソッドを作るのか</p>
+/** ソースコード中のプロセス文脈出現を表すクラス */
+
+final public class ProcessContext extends Context {
+	/** 引数のリンク束 */
+	public LinkOccurrence bundle = null;
+	/** コンストラクタ
+	 * @param mem 所属膜
+	 * @param qualifiedName 限定名
+	 * @param arity 明示的な自由リンク引数の個数
 	 */
-	private LinkOccurrence[] arg;
-	/**
-	 * 引数のリンク束
-	 * <bf>
-	 * TODO コンストラクタで設定するのか、メソッドを作るのか<br>
-	 * TODO 専用のクラスを作る？
-	 */
-	private LinkOccurrence bundle;
-	public ProcessContext(String name) {
-		super(name);
+	public ProcessContext(Membrane mem, String qualifiedName, int arity) {
+		super(mem,qualifiedName,arity);
 	}
-	
+	/** 指定された名前でリンク束を登録する */
+	public void setBundleName(String bundleName) {
+		bundle = new LinkOccurrence(bundleName, this, -1);
+	}
 	public String toString() {
-		return "$" + getName();
+		String argstext = "";
+		if (bundle.name.matches("\\*[A-Z_]")) { // todo (buddy!=null)かどうかで判定すべきである
+			argstext = "[" + java.util.Arrays.asList(args).toString();
+			if (bundle != null) argstext += "|" + bundle;
+			argstext += "]";		
+		}
+		return getQualifiedName() + argstext;
 	}
 }

@@ -1,12 +1,13 @@
+package compile.parser;
+
 /**
- * プロセスコンテキストとルールコンテキストの抽象クラス
+ * ソースファイル中のリンク・リンク束・プロセスコンテキスト・ルールコンテキストの抽象親クラス
+ * TODO プロセス文脈名およびルール文脈名には '...' や [[...]] が使えないようにする。
  */
 
-package compile.parser;
- 
 abstract class SrcContext {
  	
- 	private String name = null;
+ 	protected String name = null;
  	
  	/**
  	 * 指定された名前でコンテキストを初期化します
@@ -17,10 +18,12 @@ abstract class SrcContext {
 	}
 	
 	/**
-	 * コンテキストの名前を得ます
+	 * コンテキストの名前を返す。
 	 * @return コンテキストの名前
 	 */
 	public String getName() {
 		return name;
 	}
+	/** コンテキストの限定名（種類と名前の組に対する一意な識別子として使用できる文字列）を返す。*/
+	abstract public String getQualifiedName();
 }

@@ -1,9 +1,9 @@
+package compile.parser;
+import java.util.LinkedList;
+
 /**
  * ガード中に出現する比較アトム
  */
-package compile.parser;
-
-import java.util.LinkedList;
 
 class SrcCompareAtom extends SrcAtom {
 

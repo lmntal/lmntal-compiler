@@ -7,10 +7,9 @@ import java.util.LinkedList;
 
 class SrcRule {
 	
-	private LinkedList head = null; // ヘッドプロセス
-	private LinkedList body = null; // ボディプロセス
-	private LinkedList guard = null; // ガードプロセス
-	
+	public LinkedList head = null; // ヘッドプロセス
+	public LinkedList body = null; // ボディプロセス
+	public LinkedList guard = null; // ガードプロセス
 	/**
 	 * 指定されたヘッドルールとボディルールと空のガードでルールを初期化します
 	 * @param head ヘッドのリスト

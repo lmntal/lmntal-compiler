@@ -1,66 +1,34 @@
 package compile.structure;
 
-import java.util.List;
-import java.util.ArrayList;
+/**
+ * ソースコード中のプロセス文脈出現またはルール文脈出現を表す抽象クラス。
+ * todo リンクが張られるためAtomのサブクラスになっているが、不自然なのでいずれ修正すべきである。*/
 
-/** 
- * ProcessContextとRuleContextの親となる抽象クラス
- */
-public abstract class Context {
-	/**
-	 * コンテキストの名前
-	 */
-	protected String name;
+public abstract class Context extends Atom {
+	/** コンテキストの限定名 */
+	protected String qualifiedName;	
+	/** コンテキストのソース出現 */
+	public Context src = null;
+	/** ちょうど2回出現する場合に、もう片方の出現を保持する */
+	public Context buddy = null;
 	
-	/**
-	 * コンストラクタ
-	 * @param name コンテキスト名
+	/** コンストラクタ
+	 * @param mem 所属膜
+	 * @param qualifiedName コンテキストの限定名
+	 * @param arity コンテキスト出現の明示的な自由リンク引数の個数
 	 */
-	protected Context(String name) {
-		this.name = name;
-		status = ST_FRESH;
+	protected Context(Membrane mem, String qualifiedName, int arity) {
+		super(mem,"",arity);
+		this.qualifiedName = qualifiedName;
 	}
 	
-	/**
-	 * コンテキストの名前を得ます
-	 * @return コンテキスト名
-	 */
+	/** コンテキストの限定名を返す */
+	public String getQualifiedName() {
+		return qualifiedName;
+	}
+	/** コンテキストの名前を返す（仮） */
 	public String getName() {
-		return name;
+		return qualifiedName.substring(1);
 	}
-	
-	/**
-	 * 左辺での所属膜
-	 */
-	public Membrane lhsMem;
-	
-	/**
-	 * 右辺での所属膜の配列
-	 */
-	List rhsMems = new ArrayList();
-	
-	/**
-	 * 現在の状態。ST_で始まる定数のいずれかの値をとる
-	 */
-	public int status = ST_FRESH;
-
-	/**
-	 * 初期状態
-	 */
-	public static final int ST_FRESH = 0;
-
-	/**
-	 * 左辺に一度出現した状態
-	 */
-	public static final int ST_LHSOK = 1;
-
-	/**
-	 * 左辺・右辺両方に出現した状態
-	 */
-	public static final int ST_READY = 2;
-	
-	/**
-	 * エラー
-	 */
-	static final int ST_ERROR = 3;
+	abstract public String toString();	
 }
