@@ -37,12 +37,16 @@ public class RuleCompiler {
 	public int varcount;
 	
 	public List rhsatoms;
+	/** 右辺のアトム (Atom) -> 変数番号 (Integer) */
 	public Map  rhsatompath;
+	/** 右辺の膜 (Membrane) -> 変数番号 (Integer) */
 	public Map  rhsmempath;
 	
 	public List lhsatoms;
 	public List lhsfreemems;
+	/** 左辺のアトム (Atom) -> 変数番号 (Integer) */
 	public Map  lhsatompath;
+	/** 左辺の膜 (Membrane) -> 変数番号 (Integer) */
 	public Map  lhsmempath;
 	
 //	private List newatoms = new ArrayList();	// rhsatomsと同じなので統合
@@ -162,6 +166,7 @@ public class RuleCompiler {
 		// react命令は本来ガード終了後に発行するため、reactはreloadvars/inlinereactに分割すべき
 		guard = body;
 		compile_g();
+		
 		// ここでinlinereactを発行する。最終的にはinlinereactをreactに名称変更する？
 		
 		rhsatoms    = new ArrayList();
@@ -188,7 +193,7 @@ public class RuleCompiler {
 		loadRulesets(rs.rightMem);		
 		buildRHSTypedProcesses();
 		buildRHSAtoms(rs.rightMem);
-		body.add(0, Instruction.spec(formals, varcount));
+		// ここでvarcountの最終値が確定する。
 		updateLinks();
 		enqueueRHSAtoms();
 		addInline();
@@ -196,6 +201,8 @@ public class RuleCompiler {
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
 		freeLHSTypedProcesses();
+		//
+		body.add(0, Instruction.spec(formals, varcount));
 		body.add(new Instruction(Instruction.PROCEED));
 	}
 	
@@ -258,14 +265,28 @@ public class RuleCompiler {
 	/** ガードをコンパイルする（仮） */
 	private void compile_g() {
 
-		// ヘッド出現する型付きプロセス文脈を特定されたものとしてマークする
+		// 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
 		identifiedCxtdefs = new HashSet();
 		Iterator it = rs.typedProcessContexts.keySet().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)rs.typedProcessContexts.get(it.next());
 			if (def.src != null) {
 				if (def.src.mem == rs.guardMem) { def.src = null; } // 再呼び出しに対応（仮）
-				else identifiedCxtdefs.add(def);
+				else {
+					identifiedCxtdefs.add(def);
+					// 左辺の型付きプロセス文脈の明示的な自由リンクの先が、左辺のアトムに出現することを確認する。
+					// 出現しない場合はコンパイルエラーとする。
+					// 【注意】左辺のアトムに限るという制限は、型は非アクティブなデータを表すことを想定しているため。
+					// つまり、( 2(X) :- found(X) ) や ( 2(3) :- sour ) で2や3を$pで表すことはできない。
+					// このため、ヘッドに出現する$pは0引数であってはならないことになる。
+					// なお、プログラミングの観点から、右辺の型付きプロセス文脈の明示的な自由リンクの先は任意としている。
+					if (!lhsatompath.containsKey(def.src.args[0])) {
+						error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
+						corrupted();
+						guard.add(new Instruction(Instruction.LOCK, 0));
+						return;
+					}
+				}
 			}
 		}
 		// 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
@@ -363,6 +384,7 @@ public class RuleCompiler {
 				}
 				else {
 					error("COMPILE ERROR: unrecognized guard type constraint name: " + cstr);
+					corrupted();
 					guard.add(new Instruction(Instruction.LOCK, 0));
 					return;
 				}
@@ -375,6 +397,7 @@ public class RuleCompiler {
 		// 型付け失敗
 		guard.add(new Instruction(Instruction.LOCK, 0));
 		error("COMPILE ERROR: never proceeding guard type constraints: " + cstrs);
+		corrupted();
 	}
 	/** 型付きプロセス文脈defを1引数ファンクタfuncで束縛する */
 	private void bindToFunctor(ContextDef def, Functor func) {
@@ -452,12 +475,10 @@ public class RuleCompiler {
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)(rs.typedProcessContexts.get(it.next()));
 			Context pc = def.src;
-			//if (pc != null) { // ヘッドのときのみ
-				if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
-					body.add(new Instruction( Instruction.FREEATOM,
-						typedcxtToSrcPath(def) ));
-				}
-			//}
+			if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
+				body.add(new Instruction( Instruction.FREEATOM,
+					typedcxtToSrcPath(def) ));
+			}
 		}
 	}	
 
@@ -601,6 +622,7 @@ public class RuleCompiler {
 						rhsmemToPath(mem), lhsmemToPath(pc.def.src.mem) ));
 				} else {
 					error("FEATURE NOT IMPLEMENTED: process context must be linear: " + pc);
+					corrupted();
 				}
 			}
 		}
@@ -695,10 +717,20 @@ public class RuleCompiler {
 					ProcessContext pc = (ProcessContext)link.atom;
 					if (pc.mem.typedProcessContexts.contains(pc)) {
 						if (typedcxttypes.get(pc.def) == UNARY_ATOM_TYPE) {
-							body.add( Instruction.newlink(
+							if (rhstypedcxtpaths.containsKey(pc)) {
+								// リンク先が右辺の型付きプロセス文脈のとき // ( :- atom(X), $buddy[X] )
+								body.add( Instruction.newlink(
 												rhsatomToPath(atom), pos,
 												rhstypedcxtToPath(pc), 0,
 												rhsmemToPath(atom.mem) ));
+							}
+							else if (typedcxtsrcs.get(pc.def) == pc) {
+								// リンク先が左辺の型付きプロセス文脈のとき // ( $p[X]
+								body.add( new Instruction( Instruction.RELINK,
+												rhsatomToPath(atom), pos,
+												typedcxtToSrcPath(pc.def), 0,
+												rhsmemToPath(atom.mem) ));
+							}
 						}
 					} else { // 型付きでない場合
 						// ( $buddy[X|] :- atom(X) ) --> relink
@@ -710,7 +742,7 @@ public class RuleCompiler {
 					}
 					continue;
 				}
-				// 最初のアトムのリンク先はアトム
+				// リンク先はアトム
 				if (link.atom.mem == rs.leftMem) { // ( buddy(X) :- atom(X) )
 					body.add( new Instruction(Instruction.RELINK,
 						rhsatomToPath(atom), pos,
@@ -845,6 +877,9 @@ public class RuleCompiler {
 	////////////////////////////////////////////////////////////////
 	// 仮。LMNParserのものと統合し、おそらくEnvに移動する予定
 	
+	public void corrupted() {
+		error("SYSTEM ERROR: error recovery for the previous error is not implemented");
+	}
 	public void error(String text) {
 		System.out.println(text);
 	}

@@ -34,6 +34,9 @@ public class LMNParser {
 	private int nErrors = 0;
 	private int nWarnings = 0;
 	
+	public void corrupted() {
+		error("SYSTEM ERROR: error recovery for the previous error is not implemented");
+	}
 	public void error(String text) {
 		System.out.println(text);
 		nErrors++;
@@ -397,14 +400,21 @@ public class LMNParser {
 					if (def.src != null) {
 						// 展開を実装すれば不要になる
 						error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name: " + name);
+						corrupted();
 					}
 					def.src = pc;	// ソース出現を登録
+					if (pc.args.length != 1) {
+						error("SYNTAX ERROR: Typed process context occurring in head must have exactly one explicit free link argument: " + pc);
+						// todo 明示的な自由リンクの余剰分と不足分を無名リンクで置換する
+						corrupted();
+					}
 					it.remove();
 					mem.typedProcessContexts.add(pc);
 				}
 				else {
 					// 構造比較への変換を実装すれば不要になる
 					error("FEATURE NOT IMPLEMENTED: untyped process context name appeared more than once in a head: " + name);
+					corrupted();
 				}
 			}
 			if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
@@ -454,6 +464,7 @@ public class LMNParser {
 					 || ((pc.bundle == null) != (((ProcessContext)pc.def.src).bundle == null)) ) {
 						error("SYNTAX ERROR: Unmatched length of free link list of process context");
 						// todo 明示的な自由リンクの余剰分と不足分を無名リンクで置換する
+						corrupted();
 					}
 				}
 				if (pc.def.isTyped()) {
@@ -463,6 +474,7 @@ public class LMNParser {
 			}
 			else {
 				error("SYNTAX ERROR: process context not appeared in head: " + pc.getQualifiedName());
+				it.remove();
 			}
 		}
 		it = mem.ruleContexts.iterator();
@@ -474,6 +486,7 @@ public class LMNParser {
 			}
 			else {
 				error("SYNTAX ERROR: rule context not appeared in head: " + rc.getQualifiedName());
+				it.remove();
 			}
 		}
 		it = mem.aggregates.iterator();
@@ -543,7 +556,10 @@ public class LMNParser {
 		addProcessToMem(typeConstraints, rule.guardMem);
 		addProcessToMem(sRule.getBody(), rule.rightMem);
 
-		// プロセス文脈およびルール文脈を接続する
+		// プロセス文脈およびルール文脈を接続する。
+		// 同じ名前のプロセス文脈の引数パターンを同じにする。型付きは明示的な自由リンクの個数を1にする。
+		
+		// 型付きの名前を定義する
 		HashMap names = new HashMap();
 		Iterator it;
 		it = typedNames.keySet().iterator();
@@ -553,21 +569,20 @@ public class LMNParser {
 			def.typed = true;
 			names.put(name, def);
 		}
-			
+		
 		enumHeadNames(rule.leftMem, names);
 		// todo リンク束が左辺で閉じていないことを確認する
 		enumTypeConstraintNames(rule.guardMem, names);
 		enumBodyNames(rule.rightMem, names);
 		// todo リンク束を閉じる
-		
-//		rule.guardMem.typedProcessContexts = rule.guardMem.processContexts;
-//		rule.guardMem.processContexts = new ArrayList();
 
 		//
 		it = rule.leftMem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
 			error("SYNTAX ERROR: head process context requires an enclosing membrane: " + pc);
+			// todo 復帰する
+			corrupted();
 		}
 
 		// rule.processContexts/ruleContexts/typedProcessContexts を生成する
@@ -580,11 +595,13 @@ public class LMNParser {
 			if (typedNames.containsKey(name)) {
 				rule.typedProcessContexts.put(name, def);
 			}
-			else if (def.src instanceof ProcessContext) {
-				rule.processContexts.put(name, def);
-			}
-			else if (def.src instanceof RuleContext) {
-				rule.ruleContexts.put(name, def);
+			else { // 型付きでない場合、src!=nullのもののみが残されている
+				if (def.src instanceof ProcessContext) {
+					rule.processContexts.put(name, def);
+				}
+				else if (def.src instanceof RuleContext) {
+					rule.ruleContexts.put(name, def);
+				}
 			}
 			if (def.rhsOccs.size() == 1) {
 				if (def.src != null) {	// ガードのとき。意味が無いのでdef.srcは仕様変更か廃止したい
