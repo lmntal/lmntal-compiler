@@ -133,7 +133,7 @@ public class Inline {
 				path.append(ci.next());
 				path.append(sep);
 			}
-			compileCommand.add("javac");
+			compileCommand.add("javaca");
 			compileCommand.add("-classpath");
 			compileCommand.add(path);
 			
@@ -155,7 +155,8 @@ public class Inline {
 				}
 				cp = Runtime.getRuntime().exec(cmd);
 			}
-		} catch (Exception e) {
+		} catch (java.io.IOException e) {
+			System.out.println("\n*** Compile failed. javac not found on PATH. javac is necessary for compiling inline code. ***\n");
 			Env.d(e);
 		}
 	}
