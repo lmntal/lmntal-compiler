@@ -169,104 +169,94 @@ abstract class AbstractMembrane extends QueuedEntity {
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
 	abstract protected void enqueueAllAtoms();
 
-	// TODO $pの移動のためのメソッドの仕様を選ぶ
-	// 案1：remove/pourで自由リンク管理アトムを追加・削除
-	// 案2：自由リンク管理アトム追加・削除のための専用メソッドの追加
-	// 案3：「removememで削除＆★化/pourで移動のみ/afterpourで追加」に分けて行う（by n-kato）
-	//		afterpour m,n ボディ命令は内側から再帰的に呼ばれ、一段ずつ追加する
-	//		（案3の詳細はレビューの時に、またはメールで）
-	///////////////////
-	// 案1
-	/**
-	 * この膜を親膜から除去する。
-	 * その際、この膜の自由リンクを管理している自由リンク管理アトムを
-	 * baseMem内のoutside_proxyまで削除する。
-	 * @throws RuntimeException この膜にあるinside_proxyと、対応するbaseMemのoutside_proxyの間に
-	 * 					自由リンク管理アトム以外のアトムが接続していた場合
-	 */
-	void remove(AbstractMembrane baseMem) {
-		remove();
-		Iterator it = atomIteratorOfFunctor(Functor.INSIDE_PROXY);
-		while (it.hasNext()) {
-			removeProxyAtoms((Atom)it.next(), baseMem);
-		}
-	}
-	/**
-	 * inside0が管理しているリンクと同じリンクを管理する自由リンク管理アトムを、
-	 * baseMem内のoutside_proxyまで削除する。
-	 * @throws RuntimeException inside0とbaseMemのoutside_proxyの間に
-	 * 					自由リンク管理アトム以外のアトムが接続していた場合
-	 */
-	protected void removeProxyAtoms(Atom inside0, AbstractMembrane baseMem) {
-		Atom inside;
-		Atom outside = inside0.args[0].getAtom();
-		outside.remove();
-		AbstractMembrane current = parent;
-		try {
-			while (current != baseMem) {
-				if (current == null) {
-					//TODO SystemError用の例外クラスを投げる
-					throw new RuntimeException("SYSTEM ERROR: baseMem is not ancester");
-				}
-				//curentの自由リンクを管理するproxyを除去
-				inside = outside.args[1].getAtom();
-				outside = inside.args[0].getAtom();
-				inside.remove();
-				outside.remove();
-				current = current.parent;
-			}
-		} catch (IndexOutOfBoundsException e) {
-			//途中で自由リンク管理アトム以外のアトムに接続していた場合に発生する可能性がある
-			//TODO SystemError用の例外クラスを投げる
-			throw new RuntimeException("SYSTEM ERROR: inconsistent proxy");
-		}
-		if (outside.getMem() != current) {
-			//TODO SystemError用の例外クラスを投げる
-			throw new RuntimeException("SYSTEM ERROR: inconsistent proxy");
-		}
-		//TODO relinkAtomArgsの引数条件を確認
-		current.relinkAtomArgs(inside0, 0, outside, 1);
-	}
-	
-	/**
-	 * srcMemの内容を全て移動する。
-	 * その際、baseMemまでの膜に自由リンク管理アトムを追加する。
-	 */
-	void pour(AbstractMembrane srcMem, AbstractMembrane baseMem) {
-		pour(srcMem);
-		Iterator it = atomIteratorOfFunctor(Functor.INSIDE_PROXY);
-		while (it.hasNext()) {
-			addProxyAtoms((Atom)it.next(), baseMem);
-		}
-	}
+//	// TODO $pの移動のためのメソッドの仕様を選ぶ
+//	// 案1：remove/pourで自由リンク管理アトムを追加・削除
+//	// 案2：自由リンク管理アトム追加・削除のための専用メソッドの追加
+//	// 案3：「removememで削除＆★化/pourで移動のみ/afterpourで追加」に分けて行う（by n-kato）
+//	//		afterpour m,n ボディ命令は内側から再帰的に呼ばれ、一段ずつ追加する
+//	//		（案3の詳細はレビューの時に、またはメールで）
+//	///////////////////
+//	// 案1
+//	/**
+//	 * この膜を親膜から除去する。
+//	 * その際、この膜の自由リンクを管理している自由リンク管理アトムを
+//	 * baseMem内のoutside_proxyまで削除する。
+//	 * @throws RuntimeException この膜にあるinside_proxyと、対応するbaseMemのoutside_proxyの間に
+//	 * 					自由リンク管理アトム以外のアトムが接続していた場合
+//	 */
+//	void remove(AbstractMembrane baseMem) {
+//		remove();
+//		Iterator it = atomIteratorOfFunctor(Functor.INSIDE_PROXY);
+//		while (it.hasNext()) {
+//			removeProxyAtoms((Atom)it.next(), baseMem);
+//		}
+//	}
+//	/**
+//	 * inside0が管理しているリンクと同じリンクを管理する自由リンク管理アトムを、
+//	 * baseMem内のoutside_proxyまで削除する。
+//	 * @throws RuntimeException inside0とbaseMemのoutside_proxyの間に
+//	 * 					自由リンク管理アトム以外のアトムが接続していた場合
+//	 */
+//	protected void removeProxyAtoms(Atom inside0, AbstractMembrane baseMem) {
+//		Atom inside;
+//		Atom outside = inside0.args[0].getAtom();
+//		outside.remove();
+//		AbstractMembrane current = parent;
+//		try {
+//			while (current != baseMem) {
+//				if (current == null) {
+//					//TODO SystemError用の例外クラスを投げる
+//					throw new RuntimeException("SYSTEM ERROR: baseMem is not ancester");
+//				}
+//				//curentの自由リンクを管理するproxyを除去
+//				inside = outside.args[1].getAtom();
+//				outside = inside.args[0].getAtom();
+//				inside.remove();
+//				outside.remove();
+//				current = current.parent;
+//			}
+//		} catch (IndexOutOfBoundsException e) {
+//			//途中で自由リンク管理アトム以外のアトムに接続していた場合に発生する可能性がある
+//			//TODO SystemError用の例外クラスを投げる
+//			throw new RuntimeException("SYSTEM ERROR: inconsistent proxy");
+//		}
+//		if (outside.getMem() != current) {
+//			//TODO SystemError用の例外クラスを投げる
+//			throw new RuntimeException("SYSTEM ERROR: inconsistent proxy");
+//		}
+//		//TODO relinkAtomArgsの引数条件を確認
+//		current.relinkAtomArgs(inside0, 0, outside, 1);
+//	}
+//	
+//	/**
+//	 * srcMemの内容を全て移動する。
+//	 * その際、baseMemまでの膜に自由リンク管理アトムを追加する。
+//	 */
+//	void pour(AbstractMembrane srcMem, AbstractMembrane baseMem) {
+//		pour(srcMem);
+//		Iterator it = atomIteratorOfFunctor(Functor.INSIDE_PROXY);
+//		while (it.hasNext()) {
+//			addProxyAtoms((Atom)it.next(), baseMem);
+//		}
+//	}
+//
+//	protected void addProxyAtoms(Atom inside0, AbstractMembrane baseMem) {
+//		AbstractMembrane m = parent;
+//		Atom inside;
+//		Atom outside = m.newAtom(Functor.OUTSIDE_PROXY);
+//		m.newLink(inside0, 0, outside, 0);
+//		while (m != baseMem) {
+//			inside = m.newAtom(Functor.INSIDE_PROXY);
+//			m.newLink(outside, 1, inside, 1);
+//			m = m.parent;
+//			outside = m.newAtom(Functor.OUTSIDE_PROXY);
+//			m.newLink(inside, 0, outside, 0);
+//		}
+//		m.relinkAtomArgs(outside, 1, inside0, 0);
+//	}
+//	// 案1ここまで
+//	//////////////////////
 
-	protected void addProxyAtoms(Atom inside0, AbstractMembrane baseMem) {
-		AbstractMembrane m = parent;
-		Atom inside;
-		Atom outside = m.newAtom(Functor.OUTSIDE_PROXY);
-		m.newLink(inside0, 0, outside, 0);
-		while (m != baseMem) {
-			inside = m.newAtom(Functor.INSIDE_PROXY);
-			m.newLink(outside, 1, inside, 1);
-			m = m.parent;
-			outside = m.newAtom(Functor.OUTSIDE_PROXY);
-			m.newLink(inside, 0, outside, 0);
-		}
-		m.relinkAtomArgs(outside, 1, inside0, 0);
-	}
-	// 案1ここまで
-	//////////////////////
-    
-	/**
-	 * srcMemの内容を全て移動する。
-	 * 案1ではおそらく不要
-	 */
-	void pour(AbstractMembrane srcMem) {
-		atoms.addAll(srcMem.atoms);
-		mems.addAll(srcMem.mems);
-	}
-
-	
 	/** 指定されたアトムをこの膜から除去する。 */
 	void removeAtom(Atom atom) {
 		atoms.remove(atom);
@@ -282,6 +272,73 @@ abstract class AbstractMembrane extends QueuedEntity {
 	void remove() {
 		parent.removeMem(this);
 		parent = null;
+		//案3
+		removeProxies();
+	}
+	protected void removeProxies() {
+		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
+		ArrayList removeList = new ArrayList();
+		while (it.hasNext()) {
+			Atom outside = (Atom)it.next();
+			//この膜にあって第2引数同士が直接つながっているoutside_proxyアトムとinside_proxyアトムを除去
+			Atom a = outside.args[1].getAtom();
+			if (a.getFunctor().equals(Functor.INSIDE_PROXY)) {
+				unifyAtomArgs(outside, 0, a, 0);
+				removeList.add(outside);
+				removeList.add(a);
+			} else {
+				//この膜にあるそれ以外のoutside_proxyアトムのうち
+				//子膜のinside_proxyに接続していないものの名前をstarに変える
+				a = outside.args[0].getAtom();
+				if (!a.getFunctor().equals(Functor.INSIDE_PROXY) ||
+					 a.getMem().getParent() != this) { //TODO この条件は常に真？
+					//TODO アトムを再利用
+					Atom star = newAtom(Functor.STAR); //atomsに追加されるがitには影響なし
+					//TODO リンクの張替え方法はこれで大丈夫？
+					newLink(star, 1, outside.args[0].getAtom(), outside.args[0].getPos());
+					newLink(star, 0, outside.args[1].getAtom(), outside.args[1].getPos());
+					removeList.add(a);
+
+				}
+			}
+		}
+		atoms.removeAll(removeList);
+		
+		//この膜のinside_proxyアトムの名前をstarに変える
+		removeList.clear();
+		it = atoms.iteratorOfFunctor(Functor.INSIDE_PROXY);
+		while (it.hasNext()) {
+			Atom inside = (Atom)it.next();
+			Atom star = newAtom(Functor.STAR);
+			newLink(star, 0, inside.args[0].getAtom(), inside.args[0].getPos());
+			newLink(star, 1, inside.args[1].getAtom(), inside.args[1].getPos());
+			removeList.add(inside);
+		}
+	}
+	/**
+	 * srcMemの内容を全て移動する。
+	 */
+	void pour(AbstractMembrane srcMem) {
+		atoms.addAll(srcMem.atoms);
+		mems.addAll(srcMem.mems);
+	}
+	void insertProxies(AbstractMembrane childMemWithStar/* N */) {
+		Iterator it = childMemWithStar.atomIteratorOfFunctor(Functor.STAR);
+		ArrayList removeList = new ArrayList();
+		while (it.hasNext()) {
+			Atom star = (Atom)it.next(); // n
+			Atom inside = newAtom(Functor.INSIDE_PROXY); //これもn（名前変更後）
+			newLink(inside, 1, star.args[1].getAtom(), star.args[1].getPos());
+			removeList.add(star);
+			if (star.args[0].getAtom().getMem() != this /* M */) {
+				Atom outside = newAtom(Functor.OUTSIDE_PROXY); // o
+				Atom star2 = newAtom(Functor.STAR); //m
+				newLink(outside, 1, star2, 1);
+				relinkAtomArgs(star2, 0, star, 0);
+				newLink(inside, 0, outside, 0);
+			}
+		}
+		atoms.removeAll(removeList);
 	}
 	
 	/**
