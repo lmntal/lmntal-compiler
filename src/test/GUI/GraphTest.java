@@ -19,7 +19,7 @@ public class GraphTest extends JFrame {
 		setVisible(true);
 		p.start();
 	}
-
+	
 	protected void initComponents() {
 		p = new LMNGraphPanel();
 //		try {
