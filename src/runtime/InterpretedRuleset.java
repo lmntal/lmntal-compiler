@@ -2,17 +2,17 @@ package runtime;
 
 import java.util.*;
 
-class InterpretedReactor {
+class InterpreterReactor {
 	AbstractMembrane[] mems;
 	Atom[] atoms;
 	List vars;
 	//List insts;
-	InterpretedReactor(
+	InterpreterReactor(
 		AbstractMembrane[] mems,
 		Atom[] atoms,
 		List vars /*, List insts*/
 	) {
-		Env.n("InterpretedReactor");
+		Env.n("InterpreterReactor");
 		this.mems = mems;
 		this.atoms = atoms;
 		this.vars = vars;
@@ -157,14 +157,15 @@ class InterpretedReactor {
 					//====アトムを操作する基本ボディ命令====ここから====
 				case Instruction.REMOVEATOM :
 				case Instruction.LOCALREMOVEATOM : //[srcatom]
+					Atom atom;
+					Atom a;
+					atom = atoms[inst.getIntArg1()];
+					atom.mem.removeAtom(atom);
 					break;
-
 				case Instruction.NEWATOM :
 				case Instruction.LOCALNEWATOM : //[-dstatom, srcmem, funcref]
 					func = (Functor) inst.getArg3();
-					Atom a =
-						atoms[inst.getIntArg1()] =
-							mems[inst.getIntArg2()].newAtom(func);
+					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
 
 					break;
 
@@ -314,8 +315,8 @@ class InterpretedReactor {
 						bodyatoms[i] =
 							atoms[((Integer) atomformals.get(i)).intValue()];
 					}
-					InterpretedReactor ir =
-						new InterpretedReactor(
+					InterpreterReactor ir =
+						new InterpreterReactor(
 							bodymems,
 							bodyatoms,
 							new ArrayList());
@@ -535,8 +536,8 @@ if (formals < 10) formals = 10;
 		Atom[] atoms = new Atom[formals];
 		mems[0] = mem;
 		atoms[1] = atom;
-		InterpretedReactor ir =
-			new InterpretedReactor(mems, atoms, new ArrayList());
+		InterpreterReactor ir =
+			new InterpreterReactor(mems, atoms, new ArrayList());
 		return ir.interpret(matchInsts, 0);
 	}
 	
