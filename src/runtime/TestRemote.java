@@ -198,10 +198,18 @@ class TestRemote{
 		//LMNtalRuntimeManager.terminateAllNeighbors();	 //もっといい方法ないかな
 		//System.out.println("terminateAllNeighbours() success"); 
 		
-		System.out.println("now terminating");
-		LMNtalRuntimeManager.terminateAll();
-		LMNtalRuntimeManager.disconnectFromDaemon();
-		System.out.println("terminated");
+		String hoge = "";
+		synchronized(hoge){
+			try {
+				hoge.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		//System.out.println("now terminating");
+		//LMNtalRuntimeManager.terminateAll();
+		//LMNtalRuntimeManager.disconnectFromDaemon();
+		//System.out.println("terminated");
 
 		System.out.println("alive thread(s):");
 		Thread[] t = new Thread[Thread.activeCount()];
