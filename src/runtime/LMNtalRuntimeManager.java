@@ -138,19 +138,27 @@ public final class LMNtalRuntimeManager {
 	/** 登録されている全てのRemoteLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
 	 *  Env.theRuntime も terminate する (n-kato) 2004-09-17 */
 	public static boolean terminateAll() {
+		System.out.println("LMNtalRuntimeManager.terminateAll() entered");
+		
 		synchronized(terminateLock) { // 重複転送防止のため（仮）		
 			if(Env.theRuntime.isTerminated()){
+				System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime.isTerminated() is false");
 				return false;
 			} else {
+				System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime.isTerminated() is true");
 				Env.theRuntime.terminate();
 			}
 		}
 
+		System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime is terminated");
+		
 		childNode.clear();
 		Iterator it = runtimeids.keySet().iterator();
 		while (it.hasNext()) {
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
 
+			System.out.println("LMNtalRuntimeManager.terminateAll(): now sending TERMINATE to " + machine.hostname);
+			
 			if(daemon.sendWait(machine.hostname,"TERMINATE")){
 				childNode.add(machine);
 			}
