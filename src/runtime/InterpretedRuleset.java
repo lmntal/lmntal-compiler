@@ -343,7 +343,6 @@ class InterpreterReactor {
 
 				case Instruction.COPYATOM :
 				case Instruction.LOCALCOPYATOM : //[-dstatom, mem, srcatom]
-					//TODO Functorのarityは2でいいのか？ ＜ダメです。命令の仕様をよく読むこと＞
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(atoms[inst.getIntArg1()].getFunctor());
 					break; //nakajima 2003-12-27, 2004-01-03
 
@@ -373,7 +372,8 @@ class InterpreterReactor {
 					//mems[inst.getIntArg2()].newRoot(    )
 					break; //nakajima 2003-12-27
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
-					break;
+					mems[inst.getIntArg1()].moveCellsFrom(mems[inst.getIntArg2()]);
+					break; //nakajima 2004-01-04
 				case Instruction.ENQUEUEALLATOMS : //[srcmem]
 					break;
 				case Instruction.FREEMEM : //[srcmem]
