@@ -156,10 +156,6 @@ public class GraphLayout implements Runnable {
 	protected synchronized void relax() {
 		if(!getAllowRelax()) return;
 		relax(rootMem);
-		Object[] mems = rootMem.getMemArray();
-		for(int i=0;i<mems.length;i++) {
-			relax((AbstractMembrane)mems[i]);
-		}
 	}
 	
 	/**
@@ -171,6 +167,7 @@ public class GraphLayout implements Runnable {
 		
 		for (Iterator i=m.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
+			if(!me.isVisible()) continue;
 			double dx = 0;
 			double dy = 0;
 			
@@ -178,6 +175,7 @@ public class GraphLayout implements Runnable {
 			
 			// angle でソート
 			Edge ie[] = new Edge[me.getEdgeCount()];
+//			System.out.println("arround "+me+"  "+me.getEdgeCount());
 			for(int j=0;j<ie.length;j++) {
 				ie[j]=new Edge(me, me.getNthNode(j));
 //				System.out.println(ie[j]);
@@ -241,8 +239,15 @@ public class GraphLayout implements Runnable {
 		// 実際に移動する
 		for (Iterator i=m.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
+			if(!me.isVisible()) continue;
 			if(me==((LMNGraphPanel)parent).movingNode) continue;
 			me.move(parent.getBounds());
+		}
+		
+		// 子膜
+		Object[] mems = m.getMemArray();
+		for(int i=0;i<mems.length;i++) {
+			relax((AbstractMembrane)mems[i]);
 		}
 	}
 	

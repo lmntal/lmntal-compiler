@@ -185,7 +185,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, Serializa
 	}
 	public Node getNthNode(int index) {
 		Atom a = nthAtom(index);
-		if(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
+		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
 //			System.out.println(a.nthAtom(0).nthAtom(0));
 //			System.out.println(a.nthAtom(0).nthAtom(1));
 			a = a.nthAtom(0).nthAtom(1);
@@ -194,11 +194,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, Serializa
 		return a;
 	}
 	public int getEdgeCount() {
-		int v=0;
-		for(int i=0;i<functor.getArity();i++) {
-			if(!(functor.equals(Functor.INSIDE_PROXY) || functor.equals(Functor.OUTSIDE_PROXY))) v++;
-		}
-		return v;
+		return functor.getArity();
 	}
 	public void setMoveDelta(double dx, double dy) {
 		vx += dx;
