@@ -1,5 +1,9 @@
 package runtime;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+
 //import java.util.ArrayList;
 //import java.util.Iterator;
 //import java.util.List;
@@ -12,7 +16,7 @@ package runtime;
  * リンクの接続先を、アトムと引数番号の組として表す。LMNtalのリンクには方向が無いので、
  * １つのリンクに対してこのクラスのインスタンスを２つ使用する。
  */
-public final class Link implements Cloneable {
+public final class Link implements Cloneable, Serializable {
 	/** リンク先のアトム */
 	private Atom atom;
 	/** リンク先が第何引数か */
@@ -86,5 +90,15 @@ public final class Link implements Cloneable {
 		this.atom = link.atom;
 		this.pos = link.pos;
 	}
-}
 
+	/**
+	 * 直列化復元時に呼ばれる。
+	 * @param in 読み込むストリーム
+	 * @throws IOException 入出力エラーが発生した場合
+	 * @throws ClassNotFoundException 直列化されたオブジェクトのクラスが見つからなかった場合
+	 */
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		id = lastId++;
+	}
+}

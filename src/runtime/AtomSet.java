@@ -1,5 +1,6 @@
 package runtime;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import util.Util;
  * Functor毎にアトムを管理している。
  * @author Mizuno
  */
-public final class AtomSet {
+public final class AtomSet implements Serializable {
 	/** atoms内のアトムの数。整合性要注意 */
 	private int size = 0;
 	/** 実際にアトムの集合を管理している変数 */

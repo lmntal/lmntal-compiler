@@ -1,8 +1,12 @@
 package runtime;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.HashMap;
+
 import util.Stack;
 
 /**
@@ -365,15 +369,43 @@ public final class Membrane extends AbstractMembrane {
 			Atom atom = (Atom)it.next();
 			atomTable.put(atom.getLocalID(), atom);
 		}
-		
-		return new byte[0];	// TODO 【実装】（有志A）1/2
-		// （次の案）以下をカンマで連結する
-		// アトム      -> atomid:functortext( リンク先atomid:pos, ... )
-		// 子膜        -> [host:]localmemid:{ inside_proxyのatomid, ... }[/]
-		// ルールセット -> globalRulesetID
-		// host:localmemid が globalmemid。host:はルート膜のときのみ付加される。
-		
+
+		try {
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			ObjectOutputStream out = new ObjectOutputStream(bout);
+
+			//子膜
+			out.writeInt(mems.size());
+			it = memIterator();
+			while (it.hasNext()) {
+				AbstractMembrane m = (AbstractMembrane)it.next();
+				out.writeObject(m.getTask().getMachine().hostname);
+				out.writeObject(m.getLocalID());
+			}
+			//アトム
+			out.writeInt(atoms.size());
+			it = atomIterator();
+			while (it.hasNext()) {
+				Atom a = (Atom)it.next();
+				out.writeObject(a);
+			}
+			//ルールセット
+			out.writeInt(rulesets.size());
+			it = rulesetIterator();
+			while (it.hasNext()) {
+				Ruleset r = (Ruleset)it.next();
+				out.writeObject(r.getGlobalRulesetID());
+			}
+			//todo nameは不要？
+
+			out.close();
+			return bout.toByteArray();
+		} catch (IOException e) {
+			//ByteArrayOutputStreamなので、発生するはずがない
+			throw new RuntimeException("Unwxpected Exception", e);
+		}
 	}
+
 	/** アトムIDに対応するアトムを取得する */
 	public Atom lookupAtom(String atomid) {
 		return (Atom)atomTable.get(atomid);

@@ -1,7 +1,17 @@
 package runtime;
 
 //import java.util.HashMap;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.util.HashMap;
 import java.util.Iterator;
+
+import compile.RulesetCompiler;
+import compile.parser.LMNParser;
+
+import daemon.IDConverter;
 
 //import daemon.IDConverter;
 
@@ -288,14 +298,83 @@ public final class RemoteMembrane extends AbstractMembrane {
 		locked = false;
 	}
 	/** キャッシュを更新する
-	 * @see Membrane#cache() */
+	 * @see Membrane#cache()
+	 * author mizuno */
 	protected void updateCache(byte[] data) {
-		// TODO 【実装】（有志A）2/2
-		
-		// アトム      ->
-		// 子膜        -> daemon.IDConverter.registerGlobalMembrane()；自由リンクを接続
-		// ルールセット -> 直ちに現物を取得（ストリームを占有するとこれができないので困ったね）
+		//
+		//前処理
+		//
 
+		//前のキャッシュをクリア
+		//全部削除しなくても良いのかもしれないが、とりあえずは全部削除する。
+		mems.clear();
+		rulesets.clear();
+		//INSIDE_PROXYだけとっておく
+		HashMap proxyMap = new HashMap();
+		Iterator it = atomIteratorOfFunctor(Functor.INSIDE_PROXY);
+		while (it.hasNext()) {
+			Atom a = (Atom)it.next();
+			proxyMap.put(a.remoteid, a);
+		}
+		//todo なぜにdeprecated?
+		atoms.clear();
+		
+		try {
+			ByteArrayInputStream bin = new ByteArrayInputStream(data);
+			ObjectInputStream in = new ObjectInputStream(bin);
+			
+			//膜
+			int n = in.readInt();
+			for (int i = 0; i < n; i++) {
+				String hostname = (String)in.readObject();
+				String memid = (String)in.readObject();
+				RemoteMembrane m;
+				//TODO RemoteTaskはどうやって取得したら良い？
+				m = new RemoteMembrane(null, this, memid);
+				//TODO GlobalMemIDの正しい作成方法は？
+				String globalid = hostname + ":" + memid;
+				IDConverter.registerGlobalMembrane(globalid, m);
+				mems.add(m);
+				addMem(m);
+			}
+
+			//アトム
+			n = in.readInt();
+			for (int i = 0; i < n; i++) {
+				Atom a = (Atom)in.readObject();
+				Functor f = a.getFunctor();
+				if (f.equals(Functor.INSIDE_PROXY)) {
+					//すでにある物と置き換える
+					Atom a2 = (Atom)proxyMap.get(a.remoteid);
+					//relinkAtomArgsを使うとメッセージが送信されてしまうので、直接書き換える。
+					a2.args[1] = a.args[1];
+					a2.args[1].getBuddy().set(a2, 1);
+					//同上
+					a2.mem = this;
+					atoms.add(a2);
+				} else {
+					a.mem = this;
+					atoms.add(a);
+				}
+			}
+			
+			//ルールセット
+			n = in.readInt();
+			for (int i = 0; i < n; i++) {
+				String id = (String)in.readObject();
+				Ruleset r = IDConverter.lookupRuleset(id);
+				//todo これはIDConverterの中でやる事？
+				if (r == null) {
+					r = (Ruleset)sendWaitObject("REQUIRERULESET " + id);					
+				}
+				rulesets.add(r);
+			}
+		} catch (IOException e) {
+			//ByteArrayOutputStreamなので、発生するはずがない
+			throw new RuntimeException("Unwxpected Exception", e);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Unwxpected Exception", e);
+		}
 	}
 
 	///////////////////////////////
@@ -318,6 +397,45 @@ public final class RemoteMembrane extends AbstractMembrane {
 		String host = task.runtime.hostname;
 		String msg = cmd + " " + getGlobalMemID();
 		return LMNtalRuntimeManager.daemon.sendWaitObject(host,msg);
+	}
+	
+	/**
+	 * キャッシュテスト
+	 */
+	public static void main(String[] args) throws Exception {
+		LMNParser lp = new LMNParser(new InputStreamReader(System.in));
+		compile.structure.Membrane m = lp.parse();
+		Ruleset rs = RulesetCompiler.compileMembrane(m, "Test");
+//		Inline.makeCode();
+//		((InterpretedRuleset)rs).showDetail();
+//		m.showAllRules();
+		
+		// 実行
+		MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
+		LMNtalRuntimeManager.init();
+
+		Membrane rootMem = rt.getGlobalRoot();
+		rs.react(rootMem);
+		System.out.println("src:");
+		System.out.println(rootMem);
+		
+		RemoteMembrane remote = new RemoteMembrane(null);
+
+		byte[] data = rootMem.cache();
+		remote.updateCache(data);
+		
+		Iterator it = rootMem.memIterator();
+		if (it.hasNext()) {
+			Membrane src = (Membrane)it.next();
+			data = src.cache();
+			Iterator it2 = remote.memIterator();
+			
+			RemoteMembrane dst = (RemoteMembrane)it2.next();
+			dst.updateCache(data);
+		}
+		
+		System.out.println("dst : ");
+		System.out.println(remote);
 	}
 	
 }
