@@ -67,3 +67,17 @@ X-Mailer: Mew version 2.2 on Emacs 20.7 / Mule 4.1 (AOI)
 6～9 原?   ルールコンパイラの実装
 
 早稲田大学理工学部ＣＳ学科 上田研究室 助手  加藤 紀夫
+
+
+
+
+
+[Develop members]
+static final String 有志A = "中島";
+static final String 有志B = "永田";
+static final String 有志C = "矢島";
+
+String[] members 
+   = {"永田", "矢島", "水野", "原", 
+       有志A,  有志B, 有志C};
+
