@@ -6,9 +6,7 @@ package util;
  * 実際の要素には子クラスのインスタンスを使用する。
  */
 public class QueuedEntity {
-	/** 子クラス内からはこれらの変数に直接アクセスしない */
 	QueuedEntity next, prev;
-	/** このクラスのインスタンスを直接生成するのは同一パッケージ内のみ */
 	protected QueuedEntity() {
 		next = prev = null;
 	}
@@ -16,10 +14,10 @@ public class QueuedEntity {
 	public boolean isQueued() {
 		return next != null;
 	}
-	/** スタックから除去 */
+	/** スタックに積まれていれば除去する */
 	public void dequeue() {
 		if (!isQueued()) {
-			System.out.println("SYSTEM ERROR: dequeued entity is not in a queue");
+			//System.out.println("SYSTEM ERROR: dequeued entity is not in a queue");
 			return;
 		}
 		next.prev = prev;

@@ -13,9 +13,9 @@ import java.lang.Integer;
  * @author Mizuno
  */
 public final class Atom extends QueuedEntity {
-	/** 所属膜。MembraneクラスのaddAtomメソッド内で更新する。nullが入ることもある。*/
-	private AbstractMembrane mem;
-	/** 名前とリンク数 */
+	/** 所属膜。AbstractMembraneとそのサブクラスが自由に変更してよい。nullが入ることもある。*/
+	AbstractMembrane mem;
+	/** ファンクタ（名前とリンク数） */
 	private Functor functor;
 	/** リンク */
 	Link[] args;
@@ -65,10 +65,11 @@ public final class Atom extends QueuedEntity {
 		return Integer.toString(id);
 	}
 
-	/** 名前の取得 */
+	/** ファンクタの取得 */
 	Functor getFunctor(){
 		return functor;
 	}
+	/** 名前の取得 */
 	String getName() {
 		return functor.getName();
 	}
@@ -79,12 +80,21 @@ public final class Atom extends QueuedEntity {
 	Link getLastArg() {
 		return args[getArity() - 1];
 	}
+	/** 所属膜の取得 */
 	AbstractMembrane getMem() {
 		return mem;
 	}
-	
-	void remove() {
-		mem.removeAtom(this);
-		mem = null;
-	}
+//	/** 所属膜を設定する。AbstractMembraneとそのサブクラスのみ呼び出してよい。*/
+//	void setMem(AbstractMembrane mem) {
+//		this.mem = mem;
+//	}
+//	/**@deprecated*/	
+//	void remove() {
+//		mem.removeAtom(this);
+//		mem = null;
+//	}
+//	/** スタックに入っていれば除去する */
+//	public void dequeue() {
+//		super.dequeue();
+//	}
 }

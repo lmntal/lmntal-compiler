@@ -161,21 +161,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	// 操作2 - アトムの操作
 
-	/** 新しいアトムを作成し、この膜に追加する。
-	 * TODO 実行スタックに自動的には詰まれないように仕様変更する。
-	 */
+	/** 新しいアトムを作成し、この膜に追加する。*/
 	public Atom newAtom(Functor functor) {
 		Atom a = new Atom(this, functor);
-// #if (VERSION != 1.16_mizuno)
 		addAtom(a);
-		atoms.add(a);
-// #else
-//	atoms.add(atom);
-//	if (functor.isActive()) {
-//		enqueueAtom(a);
-//	}
-//	atomCount++;
-// #endif
 		return a;
 	}
 	/** 1引数のnewAtomを呼び出すマクロ */
@@ -183,21 +172,26 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return newAtom(new Functor(name, arity));
 	}	
 	/** この膜にアトムを追加するための内部命令。
-	 * アクティブアトムの場合には実行スタックに追加する。
-	 * pourでも使用される予定。 */
+	 * <strike>アクティブアトムの場合には実行スタックに追加する。
+	 * pourでも使用される予定。</strike> */
 	protected final void addAtom(Atom atom) {
 		atoms.add(atom);
-		if (atom.getFunctor().isActive()) {
-			enqueueAtom(atom);
-		} 
+//		if (atom.getFunctor().isActive()) {
+//			enqueueAtom(atom);
+//		} 
 //		atomCount++;
 	}
-
-	/** 指定された子膜に新しいinside_proxyアトムを追加する
-	 * @deprecated */
-	Atom newFreeLink(AbstractMembrane mem) {
-		return mem.newAtom(Functor.INSIDE_PROXY);
+	/** アトムをこの膜に追加する。*/
+	public final void localAddAtom(Atom atom) {
+		atom.mem = this;
+		addAtom(atom);
 	}
+
+//	/** 指定された子膜に新しいinside_proxyアトムを追加する
+//	 * @deprecated */
+//	Atom newFreeLink(AbstractMembrane mem) {
+//		return mem.newAtom(Functor.INSIDE_PROXY);
+//	}
 	/** 指定されたアトムの名前を変える */
 	void alterAtomFunctor(Atom atom, Functor func) {
 		atoms.remove(atom);
@@ -213,15 +207,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	abstract protected void enqueueAllAtoms();
 
 	/** 指定されたアトムをこの膜から除去する。
-	 * 実行スタックに入っている場合、実行スタックから取り除く。
-	 * TODO enqueueatom同様dequeueatomボディ命令を独立させる。
-	 * AbstractMembrane#dequeueAtomはその場合のみabstractメソッドにする意味がある。
-	 * 逆に、独立させないならdequeueAtomはマクロ（private final）でよい。 */
+	 * <strike>実行スタックに入っている場合、実行スタックから取り除く。</strike>*/
 	public void removeAtom(Atom atom) {
 		atoms.remove(atom);
-		//if (atom.isQueued()) { // dequeueAtom内に移動しました→水野君は確認後コメントを消して下さい
-			dequeueAtom(atom);
-		//}
+		atom.mem = null;
 	}
 	/** removeAtomを呼び出すマクロ */
 	final void removeAtoms(ArrayList atomlist) {
@@ -232,18 +221,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		}
 	}
 
-	/** 
-	 * この膜にあるアトムatomがこの計算ノードが実行するタスクにある膜の実行スタック内にあれば、除去する。
-	 * 他の計算ノードが実行するタスクにある膜の実行スタック内のとき（システムコール）は、この膜は
-	 * ロックされていないので何もしないでよいが、その場合は実行スタック内にないので既に対応できている。
-	 * <p><strike>「この膜の実行スタックに入っているアトムatomを実行スタックから除去する」</strike>
-	 * ←現在のデータ構造では、どの膜の実行スタックに入っているか調べることができないため却下された。
-	 */
-	protected final void dequeueAtom(Atom atom) {
-		if (atom.isQueued()) {
-			atom.dequeue();
-		}
-	}
+//	/** 
+//	 * この膜にあるアトムatomがこの計算ノードが実行するタスクにある膜の実行スタック内にあれば、除去する。
+//	 * 他の計算ノードが実行するタスクにある膜の実行スタック内のとき（システムコール）は、この膜は
+//	 * ロックされていないので何もしないでよいが、その場合は実行スタック内にないので既に対応できている。*/
+//	public final void dequeueAtom(Atom atom) {
+//		if (atom.isQueued()) {
+//			atom.dequeue();
+//		}
+//	}
 
 	// 操作3 - 子膜の操作
 	
@@ -253,7 +239,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	protected final void addMem(AbstractMembrane mem) {
 		mems.add(mem);
 	}
-	/** 指定された膜をこの膜から除去する。実行膜スタックは操作しない。 */
+	/** 指定された膜をこの膜から除去する。実行膜スタックは操作しない。*/
 	public void removeMem(AbstractMembrane mem) {
 		mems.remove(mem);
 	}	
@@ -311,8 +297,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom1.args[pos1] = link2;
 	}
 	
-	// TODO relinkLocalAtomArgsとunifyLocalAtomArgsはLocalでないメソッドと同じなので何とかする
-
 	/** relinkAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。
 	 */
 	protected final void relinkLocalAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
@@ -343,7 +327,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public void remove() {
 		parent.removeMem(this);
 		parent = null;
-		// removeProxies();
 	}
 
 	/** 除去された膜srcMemにある全てのアトムおよび膜をこの膜に移動する。
@@ -370,9 +353,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		
 //	}
 	
-	/** この膜をdstMemに移動する。parent!=nullを仮定する。 */
+	/** この膜をdstMemに移動する。parent==nullを仮定する。 */
 	public void moveTo(AbstractMembrane dstMem) {
-		parent.removeMem(this);
+		if (parent != null) {
+			System.out.println("Warning: membrane with parent was moved");
+			parent.removeMem(this);
+		} 
 		dstMem.addMem(this);
 		parent = dstMem;
 		if (dstMem.task != task) {
@@ -467,7 +453,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		while (it.hasNext()) {
 			Atom outside = (Atom)it.next();
 			Atom a0 = outside.args[0].getAtom();
-			// outsideのリンク先が子膜でない場合			
+			// outsideのリンク先が子膜でない場合【この検査のためにremoveで parent=null; が必要】			
 			if (a0.getMem().getParent() != this) {
 				Atom a1 = outside.args[1].getAtom();
 				// この膜を通過して親膜に出ていくリンクを除去

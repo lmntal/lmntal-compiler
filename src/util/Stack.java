@@ -55,11 +55,8 @@ public final class Stack {
 	public boolean isEmpty(){
 		return tail.prev == head;
 	}
-//	QueuedEntity.removeがあるので使わない
-/*	public void remove(QueuedEntity entity) {
-		dentity.prev.next = entity.next;
-		entity.next.prev = entity.prev;
-		entity.prev = entity.next = null;
-	}
-*/
+//	/**@deprecated*/
+//	public void remove(QueuedEntity entity) {
+//		entity.remove();
+//	}
 }

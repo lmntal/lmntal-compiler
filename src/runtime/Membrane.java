@@ -74,7 +74,7 @@ public final class Membrane extends AbstractMembrane {
 				Iterator i2 = atoms.iteratorOfFunctor(f);
 				while (i2.hasNext()) {
 					Atom a = (Atom)i2.next();
-					dequeueAtom(a);
+					a.dequeue();
 					ready.push(a);
 				}
 			}

@@ -125,15 +125,15 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("NEWATOM",atomid);
 		return a;
 	}
-	/** 指定された子膜に新しいinside_proxyアトムを追加する 
-	 * @deprecated */
-	public Atom newFreeLink(AbstractMembrane submem) {
-		Atom a = submem.newAtom(Functor.INSIDE_PROXY);
-		if (submem.task.getMachine() != task.getMachine()) {
-			send("ADDFREELINK",submem.getAtomID(a));
-		}
-		return a;
-	}
+//	/** 指定された子膜に新しいinside_proxyアトムを追加する 
+//	 * @deprecated */
+//	public Atom newFreeLink(AbstractMembrane submem) {
+//		Atom a = submem.newAtom(Functor.INSIDE_PROXY);
+//		if (submem.task.getMachine() != task.getMachine()) {
+//			send("ADDFREELINK",submem.getAtomID(a));
+//		}
+//		return a;
+//	}
 	void alterAtomFunctor(Atom atom, Functor func) {
 		send("ALTERATOMFUNCTOR",getAtomID(atom),func.toString());
 		super.alterAtomFunctor(atom,func);
@@ -149,10 +149,6 @@ final class RemoteMembrane extends AbstractMembrane {
 			send("ENQUEUEATOM",atomid);
 		}
 	}
-	// abstractメソッドではなくなった
-	//protected void dequeueAtom(Atom atom) {
-	//	send("DEQUEUEATOM",getAtomID(atom));
-	//}
 	/** リモートのpourで行われるため何もしなくてよい */
 	protected void enqueueAllAtoms() {}
 
