@@ -1,9 +1,8 @@
 package runtime;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -39,7 +38,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** アトムの集合 */
 	protected AtomSet atoms = new AtomSet();
 	/** 子膜の集合 */
-	protected Set mems = new HashSet();
+	protected Set mems = new RandomSet();
 //	/** この膜にあるproxy以外のアトムの数。 */
 //	protected int atomCount = 0;
 //	/** このセルの自由リンクの数 */
@@ -150,12 +149,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	/** この膜にある子膜の反復子を取得する */
 	public Iterator memIterator() {
-// TODO 膜をシャッフルするようにする
-//		if (Env.shuffle) {
-//			return new RandomIterator(mems);
-//		} else {
-			return mems.iterator();
-//		}
+		return mems.iterator();
 	}
 	/** 名前funcを持つアトムの反復子を取得する */
 	public Iterator atomIteratorOfFunctor(Functor functor) {

@@ -93,7 +93,12 @@ public class FrontEnd {
 						Env.fTrace = true;
 						break;
 					case 's':
-						Env.shuffle = Env.SHUFFLE_DEFAULT;
+						if (args[i].matches("-s[0-9]")) {
+							Env.shuffle = args[i].charAt(2) - '0';
+						} else {
+							Env.shuffle = Env.SHUFFLE_DEFAULT;
+						}
+						System.out.println("shuffle level " + Env.shuffle);
 						break;
 					case 'e':
 						// lmntal -e 'a,(a:-b)'

@@ -87,7 +87,7 @@ public class REPL {
 					System.out.println("  [no]debug    [0-9] - set debug level");
 					System.out.println("  [no]optimize [0-9] - set optimization level");
 					System.out.println("  [no]verbose  [0-9] - set verbose level");
-					System.out.println("  [no]shuffle  [0-3] - set shuffle level");
+					System.out.println("  [no]shuffle  [0-4] - set shuffle level");
 					System.out.println("  [no]trace          - set trace mode");					
 					System.out.println("  h                  - help");
 					System.out.println("  q                  - quit");

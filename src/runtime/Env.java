@@ -60,6 +60,7 @@ public final class Env {
 	public static final int SHUFFLE_DONTUSEATOMSTACKS = 1;
 	public static final int SHUFFLE_ATOMS = 2;
 	public static final int SHUFFLE_RULES = 3;
+	public static final int SHUFFLE_MEMS = 4;
 
 	public static final int SHUFFLE_INIT  = 1;
 	public static final int SHUFFLE_DEFAULT = 3;
