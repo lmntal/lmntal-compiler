@@ -99,7 +99,7 @@ public class LMNtalDaemon implements Runnable {
 	}
 	static {
 		try {
-			myhostname = InetAddress.getLocalHost().getHostAddress();//Canonical
+			myhostname = InetAddress.getLocalHost().getHostAddress();//Canonical  //TODO (nakajima)NAT対応
 		} catch (Exception e) {
 			myhostname =  "DEFERRED";	// とりあえず放置
 			e.printStackTrace();
@@ -139,6 +139,17 @@ public class LMNtalDaemon implements Runnable {
 		} catch (NumberFormatException e){
 			System.out.println("Cannot parse as integer");
 			e.printStackTrace();
+			System.exit(-1);
+		}
+
+		//	NAT噛んでたら糸冬了
+		try {
+			if(!InetAddress.getLocalHost().getHostAddress().equals(InetAddress.getLocalHost().getHostAddress())){
+				System.out.println("!!! Distributed LMNtal Runtime does NOT work under NAT !!!");
+				System.exit(-1);
+			}
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
 			System.exit(-1);
 		}
 
