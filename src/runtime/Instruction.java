@@ -1013,39 +1013,39 @@ public class Instruction {
     }
 	
     /**
-     * 指定された命令をつくる
+     * 指定された命令をつくる。いずれprivateにするといいのかも知れない。
      * @param kind
      */
     public Instruction(int kind) {
     	this.kind = kind;
     }
-    private Instruction(int kind, int arg1) {
+	public Instruction(int kind, int arg1) {
 		this.kind = kind;
 		add(arg1);
     }
-	private Instruction(int kind, int arg1, int arg2) {
+	public Instruction(int kind, int arg1, int arg2) {
 		this.kind = kind;
 		add(arg1);
 		add(arg2);
 	}
-	private Instruction(int kind, int arg1, Object arg2) {
+	public Instruction(int kind, int arg1, Object arg2) {
 		this.kind = kind;
 		add(arg1);
 		add(arg2);
 	}
-	private Instruction(int kind, int arg1, int arg2, int arg3) {
-		this.kind = kind;
-		add(arg1);
-		add(arg2);
-		add(arg3);
-	}
-	private Instruction(int kind, int arg1, int arg2, Object arg3) {
+	public Instruction(int kind, int arg1, int arg2, int arg3) {
 		this.kind = kind;
 		add(arg1);
 		add(arg2);
 		add(arg3);
 	}
-    private Instruction(int kind, int arg1, int arg2, int arg3, int arg4) {
+	public Instruction(int kind, int arg1, int arg2, Object arg3) {
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+	}
+	public Instruction(int kind, int arg1, int arg2, int arg3, int arg4) {
 		this.kind = kind;
 		add(arg1);
 		add(arg2);
