@@ -110,11 +110,13 @@ public final class Atom extends QueuedEntity {
 	public Atom nthAtom(int n) {
 		return args[n].getAtom();
 	}
-	/** ファンクタ名を変える。所属膜のみが呼ぶことができる。*/
+	/** ファンクタ名を変える。所属膜のみが呼ぶことができる。
+	 * TODO 【@deprecated】所属膜がリモートの場合もあるので、膜のalterAtomFunctorメソッドを呼んで下さい。*/
 	public void changeName(String name) {
 		setFunctor( new Functor(name, getFunctor().getArity()) );
 	}
-	/** けす TODO リンクもけす */
+	/** けす TODO リンクもけす
+	 * TODO リンクでつながったアトムを消す抽象膜クラスのメソッドを作り、それを呼ぶようにして下さい。*/
 	public void remove() {
 		mem.removeAtom(this);
 	}
