@@ -2,8 +2,7 @@
 NAME
 	Integer module
 
-SYNOPSIS  +,-,*,/,mod,abs,>,<,>=,=<,==,!=
-          <<,>>,ビット演算(&,|,^),power(XのN準E,rnd
+SYNOPSIS  
 	
 AUTHOR
 	Koji Hara
