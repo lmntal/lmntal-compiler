@@ -111,7 +111,7 @@ public class LMNtalDaemon implements Runnable {
 	 *
 	 */
 	public static void main(String args[]) {
-		Thread t = new Thread(new LMNtalDaemon());
+		Thread t = new Thread(new LMNtalDaemon(), "LMNtalDaemon");
 		t.start();
 	}
 
@@ -131,7 +131,7 @@ public class LMNtalDaemon implements Runnable {
 				//登録する
 				if (registerRemoteHostNode(node)) {
 					//登録成功。
-					Thread t2 = new Thread(node);
+					Thread t2 = new Thread(node, "LMNalDaemonMessageProcessor");
 					t2.start();
 				} else {
 					//登録失敗。糸冬了
@@ -247,7 +247,7 @@ public class LMNtalDaemon implements Runnable {
 			//todo 「接続しようとしたときからn分だめだったらtimeout」にする
 			LMNtalDaemonMessageProcessor node = new LMNtalDaemonMessageProcessor(socket);
 			if (registerRemoteHostNode(node)) {
-				Thread t = new Thread(node);
+				Thread t = new Thread(node, "LMNtalDaemonMessageProcessor");
 				t.start();
 				return true;
 			}

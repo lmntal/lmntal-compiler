@@ -137,7 +137,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 							}
 							buf.append("END\n");
 							content = buf.toString();
-						}
+						} 
 						
 						LMNtalNode targetNode;
 						

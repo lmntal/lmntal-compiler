@@ -63,7 +63,7 @@ import util.Stack;
 
 class Task extends AbstractTask implements Runnable {
 	/** このタスクのルールスレッド */
-	protected Thread thread = new Thread(this);
+	protected Thread thread = new Thread(this, "Task");
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
 	Stack bufferedStack = new Stack();

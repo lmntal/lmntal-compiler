@@ -83,7 +83,7 @@ public final class LMNtalRuntimeManager {
 			Socket socket = new Socket("localhost", LMNtalDaemon.DEFAULT_PORT);
 			String rgid = Env.theRuntime.runtimeid;
 			daemon = new LMNtalRuntimeMessageProcessor(socket,rgid);
-			Thread t = new Thread(daemon);
+			Thread t = new Thread(daemon, "LMNtalRuntimeMessageProcessor");
 			t.start();
 			if (!daemon.sendWaitRegisterLocal("MASTER")) {
 				throw new Exception("cannot connect to daemon");

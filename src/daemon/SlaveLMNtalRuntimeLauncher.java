@@ -19,7 +19,7 @@ class SlaveLMNtalRuntimeLauncher {
 			LMNtalRuntimeMessageProcessor node = new LMNtalRuntimeMessageProcessor(socket,rgid);
 			LMNtalRuntimeManager.daemon = node;
 			
-			Thread nodeThread = new Thread(node);
+			Thread nodeThread = new Thread(node, "LMNtalRuntimeMessageProcessor");
 			nodeThread.start();
 			if (node.sendWaitRegisterLocal("REMOTE")) {
 				//LocalLMNtalRuntime¤òµ¯Æ°				
