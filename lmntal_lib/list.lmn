@@ -1,6 +1,6 @@
 /*
 NAME
-	Queue module (ring)
+	List module
 
 SYNOPSIS
 
@@ -52,6 +52,20 @@ H=list.of_queue(queue.new(Head, Head)) :- H=[].
 H=list.of_queue(queue.new(Head, Tail)) :-
 	H=[El | list.of_queue(shift(queue.new(Head, Tail), El))].
 
+
+/**
+ * grep
+ * 
+ * (a -> Bool) -> List -> List
+ * 
+ * @example r=list.grep(f, [1,2,3,4,5]).
+ *          H=[f,N] :- N<3 | H=[true, N].
+ *          H=[f,N]:-N>=3 | H=[false,N].
+ */
+H=list.grep(F, List) :- unary(F) | H=grep_s0(list.map(F, List)).
+H=grep_s0([ [true, El] | CDR ]) :- H=[El | grep_s0(CDR)].
+H=grep_s0([ [false, El] | CDR ]) :- H=grep_s0(CDR), nil(El).
+H=grep_s0([]) :- H=[].
 
 /**
  * map
