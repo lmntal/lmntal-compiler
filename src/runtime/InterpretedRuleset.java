@@ -626,19 +626,43 @@ class InterpretiveReactor {
 					atoms[inst.getIntArg1()] = new Atom(null, func);						
 					break; //nakajima 2004-01-05
 				case Instruction.INOT : //[-dstintatom, intatom]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(~x));	
+					break; //nakajima 2004-01-21
 				case Instruction.IAND : //[-dstintatom, intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x & y));	
+					break; //nakajima 2004-01-21
 				case Instruction.IOR : //[-dstintatom, intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x | y));	
+					break; //nakajima 2004-01-21
 				case Instruction.IXOR : //[-dstintatom, intatom1, intatom2]
-					break;
-				case Instruction.ISHL : //[-dstintatom, intatom1, intatom2] 左シフト
-					break;
-				case Instruction.ISHR : //[-dstintatom, intatom1, intatom2] 右シフト
-					break;
-				case Instruction.ISAR : //[-dstintatom, intatom1, intatom2] 符号付
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x ^ y));	
+					break; //nakajima 2004-01-21
+				case Instruction.ISHL : //[-dstintatom, intatom1, intatom2]
+					// TODO javaでは>>は符号つき右シフト、<<が符号つき左シフト、>>>は符号なし右シフトですのでここはそれぞれISAL, ISAR, ISHRにしたほうがいいんじゃないですか？
+					//intatom1をintatom2ビット分符号つき(算術)左シフト
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x << y));	
+					break; //nakajima 2004-01-21
+				case Instruction.ISHR : //[-dstintatom, intatom1, intatom2] 
+					//intatom1をintatom2ビット分符号つき(算術)右シフト
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x >> y));	
+					break; //nakajima 2004-01-21					
+				case Instruction.ISAR : //[-dstintatom, intatom1, intatom2] 
+					//intatom1をintatom2ビット分論理右シフト
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x >>> y));	
+					break; //nakajima 2004-01-21	
 				case Instruction.IADDFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
