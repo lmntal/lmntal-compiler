@@ -820,7 +820,7 @@ public class RuleCompiler {
 								body.add( new Instruction(Instruction.LOOKUPLINK,
 												copiedlink, rhspcToMapPath(atom), srclinkid));
 								body.add( new Instruction(Instruction.GETLINK,
-												buddylink, rhsatomToPath(link.atom), link.pos ));
+												buddylink, lhsatomToPath(link.atom), link.pos ));
 								body.add( new Instruction(Instruction.UNIFYLINKS,
 												copiedlink, buddylink, rhsmemToPath(atom.mem) ));
 							}
