@@ -7,11 +7,26 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+/*
+ * メッセージの中身を見て処理する。基本的にLMNtalDaemonのソケットが開かれると、
+ * これが生成される。つまり物理的な計算機1台の中に複数存在しうる。
+ * 
+ * @author nakajima
+ */
 public class LMNtalDaemonMessageProcessor implements Runnable {
+	static boolean DEBUG = true;
+
 	BufferedReader in;
 	BufferedWriter out;
 	Socket socket;
 
+	/*
+	 * コンストラクタ。
+	 * 
+	 * @param socket 開かれたソケット。
+	 * @param in 入力。BufferedReader。
+	 * @param out 出力。BufferedWriter。
+	 */
 	public LMNtalDaemonMessageProcessor(
 		Socket tmpSocket,
 		BufferedReader inTmp,
@@ -21,9 +36,16 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 		socket = tmpSocket;
 	}
 
-	public static boolean isMyself(String fqdn){
+	/*
+	 * ホストfqdnが自分自身か判定。
+	 * 
+	 * @param fqdn Fully Qualified Domain Name
+	 * @return 自分自身に割り振られているIPアドレスからホスト名を引いて、fqdnとstringで比較。同じだったらtrue、それ以外はfalse。
+	 */
+	public static boolean isMyself(String fqdn) {
 		try {
-			return InetAddress.getLocalHost().getHostAddress().equals(InetAddress.getByName(fqdn).getHostAddress());
+			return InetAddress.getLocalHost().getHostAddress().equals(
+				InetAddress.getByName(fqdn).getHostAddress());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			return false;
@@ -31,7 +53,9 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("LMNtalDaemonMessageProcessor.run()");
+		if (DEBUG) {
+			System.out.println("LMNtalDaemonMessageProcessor.run()");
+		}
 
 		String input = "";
 
@@ -44,7 +68,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 				break;
 			}
 
-			System.out.println("in.readLine(): " + input);
+			if (DEBUG) {
+				System.out.println("in.readLine(): " + input);
+			}
+
 			if (input == null) {
 				System.out.println("（　´∀｀）＜　inputがぬる");
 				break;
@@ -82,7 +109,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 				//戻す先
 				LMNtalNode returnNode = LMNtalDaemon.getNodeFromMsgId(msgid);
 
-				System.out.println("res: returnNode is: " + returnNode.toString());
+				if (DEBUG)
+					System.out.println(
+						"res: returnNode is: " + returnNode.toString());
+
 				if (returnNode == null) {
 					//戻し先がnull
 					try {
@@ -96,7 +126,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 				} else {
 					//System.out.println(returnNode.getOutputStream().toString());
 					//System.out.println(input);
-					try {					
+					try {
 						returnNode.out.write(input + "\n");
 						returnNode.out.flush();
 						continue;
@@ -115,21 +145,19 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 					try {
 						out.write("ok\n");
 						out.flush();
-						continue;
 					} catch (IOException e1) {
 						e1.printStackTrace();
-						continue;
 					}
+					continue;
 				} else {
 					//失敗
 					try {
 						out.write("fail\n");
 						out.flush();
-						continue;
 					} catch (IOException e1) {
 						e1.printStackTrace();
-						continue;
 					}
+					continue;
 				}
 			} else if (parsedInput[0].equalsIgnoreCase("dumphash")) {
 				//dumphash
@@ -150,23 +178,23 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 					//メッセージ登録成功
 
 					//自分自身宛かどうか判断
-				try{
-					if (isMyself(fqdn)) {
-						System.out.println(
-							"This message is for me: "
-								+ InetAddress
-									.getLocalHost()
-									.getHostAddress());
+					try {
+						if (isMyself(fqdn)) {
+							if(DEBUG) System.out.println(
+								"This message is for me: "
+									+ InetAddress
+										.getLocalHost()
+										.getHostAddress());
 
-						//自分自身宛なら、自分自身で処理する
+							//自分自身宛なら、自分自身で処理する
 
-						/* ここで処理される命令一覧
-						 * 
-						 *  begin
-						 *  connect
-						 *  lock taskid
-						 *  terminate
-						 */
+							/* ここで処理される命令一覧
+							 * 
+							 *  begin
+							 *  connect
+							 *  lock taskid
+							 *  terminate
+							 */
 
 							String command = (parsedInput[3].split(" ", 3))[0];
 
@@ -179,25 +207,25 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								continue;
 								//OK返すのは生成されたライタイムがする。
 							} else if (command.equalsIgnoreCase("begin")) {
-								//仮
+								//TODO 実装
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
 							} else if (command.equalsIgnoreCase("lock")) {
-								//仮
+								//TODO 実装
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
 							} else if (command.equalsIgnoreCase("terminate")) {
-								//仮
 								//TODO 実装
-								
+
 								//terminateだけ変
 								//
 								//やるべきことはEnv.theRuntimeのterminate
 								//でも呼べないからどうしよう？
 								//LocalLMNtalRuntime.terminate();
 								
+
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
@@ -216,17 +244,21 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 							if (targetNode == null) {
 								//宛先ノードへ接続するのが初めての場合
 								result = LMNtalDaemon.connect(fqdn);
-								
-								if(result){
-									targetNode =
-										LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
 
-									if(targetNode == null){
+								if (result) {
+									targetNode =
+										LMNtalDaemon.getLMNtalNodeFromFQDN(
+											fqdn);
+
+									if (targetNode == null) {
+										//接続失敗
 										out.write("fail\n");
 										out.flush();
 										continue;
 									} else {
-										LMNtalDaemon.sendMessage(targetNode, input + "\n");
+										LMNtalDaemon.sendMessage(
+											targetNode,
+											input + "\n");
 									}
 
 									continue;
@@ -254,9 +286,9 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 						e1.printStackTrace();
 						//continue;
 						break;
-					}  catch (NullPointerException nurupo){
+					} catch (NullPointerException nurupo) {
 						System.out.println("（　´∀｀）＜　ぬるぽ");
-						nurupo.printStackTrace();	
+						nurupo.printStackTrace();
 						//continue;
 						break;
 					}

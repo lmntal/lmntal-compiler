@@ -374,17 +374,33 @@ public class LMNtalDaemon implements Runnable {
 		if (isRegisted(fqdn)) {
 			//すでに接続済みの場合
 
-			//TODO 実装：生きているかを確認する
+			//TODO このif文の中身だけ単体テスト
 
-			//Socketをとってくる
-
+			LMNtalNode target = getLMNtalNodeFromFQDN(fqdn);
+			String msg = new String(makeID() + " connect\n");
+			
 			//connectを送る
+			try {
+				target.out.write(msg);
+				target.out.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false; //終了
+			}
 
-			//OKがきたらtrueを返す
+			//返事を待つ
+			try {
+				String ans = target.in.readLine();
 
-			//返事がなかったらfalseを返す
-
-			return true;
+				if(ans != null){
+					return true; //何か帰ってきていれば生きている。例えNGでも。
+				} else {
+					return false;
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				return false; //終了
+			}
 		} else {
 			try {
 				//新規接続の場合

@@ -33,6 +33,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 			((Task)it.next()).signal();
 		}
 		// TODO joinする
+		
 		// スレーブランタイムならば、VMを終了する。
 		// if (!(this instanceof MasterLMNtalRuntime)) System.exit(0);
 	}
@@ -40,6 +41,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 	public boolean isTerminated() {
 		return terminated;
 	}
+	
 //	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
 //	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
 //	 *  タスクが木構造になっていないと出来ない。優先度はしばらく未実装。
