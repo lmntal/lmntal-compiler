@@ -1,69 +1,19 @@
-/*
-----------------------------------------------------------------------
-Lambda calculus simulator
-                                              Koji Hara
-                                              2004/12/26(Sun) 06:48:03
-                                              2004/12/21(Tue) 21:26:18
-----------------------------------------------------------------------
-
-
-----------------------------------------------------------------------
-概要
-----------------------------------------------------------------------
-ラムダ計算の定義そのまま。
-
-束縛変数はコピーされる。（要groundガード命令）
-
-----------------------------------------------------------------------
-内部表現
-----------------------------------------------------------------------
-
-LAMBDA_EXPR ::= 
-        Var
-      | apply(LAMBDA_EXPR, LAMBDA_EXPR)
-      | lambda(Term, LAMBDA_EXPR)
-
-Var ::= 
-        自由変数       : (unary) atom
-      | 束縛変数の定義 : [R0, R1, ..., Rn]
-      | 束縛変数の出現 : ref(R0), ref(R1), ..., ref(Rn)
-
-----------------------------------------------------------------------
-TODO
-----------------------------------------------------------------------
--定義する : if ! fib plus mult power differential...
--変換器（文字列表現 <==> 内部表現） : 束縛変数の管理が厄介そう
---ここは手で書くとしたら ground を使わないグラフリダクションのやつ(_old)も書けたっぽい
-
-*/
-
-// ----------------------------------------------------------------------
-// Lambda 計算のルール
-// ----------------------------------------------------------------------
-{
-	module(lambda).
-	H=apply(lambda([A|R], M), Expr), E=ref(A) :- ground(Expr) | H=apply(lambda(R, M), Expr), E=Expr.
-	H=apply(lambda([   ], M), Expr)           :- ground(Expr) | H=M.
-}
-
-// ----------------------------------------------------------------------
-// サンプルコード
-// ----------------------------------------------------------------------
+// ラムダ計算のサンプル hara
 
 { lambda.use.
 	// (lambda y . y y) x => x x
-	r=apply(lambda([A,B], apply(ref(A), ref(B))), x).
+	r=apply(lambda(x, apply(x, x)), x).
 }
 
 { lambda.use.
 	// (lambda x . x x) (lambda x . x x) => self => self ...
 	// とまらないので注意 
-//	r=apply(lambda([A,B], apply(ref(A), ref(B))), lambda([C,D], apply(ref(C), ref(D)))).
+//	r=apply(lambda(x, apply(x, x)), lambda(x, apply(x, x))).
 }
 
 { lambda.use.
 	// (lambda f . (lambda x . f (f x) ) ) succ 0 => succ (succ 0)
-	r=apply(apply(lambda([A,B], lambda([C], apply(ref(A), apply(ref(B), ref(C))))), succ), 0).
+	r=apply(apply(lambda(f, lambda(x, apply(f, apply(f, x)))), succ), 0).
 }
 
 /**
@@ -76,12 +26,12 @@ TODO
 {
 	integer.use. lambda.use.
 	
-	r=apply(lambda([MULT], 
-		apply(lambda([SQUARE], M), 
-			lambda([C, D], apply(apply(ref(MULT), ref(C)), ref(D)))
-		)), lambda([A], lambda([B], '*'(ref(A), ref(B))))
+	r=apply(lambda(mult,
+		apply(lambda(square, M), 
+			lambda(x, apply(apply(mult, x), x))
+		)), lambda_0([A], lambda_0([B], '*'(ref(A), ref(B))))    // 組み込みの機能 '*' はラムダ式じゃないので内部形式で表しておく 
 		).
-	M=apply(ref(SQUARE), 5).
+	M=apply(square, 5).
 }
 /**
  * let mult = fun x -> fun y -> * x y in mult 5 6
@@ -91,9 +41,9 @@ TODO
 {
 	integer.use. lambda.use.
 	
-	r=apply(lambda([MULT], M1), 
-		lambda([A], lambda([B], '*'(ref(A), ref(B)))) ).
-	M1=apply(apply(ref(MULT), 5), 6).
+	r=apply(lambda(mult, M1), 
+		lambda_0([A], lambda_0([B], '*'(ref(A), ref(B)))) ).
+	M1=apply(apply(mult, 5), 6).
 }
 
 
