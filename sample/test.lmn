@@ -265,9 +265,9 @@ a:-{b,b,b,b,b. b:-c}@"localhost". a,a,a,a. {$p,@p}:-$p
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 { pi(X), ( pi(X) :- X=3.14 ) }, {pi($p)}:- result=$p.        % ==>¡ÚNullPointerException¡Û
-{ A=f(f(A)) }, ( {X=f(Y),$p[X,Y]} :- { X=g(g(Y)),$p[X,Y] } ) % ==>¡ÚNullPointerException¡Û
+  A=f(f(f(f(A)))),    c,c, ( c, X=f(Y) :- X=g(Y) )                      % ==>   f(g(g(f(A))),A)
+{ A=f(f(f(f(A)))) },  c,c, ( c,{X=f(Y),$p[X,Y]} :- { X=g(Y),$p[X,Y] } ) % ==> { f(g(g(f(A))),A) }
 
-A=f(f(f(f(f(A))))), c,c, ( c, X=f(Y) :- X=g(Y) )             % ==> f(g(f(g(f(A)))),A)
 
 ( {f(X),$p[X]} :- { g(X),$p[X] } )
 
