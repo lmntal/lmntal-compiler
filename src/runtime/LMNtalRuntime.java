@@ -106,7 +106,7 @@ final class Task extends AbstractTask {
 
 /** 物理マシン */
 final class LMNtalRuntime extends AbstractLMNtalRuntime {
-	List Tasks = new ArrayList();
+	List tasks = new ArrayList();
 	AbstractMembrane rootMem;
 	
 	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
@@ -129,7 +129,7 @@ final class LMNtalRuntime extends AbstractLMNtalRuntime {
 		Task m;
 		do{
 			allIdle = true; // idleでないタスクが見つかったらfalseになる。
-			it = Tasks.iterator();
+			it = tasks.iterator();
 			while(it.hasNext()){
 				m = (Task)it.next();
 				if(!m.isIdle()){ // idleでないタスクがあったら
@@ -143,7 +143,7 @@ final class LMNtalRuntime extends AbstractLMNtalRuntime {
 	
 	AbstractTask newTask() {
 		Task m = new Task();
-		Tasks.add(m);
+		tasks.add(m);
 		return m;
 	}
 }
