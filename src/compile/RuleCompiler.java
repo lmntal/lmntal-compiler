@@ -37,8 +37,8 @@ public class RuleCompiler {
 	/** コンパイルされるルールに対応するルールオブジェクト */
 	public Rule theRule;
 	
-	public List atommatches;
-	public List memmatch;
+	public List atomMatch;
+	public List memMatch;
 	public List body;
 	
 	public int varcount;
@@ -89,10 +89,10 @@ public class RuleCompiler {
 		
 		//showInstructions();
 		
-		//rule.register(@atommatches,@memmatch,@body)
-		theRule.memMatch     = memmatch;
-		theRule.atomMatch  = atommatches;
-		theRule.body         = body;
+		//rule.register(@atomMatches,@memMatch,@body)
+		theRule.memMatch  = memMatch;
+		theRule.atomMatch = atomMatch;
+		theRule.body      = body;
 		
 		theRule.showDetail();
 		
@@ -110,50 +110,46 @@ public class RuleCompiler {
 	private void compile_l() {
 		Env.c("compile_l");
 		
-		atommatches = new ArrayList();
+		atomMatch = new ArrayList();
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化
 			
 			if (firstid < hc.atoms.size()) {
-				// アトム主導 - ここは放置しました(12/8 加藤)
-				/* 
-				atommatches.add(hc.match);
+				// アトム主導
+				List brancharg = new ArrayList();
+				brancharg.add(hc.match);
+				atomMatch.add(new Instruction(Instruction.BRANCH, brancharg));
 				hc.mempath.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
-				hc.atomidpath.set(firstid, new Integer(1));
+				hc.atomidpath.set(firstid, new Integer(1));	// 主導するアトムの変数番号は 1
 				hc.varcount = 1;
-				Membrane mem = ((Atom)(hc.atoms.get(firstid))).mem;
-				hc.match.add( Instruction.dummy("[:execlevel, mem.memlevel]") );
-				hc.match.add( Instruction.dummy("[:func,1,@lhscmp.atoms[firstid].func") );
-				
-				{
-					List l = new LinkedList();
-					l.add("memof");
-					l.add(new Integer(1));
-					hc.mempaths.put(mem, l);
+				Atom atom = (Atom)hc.atoms.get(firstid);
+				hc.match.add(new Instruction(Instruction.FUNC, 1, atom.functor));
+				Membrane mem = atom.mem;
+				if (mem == rs.leftMem) {
+					hc.match.add(new Instruction(Instruction.TESTMEM, 0, 1));
 				}
-				// 親膜をたどる
-				while(mem.mem != null) {
-					List l = ((List)(hc.mempaths.get(mem)));
-					List ll = new LinkedList();
-					
-					Iterator li=l.iterator();
-					while(li.hasNext()) ll.add(li.next());
-					
-					ll.add(0, ":memof");
-					hc.mempaths.put(mem.mem, ll);
-					mem = mem.mem;
+				else {
+					hc.match.add(new Instruction(Instruction.GETMEM, varcount+1, 1));
+					hc.mempath.put(mem, new Integer(++varcount));
+					do {
+						hc.match.add(new Instruction(Instruction.GETPARENT,varcount+1,varcount));
+						hc.mempath.put(mem, new Integer(++varcount));
+						mem = mem.mem;
+					}	
+					while (mem != rs.leftMem);
+					hc.match.add(new Instruction(Instruction.EQMEM, 0, varcount));
+					for (int i = varcount; --i >= 2; ) {
+						hc.match.add(new Instruction(Instruction.LOCK,i));
+					}
 				}
 				hc.compileLinkedGroup(firstid);
-				*/
 			} else {
 				// 膜主導
-				memmatch = hc.match;
+				memMatch = hc.match;
 				hc.mempath.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
 			hc.compileMembrane(rs.leftMem);
-			new Instruction();
-			//Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals());
-			//hc.match.add( Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals()) );
+			hc.match.add( Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals()) );
 		}
 	}
 	
@@ -398,12 +394,12 @@ public class RuleCompiler {
 	 */
 	private void showInstructions() {
 		Iterator it;
-		it = atommatches.listIterator();
-		Env.p("--atommatches :");
+		it = atomMatch.listIterator();
+		Env.p("--atomMatches :");
 		while(it.hasNext()) Env.p((Instruction)it.next());
 		
-		it = memmatch.listIterator();
-		Env.p("--memmatch :");
+		it = memMatch.listIterator();
+		Env.p("--memMatch :");
 		while(it.hasNext()) Env.p((Instruction)it.next());
 		
 		it = body.listIterator();

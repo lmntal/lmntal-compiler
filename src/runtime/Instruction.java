@@ -145,22 +145,22 @@ public class Instruction {
 	public static final int LOCALANYMEM = LOCAL + ANYMEM;
 
 	/** getmem [-dstmem, srcatom]
-	 * <br>（推奨されない）ボディ命令<br>
-	 * アトム$srcatomの所属膜への参照を$dstmemに代入する。
-	 * <p><b>注意</b>　ガード命令としては廃止された。
-	 * @see lockmem */
+	 * <br>ガード命令<br>
+	 * アトム$srcatomの所属膜への参照をロックせずに$dstmemに代入する。
+	 * <p>アトム主導テストで使用される。
+	 * @see lock */
 	public static final int GETMEM = 8;
 	// LOCALGETMEMは不要
 	
 	/** getparent [-dstmem, srcmem]
-	 * <br>（推奨されない）ボディ命令<br>
-	 * 膜$srcmemの親膜への参照を$dstmemに代入する。
-	 * <p><b>注意</b>　ガード命令としては廃止された。*/
+	 * <br>ガード命令<br>
+	 * （ロックしていない）膜$srcmemの親膜への参照をロックせずに$dstmemに代入する。
+	 * <p>アトム主導テストで使用される。*/
 	public static final int GETPARENT = 9;
 	// LOCALGETPARENTは不要
 
-    // 膜に関係する出力しない基本ガード命令 (10--24)
-	//  ----- testmem    [dstmem, freelinkatom]
+    // 膜に関係する出力しない基本ガード命令 (10--19)
+	//  ----- testmem    [dstmem, srcatom]
 	//  ----- norules    [srcmem] 
 	//  ----- natoms     [srcmem, count]
 	//  ----- nfreelinks [srcmem, count]
@@ -168,10 +168,11 @@ public class Instruction {
 	//  ----- eqmem      [mem1, mem2]
 	//  ----- neqmem     [mem1, mem2]
 	//  ----- stable     [srcmem]
+	// [local]lock       [srcmem]
 
-    /** testmem [dstmem, freelinkatom]
+    /** testmem [dstmem, srcatom]
      * <br>ガード命令<br>
-     * 自由リンク出力管理アトム$freelinkatomが（ロックされた）膜$dstmemに所属することを確認する。
+     * アトム$srcatomが（ロックされた）膜$dstmemに所属することを確認する。
      * <p><b>注意</b>　Ruby版ではgetmemで参照を取得した後でeqmemを行っていた。
      * @see lockmem */
 	public static final int TESTMEM = 10;
@@ -222,6 +223,20 @@ public class Instruction {
 	public static final int STABLE = 17;
 	// LOCALSTABLEは不要
 
+	/** lock [srcmem]
+	 * <br>ロック取得するガード命令<br>
+	 * 膜$srcmemに対して、ノンブロッキングでのロックを取得を試みる。
+	 * 取得したロックは、後続の命令列が失敗したときに解放される。
+	 * <p>アトム主導テストで、主導するアトムによって特定された膜のロックを取得するために使用される。
+	 * @see lockmem
+	 * @see getmem */
+	public static final int LOCK = 18;
+	
+	/** locallock [srcmem]
+	 * <br>ロック取得する最適化用ガード命令<br>
+	 * lockと同じ。ただし$srcmemはこの計算ノードに存在する。*/
+	public static final int LOCALLOCK = LOCAL + LOCK;
+    
 	// アトムに関係する出力しない基本ガード命令 (20-24)
 	//  -----  func    [srcatom, funcref]
 	//  -----  eqatom  [atom1, atom2]
@@ -901,8 +916,8 @@ public class Instruction {
 	public int getID() {
 		return getKind();
 	}
-	public int getIntArg(int arg) {
-		return ((Integer)data.get(arg)).intValue();
+	public int getIntArg(int pos) {
+		return ((Integer)data.get(pos)).intValue();
 	}
 	public int getIntArg1() {
 		return ((Integer)data.get(0)).intValue();
@@ -916,8 +931,8 @@ public class Instruction {
 	public int getIntArg4() {
 		return ((Integer)data.get(3)).intValue();
 	}
-	public Object getArg(int arg) {
-		return data.get(arg);
+	public Object getArg(int pos) {
+		return data.get(pos);
 	}
 	public Object getArg1() {
 		return data.get(0);
@@ -930,6 +945,26 @@ public class Instruction {
 	}
 	public Object getArg4() {
 		return data.get(3);
+	}
+	/**@deprecated*/
+	public void setArg(int pos, Object arg) {
+		data.set(pos,arg);
+	}
+	/**@deprecated*/
+	public void setArg1(Object arg) {
+		data.set(0,arg);
+	}
+	/**@deprecated*/
+	public void setArg2(Object arg) {
+		data.set(1,arg);
+	}
+	/**@deprecated*/
+	public void setArg3(Object arg) {
+		data.set(2,arg);
+	}
+	/**@deprecated*/
+	public void setArg4(Object arg) {
+		data.set(3,arg);
 	}
 
     ////////////////////////////////////////////////////////////////
@@ -1055,7 +1090,11 @@ public class Instruction {
 	public Instruction(int kind, int arg1) {
 		this.kind = kind;
 		add(arg1);
-    }
+	}
+	public Instruction(int kind, Object arg1) {
+		this.kind = kind;
+		add(arg1);
+	}
 	public Instruction(int kind, int arg1, int arg2) {
 		this.kind = kind;
 		add(arg1);

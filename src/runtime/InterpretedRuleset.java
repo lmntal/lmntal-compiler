@@ -95,7 +95,7 @@ class InterpretedReactor {
 				//====膜に関係する出力する基本ガード命令====ここまで====
 
 				//====膜に関係する出力しない基本ガード命令====ここから====
-			case Instruction.TESTMEM: //[dstmem, freelinkatom]
+			case Instruction.TESTMEM: //[dstmem, srcatom]
 				if (mems[inst.getIntArg1()] != atoms[inst.getIntArg2()].mem) return false;
 				break; //n-kato
 			case Instruction.NORULES: //[srcmem] 
@@ -111,6 +111,9 @@ class InterpretedReactor {
 			case Instruction.NEQMEM: //[mem1, mem2]
 				break;
 			case Instruction.STABLE: //[srcmem] 
+				break;
+			case Instruction.LOCK:
+			case Instruction.LOCALLOCK: //[srcmem] 
 				break;
 				//====膜に関係する出力しない基本ガード命令====ここまで====
 
