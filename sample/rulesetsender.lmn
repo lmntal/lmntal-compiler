@@ -1,0 +1,29 @@
+[[/*inline_define*/
+import java.io.*;
+import java.net.*;
+]].
+
+[[/*inline*/
+try {
+	Socket socket = new Socket("localhost", 1234);
+	DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+	Iterator it = mem.rulesetIterator();
+	while (it.hasNext()) {
+		Ruleset r = (Ruleset)it.next();
+		ByteArrayOutputStream bs = new ByteArrayOutputStream();
+		ObjectOutputStream out2 = new ObjectOutputStream(bs);
+		r.serialize(out2);
+		out2.close();
+		byte[] data = bs.toByteArray();
+		out.writeInt(data.length);
+		out.write(data);
+	}
+	out.writeInt(0);
+	out.close();
+	socket.close();
+} catch (Exception e) {
+	e.printStackTrace();
+}
+]].
+a.
+a :- b, (b :- c).
