@@ -28,7 +28,7 @@ public final class LinkOccurrence {
 	 * @param atom 所属するアトム
 	 * @param pos 所属するアトムでの場所
 	 */
-	LinkOccurrence(String name, Atom atom, int pos) {
+	public LinkOccurrence(String name, Atom atom, int pos) {
 		this.name = name;
 		this.atom = atom;
 		this.pos = pos;
