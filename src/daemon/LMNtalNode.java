@@ -46,13 +46,13 @@ public class LMNtalNode {
 	//
 	
 	public void close() {
-		if(Env.debug > 0)System.out.println("LMNtalNode.close(): "+ socket);
+		if(Env.debugDaemon > 0)System.out.println("LMNtalNode.close(): "+ socket);
 		try {
 			in.close();
 			out.close();
-			if(Env.debug > 0)System.out.println("LMNtalNode.close(): BufferedStreams closed.");
+			if(Env.debugDaemon > 0)System.out.println("LMNtalNode.close(): BufferedStreams closed.");
 			socket.close();
-			if(Env.debug > 0)System.out.println("LMNtalNode.close(): socket has closed.");
+			if(Env.debugDaemon > 0)System.out.println("LMNtalNode.close(): socket has closed.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
