@@ -30,20 +30,38 @@ public class Optimizer {
 				reuseAtom(body);
 			}
 			if (Env.optimize >= 7) {
-				makeLoop(head, body);
+				makeLoop(head, body); //まだ問題だらけ
 			}
 		}
 	}
 
+	private static class Link {
+		int atom;
+		int pos;
+		Link(int atom, int pos) {
+			this.atom = atom;
+			this.pos = pos;
+		}
+		public boolean equals(Object o) {
+			Link l = (Link)o;
+			return this.atom == l.atom && this.pos == l.pos;
+		}
+		public int hashCode() {
+			return atom + pos;
+		}
+	}
 	/**
 	 * 同一ルールの複数回同時適用<br>
 	 * とりあえず、次の条件を満たしている場合にのみ処理を行う。
 	 * <ul>
+	 *  <li>ボディ実行仮引数と実引数が同じである。
 	 *  <li>spec命令以外の最初の命令がfindatomで、その第二引数は0である。
 	 *  <li>はじめのfindatom命令によって取得されたアトムが再利用されている。
 	 * </ul>
-	 * @param head
-	 * @param body
+	 * 一つ目の条件が満たされない場合の動作は定義されない。（TODO これは何とかする。）
+	 * それ以外の条件が満たされない場合は何もしない。
+	 * @param head 膜主導マッチング命令列
+	 * @param body ボディ命令列
 	 */	
 	private static void makeLoop(List head, List body) {
 		Instruction inst = (Instruction)head.get(0);
@@ -56,6 +74,9 @@ public class Optimizer {
 		}
 		Integer firstAtom = (Integer)inst.getArg1();
 
+		//条件に合致するか検査＋情報収集
+		HashMap links = new HashMap(); //newlink命令で生成したリンクの情報
+		HashMap functor = new HashMap(); // atom -> functor
 		Iterator it = body.iterator();
 		while (it.hasNext()) {
 			inst = (Instruction)it.next();
@@ -65,6 +86,23 @@ public class Optimizer {
 					if (inst.getArg1().equals(firstAtom)) {
 						return;
 					}
+					break;
+				case Instruction.NEWLINK:
+				case Instruction.LOCALNEWLINK:
+					Link l1 = new Link(inst.getIntArg1(), inst.getIntArg2());
+					Link l2 = new Link(inst.getIntArg3(), inst.getIntArg4());
+					links.put(l1, l2);
+					links.put(l2, l1);
+					break;
+				case Instruction.NEWATOM:
+					functor.put(inst.getArg1(), inst.getArg3());
+					break;
+				case Instruction.FINDATOM:
+					functor.put(inst.getArg1(), inst.getArg3());
+					break;
+				case Instruction.FUNC:
+					functor.put(inst.getArg1(), inst.getArg2());
+					break;
 			}
 		}
 		HashMap changeMap = new HashMap();
@@ -72,9 +110,57 @@ public class Optimizer {
 		ArrayList loop = new ArrayList(); //ループ内の命令列
 		
 		//ループ内命令列の生成
-		loop.addAll(head.subList(2, head.size() - 1)); //spec,findatom,reactを除去
-		loop.addAll(body.subList(1, body.size())); //specを除去
+		
+		Instruction spec = (Instruction)body.get(0);
+		//ループ内命令列で使用する変数の開始値
+		int base = spec.getIntArg2(); 
+		//もともとの変数→ループ内での変数
+		HashMap varMap = new HashMap();
+		varMap.put(new Integer(0), new Integer(0)); //本膜
+		for (int i = 1; i < base; i++) {
+			varMap.put(new Integer(i), new Integer(base + i));
+			System.out.println(i + " -> " + (base + i));
+		}
+		varMap.put(firstAtom, firstAtom);
+		
+		it = head.subList(2, head.size() - 1).iterator(); //spec,findatom,reactを除去
+		while (it.hasNext()) {
+			inst = (Instruction)it.next();
+			switch (inst.getKind()) {
+				case Instruction.DEREF:
+					Link l = (Link)links.get(new Link(inst.getIntArg2(), inst.getIntArg3()));
+					if (l != null && l.pos == inst.getIntArg4()) {
+						System.out.println(inst.getArg1() + " -> " + l.atom);
+						varMap.put(inst.getArg1(), new Integer(l.atom));
+					}
+					break;
+				case Instruction.FUNC:
+					Integer atom = (Integer)varMap.get(inst.getArg1());
+					if (functor.containsKey(atom)) {
+						if (!functor.get(atom).equals(inst.getArg2())) {
+							//絶対失敗するので複数回同時適用は行わない
+							return;
+						}
+						//絶対成功するので除去	
+					} else {
+						loop.add(inst.clone());
+					}
+					break;					
+				default:
+					loop.add(inst.clone());
+					break;
+			}
+		}
 
+		it = body.subList(1, body.size()).iterator(); //specを除去
+		while (it.hasNext()) {
+			inst = (Instruction)it.next();
+			loop.add(inst.clone());
+		}
+		
+		Instruction.changeAtomId(loop, varMap);
+		Instruction.changeMemId(loop, varMap);
+		
 		//proceed命令の前に挿入
 		body.add(body.size() - 1, new Instruction(Instruction.LOOP, loop));		
 	}

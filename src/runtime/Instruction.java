@@ -33,7 +33,7 @@ import java.lang.reflect.Field;
  *
  * @author hara, nakajima, n-kato
  */
-public class Instruction {
+public class Instruction implements Cloneable {
 	
     /** 命令の種類を保持する。*/	
     private int kind;
@@ -1173,6 +1173,16 @@ public class Instruction {
 		add(arg5);
 	}
 
+	public Object clone() {
+		Instruction c = new Instruction();
+		c.kind = this.kind;
+		Iterator it = this.data.iterator();
+		while (it.hasNext()) {
+			c.data.add(it.next());
+		}
+		return c;
+	}
+	
 	//////////////////////////////////
 	// 最適化器が使う、命令列書き換えのためのクラスメソッド
 	// @author Mizuno
@@ -1213,7 +1223,7 @@ public class Instruction {
 	/**
 	 * 与えられた対応表よって、ボディ命令列中のアトムIDを書き換える。<br>
 	 * 命令列中のアトムIDが、対応表のキーに出現する場合、対応する値に書き換えます。
-	 *
+	 * 
 	 * @param list 書き換える命令列
 	 * @param map アトムIDの対応表。
 	 */
@@ -1221,7 +1231,13 @@ public class Instruction {
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
-			switch (inst.getKind()) {
+			switch (inst.getKind()) { // TODO ガード命令や、出力変数も書き換える
+				case Instruction.FUNC:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.NEWATOM:
+					changeArg(inst, 1, map);
+					break;
 				case Instruction.NEWLINK:
 				case Instruction.LOCALNEWLINK:
 					changeArg(inst, 1, map);
