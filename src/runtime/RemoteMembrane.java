@@ -96,6 +96,16 @@ final class RemoteTask extends AbstractTask {
 //		//done 2004-0623 nakajima:todo 実装:RemoteLMNtalRuntimeに制御を移して命令列をあて先に流す
 //		System.out.println("SYSTEM ERROR: remote call not implemented");
 //	}
+
+	/**@deprecated*/
+	void send(String cmd) {
+		throw new RuntimeException("error in send");
+	}
+	/**@deprecated*/
+	void flush(String cmd) {
+		throw new RuntimeException("error in flush");
+	}
+
 	// ロック
 	public void lock() {
 		throw new RuntimeException("not implemented");
