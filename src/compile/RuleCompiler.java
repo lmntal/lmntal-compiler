@@ -411,12 +411,12 @@ public class RuleCompiler {
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)(rs.typedProcessContexts.get(it.next()));
 			Context pc = def.src;
-			if (pc != null) { // ヘッドのときのみ
+			//if (pc != null) { // ヘッドのときのみ
 				if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
 					body.add(new Instruction( Instruction.FREEATOM,
 						typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
-			}
+			//}
 		}
 	}	
 
