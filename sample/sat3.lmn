@@ -1,16 +1,16 @@
-% ‰ü’ùsatƒ\ƒ‹ƒo
-% ¶¬AŒŸØ‚ğ“¯•Às“I‚ÉB
-% ƒ‹[ƒ‹‚Ì‡˜‚É‚æ‚é—Dæ“x‚ğ—˜—pB
+% ²şÄûsat¥½¥ë¥Ğ
+% À¸À®¡¢¸¡¾Ú¤òÆ±»şÊÂ¹ÔÅª¤Ë¡£
+% ¥ë¡¼¥ë¤Î½ç½ø¤Ë¤è¤ëÍ¥ÀèÅÙ¤òÍøÍÑ¡£
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% –â‘èuŠÈ’P‚È—áv
+% ÌäÂê¡Ö´ÊÃ±¤ÊÎã¡×
 %c(1, {notx(1),notx(2)        }).
 %c(2, {   x(1),notx(2),   x(1)}).
-%m(2).   % ß‚Ì”
-%var(2). % •Ï”‚Ì”
+%m(2).   % Àá¤Î¿ô
+%var(2). % ÊÑ¿ô¤Î¿ô
 %gen_var(2).
 
-unsolved.    % ‰ğ‚©‚ê‚½‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
+unsolved.    % ²ò¤«¤ì¤¿¤«¤É¤¦¤«¤Î¥Õ¥é¥°
 
 preparing_space = {
 unsolvable.
@@ -19,35 +19,35 @@ z(0).
 
 %%%%LMNtal rule%%%%
 
-% •Ï”¶¬
+% ÊÑ¿ôÀ¸À®
 preparing_space={$s[]     },gen_var(N)  :- int(N),N>0|
 preparing_space={$s[],a(N)},gen_var(N-1).
 preparing_space={$s[]},gen_var(N) :- int(N),N=0|
           space={$s[]}.
 
-% ŒŸØ(•¡»‚É—Dæ‚·‚é)
+% ¸¡¾Ú(Ê£À½¤ËÍ¥Àè¤¹¤ë)
 
-% ‚±‚Á‚¿‚ªæ
+% ¤³¤Ã¤Á¤¬Àè
 unsolved,m(M),space={ unsolvable,z(Z),$s[]} :- int(Z),int(M),Z=M |
-  solved,m(M),space={   solvable,     $s[]},              % z‚ªm‚É“™‚µ‚­‚È‚ê‚Î‰ğ
+  solved,m(M),space={   solvable,     $s[]},              % z¤¬m¤ËÅù¤·¤¯¤Ê¤ì¤Ğ²ò
 [[/*inline*/
 	Atom l = mem.newAtom(new Functor(Long.toString(new GregorianCalendar().getTimeInMillis()),1));
 	Atom e = mem.newAtom(new Functor("endtime",1));
 	mem.newLink(l,0,e,0);
 ]].
 
-% ‚±‚Á‚¿‚ªŒã
+% ¤³¤Ã¤Á¤¬¸å
 unsolved,c(M,{   x(Nx),$c[]}),space={  t(Nt),z(Z  )     ,$s[]} :- int(M),int(Nx),int(Nt),int(Z),Nx=Nt,Z=M-1|
 unsolved,c(M,{   x(Nx),$c[]}),space={  t(Nt),z(Z+1)     ,$s[]}.
 unsolved,c(M,{notx(Nx),$c[]}),space={  f(Nf),z(Z  )     ,$s[]} :- int(M),int(Nx),int(Nf),int(Z),Nx=Nf,Z=M-1|
 unsolved,c(M,{notx(Nx),$c[]}),space={  f(Nf),z(Z+1)     ,$s[]}.
 
-% •¡»¶¬
+% Ê£À½À¸À®
 unsolved,space={a(N),$v[]}                   :- int(N) |
 unsolved,space={t(N),$v[]}, space={f(N),$v[]}.
 
 
-%%%%%%%%%%%%%%%%%%% ˆÈ‰º Java %%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%% °Ê²¼ Java %%%%%%%%%%%%%%
 [[/*inline_define*/
 import java.io.*;
 import java.util.*;
@@ -56,7 +56,7 @@ import java.lang.*;
 
 input.
 
-% ƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚İ
+% ¥Õ¥¡¥¤¥ë¤«¤éÆÉ¤ß¹ş¤ß
 input :-
 [[/*inline*/
 	int n=0,m=0;
@@ -124,9 +124,9 @@ input :-
 	mem.newLink(l,0,s,0);
 	mem.removeAtom(me);
 ]].
-% ƒtƒ@ƒCƒ‹‚Éo—Í
+% ¥Õ¥¡¥¤¥ë¤Ë½ĞÎÏ
 
-% o—Í‚ğÅŒã‚É‘‚­‚±‚Æ‚ÅA‰ğ‚¯‚È‚¢ê‡‚É‚à“Á‚É”»’è‚Í—v‚ç‚È‚¢B
+% ½ĞÎÏ¤òºÇ¸å¤Ë½ñ¤¯¤³¤È¤Ç¡¢²ò¤±¤Ê¤¤¾ì¹ç¤Ë¤âÆÃ¤ËÈ½Äê¤ÏÍ×¤é¤Ê¤¤¡£
 
 solved,var(V),m(M),starttime(S),endtime(E)
 :-
