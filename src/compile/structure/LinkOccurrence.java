@@ -24,6 +24,7 @@ public final class LinkOccurrence {
 	/** 2回しか出現しない場合に、もう片方の出現を保持する */
 	public LinkOccurrence buddy = null;
 	
+	
 	/**
 	 * リンク出現を生成する。
 	 * @param name リンク名

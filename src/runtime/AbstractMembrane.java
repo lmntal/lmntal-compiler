@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import util.QueuedEntity;
 import util.RandomIterator;
@@ -440,12 +442,146 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			srcMem.setTask(task);
 		}
 	}
+
+	// kudo
+	/** この膜の複製を生成する 自由リンクが無いものと仮定(子膜にも。)
+	 *  pMemの子膜として作成
+	 * */
+	public HashMap copyFrom(AbstractMembrane srcMem) {
+		int atomsize = srcMem.atoms.size(); //アトムの数
+		int memsize = srcMem.mems.size(); //子膜の数
+		List linkatom[] = new LinkedList[atomsize]; //リンク先のアトムのリスト
+		List linkpos[] = new LinkedList[atomsize]; //リンク先のポジションのリスト
+		//初期化
+		for (int i = 0; i < linkatom.length; i++) {
+			linkatom[i] = new LinkedList();
+			linkpos[i] = new LinkedList();
+		}
+
+		//子膜に繋がるリンクに関して（$outのみか）。下で振った番号で使えるようにしておく。
+		//どの子膜の、どのアトムに繋がっているのかを示す。id番号。
+		int  glmemid[] = new int[atomsize];
+		int glatomid[] = new int[atomsize];
+		
+		//アトムにとりあえず番号を振る。Atom.idとは別。名前がよくないな。
+		Map atomId = new HashMap(); //Atom -> int
+		Atom idAtom[] = new Atom[atomsize]; //int -> Atom
+		int varcount = 0;
+		
+		//子膜にも番号を振る
+		Map memId = new HashMap(); // Mem -> int
+		AbstractMembrane idMem[] = new AbstractMembrane[memsize]; //int -> Mem
+		int memvarcount = 0;
+		
+		//リンク情報を取得
+		Iterator it = srcMem.atomIterator();
+		while (it.hasNext()) {
+			//リンク元アトム
+			Atom atomo = (Atom) it.next();//リンク元
+			if (!atomId.containsKey(atomo)) {
+				atomId.put(atomo, new Integer(varcount));
+				idAtom[varcount++] = atomo;
+			}
+			int o = ((Integer) atomId.get(atomo)).intValue();
+			//リンクを辿る
+			for (int i = 0; i < atomo.args.length; i++) {
+				Atom atoml = atomo.nthAtom(i);
+				if (atoml.mem == srcMem) { //局所リンク
+					if (!atomId.containsKey(atoml)) {
+						atomId.put(atoml, new Integer(varcount));
+						idAtom[varcount++] = atoml;
+					}
+					linkatom[o].add(i, atomId.get(atoml));
+					linkpos[o].add(i, new Integer(atomo.getArg(i).getPos()));
+				//}else if(atoml.mem == null){System.out.println("hahahahah");
+				}else if(atoml.mem != null && atoml.mem.parent == srcMem){//子膜へのリンク
+					if(!memId.containsKey(atoml.mem)){
+						memId.put(atoml.mem,new Integer(memvarcount));
+						idMem[memvarcount++] = atoml.mem;
+					}
+					glmemid[o] = ((Integer)memId.get(atoml.mem)).intValue();
+					glatomid[o] = atoml.hashCode(); 
+					linkatom[o].add(i,null);
+					linkpos[o].add(i,new Integer(atomo.getArg(i).getPos()));
+				}else{//親膜ないしどこにも繋がっていない
+					linkatom[o].add(i,null);
+					linkpos[o].add(i,null);
+				}
+			}
+		}
+
+		//子膜のmap情報を得る
+		it = srcMem.memIterator();
+		while(it.hasNext()){
+			AbstractMembrane itm = (AbstractMembrane)it.next();
+			if(!memId.containsKey(itm)){
+				memId.put(itm,new Integer(memvarcount));
+				idMem[memvarcount++] = itm;
+			}
+		}
+
+
+		//子膜を再帰的にコピー(上と同時進行にすると同膜間コピーができない)
+		Map[] oldIdToNewAtom = new Map[memsize];
+		for(int i=0;i<memvarcount;i++){
+			oldIdToNewAtom[i] = newMem().copyFrom(idMem[i]);
+		}
+
+		HashMap retHashMap = new HashMap();//コピー元の$inのid -> コピー先の$inアトム
+
+		//アトムのコピーを作成
+		Atom[] idAtomCopied = new Atom[varcount];
+		for (int i = 0; i < varcount; i++) {
+			idAtomCopied[i] = newAtom(idAtom[i].getFunctor());
+		}
+
+		//リンクの貼りなおし
+		for (int i = 0; i < varcount; i++) {
+			for (int j = 0; j < linkatom[i].size();j++) {
+				if(linkatom[i].get(j) != null){
+					int l = ((Integer) linkatom[i].get(j)).intValue();
+					int lp = ((Integer) linkpos[i].get(j)).intValue();
+//					System.out.print(" 1 = " + idAtomCopied[i].toString());
+//					System.out.print(" 2 = " + j);
+//					System.out.print(" 3 = " + idAtomCopied[l].toString());
+//					System.out.print(" 4 = " + lp + "\n");
+					newLink(idAtomCopied[i], j, idAtomCopied[l], lp);
+				}else{//リンク先が同じ膜に無い場合
+					//Link link = new Link(idAtomCopied[i],j);
+					if(idAtom[i].nthAtom(j).mem != null && idAtom[i].nthAtom(j).mem.parent == srcMem){//子膜に繋がっていた場合
+						Atom na = (Atom)oldIdToNewAtom[glmemid[i]].get(new Integer(glatomid[i]));
+						int lp = ((Integer) linkpos[i].get(j)).intValue();
+						newLink(idAtomCopied[i],j,na,lp);
+					}else{//親膜ないしどこにも繋がっていない、mapに追加
+						retHashMap.put(new Integer(idAtom[i].hashCode()),idAtomCopied[i]);
+					}
+				}
+			}
+		}
+		return retHashMap;
+	}
 	
-//	/** この膜の複製を生成する */
-//	Membrane copy() {
-//		
-//	}
-	
+	public void drop(){
+		if (isRoot()) {
+			// TODO kill this task
+		}
+		Iterator it = atomIterator();
+		while(it.hasNext()){
+			Atom atom = (Atom)it.next();
+			atom.dequeue();
+			// it.remove();
+		}
+		it = memIterator();
+		while(it.hasNext()){
+			((AbstractMembrane)it.next()).drop();
+		}
+	}
+
+	//	/** この膜の複製を生成する */
+	//	Membrane copy() {
+	//		
+	//	}
+
 	/** この膜をdstMemに移動し、活性化する。parent==nullを仮定する。*/
 	public void moveTo(AbstractMembrane dstMem) {
 		if (parent != null) {

@@ -950,21 +950,28 @@ public class LMNParser {
 					rule.ruleContexts.put(name, def);
 				}
 			}
-			if (def.rhsOccs.size() == 1) {
-				if (def.lhsOcc != null) {	// ガードでないとき
-					Context rhsocc = ((Context)def.rhsOccs.get(0));
+//			if (def.rhsOccs.size() == 1) {
+//				if (def.lhsOcc != null) {	// ガードでないとき
+//					Context rhsocc = ((Context)def.rhsOccs.get(0));
+//					rhsocc.buddy = def.lhsOcc;
+//					def.lhsOcc.buddy = rhsocc;
+//				}
+//			}
+			if( def.lhsOcc != null) {
+				for(int i=0;i<def.rhsOccs.size();i++){
+					Context rhsocc = ((Context)def.rhsOccs.get(i));
 					rhsocc.buddy = def.lhsOcc;
-					def.lhsOcc.buddy = rhsocc;
 				}
+				if (def.rhsOccs.size() > 0 )def.lhsOcc.buddy = ((Context)def.rhsOccs.get(0));
 			}
 		}
 		
-		// （非線型プロセス文脈が実装されるまでの仮措置として）線型でない型なし$pを取り除く
-		it = rule.processContexts.values().iterator();
+		// （非線型プロセス文脈が実装されるまでの仮措置として）線型でなく剰余引数が[]でない型なし$pを取り除く
+/*		it = rule.processContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
-			if (def.rhsOccs.size() != 1) {
-				error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + def.getName());
+			//if (def.rhsOccs.size() != 1 && ((ProcessContext)def.lhsOcc).bundle != null) {
+			//	error("FEATURE NOT IMPLEMENTED: untyped process context must be linear unless its bundle is null: " + def.getName());
 				int len = def.lhsOcc.args.length;
 				Iterator it2 = def.rhsOccs.iterator();
 				while (it2.hasNext()) {
@@ -995,8 +1002,8 @@ public class LMNParser {
 				def.lhsOcc.buddy = rhsocc;
 				rhsocc.def = def;
 				def.rhsOccs.add(rhsocc);
-			}
-		}
+			//}
+		}*/
 	}
 }
 

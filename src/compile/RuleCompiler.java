@@ -202,6 +202,7 @@ public class RuleCompiler {
 		//Env.d("lhsmempaths.get(rs.leftMem) -> "+lhsmempaths.get(rs.leftMem));
 		//Env.d("rhsmempaths -> "+rhsmempaths);
 
+		recursiveLockLHSNonlinearProcessesContextMems();
 		dequeueLHSAtoms();
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
@@ -221,10 +222,12 @@ public class RuleCompiler {
 		enqueueRHSAtoms();
 		addInline();
 		addRegAndLoadModules();
-		unlockReusedOrNewRootMem(rs.rightMem);
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
 		freeLHSTypedProcesses();
+		freeLHSSingletonProcessesContexts();
+		recursiveUnLockLHSNonlinearProcessesContextMems();
+		unlockReusedOrNewRootMem(rs.rightMem);
 		//
 		body.add(0, Instruction.spec(formals, varcount));
 		
@@ -349,6 +352,43 @@ public class RuleCompiler {
 			}
 		}
 	}	
+
+	//kudo
+	private void freeLHSSingletonProcessesContexts(){
+		Iterator it = rs.processContexts.values().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			if (def.rhsOccs.size() == 0) {
+				body.add(new Instruction( Instruction.DROPMEM,
+					lhsmemToPath(def.lhsOcc.mem) ));
+			}
+		}
+	}
+
+	//kudo
+	private void recursiveLockLHSNonlinearProcessesContextMems(){
+		Iterator it = rs.processContexts.values().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			if (def.rhsOccs.size() != 1) {
+				body.add(new Instruction( Instruction.RECURSIVELOCK,
+					lhsmemToPath(def.lhsOcc.mem) ));
+			}
+		}
+	}
+
+	//kudo
+	private void recursiveUnLockLHSNonlinearProcessesContextMems(){
+		Iterator it = rs.processContexts.values().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			if (def.rhsOccs.size() != 1) {
+				body.add(new Instruction( Instruction.RECURSIVEUNLOCK,
+					lhsmemToPath(def.lhsOcc.mem) ));
+			}
+		}
+	}
+
 
 	private void buildRHSTypedProcesses() {
 		Iterator it = rs.typedProcessContexts.values().iterator();
@@ -494,6 +534,8 @@ public class RuleCompiler {
 		return procvarcount;
 	}	
 
+	HashMap rhsmappaths = new HashMap();
+
 	/** 膜の階層構造およびプロセス文脈の内容を親膜側から再帰的に生成する。
 	 * @return 膜memの内部に出現したプロセス文脈の個数 */
 	private int buildRHSMem(Membrane mem) {
@@ -506,10 +548,15 @@ public class RuleCompiler {
 				error("SYSTEM ERROR: ProcessContext.def.lhsOcc.mem is not set");
 			}
 			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.lhsOcc.mem)) {
-				if (pc.def.rhsOccs.get(0) == pc) {
-					body.add(new Instruction(Instruction.MOVECELLS,
-						rhsmemToPath(mem), lhsmemToPath(pc.def.lhsOcc.mem) ));
-				} 
+//				if (pc.def.rhsOccs.get(0) == pc) {
+//					body.add(new Instruction(Instruction.MOVECELLS,
+//						rhsmemToPath(mem), lhsmemToPath(pc.def.lhsOcc.mem) ));
+//				} 
+
+				int rethashmap = varcount++;
+				body.add(new Instruction(Instruction.COPYMEM,
+					rethashmap, rhsmemToPath(mem), lhsmemToPath(pc.def.lhsOcc.mem) ));
+				rhsmappaths.put(pc,new Integer(rethashmap));
 				//else {
 				//	error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + pc);
 				//	corrupted();
@@ -573,6 +620,7 @@ public class RuleCompiler {
 //			} 
 		}
 	}
+	
 	/** 右辺の膜内のアトムを生成する。
 	 * 単一化アトムならばUNIFY命令を生成し、
 	 * それ以外ならば右辺のアトムのリストrhsatomsに追加する。 */
@@ -632,11 +680,24 @@ public class RuleCompiler {
 						// リンク先の型なしプロセス文脈は右辺に限られる。そして、そのプロセス文脈の
 						// 左辺での出現における対応する自由リンクは、左辺のアトムに接続している。
 						// ( { org(Y,), $pc[Y,|] } :- atom(X), $pc[X,|] )
+//						LinkOccurrence orglink = pc.buddy.args[link.pos].buddy; // org引数のYの出現
+//						body.add( new Instruction(Instruction.RELINK,
+//										rhsatomToPath(atom), pos,
+//										lhsatomToPath(orglink.atom), orglink.pos,
+//										rhsmemToPath(targetmem) ));
 						LinkOccurrence orglink = pc.buddy.args[link.pos].buddy; // org引数のYの出現
-						body.add( new Instruction(Instruction.RELINK,
-										rhsatomToPath(atom), pos,
-										lhsatomToPath(orglink.atom), orglink.pos,
-										rhsmemToPath(targetmem) ));
+						int srclink = varcount++;
+						int copiedlink = varcount++;
+						int atomlink = varcount++;
+						body.add( new Instruction(Instruction.GETLINK,
+										srclink, lhsatomToPath(orglink.atom), orglink.pos ));
+						body.add( new Instruction(Instruction.LOOKUPLINK,
+										copiedlink, ((Integer)rhsmappaths.get(pc)).intValue(),
+										srclink));
+						body.add( new Instruction(Instruction.ALLOCLINK,
+										atomlink, rhsatomToPath(atom), pos ));
+						body.add( new Instruction(Instruction.UNIFYLINKS,
+										copiedlink, atomlink ));
 					}
 					continue;
 				}
@@ -751,13 +812,30 @@ public class RuleCompiler {
 							// ( {org(Y,),$buddypc[Y,|]},{src(Z,),$atom[Z,|]} :- $buddypc[X,|],$atom[X,|] )
 							LinkOccurrence orglink = buddypc.buddy.args[link.pos].buddy; // org引数のYの出現
 							LinkOccurrence srclink = atom.   buddy.args[pos     ].buddy; // src引数のZの出現
-							if ( lhsatomToPath(orglink.atom) < lhsatomToPath(srclink.atom)
-							  || ( lhsatomToPath(orglink.atom) == lhsatomToPath(srclink.atom)
-								&& orglink.pos < srclink.pos )) {
-								body.add( new Instruction(Instruction.UNIFY,
-												lhsatomToPath(srclink.atom), srclink.pos,
-												lhsatomToPath(orglink.atom), orglink.pos,
-												rhsmemToPath(atom.mem) ));
+							//if ( lhsatomToPath(orglink.atom) < lhsatomToPath(srclink.atom)
+							//  || ( lhsatomToPath(orglink.atom) == lhsatomToPath(srclink.atom)
+							//	&& orglink.pos < srclink.pos )) {
+							if ( ((Integer)rhsmappaths.get(atom)).intValue() < ((Integer)rhsmappaths.get(buddypc)).intValue()
+							  || ( ((Integer)rhsmappaths.get(atom)).intValue() == ((Integer)rhsmappaths.get(buddypc)).intValue())
+							    && orglink.pos <= srclink.pos ) {
+//								body.add( new Instruction(Instruction.UNIFY,
+//												lhsatomToPath(srclink.atom), srclink.pos,
+//												lhsatomToPath(orglink.atom), orglink.pos,
+//												rhsmemToPath(atom.mem) ));
+								int buddylink = varcount++;
+								body.add( new Instruction(Instruction.GETLINK,
+												buddylink, lhsatomToPath(srclink.atom), srclink.pos ));
+								int buddycopiedlink = varcount++;
+								body.add( new Instruction(Instruction.LOOKUPLINK,
+												buddycopiedlink, ((Integer)rhsmappaths.get(buddypc)).intValue(), buddylink ));
+								int atomlink = varcount++;
+								body.add( new Instruction(Instruction.GETLINK,
+												atomlink, lhsatomToPath(orglink.atom), orglink.pos ));
+								int atomcopiedlink = varcount++;
+								body.add( new Instruction(Instruction.LOOKUPLINK,
+												atomcopiedlink, ((Integer)rhsmappaths.get(atom)).intValue(), atomlink ));
+								body.add( new Instruction(Instruction.UNIFYLINKS,
+												buddycopiedlink, atomcopiedlink ));
 							}
 						}
 					}

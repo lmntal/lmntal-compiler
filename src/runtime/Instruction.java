@@ -870,6 +870,7 @@ public class Instruction implements Cloneable, Serializable {
 	//  ----- recursiveunlock          [srcmem]
 	//  ----- copymem         [-dstmem, srcmem]
 	//  ----- dropmem                  [srcmem]
+	//  
 	
     /** recursivelock [srcmem]
      * <br>（予約された）ガード命令<br>
@@ -892,14 +893,16 @@ public class Instruction implements Cloneable, Serializable {
 	// LOCALRECURSIVEUNLOCKは最適化の効果が無いため却下
 	static {setArgType(RECURSIVEUNLOCK, new ArgType(false, ARG_MEM));}
 
-    /** copymem [-dstmem, srcmem]
+    /** copymem [-dstmap, dstmem, srcmem]
      * <br>（予約された）ボディ命令<br>
      * 再帰的にロックされた膜$srcmemの内容のコピーを作成し、膜$dstmemに入れる。
-     * $dstmemの自由リンク管理アトムの第1引数は、対応する$srcmemの第1引数を指すリンクで初期化するが、
-     * 他の計算ノードには初期化を通知しない。*/
+     * その際、リンク先がこの膜の(子膜を含めて)中に無いアトムの情報を
+     * コピーされるアトムのid -> コピーされたアトムオブジェクト
+     * というHashMapオブジェクトとして、dstmapに入れる。
+     **/
     public static final int COPYMEM = 82;
 	// LOCALCOPYMEMは最適化の効果が無いため却下
-	static {setArgType(COPYMEM, new ArgType(true, ARG_MEM, ARG_MEM));}
+	static {setArgType(COPYMEM, new ArgType(true, ARG_VAR, ARG_MEM, ARG_MEM));}
 
 	/** dropmem [srcmem]
 	 * <br>（予約された）ボディ命令<br>
@@ -908,6 +911,20 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int DROPMEM = 83;
 	// LOCALDROPMEMは最適化の効果が無いため却下
 	static {setArgType(DROPMEM, new ArgType(false, ARG_MEM));}
+
+	/** getlinkfrommap [-dstlink, srcmap, srclink]
+	 * srclinkのリンク先のアトムのコピーをsrcmapより得て、
+	 * そのアトムをリンク先とする-dstlinkを作って返す。
+	 */
+	public static final int LOOKUPLINK = 84;
+	static {setArgType(LOOKUPLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+
+//	/** setlinks [link1, link2]
+//	 * link1のリンク先にlink2をセットし、
+//	 * link2のリンク先にlink1をセットする。
+//	 */
+//	public static final int SETLINKS = 85;
+//	static {setArgType(SETLINKS, new ArgType(true, ARG_VAR, ARG_VAR));}
 
 //	/** * [srcatom,pos]
 //	 * <br>（予約された）ボディ命令<br>

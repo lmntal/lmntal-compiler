@@ -614,16 +614,28 @@ class InterpretiveReactor {
 				case Instruction.RECURSIVEUNLOCK : //[srcmem]
 					mems[inst.getIntArg1()].recursiveUnlock();
 					break;//nakajima 2004-01-04, n-kato
-//				case Instruction.COPYMEM : //[-dstmem, srcmem]
-					// //todo proxyに関する処理をまだ書いてない→それ以前にcopymemはまだ実装できません
-					//「内容」とは子膜・アトム・ルール（ルールは違う。それと、addAllで追加すると親膜はどうなってしまいますか？）
-					//mems[inst.getIntArg1()].copyRulesFrom(mems[inst.getIntArg2()]);
-					//mems[inst.getIntArg1()].atoms.addAll(mems[inst.getIntArg2()].atoms);
-					//mems[inst.getIntArg1()].mems.addAll(mems[inst.getIntArg2()].mems);
-					//break;
+
+				case Instruction.COPYMEM : //[-dstmap, -dstmem, srcmem]
+					// 自由リンクを持たない膜（その子膜とのリンクはOK）のみ
+					vars.set(inst.getIntArg1(),mems[inst.getIntArg2()].copyFrom(mems[inst.getIntArg3()]));
+					break; //kudo 2004-09-29
 				case Instruction.DROPMEM : //[srcmem]
-					//mems[inst.getIntArg1()] = null;まだ実装できません
-					break; //nakajima 2004-01-05
+					mems[inst.getIntArg1()].drop();
+					break; //kudo 2004-09-29
+				case Instruction.LOOKUPLINK : //[-dstlink, srcmap, srclink]
+					HashMap srcmap = (HashMap)vars.get(inst.getIntArg2());
+					//Link srclink = atoms[inst.getIntArg3()].getArg(inst.getIntArg4());
+					Link srclink = (Link)vars.get(inst.getIntArg3());
+					Atom la = (Atom) srcmap.get(new Integer(srclink.getAtom().hashCode()));
+					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
+					break; //kudo 2004-10-10
+//				case Instruction.LINKS : //[link, atom, pos]
+//					Link l1 = (Link)vars.get(inst.getIntArg1());
+//					Link l2 = (Link)vars.get(inst.getIntArg2());
+//					l1.getAtom().args[l1.getPos()] = l2;
+//					l2.getAtom().args[l2.getPos()] = l1;
+//					//atoms[inst.getIntArg2()].mem.newLink(atoms[inst.getIntArg2()],inst.getIntArg3(),li.getAtom(),li.getPos());
+//					break; //kudo 2004-10-10
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 
 					//====制御命令====ここから====
