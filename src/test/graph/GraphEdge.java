@@ -24,7 +24,9 @@ public class GraphEdge {
 	}
 	
 	public void paint(Graphics g) {
-		g.drawLine((int)from.getPosition().getX(), (int)from.getPosition().getY(),
-			(int)to.getPosition().getX(), (int)to.getPosition().getY());
+		if (from != null && to != null) {
+			g.drawLine((int)from.getPosition().getX(), (int)from.getPosition().getY(),
+				(int)to.getPosition().getX(), (int)to.getPosition().getY());
+		}
 	}
 }

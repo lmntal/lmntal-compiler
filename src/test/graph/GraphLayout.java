@@ -65,6 +65,7 @@ public class GraphLayout implements Runnable {
 		// 移動分の計算
 		for (int i=0; i<edges.size(); i++) {
 			GraphEdge edge = (GraphEdge)edges.get(i);
+			if (edge.to == null || edge.from == null) continue;
 			double vx = edge.to.getPosition().getX() - edge.from.getPosition().getX();
 			double vy = edge.to.getPosition().getY() - edge.from.getPosition().getY();
 			double len = Math.sqrt(vx*vx+vy*vy);
