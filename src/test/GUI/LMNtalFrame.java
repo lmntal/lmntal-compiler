@@ -72,6 +72,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	}
 	
 	public void waitBusy() {
+//		lmnPanel.getGraphLayout().calc();
 		lmnPanel.getGraphLayout().allowRelax = true;
 		busy = true;
 		while(busy) {
