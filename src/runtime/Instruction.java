@@ -248,7 +248,8 @@ public class Instruction {
 	try {
 	    answer = ((Integer)table.get(instructionString.toUpperCase())).intValue();
 	} catch (NullPointerException e){
-	    //何をしようかな…？
+	    System.out.println(e);
+	    System.exit(1);
 	}
 
 	return answer;
@@ -304,7 +305,7 @@ public class Instruction {
 	} catch (ArrayIndexOutOfBoundsException e){
 	    //	     answer = "　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n";
 
-	    answer = "1 名前：仕様書無しさん 03/09/21 00:23\n　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n2 名前：仕様書無しさん ：03/09/21 00:24\n　　Λ＿Λ　　＼＼ \n　 （　・∀・）　　　|　|　ｶﾞｯ\n　と　　　　）　 　 |　| \n　　 Ｙ　/ノ　　　 人 \n　　　 /　）　 　 < 　>__Λ∩ \n　 ＿/し'　／／. Ｖ｀Д´）/\n　（＿フ彡　　　　　 　　/ \n\n";
+	    answer = "\n1 名前：仕様書無しさん 03/09/21 00:23\n　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n2 名前：仕様書無しさん ：03/09/21 00:24\n　　Λ＿Λ　　＼＼ \n　 （　・∀・）　　　|　|　ｶﾞｯ\n　と　　　　）　 　 |　| \n　　 Ｙ　/ノ　　　 人 \n　　　 /　）　 　 < 　>__Λ∩ \n　 ＿/し'　／／. Ｖ｀Д´）/\n　（＿フ彡　　　　　 　　/ \n\n";
 	} catch (Exception e){
 	    //本当にヤヴァイ場合
 	    System.out.println(e);
