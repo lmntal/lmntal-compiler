@@ -6,9 +6,9 @@ package runtime;
  */
 public class Functor {
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
-	public static final Functor INSIDE_PROXY = new Functor("i",2,null,".inside");
+	public static final Functor INSIDE_PROXY = new Functor("$in",2,null,".inside");
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
-	public static final Functor OUTSIDE_PROXY = new Functor("o",2,null,".outside");
+	public static final Functor OUTSIDE_PROXY = new Functor("$out",2,null,".outside");
 	/** $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム
 	 * を表すファンクタ temporary_inside_proxy （通称:star）*/
 	public static final Functor STAR = new Functor("$transient_inside_proxy",2,null,".star");
@@ -34,6 +34,7 @@ public class Functor {
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
 	public final String getQuotedFunctorName() {
 		String text = getAbbrName();
+		if (strFunctor.startsWith(".")) return text;	// 臨時
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 			text = quoteName(text);
 		}
