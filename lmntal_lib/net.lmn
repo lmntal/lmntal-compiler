@@ -20,7 +20,7 @@ module(net).
 			}
 //			System.out.println(b);
 			me.nthAtom(0).remove();
-			me.set(b.toString()
+			me.setFunctor(b.toString()
 				.replaceAll("<script>.*?</script>", "")
 				.replaceAll("<br>", "\n")
 				.replaceAll("<.*?>", "")

@@ -224,7 +224,7 @@ H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], readline(In
 //		  java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(1).getFunctor()).getObject();
 //		  String s = br.readLine();
 //		  me.nthAtom(1).remove();
-//		  me.set(s, 1);
+//		  me.setFunctor(s, 1);
 //	  } catch(Exception e) {System.out.println(e);}
 //]](Result, Object).
 //
