@@ -1,7 +1,8 @@
 package compile.structure;
 
 import java.util.HashMap;
-//import java.util.LinkedList;
+import java.util.LinkedList;
+import java.util.Iterator;
 
 /** 
  * ソースコード中のルールの構造を表すクラス
@@ -17,11 +18,14 @@ public final class RuleStructure {
 	/** Bodyを格納する膜 */
 	public Membrane rightMem = new Membrane(null);
 	
-	/** ガードを格納する膜 */
+	/** ガード型制約を格納する膜 */
 	public Membrane guardMem = new Membrane(null);
 
 //	/** ガードの型制約 (TypeConstraint) のリスト */
 //	public LinkedList typeConstraints = new LinkedList();
+	
+	/** ガード否定条件（ProcessContextEquationのLinkedList）のリスト */
+	public LinkedList guardNegatives = new LinkedList();
 	
 	/** プロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef) */
 	public HashMap processContexts = new HashMap();
@@ -46,8 +50,21 @@ public final class RuleStructure {
 
 	public String toString() {
 		String text = "( " + leftMem.toStringWithoutBrace() + " :- ";
-		if (!guardMem.atoms.isEmpty())
-			text += guardMem.toStringAsGuard() + " | ";
+		String guard = "";
+		if (!guardMem.atoms.isEmpty()) {
+			guard += guardMem.toStringAsGuardTypeConstraints() + " ";
+		}
+		Iterator it = guardNegatives.iterator();
+		while (it.hasNext()) {
+			String eqstext = "";
+			Iterator it2 = ((LinkedList)it.next()).iterator();
+			while (it2.hasNext()) {
+				eqstext += "," + ((ProcessContextEquation)it2.next()).toString();
+			}
+			if (eqstext.length() > 0)  eqstext = eqstext.substring(1);
+			guard += "\\+(" + eqstext + ") ";
+		}
+		if (guard.length() > 0)  text += guard + "| ";
 		return text + rightMem.toStringWithoutBrace() + " )";
 	}
 }

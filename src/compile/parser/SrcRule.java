@@ -7,9 +7,10 @@ import java.util.LinkedList;
 
 class SrcRule {
 	
-	public LinkedList head = null; // ヘッドプロセス
-	public LinkedList body = null; // ボディプロセス
-	public LinkedList guard = null; // ガードプロセス
+	public LinkedList head;			// ヘッドプロセス
+	public LinkedList body;			// ボディプロセス
+	public LinkedList guard;			// ガードプロセス
+	public LinkedList guardNegatives;	// ガード否定条件構文のリスト
 	/**
 	 * 指定されたヘッドルールとボディルールと空のガードでルールを初期化します
 	 * @param head ヘッドのリスト
@@ -28,6 +29,7 @@ class SrcRule {
 	public SrcRule(LinkedList head, LinkedList guard, LinkedList body) {
 		this.head = head;
 		this.guard = guard;
+		this.guardNegatives = new LinkedList();
 		this.body = body;
 	}
 
@@ -52,6 +54,12 @@ class SrcRule {
 	 */
 	public LinkedList getGuard() {
 		return this.guard;
+	}
+	/**
+	 * ガード型制約を取得する
+	 */
+	public LinkedList getGuardNegatives() {
+		return this.guardNegatives;
 	}
 	
 	/**

@@ -1,7 +1,6 @@
 package compile.structure;
 
 import runtime.Functor;
-import java.util.Arrays;
 
 /**
  * ソースコード中のアトム（またはアトム集団）の構造を表すクラス。
@@ -77,10 +76,11 @@ public class Atom {
 	}
 	public String toString() {
 		if (args.length == 0) return functor.getQuotedAtomName();
-		String argstext = Arrays.asList(args).toString();
-		argstext = argstext.substring(1, argstext.length() - 1);
-		argstext = argstext.replaceAll(", ",",");
-		return functor.getQuotedFunctorName() + "(" + argstext + ")";
+		String argstext = "";
+		for (int i = 0; i < args.length; i++) {
+			argstext += "," + args[i];
+		}
+		return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
 	}
 	public String toStringAsTypeConstraint() {
 		if (args.length == 0) return functor.getQuotedAtomName();

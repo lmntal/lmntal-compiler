@@ -108,9 +108,10 @@ public final class Membrane {
 	public String toString() {
 		return "{ " + toStringWithoutBrace() + " }" + (stable ? "/" : "");
 	}
-	public String toStringAsGuard() {
-		Iterator it = atoms.iterator();
+	public String toStringAsGuardTypeConstraints() {
+		if (atoms.isEmpty()) return "";
 		String text = "";
+		Iterator it = atoms.iterator();
 		while (it.hasNext()) {
 			text += " " + ((Atom)it.next()).toStringAsTypeConstraint();
 		}

@@ -184,6 +184,7 @@ public class ParserTest extends JFrame implements ActionListener {
 		
 		nodeRule.add(nodeRuleHead);
 		nodeRule.add(nodeRuleGuard);
+		// todo rule.guardNegatives を表示する
 		nodeRule.add(nodeRuleBody);
 		
 		node.add(nodeRule);
