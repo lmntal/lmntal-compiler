@@ -136,10 +136,10 @@ public final class LMNtalRuntimeManager {
 
 		synchronized(terminateLock) { // 重複転送防止のため（仮）		
 			if(Env.theRuntime.isTerminated()){
-				if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): runtime " + Env.theRuntime + " is already terminated...");
+				//if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): runtime " + Env.theRuntime + " is already terminated...");
 				return;
 			} else {
-				if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): now terminate runtime " + Env.theRuntime );
+				//if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): now terminate runtime " + Env.theRuntime );
 				Env.theRuntime.terminate();
 			}
 		}
@@ -147,9 +147,9 @@ public final class LMNtalRuntimeManager {
 		Iterator it = runtimeids.keySet().iterator();
 		while (it.hasNext()) {
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
-			if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): now ommiting TERMINATE to  " + machine.hostname );
+			//if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): now ommiting TERMINATE to  " + machine.hostname );
 			daemon.sendWait(machine.hostname,"TERMINATE");
-			if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): ommiting TERMINATE to  " + machine.hostname +"finished");
+			//if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): ommiting TERMINATE to  " + machine.hostname +" finished");
 		}
 		runtimeids.clear();
 	}
