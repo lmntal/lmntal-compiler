@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 //TODO 終了するようにする
+//TODO negtiationを設計・実装
 
 public class LMNtalDaemonTest {
 	public static void main(String args[]) {
