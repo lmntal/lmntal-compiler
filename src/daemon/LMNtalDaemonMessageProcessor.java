@@ -140,7 +140,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 							// endが来るまで積み込む
 							while(true){ //TODO BEGINだけきてその後が来ないとbreakしない
 								String inputline = readLine();
-								if (DEBUG) System.out.println("wafter BEGIN:  " + inputline);
+								if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run(): after BEGIN:  " + inputline);
 								if (inputline == null) break;
 								if (inputline.equalsIgnoreCase("END")) break;
 								buf.append(inputline);
