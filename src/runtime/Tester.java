@@ -63,7 +63,10 @@ public class Tester extends TestCase {
 		assertTrue(atomSet.remove(atom[2]));
 		assertTrue(!atomSet.remove(atom[2]));
 		assertEquals(atomSet.size(), 3);
-		
+
+		//整合性検査
+		assertTrue(atomSet.verify());
+				
 		//iteratorのテスト		
 		Iterator it = atomSet.functorIterator();
 		int count = 0;
@@ -113,6 +116,8 @@ public class Tester extends TestCase {
 		assertTrue(atomSet.isEmpty());
 		assertEquals(0, atomSet.size());
 		
+		//整合性検査
+		assertTrue(atomSet.verify());
 	}
 	private boolean areSameSet(Set set1, Set set2) {
 		HashSet tmpSet1 = new HashSet();

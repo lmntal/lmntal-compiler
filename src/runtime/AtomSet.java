@@ -56,20 +56,6 @@ public final class AtomSet implements Set{
 		}
 	}
 
-//2003/10/22 Mizuno このメソッドはやめて、iteratorOfFunctorを使うようにする。
-//	/**
-//	 * 与えられたFunctorを持つアトムの集合を返す。
-//	 * そのようなアトムがない場合は空の集合を返す。
-//	 * 返された集合に直接add/remove等の操作しないこと。
-//	 */	
-//	public Set getAtomsOfFunctor(Functor f) {
-//		Set s = (Set)atoms.get(f);
-//		if (s == null) {
-//			return new HashSet();
-//		} else {
-//			return s;
-//		}
-//	}
 	/** この集合内にあるアトムの反復子を返す */
 	public Iterator iterator() {
 		return new AtomIterator(atoms);
@@ -87,6 +73,7 @@ public final class AtomSet implements Set{
 	 * Functorの反復子を返す。
 	 * この集合内にあるアトムのFunctorは全てこの反復子を使って取得できるが、
 	 * この反復子で取得できるFunctorを持つアトムが必ずこの集合内にあるとは限らない。
+	 * TODO removeされた時に、アトム数が0になったFunctor除去するようにした方が良いか？
 	 */
 	public Iterator functorIterator() {
 		return atoms.keySet().iterator();
@@ -163,7 +150,7 @@ public final class AtomSet implements Set{
 	}
 	/**
 	 * 指定されたコレクション内の全ての要素が含まれる場合にはtrueを返す。
-	 * 現在は効率の悪い実装をしているので、将来変更する必要がある。 
+	 * TODO 現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
 	 */
 	public boolean containsAll(Collection c) {
 		Iterator it = c.iterator();
@@ -176,7 +163,7 @@ public final class AtomSet implements Set{
 	}
 	/**
 	 * 指定されたコレクション内の全ての要素をこの集合に追加する。
-	 * 現在は効率の悪い実装をしているので、将来変更する必要がある。 
+	 * TODO 現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
 	 * @return この集合が変更された場合はtrue
 	 */
 	public boolean addAll(Collection c) {
@@ -191,7 +178,7 @@ public final class AtomSet implements Set{
 	}
 	/**
 	 * 指定されたコレクション内の全ての要素をこの集合から除去する。
-	 * 現在は効率の悪い実装をしているので、将来変更する必要がある。 
+	 * TODO 現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
 	 * @return この集合が変更された場合はtrue
 	 */
 	public boolean removeAll(Collection c) {
@@ -214,7 +201,18 @@ public final class AtomSet implements Set{
 		atoms.clear();
 		size = 0;
 	}
+	
+	/** sizeの整合性を検査する。デバッグ用。*/
+	public boolean verify() {
+		int n = 0;
+		Iterator it = atoms.values().iterator();
+		while (it.hasNext()) {
+			n += ((Set)it.next()).size();
+		}
+		return size == n;
+	}
 }
+
 /** AtomSetの要素に対して使用する反復子 */
 final class AtomIterator implements Iterator {
 	/** Functorをキーとし、アトムの集合（Set）を値とするMap */
