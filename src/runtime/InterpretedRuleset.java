@@ -1,16 +1,16 @@
 package runtime;
 
 public final class InterpretedRuleset extends Ruleset {
-	/** ‚Æ‚è‚ ‚¦‚¸ƒ‹[ƒ‹‚Ì”z—ñ‚Æ‚µ‚ÄÀ‘• */
+	/** ¤È¤ê¤¢¤¨¤º¥ë¡¼¥ë¤ÎÇÛÎó¤È¤·¤Æ¼ÂÁõ */
 	private int id;
 	private static int lastId;
 	
 	
-	/** –Œå“±Às—p–½—ß—ñB‚P‚Â–Ú‚Ì“Y‚¦š‚Íƒ‹[ƒ‹”Ô† */
+	/** Ëì¼çÆ³¼Â¹ÔÍÑÌ¿ÎáÎó¡££±¤ÄÌÜ¤ÎÅº¤¨»ú¤Ï¥ë¡¼¥ëÈÖ¹æ */
 	private HeadInstruction[][] memMatch;
-	/** ƒAƒgƒ€å“±Às—p–½—ß—ñBMap‚É‚·‚×‚«H */
+	/** ¥¢¥È¥à¼çÆ³¼Â¹ÔÍÑÌ¿ÎáÎó¡£Map¤Ë¤¹¤Ù¤­¡© */
 	private HeadInstruction[][] atomMatches;
-	/** ƒ{ƒfƒBÀs—p–½—ß—ñB‚P‚Â–Ú‚Ì“Y‚¦š‚Íƒ‹[ƒ‹”Ô† */
+	/** ¥Ü¥Ç¥£¼Â¹ÔÍÑÌ¿ÎáÎó¡££±¤ÄÌÜ¤ÎÅº¤¨»ú¤Ï¥ë¡¼¥ëÈÖ¹æ */
 	private BodyInstruction[][] body;
 	
 	public InterpretedRuleset(compile.Rule[] rules) {
@@ -20,25 +20,25 @@ public final class InterpretedRuleset extends Ruleset {
 		return "@" + id;
 	}
 	/**
-	 * ƒAƒgƒ€å“±ƒeƒXƒg‚ğs‚¢Aƒ}ƒbƒ`‚·‚ê‚Î“K—p‚·‚é
-	 * @return ƒ‹[ƒ‹‚ğ“K—p‚µ‚½ê‡‚Ítrue
+	 * ¥¢¥È¥à¼çÆ³¥Æ¥¹¥È¤ò¹Ô¤¤¡¢¥Ş¥Ã¥Á¤¹¤ì¤ĞÅ¬ÍÑ¤¹¤ë
+	 * @return ¥ë¡¼¥ë¤òÅ¬ÍÑ¤·¤¿¾ì¹ç¤Ïtrue
 	 */
 	boolean react(Membrane mem, Atom atom) {
 		return false;
 	}
 	/**
-	 * –Œå“±ƒeƒXƒg‚ğs‚¢Aƒ}ƒbƒ`‚·‚ê‚Î“K—p‚·‚é
-	 * @return ƒ‹[ƒ‹‚ğ“K—p‚µ‚½ê‡‚Ítrue
+	 * Ëì¼çÆ³¥Æ¥¹¥È¤ò¹Ô¤¤¡¢¥Ş¥Ã¥Á¤¹¤ì¤ĞÅ¬ÍÑ¤¹¤ë
+	 * @return ¥ë¡¼¥ë¤òÅ¬ÍÑ¤·¤¿¾ì¹ç¤Ïtrue
 	 */
 	boolean react(Membrane mem) {
 		return false;
 	}
 	/**
-	 * ƒ‹[ƒ‹‚ğ“K—p‚·‚éB<br>
-	 * ˆø”‚Ì–Œ‚ÆAˆø”‚ÌƒAƒgƒ€‚ÌŠ‘®–Œ‚Í‚·‚Å‚ÉƒƒbƒN‚³‚ê‚Ä‚¢‚é‚à‚Ì‚Æ‚·‚éB
-	 * @param ruleid “K—p‚·‚éƒ‹[ƒ‹
-	 * @param memArgs Àˆø”‚Ì‚¤‚¿A–Œ‚Å‚ ‚é‚à‚Ì
-	 * @param atomArgs Àˆø”‚Ì‚¤‚¿AƒAƒgƒ€‚Å‚ ‚é‚à‚Ì
+	 * ¥ë¡¼¥ë¤òÅ¬ÍÑ¤¹¤ë¡£<br>
+	 * °ú¿ô¤ÎËì¤È¡¢°ú¿ô¤Î¥¢¥È¥à¤Î½êÂ°Ëì¤Ï¤¹¤Ç¤Ë¥í¥Ã¥¯¤µ¤ì¤Æ¤¤¤ë¤â¤Î¤È¤¹¤ë¡£
+	 * @param ruleid Å¬ÍÑ¤¹¤ë¥ë¡¼¥ë
+	 * @param memArgs ¼Â°ú¿ô¤Î¤¦¤Á¡¢Ëì¤Ç¤¢¤ë¤â¤Î
+	 * @param atomArgs ¼Â°ú¿ô¤Î¤¦¤Á¡¢¥¢¥È¥à¤Ç¤¢¤ë¤â¤Î
 	 */
 	private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
 	}

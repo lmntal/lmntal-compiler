@@ -1,14 +1,14 @@
 /*
- * ì¬“ú: 2003/10/21
+ * ºîÀ®Æü: 2003/10/21
  *
  */
 package runtime;
 import java.util.*;
 
 /**
- * 1 ‚Â‚Ì–½—ß‚ğ•Û‚·‚éB
+ * 1 ¤Ä¤ÎÌ¿Îá¤òÊİ»ı¤¹¤ë¡£
  * 
- * •¡”‚Å‚à\‚í‚È‚¢‚Æ‚¨‚à‚¤B
+ * Ê£¿ô¤Ç¤â¹½¤ï¤Ê¤¤¤È¤ª¤â¤¦¡£
  * 
  * @author pa
  *
@@ -24,7 +24,7 @@ public class Instruction {
 	public List data = new ArrayList();
 	
 	public Instruction() {
-		// ‚½‚Æ‚¦‚Î [react, [1, 2, 5]]
+		// ¤¿¤È¤¨¤Ğ [react, [1, 2, 5]]
 		ArrayList sl = new ArrayList();
 		sl.add(new Integer(1));
 		sl.add(new Integer(2));

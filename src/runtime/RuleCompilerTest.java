@@ -1,5 +1,5 @@
 /*
- * ì¬“ú: 2003/10/24
+ * ºîÀ®Æü: 2003/10/24
  *
  */
 package runtime;
@@ -7,15 +7,15 @@ package runtime;
 import java.util.*;
 
 /**
- * abterms ‚ğ–½—ß—ñi‰¼‚É foo ‚ÆŒÄ‚Ôj‚É•ÏŠ·‚·‚éB
+ * abterms ¤òÌ¿ÎáÎó¡Ê²¾¤Ë foo ¤È¸Æ¤Ö¡Ë¤ËÊÑ´¹¤¹¤ë¡£
  * 
- * ‚¶‚Á‚¯‚ñ’iŠK
+ * ¤¸¤Ã¤±¤óÃÊ³¬
  * @author hara
  *
  */
 public class RuleCompilerTest {
 	/**
-	 * ƒeƒXƒg—p‚ß‚¢‚ñ
+	 * ¥Æ¥¹¥ÈÍÑ¤á¤¤¤ó
 	 * 
 	 * @param args
 	 */
@@ -34,7 +34,7 @@ public class RuleCompilerTest {
 		List ab=genTestAbterms();
 		Env.p(ab);
 		
-		// Å‰‚ÉA‰Šúó‘Ô‚Ìƒuƒc‚ğ¶¬‚·‚é‚æ‚¤‚Èƒ‹[ƒ‹‚ğ¶¬‚·‚éB
+		// ºÇ½é¤Ë¡¢½é´ü¾õÂÖ¤Î¥Ö¥Ä¤òÀ¸À®¤¹¤ë¤è¤¦¤Ê¥ë¡¼¥ë¤òÀ¸À®¤¹¤ë¡£
 		// ( :- world)
 		RuleCompiler rc = new RuleCompiler();
 		rc.loadProc(rc.r, ab);
@@ -42,7 +42,7 @@ public class RuleCompilerTest {
 		
 		Rule r = rc.compile();
 		
-		// ¶¬
+		// À¸À®
 		r.react(Env.rootMembrane);
 	}
 	static List gen(String s) {

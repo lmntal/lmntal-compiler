@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 /**
  * @author mizuno
- * 汎用ユーティリティメソッド・定数を集めたクラス
+ * ﾈﾆﾍﾑ･譯ｼ･ﾆ･｣･�･ﾆ･｣･皈ｽ･ﾃ･ﾉ｡ｦﾄ�ｿｸ､皃ｿ･ｯ･鬣ｹ
  */
 abstract public class Util {
 	public static final Iterator NULL_ITERATOR = (new ArrayList()).iterator();

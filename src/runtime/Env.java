@@ -1,11 +1,11 @@
 /*
- * ì¬“ú: 2003/10/24
+ * ºîÀ®Æü: 2003/10/24
  *
  */
 package runtime;
 
 /**
- * ŠÂ‹«BƒfƒoƒbƒO—pB
+ * ´Ä¶­¡£¥Ç¥Ğ¥Ã¥°ÍÑ¡£
  * @author hara
  */
 public final class Env {

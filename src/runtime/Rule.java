@@ -1,11 +1,11 @@
 /*
- * ì¬“ú: 2003/10/24
+ * ºîÀ®Æü: 2003/10/24
  *
  */
 package runtime;
 
 /**
- * söŒë‚¿‚ã‚¤
+ * »î¹Ôºø¸í¤Á¤å¤¦
  * @author hara
  */
 
@@ -16,8 +16,8 @@ public final class Rule {
 	public String text;
 	
 	/**
-	 * –Œå“±ƒeƒXƒg‚ğs‚¢Aƒ}ƒbƒ`‚·‚ê‚Î“K—p‚·‚é
-	 * @return ƒ‹[ƒ‹‚ğ“K—p‚µ‚½ê‡‚Ítrue
+	 * Ëì¼çÆ³¥Æ¥¹¥È¤ò¹Ô¤¤¡¢¥Ş¥Ã¥Á¤¹¤ì¤ĞÅ¬ÍÑ¤¹¤ë
+	 * @return ¥ë¡¼¥ë¤òÅ¬ÍÑ¤·¤¿¾ì¹ç¤Ïtrue
 	 */
 	public boolean react(Membrane mem) {
 		Env.c("Rule.react "+mem);

@@ -4,9 +4,9 @@ import java.util.List;
 
 import runtime.Functor;
 
-/** 僜乕僗僐乕僪拞偺傾僩儉偺峔憿傪昞偡僋儔僗 */
+/** ソ〖スコ〖ド面のアトムの菇陇を山すクラス */
 final class Atom {
-	/** 恊枌 */
+	/** 科遂 */
 	Membrane mem;
 	Functor functor;
 	LinkOccurrence[] args;
@@ -18,12 +18,12 @@ final class Atom {
 }
 
 final class Membrane {
-	/** 恊枌 */
+	/** 科遂 */
 	Membrane mem;
 	
-	//memo:慡偰1偮偺攝楍偵擖傟傞曽朄傕偁傞丅
+	//memo:链て1つの芹误に掐れる数恕もある。
 	List atoms;
-	/** 巕枌 */
+	/** 灰遂 */
 	List mems;
 	List rules;
 	List processContexts;
@@ -40,19 +40,19 @@ final class LinkOccurrence {
 	Atom atom;
 	int pos;
 	/**
-	 * 儖乕儖拞偺偳偺応強偵弌尰偟偰偄傞偐傪尰偡丅
-	 * 掕悢HEAD偐BODY偺偄偢傟偐偺抣偑擖傞丅
-	 * 儖乕儖奜偺弌尰偺応崌偼丄弶傔偵侾搙偩偗幚峴偝傟傞儖乕儖偺塃曈偲傒側偡丅
+	 * ル〖ル面のどの眷疥に叫附しているかを附す。
+	 * 年眶HEADかBODYのいずれかの猛が掐る。
+	 * ル〖ル嘲の叫附の眷圭は、介めに１刨だけ悸乖されるル〖ルの宝收とみなす。
 	 */
 	int place;
-	/** 2夞偟偐弌尰偟側偄応崌偵丄傕偆曅曽偺弌尰傪曐帩偡傞 */
+	/** 2搀しか叫附しない眷圭に、もう室数の叫附を瘦积する */
 	LinkOccurrence buddy;
 	
 	/**
-	 * 儕儞僋弌尰傪惗惉偡傞丅
+	 * リンク叫附を栏喇する。
 	 * @param place 
-	 *         掕悢HEAD偐BODY偺偄偢傟偐偺抣偑擖傞丅
-	 *         儖乕儖奜偺弌尰偺応崌偼丄弶傔偵侾搙偩偗幚峴偝傟傞儖乕儖偺塃曈偲傒側偡丅
+	 *         年眶HEADかBODYのいずれかの猛が掐る。
+	 *         ル〖ル嘲の叫附の眷圭は、介めに１刨だけ悸乖されるル〖ルの宝收とみなす。
 	 */
 	LinkOccurrence(String name, Atom atom, int pos, int place) {
 		this.name = name;
@@ -64,13 +64,13 @@ final class LinkOccurrence {
 	static final int BODY = 1;
 	
 
-	/** 偙偺弌尰偑嵟廔儕儞僋偺応崌偵true傪曉偡 */
+	/** この叫附が呵姜リンクの眷圭にtrueを手す */
 	boolean isFunctorRef() { 
 		return atom.functor.getArity() == pos;
 	}
-	/** 帺桼儕儞僋傪暵偠傞 */
+	/** 极统リンクを誓じる */
 	void terminate(Membrane mem) {
-		atom = new Atom(null, "*", 1); //todo:儖乕僩枌
+		atom = new Atom(null, "*", 1); //todo:ル〖ト遂
 		pos = 1;
 		atom.args[0] = this;
 	}
@@ -79,7 +79,7 @@ final class RuleStructure {
 	Membrane leftMem, rightMem;
 }
 
-/** ProcessContext偲RuleContext偺恊偲側傞拪徾僋儔僗 */
+/** ProcessContextとRuleContextの科となる藐据クラス */
 abstract class Context {
 	protected String name;
 	protected Context(String name) {
@@ -88,17 +88,17 @@ abstract class Context {
 	String getName() {
 		return name;
 	}
-	/** 嵍曈偱偺強懏枌 */
+	/** 焊收での疥掳遂 */
 	Membrane lhsMem;
-	/** 塃曈偱偺強懏枌偺攝楍 */
+	/** 宝收での疥掳遂の芹误 */
 	List rhsMems;
-	/** 尰嵼偺忬懺丅ST_偱巒傑傞掕悢偺偄偢傟偐偺抣傪偲傞 */
+	/** 附哼の觉轮。ST_で幌まる年眶のいずれかの猛をとる */
 	int status = ST_FRESH;
-	/** 弶婜忬懺 */
+	/** 介袋觉轮 */
 	static final int ST_FRESH = 0;
-	/** 嵍曈偵堦搙弌尰偟偨忬懺 */
+	/** 焊收に办刨叫附した觉轮 */
 	static final int ST_LHSOK = 1;
-	/** 嵍曈丒塃曈椉曽偵弌尰偟偨忬懺 */
+	/** 焊收ˇ宝收尉数に叫附した觉轮 */
 	static final int ST_READY = 2;
 	static final int ST_ERROR = 3;
 }
@@ -113,5 +113,5 @@ final class RuleContext extends Context{
 	}
 }
 
-/** 側偤偐偙傟偑柍偄偲javadoc傪嶌惉偱偒側偄 */
+/** なぜかこれが痰いとjavadocを侯喇できない */
 class DataStructure {}

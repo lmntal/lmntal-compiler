@@ -44,7 +44,7 @@ public final class Stack {
 	public QueuedEntity peek() {
 		return tail.prev;
 	}
-//	QueuedEntity.remove‚ª‚ ‚é‚Ì‚ÅŽg‚í‚È‚¢
+//	QueuedEntity.remove¤¬¤¢¤ë¤Î¤Ç»È¤ï¤Ê¤¤
 /*	public void remove(QueuedEntity entity) {
 		dentity.prev.next = entity.next;
 		entity.next.prev = entity.prev;

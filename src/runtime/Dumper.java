@@ -3,38 +3,38 @@ package runtime;
 import java.util.*;
 
 class Dumper {
-	/** –Œ‚Ì’†g‚ğo—Í‚·‚éBo—ÍŒ`®‚Ìw’è‚Í‚Ü‚¾‚Å‚«‚È‚¢B */
+	/** Ëì¤ÎÃæ¿È¤ò½ĞÎÏ¤¹¤ë¡£½ĞÎÏ·Á¼°¤Î»ØÄê¤Ï¤Ş¤À¤Ç¤­¤Ê¤¤¡£ */
 	static String dump(AbstractMembrane mem) {
 		StringBuffer buf = new StringBuffer();
 		List predAtoms = new ArrayList();
 		Set atoms = new HashSet(mem.getAtomCount());
 
-		// ƒAƒgƒ€‚Ìo—Í
+		// ¥¢¥È¥à¤Î½ĞÎÏ
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
 			Atom a = (Atom)it.next();
 			atoms.add(a);
-			//‚±‚ê‚ç‚ÌƒAƒgƒ€‚ğ‹N“_‚É‚·‚éB
-			//ÅIˆø”“¯m‚ª‚Â‚È‚ª‚Á‚Ä‚¢‚éê‡Aarity‚ª1‚Ì•¨‚ğ—Dæ‚µ‚½•û‚ª‚¢‚¢‚©‚àB
-			if (a.getArity() == 0 ||						//ƒŠƒ“ƒN‚Ì‚È‚¢ê‡
-				a.getLastArg().getAtom().getMem() != mem ||	//ÅIˆø”‚ª–Œ‚Ì©—RƒŠƒ“ƒN‚Ìê‡
-				a.getLastArg().isFuncRef() ) {				//ÅIˆø”“¯m‚ª‚Â‚È‚ª‚Á‚Ä‚¢‚éê‡
+			//¤³¤ì¤é¤Î¥¢¥È¥à¤òµ¯ÅÀ¤Ë¤¹¤ë¡£
+			//ºÇ½ª°ú¿ôÆ±»Î¤¬¤Ä¤Ê¤¬¤Ã¤Æ¤¤¤ë¾ì¹ç¡¢arity¤¬1¤ÎÊª¤òÍ¥Àè¤·¤¿Êı¤¬¤¤¤¤¤«¤â¡£
+			if (a.getArity() == 0 ||						//¥ê¥ó¥¯¤Î¤Ê¤¤¾ì¹ç
+				a.getLastArg().getAtom().getMem() != mem ||	//ºÇ½ª°ú¿ô¤¬Ëì¤Î¼«Í³¥ê¥ó¥¯¤Î¾ì¹ç
+				a.getLastArg().isFuncRef() ) {				//ºÇ½ª°ú¿ôÆ±»Î¤¬¤Ä¤Ê¤¬¤Ã¤Æ¤¤¤ë¾ì¹ç
 				predAtoms.add(a);
 			}
 		}
 
-		//predAtoms“à‚ÌƒAƒgƒ€‚ğ‹N“_‚Éo—Í
+		//predAtomsÆâ¤Î¥¢¥È¥à¤òµ¯ÅÀ¤Ë½ĞÎÏ
 		it = predAtoms.iterator();
 		while (it.hasNext()) {
 			Atom a = (Atom)it.next();
-			//‚·‚Å‚Éo—Í‚³‚ê‚Ä‚µ‚Ü‚Á‚Ä‚¢‚éê‡‚à‚ ‚é
+			//¤¹¤Ç¤Ë½ĞÎÏ¤µ¤ì¤Æ¤·¤Ş¤Ã¤Æ¤¤¤ë¾ì¹ç¤â¤¢¤ë
 			if (atoms.contains(a)) {
 				buf.append(dumpAtomGroup(a, atoms));
 				buf.append(", ");
 			}
 		}
-		//•Â˜H‚ª‚ ‚éê‡‚É‚Í‚Ü‚¾c‚Á‚Ä‚¢‚é‚Ì‚ÅA“K“–‚ÈŠ‚©‚ço—ÍB
-		//•Â˜H‚Ì•”•ª‚ğ’T‚µ‚½•û‚ª‚¢‚¢‚ªA‚Æ‚è‚ ‚¦‚¸‚±‚Ì‚Ü‚ÜB
+		//ÊÄÏ©¤¬¤¢¤ë¾ì¹ç¤Ë¤Ï¤Ş¤À»Ä¤Ã¤Æ¤¤¤ë¤Î¤Ç¡¢Å¬Åö¤Ê½ê¤«¤é½ĞÎÏ¡£
+		//ÊÄÏ©¤ÎÉôÊ¬¤òÃµ¤·¤¿Êı¤¬¤¤¤¤¤¬¡¢¤È¤ê¤¢¤¨¤º¤³¤Î¤Ş¤Ş¡£
 		while (true) {
 			it = atoms.iterator();
 			if (!it.hasNext()) {
@@ -44,7 +44,7 @@ class Dumper {
 			buf.append(", ");
 		}
 
-		//q–Œ‚Ìo—Í		
+		//»ÒËì¤Î½ĞÎÏ		
 		it = mem.memIterator();
 		while (it.hasNext()) {
 			buf.append("{");
@@ -52,7 +52,7 @@ class Dumper {
 			buf.append("}, ");
 		}
 		
-		//ƒ‹[ƒ‹‚Ìo—Í
+		//¥ë¡¼¥ë¤Î½ĞÎÏ
 		it = mem.rulesetIterator();
 		while (it.hasNext()) {
 			buf.append((Ruleset)it.next());
@@ -85,7 +85,7 @@ class Dumper {
 		if (arity > 1) {
 			buf.append("(");
 			buf.append(dumpLink(a.args[0], atoms));
-			//ÅIˆø”ˆÈŠO‚ğo—Í
+			//ºÇ½ª°ú¿ô°Ê³°¤ò½ĞÎÏ
 			for (int i = 1; i < arity - 1; i++) {
 				buf.append(",");
 				buf.append(dumpLink(a.args[i], atoms));

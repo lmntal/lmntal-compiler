@@ -11,29 +11,29 @@ import util.Stack;
 import util.Util;
 
 /**
- * ƒAƒgƒ€ƒNƒ‰ƒXBƒ[ƒJƒ‹EƒŠƒ‚[ƒg‚ÉŠÖ‚í‚ç‚¸‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğg—p‚·‚éB
+ * ¥¢¥È¥à¥¯¥é¥¹¡£¥í¡¼¥«¥ë¡¦¥ê¥â¡¼¥È¤Ë´Ø¤ï¤é¤º¤³¤Î¥¯¥é¥¹¤Î¥¤¥ó¥¹¥¿¥ó¥¹¤ò»ÈÍÑ¤¹¤ë¡£
  * @author Mizuno
  */
 class Atom extends QueuedEntity {
-	/** e–ŒBMembraneƒNƒ‰ƒX‚ÌaddAtomƒƒ\ƒbƒh“à‚ÅXV‚·‚éB */
+	/** ¿ÆËì¡£Membrane¥¯¥é¥¹¤ÎaddAtom¥á¥½¥Ã¥ÉÆâ¤Ç¹¹¿·¤¹¤ë¡£ */
 	private AbstractMembrane mem;
-	/** –¼‘O */
+	/** Ì¾Á° */
 	private Functor functor;
-	/** ƒŠƒ“ƒN */
+	/** ¥ê¥ó¥¯ */
 	Link[] args;
 	
 	private static int lastId = 0;
 	private int id;
 	
 	///////////////////////////////
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ¥³¥ó¥¹¥È¥é¥¯¥¿
 
 	/**
-	 * w’è‚³‚ê‚½–¼‘O‚ÆƒŠƒ“ƒN”‚ğ‚ÂƒAƒgƒ€‚ğì¬‚·‚éB
-	 * AbstractMembrane‚ÌnewAtomƒƒ\ƒbƒh“à‚ÅŒÄ‚Î‚ê‚éB
-	 * @param mem e–Œ
-	 * @param name ƒAƒgƒ€‚Ì–¼‘O
-	 * @param arity ƒŠƒ“ƒN”
+	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¤È¥ê¥ó¥¯¿ô¤ò»ı¤Ä¥¢¥È¥à¤òºîÀ®¤¹¤ë¡£
+	 * AbstractMembrane¤ÎnewAtom¥á¥½¥Ã¥ÉÆâ¤Ç¸Æ¤Ğ¤ì¤ë¡£
+	 * @param mem ¿ÆËì
+	 * @param name ¥¢¥È¥à¤ÎÌ¾Á°
+	 * @param arity ¥ê¥ó¥¯¿ô
 	 */
 	Atom(AbstractMembrane mem, String name, int arity) {
 		this.mem = mem;
@@ -43,26 +43,26 @@ class Atom extends QueuedEntity {
 	}
 
 	///////////////////////////////
-	// î•ñ‚Ìæ“¾
+	// ¾ğÊó¤Î¼èÆÀ
 
 	public String toString() {
 		return functor.getName();
 	}
 	/**
-	 * ƒfƒtƒHƒ‹ƒg‚ÌÀ‘•‚¾‚Æˆ—Œn‚Ì“à•”ó‘Ô‚ª•Ï‚í‚é‚Æ•Ï‚í‚Á‚Ä‚µ‚Ü‚¤‚Ì‚ÅA
-	 * ƒCƒ“ƒXƒ^ƒ“ƒX‚²‚Æ‚Éƒ†ƒj[ƒN‚Èid‚ğ—pˆÓ‚µ‚ÄƒnƒbƒVƒ…ƒR[ƒh‚Æ‚µ‚Ä—˜—p‚·‚éB
+	 * ¥Ç¥Õ¥©¥ë¥È¤Î¼ÂÁõ¤À¤È½èÍı·Ï¤ÎÆâÉô¾õÂÖ¤¬ÊÑ¤ï¤ë¤ÈÊÑ¤ï¤Ã¤Æ¤·¤Ş¤¦¤Î¤Ç¡¢
+	 * ¥¤¥ó¥¹¥¿¥ó¥¹¤´¤È¤Ë¥æ¥Ë¡¼¥¯¤Êid¤òÍÑ°Õ¤·¤Æ¥Ï¥Ã¥·¥å¥³¡¼¥É¤È¤·¤ÆÍøÍÑ¤¹¤ë¡£
 	 */
 	public int hashCode() {
 		return id;
 	}
-	/** –¼‘O‚Ìæ“¾ */
+	/** Ì¾Á°¤Î¼èÆÀ */
 	Functor getFunctor(){
 		return functor;
 	}
 	String getName() {
 		return functor.getName();
 	}
-	/** ƒŠƒ“ƒN”‚ğæ“¾ */
+	/** ¥ê¥ó¥¯¿ô¤ò¼èÆÀ */
 	int getArity() {
 		return functor.getArity();
 	}
@@ -75,34 +75,34 @@ class Atom extends QueuedEntity {
 }
 
 /**
- * ƒ[ƒJƒ‹–ŒƒNƒ‰ƒXBÀs‚ÌA©ŒvZƒm[ƒh“à‚É‚ ‚é–Œ‚ğ•\‚·B
+ * ¥í¡¼¥«¥ëËì¥¯¥é¥¹¡£¼Â¹Ô»ş¤Î¡¢¼«·×»»¥Î¡¼¥ÉÆâ¤Ë¤¢¤ëËì¤òÉ½¤¹¡£
  * @author Mizuno
  */
 final class Membrane extends AbstractMembrane {
-	/** ÀsƒXƒ^ƒbƒN */
+	/** ¼Â¹Ô¥¹¥¿¥Ã¥¯ */
 	private Stack ready = new Stack();
 	/**
-	 * w’è‚³‚ê‚½ƒ}ƒVƒ“‚ÉŠ‘®‚·‚é–Œ‚ğì¬‚·‚éB
-	 * newMemƒƒ\ƒbƒh“à‚ÅŒÄ‚Î‚ê‚éB
+	 * »ØÄê¤µ¤ì¤¿¥Ş¥·¥ó¤Ë½êÂ°¤¹¤ëËì¤òºîÀ®¤¹¤ë¡£
+	 * newMem¥á¥½¥Ã¥ÉÆâ¤Ç¸Æ¤Ğ¤ì¤ë¡£
 	 */
 	private Membrane(AbstractMachine machine, AbstractMembrane mem) {
 		super(machine, mem);
 	}
 	/**
-	 * w’è‚³‚ê‚½ƒ}ƒVƒ“‚Ìƒ‹[ƒg–Œ‚ğì¬‚·‚éB
+	 * »ØÄê¤µ¤ì¤¿¥Ş¥·¥ó¤Î¥ë¡¼¥ÈËì¤òºîÀ®¤¹¤ë¡£
 	 */
 	Membrane(Machine machine) {
 		super(machine, null);
 	}
 
 	///////////////////////////////
-	// ‘€ì
+	// Áàºî
 
-	/** ÀsƒXƒ^ƒbƒN‚Ìæ“ª‚ÌƒAƒgƒ€‚ğæ“¾‚µAÀsƒXƒ^ƒbƒN‚©‚çœ‹ */
+	/** ¼Â¹Ô¥¹¥¿¥Ã¥¯¤ÎÀèÆ¬¤Î¥¢¥È¥à¤ò¼èÆÀ¤·¡¢¼Â¹Ô¥¹¥¿¥Ã¥¯¤«¤é½üµî */
 	Atom popReadyAtom() {
 		return (Atom)ready.pop();
 	}
-	/** –Œ‚ÌŠˆ«‰» */
+	/** Ëì¤Î³èÀ­²½ */
 	void activate() {
 		if (this.isQueued()) {
 			return;
@@ -116,14 +116,14 @@ final class Membrane extends AbstractMembrane {
 		ready.push(atom);
 	}
 	/** 
-	 * ˆÚ“®‚³‚ê‚½ŒãAƒAƒNƒeƒBƒuƒAƒgƒ€‚ğÀsƒXƒ^ƒbƒN‚É“ü‚ê‚é‚½‚ß‚ÉŒÄ‚Ño‚³‚ê‚éB
+	 * °ÜÆ°¤µ¤ì¤¿¸å¡¢¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤ò¼Â¹Ô¥¹¥¿¥Ã¥¯¤ËÆş¤ì¤ë¤¿¤á¤Ë¸Æ¤Ó½Ğ¤µ¤ì¤ë¡£
 	 */
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
 	protected void enqueueAllAtoms() {
 		Iterator i = atoms.functorIterator();
 		while (i.hasNext()) {
 			Functor f = (Functor)i.next();
-			if (true) { // f ‚ªƒAƒNƒeƒBƒu‚Ìê‡
+			if (true) { // f ¤¬¥¢¥¯¥Æ¥£¥Ö¤Î¾ì¹ç
 				Iterator i2 = atoms.iteratorOfFunctor(f);
 				while (i2.hasNext()) {
 					ready.push((Atom)i2.next());
@@ -132,7 +132,7 @@ final class Membrane extends AbstractMembrane {
 		}
 	}
 	/**
-	 * q–Œ‚ğ¶¬‚·‚éB
+	 * »ÒËì¤òÀ¸À®¤¹¤ë¡£
 	 */
 	AbstractMembrane newMem() {
 		Membrane m = new Membrane(machine, this);
@@ -141,39 +141,39 @@ final class Membrane extends AbstractMembrane {
 	}
 }
 /**
- * ’ŠÛ–ŒƒNƒ‰ƒXBƒ[ƒJƒ‹–ŒƒNƒ‰ƒX‚Æ–ŒƒLƒƒƒbƒVƒ…i–¢À‘•j‚ÌeƒNƒ‰ƒX
+ * Ãê¾İËì¥¯¥é¥¹¡£¥í¡¼¥«¥ëËì¥¯¥é¥¹¤ÈËì¥­¥ã¥Ã¥·¥å¡ÊÌ¤¼ÂÁõ¡Ë¤Î¿Æ¥¯¥é¥¹
  * @author Mizuno
  */
 abstract class AbstractMembrane extends QueuedEntity {
-	/** ‚±‚Ì–Œ‚ğŠÇ—‚·‚éƒ}ƒVƒ“ */
+	/** ¤³¤ÎËì¤ò´ÉÍı¤¹¤ë¥Ş¥·¥ó */
 	protected AbstractMachine machine;
-	/** e–Œ */
+	/** ¿ÆËì */
 	protected AbstractMembrane mem;
-	/** ƒAƒgƒ€‚ÌW‡ */
+	/** ¥¢¥È¥à¤Î½¸¹ç */
 	protected AtomSet atoms = new AtomSet();;
-	/** q–Œ‚ÌW‡ */
+	/** »ÒËì¤Î½¸¹ç */
 	protected Set mems = new HashSet();
-	/** ‚±‚Ì–Œ‚É‚ ‚éproxyˆÈŠO‚ÌƒAƒgƒ€‚Ì”B */
+	/** ¤³¤ÎËì¤Ë¤¢¤ëproxy°Ê³°¤Î¥¢¥È¥à¤Î¿ô¡£ */
 	protected int atomCount = 0;
-	/** ‚±‚ÌƒZƒ‹‚Ì©—RƒŠƒ“ƒN‚Ì” */
+	/** ¤³¤Î¥»¥ë¤Î¼«Í³¥ê¥ó¥¯¤Î¿ô */
 	protected int freeLinkCount = 0;
-	/** ƒ‹[ƒ‹ƒZƒbƒg‚ÌW‡B */
+	/** ¥ë¡¼¥ë¥»¥Ã¥È¤Î½¸¹ç¡£ */
 	protected List rulesets = new ArrayList();
-	/** ‚±‚Ì–ŒˆÈ‰º‚É“K—p‚Å‚«‚éƒ‹[ƒ‹‚ª–³‚¢‚Æ‚«‚Étrue */
+	/** true¤Ê¤é¤Ğ¤³¤ÎËì°Ê²¼¤ËÅ¬ÍÑ¤Ç¤­¤ë¥ë¡¼¥ë¤¬Ìµ¤¤ */
 	protected boolean stable = false;
-	/** ƒƒbƒN‚³‚ê‚Ä‚¢‚é‚Étrue */
+	/** ¥í¥Ã¥¯¤µ¤ì¤Æ¤¤¤ë»ş¤Ëtrue */
 	protected boolean locked = false;
-//	/** ÅŒã‚ÉƒƒbƒN‚µ‚½ŒvZƒm[ƒh */
+//	/** ºÇ¸å¤Ë¥í¥Ã¥¯¤·¤¿·×»»¥Î¡¼¥É */
 //	protected CalcNode lastLockNode;
 
 	private static int lastId = 0;
 	private int id;
 	
 	///////////////////////////////
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ¥³¥ó¥¹¥È¥é¥¯¥¿
 
 	/**
-	 * w’è‚³‚ê‚½ƒ}ƒVƒ“‚ÉŠ‘®‚·‚é–Œ‚ğì¬‚·‚éB
+	 * »ØÄê¤µ¤ì¤¿¥Ş¥·¥ó¤Ë½êÂ°¤¹¤ëËì¤òºîÀ®¤¹¤ë¡£
 	 */
 	protected AbstractMembrane(AbstractMachine machine, AbstractMembrane mem) {
 		this.machine = machine;
@@ -182,81 +182,81 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 
 	///////////////////////////////
-	// î•ñ‚Ìæ“¾
+	// ¾ğÊó¤Î¼èÆÀ
 
 	/**
-	 * ƒfƒtƒHƒ‹ƒg‚ÌÀ‘•‚¾‚Æˆ—Œn‚Ì“à•”ó‘Ô‚ª•Ï‚í‚é‚Æ•Ï‚í‚Á‚Ä‚µ‚Ü‚¤‚Ì‚ÅA
-	 * ƒCƒ“ƒXƒ^ƒ“ƒX‚²‚Æ‚Éƒ†ƒj[ƒN‚Èid‚ğ—pˆÓ‚µ‚ÄƒnƒbƒVƒ…ƒR[ƒh‚Æ‚µ‚Ä—˜—p‚·‚éB
+	 * ¥Ç¥Õ¥©¥ë¥È¤Î¼ÂÁõ¤À¤È½èÍı·Ï¤ÎÆâÉô¾õÂÖ¤¬ÊÑ¤ï¤ë¤ÈÊÑ¤ï¤Ã¤Æ¤·¤Ş¤¦¤Î¤Ç¡¢
+	 * ¥¤¥ó¥¹¥¿¥ó¥¹¤´¤È¤Ë¥æ¥Ë¡¼¥¯¤Êid¤òÍÑ°Õ¤·¤Æ¥Ï¥Ã¥·¥å¥³¡¼¥É¤È¤·¤ÆÍøÍÑ¤¹¤ë¡£
 	 */
 	public int hashCode() {
 		return id;
 	}
 
-	/** ‚±‚Ì–Œ‚ğŠÇ—‚·‚éƒ}ƒVƒ“‚Ìæ“¾ */
+	/** ¤³¤ÎËì¤ò´ÉÍı¤¹¤ë¥Ş¥·¥ó¤Î¼èÆÀ */
 	AbstractMachine getMachine() {
 		return machine;
 	}
-	/** e–Œ‚Ìæ“¾ */
+	/** ¿ÆËì¤Î¼èÆÀ */
 	AbstractMembrane getMem() {
 		return mem;
 	}
 	int getMemCount() {
 		return mems.size();
 	}
-	/** proxyˆÈŠO‚ÌƒAƒgƒ€‚Ì”‚ğæ“¾ */
+	/** proxy°Ê³°¤Î¥¢¥È¥à¤Î¿ô¤ò¼èÆÀ */
 	int getAtomCount() {
 		return atomCount;
 	}
-	/** ‚±‚ÌƒZƒ‹‚Ì©—RƒŠƒ“ƒN‚Ì”‚ğæ“¾ */
+	/** ¤³¤Î¥»¥ë¤Î¼«Í³¥ê¥ó¥¯¤Î¿ô¤ò¼èÆÀ */
 	int getFreeLinkCount() {
 		return freeLinkCount;
 	}
-	/** ‚±‚Ì–Œ‚Æ‚»‚Ìq‘·‚É“K—p‚Å‚«‚éƒ‹[ƒ‹‚ª‚È‚¢ê‡‚Étrue */
+	/** ¤³¤ÎËì¤È¤½¤Î»ÒÂ¹¤ËÅ¬ÍÑ¤Ç¤­¤ë¥ë¡¼¥ë¤¬¤Ê¤¤¾ì¹ç¤Ëtrue */
 	boolean isStable() {
 		return stable;
 	}
-	/** ‚±‚Ì–Œ‚Éƒ‹[ƒ‹‚ª‚ ‚ê‚Îtrue */
+	/** ¤³¤ÎËì¤Ë¥ë¡¼¥ë¤¬¤¢¤ì¤Ğtrue */
 	boolean hasRule() {
 		return rulesets.size() > 0;
 	}
 	boolean isRoot() {
 		return machine.getRoot() == this;
 	}
-	/** ‚±‚Ì–Œ‚É‚ ‚éƒAƒgƒ€‚Ì”½•œq‚ğæ“¾‚·‚é */
+	/** ¤³¤ÎËì¤Ë¤¢¤ë¥¢¥È¥à¤ÎÈ¿Éü»Ò¤ò¼èÆÀ¤¹¤ë */
 	Iterator atomIterator() {
 		return atoms.iterator();
 	}
-	/** ‚±‚Ì–Œ‚É‚ ‚éq–Œ‚Ì”½•œq‚ğæ“¾‚·‚é */
+	/** ¤³¤ÎËì¤Ë¤¢¤ë»ÒËì¤ÎÈ¿Éü»Ò¤ò¼èÆÀ¤¹¤ë */
 	Iterator memIterator() {
 		return mems.iterator();
 	}
-	/** –¼‘Ofunc‚ğ‚ÂƒAƒgƒ€‚Ì”½•œq‚ğæ“¾‚·‚é */
-	Iterator atomIteratorOfFuncor(Functor functor) {
+	/** Ì¾Á°func¤ò»ı¤Ä¥¢¥È¥à¤ÎÈ¿Éü»Ò¤ò¼èÆÀ¤¹¤ë */
+	Iterator atomIteratorOfFunctor(Functor functor) {
 		return atoms.iteratorOfFunctor(functor);
 	}
-	/** ‚±‚Ì–Œ‚É‚ ‚éƒ‹[ƒ‹ƒZƒbƒg‚Ì”½•œq‚ğ•Ô‚· */
+	/** ¤³¤ÎËì¤Ë¤¢¤ë¥ë¡¼¥ë¥»¥Ã¥È¤ÎÈ¿Éü»Ò¤òÊÖ¤¹ */
 	Iterator rulesetIterator() {
 		return rulesets.iterator();
 	}
 
 
 	///////////////////////////////
-	// ‘€ì
+	// Áàºî
 
-	/** ƒ‹[ƒ‹‚ğ‘S‚ÄƒNƒŠƒA‚·‚é */
+	/** ¥ë¡¼¥ë¤òÁ´¤Æ¥¯¥ê¥¢¤¹¤ë */
 	void clearRules() {
 		rulesets.clear();
 	}
 
-	/** srcMem‚É‚ ‚éƒ‹[ƒ‹‚ğ‚±‚Ì–Œ‚ÉƒRƒs[‚·‚éB */
+	/** srcMem¤Ë¤¢¤ë¥ë¡¼¥ë¤ò¤³¤ÎËì¤Ë¥³¥Ô¡¼¤¹¤ë¡£ */
 	void inheritRules(AbstractMembrane srcMem) {
 		rulesets.addAll(srcMem.rulesets);
 	}
-	/** ƒ‹[ƒ‹ƒZƒbƒg‚ğ’Ç‰Á */
+	/** ¥ë¡¼¥ë¥»¥Ã¥È¤òÄÉ²Ã */
 	void loadRuleset(Ruleset srcRuleset) {
 		rulesets.add(srcRuleset);
 	}
-	/** ƒAƒgƒ€‚Ì’Ç‰Á */
+	/** ¥¢¥È¥à¤ÎÄÉ²Ã */
 	Atom newAtom(String name, int arity) {
 		Atom a = new Atom(this, name, arity);
 		atoms.add(a);
@@ -264,22 +264,22 @@ abstract class AbstractMembrane extends QueuedEntity {
 		atomCount++;
 		return a;
 	}
-	/** w’è‚³‚ê‚½ƒAƒgƒ€‚ğÀsƒXƒ^ƒbƒN‚ÉÏ‚Ş */
+	/** »ØÄê¤µ¤ì¤¿¥¢¥È¥à¤ò¼Â¹Ô¥¹¥¿¥Ã¥¯¤ËÀÑ¤à */
 	abstract protected void enqueueAtom(Atom atom);
-//	/** –Œ‚Ì’Ç‰Á */
+//	/** Ëì¤ÎÄÉ²Ã */
 	abstract AbstractMembrane newMem();
 
-//	”p~BnewAtom/newMem‚ğg—p‚·‚éB
-// 	/** ƒAƒgƒ€‚Ì’Ç‰ÁBƒAƒNƒeƒBƒuƒAƒgƒ€‚Ìê‡‚É‚ÍÀsƒXƒ^ƒbƒN‚É’Ç‰Á‚·‚éB */
+//	ÇÑ»ß¡£newAtom/newMem¤ò»ÈÍÑ¤¹¤ë¡£
+// 	/** ¥¢¥È¥à¤ÎÄÉ²Ã¡£¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î¾ì¹ç¤Ë¤Ï¼Â¹Ô¥¹¥¿¥Ã¥¯¤ËÄÉ²Ã¤¹¤ë¡£ */
 //	void addAtom(Atom atom) {
 //		atoms.add(atom);
 //		activateAtom(atom);
 //	}
-	/** –Œ‚Ì’Ç‰Á */
+	/** Ëì¤ÎÄÉ²Ã */
 	protected void addMem(AbstractMembrane mem) {
 		mems.add(mem);
 	}
-	/** dstMem‚ÉˆÚ“® */
+	/** dstMem¤Ë°ÜÆ° */
 	void moveTo(AbstractMembrane dstMem) {
 		mem.removeMem(this);
 		dstMem.addMem(this);
@@ -287,18 +287,17 @@ abstract class AbstractMembrane extends QueuedEntity {
 //		movedTo(machine, dstMem);
 		enqueueAllAtoms();
 	}
-	/** ˆÚ“®‚³‚ê‚½ŒãAƒAƒNƒeƒBƒuƒAƒgƒ€‚ğÀsƒXƒ^ƒbƒN‚É“ü‚ê‚é‚½‚ß‚ÉŒÄ‚Ño‚³‚ê‚é */
+	/** °ÜÆ°¤µ¤ì¤¿¸å¡¢¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤ò¼Â¹Ô¥¹¥¿¥Ã¥¯¤ËÆş¤ì¤ë¤¿¤á¤Ë¸Æ¤Ó½Ğ¤µ¤ì¤ë */
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
 	abstract protected void enqueueAllAtoms();
 	
-	/** srcMem‚Ì“à—e‚ğ‘S‚ÄˆÚ“®‚·‚é */
+	/** srcMem¤ÎÆâÍÆ¤òÁ´¤Æ°ÜÆ°¤¹¤ë */
 	void pour(AbstractMembrane srcMem) {
 		atoms.addAll(srcMem.atoms);
 		mems.addAll(srcMem.mems);
-		//ƒ‹[ƒ‹‚ÌˆÚ“®H
 	}
 	
-	/** w’è‚³‚ê‚½ƒAƒgƒ€‚ğ‚±‚Ì–Œ‚©‚çœ‹‚·‚éB */
+	/** »ØÄê¤µ¤ì¤¿¥¢¥È¥à¤ò¤³¤ÎËì¤«¤é½üµî¤¹¤ë¡£ */
 	void removeAtom(Atom atom) {
 		atoms.remove(atom);
 		atomCount--;
@@ -306,41 +305,41 @@ abstract class AbstractMembrane extends QueuedEntity {
 			Util.systemError("Membrane.atomCount is pisitive value");
 		}
 	}
-	/** w’è‚³‚ê‚½–Œ‚ğ‚±‚Ì–Œ‚©‚çœ‹‚·‚é */
+	/** »ØÄê¤µ¤ì¤¿Ëì¤ò¤³¤ÎËì¤«¤é½üµî¤¹¤ë */
 	void removeMem(AbstractMembrane mem) {
 		mems.remove(mem);
 	}
 	
 	/**
-	 * ‚±‚Ì–Œ‚ğƒƒbƒN‚·‚é
-	 * @param mem ƒ‹[ƒ‹‚Ì‚ ‚é–Œ
-	 * @return ƒƒbƒN‚É¬Œ÷‚µ‚½ê‡‚Ítrue
+	 * ¤³¤ÎËì¤ò¥í¥Ã¥¯¤¹¤ë
+	 * @param mem ¥ë¡¼¥ë¤Î¤¢¤ëËì
+	 * @return ¥í¥Ã¥¯¤ËÀ®¸ù¤·¤¿¾ì¹ç¤Ïtrue
 	 */
 	boolean lock(AbstractMembrane mem) {
 		if (locked) {
-			//todo:ƒLƒ…[‚É‹L˜^
+			//todo:¥­¥å¡¼¤Ëµ­Ï¿
 			return false;
 		} else {
-			//todo:ŒvZƒm[ƒh‚Ì‹L˜^AƒLƒƒƒbƒVƒ…‚ÌXV
+			//todo:·×»»¥Î¡¼¥É¤Îµ­Ï¿¡¢¥­¥ã¥Ã¥·¥å¤Î¹¹¿·
 			locked = true;
 			return true;
 		}
 	}
 	/**
-	 * ‚±‚Ì–Œ‚Æ‚»‚Ìq‘·‚ğÄ‹A“I‚ÉƒƒbƒN‚·‚é
-	 * @param mem ƒ‹[ƒ‹‚Ì‚ ‚é–Œ
-	 * @return ƒƒbƒN‚É¬Œ÷‚µ‚½ê‡‚Ítrue
+	 * ¤³¤ÎËì¤È¤½¤Î»ÒÂ¹¤òºÆµ¢Åª¤Ë¥í¥Ã¥¯¤¹¤ë
+	 * @param mem ¥ë¡¼¥ë¤Î¤¢¤ëËì
+	 * @return ¥í¥Ã¥¯¤ËÀ®¸ù¤·¤¿¾ì¹ç¤Ïtrue
 	 */
 	boolean recursiveLock(AbstractMembrane mem) {
 		return false;
 	}
 	
-//	/** ‚±‚Ì–Œ‚Ì•¡»‚ğ¶¬‚·‚é */
+//	/** ¤³¤ÎËì¤ÎÊ£À½¤òÀ¸À®¤¹¤ë */
 //	Membrane copy() {
 //		
 //	}
 	
-	/** ƒƒbƒN‚ğ‰ğœ‚·‚é */
+	/** ¥í¥Ã¥¯¤ò²ò½ü¤¹¤ë */
 	void unlock() {
 		
 	}
@@ -348,25 +347,31 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 	
 	///////////////////////
-	// ƒŠƒ“ƒN‚Ì‘€ì
+	// ¥ê¥ó¥¯¤ÎÁàºî
 	/**
-	 * atom1‚Ì‘æpos1ˆø”‚ÆAatom2‚Ì‘æ2ˆø”‚ğÚ‘±‚·‚éB
+	 * atom1¤ÎÂèpos1°ú¿ô¤È¡¢atom2¤ÎÂèpos2°ú¿ô¤òÀÜÂ³¤¹¤ë¡£
+	 * ÀÜÂ³¤¹¤ë¥¢¥È¥à¤Ï¡¢
+	 * <ol><li>¤³¤ÎËì¤Î¥¢¥È¥àÆ±»Î
+	 *     <li>¤³¤ÎËì¤Îproxy_out¤È¿ÆËì¤Îproxy_in
+	 *     <li>¤³¤ÎËì¤Îproxy_in¤È»ÒËì¤Îproxy_out
+	 * </ol>
+	 * ¤Î3ÄÌ¤ê¤Î¾ì¹ç¤¬¤¢¤ë¡£
 	 */
 	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = new Link(atom2, pos2);
 		atom2.args[pos2] = new Link(atom1, pos1);
 	}
 	/**
-	 * atom1‚Ì‘æpos1ˆø”‚ÆAatom2‚Ì‘æ2ˆø”‚ÌƒŠƒ“ƒNæ‚ğÚ‘±‚·‚éB
+	 * atom1¤ÎÂèpos1°ú¿ô¤È¡¢atom2¤ÎÂèpos2°ú¿ô¤Î¥ê¥ó¥¯Àè¤òÀÜÂ³¤¹¤ë¡£
 	 */
-	void relinkAtomArg(Atom atom1, int pos1, Atom atom2, int pos2) {
+	void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].set(atom2.args[pos2]);
 		atom2.args[pos2].set(atom1, pos1);
 	}
 	/**
-	 * atom1‚Ì‘æpos1ˆø”‚ÌƒŠƒ“ƒNæ‚ÆAatom2‚Ì‘æ2ˆø”‚ÌƒŠƒ“ƒNæ‚ğÚ‘±‚·‚éB
+	 * atom1¤ÎÂèpos1°ú¿ô¤Î¥ê¥ó¥¯Àè¤È¡¢atom2¤ÎÂèpos2°ú¿ô¤Î¥ê¥ó¥¯Àè¤òÀÜÂ³¤¹¤ë¡£
 	 */
-	void unifyLink(Atom atom1, int pos1, Atom atom2, int pos2) {
+	void unifyAtoyArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].set(atom2.args[pos2]);
 		atom2.args[pos2].set(atom1.args[pos1]);
 	}
@@ -374,19 +379,19 @@ abstract class AbstractMembrane extends QueuedEntity {
 
 
 /**
- * ƒŠƒ“ƒN‚ÌÚ‘±æ‚ğAƒAƒgƒ€‚Æˆø””Ô†‚Ì‘g‚Æ‚µ‚Ä•\‚·BLMNtal‚ÌƒŠƒ“ƒN‚É‚Í•ûŒü‚ª–³‚¢‚Ì‚ÅA
- * ‚P‚Â‚ÌƒŠƒ“ƒN‚É‘Î‚µ‚Ä‚±‚ÌƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğ‚Q‚Âg—p‚·‚éB
+ * ¥ê¥ó¥¯¤ÎÀÜÂ³Àè¤ò¡¢¥¢¥È¥à¤È°ú¿ôÈÖ¹æ¤ÎÁÈ¤È¤·¤ÆÉ½¤¹¡£LMNtal¤Î¥ê¥ó¥¯¤Ë¤ÏÊı¸ş¤¬Ìµ¤¤¤Î¤Ç¡¢
+ * £±¤Ä¤Î¥ê¥ó¥¯¤ËÂĞ¤·¤Æ¤³¤Î¥¯¥é¥¹¤Î¥¤¥ó¥¹¥¿¥ó¥¹¤ò£²¤Ä»ÈÍÑ¤¹¤ë¡£
  */
 final class Link {
-	/** ƒŠƒ“ƒNæ‚ÌƒAƒgƒ€ */
+	/** ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à */
 	private Atom atom;
-	/** ƒŠƒ“ƒNæ‚ª‘æ‰½ˆø”‚© */
+	/** ¥ê¥ó¥¯Àè¤¬Âè²¿°ú¿ô¤« */
 	private int pos;
 
 	private static int lastId = 0;
 	private int id;
 	///////////////////////////////
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ¥³¥ó¥¹¥È¥é¥¯¥¿
 	
 	Link(Atom atom, int pos) {
 		set(atom, pos);
@@ -394,9 +399,9 @@ final class Link {
 	}
 
 	///////////////////////////////
-	// î•ñ‚Ìæ“¾
+	// ¾ğÊó¤Î¼èÆÀ
 
-	/** ‘Î‚É‚È‚é‚Q‚Â‚ÌƒŠƒ“ƒN‚Ìid‚Ì‚¤‚¿Aá‚¢•û‚ğƒŠƒ“ƒN‚Ì”Ô†‚Æ‚µ‚Äg—p‚·‚éB */
+	/** ÂĞ¤Ë¤Ê¤ë£²¤Ä¤Î¥ê¥ó¥¯¤Îid¤Î¤¦¤Á¡¢¼ã¤¤Êı¤ò¥ê¥ó¥¯¤ÎÈÖ¹æ¤È¤·¤Æ»ÈÍÑ¤¹¤ë¡£ */
 	public String toString() {
 		int i;
 		if (this.id < atom.args[pos].id) {
@@ -407,36 +412,36 @@ final class Link {
 		return "_" + i;
 	}
 				
-	/** ƒŠƒ“ƒNæ‚ÌƒAƒgƒ€‚ğæ“¾‚·‚é */
+	/** ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ò¼èÆÀ¤¹¤ë */
 	Atom getAtom() {
 		return atom;
 	}
-	/** ƒŠƒ“ƒNæ‚Ìˆø””Ô†‚ğæ“¾‚·‚é */
+	/** ¥ê¥ó¥¯Àè¤Î°ú¿ôÈÖ¹æ¤ò¼èÆÀ¤¹¤ë */
 	int getPos() {
 		return pos;
 	}
-	/** ‚±‚ÌƒŠƒ“ƒN‚Æ‘Î‚ğ‚È‚·‹tŒü‚«‚ÌƒŠƒ“ƒN‚ğæ“¾‚·‚é */
+	/** ¤³¤Î¥ê¥ó¥¯¤ÈÂĞ¤ò¤Ê¤¹µÕ¸ş¤­¤Î¥ê¥ó¥¯¤ò¼èÆÀ¤¹¤ë */
 	Link getBuddy() {
 		return atom.args[pos];
 	}
-	/** ƒŠƒ“ƒNæ‚ªÅIƒŠƒ“ƒN‚Ìê‡‚Étrue‚ğ•Ô‚· */
+	/** ¥ê¥ó¥¯Àè¤¬ºÇ½ª¥ê¥ó¥¯¤Î¾ì¹ç¤Ëtrue¤òÊÖ¤¹ */
 	boolean isFuncRef() {
 		return atom.getArity() - 1 == pos;
 	}
 
 	///////////////////////////////
-	// ‘€ì
+	// Áàºî
 	/**
-	 * Ú‘±æ‚ğİ’è‚·‚éB
-	 * –ŒƒNƒ‰ƒX‚ÌƒŠƒ“ƒN‘€ì—pƒƒ\ƒbƒh“à‚Å‚Ì‚İŒÄ‚Ño‚³‚ê‚éB
+	 * ÀÜÂ³Àè¤òÀßÄê¤¹¤ë¡£
+	 * Ëì¥¯¥é¥¹¤Î¥ê¥ó¥¯ÁàºîÍÑ¥á¥½¥Ã¥ÉÆâ¤Ç¤Î¤ß¸Æ¤Ó½Ğ¤µ¤ì¤ë¡£
 	 */
 	void set(Atom atom, int pos) {
 		this.atom = atom;
 		this.pos = pos;
 	}
 	/**
-	 * ‚±‚ÌƒŠƒ“ƒN‚ÌÚ‘±æ‚ğA—^‚¦‚ç‚ê‚½ƒŠƒ“ƒN‚ÌÚ‘±æ‚Æ“¯‚¶‚É‚·‚éB
-	 * –ŒƒNƒ‰ƒX‚ÌƒŠƒ“ƒN‘€ì—pƒƒ\ƒbƒh“à‚Å‚Ì‚İŒÄ‚Ño‚³‚ê‚éB
+	 * ¤³¤Î¥ê¥ó¥¯¤ÎÀÜÂ³Àè¤ò¡¢Í¿¤¨¤é¤ì¤¿¥ê¥ó¥¯¤ÎÀÜÂ³Àè¤ÈÆ±¤¸¤Ë¤¹¤ë¡£
+	 * Ëì¥¯¥é¥¹¤Î¥ê¥ó¥¯ÁàºîÍÑ¥á¥½¥Ã¥ÉÆâ¤Ç¤Î¤ß¸Æ¤Ó½Ğ¤µ¤ì¤ë¡£
 	 */
 	void set(Link link) {
 		this.atom = link.atom;
@@ -445,7 +450,7 @@ final class Link {
 }
 
 final class Machine extends AbstractMachine {
-	/** Às–ŒƒXƒ^ƒbƒN */
+	/** ¼Â¹ÔËì¥¹¥¿¥Ã¥¯ */
 	Stack memStack = new Stack();
 	Machine() {
 		root = new Membrane(this);
@@ -457,15 +462,15 @@ final class Machine extends AbstractMachine {
 	}
 }
 abstract class AbstractMachine {
-	/** ƒ‹[ƒg–Œ */
+	/** ¥ë¡¼¥ÈËì */
 	protected AbstractMembrane root;
-	/** ƒ‹[ƒg–Œ‚Ìæ“¾ */
+	/** ¥ë¡¼¥ÈËì¤Î¼èÆÀ */
 	AbstractMembrane getRoot() {
 		return root;
 	}
 }
 
-/** ŒvZƒm[ƒh */
+/** ·×»»¥Î¡¼¥É */
 final class LMNtalRuntime {
 	List machines = new ArrayList();
 	void exec() {
@@ -477,5 +482,5 @@ final class LMNtalRuntime {
 	}
 }
 
-/** ‚È‚º‚©‚±‚ê‚ª–³‚¢‚Æjavadoc‚ğì¬‚Å‚«‚È‚¢ */
+/** ¤Ê¤¼¤«¤³¤ì¤¬Ìµ¤¤¤Èjavadoc¤òºîÀ®¤Ç¤­¤Ê¤¤ */
 class DataStructure {}

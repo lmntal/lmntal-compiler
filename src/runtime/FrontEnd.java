@@ -1,5 +1,5 @@
 /*
- * 嶌惉擔: 2003/10/22
+ * 侯喇泣: 2003/10/22
  */
 package runtime;
 
@@ -9,28 +9,28 @@ import org.gnu.readline.Readline;
 import org.gnu.readline.ReadlineLibrary;
 
 /**
- * LMNtal 偺儊僀儞
+ * LMNtal のメイン
  * 
  * <pre>
- * TODO for 恊垽側傞栴搰偝傫 
- * 僐儅儞僪儔僀儞堷悢偺張棟
- * 乮僼傽僀儖柤偑巜掕偝傟偰偄偨傜偦傟傪夝庍幚峴
- * 丂巜掕偝傟偰側偐偭偨傜 runREPL() 幚峴乯
+ * TODO for 科唉なる甜喷さん 
+ * コマンドライン苞眶の借妄
+ * ∈ファイル叹が回年されていたらそれを豺坚悸乖
+ * 　回年されてなかったら runREPL() 悸乖∷
  * 
- * TODO 柤慜偼 FrontEnd 偱偄偄傫偩傠偆偐丅
- *       埬丗FrontEnd
- *           慺捈偵 Main
+ * TODO 叹涟は FrontEnd でいいんだろうか。
+ *       捌¨FrontEnd
+ *           燎木に Main
  * </pre>
  * 
- * 嶌惉擔: 2003/10/22
+ * 侯喇泣: 2003/10/22
  */
 public class FrontEnd {
 	/**
-	 * LMNtal-REPL 傪幚峴偡傞丅
+	 * LMNtal-REPL を悸乖する。
 	 * 
-	 * 僀儞僞儔僋僥傿僽儌乕僪丅
-	 * LMNtal 尵岅偑庴棟偡傞暥帤楍傪 1 峴擖椡偡傞偲
-	 * 偦傟傪幚峴偟偨寢壥偺暥帤楍偑昞帵偝傟傞丅
+	 * インタラクティブモ〖ド。
+	 * LMNtal 咐胳が减妄する矢机误を 1 乖掐蜗すると
+	 * それを悸乖した冯蔡の矢机误が山绩される。
 	 *
 	 */
 	public void runREPL() {
@@ -88,17 +88,17 @@ public class FrontEnd {
 	}
 	
 	/**
-	 * 慡偰偺巒傑傝
+	 * 链ての幌まり
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		FrontEnd fe = new FrontEnd();
 		/**
-		 * TODO 僐儅儞僪儔僀儞堷悢偑偁偭偨傜僼傽僀儖偺拞恎傪夝庍幚峴
+		 * TODO コマンドライン苞眶があったらファイルの面咳を豺坚悸乖
 		 */
 		
-		//巜掕偑側偗傟偽偙傟傪屇傇
+		//回年がなければこれを钙ぶ
 		fe.runREPL();
 	}
 }

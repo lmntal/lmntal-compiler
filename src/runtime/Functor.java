@@ -1,17 +1,17 @@
 package runtime;
 
 /**
- * String‚Ì–¼‘O‚ÆƒŠƒ“ƒN”‚Ì‘g‚©‚ç‚È‚éƒAƒgƒ€‚ÌFunctorB
+ * String¤ÎÌ¾Á°¤È¥ê¥ó¥¯¿ô¤ÎÁÈ¤«¤é¤Ê¤ë¥¢¥È¥à¤ÎFunctor¡£
  */
 public class Functor{
 	private String name;
 	private int arity;
-	/** Šeíƒƒ\ƒbƒh‚Åg‚¤‚½‚ß‚É•Û‚µ‚Ä‚¨‚­B®‡«—v’ˆÓ */
+	/** ³Æ¼ï¥á¥½¥Ã¥É¤Ç»È¤¦¤¿¤á¤ËÊİ»ı¤·¤Æ¤ª¤¯¡£À°¹çÀ­Í×Ãí°Õ */
 	private String strFunctor;
 	public Functor(String name, int arity) {
 		this.name = name;
 		this.arity = arity;
-		// == ‚Å”äŠr‚Å‚«‚é‚æ‚¤‚É‚·‚é‚½‚ß‚Éintern‚µ‚Ä‚¨‚­B
+		// == ¤ÇÈæ³Ó¤Ç¤­¤ë¤è¤¦¤Ë¤¹¤ë¤¿¤á¤Ëintern¤·¤Æ¤ª¤¯¡£
 		strFunctor = (name + "_" + arity).intern();
 	}
 	public String getName() {
@@ -27,7 +27,7 @@ public class Functor{
 		return strFunctor.hashCode();
 	}
 	public boolean equals(Object o) {
-		// ƒRƒ“ƒXƒgƒ‰ƒNƒ^‚Åintern‚µ‚Ä‚¢‚é‚Ì‚ÅA==‚Å”äŠr‚Å‚«‚éB
+		// ¥³¥ó¥¹¥È¥é¥¯¥¿¤Çintern¤·¤Æ¤¤¤ë¤Î¤Ç¡¢==¤ÇÈæ³Ó¤Ç¤­¤ë¡£
 		return ((Functor)o).strFunctor == this.strFunctor;
 	}
 }

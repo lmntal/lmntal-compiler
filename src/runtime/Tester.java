@@ -46,7 +46,7 @@ public class Tester extends TestCase {
 			new Atom(null, "b", 1)
 		};
 
-		//add/contains‚ÌƒeƒXƒg		
+		//add/contains¤Î¥Æ¥¹¥È		
 		for (int i = 0; i < 4; i++) {
 			hashSet.add(atom[i]);
 		}
@@ -60,12 +60,12 @@ public class Tester extends TestCase {
 		assertTrue(!atomSet.addAll(hashSet));
 		assertTrue(areSameSet(hashSet, atomSet));
 		
-		//remove‚ÌƒeƒXƒg
+		//remove¤Î¥Æ¥¹¥È
 		assertTrue(atomSet.remove(atom[2]));
 		assertTrue(!atomSet.remove(atom[2]));
 		assertEquals(atomSet.size(), 3);
 		
-		//iterator‚ÌƒeƒXƒg		
+		//iterator¤Î¥Æ¥¹¥È		
 		Iterator it = atomSet.functorIterator();
 		int count = 0;
 		while (it.hasNext()) {
@@ -76,7 +76,7 @@ public class Tester extends TestCase {
 				f.equals(new Functor("a", 2)) ||
 				f.equals(new Functor("b", 1)));
 		}
-		//íœ‚³‚ê‚½‚Í‚¸‚Ì‚à‚Ì‚ªŽc‚Á‚Ä‚¢‚Ä‚à‚©‚Ü‚í‚È‚¢i—v‘f”‚O‚É‚È‚éj
+		//ºï½ü¤µ¤ì¤¿¤Ï¤º¤Î¤â¤Î¤¬»Ä¤Ã¤Æ¤¤¤Æ¤â¤«¤Þ¤ï¤Ê¤¤¡ÊÍ×ÁÇ¿ô£°¤Ë¤Ê¤ë¡Ë
 		assertTrue(count == 3 || count == 2);
 
 		it = atomSet.iterator();

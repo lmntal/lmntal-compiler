@@ -3,20 +3,20 @@ package runtime;
 import java.util.*;
 
 /*
- * ì¬“ú: 2003/10/24
+ * ºîÀ®Æü: 2003/10/24
  *
  */
 
 /**
- * abterms ‚ğƒ‹[ƒ‹ƒIƒuƒWƒFƒNƒg‚É•ÏŠ·‚·‚éB
- * ƒ‹[ƒ‹ƒIƒuƒWƒFƒNƒg‚Í–½—ß—ñ‚ğ‚ÂB
+ * abterms ¤ò¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¤ËÊÑ´¹¤¹¤ë¡£
+ * ¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¤ÏÌ¿ÎáÎó¤ò»ı¤Ä¡£
  * 
- * ‚Ì‚ÅA‹@”\‚Í abterms -> –½—ß—ñ
+ * ¤Î¤Ç¡¢µ¡Ç½¤Ï abterms -> Ì¿ÎáÎó
  * 
- * Œ´ì‹Æ’†
+ * ¸¶ºî¶ÈÃæ
  * 
- * TODO loadProc ‚Í Membrane ‚Ìƒƒ\ƒbƒh‚Å‚ ‚é‚×‚«‚©‚àB
- * ‚à‚¤‚¢‚Á‚©‚µ‚å‚Å‚Â‚©‚í‚ê‚é loadProc ‚ğ‚İ‚ÄŒŸØ‚·‚é‚±‚ÆB
+ * TODO loadProc ¤Ï Membrane ¤Î¥á¥½¥Ã¥É¤Ç¤¢¤ë¤Ù¤­¤«¤â¡£
+ * ¤â¤¦¤¤¤Ã¤«¤·¤ç¤Ç¤Ä¤«¤ï¤ì¤ë loadProc ¤ò¤ß¤Æ¸¡¾Ú¤¹¤ë¤³¤È¡£
  * 
  * 
  * @author hara
@@ -30,7 +30,7 @@ public class RuleCompiler {
 		r = new Membrane(Env.machine);
 	}
 	/**
-	 * –Œ mem ‚É abterms ‚ğ“Ç‚İ‚ŞB
+	 * Ëì mem ¤Ë abterms ¤òÆÉ¤ß¹ş¤à¡£
 	 * 
 	 * @param mem
 	 * @param ab
@@ -60,8 +60,8 @@ public class RuleCompiler {
 			}
 		}
 		if(! rules.isEmpty()) {
-			//Ruleset ‚Í abstract ‚¶‚á‚È‚­‚Ä‚¢‚¢‚ñ‚¶‚á‚È‚¢‚©H
-			//‚Ğ‚Æ‚Ü‚¸‚ ‚Æ‚Ü‚í‚µ
+			//Ruleset ¤Ï abstract ¤¸¤ã¤Ê¤¯¤Æ¤¤¤¤¤ó¤¸¤ã¤Ê¤¤¤«¡©
+			//¤Ò¤È¤Ş¤º¤¢¤È¤Ş¤ï¤·
 			//mem.loadruleset( new Ruleset(rules) );
 		}
 		return coupleLinks(links);
@@ -136,7 +136,7 @@ public class RuleCompiler {
 					load_term mem, term, links
 					
 				#----------------------------------------------------------------------
-				# ƒvƒƒZƒXEƒ‹[ƒ‹•Ï”
+				# ¥×¥í¥»¥¹¡¦¥ë¡¼¥ëÊÑ¿ô
 				#----------------------------------------------------------------------
 				when :metavar
 					kind = term[1]
@@ -161,7 +161,7 @@ public class RuleCompiler {
 	}
 	
 	/**
-	 *  = ‚ğœ‹‚·‚éB
+	 *  = ¤ò½üµî¤¹¤ë¡£
 	 */
 	public void simplify() {
 		static_unify(l);
@@ -214,7 +214,7 @@ public class RuleCompiler {
 			# 
 			@lhscmp.compile_mem  @lhs
 			@lhscmp.compile_negs @negs
-			# ”½‰‚µ‚ë‚Æ‚¢‚¤–½—ß
+			# È¿±ş¤·¤í¤È¤¤¤¦Ì¿Îá
 			@lhscmp.match.push [:react, @ruleid, @lhscmp.getactuals]
 		end
 		 */
@@ -310,12 +310,12 @@ class HeadCompiler {
 	}
 	
 	/**
-	 * head ‚Ì‰¼ˆø”ƒŠƒXƒg‚ğ‚Â‚­‚Á‚Ä‚¢‚éB‰½”Ô–Ú‚ª‚Ç‚ÌƒAƒgƒ€B
+	 * head ¤Î²¾°ú¿ô¥ê¥¹¥È¤ò¤Ä¤¯¤Ã¤Æ¤¤¤ë¡£²¿ÈÖÌÜ¤¬¤É¤Î¥¢¥È¥à¡£
 	 */
 	public void enumformals() {
 		/*
 		mem.each_atom do | atom |
-			# ƒnƒbƒVƒ…BƒAƒgƒ€”Ô†‚ğ‚¢‚ê‚éB
+			# ¥Ï¥Ã¥·¥å¡£¥¢¥È¥àÈÖ¹æ¤ò¤¤¤ì¤ë¡£
 			@atomids[atom] = @atoms.length
 			@atoms.push atom
 		end

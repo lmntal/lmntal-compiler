@@ -5,15 +5,15 @@ final class SystemRuleset extends Ruleset {
 		return "System Ruleset Object";
 	}
 	/**
-	 * ƒAƒgƒ€å“±ƒeƒXƒg‚ğs‚¢Aƒ}ƒbƒ`‚·‚ê‚Î“K—p‚·‚é
-	 * @return ƒ‹[ƒ‹‚ğ“K—p‚µ‚½ê‡‚Ítrue
+	 * ¥¢¥È¥à¼çÆ³¥Æ¥¹¥È¤ò¹Ô¤¤¡¢¥Ş¥Ã¥Á¤¹¤ì¤ĞÅ¬ÍÑ¤¹¤ë
+	 * @return ¥ë¡¼¥ë¤òÅ¬ÍÑ¤·¤¿¾ì¹ç¤Ïtrue
 	 */
 	boolean react(Membrane mem, Atom atom) {
 		return false;
 	}
 	/**
-	 * –Œå“±ƒeƒXƒg‚ğs‚¢Aƒ}ƒbƒ`‚·‚ê‚Î“K—p‚·‚é
-	 * @return ƒ‹[ƒ‹‚ğ“K—p‚µ‚½ê‡‚Ítrue
+	 * Ëì¼çÆ³¥Æ¥¹¥È¤ò¹Ô¤¤¡¢¥Ş¥Ã¥Á¤¹¤ì¤ĞÅ¬ÍÑ¤¹¤ë
+	 * @return ¥ë¡¼¥ë¤òÅ¬ÍÑ¤·¤¿¾ì¹ç¤Ïtrue
 	 */
 	boolean react(Membrane mem) {
 		return false;
