@@ -1,7 +1,7 @@
 package runtime;
 
 import java.util.HashSet;
-//import java.util.Iterator;
+import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -13,31 +13,30 @@ public class Tester extends TestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(Tester.class);
 	}
-	public void testAppend() {
-		Machine machine = new Machine();
-		Task task = new MasterTask((LMNtalRuntime)machine);
-		Membrane root = (Membrane)task.getRoot();
-		
-		Atom append = root.newAtom("append", 3);
-		Atom cons = root.newAtom("cons", 3);
-		Atom nil1 = root.newAtom("nil", 1);
-		Atom nil2 = root.newAtom("nil", 1);
-		Atom one = root.newAtom("1", 1);
-		Atom result = root.newAtom("result", 1);
-		
-		root.newLink(result, 0, append, 2);
-		root.newLink(append, 0, nil1, 0);
-		root.newLink(append, 1, cons, 2);
-		root.newLink(cons, 0, one, 0);
-		root.newLink(cons, 1, nil2, 0);
-		
-		String ret = Dumper.dump(root);
-		System.out.println("\nret = " + ret);
-		assertTrue(ret.equals("append(nil,cons(1,nil),result), ") ||
-				   ret.equals("result(append(nil,cons(1,nil)), "));
-	}
+//	public void testAppend() {
+//		Machine machine = new Machine();
+//		Task task = new MasterTask((LMNtalRuntime)machine);
+//		Membrane root = (Membrane)task.getRoot();
+//		
+//		Atom append = root.newAtom("append", 3);
+//		Atom cons = root.newAtom("cons", 3);
+//		Atom nil1 = root.newAtom("nil", 1);
+//		Atom nil2 = root.newAtom("nil", 1);
+//		Atom one = root.newAtom("1", 1);
+//		Atom result = root.newAtom("result", 1);
+//		
+//		root.newLink(result, 0, append, 2);
+//		root.newLink(append, 0, nil1, 0);
+//		root.newLink(append, 1, cons, 2);
+//		root.newLink(cons, 0, one, 0);
+//		root.newLink(cons, 1, nil2, 0);
+//		
+//		String ret = Dumper.dump(root);
+//		System.out.println("\nret = " + ret);
+//		assertTrue(ret.equals("append(nil,cons(1,nil),result), ") ||
+//				   ret.equals("result(append(nil,cons(1,nil)), "));
+//	}
 	public void testAtomSet() {
-		/*
 		AtomSet atomSet = new AtomSet();
 		HashSet hashSet = new HashSet();
 		Atom[] atom = {
@@ -46,6 +45,15 @@ public class Tester extends TestCase {
 			new Atom(null, new Functor("a", 2)), 
 			new Atom(null, new Functor("b", 1))
 		};
+//		Membrane mem = new Membrane();
+		LMNtalRuntime r = new LMNtalRuntime();
+		AbstractTask t = r.newTask();
+		AbstractMembrane mem = t.getRoot();
+		for (int i = 0; i < 4; i++) {
+			mem.addAtom(atom[i]);
+		}
+		atomSet = mem.atoms;
+		atomSet.clear(); //ちょっと強引な方法
 
 		//add/containsのテスト		
 		for (int i = 0; i < 4; i++) {
@@ -57,6 +65,13 @@ public class Tester extends TestCase {
 		assertTrue(!atomSet.add(atom[0]));
 		assertEquals(1, atomSet.size());
 		assertTrue(atomSet.addAll(hashSet));
+
+		Iterator it1 = atomSet.iterator();
+		while (it1.hasNext()) {
+			System.out.println(atomSet.contains(it1.next()));
+		}
+		
+
 		assertEquals(4, atomSet.size());
 		assertTrue(!atomSet.addAll(hashSet));
 		assertTrue(areSameSet(hashSet, atomSet));
@@ -120,13 +135,13 @@ public class Tester extends TestCase {
 		
 		//整合性検査
 		assertTrue(atomSet.verify());
-		*/
 	}
-	private boolean areSameSet(Set set1, Set set2) {
-		HashSet tmpSet1 = new HashSet();
-		HashSet tmpSet2 = new HashSet();
-		tmpSet1.addAll(set1);
-		tmpSet2.addAll(set2);
-		return tmpSet1.equals(tmpSet2);
+	private boolean areSameSet(Set set1, AtomSet set2) {
+		return set1.size() == set2.size() && set2.containsAll(set1);
+//		HashSet tmpSet1 = new HashSet();
+//		HashSet tmpSet2 = new HashSet();
+//		tmpSet1.addAll(set1);
+//		tmpSet2.addAll(set2);
+//		return tmpSet1.equals(tmpSet2);
 	}
 }

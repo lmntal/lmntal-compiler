@@ -119,8 +119,15 @@ public class RandomSet implements Set {
 		Iterator i = map.keySet().iterator();
 		while (i.hasNext()) {
 			Object o = i.next();
-			if (!array.get(((Integer)map.get(o)).intValue()).equals(o)) {
-				return false;
+			Object o2 = array.get(((Integer)map.get(o)).intValue());
+			if (o == null) {
+				if (o2 != null) {
+					return false;
+				}
+			} else {
+				if (!o.equals(o2)) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -195,6 +202,7 @@ public class RandomSet implements Set {
 		assert(h.addAll(Arrays.asList(data)) == r.addAll(Arrays.asList(data)));
 		assert(r.equals(h));
 		assert(h.hashCode() == r.hashCode());
+		assert(r.verify());
 		r.clear();
 		h.clear();
 		assert(r.size() == 0);
@@ -208,6 +216,7 @@ public class RandomSet implements Set {
 		assert(r.equals(h));
 		h.add(data[0]);
 		assert(!r.equals(h));
+		assert(r.verify());
 		System.out.println("ok");
 	}
 	private static void assert(boolean b) {
