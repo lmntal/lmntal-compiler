@@ -443,7 +443,6 @@ public class LMNParser {
 		
 		// todo ここでガードを型制約と否定条件に分類する（現在は全て型制約として扱っている）
 		LinkedList typeConstraints = sRule.getGuard();
-		System.out.println(typeConstraints);
 		// === 略記法の展開ここから ===
 
 		// - 数値の符号の取り込み

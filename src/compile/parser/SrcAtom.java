@@ -25,6 +25,10 @@ class SrcAtom {
 	public SrcAtom(String name) {
 		this(new SrcName(name));
 	}
+	/**
+	 * 指定された名前トークンを持つ子プロセスなしのアトム構文を生成する
+	 * @param srcname 名前トークン
+	 */
 	public SrcAtom(SrcName srcname) {
 		this(srcname, new LinkedList(), -1,-1);
 	}
@@ -35,42 +39,32 @@ class SrcAtom {
 	 * @param process 子供プロセス
 	 */
 	public SrcAtom(String name, LinkedList process) {
-		this(new SrcName(name), process);
-	}
-	public SrcAtom(SrcName srcname, LinkedList process) {
-		this(srcname, process, -1,-1);
+		this(new SrcName(name), process, -1,-1);
 	}
 
 	/**
 	 * デバッグ情報も受け取るコンストラクタ(子供プロセス無し)
 	 * @author Tomohito Makino
-	 * @param name アトム名
+	 * @param srcname 名前トークン
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
 	 */
-	public SrcAtom(String name, int line, int column) {
-		this(new SrcName(name),line,column);
-	}
 	public SrcAtom(SrcName srcname, int line, int column) {
 		this(srcname, new LinkedList(), line, column);
-	}
-	
+	}	
+	/**
+	 * デバッグ情報も受け取るコンストラクタ
+	 * @author Tomohito Makino
+	 * @param nametoken 名前トークン
+	 * @param process 子供プロセス
+	 * @param line ソースコード上での出現位置(行)
+	 * @param column ソースコード上での出現位置(桁)
+	 */
 	public SrcAtom(SrcName nametoken, LinkedList process, int line, int column) {
 		this.srcname = nametoken;
 		this.process = process;
 		this.line = line;
 		this.column = column;	
-	}
-	/**
-	 * デバッグ情報も受け取るコンストラクタ
-	 * @author Tomohito Makino
-	 * @param name アトム名
-	 * @param process 子供プロセス
-	 * @param line ソースコード上での出現位置(行)
-	 * @param column ソースコード上での出現位置(桁)
-	 */
-	public SrcAtom(String name, LinkedList process, int line, int column) {
-		this(new SrcName(name),process,line,column);
 	}
 	
 	public void setSourceLocation(int line, int column) {
@@ -79,7 +73,7 @@ class SrcAtom {
 	}
 
 	
-	/** アトム名トークンを返す 
+	/** 名前トークンを取得する 
 	 * @deprecated*/
 	public SrcName getSrcName() { return srcname; }
 

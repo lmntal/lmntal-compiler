@@ -31,7 +31,7 @@ public class SrcDumper {
 	}
 	
 	public static String dumpAtom(SrcAtom atom, int indent) {
-		String s = (dumpIndent(indent)+atom.getName() + "(" + BR);
+		String s = (dumpIndent(indent) + atom.getName() + "(" + BR);
 		s += dumpLinkedList(atom.getProcess(), indent+1);
 		s += (dumpIndent(indent)+")"+BR);
 		return s;
