@@ -16,6 +16,7 @@ import runtime.RemoteLMNtalRuntime;
 import runtime.RemoteMembrane;
 import runtime.RemoteTask;
 import runtime.Ruleset;
+import runtime.Env;
 import util.HybridOutputStream;
 
 /**
@@ -26,8 +27,6 @@ import util.HybridOutputStream;
  * @author nakajima, n-kato
  */
 public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnable {
-	boolean DEBUG = true;
-	
 	/** このVMで実行するLMNtalRuntimeが所属するruntimeGroupID（コンストラクタで設定）*/
 	protected String rgid;
 	
@@ -67,7 +66,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定のホストにメッセージを送信し、返答を待つ。
 	 * @return 返答に含まれる文字列 */
 	public String sendWaitText(String fqdn, String command){
-		//if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.sendWaitText()");
+		//if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeMessageProcessor.sendWaitText()");
 		Object obj = sendWaitObject(fqdn, command);
 		if (obj instanceof String) {
 			return (String)obj;
@@ -101,14 +100,14 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定したメッセージに対する返答を待ってブロックする。
 	 * @return 返答が格納されたオブジェクト */
 	synchronized public Object waitForResponseObject(String msgid) {
-		//if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(" + msgid + ")");
+		//System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(" + msgid + ")");
 		while (!messagePool.containsKey(msgid)) { 
 			try {
-				//if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(): waiting...");
+				//System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(): waiting...");
 				wait(); 
 			} catch (InterruptedException e) {	}
 		}
-		//if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(): loop quit");
+		//System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(): loop quit");
 		return messagePool.remove(msgid);
 	}	
 	/** 指定したメッセージに対する返答を待ってブロックする。
@@ -140,7 +139,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		if (DEBUG) System.out.println("LMNtalRuntimeMessageProcessor.run()");
+		if (Env.debugDaemon > 0) System.out.println("LMNtalRuntimeMessageProcessor.run()");
 		String input;
 		while (true) {
 			//ソケットを閉じるとき、この段階で閉じらていれるよりreadLine()まで行って待っている場合のほうが考えられる。
@@ -168,7 +167,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				System.out.println("LMNtalRuntimeMessageProcessor.run(): （　´∀｀）＜　inputがぬる");
 				break;
 			}
-			if (DEBUG) System.out.println("LMNtalRuntimeMessageProcessor.run(): in.readLine(): " + input);
+			if(Env.debugDaemon > 0) System.out.println("LMNtalRuntimeMessageProcessor.run(): in.readLine(): " + input);
 
 			/* メッセージ:
 			 *   RES msgid 返答
@@ -197,8 +196,8 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				else res = content;
 				synchronized(this) {	
 					messagePool.put(msgid, res);
-					//if (DEBUG) System.out.println(res.toString());
-					//if (DEBUG) System.out.println(messagePool.toString());
+					//System.out.println(res.toString());
+					//System.out.println(messagePool.toString());
 					
 //					Object suspended = blockingObjects.remove(msgid);
 //					if (suspended == null) {
@@ -207,7 +206,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 //						continue;
 //					}
 					
-					//if (DEBUG) System.out.println("notifyALL");
+					//System.out.println("notifyALL");
 					notifyAll();
 				}
 				continue;
@@ -244,7 +243,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				} else if (command[0].equalsIgnoreCase("DISCONNECTRUNTIME")) { 
 					//DISCONNECTRUNTIME
 					
-					Thread t1 = new Thread(new DisconnectRuntimeProcessor());
+					Thread t1 = new Thread(new DisconnectRuntimeProcessor(rgid, this)); //TODO (nakajima)このrgidでよかったっけ？
 					t1.start();
 					
 				} else if (command[0].equalsIgnoreCase("CONNECT")) {
@@ -294,11 +293,11 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		AbstractMembrane obj = IDConverter.lookupGlobalMembrane(command[1]); //TODO globalidを作成する時に間違ったIDを作成している？  or 登録されていない？（こっちを先に調べる）
 		if (!(obj instanceof Membrane)) {
 			respondAsFail(msgid);
-			if(true)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is not found!)"); //TODO Env.debug
+			if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is not found!)");
 			return;
 		}
 		Membrane mem = (Membrane)obj;
-		if(true)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is found.)"); //TODO Env.debug
+		if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is found.)");
 		
 		if (command[0].equalsIgnoreCase("LOCK")
 		 || command[0].equalsIgnoreCase("BLOCKINGLOCK")
@@ -321,8 +320,6 @@ class InstructionBlockProcessor implements Runnable {
 //	String fqdn;
 	String msgid;
 	LinkedList insts;
-	
-	static boolean DEBUG = true;  //todo Env.debugを使う
 	
 	InstructionBlockProcessor(LMNtalRuntimeMessageProcessor remote, 
 //		String fqdn, 
@@ -352,7 +349,7 @@ class InstructionBlockProcessor implements Runnable {
 	/** グローバル膜IDまたはNEW_に対応する膜を探す
 	 * @return Membrane（見つからなかった場合はnull）*/
 	public AbstractMembrane lookupMembrane(String memid) {
-		if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.lookupMembrane(" + memid + ")");
+		if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeMessageProcessor.lookupMembrane(" + memid + ")");
 		
 		Object obj = newMemTable.get(memid);
 		if (obj instanceof AbstractMembrane) return (AbstractMembrane)obj;
@@ -420,7 +417,7 @@ class InstructionBlockProcessor implements Runnable {
 				String[] command = input.split(" ",6); // RemoteMembrane.send()の引数の個数を参照せよ
 				command[0] = command[0].toUpperCase();
 				
-				if(DEBUG){
+				if(Env.debugDaemon > 0){
 					System.out.println("InstructionBlockProcessor.run(): command is : ");
 					for(int i = 0; i < command.length; i ++){
 						System.out.println("command[" + i + "] is:" + command[i]);
@@ -722,7 +719,19 @@ class TerminateProcessor implements Runnable {
  *
  */
 class DisconnectRuntimeProcessor implements Runnable {
+	String rgid;
+	LMNtalNode node;
+		
+	DisconnectRuntimeProcessor(String rgid, LMNtalNode node){
+		this.rgid = rgid;
+		this.node= node;
+	}
+	
 	public void run(){
-		LMNtalRuntimeManager.disconnectAll();
+		if(LMNtalRuntimeManager.disconnectAll()){
+			node.sendMessage("UNREGISTERLOCAL" + " " + rgid);
+		} else {
+			System.out.println("DISCONNECTRUNTIME failed");
+		}
 	}
 }

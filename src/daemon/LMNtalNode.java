@@ -103,7 +103,7 @@ public class LMNtalNode {
 //		}
 //	}
 	public static boolean isMyself(String ipstr) {
-		//if(true)System.out.println("LMNtalNode.isMyself(" + ipstr + ")");
+		//if(Env.debugDaemon)System.out.println("LMNtalNode.isMyself(" + ipstr + ")");
 		
 		boolean result = false; 
 		
@@ -114,7 +114,7 @@ public class LMNtalNode {
 			e.printStackTrace();
 		}
 		
-		if(true)System.out.println("LMNtalNode.isMyself(" + ipstr + ") is " + result);
+		if(Env.debugDaemon > 0)System.out.println("LMNtalNode.isMyself(" + ipstr + ") is " + result);
 		return result;
 	}
 	

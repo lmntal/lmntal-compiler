@@ -44,7 +44,7 @@ public final class LMNtalRuntimeManager {
 	 * 
 	 * @param nodedesc ノード識別子 */
 	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
-		if(true)System.out.println("LMNtalRuntimeManager.connectRuntime(" + nodedesc +")"); //todo use Env
+		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime(" + nodedesc +")");
 		
 		String fqdn = nodedescToFQDN(nodedesc);
 		if (fqdn == null) return null;
@@ -130,17 +130,17 @@ public final class LMNtalRuntimeManager {
 			
 			daemon.close(); //TODO これが終わらない→DISCONNECT命令の実装が先
 			
-			if(true)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon(): the socket has closed.");
+			if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon(): the socket has closed.");
 			daemon = null;
 		}
 	}
 
 	/**
-	 * 
+	 * teminateAll()を専用スレッドで実行するためのラッパ
+	 * @author nakajima
 	 */
 	public static boolean terminateAllThreaded(){
 		//	TODO (nakajima)空のときはスレッドつくらないでreturn
-		
 		TerminateAllProcessor tap = new TerminateAllProcessor(); 
 		
 		Thread t = new Thread(tap, "TerminateAllProcessor");
@@ -176,11 +176,10 @@ public final class LMNtalRuntimeManager {
 
 //		System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime is terminated");
 		
-
-		
 		childNode.clear();
 		Iterator it = runtimeids.keySet().iterator(); 
 		while (it.hasNext()) {
+			//RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
 
 //			System.out.println("LMNtalRuntimeManager.terminateAll(): now sending TERMINATE to " + machine.hostname);
@@ -193,20 +192,52 @@ public final class LMNtalRuntimeManager {
 //		System.out.println("LMNtalRuntimeManager.terminateAll(): everything finished and returning true");
 		return true;
 	}
+
+	/**
+	 * disconnectAll()を専用スレッドで実行するためのラッパ
+	 *@author nakajima
+	 */
+	public static void disconnectAllThreaded(){	
+		DisconnectAllProcessor dap = new DisconnectAllProcessor();
+		
+		Thread t = new Thread(dap, "DisconnectAllProcessor");
+		t.start();
+		
+		synchronized(t){
+			try {
+				t.join();
+//				System.out.println("terminateAllThreaded(): after thread.join");
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	/**
 	 * DISCONNECTRUNTIMEの中の人の中の人
 	 * @author nakajima
 	 */
-	public static void disconnectAll(){
+	public static boolean disconnectAll(){
 		Iterator it = childNode.iterator();
 		while(it.hasNext()){
-			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
+			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)it.next();
+//			if(daemon == null){System.out.println("DAEMON IS NULL");}
+//			if(machine == null){System.out.println("MACHINE IS NULL");}
 			daemon.sendWait(machine.hostname,"DISCONNECTRUNTIME");
 		}
-		daemon.sendMessage("UNREGISTERLOCAL");
 		childNode.clear();
 		runtimeids.clear();
+		
+		return true;
+	}
+}
+
+class DisconnectAllProcessor implements Runnable{
+	boolean result;
+	public void run(){
+//		System.out.println("DisconnectAllProcessor.run() entered");
+		result = LMNtalRuntimeManager.disconnectAll();
+//		System.out.println("DisconnectAllProcessor.run(): now quitting...");
 	}
 }
 

@@ -353,7 +353,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 						continue;
 					}
 					r = (RemoteLMNtalRuntime)ar;
-					if(true)System.out.println("RemoteMembrane.updateCache(): cast 成功");
+					if(Env.debug > 0)System.out.println("RemoteMembrane.updateCache(): cast 成功");
 				}
 				//
 				RemoteTask t;
@@ -403,14 +403,14 @@ public final class RemoteMembrane extends AbstractMembrane {
 					//r = (Ruleset)sendWaitObject("REQUIRERULESET " + id);  //膜のメソッドじゃなくて直にデーモンに要求しないといけない
 					Object res_rawdata;
 					res_rawdata = LMNtalRuntimeManager.daemon.sendWaitObject(this.task.runtime.hostname, "REQUIRERULESET " +id); //todo あやしい
-					//if(true)System.out.println("RemoteMembrane.updateCache(): we did REQUIRERULESET and got: " + hoge); //todo Env.debug
+					//if(Env.debug > 0)System.out.println("RemoteMembrane.updateCache(): we did REQUIRERULESET and got: " + hoge);
 					if(res_rawdata instanceof byte[]){
 						r = Ruleset.deserialize((byte[]) res_rawdata);
 					} else if(res_rawdata instanceof String){
 						throw new RuntimeException("cannot load rulset " + id + ", instead we got: " + r);
 					} else {}
 					
-					//if(true)System.out.println("RemoteMembrane.updateCache(): we did REQUIRERULESET and got and casted: " + r); //todo Env.debug
+					//if(Env.debug > 0)System.out.println("RemoteMembrane.updateCache(): we did REQUIRERULESET and got and casted: " + r);
 				}
 				rulesets.add(r);
 			}

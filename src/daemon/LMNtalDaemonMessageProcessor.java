@@ -3,6 +3,8 @@ package daemon;
 import java.io.IOException;
 import java.net.Socket;
 
+import runtime.Env;
+
 import util.StreamDumper;
 
 //import runtime.Env;
@@ -19,8 +21,6 @@ import util.StreamDumper;
  * @author nakajima, n-kato
  */
 public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable {
-	boolean DEBUG = true; //LMNtalDaemon.main()から呼ぶときにEnv.debugは使えない...
-	
 	public LMNtalDaemonMessageProcessor(Socket socket) {
 		super(socket);
 	}
@@ -31,7 +31,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run()");
+		if (Env.debugDaemon > 0) System.out.println("LMNtalDaemonMessageProcessor.run()");
 		String input;
 		while (true) {
 			try {
@@ -45,12 +45,12 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				System.out.println("LMNtalDaemonMessageProcessor.run(): in.readLine(): （　´∀｀）＜　inputがぬる");
 				break;
 			}
-			if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run(): in.readLine(): " + input);
+			if (Env.debugDaemon > 0) System.out.println("LMNtalDaemonMessageProcessor.run(): in.readLine(): " + input);
 
 			/* メッセージ:
 			 *   RES msgid 返答
 			 *   REGISTERLOCAL (MASTER|SLAVE) msgid rgid
-			 *   UNREGISTERLOCAL
+			 *   UNREGISTERLOCAL rgid
 			 *   DUMPHASH
 			 *   CMD msgid fqdn rgid コマンド
 			 *     - fqdn が自分宛 
@@ -85,7 +85,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				//戻す先
 				LMNtalNode returnNode = LMNtalDaemon.unregisterMessage(msgid);
 				
-				if (DEBUG) System.out.println("res: returnNode is: " + returnNode);
+				if (Env.debugDaemon > 0) System.out.println("res: returnNode is: " + returnNode);
 
 				if (returnNode == null) {
 					//戻し先がnull
@@ -109,14 +109,14 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				continue;
 			} else if (parsedInput[0].equalsIgnoreCase("UNREGISTERLOCAL")){
 				//UNREGISTERLOCAL rgid
-
 				//TODO (nakajima)ちゃんと実装する
+								
 				//rgid を削除
 				String rgid  = parsedInput[1];
 				if(LMNtalDaemon.unregisterRuntimeGroup(rgid)){
 					//	自分自身にある、マスタランタイム(LMNtalRuntimeMessageProcessor)との通信路を切る
 					
-					if(true)System.out.println("LMNtalDaemonMessageProcessor: now closing connection to " + rgid);
+					System.out.println("LMNtalDaemonMessageProcessor: now closing connection to " + rgid);
 					close();
 				}
 				return;
@@ -145,7 +145,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 							// endが来るまで積み込む
 							while(true){ // BEGINだけきてその後が来ないとbreakしない→それは仕様ですので
 								String inputline = readLine();
-								if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run(): after BEGIN:  " + inputline);
+								if (Env.debugDaemon > 0) System.out.println("LMNtalDaemonMessageProcessor.run(): after BEGIN:  " + inputline);
 								if (inputline == null) break;
 								if (inputline.equalsIgnoreCase("END")) break;
 								buf.append(inputline);
@@ -177,7 +177,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 												+ " "
 												+ rgid);
 
-									if (DEBUG) System.out.println(newCmdLine);
+									if (Env.debugDaemon > 0) System.out.println(newCmdLine);
 
 									Process slave = Runtime.getRuntime().exec(newCmdLine);
 									
@@ -209,7 +209,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 							}
 						}
 						if (targetNode != null && targetNode.sendMessage(content)) {
-							if(DEBUG)System.out.println("LMNtalDaemonMessageProcessor.run(): target node is " + targetNode.toString() + " and now sending: " + content);
+							if(Env.debugDaemon > 0)System.out.println("LMNtalDaemonMessageProcessor.run(): target node is " + targetNode.toString() + " and now sending: " + content);
 							continue;
 						}
 						// 転送失敗したら下に抜ける

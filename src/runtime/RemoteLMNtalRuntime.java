@@ -35,7 +35,7 @@ public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 * @return AbstractTask
 	 */
 	public AbstractTask newTask(AbstractMembrane parent) {
-		if(true)System.out.println("RemoteLMNtalRuntime.newTask()"); //todo use Env
+		if(Env.debug > 0)System.out.println("RemoteLMNtalRuntime.newTask()");
 		RemoteTask task = new RemoteTask(this, parent);
 		RemoteMembrane newroot = (RemoteMembrane)task.getRoot();
 		if (newroot.remote == null) {
