@@ -12,7 +12,8 @@ import java_cup.runtime.Symbol;
 %class Lexer
 
 %{
-	private final boolean _DEBUG = false;
+	private final boolean _DEBUG = true;
+	StringBuffer string = new StringBuffer();
 
     /* To create a new java_cup.runtime.Symbol with information about
        the current token, the token will have no value in this
@@ -36,17 +37,20 @@ LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
-LinkName = [A-Z][A-Za-z_0-9]*
-AtomName = [a-z0-9][A-Za-z_0-9]*
+LinkName       = [A-Z][A-Za-z_0-9]*
+AtomNameNormal = [a-z0-9][A-Za-z_0-9]*
 
 Comment = {TraditionalComment} | {EndOfLineComment}
 
 TraditionalComment = "/*" [^*] ~"*/"
 EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 
+%state QUOTED
+
 %% 
 
 /* ------------------------Lexical Rules Section---------------------- */
+
 <YYINITIAL> {
 	"nil"			{ return symbol(sym.NULL); }
 	","				{ return symbol(sym.COMMA); }
@@ -72,12 +76,19 @@ EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 	"-"				{ return symbol(sym.MINAS); }
 	"["				{ return symbol(sym.LBRACKET); }
 	"]"				{ return symbol(sym.RBRACKET); }
+	"[["			{ string.setLength(0); yybegin(QUOTED); }
 	"\\+"			{ return symbol(sym.NEGATIVE); }
 	{LinkName}		{ return symbol(sym.LINK_NAME, yytext()); }
-	{AtomName}		{ return symbol(sym.ATOM_NAME, yytext()); }
+	{AtomNameNormal}		{ return symbol(sym.ATOM_NAME_NORMAL, yytext()); }
 	{WhiteSpace}	{ /* just skip */ }
 	{Comment}		{ /* just skip */ }
 }
+
+<QUOTED> {
+	"]]"			{ yybegin(YYINITIAL); return symbol(sym.QUOTED_STRING, string.toString()); }
+	.				{ string.append( yytext() ); }
+}
+	
 
 /* No token was found for the input so through an error.  Print out an
    Illegal character message with the illegal character that was found. */

@@ -8,17 +8,39 @@ import java.io.*;
 import java.util.*;
 
 /**
+ * インラインの方針<BR>
+ * 
+ * <UL>
+ * <LI>"/＊inline＊/" で始まるファンクタ名を持つアトムをインラインとして扱う。
+ * 
+ * <LI>あるインラインコードの実行は、
+ * そのコードが右辺に含まれるルールを適用した直後のタイミングで実行される。
+ * 
+ * <LI>対応する中間命令は INLINE である。
+ * 
+ * <LI>リンク先のアトムをいじれるように、すべての NEWATOM, LINK などの操作が終わってから
+ * INLINE 命令を発行する。
+ * 
+ * <LI>中間命令の例
+ * </UL>
+ * <PRE>
+ *   NEWATOM [1, 0, abc_0]
+ *   ...いろいろ
+ *   INLINE  [1, 0]
+ * </PRE>
+ * 
  * @author hara
- *
  */
 public class Inline {
 	/** インラインクラスが使用可能の時、そのオブジェクトが入る。*/
 	public static InlineCode inlineCode;
 	
+	/** コンパイルプロセス。 */
 	static Process cp;
 	
 	/** Hash { インラインコード文字列 -> 一意な連番 } */
 	public static Map code = new HashMap(); 
+	
 	/** 一意な連番 */
 	static int codeCount = 0;
 	
@@ -28,6 +50,18 @@ public class Inline {
 	 */
 	public static void initInline() {
 		try {
+			if(cp!=null) {
+				// コンパイルしてるプロセスのエラー出力を取得。
+				// これをしないと、エラーがたくさんあるときデッドロックになって止まる！
+				BufferedReader br = new BufferedReader(new InputStreamReader(cp.getErrorStream()));
+				String el;
+				while( (el=br.readLine())!=null ) {
+					System.err.println(el);
+				}
+				cp.waitFor();
+				Env.p("Compile result :  "+cp.exitValue());
+				cp = null;
+			}
 			inlineCode = (InlineCode)Class.forName("MyInlineCode").newInstance();
 		} catch (Exception e) {
 			Env.p(e);
@@ -53,8 +87,8 @@ public class Inline {
 	 * @param atom
 	 */
 	public static void add(String src) {
-		//if(src.startsWith("/*inline*/")) {
-		if(src.startsWith("a")) {
+		if(src.startsWith("/*inline*/")) {
+		//if(src.startsWith("a")) {
 			//登録
 			Env.p("Register inlineCode : "+src);
 			code.put(src, new Integer(codeCount++));
@@ -70,19 +104,22 @@ public class Inline {
 			PrintWriter p = new PrintWriter(new FileOutputStream("MyInlineCode.java"));
 			Env.p("make inline code "+code);
 			
+			if(code.isEmpty()) return;
+			
 			//p.println("package runtime;");
 			p.println("import runtime.*;");
 			p.println("public class MyInlineCode implements InlineCode {");
-			p.println("\tpublic void run(Atom a, int codeID) {");
-			p.println("\t\tEnv.p(a);");
+			p.println("\tpublic void run(Atom me, int codeID) {");
+			p.println("\t\t//Env.p(a);");
 			p.println("\t\tswitch(codeID) {");
 			Iterator i = code.keySet().iterator();
 			while(i.hasNext()) {
 				String s = (String)i.next();
 				int codeID = ((Integer)(code.get(s))).intValue();
 				p.println("\t\tcase "+codeID+": ");
-				p.println("\t\t\t/*"+s+"*/");
-				p.println("\t\t\tSystem.out.println(\"=> call Inline "+s+" \");");
+				//p.println("\t\t\t/*"+s.replaceAll("\\*\\/", "* /").replaceAll("\\/\\*", "/ *")+"*/");
+				//p.println("\t\t\tSystem.out.println(\"=> call Inline "+s+" \");");
+				p.println("\t\t\t"+s);
 				p.println("\t\t\tbreak;");
 			}
 			p.println("\t\t}");
@@ -90,15 +127,8 @@ public class Inline {
 			p.println("}");
 			p.close();
 			
+			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
 			cp = Runtime.getRuntime().exec("javac MyInlineCode.java");
-			BufferedReader br = new BufferedReader(new InputStreamReader(cp.getErrorStream()));
-			String el;
-			while( (el=br.readLine())!=null ) {
-				System.err.println(el);
-			}
-			cp.waitFor();
-			Env.p("Compile result :  "+cp.exitValue());
-			
 		} catch (Exception e) {
 			Env.p("!!! "+e.getMessage()+e.getStackTrace());
 		}

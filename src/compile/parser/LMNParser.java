@@ -7,11 +7,14 @@ package compile.parser;
 
 import java_cup.runtime.Scanner;
 import java.io.Reader;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
+import java_cup.runtime.Symbol;
 import runtime.Inline;
+import runtime.Env;
 import compile.structure.*;
 
 public class LMNParser {
@@ -49,7 +52,7 @@ public class LMNParser {
 		try {
 			result = (LinkedList)p.parse().value;
 		} catch (Exception e) {
-			throw new ParseException(e.getMessage());	
+			throw new ParseException(e.getMessage()+" "+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));	
 		}
 		return result;
 	}

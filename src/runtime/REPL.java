@@ -6,6 +6,7 @@ package runtime;
 
 import java.io.EOFException;
 import java.io.StringReader;
+import java.util.Arrays;
 
 import compile.*;
 import compile.parser.*;
@@ -98,7 +99,7 @@ public class REPL {
 			Env.p( Dumper.dump(rootmem) );
 			Env.p( rootmem );
 		} catch (Exception e) {
-			Env.p("!!! "+e.getMessage()+"\n"+e.getStackTrace());
+			Env.p("!! catch in REPL !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 		
 		//System.out.println(line+"  =>  {a, b, {c}}, ({b, $p}:-{c, $p})");

@@ -48,12 +48,15 @@ public final class Env {
 	/**
 	 * Better list dumper : No comma output
 	 */
-	public static String parray(Collection l) {
+	public static String parray(Collection l, String delim) {
 		StringBuffer s = new StringBuffer();
 		for(Iterator i=l.iterator();i.hasNext();) {
-			s.append( i.next().toString()+(i.hasNext() ? " ":"") );
+			s.append( i.next().toString()+(i.hasNext() ? delim:"") );
 		}
 		return s.toString();
+	}
+	public static String parray(Collection l) {
+		return parray(l, " ");
 	}
 	
 	/**

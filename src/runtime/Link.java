@@ -47,7 +47,7 @@ public final class Link implements Cloneable {
 	}
 				
 	/** リンク先のアトムを取得する */
-	Atom getAtom() {
+	public Atom getAtom() {
 		return atom;
 	}
 	/** リンク先の引数番号を取得する */

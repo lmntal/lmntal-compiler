@@ -9,11 +9,13 @@ terminal		NULL, COMMA, LPAREN, RPAREN, LBREATH, RBREATH,
 				RULE, UNIFY, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE,
 				LT, LE, GT, GE, EQ, NE,
-				ASTERISK, SLASH, PLUS, MINAS;
+				ASTERISK, SLASH, PLUS, MINAS,
+				QUOTED_STRING;
 				
-terminal String	LINK_NAME, ATOM_NAME;
+terminal String	LINK_NAME, ATOM_NAME_NORMAL;
 
 non terminal SrcLink			Link;
+non terminal String				AtomName;
 non terminal SrcAtom			UnitAtom;
 non terminal SrcAtom			Atom400;
 non terminal SrcAtom			Atom500;
@@ -42,16 +44,24 @@ start with ProcessList;
 Link		::=   LINK_NAME:name
 					{: RESULT = new SrcLink(name); :};
 					
-UnitAtom	::=	  ATOM_NAME:name
+// added by hara
+AtomName	::=   QUOTED_STRING:name
+					{: RESULT = name.toString(); :}
+				| ATOM_NAME_NORMAL:name
+					{: RESULT = name.toString(); :};
+
+
+UnitAtom	::=	  AtomName:name
 					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
-				| ATOM_NAME:name LPAREN RPAREN
+				| AtomName:name LPAREN RPAREN
 					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
-				| ATOM_NAME:name LPAREN ProcessList:list RPAREN
+				| AtomName:name LPAREN ProcessList:list RPAREN
 					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
 				| List:list
 					{: RESULT = list; :}
 				| LPAREN Atom:atom RPAREN
-					{: RESULT = atom; :};
+					{: RESULT = atom; :}
+				;
 
 					
 Atom400		::=   UnitAtom:atom
@@ -110,15 +120,15 @@ Rule		::=	  LPAREN ProcessList:head RULE ProcessList:body RPAREN
 			    | LPAREN ProcessList:head RULE ProcessList:guard GUARD ProcessList:body RPAREN
 					{: RESULT = new SrcRule(head, guard, body); :};
 
-ProcessContext	::=   PROCVAR ATOM_NAME:name
+ProcessContext	::=   PROCVAR AtomName:name
 						{: RESULT = new SrcProcessContext(name); :};
 
 /*
-TypedProcessContext ::= PROCVAR ATOM_NAME:name LBRACKET LINK_NAME:link RBRACKET
+TypedProcessContext ::= PROCVAR AtomName:name LBRACKET LINK_NAME:link RBRACKET
 							{: RESULT = new SrcTypedProcessContext(name, link); :};
 */
 
-RuleContext	::=   RULEVAR ATOM_NAME:name
+RuleContext	::=   RULEVAR AtomName:name
 					{: RESULT = new SrcRuleContext(name); :};
 
 Context		::=   ProcessContext:p
