@@ -99,14 +99,14 @@ public class Instruction implements Cloneable {
      * <br>出力する最適化用ガード命令<br>
      * リンク$srclinkが第dstpos引数に接続していることを確認したら、
      * リンク先のアトムへの参照を$dstatomに代入する。*/
-	public static final int DEREFLINK = 3;
+	public static final int DEREFLINK = 3; // by mizuno
 	// LOCALDEREFLINKは不要
 	static {setArgType(DEREFLINK, new ArgType(true, ARG_ATOM, ARG_VAR, ARG_INT));}
 
 	/** findatom [-dstatom, srcmem, funcref]
 	 * <br>反復するガード命令<br>
 	 * 膜$srcmemにあってファンクタfuncrefを持つアトムへの参照を次々に$dstatomに代入する。*/
-	public static final int FINDATOM = 4; // by mizuno
+	public static final int FINDATOM = 4;
 	// LOCALFINDATOMは不要
 	static {setArgType(FINDATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
 
@@ -661,12 +661,6 @@ public class Instruction implements Cloneable {
 	public static final int ALLOCLINK = 64;
 	// LOCALGETLINKは不要
 	static {setArgType(ALLOCLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));}
-
-//	/** dereflink [atom, link]
-//	 * <br>出力する失敗しない拡張ガード命令、最適化用ボディ命令<br>
-//	 * リンク$linkが指すアトムへの参照を$atomに代入する。*/
-//	public static final int DEREFLINK = err;
-//	// LOCALDEREFLINKは不要
 
 	// リンクを操作するボディ命令 (65--69)
 	// [local]newlink     [atom1, pos1, atom2, pos2, mem1]
