@@ -649,7 +649,7 @@ public class Translator {
 					break;//nakajima 2004-01-04, n-kato
 				case Instruction.COPYCELLS : //[-dstmap, -dstmem, srcmem]
 					// <strike>自由リンクを持たない膜（その子膜とのリンクはOK）のみ</strike>
-					writer.write(tabs + "var" + inst.getIntArg1() + " =  ((AbstractMembrane)var" + inst.getIntArg2() + ").copyFrom(((AbstractMembrane)var" + inst.getIntArg3() + "));\n");
+					writer.write(tabs + "var" + inst.getIntArg1() + " =  ((AbstractMembrane)var" + inst.getIntArg2() + ").copyCellsFrom(((AbstractMembrane)var" + inst.getIntArg3() + "));\n");
 					break; //kudo 2004-09-29
 				case Instruction.DROPMEM : //[srcmem]
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").drop();\n");
@@ -657,9 +657,42 @@ public class Translator {
 				case Instruction.LOOKUPLINK : //[-dstlink, srcmap, srclink]
 					writer.write(tabs + "HashMap srcmap = (HashMap)var" + inst.getIntArg2() + ";\n");
 					writer.write(tabs + "Link srclink = (Link)var" + inst.getIntArg3() + ";\n");
-					writer.write(tabs + "Atom la = (Atom) srcmap.get(new Integer(srclink.getAtom().id)); // hashCode()をidに変更 (2004-10-12) n-kato\n");
+					writer.write(tabs + "Atom la = (Atom) srcmap.get(srclink.getAtom());\n");
 					writer.write(tabs + "var" + inst.getIntArg1() + " = new Link(la, srclink.getPos());\n");
 					break; //kudo 2004-10-10
+//未対応。変数は、配列に持たなければならなかったらしい。
+//				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
+//					writer.write(tabs + "func = " + getFuncVarName(new Functor("=",2) + ";\n");
+//					writer.write(tabs + "linklist=(List)var" + inst.getIntArg2() + ";\n");
+//					writer.write(tabs + "insset=new HashSet();\n");
+//					writer.write(tabs + "mem=((AbstractMembrane)var" + inst.getIntArg3() + ");\n");
+//					writer.write(tabs + "for(int i=0;i<linklist.size();i++)\n");
+//					writer.write(tabs + "	for(int j=i+1;j<linklist.size();j++){\n");
+//					writer.write(tabs + "		Link a=(Link)var((Integerlinklist.get(i)).intValue());\n");
+//					writer.write(tabs + "		Link b=(Link)var((Integerlinklist.get(j)).intValue());\n");
+//					writer.write(tabs + "		if(a==b.getBuddy()){\n");
+//					writer.write(tabs + "			Atom eq=srcmem.newAtom(FUNC_UNIFY);\n");
+//					writer.write(tabs + "			srcmem.unifyLinkBuddies(a,new Link(eq,0));\n");
+//					writer.write(tabs + "			srcmem.unifyLinkBuddies(b,new Link(eq,1));\n");
+//					writer.write(tabs + "			insset.add(eq);\n");
+//					writer.write(tabs + "		}\n");
+//					writer.write(tabs + "	}\n");
+//					writer.write(tabs + "var" + inst.getIntArg1() + " = insset;\n");
+//					break; //kudo 2004-12-29
+//				case Instruction.DELETECONNECTORS : //[srcset,srcmap,srcmem]
+//					writer.write(tabs + "Set delset = (Set)var" + inst.getIntArg1() + ";\n");
+//					writer.write(tabs + "Map delmap = (Map)var" + inst.getIntArg2() + ";\n");
+//					writer.write(tabs + "srcmem = ((AbstractMembrane)var" + inst.getIntArg3() + ");\n");
+//					writer.write(tabs + "Iterator it" + iteratorNo + " = delset.iterator();\n");
+//					writer.write(tabs + "while(it" + iteratorNo + ".hasNext()){\n");
+//					writer.write(tabs + "	Atom orig=(Atom)it" + iteratorNo + ".next();\n");
+//					writer.write(tabs + "	Atom copy=(Atom)delmap.get(orig);//new Integer(orig.id));\n");
+//					writer.write(tabs + "	srcmem.unifyLinkBuddies(copy.getArg(0), copy.getArg(1));\n");
+////						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
+////						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
+//					writer.write(tabs + "	srcmem.removeAtom(copy);\n");
+//					writer.write(tabs + "}\n");
+//					break; //kudo 2004-12-29
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 					//====制御命令====ここから====
 				case Instruction.COMMIT :
