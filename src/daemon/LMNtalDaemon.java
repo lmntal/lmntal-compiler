@@ -69,7 +69,7 @@ public class LMNtalDaemon implements Runnable {
 	/**
 	 * 自ホストのfqdn。中身はInetAddress.getLocalHost()
 	 */
-	static String myhostname;
+	static String myhostaddress;
 	
 	/**
 	 * LMNtalDaemon is ready if this is true.
@@ -99,15 +99,15 @@ public class LMNtalDaemon implements Runnable {
 	}
 	static {
 		try {
-			myhostname = InetAddress.getLocalHost().getHostAddress();//Canonical  //TODO (nakajima)NAT対応
+			myhostaddress = InetAddress.getLocalHost().getHostAddress();//Canonical  //TODO (nakajima)NAT対応
 		} catch (Exception e) {
-			myhostname =  "DEFERRED";	// とりあえず放置
+			myhostaddress =  "DEFERRED";	// とりあえず放置
 			e.printStackTrace();
 		}
 		
-		if(myhostname.equals("127.0.0.1")){
+		if(myhostaddress.equals("127.0.0.1")){
 			//throw new RuntimeException("cannot resolve hostname. contact your system adminitrator and configure your DNS settings");
-			myhostname =  "DEFERRED";	// とりあえず放置
+			myhostaddress =  "DEFERRED";	// とりあえず放置
 		}
 	}
 	
@@ -294,6 +294,10 @@ public class LMNtalDaemon implements Runnable {
 	 * @param fqdn ホスト名。Fully Qualified Domain Nameである事。 
 	 */
 	public static boolean makeRemoteConnection(String fqdn) {
+		Thread t1 = new Thread(new MakeRemoteConnectionThread(), "MakeRemoteConnectionThread");
+		t1.start();
+		
+		
 		//「ブロックしないようにする」
 		//todo 3分間誰も通信できなくなるのを回避するために専用スレッドを作る（後回しでよい） n-kato 2004-08-20
 
@@ -347,7 +351,7 @@ public class LMNtalDaemon implements Runnable {
 		return true;
 	}
 
-	//TODO 終了する時にちゃんとこれを呼ぶ(nakajima)
+	//TODO (nakajima)終了する時にちゃんとこれを呼ぶ
 	public static boolean unregisterRuntimeGroup(String rgid){
 		if (Env.debugDaemon > 0)System.out.println("unregisterRuntimeGroup(" + rgid +  ")");
 		
@@ -459,9 +463,16 @@ public class LMNtalDaemon implements Runnable {
 	 *  todo 一意なIDを作る
 	 */
 	public static String makeID() {
-		return myhostname+ ":" + r.nextLong();
+		return myhostaddress+ ":" + r.nextLong();
 	}
 	public static String getLocalHostName() {
-		return myhostname;
+		return myhostaddress;
+	}
+}
+
+class MakeRemoteConnectionThread implements Runnable{
+
+	public void run(){
+	
 	}
 }
