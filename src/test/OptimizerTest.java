@@ -95,11 +95,11 @@ public class OptimizerTest extends TestCase {
 		Functor b = new Functor("b", 0);
 		ArrayList list = new ArrayList();
 
-		System.out.println("( {a, $p}, {b, $q} :- {a, $q}, {b, $p} )");
+		System.out.println("( {a, $p}, {b, $q} :- {a, $q}, {a, b, $p} )");
 
-		list.add(Instruction.spec(5, 9));
+		list.add(Instruction.spec(5, 10));
 		list.add(Instruction.removeatom(3, 1, a));
-		list.add(Instruction.removeatom(4, 2, a));
+		list.add(Instruction.removeatom(4, 2, b));
 		list.add(new Instruction(Instruction.REMOVEMEM, 1, 0));
 		list.add(new Instruction(Instruction.REMOVEPROXIES, 1));
 		list.add(new Instruction(Instruction.REMOVEMEM, 2, 0));
@@ -112,7 +112,8 @@ public class OptimizerTest extends TestCase {
 		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 6));
 		list.add(new Instruction(Instruction.INSERTPROXIES, 0, 5));
 		list.add(Instruction.newatom(7, 5, a));
-		list.add(Instruction.newatom(8, 6, b));
+		list.add(Instruction.newatom(8, 6, a));
+		list.add(Instruction.newatom(9, 6, b));
 
 		list.add(new Instruction(Instruction.FREEMEM, 1));
 		list.add(new Instruction(Instruction.FREEMEM, 2));

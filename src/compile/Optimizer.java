@@ -151,7 +151,70 @@ public class Optimizer {
 		}
 		Instruction.changeMemId(list, reuseMap);
 	}
-		
+	
+	/**
+	 * 膜・ファンクタ毎にアトムの集合を管理するためのクラス。
+	 * アトム再利用コードを生成する際にアトムを管理するために使用する。
+	 * @author Ken
+	 */
+	private static class AtomSet {
+		HashMap map = new HashMap(); // mem -> (functor -> atoms)
+		/**
+		 * アトムを追加する
+		 * @param mem アトムが所属する膜
+		 * @param functor アトムのファンクタ
+		 * @param atom 追加するアトム
+		 */
+		void add(Integer mem, Functor functor, Integer atom) {
+			HashMap map2 = (HashMap)map.get(mem);
+			if (map2 == null) {
+				map2 = new HashMap();
+				map.put(mem, map2);
+			}
+			HashSet atoms = (HashSet)map2.get(functor);
+			if (atoms == null) {
+				atoms = new HashSet();
+				map2.put(functor, atoms);
+			}
+			atoms.add(atom);
+		}
+		/**
+		 * 指定された膜に所属する、指定されたファンクタを持つアトムの反復子を返す
+		 * @param mem アトムが所属するアトム
+		 * @param functor アトムのファンクター
+		 * @return 反復子
+		 */
+		Iterator iterator(Integer mem, Functor functor) {
+			HashMap map2 = (HashMap)map.get(mem);
+			if (map2 == null) {
+				return util.Util.NULL_ITERATOR;
+			}
+			HashSet atoms = (HashSet)map2.get(functor);
+			if (atoms == null) {
+				return util.Util.NULL_ITERATOR;
+			}
+			return atoms.iterator();
+		}
+		/**
+		 * 膜の反復子を返す
+		 * @return 反復子
+		 */
+		Iterator memIterator() {
+			return map.keySet().iterator();
+		}
+		/**
+		 * 指定された膜内にある、このインスタンスが管理するアトムのファンクタの反復子を返す
+		 * @param mem 膜
+		 * @return 反復子
+		 */
+		Iterator functorIterator(Integer mem) {
+			HashMap map2 = (HashMap)map.get(mem);
+			if (map2 == null) {
+				return util.Util.NULL_ITERATOR;
+			}
+			return map2.keySet().iterator();
+		}
+	}
 	/**	
 	 * アトム再利用を行うコードを生成する。<br>
 	 * 引数に渡される命令列は、次の条件を満たしている必要がある。
@@ -168,8 +231,8 @@ public class Optimizer {
 		//
 		
 		// removeatom/newatom/getlink命令の情報を調べる
-		HashMap removedAtoms = new HashMap(); // functor -> set of atomId
-		HashMap createdAtoms = new HashMap(); // functor -> set of atomId
+		AtomSet removedAtoms = new AtomSet();
+		AtomSet createdAtoms = new AtomSet();
 		HashMap getlinkInsts = new HashMap(); // linkId -> getlink instruction
 		
 		Iterator it = list.iterator();
@@ -177,20 +240,16 @@ public class Optimizer {
 			Instruction inst = (Instruction)it.next();
 			switch (inst.getKind()) {
 				case Instruction.REMOVEATOM:
-					//とりあえず本膜だけ
-					if (inst.getIntArg2() == 0) {
-						Integer atomId = (Integer)inst.getArg1();
-						Functor functor = (Functor)inst.getArg3();
-						addToMap(removedAtoms, functor, atomId);
-					}
+					Integer atom = (Integer)inst.getArg1();
+					Functor functor = (Functor)inst.getArg3();
+					Integer mem = (Integer)inst.getArg2();
+					removedAtoms.add(mem, functor, atom);
 					break;
 				case Instruction.NEWATOM:
-					//とりあえず本膜だけ
-					if (inst.getIntArg2() == 0) {
-						Integer atomId = (Integer)inst.getArg1();
-						Functor functor = (Functor)inst.getArg3();
-						addToMap(createdAtoms, functor, atomId);
-					}
+					atom = (Integer)inst.getArg1();
+					functor = (Functor)inst.getArg3();
+					mem = (Integer)inst.getArg2();
+					createdAtoms.add(mem, functor, atom);
 					break;
 				case Instruction.GETLINK:
 					//後で場所を移動する
@@ -206,18 +265,19 @@ public class Optimizer {
 		//再利用されるアトムのID（reuseMapの値に設定されているIDの集合）
 		HashSet reuseAtoms = new HashSet(); 
 
-		//本膜中にある、同じ名前のアトムを再利用する
-		//とりあえずでてきた順に対応させる	
-		Iterator functorIterator = removedAtoms.keySet().iterator();
-		while (functorIterator.hasNext()) {
-			Functor functor = (Functor)functorIterator.next();
-			if (createdAtoms.containsKey(functor)) {
-				Iterator removedAtomIterator = ((HashSet)removedAtoms.get(functor)).iterator();
-				Iterator createdAtomIterator = ((HashSet)createdAtoms.get(functor)).iterator();
+		//同じ膜にある、同じ名前のアトムを再利用する
+		Iterator memIterator = removedAtoms.memIterator();
+		while (memIterator.hasNext()) {
+			Integer mem = (Integer)memIterator.next();
+			Iterator functorIterator = removedAtoms.functorIterator(mem);
+			while (functorIterator.hasNext()) {
+				Functor functor = (Functor)functorIterator.next();
+				Iterator removedAtomIterator = removedAtoms.iterator(mem, functor);
+				Iterator createdAtomIterator = createdAtoms.iterator(mem, functor);
 				while (removedAtomIterator.hasNext() && createdAtomIterator.hasNext()) {
-					Integer removeAtomId = (Integer)removedAtomIterator.next();
-					reuseMap.put(createdAtomIterator.next(), removeAtomId);
-					reuseAtoms.add(removeAtomId);
+					Integer removeAtom = (Integer)removedAtomIterator.next();
+					reuseMap.put(createdAtomIterator.next(), removeAtom);
+					reuseAtoms.add(removeAtom);
 					//再利用の組み合わせが決まったものは削除する
 					//（この後に続く、アトム名が異なる場合などの再利用の組み合わせを決定する処理のため。）
 					removedAtomIterator.remove();
@@ -226,7 +286,7 @@ public class Optimizer {
 			}
 		}
 		
-		//TODO アトム名が異なるものの再利用の組み合わせを決定するコードをここに書く
+		//TODO 膜・アトム名が異なるものの再利用の組み合わせを決定するコードをここに書く
 
 		//再利用方法の表示（デバッグ用）
 		it = reuseMap.keySet().iterator();
