@@ -1622,18 +1622,18 @@ public class Instruction implements Cloneable {
 		if(tmp.equals("loop") && data.size() == 1 && data.get(0) instanceof ArrayList && ((ArrayList)data.get(0)).size() == 1) {
 			ArrayList list = (ArrayList)((ArrayList)data.get(0)).get(0);
 			if(list.size() == 0) {
-				buffer.append("[[[]]]\n");
+				buffer.append("[[[]]]");
 			} else {
 				buffer.append("[[[\n");
 				int i;
 				for(i = 0; i < list.size()-1; i++){
-					buffer.append("  ");
+					buffer.append("                  ");
 					buffer.append(list.get(i));
 					buffer.append(", \n");
 				}
-				buffer.append("  ");
+				buffer.append("                  ");
 				buffer.append(list.get(i));
-				buffer.append("]]]\n");
+				buffer.append("]]]");
 			}
 		} else {
 			buffer.append(data.toString());
