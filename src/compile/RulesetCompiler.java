@@ -21,11 +21,19 @@ public class RulesetCompiler {
 	/**
 	 * 与えられた膜構造を生成するreactメソッドを実装するルールセットを生成する。
 	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
+	 * 
+	 * @param unitName ファイル名
 	 * @param m 膜構造
-	 * @return (:-m)というルール1つだけからなるルールセット */
-	public static Ruleset compileMembrane(Membrane m) {
+	 * @return (:-m)というルール1つだけからなるルールセット
+	 */
+	public static Ruleset compileMembrane(Membrane m, String unitName) {
 		return (Ruleset)compileMembraneToGeneratingMembrane(m).rulesets.get(0);
 	}
+	
+	public static Ruleset compileMembrane(Membrane m) {
+		return compileMembrane(m, "-");
+	}
+	
 	/**
 	 * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
 	 * より正確に言うと、与えられた膜構造の内容に対応するプロセスを1回だけ生成するreactメソッドを

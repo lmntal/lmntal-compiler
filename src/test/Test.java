@@ -18,10 +18,16 @@ import runtime.Env;
 public class Test {
 
 	public static void main(String[] args) {
-		a();
+//		a();
 //		b();
+		c();
 	}
 	
+	public static void c() {
+		String s = "abc/def/g.txt";
+		s = s.replaceAll(".*?[\\/]([^\\/]+)$", "$1");
+		System.out.println(s);
+	}
 	public static void b() {
 		String s = "1 2 .. 3.. 4. 5 6 7";
 		String r[] = s.split("[\\s.]+");
