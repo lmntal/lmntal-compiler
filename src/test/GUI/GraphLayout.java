@@ -120,8 +120,8 @@ public class GraphLayout implements Runnable {
 					double len = Math.sqrt(tx*tx+ty*ty);
 					
 					// move = t times diff
-					dx = 2 * tx / len * a_r;
-					dy = 2 * ty / len * a_r;
+					dx = 20 * tx / len * a_r;
+					dy = 20 * ty / len * a_r;
 					
 					cur.to.setMoveDelta(dx,dy);
 				}
