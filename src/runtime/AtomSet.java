@@ -150,7 +150,7 @@ public final class AtomSet implements Set{
 	}
 	/**
 	 * 指定されたコレクション内の全ての要素が含まれる場合にはtrueを返す。
-	 * TODO 現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
+	 * <p>現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
 	 */
 	public boolean containsAll(Collection c) {
 		Iterator it = c.iterator();
@@ -163,7 +163,7 @@ public final class AtomSet implements Set{
 	}
 	/**
 	 * 指定されたコレクション内の全ての要素をこの集合に追加する。
-	 * TODO 現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
+	 * <p>現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
 	 * @return この集合が変更された場合はtrue
 	 */
 	public boolean addAll(Collection c) {
@@ -178,7 +178,7 @@ public final class AtomSet implements Set{
 	}
 	/**
 	 * 指定されたコレクション内の全ての要素をこの集合から除去する。
-	 * TODO 現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
+	 * <p>現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
 	 * @return この集合が変更された場合はtrue
 	 */
 	public boolean removeAll(Collection c) {
