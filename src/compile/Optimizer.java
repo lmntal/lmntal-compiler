@@ -715,7 +715,8 @@ public class Optimizer {
 																 l.pos,
 																 inst.getIntArg5()));
 						} catch (IndexOutOfBoundsException e) {
-							loopIterator.set(Instruction.newlink(inst.getIntArg1(),
+							loopIterator.set(new Instruction(Instruction.NEWLINK,
+																 inst.getIntArg1(),
 																 inst.getIntArg2(),
 																 l.atom,
 																 l.pos));
@@ -765,7 +766,7 @@ public class Optimizer {
 			}
 			varargs.add(i2);
 		}
-		loop.add(loop.size() - 1, Instruction.reloadvars(memargs, atomargs, varargs));
+		loop.add(loop.size() - 1, Instruction.resetvars(memargs, atomargs, varargs));
 		
 		Instruction.changeVar(loop, varMap);
 		
