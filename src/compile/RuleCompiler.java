@@ -682,14 +682,14 @@ public class RuleCompiler {
 						// 左辺での出現における対応する自由リンクは、左辺のアトムに接続している。
 						// ( { org(Y,), $pc[Y,|] } :- atom(X), $pc[X,|] )
 						if (false && pc.def.rhsOccs.size() == 1) {
-							LinkOccurrence orglink = pc.buddy.args[link.pos].buddy; // org引数のYの出現
+							LinkOccurrence orglink = pc.def.lhsOcc.args[link.pos].buddy; // org引数のYの出現
 							body.add( new Instruction(Instruction.RELINK,
 											rhsatomToPath(atom), pos,
 											lhsatomToPath(orglink.atom), orglink.pos,
 											rhsmemToPath(targetmem) ));
 						}
 						else {
-							LinkOccurrence orglink = pc.buddy.args[link.pos].buddy; // org引数のYの出現
+							LinkOccurrence orglink = pc.def.lhsOcc.args[link.pos].buddy; // org引数のYの出現
 							int srclink = varcount++;
 							int copiedlink = varcount++;
 							int atomlink = varcount++;
@@ -769,7 +769,7 @@ public class RuleCompiler {
 				else {
 					// リンク先が型付きでないプロセス文脈のとき、PART1と同じ理由で$buddypcは右辺。
 					// ( {org(Y,), $buddypc[Y,|]} :- type($atom) | $buddypc[X,|], $atom[X|] )
-					LinkOccurrence orglink = buddypc.buddy.args[pos].buddy; // org引数のYの出現
+					LinkOccurrence orglink = buddypc.def.lhsOcc.args[pos].buddy; // org引数のYの出現
 					if (gc.typedcxttypes.get(atom.def) == GuardCompiler.UNARY_ATOM_TYPE) {
 						body.add( new Instruction(Instruction.RELINK,
 												rhstypedcxtToPath(atom), 0,
@@ -792,7 +792,7 @@ public class RuleCompiler {
 						// 型付きでないプロセス文脈のリンク先がアトムのとき
 						if (lhsatoms.contains(link.atom)) { // リンク先は左辺のトップレベル
 							// ( {src(Z,),$atom[Z,|]},buddy(X) :- $atom[X,|] )
-							LinkOccurrence srclink = atom.buddy.args[pos].buddy; // src引数のZの出現
+							LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy; // src引数のZの出現
 							body.add( new Instruction(Instruction.LOCALUNIFY,
 												lhsatomToPath(link.atom), link.pos,
 												lhsatomToPath(srclink.atom), srclink.pos,
@@ -815,8 +815,8 @@ public class RuleCompiler {
 						else {
 							// リンク先が型付きでないプロセス文脈のとき、PART1と同じ理由で$buddypcは右辺。
 							// ( {org(Y,),$buddypc[Y,|]},{src(Z,),$atom[Z,|]} :- $buddypc[X,|],$atom[X,|] )
-							LinkOccurrence orglink = buddypc.buddy.args[link.pos].buddy; // org引数のYの出現
-							LinkOccurrence srclink = atom.   buddy.args[pos     ].buddy; // src引数のZの出現
+							LinkOccurrence orglink = buddypc.def.lhsOcc.args[link.pos].buddy; // org引数のYの出現
+							LinkOccurrence srclink = atom.   def.lhsOcc.args[pos     ].buddy; // src引数のZの出現
 							if (false && buddypc.def.rhsOccs.size() == 1) {
 								if ( lhsatomToPath(orglink.atom) < lhsatomToPath(srclink.atom)
 								  || ( lhsatomToPath(orglink.atom) == lhsatomToPath(srclink.atom)

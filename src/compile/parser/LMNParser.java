@@ -960,9 +960,9 @@ public class LMNParser {
 			if( def.lhsOcc != null) {	// ガードでないとき
 				for(int i=0;i<def.rhsOccs.size();i++){
 					Context rhsocc = ((Context)def.rhsOccs.get(i));
-					rhsocc.buddy = def.lhsOcc;
+					rhsocc.def.lhsOcc = def.lhsOcc;
 				}
-				if (def.rhsOccs.size() > 0 )def.lhsOcc.buddy = ((Context)def.rhsOccs.get(0));
+				//if (def.rhsOccs.size() > 0 )def.lhsOcc.buddy = ((Context)def.rhsOccs.get(0));
 			}
 		}
 		
@@ -998,8 +998,8 @@ public class LMNParser {
 					rhsocc.setBundleName(SrcLinkBundle.PREFIX_TAG + generateNewLinkName());
 					// add to names;
 				}
-				rhsocc.buddy = def.lhsOcc;
-				def.lhsOcc.buddy = rhsocc;
+				rhsocc.def.lhsOcc = def.lhsOcc;
+				//def.lhsOcc.buddy = rhsocc;
 				rhsocc.def = def;
 				def.rhsOccs.add(rhsocc);
 			}
