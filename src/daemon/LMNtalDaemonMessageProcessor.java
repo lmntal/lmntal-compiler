@@ -119,8 +119,8 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 							if(command.equalsIgnoreCase("connect")){
 								//connectがきたら、ランタイムを生成する。
 								//TODO rgidの決め方どうしよう？
-								Thread remoteRuntime = new Thread(new DummyRemoteRuntime(1));
-								remoteRuntime.start();
+
+
 
 								//OK返すのは生成されたライタイムが登録されてから。
 								
