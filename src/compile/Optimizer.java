@@ -32,7 +32,7 @@ public class Optimizer {
 				}
 			}
 			if (Env.optimize >= 7) {
-				makeLoop(head, body); //まだ問題だらけ
+				makeLoop(head, body);
 			}
 		}
 	}
@@ -690,7 +690,9 @@ public class Optimizer {
 
 		//条件に合致するか検査＋情報収集
 		HashMap links = new HashMap(); //newlink命令で生成したリンクの情報
+		HashMap linkToAtom = new HashMap(); //リンク -> getlinkしたアトム
 		HashMap functor = new HashMap(); // atom -> functor
+		HashMap inherit = new HashMap(); // (atom,pos) -> inheritするリンク
 		//種類ごとに変数一覧を作成
 		ArrayList memvars = new ArrayList();
 		ArrayList atomvars = new ArrayList();
@@ -722,10 +724,19 @@ public class Optimizer {
 					links.put(l1, l2);
 					links.put(l2, l1);
 					break;
+				case Instruction.INHERITLINK:
+					Link l = new Link(inst.getIntArg1(), inst.getIntArg2());
+					inherit.put(l, inst.getArg3());
+					System.out.println(l + "->" + inst.getArg1());
+					break;
 				case Instruction.NEWATOM:
 				case Instruction.LOCALNEWATOM:
 					functor.put(inst.getArg1(), inst.getArg3());
 					atomvars.add(inst.getArg1());
+					break;
+				case Instruction.GETLINK:
+					linkToAtom.put(inst.getArg1(), inst.getArg2());
+					othervars.add(inst.getArg1());
 					break;
 				case Instruction.NEWATOMINDIRECT:
 				case Instruction.LOCALNEWATOMINDIRECT:
@@ -742,7 +753,6 @@ public class Optimizer {
 //				case Instruction.COPYMEM:
 					memvars.add(inst.getArg1());
 					break;
-				case Instruction.GETLINK:
 				case Instruction.ALLOCLINK:
 					othervars.add(inst.getArg1());
 					break;
@@ -792,21 +802,14 @@ public class Optimizer {
 			loop.add(((Instruction)lit.next()).clone());
 		}
 
-//		//もともとの変数→ループ内での変数
-//		HashMap varMap = new HashMap();
-//		varMap.put(new Integer(0), new Integer(0)); //本膜
-//		for (int i = 1; i < base; i++) {
-//			varMap.put(new Integer(i), new Integer(base + i));
-//		}
 		//ループ内変数の付け替え
 
-		HashMap atomVarMap = new HashMap();
+		//もともとの変数→ループ内で、再定義する場合の変数
 		HashMap memVarMap = new HashMap();
+		HashMap atomVarMap = new HashMap();
 		HashMap otherVarMap = new HashMap();
+		//ループ内で再定義している変数→もともとの変数
 		HashMap reverseAtomVarMap = new HashMap();
-//		ArrayList atomargs = new ArrayList();
-//		ArrayList memargs = new ArrayList();
-//		ArrayList varargs = new ArrayList();
 		int base = atomvars.size() + memvars.size() + othervars.size() + 10; //ループ内命令列で使用する変数の開始値 
 		nextArg = base;
 		//膜
@@ -822,7 +825,6 @@ public class Optimizer {
 			if (!a.equals(firstAtom)) {
 				Integer t = new Integer(nextArg++);
 				atomVarMap.put(a, t);
-				System.out.println(a + "->" + t);
 				reverseAtomVarMap.put(t, a); 
 			}
 		}
@@ -840,17 +842,37 @@ public class Optimizer {
 
 		Instruction resetVars = Instruction.resetvars(memvars, atomvars, othervars);
 
+		//ループ中の、変数->前回時データの入った変数
+		HashMap beforeVar = new HashMap();
+		//ループ外の変数->ループ内での前回時データが入った変数
+		HashMap outToBeforeVar = new HashMap();
+		for (int i = 0; i < memvars.size(); i++) {
+			beforeVar.put(memVarMap.get(memvars.get(i)), new Integer(i));
+			outToBeforeVar.put(memvars.get(i), new Integer(i));
+		}
+		for (int i = 0; i < atomvars.size(); i++) {
+			beforeVar.put(atomVarMap.get(atomvars.get(i)), new Integer(memvars.size() + i));
+			outToBeforeVar.put(atomvars.get(i), new Integer(memvars.size() + i));
+		}
+		for (int i = 0; i < othervars.size(); i++) {
+			beforeVar.put(otherVarMap.get(othervars.get(i)), new Integer(memvars.size() + atomvars.size() + i));
+			outToBeforeVar.put(othervars.get(i), new Integer(memvars.size() + atomvars.size() + i));
+		}
+		
 		//命令列の変更を行う
 
 		//ループ内用変数置き換えマップ
+		//検査を省略して、前回ループの変数を使用する場合の、
+		// 「再定義した場合の変数->前回ループ時の値が入っている変数」
 		HashMap atomVarMap2 = new HashMap();
-		HashMap reverseAtomVarMap2 = new HashMap();
+		//上の逆
+//		HashMap reverseAtomVarMap2 = new HashMap();
 //		HashMap memVarMap2 = new HashMap();
-//		HashMap otherVarMap2 = new HashMap();
+		HashMap otherVarMap2 = new HashMap();
 //		memVarMap2.put(new Integer(0), new Integer(0)); //本膜
 //		atomVarMap.put(new Integer(firstAtom.intValue() + base), firstAtom);
 		atomVarMap2.put(firstAtom, firstAtom);
-		reverseAtomVarMap2.put(firstAtom, firstAtom);
+//		reverseAtomVarMap2.put(firstAtom, firstAtom);
 		
 		ArrayList moveInsts = new ArrayList();
 		ListIterator baseIterator = head.subList(2, head.size() - 1).listIterator(); //１回目用命令列
@@ -860,23 +882,38 @@ public class Optimizer {
 			inst = (Instruction)loopIterator.next();
 			switch (inst.getKind()) {
 				case Instruction.DEREF:
-					Link l = (Link)links.get(new Link(inst.getIntArg2(), inst.getIntArg3()));
+//					Link l = (Link)links.get(new Link(inst.getIntArg2(), inst.getIntArg3()));
+					Link l = (Link)links.get(new Link(((Integer)reverseAtomVarMap.get(inst.getArg2())).intValue(), inst.getIntArg3()));
 					if (l != null && l.pos == inst.getIntArg4()) {
-						atomVarMap2.put(inst.getArg1(), new Integer(l.atom));
-						reverseAtomVarMap2.put(new Integer(l.atom), inst.getArg1());
+//						atomVarMap2.put(inst.getArg1(), new Integer(l.atom));
+						atomVarMap2.put(inst.getArg1(), outToBeforeVar.get(new Integer(l.atom)));
+//						reverseAtomVarMap2.put(new Integer(l.atom), inst.getArg1());
 						loopIterator.remove();
+						break; //削除したので後の処理はしない
+					}
+					Integer beforeAtom = (Integer)atomVarMap.get(atomvars.get(((Integer)beforeVar.get(inst.getArg2())).intValue() - memvars.size()));
+					System.out.println(inst.getArg2() + "," + beforeAtom);
+					if (beforeVar.get(beforeAtom).equals(atomVarMap2.get(beforeAtom))) {
+						Integer t = (Integer)outToBeforeVar.get(inherit.get(new Link(inst.getIntArg2(), inst.getIntArg3())));
+						loopIterator.set(new Instruction(Instruction.DEREFLINK, inst.getIntArg1(), t.intValue(), inst.getIntArg4()));
 					}
 					break;
 				case Instruction.FUNC:
 					if (atomVarMap2.containsKey(inst.getArg1())) {
-						Integer atom = (Integer)atomVarMap2.get(inst.getArg1());
-						if (functor.containsKey(atom)) {
-							if (!functor.get(atom).equals(inst.getArg2())) {
-								//絶対失敗するので複数回同時適用は行わない
-								return;
+//start
+//						Integer atom = (Integer)atomVarMap2.get(inst.getArg1());
+						int afterchange = ((Integer)atomVarMap2.get(inst.getArg1())).intValue();
+						if (afterchange < memvars.size() + atomvars.size()) {
+							Integer atom = (Integer)atomvars.get(afterchange - memvars.size());
+//end
+							if (functor.containsKey(atom)) {
+								if (!functor.get(atom).equals(inst.getArg2())) {
+									//絶対失敗するので複数回同時適用は行わない
+									return;
+								}
+								//絶対成功するので除去	
+								loopIterator.remove();
 							}
-							//絶対成功するので除去	
-							loopIterator.remove();
 						}
 					}
 					break;					
@@ -884,6 +921,7 @@ public class Optimizer {
 		}
 
 		HashMap changeToNewlink = new HashMap(); //newlinkに変更するリンク -> リンク先
+		HashMap changeLink = new HashMap(); //inheritlinkの移動に伴い削除されたgetlink命令の第2引数の前回ループ時変数→第1引数
 		baseIterator = body.listIterator(1); //１回目用命令列
 		//loopIteratorはさっきの続き
 		while (baseIterator.hasNext()) {
@@ -891,60 +929,90 @@ public class Optimizer {
 			inst = (Instruction)loopIterator.next();
 			switch (inst.getKind()) {
 				case Instruction.GETLINK:
+					//リンク先がわかっているgetlinkの除去
 					Integer atom = (Integer)inst.getArg2();
-					Integer baseAtom;
+//					Integer baseAtom;
 					if (atomVarMap2.containsKey(atom)) {
 						atom = (Integer)atomVarMap2.get(inst.getArg2()); //変数置き換え後
-						baseAtom = (Integer)reverseAtomVarMap2.get(atom); //前回ループ
-					} else {
-						baseAtom = (Integer)atomVarMap.get(atom);
-						if (baseAtom == null) {
-							break;
-						}
-						System.out.println("atom:"+atom);
-						System.out.println("baseAtom:"+baseAtom);
-					}
-					Link l = (Link)links.get(new Link(baseAtom.intValue(), inst.getIntArg3()));
-					if (l != null) { //前回のループのnewlinkによってリンク先が特定できる場合
-						Integer baseAtom2 = new Integer(l.atom);
-						if (baseAtom.equals(atomVarMap2.get(atom)) ||
-							baseAtom2.equals(atomVarMap2.get(atomVarMap.get(baseAtom2)))) { //前回のループのnewlink命令が削除されるものの場合
-							System.out.println(inst);
-							System.out.println(baseAtom + " " + atom);
-							System.out.println(baseAtom2 + " " + atomVarMap.get(baseAtom2));
-							//getlinkを削除し、inheritlinkをnewlinkに変更
-							changeToNewlink.put(inst.getArg1(), l);
-							loopIterator.remove();
+//						baseAtom = (Integer)reverseAtomVarMap2.get(atom); //前回ループ
+						if (atom.intValue() < memvars.size() + atomvars.size()) {
+							Integer baseAtom = (Integer)atomvars.get(atom.intValue() - memvars.size()); //ループ外変数
+	//					} else {
+	//						baseAtom = null;//(Integer)atomVarMap.get(atom);
+	//					}
+	//					if (baseAtom != null) {
+							Link l = (Link)links.get(new Link(baseAtom.intValue(), inst.getIntArg3()));
+							if (l != null) { //前回のループのnewlinkによってリンク先が特定できる場合
+	//							Integer baseAtom2 = new Integer(l.atom);
+								Integer atom2 = (Integer)atomVarMap.get(new Integer(l.atom));
+	//							if (baseAtom.equals(atomVarMap2.get(atom)) ||
+	//								baseAtom2.equals(atomVarMap2.get(atomVarMap.get(baseAtom2)))) { //前回のループのnewlink命令が削除されるものの場合
+								if (beforeVar.get(atom).equals(atomVarMap2.get(atom)) ||
+									beforeVar.get(atom2).equals(atomVarMap2.get(atom2))) { //前回のループのnewlink命令が削除されるものの場合
+									//getlinkを削除し、inheritlinkをnewlinkに変更
+									loopIterator.remove();
+									changeToNewlink.put(inst.getArg1(), l);
+									//削除したので他の処理は行わない
+									break;
+								}
+							}
+	
+							//inheritlinkを最後に移動する事に伴うgetlinkの処理
+	//						if (baseAtom.equals(atomVarMap2.get(reverseAtomVarMap.get(baseAtom)))) {
+							if (atom.intValue() < memvars.size() + atomvars.size()) {
+								Integer beforeOutVar = (Integer)atomvars.get(atom.intValue() - memvars.size());
+								Integer beforeAtom = (Integer)atomVarMap.get(beforeOutVar);
+								if (beforeVar.get(beforeAtom).equals(atomVarMap2.get(beforeAtom))) {
+									loopIterator.remove();
+		//							changeLink.put(beforeAtom, inst.getArg1());
+									otherVarMap2.put(inst.getArg1(), outToBeforeVar.get(inherit.get(new Link(beforeOutVar.intValue(), inst.getIntArg3()))));
+								}
+							}
 						}
 					}
 					break;
 				case Instruction.INHERITLINK:
-					Integer linkVar = (Integer)inst.getArg3();
-					if (changeToNewlink.containsKey(linkVar)) {
-						l = (Link)changeToNewlink.get(linkVar);
-						//newlinkに変更
-						try {
-							loopIterator.set(Instruction.newlink(inst.getIntArg1(),
-																 inst.getIntArg2(),
-																 l.atom,
-																 l.pos,
-																 inst.getIntArg5()));
-						} catch (IndexOutOfBoundsException e) {
-							loopIterator.set(new Instruction(Instruction.NEWLINK,
-																 inst.getIntArg1(),
-																 inst.getIntArg2(),
-																 l.atom,
-																 l.pos));
-						}	
+					Integer atomVar = (Integer)inst.getArg1();
+//					Integer baseAtom = (Integer)reverseAtomVarMap.get(atomVar);
+					Integer beforeAtom = (Integer)beforeVar.get(atomVar);
+					if (beforeAtom.equals(atomVarMap2.get(atomVar))) { //もともとの変数番号と同じになっている場合
+						//最後に移動
+						moveInsts.add(baseInst);
+						baseIterator.remove();
+						loopIterator.remove();
+//						if (changeLink.containsKey(atomVar)) {
+//							otherVarMap2.put(changeLink.get(atomVar), beforeVar.get(inst.getArg1()));
+//						}
+					} else {
+						Integer linkVar = (Integer)inst.getArg3();
+						if (changeToNewlink.containsKey(linkVar)) {
+							Link l = (Link)changeToNewlink.get(linkVar);
+							//newlinkをループ後に移動したのに伴いinheritlinkをnewlinkに変更
+							try {
+								loopIterator.set(Instruction.newlink(inst.getIntArg1(),
+																	 inst.getIntArg2(),
+//																	 l.atom,
+																	 ((Integer)outToBeforeVar.get(new Integer(l.atom))).intValue(),
+																	 l.pos,
+																	 inst.getIntArg5()));
+							} catch (IndexOutOfBoundsException e) {
+								loopIterator.set(new Instruction(Instruction.NEWLINK,
+																	 inst.getIntArg1(),
+																	 inst.getIntArg2(),
+//																	 l.atom,
+																	 ((Integer)outToBeforeVar.get(new Integer(l.atom))).intValue(),
+																	 l.pos));
+							}
+						}
 					}
 					break;
 				case Instruction.NEWLINK:
-					int atomVar = inst.getIntArg1();
-					int atomVar2 = inst.getIntArg3();
-					baseAtom = (Integer)reverseAtomVarMap.get(inst.getArg1());
-					Integer baseAtom2 = (Integer)reverseAtomVarMap.get(inst.getArg3());
-					if (baseAtom.equals(atomVarMap2.get(new Integer(atomVar))) ||
-						baseAtom2.equals(atomVarMap2.get(new Integer(atomVar2)))) { //もともとの変数番号と同じになっている場合
+					atomVar = (Integer)inst.getArg1();
+					Integer atomVar2 = (Integer)inst.getArg3();
+					beforeAtom = (Integer)beforeVar.get(inst.getArg1());
+					Integer beforeAtom2 = (Integer)beforeVar.get(inst.getArg3());
+					if (beforeAtom.equals(atomVarMap2.get(atomVar)) ||
+						beforeAtom2.equals(atomVarMap2.get(atomVar2))) { //もともとの変数番号と同じになっている場合
 						//最後に移動
 						moveInsts.add(baseInst);
 						baseIterator.remove();
@@ -957,31 +1025,6 @@ public class Optimizer {
 		int memmax = ((List)react.getArg2()).size();
 		int atommax = memmax + ((List)react.getArg3()).size();
 
-//		ArrayList memargs = new ArrayList();
-//		ArrayList atomargs = new ArrayList();
-//		ArrayList varargs = new ArrayList();
-//		memargs.add(new Integer(0));
-//		int i;
-//		//膜
-//		for (i = base + 1; i < base + memmax; i++) {
-//			memargs.add(new Integer(i));
-//		}
-//		//アトム
-//		for (; i < base + atommax; i++) {
-//			Integer i2 = new Integer(i);
-//			if (varMap.containsKey(i2)) {
-//				i2 = (Integer)varMap.get(i2);
-//			}
-//			atomargs.add(i2);
-//		}
-//		//ローカル変数
-//		for (; i < base + base; i++) {
-//			Integer i2 = new Integer(i);
-//			if (varMap.containsKey(i2)) {
-//				i2 = (Integer)varMap.get(i2);
-//			}
-//			varargs.add(i2);
-//		}
 		ArrayList memvars2 = new ArrayList();
 		ArrayList atomvars2 = new ArrayList();
 		ArrayList othervars2 = new ArrayList();
@@ -1012,10 +1055,10 @@ public class Optimizer {
 		looparg.add(loop);
 		body.add(body.size() - 1, new Instruction(Instruction.LOOP, looparg));
 		//最後に1回実行する命令を挿入
+		Instruction.changeVar(moveInsts, outToBeforeVar);
 		body.addAll(body.size() - 1, moveInsts);
 		
 		//spec命令の変更
-		System.out.println(nextArg);
 		body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
 	}
 
