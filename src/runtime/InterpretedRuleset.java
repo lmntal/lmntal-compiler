@@ -169,13 +169,13 @@ class InterpreterReactor {
 
 					//====ファンクタに関係する命令====ここから====
 				case Instruction.DEREFFUNC : //[-dstfunc, srcatom, srcpos]
-					vars.set(inst.getArg1(), atoms[inst.getIntArg2()].args[inst.getIntArg3()].atom.getFunctor()));
+					vars.set(inst.getIntArg1(), atoms[inst.getIntArg2()].args[inst.getIntArg3()].getAtom().getFunctor());
 					break; //nakajima 2003-12-21
 				case Instruction.GETFUNC : //[-func, atom]
-					vars.set(inst.getArg1(), atoms[inst.getIntArg2()].getFunctor());
+					vars.set(inst.getIntArg1(), atoms[inst.getIntArg2()].getFunctor());
 					break; //nakajima 2003-12-21
 				case Instruction.LOADFUNC : //[-func, funcref]
-					vars.set(inst.getArg1(), (Functor)inst.getArg2());
+					vars.set(inst.getIntArg1(), (Functor)inst.getArg2());
 					break;//nakajima 2003-12-21
 				case Instruction.EQFUNC : //[func1, func2]
 					//todo: castが本当にいらないのか確認
