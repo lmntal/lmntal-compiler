@@ -1,0 +1,17 @@
+[[/*inline_define*/
+]],
+io : {
+	( print(String) :- [[/*inline*/
+		System.out.println(me.nth(0));
+		]](String)
+	)
+}
+,
+use(io), print([[
+
+abcdefg
+
+end
+
+]])
+
