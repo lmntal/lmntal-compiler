@@ -16,113 +16,174 @@ import java.util.*;
  *
  */
 public class Instruction {
-    //マッチングの実行
 
     //基本命令
-    /** deref [dstatom ,srcatom, srcpos, dstpos] 
-     * ＠return int
+    /** deref [?dstatom ,srcatom, srcpos, dstpos] 
+     * <BR>ガード命令<BR>
      * アトムsrcatomの第srcpos引数のリンク先が第dstpos引数に接続していることを確認したら、リンク先のアトムをdstatomに代入する。
      */
     public static final int DEREF = 0;
 
-    /** getmem [dstmem, srcatom] */
-    public static final int GETMEM = 1;
+    /** getmem [?dstmem, srcatom]
+     * <BR>失敗しないガード命令、ボディ命令<BR>
+     * 膜srcmemの所属膜への参照を取得する。
+	 */
+	public static final int GETMEM = 1;
 
-    /** getparent [dstmem, srcmem] */
+	/** getparent [?dstmem, srcmem]
+	 * <BR>失敗しないガード命令、ボディ命令<BR>
+	 * 膜srcmemの親膜への参照を取得する。
+	 * <P>TODO: 自由リンク管理アトムがあるので不要？
+	 */
     public static final int GETPARENT = 2;
 
-    /** anymem [dstmem, srcmem] 
-     * 膜srcmemの子膜に対して次々に、ノンブロッキングでのロック取得を試みる。（ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である） （この検査は方法２ではneq命令で行っていた）。そして、各子膜をdstmemに代入する。取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
+    /** anymem [??dstmem, srcmem] 
+     * <BR>ガード命令<BR>
+     * 膜srcmemの子膜のうちまだロックを取得していない膜に対して次々に、ノンブロッキングでのロック取得を試みる。
+     * ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
+     * （この検査は方法２ではneq命令で行っていた）。
+     * そして、各子膜をdstmemに代入する。
+     * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
+     * <P>注意: ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。
      */
     public static final int ANYMEM = 3;
 
-    /**    findatom [dstatom, srcmem, func]
+    /** findatom [dstatom, srcmem, func]
      * 膜srcmemにあって名前funcを持つアトムを次々にdstatomに代入する。
      */
     public static final int FINDATOM = 4;
 
     /** func [srcatom, func]
+	 * <BR>失敗しないガード命令、ボディ命令<BR>
+     * アトムsrcatomがファンクタfuncを持つことを確認する。
      */
     public static final int FUNC = 5;
 
     /** norules [srcmem] 
+	 * <BR>ガード命令<BR>
+	 * 膜srcmemにルールが存在しないことを確認する。
      */
     public static final int NORULES = 6;
 
-    /** natoms [?]
-     */
+	/** natoms [srcmem, count]
+	 * <BR>ガード命令<BR>
+	 * 膜srcmemの自由リンクアトム以外のアトム数がcountであることを確認する
+	 * <P>TODO:必要ですか？
+	 */
     public static final int NATOMS = 8;
 
-    /** nfreelinks [?]
+    /** nfreelinks [srcmem, count]
+     * <BR>ガード命令<BR>
+     * 膜srcmemの自由リンク数がcountであることを確認する。
      */
     public static final int NFREELINKS = 9;
 
-    /** nmems [?]
+    /** nmems [srcmem, count]
+     * <BR>ガード命令<BR>
+     * 膜srcmemの子膜の数がcountであることを確認する。
      */
     public static final int NMEMS = 10;
 
-    /** eq [mem1, mem2]
+	/** eq [atom1, atom2]<BR>
+     *  eq [mem1, mem2]
+     * <BR>ガード命令<BR>
+     * アトムatom1とatom2が同一のアトムを参照していることを確認する。
+     * 膜mem1と膜mem2が同一の膜を参照していることを確認する。
      */
     public static final int EQ = 11;
 
-    /** neq [mem1, mem2]
-     */
+	/** neq [atom1, atom2]<BR>
+	 *  neq [mem1, mem2]
+	 * <BR>ガード命令<BR>
+	 * アトムatom1とatom2が異なるアトムを参照していることを確認する。
+	 * 膜mem1と膜mem2が異なる膜を参照していることを確認する。
+	 * <P>TODO:膜に対するneq命令は不要？
+	 */
     public static final int NEQ = 12;
 
 
-    /** LOCK [srcmem]
-     * 膜srcmemに対するノンブロッキングでのロック取得を試みる。（ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である） （この検査は方法２ではneq命令で行っていた）。取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。  */
+    /** lock [srcmem]
+	 * <BR>ガード命令<BR>
+     * 膜srcmemに対するノンブロッキングでのロック取得を試みる。
+     * ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
+     * （この検査は方法２ではneq命令で行っていた）。
+     * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。  
+     * TODO: srcmemにmemof記法が廃止されたため、ロックはgetparentで行う。したがってlockは廃止。*/
     public static final int LOCK = 13;
 
-    /** unlock [?]
+    /** unlock [srcmem]
+	 * <BR>ボディ命令<BR>
+     * 膜srcmemのロックを解放する。
      */
     public static final int UNLOCK = 14;
 
     // ボディの実行
     /** removeatom [srcatom]
+	 * <BR>ボディ命令<BR>
      * アトムsrcatomを現在の膜から取り出す。
      */
     public static final int REMOVEATOM = 15;
 
     /** removemem [srcmem]
+	 * <BR>ボディ命令<BR>
      * 膜srcmemを現在の膜から取り出す。
      */
     public static final int REMOVEMEM = 16;
 
-    /** addproxy [?]
+    /** insertproxies [parentmem M],[srcmem N]
+     * <BR>ボディ命令<BR>
+     * 膜srcmem内の star アトム n に対して、以下を行う。
+     * <OL>
+     * <LI>n の名前を inside_proxy に変える。
+     * <LI>n の第1引数のリンク先が parentmem 内のアトム
+     * （この場合必ず outside_proxy または starになる）でなければ、
+     * <OL>
+     * <LI>M 内に outside_proxy o および star m を生成し、 
+newlink o,2,m,2 を行い、 
+relink  m,1,n,1 を行い、 
+newlink n,1,o,1 を行う。 
+
      */
-    public static final int ADDPROXY = 17;
+    public static final int INSERTPROXIES = 17;
 
     /** removeproxy [?]
      */
-    public static final int REMOVEPROXY = 18;
+    public static final int REMOVEPROXIES = 18;
 
     /** hoge_star [?]
      */
     //public static final int HOGE_STAR = 19;
 
-    /** newatom [dstatom, srcmem, func]
-     * 膜srcmemに名前funcを持つ新しいアトム作成し、 dstatomに代入する。
+    /** newatom [?dstatom, srcmem, func]
+     * <BR>ボディ命令<BR>
+     * 膜srcmemに名前funcを持つ新しいアトム作成し、参照をdstatomに代入する。
      */
     public static final int NEWATOM = 20;
 
-    /** newmem [dstmem, srcmem]
-     * 膜srcmemに新しい子膜を作成し、 dstmemに代入する。
+    /** newmem [?dstmem, srcmem]
+	 * <BR>ボディ命令<BR>
+     * 膜srcmemに新しい子膜を作成し、dstmemに代入する。
      */
     public static final int NEWMEM = 21;
 
     /** newlink [atom1, pos1, atom2, pos2]
-     * アトムatom1の第pos1引数と、アトムatom2の第pos2引数を接続する。
+	 * <BR>ボディ命令<BR>
+     * アトムatom1の第pos1引数から、アトムatom2の第pos2引数に向けて片方向リンクを張る。
+     * TODO: 逆向きも同時に張るようにする。
      */
     public static final int NEWLINK = 22;
 
     /** relink [atom1, pos1, atom2, pos2]
+	 * <BR>ボディ命令<BR>
      * アトムatom1の第pos1引数のリンク先の引数と、アトムatom2の第pos2引数を接続する。
+     * <P>典型的には、atom1はルールボディに、atom2はルールヘッドに存在する。
      */
     public static final int RELINK = 23;
 
     /** unify [atom1, pos1, atom2, pos2]
-     * アトムatom1の第pos1引数のリンク先の引数と、アトムatom2の第pos2引数のリンク先の引数を接続する。
+ 	 * <BR>ボディ命令<BR>
+	 * アトムatom1の第pos1引数のリンク先の引数と、アトムatom2の第pos2引数のリンク先の引数を接続する。
+	 * <P>典型的には、atom1とatom2は
      */
     public static final int UNIFY = 24;
 
@@ -137,17 +198,21 @@ public class Instruction {
     public static final int DEQUEUEMEM = 26;
 
     /** movemem [dstmem, srcmem]
-     * 膜srcmemを膜dstmemに移動する。膜dstmemのchildatomsを更新する。
+	 * <BR>ボディ命令<BR>
+     * 膜srcmemを膜dstmemに移動する。
      */
     public static final int MOVEMEM = 27;
 	      
     //拡張命令
     /** recursivelock [srcmem]
+	 * <BR>失敗しない（？）ガード命令<BR>
      * 膜srcmemの全ての子膜に対して再帰的にロックを取得する。ブロッキングで行う。
      */
     public static final int RECURSIVELOCK = 28;
 
-    /** recursiveunlock [?]
+    /** recursiveunlock [srcmem]
+	 * <BR>ボディ命令<BR>
+     * 膜srcmemの全ての子膜に対して再帰的にロックを解放する。
      */
     public static final int RECURSIVEUNLOCK = 29;
 
