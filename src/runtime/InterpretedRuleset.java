@@ -67,14 +67,20 @@ public final class InterpretedRuleset extends Ruleset {
 		Atom[]             atoms = new Atom[formals];
 		mems[0]  = mem;
 		atoms[1] = atom;
-		
-		Iterator it = matchInsts.iterator();
-		while(it.hasNext()) {
-			// TODO マッチテストなかじま
-			Instruction inst = (Instruction)it.next();
+		return matchTestStep(mems,atoms,matchInsts,0);
+	}
+	private boolean matchTestStep(AbstractMembrane[] mems, Atom[] atoms,
+									List matchInsts, int pc) {
+		while (pc < matchInsts.size()) {
+			Instruction inst = (Instruction)matchInsts.get(pc++);
 			switch (inst.getKind()){
 			//case Instruction.....:
 			case Instruction.REACT:
+				Rule rule = (Rule)inst.getArg1();
+				List bodyInsts = (List)rule.body;
+				Instruction spec = (Instruction)bodyInsts.get(0);
+				int formals = spec.getIntArg1();
+				int locals  = spec.getIntArg2();
 				AbstractMembrane[] bodymems  = new AbstractMembrane[locals];
 				Atom[]             bodyatoms = new Atom[locals];
 				List memformals  = (List)inst.getArg2();
@@ -85,7 +91,17 @@ public final class InterpretedRuleset extends Ruleset {
 				for (int i = 0; i < atomformals.size(); i++) {
 					bodyatoms[i]  = atoms[((Integer)atomformals.get(i)).intValue()];
 				}
-				body(((Rule)inst.getArg1()).body, bodymems, bodyatoms);
+				body(bodyInsts, bodymems, bodyatoms);
+				return true;
+			case Instruction.FINDATOM: // findatom [-dstatom, srcmem, funcref]
+				Functor func = (Functor)inst.getArg3();
+				Iterator it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
+				while (it.hasNext()){
+					Atom a = (Atom)it.next();
+					atoms[inst.getIntArg1()] = a;					
+					if (matchTestStep(mems,atoms,matchInsts,pc)) return true;
+				}
+				break;
 			}
 		}
 		return false;
