@@ -106,6 +106,13 @@ public final class LMNtalRuntimeManager {
 		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon()");
 		if (daemon != null) {
 			// TODO 【質問】(n-kato) unregisterlocalを使わずに問答無用で切ればいいと思っていたんですけど、ダメなんですか？ 切れたらdaemon側で勝手にMASTER表から除去して向こうのスレッドが終わるという風に。2004-08-27
+			// 【回答】(mizuno)
+			//     LMNtalRuntimeMessageProcessorがin.readLine()でブロックしている最中にソケットを閉じるとSocketExceptionが発生してしまうので、その回避方法として、中島さんと相談してこうしてみました。
+			//     unregisterlocalによってデーモン側でOutputStreamを閉じてもらえば、EOFが送られてくるのでreadLineがnullを返してくれます。
+			//     最も、この方法でもデーモン側がOutputStreamを閉じる前にcloseが呼ばれてしまうと同じ事なのでもうひと工夫必要なようです。（…ということに今気がつきました。）
+			//     「もうひと工夫」の案 : readLine()からnullが帰ってきたらcloseする
+			//     unregisterlocalを使わずに、readLine()でSocketExceptionが発生したら黙って終了する、という方法ももちろんありますが、
+			//     本当に問題が起きたときの例外と区別ができないのがいやだ、という理由でこの方法を選択しました。
 			daemon.sendWaitUnregisterLocal();
 
 			daemon.close(); 

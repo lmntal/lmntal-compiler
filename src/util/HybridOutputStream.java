@@ -72,5 +72,8 @@ public class HybridOutputStream {
 			System.out.println(reader.readLine());
 		}
 		System.out.println(reader.readObject());
+
+		System.out.println(reader.readLine());
+		System.out.println(reader.readLine());
 	}
 }
