@@ -21,26 +21,27 @@ public class Instruction {
     private int id;
 	
     //マッチング命令
-    /** deref [-dstatom, +srcatom, +srcpos, +dstpos]
+    /** deref [-dstatom, srcatom, srcpos, dstpos]
      * <br><strong><font color="#ff0000">ガード命令</font></strong><br>
-     * アトムsrcatomの第srcpos引数のリンク先が第dstpos引数に接続していることを確認したら、リンク先のアトムをdstatomに代入する。
+     * アトムsrcatomの第srcpos引数のリンク先が第dstpos引数に接続していることを確認したら、
+     * リンク先のアトムをdstatomに代入する。
      */
     public static final int DEREF = 0;
 
-    /** getmem [?dstmem, srcatom]
+    /** getmem [-dstmem, srcatom]
      * <br>失敗しないガード命令、ボディ命令<br>
      * 膜srcmemの所属膜への参照を取得する。
      */
     public static final int GETMEM = 1;
 
-    /** getparent [?dstmem, srcmem]
+    /** getparent [-dstmem, srcmem]
      * <br>失敗しないガード命令、ボディ命令<br>
      * 膜srcmemの親膜への参照を取得する。
-     * <P>TODO: 自由リンク管理アトムがあるので不要？
+     * <p>自由リンク管理アトムがあるので不要？→そうでもないらしい
      */
     public static final int GETPARENT = 2;
 
-    /** anymem [??dstmem, srcmem] 
+    /** anymem [-dstmem, srcmem] 
      * <br>ガード命令<br>
      * 膜srcmemの子膜のうちまだロックを取得していない膜に対して次々に、ノンブロッキングでのロック取得を試みる。
      * ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
@@ -71,7 +72,6 @@ public class Instruction {
     /** natoms [srcmem, count]
      * <br>ガード命令<br>
      * 膜srcmemの自由リンクアトム以外のアトム数がcountであることを確認する
-     * <P>TODO:必要ですか？
      */
     public static final int NATOMS = 8;
 
@@ -171,9 +171,9 @@ public class Instruction {
     public static final int NEWMEM = 21;
 
     /** newlink [atom1, pos1, atom2, pos2]
-     * <br>ボディ命令<br>
-     * アトムatom1の第pos1引数から、アトムatom2の第pos2引数に向けて片方向リンクを張る。
-     * TODO: 逆向きも同時に張るようにする。
+	 * <br>ボディ命令<br>
+     * アトムatom1の第pos1引数と、アトムatom2の第pos2引数の間に両方向リンクを張る。
+     * <p><b>注意</b>　片方向から仕様変更されています
      */
     public static final int NEWLINK = 22;
 

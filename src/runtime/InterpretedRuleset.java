@@ -2,6 +2,7 @@ package runtime;
 
 import java.util.*;
 
+// TODO 【重要】マッチング検査の途中で取得したロックを全て解放する必要がある
 
 /**
  * compile.RuleCompiler によって生成される。
@@ -74,14 +75,18 @@ public final class InterpretedRuleset extends Ruleset {
 	    break;
 
 	case Instruction.GETMEM:
-	    //getmem [dstmem, srcatom]
-	    //TODO:聞く:「膜の所属膜」とは？
+	    //getmem [-dstmem, srcatom]
+	    //TODO 回答：聞く:「膜の所属膜」とは？→[1]が膜のときはGETPARENTを使う。「親膜」の意味。
 	    //ruby版だとgetparentと同じ実装になってるのでとりあえずそうする
-	    memArgs[0] = memArgs[1].mem;
-	    break;
+	    //コメント：Java版では命令ごとに引数の型を固定するために、名前を分けることにしました
+	    
+		memArgs[0] = memArgs[1].mem;
+		//TODO ルール実行中の変数ベクタを参照渡しして、引数で間接参照する設計にする方がよい。
+		// そうしないと、出力引数がうまく反映しない。
+		break;
 
 	case Instruction.GETPARENT:
-	    //getparent [dstmem, srcmem] 
+	    //getparent [-dstmem, srcmem] 
 	    memArgs[0] = memArgs[1].mem;
 	    break;
 
