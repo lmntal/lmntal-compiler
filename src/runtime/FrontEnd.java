@@ -231,7 +231,7 @@ public class FrontEnd {
 			LMNtalRuntimeManager.init();
 
 			Membrane root = rt.getGlobalRoot();
-			if(Env.fGUI) Env.gui = new LMNtalFrame();
+			Env.initGUI();
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
 			
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
