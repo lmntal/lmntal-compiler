@@ -317,6 +317,9 @@ if (locals < 10) locals = 10;
 				case Instruction.PROCEED :
 					return true;
 
+				case Instruction.SPEC:
+					break;
+
 				case Instruction.BRANCH :
 					List subinsts;
 					subinsts = (List) ((List) inst.getArg1()).get(0);
