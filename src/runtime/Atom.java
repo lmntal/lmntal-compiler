@@ -49,7 +49,7 @@ public final class Atom extends QueuedEntity {
 
 	///////////////////////////////
 	// 操作
-	void setFunctor(Functor newFunctor) {
+	public void setFunctor(Functor newFunctor) {
 		if (newFunctor.getArity() > args.length) {
 			// TODO SystemError用の例外クラスを投げる
 			throw new RuntimeException("SYSTEM ERROR: insufficient link vector length");
@@ -104,11 +104,19 @@ public final class Atom extends QueuedEntity {
 	}
 	/** 第 n 引数につながってるアトムの名前を取得する */
 	public String nth(int n) {
-		return args[n].getAtom().getFunctor().getName();
+		return nthAtom(n).getFunctor().getName();
+	}
+	/** 第 n 引数につながってるアトムを取得する */
+	public Atom nthAtom(int n) {
+		return args[n].getAtom();
 	}
 	/** ファンクタ名を変える。所属膜のみが呼ぶことができる。*/
-	void changeName(String name) {
+	public void changeName(String name) {
 		setFunctor( new Functor(name, getFunctor().getArity()) );
+	}
+	/** けす TODO リンクもけす */
+	public void remove() {
+		mem.removeAtom(this);
 	}
 //	/** 所属膜を設定する。AbstractMembraneとそのサブクラスのみ呼び出してよい。*/
 //	void setMem(AbstractMembrane mem) {

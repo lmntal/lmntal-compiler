@@ -145,10 +145,10 @@ public class Inline {
 			while(i.hasNext()) {
 				String s = (String)i.next();
 				int codeID = ((Integer)(code.get(s))).intValue();
-				p.println("\t\tcase "+codeID+": ");
+				p.println("\t\tcase "+codeID+": {");
 				//p.println("\t\t\t/*"+s.replaceAll("\\*\\/", "* /").replaceAll("\\/\\*", "/ *")+"*/");
 				p.println("\t\t\t"+s);
-				p.println("\t\t\tbreak;");
+				p.println("\t\t\tbreak; }");
 			}
 			p.println("\t\t}");
 			p.println("\t}");
