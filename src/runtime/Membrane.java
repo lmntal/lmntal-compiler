@@ -22,7 +22,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 親膜。ルート膜ならばnull */
 	protected AbstractMembrane parent;
 	/** アトムの集合 */
-	protected AtomSet atoms = new AtomSet();;
+	protected AtomSet atoms = new AtomSet();
 	/** 子膜の集合 */
 	protected Set mems = new HashSet();
 	/** この膜にあるproxy以外のアトムの数。 */
@@ -95,7 +95,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 		return rulesets.size() > 0;
 	}
 	boolean isRoot() {
-		return parent == null; // machine.getRoot() == this;
+		return machine.getRoot() == this;
 	}
 	/** この膜にあるアトムの反復子を取得する */
 	Iterator atomIterator() {
@@ -153,7 +153,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 //		atoms.add(atom);
 //		activateAtom(atom);
 //	}
-	/** dstMemに移動 */
+	/** dstMemに移動する */
 	void moveTo(AbstractMembrane dstMem) {
 		parent.removeMem(this);
 		dstMem.addMem(this);
@@ -182,9 +182,17 @@ abstract class AbstractMembrane extends QueuedEntity {
 		atoms.remove(atom);
 	}
 	void removeAtoms(ArrayList atomlist) {
-		atoms.removeAll(atomlist);
+		// atoms.removeAll(atomlist);
+		Iterator it = atomlist.iterator();
+		while (it.hasNext()) {
+			removeAtom((Atom)it.next());
+		}
 	}
-
+	/** 指定された膜をこの膜から除去する */
+	void removeMem(AbstractMembrane mem) {
+		mems.remove(mem);
+	}
+	/** この膜を親膜から切り離す（detachという名前の方が正しいかもしれない） */
 	void remove() {
 		parent.removeMem(this);
 		parent = null;
@@ -336,15 +344,10 @@ abstract class AbstractMembrane extends QueuedEntity {
 		removeAtoms(removeList);
 	}
 	//////////////////////
-	// protected submethods to update instance varibales
-
+	
 	/** 膜の追加 */
 	protected void addMem(AbstractMembrane mem) {
 		mems.add(mem);
-	}
-	/** 指定された膜をこの膜から除去する */
-	protected void removeMem(AbstractMembrane mem) {
-		mems.remove(mem);
 	}
 	
 	////////////////////////////////
@@ -460,7 +463,7 @@ final class Membrane extends AbstractMembrane {
 	}
 	/** 膜の活性化 */
 	void activate() {
-		if (isQueued()) {
+		if (!isQueued()) {
 			return;
 		}
 		if (!isRoot()) {
