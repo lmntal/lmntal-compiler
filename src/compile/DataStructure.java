@@ -17,6 +17,7 @@ final class Atom {
 	}
 }
 
+/** ソースコード中の膜の構造を表すクラス */
 final class Membrane {
 	/** 親膜 */
 	Membrane mem;
@@ -35,6 +36,7 @@ final class Membrane {
 	}
 }
 
+/** ソースコード中のリンクの各出現を表すクラス */
 final class LinkOccurrence {
 	String name;
 	Atom atom;
@@ -75,6 +77,7 @@ final class LinkOccurrence {
 		atom.args[0] = this;
 	}
 }
+/** ソースコード中のルールの構造を表すクラス */
 final class RuleStructure {
 	Membrane leftMem, rightMem;
 }
@@ -102,11 +105,28 @@ abstract class Context {
 	static final int ST_READY = 2;
 	static final int ST_ERROR = 3;
 }
+/**
+ * ソースコード中のプロセス文脈の構造を表すクラス
+ * <br>TODO 型付きプロセス文脈の扱いは？
+ */
 final class ProcessContext extends Context{
+	/**
+	 * 引数のリンク束
+	 * <br>TODO コンストラクタで設定するのか、メソッドを作るのか</p>
+	 */
+	private LinkOccurrence[] arg;
+	/**
+	 * 引数のリンク束
+	 * <bf>
+	 * TODO コンストラクタで設定するのか、メソッドを作るのか<br>
+	 * TODO 専用のクラスを作る？
+	 */
+	private LinkOccurrence bundle;
 	ProcessContext(String name) {
 		super(name);
 	}
 }
+/** ソースコード中のルール文脈の構造を表すクラス */
 final class RuleContext extends Context{
 	RuleContext(String name) {
 		super(name);
