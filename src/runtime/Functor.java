@@ -45,7 +45,7 @@ public class Functor {
 	public final String getQuotedAtomName() {
 		String text = getAbbrName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\]|[=!<>]+)$")) {
-			if (!text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.[0-9]*([Ee][+-]?[0-9]+)?)$")) {
+			if (!text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
 				text = text.replaceAll("'","''");
 				text = "'" + text + "'";
 			}

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ListIterator;
 
 import runtime.Functor;
 import runtime.Inline;
@@ -81,6 +82,7 @@ public class LMNParser {
 	public Membrane parse() throws ParseException {
 		LinkedList srcProcess = parseSrc();
 		Membrane mem = new Membrane(null);
+		incorporateSignSymbols(srcProcess);
 		expandAtoms(srcProcess);
 		correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
@@ -444,6 +446,11 @@ public class LMNParser {
 		System.out.println(typeConstraints);
 		// === 略記法の展開ここから ===
 
+		// - 数値の符号の取り込み
+		incorporateSignSymbols(sRule.getHead());
+		incorporateSignSymbols(typeConstraints);
+		incorporateSignSymbols(sRule.getBody());
+
 		// - アトム展開（アトム引数の再帰的な展開）
 		expandAtoms(sRule.getHead());
 		expandAtoms(typeConstraints);
@@ -622,6 +629,38 @@ public class LMNParser {
 	//
 	// 略記法の展開
 	//
+
+	/** プロセス構造（子ルール外）に出現する符号を数値アトムに取り込む。
+	 * <pre>
+	 * '+'(x) → '+x'
+	 * '-'(x) → '-x'
+	 * </pre>
+	 */
+	private void incorporateSignSymbols(LinkedList process) {
+		ListIterator it = process.listIterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcAtom) {
+				SrcAtom atom = (SrcAtom)obj;
+				if (atom.getProcess().size() == 1
+				 && (atom.getName().getName().equals("+") || atom.getName().getName().equals("-"))
+				 && atom.getProcess().get(0) instanceof SrcAtom) {
+				 	SrcAtom inneratom = (SrcAtom)atom.getProcess().get(0);
+				 	if (inneratom.getProcess().size() == 0
+				 	 && inneratom.getName().getName().matches("([0-9]+|[0-9]*\\.[0-9]*)([Ee][+-]?[0-9]+)?")) {
+						it.remove();
+						it.add(new SrcAtom( atom.getName().getName()
+							+ ((SrcAtom)atom.getProcess().get(0)).getName().getName() ));
+						continue;
+				 	 }
+				}
+				incorporateSignSymbols(atom.getProcess());
+			}
+			else if (obj instanceof SrcMembrane) {
+				incorporateSignSymbols(((SrcMembrane)obj).getProcess());
+			}
+		}
+	}
 	
 	/** プロセス構造（子ルール外）をアトム展開する。
 	 * すなわち、アトム引数に出現する全てのアトム構造と膜構造を再帰的に展開する。
