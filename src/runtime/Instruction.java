@@ -1258,6 +1258,9 @@ public class Instruction implements Cloneable {
 				case Instruction.ENQUEUEATOM:
 					changeArg(inst, 1, map);
 					break;
+				case Instruction.DEQUEUEATOM:
+					changeArg(inst, 1, map);
+					break;
 				case Instruction.REMOVEATOM:
 				case Instruction.LOCALREMOVEATOM:
 					changeArg(inst, 2, map);

@@ -638,7 +638,6 @@ public class Optimizer {
 		varMap.put(new Integer(0), new Integer(0)); //本膜
 		for (int i = 1; i < base; i++) {
 			varMap.put(new Integer(i), new Integer(base + i));
-			System.out.println(i + " -> " + (base + i));
 		}
 		lit = head.subList(2, head.size() - 1).listIterator(); //spec,findatom,reactを除去
 		while (lit.hasNext()) {
@@ -652,12 +651,12 @@ public class Optimizer {
 
 		//命令列の変更を行う
 		varMap = new HashMap();
-		varMap.put(firstAtom, firstAtom);
+		varMap.put(new Integer(firstAtom.intValue() + base), firstAtom);
 		
 		ArrayList moveInsts = new ArrayList();
 		ListIterator baseIterator = head.subList(2, head.size() - 1).listIterator(); //１回目用命令列
 		ListIterator loopIterator = loop.listIterator(); //ループ内命令列
-		while (lit.hasNext()) {
+		while (baseIterator.hasNext()) {
 			baseIterator.next();
 			inst = (Instruction)loopIterator.next();
 			switch (inst.getKind()) {
@@ -686,18 +685,18 @@ public class Optimizer {
 
 		HashMap changeToNewlink = new HashMap(); //newlinkに変更するリンク -> リンク先
 		baseIterator = body.listIterator(1); //１回目用命令列
-		loopIterator = loop.listIterator(); // ループ内命令列
-		while (lit.hasNext()) {
+		//loopIteratorはさっきの続き
+		while (baseIterator.hasNext()) {
 			Instruction baseInst = (Instruction)baseIterator.next();
 			inst = (Instruction)loopIterator.next();
 			switch (inst.getKind()) {
 				case Instruction.GETLINK:
 					int atom = inst.getIntArg2();
-					Link l = (Link)links.get(new Link(atom, inst.getIntArg3()));
+					Link l = (Link)links.get(new Link(atom - base, inst.getIntArg3()));
 					if (l != null) { //前回のループのnewlinkによってリンク先が特定できる場合
 						int atom2 = l.atom;
-						if (varMap.get(new Integer(atom)).equals(new Integer(atom- base)) ||
-							varMap.get(new Integer(atom2)).equals(new Integer(atom2 - base))) { //前回のループのnewlink命令が削除されるものの場合
+						if (new Integer(atom- base).equals(varMap.get(new Integer(atom))) ||
+							new Integer(atom2 - base).equals(varMap.get(new Integer(atom2)))) { //前回のループのnewlink命令が削除されるものの場合
 							//getlinkを削除し、inheritlinkをnewlinkに変更
 							changeToNewlink.put(inst.getArg1(), l);
 							loopIterator.remove();
@@ -720,8 +719,8 @@ public class Optimizer {
 				case Instruction.NEWLINK:
 					int atomVar = inst.getIntArg1();
 					int atomVar2 = inst.getIntArg3();
-					if (varMap.get(new Integer(atomVar)).equals(new Integer(atomVar - base)) ||
-						varMap.get(new Integer(atomVar2)).equals(new Integer(atomVar2 - base))) { //もともとの変数番号と同じになっている場合
+					if (new Integer(atomVar - base).equals(varMap.get(new Integer(atomVar))) ||
+						new Integer(atomVar2 - base).equals(varMap.get(new Integer(atomVar2)))) { //もともとの変数番号と同じになっている場合
 						//最後に移動
 						moveInsts.add(baseInst);
 						baseIterator.remove();
