@@ -358,7 +358,10 @@ class InterpreterReactor {
 					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newMem();
 					break; //n-kato
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
-					break;
+					//TODO AbstactMachineクラスが存在しない
+					//AbstractMachine remotenode = new AbstractMachine();
+					//mems[inst.getIntArg2()].newRoot()
+					break; //nakajima 2003-12-27
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
 					break;
 				case Instruction.ENQUEUEALLATOMS : //[srcmem]
