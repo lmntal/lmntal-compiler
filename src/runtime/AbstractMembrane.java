@@ -687,7 +687,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <p>この膜に対して
 	 * <ol>
 	 * <li>この膜の自由/局所リンクでないにもかかわらずこの膜内を通過しているリンクを除去し（例:V=A）
-	 * <li>この膜の自由リンクが出現するアトムの名前をstarに変える。
+	 * <li>この膜の自由リンクが出現するアトム（ただし$in,$outのいずれか）の名前をstarに変える。
 	 * </ol>
 	 * <p>すべてのremoveProxiesの呼び出しが終了すると
 	 * <ul>
@@ -704,6 +704,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * ( {$p} :- ... )
 	 *      {a(i(X))}, b(o(X))
 	 * --> *{a(s(X))}; b(o(X))
+	 * 
+	 * 
+	 * ( {$p[i(A)|*V]},{$q[i(B)|*W]},E=o(A),F=o(B) :- ... )
+	 *                                      {a(i(A)),b(i(B))}, {c(i(A')),d(i(B'))}, o(A)=o(A'),o(B)=o(B')
+	 * --> AA=i(A),BB=i(B'),E=o(A),F=o(B'); {a( AA ),b(i(B))}, {c(i(A')),d( BB  )}, E=o(A'),F=o(B)
+	 * -->>AA=i(A),BB=i(B'),E=o(A),F=o(B');*{a( AA ),b(s(B))};*{c(s(A')),d( BB  )}; E=o(A'),F=o(B)
 	 * </pre>
 	 */
 	public void removeProxies() {
@@ -762,20 +768,26 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 
 	 *      {a(s(X))}; b(o(X))
 	 * -->  {a(s(X))}; b(o(X))
+	 * 
+	 *      AA=i(A),BB=i(B'),E=o(A),F=o(B'); {a( AA ),b(s(B))}; {c(s(A')),d( BB  )}; E=o(A'),F=o(B)
+	 * -->  変化なし
 	 * </pre>
 	 */
 	public void removeToplevelProxies() {
+		// (*) は ( {$p[i(A)]},{$q[|*V]},E=o(A) :- ... ) でEが*Vに含まれる場合などへの対策（安全側に近似）
 		ArrayList removeList = new ArrayList();
 		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
 		while (it.hasNext()) {
 			Atom outside = (Atom)it.next();
 			// outsideの第1引数のリンク先が子膜でない場合			
-			if (outside.args[0].getAtom().getMem().getParent() != this) {
+			if (outside.args[0].getAtom().getMem() != null // 追加 n-kato 2004-10-30 (*)
+			 && outside.args[0].getAtom().getMem().getParent() != this) {
 				// outsideの第2引数のリンク先がoutsideの場合
 				Atom a1 = outside.args[1].getAtom();
 				if (a1.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
 					// 2つめのoutsideの第1引数のリンク先が子膜でない場合
-					if (a1.args[0].getAtom().getMem().getParent() != this) {
+					if (a1.args[0].getAtom().getMem() != null // 追加 n-kato 2004-10-30 (*)
+					 && a1.args[0].getAtom().getMem().getParent() != this) {
 						if (!removeList.contains(outside)) {
 							unifyLocalAtomArgs(outside, 0, a1, 0);
 							removeList.add(outside);
@@ -827,6 +839,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * ( ... :- {$p} )
 	 *      {a(s(V))}; b(o(V))
 	 * -->  {a(i(V))}, b(o(V))
+	 * 
+	 * ( ... :- {$p[i(A)|*V],$q[i(B)|*W]},E=o(A),F=o(B) )
+	 *      AA=i(A),BB=i(B'),E=o(A),F=o(B'); {a( AA ),b(s(B))}; {c(s(A')),d( BB  )}; E=o(A'),F=o(B)
+	 * -->  AA=i(A),BB=i(B'),E=o(A),F=o(B');*{a( AA ),b(i(B))},*{c(i(A')),d( BB  )}, E=o(A'),F=o(B)
 	 * </pre>
 	 */
 	public void insertProxies(AbstractMembrane childMemWithStar) {
