@@ -1,15 +1,24 @@
-[[/*inline_define*/
-]],
-io.print([[
+//[[/*inline_define*/
+//]],
+//io.print([[
+//
+//abcdefg
+//
+//end
+//
+//]]).
+//
+//a.
+//(a :- b, io.fopen(h1, [[tmp_a]])).
+//(b :- c, io.fprint(h1, [[hahahahahahaha]])).
+//(c :-    io.fclose(h1)).
+//
 
-abcdefg
 
-end
+io.a.
 
-]]).
+r=[fileReader.new("../sample/io.lmn")].
 
-a.
-(a :- b, io.fopen(h1, [[tmp_a]])).
-(b :- c, io.fprint(h1, [[hahahahahahaha]])).
-(c :-    io.fclose(h1)).
+p(10).
+p(N), r([Obj]) :- N>=0, M=N-1 | p(M), r([fileReader.readLine(io.print), Obj]).
 

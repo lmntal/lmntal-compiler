@@ -8,13 +8,18 @@ AUTHOR
 	Koji Hara
 
 HISTORY
-	2004/05/12(…) 13:08:18
+	2004/05/12(Wed)
+		split join concat
 
 */
 
 string : {
 
-// H=split([[\s+]], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
+/**
+ * split : String -> String -> List
+ * 
+ * H=split([[\s+]], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
+ */
 H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[[/*inline*/
 	String r[] = me.nth(1).split(me.nth(0));
 	
@@ -38,12 +43,25 @@ H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[[/*inline*/
 	mem.removeAtom(me);
 	]](Regexp, S).
 
-// H=join("_", [1,2,3])  ==>  H="1_2_3"
-H=string.join(S, [CAR|[]]) :- unary(S) | H=CAR.
-H=string.join(S, [CAR|CDR]) :- unary(S) | H="^"(CAR, "^"(S, string.join(S, CDR))).
+/**
+ * join : String -> List -> String
+ * 
+ * H=join("_", [1,2,3])  ==>  H="1_2_3"
+ */
+H=string.join(Glue, [CAR|[]]) :- unary(Glue) | H=CAR.
+H=string.join(Glue, [CAR|CDR]) :- unary(Glue) | H=string.concat(CAR, string.concat(Glue, string.join(Glue, CDR))).
 
-// H='^'("abc", "de")  ==>  H="abcde"
-H="^"(S1, S2) :- unary(S1), unary(S2) | H=[[/*inline*/
+//H=string.join(Glue, List) :- unary(Glue) | H=list.fold(string.concat, "", List).
+
+//H=list.fold(Exp, Unit, []) :- unary(Exp), Unary(Unit) | H=Unit.
+//H=list.fold(Exp, Unit, [Car|Cdr]) :- unary(Exp), Unary(Unit) | H=Exp(Car, list.fold(Exp, Unit, Cdr)).
+
+/**
+ * concat : String -> String -> String
+ * 
+ * H='^'("abc", "de")  ==>  H="abcde"
+ */
+H=string.concat(S1, S2) :- unary(S1), unary(S2) | H=[[/*inline*/
 	Atom cat = mem.newAtom(new Functor(me.nth(0) + me.nth(1), 1));
 	mem.relinkAtomArgs(cat, 0, me, 2);
 	

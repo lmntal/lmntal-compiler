@@ -1,10 +1,3 @@
-[[/*inline_define*/
-import java.util.*;
-import java.io.*;
-class IO {
-	public static Map handles = new HashMap();
-}
-]],
 io:{
 io.print(String) :- unary(String)|[[/*inline*/
 	System.out.println(me.nth(0));
@@ -26,18 +19,56 @@ io.input :- [[/*inline*/
 io.popup(String) :- unary(String)|[[/*inline*/
 	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
 	]](String).
-io.fopen(Handle, String) :- unary(Handle), unary(String)|[[/*inline*/
+//io.fopen(Handle, String) :- unary(Handle), unary(String)|[[/*inline*/
+//	try {
+//		PrintWriter pw = new PrintWriter(new FileOutputStream(me.nth(1)));
+//		IO.handles.put(me.nth(0), pw);
+//	} catch(Exception e) {}
+//	]](Handle, String).
+//io.fprint(Handle, String) :- unary(Handle), unary(String)|[[/*inline*/
+//	((PrintWriter)IO.handles.get(me.nth(0))).println(me.nth(1));
+//	]](Handle, String).
+//io.fclose(Handle) :- unary(Handle)|[[/*inline*/
+//	((PrintWriter)IO.handles.get(me.nth(0))).close();
+//	]](Handle).
+
+}.
+
+
+fileReader : {
+
+/**
+ * Constructor : () -> java::BufferedReader
+ * 
+ */
+H=fileReader.new(Filename) :- unary(Filename) | H=[[/*inline*/
 	try {
-		PrintWriter pw = new PrintWriter(new FileOutputStream(me.nth(1)));
-		IO.handles.put(me.nth(0), pw);
+		Atom br = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.FileReader(me.nth(0)))));
+		System.out.println("FILE="+me.nth(0));
+		mem.relink(br, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
 	} catch(Exception e) {}
-	]](Handle, String).
-io.fprint(Handle, String) :- unary(Handle), unary(String)|[[/*inline*/
-	((PrintWriter)IO.handles.get(me.nth(0))).println(me.nth(1));
-	]](Handle, String).
-io.fclose(Handle) :- unary(Handle)|[[/*inline*/
-	((PrintWriter)IO.handles.get(me.nth(0))).close();
-	]](Handle).
-}
+	]](Filename).
+
+//H=[Object, fileReader.readLine(Result)|Rest] :- H=[Object|Rest], kill(Result).
+
+
+/**
+ * readLine : ?
+ * 
+ */
+H=[fileReader.readLine(Result), Object] :- class(Object, "java.io.BufferedReader") |
+	H=[Object], [[/*inline*/
+		try {
+			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(1).getFunctor()).getObject();
+			String s = br.readLine();
+			me.nthAtom(1).remove();
+			me.set(s, 1);
+		} catch(Exception e) {System.out.println(e);}
+	]](Result, Object).
+
+}.
+
 
 //	inputString("How much?", Answer).
