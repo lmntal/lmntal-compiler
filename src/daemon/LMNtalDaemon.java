@@ -34,8 +34,7 @@ public class LMNtalDaemon implements Runnable {
 	/*
 	 * 凡例： rgid  … runtime group id
 	 */
-	public static final int DEFAULT_PORT = Env.daemonListenPort; //(nakajima)これいらないような気が
-	int portnum = DEFAULT_PORT;  //portnum = Env.DAEMON_DEFAULT_LISTENPORTでいいような気が
+	int portnum = Env.daemonListenPort;
 	
 	/** listenするソケット */
 	ServerSocket servSocket = null;
