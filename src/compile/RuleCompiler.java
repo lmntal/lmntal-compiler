@@ -1,7 +1,9 @@
 package compile;
 
-//import java.util.*;
+import java.util.*;
 import runtime.Env;
+import runtime.InterpretedRuleset;
+import runtime.Instruction;
 
 /*
  * 作成日: 2003/10/24
@@ -25,6 +27,9 @@ import runtime.Env;
  */
 public class RuleCompiler {
 	public RuleStructure rs;
+	public List atommatches = new ArrayList();
+	public List memmatch = new ArrayList();
+	HeadCompiler hc;
 	
 	/**
 	 * rs 用のルールコンパイラをつくる
@@ -39,17 +44,17 @@ public class RuleCompiler {
 	
 	/**
 	 * コンパイルする。
-	 * 何を返すかは未定
 	 * 
-	 * @return Rule
+	 * @return InterpretedRuleset
 	 */
-	public Rule compile() {
+	public InterpretedRuleset compile() {
 		Env.c("compile");
-		Rule r = new Rule();
+		List rules = new ArrayList();
+		
 		//r.text = "( "+l.toString()+" :- "+r.toString()+" )";
 		//@ruleid = rule.ruleid
 		
-		HeadCompiler hc = new HeadCompiler(rs.leftMem);
+		hc = new HeadCompiler(rs.leftMem);
 		hc.enumformals();
 		if(false /* @lhs.natoms + @lhs.nmems == 0 */) {
 			hc.freemems.add(rs.leftMem);
@@ -61,17 +66,56 @@ public class RuleCompiler {
 		optimize();
 		
 		//rule.register(@atommatches,@memmatch,@body)
-		return r;
+		Rule[] rr = new Rule[rules.size()];
+		for(int i=0;i<rules.size();i++) {
+			rr[i] = (Rule)rules.get(i);
+		}
+		return new InterpretedRuleset( rr );
 	}
 	
 	private void compile_l() {
 		Env.c("compile_l");
+		for(int firstid=0; firstid<=hc.atoms.size(); firstid++) {
+			hc.prepare();
+			if(firstid < hc.atoms.size()) {
+				atommatches.addAll(hc.match);
+				hc.atomidpath.set(firstid, new Integer(1));
+				hc.varcount = 1;
+				Membrane mem = ((Atom)(hc.atoms.get(firstid))).mem;
+				hc.match.add( new Instruction(/* [:execlevel, mem.memlevel] */) );
+				hc.match.add( new Instruction(/* [:func,1,@lhscmp.atoms[firstid].func */) );
+				
+				hc.mempaths.put(mem, "[:memof,1]");
+				// 親膜をたどる
+				while(mem.mem != null) {
+					//@lhscmp.mempaths[mem.mem] = @lhscmp.mempaths[mem].dup.unshift :memof
+					List l = ((List)(hc.mempaths.get(mem)));
+					List ll = new ArrayList();
+					for(ListIterator li=l.listIterator();li.hasNext();) {
+						ll.add(li.next());
+					}
+					ll.add(0, ":memof");
+					hc.mempaths.put(mem.mem, ll);
+					mem = mem.mem;
+				}
+				hc.compile_group(firstid);
+			} else {
+				memmatch = hc.match;
+				hc.varcount = 0;
+				List tmp = new ArrayList();
+				tmp.add(new Integer(0));
+				hc.mempaths.put(rs.leftMem, tmp);
+			}
+			hc.compile_mem(rs.leftMem);
+			// 反応しろという命令
+			hc.match.add( new Instruction( /*[:react, @ruleid, @lhscmp.getactuals]*/ ) );
+		}
 		/*
-		@atommatches = []
 		for firstid in 0..(@lhscmp.atoms.length)
 			@lhscmp.prepare
 			if firstid < @lhscmp.atoms.length
 				@atommatches.push @lhscmp.match
+				
 				@lhscmp.atomidpath[firstid] = @lhscmp.varcount = 1
 				mem = @lhscmp.atoms[firstid].mem
 				@lhscmp.match.push [:execlevel, mem.memlevel]

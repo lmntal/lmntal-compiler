@@ -8,9 +8,10 @@ import runtime.Env;
 /** ソースコード中のアトムの構造を表すクラス */
 final class Atom {
 	/** 親膜 */
-	Membrane mem;
-	Functor functor;
-	LinkOccurrence[] args;
+	public Membrane mem;
+	public Functor functor;
+	public LinkOccurrence[] args;
+	
 	Atom(Membrane mem, String name, int arity) {
 		this.mem = mem;
 		functor = new Functor(name, arity);
@@ -31,6 +32,10 @@ final class Membrane {
 	/** 子膜 */
 	public List mems = new ArrayList();
 	public List rules = new ArrayList();
+	
+	// とちゅうで必要になるらしい
+	public runtime.Ruleset ruleset = null;
+	
 	public List processContexts = new ArrayList();
 	public List ruleContexts = new ArrayList();
 	public List typedProcessContexts = new ArrayList();
