@@ -3,5 +3,7 @@
     <classpathentry kind="src" path="src"/>
     <classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
     <classpathentry exported="true" kind="lib" path="C:/p/eclipse/plugins/org.junit_3.8.1/junit.jar"/>
+    <classpathentry kind="lib"
+        path="C:/d/_uni/lmntal/cvs/devel/libreadline-java.jar" sourcepath="C:/d/_uni/lmntal/cvs/devel/src/"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
