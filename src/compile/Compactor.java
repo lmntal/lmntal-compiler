@@ -340,7 +340,67 @@ public class Compactor {
 	/** 共通部分式を除去する
 	 * @return changed */
 	public static boolean eliminateCommonSubexpressions(List insts) {
-		return false;
+		boolean changed = false;
+		HashMap varChangeMap = new HashMap();
+		for (int i1 = insts.size() - 1; i1 >= 0; i1--) {
+			Instruction inst1 = (Instruction)insts.get(i1);
+			if (!inst1.hasSideEffect() && !inst1.hasControlEffect()) {
+				//取得命令
+				for (int i2 = i1 + 1; i2 < insts.size(); i2++) {
+					Instruction inst2 = (Instruction)insts.get(i2);
+					if (inst1.hasSideEffect()) {
+						break;
+					}
+					if (sameTypeAndSameInputArgs(inst1, inst2, true)) {
+						varChangeMap.put(inst2.getArg1(), inst1.getArg1());
+						insts.remove(i2);
+						i2--;
+						changed = true;
+					}
+				}
+			} else {
+				switch (inst1.getKind()) {
+				//検査命令
+				case Instruction.EQATOM:
+				case Instruction.EQMEM:
+				case Instruction.EQFUNC:
+				case Instruction.SAMEFUNC:
+				case Instruction.ISINT: case Instruction.ISUNARY:
+				case Instruction.IEQ: case Instruction.ILT: case Instruction.ILE:
+				case Instruction.IGT: case Instruction.IGE: case Instruction.INE:
+				case Instruction.FEQ: case Instruction.FLT: case Instruction.FLE:
+				case Instruction.FGT: case Instruction.FGE: case Instruction.FNE:
+					for (int i2 = i1 + 1; i2 < insts.size(); i2++) {
+						Instruction inst2 = (Instruction)insts.get(i2);
+						if (inst2.hasSideEffect()) {
+							break; //for
+						}
+						if (sameTypeAndSameInputArgs(inst1, inst2, false)) {
+						 	insts.remove(i2);
+							i2++;
+							changed = true;
+						}
+					}
+					break; //switch
+				}
+			}
+		}
+		Instruction.applyVarRewriteMap(insts, varChangeMap);
+		return changed;
+	}
+	/**
+	 * ２つの命令が、同じ種類で、同じ入力引数を持つかどうかを検査する。
+	 */
+	private static boolean sameTypeAndSameInputArgs(Instruction inst1, Instruction inst2, boolean hasOutputArg) {
+		if (inst1.getKind() != inst2.getKind()) {
+			return false;
+		}
+		for (int i = (hasOutputArg ? 1 : 0); i < inst1.data.size(); i++) {
+			if (!inst1.getArg(i).equals(inst2.getArg(i))) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/** 冗長な命令を除去する

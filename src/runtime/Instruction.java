@@ -1980,7 +1980,12 @@ public class Instruction implements Cloneable, Serializable {
 			case Instruction.ALLOCMEM:
 			case Instruction.LOCK:
 			case Instruction.GETRUNTIME:
+			case Instruction.ISINT: case Instruction.ISUNARY:
 			case Instruction.IADD: case Instruction.IADDFUNC:
+			case Instruction.IEQ: case Instruction.ILT: case Instruction.ILE:
+			case Instruction.IGT: case Instruction.IGE: case Instruction.INE:
+			case Instruction.FEQ: case Instruction.FLT: case Instruction.FLE:
+			case Instruction.FGT: case Instruction.FGE: case Instruction.FNE:
 				return false;
 		}
 		return true;
