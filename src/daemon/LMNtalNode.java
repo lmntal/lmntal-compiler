@@ -10,7 +10,13 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.net.Socket;
 
-/** @author nakajima, n-kato */
+/**
+ *  LMNtalにおけるノードを表現するクラス
+ * 
+ * とりあえずreader, writer, socket, ipを持っておく
+ * 
+ *  @author nakajima, n-kato 
+ * */
 public class LMNtalNode {
 	Socket socket = null;
 	InetAddress ip = null;
@@ -217,10 +223,7 @@ public class LMNtalNode {
 		}
 	}
 	
-	//TODO localhost宛のメッセージのフォーマット
-	void sendLocal(BufferedWriter out, String rgid, String command){
-			
-	}
+
 	*/
 
 }

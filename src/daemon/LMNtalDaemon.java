@@ -126,7 +126,7 @@ public class LMNtalDaemon implements Runnable {
 					Thread t2 = new Thread(node);
 					t2.start();
 				} else {
-					//登録失敗。糸冬
+					//登録失敗。糸冬了
 					node.close();
 				}
 			} catch (IOException e) {
@@ -355,7 +355,7 @@ public class LMNtalDaemon implements Runnable {
 
 	/*
 	 * 一意なintを返す。rgidとかmsgidとかに使う。いまところはInetAddress.getLocalHost()+":"+Randmom.nextLong()の返り値を返しているだけ。
-	 *  todo 一意なIDを作る
+	 *  todo 本当に一意なIDを作る
 	 */
 	public static String makeID() {
 		return myhostname+ ":" + r.nextLong();

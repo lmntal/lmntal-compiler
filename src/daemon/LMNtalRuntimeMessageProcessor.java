@@ -14,6 +14,8 @@ import runtime.LMNtalRuntimeManager;
  * ランタイムが生成するオブジェクト。
  * デーモンとのコネクションに対して生成され、メッセージの受信を行う。
  * 
+ * 命令ブロック内にくくられるメッセージ本文を処理する。
+ * 
  * TODO LMNtalDaemonMessageProcessorと共通の処理をLMNtalNodeに移管する。
  * @author nakajima, n-kato
  */
@@ -308,8 +310,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			//やるべきことはEnv.theRuntimeのterminate
 			//でも呼べないからどうしよう？
 			//LocalLMNtalRuntime.terminate();
-			Env.theRuntime.terminate(); //TODO
-															  // これでいいのかな
+			Env.theRuntime.terminate(); //TODO  これでいいのかな
 	
 			//out.write("not implemented yet\n");
 			//out.flush();
@@ -381,6 +382,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				
 				//案：BEGINからENDまで出てくる引数の中でNEWがつかないものを動的に仮引数リストにいれてやると
 				//InterpretedRulsetのコードが使えるので、そうする？
+				//→そうしましょう。(nakajima:2004-08-13)
 				
 				if(commandInsideBegin[0].equalsIgnoreCase("end")){
 					//糸冬
@@ -390,7 +392,9 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					
 					//dstmem.clearRules()を呼ぶ
 					//(IDConverter.getMem(dstmem)).clearRules();
-		
+	
+					
+					
 					out.write("not implemented yet\n");
 					out.flush();
 		

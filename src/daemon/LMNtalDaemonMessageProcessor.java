@@ -14,6 +14,8 @@ import java.net.Socket;
  * 基本的にLMNtalDaemonのソケットが開かれると、これが生成される。
  * つまり物理的な計算機1台の中に複数存在しうる。
  * 
+ *命令ブロックにくくられないメッセージ本文の処理を行う。 
+ * 
  * @author nakajima, n-kato
  */
 public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable {
@@ -53,10 +55,10 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			 * inputの可能性。
 			 * 
 			 * コマンドからはじまるメッセージ
-			 *  msgid fqdn rgid メッセージ
+			 * cmd msgid fqdn rgid メッセージ
 			 *   - fqdn が自分宛 
 			 *   - fqdn が他人宛
-			 * BEGIN~ENDの途中
+			 * 済→BEGIN~ENDの途中（今はまとめて処理される）
 			 *  
 			 */
 
@@ -68,12 +70,13 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			 * RES                        msgid メッセージ本文
 			 * REGISTERLOCAL MASTER/SLAVE msgid rgid
 			 * dumphash
-			 *  
+			 * cmd 
 			 */
 			String[] parsedInput = input.split(" ", 4);
 
 			if (parsedInput[0].equalsIgnoreCase("res")) {
-				//res msgid 結果
+				//res msgid メッセージ本文
+
 				String msgid = parsedInput[1];
 
 				//戻す先
@@ -93,7 +96,8 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 					continue;
 				}
 			} else if (parsedInput[0].equalsIgnoreCase("registerlocal")) {
-				//REGISTERLOCAL MASTER/SLAVE msgid rgid
+				// REGISTERLOCAL MASTER/SLAVE msgid rgid
+
 				//rgidとLMNtalNodeを登録
 				String type  = parsedInput[1];
 				String msgid = parsedInput[2];
@@ -103,36 +107,43 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				continue;
 			} else if (parsedInput[0].equalsIgnoreCase("dumphash")) {
 				//dumphash
+
 				LMNtalDaemon.dumpHashMap();
 				continue;
 				
 				/* コマンドからはじまる文字列の処理：ここまで */
-				
-			} else {
-				// TODO 耐故障性や拡張性のため、msgid の前に共通コマンド名（例えばcmd）を書いた方がよい
-				// todo 半角空白で分割するので " を書く意味がないのを何とかする
-				
-				/* msgid "fqdn" rgid メッセージ の処理 */
-			
-				//msgidからつづく命令列とみなす
-				String msgid = parsedInput[0];
-				String fqdn = (parsedInput[1].split("\"", 3))[1];
-				String rgid = parsedInput[2];
+			} else if (parsedInput[0].equalsIgnoreCase("cmd")) {
+				// todo 耐故障性や拡張性のため、msgid の前に共通コマンド名（例えばcmd）を書いた方がよい
+				// ↑済 nakajima 2004-08-16
+				// todo 半角空白で分割するので " を書く意味がないのを何とかする 
+
+				/*cmd  msgid "fqdn" rgid メッセージ の処理 
+				 * 
+				 *  処理するメッセージは：
+				 * connect
+				 * begin
+				 * */
+				String msgid = parsedInput[1];
+				String fqdn = (parsedInput[2].split("\"", 3))[1];
+				String rgid = parsedInput[3];
 
 				//メッセージを登録
 				LMNtalNode returnNode = this;
 				boolean result = LMNtalDaemon.registerMessage(msgid, returnNode);
-				
+
 				if (result == true) {
 					//メッセージ登録成功
 					try {
-						String[] command = parsedInput[3].split(" ", 3);
+						String[] command = parsedInput[4].split(" ", 3);
 
 						//転送する内容を取得する
 						String content = input + "\n";
 						if (command[0].equalsIgnoreCase("begin")) {
+							//BEGIN
+							
 							StringBuffer buf = new StringBuffer(content);
 							// endが来るまで積み込む
+							//todo "end"が途中で偶然出現する可能性があるか？
 							while(true){
 								String inputline = in.readLine();
 								if (inputline == null) break;
@@ -143,10 +154,12 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 							buf.append("end\n");
 							content = buf.toString();
 						}
-						
+
 						LMNtalNode targetNode;
-						
+
 						if (command[0].equalsIgnoreCase("connect")) {
+							//CONNECT
+							
 							//自分自身宛かどうか判断
 							if (isMyself(fqdn)) { //自分自身宛
 								if (!LMNtalDaemon.isRuntimeGroupRegistered(rgid)) {	
@@ -155,7 +168,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 									//新規にランタイムを作る。
 									String newCmdLine =
 										new String(
-											"java daemon/SlaveLMNtalRuntimeLauncher "
+											"java daemon/LocalLMNtalRuntimeSessionManager "
 												+ msgid
 												+ " "
 												+ rgid);
@@ -165,7 +178,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 
 									Process remoteRuntime =
 										Runtime.getRuntime().exec(newCmdLine);
-									
+
 									//OK返すのは生成されたランタイムがする。
 									continue;
 								} else {
@@ -178,7 +191,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
 							}
 						} else {
-							// connect以外のとき
+							// begin, connect以外のとき
 							// 自分自身宛かどうか判断
 							if (isMyself(fqdn)) { //自分自身宛
 								targetNode = LMNtalDaemon.getRuntimeGroupNode(rgid);
@@ -187,6 +200,12 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
 							}
 						}
+						
+						/*
+						 * メッセージ転送
+						 * 自分自身の内部向け→
+						 * 他ノード向け→
+						 */
 						if (targetNode != null && targetNode.sendMessage(content)) {
 							continue;
 						}
@@ -200,8 +219,13 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 					}
 					LMNtalDaemon.unregisterMessage(msgid);
 				}
+								
 				//既にmsgTableに登録されている時 or 通信失敗
 				respondAsFail(msgid);
+			} else {
+				//不正 or 未実装なメッセージ
+				
+				//何もしない（捨てる
 			}
 		}
 	}
