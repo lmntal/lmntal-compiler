@@ -2,13 +2,16 @@ package compile.structure;
 
 final public class TypedProcessContext extends Context {
 
+	// TODO buddy の buddy で相手を参照する
+	public LinkOccurrence freeLink;
+	
 	/**
-	 * TODO: 仕様を決める
+	 * TODO 仕様を考える、クラス構造
 	 * @param name
 	 */
-	protected TypedProcessContext(String name) {
+	public TypedProcessContext(String name, LinkOccurrence freeLink) {
 		super(name);
-		// TODO 自動生成されたコンストラクター・スタブ
+		this.freeLink = freeLink;
 	}
 		
 }
