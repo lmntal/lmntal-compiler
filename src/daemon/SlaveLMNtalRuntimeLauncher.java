@@ -2,6 +2,7 @@ package daemon;
 
 import java.net.Socket;
 
+import runtime.Env;
 import runtime.LocalLMNtalRuntime;
 import runtime.LMNtalRuntimeManager;
 
@@ -15,7 +16,7 @@ class SlaveLMNtalRuntimeLauncher {
 			String callerMsgid = args[0];
 			String rgid = args[1];
 
-			Socket socket = new Socket("localhost", LMNtalDaemon.DEFAULT_PORT);
+			Socket socket = new Socket("localhost", Env.daemonListenPort);
 			LMNtalRuntimeMessageProcessor node = new LMNtalRuntimeMessageProcessor(socket,rgid);
 			LMNtalRuntimeManager.daemon = node;
 			
