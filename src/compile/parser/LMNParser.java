@@ -167,13 +167,18 @@ public class LMNParser {
 		int arity = p.size();
 		
 		// [1]ファンクタを決定する
-		SrcName srcname = sAtom.getName();
-		String name = srcname.getName();
-		
 		// GUIからの動的な生成に対応する場合にそなえて AtomFactory のようなものがあった方がよい。
 		// runtime.*Functor の多さが、現状の不自然さを物語る。
+
+		SrcName srcname = sAtom.getName();
+		String name = srcname.getName();
+		String path = null;
+		if (srcname.getType() == SrcName.PATHED) {
+			int pos = name.indexOf('.');
+			path = name.substring(0, pos);
+		}
 		
-		Functor func = new runtime.Functor(name, arity);
+		Functor func = new runtime.Functor(name, arity, path);
 		if (arity == 1) {
 			if (srcname.getType() == SrcName.PLAIN || srcname.getType() == SrcName.SYMBOL) {
 				try {
@@ -189,15 +194,9 @@ public class LMNParser {
 				}
 			}
 		}
-		String path = null;
-		if (srcname.getType() == SrcName.PATHED) {
-			int pos = name.indexOf('.');
-			path = name.substring(0, pos);
-		}
 		
 		// [2] アトム構造を生成する
 		Atom atom = new Atom(mem, func);
-		atom.path = path;
 		atom.setSourceLocation(sAtom.line, sAtom.column);
 		
 		// [3] 引数の構造を生成する		

@@ -5,7 +5,7 @@ import java.util.*;
 public class Dumper {
 	/** todo このクラスにあるのはおかしいので適切な場所に移動する */
 	static boolean isInfixOperator(String name) {
-		return name.equals("=");
+		return name.matches("=|>=");
 	}
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	public static String dump(AbstractMembrane mem) {
@@ -40,7 +40,7 @@ public class Dumper {
 			}
 			else if (a.getLastArg().isFuncRef()
 				// todo コードが気持ち悪いのでなんとかする
-			    && !a.getFunctor().getInternalName().equals("")	// 通常のファンクタを起点にしたい
+			    && a.getFunctor().isSymbol()					// 通常のファンクタを起点にしたい
 			//	&& !a.getName().matches("-?[0-9]+|^[A-Z]")) {	// IntegerFunctor未使用時の古いコード
 				&& !a.getName().matches("^[A-Z].*")) {			// 補完された自由リンクは引数に置きたい
 				predAtoms[a.getArity() == 1 ? 2 : 3].add(a);
@@ -89,36 +89,36 @@ public class Dumper {
 		return buf.toString();
 	}
 	private static String dumpAtomGroup(Atom a, Set atoms) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(a.getAbbrName());
-		atoms.remove(a);
-		int arity = a.getArity();
-		if (arity > 0) {
-			buf.append("(");
-			buf.append(dumpLink(a.args[0], atoms));
-			for (int i = 1; i < arity; i++) {
-				buf.append(",");
-				buf.append(dumpLink(a.args[i], atoms));
-			}
-			buf.append(")");
-		}
-		return buf.toString();
+		return dumpAtomGroup(a,atoms,0);
 	}
 	private static String dumpAtomGroupWithoutLastArg(Atom a, Set atoms) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(a.getAbbrName());
+		return dumpAtomGroup(a,atoms,1);
+	}
+	/** アトムの引数を展開しながら文字列に変換する。
+	 * ただし、アトムaの最後のreducedArgCount個の引数は出力しない。
+	 * <p>
+	 * 出力したアトムはatomsから除去される。
+	 * 出力するアトムはatomsの要素でなければならない。
+	 * @param a 出力するアトム
+	 * @param atoms まだ出力していないアトムの集合 [in,out]
+	 * @param reducedArgCount aのうち出力しない最後の引数の長さ
+	 */
+	private static String dumpAtomGroup(Atom a, Set atoms, int reducedArgCount) {
 		atoms.remove(a);
-		int arity = a.getArity();
-		if (arity > 1) {
-			buf.append("(");
-			buf.append(dumpLink(a.args[0], atoms));
-			//最終引数以外を出力
-			for (int i = 1; i < arity - 1; i++) {
-				buf.append(",");
-				buf.append(dumpLink(a.args[i], atoms));
-			}
-			buf.append(")");
+		Functor func = a.getFunctor();
+		int arity = func.getArity() - reducedArgCount;
+		if (arity == 0) {
+			return func.getQuotedAtomName(); // func.getAbbrName();
 		}
+		StringBuffer buf = new StringBuffer();
+		buf.append(func.getQuotedFunctorName());
+		buf.append("(");
+		buf.append(dumpLink(a.args[0], atoms));
+		for (int i = 1; i < arity; i++) {
+			buf.append(",");
+			buf.append(dumpLink(a.args[i], atoms));
+		}
+		buf.append(")");
 		return buf.toString();
 	}
 	private static String dumpLink(Link l, Set atoms) {

@@ -22,7 +22,7 @@ public final class Atom extends QueuedEntity {
 	/** ファンクタ（名前とリンク数） */
 	private Functor functor;
 	/** リンク */
-	public Link[] args;
+	Link[] args;
 
 	private static int lastId = 0;
 	/** このアトムのローカルID */
@@ -70,6 +70,10 @@ public final class Atom extends QueuedEntity {
 		return Integer.toString(id);
 	}
 
+	/** 所属膜の取得 */
+	public AbstractMembrane getMem() {
+		return mem;
+	}
 	/** ファンクタを取得 */
 	public Functor getFunctor(){
 		return functor;
@@ -94,16 +98,12 @@ public final class Atom extends QueuedEntity {
 	public Link getArg(int pos) {
 		return args[pos];
 	}
-	/** 所属膜の取得 */
-	public AbstractMembrane getMem() {
-		return mem;
-	}
-	/** 第 n 引数につながってるアトムのファンクタ名を返す */
+	/** 第 n 引数につながってるアトムの名前を取得する */
 	public String nth(int n) {
 		return args[n].getAtom().getFunctor().getName();
 	}
-	/** ファンクタ名を変える */
-	public void changeName(String name) {
+	/** ファンクタ名を変える。所属膜のみが呼ぶことができる。*/
+	void changeName(String name) {
 		setFunctor( new Functor(name, getFunctor().getArity()) );
 	}
 //	/** 所属膜を設定する。AbstractMembraneとそのサブクラスのみ呼び出してよい。*/

@@ -5,56 +5,89 @@ package runtime;
  * Stringの名前とリンク数の組からなるアトムのFunctor。
  */
 public class Functor {
-	//TODO 自由リンク管理アトムの名前が通常アトムと同じにならないようにする
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
-	public static final Functor INSIDE_PROXY = new Functor("$inside", 2);
+	public static final Functor INSIDE_PROXY = new Functor("$inside",2,null,"$inside");
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
-	public static final Functor OUTSIDE_PROXY = new Functor("$outside", 2);
+	public static final Functor OUTSIDE_PROXY = new Functor("$outside",2,null,"$outside");
 	/** $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム
 	 * を表すファンクタ temporary_inside_proxy （通称:star）*/
-	public static final Functor STAR = new Functor("$transient_inside_proxy", 2);
+	public static final Functor STAR = new Functor("$transient_inside_proxy",2,null,"$star");
 	
-	private String name;	// "" は予約
+	/** シンボル名。このクラスのオブジェクトの場合は、名前の表示名が格納される。
+	 * 空文字列のときは、サブクラスのオブジェクトであることを表す。*/
+	private String name;
+	/** アリティ（引数の個数）*/
 	private int arity;
 	/** 各種メソッドで使うために保持しておく。整合性要注意 */
 	private String strFunctor;
-//	/** ファンクタ表記中の所属膜名（明示的に指定されていない場合はnull）*/
-//	public String path = null;
-
-//	/**
-//	 * ファンクタ表記中の所属膜名。ソースコードで明示的に指定されたらそれ。
-//	 * 指定されなかったら、デフォルトとしてそのファンクタが実際に所属する膜。
-//	 * @deprecated
-//	 */
-//	public String path;
-//
-//	/**
-//	 * 所属膜が明示的に指定されなかった時に真。
-//	 */
-//	public boolean pathFree;
+	/** ファンクタ表記中のモジュール名（明示的に指定されていない場合はnull）*/
+	private String path = null;
 	
+	////////////////////////////////////////////////////////////////
+	
+	/** 表示名に対する内部名を取得する */
+	public static String escapeName(String name) {
+		name = name.replaceAll("\\$","\\$\\$");
+		name = name.replaceAll("\\.","\\$.");
+		return name;
+	}
+	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
+	public String getQuotedFunctorName() {
+		String text = getName();
+		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
+			text = text.replaceAll("'","''");
+			text = "'" + text + "'";
+		}
+		if (path != null) text = path + "." + text;
+		return text;
+	}
+	/** 引数をもたないアトムの名前として表示名を印字するための文字列を返す */
+	public String getQuotedAtomName() {
+		String text = getName();
+		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\]|[=!<>]+)$")) {
+			text = text.replaceAll("'","''");
+			text = "'" + text + "'";
+		}
+		if (path != null) text = path + "." + text;
+		return text;
+	}
+	////////////////////////////////////////////////////////////////
+	
+	/** モジュール名なしのファンクタを生成する。
+	 * @param name シンボル名 */
 	public Functor(String name, int arity) {
-//		this(name, arity, null);
-//	}
-//	public Functor(String name, int arity, compile.structure.Membrane m) {
-
-//		int pos = name.indexOf('.');
-//		if(pos!=-1) {
-//			this.path = name.substring(0, pos);
-//			if(path.indexOf('\n')!=-1 || path.indexOf('/')!=-1 || path.indexOf('*')!=-1) this.path=null;
-//		}
-		this.name = name;
+		this(name,arity,null);
+	}	
+	/** 指定されたモジュール名を持つファンクタを生成する。
+	 * @param name シンボル名（モジュール名を指定してはいけない）
+	 * @param arity 引数の個数
+	 * @param path モジュール名（またはnull）
+	 */
+	public Functor(String name, int arity, String path) {
+		this.name  = name;
 		this.arity = arity;
+		this.path  = path;
+		name = escapeName(name);
+		if (path != null) name = escapeName(path) + "$" + name;
 		// == で比較できるようにするためにinternしておく。
 		strFunctor = (name + "_" + arity).intern();
 	}
+	private Functor(String name, int arity, String path, String strFunctor) {
+		this.name  = name;
+		this.arity = arity;
+		this.path  = path;
+		this.strFunctor = strFunctor;
+	}
+
+	////////////////////////////////////////////////////////////////
+
 	/** 適切に省略された表示名を取得 */
 	public String getAbbrName() {
 		String full = getName();
 		return full.length() > 10 ? full.substring(0, 10) : full;
 	}
-	/** 名前の内部名を取得する。
-	 * @return nameフィールドの値。サブクラスならば空文字列が返る。*/
+	/** シンボル名を取得する。
+	 * @return nameフィールドの値。サブクラスのオブジェクトのときそのときに限り空文字列が返る。*/
 	public final String getInternalName() {
 		return name;
 	}
@@ -62,6 +95,7 @@ public class Functor {
 	public String getName() {
 		return name;
 	}
+	/** アリティを取得する。*/
 	public int getArity() {
 		return arity;
 	}
@@ -71,6 +105,10 @@ public class Functor {
 	boolean isActive() {
 		//とりあえず全部アクティブ
 		return true;
+	}
+	/** このクラスのオブジェクトかどうかを調べる。*/
+	public boolean isSymbol() {
+		return !name.equals("");
 	}
 	public String toString() {
 		return strFunctor.length() > 10 ? strFunctor.substring(0, 10) : strFunctor;
@@ -82,6 +120,9 @@ public class Functor {
 		// コンストラクタでinternしているので、==で比較できる。
 		// 引数oがFunctorのサブクラスの場合、falseを返す。
 		return ((Functor)o).strFunctor == this.strFunctor;
+	}
+	public String getPath() {
+		return path;
 	}
 }
 

@@ -13,8 +13,8 @@ import java.util.Arrays;
 public class Atom {
 	/** 所属膜 */
 	public Membrane mem = null;
-	/** 明示的に指定されたモジュール名（明示的に指定されていない場合はnull）*/
-	public String path = null;
+//	/** 明示的に指定されたモジュール名（明示的に指定されていない場合はnull）*/
+//	public String path = null;
 	/** アトムのファンクタ */
 	public Functor functor;
 	/** アトムのリンク列（またはアトム集団のリンク束列） */
@@ -83,7 +83,7 @@ public class Atom {
 		return functor.getAbbrName() + "(" + argstext + ")";
 	}
 	public String getPath() {
-		return path;
+		return functor.getPath();
 	}
 	
 }

@@ -8,9 +8,9 @@ public class FloatingFunctor extends Functor {
 	public FloatingFunctor(double value) { super("",1);  this.value = value; }
 	public String toString() { return "" + value; }
 	public String getName() { return toString(); }
-	public int hashCode() { return (int)Double.doubleToLongBits(value); }
+	public int hashCode() { return (int)(Double.doubleToLongBits(value) >> 32); }
 	public double floatValue() { return value; }
 	public boolean equals(Object o) {
-		return (o instanceof IntegerFunctor) && ((IntegerFunctor)o).value == value;
+		return (o instanceof FloatingFunctor) && ((FloatingFunctor)o).value == value;
 	}
 }
