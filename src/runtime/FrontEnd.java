@@ -170,7 +170,7 @@ public class FrontEnd {
 							Env.fDEMO = true;
 						} else if(args[i].equals("--remain")){
 							/// --remain
-							/// Processes are remain.
+							/// Processes remain.
 							Env.fREMAIN = true;
 						} else if(args[i].equals("--start-daemon")){
 							/// --start-daemon
@@ -404,3 +404,4 @@ public class FrontEnd {
 	}
 }
 // TODO 初期配置で子タスクを作る
+// TODO dumperをマルチスレッド対応にする
