@@ -201,10 +201,14 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	public void paintNode(Graphics g) {
 		String label = getName();
 		FontMetrics fm = g.getFontMetrics();
+		if(Env.fDEMO) {
+			g.setFont(new Font(null, Font.PLAIN, 30));
+		}
 		int w = fm.stringWidth(label);
 		int h = fm.getHeight();
 		
-		Dimension size = new Dimension(16, 16);
+		int wh = Env.fDEMO ? 40 : 16;
+		Dimension size = new Dimension(wh, wh);
 //		g.setColor(new Color(64,128,255));
 		// 適当に色分けする！
 		

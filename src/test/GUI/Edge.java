@@ -47,7 +47,7 @@ class Edge implements Comparable {
 	}
 	
 	public double getStdLen() {
-		return 50.0;
+		return runtime.Env.fDEMO ? 100.0 : 50.0;
 	}
 	
 	public double getLen() {

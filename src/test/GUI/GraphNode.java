@@ -1,6 +1,8 @@
 /**
  * グラフのノードを表す
  * 現在位置などを保持
+ * 
+ * 7/29 このクラスは使われていない。（Atom にある）
  */
 
 package test.GUI;
@@ -13,6 +15,7 @@ import java.awt.Rectangle;
 import java.awt.Dimension;
 
 public class GraphNode implements Node {
+	boolean demo;
 	
 	List linkedNodes = new ArrayList();
 	
@@ -44,7 +47,7 @@ public class GraphNode implements Node {
 	protected int dx = 0;
 	protected int dy = 0;
 	
-	protected Dimension size = new Dimension(16,16);
+	protected Dimension size;
 	
 	public double length_between(GraphNode n) {
 		double dx,dy;
@@ -132,7 +135,8 @@ public class GraphNode implements Node {
 	};
 	
 	public void paintNode(Graphics g) {
-		FontMetrics fm = g.getFontMetrics();
+		FontMetrics fm;
+		fm = g.getFontMetrics();
 		int w = fm.stringWidth(label);
 		int h = fm.getHeight();
 		

@@ -135,7 +135,9 @@ public class FrontEnd {
 					case '-': // 文字列オプション
 						if(args[i].equals("--help")){
 							System.out.println("usage: FrontEnd [options...] [filenames...]");
-						}else{
+						} else if(args[i].equals("--demo")){
+							Env.fDEMO = true;
+						} else {
 							System.out.println("不明なオプション:" + args[i]);
 							System.exit(-1);
 						}

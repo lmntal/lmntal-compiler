@@ -97,6 +97,7 @@ public final class Env {
 	 */
 	public static boolean fGUI = false;
 	public static LMNtalFrame gui;
+	public static boolean fDEMO;
 	
 	/**
 	 * CGI ¥â¡¼¥É
