@@ -16,6 +16,8 @@ class DummyRuntime implements Runnable {
 		rgid = tmpRgid;
 	}
 
+	
+
 	public void run() {
 		try {
 			Socket socket =

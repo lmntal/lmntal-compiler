@@ -8,8 +8,9 @@ package test.distribute;
  *  - cureでLMNtalDaemonTestを実行
  *  - brieやbanonなどにログイン、仮想ターミナルを2つあげる（以下、ターミナル1とターミナル2）
  *  - [ターミナル1-2] cd eclipse/devel/bin/
- *  - [ターミナル1] java test/distribute/LMNtalDaemonTest
- *  - [ターミナル2] java test/distribute/DaemonTester  
+ *  - scpでログイン先の~/eclipse/devel/bin/[daemon,test/distribute]以下を最新に
+ *  - [ターミナル1] java daemon/LMNtalDaemon
+ *  - [ターミナル2] java test/distribute/DaemonTester
  */
 
 class DaemonTester{

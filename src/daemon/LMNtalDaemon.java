@@ -69,8 +69,9 @@ public class LMNtalDaemon implements Runnable {
 		static HashMap nodeTable = new HashMap();
 		static HashMap registedRuntimeTable = new HashMap();
 		static HashMap msgTable = new HashMap();
+		static int id = 0;
 
-		public LMNtalDaemon() {
+		public LMNtalDaemon() {			
 			try {
 				servSocket = new ServerSocket(60000);
 
@@ -88,6 +89,13 @@ public class LMNtalDaemon implements Runnable {
 					"ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
 			}
 		}
+
+		//メイソはテスト用。自分自身（スレッド）をあげるのみ。
+		public static void main(String args[]){
+			Thread t = new Thread(new LMNtalDaemon());
+			t.start();
+		}
+
 
 		public void run() {
 			System.out.println("LMNtalDaemon.run()");
@@ -225,16 +233,34 @@ public class LMNtalDaemon implements Runnable {
 			Collection c = nodeTable.values();
 			Iterator it = c.iterator();
 
-			while (it.hasNext()) {
-				if (((LMNtalNode) (it.next()))
-					.getInetAddress()
-					.getCanonicalHostName()
-					.equalsIgnoreCase(fqdn)) {
+//			while (it.hasNext()) {
+//				if (((LMNtalNode) (it.next()))
+//					.getInetAddress()
+//					.getCanonicalHostName()
+//					.equalsIgnoreCase(fqdn)) {
+//						System.out.println("LMNtalDaemon.isRegisted("  + fqdn + ") is true!" );
+//						return (LMNtalNode)(it.next());
+//				}
+//			}
+
+			try {
+				InetAddress ip = InetAddress.getByName(fqdn);
+				String ipstr = ip.getHostAddress();
+				LMNtalNode node;
+				
+				while(it.hasNext()){
+					node = (LMNtalNode)(it.next());
+					
+					if (node.getInetAddress().getHostAddress().equals(ipstr)){
 						System.out.println("LMNtalDaemon.isRegisted("  + fqdn + ") is true!" );
-						return (LMNtalNode)(it.next());
+						return node;
+					}
 				}
+			} catch (UnknownHostException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
 			}
-	
+
 			return null;
 		}
 
@@ -338,5 +364,13 @@ public class LMNtalDaemon implements Runnable {
 			tmpSet = msgTable.entrySet();
 			System.out.println("Dump msgTable");
 			System.out.println(tmpSet);
+		}
+		
+		public static int makeID(){
+			//一意なintを返す．
+			//rgidとかmsgidとかに使う。
+			//でも作り方がわからないのでとりあえずインクリメントして返す。
+			id++;
+			return id;	
 		}
 	}

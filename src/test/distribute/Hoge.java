@@ -4,6 +4,8 @@ package test.distribute;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -16,9 +18,38 @@ class Hoge {
 //		TestStringSplit2();
 //		DumpHashMap();
 		//DumpHashMapNeat();
-		RuntimeBootTest();			
+//		RuntimeBootTest();
+//		privateIPhanteiTest();
+		privateIPhanteiTest2();
 	}
 	
+	/**
+	 * 
+	 */
+	private static void privateIPhanteiTest2() {
+		try {
+			InetAddress test = InetAddress.getLocalHost();
+			
+			
+			
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private static void privateIPhanteiTest() {
+		try {
+			System.out.println("The result of InetAddress.getLocalHost(): " + InetAddress.getLocalHost());
+			System.out.println("The result of getHostAddress(): " + InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
 	/**
 	 * 
 	 */

@@ -10,6 +10,7 @@ class DummyRemoteRuntime{
 	public static void main(String[] args){
 		try {
 			int rgid = Integer.parseInt(args[0]);
+			int callerMsgid = Integer.parseInt(args[1]);
 			
 			Socket socket = new Socket("localhost", 60000);
 
@@ -31,15 +32,13 @@ class DummyRemoteRuntime{
 			String input;
 			while(true){
 				input = in.readLine();
-								
 				
 				if(input.equalsIgnoreCase("ok")){
-					
-				} else if(input.equalsIgnoreCase("res")){
-										
-				}
-				
-				
+					//connectを発行した元に対してres msgid okを返す
+					command = "res " + callerMsgid + " ok\n";
+					out.write(command);
+					out.flush();
+				} 
 			}
 		} catch (Exception e) {
 			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());

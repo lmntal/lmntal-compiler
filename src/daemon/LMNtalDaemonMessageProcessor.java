@@ -3,6 +3,7 @@ package daemon;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 
 
@@ -48,7 +49,7 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 				/* コマンドからはじまるメッセージを処理。
 				 * 
 				 * ここで処理される命令一覧。これ以外のは下スクロールしてね
-				 *  res
+				 *  res msgid メッセージ本文
 				 *  registerlocal
 				 *  dumphash - デバッグ用
 				 */
@@ -62,11 +63,9 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 
 				if (tmpString[0].equalsIgnoreCase("res")) {
 					//res msgid 結果
-					//直接戻せばよい
-
-					//TODO 単体テスト
 					msgid = new Integer(tmpString[1]);
 
+					//戻す先
 					LMNtalNode returnNode =
 						LMNtalDaemon.getNodeFromMsgId(msgid);
 
@@ -104,6 +103,20 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 						//メッセージ登録成功
 						
 						//自分自身宛かどうか判断
+//						System.out.println("----------------------------\n" + socket.getInetAddress());
+//						if(socket.getInetAddress().isLinkLocalAddress()) {
+//							System.out.println("----------------------------\n" + "true");
+//						} else if (! socket.getInetAddress().isLinkLocalAddress()){
+//							System.out.println("----------------------------\n" + "false");
+//						} else {
+//							System.out.println("----------------------------\n" + "hogehoge");
+//						}
+						
+						InetAddress i = InetAddress.getLocalHost();
+						System.out.println(i.getHostAddress());
+						System.out.println(InetAddress.getByName(fqdn).getHostAddress());
+						System.exit(0);
+						
 						if (socket.getInetAddress().isAnyLocalAddress()){
 							//自分自身宛なら、自分自身で処理する
 							
@@ -121,10 +134,9 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 								//TODO rgidの決め方どうしよう？
 
 								Process remoteRuntime;
-								remoteRuntime = Runtime.getRuntime().exec("java DummyRemoteRuntime 100");
+								remoteRuntime = Runtime.getRuntime().exec("java DummyRemoteRuntime " + LMNtalDaemon.makeID() + " " + msgid);
 
-								
-								//OK返すのは生成されたライタイムが登録されてから。
+								//OK返すのは生成されたライタイムがする。
 							} else if(command.equalsIgnoreCase("begin")){
 								//仮
 								out.write("not implemented yet\n");
