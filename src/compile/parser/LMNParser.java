@@ -128,10 +128,18 @@ public class LMNParser {
 	}
 	/** 左辺と右辺の自由リンクをつなぐ（n-katoによる仮のコード） */
 	private void coupleInheritedLinks(Hashtable lhsfreelinks, Hashtable rhsfreelinks) throws ParseException {
-		Hashtable linkNameTable = lhsfreelinks;
+		Hashtable linkNameTable = new Hashtable();
+		Enumeration lhsenum = lhsfreelinks.keys();
+		while (lhsenum.hasMoreElements()) {
+			String linkname = (String)lhsenum.nextElement();
+			if (lhsfreelinks.get(linkname) == Boolean.TRUE) continue;
+			LinkOccurrence lhsocc = (LinkOccurrence)lhsfreelinks.get(linkname);
+			connectLink(lhsocc, linkNameTable);
+		}
 		Enumeration rhsenum = rhsfreelinks.keys();
 		while (rhsenum.hasMoreElements()) {
 			String linkname = (String)rhsenum.nextElement();
+			if (rhsfreelinks.get(linkname) == Boolean.TRUE) continue;
 			LinkOccurrence rhsocc = (LinkOccurrence)rhsfreelinks.get(linkname);
 			connectLink(rhsocc, linkNameTable);
 		}
