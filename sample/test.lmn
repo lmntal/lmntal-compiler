@@ -1,0 +1,7 @@
+[[/*inline*/System.out.println(me.nth(0));]](test)
+
+a,a,a,(a:-{b(X)},c(X)),({b(X)},c(X):- d(E),{e(E)})
+
+a(X),{g(X)},(a(X),{g(X)}:- e(X),{h(X)})
+
+f(X),{g(X)}
