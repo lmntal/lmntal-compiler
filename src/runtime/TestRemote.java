@@ -1,8 +1,5 @@
 package runtime;
 
-import java.net.Socket;
-import java.net.SocketException;
-
 /*
  * 分散処理のテスト用
  *
@@ -85,6 +82,8 @@ class TestRemote{
 			System.exit(1);
 		}
 		System.out.println("connectRuntime success");
+		
+		LMNtalRuntimeManager.disconnectFromDaemon();
 		
 		//RemoteTask banonTask1 = (RemoteTask) banon.newTask(rootMem);
 
