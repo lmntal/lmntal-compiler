@@ -8,19 +8,32 @@ import daemon.LMNtalNode;
 
 /**
  * リモート計算ノード
+ * 計算の発行元にあって、リモート側（ネットワークの向こう側）の代理人として存在する。
+ * やってる事は命令をリモートへ転送する役目。
+ * 
+ * TODO この解説が正しいか確認
  * 
  * @author n-kato
  * 
- * メッセージ処理はLMNtalDaemonMessageProcessorに全部丸投げ？
  */
 final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 	String cmdbuffer;
 	boolean result;
 	
+	/*
+	 * リモート側のホスト名。Fully Qualified Domain Nameである必要がある。
+	 */
 	protected String hostname;
+	/*
+	 * hostnameに対応するLMNtalNode。実際はLMNtalDaemon.getLMNtalNodeFromFQDN()でとってきてるだけ。
+	 */
 	protected LMNtalNode lmnNode; 
 	
-	
+/*
+ * コンストラクタ
+ * 
+ * @param hostname つなげたいホストのホスト名。Fully Qualified Domain Nameである必要がある。
+ */	
 	protected RemoteLMNtalRuntime(String hostname) {
 		//runtimeidの中にはfqdnが入っている（とみなす）
 
@@ -31,23 +44,48 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 		// todo 下と同じ
 		return (AbstractTask)null;
 	}
+	
+	/*
+	 * タスクを作る命令を発行する。
+	 * 実際にタスクが作られるのはリモート側。
+	 * 
+	 * @param AbstractMembrane 親膜
+	 * @return AbstractTask
+	 */
 	public AbstractTask newTask(AbstractMembrane parent) {
 		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
 
+		//RemoteTask r = new RemoteTask((AbstractLMNtalRuntime)this);
 		
-
+		
+		send("NEWTASK");
+		//return (AbstractTask)r;
+		
 		return (AbstractTask)null;
 	}
+	
+	/*
+	 * TERMINATEを発行。
+	 */
 	public void terminate() {
 		//TODO 実装@LMNtalDaemon(or MessageProcessor
 		//send("TERMINATE");
 	}
 	
+	/*
+	 * AWAKEを発行
+	 */
 	public void awake() {
 		//TODO 実装
 		//send("AWAKE");
 	}
-	
+
+/*
+ * リモート側に接続する。
+ * 実際はLMNtalDaemon.connet(hostname)を呼出しているだけ。
+ * 
+ * @return 接続成功したらtrue、失敗したらfalse。接続の成功判定はLMNtalDaemon.connect()が返すbooleanと、
+ */	
 	public boolean connect(){
 		//TODO 単体テスト
 		result = LMNtalDaemon.connect(hostname);
@@ -59,26 +97,34 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 		}
 	}
 	
+	/*
+	 * cmdをcmdbufferにためる
+	 */
 	void send(String cmd) {
 		cmdbuffer += cmd + "\n";
 	}
 	
+	/*
+	 * cmdbufferにたまった命令をリモート側へ送り、cmdbufferを空にする。
+	 * 実際にはLMNtalDaemon.sendMessage()を呼んでいるだけ。
+	 * 
+	 * @return LMNtalDaemon.sendMessage()の返り値をそのまま返す。
+	 */
 	void flush() {
 		result = LMNtalDaemon.sendMessage(lmnNode,cmdbuffer);
 		
 		if(result == true){
 			cmdbuffer = ""; //バッファを初期化
 		} else {
-			//TODO 送信失敗時に何かする
+			throw new RuntimeException("error in flush()");
 		}
 	}
 	
 }
 
-
 /**
  * リモートタスククラス
- * TODO コネクションの管理はRemoteMachineにまかせる。
+ * 済20040707 nakajima コネクションの管理はRemoteMachineにまかせる。
  *       しかしnextatom(mem)idはsynchronizedにしなければならなくなる。
  * @author n-kato
  */
@@ -87,12 +133,23 @@ final class RemoteTask extends AbstractTask {
 	int nextatomid;
 	int nextmemid;
 	RemoteTask(AbstractLMNtalRuntime runtime) { super(runtime); }
-	String getNextAtomID() {
+
+//	String getNextAtomID() {
+//		return "NEW_" + nextatomid++;
+//	}
+	
+	synchronized String getNextAtomID(){
 		return "NEW_" + nextatomid++;
 	}
-	String getNextMemID() {
+
+//	String getNextMemID() {
+//		return "NEW_" + nextmemid++;
+//	}
+
+	synchronized String getNextMemID() {
 		return "NEW_" + nextmemid++;
 	}
+
 //	RemoteRuntimeに移動:2004-06-23 nakajima
 //	void send(String cmd) {
 //		cmdbuffer += cmd + "\n";
@@ -104,19 +161,21 @@ final class RemoteTask extends AbstractTask {
 //	}
 
 	/**@deprecated*/
-	void send(String cmd) {
-		throw new RuntimeException("error in send");
-	}
+//	void send(String cmd) {
+//		throw new RuntimeException("error in send");
+//	}
 	/**@deprecated*/
-	void flush(String cmd) {
-		throw new RuntimeException("error in flush");
-	}
+//	void flush(String cmd) {
+//		throw new RuntimeException("error in flush");
+//	}
 
 	// ロック
 	public void lock() {
+		//TODO 実装
 		throw new RuntimeException("not implemented");
 	}
 	public boolean unlock() {
+		//TODO 実装
 		throw new RuntimeException("not implemented");
 	}
 }
@@ -141,16 +200,25 @@ final class RemoteMembrane extends AbstractMembrane {
 	}
 	
 	void send(String cmd) {
-		((RemoteTask)task).send(cmd + " " + remoteid);
+		//TODO 単体テスト
+		//((RemoteTask)task).send(cmd + " " + remoteid);
+		((RemoteLMNtalRuntime)(task.runtime)).send(cmd + " " + remoteid);
 	}
 	void send(String cmd, String args) {
-		((RemoteTask)task).send(cmd + " " + remoteid + " " + args);
+		//TODO 単体テスト
+		//((RemoteTask)task).send(cmd + " " + remoteid + " " + args);
+		((RemoteLMNtalRuntime)(task.runtime)).send(cmd + " " + remoteid + " " + args);
 	}
 	void send(String cmd, String arg1, String arg2) {
-		((RemoteTask)task).send(cmd + " " + remoteid + " " + arg1 + " " + arg2);
+		//TODO 単体テスト
+		//((RemoteTask)task).send(cmd + " " + remoteid + " " + arg1 + " " + arg2);
+		((RemoteLMNtalRuntime)(task.runtime)).send(cmd + " " + remoteid + " " + arg1 + " " + arg2);
 	}
 	void send(String cmd, String arg1, String arg2, String arg3, String arg4) {
-		((RemoteTask)task).send(cmd + " " + remoteid + " " + arg1 + " " + arg2
+		//TODO 単体テスト
+		//((RemoteTask)task).send(cmd + " " + remoteid + " " + arg1 + " " + arg2
+		//											 + " " + arg3 + " " + arg4);
+		((RemoteLMNtalRuntime)(task.runtime)).send(cmd + " " + remoteid + " " + arg1 + " " + arg2
 													 + " " + arg3 + " " + arg4);
 	}
 	///////////////////////////////
