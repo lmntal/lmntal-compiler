@@ -499,7 +499,7 @@ public class LMNParser {
 
 		// 構造の生成
 		addProcessToMem(sRule.getHead(), rule.leftMem);		
-		addProcessToMem(typeConstraints, rule.guardMem);
+//		reorderTypeConstraints(typeConstraints, rule.typeConstraints);
 		addProcessToMem(sRule.getBody(), rule.rightMem);
 
 		// プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する

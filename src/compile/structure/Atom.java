@@ -37,8 +37,7 @@ public class Atom {
 	/**
 	 * コンストラクタ
 	 * @param mem このアトムの所属膜
-	 * @param name アトム名を表す文字列
-	 * @param arity リンクの数
+	 * @param functor ファンクタ
 	 */
 	public Atom(Membrane mem, Functor functor) {
 		this.mem = mem;
