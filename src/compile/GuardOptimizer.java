@@ -117,9 +117,30 @@ public class GuardOptimizer {
                     //sameatomlink,sameatomgrouplinkはDEREF命令を見つけたとき値を増やす
                     int sameatomlink = 0; 
            	        int sameatomgrouplink = 0;
-                    for(int hid=1; hid<headsize; hid++){
+                    for(int hid=1; hid<headsize-1; hid++){
                 		Instruction insth = (Instruction)head.get(hid);
                 		switch(insth.getKind()){
+                			/*
+                			単純にDEREFATOMの第2引数を第1引数に持つFINDATOMもしくは
+                			DEREFの下に移動させる場合
+                			例：a(10,20,30,X),b(40,Y) :- X<Yで変な位置に移動
+                				2引数以上のアトムの扱いに対応できないらしい
+                			case Instruction.FINDATOM:
+                			case Instruction.DEREF:
+                				if(insth.getIntArg1() == srcatom){
+									head.add(hid+1, instg);
+									headvarcount += 1;
+									headatomargs.add(new Integer(atomvar));
+									headsize += 1;
+									guard.remove(gid);
+									guardsize -= 1;
+									gid -= 1;
+									hid = headsize;
+									break;                    					
+                				}
+                				break;
+                			*/
+                			
                 			case Instruction.FINDATOM:
                 			    /*
                 			     * ここが最も怪しい。というか途中です。
@@ -131,7 +152,7 @@ public class GuardOptimizer {
                 			     * 	　･			DEREFATOMを移動させる。
                 			     * finpoint2   FINDATOM!) [finddstatom2,,,,]
                 			     * 正当性は全く保証できないが膜が無ければそこそこうまく行くように思える。
-                			     */
+                			    */
                 				findpoint2 = hid;
                 				finddstatom2 = insth.getIntArg1();
                 				//1つ前に見つけたFINDATOMとのマッチング
@@ -188,8 +209,10 @@ public class GuardOptimizer {
                 				hid = headsize;
                 				break;
                 				
+                				
                 			default: break;
                 		}
+                		
                 	}
                 	break;
                 //====DEREFATOMはここまで====//
