@@ -71,11 +71,11 @@ public class GraphLayout implements Runnable {
 	}
 	
 	public void calc() {
-		allowRelax = true;
+		setAllowRelax(true);
 		for(int i=0;i<100;i++) {
 			relax();
 		}
-		allowRelax = false;
+		setAllowRelax(false);
 	}
 	
 	public void run() {
@@ -92,7 +92,7 @@ public class GraphLayout implements Runnable {
 	}
 	
 	public Rectangle getAtomsBound() {
-		final int m=8;
+		final int m=1;
 		Rectangle r = new Rectangle(parent.getWidth()/m, parent.getHeight()/m, parent.getWidth()/m*2, parent.getHeight()/m*2);
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
@@ -103,16 +103,22 @@ public class GraphLayout implements Runnable {
 			}
 		}
 		int w = r.width, h = r.height;
-		r.x += w/4;
-		r.y += h/4;
-		r.width -= w/2;
-		r.height -= h/2;
+//		r.x += w/4;
+//		r.y += h/4;
+//		r.width -= w/2;
+//		r.height -= h/2;
 		return r;
 	}
 	
-	public volatile boolean allowRelax;
+	private volatile boolean allowRelax;
+	public synchronized void setAllowRelax(boolean v) {
+		allowRelax = v;
+	}
+	public synchronized boolean getAllowRelax() {
+		return allowRelax;
+	}
 	protected synchronized void relax() {
-		if(!allowRelax) return;
+		if(!getAllowRelax()) return;
 		if(rootMem==null) return;
 		
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {

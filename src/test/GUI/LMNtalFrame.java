@@ -73,7 +73,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	public void waitBusy() {
 //		lmnPanel.getGraphLayout().calc();
-		lmnPanel.getGraphLayout().allowRelax = true;
+		lmnPanel.getGraphLayout().setAllowRelax(true);
 		busy = true;
 		while(busy) {
 			try {
@@ -81,7 +81,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 			} catch (Exception e) {
 			}
 		}
-		lmnPanel.getGraphLayout().allowRelax = false;
+		lmnPanel.getGraphLayout().setAllowRelax(false);
 	}
 	
 	public void onTrace() {
