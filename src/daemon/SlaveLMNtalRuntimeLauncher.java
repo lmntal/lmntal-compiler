@@ -45,19 +45,23 @@ class SlaveLMNtalRuntimeLauncher {
 				command = "res " + callerMsgid + " ok\n";
 				out.write(command);
 				out.flush();
+				
+				//LocalLMNtalRuntimeを起動
+				runtime = new LocalLMNtalRuntime();
+
+				//TODO この先何をすればいいのか
+
+
 			} else {
-				//TODO この部分実装
+				//connectを発行した元に対してres msgid failを返す
+				command = "res " + callerMsgid + " fail\n";
+				out.write(command);
+				out.flush();
 			}
 
 		} catch (Exception e) {
 			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());
 			e.printStackTrace();
 		}
-		
-		//LocalLMNtalRuntimeを起動
-		runtime = new LocalLMNtalRuntime();
-			
-		//TODO この先何をすればいいのか
-		
 	}
 }

@@ -27,21 +27,22 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 		this.hostname = hostname;
 	}
 
-
-
 	public AbstractTask newTask() {
 		// todo 下と同じ
 		return (AbstractTask)null;
 	}
 	public AbstractTask newTask(AbstractMembrane parent) {
 		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
+
 		
+
 		return (AbstractTask)null;
 	}
 	public void terminate() {
 		//TODO 実装@LMNtalDaemon(or MessageProcessor
 		//send("TERMINATE");
 	}
+	
 	public void awake() {
 		//TODO 実装
 		//send("AWAKE");
@@ -57,9 +58,11 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 			return false;
 		}
 	}
+	
 	void send(String cmd) {
 		cmdbuffer += cmd + "\n";
 	}
+	
 	void flush() {
 		result = LMNtalDaemon.sendMessage(lmnNode,cmdbuffer);
 		

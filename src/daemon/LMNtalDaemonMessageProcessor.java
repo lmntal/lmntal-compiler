@@ -211,6 +211,11 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								continue;
 							} else if (command.equalsIgnoreCase("begin")) {
 								//TODO 実装
+								
+								//beginの後はendがくるまで命令が連続でくる...
+								
+
+								
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
