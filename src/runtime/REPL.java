@@ -44,7 +44,7 @@ public class REPL {
 				}
 			});
 		
-		System.out.println("        LMNtal version 0.03.20040111");
+		System.out.println("        LMNtal version 0.04.20040114");
 		System.out.println("");
 //		System.out.println("[TIPS] Type q to quit.");
 		System.out.println("Commands:");

@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import runtime.Functor;
 import runtime.Inline;
 import runtime.Env;
 import compile.Module;
@@ -26,6 +27,19 @@ public class LMNParser {
 
 	private int nLinkNumber = 0;
 	private Scanner lex = null;
+	
+	private int nErrors = 0;
+	private int nWarnings = 0;
+	
+	public void error(String text) {
+		System.out.println(text);
+		nErrors++;
+	}
+	public void warning(String text) {
+		System.out.println(text);
+		nWarnings++;
+	}
+	
 	
 	/**
 	   字句解析器と入力を指定して初期化
@@ -150,8 +164,18 @@ public class LMNParser {
 		boolean alllinks   = true;
 		boolean allbundles = true;
 		LinkedList p = sAtom.getProcess();
-		Atom atom = new Atom(mem, sAtom.getName(), p.size(), sAtom.line, sAtom.column);
-		for (int i = 0; i < p.size(); i++) {
+		String name = sAtom.getName();
+		int arity = p.size();
+		Functor func;
+		if (sAtom.getNameType() == SrcAtom.INTEGER && arity == 1) {
+			func = Functor.newIntegerFunctor(Integer.parseInt(name));
+		}
+		else {
+			func = new Functor(name, arity);
+		}
+		Atom atom = new Atom(mem, func);
+		atom.setSourceLocation(sAtom.line, sAtom.column);
+		for (int i = 0; i < arity; i++) {
 			Object obj = p.get(i);
 			// リンク
 			if (obj instanceof SrcLink) {
@@ -176,9 +200,9 @@ public class LMNParser {
 			}
 		}
 		// アトムとアトム集団を識別する
-		if (p.size() > 0 && allbundles) 
+		if (arity > 0 && allbundles) 
 			mem.aggregates.add(atom);
-		else if (p.size() == 0 || alllinks )
+		else if (arity == 0 || alllinks )
 			mem.atoms.add(atom);
 		else {
 			System.out.println("SYNTAX ERROR: arguments of an atom contain both links and bundles");

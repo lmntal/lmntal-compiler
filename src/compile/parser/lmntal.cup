@@ -50,11 +50,11 @@ AtomName    ::= ATOM_NAME:name
 					{: RESULT = name.toString(); :};
 
 UnitAtom	::=	  FuncName:name
-					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
+					{: RESULT = new SrcAtom(name, SrcAtom.PLAIN, nameleft, nameright); :}
 				| FuncName:name LPAREN RPAREN
-					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
+					{: RESULT = new SrcAtom(name, SrcAtom.PLAIN, nameleft, nameright); :}
 				| FuncName:name LPAREN ProcessList:list RPAREN
-					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
+					{: RESULT = new SrcAtom(name, SrcAtom.PLAIN, list, nameleft, nameright); :}
 				| List:list
 					{: RESULT = list; :}
 				| LPAREN Atom:atom RPAREN

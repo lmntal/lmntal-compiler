@@ -23,14 +23,27 @@ public class Atom {
 	 * 情報が無いときは-1を代入
 	 * @author Tomohito Makino
 	 */
-	public int line;
+	public int line = -1;
 	
 	/**
 	 * デバッグ情報:ソースコード中での出現位置(桁)
 	 * 情報が無いときは-1を代入
 	 * @author Tomohito Makino
 	 */
-	public int column;
+	public int column = -1;
+
+	/**
+	 * コンストラクタ
+	 * @param mem このアトムの所属膜
+	 * @param name アトム名を表す文字列
+	 * @param arity リンクの数
+	 */
+	public Atom(Membrane mem, Functor functor) {
+		this.mem = mem;
+		this.functor = functor;
+		args = new LinkOccurrence[functor.getArity()];
+		Inline.add(functor.getName());
+	}
 
 	/**
 	 * コンストラクタ
@@ -39,7 +52,7 @@ public class Atom {
 	 * @param arity リンクの数
 	 */
 	public Atom(Membrane mem, String name, int arity) {
-		this(mem,name,arity,-1,-1);
+		this(mem,new Functor(name,arity));
 	}
 	
 	/**
@@ -50,16 +63,15 @@ public class Atom {
 	 * @param arity リンクの数
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
+	 * @deprecated
 	 */	
 	public Atom(Membrane mem, String name, int arity, int line, int column){
-		this.mem = mem;
-		functor = new Functor(name, arity, mem);
-		args = new LinkOccurrence[arity];
+		this(mem,name,arity);
+		setSourceLocation(line,column);		
+	}
+	public void setSourceLocation(int line, int column) {
 		this.line = line;
 		this.column = column;
-		
-		//Inline
-		Inline.add(name);
 	}
 	
 	public String toString() {

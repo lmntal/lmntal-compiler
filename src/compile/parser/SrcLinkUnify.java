@@ -1,6 +1,7 @@
 /**
  * ソースファイル中のリンク単一化の表現
  */
+// TODO このファイルは廃止する
 
 package compile.parser;
 import java.util.LinkedList;
