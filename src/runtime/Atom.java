@@ -1,0 +1,90 @@
+package runtime;
+
+//import java.util.ArrayList;
+//import java.util.Iterator;
+//import java.util.List;
+
+import util.QueuedEntity;
+import java.lang.Integer;
+//import util.Stack;
+
+/**
+ * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
+ * @author Mizuno
+ */
+public final class Atom extends QueuedEntity {
+	/** 所属膜。MembraneクラスのaddAtomメソッド内で更新する。 */
+	private AbstractMembrane mem;
+	/** 名前とリンク数 */
+	private Functor functor;
+	/** リンク */
+	Link[] args;
+	
+	private static int lastId = 0;
+	private int id;
+	
+	///////////////////////////////
+	// コンストラクタ
+
+	/**
+	 * 指定された名前とリンク数を持つアトムを作成する。
+	 * AbstractMembraneのnewAtomメソッド内で呼ばれる。
+	 * @param mem 所属膜
+	 */
+	Atom(AbstractMembrane mem, Functor functor) {
+		this.mem = mem;
+		this.functor = functor;
+		args = new Link[functor.getArity()];
+		id = lastId++;
+	}
+
+	///////////////////////////////
+	// 操作
+	void changeFunctor(Functor newFunctor) {
+		if (functor.getArity() != newFunctor.getArity()) {
+			// TODO SystemError用の例外クラスを投げる
+			throw new RuntimeException("SYSTEM ERROR: cannot change arity");
+		}
+		functor = newFunctor;
+	}
+	///////////////////////////////
+	// 情報の取得
+
+	public String toString() {
+		return functor.getName();
+	}
+	/**
+	 * デフォルトの実装だと処理系の内部状態が変わると変わってしまうので、
+	 * インスタンスごとにユニークなidを用意してハッシュコードとして利用する。
+	 */
+	public int hashCode() {
+		return id;
+	}
+	/** このアトムのローカルIDを取得する */
+	String getLocalID() {
+		return Integer.toString(id);
+	}
+
+	/** 名前の取得 */
+	Functor getFunctor(){
+		return functor;
+	}
+	String getName() {
+		return functor.getName();
+	}
+	/** リンク数を取得 */
+	int getArity() {
+		return functor.getArity();
+	}
+	Link getLastArg() {
+		return args[getArity() - 1];
+	}
+	AbstractMembrane getMem() {
+		return mem;
+	}
+	
+	void remove() {
+		mem.removeAtom(this);
+		mem = null;
+	}
+}
