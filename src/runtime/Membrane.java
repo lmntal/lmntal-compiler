@@ -180,11 +180,11 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 指定されたアトムをこの膜から除去する。 */
 	void removeAtom(Atom atom) {
 		atoms.remove(atom);
-//		atomCount--;
-//		if (atomCount < 0) {
-//			Util.systemError("Membrane.atomCount is pisitive value");
-//		}
 	}
+	void removeAtoms(ArrayList atomlist) {
+		atoms.removeAll(atomlist);
+	}
+
 	void remove() {
 		parent.removeMem(this);
 		parent = null;
@@ -206,7 +206,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 *     このうち後者は、removeToplevelProxiesで除去される。
 	 * </ul>
 	 */
-	void removeProxies() {
+	final void removeProxies() {
 		// TODO atomsへの操作が必要になるので、Setのクローンを取得してその反復子を使った方が
 		//      読みやすい＆効率が良いかもしれない
 		ArrayList changeList = new ArrayList();	// star化するアトムのリスト
@@ -241,7 +241,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 				}
 			}
 		}
-		atoms.removeAll(removeList);
+		removeAtoms(removeList);
 		// この膜のinside_proxyアトムの名前をstarに変える
 		it = atoms.iteratorOfFunctor(Functor.INSIDE_PROXY);
 		while (it.hasNext()) {
@@ -257,7 +257,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 * 本膜に対して呼ぶことができる（呼ばなくてもよい）。
 	 * <p>この膜を通過して無関係な膜に入っていくリンクを除去する。
 	 */
-	void removeToplevelProxies() {
+	final void removeToplevelProxies() {
 		ArrayList removeList = new ArrayList();
 		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
 		while (it.hasNext()) {
@@ -298,7 +298,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 * </ol>
 	 * @param childMemWithStar （自由リンクを持つ）子膜
 	 */
-	void insertProxies(AbstractMembrane childMemWithStar) {
+	final void insertProxies(AbstractMembrane childMemWithStar) {
 		ArrayList changeList = new ArrayList();	// inside_proxy化するアトムのリスト
 		Iterator it = childMemWithStar.atomIteratorOfFunctor(Functor.STAR);
 		while (it.hasNext()) {
@@ -323,7 +323,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 * <p>この膜にあるstarに対して、
 	 * 反対側の出現であるoutside_proxyとともに除去し第2引数同士を直結する。
 	 */
-	void removeToplevelStars() {
+	final void removeTemporaryProxies() {
 		ArrayList removeList = new ArrayList();
 		Iterator it = atomIteratorOfFunctor(Functor.STAR);
 		while (it.hasNext()) {
@@ -333,7 +333,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 			removeList.add(star);
 			removeList.add(outside);
 		}
-		atoms.removeAll(removeList);
+		removeAtoms(removeList);
 	}
 	//////////////////////
 	// protected submethods to update instance varibales
