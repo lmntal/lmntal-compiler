@@ -203,8 +203,8 @@ public final class Membrane extends AbstractMembrane {
 		if (locked) {
 			return false;
 		} else {
-			if (isRoot()) {
-				if (parent == null || parent.task.remote == null) {
+			if (isRoot() && parent != null) {
+				if (parent.task.remote == null) {
 					task.remote = (RemoteTask)task;
 				}
 				else {

@@ -18,9 +18,4 @@ abstract class AbstractLMNtalRuntime {
 	 * @param parent ルート膜の親膜
 	 * @return 作成したタスク */
 	abstract AbstractTask newTask(AbstractMembrane parent);
-	/** このランタイムの終了を要求する。他のランタイムのことは考えなくてよい。*/
-	abstract public void terminate();
-	
-//	/** ランタイムのルールスレッドに対して再実行を要求する。*/
-//	abstract public void awake();
 }

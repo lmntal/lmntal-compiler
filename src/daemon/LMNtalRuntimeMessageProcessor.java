@@ -141,7 +141,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			 * 返答:
 			 *   OK | FAIL | UNCHANGED | RAW bytes \n data
 			 */
-			String[] parsedInput = input.split(" ", 4);
+			String[] parsedInput = input.split(" ", 5);
 
 			if (parsedInput[0].equalsIgnoreCase("RES")) {
 				// RES msgid (OK | FAIL | UNCHANGED | RAW bytes \n data)
@@ -179,7 +179,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				continue;
 			} else if (parsedInput[0].equalsIgnoreCase("CMD")) {
 				// CMD msgid fqdn rgid コマンド
-				String msgid = parsedInput[0];
+				String msgid = parsedInput[1];
 				// 自分自身宛なので、自分自身で処理する
 				
 				/* コマンド:
@@ -196,7 +196,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				 *   ASYNCUNLOCK    globalmemid -> OK | FAIL
 				 */
 
-				String[] command = parsedInput[3].split(" ", 3);
+				String[] command = parsedInput[4].split(" ", 3);
 				
 				if (command[0].equalsIgnoreCase("TERMINATE")) {
 					Env.theRuntime.terminate();

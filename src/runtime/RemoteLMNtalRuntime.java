@@ -49,13 +49,6 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 		task.remote.send("NEWTASK",newmemid,parent);
 		return task;
 	}
-
-	/**
-	 * TERMINATEを発行。
-	 */
-	public void terminate() {
-		LMNtalRuntimeManager.daemon.sendMessage("TERMINATE");
-	}
 	
 	////////////////////////////////
 	// RemoteLMNtalRuntime で定義されるメソッド

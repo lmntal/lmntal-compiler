@@ -61,7 +61,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			 *   ...
 			 */
 
-			String[] parsedInput = input.split(" ", 4);
+			String[] parsedInput = input.split(" ", 5);
 
 			if (parsedInput[0].equalsIgnoreCase("RES")) {
 				// RES msgid 返答
@@ -110,9 +110,9 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			} else if (parsedInput[0].equalsIgnoreCase("CMD")) {
 				// CMD msgid fqdn rgid コマンド
 			
-				String msgid = parsedInput[0];
-				String fqdn = parsedInput[1].replaceAll("\"","");
-				String rgid = parsedInput[2];
+				String msgid = parsedInput[1];
+				String fqdn = parsedInput[2].replaceAll("\"","");
+				String rgid = parsedInput[3];
 
 				//メッセージを登録
 				LMNtalNode returnNode = this;
@@ -121,7 +121,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				if (result == true) {
 					//メッセージ登録成功
 					try {
-						String[] command = parsedInput[3].split(" ", 3);
+						String[] command = parsedInput[4].split(" ", 3);
 
 						//転送する内容を取得する
 						String content = input + "\n";
