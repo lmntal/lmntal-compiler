@@ -354,10 +354,10 @@ class InterpreterReactor {
 					return true; //n-kato
 
 				case Instruction.PROCEED :
-					return true;
+					return true; //n-kato
 
 				case Instruction.SPEC:
-					break;
+					break;//n-kato
 
 				case Instruction.BRANCH :
 					List subinsts;
@@ -384,6 +384,11 @@ class InterpreterReactor {
 					break; //n-kato
 
 					//====制御命令====ここまで====
+
+					//====型付きプロセス文脈を扱うための追加命令====ここから====
+				case Instruction.EQGROUND : //[groundlink1,groundlink2]
+					break;
+					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 
 					//====型検査のためのガード命令====ここから====
 				case Instruction.ISGROUND : //[link]
