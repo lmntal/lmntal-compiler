@@ -120,7 +120,7 @@ public class FrontEnd {
 			compile.structure.Membrane root = RulesetCompiler.runStartWithNull(m);
 			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
 			Env.d( "After compile : "+ir );
-			root.showAllRule();
+			root.showAllRules();
 			
 			// ผยนิ
 			LMNtalRuntime rt = new LMNtalRuntime();
