@@ -317,24 +317,41 @@ public final class RemoteMembrane extends AbstractMembrane {
 			proxyMap.put(a.remoteid, a);
 		}
 		atoms.clear();
-		
+
+		//
 		try {
 			ByteArrayInputStream bin = new ByteArrayInputStream(data);
 			ObjectInputStream in = new ObjectInputStream(bin);
 			
-			//膜
+			//子膜
 			int n = in.readInt();
 			for (int i = 0; i < n; i++) {
 				String hostname = (String)in.readObject();
 				String memid = (String)in.readObject();
+				boolean isRoot = ((Boolean)in.readObject()).booleanValue();
+				//
+				RemoteLMNtalRuntime r;
+				r = (RemoteLMNtalRuntime)LMNtalRuntimeManager.runtimeids.get(hostname);
+				if (r == null) {
+					r = (RemoteLMNtalRuntime)LMNtalRuntimeManager.connectRuntime(hostname);
+				}
+				//
+				RemoteTask t;
 				RemoteMembrane m;
-				//TODO RemoteTaskはどうやって取得したら良い？
-				m = new RemoteMembrane(null, this, memid);
-				//TODO GlobalMemIDの正しい作成方法は？
-				String globalid = hostname + ":" + memid;
+				if (isRoot) {
+					t = new RemoteTask(r, this);
+					m = (RemoteMembrane)t.getRoot();
+					m.globalid = memid;
+				}
+				else {
+					t = (RemoteTask)getTask();
+					m = new RemoteMembrane(t, this, memid);
+					mems.add(m);
+					addMem(m);
+				}
+				// GlobalMemIDの正しい作成方法は？→さっさとメソッドにした方がいいですね
+				String globalid = r.hostname + ":" + memid;
 				IDConverter.registerGlobalMembrane(globalid, m);
-				mems.add(m);
-				addMem(m);
 			}
 
 			//アトム
@@ -362,12 +379,16 @@ public final class RemoteMembrane extends AbstractMembrane {
 			for (int i = 0; i < n; i++) {
 				String id = (String)in.readObject();
 				Ruleset r = IDConverter.lookupRuleset(id);
-				//todo これはIDConverterの中でやる事？
+				//todo これはIDConverterの中でやる事？→たぶん外でやった方がよいと思うけど根拠はない
 				if (r == null) {
 					r = (Ruleset)sendWaitObject("REQUIRERULESET " + id);					
 				}
 				rulesets.add(r);
 			}
+			
+			//
+			stable = ((Boolean)in.readObject()).booleanValue();
+
 		} catch (IOException e) {
 			//ByteArrayOutputStreamなので、発生するはずがない
 			throw new RuntimeException("Unwxpected Exception", e);

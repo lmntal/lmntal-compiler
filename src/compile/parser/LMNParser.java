@@ -86,42 +86,6 @@ public class LMNParser {
 		return mem;
 	}
 	
-	/**
-	 * これは古いので使わない (n-kato) 20040820
-	 * <p>
-	 * parseの代わりに呼ぶ。【未実装】
-	 * <p>
-	 * <b>キャッシュ文字列の定義</b>
-	 * アトム       → p(リンク...)
-	 * 自由リンク   → $in_(insideproxyアトムの親膜計算機でのLocalID)[リンク]
-	 * ルールセット → $rs_(ルールセットのGlobalID)
-	 * 子膜        → { $mem_(子膜のGlobalID), 自由リンク... }
-	 * <b>例</b>
-	 * <pre>
-	 * $in_11[_1], $in_22[_2], f(_1,_3), g(_3,_4), $rs_1111_611, $rs_1111_612,
-	 *   { $mem_3333_7, $in_33[_2], $in_44[_4] }
-	 * </pre>
-	 * <p>
-	 * キャッシュ文字列を解析し、プロセス構造が入った膜構造を生成する。
-	 * @return キャッシュ文字列全体が表すプロセス構造が入った膜構造（詳細未定）
-	 * @throws ParseException
-	 */
-	public Membrane parseCacheText() throws ParseException {
-		fCacheParser = true;
-		LinkedList srcProcess = parseSrc();
-		Membrane mem = new Membrane(null);
-		expander.incorporateSignSymbols(srcProcess);
-		expander.incorporateModuleNames(srcProcess);
-		expander.expandAtoms(srcProcess);
-		expander.correctWorld(srcProcess);
-		addProcessToMem(srcProcess, mem);
-		// todo 実装する
-		HashMap freeLinks = addProxies(mem);
-		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
-		return mem;
-	}
-	
-	
 	/**	
 		解析の結果を LinkedList とする解析木として返します。
 		@return 解析されたソースコードのリスト

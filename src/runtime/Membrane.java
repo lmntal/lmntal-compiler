@@ -386,6 +386,7 @@ public final class Membrane extends AbstractMembrane {
 				AbstractMembrane m = (AbstractMembrane)it.next();
 				out.writeObject(m.getTask().getMachine().hostname);
 				out.writeObject(m.getLocalID());
+				out.writeObject(new Boolean(m.isRoot()));
 			}
 			//アトム
 			out.writeInt(atoms.size());
@@ -402,6 +403,8 @@ public final class Membrane extends AbstractMembrane {
 				out.writeObject(r.getGlobalRulesetID());
 			}
 			//todo nameは不要？
+			//out.writeObject(name);
+			out.writeObject(new Boolean(stable));
 
 			out.close();
 			return bout.toByteArray();
