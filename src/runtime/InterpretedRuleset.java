@@ -530,13 +530,19 @@ class InterpreterReactor {
 
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[groundlink1,groundlink2]
-					
-					break;
+					if(vars.get(inst.getIntArg1()).equals(vars.get(inst.getIntArg2()))){
+						return true;
+					}
+					break; //nakajima 2004-01-05
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 
 					//====型検査のためのガード命令====ここから====
 				case Instruction.ISGROUND : //[link]
-					break;
+					atom = ((Link)vars.get(inst.getIntArg1())).getAtom();
+					if (atom.getMem().equals(mems[0])){
+						return true;
+					}
+					break; //nakajima 2004-01-05
 
 				case Instruction.ISINT : //[atom]
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof IntegerFunctor)) return false;
