@@ -58,7 +58,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, Serializa
 	 * AbstractMembraneのnewAtomメソッド内で呼ばれる。
 	 * @param mem 所属膜
 	 */
-	Atom(AbstractMembrane mem, Functor functor) {
+	public Atom(AbstractMembrane mem, Functor functor) {
 		this.mem = mem;
 		this.functor = functor;
 		args = new Link[functor.getArity()];

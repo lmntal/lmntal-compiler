@@ -162,7 +162,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return atoms.getAtomCountOfFunctor(Functor.INSIDE_PROXY);
 	}
 	/** この膜とその子孫に適用できるルールがない場合にtrue */
-	boolean isStable() {
+	public boolean isStable() {
 		return stable;
 	}
 	/** stableフラグをONにする 10/26矢島 Task#exec()内で使う*/
