@@ -17,32 +17,64 @@ h = (lambda x (lambda y (y x)))
 => h = lambda( x, lambda(y, apply(y, x) ) )
 
 
-[ƒRƒ“ƒrƒl[ƒ^‚ðŽg‚Á‚½Ž®]‚Ö‚Ì•ÏŠ·ƒ‹[ƒ‹
+----------------------------------------------------------------------
+¥é¥à¥À¼°¢ª¥³¥ó¥Ó¥Í¡¼¥¿¤Î¤ß¤«¤é¤Ê¤ë¼°     YET
+----------------------------------------------------------------------
+
+[¥³¥ó¥Ó¥Í¡¼¥¿¤ò»È¤Ã¤¿¼°]¤Ø¤ÎÊÑ´¹¥ë¡¼¥ë
 
 (lambda x x) => (lambda x x)
 (lambda x P) => (lambda x (lambda y x)) P
 (lambda x (P Q)) => (lambda x (lambda y (lambda z (x z (y z))))) (lambda x P) (lambda x Q)
 
-ª‚ª”½‰ž‚µI‚í‚Á‚½‚ç‚±‚ê‚ð‚â‚é
+¢¬¤¬È¿±þ¤·½ª¤ï¤Ã¤¿¤é¤³¤ì¤ò¤ä¤ë
 (lambda x x) => COM_I
 (lambda x (lambda y x)) => COM_K
 (lambda x (lambda y (lambda z (x z (y z))))) => COM_S
 
+¡ÚÎã¡Û
+	lambda f (f 5) (lambda n (mult n n))
+	C (lambda f f) 5 (lambda n (mult n n))
+	C I 5 (lambda n (mult n n))
+	C I 5 (S (lambda n (mult n)) (lambda n n))
+	C I 5 (S (lambda n (mult n)) I)
+//	C I 5 (S B mult (lambda n n) I)
+//	C I 5 (S B mult I I)
+	¤É¤¦¤ä¤é¤³¤¦¤Ê¤ë¤é¤·¤¤
+	C I 5 (S mult I)
+
+
+----------------------------------------------------------------------
+¥³¥ó¥Ó¥Í¡¼¥¿¤Î¤ß¤«¤é¤Ê¤ë¼°¢ªÉ¾²Á·ë²Ì     DONE
+----------------------------------------------------------------------
+I P     -> P
+K P Q   -> P
+S P Q R -> P R (Q R)
+B P Q R -> P Q R
+C P Q R -> P R Q
+
+¡ÚÎã¡Û
+	C I 5 (S mult I)
+	I (S mult I) 5
+	S mult I 5
+	mult 5 I 5
+	mult 5 5
+
 ]].
 //-----------------------------------------------------------------------------------------------
 
-handle = lambda(term(x), lambda(term(y), apply(term(y), term(x)), s1 ), s0 ).
+//handle = lambda(term(x), lambda(term(y), apply(term(y), term(x)), s1 ), s0 ).
 //handle = lambda(term(x), term(x) ).
 //handle = lambda(term(x), lambda(term(y), term(x)) ).
 //handle = lambda(term(x), lambda(term(y), lambda(term(z), apply(apply(term(x), term(z)), apply(term(y), term(z)))))).
 
 //(lambda x x) => (lambda x x)
 //(lambda x P) => (lambda x (lambda y x)) P      x not free in P
-( H = lambda(term(T), P, s0) :- unary(T) | H=lambda(term(T), local(T, P), s1) ).
-( H = local_res(lambda(term(T), P, S), 1) :- unary(T), unary(S) | H=apply(lambda(term(x), lambda(term(y), x, s1), s1), P) ).
+//( H = lambda(term(T), P, s0) :- unary(T) | H=lambda(term(T), local(T, P), s1) ).
+//( H = local_res(lambda(term(T), P, S), 1) :- unary(T), unary(S) | H=apply(lambda(term(x), lambda(term(y), x, s1), s1), P) ).
 
 //(lambda x (P Q)) => (lambda x (lambda y (lambda z (x z (y z))))) (lambda x P) (lambda x Q)
-( H = lambda(term(T), apply(P, Q), S) :- unary(T), unary(S) | H=apply(apply(lambda(term(x), lambda(term(y), lambda(term(z), apply(apply(x, z), apply(y, z)), s1), s1), s1), lambda(term(T), P, S)), lambda(term(T), Q, S)) ).
+//( H = lambda(term(T), apply(P, Q), S) :- unary(T), unary(S) | H=apply(apply(lambda(term(x), lambda(term(y), lambda(term(z), apply(apply(x, z), apply(y, z)), s1), s1), s1), lambda(term(T), P, S)), lambda(term(T), Q, S)) ).
 
 
 // (lambda x x) => COM_I
@@ -58,22 +90,100 @@ handle = lambda(term(x), lambda(term(y), apply(term(y), term(x)), s1 ), s0 ).
 
 
 //----------------------------------------------------------------------
-// local(X, P) : X ‚ª P “à‚Å‘©”›‚³‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©
+// local(X, P) : X ¤¬ P Æâ¤ÇÂ«Çû¤µ¤ì¤Æ¤¤¤ë¤«¤É¤¦¤«
 //----------------------------------------------------------------------
-( H=local(X, term(T)) :- unary(X), unary(T), X=T | H=local_res(term(T), 1) ).
-( H=local(X, term(T)) :- unary(X), unary(T), X\=T | H=local_res(term(T), 0) ).
-
-( H=local(X, apply(P, Q)) :- unary(X) | H=apply(local(X, P), local(X, Q)) ).
-( H=apply(local_res(P, R1), local_res(Q, R2)) :- R1*R2=:=1 | H=local_res(apply(P, Q), 1) ).
-( H=apply(local_res(P, R1), local_res(Q, R2)) :- R1*R2=:=0 | H=local_res(apply(P, Q), 0) ).
-
-( H=local(X, lambda(term(T), P, S)) :- unary(X), unary(T), T=X | H=local_res(lambda(term(T), P, S), 1) ).
-( H=local(X, lambda(term(T), P, S)) :- unary(X), unary(T), T\=X | H=lambda(term(T), local(X, P), S), 1).
-( H=lambda(T, local_res(P, R), S) :- int(R) | H=local_res(lambda(T, P, S), R) ).
+//( H=local(X, term(T)) :- unary(X), unary(T), X=T | H=local_res(term(T), 1) ).
+//( H=local(X, term(T)) :- unary(X), unary(T), X\=T | H=local_res(term(T), 0) ).
+//
+//( H=local(X, apply(P, Q)) :- unary(X) | H=apply(local(X, P), local(X, Q)) ).
+//( H=apply(local_res(P, R1), local_res(Q, R2)) :- R1*R2=:=1 | H=local_res(apply(P, Q), 1) ).
+//( H=apply(local_res(P, R1), local_res(Q, R2)) :- R1*R2=:=0 | H=local_res(apply(P, Q), 0) ).
+//
+//( H=local(X, lambda(term(T), P, S)) :- unary(X), unary(T), T=X | H=local_res(lambda(term(T), P, S), 1) ).
+//( H=local(X, lambda(term(T), P, S)) :- unary(X), unary(T), T\=X | H=lambda(term(T), local(X, P), S), 1).
+//( H=lambda(T, local_res(P, R), S) :- int(R) | H=local_res(lambda(T, P, S), R) ).
 
 
 //S=lambda(x, lambda(y, apply(term(y), term(x)) ) ).
 //S=apply(term(x), lambda(y, term(y))).
 //h=local(x, S).
 
+
+//----------------------------------------------------------------------
+// week reduction of combinator -> ´°À®¡£
+//----------------------------------------------------------------------
+( // I P -> P
+	{ c(H), l(L), r(EX_P) }, 
+	{ c(L), v(com_I) }
+	:-
+	H=EX_P
+).
+( // K P Q -> P
+	{ c(H), l(L), r(EX_Q) }, 
+		{ c(L), l(LL), r(EX_P) }, 
+			{ c(LL), v(com_I) }, 
+	:-
+	H=EX_P, EX_Q=n
+).
+
+( // S P Q R -> P R (Q R)
+	{ c(H), l(L), r(EX_R) },
+		{ c(L), l(LL), r(EX_Q) },
+			{ c(LL), l(LLL), r(EX_P) },
+				{ c(LLL), v(com_S) },
+		{ c(EX_R), $p }
+	:-
+	{ c(H), l(L), r(R) }, 
+		{ c(L), l(EX_P), r(EX_R) }, 
+	{ c(R), l(EX_Q), r(EX_R2) }, 
+		{ c(EX_R), c(EX_R2), $p }
+).
+
+( // B P Q R -> P Q R
+	{ c(H), l(L), r(EX_R) },
+		{ c(L), l(LL), r(EX_Q) },
+			{ c(LL), l(LLL), r(EX_P) },
+				{ c(LLL), v(com_B) }
+	:-
+	{ c(H), l(EX_P), r(R) },
+	{ c(R), l(EX_Q), r(EX_R) }
+).
+( // C P Q R -> P R Q
+	{ c(H), l(L), r(EX_R) },
+		{ c(L), l(LL), r(EX_Q) },
+			{ c(LL), l(LLL), r(EX_P) },
+				{ c(LLL), v(com_C) }
+	:-
+	{ c(H), l(L), r(EX_Q) },
+	{ c(L), l(EX_P), r(EX_R) }
+).
+
+
+//----------------------------------------------------------------------
+// ¤Æ¤¹¤È
+//----------------------------------------------------------------------
+//// com_S 2 3 4444444
+//h(H).
+//{c(H), l(L), r(R)}.
+//{ c(L), l(LL), r(LR) }.
+//	{ c(LL), l(LLL), r(LLR) }.
+//		{ c(LLL), v(com_S) }.
+//		{ c(LLR), v(2) }.
+//	{ c(LR), v(3) }.
+//{ c(R), v(4444444) }.
+
+
+//// C I 5 (S mult I)
+h(H).
+{c(H),l(L),r(R)}.
+	{c(L),l(LL),r(LR)}.
+		{c(LL),l(LLL),r(LLR)}.
+			{c(LLL),v(com_C)}.
+			{c(LLR),v(com_I)}.
+		{c(LR),v(5)}.
+	{c(R),l(RL),r(RR)}.
+		{c(RL),l(RLL),r(RLR)}.
+			{c(RLL),v(com_S)}.
+			{c(RLR),v(mult)}.
+		{c(RR),v(com_I)}.
 
