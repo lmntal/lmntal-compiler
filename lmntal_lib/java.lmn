@@ -31,11 +31,11 @@ class Java {
 		if(argv==null) argv=new Object[0];
 		Class cl[] = new Class[argv.length];
 		
-		if(false) { // 庐いけどだめな数恕。add(Button) が add(Component) にマッチしない
+		if(false) { // 懍偄偗偳偩傔側曽朄丅add(Button) 偑 add(Component) 偵儅僢僠偟側偄
 			try {
-				// 涩妥に炳じて纳裁する
+				// 昁梫偵墳偠偰捛壛偡傞
 				Class IntegerClass = Class.forName("java.lang.Integer");
-				// メソッドを急侍するためにクラスの芹误をつくる
+				// 儊僜僢僪傪幆暿偡傞偨傔偵僋儔僗偺攝楍傪偮偔傞
 				for(int i=0;i<cl.length;i++) {
 					cl[i] = argv[i].getClass();
 					if(cl[i].equals(IntegerClass)) cl[i] = Integer.TYPE;
@@ -52,7 +52,7 @@ class Java {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else { // 觅いけどよさそうな数恕
+		} else { // 抶偄偗偳傛偝偦偆側曽朄
 			Method mm[] = obj.getClass().getMethods();
 			for(int j=0;j<mm.length;j++) {
 				try {
@@ -97,7 +97,7 @@ class Java {
 /**
  * new : String -> List of Object -> Object
  * 
- * 回年したクラスの糠しいインスタンスを手す
+ * 巜掕偟偨僋儔僗偺怴偟偄僀儞僗僞儞僗傪曉偡
  */
 H=java.new(Class) :- H=java.new(Class, []).
 H=java.new(Class, List) :- unary(Class) | H=[:/*inline*/
@@ -115,7 +115,7 @@ H=java.new(Class, List) :- unary(Class) | H=[:/*inline*/
 /**
  * invoke : Object -> String -> List of Object -> Object
  * 
- * 回年したオブジェクトのメソッドを钙び叫し、冯蔡を手す
+ * 巜掕偟偨僆僽僕僃僋僩偺儊僜僢僪傪屇傃弌偟丄寢壥傪曉偡
  */
 H=java.invoke(Object, Method) :- H=java.invoke(Object, Method, []).
 H=java.invoke(Object, Method, List) :- unary(Method), unary(Object) | H=[:/*inline*/

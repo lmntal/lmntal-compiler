@@ -1,0 +1,45 @@
+/*
+----------------------------------------------------------------------
+Lambda calculus simulator
+                                              Koji Hara
+                                              2005/01/13(Thu) 14:34:53
+----------------------------------------------------------------------
+
+
+----------------------------------------------------------------------
+概要
+----------------------------------------------------------------------
+[1]ラムダ式を I, S, K コンビネータと自由変数の組み合わせに変換して、
+[2]コンビネータを消していく。
+Foundations of Functional Programming, A C Norman, Easter Term 2004 を参考にした。
+
+[2] は、有向グラフまたは ground のどちらかが必要。
+
+----------------------------------------------------------------------
+TODO
+----------------------------------------------------------------------
+
+*/
+{
+	module(lambda2).
+	
+	H=lambda(V, B) :- V=B | H=com_I.
+	H=lambda(V, B) :- V\=B | H=apply(com_K, B).
+	H=lambda(V, apply(M, N)) :- unary(V) | H=apply(apply(com_S, lambda(V, M)), lambda(V, N)).
+	
+	// ground でコピーする版。
+	H=apply(com_I, X) :- H=X.
+	H=apply(apply(com_K, X), Y) :- ground(Y) | H=X.
+	H=apply(apply(apply(com_S, F), G), X) :- ground(X) | H=apply(apply(F, X), apply(G, X)).
+	
+	// 有向グラフ版。途中。こんがらがってわからん
+//	H=apply0({v=com_I}, X) :- H=X.
+//	H=apply0({v=V0}, Y), V0=apply0({v=V1}, X), V1=com_K :- Y=nil, H=X.
+//	H=apply0({v=V0}, {v=V1, $p1}), V0=apply0({v=V2}, G), V2=apply0({v=V3}, F), V3=com_S, V1=X :- H=apply0({v=V0}, {v=V1}), V0=apply0(F, {v=X, '+'=L, $p1}), V1=apply0(G, L).
+//	H=lambda(A, B) :- H=lambda0({v=A}, {v=B}).
+//	H=apply(A, B) :- H=apply0({v=A}, {v=B}).
+	
+	r=apply(lambda(x, apply(apply(mult, x), 3)), 2).
+//	r=apply(apply(apply(com_S, f), g), x).
+}
+
