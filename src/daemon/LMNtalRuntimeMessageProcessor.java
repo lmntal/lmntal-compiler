@@ -278,9 +278,11 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		AbstractMembrane obj = IDConverter.lookupGlobalMembrane(command[1]);
 		if (!(obj instanceof Membrane)) {
 			respondAsFail(msgid);
+			if(true)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is not found!)"); //TODO Env.debug
 			return;
 		}
 		Membrane mem = (Membrane)obj;
+		if(true)System.out.println("LMNtalRuntimeMessageProcessor.onCmd(" + command[1] + " is found.)"); //TODO Env.debug
 		
 		if (command[0].equalsIgnoreCase("LOCK")
 		 || command[0].equalsIgnoreCase("BLOCKINGLOCK")
@@ -300,7 +302,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					respond(msgid, "UNCHANGED");
 				}
 				return;
-			}
+			} //下に抜ける
 		} else if (command[0].equalsIgnoreCase("RECURSIVELOCK")) {
 			// RECURSIVELOCK globalmemid
 			// ロックしたローカルの膜の全世界の子孫膜を再帰的にロック（キャッシュは更新しない）
