@@ -30,11 +30,13 @@ import java_cup.runtime.Symbol;
 %}
 
 %line
+%unicode
 %column
 %cup
 
 LineTerminator = \r|\n|\r\n
-InputCharacter = [^\r\n]
+/*InputCharacter = [^\r\n]*/
+InputCharacter = Character
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
 LinkName       = [A-Z][A-Za-z_0-9]*
