@@ -50,12 +50,14 @@ LinkName       = [A-Z][A-Za-z_0-9]*
 PathedAtomName = [a-z0-9][A-Za-z_0-9]* \.[a-z0-9][A-Za-z_0-9]*
 AtomName = [a-z0-9][A-Za-z_0-9]*
 
+NumberName = -[0-9]+ | [+-][0-9]*\.[0-9]*([Ee][+-]?[0-9]+)?
+
 Comment = {TraditionalComment} | {EndOfLineComment}
 
 TraditionalComment = "/*" [^*] ~"*/"
 EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 
-RelOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
+RelativeOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
 
 %state QUOTED
 
@@ -64,31 +66,32 @@ RelOp = "=" | "==" | "!=" | "<" | ">" | ">=" | "=<" | "::"
 /* ------------------------Lexical Rules Section---------------------- */
 
 <YYINITIAL> {
-	","				{ return symbol(sym.COMMA); }
-	"("				{ return symbol(sym.LPAREN); }
-	")"				{ return symbol(sym.RPAREN); }
-	"{"				{ return symbol(sym.LBRACE); }
-	"}"				{ return symbol(sym.RBRACE); }
-	":"				{ return symbol(sym.COLON); }
-	":-"			{ return symbol(sym.RULE); }
-	"."				{ return symbol(sym.PERIOD); }
-	"|"				{ return symbol(sym.GUARD); }
-	{RelOp}	        { return symbol(sym.RELOP, yytext()); }
-	"$"				{ return symbol(sym.PROCVAR); }
-	"@"				{ return symbol(sym.RULEVAR); }
-	"*"				{ return symbol(sym.ASTERISK); }
-	"/"				{ return symbol(sym.SLASH); }
-	"+"				{ return symbol(sym.PLUS); }
-	"-"				{ return symbol(sym.MINUS); }
-	"["				{ return symbol(sym.LBRACKET); }
-	"]"				{ return symbol(sym.RBRACKET); }
-	"[["			{ string.setLength(0); yybegin(QUOTED); }
-	"\\+"			{ return symbol(sym.NEGATIVE); }
-	{LinkName}		{ return symbol(sym.LINK_NAME, yytext()); }
-	{PathedAtomName} { return symbol(sym.PATHED_ATOM_NAME, yytext()); }
-	{AtomName}		{ return symbol(sym.ATOM_NAME, yytext()); }
-	{WhiteSpace}	{ /* just skip */ }
-	{Comment}		{ /* just skip */ }
+	","					{ return symbol(sym.COMMA); }
+	"("					{ return symbol(sym.LPAREN); }
+	")"					{ return symbol(sym.RPAREN); }
+	"{"					{ return symbol(sym.LBRACE); }
+	"}"					{ return symbol(sym.RBRACE); }
+	":"					{ return symbol(sym.COLON); }
+	":-"				{ return symbol(sym.RULE); }
+	"."					{ return symbol(sym.PERIOD); }
+	"|"					{ return symbol(sym.GUARD); }
+	{RelativeOp}		{ return symbol(sym.RELOP, yytext()); }
+	"$"					{ return symbol(sym.PROCVAR); }
+	"@"					{ return symbol(sym.RULEVAR); }
+	"*"					{ return symbol(sym.ASTERISK); }
+	"/"					{ return symbol(sym.SLASH); }
+	"+"					{ return symbol(sym.PLUS); }
+	"-"					{ return symbol(sym.MINUS); }
+	"["					{ return symbol(sym.LBRACKET); }
+	"]"					{ return symbol(sym.RBRACKET); }
+	"[["				{ string.setLength(0); yybegin(QUOTED); }
+	"\\+"				{ return symbol(sym.NEGATIVE); }
+	{LinkName}			{ return symbol(sym.LINK_NAME, yytext()); }
+	{NumberName}		{ return symbol(sym.NUMBER_NAME, yytext()); }
+	{PathedAtomName}	{ return symbol(sym.PATHED_ATOM_NAME, yytext()); }
+	{AtomName}			{ return symbol(sym.ATOM_NAME, yytext()); }
+	{WhiteSpace}		{ /* just skip */ }
+	{Comment}			{ /* just skip */ }
 }
 
 <QUOTED> {

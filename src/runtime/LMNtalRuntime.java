@@ -103,7 +103,7 @@ final class Task extends AbstractTask {
 				}
 				if (flag == false) {
 					int debugvalue = Env.debug; // todo spy機能を実装する
-					Env.debug = 0;
+					if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
 					flag = SystemRuleset.getInstance().react(mem);
 					Env.debug = debugvalue;
 				}

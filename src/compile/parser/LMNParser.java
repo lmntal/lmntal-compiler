@@ -164,14 +164,16 @@ public class LMNParser {
 		boolean alllinks   = true;
 		boolean allbundles = true;
 		LinkedList p = sAtom.getProcess();
-		String name = sAtom.getName();
+		SrcName name = sAtom.getName();
 		int arity = p.size();
 		Functor func;
-		if (sAtom.getNameType() == SrcAtom.INTEGER && arity == 1) {
-			func = Functor.newIntegerFunctor(Integer.parseInt(name));
-		}
-		else {
-			func = new Functor(name, arity);
+		func = new runtime.Functor(name.getName(), arity);
+		if (name.getType() == SrcName.PLAIN && arity == 1) {
+			try {
+				func = new runtime.IntegerFunctor(Integer.parseInt(name.getName()));
+			}
+			catch (NumberFormatException e) {		
+			}
 		}
 		Atom atom = new Atom(mem, func);
 		atom.setSourceLocation(sAtom.line, sAtom.column);

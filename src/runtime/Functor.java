@@ -23,12 +23,12 @@ public class Functor {
 	 * ファンクタ表記中の所属膜名。ソースコードで明示的に指定されたらそれ。
 	 * 指定されなかったら、デフォルトとしてそのファンクタが実際に所属する膜。
 	 */
-	public String   path;
+	public String path;
 	
-	/**
-	 * 所属膜が明示的に指定されなかった時に真。
-	 */
-	public boolean pathFree;
+//	/**
+//	 * 所属膜が明示的に指定されなかった時に真。
+//	 */
+//	public boolean pathFree;
 	
 	public Functor(String name, int arity) {
 //		this(name, arity, null);
@@ -44,11 +44,16 @@ public class Functor {
 		// == で比較できるようにするためにinternしておく。
 		strFunctor = (name + "_" + arity).intern();
 	}
-	/** 適切に省略された名前を取得 */
+	/** 適切に省略された表示名を取得 */
 	public String getAbbrName() {
-		String full = name;
+		String full = getName();
 		return full.length() > 10 ? full.substring(0, 10) : full;
 	}
+	/** 名前の内部名を返す */
+	public final String getInternalName() {
+		return name;
+	}
+	/** 名前の表示名を返す */
 	public String getName() {
 		return name;
 	}

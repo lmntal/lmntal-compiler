@@ -13,10 +13,10 @@ package compile.structure;
 final public class ProxyAtom extends Atom {
 
 	/** 自由リンク出力管理アトム名 */
-	public final static String INSIDE_PROXY_NAME = runtime.Functor.INSIDE_PROXY.getName();
+	public final static String INSIDE_PROXY_NAME = runtime.Functor.INSIDE_PROXY.getInternalName();
 	
 	/** 自由リンク入力管理アトム名 */
-	public final static String OUTSIDE_PROXY_NAME = runtime.Functor.OUTSIDE_PROXY.getName();
+	public final static String OUTSIDE_PROXY_NAME = runtime.Functor.OUTSIDE_PROXY.getInternalName();
 	
 	/**
 	 * コンストラクタ

@@ -12,10 +12,10 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE,
 				ASTERISK, SLASH, PLUS, MINUS,
 				QUOTED_STRING;
 				
-terminal String LINK_NAME, ATOM_NAME, PATHED_ATOM_NAME;
+terminal String LINK_NAME, NUMBER_NAME, ATOM_NAME, PATHED_ATOM_NAME;
 
 non terminal SrcLink			Link;
-non terminal String				FuncName;
+non terminal SrcName			FuncName;
 non terminal String				AtomName;
 non terminal Object				UnitAtom;
 non terminal Object				Atom400;
@@ -40,21 +40,23 @@ Link		::=   LINK_NAME:name
 
 // added by hara
 FuncName	::=   QUOTED_STRING:name
-					{: RESULT = name.toString(); :}
+					{: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
 				| ATOM_NAME:name
-					{: RESULT = name.toString(); :}
+					{: RESULT = new SrcName(name.toString()); :}
 				| PATHED_ATOM_NAME:name
-					{: RESULT = name.toString(); :};
+					{: RESULT = new SrcName(name.toString(), SrcName.PATHED); :};
 
 AtomName    ::= ATOM_NAME:name
 					{: RESULT = name.toString(); :};
 
-UnitAtom	::=	  FuncName:name
-					{: RESULT = new SrcAtom(name, SrcAtom.PLAIN, nameleft, nameright); :}
+UnitAtom	::=	  NUMBER_NAME:name
+					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
+				| FuncName:name
+					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
 				| FuncName:name LPAREN RPAREN
-					{: RESULT = new SrcAtom(name, SrcAtom.PLAIN, nameleft, nameright); :}
+					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
 				| FuncName:name LPAREN ProcessList:list RPAREN
-					{: RESULT = new SrcAtom(name, SrcAtom.PLAIN, list, nameleft, nameright); :}
+					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
 				| List:list
 					{: RESULT = list; :}
 				| LPAREN Atom:atom RPAREN

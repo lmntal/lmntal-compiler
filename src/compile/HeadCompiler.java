@@ -158,7 +158,7 @@ public class HeadCompiler {
 				targetidqueue.addLast( new Integer(buddyid) );
 				match.add(new Instruction(Instruction.FUNC, buddyatompath, buddyatom.functor));
 				
-				if (atom.functor.getName() == ProxyAtom.OUTSIDE_PROXY_NAME && pos == 0) {
+				if (atom.functor.getInternalName() == ProxyAtom.OUTSIDE_PROXY_NAME && pos == 0) {
 					// 子膜へのリンクの場合
 					Membrane buddymem = buddyatom.mem;								
 					int buddymempath = memToPath(buddyatom.mem);

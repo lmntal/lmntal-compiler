@@ -13,6 +13,8 @@ import java.util.Arrays;
 public class Atom {
 	/** 所属膜 */
 	public Membrane mem = null;
+	/** 明示的に指定されたモジュール名（明示的に指定されていない場合はnull）*/
+	public String path;
 	/** アトムのファンクタ */
 	public Functor functor;
 	/** アトムのリンク列（またはアトム集団のリンク束列） */
@@ -42,7 +44,7 @@ public class Atom {
 		this.mem = mem;
 		this.functor = functor;
 		args = new LinkOccurrence[functor.getArity()];
-		Inline.add(functor.getName());
+		Inline.add(functor.getInternalName());
 	}
 
 	/**

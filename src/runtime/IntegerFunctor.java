@@ -7,6 +7,7 @@ public class IntegerFunctor extends Functor {
 	int value;
 	public IntegerFunctor(int value) { super("",1);  this.value = value; }
 	public String toString() { return "" + value; }
+	public String getName() { return toString(); }
 	public int hashCode() { return value; }
 	public int intValue() { return value; }
 	public boolean equals(Object o) {

@@ -15,6 +15,11 @@ public final class Env {
 	 */
 	public static int debug = 0;
 	
+	/** システムルールセットの命令列実行を表示する */
+	static final int DEBUG_SYSTEMRULESET = 7;
+	/** デフォルトのデバッグレベル */
+	static final int DEBUG_DEFAULT = 1;
+	
 	/**
 	 * Optimize level.
 	 */

@@ -39,8 +39,10 @@ public class Dumper {
 				predAtoms[1].add(a);
 			}
 			else if (a.getLastArg().isFuncRef()
-			 // && !a.getName().equals("")
-				&& !a.getName().matches("-?[0-9]+|^[A-Z]")) {
+				// todo コードが気持ち悪いのでなんとかする
+			    && !a.getFunctor().getInternalName().equals("")	// 通常のファンクタを起点にしたい
+			//	&& !a.getName().matches("-?[0-9]+|^[A-Z]")) {	// IntegerFunctor未使用時の古いコード
+				&& !a.getName().matches("^[A-Z]")) {			// 保管された自由リンクは引数に置きたい
 				predAtoms[a.getArity() == 1 ? 2 : 3].add(a);
 			}
 		}

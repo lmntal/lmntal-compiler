@@ -7,20 +7,8 @@ import java.util.LinkedList;
 class SrcAtom {
 
 	protected LinkedList process = null;
-	protected String name = null;
-	
-	/** 名前トークンの種類
-	 * <p>（名前のためのクラスを作り、種類ごとにサブクラス化するのが正しいが、サボった）*/
-	int nametype;
-
-	// typeの値
-	static final int PLAIN   = 0;		// aaa
-	static final int SYMBOL  = 1;		// 'aaa' 'AAA'
-	static final int STRING  = 2;		// "aaa" "AAA"
-	static final int QUOTED  = 3;		// [[aaa]] [[AAA]]
-	static final int PATHED  = 4;		// aaa.bbb
-	static final int INTEGER = 10;	// 345 -345
-	static final int FLOAT   = 11;	// 3.14 -3.14e-33
+	//protected String name = null;
+	protected SrcName name;
 	
 	/**
 	 * ソースコード中での出現位置(行)
@@ -34,20 +22,14 @@ class SrcAtom {
 	int column = -1;
 
 	/**
-	 * 指定されたPLAINな名前の子プロセスなしのアトム構文を生成する
+	 * 指定された名前の子プロセスなしのアトム構文を生成する
 	 * @param name アトム名
 	 */
-	public SrcAtom(String name) {
-		this(name, PLAIN);
+	public SrcAtom(SrcName name) {
+		this(name, new LinkedList(), -1,-1);
 	}
-
-	/**
-	 * 指定された名前で子供プロセスなしで初期化します
-	 * @param name アトム名
-	 * @param nametype 名前トークンの種類
-	 */
-	public SrcAtom(String name, int nametype) {
-		this(name, nametype, new LinkedList(), -1,-1);
+	public SrcAtom(String name) {
+		this(new SrcName(name));
 	}
 	
 	/**
@@ -55,8 +37,11 @@ class SrcAtom {
 	 * @param name アトム名
 	 * @param process 子供プロセス
 	 */
+	public SrcAtom(SrcName name, LinkedList process) {
+		this(name, process, -1,-1);
+	}
 	public SrcAtom(String name, LinkedList process) {
-		this(name, PLAIN, process, -1,-1);
+		this(new SrcName(name), process);
 	}
 
 	/**
@@ -66,8 +51,11 @@ class SrcAtom {
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
 	 */
-	public SrcAtom(String name, int nametype, int line, int column) {
-		this(name, nametype, new LinkedList(), line, column);
+	public SrcAtom(SrcName name, int line, int column) {
+		this(name, new LinkedList(), line, column);
+	}
+	public SrcAtom(String name, int line, int column) {
+		this(new SrcName(name),line,column);
 	}
 	
 	/**
@@ -78,12 +66,14 @@ class SrcAtom {
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
 	 */
-	public SrcAtom(String name, int nametype, LinkedList process, int line, int column) {
+	public SrcAtom(SrcName name, LinkedList process, int line, int column) {
 		this.name = name;
-		this.nametype = nametype;
 		this.process = process;
 		this.line = line;
 		this.column = column;	
+	}
+	public SrcAtom(String name, LinkedList process, int line, int column) {
+		this(new SrcName(name),process,line,column);
 	}
 	
 	public void setSourceLocation(int line, int column) {
@@ -92,13 +82,8 @@ class SrcAtom {
 	}
 
 	
-	/**
-	 * このアトムの名前を得ます
-	 * @return アトム名をあらわす文字列
-	 */
-	public String getName() { return name; }
-
-	public int getNameType() { return nametype; }
+	/** アトム名を返す */
+	public SrcName getName() { return name; }
 	
 	/**
 	 * このアトムの子プロセスを得ます

@@ -426,7 +426,7 @@ public class RuleCompiler {
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
 			int atomID = rhsatomToPath(atom);
-			int codeID = Inline.getCodeID(atom.functor.getName());
+			int codeID = Inline.getCodeID(atom.functor.getInternalName());
 			if(codeID == -1) continue;
 			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
 		}
@@ -436,9 +436,9 @@ public class RuleCompiler {
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
-			if(atom.functor.getName().equals("use") && atom.functor.getArity()==1) {
+			if(atom.functor.getInternalName().equals("use") && atom.functor.getArity()==1) {
 				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
-				atom.args[0].buddy.atom.functor.getName()) );
+				atom.args[0].buddy.atom.functor.getInternalName()) );
 			}
 			if(atom.functor.path!=null && !atom.functor.path.equals(atom.mem.name)) {
 				// この時点では解決できないモジュールがあるので名前にしておく

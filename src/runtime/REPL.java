@@ -48,7 +48,7 @@ public class REPL {
 		System.out.println("");
 //		System.out.println("[TIPS] Type q to quit.");
 		System.out.println("Commands:");
-		System.out.println("  [no]debug          - set debug mode");
+		System.out.println("  [no]debug    [0-9] - set debug level");
 		System.out.println("  [no]shuffle        - set shuffle mode");
 		System.out.println("  [no]trace          - set trace mode");
 		System.out.println("  [no]optimize [0-9] - set optimize level"); //書き方変えた方がよい？
@@ -61,13 +61,11 @@ public class REPL {
 					//System.out.println("no input");
 				} else if(line.equals("q")) {
 					break;
-				} else if(line.equals("debug")) {
-					Env.p("debug mode on");
-					Env.debug = 1;
-					continue;
-				} else if(line.equals("nodebug")) {
-					Env.p("debug mode off");
-					Env.debug = 0;
+				} else if(line.matches("nodebug|debug( [0-9])?")) {
+					if (line.length() == 5) Env.debug = Env.DEBUG_DEFAULT;
+					else if (line.charAt(0) == 'n') Env.debug = 0;
+					else Env.debug = line.charAt(line.length() - 1) - '0';
+					Env.p("debug level " + Env.debug);
 					continue;
 				} else if(line.equals("trace")) {
 					Env.p("trace mode on");
