@@ -13,6 +13,7 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE,
 terminal		QUOTED_STRING;
 terminal String RELOP, STRING;
 terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
+terminal String CHAR_CODE_LITERAL;
 
 non terminal SrcLink			Link;
 non terminal SrcName			FuncName;
@@ -53,6 +54,7 @@ start with WorldProcessList;
 Link		::=   LINK_NAME:name
 					{: RESULT = new SrcLink(name); :};
 
+// 引数なしまたは引数ありのアトムの名前として使用できるリテラル
 FuncName	::=   ATOM_NAME:name
 					{: RESULT = new SrcName(name); :}
 				| QUOTED_STRING:name
@@ -73,11 +75,15 @@ FuncName	::=   ATOM_NAME:name
 				| PATHED_ATOM_NAME:name
 					{: RESULT = new SrcName(name.replace(':','.'), SrcName.PATHED); :};
 
+// [a-z0-9][A-Za-z0-9_]*
 AtomName    ::= ATOM_NAME:name
 					{: RESULT = name.toString(); :};
 
+// 演算子が付いていない項
 UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
+				| CHAR_CODE_LITERAL:name
+					{: RESULT = new SrcAtom(new SrcName(""+(int)name.charAt(2)), nameleft, nameright); :}
 				| FuncName:name
 					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
 				| FuncName:name LPAREN ProcessList:list RPAREN
@@ -89,7 +95,7 @@ UnitAtom	::=	  NUMBER_NAME:name
 				| LPAREN QuotedOperatorAtom:atom RPAREN
 					{: RESULT = atom; :}
 				| Context:p
-					{:  RESULT = p; :}
+					{: RESULT = p; :}
 				| LPAREN Atom:atom RPAREN
 					{: RESULT = atom; :}
 				| Link:link
@@ -181,6 +187,7 @@ Atom800		::=   Atom700:atom
 Atom		::=   Atom800:atom
 					{: RESULT = atom; :};
 
+// ( ) で囲って演算子がついていない単独の項にできる演算子
 QuotedOperatorAtom ::=
 				  PLUS			{: RESULT = new SrcAtom("+");	:}
 				| MINUS			{: RESULT = new SrcAtom("-");	:}

@@ -49,6 +49,8 @@ AtomName = [a-z0-9][A-Za-z_0-9]*
 // AtomNameに加えて0引数でアトム名となる文字列その１（AtomNameと排他的でなければならない）
 NumberName = [0-9]*\.[0-9]+ | [0-9]*\.?[0-9]+ [Ee][+-]?[0-9]+
 
+CharCodeLiteral = "#\"" . "\""
+
 // AtomNameに加えて0引数でアトム名となる文字列その２、仮。
 // （:の構文解析が決定するまでの間、:もここで取り込む。:は直ちに.に置換される）
 // （注意）モジュール名の先頭文字は a-z に限定してあります
@@ -67,7 +69,7 @@ String = "\"" ("\\\"" | [^\"\r\n]* | "\\"[\r]?"\n" )* "\""
 
 ////////////////////////////////////////////////////////////////
 
-RelativeOp = "=" | "==" | "!=" | "::" | "?" | {IntegerRelativeOp} | {FloatingRelativeOp}
+RelativeOp = "=" | "==" | "!=" | "\\=" | "::" | "?" | {IntegerRelativeOp} | {FloatingRelativeOp}
 IntegerRelativeOp  = "<" | ">" | ">=" | "=<" | "=:=" | "=\\="
 FloatingRelativeOp = "<."| ">."| ">=."| "=<."| "=:=."| "=\\=."
 
@@ -111,6 +113,7 @@ EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	{LinkName}			{ return symbol(sym.LINK_NAME, yytext()); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME, yytext()); }
+	{CharCodeLiteral}	{ return symbol(sym.CHAR_CODE_LITERAL, yytext()); }
 	{SymbolName}		{ return symbol(sym.SYMBOL_NAME, yytext()); }
 	{String}			{ return symbol(sym.STRING, yytext()); }
 	{PathedAtomName}	{ return symbol(sym.PATHED_ATOM_NAME, yytext()); }

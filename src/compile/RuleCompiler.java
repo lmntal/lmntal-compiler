@@ -351,20 +351,20 @@ public class RuleCompiler {
 					int atomid1 = loadUnaryAtom(def1);
 					guard.add(new Instruction(Instruction.ISUNARY, atomid1));
 				}
-// NSAMEFUNC を作るか？
-//				else if (func.equals(new Functor("\\=",2))) {
-//					if (!identifiedCxtdefs.contains(def1)) continue;
-//					if (!identifiedCxtdefs.contains(def2)) continue;
-//					int atomid1 = loadUnaryAtom(def1);
-//					int atomid2 = loadUnaryAtom(def2);
-//					guard.add(new Instruction(Instruction.ISUNARY, atomid1));
-//					guard.add(new Instruction(Instruction.ISUNARY, atomid2));
-//					int funcid1 = varcount++;
-//					int funcid2 = varcount++;
-//					guard.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
-//					guard.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
-//					guard.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
-//				}
+				else if (func.equals(new Functor("\\=",2))) {
+					// NSAMEFUNC を作るか？
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					if (!identifiedCxtdefs.contains(def2)) continue;
+					int atomid1 = loadUnaryAtom(def1);
+					int atomid2 = loadUnaryAtom(def2);
+					guard.add(new Instruction(Instruction.ISUNARY, atomid1));
+					guard.add(new Instruction(Instruction.ISUNARY, atomid2));
+					int funcid1 = varcount++;
+					int funcid2 = varcount++;
+					guard.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
+					guard.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+					guard.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
+				}
 				else if (func.getSymbolFunctorID().equals("class_2")) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
