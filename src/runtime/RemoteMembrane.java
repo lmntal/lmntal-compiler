@@ -20,7 +20,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 	protected String hostname;
 	protected LMNtalNode lmnNode; 
 	protected RemoteLMNtalRuntime(String hostname) {
-		//runtimeidの中にはfqdnが入っている
+		//runtimeidの中にはfqdnが入っている（とみなす）
 
 		this.hostname = hostname;
 	}
@@ -41,6 +41,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 		//send("TERMINATE");
 	}
 	public void awake() {
+		//TODO 実装
 		//send("AWAKE");
 	}
 	
