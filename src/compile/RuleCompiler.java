@@ -26,27 +26,39 @@ import runtime.Env;
 public class RuleCompiler {
 	public RuleStructure rs;
 	
+	/**
+	 * rs 用のルールコンパイラをつくる
+	 * 
+	 * @param rs ルール
+	 */
 	RuleCompiler(RuleStructure rs) {
 		Env.n("RuleCompiler");
 		Env.p(rs);
 		this.rs = rs;
 	}
+	
+	/**
+	 * コンパイルする。
+	 * 何を返すかは未定
+	 * 
+	 * @return Rule
+	 */
 	public Rule compile() {
 		Env.c("compile");
 		Rule r = new Rule();
 		//r.text = "( "+l.toString()+" :- "+r.toString()+" )";
 		//@ruleid = rule.ruleid
 		
-		HeadCompiler hc = new HeadCompiler(r.leftMem);
+		HeadCompiler hc = new HeadCompiler(rs.leftMem);
 		hc.enumformals();
 		if(false /* @lhs.natoms + @lhs.nmems == 0 */) {
-			hc.freemems.add(l);
+			hc.freemems.add(rs.leftMem);
 		}
 		compile_l();
 		compile_r();
 		
 		//optimize if $optlevel > 0
-		if(false) optimize();
+		optimize();
 		
 		//rule.register(@atommatches,@memmatch,@body)
 		return r;
@@ -114,6 +126,7 @@ public class RuleCompiler {
 	}
 	
 	private void optimize() {
+		Env.c("optimize");
 	}
 }
 

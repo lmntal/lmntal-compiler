@@ -1,6 +1,6 @@
-/*
+/* 
  * 作成日: 2003/10/24
- *
+ * 
  */
 package compile;
 
@@ -21,9 +21,9 @@ public class RuleCompilerTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Membrane m = getTestStructure();
-		Env.p(m);
-		RuleCompiler rc = new RuleCompiler(m);
+		RuleStructure rs = getTestStructure();
+		Env.p(rs);
+		RuleCompiler rc = new RuleCompiler(rs);
 		rc.compile();
 	}
 	
@@ -34,8 +34,9 @@ public class RuleCompilerTest {
 	 * 
 	 * @return まく
 	 */
-	static Membrane getTestStructure() {
+	static RuleStructure getTestStructure() {
 		// ルート膜の親膜は null
+		RuleStructure rs = new RuleStructure();
 		Membrane m = new Membrane(null);
 		
 		// ルール
@@ -47,7 +48,10 @@ public class RuleCompilerTest {
 		m.atoms.add( new Atom(m, "v", 0) );
 		m.atoms.add( new Atom(m, "w", 0) );
 		m.rules.add(r);
-		return m;
+		
+		rs.leftMem = new Membrane(null);
+		rs.rightMem = m;
+		return rs;
 	}
 }
 
