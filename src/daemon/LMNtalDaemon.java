@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.Set;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -72,12 +71,32 @@ public class LMNtalDaemon implements Runnable {
 	static boolean DEBUG = true;
 
 	ServerSocket servSocket = null;
+	
+	/*
+	 * ソケットとつなげてきた元のノードの表
+	 */
 	static HashMap nodeTable = new HashMap();
+	
+	/*
+	 * ローカルにあるruntimeの表
+	 */
 	static HashMap registedRuntimeTable = new HashMap();
+	
+	/*
+	 * メッセージの表
+	 */
 	static HashMap msgTable = new HashMap();
+	
+	/*
+	 * 起動されたLocalLMNtalRuntimeの表
+	 */
 	//static HashMap slaveRuntimeTable = new HashMap();
-	static int id = 0;
+
+	/*
+	 * idを作るのに使うランダム
+	 */
 	static Random r = new Random();
+	
 	//static Process remoteRuntime;
 
 	/*
@@ -117,7 +136,7 @@ public class LMNtalDaemon implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("LMNtalDaemon.run()");
+		if(DEBUG)System.out.println("LMNtalDaemon.run()");
 
 		Socket tmpSocket;
 		BufferedReader tmpInStream;
@@ -127,9 +146,8 @@ public class LMNtalDaemon implements Runnable {
 			try {
 				tmpSocket = servSocket.accept(); //コネクションがくるまで待つ
 
-				if (DEBUG) {
-					System.out.println("accepted socket: " + tmpSocket);
-				}
+				if (DEBUG)System.out.println("accepted socket: " + tmpSocket);
+				
 
 				//入力stream			
 				tmpInStream =
@@ -172,7 +190,7 @@ public class LMNtalDaemon implements Runnable {
 	}
 
 	/*
-	 * Socketをkey, LMNtalNodeをvalueとするHashMapに登録する
+	 * Socketをkey, LMNtalNodeをvalueとするHashMap(nodeTable)に登録する
 	 * 
 	 * @param socket ソケット
 	 * @param node LMNtalノード
@@ -244,25 +262,20 @@ public class LMNtalDaemon implements Runnable {
 	 * @return rgidなキーが存在する時はfalse
 	 */
 	public static boolean registerLocal(Integer rgid, Socket socket) {
-		if (DEBUG) {
-			System.out.println(
-				"registerLocal(" + rgid + ", " + socket.toString() + ")");
-		}
+		if (DEBUG)System.out.println("registerLocal(" + rgid + ", " + socket.toString() + ")");
 
 		synchronized (registedRuntimeTable) {
 			if (registedRuntimeTable.containsKey(rgid)) {
-				if (DEBUG) {
-					System.out.println("registerLocal failed");
-				}
+				if (DEBUG)System.out.println("registerLocal failed");
+				
 				return false;
 			}
 
 			registedRuntimeTable.put(rgid, socket);
 		}
 
-		if (DEBUG) {
-			System.out.println("registerLocal succeeded");
-		}
+		if (DEBUG)System.out.println("registerLocal succeeded");
+		
 
 		return true;
 	}
@@ -275,10 +288,7 @@ public class LMNtalDaemon implements Runnable {
 	 * @return msgidなキーが存在していたらfalse
 	 */
 	public static boolean registerMessage(Integer msgid, LMNtalNode node) {
-		if (DEBUG) {
-			System.out.println(
-				"registerMessage(" + msgid + ", " + node.toString() + ")");
-		}
+		if (DEBUG)System.out.println("registerMessage(" + msgid + ", " + node.toString() + ")");
 
 		synchronized (msgTable) {
 			if (msgTable.containsKey(msgid)) {
@@ -288,9 +298,7 @@ public class LMNtalDaemon implements Runnable {
 			msgTable.put(msgid, node);
 		}
 
-		if (DEBUG) {
-			System.out.println("registerMessage succeeded");
-		}
+		if (DEBUG)System.out.println("registerMessage succeeded");
 
 		return true;
 	}
@@ -301,9 +309,8 @@ public class LMNtalDaemon implements Runnable {
 	 *  @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらtrue。それ以外はfalse。
 	 */
 	public static boolean isRegisted(String fqdn) {
-		if (DEBUG) {
-			System.out.println("now in LMNtalDaemon.isRegisted(" + fqdn + ")");
-		}
+		if (DEBUG) System.out.println("now in LMNtalDaemon.isRegisted(" + fqdn + ")");
+		
 
 		Collection c = nodeTable.values();
 		Iterator it = c.iterator();
@@ -313,18 +320,13 @@ public class LMNtalDaemon implements Runnable {
 				.getInetAddress()
 				.getCanonicalHostName()
 				.equalsIgnoreCase(fqdn)) {
-				if (DEBUG) {
-					System.out.println(
-						"LMNtalDaemon.isRegisted(" + fqdn + ") is true!");
-				}
+				if (DEBUG) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is true!");
 				return true;
 			}
 		}
 
-		if (DEBUG) {
-			System.out.println(
-				"LMNtalDaemon.isRegisted(" + fqdn + ") is false!");
-		}
+		if (DEBUG) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is false!");
+		
 
 		return false;
 	}
@@ -337,9 +339,7 @@ public class LMNtalDaemon implements Runnable {
 	 *   
 	 */
 	public static LMNtalNode getNodeFromMsgId(Integer msgid) {
-		if (DEBUG) {
-			System.out.println("getNodeFromMsgId(" + msgid + ")");
-		}
+		if (DEBUG)System.out.println("getNodeFromMsgId(" + msgid + ")");
 
 		synchronized (msgTable) {
 			return (LMNtalNode) msgTable.get(msgid);
@@ -353,10 +353,8 @@ public class LMNtalDaemon implements Runnable {
 	 * @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらそのLMNtalNode。それ以外はnull。
 	 */
 	public static LMNtalNode getLMNtalNodeFromFQDN(String fqdn) {
-		if (DEBUG) {
-			System.out.println(
-				"now in LMNtalDaemon.getLMNtalNodeFromFQDN(" + fqdn + ")");
-		}
+		if (DEBUG)System.out.println("now in LMNtalDaemon.getLMNtalNodeFromFQDN(" + fqdn + ")");
+		
 
 		Collection c = nodeTable.values();
 		Iterator it = c.iterator();
@@ -501,23 +499,19 @@ public class LMNtalDaemon implements Runnable {
 	 * デバッグ用。nodeTable, registedRuntimeTable, msgTableを出力する。 
 	 */
 	static void dumpHashMap() {
-		Set tmpSet;
-
-		tmpSet = nodeTable.entrySet();
 		System.out.println("Dump nodeTable: ");
-		System.out.println(tmpSet);
+		System.out.println(nodeTable.entrySet());
 
-		tmpSet = registedRuntimeTable.entrySet();
 		System.out.println("Dump registedRuntimeTable: ");
-		System.out.println(tmpSet);
+		System.out.println(registedRuntimeTable.entrySet());
 
-		tmpSet = msgTable.entrySet();
 		System.out.println("Dump msgTable: ");
-		System.out.println(tmpSet);
+		System.out.println(msgTable.entrySet());
 	}
 
 	/*
-	 * 一意なintを返す。rgidとかmsgidとかに使う。Randmom.nextInt()を返しているだけ…。
+	 * 一意なintを返す。rgidとかmsgidとかに使う。いまところはRandmom.nextInt()の返り値を返しているだけ。
+	 *  TODO 一意なIDを作る
 	 */
 	public static int makeID() {
 		return r.nextInt();

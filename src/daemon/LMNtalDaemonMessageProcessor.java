@@ -233,7 +233,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								
 								//beginの後はendがくるまで命令が連続でくる...
 								//どう処理しようか。
-																								
+								//そのままLocalLMNtalRuntimeにまわすのがいいのかな
+								//来る命令は分散用の命令でなく、タスクとして実行されるべき命令。
+								
+																						
 								
 								out.write("not implemented yet\n");
 								out.flush();
