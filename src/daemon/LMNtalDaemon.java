@@ -242,7 +242,9 @@ public class LMNtalDaemon implements Runnable {
 		try {
 			//新規接続の場合
 			socket = new Socket(fqdn, DEFAULT_PORT);
-			socket.setSoTimeout(180000); //とりあえず3分
+			//socket.setSoTimeout(180000); //とりあえず3分
+			//↑一旦つないで3分通信がないときもtimeoutが発生するのでとりあえずコメントアウト(2004-08-22 nakajima
+			//todo 「接続しようとしたときからn分だめだったらtimeout」にする
 			LMNtalDaemonMessageProcessor node = new LMNtalDaemonMessageProcessor(socket);
 			if (registerRemoteHostNode(node)) {
 				Thread t = new Thread(node);
