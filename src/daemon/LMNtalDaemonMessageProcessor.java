@@ -50,6 +50,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			/* メッセージ:
 			 *   RES msgid 返答
 			 *   REGISTERLOCAL (MASTER|SLAVE) msgid rgid
+			 *   UNREGISTERLOCAL
 			 *   DUMPHASH
 			 *   CMD msgid fqdn rgid コマンド
 			 *     - fqdn が自分宛 
@@ -59,7 +60,6 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			 * コマンド:
 			 *   BEGIN \n ボディ命令... END
 			 *   CONNECT dst_nodedesc src_nodedesc
-			 *   TERMINATE
 			 *   SETENV variable value  //TODO SETENV
 			 *   ...
 			 */
