@@ -416,9 +416,9 @@ public class LMNParser {
 		it = mem.ruleContexts.iterator();
 		while (it.hasNext()) {
 			RuleContext rc = (RuleContext)it.next();
-			names.put(rc.getQualifiedName(), rc);
 			rc.def = new ContextDef(rc.getQualifiedName());
 			rc.def.src = rc;
+			names.put(rc.getQualifiedName(), rc.def);
 		}
 		//
 		it = mem.aggregates.iterator();
