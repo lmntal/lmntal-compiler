@@ -1252,6 +1252,7 @@ public class Instruction implements Cloneable {
 				case Instruction.INHERITLINK:
 				case Instruction.LOCALINHERITLINK:
 					changeArg(inst, 1, map);
+					changeArg(inst, 3, map);
 					changeArg(inst, 4, map);
 					break;
 				case Instruction.ENQUEUEATOM:

@@ -564,6 +564,9 @@ public class Optimizer {
 		public int hashCode() {
 			return atom + pos;
 		}
+		public String toString() {
+			return "(" + atom + ", " + pos + ")";
+		}
 	}
 	/**
 	 * 同一ルールの複数回同時適用<br>
@@ -626,6 +629,7 @@ public class Optimizer {
 		
 		//ループ内命令列の生成
 		
+		//まずはコピーして変数番号付け替え
 		Instruction spec = (Instruction)body.get(0);
 		//ループ内命令列で使用する変数の開始値
 		int base = spec.getIntArg2(); 
@@ -636,87 +640,93 @@ public class Optimizer {
 			varMap.put(new Integer(i), new Integer(base + i));
 			System.out.println(i + " -> " + (base + i));
 		}
-		varMap.put(firstAtom, firstAtom);
-
-		ArrayList moveInsts = new ArrayList();
 		lit = head.subList(2, head.size() - 1).listIterator(); //spec,findatom,reactを除去
 		while (lit.hasNext()) {
-			inst = (Instruction)lit.next();
+			loop.add(((Instruction)lit.next()).clone());
+		}
+		lit = body.listIterator(1);
+		while (lit.hasNext()) {
+			loop.add(((Instruction)lit.next()).clone());
+		}
+		Instruction.changeVar(loop, varMap); //specを除去
+
+		//命令列の変更を行う
+		varMap = new HashMap();
+		varMap.put(firstAtom, firstAtom);
+		
+		ArrayList moveInsts = new ArrayList();
+		ListIterator baseIterator = head.subList(2, head.size() - 1).listIterator(); //１回目用命令列
+		ListIterator loopIterator = loop.listIterator(); //ループ内命令列
+		while (lit.hasNext()) {
+			baseIterator.next();
+			inst = (Instruction)loopIterator.next();
 			switch (inst.getKind()) {
 				case Instruction.DEREF:
 					Link l = (Link)links.get(new Link(inst.getIntArg2(), inst.getIntArg3()));
 					if (l != null && l.pos == inst.getIntArg4()) {
-						//除去
-						System.out.println(inst.getArg1() + " -> " + l.atom);
 						varMap.put(inst.getArg1(), new Integer(l.atom));
-					} else {
-						loop.add(inst.clone());
+						loopIterator.remove();
 					}
 					break;
 				case Instruction.FUNC:
-					Integer atom = (Integer)varMap.get(inst.getArg1());
-					if (functor.containsKey(atom)) {
-						if (!functor.get(atom).equals(inst.getArg2())) {
-							//絶対失敗するので複数回同時適用は行わない
-							return;
+					if (varMap.containsKey(inst.getArg1())) {
+						Integer atom = (Integer)varMap.get(inst.getArg1());
+						if (functor.containsKey(atom)) {
+							if (!functor.get(atom).equals(inst.getArg2())) {
+								//絶対失敗するので複数回同時適用は行わない
+								return;
+							}
+							//絶対成功するので除去	
+							loopIterator.remove();
 						}
-						//絶対成功するので除去	
-					} else {
-						loop.add(inst.clone());
 					}
 					break;					
-				default:
-					loop.add(inst.clone());
-					break;
 			}
 		}
 
 		HashMap changeToNewlink = new HashMap(); //newlinkに変更するリンク -> リンク先
-		lit = body.listIterator(1); //specを除去
+		baseIterator = body.listIterator(1); //１回目用命令列
+		loopIterator = loop.listIterator(); // ループ内命令列
 		while (lit.hasNext()) {
-			inst = (Instruction)lit.next();
+			Instruction baseInst = (Instruction)baseIterator.next();
+			inst = (Instruction)loopIterator.next();
 			switch (inst.getKind()) {
 				case Instruction.GETLINK:
-					Integer atom = (Integer)inst.getArg2();
-					Link l = (Link)links.get(new Link(atom.intValue(), inst.getIntArg3()));
-					Integer atom2 = new Integer(l.atom);
-					if (varMap.get(atom).equals(atom) || varMap.get(atom2).equals(atom2)) {
-						//削除されるnewlink命令で生成されるはずのリンクに対するgetlinkの場合
-						//getlinkを削除し、inheritlinkをnewlinkに変更
-						changeToNewlink.put(inst.getArg1(), l);
-					} else {
-						loop.add(inst.clone());
+					int atom = inst.getIntArg2();
+					Link l = (Link)links.get(new Link(atom, inst.getIntArg3()));
+					if (l != null) { //前回のループのnewlinkによってリンク先が特定できる場合
+						int atom2 = l.atom;
+						if (varMap.get(new Integer(atom)).equals(new Integer(atom- base)) ||
+							varMap.get(new Integer(atom2)).equals(new Integer(atom2 - base))) { //前回のループのnewlink命令が削除されるものの場合
+							//getlinkを削除し、inheritlinkをnewlinkに変更
+							changeToNewlink.put(inst.getArg1(), l);
+							loopIterator.remove();
+						}
 					}
 					break;
 				case Instruction.INHERITLINK:
 					Integer linkVar = (Integer)inst.getArg3();
 					if (changeToNewlink.containsKey(linkVar)) {
 						l = (Link)changeToNewlink.get(linkVar);
-						System.out.println(linkVar);
-						System.out.println(l);
 						//newlinkに変更
-						loop.add(Instruction.newlink(inst.getIntArg1(),
-													 inst.getIntArg2(),
-													 l.atom,
-													 l.pos));
-													 //inst.getIntArg5()));
-					} else {
-						loop.add(inst.clone());
+						loopIterator.set(Instruction.newlink(inst.getIntArg1(),
+															 inst.getIntArg2(),
+															 l.atom,
+															 l.pos));
+															 //inst.getIntArg5()));
+						
 					}
 					break;
 				case Instruction.NEWLINK:
-					atom = (Integer)inst.getArg1();
-					atom2 = (Integer)inst.getArg3();
-					if (varMap.get(atom).equals(atom) || varMap.get(atom2).equals(atom2)) {
+					int atomVar = inst.getIntArg1();
+					int atomVar2 = inst.getIntArg3();
+					if (varMap.get(new Integer(atomVar)).equals(new Integer(atomVar - base)) ||
+						varMap.get(new Integer(atomVar2)).equals(new Integer(atomVar2 - base))) { //もともとの変数番号と同じになっている場合
 						//最後に移動
-						moveInsts.add(inst);
-						lit.remove();
-					} else {
-						loop.add(inst.clone());
+						moveInsts.add(baseInst);
+						baseIterator.remove();
+						loopIterator.remove();
 					}
-					break;
-				default:
-					loop.add(inst.clone());
 					break;
 			}
 		}
