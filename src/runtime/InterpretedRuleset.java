@@ -574,15 +574,27 @@ class InterpreterReactor {
 					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x+y));
 					break; //n-kato
 				case Instruction.ISUB : //[-dstintatom, intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x-y));	
+					break; //nakajima 2004-01-05
 				case Instruction.IMUL : //[-dstintatom, intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x * y));	
+					break; //nakajima 2004-01-05
 				case Instruction.IDIV : //[-dstintatom, intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor((int)(x / y)));				
+					break; //nakajima 2004-01-05
 				case Instruction.INEG : //[-dstintatom, intatom1, intatom2]
 					break;
 				case Instruction.IMOD : //[-dstintatom, intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x % y));						
+					break; //nakajima 2004-01-05
 				case Instruction.INOT : //[-dstintatom, intatom1, intatom2]
 					break;
 				case Instruction.IAND : //[-dstintatom, intatom1, intatom2]
@@ -603,15 +615,27 @@ class InterpreterReactor {
 					vars.set(inst.getIntArg1(), new IntegerFunctor(x+y));
 					break; //n-kato
 				case Instruction.ISUBFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x-y));
+					break; //nakajima 2003-01-05
 				case Instruction.IMULFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x*y));
+					break; //nakajima 2003-01-05
 				case Instruction.IDIVFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
+					vars.set(inst.getIntArg1(), new IntegerFunctor((int)(x / y)));
+					break; //nakajima 2003-01-05
 				case Instruction.INEGFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					break;
 				case Instruction.IMODFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x % y));
+					break; //nakajima 2003-01-05
 				case Instruction.INOTFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					break;
 				case Instruction.IANDFUNC : //[-dstintfunc, intfunc1, intfunc2]
@@ -630,21 +654,61 @@ class InterpreterReactor {
 
 					//====整数用の組み込みガード命令====ここから====
 				case Instruction.ILT : //[intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
+					if( x < y ){
+						return true;			
+					}
+					break; //nakajima 2003-01-05
 				case Instruction.ILE : //[intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
+					if( x <= y ){
+						return true;			
+					}
+					break; //nakajima 2003-01-05
 				case Instruction.IGT : //[intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
+					if( x > y ){
+						return true;			
+					}
+					break; //nakajima 2003-01-05
 				case Instruction.IGE : //[intatom1, intatom2]
-					break;
+					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
+					if( x >= y ){
+						return true;			
+					}
+					break; //nakajima 2003-01-05
 				case Instruction.ILTFUNC : //[intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					if( x < y ){
+						return true;			
+					}		
+					break; //nakajima 2003-01-05
 				case Instruction.ILEFUNC : //[intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					if( x <= y ){
+						return true;			
+					}		
+					break; //nakajima 2003-01-05
 				case Instruction.IGTFUNC : //[intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					if( x > y ){
+						return true;			
+					}		
+					break; //nakajima 2003-01-05
 				case Instruction.IGEFUNC : //[intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					if( x >= y ){
+						return true;			
+					}		
+					break; //nakajima 2003-01-05
 					//====整数用の組み込みガード命令====ここまで====
 
 				default :
