@@ -55,4 +55,8 @@ class SrcRule {
 	public LinkedList getBody() {
 		return this.body;
 	}
+	
+	public String toString() {
+		return "(rule)";
+	}
 }

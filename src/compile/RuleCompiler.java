@@ -240,6 +240,10 @@ public class RuleCompiler {
 		guardLibrary2.put(new Functor("=<", 2), new int[]{ISINT,  ISINT,   Instruction.ILE});
 		guardLibrary2.put(new Functor(">",  2), new int[]{ISINT,  ISINT,   Instruction.IGT});
 		guardLibrary2.put(new Functor(">=", 2), new int[]{ISINT,  ISINT,   Instruction.IGE});
+		guardLibrary2.put(new Functor("=:=",  2), new int[]{ISINT,  ISINT,   Instruction.IEQ});
+		guardLibrary2.put(new Functor("=\\=", 2), new int[]{ISINT,  ISINT,   Instruction.INE});
+		guardLibrary2.put(new Functor("=:=.", 2), new int[]{ISFLOAT,ISFLOAT,   Instruction.FEQ});
+		guardLibrary2.put(new Functor("=\\=.",2), new int[]{ISFLOAT,ISFLOAT,   Instruction.FNE});
 		guardLibrary2.put(new Functor("+.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FADD});
 		guardLibrary2.put(new Functor("-.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FSUB});
 		guardLibrary2.put(new Functor("*.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FMUL});
@@ -248,8 +252,8 @@ public class RuleCompiler {
 		guardLibrary2.put(new Functor("-",  3), new int[]{ISINT,  ISINT,   Instruction.ISUB});
 		guardLibrary2.put(new Functor("*",  3), new int[]{ISINT,  ISINT,   Instruction.IMUL});
 		guardLibrary2.put(new Functor("/",  3), new int[]{ISINT,  ISINT,   Instruction.IDIV});
-//		guardLibrary1.put(new Functor("int",  2),new int[]{ISINT,	Instruction.ITOF});
-//		guardLibrary1.put(new Functor("float",2),new int[]{ISFLOAT,Instruction.FTOI});
+		guardLibrary1.put(new Functor("int",  2),new int[]{ISINT,	Instruction.INT2FLOAT});
+		guardLibrary1.put(new Functor("float",2),new int[]{ISFLOAT,Instruction.FLOAT2INT});
 	}
 	/** ガードをコンパイルする（仮） */
 	private void compile_g() {
@@ -319,6 +323,12 @@ public class RuleCompiler {
 						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
 					}
 					else bindToUnaryAtom(def1, atomid2);
+				}
+				else if (func.equals(new Functor("==",2))) {
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					if (!identifiedCxtdefs.contains(def2)) continue;
+					int atomid2 = loadUnaryAtom(def2);
+					bindToUnaryAtom(def1, atomid2);
 				}
 				else if (guardLibrary1.containsKey(func)) {
 					int[] desc = (int[])guardLibrary1.get(func);

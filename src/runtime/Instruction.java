@@ -936,6 +936,8 @@ public class Instruction implements Cloneable {
 	public static final int ILE = 421;
 	public static final int IGT = 422;
 	public static final int IGE = 423;	
+	public static final int IEQ = 424;	
+	public static final int INE = 425;	
 
 	/** iltfunc [intfunc1, intfunc2]
 	 * <br>整数用の最適化用組み込みガード命令<br>
@@ -952,11 +954,6 @@ public class Instruction implements Cloneable {
 	public static final int FMUL = 602;
 	public static final int FDIV = 603;
 	public static final int FNEG = 604;
-
-	// TODO BUILTIN 命令を使う方がよいと思われる
-//	public static final int FSIN = 610;
-//	public static final int FCOS = 611;
-//	public static final int FTAN = 612;
 	
 	public static final int FADDFUNC = FADD + OPT;
 	public static final int FSUBFUNC = FSUB + OPT;
@@ -969,11 +966,23 @@ public class Instruction implements Cloneable {
 	public static final int FLE = 621;
 	public static final int FGT = 622;
 	public static final int FGE = 623;	
+	public static final int FEQ = 624;	
+	public static final int FNE = 625;	
 
 	public static final int FLTFUNC = FLT + OPT;
 	public static final int FLEFUNC = FLE + OPT;
 	public static final int FGTFUNC = FGT + OPT;
 	public static final int FGEFUNC = FGE + OPT;
+
+	// ここもBUILTIN 命令にすべきである。
+	public static final int FLOAT2INT = 630;
+	public static final int INT2FLOAT = 631;
+
+	// TODO BUILTIN 命令を使う方がよいと思われる
+//	public static final int FSIN = 640;
+//	public static final int FCOS = 641;
+//	public static final int FTAN = 642;
+
 
 	////////////////////////////////////////////////////////////////
 

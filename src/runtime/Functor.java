@@ -46,7 +46,7 @@ public class Functor {
 	/** 引数をもたないアトムの名前として表示名を印字するための文字列を返す */
 	public final String getQuotedAtomName() {
 		String text = getAbbrName();
-		if (!text.matches("^([A-Za-z0-9_]*|\\[\\])$")) {
+		if (!text.matches("^([a-z0-9_]*|\\[\\])$")) {
 			if (!text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
 				text = quoteName(text);
 			}

@@ -88,11 +88,11 @@ public class Dumper {
 			//  0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
 			//  1. 結合度が = 以下の2引数演算子のアトム
 			//  2. 通常のシンボル名でリンク先が最終引数の1引数アトム
-			//  3. 通常のシンボル名でリンク先が最終引数の2引数以上のアトム
-			//  4. リンク先が最終引数のconsアトム
+			//  3. 通常のシンボル名で最終引数のリンク先が最終引数の2引数以上のアトム
+			//  4. 第3引数のリンク先が最終引数のconsアトム
 			
 			// 起点にしないアトム
-			//  - $in,$out,[],およびA-Zで始まるアトム
+			//  - $in,$out,[],整数,実数,およびA-Zで始まるアトム
 			
 			it = mem.atomIterator();
 			while (it.hasNext()) {
@@ -131,7 +131,8 @@ public class Dumper {
 						if(commaFlag) buf.append(", "); else commaFlag = true;
 						// consは演算子と同じ表示的な扱い
 						if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
-							if (a.getFunctor().equals(FUNC_CONS)) {
+							if (a.getFunctor().equals(FUNC_CONS)
+							 || (a.getArity() == 3 && isInfixOperator(a.getName()))) {
 								buf.append(dumpLink(a.getLastArg(), atoms, 700));
 								buf.append("=");
 								buf.append(dumpAtomGroupWithoutLastArg(a, atoms, 700));

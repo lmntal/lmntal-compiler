@@ -7,7 +7,7 @@ package compile.parser;
 
 import java_cup.runtime.Scanner;
 import java.io.Reader;
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.LinkedList;
 //import java.util.ArrayList;
 import java.util.List;
@@ -17,13 +17,13 @@ import java.util.ListIterator;
 
 import runtime.Functor;
 import runtime.Inline;
-import runtime.Env;
+//import runtime.Env;
 import compile.Module;
 import compile.structure.*;
 
 public class LMNParser {
 
-	private static final String       LINK_NAME_PREFIX = "";	// [A-Z_][A-Za-z0-9_]* 以外
+	private static final String       LINK_NAME_PREFIX = "~"; // [A-Z_][A-Za-z0-9_]* 以外
 	private static final String PROXY_LINK_NAME_PREFIX = "^"; // 〃
 	private static final String PROCESS_CONTEXT_NAME_PREFIX = "_"; // [a-z0-9][A-Za-z0-9_]* 以外
 	static final LinkOccurrence CLOSED_LINK = new LinkOccurrence("",null,0);
@@ -64,13 +64,15 @@ public class LMNParser {
 		@return 解析されたソースコードのリスト
 		@throws ParseException 
 	*/
-	protected LinkedList parseSrc() throws ParseException {
+	protected LinkedList parseSrc() { // throws ParseException {
 		parser p = new parser(lex);
 		LinkedList result = null;
 		try {
 			result = (LinkedList)p.parse().value;
 		} catch (Exception e) {
-			throw new ParseException(e.getMessage()+" "+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));	
+//			throw new ParseException(e.getMessage()+" "+runtime.Env.parray(java.util.Arrays.asList(e.getStackTrace()), "\n"));	
+//			error("PARSE ERROR: " + p.error_sym());
+			result = new LinkedList();
 		}
 		return result;
 	}
@@ -221,11 +223,15 @@ public class LMNParser {
 
 			// プロセス文脈
 			else if (obj instanceof SrcProcessContext) {
-				throw new ParseException("Untyped process context in an atom argument: " + obj);
+				error("SYNTAX ERROR: Untyped process context in an atom argument: " + obj);
+				setLinkToAtomArg(new SrcLink(generateNewLinkName()), atom, i);
+				allbundles = false;
 			}
 			// その他
 			else {
-				throw new ParseException("Illegal object in an atom argument: " + obj);
+				error("SYNTAX ERROR: Illegal object in an atom argument: " + obj);
+				setLinkToAtomArg(new SrcLink(generateNewLinkName()), atom, i);
+				allbundles = false;
 			}
 		}
 		
@@ -286,7 +292,7 @@ public class LMNParser {
 	 * @throws ParseException
 	 * @return リンク名から自由リンク出現へのHashMap
 	 */
-	private static HashMap coupleLinks(Membrane mem) throws ParseException {
+	private HashMap coupleLinks(Membrane mem) throws ParseException {
 		// 同じ膜レベルのリンク結合を行う
 		HashMap links = new HashMap();
 		List[] lists = {mem.atoms, mem.processContexts, mem.typedProcessContexts};
@@ -318,10 +324,10 @@ public class LMNParser {
 	 * @param lnk 記録するリンク出現
 	 * @throws ParseException 2回より多くリンク名が出現した場合
 	 */
-	private static void addLinkOccurrence(HashMap links, LinkOccurrence lnk) throws ParseException {
+	private void addLinkOccurrence(HashMap links, LinkOccurrence lnk) throws ParseException {
 		// 3回以上の出現
 		if (links.get(lnk.name) == CLOSED_LINK) {
-			throw new ParseException("Link " + lnk.name + " appears more than twice.");
+			error("SYNTAX ERROR: Link " + lnk.name + " appears more than twice.");
 		}
 		// 1回目の出現
 		else if (links.get(lnk.name) == null) {
@@ -392,7 +398,7 @@ public class LMNParser {
 				if (def.isTyped()) {
 					if (def.src != null) {
 						// 展開を実装すれば不要になる
-						throw new ParseException("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name: " + name);
+						error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name: " + name);
 					}
 					def.src = pc;	// ソース出現を登録
 					it.remove();
@@ -400,7 +406,7 @@ public class LMNParser {
 				}
 				else {
 					// 構造比較への変換を実装すれば不要になる
-					throw new ParseException("FEATURE NOT IMPLEMENTED: untyped process context name appeared more than once in a head: " + name);
+					error("FEATURE NOT IMPLEMENTED: untyped process context name appeared more than once in a head: " + name);
 				}
 			}
 			if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
@@ -625,7 +631,7 @@ public class LMNParser {
 			it = links.keySet().iterator();
 			while (it.hasNext()) {
 				LinkOccurrence link = (LinkOccurrence)links.get(it.next());
-				error("SYNTAX ERROR: rule contains free variable: "+ link.name);
+				error("SYNTAX ERROR: rule with free variable: "+ link.name);
 				LinkedList process = new LinkedList();
 				process.add(new SrcLink(link.name));
 				SrcAtom sAtom = new SrcAtom(link.name, process);
@@ -957,7 +963,7 @@ public class LMNParser {
 					else {
 						String proccxtname = generateNewProcessContextName();
 						sAtom.getProcess().set(i, new SrcProcessContext(proccxtname, true));
-						error("SYNTAX ERROR: Illegal object in guard atom argument: " + obj);
+						error("SYNTAX ERROR: Illegal object in guard atom argument: " + subobj);
 					}
 				}
 			}
@@ -983,7 +989,7 @@ public class LMNParser {
 					else {
 						String linkname = generateNewLinkName();
 						sAtom.getProcess().set(i, new SrcLink(linkname));
-						error("SYNTAX ERROR: Illegal object in an atom argument: " + obj);
+						error("SYNTAX ERROR: Illegal object in an atom argument: " + subobj);
 					}
 				}
 			}

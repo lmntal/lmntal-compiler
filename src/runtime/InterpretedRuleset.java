@@ -759,6 +759,17 @@ class InterpretiveReactor {
 					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
 					if (!(x >= y)) return false;
 					break; // n-kato
+				case Instruction.IEQ : //[intatom1, intatom2]
+					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
+					if (!(x == y)) return false;
+					break; // n-kato
+				case Instruction.INE : //[intatom1, intatom2]
+					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
+					if (!(x != y)) return false;
+					break; // n-kato
+
 				case Instruction.ILTFUNC : //[intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
@@ -779,6 +790,7 @@ class InterpretiveReactor {
 					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					if (!(x >= y)) return false;
 					break; // n-kato
+				// IEQFUNC INEFUNC FEQFUNC FNEFUNC FNEFUNC... INT2FLOATFUNC...
 					//====整数用の組み込みガード命令====ここまで====
 
 
@@ -827,6 +839,25 @@ class InterpretiveReactor {
 					u = ((FloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
 					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
 					if (!(u >= v)) return false;
+					break; // n-kato
+				case Instruction.FEQ : //[floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
+					if (!(u == v)) return false;
+					break; // n-kato
+				case Instruction.FNE : //[floatatom1, floatatom2]
+					u = ((FloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
+					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
+					if (!(u != v)) return false;
+					break; // n-kato
+
+				case Instruction.FLOAT2INT: //[-intatom, floatatom]
+					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor((int)u));
+					break; // n-kato
+				case Instruction.INT2FLOAT: //[-floatatom, intatom]
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new FloatingFunctor((double)x));
 					break; // n-kato
 
 

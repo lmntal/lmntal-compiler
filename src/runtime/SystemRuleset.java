@@ -93,7 +93,7 @@ final class SystemRuleset extends Ruleset {
 	 * 指定されたInterpretedRulesetに対して、integerモジュール相当の内容を追加するために使用される。
 	 * 【注意】整数演算を無効にするオプションがあってもよい。		
 	 */
-	static Rule buildBinopRule(String name, int typechecker, int op) {
+	static Rule buildBinOpRule(String name, int typechecker, int op) {
 		// 1:'+'(X,Y,Res), 2:$x[X], 3:$y[Y] :- int($x),int($y), (4:$z)=$x+$y | 5:$z[Res].
 		Rule rule = new Rule();
 		List insts = rule.memMatch;
@@ -112,25 +112,57 @@ final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  3,0));
 		insts.add(new Instruction(Instruction.LOCALADDATOM,  0,4));
 		insts.add(new Instruction(Instruction.RELINK,        4,0,1,2));
+		insts.add(new Instruction(Instruction.FREEATOM,      1));
+		insts.add(new Instruction(Instruction.FREEATOM,      2));
+		insts.add(new Instruction(Instruction.FREEATOM,      3));
 		insts.add(new Instruction(Instruction.PROCEED));
 		return rule;
 	}
+	/**
+	 * 仮メソッド。
+	 */
+	static Rule buildUnaryOpRule(String name, int typechecker, int op) {
+		// 1:float(X,Res), 2:$x[X] :- int($x), (3:$y)=float($x) | 4:$y[Res].
+		Rule rule = new Rule();
+		List insts = rule.memMatch;
+		// match		
+		insts.add(new Instruction(Instruction.SPEC,        5,0));
+		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,2)));
+		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
+		insts.add(new Instruction(typechecker,             2));
+		insts.add(new Instruction(op,                    3,2));
+		// react
+		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
+		insts.add(new Instruction(Instruction.LOCALADDATOM,  0,3));
+		insts.add(new Instruction(Instruction.RELINK,        3,0,1,1));
+		insts.add(new Instruction(Instruction.FREEATOM,      1));
+		insts.add(new Instruction(Instruction.FREEATOM,      2));
+		insts.add(new Instruction(Instruction.PROCEED));
+		return rule;
+	}
+	
+	
 	static void loadIntegerRules(InterpretedRuleset ruleset) {
 		Rule rule;
 		List insts;		
 		
-		ruleset.rules.add(buildBinopRule("+",Instruction.ISINT,Instruction.IADD));
-		ruleset.rules.add(buildBinopRule("-",Instruction.ISINT,Instruction.ISUB));
-		ruleset.rules.add(buildBinopRule("*",Instruction.ISINT,Instruction.IMUL));
-		ruleset.rules.add(buildBinopRule("/",Instruction.ISINT,Instruction.IDIV));
-		ruleset.rules.add(buildBinopRule("%",Instruction.ISINT,Instruction.IMOD));
+		ruleset.rules.add(buildBinOpRule("+",Instruction.ISINT,Instruction.IADD));
+		ruleset.rules.add(buildBinOpRule("-",Instruction.ISINT,Instruction.ISUB));
+		ruleset.rules.add(buildBinOpRule("*",Instruction.ISINT,Instruction.IMUL));
+		ruleset.rules.add(buildBinOpRule("/",Instruction.ISINT,Instruction.IDIV));
+		ruleset.rules.add(buildBinOpRule("mod",Instruction.ISINT,Instruction.IMOD));
 
-		ruleset.rules.add(buildBinopRule("+.",Instruction.ISFLOAT,Instruction.FADD));
-		ruleset.rules.add(buildBinopRule("-.",Instruction.ISFLOAT,Instruction.FSUB));
-		ruleset.rules.add(buildBinopRule("*.",Instruction.ISFLOAT,Instruction.FMUL));
-		ruleset.rules.add(buildBinopRule("/.",Instruction.ISFLOAT,Instruction.FDIV));
+		ruleset.rules.add(buildBinOpRule("+.",Instruction.ISFLOAT,Instruction.FADD));
+		ruleset.rules.add(buildBinOpRule("-.",Instruction.ISFLOAT,Instruction.FSUB));
+		ruleset.rules.add(buildBinOpRule("*.",Instruction.ISFLOAT,Instruction.FMUL));
+		ruleset.rules.add(buildBinOpRule("/.",Instruction.ISFLOAT,Instruction.FDIV));
+
+		ruleset.rules.add(buildUnaryOpRule("int",  Instruction.ISFLOAT,Instruction.FLOAT2INT));
+		ruleset.rules.add(buildUnaryOpRule("float",Instruction.ISINT,  Instruction.INT2FLOAT));
 		
-		// 1:cp(A,B,C), 2:$n[A] :- int($n) | $3:$n[B], $4:$n[C].
+		// 1:cp(A,B,C), 2:$n[A] :- unary($n) | $3:$n[B], $4:$n[C].
 		// reuse { 2->4 }
 		rule = new Rule();
 		insts = rule.memMatch;
@@ -138,7 +170,7 @@ final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.SPEC,        4,0));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor("cp",3)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
-		insts.add(new Instruction(Instruction.ISINT,       2));
+		insts.add(new Instruction(Instruction.ISUNARY,     2));
 		// react
 		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
