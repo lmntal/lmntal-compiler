@@ -170,8 +170,8 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 
 									if (DEBUG) System.out.println(newCmdLine);
 
-									//TODO (nakajima)debug
 									Process slave = Runtime.getRuntime().exec(newCmdLine);
+									
 									Thread dumpErr = new Thread(new StreamDumper("slave runtime.error", slave.getErrorStream()));
 									Thread dumpOut = new Thread(new StreamDumper("slave runtime.stdout", slave.getInputStream()));
 									dumpErr.start();
