@@ -47,6 +47,7 @@ public class Module {
 	 * @param m
 	 */
 	public static void regMemName(String name, Membrane m) {
+		System.out.println("reg "+name);
 		memNameTable.put(name, m);
 	}
 	

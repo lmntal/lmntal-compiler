@@ -247,7 +247,7 @@ public class RuleCompiler {
 		updateLinks();
 		enqueueRHSAtoms();
 		addInline();
-		addLoadModules();
+		addRegAndLoadModules();
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
 		freeLHSTypedProcesses();
@@ -1064,10 +1064,16 @@ public class RuleCompiler {
 	}
 	static final Functor FUNC_USE = new Functor("use",1);
 	/** モジュールを読み込む */
-	private void addLoadModules() {
+	private void addRegAndLoadModules() {
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
+			//REG
+			if(atom.functor.getArity()==1 && atom.functor.getName().equals("module")) {
+				Module.regMemName(atom.args[0].buddy.atom.functor.getName(), atom.mem);
+			}
+			
+			//LOAD
 			if (atom.functor.equals(FUNC_USE)) {
 				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
 					atom.args[0].buddy.atom.functor.getName()) );

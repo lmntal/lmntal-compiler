@@ -17,7 +17,6 @@ import java.util.ListIterator;
 
 import runtime.Functor;
 //import runtime.Env;
-import compile.Module;
 import compile.structure.*;
 
 public class LMNParser {
@@ -194,8 +193,6 @@ public class LMNParser {
 	 */
 	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) throws ParseException {
 		Membrane submem = new Membrane(mem);
-		Module.regMemName(sMem.name, submem);
-		submem.name = sMem.name;
 		submem.stable = sMem.stable;
 		addProcessToMem(sMem.getProcess(), submem);
 		mem.mems.add(submem);

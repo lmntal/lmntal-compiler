@@ -8,14 +8,12 @@ class SrcMembrane {
 	LinkedList process = null;
 	/** 終了フラグの有無 */
 	public boolean stable = false;
-	/** 名前 */
-	public String name;
 	
 	/**
 	 * 空の膜を作成します 
 	 */
 	public SrcMembrane() {
-		this(null, new LinkedList());
+		this(new LinkedList());
 	}
 	
 	/**
@@ -23,17 +21,7 @@ class SrcMembrane {
 	 * @param process 膜に含まれる子プロセス
 	 */
 	public SrcMembrane(LinkedList process) {
-		this(null, process);
-	}
-	
-	/**
-	 * 指定された子プロセスを持つ名前つき膜を作成します
-	 * @param process 膜に含まれる子プロセス
-	 */
-	public SrcMembrane(String name, LinkedList process) {
-		this.name = name;
 		this.process = process;
-		//runtime.Env.p("Membran name = "+name);
 	}
 	
 	/**
