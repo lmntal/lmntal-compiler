@@ -800,7 +800,7 @@ public class Instruction implements Cloneable {
 	//  -----  react       [ruleref, [memargs...], [atomargs...]]
 	//  -----  inlinereact [ruleref, [memargs...], [atomargs...]]
 	//  -----  resetvars   [[memargs...], [atomargs...], [varargs...]]
-	//  -----  resetvars2  [[memargs...], [atomargs...], [varargs...]]
+	//  -----  changevars  [[memargs...], [atomargs...], [varargs...]]
 	//  -----  spec        [formals,locals]
 	//  -----  proceed
 	//  -----  stop 
@@ -866,21 +866,21 @@ public class Instruction implements Cloneable {
     /** branch [[instructions...]]
      * <br>構造化命令<br>
      * 引数の命令列を実行することを表す。
-     * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、次の命令に進む。
+     * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、branchの次の命令に進む。
      * 引数実行中にproceed命令を実行した場合、ここで終了する。*/
     public static final int BRANCH = 206;
 
 	/** loop [[instructions...]]
 	 * <br>構造化命令<br>
 	 * 引数の命令列を実行することを表す。
-     * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、次の命令に進む。
+     * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、loopの次の命令に進む。
      * 引数実行中にproceed命令を実行した場合、このloop命令の実行を繰り返す。*/
 	public static final int LOOP = 207;
 
 	/** run [[instructions...]]
 	 * <br>（予約された）構造化命令<br>
 	 * 引数の命令列を実行することを表す。引数列はロックを取得してはならない。
-	 * 引数実行中に失敗した場合、次の命令に進む。
+	 * 引数実行中に失敗した場合、runの次の命令に進む。
 	 * 引数実行中にproceed命令を実行した場合、次の命令に進む。
 	 * <p>将来、明示的な引数付きのプロセス文脈のコンパイルに使用するために予約。*/
 	public static final int RUN = 208;
@@ -888,7 +888,7 @@ public class Instruction implements Cloneable {
 	/** not [[instructions...]]
 	 * <br>（予約された）構造化命令<br>
 	 * 引数の命令列を実行することを表す。引数列はロックを取得してはならない。
-	 * 引数実行中に失敗した場合、次の命令に進む。
+	 * 引数実行中に失敗した場合、notの次の命令に進む。
 	 * 引数実行中にproceed命令を実行した場合、この命令が失敗する。
 	 * <p>将来、否定条件のコンパイルに使用するために予約。*/
 	public static final int NOT = 209;
@@ -901,9 +901,7 @@ public class Instruction implements Cloneable {
 	 * <br>ガード命令、ボディ命令<br>
 	 * アトム$atomに対して、inlinerefが指定するインライン命令を適用し、成功することを確認する。
 	 * <p>inlinerefには現在、インライン番号を渡すことになっているが、
-	 * 処理系はinlinerefを無視して$atomのファンクタからインライン命令を決定してよい。
-	 * 仕様は将来変更されるかもしれない。
-	 * <p>ボディで呼ばれる場合典型的には、全てのリンクを張りなおした直後に呼ばれる。*/
+	 * <p>ボディで呼ばれる場合、典型的には、全てのリンクを張り直した直後に呼ばれる。*/
 	public static final int INLINE = 210;
 
 	/** builtin [class, method, [links...]]
@@ -1566,7 +1564,7 @@ public class Instruction implements Cloneable {
 
 	/**
 	 * デバッグ用表示メソッド。
-	 * 命令のid (int)を与えると、該当する命令のStringを返してくれる。
+	 * 命令のkind (int)を与えると、該当する命令の名前 (String) を返してくれる。
 	 *
 	 * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
 	 * @return String
@@ -1865,12 +1863,3 @@ public class Instruction implements Cloneable {
     // 	}
     //     }
 }
-
-//以下、廃止された命令の墓場
-
-//* lock [srcmem]
-//* <br>（廃止された）ガード命令<br>
-//* 膜$srcmemに対するノンブロッキングでのロック取得を試みる。
-//* ロック取得に成功すれば、この膜はまだ参照を（＝ロックを）取得していなかった膜である
-//* <p>srcmemにmemof記法が廃止されたため、ロックはlockmemで行う。したがってlockは廃止された。*/
-//public static final int LOCK = err;
