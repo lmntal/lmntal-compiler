@@ -182,7 +182,7 @@ public class Translator {
 		Manifest mf = new Manifest();
 		Attributes att = mf.getMainAttributes();
 		att.put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream("a.jar")), mf);
+		JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(sourceName + ".jar")), mf);
 		putToJar(out, "", baseDir);
 		out.close();
 		
@@ -191,32 +191,6 @@ public class Translator {
 			Env.warning("failed to delete temprary files");
 		}
 	}
-//	/**
-//	 * 指定されたディレクトリから再帰的に .java ファイルを探し、それがまだコンパイルされていなければコンパイルする。
-//	 * @param directory .java ファイルを探すディレクトリ
-//	 * @return 全ての .java ファイルのコンパイルに成功した場合 true
-//	 * @throws IOException IOエラーが発生した場合
-//	 */
-//	private static boolean compileDir(File directory) throws IOException {
-//		String[] files = directory.list();
-//		for (int i = 0; i < files.length; i++) {
-//			File f = new File(directory, files[i]);
-//			if (f.isDirectory()) {
-//				if (!compileDir(f)) {
-//					return false;
-//				}
-//			} else	if (files[i].endsWith(".java")) {
-//				String classFileName = files[i].substring(0, files[i].length() - 5) + ".class";
-//				File classFile = new File(directory, classFileName);
-//				if (!classFile.exists()) {
-//					if (!compile(f)) {
-//						return false;
-//					}
-//				}
-//			}
-//		}
-//		return true;
-//	}
 	/**
 	 * 変換したファイルをコンパイルする。
 	 * @param file コンパイルするファイル
@@ -330,6 +304,7 @@ public class Translator {
 		writer.write("\n");
 		writer.write("public class " + className + " extends Ruleset {\n");
 		writer.write("	private static final " + className + " theInstance = new " + className + "();\n");
+		writer.write("	private " + className + "() {}\n");
 		writer.write("	public static " + className + " getInstance() {\n");
 		writer.write("		return theInstance;\n");
 		writer.write("	}\n");
@@ -337,15 +312,17 @@ public class Translator {
 		writer.write("	private String globalRulesetID;\n");
 		writer.write("	public String getGlobalRulesetID() {\n");
 		writer.write("		if (globalRulesetID == null) {\n");
-		writer.write("			globalRulesetID = Env.theRuntime.getRuntimeID() + \":\" + id;\n");
+		String libname = (Env.fLibrary ? sourceName : "");
+		writer.write("			globalRulesetID = Env.theRuntime.getRuntimeID() + \":" + libname + "\" + id;\n");
 		writer.write("			IDConverter.registerRuleset(globalRulesetID, this);\n");
 		writer.write("		}\n");
 		writer.write("		return globalRulesetID;\n");
 		writer.write("	}\n");
 		writer.write("	public String toString() {\n");
-		writer.write("		return \"@\" + id;\n");
+		writer.write("		return \"@" + libname + "\" + id;\n");
 		writer.write("	}\n");
 
+		//膜手動テスト
 		writer.write("	public boolean react(Membrane mem, Atom atom) {\n");
 		writer.write("		boolean result = false;\n");
 		Iterator it = ruleset.rules.iterator();
@@ -359,6 +336,7 @@ public class Translator {
 		}
 		writer.write("		return result;\n");
 		writer.write("	}\n");
+		//アトム手動テスト
 		writer.write("	public boolean react(Membrane mem) {\n");
 		writer.write("		boolean result = false;\n");
 		it = ruleset.rules.iterator();
@@ -372,7 +350,8 @@ public class Translator {
 		}
 		writer.write("		return result;\n");
 		writer.write("	}\n");
-		
+
+		//InstructionList をメソッドに変換
 		it = ruleset.rules.iterator();
 		while (it.hasNext()) {
 			Rule rule = (Rule)it.next();
@@ -384,6 +363,8 @@ public class Translator {
 			translate(instList);
 		}
 
+		//Functor の生成。毎回 new するのを防ぐため、クラス変数にする。
+		//この方法だと Ruleset 毎に作られるので、Functors クラスみたいな物を作った方がよいかもしれない。
 		it = funcVarMap.keySet().iterator();
 		while (it.hasNext()) {
 			Functor func = (Functor)it.next();
