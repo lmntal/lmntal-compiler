@@ -1,13 +1,42 @@
 package runtime;
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.net.Socket;
 
-// このファイルは編集中です。
+/**
+ * リモート計算ノード
+ * @author n-kato
+ */
+final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
+	protected String runtimeid;
+	protected Socket socket;
+	protected RemoteLMNtalRuntime(String runtimeid) {
+		this.runtimeid = runtimeid;
+	}
+	//
+	static HashMap runtimeids = new HashMap();
+	public static AbstractLMNtalRuntime connectRuntime(String node) {
+		node = node.intern();
+		AbstractLMNtalRuntime ret = (AbstractLMNtalRuntime)runtimeids.get(node);
+		if (ret == null) {
+			ret = new RemoteLMNtalRuntime(node);
+			runtimeids.put(node,ret);
+		}
+		return ret;
+	}
+	public AbstractMachine newMachine() {
+		// TODO コネクションの管理をRemotemachineからこのクラスに移した後でsendを発行するコードを書く
+		return (AbstractMachine)null;
+	}
+}
+
 
 /**
  * リモートマシンクラス
+ * TODO コネクションの管理はRemoteLMNtalRuntimeにまかせる。
+ *       しかしnextatom(mem)idはsynchronizedにしなければならなくなる。
  * @author n-kato
  */
 final class RemoteMachine extends AbstractMachine {
@@ -34,31 +63,44 @@ final class RemoteMachine extends AbstractMachine {
  * @author n-kato
  */
 final class RemoteMembrane extends AbstractMembrane {
-	protected String memid;
-	protected HashMap atomids;
-	public RemoteMembrane(RemoteMachine machine, RemoteMembrane parent, String memid) {
+	/** この膜を管理するマシンにおけるこの膜のID */
+	protected String remoteid;
+	/** この膜のアトムのローカルIDからリモートIDへの写像 */
+	protected HashMap atomids = new HashMap();
+	public RemoteMembrane(RemoteMachine machine, RemoteMembrane parent, String remoteid) {
 		super(machine,parent);
-		this.memid = memid;
-		atomids = new HashMap();
+		this.remoteid = remoteid;
 	}
-	String getMemID() { return memid; }
+	
 	void send(String cmd) {
-		((RemoteMachine)machine).send(cmd + " " + memid);
+		((RemoteMachine)machine).send(cmd + " " + remoteid);
 	}
 	void send(String cmd, String args) {
-		((RemoteMachine)machine).send(cmd + " " + memid + " " + args);
+		((RemoteMachine)machine).send(cmd + " " + remoteid + " " + args);
 	}
+	void send(String cmd, String arg1, String arg2) {
+		((RemoteMachine)machine).send(cmd + " " + remoteid + " " + arg1 + " " + arg2);
+	}
+	void send(String cmd, String arg1, String arg2, String arg3, String arg4) {
+		((RemoteMachine)machine).send(cmd + " " + remoteid + " " + arg1 + " " + arg2
+														   + " " + arg3 + " " + arg4);
+	}
+	///////////////////////////////
+	// 情報の取得
+	
+	String getMemID() { return remoteid; }
+	String getAtomID(Atom atom) { return (String)atomids.get(atom); }
 
 	///////////////////////////////
 	// 操作
 
-	/** ロックが解放されたときに再活性化されるため、何もしなくてよい */
-	void activate() {}
+	// 操作1 - ルールの操作
+
 	void clearRules() {
 		send("CLEARRULES");
 		super.clearRules();
 	}
-	/** TODO Ruleset#getGlobalRulesetID()のようなメソッドを作る */
+	/** TODO Ruleset#getGlobalRulesetID()のようなメソッドを作る。 */
 	void inheritRules(AbstractMembrane srcMem) {
 		Iterator it = srcMem.rulesetIterator();
 		while (it.hasNext()) {
@@ -67,7 +109,15 @@ final class RemoteMembrane extends AbstractMembrane {
 		}
 		super.inheritRules(srcMem);
 	}
-	/** アトムの追加 */
+	/** ルールセットを追加 */
+	void loadRuleset(Ruleset srcRuleset) {
+		send("LOADRULESET"/*,srcRuleset.getGlobalRulesetID()*/);
+		super.loadRuleset(srcRuleset);
+	}
+	
+	// 操作2 - アトムの操作
+
+	/** 新しいアトムを作成し、この膜に追加し、この膜の実行スタックに入れる。 */
 	Atom newAtom(Functor functor) {
 		Atom a = super.newAtom(functor);
 		String atomid = ((RemoteMachine)machine).getNextAtomID();
@@ -75,71 +125,109 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("NEWATOM",atomid);
 		return a;
 	}
-	/** 指定されたアトムを実行スタックに積む */
-	protected void enqueueAtom(Atom atom) {
-		send("ENQUEUEATOM",(String)atomids.get(atom));
-	}
-	/** 膜の追加 */
-	AbstractMembrane newMem() {
-		String newmemid = ((RemoteMachine)machine).getNextMemID();
-		RemoteMembrane m = new RemoteMembrane((RemoteMachine)machine, this, newmemid);
-		m.memid = newmemid;
-		mems.add(m);
-		send("NEWMEM",newmemid);
-		return m;
-	}
-	
-	/** dstMemに移動 
-	 * TODO ルート膜とそれ以外で分ける */
-	void moveTo(AbstractMembrane dstMem) {
-		/*
-		send("MOVETO");
-		parent.removeMem(this);
-		dstMem.addMem(this);
-		parent = dstMem;
-		enqueueAllAtoms();
-		*/
+	/** 指定された子膜に新しいinside_proxyアトムを追加する */
+	Atom newFreeLink(AbstractMembrane submem) {
+		Atom a = submem.newAtom(Functor.INSIDE_PROXY);
+		if (submem.machine.getRuntime() != machine.getRuntime()) {
+			send("ADDFREELINK",submem.getAtomID(a));
+		}
+		return a;
 	}
 	void alterAtomFunctor(Atom atom, Functor func) {
-		send("ALTERATONFUNCTOR",atomids.get(atom) + " " + func.toString());
+		send("ALTERATOMFUNCTOR",getAtomID(atom),func.toString());
 		super.alterAtomFunctor(atom,func);
 	}
-	protected void enqueueAllAtoms() {
-		send("ENQUEUEALLATOMS");
-	}
 	void removeAtom(Atom atom) {
-		send("REMOVEATOM",(String)atomids.get(atom));		super.removeAtom(atom);
+		send("REMOVEATOM",getAtomID(atom));
+		super.removeAtom(atom);
 	}
+	/** 指定されたアトムをこの膜の実行スタックに積む */
+	protected void enqueueAtom(Atom atom) {
+		String atomid = getAtomID(atom);
+		if (atomid != null) { // AbstractMembrane#addAtomからの呼び出しは無視する
+			send("ENQUEUEATOM",atomid);
+		}
+	}
+	// abstractメソッドではなくなった
+	//protected void dequeueAtom(Atom atom) {
+	//	send("DEQUEUEATOM",getAtomID(atom));
+	//}
+	/** リモートのpourで行われるため何もしなくてよい */
+	protected void enqueueAllAtoms() {}
+
+	// 操作3 - 子膜の操作
+	
+	/** 新しい子膜を作成する */
+	AbstractMembrane newMem() {
+		String newremoteid = ((RemoteMachine)machine).getNextMemID();
+		RemoteMembrane m = new RemoteMembrane((RemoteMachine)machine, this, newremoteid);
+		m.remoteid = newremoteid;
+		addMem(m);
+		send("NEWMEM",newremoteid);
+		return m;
+	}
+	AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
+		// TODO 実装する
+		return null;
+	}
+
 	void removeMem(AbstractMembrane mem) {
-		if (mem instanceof RemoteMembrane) {
-			send("REMOVEMEM",((RemoteMembrane)mem).memid);
-		}
-		else { 
-			// TODO このときは何を送るべきか
-			send("REMOVEMEM","TODO");
-		}
+		send("REMOVEMEM",mem.getMemID());
 		super.removeMem(mem);
 	}
 
+	// 操作4 - リンクの操作
+
+	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
+		send("NEWLINK",""+getAtomID(atom1)+pos1+getAtomID(atom2)+pos2);
+		super.newLink(atom1,pos1,atom2,pos2);
+	}
+	void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+		send("RELINKATOMARGS",""+getAtomID(atom1)+pos1+getAtomID(atom2)+pos2);
+		super.relinkAtomArgs(atom1,pos1,atom2,pos2);
+	}
+	void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+		send("UNIFYATOMARGS",""+getAtomID(atom1)+pos1+getAtomID(atom2)+pos2);
+		super.unifyAtomArgs(atom1,pos1,atom2,pos2);
+	}
+
+	// 操作5 - 膜自身や移動に関する操作
+	
+	/** ロックが解放されたときに再活性化されるため、何もしなくてよい */
+	void activate() {}
 	void remove() {
 		send("REMOVE");
 		super.remove();
 	}
+
 	void pour(AbstractMembrane srcMem) {
-		//send("POUR");
+		if (srcMem.machine.getRuntime() != machine.getRuntime()) {
+			throw new RuntimeException("cross-site remote process fusion not implemented");
+		}
+		send("POUR",srcMem.getMemID());
 	}
 	
-	////////////////////////////////
-	// ロック
+	/** dstMemに移動 */
+	void moveTo(AbstractMembrane dstMem) {
+		if (dstMem.machine.getRuntime() != machine.getRuntime()) {
+			throw new RuntimeException("cross-site remote process migration not implemented");
+		}
+		// remote call of a local process migration
+		send("MOVETO",dstMem.getMemID());
+		super.moveTo(dstMem);
+	}
+	
+	// 操作6 - ロックに関する操作
+	
 	synchronized boolean lock(AbstractMembrane mem) {
 		if (locked) {
 			//todo:キューに記録
-			// TODO locked==trueのとき、この計算ノードの誰がロックしたか分からないのを何とかする
+			//todo:locked==trueのとき、この計算ノードの誰がロックしたか分からないのを何とかする
 			return false;
 		} else {
 			//todo:計算ノードの記録、キャッシュの更新
 			locked = true;
-			return false;
+			return true;
 		}
 	}
 	boolean recursiveLock(AbstractMembrane mem) {
@@ -150,19 +238,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("UNLOCK");
 	}
 	void recursiveUnlock() {
-		send("RECURSIVEUNLOCK");
+		//send("RECURSIVEUNLOCK");
 	}
-	// リンクの操作	
-	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
-		send("NEWLINK",""+atomids.get(atom1)+pos1+atomids.get(atom2)+pos2);
-		super.newLink(atom1,pos1,atom2,pos2);
-	}
-	void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		send("RELINKATOMARGS",""+atomids.get(atom1)+pos1+atomids.get(atom2)+pos2);
-		super.relinkAtomArgs(atom1,pos1,atom2,pos2);
-	}
-	void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		send("UNIFYATOMARGS",""+atomids.get(atom1)+pos1+atomids.get(atom2)+pos2);
-		super.unifyAtomArgs(atom1,pos1,atom2,pos2);
-	}
+
 }
