@@ -812,9 +812,10 @@ public class Instruction {
 	/** inline [atom, inlineref]
 	 * <br>ガード命令、ボディ命令<br>
 	 * アトム$atomに対して、inlinerefが指定するインライン命令を適用し、成功することを確認する。
-	 * <p>inlinerefには現在、$atomのファンクタへの参照を渡すことになっているが、将来変更する予定。
+	 * <p>inlinerefには現在、インライン番号を渡すことになっているが、
 	 * 処理系はinlinerefを無視して$atomのファンクタからインライン命令を決定してよい。
-	 * <p>ボディで呼ばれる場合典型的には、引数のリンクを張った後に呼ばれる。*/
+	 * 仕様は将来変更されるかもしれない。
+	 * <p>ボディで呼ばれる場合典型的には、全てのリンクを張りなおした直後に呼ばれる。*/
 	public static final int INLINE = 210;
 
 	/** builtin [class, method, [links...]]
@@ -828,7 +829,16 @@ public class Instruction {
 	public static final int BUILTIN = 211;
 
 	///////////////////////////////////////////////////////////////////////
-	
+
+	// 型付きプロセス文脈を扱うための追加命令 (216--219)	
+
+	/** eqground [groundlink1,groundlink2]
+	 * <br>（予約された）型付き拡張用ガード命令<br>
+	 * 基底項プロセスを指す2つのリンクlink1とlink2に対して、
+	 * それらが同じ形状の基底項プロセスであることを確認する。
+	 * @see isground */
+	public static final int EQGROUND = 216;
+    	
 	// 型検査のためのガード命令 (220--229)	
 
 	/** isground [link]
@@ -905,8 +915,8 @@ public class Instruction {
 	public static final int ILEFUNC = ILE + OPT;
 	public static final int IGTFUNC = IGT + OPT;
 	public static final int IGEFUNC = IGE + OPT;
-	
-    ////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////
 
     /** 命令の種類を取得する。*/
 	public int getKind() {
