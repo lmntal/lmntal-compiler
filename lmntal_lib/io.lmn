@@ -93,16 +93,11 @@ H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			Atom obj = me.nthAtom(0);
-			String s = me.nth(1);
-			if(s.equals("nil")) {
-				obj.remove();
-				obj = mem.newAtom(new Functor("nil", 1));
-				break;
-			}
+			Atom done = mem.newAtom(new Functor("done", 1));
 			if(pw!=null) {
-				pw.println(s);
+				pw.println(me.nth(1));
 			}
-			mem.relink(obj, 0, me, 2);
+			mem.relink(done, 0, me, 2);
 			me.nthAtom(1).remove();
 			me.remove();
 		} catch(Exception e) {e.printStackTrace();}
@@ -167,11 +162,15 @@ H=readline(Object, Result) :- class(Object, "java.io.BufferedReader") |
 			Atom result = mem.newAtom(new Functor(s==null?"":s, 1));
 			mem.relink(result, 0, me, 1);
 			Atom obj = me.nthAtom(0);
+			Atom res;
+			obj.remove();
 			if(s==null) {
-				obj.remove();
-				obj = mem.newAtom(new Functor("nil", 1));
+				res = mem.newAtom(new Functor("nil", 1));
+			} else {
+				res = mem.newAtom(new Functor("done", 1));
 			}
-			mem.relink(obj, 0, me, 2);
+			mem.relink(res, 0, me, 2);
+//			mem.relink(obj, 0, me, 2);
 			me.remove();
 		} catch(Exception e) {Env.e(e);}
 	]](Object, Result).
