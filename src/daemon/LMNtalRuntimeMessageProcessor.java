@@ -43,7 +43,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** ローカルデーモンに対してUN REGISTERLOCAL を発行する。（現状のUNREGISTERLOCALの実装では返事はこない）*/
 	public void sendWaitUnregisterLocal() {
 		// UNREGSITERLOCAL rgid
-		String command = "UNREGISTERLOAL " + rgid + "\n";
+		String command = "UNREGISTERLOCAL " + rgid + "\n";
 		sendMessage(command);
 	}
 	
