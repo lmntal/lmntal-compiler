@@ -148,6 +148,7 @@ public final class LMNtalRuntimeManager {
 		synchronized(t){
 			try {
 				t.join();
+				System.out.println("terminateAllThreaded(): after thread.join");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
