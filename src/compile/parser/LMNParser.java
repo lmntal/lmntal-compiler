@@ -176,6 +176,10 @@ public class LMNParser {
 		else if (obj instanceof SrcRuleContext) {
 			addSrcRuleContextToMem((SrcRuleContext)obj, mem);
 		}
+		// リンク
+		else if (obj instanceof SrcLink) {
+			error("SYNTAX ERROR: top-level variable occurrence: " + ((SrcLink)obj).getName());
+		}
 		// その他 
 		else {
 			throw new ParseException("SYSTEM ERROR: Illegal Object to add to a membrane: "+obj);
@@ -467,22 +471,6 @@ public class LMNParser {
 		mem.freeLinks = links;
 		return links;
 	}
-
-	private HashMap enumGuardNegativeLinks(RuleStructure rule ) {
-//		
-//		Iterator it = rule.guardNegatives.iterator();
-//		while (it.hasNext()) {
-//			Iterator it2 = ((LinkedList)it.next()).iterator();
-//			while (it2.hasNext()) {
-//				
-//				eq.mem
-//			}
-//			removeClosedLinks(links);
-//			//mem.freeLinks = links;
-//		}
-//		return links;
-		return null;
-	}
 	
 	/** 閉じたリンクをlinksから除去する */
 	private static void removeClosedLinks(HashMap links) {
@@ -586,13 +574,26 @@ public class LMNParser {
 			removeClosedLinks(interlinks);
 
 			// ガード匿名リンクを処理する（$ppの剰余項が[]でない限り重要ではない）
+			
+			// {$p[A|*V]} :- \+($p=(f(A)            )) | ... // *V={}       片方向リンク
+			// {$p[A|*V]} :- \+($p=(e,   $pp[ |*W]  )) | ... // A∈*W
+			// {$p[A|*V]} :- \+($p=(e,   $pp[A|*W]  )) | ... // *V=*W       片方向リンク
+			// {$p[A|*V]} :- \+($p=(e,   $pp[B|*W]  )) | ... // A∈*W,B∈*V 
+			// {$p[ |*V]} :- \+($p=(f(B)            )) | ... // *V={B}
+			// {$p[A]   } :- \+($p=(f(B)            )) | ... // {A}≠{B}
+			// {$p[A|*V]} :- \+($p=(f(B)            )) | ... // not A∈{B} よりマッチしない
+			// {$p[A]   } :- \+($p=(f(B),$pp[A,B|*W])) | ... //
+			// {$p[A|*V]} :- \+($p=(f(B),$pp[A,B|*W])) | ... //
+			
+			// {$p[A|*V]} :- \+($p=(f(B),$pp[A,B|*W])) | ... //
+						
 			Iterator it3 = interlinks.keySet().iterator();
 			anonymouslink:
 			while (it3.hasNext()) {
 				String linkname = (String)it3.next();
 				LinkOccurrence lnk = (LinkOccurrence)interlinks.get(linkname);
 				if (lnk.atom.mem.processContexts.isEmpty()) {
-					warning("WARNING: unsatisfiable negative condition because of free link: " + lnk.name);
+					warning("WARNING: unsatisfiable negative condition because of the free link: " + lnk.name);
 				}
 				else {
 					ProcessContext pc = (ProcessContext)lnk.atom.mem.processContexts.get(0);
@@ -1490,7 +1491,12 @@ class SyntaxExpander {
 				SrcAtom sAtom = (SrcAtom)obj;
 				for (int i = 0; i < sAtom.getProcess().size(); i++) {
 					Object subobj = sAtom.getProcess().get(i);
-					if (subobj instanceof SrcLink) {}
+					if (subobj instanceof SrcLinkBundle) {
+						String linkname = generateNewLinkName();
+						sAtom.getProcess().set(i, new SrcLink(linkname));
+						error("SYNTAX ERROR: illegal link bundle: " + subobj);
+					}
+					else if (subobj instanceof SrcLink) {}
 					else {
 						String linkname = generateNewLinkName();
 						sAtom.getProcess().set(i, new SrcLink(linkname));
@@ -1502,6 +1508,10 @@ class SyntaxExpander {
 				correctWorld(((SrcMembrane)obj).getProcess());
 			}
 			else if (obj instanceof SrcRule) {}
+			else if (obj instanceof SrcLink) {
+				error("SYNTAX ERROR: top-level variable occurrence: " + ((SrcLink)obj).getName());
+				it.remove();
+			}
 			else {
 				error("SYNTAX ERROR: illegal object outside a rule: " + obj);
 				it.remove();

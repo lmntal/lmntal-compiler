@@ -2,7 +2,7 @@ package compile.parser;
 
 /** ソースファイル中のリンク束表現 */
 
-class SrcLinkBundle extends SrcContext {
+class SrcLinkBundle extends SrcLink {
 	static final String PREFIX_TAG = "*";
 	/**
 	 * 指定された名前のリンク束を作成します

@@ -78,6 +78,26 @@ public class GuardCompiler extends HeadCompiler {
 		typedProcessContexts = rc.rs.typedProcessContexts;
 	}
 
+	/** initNormalizedCompiler呼び出し後に呼ばれる。
+	 * 左辺関係型付き$pに対して、ガード用の仮引数番号を
+	 * 変数番号として左辺関係型付き$pのマッチングを取り終わった内部状態を持つようにする。*/
+	final void initNormalizedGuardCompiler(GuardCompiler gc) {
+		identifiedCxtdefs = (HashSet)gc.identifiedCxtdefs.clone();
+		typedcxtdatatypes = (HashMap)gc.typedcxtdatatypes.clone();
+		typedcxtdefs = (ArrayList)((ArrayList)gc.typedcxtdefs).clone();
+		typedcxtsrcs = (HashMap)gc.typedcxtsrcs.clone();
+		typedcxttypes = (HashMap)gc.typedcxttypes.clone();
+		varcount = gc.varcount;	// 重複
+	}
+	
+	/** ガード否定条件のコンパイルで使うためにthisに対する正規化されたGuardCompilerを作成して返す。
+	 * 正規化とは、左辺の全てのアトム/膜および左辺関係型付き$pに対して、ガード/ボディ用の仮引数番号を
+	 * 変数番号として左辺と左辺関係型制約のマッチングを取り終わった内部状態を持つようにすることを意味する。*/
+	final GuardCompiler getNormalizedGuardCompiler() {
+		GuardCompiler gc = new GuardCompiler(rc,this);
+		gc.initNormalizedGuardCompiler(this);
+		return gc;
+	}
 	//
 	
 	void fixTypedProcesses() {
