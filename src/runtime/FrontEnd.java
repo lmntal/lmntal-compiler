@@ -198,13 +198,7 @@ public class FrontEnd {
 		}
 		
 		// 実行
-		
-		if(Env.oneLiner!=null) {
-			// 一行実行の場合はそれを優先
-			REPL.processLine(Env.oneLiner);
-			return;
-		}
-		
+
 		//start LMNtalDaemon
 		if(Env.startDaemon){
 			String classpath = System.getProperty("java.class.path");
@@ -228,6 +222,12 @@ public class FrontEnd {
 				e1.printStackTrace();
 				System.exit(-1);
 			}
+		}
+
+		if(Env.oneLiner!=null) {
+			// 一行実行の場合はそれを優先
+			REPL.processLine(Env.oneLiner);
+			return;
 		}
 		
 		// ソースありならソースを解釈実行、なしなら REPL。
