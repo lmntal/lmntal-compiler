@@ -35,9 +35,9 @@ public class GraphLayout implements Runnable {
 		return this.area;
 	}
 	
-	public void addNode(GraphNode node) {
-		nodes.add(node);
-	}
+//	public void addNode(GraphNode node) {
+//		nodes.add(node);
+//	}
 	
 	public void removeAllNodes() {
 		nodes.removeAllElements();

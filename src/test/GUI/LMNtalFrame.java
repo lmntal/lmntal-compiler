@@ -5,7 +5,7 @@ import java.awt.event.*;
 
 import javax.swing.*;
 import runtime.Env;
-import compile.parser.ParseException;
+//import compile.parser.ParseException;
 
 class MyThread extends Thread {
 	LMNtalFrame f;
@@ -84,17 +84,17 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 //		});
 	}
 	
-	/**
-	 * 新しい LMNtal ソースコードによりグラフを更新する。
-	 * @param s
-	 */
-	void setSource(String s) {
-		try {
-			lmnPanel.setSource(s);
-		} catch (ParseException e) {
-//			e.printStackTrace();
-		}
-	}
+//	/**
+//	 * 新しい LMNtal ソースコードによりグラフを更新する。
+//	 * @param s
+//	 */
+//	void setSource(String s) {
+//		try {
+//			lmnPanel.setSource(s);
+//		} catch (ParseException e) {
+////			e.printStackTrace();
+//		}
+//	}
 	
 	public void waitBusy() {
 //		lmnPanel.getGraphLayout().calc();
