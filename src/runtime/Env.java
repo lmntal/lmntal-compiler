@@ -98,6 +98,13 @@ public final class Env {
 	public static boolean fGUI = false;
 	public static LMNtalFrame gui;
 	public static boolean fDEMO;
+	public static int atomSize;
+	
+	public static void initGUI() {
+		if(!Env.fGUI) return;
+		atomSize = Env.fDEMO ? 40 : 16;
+		Env.gui = new LMNtalFrame();
+	}
 	
 	/**
 	 * CGI ¥â¡¼¥É

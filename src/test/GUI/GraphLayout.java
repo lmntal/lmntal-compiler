@@ -280,11 +280,12 @@ public class GraphLayout implements Runnable {
 		final double MARGIN = 15.0;
 		
 		Node[] nodes = (Node[])m.getAtomArray();
-		m.rect.setRect(0.0, 0.0, 0.0, 0.0);
+		m.rect.setRect(m.rect.x, m.rect.y, 0.0, 0.0);
 		for(int i=0;i<nodes.length;i++) {
 			if(!nodes[i].isVisible()) continue;
-			if(m.rect.x==0.0 && m.rect.y==0.0) m.rect.setRect(nodes[i].getPosition().x-MARGIN, nodes[i].getPosition().y-MARGIN, MARGIN*2, MARGIN*2);
-			else                               m.rect.add(new Rectangle2D.Double(nodes[i].getPosition().x-MARGIN, nodes[i].getPosition().y-MARGIN, MARGIN*2, MARGIN*2));
+			double mg = MARGIN+runtime.Env.atomSize;
+			if(m.rect.isEmpty()) m.rect.setRect(nodes[i].getPosition().x-mg, nodes[i].getPosition().y-mg, mg*2, mg*2);
+			else                 m.rect.add(new Rectangle2D.Double(nodes[i].getPosition().x-mg, nodes[i].getPosition().y-mg, mg*2, mg*2));
 			nodes[i].paintEdge(g);
 		}
 		for(int i=0;i<nodes.length;i++) {
@@ -296,12 +297,15 @@ public class GraphLayout implements Runnable {
 		for(int i=0;i<mems.length;i++) {
 			AbstractMembrane mm = (AbstractMembrane)mems[i];
 			paintMem(g, mm);
-			if(m.rect.x==0.0 && m.rect.y==0.0) m.rect.setRect(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2);
-			else                               m.rect.add(new Rectangle2D.Double(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2));
+			if(m.rect.isEmpty()) m.rect.setRect(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2);
+			else                 m.rect.add(new Rectangle2D.Double(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2));
 //			System.out.println(m.rect);
 		}
 		if(!m.equals(rootMem)) {
-			g.drawRoundRect((int)m.rect.x, (int)m.rect.y, (int)m.rect.width, (int)m.rect.height, 10, 10);
+			final int ROUND=40;
+			// 空の膜のばあいはここで empty になっている
+			if(m.rect.isEmpty()) m.rect.width=m.rect.height=MARGIN*2;
+			g.drawRoundRect((int)m.rect.x, (int)m.rect.y, (int)m.rect.width, (int)m.rect.height, ROUND, ROUND);
 		}
 	}
 }

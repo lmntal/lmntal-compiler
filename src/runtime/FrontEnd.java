@@ -7,8 +7,6 @@ import java.io.*;
 import java.lang.SecurityException;
 import java.util.*;
 
-import test.GUI.LMNtalFrame;
-
 import compile.*;
 import compile.parser.*;
 
