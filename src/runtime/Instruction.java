@@ -233,21 +233,28 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int NATOMS = 13;
 	// LOCALNATOMSは不要
 	static {setArgType(NATOMS, new ArgType(false, ARG_MEM, ARG_INT));}
+	
+	/** natomsindirect [srcmem, countfunc]
+	 * <br>ガード命令<br>
+	 * 膜$srcmemの自由リンク管理アトム以外のアトム数が$countfuncの値であることを確認する。
+	 */
+	public static final int NATOMSINDIRECT = 14;
+	static {setArgType(NATOMSINDIRECT, new ArgType(false, ARG_MEM, ARG_VAR));}
 
     /** nmems [srcmem, count]
      * <br>ガード命令<br>
      * 膜$srcmemの子膜の数がcountであることを確認する。*/
-    public static final int NMEMS = 14;
+    public static final int NMEMS = 15;
 	// LOCALNMEMSは不要
 	static {setArgType(NMEMS, new ArgType(false, ARG_MEM, ARG_INT));}
 
-	// 15は予約 see isground
+	// 16は予約 see isground
 
     /** eqmem [mem1, mem2]
      * <br>ガード命令<br>
      * $mem1と$mem2が同一の膜を参照していることを確認する。
      * <p><b>注意</b> Ruby版のeqから分離 */
-    public static final int EQMEM = 16;
+    public static final int EQMEM = 17;
 	// LOCALEQMEMは不要
 	static {setArgType(EQMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 	
@@ -256,14 +263,14 @@ public class Instruction implements Cloneable, Serializable {
      * $mem1と$mem2が異なる膜を参照していることを確認する。
      * <p><b>注意</b> Ruby版のneqから分離
      * <p><font color=red><b>この命令は不要かも知れない</b></font> */
-    public static final int NEQMEM = 17;
+    public static final int NEQMEM = 18;
 	// LOCALNEQMEMは不要
 	static {setArgType(NEQMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** stable [srcmem]
 	 * <br>ガード命令<br>
 	 * 膜$srcmemとその子孫の全ての膜の実行が停止していることを確認する。*/
-	public static final int STABLE = 18;
+	public static final int STABLE = 19;
 	// LOCALSTABLEは不要
 	static {setArgType(STABLE, new ArgType(false, ARG_MEM));}
     
@@ -1114,13 +1121,20 @@ public class Instruction implements Cloneable, Serializable {
 	 * （基底項プロセスを指す）リンク$srclinkを$dstmemに複製し、$dstlinkに格納する。
 	 * @see isground */
 	public static final int COPYGROUND = 217;
-	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM));}
+		
+	/** removeground [srclink,srcmem]
+	 * $srcmemに属する（基底項プロセスを指す）リンク$srclinkを現在の膜から取り出す。
+	 * 実行アトムスタックは操作しない。
+	 */
+	public static final int REMOVEGROUND = 218;
+	static {setArgType(REMOVEGROUND, new ArgType(false, ARG_VAR, ARG_MEM));}
 	
-	/** dropground [srclink, srcmem]
-	 * $srcmemに属する（基底項プロセスを指す）リンク$srclinkを破棄する。
-	 * @see isground */
-	public static final int DROPGROUND = 218;
-	static {setArgType(DROPGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
+	/** freeground [srclink]
+	 * 基底項プロセス$srclinkがどの膜にも属さず、かつスタックに積まれていないことを表す。
+	 */
+	public static final int FREEGROUND = 219;
+	static {setArgType(FREEGROUND, new ArgType(false, ARG_VAR));}
 	
 	// 型検査のためのガード命令 (220--229)	
 
@@ -1203,6 +1217,23 @@ public class Instruction implements Cloneable, Serializable {
 	 * <p>ルールの右辺に{..}@Hがあるときに使用される。文字列を使うのは仮仕様だがおそらく変えない。*/
 	public static final int CONNECTRUNTIME = 231;
 	static {setArgType(CONNECTRUNTIME, new ArgType(false, ARG_ATOM));}
+
+	/////////////////////////////////////////////////////////////////////////
+	
+	// アトムセットを操作するための命令 ( 240--249)
+	
+	/** newset [-dstset]
+	 * 新しいアトムセットを作る
+	 */
+	public static final int NEWSET = 240;
+	static {setArgType(NEWSET, new ArgType(true,ARG_VAR));}
+	
+	/** addatomtoset [srcset, atom]
+	 * $atomをアトムセット$srcsetに追加する
+	 */
+	public static final int ADDATOMTOSET = 241;
+	static {setArgType(ADDATOMTOSET, new ArgType(false, ARG_VAR, ARG_ATOM));}
+
 
 	///////////////////////////////////////////////////////////////////////
 
