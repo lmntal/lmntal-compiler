@@ -298,7 +298,7 @@ class InterpreterReactor {
 					break; //n-kato
 				case Instruction.NEWATOMINDIRECT :
 				case Instruction.LOCALNEWATOMINDIRECT : //[-dstatom, srcmem, func]
-					//TODO NEWATOMとほぼ同じコードになっちゃったけどいいの？funcとfuncrefって違うし…。
+					//TODO NEWATOMとほぼ同じコードになっちゃったけどいいの？funcとfuncrefって違うし…。＜ダメ。仕様をよく読むこと＞
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom((Functor)inst.getArg3());
 					break; //nakajima 2003-12-27
 				case Instruction.ENQUEUEATOM :
@@ -319,7 +319,7 @@ class InterpreterReactor {
 					break; //n-kato
 				case Instruction.ALTERFUNCINDIRECT :
 				case Instruction.LOCALALTERFUNCINDIRECT : //[atom, func]
-					//TODO funcrefと$funcって何が違うのですか？
+					//TODO funcrefと$funcって何が違うのですか？＜funcはint、funcrefはFunctor＞
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.alterAtomFunctor(atom,(Functor)inst.getArg2());
 					break; //nakajima 2003-12-27
@@ -331,13 +331,13 @@ class InterpreterReactor {
 					break; //nakajima 2003-12-27
 
 				case Instruction.ALLOCATOMINDIRECT : //[-dstatom, func]
-					// TODO funcrefと$funcって何が違うのですか？
+					// TODO funcrefと$funcって何が違うのですか？＜上＞
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)inst.getArg2());
 					break;
 
 				case Instruction.COPYATOM :
 				case Instruction.LOCALCOPYATOM : //[-dstatom, mem, srcatom]
-					//TODO Functorのarityは2でいいのか？
+					//TODO Functorのarityは2でいいのか？ ＜ダメです。命令の仕様をよく読むこと＞
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(atoms[inst.getIntArg3()].getName(), 2);
 					break; //nakajima 2003-12-27
 
@@ -358,7 +358,7 @@ class InterpreterReactor {
 					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newMem();
 					break; //n-kato
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
-					//TODO AbstactMachineクラスが存在しない
+					//TODO AbstactMachineクラスが存在しない＜命令の仕様をよく読むこと＞
 					//AbstractMachine remotenode = new AbstractMachine();
 					//mems[inst.getIntArg2()].newRoot()
 					break; //nakajima 2003-12-27
