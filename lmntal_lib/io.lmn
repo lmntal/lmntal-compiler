@@ -1,6 +1,7 @@
 io:{
 io.print(String) :- unary(String)|[[/*inline*/
 	System.out.println(me.nth(0));
+	me.setName("nil");
 	]](String).
 io.input(Message) :- [[/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));

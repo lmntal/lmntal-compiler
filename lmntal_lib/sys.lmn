@@ -1,0 +1,37 @@
+/*
+NAME
+	System module
+
+SYNOPSIS
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/05/23(Sun)
+
+*/
+
+sys : {
+
+/**
+ * dump : unit -> unit
+ * 
+ * Dump this membrane
+ */
+sys.dump :- [[/*inline*/
+	me.setName("nil");
+	System.out.println(Dumper.dump(mem));
+	]].
+
+sys.trace(on) :- [[/*inline*/
+	Env.fTrace=true;
+	me.setName("nil");
+	]].
+sys.trace(off) :- [[/*inline*/
+	Env.fTrace=false;
+	me.setName("nil");
+	]].
+
+}.
+
