@@ -381,7 +381,8 @@ class InterpreterReactor {
 
 				case Instruction.ADDMEM :
 				case Instruction.LOCALADDMEM : //[dstmem, srcmem]
-					break;
+					mems[inst.getIntArg2()].moveTo(mems[inst.getIntArg1()]);
+					break;//nakajima 2004-01-04
 
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
