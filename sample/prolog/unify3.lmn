@@ -93,39 +93,93 @@
 	unify([A | Z],[B | Y],_,_,_) :- 
 	Aの先が変数で束縛されている && Bの先がシンボル && Aの束縛先がBと同じシンボル | 
 		unify(Z, Y,_,_,_)
+		
+	unify([X, X], [a, a])
 */
-% TODO:ルール
-
+(
+	unify([A | Z], [B | Y], QUERY_OUT, FACT_OUT, BINDING),
+	vars ={
+		{ p(A), bind(BIND), $p1 }, $p2
+	},
+	symbols ={
+		{ p(B), p(BIND), $p3 }, $p4
+	}
+		:-
+	QUERY_OUT=[A | QUERY_OUT_2], FACT_OUT=[B | FACT_OUT_2],
+	unify(Z, Y, QUERY_OUT_2, FACT_OUT_2, BINDING),
+	vars ={
+		{ p(A), bind(BIND), $p1 }, $p2
+	},
+	symbols ={
+		{ p(B), p(BIND), $p3 }, $p4
+	}
+),
 /*
 	unify([A | Z],[B | Y],_,_,_) :- 
 	Bの先が変数で束縛されている && Aの先がシンボル && Bの束縛先がAと同じシンボル | 
 		unify(Z, Y,_,_,_)
 */
-%TODO:ルール
-
+(
+	unify([A | Z], [B | Y], QUERY_OUT, FACT_OUT, BINDING),
+	vars ={
+		{ p(B), bind(BIND), $p1 }, $p2
+	},
+	symbols ={
+		{ p(A), p(BIND), $p3 }, $p4
+	}
+		:-
+	QUERY_OUT=[A | QUERY_OUT_2], FACT_OUT=[B | FACT_OUT_2],
+	unify(Z, Y, QUERY_OUT_2, FACT_OUT_2, BINDING),
+	vars ={
+		{ p(B), bind(BIND), $p1 }, $p2
+	},
+	symbols ={
+		{ p(A), p(BIND), $p3 }, $p4
+	}
+),
 /*
-	TODO: 変数同士の束縛
+	変数同士の束縛
 	X = X そのまま通過
 	X = Y? 
 */
 /*
-	unify([],[A | Z],_,_,_) :- fail
-	unify([A | Z],[],_,_,_) :- fail
-	片方のみ [] リスト
-
-(
-	unify([A | Z], [], QUERY_OUT, FACT_OUT, BINDING)
-		:-
-	QUERY_OUT=[A | Z], FACT_OUT=[], BINDING=[],
-	fail
-),
-(
-	unify([], [A | Z], QUERY_OUT, FACT_OUT, BINDING)
-		:-
-	QUERY_OUT=[], FACT_OUT=[A | Z], BINDING=[],
-	fail
-),
+	X = X そのまま通過
+	unify([A | Z],[B | Y],_,_,_) :- 
+	Aの先の変数 == Bの先の変数 |
+		unify([Z],[Y],_,_,_) 
+		
+	unify([X], [X])
 */
+(
+	unify([A | Z], [B | Y], QUERY_OUT, FACT_OUT, BINDING),
+	vars ={
+		{ p(A), p(B), $p1 }, $p2
+	}
+		:-
+	QUERY_OUT=[A | QUERY_OUT_2], FACT_OUT=[B | FACT_OUT_2],
+	unify(Z, Y, QUERY_OUT_2, FACT_OUT_2, BINDING),
+	vars ={
+		{ p(A), p(B), $p1 }, $p2
+	}
+),
+/*
+	両方とも異なる変数
+	- 両方とも束縛されていない
+		connect を行う
+*/
+% TODO:rule
+/*
+	両方とも異なる変数
+	- 両方とも束縛されている
+		束縛先のシンボルの比較 
+*/
+% TODO:rule
+/*
+	両方とも異なる変数
+	- 片方のみ束縛されている
+		束縛されている変数のシンボルと同じシンボルへ束縛を行う
+*/
+% TODO:rule*2
 /*
 	unify(_,_,_,_,_) :- fail
 	このルールが最も優先度が低ければ、上のルールから外れたものは失敗
@@ -141,16 +195,16 @@
 */
 % シンボルテーブル
 symbols = {
-	{ a, p(S1_1)/*, p(S1_2)*/ }
-	{ b, p(S2_1)/*, p(S2_2)*/ }
+	{ a, p(S1_1), p(S1_2) }
+%	{ b, p(S2_1)/*, p(S2_2)*/ }
 %	{ c, p(S3_1), p(S3_2) }
 },
 % 変数テーブル
 % bindのリンク先が束縛された値 null のときは束縛されていない
 vars = {
-	{ var_X, p(V1_1), p(V1_2), bind(null) }/*,*/
+	{ var_X, p(V1_1), p(V1_2), bind(null) }
 /*	{ var_Y, p(V2_1), bind(null) } */
 },
 %unify([],[], QUERY, FACT, BINDING),
-unify([V1_1, S2_1],[S1_1, V1_2], QUERY, FACT, BINDING),
+unify([V1_1], [V1_2], QUERY, FACT, BINDING),
 query(QUERY), fact(FACT), binding(BINDING)
