@@ -165,7 +165,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	 *  (non-Javadoc)
 	 * @see runtime.AbstractMembrane#newRoot(null)
 	 */
-	public AbstractMembrane newRoot(RemoteLMNtalRuntime runtime) {
+	public AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
 		//RemoteTask¤òºî¤ë
 		//RemoteTask newtask = (RemoteTask)runtime.newTask(this);
 
