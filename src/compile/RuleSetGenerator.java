@@ -18,12 +18,12 @@ import compile.structure.*;
 public class RuleSetGenerator {
 	
 	/**
-	 * 与えられた膜を生成するルールを持った膜を作り、
-	 * その直属の全ての RuleStructure について、
-	 * 対応する Rule を生成してその膜のルールセットに追加する。
-	 * 
-	 * @param m 対象となる膜
-	 * @return 指定した膜のルールセット
+	 * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
+	 * より正確に言うと、与えられた膜構造に対応する膜を1回だけ生成するreactメソッドを
+	 * 実装するルールセットを持った膜構造を生成する。
+	 * メソッド実行中、膜構造内部にあるルール構造がルールセットにコンパイルされる。
+	 * @param m 膜構造
+	 * @return 生成したルールセットを持つ膜構造
 	 */
 	public static Membrane runStartWithNull(Membrane m) {
 		Env.c("RuleSetGenerator.runStartWithNull");
