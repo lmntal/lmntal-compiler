@@ -78,7 +78,7 @@ public final class InterpretedRuleset extends Ruleset {
 		InterpretiveReactor ir = new InterpretiveReactor(locals);
 		ir.mems[0] = mem;
 		if (atom != null) { ir.atoms[1] = atom; }
-  		return ir.interpret(matchInsts, 0);
+  		return ir.interpret(matchInsts, 1);	// [0]はspecなのでスキップする
 	}
 	public String toString() {
 		String ret = "@" + id;
@@ -133,8 +133,26 @@ class InterpretiveReactor {
 		this.mems  = new AbstractMembrane[size];
 		this.atoms = new Atom[size];
 		this.vars  = new ArrayList();
-		ArrayList newvars = new ArrayList(size);
+		//ArrayList newvars = new ArrayList(size);
 		for (int i = 0; i < size; i++) {
+			this.vars.add(null);
+		}
+	}
+	/** 変数ベクタを拡張する */
+	private void extendVector(int size) {
+		int oldsize = mems.length;
+		if (oldsize >= size) return;
+		AbstractMembrane[] oldmems = mems;
+		Atom[] oldatoms = atoms;
+		
+		this.mems  = new AbstractMembrane[size];
+		this.atoms = new Atom[size];
+		
+		for (int i = 0; i < oldsize; i++) {
+			mems[i] = oldmems[i];
+			atoms[i] = oldatoms[i];
+		}
+		for (int i = oldsize; i < size; i++) {
 			this.vars.add(null);
 		}
 	}
@@ -319,11 +337,11 @@ class InterpretiveReactor {
 
 					//====アトムに関係する出力しない基本ガード命令====ここから====
 				case Instruction.FUNC : //[srcatom, funcref]
-					if (!atoms[inst.getIntArg1()].getFunctor().equals((Functor)inst.getArg2()))
+					if (!((Functor)inst.getArg2()).equals(atoms[inst.getIntArg1()].getFunctor())) 
 						return false;
 					break; //n-kato
 				case Instruction.NOTFUNC : //[srcatom, funcref]
-					if (atoms[inst.getIntArg1()].getFunctor().equals((Functor)inst.getArg2()))
+					if (((Functor)inst.getArg2()).equals(atoms[inst.getIntArg1()].getFunctor())) 
 						return false;
 					break; //n-kato
 				case Instruction.EQATOM : //[atom1, atom2]
@@ -564,9 +582,9 @@ class InterpretiveReactor {
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 
 					//====制御命令====ここから====
-				case Instruction.INLINEREACT :
+				case Instruction.COMMIT :
 					break;//
-				case Instruction.REACT :
+				case Instruction.REACT : {
 					Rule rule = (Rule) inst.getArg1();
 					List bodyInsts = (List) rule.body;
 					Instruction spec = (Instruction) bodyInsts.get(0);
@@ -578,11 +596,23 @@ class InterpretiveReactor {
 					
 					InterpretiveReactor ir = new InterpretiveReactor(locals);
 					ir.reloadVars(this, locals, (List)inst.getArg2(),
-						(List)inst.getArg3(), new ArrayList());
-					if (ir.interpret(bodyInsts, 0)) return true;
+						(List)inst.getArg3(), (List)inst.getArg4());
+					if (ir.interpret(bodyInsts, 1)) return true; // [0]はspecなのでスキップする
 					if (Env.debug == 9) Env.p("info: body execution failed");
 					return false; //n-kato
-
+					}
+				case Instruction.JUMP: {
+					InstructionList label = (InstructionList) inst.getArg1();
+					List bodyInsts = (List) label.insts;
+					Instruction spec = (Instruction) bodyInsts.get(0);
+					int formals = spec.getIntArg1();
+					int locals  = spec.getIntArg2();					
+					InterpretiveReactor ir = new InterpretiveReactor(locals);
+					ir.reloadVars(this, locals, (List)inst.getArg2(),
+						(List)inst.getArg3(), (List)inst.getArg4());
+					if (ir.interpret(bodyInsts, 1)) return true; // [0]はspecなのでスキップする
+					return false; //n-kato
+					}
 				case Instruction.RESETVARS :
 					reloadVars(this, vars.size(), (List)inst.getArg1(),
 							(List)inst.getArg2(), (List)inst.getArg3());
@@ -596,7 +626,8 @@ class InterpretiveReactor {
 				case Instruction.PROCEED:
 					return true; //n-kato
 
-				case Instruction.SPEC:
+				case Instruction.SPEC://[formals,locals]
+					extendVector(inst.getIntArg2());
 					break;//n-kato
 
 				case Instruction.BRANCH :

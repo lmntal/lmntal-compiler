@@ -8,11 +8,17 @@ import runtime.Instruction;
 import runtime.Functor;
 import runtime.Env;
 
+import runtime.Rule;
+
 /**
  * 最適化を行うクラスメソッドを持つクラス。
  * @author Mizuno
  */
 public class Optimizer {
+	/** ルールオブジェクトを最適化する */
+	public static void optimizeRule(Rule rule) {
+		optimize(rule.memMatch, rule.body);
+	}
 	/**	
 	 * 渡された命令列を、現在の最適化レベルに応じて最適化する。<br>
 	 * 命令列中には、1引数のremoveatom/removemem命令が現れていてはいけない。
@@ -121,7 +127,7 @@ public class Optimizer {
 		HashMap varInBody = new HashMap(); // ヘッドでの変数名→ボディでの変数名
 		
 		Instruction react = (Instruction)head.get(head.size() - 1);
-		if (react.getKind() != Instruction.REACT) {
+		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
 			return;
 		}
 		int i = 0;
@@ -724,6 +730,13 @@ public class Optimizer {
 			}
 			varInBody.put(atomlist.get(i), new Integer(memlist.size() + i));
 		}
+// added by <<n-kato
+		List otherlist = (List)react.getArg4();
+		for (int i = 0; i < otherlist.size(); i++) {
+			othervars.add(new Integer(i));
+			varInBody.put(otherlist.get(i), new Integer(memlist.size() + atomlist.size() + i));
+		}
+// n-kato
 
 		ListIterator lit = head.listIterator();
 		while (lit.hasNext()) {
@@ -800,11 +813,11 @@ public class Optimizer {
 
 		ArrayList loop = new ArrayList(); //ループ内の命令列
 		//マッチング命令列
-		lit = head.subList(2, head.size() - 1).listIterator(); //spec,findatom,reactを除去
+		lit = head.subList(2, head.size() - 1).listIterator(); //spec,findatom,react/callを除去
 		while (lit.hasNext()) {
 			loop.add(((Instruction)lit.next()).clone());
 		}
-		if (react.getKind() != Instruction.REACT) {
+		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
 //			System.out.println(react);
 			return;
 		}

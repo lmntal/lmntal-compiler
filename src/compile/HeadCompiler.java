@@ -102,7 +102,7 @@ public class HeadCompiler {
 				if (buddylink == null) continue; // ガード匿名リンクは無視
 				
 				Atom buddyatom = buddylink.atom;
-				if (!atomids.containsKey(buddyatom)) continue; // 右辺へのリンクは無視
+				if (!atomids.containsKey(buddyatom)) continue; // 右辺（や型付き$p）へのリンクは無視
 				
 				if (atomToPath(buddyatom) != UNBOUND) { // リンク先のアトムをすでに取得している場合
 					// lhs(>)->lhs(<) または neg(>)->sameneg(<) ならば、

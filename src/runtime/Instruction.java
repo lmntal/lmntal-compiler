@@ -45,9 +45,11 @@ public class Instruction implements Cloneable {
 	/**整数*/
 	public static final int ARG_INT = 3;
 	/**命令列*/
-	public static final int ARG_INST = 4;
+	public static final int ARG_INSTS = 4;
+	/**ラベル付き命令列*/
+	public static final int ARG_LABEL = 5;
 	/**その他オブジェクト(ルールなど)への参照*/
-	public static final int ARG_OBJ = 5;
+	public static final int ARG_OBJ = 6;
 	
     /** 命令の種類を保持する。*/	
     private int kind;
@@ -915,8 +917,9 @@ public class Instruction implements Cloneable {
 	// 200番以降の命令にはLOCAL修飾版は存在しない
 	
 	// 制御命令 (200--209)
-	//  -----  react       [ruleref, [memargs...], [atomargs...]]
-	//  -----  inlinereact [ruleref, [memargs...], [atomargs...]]
+	//  -----  react       [ruleref,         [memargs...], [atomargs...], [varargs...]]
+	//  -----  jump        [instructionlist, [memargs...], [atomargs...], [varargs...]]
+	//  -----  commit      [ruleref]
 	//  -----  resetvars   [[memargs...], [atomargs...], [varargs...]]
 	//  -----  changevars  [[memargs...], [atomargs...], [varargs...]]
 	//  -----  spec        [formals,locals]
@@ -927,25 +930,42 @@ public class Instruction implements Cloneable {
 	//  -----  run         [[instructions...]]
 	//  -----  not         [[instructions...]]
 
-	/** react [ruleref, [memargs...], [atomargs...]]
-     * <br>失敗しないガード命令<br>
-     * ルールrulerefに対するマッチングが成功したことを表す。
-     * 処理系はこのルールのボディを呼び出さなければならない。*/
-    public static final int REACT = 200;
-	static {setArgType(REACT, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
+	/** react [ruleref, [memargs...], [atomargs...], [varargs...]]
+	 * <br>失敗しないガード命令<br>
+	 * ルールrulerefに対するマッチングが成功したことを表す。
+	 * 処理系はこのルールのボディを呼び出さなければならない。
+	 * <p>spec        [formals, locals];
+	 *    resetvars   [memargs...], [atomargs...], [varargs...];
+	 *    branch      [body] と同じ。
+	 * ただしbodyはrulerefのボディ命令列で、先頭の命令はspec[formals,locals]。
+	 * <p>（未使用命令）*/
+	public static final int REACT = 1200;
+	static {setArgType(REACT, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
 
-	/** inlinereact [ruleref, [memargs...], [atomargs...]]
-	 * <br>無視される<br>
-     * ルールrulerefに対するマッチングが成功したことを表す。
-     * <p>トレース用。*/
-	public static final int INLINEREACT = 201;
-	static {setArgType(INLINEREACT, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
+	/** jump [instructionlist, [memargs...], [atomargs...], [varargs...]]
+     * <br>制御命令<br>
+     * 指定の引数列でラベル付き命令列instructionlistを呼び出す。
+     * <p>
+     * 指定した命令列の実行に失敗すると、この命令が失敗する。
+     * 指定した命令列の実行に成功すると、ここで終了する。
+     * <p>spec        [formals, locals];
+     *    resetvars   [memargs...], [atomargs...], [varargs...];
+     *    branch      [body] と同じ。
+     * ただしbodyはinstructionlistの命令列で、先頭の命令はspec[formals,locals]*/
+    public static final int JUMP = 200;
+	static {setArgType(JUMP, new ArgType(false, ARG_LABEL, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
+
+	/** commit [ruleref]
+	 * <br>無視される最適化用およびトレース用命令<br>
+	 * 現在の実引数ベクタでルールrulerefに対するマッチングが成功したことを表す。
+	 * 処理系は、この命令に到達するまでに行った全ての分岐履歴を忘却してよい。*/
+	public static final int COMMIT = 201;
+	static {setArgType(COMMIT, new ArgType(false, ARG_OBJ));}
 
 	/** resetvars [[memargs...], [atomargs...], [varargs...]]
 	 * <br>失敗しないガード命令および最適化用ボディ命令<br>
 	 * 変数ベクタの内容を再定義する。新しい変数番号は、膜、アトム、その他の順番で0から振り直される。
 	 * <b>注意</b>　memargs[0]は本膜が予約しているため変更してはならない。
-	 * <p>（仕様検討中の未使用命令）
 	 */
 	public static final int RESETVARS = 202;
 	static {setArgType(RESETVARS, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
@@ -957,14 +977,15 @@ public class Instruction implements Cloneable {
 	 * ただしnullが入っている要素は無視される。
 	 * 同じ番号に異なる種類のオブジェクトが振られないように注意すること。
 	 * <b>注意</b>　memargs[0]は本膜が予約しているため変更してはならない。
-	 * <p>（仕様検討中の未使用命令）
+	 * <p>（未使用命令）
 	 */
 	public static final int CHANGEVARS = 1202;
 	static {setArgType(CHANGEVARS, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
 
     /** spec [formals, locals]
-     * <br>無視される制御命令<br>
-     * 仮引数と局所変数の個数を宣言する。*/
+     * <br>制御命令<br>
+     * 仮引数と局所変数の個数を宣言する。
+     * 局所変数の個数が不足している場合、変数ベクタを拡張する。*/
     public static final int SPEC = 203;
 	static {setArgType(SPEC, new ArgType(false, ARG_INT, ARG_INT));}
 
@@ -992,7 +1013,7 @@ public class Instruction implements Cloneable {
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、branchの次の命令に進む。
      * 引数実行中にproceed命令を実行した場合、ここで終了する。*/
     public static final int BRANCH = 206;
-	static {setArgType(BRANCH, new ArgType(false, ARG_INST));}
+	static {setArgType(BRANCH, new ArgType(false, ARG_INSTS));}
 
 	/** loop [[instructions...]]
 	 * <br>構造化命令<br>
@@ -1000,7 +1021,7 @@ public class Instruction implements Cloneable {
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、loopの次の命令に進む。
      * 引数実行中にproceed命令を実行した場合、このloop命令の実行を繰り返す。*/
 	public static final int LOOP = 207;
-	static {setArgType(LOOP, new ArgType(false, ARG_INST));}
+	static {setArgType(LOOP, new ArgType(false, ARG_INSTS));}
 
 	/** run [[instructions...]]
 	 * <br>（予約された）構造化命令<br>
@@ -1009,7 +1030,7 @@ public class Instruction implements Cloneable {
 	 * 引数実行中にproceed命令を実行した場合、次の命令に進む。
 	 * <p>将来、明示的な引数付きのプロセス文脈のコンパイルに使用するために予約。*/
 	public static final int RUN = 208;
-	static {setArgType(RUN, new ArgType(false, ARG_INST));}
+	static {setArgType(RUN, new ArgType(false, ARG_INSTS));}
 
 	/** not [[instructions...]]
 	 * <br>（予約された）構造化命令<br>
@@ -1018,7 +1039,7 @@ public class Instruction implements Cloneable {
 	 * 引数実行中にproceed命令を実行した場合、この命令が失敗する。
 	 * <p>将来、否定条件のコンパイルに使用するために予約。*/
 	public static final int NOT = 209;
-	static {setArgType(NOT, new ArgType(false, ARG_INST));}
+	static {setArgType(NOT, new ArgType(false, ARG_INSTS));}
 
 	// 組み込み機能に関する命令（仮） (210--219)
 	//  -----  inline  [atom, inlineref]
@@ -1382,7 +1403,7 @@ public class Instruction implements Cloneable {
     /**
      * react 命令を生成する。
      * @param r 反応できるルールオブジェクト
-     * @param actual 実引数
+     * @param actual 実引数列
      * @deprecated
      */
     public static Instruction react(Rule r, List actual) {
@@ -1391,19 +1412,60 @@ public class Instruction implements Cloneable {
 		i.add(actual);
 		return i;
     }
-    /**
-     * react 命令を生成する。
-     * @param r 反応できるルールオブジェクト
-     * @param memactuals 膜実引数のリスト。膜の変数番号からなる。
-     * @param atomactuals アトム実引数のリスト。アトムの変数番号からなる。
-     */
-    public static Instruction react(Rule r, List memactuals, List atomactuals) {
+	/**
+	 * react 命令を生成する。
+	 * @param r 反応できるルールオブジェクト
+	 * @param memactuals 膜実引数のリスト。膜の変数番号からなる。
+	 * @param atomactuals アトム実引数のリスト。アトムの変数番号からなる。
+	 * @deprecated
+	 */
+	public static Instruction react(Rule r, List memactuals, List atomactuals) {
 		Instruction i = new Instruction(REACT);
 		i.add(r);
 		i.add(memactuals);
 		i.add(atomactuals);
+		i.add(new ArrayList());
 		return i;
-    }
+	}
+	/**
+	 * react 命令を生成する。
+	 * @param r 反応できるルールオブジェクト
+	 * @param memactuals 膜実引数のリスト。膜の変数番号からなる。
+	 * @param atomactuals アトム実引数のリスト。アトムの変数番号からなる。
+	 * @param varactuals その他の実引数のリスト。その他の変数番号からなる。
+	 */
+	public static Instruction react(Rule r, List memactuals, List atomactuals, List varactuals) {
+		Instruction i = new Instruction(REACT);
+		i.add(r);
+		i.add(memactuals);
+		i.add(atomactuals);
+		i.add(varactuals);
+		return i;
+	}
+	/**
+	 * jump 命令を生成する。
+	 * @param insts ジャンプ先のラベル付き命令列
+	 * @param memactuals 膜実引数のリスト。膜の変数番号からなる。
+	 * @param atomactuals アトム実引数のリスト。アトムの変数番号からなる。
+	 * @param varactuals その他の実引数のリスト。その他の変数番号からなる。
+	 */
+	public static Instruction jump(InstructionList insts, List memactuals, List atomactuals, List varactuals) {
+		Instruction i = new Instruction(JUMP);
+		i.add(insts);
+		i.add(memactuals);
+		i.add(atomactuals);
+		i.add(varactuals);
+		return i;
+	}
+	/**
+	 * commit 命令を生成する。
+	 * @param r 反応するルールオブジェクト
+	 */
+	public static Instruction commit(Rule r) {
+		Instruction i = new Instruction(COMMIT);
+		i.add(r);
+		return i;
+	}
     /** resetvars 命令を生成する */
     public static Instruction resetvars(List memargs, List atomargs, List varargs) {
     	Instruction i = new Instruction(RESETVARS);

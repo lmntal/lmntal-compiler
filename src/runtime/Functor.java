@@ -111,7 +111,7 @@ public class Functor {
 	/** 適切に省略された表示名を取得 */
 	public String getAbbrName() {
 		String full = getName();
-		return full.length() > 14 ? full.substring(0, 12) + ".." : full;
+		return full.length() > Env.printLength ? full.substring(0, Env.printLength-2) + ".." : full;
 	}
 	/** シンボル名を取得する。
 	 * @return nameフィールドの値。サブクラスのオブジェクトのときそのときに限り空文字列が返る。*/
@@ -135,6 +135,7 @@ public class Functor {
 	public boolean isActive() {
 		// （仮）
 		if (getSymbolFunctorID().equals("n_1")) return false;
+		if (getSymbolFunctorID().equals("c_3")) return false;
 		return getSymbolFunctorID().matches("^[a-z].*$");
 	}
 	/** このクラスのオブジェクトかどうかを調べる。*/

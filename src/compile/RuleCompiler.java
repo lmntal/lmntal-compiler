@@ -5,6 +5,7 @@ import runtime.Env;
 import runtime.Rule;
 //import runtime.InterpretedRuleset;
 import runtime.Instruction;
+import runtime.InstructionList;
 import runtime.Functor;
 import runtime.Inline;
 import compile.structure.*;
@@ -67,7 +68,8 @@ public class RuleCompiler {
 		//Env.d(rs);
 		this.rs = rs;
 	}
-	
+	/** ヘッドのマッチング終了後の継続命令列のラベル */
+	private InstructionList contLabel;
 	/**
 	 * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルする
 	 */
@@ -81,17 +83,28 @@ public class RuleCompiler {
 		hc = new HeadCompiler(rs.leftMem);
 		hc.enumFormals(rs.leftMem);	// ヘッドに対する仮引数リストを作る
 		
+		if (!rs.typedProcessContexts.isEmpty()) {
+			theRule.guardLabel = new InstructionList();
+			contLabel = theRule.guardLabel;
+			guard = theRule.guardLabel.insts;
+		}
+		else guard = null;
+		theRule.bodyLabel = new InstructionList();
+		body = theRule.bodyLabel.insts;
+
+		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);		
+		
 		compile_l();
+		compile_g();
 		compile_r();
-		
-		optimize();	// optimize if $optlevel > 0
-		
-		//showInstructions();
 		
 		//rule.register(@atomMatches,@memMatch,@body)
 		theRule.memMatch  = memMatch;
 		theRule.atomMatch = atomMatch;
+		theRule.guard     = guard;
 		theRule.body      = body;
+		
+		optimize();	// optimize if $optlevel > 0
 		
 		//theRule.showDetail();
 		return theRule;
@@ -164,36 +177,41 @@ public class RuleCompiler {
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
 			hc.compileMembrane(rs.leftMem);
-			hc.match.add(0, Instruction.spec((hc.match == memMatch) ? 1 : 2, hc.varcount));	// とりあえずここに追加（仮）
-			// hc.match.add( hc.getResetVarsInstruction() );
-			// hc.match.add( Instruction.react(theRule) );
-			hc.match.add( Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals()) );
+			if (hc.match == memMatch) {
+				hc.match.add(0, Instruction.spec(1, hc.varcount));
+			}
+			// jump命令群の生成
+			List memActuals  = hc.getMemActuals();
+			List atomActuals = hc.getAtomActuals();
+			List varActuals  = hc.getVarActuals();
+			// - コード#1
+//			hc.match.add( Instruction.react(theRule, memActuals, atomActuals, varActuals) );
+			// - コード#2
+			hc.match.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
+			// - コード#3
+//			hc.match.add( Instruction.inlinereact(theRule, memActuals, atomActuals, varActuals) );
+//			int formals = memActuals.size() + atomActuals.size() + varActuals.size();
+//			hc.match.add( Instruction.spec(formals, formals) );
+//			hc.match.add( hc.getResetVarsInstruction() );
+//			List brancharg = new ArrayList();
+//			brancharg.add(body);
+//			hc.match.add( new Instruction(Instruction.BRANCH, brancharg) );
+			
+			// jump命令群の生成終わり
 			if (maxvarcount < hc.varcount) maxvarcount = hc.varcount;
 		}
-		atomMatch.add(0, Instruction.spec(2,maxvarcount));	// とりあえずここに追加（仮）
+		atomMatch.add(0, Instruction.spec(2,maxvarcount));
 	}
 	
+	// TODO spec命令を外側に持ち上げる最適化器を実装する
 	
 	/** 右辺膜をコンパイルする */
 	private void compile_r() {
 		Env.c("compile_r");
-		
-		// ヘッドの取り込み
-		lhsatoms = hc.atoms;
-		lhsmems = hc.mems;
-		genLHSPaths();
-		varcount = lhsatoms.size() + lhsmems.size();
 		int formals = varcount;
-		//
-		body = new ArrayList();
-		
-		// [ガードのコンパイル]
-		// react命令は本来ガード終了後に発行するため、reactはreloadvars/inlinereactに分割すべき
-		guard = body;
-		compile_g();
-		
-		// ここでinlinereactを発行する。最終的にはinlinereactをreactに名称変更する？
-		
+		body.add( Instruction.commit(theRule) );
+		inc_guard();
+			
 		rhsatoms    = new ArrayList();
 		rhsatompath = new HashMap();
 		rhsmempath  = new HashMap();
@@ -244,7 +262,7 @@ public class RuleCompiler {
 	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
 	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
-	
+
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
 	HashMap typedcxtdatatypes = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型のパターンを表す定数オブジェクト */
@@ -256,6 +274,9 @@ public class RuleCompiler {
 	/** ソース出現が特定された型付きプロセス文脈定義のセット
 	 * <p>identifiedCxtdefs.contains(x) は、左辺に出現するかまたはloadedであること。*/
 	HashSet identifiedCxtdefs = new HashSet(); 
+	/** 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
+	 * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。*/
+	List typedcxtdefs = new ArrayList();
 		
 	static final int UNBOUND = -1;
 		
@@ -300,9 +321,70 @@ public class RuleCompiler {
 		guardLibrary1.put(new Functor("int",   2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
 		guardLibrary1.put(new Functor("float", 2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
 	}	
+
+	private void inc_head() {
+		// ヘッドの取り込み
+		lhsatoms = hc.atoms;
+		lhsmems  = hc.mems;
+		genLHSPaths();
+		varcount = lhsatoms.size() + lhsmems.size();
+	}
+	private void inc_guard() {
+		// ガードの取り込み
+		varcount = lhsatoms.size() + lhsmems.size();
+		// typedcxtdefs = gc.typedcxtdefs;
+		genTypedProcessContextPaths();
+//		varcount = lhsatoms.size() + lhsmems.size() + rs.typedProcessContexts.size();
+	}
+	private void genTypedProcessContextPaths() {
+		Iterator it = typedcxtdefs.iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			typedcxtsrcs.put( def, new Integer(varcount++) );
+		}
+	}
+//	public void enumTypedContextDefs() {
+//		Iterator it = rs.typedProcessContexts.values().iterator();
+//		while (it.hasNext()) {
+//			ContextDef def = (ContextDef)it.next();
+//			typedcxtdefs.add(def);
+//		}
+//	}
+	
 	/** ガードをコンパイルする（仮） */
 	private void compile_g() {
-
+		inc_head();
+		if (guard == null) return;
+		int formals = varcount;
+		fixTypedProcesses();
+		guard.add( 0, Instruction.spec(formals,varcount) );
+		guard.add( Instruction.jump(theRule.bodyLabel, gc_getMemActuals(),
+			gc_getAtomActuals(), gc_getVarActuals()) );
+	}
+	public List gc_getMemActuals() {
+		List args = new ArrayList();		
+		for (int i = 0; i < lhsmems.size(); i++) {
+			args.add( lhsmempath.get(lhsmems.get(i)) );
+		}
+		return args;
+	}
+	public List gc_getAtomActuals() {
+		List args = new ArrayList();		
+		for (int i = 0; i < lhsatoms.size(); i++) {
+			args.add( lhsatompath.get(lhsatoms.get(i)) );
+		}
+		Iterator it = typedcxtdefs.iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			if (typedcxttypes.get(def) == UNARY_ATOM_TYPE)
+				args.add( new Integer(typedcxtToSrcPath(def)) );
+		}
+		return args;
+	}		
+	public List gc_getVarActuals() {
+		return new ArrayList();
+	}
+	private void fixTypedProcesses() {
 		// 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
 		identifiedCxtdefs = new HashSet();
 		Iterator it = rs.typedProcessContexts.values().iterator();
@@ -402,6 +484,7 @@ public class RuleCompiler {
 						int atomid1 = varcount++;
 						guard.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
 						typedcxtsrcs.put(def1, new Integer(atomid1));
+						typedcxtdefs.add(def1);
 						identifiedCxtdefs.add(def1);
 						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
 					}
@@ -488,6 +571,7 @@ public class RuleCompiler {
 			identifiedCxtdefs.add(def);
 			int atomid = varcount++;
 			typedcxtsrcs.put(def, new Integer(atomid));
+			typedcxtdefs.add(def);
 			guard.add(new Instruction(Instruction.ALLOCATOM, atomid, func));			
 		}
 		else {
@@ -498,6 +582,7 @@ public class RuleCompiler {
 				guard.add(new Instruction(Instruction.DEREFATOM,
 					atomid, lhsatomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(atomid));
+				typedcxtdefs.add(def);
 			}
 			guard.add(new Instruction(Instruction.FUNC, atomid, func));
 		}
@@ -508,6 +593,7 @@ public class RuleCompiler {
 		if (!identifiedCxtdefs.contains(def)) {
 			identifiedCxtdefs.add(def);
 			typedcxtsrcs.put(def, new Integer(atomid));
+			typedcxtdefs.add(def);
 		}
 		else {
 			int loadedatomid = typedcxtToSrcPath(def);
@@ -517,6 +603,7 @@ public class RuleCompiler {
 				guard.add(new Instruction(Instruction.DEREFATOM,
 					loadedatomid, lhsatomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(loadedatomid));
+				typedcxtdefs.add(def);
 			}
 			guard.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
 //			int funcid1 = varcount++;
@@ -539,6 +626,7 @@ public class RuleCompiler {
 			guard.add(new Instruction(Instruction.DEREFATOM,
 				atomid, lhsatomToPath(srclink.atom), srclink.pos));
 			typedcxtsrcs.put(def, new Integer(atomid));
+			typedcxtdefs.add(def);
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 		return atomid;
@@ -648,7 +736,8 @@ public class RuleCompiler {
 	
 	private void optimize() {
 		Env.c("optimize");
-		Optimizer.optimize(memMatch, body);
+//		Optimizer.optimize(memMatch, body);
+		Optimizer.optimizeRule(theRule);
 	}	
 	/** 左辺のアトムを所属膜から除去する。*/
 	private void removeLHSAtoms() {

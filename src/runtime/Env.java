@@ -25,6 +25,13 @@ public final class Env {
 	 * Optimization level.
 	 */
 	public static int optimize = 0;
+
+	/** 命令列のインライニングを行う最適化レベル */
+	public static final int OPTIMIZE_INLINING = 1;
+	/** 冗長な命令を除去する最適化レベル */
+	public static final int OPTIMIZE_RE = 1;
+	/** 検査命令を持ち上げる最適化レベル */
+	public static final int OPTIMIZE_FF = 1;
 	
 	////////////////////////////////////////////////////////////////
 	
@@ -63,7 +70,10 @@ public final class Env {
 	 * トレース実行
 	 */
 	public static boolean fTrace = false;
-		
+	
+	/** アトム名の表示する長さ */
+	public static int printLength = 14;
+	
 	/**
 	 * General error report
 	 * @param o
