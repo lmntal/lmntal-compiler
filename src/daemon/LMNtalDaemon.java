@@ -4,6 +4,10 @@ package daemon;
 //import java.util.HashMap;
 //import java.util.Iterator;
 import java.net.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 import java.io.*;
 
 //TODO 実装
@@ -55,75 +59,284 @@ public class LMNtalDaemon implements Runnable {
 	 * - TERMINATE runtimegroupid が必要。受信したら自分が知っている全てのランタイムに同じメッセージを送る。
 	 */
 	 
-	static int LMNTAL_DAEMON_PORT = 60000;
-	ServerSocket servSocket = null;
+	/**
+	 * 物理的な計算機の境界にあって、LMNtalRuntimeインスタンスとリモートノードの対応表を保持する。
+	 * @author nakajima
+	 *
+	 */
 
-	public LMNtalDaemon() {
-		try {
-			servSocket = new ServerSocket(LMNTAL_DAEMON_PORT);
-		} catch (Exception e) {
-			System.out.println("ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
-		}
-	}
+		ServerSocket servSocket = null;
+		static HashMap nodeTable = new HashMap();
+		static HashMap registedRuntimeTable = new HashMap();
+		static HashMap msgTable = new HashMap();
 
-	public void run() {
-		try {
-			while (true) {
-				Thread t2 =
-					new Thread(new LMNtalDaemonThread(servSocket.accept()));
-				t2.start();
+		public LMNtalDaemon() {
+			try {
+				servSocket = new ServerSocket(60000);
+
+			} catch (Exception e) {
+				System.out.println(
+					"ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
 			}
-		} catch (Exception e) {
-			System.out.println("ERROR in LMNtalDaemon.run() " + e.toString());
 		}
-	}
-}
 
-class LMNtalDaemonThread implements Runnable {
-	Socket socket;
+		public LMNtalDaemon(int portnum) {
+			try {
+				servSocket = new ServerSocket(portnum);
+			} catch (Exception e) {
+				System.out.println(
+					"ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
+			}
+		}
 
-	public LMNtalDaemonThread(Socket tmpSocket) {
-		socket = tmpSocket;
-		System.out.println(
-			"new LMNtalDaemonThread created using " + socket.toString());
-	}
+		public void run() {
+			System.out.println("LMNtalDaemon.run()");
 
-	public void run() {
-		try {
-			//入力stream			
-			BufferedReader inStream =
-				new BufferedReader(
-					new InputStreamReader(socket.getInputStream()));
+			Socket tmpSocket;
+			BufferedReader tmpInStream;
+			BufferedWriter tmpOutStream;
 
-			//出力stream
-			BufferedWriter outStream =
-				new BufferedWriter(
-					new OutputStreamWriter(socket.getOutputStream()));
-
-			//1周目
-			outStream.write("LMNtalDaemon @ " + InetAddress.getLocalHost().toString());
-			outStream.write("enter 'quit' to terminate the programme.\n");
-			outStream.flush();
-
-			//2週目以降。"quit"で終了。
 			while (true) {
-				String input = inStream.readLine();
-				if (input.equals("quit")) {
+				try {
+					tmpSocket = servSocket.accept();
+					System.out.println("accepted socket: " + tmpSocket);
+
+					//入力stream			
+					tmpInStream =
+						new BufferedReader(
+							new InputStreamReader(tmpSocket.getInputStream()));
+
+					//出力stream
+					tmpOutStream =
+						new BufferedWriter(
+							new OutputStreamWriter(tmpSocket.getOutputStream()));
+
+					if (register(tmpSocket,
+						new LMNtalNode(
+							tmpSocket.getInetAddress(),
+							tmpInStream,
+							tmpOutStream))) {
+						//登録成功。
+						Thread t2 =
+							new Thread(
+								new LMNtalDaemonMessageProcessor(
+									tmpSocket,
+									tmpInStream,
+									tmpOutStream));
+						t2.start();
+					} else {
+						//登録失敗。糸冬
+						tmpInStream.close();
+						tmpOutStream.close();
+						tmpSocket.close();
+					}
+
+				} catch (IOException e) {
+					System.out.println(
+						"ERROR in LMNtalDaemon.run() " + e.toString());
 					break;
 				}
-				System.out.println("input: " + input);
+			}
+		}
 
-				outStream.write(input);
-				outStream.flush();
+		static boolean register(Socket socket, LMNtalNode node) {
+			System.out.println(
+				"register(" + socket.toString() + ", " + node.toString() + ")");
+
+			synchronized (nodeTable) {
+				if (nodeTable.containsKey(socket)) {
+					return false;
+				}
+
+				nodeTable.put(socket, node);
+			}
+			return true;
+		}
+
+		public static boolean registerLocal(Integer rgid, Socket socket) {
+			System.out.println(
+				"registerLocal(" + rgid + ", " + socket.toString() + ")");
+
+			synchronized (registedRuntimeTable) {
+				if (registedRuntimeTable.containsKey(rgid)) {
+					System.out.println("registerLocal failed");
+					return false;
+				}
+
+				registedRuntimeTable.put(rgid, socket);
 			}
 
-			//切断処理
-			inStream.close();
-			outStream.close();
-			socket.close();
-		} catch (Exception e) {
+			System.out.println("registerLocal succeeded");
+			return true;
+		}
+	
+
+		public static boolean registerMessage(Integer msgid, LMNtalNode node) {
 			System.out.println(
-				"ERROR in LMNtalDaemonThread.run()!!! " + e.toString());
+				"registerMessage(" + msgid + ", " + node.toString() + ")");
+
+			synchronized (msgTable) {
+				if (msgTable.containsKey(msgid)) {
+					return false;
+				}
+
+				registedRuntimeTable.put(msgid, node);
+			}
+
+			return true;
+		}
+
+		public static LMNtalNode getNodeFromMsgId(Integer msgid) {
+			System.out.println("getNodeFromMsgId(" + msgid + ")");
+
+			synchronized (msgTable) {
+				return (LMNtalNode) msgTable.get(msgid);
+			}
+		}
+
+		/* 
+		 *  fqdn上のLMNtalDaemonが既に登録されているかどうか確認する
+		 */
+		public static boolean isRegisted(String fqdn) {
+			System.out.println("now in LMNtalDaemon.isRegisted(" + fqdn + ")");
+		
+			//TODO 単体テスト
+			Collection c = nodeTable.values();
+			Iterator it = c.iterator();
+
+			while (it.hasNext()) {
+				if (((LMNtalNode) (it.next()))
+					.getInetAddress()
+					.getCanonicalHostName()
+					.equalsIgnoreCase(fqdn)) {
+						System.out.println("LMNtalDaemon.isRegisted("  + fqdn + ") is true!" );
+						return true;
+				}
+			}
+
+			System.out.println("LMNtalDaemon.isRegisted("  + fqdn + ") is false!" );
+			return false;
+		}
+
+		public static LMNtalNode getLMNtalNodeFromFQDN(String fqdn){
+			System.out.println("now in LMNtalDaemon.getLMNtalNodeFromFQDN(" + fqdn + ")");
+		
+			//TODO 単体テスト
+			Collection c = nodeTable.values();
+			Iterator it = c.iterator();
+
+			while (it.hasNext()) {
+				if (((LMNtalNode) (it.next()))
+					.getInetAddress()
+					.getCanonicalHostName()
+					.equalsIgnoreCase(fqdn)) {
+						System.out.println("LMNtalDaemon.isRegisted("  + fqdn + ") is true!" );
+						return (LMNtalNode)(it.next());
+				}
+			}
+	
+			return null;
+		}
+
+
+		/*
+		 *  fqdn上のLMNtalDaemonを登録する＆登録してもらう
+		 */
+		public static boolean connect(String fqdn) {
+			System.out.println("now in LMNtalDaemon.connect(" + fqdn + ")");
+			//TODO firewallにひっかかってパケットが消滅した時をどうするか？
+		
+			boolean result = false;
+			boolean isRegisted = isRegisted(fqdn);
+
+			try {
+
+			
+				if(isRegisted){
+					//既に登録済みの場合は、そのホストに"connect"を送って生死を判定する
+					LMNtalNode remoteNode = getLMNtalNodeFromFQDN(fqdn);
+
+
+			
+				} else {
+					//新規接続の場合
+					InetAddress ip = InetAddress.getByName(fqdn);
+
+					Socket socket =
+						new Socket(fqdn, 60000);
+
+					BufferedReader in =
+						new BufferedReader(
+							new InputStreamReader(socket.getInputStream()));
+
+					BufferedWriter out =
+						new BufferedWriter(
+							new OutputStreamWriter(socket.getOutputStream()));
+
+					LMNtalNode node = new LMNtalNode(ip, in, out);
+					if (register(socket, node)){
+						//connectを送る
+										
+					
+					} else {
+						result = false;
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("ERROR in LMNtalDaemon.connect(" + fqdn + "): " + e.toString());
+				result = false;
+			}
+
+			return result;
+		}
+
+		public static boolean sendMessage(String fqdn, String message){
+			LMNtalNode target = getLMNtalNodeFromFQDN(fqdn);
+
+			try{
+				BufferedWriter out = target.out;
+				
+				out.write(message);
+				out.flush();
+				return true;
+			} catch (Exception e){
+				System.out.println("ERROR in LMNtalDaemon.sendMessage: " + e.toString());
+			}
+		
+			return false;
+		}
+
+
+		boolean disconnect(Socket socket) {
+			LMNtalNode node = (LMNtalNode) nodeTable.get(socket);
+
+			try {
+				node.getInputStream().close();
+				node.getOutputStream().close();
+				socket.close();
+
+				return true;
+			} catch (Exception e) {
+				System.out.println(
+					"LMNtalDaemon.disconnect() failed!!! " + e.toString());
+			}
+
+			return false;
+		}
+
+		static void dumpHashMap() {
+			Set tmpSet;
+
+			tmpSet = nodeTable.entrySet();
+			System.out.println("Dump nodeTable");
+			System.out.println(tmpSet);
+
+			tmpSet = registedRuntimeTable.entrySet();
+			System.out.println("Dump registedRuntimeTable");
+			System.out.println(tmpSet);
+
+			tmpSet = msgTable.entrySet();
+			System.out.println("Dump msgTable");
+			System.out.println(tmpSet);
 		}
 	}
-}

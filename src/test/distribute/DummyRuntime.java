@@ -42,9 +42,15 @@ class DummyRuntime implements Runnable {
 //			System.out.println(in.readLine());
 			
 			//msgid "cure.ueda.info.waseda.ac.jp" rgid connect
-			connectCure(out);
+//			connectCure(out);
+//			Thread.sleep(300);
+//			System.out.println(in.readLine());
+			
+			//msgid "cure.ueda.info.waseda.ac.jp" rgid connect
+			connectHost(out, "banon.ueda.info.waseda.ac.jp");
 			Thread.sleep(300);
 			System.out.println(in.readLine());
+			
 			
 			//hashmapの中身を吐く
 			dumpHash(out);
@@ -85,12 +91,12 @@ class DummyRuntime implements Runnable {
 		}
 	}
 
-	void connectCure(BufferedWriter out) {
-		//msgid "cure.ueda.info.waseda.ac.jp" rgid connect
+	void connectHost(BufferedWriter out, String fqdn) {
+		//eg. msgid "cure.ueda.info.waseda.ac.jp" rgid connect
 		int msgid = 10000;
 
 		String command =
-			new String(msgid + " \"cure.ueda.info.waseda.ac.jp\" " + rgid + " connect\n");
+			new String(msgid + " \"" + fqdn + "\" " + rgid + " connect\n");
 
 		System.out.println("TmpRuntime.connect(): now omitting: " + command);
 		try {
