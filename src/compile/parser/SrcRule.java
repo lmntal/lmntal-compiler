@@ -7,18 +7,31 @@ import java.util.LinkedList;
 
 class SrcRule {
 	
-	private LinkedList head = null;
-	private LinkedList body = null;
+	private LinkedList head = null; // ヘッドプロセス
+	private LinkedList body = null; // ボディプロセス
+	private LinkedList guard = null; // ガードプロセス
 	
 	/**
-	 * 指定されたヘッドルールとボディルールでルールを初期化します
+	 * 指定されたヘッドルールとボディルールと空のガードでルールを初期化します
 	 * @param head ヘッドのリスト
 	 * @param body ボディのリスト
 	 */
 	public SrcRule(LinkedList head, LinkedList body) {
+		this(head, new LinkedList(), body);
+	}
+	
+	/**
+	 * 指定されたヘッドルールとボディルールとガードでルールを初期化します
+	 * @param head ヘッドのリスト
+	 * @param gurad ガードのリスト
+	 * @param body ボディのリスト
+	 */
+	public SrcRule(LinkedList head, LinkedList guard, LinkedList body) {
 		this.head = head;
+		this.guard = guard;
 		this.body = body;
 	}
+
 	
 	/**
 	 * ルールのヘッドを取得します
@@ -26,6 +39,14 @@ class SrcRule {
 	 */
 	public LinkedList getHead() {
 		return this.head;
+	}
+	
+	/**
+	 * ルールのガードを得ます
+	 * @return ガードのリスト
+	 */
+	public LinkedList getGuard() {
+		return this.guard;
 	}
 	
 	/**
