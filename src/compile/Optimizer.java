@@ -599,6 +599,12 @@ public class Optimizer {
 			Iterator functorIterator = removedAtoms.functorIterator(mem);
 			while (functorIterator.hasNext()) {
 				Functor functor = (Functor)functorIterator.next();
+				//removeproxies・insertproxiesがあるので、再利用できない
+				if (functor.equals(Functor.INSIDE_PROXY) ||
+					functor.equals(Functor.OUTSIDE_PROXY) ||
+					functor.equals(Functor.STAR)) {
+					continue;
+				}
 				Iterator removedAtomIterator = removedAtoms.iterator(mem, functor);
 				Iterator createdAtomIterator = createdAtoms.iterator(mem, functor);
 				while (removedAtomIterator.hasNext() && createdAtomIterator.hasNext()) {
