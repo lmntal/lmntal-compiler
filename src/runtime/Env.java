@@ -5,6 +5,8 @@
 package runtime;
 import java.util.*;
 
+import test.GUI.LMNGraphPanel;
+
 /**
  * 環境。デバッグ用。
  * @author hara
@@ -70,6 +72,12 @@ public final class Env {
 	 * トレース実行
 	 */
 	public static boolean fTrace = false;
+	
+	/**
+	 * GUI 有効。仮仮仮仮
+	 */
+	public static boolean fGUI = false;
+	public static LMNGraphPanel gui;
 	
 	/** アトム名の表示する長さ */
 	public static int printLength = 14;

@@ -84,6 +84,9 @@ public class FrontEnd {
 						}
 //						System.out.println("verbose level " + Env.verbose);
 						break;
+					case 'g':
+						Env.fGUI = true;
+						break;
 					case 't':
 						Env.fTrace = true;
 						break;

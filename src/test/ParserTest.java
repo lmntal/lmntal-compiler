@@ -11,7 +11,7 @@ import compile.parser.ParseException;
 //import java.util.LinkedList;
 import compile.structure.*;
 
-import test.graph.*;
+import test.GUI.*;
 
 public class ParserTest extends JFrame implements ActionListener {
 

@@ -1,6 +1,7 @@
 package runtime;
 
 import java.util.Iterator;
+
 import util.Stack;
 
 /** 抽象タスク */
@@ -160,6 +161,10 @@ final class Task extends AbstractTask {
 					if (Env.fTrace) {
 						Env.p( " ==> " );
 						Env.p( Dumper.dump(getRoot()) );
+						if(Env.fGUI) {
+							// TODO GUI と接続する。
+							//Env.gui.setMembrane(getRoot());
+						}
 					}
 				}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行アトムスタックが空の時
