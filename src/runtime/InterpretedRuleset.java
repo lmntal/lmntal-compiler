@@ -419,13 +419,17 @@ class InterpreterReactor {
 
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここから====
 				case Instruction.REMOVEPROXIES : //[srcmem]
-					break;
+					mems[inst.getIntArg1()].removeProxies();
+					break; //nakajima 2004-01-04
 				case Instruction.REMOVETOPLEVELPROXIES : //[srcmem]
-					break;
+					mems[inst.getIntArg1()].removeToplevelProxies();
+					break; //nakajima 2004-01-04
 				case Instruction.INSERTPROXIES : //[parentmem,childmem]
-					break;
+					mems[inst.getIntArg1()].insertProxies(mems[inst.getIntArg2()]);
+					break;  //nakajima 2004-01-04
 				case Instruction.REMOVETEMPORARYPROXIES : //[srcmem]
-					break;
+					mems[inst.getIntArg1()].removeTemporaryProxies();
+					break; //nakajima 2004-01-04
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここまで====
 
 					//====ルールを操作するボディ命令====ここから====
