@@ -100,21 +100,20 @@ final class RemoteTask extends AbstractTask {
 	}
 
 	// ロック
-	public void lock() {
-		//リモートのルート膜にlock命令を送る
-		
-		//TODO 実装
-		throw new RuntimeException("not implemented");
-	}
-	public boolean unlock() {
-		//TODO 実装
-
-		//リモートのルート膜にunlock命令を送る
-		//もう送られているのかどうか調べる
-
-		//cmdbufferをflush()する
-		flush();
-
-		throw new RuntimeException("not implemented");
-	}
+	// nakajima20040719: RemoteMembraneにあるのでいらないような気がする
+//	public void lock() {
+//		//リモートのルート膜にlock命令を送る
+//		
+//		throw new RuntimeException("not implemented");
+//	}
+//	public boolean unlock() {
+//
+//		//リモートのルート膜にunlock命令を送る
+//		//もう送られているのかどうか調べる
+//
+//		//cmdbufferをflush()する
+//		flush();
+//
+//		throw new RuntimeException("not implemented");
+//	}
 }
