@@ -22,9 +22,9 @@ public class Optimizer {
 	 */
 	public static void optimize(List head, List body) {
 		if (Env.optimize > 0) {
-			if (Env.optimize >= 4) {
-				reuseMem(body);
-			}
+//			if (Env.optimize >= 4) {
+//				reuseMem(body);
+//			}
 			if (Env.optimize >= 2) {
 				if (changeOrder(body)) {
 					reuseAtom(body);
@@ -733,43 +733,39 @@ public class Optimizer {
 						loopIterator.remove();
 					}
 					break;
-				case Instruction.PROCEED:
-					//reloadvars命令を挿入
-					Instruction react = (Instruction)head.get(head.size() - 1);
-					int memmax = ((List)react.getArg2()).size();
-					int atommax = memmax + ((List)react.getArg3()).size();
-
-					ArrayList memargs = new ArrayList();
-					ArrayList atomargs = new ArrayList();
-					ArrayList varargs = new ArrayList();
-					memargs.add(new Integer(0));
-					int i;
-					//膜
-					for (i = base + 1; i < base + memmax; i++) {
-						memargs.add(new Integer(i));
-					}
-					//アトム
-					for (; i < base + atommax; i++) {
-						Integer i2 = new Integer(i);
-						if (varMap.containsKey(i2)) {
-							i2 = (Integer)varMap.get(i2);
-						}
-						atomargs.add(i2);
-					}
-					//ローカル変数
-					for (; i < base + base; i++) {
-						Integer i2 = new Integer(i);
-						if (varMap.containsKey(i2)) {
-							i2 = (Integer)varMap.get(i2);
-						}
-						varargs.add(i2);
-					}
-					loopIterator.previous();
-					loopIterator.add(Instruction.reloadvars(memargs, atomargs, varargs));
-					loopIterator.next();
-					break;
 			}
 		}
+		//ループの最後にreloadvars命令を挿入
+		Instruction react = (Instruction)head.get(head.size() - 1);
+		int memmax = ((List)react.getArg2()).size();
+		int atommax = memmax + ((List)react.getArg3()).size();
+
+		ArrayList memargs = new ArrayList();
+		ArrayList atomargs = new ArrayList();
+		ArrayList varargs = new ArrayList();
+		memargs.add(new Integer(0));
+		int i;
+		//膜
+		for (i = base + 1; i < base + memmax; i++) {
+			memargs.add(new Integer(i));
+		}
+		//アトム
+		for (; i < base + atommax; i++) {
+			Integer i2 = new Integer(i);
+			if (varMap.containsKey(i2)) {
+				i2 = (Integer)varMap.get(i2);
+			}
+			atomargs.add(i2);
+		}
+		//ローカル変数
+		for (; i < base + base; i++) {
+			Integer i2 = new Integer(i);
+			if (varMap.containsKey(i2)) {
+				i2 = (Integer)varMap.get(i2);
+			}
+			varargs.add(i2);
+		}
+		loop.add(loop.size() - 1, Instruction.reloadvars(memargs, atomargs, varargs));
 		
 		Instruction.changeVar(loop, varMap);
 		
