@@ -92,7 +92,6 @@ H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 	H=[[/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
-			Atom obj = me.nthAtom(0);
 			Atom done = mem.newAtom(new Functor("done", 1));
 			if(pw!=null) {
 				pw.println(me.nth(1));
