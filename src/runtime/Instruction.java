@@ -1345,6 +1345,26 @@ public class Instruction implements Cloneable {
 				case Instruction.FUNC:
 					changeArg(inst, 1, map);
 					break;
+				case Instruction.FINDATOM:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.ANYMEM:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
+				case Instruction.NATOMS:
+				case Instruction.NMEMS:
+					changeArg(inst, 1, map);
+					break;	
+				case Instruction.NORULES:
+					changeArg(inst, 1, map);
+					break;
+				case Instruction.LOCKMEM:
+				case Instruction.TESTMEM:
+					changeArg(inst, 1, map);
+					changeArg(inst, 2, map);
+					break;
 				case Instruction.NEWATOM:
 				case Instruction.LOCALNEWATOM:
 				case Instruction.NEWATOMINDIRECT:
@@ -1376,6 +1396,7 @@ public class Instruction implements Cloneable {
 					break;
 				case Instruction.REMOVEATOM:
 				case Instruction.LOCALREMOVEATOM:
+					changeArg(inst, 1, map);
 					changeArg(inst, 2, map);
 					break;
 				case Instruction.COPYATOM:
@@ -1402,6 +1423,7 @@ public class Instruction implements Cloneable {
 				case Instruction.ENQUEUEALLATOMS:
 					changeArg(inst, 1, map);
 					break;
+				case Instruction.FREEATOM:
 				case Instruction.FREEMEM:
 					changeArg(inst, 1, map);
 					break;
@@ -1449,11 +1471,11 @@ public class Instruction implements Cloneable {
 				case Instruction.DROPMEM:
 					changeArg(inst, 1, map);
 					break;
-			//
 				case RELINK:
 				case LOCALRELINK:
 					changeArg(inst, 5, map);
 					break;
+					
 			}
 		}
 	}
