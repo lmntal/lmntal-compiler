@@ -267,6 +267,7 @@ public class RuleCompiler {
 		guardLibrary2.put(new Functor("-",    3), new int[]{ISINT,  ISINT,   Instruction.ISUB});
 		guardLibrary2.put(new Functor("*",    3), new int[]{ISINT,  ISINT,   Instruction.IMUL});
 		guardLibrary2.put(new Functor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV});
+		guardLibrary2.put(new Functor("mod",  3), new int[]{ISINT,  ISINT,   Instruction.IMOD});
 		guardLibrary1.put(new Functor("int",  2), new int[]{ISINT,           Instruction.INT2FLOAT});
 		guardLibrary1.put(new Functor("float",2), new int[]{ISFLOAT,         Instruction.FLOAT2INT});
 	}
@@ -535,7 +536,7 @@ public class RuleCompiler {
 				if (link1.atom.mem != mem && link2.atom.mem != mem) {
 					// 単一化アトムのリンク先が両方とも他の膜につながっている場合
 					if (mem == rs.leftMem) {
-						// ( X=Y :- p(X,Y) ) は意味解析エラー
+						// ( X=Y :- p(X,Y) ) は意味解析エラー（=は通常のヘッドアトムと見なして放置される）
 						error("COMPILE ERROR: head contains body unification");
 					}
 					else {

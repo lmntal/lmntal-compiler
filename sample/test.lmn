@@ -123,6 +123,7 @@ p(2 mod 0)                % ==> p('NaN')¡ÚÌ¤¼ÂÁõ¡Û
 (a($p):- $p=4        | end($p)),   a(4),a(5) % ==> end(4),a(5)
 
 (gen(1) :- X=X),(gen(N) :- N>1 | p(N),gen(N-1)), gen(20), (p(A),p(B) :- B=(B/A)*A | p(A)) 
+(gen(1) :- X=X),(gen(N) :- N>1 | p(N),gen(N-1)), gen(20), (p(A),p(B) :- B mod A =:= 0 | p(A)) 
 
 %
 
