@@ -6,6 +6,9 @@ abstract public class AbstractTask {
 	protected AbstractLMNtalRuntime runtime;
 	/** ルート膜 */
 	protected AbstractMembrane root;
+	/** ayncUnlockされたときにtrueになる*/
+	protected boolean asyncFlag = false;
+	
 	/** コンストラクタ
 	 * @param runtime 所属するランタイム */
 	AbstractTask(AbstractLMNtalRuntime runtime) {

@@ -74,8 +74,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	protected boolean stable = false;
 	/** 永続フラグ（trueならばルール適用できなくてもstableにならない）*/
 	public boolean perpetual = false;
-	/** ロックされている時にtrue。 */
-	protected boolean locked = false;
+//	/** ロックされている時にtrue。 */
+//	protected boolean locked = false;
 	/** locked = trueの時には、この膜をロックしているスレッドが入っている。*/
 	protected Thread lockThread = null;
 	/** リモート（リモート膜のときにボディ命令メソッド呼び出しの転送先となるリモートタスクまたはnull）

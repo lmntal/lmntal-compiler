@@ -216,11 +216,23 @@ public final class Membrane extends AbstractMembrane {
 	 * したがってルールスレッドは、本膜をロックした場合ただちにリモートをnullに設定すること。
 	 * @return ロックの取得に成功したかどうか */
 	synchronized public boolean lock() {
-		if (locked) {
+//		if (locked) {
+		if (lockThread != null) {
 			return false;
 		} else {
-			locked = true;
+//			locked = true;
 			lockThread = Thread.currentThread();
+			
+//			Iterator it = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot().mems.iterator();
+//			if (it.hasNext()) {
+//				Task a = (Task)((Membrane)it.next()).getTask();
+//				if (a.thread == lockThread) {
+//					System.out.println("した");
+//				} else {
+//					System.out.println("うえ?");
+//				}
+//			}
+			
 			if (parent != null) remote = parent.remote;
 			return true;
 		}
@@ -305,8 +317,10 @@ public final class Membrane extends AbstractMembrane {
 	 */
 	public void quietUnlock() {
 		Task task = (Task)getTask();
-		locked = false;
+//		locked = false;
+		lockThread = null;
 		if (isRoot()) {
+			task.idle = false;
 			// このタスクのルールスレッドまたはその停止を待ってブロックしているスレッドを再開する。
 			task.signal();
 		}
@@ -323,7 +337,6 @@ public final class Membrane extends AbstractMembrane {
 			synchronized(task) {
 				task.memStack.moveFrom(task.bufferedStack);
 			}
-			task.idle = false;
 		}
 		quietUnlock();
 	}
@@ -337,10 +350,12 @@ public final class Membrane extends AbstractMembrane {
 		activate();
 		AbstractMembrane mem = this;
 		while (!mem.isRoot()) {
-			mem.locked = false;
+//			mem.locked = false;
+			mem.lockThread = null;
 			mem = mem.parent;
 		}
 		// task.async = null;
+		task.asyncFlag = true;
 		mem.unlock();
 	}
 	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/

@@ -24,7 +24,8 @@ public final class RemoteTask extends AbstractTask {
 	RemoteTask(RemoteLMNtalRuntime runtime, AbstractMembrane parent){
 		super(runtime);
 		root = new RemoteMembrane(this, parent);
-		root.locked = true;
+//		root.locked = true;
+		root.lockThread = Thread.currentThread();
 		root.remote = parent.remote;
 		parent.addMem(root);	// タスクは膜の作成時に設定した
 	}

@@ -91,7 +91,8 @@ class Task extends AbstractTask implements Runnable {
 	Task(AbstractLMNtalRuntime runtime, AbstractMembrane parent) {
 		super(runtime);
 		root = new Membrane(this);
-		root.locked = true;
+//		root.locked = true;
+		root.lockThread = Thread.currentThread();
 		root.remote = parent.remote;
 		root.activate(); 		// 仮の実行膜スタックに積む
 		parent.addMem(root);	// タスクは膜の作成時に設定した
@@ -166,7 +167,7 @@ class Task extends AbstractTask implements Runnable {
 						if (getMachine() instanceof MasterLMNtalRuntime) {
 							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
 							// memToDump = getRoot();
-							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
+//							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
 								Env.p( " --> \n" + Dumper.dump( memToDump ) );
 						}
 					}
@@ -213,7 +214,7 @@ class Task extends AbstractTask implements Runnable {
 						if (getMachine() instanceof MasterLMNtalRuntime) {
 							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
 							// memToDump = getRoot();
-							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
+//							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
 								Env.p( " ==> \n" + Dumper.dump( memToDump ) );
 						}
 					}
@@ -227,7 +228,9 @@ class Task extends AbstractTask implements Runnable {
 			if (lockRequestCount > 0) {
 				signal();
 			}
-			if (memStack.isEmpty()) idle = true;
+			if (memStack.isEmpty()) {
+				idle = true;
+			}
 		}
 		//System.out.println(mem.getAtomCount() + ": exec3");
 		
@@ -283,7 +286,10 @@ class Task extends AbstractTask implements Runnable {
 			}
 			if (root != null) { 	
 				if (Env.fTrace) {
-					Env.p( " ==>* \n" + Dumper.dump(root) );
+					if (asyncFlag) {
+						asyncFlag = false;
+						Env.p( " ==>* \n" + Dumper.dump(root) );
+					}
 				}
 			}
 		}	

@@ -204,7 +204,8 @@ public final class RemoteMembrane extends AbstractMembrane {
 	// - ガード命令
 	
 	synchronized public boolean lock() {
-		if (locked) return false;
+//		if (locked) return false;
+		if (lockThread != null) return false;
 		if (fUnlockDeferred) {
 			fUnlockDeferred = false;
 		} else {
@@ -283,7 +284,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 	}
 
 	private void onLock(boolean signal) {
-		locked = true;
+//		locked = true;
 		lockThread = Thread.currentThread();
 		if (signal || isRoot()) {
 			if (signal || parent == null || parent.remote == null) {
@@ -299,7 +300,8 @@ public final class RemoteMembrane extends AbstractMembrane {
 			if (remote == task) remote.flush();	// 命令ブロックの積み上げを終了する
 		}
 		remote = null;
-		locked = false;
+//		locked = false;
+		lockThread = null;
 	}
 	/** キャッシュを更新する
 	 * @see Membrane#cache()
