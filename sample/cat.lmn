@@ -1,0 +1,8 @@
+/**
+ * 標準入力を標準出力に書き出すサンプル
+ */
+io.use.
+
+o=done.
+o=done:-i=readline(data).
+i=done, data(D):-o=print(D).
