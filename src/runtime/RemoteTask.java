@@ -56,21 +56,21 @@ public final class RemoteTask extends AbstractTask {
 	}
 	
 	void send(String cmd, AbstractMembrane mem) {
-		cmdbuffer += cmd + " " + mem.getGlobalMemID();
+		cmdbuffer += cmd + " " + mem.getGlobalMemID() + "\n"; 
 	}
 	void send(String cmd, AbstractMembrane mem, String args) {
-		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + args;
+		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + args + "\n"; 
 	}
 	void send(String cmd, AbstractMembrane mem,
 			String arg1, int arg2, String arg3, int arg4) {
 		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " "
-			+ arg1 + " " + arg2 + " " + arg3 + " " + arg4;
+			+ arg1 + " " + arg2 + " " + arg3 + " " + arg4 + "\n"; 
 	}
 	void send(String cmd, String outarg, AbstractMembrane mem) {
-		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + outarg;
+		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + outarg + "\n"; 
 	}
 	void send(String cmd, String outarg, AbstractMembrane mem, String args) {
-		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + outarg + " " + args;
+		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + outarg + " " + args + "\n"; 
 	}
 
 	/**
@@ -82,7 +82,7 @@ public final class RemoteTask extends AbstractTask {
 	 * @throws RuntimeException 通信失敗（fatal）
 	 */
 	void flush() {
-		String cmd = "BEGIN\n" + cmdbuffer + "\nEND";
+		String cmd = "BEGIN\n" + cmdbuffer + "END"; 
 		boolean result = LMNtalRuntimeManager.daemon.sendWait(runtime.hostname, cmd);
 		if (!result) {
 			throw new RuntimeException("RemoteTask: error in flush()");
