@@ -823,7 +823,7 @@ public class Optimizer {
 		HashMap otherVarMap = new HashMap();
 		//ループ内で再定義している変数→もともとの変数
 		HashMap reverseAtomVarMap = new HashMap();
-		int base = atomvars.size() + memvars.size() + othervars.size() + 10; //ループ内命令列で使用する変数の開始値 
+		int base = atomvars.size() + memvars.size() + othervars.size(); //ループ内命令列で使用する変数の開始値 
 		nextArg = base;
 		//膜
 		Iterator it = memvars.subList(1, memvars.size()).iterator(); //はじめは本膜
@@ -1115,7 +1115,9 @@ public class Optimizer {
 		body.addAll(body.size() - 1, moveInsts);
 		
 		//spec命令の変更
-		body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
+		if (nextArg > spec.getIntArg1()) {
+			body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
+		}
 	}
 
 }
