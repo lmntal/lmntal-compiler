@@ -7,16 +7,21 @@ import java.util.LinkedList;
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
 terminal		NULL, COMMA, LPAREN, RPAREN, LBREATH, RBREATH,
 				RULE, UNIFY, PERIOD, GUARD, PROCVAR, RULEVAR, 
-				WILDCARD, LBRACET, RBRACET, NEGATIVE,
-				LT, LE, GT, GE, EQ, NE;
+				LBRACKET, RBRACKET, NEGATIVE,
+				LT, LE, GT, GE, EQ, NE,
+				ASTERISK, SLASH, PLUS, MINAS;
 				
 terminal String	LINK_NAME, ATOM_NAME;
 
 non terminal SrcLink			Link;
+non terminal SrcAtom			UnitAtom;
+non terminal SrcAtom			Atom400;
+non terminal SrcAtom			Atom500;
 non terminal SrcAtom			Atom;
 non terminal SrcMembrane		Membrane;
 non terminal SrcRule			Rule;
 non terminal SrcProcessContext	ProcessContext;
+non terminal SrcTypedProcessContext TypedProcessContext;
 non terminal SrcRuleContext		RuleContext;
 non terminal SrcContext			Context;
 non terminal Object				Process;
@@ -27,6 +32,8 @@ non terminal LinkedList         GuardProcessList;
 */
 non terminal SrcLinkUnify		LinkUnify;
 non terminal SrcCompareAtom     CompareAtom;
+non terminal SrcAtom			List;
+non terminal SrcAtom			ListCdr;
 
 start with ProcessList;
 
@@ -35,12 +42,63 @@ start with ProcessList;
 Link		::=   LINK_NAME:name
 					{: RESULT = new SrcLink(name); :};
 					
-Atom		::=	  ATOM_NAME:name
+UnitAtom	::=	  ATOM_NAME:name
 					{: RESULT = new SrcAtom(name); :}
 				| ATOM_NAME:name LPAREN RPAREN
 					{: RESULT = new SrcAtom(name); :}
 				| ATOM_NAME:name LPAREN ProcessList:list RPAREN
-					{: RESULT = new SrcAtom(name, list); :};
+					{: RESULT = new SrcAtom(name, list); :}
+				| List:list
+					{: RESULT = list; :}
+				| LPAREN Atom:atom RPAREN
+					{: RESULT = atom; :};
+
+					
+Atom400		::=   UnitAtom:atom
+					{: RESULT = atom; :}
+				| Atom400:atom1 ASTERISK UnitAtom:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("*", list); :}
+				| Atom400:atom1 SLASH UnitAtom:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("/", list); :};
+
+Atom500		::=   Atom400:atom
+					{: RESULT = atom; :}
+				| Atom500:atom1 MINAS Atom400:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("-", list); :}
+				| Atom500:atom1 PLUS Atom400:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("+", list); :};
+					
+Atom		::=   Atom500:atom
+					{: RESULT = atom; :}
+				| Atom500:atom1 UNIFY Atom500:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("=", list); :};
+
+List        ::=   LBRACKET RBRACKET
+					{: RESULT = new SrcAtom("[]"); :}
+                | LBRACKET Atom:atom ListCdr:cdr RBRACKET
+                    {: LinkedList list = new LinkedList();
+                       list.add(atom); list.add(cdr);
+                       RESULT = new SrcAtom(".", list); :};
+                
+ListCdr     ::=   GUARD Atom:atom
+                    {: RESULT = atom;  :}
+                | COMMA Atom:atom ListCdr:cdr
+                    {: LinkedList list = new LinkedList();
+                       list.add(atom); list.add(cdr);
+                       RESULT = new SrcAtom(".", list); :}
+                |  
+                    {: RESULT = new SrcAtom("[]"); :};
+
 
 Membrane	::=	  LBREATH RBREATH
 					{: RESULT = new SrcMembrane(); :}
@@ -53,7 +111,12 @@ Rule		::=	  LPAREN ProcessList:head RULE ProcessList:body RPAREN
 					{: RESULT = new SrcRule(head, guard, body); :};
 
 ProcessContext	::=   PROCVAR ATOM_NAME:name
-					{: RESULT = new SrcProcessContext(name); :};
+						{: RESULT = new SrcProcessContext(name); :};
+
+/*
+TypedProcessContext ::= PROCVAR ATOM_NAME:name LBRACKET LINK_NAME:link RBRACKET
+							{: RESULT = new SrcTypedProcessContext(name, link); :};
+*/
 
 RuleContext	::=   RULEVAR ATOM_NAME:name
 					{: RESULT = new SrcRuleContext(name); :};
@@ -100,8 +163,10 @@ GuardProcess ::=  Process:p
 ProcessList	::=   GuardProcess:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
 				| ProcessList:list COMMA GuardProcess:p
+					{: list.add(p); RESULT = list; :}
+				| ProcessList:list PERIOD GuardProcess:p
 					{: list.add(p); RESULT = list; :};
-				
+					
 /*
 GuardProcessList ::=   GuardProcess:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
