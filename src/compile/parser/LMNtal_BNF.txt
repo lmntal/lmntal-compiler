@@ -6,15 +6,21 @@
  *   @ JFlex, Java CUPを使用
  *     JFlex (http://jflex.de/) Ver 1.4 pre5
  *         ant flex_compile
+ *         Lexer.java
  *     Java CUP (http://www.cs.princeton.edu/~appel/modern/java/CUP/) Ver 0.10k
  *         ant bison_compile
+ *         parser.java
  *   @ 簡略記法も対応する
  *   @ ルールでしか出現しないもの(RuleContext)がデータ部分に出ている
  *     ようなことはチェックしていない
  *      P と T の区別はしていない
- *
+ *   @ 返り値は LinkedList (Processのどれか)
+ *     parser p = new parser(new Lexer(Reader in));
+ *     LinkedList result = (LinkedList)p.parse().value();
+ * 
  * (2) 意味解析器
- *   @ compile.struture.*
+ *   @ compile.struture.* へと変換
+ *     トップはMembraneとなる
  *   @ リンクの貼り付け
  *   @ アトム中のアトムなどの簡略記法を展開する
  *   @ 膜を通過するリンクのプロキシーを生成する
