@@ -34,9 +34,9 @@ import java_cup.runtime.Symbol;
 %unicode
 %cup
 
-LineTerminator = \r|\n|\r\n
-InputCharacter = ([^\r\n]|Character)
-WhiteSpace     = {LineTerminator} | [ \t\f]
+LineTerminator = \r|\n|\r\n|\f
+InputCharacter = ([^\r\n\f]|Character)
+WhiteSpace     = {LineTerminator} | [ \t]
 
 LinkName       = [A-Z_][A-Za-z_0-9]*
 
