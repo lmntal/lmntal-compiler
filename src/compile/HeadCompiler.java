@@ -110,7 +110,9 @@ public class HeadCompiler {
 				
 //				if( buddymem.mems.get(0).equals(targetmem.mems.get(0)) ) {
 //					// lhs->lhs, neg->sameneg
-//					while( targetmem.memlevel > buddymem.memlevel
+//					while( targetmem.memlevel > buddymem.memlevel ) {
+//						targetmem = targetmem.mem;
+//					}
 //				}
 			}
 		}
