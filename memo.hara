@@ -2,6 +2,7 @@
 
 
 scp ~/lmntal/dist/lmntal.jar hara@banon:lmntal/devel/dist/
+scp -r ~/lmntal/lmntal_lib/ hara@banon:lmntal/devel/
 
 LMNtal 処理系にかかわるデータの流れとデータに加えられる処理
 
