@@ -124,7 +124,7 @@ public class Dumper {
 		return buf.toString();
 	}
 	private static String dumpLink(Link l, Set atoms) {
-		if (l.isFuncRef() && atoms.contains(l.getAtom())) {
+		if (Env.verbose < Env.VERBOSE_EXPANDATOMS && l.isFuncRef() && atoms.contains(l.getAtom())) {
 			return dumpAtomGroupWithoutLastArg(l.getAtom(), atoms);
 		} else {
 			return l.toString();

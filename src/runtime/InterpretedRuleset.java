@@ -78,7 +78,7 @@ public final class InterpretedRuleset extends Ruleset {
 	}
 	public String toString() {
 		String ret = "@" + id;
-		if (Env.debug > 0) {
+		if (Env.verbose >= Env.VERBOSE_EXPANDRULES) {
 			StringBuffer s = new StringBuffer("");
 			Iterator it = rules.iterator();
 			while (it.hasNext()) {

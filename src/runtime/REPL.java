@@ -59,7 +59,8 @@ public class REPL {
 				} else if(line.equals("h")) {
 					System.out.println("Commands:");
 					System.out.println("  [no]debug    [0-9] - set debug level");
-					System.out.println("  [no]optimize [0-9] - set optimize level"); //書き方変えた方がよい？
+					System.out.println("  [no]optimize [0-9] - set optimization level"); //書き方変えた方がよい？
+					System.out.println("  [no]verbose  [0-9] - set verbose level");
 					System.out.println("  [no]shuffle        - set shuffle mode");
 					System.out.println("  [no]trace          - set trace mode");					
 					System.out.println("  h                  - help");
@@ -70,6 +71,18 @@ public class REPL {
 					else if (line.charAt(0) == 'n') Env.debug = 0;
 					else Env.debug = line.charAt(line.length() - 1) - '0';
 					Env.p("debug level " + Env.debug);
+					continue;
+				} else if(line.matches("noverbose|verbose( [0-9])?")) {
+					if (line.length() == 7) Env.verbose = Env.VERBOSE_DEFAULT;
+					else if (line.charAt(0) == 'n') Env.verbose = 0;
+					else Env.verbose = line.charAt(line.length() - 1) - '0';
+					Env.p("verbose level " + Env.verbose);
+					continue;
+				} else if(line.matches("nooptimize|optimize( [0-9])?")) {
+					if (line.length() == 8) Env.optimize = 5;
+					else if (line.charAt(0) == 'n') Env.optimize = 0;
+					else Env.optimize = line.charAt(line.length() - 1) - '0';
+					Env.p("optimization level " + Env.optimize);
 					continue;
 				} else if(line.equals("trace")) {
 					Env.p("trace mode on");
@@ -86,18 +99,6 @@ public class REPL {
 				} else if(line.equals("noshuffle")) {
 					Env.p("shuffle mode off");
 					Env.fRandom = false;
-					continue;
-				} else if (line.equals("optimize")) {
-					Env.p("optimize level 5");
-					Env.optimize = 5;
-					continue;
-				} else if (line.equals("nooptimize")) {
-					Env.p("optimize level 0");
-					Env.optimize = 0;
-					continue;
-				} else if (line.matches("optimize [0-9]")) {
-					Env.optimize = line.charAt(9) - '0';
-					Env.p("optimize level " + Env.optimize);
 					continue;
 				} else {
 					processLine(line);

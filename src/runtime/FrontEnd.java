@@ -156,7 +156,7 @@ public class FrontEnd {
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}
 			rt.exec();
-			if (!Env.fTrace) {
+			if (!Env.fTrace && Env.verbose > 0) {
 				Env.d( "After execute : " );
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}

@@ -21,9 +21,21 @@ public final class Env {
 	static final int DEBUG_DEFAULT = 1;
 	
 	/**
-	 * Optimize level.
+	 * Optimization level.
 	 */
 	public static int optimize = 0;
+	
+	public static final int VERBOSE_DEFAULT = 2;
+	/**
+	 * アトム引数を展開する冗長レベル */
+	public static final int VERBOSE_EXPANDATOMS = 3;
+	/**
+	 * ルールセットの内容を展開する冗長レベル */
+	public static final int VERBOSE_EXPANDRULES = 4;
+	/**
+	 * verbose level.
+	 */
+	public static int verbose = VERBOSE_DEFAULT;
 	
 	/**
 	 * ランダム実行
