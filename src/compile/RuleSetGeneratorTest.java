@@ -42,7 +42,7 @@ public class RuleSetGeneratorTest {
 	 * テストする
 	 * @param src
 	 */
-	public static void test(String src) {
+	public static InterpretedRuleset test(String src) {
 		try {
 			// thnx to 永田書記長
 			LMNParser lp = new LMNParser(new StringReader(src));
@@ -59,6 +59,8 @@ public class RuleSetGeneratorTest {
 			root.showAllRuleset();
 			root.showAllRule();
 			
+			return ir;
+			
 			//Env.p("");
 			//Env.p("Generated InterpretedRuleset :");
 			//Env.p(ir);
@@ -66,6 +68,7 @@ public class RuleSetGeneratorTest {
 		} catch (ParseException e) {
 			Env.p(e);
 		}
+		return null;
 	}
 	
 	/**
