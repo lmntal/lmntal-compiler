@@ -74,7 +74,7 @@ public class RulesetCompiler {
 		Iterator it = mem.mems.listIterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
-			processMembrane(submem);
+			processMembrane(submem, unitName);
 		}
 		// この膜にあるルール構造をルールオブジェクトにコンパイルする
 		ArrayList rules = new ArrayList();
@@ -82,8 +82,8 @@ public class RulesetCompiler {
 		while (it.hasNext()) {
 			RuleStructure rs = (RuleStructure)it.next();
 			// ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
-			processMembrane(rs.leftMem); // 一応左辺も
-			processMembrane(rs.rightMem);
+			processMembrane(rs.leftMem, unitName); // 一応左辺も
+			processMembrane(rs.rightMem, unitName);
 			//
 			RuleCompiler rc = new RuleCompiler(rs, unitName);
 			rc.compile();

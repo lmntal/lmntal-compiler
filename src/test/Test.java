@@ -5,7 +5,8 @@
 package test;
 
 
-import java.util.Arrays;
+import java.io.*;
+import java.util.*;
 
 import runtime.Env;
 
@@ -20,9 +21,17 @@ public class Test {
 	public static void main(String[] args) {
 //		a();
 //		b();
-		c();
+//		c();
+		d();
 	}
 	
+	public static void d() {
+		try {
+			File f = new File("abc/build.xml/");
+			System.out.println(f.getPath());
+		} catch (Exception e) {
+		}
+	}
 	public static void c() {
 		String s = "abc/def/g.txt";
 		s = s.replaceAll(".*?[\\/]([^\\/]+)$", "$1");
@@ -36,10 +45,11 @@ public class Test {
 	}
 	
 	public static void a() {
-		java.util.Enumeration e = System.getProperties().keys();
-		while(e.hasMoreElements()) {
-			String o = (String)e.nextElement(); 
+		Iterator it = System.getProperties().keySet().iterator();
+		while(it.hasNext()) {
+			String o = (String)it.next();
 			Env.p(o+"  =>  "+System.getProperty(o));
 		}
 	}
+	
 }

@@ -4,9 +4,7 @@
  */
 package compile;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 //import runtime.Functor;
@@ -39,9 +37,9 @@ public class Module {
 	static {
 		//libPath.add("hoge");
 		//libPath.add("FOO");
-		libPath.add("./lmntal_lib");
-		libPath.add("../lmntal_lib");
-		libPath.add(".");
+		libPath.add(new File("./lmntal_lib"));
+		libPath.add(new File("../lmntal_lib"));
+		libPath.add(new File("."));
 	}
 	
 	/**
@@ -62,12 +60,12 @@ public class Module {
 		
 		Iterator it = libPath.iterator();
 		while(it.hasNext()) {
-			String thePath = (String)it.next();
-			String filename = thePath+"/"+mod_name+".lmn";
-			StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" from "+filename+" ...");
+			String thePath = ((File)it.next()).toString();
+			File file = new File(thePath+"/"+mod_name+".lmn");
+			StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" from "+file+" ...");
 			try {
-				LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(filename))));
-				runtime.Ruleset rs = RulesetCompiler.compileMembrane(lp.parse(), filename);
+				LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(file))));
+				runtime.Ruleset rs = RulesetCompiler.compileMembrane(lp.parse(), file.toString());
 				//Env.p("MOD compiled "+rs);
 				//memNameTable がモジュール膜への参照を保持しているので、GCされない。
 				m.rulesets.add(rs);
@@ -109,9 +107,7 @@ public class Module {
 			String path = a.getPath();
 			if(path == null) continue;
 			if(path.equals(m.name)) continue;
-//			Env.p("Check module existence "+path);
 			if(!memNameTable.containsKey(path)) {
-//				Env.p("TODO: search lib file : " + path);
 				need.add(path);
 			}
 		}
@@ -125,54 +121,5 @@ public class Module {
 		while(i.hasNext()) {
 			getNeedModules((Membrane)i.next(), need);
 		}
-	}
-	
-	/**
-	 * 
-	 * @param m
-	 */
-	public static void fixupLoadModule(Membrane m) {
-		//Env.d("genInstruction");
-//		
-//		//Env.p(memNameTable);
-//		
-//		Iterator i;
-//		Iterator it0 = m.rulesets.iterator();
-//		while (it0.hasNext()){
-//			i = ((InterpretedRuleset)it0.next()).rules.listIterator();
-//			while(i.hasNext()) {
-//				runtime.Rule rule = (runtime.Rule)i.next();
-//				ListIterator ib = rule.body.listIterator();
-//				while(ib.hasNext()) {
-//					Instruction inst = (Instruction)ib.next();
-//					// きたない。
-//					if(inst.getKind()==Instruction.LOADMODULE) {
-//						//Env.p("module solved : "+modules.get(inst.getArg2()));
-//						ib.remove();
-//						// モジュール膜直属のルールセットを全部読み込む
-//						Membrane mem = (Membrane)memNameTable.get(inst.getArg2());
-//						if(mem==null) {
-//							Env.e("Undefined module "+inst.getArg2());
-//						} else {
-//							Iterator it3 = mem.rulesets.iterator();
-//							while (it3.hasNext()) {
-//								ib.add(new Instruction(Instruction.LOADMODULE, inst.getIntArg1(),
-//									(runtime.Ruleset)it3.next()));
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//		i = m.rules.listIterator();
-//		while(i.hasNext()) {
-//			RuleStructure rs = (RuleStructure)i.next();
-//			fixupLoadModule(rs.leftMem);
-//			fixupLoadModule(rs.rightMem);
-//		}
-//		i = m.mems.listIterator();
-//		while(i.hasNext()) {
-//			fixupLoadModule((Membrane)i.next());
-//		}
 	}
 }

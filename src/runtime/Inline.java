@@ -45,8 +45,8 @@ public class Inline {
 	
 	static List classPath = new ArrayList();
 	static {
-		classPath.add(".");
-		classPath.add("lmntal.jar");
+		classPath.add(new File("."));
+		classPath.add(new File("lmntal.jar"));
 	}
 	
 	/**
@@ -78,15 +78,24 @@ public class Inline {
 	}
 	
 	/**
-	 * LMNtal ソースファイル名に対応するクラス名を返す
-	 * @param lmn LMNtal ソースファイル。パスを含んでもよい。
+	 * インラインコードのソースファイルのパスを返す。最後の / も含む。
+	 * @param unitName
 	 * @return
 	 */
-	public static String className_of_lmntalFilename(String lmn) {
-		// パスを取得
-		String path = lmn.replaceFirst("([\\/])[^\\/]+$", "$1");
-		
-		String o = lmn.replaceAll("^.*?[\\/]([^\\/]+)$", "$1");
+	public static File path_of_unitName(String unitName) {
+		if(unitName.equals(InlineUnit.DEFAULT_UNITNAME)) return new File("");
+		File path = new File(unitName).getParentFile();
+		path = new File(path + "/.lmntal_inline/");
+		return path;
+	}
+	
+	/**
+	 * クラス名を返す
+	 * @param unitName
+	 * @return
+	 */
+	public static String className_of_unitName(String unitName) {
+		String o = new File(unitName).getName();
 		o = o.replaceAll("\\.lmn$", "");
 		// クラス名に使えない文字を削除
 		o = o.replaceAll("\\-", "");
@@ -94,12 +103,22 @@ public class Inline {
 		return o;
 	}
 	/**
+	 * インラインコードのソースファイル名を返す。パス付。
+	 * @param unitName
+	 * @return
+	 */
+	public static File fileName_of_unitName(String unitName) {
+		return new File(Inline.path_of_unitName(unitName)+"/"+className_of_unitName(unitName)+".java");
+	}
+	
+	/**
 	 * 指定したファンクタ名を持つコードID を返す。
 	 * @param codeStr
 	 * @return codeID
 	 */
 	public static int getCodeID(String unitName, String codeStr) {
-		return getUnit(unitName).getCodeID(codeStr);
+		if(!inlineSet.containsKey(unitName)) return -1;
+		return ((InlineUnit)inlineSet.get(unitName)).getCodeID(codeStr);
 	}
 	
 	/**
@@ -155,16 +174,21 @@ public class Inline {
 				path.append(sep);
 			}
 			StringBuffer srcs = new StringBuffer("");
-			Iterator ik = inlineSet.keySet().iterator();
-			while(ik.hasNext()) {
-				String unitName = (String)ik.next();
-				if(!inlineSet.containsKey(unitName)) continue;
-				InlineUnit u = (InlineUnit)inlineSet.get(unitName);
-				if(!u.isCached()) srcs.append(className_of_lmntalFilename(u.name)+".java ");
+			Iterator iu = inlineSet.values().iterator();
+			boolean do_compile = false;
+			while(iu.hasNext()) {
+				InlineUnit u = (InlineUnit)iu.next();
+				if(!u.isCached()) {
+					srcs.append(fileName_of_unitName(u.name));
+					srcs.append(" ");
+					do_compile = true;
+				}
 			}
-			String cmd = "javac -classpath "+path+" "+srcs;
-			Env.d("Compile command line: "+cmd);
-			cp = Runtime.getRuntime().exec(cmd);
+			if(do_compile) {
+				String cmd = "javac -classpath "+path+" "+srcs;
+				Env.d("Compile command line: "+cmd);
+				cp = Runtime.getRuntime().exec(cmd);
+			}
 		} catch (Exception e) {
 			Env.d("!!! "+e+Arrays.asList(e.getStackTrace()));
 		}

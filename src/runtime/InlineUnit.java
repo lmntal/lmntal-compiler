@@ -35,13 +35,15 @@ public class InlineUnit {
 	
 	/****** コンパイル時に使う ******/
 	
+	/**
+	 * TODO class ファイルが最新かどうかを返す
+	 */
 	public boolean isCached() {
 		return false;
 	}
 	
 	InlineUnit(String name) {
 		this.name = name;
-		System.out.println(">>> new InlineUnit "+name);
 	}
 	
 	/**
@@ -55,11 +57,11 @@ public class InlineUnit {
 	
 	public void register(String code, int type) {
 		switch(type) {		case EXEC:
-			Env.d("Register inlineCode : "+code);
+			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineCode : "+code);
 			codes.put(code, new Integer(codeCount++));
 			break;
 		case DEFINE:
-			Env.d("Register inlineDefineCode : "+code);
+			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineDefineCode : "+code);
 			defs.add(code);
 			break;
 		}
@@ -69,13 +71,18 @@ public class InlineUnit {
 	 * コードを生成する。
 	 */
 	public void makeCode() {
+		if(isCached()) return;
 		try {
 			if(codes.isEmpty() && defs.isEmpty()) return;
 			Iterator i;
 			
-			String className = Inline.className_of_lmntalFilename(name);
-			PrintWriter p = new PrintWriter(new FileOutputStream(className+".java"));
-			Env.d("make inline code "+name);
+			String className = Inline.className_of_unitName(name);
+			File outputFile = Inline.fileName_of_unitName(name);
+			if(!outputFile.getParentFile().exists()) {
+				outputFile.getParentFile().mkdirs();
+			}
+			PrintWriter p = new PrintWriter(new FileOutputStream(outputFile));
+//			Env.d("make inline code "+name);
 			
 			//p.println("package runtime;");
 			p.println("import runtime.*;");
@@ -106,6 +113,7 @@ public class InlineUnit {
 			p.println("}");
 			p.close();
 			
+			Env.d("Class "+className+" written to "+outputFile);
 		} catch (Exception e) {
 			Env.d("!!! "+e+Arrays.asList(e.getStackTrace()));
 		}
@@ -115,8 +123,11 @@ public class InlineUnit {
 	
 	public void attach() {
 		// jar で処理系を起動すると、勝手なファイルからクラスをロードすることができないみたい。
-		String cname = Inline.className_of_lmntalFilename(name);
-		ClassLoader cl = new FileClassLoader();
+		String cname = Inline.className_of_unitName(name);
+		File path = Inline.path_of_unitName(name);
+		FileClassLoader cl = new FileClassLoader();
+		cl.setClassPath(path.toString());
+		Env.d("Try loading "+cl.filename_of_class(cname));
 		try {
 			Object o = cl.loadClass(cname).newInstance();
 			if (o instanceof InlineCode) {
@@ -125,10 +136,10 @@ public class InlineUnit {
 		} catch (Exception e) {
 			//Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
-		if (inlineCode != null) {
-			Env.d(cname+" Loaded");
-		} else {
+		if (inlineCode == null) {
 			Env.d("Failed in loading "+cname);
+		} else {
+			Env.d(cname+" Loaded");
 		}
 	}
 	
