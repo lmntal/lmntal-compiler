@@ -728,8 +728,7 @@ public class LMNParser {
 						it.remove();
 						it.add(new SrcAtom( atom.getName()
 							+ ((SrcAtom)atom.getProcess().get(0)).getName() ));
-						continue;
-				 	 }
+					}
 				}
 				incorporateSignSymbols(atom.getProcess());
 			}
@@ -827,7 +826,8 @@ public class LMNParser {
 		
 	/** unabbreviateTypedLinksで使うための写像を生成する。
 	 * @return 型付きリンクの限定名 " X" (String) から、
-	 * 対応する型付きプロセス文脈名 "$_X" (String) への写像
+	 * 対応する型付きプロセス文脈名テキスト "X" (String) への写像
+	 * <p>todo もはや不要。単にリンク名テキスト "X" から生成するように修正すべきである。
 	 */
 	HashMap computeTypedLinkNameMap(LinkedList typeConstraints) {	
 		HashMap typedLinkNameMap = new HashMap();
@@ -838,7 +838,7 @@ public class LMNParser {
 			String name = (String)it.next();
 			Object obj = ((LinkedList)typedNames.get(name)).getFirst();
 			if (obj instanceof SrcLink) {
-				typedLinkNameMap.put(name, "_" + ((SrcLink)obj).getName());
+				typedLinkNameMap.put(name, ((SrcLink)obj).getName());
 			}
 		}
 		return typedLinkNameMap;
@@ -847,8 +847,8 @@ public class LMNParser {
 	/** アトム展開後のプロセス構造（子ルール外）に出現する全てのtypedLinkNameMap内のリンク名を
 	 * プロセス文脈構文に置換する。
 	 * @param typedLinkNameMap 型付きリンクの限定名 " X" (String) から、
-	 * 対応する型付きプロセス文脈名 "$_X" (String) への写像
-	 * <pre> p(s1,X,sn) → p(s1,$_X,sn)
+	 * 対応する型付きプロセス文脈名テキスト "X" (String) への写像
+	 * <pre> p(s1,X,sn) → p(s1,$X,sn)
 	 * </pre>*/
 	private void unabbreviateTypedLinks(LinkedList process, HashMap typedLinkNameMap) {
 		Iterator it = process.iterator();
@@ -863,7 +863,7 @@ public class LMNParser {
 						String name = srcLink.getQualifiedName();
 						if (typedLinkNameMap.containsKey(name)) {
 							sAtom.getProcess().set(i,
-								new SrcProcessContext((String)typedLinkNameMap.get(name)));
+								new SrcProcessContext((String)typedLinkNameMap.get(name),true));
 						}
 					}
 				}
