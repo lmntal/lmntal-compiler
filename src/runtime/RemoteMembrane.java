@@ -336,7 +336,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 					if (ar instanceof LocalLMNtalRuntime) {
 						AbstractMembrane am = IDConverter.lookupGlobalMembrane(hostname + ":" + memid);
 						if (am == null) { // 起こらないと思うけどどうだろう
-							throw new RuntimeException("SYSTEM ERROR: unknown local membrane id");
+							throw new RuntimeException("SYSTEM ERROR: unknown local membrane id: " + hostname + ":" + memid);
 						}
 						else {
 							addMem(am);
