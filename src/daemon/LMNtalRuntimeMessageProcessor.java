@@ -447,7 +447,7 @@ class InstructionBlockProcessor implements Runnable {
 					AbstractLMNtalRuntime rt = LMNtalRuntimeManager.connectRuntime(fqdn);
 					if (rt instanceof RemoteLMNtalRuntime) {
 						RemoteLMNtalRuntime rrt = (RemoteLMNtalRuntime)rt;
-						m = rrt.createPseudoMembrane();
+						m = rrt.createPseudoMembrane(memid);
 						registerNewMembrane(memid,m);
 					}
 					if (m == null) {
