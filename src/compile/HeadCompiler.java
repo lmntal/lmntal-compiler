@@ -130,6 +130,19 @@ public class HeadCompiler {
 						buddyatompath, atomToPath(buddyatom) ));
 					continue;
 				}
+				else { // リンク先のアトムをまだ取得していない場合
+					// リンク先の引数位置が自由であり、かつ同じファンクタを持つどのアトムとも
+					// 異なることを確かめなければならない。(2004.6.4)
+					Iterator it = buddyatom.mem.atoms.iterator();
+					while (it.hasNext()) {
+						Atom otheratom = (Atom)it.next();					
+						int other = atomToPath(otheratom);
+						if (other == UNBOUND) continue;
+						if (!otheratom.functor.equals(buddyatom.functor)) continue;
+						// if (!atomids.contains(otheratom.args[buddylink.pos]))
+						match.add(new Instruction(Instruction.NEQATOM, buddyatompath, other));
+					}
+				}
 				
 				// リンク先のアトムを変数に取得する
 				
