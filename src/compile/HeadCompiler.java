@@ -40,6 +40,7 @@ public class HeadCompiler {
 	
 	private Map atomids		= new HashMap();	// Atom -> atoms内のindex（廃止の方向で検討する）
 	private HashSet visited	= new HashSet();	// Atom -> boolean, マッチング命令を生成したかどうか
+	private HashSet memVisited	= new HashSet();	// Membrane -> boolean, compileMembraneを呼んだかどうか
 	
 	int varcount;	// いずれアトムと膜で分けるべきだと思う
 	
@@ -114,14 +115,18 @@ public class HeadCompiler {
 		mempaths.clear();
 		atompaths.clear();
 		visited.clear();
+		memVisited.clear();
 		matchLabel = new InstructionList();
 		match = matchLabel.insts;
 		varcount = 1;	// [0]は本膜
 //		mempaths.put(mems.get(0), new Integer(0));	// 本膜の変数番号は 0
 	}
-	/** リンクでつながったアトムおよびその所属膜に対してマッチングを行う */
+	/** リンクでつながったアトムおよびその所属膜に対してマッチングを行う。
+	 * また、途中で見つかった「新しい膜」のそれぞれに対して、compileMembraneを呼ぶ。
+	 */
 	public void compileLinkedGroup(Atom firstatom) {
 		Env.c("compileLinkedGroup");
+		LinkedList newmemlist = new LinkedList();
 		LinkedList atomqueue = new LinkedList();
 		atomqueue.add(firstatom);
 		while( ! atomqueue.isEmpty() ) {
@@ -261,6 +266,7 @@ public class HeadCompiler {
 						buddymempath = varcount++;
 						mempaths.put(buddymem, new Integer(buddymempath));
 						match.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath ));
+						newmemlist.add(buddymem);
 					// // GETMEM時代のコード
 					//	Iterator it = buddymem.mem.mems.iterator();
 					//	while (it.hasNext()) {
@@ -274,10 +280,19 @@ public class HeadCompiler {
 				}
 			}
 		}
+		// 見つかった新しい子膜にあるアトムを優先的に検査する。
+		// TODO アクティブアトムがある膜を優先すべきである。これは膜主導のときの最初のアトム選択と共通の課題
+		Iterator it = newmemlist.iterator();
+		while (it.hasNext()) {
+			compileMembrane((Membrane)it.next());
+		}
 	}
 	/** 膜および子孫の膜に対してマッチングを行う */
 	public void compileMembrane(Membrane mem) {
 		Env.c("compileMembrane");
+		if (memVisited.contains(mem)) return;
+		memVisited.add(mem);
+
 		int thismempath = memToPath(mem);
 		
 		Iterator it = mem.atoms.iterator();
@@ -306,8 +321,9 @@ public class HeadCompiler {
 					}
 				}
 				atompaths.put(atom, new Integer(atompath));
+				compileLinkedGroup(atom);
 			}
-			compileLinkedGroup(atom);
+//			compileLinkedGroup(atom);	// 2行上に移動してみた n-kato (2004.7.16)
 		}
 		it = mem.mems.iterator();
 		while (it.hasNext()) {

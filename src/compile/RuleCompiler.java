@@ -116,13 +116,15 @@ public class RuleCompiler {
 				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS) continue;
 				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
 				
+				Atom atom = (Atom)hc.atoms.get(firstid);
+				if (!atom.functor.isActive()) continue;
+				
 				// アトム主導
 				InstructionList tmplabel = new InstructionList();
 				tmplabel.insts = hc.match;
 				atomMatch.add(new Instruction(Instruction.BRANCH, tmplabel));
 				
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
-				Atom atom = (Atom)hc.atoms.get(firstid);
 				hc.atompaths.put(atom, new Integer(1));		// 主導するアトムの変数番号は 1
 				hc.varcount = 2;
 				hc.match.add(new Instruction(Instruction.FUNC, 1, atom.functor));
@@ -144,7 +146,9 @@ public class RuleCompiler {
 					hc.match.add(new Instruction(Instruction.GETPARENT,hc.varcount,hc.varcount-1));
 					hc.match.add(new Instruction(Instruction.EQMEM, 0, hc.varcount++));
 				}
-				hc.compileLinkedGroup((Atom)hc.atoms.get(firstid));
+				Atom firstatom = (Atom)hc.atoms.get(firstid);
+				hc.compileLinkedGroup(firstatom);
+				hc.compileMembrane(firstatom.mem);
 			} else {
 				// 膜主導
 				theRule.memMatchLabel = hc.matchLabel;
