@@ -33,7 +33,7 @@ public final class InterpretedRuleset extends Ruleset {
 	 * アトム主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
 	 */
-	boolean react(Membrane mem, Atom atom) {
+	boolean public react(Membrane mem, Atom atom) {
 
         
         
@@ -44,7 +44,7 @@ public final class InterpretedRuleset extends Ruleset {
 	 * 膜主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
 	 */
-	boolean react(Membrane mem) {
+	boolean public react(Membrane mem) {
 		return false;
 	}
 	/**
