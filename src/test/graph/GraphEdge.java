@@ -20,7 +20,7 @@ public class GraphEdge {
 	public GraphEdge(GraphNode from, GraphNode to) {
 		this.from = from;
 		this.to = to;
-		this.len = 50.0;
+		this.len = 70.0;
 	}
 	
 	public void paint(Graphics g) {
