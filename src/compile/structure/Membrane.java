@@ -48,6 +48,7 @@ public final class Membrane {
 	
 	/**
 	 * 膜内の自由リンク(compile.struct.LinkOccurrence)へのポインタ
+	 * TODO O(1)で自由リンクであるかどうかわかる形式にする Hashset?
 	 */
 	public List freeLinks = new ArrayList();
 	
