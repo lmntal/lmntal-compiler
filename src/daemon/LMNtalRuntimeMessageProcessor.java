@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import runtime.AbstractLMNtalRuntime;
 import runtime.AbstractMembrane;
 import runtime.Atom;
-import runtime.Env;
 import runtime.Functor;
 import runtime.LMNtalRuntimeManager;
 import runtime.Membrane;

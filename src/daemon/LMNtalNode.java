@@ -149,9 +149,7 @@ public class LMNtalNode {
 	void respondAsFail(String msgid){
 		respond(msgid,"FAIL");
 	}
-	/** (n-kato)このメソッドを使わないように書き換えてもよい（仮）*/
 	void respondRawData(String msgid, byte[] data) {
-//		respond(msgid, "RAW " + data.length + "\n" + data); // TODO 文字列結合していいのか調べる
 		respond(msgid, "RAW", data);
 	}
 	////////////////////////////////

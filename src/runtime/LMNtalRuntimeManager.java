@@ -40,7 +40,7 @@ public final class LMNtalRuntimeManager {
 	 *  <p>現在の実装では、生存の確認中にブロックする。
 	 * しかしルールスレッドが長期間ブロックするのでよくないという本質的な問題がある。
 	 * 
-	 * @param nodedesc ノード識別子（現在はfqdnのみ） */
+	 * @param nodedesc ノード識別子 */
 	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
 		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime()");
 		String fqdn = nodedescToFQDN(nodedesc);
