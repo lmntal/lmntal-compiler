@@ -375,7 +375,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/**
 	 * atom1の第pos1引数のリンク先と、atom2の第pos2引数のリンク先を接続する。
 	 */
-	void unifyAtoyArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+	void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].set(atom2.args[pos2]);
 		atom2.args[pos2].set(atom1.args[pos1]);
 	}
@@ -490,7 +490,7 @@ final class Machine extends AbstractMachine {
 					if(((Ruleset)it.next()).react(mem, a)) goto NEXT;
 				}
 				// 適用できなかった時
-				if(mem.isRoot()) mem.getMem().enqueueAtom(a);
+				if(!mem.isRoot()) mem.getMem().enqueueAtom(a);
 				else {}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行膜スタックが空の時
 				while(it.hasNext()){ // 膜主導テストを行う
@@ -547,7 +547,7 @@ final class LMNtalRuntime {
 					break;
 				}
 			}
-		}while(allIdle);
+		}while(!allIdle);
 	}
 	
 	Machine newMachine() {
