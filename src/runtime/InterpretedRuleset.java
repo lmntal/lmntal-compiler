@@ -648,12 +648,9 @@ class InterpretiveReactor {
 					// (n-kato)
 					// すべて仕様です。というか、リンク先は親膜にあるかもしれないわけですし、
 					// 本膜の親膜にあるアトムを調べることは許されていません。
-//					if(f.equals(Functor.OUTSIDE_PROXY)) {
-//						f = atoms[inst.getIntArg1()].args[0].getAtom().args[1].getAtom().getFunctor();
-//					}
-//					else if(f.equals(Functor.INSIDE_PROXY)) {
-//						f = atoms[inst.getIntArg1()].args[0].getAtom().args[1].getAtom().getFunctor();
-//					}
+					// (hara) じゃそういうときは「失敗」ということでいいですかねぇ
+					if(f.equals(Functor.OUTSIDE_PROXY)) return false;
+					if(f.equals(Functor.INSIDE_PROXY)) return false;
 					if (f.getArity() != 1) return false;
 					break; // n-kato
 //				case Instruction.ISUNARYFUNC: // [func]
