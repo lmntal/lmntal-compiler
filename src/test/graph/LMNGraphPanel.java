@@ -35,7 +35,7 @@ public class LMNGraphPanel extends GraphPanel {
 		// atom
 		for (int i=0; i<mem.atoms.size();i++) {
 			Atom atom = (Atom)mem.atoms.get(i);
-			Point p = new Point((int)(Math.random()*getPreferredArea().getWidth()), (int)(Math.random()*getPreferredArea().getHeight()));
+			Point p = new Point(30 + atom.column * 20, 30 + atom.line * 40);
 			GraphNode node = new GraphNode(atom.functor.getName() , p);
 			getGraphLayout().addNode(node);
 			for (int j=0;j<atom.args.length;j++) {
