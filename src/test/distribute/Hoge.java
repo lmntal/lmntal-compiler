@@ -21,7 +21,18 @@ class Hoge {
 //		RuntimeBootTest();
 //		privateIPhanteiTest();
 		//privateIPhanteiTest2();
-		testLabel();
+		//testLabel();
+		testProperty();
+	}
+
+	/**
+	 * 
+	 */
+	private static void testProperty() {
+		System.out.println(System.getProperty("os.name"));
+		System.out.println(System.getProperty("os.arch"));
+		System.out.println(System.getProperty("os.version"));
+		
 	}
 
 	/**
