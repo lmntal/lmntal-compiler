@@ -734,8 +734,8 @@ public class LMNParser {
 		incorporateModuleNames(typeConstraints);
 		incorporateModuleNames(sRule.getBody());
 		
-		// - 型制約の = を除去する
-		// todo
+		// - 型制約の冗長な = を除去する
+		shrinkUnificationConstraints(typeConstraints);
 		
 		// - アトム展開（アトム引数の再帰的な展開）
 		expandAtoms(sRule.getHead());
@@ -830,6 +830,32 @@ public class LMNParser {
 			}
 			else if (obj instanceof SrcMembrane) {
 				incorporateModuleNames(((SrcMembrane)obj).getProcess());
+			}
+		}
+	}
+	/** （ガード型制約の）プロセス構造のトップレベルに出現する冗長な = を除去する。
+	 * <pre>
+	 * $p = f(t1..tn) → f(t1..tn,$p)
+	 * f(t1..tn) = $p → f(t1..tn,$p)
+	 * </pre>
+	 */
+	private void shrinkUnificationConstraints(LinkedList process) {
+		ListIterator it = process.listIterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcAtom) {
+				SrcAtom atom = (SrcAtom)obj;
+				if (!atom.getName().equals("=")) continue;
+				if (atom.getProcess().size() != 2) continue;
+				for (int atomarg = 0; atomarg < 2; atomarg++) {
+					if (!(atom.getProcess().get(1 - atomarg) instanceof SrcProcessContext)) continue;
+					if (!(atom.getProcess().get(atomarg) instanceof SrcAtom)) continue;
+					SrcAtom subatom = (SrcAtom)atom.getProcess().get(atomarg);
+					it.remove();
+					it.add(subatom);
+					subatom.getProcess().add(atom.getProcess().get(1 - atomarg));
+					break;
+				}
 			}
 		}
 	}
