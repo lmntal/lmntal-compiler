@@ -500,7 +500,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 					}
 					linkatom[o].add(i, atomId.get(atoml));
 					linkpos[o].add(i, new Integer(atomo.getArg(i).getPos()));
-				//}else if(atoml.mem == null){System.out.println("hahahahah");
 				}else if(atoml.mem != null && atoml.mem.parent == srcMem){//子膜へのリンク
 					if(!memId.containsKey(atoml.mem)){
 						memId.put(atoml.mem,new Integer(memvarcount));
@@ -548,13 +547,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 				if(linkatom[i].get(j) != null){
 					int l = ((Integer) linkatom[i].get(j)).intValue();
 					int lp = ((Integer) linkpos[i].get(j)).intValue();
-//					System.out.print(" 1 = " + idAtomCopied[i].toString());
-//					System.out.print(" 2 = " + j);
-//					System.out.print(" 3 = " + idAtomCopied[l].toString());
-//					System.out.print(" 4 = " + lp + "\n");
 					newLink(idAtomCopied[i], j, idAtomCopied[l], lp);
 				}else{//リンク先が同じ膜に無い場合
-					//Link link = new Link(idAtomCopied[i],j);
 					if(idAtom[i].nthAtom(j).mem != null && idAtom[i].nthAtom(j).mem.parent == srcMem){//子膜に繋がっていた場合
 						Atom na = (Atom)oldIdToNewAtom[glmemid[i]].get(new Integer(glatomid[i]));
 						int lp = ((Integer) linkpos[i].get(j)).intValue();

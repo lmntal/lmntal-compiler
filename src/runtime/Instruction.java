@@ -922,13 +922,6 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int LOOKUPLINK = 84;
 	static {setArgType(LOOKUPLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
 
-//	/** setlinks [link1, link2]
-//	 * link1のリンク先にlink2をセットし、
-//	 * link2のリンク先にlink1をセットする。
-//	 */
-//	public static final int SETLINKS = 85;
-//	static {setArgType(SETLINKS, new ArgType(true, ARG_VAR, ARG_VAR));}
-
 //	/** * [srcatom,pos]
 //	 * <br>（予約された）ボディ命令<br>
 //	 * アトムsrcatomの第1引数のリンク先のリンク先のアトムの第pos引数と、

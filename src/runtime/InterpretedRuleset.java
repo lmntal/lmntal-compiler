@@ -634,18 +634,10 @@ class InterpretiveReactor {
 					break; //kudo 2004-09-29
 				case Instruction.LOOKUPLINK : //[-dstlink, srcmap, srclink]
 					HashMap srcmap = (HashMap)vars.get(inst.getIntArg2());
-					//Link srclink = atoms[inst.getIntArg3()].getArg(inst.getIntArg4());
 					Link srclink = (Link)vars.get(inst.getIntArg3());
 					Atom la = (Atom) srcmap.get(new Integer(srclink.getAtom().id)); // hashCode()をidに変更 (2004-10-12) n-kato
 					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
 					break; //kudo 2004-10-10
-//				case Instruction.LINKS : //[link, atom, pos]
-//					Link l1 = (Link)vars.get(inst.getIntArg1());
-//					Link l2 = (Link)vars.get(inst.getIntArg2());
-//					l1.getAtom().args[l1.getPos()] = l2;
-//					l2.getAtom().args[l2.getPos()] = l1;
-//					//atoms[inst.getIntArg2()].mem.newLink(atoms[inst.getIntArg2()],inst.getIntArg3(),li.getAtom(),li.getPos());
-//					break; //kudo 2004-10-10
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 
 					//====制御命令====ここから====
