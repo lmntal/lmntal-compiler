@@ -48,15 +48,16 @@ class SlaveLMNtalRuntimeLauncher {
 			} else {
 				//TODO この部分実装
 			}
-			
-			//LocalLMNtalRuntimeを起動
-			runtime = new LocalLMNtalRuntime();
-			
-			//TODO この先何をすればいいのか
-				
+
 		} catch (Exception e) {
 			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());
 			e.printStackTrace();
 		}
+		
+		//LocalLMNtalRuntimeを起動
+		runtime = new LocalLMNtalRuntime();
+			
+		//TODO この先何をすればいいのか
+		
 	}
 }

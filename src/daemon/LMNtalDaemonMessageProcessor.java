@@ -189,23 +189,26 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 							//自分自身宛なら、自分自身で処理する
 
 							/* ここで処理される命令一覧
-							 * 
 							 *  begin
 							 *  connect
 							 *  lock taskid
 							 *  terminate
 							 */
+							 
+							 //TODO 分散と関係ない命令はどうしよう？InterpretedRuleset.interpret()に食わせるか？
 
 							String command = (parsedInput[3].split(" ", 3))[0];
 
 							if (command.equalsIgnoreCase("connect")) {
-								//connectがきたら、ランタイムを生成する。
+								//TODO すでにランタイムがる場合はどうしよう？生きているかを確認する命令を作成する？
 
+								//新規にラインタイムを作る。
+								//OK返すのは生成されたランタイムがする。
 								LMNtalDaemon.createRemoteRuntime(
 									msgid.intValue());
+								//TODO 生成されたランタイムのrgidはもっておかなくていいのかな
 
 								continue;
-								//OK返すのは生成されたライタイムがする。
 							} else if (command.equalsIgnoreCase("begin")) {
 								//TODO 実装
 								out.write("not implemented yet\n");
