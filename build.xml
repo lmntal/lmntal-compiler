@@ -1,0 +1,79 @@
+<project name="LMNtal" default="dist" basedir=".">
+	<!-- directory properties -->
+	<property name="src" value="src"/>
+	<property name="build" value="bin"/>
+	<property name="dist"  value="dist"/>
+	<property name="lib"  value="lib"/>
+	<property name="docs" value="doc"/>
+	<property name="classpath"  value=""/>
+	
+	<!-- tool properties -->
+	<property name="flex"  location="${lib}/JFlex.jar"/>
+	<property name="bison"  location="${lib}/java_cup.jar"/>
+	
+	<!-- properties -->
+	<property name="encoding" value="euc-jp"/>
+	
+	<target name="init">
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}"/>
+	</target>
+
+	<!-- flex compile, clean -->
+	<target name="flex_compile">
+		<java jar="${flex}" dir="${src}" fork="true">
+			<arg value="${src}/compile/parser/lmntal.flex"/>
+		</java>
+	</target>
+	<target name="flex_clean">
+		<delete file="${src}/compile/parser/Lexer.java"/>
+	</target>
+	
+	<!-- bison compile, clean -->
+	<target name="bison_compile">
+		<java jar="${bison}" dir="${src}" fork="true">
+			<arg value="${src}/compile/parser/lmntal.cup"/>
+		</java>
+		<move file="${src}/sym.java" todir="${src}/compile/parser"/>
+		<move file="${src}/parser.java" todir="${src}/compile/parser"/>
+	</target>
+	<target name="bison_clean">
+		<delete file="${src}/compile/parser/parser.java"/>
+		<delete file="${src}/compile/parser/sym.java"/>
+	</target>
+	
+	<!-- java compile -->
+	<target name="compile" depends="init" description="compile the source">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}" classpath="${classpath}" encoding="${encoding}"/>
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}"/>
+		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+		<jar jarfile="${dist}/lmntal.jar" basedir="${build}">
+			<manifest>
+				<attribute name="Main-Class" value="compile.Main"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean" depends="flex_clean,bison_clean" description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}"/>
+		<delete dir="${dist}"/>
+	</target>
+	
+	<target name="run">
+		<java jar="${dist}/lmntal.jar" fork="true"/>
+	</target>
+	
+	<target name="doc">
+		<javadoc destdir="${docs}" author="true" version="true" use="true" windowtitle="LMNtal API" encoding="${encoding}" charset="${encoding}">
+			<fileset dir="${src}" defaultexcludes="yes"/>
+			<link href="http://java.sun.com/j2se/1.4/ja/docs/ja/api/"/>
+		</javadoc>
+	</target>
+	
+</project>
