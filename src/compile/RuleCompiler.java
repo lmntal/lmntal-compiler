@@ -627,10 +627,11 @@ public class RuleCompiler {
 				if (pc.def.rhsOccs.get(0) == pc) {
 					body.add(new Instruction(Instruction.MOVECELLS,
 						rhsmemToPath(mem), lhsmemToPath(pc.def.src.mem) ));
-				} else {
-					error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + pc);
-					corrupted();
-				}
+				} 
+				//else {
+				//	error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + pc);
+				//	corrupted();
+				//}
 			}
 		}
 		it = mem.mems.iterator();

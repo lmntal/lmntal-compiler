@@ -683,7 +683,7 @@ public class LMNParser {
 			if (def.isTyped()) {
 				rule.typedProcessContexts.put(name, def);
 			}
-			else { // 型付きでない場合、src==nullのものはエラーなので登録しない
+			else { // 型付きでない場合、src!=nullとなっている
 				if (def.src instanceof ProcessContext) {
 					rule.processContexts.put(name, def);
 				}
@@ -698,6 +698,16 @@ public class LMNParser {
 					def.src.buddy = rhsocc;
 				}
 			}			
+		}
+		
+		// （非線型プロセス文脈が実装されるまでの仮措置として）線型でないものを取り除く
+		it = rule.processContexts.values().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			if (def.rhsOccs.size() != 1) {
+				error("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + def.getName());
+				corrupted();
+			}
 		}
 	}
 	
