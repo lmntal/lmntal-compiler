@@ -63,15 +63,16 @@ public class RuleSetGenerator {
 	
 	public static Map modules = new HashMap();
 	public static void listupModules(Membrane m) {
-		Env.p("listupModules");
+		//Env.p("listupModules");
+		runtime.Functor f = new runtime.Functor("name", 1);
+		
 		Iterator i;
 		i = m.atoms.listIterator();
 		while(i.hasNext()) {
 			Atom a = (Atom)i.next();
-			runtime.Functor f = new runtime.Functor("name", 1);
 			if(a.functor.equals(f)) {
 				Env.p("Module found : "+a.args[0].atom);
-				modules.put(a.args[0].atom.mem, a.args[0].atom.toString());
+				modules.put(a.args[0].atom.mem, a.args[0].buddy.atom.toString());
 			}
 		}
 		i = m.rules.listIterator();
