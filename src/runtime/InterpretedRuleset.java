@@ -382,27 +382,26 @@ class InterpreterReactor {
 					//====膜を操作する基本ボディ命令====ここまで====
 
 					//====リンクを操作するボディ命令====ここから====
-				case Instruction.NEWLINK :
-				case Instruction.LOCALNEWLINK: //[atom1, pos1, atom2, pos2]
+				case Instruction.NEWLINK:		 //[atom1, pos1, atom2, pos2, mem1]
+				case Instruction.LOCALNEWLINK:	 //[atom1, pos1, atom2, pos2 (,mem1)]
 					atoms[inst.getIntArg1()].mem.newLink(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break; //n-kato
-				case Instruction.RELINK :
-				case Instruction.LOCALRELINK : //[atom1, pos1, atom2, pos2]
+				case Instruction.RELINK:		 //[atom1, pos1, atom2, pos2, mem]
+				case Instruction.LOCALRELINK:	 //[atom1, pos1, atom2, pos2 (,mem)]
 					atoms[inst.getIntArg1()].mem.relinkAtomArgs(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break; //n-kato
-				case Instruction.UNIFY :
-				case Instruction.LOCALUNIFY : //[atom1, pos1, atom2, pos2]
-					atoms[inst.getIntArg1()].mem.unifyAtomArgs(
+				case Instruction.UNIFY: //[atom1, pos1, atom2, pos2]
+					mems[0].unifyAtomArgs(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break; //n-kato
 
-				case Instruction.INHERITLINK :
-				case Instruction.LOCALINHERITLINK : //[atom1, pos1, link2]
+				case Instruction.INHERITLINK:		 //[atom1, pos1, link2, mem]
+				case Instruction.LOCALINHERITLINK:	 //[atom1, pos1, link2 (,mem)]
 					atoms[inst.getIntArg1()].mem.inheritLink(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						(Link)vars.get(inst.getIntArg3()) );

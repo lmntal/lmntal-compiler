@@ -316,8 +316,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 空ならば実行膜スタックに積む。
 	 * </dl>*/
 	public abstract void activate();
+
 	/** この膜を親膜から除去する
-	 * @reprecated */
+	 * @deprecated */
 	public void remove() {
 		parent.removeMem(this);
 	}

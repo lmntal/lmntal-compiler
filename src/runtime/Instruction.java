@@ -539,58 +539,57 @@ public class Instruction {
 	// 予約 (60--64)
 	
 	// リンクを操作するボディ命令 (65--69)
-	// [local]newlink     [atom1, pos1, atom2, pos2]
-	// [local]relink      [atom1, pos1, atom2, pos2]
+	// [local]newlink     [atom1, pos1, atom2, pos2, mem1]
+	// [local]relink      [atom1, pos1, atom2, pos2, mem]
 	// [local]unify       [atom1, pos1, atom2, pos2]
-	// [local]inheritlink [atom1, pos1, link2]
+	// [local]inheritlink [atom1, pos1, link2, mem]
 
-	/** newlink [atom1, pos1, atom2, pos2]
+	/** newlink [atom1, pos1, atom2, pos2, mem1]
 	 * <br>ボディ命令<br>
-	 * アトム$atom1の第pos1引数と、アトム$atom2の第pos2引数の間に両方向リンクを張る。
+	 * アトム$atom1（膜$mem1にある）の第pos1引数と、
+	 * アトム$atom2の第pos2引数の間に両方向リンクを張る。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールボディに存在する。
 	 * <p><b>注意</b>　Ruby版の片方向から仕様変更された */
 	public static final int NEWLINK = 65;
 
-	/** localnewlink [atom1, pos1, atom2, pos2]
+	/** localnewlink [atom1, pos1, atom2, pos2 (,mem1)]
 	 * <br>最適化用ボディ命令<br>
-	 * newlinkと同じ。ただし$atom1はこの計算ノードに存在する。*/
+	 * newlinkと同じ。ただし膜$mem1はこの計算ノードに存在する。*/
 	public static final int LOCALNEWLINK = LOCAL + NEWLINK;
 
-	/** relink [atom1, pos1, atom2, pos2]
+	/** relink [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
-	 * アトム$atom1の第pos1引数と、アトム$atom2の第pos2引数のリンク先を接続する。
+	 * アトム$atom1（膜$memにある）の第pos1引数と、
+	 * アトム$atom2の第pos2引数のリンク先（膜$memにある）の引数を接続する。
 	 * <p>典型的には、$atom1はルールボディに、$atom2はルールヘッドに存在する。
 	 * <p>実行後、$atom2[pos2]の内容は無効になる。*/
 	public static final int RELINK = 66;
 
-	/** localrelink [atom1, pos1, atom2, pos2]
+	/** localrelink [atom1, pos1, atom2, pos2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
-	 * relinkと同じ。ただし$atom1および$atom2はこの計算ノードに存在する。*/
+	 * relinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALRELINK = LOCAL + RELINK;
 
 	/** unify [atom1, pos1, atom2, pos2]
 	 * <br>ボディ命令<br>
-	 * アトム$atom1の第pos1引数のリンク先の引数と、アトム$atom2の第pos2引数のリンク先の引数を接続する。
+	 * アトム$atom1の第pos1引数のリンク先（本膜にある）の引数と、
+	 * アトム$atom2の第pos2引数のリンク先（本膜にある）の引数を接続する。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。*/
 	public static final int UNIFY = 67;
+	// LOCALUNIFYは不要
 
-	/** localunify [atom1, pos1, atom2, pos2]
+	/** inheritlink [atom1, pos1, link2, mem]
 	 * <br>最適化用ボディ命令<br>
-	 * unifyと同じ。ただし$atom1および$atom2はこの計算ノードに存在する。*/
-	public static final int LOCALUNIFY = LOCAL + UNIFY;
-
-	/** inheritlink [atom1, pos1, link2]
-	 * <br>最適化用ボディ命令<br>
-	 * $atom1の第pos1引数と、リンク$link2のリンク先を接続する。
-	 * アトム$atom1の第pos1引数と、リンク$link2のリンク先を接続する。
+	 * アトム$atom1（膜$memにある）の第pos1引数と、
+	 * リンク$link2のリンク先（膜$memにある）を接続する。
 	 * <p>典型的には、$atom1はルールボディに存在し、$link2はルールヘッドに存在する。relinkの代用。
 	 * <p>$link2は再利用されるため、実行後は$link2は廃棄しなければならない。
 	 * @see getlink */
 	public static final int INHERITLINK = 68;
 
-	/** localinheritlink [atom1, pos1, link2]
+	/** localinheritlink [atom1, pos1, link2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
-	 * inheritlinkと同じ。ただし$atom1はこの計算ノードに存在する。*/
+	 * inheritlinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALINHERITLINK = LOCAL + INHERITLINK;
 
     // 自由リンク管理アトム自動処理のためのボディ命令 (70--74)
@@ -935,6 +934,9 @@ public class Instruction {
 	public int getIntArg4() {
 		return ((Integer)data.get(3)).intValue();
 	}
+	public int getIntArg5() {
+		return ((Integer)data.get(4)).intValue();
+	}
 	public Object getArg(int pos) {
 		return data.get(pos);
 	}
@@ -949,6 +951,9 @@ public class Instruction {
 	}
 	public Object getArg4() {
 		return data.get(3);
+	}
+	public Object getArg5() {
+		return data.get(4);
 	}
 	/**@deprecated*/
 	public void setArg(int pos, Object arg) {
@@ -969,6 +974,10 @@ public class Instruction {
 	/**@deprecated*/
 	public void setArg4(Object arg) {
 		data.set(3,arg);
+	}
+	/**@deprecated*/
+	public void setArg5(Object arg) {
+		data.set(4,arg);
 	}
 
     ////////////////////////////////////////////////////////////////
@@ -1057,10 +1066,15 @@ public class Instruction {
     public static Instruction newmem(int ret, int srcmem) {
 		return new Instruction(NEWMEM,ret,srcmem);
     }
-    /** newlink 命令を生成する */
-    public static Instruction newlink(int atom1, int pos1, int atom2, int pos2) {
+	/** newlink 命令を生成する
+	 * @deprecated */
+	public static Instruction newlink(int atom1, int pos1, int atom2, int pos2) {
 		return new Instruction(NEWLINK,atom1,pos1,atom2,pos2);
-    }
+	}
+	/** newlink 命令を生成する */
+	public static Instruction newlink(int atom1, int pos1, int atom2, int pos2, int mem1) {
+		return new Instruction(NEWLINK,atom1,pos1,atom2,pos2,mem1);
+	}
     /** loadruleset 命令を生成する */
     public static Instruction loadruleset(int mem, Ruleset rs) {
 		return new Instruction(LOADRULESET,mem,rs);
@@ -1077,10 +1091,6 @@ public class Instruction {
 	public static Instruction removeatom(int atom, int mem, Functor func) {
 		return new Instruction(REMOVEATOM,atom,mem,func);
 	}
-//	/** @deprecated */
-//	public static Instruction removeatom(int atom, Functor func) {
-//		return new Instruction(REMOVEATOM,atom,func);
-//	}
     
 	// コンストラクタ
 	
@@ -1136,7 +1146,15 @@ public class Instruction {
 		add(arg2);
 		add(arg3);
 		add(arg4);
-    }
+	}
+	public Instruction(int kind, int arg1, int arg2, int arg3, int arg4, int arg5) {
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+		add(arg4);
+		add(arg5);
+	}
 
 	//////////////////////////////////
 	// 最適化器が使う、ID書き換えのためのクラスメソッド
@@ -1261,6 +1279,17 @@ public class Instruction {
 					break;
 				case Instruction.DROPMEM:
 					changeArg(inst, 1, map);
+					break;
+			//
+				case NEWLINK:
+				case LOCALNEWLINK:
+				case RELINK:
+				case LOCALRELINK:
+					changeArg(inst, 5, map);
+					break;
+				case INHERITLINK:
+				case LOCALINHERITLINK:
+					changeArg(inst, 4, map);
 					break;
 			}
 		}

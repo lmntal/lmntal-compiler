@@ -257,7 +257,10 @@ public class RuleCompiler {
 	private void removeLHSAtoms() {
 		Env.c("RuleCompiler::removeLHSAtoms");
 		for (int i = 0; i < lhsatoms.size(); i++) {
-			body.add( new Instruction(Instruction.REMOVEATOM, lhsfreemems.size() + i ));
+			Atom atom = (Atom)lhsatoms.get(i);
+			body.add( Instruction.removeatom(
+				lhsatomToPath(atom), // ¢« lhsfreemems.size() + i ¤Ë°ìÃ×¤¹¤ë
+				lhsmemToPath(atom.mem), atom.functor ));
 		}
 	}
 	/** º¸ÊÕ¤ÎËì¤ò»ÒËìÂ¦¤«¤éºÆµ¢Åª¤Ë½üµî¤¹¤ë¡£
@@ -352,7 +355,7 @@ public class RuleCompiler {
 				LinkOccurrence link2 = atom.args[1].buddy;
 				body.add(new Instruction( Instruction.UNIFY,
 					lhsatomToPath(link1.atom), link1.pos,
-					lhsatomToPath(link2.atom), link2.pos ));
+					lhsatomToPath(link2.atom), link2.pos));
 			} else {
 				int atomid = varcount++;
 				rhsatompath.put(atom, new Integer(atomid));
@@ -378,13 +381,15 @@ public class RuleCompiler {
 				if (link.atom.mem == rs.leftMem) {
 					body.add( new Instruction(Instruction.RELINK,
 						rhsatomToPath(atom), pos,
-						lhsatomToPath(link.atom), link.pos));
+						lhsatomToPath(link.atom), link.pos,
+						rhsmemToPath(atom.mem) ));
 				} else {
 					if (rhsatomToPath(atom) < rhsatomToPath(link.atom)
 					|| (rhsatomToPath(atom) == rhsatomToPath(link.atom) && pos < link.pos)) {
 						body.add( new Instruction(Instruction.NEWLINK,
 							rhsatomToPath(atom), pos,
-							rhsatomToPath(link.atom), link.pos));
+							rhsatomToPath(link.atom), link.pos,
+							rhsmemToPath(atom.mem) ));
 					}
 				}
 			}

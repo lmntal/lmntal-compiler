@@ -189,10 +189,10 @@ final class RemoteMembrane extends AbstractMembrane {
 	public void activate() {
 		send("ACTIVATE");
 	}
-	public void remove() {
-		send("REMOVE");
-		super.remove();
-	}
+//	public void remove() {
+//		send("REMOVE");
+//		super.remove();
+//	}
 
 	public void moveCellsFrom(AbstractMembrane srcMem) {
 		if (srcMem.task.getMachine() != task.getMachine()) {
