@@ -1,6 +1,6 @@
 // append の自動デモ用   hara
 
-// java -cp bin runtime.FrontEnd -g --demo append_forever.lmn
+// java -cp bin runtime.FrontEnd -x screen max -x auto on -g --demo append_forever.lmn
 
 res=list.append([a,b,c],[d,e,f,g]).
 

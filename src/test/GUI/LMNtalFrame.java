@@ -7,7 +7,26 @@ import javax.swing.*;
 import runtime.Env;
 import compile.parser.ParseException;
 
+class MyThread extends Thread {
+	LMNtalFrame f;
+	MyThread(LMNtalFrame ff) {
+		f = ff;
+	}
+	
+	public void run() {
+		while(true) {
+			try {
+//				System.out.println("go");
+				f.busy = false;
+				sleep(4000);
+			} catch (Exception e) {
+			}
+		}
+	}
+}
+
 public class LMNtalFrame extends JFrame implements KeyListener {
+	Thread th;
 	
 	public LMNGraphPanel lmnPanel = null;
 	JTextArea jt;
@@ -17,7 +36,14 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		initComponents();
 		setSize(800,600);
+		if(Env.getExtendedOption("screen").equals("max")) {
+			setExtendedState(Frame.MAXIMIZED_BOTH | getExtendedState());
+		}
 		setVisible(true);
+		if(!Env.getExtendedOption("auto").equals("")) {
+			th = new MyThread(this);
+			th.start();
+		}
 	}
 	
 	public void keyPressed(KeyEvent e) {
