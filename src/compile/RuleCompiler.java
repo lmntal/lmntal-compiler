@@ -189,9 +189,9 @@ public class RuleCompiler {
 		buildRHSAtoms(rs.rightMem);
 		body.add(0, Instruction.spec(formals, varcount));
 		updateLinks();
+		addInline();
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
-		addInline();
 		body.add(new Instruction(Instruction.PROCEED));
 	}
 	
