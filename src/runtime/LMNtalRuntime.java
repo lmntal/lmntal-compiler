@@ -9,11 +9,10 @@ import util.Stack;
 /** 抽象物理マシンクラス */
 abstract class AbstractMachine {
 	protected String runtimeid;
-	/** この物理マシンに（親膜を持たない）ルート膜を作成する。
-	 * <p>
-	 * ルート膜の親膜またはnullを引数に取るようにした方がよいかも知れない。
-	 * 詳細は、タスクを生成する構文を決定する頃に決める */
+	/** この物理マシンに親膜を持たないロックされていないルート膜を作成し、仮でない実行膜スタックに積む。*/
 	abstract AbstractTask newTask();
+	/** この物理マシンに指定の親膜を持つロックされたルート膜を作成し、仮の実行膜スタックに積む。*/
+	abstract AbstractTask newTask(AbstractMembrane parent);
 }
 
 /** 抽象タスククラス */
@@ -41,13 +40,18 @@ final class Task extends AbstractTask {
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
 	Stack bufferedStack = new Stack();
-	boolean idle;
+	boolean idle = false;
 	static final int maxLoop = 10;
 	
 	Task() {
 		root = new Membrane(this);
 		memStack.push(root);
-		idle = false;
+	}
+	Task(AbstractMembrane parent) {
+		root = new Membrane(this);
+		root.lock(root);
+		root.activate(); // 仮の実行膜スタックに積む
+		parent.addMem(root);
 	}
 	
 	boolean isIdle(){
@@ -55,19 +59,18 @@ final class Task extends AbstractTask {
 	}
 	
 	void exec() {
-		if(memStack.isEmpty()){ // 空ならidleにする。
-			idle = true;
+		Membrane mem = (Membrane)memStack.peek();
+		if(mem == null || !mem.lock(mem)) {
+			// 本膜が無いかまたは本膜のロックを取得できないとき
+			if (mem != null) { System.out.println(mem);}			idle = true;
 			return;
 		}
-		// 実行膜スタックが空でない
-		Membrane mem = (Membrane)memStack.peek();
-		if(!mem.lock(mem)) return; // ロック失敗
 		
-		Atom a;
 		for(int i=0; i < maxLoop && mem == memStack.peek(); i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
-			
-			a = mem.popReadyAtom();
+//			System.out.println("mems  = " + memStack);
+//			System.out.println("atoms = " + mem.getReadyStackStatus());
+			Atom a = mem.popReadyAtom();
 			Iterator it = mem.rulesetIterator();
 			boolean flag;
 			if(a != null){ // 実行膜スタックが空でないとき
@@ -82,8 +85,12 @@ final class Task extends AbstractTask {
 			}else{ // 実行膜スタックが空の時
 				flag = false;
 				while(it.hasNext()){ // 膜主導テストを行う
-					if(((Ruleset)it.next()).react(mem)) flag = true;
+					if(((Ruleset)it.next()).react(mem)) {
+						flag = true;
+						if (memStack.peek() != mem) break;
+					}
 				}
+
 				if(flag == false){ // ルールが適用できなかった時
 					memStack.pop(); // 本膜をpop
 					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
@@ -94,8 +101,8 @@ final class Task extends AbstractTask {
 					it = mem.memIterator();
 					flag = false;
 					while(it.hasNext()){
-						if(((Membrane)it.next()).isStable() == false)
-								flag = true;
+						if(((AbstractMembrane)it.next()).isStable() == false)
+							flag = true;
 					}
 					if(flag == false) mem.toStable();
 				}
@@ -112,7 +119,6 @@ public final class LMNtalRuntime extends Machine {
 	public LMNtalRuntime(){
 		AbstractTask t = newTask();
 		globalRoot = (Membrane)t.getRoot();
-		
 		// Inline
 		Inline.initInline();
 	}
@@ -139,46 +145,35 @@ public final class LMNtalRuntime extends Machine {
 class Machine extends AbstractMachine {
 	List tasks = new ArrayList();
 	
-	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
-	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
-	 *  タスクが木構造になっていないと出来ない。優先度はしばらく未実装。
-	 */
-
-	/**
-	 * 	このマシンにタスクを作る。これを呼んだ後、ルート膜のmembrane.setParent()が呼ばれる？
-	 * これをやめて、Taskのコンストラクタに親膜を渡すようにしたほうがいい？
-	 */
 	AbstractTask newTask() {
 		Task t = new Task();
 		tasks.add(t);
 		return t;
 	}
-
-/* TODO　消去。Master以外では、タスクを最初に作る必要はない。
-	public Machine(){
-		newTask();
+	AbstractTask newTask(AbstractMembrane parent) {
+		Task t = new Task(parent);
+		tasks.add(t);
+		return t;
 	}
-*/	
-//	AbstractMembrane getRootMem(){
-//		return rootMem;
-//	}
-	
+
+	/** 物理マシンが持つタスク全てがidleになるまで実行。<br>
+	 *  Tasksに積まれた順に実行する。親タスク優先にするためには
+	 *  タスクが木構造になっていないと出来ない。優先度はしばらく未実装。
+	 */
 	public void exec() {
 		boolean allIdle;
-		Iterator it;
-		Task m;
-		do{
+		do {
 			allIdle = true; // idleでないタスクが見つかったらfalseになる。
-			it = tasks.iterator();
-			while(it.hasNext()){
-				m = (Task)it.next();
-				if(!m.isIdle()){ // idleでないタスクがあったら
-					m.exec(); // ひとしきり実行
+			Iterator it = tasks.iterator();
+			while (it.hasNext()) {
+				Task task = (Task)it.next();
+				if (!task.isIdle()) { // idleでないタスクがあったら
+					task.exec(); // ひとしきり実行
 					allIdle = false; // idleでないタスクがある
 					break;
 				}
 			}
-		}while(!allIdle);
+		} while(!allIdle);
 	}
 }
 

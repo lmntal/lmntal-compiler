@@ -466,7 +466,7 @@ public class Instruction {
 
 	/** localnewmem [-dstmem, srcmem]
 	* <br>最適化用ボディ命令<br>
-	* newmemと同じ。ただし$srcmemはこの計算ノードに存在する。*/
+	* newmemと同じ。ただし$srcmemは<B>本膜と同じタスクによって管理される</B>。*/
 	public static final int LOCALNEWMEM = LOCAL + NEWMEM;
 
 	/** newroot [-dstmem, srcmem, node]

@@ -32,8 +32,11 @@ public final class InterpretedRuleset extends Ruleset {
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
 			Rule r = (Rule) it.next();
-			result
-				|= matchTest(mem, atom, r.atomMatch);
+			if (matchTest(mem, atom, r.atomMatch)) {
+				result = true;
+				//if (!mem.isCurrent()) return true;
+				return true;
+			}
 		}
 		return result;
 	}
@@ -47,8 +50,11 @@ public final class InterpretedRuleset extends Ruleset {
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
 			Rule r = (Rule) it.next();
-			result
-				|= matchTest(mem, null, r.memMatch);
+			if (matchTest(mem, null, r.memMatch)) {
+				result = true;
+				return true;
+				//if (!mem.isCurrent()) return true;
+			}
 		}
 		return result;
 	}
@@ -353,11 +359,13 @@ class InterpreterReactor {
 					mem = mems[inst.getIntArg1()];
 					mem.parent.removeMem(mem);
 					break; //n-kato
-				case Instruction.NEWMEM :
-				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
+				case Instruction.NEWMEM: //[-dstmem, srcmem]
 					mem = mems[inst.getIntArg2()].newMem();
 					mems[inst.getIntArg1()] = mem;
-					mem.activate();
+					break; //n-kato
+				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
+					mem = ((Membrane)mems[inst.getIntArg2()]).newLocalMembrane();
+					mems[inst.getIntArg1()] = mem;
 					break; //n-kato
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
 					//TODO AbstactMachineクラスが存在しない＜命令の仕様をよく読むこと＞
@@ -476,7 +484,7 @@ class InterpreterReactor {
 					ir.interpret(bodyInsts, 0);
 					return true; //n-kato
 
-				case Instruction.PROCEED :
+				case Instruction.PROCEED:
 					return true; //n-kato
 
 				case Instruction.SPEC:

@@ -106,10 +106,11 @@ public class RuleCompiler {
 		Env.c("compile_l");
 		
 		atomMatch = new ArrayList();
+		int maxvarcount = 2;	// アトム主導用（仮）
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化			
 			if (firstid < hc.atoms.size()) {			
-				if (true) continue; // 臨時
+				if (true) continue; // 臨時【注意：外してもよいいが、アトム主導は現在未テスト】
 				// アトム主導
 				List singletonListArgToBranch = new ArrayList();
 				singletonListArgToBranch.add(hc.match);
@@ -144,9 +145,11 @@ public class RuleCompiler {
 				hc.mempath.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
 			hc.compileMembrane(rs.leftMem);
-			hc.match.add(0, Instruction.spec(hc.varcount,0));	// とりあえずここに追加
+			hc.match.add(0, Instruction.spec(hc.varcount,0));	// とりあえずここに追加（仮）
 			hc.match.add( Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals()) );
+			if (maxvarcount < hc.varcount) maxvarcount = hc.varcount;
 		}
+		atomMatch.add(0, Instruction.spec(maxvarcount,0));	// とりあえずここに追加（仮）
 	}
 	
 	/** 右辺膜をコンパイルする */
@@ -185,6 +188,7 @@ public class RuleCompiler {
 		buildRHSAtoms(rs.rightMem);
 		body.add(0, Instruction.spec(formals, varcount));
 		updateLinks();
+		enqueueRHSAtoms();
 		addInline();
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
@@ -395,9 +399,15 @@ public class RuleCompiler {
 			}
 		}
 	}
-	/**
-	 * インライン命令を生成する。
-	 */
+	/** アトムを実行スタックに積む */
+	private void enqueueRHSAtoms() {
+		Iterator it = rhsatoms.iterator();
+		while(it.hasNext()) {
+			Atom atom = (Atom)it.next();
+			body.add( new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
+		}
+	}
+	/** インライン命令を実行する */
 	private void addInline() {
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {

@@ -238,7 +238,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		mem.parent = null;
 	}	
 	/** 指定された計算ノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
-	 * このメソッドは使わないかもしれないが、一応作っておく。
 	 * @return 作成されたルート膜
 	 */
 	public abstract AbstractMembrane newRoot(AbstractMachine runtime);
@@ -368,17 +367,17 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			((AbstractMembrane)it.next()).setTask(newTask);
 		}
 	}
-	/** この膜（ルート膜）の親膜を変更する。Machine（計算ノード）のみが呼ぶことができる。
-	 * <p>いずれ、
-	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
-	 * AbstractMembrane#moveToを使って親膜を変更することにより、
-	 * TODO この問題のあるメソッドは廃止しなければならない */
-	void setParent(AbstractMembrane mem) {
-		if (!isRoot()) {
-			throw new RuntimeException("setParent requires this be a root membrane");
-		}
-		parent = mem;
-	}
+//	/** この膜（ルート膜）の親膜を変更する。Machine（計算ノード）のみが呼ぶことができる。
+//	 * <p>いずれ、
+//	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
+//	 * AbstractMembrane#moveToを使って親膜を変更することにより、
+//	 * todo この問題のあるメソッドは廃止しなければならない */
+//	void setParent(AbstractMembrane mem) {
+//		if (!isRoot()) {
+//			throw new RuntimeException("setParent requires this be a root membrane");
+//		}
+//		parent = mem;
+//	}
 	// 操作6 - ロックに関する操作
 	
 	/**

@@ -1,4 +1,5 @@
 package util;
+import java.util.ArrayList;
 
 public final class Stack {
 	/** Äì */
@@ -75,4 +76,13 @@ public final class Stack {
 //	public void remove(QueuedEntity entity) {
 //		entity.remove();
 //	}
+	public String toString() {
+		ArrayList list = new ArrayList();
+		QueuedEntity entity = head.next;
+		while (entity != tail) {
+			list.add(entity);
+			entity = entity.next;
+		}
+		return list.toString();
+	}
 }

@@ -28,6 +28,11 @@ public final class Membrane extends AbstractMembrane {
 	String getMemID() { return getLocalID(); }
 	String getAtomID(Atom atom) { return atom.getLocalID(); }
 	
+//	boolean isCurrent() { return getTask().memStack.peek() == this; }
+	
+	/** デバッグ用 */
+	String getReadyStackStatus() { return ready.toString(); }
+
 	///////////////////////////////
 	// 操作
 
@@ -42,11 +47,14 @@ public final class Membrane extends AbstractMembrane {
 	protected void enqueueAtom(Atom atom) {
 		ready.push(atom);
 	}
-	/** 膜の活性化。ただしこの膜はルート膜ではなく、スタックに積まれておらず、
-	 * しかも親膜は仮でない実行膜スタックに積まれている。*/
-	public void activateThis() {
-		activate();
-	}
+
+//	/** 膜の活性化。ただしこの膜はルート膜ではなく、スタックに積まれておらず、
+//	 * しかも親膜は仮でない実行膜スタックに積まれている。
+//   * → newMem / newLocalMembrane に移動しました */
+//	public void activateThis() {
+//		((Task)task).memStack.push(this);
+//	}
+
 	/** 膜の活性化 */
 	public void activate() {
 		if (isQueued()) {
@@ -98,17 +106,32 @@ public final class Membrane extends AbstractMembrane {
 	public AbstractMembrane newMem() {
 		Membrane m = new Membrane(task, this);
 		mems.add(m);
+		// 親膜と同じ実行膜スタックに積む
+		Task t = (Task)task;
+		if (t.bufferedStack.isEmpty()) {
+			t.memStack.push(m);
+		}
+		else {
+			t.bufferedStack.push(m);
+		}		
 		return m;
 	}
+	/** newMemと同じ。ただし親膜は仮でない実行膜スタックに積まれている。 */
+	public AbstractMembrane newLocalMembrane() {
+		Membrane m = new Membrane(task, this);
+		mems.add(m);
+		((Task)task).memStack.push(m);
+		return m;		
+	}
 	public AbstractMembrane newRoot(AbstractMachine runtime) {
-		AbstractTask task = runtime.newTask();
-		task.getRoot().setParent(this);
+		AbstractTask task = runtime.newTask(this);
 		return task.getRoot();
 	}
 	public void unlock() {
 		if (isRoot()) {
 			Task t = (Task)task;
 			t.memStack.moveFrom(t.bufferedStack);
+			t.idle = false;
 		}
 		super.unlock();
 	}

@@ -27,6 +27,10 @@ final class RemoteMachine extends AbstractMachine {
 		return ret;
 	}
 	public AbstractTask newTask() {
+		// todo 下と同じ
+		return (AbstractTask)null;
+	}
+	public AbstractTask newTask(AbstractMembrane parent) {
 		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
 		return (AbstractTask)null;
 	}

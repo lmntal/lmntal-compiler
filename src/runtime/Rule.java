@@ -32,10 +32,10 @@ public final class Rule {
 	 */
 	public void showDetail() {
 		Iterator l;
-		l = atomMatch.listIterator();
 		Env.d("Rule.showDetail  this = "+this);
 		
 		/*
+		l = atomMatch.listIterator();
 		Env.d("--atommatches :", 1);
 		while(l.hasNext()) {
 			Iterator ll = ((List)l.next()).iterator();
@@ -43,6 +43,11 @@ public final class Rule {
 		}
 		*/
 		
+	
+		l = atomMatch.listIterator();
+		Env.d("--atommatch :", 1);
+		while(l.hasNext()) Env.d((Instruction)l.next(), 2);
+
 		l = memMatch.listIterator();
 		Env.d("--memmatch :", 1);
 		while(l.hasNext()) Env.d((Instruction)l.next(), 2);
@@ -50,7 +55,7 @@ public final class Rule {
 		l = body.listIterator();
 		Env.d("--body :", 1);
 		while(l.hasNext()) Env.d((Instruction)l.next(), 2);
-		
+	
 		Env.d("");
 	}
 	
