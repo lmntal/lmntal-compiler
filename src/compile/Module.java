@@ -147,6 +147,8 @@ import compile.structure.*;
 public class Module {
 	public static List libPath = new ArrayList();
 	public static Map memNameTable = new HashMap();
+	public static Map loaded = new HashMap();
+	public static Object EXIST = new Object();
 	
 	static {
 		//libPath.add("hoge");
@@ -170,6 +172,8 @@ public class Module {
 	 * @param mod_name  モジュール名
 	 */
 	public static void loadModule(Membrane m, String mod_name) {
+		if(loaded.get(mod_name)!=null) return;
+		
 		Iterator it = libPath.iterator();
 		while(it.hasNext()) {
 			String thePath = (String)it.next();
@@ -183,6 +187,7 @@ public class Module {
 				m.rulesets.addAll(nm.rulesets);
 				sb.append(" [ OK ] ");
 				Env.d(sb.toString());
+				loaded.put(mod_name, EXIST);
 				return;
 			} catch (Exception e) {
 				sb.append(" [ FAILED ] ");

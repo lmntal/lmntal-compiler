@@ -102,6 +102,7 @@ public class Inline {
 	 * @param funcName
 	 */
 	public static void add(String funcName) {
+		if(funcName==null) return;
 		if(funcName.startsWith("/*inline*/")) {
 		//if(src.startsWith("a")) {
 			//епо©

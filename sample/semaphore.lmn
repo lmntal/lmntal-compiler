@@ -1,15 +1,14 @@
 //Semaphore example
 
 //Make new semaphore
-call(sem, sem.new, sem1).
+{mv(sem), sem.new(sem1)}.
 {
-	call(sem, sem.up,    sem1).
-	allowed(sem1) :- io.print([[Critical A 1]]), allowed1(sem1).
-	allowed1(sem1) :- io.print([[Critical A 2]]), call(sem, sem.down,  sem1).
+	{mv(sem), sem.up(sem1), handle(X)}. res(X).
+	res(X),{shrink(X),allowed} :- io.print([[Critical A 1]]), state1.
+	state1 :- io.print([[Critical A 2]]), {mv(sem), sem.down(sem1)}.
 }.
 {
-	call(sem, sem.up,    sem1).
-	allowed(sem1) :- io.print([[Critical B 1]]), allowed1(sem1).
-	allowed1(sem1) :- io.print([[Critical B 2]]), call(sem, sem.down,  sem1).
+	{mv(sem), sem.up(sem1), handle(X)}. res(X).
+	res(X),{shrink(X),allowed} :- io.print([[Critical B 1]]), state1.
+	state1 :- io.print([[Critical B 2]]), {mv(sem), sem.down(sem1)}.
 }.
-
