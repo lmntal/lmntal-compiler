@@ -71,6 +71,10 @@ public class Atom {
 	}
 	
 	public String toString() {
-		return functor+(args.length==0 ? "" : "("+Arrays.asList(args)+")");
+		if (args.length == 0) return functor.getAbbrName();
+		String argstext = Arrays.asList(args).toString();
+		argstext = argstext.substring(1, argstext.length() - 1);
+		argstext = argstext.replaceAll(", ",",");
+		return functor.getAbbrName() + "(" + argstext + ")";
 	}
 }
