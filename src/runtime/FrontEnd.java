@@ -3,13 +3,7 @@
  */
 package runtime;
 
-import java.io.FileInputStream;
-import java.io.SequenceInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.Reader;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.lang.SecurityException;
 import java.util.*;
 
@@ -80,11 +74,11 @@ public class FrontEnd {
 						break;
 					case 'L':
 						// インラインコードのコンパイル時に -classpath オプションになる部分を追加することができる。
-						Inline.classPath.add(0, args[++i]);
+						Inline.classPath.add(0, new File(args[++i]));
 						break;
 					case 'I':
 						// LMNtal ライブラリの検索パスを追加することができる。
-						compile.Module.libPath.add(args[++i]);
+						compile.Module.libPath.add(new File(args[++i]));
 						break;
 					case 'c':
 						if (args[i].equals("-cgi")) {

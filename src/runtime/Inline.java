@@ -1,7 +1,3 @@
-/*
- * 作成日: 2003/12/16
- *
- */
 package runtime;
 
 import java.io.*;
@@ -30,7 +26,7 @@ import java.util.*;
  * <PRE>
  *   NEWATOM [1, 0, abc_0]
  *   ...いろいろ
- *   INLINE  [1, 0]
+ *   INLINE  [1, <unitName>, 0]
  * </PRE>
  * 
  * @author hara
@@ -42,16 +38,17 @@ public class Inline {
 	/** コンパイルプロセス。 */
 	static Process cp;
 	
-	
+	/** LMntal ライブラリを探すパス */
 	static List classPath = new ArrayList();
 	static {
 		classPath.add(new File("."));
 		classPath.add(new File("lmntal.jar"));
 	}
 	
+	/****** コンパイル時に使う ******/
+	
 	/**
-	 * インラインを使うための初期化。実行時に呼ぶ。
-	 *
+	 * コンパイルされたインラインコードを読み込んで InlineUnit に関連付ける
 	 */
 	public static void initInline() {
 		try {
@@ -60,55 +57,18 @@ public class Inline {
 				// これをしないと、エラーがたくさんあるときデッドロックになって止まる！
 				BufferedReader br = new BufferedReader(new InputStreamReader(cp.getErrorStream()));
 				String el;
-				while( (el=br.readLine())!=null ) {
-					System.err.println(el);
-				}
+				while( (el=br.readLine())!=null ) Env.d(el);
 				cp.waitFor();
 				Env.d("Compile result :  "+cp.exitValue());
 				cp = null;
 			}
 		} catch (Exception e) {
-			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+			Env.d(e);
 		}
-		Iterator ui = inlineSet.values().iterator();
-		while(ui.hasNext()) {
+		for(Iterator ui = inlineSet.values().iterator();ui.hasNext();) {
 			InlineUnit u = (InlineUnit)ui.next();
 			u.attach();
 		}
-	}
-	
-	/**
-	 * インラインコードのソースファイルのパスを返す。最後の / も含む。
-	 * @param unitName
-	 * @return
-	 */
-	public static File path_of_unitName(String unitName) {
-		if(unitName.equals(InlineUnit.DEFAULT_UNITNAME)) return new File("");
-		File path = new File(unitName).getParentFile();
-		path = new File(path + "/.lmntal_inline/");
-		return path;
-	}
-	
-	/**
-	 * クラス名を返す
-	 * @param unitName
-	 * @return
-	 */
-	public static String className_of_unitName(String unitName) {
-		String o = new File(unitName).getName();
-		o = o.replaceAll("\\.lmn$", "");
-		// クラス名に使えない文字を削除
-		o = o.replaceAll("\\-", "");
-		o = "SomeInlineCode"+o;
-		return o;
-	}
-	/**
-	 * インラインコードのソースファイル名を返す。パス付。
-	 * @param unitName
-	 * @return
-	 */
-	public static File fileName_of_unitName(String unitName) {
-		return new File(Inline.path_of_unitName(unitName)+"/"+className_of_unitName(unitName)+".java");
 	}
 	
 	/**
@@ -122,12 +82,12 @@ public class Inline {
 	}
 	
 	/**
-	 * パース中にアトムが出てくると呼ばれる。
 	 * ここで必要に応じてインライン命令を登録する。
+	 * すべてのアトムに対してこれを呼ぶべき。
 	 * @param unitName
 	 * @param funcName
 	 */
-	public static void add(String unitName, String funcName) {
+	public static void register(String unitName, String funcName) {
 		if(funcName==null) return;
 		
 		int type=0;
@@ -140,20 +100,12 @@ public class Inline {
 		}
 		
 		//登録
-		getUnit(unitName).register(funcName, type);
-	}
-	
-	static InlineUnit getUnit(String unitName) {
-		if(!inlineSet.containsKey(unitName)) {
-			inlineSet.put(unitName, new InlineUnit(unitName));
-		}
-		return (InlineUnit)inlineSet.get(unitName);
+		if(!inlineSet.containsKey(funcName)) inlineSet.put(unitName, new InlineUnit(unitName));
+		((InlineUnit)inlineSet.get(unitName)).register(funcName, type);
 	}
 	
 	/**
-	 * コードを生成する。
-	 * TODO java ファイルの名前を、コンパイルするファイル名と同じにする。oneLiner や REPL の時は "-"
-	 * TODO 更新されてたときだけコンパイルする。
+	 * 必要に応じてコードの生成とコンパイルを行う。
 	 */
 	public static void makeCode() {
 		Iterator it = inlineSet.values().iterator();
@@ -168,18 +120,16 @@ public class Inline {
 			// OS とかによってクラスパスの区切り文字が ; だったり : だったりするので動的に取得
 			StringBuffer path = new StringBuffer("");
 			String sep = System.getProperty("path.separator");
-			Iterator ci=classPath.iterator();
-			while(ci.hasNext()) {
+			for(Iterator ci=classPath.iterator();ci.hasNext();) {
 				path.append(ci.next());
 				path.append(sep);
 			}
 			StringBuffer srcs = new StringBuffer("");
-			Iterator iu = inlineSet.values().iterator();
 			boolean do_compile = false;
-			while(iu.hasNext()) {
+			for(Iterator iu = inlineSet.values().iterator();iu.hasNext();) {
 				InlineUnit u = (InlineUnit)iu.next();
 				if(!u.isCached()) {
-					srcs.append(fileName_of_unitName(u.name));
+					srcs.append(InlineUnit.srcFile(u.name));
 					srcs.append(" ");
 					do_compile = true;
 				}
@@ -190,9 +140,11 @@ public class Inline {
 				cp = Runtime.getRuntime().exec(cmd);
 			}
 		} catch (Exception e) {
-			Env.d("!!! "+e+Arrays.asList(e.getStackTrace()));
+			Env.d(e);
 		}
 	}
+	
+	/****** 実行時に使う ******/
 	
 	/**
 	 * インライン命令を実行する。

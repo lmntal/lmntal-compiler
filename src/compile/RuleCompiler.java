@@ -1055,7 +1055,7 @@ public class RuleCompiler {
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
 			int atomID = rhsatomToPath(atom);
-			Inline.add(unitName, atom.functor.getName());
+			Inline.register(unitName, atom.functor.getName());
 			int codeID = Inline.getCodeID(unitName, atom.functor.getName());
 			if(codeID == -1) continue;
 			body.add( new Instruction(Instruction.INLINE, atomID, unitName, codeID));

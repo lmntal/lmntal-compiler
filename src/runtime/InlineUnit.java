@@ -18,28 +18,37 @@ public class InlineUnit {
 	/** インラインクラスが使用可能の時、そのオブジェクトが入る。*/
 	public static InlineCode inlineCode;
 	
-	Date classDate;
-	Date srcDate;
-	
-	/** Hash { インラインコード文字列 -> 一意な連番 } */
+	/** Hash { インラインコード文字列 => 一意な連番 } */
 	public static Map codes = new HashMap(); 
 	
 	/** List インライン宣言コード文字列 */
 	public static List defs = new ArrayList(); 
 	
-	/** 一意な連番 */
+	/** 一意な連番。インラインコード文字列と1対1 */
 	static int codeCount = 0;
 	
+	/** インライン実行アトム */
 	static final int EXEC   = 0;
+	
+	/** インライン宣言行アトム */
 	static final int DEFINE = 1;
 	
 	/****** コンパイル時に使う ******/
 	
 	/**
-	 * TODO class ファイルが最新かどうかを返す
+	 * class ファイルが最新かどうかを返す
 	 */
 	public boolean isCached() {
-		return false;
+		// ?.lmn
+		File src = new File(name);
+		// ?.class
+		File dst = classFile(name);
+//		System.out.println(src+" "+src.lastModified());
+//		System.out.println(dst+" "+dst.lastModified());
+		
+		// src が無いのは、"-" のとき
+		if(!dst.exists() || !src.exists()) return false;
+		return src.lastModified() <= dst.lastModified();
 	}
 	
 	InlineUnit(String name) {
@@ -55,8 +64,14 @@ public class InlineUnit {
 		return codes.containsKey(codeStr) ? ((Integer)codes.get(codeStr)).intValue() : -1;
 	}
 	
+	/**
+	 * インラインアトムを登録しる。
+	 * @param code アトム名
+	 * @param type インライン実行アトム => EXEC ,  インライン宣言アトム => DEFINE
+	 */
 	public void register(String code, int type) {
-		switch(type) {		case EXEC:
+		switch(type) {
+		case EXEC:
 			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineCode : "+code);
 			codes.put(code, new Integer(codeCount++));
 			break;
@@ -76,8 +91,8 @@ public class InlineUnit {
 			if(codes.isEmpty() && defs.isEmpty()) return;
 			Iterator i;
 			
-			String className = Inline.className_of_unitName(name);
-			File outputFile = Inline.fileName_of_unitName(name);
+			String className = className(name);
+			File outputFile = srcFile(name);
 			if(!outputFile.getParentFile().exists()) {
 				outputFile.getParentFile().mkdirs();
 			}
@@ -115,21 +130,22 @@ public class InlineUnit {
 			
 			Env.d("Class "+className+" written to "+outputFile);
 		} catch (Exception e) {
-			Env.d("!!! "+e+Arrays.asList(e.getStackTrace()));
+			Env.d(e);
 		}
 	}
 	
 	/****** 実行時に使う ******/
 	
+	/**
+	 * 自分に対応するインラインコードクラスを読み込む。
+	 */
 	public void attach() {
 		// jar で処理系を起動すると、勝手なファイルからクラスをロードすることができないみたい。
-		String cname = Inline.className_of_unitName(name);
-		File path = Inline.path_of_unitName(name);
+		String cname = className(name);
 		FileClassLoader cl = new FileClassLoader();
-		cl.setClassPath(path.toString());
-		Env.d("Try loading "+cl.filename_of_class(cname));
+		Env.d("Try loading "+classFile(name));
 		try {
-			Object o = cl.loadClass(cname).newInstance();
+			Object o = cl.loadClass(name).newInstance();
 			if (o instanceof InlineCode) {
 				inlineCode = (InlineCode)o;
 			}
@@ -152,5 +168,49 @@ public class InlineUnit {
 		Env.d(" => call Inline "+atom.getName()+" "+codeID);
 		if(inlineCode==null) return;
 		inlineCode.run(atom, codeID);
+	}
+
+	/**
+	 * インラインコードのソースファイルのパスを返す。最後の / は含まない。
+	 * @param unitName
+	 * @return PATH/
+	 */
+	public static File srcPath(String unitName) {
+		if(unitName.equals(DEFAULT_UNITNAME)) return new File("");
+		File path = new File(unitName).getParentFile();
+		path = new File(path + "/.lmntal_inline");
+		return path;
+	}
+
+	/**
+	 * クラス名を返す
+	 * @param unitName
+	 * @return SomeClass
+	 */
+	public static String className(String unitName) {
+		String o = new File(unitName).getName();
+		o = o.replaceAll("\\.lmn$", "");
+		// クラス名に使えない文字を削除
+		o = o.replaceAll("\\-", "");
+		o = "SomeInlineCode"+o;
+		return o;
+	}
+
+	/**
+	 * インラインコードのソースファイル名を返す。パス付。
+	 * @param unitName
+	 * @return PATH/SomeClass.java
+	 */
+	public static File srcFile(String unitName) {
+		return new File(srcPath(unitName)+"/"+className(unitName)+".java");
+	}
+
+	/**
+	 * インラインコードのクラスファイル名を返す。パス付。
+	 * @param unitName
+	 * @return
+	 */
+	public static File classFile(String unitName) {
+		return new File(srcPath(unitName) + "/" + className(unitName) + ".class");
 	}
 }

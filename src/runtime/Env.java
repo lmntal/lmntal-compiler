@@ -130,6 +130,14 @@ public final class Env {
 	}
 	
 	/**
+	 * Exception dumper for debug
+	 * @param e
+	 */
+	public static void d(Exception e) {
+		if(debug > 0) e.printStackTrace();
+	}
+	
+	/**
 	 * General dumper for debug with indent
 	 * @param o
 	 * @param depth インデントの深さ
