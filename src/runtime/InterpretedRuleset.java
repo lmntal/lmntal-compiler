@@ -261,6 +261,17 @@ class InterpretedReactor {
 					break;
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここまで====
 
+					//====ルールを操作するボディ命令====ここから====
+				case Instruction.LOADRULESET: //[dstmem, ruleset]
+					((AbstractMembrane)mems[inst.getIntArg1()]).loadRuleset(
+						(Ruleset)inst.getArg2() );
+					break;
+				case Instruction.COPYRULES:   //[dstmem, srcmem]
+					break;
+				case Instruction.CLEARRULES:  //[dstmem, srcmem]
+					break;
+					//====ルールを操作するボディ命令====ここまで====
+
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
 				case Instruction.RECURSIVELOCK : //[srcmem]
 					break;
