@@ -31,8 +31,8 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 * @param hostname つなげたいホストのホスト名。Fully Qualified Domain Nameである必要がある。
 	 */
 	protected RemoteLMNtalRuntime(String hostname) {
-		//runtimeidの中にはfqdnが入っている（とみなす）
-
+		//hostnameの中にはfqdnが入っている（とみなす）
+		this.runtimeid = LMNtalDaemon.makeID();  //TODO 仮実装。
 		this.hostname = hostname;
 	}
 
@@ -78,7 +78,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 */
 	public boolean connect() {
 		//TODO 単体テスト
-		result = LMNtalDaemon.connect(hostname);
+		result = LMNtalDaemon.connect(hostname, runtimeid);
 		lmnNode = LMNtalDaemon.getLMNtalNodeFromFQDN(hostname);
 		if (lmnNode != null && result == true) {
 			return true;

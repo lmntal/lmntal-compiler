@@ -8,14 +8,15 @@ public class LMNtalNode {
 	InetAddress ip;
 	BufferedReader in;
 	BufferedWriter out;
-
+	
 	LMNtalNode(
-		InetAddress tmpIp,
-		BufferedReader tmpInStream,
-		BufferedWriter tmpOutStream) {
-		ip = tmpIp;
-		in = tmpInStream;
-		out = tmpOutStream;
+		InetAddress ip,
+		BufferedReader in,
+		BufferedWriter out
+		) {
+		this.ip = ip;
+		this.in = in;
+		this.out = out;
 	}
 
 	BufferedReader getInputStream() {

@@ -11,8 +11,7 @@ import runtime.Env;
 import runtime.Membrane;
 
 /*
- * メッセージの中身を見て処理する。基本的にLMNtalDaemonのソケットが開かれると、
- * これが生成される。つまり物理的な計算機1台の中に複数存在しうる。
+ * メッセージの中身を見て処理する。基本的にLMNtalDaemonのソケットが開かれると、 これが生成される。つまり物理的な計算機1台の中に複数存在しうる。
  * 
  * @author nakajima
  */
@@ -24,28 +23,26 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 	BufferedWriter out;
 	Socket socket;
 
-
 	/*
 	 * コンストラクタ。
 	 * 
-	 * @param socket 開かれたソケット。
-	 * @param in 入力。BufferedReader。
-	 * @param out 出力。BufferedWriter。
+	 * @param socket 開かれたソケット。 @param in 入力。BufferedReader。 @param out
+	 * 出力。BufferedWriter。
 	 */
 	public LMNtalDaemonMessageProcessor(
-		Socket tmpSocket,
-		BufferedReader inTmp,
-		BufferedWriter outTmp) {
-		in = inTmp;
-		out = outTmp;
-		socket = tmpSocket;
+		Socket socket,
+		BufferedReader in,
+		BufferedWriter out) {
+		this.in = in;
+		this.out = out;
+		this.socket = socket;
 	}
 
 	/*
 	 * ホストfqdnが自分自身か判定。
 	 * 
-	 * @param fqdn Fully Qualified Domain Name
-	 * @return 自分自身に割り振られているIPアドレスからホスト名を引いて、fqdnとstringで比較。同じだったらtrue、それ以外はfalse。
+	 * @param fqdn Fully Qualified Domain Name @return
+	 * 自分自身に割り振られているIPアドレスからホスト名を引いて、fqdnとstringで比較。同じだったらtrue、それ以外はfalse。
 	 */
 	public static boolean isMyself(String fqdn) {
 		try {
@@ -58,13 +55,12 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 	}
 
 	/*
-	 *  (non-Javadoc)
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		if (DEBUG) {
-			System.out.println("LMNtalDaemonMessageProcessor.run()");
-		}
+		if (DEBUG){System.out.println("LMNtalDaemonMessageProcessor.run()");
 
 		String input = "";
 
@@ -77,37 +73,36 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 				break;
 			}
 
-			if (DEBUG) {
-				System.out.println("in.readLine(): " + input);
-			}
+			if (DEBUG)System.out.println("in.readLine(): " + input);
 
 			if (input == null) {
 				System.out.println("（　´∀｀）＜　inputがぬる");
 				break;
 			}
 
-			/* 
+			/*
 			 * inputの可能性。
 			 * 
 			 * コマンドからはじまるメッセージ
-			 * msgid fqdn rgid メッセージ 
-			 *   - fqdn が自分宛
+			 *  msgid fqdn rgid メッセージ
+			 *   - fqdn が自分宛 
 			 *   - fqdn が他人宛
 			 * BEGIN~ENDの途中
-			 * 
+			 *  
 			 */
 
-			/* コマンドからはじまるメッセージを処理。
+			/*
+			 * コマンドからはじまるメッセージを処理。
 			 * 
 			 * ここで処理される命令一覧。これ以外のは下スクロールしてね
 			 * 
-			 *  res msgid メッセージ本文
-			 *  registerlocal
-			 *  dumphash - デバッグ用
-			 * 
+			 * res msgid メッセージ本文
+			 * registerlocal rgid
+			 * dumphash
+			 *  
 			 */
-			Integer msgid;
-			Integer rgid;
+			String msgid;
+			String rgid;
 			String fqdn;
 			boolean result;
 			String[] parsedInput = new String[4];
@@ -115,7 +110,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 			if (parsedInput[0].equalsIgnoreCase("res")) {
 				//res msgid 結果
-				msgid = new Integer(parsedInput[1]);
+				msgid = parsedInput[1];
 
 				//戻す先
 				LMNtalNode returnNode = LMNtalDaemon.getNodeFromMsgId(msgid);
@@ -126,18 +121,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 				if (returnNode == null) {
 					//戻し先がnull
-					try {
-						out.write("res " + msgid.toString() + " fail\n");
-						out.flush();
-						continue;
-					} catch (IOException e1) {
-						e1.printStackTrace();
-						continue;
-					}
+					LMNtalDaemon.respondAsFail(out, msgid);
+					continue;
 				} else {
-					//System.out.println(returnNode.getOutputStream().toString());
-					//System.out.println(input);
-					try {
+					try {  //todo LMNtalDaemonに移す
 						returnNode.out.write(input + "\n");
 						returnNode.out.flush();
 						continue;
@@ -149,11 +136,12 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 			} else if (parsedInput[0].equalsIgnoreCase("registerlocal")) {
 				//registerlocal rgid
 				//rgidとソケットを登録
-				rgid = new Integer(parsedInput[1]);
+				rgid = parsedInput[1];
+
 				result = LMNtalDaemon.registerLocal(rgid, socket);
-				if (result == true) {
-					//成功
+				if (result == true) {  //todo LMNtalDaemonで面倒を見る
 					try {
+						//成功
 						out.write("ok\n");
 						out.flush();
 					} catch (IOException e1) {
@@ -161,8 +149,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 					}
 					continue;
 				} else {
-					//失敗
 					try {
+						//成功
 						out.write("fail\n");
 						out.flush();
 					} catch (IOException e1) {
@@ -174,11 +162,16 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 				//dumphash
 				LMNtalDaemon.dumpHashMap();
 				continue;
+				
+				/* コマンドからはじまる文字列の処理：ここまで */
+				
 			} else {
+				/* msgid "fqdn" rgid メッセージ の処理 */
+			
 				//msgidからつづく命令列とみなす
-				//msgid "FQDN" rgid メッセージ
-				msgid = new Integer(parsedInput[0]);
+				msgid = parsedInput[0];
 				fqdn = (parsedInput[1].split("\"", 3))[1];
+				rgid = parsedInput[2];
 
 				//メッセージを登録
 				LMNtalNode returnNode =
@@ -200,14 +193,16 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 							//自分自身宛なら、自分自身で処理する
 
-							/* ここで処理される命令一覧
-							 * connect
-							 * begin
+							/*
+							 * ここで処理される命令一覧
+							 * 
+							 *  connect
+							 *  begin
+							 *  beginrule
 							 * 
 							 * lock
 							 * blockinglock
-							 * asynclock
-							 * recursivelock
+							 * asynclock recursivelock
 							 * 
 							 * unlock
 							 * blockingunlock
@@ -215,79 +210,94 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 							 * recursiveunlock
 							 * 
 							 * terminate
-							 * 
+							 *  
 							 */
-
-							//TODO 分散と関係ない命令はどうしよう？InterpretedRuleset.interpret()に食わせるか？
 
 							String[] command = new String[3];
 							command = parsedInput[3].split(" ", 3);
 							String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
 							Membrane realMem;
 
-
 							if (command[0].equalsIgnoreCase("connect")) {
-								//TODO すでにランタイムがる場合はどうしよう？生きているかを確認する命令を作成する？
+								if(LMNtalDaemon.registerRemote(rgid, socket)){
+									/** 登録されていない時 */
+									
+									//新規にラインタイムを作る。
+									//OK返すのは生成されたランタイムがする。
+									
+									//daemonに登録。
+									LMNtalDaemon.registerRemote(rgid, socket);
+									
+									String newCmdLine =
+										new String(
+											"java daemon/SlaveLMNtalRuntimeLauncher "
+												+ rgid
+												+ " "
+												+ msgid.toString());
 
-								//新規にラインタイムを作る。
-								//OK返すのは生成されたランタイムがする。
+									if (DEBUG)
+										System.out.println(newCmdLine);
 
-								Integer slaveRuntimeRgid =
-									new Integer(LMNtalDaemon.makeID());
-
-								String newCmdLine =
-									new String(
-										"java daemon/SlaveLMNtalRuntimeLauncher "
-											+ slaveRuntimeRgid.toString()
-											+ " "
-											+ msgid.toString());
-
-								if (DEBUG)
-									System.out.println(newCmdLine);
-
-								try {
-									Process remoteRuntime =
-										Runtime.getRuntime().exec(newCmdLine);
-								} catch (IOException e) {
-									e.printStackTrace();
-									out.write(
-										"res " + msgid.toString() + " fail\n");
-									out.flush();
+									try {
+										Process remoteRuntime =
+											Runtime.getRuntime().exec(newCmdLine);
+									} catch (IOException e) {
+										e.printStackTrace();
+										LMNtalDaemon.respondAsFail(out,msgid);
+									}
+									/** 登録されていない時：ここまで */
+									
+								} else {
+									/** 既に登録済みの時 */
+									Socket localSocket = LMNtalDaemon.getLocalSocket(rgid);
+									
+									if(localSocket == null){
+										LMNtalDaemon.respondAsFail(out,msgid); 
+									} else {
+										//TODO  内部同士でやりとりするメッセージのフォーマットを考える。とりあえず内部では死なないものと思って放置する
+										
+										//LMNtalDaemon.sendLocal(out, rgid, "CONNECT");
+										
+										//OKを返すのはローカルランタイムが行う。todo	  不正確。実際はSlaveLMNtalRuntimeLauncher（の予定
+										/** 既に登録済みの時：ここまで */
+									}
 								}
+
 								continue;
 							} else if (command[0].equalsIgnoreCase("begin")) {
 								/*
-								 * ここで処理される命令：
-								 * (最新版はRemoteMembraneクラス参照。)
+								 * ここで処理される命令： (最新版はRemoteMembraneクラス参照。)
 								 * 
 								 * end
 								 * 
 								 * ルールの操作
-								 * clearrules dstmem
-								 * loadruleset dstmem globalRulesetID
+								 *  clearrules  dstmem
+								 *  loadruleset  dstmem ruleset
 								 * 
-								 * アトムの操作
-								 * newatom srcmem atomid
-								 * alteratomfunctor srcmem atomid func.getName()
-								 * removeatom srcmem atomid
+								 * アトムの操作 
+								 * newatom srcmem atomid 
+								 * alteratomfunctor srcmem atomid func.getName() 
+								 * removeatom
+								 * srcmem atomid 
 								 * enqueueatom srcmem atomid
 								 * 
 								 * 子膜の操作
-								 * newmem srcmem dstmem
-								 * removemem srcmem parentmem
+								 *  newmem srcmem dstmem 
+								 * removemem srcmem
+								 * parentmem
 								 * 
-								 * リンクの操作
+								 * リンクの操作 
 								 * newlink mem atomid1 pos1 atomid2 pos2
 								 * relinkatomargs mem atomid1 pos1 atomid2 pos2
 								 * unifyatomargs mem atomid1 pos1 atomid2 pos2
 								 * 
-								 * 膜自身や移動に関する操作
-								 * movecells dstmem srcmem
+								 * 膜自身や移動に関する操作 
+								 * movecells dstmem srcmem 
 								 * moveto srcmem dstmem
 								 * 
 								 * 仮称
-								 * requireruleset globalRulesetID
-								 * newroot mem
+								 *  requireruleset globalRulesetID 
+								 *  newroot mem
 								 */
 								
 								String[] commandInsideBegin = new String[5]; //RemoteMembrane.send()の引数の個数を参照せよ
@@ -296,7 +306,13 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									input = in.readLine();
 									commandInsideBegin = input.split(" ",5);
 
-
+									//TODO ここで命令を書くのではなくて、Instruction.javaの命令番号を引いてくる。
+									//そして変換表もひける。
+									//案: new InstructionListをする。
+									
+									//案：BEGINからENDまで出てくる引数の中でNEWがつかないものを動的に仮引数リストにいれてやると
+									//InterpretedRulsetのコードが使えるので、そうする？
+									
 									if(commandInsideBegin[0].equalsIgnoreCase("end")){
 										//糸冬
 										continue outsideloop;
@@ -323,7 +339,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										continue beginEndLoop;
 									} else if (commandInsideBegin[0].equalsIgnoreCase("newatom")){
 										srcmem = commandInsideBegin[1]; //グローバル膜ID
-										atom1 = commandInsideBegin[2]; //NEW_1とか 
+										atom1 = commandInsideBegin[2]; //NEW_1とか
 										
 										//NEW_1をatomidに変換
 										//キャッシュからatomidに対応するAtomオブジェクトをもってくる
@@ -371,12 +387,14 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										srcmem = commandInsideBegin[1];
 										dstmem = commandInsideBegin[2];
 										
-										//realMem = IDConverter.getMem(srcmem).newMem();
+										//realMem =
+										// IDConverter.getMem(srcmem).newMem();
 										//if(IDConverter.registerMem(dstmem,realMem)){
 										//	continue beginEndLoop;
 										//} else {
 										//     //todo: 失敗時になにかする
-										//     //System.out.println("failed to register new membrane");
+										//     //System.out.println("failed to
+										// register new membrane");
 										//     continue beginEndLoop;
 										//}
 										
@@ -398,7 +416,14 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										srcmem = commandInsideBegin[1];
 										
 										//TODO 実装
-										//AbstractTask task = (IDConverter.getMem(srcmem)).task.runtime.newTask(this);
+										
+										//create new LMNtalLocalRuntime
+										
+										//create new Task & root membrane
+										//AbstractTask task =
+										// (IDConverter.getMem(srcmem)).task.runtime.newTask(this);
+										
+										//todo この後どうするのかな
 										
 										out.write("not implemented yet\n");
 										out.flush();
@@ -447,8 +472,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										dstmem = commandInsideBegin[1];
 										srcmem = commandInsideBegin[2];
 										
-										//Membrane dstmemobj = IDConverter.getMem(dstmem);
-										//Membrane srcmemobj = IDConverter.getMem(srcmem);
+										//Membrane dstmemobj =
+										// IDConverter.getMem(dstmem);
+										//Membrane srcmemobj =
+										// IDConverter.getMem(srcmem);
 //
 //										if (dstmemobj == srcmemobj) continue beginEndLoop;
 //
@@ -479,7 +506,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 										out.flush();
 
 										continue beginEndLoop;
-									//} else if (commandInsideBegin[0].equalsIgnoreCase("requireruleset")){
+									//} else if
+									// (commandInsideBegin[0].equalsIgnoreCase("requireruleset")){
 										//TODO 実装
 									} else {
 										//未知の命令
@@ -497,7 +525,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								////ロック成功
 								//
 								////キャッシュ更新チェック
-								//   キャッシュオブジェクト.update(); 
+								//   キャッシュオブジェクト.update();
 								//
 								//
 								
@@ -506,7 +534,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//////更新されていなかったら「更新されていませんメッセージ」
 								
 								//ロック失敗
-								//out.write("res " + msgid.toString() + " fail\n");
+								//out.write("res " + msgid.toString() + "
+								// fail\n");
 								//out.flush();
 								
 								out.write("not implemented yet\n");
@@ -525,7 +554,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//IDConverter.getMem(command[1]).asyncLock();
 
 								//キャッシュ更新
-																
+
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
@@ -537,7 +566,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//} else {
 								    //不成功
 								    //System.out.println("UNLOCK failed");
-								    //out.write("res " + msgid.toString() + " fail\n");
+								    //out.write("res " + msgid.toString() + "
+									// fail\n");
 								    //out.flush();
 								    //continue;
 								//}
@@ -559,7 +589,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//} else {
 									//不成功
 									//System.out.println("ASYNCUNLOCK failed");
-									//out.write("res " + msgid.toString() + " fail\n");
+									//out.write("res " + msgid.toString() + "
+									// fail\n");
 									//out.flush();
 									//continue;
 								//}
@@ -588,16 +619,15 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//やるべきことはEnv.theRuntimeのterminate
 								//でも呼べないからどうしよう？
 								//LocalLMNtalRuntime.terminate();
-								Env.theRuntime.terminate(); //TODO これでいいのかな
+								Env.theRuntime.terminate(); //TODO
+																				  // これでいいのかな
 
 								//out.write("not implemented yet\n");
 								//out.flush();
 								continue;
 							} else {
 								//未知のコマンド or それ以外の何か
-								out.write(
-									"res " + msgid.toString() + " fail\n");
-								out.flush();
+								LMNtalDaemon.respondAsFail(out,msgid);
 								continue;
 							}
 						} else {
@@ -606,9 +636,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 							//宛先ノードは既知か？
 							LMNtalNode targetNode =
 								LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+				
 							if (targetNode == null) {
 								//宛先ノードへ接続するのが初めての場合
-								result = LMNtalDaemon.connect(fqdn);
+								result = LMNtalDaemon.connect(fqdn, rgid);
 
 								if (result) {
 									targetNode =
@@ -617,24 +648,17 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 									if (targetNode == null) {
 										//接続失敗
-										out.write(
-											"res "
-												+ msgid.toString()
-												+ " fail\n");
-										out.flush();
+										LMNtalDaemon.respondAsFail(out,msgid);
 										continue;
 									} else {
 										LMNtalDaemon.sendMessage(
 											targetNode,
 											input + "\n");
 									}
-
 									continue;
 								} else {
 									//宛先ノードへの接続失敗
-									out.write(
-										"res " + msgid.toString() + " fail\n");
-									out.flush();
+									LMNtalDaemon.respondAsFail(out,msgid);
 									continue;
 								}
 							} else {
@@ -645,9 +669,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									continue;
 								} else {
 									//転送失敗
-									out.write(
-										"res " + msgid.toString() + " fail\n");
-									out.flush();
+									LMNtalDaemon.respondAsFail(out,msgid);
 									continue;
 								}
 							}
@@ -656,25 +678,16 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 						e1.printStackTrace();
 						//continue;
 						break;
-					} catch (NullPointerException nurupo) {
+					} catch (NullPointerException nullpo) {
 						System.out.println("（　´∀｀）＜　ぬるぽ");
-						nurupo.printStackTrace();
+						nullpo.printStackTrace();
 						//continue;
 						break;
 					}
 				} else {
-					//既にmsgTableに登録されている時 or 通信失敗時
-					try {
-						out.write("res " + msgid.toString() + " fail\n");
-						out.flush();
-						//continue;
-						break;
-					} catch (IOException e1) {
-						//todo: 通信失敗時は何しよう？
-						
-						e1.printStackTrace();
-						break;
-					}
+					//既にmsgTableに登録されている時 or 通信失敗
+					LMNtalDaemon.respondAsFail(out,msgid);
+				}
 				}
 			}
 		}

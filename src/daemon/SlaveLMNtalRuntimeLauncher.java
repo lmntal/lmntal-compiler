@@ -2,6 +2,7 @@ package daemon;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -9,16 +10,18 @@ import java.net.Socket;
 import runtime.LocalLMNtalRuntime;
 
 class SlaveLMNtalRuntimeLauncher {
+	//TODO 名称変更。ここはLocalLMNtalRuntimeとLMNtalDaemonの間にいて、ローカルホスト内TCP通信の面倒を接続元がソケットを閉じるまで見続ける。
+	
 	static boolean DEBUG = true;
 	
 	static LocalLMNtalRuntime runtime;
-	static int rgid;
+	static String rgid;
 	
 	public static void main(String[] args){
 		try {
-			rgid = Integer.parseInt(args[0]);
-			int callerMsgid = Integer.parseInt(args[1]);
-			
+			rgid = args[0];
+			String callerMsgid = args[1];
+
 			Socket socket = new Socket("localhost", 60000);
 
 			BufferedWriter out =
@@ -57,7 +60,8 @@ class SlaveLMNtalRuntimeLauncher {
 				
 				//ルールセットを作る
 
-
+				//メッセージ待ちに入る。
+				//processMessage(in, out);
 			} else {
 				//connectを発行した元に対してres msgid failを返す
 				command = "res " + callerMsgid + " fail\n";
@@ -68,6 +72,42 @@ class SlaveLMNtalRuntimeLauncher {
 		} catch (Exception e) {
 			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());
 			e.printStackTrace();
+		}
+	}
+	
+	void processMessage(BufferedReader in, BufferedWriter out){
+		String input = "";
+		String inputParsed[] = new String[3];
+		
+		while(true){ 
+			 //TODO 接続元がコネクションを切るまでまわりつづける(停止判定をする)
+			
+			try {
+				input = in.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+				continue; //todo これでいいのかな
+			}
+			
+			inputParsed = input.split(" ",3);
+			
+			if(inputParsed[0].equalsIgnoreCase("connect")){
+				//CONNECT msgid
+				//CONNECTが来たらokを返す
+				try {
+					out.write("res " + inputParsed[1] + " ok\n"); //todo inputParsed[1]が空だった時の対策
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					System.out.println("Error in CONNECT");
+				}
+				
+			//} else if(inputParsed[0].equalsIgnoreCase("")){
+				
+			} else {
+				//cannot parse
+				System.out.println("Error in SlaveLMNtalRuntimeLauncher.processMessage(): cannot parse input");
+				continue;
+			}
 		}
 	}
 }
