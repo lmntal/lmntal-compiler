@@ -169,15 +169,22 @@ class InterpreterReactor {
 
 					//====ファンクタに関係する命令====ここから====
 				case Instruction.DEREFFUNC : //[-dstfunc, srcatom, srcpos]
-					break;
+					vars.set(inst.getArg1(), atoms[inst.getIntArg2()].args[inst.getIntArg3()].atom.getFunctor()));
+					break; //nakajima 2003-12-21
 				case Instruction.GETFUNC : //[-func, atom]
-					break;
+					vars.set(inst.getArg1(), atoms[inst.getIntArg2()].getFunctor());
+					break; //nakajima 2003-12-21
 				case Instruction.LOADFUNC : //[-func, funcref]
-					break;
+					vars.set(inst.getArg1(), (Functor)inst.getArg2());
+					break;//nakajima 2003-12-21
 				case Instruction.EQFUNC : //[func1, func2]
-					break;
+					//todo: castが本当にいらないのか確認
+					if (inst.getArg1() != inst.getArg2()) return false;
+					break; //nakajima 2003-12-21
 				case Instruction.NEQFUNC : //[func1, func2]
-					break;
+					//todo: castが本当にいらないのか確認
+					if (inst.getArg1() == inst.getArg2()) return false;
+					break; //nakajima 2003-12-21
 					//====ファンクタに関係する命令====ここまで====
 
 					//====アトムを操作する基本ボディ命令====ここから====
