@@ -66,11 +66,11 @@ public class Instruction {
 	    buffer.append("[ ");
 	    buffer.append(hoge[0]);
 
-	    for (int i = 1;i < hoge.length;i++) {
+	    for (int i = 1; i < hoge.length-1; i+=2) {
 		buffer.append(", ");
 		
 		buffer.append("[");
-		fuga = hoge[i].toArray();
+		fuga = hoge[i+1].toArray();
 		for (int j = 0; j < fuga.length; j++) {
 		    buffer.append(fuga[j]);
 		}
