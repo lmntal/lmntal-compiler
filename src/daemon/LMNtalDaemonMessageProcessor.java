@@ -57,6 +57,8 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			 * コマンド:
 			 *   BEGIN \n ボディ命令... END
 			 *   CONNECT dst_nodedesc src_nodedesc
+			 *   DISCONNECT
+			 * 
 			 *   TERMINATE
 			 *   ...
 			 */
@@ -103,6 +105,16 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				boolean result = LMNtalDaemon.registerRuntimeGroup(rgid, this);
 				respond(msgid, result);
 				continue;
+			}  else if (parsedInput[0].equalsIgnoreCase("UNREGISTERLOCAL")){
+				//UNREGISTERLOCAL rgid
+				
+				//rgid を削除
+				String rgid  = parsedInput[1];
+				if(LMNtalDaemon.unregisterRuntimeGroup(rgid)){
+					//	自分自身にある、マスタランタイム(LMNtalRuntimeMessageProcessor)との通信路を切る
+					close();
+				}
+				continue;
 			} else if (parsedInput[0].equalsIgnoreCase("DUMPHASH")) {
 				// DUMPHASH
 				LMNtalDaemon.dumpHashMap();
@@ -139,7 +151,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 							content = buf.toString();
 						} 
 						
-						LMNtalNode targetNode;
+						LMNtalNode targetNode = null;
 						
 						if (command[0].equalsIgnoreCase("CONNECT")) {
 							//自分自身宛かどうか判断

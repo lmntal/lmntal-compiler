@@ -123,7 +123,7 @@ public class LMNtalNode {
 			out.flush();
 			return true;
 		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.sendMessage()");
+			System.out.println("ERROR in LMNtalNode.sendMessage()");
 			e.printStackTrace();
 		}
 		return false;
