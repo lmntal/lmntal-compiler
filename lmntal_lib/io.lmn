@@ -22,8 +22,19 @@ io.popup(String) :- unary(String)|[[/*inline*/
 	]](String).
 
 /**
- * Constructor : String -> java::BufferedReader
+ * io.toFile : String -> List of String -> unit
  * 
+ * @example r=io.toFile(b, io.fromFile(a))
+ */
+H=io.toFile(Filename, List) :- unary(Filename) | H=toFile_s0(io.fileWriter(Filename), List).
+H=toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=toFile_s0(print(Obj, CAR), CDR).
+H=toFile_s0(Obj, []) :- H=close(Obj).
+
+
+/**
+ * io.fileWriter : String -> java.io.PrintWriter
+ * 
+ * @example r=close(print(io.fileWriter(a), abc))
  */
 H=io.fileWriter(Filename) :- unary(Filename) | H=[[/*inline*/
 	try {
@@ -36,7 +47,7 @@ H=io.fileWriter(Filename) :- unary(Filename) | H=[[/*inline*/
 	]](Filename).
 
 /**
- * print : ?
+ * print : String -> unit
  * 
  */
 H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
@@ -60,7 +71,7 @@ H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 	]](Object, String).
 
 /**
- * close : 
+ * close : unit -> unit
  * 
  */
 H=close(Object) :- class(Object, "java.io.PrintWriter") |
@@ -68,23 +79,23 @@ H=close(Object) :- class(Object, "java.io.PrintWriter") |
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			pw.close();
-			mem.relink(me.nthAtom(0), 0, me, 2);
+			mem.relink(me.nthAtom(0), 0, me, 1);
 			me.remove();
 		} catch(Exception e) {Env.e(e);}
 	]](Object).
 
 /**
- * io.file : String -> Queue of String
+ * io.fromFile : String -> List of String
  * 
  */
-H=io.file(Filename) :- H=file_s0(io.fileReader(Filename), queue.new).
-H=file_s0(Obj, Queue) :- class(Obj,"java.io.BufferedReader") |
-	H=file_s0(readline(Obj, String), push(Queue, String)).
-H=file_s0(nil, Queue) :- H=Queue.
+H=io.fromFile(Filename) :- H=fromFile_s0(io.fileReader(Filename), []).
+H=fromFile_s0(Obj, List) :- class(Obj, "java.io.BufferedReader") |
+	H=[String|fromFile_s0(readline(Obj, String), List)].
+H=fromFile_s0(nil, List) :- H=List.
 
 
 /**
- * Constructor : String -> java::BufferedReader
+ * io.fileReader : String -> java::BufferedReader
  * 
  */
 H=io.fileReader(Filename) :- unary(Filename) | H=[[/*inline*/
