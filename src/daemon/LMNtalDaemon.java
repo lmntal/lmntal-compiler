@@ -32,35 +32,7 @@ import runtime.AbstractMembrane;
  */
 public class LMNtalDaemon implements Runnable {
 	/*
-	 * 例(略記):    a :- { b }@"banon" 
-	 * 例:          a :- connectruntime("banon", B) | {b}@B.
-	 *              a :- connectruntimefailure("banon") | fail("banon").
-	 * 
-	 * 
-	 * とりあえず考えてみたプロトコル
-	 * 
 	 * 凡例： rgid  … runtime group id
-	 * 
-	 * 登録関係
-	 * HELO …（ノﾟДﾟ）おはよう
-	 * READY …ack
-	 * REGISTERLOCAL rgid …ローカルにあるマスタランタイムを登録
-	 * OK, msgid … 成功
-	 * FAIL, msgid … 失敗
-	 * REGISTERREMOTE, rgid …手元に登録してあるマスタランタイムを相手に送る
-	 * REGISTERFINISHED, rgid …黒を作成できたことをマスタランタイムがある計算機のdaemonに送る
-	 * CONNECTRUNTIME, msgid, "banon"
-	 * TERMINATE, rgid 
-	 * 
-	 * 実行関係
-	 * COPYRULESET …ルールセットを全て送る
-	 * COPYRULE …ルールを一つ送る
-	 * COPYPROCESSCONTEXT …$pを送る
-	 * COPYFREELINK
-	 * COPYATOM
-	 * 
-	 *
-	 * 
 	 */
 
 	/*【n-katoからのコメント】
@@ -75,7 +47,7 @@ public class LMNtalDaemon implements Runnable {
 	ServerSocket servSocket = null;
 	
 	/*
-	 * ソケットとつなげてきた元のノードの表
+	 * ソケットと接続元の表
 	 */
 	static HashMap nodeTable = new HashMap();
 	
@@ -99,13 +71,12 @@ public class LMNtalDaemon implements Runnable {
 	 */
 	static HashMap localMemTable = new HashMap();
 
+
 	/*
-	 * idを作るのに使うランダム
+	 * idを作るのに使うランダムオブジェクト
 	 */
 	static Random r = new Random();
 	
-	//static Process remoteRuntime;
-
 	/*
 	 * コンストラクタ。 tcp60000番にServerSocketを開くだけ。
 	 */
@@ -121,7 +92,7 @@ public class LMNtalDaemon implements Runnable {
 
 	/*
 	 * コンストラクタ。 tcpのportnum番ポートにServerSocketを開くだけ。
-	 * @param portnum ServerSocketに渡す
+	 * @param portnum ServerSocketに渡すtcpポート番号
 	 */
 	public LMNtalDaemon(int portnum) {
 		try {
@@ -142,6 +113,12 @@ public class LMNtalDaemon implements Runnable {
 		t.start();
 	}
 
+/*
+ * 接続を待ち、接続が来たらLMNtalNodeを作成して登録、そしてLMntalDaemonMessageProcessorスレッドを起動する。
+ * 
+ *  (non-Javadoc)
+ * @see java.lang.Runnable#run()
+ */
 	public void run() {
 		if(DEBUG)System.out.println("LMNtalDaemon.run()");
 
@@ -550,4 +527,6 @@ public class LMNtalDaemon implements Runnable {
 		
 		return null;
 	}
+	
+
 }

@@ -1,6 +1,7 @@
 package runtime;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,6 +12,13 @@ import java.util.List;
 public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runnable */{
 	List tasks = new ArrayList();
 //	protected Thread thread = new Thread(this);
+
+	/*
+	 * global rulset id --> rulset objectな表
+	 */
+	HashMap rulesetIDMap = new HashMap();
+
+
 	public LocalLMNtalRuntime(){
 		Env.theRuntime = this;
 	}
@@ -61,4 +69,29 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 //			}
 //		} while(!allIdle);
 //	}
+
+	/*
+	 * global rulset id --> ルールセットオブジェクトな表に登録
+	 */
+	boolean registerRuleset(Ruleset rs){
+		String globalid = rs.getGlobalRulesetID();
+		
+		if(globalid != null) {
+			rulesetIDMap.put(rs.getGlobalRulesetID(), rs);
+			return true;
+		}
+		
+		return false;
+	}
+
+	/*
+	 * global rulset id --> rulset object
+	 */
+	Ruleset getLocalRulsetID(String globalRulesetID){
+		Ruleset rs = (Ruleset)rulesetIDMap.get(globalRulesetID);
+		
+		if(rs != null) return rs;
+		
+		return null;
+	}
 }

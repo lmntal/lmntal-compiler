@@ -16,6 +16,25 @@ import runtime.Env;
  * @author nakajima
  */
 public class LMNtalDaemonMessageProcessor implements Runnable {
+	/*
+	 * メッセージ。ver.20040710
+	 * 
+	 * res msgid msg
+	 * dumphash
+	 * registerlocal
+	 * begin
+	 * end
+	 * lock
+	 * unlock
+	 * terminate
+	 * 
+	 * 
+	 * 以下はbegin-endの中にのみある
+	 * RemoteMembrane.java参照。
+	 * 
+	 * 
+	 */
+
 	static boolean DEBUG = true;
 
 	BufferedReader in;
@@ -184,22 +203,24 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 					//自分自身宛かどうか判断
 					try {
 						if (isMyself(fqdn)) {
-							if(DEBUG) System.out.println(
-								"This message is for me: "
-									+ InetAddress
-										.getLocalHost()
-										.getHostAddress());
+							if (DEBUG)
+								System.out.println(
+									"This message is for me: "
+										+ InetAddress
+											.getLocalHost()
+											.getHostAddress());
 
 							//自分自身宛なら、自分自身で処理する
 
 							/* ここで処理される命令一覧
-							 *  begin
-							 *  connect
-							 *  lock taskid
-							 *  terminate
+							 * begin
+							 * end
+							 * connect
+							 * lock taskid
+							 * terminate
 							 */
-							 
-							 //TODO 分散と関係ない命令はどうしよう？InterpretedRuleset.interpret()に食わせるか？
+
+							//TODO 分散と関係ない命令はどうしよう？InterpretedRuleset.interpret()に食わせるか？
 
 							String command = (parsedInput[3].split(" ", 3))[0];
 
@@ -208,36 +229,38 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 								//新規にラインタイムを作る。
 								//OK返すのは生成されたランタイムがする。
-								
-								slaveRuntimeRgid = new Integer(LMNtalDaemon.makeID());
-								
+
+								slaveRuntimeRgid =
+									new Integer(LMNtalDaemon.makeID());
+
 								String newCmdLine =
 									new String(
 										"java daemon/SlaveLMNtalRuntimeLauncher "
 											+ slaveRuntimeRgid.toString()
 											+ " "
 											+ msgid.toString());
-											
-								if (DEBUG)System.out.println(newCmdLine);
+
+								if (DEBUG)
+									System.out.println(newCmdLine);
 
 								try {
-									Process remoteRuntime = Runtime.getRuntime().exec(newCmdLine);
+									Process remoteRuntime =
+										Runtime.getRuntime().exec(newCmdLine);
 								} catch (IOException e) {
 									e.printStackTrace();
-									out.write("res " + msgid.toString() + " fail\n");
+									out.write(
+										"res " + msgid.toString() + " fail\n");
 									out.flush();
 								}
 								continue;
 							} else if (command.equalsIgnoreCase("begin")) {
 								//TODO 実装
-								
+
 								//beginの後はendがくるまで命令が連続でくる...
 								//どう処理しようか。
 								//そのままLocalLMNtalRuntimeにまわすのがいいのかな
 								//来る命令は分散用の命令でなく、タスクとして実行されるべき命令。
-								
-																						
-								
+
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
@@ -257,9 +280,18 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//out.write("not implemented yet\n");
 								//out.flush();
 								continue;
+							} else if (command.equalsIgnoreCase("lock")){
+								//TODO 実装
+								//lock
+								
+								//ロック要求がきたら、キャッシュ機構を有効化しないといけない。
+								
+								
+								
 							} else {
 								//未知のコマンド or それ以外の何か
-								out.write("res " + msgid.toString() + " fail\n");
+								out.write(
+									"res " + msgid.toString() + " fail\n");
 								out.flush();
 								continue;
 							}
@@ -280,7 +312,10 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 									if (targetNode == null) {
 										//接続失敗
-										out.write("res " + msgid.toString() + " fail\n");
+										out.write(
+											"res "
+												+ msgid.toString()
+												+ " fail\n");
 										out.flush();
 										continue;
 									} else {
@@ -292,7 +327,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									continue;
 								} else {
 									//宛先ノードへの接続失敗
-									out.write("res " + msgid.toString() + " fail\n");
+									out.write(
+										"res " + msgid.toString() + " fail\n");
 									out.flush();
 									continue;
 								}
@@ -304,7 +340,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									continue;
 								} else {
 									//転送失敗
-									out.write("res " + msgid.toString() + " fail\n");
+									out.write(
+										"res " + msgid.toString() + " fail\n");
 									out.flush();
 									continue;
 								}
