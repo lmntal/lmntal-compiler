@@ -369,7 +369,7 @@ public final class Membrane extends AbstractMembrane {
 		return new byte[0];	// TODO 【実装】（有志A）1/2
 		// （次の案）以下をカンマで連結する
 		// アトム      -> atomid:functortext( リンク先atomid:pos, ... )
-		// 子膜        -> [host:]localmemid:{ inside_proxyのatomid, ... }
+		// 子膜        -> [host:]localmemid:{ inside_proxyのatomid, ... }[/]
 		// ルールセット -> globalRulesetID
 		// host:localmemid が globalmemid。host:はルート膜のときのみ付加される。
 		

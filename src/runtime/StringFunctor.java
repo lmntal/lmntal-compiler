@@ -7,5 +7,5 @@ package runtime;
 public class StringFunctor extends ObjectFunctor {
 	public StringFunctor(String data) { super(data); }
 	public String getQuotedAtomName() { return getStringLiteralText(getName()); }
-	public String getQuotedFuncName() { return getQuotedAtomName(); }
+	public String getQuotedFunctorName() { return getQuotedAtomName(); }
 }

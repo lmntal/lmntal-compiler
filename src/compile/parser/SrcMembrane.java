@@ -8,6 +8,8 @@ class SrcMembrane {
 	LinkedList process = null;
 	/** 終了フラグの有無 */
 	public boolean stable = false;
+	/** ＠指定またはnull */
+	Object pragma = null;
 	
 	/**
 	 * 空の膜を作成します 

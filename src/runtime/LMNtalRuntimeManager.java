@@ -103,9 +103,9 @@ public final class LMNtalRuntimeManager {
 		}
 	}
 	public static void disconnectFromDaemon() {
-		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon()");
 		if (daemon != null) {
-			// TODO 【質問】(n-kato) unregisterlocalを使わずに問答無用で切ればいいと思っていたんですけど、ダメなんですか？ 切れたらdaemon側で勝手にMASTER表から除去して向こうのスレッドが終わるという風に。2004-08-27
+			if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon()");
+			// 【質問】(n-kato) unregisterlocalを使わずに問答無用で切ればいいと思っていたんですけど、ダメなんですか？ 切れたらdaemon側で勝手にMASTER表から除去して向こうのスレッドが終わるという風に。2004-08-27
 			// 【回答】(mizuno)
 			//     LMNtalRuntimeMessageProcessorがin.readLine()でブロックしている最中にソケットを閉じるとSocketExceptionが発生してしまうので、その回避方法として、中島さんと相談してこうしてみました。
 			//     unregisterlocalによってデーモン側でOutputStreamを閉じてもらえば、EOFが送られてくるのでreadLineがnullを返してくれます。
@@ -122,8 +122,9 @@ public final class LMNtalRuntimeManager {
 	}
 	private static Object terminateLock = "";
 	/** 登録されている全てのRemoteLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
-	 *  Env.theRuntime は terminate しない。*/
-	public static void terminateAllNeighbors() {
+	 *  Env.theRuntime も terminate する (n-kato) 2004-09-17 */
+	public static void terminateAll() {
+		Env.theRuntime.terminate();
 		synchronized(terminateLock) { // 重複転送防止のため（仮）
 			Iterator it = runtimeids.keySet().iterator();
 			while (it.hasNext()) {

@@ -198,7 +198,7 @@ class TestRemote{
 		//System.out.println("terminateAllNeighbours() success"); 
 		
 		System.out.println("now terminating");
-		LMNtalRuntimeManager.terminateAllNeighbors();
+		LMNtalRuntimeManager.terminateAll();
 		LMNtalRuntimeManager.disconnectFromDaemon();
 		System.out.println("terminated");
 

@@ -26,7 +26,7 @@ class SlaveLMNtalRuntimeLauncher {
 				LocalLMNtalRuntime runtime = new LocalLMNtalRuntime();
 				node.respondAsOK(callerMsgid);	// node.runtimeidを返す場合、このresの引数にする
 				nodeThread.join(); //socketが切断するまで待つ
-				LMNtalRuntimeManager.terminateAllNeighbors();
+				LMNtalRuntimeManager.terminateAll();
 				LMNtalRuntimeManager.disconnectFromDaemon();
 			}
 		} catch (Exception e) {

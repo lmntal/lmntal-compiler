@@ -231,7 +231,7 @@ public class FrontEnd {
 			Membrane root = rt.getGlobalRoot();
 			Env.initGUI(root);
 			//root.blockingLock();
-			rs.react(root); // TODO 【検証】初期配置で子タスクを作った場合にどうなるか考える
+			rs.react(root); // TODO 【検証】初期配置で子タスクを作った場合にどうなるか考える→LMNParserを修正することにした
 			if (Env.gui != null) {
 				Env.gui.lmnPanel.getGraphLayout().calc();
 				Env.gui.onTrace();
@@ -246,8 +246,7 @@ public class FrontEnd {
 			if (Env.gui != null) {
 				while(true) Env.gui.onTrace();
 			}
-			
-			LMNtalRuntimeManager.terminateAllNeighbors();
+			LMNtalRuntimeManager.terminateAll();
 			LMNtalRuntimeManager.disconnectFromDaemon();
 			
 		} catch (Exception e) {
@@ -255,3 +254,5 @@ public class FrontEnd {
 		}
 	}
 }
+// TODO 初期配置で子タスクを作る
+// TODO dumperをマルチスレッド対応にする

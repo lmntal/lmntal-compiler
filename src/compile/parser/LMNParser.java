@@ -78,6 +78,7 @@ public class LMNParser {
 		expander.incorporateSignSymbols(srcProcess);
 		expander.incorporateModuleNames(srcProcess);
 		expander.expandAtoms(srcProcess);
+		//expander.correctPragma(srcProcess); TODO ガードが無いので書けない
 		expander.correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = addProxies(mem);
@@ -233,6 +234,16 @@ public class LMNParser {
 	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) throws ParseException {
 		Membrane submem = new Membrane(mem);
 		submem.stable = sMem.stable;
+		if (sMem.pragma instanceof SrcProcessContext) {
+			SrcProcessContext sProc = (SrcProcessContext)sMem.pragma;			
+			String name = sProc.getQualifiedName();
+			ProcessContext pc = new ProcessContext(mem, name, 0);
+			submem.pragmaAtHost = pc;
+			// todo 【コード整理】直接ContextDefを代入できるようにする(1)
+		}
+		if (sMem.pragma != null && submem.pragmaAtHost == null) {
+			warning("WARNING: unregognized pragma, ignored: " + sMem.pragma);
+		}
 		addProcessToMem(sMem.getProcess(), submem);
 		mem.mems.add(submem);
 	}
@@ -760,7 +771,7 @@ public class LMNParser {
 					else {
 						explicitfreelinks.add(lnk.name);
 					}
-				}			
+				}
 			}
 		}
 		it = mem.ruleContexts.iterator();
@@ -800,6 +811,23 @@ public class LMNParser {
 				RuleContext rc = (RuleContext)it.next();
 				if (rc.def.lhsOcc == rc)  rc.def.lhsOcc = null; // 左辺での出現の登録を取り消す
 				it.remove(); // namesには残る
+			}
+		}
+		//
+		if (mem.pragmaAtHost != null) { // ＠指定は型付きプロセス文脈（仮）
+			ProcessContext pc = mem.pragmaAtHost;
+			String name = pc.getQualifiedName();
+			pc.def = (ContextDef)names.get(name);
+			if (pc.def == null) {
+				error("SYSTEM ERROR: contextdef not set for pragma " + name);
+			}			
+			// todo 【コード整理】直接ContextDefを代入できるようにする(2)
+			if (pc.def.lhsMem == null) {
+				pc.def.lhsMem = mem;
+			}
+			else {
+				// 展開を実装すれば不要になる？
+				error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name for pragma: " + name);
 			}
 		}
 	}
@@ -868,6 +896,16 @@ public class LMNParser {
 			for (int i = 0; i < atom.args.length; i++) {
 				addLinkOccurrence(names, atom.args[i]);
 			}
+		}
+		//
+		if (mem.pragmaAtHost != null) { // ＠指定は型付きプロセス文脈（仮）
+			ProcessContext pc = mem.pragmaAtHost;
+			String name = pc.getQualifiedName();
+			pc.def = (ContextDef)names.get(name);
+			if (pc.def == null) {
+				error("SYSTEM ERROR: contextdef not set for pragma " + name);
+			}			
+			// todo 【コード整理】直接ContextDefを代入できるようにする(2)
 		}
 	}
 
@@ -1053,13 +1091,19 @@ class SyntaxExpander {
 		
 		// - アトム展開（アトム引数の再帰的な展開）
 		expandAtoms(sRule.getHead());
-		expandAtoms(typeConstraints);
 		expandAtoms(guardNegatives);
 		expandAtoms(sRule.getBody());
 
+		// - 左辺と右辺の＠指定を処理する
+		correctPragma(typeConstraints, sRule.getHead(), "string");
+		correctPragma(typeConstraints, sRule.getBody(), "connectRuntime");
+
+		// - アトム展開（ガード型制約）
+		expandAtoms(typeConstraints);
+		
 		// - 型制約の構文エラーを訂正し、アトム引数にリンクかプロセス文脈のみが存在するようにする
 		correctTypeConstraints(typeConstraints);
-
+		
 		// - 型制約に出現するリンク名Xに対して、ルール内の全てのXを$Xに置換する
 		HashMap typedLinkNameMap = computeTypedLinkNameMap(typeConstraints);
 		unabbreviateTypedLinks(sRule.getHead(), typedLinkNameMap);
@@ -1421,7 +1465,16 @@ class SyntaxExpander {
 				}
 			}
 			else if (obj instanceof SrcMembrane) {
-				unabbreviateTypedLinks(((SrcMembrane)obj).getProcess(), typedLinkNameMap);
+				// {..}@H → {..}@($h) //（仮）
+				SrcMembrane sMem = (SrcMembrane)obj;
+				if (sMem.pragma instanceof SrcLink) {
+					SrcLink srcLink = (SrcLink)sMem.pragma;
+					String name = srcLink.getQualifiedName();
+					if (typedLinkNameMap.containsKey(name)) {
+						sMem.pragma = new SrcProcessContext((String)typedLinkNameMap.get(name),true);
+					}
+				}
+				unabbreviateTypedLinks(sMem.getProcess(), typedLinkNameMap);
 			}
 			else if (obj instanceof LinkedList) {
 				unabbreviateTypedLinks((LinkedList)obj, typedLinkNameMap);
@@ -1482,7 +1535,59 @@ class SyntaxExpander {
 			}
 		}
 	}*/
+
+	////////////////////////////////////////////////////////////////
+	//
+	// ＠指定を処理するメソッド
+	//
 	
+	/** アトム展開後のプロセス構造に対して、
+	 * (1) {..}@"hostname"を{..}@Hに置換し、ガード型制約 H="hostname" を追加する。
+	 * (2) {..}@Hに対して、ガード型制約 cmd(H) を追加する。
+	 * <p>左辺の場合のpragmaフィールドへの登録は、addProcessToMemで行う。
+	 * @param cmd 右辺ならば"connectRuntime"を、左辺ならば"string"を渡すこと。(2)で使用される。*/
+	private void correctPragma(LinkedList typeConstraints, LinkedList process, String cmd) {
+		Iterator it = process.iterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcMembrane) {
+				SrcMembrane sMem = (SrcMembrane)obj;
+				correctPragma(typeConstraints, sMem.process, cmd);
+				if (sMem.pragma instanceof SrcAtom) {
+					SrcAtom sAtom = (SrcAtom)sMem.pragma;
+					// (1) | {..}@"hostname" → "hostname"($h) | {..}@($h)
+					if (sAtom.getProcess().size() == 0 && sAtom.getNameType() == SrcName.STRING) {
+						String cxtname = generateNewProcessContextName();
+						sMem.pragma = new SrcProcessContext(cxtname);
+						SrcAtom eq = new SrcAtom(sAtom.srcname);
+						eq.getProcess().add(new SrcProcessContext(cxtname));
+						typeConstraints.add(eq);						
+					}
+				}
+				if (sMem.pragma instanceof SrcLink) {
+					// (2) | {..}@H → cmd(H) | {..}@H
+					LinkedList args = new LinkedList();
+					args.add(new SrcLink(((SrcLink)sMem.pragma).getName()));
+					typeConstraints.add(new SrcAtom(cmd,args));
+					continue;
+				}
+				if (sMem.pragma instanceof SrcProcessContext) {
+					SrcProcessContext sProcCxt = (SrcProcessContext)sMem.pragma;
+					if (sProcCxt.args == null && sProcCxt.bundle == null) {
+						// (2) | {..}@($h) → cmd($h) | {..}@($h)
+						LinkedList args = new LinkedList();
+						args.add(new SrcProcessContext(sProcCxt.getName()));
+						typeConstraints.add(new SrcAtom(cmd,args));
+						continue;
+					}
+				}
+				if (sMem.pragma == null) continue;
+				error("SYNTAX ERROR: illegal pragma, ignored: " + obj);
+				sMem.pragma = null;
+			}
+		}
+	}
+
 	////////////////////////////////////////////////////////////////
 	//
 	// 構文エラー検出および復帰を行うメソッド

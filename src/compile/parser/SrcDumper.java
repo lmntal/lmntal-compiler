@@ -52,6 +52,7 @@ public class SrcDumper {
 		s += dumpLinkedList(mem.getProcess(), indent+1);
 		s += dumpIndent(indent)+"}";
 		if (mem.stable) s += "/";
+		if (mem.pragma != null)  s += dump(mem.pragma, indent + 1);
 		s += BR;
 		return s;
 	}

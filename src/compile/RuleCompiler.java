@@ -221,6 +221,7 @@ public class RuleCompiler {
 		enqueueRHSAtoms();
 		addInline();
 		addRegAndLoadModules();
+		unlockReusedOrNewRootMem(rs.rightMem);
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
 		freeLHSTypedProcesses();
@@ -233,7 +234,7 @@ public class RuleCompiler {
 //		} else 
 		body.add(new Instruction(Instruction.PROCEED));
 	}
-	
+		
 	////////////////////////////////////////////////////////////////
 	//
 	// ガード関係
@@ -520,7 +521,18 @@ public class RuleCompiler {
 			Membrane submem = (Membrane)it.next();
 			int submempath = varcount++;
 			rhsmempath.put(submem, new Integer(submempath));
-			body.add( Instruction.newmem(submempath, rhsmemToPath(mem) ) );
+			if (submem.pragmaAtHost != null) { // 右辺で＠指定されている場合
+				if (submem.pragmaAtHost.def == null) {
+					error("SYSTEM ERROR: pragmaAtHost.def is not set: " + submem.pragmaAtHost.getQualifiedName());
+					corrupted();
+				}
+				int nodedescatomid = typedcxtToSrcPath(submem.pragmaAtHost.def);
+				body.add( new Instruction(Instruction.NEWROOT, submempath, rhsmemToPath(mem),
+					nodedescatomid) );
+			}
+			else { // 通常の右辺膜の場合
+				body.add( Instruction.newmem(submempath, rhsmemToPath(mem) ) );
+			}
 			if (submem.name != null)
 				body.add(new Instruction( Instruction.SETMEMNAME, submempath, submem.name.intern() ));
 			int subcount = buildRHSMem(submem);
@@ -800,6 +812,15 @@ public class RuleCompiler {
 				// この時点では解決できないモジュールがあるので名前にしておく
 				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem), path));
 			}
+		}
+	}
+	/**（再利用された膜または）新しいルート膜に対して、子孫膜から順番にUNLOCKMEMを発行する。
+	 * ただし現在の実装では、この時点ではまだ膜は再利用されていない。*/
+	private void unlockReusedOrNewRootMem(Membrane mem) {
+		Iterator it = mem.mems.iterator();
+		while (it.hasNext()) unlockReusedOrNewRootMem((Membrane)it.next());
+		if (mem.pragmaAtHost != null) { // 右辺で＠指定されている場合
+			body.add(new Instruction(Instruction.UNLOCKMEM, rhsmemToPath(mem)));
 		}
 	}
 	/** 左辺の膜を廃棄する */

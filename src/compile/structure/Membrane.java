@@ -17,6 +17,13 @@ public final class Membrane {
 	public Membrane mem = null;
 	/** 終了フラグがセットされているかどうかを表す */
 	public boolean stable = false;
+	/** ＠指定またはnull
+	 * <p><b>仮仕様</b>
+	 * ホスト指定を表す文字列が入る型付きプロセス文脈名を持った
+	 * 所属膜を持たないプロセスコンテキストが代入される。
+	 * <br>[要注意]例外的に、引数の長さおよびbundleは0にセットされる。
+	 * @see ContextDef.lhsMem */
+	public ProcessContext pragmaAtHost = null;
 	
 	/** システムルールセットとして使うなら真 */
 	public boolean is_system_ruleset = false;
@@ -106,7 +113,11 @@ public final class Membrane {
 		return Env.parray(list).toString();
 	}
 	public String toString() {
-		return "{ " + toStringWithoutBrace() + " }" + (stable ? "/" : "");
+		String ret = "{ " + toStringWithoutBrace() + " }" + (stable ? "/" : "");
+		if (pragmaAtHost != null) {
+			ret += "@" + ((ProcessContext)pragmaAtHost).getQualifiedName();
+		}
+		return ret;
 	}
 	public String toStringAsGuardTypeConstraints() {
 		if (atoms.isEmpty()) return "";

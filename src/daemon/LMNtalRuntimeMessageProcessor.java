@@ -229,8 +229,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				
 				if (command[0].equalsIgnoreCase("TERMINATE")) {
 					// TERMINATE
-					Env.theRuntime.terminate();
-					LMNtalRuntimeManager.terminateAllNeighbors();
+					LMNtalRuntimeManager.terminateAll();
 					respondAsOK(msgid);
 					return;
 				} else if (command[0].equalsIgnoreCase("CONNECT")) {
@@ -604,5 +603,7 @@ class InstructionBlockProcessor implements Runnable {
 			innerremote.flush();
 		}
 		remoteTable.clear();
+
+		// m.remoteがnullに初期化されないのが問題かもしれない
 	}
 }

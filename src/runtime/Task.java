@@ -95,7 +95,7 @@ class Task extends AbstractTask implements Runnable {
 		root.remote = parent.remote;
 		root.activate(); 		// 仮の実行膜スタックに積む
 		parent.addMem(root);	// タスクは膜の作成時に設定した
-		thread.run();
+		thread.start();
 	}
 	/** 親膜の無い膜を作成し、このタスクが管理する膜にする。 */
 	public Membrane createFreeMembrane() {
@@ -121,6 +121,7 @@ class Task extends AbstractTask implements Runnable {
 	/** このタスクの本膜のルールを実行する */
 	void exec() {
 		Membrane mem; // 本膜
+		//System.out.println(getRoot().getAtomCount() + ": exec1 ");
 		synchronized(this) {
 			// このタスクを実行するルールスレッド（現在のスレッド）に停止要求があるときは何もしない
 			if (lockRequestCount > 0) {
@@ -131,12 +132,15 @@ class Task extends AbstractTask implements Runnable {
 			mem = (Membrane)memStack.peek();
 			if(mem == null || !mem.lock()) {
 				// 本膜が無いかまたは本膜のロックを取得できないとき
+//				if (Env.debug > 7) if (mem != null) Env.p("cannot acquire lock");
 				idle = true;
 				return;
 			}
 			mem.remote = null;
 		}
+		//System.out.println(mem.getAtomCount() + ": exec2");
 		// 実行
+		boolean fActivateRootTask = false;
 		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
 //			System.out.println("mems  = " + memStack);
@@ -159,8 +163,12 @@ class Task extends AbstractTask implements Runnable {
 				}
 				else {
 					if (Env.fTrace) {
-						Env.p( " --> " );
-						Env.p( Dumper.dump(getRoot()) );
+						if (getMachine() instanceof MasterLMNtalRuntime) {
+							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
+							// memToDump = getRoot();
+							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
+								Env.p( " --> \n" + Dumper.dump( memToDump ) );
+						}
 					}
 					Env.guiTrace();
 				}// システムコールアトムなら親膜につみ、親膜を活性化
@@ -188,17 +196,7 @@ class Task extends AbstractTask implements Runnable {
 					memStack.pop(); // 本膜をpop
 					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
 					if(mem.isRoot() && mem.getParent() != null) {
-						new Thread() {
-							AbstractMembrane mem;
-							public void run() {
-								if (mem.getParent().asyncLock())
-									mem.getParent().asyncUnlock();
-							}
-							public void activate(AbstractMembrane mem) {
-								this.mem = mem;
-								run();
-							}
-						}.activate(mem);
+						fActivateRootTask = true;
 					}
 					if (!mem.perpetual) {
 						// 子膜が全てstableなら、この膜をstableにする。
@@ -212,8 +210,12 @@ class Task extends AbstractTask implements Runnable {
 					}
 				} else {
 					if (Env.fTrace) {
-						Env.p( " ==> " );
-						Env.p( Dumper.dump(getRoot()) );
+						if (getMachine() instanceof MasterLMNtalRuntime) {
+							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
+							// memToDump = getRoot();
+							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
+								Env.p( " ==> \n" + Dumper.dump( memToDump ) );
+						}
 					}
 					Env.guiTrace();
 				}
@@ -225,18 +227,37 @@ class Task extends AbstractTask implements Runnable {
 			if (lockRequestCount > 0) {
 				signal();
 			}
+			if (memStack.isEmpty()) idle = true;
+		}
+		//System.out.println(mem.getAtomCount() + ": exec3");
+		//
+		if (fActivateRootTask) {
+			new Thread() {
+				AbstractMembrane mem;
+				public void run() {
+					if (mem.getParent().asyncLock())
+						mem.getParent().asyncUnlock();
+				}
+				public void activate(AbstractMembrane mem) {
+					this.mem = mem;
+					run();
+				}
+			}.activate(mem);
 		}
 	}
 	/** このタスク固有のルールスレッドが実行する処理 */
 	public void run() {
-		Membrane root = null;
-		if (runtime instanceof MasterLMNtalRuntime) root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
-		while (true) {
-			if (root != null) { 	
-				if (Env.fTrace) {
-					Env.p( Dumper.dump(root) );
-				}
+		Membrane root = null; // ルートタスクのときのみルート膜が入る。それ以外はnull
+		if (runtime instanceof MasterLMNtalRuntime) {
+			root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
+			if (root.getTask() != this) root = null;			
+		}
+		if (root != null) { 	
+			if (Env.fTrace) {
+				Env.p( Dumper.dump(root) );
 			}
+		}
+		while (true) {
 			while (true) {
 				while (!isIdle()) {
 					exec();
@@ -249,12 +270,19 @@ class Task extends AbstractTask implements Runnable {
 						continue;
 					}
 					try {
+						//System.out.println(getRoot().getAtomCount() + " Thread suspended");
 						wait();
+						//System.out.println(getRoot().getAtomCount() + " Thread resumed");
 					}
 					catch (InterruptedException e) {}
 					awakened = false;
 				}
 				break;
+			}
+			if (root != null) { 	
+				if (Env.fTrace) {
+					Env.p( " ==>* \n" + Dumper.dump(root) );
+				}
 			}
 		}	
 	}

@@ -30,9 +30,10 @@ public class GuardCompiler extends HeadCompiler {
 		return ((Integer)typedcxtsrcs.get(def)).intValue();
 	}
 	
-	static final int ISINT    = Instruction.ISINT;
-	static final int ISFLOAT  = Instruction.ISFLOAT;
-	static final int ISSTRING = Instruction.ISSTRING;
+	static final int ISINT    = Instruction.ISINT;	// 型制約の引数が整数型であることを表す
+	static final int ISFLOAT  = Instruction.ISFLOAT;	// 〃 浮動小数点数型
+	static final int ISSTRING = Instruction.ISSTRING;	// 〃 文字列型
+	static final int ISMEM    = Instruction.ANYMEM;	// 〃 膜（getRuntime専用）
 	static HashMap guardLibrary1 = new HashMap(); // 1入力ガード型制約名
 	static HashMap guardLibrary2 = new HashMap(); // 2入力ガード型制約名
 	static {
@@ -62,6 +63,7 @@ public class GuardCompiler extends HeadCompiler {
 		guardLibrary1.put(new Functor("float", 1), new int[]{ISFLOAT});
 		guardLibrary1.put(new Functor("float", 2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
 		guardLibrary1.put(new Functor("int",   2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
+		guardLibrary1.put(new Functor("connectRuntime",1), new int[]{ISSTRING, Instruction.CONNECTRUNTIME});
 	}
 	
 	//
@@ -119,6 +121,18 @@ public class GuardCompiler extends HeadCompiler {
 					rc.corrupted();
 					match.add(new Instruction(Instruction.LOCK, 0));	// 強制的に失敗させているだけ
 					return;
+				}
+			}
+			else if (def.lhsMem != null) {
+				if (def.lhsMem.pragmaAtHost.def == def) {
+					// 左辺の＠指定で定義される場合
+					identifiedCxtdefs.add(def);
+					int atomid = varcount++;
+					match.add(new Instruction(Instruction.GETRUNTIME, atomid, memToPath(def.lhsMem)));
+					typedcxtsrcs.put(def, new Integer(atomid));
+					typedcxtdefs.add(def);
+					typedcxttypes.put(def, UNARY_ATOM_TYPE);
+					typedcxtdatatypes.put(def, new Integer(ISSTRING));
 				}
 			}
 		}

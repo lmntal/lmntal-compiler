@@ -93,8 +93,9 @@ public class LMNtalNode {
 	 */
 	public static boolean isMyself(String fqdn) {
 		try {
-			return InetAddress.getLocalHost().getHostAddress().equals(
-				InetAddress.getByName(fqdn).getHostAddress());
+			String hostaddr = InetAddress.getByName(fqdn).getHostAddress();
+			if (hostaddr.equals("127.0.0.1")) return true;
+			return InetAddress.getLocalHost().getHostAddress().equals(hostaddr);
 		} catch (java.net.UnknownHostException e) {
 			e.printStackTrace();
 			return false;
@@ -106,7 +107,7 @@ public class LMNtalNode {
 			return InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
-			return "???";
+			return "???"; // どうせ通信できないので(?)放置しておく
 		}
 	}
 	

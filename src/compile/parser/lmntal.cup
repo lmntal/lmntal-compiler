@@ -20,7 +20,8 @@ parser code {:
 
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
-terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE, RBRACE_SLASH,
+terminal		COMMA, LPAREN, RPAREN, LBRACE,
+				RBRACE, RBRACE_SLASH, RBRACE_AT, RBRACE_SLASH_AT,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
@@ -271,12 +272,22 @@ Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 				//| AtomName:name COLON LBRACE WorldProcessList:list RBRACE
 				//	{: RESULT = new SrcMembrane(name, list); :}
 				//|
-				   LBRACE WorldProcessList:list RBRACE_SLASH
+				  LBRACE WorldProcessList:list RBRACE_SLASH
 					{: SrcMembrane sMem = new SrcMembrane(list);
 					   sMem.stable = true;
 					   RESULT = sMem; :}
 				| LBRACE WorldProcessList:list RBRACE
-					{: RESULT = new SrcMembrane(list); :};
+					{: RESULT = new SrcMembrane(list); :}
+				| LBRACE WorldProcessList:list RBRACE_SLASH_AT UnitAtom:atom
+					{: SrcMembrane sMem = new SrcMembrane(list);
+					   sMem.stable = true;
+					   sMem.pragma = atom;
+					   RESULT = sMem; :}
+				| LBRACE WorldProcessList:list RBRACE_AT UnitAtom:atom
+					{: SrcMembrane sMem = new SrcMembrane(list);
+					   sMem.pragma = atom;
+					   RESULT = sMem; :}
+				;
 					
 // 丸カッコなしのルール構文
 Rule		::=	  ProcessList:head RULE ProcessList:body 

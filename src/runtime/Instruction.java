@@ -568,16 +568,16 @@ public class Instruction implements Cloneable, Serializable {
 	// LOCALALLOCMEMは不要
 	static {setArgType(ALLOCMEM, new ArgType(true, ARG_MEM));}
 
-	/** newroot [-dstmem, srcmem, node]
+	/** newroot [-dstmem, srcmem, nodeatom]
 	 * <br>（予約された）ボディ命令<br>
-	 * 膜$srcmemの子膜に文字列nodeで指定された計算ノードで実行される新しいロックされたルート膜を作成し、
-	 * 参照を$dstmemに代入し、（ロックしたまま）活性化する。
+	 * 膜$srcmemの子膜にアトム$nodeatomの名前で指定された計算ノードで実行される新しいロックされた
+	 * ルート膜を作成し、参照を$dstmemに代入し、（ロックしたまま）活性化する。
 	 * この場合の活性化は、仮の実行膜スタックに積むことを意味する。
 	 * <p>newmemと違い、このルート膜のロックは明示的に解放しなければならない。
 	 * @see unlockmem */
 	public static final int NEWROOT = 53;
 	// LOCALNEWROOTは最適化の効果が無いため却下
-	static {setArgType(NEWROOT, new ArgType(true, ARG_MEM, ARG_MEM, ARG_OBJ));}
+	static {setArgType(NEWROOT, new ArgType(true, ARG_MEM, ARG_MEM, ARG_ATOM));}
 	
 	/** movecells [dstmem, srcmem]
 	 * <br>ボディ命令<br>
@@ -1051,7 +1051,7 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int NOT = 209;
 	static {setArgType(NOT, new ArgType(false, ARG_INSTS));}
 
-	// 組み込み機能に関する命令（仮） (210--219)
+	// 組み込み機能に関する命令（仮） (210--215)
 	//  -----  inline  [atom, inlineref]
 	//  -----  builtin [class, method, [links...]]
 
@@ -1085,7 +1085,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * @see isground */
 	public static final int EQGROUND = 216;
 	static {setArgType(EQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
-    	
+	
 	// 型検査のためのガード命令 (220--229)	
 
 	/** isground [-natoms, link]
@@ -1144,6 +1144,27 @@ public class Instruction implements Cloneable, Serializable {
 	 * $stringfuncに代入する。*/
 	public static final int GETCLASSFUNC = 228 + OPT;
 	static {setArgType(GETCLASSFUNC, new ArgType(true, ARG_VAR, ARG_VAR));}
+
+	///////////////////////////////////////////////////////////////////////
+
+	// 分散拡張用の命令 (230--239)
+	/** getruntime [-dstatom, srcmem]
+	 * <br>失敗しない分散拡張用ガード命令<br>
+	 * 膜$srcmem（を管理するタスク）が所属するノードを表す文字列ファンクタを持つ
+	 * 所属膜を持たない文字列アトムを生成し、$dstatomに代入する。
+	 * <p>ルールの左辺に{..}@Hがあるときに使用される。文字列を使うのは仮仕様だがおそらく変えない。*/
+	public static final int GETRUNTIME = 230;
+	static {setArgType(GETRUNTIME, new ArgType(true, ARG_ATOM, ARG_MEM));}
+	
+	/** connectruntime [srcatom]
+	 * <br>分散拡張用ガード命令<br>
+	 * アトム$srcatomが文字列ファンクタを持つことを確認し、
+	 * その文字列が表すノードに接続できることを確認する。
+	 * <p>ルールの右辺に{..}@Hがあるときに使用される。文字列を使うのは仮仕様だがおそらく変えない。*/
+	public static final int CONNECTRUNTIME = 231;
+	static {setArgType(CONNECTRUNTIME, new ArgType(false, ARG_ATOM));}
+
+	///////////////////////////////////////////////////////////////////////
 
 	// 整数用の組み込みボディ命令 (400--419+OPT)
 	/** iadd [-dstintatom, intatom1, intatom2]
@@ -1309,7 +1330,6 @@ public class Instruction implements Cloneable, Serializable {
 //	public static final int FSIN = 640;
 //	public static final int FCOS = 641;
 //	public static final int FTAN = 642;
-
 
 	////////////////////////////////////////////////////////////////
 

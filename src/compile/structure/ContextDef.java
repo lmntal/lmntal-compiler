@@ -32,6 +32,12 @@ public class ContextDef {
 	public boolean isTyped() {
 		return typed;
 	}
+	
+	/** ＠指定される左辺の膜またはnull（仮）
+	 * @see Membrane.pragma
+	 * todo HashMap を使うようにしてlhsMemは廃止する */
+	public Membrane lhsMem = null;
+
 	/** 左辺での出現またはnull。
 	 * <strike>右辺での生成時に使うオリジナルへの参照。
 	 * nullのとき、ルールコンパイラはガード出現を代入してよい。</strike> */

@@ -480,9 +480,10 @@ class InterpretiveReactor {
 					mems[inst.getIntArg1()] = mem;
 					break; //n-kato
 
-				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
-					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newRoot((String)inst.getArg3());
-					break; //n-kato 2004-07-24
+				case Instruction.NEWROOT : //[-dstmem, srcmem, nodeatom]
+					String nodedesc = atoms[inst.getIntArg3()].getFunctor().getName();
+					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newRoot(nodedesc);
+					break; //n-kato 2004-09-17
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
 					mems[inst.getIntArg1()].moveCellsFrom(mems[inst.getIntArg2()]);
 					break; //nakajima 2004-01-04, n-kato
@@ -728,7 +729,7 @@ class InterpretiveReactor {
 				case Instruction.ISFLOAT : //[atom]
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof FloatingFunctor)) return false;
 					break; //n-kato
-				case Instruction.ISSTRING : //[atom] // todo StringFunctorに変える
+				case Instruction.ISSTRING : //[atom] // todo StringFunctorに変える（CONNECTRUNTIMEも）
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof ObjectFunctor)) return false;
 					if (!(((ObjectFunctor)atoms[inst.getIntArg1()].getFunctor()).getObject() instanceof String)) return false;
 					break; //n-kato
@@ -752,12 +753,25 @@ class InterpretiveReactor {
 				case Instruction.INLINE : //[atom, inlineref]
 					Inline.callInline( atoms[inst.getIntArg1()], (String)inst.getArg2(), inst.getIntArg3() );
 					break; //hara
-					//====組み込み機能に関する命令====ここまで====
 //				case Instruction.BUILTIN: //[class, atom]
 //					add(A,B,C) :- int(A),int(B),$builtin:iadd(A,B,C), 
 //					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
 //					break;
 					//====組み込み機能に関する命令====ここまで====
+
+					//====分散拡張用の命令====ここから====
+
+				case Instruction.CONNECTRUNTIME: //[srcatom] // todo StringFunctorに変える（ISSTRINGも）
+					func = atoms[inst.getIntArg1()].getFunctor();
+					if (!(func instanceof ObjectFunctor)) return false;
+					if (!(((ObjectFunctor)func).getObject() instanceof String)) return false;
+					if (LMNtalRuntimeManager.connectRuntime(func.getName()) == null) return false;
+					break; //n-kato
+				case Instruction.GETRUNTIME: //[-dstatom,srcmem] // todo StringFunctorに変える（ISSTRINGも）
+					String hostname = mems[inst.getIntArg2()].getTask().getMachine().hostname;
+					atoms[inst.getIntArg1()] = new Atom(null, new StringFunctor(hostname));
+					break; //n-kato
+					//====分散拡張用の命令====ここまで====
 					
 					//====整数用の組み込みボディ命令====ここから====
 				case Instruction.IADD : //[-dstintatom, intatom1, intatom2]
