@@ -15,7 +15,8 @@ HISTORY
 
 */
 
-string : {
+{
+module(string).
 
 /**
  * replace : String -> String -> String -> String

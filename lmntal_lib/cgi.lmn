@@ -12,7 +12,8 @@ HISTORY
 
 */
 
-cgi : {
+{
+module(cgi).
 
 /**
  * parse_query : unit -> Map

@@ -19,5 +19,7 @@
 	//({call($m,$method),$p}:-unary($m),unary($method)|{call($m).{$method=$arg.}).
 }.
 
-static : {
+{
+module(static).
+
 }.

@@ -12,7 +12,8 @@ HISTORY
 
 */
 
-sys : {
+{
+module(sys).
 
 /**
  * dump : unit -> unit

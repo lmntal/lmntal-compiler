@@ -19,7 +19,8 @@ HISTORY
 
 */
 
-map : {
+{
+module(map).
 
 /**
  * new : unit -> Map

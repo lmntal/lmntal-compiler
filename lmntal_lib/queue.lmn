@@ -22,7 +22,8 @@ HISTORY
 
 */
 
-queue : {
+{
+module(queue).
 
 /**
  * new : unit -> Queue

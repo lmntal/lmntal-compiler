@@ -13,7 +13,9 @@ HISTORY
 
 */
 
-io:{
+{
+module(io).
+
 
 io.print(String) :- unary(String)|[[/*inline*/
 	System.out.println(me.nth(0));

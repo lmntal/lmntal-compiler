@@ -15,7 +15,9 @@ HISTORY
 
 */
 
-amidakuji : {
+{
+	module(amidakuji).
+	
 	amidakuji.start_at($y),c($s,C,D)
 	 :- $s=$y | you($s,U),c(U,C,D).
 	

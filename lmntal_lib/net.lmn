@@ -3,7 +3,9 @@ import java.net.*;
 import java.io.*;
 ]].
 
-net : {
+{
+module(net).
+
 	( H=net.get(S) :- unary(S) | H=[[/*inline*/
 		try {
 			URL url = new URL(me.nth(0));

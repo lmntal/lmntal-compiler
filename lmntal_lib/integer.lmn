@@ -13,8 +13,8 @@ HISTORY
 
 */
 
-integer : {
-//module(integer).
+{
+module(integer).
 
 /**
  * +

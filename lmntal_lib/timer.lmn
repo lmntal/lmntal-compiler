@@ -1,6 +1,8 @@
 % timer, time, benchmark, long の開発者向けサンプル by n-kato
 
-timer : {
+{
+module(timer).
+
 %	export([benchmark,gettime,subtract]).
 
 %	timer:getTime(-Long)

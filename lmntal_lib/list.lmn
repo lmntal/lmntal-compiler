@@ -13,7 +13,8 @@ HISTORY
 
 */
 
-list : {
+{
+module(list).
 
 /**
  * new : unit -> List

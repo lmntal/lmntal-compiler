@@ -1,6 +1,8 @@
 // Semaphore
 
-sem : {
+{
+module(sem).
+
 	name(sem).
 	static.load.
 	
