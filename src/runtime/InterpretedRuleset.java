@@ -343,7 +343,8 @@ class InterpreterReactor {
 
 					//case Instruction.ADDATOM:
 				case Instruction.LOCALADDATOM : //[dstmem, atom]
-					break;
+					mems[inst.getIntArg1()].addAtom(atoms[inst.getIntArg2()]);
+					break; //nakajima 2003-12-27
 					//====アトムを操作する型付き拡張用命令====ここまで====
 
 					//====膜を操作する基本ボディ命令====ここから====
