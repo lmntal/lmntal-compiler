@@ -12,16 +12,19 @@ public interface InlineCode {
 	public void run(Atom a, int codeID);
 }
 
-class MyInlineCode implements InlineCode {
-	public void run(Atom me, int id) {
-		Env.p("Exec inline : "+me.getName());
-		
-		me.getFunctor().getName();
-		switch(id) {
-		//case eval "/*inline*/;".hashCode():
-		case 0:
-			;
-			break;
-		}
-	}
-}
+<<<<<<< InlineCode.java
+//class MyInlineCode implements InlineCode {
+//	public void run(Atom me, int id) {
+//		Env.p("Exec inline : "+me.getName());
+//		
+//		me.getFunctor().getName()
+//		switch(id) {
+//		//case eval "/*inline*/;".hashCode():
+//		case 0:
+//			;
+//			break;
+//		}
+//	}
+//}
+=======
+>>>>>>> 1.4

@@ -119,7 +119,7 @@ public class Inline {
 	 */
 	public static void makeCode() {
 		try {
-			if(code.isEmpty()) return;
+			if(code.isEmpty() && defs.isEmpty()) return;
 			Iterator i;
 			
 			PrintWriter p = new PrintWriter(new FileOutputStream("MyInlineCode.java"));
@@ -136,7 +136,8 @@ public class Inline {
 			p.println("public class MyInlineCode implements InlineCode {");
 			p.println("\tpublic static String version=\"static string.\";");
 			p.println("\tpublic void run(Atom me, int codeID) {");
-			p.println("\t\t//Env.d(a);");
+			//p.println("\t\tEnv.p(\"-------------------------- \");");
+			//p.println("\t\tEnv.d(\"Exec Inline \"+me+codeID);");
 			p.println("\t\tswitch(codeID) {");
 			i = code.keySet().iterator();
 			while(i.hasNext()) {
@@ -144,7 +145,6 @@ public class Inline {
 				int codeID = ((Integer)(code.get(s))).intValue();
 				p.println("\t\tcase "+codeID+": ");
 				//p.println("\t\t\t/*"+s.replaceAll("\\*\\/", "* /").replaceAll("\\/\\*", "/ *")+"*/");
-				//p.println("\t\t\tSystem.out.println(\"=> call Inline "+s+" \");");
 				p.println("\t\t\t"+s);
 				p.println("\t\t\tbreak;");
 			}
@@ -156,7 +156,11 @@ public class Inline {
 			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
 			cp = Runtime.getRuntime().exec("javac -classpath .;lmntal.jar MyInlineCode.java");
 		} catch (Exception e) {
+<<<<<<< Inline.java
+			Env.d("!!!!! "+e.getMessage()+e.getStackTrace());
+=======
 			Env.d("!!! "+e.getMessage()+Arrays.asList(e.getStackTrace()));
+>>>>>>> 1.10
 		}
 		
 	}

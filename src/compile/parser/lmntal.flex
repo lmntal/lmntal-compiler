@@ -41,7 +41,10 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
 Inline = "[[" [^*] ~"]]"
 
 LinkName       = [A-Z][A-Za-z_0-9]*
-AtomNameNormal = {Inline} | [a-z0-9][A-Za-z_0-9]*
+/* これだと [[ と ]] がアトム名に含まれちゃうので一時的に退避 hara */
+/* なんかいい方法ないすかねー */
+/*AtomNameNormal = {Inline} | [a-z0-9][A-Za-z_0-9]* */
+AtomNameNormal = [a-z0-9][A-Za-z_0-9]*
 
 Comment = {TraditionalComment} | {EndOfLineComment}
 

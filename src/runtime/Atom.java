@@ -69,7 +69,7 @@ public final class Atom extends QueuedEntity {
 	}
 
 	/** ファンクタを取得 */
-	Functor getFunctor(){
+	public Functor getFunctor(){
 		return functor;
 	}
 	/** 名前を取得 */
@@ -95,6 +95,14 @@ public final class Atom extends QueuedEntity {
 	/** 所属膜の取得 */
 	public AbstractMembrane getMem() {
 		return mem;
+	}
+	/** 第 n 引数につながってるアトムのファンクタ名を返す */
+	public String nth(int n) {
+		return args[n].getAtom().getFunctor().getName();
+	}
+	/** ファンクタ名を変える */
+	public void changeName(String name) {
+		setFunctor( new Functor(name, getFunctor().getArity()) );
 	}
 //	/** 所属膜を設定する。AbstractMembraneとそのサブクラスのみ呼び出してよい。*/
 //	void setMem(AbstractMembrane mem) {
