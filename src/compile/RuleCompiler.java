@@ -9,23 +9,13 @@ import runtime.Functor;
 import runtime.Inline;
 import compile.structure.*;
 
-// 【確認】左辺膜の自由リンクに対応する自由リンク管理アトムは生成されないようになっているかどうか
-// → なっていた。
-
 /**
- * <pre>
- * コンパイル時データ構造（膜）にルールセットを付加する。
- * 
- * 具体的には、Membrane -> RuleSet が付加された Membrane
- * 
- * 外部からは、{ ( :- WORLD ) } の形式で呼ばれることになる。
- * WORLD にはルールが含まれる場合もあるので、
- * 見つかったルールからルールオブジェクトを生成してその膜のルールセットに追加する
- * という作業を再帰的にやることになる。
- * 
- * </pre>
- * 
- * - ルール内ルールの処理方法の改善案については下のtodoを参照のこと
+ * コンパイル時ルール構造（compile.structure.RuleStructure）を
+ * （インタプリタ動作可能な）ルールオブジェクト（runtime.Rule）に変換する。
+ * <p>
+ * 子ルール構造は無視される代わりに、同じ膜の持つルールセット（runtime.Ruleset）が参照される。
+ * したがってこのクラスを呼び出す RulesetCompiler は、
+ * 子ルール構造を事前にルールセットにコンパイルしておく必要がある。
  * 
  * @author n-kato, hara
  */
@@ -286,7 +276,7 @@ public class RuleCompiler {
 	}	
 
 	/** 膜の階層構造およびプロセス文脈の内容を親膜側から再帰的に生成する。
-	 * @return */
+	 * @return 膜memの内部に出現したプロセス文脈の個数 */
 	private int buildRHSMem(Membrane mem) {
 		Env.c("RuleCompiler::buildRHSMem" + mem);
 		int procvarcount = mem.processContexts.size();
@@ -418,7 +408,7 @@ public class RuleCompiler {
 			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
 		}
 	}
-	/** 左辺の膜を除去する */
+	/** 左辺の膜を廃棄する */
 	private void freeLHSMem(Membrane mem) {
 		Env.c("RuleCompiler::freeLHSMem");
 		Iterator it = mem.mems.iterator();
@@ -429,6 +419,7 @@ public class RuleCompiler {
 			body.add(new Instruction(Instruction.FREEMEM, lhsmemToPath(submem)));
 		}
 	}
+	/** 左辺のアトムを廃棄する */
 	private void freeLHSAtoms() {
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			body.add( new Instruction(Instruction.FREEATOM, lhsfreemems.size() + i ));
