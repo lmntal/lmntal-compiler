@@ -238,7 +238,7 @@ class InterpretiveReactor {
 					if (mems[inst.getIntArg1()].hasRules()) return false;
 					break; //n-kato
 				case Instruction.NATOMS : //[srcmem, count]
-					if (mems[inst.getIntArg1()].atoms.size() != inst.getIntArg2()) return false;
+					if (mems[inst.getIntArg1()].atoms.getNormalAtomCount() != inst.getIntArg2()) return false;
 					break; //n-kato
 				case Instruction.NFREELINKS : //[srcmem, count]
 					// TODO 何か変
@@ -305,7 +305,7 @@ class InterpretiveReactor {
 				case Instruction.NEWATOMINDIRECT :
 				case Instruction.LOCALNEWATOMINDIRECT : //[-dstatom, srcmem, func]
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom((Functor)(vars.get(inst.getIntArg3())));
-					break; //nakajima 2003-12-27, 2004-01-03
+					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 				case Instruction.ENQUEUEATOM :
 				case Instruction.LOCALENQUEUEATOM : //[srcatom]
 					atom = atoms[inst.getIntArg1()];
@@ -326,27 +326,27 @@ class InterpretiveReactor {
 				case Instruction.LOCALALTERFUNCINDIRECT : //[atom, func]
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.alterAtomFunctor(atom,(Functor)(vars.get(inst.getIntArg2())));
-					break; //nakajima 2003-12-27, 2004-01-03
+					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 					//====アトムを操作する基本ボディ命令====ここまで====
 
 					//====アトムを操作する型付き拡張用命令====ここから====
 				case Instruction.ALLOCATOM : //[-dstatom, funcref]
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)inst.getArg2());
-					break; //nakajima 2003-12-27
+					break; //nakajima 2003-12-27, n-kato
 
 				case Instruction.ALLOCATOMINDIRECT : //[-dstatom, func]
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)(vars.get(inst.getIntArg2())));
-					break; //nakajima 2003-12-27, 2004-01-03
+					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 
 				case Instruction.COPYATOM :
 				case Instruction.LOCALCOPYATOM : //[-dstatom, mem, srcatom]
-					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(atoms[inst.getIntArg1()].getFunctor());
-					break; //nakajima 2003-12-27, 2004-01-03
+					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(atoms[inst.getIntArg3()].getFunctor());
+					break; //nakajima, n-kato
 
 					//case Instruction.ADDATOM:
 				case Instruction.LOCALADDATOM : //[dstmem, atom]
 					mems[inst.getIntArg1()].addAtom(atoms[inst.getIntArg2()]);
-					break; //nakajima 2003-12-27
+					break; //nakajima 2003-12-27, n-kato
 					//====アトムを操作する型付き拡張用命令====ここまで====
 
 					//====膜を操作する基本ボディ命令====ここから====
@@ -364,13 +364,12 @@ class InterpretiveReactor {
 					mems[inst.getIntArg1()] = mem;
 					break; //n-kato
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
-					//TODO AbstactMachineクラスが存在しない＜命令の仕様をよく読むこと＞
 					//AbstractMachine remotenode = new AbstractMachine(  );
 					//mems[inst.getIntArg2()].newRoot(    )
 					break; //nakajima 2003-12-27
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
 					mems[inst.getIntArg1()].moveCellsFrom(mems[inst.getIntArg2()]);
-					break; //nakajima 2004-01-04
+					break; //nakajima 2004-01-04, n-kato
 				case Instruction.ENQUEUEALLATOMS : //[srcmem]
 					break;
 				case Instruction.FREEMEM : //[srcmem]
@@ -379,7 +378,7 @@ class InterpretiveReactor {
 				case Instruction.ADDMEM :
 				case Instruction.LOCALADDMEM : //[dstmem, srcmem]
 					mems[inst.getIntArg2()].moveTo(mems[inst.getIntArg1()]);
-					break;//nakajima 2004-01-04
+					break;//nakajima 2004-01-04, n-kato
 
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
@@ -417,16 +416,16 @@ class InterpretiveReactor {
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここから====
 				case Instruction.REMOVEPROXIES : //[srcmem]
 					mems[inst.getIntArg1()].removeProxies();
-					break; //nakajima 2004-01-04
+					break; //nakajima 2004-01-04, n-kato
 				case Instruction.REMOVETOPLEVELPROXIES : //[srcmem]
 					mems[inst.getIntArg1()].removeToplevelProxies();
-					break; //nakajima 2004-01-04
+					break; //nakajima 2004-01-04, n-kato
 				case Instruction.INSERTPROXIES : //[parentmem,childmem]
 					mems[inst.getIntArg1()].insertProxies(mems[inst.getIntArg2()]);
-					break;  //nakajima 2004-01-04
+					break;  //nakajima 2004-01-04, n-kato
 				case Instruction.REMOVETEMPORARYPROXIES : //[srcmem]
 					mems[inst.getIntArg1()].removeTemporaryProxies();
-					break; //nakajima 2004-01-04
+					break; //nakajima 2004-01-04, n-kato
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここまで====
 
 					//====ルールを操作するボディ命令====ここから====
@@ -446,22 +445,20 @@ class InterpretiveReactor {
 
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
 				case Instruction.RECURSIVELOCK : //[srcmem]
-					if (mems[inst.getIntArg1()].recursiveLock(mems[0]) ){
-						return true;
-					}
-					break; //nakajima 2004-01-04
+					if (!mems[inst.getIntArg1()].recursiveLock(mems[0])) return false;
+					break; //n-kato
 				case Instruction.RECURSIVEUNLOCK : //[srcmem]
 					mems[inst.getIntArg1()].recursiveUnlock();
-					break;//nakajima 2004-01-04
+					break;//nakajima 2004-01-04, n-kato
 				case Instruction.COPYMEM : //[-dstmem, srcmem]
-					//TODO proxyに関する処理をまだ書いてない
-					//「内容」とは子膜・アトム・ルール
-					mems[inst.getIntArg1()].copyRulesFrom(mems[inst.getIntArg2()]);
-					mems[inst.getIntArg1()].atoms.addAll(mems[inst.getIntArg2()].atoms);
-					mems[inst.getIntArg1()].mems.addAll(mems[inst.getIntArg2()].mems);
+					// //todo proxyに関する処理をまだ書いてない→それ以前にcopymemはまだ実装できません
+					//「内容」とは子膜・アトム・ルール（ルールは違う。それと、addAllで追加すると親膜はどうなってしまいますか？）
+					//mems[inst.getIntArg1()].copyRulesFrom(mems[inst.getIntArg2()]);
+					//mems[inst.getIntArg1()].atoms.addAll(mems[inst.getIntArg2()].atoms);
+					//mems[inst.getIntArg1()].mems.addAll(mems[inst.getIntArg2()].mems);
 					break;
 				case Instruction.DROPMEM : //[srcmem]
-					mems[inst.getIntArg1()] = null;
+					//mems[inst.getIntArg1()] = null;まだ実装できません
 					break; //nakajima 2004-01-05
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 
@@ -530,18 +527,19 @@ class InterpretiveReactor {
 
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[groundlink1,groundlink2]
-					if(vars.get(inst.getIntArg1()).equals(vars.get(inst.getIntArg2()))){
-						return true;
-					}
+					//intに限らないから命令が違うんですけど
+					//if(vars.get(inst.getIntArg1()).equals(vars.get(inst.getIntArg2()))){
+					//	return true;
+					//}
 					break; //nakajima 2004-01-05
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 
 					//====型検査のためのガード命令====ここから====
 				case Instruction.ISGROUND : //[link]
-					atom = ((Link)vars.get(inst.getIntArg1())).getAtom();
-					if (atom.getMem().equals(mems[0])){
-						return true;
-					}
+					//atom = ((Link)vars.get(inst.getIntArg1())).getAtom();
+					//if (atom.getMem().equals(mems[0])){
+					//	return true;
+					//}
 					break; //nakajima 2004-01-05
 
 				case Instruction.ISINT : //[atom]
@@ -586,14 +584,20 @@ class InterpretiveReactor {
 				case Instruction.IDIV : //[-dstintatom, intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor((int)(x / y)));				
-					break; //nakajima 2004-01-05
-				case Instruction.INEG : //[-dstintatom, intatom1, intatom2]
+					if (y == 0) func = new Functor("NaN",1);
+					else func = new IntegerFunctor(x / y);
+					atoms[inst.getIntArg1()] = new Atom(null, func);				
+					break; //nakajima 2004-01-05, n-kato
+				case Instruction.INEG : //[-dstintatom, intatom]
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(-x));				
 					break;
 				case Instruction.IMOD : //[-dstintatom, intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x % y));						
+					if (y == 0) func = new Functor("NaN",1);
+					else func = new IntegerFunctor(x % y);
+					atoms[inst.getIntArg1()] = new Atom(null, func);						
 					break; //nakajima 2004-01-05
 				case Instruction.INOT : //[-dstintatom, intatom1, intatom2]
 					break;
@@ -627,14 +631,20 @@ class InterpretiveReactor {
 				case Instruction.IDIVFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
-					vars.set(inst.getIntArg1(), new IntegerFunctor((int)(x / y)));
+					if (y == 0) func = new Functor("NaN",1);
+					else func = new IntegerFunctor(x / y);
+					vars.set(inst.getIntArg1(), func);
 					break; //nakajima 2003-01-05
-				case Instruction.INEGFUNC : //[-dstintfunc, intfunc1, intfunc2]
+				case Instruction.INEGFUNC : //[-dstintfunc, intfunc]
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					vars.set(inst.getIntArg1(), new IntegerFunctor(-x));
 					break;
 				case Instruction.IMODFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
-					vars.set(inst.getIntArg1(), new IntegerFunctor(x % y));
+					if (y == 0) func = new Functor("NaN",1);
+					else func = new IntegerFunctor(x % y);
+					vars.set(inst.getIntArg1(), func);
 					break; //nakajima 2003-01-05
 				case Instruction.INOTFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					break;
@@ -656,59 +666,43 @@ class InterpretiveReactor {
 				case Instruction.ILT : //[intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if( x < y ){
-						return true;			
-					}
-					break; //nakajima 2003-01-05
+					if (!(x < y)) return false;
+					break; // n-kato
 				case Instruction.ILE : //[intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if( x <= y ){
-						return true;			
-					}
-					break; //nakajima 2003-01-05
+					if (!(x <= y)) return false;
+					break; // n-kato
 				case Instruction.IGT : //[intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if( x > y ){
-						return true;			
-					}
-					break; //nakajima 2003-01-05
+					if (!(x > y)) return false;
+					break; // n-kato
 				case Instruction.IGE : //[intatom1, intatom2]
 					x = ((IntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if( x >= y ){
-						return true;			
-					}
-					break; //nakajima 2003-01-05
+					if (!(x >= y)) return false;
+					break; // n-kato
 				case Instruction.ILTFUNC : //[intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
-					if( x < y ){
-						return true;			
-					}		
-					break; //nakajima 2003-01-05
+					if (!(x < y)) return false;
+					break; // n-kato
 				case Instruction.ILEFUNC : //[intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
-					if( x <= y ){
-						return true;			
-					}		
-					break; //nakajima 2003-01-05
+					if (!(x <= y)) return false;
+					break; // n-kato
 				case Instruction.IGTFUNC : //[intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
-					if( x > y ){
-						return true;			
-					}		
-					break; //nakajima 2003-01-05
+					if (!(x > y)) return false;
+					break; // n-kato
 				case Instruction.IGEFUNC : //[intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg1())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
-					if( x >= y ){
-						return true;			
-					}		
-					break; //nakajima 2003-01-05
+					if (!(x >= y)) return false;
+					break; // n-kato
 					//====整数用の組み込みガード命令====ここまで====
 
 				default :
