@@ -17,7 +17,7 @@ final public class ProcessContext extends Context{
 	 * TODO 専用のクラスを作る？
 	 */
 	private LinkOccurrence bundle;
-	ProcessContext(String name) {
+	public ProcessContext(String name) {
 		super(name);
 	}
 }
