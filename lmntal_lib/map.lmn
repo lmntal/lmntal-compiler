@@ -1,14 +1,14 @@
-// unary map
-// can be ground map if ground() implemented
+// 単項アトムのマップ
+// ground() が実装されれば、すぐに基底項のマップになる。
 map : {
 	map.new($self)
 	 :- unary($self)|{name($self)}.
 	 
-	// override exist key
+	// すでにあるばあい
 	map.put($self, $k, $v), {name($name), assoc($ok, $ov), $p}
 	 :- unary($k),unary($v),$name=$self,$ok=$k,unary($ov) | {name($name), assoc($k, $v), $p}.
 	
-	// add new key
+	// ないばあい
 	map.put($self, $k, $v), {name($name), $p}
 	 :- unary($k),unary($v),$name=$self | {name($name), assoc($k, $v), $p}.
 	
