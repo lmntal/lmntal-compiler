@@ -634,7 +634,7 @@ class InterpretiveReactor {
 
 				case Instruction.COPYMEM : //[-dstmap, -dstmem, srcmem]
 					// <strike>自由リンクを持たない膜（その子膜とのリンクはOK）のみ</strike>
-					vars.set(inst.getIntArg1(), mems[inst.getIntArg2()].copyFrom(mems[inst.getIntArg3()]));
+					vars.set(inst.getIntArg1(), mems[inst.getIntArg2()].copyCellsFrom(mems[inst.getIntArg3()]));
 					break; //kudo 2004-09-29
 				case Instruction.DROPMEM : //[srcmem]
 					mems[inst.getIntArg1()].drop();
@@ -642,7 +642,7 @@ class InterpretiveReactor {
 				case Instruction.LOOKUPLINK : //[-dstlink, srcmap, srclink]
 					HashMap srcmap = (HashMap)vars.get(inst.getIntArg2());
 					Link srclink = (Link)vars.get(inst.getIntArg3());
-					Atom la = (Atom) srcmap.get(new Integer(srclink.getAtom().id)); // hashCode()をidに変更 (2004-10-12) n-kato
+					Atom la = (Atom) srcmap.get(srclink.getAtom());//new Integer(srclink.getAtom().id)); // hashCode()をidに変更 (2004-10-12) n-kato
 					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
 					break; //kudo 2004-10-10
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
@@ -674,7 +674,7 @@ class InterpretiveReactor {
 					it = delset.iterator();
 					while(it.hasNext()){
 						Atom orig=(Atom)it.next();
-						Atom copy=(Atom)delmap.get(new Integer(orig.id));
+						Atom copy=(Atom)delmap.get(orig);//new Integer(orig.id));
 						srcmem.unifyLinkBuddies(copy.args[0], copy.args[1]);
 //						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
 //						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
