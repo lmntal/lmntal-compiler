@@ -187,7 +187,7 @@ class InterpretiveReactor {
 					return false; //n-kato
 				case Instruction.GETLINK : //[-link, atom, pos]
 					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
-					vars.set(inst.getIntArg3(),link);
+					vars.set(inst.getIntArg1(),link); //3->1 by mizuno
 					break; //n-kato
 					//====アトムに関係する出力する基本ガード命令====ここまで====
 
@@ -487,12 +487,14 @@ class InterpretiveReactor {
 					Instruction spec = (Instruction) bodyInsts.get(0);
 					int formals = spec.getIntArg1();
 					int locals = spec.getIntArg2();
-					
 // // ArrayIndexOutOfBoundsException がでたので一時的に変更
 // if (locals < 10) locals = 10;
 					
 					AbstractMembrane[] bodymems = new AbstractMembrane[locals];
 					Atom[] bodyatoms = new Atom[locals];
+					// vars.setメソッド呼び出し時にIndexOutOfBoundsExceptionが出るので暫定対応 by mizuno
+					Vector bodyvars = new Vector(locals);
+					bodyvars.setSize(locals);
 					List memformals = (List) inst.getArg2();
 					List atomformals = (List) inst.getArg3();
 					for (int i = 0; i < memformals.size(); i++) {
@@ -507,7 +509,7 @@ class InterpretiveReactor {
 						new InterpretiveReactor(
 							bodymems,
 							bodyatoms,
-							new ArrayList());
+							bodyvars);
 					ir.interpret(bodyInsts, 0);
 					return true; //n-kato
 
@@ -525,7 +527,7 @@ class InterpretiveReactor {
 					break; //nakajima
 
 				case Instruction.LOOP :
-					subinsts = (List) ((List) inst.getArg1()).get(0);
+					subinsts = (List) ((List) inst.getArg1()); // remove ".get(0)" by mizuno
 					while (interpret(subinsts, 0)) {
 					}
 					break; //nakajima, n-kato
