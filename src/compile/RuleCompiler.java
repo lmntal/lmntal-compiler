@@ -9,7 +9,8 @@ import runtime.Functor;
 import runtime.Inline;
 import compile.structure.*;
 
-// TODO 【確認】左辺膜の自由リンクに対応する自由リンク管理アトムは生成されないようになっているかどうか
+// 【確認】左辺膜の自由リンクに対応する自由リンク管理アトムは生成されないようになっているかどうか
+// → なっていた。
 
 /**
  * <pre>

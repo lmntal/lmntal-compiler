@@ -158,11 +158,11 @@ class InterpreterReactor {
 					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
 					if (link.getPos() != inst.getIntArg4()) return false;
 					atoms[inst.getIntArg1()] = link.getAtom();
-					break;
+					break; //n-kato
 				case Instruction.DEREFATOM : // [-dstatom, srcatom, srcpos]
 					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
 					atoms[inst.getIntArg1()] = link.getAtom();
-					break;
+					break; //n-kato
 				case Instruction.FINDATOM : // [-dstatom, srcmem, funcref]
 					func = (Functor) inst.getArg3();
 					it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
@@ -176,7 +176,7 @@ class InterpreterReactor {
 				case Instruction.GETLINK : //[-link, atom, pos]
 					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
 					vars.set(inst.getIntArg3(),link);
-					break;
+					break; //n-kato
 					//====アトムに関係する出力する基本ガード命令====ここまで====
 
 					//====膜に関係する出力する基本ガード命令 ====ここから====
@@ -213,14 +213,14 @@ class InterpreterReactor {
 							return true;
 						mem.unlock();						
 					}
-					break;
+					break; //n-kato
 
 				case Instruction.GETMEM : //[-dstmem, srcatom]
 					mems[inst.getIntArg1()] = atoms[inst.getIntArg2()].mem;
-					break;
+					break; //n-kato
 				case Instruction.GETPARENT : //[-dstmem, srcmem]
 					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].parent;
-					break;
+					break; //n-kato
 
 					//====膜に関係する出力する基本ガード命令====ここまで====
 
@@ -230,10 +230,10 @@ class InterpreterReactor {
 					break; //n-kato
 				case Instruction.NORULES : //[srcmem] 
 					if (mems[inst.getIntArg1()].hasRules()) return false;
-					break;
+					break; //n-kato
 				case Instruction.NATOMS : //[srcmem, count]
 					if (mems[inst.getIntArg1()].atoms.size() != inst.getIntArg2()) return false;
-					break;
+					break; //n-kato
 				case Instruction.NFREELINKS : //[srcmem, count]
 					// TODO 何か変
 					mem = mems[inst.getIntArg1()];
@@ -242,49 +242,47 @@ class InterpreterReactor {
 					break;
 				case Instruction.NMEMS : //[srcmem, count]
 					if (mems[inst.getIntArg1()].mems.size() != inst.getIntArg2()) return false;
-					break;
+					break; //n-kato
 				case Instruction.EQMEM : //[mem1, mem2]
 					if (mems[inst.getIntArg1()] != mems[inst.getIntArg2()]) return false;
-					break;
+					break; //n-kato
 				case Instruction.NEQMEM : //[mem1, mem2]
 					if (mems[inst.getIntArg1()] == mems[inst.getIntArg2()]) return false;
-					break;
+					break; //n-kato
 				case Instruction.STABLE : //[srcmem] 
 					if (!mems[inst.getIntArg1()].isStable()) return false;
-					break;
+					break; //n-kato
 					//====膜に関係する出力しない基本ガード命令====ここまで====
 
 					//====アトムに関係する出力しない基本ガード命令====ここから====
 				case Instruction.FUNC : //[srcatom, funcref]
 					if (!atoms[inst.getIntArg1()].getFunctor().equals((Functor)inst.getArg2()))
 						return false;
-					break;
+					break; //n-kato
 				case Instruction.EQATOM : //[atom1, atom2]
 					if (atoms[inst.getIntArg1()] != atoms[inst.getIntArg2()]) return false;
-					break;
+					break; //n-kato
 				case Instruction.NEQATOM : //[atom1, atom2]
 					if (atoms[inst.getIntArg1()] == atoms[inst.getIntArg2()]) return false;
-					break;
+					break; //n-kato
 					//====アトムに関係する出力しない基本ガード命令====ここまで====
 
 					//====ファンクタに関係する命令====ここから====
 				case Instruction.DEREFFUNC : //[-dstfunc, srcatom, srcpos]
 					vars.set(inst.getIntArg1(), atoms[inst.getIntArg2()].args[inst.getIntArg3()].getAtom().getFunctor());
-					break; //nakajima 2003-12-21
+					break; //nakajima 2003-12-21, n-kato
 				case Instruction.GETFUNC : //[-func, atom]
 					vars.set(inst.getIntArg1(), atoms[inst.getIntArg2()].getFunctor());
-					break; //nakajima 2003-12-21
+					break; //nakajima 2003-12-21, n-kato
 				case Instruction.LOADFUNC : //[-func, funcref]
 					vars.set(inst.getIntArg1(), (Functor)inst.getArg2());
-					break;//nakajima 2003-12-21
+					break;//nakajima 2003-12-21, -kato
 				case Instruction.EQFUNC : //[func1, func2]
-					//todo: castが本当にいらないのか確認
-					if (inst.getArg1() != inst.getArg2()) return false;
-					break; //nakajima 2003-12-21
+					if (!vars.get(inst.getIntArg1()).equals(vars.get(inst.getIntArg2()))) return false;
+					break; //nakajima, n-kato
 				case Instruction.NEQFUNC : //[func1, func2]
-					//todo: castが本当にいらないのか確認
-					if (inst.getArg1() == inst.getArg2()) return false;
-					break; //nakajima 2003-12-21
+					if (vars.get(inst.getIntArg1()).equals(vars.get(inst.getIntArg2()))) return false;
+					break; //nakajima, n-kato
 					//====ファンクタに関係する命令====ここまで====
 
 					//====アトムを操作する基本ボディ命令====ここから====
@@ -292,32 +290,31 @@ class InterpreterReactor {
 				case Instruction.LOCALREMOVEATOM : //[srcatom, srcmem, funcref]
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.removeAtom(atom);
-					break;
+					break; //n-kato
 				case Instruction.NEWATOM :
 				case Instruction.LOCALNEWATOM : //[-dstatom, srcmem, funcref]
 					func = (Functor) inst.getArg3();
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
-					break;
+					break; //n-kato
 				case Instruction.NEWATOMINDIRECT :
-				case Instruction.LOCALNEWATOMINDIRECT :
-					//[-dstatom, srcmem, func]
+				case Instruction.LOCALNEWATOMINDIRECT : //[-dstatom, srcmem, func]
 					break;
 				case Instruction.ENQUEUEATOM :
 				case Instruction.LOCALENQUEUEATOM : //[srcatom]
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.enqueueAtom(atom);
-					break;
+					break; //n-kato
 				case Instruction.DEQUEUEATOM : //[srcatom]
 					atom = atoms[inst.getIntArg1()];
 					atom.dequeue();
-					break;
+					break; //n-kato
 				case Instruction.FREEATOM : //[srcatom]
 					break; //n-kato
 				case Instruction.ALTERFUNC :
 				case Instruction.LOCALALTERFUNC : //[atom, funcref]
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.alterAtomFunctor(atom,(Functor)inst.getArg2());
-					break;
+					break; //n-kato
 				case Instruction.ALTERFUNCINDIRECT :
 				case Instruction.LOCALALTERFUNCINDIRECT : //[atom, func]
 					break;
@@ -344,11 +341,11 @@ class InterpreterReactor {
 				case Instruction.LOCALREMOVEMEM : //[srcmem, parentmem]
 					mem = mems[inst.getIntArg1()];
 					mem.parent.removeMem(mem);
-					break;
+					break; //n-kato
 				case Instruction.NEWMEM :
 				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
 					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newMem();
-					break;
+					break; //n-kato
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
 					break;
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
@@ -365,35 +362,35 @@ class InterpreterReactor {
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
 					mems[inst.getIntArg1()].unlock();
-					break;
+					break; //n-kato
 					//====膜を操作する基本ボディ命令====ここまで====
 
 					//====リンクを操作するボディ命令====ここから====
 				case Instruction.NEWLINK :
 				case Instruction.LOCALNEWLINK: //[atom1, pos1, atom2, pos2]
 					atoms[inst.getIntArg1()].mem.newLink(
-						(Atom)atoms[inst.getIntArg1()], inst.getIntArg2(),
-						(Atom)atoms[inst.getIntArg3()], inst.getIntArg4() );
-					break;
+						atoms[inst.getIntArg1()], inst.getIntArg2(),
+						atoms[inst.getIntArg3()], inst.getIntArg4() );
+					break; //n-kato
 				case Instruction.RELINK :
 				case Instruction.LOCALRELINK : //[atom1, pos1, atom2, pos2]
 					atoms[inst.getIntArg1()].mem.relinkAtomArgs(
-						(Atom)atoms[inst.getIntArg1()], inst.getIntArg2(),
-						(Atom)atoms[inst.getIntArg3()], inst.getIntArg4() );
-					break;
+						atoms[inst.getIntArg1()], inst.getIntArg2(),
+						atoms[inst.getIntArg3()], inst.getIntArg4() );
+					break; //n-kato
 				case Instruction.UNIFY :
 				case Instruction.LOCALUNIFY : //[atom1, pos1, atom2, pos2]
 					atoms[inst.getIntArg1()].mem.unifyAtomArgs(
-						(Atom)atoms[inst.getIntArg1()], inst.getIntArg2(),
-						(Atom)atoms[inst.getIntArg3()], inst.getIntArg4() );
-					break;
+						atoms[inst.getIntArg1()], inst.getIntArg2(),
+						atoms[inst.getIntArg3()], inst.getIntArg4() );
+					break; //n-kato
 
 				case Instruction.INHERITLINK :
 				case Instruction.LOCALINHERITLINK : //[atom1, pos1, link2]
 					atoms[inst.getIntArg1()].mem.inheritLink(
-						(Atom)atoms[inst.getIntArg1()], inst.getIntArg2(),
+						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						(Link)vars.get(inst.getIntArg3()) );
-					break;
+					break; //n-kato
 					//====リンクを操作するボディ命令====ここまで====
 
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここから====
@@ -408,14 +405,18 @@ class InterpreterReactor {
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここまで====
 
 					//====ルールを操作するボディ命令====ここから====
-				case Instruction.LOADRULESET: //[dstmem, ruleset]
+				case Instruction.LOADRULESET:
+				case Instruction.LOCALLOADRULESET: //[dstmem, ruleset]
 					mems[inst.getIntArg1()].loadRuleset((Ruleset)inst.getArg2() );
-					break;
-				case Instruction.COPYRULES:   //[dstmem, srcmem]
+					break; //n-kato
+				case Instruction.COPYRULES:
+				case Instruction.LOCALCOPYRULES:   //[dstmem, srcmem]
 					mems[inst.getIntArg1()].copyRulesFrom(mems[inst.getIntArg2()]);
-					break;
-				case Instruction.CLEARRULES:  //[dstmem, srcmem]
-					break;
+					break; //n-kato
+				case Instruction.CLEARRULES:
+				case Instruction.LOCALCLEARRULES:  //[dstmem]
+					mems[inst.getIntArg1()].clearRules();
+					break; //n-kato
 					//====ルールを操作するボディ命令====ここまで====
 
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
@@ -502,13 +503,15 @@ class InterpreterReactor {
 					break;
 
 				case Instruction.ISINT : //[atom]
-					break;
+					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof IntegerFunctor)) return false;
+					break; //n-kato
 				case Instruction.ISFLOAT : //[atom]
 					break;
 				case Instruction.ISSTRING : //[atom]
 					break;
 				case Instruction.ISINTFUNC : //[func]
-					break;
+					if (!(vars.get(inst.getIntArg1()) instanceof IntegerFunctor)) return false;
+					break; //n-kato
 				case Instruction.ISFLOATFUNC : //[func]
 					break;
 				case Instruction.ISSTRINGFUNC : //[func]
@@ -518,12 +521,16 @@ class InterpreterReactor {
 					//====組み込み機能に関する命令====ここから====
 				case Instruction.INLINE : //[atom, inlineref]
 					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
-					break;
+					break; //hara
 					//====組み込み機能に関する命令====ここまで====
 					
 					//====整数用の組み込みボディ命令====ここから====
 				case Instruction.IADD : //[-dstintatom, intatom1, intatom2]
-					break;
+					int x,y;
+					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
+					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
+					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x+y));
+					break; //n-kato
 				case Instruction.ISUB : //[-dstintatom, intatom1, intatom2]
 					break;
 				case Instruction.IMUL : //[-dstintatom, intatom1, intatom2]
@@ -549,7 +556,10 @@ class InterpreterReactor {
 				case Instruction.ISAR : //[-dstintatom, intatom1, intatom2]
 					break;
 				case Instruction.IADDFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					break;
+					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
+					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
+					vars.set(inst.getIntArg1(), new IntegerFunctor(x+y));
+					break; //n-kato
 				case Instruction.ISUBFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					break;
 				case Instruction.IMULFUNC : //[-dstintfunc, intfunc1, intfunc2]
