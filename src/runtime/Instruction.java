@@ -10,6 +10,8 @@ import java.util.*;
  * 
  * 複数でも構わないとおもう。
  * 
+ * デバッグ用表示メソッドを備える。
+ *
  * @author pa
  *
  */
@@ -20,7 +22,8 @@ public class Instruction {
 	public static final int NAME      = 3;
 	public static final int AT        = 4;
 	public static final int METAVAR   = 5;
-	
+
+    //引数無しだと初期容量は10(by api仕様書)
 	public List data = new ArrayList();
 	
 	public Instruction() {
@@ -33,4 +36,51 @@ public class Instruction {
 		data.add(sl);
 		System.out.println(data);
 	}
+
+    /**
+     * デバッグ用表示メソッド。
+     *
+     * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
+     * @return String
+     *
+     */
+    public String toString(){
+	return "not implemented\n";
+    }
+
+    /**
+     * デバッグ用表示メソッド。与えられたListをObject[]に変換し、それぞれの要素に対してtoString()を呼ぶ。
+     *
+     * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
+     * @return void
+     * @param List
+     */
+    public static void Dump(List listToBeDumped){
+	Object[] tmp = listToBeDumped.toArray();
+
+	for (int i = 0; i < tmp.length; i++){
+	    System.out.print(tmp[i].toString());
+	    System.out.print(" ");
+	    System.out.println();
+	}
+    }
+    /**
+     * デバッグ用表示メソッド。Instruction
+     * オブジェクト内のListをObject[]に変換し、
+     * それぞれの要素に対してtoString()を呼ぶ。
+     *
+     * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
+     * @return void
+     */
+    public void Dump(){
+	Object[] tmp = data.toArray();
+
+	for (int i = 0; i < tmp.length; i++){
+	    System.out.print(tmp[i].toString());
+	    System.out.print(" ");
+	    System.out.println();
+	}
+    }
+
+
 }
