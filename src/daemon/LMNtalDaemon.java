@@ -179,7 +179,8 @@ public class LMNtalDaemon implements Runnable {
 		while (it.hasNext()) {
 			if (((LMNtalNode) (it.next()))
 				.getInetAddress()
-				.getCanonicalHostName()
+//			.getCanonicalHostName()
+			.getHostName()
 				.equalsIgnoreCase(fqdn)) {
 				if (Env.debug > 0) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is true!");
 				return true;
