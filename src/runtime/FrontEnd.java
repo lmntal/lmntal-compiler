@@ -169,9 +169,40 @@ public class FrontEnd {
 							/// Demo mode.  Draw atoms and text larger.
 							Env.fDEMO = true;
 						} else if(args[i].equals("--start-daemon")){
-							/// --distributed
+							/// --start-daemon
 							/// Start LMNtalDaemon
 							Env.startDaemon = true;			
+						} else if(args[i].matches("--port")){
+							/// --port portnumber
+							/// Specifies the port number that LMNtalDaemon listens on. The default is 60000. Only dynamic and private ports defined by IANA is usable: port 49152 through 65535. 
+							
+							if (args[i+1].matches("\\d*")) {
+								try{ 
+									/*
+									 * http://www.iana.org/assignments/port-numbers
+									 * 
+									 * DYNAMIC AND/OR PRIVATE PORTS
+									 *  The Dynamic and/or Private Ports are those from 49152 through 65535
+									 */
+									int portnum = Integer.parseInt(args[i+1]);
+									if(portnum < 49152 || portnum > 65535){
+										System.out.println("Invalid option: " + args[i] + " " + args[i+1]);
+										System.out.println("only port 49152 through 65535 is available");
+										System.exit(-1);
+									}
+									Env.daemonListenPort = portnum;
+								} catch (NumberFormatException e){
+									//e.printStackTrace();
+									System.out.println("Invalid option: " + args[i] + " " + args[i+1]);
+									System.out.println("Cannot parse as integer: " + args[i+1]);
+									System.exit(-1);
+								}
+							} else {
+								System.out.println("Invalid option: " + args[i] + " " + args[i+1]);
+								System.exit(-1);
+							}
+							
+							i++;
 						} else if(args[i].equals("--debug-daemon")){
 							/// --debug-daemon
 							/// dump debug message of LMNtalDaemon
@@ -208,13 +239,35 @@ public class FrontEnd {
 						+ " "
 						+ classpath
 						+ " "
-						+"daemon.LMNtalDaemon"); 		//TODO Env渡す
+						+"daemon.LMNtalDaemon"
+						+ " "
+						+ Env.debugDaemon
+						+ " "
+						+ Env.daemonListenPort
+						); 
+			
 			//System.out.println(newCmdLine);
 			try {
 				Process daemon = Runtime.getRuntime().exec(newCmdLine);
+
+				//daemonが起動するまで待つ
+				//TODO 既にLMNtalDaemonが起動していたら起動しない
+				InputStreamReader daemonStdout =new InputStreamReader(daemon.getInputStream()); 
+				for(int i = 0;  i < 10; i++){ //ネットワークインタフェースがあがってない時は永久にready()はfalseなので
+					if(daemonStdout.ready()) break;
+					try {
+						Thread.sleep(100);
+						//System.out.println("LMNtalDaemon not yet started...");
+						//System.out.println(daemonStdout.ready());
+					} catch (InterruptedException e2) {
+						//e2.printStackTrace();
+					}
+				}
+				//daemonStdout.close();
+
 				if(Env.debugDaemon > 0){
-					Thread dumpErr = new Thread(new StreamDumper("LMNtalDaemon.stderr", daemon.getErrorStream()));
-					Thread dumpOut = new Thread(new StreamDumper("LMNtalDaemon.stdout", daemon.getInputStream()));
+					Thread dumpErr = new Thread(new StreamDumper("LMNtalDaemon.stderr", daemon.getErrorStream()),"StreamDumper");
+					Thread dumpOut = new Thread(new StreamDumper("LMNtalDaemon.stdout", daemon.getInputStream()),"StreamDumper");
 					dumpErr.start();
 					dumpOut.start();
 				}
