@@ -14,7 +14,7 @@ public final class Membrane {
 	/** 
 	 * 親膜 
 	 */
-	Membrane mem;
+	public Membrane mem = null;
 	
 	/**
 	 * アトム(compile.structure.Atom)のリスト
