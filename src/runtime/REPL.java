@@ -5,20 +5,24 @@
 package runtime;
 
 import java.io.EOFException;
+import java.io.StringReader;
 
+import compile.*;
+import compile.parser.*;
 import org.gnu.readline.Readline;
 import org.gnu.readline.ReadlineLibrary;
 
 /**
- * インタラクティブモード。
+ * インタラクティブモード。(Read-Eval-Print-Loop)
  * LMNtal 言語が受理する文字列を 1 行入力すると
  * それを実行した結果の文字列が表示される。
  * 
- * @author pa
+ * @author hara
  */
 public class REPL {
 	/**
 	 * LMNtal-REPL を実行する。
+	 * REPL から抜けるコマンドが入力されると、戻ってくる。
 	 */
 	public void run() {
 		String line;
@@ -71,6 +75,19 @@ public class REPL {
 	 * @param line     LMNtal statement (one liner)
 	 */
 	private void processLine(String line) {
-		System.out.println(line+"  =>  {a, b, {c}}, ({b, $p}:-{c, $p})");
+		try {
+			LMNParser lp = new LMNParser(new StringReader(line));
+			compile.structure.Membrane m = lp.parse();
+			InterpretedRuleset ir = RuleSetGenerator.run(m);
+			Env.p("");
+			Env.p( "After parse   : "+m );
+			Env.p( "After compile : "+ir );
+			ir.showDetail();
+			Env.p( "After execute : yet" );
+		} catch (ParseException e) {
+			Env.p(e);
+		}
+		
+		//System.out.println(line+"  =>  {a, b, {c}}, ({b, $p}:-{c, $p})");
 	}
 }
