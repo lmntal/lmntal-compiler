@@ -149,15 +149,6 @@ public class Module {
 	public static Map memNameTable = new HashMap();
 	
 	/**
-	 * よきにとりはからう
-	 * @param m
-	 */
-	public static void run(Membrane m) {
-		resolveModules(m);
-		fixupLoadModule(m);
-	}
-	
-	/**
 	 * 膜を名表に登録する。
 	 * @param m
 	 */
@@ -201,7 +192,7 @@ public class Module {
 	}
 	
 	/**
-	 * 指定した膜について、必要なモジュール一覧をつくる。
+	 * 指定した膜について、未解決モジュール一覧をつくる。
 	 * @param m
 	 * @param need 出力引数。モジュール一覧が入る。
 	 */

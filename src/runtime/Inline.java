@@ -86,12 +86,12 @@ public class Inline {
 	
 	/**
 	 * 指定したファンクタ名を持つコードID を返す。
-	 * @param name
+	 * @param codeStr
 	 * @return codeID
 	 */
-	public static int getCodeID(String name) {
+	public static int getCodeID(String codeStr) {
 		try {
-			return ((Integer)code.get(name)).intValue();
+			return ((Integer)code.get(codeStr)).intValue();
 		} catch (Exception e) {
 			return -1;
 		}
@@ -99,18 +99,18 @@ public class Inline {
 	/**
 	 * パース中にアトムが出てくると呼ばれる。
 	 * ここで必要に応じてインライン命令を登録する。
-	 * @param atom
+	 * @param funcName
 	 */
-	public static void add(String src) {
-		if(src.startsWith("/*inline*/")) {
+	public static void add(String funcName) {
+		if(funcName.startsWith("/*inline*/")) {
 		//if(src.startsWith("a")) {
 			//登録
-			Env.d("Register inlineCode : "+src);
-			code.put(src, new Integer(codeCount++));
-		} else if(src.startsWith("/*inline_define*/")) {
+			Env.d("Register inlineCode : "+funcName);
+			code.put(funcName, new Integer(codeCount++));
+		} else if(funcName.startsWith("/*inline_define*/")) {
 			//登録
-			Env.d("Register inlineDefineCode : "+src);
-			defs.add(src);
+			Env.d("Register inlineDefineCode : "+funcName);
+			defs.add(funcName);
 		}
 	}
 	
