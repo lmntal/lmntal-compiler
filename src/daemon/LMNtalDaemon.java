@@ -128,7 +128,6 @@ public class LMNtalDaemon implements Runnable {
 	 */
 	public static void main(String args[]) {
 
-		//TODO 引数をチェック。
 		//java -classpath java.class.path daemon.LMNtalDaemon Env.debugDaemon Env.daemonListenPort 
 		if(args.length < 2){
 			System.out.println("Invalid option");
