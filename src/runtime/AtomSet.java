@@ -12,7 +12,7 @@ import util.Util;
 
 /**
  * アトムの集合を管理するためのクラス。
- * 要素はAbstractAtomクラスかその子孫のクラスのインスタンスのみと仮定する。
+ * 要素はAtomクラスのインスタンスのみと仮定する。
  * Functorをキーとし、そのFunctorを持つアトムの集合を値とするMapを使って、
  * Functor毎にアトムを管理している。
  * @author Mizuno
@@ -29,10 +29,10 @@ public final class AtomSet implements Set{
 	}
 	/** 自由リンク管理アトム以外のアトムの数の取得 */
 	public int getNormalAtomCount() {
-		return size - getAtomCountOfFunctor(Functor.INSIDE_PROXY) -
-						getAtomCountOfFunctor(Functor.OUTSIDE_PROXY);
+		return size - getAtomCountOfFunctor(Functor.INSIDE_PROXY)
+					 - getAtomCountOfFunctor(Functor.OUTSIDE_PROXY);
 	}
-	/** 指定されたFunctorのアトムの数の取得 */
+	/** 指定されたFunctorを持つアトムの数の取得 */
 	public int getAtomCountOfFunctor(Functor f) {
 		Set s = (Set)atoms.get(f);
 		if (s == null) {
@@ -41,11 +41,11 @@ public final class AtomSet implements Set{
 			return s.size();
 		}
 	}
-	/** 空の場合にtrue */
+	/** 空かどうかを返す */
 	public boolean isEmpty() {
 		return size == 0;
 	}
-	/** 与えられたアトムがこの集合内にある場合はtrue。 */
+	/** 与えられたアトムがこの集合内にあるかどうかを返す */
 	public boolean contains(Object o) {
 		Functor f = ((Atom)o).getFunctor();
 		Set s = (Set)atoms.get(f);
@@ -80,7 +80,7 @@ public final class AtomSet implements Set{
 	}
 	/**
 	 * この集合内の全てのアトムか格納されている配列を返す。
-	 * 返される配列の実行時の型はAbstractAtom[]です。
+	 * 返される配列の実行時の型はAtom[]です。
 	 */
 	public Object[] toArray() {
 		Object[] ret = new Atom[size];
