@@ -1,6 +1,7 @@
 // rule manipulation       by hara
 // 
-// $ java runtime.FrontEnd -s -t ../sample/rule.lmn
+// $ java -cp bin runtime.FrontEnd -g sample/rule.lmn -O4
+// -O4 をつけると膜とアトムの再利用が有効になるので GUI 表示が乱れない。
 
 
 { work. bottom. }.
@@ -8,8 +9,8 @@
 { up.   ( a( N):-N>10|top ).    ( a(N) :- M=N+1 | a(M) ).  }.
 { down. ( a( N):-N<0 |bottom ). ( a(N) :- M=N-1 | a(M) ).  }.
 
-( {work. top.    @q.} :- {work. top.    } ).
-( {work. bottom. @q.} :- {work. bottom. } ).
+//( {work. top.    @q.} :- {work. top.    } ).
+//( {work. bottom. @q.} :- {work. bottom. } ).
 
 ( { work. bottom. @o. }/, {up.   @n.} :- { work. a( 1). @n. }, {up.   @n} ).
 ( { work. top.    @o. }/, {down. @n.} :- { work. a( 9). @n. }, {down. @n} ).
