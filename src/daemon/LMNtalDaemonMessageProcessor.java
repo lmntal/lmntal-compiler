@@ -109,11 +109,14 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				continue;
 			} else if (parsedInput[0].equalsIgnoreCase("UNREGISTERLOCAL")){
 				//UNREGISTERLOCAL rgid
-				
+
+				//TODO ちゃんと実装する
 				//rgid を削除
 				String rgid  = parsedInput[1];
 				if(LMNtalDaemon.unregisterRuntimeGroup(rgid)){
 					//	自分自身にある、マスタランタイム(LMNtalRuntimeMessageProcessor)との通信路を切る
+					
+					if(true)System.out.println("LMNtalDaemonMessageProcessor: now closing connection to " + rgid);
 					close();
 				}
 				return;
@@ -191,7 +194,8 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 								}
 							} else { //他ノード宛ならconnectをそのまま転送する
 								LMNtalDaemon.makeRemoteConnection(fqdn); // TODO（効率改善）ブロックしないようにする
-								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+								//targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+								targetNode = LMNtalDaemon.getLMNtalNode(fqdn);
 							}
 						} else {
 							// connect以外のとき
@@ -200,7 +204,8 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 								targetNode = LMNtalDaemon.getRuntimeGroupNode(rgid);
 							}
 							else {
-								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+								//targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+								targetNode = LMNtalDaemon.getLMNtalNode(fqdn);
 							}
 						}
 						if (targetNode != null && targetNode.sendMessage(content)) {
