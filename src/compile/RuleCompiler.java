@@ -104,7 +104,6 @@ public class RuleCompiler {
 		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;
 		theRule.body      = body;
-		
 		optimize();
 		return theRule;
 	}
@@ -194,8 +193,8 @@ public class RuleCompiler {
 	// todo spec命令を外側に持ち上げる最適化器を実装する
 	
 	/**
-	 * 左辺のアトムのリンクに対してgelinkを行い、変数番号を登録する。(RISC化)
-	 * 将来的にはリンクを引数に渡すようにする予定。
+	 * 左辺のアトムのリンクに対してgetlinkを行い、変数番号を登録する。(RISC化)
+	 * 将来的にはリンクオブジェクトをボディ命令列の引数に渡すようにするかもしれない。
 	 */
 	private void getLHSLinks() {
 		lhslinkpath = new HashMap();
@@ -231,7 +230,6 @@ public class RuleCompiler {
 		//Env.d("rhsmempaths -> "+rhsmempaths);
 
 		recursiveLockLHSNonlinearProcessContextMems();
-		getLHSLinks();
 		dequeueLHSAtoms();
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
@@ -288,6 +286,7 @@ public class RuleCompiler {
 	private void inc_guard() {
 		// ガードの取り込み
 		varcount = lhsatoms.size() + lhsmems.size();
+		getLHSLinks();
 		// typedcxtdefs = gc.typedcxtdefs;
 		// varcount = lhsatoms.size() + lhsmems.size() + rs.typedProcessContexts.size();
 		genTypedProcessContextPaths();
@@ -310,16 +309,17 @@ public class RuleCompiler {
 		if (guard == null) return;
 		int formals = gc.varcount;
 		gc.checkMembraneStatus();
+		gc.getLHSLinks();
 		gc.fixTypedProcesses();
-		//RISC化で、暫定処置としてガードでgetlinkした物をボディに渡さない事にしたので、
-		//ガード命令列の局所変数の数とボディ命令列の引数の数が一致しなくなった。by mizuno
-//		varcount = gc.varcount;
-		varcount = gc.getMemActuals().size() + gc.getAtomActuals().size() 
-					+ gc.getVarActuals().size();
+		varcount = gc.varcount;
 		compileNegatives();
-		guard.add( 0, Instruction.spec(formals,gc.varcount) );
+		guard.add( 0, Instruction.spec(formals,varcount) );
 		guard.add( Instruction.jump(theRule.bodyLabel, gc.getMemActuals(),
 			gc.getAtomActuals(), gc.getVarActuals()) );
+		//RISC化で、暫定処置としてガードでgetlinkした物をボディに渡さない事にしたので、
+		//ガード命令列の局所変数の数とボディ命令列の引数の数が一致しなくなった。by mizuno
+		varcount = gc.getMemActuals().size() + gc.getAtomActuals().size() 
+					+ gc.getVarActuals().size();
 	}
 	void compileNegatives() {
 		Iterator it = rs.guardNegatives.iterator();

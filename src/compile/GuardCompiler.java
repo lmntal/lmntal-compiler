@@ -128,10 +128,11 @@ public class GuardCompiler extends HeadCompiler {
 			}
 		}
 	}
-	/** 型付きプロセス文脈が表すプロセスを一意に決定する。*/
-	void fixTypedProcesses() {
-		// STEP 0 - 引数に渡されたアトムのリンクに対してgelinkを行い、変数番号を登録する。(RISC化)
-		//          将来的にはリンクを引数に渡すようにする予定。
+	/** 引数に渡されたアトムのリンクに対してgetlinkを行い、変数番号を登録する。(RISC化)
+	 * <strike>将来的にはリンクオブジェクトをガード命令列の引数に渡すようにするかも知れない。</strike>
+	 * 将来的にはガード命令列はヘッド命令列にインライン展開される予定なので、
+	 * このメソッドで生成されるgetlinkは冗長命令の除去により消せる見込み。*/
+	void getLHSLinks() {
 		for (int i = 0; i < atoms.size(); i++) {
 			Atom atom = (Atom)atoms.get(i);
 			int atompath = atomToPath(atom);
@@ -144,7 +145,10 @@ public class GuardCompiler extends HeadCompiler {
 			}
 			linkpaths.put(new Integer(atompath), paths);
 		}
-
+	}
+	
+	/** 型付きプロセス文脈が表すプロセスを一意に決定する。*/
+	void fixTypedProcesses() {
 		// STEP 1 - 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
 		identifiedCxtdefs = new HashSet();
 		Iterator it = typedProcessContexts.values().iterator();
@@ -161,7 +165,7 @@ public class GuardCompiler extends HeadCompiler {
 				if (!atompaths.containsKey(def.lhsOcc.args[0].buddy.atom)) {
 					rc.error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
 					rc.corrupted();
-					match.add(new Instruction(Instruction.LOCK, 0));	// 強制的に失敗させているだけ
+					match.add(Instruction.fail());
 					return;
 				}
 			}
@@ -354,7 +358,7 @@ public class GuardCompiler extends HeadCompiler {
 	
 	/** 型制約を廃棄する。エラー復帰用メソッド */
 	private void discardTypeConstraint(Atom cstr) {
-		match.add(new Instruction(Instruction.LOCK, 0));
+		match.add(Instruction.fail());
 		for (int i = 0; i < cstr.functor.getArity(); i++) {
 			ContextDef def = ((ProcessContext)cstr.args[i].buddy.atom).def;
 			bindToFunctor(def,new Functor("*",1));
@@ -436,6 +440,9 @@ public class GuardCompiler extends HeadCompiler {
 	
 	////////////////////////////////////////////////////////////////
 
+	/** HeadCompiler.getAtomActualsのオーバーライド。
+	 * GuardCompilerは現状では、atomsに対応する変数番号のリストの後に、
+	 * typedcxtdefsのうちUNARY_ATOM_TYPEであるようなものの変数番号のリストをつなげたArrayListを返す。*/
 	public List getAtomActuals() {
 		List args = new ArrayList();		
 		for (int i = 0; i < atoms.size(); i++) {

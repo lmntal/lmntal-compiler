@@ -180,16 +180,25 @@ public class HeadCompiler {
 						if (b == t && buddylink.pos < pos) continue;
 					}
 				}
-				// リンク先のアトムを新しい変数に取得する
+				// リンク先のアトムを新しい変数に取得する (*A)
 				int buddyatompath = varcount++;
 				match.add( new Instruction(Instruction.DEREF,
 					buddyatompath, atomToPath(atom), pos, buddylink.pos ));
-				// リンク先が他の等式右辺のアトムの場合（等式間リンク）
+				
+				// リンク先が他の等式右辺のアトムの場合（等式間リンクの場合）
+				// 膜間の自由リンク管理アトム鎖の検査をし、膜階層がマッチするか検査を行う。
+				// また*AのDEREFの第4引数およびbuddyatompathを訂正する。
 				if (proccxteqMap.containsKey(atom.mem)
-				 && proccxteqMap.containsKey(buddyatom.mem) && buddyatom.mem != atom.mem) {
-					int firstindex = match.size() - 1;
-					LinkedList buddySupermems = new LinkedList();
-					LinkedList atomSupermems  = new LinkedList();
+				 && proccxteqMap.containsKey(buddyatom.mem) && buddyatom.mem != atom.mem) {				
+					// ( 0: 1:{$p[|*X],2:{$q[|*Y]}} :- \+($p=(atom(L),$pp),$q=(buddy(L),$qq)) | ... )
+					// このルールのガードの意味:
+					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) にはマッチしない
+					int firstindex = match.size() - 1; // atomからのDEREF命令を指す
+					//
+					LinkedList atomSupermems  = new LinkedList(); // atomの広義先祖膜列（親膜側が先頭）
+					LinkedList buddySupermems = new LinkedList(); // buddyの広義先祖膜列（親膜側が先頭）
+					// 広義先祖膜列の計算
+					// atomSupermems = {0,1}; buddySupermems = {0,1,2}
 					Membrane mem = ((ProcessContextEquation)proccxteqMap.get(buddyatom.mem)).def.lhsOcc.mem;
 					while (mem != null) {
 						buddySupermems.addFirst(mem);
@@ -200,12 +209,15 @@ public class HeadCompiler {
 						atomSupermems.addFirst(mem);
 						mem = mem.mem;
 					}
+					// 広義先祖膜列の共通部分削除
+					// atomSupermems = {}; buddySupermems = {2}
 					Iterator ita = atomSupermems.iterator();
 					Iterator itb = buddySupermems.iterator();
 					while (ita.hasNext() && itb.hasNext() && ita.next() == itb.next()) {
 						ita.remove();
 						itb.remove();
 					}
+					// 広義先祖膜列を命令列に変換しbuddyatompathを訂正する
 					while (!atomSupermems.isEmpty()) {
 						mem = (Membrane)atomSupermems.removeLast();
 						match.add( new Instruction(Instruction.FUNC, buddyatompath, Functor.INSIDE_PROXY) );
@@ -222,14 +234,16 @@ public class HeadCompiler {
 						buddyatompath += 2;
 					}
 					varcount = buddyatompath + 1;
-					int lastindex = match.size() - 1;
+					int lastindex = match.size() - 1; // buddyatomを取得するためのDEREF命令を指す
 					
+					// deref命令の第4引数を修正する					
+					// - deref [-tmp1atom,atom,atompos,buddypos] ==> deref [-tmp1atom,atom,atompos,1]
 //					((Instruction)match.get(firstindex)).setArg4(new Integer(1));
 					Instruction oldfirst = (Instruction)match.remove(firstindex);
 					Instruction newfirst = new Instruction(Instruction.DEREF,
 						oldfirst.getIntArg1(), oldfirst.getIntArg2(), oldfirst.getIntArg3(), 1);
 					match.add(firstindex,newfirst);
-					
+					// - deref [-buddyatom,tmpatom,tmppos,1] ==> deref [-buddyatom,buddypos,atompos,buddypos]
 //					((Instruction)match.get(lastindex)).setArg4(new Integer(buddylink.pos));
 					Instruction oldlast = (Instruction)match.remove(lastindex);
 					Instruction newlast = new Instruction(Instruction.DEREF,
@@ -372,9 +386,14 @@ public class HeadCompiler {
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 			compileMembrane(submem);
 		}
-		// $p等式右辺膜以外の場合は、自由リンクに関する検査を行う
+		// $p等式右辺膜以外の場合は、自由リンクに関する検査を行う。
+		// 現在 redex "Tθ" に = を含んでもよい言語仕様になっているため、この検査は実は不要。
+		// したがって省略した。(n-kato 2004.11.24)
+		if (false)
 		if (!mem.processContexts.isEmpty() && !proccxteqMap.containsKey(mem)) {
-			ProcessContext pc = (ProcessContext)mem.processContexts.get(0);
+			ProcessContext pc = (ProcessContext)mem.processContexts.get(0); // 左辺膜の$p（必ず非トップ膜）
+			// 明示的なリンク先（必ず非トップ膜のアトム（自由リンク管理アトムを含む））が
+			// 自由リンク出力管理アトムでないことを確認する
 			for (int i = 0; i < pc.args.length; i++) {
 				int freelinktestedatompath = varcount++;
 				match.add(new Instruction(Instruction.DEREFATOM, freelinktestedatompath,
@@ -382,6 +401,7 @@ public class HeadCompiler {
 				match.add(new Instruction(Instruction.NOTFUNC, freelinktestedatompath,
 					Functor.INSIDE_PROXY));
 			}
+			// リンク束が無い場合
 			if (pc.bundle == null) {
 				match.add(new Instruction(Instruction.NFREELINKS, thismempath,
 					mem.getFreeLinkAtomCount()));					
@@ -391,6 +411,8 @@ public class HeadCompiler {
 //	public Instruction getResetVarsInstruction() {
 //		return Instruction.resetvars(getMemActuals(), getAtomActuals(), getVarActuals());
 //	}
+	/** 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）への膜引数列を返す。
+	 * 具体的にはmemsに対応する変数番号のリストを格納したArrayListを返す。*/
 	public List getMemActuals() {
 		List args = new ArrayList();		
 		for (int i = 0; i < mems.size(); i++) {
@@ -398,6 +420,8 @@ public class HeadCompiler {
 		}
 		return args;
 	}
+	/** 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）へのアトム引数列を返す。
+	 * 具体的にはHeadCompilerはatomsに対応する変数番号のリストを格納したArrayListを返す。*/
 	public List getAtomActuals() {
 		List args = new ArrayList();		
 		for (int i = 0; i < atoms.size(); i++) {
@@ -405,9 +429,14 @@ public class HeadCompiler {
 		}
 		return args;
 	}		
+	/** 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）への膜やアトム以外の引数列を返す。
+	 * 具体的にはHeadCompilerは空のArrayListを返す。*/
 	public List getVarActuals() {
 		return new ArrayList();
 	}
+	
+	////////////////////////////////////////////////////////////////
+	
 	/** ガード否定条件をコンパイルする */
 	void compileNegativeCondition(LinkedList eqs) {
 		//int formals = varcount;

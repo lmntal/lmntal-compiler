@@ -49,8 +49,11 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int ARG_INSTS = 4;
 	/**ラベル付き命令列*/
 	public static final int ARG_LABEL = 5;
+	/**変数番号のList*/
+	public static final int ARG_VARS = 6;
 	/**その他オブジェクト(ルールなど)への参照*/
-	public static final int ARG_OBJ = 6;
+	public static final int ARG_OBJ = 7;
+	
 	
     /** 命令の種類を保持する。*/	
     private int kind;
@@ -174,7 +177,7 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(LOCALLOCK, new ArgType(false, ARG_MEM));}
 
 	/** getmem [-dstmem, srcatom]
-	 * <br>ガード命令<br>
+	 * <br>失敗しないガード命令<br>
 	 * アトム$srcatomの所属膜への参照をロックせずに$dstmemに代入する。
 	 * <p>アトム主導テストで使用される。
 	 * @see lock */
@@ -968,7 +971,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * ただしbodyはrulerefのボディ命令列で、先頭の命令はspec[formals,locals]
 	 * <p>（未使用命令）*/
 	public static final int REACT = 1200;
-	static {setArgType(REACT, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
+	static {setArgType(REACT, new ArgType(false, ARG_OBJ, ARG_VARS, ARG_VARS, ARG_VARS));}
 
 	/** jump [instructionlist, [memargs...], [atomargs...], [varargs...]]
      * <br>制御命令<br>
@@ -981,7 +984,7 @@ public class Instruction implements Cloneable, Serializable {
      *    branch      [body] と同じ。
      * ただしbodyはinstructionlistの命令列で、先頭の命令はspec[formals,locals]*/
     public static final int JUMP = 200;
-	static {setArgType(JUMP, new ArgType(false, ARG_LABEL, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
+	static {setArgType(JUMP, new ArgType(false, ARG_LABEL, ARG_VARS, ARG_VARS, ARG_VARS));}
 
 	/** commit [ruleref]
 	 * <br>無視される最適化用およびトレース用命令<br>
@@ -996,7 +999,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * <b>注意</b>　memargs[0]は本膜が予約しているため変更してはならない。
 	 */
 	public static final int RESETVARS = 202;
-	static {setArgType(RESETVARS, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
+	static {setArgType(RESETVARS, new ArgType(false, ARG_VARS, ARG_VARS, ARG_VARS));}
 
 	/** changevars [[memargs...], [atomargs...], [varargs...]]
 	 * <br>失敗しないガード命令および最適化用ボディ命令<br>
@@ -1008,7 +1011,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * <p>（未使用命令）
 	 */
 	public static final int CHANGEVARS = 1202;
-	static {setArgType(CHANGEVARS, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));}
+	static {setArgType(CHANGEVARS, new ArgType(false, ARG_VARS, ARG_VARS, ARG_VARS));}
 
     /** spec [formals, locals]
      * <br>制御命令<br>
@@ -1060,14 +1063,14 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int RUN = 208;
 	static {setArgType(RUN, new ArgType(false, ARG_INSTS));}
 
-	/** not [[instructions...]]
+	/** not [instructionlist]
 	 * <br>（予約された）構造化命令<br>
 	 * 引数の命令列を実行することを表す。引数列はロックを取得してはならない。
 	 * 引数実行中に失敗した場合、notの次の命令に進む。
 	 * 引数実行中にproceed命令を実行した場合、この命令が失敗する。
 	 * <p>将来、否定条件のコンパイルに使用するために予約。*/
 	public static final int NOT = 209;
-	static {setArgType(NOT, new ArgType(false, ARG_INSTS));}
+	static {setArgType(NOT, new ArgType(false, ARG_LABEL));}
 
 	// 組み込み機能に関する命令（仮） (210--215)
 	//  -----  inline  [atom, inlineref]
@@ -1595,6 +1598,14 @@ public class Instruction implements Cloneable, Serializable {
 		return new Instruction(DEQUEUEATOM,atom);
 	}
     
+    /** fail擬似命令を生成する */
+	public static Instruction fail() {
+		InstructionList label = new InstructionList();
+		label.add(new Instruction(PROCEED));
+		return new Instruction(Instruction.NOT, label);
+	}
+		
+		
 	// コンストラクタ
 	
     /** 無名命令を作る。*/
@@ -1799,10 +1810,21 @@ public class Instruction implements Cloneable, Serializable {
 					case ARG_VAR:
 						changeArg(inst, i+1, map);
 						break;
-					case ARG_INSTS:
 					case ARG_LABEL:
-						// TODO いずれ正しく実装すること(1)
-						break;				}
+						if (inst.getKind() == JUMP) break; // JUMP命令のLABEL引数はただのラベルなので除外
+						applyVarRewriteMap( ((InstructionList)inst.data.get(i)).insts, map);
+						break;
+					case ARG_INSTS:
+						applyVarRewriteMap( (List)inst.data.get(i), map);
+						break;
+					case ARG_VARS:
+						ListIterator li = ((List)inst.data.get(i)).listIterator();
+						while (li.hasNext()) {
+							Object varnum = li.next();
+							if (map.containsKey(varnum)) li.set(map.get(varnum));
+						}
+						break;
+				}
 			}
 			if (inst.getKind() == RESETVARS || inst.getKind() == CHANGEVARS) break;
 		}
@@ -1811,20 +1833,9 @@ public class Instruction implements Cloneable, Serializable {
 	public static void applyVarRewriteMapFrom(List list, Map map, int start) {
 		applyVarRewriteMap( list.subList(start, list.size()), map );
 	}
-	
-	/**
-	 * この命令が出力命令の場合、出力の種類を返す。
-	 * そうでない場合、-1を返す。
-	 */
-	public int getOutputType() {
-		ArgType argtype = (ArgType)argTypeTable.get(new Integer(kind));
-		if (argtype.output) {
-			return argtype.type[0];
-		} else {
-			return -1;
-		}
-	}
 
+	////////////////////////////////////////////////////////////////
+	
 	/**
 	 * 対応表によって引数を書き換える。
 	 * @param inst 書き換える命令
@@ -1852,15 +1863,24 @@ public class Instruction implements Cloneable, Serializable {
 			if (argtype.output) i++;
 			for (; i < inst.data.size(); i++) {
 				switch (argtype.type[i]) {
-				case ARG_MEM:
-				case ARG_ATOM:
-				case ARG_VAR:
-					if (inst.data.get(i).equals(varnum)) count++;
-					break;
-				case ARG_INSTS:
-				case ARG_LABEL:
-					// TODO いずれ正しく実装すること(2)
-					break;
+					case ARG_MEM:
+					case ARG_ATOM:
+					case ARG_VAR:
+						if (inst.data.get(i).equals(varnum)) count++;
+						break;
+					case ARG_LABEL:
+						if (inst.getKind() == JUMP) break; // JUMP命令のLABEL引数はただのラベルなので除外
+						count += getVarUseCount( ((InstructionList)inst.data.get(i)).insts, varnum);
+						break;
+					case ARG_INSTS:
+						count += getVarUseCount( (List)inst.data.get(i), varnum);
+						break;
+					case ARG_VARS:
+						Iterator it2 = ((List)inst.data.get(i)).iterator();
+						while (it2.hasNext()) {
+							if (it2.next().equals(varnum)) count++;
+						}
+						break;
 				}
 			}
 		}
@@ -1873,6 +1893,71 @@ public class Instruction implements Cloneable, Serializable {
 	 * @see getVarUseCount */
 	public static int getVarUseCountFrom(List list, Integer varnum, int start) {
 		return getVarUseCount( list.subList(start, list.size()), varnum );
+	}
+	
+	////////////////////////////////////////////////////////////////
+	/**
+	 * この命令が出力命令の場合、出力の種類を返す。
+	 * そうでない場合、-1を返す。
+	 */
+	public int getOutputType() {
+		ArgType argtype = (ArgType)argTypeTable.get(new Integer(kind));
+		if (argtype.output) {
+			return argtype.type[0];
+		} else {
+			return -1;
+		}
+	}
+	/** この命令が副作用を持つ可能性があるかどうかを返す。不明な場合trueを返さなければならない。
+	 * ただし膜のロック取得は副作用とは見なさない。
+	 * <p>どうやら、従来「ガード命令」と呼んでいたものに相当するらしい。*/
+	public boolean hasSideEffect() {
+		// todo 水野君方式のかっこいい管理にして正しく実装する予定
+		switch (getKind()) {
+			case Instruction.DEREF:
+			case Instruction.DEREFATOM:
+			case Instruction.DEREFLINK:
+			case Instruction.DEREFFUNC:
+			case Instruction.GETFUNC:
+			case Instruction.FUNC:
+			case Instruction.EQATOM:
+			case Instruction.SAMEFUNC:
+			case Instruction.GETMEM:
+			case Instruction.GETPARENT:
+			case Instruction.LOADFUNC:
+			case Instruction.GETLINK:
+			case Instruction.ALLOCLINK:
+			case Instruction.ALLOCMEM:
+			case Instruction.LOCK:
+			case Instruction.GETRUNTIME:
+			case Instruction.IADD: case Instruction.IADDFUNC:
+				return false;
+		}
+		return true;
+	}
+	/** この命令が制御動作をする可能性があるかどうかを返す。
+	 * 制御動作とは失敗や反復などを表す。不明な場合trueを返さなければならない。*/
+	public boolean hasControlEffect() {
+		// todo 水野君方式のかっこいい管理にして正しく実装する予定
+		switch (getKind()) {
+			case Instruction.DEREFATOM:
+			case Instruction.DEREFFUNC:
+			case Instruction.GETFUNC:
+			case Instruction.GETMEM:
+			case Instruction.LOADFUNC:
+			case Instruction.GETLINK:
+			case Instruction.ALLOCLINK:
+			case Instruction.ALLOCMEM:
+			case Instruction.IADD: case Instruction.IADDFUNC:
+				return false;
+			case Instruction.DEREF:
+			case Instruction.DEREFLINK:
+			case Instruction.IDIV: case Instruction.IDIVFUNC:
+			case Instruction.LOCK:
+			case Instruction.GETPARENT:
+				return true;
+		}
+		return true;
 	}
 	
 	//////////////////////////////////
