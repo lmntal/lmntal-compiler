@@ -239,9 +239,8 @@ public final class AtomSet implements Serializable {
 	public boolean retainAll(Collection c) {
 		throw new UnsupportedOperationException();
 	}
-	/** 全ての要素を除去する
-	 * @deprecated */
-	public void clear() {
+	/** 全ての要素を除去する */
+	protected void clear() {
 //		Iterator it = iterator();
 //		while (it.hasNext()) {
 //			((Atom)it.next()).index = -1;

@@ -316,7 +316,6 @@ public final class RemoteMembrane extends AbstractMembrane {
 			Atom a = (Atom)it.next();
 			proxyMap.put(a.remoteid, a);
 		}
-		//todo ¤Ê¤¼¤Ëdeprecated?
 		atoms.clear();
 		
 		try {

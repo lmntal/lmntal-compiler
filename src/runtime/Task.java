@@ -140,7 +140,7 @@ class Task extends AbstractTask implements Runnable {
 		}
 		//System.out.println(mem.getAtomCount() + ": exec2");
 		// 実行
-		boolean fActivateRootTask = false;
+		AbstractMembrane memToActivate = null;
 		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
 //			System.out.println("mems  = " + memStack);
@@ -196,7 +196,7 @@ class Task extends AbstractTask implements Runnable {
 					memStack.pop(); // 本膜をpop
 					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
 					if(mem.isRoot() && mem.getParent() != null) {
-						fActivateRootTask = true;
+						memToActivate = mem.getParent();
 					}
 					if (!mem.perpetual) {
 						// 子膜が全てstableなら、この膜をstableにする。
@@ -231,18 +231,18 @@ class Task extends AbstractTask implements Runnable {
 		}
 		//System.out.println(mem.getAtomCount() + ": exec3");
 		//
-		if (fActivateRootTask) {
+		if (memToActivate != null) {
 			new Thread() {
 				AbstractMembrane mem;
 				public void run() {
-					if (mem.getParent().asyncLock())
-						mem.getParent().asyncUnlock();
+					if (mem.asyncLock())
+						mem.asyncUnlock();
 				}
 				public void activate(AbstractMembrane mem) {
 					this.mem = mem;
 					run();
 				}
-			}.activate(mem);
+			}.activate(memToActivate);
 		}
 	}
 	/** このタスク固有のルールスレッドが実行する処理 */
