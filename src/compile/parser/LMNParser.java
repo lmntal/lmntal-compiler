@@ -932,7 +932,8 @@ public class LMNParser {
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
 			if (def.rhsOccs.size() != 1 && ((ProcessContext)def.lhsOcc).bundle != null) {
-				error("FEATURE NOT IMPLEMENTED: untyped process context must be linear unless its bundle is null: " + def.getName());
+				error( "FEATURE NOT IMPLEMENTED: untyped process context must be linear unless its bundle is null: "
+					+ def.getName() +"\nHINT: Try " + def.getName() + "[] instead." );
 				throw new ParseException("");
 //				int len = def.lhsOcc.args.length;
 //				Iterator it2 = def.rhsOccs.iterator();
