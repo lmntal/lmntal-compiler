@@ -294,10 +294,6 @@ public class LMNtalDaemon implements Runnable {
 	 * @param fqdn ホスト名。Fully Qualified Domain Nameである事。 
 	 */
 	public static boolean makeRemoteConnection(String fqdn) {
-		Thread t1 = new Thread(new MakeRemoteConnectionThread(), "MakeRemoteConnectionThread");
-		t1.start();
-		
-		
 		//「ブロックしないようにする」
 		//todo 3分間誰も通信できなくなるのを回避するために専用スレッドを作る（後回しでよい） n-kato 2004-08-20
 
