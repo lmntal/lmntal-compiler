@@ -1,3 +1,5 @@
+//seq.run(Data,[F1,F2...]).
+//DataをF1,F2...の順に適用する
 {module(seq). 
  seq.run(Data,[A|RES]),{+A. @p},{+Data. $p. @r}/
   :- {+Data. $p. @p},seq.run(Data,RES)}.
