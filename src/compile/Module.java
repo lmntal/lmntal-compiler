@@ -145,8 +145,16 @@ import compile.structure.*;
  *
  */
 public class Module {
-	public static String libPath = "../lmntal_lib/";
+	public static List libPath = new ArrayList();
 	public static Map memNameTable = new HashMap();
+	
+	static {
+		//libPath.add("hoge");
+		//libPath.add("FOO");
+		libPath.add("./lmntal_lib/");
+		libPath.add("../lmntal_lib/");
+		libPath.add(".");
+	}
 	
 	/**
 	 * 膜を名表に登録する。
@@ -162,20 +170,26 @@ public class Module {
 	 * @param mod_name  モジュール名
 	 */
 	public static void loadModule(Membrane m, String mod_name) {
-		String filename = libPath+mod_name+".lmn";
-		StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" ...");
-		try {
-			LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(filename))));
-			Membrane nm = RulesetCompiler.runStartWithNull(lp.parse());
-//			Env.p("MOD compiled "+nm);
-			//memNameTable がモジュール膜への参照を保持しているので、GCされない。
-			//m.add(nm);
-			sb.append(" [ OK ] ");
-		} catch (Exception e) {
-			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
-			sb.append(" [ FAILED ] ");
+		Iterator it = libPath.iterator();
+		while(it.hasNext()) {
+			String thePath = (String)it.next();
+			String filename = thePath+mod_name+".lmn";
+			StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" from "+thePath+" ...");
+			try {
+				LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(filename))));
+				Membrane nm = RulesetCompiler.runStartWithNull(lp.parse());
+	//			Env.p("MOD compiled "+nm);
+				//memNameTable がモジュール膜への参照を保持しているので、GCされない。
+				//m.add(nm);
+				sb.append(" [ OK ] ");
+				Env.d(sb.toString());
+				return;
+			} catch (Exception e) {
+				sb.append(" [ FAILED ] ");
+				Env.d(sb.toString());
+				//Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+			}
 		}
-		Env.d(sb.toString());
 	}
 	
 	/**

@@ -154,8 +154,10 @@ public class Inline {
 			p.println("}");
 			p.close();
 			
+			
 			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
-			cp = Runtime.getRuntime().exec("javac -classpath .;lmntal.jar MyInlineCode.java");
+			// OS とかによってクラスパスの区切り文字が ; だったり : だったりするので動的に取得
+			cp = Runtime.getRuntime().exec("javac -classpath ."+System.getProperty("path.separator")+"lmntal.jar MyInlineCode.java");
 		} catch (Exception e) {
 			Env.d("!!! "+e+Arrays.asList(e.getStackTrace()));
 		}

@@ -8,7 +8,9 @@ package test;
 import runtime.Env;
 
 /**
- * @author pa
+ * わかったこと→ path.separator = (linux => : windows => ;)
+ * 
+ * @author hara
  *
  */
 public class Test {
