@@ -68,7 +68,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定のホストにメッセージを送信し、返答を待つ。
 	 * @return 返答に含まれる文字列 */
 	public String sendWaitText(String fqdn, String command){
-		if(Env.debug > 0)System.out.println("LMNtalRuntimeMessageProcessor.sendWaitText()");
+		if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.sendWaitText()");
 		Object obj = sendWaitObject(fqdn, command);
 		if (obj instanceof String) {
 			return (String)obj;
@@ -102,14 +102,14 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定したメッセージに対する返答を待ってブロックする。
 	 * @return 返答が格納されたオブジェクト */
 	synchronized public Object waitForResponseObject(String msgid) {
-		if(Env.debug > 0)System.out.println("waitForResponseObject()");
+		if(DEBUG)System.out.println("waitForResponseObject()");
 		while (!messagePool.containsKey(msgid)) { 
 			try {
-				if(Env.debug > 0)System.out.println("waitForResponseObject(): waiting...");
+				if(DEBUG)System.out.println("waitForResponseObject(): waiting...");
 				wait(); 
 			} catch (InterruptedException e) {	}
 		}
-		if(Env.debug > 0)System.out.println("waitForResponseObject(): loop quit");
+		if(DEBUG)System.out.println("waitForResponseObject(): loop quit");
 		return messagePool.remove(msgid);
 	}	
 	/** 指定したメッセージに対する返答を待ってブロックする。
@@ -141,7 +141,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		if (Env.debug > 0) System.out.println("LMNtalRuntimeMessageProcessor.run()");
+		if (DEBUG) System.out.println("LMNtalRuntimeMessageProcessor.run()");
 		String input;
 		while (true) {
 			//ソケットを閉じるとき、この段階で閉じらていれるよりreadLine()まで行って待っている場合のほうが考えられる。
@@ -162,7 +162,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				System.out.println("LMNtalRuntimeMessageProcessor: （　´∀｀）＜　inputがぬる");
 				break;
 			}
-			if (Env.debug > 0) System.out.println("LMNtalRuntimeMessageProcessor.in.readLine(): " + input);
+			if (DEBUG) System.out.println("LMNtalRuntimeMessageProcessor.in.readLine(): " + input);
 
 			/* メッセージ:
 			 *   RES msgid 返答
@@ -191,8 +191,8 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				else res = content;
 				synchronized(this) {	
 					messagePool.put(msgid, res);
-					//if (Env.debug > 0) System.out.println(res.toString());
-					//if (Env.debug > 0) System.out.println(messagePool.toString());
+					//if (DEBUG) System.out.println(res.toString());
+					//if (DEBUG) System.out.println(messagePool.toString());
 					
 //					Object suspended = blockingObjects.remove(msgid);
 //					if (suspended == null) {
@@ -201,7 +201,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 //						continue;
 //					}
 					
-					//if (Env.debug > 0) System.out.println("notifyALL");
+					//if (DEBUG) System.out.println("notifyALL");
 					notifyAll();
 				}
 				continue;
@@ -320,6 +320,8 @@ class InstructionBlockProcessor implements Runnable {
 	String msgid;
 	LinkedList insts;
 	
+	static boolean DEBUG = true;
+	
 	InstructionBlockProcessor(LMNtalRuntimeMessageProcessor remote, 
 //		String fqdn, 
 		String msgid, LinkedList insts) {
@@ -421,7 +423,7 @@ class InstructionBlockProcessor implements Runnable {
 
 				String memid = command[1];
 				AbstractMembrane m = lookupMembrane(memid);
-				if(Env.debug > 0)System.out.println("LMNtalRuntimeMessageProcessor.run(): m is " + m.toString());
+				if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.run(): m is " + m.toString());
 
 				if (m == null) {
 					// 未知の膜の場合、擬似膜の作成を試みる
