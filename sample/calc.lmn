@@ -100,8 +100,8 @@ class LMNtalFrame extends JFrame implements ActionListener {
 {
   createFrame.
   createFrame :- [[/*inline*/
-    Membrane mem = (Membrane)me.getMem();
-    LMNtalFrame frame = new LMNtalFrame(mem);
+//    Membrane mem = (Membrane)me.getMem();
+    LMNtalFrame frame = new LMNtalFrame((Membrane)mem);
     Atom a = mem.newAtom(new Functor("frame",1));
     Atom b = mem.newAtom(new ObjectFunctor(frame));
     mem.newLink(a,0,b,0);
@@ -127,7 +127,7 @@ class LMNtalFrame extends JFrame implements ActionListener {
   cmd(control,off) :- terminate.
 
   update, frame(F) :- class(F,"LMNtalFrame") | frame(F), [[/*inline*/
-    Membrane mem = (Membrane)me.getMem();
+//    Membrane mem = (Membrane)me.getMem();
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
     frame.update();
@@ -139,7 +139,7 @@ class LMNtalFrame extends JFrame implements ActionListener {
 {terminate,frame(F),$p,@p} :- class(F,"LMNtalFrame") | { [[/*inline*/
     ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
-    Membrane mem = (Membrane)me.getMem();
+//    Membrane mem = (Membrane)me.getMem();
     frame.setVisible(false);
     frame.dispose();
     mem.removeAtom(me.nthAtom(0));

@@ -58,9 +58,13 @@ public class Inline {
 				// これをしないと、エラーがたくさんあるときデッドロックになって止まる！
 				BufferedReader br = new BufferedReader(new InputStreamReader(cp.getErrorStream()));
 				String el;
-				while( (el=br.readLine())!=null ) Env.d(el);
+				while( (el=br.readLine())!=null ) Env.p(el);
 				cp.waitFor();
 				Env.d("Compile result :  "+cp.exitValue());
+				if(cp.exitValue()==1) {
+					System.out.println("Failed in compiling. Commandline was :");
+					System.out.println(compileComamndLine);
+				} 
 				cp = null;
 			}
 		} catch (Exception e) {
@@ -105,6 +109,7 @@ public class Inline {
 		((InlineUnit)inlineSet.get(unitName)).register(funcName, type);
 	}
 	
+	static String compileComamndLine;
 	/**
 	 * 必要に応じてコードの生成とコンパイルを行う。
 	 */
@@ -137,9 +142,9 @@ public class Inline {
 				}
 			}
 			if(do_compile) {
-				String cmd = "javac -classpath "+path+" "+srcs;
-				Env.d("Compile command line: "+cmd);
-				cp = Runtime.getRuntime().exec(cmd);
+				compileComamndLine = "javac -classpath "+path+" "+srcs;
+				Env.d("Compile command line: "+compileComamndLine);
+				cp = Runtime.getRuntime().exec(compileComamndLine);
 			}
 		} catch (Exception e) {
 			Env.d(e);

@@ -22,6 +22,58 @@ io.popup(String) :- unary(String)|[[/*inline*/
 	]](String).
 
 /**
+ * Constructor : String -> java::BufferedReader
+ * 
+ */
+H=io.fileWriter(Filename) :- unary(Filename) | H=[[/*inline*/
+	try {
+		Atom pw = mem.newAtom(new ObjectFunctor(new java.io.PrintWriter(new java.io.FileWriter(me.nth(0)))));
+//		System.out.println("FILE="+me.nth(0));
+		mem.relink(pw, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+	} catch(Exception e) {}
+	]](Filename).
+
+/**
+ * print : ?
+ * 
+ */
+H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
+	H=[[/*inline*/
+		try {
+			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			Atom obj = me.nthAtom(0);
+			String s = me.nth(1);
+			if(s.equals("nil")) {
+				obj.remove();
+				obj = mem.newAtom(new Functor("nil", 1));
+				break;
+			}
+			if(pw!=null) {
+				pw.println(s);
+			}
+			mem.relink(obj, 0, me, 2);
+			me.nthAtom(1).remove();
+			me.remove();
+		} catch(Exception e) {Env.e(e);}
+	]](Object, String).
+
+/**
+ * close : 
+ * 
+ */
+H=close(Object) :- class(Object, "java.io.PrintWriter") |
+	H=[[/*inline*/
+		try {
+			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			pw.close();
+			mem.relink(me.nthAtmo(0), 0, me, 2);
+			me.remove();
+		} catch(Exception e) {Env.e(e);}
+	]](Object).
+
+/**
  * io.file : String -> Queue of String
  * 
  */

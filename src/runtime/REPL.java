@@ -66,7 +66,7 @@ public class REPL {
 				}
 			});
 		
-		System.out.println("        LMNtal version 0.63.20040507");
+		System.out.println("        LMNtal version 0.64.20040528");
 		System.out.println("");
 		System.out.println("Type h to see help.");
 		System.out.println("Type q to quit.");

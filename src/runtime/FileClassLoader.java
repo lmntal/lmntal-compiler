@@ -18,15 +18,17 @@ public class FileClassLoader extends ClassLoader {
 	 * クラスを読み込んで返す
 	 */
 	public Class findClass(String uname) {
+//		System.out.println("TRY to load" + uname);
 		try {
 			File filename = InlineUnit.classFile(uname);
+//			System.out.println("FILE "+filename);
 			FileInputStream fi = new FileInputStream( filename );
 			byte[] buf = new byte[fi.available()];
 			int len = fi.read(buf);
 			//Env.p("FileClassLoader : "+buf);
 			return defineClass(InlineUnit.className(uname), buf, 0, len);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return null;
 	}

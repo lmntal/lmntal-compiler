@@ -176,8 +176,13 @@ public class InlineUnit {
 	 * @return PATH/
 	 */
 	public static File srcPath(String unitName) {
-		if(unitName.equals(DEFAULT_UNITNAME)) return new File("");
-		File path = new File(unitName).getParentFile();
+		File path;
+		if(unitName.equals(DEFAULT_UNITNAME)) {
+			path = new File(".");
+		} else {
+			path = new File(unitName).getParentFile();
+			if(path==null) path = new File(".");
+		}
 		path = new File(path + "/.lmntal_inline");
 		return path;
 	}
@@ -188,14 +193,17 @@ public class InlineUnit {
 	 * @return SomeClass
 	 */
 	public static String className(String unitName) {
+		// あやしい
 		String o = new File(unitName).getName();
-		o = o.replaceAll("\\.lmn$", "");
-		// クラス名に使えない文字を削除
-		o = o.replaceAll("\\-", "");
-		o = "SomeInlineCode"+o;
+		if(unitName.endsWith(".lmn") || unitName.equals(InlineUnit.DEFAULT_UNITNAME)) {
+			o = o.replaceAll("\\.lmn$", "");
+			// クラス名に使えない文字を削除
+			o = o.replaceAll("\\-", "");
+			o = "SomeInlineCode"+o;
+		}
 		return o;
 	}
-
+	
 	/**
 	 * インラインコードのソースファイル名を返す。パス付。
 	 * @param unitName
