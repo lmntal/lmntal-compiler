@@ -44,9 +44,7 @@ LinkName       = [A-Z_][A-Za-z_0-9]*
 //
 // アトム名関係
 
-//AtomName = [a-z0-9][A-Za-z_0-9]*
-AtomName = [a-ln-z0-9][A-Za-z_0-9]* | m([A-Za-np-z_0-9]([A-Za-ce-z_0-9][A-Za-z_0-9]*)?)?
-// ↑よくわかんないけど mo や mov や mop が Syntax error になります hara
+AtomName = [a-z0-9][A-Za-z_0-9]*
 
 // AtomNameに加えて0引数でアトム名となる文字列その１（AtomNameと排他的でなければならない）
 NumberName = [0-9]*\.[0-9]+ | [0-9]*\.?[0-9]+ [Ee][+-]?[0-9]+
