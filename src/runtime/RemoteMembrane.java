@@ -26,24 +26,24 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 		}
 		return ret;
 	}
-	public AbstractMachine newMachine() {
-		// TODO コネクションの管理をRemotemachineからこのクラスに移した後でsendを発行するコードを書く
-		return (AbstractMachine)null;
+	public AbstractTask newTask() {
+		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
+		return (AbstractTask)null;
 	}
 }
 
 
 /**
- * リモートマシンクラス
+ * リモートタスククラス
  * TODO コネクションの管理はRemoteLMNtalRuntimeにまかせる。
  *       しかしnextatom(mem)idはsynchronizedにしなければならなくなる。
  * @author n-kato
  */
-final class RemoteMachine extends AbstractMachine {
+final class RemoteTask extends AbstractTask {
 	String cmdbuffer;
 	int nextatomid;
 	int nextmemid;
-	RemoteMachine() {}
+	RemoteTask() {}
 	String getNextAtomID() {
 		return "NEW_" + nextatomid++;
 	}
@@ -63,26 +63,26 @@ final class RemoteMachine extends AbstractMachine {
  * @author n-kato
  */
 final class RemoteMembrane extends AbstractMembrane {
-	/** この膜を管理するマシンにおけるこの膜のID */
+	/** この膜を管理する計算ノードにおけるこの膜のID */
 	protected String remoteid;
 	/** この膜のアトムのローカルIDからリモートIDへの写像 */
 	protected HashMap atomids = new HashMap();
-	public RemoteMembrane(RemoteMachine machine, RemoteMembrane parent, String remoteid) {
-		super(machine,parent);
+	public RemoteMembrane(RemoteTask task, RemoteMembrane parent, String remoteid) {
+		super(task,parent);
 		this.remoteid = remoteid;
 	}
 	
 	void send(String cmd) {
-		((RemoteMachine)machine).send(cmd + " " + remoteid);
+		((RemoteTask)task).send(cmd + " " + remoteid);
 	}
 	void send(String cmd, String args) {
-		((RemoteMachine)machine).send(cmd + " " + remoteid + " " + args);
+		((RemoteTask)task).send(cmd + " " + remoteid + " " + args);
 	}
 	void send(String cmd, String arg1, String arg2) {
-		((RemoteMachine)machine).send(cmd + " " + remoteid + " " + arg1 + " " + arg2);
+		((RemoteTask)task).send(cmd + " " + remoteid + " " + arg1 + " " + arg2);
 	}
 	void send(String cmd, String arg1, String arg2, String arg3, String arg4) {
-		((RemoteMachine)machine).send(cmd + " " + remoteid + " " + arg1 + " " + arg2
+		((RemoteTask)task).send(cmd + " " + remoteid + " " + arg1 + " " + arg2
 														   + " " + arg3 + " " + arg4);
 	}
 	///////////////////////////////
@@ -120,7 +120,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	/** 新しいアトムを作成し、この膜に追加し、この膜の実行スタックに入れる。 */
 	Atom newAtom(Functor functor) {
 		Atom a = super.newAtom(functor);
-		String atomid = ((RemoteMachine)machine).getNextAtomID();
+		String atomid = ((RemoteTask)task).getNextAtomID();
 		atomids.put(a,atomid);
 		send("NEWATOM",atomid);
 		return a;
@@ -128,7 +128,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	/** 指定された子膜に新しいinside_proxyアトムを追加する */
 	Atom newFreeLink(AbstractMembrane submem) {
 		Atom a = submem.newAtom(Functor.INSIDE_PROXY);
-		if (submem.machine.getRuntime() != machine.getRuntime()) {
+		if (submem.task.getRuntime() != task.getRuntime()) {
 			send("ADDFREELINK",submem.getAtomID(a));
 		}
 		return a;
@@ -159,8 +159,8 @@ final class RemoteMembrane extends AbstractMembrane {
 	
 	/** 新しい子膜を作成する */
 	AbstractMembrane newMem() {
-		String newremoteid = ((RemoteMachine)machine).getNextMemID();
-		RemoteMembrane m = new RemoteMembrane((RemoteMachine)machine, this, newremoteid);
+		String newremoteid = ((RemoteTask)task).getNextMemID();
+		RemoteMembrane m = new RemoteMembrane((RemoteTask)task, this, newremoteid);
 		m.remoteid = newremoteid;
 		addMem(m);
 		send("NEWMEM",newremoteid);
@@ -201,7 +201,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	}
 
 	void pour(AbstractMembrane srcMem) {
-		if (srcMem.machine.getRuntime() != machine.getRuntime()) {
+		if (srcMem.task.getRuntime() != task.getRuntime()) {
 			throw new RuntimeException("cross-site remote process fusion not implemented");
 		}
 		send("POUR",srcMem.getMemID());
@@ -209,7 +209,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	
 	/** dstMemに移動 */
 	void moveTo(AbstractMembrane dstMem) {
-		if (dstMem.machine.getRuntime() != machine.getRuntime()) {
+		if (dstMem.task.getRuntime() != task.getRuntime()) {
 			throw new RuntimeException("cross-site remote process migration not implemented");
 		}
 		// remote call of a local process migration

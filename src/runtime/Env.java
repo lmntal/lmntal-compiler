@@ -10,8 +10,8 @@ import java.util.*;
  * @author hara
  */
 public final class Env {
-	public static Machine machine = new Machine();
-	public static Membrane rootMembrane = new Membrane(machine);
+	public static Task task = new Task();
+	public static Membrane rootMembrane = new Membrane(task);
 	
 	/**
 	 * General dumper

@@ -14,7 +14,7 @@ public class Tester extends TestCase {
 		junit.textui.TestRunner.run(Tester.class);
 	}
 	public void testAppend() {
-		Machine machine = new Machine();
+		Task machine = new Task();
 		Membrane root = (Membrane)machine.getRoot();
 		
 		Atom append = root.newAtom("append", 3);

@@ -31,8 +31,8 @@ import util.Stack;
  * @author Mizuno
  */
 abstract class AbstractMembrane extends QueuedEntity {
-	/** この膜を管理するマシン */
-	protected AbstractMachine machine;
+	/** この膜を管理するタスク */
+	protected AbstractTask task;
 	/** 親膜。リモートにあるならばRemoteMembraneオブジェクトまたはnullを参照する */
 	protected AbstractMembrane parent;
 	/** アトムの集合 */
@@ -59,10 +59,10 @@ abstract class AbstractMembrane extends QueuedEntity {
 	// コンストラクタ
 
 	/**
-	 * 指定されたマシンに所属する膜を作成する。
+	 * 指定されたタスクに所属する膜を作成する。
 	 */
-	protected AbstractMembrane(AbstractMachine machine, AbstractMembrane parent) {
-		this.machine = machine;
+	protected AbstractMembrane(AbstractTask task, AbstractMembrane parent) {
+		this.task = task;
 		this.parent = parent;
 		id = nextId++;
 	}
@@ -88,9 +88,9 @@ abstract class AbstractMembrane extends QueuedEntity {
 	
 	//
 	
-	/** この膜を管理するマシンの取得 */
-	AbstractMachine getMachine() {
-		return machine;
+	/** この膜を管理するタスクの取得 */
+	AbstractTask getTask() {
+		return task;
 	}
 	/** 親膜の取得 */
 	AbstractMembrane getParent() {
@@ -111,7 +111,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	boolean isStable() {
 		return stable;
 	}
-	/** stableフラグをONにする 10/26矢島 machine.exec()内で使う*/
+	/** stableフラグをONにする 10/26矢島 Task#exec()内で使う*/
 	void toStable(){
 		stable = true;
 	}
@@ -120,7 +120,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 		return rulesets.size() > 0;
 	}
 	boolean isRoot() {
-		return machine.getRoot() == this;
+		return task.getRoot() == this;
 	}
 	
 	// 反復子
@@ -209,7 +209,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** 指定されたアトムをこの膜の実行スタックに積む */
 	abstract protected void enqueueAtom(Atom atom);
 	/** この膜が移動された後、アクティブアトムを実行スタックに入れるために呼び出される。
-	 * <p>Ruby版ではmovedTo(machine,dstMem)を再帰呼び出ししていたが、
+	 * <p>Ruby版ではmovedTo(task,dstMem)を再帰呼び出ししていたが、
 	 * キューし直すべきかどうかの判断の手間が掛かりすぎるため子孫の膜に対する処理は廃止された。 */
 	abstract protected void enqueueAllAtoms();
 
@@ -234,8 +234,8 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 
 	/** 
-	 * この膜にあるアトムatomがこの計算ノードが実行するマシンにある膜の実行スタック内にあれば、除去する。
-	 * 他の計算ノードが実行するマシンにある膜の実行スタック内のとき（システムコール）は、この膜は
+	 * この膜にあるアトムatomがこの計算ノードが実行するタスクにある膜の実行スタック内にあれば、除去する。
+	 * 他の計算ノードが実行するタスクにある膜の実行スタック内のとき（システムコール）は、この膜は
 	 * ロックされていないので何もしないでよいが、その場合は実行スタック内にないので既に対応できている。
 	 * <p><strike>「この膜の実行スタックに入っているアトムatomを実行スタックから除去する」</strike>
 	 * ←現在のデータ構造では、どの膜の実行スタックに入っているか調べることができないため却下された。
@@ -337,11 +337,11 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 
 	/** 除去された膜srcMemにある全てのアトムおよび膜をこの膜に移動する。
-	 * 膜srcMemの子孫のうちルート膜の手前までの全ての膜を、この膜と同じマシンの管理にする。
+	 * 膜srcMemの子孫のうちルート膜の手前までの全ての膜を、この膜と同じタスクの管理にする。
 	 * srcMemはこのメソッド実行後、このまま廃棄しなければならない。
 	 */
 	void pour(AbstractMembrane srcMem) {
-		if (srcMem.machine.getRuntime() != machine.getRuntime()) {
+		if (srcMem.task.getRuntime() != task.getRuntime()) {
 			throw new RuntimeException("cross-site process fusion not implemented");
 		}
 		atoms.addAll(srcMem.atoms);
@@ -350,8 +350,8 @@ abstract class AbstractMembrane extends QueuedEntity {
 		while (it.hasNext()) {
 			((AbstractMembrane)it.next()).parent = this;
 		}
-		if (srcMem.machine != machine) {
-			srcMem.setMachine(machine);
+		if (srcMem.task != task) {
+			srcMem.setTask(task);
 		}
 	}
 	
@@ -362,7 +362,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	
 	/** この膜をdstMemに移動する。parent!=nullを仮定する。 */
 	void moveTo(AbstractMembrane dstMem) {
-		if (dstMem.machine.getRuntime() != machine.getRuntime()) {
+		if (dstMem.task.getRuntime() != task.getRuntime()) {
 			parent = dstMem;
 			//((RemoteMembrane)dstMem).send("ADDROOT",getMemID());
 			throw new RuntimeException("cross-site process migration not implemented");
@@ -370,23 +370,23 @@ abstract class AbstractMembrane extends QueuedEntity {
 		parent.removeMem(this);
 		dstMem.addMem(this);
 		parent = dstMem;
-		if (dstMem.machine != machine) {
-			setMachine(dstMem.machine);
+		if (dstMem.task != task) {
+			setTask(dstMem.task);
 		}
 		enqueueAllAtoms();
 	}
-	/** この膜とその子孫を管理するマシンを更新するために呼ばれる内部命令 */
-	private void setMachine(AbstractMachine newMachine) {
+	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
+	private void setTask(AbstractTask newTask) {
 		if (isRoot()) return;
-		this.machine = newMachine;
+		this.task = newTask;
 		Iterator it = memIterator();
 		while (it.hasNext()) {
-			((AbstractMembrane)it.next()).setMachine(newMachine);
+			((AbstractMembrane)it.next()).setTask(newTask);
 		}
 	}
 	/** この膜（ルート膜）の親膜を変更する。
 	 * <p>いずれ、
-	 * AbstractMembrane#newRootおよびAbstractLMNtalRuntime#newMachineの引数に親膜を渡すようにし、
+	 * AbstractMembrane#newRootおよびAbstractLMNtalRuntime#newTaskの引数に親膜を渡すようにし、
 	 * AbstractMembrane#moveToを使って親膜を変更することにより、
 	 * TODO この問題のあるメソッドは廃止しなければならない */
 	void setParent(AbstractMembrane mem) {
@@ -610,17 +610,17 @@ final class Membrane extends AbstractMembrane {
 	/** 実行スタック */
 	private Stack ready = new Stack();
 	/**
-	 * 指定されたマシンに所属する膜を作成する。
+	 * 指定されたタスクに所属する膜を作成する。
 	 * newMem/newRoot メソッド内で呼ばれる。
 	 */
-	private Membrane(AbstractMachine machine, AbstractMembrane parent) {
-		super(machine, parent);
+	private Membrane(AbstractTask task, AbstractMembrane parent) {
+		super(task, parent);
 	}
 	/**
-	 * 親膜を持たない膜を作成し、指定されたマシンのルート膜にする。
+	 * 親膜を持たない膜を作成し、指定されたタスクのルート膜にする。
 	 */
-	Membrane(Machine machine) {
-		super(machine, null);
+	Membrane(Task task) {
+		super(task, null);
 	}
 
 	String getMemID() { return getLocalID(); }
@@ -648,7 +648,7 @@ final class Membrane extends AbstractMembrane {
 		if (!isRoot()) {
 			((Membrane)parent).activate();
 		}
-		((Machine)machine).memStack.push(this);
+		((Task)task).memStack.push(this);
 	}
 	/** 
 	 * 移動された後、この膜のアクティブアトムを実行スタックに入れるために呼び出される。
@@ -669,13 +669,13 @@ final class Membrane extends AbstractMembrane {
 		}
 	}
 	AbstractMembrane newMem() {
-		Membrane m = new Membrane(machine, this);
+		Membrane m = new Membrane(task, this);
 		mems.add(m);
 		return m;
 	}
 	AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
-		AbstractMachine mach = runtime.newMachine();
-		mach.getRoot().setParent(this);
-		return mach.getRoot();
+		AbstractTask task = runtime.newTask();
+		task.getRoot().setParent(this);
+		return task.getRoot();
 	}
 }
