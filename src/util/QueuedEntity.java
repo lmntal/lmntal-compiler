@@ -12,12 +12,16 @@ public class QueuedEntity {
 	protected QueuedEntity() {
 		next = prev = null;
 	}
-	/** スタックに積まれている場合はtrue。 */
+	/** スタックに積まれている場合はtrueを返す */
 	public boolean isQueued() {
 		return next != null;
 	}
 	/** スタックから除去 */
 	public void dequeue() {
+		if (!isQueued()) {
+			System.out.println("SYSTEM ERROR: dequeued entity is not in a queue");
+			return;
+		}
 		next.prev = prev;
 		prev.next = next;
 		prev = null;
