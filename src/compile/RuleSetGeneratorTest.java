@@ -8,7 +8,7 @@ import runtime.Env;
 import runtime.InterpretedRuleset;
 
 /**
- * 実行時データ構造を命令列（仮に foo と呼ぶ）に変換する。
+ * 実行時データ構造からルールセットを得るテスト
  * 
  * じっけん段階
  * @author hara
@@ -21,8 +21,8 @@ public class RuleSetGeneratorTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//Membrane m = getTestStructure1();
-		Membrane m = getTestStructure2();
+		Membrane m = getTestStructure1();
+		//Membrane m = getTestStructure2();
 		Env.p(m);
 		InterpretedRuleset ir = RuleSetGenerator.run(m);
 		
@@ -33,9 +33,9 @@ public class RuleSetGeneratorTest {
 	}
 	
 	/**
-	 * デバッグ用データ構造をつくる。
+	 * デバッグ用膜構造をつくる。
 	 * 
-	 * v, w, ( v :- w, w )
+	 * ( :- v, w, ( v :- w, w ) )
 	 * 
 	 * @return RuleStructure
 	 */
@@ -62,9 +62,9 @@ public class RuleSetGeneratorTest {
 	}
 	
 	/**
-	 * デバッグ用データ構造をつくる。
+	 * デバッグ用膜構造をつくる。2
 	 * 
-	 * v, w, ( v :- w, w )
+	 * ( v :- w, w )
 	 * 
 	 * @return RuleStructure
 	 */
@@ -78,7 +78,7 @@ public class RuleSetGeneratorTest {
 	}
 	
 	/**
-	 * デバッグ用データ構造をつくる。2
+	 * デバッグ用ルール構造をつくる。
 	 * 
 	 * ( v :- w, w )
 	 * 

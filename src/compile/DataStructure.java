@@ -118,7 +118,7 @@ final class LinkOccurrence {
 }
 /** ソースコード中のルールの構造を表すクラス */
 final class RuleStructure {
-	/** 所属膜 */
+	/** 所属膜。コンパイル時につかうので予めセットしてください */
 	public Membrane parent;
 	public Membrane leftMem = new Membrane(null);
 	public Membrane rightMem = new Membrane(null);

@@ -105,6 +105,10 @@ public class RuleCompiler {
 		
 		theRule.showDetail();
 		((InterpretedRuleset)rs.parent.ruleset).rules.add(theRule);
+		
+		// ルールの右辺膜以下にルールがあるかもしれないので再帰的に走査
+		RuleSetGenerator.processMembrane(rs.leftMem); // 一応左辺も
+		RuleSetGenerator.processMembrane(rs.rightMem);
 	}
 	
 	private void compile_l() {
