@@ -1,0 +1,179 @@
+% 記号
+symbols = {
+	% 名前の表現
+	{ naoyuki  , p(N1_1), p(N1_2), p(N1_3) },
+	{ hyougo   , p(N2_1), p(N2_2) },
+	{ saburo   , p(N3_1), p(N3_2) },
+	{ shinji   , p(N4_1), p(N4_2) },
+	{ yoshihisa, p(N5_1) },
+	{ hisako   , p(N6_1), p(N6_2), p(N6_3) },
+	{ yoko     , p(N7_1), p(N7_2), p(Q2_2) },
+	{ nobuko   , p(N8_1) }
+	% no ルールで使う
+	{ null       }
+},
+% 述語
+predicates = {
+	father(N1_1, N2_1), % father(naoyuki, hyogo)
+	father(N3_1, N1_2), % father(saburo, naoyuki)
+	father(N3_2, N4_1), % father(saburo, shinji)
+	father(N5_1, N6_1), % father(yoshihisa, hisako)
+	mother(N6_2, N2_2), % mother(hisako, hyogo)
+	mother(N7_1, N1_3), % mother(yoko, naoyuki)
+	mother(N7_2, N4_2), % mother(yoko, shinji)
+	mother(N8_1, N6_3)  % mother(nobuko, hisako)
+},
+/*
+ 単純な問題(on Prolog)
+    | ?- father(naoyuki, hyogo).
+    yes
+    | ?- father(saburo, hyogo).
+    no
+    
+    名前のシンボルは手動で書き換え・・   
+*/
+% ルール father
+(
+	% ルール father :- yes
+	father(Q1, Q2),
+	symbols = {
+		{ p(Q1), p(D1), $r1 },
+		{ p(Q2), p(D2), $r2 },
+		$r3
+	},
+	predicates = {
+		father(D1, D2),
+		$r4
+	}
+		:-
+	yes,
+	symbols = {
+		{ p(D1), $r1 },
+		{ p(D2), $r2 },
+		$r3
+	},
+	predicates = {
+		father(D1, D2),
+		$r4
+	}
+),
+(
+	% ルール father :- no
+	% yes ルールが優先されるならこれだけでも大丈夫？
+	father(Q1, Q2),
+	symbols = {
+		{ p(Q1), $r1 },
+		{ p(Q2), $r2 },
+		$r3
+	}
+		:-
+	no,
+	symbols = {
+		{ $r1 },
+		{ $r2 },
+		$r3
+	}
+),
+% ルール mother
+// fatherと同じように書く？ 述語に比例してルールが増える・・
+
+/*
+ 変数への値代入
+    | ?- father(F, hyogo).
+    F = naoyuki ? 
+    yes
+    | ?- father(F, saburo).
+    no
+*/
+(
+	% ルール father( ,_) :- yes, 変数置き換え
+	father(Q1, F), var(F),
+	symbols = {
+		{ p(Q1), p(D1), $r1 },
+		{        p(D2), $r2 },
+		$r3
+	},
+	predicates = {
+		father(D1, D2),
+		$r4
+	}
+		:-
+	father(Q1, Q2), var(F),
+	symbols = {
+		{ p(Q1),       p(D1), $r1 },
+		{ p(Q2), p(F), p(D2), $r2 },
+		$r3
+	},
+	predicates = {
+		father(D1, D2),
+		$r4
+	}
+),
+(
+	% ルール father(_, ) :- yes, 変数リンク先の置き換え
+	father(F, Q2), var(F),
+	symbols = {
+		{        p(D1), $r1 },
+		{ p(Q2), p(D2), $r2 },
+		$r3
+	},
+	predicates = {
+		father(D1, D2),
+		$r4
+	}
+		:-
+	father(Q1, Q2), var(F),
+	symbols = {
+		{ p(Q1), p(F), p(D1), $r1 },
+		{ p(Q2),       p(D2), $r2 },
+		$r3
+	},
+	predicates = {
+		father(D1, D2),
+		$r4
+	}
+),
+(
+	% ルール father( ,_) :- no
+	% yes ルールが優先されるならこれｄ
+	father(Q1, F), var(F),
+	symbols = {
+		{ p(Q1), $r1       },
+		{        $r2, null },
+		$r3
+	}
+		:-
+	father(Q1, Q2),
+	symbols = {
+		{ p(Q1), $r1       },
+		{ p(Q2), $r2, null },
+		$r3
+	}
+),
+(
+	% ルール father(_, ) :- no
+	% yes ルールが優先されるならこれｄ
+	father(F, Q2), var(F),
+	symbols = {
+		{ p(Q2), $r1       },
+		{        $r2, null },
+		$r3
+	}
+		:-
+	father(Q1, Q2),
+	symbols = {
+		{ p(Q2), $r1       },
+		{ p(Q1), $r2, null },
+		$r3
+	}
+),
+% クエリ
+/*
+    | ?- father(F, hyogo).
+    F = naoyuki ? 
+    yes
+    | ?- father(F, saburo).
+    no
+*/
+father(Q2_2, Q2_1),
+var(Q2_1)
