@@ -14,7 +14,9 @@ import daemon.LMNtalNode;
  * メッセージ処理はLMNtalDaemonMessageProcessorに全部丸投げ？
  */
 final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
-
+	String cmdbuffer;
+	boolean result;
+	
 	protected String hostname;
 	protected LMNtalNode lmnNode; 
 	protected RemoteLMNtalRuntime(String hostname) {
@@ -23,12 +25,15 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 		this.hostname = hostname;
 	}
 
+
+
 	public AbstractTask newTask() {
 		// todo 下と同じ
 		return (AbstractTask)null;
 	}
 	public AbstractTask newTask(AbstractMembrane parent) {
 		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
+		
 		return (AbstractTask)null;
 	}
 	public void terminate() {
@@ -40,14 +45,28 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
 	}
 	
 	public boolean connect(){
-		boolean connectResult = LMNtalDaemon.connect(hostname);
+		//TODO 単体テスト
+		result = LMNtalDaemon.connect(hostname);
 		lmnNode = LMNtalDaemon.getLMNtalNodeFromFQDN(hostname);
-		if(lmnNode != null && connectResult == true){
+		if(lmnNode != null && result == true){
 			return true;
 		} else {
 			return false;
 		}
 	}
+	void send(String cmd) {
+		cmdbuffer += cmd + "\n";
+	}
+	void flush() {
+		result = LMNtalDaemon.sendMessage(lmnNode,cmdbuffer);
+		
+		if(result == true){
+			cmdbuffer = ""; //バッファを初期化
+		} else {
+			//TODO 送信失敗時に何かする
+		}
+	}
+	
 }
 
 
@@ -58,7 +77,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime{
  * @author n-kato
  */
 final class RemoteTask extends AbstractTask {
-	String cmdbuffer;
+//	String cmdbuffer;
 	int nextatomid;
 	int nextmemid;
 	RemoteTask(AbstractLMNtalRuntime runtime) { super(runtime); }
@@ -68,14 +87,15 @@ final class RemoteTask extends AbstractTask {
 	String getNextMemID() {
 		return "NEW_" + nextmemid++;
 	}
-	void send(String cmd) {
-		cmdbuffer += cmd + "\n";
-	}
-	void flush() {
-		//TODO 実装:RemoteLMNtalRuntimeに制御を移して命令列をあて先に流す
-		System.out.println("SYSTEM ERROR: remote call not implemented");
-	}
-
+//	RemoteRuntimeに移動:2004-06-23 nakajima
+//	void send(String cmd) {
+//		cmdbuffer += cmd + "\n";
+//	}
+//	RemoteRuntimeに移動:2004-06-23 nakajima
+//	void flush() {
+//		//done 2004-0623 nakajima:todo 実装:RemoteLMNtalRuntimeに制御を移して命令列をあて先に流す
+//		System.out.println("SYSTEM ERROR: remote call not implemented");
+//	}
 	// ロック
 	public void lock() {
 		throw new RuntimeException("not implemented");

@@ -20,6 +20,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 		tasks.add(t);
 		return t;
 	}
+	
 	/** （マスタタスクによって）このランタイムの終了が要求されたかどうか */
 	protected boolean terminated = false;
 	/** このランタイムの終了を要求する。
