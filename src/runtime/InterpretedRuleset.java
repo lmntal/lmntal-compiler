@@ -1,5 +1,8 @@
 package runtime;
 
+import java.util.Iterator;
+import java.util.Arrays;
+
 public final class InterpretedRuleset extends Ruleset {
 	/** とりあえずルールの配列として実装 */
 	private int id;
@@ -14,6 +17,23 @@ public final class InterpretedRuleset extends Ruleset {
 	public Instruction[] body;
 	
 	public InterpretedRuleset() {
+	}
+	
+	public void showDetail() {
+		Iterator l;
+		l = Arrays.asList( atomMatches ).listIterator();
+		Env.p("--atommatches :");
+		while(l.hasNext()) Env.p((Instruction)l.next());
+		
+		l = Arrays.asList( memMatch ).listIterator();
+		Env.p("--memmatch :");
+		while(l.hasNext()) Env.p((Instruction)l.next());
+		
+		l = Arrays.asList( body ).listIterator();
+		Env.p("--body :");
+		while(l.hasNext()) Env.p((Instruction)l.next());
+		
+		Env.p(toString());
 	}
 	
 	public String toString() {

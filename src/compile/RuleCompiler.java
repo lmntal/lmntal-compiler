@@ -92,20 +92,7 @@ public class RuleCompiler {
 		//optimize if $optlevel > 0
 		optimize();
 		
-		{
-			Iterator l;
-			l = atommatches.listIterator();
-			Env.p("--atommatches :");
-			while(l.hasNext()) Env.p((Instruction)l.next());
-			
-			l = memmatch.listIterator();
-			Env.p("--memmatch :");
-			while(l.hasNext()) Env.p((Instruction)l.next());
-			
-			l = body.listIterator();
-			Env.p("--body :");
-			while(l.hasNext()) Env.p((Instruction)l.next());
-		}
+		//showInstructions();
 		
 		//rule.register(@atommatches,@memmatch,@body)
 		iRuleset.memMatch    = new Instruction[memmatch.size()];
@@ -118,17 +105,19 @@ public class RuleCompiler {
 			
 			l = memmatch.listIterator(); i=0;
 			while(l.hasNext()) {
-				iRuleset.memMatch[i] = (Instruction)l.next();
+				iRuleset.memMatch[i++] = (Instruction)l.next();
 			}
 			l = atommatches.listIterator(); i=0;
 			while(l.hasNext()) {
-				iRuleset.atomMatches[i] = (Instruction)l.next();
+				iRuleset.atomMatches[i++] = (Instruction)l.next();
 			}
 			l = body.listIterator(); i=0;
 			while(l.hasNext()) {
-				iRuleset.body[i] = (Instruction)l.next();
+				iRuleset.body[i++] = (Instruction)l.next();
 			}
 		}
+		//iRuleset.showDetail();
+		
 		return iRuleset;
 	}
 	
@@ -140,7 +129,6 @@ public class RuleCompiler {
 			
 			if(firstid < hc.atoms.size()) {
 				atommatches.addAll(hc.match);
-				Env.p(""+hc.atomidpath.size());
 				hc.atomidpath.set(firstid, new Integer(1));
 				hc.varcount = 1;
 				Membrane mem = ((Atom)(hc.atoms.get(firstid))).mem;
@@ -389,6 +377,24 @@ public class RuleCompiler {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * デバッグ用表示
+	 */
+	private void showInstructions() {
+		Iterator l;
+		l = atommatches.listIterator();
+		Env.p("--atommatches :");
+		while(l.hasNext()) Env.p((Instruction)l.next());
+		
+		l = memmatch.listIterator();
+		Env.p("--memmatch :");
+		while(l.hasNext()) Env.p((Instruction)l.next());
+		
+		l = body.listIterator();
+		Env.p("--body :");
+		while(l.hasNext()) Env.p((Instruction)l.next());
 	}
 }
 

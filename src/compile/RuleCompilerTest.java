@@ -26,6 +26,8 @@ public class RuleCompilerTest {
 		RuleCompiler rc = new RuleCompiler(rs);
 		rc.simplify();
 		InterpretedRuleset r = rc.compile();
+		
+		r.showDetail();
 	}
 	
 	/**
