@@ -567,7 +567,13 @@ class InterpretiveReactor {
 					//	return true;
 					//}
 					break; //nakajima 2004-01-05
-
+					
+				case Instruction.ISUNARY: // [atom]
+					if (atoms[inst.getIntArg1()].getFunctor().getArity() != 1) return false;
+					break; // n-kato
+				case Instruction.ISUNARYFUNC: // [func]
+					break;
+					
 				case Instruction.ISINT : //[atom]
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof IntegerFunctor)) return false;
 					break; //n-kato

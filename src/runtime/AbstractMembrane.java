@@ -529,10 +529,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 				Atom a1 = outside.args[1].getAtom();
 				if (a1.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
 					// 2つめのoutsideの第1引数のリンク先が子膜でない場合
-					if (!removeList.contains(outside)) {
-						unifyLocalAtomArgs(outside, 0, a1, 0);
-						removeList.add(outside);
-						removeList.add(a1);
+					if (a1.args[0].getAtom().getMem().getParent() != this) {
+						if (!removeList.contains(outside)) {
+							unifyLocalAtomArgs(outside, 0, a1, 0);
+							removeList.add(outside);
+							removeList.add(a1);
+						}
 					}
 				}
 			}
@@ -599,7 +601,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 				// 自由リンクの反対側の出現がこの膜のアトムならば、後者の名前をoutside_proxyに変える。
 				// このときstarが消えるかもしれないので、starをキューで実装するときはバグに注意。
 				if (oldstar.getMem() == this) {
-					changeList.add(star);
+					//changeList.add(star);
 					alterAtomFunctor(oldstar, Functor.OUTSIDE_PROXY);
 					newLink(oldstar, 0, star, 0);
 				} else {
