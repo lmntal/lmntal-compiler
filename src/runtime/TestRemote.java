@@ -98,8 +98,9 @@ class TestRemote{
 		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
 		//	rt_banon.flush();
 
-		//CONNECT
-		RemoteMembrane rm_banon = (RemoteMembrane)rootMem.newRoot("banon.ueda.info.waseda.ac.jp");
+		//別方法のCONNECT
+//		RemoteMembrane rm_banon = (RemoteMembrane)rootMem.newRoot("banon.ueda.info.waseda.ac.jp");
+		RemoteMembrane rm_banon = (RemoteMembrane)rootMem.newRoot("133.9.237.9");
 
 		//NEWATOM
 		Atom atom_hoge_banon = rm_banon.newAtom(new Functor("hoge", 1));
