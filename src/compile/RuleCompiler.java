@@ -67,8 +67,8 @@ public class RuleCompiler {
 	 * 指定された RuleStructure 用のルールをつくる
 	 */
 	RuleCompiler(RuleStructure rs) {
-		//Env.n("RuleCompiler");
-		//Env.p(rs);
+		Env.n("RuleCompiler");
+		Env.p(rs);
 		this.rs = rs;
 	}
 	
