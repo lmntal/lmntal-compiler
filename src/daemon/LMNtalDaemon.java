@@ -47,12 +47,12 @@ public class LMNtalDaemon implements Runnable {
 	ServerSocket servSocket = null;
 	
 	/**
-	 * ソケットと接続元の表: Socket -> LMNtalNode
+	 * ソケットと接続元の表: InetAddress -> LMNtalNode
 	 */
 	static HashMap nodeTable = new HashMap();
 	
 	/**
-	 * ローカルにあるruntimeの表: rgid (String) -> Socket（LMntalNodeに変更した方がよい）
+	 * ローカルにあるruntimeの表: rgid (String) -> Socket（LMNtalNodeに変更した方がよい）
 	 */
 	static HashMap registedLocalRuntimeTable = new HashMap();
 	
@@ -135,38 +135,17 @@ public class LMNtalDaemon implements Runnable {
 				tmpSocket = servSocket.accept(); //コネクションがくるまで待つ
 
 				if (DEBUG)System.out.println("accepted socket: " + tmpSocket);
-
-				//入力stream			
-				tmpInStream =
-					new BufferedReader(
-						new InputStreamReader(tmpSocket.getInputStream()));
-
-				//出力stream
-				tmpOutStream =
-					new BufferedWriter(
-						new OutputStreamWriter(tmpSocket.getOutputStream()));
-
+				LMNtalDaemonMessageProcessor node = new LMNtalDaemonMessageProcessor(tmpSocket);
+				
 				//登録する
-				if (registerNode(tmpSocket,
-					new LMNtalNode(
-						tmpSocket.getInetAddress(),
-						tmpInStream,
-						tmpOutStream))) {
+				if (registerNode(node)) {
 					//登録成功。
-					Thread t2 =
-						new Thread(
-							new LMNtalDaemonMessageProcessor(
-								tmpSocket,
-								tmpInStream,
-								tmpOutStream));
+					Thread t2 = new Thread(node);
 					t2.start();
 				} else {
 					//登録失敗。糸冬
-					tmpInStream.close();
-					tmpOutStream.close();
-					tmpSocket.close();
+					node.close();
 				}
-
 			} catch (IOException e) {
 				System.out.println(
 					"ERROR in LMNtalDaemon.run() " + e.toString());
@@ -176,26 +155,23 @@ public class LMNtalDaemon implements Runnable {
 		}
 	}
 
-	/*
-	 * Socketをkey, LMNtalNodeをvalueとするHashMap(nodeTable)に登録する
-	 * 
-	 * @param socket ソケット
-	 * @param node LMNtalノード
-	 * 
+	/**
+	 * LMNtalNodeをnodeTableに登録する
+	 * @param node LMNtalNode
 	 * @return socketというキーが既に存在していたらfalse
 	 */
-	static boolean registerNode(Socket socket, LMNtalNode node) {
-		if (DEBUG)System.out.println("registerNode(" + socket.toString() + ", " + node.toString() + ")");
+	static boolean registerNode(LMNtalNode node) {
+		if (DEBUG)System.out.println("registerNode(" + node.toString() + ")");
 
 		synchronized (nodeTable) {
-			if (nodeTable.containsKey(socket)) {
+			if (nodeTable.containsKey(node.getInetAddress())) {
 				return false;
 			}
-
-			nodeTable.put(socket, node);
+			nodeTable.put(node.getInetAddress(), node);
 		}
 		return true;
 	}
+
 
 	/*
 	 * リモート側で使われるスレーブランタイムを生成する。
@@ -318,39 +294,12 @@ public class LMNtalDaemon implements Runnable {
 
 	////////////////////////////////////////////////////////////////
 
-	/* 
-	 *  fqdn上のLMNtalDaemonが既に登録されているかどうか確認する
-	 *  @param fqdn Fully Qualified Domain Nameなホスト名
-	 *  @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらtrue。それ以外はfalse。
-	 */
-	public static boolean isHostRegistered(String fqdn) {
-		if (DEBUG) System.out.println("now in LMNtalDaemon.isRegisted(" + fqdn + ")");
-		
-
-		Collection c = nodeTable.values();
-		Iterator it = c.iterator();
-
-		while (it.hasNext()) {
-			if (((LMNtalNode) (it.next()))
-				.getInetAddress()
-				.getCanonicalHostName()
-				.equalsIgnoreCase(fqdn)) {
-				if (DEBUG) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is true!");
-				return true;
-			}
-		}
-
-		if (DEBUG) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is false!");
-		
-
-		return false;
-	}
 
 	////////////////////////////////////////////////////////////////
 
-	public static LMNtalNode getNode(Socket socket){
-		return (LMNtalNode) nodeTable.get(socket);
-	}
+//	public static LMNtalNode getNode(InetAddress ip){
+//		return (LMNtalNode) nodeTable.get(ip);
+//	}
 
 	public static Socket getRuntimeGroupSocket(String rgid){
 		return (Socket)registeredRuntimeGroupTable.get(rgid);
@@ -375,6 +324,37 @@ public class LMNtalDaemon implements Runnable {
 		}
 	}
 
+
+	/* 
+	 *  fqdn上のLMNtalDaemonが既に登録されているかどうか確認する
+	 *  @param fqdn Fully Qualified Domain Nameなホスト名
+	 *  @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらtrue。それ以外はfalse。
+	 */
+	public static boolean isHostRegistered(String fqdn) {
+		// return (getLMNtalNodeFromFQDN(fqdn) != null);
+		
+		if (DEBUG) System.out.println("now in LMNtalDaemon.isRegisted(" + fqdn + ")");
+		
+
+		Collection c = nodeTable.values();
+		Iterator it = c.iterator();
+
+		while (it.hasNext()) {
+			if (((LMNtalNode) (it.next()))
+				.getInetAddress()
+				.getCanonicalHostName()
+				.equalsIgnoreCase(fqdn)) {
+				if (DEBUG) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is true!");
+				return true;
+			}
+		}
+
+		if (DEBUG) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is false!");
+		
+
+		return false;
+	}
+	
 	/*
 	 * Fully Qualified Domain Name fqdnに対応するLMNtalNodeを探す。
 	 * 
@@ -446,25 +426,15 @@ public class LMNtalDaemon implements Runnable {
 		} else {
 			try {
 				//新規接続の場合
-				InetAddress ip = InetAddress.getByName(fqdn);
-
 				Socket socket = new Socket(fqdn, 60000);
-
-				BufferedReader in =
-					new BufferedReader(
-						new InputStreamReader(socket.getInputStream()));
-
-				BufferedWriter out =
-					new BufferedWriter(
-						new OutputStreamWriter(socket.getOutputStream()));
-
-				Thread t =
-					new Thread(
-						new LMNtalDaemonMessageProcessor(socket, in, out));
-				t.start();
-
-				LMNtalNode node = new LMNtalNode(ip, in, out);
-				return registerNode(socket, node);
+				LMNtalDaemonMessageProcessor node = new LMNtalDaemonMessageProcessor(socket);
+				if (registerNode(node)) {
+					Thread t = new Thread(node);
+					t.start();
+					return true;
+				}
+				node.close();
+				return false;
 			} catch (Exception e) {
 				System.out.println(
 					"ERROR in LMNtalDaemon.connect(" + fqdn + ", rgid: " + rgid + ")");
@@ -588,29 +558,29 @@ public class LMNtalDaemon implements Runnable {
 			
 	}
 	
-	/*
-	 * 接続を切る。
-	 * 
-	 * @param socket 接続を切りたいソケット。
-	 * @return socket.close()したらtrue。それ以外はfalse。  
-	 */
-	boolean disconnect(Socket socket) {
-		LMNtalNode node = (LMNtalNode) nodeTable.get(socket);
-
-		try {
-			node.getInputStream().close();
-			node.getOutputStream().close();
-			socket.close();
-
-			return true;
-		} catch (Exception e) {
-			System.out.println(
-				"LMNtalDaemon.disconnect() failed!!! " + e.toString());
-			e.printStackTrace();
-		}
-
-		return false;
-	}
+//	/*
+//	 * 接続を切る。
+//	 * 
+//	 * @param socket 接続を切りたいソケット。
+//	 * @return socket.close()したらtrue。それ以外はfalse。  
+//	 */
+//	boolean disconnect(Socket socket) {
+//		LMNtalNode node = (LMNtalNode) nodeTable.get(socket);
+//
+//		try {
+//			node.getInputStream().close();
+//			node.getOutputStream().close();
+//			socket.close();
+//
+//			return true;
+//		} catch (Exception e) {
+//			System.out.println(
+//				"LMNtalDaemon.disconnect() failed!!! " + e.toString());
+//			e.printStackTrace();
+//		}
+//
+//		return false;
+//	}
 
 	/*
 	 * デバッグ用。nodeTable, registedRuntimeTable, msgTableを出力する。 

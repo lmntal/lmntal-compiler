@@ -3,7 +3,9 @@ package runtime;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import daemon.LMNtalDaemonMessageProcessor;
+import daemon.LMNtalNode;
+import daemon.LMNtalRuntimeMessageProcessor;
+import java.net.Socket;
 
 
 /**
@@ -12,8 +14,9 @@ import daemon.LMNtalDaemonMessageProcessor;
  */
 
 public final class LMNtalRuntimeManager {
-
-	/** 計算ノード表（String -> AbstractLMNtalRuntime）*/
+	/** ローカルのデーモンとの通信路 */
+	static LMNtalRuntimeMessageProcessor daemon = null;
+	/** 計算ノード表（String -> RemoteLMNtalRuntime）*/
 	static HashMap runtimeids = new HashMap();
 	/** 計算ノード表を利用開始する */
 	public static void init() {}
@@ -24,9 +27,22 @@ public final class LMNtalRuntimeManager {
 		node = node.intern();
 
 		//あて先はどこ？
-		if(LMNtalDaemonMessageProcessor.isMyself(node)){
+		if(LMNtalNode.isMyself(node)){
 			//localhostなら  自分自身を返す
 			return Env.theRuntime;
+		}
+		//
+		if (daemon == null) {
+			try {
+				Socket socket = new Socket(node, 60000);
+				daemon = new LMNtalRuntimeMessageProcessor(socket);
+				Thread t = new Thread(daemon);
+				t.start();
+			}
+			catch (Exception e) {
+				System.out.println("Cannot connect to LMNtal deamon (not started?)");
+				return null;
+			}
 		}
 		
 		//remote

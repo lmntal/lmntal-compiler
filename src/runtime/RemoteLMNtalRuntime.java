@@ -2,7 +2,7 @@ package runtime;
 
 //import daemon.Cache;
 import daemon.LMNtalDaemon;
-import daemon.LMNtalNode;
+//import daemon.LMNtalNode;
 
 /**
  * リモート計算ノード
@@ -21,10 +21,10 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 */
 	protected String hostname;
 	
-	/**
-	 * hostnameに対応するLMNtalNode。実際はLMNtalDaemon.getLMNtalNodeFromFQDN()でとってきてるだけ。
-	 */
-	protected LMNtalNode lmnNode;
+//	/**
+//	 * hostnameに対応するLMNtalNode。実際はLMNtalDaemon.getLMNtalNodeFromFQDN()でとってきてるだけ。
+//	 */
+//	protected LMNtalNode lmnNode;
 
 	/**
 	 * コンストラクタ
@@ -81,13 +81,16 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 */
 	public boolean connect() {
 		//TODO 単体テスト
-		result = LMNtalDaemon.connect(hostname, runtimeid);
-		lmnNode = LMNtalDaemon.getLMNtalNodeFromFQDN(hostname);
-		if (lmnNode != null && result == true) {
-			return true;
-		} else {
-			return false;
-		}
+//		result = LMNtalDaemon.connect(hostname, runtimeid);
+//		lmnNode = LMNtalDaemon.getLMNtalNodeFromFQDN(hostname);
+		
+//		if (lmnNode != null && result == true) {
+//			return true;
+//		} else {
+//			return false;
+//		}
+
+		return result;
 	}
 
 }
