@@ -5,6 +5,7 @@
 package compile;
 
 import runtime.Env;
+import runtime.InterpretedRuleset;
 
 /**
  * 実行時データ構造を命令列（仮に foo と呼ぶ）に変換する。
@@ -23,7 +24,8 @@ public class RuleCompilerTest {
 		RuleStructure rs = getTestStructure();
 		Env.p(rs);
 		RuleCompiler rc = new RuleCompiler(rs);
-		rc.compile();
+		rc.simplify();
+		InterpretedRuleset r = rc.compile();
 	}
 	
 	/**

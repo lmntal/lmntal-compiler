@@ -18,6 +18,7 @@ public class HeadCompiler {
 	public List visited = new ArrayList();
 	public List atomidpath = new ArrayList();
 	public List match = new ArrayList();
+	public Map atomids = new HashMap();
 	
 	public int varcount;
 	

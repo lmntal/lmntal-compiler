@@ -29,6 +29,21 @@ public class RuleCompiler {
 	public RuleStructure rs;
 	public List atommatches = new ArrayList();
 	public List memmatch = new ArrayList();
+	public int varcount;
+	public List body;
+	
+	public List lhsfreemems;
+	public Map lhsatomids;
+	
+	public List rhsatoms;
+	public Map rhsatompath;
+	public Map rhsmempaths;
+	
+	public List lhsatoms;
+	public Map lhsatompath;
+	public Map lhsatomidpath;
+	public Map lhsmempaths;
+	
 	HeadCompiler hc;
 	
 	/**
@@ -142,6 +157,14 @@ public class RuleCompiler {
 	
 	private void compile_r() {
 		Env.c("compile_r");
+		lhsatoms = hc.atoms;
+		lhsfreemems = hc.freemems;
+		lhsatomids = hc.atomids;
+		varcount = lhsatoms.size() + lhsfreemems.size();
+		rhsatompath = new HashMap();
+		rhsmempaths = new HashMap();
+		rhsmempaths.put(rs.rightMem, lhsmempaths.get(rs.leftMem));
+		genlhsmempaths();
 		/*
 		@lhsatoms 	 = @lhscmp.atoms
 		@lhsfreemems = @lhscmp.freemems
@@ -166,6 +189,102 @@ public class RuleCompiler {
 		
 		@body.first.push @varcount
 		update_links
+		 */
+	}
+	
+	public void simplify() {
+		Env.c("RuleCompiler::simplify");
+		static_unify(rs.leftMem);
+		static_unify(rs.rightMem);
+	}
+	
+	public void static_unify(Membrane mem) {
+		Env.c("RuleCompiler::static_unify");
+		/*
+		mem.each_mem do | submem | static_unify submem end
+		removedatoms = []
+		mem.each_atomoffunc($FUNC_UNIFY) do | atom |
+			link1 = atom.args[1]
+			link2 = atom.args[2]
+			if link1.atom.mem.getmem(0) != mem.getmem(0) and \
+				 link2.atom.mem.getmem(0) != mem.getmem(0)
+				if mem.getmem(0) == @lhs
+					$nerrors += 1
+					print "Compile error: head contains body unification\n"
+				end
+				next
+			end
+			link1.relink link2
+			link2.relink link1
+			removedatoms.push atom
+		end
+		removedatoms.each do | atom | atom.remove end
+		 */
+	}
+	
+	private void genlhsmempaths() {
+		Env.c("RuleCompiler::genlhsmempaths");
+		
+		Membrane mem;
+		int atomid;
+		
+		List rootmems = new ArrayList();
+		lhsmempaths = new HashMap();
+		lhsatomidpath = new HashMap();
+		
+		for(int i=0;i<lhsatoms.size();i++) {
+			Atom atom = (Atom)(lhsatoms.get(i));
+			atomid = ((Integer)(lhsatomids.get( (Object)atom) )).intValue();
+			lhsatomidpath.put(new Integer(atomid), new Integer(atomid + 1));
+			if(lhsmempaths.get(atom.mem)!=null) {
+				varcount++;
+				lhsmempaths.put((Object)(atom.mem), new Integer(varcount));
+				body.add("[:getmem, @varcount, atomid + 1]");
+				rootmems.add(atom.mem);
+			}
+		}
+		for(int i=0;i<lhsfreemems.size();i++) {
+			mem = (Membrane)(lhsfreemems.get(i));
+			lhsmempaths.put(mem, new Integer(i + lhsatoms.size() + 1));
+			rootmems.add(mem);
+		}
+		while( mem.mem != null && ! lhsmempaths.containsValue(mem.mem) ) {
+			varcount++;
+			lhsmempaths.put((Object)(mem.mem), new Integer(varcount));
+			body.add( "[:getparent, @varcount, @lhsmempaths[mem]]" );
+			mem = mem.mem;
+		}
+		/*
+		rootmems = []
+		@lhsmempaths	 = {} # elements are integers such as 4
+		@lhsatomidpath = {}
+		@lhsatoms.each do | atom |
+			atomid = @lhsatomids[atom]
+			@lhsatomidpath[atomid] = atomid + 1
+			
+			unless @lhsmempaths[atom.mem]
+				@lhsmempaths[atom.mem] = (@varcount += 1)
+				@body.push [:getmem, @varcount, atomid + 1]
+				rootmems.push atom.mem
+			end
+		end
+		@lhsfreemems.length.times do | index |
+			mem = @lhsfreemems[index]
+			@lhsmempaths[mem] = (index + @lhsatoms.length + 1)
+			rootmems.push mem
+		end
+		rootmems.each do | mem |
+# 		 while mem.mem and (not @lhsmempaths.include? mem.mem or
+# 				 @lhsmempaths[mem].length + 1 < @lhsmempaths[mem.mem].length)
+# 			 @lhsmempaths[mem.mem] = @lhsmempaths[mem].dup.unshift :memof
+# 			 mem = mem.mem
+# 		 end
+			while mem.mem and not @lhsmempaths.include? mem.mem
+				@lhsmempaths[mem.mem] = (@varcount += 1)
+				@body.push [:getparent, @varcount, @lhsmempaths[mem]]
+				mem = mem.mem
+			end
+		end
 		 */
 	}
 	
