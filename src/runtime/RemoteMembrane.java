@@ -36,7 +36,7 @@ final class RemoteMachine extends AbstractMachine {
 final class RemoteMembrane extends AbstractMembrane {
 	protected String memid;
 	protected HashMap atomids;
-	public RemoteMembrane(AbstractMachine machine, RemoteMembrane parent, String memid) {
+	public RemoteMembrane(RemoteMachine machine, RemoteMembrane parent, String memid) {
 		super(machine,parent);
 		this.memid = memid;
 		atomids = new HashMap();
@@ -82,7 +82,7 @@ final class RemoteMembrane extends AbstractMembrane {
 	/** 膜の追加 */
 	AbstractMembrane newMem() {
 		String newmemid = ((RemoteMachine)machine).getNextMemID();
-		RemoteMembrane m = new RemoteMembrane(machine, this, newmemid);
+		RemoteMembrane m = new RemoteMembrane((RemoteMachine)machine, this, newmemid);
 		m.memid = newmemid;
 		mems.add(m);
 		send("NEWMEM",newmemid);
@@ -110,13 +110,15 @@ final class RemoteMembrane extends AbstractMembrane {
 	void removeAtom(Atom atom) {
 		send("REMOVEATOM",(String)atomids.get(atom));		super.removeAtom(atom);
 	}
-	void removeAtoms(ArrayList atomlist) {
-		Iterator it = atomlist.iterator();
-		while (it.hasNext()) {
-			Atom atom = (Atom)it.next();
-			send("REMOVEATOM",(String)atomids.get(atom));
+	void removeMem(AbstractMembrane mem) {
+		if (mem instanceof RemoteMembrane) {
+			send("REMOVEMEM",((RemoteMembrane)mem).memid);
 		}
-		super.removeAtoms(atomlist);
+		else { 
+			// TODO このときは何を送るべきか
+			send("REMOVEMEM","TODO");
+		}
+		super.removeMem(mem);
 	}
 
 	void remove() {
