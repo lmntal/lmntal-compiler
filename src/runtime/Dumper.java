@@ -21,10 +21,13 @@ final class Unlexer {
 
 public class Dumper {
 	static HashMap binops = new HashMap();
-	static final int xfy = 0;
-	static final int yfx = 1;
-	static final int xfx = 2;
+	private static final int xfy = 0;
+	private static final int yfx = 1;
+	private static final int xfx = 2;
 	static {
+		binops.put("^",   new int[]{xfy,200});
+		binops.put("**",  new int[]{xfy,300});
+		binops.put("mod", new int[]{xfx,300});
 		binops.put("*",   new int[]{yfx,400});
 		binops.put("/",   new int[]{yfx,400});
 		binops.put("*.",  new int[]{yfx,400});

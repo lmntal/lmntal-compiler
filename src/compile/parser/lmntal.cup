@@ -7,7 +7,7 @@ import java.util.LinkedList;
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
 terminal		COMMA, LPAREN, RPAREN, LBRACE, RBRACE,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
-				LBRACKET, RBRACKET, NEGATIVE,
+				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
 				ASTERISK, SLASH, PLUS, MINUS;
 terminal		QUOTED_STRING;
@@ -17,8 +17,11 @@ terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME
 non terminal SrcLink			Link;
 non terminal SrcName			FuncName;
 non terminal String				AtomName;
+non terminal Object				QuotedOperatorAtom;
 non terminal Object				UnitAtom;
 non terminal Object				UnaryOpAtom;
+non terminal Object				Atom200;
+non terminal Object				Atom300;
 non terminal Object				Atom400;
 non terminal Object				Atom500;
 non terminal Object				Atom;
@@ -79,6 +82,8 @@ UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = list; :}
 				| LPAREN Rule:rule RPAREN
 					{: RESULT = rule; :}
+				| LPAREN QuotedOperatorAtom:atom RPAREN
+					{: RESULT = atom; :}
 				| Context:p
 					{:  RESULT = p; :}
 				| LPAREN Atom:atom RPAREN
@@ -99,21 +104,39 @@ UnaryOpAtom	::=	  UnitAtom:atom
 					   RESULT = new SrcAtom("-", list); :}
 				;
 
-Atom400		::=   UnaryOpAtom:atom
+Atom200		::=   UnaryOpAtom:atom
 					{: RESULT = atom; :}
-				| Atom400:atom1 ASTERISK_DOT UnaryOpAtom:atom2
+				| Atom200:atom1 HAT UnaryOpAtom:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("^", list); :};
+
+Atom300		::=   Atom200:atom
+					{: RESULT = atom; :}
+				| Atom200:atom1 MOD Atom200:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("mod", list); :}
+				| Atom300:atom1 ASTERISK_ASTERISK Atom200:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("**", list); :};
+
+Atom400		::=   Atom300:atom
+					{: RESULT = atom; :}
+				| Atom400:atom1 ASTERISK_DOT Atom300:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("*.", list); :}
-				| Atom400:atom1 SLASH_DOT UnaryOpAtom:atom2
+				| Atom400:atom1 SLASH_DOT Atom300:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("/.", list); :}
-				| Atom400:atom1 ASTERISK UnaryOpAtom:atom2
+				| Atom400:atom1 ASTERISK Atom300:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("*", list); :}
-				| Atom400:atom1 SLASH UnaryOpAtom:atom2
+				| Atom400:atom1 SLASH Atom300:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("/", list); :};
@@ -143,6 +166,22 @@ Atom		::=   Atom500:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom(op, list); :};
+
+QuotedOperatorAtom ::=
+				  PLUS			{: RESULT = new SrcAtom("+");	:}
+				| MINUS			{: RESULT = new SrcAtom("-");	:}
+				| ASTERISK		{: RESULT = new SrcAtom("*");	:}
+				| SLASH			{: RESULT = new SrcAtom("/");	:}
+				| PLUS_DOT		{: RESULT = new SrcAtom("+.");	:}
+				| MINUS_DOT		{: RESULT = new SrcAtom("-.");	:}
+				| ASTERISK_DOT	{: RESULT = new SrcAtom("*.");	:}
+				| SLASH_DOT		{: RESULT = new SrcAtom("/.");	:}
+				| MOD			{: RESULT = new SrcAtom("mod");	:}
+				| RELOP:op		{: RESULT = new SrcAtom(op);	:}
+				| HAT			{: RESULT = new SrcAtom("^");	:}
+				| TILDE			{: RESULT = new SrcAtom("~");	:}
+				| ASTERISK_ASTERISK	{: RESULT = new SrcAtom("**");	:}
+				;
 
 List        ::=   LBRACKET RBRACKET
 					{: RESULT = new SrcAtom("[]"); :}

@@ -44,7 +44,8 @@ LinkName       = [A-Z_][A-Za-z_0-9]*
 //
 // アトム名関係
 
-AtomName = [a-z0-9][A-Za-z_0-9]*
+//AtomName = [a-z0-9][A-Za-z_0-9]*
+AtomName = [a-ln-z0-9][A-Za-z_0-9]* | m([A-Za-np-z_0-9]([A-Za-ce-z_0-9][A-Za-z_0-9]*)?)?
 
 // AtomNameに加えて0引数でアトム名となる文字列その１（AtomNameと排他的でなければならない）
 NumberName = [0-9]*\.[0-9]+ | [0-9]*\.?[0-9]+ [Ee][+-]?[0-9]+
@@ -65,7 +66,7 @@ String = "\"" [^\"\r\n]* ("\\\"" [^\"\r\n]*)* "\""
 
 ////////////////////////////////////////////////////////////////
 
-RelativeOp = "=" | "==" | "!=" | "::" | {IntegerRelativeOp} | {FloatingRelativeOp}
+RelativeOp = "=" | "==" | "!=" | "::" | "?" | {IntegerRelativeOp} | {FloatingRelativeOp}
 IntegerRelativeOp  = "<" | ">" | ">=" | "=<" | "=:=" | "=\\="
 FloatingRelativeOp = "<."| ">."| ">=."| "=<."| "=:=."| "=\\=."
 
@@ -93,6 +94,9 @@ EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
 	"/."				{ return symbol(sym.SLASH_DOT); }
 	"-."				{ return symbol(sym.MINUS_DOT); }
 	"+."				{ return symbol(sym.PLUS_DOT); }
+	"^"					{ return symbol(sym.HAT); }
+	"~"					{ return symbol(sym.TILDE); }
+	"**"				{ return symbol(sym.ASTERISK_ASTERISK); }
 	"$"					{ return symbol(sym.PROCVAR); }
 	"@"					{ return symbol(sym.RULEVAR); }
 	"*"					{ return symbol(sym.ASTERISK); }
@@ -101,7 +105,8 @@ EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
 	"-"					{ return symbol(sym.MINUS); }
 	"["					{ return symbol(sym.LBRACKET); }
 	"]"					{ return symbol(sym.RBRACKET); }
-	"[[" ~"]]"			{ string.setLength(0); yybegin(QUOTED); }
+	"mod" 				{ return symbol(sym.MOD); }
+	"[[" 				{ string.setLength(0); yybegin(QUOTED); }
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	{LinkName}			{ return symbol(sym.LINK_NAME, yytext()); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME, yytext()); }
