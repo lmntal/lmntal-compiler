@@ -244,13 +244,13 @@ public class RuleCompiler {
 		//Env.d("lhsmempaths.get(rs.leftMem) -> "+lhsmempaths.get(rs.leftMem));
 		//Env.d("rhsmempaths -> "+rhsmempaths);
 
-		recursiveLockLHSNonlinearProcessContextMems();
 		dequeueLHSAtoms();
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
 		if (removeLHSMem(rs.leftMem) >= 2) {
 			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
 		}
+		recursiveLockLHSNonlinearProcessContextMems();
 		buildRHSMem(rs.rightMem);
 		if (!rs.rightMem.processContexts.isEmpty()) {
 			body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
