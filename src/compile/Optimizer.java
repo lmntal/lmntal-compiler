@@ -31,9 +31,9 @@ public class Optimizer {
 					removeUnnecessaryRelink(body);
 				}
 			}
-			if (Env.optimize >= 7) {
-				makeLoop(head, body); //まだ問題だらけ
-			}
+//			if (Env.optimize >= 7) {
+//				makeLoop(head, body); //まだ問題だらけ
+//			}
 		}
 	}
 
@@ -651,6 +651,7 @@ public class Optimizer {
 
 		//命令列の変更を行う
 		varMap = new HashMap();
+		varMap.put(new Integer(0), new Integer(0)); //本膜
 		varMap.put(new Integer(firstAtom.intValue() + base), firstAtom);
 		
 		ArrayList moveInsts = new ArrayList();
@@ -726,6 +727,19 @@ public class Optimizer {
 						baseIterator.remove();
 						loopIterator.remove();
 					}
+					break;
+				case Instruction.PROCEED:
+					//next命令に変更
+					ArrayList argList = new ArrayList();
+					argList.add(new Integer(0));
+					for (int i = base + 1; i < 2 * base; i++) {
+						Integer i2 = new Integer(i);
+						if (varMap.containsKey(i2)) {
+							i2 = (Integer)varMap.get(i2);
+						}
+						argList.add(i2);
+					}
+					loopIterator.set(Instruction.dummy("next    " + argList));
 					break;
 			}
 		}
