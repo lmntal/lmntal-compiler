@@ -42,7 +42,8 @@ public class LMNtalDaemon implements Runnable {
 	ServerSocket servSocket = null;
 	
 	/**
-	 * リモートのデーモンとの接続表: InetAddress -> LMNtalNode
+	 * リモートのデーモンとの接続表: ipstr (String) -> LMNtalNode
+	 * (obsolete)リモートのデーモンとの接続表: InetAddress -> LMNtalNode
 	 */
 	static HashMap remoteHostTable = new HashMap();
 	
@@ -151,13 +152,16 @@ public class LMNtalDaemon implements Runnable {
 	 * @return このホストが既に登録されていたらfalse
 	 */
 	static boolean registerRemoteHostNode(LMNtalDaemonMessageProcessor node) {
-		if (Env.debug > 0)System.out.println("registerNode(" + node.toString() + ")");
+		if (Env.debug > 0)System.out.println("LMNtalDaemon.registerRemoteHostNode(" + node.toString() + ")");
 		
 		synchronized (remoteHostTable) {
 			if (remoteHostTable.containsKey(node.getInetAddress())) {
 				return false;
 			}
-			remoteHostTable.put(node.getInetAddress(), node);
+//			remoteHostTable.put(node.getInetAddress(), node);
+			//nakajima 2004-10-22
+			//実はgetIpstrは呼ばなくてよい
+			remoteHostTable.put(getIpstr(node.getInetAddress().getHostAddress()), node);
 		}
 		return true;
 	}
@@ -170,61 +174,43 @@ public class LMNtalDaemon implements Runnable {
 	 *  @param ip ipv4 address (String)
 	 *  @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらtrue。それ以外はfalse。
 	 */
-	public static boolean isHostRegistered(String ip) {
-		//if (Env.debug > 0) System.out.println("now in LMNtalDaemon.isHostRegisted(" + ip + ")");
-		
-		Collection c = remoteHostTable.values();
-		Iterator it = c.iterator();
+	public static boolean isHostRegistered(String hostname) {
+		//if (Env.debug > 0) System.out.println("now in LMNtalDaemon.isHostRegisted(" + hostname + ")");
 
-		while (it.hasNext()) {
-			if (((LMNtalNode) (it.next()))
-				.getInetAddress()
-				.getHostName()
-				.equalsIgnoreCase(ip)) {
-				if (Env.debug > 0) System.out.println("LMNtalDaemon.isHostRegisted(" + ip + ") is true!");
-				return true;
-			}
+		return (getLMNtalNode(hostname) != null);
+	}
+
+	/**
+	 * hostname -> ipstr
+	 * @param hostname
+	 * @return ipstr
+	 */
+	public static String getIpstr(String hostname){
+		try {
+			String ipstr = java.net.InetAddress.getByName(hostname).getHostAddress();
+			return ipstr;
+		} catch (UnknownHostException e) {
+			return null;
 		}
-
-		if (Env.debug > 0) System.out.println("LMNtalDaemon.isHostRegisted(" + ip + ") is false!");
-
-		return false;
 	}
 	
 	
-	/* 
-	 *  fqdn上のLMNtalDaemonが既に登録されているかどうか確認する
-	 *  @param fqdn Fully Qualified Domain Nameなホスト名
-	 *  @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらtrue。それ以外はfalse。
+	/**
 	 * 
-	 * (nakajima 2004-10-20) 登録はホスト名じゃなくてIPアドレスで行う事になったので廃止
+	 *  hostnameに対応するLMNtalNodeを探す。
+	 * @param hostname
+	 * @return 
 	 */
-//	public static boolean isHostRegistered(String fqdn) {
-//		// return (getLMNtalNodeFromFQDN(fqdn) != null);
-//		
-//		if (Env.debug > 0) System.out.println("now in LMNtalDaemon.isRegisted(" + fqdn + ")");
-//		
-//
-//		Collection c = remoteHostTable.values();
-//		Iterator it = c.iterator();
-//
-//		while (it.hasNext()) {
-//			if (((LMNtalNode) (it.next()))
-//				.getInetAddress()
-////			.getCanonicalHostName()
-//			.getHostName()
-//				.equalsIgnoreCase(fqdn)) {
-//				if (Env.debug > 0) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is true!");
-//				return true;
-//			}
-//		}
-//
-//		if (Env.debug > 0) System.out.println("LMNtalDaemon.isRegisted(" + fqdn + ") is false!");
-//
-//		return false;
-//	}
+	public static LMNtalNode getLMNtalNode(String hostname){
+		//hostname -> ipstr
+		String ipstr = getIpstr(hostname);
+				
+		//nodeTable.get して castして返す。無かったらnullを返す
+		return (LMNtalNode)remoteHostTable.get(ipstr);
+	}
 	
 	/**
+	 * 
 	 * Fully Qualified Domain Name fqdnに対応するLMNtalNodeを探す。
 	 * 
 	 * @param fqdn ホスト名。Fully Qualified Domain Nameである事。 

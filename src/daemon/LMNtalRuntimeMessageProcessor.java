@@ -101,14 +101,14 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定したメッセージに対する返答を待ってブロックする。
 	 * @return 返答が格納されたオブジェクト */
 	synchronized public Object waitForResponseObject(String msgid) {
-		if(DEBUG)System.out.println("waitForResponseObject()");
+		//if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(" + msgid + ")");
 		while (!messagePool.containsKey(msgid)) { 
 			try {
-				if(DEBUG)System.out.println("waitForResponseObject(): waiting...");
+				//if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(): waiting...");
 				wait(); 
 			} catch (InterruptedException e) {	}
 		}
-		if(DEBUG)System.out.println("waitForResponseObject(): loop quit");
+		//if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.waitForResponseObject(): loop quit");
 		return messagePool.remove(msgid);
 	}	
 	/** 指定したメッセージに対する返答を待ってブロックする。
@@ -153,15 +153,15 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			} catch (IOException e) {
 				//todo disconnectFromDaemon()する時に、必ずこの例外が発生するのを防ぐ
 				//済 2004-08-24 nakajima
-				System.out.println("LMNtalRuntimeMessageProcessor: ERROR:このスレッドには書けません!");
+				System.out.println("LMNtalRuntimeMessageProcessor.run(): ERROR:このスレッドには書けません!");
 				e.printStackTrace(); 
 				break;
 			}
 			if (input == null) {
-				System.out.println("LMNtalRuntimeMessageProcessor: （　´∀｀）＜　inputがぬる");
+				System.out.println("LMNtalRuntimeMessageProcessor.run(): （　´∀｀）＜　inputがぬる");
 				break;
 			}
-			if (DEBUG) System.out.println("LMNtalRuntimeMessageProcessor.in.readLine(): " + input);
+			if (DEBUG) System.out.println("LMNtalRuntimeMessageProcessor.run(): in.readLine(): " + input);
 
 			/* メッセージ:
 			 *   RES msgid 返答
@@ -319,7 +319,7 @@ class InstructionBlockProcessor implements Runnable {
 	String msgid;
 	LinkedList insts;
 	
-	static boolean DEBUG = true;
+	static boolean DEBUG = true;  //todo Env.debugを使う
 	
 	InstructionBlockProcessor(LMNtalRuntimeMessageProcessor remote, 
 //		String fqdn, 
@@ -348,7 +348,7 @@ class InstructionBlockProcessor implements Runnable {
 	/** グローバル膜IDまたはNEW_に対応する膜を探す
 	 * @return Membrane（見つからなかった場合はnull）*/
 	public AbstractMembrane lookupMembrane(String memid) {
-		if(DEBUG)System.out.println("LMNRuntimeMessageProcessor.lookupMembrane(" + memid + ")");
+		if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.lookupMembrane(" + memid + ")");
 		
 		Object obj = newMemTable.get(memid);
 		if (obj instanceof AbstractMembrane) return (AbstractMembrane)obj;
