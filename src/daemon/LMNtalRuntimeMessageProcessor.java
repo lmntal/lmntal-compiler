@@ -349,6 +349,8 @@ class InstructionBlockProcessor implements Runnable {
 	/** グローバル膜IDまたはNEW_に対応する膜を探す
 	 * @return Membrane（見つからなかった場合はnull）*/
 	public AbstractMembrane lookupMembrane(String memid) {
+		if(DEBUG)System.out.println("LMNRuntimeMessageProcessor.lookupMembrane(" + memid + ")");
+		
 		Object obj = newMemTable.get(memid);
 		if (obj instanceof AbstractMembrane) return (AbstractMembrane)obj;
 		return IDConverter.lookupGlobalMembrane(memid);
