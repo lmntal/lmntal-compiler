@@ -20,4 +20,8 @@ final public class ProcessContext extends Context{
 	public ProcessContext(String name) {
 		super(name);
 	}
+	
+	public String toString() {
+		return "$" + getName();
+	}
 }

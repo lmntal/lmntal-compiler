@@ -33,4 +33,8 @@ public final class LinkOccurrence {
 		this.atom = atom;
 		this.pos = pos;
 	}
+	
+	public String toString() {
+		return name;
+	}
 }
