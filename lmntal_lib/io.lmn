@@ -26,13 +26,18 @@ io.use :-
 		Atom stdin = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.InputStreamReader(System.in))));
 		mem.relink(stdin, 0, me, 0);
 		me.remove();
+		]],
+	io.stdout=[[/*inline*/
+		Atom stdout = mem.newAtom(new ObjectFunctor(new java.io.PrintWriter(System.out, true)));
+		mem.relink(stdout, 0, me, 0);
+		me.remove();
 		]].
 
 
-io.print(String) :- unary(String)|[[/*inline*/
-	System.out.println(me.nth(0));
-	me.setName("nil");
-	]](String).
+//io.print(String) :- unary(String)|[[/*inline*/
+//	System.out.println(me.nth(0));
+//	me.setName("nil");
+//	]](String).
 io.input(Message) :- [[/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
 	me.setName(s);
@@ -80,6 +85,9 @@ H=io.fileWriter(Filename) :- unary(Filename) | H=[[/*inline*/
  * print : String -> unit
  * 
  */
+H=print(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
+	H=print(STDOUT, String), io.stdout(STDOUT).
+
 H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 	H=[[/*inline*/
 		try {
@@ -97,7 +105,7 @@ H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 			mem.relink(obj, 0, me, 2);
 			me.nthAtom(1).remove();
 			me.remove();
-		} catch(Exception e) {Env.e(e);}
+		} catch(Exception e) {e.printStackTrace();}
 	]](Object, String).
 
 /**

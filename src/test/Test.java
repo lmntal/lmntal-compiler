@@ -9,6 +9,8 @@ import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
@@ -33,9 +35,15 @@ public class Test {
 //		d();
 //		e();
 //		f();
-		g();
+//		g();
+		h();
 	}
 	
+	public static void h() {
+		PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out));
+		pw.println("hello");
+		pw.flush();
+	}
 	public static void g() throws Exception {
 		if(false) {
 			Frame fr = new Frame("test");
