@@ -42,23 +42,17 @@ public class OptimizerTest extends TestCase {
 //		list.add(Instruction.react(null, null));
 //
 		//body
-//		list.add(Instruction.removeatom(1)); //append
-		list.add(new Instruction(Instruction.REMOVEATOM, 1, 0, append));
-//		list.add(Instruction.removeatom(2)); //cons
-		list.add(new Instruction(Instruction.REMOVEATOM, 2, 0, cons));
+		list.add(Instruction.removeatom(1, 0, append)); //append
+		list.add(Instruction.removeatom(2, 0, cons)); //cons
 		list.add(Instruction.newatom(3, 0, cons));
 		list.add(Instruction.newatom(4, 0, append));
-//		list.add(new Instruction(Instruction.RELINK, 3, 0, 2, 0));
 		list.add(new Instruction(Instruction.GETLINK, 5, 2, 0));
 		list.add(new Instruction(Instruction.INHERITLINK, 3, 0, 5));
 		list.add(Instruction.newlink(3, 1, 4, 2));
-//		list.add(new Instruction(Instruction.RELINK, 3, 2, 1, 2));
 		list.add(new Instruction(Instruction.GETLINK, 6, 1, 2));
 		list.add(new Instruction(Instruction.INHERITLINK, 3, 2, 6));
-//		list.add(new Instruction(Instruction.RELINK, 4, 0, 2, 1));
 		list.add(new Instruction(Instruction.GETLINK, 7, 2, 1));
 		list.add(new Instruction(Instruction.INHERITLINK, 4, 0, 7));
-//		list.add(new Instruction(Instruction.RELINK, 4, 1, 1, 1));
 		list.add(new Instruction(Instruction.GETLINK, 8, 1, 1));
 		list.add(new Instruction(Instruction.INHERITLINK, 4, 1, 8));
 		

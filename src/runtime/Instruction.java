@@ -304,7 +304,7 @@ public class Instruction {
 	// LOCALEQFUNCは不要
 
     // アトムを操作する基本ボディ命令 (30--39)    
-	// [local]removeatom                  [srcatom]
+	// [local]removeatom                  [srcatom, srcmem, func]
 	// [local]newatom           [-dstatom, srcmem, funcref]
 	// [local]newatomindirect   [-dstatom, srcmem, func]
     // [local]enqueueatom                 [srcatom]
@@ -313,9 +313,9 @@ public class Instruction {
 	// [local]alterfunc                   [atom, funcref]
 	// [local]alterfuncindirect           [atom, func]
 
-    /** removeatom [srcatom]
+    /** removeatom [srcatom, srcmem, func]
      * <br>ボディ命令<br>
-     * アトム$srcatomを現在の膜から取り出す。実行スタックは操作しない。
+     * $srcmemにある、名前$funcを持つアトム$srcatomを現在の膜から取り出す。実行スタックは操作しない。
      * @see dequeueatom */
 	public static final int REMOVEATOM = 30;
 	
@@ -441,7 +441,7 @@ public class Instruction {
 	// 一般の ADDATOM は存在しない。
 	
 	// 膜を操作する基本ボディ命令 (50--59)    
-	// [local]removemem                [srcmem]
+	// [local]removemem                [srcmem, parentmem]
 	// [local]newmem          [-dstmem, srcmem]
 	//  ----- newroot         [-dstmem, srcmem, node]
 	//  ----- movecells                [dstmem, srcmem]
@@ -450,14 +450,14 @@ public class Instruction {
 	// [local]addmem                   [dstmem, srcmem]
 	// [local]unlockmem                [srcmem]
 
-	/** removemem [srcmem]
+	/** removemem [srcmem, parentmem]
 	 * <br>ボディ命令<br>
-	 * 膜$srcmemを現在の膜から取り出す。
+	 * 膜$srcmemを膜$parentmemから取り出す。
 	 * 膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。
 	 * @see removeproxies */
 	public static final int REMOVEMEM = 50;
 
-	/** localremovemem [srcmem]
+	/** localremovemem [srcmem, parentmem]
 	 * <br>最適化用ボディ命令<br>
 	 * removememと同じ。ただし$srcmemの親膜はこの計算ノードに存在する。*/
 	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
@@ -1065,14 +1065,18 @@ public class Instruction {
     public static Instruction getmem(int ret, int atom) {
 		return new Instruction(GETMEM,ret,atom);
     }	
-    /** removeatom 命令を生成する */
+    /** removeatom 命令を生成する @deprecated*/
 	public static Instruction removeatom(int atom) {
 		return new Instruction(REMOVEATOM,atom);
-	}	
+	}
+	/** removeatom 命令を生成する*/
+	public static Instruction removeatom(int atom, int mem, Functor func) {
+		return new Instruction(REMOVEATOM,atom,mem,func);
+	}
 	/** @deprecated */
 	public static Instruction removeatom(int atom, Functor func) {
 		return new Instruction(REMOVEATOM,atom,func);
-	}	
+	}
     
 	// コンストラクタ
 	
@@ -1124,7 +1128,52 @@ public class Instruction {
 		add(arg3);
 		add(arg4);
     }
-    
+
+	//////////////////////////////////
+	// 最適化器が使う、アトムID書き換えのためのクラスメソッド
+	// @author Mizuno
+	
+	/**
+	 * 与えられた対応表よって、命令列中のアトムIDを書き換える。<br>
+	 * 命令列中のアトムIDが、対応表のキーに出現する場合、対応する値に書き換えます。
+	 *
+	 * @param list 書き換える命令列
+	 * @param map アトムIDの対応表。
+	 */
+	public static void changeAtomId(List list, Map map) {
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			switch (inst.getKind()) {
+				case Instruction.NEWLINK: {
+					changeArg(inst, 1, map);
+					changeArg(inst, 3, map);
+					break;
+				}
+				case Instruction.GETLINK: {
+					changeArg(inst, 2, map);
+					break;
+				}
+				case Instruction.INHERITLINK: {
+					changeArg(inst, 1, map);
+					break;
+				}
+			}
+		}
+	}
+	/**
+	 * 対応表によって引数を書き換える。
+	 * @param inst 書き換える命令
+	 * @param pos 書き換える引数番号
+	 * @param map 書き換えマップ
+	 */
+	private static void changeArg(Instruction inst, int pos, Map map) {
+		Integer id = (Integer)inst.data.get(pos - 1);
+		if (map.containsKey(id)) {
+			inst.data.set(pos - 1, map.get(id));
+		}
+	}
+
 	//////////////////////////////////
 	//
 	// デバッグ用表示メソッド

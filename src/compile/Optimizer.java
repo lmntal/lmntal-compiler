@@ -13,23 +13,29 @@ import runtime.Functor;
  */
 public class Optimizer {
 	/**	
-	 * 最適化する。
-	 * TODO 再利用した膜内のアトムの再利用（現状は本膜のみ）
-	 * TODO 命令列の操作（移動・削除）の効率的な実装
-	 * @param list 最適化したい命令列
+	 * 渡された命令列を最適化する。
+	 * @param list 最適化したい命令列。今のところボディ命令列が渡されることを仮定している。
 	 */
 	public static void optimize(List list) {
-		
+		//TODO relink命令を、getlink/inheritlink命令に変換する？
+		reuseAtom(list);
+		removeUnnecessaryRelink(list);
+	}
+	
+	/**	
+	 * アトム再利用を行う。
+	 * @param list 最適化したい命令列。今のところボディ命令列が渡されることを仮定している。
+	 */
+	private static void reuseAtom(List list) {
 		/////////////////////////////////////////////////
 		//
 		// 再利用するアトムの組み合わせを決定する
 		//
 		
-		// removeatom/newatom/getlink/inherit命令の情報を調べる
+		// removeatom/newatom/getlink命令の情報を調べる
 		HashMap removedAtoms = new HashMap(); // functor -> set of atomId
 		HashMap createdAtoms = new HashMap(); // functor -> set of atomId
 		HashMap getlinkInsts = new HashMap(); // linkId -> getlink instruction
-		HashMap inheritlinkInsts = new HashMap(); // linkId -> inheritlink instruction
 		
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
@@ -52,10 +58,8 @@ public class Optimizer {
 					}
 					break;
 				case Instruction.GETLINK:
+					//後で場所を移動する
 					getlinkInsts.put(inst.getArg1(), inst);
-					break;
-				case Instruction.INHERITLINK:
-					inheritlinkInsts.put(inst.getArg3(), inst);
 					break;
 			}
 		}
@@ -67,7 +71,8 @@ public class Optimizer {
 		//再利用されるアトムのID（reuseMapの値に設定されているIDの集合）
 		HashSet reuseAtoms = new HashSet(); 
 
-		//本膜中にある、同じ名前のアトムを再利用する	
+		//本膜中にある、同じ名前のアトムを再利用する
+		//とりあえずでてきた順に対応させる	
 		Iterator functorIterator = removedAtoms.keySet().iterator();
 		while (functorIterator.hasNext()) {
 			Functor functor = (Functor)functorIterator.next();
@@ -100,71 +105,44 @@ public class Optimizer {
 		// アトムを再利用するような命令列を生成する
 		//
 
-		// 冗長なgetlink/inheritlink命令を探してremovelinkInsts/inheritlinkInstsから除去する
-		it = getlinkInsts.keySet().iterator();
-		while (it.hasNext()) {
-			Integer linkId = (Integer)it.next();
-			Instruction getlink = (Instruction)getlinkInsts.get(linkId);
-			Instruction inheritlink = (Instruction)inheritlinkInsts.get(linkId);
-			//inheritlink第1引数のアトムに対応する再利用後のアトムID
-			Integer atomId = (Integer)reuseMap.get(inheritlink.getArg1());
-			if (inheritlink != null && 
-				atomId != null && atomId.equals(getlink.getArg2()) &&
-				inheritlink.getArg2().equals(getlink.getArg3())) {
-
-				it.remove();
-				inheritlinkInsts.remove(linkId);
-			}
-		}
 										
 		// アトム再利用をするとgetlink命令の前にinherit命令が来る事があるので、
 		// getlink命令を命令列の先頭に移動する。
+		// TODO 適切な移動場所を見つける
 		it = getlinkInsts.values().iterator();
 		while (it.hasNext()) {
 			list.add(0, it.next());
 		}
 
-		//不要になった命令を除去し、アトムIDを書き換える
-		it = list.subList(getlinkInsts.size(), list.size()).iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
+		//不要になったremoveatom/newatom命令を除去
+		ListIterator lit = list.listIterator(getlinkInsts.size());
+		while (lit.hasNext()) {
+			Instruction inst = (Instruction)lit.next();
 			switch (inst.getKind()) {
 				case Instruction.REMOVEATOM: {
 					Integer atomId = (Integer)inst.getArg1();
 					if (reuseAtoms.contains(atomId)) {
-						it.remove();
+						lit.remove();
 					}
 					break;
 				}
 				case Instruction.NEWATOM: {
 					Integer atomId = (Integer)inst.getArg1();
 					if (reuseMap.containsKey(atomId)) {
-						it.remove();
+						lit.remove();
 					}
-					break;
-				}
-				case Instruction.NEWLINK: {
-					changeAtomArg1(inst, reuseMap);
-					changeAtomArg3(inst, reuseMap);
 					break;
 				}
 				case Instruction.GETLINK: {
 					//先頭に移動したので除去
-					it.remove();
-					break;
-				}
-				case Instruction.INHERITLINK: {
-					//inheritlinkInstsにない場合は冗長と判断されたものなので削除
-					if (!inheritlinkInsts.containsKey(inst.getArg3())) {
-						it.remove();
-					} else {
-						changeAtomArg1(inst, reuseMap);
-					}
+					lit.remove();
 					break;
 				}
 			}
 		}
 
+		//アトムIDの付け替え
+		Instruction.changeAtomId(list, reuseMap);
 	}
 
 	/**
@@ -185,27 +163,31 @@ public class Optimizer {
 	}			
 
 	/**
-	 * 第１引数を書き換える。
-	 * @param inst 書き換える命令
-	 * @param reuseMap アトム再利用マップ
+	 * 冗長なrelink/inheritlink命令を除去します。
+	 * @param list
 	 */
-	private static void changeAtomArg1(Instruction inst, Map reuseMap) {
-		Integer before = (Integer)inst.getArg1();
-		Integer after = (Integer)reuseMap.get(before);
-		if (after != null) {
-			inst.setArg1(after);
+	private static void removeUnnecessaryRelink(List list) {
+		HashMap getlinkInsts = new HashMap(); // linkId -> getlink instruction
+		ArrayList remove = new ArrayList();
+		
+		Iterator it = list.iterator();
+		while (it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			switch (inst.getKind()) {
+				case Instruction.GETLINK:
+					getlinkInsts.put(inst.getArg1(), inst);
+					break;
+				case Instruction.INHERITLINK:
+					Instruction getlink = (Instruction)getlinkInsts.get(inst.getArg3());
+					if (getlink.getArg2().equals(inst.getArg1()) &&  // <- atomID
+						 getlink.getArg3().equals(inst.getArg2())) { // <- pos
+						//冗長なので除去
+						remove.add(getlink);
+						remove.add(inst);
+					}
+					break;
+			}
 		}
-	}
-	/**
-	 * 第３引数を書き換える。
-	 * @param inst 書き換える命令
-	 * @param reuseMap アトム再利用マップ
-	 */
-	private static void changeAtomArg3(Instruction inst, Map reuseMap) {
-		Integer before = (Integer)inst.getArg3();
-		Integer after = (Integer)reuseMap.get(before);
-		if (after != null) {
-			inst.setArg3(after);
-		}
+		list.removeAll(remove);
 	}
 }
