@@ -172,17 +172,17 @@ public class LMNParser {
 		// GUIからの動的な生成に対応する場合にそなえて FunctorFactory のようなものがあった方がよい。
 		// runtime.*Functor の多さが、現状の不自然さを物語る。
 
-		SrcName srcname = sAtom.getName();
-		String name = srcname.getName();
+		int nametype = sAtom.getNameType();
+		String name = sAtom.getName();
 		String path = null;
-		if (srcname.getType() == SrcName.PATHED) {
+		if (nametype == SrcName.PATHED) {
 			int pos = name.indexOf('.');
 			path = name.substring(0, pos);
 			name = name.substring(pos + 1);
 		}
 		Functor func = new runtime.Functor(name, arity, path);
 		if (arity == 1 && path == null) {
-			if (srcname.getType() == SrcName.PLAIN || srcname.getType() == SrcName.SYMBOL) {
+			if (nametype == SrcName.PLAIN || nametype == SrcName.SYMBOL) {
 				try {
 					func = new runtime.IntegerFunctor(Integer.parseInt(name));
 				}
@@ -643,14 +643,14 @@ public class LMNParser {
 			if (obj instanceof SrcAtom) {
 				SrcAtom atom = (SrcAtom)obj;
 				if (atom.getProcess().size() == 1
-				 && (atom.getName().getName().equals("+") || atom.getName().getName().equals("-"))
+				 && (atom.getName().equals("+") || atom.getName().equals("-"))
 				 && atom.getProcess().get(0) instanceof SrcAtom) {
 				 	SrcAtom inneratom = (SrcAtom)atom.getProcess().get(0);
 				 	if (inneratom.getProcess().size() == 0
-				 	 && inneratom.getName().getName().matches("([0-9]+|[0-9]*\\.[0-9]*)([Ee][+-]?[0-9]+)?")) {
+				 	 && inneratom.getName().matches("([0-9]+|[0-9]*\\.[0-9]*)([Ee][+-]?[0-9]+)?")) {
 						it.remove();
-						it.add(new SrcAtom( atom.getName().getName()
-							+ ((SrcAtom)atom.getProcess().get(0)).getName().getName() ));
+						it.add(new SrcAtom( atom.getName()
+							+ ((SrcAtom)atom.getProcess().get(0)).getName() ));
 						continue;
 				 	 }
 				}

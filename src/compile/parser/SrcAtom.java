@@ -5,7 +5,7 @@ import java.util.LinkedList;
 class SrcAtom {
 	protected LinkedList process = null;
 	/** 名前トークン */
-	protected SrcName name;
+	protected SrcName srcname;
 	
 	/**
 	 * ソースコード中での出現位置(行)
@@ -22,11 +22,11 @@ class SrcAtom {
 	 * 指定された名前の子プロセスなしのアトム構文を生成する
 	 * @param name アトム名
 	 */
-	public SrcAtom(SrcName name) {
-		this(name, new LinkedList(), -1,-1);
-	}
 	public SrcAtom(String name) {
 		this(new SrcName(name));
+	}
+	public SrcAtom(SrcName srcname) {
+		this(srcname, new LinkedList(), -1,-1);
 	}
 	
 	/**
@@ -34,11 +34,11 @@ class SrcAtom {
 	 * @param name アトム名
 	 * @param process 子供プロセス
 	 */
-	public SrcAtom(SrcName name, LinkedList process) {
-		this(name, process, -1,-1);
-	}
 	public SrcAtom(String name, LinkedList process) {
 		this(new SrcName(name), process);
+	}
+	public SrcAtom(SrcName srcname, LinkedList process) {
+		this(srcname, process, -1,-1);
 	}
 
 	/**
@@ -48,13 +48,19 @@ class SrcAtom {
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
 	 */
-	public SrcAtom(SrcName name, int line, int column) {
-		this(name, new LinkedList(), line, column);
-	}
 	public SrcAtom(String name, int line, int column) {
 		this(new SrcName(name),line,column);
 	}
+	public SrcAtom(SrcName srcname, int line, int column) {
+		this(srcname, new LinkedList(), line, column);
+	}
 	
+	public SrcAtom(SrcName nametoken, LinkedList process, int line, int column) {
+		this.srcname = nametoken;
+		this.process = process;
+		this.line = line;
+		this.column = column;	
+	}
 	/**
 	 * デバッグ情報も受け取るコンストラクタ
 	 * @author Tomohito Makino
@@ -63,12 +69,6 @@ class SrcAtom {
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
 	 */
-	public SrcAtom(SrcName name, LinkedList process, int line, int column) {
-		this.name = name;
-		this.process = process;
-		this.line = line;
-		this.column = column;	
-	}
 	public SrcAtom(String name, LinkedList process, int line, int column) {
 		this(new SrcName(name),process,line,column);
 	}
@@ -79,8 +79,14 @@ class SrcAtom {
 	}
 
 	
-	/** アトム名を返す */
-	public SrcName getName() { return name; }
+	/** アトム名トークンを返す 
+	 * @deprecated*/
+	public SrcName getSrcName() { return srcname; }
+
+	/** アトム名を取得する */
+	public String getName() { return srcname.getName(); }
+	/** アトム名トークンの種類を取得する */
+	public int getNameType() { return srcname.getType(); }
 	
 	/**
 	 * このアトムの子プロセスを得ます
