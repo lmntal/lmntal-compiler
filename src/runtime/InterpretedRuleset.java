@@ -30,6 +30,9 @@ class InterpreterReactor {
 	boolean interpret(List insts, int pc) {
 		//Env.p("interpret : " + insts);
 		Iterator it;
+		Atom atom;
+		AbstractMembrane mem;
+		Link link;
 		Functor func;
 		while (pc < insts.size()) {
 			Instruction inst = (Instruction) insts.get(pc++);
@@ -52,13 +55,15 @@ class InterpreterReactor {
 
 					//====アトムに関係する出力する基本ガード命令====ここから====
 				case Instruction.DEREF : //[-dstatom, srcatom, srcpos, dstpos]
+					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
+					if (link.getPos() != inst.getIntArg4()) return false;
+					atoms[inst.getIntArg1()] = link.getAtom();
 					break;
-
-				case Instruction.DEREFATOM : //[-dstatom, srcatom, srcpos]
+				case Instruction.DEREFATOM : // [-dstatom, srcatom, srcpos]
+					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
+					atoms[inst.getIntArg1()] = link.getAtom();
 					break;
-
-				case Instruction.FINDATOM :
-					// findatom [-dstatom, srcmem, funcref]
+				case Instruction.FINDATOM : // [-dstatom, srcmem, funcref]
 					func = (Functor) inst.getArg3();
 					it = mems[inst.getIntArg2()].atoms.iteratorOfFunctor(func);
 					while (it.hasNext()) {
@@ -68,8 +73,9 @@ class InterpreterReactor {
 							return true;
 					}
 					return false; //n-kato
-
 				case Instruction.GETLINK : //[-link, atom, pos]
+					link = atoms[inst.getIntArg2()].args[inst.getIntArg3()];
+					vars.set(inst.getIntArg3(),link);
 					break;
 					//====アトムに関係する出力する基本ガード命令====ここまで====
 
@@ -77,7 +83,7 @@ class InterpreterReactor {
 				case Instruction.LOCKMEM :
 				case Instruction.LOCALLOCKMEM :
 					// lockmem [-dstmem, freelinkatom]
-					AbstractMembrane mem = atoms[inst.getIntArg2()].mem;
+					mem = atoms[inst.getIntArg2()].mem;
 					if (mem.lock(mems[0])) {
 						mems[inst.getIntArg1()] = mem;
 						if (interpret(insts, pc))
@@ -99,36 +105,52 @@ class InterpreterReactor {
 						}
 					}
 					return false; //n-kato
+				case Instruction.LOCK :
+				case Instruction.LOCALLOCK : //[srcmem] 
+					mem = mems[inst.getIntArg1()];
+					if (mem.lock(mems[0])) {
+						if (interpret(insts, pc))
+							return true;
+						mem.unlock();						
+					}
+					break;
 
 				case Instruction.GETMEM : //[-dstmem, srcatom]
+					mems[inst.getIntArg1()] = atoms[inst.getIntArg2()].mem;
 					break;
 				case Instruction.GETPARENT : //[-dstmem, srcmem]
+					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].parent;
 					break;
 
 					//====膜に関係する出力する基本ガード命令====ここまで====
 
 					//====膜に関係する出力しない基本ガード命令====ここから====
 				case Instruction.TESTMEM : //[dstmem, srcatom]
-					if (mems[inst.getIntArg1()]
-						!= atoms[inst.getIntArg2()].mem)
-						return false;
+					if (mems[inst.getIntArg1()] != atoms[inst.getIntArg2()].mem) return false;
 					break; //n-kato
 				case Instruction.NORULES : //[srcmem] 
+					if (mems[inst.getIntArg1()].hasRules()) return false;
 					break;
 				case Instruction.NATOMS : //[srcmem, count]
+					if (mems[inst.getIntArg1()].atoms.size() != inst.getIntArg2()) return false;
 					break;
 				case Instruction.NFREELINKS : //[srcmem, count]
+					// TODO 何か変
+					mem = mems[inst.getIntArg1()];
+					if (mem.atoms.size() - mem.atoms.getNormalAtomCount() != inst.getIntArg2())
+						return false;
 					break;
 				case Instruction.NMEMS : //[srcmem, count]
+					if (mems[inst.getIntArg1()].mems.size() != inst.getIntArg2()) return false;
 					break;
 				case Instruction.EQMEM : //[mem1, mem2]
+					if (mems[inst.getIntArg1()] != mems[inst.getIntArg2()]) return false;
 					break;
 				case Instruction.NEQMEM : //[mem1, mem2]
+					if (mems[inst.getIntArg1()] == mems[inst.getIntArg2()]) return false;
 					break;
 				case Instruction.STABLE : //[srcmem] 
-					break;
-				case Instruction.LOCK :
-				case Instruction.LOCALLOCK : //[srcmem] 
+					if (!mems[inst.getIntArg1()].isStable()) return false;
 					break;
 					//====膜に関係する出力しない基本ガード命令====ここまで====
 
@@ -161,8 +183,6 @@ class InterpreterReactor {
 					//====アトムを操作する基本ボディ命令====ここから====
 				case Instruction.REMOVEATOM :
 				case Instruction.LOCALREMOVEATOM : //[srcatom]
-					Atom atom;
-					Atom a;
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.removeAtom(atom);
 					break;
@@ -170,22 +190,26 @@ class InterpreterReactor {
 				case Instruction.LOCALNEWATOM : //[-dstatom, srcmem, funcref]
 					func = (Functor) inst.getArg3();
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
-
 					break;
-
 				case Instruction.NEWATOMINDIRECT :
 				case Instruction.LOCALNEWATOMINDIRECT :
 					//[-dstatom, srcmem, func]
 					break;
 				case Instruction.ENQUEUEATOM :
 				case Instruction.LOCALENQUEUEATOM : //[srcatom]
+					atom = atoms[inst.getIntArg1()];
+					atom.mem.enqueueAtom(atom);
 					break;
 				case Instruction.DEQUEUEATOM : //[srcatom]
+					atom = atoms[inst.getIntArg1()];
+					atom.dequeue();
 					break;
 				case Instruction.FREEATOM : //[srcatom]
 					break; //n-kato
 				case Instruction.ALTERFUNC :
 				case Instruction.LOCALALTERFUNC : //[atom, funcref]
+					atom = atoms[inst.getIntArg1()];
+					atom.mem.alterAtomFunctor(atom,(Functor)inst.getArg2());
 					break;
 				case Instruction.ALTERFUNCINDIRECT :
 				case Instruction.LOCALALTERFUNCINDIRECT : //[atom, func]
@@ -233,6 +257,7 @@ class InterpreterReactor {
 
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
+					mems[inst.getIntArg1()].unlock();
 					break;
 					//====膜を操作する基本ボディ命令====ここまで====
 
@@ -277,10 +302,10 @@ class InterpreterReactor {
 
 					//====ルールを操作するボディ命令====ここから====
 				case Instruction.LOADRULESET: //[dstmem, ruleset]
-					((AbstractMembrane)mems[inst.getIntArg1()]).loadRuleset(
-						(Ruleset)inst.getArg2() );
+					mems[inst.getIntArg1()].loadRuleset((Ruleset)inst.getArg2() );
 					break;
 				case Instruction.COPYRULES:   //[dstmem, srcmem]
+					mems[inst.getIntArg1()].copyRulesFrom(mems[inst.getIntArg2()]);
 					break;
 				case Instruction.CLEARRULES:  //[dstmem, srcmem]
 					break;

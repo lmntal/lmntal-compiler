@@ -101,13 +101,13 @@ final class RemoteMembrane extends AbstractMembrane {
 		super.clearRules();
 	}
 	/** TODO Ruleset#getGlobalRulesetID()のようなメソッドを作る。 */
-	public void inheritRules(AbstractMembrane srcMem) {
+	public void copyRulesFrom(AbstractMembrane srcMem) {
 		Iterator it = srcMem.rulesetIterator();
 		while (it.hasNext()) {
 			Ruleset rs = (Ruleset)it.next();
 			send("LOADRULESET"/*,rs.getGlobalRulesetID()*/);
 		}
-		super.inheritRules(srcMem);
+		super.copyRulesFrom(srcMem);
 	}
 	/** ルールセットを追加 */
 	public void loadRuleset(Ruleset srcRuleset) {
@@ -189,7 +189,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		super.remove();
 	}
 
-	public void pour(AbstractMembrane srcMem) {
+	public void moveCellsFrom(AbstractMembrane srcMem) {
 		if (srcMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site remote process fusion not implemented");
 		}

@@ -151,7 +151,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		rulesets.clear();
 	}
 	/** srcMemにあるルールをこの膜にコピーする。 */
-	public void inheritRules(AbstractMembrane srcMem) {
+	public void copyRulesFrom(AbstractMembrane srcMem) {
 		rulesets.addAll(srcMem.rulesets);
 	}
 	/** ルールセットを追加 */
@@ -327,7 +327,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 膜srcMemの子孫のうちルート膜の手前までの全ての膜を、この膜と同じタスクの管理にする。
 	 * srcMemはこのメソッド実行後、このまま廃棄しなければならない。
 	 */
-	public void pour(AbstractMembrane srcMem) {
+	public void moveCellsFrom(AbstractMembrane srcMem) {
 		if (srcMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site process fusion not implemented");
 		}
