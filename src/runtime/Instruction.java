@@ -1463,30 +1463,50 @@ public class Instruction implements Cloneable {
 		//nakajima版2004-01-21
 		StringBuffer buffer = new StringBuffer("               ");
 		String tmp = getInstructionString(kind);
+		
 		if( tmp.length() > 14 ) {
 			buffer.replace(0, 14, tmp.substring(0,14));
 		} else {
 			buffer.replace(0, tmp.length(), tmp);
 		}
 
-		buffer.append(data.toString());
+		if(tmp.equals("loop") && data.size() == 1 && data.get(0) instanceof ArrayList && ((ArrayList)data.get(0)).size() == 1) {
+			ArrayList list = (ArrayList)((ArrayList)data.get(0)).get(0);
+			if(list.size() == 0) {
+				buffer.append("[[[]]]\n");
+			} else {
+				buffer.append("[[[\n");
+				int i;
+				for(i = 0; i < list.size()-1; i++){
+					buffer.append("  ");
+					buffer.append(list.get(i));
+					buffer.append(", \n");
+				}
+				buffer.append("  ");
+				buffer.append(list.get(i));
+				buffer.append("]]]\n");
+			}
+		} else {
+			buffer.append(data.toString());
+		}
 
 		//各要素を分解
 		//instanceOf
 		//ArrayListであって、空でなくて、かつcastして先頭要素を手に入れたのがinstanceOfでIntegerでないとき、
 		//引数列は命令列なのでインデント+2ぐらいで再帰的に。
 //		for (int i =0; i < data.size(); i++){
-//			Object hoge = data.get(i);
-//			if(hoge instanceof ArrayList){
-//				ArrayList hogearray = (ArrayList)hoge;
-//				if(!hogearray.isEmpty()){
-//					if(!(hogearray.get(0) instanceof Integer)){
-//						buffer.append(hogearray.toString());
-//						buffer.append("  ");
-//					} else {
-//						buffer.append(hogearray.toString());
-//					}
+//			ArrayList hoge = (ArrayList)data.get(i);
+//
+//			if(!hoge.isEmpty()){
+//				if(!(hoge.get(0) instanceof Integer)){
+//					buffer.append("\n  ");
+//					buffer.append((String)hoge.get(0));
+//				} else {
+//					buffer.append(hoge.toString());
+//					continue;
 //				}
+//			} else {
+//				buffer.append(hoge.toString());			
 //			}
 //		}
 		
