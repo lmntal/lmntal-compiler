@@ -15,11 +15,10 @@ import runtime.InterpretedRuleset;
  * 
  */
 public class RulesetCompiler {
-	
 	/**
 	 * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
 	 * より正確に言うと、与えられた膜構造に対応する膜を1回だけ生成するreactメソッドを
-	 * 実装するルールセットを持った膜構造を生成する。
+	 * 実装するルールセットを唯一のルールセットとして持つ膜構造を生成する。
 	 * メソッド実行中、膜構造内部にあるルール構造がルールセットにコンパイルされる。
 	 * @param m 膜構造
 	 * @return 生成したルールセットを持つ膜構造
@@ -33,7 +32,7 @@ public class RulesetCompiler {
 		rs.rightMem = m;
 		root.rules.add(rs);
 		processMembrane(root);
-//		Module.genInstruction(root);
+		Module.genInstruction(root);
 		return root;
 	}
 	
