@@ -27,61 +27,91 @@ public class LMNGraphPanel extends GraphPanel {
 		layout.calc();
 	}
 	
+	GraphNode node_of_atom(runtime.Atom atom, Map atoms) {
+		GraphNode n = (GraphNode)atoms.get(atom);
+		if(n==null) {
+			Point p = new Point(30 + (int)(Math.random()*40) + (int)(Math.random()*3), 30 + (int)(Math.random()*40) + (int)(Math.random()*3));
+			n = new GraphNode(atom.getName(), p);
+			atoms.put(atom, n);
+			getGraphLayout().addNode(n);
+		}
+		return n;
+	}
+	
+	GraphNode node_of_atom(Atom atom, Map atoms) {
+		GraphNode n = (GraphNode)atoms.get(atom);
+		if(n==null) {
+			Point p = new Point(30 + atom.column * 20 + (int)(Math.random()*3), 30 + atom.line * 40 + (int)(Math.random()*3));
+			n = new GraphNode(atom.functor.getName() , p);
+			atoms.put(atom, n);
+			getGraphLayout().addNode(n);
+		}
+		return n;
+	}
+	
+	runtime.Atom buddy(runtime.Atom a, int i) {
+		return a.nthAtom(i);
+	}
+	
+	Atom buddy(Atom a, int i) {
+		LinkOccurrence link = a.args[i];
+		if(link.buddy != null) {
+			return link.buddy.atom;
+		}
+		return null;
+	}
+	
 	/**
 	 * 膜を追加する
-	 * 
-	 * TODO runtime.Membrane も追加できるようにしないとだめだ！！！！！！！
-	 * 
-	 * @param mem
 	 */
-	public void addMembrane(Membrane mem) {
-		Hashtable table_atom = new Hashtable();
-		Hashtable table_link = new Hashtable();
+	public void addMembrane(runtime.Membrane mem) {
+		Map atoms = new Hashtable();
 		
 		// atom
-		for (int i=0; i<mem.atoms.size();i++) {
-			Atom atom = (Atom)mem.atoms.get(i);
-			Point p = new Point(30 + atom.column * 20 + (int)(Math.random()*3), 30 + atom.line * 40 + (int)(Math.random()*3));
-			GraphNode node = new GraphNode(atom.functor.getName() , p);
-			getGraphLayout().addNode(node);
-			for (int j=0;j<atom.args.length;j++) {
-				LinkOccurrence link = atom.args[j];
-				if ((link.buddy != null)
-				 && (link.hashCode() > link.buddy.hashCode())) {
-				 	table_link.put(link,link);
-				 }
+		Iterator it = mem.atomIterator();
+		while(it.hasNext()) {
+			runtime.Atom atom = (runtime.Atom)it.next();
+			GraphNode node = node_of_atom(atom, atoms);
+			for (int j=0;j<atom.getFunctor().getArity();j++) {
+				GraphNode node_to = node_of_atom(buddy(atom, j), atoms);
+				node.addLinkedNode(node_to);
 			}
-			table_atom.put(atom, node);
+			atoms.put(atom, node);
+		}
+	}
+	
+	/**
+	 * 膜を追加する
+	 */
+	public void addMembrane(Membrane mem) {
+		Map atoms = new Hashtable();
+		
+		// atom
+		Iterator it = mem.atoms.iterator();
+		while(it.hasNext()) {
+			Atom atom = (Atom)it.next();
+			GraphNode node = node_of_atom(atom, atoms);
+			for (int j=0;j<atom.args.length;j++) {
+				GraphNode node_to = node_of_atom(buddy(atom, j), atoms);
+				node.addLinkedNode(node_to);
+			}
+			atoms.put(atom, node);
 		}
 		
 		// child mem
-		for (int i=0; i<mem.mems.size();i++) {
-			Membrane child = (Membrane)mem.mems.get(i);
-			Point p = new Point((int)(Math.random()*getPreferredArea().getWidth()), (int)(Math.random()*getPreferredArea().getHeight()));
-			GraphNode node = new GraphNode("Mem@"+child.hashCode() , p);
-			getGraphLayout().addNode(node);
-			for (Iterator it = child.freeLinks.keySet().iterator(); it.hasNext(); ) {
-				LinkOccurrence link = (LinkOccurrence)child.freeLinks.get(it.next());
-				if ((link.buddy != null)
-				 && (link.hashCode() > link.buddy.hashCode())) {
-					table_link.put(link,link);
-				 }
-			}
-			table_atom.put(child, node);
-		}
-		
-		Enumeration e = table_link.keys();
-		while (e.hasMoreElements()) {
-			LinkOccurrence link = (LinkOccurrence)e.nextElement();
-			// atom
-			GraphNode from = (GraphNode)table_atom.get(link.atom);
-			GraphNode to = (GraphNode)table_atom.get(link.buddy.atom);
-			// child
-			if (from == null) from = (GraphNode)table_atom.get(link.atom.mem);
-			if (to == null) to = (GraphNode)table_atom.get(link.buddy.atom.mem);
-
-			from.addLinkedNode(to);
-			to.addLinkedNode(from);
-		}
+//		for (int i=0; i<mem.mems.size();i++) {
+//			Membrane child = (Membrane)mem.mems.get(i);
+//			Point p = new Point((int)(Math.random()*getPreferredArea().getWidth()), (int)(Math.random()*getPreferredArea().getHeight()));
+//			GraphNode node = new GraphNode("Mem@"+child.hashCode() , p);
+//			getGraphLayout().addNode(node);
+//			for (Iterator it = child.freeLinks.keySet().iterator(); it.hasNext(); ) {
+//				LinkOccurrence link = (LinkOccurrence)child.freeLinks.get(it.next());
+//				if ((link.buddy != null)
+//				 && (link.hashCode() > link.buddy.hashCode())) {
+//					table_link.put(link,link);
+//				 }
+//			}
+//			atoms.put(child, node);
+//		}
 	}
 }
