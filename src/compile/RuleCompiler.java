@@ -222,7 +222,9 @@ public class RuleCompiler {
 	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
 	
-	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表す定数オブジェクト */
+	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
+	HashMap typedcxtdatatypes = new HashMap();
+	/** 型付きプロセス文脈定義 (ContextDef) -> データ型のパターンを表す定数オブジェクト */
 	HashMap typedcxttypes = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現の変数番号（def.src は現在未使用） */
 	HashMap typedcxtsrcs  = new HashMap();
@@ -259,18 +261,20 @@ public class RuleCompiler {
 		guardLibrary2.put(new Functor("=\\=", 2), new int[]{ISINT,  ISINT,   Instruction.INE});
 		guardLibrary2.put(new Functor("=:=.", 2), new int[]{ISFLOAT,ISFLOAT, Instruction.FEQ});
 		guardLibrary2.put(new Functor("=\\=.",2), new int[]{ISFLOAT,ISFLOAT, Instruction.FNE});
-		guardLibrary2.put(new Functor("+.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FADD});
-		guardLibrary2.put(new Functor("-.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FSUB});
-		guardLibrary2.put(new Functor("*.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FMUL});
-		guardLibrary2.put(new Functor("/.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FDIV});
-		guardLibrary2.put(new Functor("+",    3), new int[]{ISINT,  ISINT,   Instruction.IADD});
-		guardLibrary2.put(new Functor("-",    3), new int[]{ISINT,  ISINT,   Instruction.ISUB});
-		guardLibrary2.put(new Functor("*",    3), new int[]{ISINT,  ISINT,   Instruction.IMUL});
-		guardLibrary2.put(new Functor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV});
-		guardLibrary2.put(new Functor("mod",  3), new int[]{ISINT,  ISINT,   Instruction.IMOD});
-		guardLibrary1.put(new Functor("int",  2), new int[]{ISINT,           Instruction.INT2FLOAT});
-		guardLibrary1.put(new Functor("float",2), new int[]{ISFLOAT,         Instruction.FLOAT2INT});
-	}
+		guardLibrary2.put(new Functor("+.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FADD, ISFLOAT});
+		guardLibrary2.put(new Functor("-.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FSUB, ISFLOAT});
+		guardLibrary2.put(new Functor("*.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FMUL, ISFLOAT});
+		guardLibrary2.put(new Functor("/.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FDIV, ISFLOAT});
+		guardLibrary2.put(new Functor("+",    3), new int[]{ISINT,  ISINT,   Instruction.IADD, ISINT});
+		guardLibrary2.put(new Functor("-",    3), new int[]{ISINT,  ISINT,   Instruction.ISUB, ISINT});
+		guardLibrary2.put(new Functor("*",    3), new int[]{ISINT,  ISINT,   Instruction.IMUL, ISINT});
+		guardLibrary2.put(new Functor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV, ISINT});
+		guardLibrary2.put(new Functor("mod",  3), new int[]{ISINT,  ISINT,   Instruction.IMOD, ISINT});
+		guardLibrary1.put(new Functor("int",  1), new int[]{ISINT});
+		guardLibrary1.put(new Functor("float",1), new int[]{ISINT});
+		guardLibrary1.put(new Functor("int",  2), new int[]{ISINT,           Instruction.INT2FLOAT, ISFLOAT});
+		guardLibrary1.put(new Functor("float",2), new int[]{ISFLOAT,         Instruction.FLOAT2INT, ISINT});
+	}	
 	/** ガードをコンパイルする（仮） */
 	private void compile_g() {
 
@@ -315,26 +319,19 @@ public class RuleCompiler {
 				if (func.getArity() > 0)  def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
 				if (func.getArity() > 1)  def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
 				if (func.getArity() > 2)  def3 = ((ProcessContext)cstr.args[2].buddy.atom).def;
-				if (func.getSymbolFunctorID().equals("int_1")) {
-					if (!identifiedCxtdefs.contains(def1)) continue;
-					int atomid1 = loadUnaryAtom(def1);
-					guard.add(new Instruction(Instruction.ISINT, atomid1));
-				}
-				else if (func.getSymbolFunctorID().equals("float_1")) {
-					if (!identifiedCxtdefs.contains(def1)) continue;
-					int atomid1 = loadUnaryAtom(def1);
-					guard.add(new Instruction(Instruction.ISFLOAT, atomid1));
-				}
-				else if (func.getSymbolFunctorID().equals("unary_1")) {
+
+				if (func.getSymbolFunctorID().equals("unary_1")) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					guard.add(new Instruction(Instruction.ISUNARY, atomid1));
 				}
 				else if (func instanceof runtime.IntegerFunctor) {
 					bindToFunctor(def1, func);
+					typedcxtdatatypes.put(def1, new Integer(ISINT));
 				}
 				else if (func instanceof runtime.FloatingFunctor) {
 					bindToFunctor(def1, func);
+					typedcxtdatatypes.put(def1, new Integer(ISFLOAT));
 				}
 				else if (func.equals(FUNC_UNIFY)) {
 					if (!identifiedCxtdefs.contains(def2)) {
@@ -353,25 +350,39 @@ public class RuleCompiler {
 						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
 					}
 					else bindToUnaryAtom(def1, atomid2);
+					//
+					Object newdatatype = typedcxtdatatypes.get(def2);
+					if (newdatatype == null) newdatatype = typedcxtdatatypes.get(def1);
+					typedcxtdatatypes.put(def1,newdatatype);
+					typedcxtdatatypes.put(def2,newdatatype);
 				}
 				else if (func.equals(new Functor("==",2))) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
 					int atomid2 = loadUnaryAtom(def2);
 					bindToUnaryAtom(def1, atomid2);
+					//
+					Object newdatatype = typedcxtdatatypes.get(def1);
+					if (newdatatype == null) newdatatype = typedcxtdatatypes.get(def2);
+					typedcxtdatatypes.put(def1,newdatatype);
+					typedcxtdatatypes.put(def2,newdatatype);
 				}
 				else if (guardLibrary1.containsKey(func)) {
 					int[] desc = (int[])guardLibrary1.get(func);
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
-					guard.add(new Instruction(desc[0], atomid1));
+					if (!new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
+						guard.add(new Instruction(desc[0], atomid1));
+						typedcxtdatatypes.put(def1, new Integer(desc[0]));
+					}
 					if (func.getArity() == 1) {
-						guard.add(new Instruction(desc[1], atomid1));
+						if (desc.length > 1) guard.add(new Instruction(desc[1], atomid1));
 					}
 					else {
 						int atomid2 = varcount++;
 						guard.add(new Instruction(desc[1], atomid2, atomid1));
 						bindToUnaryAtom(def2, atomid2);
+						typedcxtdatatypes.put(def2, new Integer(desc[2]));
 					}
 				}
 				else if (guardLibrary2.containsKey(func)) {
@@ -380,8 +391,14 @@ public class RuleCompiler {
 					if (!identifiedCxtdefs.contains(def2)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					int atomid2 = loadUnaryAtom(def2);
-					guard.add(new Instruction(desc[0], atomid1));
-					guard.add(new Instruction(desc[1], atomid2));
+					if (!new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
+						guard.add(new Instruction(desc[0], atomid1));
+						typedcxtdatatypes.put(def1, new Integer(desc[0]));
+					}
+					if (!new Integer(desc[1]).equals(typedcxtdatatypes.get(def2))) {
+						guard.add(new Instruction(desc[1], atomid2));
+						typedcxtdatatypes.put(def1, new Integer(desc[1]));
+					}
 					if (func.getArity() == 2) {
 						guard.add(new Instruction(desc[2], atomid1, atomid2));
 					}
@@ -389,6 +406,7 @@ public class RuleCompiler {
 						int atomid3 = varcount++;
 						guard.add(new Instruction(desc[2], atomid3, atomid1, atomid2));
 						bindToUnaryAtom(def3, atomid3);
+						typedcxtdatatypes.put(def3, new Integer(desc[3]));
 					}
 				}
 				else {
@@ -748,7 +766,7 @@ public class RuleCompiler {
 				}
 				// リンク先はアトム
 				if (link.atom.mem == rs.leftMem) { // ( buddy(X) :- atom(X) )
-					body.add( new Instruction(Instruction.RELINK,
+					body.add( new Instruction(Instruction.RELINK,//LOCALRELINKに修正予定
 						rhsatomToPath(atom), pos,
 						lhsatomToPath(link.atom), link.pos,
 						rhsmemToPath(atom.mem) ));
