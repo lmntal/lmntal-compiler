@@ -206,7 +206,7 @@ public class Instruction {
      * 命令の文字列(String)を与えると、該当する命令のintを返してくれる
      *
      * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
-     * @return String
+     * @return int
      * 
      */
     public static int getInstructionInteger(String instructionString){
