@@ -8,8 +8,6 @@ import java.util.Set;
 
 import util.QueuedEntity;
 import util.Stack;
-import util.Util;
-
 
 /**
  * 抽象膜クラス。ローカル膜クラスと膜キャッシュ（未実装）の親クラス
