@@ -12,9 +12,9 @@ import daemon.LMNtalDaemon;
 class DummyRuntime implements Runnable {
 	//テスト用ランタイムもどき
 	//デーモンにつなぐだけ
-	int rgid;
+	String rgid;
 
-	DummyRuntime(int tmpRgid) {
+	DummyRuntime(String tmpRgid) {
 		rgid = tmpRgid;
 	}	
 
@@ -95,7 +95,7 @@ class DummyRuntime implements Runnable {
 
 	void connectHost(BufferedWriter out, String fqdn) {
 		//eg. msgid "cure.ueda.info.waseda.ac.jp" rgid connect
-		int msgid = LMNtalDaemon.makeID();
+		String msgid = LMNtalDaemon.makeID();
 
 		String command =
 			new String(msgid + " \"" + fqdn + "\" " + rgid + " connect\n");
