@@ -10,6 +10,7 @@ public interface Node {
 	public Node getNthNode(int index);
 	
 	public void setMoveDelta(double dx, double dy);
+	public void initMoveDelta();
 	public void move(Rectangle area);
 	public void paintNode(Graphics g);
 	public void paintEdge(Graphics g);

@@ -21,9 +21,13 @@ public class LMNGraphPanel extends GraphPanel {
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent arg0) {
+			public void mousePressed(MouseEvent e) {
 				//determine nearest node
-				movingNode = getGraphLayout().getNearestNode(arg0.getPoint());
+				movingNode = getGraphLayout().getNearestNode(e.getPoint());
+			}
+			public void mouseReleased(MouseEvent e) {
+				movingNode.initMoveDelta();
+				movingNode = null;
 			}
 		});
 		addMouseMotionListener(new MouseMotionAdapter() {

@@ -75,6 +75,9 @@ public class GraphNode implements Node {
 		this.dx += dx;
 		this.dy += dy;
 	}
+	public void initMoveDelta() {
+		dx = dy = 0;
+	}
 	
 	public boolean isFixed() {
 		return false;

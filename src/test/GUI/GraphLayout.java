@@ -5,7 +5,6 @@ import java.awt.*;
 import java.util.Vector;
 
 public class GraphLayout implements Runnable {
-
 	public static Color colors[] = {
 		Color.BLACK,
 		Color.BLUE,

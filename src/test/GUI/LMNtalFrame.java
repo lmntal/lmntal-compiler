@@ -46,7 +46,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		getContentPane().setLayout(new BorderLayout());
 //		getContentPane().add(jt=new JTextArea(5, 80), BorderLayout.NORTH);
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
-		getContentPane().add(bt=new JButton("Go ahead ¡²|¡±|¡û"), BorderLayout.SOUTH);
+		getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
 		bt.addActionListener(new ActionAdapter(this));
 //		getContentPane().addKeyListener(new MyKeyAdapter(this));
 		
