@@ -1,4 +1,52 @@
+/*
+NAME
+	Queue module (ring)
+
+SYNOPSIS
+
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/05/22(Sat)
+
+*/
+
 list : {
+
+/**
+ * new : unit -> List
+ * 
+ */
+H=list.new :- H=[].
+
+/**
+ * is_empty
+ * 
+ */
+H=is_empty([], Return) :- H=[], Return=true.
+H=is_empty('.'(Value, Next), Return) :- H='.'(Value, Next), Return=false.
+
+/**
+ * unshift
+ * 
+ */
+H=unshift([], Obj) :- H='.'(Obj, []).
+H=unshift('.'(Value, Next), Obj) :- H='.'(Obj, '.'(Value, Next)).
+
+/**
+ * shift
+ * 
+ */
+H=shift([], Return) :- H=[], Return=nil.
+H=shift('.'(Value, Next), Return) :- H=Next, Return=Value.
+
+
+
+
+
+
 	Res=list.flatten(nil, R) :- Res=R.
 	Res=list.flatten(int(N), R) :- Res=cons(int(N), R).
 	Res=list.flatten(cons(A, B), R) :- Res=list.flatten(A, list.flatten(B, R)).

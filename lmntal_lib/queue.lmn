@@ -14,6 +14,32 @@ SYNOPSIS
 	 ==>
 	v1([abc,def]), r(queue.new([123|_33],_33)), @602
 
+
+	** queue_of_list **
+	$ java runtime.FrontEnd -e 'list.new, r(queue.of_list([1,2,3],return))' -t
+	list.new, r(queue.of_list([1,2,3],return)), @602, @604
+	 ==>
+	list.new, r(queue.of_list([1,2,3],return,queue.new)), @602, @604
+	 ==>
+	list.new, r(queue.of_list([1,2,3],return,queue.new(_26,_26))), @602, @604
+	 ==>
+	list.new, r(queue.of_list([2,3],return,push(queue.new(_26,_26),1))), @602, @604
+	 ==>
+	list.new, r(queue.of_list([2,3],return,queue.new([1|_37],_37))), @602, @604
+	 ==>
+	list.new, r(queue.of_list([3],return,push(queue.new([1|_37],_37),2))), @602, @604
+	 ==>
+	list.new, r(queue.of_list([3],return,queue.new([1,2|_50],_50))), @602, @604
+	 ==>
+	list.new, r(queue.of_list([],return,push(queue.new([1,2|_50],_50),3))), @602, @604
+	 ==>
+	list.new, r(queue.of_list([],return,queue.new([1,2,3|_63],_63))), @602, @604
+	 ==>
+	list.new, return(queue.new([1,2,3|_63],_63)), r([]), @602, @604
+
+DESCRIPTION
+	たぶんいろんな事するときにこれがよく使われるとおもう
+
 AUTHOR
 	Koji Hara
 
@@ -29,6 +55,13 @@ queue : {
  * 
  */
 H=queue.new :- H=queue.new(Head, Tail), Head=Tail.
+
+/**
+ * is_empty
+ * 
+ */
+H=is_empty(queue.new(Head, Head), Return) :- H=queue.new(Head, Head), Return=true.
+H=is_empty(queue.new('.'(Obj, Head2), Tail), Return) :- H=queue.new('.'(Obj, Head2), Tail), Return=false.
 
 /**
  * unshift
@@ -56,6 +89,21 @@ H=push(queue.new(Head, Tail), Obj) :- H=queue.new(Head, Tail2), '.'(Obj, Tail2, 
  */
 H=pop(queue.new(Head, Tail), Return), '.'(Obj, Tail, Tail2) :- H=queue.new(Head, Tail2), Return=Obj.
 H=pop(queue.new(Head, Head), Return) :- H=queue.new(Head, Head), Return=nil.
+
+/**
+ * of_list
+ * 
+ * List -> Queue
+ */
+H=queue.of_list([], Return) :- H=[], Return=queue.new.
+H=queue.of_list('.'(Value, Next), Return) :-
+	H=queue.of_list('.'(Value, Next), Return, queue.new).
+
+H=queue.of_list([], Return, Queue) :-
+	H=[], Return=Queue.
+
+H=queue.of_list('.'(Value, Next), Return, Queue) :-
+	H=queue.of_list(Next, Return, push(Queue, Value)).
 
 
 }
