@@ -122,8 +122,8 @@
 */
 % シンボルテーブル
 symbols = {
-	{ a, p(S1_1)/*, p(S1_2)*/ }
-	{ b, p(S2_1)/*, p(S2_2)*/ }
+	{ a, p(S1_1), p(S1_2) }
+	{ b, p(S2_1), p(S2_2) }
 %	{ c, p(S3_1), p(S3_2) }
 },
 % 変数テーブル
@@ -133,5 +133,8 @@ vars = {
 	{ var_Y, p(V2_1), bind(null) }
 },
 %unify([],[], QUERY, FACT, BINDING),
+%unify([S1_1],[], QUERY, FACT, BINDING),
+%unify([S1_1, S2_1],[S1_2, S2_2], QUERY, FACT, BINDING),
+%unify([V1_1],[S1_1], QUERY, FACT, BINDING),
 unify([V1_1, S2_1],[S1_1, V2_1], QUERY, FACT, BINDING),
 query(QUERY), fact(FACT), binding(BINDING)
