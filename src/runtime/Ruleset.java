@@ -1,6 +1,10 @@
 package runtime;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  * ルールの集合。
@@ -35,17 +39,35 @@ abstract public class Ruleset {
 	
 	/** (n-kato)このメソッドを使わないように書き換えてもよい（仮）*/
 	public byte[] serialize() {
-		return new byte[0]; // TODO 【実装】（水野君） - ただしバイナリ転送問題の解決が先
+		try {
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			ObjectOutputStream out = new ObjectOutputStream(bout);
+			serialize(out);
+			out.close();
+			return bout.toByteArray();
+		} catch (IOException e) {
+			//ByteArrayOutputStreamなので絶対に発生しない。
+			throw new RuntimeException("Unexpected Exception", e);
+		}
 	}
 	/** (n-kato)このメソッドを使わないように書き換えてもよい（仮）*/
 	public static Ruleset deserialize(byte[] data) {
-		return null; // todo 実装（水野君） - ただしバイナリ転送問題の解決が先
+		try {
+			ByteArrayInputStream bin = new ByteArrayInputStream(data);
+			ObjectInputStream in = new ObjectInputStream(bin);
+			Ruleset ret = Ruleset.deserialize(in);
+			in.close();
+			return ret;
+		} catch (IOException e) {
+			//ByteArrayInputStreamなので絶対に発生しない。
+			throw new RuntimeException("Unexpected Exception", e);
+		}
 	}
 	
 	/**
 	 * このインスタンスの内容をストリームに書き込む。
-	 * 子クラスでオーバーライドする場合は、最初にこのメソッドの返り値をバイト列の先頭に追加する必要がある。
-	 * @return バイト列
+	 * 子クラスでオーバーライドする場合は、最初にこのメソッドを呼び出す必要がある。
+	 * @param out 書き込むストリーム
 	 */
 	public void serialize(ObjectOutputStream out) throws IOException {
 		out.writeObject(getClass());
@@ -53,20 +75,34 @@ abstract public class Ruleset {
 	}
 	/**
 	 * バイト列からRulesetを復元する。
-	 * @param out バイト列
+	 * @param in 読み込むストリーム
 	 * @return 復元したオブジェクト
 	 */
-	public static Ruleset deserialize(ObjectInputStream in) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Class c = (Class)in.readObject();
-		Ruleset ret = (Ruleset)c.newInstance();
+	public static Ruleset deserialize(ObjectInputStream in) throws IOException {
+		Class c;
+		Ruleset ret;
+		try {
+			c = (Class)in.readObject();
+			ret = (Ruleset)c.newInstance();
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Unexpected Error in deserialization");
+		} catch (InstantiationException e) {
+			throw new RuntimeException("Unexpected Error in deserialization");
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Unexpected Error in deserialization");
+		}
 		ret.deserializeInstance(in);
 		return ret;
 	}
 	/**
 	 * ストリームから、このインスタンスの内容を復元する。子クラスでオーバーライドする場合は、最初にこのメソッドを呼び出す必要がある。
-	 * @param out 読み込むストリーム
+	 * @param in 読み込むストリーム
 	 */
-	protected void deserializeInstance(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		holes = (Functor[])in.readObject();
+	protected void deserializeInstance(ObjectInputStream in) throws IOException {
+		try {
+			holes = (Functor[])in.readObject();
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Unexpected Error in deserialization");
+		}
 	}
 }
