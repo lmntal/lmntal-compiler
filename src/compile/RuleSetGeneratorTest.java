@@ -31,7 +31,7 @@ public class RuleSetGeneratorTest {
 		//test("v,v,w");
 		//test("{}");
 		//test("{v}");
-		test("a(X), b(X)");
+		test("a(X), b(X), c(d)");
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class RuleSetGeneratorTest {
 			//Membrane m = getTestStructure1();
 			//Membrane m = getTestStructure2();
 			Env.p(m);
-			InterpretedRuleset ir = RuleSetGenerator.run(m);
+			InterpretedRuleset ir = RuleSetGenerator.runStartWithNull(m);
 			
 			Env.p("");
 			Env.p("Compiled Membrane :");

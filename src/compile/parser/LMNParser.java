@@ -65,15 +65,7 @@ public class LMNParser {
 		Membrane mem = new Membrane(null);
 		addProcessToMem(src, mem);
 		createProxy(mem);
-		
-		// 世界を生成する
-		Membrane root = new Membrane(null);
-		RuleStructure rs = new RuleStructure();
-		rs.leftMem  = new Membrane(null);
-		rs.rightMem = mem;
-		root.rules.add(rs);
-		rs.parent = root;
-		return root;
+		return mem;
 	}
 	
 	/**

@@ -410,12 +410,14 @@ public class RuleCompiler {
 			
 			for(int pos=0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos];
+				Env.p(atom+"("+pos+")"+" buddy -> "+link.buddy.atom+" link.atom="+link.atom);
 				if(link.atom.mem.equals(rs.leftMem)) {
 					body.add( Instruction.dummy("[:relink, "+rhsatompath.get(atom)+", "+pos+", "
 						+lhsatomidpath.get(lhsatomids.get(link.atom))+", "+link.pos) );
 				} else {
-					body.add( Instruction.dummy("[:newlink, "+rhsatompath.get(atom)+", "+pos+", "
-						+rhsatompath.get(link.atom)+", "+link.pos) );
+					body.add( Instruction.newlink(
+						((Integer)rhsatompath.get(atom)).intValue(), pos,
+						((Integer)rhsatompath.get(link.atom)).intValue(), link.pos) );
 				}
 			}
 		}
