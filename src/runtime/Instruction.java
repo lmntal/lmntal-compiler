@@ -1108,6 +1108,14 @@ public class Instruction implements Cloneable {
 		i.add(atomactuals);
 		return i;
     }
+    /** reloadvars 命令を生成する */
+    public static Instruction reloadvars(List memargs, List atomargs, List varargs) {
+    	Instruction i = new Instruction(RELOADVARS);
+    	i.add(memargs);
+    	i.add(atomargs);
+    	i.add(varargs);
+    	return i;
+    }
     /** @deprecated */
     public static Instruction findatom(int dstatom, List srcmem, Functor func) {
 		Instruction i = new Instruction(FINDATOM);

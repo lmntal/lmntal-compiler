@@ -623,7 +623,6 @@ public class Optimizer {
 					break;
 			}
 		}
-		HashMap changeMap = new HashMap();
 
 		ArrayList loop = new ArrayList(); //ループ内の命令列
 		
@@ -709,12 +708,18 @@ public class Optimizer {
 					if (changeToNewlink.containsKey(linkVar)) {
 						l = (Link)changeToNewlink.get(linkVar);
 						//newlinkに変更
-						loopIterator.set(Instruction.newlink(inst.getIntArg1(),
-															 inst.getIntArg2(),
-															 l.atom,
-															 l.pos));
-															 //inst.getIntArg5()));
-						
+						try {
+							loopIterator.set(Instruction.newlink(inst.getIntArg1(),
+																 inst.getIntArg2(),
+																 l.atom,
+																 l.pos,
+																 inst.getIntArg5()));
+						} catch (IndexOutOfBoundsException e) {
+							loopIterator.set(Instruction.newlink(inst.getIntArg1(),
+																 inst.getIntArg2(),
+																 l.atom,
+																 l.pos));
+						}	
 					}
 					break;
 				case Instruction.NEWLINK:
@@ -729,17 +734,39 @@ public class Optimizer {
 					}
 					break;
 				case Instruction.PROCEED:
-					//next命令に変更
-					ArrayList argList = new ArrayList();
-					argList.add(new Integer(0));
-					for (int i = base + 1; i < 2 * base; i++) {
+					//reloadvars命令を挿入
+					Instruction react = (Instruction)head.get(head.size() - 1);
+					int memmax = ((List)react.getArg2()).size();
+					int atommax = memmax + ((List)react.getArg3()).size();
+
+					ArrayList memargs = new ArrayList();
+					ArrayList atomargs = new ArrayList();
+					ArrayList varargs = new ArrayList();
+					memargs.add(new Integer(0));
+					int i;
+					//膜
+					for (i = base + 1; i < base + memmax; i++) {
+						memargs.add(new Integer(i));
+					}
+					//アトム
+					for (; i < base + atommax; i++) {
 						Integer i2 = new Integer(i);
 						if (varMap.containsKey(i2)) {
 							i2 = (Integer)varMap.get(i2);
 						}
-						argList.add(i2);
+						atomargs.add(i2);
 					}
-					loopIterator.set(Instruction.dummy("next    " + argList));
+					//ローカル変数
+					for (; i < base + base; i++) {
+						Integer i2 = new Integer(i);
+						if (varMap.containsKey(i2)) {
+							i2 = (Integer)varMap.get(i2);
+						}
+						varargs.add(i2);
+					}
+					loopIterator.previous();
+					loopIterator.add(Instruction.reloadvars(memargs, atomargs, varargs));
+					loopIterator.next();
 					break;
 			}
 		}
