@@ -312,7 +312,7 @@ class InterpreterReactor {
 							mems[((Integer) memformals.get(i)).intValue()];
 					}
 					for (int i = 0; i < atomformals.size(); i++) {
-						bodyatoms[i] =
+						bodyatoms[i + memformals.size()] =
 							atoms[((Integer) atomformals.get(i)).intValue()];
 					}
 					InterpreterReactor ir =
