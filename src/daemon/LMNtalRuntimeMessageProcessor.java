@@ -88,7 +88,20 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			return null;
 		}
 	}
-	
+
+	/** 指定ホストに対してDISCONNECTを送る。返事はこない。 */
+	public void sendDisconnect(String fqdn){
+		try{
+			HybridOutputStream out = getOutputStream();
+			String msgid = LMNtalDaemon.makeID();
+			out.write("CMD " + msgid + " \"" + fqdn + "\" " + rgid + " " + "DISCONNECT" + "\n");
+			out.flush();
+		} catch (Exception e){
+			System.out.println("ERROR in LMNtalRuntimeMessageProcessor.sendDisconnect(): ");
+			e.printStackTrace();
+		}
+	}
+
 	////////////////////////////////////////////////////////////////
 	
 //	/** msgid (String) -> ブロックしている Object */
