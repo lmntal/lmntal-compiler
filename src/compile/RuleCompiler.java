@@ -38,11 +38,11 @@ public class RuleCompiler {
 	int varcount;			// 次の変数番号
 	
 	List rhsatoms;
-	Map  rhsatompath;		// 右辺のアトム (Atom) -> 変数番号 (Integer)
+	Map  rhsatompath;		// 右辺のアトム (Atomic) -> 変数番号 (Integer)
 	Map  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)	
 	List lhsatoms;
 	List lhsmems;
-	Map  lhsatompath;		// 左辺のアトム (Atom) -> 変数番号 (Integer)
+	Map  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
 	Map  lhsmempath;		// 左辺の膜 (Membrane) -> 変数番号 (Integer)
 	Map  lhslinkpath;		// 左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])
 	
@@ -50,9 +50,9 @@ public class RuleCompiler {
 	
 	final int lhsmemToPath(Membrane mem) { return ((Integer)lhsmempath.get(mem)).intValue(); }
 	final int rhsmemToPath(Membrane mem) { return ((Integer)rhsmempath.get(mem)).intValue(); }
-	final int lhsatomToPath(Atom atom) { return ((Integer)lhsatompath.get(atom)).intValue(); } 
-	final int rhsatomToPath(Atom atom) { return ((Integer)rhsatompath.get(atom)).intValue(); } 
-	final int lhslinkToPath(Atom atom, int pos) {
+	final int lhsatomToPath(Atomic atom) { return ((Integer)lhsatompath.get(atom)).intValue(); } 
+	final int rhsatomToPath(Atomic atom) { return ((Integer)rhsatompath.get(atom)).intValue(); } 
+	final int lhslinkToPath(Atomic atom, int pos) {
 		int atompath = lhsatomToPath(atom);
 		return ((int[])lhslinkpath.get(new Integer(atompath)))[pos];
 	}
@@ -301,10 +301,10 @@ public class RuleCompiler {
 	private void inc_guard() {
 		// ガードの取り込み
 		varcount = lhsatoms.size() + lhsmems.size();
-		getLHSLinks();
+		genTypedProcessContextPaths();
 		// typedcxtdefs = gc.typedcxtdefs;
 		// varcount = lhsatoms.size() + lhsmems.size() + rs.typedProcessContexts.size();
-		genTypedProcessContextPaths();
+		getLHSLinks();
 	}
 
 //	private void inc_head(HeadCompiler hc) {
@@ -368,7 +368,9 @@ public class RuleCompiler {
 		Iterator it = gc.typedcxtdefs.iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
-			typedcxtsrcs.put( def, new Integer(varcount++) );
+			if (gc.typedcxttypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
+				typedcxtsrcs.put( def, new Integer(varcount++) );
+			}
 		}
 	}
 //	public void enumTypedContextDefs() {
@@ -788,7 +790,7 @@ public class RuleCompiler {
 		it = rhstypedcxtpaths.keySet().iterator();
 		while (it.hasNext()) {
 			ProcessContext atom = (ProcessContext)it.next();
-			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
+			for (int pos = 0; pos < atom.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
 				if (link == null) {
 					error("SYSTEM ERROR: buddy of process context explicit free link is not set");
@@ -847,7 +849,7 @@ public class RuleCompiler {
 			Iterator it2 = def.rhsOccs.iterator();
 			while (it2.hasNext()) {
 				ProcessContext atom = (ProcessContext)it2.next();
-				for (int pos = 0; pos < atom.functor.getArity(); pos++) {
+				for (int pos = 0; pos < atom.getArity(); pos++) {
 					LinkOccurrence link = atom.args[pos].buddy;	// 明示的な自由リンクのリンク先のリンク出現
 					if (!(link.atom instanceof ProcessContext)) {
 						// 型付きでないプロセス文脈のリンク先がアトムのとき
@@ -984,13 +986,13 @@ public class RuleCompiler {
 			Atom atom = (Atom)it.next();
 			//REG
 			if(atom.functor.getArity()==1 && atom.functor.getName().equals("module")) {
-				Module.regMemName(atom.args[0].buddy.atom.functor.getName(), atom.mem);
+				Module.regMemName(atom.args[0].buddy.atom.getName(), atom.mem);
 			}
 			
 			//LOAD
 			if (atom.functor.equals(FUNC_USE)) {
 				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
-					atom.args[0].buddy.atom.functor.getName()) );
+					atom.args[0].buddy.atom.getName()) );
 			}
 			String path = atom.getPath(); // .functor.path;
 			if(path!=null && !path.equals(atom.mem.name)) {

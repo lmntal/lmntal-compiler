@@ -136,7 +136,7 @@ public class GuardCompiler extends HeadCompiler {
 		for (int i = 0; i < atoms.size(); i++) {
 			Atom atom = (Atom)atoms.get(i);
 			int atompath = atomToPath(atom);
-			int arity = atom.functor.getArity();
+			int arity = atom.getArity();
 			int[] paths = new int[arity];
 			for (int j = 0; j < arity; j++) {
 				paths[j] = varcount;

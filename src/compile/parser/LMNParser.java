@@ -126,7 +126,7 @@ public class LMNParser {
 	 * @param atom セット先のアトム
 	 * @param pos セット先のアトムでの場所
 	 */
-	private void setLinkToAtomArg(SrcLink link, Atom atom, int pos) {
+	private void setLinkToAtomArg(SrcLink link, Atomic atom, int pos) {
 		//if (pos >= atom.args.length) error("SYSTEM ERROR: out of Atom arg length:"+pos);
 		atom.args[pos] = new LinkOccurrence(link.getName(), atom, pos);
 	}
@@ -418,7 +418,8 @@ public class LMNParser {
 				// Xがmemの局所リンクであり、1^Xをmem内ですでに使用した場合は、1^^Xとする。
 				// Xがsubmemの子膜への直通リンクであり、そこでの膜間リンク名が1^Xの場合は、2^Xとする。
 				String index = "1";
-				if (freeLink.atom.functor.equals(ProxyAtom.OUTSIDE_PROXY)
+				if (freeLink.atom instanceof Atom
+				 && ((Atom)freeLink.atom).functor.equals(ProxyAtom.OUTSIDE_PROXY)
 				 && freeLink.atom.args[0].name.startsWith("1") ) {
 				 	index = "2";
 				}
@@ -473,7 +474,7 @@ public class LMNParser {
 		for (int i = 0; i < lists.length; i++) {
 			Iterator it = lists[i].iterator();
 			while (it.hasNext()) {
-				Atom a = (Atom)it.next();
+				Atomic a = (Atomic)it.next();
 				for (int j = 0; j < a.args.length; j++) {
 					if (a.args[j].buddy == null) { // outside_proxyの第1引数はすでに非nullになっている
 						addLinkOccurrence(links, a.args[j]);

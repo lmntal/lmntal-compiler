@@ -36,7 +36,7 @@ public class HeadCompiler {
 	public List mems			= new ArrayList();	// 出現する膜のリスト。[0]がm
 	public List atoms			= new ArrayList();	// 出現するアトムのリスト	
 	public Map  mempaths		= new HashMap();	// Membrane -> 変数番号
-	public Map  atompaths		= new HashMap();	// Atom -> 変数番号
+	public Map  atompaths		= new HashMap();	// Atomic -> 変数番号
 	public Map  linkpaths		= new HashMap();	// Atomの変数番号 -> リンクの変数番号の配列
 	
 	private Map atomids		= new HashMap();	// Atom -> atoms内のindex（廃止の方向で検討する）
@@ -50,10 +50,10 @@ public class HeadCompiler {
 	
 	private HashMap proccxteqMap = new HashMap(); // Membrane -> ProcessContextEquation
 	
-	final boolean isAtomLoaded(Atom atom) { return atompaths.containsKey(atom); }
+	final boolean isAtomLoaded(Atomic atom) { return atompaths.containsKey(atom); }
 	final boolean isMemLoaded(Membrane mem) { return mempaths.containsKey(mem); }
 
-	final int atomToPath(Atom atom) { 
+	final int atomToPath(Atomic atom) { 
 		if (!isAtomLoaded(atom)) return UNBOUND;
 		return ((Integer)atompaths.get(atom)).intValue();
 	}
@@ -162,8 +162,8 @@ public class HeadCompiler {
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence buddylink = atom.args[pos].buddy;
 				if (buddylink == null) continue; // ガード匿名リンクは無視
-				Atom buddyatom = buddylink.atom;
-				if (!atomids.containsKey(buddyatom)) continue; // 右辺や$p（およびlhs->neg）へのリンクは無視
+				if (!atomids.containsKey(buddylink.atom)) continue; // 右辺や$p（およびlhs->neg）へのリンクは無視
+				Atom buddyatom = (Atom)buddylink.atom;
 				
 				if (atomToPath(buddyatom) != UNBOUND) {
 					// リンク先のアトムをすでに取得している場合。

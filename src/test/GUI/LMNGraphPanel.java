@@ -95,7 +95,7 @@ public class LMNGraphPanel extends GraphPanel {
 		return a.nthAtom(i);
 	}
 	
-	Atom buddy(Atom a, int i) {
+	Atomic buddy(Atomic a, int i) {
 		LinkOccurrence link = a.args[i];
 		if(link.buddy != null) {
 			return link.buddy.atom;
