@@ -107,7 +107,6 @@ public class Inline {
 			Env.d("Register inlineCode : "+src);
 			code.put(src, new Integer(codeCount++));
 		} else if(src.startsWith("/*inline_define*/")) {
-		//if(src.startsWith("a")) {
 			//епо©
 			Env.d("Register inlineDefineCode : "+src);
 			defs.add(src);
