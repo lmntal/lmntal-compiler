@@ -43,10 +43,19 @@ public class Instruction {
      * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
      * @return String
      *
+     * メモ：Instructionの中は、Listの中にArrayListが入れ子になって入っている。
+     *
      */
     public String toString(){
-	return "not implemented\n";
+	//手抜きな方法
+	//	return "not implemented\n";
+
+	//手抜きな方法その2
+	Object hoge;
+	hoge = (Object)data;
+	return hoge.toString();
     }
+
 
     /**
      * デバッグ用表示メソッド。与えられたListをObject[]に変換し、それぞれの要素に対してtoString()を呼ぶ。
@@ -54,33 +63,72 @@ public class Instruction {
      * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
      * @return void
      * @param List
+     *
      */
     public static void Dump(List listToBeDumped){
 	Object[] tmp = listToBeDumped.toArray();
 
-	for (int i = 0; i < tmp.length; i++){
+	System.out.print("Command: ");
+	System.out.print(tmp[0].toString());
+
+	System.out.print("\t");
+	System.out.print("Arguments: ");
+
+	for (int i = 1; i < tmp.length; i++){
 	    System.out.print(tmp[i].toString());
-	    System.out.print(" ");
-	    System.out.println();
+	    System.out.print(", ");
 	}
+	System.out.println();
     }
+
     /**
      * デバッグ用表示メソッド。Instruction
      * オブジェクト内のListをObject[]に変換し、
      * それぞれの要素に対してtoString()を呼ぶ。
+     * 
+     * deprecated: by NAKAJIMA Motomu on 2003-10-25
+     *
+     * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
+     * @return void
+     */
+//     public void Dump(){
+// 	Object[] tmp = data.toArray();
+
+// 	for (int i = 0; i < tmp.length; i++){
+// 	    System.out.print(tmp[i].toString());
+// 	    System.out.print(" ");
+// 	    System.out.println();
+// 	}
+//     }
+
+    /**
+     * デバッグ用表示メソッド。
+     * 
+     * Listの先頭はcommandと見なす。
+     * commandの次は、引数のArrayListと見なす。
+     * その次はまたcommandと見なす。
      *
      * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
      * @return void
      */
     public void Dump(){
-	Object[] tmp = data.toArray();
+	Object[] hoge = data.toArray();
+	Object[] fuga;
+	
+	for (int i = 0; i < hoge.length-1 ; i+=2){
+	    System.out.print("Command: ");
+	    System.out.print(hoge[0].toString());
 
-	for (int i = 0; i < tmp.length; i++){
-	    System.out.print(tmp[i].toString());
-	    System.out.print(" ");
+	    System.out.print("\t");
+	    System.out.print("Arguments: ");
+
+	    fuga = hoge[i].toArray();
+	    for (int j = 1; j < fuga.length; j++){
+		System.out.print(fuga[j].toString());
+		System.out.print(" ");
+	    }
 	    System.out.println();
 	}
+	System.out.println();
     }
-
-
 }
