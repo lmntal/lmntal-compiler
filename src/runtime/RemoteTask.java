@@ -34,7 +34,7 @@ final class RemoteTask extends AbstractTask {
 	 * コンストラクタ。
 	 */
 	 RemoteTask(RemoteLMNtalRuntime runtime){
-	 	super((AbstactLMNtalRuntime)runtime);
+	 	super((AbstractLMNtalRuntime)runtime);
 	 	remoteNode = runtime.lmnNode;
 	 }
 
