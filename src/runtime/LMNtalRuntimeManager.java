@@ -141,7 +141,7 @@ public final class LMNtalRuntimeManager {
 		System.out.println("LMNtalRuntimeManager.terminateAll() entered");
 		
 		synchronized(terminateLock) { // 重複転送防止のため（仮）		
-			if(!Env.theRuntime.isTerminated()){
+			if(Env.theRuntime.isTerminated()){
 				System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime.isTerminated() is true");
 				return false;
 			} else {
