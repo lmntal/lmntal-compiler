@@ -4,7 +4,7 @@
 
 /* --------------------------Usercode Section------------------------ */
 package compile.parser;
-import java_cup.runtime.*;
+import java_cup.runtime.Symbol;
 
 %%
 
@@ -63,7 +63,7 @@ EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 	"*"				{ return symbol(sym.WILDCARD); }
 	"["				{ return symbol(sym.LBRACET); }
 	"]"				{ return symbol(sym.RBRACET); }
-	"/+"			{ return symbol(sym.NEGATIVE); }
+	"\+"			{ return symbol(sym.NEGATIVE); }
 	{LinkName}		{ return symbol(sym.LINK_NAME, yytext()); }
 	{AtomName}		{ return symbol(sym.ATOM_NAME, yytext()); }
 	{WhiteSpace}	{ /* just skip */ }

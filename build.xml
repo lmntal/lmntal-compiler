@@ -1,10 +1,10 @@
 <project name="LMNtal" default="dist" basedir=".">
 	<!-- directory properties -->
-	<property name="src" value="src"/>
-	<property name="build" value="bin"/>
-	<property name="dist"  value="dist"/>
-	<property name="lib"  value="lib"/>
-	<property name="docs" value="doc"/>
+	<property name="src" location="src"/>
+	<property name="build" location="bin"/>
+	<property name="dist"  location="dist"/>
+	<property name="lib"  location="lib"/>
+	<property name="docs" location="doc"/>
 	<property name="classpath"  value=""/>
 	
 	<!-- tool properties -->

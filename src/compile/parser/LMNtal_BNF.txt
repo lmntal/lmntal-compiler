@@ -45,7 +45,7 @@
                   | '{' <ProcessList> '}'
 
 <Rule>          =   '(' <ProcessList> ':-' <ProcessList> ')'
-                =   '(' <ProcessList> ':-' <NagateList> <ProcessList> ')'
+                  | '(' <ProcessList> ':-' <NagateList> <ProcessList> ')' // not supported now
 
 <ProcessCotext> =   '$' <AtomName>
 
@@ -64,6 +64,6 @@
                   | <LinkUnify>
 
 <ProcessList>   =   <Process>
-                  | <Process> ',' <ProcessList>
+                  | <ProcessList> ',' <Process>
 
 <LMNtalProg>    =   <ProcessList>

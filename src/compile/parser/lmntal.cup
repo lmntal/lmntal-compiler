@@ -4,7 +4,6 @@ package compile.parser;
 
 import java_cup.runtime.*;
 import java.util.LinkedList;
-import compile.struct.*;
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
 terminal		NULL, COMMA, LPAREN, RPAREN, LBREATH, RBREATH, 
@@ -12,92 +11,67 @@ terminal		NULL, COMMA, LPAREN, RPAREN, LBREATH, RBREATH,
 				WILDCARD, LBRACET, RBRACET, NEGATIVE;
 terminal String	LINK_NAME, ATOM_NAME;
 
-non terminal LinkedList			proc_list;
-non terminal LinkedList			rule_list;
-non terminal LinkedList			link_list;
-non terminal LMNSentenseAtom	atom;
-non terminal LMNSentenseRule	rule;
-non terminal LMNSentenseCell	cell;
-non terminal LMNSentenseRuleCell rule_cell;
-non terminal LMNSentenseRuleProcVar proc_var;
-non terminal Object				rule_obj,process;
-start with proc_list;
+non terminal SrcLink			Link;
+non terminal SrcAtom			Atom;
+non terminal SrcMembrane		Membrane;
+non terminal SrcRule			Rule;
+non terminal SrcProcessContext	ProcessContext;
+non terminal SrcRuleContext		RuleContext;
+non terminal SrcContext			Context;
+non terminal SrcLinkUnify		LinkUnify;
+non terminal Object				Process;
+non terminal LinkedList			ProcessList;
+
+start with ProcessList;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
-/*
-以下の構文規則によって定義される$P$をプロセスと呼ぶ。
 
-\[
-\begin{array}{r@{}c@{}l}
-P&~::=~& \zero ~|~ p(X_1,\ldots,X_m) ~|~ P,P ~|~ \{ P \}
-   ~|~   (T\react G \guard T)
-\\
-T&~::=~& \zero ~|~ p(X_1,\ldots,X_m) ~|~ T,T ~|~ \{ T \}
-   ~|~   (T\react G \guard T) \\
-  &~|~ & \rulevar p
-   ~|~   \procvar p \texttt{[$X_1,\ldots,X_m$|$\fvstar X$]}
-   ~|~   p(\fvstar X_1,\ldots,\texttt\fvstar X_m)
-\\
-G&~::=~& \zero ~|~ G,G 
-   ~|~   \negate (\,\procvar p_1\,\texttt{=}\,(T_1),\ldots,
-                    \procvar p_n\,\texttt{=}\,(T_n) \,)
-\\
-\end{array}
-\]
-*/
-
-link_list	::=	  LINK_NAME:name
-					{: LinkedList list = new LinkedList(); list.add(new LMNSentenseLink(name)); RESULT = list; :}
-				| link_list:list COMMA LINK_NAME:name
-					{: list.add(new LMNSentenseLink(name)); RESULT = list; :};
-
-atom		::=	  ATOM_NAME:name
-					{: RESULT = new LMNSentenseAtom(name); :}
+Link		::=   LINK_NAME:name
+					{: RESULT = new SrcLink(name); :};
+					
+Atom		::=	  ATOM_NAME:name
+					{: RESULT = new SrcAtom(name); :}
 				| ATOM_NAME:name LPAREN RPAREN
-					{: RESULT = new LMNSentenseAtom(name); :}
-				| ATOM_NAME:name LPAREN link_list:list RPAREN
-					{: RESULT = new LMNSentenseAtom(name, list); :};
+					{: RESULT = new SrcAtom(name); :}
+				| ATOM_NAME:name LPAREN ProcessList:list RPAREN
+					{: RESULT = new SrcAtom(name, list); :};
 
-rule		::=	  LPAREN rule_list:left RULE rule_list:right RPAREN
-					{: RESULT = new LMNSentenseRule(left, right);:};
+Membrane	::=	  LBREATH RBREATH
+					{: RESULT = new SrcMembrane(); :}
+				| LBREATH ProcessList:list RBREATH
+					{: RESULT = new SrcMembrane(list); :};
 
-cell		::=	  LBREATH RBREATH
-					{: RESULT = new LMNSentenseCell(); :}
-				| LBREATH proc_list:list RBREATH
-					{: RESULT = new LMNSentenseCell(list); :};
+Rule		::=	  LPAREN ProcessList:head RULE ProcessList:body RPAREN
+					{: RESULT = new SrcRule(head, body); :};
 
-rule_cell	::=	  LBREATH rule_list:list RBREATH
-					{: RESULT = new LMNSentenseRuleCell(list); :};
+ProcessContext	::=   PROCVAR ATOM_NAME:name
+					{: RESULT = new SrcProcessContext(name); :};
 
-process		::=   NULL
-					{: RESULT=null; :}
-				| atom:a
-					{: RESULT=a; :}
-				| cell:c
-					{: RESULT=c; :}
-				| rule:r
-					{: RESULT=r; :};
+RuleContext	::=   RULEVAR ATOM_NAME:name
+					{: RESULT = new SrcRuleContext(name); :};
 
-proc_var	::=   PROCVAR ATOM_NAME:n
-					{: RESULT = new LMNSentenseRuleProcVar(n); :};
+Context		::=   ProcessContext:p
+					{: RESULT = p; :}
+				| RuleContext:r
+					{: RESULT = r; :};
 
-rule_obj	::=   NULL
-					{: RESULT=null; :}
-				| atom:a
-					{: RESULT = a; :}
-				| rule_cell:c
-					{: RESULT = c; :}
-				| LINK_NAME:n1 EQUALS LINK_NAME:n2
-					{: RESULT = new LMNSentenseEqualsAtom(n1,n2); :}
-				| proc_var:p
-					{: RESULT = p; :};
+LinkUnify	::=   Link:left EQUALS Link:right
+					{: RESULT = new SrcLinkUnify(left, right); :};
 
-rule_list	::=   rule_obj:r
-					{: LinkedList list = new LinkedList(); list.add(r); /*System.out.println("rule::"+r);*/ RESULT = list; :}
-				| rule_list:list COMMA rule_obj:r
-					{: list.add(r); /*System.out.println("rule::"+r);*/ RESULT = list; :};
+Process		::=   Atom:p
+					{:  RESULT = p; :}
+				| Membrane:p
+					{:  RESULT = p; :}
+				| Rule:p
+					{:  RESULT = p; :}
+				| Context:p
+					{:  RESULT = p; :}
+				| Link:p
+					{:  RESULT = p; :}
+				| LinkUnify:p
+					{:  RESULT = p; :};
 
-proc_list	::=	  process:p
-					{: LinkedList list = new LinkedList(); if (p != null) list.add(p); /*System.out.println("process::"+p);*/ RESULT = list; :}
-				| proc_list:list COMMA process:p
-					{: if (p != null) list.add(p); /*System.out.println("process"+p);*/ RESULT = list; :};
+ProcessList	::=   Process:p
+					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
+				| ProcessList:list COMMA Process:p
+					{: list.add(p); RESULT = list; :};
