@@ -273,7 +273,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	/** atom1の第pos1引数のリンク先と、atom2の第pos2引数のリンク先を接続する。
 	 */
-	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+	public final void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
 	}
@@ -300,8 +300,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** unifyAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。
 	 */
 	protected final void unifyLocalAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
-		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
-		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
+		unifyAtomArgs(atom1, pos1, atom2, pos2);
 	}
 
 	// 操作5 - 膜自身や移動に関する操作
