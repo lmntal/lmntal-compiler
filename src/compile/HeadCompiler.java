@@ -186,6 +186,7 @@ public class HeadCompiler {
 	public void compileMembrane(Membrane mem) {
 		Env.c("compileMembrane");
 		int thismempath = memToPath(mem);
+		
 		Iterator it = mem.atoms.iterator();
 		while (it.hasNext()) {
 			Atom atom = (Atom)it.next();
@@ -235,6 +236,9 @@ public class HeadCompiler {
 			}
 			if (submem.ruleContexts.isEmpty()) {
 				match.add(new Instruction(Instruction.NORULES, submempath));
+			}
+			if (submem.stable) {
+				match.add(new Instruction(Instruction.STABLE, submempath));
 			}
 			compileMembrane(submem);
 		}

@@ -155,6 +155,7 @@ public class LMNParser {
 		// hara
 		Module.regMemName(sMem.name, submem);
 		submem.name = sMem.name;
+		submem.stable = sMem.stable;
 		addProcessToMem(sMem.getProcess(), submem);
 		mem.mems.add(submem);
 	}

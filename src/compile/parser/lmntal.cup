@@ -28,10 +28,13 @@ non terminal SrcRuleContext		RuleContext;
 non terminal SrcContext			Context;
 non terminal Object				Process;
 non terminal LinkedList			ProcessList;
+non terminal LinkedList			NonemptyProcessList;
+non terminal LinkedList			WorldProcessList;
+non terminal LinkedList			NonemptyWorldProcessList;
 non terminal Object				List;
 non terminal Object				ListCdr;
 
-start with ProcessList;
+start with WorldProcessList;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
 
@@ -64,14 +67,16 @@ UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
 				| FuncName:name
 					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
-				| FuncName:name LPAREN RPAREN
-					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
+//				| FuncName:name LPAREN RPAREN
+//					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
 				| FuncName:name LPAREN ProcessList:list RPAREN
 					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
 				| List:list
 					{: RESULT = list; :}
-				| LPAREN Atom:atom RPAREN
-					{: RESULT = atom; :}
+				| LPAREN Rule:rule RPAREN
+					{: RESULT = rule; :}
+//				| LPAREN Atom:atom RPAREN
+//					{: RESULT = atom; :}
 				| Link:link
 					{: RESULT = link; :}
 				;
@@ -134,18 +139,23 @@ ListCdr     ::=   GUARD Atom:atom
                     {: RESULT = new SrcAtom("[]"); :};
 
 
-Membrane	::=	  AtomName:name COLON LBRACE RBRACE
-					{: RESULT = new SrcMembrane(name); :}
-				| LBRACE RBRACE
-					{: RESULT = new SrcMembrane(); :}
-				| AtomName:name COLON LBRACE ProcessList:list RBRACE
+Membrane	::=	  AtomName:name COLON LBRACE WorldProcessList:list RBRACE SLASH
+					{: SrcMembrane sMem = new SrcMembrane(name, list);
+					   sMem.stable = true;
+					   RESULT = sMem; :}
+				| AtomName:name COLON LBRACE WorldProcessList:list RBRACE
 					{: RESULT = new SrcMembrane(name, list); :}
-				| LBRACE ProcessList:list RBRACE
+				| LBRACE WorldProcessList:list RBRACE SLASH
+					{: SrcMembrane sMem = new SrcMembrane(list);
+					   sMem.stable = true;
+					   RESULT = sMem; :}
+				| LBRACE WorldProcessList:list RBRACE
 					{: RESULT = new SrcMembrane(list); :};
+					
 
-Rule		::=	  LPAREN ProcessList:head RULE ProcessList:body RPAREN
+Rule		::=	  ProcessList:head RULE ProcessList:body 
 					{: RESULT = new SrcRule(head, body); :}
-			    | LPAREN ProcessList:head RULE ProcessList:guard GUARD ProcessList:body RPAREN
+			    | ProcessList:head RULE ProcessList:guard GUARD ProcessList:body 
 					{: RESULT = new SrcRule(head, guard, body); :};
 
 ProcessContext	::= PROCVAR AtomName:name
@@ -163,15 +173,39 @@ Process		::=   Atom:p
 					{:  RESULT = p; :}
 				| Membrane:p
 					{:  RESULT = p; :}
-				| Rule:p
-					{:  RESULT = p; :}
+//				| Rule:p
+//					{:  RESULT = p; :}
 				| Context:p
 					{:  RESULT = p; :};
 
-ProcessList ::= Process:p
+ProcessList ::= /* epsilon */
+					{: RESULT = new LinkedList(); :}
+				| NonemptyProcessList:list
+					{: RESULT = list; :}
+				| NonemptyProcessList:list COMMA
+					{: RESULT = list; :};
+NonemptyProcessList ::=
+				  Process:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
-				| ProcessList:list COMMA Process:p
-					{: list.add(p); RESULT = list; :} ;
+				| NonemptyProcessList:list COMMA Process:p
+					{: list.add(p); RESULT = list; :};
+
+WorldProcessList ::= /* epsilon */
+					{: RESULT = new LinkedList(); :}
+				| NonemptyWorldProcessList:list
+					{: RESULT = list; :}
+				| NonemptyWorldProcessList:list PERIOD
+					{: RESULT = list; :};
+NonemptyWorldProcessList ::=
+				  NonemptyProcessList:p
+					{: RESULT = p; :}
+				| Rule:p
+					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
+				| NonemptyWorldProcessList:list PERIOD Rule:p
+					{: list.add(p); RESULT = list; :}
+				| NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
+					{: list.addAll(p); RESULT = list; :};
+
 
 /*
 TypedProcessContext ::= PROCVAR AtomName:name LBRACKET LINK_NAME:link RBRACKET

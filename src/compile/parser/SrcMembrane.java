@@ -19,13 +19,6 @@ class SrcMembrane {
 	}
 	
 	/**
-	 * 空の名前つき膜を作成します 
-	 */
-	public SrcMembrane(String name) {
-		this(name, new LinkedList());
-	}
-	
-	/**
 	 * 指定された子プロセスを持つ膜を作成します
 	 * @param process 膜に含まれる子プロセス
 	 */

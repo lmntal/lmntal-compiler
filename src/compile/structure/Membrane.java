@@ -15,7 +15,9 @@ import runtime.Env;
 public final class Membrane {
 	/** 親膜 <p> todo いずれmemはparentに名称変更する */
 	public Membrane mem = null;
-	
+	/** 終了フラグがセットされているかどうかを表す */
+	public boolean stable = false;
+
 	/** アトム(compile.structure.Atom)のリスト */
 	public List atoms = new ArrayList();
 
@@ -90,7 +92,7 @@ public final class Membrane {
 		
 	}
 	public String toString() {
-		return "{ " + toStringWithoutBrace() + " }";
+		return "{ " + toStringWithoutBrace() + " }" + (stable ? "/" : "");
 	}
 	
 	/**

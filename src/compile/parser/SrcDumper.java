@@ -48,7 +48,9 @@ public class SrcDumper {
 	public static String dumpMembrane(SrcMembrane mem, int indent) {
 		String s = (dumpIndent(indent)+"{" + BR);
 		s += dumpLinkedList(mem.getProcess(), indent+1);
-		s += (dumpIndent(indent)+"}"+BR);
+		s += dumpIndent(indent)+"}";
+		if (mem.stable) s += "/";
+		s += BR;
 		return s;
 	}
 	
