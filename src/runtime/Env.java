@@ -13,6 +13,8 @@ import test.GUI.*;
  */
 public final class Env {
 
+	static final String LMNTAL_VERSION = "0.65.20041025";
+
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
 	/** 内部命令の実行をトレースするデバッグレベル */

@@ -60,9 +60,9 @@ public class FrontEnd {
 						/// -x <name> <value>
 						/// User defined option.
 						/// <name>    <value>    description
-						/// =================================================================
+						/// ===========================================================
 						/// screen    max        full screen mode
-						/// auto      on         reaction auto proceed mode when GUI enabled
+						/// auto      on         reaction auto proceed mode when GUI on
 						if (i + 2 < args.length) {
 							String name  = i+1<args.length ? args[i+1] : "";
 							String value = i+2<args.length ? args[i+2] : "";
@@ -78,19 +78,19 @@ public class FrontEnd {
 					case 'I':
 						/// -I <path>
 						/// Additional path for LMNtal library
-						/// default path is ./lmntal_lib and ../lmntal_lib
+						/// The default path is ./lmntal_lib and ../lmntal_lib
 						compile.Module.libPath.add(new File(args[++i]));
 						break;
 					case 'c':
 						/// -cgi
-						/// CGI mode. Output header 'Content-type:text/html'
+						/// CGI mode.  Output the header 'Content-type:text/html'
 						if (args[i].equals("-cgi")) {
 							Env.fCGI = true;
 						}
 						break;
 					case 'd':
-						/// -d<0-9>
-						/// Debug level.
+						/// -d[<0-9>]
+						/// Debug output level.
 						if (args[i].matches("-d[0-9]")) {
 							Env.debug = args[i].charAt(2) - '0';
 						} else {
@@ -99,7 +99,7 @@ public class FrontEnd {
 //						System.out.println("debug level " + Env.debug);
 						break;
 					case 'v':
-						/// -v<0-9>
+						/// -v[<0-9>]
 						/// Verbose output level.
 						if (args[i].matches("-v[0-9]")) {
 							Env.verbose = args[i].charAt(2) - '0';
@@ -110,8 +110,8 @@ public class FrontEnd {
 						break;
 					case 'g':
 						/// -g
-						/// GUI mode. Atoms, Membranes, Links are drawn.
-						/// A reaction proceeds after button click.
+						/// GUI mode. Atoms, membranes and links are drawn graphically.
+						/// Click button to proceed reaction. Close the window to quit.
 						Env.fGUI = true;
 						break;
 					case 't':
@@ -120,8 +120,12 @@ public class FrontEnd {
 						Env.fTrace = true;
 						break;
 					case 's':
-						/// -s<0-9>
-						/// Shuffle level. Random application of reaction rules.
+						/// -s[<0-9>]  (-s=-s3)
+						/// Shuffle level.  Select a strategy of rule application.
+						///   0: use an atom stack for each membrane (LIFO)
+						///   1: default (atoms are selected in some arbitrary manner)
+						///   2: select atoms and membranes randomly from a membrane
+						///   3: select atoms, mems and rules randomly from a membrane
 						if (args[i].matches("-s[0-9]")) {
 							Env.shuffle = args[i].charAt(2) - '0';
 						} else {
@@ -131,42 +135,45 @@ public class FrontEnd {
 						break;
 					case 'e':
 						/// -e <LMNtal program>
-						/// One liner code execution like perl.
+						/// One liner code execution like Perl.
 						/// Example: -e 'a,(a:-b)'
 						if (++i < args.length)  Env.oneLiner = args[i];
 						break;
 					case 'O':
 						/// -O<0-9>
 						/// Optimize level.
+						/// Intermediate instruction sequences are optimized.
 						if (args[i].length() == 2) {
 							Env.optimize = 5;
 						} else if (args[i].matches("-O[0-9]")) {
 							Env.optimize = args[i].charAt(2) - '0';
 						} else {
-							System.out.println("不明なオプション:" + args[i]);
+							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
 						}
 						break;
 					case '-': // 文字列オプション
 						if(args[i].equals("--help")){
 							/// --help
-							/// Show usage(this).
-							System.out.println("usage: FrontEnd [options...] [filenames...]");
+							/// Show usage (this).
+							System.out.println("usage: java -jar lmntal.jar [options...] [filenames...]");
+							// usage: FrontEnd [options...] [filenames...]
 							
 							// commandline: perl src/help_gen.pl < src/runtime/FrontEnd.java > src/runtime/Help.java
 							Help.show();
 					        System.exit(-1);
 						} else if(args[i].equals("--demo")){
 							/// --demo
-							/// Demo mode. Atoms and strings will be drawn larger.
+							/// Demo mode.  Draw atoms and text larger.
 							Env.fDEMO = true;
 						} else {
-							System.out.println("不明なオプション:" + args[i]);
+							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
 						}
 						break;
 					default:
-						System.out.println("不明なオプション:" + args[i]);
+						System.out.println("Invalid option: " + args[i]);
+						System.out.println("Use option --help to see a long list of options.");
 						System.exit(-1);						
 					}
 				}

@@ -268,7 +268,7 @@ a:-{b,b,b,b,b. b:-c}@"localhost". a,a,a,a. {$p,@p}:-$p
   A=f(f(f(f(A)))),    c,c, ( c, X=f(Y) :- X=g(Y) )                      % ==>   f(g(g(f(A))),A)
 { A=f(f(f(f(A)))) },  c,c, ( c,{X=f(Y),$p[X,Y]} :- { X=g(Y),$p[X,Y] } ) % ==> { f(g(g(f(A))),A) }
 
-{$p[X]}:-$p[X],$p[Y],n(Y). {a(X)},e(X) % ==>¡ÚNullPointerException¡Û
+{$p[X]}:-$p[X], $p[Y],f(Y), $p[Z],$p[Z].  {p(X)},g(X) % ==> f(p), p(g), p(p)
 
 { pi(X), res(X), ( pi(X) :- X=3.14 ) }, ( {res($p),@r} :- result=$p ) % ==> result(3.14)
 
@@ -280,6 +280,8 @@ go. % ==> e,e,e,result(3.14)
 ( {f(X),$p[X]} :- { g(X),$p[X] } )
 
 {$p[X]}:-$p[X].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % UpdateLinks ¤Î¥Æ¥¹¥È
 
@@ -295,15 +297,12 @@ go. % ==> e,e,e,result(3.14)
 
 {$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,Z),g(X,Z)} % ==> g(A,A),g(B,B)
 {$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,Z),g(X,Z)} % ==> g(A,A)
-{$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,X)}        % ==> g(A,A),g(B,B)
+{$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,X)}        % ==> g(A,A),g(B,B) ¡ÚNull¡Û¢¨1
 {$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,X)}        % ==> ()
 
+{$p[X,Y]} :- $p[A,B],$p[A,B].  {f(X,Y)},g(X,Y)
 
 {$p[X,Y,Z],f(X),f(Y),f(Z)} :- $p[V,V,W],g(W).   {f(A),f(A),f(C),f(C)}
-
-A=B,f(C), g(C),A=B --> f(g)
-A=B,f(C), g(A),A=C --> f(g)
-A=B,f(C), g(B),A=C --> f(g)
 
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,B,C,C)} % ==> e(g)
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,C,B)} % ==> e(g)
@@ -311,7 +310,10 @@ A=B,f(C), g(B),A=C --> f(g)
 
 p(A,B,C,D,E) :- A=B,C=D,g(E).  e(A),p(A,B,B,C,C). % ==> e(g)
 
-{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N), $p[A,A,B,B,C],g(C).  {e(A),f(A,B,B,C,C)} % ==> ¡ÚNullPointerException¡ÛdebugÃæ n-kato
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N), $p[A,A,B,B,C],g(C).  {e(A),f(A,B,B,C,C)} % ==> ¡ÚNull¡Û
+
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N), $p[A,A,B,B,C],g(C).  {e(A,B,C,D,E),f(A,B,C,D,E)} % ==> ¡ÚNull¡Û
+
 
 rule with empty head due to syntax error -> must stop!
 
