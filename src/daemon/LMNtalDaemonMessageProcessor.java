@@ -5,8 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-
-
+import java.net.UnknownHostException;
 
 class LMNtalDaemonMessageProcessor implements Runnable {
 	BufferedReader in;
@@ -25,104 +24,140 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 	public void run() {
 		System.out.println("LMNtalDaemonMessageProcessor.run()");
 
+		String input = "";
+
 		while (true) {
 			try {
-				String input = in.readLine();
+				input = in.readLine();
+			} catch (IOException e) {
+				System.out.println("ERROR:このスレッドには書けません!");
+				e.printStackTrace();
+				break;
+			}
 
-				System.out.println("in.readLine(): " + input);
-				if (input == null) {
-					break;
-				}
+			System.out.println("in.readLine(): " + input);
+			if (input == null) {
+				System.out.println("　 ∧＿∧ 　　\n 　（　´∀｀）＜　inputがぬる");
+				break;
+			}
 
-				/* 
-				 * inputの可能性。
-				 * 
-				 * コマンドからはじまるメッセージ
-				 * msgid fqdn rgid メッセージ 
-				 *   - fqdn が自分宛
-				 *   - fqdn が他人宛
-				 * BEGIN~ENDの途中
-				 * 
-				 */
-				
+			/* 
+			 * inputの可能性。
+			 * 
+			 * コマンドからはじまるメッセージ
+			 * msgid fqdn rgid メッセージ 
+			 *   - fqdn が自分宛
+			 *   - fqdn が他人宛
+			 * BEGIN~ENDの途中
+			 * 
+			 */
 
-				/* コマンドからはじまるメッセージを処理。
-				 * 
-				 * ここで処理される命令一覧。これ以外のは下スクロールしてね
-				 *  res msgid メッセージ本文
-				 *  registerlocal
-				 *  dumphash - デバッグ用
-				 */
-				Integer msgid;
-				Integer rgid;
-				String fqdn;
-				boolean result;
-				String[] tmpString = new String[3];
+			/* コマンドからはじまるメッセージを処理。
+			 * 
+			 * ここで処理される命令一覧。これ以外のは下スクロールしてね
+			 *  res msgid メッセージ本文
+			 *  registerlocal
+			 *  dumphash - デバッグ用
+			 */
+			Integer msgid;
+			Integer rgid;
+			String fqdn;
+			boolean result;
+			String[] parsedInput = new String[4];
+			parsedInput = input.split(" ", 4);
 
-				tmpString = input.split(" ", 3);
+			if (parsedInput[0].equalsIgnoreCase("res")) {
+				//res msgid 結果
+				msgid = new Integer(parsedInput[1]);
 
-				if (tmpString[0].equalsIgnoreCase("res")) {
-					//res msgid 結果
-					msgid = new Integer(tmpString[1]);
+				//戻す先
+				LMNtalNode returnNode = LMNtalDaemon.getNodeFromMsgId(msgid);
 
-					//戻す先
-					LMNtalNode returnNode =
-						LMNtalDaemon.getNodeFromMsgId(msgid);
-
-					returnNode.getOutputStream().write(input);
-					returnNode.getOutputStream().flush();
-				} else if (tmpString[0].equalsIgnoreCase("registerlocal")) {
-					//registerlocal rgid
-					//rgidとソケットを登録
-					rgid = new Integer(tmpString[1]);
-					result = LMNtalDaemon.registerLocal(rgid, socket);
-					if (result == true) {
-						//成功
-						out.write("ok\n");
-						out.flush();
-					} else {
-						//失敗
+				//System.out.println("res: returnNode is: " + returnNode.toString());
+				if (returnNode == null) {
+					//戻し先がnull
+					try {
 						out.write("fail\n");
 						out.flush();
+						continue;
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						continue;
 					}
-				} else if (tmpString[0].equalsIgnoreCase("dumphash")) {
-					//dumphash
-					LMNtalDaemon.dumpHashMap();
 				} else {
-					//msgidからつづく命令列とみなす
-					//msgid "FQDN" rgid メッセージ
-					msgid = new Integer(tmpString[0]);
-					fqdn = (tmpString[1].split("\"", 3))[1];
-					
-					//メッセージを登録
-					LMNtalNode returnNode =
-						new LMNtalNode(socket.getInetAddress(), in, out);
-					result = LMNtalDaemon.registerMessage(msgid, returnNode);
+					//System.out.println(returnNode.getOutputStream().toString());
+					//System.out.println(input);
+					try {
+						returnNode.getOutputStream().write(input + "\n");
+						returnNode.getOutputStream().flush();
+						continue;
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						continue;
+					}
+				}
+			} else if (parsedInput[0].equalsIgnoreCase("registerlocal")) {
+				//registerlocal rgid
+				//rgidとソケットを登録
+				rgid = new Integer(parsedInput[1]);
+				result = LMNtalDaemon.registerLocal(rgid, socket);
+				if (result == true) {
+					//成功
+					try {
+						out.write("ok\n");
+						out.flush();
+						continue;
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						continue;
+					}
+				} else {
+					//失敗
+					try {
+						out.write("fail\n");
+						out.flush();
+						continue;
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						continue;
+					}
+				}
+			} else if (parsedInput[0].equalsIgnoreCase("dumphash")) {
+				//dumphash
+				LMNtalDaemon.dumpHashMap();
+				continue;
+			} else {
+				//msgidからつづく命令列とみなす
+				//msgid "FQDN" rgid メッセージ
+				msgid = new Integer(parsedInput[0]);
+				fqdn = (parsedInput[1].split("\"", 3))[1];
 
-					if (result == true) {
-						//メッセージ登録成功
-						
-						//自分自身宛かどうか判断
-//						System.out.println("----------------------------\n" + socket.getInetAddress());
-//						if(socket.getInetAddress().isLinkLocalAddress()) {
-//							System.out.println("----------------------------\n" + "true");
-//						} else if (! socket.getInetAddress().isLinkLocalAddress()){
-//							System.out.println("----------------------------\n" + "false");
-//						} else {
-//							System.out.println("----------------------------\n" + "hogehoge");
-//						}
-						
-//						InetAddress i = InetAddress.getLocalHost();
-//						System.out.println(i.getHostAddress());
-//						System.out.println(InetAddress.getByName(fqdn).getHostAddress());
-//						System.exit(0);
-						
-						//if (socket.getInetAddress().isAnyLocalAddress()){
-						if (InetAddress.getLocalHost().getHostAddress().equals(InetAddress.getByName(fqdn).getHostAddress())){
-							System.out.println("This message is for me: " + InetAddress.getLocalHost().getHostAddress());
-							
+				//メッセージを登録
+				LMNtalNode returnNode =
+					new LMNtalNode(socket.getInetAddress(), in, out);
+				result = LMNtalDaemon.registerMessage(msgid, returnNode);
+
+				if (result == true) {
+					//メッセージ登録成功
+
+					//自分自身宛かどうか判断
+					try {
+						if (InetAddress
+							.getLocalHost()
+							.getHostAddress()
+							.equals(
+								InetAddress
+									.getByName(fqdn)
+									.getHostAddress())) {
+
+							System.out.println(
+								"This message is for me: "
+									+ InetAddress
+										.getLocalHost()
+										.getHostAddress());
+
 							//自分自身宛なら、自分自身で処理する
-							
+
 							/* ここで処理される命令一覧
 							 * 
 							 *  begin
@@ -130,78 +165,103 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 							 *  lock taskid
 							 *  terminate
 							 */
-							
-							String command =  (tmpString[2].split(" ", 3))[0];
-							if(command.equalsIgnoreCase("connect")){
+
+							String command = (parsedInput[3].split(" ", 3))[0];
+
+							if (command.equalsIgnoreCase("connect")) {
 								//connectがきたら、ランタイムを生成する。
-								//TODO rgidの決め方どうしよう？
 
-								Process remoteRuntime;
-								remoteRuntime = Runtime.getRuntime().exec("java DummyRemoteRuntime " + LMNtalDaemon.makeID() + " " + msgid);
+								LMNtalDaemon.createRemoteRuntime(
+									msgid.intValue());
 
+								continue;
 								//OK返すのは生成されたライタイムがする。
-							} else if(command.equalsIgnoreCase("begin")){
-								//仮
-								out.write("not implemented yet\n");
-								out.flush();							 
-							} else if(command.equalsIgnoreCase("lock")){
+							} else if (command.equalsIgnoreCase("begin")) {
 								//仮
 								out.write("not implemented yet\n");
 								out.flush();
-							} else if(command.equalsIgnoreCase("terminate")){
+								continue;
+							} else if (command.equalsIgnoreCase("lock")) {
 								//仮
 								out.write("not implemented yet\n");
 								out.flush();
+								continue;
+							} else if (command.equalsIgnoreCase("terminate")) {
+								//仮
+								out.write("not implemented yet\n");
+								out.flush();
+								continue;
 							} else {
 								//未知のコマンド or それ以外の何か
 								out.write("fail\n");
-								out.flush();	
-							}						
+								out.flush();
+								continue;
+							}
 						} else {
 							//他ノード宛ならメッセージをいじらずにそのまま転送する
-							
-							//宛先ノードは既知か？
-							LMNtalNode targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
-							if(targetNode == null){
-								//宛先ノードへ接続するのが初めての場合
-								LMNtalDaemon.connect(fqdn);
-								targetNode = LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
 
-								LMNtalDaemon.sendMessage( targetNode  , input  );
+							//宛先ノードは既知か？
+							LMNtalNode targetNode =
+								LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+							if (targetNode == null) {
+								//宛先ノードへ接続するのが初めての場合
+								result = LMNtalDaemon.connect(fqdn);
 								
+								if(result){
+									targetNode =
+										LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
+
+									LMNtalDaemon.sendMessage(targetNode, input);
+
+									continue;
+								} else {
+									//宛先ノードへの接続失敗
+									out.write("fail\n");
+									out.flush();
+									continue;
+								}
 							} else {
 								//宛先ノードが既知の場合
-								if (LMNtalDaemon.sendMessage( targetNode  , input  )){
+								if (LMNtalDaemon
+									.sendMessage(targetNode, input)) {
 									//OKを返すのは、転送先がやるのでここではOKを返さない
+									continue;
 								} else {
 									//転送失敗
 									out.write("fail\n");
 									out.flush();
+									continue;
 								}
 							}
 						}
-					} else {
-						//既にmsgTableに登録されている時 or 通信失敗時
+					} catch (UnknownHostException e1) {
+						e1.printStackTrace();
+						//continue;
+						break;
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						//continue;
+						break;
+					}  catch (NullPointerException nurupo){
+						System.out.println("　 ∧＿∧ 　　\n 　（　´∀｀）＜　ぬるぽ");
+						nurupo.printStackTrace();	
+						//continue;
+						break;
+					}
+				} else {
+					//既にmsgTableに登録されている時 or 通信失敗時
+					try {
 						out.write("fail\n");
 						out.flush();
+						//continue;
+						break;
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						//continue;
+						break;
 					}
-
 				}
-
-			} catch (IOException e) {
-				System.out.println("ERROR:このスレッドには書けません! " + e.toString());
-				break;
-			} catch (ArrayIndexOutOfBoundsException ae) {
-				//送られてきたメッセージが短かすぎるとき（＝不正な時
-				//'hoge' とかそういう時
-				System.out.println("Invalid Message: " + ae.toString());
-				ae.printStackTrace();
-				break;
-			} catch (Exception e){
-				e.printStackTrace();
-				break;
 			}
 		}
 	}
-
 }
