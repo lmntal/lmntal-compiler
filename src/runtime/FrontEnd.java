@@ -109,13 +109,13 @@ public class FrontEnd {
 			
 				// ผยนิ
 				LMNtalRuntime rt = new LMNtalRuntime();
-				rt.applyRulesetOnce(ir);
+				ir.react(rt.getGlobalRoot());
 				rt.exec();
-				Membrane result = (Membrane)rt.getRoot();
-			
+				
+				Membrane rootmem = (Membrane)rt.getGlobalRoot();
 				Env.p( "After execute : " );
-				Env.p( Dumper.dump(result) );
-				Env.p( result );
+				Env.p( Dumper.dump(rootmem) );
+				Env.p( rootmem );
 			} catch (ParseException e) {
 				Env.p(e);
 			}

@@ -89,14 +89,14 @@ public class REPL {
 			root.showAllRule();
 			
 			// ผยนิ
-			LMNtalRuntime rt = new LMNtalRuntime(ir);
+			LMNtalRuntime rt = new LMNtalRuntime();
+			ir.react(rt.getGlobalRoot());
 			rt.exec();
-			Membrane result = (Membrane)rt.getRootMem();
-			
-			
+				
+			Membrane rootmem = (Membrane)rt.getGlobalRoot();
 			Env.p( "After execute : " );
-			Env.p( Dumper.dump(result) );
-			Env.p( result );
+			Env.p( Dumper.dump(rootmem) );
+			Env.p( rootmem );
 		} catch (ParseException e) {
 			Env.p(e);
 		}
