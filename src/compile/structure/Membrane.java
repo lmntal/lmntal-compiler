@@ -114,27 +114,25 @@ public final class Membrane {
 	 * 　[3] [1]の右辺膜の中にあるルール
 	 * </pre>
 	 */
-	public void showAllRule() {
-		Env.c("Membrane.showAllRule mem="+this);
+	public void showAllRules() {
+		Env.c("Membrane.showAllRules " + this);
 		Iterator it = rulesets.iterator();
 		while (it.hasNext()) {
 			((InterpretedRuleset)it.next()).showDetail();
 		}
 		
-		Iterator l;
-		
 		// 直属のルールそれぞれについて、その左辺膜と右辺膜のルールセットを表示
-		l = rules.listIterator();
-		while(l.hasNext()) {
-			RuleStructure rs = (RuleStructure)l.next();
+		it = rules.iterator();
+		while (it.hasNext()) {
+			RuleStructure rs = (RuleStructure)it.next();
 			//Env.p("");
 			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
-			rs.leftMem.showAllRule();
+			rs.leftMem.showAllRules();
 			//Env.p("About rule structure (LEFT): "+rs.rightMem+" of "+rs);
-			rs.rightMem.showAllRule();
+			rs.rightMem.showAllRules();
 		}
 		// 子膜それぞれ
-		l = mems.listIterator();
-		while(l.hasNext()) ((Membrane)l.next()).showAllRule();
+		it = mems.iterator();
+		while(it.hasNext()) ((Membrane)it.next()).showAllRules();
 	}
 }
