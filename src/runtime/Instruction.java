@@ -883,33 +883,32 @@ public class Instruction implements Cloneable {
 	public static final int ISFLOATFUNC  = ISFLOAT  + OPT;
 	public static final int ISSTRINGFUNC = ISSTRING + OPT;
 
-	// 整数用の組み込みボディ命令 (230--249)
-
+	// 整数用の組み込みボディ命令 (400--419+OPT)
 	/** iadd [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
 	 * 整数アトムの加算結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
-	public static final int IADD = 230;
-	public static final int ISUB = 231;
-	public static final int IMUL = 232;
-	public static final int IDIV = 233;
-	public static final int INEG = 234;
-	public static final int IMOD = 235;
-	public static final int INOT = 240;
-	public static final int IAND = 241;
-	public static final int IOR  = 242;
-	public static final int IXOR = 243;
+	public static final int IADD = 400;
+	public static final int ISUB = 401;
+	public static final int IMUL = 402;
+	public static final int IDIV = 403;
+	public static final int INEG = 404;
+	public static final int IMOD = 405;
+	public static final int INOT = 410;
+	public static final int IAND = 411;
+	public static final int IOR  = 412;
+	public static final int IXOR = 413;
 	/** iadd [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
 	 * intatom1をintatom2ビット分符号つき(算術)左シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
-	public static final int ISAL = 244;
+	public static final int ISAL = 414;
 	/** iadd [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
 	 * intatom1をintatom2ビット分符号つき(算術)右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
-	public static final int ISAR = 245;
+	public static final int ISAR = 415;
 	/** iadd [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
 	 * intatom1をintatom2ビット分論理右シフトした結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。*/
-	public static final int ISHR = 246;
+	public static final int ISHR = 416;
 
 	/** iaddfunc [-dstintfunc, intfunc1, intfunc2]
 	 * <br>整数用の最適化用組み込み命令<br>
@@ -928,15 +927,15 @@ public class Instruction implements Cloneable {
 	public static final int ISARFUNC = ISAR + OPT;
 	public static final int ISHRFUNC = ISHR + OPT;
 
-	// 整数用の組み込みガード命令 (250--259)
+	// 整数用の組み込みガード命令 (420--429+OPT)
 
 	/** ilt [intatom1, intatom2]
 	 * <br>整数用の組み込みガード命令<br>
 	 * 整数アトムの値の大小比較が成り立つことを確認する。*/
-	public static final int ILT = 250;
-	public static final int ILE = 251;
-	public static final int IGT = 252;
-	public static final int IGE = 253;	
+	public static final int ILT = 420;
+	public static final int ILE = 421;
+	public static final int IGT = 422;
+	public static final int IGE = 423;	
 
 	/** iltfunc [intfunc1, intfunc2]
 	 * <br>整数用の最適化用組み込みガード命令<br>
@@ -945,6 +944,47 @@ public class Instruction implements Cloneable {
 	public static final int ILEFUNC = ILE + OPT;
 	public static final int IGTFUNC = IGT + OPT;
 	public static final int IGEFUNC = IGE + OPT;
+
+
+	// 浮動小数点数用の組み込みボディ命令 (600--619+OPT)
+	public static final int FADD = 600;
+	public static final int FSUB = 601;
+	public static final int FMUL = 602;
+	public static final int FDIV = 603;
+	public static final int FNEG = 604;
+	public static final int FMOD = 605;
+	public static final int FNOT = 610;
+	public static final int FAND = 611;
+	public static final int FOR  = 612;
+	public static final int FXOR = 613;
+	public static final int FSAL = 614;
+	public static final int FSAR = 615;
+	public static final int FSHR = 616;
+	
+	public static final int FADDFUNC = FADD + OPT;
+	public static final int FSUBFUNC = FSUB + OPT;
+	public static final int FMULFUNC = FMUL + OPT;
+	public static final int FDIVFUNC = FDIV + OPT;
+	public static final int FNEGFUNC = FNEG + OPT;
+	public static final int FMODFUNC = FMOD + OPT;
+	public static final int FNOTFUNC = FNOT + OPT;
+	public static final int FANDFUNC = FAND + OPT;
+	public static final int FORFUNC  = FOR  + OPT;
+	public static final int FXORFUNC = FXOR + OPT;
+	public static final int FSALFUNC = FSAL + OPT;
+	public static final int FSARFUNC = FSAR + OPT;
+	public static final int FSHRFUNC = FSHR + OPT;
+	
+	// 浮動小数点数用の組み込みガード命令 (620--629+OPT)
+	public static final int FLT = 620;
+	public static final int FLE = 621;
+	public static final int FGT = 622;
+	public static final int FGE = 623;	
+
+	public static final int FLTFUNC = FLT + OPT;
+	public static final int FLEFUNC = FLE + OPT;
+	public static final int FGTFUNC = FGT + OPT;
+	public static final int FGEFUNC = FGE + OPT;
 
 	////////////////////////////////////////////////////////////////
 
