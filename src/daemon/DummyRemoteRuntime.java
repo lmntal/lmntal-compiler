@@ -9,8 +9,12 @@ import java.net.Socket;
 class DummyRemoteRuntime implements Runnable {
 	int rgid;
 
-	public DummyRemoteRuntime() {
-		rgid = 100;
+	public DummyRemoteRuntime(int tmpRgid) {
+		rgid = tmpRgid;
+	}
+
+	public int getRgid(){
+		return rgid;
 	}
 
 	public void run() {
@@ -31,6 +35,10 @@ class DummyRemoteRuntime implements Runnable {
 
 			out.write(command);
 			out.flush();
+			
+			
+			
+			
 		} catch (Exception e) {
 			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());
 		}

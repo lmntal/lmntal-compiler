@@ -22,26 +22,36 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("LMNtalDaemonThread2.run()");
+		System.out.println("LMNtalDaemonMessageProcessor.run()");
 
 		while (true) {
 			try {
 				String input = in.readLine();
-				//テスト用：
-				//String input = new String("msgid \"localhost\" runtimegroupid connect\n");
-				System.out.println("input: " + input);
+
+				System.out.println("in.readLine(): " + input);
 				if (input == null) {
 					break;
 				}
 
-				//ここからメッセージ処理部分
-				/* ここで処理される命令一覧。これ以外のは下スクロールしてね
+				/* 
+				 * inputの可能性。
+				 * 
+				 * コマンドからはじまるメッセージ
+				 * msgid fqdn rgid メッセージ 
+				 *   - fqdn が自分宛
+				 *   - fqdn が他人宛
+				 * BEGIN~ENDの途中
+				 * 
+				 */
+				
+
+				/* コマンドからはじまるメッセージを処理。
+				 * 
+				 * ここで処理される命令一覧。これ以外のは下スクロールしてね
 				 *  res
 				 *  registerlocal
-				 *  (dumphash)
-				 *  
+				 *  dumphash - デバッグ用
 				 */
-							
 				Integer msgid;
 				Integer rgid;
 				String fqdn;
@@ -107,15 +117,14 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 							
 							String command =  (tmpString[2].split(" ", 3))[0];
 							if(command.equalsIgnoreCase("connect")){
-								//connectがきたら、ランタイムを生成して ok を返す
-								
-								Thread remoteRuntime = new Thread(new DummyRemoteRuntime());
+								//connectがきたら、ランタイムを生成する。
+								//TODO rgidの決め方どうしよう？
+								Thread remoteRuntime = new Thread(new DummyRemoteRuntime(1));
 								remoteRuntime.start();
 
-
-
-								out.write("ok\n");
-								out.flush();
+								//OK返すのは生成されたライタイムが登録されてから。
+								
+								
 							} else if(command.equalsIgnoreCase("begin")){
 								//仮
 								out.write("not implemented yet\n");
@@ -136,9 +145,9 @@ class LMNtalDaemonMessageProcessor implements Runnable {
 						} else {
 							//他ノード宛ならメッセージをいじらずにそのまま転送する
 							if (LMNtalDaemon.sendMessage( (tmpString[1].split("\"", 3))[1]  , input  )){
-								out.write("ok\n");
-								out.flush();
+								//OKを返すのは、転送先がやるのでここではOKを返さない
 							} else {
+								//転送失敗
 								out.write("fail\n");
 								out.flush();
 							}
