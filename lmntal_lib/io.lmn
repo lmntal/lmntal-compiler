@@ -12,8 +12,8 @@ io:{
 		]](Message) ).
 	( io.input(Message, X) :- [[/*inline*/
 		String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
-		me.changeName(s);
-		me.nthAtom(0).changeName("done");
+		me.changeName("done");
+		me.nthAtom(0).changeName(s);
 		]](Message, X) ).
 	( io.input :- [[/*inline*/
 		String s = javax.swing.JOptionPane.showInputDialog(null, "Input text.");

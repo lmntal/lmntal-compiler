@@ -1,0 +1,28 @@
+/*
+NAME
+	Amidakuji module
+
+SYNOPSIS
+	amidakuji.start_at(start2).
+	==>
+	amidakuji.done(goal??).
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/01/30(Fri) 10:55:09
+
+*/
+
+amidakuji : {
+	amidakuji.start_at($y),c($s,C,D)
+	 :- $s=$y | you($s,U),c(U,C,D).
+	
+	you(T1,M1), c(M1,C,D1), c(T2,C,D2)
+	 :- c(T1,C,D1), c(T2,C,M2), you(M2,D2).
+	
+	c(U,C,M), you(M,$goal)
+	 :- unary($goal) | c(U,C,$goal), amidakuji.done($goal).
+}.
+
