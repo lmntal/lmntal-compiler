@@ -90,7 +90,7 @@ public final class RemoteTask extends AbstractTask {
 		String cmd = "BEGIN\n" + cmdbuffer + "END";
 		String result = LMNtalRuntimeManager.daemon.sendWaitText(runtime.hostname, cmd);
 
-		if (result.substring(0, 4).equalsIgnoreCase("FAIL")) {
+		if (result.length() >= 4 && result.substring(0, 4).equalsIgnoreCase("FAIL")) {
 			throw new RuntimeException("RemoteTask.flush: failure");
 		}
 		// BEGINメッセージに対する返答を解釈する
