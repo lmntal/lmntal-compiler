@@ -5,6 +5,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import util.Stack;
+
+/** 抽象マシンクラス */
+abstract class AbstractMachine {
+	/** ルート膜 */
+	protected AbstractMembrane root;
+	/** ルート膜の親膜 */
+	protected AbstractMembrane supermem;
+	
+	/** ルート膜の取得 */
+	AbstractMembrane getRoot() {
+		return root;
+	}
+}
+
 /**
  * TODO 「タスク」に名前変更
  * TODO システムルールセットのマッチテスト・ボディ実行
@@ -48,7 +62,7 @@ final class Machine extends AbstractMachine {
 					if(((Ruleset)it.next()).react(mem, a)) flag = true;
 				}
 				if(flag == false){ // ルールが適用できなかった時
-					if(!mem.isRoot()) mem.getParent().enqueueAtom(a);
+					if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
 				}
 				else {}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行膜スタックが空の時
@@ -59,10 +73,11 @@ final class Machine extends AbstractMachine {
 				if(flag == false){ // ルールが適用できなかった時
 					memStack.pop(); // 本膜をpop
 					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
-					if(mem.isRoot() && mem.getParent() != null)
-						((Membrane)mem.getParent()).activate();
-					it = mem.memIterator();
+					if(mem.isRoot() && supermem != null) {
+						supermem.activate();
+					}
 					// 子膜が全てstableなら、この膜をstableにする。
+					it = mem.memIterator();
 					flag = false;
 					while(it.hasNext()){
 						if(((Membrane)it.next()).isStable() == false)
@@ -74,15 +89,6 @@ final class Machine extends AbstractMachine {
 		}
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
 		mem.unlock();
-	}
-}
-abstract class AbstractMachine {
-	/** ルート膜 */
-	protected AbstractMembrane root;
-	
-	/** ルート膜の取得 */
-	AbstractMembrane getRoot() {
-		return root;
 	}
 }
 
