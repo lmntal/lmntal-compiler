@@ -98,7 +98,7 @@ public class REPL {
 			Env.p( Dumper.dump(rootmem) );
 			Env.p( rootmem );
 		} catch (Exception e) {
-			Env.p("!!! "+e);
+			Env.p("!!! "+e.getMessage()+"\n"+e.getStackTrace());
 		}
 		
 		//System.out.println(line+"  =>  {a, b, {c}}, ({b, $p}:-{c, $p})");

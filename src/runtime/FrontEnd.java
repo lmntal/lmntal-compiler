@@ -116,7 +116,7 @@ public class FrontEnd {
 				Env.p( Dumper.dump(rootmem) );
 				Env.p( rootmem );
 			} catch (ParseException e) {
-				Env.p(e);
+				Env.p(e.getMessage()+"\n"+e.getStackTrace());
 			}
 		}
 	}

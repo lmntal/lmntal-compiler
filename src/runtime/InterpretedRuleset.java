@@ -166,8 +166,6 @@ class InterpretedReactor {
 						atoms[inst.getIntArg1()] =
 							mems[inst.getIntArg2()].newAtom(func);
 
-					//インラインのてすと
-//					Inline.callInline(a);
 					break;
 
 				case Instruction.NEWATOMINDIRECT :
@@ -374,6 +372,12 @@ class InterpretedReactor {
 					break;
 					//====型検査のためのガード命令====ここまで====
 
+					//====組み込み機能に関する命令====ここから====
+				case Instruction.INLINE : //[atom, inlineref]
+					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
+					break;
+					//====組み込み機能に関する命令====ここまで====
+					
 					//====整数用の組み込みボディ命令====ここから====
 				case Instruction.IADD : //[-dstintatom, intatom1, intatom2]
 					break;

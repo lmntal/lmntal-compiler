@@ -6,6 +6,7 @@ import runtime.Rule;
 //import runtime.InterpretedRuleset;
 import runtime.Instruction;
 import runtime.Functor;
+import runtime.Inline;
 import compile.structure.*;
 
 // TODO 【確認】左辺膜の自由リンクに対応する自由リンク管理アトムは生成されないようになっているかどうか
@@ -51,6 +52,8 @@ public class RuleCompiler {
 	public List lhsfreemems;
 	public Map  lhsatompath;
 	public Map  lhsmempath;
+	
+	private List newatoms = new ArrayList();
 	
 	HeadCompiler hc;
 	
@@ -188,6 +191,7 @@ public class RuleCompiler {
 		updateLinks();
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
+		addInline();
 		body.add(new Instruction(Instruction.PROCEED));
 	}
 	
@@ -343,6 +347,8 @@ public class RuleCompiler {
 				int atomid = varcount++;
 				rhsatompath.put(atom, new Integer(atomid));
 				rhsatoms.add(atom);
+				// NEWATOM した分を覚えておく
+				newatoms.add(atom);
 				body.add(Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
 			}
 		}
@@ -386,6 +392,21 @@ public class RuleCompiler {
 	private void freeLHSAtoms() {
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			body.add( new Instruction(Instruction.FREEATOM, i+1) );
+		}
+	}
+	
+	/**
+	 * インライン命令を生成する。
+	 *
+	 */
+	private void addInline() {
+		Iterator i = newatoms.iterator();
+		while(i.hasNext()) {
+			Atom atom = (Atom)i.next();
+			int atomID = ((Integer)rhsatompath.get(atom)).intValue();
+			int codeID = Inline.getCodeID(atom.functor.getName());
+			if(codeID==-1) continue;
+			body.add( new Instruction(Instruction.INLINE, atomID, codeID));
 		}
 	}
 

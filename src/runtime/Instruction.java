@@ -1109,6 +1109,11 @@ public class Instruction {
 		add(arg1);
 		add(arg2);
 	}
+	public Instruction(int kind, Object arg1, int arg2) {
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+	}
 	public Instruction(int kind, int arg1, int arg2, int arg3) {
 		this.kind = kind;
 		add(arg1);

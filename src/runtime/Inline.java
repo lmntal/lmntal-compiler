@@ -36,6 +36,18 @@ public class Inline {
 	}
 	
 	/**
+	 * 指定したファンクタ名を持つコードID を返す。
+	 * @param name
+	 * @return codeID
+	 */
+	public static int getCodeID(String name) {
+		try {
+			return ((Integer)code.get(name)).intValue();
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+	/**
 	 * パース中にアトムが出てくると呼ばれる。
 	 * ここで必要に応じてインライン命令を登録する。
 	 * @param atom
@@ -98,7 +110,7 @@ public class Inline {
 	 * @param atom 実行すべきアトム名を持つアトム
 	 */
 	public static void callInline(Atom atom, int codeID) {
-		Env.p(atom+" "+codeID);
+		//Env.p(atom+" "+codeID);
 		if(inlineCode==null) return;
 		//Env.p("=> call Inline "+atom.getName());
 		inlineCode.run(atom, codeID);
