@@ -223,6 +223,9 @@ public class FrontEnd {
 							/// --debug-daemon
 							/// dump debug message of LMNtalDaemon
 							Env.debugDaemon = Env.DEBUG_DEFAULT;
+						} else if (args[i].equals("--translate")) {
+							// 暫定オプション
+							Env.fInterpret = false;
 						} else {
 							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
@@ -366,7 +369,6 @@ public class FrontEnd {
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
 
-//			if (false) {
 			if (Env.fInterpret) {
 				run(rs);
 			} else {
