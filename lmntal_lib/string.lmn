@@ -16,6 +16,26 @@ HISTORY
 string : {
 
 /**
+ * replace : String -> String -> String -> String
+ * 
+ * パターン文字列が変だったときは元の文字列を返す
+ */
+H=string.replace(String, Regexp, Replacement) :-
+	unary(String), unary(Regexp), unary(Replacement) | H=[[/*inline*/
+	String s=null;
+	try {
+		s = me.nth(0).replaceAll(me.nth(1), me.nth(2));
+	} catch(Exception e) {}
+	if(s==null) s = me.nth(0);
+	Atom result = mem.newAtom(new Functor(s, 1));
+	mem.relink(result, 0, me, 3);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.nthAtom(2).remove();
+	me.remove();
+	]](String, Regexp, Replacement).
+
+/**
  * split : String -> String -> List
  * 
  * H=split([[\s+]], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
