@@ -104,7 +104,6 @@ public class RuleCompiler {
 		theRule.atomMatches  = atommatches;
 		theRule.body         = body;
 		
-		Env.p("=theRule.showDetail ");
 		theRule.showDetail();
 		((InterpretedRuleset)rs.parent.ruleset).rules.add(theRule);
 		
@@ -359,17 +358,7 @@ public class RuleCompiler {
 			Membrane m = (Membrane)(l.next());
 			inherit_builtins(m);
 		}
-		//l=mem.rules.iterator();
-		//while(l.hasNext()) {
-		//	RuleStructure r = (RuleStructure)(l.next());
-		
-		//((InterpretedRuleset)mem.ruleset).showDetail();
-		
-		
 		body.add( Instruction.loadruleset(((Integer)rhsmempaths.get(mem)).intValue(), mem.ruleset) );
-		Env.p("after body.add"+body);
-		
-		//}
 	}
 	
 	private void build_rhsatoms(Membrane mem) {

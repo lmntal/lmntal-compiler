@@ -73,17 +73,27 @@ public class REPL {
 	 */
 	private void processLine(String line) {
 		try {
+			// 字句解析　構文解析　意味解析
 			LMNParser lp = new LMNParser(new StringReader(line));
+			
+			// ルールセット生成
 			compile.structure.Membrane m = lp.parse();
 			compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
 			InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
+			
+			// 実行
+			LMNtalRuntime rt = new LMNtalRuntime(ir);
+			rt.exec();
+			Membrane result = (Membrane)rt.getRootMem();
+			
 			
 			Env.p("");
 			Env.p( "After parse   : "+m );
 			Env.p( "After compile : "+ir );
 			m.showAllRule();
-			Env.p( "After execute : YET" );
-			// TODO 実行結果を出す
+			Env.p( "After execute : " );
+			Env.p( Dumper.dump(result) );
+			Env.p( result );
 		} catch (ParseException e) {
 			Env.p(e);
 		}

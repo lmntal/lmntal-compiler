@@ -1,7 +1,9 @@
 package compile.structure;
 
 /** 
- * ソースコード中のリンクの各出現を表すクラス
+ * ソースコード中のリンクの各出現を表すクラス。<br>
+ * runtime.Link と違って、LinkOccurrence.atom はこちら側のアトムオブジェクトが入っている。
+ * 
  */
 public final class LinkOccurrence {
 	/**
@@ -10,12 +12,12 @@ public final class LinkOccurrence {
 	public String name;
 	
 	/**
-	 * 所属するアトムオブジェクト
+	 * 所属するアトムオブジェクト（こちら側）
 	 */
 	public Atom atom;
 	
 	/**
-	 * アトムでのリンク位置
+	 * （こちら側の）アトムでのリンク位置
 	 */
 	public int pos;
 	

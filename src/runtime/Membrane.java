@@ -546,6 +546,30 @@ abstract class AbstractMembrane extends QueuedEntity {
 		}
 		removeAtoms(removeList);
 	}
+	
+	/**
+	 * {} なしで出力する。
+	 * 
+	 * ルールの出力の際、{} アリだと
+	 * (a:-b) が ({a}:-{b}) になっちゃうから。
+	 *  
+	 * @return String 
+	 */
+	public String toStringWithoutBrace() {
+		return 
+		(atoms.isEmpty() ? "" : ""+Env.parray(atoms))+
+		(mems.isEmpty() ? "" : " "+Env.parray(mems))+
+		(rulesets.isEmpty() ? "" : " "+Env.parray(rulesets))+
+		//(processContexts.isEmpty() ? "" : " "+Env.parray(processContexts))+
+		//(ruleContexts.isEmpty() ? "" : " "+Env.parray(ruleContexts))+
+		//(typedProcessContexts.isEmpty() ? "" : " "+Env.parray(typedProcessContexts))+
+		"";
+		
+	}
+	
+	public String toString() {
+		return "{ " + toStringWithoutBrace() + " }";
+	}
 }
 
 /**

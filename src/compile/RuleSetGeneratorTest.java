@@ -31,9 +31,11 @@ public class RuleSetGeneratorTest {
 		//test("v,v,w");
 		//test("{}");
 		//test("{v}");
-		// test("a(X), b(X), c(d)");
+		//test("a(X), b(X), c(d)");
+		//test("a(X,Y), b(X,Y)");
 		//test("(a:-b)");
-		test("(a:-b), (c:-d)");
+		//test("(a:-b), (c:-d)");
+		test("a(X), { b(X) }");
 	}
 	
 	/**
