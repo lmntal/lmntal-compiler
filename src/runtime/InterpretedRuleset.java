@@ -546,7 +546,7 @@ class InterpretiveReactor {
 
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
 				case Instruction.RECURSIVELOCK : //[srcmem]
-					if (!mems[inst.getIntArg1()].recursiveLock()) return false;
+					mems[inst.getIntArg1()].recursiveLock();
 					break; //n-kato
 				case Instruction.RECURSIVEUNLOCK : //[srcmem]
 					mems[inst.getIntArg1()].recursiveUnlock();

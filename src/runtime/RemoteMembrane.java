@@ -52,6 +52,10 @@ final class RemoteMachine extends AbstractMachine {
 	public void terminate() {
 		//send("TERMINATE");
 	}
+	public void awake() {
+		//send("AWAKE");
+	}
+
 }
 
 
@@ -80,10 +84,6 @@ final class RemoteTask extends AbstractTask {
 	}
 
 	// ロック
-	public boolean nonblockingLock() {
-		return false;
-		// todo 実装する
-	}
 	public void lock() {
 		throw new RuntimeException("not implemented");
 	}
@@ -262,23 +262,25 @@ final class RemoteMembrane extends AbstractMembrane {
 			return true;
 		}
 	}
-	public boolean recursiveLock() {
-		//send("RECURSIVELOCK");
-		return false;
-	}
 	public void blockingLock() {
 		//todo:locked==trueのとき、この計算ノードの誰がロックしたか分からないのを何とかする
 		send("BLOCKINGLOCK");
 		//wait;
+		// todo:キャッシュの更新
 	}
-	public void unlock() {
-		send("UNLOCK");
+	public void asyncLock() {
+		send("ASYNCLOCK");
 	}
-	public void blockingUnlock() {
-		send("BLOCKINGUNLOCK");
-		//todo 実装する
+	public void unlock(boolean signal) {
+		send("UNLOCK",""+signal);
+	}
+	public void asyncUnlock() {
+		send("ASYNCUNLOCK");
+	}
+	public void recursiveLock() {
+		send("RECURSIVELOCK");
 	}
 	public void recursiveUnlock() {
-		//send("RECURSIVEUNLOCK");
+		send("RECURSIVEUNLOCK");
 	}
 }

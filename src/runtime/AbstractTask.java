@@ -22,43 +22,70 @@ abstract public class AbstractTask {
 	public AbstractMembrane getRoot() {
 		return root;
 	}
-	
-	// ロック
-	/** このタスクのロックをノンブロッキングで取得する */
-	public abstract boolean nonblockingLock();
-	/** このタスクのロックをブロッキングで取得し、ロックカウントを1増やす。*/
-	public abstract void lock();
-	/** このタスクのロックカウントが正ならば1減らす。
-	 * ロックカウントが0になった場合、ロックが解放されたことを意味するので、
-	 * 待っているほかのスレッドがロックの再取得を試みることができるように自分自身にシグナルを発行する。
-	 * @return ロックが解放されたかどうか */
-	public abstract boolean unlock();
+	/** このタスクに対してシグナルを発行する。
+	 * すなわち、このタスクのルート膜のロックの取得をするためにブロックしているスレッドが存在するならば
+	 * そのスレッドを再開してロックの取得を試みることを要求し、
+	 * 存在しないならばこのタスクのルールスレッドの再実行を要求する。
+	 * <p>実際には、ルールスレッドに対してawakeメソッドを発行する。*/
+	public final void signal() {
+		getMachine().awake();
+	}
 }
 
 /** タスク
- * TODO タスク間の上下関係の実装をする？ -> (1)しない (2)弱い制約条件 (3)厳密な制約条件として
+ * TODO タスクに優先度を設定する。これはルールスレッドによるロックがブロッキングになるかどうかの決定に影響させる。
+ * 非同期実行はルールスレッドよりも高い優先度を与える。
+ * TODO ルート膜が先祖タスクまたは自タスクのルールスレッドによってロックされたかどうかを記憶する。
+ * これにより、先祖タスクのルールスレッドを停止して動作する非同期実行が可能となる。
  * <p>
- * <b>方法6</b><br>
+ * <font size=+1><b>方法6</b></font><br>
+ * 
+ * <p>
+ * <b>不変条件</b>
+ * <p>
  * 膜のロックを取得しようとするスレッドは、どの膜のロックも取得していないか、
  * またはロックを取得しようとする膜の親膜のロックを取得していなければならない。
  * <p>
- * ルール適用を行うためのスレッドをルールスレッドと呼ぶ。
- * 現在ルールスレッドは物理マシンごとに1つとなっているが、理想的にはタスクごとに1つとすべきである。
+ * ルールスレッド以外のスレッドは、最初にルート膜のロックを取得しなければならない。
+ * 
  * <p>
- * ルールスレッドは、ルール適用時にタスクのロックを取得しようとする。
- * ルールスレッドは、膜のロック取得をノンブロッキングで行う。すでにロックされていた場合は放置する。
+ * <b>ルールスレッド</b>
+ * <p>
+ * ルール適用を行うためのスレッドをルールスレッドと呼ぶ。
+ * タスクはちょうど1つのルールスレッドによって実行される。
+ * 現状ではルールスレッドは物理マシンごとに1つ存在し、タスクによって共有されている。
+ * <p>
+ * 各スレッドは、ルールスレッドに対して停止要求を発行し解除することができる。
+ * ルールスレッドは、停止要求中のスレッドが存在するときはルール適用を行わない。
+ * ルールスレッドは、停止要求を検知すると直ちにルール適用を中止し、自分自身にシグナルを発行する。
+ * <p>
+ * 現状では、ルールスレッドは、膜のロック取得をノンブロッキングで行う。
+ * このため、膜がすでにロックされていた場合、その膜に対するルール適用を行わない。
+ * これは、タスクに優先度を設けることによりブロッキングでの取得を可能にすることにより解決すべきである。
+ * 
+ * <p>
+ * <b>ルールスレッドでないスレッド</b>
  * <p>
  * ルールスレッドでないスレッドは、膜のロック取得をブロッキングで行う。
- * 膜のロック取得をブロッキングで行う場合、そのタスクのロックも取得する。
- * タスクのロック取得に失敗した場合、そのタスクにロック要求を行う。
- * タスクが同じ物理マシンで実行されている場合、シグナルだけで処理されるためIDは不要。
- * タスクが他の物理マシンで実行されている場合、要求元スレッドのIDを適宜決定して送信する。
- * この場合、ロック解放時に発生するシグナルを受けてロックの再取得を試み続け、成功したらIDと共に返信する。
+ * 膜がロックされている場合、タスクのルールスレッドに対して停止要求を発行した後、
+ * このルールスレッドがシグナルを発行するのを待って再度膜のロック取得を試みつづける。
  * <p>
  * ルールスレッドでないスレッドは、短時間でロックを解放すべきである。
  * ルールスレッドは、そのタスクに対してロック要求があった場合には直ちに実行を停止すべきである。
- * ルールスレッドは、本膜を管理するタスク以外のタスクのロックは短時間で解放すべきである。
- * システムコールは、子タスクのロックを取得した後、ノンブロッキングでロックを取得する。
+ * ルールスレッドは、本膜を管理するタスク以外のタスクのロック（非線形プロセス文脈のときのみ必要）
+ * は短時間で解放すべきである。
+ * 
+ * <p>
+ * <b>親タスクの膜の活性化</b>
+ * <p>
+ * 非同期で膜のロックを取得することにより実行膜スタックを更新することにより実現する。実装済み。未テスト。
+ * 
+ * <p>
+ * <b>システムコール</b>
+ * <p>
+ * 非同期で膜のロックを取得することにより実現可能。
+ * ただし子膜の取得がブロッキングになるようにタスクに優先度を設ける必要があるはずである。
+ * システムコールは現在はまだ実装されていない。
  */
 final class Task extends AbstractTask {
 	/** 実行膜スタック */
@@ -93,22 +120,23 @@ final class Task extends AbstractTask {
 	}
 	/** このタスクを実行する */
 	void exec() {
-		// タスクのロックを取得する
-		if (lockRequested || !nonblockingLock()) {
-			// 本膜のロック以前に、タスクのロックを取得できないとき
-			idle = true;
-			return;
-		}
-		// 本膜のロックを取得する
-		Membrane mem = (Membrane)memStack.peek();
-		if(mem == null || !mem.lock()) {
-			// 本膜が無いかまたは本膜のロックを取得できないとき
-			idle = true;
-			unlock();
-			return;
+		Membrane mem;
+		synchronized(this) {
+			// このタスクを実行するルールスレッド（現在のスレッド）に停止要求があるときは何もしない
+			if (lockRequestCount > 0) {
+				idle = true;
+				return;
+			}
+			// 本膜のロックを取得する
+			mem = (Membrane)memStack.peek();
+			if(mem == null || !mem.lock()) {
+				// 本膜が無いかまたは本膜のロックを取得できないとき
+				idle = true;
+				return;
+			}
 		}
 		// 実行
-		for(int i=0; i < maxLoop && mem == memStack.peek() && !lockRequested; i++){
+		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
 //			System.out.println("mems  = " + memStack);
 //			System.out.println("atoms = " + mem.getReadyStackStatus());
@@ -158,7 +186,17 @@ final class Task extends AbstractTask {
 					memStack.pop(); // 本膜をpop
 					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
 					if(mem.isRoot() && mem.getParent() != null) {
-						mem.getParent().activate();
+						new Thread() {
+							AbstractMembrane mem;
+							public void run() {
+								mem.getParent().asyncLock();
+								mem.getParent().asyncUnlock();
+							}
+							public void activate(AbstractMembrane mem) {
+								this.mem = mem;
+								run();
+							}
+						}.activate(mem);
 					}
 					if (!mem.perpetual) {
 						// 子膜が全てstableなら、この膜をstableにする。
@@ -179,56 +217,28 @@ final class Task extends AbstractTask {
 			}
 		}
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
-		mem.unlock();
-		unlock();
-	}
-	
-	// ロック
-	
-	/** このタスクをロックしたスレッドまたはnull */
-	private Thread lockingThread = null;
-	/** ロックカウント */
-	private int lockCount = 0;
-	/** ルールスレッド以外のスレッドがこのタスクのロック取得を要求しているかどうか */
-	private boolean lockRequested = false;
-	/** このタスクのロックをノンブロッキングで取得する */
-	synchronized public boolean nonblockingLock() {
-		if (lockingThread == null) {
-			lockingThread = Thread.currentThread();
-			lockCount = 1;
-			lockRequested = false;
-			return true;
-		}
-		if (lockingThread == Thread.currentThread()) {
-			lockCount++;
-			return true;
-		}
-		return false;
-	}
-	/** このタスクのロックをブロッキングで取得し、ロックカウントを1増やす。*/
-	synchronized public void lock() {
-		while (true) {
-			if (nonblockingLock()) return;
-			lockRequested = true;
-			try {
-				wait();
-			}
-			catch (InterruptedException e) {}
-		}
-	}
-	/** このタスクのロックカウントが正ならば1減らす。
-	 * ロックカウントが0になった場合、ロックが解放されたことを意味するので、
-	 * 待っているほかのスレッドがロックの再取得を試みることができるように自分自身にシグナルを発行する。
-	 * @return ロックが解放されたかどうか */
-	public boolean unlock() {
-		if (lockCount == 0) return false;
 		synchronized(this) {
-			if (--lockCount == 0) {
-				lockingThread = null;
-				notify();
-				return true;
+			mem.unlock();
+			if (lockRequestCount > 0) {
+				signal();
 			}
-			return false;
 		}
+	}
+	
+	// タスクのルールスレッドに対する停止要求
+
+	/** このタスクのルールスレッドに対して停止要求を発行しているスレッドの個数
+	 * TODO LinkedListを使ってスレッドをキューで管理することにより飢餓を無くす。
+	 * これには Membrane#blockingLock() を書き直すことが含まれる。*/
+	private int lockRequestCount = 0;
+	/** このタスクのルールスレッドに対して停止要求を発行する。
+	 * <p>キューで管理していないことによる実装の都合により、
+	 * 呼び出しは物理マシンに関するsynchronizedブロック内でなければならない（と思う）*/
+	synchronized public void requestLock() {
+		lockRequestCount++;
+	}
+	/** このタスクのルールスレッドに対して発行した停止要求を解除する。*/
+	synchronized public void retractLock() {
+		lockRequestCount--;
 	}
 }

@@ -126,14 +126,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public void makePerpetual() {
 		perpetual = true;
 	}
-	/** 永続フラグをOFFにする */
-	public void makeNotPerpetual() {
-		AbstractMachine machine = getTask().getMachine();
-		synchronized(machine) {
-			perpetual = false;
-			machine.notify();
-		}
-	}
+//	/** 永続フラグをOFFにする */
+//	public void makeNotPerpetual() {
+//		AbstractMachine machine = getTask().getMachine();
+//		synchronized(machine) {
+//			perpetual = false;
+//			machine.notify();
+//		}
+//	}
 	/** この膜にルールがあればtrue */
 	public boolean hasRules() {
 		return rulesets.size() > 0;
@@ -393,7 +393,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		
 //	}
 	
-	/** この膜をdstMemに移動する。parent==nullを仮定する。 */
+	/** この膜をdstMemに移動し、活性化する。parent==nullを仮定する。*/
 	public void moveTo(AbstractMembrane dstMem) {
 		if (parent != null) {
 			System.out.println("Warning: membrane with parent was moved");
@@ -403,6 +403,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		if (dstMem.task != task) {
 			setTask(dstMem.task);
 		}
+		activate();
 		//enqueueAllAtoms();
 	}
 	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
@@ -428,26 +429,52 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	// 操作6 - ロックに関する操作
 	/**
-	 * この膜をロックする。
-	 * <p>ルールスレッドが膜のロックをするときに使用する。
-	 * @return ロックに成功した場合はtrue */
+	 * この膜のロック取得を試みる。
+	 * <p>ルールスレッドがこの膜のロックを取得するときに使用する。
+	 * @return ロックの取得に成功したかどうか */
 	public abstract boolean lock();
 	/**
-	 * この膜とその子孫を再帰的にロックする。
-	 * todo プロセス文脈のコピーという使用目的から考えて、ブロッキングで行うべきであると思われる。
-	 * @return ロックに成功した場合はtrue */
-	public abstract boolean recursiveLock();
-	/**
-	 * この膜を管理するタスクのロックを取得した後、この膜のロックを取得する。
-	 * <p>ルールスレッド以外のスレッドが膜のロックを取得するときに使用する。*/
+	 * この膜のロック取得を試みる。
+	 * 失敗した場合、この膜を管理するタスクのルールスレッドに停止要求を送る。その後、
+	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
+	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。*/
 	public abstract void blockingLock();
 	/**
-	 * ロックを解放する。
-	 * <p>ルート膜の場合、仮の実行膜スタックの内容を実行膜スタックの底に転送する。*/
-	public abstract void unlock();
-	/** blockingLock()で取得した膜のロックを解放する。
-	 * <p>ルート膜の場合または本膜の場合、仮の実行膜スタックの内容を実行膜スタックの底に転送する。*/
-	public abstract void blockingUnlock();
+	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックを取得し、実行膜スタックから除去する。
+	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。*/
+	public abstract void asyncLock();
+
+	/**
+	 * 取得したこの膜のロックを解放する。ルート膜の場合、
+	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
+	 * この膜を管理するタスクに対してシグナルを発行する。
+	 * <p>unlock(false);を実行するマクロ */
+	public final void unlock() {
+		unlock(false);
+	}
+	/** 取得したこの膜のロックを解放する。
+	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
+	 * この膜を管理するタスクに対してシグナルを発行する。
+	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。
+	 * <p>unlock(true);を実行するマクロ */
+	public final void blockingUnlock() {
+		unlock(true);
+	}
+
+	/** この膜からこの膜を管理するタスクのルート膜までの全ての膜の取得したロックを解放し、この膜を活性化する。
+	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。
+	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。*/
+	public abstract void asyncUnlock();
+	
+	/**
+	 * 取得したこの膜のロックを解放する。ルート膜の場合またはsignal引数がtrueの場合、
+	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
+	 * この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。*/
+	public abstract void unlock(boolean signal);
+	
+	/** この膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。*/
+	public abstract void recursiveLock();
+	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/
 	public abstract void recursiveUnlock();
 
 	///////////////////////////////

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/** 抽象物理マシンクラス */
+/** 抽象物理マシン（抽象計算ノード）クラス */
 abstract class AbstractMachine {
 	protected String runtimeid;
 	/** この物理マシンに親膜を持たないロックされていないルート膜を作成し、仮でない実行膜スタックに積む。*/
@@ -13,6 +13,9 @@ abstract class AbstractMachine {
 	abstract AbstractTask newTask(AbstractMembrane parent);
 	/** この物理マシンの実行を終了する */
 	abstract public void terminate();
+	
+	/** この計算ノードのルールスレッドに対して再実行を要求する。*/
+	abstract public void awake();
 }
 
 /** 物理マシン */
@@ -30,8 +33,15 @@ class Machine extends AbstractMachine implements Runnable {
 		tasks.add(t);
 		return t;
 	}
+	/** この物理マシンのルールスレッドの再実行が要求されたかどうか */
+	protected boolean awakened = false;
 	/** （マスター計算ノードによって）この物理マシンの終了が要求されたかどうか */
 	protected boolean terminated = false;
+	/** この物理マシンのルールスレッドの再実行を要求する */
+	synchronized public void awake() {
+		awakened = true;
+		notify();
+	}
 	/** この物理マシンの終了を要求する */
 	synchronized public void terminate() {
 		terminated = true;
@@ -62,6 +72,10 @@ class Machine extends AbstractMachine implements Runnable {
 			localExec();
 			synchronized(this) {
 				if (terminated) break;
+				if (awakened) {
+					awakened = false;
+					continue;
+				}
 				try {
 					wait();
 				}

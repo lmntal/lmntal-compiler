@@ -6,7 +6,7 @@ import util.Stack;
 /**
  * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。
  * TODO 最適化用に、子孫にルート膜を持つことができない（実行時エラーを出す）「データ膜」クラスを作る。
- * @author Mizuno
+ * @author Mizuno, n-kato
  */
 public final class Membrane extends AbstractMembrane {
 	/** 実行アトムスタック */
@@ -42,7 +42,7 @@ public final class Membrane extends AbstractMembrane {
 		return (Atom)ready.pop();
 	}
 	/** 
-	 * 指定されたアトムを実行アトムスタックに追加する。
+	 * 指定されたアトムをこの膜の実行アトムスタックに追加する。
 	 * @param atom 実行アトムスタックに追加するアトム
 	 */
 	public void enqueueAtom(Atom atom) {
@@ -64,12 +64,14 @@ public final class Membrane extends AbstractMembrane {
 		Task t = (Task)task;
 		if (!isRoot()) {
 			((Membrane)parent).activate();
-			if (t.bufferedStack.isEmpty()) {
-				t.memStack.push(this);
+			synchronized(task.getMachine()) {
+				if (t.bufferedStack.isEmpty()) {
+					t.memStack.push(this);
+				}
+				else {
+					t.bufferedStack.push(this);
+				}
 			}
-			else {
-				t.bufferedStack.push(this);
-			}			
 		}
 		else {
 			// ASSERT(t.bufferedStack.isEmpty());
@@ -77,7 +79,7 @@ public final class Membrane extends AbstractMembrane {
 		}
 	}
 
-	/** dstMemに移動 */
+	/** この膜をdstMemに移動し、活性化する。*/
 	public void moveTo(AbstractMembrane dstMem) {
 		if (dstMem.task.getMachine() != task.getMachine()) {
 			parent = dstMem;
@@ -88,8 +90,7 @@ public final class Membrane extends AbstractMembrane {
 	}
 	/** 
 	 * 移動された後、この膜のアクティブアトムを実行アトムスタックに入れるために呼び出される。
-	 * <p><b>注意</b>　Ruby版のmovedtoと異なり、子孫の膜にあるアトムに対しては何もしない。
-	 */
+	 * <p><b>注意</b>　Ruby版のmovedtoと異なり、子孫の膜にあるアトムに対しては何もしない。*/
 	public void enqueueAllAtoms() {
 		Iterator i = atoms.functorIterator();
 		while (i.hasNext()) {
@@ -132,24 +133,9 @@ public final class Membrane extends AbstractMembrane {
 	// ロック
 	
 	/**
-	 * この膜を管理するタスクのロックを取得した後、この膜のロックを取得する。
-	 * <p>ルールスレッド以外のスレッドが膜のロックを取得するときに使用する。*/
-	public void blockingLock() {
-		((Task)task).lock();
-		while (!lock()) { // 親タスクのルールスレッドが膜のロックを取得している間、繰り返す
-			AbstractMachine mach = task.getMachine();
-			synchronized(mach) {
-				try {
-					mach.wait();
-				}
-				catch (InterruptedException e) {}
-			}
-		}
-	}
-	/**
-	 * この膜をロックする。
-	 * <p>ルールスレッドが膜のロックをするときに使用する。
-	 * @return ロックに成功した場合はtrue */
+	 * この膜のロック取得を試みる。
+	 * <p>ルールスレッドがこの膜のロックを取得するときに使用する。
+	 * @return ロックの取得に成功したかどうか */
 	synchronized public boolean lock() {
 		if (locked) {
 			return false;
@@ -159,54 +145,90 @@ public final class Membrane extends AbstractMembrane {
 		}
 	}
 	/**
-	 * この膜とその子孫を再帰的にロックする。
-	 * todo プロセス文脈のコピーという使用目的から考えて、ブロッキングで行うべきであると思われる。
-	 * @return ロックに成功した場合はtrue */
-	public boolean recursiveLock() {
-		// 実装する
-		return false;
+	 * この膜のロック取得を試みる。
+	 * 失敗した場合、この膜を管理するタスクのルールスレッドに停止要求を送る。その後、
+	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
+	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。*/
+	public void blockingLock() {
+		if (lock()) return;
+		AbstractMachine mach = task.getMachine();
+		synchronized(mach) {
+			((Task)task).requestLock();
+			try {
+				mach.wait();
+			}
+			catch (InterruptedException e) {}
+			while (!lock()) {
+				try {
+					mach.wait();
+				}
+				catch (InterruptedException e) {}
+			}
+			((Task)task).retractLock();
+		}
 	}
-	/** 
-	 * 取得した膜のロックを解放し、この膜を管理するタスクのロックカウントが正ならば1減らす。
-	 * <p>タスクのロックが解放されたかまたはルート膜の場合、さらに以下の順番で処理を行う:
-	 * <ul>
-	 * <li>仮の実行膜スタックの内容を実行膜スタックの底に転送し、
-	 * <li>タスクをアイドル状態でなくし、
-	 * <li>タスクを実行する物理マシンにシグナルを発行する。
-	 * </ul>*/
-	public void unlock() {
-		boolean signal = ( isRoot() );
+	/**
+	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックを取得し、実行膜スタックから除去する。
+	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。*/
+	public void asyncLock() {
+		if (!isRoot()) parent.asyncLock();
+		blockingLock();
+		dequeue();
+	}
+
+	/**
+	 * 取得したこの膜のロックを解放する。
+	 * ルート膜の場合またはsignal引数がtrueの場合、
+	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
+	 * この膜を管理するタスクに対してシグナル（notifyメソッド）を発行する。*/
+	public void unlock(boolean signal) {
+		if (isRoot()) signal = true;
 		if (signal) {
 			Task t = (Task)task;
-			t.memStack.moveFrom(t.bufferedStack);
-			((Task)task).idle = false;
+			synchronized(task) {
+				t.memStack.moveFrom(t.bufferedStack);
+			}
+			t.idle = false;
 		}
 		locked = false;
 		if (signal) {
-			AbstractMachine machine = getTask().getMachine();
-			synchronized(machine) {
-				machine.notify();
-			}
+			// このタスクのルールスレッドまたはその停止を待ってブロックしているスレッドを再開する。
+			getTask().signal();
 		}
 	}
-	/** blockingLock()で取得した膜のロックを解放し、タスクのロックカウントが正ならば1減らす。*/
-	public void blockingUnlock() {
-		boolean signal = ( ((Task)task).unlock() || isRoot() );
-		if (signal) {
-			Task t = (Task)task;
-			t.memStack.moveFrom(t.bufferedStack);
-			((Task)task).idle = false;
+	/** この膜からこの膜を管理するタスクのルート膜までの全ての膜の取得したロックを解放し、この膜を活性化する。
+	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。
+	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。*/
+	public void asyncUnlock() {
+		activate();
+		AbstractMembrane mem = this;
+		while (!mem.isRoot()) {
+			mem.locked = false;
+			mem = mem.parent;
 		}
-		locked = false;
-		if (signal) {
-			AbstractMachine machine = getTask().getMachine();
-			synchronized(machine) {
-				machine.notify();
-			}
+		mem.unlock();
+	}
+	
+	/** この膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。*/
+	public void recursiveLock() {
+		Iterator it = memIterator();
+		while (it.hasNext()) {
+			AbstractMembrane mem = (AbstractMembrane)it.next();
+			mem.blockingLock();
+			mem.recursiveLock();
 		}
 	}
+	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/
 	public void recursiveUnlock() {
-		// 実装する
+		Iterator it = memIterator();
+		while (it.hasNext()) {
+			AbstractMembrane mem = (AbstractMembrane)it.next();
+			mem.recursiveUnlock();
+			mem.unlock();
+		}
 	}
 }
+// 仮の実行膜スタックに積まれた親膜が、別の非同期スレッドによってロックされ除去された場合にどうなるか調べる
+// 仮の実行膜スタックを2つのスレッドが同時に操作している気がする。
+// 仮の実行膜スタックはスレッドローカルストレージかも知れない。
 
