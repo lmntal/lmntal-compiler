@@ -49,19 +49,19 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 	}
 	/** このランタイムの終了を要求する。
 	 * 具体的には、この物理マシンのterminatedフラグをONにし、
-	 * 各タスクのルールスレッドに終わるように言う */
+	 * 各タスクのルールスレッドに終わるように言う。*/
 	synchronized public void terminate() {
 		terminated = true;
 		Iterator it = tasks.iterator();
 		while (it.hasNext()) {
 			((Task)it.next()).signal();
 		}
-		// TODO joinする
-		
-		// スレーブランタイムならば、VMを終了する。
-		// if (!(this instanceof MasterLMNtalRuntime)) System.exit(0);
+		// TODO ルールスレッドに対してjoinする（以下のコードは仮）
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {}
 	}
-	
+
 	/** terminateフラグがONになるまで待つ。
 	 * <p>スレーブランタイムとして実行するときに使用する。*/
 	public void waitForTermination() {

@@ -77,7 +77,7 @@ public final class LMNtalRuntimeManager {
 			daemon = new LMNtalRuntimeMessageProcessor(socket,rgid);
 			Thread t = new Thread(daemon);
 			t.start();
-			if (!daemon.sendWaitRegisterLocal("master")) {
+			if (!daemon.sendWaitRegisterLocal("MASTER")) {
 				throw new Exception("cannot connect to daemon");
 			}
 			return true;
