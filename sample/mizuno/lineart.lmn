@@ -21,7 +21,7 @@ init, width(Width), height(Height) :- int(Width), int(Height) |
 	         a(integer.rnd(Width),rand_v),a(integer.rnd(Height),rand_v)),
 	gen_nil_list(H,T,15),
 	frame=newFrame(Width, Height),
-	wait(newTimer(1)),
+	wait(newTimer(100)),
 	width(Width), height(Height),
 	sys.perpetual(on).
 
