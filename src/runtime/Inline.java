@@ -63,7 +63,7 @@ public class Inline {
 				Env.d("Compile result :  "+cp.exitValue());
 				if(cp.exitValue()==1) {
 					System.out.println("Failed in compiling. Commandline was :");
-					System.out.println(compileComamndLine);
+					System.out.println(compileCommand);
 				} 
 				cp = null;
 			}
@@ -109,7 +109,11 @@ public class Inline {
 		((InlineUnit)inlineSet.get(unitName)).register(funcName, type);
 	}
 	
-	static String compileComamndLine;
+	public static void terminate() {
+		if(cp!=null) cp.destroy();
+	}
+	
+	static List compileCommand = new ArrayList();
 	/**
 	 * 必要に応じてコードの生成とコンパイルを行う。
 	 */
@@ -130,21 +134,27 @@ public class Inline {
 				path.append(ci.next());
 				path.append(sep);
 			}
+			compileCommand.add("javac");
+			compileCommand.add("-classpath");
+			compileCommand.add(path);
+			
 			StringBuffer srcs = new StringBuffer("");
 			boolean do_compile = false;
 			for(Iterator iu = inlineSet.values().iterator();iu.hasNext();) {
 				InlineUnit u = (InlineUnit)iu.next();
 				if(!u.isCached()) {
-					srcs.append(InlineUnit.srcFile(u.name));
-					srcs.append(" ");
+					compileCommand.add(InlineUnit.srcFile(u.name));
 					InlineUnit.classFile(u.name).delete();
 					do_compile = true;
 				}
 			}
 			if(do_compile) {
-				compileComamndLine = "javac -classpath "+path+" "+srcs;
-				Env.d("Compile command line: "+compileComamndLine);
-				cp = Runtime.getRuntime().exec(compileComamndLine);
+				Env.d("Compile command line: "+compileCommand);
+				String cmd[] = new String[compileCommand.size()];
+				for(int i=0;i<compileCommand.size();i++) {
+					cmd[i] = compileCommand.get(i).toString();
+				}
+				cp = Runtime.getRuntime().exec(cmd);
 			}
 		} catch (Exception e) {
 			Env.d(e);

@@ -88,9 +88,9 @@ public final class Env {
 	public static boolean fTrace = false;
 	
 	/**
-	 * REPL
+	 * one liner
 	 */
-	public static String REPL;
+	public static String oneLiner;
 	
 	/**
 	 * GUI 有効。仮仮仮仮

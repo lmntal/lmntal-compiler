@@ -49,6 +49,12 @@ public class FrontEnd {
 		} catch (NumberFormatException e) {
 		}
 		
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				Inline.terminate();
+			}
+		});
+		
 		FileInputStream fis = null;
 		InputStream is = null;
 		Reader src = null;
@@ -118,7 +124,7 @@ public class FrontEnd {
 					case 'e':
 						// lmntal -e 'a,(a:-b)'
 						// 形式で実行できるようにする。like perl
-						Env.REPL = args[++i];
+						Env.oneLiner = args[++i];
 						break;
 					case 'O':
 						if (args[i].length() == 2) {
@@ -149,21 +155,23 @@ public class FrontEnd {
 		}
 		
 		Env.initGUI();
-		if(Env.REPL==null) {
-			String srcFile = (String)Env.argv.remove(0);
-			try{
-				fis = new FileInputStream(srcFile);
-			} catch(FileNotFoundException e) {
-				System.out.println("ファイルが見つかりません:" + srcFile);
-				System.exit(-1);
-			} catch(SecurityException e) {
-				System.out.println("ファイルが開けません:" + srcFile);
-				System.exit(-1);
+		if(Env.oneLiner==null) {
+			if(!Env.argv.isEmpty()) {
+				String srcFile = (String)Env.argv.remove(0);
+				try{
+					fis = new FileInputStream(srcFile);
+				} catch(FileNotFoundException e) {
+					System.out.println("ファイルが見つかりません:" + srcFile);
+					System.exit(-1);
+				} catch(SecurityException e) {
+					System.out.println("ファイルが開けません:" + srcFile);
+					System.exit(-1);
+				}
+				if(is == null) is = fis;
+				else is = new SequenceInputStream(is, fis); // ソースファイルを連結
 			}
-			if(is == null) is = fis;
-			else is = new SequenceInputStream(is, fis); // ソースファイルを連結
 		} else {
-			REPL.processLine(Env.REPL);
+			REPL.processLine(Env.oneLiner);
 			return;
 //			System.exit(-1);
 		}
