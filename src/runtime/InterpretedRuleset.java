@@ -167,7 +167,7 @@ class InterpretedReactor {
 							mems[inst.getIntArg2()].newAtom(func);
 
 					//インラインのてすと
-					Inline.callInline(a);
+					Inline.callInline(a, ((Integer)Inline.code.get(a)).intValue());
 					break;
 
 				case Instruction.NEWATOMINDIRECT :

@@ -9,7 +9,7 @@ package runtime;
  *
  */
 public interface InlineCode {
-	public void run(Atom a);
+	public void run(Atom a, int codeID);
 }
 
 //class MyInlineCode implements InlineCode {

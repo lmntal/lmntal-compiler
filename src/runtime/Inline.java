@@ -1,8 +1,6 @@
 /*
  * 作成日: 2003/12/16
  *
- * この生成されたコメントの挿入されるテンプレートを変更するため
- * ウィンドウ > 設定 > Java > コード生成 > コードとコメント
  */
 package runtime;
 
@@ -10,10 +8,8 @@ import java.io.*;
 import java.util.*;
 
 /**
- * @author pa
+ * @author hara
  *
- * この生成されたコメントの挿入されるテンプレートを変更するため
- * ウィンドウ > 設定 > Java > コード生成 > コードとコメント
  */
 public class Inline {
 	/** インラインクラスが使用可能の時、そのオブジェクトが入る。*/
@@ -21,7 +17,10 @@ public class Inline {
 	
 	static Process cp;
 	
-	static List code = new ArrayList(); 
+	/** Hash { インラインコード文字列 -> 一意な連番 } */
+	static Map code = new HashMap(); 
+	/** 一意な連番 */
+	static int codeCount = 0;
 	
 	/**
 	 * インラインを使うための初期化。実行時に呼ぶ。
@@ -46,7 +45,7 @@ public class Inline {
 		if(src.startsWith("a")) {
 			//登録
 			Env.p("Register inlineCode : "+src);
-			code.add(src);
+			code.put(src, new Integer(codeCount++));
 		}
 	}
 	
@@ -65,10 +64,11 @@ public class Inline {
 			p.println("\tpublic void run(Atom a) {");
 			p.println("\t\tEnv.p(a);");
 			p.println("\t\tswitch(a.getName().hashCode()) {");
-			Iterator i = code.iterator();
+			Iterator i = code.keySet().iterator();
 			while(i.hasNext()) {
 				String s = (String)i.next();
-				p.println("\t\tcase "+s.hashCode()+": ");
+				int codeID = ((Integer)(code.get(s))).intValue();
+				p.println("\t\tcase "+codeID+": ");
 				p.println("\t\t\t/*"+s+"*/");
 				p.println("\t\t\tSystem.out.println(\"=> call Inline "+s+" \");");
 				p.println("\t\t\tbreak;");
@@ -97,9 +97,9 @@ public class Inline {
 	 * インライン命令を実行する。
 	 * @param atom 実行すべきアトム名を持つアトム
 	 */
-	public static void callInline(Atom atom) {
+	public static void callInline(Atom atom, int codeID) {
 		if(inlineCode==null) return;
 		//Env.p("=> call Inline "+atom.getName());
-		inlineCode.run(atom);
+		inlineCode.run(atom, codeID);
 	}
 }
