@@ -72,20 +72,6 @@ public final class AtomSet {
 	/** 与えられた名前を持つアトムの反復子を返す */
 	public Iterator iteratorOfFunctor(Functor functor) {
 		List s = (List)atoms.get(functor);
-		if(!functor.pathFree) {
-			// モジュールのための追加 by hara。効率悪いけどいいや。
-			List t = new ArrayList();
-			if (s != null) {
-				Iterator i = s.iterator();
-				while(i.hasNext()) {
-					Atom a=(Atom)i.next();
-					if(functor.path!=null && a.getFunctor().path.equals(functor.path)) {
-						t.add(a);
-					}
-				}
-			}
-			s = t;
-		}
 		if (s == null) {
 			return Util.NULL_ITERATOR;
 		} else {

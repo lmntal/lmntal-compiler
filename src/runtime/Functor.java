@@ -34,28 +34,19 @@ public class Functor {
 		this(name, arity, null);
 	}
 	public Functor(String name, int arity, compile.structure.Membrane m) {
-		// 名前空間
 		int pos = name.indexOf('.');
 		if(pos!=-1) {
 			this.path = name.substring(0, pos);
-			if(path.indexOf('\n')!=-1 || path.indexOf('/')!=-1 || path.indexOf('*')!=-1) pathFree=true;
-		} else {
-			pathFree = true;
-		}
-		if(pathFree) {
-			if(m!=null) this.path = m.name;
-		} else {
-			name = name.substring(pos+1);
+			if(path.indexOf('\n')!=-1 || path.indexOf('/')!=-1 || path.indexOf('*')!=-1) this.path=null;
 		}
 		this.name = name;
-		//Env.p("new Fun "+path+"  "+name+" "+m);
 		this.arity = arity;
 		// == で比較できるようにするためにinternしておく。
 		strFunctor = (name + "_" + arity).intern();
 	}
 	/** 適切に省略された名前を取得 */
 	public String getAbbrName() {
-		String full = path==null ? name : path+"."+name;
+		String full = name;
 		return full.length() > 10 ? full.substring(0, 10) : full;
 	}
 	public String getName() {
