@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
+//import java.util.Set;
 import java.util.ArrayList;
 
 import util.Util;
@@ -19,7 +19,7 @@ import util.RandomIterator;
  * Functor毎にアトムを管理している。
  * @author Mizuno
  */
-public final class AtomSet implements Set{
+public final class AtomSet {
 	/** atoms内のアトムの数。整合性要注意 */
 	private int size = 0;
 	/** 実際にアトムの集合を管理している変数 */
@@ -207,7 +207,8 @@ public final class AtomSet implements Set{
 	public boolean retainAll(Collection c) {
 		throw new UnsupportedOperationException();
 	}
-	/** 全ての要素を除去する */
+	/** 全ての要素を除去する
+	 * @deprecated */
 	public void clear() {
 		Iterator it = iterator();
 		while (it.hasNext()) {

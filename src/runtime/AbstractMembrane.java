@@ -99,7 +99,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public int getMemCount() {
 		return mems.size();
 	}
-	/** proxy以外のアトムの数を取得 */
+	/** proxy以外のアトムの数を取得
+	 * todo この名前でいいのかどうか */
 	public int getAtomCount() {
 		return atoms.getNormalAtomCount();
 	}
@@ -333,14 +334,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * srcMemはこのメソッド実行後、このまま廃棄しなければならない。
 	 */
 	public void moveCellsFrom(AbstractMembrane srcMem) {
+		if (this == srcMem) return;
 		if (srcMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site process fusion not implemented");
 		}
-		atoms.addAll(srcMem.atoms);
 		mems.addAll(srcMem.mems);
 		Iterator it = srcMem.atomIterator();
 		while (it.hasNext()) {
-			((Atom)it.next()).mem = this;
+			addAtom((Atom)it.next());
 		}
 		it = srcMem.memIterator();
 		while (it.hasNext()) {
@@ -432,7 +433,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	// $pの先祖の全ての膜をうまく再利用することによって、star関連の処理を全く呼ぶ必要がなくなる。
 	
 	/** この膜がremoveされた直後に呼ばれる。
-	 * なおremoveは、ルール左辺に書かれたアトムを除去した後、
+	 * なおremoveProxiesは、ルール左辺に書かれたアトムを除去した後、
 	 * ルール左辺に書かれた膜のうち$pを持つものに対して内側の膜から呼ばれる。
 	 * <p>この膜に対して
 	 * <ol>
@@ -512,7 +513,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 				}
 			}
 		}
-		atoms.removeAll(removeList);
+		removeAtoms(removeList);
 	}
 	/** 右辺の膜構造および$pの内容を配置した後で、
 	 * ルール右辺に書かれた膜と本膜に対して内側の膜から呼ばれる。
@@ -551,8 +552,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		}
 		it = changeList.iterator();
 		while (it.hasNext()) {
-			alterAtomFunctor((Atom)it.next(), Functor.INSIDE_PROXY);
+			childMemWithStar.alterAtomFunctor((Atom)it.next(), Functor.INSIDE_PROXY);
 		}
+		
 	}
 	/** 右辺のトップレベルに$pがあるルールの実行時、最後に本膜に残ったstarを処理するために呼ばれる。
 	 * <p>この膜にあるstarに対して、
@@ -574,21 +576,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/**
 	 * {} なしで出力する。
 	 * 
-	 * ルールの出力の際、{} アリだと
-	 * (a:-b) が ({a}:-{b}) になっちゃうから。
-	 *  
+	 * // ルールの出力の際、{} アリだと
+	 * // (a:-b) が ({a}:-{b}) になっちゃうから。
+	 * 
 	 * @return String 
+	 * @deprecated
 	 */
 	public String toStringWithoutBrace() {
-		return 
-		(atoms.isEmpty() ? "" : ""+Env.parray(atoms))+
-		(mems.isEmpty() ? "" : " "+Env.parray(mems))+
-		(rulesets.isEmpty() ? "" : " "+Env.parray(rulesets))+
-		//(processContexts.isEmpty() ? "" : " "+Env.parray(processContexts))+
-		//(ruleContexts.isEmpty() ? "" : " "+Env.parray(ruleContexts))+
-		//(typedProcessContexts.isEmpty() ? "" : " "+Env.parray(typedProcessContexts))+
-		"";
-		
+		return Dumper.dump(this);		
 	}
 	
 	public String toString() {
