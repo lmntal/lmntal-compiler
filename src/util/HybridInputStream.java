@@ -15,7 +15,7 @@ public class HybridInputStream {
 			//未読み込みの文字列データが残っている
 			throw new IOException();
 		}
-		ByteArrayInputStream bin = new ByteArrayInputStream(readByteArray());
+		ByteArrayInputStream bin = new ByteArrayInputStream(readBytes());
 		ObjectInputStream oin = new ObjectInputStream(bin);
 		return oin.readObject();
 	}
@@ -26,12 +26,12 @@ public class HybridInputStream {
 	
 	public String readLine() throws IOException {
 		if (bufTokenizer == null || !bufTokenizer.hasMoreTokens()) {
-			bufTokenizer = new StringTokenizer(new String(readByteArray()), "\r\n");
+			bufTokenizer = new StringTokenizer(new String(readBytes()), "\r\n");
 		}
 		return bufTokenizer.nextToken();
 	}
 	
-	private byte[] readByteArray() throws IOException {
+	public byte[] readBytes() throws IOException {
 		int size = readInt();
 		byte[] data = new byte[size];
 		in.read(data);

@@ -13,11 +13,11 @@ public class HybridOutputStream {
 		ObjectOutputStream oout = new ObjectOutputStream(bout);
 		oout.writeObject(o);
 		oout.close();
-		writeByteArray(bout.toByteArray());
+		writeBytes(bout.toByteArray());
 	}
 	
 	public void write(String str) throws IOException {
-		writeByteArray(str.getBytes());
+		writeBytes(str.getBytes());
 	}
 
 	public void flush() throws IOException {
@@ -26,7 +26,7 @@ public class HybridOutputStream {
 	public void close() throws IOException {
 		out.close();
 	}
-	private void writeByteArray(byte[] data) throws IOException {
+	public void writeBytes(byte[] data) throws IOException {
 		writeInt(data.length);
 		out.write(data);
 	}
