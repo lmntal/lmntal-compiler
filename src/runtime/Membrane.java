@@ -262,7 +262,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 * このメソッドは使わないかもしれないが、一応作っておく。
 	 * @return 作成されたルート膜
 	 */
-	abstract AbstractMembrane newRoot(AbstractLMNtalRuntime runtime);
+	abstract AbstractMembrane newRoot(AbstractMachine runtime);
 
 	// 操作4 - リンクの操作
 	
@@ -386,7 +386,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 	/** この膜（ルート膜）の親膜を変更する。
 	 * <p>いずれ、
-	 * AbstractMembrane#newRootおよびAbstractLMNtalRuntime#newTaskの引数に親膜を渡すようにし、
+	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
 	 * AbstractMembrane#moveToを使って親膜を変更することにより、
 	 * TODO この問題のあるメソッドは廃止しなければならない */
 	void setParent(AbstractMembrane mem) {
@@ -673,7 +673,7 @@ final class Membrane extends AbstractMembrane {
 		mems.add(m);
 		return m;
 	}
-	AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
+	AbstractMembrane newRoot(AbstractMachine runtime) {
 		AbstractTask task = runtime.newTask();
 		task.getRoot().setParent(this);
 		return task.getRoot();

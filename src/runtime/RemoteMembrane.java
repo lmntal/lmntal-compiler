@@ -9,7 +9,7 @@ import java.net.Socket;
  * リモート計算ノード
  * @author n-kato
  */
-final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
+final class RemoteLMNtalRuntime extends AbstractMachine {
 	protected String runtimeid;
 	protected Socket socket;
 	protected RemoteLMNtalRuntime(String runtimeid) {
@@ -17,9 +17,9 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	}
 	//
 	static HashMap runtimeids = new HashMap();
-	public static AbstractLMNtalRuntime connectRuntime(String node) {
+	public static AbstractMachine connectRuntime(String node) {
 		node = node.intern();
-		AbstractLMNtalRuntime ret = (AbstractLMNtalRuntime)runtimeids.get(node);
+		AbstractMachine ret = (AbstractMachine)runtimeids.get(node);
 		if (ret == null) {
 			ret = new RemoteLMNtalRuntime(node);
 			runtimeids.put(node,ret);
@@ -166,7 +166,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("NEWMEM",newremoteid);
 		return m;
 	}
-	AbstractMembrane newRoot(AbstractLMNtalRuntime runtime) {
+	AbstractMembrane newRoot(AbstractMachine runtime) {
 		// TODO 実装する
 		return null;
 	}
