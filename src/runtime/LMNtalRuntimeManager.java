@@ -147,6 +147,7 @@ public final class LMNtalRuntimeManager {
 		Iterator it = runtimeids.keySet().iterator();
 		while (it.hasNext()) {
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
+			if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): now ommiting TERMINATE to  " + machine.hostname );
 			daemon.sendWait(machine.hostname,"TERMINATE");
 		}
 		runtimeids.clear();
