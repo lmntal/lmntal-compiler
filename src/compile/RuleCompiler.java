@@ -720,18 +720,19 @@ public class RuleCompiler {
 				if (link1.atom.mem != mem && link2.atom.mem != mem) {
 					// 単一化アトムのリンク先が両方とも他の膜につながっている場合
 					if (mem == rs.leftMem) {
-						// ( X=Y :- p(X,Y) ) は意味解析エラー（=は通常のヘッドアトムと見なして放置される）
-						error("COMPILE ERROR: head contains body unification");
+		// <strike>( X=Y :- p(X,Y) ) は意味解析エラー（=は通常のヘッドアトムと見なして放置される）</strike>
+		//				error("COMPILE ERROR: head contains body unification");
+		// ( X=Y :- p(X,Y) ) は ( :- p(X,X) ) になる
 					}
 					else {
 						// ( p(X,Y) :- X=Y ) はUNIFYボディ命令を出力するのでここでは何もしない
+						continue;
 					}
-				} else {
-					link1.buddy = link2;
-					link2.buddy = link1;
-					link2.name = link1.name;
-					removedAtoms.add(atom);
 				}
+				link1.buddy = link2;
+				link2.buddy = link1;
+				link2.name = link1.name;
+				removedAtoms.add(atom);
 			}
 		}
 		it = removedAtoms.iterator();
