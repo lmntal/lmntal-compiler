@@ -153,6 +153,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public int getAtomCount() {
 		return atoms.getNormalAtomCount();
 	}
+	/** 指定されたファンクタをもつアトムの数を取得*/
+	public int getAtomCountOfFunctor(Functor functor) {
+		return atoms.getAtomCountOfFunctor(functor);
+	}
 	/** このセルの自由リンクの数を取得 */
 	public int getFreeLinkCount() {
 		return atoms.getAtomCountOfFunctor(Functor.INSIDE_PROXY);
