@@ -6,7 +6,7 @@ package runtime;
 abstract public class AbstractLMNtalRuntime {
 	/** ランタイムID。このVMのグローバルな識別子。ルールセットのIDの一部として使用される */
 	protected String runtimeid;
-	/** リモート側のホスト名。Fully Qualified Domain Nameである必要がある。
+	/** このランタイムが動作するホスト名。Fully Qualified Domain Nameである必要がある。
 	 * <p>RemoteLMNtalRuntimeから移動してみた */
 	protected String hostname;
 

@@ -39,8 +39,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	protected AtomSet atoms = new AtomSet();
 	/** 子膜の集合 */
 	protected Set mems = new RandomSet();
-//	/** この膜にあるproxy以外のアトムの数。 */
-//	protected int atomCount = 0;
 //	/** このセルの自由リンクの数 */
 //	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
@@ -241,8 +239,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atoms.add(atom);
 //		if (atom.getFunctor().isActive()) {
 //			enqueueAtom(atom);
-//		} 
-//		atomCount++;
+//		}
 	}
 	/** [final] removeAtomを呼び出すマクロ */
 	final void removeAtoms(List atomlist) {
@@ -283,19 +280,19 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	/** 指定されたノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
 	 * @param node ノード名を表す文字列
-	 * @return 作成されたルート膜
-	 */
+	 * @return 作成されたルート膜 */
 	public AbstractMembrane newRoot(String node) {
 		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(node);
 		return machine.newTask(this).getRoot();
 	}
+	
 	// ボディ操作4 - リンクの操作
 	
 	/**
 	 * atom1の第pos1引数と、atom2の第pos2引数を接続する。
 	 * 接続するアトムは、
 	 * <ol><li>この膜のアトム同士
-	 *     <li>この膜のoutside_proxyと子膜のinside_proxy
+	 *     <li>この膜のoutside_proxy（atom1）と子膜のinside_proxy（atom2）
 	 * </ol>
 	 * の2通りに限られる。
 	 * <p>
@@ -317,44 +314,43 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
 		atom2.args[pos2].getBuddy().set(atom1, pos1);
 	}
-	public void relink(Atom atom1, int pos1, Atom atom2, int pos2) {
-		relinkAtomArgs(atom1, pos1, atom2, pos2);
-	}
-	/** atom1の第pos1引数のリンク先と、atom2の第pos2引数のリンク先を接続する。
-	 */
+	/** atom1の第pos1引数のリンク先と、atom2の第pos2引数のリンク先を接続する。*/
 	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
 	}
+	
+	// 拡張
+	
+	/**@deprecated*/
+	public void relink(Atom atom1, int pos1, Atom atom2, int pos2) {
+		relinkAtomArgs(atom1, pos1, atom2, pos2);
+	}
 	/** link1の指すアトム引数とlink2の指すアトム引数の間に、双方向のリンクを張る。
-	 * <p>実行後link1およびlink2自身は無効なリンクオブジェクトになるため、参照を使用してはならない。
-	 */
+	 * <p>実行後link1およびlink2自身は無効なリンクオブジェクトになるため、参照を使用してはならない。*/
 	public void unifyLinkBuddies(Link link1, Link link2) {
 		link1.getBuddy().set(link2);
 		link2.getBuddy().set(link1);
 	}
-
-	/** atom2の第pos2引数に格納されたリンクオブジェクトへの参照を取得する。
-	 */
-	public final Link getAtomArg(Atom atom2, int pos2) {
-		return atom2.args[pos2];
-	}
 	/** atom1の第pos1引数と、リンクlink2のリンク先を接続する。
-	 * <p>link2は再利用されるため、実行後link2の参照を使用してはならない。
-	 */
+	 * <p>link2は再利用されるため、実行後link2の参照を使用してはならない。*/
 	public void inheritLink(Atom atom1, int pos1, Link link2) {
 		link2.getBuddy().set(atom1, pos1);
 		atom1.args[pos1] = link2;
 	}
+
+	// 以下は AbstractMembrane の final メソッド
 	
-	/** relinkAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。
-	 */
+	/** [final] atom2の第pos2引数に格納されたリンクオブジェクトへの参照を取得する。*/
+	public final Link getAtomArg(Atom atom2, int pos2) {
+		return atom2.args[pos2];
+	}	
+	/** [final] relinkAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。*/
 	protected final void relinkLocalAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
 		atom2.args[pos2].getBuddy().set(atom1, pos1);
 	}
-	/** unifyAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。
-	 */
+	/** [final] unifyAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。*/
 	protected final void unifyLocalAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);

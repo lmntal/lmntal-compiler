@@ -329,7 +329,7 @@ class InstructionBlockProcessor implements Runnable {
 		 *   UNIFYATOMARGS    srcmemid atomid1 pos1 atomid2 pos2
 		 * 
 		 * [5] 膜自身や移動に関する操作 
-		 *   ACTIVATE         dstmemid
+		 *   ACTIVATE         srcmemid
 		 *   MOVECELLSFROM    dstmemid srcmemid
 		 *   MOVETO           srcmemid dstmemid
 		 * 
