@@ -24,7 +24,7 @@ public class RuleSetGenerator {
 	 * @param m 対象となる膜
 	 * @return 指定した膜のルールセット
 	 */
-	public static InterpretedRuleset runStartWithNull(Membrane m) {
+	public static Membrane runStartWithNull(Membrane m) {
 		Env.c("RuleSetGenerator.runStartWithNull");
 		// 世界を生成する
 		Membrane root = new Membrane(null);
@@ -34,7 +34,7 @@ public class RuleSetGenerator {
 		root.rules.add(rs);
 		rs.parent = root;
 		processMembrane(root);
-		return (InterpretedRuleset)root.ruleset;
+		return root;
 	}
 	
 	public static InterpretedRuleset run(Membrane m) {

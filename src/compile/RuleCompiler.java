@@ -356,12 +356,18 @@ public class RuleCompiler {
 			Membrane m = (Membrane)(l.next());
 			inherit_builtins(m);
 		}
-		l=mem.rules.iterator();
-		while(l.hasNext()) {
-			RuleStructure r = (RuleStructure)(l.next());
-			
-			body.add( Instruction.dummy("[:loadruleset"+rhsmempaths.get(mem)+", "+r) );
-		}
+		//l=mem.rules.iterator();
+		//while(l.hasNext()) {
+		//	RuleStructure r = (RuleStructure)(l.next());
+		
+		Env.p("rhsmempaths.get(mem) "+rhsmempaths.get(mem));
+		Env.p("mem.ruleset  "+mem.ruleset);
+		((InterpretedRuleset)mem.ruleset).showDetail();
+		Env.p("mem  "+mem);
+		
+		body.add( Instruction.loadruleset(((Integer)rhsmempaths.get(mem)).intValue(), mem.ruleset) );
+		
+		//}
 	}
 	
 	private void build_rhsatoms(Membrane mem) {

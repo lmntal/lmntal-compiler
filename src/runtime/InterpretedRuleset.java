@@ -35,7 +35,17 @@ public final class InterpretedRuleset extends Ruleset {
 	
 	
     public String toString() {
-	return "@" + id;
+    	StringBuffer s=new StringBuffer("");
+		Iterator l;
+		l = rules.listIterator();
+		while(l.hasNext()) s.append( ((Rule)l.next()).toString() );
+		l = rules.listIterator();
+		while(l.hasNext()) {
+			Env.p("l.next "+l.next());
+			((Rule)l.next()).showDetail();
+		} 
+		return "aa"+s.toString();
+		//return "@" + id;
     }
     /**
      * アトム主導テストを行い、マッチすれば適用する
@@ -248,8 +258,8 @@ public final class InterpretedRuleset extends Ruleset {
     }
 	
     public void showDetail() {
-	Iterator l;
-	l = rules.listIterator();
-	while(l.hasNext()) ((Rule)l.next()).showDetail();
+		Iterator l;
+		l = rules.listIterator();
+		while(l.hasNext()) ((Rule)l.next()).showDetail();
     }
 }

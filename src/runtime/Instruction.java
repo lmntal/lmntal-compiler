@@ -247,6 +247,11 @@ public class Instruction {
 	 */
 	public static final int SPEC = 35;
 	
+	/** loadruleset [mem, ruleset]
+	 * copy to mem the ruleset object
+	 */
+	public static final int LOADRULESET = 36;
+	
 	/**
 	 * 命令の数。新命令はこれより小さな数字にすること。
 	 */
@@ -379,6 +384,18 @@ public class Instruction {
 		return i;
 	}
 	
+	/**
+	 * loadruleset 命令を生成する。
+	 * @param mem
+	 * @param rs
+	 * @return
+	 */
+	public static Instruction loadruleset(int mem, Ruleset rs) {
+		Instruction i = new Instruction(LOADRULESET);
+		i.add(mem);
+		i.add(rs);
+		return i;
+	}
 	
 	
 	
@@ -470,6 +487,7 @@ public class Instruction {
 	table.put("STOP", new Integer(STOP));
 	table.put("REACT", new Integer(REACT));
 	table.put("SPEC", new Integer(SPEC));
+	table.put("LOADRULESET", new Integer(LOADRULESET));
 
 	try {
 	    answer = ((Integer)table.get(instructionString.toUpperCase())).intValue();
@@ -526,6 +544,7 @@ public class Instruction {
 	hoge[STOP] = new String("STOP");
 	hoge[REACT] = new String("REACT");
 	hoge[SPEC] = new String("SPEC");
+	hoge[LOADRULESET] = new String("LOADRULESET");
 
 	try {
 	    answer = hoge[instrcutionNum];

@@ -30,8 +30,7 @@ public class REPL {
 			//Readline.load(ReadlineLibrary.Getline);
 			//Readline.load(ReadlineLibrary.GnuReadline);
 			Readline.load(ReadlineLibrary.PureJava);
-		}
-		catch (UnsatisfiedLinkError ignore_me) {
+		} catch (UnsatisfiedLinkError ignore_me) {
 			System.err.println("couldn't load readline lib. Using simple stdin.");
 		}
 
@@ -58,11 +57,9 @@ public class REPL {
 				} else {
 					processLine(line);
 				}
-			} 
-			catch (EOFException e) {
+			} catch (EOFException e) {
 				break;
-			} 
-			catch (Exception e) {
+			} catch (Exception e) {
 				//doSomething();
 			}
 		}
@@ -78,12 +75,15 @@ public class REPL {
 		try {
 			LMNParser lp = new LMNParser(new StringReader(line));
 			compile.structure.Membrane m = lp.parse();
-			InterpretedRuleset ir = RuleSetGenerator.run(m);
+			compile.structure.Membrane root = RuleSetGenerator.runStartWithNull(m);
+			InterpretedRuleset ir = (InterpretedRuleset)root.ruleset;
+			
 			Env.p("");
 			Env.p( "After parse   : "+m );
 			Env.p( "After compile : "+ir );
-			ir.showDetail();
-			Env.p( "After execute : yet" );
+			m.showAllRule();
+			Env.p( "After execute : YET" );
+			// TODO 実行結果を出す
 		} catch (ParseException e) {
 			Env.p(e);
 		}
