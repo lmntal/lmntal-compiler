@@ -1,0 +1,57 @@
+0
+
+spec [3, 0]
+findatom [1, 0, append_3]
+deref [2, 1, 0, 2]
+func [2, cons_3]
+react [... , [0], [1,2,3]]
+
+spec [3, 9]
+getlink [7, 2, 1]
+getlink [6, 1, 2]
+newlink [2, 1, 1, 2, 0]
+inheritlink [2, 2, 6, 0]
+inheritlink [1, 0, 7, 0]
+proceed []
+
+
+1不要な検査・リンク取得を除去
+
+findatom [1, 0, append_3]
+deref [2, 1, 0, 2]
+func [2, cons_3]
+getlink [7, 2, 1]
+getlink [6, 1, 2]
+newlink [2, 1, 1, 2, 0]
+inheritlink [2, 2, 6, 0]
+inheritlink [1, 0, 7, 0]
+
+loop [
+	deref [2, 2, 1, 2]
+	func [2, cons_3]
+	getlink [7, 2, 1]
+	getlink [6, 1, 2]
+	newlink [2, 1, 1, 2, 0]
+	inheritlink [2, 2, 6, 0]
+	inheritlink [1, 0, 7, 0]
+	proceed [2]
+]
+
+2冗長な操作を除去
+
+findatom [1, 0, append_3]
+deref [2, 1, 0, 2]
+func [2, cons_3]
+getlink [6, 1, 2]
+inheritlink [2, 2, 6, 0]
+
+loop [
+	deref [2, 2, 1, 2]
+	func [2, cons_3]
+	next [0, 1, 2]
+]
+
+getlink [7, 2, 1]
+newlink [2, 1, 1, 2, 0]
+inheritlink [1, 0, 7, 0]
+proceed []
