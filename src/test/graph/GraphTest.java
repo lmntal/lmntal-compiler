@@ -4,9 +4,11 @@ import java.awt.BorderLayout;
 
 import javax.swing.*;
 
+import compile.parser.ParseException;
+
 public class GraphTest extends JFrame {
 	
-	private GraphPanel p = null;
+	private LMNGraphPanel p = null;
 	
 	public GraphTest() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -18,6 +20,11 @@ public class GraphTest extends JFrame {
 	
 	protected void initComponents() {
 		p = new LMNGraphPanel();
+		try {
+			p.setSource("append(c(aa,c(bb,c(cc,n))),c(dd,c(ee,n)),result)");
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 		setTitle("GraphTest");
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(p, BorderLayout.CENTER);

@@ -11,6 +11,8 @@ import compile.parser.ParseException;
 //import java.util.LinkedList;
 import compile.structure.*;
 
+import test.graph.*;
+
 public class ParserTest extends JFrame implements ActionListener {
 
 	private JTextArea srcInput = null;
@@ -18,6 +20,7 @@ public class ParserTest extends JFrame implements ActionListener {
 	private JTree tree = null;
 	private JButton btnRun = null;
 	private JButton btnOpen = null;
+	private LMNGraphPanel pLMN = null;
 	
 	public ParserTest() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -61,6 +64,11 @@ public class ParserTest extends JFrame implements ActionListener {
 		pOpe.add(btnRun);
 		
 		getContentPane().add(pOpe, BorderLayout.NORTH);
+		
+		pLMN = new LMNGraphPanel();
+		
+		getContentPane().add(new JScrollPane(pLMN), BorderLayout.SOUTH);
+		
 	}
 	
 	public static void main(String args[]) {
@@ -80,6 +88,8 @@ public class ParserTest extends JFrame implements ActionListener {
 				rootTree.removeAllChildren();
 				addMembrane(src, rootTree);
 				tree.setModel(new DefaultTreeModel(rootTree));
+				pLMN.setMembrane(src);
+				pLMN.start();
 			} catch (ParseException pe) {
 				System.err.println(pe);
 			}
