@@ -1978,6 +1978,7 @@ public class Instruction implements Cloneable, Serializable {
 			case Instruction.GETLINK:
 			case Instruction.ALLOCLINK:
 			case Instruction.ALLOCMEM:
+			case Instruction.LOOKUPLINK:
 			case Instruction.LOCK:
 			case Instruction.GETRUNTIME:
 			case Instruction.ISINT: case Instruction.ISUNARY:
@@ -2003,6 +2004,7 @@ public class Instruction implements Cloneable, Serializable {
 			case Instruction.GETLINK:
 			case Instruction.ALLOCLINK:
 			case Instruction.ALLOCMEM:
+			case Instruction.LOOKUPLINK:
 			case Instruction.IADD: case Instruction.IADDFUNC:
 				return false;
 			case Instruction.DEREF:

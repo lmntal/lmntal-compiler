@@ -341,20 +341,21 @@ public class Compactor {
 	 * @return changed */
 	public static boolean eliminateCommonSubexpressions(List insts) {
 		boolean changed = false;
-		HashMap varChangeMap = new HashMap();
 		for (int i1 = insts.size() - 1; i1 >= 0; i1--) {
 			Instruction inst1 = (Instruction)insts.get(i1);
 			if (!inst1.hasSideEffect() && !inst1.hasControlEffect()) {
 				//ผ่ฦภฬฟฮแ
 				for (int i2 = i1 + 1; i2 < insts.size(); i2++) {
 					Instruction inst2 = (Instruction)insts.get(i2);
-					if (inst1.hasSideEffect()) {
+					if (inst2.hasSideEffect()) {
 						break;
 					}
 					if (sameTypeAndSameInputArgs(inst1, inst2, true)) {
+						HashMap varChangeMap = new HashMap();
 						varChangeMap.put(inst2.getArg1(), inst1.getArg1());
 						insts.remove(i2);
 						i2--;
+						Instruction.applyVarRewriteMap(insts, varChangeMap);
 						changed = true;
 					}
 				}
@@ -377,7 +378,7 @@ public class Compactor {
 						}
 						if (sameTypeAndSameInputArgs(inst1, inst2, false)) {
 						 	insts.remove(i2);
-							i2++;
+							i2--;
 							changed = true;
 						}
 					}
@@ -385,7 +386,6 @@ public class Compactor {
 				}
 			}
 		}
-		Instruction.applyVarRewriteMap(insts, varChangeMap);
 		return changed;
 	}
 	/**
