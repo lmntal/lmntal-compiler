@@ -703,7 +703,10 @@ public class RuleCompiler {
 	private void optimize() {
 		Env.c("optimize");
 //		Optimizer.optimize(memMatch, body);
-		Optimizer.optimizeRule(theRule);
+		if (!rs.fSuppressEmptyHeadWarning) {
+			//このフラグがtrue <=> theRuleは初期データ生成用ルール
+			Optimizer.optimizeRule(theRule);
+		}
 	}
 
 	////////////////////////////////////////////////////////////////
