@@ -2,13 +2,17 @@ package runtime;
 
 import java.util.*;
 
-private class InterpretedReactor {
-	InterpretedReactor(
-		AbstractMembrane[] mems;
-		Atom[] atoms;
-		List vars;
-		List insts;
-		);
+class InterpretedReactor {
+	AbstractMembrane[] mems;
+	Atom[] atoms;
+	List vars;
+	List insts;
+	InterpretedReactor(AbstractMembrane[] mems, Atom[] atoms, List vars, List insts) {
+		this.mems = mems;
+		this.atoms = atoms;
+		this.vars = vars;
+		this.insts = insts;
+	}
 
 	/** 命令列を解釈する。
 	 * @param mems  膜変数のベクタ
@@ -18,7 +22,7 @@ private class InterpretedReactor {
 	 * @param pc    命令列中のプログラムカウンタ
 	 * @return 命令列の実行が成功したかどうかを返す
 	 */
-	private boolean interpret(int pc) {
+	boolean interpret(int pc) {
 		Iterator it;
 		Functor func;
 		while (pc < insts.size()) {
