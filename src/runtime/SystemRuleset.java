@@ -1,6 +1,9 @@
 package runtime;
 import java.util.List;
 
+import java.io.*;
+import java.util.*;
+
 /** システムルールセット
  * <p>todo インスタンスを誰が生成するのか決める</p>
  * 
@@ -85,18 +88,76 @@ public final class SystemRuleset extends Ruleset {
 
 		////////////////////////////////////////////////////////////
 		//
-		// ガードがコンパイルできるようになるまでの当分の間、
-		// このタイミングで組み込みモジュールをロードさせてもらう。
+		// 当分の間、このタイミングで組み込みモジュールをロードさせてもらう。
 		
-		if (true) {
+		if (true) { // ガード最適化器が完成するまではこちらを使う
 			loadBuiltInRules(ruleset);
-		}			
+		}
+		else {
+			String text = "";
+			text += " Res=X+Y      :- Z=X+Y      | Res=Z.    \n";
+			text += " Res=X-Y      :- Z=X-Y      | Res=Z.    \n";
+			text += " Res=X*Y      :- Z=X*Y      | Res=Z.    \n";
+			text += " Res=X/Y      :- Z=X/Y      | Res=Z.    \n";
+			text += " Res=X mod Y  :- Z=X mod Y  | Res=Z.    \n";
+			text += " Res=X+.Y     :- Z=X+.Y     | Res=Z.    \n";
+			text += " Res=X-.Y     :- Z=X-.Y     | Res=Z.    \n";
+			text += " Res=X*.Y     :- Z=X*.Y     | Res=Z.    \n";
+			text += " Res=X/.Y     :- Z=X/.Y     | Res=Z.    \n";
+			text += " Res=int(X)   :- Z=int(X)   | Res=Z.    \n";
+			text += " Res=float(X) :- Z=float(X) | Res=Z.    \n";
+			text += " cp(X,Y,Z)    :- unary(X)   | Y=X, Z=X. \n";
+			compileAndLoadRules(ruleset,text);
+		}
+		if (false) {
+			String text = "";
+			text += generateUnaryFloatingFunctionRuleText("sin");
+			compileAndLoadRules(ruleset,text);
+		}
 		//ruleset.compile();
+	}
+	static String generateUnaryFloatingFunctionRuleText(String func) {
+		String text = " Res=" + func + "(X) :- float(X) | [[/*inline*/";
+		text += "double x = ((FloatingFunctor)me.nthAtom(0).getFunctor()).value;";
+		text += "double y = Math." + func + "(x);";
+		text += "AbstractMembrane mem = me.getMem();";
+		text += "Atom res = mem.newAtom(new FloatingFunctor(y));";
+		text += "mem.relinkAtomArgs(res,0,me,1);";
+		text += "mem.removeAtom(me.nthAtom(0));";
+		text += "mem.removeAtom(me);]](X,Res).\n";
+		return text;
+	}
+	/** 
+	 * LMNtalプログラムテキストをコンパイルし、含まれるルール列を指定したルールセットに追加する。
+	 * @param ruleset 追加先のルールセット
+	 * @param text （トップレベルにルール列を含む）LMNtalプログラムテキスト */
+	static void compileAndLoadRules(InterpretedRuleset ruleset, String text) {
+		Reader src = new StringReader(text);
+		compile.parser.LMNParser lp = new compile.parser.LMNParser(src);
+		compile.structure.Membrane m = null;
+		try {
+			m = lp.parse();
+		} catch(Exception e){}
+		// todo 下記コードは明らかに不自然なので、InterpretedRuleset（のリストまたはそれを持つ
+		// コンパイル時膜構造）を生成するだけのメソッドをRulesetCompilerに作る。
+		compile.structure.Membrane root = compile.RulesetCompiler.runStartWithNull(m);
+		if (!root.rulesets.isEmpty()) {
+			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
+			Rule rule = (Rule)ir.rules.get(0);
+			Iterator it = rule.body.iterator();
+			while (it.hasNext()) {
+				Instruction loadruleset = (Instruction)it.next();
+				if (loadruleset.getKind() == Instruction.LOADRULESET) {
+					InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
+					ruleset.rules.addAll(ir2.rules);
+				}
+			}
+		}
 	}
 	/**
 	 * 仮メソッド。
 	 * 指定されたInterpretedRulesetに対して、integerモジュール相当の内容を追加するために使用される。
-	 * 【注意】整数演算を無効にするオプションがあってもよい。		
+	 * 【注意】整数演算を無効にするオプションがあってもよい。	
 	 */
 	static Rule buildBinOpRule(String name, int typechecker, int op) {
 		// 1:'+'(X,Y,Res), 2:$x[X], 3:$y[Y] :- int($x),int($y), (4:$z)=$x+$y | 5:$z[Res].
@@ -124,7 +185,7 @@ public final class SystemRuleset extends Ruleset {
 		return rule;
 	}
 	/**
-	 * 仮メソッド。
+	 * 仮メソッド。	
 	 */
 	static Rule buildUnaryOpRule(String name, int typechecker, int op) {
 		// 1:float(X,Res), 2:$x[X] :- int($x), (3:$y)=float($x) | 4:$y[Res].
@@ -148,7 +209,7 @@ public final class SystemRuleset extends Ruleset {
 		return rule;
 	}
 	
-	
+	/** */
 	static void loadBuiltInRules(InterpretedRuleset ruleset) {
 		Rule rule;
 		List insts;		
