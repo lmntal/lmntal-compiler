@@ -1460,11 +1460,36 @@ public class Instruction implements Cloneable {
      *
      */
     public String toString() {
-
 		//nakajima版2004-01-21
-		StringBuffer buffer = new StringBuffer("                    ");
-		buffer.insert(0,getInstructionString(kind));
+		StringBuffer buffer = new StringBuffer("               ");
+		String tmp = getInstructionString(kind);
+		if( tmp.length() > 14 ) {
+			buffer.replace(0, 14, tmp.substring(0,14));
+		} else {
+			buffer.replace(0, tmp.length(), tmp);
+		}
+
 		buffer.append(data.toString());
+
+		//各要素を分解
+		//instanceOf
+		//ArrayListであって、空でなくて、かつcastして先頭要素を手に入れたのがinstanceOfでIntegerでないとき、
+		//引数列は命令列なのでインデント+2ぐらいで再帰的に。
+//		for (int i =0; i < data.size(); i++){
+//			Object hoge = data.get(i);
+//			if(hoge instanceof ArrayList){
+//				ArrayList hogearray = (ArrayList)hoge;
+//				if(!hogearray.isEmpty()){
+//					if(!(hogearray.get(0) instanceof Integer)){
+//						buffer.append(hogearray.toString());
+//						buffer.append("  ");
+//					} else {
+//						buffer.append(hogearray.toString());
+//					}
+//				}
+//			}
+//		}
+		
 		return buffer.toString();
 
 	//n-kato版2004-01-21まで使ってました
