@@ -133,6 +133,7 @@ public class Inline {
 				path.append(ci.next());
 				path.append(sep);
 			}
+			compileCommand.clear();			// n-kato
 //			compileCommand.add("javaca");	// hara
 			compileCommand.add("javac");	// n-kato
 			compileCommand.add("-classpath");
