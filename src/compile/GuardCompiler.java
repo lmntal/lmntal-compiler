@@ -18,6 +18,10 @@ public class GuardCompiler extends HeadCompiler {
 	HashMap typedcxttypes = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号 */
 	HashMap typedcxtsrcs  = new HashMap();
+	/** ground型付きプロセス文脈定義(ContextDef) -> リンクのソース出現（コピー元とする出現）の変数番号 */
+	HashMap groundsrcs = new HashMap();
+	/** 膜(Membrane) -> (その膜に存在するground型付きプロセス文脈定義(ContextDef) -> 構成アトム数)というマップ */
+	HashMap memToGroundSizes = new HashMap();
 	/** ソース出現が特定された型付きプロセス文脈定義のセット
 	 * <p>identifiedCxtdefs.contains(x) は、左辺に出現するかまたはloadedであることを表す。*/
 	HashSet identifiedCxtdefs = new HashSet(); 
@@ -28,6 +32,11 @@ public class GuardCompiler extends HeadCompiler {
 	int typedcxtToSrcPath(ContextDef def) {
 		if (!typedcxtsrcs.containsKey(def)) return UNBOUND;
 		return ((Integer)typedcxtsrcs.get(def)).intValue();
+	}
+	
+	int groundToSrcPath(ContextDef def) {
+		if (!groundsrcs.containsKey(def)) return UNBOUND;
+		return ((Integer)groundsrcs.get(def)).intValue();
 	}
 	
 	static final int ISINT    = Instruction.ISINT;	// 型制約の引数が整数型であることを表す
@@ -113,10 +122,7 @@ public class GuardCompiler extends HeadCompiler {
 			int mempath = memToPath(mem);
 			if (mempath == 0) continue; //本膜に対しては何もしない
 			if (mem.processContexts.isEmpty()) {
-	//				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
-				// TODO （機能拡張）単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(1)
-				match.add(new Instruction(Instruction.NATOMS, mempath,
-					mem.getNormalAtomCount() + mem.typedProcessContexts.size() ));
+				countAtomsOfMembrane(mem);
 				match.add(new Instruction(Instruction.NMEMS,  mempath, mem.mems.size()));
 			}
 			//
@@ -179,7 +185,7 @@ public class GuardCompiler extends HeadCompiler {
 				}
 			}
 		}
-		// STEP 2 - 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
+		// STEP 2 - 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す		
 		LinkedList cstrs = new LinkedList();
 		it = typeConstraints.iterator();
 		while (it.hasNext()) cstrs.add(it.next());
@@ -201,6 +207,10 @@ public class GuardCompiler extends HeadCompiler {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					match.add(new Instruction(Instruction.ISUNARY, atomid1));
+				}
+				else if (func.getSymbolFunctorID().equals("ground_1")){
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					checkGroundLink(def1);
 				}
 				else if (func.equals(new Functor("\\=",2))) {
 					// NSAMEFUNC を作るか？
@@ -245,6 +255,10 @@ public class GuardCompiler extends HeadCompiler {
 					if (!identifiedCxtdefs.contains(def2)) { // (+X = -Y) は (-Y = +X) として処理する
 						ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
 						if (!identifiedCxtdefs.contains(def2)) continue;
+					}
+					// 未特定のdef1 = groundのdef2 は許されない
+					if(GROUND_ALLOWED && typedcxttypes.get(def2) != UNARY_ATOM_TYPE){
+						if (!identifiedCxtdefs.contains(def1)) continue;
 					}
 					processEquivalenceConstraint(def1,def2);
 				}
@@ -316,11 +330,12 @@ public class GuardCompiler extends HeadCompiler {
 		}
 		error("COMPILE ERROR: never proceeding type constraint: " + text);
 	}
+	boolean GROUND_ALLOWED = true;
 	/** 制約 X=Y または X==Y を処理する。ただしdef2は特定されていなければならない。*/
 	private void processEquivalenceConstraint(ContextDef def1, ContextDef def2) {
 		boolean checkNeeded = (typedcxttypes.get(def1) == null
 							 && typedcxttypes.get(def2) == null); // 型付きであることの検査が必要かどうか
-		boolean GROUND_ALLOWED = false;
+		//boolean GROUND_ALLOWED = true;
 		// GROUND_ALLOWED のとき (unary = ?) は (? = unary) として処理する（ただし?はgroundまたはnull）
 		if (GROUND_ALLOWED && typedcxttypes.get(def2) != UNARY_ATOM_TYPE) {
 			if (typedcxttypes.get(def1) == UNARY_ATOM_TYPE) {
@@ -328,7 +343,15 @@ public class GuardCompiler extends HeadCompiler {
 			}
 		}
 		if (GROUND_ALLOWED && typedcxttypes.get(def2) != UNARY_ATOM_TYPE) { // (? = ground)
-			// todo 実装
+			//if(checkNeeded){
+				checkGroundLink(def1);
+				checkGroundLink(def2);
+			//}
+			int linkid1 = loadGroundLink(def1);
+			int linkid2 = loadGroundLink(def2);
+			
+			/** groundについては、(未特定の$p1)=(特定済の$p2)という形は許されないものとする。fix..ではじく */
+			match.add(new Instruction(Instruction.EQGROUND,linkid1,linkid2));
 		}
 		else {
 			int atomid2 = loadUnaryAtom(def2);
@@ -433,7 +456,82 @@ public class GuardCompiler extends HeadCompiler {
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 		return atomid;
+	}	
+	
+	/** 型付プロセス文脈defの（特定されている）ソース出現のリンクを取得する。
+	 *  groundsrcsに追加する。
+	 *  型情報を更新する。
+	 *  @param def プロセス文脈定義
+	 *  @return リンクの変数番号 */
+	private int loadGroundLink(ContextDef def) {
+		int linkid = groundToSrcPath(def);
+		if( linkid == UNBOUND){
+			int[] paths = (int[])linkpaths.get(new Integer(atomToPath(def.lhsOcc.args[0].buddy.atom)));
+			linkid = paths[def.lhsOcc.args[0].buddy.pos];
+			groundsrcs.put(def,new Integer(linkid));
+		}
+		return linkid;
 	}
+	
+	//左辺の膜(Membrane) -> その膜のアトムが入ったsetを指す変数番号(Integer)
+	HashMap memToAtomSetPath = new HashMap();
+	
+	/** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
+	 *  @param def プロセス文脈定義 */
+	private void checkGroundLink(ContextDef def) {
+		if(typedcxttypes.get(def) != UNARY_ATOM_TYPE && typedcxttypes.get(def) != GROUND_LINK_TYPE){
+			typedcxttypes.put(def,GROUND_LINK_TYPE);
+			int linkid = loadGroundLink(def);
+			int srcsetpath;
+			if(!memToAtomSetPath.containsKey(def.lhsOcc.mem)){
+				srcsetpath = varcount++;
+				match.add(new Instruction(Instruction.NEWSET,srcsetpath));
+				Iterator it = def.lhsOcc.mem.atoms.iterator();
+				while(it.hasNext()){
+					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
+				}
+				memToAtomSetPath.put(def.lhsOcc.mem,new Integer(srcsetpath));
+			}
+			else srcsetpath = ((Integer)memToAtomSetPath.get(def.lhsOcc.mem)).intValue();		
+			int natom = varcount++;
+			match.add(new Instruction(Instruction.ISGROUND, natom, linkid, srcsetpath));
+			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem,new HashMap());
+			((Map)memToGroundSizes.get(def.lhsOcc.mem)).put(def,new Integer(natom));
+		}
+		return;
+	}
+	
+	
+	/**
+	 * 膜内のアトム数を数える。$pが無いことが条件。
+	 * ground,unaryについてもきちんと考える。
+	 * 
+	 * @param mem 数をチェックする膜
+	 */
+	private void countAtomsOfMembrane(Membrane mem){
+		if(!memToGroundSizes.containsKey(mem)){ // 厳しくRISC化するなら、natomsも分けるべきか
+			match.add(new Instruction(Instruction.NATOMS, memToPath(mem),
+				mem.getNormalAtomCount() + mem.typedProcessContexts.size() ));
+		}else{
+			Map gmap = (Map)memToGroundSizes.get(mem);
+			//普通のアトムの個数と、unaryの個数
+			int ausize = mem.getNormalAtomCount() + mem.typedProcessContexts.size() - gmap.size();
+			int ausfunc = varcount++;
+			match.add(new Instruction(Instruction.LOADFUNC,ausfunc,new runtime.IntegerFunctor(ausize)));
+			//各groundについて、isground命令で貰ってきたground構成アトム数を足していく
+			int allfunc = ausfunc;	
+			Iterator it2 = gmap.keySet().iterator();
+			while(it2.hasNext()){
+				ContextDef def = (ContextDef)it2.next();
+				int natomfp = ((Integer)gmap.get(def)).intValue();
+				int newfunc = varcount++;
+				match.add(new Instruction(Instruction.IADDFUNC,newfunc,allfunc,natomfp));
+				allfunc = newfunc;
+			}
+			match.add(new Instruction(Instruction.NATOMSINDIRECT,memToPath(mem),allfunc));
+		}
+	}
+	
 	
 	////////////////////////////////////////////////////////////////
 
