@@ -86,7 +86,7 @@ final class RemoteTask extends AbstractTask {
 	 * @throw RuntimeException LMntalDaemon.sendMessage()の返り値がfalseの時（つまり送信失敗時）
 	 */
 	synchronized void flush() {
-		//TODO BEGINとENDをつける（ここでやるべきかLMNtalDaemonなど他の場所でやるべきか
+		//TODO msgid, rgid, BEGINとENDをつける（ここでやるべきかLMNtalDaemonなど他の場所でやるべきか
 
 		boolean result = LMNtalDaemon.sendMessage(remoteNode, cmdbuffer);
 
