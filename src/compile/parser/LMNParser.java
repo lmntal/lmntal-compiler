@@ -269,7 +269,7 @@ public class LMNParser {
 	private void addAtomToMem(SrcAtom sAtom, Membrane mem, SrcLink lastLink) throws ParseException {
 		if (lastLink != null) sAtom.process.add(lastLink);
 		LinkedList p = sAtom.getProcess();
-		Atom atom = new Atom(mem, sAtom.getName(), p.size());
+		Atom atom = new Atom(mem, sAtom.getName(), p.size(), sAtom.line, sAtom.column);
 		// リンクの編集
 		for (int i=0;i<p.size();i++) {
 			Object obj = p.get(i);
