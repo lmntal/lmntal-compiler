@@ -745,7 +745,8 @@ public class Instruction {
 	/** proceed
 	 * <br>制御命令<br>
 	 * ルールの適用が終わり、再利用された全ての膜のロックを解放したことを表す。
-	 * <p><b>注意</b>　Ruby版では、リスト終端によって表現していたが、今回は試しに明示化してみた。*/
+	 * <p><b>注意</b>　Ruby版では、リスト終端によって表現していたが、
+	 * 今回は atommatches を単一の命令列にしたため、明示化しなければならなくなった。*/
 	public static final int PROCEED = 204;
 
 	/** stop 
@@ -762,7 +763,7 @@ public class Instruction {
      * 引数の命令列を実行することを表す。
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、
      * 典型的にはこのbranchの次の命令に進む。
-     * 引数列を最後まで実行した場合、ここで終了する。*/
+     * 引数列中の PROCEED 命令を実行した場合、ここで終了する。*/
     public static final int BRANCH = 206;
 
 	/** loop [[instructions...]]
