@@ -1,5 +1,6 @@
 package runtime;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -20,6 +21,8 @@ public final class LMNtalRuntimeManager {
 	public static LMNtalRuntimeMessageProcessor daemon = null;
 	/** 計算ノード表: nodedesc (String) -> RemoteLMNtalRuntime */
 	static HashMap runtimeids = new HashMap();
+	/** TERMINATE時にspanning treeを作成するが、その時に作った子を入れておく */
+	static ArrayList childNode = new ArrayList();
 
 	/** 計算ノード表を利用開始する */
 	public static void init() {}
@@ -134,25 +137,39 @@ public final class LMNtalRuntimeManager {
 	private static Object terminateLock = "";
 	/** 登録されている全てのRemoteLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
 	 *  Env.theRuntime も terminate する (n-kato) 2004-09-17 */
-	public static void terminateAll() {
-
+	public static boolean terminateAll() {
 		synchronized(terminateLock) { // 重複転送防止のため（仮）		
 			if(Env.theRuntime.isTerminated()){
-				//if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): runtime " + Env.theRuntime + " is already terminated...");
-				return;
+				return false;
 			} else {
-				//if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): now terminate runtime " + Env.theRuntime );
 				Env.theRuntime.terminate();
 			}
 		}
 
+		childNode.clear();
 		Iterator it = runtimeids.keySet().iterator();
 		while (it.hasNext()) {
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
-			//if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): now ommiting TERMINATE to  " + machine.hostname );
-			daemon.sendWait(machine.hostname,"TERMINATE");
-			//if(true) System.out.println("LMNtalRuntimeManager.terminateAll(): ommiting TERMINATE to  " + machine.hostname +" finished");
+
+			if(daemon.sendWait(machine.hostname,"TERMINATE")){
+				childNode.add(machine);
+			}
 		}
 		runtimeids.clear();
+		return true;
+	}
+	
+	/**
+	 * DISCONNECTRUNTIMEの中の人の中の人
+	 * @author nakajima
+	 */
+	public static void disconnectAll(){
+		Iterator it = childNode.iterator();
+		while(it.hasNext()){
+			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
+			daemon.sendWait(machine.hostname,"DISCONNECTRUNTIME");
+		}
+		daemon.sendMessage("UNREGISTERLOCAL");
+		childNode.clear();
 	}
 }
