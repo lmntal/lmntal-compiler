@@ -1,0 +1,31 @@
+/*
+NAME
+	Integer module
+
+SYNOPSIS
+	
+AUTHOR
+	Taro Ogawa
+	Koji Hara
+
+HISTORY
+	2004/06/04(Fri)
+
+*/
+
+integer : {
+
+/**
+ * +
+ * 
+ */
+H='+'(A, B) :- A+B=C | H=C.
+
+/**
+ * -
+ * 
+ */
+
+// あとはたのんだ!  * / mod << >> & | abs > < >= <= == != power（？の？乗） ...
+
+}.
