@@ -122,7 +122,7 @@ final class Task extends AbstractTask {
 						Env.p( Dumper.dump(getRoot()) );
 					}
 				}// システムコールアトムなら親膜につみ、親膜を活性化
-			}else{ // 実行膜スタックが空の時
+			}else{ // 実行アトムスタックが空の時
 				flag = false;
 				// アトム主導が無い現在、足し算を先に行うために、順番を変えてみた。
 				// 本来はアトム主導により、+ がdequeueされた直後に、再帰呼び出しがdequeueされる。

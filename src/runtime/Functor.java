@@ -141,9 +141,9 @@ public class Functor {
 	public boolean isSymbol() {
 		return !name.equals("");
 	}
-	/** オーバーライドしない限りgetAbbrName()と同じ。*/
+	/** オーバーライドしない限り getAbbrName()+"_"+getArity() を返す */
 	public String toString() {
-		return getAbbrName();
+		return getAbbrName() + "_" + getArity();
 	}
 	public int hashCode() {
 		return strFunctor.hashCode();

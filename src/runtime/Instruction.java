@@ -181,7 +181,8 @@ public class Instruction implements Cloneable {
 	
 	/** getparent [-dstmem, srcmem]
 	 * <br>ガード命令<br>
-	 * （ロックしていない）膜$srcmemの親膜への参照をロックせずに$dstmemに代入する。
+	 * （ロックしていない）膜$srcmemに対して、その親膜への参照をロックせずに$dstmemに代入する。
+	 * 親膜が無い場合は失敗する。
 	 * <p>アトム主導テストで使用される。*/
 	public static final int GETPARENT = 9;
 	// LOCALGETPARENTは不要

@@ -281,7 +281,9 @@ class InterpretiveReactor {
 					mems[inst.getIntArg1()] = atoms[inst.getIntArg2()].mem;
 					break; //n-kato
 				case Instruction.GETPARENT : //[-dstmem, srcmem]
-					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].parent;
+					mem = mems[inst.getIntArg2()].parent;
+					if (mem == null) return false;
+					mems[inst.getIntArg1()] = mem;
 					break; //n-kato
 
 					//====膜に関係する出力する基本ガード命令====ここまで====

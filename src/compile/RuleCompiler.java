@@ -136,29 +136,28 @@ public class RuleCompiler {
 				singletonListArgToBranch.add(hc.match);
 				atomMatch.add(new Instruction(Instruction.BRANCH, singletonListArgToBranch));
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
-				hc.atomidpath.set(firstid, new Integer(1));	// 主導するアトムの変数番号は 1
-				hc.varcount = 2;
 				Atom atom = (Atom)hc.atoms.get(firstid);
+				hc.atompaths.put(atom, new Integer(1));	// 主導するアトムの変数番号は 1
+				hc.varcount = 2;
 				hc.match.add(new Instruction(Instruction.FUNC, 1, atom.functor));
 				Membrane mem = atom.mem;
 				if (mem == rs.leftMem) {
 					hc.match.add(new Instruction(Instruction.TESTMEM, 0, 1));
 				}
 				else {
-					hc.match.add(new Instruction(Instruction.GETMEM, varcount, 1));
-					hc.mempaths.put(mem, new Integer(varcount++));
-					do {
-						hc.match.add(new Instruction(Instruction.GETPARENT,varcount,varcount-1));
-						hc.mempaths.put(mem, new Integer(varcount++));
+					hc.match.add(new Instruction(Instruction.GETMEM, hc.varcount, 1));
+					hc.match.add(new Instruction(Instruction.LOCK,   hc.varcount));
+					hc.mempaths.put(mem, new Integer(hc.varcount++));
+					while (mem != rs.leftMem) {
+						hc.match.add(new Instruction(Instruction.GETPARENT,hc.varcount,hc.varcount-1));
+						hc.match.add(new Instruction(Instruction.LOCK,     hc.varcount));
+						hc.mempaths.put(mem, new Integer(hc.varcount++));
 						mem = mem.mem;
-					}	
-					while (mem != rs.leftMem);
-					hc.match.add(new Instruction(Instruction.EQMEM, 0, varcount-1));
-					for (int i = varcount-1; --i >= 2; ) {
-						hc.match.add(new Instruction(Instruction.LOCK,i));
 					}
+					hc.match.add(new Instruction(Instruction.GETPARENT,hc.varcount,hc.varcount-1));
+					hc.match.add(new Instruction(Instruction.EQMEM, 0, hc.varcount++));
 				}
-				hc.compileLinkedGroup(firstid);
+				hc.compileLinkedGroup((Atom)hc.atoms.get(firstid));
 			} else {
 				// 膜主導
 				memMatch = hc.match;
@@ -948,7 +947,8 @@ public class RuleCompiler {
 			Atom atom = (Atom)it.next();
 			if (!atom.functor.equals(Functor.INSIDE_PROXY)
 			 && !atom.functor.equals(Functor.OUTSIDE_PROXY) 
-			 && atom.functor.isSymbol() ) {
+			 && atom.functor.isSymbol()
+			 && atom.functor.isActive() ) {
 				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
 			}
 		}

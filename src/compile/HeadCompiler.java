@@ -14,7 +14,7 @@ import compile.structure.*;
  * 膜に対するマッチング命令列を出力する
  * @author n-kato, pa
  * 
- * TODO 簡単のため、いずれ仮引数IDを廃止する。
+ * 仮引数IDは廃止された。
  * Ruby版では仮引数IDがそのままボディ命令列の仮引数番号を表していたが、今は違うので、仮引数ID自身には意味が無くなったため。
  * この廃止に伴って、仮引数IDでループする部分は全てatoms.iterator()を使うように変更する。
  * 
@@ -23,7 +23,6 @@ import compile.structure.*;
  * <p><b>現状</b>　
  * 現在マッチング命令列では、本膜の変数番号を0、主導するアトムの変数番号を1にしている。これは今後も変えない。
  * ボディ命令列の仮引数では、先にmemsを枚挙してから、その続きの変数番号にatomsを枚挙している。
- * 本膜の仮引数IDが0である。この制約は今後、仮引数IDがなくなると同時になくなる。
  */
 public class HeadCompiler {
 	public Membrane m;
@@ -33,33 +32,23 @@ public class HeadCompiler {
 	 * OBSOLETE: 実引数リスト内で、任意の空膜は任意のアトムより後ろに来る。
 	 * メモ: 空膜と言っても{$p}なども含まれる
 	 */
-	public List mems          = new ArrayList();	// 出現する膜のリスト。[0]がm
-	public List atoms         = new ArrayList();	// 出現するアトムのリスト
+	public List match			= new ArrayList();	// マッチング命令列
+	public List mems			= new ArrayList();	// 出現する膜のリスト。[0]がm
+	public List atoms			= new ArrayList();	// 出現するアトムのリスト	
+	public Map  mempaths		= new HashMap();	// Membrane -> 変数番号
+	public Map  atompaths		= new HashMap();	// Atom -> 変数番号
 	
-	public boolean visited[];
-
-	public Map  mempaths      = new HashMap();	// Membrane -> 変数番号
-	public Map  atompaths     = new HashMap();	// Atom -> 変数番号。いずれatomids/atomidpathに取って代わる
-	
-	public Map  atomids       = new HashMap();	// Atom -> 仮引数ID
-	public List atomidpath    = new ArrayList();	// 仮引数ID -> 変数番号。いずれ配列にする。
-	
-	public List match         = new ArrayList();
+	private Map atomids		= new HashMap();	// Atom -> atoms内のindex（廃止の方向で検討する）
+	private HashSet visited	= new HashSet();	// Atoms -> boolean, マッチング命令を生成したかどうか
 	
 	int varcount;	// いずれアトムと膜で分けるべきだと思う
 	
-	// いずれこれらのマクロは統廃合する
-
-	final int atomToID(Atom atom) { return ((Integer)atomids.get(atom)).intValue(); }
-	final int atomToPath(Atom atom) { return atomIDToPath(atomToID(atom)); }
-
-	final boolean isAtomLoaded(Atom atom) { return isAtomIDLoaded(atomToID(atom)); }
-	final boolean isAtomIDLoaded(int id) { return atomidpath.get(id) != null; }
+	final boolean isAtomLoaded(Atom atom) { return atompaths.containsKey(atom); }
 	final boolean isMemLoaded(Membrane mem) { return mempaths.containsKey(mem); }
 
-	final int atomIDToPath(int id) {
-		if (!isAtomIDLoaded(id)) return UNBOUND;
-		return ((Integer)atomidpath.get(id)).intValue();
+	final int atomToPath(Atom atom) { 
+		if (!isAtomLoaded(atom)) return UNBOUND;
+		return ((Integer)atompaths.get(atom)).intValue();
 	}
 	final int memToPath(Membrane mem) {
 		 if (!isMemLoaded(mem)) return UNBOUND;
@@ -78,7 +67,7 @@ public class HeadCompiler {
 		Env.c("enumFormals");
 		Iterator it = mem.atoms.iterator();
 		while (it.hasNext()) {
-			// アトムの仮引数IDを登録する
+			// 左辺に出現したアトムを登録する
 			Atom atom = (Atom)it.next();
 			atomids.put(atom, new Integer(atoms.size()));
 			atoms.add(atom);
@@ -88,15 +77,6 @@ public class HeadCompiler {
 		while (it.hasNext()) {
 			enumFormals((Membrane)it.next());
 		}
-		// OBSOLETE: 子膜それぞれにやってたのを、自分に関して調べるように変更。
-		// OBSOLETE: これで大元の膜に対してこれを書く必要がなくなった（とおもう）
-		// // bodyでのgetparentを廃止するために条件判定を除去。本膜を[0]にするため上に移動。
-		//if(mem.atoms.size() + mem.mems.size() == 0) {
-		//mems.add(mem);
-		//}
-		//Env.d("atomids = "+atomids);
-		//Env.d("atoms = "+atoms);
-		//Env.d("mems = "+mems);
 	}
 	
 	public void prepare() {
@@ -104,58 +84,53 @@ public class HeadCompiler {
 		varcount = 1;	// [0]は本膜
 		mempaths.clear();
 		atompaths.clear();
-		visited = new boolean[atoms.size()];
-		atomidpath = new ArrayList();
-		for (int i = 0; i < atoms.size(); i++) atomidpath.add(null);
+		visited.clear();
 		match = new ArrayList();
 	}
 	
-	public void compileLinkedGroup(int atomid) {
+	public void compileLinkedGroup(Atom firstatom) {
 		Env.c("compileLinkedGroup");
-		LinkedList targetidqueue = new LinkedList();
-		targetidqueue.add(new Integer(atomid));
-		while( ! targetidqueue.isEmpty() ) {
-			int targetid = ((Integer)targetidqueue.removeFirst()).intValue();
+		LinkedList atomqueue = new LinkedList();
+		atomqueue.add(firstatom);
+		while( ! atomqueue.isEmpty() ) {
+			Atom atom = (Atom)atomqueue.removeFirst();			
+			if (visited.contains(atom)) continue;
+			visited.add(atom);
 			
-			if (visited[targetid]) continue;
-			visited[targetid] = true;
-			
-			Atom atom = (Atom)atoms.get(targetid);
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence buddylink = atom.args[pos].buddy;
 				if (buddylink == null) continue; // ガード匿名リンクは無視
 				
 				Atom buddyatom = buddylink.atom;
 				if (!atomids.containsKey(buddyatom)) continue; // 右辺へのリンクは無視
-				int buddyid = atomToID(buddyatom);
 				
-				if (atomIDToPath(buddyid) != UNBOUND) { // リンク先のアトムをすでに取得している場合
+				if (atomToPath(buddyatom) != UNBOUND) { // リンク先のアトムをすでに取得している場合
 					// lhs(>)->lhs(<) または neg(>)->sameneg(<) ならば、
 					// すでに同一性を確認するコードを出力しているため、何もしない
 					if (true 
 					 || (buddyatom.mem == m && atom.mem == m) // 否定条件コンパイル時にdebug予定
 					   ) { 
-						int b = atomIDToPath(buddyid);
-						int t = atomIDToPath(targetid);
+						int b = atomToPath(buddyatom);
+						int t = atomToPath(atom);
 						if (b < t) continue;
 						if (b == t && buddylink.pos < pos) continue;
 					}
 				}
 				int buddyatompath = varcount++;
 				match.add( new Instruction(Instruction.DEREF,
-					buddyatompath, atomIDToPath(targetid), pos, buddylink.pos ));
+					buddyatompath, atomToPath(atom), pos, buddylink.pos ));
 					
-				if( atomIDToPath(buddyid) != UNBOUND ) { // リンク先のアトムをすでに取得している場合
+				if( atomToPath(buddyatom) != UNBOUND ) { // リンク先のアトムをすでに取得している場合
 					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs なのでリンク先のアトムの同一性を確認
 					match.add(new Instruction(Instruction.EQATOM,
-						buddyatompath, atomIDToPath(buddyid) ));
+						buddyatompath, atomToPath(buddyatom) ));
 					continue;
 				}
 				
 				// リンク先のアトムを変数に取得する
 				
-				atomidpath.set(buddyid, new Integer(buddyatompath));
-				targetidqueue.addLast( new Integer(buddyid) );
+				atompaths.put(buddyatom, new Integer(buddyatompath));
+				atomqueue.addLast( buddyatom );
 				match.add(new Instruction(Instruction.FUNC, buddyatompath, buddyatom.functor));
 				
 				if (atom.functor.equals(runtime.Functor.OUTSIDE_PROXY) && pos == 0) {
@@ -190,8 +165,7 @@ public class HeadCompiler {
 		Iterator it = mem.atoms.iterator();
 		while (it.hasNext()) {
 			Atom atom = (Atom)it.next();
-			int targetid = atomToID(atom); // 仮引数ID
-			if (atomIDToPath(targetid) == UNBOUND) {
+			if (atomToPath(atom) == UNBOUND) {
 				// 見つかったアトムを変数に取得する
 				int atompath = varcount++;
 				match.add(Instruction.findatom(atompath, thismempath, atom.functor));
@@ -205,9 +179,9 @@ public class HeadCompiler {
 					//if (otheratom == atom) continue;
 					match.add(new Instruction(Instruction.NEQATOM, atompath, other));
 				}
-				atomidpath.set(targetid, new Integer(atompath));
+				atompaths.put(atom, new Integer(atompath));
 			}
-			compileLinkedGroup(targetid);
+			compileLinkedGroup(atom);
 		}
 		it = mem.mems.iterator();
 		while (it.hasNext()) {
@@ -267,7 +241,7 @@ public class HeadCompiler {
 	public List getAtomActuals() {
 		List args = new ArrayList();		
 		for (int i = 0; i < atoms.size(); i++) {
-			args.add( atomidpath.get(i) );
+			args.add( atompaths.get(atoms.get(i)) );
 		}
 		return args;
 	}		
