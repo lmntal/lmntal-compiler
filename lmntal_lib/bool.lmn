@@ -20,8 +20,8 @@ module(bool).
  * not
  *
  */
-H='not'(true) :- H=false.
-H='not'(false) :- H=true.
+H=not(true) :- H=false.
+H=not(false) :- H=true.
 
 /*
  * &&
@@ -41,5 +41,5 @@ H='||'(true, true) :- H=true.
 H='||'(true, false) :- H=true.
 H='||'(false, true) :- H=true.
 H='||'(false, false) :- H=false.
-
+ 
 }.
