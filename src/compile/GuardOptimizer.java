@@ -6,7 +6,7 @@ package compile;
 import java.util.*;
 import runtime.Instruction;
 import runtime.InstructionList;
-//import runtime.Functor;
+import runtime.Functor;
 //import runtime.Env;
 
 //import runtime.Rule;
@@ -113,11 +113,11 @@ public class GuardOptimizer {
            	        int findpoint2 = 0;
                     //FINDATOMの第1引数とDEREFATOMの第2引数を比べることでDEREFATOMを移動させるのだが、
                     //この対応関係はイマイチ分からない。
-                    //とりあえずsameatomlink,sameatomgrouplinkで調整しつつマッチングを図る
-                    //sameatomlink,sameatomgrouplinkはDEREF命令を見つけたとき値を増やす
-                    int sameatomlink = 0; 
-           	        int sameatomgrouplink = 0;
-                    for(int hid=1; hid<headsize-1; hid++){
+                    //とりあえずlinknum,jointlinknumで調整しつつマッチングを図る
+                    //linknum,jointlinknumはFUNC命令を見つけたとき値を増やす
+                    int linknum = 0; 
+           	        int jointlinknum = 0;
+                    for(int hid=1; hid<headsize; hid++){
                 		Instruction insth = (Instruction)head.get(hid);
                 		switch(insth.getKind()){
                 			/*
@@ -145,31 +145,19 @@ public class GuardOptimizer {
                 			    /*
                 			     * ここが最も怪しい。というか途中です。
                 			     * findpoint   FINDATOM!) [finddstatom,,,,]
-                			     * 	  ･        この間にあるDEREF命令をを見て、sameatomlink,sameatomgrouplink
+                			     * 	  ･        この間にあるDEREF命令をを見てlinknum,jointlinknum
                 			     *    ･ 	   をカウントする。
-                			     * 	  ･		    finddstatom=srcatom-sameatomgrouplinkならfindpoint
-                			     * 	　･			finddstatom=srcatom || findstatom=srcatom+sameatomlinならfindpoint2に
+                			     * 	  ･		    finddstatom=srcatom-jointlinknumならfindpoint
+                			     * 	　･			finddstatom=srcatom || findstatom=srcatom+linknumならfindpoint2に
                 			     * 	　･			DEREFATOMを移動させる。
                 			     * finpoint2   FINDATOM!) [finddstatom2,,,,]
-                			     * 正当性は全く保証できないが膜が無ければそこそこうまく行くように思える。
+                			     * 
                 			    */
                 				findpoint2 = hid;
                 				finddstatom2 = insth.getIntArg1();
-                				//1つ前に見つけたFINDATOMとのマッチング
-                			    if(finddstatom == srcatom - sameatomgrouplink){
-									head.add(findpoint+1, instg);
-									headvarcount += 1;
-									headatomargs.add(new Integer(atomvar));
-									headsize += 1;
-									guard.remove(gid);
-									guardsize -= 1;
-									gid -= 1;
-									hid = headsize;
-									break;                				
-                				} 
                 				//今回見つけたFINDATOMとのマッチング
-                				else if(finddstatom2 == srcatom
-									|| finddstatom2 == srcatom + sameatomlink){
+                				 if(//finddstatom2 == srcatom ||
+                				    finddstatom2 == srcatom + linknum){
 							 		  head.add(findpoint2+1, instg);
 									  headvarcount += 1;
 									  headatomargs.add(new Integer(atomvar));
@@ -180,18 +168,30 @@ public class GuardOptimizer {
 									  hid = headsize;
 									  break;                				
 									}
+								 //1つ前に見つけたFINDATOMとのマッチング
+								 //これらは同時に条件を満たすことがあるがどちらを優先すればいいのか不明
+								 //この順でないとうまく行かない例:a(X,10),b(Y,20),c(Z,30) :- X+Y<Z | ok.
+								 else if(finddstatom == srcatom - jointlinknum){
+								 	head.add(findpoint+1, instg);
+								 	headvarcount += 1;
+									 headatomargs.add(new Integer(atomvar));
+									 headsize += 1;
+									 guard.remove(gid);
+									 guardsize -= 1;
+									 gid -= 1;
+									 hid = headsize;
+									 break;                				
+								 } 
 								 findpoint = hid;
 								 finddstatom = insth.getIntArg1();
                 				break;
                 			
-                			case Instruction.DEREF:
-                			 	//DEREFの第2引数に着目
-                				//定数アトムへのリンクの場合 a(X,10,20),b(Y,30)におけるの10,20,30へのリンク
-                				//つまり同じアトム内へのリンクの場合
-                				if(finddstatom == insth.getIntArg2()) sameatomlink += 1;
-                				//a(X,A),b(A,Y,10)におけるAへのリンク
-                				//つまり同じアトムグループ内の他のアトムへのリンクの場合
-                				else sameatomgrouplink += 1;
+                			case Instruction.FUNC:
+                			 	//FUNCの第2引数に着目
+                				//引数1のリンクの場合linknumを
+                				//引数2以上のリンク(繋ぎ役のようなリンク)の場合jointlinknumを+1
+                				if(((Functor)insth.getArg2()).getArity() == 1) linknum+=1;
+                				else jointlinknum += 1;
                 				break;
                 				
                 			
