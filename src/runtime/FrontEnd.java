@@ -226,6 +226,10 @@ public class FrontEnd {
 						} else if (args[i].equals("--translate")) {
 							// 暫定オプション
 							Env.fInterpret = false;
+						} else if (args[i].equals("--library")) {
+							/// --library
+							/// Generate library.
+							Env.fLibrary = true;
 						} else if (args[i].equals("--pp0")) {
 							// 暫定オプション
 							Env.preProcess0 = true;
@@ -359,12 +363,25 @@ public class FrontEnd {
 			try {
 				LMNParser lp = new LMNParser(src);
 				m = lp.parse();
-			} catch (ParseException e) {
+			}	
+			catch (ParseException e) {
 				Env.p("Compilation Failed");
 				return;	
 			}
+			if (!Env.fInterpret) {
+				Translator.init(unitName);
+			}
 			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
 			Inline.makeCode();
+			if (!Env.fInterpret) {
+				try {
+					Translator.genModules();
+					Translator.genMain((InterpretedRuleset)rs);
+					Translator.genJAR();
+				} catch (IOException e) {
+					Env.e("Failed to write Translated File. " + e.getLocalizedMessage());
+				}
+			}
 			if (Env.nErrors > 0) {
 				Env.p("Compilation Failed");
 				return;
@@ -374,9 +391,10 @@ public class FrontEnd {
 
 			if (Env.fInterpret) {
 				run(rs);
-			} else {
-				new Translator((InterpretedRuleset)rs).translate(true);
 			}
+//			else {
+//				new Translator((InterpretedRuleset)rs).translate(true);
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
@@ -441,7 +459,6 @@ public class FrontEnd {
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 	}
-	
 	/**
 	 * プリプロセッサ0
 	 * 
