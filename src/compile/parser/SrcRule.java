@@ -33,6 +33,6 @@ class SrcRule {
 	 * @return ボディのリスト
 	 */
 	public LinkedList getBody() {
-		return this.head;
+		return this.body;
 	}
 }
