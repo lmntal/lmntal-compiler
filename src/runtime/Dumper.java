@@ -8,7 +8,10 @@ public class Dumper {
 		StringBuffer buf = new StringBuffer();
 		List predAtoms = new ArrayList();
 		Set atoms = new HashSet(mem.getAtomCount());
-
+		boolean commaFlag;
+		
+		commaFlag = false;
+		
 		// アトムの出力
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
@@ -30,8 +33,8 @@ public class Dumper {
 			Atom a = (Atom)it.next();
 			//すでに出力されてしまっている場合もある
 			if (atoms.contains(a)) {
+				if(commaFlag) buf.append(", "); else commaFlag = true;
 				buf.append(dumpAtomGroup(a, atoms));
-				buf.append(", ");
 			}
 		}
 		//閉路がある場合にはまだ残っているので、適当な所から出力。
@@ -41,23 +44,24 @@ public class Dumper {
 			if (!it.hasNext()) {
 				break;
 			}
+			if(commaFlag) buf.append(", "); else commaFlag = true;
 			buf.append(dumpAtomGroup((Atom)it.next(), atoms));
-			buf.append(", ");
 		}
 
 		//子膜の出力		
 		it = mem.memIterator();
 		while (it.hasNext()) {
+			if(commaFlag) buf.append(", "); else commaFlag = true;
 			buf.append("{");
 			buf.append(dump((Membrane)it.next()));
-			buf.append("}, ");
+			buf.append("}");
 		}
 		
 		//ルールの出力
 		it = mem.rulesetIterator();
 		while (it.hasNext()) {
+			if(commaFlag) buf.append(", "); else commaFlag = true;
 			buf.append((Ruleset)it.next());
-			buf.append(", ");
 		}
 
 		return buf.toString();
