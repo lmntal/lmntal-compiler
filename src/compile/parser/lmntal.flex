@@ -72,4 +72,4 @@ EndOfLineComment = ["//""%"] {InputCharacter}* {LineTerminator}?
 
 /* No token was found for the input so through an error.  Print out an
    Illegal character message with the illegal character that was found. */
-[^]                    { throw new Error("Illegal character <"+yytext()+">"); }
+[^]                    { throw new Error("Illegal character <"+yytext()+"> at line:"+yyline); }

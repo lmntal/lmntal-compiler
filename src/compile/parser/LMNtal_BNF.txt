@@ -4,6 +4,8 @@
  *   @ ソースファイルをそのままJavaのオブジェクトへと変換する。
  *     compile.parser.*
  *   @ JFlex, JavaCUPを使用
+ *     ant flex_compile
+ *     ant bison_compile
  *   @ 簡略記法も対応する
  *   @ ルールでしか出現しないもの(RuleContext)がデータ部分に出ている
  *     ようなことはチェックしていない

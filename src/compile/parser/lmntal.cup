@@ -2,7 +2,6 @@
 /* Import the class java_cup.runtime.*  */
 package compile.parser;
 
-import java_cup.runtime.*;
 import java.util.LinkedList;
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
