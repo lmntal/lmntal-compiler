@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import runtime.Env;
+
 /*
  * メッセージの中身を見て処理する。基本的にLMNtalDaemonのソケットが開かれると、
  * これが生成される。つまり物理的な計算機1台の中に複数存在しうる。
@@ -19,6 +21,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 	BufferedReader in;
 	BufferedWriter out;
 	Socket socket;
+
+	Integer slaveRuntimeRgid;
 
 	/*
 	 * コンストラクタ。
@@ -116,7 +120,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 				if (returnNode == null) {
 					//戻し先がnull
 					try {
-						out.write("fail\n");
+						out.write("res " + msgid.toString() + " fail\n");
 						out.flush();
 						continue;
 					} catch (IOException e1) {
@@ -204,18 +208,32 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 								//新規にラインタイムを作る。
 								//OK返すのは生成されたランタイムがする。
-								LMNtalDaemon.createRemoteRuntime(
-									msgid.intValue());
-								//TODO 生成されたランタイムのrgidはもっておかなくていいのかな
+								
+								slaveRuntimeRgid = new Integer(LMNtalDaemon.makeID());
+								
+								String newCmdLine =
+									new String(
+										"java daemon/SlaveLMNtalRuntimeLauncher "
+											+ slaveRuntimeRgid.toString()
+											+ " "
+											+ msgid.toString());
+											
+								if (DEBUG)System.out.println(newCmdLine);
 
+								try {
+									Process remoteRuntime = Runtime.getRuntime().exec(newCmdLine);
+								} catch (IOException e) {
+									e.printStackTrace();
+									out.write("res " + msgid.toString() + " fail\n");
+									out.flush();
+								}
 								continue;
 							} else if (command.equalsIgnoreCase("begin")) {
 								//TODO 実装
 								
 								//beginの後はendがくるまで命令が連続でくる...
 								//どう処理しようか。
-								
-
+																								
 								
 								out.write("not implemented yet\n");
 								out.flush();
@@ -226,21 +244,19 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								out.flush();
 								continue;
 							} else if (command.equalsIgnoreCase("terminate")) {
-								//TODO 実装
-
 								//「terminateだけ変」(by n-kato)
 								//
 								//やるべきことはEnv.theRuntimeのterminate
 								//でも呼べないからどうしよう？
 								//LocalLMNtalRuntime.terminate();
-								
+								Env.theRuntime.terminate(); //TODO これでいいのかな
 
-								out.write("not implemented yet\n");
-								out.flush();
+								//out.write("not implemented yet\n");
+								//out.flush();
 								continue;
 							} else {
 								//未知のコマンド or それ以外の何か
-								out.write("fail\n");
+								out.write("res " + msgid.toString() + " fail\n");
 								out.flush();
 								continue;
 							}
@@ -261,7 +277,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 									if (targetNode == null) {
 										//接続失敗
-										out.write("fail\n");
+										out.write("res " + msgid.toString() + " fail\n");
 										out.flush();
 										continue;
 									} else {
@@ -273,7 +289,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									continue;
 								} else {
 									//宛先ノードへの接続失敗
-									out.write("fail\n");
+									out.write("res " + msgid.toString() + " fail\n");
 									out.flush();
 									continue;
 								}
@@ -285,7 +301,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									continue;
 								} else {
 									//転送失敗
-									out.write("fail\n");
+									out.write("res " + msgid.toString() + " fail\n");
 									out.flush();
 									continue;
 								}
@@ -304,7 +320,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 				} else {
 					//既にmsgTableに登録されている時 or 通信失敗時
 					try {
-						out.write("fail\n");
+						out.write("res " + msgid.toString() + " fail\n");
 						out.flush();
 						//continue;
 						break;

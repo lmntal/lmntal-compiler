@@ -12,10 +12,11 @@ class SlaveLMNtalRuntimeLauncher {
 	static boolean DEBUG = true;
 	
 	static LocalLMNtalRuntime runtime;
+	static int rgid;
 	
 	public static void main(String[] args){
 		try {
-			int rgid = Integer.parseInt(args[0]);
+			rgid = Integer.parseInt(args[0]);
 			int callerMsgid = Integer.parseInt(args[1]);
 			
 			Socket socket = new Socket("localhost", 60000);

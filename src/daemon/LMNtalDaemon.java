@@ -75,9 +75,10 @@ public class LMNtalDaemon implements Runnable {
 	static HashMap nodeTable = new HashMap();
 	static HashMap registedRuntimeTable = new HashMap();
 	static HashMap msgTable = new HashMap();
+	//static HashMap slaveRuntimeTable = new HashMap();
 	static int id = 0;
 	static Random r = new Random();
-	static Process remoteRuntime;
+	//static Process remoteRuntime;
 
 	/*
 	 * コンストラクタ。 tcp60000番にServerSocketを開くだけ。
@@ -179,10 +180,7 @@ public class LMNtalDaemon implements Runnable {
 	 * @return socketというキーが既に存在していたらfalse
 	 */
 	static boolean register(Socket socket, LMNtalNode node) {
-		if (DEBUG) {
-			System.out.println(
-				"register(" + socket.toString() + ", " + node.toString() + ")");
-		}
+		if (DEBUG)System.out.println("register(" + socket.toString() + ", " + node.toString() + ")");
 
 		synchronized (nodeTable) {
 			if (nodeTable.containsKey(socket)) {
@@ -196,26 +194,47 @@ public class LMNtalDaemon implements Runnable {
 
 	/*
 	 * リモート側で使われるスレーブランタイムを生成する。
-	 * 
+	 *
+	 *  LMNtalDaemonMessageProcessor.run()内に移動 20040706 nakajima
+	 *  
 	 * @param msgid スレーブランタイムが返事を返す時に使うメッセージID
 	 */
-	public static void createRemoteRuntime(int msgid) {
-		String cmdLine =
-			new String(
-				"java daemon/SlaveLMNtalRuntimeLauncher "
-					+ LMNtalDaemon.makeID()
-					+ " "
-					+ msgid);
-		if (DEBUG) {
-			System.out.println(cmdLine);
-		}
+//	public static void createRemoteRuntime(int msgid) {
+//		String cmdLine =
+//			new String(
+//				"java daemon/SlaveLMNtalRuntimeLauncher "
+//					+ LMNtalDaemon.makeID()
+//					+ " "
+//					+ msgid);
+//		if (DEBUG) {
+//			System.out.println(cmdLine);
+//		}
+//
+//		try {
+//			remoteRuntime = Runtime.getRuntime().exec(cmdLine);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
-		try {
-			remoteRuntime = Runtime.getRuntime().exec(cmdLine);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+	/*
+	 * createRemoteRuntimeで生成されたスレーブランタイム(LocalLMNtalRuntime)を登録する
+	 * 
+	 * LMNtalDaemonMessageProcessor.run()内に移動: 20040706 nakajima
+	 * 
+	 * @param socket 
+	 * @param rgid 生成されたLocalLMNtalRuntimeのrgid。Integerなのは仕様です。
+	 */
+//	boolean registerSlaveRuntime(Socket socket, Integer rgid){
+//		if (DEBUG)System.out.println("registerSlaveRuntime(" + socket.toString() + ", " + rgid.toString() + ")");
+//		
+//		synchronized (slaveRuntimeTable){
+//			if(slaveRuntimeTable.containsKey(socket)) return false;
+//			
+//			slaveRuntimeTable.put(socket, rgid);
+//		}
+//		return true;
+//	}
 
 	/*
 	 * ローカルランタイムをHashMapに登録する。keyはrgid, valueはSocket。
