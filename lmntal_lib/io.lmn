@@ -1,29 +1,23 @@
 [[/*inline_define*/
 ]],
 io:{
-	( io.print(String) :- unary(String)|[[/*inline*/
-		System.out.println(me.nth(0));
-		]](String)
-	).
-	( io.input(Message) :- [[/*inline*/
-		String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
-		me.changeName(s);
-		me.nthAtom(0).changeName("done");
-		]](Message) ).
-	( io.input(Message, X) :- [[/*inline*/
-		String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
-		me.changeName("done");
-		me.nthAtom(0).changeName(s);
-		]](Message, X) ).
-	( io.input :- [[/*inline*/
-		String s = javax.swing.JOptionPane.showInputDialog(null, "Input text.");
-		me.changeName(s);
-		]] ).
-	// TODO
-	( io.inputInt(X) :- [[/*inline*/
-		//String s = javax.swing.JOptionPane.showInputDialog(null, "");
-		me.setFunctor(new IntegerFunctor(3));
-		]](X) ).
+io.print(String) :- unary(String)|[[/*inline*/
+	System.out.println(me.nth(0));
+	]](String).
+io.input(Message) :- [[/*inline*/
+	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
+	me.changeName(s);
+	me.nthAtom(0).changeName("done");
+	]](Message).
+io.input(Message, X) :- [[/*inline*/
+	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
+	me.changeName("done");
+	me.nthAtom(0).changeName(s);
+	]](Message, X).
+io.input :- [[/*inline*/
+	String s = javax.swing.JOptionPane.showInputDialog(null, "Input text.");
+	me.changeName(s);
+	]].
 }
 
 //	inputString("How much?", Answer).
