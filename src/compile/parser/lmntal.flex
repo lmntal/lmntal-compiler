@@ -76,7 +76,7 @@ FloatingRelativeOp = "<."| ">."| ">=."| "=<."| "=:=."| "=\\=."
 Comment = {TraditionalComment} | {EndOfLineComment}
 
 TraditionalComment = "/*" [^*] ~"*/"
-EndOfLineComment = ("//"|"%") {InputCharacter}* {LineTerminator}?
+EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 
 %% 
 
