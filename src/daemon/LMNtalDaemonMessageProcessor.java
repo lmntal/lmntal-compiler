@@ -74,7 +74,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 						byte[] data = readBytes();
 						//文字列結合の場合はバイト数をとっておく必要がある。
 						//todo バイト数の結合方法がこんなのでよいか調べる(…たぶんだめ。)
-						content += data.length + " " + data; // todo 文字列結合でいいのか調べる
+						content += data.length + " " + data; // todo byte[]であるdataに対して、文字列結合を使ってよいか調べる
 					}
 					catch (Exception e) {
 						content = "RES " + msgid + " FAIL\n";

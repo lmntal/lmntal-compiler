@@ -355,7 +355,7 @@ public final class Membrane extends AbstractMembrane {
 //	}
 
 	/** この膜のキャッシュを表すバイト列を取得する。
-	 * @see RemoteMembrane#updateCache() */
+	 * @see RemoteMembrane#updateCache(byte[]) */
 	public byte[] cache() {
 		
 		// atomTableを更新する // 子膜の自由リンクについては要検討

@@ -3,7 +3,6 @@ package daemon;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -15,6 +14,7 @@ import runtime.Functor;
 import runtime.LMNtalRuntimeManager;
 import runtime.Membrane;
 import runtime.RemoteLMNtalRuntime;
+import runtime.RemoteMembrane;
 import runtime.RemoteTask;
 import runtime.Ruleset;
 import util.HybridOutputStream;
@@ -331,9 +331,9 @@ class InstructionBlockProcessor implements Runnable {
 	}
 	//
 	
-	/** リモート（設計中）*/
-	HashSet remoteset = new HashSet();
-
+	/** リモート転送表（remoteの代用）: RemoteTask -> RemoteTask */
+	HashMap remoteTable = new HashMap();
+	
 	////////////////////////////////////////////////////////////////	
 
 	/** グローバル膜ID (String) -> AbstractMembrane */
@@ -379,7 +379,7 @@ class InstructionBlockProcessor implements Runnable {
 		 * 
 		 * [2] アトムの操作
 		 *   NEWATOM          srcmemid NEW_atomid func
-		 *   NEWFREELINK      srcmemid NEW_atomid
+		 *   NEWFREELINK      srcmemid NEW_atomid        // 現在は NEWATOM - - $inside と同じ
 		 *   ALTERATOMFUNCTOR srcmemid atomid func
 		 *   ENQUEUEATOM      srcmemid atomid
 		 *   REMOVEATOM       srcmemid atomid
@@ -440,44 +440,57 @@ class InstructionBlockProcessor implements Runnable {
 				
 	// === リモート膜に対するボディ命令の場合 ===
 	
-//[編集中] (n-kato)2004-08-27
-//				if (m instanceof RemoteMembrane) {
-//					// いくつかの例外を除き、その膜のホストに転送するだけ。
-//					// [例外1] このホストに対するNEWROOT命令
-//					if (command[0].equals("NEWROOT") && m.remote == null) {
-//						String nodedesc = command[3];
-//						String fqdn = LMNtalRuntimeManager.nodedescToFQDN(nodedesc);
-//						if (LMNtalNode.isMyself(fqdn)) {
-//							String tmpID = command[2];
-//							AbstractMembrane newmem = m.newRoot(nodedesc);
-//							registerNewMembrane(tmpID,newmem);
-//							result += tmpID + "=" + newmem.getGlobalMemID() + ";";
-//							continue;
-//						}
-//					}
-//					
-//					// 転送先を取得する
-//					if (m.getParent() != null) {
-//						m.remote = m.getParent().remote;
-//					}
-//					else {
-//						m.remote = (RemoteTask)m.getTask();
-//						m.remote.init();
-//						remoteset.add(m.remote);
-//					}
-//				}
-//				// この方式ではローカルの膜も転送する
-//				if (m.remote != null) {
-//					m.remote.send(input);
-//					continue;
-//				}
+				if (m instanceof RemoteMembrane) {
+					// いくつかの特例を除き、その膜のホストに転送するだけ。
+					
+					// [特例1] このホストに対するNEWROOT命令（リモート膜mは新しいルート膜の親膜）
+					// (1) 親膜mに対してnewRootメソッドを発行
+					// (2) リモートホストHに対して、NEWROOT m H 命令を送信
+					// (3) ホストHでは、mを擬似膜として作成し、newRootメソッドを発行
+					if (command[0].equals("NEWROOT") && m.remote == null) {
+						String nodedesc = command[3];
+						String fqdn = LMNtalRuntimeManager.nodedescToFQDN(nodedesc);
+						if (LMNtalNode.isMyself(fqdn)) {
+							String tmpID = command[2];
+							AbstractMembrane newmem = m.newRoot(nodedesc);
+							registerNewMembrane(tmpID,newmem);
+							result += tmpID + "=" + newmem.getGlobalMemID() + ";";
+							continue;
+						}
+					}
+					
+					// [特例終わり]
+					
+					// 転送先 m.remote を決定する
+					RemoteTask tmpremote = (RemoteTask)remoteTable.get(m.getTask());
+					if (tmpremote == null) { // リモートが未定義の場合
+						// - 先祖で最初のリモートタスクにリモートが存在する場合、そのリモートを継承する
+						AbstractMembrane tmpmem = m.getTask().getRoot().getParent();
+						while (tmpmem instanceof Membrane) {
+							tmpmem = tmpmem.getTask().getRoot().getParent();
+						}
+						if (tmpmem != null) {
+							tmpremote = (RemoteTask)remoteTable.get(tmpmem.getTask());
+						}
+						// - 存在しない場合、mを管理するタスクをリモートに設定する
+						if (tmpremote == null) {
+							tmpremote = (RemoteTask)m.getTask();
+							tmpremote.init();
+						}
+						remoteTable.put(m.getTask(), tmpremote);
+					}
+					m.remote = tmpremote;	
+									
+					// 転送する
+					m.remote.send(input);
+					continue;
+				}
+								
+	// === ローカル膜に対するボディ命令の場合 ===
 
 				Membrane mem = (Membrane)m;
 
-	// === ローカル膜に対するボディ命令の場合 ===
-
-				if (command[0].equals("END")) {
-					//糸冬
+				if (command[0].equals("END")) { // 実際には起こらない
 					break;
 	// [1] ルールの操作
 				} else if (command[0].equals("CLEARRULES")) {
@@ -507,6 +520,12 @@ class InstructionBlockProcessor implements Runnable {
 					if (func.equals(Functor.INSIDE_PROXY)) {
 						result += tmpID + "=" + mem.getAtomID(newatom) + ";";
 					}
+				} else if (command[0].equals("NEWFREELINK")) {
+					String tmpID = command[2];
+					Functor func = Functor.INSIDE_PROXY;
+					Atom newatom = mem.newAtom(func);
+					mem.registerAtom(tmpID,newatom);
+					result += tmpID + "=" + mem.getAtomID(newatom) + ";";
 				} else if (command[0].equals("ALTERATOMFUNCTOR")) {
 					Atom atom = mem.lookupAtom(command[2]);
 					mem.alterAtomFunctor(atom,Functor.deserialize(command[3]));
@@ -522,9 +541,12 @@ class InstructionBlockProcessor implements Runnable {
 					result += tmpID + "=" + newmem.getGlobalMemID() + ";";
 				} else if (command[0].equals("REMOVEMEM")) {
 					mem.removeMem(lookupMembrane(command[2]));
-				} else if (command[0].equals("NEWROOT")) {  //TODO (nakajima)自分自身へのＮＥＷＲＯＯＴをなんとかする
+				} else if (command[0].equals("NEWROOT")) { 
 					String tmpID = command[2];
-					AbstractMembrane newmem = mem.newRoot(command[3]);
+					AbstractMembrane newmem = mem.newRoot(command[3]); // 新しいリモートが初期化される
+					if (newmem instanceof RemoteMembrane) {
+						remoteTable.put(newmem.getTask(), newmem.getTask()); // 新しいリモートを登録する
+					}
 					registerNewMembrane(tmpID,newmem);
 					result += tmpID + "=" + newmem.getGlobalMemID() + ";";
 	// [4] リンクの操作
@@ -576,11 +598,13 @@ class InstructionBlockProcessor implements Runnable {
 	}
 	/** リモートに命令ブロックを転送し、返答が来るまでブロックする */
 	void flush() {
-		Iterator it = remoteset.iterator();
+		Iterator it = remoteTable.keySet().iterator();
 		while (it.hasNext()) {
-			RemoteTask innerremote = (RemoteTask)it.next();
+			RemoteTask innerremote = (RemoteTask)remoteTable.get(it.next());
 			innerremote.flush();
 		}
-		remoteset.clear();
+		remoteTable.clear();
+
+		// m.remoteがnullに初期化されないのが問題かもしれない
 	}
 }

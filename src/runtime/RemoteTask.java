@@ -49,7 +49,7 @@ public final class RemoteTask extends AbstractTask {
 		return "NEW_" + nextid++;
 	}
 
-	/** 命令ブロック送信用バッファを初期化する */
+	/** 命令ブロック送信用バッファおよびNEW_変換表を初期化する */
 	public void init() {
 		cmdbuffer = "";
 		nextid = 0;
@@ -81,11 +81,12 @@ public final class RemoteTask extends AbstractTask {
 	}
 
 	/**
-	 * 命令ブロック送信用バッファの内容をリモートに送信する
+	 * 命令ブロック送信用バッファの内容をリモートに送信し、バッファを初期化する
 	 * <p>
 	 * @throws RuntimeException 通信失敗（fatal）
 	 */
 	public void flush() {
+		if (cmdbuffer.equals("")) return;
 		String cmd = "BEGIN\n" + cmdbuffer + "END";
 		String result = LMNtalRuntimeManager.daemon.sendWaitText(runtime.hostname, cmd);
 		if (result.substring(4).equalsIgnoreCase("FAIL")) {

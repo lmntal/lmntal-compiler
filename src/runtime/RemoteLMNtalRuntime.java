@@ -62,7 +62,7 @@ public final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 				+ daemon.LMNtalDaemonMessageProcessor.getLocalHostName() + "\"" );
 	}
 	
-	/** このランタイムに擬似タスクおよび擬似膜を作成して返す。
+	/** このリモートランタイム（ローカル内のみ）に擬似タスクおよび擬似膜を作成して返す。
 	 * 擬似膜は、あるルート膜の親膜のプロキシとして使用される。
 	 * <br>擬似タスク ＝ ルート膜を持たないリモートタスク
 	 * <br>擬似膜 ＝ 擬似タスクが管理するリモート膜（親膜を持たない）

@@ -72,8 +72,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public boolean perpetual = false;
 	/** ロックされている時にtrue */
 	protected boolean locked = false;
-	/** リモート（ボディ命令メソッド呼び出しの転送先のリモートタスクまたはnull）
-	 * <p>ロック期間中のみ有効。*/
+	/** リモート（リモート膜のときにボディ命令メソッド呼び出しの転送先となるリモートタスクまたはnull）
+	 * <p>ロック期間中のみ有効。ロック取得時に設定され、ロック解放時にnullに設定される。
+	 * ロックを必要とするランタイムのみが使用し、転送するランタイムは使用しない。*/
 	public RemoteTask remote = null; // publicは仮
 	/** この膜の名前（internされた文字列またはnull） */
 	String name;
@@ -113,7 +114,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return id;
 	}
 	/** この膜のローカルIDを取得する */
-	public String getLocalID() {  //publicなのはLMNtalDaemonから呼んでいるから
+	public String getLocalID() {  //publicなのはLMNtalDaemonから呼んでいるから→呼ばなくなったのでprotectedでよい
 		return Integer.toString(id);
 	}
 	/** この膜のグローバルIDを取得する */
