@@ -33,7 +33,7 @@ import util.RandomIterator;
 abstract public class AbstractMembrane extends QueuedEntity {
 	/** この膜を管理するタスク */
 	protected AbstractTask task;
-	/** 親膜。リモートにあるならばRemoteMembraneオブジェクトまたはnullを参照する */
+	/** 親膜。リモートにあるならばRemoteMembraneオブジェクトを参照する。GlobalRootならばnull */
 	protected AbstractMembrane parent;
 	/** アトムの集合 */
 	protected AtomSet atoms = new AtomSet();
@@ -86,10 +86,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public String getLocalID() {  //publicなのはLMNtalDaemonから呼んでいるから
 		return Integer.toString(id);
 	}
-	/** この膜が所属する計算ノードにおける、この膜のIDを取得する */
-	abstract String getMemID();
+	/** この膜のグローバルIDを取得する */
+	public abstract String getGlobalMemID();
 	/** この膜が所属する計算ノードにおける、この膜の指定されたアトムのIDを取得する */
-	abstract String getAtomID(Atom atom);
+	public abstract String getAtomID(Atom atom);
 	
 	//
 	
@@ -168,9 +168,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 
 	///////////////////////////////
-	// 操作（RemoteMembraneではオーバーライドされる）
+	// ボディ操作（RemoteMembraneではオーバーライドされる）
 
-	// 操作1 - ルールの操作
+	// ボディ操作1 - ルールの操作
 	
 	/** ルールを全て消去する */
 	public void clearRules() {
@@ -186,25 +186,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		rulesets.add(srcRuleset);
 	}
 
-	// 操作2 - アトムの操作
+	// ボディ操作2 - アトムの操作
 
 	/** 新しいアトムを作成し、この膜に追加する。*/
 	public Atom newAtom(Functor functor) {
 		Atom atom = new Atom(this, functor);
 		onAddAtom(atom);
 		return atom;
-	}
-	/** 1引数のnewAtomを呼び出すマクロ */
-	final Atom newAtom(String name, int arity) {
-		return newAtom(new Functor(name, arity));
-	}	
-	/** この膜にアトムを追加するための内部命令 */
-	protected final void onAddAtom(Atom atom) {
-		atoms.add(atom);
-//		if (atom.getFunctor().isActive()) {
-//			enqueueAtom(atom);
-//		} 
-//		atomCount++;
 	}
 	/** （所属膜を持たない）アトムをこの膜に追加する。*/
 	public void addAtom(Atom atom) {
@@ -235,7 +223,22 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atoms.remove(atom);
 		atom.mem = null;
 	}
-	/** removeAtomを呼び出すマクロ */
+	
+	//
+	
+	/** [final] 1引数のnewAtomを呼び出すマクロ */
+	final Atom newAtom(String name, int arity) {
+		return newAtom(new Functor(name, arity));
+	}	
+	/** [final] この膜にアトムを追加するための内部命令 */
+	protected final void onAddAtom(Atom atom) {
+		atoms.add(atom);
+//		if (atom.getFunctor().isActive()) {
+//			enqueueAtom(atom);
+//		} 
+//		atomCount++;
+	}
+	/** [final] removeAtomを呼び出すマクロ */
 	final void removeAtoms(List atomlist) {
 		// atoms.removeAll(atomlist);
 		Iterator it = atomlist.iterator();
@@ -254,7 +257,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		}
 //	}
 
-	// 操作3 - 子膜の操作
+	// ボディ操作3 - 子膜の操作
 	
 	/** 新しい子膜を作成し、活性化する */
 	public abstract AbstractMembrane newMem();
@@ -281,7 +284,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return machine.newTask(this).getRoot();
 					
 	}
-	// 操作4 - リンクの操作
+	// ボディ操作4 - リンクの操作
 	
 	/**
 	 * atom1の第pos1引数と、atom2の第pos2引数を接続する。
@@ -352,7 +355,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
 	}
 
-	// 操作5 - 膜自身や移動に関する操作
+	// ボディ操作5 - 膜自身や移動に関する操作
 	
 	/** 活性化する。
 	 * <p>すでにスタックに積まれていれば何もしない。
@@ -434,7 +437,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		parent = mem;
 //	}
 
-	// 操作6 - ロックに関する操作
+	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される
+
 	/**
 	 * この膜のロック取得を試みる。
 	 * <p>ルールスレッドがこの膜のロックを取得するときに使用する。
@@ -444,13 +448,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * この膜のロック取得を試みる。
 	 * 失敗した場合、この膜を管理するタスクのルールスレッドに停止要求を送る。その後、
 	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
-	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。*/
-	public abstract void blockingLock();
+	 * <p>ルールスレッド以外のスレッドがこの膜のロックを取得するときに使用する。
+	 * @return ロックの取得に成功したかどうか */
+	public abstract boolean blockingLock();
 	/**
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックをブロッキングで取得し、
 	 * 実行膜スタックから除去する。ルート膜ならばblockingLock()と同じになる。
-	 * <p>ルールスレッド以外のスレッドが最初のロックとしてこの膜のロックを取得するときに使用する。*/
-	public abstract void asyncLock();
+	 * <p>ルールスレッド以外のスレッドが最初のロックとしてこの膜のロックを取得するときに使用する。
+	 * @return ロックの取得に成功したかどうか */
+	public abstract boolean asyncLock();
 
 	/**
 	 * 取得したこの膜のロックを解放する。ルート膜の場合またはsignal引数がtrueの場合、
@@ -488,8 +494,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。*/
 	public abstract void asyncUnlock();
 	
-	/** この膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。*/
-	public abstract void recursiveLock();
+	/** このロックした膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。キャッシュは更新しない。
+	 * @return ロックの取得に成功したかどうか */
+	public abstract boolean recursiveLock();
 	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/
 	public abstract void recursiveUnlock();
 

@@ -4,9 +4,12 @@ import java.net.InetAddress;
 import java.util.HashMap;
 
 import runtime.AbstractMembrane;
+import runtime.Membrane;
 
 /**
  * グローバルID -> ローカルのobject という変換をするクラス
+ * 
+ * <p>NEW_->objectの変換は、別途行う。
  * 
  * @author nakajima, n-kato
  *
@@ -15,6 +18,7 @@ public class IDConverter{
 	//グローバル膜ID (String) -> 膜オブジェクト (AbstractMembrane)
 	HashMap memTable = new HashMap();
 
+	static HashMap localMemTable = new HashMap();
 	
 	
 	/*
@@ -24,8 +28,13 @@ public class IDConverter{
 	AbstractMembrane getMem(String globalMemID){
 		return (AbstractMembrane)memTable.get(globalMemID);
 	}
-
-
+	
+	public static Membrane lookupLocalMembrane(String localMemID) {
+		return (Membrane)localMemTable.get(localMemID);
+	}
+	public static void registerLocalMembrane(String localMemID, Membrane mem) {
+		localMemTable.put(localMemID, mem);
+	}
 	
 	/*
 	 * グローバル膜ID -> ローカル膜ID を登録する

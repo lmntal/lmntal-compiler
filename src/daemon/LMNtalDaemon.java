@@ -89,14 +89,21 @@ public class LMNtalDaemon implements Runnable {
 		this.portnum = portnum;
 		try {
 			servSocket = new ServerSocket(portnum);
-			myhostname = InetAddress.getLocalHost().toString();
-		} catch (Exception e) {
+//			myhostname = InetAddress.getLocalHost().toString();
+		} catch (IOException e) {
 			System.out.println(
 				"ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
 			e.printStackTrace();
 		}
 	}
-
+	static {
+		try {
+			myhostname = InetAddress.getLocalHost().toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * メイソはテスト用。自分自身（スレッド）を1つあげるのみ。
 	 * @author nakajima
@@ -126,7 +133,7 @@ public class LMNtalDaemon implements Runnable {
 					Thread t2 = new Thread(node);
 					t2.start();
 				} else {
-					//登録失敗。糸冬了
+					//登録失敗。糸冬
 					node.close();
 				}
 			} catch (IOException e) {
@@ -224,7 +231,8 @@ public class LMNtalDaemon implements Runnable {
 	 * @param fqdn ホスト名。Fully Qualified Domain Nameである事。 
 	 */
 	public static boolean makeRemoteConnection(String fqdn) {
-		//TODO firewallにひっかかってパケットが消滅した時をどうするか？
+		//「ブロックしないようにする」
+		//todo firewallにひっかかってパケットが消滅した時をどうするか？
 
 		if (isHostRegistered(fqdn)) return true;
 		try {
@@ -306,6 +314,11 @@ public class LMNtalDaemon implements Runnable {
 		}
 	}
 
+	/**
+	 * メッセージmsgidの返却先を取得する
+	 * @param msgid メッセージID
+	 * @return メッセージmsgidを返却するLMNtalNode。見つからなかったらnull。
+	 */
 	public static LMNtalNode unregisterMessage(String msgid) {
 		synchronized (msgTable) {
 			return (LMNtalNode)msgTable.remove(msgid);
@@ -317,7 +330,7 @@ public class LMNtalDaemon implements Runnable {
 	 * 
 	 * @param msgid メッセージID
 	 * @return メッセージmsgidを発行したLMNtalNode。見つからなかったらnull。
-	 *   
+	 * @deprecated
 	 */
 	public static LMNtalNode getNodeFromMsgId(String msgid) {
 		if (DEBUG)System.out.println("getNodeFromMsgId(" + msgid + ")");
@@ -355,9 +368,12 @@ public class LMNtalDaemon implements Runnable {
 
 	/*
 	 * 一意なintを返す。rgidとかmsgidとかに使う。いまところはInetAddress.getLocalHost()+":"+Randmom.nextLong()の返り値を返しているだけ。
-	 *  todo 本当に一意なIDを作る
+	 *  todo 一意なIDを作る
 	 */
 	public static String makeID() {
 		return myhostname+ ":" + r.nextLong();
+	}
+	public static String getLocalHostName() {
+		return myhostname;
 	}
 }

@@ -6,6 +6,8 @@ abstract public class AbstractTask {
 	protected AbstractLMNtalRuntime runtime;
 	/** ルート膜 */
 	protected AbstractMembrane root;
+	/** メソッド呼び出しの転送先のリモートタスクまたはnull */
+	protected RemoteTask remote = null;
 	/** コンストラクタ
 	 * @param runtime 所属するランタイム */
 	AbstractTask(AbstractLMNtalRuntime runtime) {

@@ -6,97 +6,67 @@ package runtime;
 
 /**
  * リモート計算ノード
- * 
- * 手元にあって、リモート側（ネットワークの向こう側）の代理人として存在する。
- * やってる事は命令をリモートへ転送する役目。
+ * <p>
+ * リモートに存在するLMNtalRuntimeを表すクラス。
  * 
  * @author n-kato, nakajima
  * 
  */
 final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
-	boolean result;
-	/**
-	 * リモート側のホスト名。Fully Qualified Domain Nameである必要がある。
-	 */
-	protected String hostname;
-	
 //	/**
-//	 * hostnameに対応するLMNtalNode。実際はLMNtalDaemon.getLMNtalNodeFromFQDN()でとってきてるだけ。
+//	 * リモート側のホスト名。Fully Qualified Domain Nameである必要がある。
 //	 */
-//	protected LMNtalNode lmnNode;
-
+//	protected String hostname; →AbstractLMNtalRuntimeに移動してみた
+	
 	/**
 	 * コンストラクタ
 	 * 
-	 * @param hostname つなげたいホストのホスト名。Fully Qualified Domain Nameである必要がある。
+	 * @param hostname 計算ノードが存在するホスト名（fqdn）
 	 */
 	protected RemoteLMNtalRuntime(String hostname) {
-		//hostnameの中にはfqdnが入っている（とみなす）
 //		this.runtimeid = runtimeid;  //TODO 接続先からIDを受け取って代入する（今は未使用なので問題が発生しない）
 		this.hostname = hostname;
 	}
 
-	public AbstractTask newTask() {
-		throw new RuntimeException("Attempted to create a global root in a remote host");
-	}
-
 	/**
-	 * タスクを作る命令を発行する。
-	 * 実際にタスクが作られるのはリモート側。
+	 * リモートにタスクを作成する。
 	 * 
 	 * @param AbstractMembrane 親膜
 	 * @return AbstractTask
 	 */
 	public AbstractTask newTask(AbstractMembrane parent) {
-		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
-
-		String newmemid = null; // getNextMemID();
-		String parentmemid = daemon.IDConverter.getGlobalMembraneID(parent);
-		if (LMNtalRuntimeManager.daemon.sendWait(hostname, "NEWTASK " + parentmemid)) {
-			RemoteTask task = new RemoteTask(this, parent);
-			return task;
+		RemoteTask task = new RemoteTask(this, parent);
+		if (parent.task.remote == null) {
+			task.remote = task;
+			task.init();
 		}
-		System.out.println("failed in remote task creation: this will cause NullPointerException");
-		return (AbstractTask) null;
+		else {
+			task.remote = parent.task.remote;
+		}
+		String newmemid = parent.task.remote.getNextMemID();
+		((RemoteMembrane)task.root).globalid = newmemid;
+		//String parentmemid = daemon.IDConverter.getGlobalMembraneID(parent);
+		task.remote.send("NEWTASK",newmemid,parent);
+		return task;
 	}
 
-	/*
+	/**
 	 * TERMINATEを発行。
 	 */
 	public void terminate() {
-		//TODO 実装@LMNtalDaemon(or MessageProcessor
-		//send("TERMINATE");
+		LMNtalRuntimeManager.daemon.sendMessage("TERMINATE");
 	}
+	
+	////////////////////////////////
+	// RemoteLMNtalRuntime で定義されるメソッド
 
-	/*
-	 * AWAKEを発行
-	 */
-	public void awake() {
-		//TODO 実装
-		//send("AWAKE");
-	}
-
-	/*
-	 * リモート側に接続する。
-	 * 実際はLMNtalDaemon.connect(hostname)を呼出しているだけ。
-	 * 
-	 * @return 接続成功したらtrue、失敗したらfalse。接続の成功判定はLMNtalDaemon.connect()が返すbooleanと、
+	/**
+	 * リモートホストに対して接続確認を行う。最初に接続するときにも使用される。
+	 * @return 生存が確認できたかどうか
 	 */
 	public boolean connect() {
-		//TODO 単体テスト
-		result = LMNtalRuntimeManager.daemon.sendWait(hostname,
-			"connect " + daemon.LMNtalDaemonMessageProcessor.getLocalHostName() );
-		
-//		result = LMNtalDaemon.connect(hostname, runtimeid);
-//		lmnNode = LMNtalDaemon.getLMNtalNodeFromFQDN(hostname);
-		
-//		if (lmnNode != null && result == true) {
-//			return true;
-//		} else {
-//			return false;
-//		}
-
-		return result;
+		return LMNtalRuntimeManager.daemon.sendWait(hostname,
+			"CONNECT \"" + hostname + "\" \""
+				+ daemon.LMNtalDaemonMessageProcessor.getLocalHostName() + "\"" );
 	}
-
 }

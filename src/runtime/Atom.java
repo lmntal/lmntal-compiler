@@ -29,6 +29,9 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	/** このアトムのローカルID */
 	private int id;
 	
+	/** リモートにおけるこのアトムのローカルID（リモートが存在しない場合は未定義）*/
+	protected String remoteid;
+		
 	static void gc() {
 		lastId = 0;
 	}
@@ -65,17 +68,19 @@ public final class Atom extends QueuedEntity implements test.GUI.Node {
 	}
 	/** ファンクタ名を設定する。 */
 	public void setName(String name) {
-		set(name, getFunctor().getArity());
+		setFunctor(name, getFunctor().getArity());
 	}
 	/** ファンクタを設定する。
 	 * 所属膜がリモートの場合もあり、しかもAtomSetは必ず更新しなければならないので、
 	 * 膜のalterAtomFunctorメソッドを呼ぶ。*/
-	public void set(String name, int arity) {
+	public void setFunctor(String name, int arity) {
 		mem.alterAtomFunctor(this, new Functor(name, arity));
 	}
-	/** けす TODO リンクもけす（その場合、メソッド名を変えて下さい）
-	 * 抽象膜クラスにメソッドを作って呼ぶようにするか、または、
-	 * このメソッドから抽象膜クラスのメソッドを呼ぶ。とりあえず現状通りの後者でよい。*/
+	/**@deprecated*/
+	public void set(String name, int arity) {
+		setFunctor(name,arity);
+	}
+	/** アトムを所属膜から取り除く（リンク先のアトムは除去しない）*/
 	public void remove() {
 		mem.removeAtom(this);
 	}

@@ -14,8 +14,6 @@ import runtime.LMNtalRuntimeManager;
  * ランタイムが生成するオブジェクト。
  * デーモンとのコネクションに対して生成され、メッセージの受信を行う。
  * 
- * 命令ブロック内にくくられるメッセージ本文を処理する。
- * 
  * TODO LMNtalDaemonMessageProcessorと共通の処理をLMNtalNodeに移管する。
  * @author nakajima, n-kato
  */
@@ -42,26 +40,62 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		if (!sendMessage(command)) return false;
 		return waitForResult(msgid);
 	}
-
+	
+	////////////////////////////////
+	// 送信用
+	
+	/** 指定のホストにメッセージを送信し、返答を待つ。
+	 * @return 返答がOKかどうか */
+	public boolean sendWait(String fqdn, String command){
+		Object obj = sendWaitObject(fqdn, command);
+		if (obj instanceof String) {
+			return ((String)obj).equalsIgnoreCase("OK");
+		}
+		return false;
+	}
+	/** 指定のホストにメッセージを送信し、返答を待つ。
+	 * @return 返答に含まれるオブジェクト */
+	public Object sendWaitObject(String fqdn, String command){
+		try {
+			BufferedWriter out = getOutputStream();
+			String msgid = LMNtalDaemon.makeID();
+			out.write(msgid + " \"" + fqdn + "\" " + rgid + " " + command + "\n");
+			out.flush();
+			return waitForResponseObject(msgid);
+		} catch (IOException e) {
+			System.out.println("ERROR in LMNtalDaemon.send()");
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	////////////////////////////////////////////////////////////////
 	
 //	/** msgid (String) -> ブロックしている Object */
 //	protected HashMap blockingObjects = new HashMap();
 
-	/** msgid (String) -> メッセージmsgidに対するresの内容 (String) */
+	/** msgid (String) -> メッセージmsgidに対するresの内容 (String または byte[]) */
 	HashMap messagePool = new HashMap();
 	
-	/** 指定したメッセージに対する返答を待ってブロックする。*/
-	synchronized public String waitForResponseText(String msgid) {
-		while (!messagePool.containsKey(msgid)) {
+	/** 指定したメッセージに対する返答を待ってブロックする。
+	 * @return 返答が格納されたオブジェクト */
+	synchronized public Object waitForResponseObject(String msgid) {
+		while (messagePool.containsKey(msgid)) {
 			try {
 				wait();
-			}
-			catch (InterruptedException e) {}
+			} catch (InterruptedException e) {}
 		}
-		return (String)messagePool.remove(msgid);
+		return messagePool.remove(msgid);
+	}	
+	/** 指定したメッセージに対する返答を待ってブロックする。
+	 * @return 返答に含まれる文字列 */
+	public String waitForResponseText(String msgid) {
+		Object obj = waitForResponseObject(msgid);
+		if (obj instanceof String) return (String)obj;
+		return "fail";
 	}
-	/** 指定したメッセージに対する結果を待ってブロックする。*/
+	/** 指定したメッセージに対する結果を待ってブロックする。
+	 * @return 返答がOKかどうか */
 	public boolean waitForResult(String msgid) {
 		return waitForResponseText(msgid).equalsIgnoreCase("ok");
 	}
@@ -83,46 +117,48 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	 */
 	public void run() {
 		if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run()");
-
-		String input = "";
-
-		outsideloop:while (true) {
+		String input;
+		while (true) {
 			try {
-				input = in.readLine();
+				input = readLine();
 			} catch (IOException e) {
 				System.out.println("ERROR:このスレッドには書けません!");
 				e.printStackTrace();
 				break;
 			}
-
-			if (DEBUG)System.out.println("in.readLine(): " + input);
-
 			if (input == null) {
 				System.out.println("（　´∀｀）＜　inputがぬる");
 				break;
 			}
+			if (DEBUG) System.out.println("in.readLine(): " + input);
 
-			/*
-			 * コマンドからはじまるメッセージを処理。
-			 * 
-			 * ここで処理される命令一覧。これ以外のは下スクロールしてね
-			 * 
-			 * res msgid メッセージ本文
-			 * registerlocal rgid
-			 * dumphash
-			 *  
+			/* メッセージ:
+			 *   RES msgid 返答
+			 *   DUMPHASH
+			 *   CMD msgid fqdn rgid コマンド
+			 *     - fqdn が自分宛 
+			 *     - fqdn が他人宛
+			 * 返答:
+			 *   OK | FAIL | UNCHANGED | RAW bytes \n data
 			 */
-			String msgid;
-			String rgid;
-			String fqdn;
-			boolean result;
 			String[] parsedInput = input.split(" ", 4);
 
-			if (parsedInput[0].equalsIgnoreCase("res")) {
-				//res msgid 結果
-				msgid = parsedInput[1];
+			if (parsedInput[0].equalsIgnoreCase("RES")) {
+				// RES msgid (OK | FAIL | UNCHANGED | RAW bytes \n data)
+				String msgid = parsedInput[1];
 				String content = parsedInput[2];
-				messagePool.put(msgid, content);
+				if (content.equalsIgnoreCase("RAW")) {
+					try {
+						int bytes = Integer.parseInt(parsedInput[3]);
+						byte[] data = readBytes(bytes);
+						readLine();	// 改行文字を読み飛ばす
+						messagePool.put(msgid, data);
+					} catch (Exception e) {
+						messagePool.put(msgid, "FAIL");
+						continue;
+					}
+				}
+				else messagePool.put(msgid, content);
 				
 //				Object suspended = blockingObjects.remove(msgid);
 //				if (suspended == null) {
@@ -134,67 +170,53 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					notifyAll();
 				}
 				continue;
-			} else if (parsedInput[0].equalsIgnoreCase("registerlocal")) {
+			} else if (parsedInput[0].equalsIgnoreCase("REGISTERLOCAL")) {
 				System.out.println("invalid message: registerlocal");
 				continue;
-			} else if (parsedInput[0].equalsIgnoreCase("dumphash")) {
-				//dumphash
+			} else if (parsedInput[0].equalsIgnoreCase("DUMPHASH")) {
+				// DUMPHASH
 				LMNtalDaemon.dumpHashMap();
 				continue;
-				
-				/* コマンドからはじまる文字列の処理：ここまで */
-				
-			} else {
-				// todo 耐故障性や拡張性のため、msgid の前に共通コマンド名（例えばcmd）を書いた方がよい
-				/* msgid "fqdn" rgid メッセージ の処理 */
-			
-				//msgidからつづく命令列とみなす
-				msgid = parsedInput[0];
-				fqdn = (parsedInput[1].split("\"", 3))[1];
-				rgid = parsedInput[2];
-
+			} else if (parsedInput[0].equalsIgnoreCase("CMD")) {
+				// CMD msgid fqdn rgid コマンド
+				String msgid = parsedInput[0];
 				// 自分自身宛なので、自分自身で処理する
-
-				/*
-				 * ここで処理される命令一覧
-				 * 
-				 *  CONNECT dst_nodedesc src_nodedesc
-				 *  BEGIN
-				 *  beginrule
-				 * 
-				 * LOCK           globalmemid -> UNCHANGED | CHANGED bytes content | FAIL
-				 * BLOCKINGLOCK   globalmemid -> UNCHANGED | CHANGED bytes content
-				 * asynclock
-				 * recursivelock
-				 * 
-				 * 
-				 * UNLOCK         globalmemid -> OK | FAIL
-				 * BLOCKINGUNLOCK globalmemid -> OK | FAIL
-				 * asyncunlock
-				 * recursiveunlock
-				 * 
-				 * terminate
-				 *  
+				
+				/* コマンド:
+				 *   BEGIN \n ボディ命令... END -> OK
+				 *   CONNECT        dst_nodedesc src_nodedesc -> OK | FAIL
+				 *   TERMINATE -> OK
+				 *   REQUIRERULESET globalrulesetid -> RAW bytes \n data | FAIL
+				 *   LOCK           globalmemid prio -> UNCHANGED | RAW bytes \n data | FAIL
+				 *   BLOCKINGLOCK   globalmemid prio -> UNCHANGED | RAW bytes \n data
+				 *   RECURSIVELOCK  globalmemid -> OK | FAIL
+				 *   UNLOCK         globalmemid -> OK | FAIL
+				 *   BLOCKINGUNLOCK globalmemid -> OK | FAIL
+				 *   ASYNCLOCK      globalmemid -> OK | FAIL
+				 *   ASYNCUNLOCK    globalmemid -> OK | FAIL
 				 */
 
 				String[] command = parsedInput[3].split(" ", 3);
-				//String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
-				Membrane realMem;
-
-				if (command[0].equalsIgnoreCase("connect")) {
-					// connect "my_fqdn" "remote_fqdn"
+				
+				if (command[0].equalsIgnoreCase("TERMINATE")) {
+					Env.theRuntime.terminate();
+					LMNtalRuntimeManager.terminateAllNeighbors();
+					respondAsOK(msgid);
+					return;
+				} else if (command[0].equalsIgnoreCase("CONNECT")) {
+					// CONNECT dst_nodedesc src_nodedesc
 					String nodedesc = command[2];
 					LMNtalRuntimeManager.connectedFromRemoteRuntime(nodedesc);
 					respondAsOK(msgid);
 					continue;
 				} else {
-					if (command[0].equalsIgnoreCase("begin")) {
+					if (command[0].equalsIgnoreCase("BEGIN")) {
 						// endが来るまで処理
 						try {
 							while(true){
-								String inputline = in.readLine();
+								String inputline = readLine();
 								if (inputline == null) break;
-								if (inputline.equalsIgnoreCase("end")) {
+								if (inputline.equalsIgnoreCase("END")) {
 									break;
 								}
 								// doSomething(inputline);
@@ -209,126 +231,60 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				//respondAsFail(msgid);
 			}
 		}
-	}	
-
+	}
+	
 	void onCmd(String msgid, String[] command) {
 		//
 		if (command[0].equalsIgnoreCase("begin")) {
 			onBegin();
 			return;
 		}
-		else if (command[0].equalsIgnoreCase("lock")) {
-									
-			//ロック対象膜をロック
-			//realMem = IDConverter.getMem(command[1]);
-			//if(realMem.lock()){
-			////ロック成功
-			//
-			////キャッシュ更新チェック
-			//   キャッシュオブジェクト.update();
-			//
-			//
-									
-			//////更新されていたらキャッシュを返信する
-	
-			//////更新されていなかったら「更新されていませんメッセージ」
-									
-			//ロック失敗
-			//out.write("res " + msgid.toString() + "
-			// fail\n");
-			//out.flush();
-									
-			runtime_errorNotImplemented();	
-			return;
-		} else if (command[0].equalsIgnoreCase("blockinglock")) {
-			//IDConverter.getMem(command[1]).blockingLock();
-	
-			//キャッシュ更新
-	
-			runtime_errorNotImplemented();	
-			return;
-		} else if (command[0].equalsIgnoreCase("asynclock")) {
-	
-			//IDConverter.getMem(command[1]).asyncLock();
-	
-			//キャッシュ更新
-	
-			runtime_errorNotImplemented();	
-			return;
-		} else if (command[0].equalsIgnoreCase("unlock")) {
-									
-			//if(IDConverter.getMem(command[1]).unlock()){
-				//unlock成功
-				//continue;
-			//} else {
-				//不成功
-				//System.out.println("UNLOCK failed");
-				//out.write("res " + msgid.toString() + "
-				// fail\n");
-				//out.flush();
-				//continue;
-			//}
-									
-			runtime_errorNotImplemented();	
-			return;
-		} else if (command[0].equalsIgnoreCase("blockingunlock")) {
-			//IDConverter.getMem(command[1]).blockingUnlock();
-									
-			runtime_errorNotImplemented();	
-			return;
-		} else if (command[0].equalsIgnoreCase("asyncunlock")) {
-	
-			//if(IDConverter.getMem(command[1]).asyncUnlock()){
-				//unlock成功
-				//continue;
-			//} else {
-				//不成功
-				//System.out.println("ASYNCUNLOCK failed");
-				//out.write("res " + msgid.toString() + "
-				// fail\n");
-				//out.flush();
-				//continue;
-			//}
-	
-			runtime_errorNotImplemented();	
-			return;
-		} else if (command[0].equalsIgnoreCase("recursivelock")) {
-			//IDConverter.getMem(command[1]).recursiveLock();
-	
-			//キャッシュ更新
-																	
-			runtime_errorNotImplemented();	
-			return;
-		} else if (command[0].equalsIgnoreCase("recursiveunlock")) {
-									
-			//IDConverter.getMem(command[1]).recursiveUnlock();
-			runtime_errorNotImplemented();	
-			return;
-		} else if (command[0].equalsIgnoreCase("terminate")) {
-			//「terminateだけ変」(by n-kato)
-			//
-			//やるべきことはEnv.theRuntimeのterminate
-			//でも呼べないからどうしよう？
-			//LocalLMNtalRuntime.terminate();
-			Env.theRuntime.terminate(); //TODO  これでいいのかな
-	
-			//out.write("not implemented yet\n");
-			//out.flush();
-			return;
-		} else {
-			//未知のコマンド or それ以外の何か
-			runtime_respondAsFail(out,msgid);
-			return;
+		else if (command[0].equalsIgnoreCase("LOCK")
+			   || command[0].equalsIgnoreCase("BLOCKINGLOCK")
+			   || command[0].equalsIgnoreCase("ASYNCLOCK")) {
+			// LOCK globalmemid
+			// ローカルの膜をロック
+			Membrane mem = IDConverter.lookupLocalMembrane(command[1]);
+			if (mem != null) {
+				boolean result = false;
+				if (command[0].equalsIgnoreCase("LOCK"))         result = mem.lock();
+				if (command[0].equalsIgnoreCase("BLOCKINGLOCK")) result = mem.blockingLock();
+				if (command[0].equalsIgnoreCase("ASYNCLOCK"))    result = mem.asyncLock();
+				if (result) { // ロック取得成功
+					if (true) { // キャッシュ再送信チェック
+						byte[] data = mem.cache();
+						// todo 文字列結合でいいのか調べる
+						respond(msgid, "RAW " + data.length + "\n" + data);
+					}
+					else {
+						respond(msgid, "UNCHANGED");
+					}
+					return;
+				}
+			}
+		} else if (command[0].equalsIgnoreCase("UNLOCK")
+				 || command[0].equalsIgnoreCase("RECURSIVEUNLOCK")) {
+			// UNLOCK          globalmemid # ローカルの膜をロック解放			
+			// RECURSIVEUNLOCK globalmemid # ローカルの膜の全世界の子孫膜を再帰的にロック解放
+			Membrane mem = IDConverter.lookupLocalMembrane(command[1]);
+			if (mem != null) {
+				if (command[0].equalsIgnoreCase("UNLOCK"))          mem.unlock();
+				if (command[0].equalsIgnoreCase("RECURSIVEUNLOCK")) mem.recursiveUnlock();
+				respondAsOK(msgid);
+				return;
+			}
+		} else if (command[0].equalsIgnoreCase("RECURSIVELOCK")) {
+			// RECURSIVELOCK globalmemid
+			// ロックしたローカルの膜の全世界の子孫膜を再帰的にロック（キャッシュは更新しない）
+			Membrane mem = IDConverter.lookupLocalMembrane(command[1]);
+			if (mem != null) {
+				mem.recursiveLock();
+				respondAsOK(msgid);
+				return;
+			}
 		}
+		respondAsFail(msgid);
 	}
-	void runtime_errorNotImplemented() {
-//		out.write("not implemented yet\n");
-//		out.flush();
-	}
-	void runtime_respondAsFail(BufferedWriter out, String msgid) {
-//		LMNtalDaemon.respondAsFail(out,msgid);
-	}
-
 
 	void onBegin() {
 		/*
@@ -370,10 +326,11 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
 
 		String[] commandInsideBegin = new String[5]; //RemoteMembrane.send()の引数の個数を参照せよ
-	
+		BufferedWriter out = getOutputStream();
+
 		beginEndLoop:while(true){
 			try {
-				input = in.readLine();
+				input = readLine();
 				commandInsideBegin = input.split(" ",5);
 		
 				//TODO ここで命令を書くのではなくて、Instruction.javaの命令番号を引いてくる。
@@ -382,7 +339,6 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				
 				//案：BEGINからENDまで出てくる引数の中でNEWがつかないものを動的に仮引数リストにいれてやると
 				//InterpretedRulsetのコードが使えるので、そうする？
-				//→そうしましょう。(nakajima:2004-08-13)
 				
 				if(commandInsideBegin[0].equalsIgnoreCase("end")){
 					//糸冬
@@ -392,9 +348,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					
 					//dstmem.clearRules()を呼ぶ
 					//(IDConverter.getMem(dstmem)).clearRules();
-	
-					
-					
+		
 					out.write("not implemented yet\n");
 					out.flush();
 		
@@ -595,18 +549,5 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			}
 		}
 	}
-	//
-	/** 指定のホストに送信する。*/
-	public boolean sendWait(String fqdn, String command){
-		try {
-			String msgid = LMNtalDaemon.makeID();
-			out.write(msgid + " \"" + fqdn + "\" " + rgid + " " + command + "\n");
-			out.flush();
-			return waitForResult(msgid);
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.send()");
-			e.printStackTrace();
-			return false;
-		}
-	}
+
 }

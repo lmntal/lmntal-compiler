@@ -10,18 +10,15 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.net.Socket;
 
-/**
- *  LMNtalにおけるノードを表現するクラス
- * 
- * とりあえずreader, writer, socket, ipを持っておく
- * 
- *  @author nakajima, n-kato 
- * */
+/** ソケット通信路を表すクラス。
+ * <p>LMNtalDaemonMessageProcessor および LMNtalRuntimeMessageProcessor の親クラス。
+ * @author nakajima, n-kato */
+
 public class LMNtalNode {
-	Socket socket = null;
-	InetAddress ip = null;
-	BufferedReader in;
-	BufferedWriter out;
+	private Socket socket = null;
+	private InetAddress ip = null;
+	private BufferedReader in;
+	private BufferedWriter out;
 	
 //	public static LMNtalNode connect(String hostname, int port) {
 //		try {
@@ -37,7 +34,6 @@ public class LMNtalNode {
 	public LMNtalNode(Socket socket) {
 		this(socket, socket.getInetAddress());		
 	}
-
 	public LMNtalNode(Socket socket, InetAddress ip) {
 		try {
 			this.ip = ip;
@@ -47,30 +43,28 @@ public class LMNtalNode {
 		} catch (Exception e) {}
 	}
 	
-	private LMNtalNode(
-		Socket socket,
-		InetAddress ip,
-		BufferedReader in,
-		BufferedWriter out
-		) {
-		this.socket = socket;
-		this.ip = ip;
-		this.in = in;
-		this.out = out;
+	//
+	
+	public void close() {
+		try {
+			in.close();
+			out.close();
+			socket.close();
+		} catch (Exception e) {}
 	}
-
+	
+	////////////////////////////////////////////////////////////////
+	// 情報の取得
+	
 	public BufferedReader getInputStream() {
 		return in;
 	}
-
 	public BufferedWriter getOutputStream() {
 		return out;
 	}
-
 	public Socket getSocket() {
 		return socket;
 	}
-
 	public InetAddress getInetAddress() {
 		return ip;
 	}
@@ -84,22 +78,12 @@ public class LMNtalNode {
 			+ out.toString()
 			+ "]";
 	}
-	public void close() {
-		try {
-			in.close();
-			out.close();
-			socket.close();
-		} catch (Exception e) {}
-	}
-	
-	////////////////////////////////////////////////////////////////
-	
-
+		
 	/**
 	 * ホストfqdnが自分自身か判定。
 	 * 
-	 * @param fqdn Fully Qualified Domain Name @return
-	 * 自分自身に割り振られているIPアドレスからホスト名を引いて、fqdnとstringで比較。同じだったらtrue、それ以外はfalse。
+	 * @param fqdn Fully Qualified Domain Name
+	 * @return 自分自身に割り振られているIPアドレスからホスト名を引いて、fqdnと文字列比較した結果
 	 */
 	public static boolean isMyself(String fqdn) {
 		try {
@@ -114,116 +98,53 @@ public class LMNtalNode {
 	public static String getLocalHostName() {
 		try {
 			return InetAddress.getLocalHost().getHostAddress();
-		}
-		catch (UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			return "???";
 		}
 	}
 	
-	////////////////////////////////////////////////////////////////
+	////////////////////////////////
+	// 送信用
 	
-	/*
-	 * メッセージmessageを転送する
-	 * 
+	/**
+	 * このLMNtalNodeが表すホストにメッセージを送信する
 	 * @param message メッセージ
-	 * @return <strike>BufferedWriter.write()を呼んだらtrueを返している。</strike>
 	 */
 	public boolean sendMessage(String message) {
 		try {
 			out.write(message);
 			out.flush();
-
 			return true;
-		} catch (Exception e) {
-			System.out.println(
-				"ERROR in LMNtalDaemon.sendMessage()");
+		} catch (IOException e) {
+			System.out.println("ERROR in LMNtalDaemon.sendMessage()");
 			e.printStackTrace();
 		}
-
 		return false;
 	}
 
 	void respond(String msgid, String message){
-		try {
-			out.write("res " + msgid + " " + message + "\n");
-			out.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.respond()");
-			e.printStackTrace();
-		}
+		sendMessage("RES " + msgid + " " + message + "\n");
 	}
 	void respond(String msgid, boolean value) {
-		respond(msgid, value ? "ok" : "fail");
+		respond(msgid, value ? "OK" : "FAIL");
 	}
 	void respondAsOK(String msgid){
-		try {
-			out.write("res " + msgid + " ok\n");
-			out.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.respondAsOK()");
-			e.printStackTrace();
-		}
-	}
-
-	
+		respond(msgid,"OK");
+	}	
 	void respondAsFail(String msgid){
-		try {
-			out.write("res " + msgid + " fail\n");
-			out.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.respondAsFail()");
-			e.printStackTrace();
-		}
-	}
-	/*
-	void send(String fqdn, String rgid, String command, String arg1){
-		try {
-			out.write(LMNtalDaemon.makeID() + " \"" + fqdn + "\" " + rgid + " " + command + " " + arg1 + "\n");
-			out.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.send()");
-			e.printStackTrace();
-		}
-	}
-
-	void send(String fqdn, String rgid, String command, String arg1, String arg2){
-		try {
-			out.write(LMNtalDaemon.makeID() + " \"" + fqdn + "\" " + rgid + " " + command + " " + arg1 + " " + arg2 + "\n");
-			out.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.send()");
-			e.printStackTrace();
-		}
-	}
-	void send(String fqdn, String rgid, String command, String arg1, String arg2, String arg3){
-		try {
-			out.write(LMNtalDaemon.makeID() + " \"" + fqdn + "\" " + rgid + " " + command + " " + arg1 + " " + arg2 + " " + arg3 + "\n");
-			out.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.send()");
-			e.printStackTrace();
-		}
-	}
-	void send(String fqdn, String rgid, String command, String arg1, String arg2, String arg3, String arg4){
-		try {
-			out.write(LMNtalDaemon.makeID() + " \"" + fqdn + "\" " + rgid + " " + command + " " + arg1 + " " + arg2 + " " + arg3 + " " + arg4 + "\n");
-			out.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.send()");
-			e.printStackTrace();
-		}
-	}
-	void send(String fqdn, String rgid, String command, String arg1, String arg2, String arg3, String arg4, String arg5){
-		try {
-			out.write(LMNtalDaemon.makeID() + " \"" + fqdn + "\" " + rgid + " " + command + " " + arg1 + " " + arg2 + " " + arg3 + " " + arg4 + " " + arg5 + "\n");
-			out.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.send()");
-			e.printStackTrace();
-		}
+		respond(msgid,"FAIL");
 	}
 	
-
-	*/
+	////////////////////////////////
+	// 受信用
+	
+	protected String readLine() throws IOException {
+		return in.readLine();
+	}
+	protected byte[] readBytes(int bytes) throws IOException {
+		byte[] data = {};
+		//data = in.readBytes(bytes); // TODO バイト列をソケットで送信する
+		return data;
+	}
 
 }

@@ -69,6 +69,10 @@ class Task extends AbstractTask implements Runnable {
 	Stack bufferedStack = new Stack();
 	boolean idle = false;
 	static final int maxLoop = 100;
+	/** タスクの優先度（正確には、このタスクのルールスレッドの優先度）
+	 * <p>ロックの制御に使用する予定。将来的にはタスクのスケジューリングにも使用される予定。
+	 * <p>10以上の値でなければならない。*/
+	int priority = 32;
 	
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）*/
@@ -110,7 +114,7 @@ class Task extends AbstractTask implements Runnable {
 	}
 	/** このタスクの本膜のルールを実行する */
 	void exec() {
-		Membrane mem;
+		Membrane mem; // 本膜
 		synchronized(this) {
 			// このタスクを実行するルールスレッド（現在のスレッド）に停止要求があるときは何もしない
 			if (lockRequestCount > 0) {

@@ -99,7 +99,7 @@ public final class LMNtalRuntimeManager {
 		synchronized(terminateLock) { // 重複転送防止のため（仮）
 			Iterator it = runtimeids.keySet().iterator();
 			while (it.hasNext()) {
-				AbstractLMNtalRuntime machine = (AbstractLMNtalRuntime)runtimeids.get(it.next());
+				RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
 				machine.terminate();
 			}
 			runtimeids.clear();

@@ -1,22 +1,21 @@
 package runtime;
 
-import java.util.HashMap;
-
-//import daemon.LMNtalNode;
+//import java.util.HashMap;
 
 /**
  * リモートタスククラス
+ * <p>命令ブロックを管理する。
+ * <p>
  * 済20040707 nakajima コネクションの管理はRemoteMachineにまかせる。
- *       しかしnextatom(mem)idはsynchronizedにしなければならなくなる。
  * @author n-kato
  */
 final class RemoteTask extends AbstractTask {
-	String cmdbuffer;
-	int nextatomid;
-	int nextmemid;
-
-	//
-	HashMap memTable;
+	// 送信用
+	String cmdbuffer;	// 命令ブロック送信用バッファ
+	int nextid;		// 次のNEW_変数番号
+	
+//	// 受信用
+//	HashMap memTable;
 
 	/** 通常のコンストラクタ */
 	RemoteTask(RemoteLMNtalRuntime runtime, AbstractMembrane parent){
@@ -25,82 +24,77 @@ final class RemoteTask extends AbstractTask {
 		parent.addMem(root);	// タスクは膜の作成時に設定した
 	}
 
-	//	String getNextAtomID() {
-	//		return "NEW_" + nextatomid++;
-	//	}
+	///////////////////////////////
+	// 送信用
 
-	synchronized String getNextAtomID() {
-		return "NEW_" + nextatomid++;
+	String getNextAtomID() {
+		return "NEW_" + nextid++;
+	}
+	String getNextMemID() {
+		return "NEW_" + nextid++;
 	}
 
-	//	String getNextMemID() {
-	//		return "NEW_" + nextmemid++;
-	//	}
-
-	synchronized String getNextMemID() {
-		//LMNtalDaemon.getGlobalMembraneID(mem);
-
-		return "NEW_" + nextmemid++;
+	/** 命令ブロック送信用バッファを初期化する */
+	void init() {
+		cmdbuffer = "";
+		nextid = 0;
 	}
 
-	/*	
-	 * コマンドをリモート側へ送信する。実態はString cmdbufferにcmdと改行(\n)を加えているだけ。
-	 * 
-	 * @param cmd 送りたいコマンド
-	 */
+	/**	命令ブロック送信用バッファにボディ命令を追加する */
 	void send(String cmd) {
 		cmdbuffer += cmd + "\n";
 	}
-
-	synchronized void registerMem(String id, String mem) {
-		memTable.put(id, mem);
-	}
 	
-	/*  
-	 * "NEW_1"のようなIDを渡すと、グローバルな膜IDを返す。
-	 * 
-	 * @param id "NEW_1"のようなString
-	 * @return 膜ID。なかったらnull。
-	 */
-	String getRealMemName(String id) {
-		return (String) memTable.get(id);
+	void send(String cmd, AbstractMembrane mem) {
+		cmdbuffer += cmd + " " + mem.getGlobalMemID();
+	}
+	void send(String cmd, AbstractMembrane mem, String args) {
+		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " " + args;
+	}
+	void send(String cmd, AbstractMembrane mem,
+			String arg1, int arg2, String arg3, int arg4) {
+		cmdbuffer += cmd + " " + mem.getGlobalMemID() + " "
+			+ arg1 + " " + arg2 + " " + arg3 + " " + arg4;
+	}
+	void send(String cmd, String outarg, AbstractMembrane mem) {
+		cmdbuffer += cmd + " " + outarg + " " + mem.getGlobalMemID();
+	}
+	void send(String cmd, String outarg, AbstractMembrane mem, String args) {
+		cmdbuffer += cmd + " " + outarg + " " + mem.getGlobalMemID() + " " + args;
 	}
 
-	/*
-	 * cmdbufferにたまった命令をリモート側へ送り、cmdbufferを空にする。
-	 * 実際にはLMNtalDaemon.sendMessage()を呼んでいるだけ。
-	 * 
-	 * @throw RuntimeException LMntalDaemon.sendMessage()の返り値がfalseの時（つまり送信失敗時）
+	/**
+	 * 命令ブロック送信用バッファの内容をリモートに送信する
+	 * <p>
+	 * (n-kato) synchronizedはなぜ付いているのか？
+	 * @throws RuntimeException 通信失敗（fatal）
 	 */
 	synchronized void flush() {
-		//TODO msgid, rgid, BEGINとENDをつける（ここでやるべきかLMNtalDaemonなど他の場所でやるべきか
-
-		boolean result = LMNtalRuntimeManager.daemon.sendMessage(cmdbuffer);
-
-		if (result == true) {
-			cmdbuffer = ""; //バッファを初期化
-			nextatomid = 0;
-			nextmemid = 0;
-		} else {
+		String cmd = "BEGIN\n" + cmdbuffer + "END";
+		boolean result = LMNtalRuntimeManager.daemon.sendWait(runtime.hostname, cmd);
+		if (!result) {
 			throw new RuntimeException("error in flush()");
 		}
 	}
 
 	// ロック
 	// nakajima20040719: RemoteMembraneにあるのでいらないような気がする
-//	public void lock() {
-//		//リモートのルート膜にlock命令を送る
-//		
-//		throw new RuntimeException("not implemented");
+	// n-kato  20040815: ルート膜のロックを取得/解放するときのフックを考えていたのだと思う
+
+	///////////////////////////////
+	// 受信用
+
+//	synchronized void registerMem(String id, String mem) {
+//		memTable.put(id, mem);
 //	}
-//	public boolean unlock() {
-//
-//		//リモートのルート膜にunlock命令を送る
-//		//もう送られているのかどうか調べる
-//
-//		//cmdbufferをflush()する
-//		flush();
-//
-//		throw new RuntimeException("not implemented");
+	
+//	/*  
+//	 * "NEW_1"のようなIDを渡すと、グローバルな膜IDを返す。
+//	 * 
+//	 * @param id "NEW_1"のようなString
+//	 * @return 膜ID。なかったらnull。
+//	 */
+//	String getRealMemName(String id) {
+//		return (String) memTable.get(id);
 //	}
 }

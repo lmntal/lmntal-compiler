@@ -227,7 +227,7 @@ public class FrontEnd {
 			// 実行
 			LMNtalRuntimeManager.init();
 			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
-			Membrane root = (Membrane)rt.getGlobalRoot();
+			Membrane root = rt.getGlobalRoot();
 			Env.initGUI(root);
 			//root.blockingLock();
 			rs.react(root); // TODO 初期配置で子タスクを作った場合にどうなるか考える

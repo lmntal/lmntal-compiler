@@ -1,17 +1,15 @@
 package daemon;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.net.Socket;
 
 import runtime.LocalLMNtalRuntime;
 import runtime.LMNtalRuntimeManager;
-/*
- * LocalLMNtalRuntimeとLMNtalDaemonの間にいて、ローカルホスト内TCP通信の面倒を接続元がソケットを閉じるまで見続ける。
- * 
- * @author nakajima, n-kato
- */
-class LocalLMNtalRuntimeSessionManager {
-	//todo 名称変更。
-	//↑済 2004-08-16 nakajima
+
+class SlaveLMNtalRuntimeLauncher {
+	//todo 名称変更。ここはLocalLMNtalRuntimeとLMNtalDaemonの間にいて、ローカルホスト内TCP通信の面倒を接続元がソケットを閉じるまで見続ける。
 	
 	static boolean DEBUG = true;
 	
@@ -40,7 +38,7 @@ class LocalLMNtalRuntimeSessionManager {
 		}
 	}
 	/**@deprecated*/
-/*	static void processMessage(BufferedReader in, BufferedWriter out){
+	static void processMessage(BufferedReader in, BufferedWriter out){
 		String input = "";
 		String inputParsed[] = new String[3];
 		
@@ -70,9 +68,9 @@ class LocalLMNtalRuntimeSessionManager {
 				
 			} else {
 				//cannot parse
-				System.out.println("Error in LocalLMNtalRuntimeSessionManager.processMessage(): cannot parse input");
+				System.out.println("Error in SlaveLMNtalRuntimeLauncher.processMessage(): cannot parse input");
 				continue;
 			}
 		}
-	}*/
+	}
 }
