@@ -46,7 +46,8 @@ final class LMNtalRuntimeManager{
 		return ret;
 	}
 
-	/** 登録されている全ての物理マシンを終了し、計算ノード表の登録を削除する */
+	/** 登録されている全ての物理マシンを終了し、計算ノード表の登録を削除する
+	 * TODO Env.theRuntime は terminate しなくてよいのかどうかを明らかにする */
 	public static void terminateAll() {
 		Iterator it = runtimeids.keySet().iterator();
 		while (it.hasNext()) {
