@@ -83,12 +83,31 @@ class TestRemote{
 		}
 		System.out.println("connectRuntime success");
 		
+		Thread[] t = new Thread[Thread.activeCount()];
+		Thread.enumerate(t);
+		for (int i = 0; i < t.hashCode(); i++) 
+			System.out.println(t[i]);
 		
 		//終了処理
 //		LMNtalRuntimeManager.disconnectFromDaemon(); //これだと遠隔ノードへのコネクション張りっぱなし、slave runtimeあがりっぱなし
-		LMNtalRuntimeManager.terminateAllNeighbors();	 //もっといい方法ないかな
-		System.out.println("terminateAllNaighbours() success");
+		//LMNtalRuntimeManager.terminateAllNeighbors();	 //もっといい方法ないかな
+		//System.out.println("terminateAllNeighbours() success"); 
 
+		/*
+		 * todo 止めていいスレッドと止めなくていいスレッドを選別してちゃんとこのプログラムが終了するようにする
+		 * 
+		 * LMNtalDaemon										止めない
+		 * LMNtalDaemonMessageProcessor		LMNtalDaemonが終了する時に止める（つまり止めない
+		 *　ＬＭＮｔａｌＲｕｎｔｉｍｅＭｅｓｓａｇｅＰｒｏｃｅｓｓｏｒ　	TERMINATE処理を終了する時
+		 *　InstructionBlockProcessor					一回のBEGIN-ENDが終わる時
+		 * ＳｌａｖｅＬＭＮｔａｌＲｕｎｔｉｍｅＬａｕｎｃｈｅｒ			起動したLMNtalRuntimeMessageProcessorが終了してデーモンから切断し時=ソケットが閉じられた時＝TERMINATE
+		 * 
+		 * 
+		 * TERMINATE処理 			Env.theRuntime.terminate()
+		 */
+		
+		
+		
 		/*
 		 *  試しに実行してみるコード。
 		 * a, a:-b.
