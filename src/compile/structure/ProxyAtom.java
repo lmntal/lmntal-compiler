@@ -1,4 +1,5 @@
 package compile.structure;
+import runtime.Functor;
 
 /**
  * 膜を通過する自由リンクを管理するプロキシアトムの構造を表すクラス。
@@ -12,19 +13,19 @@ package compile.structure;
  */
 final public class ProxyAtom extends Atom {
 
-	/** 自由リンク出力管理アトム名 */
-	public final static String INSIDE_PROXY_NAME = runtime.Functor.INSIDE_PROXY.getInternalName();
+	/** 自由リンク出力管理ファンクタ */
+	public final static Functor INSIDE_PROXY_NAME = runtime.Functor.INSIDE_PROXY;
 	
-	/** 自由リンク入力管理アトム名 */
-	public final static String OUTSIDE_PROXY_NAME = runtime.Functor.OUTSIDE_PROXY.getInternalName();
+	/** 自由リンク入力管理ファンクタ */
+	public final static Functor OUTSIDE_PROXY_NAME = runtime.Functor.OUTSIDE_PROXY;
 	
 	/**
 	 * コンストラクタ
 	 * @param mem 所属膜
 	 * @param name プロキシの名前
 	 */
-	public ProxyAtom(Membrane mem, String name) {
-		super(mem,name,2);
+	public ProxyAtom(Membrane mem, Functor func) {
+		super(mem,func);
 	}
 	
 }
