@@ -178,9 +178,9 @@ public class Module {
 			try {
 				LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(filename))));
 				Membrane nm = RulesetCompiler.runStartWithNull(lp.parse());
-	//			Env.p("MOD compiled "+nm);
+				//Env.p("MOD compiled "+nm);
 				//memNameTable がモジュール膜への参照を保持しているので、GCされない。
-				//m.add(nm);
+				m.rulesets.addAll(nm.rulesets);
 				sb.append(" [ OK ] ");
 				Env.d(sb.toString());
 				return;

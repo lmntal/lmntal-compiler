@@ -158,13 +158,17 @@ public class FrontEnd {
 //			}
 
 			compile.structure.Membrane root = RulesetCompiler.runStartWithNull(m);
-			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
+//			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
 //			Env.d( "After compile : "+ir );	// つねに (:- @601)
 			root.showAllRules();
 			
 			// 実行
 			LMNtalRuntime rt = new LMNtalRuntime();
-			ir.react(rt.getGlobalRoot());
+			Iterator it = root.rulesets.iterator();
+			while(it.hasNext()) {
+				InterpretedRuleset ir = (InterpretedRuleset)it.next();
+				ir.react(rt.getGlobalRoot());
+			}
 			if (Env.fTrace) {
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}

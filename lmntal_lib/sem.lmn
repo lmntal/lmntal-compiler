@@ -6,6 +6,7 @@ sem : {
 	
 	// public static method interface defs.
 	sem.new(ready).
+	sem.down(ready).
 	sem.up(ready).
 	
 	sem.new(msg($self))
