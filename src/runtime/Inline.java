@@ -138,6 +138,7 @@ public class Inline {
 			}
 			p.println("public class MyInlineCode implements InlineCode {");
 			p.println("\tpublic void run(Atom me, int codeID) {");
+			p.println("\t\tAbstractMembrane mem = me.getMem();");
 			//p.println("\t\tEnv.p(\"-------------------------- \");");
 			//p.println("\t\tEnv.d(\"Exec Inline \"+me+codeID);");
 			p.println("\t\tswitch(codeID) {");

@@ -16,29 +16,26 @@ string : {
 
 // H=split([[\s+]], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
 H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[[/*inline*/
-	AbstractMembrane m = me.getMem();
-	
 	String r[] = me.nth(1).split(me.nth(0));
-//	System.out.println(java.util.Arrays.asList(r));
 	
 	Atom parent = me.nthAtom(2);
 	for(int i=0;i<r.length;i++) {
-		Atom c = m.newAtom(new Functor(".", 3));  // .(value child parent)
-		Atom v = m.newAtom(new Functor(r[i], 1)); // value(parent)
-		m.newLink(c, 0, v, 0);
+		Atom c = mem.newAtom(new Functor(".", 3));  // .(value child parent)
+		Atom v = mem.newAtom(new Functor(r[i], 1)); // value(parent)
+		mem.newLink(c, 0, v, 0);
 		if(i==0) {
-			m.relinkAtomArgs(c, 2, me, 2);
+			mem.relinkAtomArgs(c, 2, me, 2);
 		} else {
-			m.newLink(c, 2, parent, 1);
+			mem.newLink(c, 2, parent, 1);
 		}
 		parent = c;
 	}
-	Atom nil = m.newAtom(new Functor("[]", 1));
-	m.newLink(nil, 0, parent, 1);
+	Atom nil = mem.newAtom(new Functor("[]", 1));
+	mem.newLink(nil, 0, parent, 1);
 	
-	m.removeAtom(me.nthAtom(0));
-	m.removeAtom(me.nthAtom(1));
-	m.removeAtom(me);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me.nthAtom(1));
+	mem.removeAtom(me);
 	]](Regexp, S).
 
 // H=join("_", [1,2,3])  ==>  H="1_2_3"
@@ -47,12 +44,12 @@ H=string.join(S, [CAR|CDR]) :- unary(S) | H="^"(CAR, "^"(S, string.join(S, CDR))
 
 // H='^'("abc", "de")  ==>  H="abcde"
 H="^"(S1, S2) :- unary(S1), unary(S2) | H=[[/*inline*/
-	Atom cat = me.getMem().newAtom(new Functor(me.nth(0) + me.nth(1), 1));
-	me.getMem().relinkAtomArgs(cat, 0, me, 2);
+	Atom cat = mem.newAtom(new Functor(me.nth(0) + me.nth(1), 1));
+	mem.relinkAtomArgs(cat, 0, me, 2);
 	
-	me.getMem().removeAtom(me.nthAtom(0));
-	me.getMem().removeAtom(me.nthAtom(1));
-	me.getMem().removeAtom(me);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me.nthAtom(1));
+	mem.removeAtom(me);
 	]](S1, S2).
 
 }.
