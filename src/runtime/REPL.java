@@ -48,10 +48,11 @@ public class REPL {
 		System.out.println("");
 //		System.out.println("[TIPS] Type q to quit.");
 		System.out.println("Commands:");
-		System.out.println("  [no]debug    - set debug mode");
-		System.out.println("  [no]shuffle  - set shuffle mode");
-		System.out.println("  [no]trace    - set trace mode");
-		System.out.println("  q            - quit");
+		System.out.println("  [no]debug          - set debug mode");
+		System.out.println("  [no]shuffle        - set shuffle mode");
+		System.out.println("  [no]trace          - set trace mode");
+		System.out.println("  [no]optimize [0-9] - set optimize level"); //書き方変えた方がよい？
+		System.out.println("  q                  - quit");
 		System.out.println("");
 		while (true) {
 			try {
@@ -83,6 +84,18 @@ public class REPL {
 				} else if(line.equals("noshuffle")) {
 					Env.p("shuffle mode off");
 					Env.fRandom = false;
+					continue;
+				} else if (line.equals("optimize")) {
+					Env.p("optimize level 5");
+					Env.optimize = 5;
+					continue;
+				} else if (line.equals("nooptimize")) {
+					Env.p("optimize level 0");
+					Env.optimize = 0;
+					continue;
+				} else if (line.matches("optimize [0-9]")) {
+					Env.optimize = line.charAt(9) - '0';
+					Env.p("optimize level " + Env.optimize);
 					continue;
 				} else {
 					processLine(line);

@@ -69,6 +69,16 @@ public class FrontEnd {
 						REPL.processLine(args[i+1]);
 						System.exit(-1);
 						break;
+					case 'O':
+						if (args[i].length() == 2) {
+							Env.optimize = 5;
+						} else if (args[i].matches("-O[0-9]")) {
+							Env.optimize = args[i].charAt(2) - '0';
+						} else {
+							System.out.println("不明なオプション:" + args[i]);
+							System.exit(-1);
+						}
+						break;
 					case '-': // 文字列オプション
 						if(args[i].equals("--help")){
 							System.out.println("usage: FrontEnd [-d] filename");

@@ -6,24 +6,33 @@ package compile;
 import java.util.*;
 import runtime.Instruction;
 import runtime.Functor;
+import runtime.Env;
 
 /**
  * 最適化を行うクラスメソッドを持つクラス。
  * @author Mizuno
- * TODO 命令列の仕様を確認
  */
 public class Optimizer {
 	/**	
-	 * 渡された命令列を最適化する。<br>
+	 * 渡された命令列を、現在の最適化レベルに応じて最適化する。<br>
 	 * 命令列中には、1引数のremoveatom/removemem命令が現れていてはいけない。
-	 * @param list 最適化したい命令列。今のところボディ命令列が渡されることを仮定している。
+	 * 現在の引数仕様は暫定的なもので、将来変更される予定。
+	 * @param head 膜主導マッチング命令列
+	 * @param body ボディ命令列
 	 */
 	public static void optimize(List head, List body) {
-		Instruction.normalize(body);
-		reuseMem(body);
-		reuseAtom(body);
-		removeUnnecessaryRelink(body);
-		makeLoop(head, body);
+		if (Env.optimize > 0) {
+			Instruction.normalize(body);
+			if (Env.optimize >= 4) {
+				reuseMem(body);
+			}
+			if (Env.optimize >= 2) {
+				reuseAtom(body);
+			}
+			if (Env.optimize >= 7) {
+				makeLoop(head, body);
+			}
+		}
 	}
 
 	/**
@@ -469,8 +478,9 @@ public class Optimizer {
 		}
 		//TODO enqueueatom命令を生成
 
-		//アトムIDの付け替え
 		Instruction.changeAtomId(list, reuseMap);
+
+		removeUnnecessaryRelink(list);
 	}
 
 	/**

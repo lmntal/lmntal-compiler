@@ -14,7 +14,12 @@ public final class Env {
 	 * Debug level.
 	 */
 	public static int debug = 0;
-
+	
+	/**
+	 * Optimize level.
+	 */
+	public static int optimize = 0;
+	
 	/**
 	 * ランダム実行
 	 */
