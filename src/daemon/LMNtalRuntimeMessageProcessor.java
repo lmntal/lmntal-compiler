@@ -419,7 +419,7 @@ class InstructionBlockProcessor implements Runnable {
 				if(DEBUG){
 					System.out.println("InstructionBlockProcessor.run(): command is : ");
 					for(int i = 0; i < command.length; i ++){
-						System.out.println(command[i]);
+						System.out.println("command[" + i + "] is:" + command[i]);
 					}
 				}
 				
