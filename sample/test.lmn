@@ -265,7 +265,7 @@ a:-{b,b,b,b,b. b:-c}@"localhost". a,a,a,a. {$p,@p}:-$p
 % ÈóÀþ·¿¥×¥í¥»¥¹Ê¸Ì®¤Î¥Æ¥¹¥È
 
 {$p[]} :-$p[],$p[].        {{{a}}}         % ==> a,a,a,a,a,a,a,a
-{$p[X]}:-$p[X],$p[Y],n(Y). {{{a(X)}}},e(X) % ==> ¡ÚNullPointerException¡Û
+{$p[X]}:-$p[X],$p[Y],n(Y). {{{a(X)}}},e(X) % ==> n(a), n(a), n(a), n(a), n(a), n(a), n(a), e(a)
 {$p[X]}:-g(X).             {f(A)},f(A)     % ==> f(g)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -306,6 +306,9 @@ go. % ==> e,e,e,result(3.14)
 {$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,Z),g(X,Z)} % ==> g(A,A),g(B,B)
 {$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,Z),g(X,Z)} % ==> g(A,A)
 {$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,X)}        % ==> g(A,A),g(B,B) ¡ÚNull¡Û¢¨1
+{$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,Y)},u(X,Y) %%%%
+
+
 {$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,X)}        % ==> ()
 
 {$p[X,Y]} :- $p[A,B],$p[A,B].  {f(X,Y)},g(X,Y)
