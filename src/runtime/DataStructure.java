@@ -11,8 +11,8 @@ import runtime.stack.QueuedEntity;
  * @author Mizuno
  */
 class Atom extends QueuedEntity {
-	/** 所属膜。MembraneクラスのaddAtomメソッド内で更新する。 */
-	AbstractMembrane mem;
+	/** 親膜。MembraneクラスのaddAtomメソッド内で更新する。 */
+	private AbstractMembrane mem;
 	/** 名前 */
 	private Functor functor;
 	/** リンク */
@@ -23,23 +23,15 @@ class Atom extends QueuedEntity {
 	/**
 	 * 指定された名前とリンク数を持つアトムを作成する。
 	 * 親膜の状態は未定。実際に使用する前に親膜をmem変数に明示的に代入する必要がある。
+	 * @param mem 親膜
 	 * @param name アトムの名前
 	 * @param arity リンク数
 	 */
-	Atom(String name, int arity) {
+	Atom(AbstractMembrane mem, String name, int arity) {
+		this.mem = mem;
 		functor = new Functor(name, arity);
-		mem = null;
+		args = new Link[arity];
 	}
-//	/**
-//	 * 指定された名前とリンク数を持つアトムを作成し、指定された親膜を設定する。
-//	 * @param mem 所属膜
-//	 * @param name アトムの名前
-//	 * @param arity リンク数
-//	 */
-//	Atom(AbstractMembrane mem, String name, int arity) {
-//		functor = new Functor(name, arity);
-//		this.mem = mem;
-//	}
 
 	///////////////////////////////
 	// 情報の取得
@@ -48,9 +40,18 @@ class Atom extends QueuedEntity {
 	Functor getFunctor(){
 		return functor;
 	}
+	String getName() {
+		return functor.getName();
+	}
 	/** リンク数を取得 */
 	int getArity() {
 		return functor.getArity();
+	}
+	Link getLastArg() {
+		return args[getArity() - 1];
+	}
+	AbstractMembrane getMem() {
+		return mem;
 	}
 }
 
@@ -59,38 +60,73 @@ class Atom extends QueuedEntity {
  * @author Mizuno
  */
 final class Membrane extends AbstractMembrane {
+	/** 実行スタック */
+	private Stack ready = new Stack();
 	/**
 	 * 指定されたマシンに所属する膜を作成する。
 	 */
-	Membrane(AbstractMachine machine) {
-		super(machine);
+	Membrane(AbstractMachine machine, AbstractMembrane mem) {
+		super(machine, mem);
+	}
+
+	///////////////////////////////
+	// 操作
+
+	/** 実行スタックの先頭のアトムを取得し、実行スタックから除去 */
+	Atom popReadyAtom() {
+		return (Atom)ready.pop();
+	}
+	/** 膜の活性化 */
+	void activate() {
+		if (this.isQueued()) {
+			return;
+		}
+		if (!isRoot()) {
+			((Membrane)mem).activate();
+		}
+		((Machine)machine).memStack.push(this);
+	}
+	protected void activateAtom(Atom atom) {
+		ready.push(atom);
+	}
+	/** 
+	 * 移動された後、アクティブアトムを実行スタックに入れるために呼び出される。
+	 * AbstractMembraneクラスで宣言されている抽象メソッドの実装です。
+	 */
+//	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
+	protected void activateAllAtoms() {
+		Iterator i = atoms.functorIterator();
+		while (i.hasNext()) {
+			Functor f = (Functor)i.next();
+			if (true) { // f がアクティブの場合
+				ready.pushAll((Set)atoms.getAtomsOfFunctor(f));
+			}
+		}
 	}
 }
 /**
  * 抽象膜クラス。ローカル膜クラスと膜キャッシュ（未実装）の親クラス
  * @author Mizuno
  */
-class AbstractMembrane extends QueuedEntity {
+abstract class AbstractMembrane extends QueuedEntity {
 	/** この膜を管理するマシン */
-	private AbstractMachine machine;
+	protected AbstractMachine machine;
 	/** 親膜 */
-	private AbstractMembrane mem;
+	protected AbstractMembrane mem;
 	/** アトムの集合 */
-	private AtomSet atoms;
+	protected AtomSet atoms = new AtomSet();;
 	/** 子膜の集合 */
-	private Set mems;
+	protected Set mems = new HashSet();
 	/** この膜にあるproxy以外のアトムの数。 */
-	private int natom;
-	/** 実行スタック */
-	private Stack ready;
+	protected int natom = 0;
 	/** ルールセットの集合。 */
-	private List rulesets;
+	protected List rulesets = new ArrayList();
 	/** この膜以下に適用できるルールが無いときにtrue */
-	boolean stable;
+	boolean stable = false;
 	/** ロックされている時にtrue */
-	private boolean locked = false;
+	protected boolean locked = false;
 //	/** 最後にロックした計算ノード */
-//	private CalcNode lastLockNode;
+//	protected CalcNode lastLockNode;
 
 	///////////////////////////////
 	// コンストラクタ
@@ -98,8 +134,9 @@ class AbstractMembrane extends QueuedEntity {
 	/**
 	 * 指定されたマシンに所属する膜を作成する。
 	 */
-	AbstractMembrane(AbstractMachine machine) {
+	AbstractMembrane(AbstractMachine machine, AbstractMembrane mem) {
 		this.machine = machine;
+		this.mem = mem;
 	}
 
 	///////////////////////////////
@@ -124,7 +161,9 @@ class AbstractMembrane extends QueuedEntity {
 	boolean hasRule() {
 		return rulesets.size() > 0;
 	}
-	
+	boolean isRoot() {
+		return machine.getRoot() == this;
+	}
 	/** この膜にあるアトムの反復子を取得する */
 	Iterator atomIterator() {
 		return atoms.iterator();
@@ -146,19 +185,6 @@ class AbstractMembrane extends QueuedEntity {
 	///////////////////////////////
 	// 操作
 
-	/** 実行スタックの先頭のアトムを取得し、実行スタックから除去 */
-	Atom popReadyAtom() {
-		return (Atom)ready.pop();
-	}
-
-	/** 膜の活性化 */
-	void activate() {
-		if (this.isQueued()) {
-			return;
-		}
-		mem.activate();
-		machine.memStack.push(this);
-	}
 	/** ルールを全てクリアする */
 	void clearRules() {
 		rulesets.clear();
@@ -175,33 +201,26 @@ class AbstractMembrane extends QueuedEntity {
 	/** アトムの追加。アクティブアトムの場合には実行スタックに追加する。 */
 	void addAtom(Atom atom) {
 		atoms.add(atom);
-		atom.mem = this;
-		if (true) { //アクティブの場合
-			ready.push(atom);
-		}
+		activateAtom(atom);
 	}
+	abstract protected void activateAtom(Atom atom);
+	
 	/** 膜の追加 */
 	void addMem(AbstractMembrane mem) {
 		mems.add(mem);
-		mem.mem = this;
 	}
 	/** dstMemに移動 */
 	void moveTo(AbstractMembrane dstMem) {
 		mem.removeMem(this);
 		dstMem.addMem(this);
 		mem = dstMem;
-		movedTo(machine, dstMem); //?
+//		movedTo(machine, dstMem);
+		activateAllAtoms();
 	}
 	/** 移動された後、アクティブアトムを実行スタックに入れるために呼び出される */
-	private void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
-		Iterator i = atoms.functorIterator();
-		while (i.hasNext()) {
-			Functor f = (Functor)i.next();
-			if (true) { // f がアクティブの場合
-				ready.pushAll((Set)atoms.getAtomsOfFunctor(f));
-			}
-		}
-	}
+//	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
+	abstract protected void activateAllAtoms();
+	
 	/** srcMemの内容を全て移動する */
 	void pour(AbstractMembrane srcMem) {
 		atoms.addAll(srcMem.atoms);
@@ -256,14 +275,33 @@ class AbstractMembrane extends QueuedEntity {
 	
 	///////////////////////
 	// リンクの操作
-	
+	/**
+	 * atom1の第pos1引数と、atom2の第2引数を接続する。
+	 */
+	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
+		atom1.args[pos1] = new Link(atom2, pos2);
+		atom2.args[pos2] = new Link(atom1, pos1);
+	}
+	/**
+	 * atom1の第pos1引数と、atom2の第2引数のリンク先を接続する。
+	 */
+	void relinkAtomArg(Atom atom1, int pos1, Atom atom2, int pos2) {
+		atom1.args[pos1].set(atom2.args[pos2]);
+		atom2.args[pos2].set(atom1, pos1);
+	}
+	/**
+	 * atom1の第pos1引数のリンク先と、atom2の第2引数のリンク先を接続する。
+	 */
+	void unifyLink(Atom atom1, int pos1, Atom atom2, int pos2) {
+		atom1.args[pos1].set(atom2.args[pos2]);
+		atom2.args[pos2].set(atom1.args[pos1]);
+	}
 }
 
 
 /**
- * リンク<br>
- * リンクの接続先を、アトムと引数番号の組として表す。LMNtalのリンクには方向が無いため、
- * １つのリンクに対してこのクラスのインスタンスが２つ使われることになる。
+ * リンクの接続先を、アトムと引数番号の組として表す。LMNtalのリンクには方向が無いので、
+ * １つのリンクに対してこのクラスのインスタンスを２つ使用する。
  */
 final class Link {
 	/** リンク先のアトム */
@@ -295,19 +333,24 @@ final class Link {
 	}
 	/** リンク先が最終リンクの場合にtrueを返す */
 	boolean isFuncRef() {
-		return atom.getArity() == pos;
+		return atom.getArity() - 1 == pos;
 	}
 
 	///////////////////////////////
 	// 操作
-	
-	/** 接続先を設定する */
+	/**
+	 * 接続先を設定する。
+	 * 膜クラスのリンク操作用メソッド内でのみ呼び出される。
+	 */
 	void set(Atom atom, int pos) {
 		this.atom = atom;
 		this.pos = pos;
 	}
-	/** このリンクのリンク先を、linkのリンク先に設定する */
-	void relink(Link link) {
+	/**
+	 * このリンクの接続先を、与えられたリンクの接続先と同じにする。
+	 * 膜クラスのリンク操作用メソッド内でのみ呼び出される。
+	 */
+	void set(Link link) {
 		this.atom = link.atom;
 		this.pos = link.pos;
 	}
@@ -315,22 +358,29 @@ final class Link {
 
 final class Machine extends AbstractMachine {
 	/** 実行膜スタック */
-	Stack memStack;
-	/** ルート膜 */
-	private Membrane root;
+	Stack memStack = new Stack();
+	Machine() {
+		root = new Membrane(this, null);
+		memStack.push(root);
+	}
+	
 	void exec() {
 		
 	}
 }
 abstract class AbstractMachine {
+	/** ルート膜 */
+	protected AbstractMembrane root;
+	/** ルート膜の取得 */
+	AbstractMembrane getRoot() {
+		return root;
+	}
 }
 
 /** 計算ノード */
 final class LMNtalRuntime {
-	List machines;
+	List machines = new ArrayList();
 	void exec() {
-		Atom a = new Atom("a", 1);
-		a.dequeue();
 	}
 	Machine newMachine() {
 		return new Machine();
