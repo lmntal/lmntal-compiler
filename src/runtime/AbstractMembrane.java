@@ -273,6 +273,23 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom.mem = null;
 	}
 	
+	/** 指定された基底項プロセスをこの膜から除去する。
+	 * @param srcGround
+	 * @param srcSet 既に辿ったアトムの集合
+	 * @return
+	 */
+	public void removeGround(Link srcGround,Set srcSet){
+		if(srcSet.contains(srcGround.getAtom()))return;
+		srcSet.add(srcGround.getAtom());
+		for(int i=0;i<srcGround.getAtom().getArity();i++){
+			if(i==srcGround.getPos())continue;
+			removeGround(srcGround.getAtom().getArg(i),srcSet);
+		}
+		atoms.remove(srcGround.getAtom());
+		srcGround.getAtom().mem = null;
+		srcGround.getAtom().dequeue();
+	}
+	
 	// 以下は AbstractMembrane の final メソッド
 	
 	/** [final] 1引数のnewAtomを呼び出すマクロ */
@@ -683,20 +700,20 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return new Link(((Atom)srcMap.get(srcGround.getAtom())),srcGround.getPos());
 	}
 	
-	/**
-	 * by kudo
-	 * 基底項プロセスを破棄する(検査は済んでいる)
-	 * @param srcGround 破棄する基底項プロセス
-	 */
-	public void dropGround(Link srcGround, Set srcSet){
-		if(srcSet.contains(srcGround.getAtom()))return;
-		srcSet.add(srcGround.getAtom());
-		for(int i=0;i<srcGround.getAtom().getArity();i++){
-			if(i==srcGround.getPos())continue;
-			dropGround(srcGround.getAtom().getArg(i),srcSet);
-		}
-		srcGround.getAtom().dequeue();
-	}
+//	/**
+//	 * by kudo
+//	 * 基底項プロセスを破棄する(検査は済んでいる)
+//	 * @param srcGround 破棄する基底項プロセス
+//	 */
+//	public void dropGround(Link srcGround, Set srcSet){
+//		if(srcSet.contains(srcGround.getAtom()))return;
+//		srcSet.add(srcGround.getAtom());
+//		for(int i=0;i<srcGround.getAtom().getArity();i++){
+//			if(i==srcGround.getPos())continue;
+//			dropGround(srcGround.getAtom().getArg(i),srcSet);
+//		}
+//		srcGround.getAtom().dequeue();
+//	}
 	
 	////////////////////////////////////////////////////////////////
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される
