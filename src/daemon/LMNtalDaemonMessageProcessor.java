@@ -106,10 +106,11 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 				respond(msgid, result);
 				continue;
 			}  else if (parsedInput[0].equalsIgnoreCase("UNREGISTERLOCAL")){
-				//UNREGISTERLOCAL rgid
+				//UNREGISTERLOCAL msgid rgid
 				
 				//rgid を削除
-				String rgid  = parsedInput[1];
+				String msgid = parsedInput[1];
+				String rgid  = parsedInput[2];
 				if(LMNtalDaemon.unregisterRuntimeGroup(rgid)){
 					//	自分自身にある、マスタランタイム(LMNtalRuntimeMessageProcessor)との通信路を切る
 					close();
