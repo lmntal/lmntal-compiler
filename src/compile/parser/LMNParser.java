@@ -449,6 +449,8 @@ public class LMNParser {
 			if (names.containsKey(name)) {
 				pc.def = (ContextDef)names.get(name);
 				pc.def.rhsOccs.add(pc);
+				
+				// TODO この作業は別のメソッドでdefsを元にして行うべきである
 				if (pc.def.src != null) { // 仮。本来は[X]かどうか調べる。headも同じ。
 					if (pc.args.length != pc.def.src.args.length
 					 || ((pc.bundle == null) != (((ProcessContext)pc.def.src).bundle == null)) ) {
