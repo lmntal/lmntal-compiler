@@ -15,6 +15,8 @@ import java.net.Socket;
  */
 
 public final class LMNtalRuntimeManager {
+	static boolean DEBUG = true;
+	
 	/** ローカルのデーモンとの通信路 */
 	public static LMNtalRuntimeMessageProcessor daemon = null;
 	/** 計算ノード表: nodedesc (String) -> RemoteLMNtalRuntime */
@@ -31,11 +33,15 @@ public final class LMNtalRuntimeManager {
 	 * 
 	 * @param nodedesc ノード識別子（現在はfqdnのみ） */
 	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
+		if(DEBUG)System.out.println("LMNtalRuntimeManager.connectRuntime()");
 		String fqdn = nodedesc;
 		//宛て先がlocalhostなら  自分自身を返す
-		if (LMNtalNode.isMyself(fqdn)){
+		if(LMNtalNode.isMyself(fqdn)){
+			if(DEBUG)System.out.println("LMNtalRuntimeManager.connectRuntime(): 宛て先がlocalhostだから自分自身を返す");
 			return Env.theRuntime;
 		}
+		
+		if(DEBUG)System.out.println("LMNtalRuntimeManager.connectRuntime(): 宛て先がremoteにある場合");
 		//以下は宛て先がremoteにある場合
 		if (!connectToDaemon()) return null;			
 		
@@ -69,6 +75,8 @@ public final class LMNtalRuntimeManager {
 	
 	/** ローカルのデーモンに接続する。すでに接続している場合は何もしない。*/
 	public static boolean connectToDaemon() {
+		if(DEBUG)System.out.println("LMNtalRuntimeManager.connectToDaemon()");
+		
 		if (daemon != null) return true;
 		try {
 			// このVMはマスタノードである
@@ -84,6 +92,7 @@ public final class LMNtalRuntimeManager {
 		}
 		catch (Exception e) {
 			System.out.println("Cannot connect to LMNtal deamon (not started?)");
+			e.printStackTrace();
 			if (daemon != null) {
 				daemon.close();
 				daemon = null;

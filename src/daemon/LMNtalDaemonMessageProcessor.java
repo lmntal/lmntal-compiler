@@ -35,12 +35,12 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			try {
 				input = readLine();
 			} catch (IOException e) {
-				System.out.println("ERROR:このスレッドには書けません!");
+				System.out.println("LMNtalDaemonMessageProcessor.run(): ERROR:このスレッドには書けません!");
 				e.printStackTrace();
 				break;
 			}
 			if (input == null) {
-				System.out.println("（　´∀｀）＜　inputがぬる");
+				System.out.println("in.readLine(): （　´∀｀）＜　inputがぬる");
 				break;
 			}
 			if (DEBUG) System.out.println("in.readLine(): " + input);

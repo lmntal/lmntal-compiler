@@ -234,6 +234,8 @@ public class LMNtalDaemon implements Runnable {
 		//「ブロックしないようにする」
 		//todo 3分間誰も通信できなくなるのを回避するために専用スレッドを作る（後回しでよい） n-kato 2004-08-20
 
+		if(DEBUG)System.out.println("LMNtalDaemon.makeRemoteConnection(" + fqdn + ")");
+		
 		if (isHostRegistered(fqdn)) return true;
 		
 		Socket socket;
@@ -267,16 +269,16 @@ public class LMNtalDaemon implements Runnable {
 		return runtimeGroupTable.containsKey(rgid);
 	}
 	public static boolean registerRuntimeGroup(String rgid, LMNtalNode node){
-		if (DEBUG)System.out.println("registerRemote(" + rgid + ", " + node.toString() + ")");
+		if (DEBUG)System.out.println("registerRuntimeGroup(" + rgid + ", " + node.toString() + ")");
 		
 		synchronized(runtimeGroupTable){
 			if(runtimeGroupTable.containsKey(rgid)){
-				if (DEBUG)System.out.println("registerRemote failed");
+				if (DEBUG)System.out.println("registerRuntimeGroup failed");
 				return false;
 			}
 			runtimeGroupTable.put(rgid, node);
 		}
-		if (DEBUG)System.out.println("registerRemote succeeded");
+		if (DEBUG)System.out.println("registerRuntimeGroup succeeded");
 		return true;
 	}
 

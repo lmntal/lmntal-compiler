@@ -19,7 +19,7 @@ import runtime.LMNtalRuntimeManager;
  * @author nakajima, n-kato
  */
 public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnable {
-	static boolean DEBUG = true;
+	static boolean DEBUG = true; //todo Env.debugを使うようにする
 	
 	/** このVMで実行するLMNtalRuntimeが所属するruntimeGroupID（コンストラクタで設定）*/
 	protected String rgid;
@@ -48,6 +48,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定のホストにメッセージを送信し、返答を待つ。
 	 * @return 返答がOKかどうか */
 	public boolean sendWait(String fqdn, String command){
+		if(DEBUG)System.out.println("LMNtalRuntimeMessageProcessor.sendWait()");
 		Object obj = sendWaitObject(fqdn, command);
 		if (obj instanceof String) {
 			return ((String)obj).equalsIgnoreCase("OK");
@@ -64,7 +65,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			out.flush();
 			return waitForResponseObject(msgid);
 		} catch (IOException e) {
-			System.out.println("ERROR in LMNtalDaemon.send()");
+			System.out.println("ERROR in LMNtalRuntimeMessageProcessor.sendWaitObject(): ");
 			e.printStackTrace();
 			return null;
 		}
@@ -81,11 +82,17 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	/** 指定したメッセージに対する返答を待ってブロックする。
 	 * @return 返答が格納されたオブジェクト */
 	synchronized public Object waitForResponseObject(String msgid) {
-		while (messagePool.containsKey(msgid)) {
+		if(DEBUG)System.out.println("waitForResponseObject()");
+		while (!messagePool.containsKey(msgid)) { 
+			//todo registlocal時にこのwhileが無限ループになる
+			//済 2004-08-21 nakajima  while条件文を変更して対処
+			
 			try {
-				wait();
-			} catch (InterruptedException e) {}
+				if(DEBUG)System.out.println("waitForResponseObject(): waiting...");
+				wait(); 
+			} catch (InterruptedException e) {	}
 		}
+		if(DEBUG)System.out.println("waitForResponseObject(): loop quit");
 		return messagePool.remove(msgid);
 	}	
 	/** 指定したメッセージに対する返答を待ってブロックする。
@@ -123,15 +130,15 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			try {
 				input = readLine();
 			} catch (IOException e) {
-				System.out.println("ERROR:このスレッドには書けません!");
+				System.out.println("LMNtalRuntimeMessageProcessor: ERROR:このスレッドには書けません!");
 				e.printStackTrace();
 				break;
 			}
 			if (input == null) {
-				System.out.println("（　´∀｀）＜　inputがぬる");
+				System.out.println("LMNtalRuntimeMessageProcessor: （　´∀｀）＜　inputがぬる");
 				break;
 			}
-			if (DEBUG) System.out.println("in.readLine(): " + input);
+			if (DEBUG) System.out.println("LMNtalRuntimeMessageProcessor: in.readLine(): " + input);
 
 			/* メッセージ:
 			 *   RES msgid 返答
@@ -160,6 +167,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 					}
 				}
 				else messagePool.put(msgid, content);
+				if(DEBUG)System.out.println(messagePool.toString());
 				
 //				Object suspended = blockingObjects.remove(msgid);
 //				if (suspended == null) {
@@ -167,7 +175,8 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 //						"ERROR: no objects waiting for message id = " + msgid);
 //					continue;
 //				}
-				synchronized(this) {
+				synchronized(this) {	
+					//if(DEBUG)System.out.println("notifyALL");
 					notifyAll();
 				}
 				continue;
