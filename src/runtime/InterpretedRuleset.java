@@ -290,9 +290,8 @@ class InterpretiveReactor {
 					if (mems[inst.getIntArg1()].hasRules()) return false;
 					break; //n-kato
 				case Instruction.NFREELINKS : //[srcmem, count]
-					// TODO ²¿¤«ÊÑ
 					mem = mems[inst.getIntArg1()];
-					if (mem.atoms.size() - mem.atoms.getNormalAtomCount() != inst.getIntArg2())
+					if (mem.atoms.getAtomCountOfFunctor(Functor.INSIDE_PROXY) != inst.getIntArg2())
 						return false;
 					break;
 				case Instruction.NATOMS : //[srcmem, count]
