@@ -57,8 +57,6 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			 * コマンド:
 			 *   BEGIN \n ボディ命令... END
 			 *   CONNECT dst_nodedesc src_nodedesc
-			 *   DISCONNECT
-			 * 
 			 *   TERMINATE
 			 *   ...
 			 */

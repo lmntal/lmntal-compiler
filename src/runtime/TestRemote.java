@@ -85,35 +85,102 @@ class TestRemote{
 		System.out.println("connectRuntime success");
 
 		//マッチング命令・ボディ命令を実行してみるテスト
-		
 		//NEWROOT
 		RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
+		rt_banon.flush();
 		
-		RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
+		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
+		//	rt_banon.flush();
 		
 		//NEWATOM
-		Atom atom_hoge_banon = rm_banon.newAtom(new Functor("hoge", 1));
-		Atom atom_fuga_banon = rm_banon.newAtom(new Functor("fuga", 1));
-		Atom atom_moge_banon = rm_banon.newAtom(new Functor("moge", 1));
-		/*		
+		//Atom atom_hoge_banon = rm_banon.newAtom(new Functor("hoge", 1));
+		//Atom atom_fuga_banon = rm_banon.newAtom(new Functor("fuga", 1));
+		//Atom atom_moge_banon = rm_banon.newAtom(new Functor("moge", 1));
+		//	rt_banon.flush();
+		
 		//ALTERATOMFUNCTOR
-		rm_banon.alterAtomFunctor(atom_hoge_banon, new Functor("hoge2", 1));
+		//rm_banon.alterAtomFunctor(atom_hoge_banon, new Functor("hoge2", 1));
+		//	rt_banon.flush();
 		
 		//REMOVEATOM
-		rm_banon.removeAtom(atom_hoge_banon);
+		//rm_banon.removeAtom(atom_hoge_banon);
+		//	rt_banon.flush();
 		
 		//ENQUEUEATOM
 		//rm_banon.enqueueAtom(atom_hoge_banon);
+		//	rt_banon.flush();
 		
 		//NEWMEM
-		RemoteMembrane komaku_01_banon = (RemoteMembrane)rm_banon.newMem();
+		//RemoteMembrane komaku_01_banon = (RemoteMembrane)rm_banon.newMem();
+		//	rt_banon.flush();
 		
 		//REMOVEMEM
-		rm_banon.removeMem(komaku_01_banon);
+		//rm_banon.removeMem(komaku_01_banon);
+		//	rt_banon.flush();
 		
 		//NEWLINK
-		*/
+		//rm_banon.newLink(hoge_banon, 1, fuga_banon, 1);
+		//	rt_banon.flush();
 		
+		//RELINKATOMARGS
+		//rm_banon.	relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2);
+		//	rt_banon.flush();
+		
+		//INHERITLINK
+		//rm_banon.inheritLink(Atom atom1, int pos1, Link link2);
+		//	rt_banon.flush();
+		
+		//UNIFYATOMARGS
+		//rm_banon.unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2);
+		//	rt_banon.flush();
+		
+		//UNIFYLINKBUDDIES
+		//rm_banon.unifyLinkBuddies(Link link1, Link link2);
+		//	rt_banon.flush();
+		
+		//ACTIVATE
+		//rm_banon.activate();
+		//	rt_banon.flush();
+		
+		//MOVECELLSFROM
+		//rm_banon.moveCellsFrom(AbstractMembrane srcMem);
+		//	rt_banon.flush();
+		
+		//MOVETO
+		//rm_banon.moveTo(AbstractMembrane dstMem);
+		//	rt_banon.flush();
+		
+		//LOCK
+		//rm_banon.lock();
+		//	rt_banon.flush();
+
+		//UNLOCK
+		//rm_banon.unlock();
+		//	rt_banon.flush();
+		
+		//UNLOCK(forced)
+		//rm_banon.forceUnlock();
+		//	rt_banon.flush();
+		
+		//BLOCKINGLOCK
+		//rm_banon.blockingLock();
+		//	rt_banon.flush();
+
+		//ASYNCLOCK
+		//rm_banon.asyncLock();
+		//	rt_banon.flush();
+		
+		//ASYNCUNLOCK
+		//rm_banon.asyncUnlock();
+		//	rt_banon.flush();
+		
+		//RECURSIVELOCK
+		//rm_banon.recursiveLock();
+		//	rt_banon.flush();
+		
+		//RECURSIVEUNLOCK
+		//rm_banon.recursiveUnlock();
+		//	rt_banon.flush();
 		
 		//終了処理
 //		LMNtalRuntimeManager.disconnectFromDaemon(); //これだと遠隔ノードへのコネクション張りっぱなし、slave runtimeあがりっぱなし

@@ -167,8 +167,6 @@ public final class RemoteMembrane extends AbstractMembrane {
 	}
 
 	public void moveCellsFrom(AbstractMembrane srcMem) {
-		//todo 셋증
-		
 		if (srcMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site remote process fusion not implemented");
 		}
@@ -177,8 +175,6 @@ public final class RemoteMembrane extends AbstractMembrane {
 
 	/** dstMemㅛ겨튼 */
 	public void moveTo(AbstractMembrane dstMem) {
-		//todo 셋증
-		
 		if (dstMem.task.getMachine() != task.getMachine()) {
 			throw new RuntimeException("cross-site remote process migration not implemented");
 		}

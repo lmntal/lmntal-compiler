@@ -77,13 +77,15 @@ public final class RemoteTask extends AbstractTask {
 	 * 命令ブロック送信用バッファの内容をリモートに送信する
 	 * <p>
 	 * (n-kato) synchronizedはなぜ付いているのか？
+	 * (nakajima)不要ですね。cmdは複数スレッドによって書き込まれるかと思っていましたが、その可能性はないので消しました 2004-08-25
+	 * 
 	 * @throws RuntimeException 通信失敗（fatal）
 	 */
-	synchronized void flush() {
+	void flush() {
 		String cmd = "BEGIN\n" + cmdbuffer + "END";
 		boolean result = LMNtalRuntimeManager.daemon.sendWait(runtime.hostname, cmd);
 		if (!result) {
-			throw new RuntimeException("error in flush()");
+			throw new RuntimeException("RemoteTask: error in flush()");
 		}
 	}
 
