@@ -750,7 +750,9 @@ public class Instruction {
 	/** Integerでラップされた命令番号から命令名へのハッシュ。
 	 * 処理系開発が収束した頃に、もっと効率のよい別の構造で置き換えてもよい。 */
 	static Hashtable instructionTable = new Hashtable();
-    {
+	
+	//インスタンス生成時にスタックオーバーフローを起こしたので修正しました。 by Mizuno
+    static {
 		try {
 			Instruction inst = new Instruction();
 			Field[] fields = inst.getClass().getDeclaredFields();
