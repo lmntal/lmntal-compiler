@@ -254,10 +254,39 @@ public class Compactor {
 		int size = insts.size();
 		Instruction spec = (Instruction)insts.get(0);
 		int locals = spec.getIntArg1();	// 最初の局所変数の番号は、仮引数の個数にする
-		for (int i = 1; i < size; i++) {
+//		for (int i = 1; i < size; i++) {
+//			Instruction inst = (Instruction)insts.get(i);
+//			if (inst.getOutputType() == -1) continue;
+//			if (inst.getIntArg1() != locals) {
+//				Integer src = (Integer)inst.getArg1();
+//				Integer dst = new Integer(locals);
+//				Integer tmp = new Integer(varcount);
+//				HashMap map1 = new HashMap();
+//				HashMap map2 = new HashMap();
+//				HashMap map3 = new HashMap();
+//				map1.put(src, tmp);
+//				map2.put(dst, src);
+//				map3.put(tmp, dst);
+//				Instruction.applyVarRewriteMapFrom(insts,map1,i);
+//				Instruction.applyVarRewriteMapFrom(insts,map2,i);
+//				Instruction.applyVarRewriteMapFrom(insts,map3,i);
+//			}
+//			locals++;
+//		}
+//		return locals;
+		return renumberLocalsSub(insts.subList(1,size),locals,varcount);
+	}
+	
+	public static int renumberLocalsSub(List insts,int locals,int varcount){
+		int max = 0;
+		for(int i = 0; i < insts.size(); i++){
 			Instruction inst = (Instruction)insts.get(i);
+			if(inst.getKind() == Instruction.NOT){
+				List subinsts = ((InstructionList)inst.getArg1()).insts;
+				int sub = renumberLocalsSub(subinsts, locals, varcount);
+				if(sub > max)max = sub;
+			}
 			if (inst.getOutputType() == -1) continue;
-			// TODO 命令が命令列を引数に持つ場合再帰呼び出しする。localsの最大値を返すようにする
 			if (inst.getIntArg1() != locals) {
 				Integer src = (Integer)inst.getArg1();
 				Integer dst = new Integer(locals);
@@ -274,7 +303,8 @@ public class Compactor {
 			}
 			locals++;
 		}
-		return locals;
+		if(locals > max)max = locals;
+		return max;
 	}
 	
 	////////////////////////////////////////////////////////////////
