@@ -110,7 +110,7 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			} else if (parsedInput[0].equalsIgnoreCase("UNREGISTERLOCAL")){
 				//UNREGISTERLOCAL rgid
 
-				//TODO ちゃんと実装する
+				//TODO (nakajima)ちゃんと実装する
 				//rgid を削除
 				String rgid  = parsedInput[1];
 				if(LMNtalDaemon.unregisterRuntimeGroup(rgid)){

@@ -154,7 +154,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				//todo disconnectFromDaemon()する時に、必ずこの例外が発生するのを防ぐ
 				//済 2004-08-24 nakajima
 
-				if(true){//TODO ちゃんと判定する
+				if(true){//TODO (nakajima)ちゃんと判定する
 					System.out.println("program finished successfully");
 					break;
 				} else {
@@ -706,8 +706,8 @@ class TerminateProcessor implements Runnable {
 	}
 
 	public void run(){
-		System.out.println("TerminateProcessor.run(): now starting LMNtalRuntimeManager.termnateAll()");
-		if(LMNtalRuntimeManager.terminateAll()){  //TODO ←終わらない
+		//System.out.println("TerminateProcessor.run(): now starting LMNtalRuntimeManager.termnateAll()");
+		if(LMNtalRuntimeManager.terminateAll()){  //TODO ←終わらない(nakajima)
 			System.out.println("TerminateProcessor.run(): LMNtalRuntimeManager.termnateAll() succeded");
 			node.respondAsOK(msgid);
 		} else {
