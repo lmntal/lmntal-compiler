@@ -420,9 +420,10 @@ class InterpretiveReactor {
 					break; //n-kato
 
 				case Instruction.NEWROOT : //[-dstmem, srcmem, node]
-					//AbstractMachine remotenode = new AbstractMachine(  );
-					//mems[inst.getIntArg2()].newRoot(    )
-					break; //nakajima 2003-12-27
+					// 仕様検討中
+					AbstractMachine machine = RemoteMachine.connectRuntime((String)inst.getArg3());
+					mems[inst.getIntArg1()] = machine.newTask(mems[inst.getIntArg2()]).getRoot();
+					break;
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
 					mems[inst.getIntArg1()].moveCellsFrom(mems[inst.getIntArg2()]);
 					break; //nakajima 2004-01-04, n-kato

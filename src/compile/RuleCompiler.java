@@ -205,6 +205,10 @@ public class RuleCompiler {
 		freeLHSTypedProcesses();
 		//
 		body.add(0, Instruction.spec(formals, varcount));
+//		if (rs.rightMem.mems.isEmpty() && rs.rightMem.ruleContexts.isEmpty()
+//		 && rs.rightMem.processContexts.isEmpty() && rs.rightMem.rulesets.isEmpty()) {
+//			body.add(new Instruction(Instruction.CONTINUE));
+//		} else 
 		body.add(new Instruction(Instruction.PROCEED));
 	}
 	

@@ -86,7 +86,10 @@ public final class AtomSet {
 	 * Functorの反復子を返す。
 	 * この集合内にあるアトムのFunctorは全てこの反復子を使って取得できるが、
 	 * この反復子で取得できるFunctorを持つアトムが必ずこの集合内にあるとは限らない。
+	 * 
 	 * TODO removeされた時に、アトム数が0になったFunctor除去するようにした方が良いか？
+	 * (n-kato) 膜のgcメソッド（コピーGCによるローカルidの振り直しを行う予定）に任せて放置していいと思います。
+	 * ただし、gcメソッドは現在呼ばれませんけど。
 	 */
 	public Iterator functorIterator() {
 		return atoms.keySet().iterator();
