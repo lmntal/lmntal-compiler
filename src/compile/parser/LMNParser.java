@@ -291,8 +291,15 @@ public class LMNParser {
 		RuleStructure rule = new RuleStructure();
 		// TODO 簡略記法の展開 sRuleの中身を置き換え
 		
+		// ヘッド
 		addProcessToMem(sRule.getHead(), rule.leftMem);
 		createProxy(rule.leftMem);
+		
+		// ガード
+		addProcessToMem(sRule.getGuard(), rule.guardMem);
+		createProxy(rule.guardMem);
+
+		// ボディ
 		addProcessToMem(sRule.getBody(), rule.rightMem);
 		createProxy(rule.rightMem);
 		
