@@ -795,8 +795,7 @@ class InterpretiveReactor {
 					//====整数用の組み込みガード命令====ここまで====
 
 
-
-
+					//====浮動小数点数用の組み込みボディ命令====ここから====
 				case Instruction.FADD : //[-dstfloatatom, floatatom1, floatatom2]
 					double u,v;
 					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
@@ -807,12 +806,12 @@ class InterpretiveReactor {
 					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
 					v = ((FloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new FloatingFunctor(u-v));	
-					break; //nakajima 2004-01-05
+					break; // n-kato
 				case Instruction.FMUL : //[-dstfloatatom, floatatom1, floatatom2]
 					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
 					v = ((FloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new FloatingFunctor(u * v));	
-					break; //nakajima 2004-01-05
+					break; // n-kato
 				case Instruction.FDIV : //[-dstfloatatom, floatatom1, floatatom2]
 					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
 					v = ((FloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
@@ -820,7 +819,23 @@ class InterpretiveReactor {
 					//else
 					func = new FloatingFunctor(u / v);
 					atoms[inst.getIntArg1()] = new Atom(null, func);				
-					break; //nakajima 2004-01-05, n-kato
+					break; // n-kato
+				case Instruction.FNEG : //[-dstfloatatom, floatatom]
+					break; //nakajima 2004-01-23
+
+				case Instruction.FADDFUNC : //[-dstfloatfunc, floatfunc1, floatfunc2]
+					break; //nakajima 2004-01-23			
+				case Instruction.FSUBFUNC : //[-dstfloatfunc, floatfunc1, floatfunc2]
+					break; //nakajima 2004-01-23
+				case Instruction.FMULFUNC : //[-dstfloatfunc, floatfunc1, floatfunc2]
+					break; //nakajima 2004-01-23
+				case Instruction.FDIVFUNC : //[-dstfloatfunc, floatfunc1, floatfunc2]
+					break; //nakajima 2004-01-23
+				case Instruction.FNEGFUNC : //[-dstfloatfunc, floatfunc]
+					break; //nakajima 2004-01-23
+					//====浮動小数点数用の組み込みボディ命令====ここまで====
+					
+					//====浮動小数点数用の組み込みガード命令====ここから====	
 				case Instruction.FLT : //[floatatom1, floatatom2]
 					u = ((FloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
 					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
@@ -851,6 +866,15 @@ class InterpretiveReactor {
 					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
 					if (!(u != v)) return false;
 					break; // n-kato
+				case Instruction.FLTFUNC : //[floatfunc1, floatfunc2]	
+					break; //nakajima			
+				case Instruction.FLEFUNC : //[floatfunc1, floatfunc2]	
+					break; //nakajima	
+				case Instruction.FGTFUNC : //[floatfunc1, floatfunc2]	
+					break; //nakajima	
+				case Instruction.FGEFUNC : //[floatfunc1, floatfunc2]	
+					break; //nakajima	
+					//====浮動小数点数用の組み込みガード命令====ここまで====
 
 				case Instruction.FLOAT2INT: //[-intatom, floatatom]
 					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
