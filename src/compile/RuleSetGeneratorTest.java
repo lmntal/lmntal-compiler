@@ -32,7 +32,8 @@ public class RuleSetGeneratorTest {
 		//test("{}");
 		//test("{v}");
 		// test("a(X), b(X), c(d)");
-		test("(a:-b)");
+		//test("(a:-b)");
+		test("(a:-b), (c:-d)");
 	}
 	
 	/**
@@ -53,6 +54,7 @@ public class RuleSetGeneratorTest {
 			
 			Env.p("");
 			Env.p("Compiled Membrane :");
+			root.showAllRuleset();
 			root.showAllRule();
 			
 			//Env.p("");

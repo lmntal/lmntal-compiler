@@ -34,19 +34,6 @@ public final class InterpretedRuleset extends Ruleset {
     }
 	
 	
-    public String toString() {
-    	StringBuffer s=new StringBuffer("");
-		Iterator l;
-		l = rules.listIterator();
-		while(l.hasNext()) s.append( ((Rule)l.next()).toString() );
-		l = rules.listIterator();
-		while(l.hasNext()) {
-			Env.p("l.next "+l.next());
-			((Rule)l.next()).showDetail();
-		} 
-		return "aa"+s.toString();
-		//return "@" + id;
-    }
     /**
      * アトム主導テストを行い、マッチすれば適用する
      * @return ルールを適用した場合はtrue
@@ -257,9 +244,21 @@ public final class InterpretedRuleset extends Ruleset {
 	}
     }
 	
+	public String toString() {
+		StringBuffer s=new StringBuffer("");
+		Iterator l;
+		l = rules.iterator();
+		while(l.hasNext()) s.append( ((Rule)l.next()).toString()+" " );
+		return "@" + id + "  " + s;
+	}
+	
     public void showDetail() {
+    	Env.p("InterpretedRuleset.showDetail "+this);
 		Iterator l;
 		l = rules.listIterator();
-		while(l.hasNext()) ((Rule)l.next()).showDetail();
+		while(l.hasNext()) {
+			Rule r = ((Rule)l.next());
+			r.showDetail();
+		} 
     }
 }

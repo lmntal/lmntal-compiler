@@ -87,6 +87,23 @@ public final class Membrane {
 		return "{ " + toStringWithoutBrace() + " }";
 	}
 	
+	public void showAllRuleset() {
+		Env.p( ((InterpretedRuleset)ruleset) );
+		
+		Iterator l;
+		
+		// 直属のルールそれぞれについて、その左辺膜と右辺膜のルールセットを表示
+		l = rules.listIterator();
+		while(l.hasNext()) {
+			RuleStructure rs = (RuleStructure)l.next();
+			rs.leftMem.showAllRuleset();
+			rs.rightMem.showAllRuleset();
+		} 
+		// 子膜それぞれ
+		l = mems.listIterator();
+		while(l.hasNext()) ((Membrane)l.next()).showAllRuleset();
+	}
+	
 	/**
 	 * この膜の中にあるルールを全て表示する。
 	 * 
@@ -98,6 +115,7 @@ public final class Membrane {
 	 * </pre>
 	 */
 	public void showAllRule() {
+		Env.c("Membrane.showAllRule mem="+this);
 		((InterpretedRuleset)ruleset).showDetail();
 		
 		Iterator l;
@@ -106,9 +124,12 @@ public final class Membrane {
 		l = rules.listIterator();
 		while(l.hasNext()) {
 			RuleStructure rs = (RuleStructure)l.next();
+			//Env.p("");
+			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
 			rs.leftMem.showAllRule();
+			//Env.p("About rule structure (LEFT): "+rs.rightMem+" of "+rs);
 			rs.rightMem.showAllRule();
-		} 
+		}
 		// 子膜それぞれ
 		l = mems.listIterator();
 		while(l.hasNext()) ((Membrane)l.next()).showAllRule();

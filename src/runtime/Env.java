@@ -18,8 +18,18 @@ public final class Env {
 	 * @param o Object to print
 	 */
 	public static void p(Object o) {
-		System.out.println(o);
+		p(o, 0);
 	}
+	
+	/**
+	 * General dumper with indent
+	 * @param o
+	 * @param depth インデントの深さ
+	 */
+	public static void p(Object o, int depth) {
+		System.out.println(getIndent(depth) + o);
+	}
+	
 	/**
 	 * Debug output when some method called
 	 * @param o method name
@@ -34,7 +44,10 @@ public final class Env {
 	public static void n(Object o) {
 		p(">>> new "+o);
 	}
-	/** Better list dumper : No comma */
+	
+	/**
+	 * Better list dumper : No comma output
+	 */
 	public static String parray(List l) {
 		StringBuffer s = new StringBuffer();
 		for(ListIterator li=l.listIterator();li.hasNext();) {
@@ -42,9 +55,15 @@ public final class Env {
 		}
 		return s.toString();
 	}
-	public static String getIndent(int indents) {
+	
+	/**
+	 * 指定した数のインデントを返す
+	 * @param depth
+	 * @return
+	 */
+	public static String getIndent(int depth) {
 		String indent="";
-		for(int i=0;i<indents;i++) {
+		for(int i=0;i<depth;i++) {
 			indent += "\t";
 		}
 		return indent;

@@ -33,19 +33,25 @@ public final class Rule {
 	public void showDetail() {
 		Iterator l;
 		l = atomMatches.listIterator();
-		Env.p("--atommatches :");
+		Env.p("Rule.showDetail  this = "+this);
+		
+		/*
+		Env.p("--atommatches :", 1);
 		while(l.hasNext()) {
 			Iterator ll = ((List)l.next()).iterator();
-			Env.p((Instruction)ll.next());
-		} 
+			while(ll.hasNext()) Env.p(indent+(Instruction)ll.next());
+		}
+		*/
 		
 		l = memMatch.listIterator();
-		Env.p("--memmatch :");
-		while(l.hasNext()) Env.p((Instruction)l.next());
+		Env.p("--memmatch :", 1);
+		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
 		
 		l = body.listIterator();
-		Env.p("--body :");
-		while(l.hasNext()) Env.p((Instruction)l.next());
+		Env.p("--body :", 1);
+		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
+		
+		Env.p("");
 	}
 	
 	public String toString() {
