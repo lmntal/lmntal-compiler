@@ -306,7 +306,7 @@ public class RuleCompiler {
 				Functor func = cstr.functor;
 				ContextDef def1 = null;
 				ContextDef def2 = null;
-				ContextDef def3 = null;
+ 				ContextDef def3 = null;
 				if (func.getArity() > 0)  def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
 				if (func.getArity() > 1)  def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
 				if (func.getArity() > 2)  def3 = ((ProcessContext)cstr.args[2].buddy.atom).def;
@@ -700,8 +700,6 @@ public class RuleCompiler {
 				int atomid = varcount++;
 				rhsatompath.put(atom, new Integer(atomid));
 				rhsatoms.add(atom);
-//				// NEWATOM した分を覚えておく
-//				newatoms.add(atom);
 				body.add( Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
 			}
 		}
