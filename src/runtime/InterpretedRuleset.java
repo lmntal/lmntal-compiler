@@ -41,6 +41,10 @@ public final class InterpretedRuleset extends Ruleset {
      * @return ルールを適用した場合はtrue
      */
     boolean react(Membrane mem, Atom atom) {
+
+	
+	
+
 	return false;
     }
     /**
@@ -61,36 +65,42 @@ public final class InterpretedRuleset extends Ruleset {
      * 
      */
     private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
-	switch ruleid{
-	case Instruction.LOCK:
+	switch (ruleid){
+
+
+	case Instruction.GETMEM:
+	    //getmem [dstmem, srcatom]
+	    //TODO:聞く:「膜の所属膜」とは？
+	    //ruby版だとgetparentと同じ実装になってるのでとりあえずそうする
+	    memArgs[0] = memArgs[1].mem;
 	    break;
 
-	case Instruction.UNLOCK:
-	    break;
-
-	case Instruction.REMOVEATOM:
-	    break;
-
-	case Instruction.INSERTPROXIES:
-	    break;
-
-	case Instruction.REMOVEPROXIES:
-	    break;
-
-	case Instruction.NEWATOM:
+	case Instruction.GETPARENT:
+	    //getparent [dstmem, srcmem] 
+	    memArgs[0] = memArgs[1].mem;
 	    break;
 
 	case Instruction.NEWMEM:
+	    //newmem [dstmem, srcmem] 
+	    memArgs[1] = new Membrane(memArgs[0]);
+	    memArgs[0].mems.add(memArgs[1]);
 	    break;
 
-	case Instruction.NEWLINK:
+	case Instruction.NEWATOM:
+	    //newatom [dstatom, srcmem, func] 
+	    memArgs[1].atoms.add(atomArgs[1]);
+	    atomArgs[0] = atomArgs[1];
 	    break;
 
-	case Instruction.RELINK:
+	case Instruction.REMOVEATOM:
+
 	    break;
 
+	case Instruction.REMOVEMEM:
 
-	default:
+	    break;
+
+ 	default:
 	    System.out.println("Invalid rule");
 	    break;
 	}
