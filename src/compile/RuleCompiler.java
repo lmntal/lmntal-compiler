@@ -306,6 +306,9 @@ public class RuleCompiler {
 		it = mem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
+			if (pc.lhsMem == null) {
+				System.out.println("SYSTEM ERROR: ProcessContext.lhsMem is not set");
+			}
 			if (rhsmemToPath(mem) != lhsmemToPath(pc.lhsMem)) {
 				body.add(new Instruction(Instruction.MOVECELLS,
 					rhsmemToPath(mem), lhsmemToPath(pc.lhsMem) ));
