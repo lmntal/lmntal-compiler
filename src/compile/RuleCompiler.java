@@ -223,6 +223,7 @@ public class RuleCompiler {
 					//link2.atom.args[link2.pos] = link1;
 					link1.buddy = link2;
 					link2.buddy = link1;
+					link2.name = link1.name;
 					removedAtoms.add(atom);
 				}
 			}
