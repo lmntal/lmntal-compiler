@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.SecurityException;
 
 /**
@@ -88,7 +89,28 @@ public class FrontEnd {
 		}
 		
 		// srcを構文解析に渡す。
-		
+		koubun_kaiseki(src); // ダミー
+		try{
+			src.close();
+		}catch(IOException e){
+			System.out.println("ファイルがクローズできません");
+			System.exit(-1);
+		}
 		// 計算ノードに、得られた初期化ルールを渡して呼び出す
+	}
+	
+	static void koubun_kaiseki(Reader src){
+		// ソースをダンプするだけ
+		int i;
+		while(true){
+			try{
+				i = src.read();
+				if(i == -1) break;
+				System.out.write(i);
+			}catch(IOException e){
+				System.out.println("file dump error");
+				System.exit(-1);
+			}
+		}
 	}
 }
