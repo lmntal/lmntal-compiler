@@ -1,0 +1,237 @@
+条件
+生成・取得されたリンクオブジェクトは、ちょうど１回unifylinkの引数に出現する。(?)
+
+前処理
+・RISC化
+copyrules dstmem, srcmem
+ ↓
+getrules rules, srcmem
+addrules        dstmem, rules
+
+//下もやる？
+//addruleset      dstmem, <ruleset>
+// ↓
+//addrules        dstmem, <rules>    ※rulesetのみからなる集合
+
+movecells	  m2, m1
+↓
+getcell	cell, m1
+addcell		  m2, cell
+
+inheritlink		a1, pos1, l2
+↓
+makelink	l1, a1, pos1
+unifylink		l1, l2
+
+relink			a1, pos1, a2, pos2
+↓
+makelink	l1, a1, pos1
+getlink		l2, a2, pos2
+unifylink		l1, l2
+
+newlink			a1, pos1, a2, pos2
+↓
+makelink	l1, a1, pos1
+makelink	l2, a2, pos2
+unifylink		l1, l2
+
+unify			a1, pos1, a2, pos2
+↓
+getlink		l1, a1, pos1
+getlink	 	l2, a2, pos2
+unifylink		l1, l2
+
+deref		a2, a1, pos1, pos2
+↓
+getlink		l1, a1, pos1
+dereflink	a2, l1, pos2
+
+・命令列の並び替え
+ガード命令、freemem/freeatom、getrules, getcell
+
+
+膜の再利用
+
+//※movecellsを使う場合
+//newmem		m2, m3
+//movecells		m2, m1
+//freemem			m1
+//↓
+//clearrules		m1
+//addmem			m1, m3
+//unlockmem		m1
+//(m2 -> m1)
+
+freemem			m1
+newmem		m2, m3
+↓
+clearrules		m1
+addmem			m1, m3
+unlockmem		m1
+(m2 -> m1)
+
+getrules rules, m1
+addrules        m1, rules
+↓
+getrules rules, m1
+
+getrules rules, m1
+!)addrules		m2, rules
+↓
+nil
+
+movecells	m1, m1
+↓
+nil
+
+removemem		m1, m2
+addmem			m2, m1
+↓
+nil
+
+norules		m1
+clearrules	m1
+↓
+norules		m1
+
+※以下は、removeproxies命令の作り直し
+∀child ∈ parentの子膜
+!)removeproxies	child
+!)removemem		parent
+removeproxies	parent
+↓
+nil
+
+!)removeproxies			m1
+removetoplevelproxies	m0
+↓
+nil
+
+TODO insertproxies命令の作り直し
+
+アトムの再利用
+
+removeatom		a1, m0, func
+freeatom		a1
+newatom		a2, m0, func
+↓
+nil
+(a2 -> a1)
+
+getlink		l1, a1, pos1
+makelink	l2, a1, pos1
+unifylink		l1, l2
+↓
+nil
+
+//deref		a2, a1, pos1, pos2
+getlink		l1', a1, pos1
+dereflink	a2, l1', pos2
+makelink	l1, a1, pos1
+makelink	l2, a2, pos2
+unifylink		l1, l2
+↓
+getlink		l1', a1, pos1
+dereflink	a2, l1', pos2
+
+TODO unnifylinkのみ削除するようにし、後でGC
+
+ループ化
+
+方針
+ループ化は、atom主導命令を中心に考える。
+atom主導命令中のbranch命令の中から、ループ化に適したものを１つ選び、それに基づいて
+ガード・ボディ部分をループ化し、全てのマッチングに対するボディ命令として利用する。
+そのため、マッチング命令列中のjump命令の展開は、ループ化後に行う。
+
+アトム再利用・膜再利用によって、主導するアトムが同じ膜内（再利用or本間区）で
+再利用されているものを元にループ化する。
+
+--atommatch
+spec _,_
+branch _   * n
+branch [
+  spec _,_
+  D1
+  jump L1,_,[1|_],_
+]
+L1:
+spec _,_
+D2 (!)removemem  1,_)   ※1は主導したアトムに対応する変数
+proceed
+↓
+L1:
+spec _,_          ※適切に書き換える
+D2
+resetvars ??       ※これはjump命令にすべき？または不要？
+loop [
+  D1 { ?? -> ?? }   ※本膜と主導したアトム以外を使われていない変数に変える
+  D2 { ?? -> ?? }
+  resetvars ??
+  proceed
+]
+proceed
+
+D1
+makelink	l1, a1, pos1
+D2
+unifylink	l1, l2
+D3
+loop [
+  D4
+  getlink	l3, a1, pos1
+  D5
+]
+↓
+D1
+makelink	l1, a1, pos1
+D2
+unifylink	l1, l2
+D3
+loop [
+  D4
+  D5 { l3 -> l2 }
+]
+
+D1
+newatom		a1, _, f1
+D2
+loop [
+  D3
+  func			a1, F1
+  D4
+]
+↓
+D1
+newatom		a1, _, f1
+D2
+loop [
+  D3
+  D4
+]
+
+D1
+newatom		a1, _, f1
+D2
+loop [
+  D3
+  func			a1, F2
+  D4
+]
+proceed
+↓
+D1
+newatom		a1, _, f1
+D2
+proceed
+
+unifylink		l1, l2
+loop [
+	getlink		l3, (l1 or l2のmakelink元)    (optional)
+	unifylink	l1, l2'
+]
+↓
+loop [
+	(3 -> l2 or l1)
+]
+unifylink	l1, l2
