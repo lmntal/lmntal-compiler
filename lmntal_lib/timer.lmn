@@ -1,0 +1,31 @@
+% timer, time, benchmark, long の開発者向けサンプル by n-kato
+
+timer : {
+%	export([benchmark,gettime,subtract]).
+
+%	timer:getTime(-Long)
+%	timer:subtract(+Long,+Long,-Float)
+%	timer:benchmark(Link,-Float),{'+'(Link), ... }
+
+	timer:gettime(Time) :-
+		[[/*inline*/me.getMem().alterAtomFunctor( me,
+			new ObjectFunctor(new Long(System.currentTimeMillis())) );]](Time).
+			
+	timer:subtract(Time1,Time2,Res) :- class(Time1,"java.lang.Long"), class(Time2,"java.lang.Long") |
+		[[/*inline*/
+			AbstractMembrane mem = me.getMem();
+			mem.removeAtom(me);
+			mem.removeAtom(me.getArg(0).getAtom());
+			mem.removeAtom(me.getArg(1).getAtom());
+			long time1 = ((Long)((ObjectFunctor)me.getArg(0).getAtom().getFunctor()).getObject()).longValue();
+			long time2 = ((Long)((ObjectFunctor)me.getArg(1).getAtom().getFunctor()).getObject()).longValue();
+			double res = (time1 - time2) / 1000.0;
+			Atom resatom = mem.newAtom(new FloatingFunctor(res));
+			mem.relinkAtomArgs(resatom,0,me,2);]](Time1,Time2,Res).
+
+	timer:benchmark(X,Res) :- timer:gettime(Start), timer:benchmark2(X,Start,Res).
+	timer:benchmark2(X,Start,Res), {+X,$p,@p} :- class(Start,"java.lang.Long") |
+        timer:benchmark3(Start,Res), {go,$p,@p}.
+	timer:benchmark3(Start,Res), {$p,@r}/ :- timer:gettime(End),
+		timer:subtract(End,Start,Res), {$p,@r}.
+}

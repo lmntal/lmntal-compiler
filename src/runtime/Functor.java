@@ -63,7 +63,6 @@ public class Functor {
 			text = "'" + text + "'";
 			return text;
 		}
-		// "..." や [[...]] がObjectFunctorのオブジェクトになったため、ここに来ることはもはやないはず
 		return getStringLiteralText(text);
 	}
 	/** 指定された文字列を表す文字列リテラルのテキスト表現を取得する。
@@ -112,7 +111,7 @@ public class Functor {
 	/** 適切に省略された表示名を取得 */
 	public String getAbbrName() {
 		String full = getName();
-		return full.length() > 10 ? full.substring(0, 10) : full;
+		return full.length() > 16 ? full.substring(0, 14) + ".." : full;
 	}
 	/** シンボル名を取得する。
 	 * @return nameフィールドの値。サブクラスのオブジェクトのときそのときに限り空文字列が返る。*/

@@ -244,8 +244,9 @@ public class RuleCompiler {
 		return ((Integer)rhstypedcxtpaths.get(cxt)).intValue();
 	}
 	
-	static final int ISINT   = Instruction.ISINT;
-	static final int ISFLOAT = Instruction.ISFLOAT;
+	static final int ISINT    = Instruction.ISINT;
+	static final int ISFLOAT  = Instruction.ISFLOAT;
+	static final int ISSTRING = Instruction.ISSTRING;
 	static HashMap guardLibrary1 = new HashMap(); // 1ÆþÎÏ¥¬¡¼¥É·¿À©ÌóÌ¾
 	static HashMap guardLibrary2 = new HashMap(); // 2ÆþÎÏ¥¬¡¼¥É·¿À©ÌóÌ¾
 	static {
@@ -271,7 +272,7 @@ public class RuleCompiler {
 		guardLibrary2.put(new Functor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV, ISINT});
 		guardLibrary2.put(new Functor("mod",  3), new int[]{ISINT,  ISINT,   Instruction.IMOD, ISINT});
 		guardLibrary1.put(new Functor("int",   1), new int[]{ISINT});
-		guardLibrary1.put(new Functor("string",1), new int[]{Instruction.ISSTRING});
+		guardLibrary1.put(new Functor("string",1), new int[]{ISSTRING});
 		guardLibrary1.put(new Functor("float", 1), new int[]{ISFLOAT});
 		guardLibrary1.put(new Functor("int",   2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
 		guardLibrary1.put(new Functor("float", 2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
@@ -326,6 +327,14 @@ public class RuleCompiler {
 					int atomid1 = loadUnaryAtom(def1);
 					guard.add(new Instruction(Instruction.ISUNARY, atomid1));
 				}
+				else if (func.getSymbolFunctorID().equals("class_2")) {
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					int atomid1 = loadUnaryAtom(def1);
+					int atomid2 = varcount++;
+					guard.add(new Instruction(Instruction.GETCLASS, atomid2, atomid1));
+					bindToUnaryAtom(def2, atomid2);
+					typedcxtdatatypes.put(def2, new Integer(ISSTRING));
+				}
 				else if (func instanceof runtime.IntegerFunctor) {
 					bindToFunctor(def1, func);
 					typedcxtdatatypes.put(def1, new Integer(ISINT));
@@ -336,12 +345,12 @@ public class RuleCompiler {
 				}
 				else if (func instanceof runtime.StringFunctor) {
 					bindToFunctor(def1, func);
-					typedcxtdatatypes.put(def1, new Integer(Instruction.ISSTRING));
+					typedcxtdatatypes.put(def1, new Integer(ISSTRING));
 				}
 //				else if (func instanceof runtime.ObjectFunctor
 //				&& ((runtime.ObjectFunctor)func).getObject() instanceof String) {
 //					bindToFunctor(def1, func);
-//					typedcxtdatatypes.put(def1, new Integer(Instruction.ISSTRING));
+//					typedcxtdatatypes.put(def1, new Integer(ISSTRING));
 //				}
 				else if (func.equals(FUNC_UNIFY)) {
 					if (!identifiedCxtdefs.contains(def2)) {

@@ -5,6 +5,9 @@ package runtime;
  * @see ObjectFunctor#getName() */
 public class StringFunctor extends ObjectFunctor {
 	public StringFunctor(String data) { super(data); }
-	public String getQuotedFuncName() { return getStringLiteralText(data.toString()); }
-	public String getQuotedAtomName() { return getStringLiteralText(data.toString()); }
+	public String getQuotedAtomName() {
+		if (getName().startsWith("/*inline*/")) return "/*inline*/";
+		return getStringLiteralText(getName());
+	}
+	public String getQuotedFuncName() { return getQuotedAtomName(); }
 }

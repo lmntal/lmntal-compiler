@@ -1,6 +1,7 @@
 package runtime;
 
-/** オブジェクトへの参照を保持するファンクタ
+/** オブジェクトへの参照を保持するファンクタ。
+ * このクラスをSymbolFunctorの基底クラスにした方がよさそう
  * @author n-kato */
 public class ObjectFunctor extends Functor {
 	Object data;

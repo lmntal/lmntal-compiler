@@ -1097,6 +1097,21 @@ public class Instruction implements Cloneable {
 	static {setArgType(ISFLOATFUNC, new ArgType(false, ARG_VAR));}
 	static {setArgType(ISSTRINGFUNC, new ArgType(false, ARG_VAR));}
 
+	/** getclass [-stringatom, atom]
+	 * <br>出力するガード命令<br>
+	 * アトム$atomがObjectFunctorまたはそのサブクラスのファンクタを持つことを確認し、
+	 * 格納されたオブジェクトのクラスの完全修飾名文字列を表すファンクタを持つアトムを生成し、
+	 * $stringatomに代入する。*/
+	public static final int GETCLASS = 228;
+	static {setArgType(GETCLASS, new ArgType(true, ARG_ATOM, ARG_ATOM));}
+	/** getclassfunc [-stringfunc, func]
+	 * <br>出力するガード命令<br>
+	 * ファンクタ$funcがObjectFunctorまたはそのサブクラスであることを確認し、
+	 * 格納されたオブジェクトのクラスの完全限定（修飾）名文字列を表すファンクタを生成し、
+	 * $stringfuncに代入する。*/
+	public static final int GETCLASSFUNC = 228 + OPT;
+	static {setArgType(GETCLASSFUNC, new ArgType(true, ARG_VAR, ARG_VAR));}
+
 	// 整数用の組み込みボディ命令 (400--419+OPT)
 	/** iadd [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>

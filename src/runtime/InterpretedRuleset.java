@@ -549,13 +549,13 @@ class InterpretiveReactor {
 				case Instruction.RECURSIVEUNLOCK : //[srcmem]
 					mems[inst.getIntArg1()].recursiveUnlock();
 					break;//nakajima 2004-01-04, n-kato
-				case Instruction.COPYMEM : //[-dstmem, srcmem]
+//				case Instruction.COPYMEM : //[-dstmem, srcmem]
 					// //todo proxyに関する処理をまだ書いてない→それ以前にcopymemはまだ実装できません
 					//「内容」とは子膜・アトム・ルール（ルールは違う。それと、addAllで追加すると親膜はどうなってしまいますか？）
 					//mems[inst.getIntArg1()].copyRulesFrom(mems[inst.getIntArg2()]);
 					//mems[inst.getIntArg1()].atoms.addAll(mems[inst.getIntArg2()].atoms);
 					//mems[inst.getIntArg1()].mems.addAll(mems[inst.getIntArg2()].mems);
-					break;
+					//break;
 				case Instruction.DROPMEM : //[srcmem]
 					//mems[inst.getIntArg1()] = null;まだ実装できません
 					break; //nakajima 2004-01-05
@@ -563,7 +563,7 @@ class InterpretiveReactor {
 
 					//====制御命令====ここから====
 				case Instruction.INLINEREACT :
-					break;
+					break;//
 				case Instruction.REACT :
 					Rule rule = (Rule) inst.getArg1();
 					List bodyInsts = (List) rule.body;
@@ -656,8 +656,8 @@ class InterpretiveReactor {
 //					}
 					if (f.getArity() != 1) return false;
 					break; // n-kato
-				case Instruction.ISUNARYFUNC: // [func]
-					break;
+//				case Instruction.ISUNARYFUNC: // [func]
+//					break;
 					
 				case Instruction.ISINT : //[atom]
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof IntegerFunctor)) return false;
@@ -665,17 +665,24 @@ class InterpretiveReactor {
 				case Instruction.ISFLOAT : //[atom]
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof FloatingFunctor)) return false;
 					break; //n-kato
-				case Instruction.ISSTRING : //[atom]
+				case Instruction.ISSTRING : //[atom] // todo StringFunctorに変える
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof ObjectFunctor)) return false;
 					if (!(((ObjectFunctor)atoms[inst.getIntArg1()].getFunctor()).getObject() instanceof String)) return false;
 					break; //n-kato
 				case Instruction.ISINTFUNC : //[func]
 					if (!(vars.get(inst.getIntArg1()) instanceof IntegerFunctor)) return false;
 					break; //n-kato
-				case Instruction.ISFLOATFUNC : //[func]
-					break;
-				case Instruction.ISSTRINGFUNC : //[func]
-					break;
+//				case Instruction.ISFLOATFUNC : //[func]
+//					break;
+//				case Instruction.ISSTRINGFUNC : //[func]
+//					break;
+
+				case Instruction.GETCLASS: //[-stringatom, atom]
+					if (!(atoms[inst.getIntArg2()].getFunctor() instanceof ObjectFunctor)) return false;
+					Object obj = ((ObjectFunctor)atoms[inst.getIntArg2()].getFunctor()).getObject();
+					atoms[inst.getIntArg1()] = new Atom(null, new StringFunctor( obj.getClass().toString().substring(6) ));
+					break; //n-kato
+					
 					//====型検査のためのガード命令====ここまで====
 
 					//====組み込み機能に関する命令====ここから====
@@ -705,7 +712,7 @@ class InterpretiveReactor {
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
 					if (y == 0) return false;
-					if (y == 0) func = new Functor("NaN",1);
+					//if (y == 0) func = new Functor("NaN",1);
 					else func = new IntegerFunctor(x / y);
 					atoms[inst.getIntArg1()] = new Atom(null, func);				
 					break; //nakajima 2004-01-05, n-kato
@@ -717,7 +724,7 @@ class InterpretiveReactor {
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
 					if (y == 0) return false;
-					if (y == 0) func = new Functor("NaN",1);
+					//if (y == 0) func = new Functor("NaN",1);
 					else func = new IntegerFunctor(x % y);
 					atoms[inst.getIntArg1()] = new Atom(null, func);						
 					break; //nakajima 2004-01-05
@@ -773,7 +780,8 @@ class InterpretiveReactor {
 				case Instruction.IDIVFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
-					if (y == 0) func = new Functor("NaN",1);
+					if (y == 0) return false;
+					//if (y == 0) func = new Functor("NaN",1);
 					else func = new IntegerFunctor(x / y);
 					vars.set(inst.getIntArg1(), func);
 					break; //nakajima 2003-01-05
@@ -784,7 +792,8 @@ class InterpretiveReactor {
 				case Instruction.IMODFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
-					if (y == 0) func = new Functor("NaN",1);
+					if (y == 0) return false;
+					//if (y == 0) func = new Functor("NaN",1);
 					else func = new IntegerFunctor(x % y);
 					vars.set(inst.getIntArg1(), func);
 					break; //nakajima 2003-01-05
