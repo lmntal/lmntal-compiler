@@ -1,0 +1,53 @@
+/**
+ * LMNtalソースファイル =(1)=> 解析木 =(2)=> (compile.struct.*)
+ * (1) 構文解析器
+ *   @ ソースファイルをそのままJavaのオブジェクトへと変換する。
+ *     compile.parser.*
+ *   @ JFlex, JavaCUPを使用
+ *   @ 簡略記法も対応する
+ *   @ ルールでしか出現しないもの(RuleContext)がデータ部分に出ている
+ *     ようなことはチェックしていない
+ *
+ * (2) 意味解析器
+ *   @ 
+ *   @ リンクの貼り付け
+ *   @ アトム中のアトムなどの簡略記法を展開する
+ *   @ 膜を通過するリンクのプロキシーを生成する
+ */
+
+<LinkName>      =   [A-Z][a-zA-Z0-9]*
+<AtomName>      =   [a-z0-9][a-zA-Z0-9]*
+
+<Link>          =   <LinkName>
+
+<Atom>          =   <AtomName>
+                   | <AtomName> '(' ')'
+                   | <AtomName> '(' <ProcessList> ')'
+
+<Membrane>      =   '{' '}'
+                  | '{' <ProcessList> '}'
+
+<Rule>          =   '(' <ProcessList> ':-' <ProcessList> ')'
+                =   '(' <ProcessList> ':-' <NagateList> <ProcessList> ')'
+
+<ProcessCotext> =   '@' <AtomName>
+                  | '+' <LinkName>
+
+<RuleContext>   =   '$' <AtomName>
+
+<Context>       =   <ProcessContext>
+                  | <RuleContext>
+
+<LinkUnify>     = <LinkName> '=' <LinkName>
+
+<Process>       =   <Atom>
+                  | <Membrane>
+                  | <Rule>
+                  | <Context>
+                  | <Link>
+                  | <LinkUnify>
+
+<ProcessList>   =   <Process>
+                  | <Process> ',' <ProcessList>
+
+<LMNtalProg>    =   <ProcessList>
