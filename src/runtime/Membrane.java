@@ -331,6 +331,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 		Iterator it = childMemWithStar.atomIteratorOfFunctor(Functor.STAR);
 		ArrayList removeList = new ArrayList();
 		while (it.hasNext()) {
+			//TODO 名前変更のメソッドを作る
 			Atom star = (Atom)it.next(); // n
 			Atom inside = newAtom(Functor.INSIDE_PROXY); //これもn（名前変更後）
 			relinkAtomArgs(inside, 0, star, 0);
@@ -340,10 +341,10 @@ abstract class AbstractMembrane extends QueuedEntity {
 				Atom outside = newAtom(Functor.OUTSIDE_PROXY); // o
 				Atom newstar = newAtom(Functor.STAR); //m
 				newLink(outside, 1, newstar, 1);
-				newLink(newstar, 1, outside, 1);
+//				newLink(newstar, 1, outside, 1);
 				relinkAtomArgs(newstar, 0, inside, 0);
 				newLink(inside,  0, outside, 0);
-				newLink(outside, 0, inside,  0);
+//				newLink(outside, 0, inside,  0);
 			}
 		}
 		atoms.removeAll(removeList);
@@ -408,7 +409,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 */
 	void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = new Link(atom2, pos2);
-		//atom2.args[pos2] = new Link(atom1, pos1);
+		atom2.args[pos2] = new Link(atom1, pos1);
 	}
 	/**
 	 * atom1の第pos1引数と、atom2の第pos2引数のリンク先を接続する。
