@@ -31,9 +31,9 @@ public class Optimizer {
 					removeUnnecessaryRelink(body);
 				}
 			}
-//			if (Env.optimize >= 7) {
-//				makeLoop(head, body); //まだ問題だらけ
-//			}
+			if (Env.optimize >= 7) {
+				makeLoop(head, body); //まだ問題だらけ
+			}
 		}
 	}
 
@@ -158,7 +158,7 @@ public class Optimizer {
 		lit.previous(); //最後のproceed命令の手前に追加
 		addUnlockInst(lit, reuseMap, new Integer(0), createdChildren);
 
-		Instruction.changeMemId(list, reuseMap);
+		Instruction.changeVar(list, reuseMap);
 	}
 	private static void addUnlockInst(ListIterator lit, HashMap reuseMap, Integer mem, HashMap children) {
 		//子膜を先に処理
@@ -504,9 +504,9 @@ public class Optimizer {
 //					break;
 			}
 		}
-		//TODO enqueueatom命令を生成
+		//TO DO enqueueatom命令を生成 → 元の命令列にあるものが使えるので不要
 
-		Instruction.changeAtomId(list, reuseMap);
+		Instruction.changeVar(list, reuseMap);
 
 //		it = list.iterator();
 //		while (it.hasNext()) {
@@ -592,9 +592,9 @@ public class Optimizer {
 		//条件に合致するか検査＋情報収集
 		HashMap links = new HashMap(); //newlink命令で生成したリンクの情報
 		HashMap functor = new HashMap(); // atom -> functor
-		Iterator it = body.iterator();
-		while (it.hasNext()) {
-			inst = (Instruction)it.next();
+		ListIterator lit = body.listIterator();
+		while (lit.hasNext()) {
+			inst = (Instruction)lit.next();
 			switch (inst.getKind()) {
 				case Instruction.REMOVEATOM:
 //				case Instruction.FREEATOM:
@@ -637,16 +637,20 @@ public class Optimizer {
 			System.out.println(i + " -> " + (base + i));
 		}
 		varMap.put(firstAtom, firstAtom);
-		
-		it = head.subList(2, head.size() - 1).iterator(); //spec,findatom,reactを除去
-		while (it.hasNext()) {
-			inst = (Instruction)it.next();
+
+		ArrayList moveInsts = new ArrayList();
+		lit = head.subList(2, head.size() - 1).listIterator(); //spec,findatom,reactを除去
+		while (lit.hasNext()) {
+			inst = (Instruction)lit.next();
 			switch (inst.getKind()) {
 				case Instruction.DEREF:
 					Link l = (Link)links.get(new Link(inst.getIntArg2(), inst.getIntArg3()));
 					if (l != null && l.pos == inst.getIntArg4()) {
+						//除去
 						System.out.println(inst.getArg1() + " -> " + l.atom);
 						varMap.put(inst.getArg1(), new Integer(l.atom));
+					} else {
+						loop.add(inst.clone());
 					}
 					break;
 				case Instruction.FUNC:
@@ -667,19 +671,64 @@ public class Optimizer {
 			}
 		}
 
-		it = body.subList(1, body.size()).iterator(); //specを除去
-		while (it.hasNext()) {
-			inst = (Instruction)it.next();
-			loop.add(inst.clone());
+		HashMap changeToNewlink = new HashMap(); //newlinkに変更するリンク -> リンク先
+		lit = body.listIterator(1); //specを除去
+		while (lit.hasNext()) {
+			inst = (Instruction)lit.next();
+			switch (inst.getKind()) {
+				case Instruction.GETLINK:
+					Integer atom = (Integer)inst.getArg2();
+					Link l = (Link)links.get(new Link(atom.intValue(), inst.getIntArg3()));
+					Integer atom2 = new Integer(l.atom);
+					if (varMap.get(atom).equals(atom) || varMap.get(atom2).equals(atom2)) {
+						//削除されるnewlink命令で生成されるはずのリンクに対するgetlinkの場合
+						//getlinkを削除し、inheritlinkをnewlinkに変更
+						changeToNewlink.put(inst.getArg1(), l);
+					} else {
+						loop.add(inst.clone());
+					}
+					break;
+				case Instruction.INHERITLINK:
+					Integer linkVar = (Integer)inst.getArg3();
+					if (changeToNewlink.containsKey(linkVar)) {
+						l = (Link)changeToNewlink.get(linkVar);
+						System.out.println(linkVar);
+						System.out.println(l);
+						//newlinkに変更
+						loop.add(Instruction.newlink(inst.getIntArg1(),
+													 inst.getIntArg2(),
+													 l.atom,
+													 l.pos));
+													 //inst.getIntArg5()));
+					} else {
+						loop.add(inst.clone());
+					}
+					break;
+				case Instruction.NEWLINK:
+					atom = (Integer)inst.getArg1();
+					atom2 = (Integer)inst.getArg3();
+					if (varMap.get(atom).equals(atom) || varMap.get(atom2).equals(atom2)) {
+						//最後に移動
+						moveInsts.add(inst);
+						lit.remove();
+					} else {
+						loop.add(inst.clone());
+					}
+					break;
+				default:
+					loop.add(inst.clone());
+					break;
+			}
 		}
 		
-		Instruction.changeAtomId(loop, varMap);
-		Instruction.changeMemId(loop, varMap);
+		Instruction.changeVar(loop, varMap);
 		
 		//proceed命令の前に挿入
 		ArrayList looparg = new ArrayList();
 		looparg.add(loop);
-		body.add(body.size() - 1, new Instruction(Instruction.LOOP, looparg));		
+		body.add(body.size() - 1, new Instruction(Instruction.LOOP, looparg));
+		//最後に1回実行する命令を挿入
+		body.addAll(body.size() - 1, moveInsts);
 	}
 
 }
