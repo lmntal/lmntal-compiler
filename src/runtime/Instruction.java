@@ -1105,12 +1105,15 @@ public class Instruction {
 	static Hashtable instructionTable = new Hashtable();
 	
 	//インスタンス生成時にスタックオーバーフローを起こしたので修正しました。 by Mizuno
+	//ExceptionInInitializerError がおきてたので修正 by hara
     static {
 		try {
 			Instruction inst = new Instruction();
 			Field[] fields = inst.getClass().getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
 				Field f = fields[i];
+				// 追加。hara
+				if(! f.getType().isPrimitive()) continue;
 				int kind = f.getInt(inst);
 				if (kind != LOCAL
 				 && f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {

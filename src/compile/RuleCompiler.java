@@ -151,7 +151,9 @@ public class RuleCompiler {
 				hc.mempath.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
 			hc.compileMembrane(rs.leftMem);
-			hc.match.add( Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals()) );
+			new Instruction();
+			//Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals());
+			//hc.match.add( Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals()) );
 		}
 	}
 	
