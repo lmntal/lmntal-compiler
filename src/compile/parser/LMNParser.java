@@ -183,7 +183,6 @@ public class LMNParser {
 	 */
 	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) throws ParseException {
 		Membrane submem = new Membrane(mem);
-		// hara
 		Module.regMemName(sMem.name, submem);
 		submem.name = sMem.name;
 		submem.stable = sMem.stable;
