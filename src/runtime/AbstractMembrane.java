@@ -369,8 +369,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** link1の指すアトム引数とlink2の指すアトム引数の間に、双方向のリンクを張る。
 	 * <p>実行後link1およびlink2自身は無効なリンクオブジェクトになるため、参照を使用してはならない。*/
 	public void unifyLinkBuddies(Link link1, Link link2) {
-		link1.getBuddy().set(link2);
-		link2.getBuddy().set(link1);
+		//link1.getBuddy().set(link2);
+		//link2.getBuddy().set(link1);
+		link1.getAtom().args[link1.getPos()] = link2;
+		link2.getAtom().args[link2.getPos()] = link1;
 	}
 	/** atom1の第pos1引数と、リンクlink2のリンク先を接続する。
 	 * <p>link2は再利用されるため、実行後link2の参照を使用してはならない。*/

@@ -555,6 +555,14 @@ class InterpretiveReactor {
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						(Link)vars.get(inst.getIntArg3()) );
 					break; //n-kato
+
+				case Instruction.UNIFYLINKS:		//[link1, link2, mem]
+				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
+					((Link)vars.get(inst.getIntArg1())).getAtom().getMem().unifyLinkBuddies(
+						((Link)vars.get(inst.getIntArg1())),
+						((Link)vars.get(inst.getIntArg2())));
+					break; //n-kato
+
 					//====リンクを操作するボディ命令====ここまで====
 
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここから====
