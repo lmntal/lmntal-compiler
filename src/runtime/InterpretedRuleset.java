@@ -391,8 +391,6 @@ class InterpretedReactor {
 				break;
 				//====整数用の組み込みガード命令====ここまで====
 
-
-
 			default:
 				System.out.println("Invalid rule");
 				break;
