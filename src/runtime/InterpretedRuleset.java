@@ -57,6 +57,9 @@ public final class InterpretedRuleset extends Ruleset {
 	 * @param atomArgs 実引数のうち、アトムであるもの
 	 */
 	private void body(int ruleid, AbstractMembrane[] memArgs, Atom[] atomArgs) {
+	    
+
+
 	}
 	
 	public void showDetail() {
