@@ -34,9 +34,8 @@ public class LMNtalDaemon implements Runnable {
 	/*
 	 * 凡例： rgid  … runtime group id
 	 */
-	public static final int DEFAULT_PORT = 60000;
-	
-	int portnum = DEFAULT_PORT;
+	public static final int DEFAULT_PORT = Env.daemonListenPort; //(nakajima)これいらないような気が
+	int portnum = DEFAULT_PORT;  //portnum = Env.DAEMON_DEFAULT_LISTENPORTでいいような気が
 	
 	/** listenするソケット */
 	ServerSocket servSocket = null;
@@ -74,6 +73,11 @@ public class LMNtalDaemon implements Runnable {
 	static String myhostname;
 	
 	/**
+	 * LMNtalDaemon is ready if this is true.
+	 */
+	public static boolean isReady = false;
+	
+	/**
 	 * コンストラクタ。 DEFAULT_PORTで指定されたポート番号にServerSocketを開くだけ。
 	 */
 	public LMNtalDaemon() {
@@ -108,12 +112,38 @@ public class LMNtalDaemon implements Runnable {
 	}
 	
 	/**
-	 * メイソはテスト用。自分自身（スレッド）を1つあげるのみ。
+	 * Is LMNtalDaemon ready?
+	 * 
+	 * @author nakajima
+	 * @return true if ready. false if not.
+	 */
+	public static boolean isReady(){
+		return isReady;
+	}
+	
+	/**
+	 * メイソ。自分自身（スレッド）を1つあげる。
 	 * @author nakajima
 	 *
 	 */
 	public static void main(String args[]) {
-		Thread t = new Thread(new LMNtalDaemon(), "LMNtalDaemon");
+
+		//TODO 引数をチェック。
+		//java -classpath java.class.path daemon.LMNtalDaemon Env.debugDaemon Env.daemonListenPort 
+		if(args.length < 2){
+			System.out.println("Invalid option");
+			System.exit(-1);
+		}
+		try{
+			Env.debugDaemon = Integer.parseInt(args[0]);
+			Env.daemonListenPort = Integer.parseInt(args[1]);
+		} catch (NumberFormatException e){
+			System.out.println("Cannot parse as integer");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+
+		Thread t = new Thread(new LMNtalDaemon(Env.daemonListenPort), "LMNtalDaemon");
 		t.start();
 	}
 
@@ -121,13 +151,15 @@ public class LMNtalDaemon implements Runnable {
 	 * 接続を待ち、接続が来たらLMNtalNodeを作成して登録、そしてLMNtalDaemonMessageProcessorスレッドを起動する。
 	 */
 	public void run() {
-		if(Env.debug > 0)System.out.println("LMNtalDaemon.run()");
-
+		if(Env.debugDaemon > 0)System.out.println("LMNtalDaemon.run()");
+		isReady = true;
+		if(Env.debugDaemon > 0)System.out.println("LMNtalDaemon STARTED on port " + portnum);
+		
 		while (true) {
 			try {
 				Socket socket = servSocket.accept(); //コネクションがくるまで待つ
 
-				if (Env.debug > 0)System.out.println("accepted socket: " + socket);
+				if (Env.debugDaemon > 0)System.out.println("accepted socket: " + socket);
 				LMNtalDaemonMessageProcessor node = new LMNtalDaemonMessageProcessor(socket);
 				
 				//登録する
@@ -155,7 +187,7 @@ public class LMNtalDaemon implements Runnable {
 	 * @return このホストが既に登録されていたらfalse
 	 */
 	static boolean registerRemoteHostNode(LMNtalDaemonMessageProcessor node) {
-		if (Env.debug > 0)System.out.println("LMNtalDaemon.registerRemoteHostNode(" + node.toString() + ")");
+		if (Env.debugDaemon > 0)System.out.println("LMNtalDaemon.registerRemoteHostNode(" + node.toString() + ")");
 		
 		synchronized (remoteHostTable) {
 			if (remoteHostTable.containsKey(node.getInetAddress())) {
@@ -178,7 +210,7 @@ public class LMNtalDaemon implements Runnable {
 	 *  @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらtrue。それ以外はfalse。
 	 */
 	public static boolean isHostRegistered(String hostname) {
-		//if (Env.debug > 0) System.out.println("now in LMNtalDaemon.isHostRegisted(" + hostname + ")");
+		//if (Env.debugDaemon > 0) System.out.println("now in LMNtalDaemon.isHostRegisted(" + hostname + ")");
 
 		return (getLMNtalNode(hostname) != null);
 	}
@@ -223,7 +255,7 @@ public class LMNtalDaemon implements Runnable {
 	 * 
 	 */
 	public static LMNtalNode getLMNtalNodeFromFQDN(String fqdn) {
-		if (Env.debug > 0)System.out.println("now in LMNtalDaemon.getLMNtalNodeFromFQDN(" + fqdn + ")");
+		if (Env.debugDaemon > 0)System.out.println("now in LMNtalDaemon.getLMNtalNodeFromFQDN(" + fqdn + ")");
 		
 		Collection c = remoteHostTable.values();
 		Iterator it = c.iterator();
@@ -255,7 +287,7 @@ public class LMNtalDaemon implements Runnable {
 		//「ブロックしないようにする」
 		//todo 3分間誰も通信できなくなるのを回避するために専用スレッドを作る（後回しでよい） n-kato 2004-08-20
 
-		if(Env.debug > 0)System.out.println("LMNtalDaemon.makeRemoteConnection(" + fqdn + ")");
+		if(Env.debugDaemon > 0)System.out.println("LMNtalDaemon.makeRemoteConnection(" + fqdn + ")");
 		
 		if (isHostRegistered(fqdn)) return true;
 		
@@ -292,27 +324,27 @@ public class LMNtalDaemon implements Runnable {
 		return runtimeGroupTable.containsKey(rgid);
 	}
 	public static boolean registerRuntimeGroup(String rgid, LMNtalNode node){
-		if (Env.debug > 0)System.out.println("registerRuntimeGroup(" + rgid + ", " + node.toString() + ")");
+		if (Env.debugDaemon > 0)System.out.println("registerRuntimeGroup(" + rgid + ", " + node.toString() + ")");
 		
 		synchronized(runtimeGroupTable){
 			if(runtimeGroupTable.containsKey(rgid)){
-				if (Env.debug > 0)System.out.println("registerRuntimeGroup failed");
+				if (Env.debugDaemon > 0)System.out.println("registerRuntimeGroup failed");
 				return false;
 			}
 			runtimeGroupTable.put(rgid, node);
 		}
-		if (Env.debug > 0)System.out.println("registerRuntimeGroup succeeded");
+		if (Env.debugDaemon > 0)System.out.println("registerRuntimeGroup succeeded");
 		return true;
 	}
 
-	//TODO 終了する時にちゃんとこれを呼ぶ
+	//TODO 終了する時にちゃんとこれを呼ぶ(nakajima)
 	public static boolean unregisterRuntimeGroup(String rgid){
-		if (Env.debug > 0)System.out.println("unregisterRuntimeGroup(" + rgid +  ")");
+		if (Env.debugDaemon > 0)System.out.println("unregisterRuntimeGroup(" + rgid +  ")");
 		
 		synchronized(runtimeGroupTable){
 			if(runtimeGroupTable.containsKey(rgid)){
 				runtimeGroupTable.remove(rgid);
-				if (Env.debug > 0)System.out.println("unregisterRuntimeGroup succeeded");
+				if (Env.debugDaemon > 0)System.out.println("unregisterRuntimeGroup succeeded");
 				return true;
 			}
 		}
@@ -336,7 +368,7 @@ public class LMNtalDaemon implements Runnable {
 	 * @return msgidなキーが存在していたらfalse
 	 */
 	public static boolean registerMessage(String msgid, LMNtalNode node) {
-		if (Env.debug > 0)System.out.println("registerMessage(" + msgid + ", " + node.toString() + ")");
+		if (Env.debugDaemon > 0)System.out.println("registerMessage(" + msgid + ", " + node.toString() + ")");
 
 		synchronized (msgTable) {
 			if (msgTable.containsKey(msgid)) {
@@ -346,7 +378,7 @@ public class LMNtalDaemon implements Runnable {
 			msgTable.put(msgid, node);
 		}
 
-		if (Env.debug > 0)System.out.println("registerMessage succeeded");
+		if (Env.debugDaemon > 0)System.out.println("registerMessage succeeded");
 
 		return true;
 	}
@@ -379,7 +411,7 @@ public class LMNtalDaemon implements Runnable {
 	 * @deprecated
 	 */
 	public static LMNtalNode getNodeFromMsgId(String msgid) {
-		if (Env.debug > 0)System.out.println("getNodeFromMsgId(" + msgid + ")");
+		if (Env.debugDaemon > 0)System.out.println("getNodeFromMsgId(" + msgid + ")");
 
 		synchronized (msgTable) {
 			return (LMNtalNode)msgTable.get(msgid);
@@ -421,5 +453,22 @@ public class LMNtalDaemon implements Runnable {
 	}
 	public static String getLocalHostName() {
 		return myhostname;
+	}
+}
+
+/**
+ * 親プロセスとの通信を処理するスレッド。親プロセスにはFrontEndを想定。
+ * 
+ * @author nakajima
+ *
+ */
+class ParentProcessCommunicator implements Runnable {
+	
+	ParentProcessCommunicator(){
+		
+	}
+	
+	public void run(){
+		
 	}
 }
