@@ -101,6 +101,10 @@ public class LMNtalDaemon implements Runnable {
 			myhostname =  "???";	// とりあえず放置
 			e.printStackTrace();
 		}
+		
+		if(myhostname.equals("127.0.0.1")){
+			throw new RuntimeException("cannot resolve hostname. contact your system adminitrator and configure your DNS settings");
+		}
 	}
 	
 	/**
