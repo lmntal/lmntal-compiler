@@ -61,7 +61,7 @@ public class HeadCompiler {
 		 if (!isMemLoaded(mem)) return UNBOUND;
 		 return ((Integer)mempaths.get(mem)).intValue();
 	}
-	final int linkToPath(int atomid, int pos) {
+	final int linkToPath(int atomid, int pos) { // todo HeadCompilerの仕様に合わせる？GuardCompilerも。
 		if (!linkpaths.containsKey(new Integer(atomid))) return UNBOUND;
 		return ((int[])linkpaths.get(new Integer(atomid)))[pos];
 	}
@@ -414,20 +414,23 @@ public class HeadCompiler {
 	/** 膜および子孫の膜に対して自由リンクの個数を調べる。
 	 * <p>かつて$p等式右辺膜以外の場合は、自由リンクに関する検査を行う必要があった。
 	 * しかし現在 redex "Tθ" に = を含んでもよい言語仕様になっているため、この検査は実は不要。
-	 * したがってこのメソッドは呼ばれない。(n-kato 2004.11.24--2004.11.26) */
+	 * したがってこのメソッドは呼ばれない。(n-kato 2004.11.24--2004.11.26) 
+	 * <p>このメソッドの方式だとこの膜を通過して子膜経由で再び親膜に戻っていく偽自由リンクが検出できない。
+	 * リンク束が無い場合のコードは必要なので復活させた。(2004.12.4)
+	 * */
 	public void checkFreeLinkCount(Membrane mem) {
 		if (!mem.processContexts.isEmpty()) {
 			int thismempath = memToPath(mem);
 			ProcessContext pc = (ProcessContext)mem.processContexts.get(0); // 左辺膜の$p（必ず非トップ膜）
-			// 明示的なリンク先（必ず非トップ膜のアトム（自由リンク管理アトムを含む））が
-			// 自由リンク出力管理アトムでないことを確認する
-			for (int i = 0; i < pc.args.length; i++) {
-				int freelinktestedatompath = varcount++;
-				match.add(new Instruction(Instruction.DEREFATOM, freelinktestedatompath,
-					atomToPath(pc.args[i].buddy.atom), pc.args[i].buddy.pos));
-				match.add(new Instruction(Instruction.NOTFUNC, freelinktestedatompath,
-					Functor.INSIDE_PROXY));
-			}
+//			// 明示的なリンク先（必ず非トップ膜のアトム（自由リンク管理アトムを含む））が
+//			// 自由リンク出力管理アトムでないことを確認する
+//			for (int i = 0; i < pc.args.length; i++) {
+//				int freelinktestedatompath = varcount++;
+//				match.add(new Instruction(Instruction.DEREFATOM, freelinktestedatompath,
+//					atomToPath(pc.args[i].buddy.atom), pc.args[i].buddy.pos));
+//				match.add(new Instruction(Instruction.NOTFUNC, freelinktestedatompath,
+//					Functor.INSIDE_PROXY));
+//			}
 			// リンク束が無い場合
 			if (pc.bundle == null) {
 				match.add(new Instruction(Instruction.NFREELINKS, thismempath,
