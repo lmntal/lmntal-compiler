@@ -88,7 +88,7 @@ final class Task extends AbstractTask {
 				}
 				else {
 					if (Env.fTrace) {
-						Env.p( " --> " );
+						Env.p( " ==> " );
 						Env.p( Dumper.dump(getRoot()) );
 					}
 				}// システムコールアトムなら親膜につみ、親膜を活性化
@@ -101,7 +101,9 @@ final class Task extends AbstractTask {
 						break; // ルールセットが変わっているかもしれないため
 					}
 				}
-
+				if (flag == false) {
+					flag = SystemRuleset.getInstance().react(mem);
+				}
 				if(flag == false){ // ルールが適用できなかった時
 					memStack.pop(); // 本膜をpop
 					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
@@ -118,7 +120,7 @@ final class Task extends AbstractTask {
 					if(flag == false) mem.toStable();
 				} else {
 					if (Env.fTrace) {
-						Env.p( " --> " );
+						Env.p( " ==> " );
 						Env.p( Dumper.dump(getRoot()) );
 					}
 				}					

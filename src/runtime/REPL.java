@@ -55,6 +55,30 @@ public class REPL {
 					//System.out.println("no input");
 				} else if(line.equals("q")) {
 					break;
+				} else if(line.equals("debug")) {
+					Env.p("debug mode on");
+					Env.debug = 1;
+					continue;
+				} else if(line.equals("nodebug")) {
+					Env.p("debug mode off");
+					Env.debug = 0;
+					continue;
+				} else if(line.equals("trace")) {
+					Env.p("trace mode on");
+					Env.fTrace = true;
+					continue;
+				} else if(line.equals("notrace")) {
+					Env.p("trace mode off");
+					Env.fTrace = false;
+					continue;
+				} else if(line.equals("shuffle")) {
+					Env.p("shuffle mode on");
+					Env.fRandom = true;
+					continue;
+				} else if(line.equals("noshuffle")) {
+					Env.p("shuffle mode off");
+					Env.fRandom = false;
+					continue;
 				} else {
 					processLine(line);
 				}

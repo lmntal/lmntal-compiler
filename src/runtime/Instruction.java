@@ -562,6 +562,7 @@ public class Instruction {
 	 * アトム$atom1（膜$memにある）の第pos1引数と、
 	 * アトム$atom2の第pos2引数のリンク先（膜$memにある）の引数を接続する。
 	 * <p>典型的には、$atom1はルールボディに、$atom2はルールヘッドに存在する。
+	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalrelinkが使用できる。
 	 * <p>実行後、$atom2[pos2]の内容は無効になる。*/
 	public static final int RELINK = 66;
 
@@ -570,19 +571,25 @@ public class Instruction {
 	 * relinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
 	public static final int LOCALRELINK = LOCAL + RELINK;
 
-	/** unify [atom1, pos1, atom2, pos2]
+	/** unify [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
-	 * アトム$atom1の第pos1引数のリンク先（本膜にある）の引数と、
-	 * アトム$atom2の第pos2引数のリンク先（本膜にある）の引数を接続する。
-	 * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。*/
+	 * アトム$atom1の第pos1引数のリンク先（膜$memにある）の引数と、
+	 * アトム$atom2の第pos2引数のリンク先（膜$memにある）の引数を接続する。
+	 * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。
+	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalunifyが使用できる。*/
 	public static final int UNIFY = 67;
-	// LOCALUNIFYは不要
+
+	/** localunify [atom1, pos1, atom2, pos2]
+	 * <br>最適化用ボディ命令<br>
+	 * unifyと同じ。ただし膜$memはこの計算ノードに存在する。*/
+	public static final int LOCALUNIFY = LOCAL + UNIFY;
 
 	/** inheritlink [atom1, pos1, link2, mem]
 	 * <br>最適化用ボディ命令<br>
 	 * アトム$atom1（膜$memにある）の第pos1引数と、
 	 * リンク$link2のリンク先（膜$memにある）を接続する。
 	 * <p>典型的には、$atom1はルールボディに存在し、$link2はルールヘッドに存在する。relinkの代用。
+	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでinheritrelinkが使用できる。
 	 * <p>$link2は再利用されるため、実行後は$link2は廃棄しなければならない。
 	 * @see getlink */
 	public static final int INHERITLINK = 68;
