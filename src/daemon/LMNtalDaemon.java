@@ -96,7 +96,7 @@ public class LMNtalDaemon implements Runnable {
 	}
 	static {
 		try {
-			myhostname = InetAddress.getLocalHost().getCanonicalHostName();
+			myhostname = InetAddress.getLocalHost().getHostAddress();//Canonical
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
