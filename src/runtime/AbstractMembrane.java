@@ -29,7 +29,7 @@ import util.QueuedEntity;
  * 抽象膜クラス。ローカル膜クラスおよびリモート膜クラスの親クラス
  * @author Mizuno
  */
-abstract class AbstractMembrane extends QueuedEntity {
+abstract public class AbstractMembrane extends QueuedEntity {
 	/** この膜を管理するタスク */
 	protected AbstractTask task;
 	/** 親膜。リモートにあるならばRemoteMembraneオブジェクトまたはnullを参照する */

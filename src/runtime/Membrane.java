@@ -23,7 +23,7 @@ import util.Stack;
  * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。
  * @author Mizuno
  */
-final class Membrane extends AbstractMembrane {
+public final class Membrane extends AbstractMembrane {
 	/** 実行スタック */
 	private Stack ready = new Stack();
 	/**
