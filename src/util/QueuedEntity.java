@@ -1,4 +1,4 @@
-package runtime.stack;
+package util;
 
 /**
  * Stackに積まれる要素のための親クラス。

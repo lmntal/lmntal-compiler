@@ -3,31 +3,38 @@ package runtime;
 import java.util.*;
 
 class Dumper {
+	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	static String dump(AbstractMembrane mem) {
 		StringBuffer buf = new StringBuffer();
 		List predAtoms = new ArrayList();
 		Set atoms = new HashSet(mem.getAtomCount());
 
+		// アトムの出力
 		Iterator it = mem.atomIterator();
 		while (it.hasNext()) {
 			Atom a = (Atom)it.next();
 			atoms.add(a);
-			if (a.getArity() == 0 ||
-				a.getLastArg().getAtom().getMem() != mem ||
-				a.getLastArg().isFuncRef() ) {
-				
+			//これらのアトムを起点にする。
+			//最終引数同士がつながっている場合、arityが1の物を優先した方がいいかも。
+			if (a.getArity() == 0 ||						//リンクのない場合
+				a.getLastArg().getAtom().getMem() != mem ||	//最終引数が膜の自由リンクの場合
+				a.getLastArg().isFuncRef() ) {				//最終引数同士がつながっている場合
 				predAtoms.add(a);
 			}
 		}
-		
+
+		//predAtoms内のアトムを起点に出力
 		it = predAtoms.iterator();
 		while (it.hasNext()) {
 			Atom a = (Atom)it.next();
+			//すでに出力されてしまっている場合もある
 			if (atoms.contains(a)) {
 				buf.append(dumpAtomGroup(a, atoms));
 				buf.append(", ");
 			}
 		}
+		//閉路がある場合にはまだ残っているので、適当な所から出力。
+		//閉路の部分を探した方がいいが、とりあえずこのまま。
 		while (true) {
 			it = atoms.iterator();
 			if (!it.hasNext()) {
@@ -36,7 +43,8 @@ class Dumper {
 			buf.append(dumpAtomGroup((Atom)it.next(), atoms));
 			buf.append(", ");
 		}
-		
+
+		//子膜の出力		
 		it = mem.memIterator();
 		while (it.hasNext()) {
 			buf.append("{");
@@ -44,6 +52,7 @@ class Dumper {
 			buf.append("}, ");
 		}
 		
+		//ルールの出力
 		it = mem.rulesetIterator();
 		while (it.hasNext()) {
 			buf.append((Ruleset)it.next());

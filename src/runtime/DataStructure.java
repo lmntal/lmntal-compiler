@@ -3,8 +3,7 @@ package runtime;
 import java.util.*;
 
 import util.*;
-import runtime.stack.Stack;
-import runtime.stack.QueuedEntity;
+import util.Stack;
 
 /**
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
@@ -17,6 +16,10 @@ class Atom extends QueuedEntity {
 	private Functor functor;
 	/** リンク */
 	Link[] args;
+	
+	private static int lastId = 0;
+	private int id;
+	
 	///////////////////////////////
 	// コンストラクタ
 
@@ -31,19 +34,27 @@ class Atom extends QueuedEntity {
 		this.mem = mem;
 		functor = new Functor(name, arity);
 		args = new Link[arity];
+		id = lastId++;
 	}
 
 	///////////////////////////////
 	// 情報の取得
 
+	public String toString() {
+		return functor.getName();
+	}
+	/**
+	 * デフォルトの実装だと処理系の内部状態が変わると変わってしまうので、
+	 * インスタンスごとにユニークなidを用意してハッシュコードとして利用する。
+	 */
+	public int hashCode() {
+		return id;
+	}
 	/** 名前の取得 */
 	Functor getFunctor(){
 		return functor;
 	}
 	String getName() {
-		return functor.getName();
-	}
-	public String toString() {
 		return functor.getName();
 	}
 	/** リンク数を取得 */
@@ -97,12 +108,15 @@ final class Membrane extends AbstractMembrane {
 	 * AbstractMembraneクラスで宣言されている抽象メソッドの実装です。
 	 */
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
-	protected void activateAllAtoms() {
+	protected void enqueueAllAtoms() {
 		Iterator i = atoms.functorIterator();
 		while (i.hasNext()) {
 			Functor f = (Functor)i.next();
 			if (true) { // f がアクティブの場合
-				ready.pushAll((Set)atoms.getAtomsOfFunctor(f));
+				Iterator i2 = atoms.iteratorOfFunctor(f);
+				while (i2.hasNext()) {
+					ready.push((Atom)i2.next());
+				}
 			}
 		}
 	}
@@ -131,6 +145,9 @@ abstract class AbstractMembrane extends QueuedEntity {
 //	/** 最後にロックした計算ノード */
 //	protected CalcNode lastLockNode;
 
+	private static int lastId = 0;
+	private int id;
+	
 	///////////////////////////////
 	// コンストラクタ
 
@@ -140,10 +157,19 @@ abstract class AbstractMembrane extends QueuedEntity {
 	AbstractMembrane(AbstractMachine machine, AbstractMembrane mem) {
 		this.machine = machine;
 		this.mem = mem;
+		id = lastId++;
 	}
 
 	///////////////////////////////
 	// 情報の取得
+
+	/**
+	 * デフォルトの実装だと処理系の内部状態が変わると変わってしまうので、
+	 * インスタンスごとにユニークなidを用意してハッシュコードとして利用する。
+	 */
+	public int hashCode() {
+		return id;
+	}
 
 	/** この膜を管理するマシンの取得 */
 	AbstractMachine getMachine() {
@@ -218,11 +244,11 @@ abstract class AbstractMembrane extends QueuedEntity {
 		dstMem.addMem(this);
 		mem = dstMem;
 //		movedTo(machine, dstMem);
-		activateAllAtoms();
+		enqueueAllAtoms();
 	}
 	/** 移動された後、アクティブアトムを実行スタックに入れるために呼び出される */
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
-	abstract protected void activateAllAtoms();
+	abstract protected void enqueueAllAtoms();
 	
 	/** srcMemの内容を全て移動する */
 	void pour(AbstractMembrane srcMem) {
@@ -325,6 +351,7 @@ final class Link {
 	///////////////////////////////
 	// 情報の取得
 
+	/** 対になる２つのリンクのidのうち、若い方をリンクの番号として使用する。 */
 	public String toString() {
 		int i;
 		if (this.id < atom.args[pos].id) {
