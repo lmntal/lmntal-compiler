@@ -68,7 +68,7 @@ public class HeadCompiler {
 	static final int UNBOUND = -1;
 	
 	HeadCompiler(Membrane m) {
-		Env.n("HeadCompiler");
+		//Env.n("HeadCompiler");
 		this.m = m;
 	}
 	

@@ -67,8 +67,8 @@ public class RuleCompiler {
 	 * 指定された RuleStructure 用のルールをつくる
 	 */
 	RuleCompiler(RuleStructure rs) {
-		Env.n("RuleCompiler");
-		Env.p(rs);
+		//Env.n("RuleCompiler");
+		//Env.p(rs);
 		this.rs = rs;
 	}
 	
@@ -288,7 +288,7 @@ public class RuleCompiler {
 	/** 膜の階層構造およびプロセス文脈の内容を親膜側から再帰的に生成する。
 	 * @return */
 	private int buildRHSMem(Membrane mem) {
-		Env.p("RuleCompiler::buildRHSMem" + mem);
+		Env.c("RuleCompiler::buildRHSMem" + mem);
 		int procvarcount = mem.processContexts.size();
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {

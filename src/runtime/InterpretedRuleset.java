@@ -134,10 +134,14 @@ class InterpreterReactor {
 
 					//====アトムに関係する出力しない基本ガード命令====ここから====
 				case Instruction.FUNC : //[srcatom, funcref]
+					if (!atoms[inst.getIntArg1()].getFunctor().equals((Functor)inst.getArg2()))
+						return false;
 					break;
 				case Instruction.EQATOM : //[atom1, atom2]
+					if (atoms[inst.getIntArg1()] != atoms[inst.getIntArg2()]) return false;
 					break;
 				case Instruction.NEQATOM : //[atom1, atom2]
+					if (atoms[inst.getIntArg1()] == atoms[inst.getIntArg2()]) return false;
 					break;
 					//====アトムに関係する出力しない基本ガード命令====ここまで====
 
