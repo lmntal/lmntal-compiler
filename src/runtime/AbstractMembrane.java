@@ -435,24 +435,92 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 */
 	public void moveCellsFrom(AbstractMembrane srcMem) {
 		if (this == srcMem) return;
-		if (srcMem.task.getMachine() != task.getMachine()) {
-			throw new RuntimeException("cross-site process fusion not implemented"); //TODO 実装
-		}
-		mems.addAll(srcMem.mems);
+		// アトムの移動
 		Iterator it = srcMem.atomIterator();
 		while (it.hasNext()) {
 			addAtom((Atom)it.next());
 		}
+		
+		// 子膜の移動
+		if (srcMem.task.getMachine() == task.getMachine()) {
+			// ローカル膜からローカル膜への移動
+			mems.addAll(srcMem.mems);
+		}
+		else {
+			// リモート膜からローカル膜への移動
+			it = srcMem.memIterator();
+			while (it.hasNext()) {
+				AbstractMembrane subSrcMem = (AbstractMembrane)it.next();
+				if (subSrcMem.isRoot()) {
+					subSrcMem.moveTo(this);
+				}
+				else {
+					AbstractMembrane subMem = newMem();
+					if (!subSrcMem.blockingLock()) {
+						throw new RuntimeException("AbstractMembrane.moveCellsFrom: blockingLock failure");
+					}
+					subMem.setName(subSrcMem.getName());
+					subMem.parent = null;	//removeMem(subMem)でもよい。moveToのWarning抑制用
+					subMem.moveCellsFrom(subSrcMem);
+					subSrcMem.unlock();
+				}
+			}
+		}
 		it = srcMem.memIterator();
 		while (it.hasNext()) {
-			((AbstractMembrane)it.next()).parent = this;
-		}
-		if (srcMem.task != task) {
-			srcMem.setTask(task);
+			AbstractMembrane subSrcMem = (AbstractMembrane)it.next();
+			subSrcMem.parent = this;
+			if (subSrcMem.task != task) {
+				subSrcMem.setTask(task);
+			}
 		}
 	}
 
+	/** この膜をdstMemに移動し、活性化する。parent==nullを仮定する。*/
+	public void moveTo(AbstractMembrane dstMem) {
+		if (parent != null) {
+			System.out.println("Warning: membrane with parent was moved");
+			parent.removeMem(this);
+		} 
+		if (dstMem instanceof Membrane) {
+			// ローカル膜のローカル膜への移動
+			dstMem.addMem(this);
+			if (dstMem.task != task) {
+				setTask(dstMem.task);
+			}
+		}
+		else {
+			// ローカル膜のリモート膜への移動
+			// TODO 実装
+		}
+//		activate();
+		//enqueueAllAtoms();
+	}
+	
+	/** この膜（ルート以外のとき）とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
+	private void setTask(AbstractTask newTask) {
+		if (isRoot()) return;
+		task = newTask;
+		Iterator it = memIterator();
+		while (it.hasNext()) {
+			((AbstractMembrane)it.next()).setTask(newTask);
+		}
+	}
+//	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
+//	 * <p>いずれ、
+//	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
+//	 * AbstractMembrane#moveToを使って親膜を変更することにより、
+//	 * todo この問題のあるメソッドは廃止しなければならない */
+//	void setParent(AbstractMembrane mem) {
+//		if (!isRoot()) {
+//			throw new RuntimeException("setParent requires this be a root membrane");
+//		}
+//		parent = mem;
+//	}
+
+	//////////////////////////////////////////////////////////////
 	// kudo
+	
 	/** この膜の複製を生成する <strike>自由リンクが無いものと仮定(子膜にも。)
 	 *  pMemの子膜として作成</strile>
 	 * */
@@ -581,42 +649,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			mem.free();
 		}
 	}
-
-	/** この膜をdstMemに移動し、活性化する。parent==nullを仮定する。*/
-	public void moveTo(AbstractMembrane dstMem) {
-		if (parent != null) {
-			System.out.println("Warning: membrane with parent was moved");
-			parent.removeMem(this);
-		} 
-		dstMem.addMem(this);
-		if (dstMem.task != task) {
-			setTask(dstMem.task);
-		}
-//		activate();
-		//enqueueAllAtoms();
-	}
 	
-	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
-	private void setTask(AbstractTask newTask) {
-		if (isRoot()) return;
-		task = newTask;
-		Iterator it = memIterator();
-		while (it.hasNext()) {
-			((AbstractMembrane)it.next()).setTask(newTask);
-		}
-	}
-//	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
-//	 * <p>いずれ、
-//	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
-//	 * AbstractMembrane#moveToを使って親膜を変更することにより、
-//	 * todo この問題のあるメソッドは廃止しなければならない */
-//	void setParent(AbstractMembrane mem) {
-//		if (!isRoot()) {
-//			throw new RuntimeException("setParent requires this be a root membrane");
-//		}
-//		parent = mem;
-//	}
-
+	////////////////////////////////////////////////////////////////
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される
 	
 	/**

@@ -581,8 +581,9 @@ public class Instruction implements Cloneable, Serializable {
 	
 	/** movecells [dstmem, srcmem]
 	 * <br>ボディ命令<br>
-	 * 膜$srcmemにある全てのアトムと子膜（ロックを取得していない）を膜$dstmemに移動する。
-	 * 実行膜スタックおよび実行アトムスタックは操作しない。
+	 * （親膜を持たない）膜$srcmemにある全てのアトムと子膜（ロックを取得していない）を膜$dstmemに移動する。
+	 * 子膜はルート膜の直前の膜まで再帰的に移動される。
+	 * 実行膜スタックおよび実行アトムスタックは操作しない。TODO ←仕様バグ？
 	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない（ルールセットに限りは参照してもよい）。
 	 * <p>実行後、膜$dstmemの全てのアクティブアトムをエンキューし直すべきである。
 	 * <p><b>注意</b>　Ruby版のpourから名称変更
@@ -871,9 +872,8 @@ public class Instruction implements Cloneable, Serializable {
     // 型付きでないプロセス文脈をコピーまたは廃棄するための命令 (80--89)
 	//  ----- recursivelock            [srcmem]
 	//  ----- recursiveunlock          [srcmem]
-	//  ----- copymem         [-dstmem, srcmem]
+	//  ----- copymem         [-dstmap, dstmem, srcmem]
 	//  ----- dropmem                  [srcmem]
-	//  
 	
     /** recursivelock [srcmem]
      * <br>（予約された）ガード命令<br>
