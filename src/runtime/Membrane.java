@@ -9,14 +9,17 @@ import java.util.Set;
 import util.QueuedEntity;
 import util.Stack;
 
+// TODO AbstractMachine AbstractMembrane.machine; は廃止して、
+// Machine Membrane.machine および RemoteMachine RemoteMembrane.machine にする？
+
 /**
- * 抽象膜クラス。ローカル膜クラスと膜キャッシュ（未実装）の親クラス
+ * 抽象膜クラス。ローカル膜クラスとリモート膜クラス（旧：膜キャッシュクラス；未実装）の親クラス
  * @author Mizuno
  */
 abstract class AbstractMembrane extends QueuedEntity {
 	/** この膜を管理するマシン */
 	protected AbstractMachine machine;
-	/** 親膜 */
+	/** 親膜。ルート膜ならばnull */
 	protected AbstractMembrane parent;
 	/** アトムの集合 */
 	protected AtomSet atoms = new AtomSet();;
@@ -35,7 +38,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 //	/** 最後にロックした計算ノード */
 //	protected CalcNode lastLockNode;
 
-	private static int lastId = 0;
+	private static int nextId = 0;
 	private int id;
 	
 	///////////////////////////////
@@ -47,7 +50,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	protected AbstractMembrane(AbstractMachine machine, AbstractMembrane parent) {
 		this.machine = machine;
 		this.parent = parent;
-		id = lastId++;
+		id = nextId++;
 	}
 
 	///////////////////////////////
@@ -60,7 +63,6 @@ abstract class AbstractMembrane extends QueuedEntity {
 	public int hashCode() {
 		return id;
 	}
-
 	/** この膜を管理するマシンの取得 */
 	AbstractMachine getMachine() {
 		return machine;
@@ -93,7 +95,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 		return rulesets.size() > 0;
 	}
 	boolean isRoot() {
-		return machine.getRoot() == this;
+		return parent == null; // machine.getRoot() == this;
 	}
 	/** この膜にあるアトムの反復子を取得する */
 	Iterator atomIterator() {
@@ -114,15 +116,13 @@ abstract class AbstractMembrane extends QueuedEntity {
 
 
 	///////////////////////////////
-	// 操作
+	// 操作（RemoteMembraneではオーバーライドされる）
 
 	abstract void activate();
-	
-	/** ルールを全てクリアする */
+	/** ルールを全て消去する */
 	void clearRules() {
 		rulesets.clear();
 	}
-
 	/** srcMemにあるルールをこの膜にコピーする。 */
 	void inheritRules(AbstractMembrane srcMem) {
 		rulesets.addAll(srcMem.rulesets);
@@ -144,7 +144,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 	/** 指定されたアトムを実行スタックに積む */
 	abstract protected void enqueueAtom(Atom atom);
-//	/** 膜の追加 */
+	/** 膜の追加 */
 	abstract AbstractMembrane newMem();
 
 //	廃止。newAtom/newMemを使用する。
@@ -160,10 +160,6 @@ abstract class AbstractMembrane extends QueuedEntity {
 		parent = dstMem;
 //		movedTo(machine, dstMem);
 		enqueueAllAtoms();
-	}
-	/** 膜の追加 */
-	protected void addMem(AbstractMembrane mem) {
-		mems.add(mem);
 	}
 	/** 移動された後、アクティブアトムを実行スタックに入れるために呼び出される */
 //	protected void movedTo(AbstractMachine machine, AbstractMembrane dstMem) {
@@ -189,10 +185,6 @@ abstract class AbstractMembrane extends QueuedEntity {
 //			Util.systemError("Membrane.atomCount is pisitive value");
 //		}
 	}
-	/** 指定された膜をこの膜から除去する */
-	void removeMem(AbstractMembrane mem) {
-		mems.remove(mem);
-	}
 	void remove() {
 		parent.removeMem(this);
 		parent = null;
@@ -201,7 +193,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 	/** この膜がremoveされた直後に呼ばれる。
 	 * なおremoveは、ルール左辺に書かれたアトムを除去した後、
-	 * ルール左辺に書かれた膜に対して内側の膜から呼ばれる。
+	 * ルール左辺に書かれた膜のうち$pを持つものに対して内側の膜から呼ばれる。
 	 * <p>この膜に対して
 	 * <ol>
 	 * <li>この膜の自由/局所リンクでないにもかかわらずこの膜内を通過しているリンクを除去し
@@ -214,7 +206,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 *     このうち後者は、removeToplevelProxiesで除去される。
 	 * </ul>
 	 */
-	protected void removeProxies() {
+	void removeProxies() {
 		// TODO atomsへの操作が必要になるので、Setのクローンを取得してその反復子を使った方が
 		//      読みやすい＆効率が良いかもしれない
 		ArrayList changeList = new ArrayList();	// star化するアトムのリスト
@@ -343,13 +335,27 @@ abstract class AbstractMembrane extends QueuedEntity {
 		}
 		atoms.removeAll(removeList);
 	}
+	//////////////////////
+	// protected submethods to update instance varibales
+
+	/** 膜の追加 */
+	protected void addMem(AbstractMembrane mem) {
+		mems.add(mem);
+	}
+	/** 指定された膜をこの膜から除去する */
+	protected void removeMem(AbstractMembrane mem) {
+		mems.remove(mem);
+	}
+	
+	////////////////////////////////
+	// ロック
 	
 	/**
 	 * この膜をロックする
 	 * @param mem ルールのある膜
 	 * @return ロックに成功した場合はtrue
 	 */
-	boolean lock(AbstractMembrane mem) {
+	synchronized boolean lock(AbstractMembrane mem) {
 		if (locked) {
 			//todo:キューに記録
 			return false;
@@ -365,6 +371,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	 * @return ロックに成功した場合はtrue
 	 */
 	boolean recursiveLock(AbstractMembrane mem) {
+		// TODO 実装する
 		return false;
 	}
 	
@@ -373,11 +380,13 @@ abstract class AbstractMembrane extends QueuedEntity {
 //		
 //	}
 	
-	/** ロックを解除する */
+	/** ロックを解放する */
 	void unlock() {
-		
+		locked = false;
+		// TODO 実装する
 	}
 	void recursiveUnlock() {
+		// TODO 実装する
 	}
 	
 	///////////////////////
@@ -451,7 +460,7 @@ final class Membrane extends AbstractMembrane {
 	}
 	/** 膜の活性化 */
 	void activate() {
-		if (this.isQueued()) {
+		if (isQueued()) {
 			return;
 		}
 		if (!isRoot()) {
