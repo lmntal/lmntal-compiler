@@ -465,8 +465,9 @@ public class LMNParser {
 		Hashtable typedLinkNames = new Hashtable();
 		Iterator it = typedNames.keySet().iterator();
 		while (it.hasNext()) {
-			String name = (String)it.next();
-			if (((LinkedList)typedNames.get(name)).getFirst() instanceof SrcLink) {
+			Object obj = ((LinkedList)typedNames.get((String)it.next())).getFirst();
+			if (obj instanceof SrcLink) {
+				String name = ((SrcLink)obj).getName();
 				typedLinkNames.put(name, new SrcProcessContext("_" + name, true));
 			}
 		}
@@ -763,7 +764,7 @@ public class LMNParser {
 					Object subobj = sAtom.getProcess().get(i);
 					if (subobj instanceof SrcLink) {
 						SrcLink srcLink = (SrcLink)subobj;
-						String name = srcLink.getQualifiedName();
+						String name = srcLink.getName();
 						if (typedLinkNames.containsKey(name)) {
 							sAtom.getProcess().set(i, typedLinkNames.get(name));
 						}
