@@ -392,7 +392,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 				//todo これはIDConverterの中でやる事？→たぶん外でやった方がよいと思うけど根拠はない
 				if (r == null) {
 					//r = (Ruleset)sendWaitObject("REQUIRERULESET " + id);  //膜のメソッドじゃなくて直にデーモンに要求しないといけない
-					r = (Ruleset)LMNtalRuntimeManager.daemon.sendWaitObject("REQUIRERULESET " ,id);
+					r = (Ruleset)LMNtalRuntimeManager.daemon.sendWaitObject(this.task.runtime.hostname, "REQUIRERULESET " +id); //todo あやしい
 				}
 				rulesets.add(r);
 			}
