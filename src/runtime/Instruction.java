@@ -9,12 +9,17 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Field;
 
 /*
+ * 中島君へ：Eclipseのデフォルトに合わせてタブ幅4で編集して下さい。
+ * 
+ * TODO 最適化用に、子孫にルート膜を持つことができない（実行時エラーを出す）「データ膜」クラスを作る。
  * TODO memof は廃止する方向で検討する。
- * TODO 右辺の全ての膜を生成してから、活性化を行うようにする。そのためにactivatemem命令を呼ぶ。
  * TODO ルール実行中の5つの配列はそれぞれ0から詰めて使用するのか決める。
  * TODO ルール実行中の5つの配列は3つ、あるいは1つに併合した方がよい？
  * 
- * 中島君へ：Eclipseのデフォルトに合わせてタブ幅4で編集して下さい。
+ * TODO 実行膜スタックに積むタイミングを考える。
+ *  - 右辺の全ての膜を生成してから、活性化を行うようにする。そのためにactivatemem命令を呼ぶ。
+ *  - 底のほうに積むの実現にはStackの結合を使う。コミットのタイミングで結合する
+ * ※現状では、ルート膜が除去されると、次のルート膜までの部分を移動先で実行するようにしている。
  */
 
 /**
@@ -77,7 +82,7 @@ public class Instruction {
     public static final int LOCKMEM = 3;
     
     /** locallockmem [-dstmem, srcfreelinkatom]
-     * <br>最適化用のロック取得するガード命令<br>
+     * <br>ロック取得する最適化用ガード命令<br>
      * lockmemと同じ。ただしsrcfreelinkatomはこの計算ノードに存在する。
      * @see lockmem */
 	public static final int LOCALLOCKMEM = LOCAL + LOCKMEM;
@@ -92,7 +97,7 @@ public class Instruction {
 	public static final int ANYMEM = 4;
 	
 	/** localanymem [-dstmem, srcmem]
-     * <br>最適化用の反復するロック取得するガード命令<br>
+     * <br>反復するロック取得する最適化用ガード命令<br>
 	 * anymemと同じ。ただしsrcmemはこの計算ノードに存在する。dstmemについては何も仮定しない。
 	 * @see anymem */
 	public static final int LOCALANYMEM = LOCAL + ANYMEM;
@@ -211,8 +216,17 @@ public class Instruction {
 
     /** newmem [-dstmem, srcmem]
      * <br>ボディ命令<br>
-     * 膜srcmemに新しい子膜を作成し、dstmemに代入する。
-     * 子膜はまだ実行膜スタックには積まれない。
+     * 膜srcmemに新しい子膜を作成し、dstmemに代入し、ロックしたまま実行膜スタックに積む。
+     * <p><b>注意</b>　方法4の文書に対して、「ロックしたまま実行膜スタックに積む」という操作
+     * およびその結果の「ロックしたまま実行膜スタックにも積まれた」状態が追加されました。
+     * <ul>
+     * <li>ローカルの膜の場合、親膜側から実際に実行膜スタックに積みます。
+     * 本膜のロックを解放すると、アトミックにロックが解放された状態になります。
+     * <li>リモートの膜の場合、一時的な実行スタックを作り、そこに親膜側から積んでいきます。
+     * リモートのルート膜のロックが解放されると、実行膜スタックの先頭に丸ごと移動されます。
+     * これによってアトミックにロックが解放された状態になります。
+     * TODO したがって、movememやnewrootの場合は、ルール実行終了時にロックを解放しなければなりません。
+     * </ul>
      * @see enqueuemem */
 	public static final int NEWMEM = 33;
 
@@ -223,12 +237,20 @@ public class Instruction {
 
     /** newroot [-dstmem, srcmem, node]
      * <br>（予約された）ボディ命令<br>
-     * 膜srcmemの子膜に計算ノードnodeで実行される新しいルート膜を作成し、参照をdstmemに代入する。*/
+     * 膜srcmemの子膜に文字列nodeで指定された計算ノードで実行される新しいロックされたルート膜を作成し、
+     * 参照をdstmemに代入し、ロックしたまま（仮の）実行膜スタックに積む。*/
     public static final int NEWROOT = 35;
+
+//	/** localnewroot [-dstmem, srcmem, node]
+//	 * <br>（予約された）最適化用ボディ命令<br>
+//	 * newrootと同じ。ただしsrcmemはこの計算ノードに存在する。
+//	 * この命令には最適化の効果がほとんど無いため、廃案。*/
+//	public static final int LOCALNEWROOT = LOCAL + NEWROOT;
 
     /** enqueueatom [srcatom]
      * <br>ボディ命令<br>
-     * 所属膜の実行スタックに積む。
+     * アトムsrcatomを所属膜の実行スタックに積む。
+     * <p>すでに実行スタックに積まれていた場合の動作は未定義とする。
      * TODO ※水野君[　] srcatomがアクティブかどうかは判定しない仕様にすべきですね？ */
     public static final int ENQUEUEATOM = 36;
     
@@ -239,47 +261,73 @@ public class Instruction {
 
     /** dequeueatom [srcatom]
      * <br>最適化用ボディ命令<br>
-     * アトムsrcatomが実行スタックに入っていれば、実行スタックから取り出す。
-     * <p><b>注意</b>　メモリ使用量のオーダを削減するために使う。アトム再利用のとき、因果関係に注意。*/
+     * アトムsrcatomがこの計算ノードにある実行スタックに入っていれば、実行スタックから取り出す。
+     * <p><b>注意</b>　この命令は、メモリ使用量のオーダを削減するために任意に使用することができる。
+     * アトムを再利用するときは、因果関係に注意すること。
+     * なお、他の計算ノードにある実行スタックの内容を取得/変更する命令は存在しない。*/
     public static final int DEQUEUEATOM = 37;
 
     /** localdequeueatom [srcatom]
+     * <br>最適化用ボディ命令<br>
      * dequeueatomと同じ。ただしsrcatomはこの計算ノードに存在する。*/
 	public static final int LOCALDEQUEUEATOM = LOCAL + DEQUEUEATOM;
 
-	// ここまで確認した
-	
-    /** dequeuemem [srcmem]
-     * <br>（予約された）ボディ命令<br>
-     * 膜srcmemを再帰的に実行膜スタックから取り出す。*/
-    public static final int DEQUEUEMEM = 38;
+//    /** dequeuemem [srcmem]
+//     * <br>（予約された）ボディ命令<br>
+//     * 膜srcmemを再帰的に実行膜スタックから取り出す。
+//     * 再帰的にロック取得するヘッド命令が取り出しているため不要。この命令は廃止する。
+//     */
+//    public static final int DEQUEUEMEM = err;
 
-    /** activatemem [srcmem]
-     * <br>ボディ命令<br>
-     * 膜srcmemを管理するマシンの実行膜スタックに膜srcmemを積む。
-     * <p>実行後、srcmemへの参照は廃棄しなければならない。
-     * @see unlockmem */
-	public static final int ACTIVATEMEM = 39;
-	public static final int LOCALACTIVATEMEM = LOCAL + ACTIVATEMEM;
+	/** enqueuemem [srcmem]
+	 * <br>ボディ命令<br>
+	 * 膜srcmemを管理するタスクの実行膜スタックに膜srcmemを積む。
+	 * <p><strike>実行後、srcmemへの参照は廃棄しなければならない。</strike>
+	 * <p>典型的には、ロックした膜を再利用するために移動した直後のタイミングで呼ばれる。
+	 * @see newmem
+	 * @see activatemem */
+	public static final int ENQUEUEMEM = 38;
+
+	/** localenqueuemem [srcmem]
+	 * <br>最適化用ボディ命令<br>
+	 * enqueuememと同じ。ただしsrcmemはこの計算ノードに存在する。*/
+	public static final int LOCALENQUEUEMEM = LOCAL + ENQUEUEMEM;
+
+//	ここまで確認した
 
     // ルールを操作するボディ命令 (45--49)
 	
     /** loadruleset [dstmem, ruleset]
      * <br>ボディ命令<br>
      * rulesetが参照するルールセットを膜dstmemにコピーする。
-     * TODO 本来であればこの膜のアトムをエンキューし直さなければならないのを何とかする。*/
+     * TODO 本来であればこの膜のアトムをエンキューし直さなければならない。*/
     public static final int LOADRULESET = 45;
+
+	/** localloadruleset [dstmem, ruleset]
+	 * <br>最適化用ボディ命令<br>
+	 * loadrulesetと同じ。ただしdstmemはこの計算ノードに存在する。*/
+	public static final int LOCALLOADRULESET = LOCAL + LOADRULESET;
 
     /** copyrules [dstmem, srcmem]
      * <br>ボディ命令<br>
      * 膜srcmemにある全てのルールを膜dstmemにコピーする。
-     * <p><b>注意</b>　Ruby版のinheritrulesから名称変更しました。*/
+     * <p><b>注意</b>　Ruby版のinheritrulesから名称変更 */
     public static final int COPYRULES = 46;
+
+	/** localcopyrules [dstmem, srcmem]
+	 * <br>最適化用ボディ命令<br>
+	 * copyrulesと同じ。ただしdstmemはこの計算ノードに存在する。*/
+	public static final int LOCALCOPYRULES = LOCAL + COPYRULES;
 
     /** clearrules [dstmem]
      * <br>ボディ命令<br>
      * 膜dstmemにある全てのルールを消去する。*/
-    public static final int CLEARRULES = 47;
+	public static final int CLEARRULES = 47;
+	
+	/** localclearrules [dstmem]
+	 * <br>最適化用ボディ命令<br>
+	 * clearrulesと同じ。ただしdstmemはこの計算ノードに存在する。*/
+	public static final int LOCALCLEARRULES = LOCAL + CLEARRULES;
 
     // リンクを操作するボディ命令 (50--55)
 	
@@ -287,8 +335,13 @@ public class Instruction {
      * <br>ボディ命令<br>
      * アトムatom1の第pos1引数と、アトムatom2の第pos2引数の間に両方向リンクを張る。
      * <p>典型的には、atom1とatom2はいずれもルールボディに存在する。
-     * <p><b>注意</b>　Ruby版の片方向から仕様変更された*/
+     * <p><b>注意</b>　Ruby版の片方向から仕様変更された */
     public static final int NEWLINK = 50;
+
+	/** localnewlink [atom1, pos1, atom2, pos2]
+	 * <br>ボディ命令<br>
+	 * newlinkと同じ。ただしatom1はこの計算ノードに存在する。*/
+	public static final int LOCALNEWLINK = LOCAL + NEWLINK;
 
     /** relink [atom1, pos1, atom2, pos2]
      * <br>ボディ命令<br>
@@ -297,11 +350,21 @@ public class Instruction {
      * <p>実行後、atom2[pos2]の内容は無効になる。*/
     public static final int RELINK = 51;
 
+	/** localrelink [atom1, pos1, atom2, pos2]
+	 * <br>ボディ命令<br>
+	 * relinkと同じ。ただしatom1およびatom2はこの計算ノードに存在する。*/
+	public static final int LOCALRELINK = LOCAL + RELINK;
+
     /** unify [atom1, pos1, atom2, pos2]
      * <br>ボディ命令<br>
      * アトムatom1の第pos1引数のリンク先の引数と、アトムatom2の第pos2引数のリンク先の引数を接続する。
      * <p>典型的には、atom1とatom2はいずれもルールヘッドに存在する。*/
     public static final int UNIFY = 52;
+
+	/** localunify [atom1, pos1, atom2, pos2]
+     * <br>ボディ命令<br>
+	 * unifyと同じ。ただしatom1およびatom2はこの計算ノードに存在する。*/
+	public static final int LOCALUNIFY = LOCAL + UNIFY;
 
     /** getlink [-link2, atom2, pos2]
      * <br>出力する最適化用ボディ命令<br>
@@ -310,73 +373,106 @@ public class Instruction {
      * inheritlinkと組み合わせて使用してrelinkの代用にする。*/
     public static final int GETLINK = 53;
 
+	/** localgetlink [-link2, atom2, pos2]
+	 * <br>ボディ命令<br>
+	 * getlinkと同じ。ただしatom2はこの計算ノードに存在する。*/
+    public static final int LOCALGETLINK = LOCAL + GETLINK;
+
     /** inheritlink [atom1, pos1, link2]
      * <br>最適化用ボディ命令<br>
      * atom1の第pos1引数と、リンクlink2のリンク先を接続する。
      * アトムatom1の第pos1引数と、リンクlink2のリンク先を接続する。
      * <p>典型的には、atom1はルールボディに存在し、link2はルールヘッドに存在する。
-     * <p>link2は再利用されるため、実行後はlink2を使用してはならない。
+     * <p>link2は再利用されるため、実行後はlink2は廃棄しなければならない。
      * @see getlink */
     public static final int INHERITLINK = 54;
 
+	/** localinheritlink [atom1, pos1, link2]
+	 * <br>ボディ命令<br>
+	 * inheritlinkと同じ。ただしatom1はこの計算ノードに存在する。*/
+    public static final int LOCALINHERITLINK = LOCAL + INHERITLINK;
+
     // 予約 (55-59)
 	
-    // 膜の移動および自由リンク管理アトムを自動処理するためのボディ命令 (60--69)
+    // 膜の移動およびそれに伴う自由リンク管理アトム自動処理のためのボディ命令 (60--69)
 	
     /** removeproxies [srcmem]
      * <br>ボディ命令<br>
      * 何もしない。
+     * <p>removememの直後に同じ膜に対して呼ばれる。
      * TODO removememから処理「srcmemを通る無関係な自由リンク管理アトムを自動削除する」を分離する。*/
     public static final int REMOVEPROXIES = 60;
 
     /** removetoplevelproxies [srcmem]
      * <br>ボディ命令<br>
-     * 膜srcmem（本膜）を通過している無関係な自由リンク管理アトムを除去する。*/
+     * 膜srcmem（本膜）を通過している無関係な自由リンク管理アトムを除去する。
+	 * <p>全てのremoveproxiesの後で呼ばれる。*/
     public static final int REMOVETOPLEVELPROXIES = 61;
 
     /** insertproxies [parentmem,childmem]
      * <br>ボディ命令<br>
-     * 指定された膜間に自由リンク管理アトムを自動挿入する。*/
+     * 指定された膜間に自由リンク管理アトムを自動挿入する。
+     * <p>全てのmovememの後で呼ばれる。*/
     public static final int INSERTPROXIES = 62;
 	
     /** removetemporaryproxies [srcmem]
      * <br>ボディ命令<br>
-     * 膜srcmem（本膜）に残された"star"アトムを除去する。*/
+     * 膜srcmem（本膜）に残された"star"アトムを除去する。
+     * <p>全てのinsertproxiesの後で呼ばれる。*/
     public static final int REMOVETEMPORARYPROXIES = 63;
 
     /** movecells [dstmem, srcmem]
      * <br>ボディ命令<br>
      * 膜srcmemにある全てのアトムと膜を膜dstmemに移動する。
      * <p>実行後、膜srcmemはこのまま廃棄されなければならない。
-     * <p>膜srcmemにあったアトムは実行スタックにエンキューされる。
+     * <p><strike>膜srcmemにあったアクティブアトムは実行スタックに積まれる。</strike>
      * <p><b>注意</b>　Ruby版のpourから名称変更 */
     public static final int MOVECELLS = 64;
 
+	/** enqueueallatoms [srcmem]
+	 * <br>（予約された）ボディ命令<br>
+	 * 膜srcmemにある全てのアクティブアトムをこの膜の実行スタックに積む。
+	 */
+	public static final int ENQUEUEALLATOMS = 65;
+	// LOCALENQUEUEALLATOMS は最適化の効果が少ないと思われるため、廃案。
+
     /** movemem [dstmem, srcmem]
      * <br>ボディ命令<br>
-     * 膜srcmemを膜dstmemに移動する。*/
-    public static final int MOVEMEM = 65;
+     * 膜srcmemを膜dstmemに移動する。
+     * <p>膜srcmemを再利用するために使用される。
+     * @see unlockmem */
+    public static final int MOVEMEM = 66;
 
     /** unlockmem [srcmem]
      * <br>ボディ命令<br>
-     * 膜srcmemのロックを解放する。
-     * <p>この膜を管理するマシンの実行膜スタックに積まれる。
+     * （活性化した）膜srcmemのロックを解放する。
+     * <p>再利用された膜に対して呼ばれる。
      * <p>実行後、srcmemへの参照は廃棄しなければならない。
-     * TODO activatemem に併合する？ */
-    public static final int UNLOCKMEM = 66;
+     * @see activatemem */
+    public static final int UNLOCKMEM = 67;
+
+	/** localunlockmem [srcmem]
+	 * <br>最適化用ボディ命令<br>
+	 * unlockmemと同じ。ただしsrcmemはこの計算ノードに存在する。*/
+	public static final int LOCALUNLOCKMEM = LOCAL + UNLOCKMEM;
 
     // プロセス文脈をコピーまたは廃棄するための命令 (70--74)
     
     /** recursivelock [srcmem]
-     * <br>（予約された）失敗しない（？）ガード命令<br>
-     * 膜srcmemの全ての子膜に対して再帰的にロックを取得する。ブロッキングで行う。*/
+     * <br>（予約された）ガード命令<br>
+     * 膜srcmemの全ての子膜に対して再帰的にロックを取得する。
+     * <p>右辺での出現が1回でないプロセス文脈が書かれた左辺の膜に対して使用される。
+     * TODO デッドロックが起こらないことを保証できれば、この命令はブロッキングで行うべきである。*/
     public static final int RECURSIVELOCK = 70;
 
     /** recursiveunlock [srcmem]
      * <br>（予約された）ボディ命令<br>
-     * 膜srcmemの全ての子膜に対して再帰的にロックを解放する。*/
+     * 膜srcmemの全ての子膜に対して再帰的にロックを解放する。
+     * 膜はそれを管理するタスクの実行膜スタックに再帰的に積まれる。
+     * @see unlockmem
+     * @see activatemem */
     public static final int RECURSIVEUNLOCK = 71;
-
+	
     /** copymem [-dstmem, srcmem]
      * <br>（予約された）ボディ命令<br>
      * 再帰的にロックされた膜srcmemの内容のコピーを作成し、膜dstmemに入れる。
@@ -386,7 +482,7 @@ public class Instruction {
     /** dropmem [srcmem]
      * <br>（予約された）ボディ命令<br>
      * 再帰的にロックされた膜srcmemを破棄する。
-     * この膜や子孫の膜をルート膜とするマシンは強制終了する。*/
+     * この膜や子孫の膜をルート膜とするタスクは強制終了する。*/
     public static final int DROPMEM = 73;
 
     // 予約 (75--79)
@@ -413,24 +509,25 @@ public class Instruction {
     /** spec [formals, locals]
      * <br>無視される<br>
      * 仮引数と一時変数の個数を宣言する。*/
-    public static final int SPEC = 205;
+    public static final int SPEC = 203;
 
     /** loop [[instructions...]]
      * <br>構造化命令<br>
      * 引数の命令列を実行することを表す。
      * 引数列を最後まで実行した場合、このloop命令の実行を繰り返す。*/
-    public static final int LOOP = 91;
+    public static final int LOOP = 204;
 
     /** branch [[instructions...]]
      * <br>構造化命令<br>
      * 引数の命令列を実行することを表す。
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、
      * 典型的にはこのbranchの次の命令に進む。
-     * 引数列を最後まで実行した場合、ここで終了する（TODO またはhalt命令を作る）
+     * 引数列を最後まで実行した場合、ここで終了する
+     * TODO またはhalt命令を作る
      * @see not */
-    public static final int BRANCH = 92;
+    public static final int BRANCH = 205;
 
-	// 組み込み機能に関する命令 (210--239)
+	// 組み込み機能に関する命令 (210--229)
 
 	/** inline [[args...] text]
 	 * <br>（予約された）ボディ命令
@@ -443,7 +540,7 @@ public class Instruction {
 	/** builtin [class, method, [args...]]
 	 * <br>（予約された）ボディ命令
 	 * 指定された引数でJavaのクラスメソッドを呼び出す。
-	 * インタプリタのときに組み込み機能を提供するために使用する。詳細は未定。*/
+	 * インタプリタ動作するときに組み込み機能を提供するために使用する。詳細は未定。*/
 	public static final int BUILTIN = 211;
 	
 
@@ -455,6 +552,30 @@ public class Instruction {
      */
     public int getID() {
 		return id;
+	}
+	public int getIntArg1() {
+		return ((Integer)data.get(0)).intValue();
+	}
+	public int getIntArg2() {
+		return ((Integer)data.get(1)).intValue();
+	}
+	public int getIntArg3() {
+		return ((Integer)data.get(2)).intValue();
+	}
+	public int getIntArg4() {
+		return ((Integer)data.get(3)).intValue();
+	}
+	public Object getArg1() {
+		return data.get(0);
+	}
+	public Object getArg2() {
+		return data.get(1);
+	}
+	public Object getArg3() {
+		return data.get(2);
+	}
+	public Object getArg4() {
+		return data.get(3);
 	}
 
     ////////////////////////////////////////////////////////////////
@@ -479,7 +600,7 @@ public class Instruction {
      * @param s 説明用の文字列
      */
     public static Instruction dummy(String s) {
-		Instruction i = new Instruction(-1);
+		Instruction i = new Instruction(DUMMY);
 		i.add(s);
 		return i;
     }
