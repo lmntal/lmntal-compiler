@@ -123,6 +123,9 @@ class InterpretiveReactor {
 	List vars;
 	
 	InterpretiveReactor(int size) {
+		initVector(size);
+	}
+	private void initVector(int size) {
 		this.mems  = new AbstractMembrane[size];
 		this.atoms = new Atom[size];
 		this.vars  = new ArrayList();
@@ -132,39 +135,46 @@ class InterpretiveReactor {
 		}
 	}
 	
-	private InterpretiveReactor reloadVars(int size, List memargs, List atomargs, List varargs) {
-		InterpretiveReactor ir = new InterpretiveReactor(size);
+	private void reloadVars(InterpretiveReactor irSrc,
+			int size, List memargs, List atomargs, List varargs) {
+		AbstractMembrane[] srcmems  = irSrc.mems;
+		Atom[]             srcatoms = irSrc.atoms;
+		List               srcvars  = irSrc.vars;
+		initVector(size);
+				
 		int memcount  = memargs.size();
 		int atomcount = atomargs.size();
 		for (int i = 0; i < memcount; i++) {
-			ir.mems[i] =
-			   mems[((Integer) memargs.get(i)).intValue()];
+			mems[i] =
+			   srcmems[((Integer) memargs.get(i)).intValue()];
 		}
 		for (int i = 0; i < atomcount; i++) {
-			ir.atoms[i + memcount] =
-			   atoms[((Integer) atomargs.get(i)).intValue()];
+			atoms[i + memcount] =
+			   srcatoms[((Integer) atomargs.get(i)).intValue()];
 		}
 		for (int i = 0; i < varargs.size(); i++) {
-			ir.vars.set(i + memcount + atomcount,
-				   vars.get(((Integer) varargs.get(i)).intValue()));
+			vars.set(i + memcount + atomcount,
+				srcvars.get(((Integer) varargs.get(i)).intValue()));
 		}
-		return ir;
 	}
 
-	private InterpretiveReactor changeVars(List memargs, List atomargs, List varargs) {
+	private void changeVars(InterpretiveReactor irSrc,
+			List memargs, List atomargs, List varargs) {
+		AbstractMembrane[] srcmems  = irSrc.mems;
+		Atom[]             srcatoms = irSrc.atoms;
+		List               srcvars  = irSrc.vars;
 		int size = memargs.size();
 		if (size < atomargs.size()) size = atomargs.size();
 		if (size < varargs.size())  size = varargs.size();
-		InterpretiveReactor ir = new InterpretiveReactor(size);
+		initVector(size);
 		for (int i = 0; i < size; i++) {
 			if (memargs.get(i) != null)
-				ir.mems[i]  = mems[((Integer) memargs.get(i)).intValue()];
+				mems[i]  = srcmems[((Integer) memargs.get(i)).intValue()];
 			else if (atomargs.get(i) != null)
-				ir.atoms[i] = atoms[((Integer) atomargs.get(i)).intValue()];
+				atoms[i] = srcatoms[((Integer) atomargs.get(i)).intValue()];
 			else
-				ir.vars.set(i, vars.get(((Integer) varargs.get(i)).intValue()));
+				vars.set(i, srcvars.get(((Integer) varargs.get(i)).intValue()));
 		}
-		return ir;
 	}
 	
 
@@ -545,22 +555,22 @@ class InterpretiveReactor {
 // // ArrayIndexOutOfBoundsException がでたので一時的に変更
 // if (locals < 10) locals = 10;
 					
-					InterpretiveReactor ir;
-					ir = reloadVars(locals, (List)inst.getArg2(),
+					InterpretiveReactor ir = new InterpretiveReactor(locals);
+					ir.reloadVars(this, locals, (List)inst.getArg2(),
 						(List)inst.getArg3(), new ArrayList());
 					if (ir.interpret(bodyInsts, 0)) return true;
 					if (Env.debug == 9) Env.p("info: body execution failed");
 					return false; //n-kato
 
 				case Instruction.RESETVARS :
-					ir = reloadVars(vars.size(), (List)inst.getArg1(),
+					reloadVars(this, vars.size(), (List)inst.getArg1(),
 							(List)inst.getArg2(), (List)inst.getArg3());
-					return ir.interpret(insts, pc); //n-kato
+					break;
 
 				case Instruction.CHANGEVARS :
-					ir = changeVars((List)inst.getArg1(),
+					changeVars(this, (List)inst.getArg1(),
 							(List)inst.getArg2(), (List)inst.getArg3());
-					return ir.interpret(insts, pc); //n-kato
+					break; //n-kato
 
 				case Instruction.PROCEED:
 					return true; //n-kato
