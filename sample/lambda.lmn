@@ -63,6 +63,7 @@ C P Q R -> P R Q
 ]].
 //-----------------------------------------------------------------------------------------------
 
+
 //handle = lambda(term(x), lambda(term(y), apply(term(y), term(x)), s1 ), s0 ).
 //handle = lambda(term(x), term(x) ).
 //handle = lambda(term(x), lambda(term(y), term(x)) ).
