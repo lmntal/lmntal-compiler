@@ -147,6 +147,11 @@ final class Link {
 	}
 }
 
+/**
+ * TODO 「タスク」に名前変更
+ * TODO システムルールセットのマッチテスト・ボディ実行
+ *
+ */
 final class Machine extends AbstractMachine {
 	/** 実行膜スタック */
 	Stack memStack = new Stack();
