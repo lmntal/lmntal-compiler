@@ -305,7 +305,7 @@ public class RuleCompiler {
 				}
 				else {
 					System.out.println("unrecognized guard type constraint name: " + cstr);
-					guard.add(new Instruction(Instruction.LOCKMEM, 0));
+					guard.add(new Instruction(Instruction.LOCK, 0));
 					return;
 				}
 			}
@@ -313,7 +313,7 @@ public class RuleCompiler {
 		}
 		while (changed);
 		// 型付け失敗
-		guard.add(new Instruction(Instruction.LOCKMEM, 0));
+		guard.add(new Instruction(Instruction.LOCK, 0));
 		System.out.println("Compile Error: never proceeding guard type constraints: " + cstrs);
 	}
 	
@@ -334,7 +334,7 @@ public class RuleCompiler {
 		// react命令は本来ガード終了後に発行するため、reactはreloadvars/inlinereactに分割すべき
 		guard = body;
 		compile_g();
-		// ここでinlinereactを発行する。最終的にはinilnereactをreactに名称変更する？
+		// ここでinlinereactを発行する。最終的にはinlinereactをreactに名称変更する？
 		
 		rhsatoms    = new ArrayList();
 		rhsatompath = new HashMap();
