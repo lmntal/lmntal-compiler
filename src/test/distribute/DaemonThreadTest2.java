@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 
 //TODO 終了するようにする
 
@@ -227,6 +228,22 @@ class DaemonHontai2 implements Runnable {
 
 		return false;
 	}
+	
+	static void dumpHashMap(){
+		Set tmpSet;
+		
+		tmpSet = nodeTable.entrySet();
+		System.out.println("Dump nodeTable");
+		System.out.println(tmpSet);
+		
+		tmpSet = registedRuntimeTable.entrySet();
+		System.out.println("Dump registedRuntimeTable");
+		System.out.println(tmpSet);
+		
+		tmpSet = msgTable.entrySet();
+		System.out.println("Dump msgTable");
+		System.out.println(tmpSet);
+	}
 }
 
 class LMNtalNode {
@@ -321,31 +338,29 @@ class LMNtalDaemonThread2 implements Runnable {
 					msgid = new Integer(tmpString[0]);
 
 					//メッセージを登録
-					LMNtalNode returnNode = new LMNtalNode(in, out);
+					LMNtalNode returnNode = new LMNtalNode(socket.getInetAddress(), in, out);
 					result = DaemonHontai2.registerMessage(msgid, returnNode);
 
 					if (result == true) {
 						//登録成功
+						boolean result2;
 
 						//接続しに行く
-						DaemonHontai2.connect((tmpString[1].split("\"",3))[1]);
+						result2 = DaemonHontai2.connect((tmpString[1].split("\"",3))[1]);
 
-
-
-
-
-						//接続成功
-						out.write("OK\n");
-						out.flush();
-						
-						//接続失敗
-						out.write("fail\n");
-						out.flush();
-
+						if(result2 == true){
+							//接続成功
+							out.write("OK\n");
+							out.flush();							
+						} else {
+							//接続失敗
+							out.write("fail\n");
+							out.flush();							
+						}
 					} else {
 						//既にmsgTableに登録されている時（とみなしていいのかな？）
 						//FQDN == 自分自身 の時？
-
+						
 						out.write("fail\n");
 						out.flush();
 					}
@@ -388,15 +403,21 @@ class TmpRuntime implements Runnable {
 					new InputStreamReader(socket.getInputStream()));
 			Thread.sleep(300);
 
+			//REGISTERLOCAL rgid
 			regist(out);
 			Thread.sleep(300);
 			System.out.println(in.readLine());
 
 			Thread.sleep(300);
 
+			//msgid "localhost" rgid connect
+			//
 			connect(out);
 			Thread.sleep(300);
 			System.out.println(in.readLine());
+			
+			//hashmapの中身を吐く
+			DaemonHontai2.dumpHashMap();
 
 		} catch (Exception e) {
 			System.out.println("ERROR in TmpRuntime.run()" + e.toString());

@@ -1,16 +1,47 @@
 package test.distribute;
 
-import java.util.StringTokenizer;
 
+
+import java.util.Iterator;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.HashMap;
 
 class Hoge {
 	public static void main(String args[]){
 		//TestStringTokenizer();
 //		TestStringSplit();
-		TestStringSplit2();
-			
+//		TestStringSplit2();
+//		DumpHashMap();
+		DumpHashMapNeat();			
 	}
 	
+	static void DumpHashMapNeat(){
+		HashMap map = new HashMap();
+
+		for(int i = 0; i < 15; i++){
+			map.put(new String("key" + i), new String("value" + i));
+		}
+
+		Set set = map.entrySet();		
+		Iterator it = set.iterator();
+		
+		while(it.hasNext()){
+			System.out.println(it.next());	
+		}
+	}
+	
+	static void DumpHashMap(){
+		HashMap map = new HashMap();
+
+		for(int i = 0; i < 15; i++){
+			map.put(new String("key" + i), new String("value" + i));
+		}
+
+		Set set = map.entrySet();		
+		System.out.println(set);
+	}
+
 	
 	static void TestStringSplit2(){
 		String testStr = "REGISTERLOCAL 20";
