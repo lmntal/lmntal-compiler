@@ -27,7 +27,6 @@ public final class MasterLMNtalRuntime extends LocalLMNtalRuntime {
 		globalRoot = (Membrane)masterTask.getRoot();
 		// Inline
 		Inline.initInline();
-		Env.theRuntime = this;
 	}
 
 //	/**
