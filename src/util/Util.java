@@ -58,6 +58,14 @@ abstract public class Util {
 	 * @param link
 	 * @return
 	 */
+	public static String[] arrayOfList(Link link, String s) {
+		Object v [] = arrayOfList(link);
+		String vs[] = new String[v.length];
+		for(int i=0;i<v.length;i++) {
+			vs[i] = (String)v[i];
+		}
+		return vs;
+	}
 	public static Object[] arrayOfList(Link link) {
 		List l = new ArrayList();
 		while(true) {

@@ -86,6 +86,27 @@ H=io.fileWriter(Filename) :- unary(Filename) | H=[[/*inline*/
 	]](Filename).
 
 /**
+ * io.reader : String -> java::BufferedReader
+ * 
+ */
+H=io.reader(Process) :- unary(Process) | H=[[/*inline*/
+	try {
+		Object obj = ((ObjectFunctor)(me.nthAtom(0).getFunctor())).getValue();
+		if(!(obj instanceof Process)) break;
+		Atom r = mem.newAtom(new ObjectFunctor(
+		  new java.io.BufferedReader( new java.io.InputStreamReader(
+		    ((Process)obj).getInputStream()
+		  ))
+		));
+//		System.out.println(r);
+		mem.relink(r, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+	} catch(Exception e) {e.printStackTrace();}
+	]](Process).
+
+
+/**
  * readLine : ?
  * 
  */
@@ -165,6 +186,12 @@ H=io.toFile(Filename, List) :- unary(Filename) | H=toFile_s0(io.fileWriter(Filen
 H=toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=toFile_s0(print(Obj, CAR), CDR).
 H=toFile_s0(Obj, []) :- H=close(Obj).
 
+/**
+ * io.eager
+ * 
+ */
+H=io.eager(In) :- H=io.eager(In, [], done).
+H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], readline(In, Res)).
 
 
 // Sample
