@@ -36,7 +36,7 @@ public final class InterpretedRuleset extends Ruleset {
 		Iterator it = rules.iterator();
 		while(it.hasNext()) {
 			Rule r = (Rule)it.next();
-			result |= matchTest(mem, atom, r.atomMatch);
+			result |= matchTest(mem, atom, r.atomMatch, (Instruction)r.body.get(0));
 		}
 		return result;
 	}
@@ -50,7 +50,7 @@ public final class InterpretedRuleset extends Ruleset {
 		Iterator it = rules.iterator();
 		while(it.hasNext()) {
 			Rule r = (Rule)it.next();
-			result |= matchTest(mem, null, r.memMatch);
+			result |= matchTest(mem, null, r.memMatch, (Instruction)r.body.get(0));
 		}
 		return result;
 	}
@@ -59,15 +59,23 @@ public final class InterpretedRuleset extends Ruleset {
 	 * 膜主導かアトム主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
 	 */
-	private boolean matchTest(Membrane mem, Atom atom, List matchInstructions) {
-		Env.p("atomMatch."+matchInstructions);
+	private boolean matchTest(Membrane mem, Atom atom, List matchInsts, Instruction spec) {
+		Env.p("atomMatch."+matchInsts);
+		int formals = spec.getIntArg1();
+		int locals  = spec.getIntArg2();
+		AbstractMembrane[] mems  = new AbstractMembrane[locals];
+		Atom[]             atoms = new Atom[locals];
+		mems[0]  = mem;
+		atoms[1] = atom;
 		
-		Iterator it = matchInstructions.iterator();
+		Iterator it = matchInsts.iterator();
 		while(it.hasNext()) {
 			// TODO マッチテストなかじま
-			Instruction hoge = (Instruction)it.next();
-			switch (hoge.getID()){
+			Instruction inst = (Instruction)it.next();
+			switch (inst.getKind()){
 			//case Instruction.....:
+			case Instruction.REACT:
+				body(((Rule)inst.getArg1()).body, mems, atoms);
 			}
 		}
 		return false;
@@ -83,7 +91,7 @@ public final class InterpretedRuleset extends Ruleset {
 	 *
 	 * 
 	 */
-	private void body(List rulebody, AbstractMembrane[] memArgs, Atom[] atomArgs) {
+	private void body(List rulebody, AbstractMembrane[] mems, Atom[] atoms) {
 		Iterator it = rulebody.iterator();
 		while(it.hasNext()){
 			Instruction hoge = (Instruction)it.next();

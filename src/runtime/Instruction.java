@@ -888,6 +888,9 @@ public class Instruction {
 	public int getID() {
 		return getKind();
 	}
+	public int getIntArg(int arg) {
+		return ((Integer)data.get(arg - 1)).intValue();
+	}
 	public int getIntArg1() {
 		return ((Integer)data.get(0)).intValue();
 	}
@@ -899,6 +902,9 @@ public class Instruction {
 	}
 	public int getIntArg4() {
 		return ((Integer)data.get(3)).intValue();
+	}
+	public Object getArg(int arg) {
+		return data.get(arg - 1);
 	}
 	public Object getArg1() {
 		return data.get(0);
