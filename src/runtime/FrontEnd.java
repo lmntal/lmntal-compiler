@@ -14,19 +14,23 @@ import java.io.IOException;
 import java.lang.SecurityException;
 
 /**
- * LMNtal のメイン
+ * LMNtal のメイソ
  * 
- * <pre>
- * TODO 名前は FrontEnd でいいんだろうか。
- *       案：FrontEnd
- *           素直に Main
- * </pre>
  * 
  * 作成日: 2003/10/22
  */
 public class FrontEnd {
 	/**
-	 * 全ての始まり
+	 * 全ての始まり。
+	 * 
+	 * <pre>
+	 * コマンドライン引数
+	 *   なし                       → REPL 起動
+	 *   ファイル名                 → ファイルの中身を実行して終わる
+	 *   -e [LMNtal oneliner]       → [LMNtal oneliner] （１行文）を実行して終わる
+	 *   -d                         → デバッグモード
+	 *   --help                     → ヘルプを表示
+	 * </pre>
 	 * 
 	 * @param args
 	 */
@@ -36,7 +40,7 @@ public class FrontEnd {
 		Reader src = null;
 		
 		/**
-		 * TODO コマンドライン引数があったらファイルの中身を解釈実行
+		 * コマンドライン引数があったらファイルの中身を解釈実行
 		 */
 		for(int i = 0; i < args.length;i++){
 			// 必ずlength>0, '-'ならオプション
