@@ -8,6 +8,7 @@ import util.Stack;
 /**
  * TODO 「タスク」に名前変更
  * TODO システムルールセットのマッチテスト・ボディ実行
+ * TODO マシン間の上下関係の実装、newMachineをマシンが持つようにする
  *
  */
 final class Machine extends AbstractMachine {
@@ -88,14 +89,20 @@ abstract class AbstractMachine {
 /** 計算ノード */
 final class LMNtalRuntime {
 	List machines = new ArrayList();
+	AbstractMembrane rootMem;
 	
 	/** 計算ノードが持つマシン全てがidleになるまで実行。<br>
 	 *  machinesに積まれた順に実行する。親マシン優先にするためには
 	 *  マシンが木構造になっていないと出来ない。優先度はしばらく未実装。
 	 */
 	LMNtalRuntime(Ruleset init){
-		Machine rootm = newMachine();
-		init.react((Membrane)rootm.getRoot());
+		Machine root = newMachine();
+		rootMem = root.getRoot();
+		init.react((Membrane)rootMem);
+	}
+	
+	AbstractMembrane getRootMem(){
+		return rootMem;
 	}
 	
 	void exec() {

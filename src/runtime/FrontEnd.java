@@ -100,7 +100,9 @@ public class FrontEnd {
 			// 計算ノードに、得られた初期化ルールを渡して呼び出す
 			
 			LMNtalRuntime buturimachine = new LMNtalRuntime(initRuleset);
-			buturimachine.exec(); //実行
+			buturimachine.exec(); //実行]
+			Dumper dp = new Dumper();
+			dp.dump(buturimachine.getRootMem());
 		}
 	}
 	
@@ -117,6 +119,6 @@ public class FrontEnd {
 				System.exit(-1);
 			}
 		}
-		return new InterpretedRuleset(null);
+		return new SampleInitRuleset();
 	}
 }
