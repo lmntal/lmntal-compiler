@@ -205,7 +205,7 @@ public class RuleCompiler {
 	//
 	
 	
-	static final Object UNARY_ATOM_TYPE = "1";
+	static final Object UNARY_ATOM_TYPE = "1"; // 他に、リンクタイプと、線形タイプがある
 
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表す定数オブジェクト */
 	HashMap typedcxttypes = new HashMap();
@@ -227,17 +227,29 @@ public class RuleCompiler {
 		return ((Integer)rhstypedcxtpaths.get(cxt)).intValue();
 	}
 	
-	static final int ISINT = Instruction.ISINT;
-	static HashMap guardLibrary2 = new HashMap();
+	static final int ISINT   = Instruction.ISINT;
+	static final int ISFLOAT = Instruction.ISFLOAT;
+	static HashMap guardLibrary1 = new HashMap(); // 1入力ガード型制約名
+	static HashMap guardLibrary2 = new HashMap(); // 2入力ガード型制約名
 	static {
-		guardLibrary2.put(new Functor("<", 2),	new int[]{ISINT,ISINT, Instruction.ILT});
-		guardLibrary2.put(new Functor("=<",2),	new int[]{ISINT,ISINT, Instruction.ILE});
-		guardLibrary2.put(new Functor(">", 2),	new int[]{ISINT,ISINT, Instruction.IGT});
-		guardLibrary2.put(new Functor(">=",2),	new int[]{ISINT,ISINT, Instruction.IGE});
-		guardLibrary2.put(new Functor("+",3),	new int[]{ISINT,ISINT, Instruction.IADD});
-		guardLibrary2.put(new Functor("-",3),	new int[]{ISINT,ISINT, Instruction.ISUB});
-		guardLibrary2.put(new Functor("*",3),	new int[]{ISINT,ISINT, Instruction.IMUL});
-		guardLibrary2.put(new Functor("/",3),	new int[]{ISINT,ISINT, Instruction.IDIV});
+		guardLibrary2.put(new Functor("<.", 2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLT});
+		guardLibrary2.put(new Functor("=<.",2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLE});
+		guardLibrary2.put(new Functor(">.", 2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGT});
+		guardLibrary2.put(new Functor(">=.",2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGE});
+		guardLibrary2.put(new Functor("<",  2), new int[]{ISINT,  ISINT,   Instruction.ILT});
+		guardLibrary2.put(new Functor("=<", 2), new int[]{ISINT,  ISINT,   Instruction.ILE});
+		guardLibrary2.put(new Functor(">",  2), new int[]{ISINT,  ISINT,   Instruction.IGT});
+		guardLibrary2.put(new Functor(">=", 2), new int[]{ISINT,  ISINT,   Instruction.IGE});
+		guardLibrary2.put(new Functor("+.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FADD});
+		guardLibrary2.put(new Functor("-.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FSUB});
+		guardLibrary2.put(new Functor("*.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FMUL});
+		guardLibrary2.put(new Functor("/.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FDIV});
+		guardLibrary2.put(new Functor("+",  3), new int[]{ISINT,  ISINT,   Instruction.IADD});
+		guardLibrary2.put(new Functor("-",  3), new int[]{ISINT,  ISINT,   Instruction.ISUB});
+		guardLibrary2.put(new Functor("*",  3), new int[]{ISINT,  ISINT,   Instruction.IMUL});
+		guardLibrary2.put(new Functor("/",  3), new int[]{ISINT,  ISINT,   Instruction.IDIV});
+//		guardLibrary1.put(new Functor("int",  2),new int[]{ISINT,	Instruction.ITOF});
+//		guardLibrary1.put(new Functor("float",2),new int[]{ISFLOAT,Instruction.FTOI});
 	}
 	/** ガードをコンパイルする（仮） */
 	private void compile_g() {
@@ -274,6 +286,11 @@ public class RuleCompiler {
 					int atomid1 = loadUnaryAtom(def1);
 					guard.add(new Instruction(Instruction.ISINT, atomid1));
 				}
+				else if (func.getSymbolFunctorID().equals("float_1")) {
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					int atomid1 = loadUnaryAtom(def1);
+					guard.add(new Instruction(Instruction.ISFLOAT, atomid1));
+				}
 				else if (func.getSymbolFunctorID().equals("unary_1")) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
@@ -302,6 +319,20 @@ public class RuleCompiler {
 						typedcxttypes.put(def1, UNARY_ATOM_TYPE);
 					}
 					else bindToUnaryAtom(def1, atomid2);
+				}
+				else if (guardLibrary1.containsKey(func)) {
+					int[] desc = (int[])guardLibrary1.get(func);
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					int atomid1 = loadUnaryAtom(def1);
+					guard.add(new Instruction(desc[0], atomid1));
+					if (func.getArity() == 1) {
+						guard.add(new Instruction(desc[1], atomid1));
+					}
+					else {
+						int atomid2 = varcount++;
+						guard.add(new Instruction(desc[1], atomid2, atomid1));
+						bindToUnaryAtom(def2, atomid2);
+					}
 				}
 				else if (guardLibrary2.containsKey(func)) {
 					int[] desc = (int[])guardLibrary2.get(func);
