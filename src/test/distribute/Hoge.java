@@ -8,13 +8,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.HashMap;
 
+import runtime.Env;
+import util.StreamDumper;
+
 class Hoge {
+	static String synchronizedTestObj = "hoge00";
+	
 	public static void main(String args[]){
 		//TestStringTokenizer();
 //		TestStringSplit();
@@ -27,8 +34,119 @@ class Hoge {
 		//testLabel();
 		//testProperty();
 		//testChildProcessStream();
-		testInetAddress();
+		//testInetAddress();
+		//ServerSocketTest();
+		//RuntimeTest();
+		//UnknownCommandTest();
+		SynchronizeTest();
 	}
+
+	
+	
+	/**
+	 * synchronizedの中で、同じオブジェクトをsynchronizedしているメソッドを呼び出したらどうなるかやってみるテスト。
+	 * デッドロックしないといいなorz
+	 */
+	private static void SynchronizeTest() {
+		synchronized(synchronizedTestObj){
+			SynchronizeTest2();
+			synchronizedTestObj = "hoge02";
+			System.out.println(synchronizedTestObj);
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private static void SynchronizeTest2() {
+		synchronized(synchronizedTestObj){
+			System.out.println(synchronizedTestObj);
+			synchronizedTestObj = "hoge01";
+		}
+	}
+
+
+
+	/**
+	 * Runtime.exec()でパスが通ってないコマンドを起動したらどうなるのかテスト
+	 * 追記:IOExceptionが出ました
+	 */
+	private static void UnknownCommandTest() {
+		String newCmdLine = new String("ghoehoeufejrlejrelkh");
+
+		System.out.println("now trying to exec " + newCmdLine);
+		
+		Process slave;
+		try {
+			slave = Runtime.getRuntime().exec(newCmdLine);
+			Thread dumpErr = new Thread(new StreamDumper(
+					"slave runtime.error", slave
+							.getErrorStream()));
+			Thread dumpOut = new Thread(new StreamDumper(
+					"slave runtime.stdout", slave
+							.getInputStream()));
+			dumpErr.start();
+			dumpOut.start();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		System.out.println("command " +  newCmdLine +" should be running now");
+	}
+	/**
+	 * Runtimeをいろいろ試してみる
+	 */
+	private static void RuntimeTest() {
+		System.out.println(Runtime.getRuntime());
+		
+		String classpath = System.getProperty("java.class.path");
+		String newCmdLine =
+			new String(
+					"java -classpath"   //todo javaコマンドにパスが通ってなかった時にエラー吐いて死ぬように
+					+ " "
+					+ classpath
+					+ " "
+					+"test.distribute.Hoge");
+
+		Process slave;
+		try {
+			slave = Runtime.getRuntime().exec(newCmdLine);
+			Thread dumpErr = new Thread(new StreamDumper("slave runtime.error", slave.getErrorStream()));
+			Thread dumpOut = new Thread(new StreamDumper("slave runtime.stdout", slave.getInputStream()));
+			dumpErr.start();
+			dumpOut.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 *	 *ソケットをいろいろ試してみる
+	 */
+	private static void ServerSocketTest() {
+		ServerSocket servSocket;
+		int portnum = 60000;
+		try {
+			servSocket = new ServerSocket(portnum);
+			
+			while (true) {
+				Socket socket = servSocket.accept();
+				System.out.println(socket.getInetAddress());
+				System.out.println(socket.getLocalSocketAddress());
+				System.out.println(InetAddress.getLocalHost());
+				break;
+			}
+			
+		} catch (IOException e) {
+			System.out.println(
+				"ERROR in LMNtalDaemon.LMNtalDaemon() " + e.toString());
+			e.printStackTrace();
+		}
+		
+		
+	}
+
+
 
 	/**
 	 * InetAddressを比較する方法はどれが一番いいか
