@@ -18,6 +18,9 @@ io.input :- [[/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, "Input text.");
 	me.changeName(s);
 	]].
+io.popup(String) :- unary(String)|[[/*inline*/
+	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
+	]](String).
 }
 
 //	inputString("How much?", Answer).
