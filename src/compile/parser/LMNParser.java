@@ -1,7 +1,6 @@
 /**
  * LMNtal Parser メインクラス
- * １つのソースコードはリストとして表現されます。
- * リストの各オブジェクトは、Src*のオブジェクトです。
+ * １つのソースコードはMembraneとして表現されます。
  */
 
 package compile.parser;
@@ -290,6 +289,8 @@ public class LMNParser {
 	 */
 	private void addRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
 		RuleStructure rule = new RuleStructure();
+		// TODO 簡略記法の展開 sRuleの中身を置き換え
+		
 		addProcessToMem(sRule.getHead(), rule.leftMem);
 		createProxy(rule.leftMem);
 		addProcessToMem(sRule.getBody(), rule.rightMem);
