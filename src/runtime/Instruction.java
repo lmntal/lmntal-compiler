@@ -525,6 +525,7 @@ public class Instruction implements Cloneable {
 	//  ----- enqueueallatoms          [srcmem]
 	//  ----- freemem                  [srcmem]
 	// [local]addmem                   [dstmem, srcmem]
+	// [local]enququmem                [srcmem]
 	// [local]unlockmem                [srcmem]
 	// [local]setmemname               [dstmem, name]
 
@@ -609,14 +610,21 @@ public class Instruction implements Cloneable {
 
 	/** addmem [dstmem, srcmem]
 	 * <br>ボディ命令<br>
-	 * ロックされた（親膜の無い）膜$srcmemを（活性化された）膜$dstmemに移動し、ロックしたまま活性化する。
-	 * この場合の活性化は、$srcmemがルート膜の場合、仮の実行膜スタックに積むことを意味し、
-	 * ルート膜でない場合、$dstmemと同じ実行膜スタックに積むことを意味する。
+	 * ロックされた（親膜の無い）膜$srcmemを（活性化された）膜$dstmemに移動する。
 	 * <p>膜$srcmemを再利用するために使用される。
 	 * <p>newmemと違い、$srcmemのロックは明示的に解放しなければならない。
-	 * @see unlockmem */
+	 * @see unlockmem, enqueuemem
+	 */
 	public static final int ADDMEM = 57;
 	static {setArgType(ADDMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
+
+	/** enqueuemem [srcmem]
+	 * ロックされた膜$srcmemをロックしたまま活性化する。
+	 * この場合の活性化は、$srcmemがルート膜の場合、仮の実行膜スタックに積むことを意味し、
+	 * ルート膜でない場合、親膜と同じ実行膜スタックに積むことを意味する。
+	 */	
+	public static final int ENQUEUEMEM = 58;
+	static {setArgType(ENQUEUEMEM, new ArgType(false, ARG_MEM));}
 
 	/** localaddmem [dstmem, srcmem]
 	 * <br>最適化用ボディ命令<br>
@@ -631,7 +639,7 @@ public class Instruction implements Cloneable {
 	 * <p>addmemによって再利用された膜、およびnewrootによってルールで新しく生成された
 	 * ルート膜に対して、（子孫から順番に）必ず呼ばれる。
 	 * <p>実行後、$srcmemへの参照は廃棄しなければならない。*/
-	public static final int UNLOCKMEM = 58;
+	public static final int UNLOCKMEM = 59;
 	static {setArgType(UNLOCKMEM, new ArgType(false, ARG_MEM));}
 
 	/** localunlockmem [srcmem]
@@ -644,7 +652,7 @@ public class Instruction implements Cloneable {
 	 * <br>ボディ命令<br>
 	 * 膜$dstmemの名前を文字列（またはnull）nameに設定する。
 	 * <p>現在、膜の名前の使用目的は表示用のみ。いずれ、膜名に対するマッチングができるようになるはず。*/
-	public static final int SETMEMNAME = 59;
+	public static final int SETMEMNAME = 60;
 	static {setArgType(SETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));}
 
 	/** localsetmemname [dstmem, name]
@@ -653,7 +661,7 @@ public class Instruction implements Cloneable {
 	public static final int LOCALSETMEMNAME = LOCAL + SETMEMNAME;
 	static {setArgType(LOCALSETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));}
 
-	// 予約 (60--62)
+	// 予約 (61--62)
 
 	// リンクに関係する出力するガード命令 (63--64)
 	

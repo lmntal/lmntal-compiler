@@ -257,11 +257,12 @@ public class Optimizer {
 					Integer arg1 = (Integer)inst.getArg1();
 					if (reuseMap.containsKey(arg1)) {
 						lit.remove();
+						//addmem・enqueuemem命令に変更
+						int m = ((Integer)reuseMap.get(arg1)).intValue();
 						if (!set.contains(arg1)) {
-							//addmem命令に変更
-							int m = ((Integer)reuseMap.get(arg1)).intValue();
 							lit.add(new Instruction(Instruction.ADDMEM, inst.getIntArg2(), m)); 
 						}
+						lit.add(new Instruction(Instruction.ENQUEUEMEM, m)); 
 					}
 					break;
 				case Instruction.MOVECELLS:

@@ -473,7 +473,10 @@ class InterpretiveReactor {
 				case Instruction.LOCALADDMEM : //[dstmem, srcmem]
 					mems[inst.getIntArg2()].moveTo(mems[inst.getIntArg1()]);
 					break;//nakajima 2004-01-04, n-kato
-
+				case Instruction.ENQUEUEMEM:
+					mems[inst.getIntArg1()].activate();
+//					mems[inst.getIntArg1()].enqueueAllAtoms();
+					break;
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
 					mems[inst.getIntArg1()].forceUnlock();

@@ -406,7 +406,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		if (dstMem.task != task) {
 			setTask(dstMem.task);
 		}
-		activate();
+//		activate();
 		//enqueueAllAtoms();
 	}
 	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
