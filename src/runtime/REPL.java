@@ -107,7 +107,7 @@ public class REPL {
 			} catch (EOFException e) {
 				break;
 			} catch (Exception e) {
-				System.err.println(Arrays.asList(e.getStackTrace()));
+				e.printStackTrace();
 				//doSomething();
 			}
 		}

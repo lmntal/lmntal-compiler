@@ -181,7 +181,7 @@ public class Module {
 			//m.add(nm);
 			sb.append(" [ OK ] ");
 		} catch (Exception e) {
-			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 			sb.append(" [ FAILED ] ");
 		}
 		Env.d(sb.toString());

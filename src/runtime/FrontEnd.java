@@ -174,7 +174,7 @@ public class FrontEnd {
 				Env.p( Dumper.dump(rt.getGlobalRoot()) );
 			}
 		} catch (Exception e) {
-			Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 	}
 }

@@ -93,7 +93,7 @@ public class ParserTest extends JFrame implements ActionListener {
 				pLMN.setMembrane(src);
 				pLMN.start();
 			} catch (ParseException pe) {
-				System.err.println(pe);
+				pe.printStackTrace();
 			}
 		}
 		else if (e.getSource() == btnOpen) {
@@ -111,7 +111,7 @@ public class ParserTest extends JFrame implements ActionListener {
 					}
 					srcInput.setText(buff.toString());
 				} catch (Exception ee) {
-					System.err.println(ee);
+					ee.printStackTrace();
 				}
 			}
 		}
