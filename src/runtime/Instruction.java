@@ -132,7 +132,7 @@ public class Instruction {
 	 } catch (ArrayIndexOutOfBoundsException e){
 	     //	     answer = "　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n";
 
-	     answer = "1 名前：仕様書無しさん 03/09/21 00:23\n　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n2 名前：仕様書無しさん ：03/09/21 00:24\n　　Λ＿Λ　　＼＼ \n　 （　・∀・）　　　|　|　ｶﾞｯ\n　と　　　　）　 　 |　| \n　　 Ｙ　/ノ　　　 人 \n　　　 /　）　 　 < 　>__Λ∩ \n　 ＿/し'　／／. Ｖ｀Д´）/ ←>>おまえ\n　（＿フ彡　　　　　 　　/ \n\n";
+	     answer = "1 名前：仕様書無しさん 03/09/21 00:23\n　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n2 名前：仕様書無しさん ：03/09/21 00:24\n　　Λ＿Λ　　＼＼ \n　 （　・∀・）　　　|　|　ｶﾞｯ\n　と　　　　）　 　 |　| \n　　 Ｙ　/ノ　　　 人 \n　　　 /　）　 　 < 　>__Λ∩ \n　 ＿/し'　／／. Ｖ｀Д´）/ ←>>おまえ\n　（＿フ彡　　　　　 　　/ \n\n";
 	 } catch (Exception e){
 	     //本当にヤヴァイ場合
 	     System.out.println(e);
@@ -153,8 +153,13 @@ public class Instruction {
      * ただし命令はint型、引数はint[]。
      *
      */
-    //    public String toString(){
-    //    }
+    public String toString(){
+	StringBuffer buffer = new StringB2ufffer("");
+
+	
+
+	return buffer.toString();
+    }
 
     /**
      *
