@@ -87,21 +87,21 @@ public class FrontEnd {
 			// srcがnullなのであとでエラーが
 		}else{
 			src = new BufferedReader(new InputStreamReader(is));
-		}
 		
-		// srcを構文解析に渡す。
-		Ruleset initRuleset;
-		initRuleset = koubun_kaiseki(src); // ダミー
-		try{
-			src.close();
-		}catch(IOException e){
-			System.out.println("ファイルがクローズできません");
-			System.exit(-1);
+			// srcを構文解析に渡す。
+			Ruleset initRuleset;
+			initRuleset = koubun_kaiseki(src); // ダミー
+			try{
+				src.close();
+			}catch(IOException e){
+				System.out.println("ファイルがクローズできません");
+				System.exit(-1);
+			}
+			// 計算ノードに、得られた初期化ルールを渡して呼び出す
+			
+			LMNtalRuntime buturimachine = new LMNtalRuntime(initRuleset);
+			buturimachine.exec(); //実行
 		}
-		// 計算ノードに、得られた初期化ルールを渡して呼び出す
-		
-		LMNtalRuntime buturimachine = new LMNtalRuntime(initRuleset);
-		buturimachine.exec(); //実行
 	}
 	
 	static Ruleset koubun_kaiseki(Reader src){
