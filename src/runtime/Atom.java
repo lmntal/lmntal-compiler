@@ -56,6 +56,22 @@ public final class Atom extends QueuedEntity {
 		}
 		functor = newFunctor;
 	}
+	/** ファンクタ名を設定する。 */
+	public void setName(String name) {
+		set(name, getFunctor().getArity());
+	}
+	/** ファンクタを設定する。
+	 * 所属膜がリモートの場合もあり、しかもAtomSetは必ず更新しなければならないので、
+	 * 膜のalterAtomFunctorメソッドを呼ぶ。*/
+	public void set(String name, int arity) {
+		mem.alterAtomFunctor(this, new Functor(name, arity));
+	}
+	/** けす TODO リンクもけす（その場合、メソッド名を変えて下さい）
+	 * 抽象膜クラスにメソッドを作って呼ぶようにするか、または、
+	 * このメソッドから抽象膜クラスのメソッドを呼ぶ。とりあえず現状通りの後者でよい。*/
+	public void remove() {
+		mem.removeAtom(this);
+	}
 	///////////////////////////////
 	// 情報の取得
 
@@ -109,18 +125,6 @@ public final class Atom extends QueuedEntity {
 	/** 第 n 引数につながってるアトムを取得する */
 	public Atom nthAtom(int n) {
 		return args[n].getAtom();
-	}
-	/** ファンクタ名を変える。（todo 変わらないかもしれないのでsetNameが正しい）
-	 * 所属膜がリモートの場合もあり、しかもAtomSetは必ず更新しなければならないので、
-	 * 膜のalterAtomFunctorメソッドを呼ぶ。*/
-	public void changeName(String name) {
-		mem.alterAtomFunctor(this, new Functor(name, getFunctor().getArity()));
-	}
-	/** けす TODO リンクもけす（その場合、メソッド名を変えて下さい）
-	 * 抽象膜クラスにメソッドを作って呼ぶようにするか、または、
-	 * このメソッドから抽象膜クラスのメソッドを呼ぶ。とりあえず現状通りの後者でよい。*/
-	public void remove() {
-		mem.removeAtom(this);
 	}
 //	/** 所属膜を設定する。AbstractMembraneとそのサブクラスのみ呼び出してよい。*/
 //	void setMem(AbstractMembrane mem) {

@@ -17,20 +17,21 @@ net : {
 				b.append(s);
 			}
 //			System.out.println(b);
-			me.changeName("net_got");
-			me.nthAtom(0).changeName(b.toString()
+			me.nthAtom(0).remove();
+			me.set(b.toString()
 				.replaceAll("<script>.*?</script>", "")
 				.replaceAll("<br>", "\n")
 				.replaceAll("<.*?>", "")
 				.replaceAll("&#\\d{5}", "")
-				.replaceAll("&.*;"," "));
+				.replaceAll("&.*;"," ")
+				, 1);
 		} catch (Exception e) {
 		}
 		]](S) ).
 }.
 
 sports_news : {
-	( H=sports_news.get :- H=net.get([[http://news.mobile.yahoo.co.jp/fc/sports/?k=]]) ).
+	( H=sports_news.get() :- H=net.get([[http://news.mobile.yahoo.co.jp/fc/sports/?k=]]) ).
 }.
 
 //s(H).
