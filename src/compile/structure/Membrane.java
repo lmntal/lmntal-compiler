@@ -47,6 +47,11 @@ public final class Membrane {
 	public List typedProcessContexts = new ArrayList();
 	
 	/**
+	 * 膜内の自由リンク(compile.struct.LinkOccurrence)へのポインタ
+	 */
+	public List freeLinks = new ArrayList();
+	
+	/**
 	 * コンストラクタ
 	 * @param mem 親膜
 	 */
