@@ -6,6 +6,7 @@ package compile;
 
 import java.util.*;
 import runtime.Env;
+import runtime.Instruction;
 
 /**
  * @author pa
@@ -95,10 +96,10 @@ public class HeadCompiler {
 					}
 				}
 				buddyatompath = varcount += 1;
-				match.add("[:deref, buddyatompath, @atomidpath[targetid],  pos, atom.args[pos].pos]");
+				match.add( Instruction.dummy("[:deref, buddyatompath, @atomidpath[targetid],  pos, atom.args[pos].pos]") );
 				if( ((Integer)(atomidpath.get(buddyid))).intValue() != 0 ) {
 					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs
-					match.add("[:eq, buddyatompath, @atomidpath[buddyid]]");
+					match.add( Instruction.dummy("[:eq, buddyatompath, @atomidpath[buddyid]]") );
 					continue;
 				}
 				atomidpath.set(buddyid, new Integer(buddyatompath));
@@ -165,14 +166,14 @@ public class HeadCompiler {
 			int targetid = ((Integer)(atomids.get(atom))).intValue();
 			if(atomidpath.get(targetid) == null) {
 				atomidpath.set(targetid, new Integer(++varcount));
-				match.add("[:findatom, "+varcount+", "+mempaths.get(mem)+", "+atom.functor);
+				match.add( Instruction.findatom(varcount, (List)(mempaths.get(mem)), atom.functor) );
 				for(int j=0;j<mem.atoms.size();j++) {
 					Atom otheratom = (Atom)(mem.atoms.get(j));
 					int z = ((Integer)( atomidpath.get( ((Integer)(atomids.get(otheratom))).intValue() ) )).intValue();
 					if(z==0) continue;
 					if(! otheratom.functor.equals(atom.functor)) continue;
 					if(otheratom.equals(atom)) continue;
-					match.add("[:neq"+varcount+", "+atomidpath+", "+z);
+					match.add( Instruction.dummy("[:neq"+varcount+", "+atomidpath+", "+z) );
 				}
 			}
 			compile_group(targetid);
@@ -181,20 +182,21 @@ public class HeadCompiler {
 			Membrane submem=(Membrane)(li.next());
 			if(! mempaths.containsValue(submem) ) {
 				mempaths.put(submem, new Integer(++varcount));
-				match.add("[:anymem, "+varcount+", "+mempaths.get(submem.mem));
+				match.add( Instruction.anymem(varcount, ((Integer)mempaths.get(submem.mem)).intValue()) );
+				
 				for(ListIterator li2=mem.mems.listIterator();li2.hasNext();) {
 					Membrane othermem=(Membrane)(li2.next());
 					if(null == mempaths.get(othermem)) continue;
 					if(othermem.equals(submem)) continue;
-					match.add("[:neq, ["+varcount+"], "+mempaths.get(othermem.mem));
+					match.add( Instruction.dummy("[:neq, ["+varcount+"], "+mempaths.get(othermem.mem)) );
 				}
 			}
 			if(0==submem.processContexts.size()) {
-				match.add("[:ieq, "+submem.atoms.size()+", [:natoms, "+mempaths.get(submem));
-				match.add("[:ieq, "+submem.mems.size()+", [:nmems, "+mempaths.get(submem));
+				match.add( Instruction.dummy("[:ieq, "+submem.atoms.size()+", [:natoms, "+mempaths.get(submem)) );
+				match.add( Instruction.dummy("[:ieq, "+submem.mems.size()+", [:nmems, "+mempaths.get(submem)) );
 			}
 			if(0==submem.ruleContexts.size()) {
-				match.add("[:norules, "+mempaths.get(submem));
+				match.add( Instruction.dummy("[:norules, "+mempaths.get(submem)) );
 			}
 			compile_mem(submem);
 		}

@@ -7,13 +7,13 @@ public final class InterpretedRuleset extends Ruleset {
 	
 	
 	/** 膜主導実行用命令列。１つ目の添え字はルール番号 */
-	private HeadInstruction[][] memMatch;
+	public Instruction[] memMatch;
 	/** アトム主導実行用命令列。Mapにすべき？ */
-	private HeadInstruction[][] atomMatches;
+	public Instruction[] atomMatches;
 	/** ボディ実行用命令列。１つ目の添え字はルール番号 */
-	private BodyInstruction[][] body;
+	public Instruction[] body;
 	
-	public InterpretedRuleset(compile.Rule[] rules) {
+	public InterpretedRuleset() {
 	}
 	
 	public String toString() {

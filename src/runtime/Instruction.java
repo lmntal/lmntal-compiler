@@ -8,15 +8,20 @@ import java.util.*;
 /**
  * 1 つの命令を保持する。
  * 
- * 複数でも構わないとおもう。
+ * 
  * 
  * デバッグ用表示メソッドを備える。
  *
- * @author pa
+ * @author hara
  *
  */
 public class Instruction {
-
+	
+	/**
+	 * どの命令なのかを保持する
+	 */
+	private int id;
+	
     //基本命令
     /** deref [?dstatom ,srcatom, srcpos, dstpos] 
      * <BR>ガード命令<BR>
@@ -235,14 +240,75 @@ newlink n,1,o,1 を行う。
     public static final int REACT = 33;
 
     /* control instructions */
-    /** [inline, text]*/
+    ///** [inline, text]*/
     //    public static final int INLINE = 34;
-
-
+	
+	/**
+	 * 引数を追加する。マクロの役割。
+	 * @param o オブジェクト型の引数
+	 */
+	private void add(Object o) { data.add(o); }
+	
+	/**
+	 * 引数を追加する。マクロの役割。
+	 * @param n int 型の引数
+	 */
+	private void add(int n) { data.add(new Integer(n)); }
+	
+	/**
+	 * ダミー命令を生成する
+	 * さしあたって生成メソッドがない命令はこれを使うことで型エラーを回避
+	 */
+	public static Instruction dummy(String s) {
+		Instruction i = new Instruction(-1);
+		i.add(s);
+		return i;
+	}
+	
+	/**
+	 * react 命令を生成する
+	 */
+	public static Instruction react(InterpretedRuleset ir, List actual) {
+		Instruction i = new Instruction(REACT);
+		i.add(ir);
+		i.add(actual);
+		return i;
+	}
+	
+	/**
+	 * findatom 命令を生成する
+	 */
+	public static Instruction findatom(int dstatom, List srcmem, Functor func) {
+		Instruction i = new Instruction(FINDATOM);
+		i.add(dstatom);
+		i.add(srcmem);
+		i.add(func);
+		return i;
+	}
+	
+	/**
+	 * anymem 命令を生成する
+	 */
+	public static Instruction anymem(int dstmem, int srcmem) {
+		Instruction i = new Instruction(ANYMEM);
+		i.add(dstmem);
+		i.add(srcmem);
+		return i;
+	}
+	
+	
+	
+	
+	
+	
     //引数無しだと初期容量は10(by api仕様書)
     public List data = new ArrayList();
 	
-    public Instruction() {
+	public Instruction() {
+	}
+	
+    public Instruction(int id) {
+    	this.id = id;
 
 	//deprecated by NAKAJIMA: 古いデータ形式
 	//by HARA
@@ -256,6 +322,7 @@ newlink n,1,o,1 を行う。
 	// 		System.out.println(data);
 
 	//新しいデータ形式
+	/*
 	ArrayList sl = new ArrayList();
 	sl.add(new Integer(1));
 	sl.add(new Integer(2));
@@ -263,6 +330,7 @@ newlink n,1,o,1 を行う。
 	data.add(new Integer(0)); // 0->deref命令
 	data.add(sl);
 	System.out.println(data);
+	*/
     }
 
 
@@ -371,6 +439,7 @@ newlink n,1,o,1 を行う。
 	    //	     answer = "　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n";
 
 	    answer = "\n1 名前：仕様書無しさん 03/09/21 00:23\n　 ∧＿∧ \n　（　´∀｀）＜　ぬるぽ \n\n2 名前：仕様書無しさん ：03/09/21 00:24\n　　Λ＿Λ　　＼＼ \n　 （　・∀・）　　　|　|　ｶﾞｯ\n　と　　　　）　 　 |　| \n　　 Ｙ　/ノ　　　 人 \n　　　 /　）　 　 < 　>__Λ∩ \n　 ＿/し'　／／. Ｖ｀Д´）/\n　（＿フ彡　　　　　 　　/ \n\n";
+	    answer = "dummy";
 	} catch (Exception e){
 	    //本当にヤヴァイ場合
 	    System.out.println(e);
@@ -395,26 +464,26 @@ newlink n,1,o,1 を行う。
      *
      */
     public String toString(){
+		return getInstructionString(id)+" "+data.toString();
 
-
-	StringBuffer buffer = new StringBuffer("");
-
-	if(data.isEmpty()){
-	    buffer.append(" No Instructions! ");
-	} else {
-	    for (int i = 0; i < data.size()-1; i+=2){
-		buffer.append("[");
-
-		buffer.append("Command: ");
-		buffer.append(this.getInstructionString(((Integer)data.get(i)).intValue()));
-		buffer.append(" Arguments: ");
-		buffer.append(data.get(i+1));
-		
-		buffer.append("]");
-	    }
-	}
-
-	return buffer.toString();
+//	StringBuffer buffer = new StringBuffer("");
+//
+//	if(data.isEmpty()){
+//	    buffer.append(" No Instructions! ");
+//	} else {
+//	    for (int i = 0; i < data.size()-1; i+=2){
+//		buffer.append("[");
+//
+//		buffer.append("Command: ");
+//		buffer.append( getInstructionString(((Integer)data.get(i)).intValue()));
+//		buffer.append(" Arguments: ");
+//		buffer.append(data.get(i+1));
+//		
+//		buffer.append("]");
+//	    }
+//	}
+//
+//	return buffer.toString();
     }
 
     /**

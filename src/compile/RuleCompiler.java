@@ -53,6 +53,8 @@ public class RuleCompiler {
 	
 	HeadCompiler hc;
 	
+	public InterpretedRuleset iRuleset;
+	
 	/**
 	 * rs 用のルールコンパイラをつくる
 	 * 
@@ -73,6 +75,8 @@ public class RuleCompiler {
 		Env.c("compile");
 		List rules = new ArrayList();
 		
+		iRuleset = new InterpretedRuleset();
+		
 		//r.text = "( "+l.toString()+" :- "+r.toString()+" )";
 		//@ruleid = rule.ruleid
 		
@@ -88,16 +92,44 @@ public class RuleCompiler {
 		//optimize if $optlevel > 0
 		optimize();
 		
-		Env.p("atommatches="+atommatches);
-		Env.p("memmatch="+memmatch);
-		Env.p("body="+body);
+		{
+			Iterator l;
+			l = atommatches.listIterator();
+			Env.p("--atommatches :");
+			while(l.hasNext()) Env.p((Instruction)l.next());
+			
+			l = memmatch.listIterator();
+			Env.p("--memmatch :");
+			while(l.hasNext()) Env.p((Instruction)l.next());
+			
+			l = body.listIterator();
+			Env.p("--body :");
+			while(l.hasNext()) Env.p((Instruction)l.next());
+		}
 		
 		//rule.register(@atommatches,@memmatch,@body)
-		Rule[] rr = new Rule[rules.size()];
-		for(int i=0;i<rules.size();i++) {
-			rr[i] = (Rule)rules.get(i);
+		iRuleset.memMatch    = new Instruction[memmatch.size()];
+		iRuleset.atomMatches = new Instruction[atommatches.size()];
+		iRuleset.body        = new Instruction[body.size()];
+		
+		{
+			int i;
+			Iterator l;
+			
+			l = memmatch.listIterator(); i=0;
+			while(l.hasNext()) {
+				iRuleset.memMatch[i] = (Instruction)l.next();
+			}
+			l = atommatches.listIterator(); i=0;
+			while(l.hasNext()) {
+				iRuleset.atomMatches[i] = (Instruction)l.next();
+			}
+			l = body.listIterator(); i=0;
+			while(l.hasNext()) {
+				iRuleset.body[i] = (Instruction)l.next();
+			}
 		}
-		return new InterpretedRuleset( rr );
+		return iRuleset;
 	}
 	
 	private void compile_l() {
@@ -112,8 +144,8 @@ public class RuleCompiler {
 				hc.atomidpath.set(firstid, new Integer(1));
 				hc.varcount = 1;
 				Membrane mem = ((Atom)(hc.atoms.get(firstid))).mem;
-				hc.match.add( "[:execlevel, mem.memlevel]" );
-				hc.match.add( "[:func,1,@lhscmp.atoms[firstid].func" );
+				hc.match.add( Instruction.dummy("[:execlevel, mem.memlevel]") );
+				hc.match.add( Instruction.dummy("[:func,1,@lhscmp.atoms[firstid].func") );
 				
 				hc.mempaths.put(mem, "[:memof,1]");
 				// 親膜をたどる
@@ -137,7 +169,7 @@ public class RuleCompiler {
 			}
 			hc.compile_mem(rs.leftMem);
 			// 反応しろという命令
-			hc.match.add( "[:react, @ruleid, " + hc.getactuals() );
+			hc.match.add( Instruction.react(iRuleset, hc.getactuals()) );
 		}
 	}
 	
@@ -149,7 +181,7 @@ public class RuleCompiler {
 		lhsatomids = hc.atomids;
 		varcount = lhsatoms.size() + lhsfreemems.size();
 		body = new ArrayList();
-		body.add("[:spec,@varcount]");
+		body.add( Instruction.dummy("[:spec,@varcount]") );
 		
 		genlhsmempaths();
 		rhsatoms = new ArrayList();
@@ -218,7 +250,7 @@ public class RuleCompiler {
 			if(lhsmempaths.get(atom.mem)!=null) {
 				varcount++;
 				lhsmempaths.put((Object)(atom.mem), new Integer(varcount));
-				body.add("[:getmem, @varcount, atomid + 1]");
+				body.add( Instruction.dummy("[:getmem, @varcount, atomid + 1]") );
 				rootmems.add(atom.mem);
 			}
 		}
@@ -231,7 +263,7 @@ public class RuleCompiler {
 		while( mem.mem != null && ! lhsmempaths.containsValue(mem.mem) ) {
 			varcount++;
 			lhsmempaths.put((Object)(mem.mem), new Integer(varcount));
-			body.add( "[:getparent, @varcount, @lhsmempaths[mem]]" );
+			body.add( Instruction.dummy("[:getparent, @varcount, @lhsmempaths[mem]]") );
 			mem = mem.mem;
 		}
 	}
@@ -244,8 +276,8 @@ public class RuleCompiler {
 		Env.c("RuleCompiler::remove_lhsatoms");
 		for(int i=0;i<lhsatoms.size();i++) {
 			Atom atom = (Atom)(lhsatoms.get(i));
-			body.add("[:removeatom, "+(i+1)+", "+atom.functor);
-			body.add("[:freeatom, "+(i+1)+", "+atom.functor);
+			body.add( Instruction.dummy("[:removeatom, "+(i+1)+", "+atom.functor) );
+			body.add( Instruction.dummy("[:freeatom, "+(i+1)+", "+atom.functor) );
 		}
 	}
 	
@@ -255,7 +287,7 @@ public class RuleCompiler {
 			Membrane m = (Membrane)(mem.mems.get(i));
 			
 			remove_lhsmem(m);
-			body.add("[:removemem"+lhsmempaths.get(m));
+			body.add( Instruction.dummy("[:removemem"+lhsmempaths.get(m)) );
 		}
 	}
 	
@@ -265,14 +297,14 @@ public class RuleCompiler {
 			Membrane m = (Membrane)(mem.mems.get(i));
 			
 			rhsmempaths.put(m, new Integer(++varcount));
-			body.add("[:newmem"+varcount+", "+rhsmempaths.get(m));
+			body.add( Instruction.dummy("[:newmem"+varcount+", "+rhsmempaths.get(m)) );
 			build_rhsmem(m); //inside must be enqueued first
 		}
 		for(int i=0;i<mem.processContexts.size();i++) {
 			ProcessContext p = (ProcessContext)(mem.processContexts.get(i));
 			
 			if(rhsmempaths.get(mem).equals(lhsmempaths.get(p.lhsmem))) continue;
-			body.add("[:pour"+rhsmempaths.get(mem)+", "+lhsmempaths.get(p.lhsmem));
+			body.add( Instruction.dummy("[:pour"+rhsmempaths.get(mem)+", "+lhsmempaths.get(p.lhsmem)) );
 		}
 	}
 	
@@ -286,7 +318,7 @@ public class RuleCompiler {
 			RuleContext r = (RuleContext)(mem.ruleContexts.get(i));
 			
 			if(rhsmempaths.get(mem).equals(lhsmempaths.get(r.lhsmem))) continue;
-			body.add("[:inheritrules"+rhsmempaths.get(mem)+", "+lhsmempaths.get(r.lhsmem));
+			body.add( Instruction.dummy("[:inheritrules"+rhsmempaths.get(mem)+", "+lhsmempaths.get(r.lhsmem)) );
 		}
 	}
 	
@@ -299,7 +331,7 @@ public class RuleCompiler {
 		for(int i=0;i<mem.rules.size();i++) {
 			RuleStructure r = (RuleStructure)(mem.rules.get(i));
 			
-			body.add("[:loadruleset"+rhsmempaths.get(mem)+", "+r);
+			body.add( Instruction.dummy("[:loadruleset"+rhsmempaths.get(mem)+", "+r) );
 		}
 		/*
 		mem.rulesets.each do | ruleset |
@@ -320,14 +352,14 @@ public class RuleCompiler {
 			if(atom.functor.equals(FUNC_UNIFY)) {
 				LinkOccurrence link1 = atom.args[0];
 				LinkOccurrence link2 = atom.args[1];
-				body.add("[:unify, "
+				body.add( Instruction.dummy("[:unify, "
 					+lhsatomidpath.get(lhsatomids.get(link1.atom))+", "+link1.pos
 					+lhsatomidpath.get(lhsatomids.get(link2.atom))+", "+link2.pos
-				);
+				) );
 			} else {
 				rhsatompath.put(atom, new Integer(++varcount));
 				rhsatoms.add(atom);
-				body.add("[:newatom, "+varcount+", "+rhsmempaths.get(mem)+", "+atom.functor);
+				body.add( Instruction.dummy("[:newatom, "+varcount+", "+rhsmempaths.get(mem)+", "+atom.functor) );
 			}
 		}
 	}
@@ -337,7 +369,7 @@ public class RuleCompiler {
 		for(int i=0;i<mem.mems.size();i++) {
 			Membrane m = (Membrane)(mem.mems.get(i));
 			free_lhsmem(m);
-			body.add("[:freemem, "+lhsmempaths.get(m));
+			body.add( Instruction.dummy("[:freemem, "+lhsmempaths.get(m)) );
 		}
 	}
 	
@@ -349,11 +381,11 @@ public class RuleCompiler {
 			for(int pos=1; pos <= atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos];
 				if(link.atom.mem.mems.get(0).equals(rs.leftMem)) {
-					body.add("[:relink, "+rhsatompath.get(atom)+", "+pos+", "
-						+lhsatomidpath.get(lhsatomids.get(link.atom))+", "+link.pos);
+					body.add( Instruction.dummy("[:relink, "+rhsatompath.get(atom)+", "+pos+", "
+						+lhsatomidpath.get(lhsatomids.get(link.atom))+", "+link.pos) );
 				} else {
-					body.add("[:newlink, "+rhsatompath.get(atom)+", "+pos+", "
-						+rhsatompath.get(link.atom)+", "+link.pos);
+					body.add( Instruction.dummy("[:newlink, "+rhsatompath.get(atom)+", "+pos+", "
+						+rhsatompath.get(link.atom)+", "+link.pos) );
 				}
 			}
 		}
