@@ -89,7 +89,7 @@ public class GraphLayout implements Runnable {
 				}
 				
 				if(node1.linkedNodes.size()<=1) continue;
-			
+				
 				// cur にかかる力を計算する
 				{
 					GraphEdge cur = ie[j];
@@ -120,9 +120,10 @@ public class GraphLayout implements Runnable {
 					double len = Math.sqrt(tx*tx+ty*ty);
 					
 					// move = t times diff
-					dx = 20 * tx / len * a_r;
-					dy = 20 * ty / len * a_r;
+					dx = 5 * tx / len * a_r;
+					dy = 5 * ty / len * a_r;
 					
+					cur.from.setMoveDelta(-dx,-dy);
 					cur.to.setMoveDelta(dx,dy);
 				}
 			}

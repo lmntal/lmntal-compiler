@@ -215,8 +215,7 @@ final class Task extends AbstractTask {
 						Env.p( " ==> " );
 						Env.p( Dumper.dump(getRoot()) );
 					}
-					if (Env.gui != null) // n-kato（仮仮仮）
-						Env.gui.onTrace();
+					Env.guiTrace();
 				}					
 			}
 		}
