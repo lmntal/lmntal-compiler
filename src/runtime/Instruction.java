@@ -1233,7 +1233,6 @@ public class Instruction implements Cloneable {
 				case Instruction.NEWLINK:
 				case Instruction.LOCALNEWLINK:
 					changeArg(inst, 1, map);
-					changeArg(inst, 2, map);
 					changeArg(inst, 3, map);
 //					changeArg(inst, 5, map);
 					break;
