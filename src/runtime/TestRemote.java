@@ -65,6 +65,7 @@ class TestRemote{
 		*/
 	
 		LMNtalRuntimeManager.init();
+		Env.debug = 1;
 		MasterLMNtalRuntime masterRuntime = new MasterLMNtalRuntime();
 		
 		Membrane rootMem = (Membrane)masterRuntime.getGlobalRoot();
@@ -82,7 +83,25 @@ class TestRemote{
 			System.exit(1);
 		}
 		System.out.println("connectRuntime success");
+
+		//¥Þ¥Ã¥Á¥ó¥°Ì¿Îá¡¦¥Ü¥Ç¥£Ì¿Îá¤ò¼Â¹Ô¤·¤Æ¤ß¤ë¥Æ¥¹¥È
 		
+		//NEWROOT
+		//RemoteTask rt_banon = (RemoteTask)banon.newTask(rootMem);
+		
+		
+		//RemoteMembrane rm_banon = new RemoteMembrane(rt_banon, rootMem);
+		
+		//½ªÎ»½èÍý
+//		LMNtalRuntimeManager.disconnectFromDaemon(); //¤³¤ì¤À¤È±ó³Ö¥Î¡¼¥É¤Ø¤Î¥³¥Í¥¯¥·¥ç¥óÄ¥¤ê¤Ã¤Ñ¤Ê¤·¡¢slave runtime¤¢¤¬¤ê¤Ã¤Ñ¤Ê¤·
+		//LMNtalRuntimeManager.terminateAllNeighbors();	 //¤â¤Ã¤È¤¤¤¤ÊýË¡¤Ê¤¤¤«¤Ê
+		//System.out.println("terminateAllNeighbours() success"); 
+		
+		System.out.println("now terminating");
+		LMNtalRuntimeManager.terminateAllNeighbors();
+		LMNtalRuntimeManager.disconnectFromDaemon();
+		System.out.println("terminated");
+
 		System.out.println("alive thread(s):");
 		Thread[] t = new Thread[Thread.activeCount()];
 		Thread.enumerate(t);
@@ -92,30 +111,18 @@ class TestRemote{
 				System.out.println(t[i].getName());
 			}
 			//t[i].getThreadGroup().list();
-	}
-
-		//Thread.currentThread().getThreadGroup().list();
-		
-		
-		//½ªÎ»½èÍý
-//		LMNtalRuntimeManager.disconnectFromDaemon(); //¤³¤ì¤À¤È±ó³Ö¥Î¡¼¥É¤Ø¤Î¥³¥Í¥¯¥·¥ç¥óÄ¥¤ê¤Ã¤Ñ¤Ê¤·¡¢slave runtime¤¢¤¬¤ê¤Ã¤Ñ¤Ê¤·
-		//LMNtalRuntimeManager.terminateAllNeighbors();	 //¤â¤Ã¤È¤¤¤¤ÊýË¡¤Ê¤¤¤«¤Ê
-		//System.out.println("terminateAllNeighbours() success"); 
-		
-		LMNtalRuntimeManager.terminateAllNeighbors();
-		LMNtalRuntimeManager.disconnectFromDaemon();
-
+		}
+	
 		/*
 		 *¥¹¥ì¥Ã¥É¤ò¤¤¤Ä»ß¤á¤ë¤«¡£
 		 * 
 		 * LMNtalDaemon										»ß¤á¤Ê¤¤
 		 * LMNtalDaemonMessageProcessor		LMNtalDaemon¤¬½ªÎ»¤¹¤ë»þ¤Ë»ß¤á¤ë¡Ê¤Ä¤Þ¤ê»ß¤á¤Ê¤¤
-		 *¡¡£Ì£Í£Î£ô£á£ì£Ò£õ£î£ô£é£í£å£Í£å£ó£ó£á£ç£å£Ð£ò£ï£ã£å£ó£ó£ï£ò¡¡	TERMINATE½èÍý¤ò½ªÎ»¤¹¤ë»þ
+		 *¡¡£Ì£Í£Î£ô£á£ì£Ò£õ£î£ô£é£í£å£Í£å£ó£ó£á£ç£å£Ð£ò£ï£ã£å£ó£ó£ï£ò¡Ê±ó³Ö¥Î¡¼¥É¡Ë¡¡		TERMINATE½èÍý¤ò½ªÎ»¤¹¤ë»þ
+		 * £Ì£Í£Î£ô£á£ì£Ò£õ£î£ô£é£í£å£Í£å£ó£ó£á£ç£å£Ð£ò£ï£ã£å£ó£ó£ï£ò¡Ê¼«Ê¬¼«¿È¡Ë¡¡		LMNtalRuntimeManager.disconnectFromDaemon()¤ÎÃæ¤Ç¡¢¥í¡¼¥«¥ë¤Î¥Ç¡¼¥â¥ó¤Ø¤Î¥½¥±¥Ã¥È	¤òÊÄ¤¸¤ëÁ°¤Ë
 		 *¡¡InstructionBlockProcessor					°ì²ó¤ÎBEGIN-END¤¬½ª¤ï¤ë»þ
 		 * £Ó£ì£á£ö£å£Ì£Í£Î£ô£á£ì£Ò£õ£î£ô£é£í£å£Ì£á£õ£î£ã£è£å£ò			µ¯Æ°¤·¤¿LMNtalRuntimeMessageProcessor¤¬½ªÎ»¤·¤Æ¥Ç¡¼¥â¥ó¤«¤éÀÚÃÇ¤·»þ=¥½¥±¥Ã¥È¤¬ÊÄ¤¸¤é¤ì¤¿»þ¡áTERMINATE
 		 * 
-		 * 
-		 * TERMINATE½èÍý 			Env.theRuntime.terminate()
 		 */
 		
 		

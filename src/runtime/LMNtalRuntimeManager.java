@@ -15,8 +15,6 @@ import java.net.Socket;
  */
 
 public final class LMNtalRuntimeManager {
-	static boolean DEBUG = true;
-	
 	/** ローカルのデーモンとの通信路 */
 	public static LMNtalRuntimeMessageProcessor daemon = null;
 	/** 計算ノード表: nodedesc (String) -> RemoteLMNtalRuntime */
@@ -33,15 +31,15 @@ public final class LMNtalRuntimeManager {
 	 * 
 	 * @param nodedesc ノード識別子（現在はfqdnのみ） */
 	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
-		if(DEBUG)System.out.println("LMNtalRuntimeManager.connectRuntime()");
+		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime()");
 		String fqdn = nodedesc;
 		//宛て先がlocalhostなら  自分自身を返す
 		if(LMNtalNode.isMyself(fqdn)){
-			if(DEBUG)System.out.println("LMNtalRuntimeManager.connectRuntime(): 宛て先がlocalhostだから自分自身を返す");
+			//if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime(): 宛て先がlocalhostだから自分自身を返す");
 			return Env.theRuntime;
 		}
 		
-		if(DEBUG)System.out.println("LMNtalRuntimeManager.connectRuntime(): 宛て先がremoteにある場合");
+		//if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectRuntime(): 宛て先がremoteにある場合");
 		//以下は宛て先がremoteにある場合
 		if (!connectToDaemon()) return null;			
 		
@@ -75,7 +73,7 @@ public final class LMNtalRuntimeManager {
 	
 	/** ローカルのデーモンに接続する。すでに接続している場合は何もしない。*/
 	public static boolean connectToDaemon() {
-		if(DEBUG)System.out.println("LMNtalRuntimeManager.connectToDaemon()");
+		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.connectToDaemon()");
 		
 		if (daemon != null) return true;
 		try {
@@ -86,12 +84,12 @@ public final class LMNtalRuntimeManager {
 			Thread t = new Thread(daemon, "LMNtalRuntimeMessageProcessor");
 			t.start();
 			if (!daemon.sendWaitRegisterLocal("MASTER")) {
-				throw new Exception("cannot connect to daemon");
+				throw new Exception("LMNtalRuntimeManager.connectToDaemon(): cannot connect to daemon");
 			}
 			return true;
 		}
 		catch (Exception e) {
-			System.out.println("Cannot connect to LMNtal deamon (not started?)");
+			System.out.println("LMNtalRuntimeManager.connectToDaemon(): Cannot connect to LMNtal deamon (not started?)");
 			e.printStackTrace();
 			if (daemon != null) {
 				daemon.close();
@@ -101,8 +99,10 @@ public final class LMNtalRuntimeManager {
 		}
 	}
 	public static void disconnectFromDaemon() {
+		if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon()");
 		if (daemon != null) {
-			daemon.close();
+			daemon.close(); 
+			if(Env.debug > 0)System.out.println("LMNtalRuntimeManager.disconnectFromDaemon(): the socket has closed.");
 			daemon = null;
 		}
 	}
