@@ -236,6 +236,28 @@ public class GraphLayout implements Runnable {
 				}
 			}
 		}
+		
+		for(Iterator i1 = m.atomIterator();i1.hasNext();){
+			double teisuu = 30;
+			double dx = 0;
+			double dy = 0;
+			
+			Node me = (Node)i1.next();
+			if(!me.isVisible())continue;
+			
+			for(Iterator i2 = m.atomIterator();i2.hasNext();){
+				Node me2 = (Node)i2.next();
+				if(!me2.isVisible()&&me==me2)continue;
+				Edge edge = new Edge(me,me2);
+				double f = teisuu / Math.pow(edge.getLen(),2);
+				dx = f*((me.getPosition().x-me2.getPosition().x)/edge.getLen());
+				dy = f*((me.getPosition().y-me2.getPosition().y)/edge.getLen());
+				me.setMoveDelta(dx,dy);
+				me2.setMoveDelta(-dx,-dy);
+				
+			}
+				
+		}
 		// 実際に移動する
 		for (Iterator i=m.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
