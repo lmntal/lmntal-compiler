@@ -31,13 +31,14 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	public LMNGraphPanel lmnPanel = null;
 	JTextArea jt;
 	public boolean busy = true;
+	public boolean running = true;
 	
 	public LMNtalFrame() {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 //		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				busy = false;
+				running = busy = false;
 			}
 		});
 		initComponents();
