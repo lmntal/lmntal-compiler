@@ -35,7 +35,7 @@ final class RemoteTask extends AbstractTask {
 	 */
 	 RemoteTask(RemoteLMNtalRuntime runtime){
 	 	super((AbstractLMNtalRuntime)runtime);
-	 	remoteNode = runtime.lmnNode;
+//	 	remoteNode = runtime.lmnNode;
 	 }
 
 	//	String getNextAtomID() {
