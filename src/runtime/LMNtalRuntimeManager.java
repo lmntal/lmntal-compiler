@@ -174,22 +174,23 @@ public final class LMNtalRuntimeManager {
 			}
 		}
 
-//		System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime is terminated");
+		//	System.out.println("LMNtalRuntimeManager.terminateAll(): Env.theRuntime is terminated");
 		
 		childNode.clear();
 		Iterator it = runtimeids.keySet().iterator(); 
 		while (it.hasNext()) {
 			//RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)runtimeids.get(it.next());
-
-//			System.out.println("LMNtalRuntimeManager.terminateAll(): now sending TERMINATE to " + machine.hostname);
+			if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeManager.terminateAll(): now sending TERMINATE to " + machine);
 			
 			if(daemon.sendWait(machine.hostname,"TERMINATE")){  //TODO (nakajima)ここでデッドロックな模様
+				if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeManager.terminateAll(): i got answer from " + machine);
 				childNode.add(machine);
 			}
 		}
+		System.out.println(childNode); //TODO (nakajima)なんでnullなの、ここ...
 		
-//		System.out.println("LMNtalRuntimeManager.terminateAll(): everything finished and returning true");
+		if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeManager.terminateAll(): everything finished and returning true");
 		return true;
 	}
 
@@ -206,7 +207,7 @@ public final class LMNtalRuntimeManager {
 		synchronized(t){
 			try {
 				t.join();
-			    //System.out.println("terminateAllThreaded(): after thread.join");
+				if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeManager.diconnectAllThreaded(): after thread.join");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -218,18 +219,18 @@ public final class LMNtalRuntimeManager {
 	 * @author nakajima
 	 */
 	public static boolean disconnectAll(){
-		System.out.println("LMNtalRuntimeManager.DisconnectAll() entered");
+		if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeManager.DisconnectAll() entered");
 		Iterator it = childNode.iterator();
 		while(it.hasNext()){
 			RemoteLMNtalRuntime machine = (RemoteLMNtalRuntime)it.next();
 //			if(daemon == null){System.out.println("DAEMON IS NULL");}
 //			if(machine == null){System.out.println("MACHINE IS NULL");}
-			System.out.println("LMNtalRuntimeManager.DisconnectAll(): sending DISCONNECTRUNTIME to " + machine.hostname);
+			if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeManager.DisconnectAll(): sending DISCONNECTRUNTIME to " + machine.hostname);
 			daemon.sendWait(machine.hostname,"DISCONNECTRUNTIME");
 		}
 		childNode.clear();
 		runtimeids.clear();
-		System.out.println("LMNtalRuntimeManager.DisconnectAll() quitting");
+		if(Env.debugDaemon > 0)System.out.println("LMNtalRuntimeManager.DisconnectAll() quitting");
 		return true;
 	}
 }
@@ -237,9 +238,9 @@ public final class LMNtalRuntimeManager {
 class DisconnectAllProcessor implements Runnable{
 	boolean result;
 	public void run(){
-		System.out.println("DisconnectAllProcessor.run() entered");
+		if(Env.debugDaemon > 0)System.out.println("DisconnectAllProcessor.run() entered");
 		result = LMNtalRuntimeManager.disconnectAll();
-		System.out.println("DisconnectAllProcessor.run(): now quitting...");
+		if(Env.debugDaemon > 0)System.out.println("DisconnectAllProcessor.run(): now quitting...");
 	}
 }
 
@@ -251,8 +252,8 @@ class DisconnectAllProcessor implements Runnable{
 class TerminateAllProcessor implements Runnable {
 	boolean result;
 	public void run(){
-//		System.out.println("TerminateAllProcessor.run() entered");
+//		if(Env.debugDaemon > 0)System.out.println("TerminateAllProcessor.run() entered");
 		result = LMNtalRuntimeManager.terminateAll();
-//		System.out.println("TerminateAllProcessor.run(): result is " + result + " and now quitting...");
+//		if(Env.debugDaemon > 0)System.out.println("TerminateAllProcessor.run(): result is " + result + " and now quitting...");
 	}
 }
