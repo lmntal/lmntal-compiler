@@ -34,11 +34,6 @@ public class LMNtalDaemon implements Runnable {
 	 * 凡例： rgid  … runtime group id
 	 */
 
-	/*【n-katoからのコメント】
-	 * - REGISTFINISHED は、マスタランタイムがある計算機ではなく、REGISTREMOTEを発行した計算機に送り返す。
-	 *   したがって、runtimegroupid を引数に持つ必要がある。
-	 * - TERMINATE runtimegroupid が必要。受信したら自分が知っている全てのランタイムに同じメッセージを送る。
-	 */
 	static boolean DEBUG = true;
 	
 	public static final int DEFAULT_PORT = 60000;

@@ -19,14 +19,21 @@ import runtime.LMNtalRuntimeManager;
  */
 public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnable {
 	static boolean DEBUG = true;
-
+	
+	/** このVMで実行するLMNtalRuntimeが所属するruntimeGroupID（コンストラクタで設定）*/
+	protected String rgid;
+	
+	/** このVMで実行するLMNtalRuntimeのruntimeid（未使用）*/
+	protected String runtimeid;
+	
 	/** 通常のコンストラクタ */
-	public LMNtalRuntimeMessageProcessor(Socket socket) {
+	public LMNtalRuntimeMessageProcessor(Socket socket, String rgid) {
 		super(socket);
+		this.rgid = rgid;
 	}
 	
 	/** ローカルデーモンに対して REGISTERLOCAL を発行し、返答を待つ */
-	public boolean sendWaitRegisterLocal(String type, String rgid) {
+	public boolean sendWaitRegisterLocal(String type) {
 		// REGSITERLOCAL MASTER/SLAVE msgid rgid
 		String msgid = LMNtalDaemon.makeID();
 		String command = "registerlocal " + type + " " + msgid + " " + rgid + "\n";
@@ -150,15 +157,17 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				 * ここで処理される命令一覧
 				 * 
 				 *  CONNECT dst_nodedesc src_nodedesc
-				 *  begin
+				 *  BEGIN
 				 *  beginrule
 				 * 
-				 * lock
-				 * blockinglock
-				 * asynclock recursivelock
+				 * LOCK           globalmemid -> UNCHANGED | CHANGED bytes content | FAIL
+				 * BLOCKINGLOCK   globalmemid -> UNCHANGED | CHANGED bytes content
+				 * asynclock
+				 * recursivelock
 				 * 
-				 * unlock
-				 * blockingunlock
+				 * 
+				 * UNLOCK         globalmemid -> OK | FAIL
+				 * BLOCKINGUNLOCK globalmemid -> OK | FAIL
 				 * asyncunlock
 				 * recursiveunlock
 				 * 
@@ -583,8 +592,8 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 		}
 	}
 	//
-
-	public boolean sendWait(String fqdn, String rgid, String command){
+	/** 指定のホストに送信する。*/
+	public boolean sendWait(String fqdn, String command){
 		try {
 			String msgid = LMNtalDaemon.makeID();
 			out.write(msgid + " \"" + fqdn + "\" " + rgid + " " + command + "\n");

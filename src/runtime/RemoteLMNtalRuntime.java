@@ -1,7 +1,7 @@
 package runtime;
 
 //import daemon.Cache;
-import daemon.LMNtalDaemon;
+//import daemon.LMNtalDaemon;
 //import daemon.LMNtalNode;
 
 /**
@@ -32,8 +32,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 */
 	protected RemoteLMNtalRuntime(String hostname) {
 		//hostnameの中にはfqdnが入っている（とみなす）
-		this.runtimeGroupID = Env.theRuntime.getRuntimeGroupID();
-		this.runtimeid = LMNtalDaemon.makeID();  //TODO 接続先からIDを受け取って代入する（今は未使用なので問題が発生しない）
+//		this.runtimeid = runtimeid;  //TODO 接続先からIDを受け取って代入する（今は未使用なので問題が発生しない）
 		this.hostname = hostname;
 	}
 
@@ -53,7 +52,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 
 		String newmemid = null; // getNextMemID();
 		String parentmemid = daemon.IDConverter.getGlobalMembraneID(parent);
-		if (LMNtalRuntimeManager.daemon.sendWait(hostname, "NEWTASK", parentmemid)) {
+		if (LMNtalRuntimeManager.daemon.sendWait(hostname, "NEWTASK " + parentmemid)) {
 			RemoteTask task = new RemoteTask(this, parent);
 			return task;
 		}
@@ -85,6 +84,9 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 */
 	public boolean connect() {
 		//TODO 単体テスト
+		result = LMNtalRuntimeManager.daemon.sendWait(hostname,
+			"connect " + daemon.LMNtalDaemonMessageProcessor.getLocalHostName() );
+		
 //		result = LMNtalDaemon.connect(hostname, runtimeid);
 //		lmnNode = LMNtalDaemon.getLMNtalNodeFromFQDN(hostname);
 		

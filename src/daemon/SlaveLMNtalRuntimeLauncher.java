@@ -6,29 +6,28 @@ import java.io.IOException;
 import java.net.Socket;
 
 import runtime.LocalLMNtalRuntime;
-//import runtime.LMNtalRuntimeManager;
+import runtime.LMNtalRuntimeManager;
 
 class SlaveLMNtalRuntimeLauncher {
 	//TODO 名称変更。ここはLocalLMNtalRuntimeとLMNtalDaemonの間にいて、ローカルホスト内TCP通信の面倒を接続元がソケットを閉じるまで見続ける。
 	
 	static boolean DEBUG = true;
 	
-	static LocalLMNtalRuntime runtime;
-	static String rgid;
-	
 	public static void main(String[] args){
 		try {
 			String callerMsgid = args[0];
-			rgid = args[1];
+			String rgid = args[1];
 
 			Socket socket = new Socket("localhost", LMNtalDaemon.DEFAULT_PORT);
-			LMNtalRuntimeMessageProcessor node = new LMNtalRuntimeMessageProcessor(socket);
+			LMNtalRuntimeMessageProcessor node = new LMNtalRuntimeMessageProcessor(socket,rgid);
+			LMNtalRuntimeManager.daemon = node;
+			
 			Thread nodeThread = new Thread(node);
 			nodeThread.start();
-			if (node.sendWaitRegisterLocal("remote",rgid)) {
-				//LocalLMNtalRuntimeを起動
-				runtime = new LocalLMNtalRuntime(rgid);
-				node.respondAsOK(callerMsgid);
+			if (node.sendWaitRegisterLocal("remote")) {
+				//LocalLMNtalRuntimeを起動				
+				LocalLMNtalRuntime runtime = new LocalLMNtalRuntime();
+				node.respondAsOK(callerMsgid);	// node.runtimeidを返す場合、このresの引数にする
 				//socketが切断するまで待つ
 				nodeThread.join();
 				//LMNtalRuntimeManager.terminateAll();

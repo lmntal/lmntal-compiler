@@ -218,7 +218,7 @@ public final class Env {
 	
 	/** LocalLMNtalRuntimeのインスタンス */
 	public static LocalLMNtalRuntime theRuntime;
-	
+
 	public static void guiTrace() {
 		if(gui==null) return;
 		gui.onTrace();

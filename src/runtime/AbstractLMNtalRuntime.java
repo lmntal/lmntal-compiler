@@ -4,13 +4,11 @@ package runtime;
  * @author n-kato
  */
 abstract class AbstractLMNtalRuntime {
+	/** ランタイムID。このVMのグローバルな識別子。ルールセットのIDの一部として使用される */
 	protected String runtimeid;
-	protected String runtimeGroupID;
+	/** ランタイムIDを取得する */
 	public String getRuntimeID() {
 		return runtimeid;
-	}
-	public String getRuntimeGroupID() {
-		return runtimeGroupID;
 	}
 	/** 指定した膜を親膜とするルート膜を持つタスクをこのランタイムに作成する。
 	 * @param parent ルート膜の親膜

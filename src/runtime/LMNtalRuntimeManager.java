@@ -16,9 +16,10 @@ import java.net.Socket;
 
 public final class LMNtalRuntimeManager {
 	/** ローカルのデーモンとの通信路 */
-	static LMNtalRuntimeMessageProcessor daemon = null;
+	public static LMNtalRuntimeMessageProcessor daemon = null;
 	/** 計算ノード表: nodedesc (String) -> RemoteLMNtalRuntime */
 	static HashMap runtimeids = new HashMap();
+
 	/** 計算ノード表を利用開始する */
 	public static void init() {}
 	
@@ -70,11 +71,13 @@ public final class LMNtalRuntimeManager {
 	public static boolean connectToDaemon() {
 		if (daemon != null) return true;
 		try {
+			// このVMはマスタノードである
 			Socket socket = new Socket("localhost", LMNtalDaemon.DEFAULT_PORT);
-			daemon = new LMNtalRuntimeMessageProcessor(socket);
+			String rgid = Env.theRuntime.runtimeid;
+			daemon = new LMNtalRuntimeMessageProcessor(socket,rgid);
 			Thread t = new Thread(daemon);
 			t.start();
-			if (!daemon.sendWaitRegisterLocal("master", Env.theRuntime.getRuntimeGroupID())) {
+			if (!daemon.sendWaitRegisterLocal("master")) {
 				throw new Exception("cannot connect to daemon");
 			}
 			return true;

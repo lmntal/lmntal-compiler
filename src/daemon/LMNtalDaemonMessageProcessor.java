@@ -65,8 +65,8 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			 * 
 			 * ここで処理される命令一覧。これ以外のは下スクロールしてね
 			 * 
-			 * res msgid メッセージ本文
-			 * registerlocal rgid
+			 * RES                        msgid メッセージ本文
+			 * REGISTERLOCAL MASTER/SLAVE msgid rgid
 			 * dumphash
 			 *  
 			 */
@@ -95,9 +95,9 @@ public class LMNtalDaemonMessageProcessor extends LMNtalNode implements Runnable
 			} else if (parsedInput[0].equalsIgnoreCase("registerlocal")) {
 				//REGISTERLOCAL MASTER/SLAVE msgid rgid
 				//rgidとLMNtalNodeを登録
-				String type = parsedInput[1];
+				String type  = parsedInput[1];
 				String msgid = parsedInput[2];
-				String rgid = parsedInput[3];
+				String rgid  = parsedInput[3];
 				boolean result = LMNtalDaemon.registerRuntimeGroup(rgid, this);
 				respond(msgid, result);
 				continue;

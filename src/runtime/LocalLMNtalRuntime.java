@@ -22,12 +22,8 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 
 
 	public LocalLMNtalRuntime(){
-		this("???");
-	}
-	public LocalLMNtalRuntime(String rgid){
 		Env.theRuntime = this;
-		this.runtimeid = LMNtalDaemon.makeID();
-		this.runtimeGroupID = rgid;
+		this.runtimeid = LMNtalDaemon.makeID();	// ここで生成する
 	}
 
 	public static LocalLMNtalRuntime getInstance() {
@@ -35,7 +31,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 	}
 	
 	/**
-	 * 指定した膜を親膜とするルート膜に持つタスクをこのランタイムに作成する
+	/* 指定した膜を親膜とするルート膜を持つタスクをこのランタイムに作成する。
 	 * @param parent ルート膜の親膜
 	 */
 	AbstractTask newTask(AbstractMembrane parent) {

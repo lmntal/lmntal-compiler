@@ -6,7 +6,6 @@ package runtime;
 public final class MasterLMNtalRuntime extends LocalLMNtalRuntime {
 	private Membrane globalRoot;
 	public MasterLMNtalRuntime() {
-		runtimeGroupID = runtimeid;
 		Task masterTask = new Task(this);
 		tasks.add(masterTask);
 		globalRoot = (Membrane)masterTask.getRoot();

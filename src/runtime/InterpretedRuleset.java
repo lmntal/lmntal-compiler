@@ -108,9 +108,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		}
 	}
 	
-	public String getGlobalRulesetID(){
-		//TODO 本当にglobalなIDにする
-		return "<runtimeid>" + id;
+	public String getGlobalRulesetID() {
+		return Env.theRuntime.getRuntimeID() + ":" + id;
 	}
 	
 	public void serialize(ObjectOutputStream out) throws IOException {

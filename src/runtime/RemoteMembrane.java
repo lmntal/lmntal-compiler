@@ -14,15 +14,15 @@ final class RemoteMembrane extends AbstractMembrane {
 	protected String globalid;
 	/** この膜のアトムのローカルIDからリモートIDへの写像 */
 	protected HashMap atomids = new HashMap();
-	/** この膜の子膜のローカルIDからリモートIDへの写像 */
-	protected HashMap memids = new HashMap();
+//	/** この膜の子膜のローカルIDからリモートIDへの写像 */
+//	protected HashMap memids = new HashMap();
 
 	/** 仮ロック状態かどうか。
 	 * （リモートではロックされていると見なし、ローカルではロック解放されているとみなす状態のこと）*/
 	protected boolean fUnlockDeferred = false;
 	
 	/*
-	 * コンストラクタ。remoteidはLMNtalDaemon.getGlobalMembraneIDによって生成される。
+	 * コンストラクタ。globalidはLMNtalDaemon.getGlobalMembraneIDによって生成される。
 	 */
 	public RemoteMembrane(RemoteTask task, AbstractMembrane parent) {
 		super(task, parent);
@@ -77,7 +77,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		String host = remote.hostname;
 		String msgid = daemon.LMNtalDaemon.makeID();
 		String cmd = msgid + " \"" + host + "\" " + text;
-		LMNtalRuntimeManager.daemon.sendWait(host, remote.getRuntimeGroupID(), cmd);
+		LMNtalRuntimeManager.daemon.sendWait(host, cmd);
 		return LMNtalRuntimeManager.daemon.waitForResponseText(msgid);
 	}
 	
@@ -156,15 +156,17 @@ final class RemoteMembrane extends AbstractMembrane {
 		//mems.add(m);
 		//send("NEWMEM",newremoteid);
 		//return m;
+		
+		RemoteTask task = (RemoteTask)getTask();
+		String newglobalid = task.getNextMemID();
+		RemoteMembrane submem = new RemoteMembrane(task, this);
+		submem.globalid = newglobalid;
+		//memids.put(submem.globalid, newglobalid);
+		mems.add(submem);
+		send("NEWMEM", newglobalid);
+		//task.registerMem(newglobalid, submem.globalid);
 
-		String newremoteid = ((RemoteTask) task).getNextMemID();
-		RemoteMembrane m = new RemoteMembrane((RemoteTask) task, this);
-		memids.put(m.globalid, newremoteid);
-		mems.add(m);
-		send("NEWMEM", newremoteid);
-		((RemoteTask) task).registerMem(newremoteid, m.globalid);
-
-		return m;
+		return submem;
 	}
 
 	public void removeMem(AbstractMembrane mem) {

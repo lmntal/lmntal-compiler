@@ -14,18 +14,16 @@ final class RemoteTask extends AbstractTask {
 	String cmdbuffer;
 	int nextatomid;
 	int nextmemid;
-	//LMNtalNode remoteNode;
 
 	//
 	HashMap memTable;
 
 	/** 通常のコンストラクタ */
-	 RemoteTask(RemoteLMNtalRuntime runtime, AbstractMembrane parent){
+	RemoteTask(RemoteLMNtalRuntime runtime, AbstractMembrane parent){
 		super(runtime);
-		//remoteNode = LMNtalRuntimeManager.daemon;
 		root = new RemoteMembrane(this, parent);
 		parent.addMem(root);	// タスクは膜の作成時に設定した
-	 }
+	}
 
 	//	String getNextAtomID() {
 	//		return "NEW_" + nextatomid++;

@@ -169,6 +169,7 @@ public class LMNtalNode {
 			e.printStackTrace();
 		}
 	}
+	/*
 	void send(String fqdn, String rgid, String command, String arg1){
 		try {
 			out.write(LMNtalDaemon.makeID() + " \"" + fqdn + "\" " + rgid + " " + command + " " + arg1 + "\n");
@@ -220,5 +221,6 @@ public class LMNtalNode {
 	void sendLocal(BufferedWriter out, String rgid, String command){
 			
 	}
+	*/
 
 }
