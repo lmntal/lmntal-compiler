@@ -136,7 +136,7 @@ public final class Membrane extends AbstractMembrane {
 	 * <p>ルールスレッド以外のスレッドが膜のロックを取得するときに使用する。*/
 	public void blockingLock() {
 		((Task)task).lock();
-		while (!lock()) {
+		while (!lock()) { // 親タスクのルールスレッドが膜のロックを取得している間、繰り返す
 			AbstractMachine mach = task.getMachine();
 			synchronized(mach) {
 				try {
@@ -146,7 +146,6 @@ public final class Membrane extends AbstractMembrane {
 			}
 		}
 	}
-
 	/**
 	 * この膜をロックする。
 	 * <p>ルールスレッドが膜のロックをするときに使用する。
@@ -176,6 +175,22 @@ public final class Membrane extends AbstractMembrane {
 	 * <li>タスクを実行する物理マシンにシグナルを発行する。
 	 * </ul>*/
 	public void unlock() {
+		boolean signal = ( isRoot() );
+		if (signal) {
+			Task t = (Task)task;
+			t.memStack.moveFrom(t.bufferedStack);
+			((Task)task).idle = false;
+		}
+		locked = false;
+		if (signal) {
+			AbstractMachine machine = getTask().getMachine();
+			synchronized(machine) {
+				machine.notify();
+			}
+		}
+	}
+	/** blockingLock()で取得した膜のロックを解放し、タスクのロックカウントが正ならば1減らす。*/
+	public void blockingUnlock() {
 		boolean signal = ( ((Task)task).unlock() || isRoot() );
 		if (signal) {
 			Task t = (Task)task;

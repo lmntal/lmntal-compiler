@@ -78,6 +78,18 @@ final class RemoteTask extends AbstractTask {
 	void flush() {
 		System.out.println("SYSTEM ERROR: remote call not implemented");
 	}
+
+	// ロック
+	public boolean nonblockingLock() {
+		return false;
+		// todo 実装する
+	}
+	public void lock() {
+		throw new RuntimeException("not implemented");
+	}
+	public boolean unlock() {
+		throw new RuntimeException("not implemented");
+	}
 }
 
 /**
@@ -261,6 +273,10 @@ final class RemoteMembrane extends AbstractMembrane {
 	}
 	public void unlock() {
 		send("UNLOCK");
+	}
+	public void blockingUnlock() {
+		send("BLOCKINGUNLOCK");
+		//todo 実装する
 	}
 	public void recursiveUnlock() {
 		//send("RECURSIVEUNLOCK");

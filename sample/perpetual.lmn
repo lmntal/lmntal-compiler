@@ -16,12 +16,12 @@
 				Atom k = mem.newAtom(new IntegerFunctor(i));
 				mem.newLink(p,0,k,0);
 				mem.activate();
-				mem.unlock();
+				mem.blockingUnlock();
 			}
 			mem.blockingLock();
 			mem.newAtom(new Functor("end",0));
 			mem.activate();
-			mem.unlock();
+			mem.blockingUnlock();
 		}
 	}
 ]].

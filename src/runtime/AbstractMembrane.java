@@ -445,6 +445,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * ロックを解放する。
 	 * <p>ルート膜の場合、仮の実行膜スタックの内容を実行膜スタックの底に転送する。*/
 	public abstract void unlock();
+	/** blockingLock()で取得した膜のロックを解放する。
+	 * <p>ルート膜の場合または本膜の場合、仮の実行膜スタックの内容を実行膜スタックの底に転送する。*/
+	public abstract void blockingUnlock();
 	public abstract void recursiveUnlock();
 
 	///////////////////////////////
