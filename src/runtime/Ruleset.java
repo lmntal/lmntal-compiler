@@ -17,4 +17,12 @@ abstract public class Ruleset {
 	 * @return ルールを適用した場合はtrue
 	 */
 	abstract public boolean react(Membrane mem);
+	/**
+	 * ルールセットのIDを返す
+	 * @author nakajima
+	 * @return ルールセットID
+	 * 
+	 * 
+	 */
+	abstract public int getGlobalRulesetID();
 }

@@ -107,6 +107,10 @@ public final class InterpretedRuleset extends Ruleset {
 			r.showDetail();
 		}
 	}
+	
+	public int getGlobalRulesetID(){
+		return id;
+	}
 }
 
 ////////////////////////////////////////////////////////////////

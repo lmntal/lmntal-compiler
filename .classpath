@@ -2,7 +2,7 @@
 <classpath>
     <classpathentry kind="src" path="src"/>
     <classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-    <classpathentry exported="true" kind="lib" path="C:/p/eclipse/plugins/org.junit_3.8.1/junit.jar"/>
-    <classpathentry kind="lib" path="C:/p/j2sdk1.4.2_02/lib/tools.jar"/>
+    <classpathentry kind="lib" path="/usr/share/java/junit.jar"/>
+    <classpathentry kind="lib" path="/usr/lib/j2se/1.4/lib/tools.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
