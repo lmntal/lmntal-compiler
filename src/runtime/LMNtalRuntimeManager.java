@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import daemon.LMNtalNode;
+import daemon.LMNtalDaemon;
 import daemon.LMNtalRuntimeMessageProcessor;
 import java.net.Socket;
 
@@ -16,41 +17,32 @@ import java.net.Socket;
 public final class LMNtalRuntimeManager {
 	/** ローカルのデーモンとの通信路 */
 	static LMNtalRuntimeMessageProcessor daemon = null;
-	/** 計算ノード表（String -> RemoteLMNtalRuntime）*/
+	/** 計算ノード表: nodedesc (String) -> RemoteLMNtalRuntime */
 	static HashMap runtimeids = new HashMap();
 	/** 計算ノード表を利用開始する */
 	public static void init() {}
 	
-	/** 指定されたホストに接続し、計算ノード表に登録する
-	 *  すでに登録されている場合は生存を確認する。生存を確認できない場合はnullを返す。*/
-	public static AbstractLMNtalRuntime connectRuntime(String node) {
-		node = node.intern();
-
-		//あて先はどこ？
-		if(LMNtalNode.isMyself(node)){
-			//localhostなら  自分自身を返す
+	/** 指定されたホストに接続し、計算ノード表に登録する。
+	 *  すでに登録されている場合は生存を確認する。生存を確認できない場合はnullを返す。
+	 *  初めての分散呼び出しならば、ローカルのデーモンに接続する。
+	 *  <p>現在の実装では、確認中にブロックする。
+	 * しかしルールスレッドが長期間ブロックするのでよくないという本質的な問題がある。
+	 * 
+	 * @param nodedesc ノード識別子（現在はfqdnのみ） */
+	public static AbstractLMNtalRuntime connectRuntime(String nodedesc) {
+		String fqdn = nodedesc;
+		//宛て先がlocalhostなら  自分自身を返す
+		if(LMNtalNode.isMyself(fqdn)){
 			return Env.theRuntime;
 		}
-		//
-		if (daemon == null) {
-			try {
-				Socket socket = new Socket(node, 60000);
-				daemon = new LMNtalRuntimeMessageProcessor(socket);
-				Thread t = new Thread(daemon);
-				t.start();
-			}
-			catch (Exception e) {
-				System.out.println("Cannot connect to LMNtal deamon (not started?)");
-				return null;
-			}
-		}
+		//以下は宛て先がremoteにある場合
+		if (!connectToDaemon()) return null;			
 		
-		//remote
-		RemoteLMNtalRuntime ret = (RemoteLMNtalRuntime)runtimeids.get(node);			
+		RemoteLMNtalRuntime ret = (RemoteLMNtalRuntime)runtimeids.get(fqdn);			
 
 		if (ret == null) {
-			ret = new RemoteLMNtalRuntime(node);
-			runtimeids.put(node,ret);
+			ret = new RemoteLMNtalRuntime(fqdn);
+			runtimeids.put(fqdn, ret);
 		}
 		
 		if (ret.connect()){
@@ -61,15 +53,53 @@ public final class LMNtalRuntimeManager {
 			return null;
 		}
 	}
-
-	/** 登録されている全てのLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
-	 * TODO Env.theRuntime は terminate しなくてよいのかどうかを明らかにする */
-	public static void terminateAll() {
-		Iterator it = runtimeids.keySet().iterator();
-		while (it.hasNext()) {
-			AbstractLMNtalRuntime machine = (AbstractLMNtalRuntime)runtimeids.get(it.next());
-			machine.terminate();
+	
+	/** リモートホストから接続があったときに呼ばれる。
+	 * 対応するRemoteLMNtalRuntimeが存在しなければ作成する。
+	 * @param nodedesc リモートホストが名乗ったノード識別子（現在はfqdnのみ） */
+	public static AbstractLMNtalRuntime connectedFromRemoteRuntime(String nodedesc) {
+		RemoteLMNtalRuntime ret = (RemoteLMNtalRuntime)runtimeids.get(nodedesc);
+		if (ret == null) {
+			ret = new RemoteLMNtalRuntime(nodedesc);
+			runtimeids.put(nodedesc, ret);
 		}
-		runtimeids.clear();
+		return ret;
+	}
+	
+	/** ローカルのデーモンに接続する。すでに接続している場合は何もしない。*/
+	public static boolean connectToDaemon() {
+		if (daemon != null) return true;
+		try {
+			Socket socket = new Socket("localhost", LMNtalDaemon.DEFAULT_PORT);
+			daemon = new LMNtalRuntimeMessageProcessor(socket);
+			Thread t = new Thread(daemon);
+			t.start();
+			if (!daemon.sendWaitRegisterLocal("master", Env.theRuntime.getRuntimeGroupID())) {
+				throw new Exception("cannot connect to daemon");
+			}
+			return true;
+		}
+		catch (Exception e) {
+			System.out.println("Cannot connect to LMNtal deamon (not started?)");
+			if (daemon != null) {
+				daemon.close();
+				daemon = null;
+			}
+			return false;
+		}
+	}
+	
+	private static Object terminateLock = "";
+	/** 登録されている全てのRemoteLMNtalRuntimeを終了し、計算ノード表の登録を削除する。
+	 *  Env.theRuntime は terminate しない。*/
+	public static void terminateAllNeighbors() {
+		synchronized(terminateLock) { // 重複転送防止のため（仮）
+			Iterator it = runtimeids.keySet().iterator();
+			while (it.hasNext()) {
+				AbstractLMNtalRuntime machine = (AbstractLMNtalRuntime)runtimeids.get(it.next());
+				machine.terminate();
+			}
+			runtimeids.clear();
+		}
 	}
 }

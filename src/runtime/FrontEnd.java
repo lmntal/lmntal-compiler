@@ -235,7 +235,7 @@ public class FrontEnd {
 			}
 			//root.blockingUnlock();
 			((Task)root.getTask()).execAsMasterTask();
-			LMNtalRuntimeManager.terminateAll();
+			LMNtalRuntimeManager.terminateAllNeighbors();
 
 			if (!Env.fTrace && Env.verbose > 0) {
 				Env.d( "Execution Result:" );

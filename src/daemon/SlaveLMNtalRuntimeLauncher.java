@@ -3,8 +3,6 @@ package daemon;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import runtime.LocalLMNtalRuntime;
@@ -20,56 +18,27 @@ class SlaveLMNtalRuntimeLauncher {
 	
 	public static void main(String[] args){
 		try {
-			rgid = args[0];
-			String callerMsgid = args[1];
+			String callerMsgid = args[0];
+			rgid = args[1];
 
-			Socket socket = new Socket("localhost", 60000);
-
-			BufferedWriter out =
-				new BufferedWriter(
-					new OutputStreamWriter(socket.getOutputStream()));
-			BufferedReader in =
-				new BufferedReader(
-					new InputStreamReader(socket.getInputStream()));
-
-			//REGSITERLOCAL rgid
-			String command = new String("registerlocal " + rgid + "\n");
-
-			if(DEBUG)System.out.println("DummyRemoteRuntime.run(): now omitting: " + command);
-
-			out.write(command);
-			out.flush();
-
-			String input;
-
-			//最初の1回。
-			input = in.readLine();
-				
-			if(input.equalsIgnoreCase("ok")){
-				//connectを発行した元に対してres msgid okを返す
-				command = "res " + callerMsgid + " ok\n";
-				out.write(command);
-				out.flush();
-				
+			Socket socket = new Socket("localhost", LMNtalDaemon.DEFAULT_PORT);
+			LMNtalRuntimeMessageProcessor node = new LMNtalRuntimeMessageProcessor(socket);
+			Thread nodeThread = new Thread(node);
+			nodeThread.start();
+			if (node.sendWaitRegisterLocal("remote",rgid)) {
 				//LocalLMNtalRuntimeを起動
-				runtime = new LocalLMNtalRuntime();
-		
-				//メッセージ待ちに入る。
-				//processMessage(in, out);
+				runtime = new LocalLMNtalRuntime(rgid);
+				node.respondAsOK(callerMsgid);
+				//socketが切断するまで待つ
+				nodeThread.join();
 				//LMNtalRuntimeManager.terminateAll();
-			} else {
-				//connectを発行した元に対してres msgid failを返す
-				command = "res " + callerMsgid + " fail\n";
-				out.write(command);
-				out.flush();
 			}
-
 		} catch (Exception e) {
 			System.out.println("ERROR in DummyRemoteRuntime.run()" + e.toString());
 			e.printStackTrace();
 		}
 	}
-	
+	/**@deprecated*/
 	static void processMessage(BufferedReader in, BufferedWriter out){
 		String input = "";
 		String inputParsed[] = new String[3];

@@ -15,7 +15,6 @@ import daemon.LMNtalDaemon;
  */
 final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	boolean result;
-
 	/**
 	 * リモート側のホスト名。Fully Qualified Domain Nameである必要がある。
 	 */
@@ -33,7 +32,8 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	 */
 	protected RemoteLMNtalRuntime(String hostname) {
 		//hostnameの中にはfqdnが入っている（とみなす）
-		this.runtimeid = LMNtalDaemon.makeID();  //TODO 接続先からIDを受け取って代入する
+		this.runtimeGroupID = Env.theRuntime.getRuntimeGroupID();
+		this.runtimeid = LMNtalDaemon.makeID();  //TODO 接続先からIDを受け取って代入する（今は未使用なので問題が発生しない）
 		this.hostname = hostname;
 	}
 
@@ -41,7 +41,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 		throw new RuntimeException("Attempted to create a global root in a remote host");
 	}
 
-	/*
+	/**
 	 * タスクを作る命令を発行する。
 	 * 実際にタスクが作られるのはリモート側。
 	 * 
@@ -51,9 +51,13 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 	public AbstractTask newTask(AbstractMembrane parent) {
 		// TODO コネクションの管理をRemoteTaskからこのクラスに移した後でsendを発行するコードを書く
 
-		//send("NEWTASK " + daemon.IDConverter.getGlobalMembraneID(parent));
-		//join
-		// new RemoteTask
+		String newmemid = null; // getNextMemID();
+		String parentmemid = daemon.IDConverter.getGlobalMembraneID(parent);
+		if (LMNtalRuntimeManager.daemon.sendWait(hostname, "NEWTASK", parentmemid)) {
+			RemoteTask task = new RemoteTask(this, parent);
+			return task;
+		}
+		System.out.println("failed in remote task creation: this will cause NullPointerException");
 		return (AbstractTask) null;
 	}
 
@@ -75,7 +79,7 @@ final class RemoteLMNtalRuntime extends AbstractLMNtalRuntime {
 
 	/*
 	 * リモート側に接続する。
-	 * 実際はLMNtalDaemon.connet(hostname)を呼出しているだけ。
+	 * 実際はLMNtalDaemon.connect(hostname)を呼出しているだけ。
 	 * 
 	 * @return 接続成功したらtrue、失敗したらfalse。接続の成功判定はLMNtalDaemon.connect()が返すbooleanと、
 	 */

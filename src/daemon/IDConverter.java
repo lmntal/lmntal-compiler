@@ -4,16 +4,15 @@ import java.net.InetAddress;
 import java.util.HashMap;
 
 import runtime.AbstractMembrane;
-import runtime.Membrane;
 
-/*
- * グローバルID -> ローカルID, object という変換をするクラス
+/**
+ * グローバルID -> ローカルのobject という変換をするクラス
  * 
- * @author nakajima
+ * @author nakajima, n-kato
  *
  */
 public class IDConverter{
-	//グローバル膜ID -> 膜オブジェクト
+	//グローバル膜ID (String) -> 膜オブジェクト (AbstractMembrane)
 	HashMap memTable = new HashMap();
 
 	
@@ -22,8 +21,8 @@ public class IDConverter{
 	 * グローバル膜ID -> 膜オブジェクト
 	 * @return 登録されていればMembrane, されてなければnull
 	 */
-	Membrane getMem(String globalMemID){
-		return (Membrane)memTable.get(globalMemID);
+	AbstractMembrane getMem(String globalMemID){
+		return (AbstractMembrane)memTable.get(globalMemID);
 	}
 
 
@@ -50,7 +49,7 @@ public class IDConverter{
 	/*
 	 * グローバル膜ID -> 膜オブジェクト を登録する
 	 */
-	boolean registerMem(String globalMemID, Membrane memobj){
+	boolean registerMem(String globalMemID, AbstractMembrane memobj){
 		if(memTable.get(globalMemID)==null){
 			memTable.put(globalMemID, memobj);
 			return true;

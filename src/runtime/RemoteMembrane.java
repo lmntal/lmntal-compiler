@@ -10,8 +10,8 @@ import daemon.IDConverter;
  * @author n-kato
  */
 final class RemoteMembrane extends AbstractMembrane {
-	/** この膜を管理する計算ノードにおけるこの膜のID */
-	protected String remoteid;
+	/** この膜のグローバルID */
+	protected String globalid;
 	/** この膜のアトムのローカルIDからリモートIDへの写像 */
 	protected HashMap atomids = new HashMap();
 	/** この膜の子膜のローカルIDからリモートIDへの写像 */
@@ -20,14 +20,13 @@ final class RemoteMembrane extends AbstractMembrane {
 	/** 仮ロック状態かどうか。
 	 * （リモートではロックされていると見なし、ローカルではロック解放されているとみなす状態のこと）*/
 	protected boolean fUnlockDeferred = false;
-
+	
 	/*
 	 * コンストラクタ。remoteidはLMNtalDaemon.getGlobalMembraneIDによって生成される。
 	 */
-	public RemoteMembrane(RemoteTask task, RemoteMembrane parent) {
+	public RemoteMembrane(RemoteTask task, AbstractMembrane parent) {
 		super(task, parent);
-//		this.remoteid = LMNtalDaemon.getGlobalMembraneID(this);
-		this.remoteid = IDConverter.getGlobalMembraneID(this);
+		this.globalid = IDConverter.getGlobalMembraneID(this);
 	}
 
 	/*
@@ -38,7 +37,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		RemoteMembrane parent,
 		String remoteid) {
 		super(task, parent);
-		this.remoteid = remoteid;
+		this.globalid = remoteid;
 	}
 
 /*
@@ -48,20 +47,20 @@ final class RemoteMembrane extends AbstractMembrane {
  *      20040712現在はString[4]でベタ打ち。
  */
 	void send(String cmd) {
-		((RemoteTask) task).send(cmd + " " + remoteid);
+		((RemoteTask) task).send(cmd + " " + globalid);
 	}
 	void send(String cmd, String args) {
-		((RemoteTask) task).send(cmd + " " + remoteid + " " + args);
+		((RemoteTask) task).send(cmd + " " + globalid + " " + args);
 	}
 	void send(String cmd, String arg1, String arg2) {
 		((RemoteTask) task).send(
-			cmd + " " + remoteid + " " + arg1 + " " + arg2);
+			cmd + " " + globalid + " " + arg1 + " " + arg2);
 	}
 	void send(String cmd, String arg1, String arg2, String arg3, String arg4) {
 		((RemoteTask) task).send(
 			cmd
 				+ " "
-				+ remoteid
+				+ globalid
 				+ " "
 				+ arg1
 				+ " "
@@ -71,13 +70,24 @@ final class RemoteMembrane extends AbstractMembrane {
 				+ " "
 				+ arg4);
 	}
+	
+	/** 送信し、返事がくるまでブロックする。（仮仮仮仮仮仮仮） */
+	String sendWait(String text) {
+		RemoteLMNtalRuntime remote = (RemoteLMNtalRuntime)((RemoteTask)task).runtime;
+		String host = remote.hostname;
+		String msgid = daemon.LMNtalDaemon.makeID();
+		String cmd = msgid + " \"" + host + "\" " + text;
+		LMNtalRuntimeManager.daemon.sendWait(host, remote.getRuntimeGroupID(), cmd);
+		return LMNtalRuntimeManager.daemon.waitForResponseText(msgid);
+	}
+	
 	///////////////////////////////
 	// 情報の取得
 
-	String getMemID() {
-		return remoteid;
+	public String getMemID() {
+		return globalid;
 	}
-	String getAtomID(Atom atom) {
+	public String getAtomID(Atom atom) {
 		return (String) atomids.get(atom);
 	}
 
@@ -149,10 +159,10 @@ final class RemoteMembrane extends AbstractMembrane {
 
 		String newremoteid = ((RemoteTask) task).getNextMemID();
 		RemoteMembrane m = new RemoteMembrane((RemoteTask) task, this);
-		memids.put(m.remoteid, newremoteid);
+		memids.put(m.globalid, newremoteid);
 		mems.add(m);
 		send("NEWMEM", newremoteid);
-		((RemoteTask) task).registerMem(newremoteid, m.remoteid);
+		((RemoteTask) task).registerMem(newremoteid, m.globalid);
 
 		return m;
 	}
@@ -263,18 +273,17 @@ final class RemoteMembrane extends AbstractMembrane {
 	}
 
 	// 操作6 - ロックに関する操作
-
+	
 	synchronized public boolean lock() {
 		if (locked) {
 			return false;
 		} else {
 			if (fUnlockDeferred) {
 				locked = true;
-				fUnlockDeferred = false; // ?
+				fUnlockDeferred = false;
 			} else {
-				send("LOCK");
-				//wait();
-				if (true) { // ロック取得成功
+				String response = sendWait("LOCK " + globalid);
+				if (response.equalsIgnoreCase("unchanged")) {// ロック取得成功
 					//todo:キャッシュの更新
 				} else { // ロック取得失敗
 					return false;
@@ -291,12 +300,11 @@ final class RemoteMembrane extends AbstractMembrane {
 		// ルールスレッドがロックしていた場合、タスクのIDをリモートに渡す？【TODO 本当に必要か？】
 		// 非ルールスレッドがロックしていた場合、タスクは存在しないが、
 		// 優先度無限大と見なすのでロックは解放できないことになっているので大丈夫。
-		send("BLOCKINGLOCK");
-		//wait;
+		sendWait("BLOCKINGLOCK");
 		// todo:キャッシュの更新
 	}
 	public void asyncLock() {
-		send("ASYNCLOCK");
+		sendWait("ASYNCLOCK");
 	}
 	public void unlock(boolean signal) {
 		fUnlockDeferred = true;
@@ -309,7 +317,7 @@ final class RemoteMembrane extends AbstractMembrane {
 		send("ASYNCUNLOCK");
 	}
 	public void recursiveLock() {
-		send("RECURSIVELOCK");
+		sendWait("RECURSIVELOCK");
 	}
 	public void recursiveUnlock() {
 		send("RECURSIVEUNLOCK");

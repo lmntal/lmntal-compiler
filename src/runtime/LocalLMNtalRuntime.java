@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import daemon.LMNtalDaemon;
 
 /** このVMで実行するランタイム（旧：物理マシン、旧々：計算ノード）
  * このクラスのサブクラスのインスタンスは、1つの Java VM につき高々1つしか存在しない。
@@ -21,7 +22,12 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 
 
 	public LocalLMNtalRuntime(){
+		this("???");
+	}
+	public LocalLMNtalRuntime(String rgid){
 		Env.theRuntime = this;
+		this.runtimeid = LMNtalDaemon.makeID();
+		this.runtimeGroupID = rgid;
 	}
 
 	public static LocalLMNtalRuntime getInstance() {
@@ -29,11 +35,11 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime {
 	}
 	
 	/**
-	 * タスク生成。
-	 * @param parent ルート膜
+	 * 指定した膜を親膜とするルート膜に持つタスクをこのランタイムに作成する
+	 * @param parent ルート膜の親膜
 	 */
 	AbstractTask newTask(AbstractMembrane parent) {
-		Task t = new Task(this,parent);
+		Task t = new Task(this, parent);
 		tasks.add(t);
 		return t;
 	}

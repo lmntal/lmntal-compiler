@@ -2,32 +2,78 @@ package daemon;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.InetAddress;
+//import java.net.InetAddress;
 import java.net.Socket;
 
 import runtime.Env;
 import runtime.Membrane;
+import java.util.HashMap;
+import runtime.LMNtalRuntimeManager;
 
 /**
  * ランタイムが生成するオブジェクト。
  * デーモンとのコネクションに対して生成され、メッセージの受信を行う。
+ * 
+ * TODO LMNtalDaemonMessageProcessorと共通の処理をLMNtalNodeに移管する。
  * @author nakajima, n-kato
  */
 public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnable {
 	static boolean DEBUG = true;
 
+	/** 通常のコンストラクタ */
 	public LMNtalRuntimeMessageProcessor(Socket socket) {
 		super(socket);
-		// TODO send("REGISTERLOCAL");
+	}
+	
+	/** ローカルデーモンに対して REGISTERLOCAL を発行し、返答を待つ */
+	public boolean sendWaitRegisterLocal(String type, String rgid) {
+		// REGSITERLOCAL MASTER/SLAVE msgid rgid
+		String msgid = LMNtalDaemon.makeID();
+		String command = "registerlocal " + type + " " + msgid + " " + rgid + "\n";
+		if (!sendMessage(command)) return false;
+		return waitForResult(msgid);
 	}
 
+	////////////////////////////////////////////////////////////////
+	
+//	/** msgid (String) -> ブロックしている Object */
+//	protected HashMap blockingObjects = new HashMap();
+
+	/** msgid (String) -> メッセージmsgidに対するresの内容 (String) */
+	HashMap messagePool = new HashMap();
+	
+	/** 指定したメッセージに対する返答を待ってブロックする。*/
+	synchronized public String waitForResponseText(String msgid) {
+		while (!messagePool.containsKey(msgid)) {
+			try {
+				wait();
+			}
+			catch (InterruptedException e) {}
+		}
+		return (String)messagePool.remove(msgid);
+	}
+	/** 指定したメッセージに対する結果を待ってブロックする。*/
+	public boolean waitForResult(String msgid) {
+		return waitForResponseText(msgid).equalsIgnoreCase("ok");
+	}
+	
+	////////////////////////////////////////////////////////////////
+	// todo Cacheへ移管する
+
+//	/*
+//	 * この計算機にある膜のグローバルなIDを管理
+//	 */
+//	//static HashMap localMemTable = new HashMap();
+
+	////////////////////////////////////////////////////////////////
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		if (DEBUG){System.out.println("LMNtalDaemonMessageProcessor.run()");
+		if (DEBUG) System.out.println("LMNtalDaemonMessageProcessor.run()");
 
 		String input = "";
 
@@ -48,17 +94,6 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			}
 
 			/*
-			 * inputの可能性。
-			 * 
-			 * コマンドからはじまるメッセージ
-			 *  msgid fqdn rgid メッセージ
-			 *   - fqdn が自分宛 
-			 *   - fqdn が他人宛
-			 * BEGIN~ENDの途中
-			 *  
-			 */
-
-			/*
 			 * コマンドからはじまるメッセージを処理。
 			 * 
 			 * ここで処理される命令一覧。これ以外のは下スクロールしてね
@@ -72,60 +107,27 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 			String rgid;
 			String fqdn;
 			boolean result;
-			String[] parsedInput = new String[4];
-			parsedInput = input.split(" ", 4);
+			String[] parsedInput = input.split(" ", 4);
 
 			if (parsedInput[0].equalsIgnoreCase("res")) {
 				//res msgid 結果
 				msgid = parsedInput[1];
-
-				//戻す先
-				LMNtalNode returnNode = LMNtalDaemon.getNodeFromMsgId(msgid);
-
-				if (DEBUG)
-					System.out.println(
-						"res: returnNode is: " + returnNode.toString());
-
-				if (returnNode == null) {
-					//戻し先がnull
-					// TODO (n-kato) 失敗は無視する。または、msgidでない別の新しいmsgidを作り失敗をoutに通知する
-					LMNtalDaemon.respondAsFail(out, msgid);
-					continue;
-				} else {
-					try {  //todo LMNtalDaemonに移す
-						returnNode.out.write(input + "\n");
-						returnNode.out.flush();
-						continue;
-					} catch (IOException e1) {
-						e1.printStackTrace();
-						continue;
-					}
+				String content = parsedInput[2];
+				messagePool.put(msgid, content);
+				
+//				Object suspended = blockingObjects.remove(msgid);
+//				if (suspended == null) {
+//					System.out.println(
+//						"ERROR: no objects waiting for message id = " + msgid);
+//					continue;
+//				}
+				synchronized(this) {
+					notifyAll();
 				}
+				continue;
 			} else if (parsedInput[0].equalsIgnoreCase("registerlocal")) {
-				//registerlocal rgid
-				//rgidとソケットを登録
-				rgid = parsedInput[1];
-
-				result = LMNtalDaemon.registerLocal(rgid, socket);
-				if (result == true) {  //todo LMNtalDaemonで面倒を見る
-					try {
-						//成功
-						out.write("ok\n");
-						out.flush();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-					continue;
-				} else {
-					try {
-						//成功
-						out.write("fail\n");
-						out.flush();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-					continue;
-				}
+				System.out.println("invalid message: registerlocal");
+				continue;
 			} else if (parsedInput[0].equalsIgnoreCase("dumphash")) {
 				//dumphash
 				LMNtalDaemon.dumpHashMap();
@@ -134,7 +136,7 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				/* コマンドからはじまる文字列の処理：ここまで */
 				
 			} else {
-				// TODO 耐故障性や拡張性のため、msgid の前に共通コマンド名（例えばcmd）を書いた方がよい
+				// todo 耐故障性や拡張性のため、msgid の前に共通コマンド名（例えばcmd）を書いた方がよい
 				/* msgid "fqdn" rgid メッセージ の処理 */
 			
 				//msgidからつづく命令列とみなす
@@ -142,197 +144,63 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				fqdn = (parsedInput[1].split("\"", 3))[1];
 				rgid = parsedInput[2];
 
-				//メッセージを登録
-				LMNtalNode returnNode = this;
-				result = LMNtalDaemon.registerMessage(msgid, returnNode);
+				// 自分自身宛なので、自分自身で処理する
 
-				if (result == true) {
-					//メッセージ登録成功
+				/*
+				 * ここで処理される命令一覧
+				 * 
+				 *  CONNECT dst_nodedesc src_nodedesc
+				 *  begin
+				 *  beginrule
+				 * 
+				 * lock
+				 * blockinglock
+				 * asynclock recursivelock
+				 * 
+				 * unlock
+				 * blockingunlock
+				 * asyncunlock
+				 * recursiveunlock
+				 * 
+				 * terminate
+				 *  
+				 */
 
-					//自分自身宛かどうか判断
-					try {
-						if (LMNtalDaemonMessageProcessor.isMyself(fqdn)) {
-							if (DEBUG)
-								System.out.println(
-									"This message is for me: "
-										+ InetAddress
-											.getLocalHost()
-											.getHostAddress());
+				String[] command = parsedInput[3].split(" ", 3);
+				//String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
+				Membrane realMem;
 
-							//自分自身宛なら、自分自身で処理する
-
-							/*
-							 * ここで処理される命令一覧
-							 * 
-							 *  connect
-							 *  begin
-							 *  beginrule
-							 * 
-							 * lock
-							 * blockinglock
-							 * asynclock recursivelock
-							 * 
-							 * unlock
-							 * blockingunlock
-							 * asyncunlock
-							 * recursiveunlock
-							 * 
-							 * terminate
-							 *  
-							 */
-
-							String[] command = new String[3];
-							command = parsedInput[3].split(" ", 3);
-							//String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
-							Membrane realMem;
-
-							if (command[0].equalsIgnoreCase("connect")) {
-								
-								if (!LMNtalDaemon.isRuntimeGroupRegistered(rgid)) {
-									
-									/** 登録されていない時 */
-									
-									//新規にランタイムを作る。
-									//OK返すのは生成されたランタイムがする。
-									
-									//応答メッセージとmsgidの組から判断し、registeRemoteを呼ぶ
-									
-									String newCmdLine =
-										new String(
-											"java daemon/SlaveLMNtalRuntimeLauncher "
-												+ rgid
-												+ " "
-												+ msgid.toString());
-
-									if (DEBUG)
-										System.out.println(newCmdLine);
-
-									try {
-										Process remoteRuntime =
-											Runtime.getRuntime().exec(newCmdLine);
-									} catch (IOException e) {
-										e.printStackTrace();
-										LMNtalDaemon.respondAsFail(out,msgid);
-									}
-									
-									continue;
-									/** 登録されていない時：ここまで */
-
-//									//タグなどを使ってメッセージの継続を記録する。
-//									//resを受けたときの継続：									
-//									//daemonに登録。
-//									LMNtalDaemon.registerRemote(rgid, socket);
-									
-								} else {
-									/** 既に登録済みの時 */
-									Socket localSocket = LMNtalDaemon.getLocalSocket(rgid);
-									
-									if(localSocket == null){
-										LMNtalDaemon.respondAsFail(out,msgid); 
-									} else {
-										//TODO  内部同士でやりとりするメッセージのフォーマットを考える。とりあえず内部では死なないものと思って放置する
-										
-										//LMNtalDaemon.sendLocal(out, rgid, "CONNECT");
-										
-										//OKを返すのはローカルランタイムが行う。todo	  不正確。実際はSlaveLMNtalRuntimeLauncher（の予定
-										/** 既に登録済みの時：ここまで */
-									}
-								}
-
-								continue;
-							} else {
-								Socket localSocket = LMNtalDaemon.getLocalSocket(rgid);
-								// TODO rgidに対してsocketではなくWriterを手に入れる
-								BufferedWriter localout = null; // localSocket.out;
-								localout.write(input + "\n");
-								if (command[0].equalsIgnoreCase("begin")) {
-									// endが来るまで転送
-									try {
-										while(true){
-											String inputline = in.readLine();
-											if (inputline == null) break;
-											if (inputline.equalsIgnoreCase("end")) {
-												break;
-											}
-											localout.write(inputline + "\n");
-										}
-									} catch (IOException e1) {
-										e1.printStackTrace();
-									}
-									localout.write("end\n");
-								}
-								localout.flush();
-								continue;
-							}
-						} else {
-							//他ノード宛ならメッセージをいじらずにそのまま転送する
-
-							//宛先ノードは既知か？
-							LMNtalNode targetNode =
-								LMNtalDaemon.getLMNtalNodeFromFQDN(fqdn);
-				
-							if (targetNode == null) {
-								//宛先ノードへ接続するのが初めての場合
-								result = LMNtalDaemon.connect(fqdn, rgid);
-
-								if (result) {
-									targetNode =
-										LMNtalDaemon.getLMNtalNodeFromFQDN(
-											fqdn);
-
-									if (targetNode == null) {
-										//接続失敗
-										LMNtalDaemon.respondAsFail(out,msgid);
-										continue;
-									} else {
-										LMNtalDaemon.sendMessage(
-											targetNode,
-											input + "\n");
-									}
-									continue;
-								} else {
-									//宛先ノードへの接続失敗
-									LMNtalDaemon.respondAsFail(out,msgid);
-									continue;
-								}
-							} else {
-								//宛先ノードが既知の場合
-								if (LMNtalDaemon
-									.sendMessage(targetNode, input + "\n")) {
-									//OKを返すのは、転送先がやるのでここではOKを返さない
-									continue;
-								} else {
-									//転送失敗
-									LMNtalDaemon.respondAsFail(out,msgid);
-									continue;
-								}
-							}
-						}
-					} catch (IOException e1) {
-						e1.printStackTrace();
-						//continue;
-						break;
-					} catch (NullPointerException nullpo) {
-						System.out.println("（　´∀｀）＜　ぬるぽ");
-						nullpo.printStackTrace();
-						//continue;
-						break;
-					}
+				if (command[0].equalsIgnoreCase("connect")) {
+					// connect "my_fqdn" "remote_fqdn"
+					String nodedesc = command[2];
+					LMNtalRuntimeManager.connectedFromRemoteRuntime(nodedesc);
+					respondAsOK(msgid);
+					continue;
 				} else {
-					//既にmsgTableに登録されている時 or 通信失敗
-					LMNtalDaemon.respondAsFail(out,msgid);
+					if (command[0].equalsIgnoreCase("begin")) {
+						// endが来るまで処理
+						try {
+							while(true){
+								String inputline = in.readLine();
+								if (inputline == null) break;
+								if (inputline.equalsIgnoreCase("end")) {
+									break;
+								}
+								// doSomething(inputline);
+							}
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					}
+					else onCmd(msgid, command);
+					continue;
 				}
-				}
+				//respondAsFail(msgid);
 			}
 		}
-	}
-	
-	// TODO 以下はruntime用の別クラスのメソッドであるから、そこに移動して実装すること
-	
-	/** LMNtalRuntime側で使用する */
-	void onMsg() {
-		String command[] = null;
-		String msgid = null;
+	}	
+
+	void onCmd(String msgid, String[] command) {
 		//
 		if (command[0].equalsIgnoreCase("begin")) {
 			onBegin();
@@ -450,8 +318,8 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 	void runtime_respondAsFail(BufferedWriter out, String msgid) {
 //		LMNtalDaemon.respondAsFail(out,msgid);
 	}
-	
-	/** LMNtalRuntime側で使用する */
+
+
 	void onBegin() {
 		/*
 		 * ここで処理される命令： (最新版はRemoteMembraneクラス参照。)
@@ -712,6 +580,20 @@ public class LMNtalRuntimeMessageProcessor extends LMNtalNode implements Runnabl
 				//continue;
 				break;
 			}
+		}
+	}
+	//
+
+	public boolean sendWait(String fqdn, String rgid, String command){
+		try {
+			String msgid = LMNtalDaemon.makeID();
+			out.write(msgid + " \"" + fqdn + "\" " + rgid + " " + command + "\n");
+			out.flush();
+			return waitForResult(msgid);
+		} catch (IOException e) {
+			System.out.println("ERROR in LMNtalDaemon.send()");
+			e.printStackTrace();
+			return false;
 		}
 	}
 }

@@ -2,8 +2,7 @@ package runtime;
 
 import java.util.HashMap;
 
-import daemon.LMNtalDaemon;
-import daemon.LMNtalNode;
+//import daemon.LMNtalNode;
 
 /**
  * リモートタスククラス
@@ -15,27 +14,17 @@ final class RemoteTask extends AbstractTask {
 	String cmdbuffer;
 	int nextatomid;
 	int nextmemid;
-	LMNtalNode remoteNode;
+	//LMNtalNode remoteNode;
 
 	//
 	HashMap memTable;
 
-	/*
-	 * コンストラクタ。
-	 */
-//	RemoteTask(AbstractLMNtalRuntime runtime) {
-//		super(runtime);
-//
-//		//runtimeはRemoteLMNtalRuntimeのはず
-//		remoteNode = ((RemoteLMNtalRuntime) runtime).lmnNode;
-//	}
-
-	/*
-	 * コンストラクタ。
-	 */
-	 RemoteTask(RemoteLMNtalRuntime runtime){
-	 	super((AbstractLMNtalRuntime)runtime);
-//	 	remoteNode = runtime.lmnNode;
+	/** 通常のコンストラクタ */
+	 RemoteTask(RemoteLMNtalRuntime runtime, AbstractMembrane parent){
+		super(runtime);
+		//remoteNode = LMNtalRuntimeManager.daemon;
+		root = new RemoteMembrane(this, parent);
+		parent.addMem(root);	// タスクは膜の作成時に設定した
 	 }
 
 	//	String getNextAtomID() {
@@ -88,7 +77,7 @@ final class RemoteTask extends AbstractTask {
 	synchronized void flush() {
 		//TODO msgid, rgid, BEGINとENDをつける（ここでやるべきかLMNtalDaemonなど他の場所でやるべきか
 
-		boolean result = LMNtalDaemon.sendMessage(remoteNode, cmdbuffer);
+		boolean result = LMNtalRuntimeManager.daemon.sendMessage(cmdbuffer);
 
 		if (result == true) {
 			cmdbuffer = ""; //バッファを初期化
