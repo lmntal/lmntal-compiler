@@ -122,7 +122,7 @@ public class ParserTest extends JFrame implements ActionListener {
 		}
 		// 子膜の追加
 		for (int i=0;i<mem.mems.size();i++) {
-			DefaultMutableTreeNode child = new DefaultMutableTreeNode("<Membrane>");
+			DefaultMutableTreeNode child = new DefaultMutableTreeNode("<Mem@"+mem.mems.get(i).hashCode()+">");
 			addMembrane((Membrane)mem.mems.get(i), child);
 			node.add(child);
 		}
