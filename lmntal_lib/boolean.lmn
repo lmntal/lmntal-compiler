@@ -1,0 +1,45 @@
+/*
+NAME
+	Boolean module
+
+SYNOPSIS not,&&,||
+	
+AUTHOR
+	Ken Sakurai
+
+HISTORY
+	2004/06/29(Mon)
+
+*/
+
+
+{
+module(boolean).
+
+/*
+ * not
+ *
+ */
+H=boolean.not(true) :- H=false.
+H=boolean.not(false) :- H=true.
+
+/*
+ * &&
+ *
+ */
+H='&&'(true, true) :- H=true.
+H='&&'(true, false) :- H=false.
+H='&&'(false, true) :- H=false.
+H='&&'(false, false) :- H=false.
+
+
+/*
+ * ||
+ *
+ */
+H='||'(true, true) :- H=true.
+H='||'(true, false) :- H=true.
+H='||'(false, true) :- H=true.
+H='||'(false, false) :- H=false.
+
+}.
