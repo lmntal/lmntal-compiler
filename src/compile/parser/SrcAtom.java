@@ -15,7 +15,7 @@ class SrcAtom {
 	 * @param name アトム名
 	 */
 	public SrcAtom(String name) {
-		this(name, null);
+		this(name, new LinkedList());
 	}
 	/**
 	 * 指定された名前と子供プロセスで初期化します

@@ -13,7 +13,7 @@ class SrcMembrane {
 	 * 空の膜を作成します 
 	 */
 	public SrcMembrane() {
-		this(null);	
+		this(new LinkedList());	
 	}
 	
 	/**
