@@ -319,8 +319,8 @@ public class RuleCompiler {
 		guardLibrary1.put(new Functor("int",   1), new int[]{ISINT});
 		guardLibrary1.put(new Functor("string",1), new int[]{ISSTRING});
 		guardLibrary1.put(new Functor("float", 1), new int[]{ISFLOAT});
-		guardLibrary1.put(new Functor("int",   2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
-		guardLibrary1.put(new Functor("float", 2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
+		guardLibrary1.put(new Functor("float", 2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
+		guardLibrary1.put(new Functor("int",   2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
 	}	
 
 	private void inc_head() {
