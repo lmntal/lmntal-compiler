@@ -1,0 +1,39 @@
+/*
+NAME
+	CGI module
+
+SYNOPSIS
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/05/23(Sun)
+
+*/
+
+cgi : {
+
+/**
+ * parse_query
+ * 
+ */
+H=cgi.parse_query :- nil=queue.of_list([[/*inline*/
+//	System.out.println("QS = "+Env.getExtendedOption("query_string"));
+	String q = Env.getExtendedOption("query_string");
+//	String r[] = q.split("[&=]");
+	StringTokenizer st = new StringTokenizer(q, "&=");
+	List l = new ArrayList();
+	while(st.hasMoreTokens()) {
+		l.add(st.nextToken());
+	}
+	
+//	util.Util.makeList(me.getArg(0), java.util.Arrays.asList(r));
+	util.Util.makeList(me.getArg(0), l);
+	
+	mem.removeAtom(me);
+	]], X), nil=map.of_queue(X, H).
+
+
+}.
+
