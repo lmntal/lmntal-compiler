@@ -233,7 +233,7 @@ public class HeadCompiler {
 //				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
 				// TODO 単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする
 				match.add(new Instruction(Instruction.NATOMS, submempath,
-					submem.getNormalAtomCount() - submem.typedProcessContexts.size()));
+					submem.getNormalAtomCount() + submem.typedProcessContexts.size()));
 				match.add(new Instruction(Instruction.NMEMS,  submempath, submem.mems.size()));
 			}
 			if (submem.ruleContexts.isEmpty()) {
