@@ -1087,7 +1087,7 @@ public class Optimizer {
 					if (movableEnqueue.contains(inst.getArg1())) {
 						loopIterator.remove();
 						baseIterator.remove();
-						moveInsts.add(inst);
+						moveInsts.add(baseInst);
 					}
 					break;
 			}
