@@ -82,7 +82,11 @@ final class Task extends AbstractTask {
 	/** このタスクを実行する */
 	void exec() {
 		// タスクのロックを取得する
-		if (!nonblockingLock()) return;
+		if (lockRequested || !nonblockingLock()) {
+			// 本膜のロック以前に、タスクのロックを取得できないとき
+			idle = true;
+			return;
+		}
 		// 本膜のロックを取得する
 		Membrane mem = (Membrane)memStack.peek();
 		if(mem == null || !mem.lock()) {
@@ -173,7 +177,7 @@ final class Task extends AbstractTask {
 	private Thread lockingThread = null;
 	/** ロックカウント */
 	private int lockCount = 0;
-	/** このタスクのロックがほかのスレッドによって取得を要求されているかどうか */
+	/** ルールスレッド以外のスレッドがこのタスクのロック取得を要求しているかどうか */
 	private boolean lockRequested = false;
 	/** このタスクのロックをノンブロッキングで取得する */
 	synchronized public boolean nonblockingLock() {
@@ -187,22 +191,12 @@ final class Task extends AbstractTask {
 			lockCount++;
 			return true;
 		}
-		lockRequested = true;
 		return false;
 	}
 	/** このタスクのロックをブロッキングで取得し、ロックカウントを1増やす。*/
 	synchronized public void lock() {
 		while (true) {
-			if (lockingThread == null) {
-				lockingThread = Thread.currentThread();
-				lockCount = 1;
-				lockRequested = false;
-				return;
-			}
-			if (lockingThread == Thread.currentThread()) {
-				lockCount++;
-				return;
-			}
+			if (nonblockingLock()) return;
 			lockRequested = true;
 			try {
 				wait();
