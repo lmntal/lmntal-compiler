@@ -70,6 +70,14 @@ public class Optimizer {
 		createReuseMap(reuseMap, reuseMems, parent, removedChildren, createdChildren,
 					   pourMap, pourMems, new Integer(0));
 		
+		//再利用方法の表示（デバッグ用）
+		System.out.println("result of reusing mem");
+		it = reuseMap.keySet().iterator();
+		while (it.hasNext()) {
+			Object key = it.next();
+			System.out.println(key + " " + reuseMap.get(key));
+		}
+
 		//命令列を書き換える
 		//その際、冗長なremovemem/addmem命令を除去する
 		HashSet set = new HashSet(); //removemem/addmem命令の不要な膜再利用に関わる膜
@@ -77,7 +85,12 @@ public class Optimizer {
 		while (it.hasNext()) {
 			Integer i1 = (Integer)it.next();
 			Integer i2 = (Integer)reuseMap.get(i1);
-			if (parent.get(i1).equals(parent.get(i2))) { //親が同じだったら
+			Integer p1 = (Integer)parent.get(i1);
+			Integer p2 = (Integer)parent.get(i2);
+			if (reuseMap.containsKey(p1)) {
+				p1 = (Integer)reuseMap.get(p1);
+			}
+			if (p1.equals(p2)) { //親が同じだったら
 				set.add(i1);
 				set.add(i2);
 			}
@@ -185,7 +198,7 @@ public class Optimizer {
 				while (it2.hasNext()) {
 					Integer mem2 = (Integer)it2.next();
 					System.out.println("try mem " + mem2);
-					//すでに再利用の根拠になっている場合は無視
+					//すでに再利用することが決まっている場合は無視
 					if (reuseMems.contains(mem2)) {
 						System.out.println("already used");
 						continue;
@@ -213,7 +226,7 @@ public class Optimizer {
 						Iterator it3 = list3.iterator();
 						while (it3.hasNext()) {
 							Integer m = (Integer)it3.next();
-							if (!pourMems.contains(m)) {
+							if (!pourMems.contains(m) && !reuseMems.contains(m)) {
 								result = m;
 								break;
 							}
@@ -225,8 +238,10 @@ public class Optimizer {
 					result = candidate;
 				}
 			}
-			reuseMap.put(mem, result);
-			reuseMems.add(result);
+			if (result != null) {
+				reuseMap.put(mem, result);
+				reuseMems.add(result);
+			}
 			//再帰呼び出し
 			createReuseMap(reuseMap, reuseMems, parent, removedChildren, createdChildren,
 						   pourMap, pourMems, mem);
@@ -370,6 +385,7 @@ public class Optimizer {
 		//TODO 膜・アトム名が異なるものの再利用の組み合わせを決定するコードをここに書く
 
 		//再利用方法の表示（デバッグ用）
+		
 		it = reuseMap.keySet().iterator();
 		while (it.hasNext()) {
 			Object key = it.next();
