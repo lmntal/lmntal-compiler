@@ -1,11 +1,11 @@
 package runtime;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+//import java.util.ArrayList;
+//import java.util.Iterator;
+//import java.util.List;
 
 import util.QueuedEntity;
-import util.Stack;
+//import util.Stack;
 
 /**
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。

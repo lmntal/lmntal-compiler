@@ -257,8 +257,8 @@ newlink n,1,o,1 を行う。
 	private void add(int n) { data.add(new Integer(n)); }
 	
 	/**
-	 * ダミー命令を生成する
-	 * さしあたって生成メソッドがない命令はこれを使うことで型エラーを回避
+	 * ダミー命令を生成する.
+	 * さしあたって生成メソッドがまだできてない命令はこれを使う
 	 */
 	public static Instruction dummy(String s) {
 		Instruction i = new Instruction(-1);
@@ -268,6 +268,10 @@ newlink n,1,o,1 を行う。
 	
 	/**
 	 * react 命令を生成する
+	 * 
+	 * @param ir 反応できるルールセットオブジェクト
+	 * @param actual 引数
+	 * @return
 	 */
 	public static Instruction react(InterpretedRuleset ir, List actual) {
 		Instruction i = new Instruction(REACT);
@@ -278,6 +282,11 @@ newlink n,1,o,1 を行う。
 	
 	/**
 	 * findatom 命令を生成する
+	 * 
+	 * @param dstatom
+	 * @param srcmem
+	 * @param func
+	 * @return Instruction
 	 */
 	public static Instruction findatom(int dstatom, List srcmem, Functor func) {
 		Instruction i = new Instruction(FINDATOM);
@@ -289,6 +298,10 @@ newlink n,1,o,1 を行う。
 	
 	/**
 	 * anymem 命令を生成する
+	 * 
+	 * @param dstmem
+	 * @param srcmem
+	 * @return
 	 */
 	public static Instruction anymem(int dstmem, int srcmem) {
 		Instruction i = new Instruction(ANYMEM);

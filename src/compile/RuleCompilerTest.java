@@ -27,6 +27,7 @@ public class RuleCompilerTest {
 		rc.simplify();
 		InterpretedRuleset r = rc.compile();
 		
+		Env.p("This is InterpretedRuleset.");
 		r.showDetail();
 	}
 	

@@ -6,7 +6,7 @@ import java.util.Arrays;
 public final class InterpretedRuleset extends Ruleset {
 	/** とりあえずルールの配列として実装 */
 	private int id;
-	private static int lastId;
+	private static int lastId=600;
 	
 	
 	/** 膜主導実行用命令列。１つ目の添え字はルール番号 */
@@ -17,6 +17,7 @@ public final class InterpretedRuleset extends Ruleset {
 	public Instruction[] body;
 	
 	public InterpretedRuleset() {
+		id = ++lastId;
 	}
 	
 	public void showDetail() {
