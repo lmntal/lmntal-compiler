@@ -881,14 +881,26 @@ class InterpretiveReactor {
 					v = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
 					if (!(u != v)) return false;
 					break; // n-kato
-				case Instruction.FLTFUNC : //[floatfunc1, floatfunc2]	
-					break; //nakajima			
+				case Instruction.FLTFUNC : //[floatfunc1, floatfunc2]
+					u = ((FloatingFunctor)vars.get(inst.getIntArg1())).floatValue();
+					v = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					if (!(u < v)) return false;
+					break; //nakajima 2003-01-23
 				case Instruction.FLEFUNC : //[floatfunc1, floatfunc2]	
-					break; //nakajima	
-				case Instruction.FGTFUNC : //[floatfunc1, floatfunc2]	
-					break; //nakajima	
-				case Instruction.FGEFUNC : //[floatfunc1, floatfunc2]	
-					break; //nakajima	
+					u = ((FloatingFunctor)vars.get(inst.getIntArg1())).floatValue();
+					v = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					if (!(u <= v)) return false;		
+					break; //nakajima 2003-01-23
+				case Instruction.FGTFUNC : //[floatfunc1, floatfunc2]
+					u = ((FloatingFunctor)vars.get(inst.getIntArg1())).floatValue();
+					v = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					if (!(u > v)) return false;		
+					break; //nakajima 2003-01-23
+				case Instruction.FGEFUNC : //[floatfunc1, floatfunc2]
+					u = ((FloatingFunctor)vars.get(inst.getIntArg1())).floatValue();
+					v = ((FloatingFunctor)vars.get(inst.getIntArg2())).floatValue();
+					if (!(u >= v)) return false;
+					break; //nakajima 2003-01-23
 					//====浮動小数点数用の組み込みガード命令====ここまで====
 
 				case Instruction.FLOAT2INT: //[-intatom, floatatom]
