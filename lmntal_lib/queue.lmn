@@ -3,39 +3,13 @@ NAME
 	Queue module (ring)
 
 SYNOPSIS
-	$ java runtime.FrontEnd -e 'r(shift(push(push(queue.new, [abc,def]),123),v1)).' -t
-	r(shift(push(push(queue.new,[abc,def]),123),v1)), @602
-	 ==>
-	r(shift(push(push(queue.new(_22,_22),[abc,def]),123),v1)), @602
-	 ==>
-	r(shift(push(queue.new([[abc,def]|_26],_26),123),v1)), @602
-	 ==>
-	r(shift(queue.new([[abc,def],123|_32],_32),v1)), @602
-	 ==>
+	r=shift(push(push(queue.new, [abc,def]),123),v1).
+	===>
 	v1([abc,def]), r(queue.new([123|_33],_33)), @602
 
-
-	** queue_of_list **
-	$ java runtime.FrontEnd -e 'list.new, r(queue.of_list([1,2,3],return))' -t
-	list.new, r(queue.of_list([1,2,3],return)), @602, @604
-	 ==>
-	list.new, r(queue.of_list([1,2,3],return,queue.new)), @602, @604
-	 ==>
-	list.new, r(queue.of_list([1,2,3],return,queue.new(_26,_26))), @602, @604
-	 ==>
-	list.new, r(queue.of_list([2,3],return,push(queue.new(_26,_26),1))), @602, @604
-	 ==>
-	list.new, r(queue.of_list([2,3],return,queue.new([1|_37],_37))), @602, @604
-	 ==>
-	list.new, r(queue.of_list([3],return,push(queue.new([1|_37],_37),2))), @602, @604
-	 ==>
-	list.new, r(queue.of_list([3],return,queue.new([1,2|_50],_50))), @602, @604
-	 ==>
-	list.new, r(queue.of_list([],return,push(queue.new([1,2|_50],_50),3))), @602, @604
-	 ==>
-	list.new, r(queue.of_list([],return,queue.new([1,2,3|_63],_63))), @602, @604
-	 ==>
-	list.new, return(queue.new([1,2,3|_63],_63)), r([]), @602, @604
+	r=queue.of_list([1,2,3])
+	===>
+	r(queue.new([1,2,3|_54],_54)), @602
 
 DESCRIPTION
 	たぶんいろんな事するときにこれがよく使われるとおもう
@@ -95,16 +69,15 @@ H=pop(queue.new(Head, Head), Return) :- H=queue.new(Head, Head), Return=nil.
  * 
  * List -> Queue
  */
-H=queue.of_list([], Return) :- H=[], Return=queue.new.
-H=queue.of_list('.'(Value, Next), Return) :-
-	H=queue.of_list('.'(Value, Next), Return, queue.new).
+H=queue.of_list(List) :-
+	H=queue.of_list_s0(List, queue.new).
 
-H=queue.of_list([], Return, Queue) :-
-	H=[], Return=Queue.
+H=queue.of_list_s0([], Queue) :- H=Queue.
+H=queue.of_list_s0([Value|Next], Queue) :-
+	H=queue.of_list_s0(Next, push(Queue, Value)).
 
-H=queue.of_list('.'(Value, Next), Return, Queue) :-
-	H=queue.of_list(Next, Return, push(Queue, Value)).
-
-
+queue.test :-
+	t0=shift(push(push(queue.new, [abc,def]),123),v1),
+	t1=queue.of_list([1,2,3]).
 }
 

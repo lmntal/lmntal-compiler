@@ -3,25 +3,13 @@ NAME
 	Map module
 
 SYNOPSIS
-	$ java runtime.FrontEnd -e 'r(get(put(put(put(map.new, jack, enigma), nina, myers), jack, bauer), jack, jack_is))' -t
-	r(get(put(put(put(map.new,jack,enigma),nina,myers),jack,bauer),jack,jack_is)), @602
-	 ==>
-	r(get(put(put(put(map.new(_28),jack,enigma),nina,myers),jack,bauer),jack,jack_is)), {obj(_28)}, @602
-	 ==>
-	r(get(put(put(map.new(_39),nina,myers),jack,bauer),jack,jack_is)), {enigma('.'(jack)), obj(_39)}, @602
-	 ==>
-	r(get(put(map.new(_50),jack,bauer),jack,jack_is)), {myers('.'(nina)), enigma('.'(jack)), obj(_50)}, @602
-	 ==>
-	r(get(map.new(_61),jack,jack_is)), {myers('.'(nina)), bauer('.'(jack)), obj(_61)}, @602
-	 ==>
+	r=get(put(put(put(map.new, jack, enigma), nina, myers), jack, bauer), jack, jack_is)
+	===>
 	jack_is(bauer), r(map.new(_72)), {myers('.'(nina)), bauer('.'(jack)), obj(_72)}, @602
 	
-	** map_of_queue **
-	$ java runtime.FrontEnd -e 'r(map.of_queue(push(push(push(push(queue.new,k0),v0),k1),v1), return))'
-	 ==>
-	 ...
-	 ==>
-	return(map.new(_151)), r(queue.new(_164,_164)), {v0('.'(k0)), v1('.'(k1)), obj(_151)}, @602, @604
+	r=map.of_queue(push(push(push(push(queue.new,k0),v0),k1),v1))
+	===>
+	r(map.new(_144)), nil(queue.new(_156,_156)), {v0('.'(k0)), v1('.'(k1)), obj(_144)}, @602, @604
 	
 AUTHOR
 	Koji Hara
@@ -101,17 +89,21 @@ H=is_empty(map.new(X), Return), {obj(X)} :-
  * Queue -> Map
  * [k0, v0, k1, v1] -> { k0 => v0, k1 => v1 }
  */
-H=map.of_queue(queue.new(Head, Tail), Return) :-
-	H=map.of_queue(queue.new(Head, Tail), Return, map.new).
+H=map.of_queue(queue.new(Head, Tail)) :-
+	H=map.of_queue_s0(queue.new(Head, Tail), map.new).
 
-H=map.of_queue(Queue, Return, Map) :-
-	H=map.of_queue(is_empty(Queue, Empty), Return, Map, Empty).
+H=map.of_queue_s0(Queue, Map) :-
+	H=map.of_queue_s0(is_empty(Queue, IsEmpty), Map, IsEmpty).
 
-H=map.of_queue(Queue, Return, Map, true) :-
-	H=Queue, Return=Map.
+H=map.of_queue_s0(Queue, Map, true) :-
+	H=Map, nil(Queue).
 
-H=map.of_queue(Queue, Return, Map, false) :-
-	H=map.of_queue(shift(shift(Queue, K), V), Return, put(Map, K, V)).
+H=map.of_queue_s0(Queue, Map, false) :-
+	H=map.of_queue_s0(shift(shift(Queue, K), V), put(Map, K, V)).
+
+map.test :-
+	t0=get(put(put(put(map.new, jack, enigma), nina, myers), jack, bauer), jack, jack_is),
+	t1=map.of_queue(push(push(push(push(queue.new,k0),v0),k1),v1)).
 
 }
 

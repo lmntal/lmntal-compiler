@@ -126,4 +126,3 @@ Res=list.flatten(cons(A, B), R) :- Res=list.flatten(A, list.flatten(B, R)).
 }.
 //res = list.flatten(cons(cons(int(1),cons(int(2),int(3))), int(4)), nil).
 
-// TODO inline から楽にリストを作れるようにする

@@ -18,7 +18,7 @@ cgi : {
  * parse_query : unit -> Map
  * 
  */
-H=cgi.parse_query :- nil=queue.of_list([[/*inline*/
+H=cgi.parse_query :- H=map.of_queue(queue.of_list([[/*inline*/
 //	System.out.println("QS = "+Env.getExtendedOption("query_string"));
 	String q = Env.getExtendedOption("query_string");
 //	String r[] = q.split("[&=]");
@@ -32,7 +32,7 @@ H=cgi.parse_query :- nil=queue.of_list([[/*inline*/
 	util.Util.makeList(me.getArg(0), l);
 	
 	mem.removeAtom(me);
-	]], X), nil=map.of_queue(X, H).
+	]])).
 
 
 }.
