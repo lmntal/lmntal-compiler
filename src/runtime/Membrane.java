@@ -17,7 +17,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/** この膜を管理するマシン */
 	protected AbstractMachine machine;
 	/** 親膜 */
-	protected AbstractMembrane mem;
+	protected AbstractMembrane parent;
 	/** アトムの集合 */
 	protected AtomSet atoms = new AtomSet();;
 	/** 子膜の集合 */
@@ -44,9 +44,9 @@ abstract class AbstractMembrane extends QueuedEntity {
 	/**
 	 * 指定されたマシンに所属する膜を作成する。
 	 */
-	protected AbstractMembrane(AbstractMachine machine, AbstractMembrane mem) {
+	protected AbstractMembrane(AbstractMachine machine, AbstractMembrane parent) {
 		this.machine = machine;
-		this.mem = mem;
+		this.parent = parent;
 		id = lastId++;
 	}
 
@@ -66,8 +66,8 @@ abstract class AbstractMembrane extends QueuedEntity {
 		return machine;
 	}
 	/** 親膜の取得 */
-	AbstractMembrane getMem() {
-		return mem;
+	AbstractMembrane getParent() {
+		return parent;
 	}
 	int getMemCount() {
 		return mems.size();
@@ -155,9 +155,9 @@ abstract class AbstractMembrane extends QueuedEntity {
 //	}
 	/** dstMemに移動 */
 	void moveTo(AbstractMembrane dstMem) {
-		mem.removeMem(this);
+		parent.removeMem(this);
 		dstMem.addMem(this);
-		mem = dstMem;
+		parent = dstMem;
 //		movedTo(machine, dstMem);
 		enqueueAllAtoms();
 	}
@@ -201,7 +201,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 		Atom inside;
 		Atom outside = inside0.args[0].getAtom();
 		outside.remove();
-		AbstractMembrane current = mem;
+		AbstractMembrane current = parent;
 		try {
 			while (current != baseMem) {
 				if (current == null) {
@@ -213,7 +213,7 @@ abstract class AbstractMembrane extends QueuedEntity {
 				outside = inside.args[0].getAtom();
 				inside.remove();
 				outside.remove();
-				current = current.mem;
+				current = current.parent;
 			}
 		} catch (IndexOutOfBoundsException e) {
 			//途中で自由リンク管理アトム以外のアトムに接続していた場合に発生する可能性がある
@@ -241,14 +241,14 @@ abstract class AbstractMembrane extends QueuedEntity {
 	}
 
 	protected void addProxyAtoms(Atom inside0, AbstractMembrane baseMem) {
-		AbstractMembrane m = mem;
+		AbstractMembrane m = parent;
 		Atom inside;
 		Atom outside = m.newAtom(Functor.OUTSIDE_PROXY);
 		m.newLink(inside0, 0, outside, 0);
 		while (m != baseMem) {
 			inside = m.newAtom(Functor.INSIDE_PROXY);
 			m.newLink(outside, 1, inside, 1);
-			m = m.mem;
+			m = m.parent;
 			outside = m.newAtom(Functor.OUTSIDE_PROXY);
 			m.newLink(inside, 0, outside, 0);
 		}
@@ -280,8 +280,8 @@ abstract class AbstractMembrane extends QueuedEntity {
 		mems.remove(mem);
 	}
 	void remove() {
-		mem.removeMem(this);
-		mem = null;
+		parent.removeMem(this);
+		parent = null;
 	}
 	
 	/**
@@ -362,8 +362,8 @@ final class Membrane extends AbstractMembrane {
 	 * 指定されたマシンに所属する膜を作成する。
 	 * newMemメソッド内で呼ばれる。
 	 */
-	private Membrane(AbstractMachine machine, AbstractMembrane mem) {
-		super(machine, mem);
+	private Membrane(AbstractMachine machine, AbstractMembrane parent) {
+		super(machine, parent);
 	}
 	/**
 	 * 指定されたマシンのルート膜を作成する。
@@ -385,7 +385,7 @@ final class Membrane extends AbstractMembrane {
 			return;
 		}
 		if (!isRoot()) {
-			((Membrane)mem).activate();
+			((Membrane)parent).activate();
 		}
 		((Machine)machine).memStack.push(this);
 	}

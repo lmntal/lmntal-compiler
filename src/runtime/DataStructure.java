@@ -189,7 +189,7 @@ final class Machine extends AbstractMachine {
 					if(((Ruleset)it.next()).react(mem, a)) flag = true;
 				}
 				if(flag == false){ // ルールが適用できなかった時
-					if(!mem.isRoot()) mem.getMem().enqueueAtom(a);
+					if(!mem.isRoot()) mem.getParent().enqueueAtom(a);
 				}
 				else {}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行膜スタックが空の時
@@ -200,8 +200,8 @@ final class Machine extends AbstractMachine {
 				if(flag == false){ // ルールが適用できなかった時
 					memStack.pop(); // 本膜をpop
 					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
-					if(mem.isRoot() && mem.getMem() != null)
-						((Membrane)mem.getMem()).activate();
+					if(mem.isRoot() && mem.getParent() != null)
+						((Membrane)mem.getParent()).activate();
 					it = mem.memIterator();
 					// 子膜が全てstableなら、この膜をstableにする。
 					flag = false;
