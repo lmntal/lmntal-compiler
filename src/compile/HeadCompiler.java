@@ -18,11 +18,11 @@ import compile.structure.*;
  * Ruby版では仮引数IDがそのままボディ命令列の仮引数番号を表していたが、今は違うので、仮引数ID自身には意味が無くなったため。
  * この廃止に伴って、仮引数IDでループする部分は全てatoms.iterator()を使うように変更する。
  * 
- * TODO pathという命名が現状を正しく表していない。実際はvarnum
+ * TODO pathという命名が現状を正しく表していない。実際はvarnumだが、長いのでidにしようかとも思っている
  * 
  * <p><b>現状</b>　
  * 現在マッチング命令列では、本膜の変数番号を0、主導するアトムの変数番号を1にしている。これは今後も変えない。
- * ボディ命令列の仮引数では、先にfreememsを枚挙してから、その続きの変数番号にatomsを枚挙している。
+ * ボディ命令列の仮引数では、先にmemsを枚挙してから、その続きの変数番号にatomsを枚挙している。
  * 本膜の仮引数IDが0である。この制約は今後、仮引数IDがなくなると同時になくなる。
  */
 public class HeadCompiler {
@@ -72,7 +72,7 @@ public class HeadCompiler {
 		this.m = m;
 	}
 	
-	/** 膜memの子孫の全てのアトムと膜を、それぞれリストatomsとfreememsに追加する。
+	/** 膜memの子孫の全てのアトムと膜を、それぞれリストatomsとmemsに追加する。
 	 * リスト内の追加された位置がそのアトムおよび膜の仮引数IDになる。*/
 	public void enumFormals(Membrane mem) {
 		Env.c("enumFormals");
@@ -83,7 +83,7 @@ public class HeadCompiler {
 			atomids.put(atom, new Integer(atoms.size()));
 			atoms.add(atom);
 		}
-		mems.add(mem);	// 本膜はfreemems[0]
+		mems.add(mem);	// 本膜はmems[0]
 		it = mem.mems.iterator();
 		while (it.hasNext()) {
 			enumFormals((Membrane)it.next());
@@ -92,11 +92,11 @@ public class HeadCompiler {
 		// OBSOLETE: これで大元の膜に対してこれを書く必要がなくなった（とおもう）
 		// // bodyでのgetparentを廃止するために条件判定を除去。本膜を[0]にするため上に移動。
 		//if(mem.atoms.size() + mem.mems.size() == 0) {
-		//freemems.add(mem);
+		//mems.add(mem);
 		//}
 		//Env.d("atomids = "+atomids);
 		//Env.d("atoms = "+atoms);
-		//Env.d("freemems = "+freemems);
+		//Env.d("mems = "+mems);
 	}
 	
 	public void prepare() {
@@ -261,18 +261,9 @@ public class HeadCompiler {
 			}
 		}
 	}
-/*	public Instruction generateResetInstruction() {
-		Instruction inst = new Instruction(Instruction.
-		List args = new ArrayList();
-		
-		for(int i=0;i<atoms.size();i++) {
-			args.add( atomidpath.get(i) );
-		}
-		for(int i=0;i<mems.size();i++) {
-			args.add( mempaths.get(mems.get(i)) );
-		}
-		return args;
-	}*/
+	public Instruction getResetVarsInstruction() {
+		return Instruction.resetvars(getMemActuals(), getAtomActuals(), getVarActuals());
+	}
 	public List getAtomActuals() {
 		List args = new ArrayList();		
 		for (int i = 0; i < atoms.size(); i++) {
@@ -286,5 +277,8 @@ public class HeadCompiler {
 			args.add( mempaths.get(mems.get(i)) );
 		}
 		return args;
+	}
+	public List getVarActuals() {
+		return new ArrayList();
 	}
 }

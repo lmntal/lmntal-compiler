@@ -756,7 +756,7 @@ public class Instruction implements Cloneable {
 	//  -----  run         [[instructions...]]
 	//  -----  not         [[instructions...]]
 
-    /** react [ruleref, [memargs...], [atomargs...]]
+	/** react [ruleref, [memargs...], [atomargs...]]
      * <br>失敗しないガード命令<br>
      * ルールrulerefに対するマッチングが成功したことを表す。
      * 処理系はこのルールのボディを呼び出さなければならない。*/

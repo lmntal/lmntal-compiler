@@ -34,20 +34,20 @@ public class RuleCompiler {
 	public List guard;
 	public List body;
 	
-	public int varcount;
+	int varcount;
 	
-	public List rhsatoms;
+	List rhsatoms;
 	/** 右辺のアトム (Atom) -> 変数番号 (Integer) */
-	public Map  rhsatompath;
+	Map  rhsatompath;
 	/** 右辺の膜 (Membrane) -> 変数番号 (Integer) */
-	public Map  rhsmempath;
+	Map  rhsmempath;
 	
-	public List lhsatoms;
-	public List lhsfreemems;
+	List lhsatoms;
+	List lhsmems;
 	/** 左辺のアトム (Atom) -> 変数番号 (Integer) */
-	public Map  lhsatompath;
+	Map  lhsatompath;
 	/** 左辺の膜 (Membrane) -> 変数番号 (Integer) */
-	public Map  lhsmempath;
+	Map  lhsmempath;
 	
 //	private List newatoms = new ArrayList();	// rhsatomsと同じなので統合
 	
@@ -142,6 +142,8 @@ public class RuleCompiler {
 			}
 			hc.compileMembrane(rs.leftMem);
 			hc.match.add(0, Instruction.spec(hc.varcount,0));	// とりあえずここに追加（仮）
+			// hc.match.add( hc.getResetVarsInstruction() );
+			// hc.match.add( Instruction.react(theRule) );
 			hc.match.add( Instruction.react(theRule, hc.getMemActuals(), hc.getAtomActuals()) );
 			if (maxvarcount < hc.varcount) maxvarcount = hc.varcount;
 		}
@@ -155,9 +157,9 @@ public class RuleCompiler {
 		
 		// ヘッドの取り込み
 		lhsatoms = hc.atoms;
-		lhsfreemems = hc.mems;
+		lhsmems = hc.mems;
 		genLHSPaths();
-		varcount = lhsatoms.size() + lhsfreemems.size();
+		varcount = lhsatoms.size() + lhsmems.size();
 		int formals = varcount;
 		//
 		body = new ArrayList();
@@ -178,7 +180,7 @@ public class RuleCompiler {
 		//Env.d("rs.leftMem -> "+rs.leftMem);
 		//Env.d("lhsmempaths.get(rs.leftMem) -> "+lhsmempaths.get(rs.leftMem));
 		//Env.d("rhsmempaths -> "+rhsmempaths);
-		
+
 		dequeueLHSAtoms();
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
@@ -193,7 +195,7 @@ public class RuleCompiler {
 		loadRulesets(rs.rightMem);		
 		buildRHSTypedProcesses();
 		buildRHSAtoms(rs.rightMem);
-		// ここでvarcountの最終値が確定する。
+		// ここでvarcountの最終値が確定することになっている。変更時は適切に下に移動すること。
 		updateLinks();
 		enqueueRHSAtoms();
 		addInline();
@@ -212,8 +214,10 @@ public class RuleCompiler {
 	//
 	
 	
-	static final Object UNARY_ATOM_TYPE = "1"; // 他に、リンクタイプと、線形タイプがある
-
+	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
+	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
+	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
+	
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表す定数オブジェクト */
 	HashMap typedcxttypes = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現の変数番号（def.src は現在未使用） */
@@ -239,28 +243,28 @@ public class RuleCompiler {
 	static HashMap guardLibrary1 = new HashMap(); // 1入力ガード型制約名
 	static HashMap guardLibrary2 = new HashMap(); // 2入力ガード型制約名
 	static {
-		guardLibrary2.put(new Functor("<.", 2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLT});
-		guardLibrary2.put(new Functor("=<.",2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLE});
-		guardLibrary2.put(new Functor(">.", 2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGT});
-		guardLibrary2.put(new Functor(">=.",2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGE});
-		guardLibrary2.put(new Functor("<",  2), new int[]{ISINT,  ISINT,   Instruction.ILT});
-		guardLibrary2.put(new Functor("=<", 2), new int[]{ISINT,  ISINT,   Instruction.ILE});
-		guardLibrary2.put(new Functor(">",  2), new int[]{ISINT,  ISINT,   Instruction.IGT});
-		guardLibrary2.put(new Functor(">=", 2), new int[]{ISINT,  ISINT,   Instruction.IGE});
+		guardLibrary2.put(new Functor("<.",   2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLT});
+		guardLibrary2.put(new Functor("=<.",  2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLE});
+		guardLibrary2.put(new Functor(">.",   2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGT});
+		guardLibrary2.put(new Functor(">=.",  2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGE});
+		guardLibrary2.put(new Functor("<",    2), new int[]{ISINT,  ISINT,   Instruction.ILT});
+		guardLibrary2.put(new Functor("=<",   2), new int[]{ISINT,  ISINT,   Instruction.ILE});
+		guardLibrary2.put(new Functor(">",    2), new int[]{ISINT,  ISINT,   Instruction.IGT});
+		guardLibrary2.put(new Functor(">=",   2), new int[]{ISINT,  ISINT,   Instruction.IGE});
 		guardLibrary2.put(new Functor("=:=",  2), new int[]{ISINT,  ISINT,   Instruction.IEQ});
 		guardLibrary2.put(new Functor("=\\=", 2), new int[]{ISINT,  ISINT,   Instruction.INE});
-		guardLibrary2.put(new Functor("=:=.", 2), new int[]{ISFLOAT,ISFLOAT,   Instruction.FEQ});
-		guardLibrary2.put(new Functor("=\\=.",2), new int[]{ISFLOAT,ISFLOAT,   Instruction.FNE});
-		guardLibrary2.put(new Functor("+.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FADD});
-		guardLibrary2.put(new Functor("-.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FSUB});
-		guardLibrary2.put(new Functor("*.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FMUL});
-		guardLibrary2.put(new Functor("/.", 3), new int[]{ISFLOAT,ISFLOAT, Instruction.FDIV});
-		guardLibrary2.put(new Functor("+",  3), new int[]{ISINT,  ISINT,   Instruction.IADD});
-		guardLibrary2.put(new Functor("-",  3), new int[]{ISINT,  ISINT,   Instruction.ISUB});
-		guardLibrary2.put(new Functor("*",  3), new int[]{ISINT,  ISINT,   Instruction.IMUL});
-		guardLibrary2.put(new Functor("/",  3), new int[]{ISINT,  ISINT,   Instruction.IDIV});
-		guardLibrary1.put(new Functor("int",  2),new int[]{ISINT,	Instruction.INT2FLOAT});
-		guardLibrary1.put(new Functor("float",2),new int[]{ISFLOAT,Instruction.FLOAT2INT});
+		guardLibrary2.put(new Functor("=:=.", 2), new int[]{ISFLOAT,ISFLOAT, Instruction.FEQ});
+		guardLibrary2.put(new Functor("=\\=.",2), new int[]{ISFLOAT,ISFLOAT, Instruction.FNE});
+		guardLibrary2.put(new Functor("+.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FADD});
+		guardLibrary2.put(new Functor("-.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FSUB});
+		guardLibrary2.put(new Functor("*.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FMUL});
+		guardLibrary2.put(new Functor("/.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FDIV});
+		guardLibrary2.put(new Functor("+",    3), new int[]{ISINT,  ISINT,   Instruction.IADD});
+		guardLibrary2.put(new Functor("-",    3), new int[]{ISINT,  ISINT,   Instruction.ISUB});
+		guardLibrary2.put(new Functor("*",    3), new int[]{ISINT,  ISINT,   Instruction.IMUL});
+		guardLibrary2.put(new Functor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV});
+		guardLibrary1.put(new Functor("int",  2), new int[]{ISINT,           Instruction.INT2FLOAT});
+		guardLibrary1.put(new Functor("float",2), new int[]{ISFLOAT,         Instruction.FLOAT2INT});
 	}
 	/** ガードをコンパイルする（仮） */
 	private void compile_g() {
@@ -277,8 +281,8 @@ public class RuleCompiler {
 					// 左辺の型付きプロセス文脈の明示的な自由リンクの先が、左辺のアトムに出現することを確認する。
 					// 出現しない場合はコンパイルエラーとする。この制限を「パッシブ型制限」と呼ぶことにする。
 					// 【注意】パッシブ型制限は、型は非アクティブなデータを表すことを想定することにより正当化される。
-					// つまり、( 2(X) :- found(X) ) や ( 2(3) :- sour ) で2や3を$pで表すことはできない。
-					// しかし実際には処理系実行の都合による制限である。
+					// つまり、( 2(X) :- found(X) ) や ( 2(3) :- ok ) で2や3を$pで表すことはできない。
+					// しかし実際には処理系側の都合による制限である。
 					// なお、プログラミングの観点から、右辺の型付きプロセス文脈の明示的な自由リンクの先は任意としている。
 					if (!lhsatompath.containsKey(def.src.args[0])) {
 						error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
@@ -443,7 +447,10 @@ public class RuleCompiler {
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 	}
-	/** 型付きプロセス文脈defの内容を取得する。1引数であることを仮定する。 */
+	/** 型付きプロセス文脈defの（特定されている）ソース出現の
+	 * （明示的な自由リンクが出現する）アトムを取得する。
+	 * また、このアトムが1引数であると仮定して、型情報を更新する。
+	 * @return 取得したアトムの変数番号 */
 	private int loadUnaryAtom(ContextDef def) {
 		int atomid = typedcxtToSrcPath(def);
 		if (atomid == UNBOUND) {
@@ -551,11 +558,11 @@ public class RuleCompiler {
 		Env.c("RuleCompiler::genLHSMemPaths");
 		lhsatompath = new HashMap();
 		lhsmempath  = new HashMap();
-		for (int i = 0; i < lhsfreemems.size(); i++) {
-			lhsmempath.put(lhsfreemems.get(i), new Integer(i));
+		for (int i = 0; i < lhsmems.size(); i++) {
+			lhsmempath.put(lhsmems.get(i), new Integer(i));
 		}
 		for (int i = 0; i < lhsatoms.size(); i++) {
-			lhsatompath.put(lhsatoms.get(i), new Integer( lhsfreemems.size() + i ));
+			lhsatompath.put(lhsatoms.get(i), new Integer( lhsmems.size() + i ));
 		}
 		//Env.d("lhsmempaths"+lhsmempaths);
 	}
@@ -570,7 +577,7 @@ public class RuleCompiler {
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			Atom atom = (Atom)lhsatoms.get(i);
 			body.add( Instruction.removeatom(
-				lhsatomToPath(atom), // ← lhsfreemems.size() + i に一致する
+				lhsatomToPath(atom), // ← lhsmems.size() + i に一致する
 				lhsmemToPath(atom.mem), atom.functor ));
 		}
 	}
@@ -582,7 +589,7 @@ public class RuleCompiler {
 			 && !atom.functor.equals(Functor.OUTSIDE_PROXY)
 			 && atom.functor.isSymbol() ) {
 				body.add( Instruction.dequeueatom(
-					lhsatomToPath(atom) // ← lhsfreemems.size() + i に一致する
+					lhsatomToPath(atom) // ← lhsmems.size() + i に一致する
 					));
 			}
 		}
@@ -698,7 +705,8 @@ public class RuleCompiler {
 			}
 		}
 	}
-	/** リンクの張り替えと生成を行う */
+	/** リンクの張り替えと生成を行う
+	 * TODO コードを整理する */
 	private void updateLinks() {
 		Env.c("RuleCompiler::updateLinks");
 		
@@ -708,16 +716,12 @@ public class RuleCompiler {
 			Atom atom = (Atom)it.next();			
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
-				if (link == null) {
-					error("SYSTEM ERROR: buddy of atom link is not set: " + atom + ", " + pos);
-				}
-				//Env.d(atom+"("+pos+")"+" buddy -> "+link.buddy.atom+" link.atom="+link.atom);
 				if (link.atom instanceof ProcessContext) {
 					// アトムのリンク先がプロセス文脈/型付きプロセス文脈のとき
 					ProcessContext pc = (ProcessContext)link.atom;
 					if (pc.mem.typedProcessContexts.contains(pc)) {
 						// パッシブ型制限より、右辺のアトムのリンク先の型付きプロセス文脈は右辺に限られる。
-						// ( :- t($pc) | atom(X), $pc[X|] )
+						// ( :- type($pc) | atom(X), $pc[X|] )
 						if (typedcxttypes.get(pc.def) == UNARY_ATOM_TYPE) {
 							body.add( Instruction.newlink(
 											rhsatomToPath(atom), pos,
@@ -729,7 +733,7 @@ public class RuleCompiler {
 						// リンク先の型なしプロセス文脈は右辺に限られる。そして、そのプロセス文脈の
 						// 左辺での出現における対応する自由リンクは、左辺のアトムに接続している。
 						// ( { org(Y,), $pc[Y,|] } :- atom(X), $pc[X,|] )
-						LinkOccurrence orglink = pc.buddy.args[link.pos].buddy; // orgの引数のYの出現
+						LinkOccurrence orglink = pc.buddy.args[link.pos].buddy; // org引数のYの出現
 							body.add( new Instruction(Instruction.RELINK,
 											rhsatomToPath(atom), pos,
 											lhsatomToPath(orglink.atom), orglink.pos,
@@ -784,8 +788,8 @@ public class RuleCompiler {
 				}
 				ProcessContext buddypc = (ProcessContext)link.atom;
 				if (buddypc.mem.typedProcessContexts.contains(buddypc)) {
-					// リンク先が型付きプロセス文脈のとき
-					// パッシブ型制限より、リンク先も右辺。( :- $buddypc[X|], $atom[X|] )
+					// リンク先が型付きプロセス文脈のとき、パッシブ型制限より、リンク先も右辺。
+					// ( :- $buddypc[X|], $atom[X|] )
 					if (rhstypedcxtToPath(atom) < rhstypedcxtToPath(buddypc)
 					 || (rhstypedcxtToPath(atom) == rhstypedcxtToPath(buddypc) && pos < link.pos)) {
 						if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE
@@ -798,17 +802,62 @@ public class RuleCompiler {
 					}
 				}
 				else {
-					// リンク先が型付きでないプロセス文脈のとき
-					// PART1と同じ理由で$buddypcは右辺。( :- $pc[X,|], $atom[X|] )
-					
-					// todo 実装する
-					
+					// リンク先が型付きでないプロセス文脈のとき、PART1と同じ理由で$buddypcは右辺。
+					// ( org(Y,), $buddypc[Y,|] :- $buddypc[X,|], $atom[X|] )
+					LinkOccurrence orglink = buddypc.buddy.args[pos].buddy; // org引数のYの出現
+					if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE) {
+						body.add( new Instruction(Instruction.RELINK,
+												rhstypedcxtToPath(atom), 0,
+												lhsatomToPath(orglink.atom), orglink.pos,
+												rhsmemToPath(atom.mem) ));
+					}
 				}
 			}
 		}
 		// PART 3 - 右辺の型付きでないプロセス文脈に出現するリンク
-		// todo 実装する - 反対側も型付きでないときのみ
-		
+		it = rs.processContexts.values().iterator();
+		while (it.hasNext()) {
+			ContextDef def = (ContextDef)it.next();
+			Iterator it2 = def.rhsOccs.iterator();
+			while (it2.hasNext()) {
+				ProcessContext atom = (ProcessContext)it2.next();
+				for (int pos = 0; pos < atom.functor.getArity(); pos++) {
+					LinkOccurrence link = atom.args[pos].buddy;
+					if (!(link.atom instanceof ProcessContext)) {
+						// 型付きでないプロセス文脈のリンク先がアトムのとき
+						if (lhsatoms.contains(link.atom)) { // リンク先は左辺のトップレベル
+							// ( {src(Z,),$atom[Z,|]},buddy(X) :- $atom[X,|] )
+							LinkOccurrence srclink = atom.buddy.args[pos].buddy; // src引数のZの出現
+							body.add( new Instruction(Instruction.LOCALUNIFY,
+								lhsatomToPath(link.atom), link.pos,
+								lhsatomToPath(srclink.atom), srclink.pos,
+								rhsmemToPath(atom.mem) )); // 本膜
+						}
+						else if (rhsatoms.contains(link.atom)) { // ( :- buddy(X), $atom[X,|] )
+							// PART1でnewlink済みなので、何もしない
+						}
+						else {
+							error("SYSTEM ERROR: unknown buddy of body typed process context");
+							corrupted();
+						}
+						continue;
+					}
+					else {
+						ProcessContext buddypc = (ProcessContext)link.atom;
+						if (!buddypc.mem.typedProcessContexts.contains(buddypc)) {
+							// リンク先が型付きでないプロセス文脈のとき、PART1と同じ理由で$buddypcは右辺。
+							// ( org(Y,), $buddypc[Y,|],src(Z,),$atom[Z,|] :- $buddypc[X,|],$atom[X,|] )
+							LinkOccurrence orglink = buddypc.buddy.args[link.pos].buddy; // org引数のYの出現
+							LinkOccurrence srclink = atom.   buddy.args[link.pos].buddy; // src引数のZの出現
+							body.add( new Instruction(Instruction.UNIFY,
+														lhsatomToPath(srclink.atom), srclink.pos,
+														lhsatomToPath(orglink.atom), orglink.pos,
+														rhsmemToPath(atom.mem) ));
+						}
+					}
+				}
+			}
+		}
 	}
 	/** 右辺のアトムを実行スタックに積む */
 	private void enqueueRHSAtoms() {
@@ -864,7 +913,7 @@ public class RuleCompiler {
 	/** 左辺のアトムを廃棄する */
 	private void freeLHSAtoms() {
 		for (int i = 0; i < lhsatoms.size(); i++) {
-			body.add( new Instruction(Instruction.FREEATOM, lhsfreemems.size() + i ));
+			body.add( new Instruction(Instruction.FREEATOM, lhsmems.size() + i ));
 		}
 	}
 
