@@ -1,4 +1,4 @@
-package runtime;
+package compile;
 
 import runtime.BodyInstruction;
 import runtime.HeadInstruction;
