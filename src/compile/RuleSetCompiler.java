@@ -10,7 +10,7 @@ import compile.structure.*;
 
 /**
  * ルールセットを生成して返す。
- * TODO RuleSetCompiler -> RulesetCompiler
+ * TODO Rule[S]etCompiler -> Rule[s]etCompiler
  * @author hara
  */
 public class RuleSetCompiler {
