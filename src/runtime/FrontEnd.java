@@ -372,7 +372,7 @@ public class FrontEnd {
 			if (!Env.fInterpret) {
 				try {
 					Translator.genModules();
-					Translator.genMain(rs);
+					Translator.genMain((InterpretedRuleset)rs);
 					Translator.genJAR();
 				} catch (IOException e) {
 					Env.e("Failed to write Translated File. " + e.getLocalizedMessage());

@@ -65,7 +65,7 @@ public class Translator {
 	 * @param ruleset ルールセット
 	 * @return 変換後のクラス名
 	 */
-	public static String getClassName(Ruleset ruleset) {
+	public static String getClassName(InterpretedRuleset ruleset) {
 		return "Ruleset" + ruleset.getId();
 	}
 	
@@ -111,7 +111,7 @@ public class Translator {
 	 * @param initialRuleset 初期データ生成ルールセット
 	 * @throws IOException IOエラーが発生した場合
 	 */
-	public static void genMain(Ruleset initialRuleset) throws IOException {
+	public static void genMain(InterpretedRuleset initialRuleset) throws IOException {
 		if (Env.fLibrary) return;
 		
 		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(baseDir, "Main.java")));
@@ -145,7 +145,7 @@ public class Translator {
 			Iterator rulesetIterator = ((compile.structure.Membrane)Module.memNameTable.get(moduleName)).rulesets.iterator();
 			while (rulesetIterator.hasNext()) {
 				if (!first) writer.write(", ");
-				writer.write(getClassName((Ruleset)rulesetIterator.next()) + ".getInstance()");
+				writer.write(getClassName((InterpretedRuleset)rulesetIterator.next()) + ".getInstance()");
 			}
 			writer.write("};\n");
 			writer.write("	public static Ruleset[] getRulesets() {\n");
@@ -334,9 +334,6 @@ public class Translator {
 		writer.write("		return theInstance;\n");
 		writer.write("	}\n");
 		writer.write("	private int id = " + ruleset.getId() + ";\n");
-		writer.write("	public int getId() {\n");
-		writer.write("		return id;\n");
-		writer.write("	}\n");
 		writer.write("	private String globalRulesetID;\n");
 		writer.write("	public String getGlobalRulesetID() {\n");
 		writer.write("		if (globalRulesetID == null) {\n");
