@@ -106,7 +106,7 @@ public class LMNtalDaemon implements Runnable {
 			e.printStackTrace();
 		}
 		
-		if(myhostname.equals("127.0.0.1")){
+		if(myhostname.equals("127.0.0.1")){ //TODO 分散を使うか使わないかにかかわらず、NICがあがってないとここで死んでしまう
 			throw new RuntimeException("cannot resolve hostname. contact your system adminitrator and configure your DNS settings");
 		}
 	}
@@ -453,22 +453,5 @@ public class LMNtalDaemon implements Runnable {
 	}
 	public static String getLocalHostName() {
 		return myhostname;
-	}
-}
-
-/**
- * 親プロセスとの通信を処理するスレッド。親プロセスにはFrontEndを想定。
- * 
- * @author nakajima
- *
- */
-class ParentProcessCommunicator implements Runnable {
-	
-	ParentProcessCommunicator(){
-		
-	}
-	
-	public void run(){
-		
 	}
 }
