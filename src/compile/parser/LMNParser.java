@@ -23,8 +23,8 @@ import compile.structure.*;
 
 public class LMNParser {
 
-	private static final String       LINK_NAME_PREFIX = "~"; // [A-Z_][A-Za-z0-9_]* 以外
-	private static final String PROXY_LINK_NAME_PREFIX = "^"; // 〃
+	private static final String            LINK_NAME_PREFIX = "~"; //         [A-Za-z0-9_]* 以外
+	private static final String      PROXY_LINK_NAME_PREFIX = "^"; //   [A-Z_][A-Za-z0-9_]* 以外
 	private static final String PROCESS_CONTEXT_NAME_PREFIX = "_"; // [a-z0-9][A-Za-z0-9_]* 以外
 	static final LinkOccurrence CLOSED_LINK = new LinkOccurrence("",null,0);
 
@@ -414,7 +414,7 @@ public class LMNParser {
 		// 3回以上の出現
 		if (links.get(lnk.name) == CLOSED_LINK) {
 			error("SYNTAX ERROR: Link " + lnk.name + " appears more than twice.");
-			String linkname = generateNewLinkName();
+			String linkname = lnk.name + generateNewLinkName();
 			if (lnk.name.startsWith(SrcLinkBundle.PREFIX_TAG))
 				linkname = SrcLinkBundle.PREFIX_TAG + linkname;
 			lnk.name = linkname;

@@ -19,36 +19,36 @@ public final class Membrane {
 	public boolean stable = false;
 
 	/** アトム(compile.structure.Atom)のリスト */
-	public List atoms = new ArrayList();
+	public List atoms = new LinkedList();
 
 	/** 子膜(compile.structure.Membrane)のリスト */
-	public List mems = new ArrayList();
+	public List mems = new LinkedList();
 	
 	/** ルール(compile.structure.RuleStructure)のリスト */
-	public List rules = new ArrayList();
+	public List rules = new LinkedList();
 
 	////////////////////////////////////////////////////////////////
 
 	/** アトム集団(compile.structure.Atom)のリスト */
-	public List aggregates = new ArrayList();
+	public List aggregates = new LinkedList();
 
 	/** プロセス文脈出現(compile.structure.ProcessContext)のリスト */
-	public List processContexts = new ArrayList();
+	public List processContexts = new LinkedList();
 	
-	/** ルール文脈出現(compile.struct.RuleContext)のリスト */
-	public List ruleContexts = new ArrayList();
+	/** ルール文脈出現(compile.structure.RuleContext)のリスト */
+	public List ruleContexts = new LinkedList();
 	
-	/** 型付きプロセス文脈出現(compile.struct.ProcessContext)のリスト */
-	public List typedProcessContexts = new ArrayList();
+	/** 型付きプロセス文脈出現(compile.structure.ProcessContext)のリスト */
+	public List typedProcessContexts = new LinkedList();
 	
 	////////////////////////////////////////////////////////////////
 	
-	/** 膜の自由リンク名(String)からそのリンク出現(compile.struct.LinkOccurrence)への写像 */
+	/** 膜の自由リンク名(String)からそのリンク出現(compile.structure.LinkOccurrence)への写像 */
 	public HashMap freeLinks = new HashMap();
 	
 	/** ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。*/
 //	public runtime.Ruleset ruleset = new InterpretedRuleset();
-	public List rulesets = new ArrayList();
+	public List rulesets = new LinkedList();
 	 	
 	public String name;
 	

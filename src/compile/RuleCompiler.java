@@ -271,9 +271,9 @@ public class RuleCompiler {
 
 		// 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
 		identifiedCxtdefs = new HashSet();
-		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
-			ContextDef def = (ContextDef)rs.typedProcessContexts.get(it.next());
+			ContextDef def = (ContextDef)it.next();
 			if (def.src != null) {
 				if (def.src.mem == rs.guardMem) { def.src = null; } // 再呼び出しに対応（仮）
 				else {
@@ -306,7 +306,7 @@ public class RuleCompiler {
 				Functor func = cstr.functor;
 				ContextDef def1 = null;
 				ContextDef def2 = null;
- 				ContextDef def3 = null;
+				ContextDef def3 = null;
 				if (func.getArity() > 0)  def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
 				if (func.getArity() > 1)  def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
 				if (func.getArity() > 2)  def3 = ((ProcessContext)cstr.args[2].buddy.atom).def;
@@ -331,7 +331,7 @@ public class RuleCompiler {
 				else if (func instanceof runtime.FloatingFunctor) {
 					bindToFunctor(def1, func);
 				}
-				else if (func.equals(new Functor("=",2))) {
+				else if (func.equals(FUNC_UNIFY)) {
 					if (!identifiedCxtdefs.contains(def2)) {
 						ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
 						if (!identifiedCxtdefs.contains(def2)) continue;
@@ -465,9 +465,9 @@ public class RuleCompiler {
 	}
 	
 	private void removeLHSTypedProcesses() {
-		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
-			ContextDef def = (ContextDef)(rs.typedProcessContexts.get(it.next()));
+			ContextDef def = (ContextDef)it.next();
 			Context pc = def.src;
 			if (pc != null) { // ヘッドのときのみ
 				if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
@@ -478,10 +478,9 @@ public class RuleCompiler {
 		}
 	}	
 	private void freeLHSTypedProcesses() {
-		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
-			ContextDef def = (ContextDef)(rs.typedProcessContexts.get(it.next()));
-			Context pc = def.src;
+			ContextDef def = (ContextDef)it.next();
 			if (typedcxttypes.get(def) == UNARY_ATOM_TYPE) {
 				body.add(new Instruction( Instruction.FREEATOM,
 					typedcxtToSrcPath(def) ));
@@ -490,9 +489,9 @@ public class RuleCompiler {
 	}	
 
 	private void buildRHSTypedProcesses() {
-		Iterator it = rs.typedProcessContexts.keySet().iterator();
+		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
-			ContextDef def = (ContextDef)(rs.typedProcessContexts.get(it.next()));
+			ContextDef def = (ContextDef)it.next();
 			Iterator it2 = def.rhsOccs.iterator();
 			while (it2.hasNext()) {
 				ProcessContext pc = (ProcessContext)it2.next();
@@ -746,7 +745,7 @@ public class RuleCompiler {
 						rhsatomToPath(atom), pos,
 						lhsatomToPath(link.atom), link.pos,
 						rhsmemToPath(atom.mem) ));
-				} else { // ( :- atom(X), buddy(X) )
+				} else { // ( :- buddy(X), atom(X) )
 					if (rhsatomToPath(atom) < rhsatomToPath(link.atom)
 					|| (rhsatomToPath(atom) == rhsatomToPath(link.atom) && pos < link.pos)) {
 						body.add( new Instruction(Instruction.NEWLINK,
@@ -802,7 +801,7 @@ public class RuleCompiler {
 				}
 				else {
 					// リンク先が型付きでないプロセス文脈のとき、PART1と同じ理由で$buddypcは右辺。
-					// ( org(Y,), $buddypc[Y,|] :- type($atom) | $buddypc[X,|], $atom[X|] )
+					// ( {org(Y,), $buddypc[Y,|]} :- type($atom) | $buddypc[X,|], $atom[X|] )
 					LinkOccurrence orglink = buddypc.buddy.args[pos].buddy; // org引数のYの出現
 					if (typedcxttypes.get(atom.def) == UNARY_ATOM_TYPE) {
 						body.add( new Instruction(Instruction.RELINK,
@@ -845,7 +844,7 @@ public class RuleCompiler {
 						ProcessContext buddypc = (ProcessContext)link.atom;
 						if (!buddypc.mem.typedProcessContexts.contains(buddypc)) {
 							// リンク先が型付きでないプロセス文脈のとき、PART1と同じ理由で$buddypcは右辺。
-							// ( org(Y,), $buddypc[Y,|],src(Z,),$atom[Z,|] :- $buddypc[X,|],$atom[X,|] )
+							// ( {org(Y,),$buddypc[Y,|]},{src(Z,),$atom[Z,|]} :- $buddypc[X,|],$atom[X,|] )
 							LinkOccurrence orglink = buddypc.buddy.args[link.pos].buddy; // org引数のYの出現
 							LinkOccurrence srclink = atom.   buddy.args[link.pos].buddy; // src引数のZの出現
 							body.add( new Instruction(Instruction.UNIFY,
