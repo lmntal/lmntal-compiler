@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
+import runtime.AbstractMembrane;
 import runtime.Env;
 
 /*
@@ -16,32 +18,18 @@ import runtime.Env;
  * @author nakajima
  */
 public class LMNtalDaemonMessageProcessor implements Runnable {
-	/*
-	 * メッセージ。ver.20040710
-	 * 
-	 * res msgid msg
-	 * dumphash
-	 * registerlocal
-	 * begin
-	 * end
-	 * lock
-	 * unlock
-	 * terminate
-	 * 
-	 * 
-	 * 以下はbegin-endの中にのみある
-	 * RemoteMembrane.java参照。
-	 * 
-	 * 
-	 */
-
 	static boolean DEBUG = true;
 
+	// ソケット
 	BufferedReader in;
 	BufferedWriter out;
 	Socket socket;
 
+	//あげたLocalLMNtalRuntimeのID
 	Integer slaveRuntimeRgid;
+
+	//グローバルな膜IDの表
+	HashMap memTable = new HashMap();
 
 	/*
 	 * コンストラクタ。
@@ -114,9 +102,11 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 			/* コマンドからはじまるメッセージを処理。
 			 * 
 			 * ここで処理される命令一覧。これ以外のは下スクロールしてね
+			 * 
 			 *  res msgid メッセージ本文
 			 *  registerlocal
 			 *  dumphash - デバッグ用
+			 * 
 			 */
 			Integer msgid;
 			Integer rgid;
@@ -213,11 +203,19 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 							//自分自身宛なら、自分自身で処理する
 
 							/* ここで処理される命令一覧
-							 * begin
-							 * end
 							 * connect
-							 * lock taskid
+							 * begin
+							 * 
+							 * lock
+							 * blockinglock
+							 * asynclock
+							 * unlock
+							 * asyncunlock
+							 * recursivelock
+							 * recursiveunlock
+							 * 
 							 * terminate
+							 * 
 							 */
 
 							//TODO 分散と関係ない命令はどうしよう？InterpretedRuleset.interpret()に食わせるか？
@@ -254,22 +252,173 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								}
 								continue;
 							} else if (command.equalsIgnoreCase("begin")) {
-								//TODO 実装
+								/*
+								 * ここで処理される命令：
+								 * (最新版はRemoteMembraneクラス参照。)
+								 * 
+								 * end
+								 * 
+								 * ルールの操作
+								 * clearrules dstmem
+								 * loadruleset dstmem globalRulesetID
+								 * 
+								 * アトムの操作
+								 * newatom srcmem atomid
+								 * alteratomfunctor srcmem atomid func.getName()
+								 * removeatom srcmem atomid
+								 * enqueueatom srcmem atomid
+								 * 
+								 * 子膜の操作
+								 * newmem srcmem dstmem
+								 * removemem srcmem parentmem
+								 * 
+								 * リンクの操作
+								 * newlink mem atomid1 pos1 atomid2 pos2
+								 * relinkatomargs mem atomid1 pos1 atomid2 pos2
+								 * unifyatomargs mem atomid1 pos1 atomid2 pos2
+								 * 
+								 * 膜自身や移動に関する操作
+								 * movecells dstmem srcmem
+								 * moveto srcmem dstmem
+								 * 
+								 * 仮称
+								 * requireruleset
+								 * setparent
+								 * newroot
+								 */
+								
+								String[] commandInsideBegin = new String[5]; //RemoteMembrane.send()の引数の個数を参照せよ
 
-								//beginの後はendがくるまで命令が連続でくる...
-								//どう処理しようか。
-								//そのままLocalLMNtalRuntimeにまわすのがいいのかな
-								//来る命令は分散用の命令でなく、タスクとして実行されるべき命令。
+								while(true){
+									input = in.readLine();
+									commandInsideBegin = input.split(" ",5); //ぬるぽに注意
 
+									String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
+									AbstractMembrane realMem;
+
+									if(commandInsideBegin[0].equalsIgnoreCase("end")){
+										//糸冬
+										break;
+									} else if (commandInsideBegin[0].equalsIgnoreCase("clearrules")){
+										dstmem = commandInsideBegin[1];
+										
+										
+									} else if (commandInsideBegin[0].equalsIgnoreCase("loadruleset")){
+										dstmem = commandInsideBegin[1];
+										ruleset = commandInsideBegin[2];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("newatom")){
+										srcmem = commandInsideBegin[1];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("alteratomfunctor")){
+										srcmem = commandInsideBegin[1];
+										atom1 = commandInsideBegin[2];
+										func = commandInsideBegin[3];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("removeatom")){
+										srcmem = commandInsideBegin[1];
+										atom1 = commandInsideBegin[2];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("enqueueatom")){
+										srcmem = commandInsideBegin[1];
+										atom1 = commandInsideBegin[2];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("newmem")){
+										srcmem = commandInsideBegin[1];
+										dstmem = commandInsideBegin[2];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("removemem")){
+										srcmem = commandInsideBegin[1];
+										parentmem = commandInsideBegin[2];
+									//} else if (commandInsideBegin[0].equalsIgnoreCase("newroot")){
+									} else if (commandInsideBegin[0].equalsIgnoreCase("newlink")){
+										srcmem = commandInsideBegin[1];
+										atom1 = commandInsideBegin[2];
+										pos1  = commandInsideBegin[3];
+										atom2 = commandInsideBegin[4];
+										pos2  = commandInsideBegin[5];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("relinkatomargs")){
+										srcmem = commandInsideBegin[1];
+										atom1 = commandInsideBegin[2];
+										pos1  = commandInsideBegin[3];
+										atom2 = commandInsideBegin[4];
+										pos2  = commandInsideBegin[5];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("unifyatomargs")){
+										srcmem = commandInsideBegin[1];
+										atom1 = commandInsideBegin[2];
+										pos1  = commandInsideBegin[3];
+										atom2 = commandInsideBegin[4];
+										pos2  = commandInsideBegin[5];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("movecells")){
+										dstmem = commandInsideBegin[1];
+										srcmem = commandInsideBegin[2];
+									} else if (commandInsideBegin[0].equalsIgnoreCase("moveto")){
+										srcmem = commandInsideBegin[1];
+										dstmem = commandInsideBegin[2];
+									//} else if (commandInsideBegin[0].equalsIgnoreCase("setparent")){
+									///} else if (commandInsideBegin[0].equalsIgnoreCase("requireruleset")){
+									} else {
+										//未知の命令
+										out.write("not implemented yet\n");
+										out.flush();
+										continue;
+									}
+									
+									//グローバル膜ID→NEW_4の処理		
+								}
+								
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
 							} else if (command.equalsIgnoreCase("lock")) {
 								//TODO 実装
+								
+								//ロック対象膜をロック
+								
+								//ロック成功
+								////キャッシュ更新チェック
+								
+								//////更新されていたらキャッシュを返信する
+								
+								//////更新されていなかったら「更新されていませんメッセージ」
+								
+								//ロック失敗
+								//out.write("res " + msgid.toString() + " fail\n");
+								//out.flush();
+								
+								out.write("not implemented yet\n");
+								out.flush();
+								continue;
+							} else if (command.equalsIgnoreCase("blockinglock")) {
+								//TODO 実装
+								out.write("not implemented yet\n");
+								out.flush();
+								continue;
+							} else if (command.equalsIgnoreCase("asynclock")) {
+								//TODO 実装
+								out.write("not implemented yet\n");
+								out.flush();
+								continue;
+							} else if (command.equalsIgnoreCase("unlock")) {
+								//TODO 実装
+								out.write("not implemented yet\n");
+								out.flush();
+								continue;
+							} else if (command.equalsIgnoreCase("blockingunlock")) {
+								//TODO 実装
+								out.write("not implemented yet\n");
+								out.flush();
+								continue;
+							} else if (command.equalsIgnoreCase("asyncunlock")) {
+								//TODO 実装
+								out.write("not implemented yet\n");
+								out.flush();
+								continue;
+							} else if (command.equalsIgnoreCase("recursivelock")) {
+								//TODO 実装
+								out.write("not implemented yet\n");
+								out.flush();
+								continue;
+							} else if (command.equalsIgnoreCase("recursiveunlock")) {
 								out.write("not implemented yet\n");
 								out.flush();
 								continue;
 							} else if (command.equalsIgnoreCase("terminate")) {
+								//TODO 実装
 								//「terminateだけ変」(by n-kato)
 								//
 								//やるべきことはEnv.theRuntimeのterminate
@@ -280,14 +429,6 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 								//out.write("not implemented yet\n");
 								//out.flush();
 								continue;
-							} else if (command.equalsIgnoreCase("lock")){
-								//TODO 実装
-								//lock
-								
-								//ロック要求がきたら、キャッシュ機構を有効化しないといけない。
-								
-								
-								
 							} else {
 								//未知のコマンド or それ以外の何か
 								out.write(
@@ -365,8 +506,9 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 						//continue;
 						break;
 					} catch (IOException e1) {
+						//todo: 通信失敗時は何しよう？
+						
 						e1.printStackTrace();
-						//continue;
 						break;
 					}
 				}

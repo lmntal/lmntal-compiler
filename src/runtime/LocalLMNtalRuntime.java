@@ -14,7 +14,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 //	protected Thread thread = new Thread(this);
 
 	/*
-	 * global rulset id --> rulset objectな表
+	 * global ruleset id --> ruleset objectな表
 	 */
 	HashMap rulesetIDMap = new HashMap();
 
@@ -23,12 +23,17 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 		Env.theRuntime = this;
 	}
 
+/*
+ * タスク生成。
+ * 
+ * @param parent ルート膜
+ */
 	AbstractTask newTask(AbstractMembrane parent) {
 		Task t = new Task(this,parent);
 		tasks.add(t);
 		return t;
 	}
-	
+
 	/** （マスタタスクによって）このランタイムの終了が要求されたかどうか */
 	protected boolean terminated = false;
 	/** このランタイムの終了を要求する。

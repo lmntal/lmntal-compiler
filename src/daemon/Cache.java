@@ -29,6 +29,6 @@ class Cache{
 	  *
 	  */
 	 void refresh(){
-	 	
+		//キャッシュ更新の時にinsideproxy以外はremove（膜の構成要素から剥がす）する
 	 }
 }
