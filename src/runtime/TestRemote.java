@@ -36,7 +36,7 @@ class TestRemote{
 			System.exit(0);
 		}
 		
-		//RemoteMembrane rmem = (RemoteMembrane)RemoteMembrane.newRoot(rr);
+		RemoteMembrane rmem = (RemoteMembrane)RemoteMembrane.newRoot(rr);
 		
 
 
