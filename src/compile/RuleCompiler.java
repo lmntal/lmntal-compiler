@@ -67,8 +67,8 @@ public class RuleCompiler {
 	 * 指定された RuleStructure 用のルールをつくる
 	 */
 	RuleCompiler(RuleStructure rs) {
-		Env.n("RuleCompiler");
-		Env.p(rs);
+		//Env.n("RuleCompiler");
+		//Env.p(rs);
 		this.rs = rs;
 	}
 	
@@ -163,7 +163,7 @@ public class RuleCompiler {
 		// ヘッドの取り込み
 		lhsatoms = hc.atoms;
 		lhsfreemems = hc.freemems;
-		genLHSMemPaths();
+		genLHSPaths();
 		varcount = lhsatoms.size() + lhsfreemems.size();
 		int formals = varcount;
 		
@@ -245,7 +245,7 @@ public class RuleCompiler {
 	}
 	
 	/** ヘッドの膜とアトムに対して、仮引数番号を登録する */
-	private void genLHSMemPaths() {
+	private void genLHSPaths() {
 		Env.c("RuleCompiler::genLHSMemPaths");
 		lhsatompath = new HashMap();
 		lhsmempath  = new HashMap();
@@ -264,7 +264,7 @@ public class RuleCompiler {
 	private void removeLHSAtoms() {
 		Env.c("RuleCompiler::removeLHSAtoms");
 		for (int i = 0; i < lhsatoms.size(); i++) {
-			body.add( new Instruction(Instruction.REMOVEATOM, i+1) );
+			body.add( new Instruction(Instruction.REMOVEATOM, lhsfreemems.size() + i ));
 		}
 	}
 	/** 左辺の膜を子膜側から再帰的に除去する。
