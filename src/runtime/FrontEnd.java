@@ -59,7 +59,7 @@ public class FrontEnd {
 	 * @param line     LMNtal statement (one liner)
 	 */
 	public void processLine(String line) {
-		System.out.println(line+"  =>  {a, b, {c}, ({b}:-{c})");
+		System.out.println(line+"  =>  {a, b, {c}}, ({b, $p}:-{c, $p})");
 	}
 	
 	public static void main(String[] args) {
