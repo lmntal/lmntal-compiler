@@ -148,17 +148,18 @@ public class FrontEnd {
 	 * @param src Reader 型で表されたソース
 	 */
 	public static void run(Reader src) {
-		try{
+		try {
 			LMNParser lp = new LMNParser(src);
 				
 			compile.structure.Membrane m = lp.parse();
-			if (Env.debug >= Env.DEBUG_TRACE) {
-				Env.d("");
-				Env.d( "Parse Result: " + m.toStringWithoutBrace() );
-			}
+//			if (Env.debug >= Env.DEBUG_SYSDEBUG) {
+//				Env.d("");
+//				Env.d( "Parse Result: " + m.toStringWithoutBrace() );
+//			}
+
 			compile.structure.Membrane root = RulesetCompiler.runStartWithNull(m);
 			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
-//			Env.d( "After compile : "+ir );
+//			Env.d( "After compile : "+ir );	// つねに (:- @601)
 			root.showAllRules();
 			
 			// 実行

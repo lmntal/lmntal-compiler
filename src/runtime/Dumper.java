@@ -170,7 +170,7 @@ public class Dumper {
 		}
 		while (changed);
 		
-		// 残ったアトムを s=t の形式で出力する
+		// 残ったアトムを s=t の形式で出力する（verbose < EXPANDOPS のときのみ）
 		while (!atoms.isEmpty()) {
 			it = atoms.iterator();
 			Atom a = (Atom)it.next();

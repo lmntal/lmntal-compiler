@@ -73,10 +73,11 @@ public class REPL {
 					Env.p("debug level " + Env.debug);
 					continue;
 				} else if(line.matches("noverbose|verbose( [0-9])?")) {
+					int old = Env.verbose;
 					if (line.length() == 7) Env.verbose = Env.VERBOSE_DEFAULT;
 					else if (line.charAt(0) == 'n') Env.verbose = 0;
 					else Env.verbose = line.charAt(line.length() - 1) - '0';
-					Env.p("verbose level " + Env.verbose);
+					Env.p("verbose level set to " + Env.verbose + " (previously " + old + ")");
 					continue;
 				} else if(line.matches("nooptimize|optimize( [0-9])?")) {
 					if (line.length() == 8) Env.optimize = 5;
