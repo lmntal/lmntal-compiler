@@ -344,6 +344,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 						continue;
 					}
 					r = (RemoteLMNtalRuntime)ar;
+					if(true)System.out.println("RemoteMembrane.updateCache(): cast À®¸ù");
 				}
 				//
 				RemoteTask t;
