@@ -1,0 +1,17 @@
+// 論理式を積和標準形や和積標準形に変換する（途中）
+// hara
+
+H=[not, [and, A, B]] :- H=[or, [not, A], [not, B]].
+H=[not, [or, A, B]]  :- H=[and, [not, A], [not, B]].
+H=[not, [not, A]]    :- H=A.
+// TODO ground や $C にする
+H=[or,  [and, A, B], C] :- unary(C) | H=[and, [or, A, C], [or, B, C]].
+H=[or,  A, [and, B, C]] :- unary(A) | H=[and, [or, A, B], [or, A, C]].
+
+
+//sample=[not, a, b].
+//sample=[not, [or, [and, a, b], c] ].
+//sample=[not, [not, [or, [and, a, b], c] ] ].
+sample=[not, [or, [and, 1, 2], [and, [or, [and, a, b], c], [or, 3, 4] ] ] ].
+
+
