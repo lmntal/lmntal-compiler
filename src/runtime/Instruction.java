@@ -9,9 +9,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Field;
 
 /*
- * ルール実行中の5つの配列は、1つに併合した方がよいかもしれない。
- * 現在は5つの配列を生成し、互いに変数番号が重複しないように使用している。
- * 
  * <p><b>注意</b>　方法4の文書に対して、「ロックしたまま実行膜スタックに積む」という操作
  * およびその結果の「ロックされた、かつ実行膜スタックにも積まれた」状態が追加された。
  * 
@@ -300,7 +297,7 @@ public class Instruction {
 	// LOCALEQFUNCは不要
 
     // アトムを操作する基本ボディ命令 (30--39)    
-	// [local]removeatom                  [srcatom, srcmem, func]
+	// [local]removeatom                  [srcatom, srcmem, funcref]
 	// [local]newatom           [-dstatom, srcmem, funcref]
 	// [local]newatomindirect   [-dstatom, srcmem, func]
     // [local]enqueueatom                 [srcatom]
@@ -309,13 +306,14 @@ public class Instruction {
 	// [local]alterfunc                   [atom, funcref]
 	// [local]alterfuncindirect           [atom, func]
 
-    /** removeatom [srcatom, srcmem, func]
+    /** removeatom [srcatom, srcmem, funcref]
      * <br>ボディ命令<br>
-     * $srcmemにある、名前$funcを持つアトム$srcatomを現在の膜から取り出す。実行スタックは操作しない。
+     * （膜$srcmemにあってファンクタ$funcを持つ）アトム$srcatomを現在の膜から取り出す。
+     * 実行スタックは操作しない。
      * @see dequeueatom */
 	public static final int REMOVEATOM = 30;
 	
-	/** localremoveatom [srcatom]
+	/** localremoveatom [srcatom, srcmem, funcref]
      * <br>最適化用ボディ命令<br>
      * removeatomと同じ。ただし$srcatomはこの計算ノードに存在する。*/
 	public static final int LOCALREMOVEATOM = LOCAL + REMOVEATOM;
@@ -448,14 +446,14 @@ public class Instruction {
 
 	/** removemem [srcmem, parentmem]
 	 * <br>ボディ命令<br>
-	 * 膜$srcmemを膜$parentmemから取り出す。
+	 * 膜$srcmemを親膜（$parentmem）から取り出す。
 	 * 膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。
 	 * @see removeproxies */
 	public static final int REMOVEMEM = 50;
 
 	/** localremovemem [srcmem, parentmem]
 	 * <br>最適化用ボディ命令<br>
-	 * removememと同じ。ただし$srcmemの親膜はこの計算ノードに存在する。*/
+	 * removememと同じ。ただし$srcmemの親膜（$parentmem）はこの計算ノードに存在する。*/
 	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
 
 	/** newmem [-dstmem, srcmem]
@@ -1079,10 +1077,10 @@ public class Instruction {
 	public static Instruction removeatom(int atom, int mem, Functor func) {
 		return new Instruction(REMOVEATOM,atom,mem,func);
 	}
-	/** @deprecated */
-	public static Instruction removeatom(int atom, Functor func) {
-		return new Instruction(REMOVEATOM,atom,func);
-	}
+//	/** @deprecated */
+//	public static Instruction removeatom(int atom, Functor func) {
+//		return new Instruction(REMOVEATOM,atom,func);
+//	}
     
 	// コンストラクタ
 	
