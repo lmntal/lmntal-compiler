@@ -188,7 +188,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 	}
 
 	/** dstMemに移動 */
-	public void moveTo(AbstractMembrane dstMem) {
+	public AbstractMembrane moveTo(AbstractMembrane dstMem) {
 		//todo 実装
 		
 		if (dstMem.task.getMachine() != task.getMachine()) {
@@ -196,7 +196,7 @@ public final class RemoteMembrane extends AbstractMembrane {
 		}
 		// remote call of a local process migration
 		remote.send("MOVETO", this, dstMem.getGlobalMemID());
-		super.moveTo(dstMem);
+		return super.moveTo(dstMem);
 	}
 
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される

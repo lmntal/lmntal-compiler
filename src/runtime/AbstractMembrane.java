@@ -429,9 +429,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		parent.removeMem(this);
 //	}
 
-	/** 除去された膜srcMemにある全てのアトムおよび膜をこの膜に移動する。
-	 * 膜srcMemの子孫のうちルート膜の手前までの全ての膜を、この膜と同じタスクの管理にする。
-	 * srcMemはこのメソッド実行後、このまま廃棄しなければならない。
+	/** （親膜を持たない）膜srcMemにある全てのアトムと子膜（ロックを取得していない）をこの膜に移動する。
+	 * 子膜はルート膜の直前の膜まで再帰的に移動される。ホスト間移動した膜は活性化される。
+	 * このメソッド実行後、srcMemはこのまま廃棄されなければならない。
 	 */
 	public void moveCellsFrom(AbstractMembrane srcMem) {
 		if (this == srcMem) return;
@@ -460,7 +460,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 						throw new RuntimeException("AbstractMembrane.moveCellsFrom: blockingLock failure");
 					}
 					subMem.setName(subSrcMem.getName());
-					subMem.parent = null;	//removeMem(subMem)でもよい。moveToのWarning抑制用
+					removeMem(subMem);
 					subMem.moveCellsFrom(subSrcMem);
 					subSrcMem.unlock();
 				}
@@ -476,8 +476,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		}
 	}
 
-	/** この膜をdstMemに移動し、活性化する。parent==nullを仮定する。*/
-	public void moveTo(AbstractMembrane dstMem) {
+	/** ロックされた（親膜の無い）この膜を（活性化された）膜dstMemに移動する。
+	 * 子膜のロックは取得していないものとする。
+	 * 子膜はルート膜の直前の膜まで再帰的に移動される。ホスト間移動した膜は活性化される。
+	 * <p>メソッド終了後、thisは無効な膜を指している可能性がある。
+	 * @return この膜への参照（リモート・ローカル間で移動した場合、変更している可能性がある）
+	 */
+	public AbstractMembrane moveTo(AbstractMembrane dstMem) {
 		if (parent != null) {
 			System.out.println("Warning: membrane with parent was moved");
 			parent.removeMem(this);
@@ -488,16 +493,20 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			if (dstMem.task != task) {
 				setTask(dstMem.task);
 			}
+			return this;
 		}
 		else {
 			// ローカル膜のリモート膜への移動
-			// TODO 実装
+			AbstractMembrane mem = dstMem.newMem();
+			mem.moveCellsFrom(this);
+			return mem;
 		}
 //		activate();
 		//enqueueAllAtoms();
 	}
 	
-	/** この膜（ルート以外のとき）とその子孫を管理するタスクを更新するために呼ばれる内部命令 */
+	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令。
+	 * ただしルート膜以下のタスクは変更しない。つまりルート膜に対して呼ばれた場合は何もしない。*/
 	private void setTask(AbstractTask newTask) {
 		if (isRoot()) return;
 		task = newTask;

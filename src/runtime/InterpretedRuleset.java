@@ -499,8 +499,8 @@ class InterpretiveReactor {
 
 				case Instruction.ADDMEM :
 				case Instruction.LOCALADDMEM : //[dstmem, srcmem]
-					mems[inst.getIntArg2()].moveTo(mems[inst.getIntArg1()]);
-					break;//nakajima 2004-01-04, n-kato
+					mems[inst.getIntArg2()] = mems[inst.getIntArg2()].moveTo(mems[inst.getIntArg1()]);
+					break; //nakajima 2004-01-04, n-kato, n-kato 2004-11-10
 				case Instruction.ENQUEUEMEM:
 					mems[inst.getIntArg1()].activate();
 //					mems[inst.getIntArg1()].enqueueAllAtoms();

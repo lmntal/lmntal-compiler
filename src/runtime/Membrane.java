@@ -34,7 +34,7 @@ public final class Membrane extends AbstractMembrane {
 	/** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
 	private Membrane(AbstractTask task, AbstractMembrane parent) {
 		super(task, parent);
-		daemon.IDConverter.registerGlobalMembrane(getGlobalMemID(), this); // TODO （効率改善）free時に消す
+		daemon.IDConverter.registerGlobalMembrane(getGlobalMemID(), this);
 	}
 	/** 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。*/
 	protected Membrane(Task task) {
@@ -122,16 +122,6 @@ public final class Membrane extends AbstractMembrane {
 		}
 		atoms.remove(atom);
 		atom.mem = null;
-	}
-
-	/** この膜をdstMemに移動し、活性化する。*/
-	public void moveTo(AbstractMembrane dstMem) {
-		if (dstMem.task.getMachine() != task.getMachine()) {
-			parent = dstMem;
-			//((RemoteMembrane)dstMem).send("ADDMEM",getGlobalMemID());
-			throw new RuntimeException("cross-site process migration not implemented");
-		}
-		super.moveTo(dstMem);
 	}
 
 	// ボディ操作3 - 子膜の操作

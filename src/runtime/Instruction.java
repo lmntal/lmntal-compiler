@@ -582,11 +582,12 @@ public class Instruction implements Cloneable, Serializable {
 	/** movecells [dstmem, srcmem]
 	 * <br>ボディ命令<br>
 	 * （親膜を持たない）膜$srcmemにある全てのアトムと子膜（ロックを取得していない）を膜$dstmemに移動する。
-	 * 子膜はルート膜の直前の膜まで再帰的に移動される。
-	 * 実行膜スタックおよび実行アトムスタックは操作しない。TODO ←仕様バグ？
-	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない（ルールセットに限りは参照してもよい）。
+	 * 子膜はルート膜の直前の膜まで再帰的に移動される。ホスト間移動した膜は活性化される。
+	 * <p>実行後、膜$srcmemはこのまま廃棄されなければならない
+	 * <strike>（内容物のルールセットに限り参照してよい？）</strike>
 	 * <p>実行後、膜$dstmemの全てのアクティブアトムをエンキューし直すべきである。
 	 * <p><b>注意</b>　Ruby版のpourから名称変更
+	 * <p>moveCellsFromメソッドを呼び出す。
 	 * @see enqueueallatoms */
 	public static final int MOVECELLS = 54;
 	// LOCALMOVECELLSは最適化の効果が無いため却下？あるいはさらに特化した仕様にする。
@@ -603,8 +604,8 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(ENQUEUEALLATOMS, new ArgType(false, ARG_MEM));}
 
 	/** freemem [srcmem]
-	 * <br>最適化用ボディ命令<br>
-	 * 何もしない。
+	 * <br>ボディ命令<br>
+	 * 膜$srcmemを廃棄する。
 	 * <p>$srcmemがどの膜にも属さず、かつスタックに積まれていないことを表す。
 	 * @see freeatom */
 	public static final int FREEMEM = 56;
@@ -614,8 +615,11 @@ public class Instruction implements Cloneable, Serializable {
 	/** addmem [dstmem, srcmem]
 	 * <br>ボディ命令<br>
 	 * ロックされた（親膜の無い）膜$srcmemを（活性化された）膜$dstmemに移動する。
+	 * 子膜のロックは取得していないものとする。
+	 * 子膜はルート膜の直前の膜まで再帰的に移動される。ホスト間移動した膜は活性化される。
 	 * <p>膜$srcmemを再利用するために使用される。
 	 * <p>newmemと違い、$srcmemのロックは明示的に解放しなければならない。
+	 * <p>moveToメソッドを呼び出す。
 	 * @see unlockmem, enqueuemem
 	 */
 	public static final int ADDMEM = 57;
@@ -625,6 +629,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * ロックされた膜$srcmemをロックしたまま活性化する。
 	 * この場合の活性化は、$srcmemがルート膜の場合、仮の実行膜スタックに積むことを意味し、
 	 * ルート膜でない場合、親膜と同じ実行膜スタックに積むことを意味する。
+	 * すでに実行膜スタックまたは仮の実行膜スタックに積まれている場合は、何もしない。
 	 */	
 	public static final int ENQUEUEMEM = 58;
 	static {setArgType(ENQUEUEMEM, new ArgType(false, ARG_MEM));}
