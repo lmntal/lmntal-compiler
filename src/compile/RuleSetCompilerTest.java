@@ -57,7 +57,7 @@ public class RuleSetCompilerTest {
 			//Membrane m = getTestStructure1();
 			//Membrane m = getTestStructure2();
 			Env.d(m);
-			Membrane root = RuleSetCompiler.runStartWithNull(m);
+			Membrane root = RulesetCompiler.runStartWithNull(m);
 			List ir = root.rulesets;
 			
 			Env.d("");
