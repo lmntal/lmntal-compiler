@@ -5,11 +5,11 @@
 package compile;
 
 import java.io.StringReader;
-import java.util.List;
 
 import javax.swing.JOptionPane;
 
 import runtime.Env;
+import runtime.InterpretedRuleset;
 
 import compile.parser.*;
 import compile.structure.*;
@@ -48,7 +48,7 @@ public class RuleSetCompilerTest {
 	 * テストする
 	 * @param src
 	 */
-	public static List test(String src) {
+	public static InterpretedRuleset test(String src) {
 		try {
 			// thnx to 永田書記長
 			LMNParser lp = new LMNParser(new StringReader(src));
@@ -57,15 +57,15 @@ public class RuleSetCompilerTest {
 			//Membrane m = getTestStructure1();
 			//Membrane m = getTestStructure2();
 			Env.d(m);
-			Membrane root = RulesetCompiler.runStartWithNull(m);
-			List ir = root.rulesets;
+			InterpretedRuleset rs = (InterpretedRuleset)RulesetCompiler.compileMembrane(m);
 			
 			Env.d("");
 			Env.d("Compiled Membrane :");
-			root.showAllRulesets();
-			root.showAllRules();
+			rs.showDetail();
+			m.showAllRulesets();
+			m.showAllRules();
 			
-			return ir;
+			return rs;
 			
 			//Env.d("");
 			//Env.d("Generated InterpretedRuleset :");

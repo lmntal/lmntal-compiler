@@ -658,7 +658,6 @@ class InterpretiveReactor {
 
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[groundlink1,groundlink2]
-					//intに限らないから命令が違うんですけど
 					//if(vars.get(inst.getIntArg1()).equals(vars.get(inst.getIntArg2()))){
 					//	return true;
 					//}
@@ -720,6 +719,11 @@ class InterpretiveReactor {
 				case Instruction.INLINE : //[atom, inlineref]
 					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
 					break; //hara
+					//====組み込み機能に関する命令====ここまで====
+//				case Instruction.BUILTIN: //[class, atom]
+//					add(A,B,C) :- int(A),int(B),$builtin:iadd(A,B,C), 
+//					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
+//					break;
 					//====組み込み機能に関する命令====ここまで====
 					
 					//====整数用の組み込みボディ命令====ここから====

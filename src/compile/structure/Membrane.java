@@ -163,7 +163,7 @@ public final class Membrane {
 			//Env.p("");
 			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
 			rs.leftMem.showAllRules();
-			//Env.p("About rule structure (LEFT): "+rs.rightMem+" of "+rs);
+			//Env.p("About rule structure (RIGHT): "+rs.rightMem+" of "+rs);
 			rs.rightMem.showAllRules();
 		}
 		// 子膜それぞれ

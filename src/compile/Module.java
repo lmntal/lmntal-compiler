@@ -181,10 +181,10 @@ public class Module {
 			StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" from "+thePath+" ...");
 			try {
 				LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(filename))));
-				Membrane nm = RulesetCompiler.runStartWithNull(lp.parse());
-				//Env.p("MOD compiled "+nm);
+				runtime.Ruleset rs = RulesetCompiler.compileMembrane(lp.parse());
+				//Env.p("MOD compiled "+rs);
 				//memNameTable がモジュール膜への参照を保持しているので、GCされない。
-				m.rulesets.addAll(nm.rulesets);
+				m.rulesets.add(rs);
 				sb.append(" [ OK ] ");
 				Env.d(sb.toString());
 				loaded.put(mod_name, EXIST);

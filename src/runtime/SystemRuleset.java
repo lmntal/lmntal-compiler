@@ -140,17 +140,14 @@ public final class SystemRuleset extends Ruleset {
 		} catch(Exception e){}
 		// todo 下記コードは明らかに不自然なので、InterpretedRuleset（のリストまたはそれを持つ
 		// コンパイル時膜構造）を生成するだけのメソッドをRulesetCompilerに作る。
-		compile.structure.Membrane root = compile.RulesetCompiler.runStartWithNull(m);
-		if (!root.rulesets.isEmpty()) {
-			InterpretedRuleset ir = (InterpretedRuleset)root.rulesets.get(0);
-			Rule rule = (Rule)ir.rules.get(0);
-			Iterator it = rule.body.iterator();
-			while (it.hasNext()) {
-				Instruction loadruleset = (Instruction)it.next();
-				if (loadruleset.getKind() == Instruction.LOADRULESET) {
-					InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
-					ruleset.rules.addAll(ir2.rules);
-				}
+		InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
+		Rule rule = (Rule)ir.rules.get(0);
+		Iterator it = rule.body.iterator();
+		while (it.hasNext()) {
+			Instruction loadruleset = (Instruction)it.next();
+			if (loadruleset.getKind() == Instruction.LOADRULESET) {
+				InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
+				ruleset.rules.addAll(ir2.rules);
 			}
 		}
 	}

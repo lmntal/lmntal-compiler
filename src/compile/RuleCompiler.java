@@ -1119,8 +1119,5 @@ public class RuleCompiler {
 	public void warning(String text) {
 		System.out.println(text);
 	}
-	
-	
-	
 }
 

@@ -18,8 +18,7 @@ public class OptimizerTest {
 		LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(System.in)));
 					
 		compile.structure.Membrane m = lp.parse();
-		compile.structure.Membrane root = RulesetCompiler.runStartWithNull(m);
-		InterpretedRuleset initIr = (InterpretedRuleset)root.rulesets.get(0);
+		InterpretedRuleset initIr = (InterpretedRuleset)RulesetCompiler.compileMembrane(m);
 		Rule initRule = (Rule)initIr.rules.get(0);
 		Instruction loadrulesetInst = (Instruction)initRule.body.get(1);
 		InterpretedRuleset ir = (InterpretedRuleset)loadrulesetInst.getArg2();

@@ -7,6 +7,7 @@ package compile;
 import java.util.*;
 import runtime.Env;
 import runtime.Rule;
+import runtime.Ruleset;
 import runtime.SystemRuleset;
 import compile.structure.*;
 import runtime.InterpretedRuleset;
@@ -18,6 +19,14 @@ import runtime.InterpretedRuleset;
  */
 public class RulesetCompiler {
 	/**
+	 * 与えられた膜構造を生成するreactメソッドを実装するルールセットを生成する。
+	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
+	 * @param m 膜構造
+	 * @return (:-m)というルール1つだけからなるルールセット */
+	public static Ruleset compileMembrane(Membrane m) {
+		return (Ruleset)compileMembraneToGeneratingMembrane(m).rulesets.get(0);
+	}
+	/**
 	 * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
 	 * より正確に言うと、与えられた膜構造の内容に対応するプロセスを1回だけ生成するreactメソッドを
 	 * 実装するルールセットを唯一のルールセットとして持つ膜構造を生成する。
@@ -25,7 +34,7 @@ public class RulesetCompiler {
 	 * @param m 膜構造
 	 * @return 生成したルールセットを持つ膜構造
 	 */
-	public static Membrane runStartWithNull(Membrane m) {
+	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m) {
 		Env.c("RulesetGenerator.runStartWithNull");
 		// 世界を生成する
 		Membrane root = new Membrane(null);
@@ -37,7 +46,11 @@ public class RulesetCompiler {
 		Module.resolveModules(root);
 		return root;
 	}
-	
+	/** @deprecated
+	 * @see compileMembrane */
+	public static Membrane runStartWithNull(Membrane m) {
+		return compileMembraneToGeneratingMembrane(m);
+	}
 //	public static InterpretedRuleset run(Membrane m) {
 //		Env.c("RulesetCompiler.run");
 //		processMembrane(m);
@@ -47,6 +60,7 @@ public class RulesetCompiler {
 	/**
 	 * 与えられた膜の階層下にある全ての RuleStructure について、
 	 * 対応する Rule を生成してその膜のルールセットに追加する。
+	 * <p>ルールをちょうど1つ持つ膜にはちょうど1つのルールセットが追加される。
 	 * @param mem 対象となる膜
 	 */
 	public static void processMembrane(Membrane mem) {
