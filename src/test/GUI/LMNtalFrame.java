@@ -39,7 +39,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				running = busy = false;
-				runtime.LMNtalRuntimeManager.terminateAll();	// 追加 n-kato 2004-10-30
+				runtime.LMNtalRuntimeManager.terminateAllThreaded();	// 追加 n-kato 2004-10-30
 			}
 		});
 		initComponents();
