@@ -21,7 +21,7 @@ public class RuleCompilerTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		RuleStructure rs = getTestStructure();
+		RuleStructure rs = getTestStructure2();
 		Env.p(rs);
 		RuleCompiler rc = new RuleCompiler(rs);
 		rc.simplify();
@@ -33,9 +33,33 @@ public class RuleCompilerTest {
 	 * 
 	 * v, w, ( v :- w, w )
 	 * 
-	 * @return まく
+	 * @return RuleStructure
 	 */
-	static RuleStructure getTestStructure() {
+	static RuleStructure getTestStructure1() {
+		// ルート膜の親膜は null
+		RuleStructure rs = new RuleStructure();
+		Membrane m = new Membrane(null);
+		
+		// ルール
+		RuleStructure r = getTestStructure2();
+		
+		m.atoms.add( new Atom(m, "v", 0) );
+		m.atoms.add( new Atom(m, "w", 0) );
+		m.rules.add(r);
+		
+		rs.leftMem = new Membrane(null);
+		rs.rightMem = m;
+		return rs;
+	}
+	
+	/**
+	 * デバッグ用データ構造をつくる。2
+	 * 
+	 * ( v :- w, w )
+	 * 
+	 * @return RuleStructure
+	 */
+	static RuleStructure getTestStructure2() {
 		// ルート膜の親膜は null
 		RuleStructure rs = new RuleStructure();
 		Membrane m = new Membrane(null);
@@ -45,14 +69,7 @@ public class RuleCompilerTest {
 		r.leftMem.atoms.add( new Atom(m, "v", 0) );
 		r.rightMem.atoms.add( new Atom(m, "w", 0) );
 		r.rightMem.atoms.add( new Atom(m, "w", 0) );
-		
-		m.atoms.add( new Atom(m, "v", 0) );
-		m.atoms.add( new Atom(m, "w", 0) );
-		m.rules.add(r);
-		
-		rs.leftMem = new Membrane(null);
-		rs.rightMem = m;
-		return rs;
+		return r;
 	}
 }
 

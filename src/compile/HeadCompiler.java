@@ -60,15 +60,9 @@ public class HeadCompiler {
 		varcount = 0;
 		mempaths.clear();
 		visited.clear();
-		atomidpath.clear();
+		atomidpath = new ArrayList();
+		for(int i=0;i<atoms.size();i++) atomidpath.add(null);
 		match.clear();
-		/*
-		@varcount 	= 0
-		@mempaths 	= {} # elements are lists such as [:memof, :memof, 4]
-		@visited		= [] # Array.new(@atoms.length, nil)
-		@atomidpath = [] # Array.new(@atoms.length, nil)
-		@match			= []
-		 */
 	}
 	
 	public void compile_group(int targetid) {

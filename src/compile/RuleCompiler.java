@@ -88,7 +88,9 @@ public class RuleCompiler {
 		//optimize if $optlevel > 0
 		optimize();
 		
-		Env.p(memmatch);
+		Env.p("atommatches="+atommatches);
+		Env.p("memmatch="+memmatch);
+		Env.p("body="+body);
 		
 		//rule.register(@atommatches,@memmatch,@body)
 		Rule[] rr = new Rule[rules.size()];
@@ -106,6 +108,7 @@ public class RuleCompiler {
 			
 			if(firstid < hc.atoms.size()) {
 				atommatches.addAll(hc.match);
+				Env.p(""+hc.atomidpath.size());
 				hc.atomidpath.set(firstid, new Integer(1));
 				hc.varcount = 1;
 				Membrane mem = ((Atom)(hc.atoms.get(firstid))).mem;
