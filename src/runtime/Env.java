@@ -24,4 +24,11 @@ public final class Env {
 	public static void n(Object o) {
 		p(">>> new "+o);
 	}
+	public static String getIndent(int indents) {
+		String indent="";
+		for(int i=0;i<indents;i++) {
+			indent += "\t";
+		}
+		return indent;
+	}
 }
