@@ -16,11 +16,12 @@ public class IDConverter{
 	HashMap memTable = new HashMap();
 	//ローカルID -> 
 	
+	
 	/*
 	 * グローバル膜ID -> 膜オブジェクト
 	 * @return 登録されていればAbstractMembrane, されてなければnull
 	 */
-	AbstractMembrane getLocalMemID(String globalMemID){
+	AbstractMembrane getMem(String globalMemID){
 		return (AbstractMembrane)memTable.get(globalMemID);
 	}
 	

@@ -92,7 +92,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime /*implements Runna
 	/*
 	 * global rulset id --> rulset object
 	 */
-	Ruleset getLocalRulsetID(String globalRulesetID){
+	Ruleset getRulset(String globalRulesetID){
 		Ruleset rs = (Ruleset)rulesetIDMap.get(globalRulesetID);
 		
 		if(rs != null) return rs;

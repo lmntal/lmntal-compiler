@@ -289,7 +289,7 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 
 								beginEndLoop:while(true){
 									input = in.readLine();
-									commandInsideBegin = input.split(" ",5); //ぬるぽに注意
+									commandInsideBegin = input.split(" ",5);
 
 									String srcmem, dstmem, parentmem, atom1, atom2, pos1, pos2, ruleset, func;
 									AbstractMembrane realMem;
@@ -300,7 +300,8 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									} else if (commandInsideBegin[0].equalsIgnoreCase("clearrules")){
 										dstmem = commandInsideBegin[1];
 										
-										
+										//dstmem.clearRules()を呼ぶ
+										//(IDConverter.getMem()).clearRules();
 										
 										out.write("not implemented yet\n");
 										out.flush();
@@ -309,6 +310,9 @@ public class LMNtalDaemonMessageProcessor implements Runnable {
 									} else if (commandInsideBegin[0].equalsIgnoreCase("loadruleset")){
 										dstmem = commandInsideBegin[1];
 										ruleset = commandInsideBegin[2];
+
+										//mem.loadRulesest(Ruleset)を呼ぶ
+										//(IDConverter.getMem()).loadRuleset(Env.theRuntime.getRuleset(ruleset));
 										
 										out.write("not implemented yet\n");
 										out.flush();
