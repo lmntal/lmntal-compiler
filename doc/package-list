@@ -5,4 +5,5 @@ java_cup.runtime
 org.gnu.readline
 runtime
 test
+test.graph
 util
