@@ -711,7 +711,7 @@ class TerminateProcessor implements Runnable {
 			System.out.println("TerminateProcessor.run(): LMNtalRuntimeManager.termnateAll() succeded");
 			node.respondAsOK(msgid);
 		} else {
-			//node.respondAsFail(msgid);
+			node.respondAsFail(msgid);
 		}
 	}
 }
