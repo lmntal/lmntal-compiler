@@ -51,6 +51,7 @@ public class Dumper {
 		binops.put(">=.",	new int[]{xfx,700});
 		binops.put("<.",	new int[]{xfx,700});
 		binops.put("=<.",	new int[]{xfx,700});
+		binops.put(":",		new int[]{xfy,800});	// ただし : の左辺が [a-z][A-Za-z0-9_]* のときのみ
 	}
 	static boolean isInfixOperator(String name) {
 		return binops.containsKey(name);
@@ -268,17 +269,22 @@ public class Dumper {
 		Unlexer buf = new Unlexer();
 		if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
 			if (arity == 2 && isInfixOperator(func.getName())) {
-				int type = getBinopType(func.getName());
-				int prio = getBinopPrio(func.getName());
-				int innerleftprio  = prio + ( type == yfx ? 1 : 0 );
-				int innerrightprio = prio + ( type == xfy ? 1 : 0 );
-				boolean needpar = (outerprio < innerleftprio || outerprio < innerrightprio);
-				if (needpar) buf.append("(");
-				buf.append(dumpLink(a.args[0], atoms, innerleftprio));
-				buf.append(func.getName());
-				buf.append(dumpLink(a.args[1], atoms, innerrightprio));
-				if (needpar) buf.append(")");
-				return buf.toString();
+				if ( func.getName().equals(":")
+				&& ( a.args[0].getAtom().getArity() != 1
+				  || !a.args[0].getAtom().getName().matches("[a-z][A-Za-z0-9_]*") )) {}
+				else {
+					int type = getBinopType(func.getName());
+					int prio = getBinopPrio(func.getName());
+					int innerleftprio  = prio + ( type == yfx ? 1 : 0 );
+					int innerrightprio = prio + ( type == xfy ? 1 : 0 );
+					boolean needpar = (outerprio < innerleftprio || outerprio < innerrightprio);
+					if (needpar) buf.append("(");
+					buf.append(dumpLink(a.args[0], atoms, innerleftprio));
+					buf.append(func.getName());
+					buf.append(dumpLink(a.args[1], atoms, innerrightprio));
+					if (needpar) buf.append(")");
+					return buf.toString();
+				}
 			}
 			if (arity == 2 && func.getName().equals(".")) {
 				buf.append("[");

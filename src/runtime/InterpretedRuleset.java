@@ -440,6 +440,13 @@ class InterpretiveReactor {
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
 					mems[inst.getIntArg1()].unlock();
 					break; //n-kato
+
+				case Instruction.LOCALSETMEMNAME: //[dstmem, name]
+				case Instruction.SETMEMNAME: //[dstmem, name]
+					mems[inst.getIntArg1()].setName((String)inst.getArg2());
+					break; //n-kato
+
+
 					//====膜を操作する基本ボディ命令====ここまで====
 
 					//====リンクに関係する出力するガード命令====ここから====

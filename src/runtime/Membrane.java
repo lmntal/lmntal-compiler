@@ -12,8 +12,6 @@ public final class Membrane extends AbstractMembrane {
 	/** 実行スタック */
 	private Stack ready = new Stack();
 	
-	public String name;
-	
 	/**
 	 * 指定されたタスクに所属する膜を作成する。
 	 * newMem/newRoot メソッド内で呼ばれる。

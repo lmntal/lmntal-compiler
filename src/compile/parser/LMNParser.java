@@ -73,6 +73,7 @@ public class LMNParser {
 		LinkedList srcProcess = parseSrc();
 		Membrane mem = new Membrane(null);
 		incorporateSignSymbols(srcProcess);
+		incorporateModuleNames(srcProcess);
 		expandAtoms(srcProcess);
 		correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
@@ -727,7 +728,12 @@ public class LMNParser {
 		incorporateSignSymbols(sRule.getHead());
 		incorporateSignSymbols(typeConstraints);
 		incorporateSignSymbols(sRule.getBody());
-
+		
+		// - モジュール名のアトムファンクタへの取り込み
+		incorporateModuleNames(sRule.getHead());
+		incorporateModuleNames(typeConstraints);
+		incorporateModuleNames(sRule.getBody());
+		
 		// - 型制約の = を除去する
 		// todo
 		
@@ -794,7 +800,39 @@ public class LMNParser {
 			}
 		}
 	}
-	
+	/** プロセス構造（子ルール外）に出現するモジュール名をファンクタに取り込む。
+	 * <pre>
+	 * ':'(m,p(t1..tn)) → 'm.p'(t1..tn)
+	 * </pre>
+	 */
+	private void incorporateModuleNames(LinkedList process) {
+		ListIterator it = process.listIterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcAtom) {
+				SrcAtom atom = (SrcAtom)obj;
+				if (atom.getProcess().size() == 2
+				 && atom.getName().equals(":")
+				 && atom.getProcess().get(0) instanceof SrcAtom
+				 && atom.getProcess().get(1) instanceof SrcAtom ) {
+					SrcAtom pathatom = (SrcAtom)atom.getProcess().get(0);
+					SrcAtom bodyatom = (SrcAtom)atom.getProcess().get(1);
+					if (pathatom.getProcess().size() == 0
+					 && pathatom.getNameType() == SrcName.PLAIN) {
+					 	it.remove();
+						it.add(bodyatom);
+						bodyatom.srcname = new SrcName(pathatom.getName() + "." + bodyatom.getName(), SrcName.PATHED);
+						incorporateModuleNames(bodyatom.getProcess());
+						continue;
+					}
+				}
+				incorporateModuleNames(atom.getProcess());
+			}
+			else if (obj instanceof SrcMembrane) {
+				incorporateModuleNames(((SrcMembrane)obj).getProcess());
+			}
+		}
+	}
 	/** プロセス構造（子ルール外）をアトム展開する。
 	 * すなわち、アトム引数に出現する全てのアトム構造と膜構造を再帰的に展開する。
 	 * <pre>

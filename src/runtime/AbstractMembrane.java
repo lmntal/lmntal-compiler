@@ -52,9 +52,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	protected boolean locked = false;
 //	/** 最後にロックを取得した膜 */
 //	protected AbstractMembrane lastLockedMem;
+	/** この膜の名前（internされた文字列またはnull） */
+	String name;
 
 	private static int nextId = 0;
 	private int id;
+
+	public String getName() { return name; }
+	void setName(String name) { this.name = name; } // 仕様が固まったらコンストラクタで渡すようにすべきかも
 	
 	///////////////////////////////
 	// コンストラクタ

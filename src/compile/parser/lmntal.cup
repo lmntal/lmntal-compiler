@@ -20,10 +20,13 @@ non terminal String				AtomName;
 non terminal Object				QuotedOperatorAtom;
 non terminal Object				UnitAtom;
 non terminal Object				UnaryOpAtom;
+non terminal Object				Atom90;
 non terminal Object				Atom200;
 non terminal Object				Atom300;
 non terminal Object				Atom400;
 non terminal Object				Atom500;
+non terminal Object				Atom700;
+non terminal Object				Atom800;
 non terminal Object				Atom;
 non terminal SrcMembrane		Membrane;
 non terminal SrcRule			Rule;
@@ -161,12 +164,22 @@ Atom500		::=   Atom400:atom
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("+", list); :};
 
-Atom		::=   Atom500:atom
+Atom700		::=   Atom500:atom
 					{: RESULT = atom; :}
 				| Atom500:atom1 RELOP:op Atom500:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom(op, list); :};
+
+Atom800		::=   Atom700:atom
+					{: RESULT = atom; :}
+				| AtomName:name COLON Atom800:atom
+					{: LinkedList list = new LinkedList();
+					   list.add(new SrcAtom(new SrcName(name))); list.add(atom);
+					   RESULT = new SrcAtom(":", list); :};
+
+Atom		::=   Atom800:atom
+					{: RESULT = atom; :};
 
 QuotedOperatorAtom ::=
 				  PLUS			{: RESULT = new SrcAtom("+");	:}
@@ -181,6 +194,7 @@ QuotedOperatorAtom ::=
 				| RELOP:op		{: RESULT = new SrcAtom(op);	:}
 				| HAT			{: RESULT = new SrcAtom("^");	:}
 				| TILDE			{: RESULT = new SrcAtom("~");	:}
+				| COLON			{: RESULT = new SrcAtom(":");	:}
 				| ASTERISK_ASTERISK	{: RESULT = new SrcAtom("**");	:}
 				;
 
@@ -280,6 +294,8 @@ ProcessList ::= /* epsilon */
 NonemptyProcessList ::=
 				  Process:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
+				| NonemptyProcessList:list Membrane:p
+					{: list.add(p); RESULT = list; :}
 				| NonemptyProcessList:list COMMA Process:p
 					{: list.add(p); RESULT = list; :};
 

@@ -442,6 +442,7 @@ public class Instruction implements Cloneable {
 	//  ----- freemem                  [srcmem]
 	// [local]addmem                   [dstmem, srcmem]
 	// [local]unlockmem                [srcmem]
+	// [local]setmemname               [dstmem, name]
 
 	/** removemem [srcmem, parentmem]
 	 * <br>ボディ命令<br>
@@ -540,6 +541,17 @@ public class Instruction implements Cloneable {
 	 * <br>最適化用ボディ命令<br>
 	 * unlockmemと同じ。ただし$srcmemはこの計算ノードに存在する。*/
 	public static final int LOCALUNLOCKMEM = LOCAL + UNLOCKMEM;
+
+	/** setmemname [dstmem, name]
+	 * <br>ボディ命令<br>
+	 * 膜$dstmemの名前を文字列（またはnull）nameに設定する。
+	 * <p>現在、膜の名前の使用目的は表示用のみ。いずれ、膜名に対するマッチングができるようになるはず。*/
+	public static final int SETMEMNAME = 59;
+
+	/** localsetmemname [dstmem, name]
+	 * <br>最適化用ボディ命令<br>
+	 * setmemnameと同じ。ただし$dstmemはこの計算ノードに存在する。*/
+	public static final int LOCALSETMEMNAME = LOCAL + SETMEMNAME;
 
 	// 予約 (60--62)
 
@@ -1213,10 +1225,10 @@ public class Instruction implements Cloneable {
 		i.add(locals);
 		return i;
     }
-    /** newmem 命令を生成する */
-    public static Instruction newmem(int ret, int srcmem) {
+	/** newmem 命令を生成する */
+	public static Instruction newmem(int ret, int srcmem) {
 		return new Instruction(NEWMEM,ret,srcmem);
-    }
+	}
 	/** newlink 命令を生成する
 	 * @deprecated */
 	public static Instruction newlink(int atom1, int pos1, int atom2, int pos2) {
