@@ -229,6 +229,7 @@ public class HeadCompiler {
 				mempath.put(submem, new Integer(submempath));
 			}
 			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
+			// （ガードコンパイラに移動する予定）
 			if (submem.processContexts.isEmpty()) {
 //				match.add(new Instruction(Instruction.NATOMS, submempath, submem.atoms.size()));
 				// TODO 単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする
@@ -236,6 +237,7 @@ public class HeadCompiler {
 					submem.getNormalAtomCount() + submem.typedProcessContexts.size()));
 				match.add(new Instruction(Instruction.NMEMS,  submempath, submem.mems.size()));
 			}
+			//
 			if (submem.ruleContexts.isEmpty()) {
 				match.add(new Instruction(Instruction.NORULES, submempath));
 			}

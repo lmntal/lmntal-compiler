@@ -3,6 +3,7 @@ package compile.parser;
 /** ソースファイル中のリンク束表現 */
 
 class SrcLinkBundle extends SrcContext {
+	static final String PREFIX_TAG = "*";
 	/**
 	 * 指定された名前のリンク束を作成します
 	 * @param name リンク束の名前
@@ -11,6 +12,6 @@ class SrcLinkBundle extends SrcContext {
 		super(name);
 	}
 	public String getQualifiedName() {
-		return "*" + name;
+		return PREFIX_TAG + name;
 	}
 }

@@ -59,6 +59,25 @@ public class LMNParser {
 		this(new Lexer(in));
 	}
 
+	/**
+	 * メインメソッド。ソースファイルを解析し、プロセス構造が入った膜構造を生成する。
+	 * 解析後は構文エラーが修正され、リンクやコンテキスト名の解決、およびプロキシの作成が行われている。
+	 * @return ソースファイル全体が表すプロセス構造が入った膜構造
+	 * @throws ParseException
+	 */
+	public Membrane parse() throws ParseException {
+		LinkedList srcProcess = parseSrc();
+		Membrane mem = new Membrane(null);
+		incorporateSignSymbols(srcProcess);
+		expandAtoms(srcProcess);
+		correctWorld(srcProcess);
+		addProcessToMem(srcProcess, mem);
+		HashMap freeLinks = addProxies(mem);
+		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
+		Inline.makeCode();
+		return mem;
+	}
+	
 	/**	
 		解析の結果を LinkedList とする解析木として返します。
 		@return 解析されたソースコードのリスト
@@ -77,42 +96,21 @@ public class LMNParser {
 		return result;
 	}
 	
-	/**
-	 * ソースファイルを解析し、プロセス構造が入った膜構造を生成する。
-	 * 解析後は構文エラーが修正され、リンクやコンテキスト名の解決、およびプロキシの作成が行われている。
-	 * @return ソースファイル全体が表すプロセス構造が入った膜構造
-	 * @throws ParseException
-	 */
-	public Membrane parse() throws ParseException {
-		LinkedList srcProcess = parseSrc();
-		Membrane mem = new Membrane(null);
-		incorporateSignSymbols(srcProcess);
-		expandAtoms(srcProcess);
-		correctWorld(srcProcess);
-		addProcessToMem(srcProcess, mem);
-		HashMap freeLinks = addProxies(mem);
-		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
-		Inline.makeCode();
-		return mem;
-	}
-	
 	////////////////////////////////////////////////////////////////
 	
 	/**
 	 * 膜にアトム、子膜、ルールなどを膜に登録する
 	 * @param list 登録したいプロセスのリスト
-	 * @throws ParseException
 	 */
-	void addProcessToMem(LinkedList list, Membrane mem) throws ParseException {
+	void addProcessToMem(LinkedList list, Membrane mem) {
 		for (int i = 0; i < list.size(); i++) addObjectToMem(list.get(i), mem);
 	}
 	/**
 	 * 膜にアトム、子膜、ルールなどの構文オブジェクトを追加
 	 * @param obj 追加する構文オブジェクト
 	 * @param mem 追加先の膜
-	 * @throws ParseException objが未知なオブジェクトの場合など
 	 */
-	private void addObjectToMem(Object obj, Membrane mem) throws ParseException {
+	private void addObjectToMem(Object obj, Membrane mem) {
 		// アトム
 		if (obj instanceof SrcAtom) {
 			addSrcAtomToMem((SrcAtom)obj, mem);
@@ -140,7 +138,7 @@ public class LMNParser {
 //		}
 		// その他 
 		else {
-			throw new ParseException("Illegal Object to add to a membrane: "+obj);
+			error("SYSTEM ERROR: Illegal Object to add to a membrane: "+obj);
 		}
 	}
 
@@ -148,9 +146,8 @@ public class LMNParser {
 	 * 膜構文を膜に追加
 	 * @param sMem 追加する膜構文
 	 * @param mem 追加先の膜
-	 * @throws ParseException
 	 */
-	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) throws ParseException {
+	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) {
 		Membrane submem = new Membrane(mem);
 		// hara
 		Module.regMemName(sMem.name, submem);
@@ -163,9 +160,8 @@ public class LMNParser {
 	 * アトム構文を膜に追加
 	 * @param sAtom 追加したいアトム構文
 	 * @param mem 追加先の膜
-	 * @throws ParseException
 	 */
-	private void addSrcAtomToMem(SrcAtom sAtom, Membrane mem) throws ParseException {
+	private void addSrcAtomToMem(SrcAtom sAtom, Membrane mem) {
 		boolean alllinks   = true;
 		boolean allbundles = true;
 		LinkedList p = sAtom.getProcess();
@@ -252,7 +248,7 @@ public class LMNParser {
 	
 	/** 子膜に対して再帰的にプロキシを追加する。
 	 * @return この膜の更新された自由リンクマップ mem.freeLinks */
-	private HashMap addProxies(Membrane mem) throws ParseException {
+	private HashMap addProxies(Membrane mem) {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
@@ -289,10 +285,9 @@ public class LMNParser {
 	 * 指定された膜にあるアトムの引数に対して、リンクの結合を行い、自由リンクのHashMapを返す。
 	 * <p>子膜に対してリンクの結合およびプロキシの作成が行われた後で呼び出される。
 	 * <p>副作用として、メソッドの戻り値を mem.freeLinks にセットする。
-	 * @throws ParseException
 	 * @return リンク名から自由リンク出現へのHashMap
 	 */
-	private HashMap coupleLinks(Membrane mem) throws ParseException {
+	private HashMap coupleLinks(Membrane mem) {
 		// 同じ膜レベルのリンク結合を行う
 		HashMap links = new HashMap();
 		List[] lists = {mem.atoms, mem.processContexts, mem.typedProcessContexts};
@@ -322,15 +317,18 @@ public class LMNParser {
 	/**
 	 * 指定されたリンク出現を記録する。同じ名前で2回目の出現ならばリンクの結合を行う。
 	 * @param lnk 記録するリンク出現
-	 * @throws ParseException 2回より多くリンク名が出現した場合
 	 */
-	private void addLinkOccurrence(HashMap links, LinkOccurrence lnk) throws ParseException {
+	private void addLinkOccurrence(HashMap links, LinkOccurrence lnk) {
 		// 3回以上の出現
 		if (links.get(lnk.name) == CLOSED_LINK) {
 			error("SYNTAX ERROR: Link " + lnk.name + " appears more than twice.");
+			String linkname = generateNewLinkName();
+			if (lnk.name.startsWith(SrcLinkBundle.PREFIX_TAG))
+				linkname = SrcLinkBundle.PREFIX_TAG + linkname;
+			lnk.name = linkname;
 		}
 		// 1回目の出現
-		else if (links.get(lnk.name) == null) {
+		if (links.get(lnk.name) == null) {
 			links.put(lnk.name, lnk);
 		}
 		// 2回目の出現
@@ -343,7 +341,7 @@ public class LMNParser {
 	}
 	
 	/** 膜memの自由リンクを膜内で閉じる（構文エラーからの復帰用） */
-	public void closeFreeLinks(Membrane mem) throws ParseException {
+	public void closeFreeLinks(Membrane mem) {
 		Iterator it = mem.freeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			LinkOccurrence link = (LinkOccurrence)mem.freeLinks.get(it.next());
@@ -364,7 +362,7 @@ public class LMNParser {
 
 	/** ガード型制約の型付きプロセス文脈のリストを作成する。
 	 * @param names コンテキストの限定名 (String) から ContextDef への写像 [in,out] */
-	private void enumTypeConstraintNames(Membrane mem, HashMap names) throws ParseException {
+	private void enumTypeConstraintNames(Membrane mem, HashMap names) {
 		Iterator it = mem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
@@ -378,7 +376,7 @@ public class LMNParser {
 	
 	/** ヘッドのプロセス文脈、型付きプロセス文脈、ルール文脈、リンク束のリストを作成する。
 	 * @param names コンテキストの限定名 (String) から ContextDef への写像 [in,out] */
-	private void enumHeadNames(Membrane mem, HashMap names) throws ParseException {
+	private void enumHeadNames(Membrane mem, HashMap names) {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
@@ -436,7 +434,7 @@ public class LMNParser {
 	}
 	/** ボディのプロセス文脈、型付きプロセス文脈、ルール文脈、リンク束のリストを作成する。
 	 * @param names コンテキストの限定名 (String) から ContextDef への写像 [in] */
-	private void enumBodyNames(Membrane mem, HashMap names) throws ParseException {
+	private void enumBodyNames(Membrane mem, HashMap names) {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
@@ -492,9 +490,8 @@ public class LMNParser {
 	 * ルール構文を膜に追加する
 	 * @param sRule 追加したいルール構文
 	 * @param mem 追加先の膜
-	 * @throws ParseException
 	 */
-	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
+	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) {
 		RuleStructure rule = new RuleStructure(mem);
 		
 		// todo ここでガードを型制約と否定条件に分類する（現在は全て型制約として扱っている）
@@ -610,7 +607,7 @@ public class LMNParser {
 	}
 	
 	/** 左辺と右辺の自由リンクをつなぐ */
-	void coupleInheritedLinks(RuleStructure rule) throws ParseException {
+	void coupleInheritedLinks(RuleStructure rule) {
 		HashMap lhsFreeLinks = rule.leftMem.freeLinks;
 		HashMap rhsFreeLinks = rule.rightMem.freeLinks;
 		HashMap links = new HashMap();
@@ -654,7 +651,7 @@ public class LMNParser {
 		String name = sProc.getQualifiedName();
 		if (sProc.args == null) {
 			pc = new ProcessContext(mem, name, 0);
-			pc.setBundleName("*" + sProc.getName());
+			pc.setBundleName(SrcLinkBundle.PREFIX_TAG + sProc.getName());
 		} else {
 			int length = sProc.args.size();
 			pc = new ProcessContext(mem, name, length);
@@ -677,7 +674,7 @@ public class LMNParser {
 		mem.ruleContexts.add(p);
 	}
 	
-//	private void addSrcLinkUnifyToMem(SrcLinkUnify sUnify, Membrane mem) throws ParseException {
+//	private void addSrcLinkUnifyToMem(SrcLinkUnify sUnify, Membrane mem) {
 //		Atom unify = new Atom(mem,"=",2);
 //		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(0), unify, 0);
 //		setLinkToAtomArg((SrcLink)sUnify.getProcess().get(1), unify, 1);
@@ -710,10 +707,9 @@ public class LMNParser {
 	 * @param link セットしたいリンク
 	 * @param atom セット先のアトム
 	 * @param pos セット先のアトムでの場所
-	 * @throws ParseException セット先の場所がアトムに存在しない場合
 	 */
-	private void setLinkToAtomArg(SrcLink link, Atom atom, int pos) throws ParseException {
-		if (pos >= atom.args.length) throw new ParseException("Out of Atom args length:"+pos);
+	private void setLinkToAtomArg(SrcLink link, Atom atom, int pos) {
+		//if (pos >= atom.args.length) error("SYSTEM ERROR: Out of Atom args length:"+pos);
 		atom.args[pos] = new LinkOccurrence(link.getName(), atom, pos);
 	}
 	

@@ -362,7 +362,7 @@ public class RuleCompiler {
 					}
 				}
 				else {
-					System.out.println("unrecognized guard type constraint name: " + cstr);
+					error("COMPILE ERROR: unrecognized guard type constraint name: " + cstr);
 					guard.add(new Instruction(Instruction.LOCK, 0));
 					return;
 				}
@@ -374,7 +374,7 @@ public class RuleCompiler {
 		while (changed);
 		// 型付け失敗
 		guard.add(new Instruction(Instruction.LOCK, 0));
-		System.out.println("Compile Error: never proceeding guard type constraints: " + cstrs);
+		error("COMPILE ERROR: never proceeding guard type constraints: " + cstrs);
 	}
 	/** 型付きプロセス文脈defを1引数ファンクタfuncで束縛する */
 	private void bindToFunctor(ContextDef def, Functor func) {
@@ -505,15 +505,12 @@ public class RuleCompiler {
 					// 単一化アトムのリンク先が両方とも他の膜につながっている場合
 					if (mem == rs.leftMem) {
 						// ( X=Y :- p(X,Y) ) は意味解析エラー
-						//$nerrors += 1;
-						System.out.println("Compile error: head contains body unification");
+						error("COMPILE ERROR: head contains body unification");
 					}
 					else {
 						// ( p(X,Y) :- X=Y ) はUNIFYボディ命令を出力するのでここでは何もしない
 					}
 				} else {
-					//link1.atom.args[link1.pos] = link2;
-					//link2.atom.args[link2.pos] = link1;
 					link1.buddy = link2;
 					link2.buddy = link1;
 					link2.name = link1.name;
@@ -596,14 +593,14 @@ public class RuleCompiler {
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
 			if (pc.def.src.mem == null) {
-				System.out.println("SYSTEM ERROR: ProcessContext.def.src.mem is not set");
+				error("SYSTEM ERROR: ProcessContext.def.src.mem is not set");
 			}
 			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.src.mem)) {
 				if (pc.def.rhsOccs.get(0) == pc) {
 					body.add(new Instruction(Instruction.MOVECELLS,
 						rhsmemToPath(mem), lhsmemToPath(pc.def.src.mem) ));
 				} else {
-					System.out.println("FEATURE NOT IMPLEMENTED: process context must be linear: " + pc);
+					error("FEATURE NOT IMPLEMENTED: process context must be linear: " + pc);
 				}
 			}
 		}
@@ -689,25 +686,37 @@ public class RuleCompiler {
 			Atom atom = (Atom)it.next();			
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
-				//Env.d(atom+"("+pos+")"+" buddy -> "+link.buddy.atom+" link.atom="+link.atom);
 				if (link == null) {
-					System.out.println("SYSTEM ERROR: buddy not set: " + atom + ", " + pos);
+					error("SYSTEM ERROR: buddy of atom link is not set: " + atom + ", " + pos);
 				}
+				//Env.d(atom+"("+pos+")"+" buddy -> "+link.buddy.atom+" link.atom="+link.atom);
 				if (link.atom instanceof ProcessContext) {
-					if (typedcxttypes.get(((ProcessContext)link.atom).def) == UNARY_ATOM_TYPE) {
-						body.add( new Instruction(Instruction.NEWLINK,
-											rhsatomToPath(atom), pos,
-											rhstypedcxtToPath((ProcessContext)link.atom), 0,
-											rhsmemToPath(atom.mem) ));
+					// アトムのリンク先がプロセス文脈/型付きプロセス文脈のとき
+					ProcessContext pc = (ProcessContext)link.atom;
+					if (pc.mem.typedProcessContexts.contains(pc)) {
+						if (typedcxttypes.get(pc.def) == UNARY_ATOM_TYPE) {
+							body.add( Instruction.newlink(
+												rhsatomToPath(atom), pos,
+												rhstypedcxtToPath(pc), 0,
+												rhsmemToPath(atom.mem) ));
+						}
+					} else { // 型付きでない場合
+						// ( $buddy[X|] :- atom(X) ) --> relink
+						// ( :- atom(X), $buddy[X|] ) --> newlink
+//						body.add( Instruction.newlink(
+//											rhsatomToPath(atom), pos,
+//											rhstypedcxtToPath(pc), 0,
+//											rhsmemToPath(atom.mem) ));
 					}
 					continue;
 				}
-				if (link.atom.mem == rs.leftMem) {
+				// 最初のアトムのリンク先はアトム
+				if (link.atom.mem == rs.leftMem) { // ( buddy(X) :- atom(X) )
 					body.add( new Instruction(Instruction.RELINK,
 						rhsatomToPath(atom), pos,
 						lhsatomToPath(link.atom), link.pos,
 						rhsmemToPath(atom.mem) ));
-				} else {
+				} else { // ( :- atom(X), buddy(X) )
 					if (rhsatomToPath(atom) < rhsatomToPath(link.atom)
 					|| (rhsatomToPath(atom) == rhsatomToPath(link.atom) && pos < link.pos)) {
 						body.add( new Instruction(Instruction.NEWLINK,
@@ -725,7 +734,7 @@ public class RuleCompiler {
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence link = atom.args[pos].buddy;
 				if (link == null) {
-					System.out.println("SYSTEM ERROR: buddy not set 2");
+					error("SYSTEM ERROR: buddy not set 2");
 				}
 				if (!(link.atom instanceof ProcessContext)) {
 					if (lhsatoms.contains(link.atom)) { // RELINK する
@@ -739,7 +748,7 @@ public class RuleCompiler {
 					else if (rhsatoms.contains(link.atom)) { // PART1でnewlink済みなので、何もしない
 					}
 					else {
-						System.out.println("SYSTEM ERROR: unknown buddy of body typed process context");
+						error("SYSTEM ERROR: unknown buddy of body typed process context");
 					}
 					continue;
 				}
@@ -832,5 +841,18 @@ public class RuleCompiler {
 		Env.d("--body:");
 		while(it.hasNext()) Env.d((Instruction)it.next());
 	}
+	
+	////////////////////////////////////////////////////////////////
+	// 仮。LMNParserのものと統合し、おそらくEnvに移動する予定
+	
+	public void error(String text) {
+		System.out.println(text);
+	}
+	public void warning(String text) {
+		System.out.println(text);
+	}
+	
+	
+	
 }
 
