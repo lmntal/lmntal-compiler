@@ -109,7 +109,6 @@ public class LMNtalDaemon implements Runnable {
 	 *
 	 */
 	public static void main(String args[]) {
-		Env.debug = 1; //Env.DEBUG_DEFAULTは見えないので
 		Thread t = new Thread(new LMNtalDaemon(), "LMNtalDaemon");
 		t.start();
 	}
@@ -210,11 +209,14 @@ public class LMNtalDaemon implements Runnable {
 	}
 	
 	/**
+	 * @deprecated
+	 * @see #getLMNtalNode(String) 
 	 * 
 	 * Fully Qualified Domain Name fqdnに対応するLMNtalNodeを探す。
 	 * 
 	 * @param fqdn ホスト名。Fully Qualified Domain Nameである事。 
 	 * @return nodeTableに登録されているLMNtalNodeのInetAddressからホスト名を引いてStringで比較する。合ってたらそのLMNtalNode。それ以外はnull。
+	 * 
 	 */
 	public static LMNtalNode getLMNtalNodeFromFQDN(String fqdn) {
 		if (Env.debug > 0)System.out.println("now in LMNtalDaemon.getLMNtalNodeFromFQDN(" + fqdn + ")");
@@ -299,6 +301,7 @@ public class LMNtalDaemon implements Runnable {
 		return true;
 	}
 
+	//TODO 終了する時にちゃんとこれを呼ぶ
 	public static boolean unregisterRuntimeGroup(String rgid){
 		if (Env.debug > 0)System.out.println("unregisterRuntimeGroup(" + rgid +  ")");
 		
