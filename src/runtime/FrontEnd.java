@@ -84,12 +84,14 @@ public class FrontEnd {
 			//file指定がなければこれを呼ぶ
 			REPL repl = new REPL();
 			repl.run();
+			// srcがnullなのであとでエラーが
 		}else{
 			src = new BufferedReader(new InputStreamReader(is));
 		}
 		
 		// srcを構文解析に渡す。
-		koubun_kaiseki(src); // ダミー
+		Ruleset initRuleset;
+		initRuleset = koubun_kaiseki(src); // ダミー
 		try{
 			src.close();
 		}catch(IOException e){
@@ -97,9 +99,12 @@ public class FrontEnd {
 			System.exit(-1);
 		}
 		// 計算ノードに、得られた初期化ルールを渡して呼び出す
+		
+		LMNtalRuntime buturimachine = new LMNtalRuntime(initRuleset);
+		buturimachine.exec(); //実行
 	}
 	
-	static void koubun_kaiseki(Reader src){
+	static Ruleset koubun_kaiseki(Reader src){
 		// ソースをダンプするだけ
 		int i;
 		while(true){
@@ -112,5 +117,6 @@ public class FrontEnd {
 				System.exit(-1);
 			}
 		}
+		return new InterpretedRuleset(null);
 	}
 }
