@@ -71,7 +71,6 @@ public class GraphLayout implements Runnable {
 	}
 	
 	public void calc() {
-		if(true) return;
 		setAllowRelax(true);
 		for(int i=0;i<100;i++) {
 			relax();
@@ -94,11 +93,16 @@ public class GraphLayout implements Runnable {
 	
 	public Rectangle getAtomsBound() {
 		final int m=1;
-		Rectangle r = new Rectangle((parent.getWidth() - parent.getWidth()/m)/2, (parent.getHeight() - parent.getHeight()/m)/2, parent.getWidth()/m, parent.getHeight()/m);
+		Rectangle r=null;
+		r = new Rectangle((parent.getWidth() - parent.getWidth()/m)/2, (parent.getHeight() - parent.getHeight()/m)/2, parent.getWidth()/m, parent.getHeight()/m);
+//		if(rootMem.getAtomCount()==0) {
+//		} else {
+//		}
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
 			Point p = n.getPosition().toPoint();
 //			System.out.println(r+" "+p);
+//			if(r==null) r = new Rectangle(p);
 			if(!r.contains(p)) {
 				r.add(p);
 			}
