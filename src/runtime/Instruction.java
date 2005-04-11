@@ -1428,17 +1428,14 @@ public class Instruction implements Cloneable, Serializable {
 //	public static final int FCOS = 641;
 //	public static final int FTAN = 642;
     
-    /** group [[Instructions...]]
-     * ヘッド命令列をアトムグループごとに区切る
-     * 細かい予定は未定
-     * 現在はヘッド命令列がどんな感じでグループ化しているかを
-     * 確認するくらいしかできない
+    //グループ化に関する命令
+    /** group [subinsts]
+     * subinsts 内部の命令列
      * sakurai
      */
     public static final int GROUP = 2000;
-    static {setArgType(GROUP, new ArgType(false, ARG_INSTS));}
-	////////////////////////////////////////////////////////////////
-
+	static {setArgType(GROUP, new ArgType(false, ARG_INSTS));}
+    
     /** 命令の種類を取得する。*/
 	public int getKind() {
 		return kind;
@@ -1465,6 +1462,9 @@ public class Instruction implements Cloneable, Serializable {
 	public int getIntArg5() {
 		return ((Integer)data.get(4)).intValue();
 	}
+	public int getIntArg6(){
+		return ((Integer)data.get(5)).intValue();
+	}
 	public Object getArg(int pos) {
 		return data.get(pos);
 	}
@@ -1482,6 +1482,9 @@ public class Instruction implements Cloneable, Serializable {
 	}
 	public Object getArg5() {
 		return data.get(4);
+	}
+	public Object getArg6() {
+		return data.get(5);
 	}
 	/**@deprecated*/
 	public void setArg(int pos, Object arg) {
@@ -1751,7 +1754,7 @@ public class Instruction implements Cloneable, Serializable {
 		add(arg4);
 		add(arg5);
 	}
-
+	
 	public Object clone() {
 		Instruction c = new Instruction();
 		c.kind = this.kind;
@@ -1802,8 +1805,29 @@ public class Instruction implements Cloneable, Serializable {
 			this.output = output;
 			type = new int[] {arg1, arg2, arg3, arg4, arg5};
 		}
+		ArgType(boolean output, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6){
+			this.output = output;
+			type = new int[] {arg1, arg2, arg3, arg4, arg5, arg6};
+		}
 	}
 
+	public ArrayList getVarArgs() {
+		ArrayList ret = new ArrayList();
+		ArgType argtype = (ArgType)argTypeTable.get(new Integer(getKind()));
+		int i = 0;
+		if (getOutputType() != -1) {
+			i = 1;
+		}
+		for (; i < data.size(); i++) {
+			switch (argtype.type[i]) {
+				case ARG_ATOM:
+				case ARG_MEM:
+				case ARG_VAR:
+					ret.add(getArg(i));
+			}
+		}
+		return ret;
+	}
 	/**
 	 * 与えられた対応表によって、ボディ命令列中のアトム変数を書き換える。<br>
 	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
@@ -2145,7 +2169,8 @@ public class Instruction implements Cloneable, Serializable {
 				}
 			}
 		}
-		if (data.size() == 1 && data.get(0) instanceof InstructionList) {
+		
+		if (kind != Instruction.JUMP && data.size() >= 1 && data.get(0) instanceof InstructionList) {
 			List insts = ((InstructionList)data.get(0)).insts;
 			if(insts.size() == 0) {
 				buffer.append("[]");
@@ -2155,10 +2180,16 @@ public class Instruction implements Cloneable, Serializable {
 				for(i = 0; i < insts.size()-1; i++){
 					buffer.append("                  ");
 					buffer.append(insts.get(i));
+					//TODO 出力引数だったらインデントを下げる.
 					buffer.append(", \n");
 				}
 				buffer.append("                  ");
 				buffer.append(insts.get(i));
+				for(int j = 1; j < data.size(); j++){
+					buffer.append("                  ");
+					buffer.append("     ");
+					buffer.append(", " + data.get(j));
+				}
 				buffer.append(" ]");
 				return buffer.toString();
 			}
