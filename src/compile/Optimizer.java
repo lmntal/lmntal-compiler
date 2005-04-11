@@ -18,12 +18,17 @@ import runtime.Rule;
 public class Optimizer {
 	/** ルールオブジェクトを最適化する */
 	public static void optimizeRule(Rule rule) {
+		if(Env.zoptimize >= 1) Env.optimize = 1;
 //		if (Env.optimize == 9) Compactor.compactRule(rule); else // （テスト用）
 		Compactor.compactRule(rule);
-		if (Env.optimize == 1) inlineExpandTailJump(rule.memMatch); else	// TODO 最適化器を統合する
-		if (Env.zoptimize >= 1) GuardOptimizer.guardMove(rule.memMatch, rule.guard); // ガード最適化テスト
+		if (Env.optimize == 1) {
+			inlineExpandTailJump(rule.memMatch);	// TODO 最適化器を統合する
+			if (Env.zoptimize >= 1 && Env.zoptimize < 4) GuardOptimizer.guardMove(rule.memMatch); 
+			if (Env.zoptimize >= 4) {
+				Grouping grouping = new Grouping(rule.memMatch);
+			}
+		} else 
 		optimize(rule.memMatch, rule.body);
-		if (Env.zoptimize >= 4) Grouping.atomGroup(rule.memMatch); //アトムグループ化。まだテスト段階
 	}
 	/**	
 	 * 渡された命令列を、現在の最適化レベルに応じて最適化する。<br>
