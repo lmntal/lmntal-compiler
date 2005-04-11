@@ -102,6 +102,11 @@ public class REPL {
 					else Env.optimize = line.charAt(line.length() - 1) - '0';
 					Env.p("optimization level " + Env.optimize);
 					continue;
+				} else if(line.matches("zoptimize( [0-9])?")){ //ガード関係の最適化　そのうちoptimizeと統合 sakurai
+					if (line.charAt(line.length() - 1) == 'e') Env.zoptimize = 0;
+					else Env.zoptimize = line.charAt(line.length() - 1) - '0';
+					Env.p("zoptimization level " + Env.zoptimize);
+					continue;
 				} else if(line.matches("noshuffle|shuffle( [0-9])?")) {
 					int old = Env.shuffle;
 					if (line.charAt(0) == 'n') Env.shuffle = Env.SHUFFLE_INIT;
