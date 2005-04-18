@@ -3,7 +3,10 @@
 {
 	unify.use.
 	
-	res=unify([[a],b], [var(x),var(x)]).
+	// occur_check で失敗する例
+	res=unify([f, var(x)], var(x)).
+	
+//	res=unify([[a],b], [var(x),var(x)]).
 //	res=unify([[a],b,c,var(y)], [var(x),b,c,var(x)]).
 //	res=unify(var(y), var(x)).
 //	res=unify(y, x).

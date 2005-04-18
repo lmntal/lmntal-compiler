@@ -16,10 +16,15 @@ http://www.ueda.info.waseda.ac.jp/oess/AI/Html/class_rsc/materials/index.html
 推論と定理証明(fol-2004.pdf)にある書き換えベースの unify アルゴリズムを使用。
 
 unify 対象となる構造：
-	List of (
-		  <ATOM>       : 定数
-		| var(<ATOM>)  : 変数
-	)
+T ::=   <ATOM>       : 定数
+      | var(<ATOM>)  : 変数
+      | List of T
+
+
+unify 対象となる構造の例：
+	res = a.
+	res = var(x).
+	res = [a, [b, var(x)], d].
 
 成功すると [true, { 変数束縛の集合 } ] を返す。
 失敗なら false を返す。
@@ -48,14 +53,17 @@ TODO
 		unify(A, B)                      :- unary(A), unary(B), A=B         |.
 		unify(A, B)                      :- unary(A), unary(B), A\=B        | r=fail.
 		unify(var(A), var(B))            :- unary(A), A=B                   |.
-		unify(var(A), B)                 :- unary(A), ground(B)             | r=if(occur_check(A, B), bind(A, B)).
-		unify(B, var(A))                 :- unary(A), ground(B)             | r=if(occur_check(A, B), bind(A, B)).
+		unify(var(A), B)                 :- unary(A), ground(B)             | r=if(occur_check(A, B), bind(A, B), fail).
+		unify(B, var(A))                 :- unary(A), ground(B)             | r=if(occur_check(A, B), bind(A, B), fail).
 		unify([A|R], [])                 :-                                   unify([A|R], []), r=fail.
 		unify([], [B|R])                 :-                                   unify([], [B|R]), r=fail.
 		unify([A|AR], [B|BR])            :-                                   unify(AR, BR), unify(A, B).
 		
-		// TODO
-		H=occur_check(A, B) :- unary(A), ground(B) | H=true.
+		H=occur_check(A, B)              :- unary(A),unary(B)               | H=true.
+		H=occur_check(A, var(B))         :- unary(A), A\=B                  | H=true.
+		H=occur_check(A, var(B))         :- unary(A), A=B                   | H=false.
+		H=occur_check(A, [])             :- unary(A)                        | H=true.
+		H=occur_check(A, [Car|R])        :- unary(A)                        | H=and(occur_check(A, Car), occur_check(A, R)).
 		
 		H=bind(A, B), P=var(AA)          :- unary(AA), ground(B), A=AA      | H=bind(A, B), P=B.
 		r=bind(A, B), r=bind(A0, B0)     :- unary(A), A=A0, ground(B), ground(B0) | r=if(ground_neq(B, B0), fail).

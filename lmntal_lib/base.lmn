@@ -15,6 +15,9 @@ HISTORY
 {
 module(base).
 
+// constructor
+base.use :- bool.use.
+
 //  if(Bool,  Te)     :-   if(Bool, Te, nil).
 //  if(true,  Te, Fe) :- ground(Te), ground(Fe) |   Te.
 //  if(false, Te, Fe) :- ground(Te), ground(Fe) |   Fe.
