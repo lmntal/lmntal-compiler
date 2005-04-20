@@ -637,6 +637,7 @@ public class RuleCompiler {
 	/** ルールの左辺と右辺に対してstaticUnifyを呼ぶ */
 	public void simplify() throws CompileException {
 		staticUnify(rs.leftMem);
+		checkExplicitFreeLinks(rs.leftMem);
 		staticUnify(rs.rightMem);
 		if (rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning) {
 			Env.warning("WARNING: rule with empty head: " + rs);
@@ -699,6 +700,33 @@ public class RuleCompiler {
 		}
 	}
 	
+	/**
+	 * 型なしプロセス文脈の明示的な引数を再帰的に検査する．
+	 * @param mem
+	 * @throws CompileException
+	 */
+	private void checkExplicitFreeLinks(Membrane mem)throws CompileException {
+		Env.c("RuleCompiler::checkExplicitFreeLinks");
+		Iterator it = mem.mems.iterator();
+		while(it.hasNext()) {
+			checkExplicitFreeLinks((Membrane)it.next());
+		}
+		it = mem.processContexts.iterator();
+		while(it.hasNext()){
+			ProcessContext pc = (ProcessContext)it.next();
+			if(pc.def.isTyped())continue;
+			HashSet explicitfreelinks = new HashSet();
+			for (int i = 0; i < pc.args.length; i++) {
+				LinkOccurrence lnk = pc.args[i];
+				if (explicitfreelinks.contains(lnk.name)) {
+					systemError("SYNTAX ERROR: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
+				}
+				else {
+					explicitfreelinks.add(lnk.name);
+				}
+			}
+		}
+	}
 	
 	private void optimize() {
 		Env.c("optimize");
