@@ -175,6 +175,8 @@ class InterpretiveReactor {
 	Atom[] atoms;
 	/** その他の変数のベクタ（memsやatomsは廃止してvarsに統合する？）*/
 	List vars;
+	/** ロックした膜のリスト　グループ化時に使用**/
+	List lockedMemList = new ArrayList();
 	
 	InterpretiveReactor(int size) {
 		initVector(size);
@@ -315,6 +317,7 @@ class InterpretiveReactor {
 					// lockmem [-dstmem, freelinkatom]
 					mem = atoms[inst.getIntArg2()].mem;
 					if (mem.lock()) {
+						lockedMemList.add(mem);
 						mems[inst.getIntArg1()] = mem;
 						if (interpret(insts, pc))
 							return true;
@@ -329,6 +332,7 @@ class InterpretiveReactor {
 						AbstractMembrane submem = (AbstractMembrane) it.next();
 						if (submem.lock()) {
 							mems[inst.getIntArg1()] = submem;
+							lockedMemList.add(submem);
 							if (interpret(insts, pc))
 								return true;
 							submem.unlock();
@@ -339,6 +343,7 @@ class InterpretiveReactor {
 				case Instruction.LOCALLOCK : //[srcmem] 
 					mem = mems[inst.getIntArg1()];
 					if (mem.lock()) {
+						lockedMemList.add(mem);
 						if (interpret(insts, pc))
 							return true;
 						mem.unlock();						
@@ -654,9 +659,11 @@ class InterpretiveReactor {
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
 				case Instruction.RECURSIVELOCK : //[srcmem]
 					mems[inst.getIntArg1()].recursiveLock();
+				    lockedMemList.add(mems[inst.getIntArg1()]);
 					break; //n-kato
 				case Instruction.RECURSIVEUNLOCK : //[srcmem]
 					mems[inst.getIntArg1()].recursiveUnlock();
+				    lockedMemList.add(mems[inst.getIntArg1()]);
 					break;//nakajima 2004-01-04, n-kato
 
 				case Instruction.COPYCELLS : //[-dstmap, -dstmem, srcmem]
@@ -1211,13 +1218,17 @@ class InterpretiveReactor {
 				case Instruction.GROUP:
 					subinsts = ((InstructionList)inst.getArg1()).insts;
 					if(!interpret(subinsts, 0)){
-						//現状では必ずここに入る
-						//GROUP内の命令が成功することはない
-						//System.out.println("failed");
+						//if(lockedMemList.size() == 0)System.out.println("no!");
+						//GROUP内の命令で失敗したらルール適用失敗
+						//その前のGROUP内で取得した膜のロックを開放する
+						Iterator it2 = lockedMemList.iterator();
+						while(it2.hasNext()){
+							//System.out.println("test");
+							((AbstractMembrane)it2.next()).unlock();
+						}
 						return false;
 					}
 					break;
-					//現状ではまともに動かない。
 					//sakurai
 					
 
