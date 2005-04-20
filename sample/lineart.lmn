@@ -224,12 +224,15 @@ import java.awt.*;
 import java.awt.event.*;
 
 // フレーム
+
 class LineArtFrame extends JFrame implements MouseListener{
 	
 	// 所属膜
+	
 	final Membrane mem;
 
 	// 枠に関する数値
+	
 	final int SCREEN_WIDTH;
 	final int SCREEN_HEIGHT;
 	final int FRAMEBAR_LEFT;
@@ -241,6 +244,7 @@ class LineArtFrame extends JFrame implements MouseListener{
 	boolean flgScreenClear;
 
 	//コンストラクタ
+	
 	public LineArtFrame(Membrane targetMem, int screen_width, int screen_height){
 
 		flgAction = false;
@@ -259,6 +263,7 @@ class LineArtFrame extends JFrame implements MouseListener{
 		SCREEN_WIDTH = screen_width;
 		SCREEN_HEIGHT = screen_height;
 		//ウィンドウサイズを設定(描画領域がVGAになるように)
+		
 		setBounds(100, 100, SCREEN_WIDTH + FRAMEBAR_LEFT + FRAMEBAR_RIGHT, SCREEN_HEIGHT + FRAMEBAR_TOP + FRAMEBAR_BOTTOM);
 		
 	}
@@ -297,6 +302,7 @@ class LineArtFrame extends JFrame implements MouseListener{
 			flgAction = true;
 			break;*/
 		case MouseEvent.BUTTON3://右クリックで終了
+			
 			flgAction = true;
 			mem.asyncLock();
 			mem.newAtom(new Functor("exit",0));
