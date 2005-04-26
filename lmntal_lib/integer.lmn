@@ -194,4 +194,19 @@ H = integer.rnd(N) :- int(N) | H=[:/*inline*/
   me.remove();
   :](N).
   
+/*
+ * gcd(M, N) MとNの最大公約数を返す。 by inui
+ *
+ *
+ */
+H = integer.gcd(M, N) :- M > N | H=integer.gcd(M-N, N).
+H = integer.gcd(M, N) :- N > M | H=integer.gcd(M, N-M).
+H = integer.gcd(M, N) :- N = M | H=M.
+
+/*
+ * lcm(M, N) MとNの最小公倍数を返す。 by inui
+ *
+ *
+ */
+H = integer.lcm(M, N) :- int(M),int(N) | H = M*N/integer.gcd(M, N).
 }.
