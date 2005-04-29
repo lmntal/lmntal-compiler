@@ -27,8 +27,10 @@ public class Optimizer {
 			if (Env.zoptimize >= 4) {
 				Grouping grouping = new Grouping(rule.memMatch);
 			}
-		} else 
-		optimize(rule.memMatch, rule.body);
+		} else {
+			inlineExpandTailJump(rule.memMatch);
+			optimize(rule.memMatch, rule.body);
+		}
 	}
 	/**	
 	 * 渡された命令列を、現在の最適化レベルに応じて最適化する。<br>

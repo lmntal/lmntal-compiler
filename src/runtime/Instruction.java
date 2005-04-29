@@ -1760,7 +1760,12 @@ public class Instruction implements Cloneable, Serializable {
 		c.kind = this.kind;
 		Iterator it = this.data.iterator();
 		while (it.hasNext()) {
-			c.data.add(it.next());
+			Object o = it.next();
+			if (o instanceof ArrayList) {
+				c.data.add(((ArrayList)o).clone());
+			} else {
+				c.data.add(o);
+			}
 		}
 		return c;
 	}
