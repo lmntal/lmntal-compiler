@@ -435,7 +435,7 @@ public class Translator {
 		writer.write(") {\n");
 		
 		for (int i = formals; i < locals; i++) {
-			writer.write("		Object var" + i + ";\n");
+			writer.write("		Object var" + i + " = null;\n");
 		}
 
 		//以下の変数は、変換したソース内で自由に利用できる。
@@ -1466,6 +1466,27 @@ public class Translator {
 //					writer.write(tabs + "}\n");
 
 //以下は手動生成コード
+				case Instruction.RESETVARS: {
+					writer.write(tabs + "{\n");
+					int i = 0;
+					List l = (List)inst.getArg1();
+					for (int j = 0; j < l.size(); j++) {
+						writer.write(tabs + "	Object t" + (i++) + " = var" + l.get(j) + ";\n");
+					}
+					l = (List)inst.getArg2();
+					for (int j = 0; j < l.size(); j++) {
+						writer.write(tabs + "	Object t" + (i++) + " = var" + l.get(j) + ";\n");
+					}
+					l = (List)inst.getArg3();
+					for (int j = 0; j < l.size(); j++) {
+						writer.write(tabs + "	Object t" + (i++) + " = var" + l.get(j) + ";\n");
+					}
+					for (int j = 0; j < i; j++) {
+						writer.write(tabs + "	var" + j + " = t" + j + ";\n");
+					}
+					writer.write(tabs + "}\n");
+					break;
+				}
 				case Instruction.LOADMODULE:
 					writer.write(tabs + "	try {\n");
 					writer.write(tabs + "		Class c = Class.forName(\"translated.Module_" + inst.getArg2() + "\");\n");
@@ -1519,11 +1540,13 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //nakajima, n-kato
 				case Instruction.LOOP :
-					label = (InstructionList)inst.getArg1();
+//					label = (InstructionList)inst.getArg1();
+					List list = (List)((List)inst.getArg1()).get(0);
 					writer.write(tabs + "while (true) {\n");
-					writer.write(label.label + ":\n");
+//					writer.write(label.label + ":\n");
+					writer.write("LL:\n");
 					writer.write(tabs + "	{\n");
-					translate(label.insts.iterator(), tabs + "\t\t", iteratorNo, varnum, label.label);
+					translate(list.iterator(), tabs + "\t\t", iteratorNo, varnum, "LL");
 					writer.write(tabs + "		break;\n");
 					writer.write(tabs + "	}\n");
 					writer.write(tabs + "	ret = false;\n");
