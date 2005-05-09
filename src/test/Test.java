@@ -41,9 +41,15 @@ public class Test {
 //		g();
 //		h();
 //		i();
-		j();
+//		j();
+		k();
 	}
 	
+	public static void k() {
+		byte b;
+		b = (byte)255;
+		System.out.println(b&0xff);
+	}
 	public static void j() {
 		System.out.println("aHIJc___123".replaceAll("a(.*?)c", ":$1:$1:$1:"));
 	}
