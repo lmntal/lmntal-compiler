@@ -40,7 +40,7 @@ HISTORY
 
 
 {
-module(pointer).
+module(ref).
 
 [:/*inline_define*/
 class Pointer {
