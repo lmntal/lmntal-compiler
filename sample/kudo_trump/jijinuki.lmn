@@ -1,0 +1,51 @@
+% ジジ抜き（笑）．
+
+% カードを生成する
+dealer_gen={
+gen_all.
+gen_all :- gen(13,spade),gen(13,club),gen(13,heart),gen(13,diamond).
+gen(N,Mark) :- unary(Mark),N>0 | gen(N-1,Mark), card(N,Mark).
+gen(N,Mark) :- unary(Mark),N=0 | j.
+j,j,j,j, card(N,Mark) :- int(N),unary(Mark) | (). % 全札生成後，一枚破棄．
+p(D).
+}.
+
+% プレイヤのリスト．循環リストになっている．
+L=[p(D)|L].
+
+% プレイヤ膜で行われる処理．優先的に．
+% プレイヤ膜は全て'/'をつけるべきかもしれない．
+player_rule={
+card(N1,Mark1),card(N2,Mark2),c(C) :- N1=N2,int(C) | pair(N1,Mark1,Mark2),c(C-2).
+}.
+
+%プレイヤを追加する
+add_players(5). 
+
+add_players(P)  ,L=[p(D)          |R],player_rule={@r} :- P>0 |
+add_players(P-1),L=[p(D),{c(0),@r}|R],player_rule={@r}.
+add_players(P),dealer_gen(D):- P=0 |dealer(D).
+
+% カードを配る
+dealer={p(D),$d,@d ,    card(N,Mark)},L=[p(D),{c(C),  $p,@p}     |R] :- int(N),unary(Mark),int(C)|
+dealer={p(D),$d,@d},L=[{card(N,Mark) ,         c(C+1),$p,@p},p(D)|R].
+
+% カードを配り終えたらdealerはいなくなる．別にこんな処理はいらない気もする．
+dealer={p(D),@d},L=p(D) :- L=p.
+
+% 捨て場(ルールをコメントアウトすれば，カードを破棄しない．)
+field={
+pair(N,M1,M2) :- int(N),unary(M1),unary(M2) | ().
+}.
+
+% ペアを場に出す
+{$p,@p,pair(N,M1,M2)},field={              $f,@f} :- int(N),unary(M1),unary(M2) |
+{$p,@p              },field={pair(N,M1,M2),$f,@f}.
+
+% カードを引く．カードが無くなっていないことを条件に．
+L=[p,{$p1,c(C1),  @p1},{card(N,Mark),    c(C2),  $p2,@p2}|R] :- int(N),unary(Mark),C1>0,int(C2) |
+L=[  {$p1,c(C1+1),@p1,  card(N,Mark)},p,{c(C2-1),$p2,@p2}|R].
+
+winners = [w].
+% カードが無くなったら勝ち抜け
+P=p,L=[{c(C),$p[|*Pfv],@p1}|R],Winners=[w] :- C=0 | P=p,L=R,Winners=[{$p[|*Pfv]}|[w]].
