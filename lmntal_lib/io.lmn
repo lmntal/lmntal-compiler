@@ -52,6 +52,13 @@ io.input :- [:/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, "Input text.");
 	me.setName(s);
 	:].
+R=io.inputInteger(Message) :- R=[:/*inline*/
+	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
+	Atom atom = mem.newAtom(new IntegerFunctor(Integer.parseInt(s)));
+	mem.relink(atom,0,me,1);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	:](Message).
 io.popup(String) :- unary(String)|[:/*inline*/
 	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
 	:](String).
