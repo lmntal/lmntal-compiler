@@ -59,8 +59,15 @@ R=io.inputInteger(Message) :- R=[:/*inline*/
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
 	:](Message).
-io.popup(String) :- unary(String)|[:/*inline*/
+//io.popup(String) :- unary(String)|[:/*inline*/
+//	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
+//	:](String).
+	
+io.popup(String) :- string(String) | [:/*inline*/
 	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
+	mem.newAtom(new Functor("done",0));
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
 	:](String).
 
 /**
