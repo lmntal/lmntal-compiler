@@ -12,7 +12,7 @@
 	ans(integer.rnd(100)).
 
 	//制限回数
-	count(10).
+	count(6).
 	
 	//制御用のdoneアトムを作る
 	io.popup("kazuate game start!").
@@ -25,7 +25,9 @@
 
 	//doneがないと最後に正解したときにもこのルールが適用されてしまう
 	done, count(X) :- X = 0 | io.popup("game over.").
+	
+	ok, count(X) :- io.popup("Congratulations!"), X=0.
 }.
 
 //上の膜の中に書くとio.popupでdoneができてしまい、ゲームが終わらない
-{ok, $p[], @p}/ :- io.popup("Congratulations!").
+//{ok, $p[], @p}/ :- io.popup("Congratulations!").
