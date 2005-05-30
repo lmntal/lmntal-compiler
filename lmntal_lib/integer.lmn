@@ -209,4 +209,10 @@ H = integer.gcd(M, N) :- N = M | H=M.
  *
  */
 H = integer.lcm(M, N) :- int(M),int(N) | H = M*N/integer.gcd(M, N).
+
+/*
+ * factorial(N) N¤Î³¬¾è¤ò·×»»¤¹¤ë¡£ by inui
+ */
+H = integer.factorial(N) :- N =< 1 | H = 1.
+H = integer.factorial(N) :- N >= 2 | H = N*integer.factorial(N-1).
 }.
