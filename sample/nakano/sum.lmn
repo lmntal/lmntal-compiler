@@ -1,0 +1,7 @@
+/*
+	リスト要素の総和を出す。
+*/
+r=sum([1,2,3,4,5,6,7,8,9,10]).
+R=sum2([],PSum):-R=PSum.
+R=sum2([One|Rest],PSum):-R=sum2(Rest,PSum+One).
+R=sum(List):-R=sum2(List,0).
