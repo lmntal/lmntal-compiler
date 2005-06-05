@@ -27,7 +27,6 @@ import runtime.IntegerFunctor;
 import runtime.InterpretedRuleset;
 import runtime.ObjectFunctor;
 import runtime.Rule;
-import runtime.Ruleset;
 import runtime.StringFunctor;
 
 /**
@@ -449,6 +448,8 @@ public class Translator {
 		writer.write("		AbstractMembrane mem;\n");
 		writer.write("		int x, y;\n");
 		writer.write("		double u, v;\n");
+		writer.write("		int isground_ret;");
+		writer.write("		boolean eqground_ret;");
 
 		writer.write("		boolean ret = false;\n");
 		writer.write(instList.label + ":\n");
@@ -979,7 +980,7 @@ public class Translator {
 					//====制御命令====ここまで====
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
-					writer.write(tabs + "boolean eqground_ret = ((Link)var" + inst.getIntArg1() + ").eqGround(((Link)var" + inst.getIntArg2() + "),new HashMap());\n");
+					writer.write(tabs + "eqground_ret = ((Link)var" + inst.getIntArg1() + ").eqGround(((Link)var" + inst.getIntArg2() + "),new HashMap());\n");
 					writer.write(tabs + "if (!(!eqground_ret)) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
 					writer.write(tabs + "}\n");
@@ -995,7 +996,7 @@ public class Translator {
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 					//====型検査のためのガード命令====ここから====
 				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
-					writer.write(tabs + "int isground_ret = ((Link)var" + inst.getIntArg2() + ").isGround(new HashSet(),((Set)var" + inst.getIntArg3() + "));\n");
+					writer.write(tabs + "isground_ret = ((Link)var" + inst.getIntArg2() + ").isGround(new HashSet(),((Set)var" + inst.getIntArg3() + "));\n");
 					writer.write(tabs + "if (!(isground_ret == -1)) {\n");
 					writer.write(tabs + "	var" + inst.getIntArg1() + " = new IntegerFunctor(isground_ret);\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
