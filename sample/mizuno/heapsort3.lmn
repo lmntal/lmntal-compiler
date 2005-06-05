@@ -1,0 +1,33 @@
+%ret=sort(gen(600)).
+ret=gen(600).
+
+%R=test([D1,D2|L]) :- D1 =< D2 | R=[D1|test([D2|L])].
+%R=test([D1,D2|L]) :- D1 > D2 | false(D1), R=[D1|test([D2|L])].
+%R=test([D]) :- R=[D].
+
+R=gen(N) :- N > 0 | R=[integer.rnd(100)|gen(N-1)].
+R=gen(N) :- N = 0 | R=[].
+
+R=sort([D|L]), heap({$p,@p}) :- int(D) | R=sort(L), heap({insert(D),$p,@p}).
+R=sort([]   ), heap({$p,@p}) :- R=sort2, heap({$p,@p}).
+R=sort2,       heap({$p,@p}) :- R=[remove({$p,@p})|sort2].
+R=[remove({root=R,leaves([R|L],L),@p}/)|sort2] :- R=[].
+
+% 以下ヒープ
+
+R=remove({root=c(C1,C2,VT), leaves(F,L), L2=[R1,R2|L], c(R1,R2,VL,P), $p[C1,C2,F,L2,P|*X], @p}/)
+	:- int(VT), int(VL) | R=VT, heap({root=c(C1,C2,VL), leaves([P|F],L2), $p[C1,C2,F,L2,P|*X], @p}).
+R=remove({root=c(R1,R2,VT), leaves([R1,R2|L],L), @p}/)
+	:- int(VT) | R=VT, heap({root=R, leaves([R|L],L), @p}).
+
+heap({
+% c(Child1, Child2, Value, Parent)
+root=R. leaves([R|L], L).
+
+c(c(C11,C12,V1),c(C21,C22,V2),V,P) :- V1 < V , V1 =< V2 | c(c(C11,C12,V),c(C21,C22,V2),V1,P).
+c(c(C11,C12,V1),C2,V,P),L=[C2|LL] :- V1 < V | c(c(C11,C12,V),C2,V1,P),L=[C2|LL].
+c(c(C11,C12,V1),c(C21,C22,V2),V,P) :- V2 < V , V2 =< V1 | c(c(C11,C12,V1),c(C21,C22,V),V2,P).
+
+%insert(V), root=R, leaves([R|L], L) :- root=c(R1,R2,V), leaves([R1,R2|L], L).
+insert(V), leaves([R|T], L) :- R=c(R1,R2,V), leaves(T, L2), L=[R1,R2|L2].
+}).
