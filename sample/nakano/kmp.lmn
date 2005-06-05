@@ -1,3 +1,6 @@
+/*
+	Ì¤´°¡£
+*/
 r=kmp([a,a,a,b,b,b,c,c,c,a,a,c],[a,a,c]).
 R=kmp(X,Y):-R=kmp2(X,Y,Y).
 R=kmp2([H|T],[X|Y],Z):-H=X|R=kmp2(T,Y,Z).
