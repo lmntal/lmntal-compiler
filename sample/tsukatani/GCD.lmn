@@ -1,0 +1,2 @@
+gcd(0):- true.
+gcd(N) , gcd(M) :- N =< M | gcd(M mod N).
