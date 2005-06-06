@@ -1,0 +1,4 @@
+r=even([1,2,3,4,5]).
+R=even([H|T]):- H mod 2 =0|R=[H|even(T)].
+R=even([H|T]):- H mod 2 =1|R=even(T).
+R=even([]):-R=[].
