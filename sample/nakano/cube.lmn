@@ -1,0 +1,16 @@
+%*********************************
+%立方体を生成します。b(N)を消せるとよい。
+%*********************************
+%頂点数の設定
+ret=vertex2(8).
+
+%頂点数を保持しておくアトム生成
+R = vertex2(N) :-int(N)|R=vertex(N),b(N+1).
+
+%頂点の生成
+R = vertex(N) :- N>1 | R = vertex(N-1),a(N).
+R = vertex(N) :- N=1, ground(R) |a(1).
+
+%立方体の生成
+a(W),a(X),a(Y),a(Z) :- int(W),int(X),int(Y),int(Z)|a(W,A,B),a(X,B,C),a(Y,C,D),a(Z,A,D).
+a(W,A,B),a(X,C,D),b(N) :- int(W),int(X),W+X=N|a(L,A,B),a(L,C,D),b(N).
