@@ -1,5 +1,3 @@
-% インバーター
-
-not(n(1)).
-not(n(X)) :- X = 0 | n(1).
-not(n(X)) :- X = 1 | n(0).
+not(1,x).
+not(IN,OUT) :- IN = 0 | OUT=1.
+not(IN,OUT) :- IN = 1 | OUT=0.
