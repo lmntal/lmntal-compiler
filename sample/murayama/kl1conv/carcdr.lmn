@@ -1,0 +1,4 @@
+% リストのcarとcdrを同時に取ってくる
+
+carcdr([2,3,5]).
+carcdr([H|B]) :- car(H),cdr(B).

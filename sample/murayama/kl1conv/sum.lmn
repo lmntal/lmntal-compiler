@@ -1,0 +1,6 @@
+% 膜内の要素を全て足す
+
+sum({n(3),n(4),n(6)}).
+sum({n(X),n(Y),$p}) :- int(X),int(Y) | sum({n(X+Y),$p}).
+sum({n(X)}) :- int(X) | n(X).
+ 
