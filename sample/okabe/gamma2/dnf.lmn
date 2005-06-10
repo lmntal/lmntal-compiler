@@ -1,8 +1,0 @@
-/* Dutch National Flag */
-
-red(I), white(J) :- I>J | white(I), red(J).
-white(I), blue(J) :- I>J | blue(I), white(J).
-red(I), blue(J) :- I>J | blue(I), red(J).
-
-red(1),blue(2),white(3),white(4),red(5),
-blue(6),blue(7),white(8),red(9),blue(10).
