@@ -1,0 +1,10 @@
+/* generate a multiset {2,...,N} */
+{gen(N), $p, @p} :- N = 1 | {$p, @p}.
+{gen(N), $p, @p} :- N > 1 | {num(N), gen(N-1), $p, @p}.
+
+/* R(x,y) = multiple(x,y) */
+/* A(x,y) = {y}           */
+/*                        */
+{num(X), num(Y), $p, @p} :- X mod Y=0 | {num(Y), $p, @p}.
+
+{gen(50)}.
