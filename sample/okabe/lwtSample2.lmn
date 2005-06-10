@@ -1,0 +1,9 @@
+lwt.newFrame({size(200,200),
+               show,
+               title("sampleBorder"),
+               borderPanel,
+               addButton("b1","North","b01"),addButton("b2","South","b02"),
+               addButton("b3","West","b03"),addButton("b4","East","b04"),
+               addButton("b5","Center","b05")
+             }).
+

@@ -1,0 +1,8 @@
+lwt.newFrame({size(800,500),
+               show,
+               title("sampleGrid"),
+               gridPanel(2,2),
+               addButton("g01",0,"g01"),addButton("g02",1,"g02"),
+               addButton("g03",2,"g03"),addButton("g04",3,"g04")
+             }).
+
