@@ -3,6 +3,6 @@ counter(Stream) :- counter(Stream,0).
 counter([up(N)|Stream],Count) :- New=Count+N, counter(Stream,New).
 counter([down(N)|Stream],Count) :- New=Count-N, counter(Stream,New).
 
-counter([show|Stream],Count) :- unary(Count) | x(Count), counter(Stream,Count).
+counter([show|Stream],Count) :- int(Count) | x(Count), counter(Stream,Count).
 
 counter([up(2),up(3),down(1),up(6),show]).
