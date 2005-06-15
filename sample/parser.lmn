@@ -1,0 +1,16 @@
+/*
+ * parser  by INUI
+ *
+ * Interaction Nets¤ÎÎãÂê
+ *
+ * expression: + expression expression
+ *           | 1
+ * 
+ * special thanks for KUDO
+ *
+ */
+
+parse(+(1(1(x))), u, y).
+
+parse(+(X), U, Y) :- plus(parse(X, A), parse(A, Y), U).
+parse(1(X), Y, Z) :- one(Z), X=Y.
