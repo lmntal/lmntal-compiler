@@ -12,6 +12,6 @@
  */
 parse(+(1(1(x))), u, y).
 
-parse(+(X), U, Y) :- plus(parse(X, A), parse(A, Y), U).
-parse(1(X), Y, Z) :- one(Z), X=Y.
-plus(one, one, X) :- two(X).	//定数の畳み込み
+parse(+(X), U, Y) :- '+'(parse(X, A), parse(A, Y), U).
+parse(1(X), Y, Z) :- 1(Z), X=Y.
+plus(A, B, X) :- int(A), int(B) | X=A+B.	//定数の畳み込み
