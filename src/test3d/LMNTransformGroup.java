@@ -8,12 +8,20 @@ public class LMNTransformGroup extends TransformGroup{
 	private int edge_num;
 	private Edge3D ie[];
 	private Node3D me;
+	private boolean visible = true;
 	
+
 	public void setMe(Node3D i){
 		me=i;
 	}
 	public Node3D getMe(){
 		return me;
+	}
+	public void setVisible(boolean v){
+		visible=v;
+	}
+	public boolean getVisible(){
+		return visible;
 	}
 	public void setEdge(Edge3D i[]){
 		ie=i;

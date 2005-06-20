@@ -17,9 +17,9 @@ import java.awt.Color;
 
 public class Graph3DLayout implements Runnable{
 	private static final int DELAY = 50;
-	private static final double EDGELENGTH_MAX = 0.3;//希望の長さの上限
-	private static final double EDGELENGTH_MIN = 0.1;//希望の長さの下限
-	private static final double DELTAEDGE = 0.01;//一回に移動する距離
+	private static final double EDGELENGTH = 0.5;//希望の長さの上限
+	private static final double DDEDGE = 0.1;//	誤差範囲
+	private static final double DELTAEDGE = 0.05;//一回に移動するスケール(0.01?)	
 	private Thread th = null;
 	runtime.Membrane rootMem = null;
 	private static BranchGroup obj;
@@ -224,7 +224,7 @@ public class Graph3DLayout implements Runnable{
 		if(m==null) return;
 		
 		
-		for (Edge3D j=firstEdge.getNext();j.getNext()!=null;j=j.getNext()) {
+		for (Edge3D j=firstEdge.getNext();j!=null;j=j.getNext()) {
 
 			if(me.getEdgeCount()<1) break;
 
@@ -258,7 +258,7 @@ public class Graph3DLayout implements Runnable{
 		for (Iterator i=m.atomIterator();i.hasNext();) {
 
 			Node3D me = (Node3D)i.next();
-			
+			if(!me.getObj().getVisible())continue;
 			Node3D ne[] = new Node3D[me.getEdgeCount()];
 
 			/*比較対照のノードを取得*/
@@ -267,12 +267,26 @@ public class Graph3DLayout implements Runnable{
 			}			
 			
 			for (int j=0;j<ne.length;j++) {
-				double dx=me.getPosition3d().x - ne[j].getPosition3d().x;
-				double dy=me.getPosition3d().y - ne[j].getPosition3d().y;
-				double dz=me.getPosition3d().z - ne[j].getPosition3d().z;
+				double dx;
+				double dy;
+				double dz;
+				
+				if(me.getPosition3d().x * ne[j].getPosition3d().x <0)
+					dx=abs(me.getPosition3d().x)+abs(ne[j].getPosition3d().x);
+				else dx=abs(me.getPosition3d().x - ne[j].getPosition3d().x);
+				
+				if(me.getPosition3d().y * ne[j].getPosition3d().y <0)
+					dy=abs(me.getPosition3d().y)+abs(ne[j].getPosition3d().y);
+				else dy=abs(me.getPosition3d().y - ne[j].getPosition3d().y);
+				
+				if(me.getPosition3d().z * ne[j].getPosition3d().z <0)
+					dz=abs(me.getPosition3d().z)+abs(ne[j].getPosition3d().z);
+				else dz=abs(me.getPosition3d().z - ne[j].getPosition3d().z);
+				
+				double dEdge=(dx*dx)+(dy*dy)+(dz*dz)-(EDGELENGTH*EDGELENGTH);
 				
 				/*指定以下の距離ならば引き離す*/
-				if((dx*dx)+(dy*dy)+(dz*dz)<EDGELENGTH_MIN*EDGELENGTH_MIN){
+				if(dEdge < -DDEDGE){
 					double mex = me.getPosition3d().x;
 					double mey = me.getPosition3d().y;
 					double mez = me.getPosition3d().z;
@@ -280,26 +294,26 @@ public class Graph3DLayout implements Runnable{
 					double youy = ne[j].getPosition3d().y;
 					double youz = ne[j].getPosition3d().z;
 					if(dx < dy && dx < dz){
-						if(abs(mex)<abs(youx)){
-							mex -= DELTAEDGE;
+						if(mex < youx){
+							mex -= DELTAEDGE * dEdge;
 						}else{ 
-							mex += DELTAEDGE;
+							mex += DELTAEDGE * dEdge;
 						}
 					}
 					else if(dy < dx && dy < dz){
-						if(abs(mey) < abs(youy)){
-							mey -= DELTAEDGE;
+						if(mey < youy){
+							mey -= DELTAEDGE * dEdge;
 						}
 						else{
-							mey += DELTAEDGE;
+							mey += DELTAEDGE * dEdge;
 						}
 					}
 					else{
-						if(abs(mez) < abs(youz)){
-							mez -= DELTAEDGE;
+						if(mez < youz){
+							mez -= DELTAEDGE * dEdge;
 						}
 						else{
-							mez += DELTAEDGE;
+							mez += DELTAEDGE * dEdge;
 						}
 					}
 	
@@ -313,7 +327,7 @@ public class Graph3DLayout implements Runnable{
 					//ne[j].setPosition3d(new Double3DPoint(youx,youy,youz));
 					
 				}/*指定以上なら引き付ける*/
-				else if((dx*dx)+(dy*dy)+(dz*dz)>EDGELENGTH_MAX*EDGELENGTH_MAX){
+				else if(dEdge > DDEDGE){
 					double mex = me.getPosition3d().x;
 					double mey = me.getPosition3d().y;
 					double mez = me.getPosition3d().z;
@@ -321,27 +335,27 @@ public class Graph3DLayout implements Runnable{
 					double youy = ne[j].getPosition3d().y;
 					double youz = ne[j].getPosition3d().z;
 					if(dx > dy && dx > dz){
-						if(abs(mex) < abs(youx)){
-							mex += DELTAEDGE;
+						if(mex < youx){
+							mex += DELTAEDGE * dEdge;
 						}
 						else{ 
-							mex -= DELTAEDGE;
+							mex -= DELTAEDGE * dEdge;
 						}
 					}
 					else if(dy > dx && dy > dz){
-						if(abs(mey) < abs(youy)){
-							mey += DELTAEDGE;
+						if(mey < youy){
+							mey += DELTAEDGE * dEdge;
 						}
 						else{
-							mey -= DELTAEDGE;
+							mey -= DELTAEDGE * dEdge;
 						}
 					}
 					else{
-						if(abs(mez) < abs(youz)){
-							mez += DELTAEDGE;
+						if(mez < youz){
+							mez += DELTAEDGE * dEdge;
 						}
 						else{
-							mez -= DELTAEDGE;
+							mez -= DELTAEDGE * dEdge;
 						}
 					}
 	

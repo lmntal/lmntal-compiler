@@ -151,9 +151,11 @@ public class LMNtal3DFrame extends JFrame {
                     lmntg.getTransform(t3d);
                     t3d.get(vect);
                     Double3DPoint p = new Double3DPoint(vect);
-                    System.out.println(lmntg.getEdgeNum());
+                    //System.out.println(lmntg.getEdgeNum());
                     lmntg.getMe().setPosition3d(p);
+                    lmntg.setVisible(false);
                     lmnPanel.getGraph3DLayout().edgerelax(lmntg.getMe());
+                    lmntg.setVisible(true);
                     
                 }
             }
