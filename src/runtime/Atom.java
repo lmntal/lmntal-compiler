@@ -17,9 +17,6 @@ import java.io.Serializable;
 
 import test.GUI.DoublePoint;
 import test.GUI.Node;
-import test3d.Double3DPoint;
-import test3d.LMNTransformGroup;
-import test3d.Node3D;
 import util.QueuedEntity;
 import daemon.IDConverter;
 //import util.Stack;
@@ -28,15 +25,13 @@ import daemon.IDConverter;
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
  * @author Mizuno
  */
-public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.Node3D, Serializable {
+public final class Atom extends QueuedEntity implements test.GUI.Node, Serializable {
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
 	 * ただし値を変更するときはindexも同時に更新すること。(null,-1)は所属膜なしを表す。*/
 	AbstractMembrane mem;
 	/** 所属膜のAtomSet内でのインデックス */
 	int index = -1;
-	public int getid(){
-		return id;
-	}
+	
 	/** ファンクタ（名前とリンク数） */
 	private Functor functor;
 	/** リンク */
@@ -68,13 +63,10 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		this.functor = functor;
 		args = new Link[functor.getArity()];
 		id = lastId++;
-
+		
 		if(Env.fGUI) {
 			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
 			pos = new DoublePoint(Math.random()*r.width + r.x, Math.random()*r.height + r.y);
-		}
-		if(Env.f3D) {
-			pos3d = new Double3DPoint(Math.random(), Math.random(), Math.random());
 		}
 	}
 
@@ -176,16 +168,11 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	///////////////////////////////////////////////////////////////
 	
 	/* *** *** *** *** *** BEGIN GUI *** *** *** *** *** */
-
+	
 	DoublePoint pos;
-	Double3DPoint pos3d;
-	LMNTransformGroup objTrans;
-	double vx, vy, vz;
+	double vx, vy;
 	public void initNode() {
 		pos = new DoublePoint();
-	}
-	public void initNode3d() {
-		pos3d = new Double3DPoint();
 	}
 	public boolean isVisible() {
 		return !(functor.equals(Functor.INSIDE_PROXY) || functor.equals(Functor.OUTSIDE_PROXY));
@@ -193,33 +180,10 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	public DoublePoint getPosition() {
 		return pos;
 	}
-
-	public void setObj(LMNTransformGroup obj){
-		objTrans=obj;
-	}
-	public LMNTransformGroup getObj(){
-		return objTrans;
-	}
-	public Double3DPoint getPosition3d() {
-		return pos3d;
-	}
 	public void setPosition(DoublePoint p) {
 		pos = p;
 	}
-	public void setPosition3d(Double3DPoint p) {
-		pos3d = p;
-	}
 	public Node getNthNode(int index) {
-		Atom a = nthAtom(index);
-		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
-//			System.out.println(a.nthAtom(0).nthAtom(0));
-//			System.out.println(a.nthAtom(0).nthAtom(1));
-			a = a.nthAtom(0).nthAtom(1);
-		}
-//		System.out.println(this+" 's "+index+"th atom is "+a);
-		return a;
-	}
-	public Node3D getNthNode3d(int index) {
 		Atom a = nthAtom(index);
 		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
 //			System.out.println(a.nthAtom(0).nthAtom(0));
@@ -236,16 +200,8 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		vx += dx;
 		vy += dy;
 	}
-	public void setMoveDelta3d(double dx, double dy, double dz) {
-		vx += dx;
-		vy += dy;
-		vz += dz;
-	}
 	public void initMoveDelta() {
 		vx = vy = 0;
-	}
-	public void initMoveDelta3d() {
-		vx = vy = vz = 0;
 	}
 	public void move(Rectangle area) {
 		//if (n.isFixed()) return;

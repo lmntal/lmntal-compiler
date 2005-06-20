@@ -1,0 +1,38 @@
+fix3(12),fix3(9),fix3(6),fix3(3).
+gen_pentagon(12).
+%gen_pentagon(0) :- fix3(12).
+
+/*
+gen_pentagon(N) :- N>0 | gen_pentagon(N-1),pentagon({n(x,A0,A1),n(x,A1,A2),n(x,A2,A3),n(x,A3,A4),n(x,A4,A0)}).
+fix3(N),pentagon({n(x,A0,A1),n(x,A2,A3),A1=A2,$p1}),
+		pentagon({n(x,B0,B1),n(x,B2,B3),B1=B2,$p2}),
+		pentagon({n(x,C0,C1),n(x,C2,C3),C1=C2,$p3})
+	 :- N>0 | penta3({n(n(n(n(n(n(X0,A0),A3),B0),B3),C0),C3,X0),$p1,$p2,$p3}).
+*/
+
+gen_pentagon(N) :- N>0 | gen_pentagon(N-1),n(N,A0,A1),n(N,A1,A2),n(N,A2,A3),n(N,A3,A4),n(N,A4,A0).
+fix3(N),n(K1,A0,A1),n(K2,A2,A3),A1=A2,
+		n(L1,B0,B1),n(L2,B2,B3),B1=B2,
+		n(M1,C0,C1),n(M2,C2,C3),C1=C2
+	 :- N>0,K1=N,L1=N-1,M1=N-2,K2=N,L2=N-1,M2=N-2 | n(n(n(n(n(n(X0,A0),A3),B0),B3),C0),C3,X0).
+
+%fix3(N),n(x,A0)=n(x,A1),n(x,B0)=n(x,B1),n(x,C0)=n(x,C1)
+%	 :- N>0 | n(n(n(n(n(n(X0,A0),A1),B0),B1),C0),C1,X0).
+
+%fix3(M),n(n(n(n(n(A0)))),A1),n(n(n(n(n(B0)))),B1),n(n(n(n(n(C0)))),C1),A0=A1,B0=B1,C0=C1 
+%	 :- M>0| fix3(M-1),{n(n(n(X0),n(X1)),n(n(X1),n(X2)),n(n(X2),n(X0)))}.
+
+%fix3(N),{n(n(A0),n(A1)),$p1},{n(n(B0),n(B1)),$p2},{n(n(C0),n(C1)),$p3}
+%	 :- N>0 | fix3(N-1),{n(n(A0,B1),n(B0,C1),n(C0,A1)),$p1,$p2,$p3}.
+
+%fix3(N),n(n(A0),n(A1)),n(n(B0),n(B1)),n(n(C0),n(C1))
+%	 :- N>0 | fix3(N-1),n(n(A0,B1),n(B0,C1),n(C0,A1)).
+
+%fix3(3).
+%{n(n(A0),n(A1))},{n(n(B0),n(B1))},{n(n(C0),n(C1))}.
+
+%fix3(N),{n(n(A0),n(A1))},{n(n(B0),n(B1))},{n(n(C0),n(C1))}
+%	 :- N>0 | fix3(N-1),{n(n(A0,B1),n(B0,C1),n(C0,A1))}.
+
+%fix3(N),{n(A0,A1),n(A2,A3),$p1},{n(B0,B1),n(B2,B3),$p2},{n(C0,C1),n(C2,C3),$p3},A1=A2,B1=B2,C1=C2
+%	 :- N>0 | fix3(N-1),{A1=B1,B1=C1,C1=A1,A3=B0,B3=C0,C3=A0,$p1,$p2,$p3}.

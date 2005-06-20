@@ -6,7 +6,6 @@ package runtime;
 import java.util.*;
 
 import test.GUI.*;
-import test3d.*;
 
 /**
  * 環境。デバッグ用。
@@ -106,18 +105,6 @@ public final class Env {
 	 * one liner
 	 */
 	public static String oneLiner;
-	/**
-	 * 3D mode　有効
-	 */
-	public static boolean f3D = false;
-	public static LMNtal3DFrame threed;
-	
-	public static void init3D(){
-		if(!Env.f3D)return;
-		atomSize = Env.fDEMO ? 40 : 16;
-		Env.threed = new LMNtal3DFrame();
-		
-	}
 	
 	/**
 	 * GUI 有効。仮仮仮仮
