@@ -116,6 +116,13 @@ public class FrontEnd {
 						/// Click button to proceed reaction. Close the window to quit.
 						Env.fGUI = true;
 						break;
+					case '3':
+						/// -3
+						/// 3d mode.
+						//System.out.println("f3D true");
+						Env.fGUI = false;
+						Env.f3D = true;
+						break;
 					case 't':
 						/// -t
 						/// Trace mode.
@@ -179,6 +186,11 @@ public class FrontEnd {
 							/// --demo
 							/// Demo mode.  Draw atoms and text larger.
 							Env.fDEMO = true;
+						} else if(args[i].equals("--3d")){
+							/// --3d
+							/// 3d mode.
+							Env.fGUI = false;
+							Env.f3D = true;
 						} else if(args[i].equals("--remain")){
 							/// --remain
 							/// Processes remain.
@@ -423,18 +435,25 @@ public class FrontEnd {
 			}
 			
 			Env.initGUI();
+			Env.init3D();
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
-			
+
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
+			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 			root.asyncLock();
 			rs.react(root);
 			root.asyncUnlock();
 			rt.asyncFlag = false;
-			
+
 			boolean ready = true;
 			if (Env.gui != null) {
 				Env.gui.lmnPanel.getGraphLayout().calc();
 				if (!Env.gui.onTrace())  ready = false;
+			}
+			/*TODO:3d calc*/
+			if (Env.threed != null) {
+				Env.threed.lmnPanel.getGraph3DLayout().init();
+				if (!Env.threed.onTrace())  ready = false;
 			}
 			if (ready) {
 				rt.exec(); // ((Task)root.getTask()).execAsMasterTask();
