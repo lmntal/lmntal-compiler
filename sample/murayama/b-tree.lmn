@@ -13,9 +13,9 @@
 %root(X),{+(X),[+(L)]}, create([H2|B2])
 %     :- root(X),{+(X),[+(L), H2, +(A)]}, {t(A)} , create(B2). 
 create([6,9,15,20,81,92]).
-root(X),{+(X),[+(T)]},{t(T)}. 
-root(X),{+(X),[H1|B1], $p}, create([H2|B2])
-     :- root(X),{+(X),[H1, H2, +(A) | B1], $p}, {t(A)} , create(B2). 
+root([+(T)]),t(T). 
+root([H1|B1]), create([H2|B2])
+     :- root([+(A),H2, H1| B1]), t(A) , create(B2). 
 
 %root(X),{+(X),[H1|B1]}, create([H2|B2])
 %     :- root(X),{+(X),[H1, H2, +(A) | B1]}, {t(A)} , create(B2). 
