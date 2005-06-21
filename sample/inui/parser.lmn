@@ -2,21 +2,22 @@
  * parser  by INUI
  *
  * Interaction Netsの例題
- * 定数の畳み込みをしてみました。
  *
- * expression: + expression expression
- *           | 1
- * 
+ * ポーランド記法の式を解析します
+ *  
  * Special thanks to KUDO
  *
  */
- 
+
 //parse('+'(1(1(x))), u, y).
-parse('*'('+'(1(1('+'(1(1(x))))))), u, y).
+u = parse('*'('+'(1(1('+'(1(1(x))))))), y).
 
-parse('*'(X), U, Y) :- '*'(parse(X, A), parse(A, Y), U).
-parse('+'(X), U, Y) :- '+'(parse(X, A), parse(A, Y), U).
-parse(1(X), Y, Z) :- 1(Z), X=Y.
-parse(2(X), Y, Z) :- 2(Z), X=Y.
+U = parse('*'(X), Y) :- U = parse(X, A) * parse(A, Y).
+U = parse('+'(X), Y) :- U = parse(X, A) + parse(A, Y).
 
-//'+'(A, B, X) :- int(A), int(B) | X=A+B.	//定数の畳み込み
+//古い
+//parse('+'(X), U, Y) :- '+'(C, B, U), parse(X, C, A), parse(A, B, Y).
+//parse('+'(X), U, Y) :- '+'(parse(A, X), B, U),parse(A, B, Y).
+
+U = parse(1(X), Y) :- U = 1, X=Y.
+U = parse(2(X), Y) :- U = 2, X=Y.
