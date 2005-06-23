@@ -7,23 +7,7 @@
 % Ret=reverse([], L) :- Ret=L.
 % create(X) :- create1(reverse(X)).
 
-%n(5).
-%root(X), {+(X),[3,+(A),5,+(B),6,+(C),8]},{t(A)},{t(B)},{t(C)}.
-
-%root(X),{+(X),[+(L)]}, create([H2|B2])
-%     :- root(X),{+(X),[+(L), H2, +(A)]}, {t(A)} , create(B2). 
 create([6,9,15,20,81,92]).
-root([+(T)]),t(T). 
-root([H1|B1]), create([H2|B2])
-     :- root([+(A),H2, H1| B1]), t(A) , create(B2). 
-
-%root(X),{+(X),[H1|B1]}, create([H2|B2])
-%     :- root(X),{+(X),[H1, H2, +(A) | B1]}, {t(A)} , create(B2). 
-
-%{[+(A)]},{t(A)}. 
-%{[H1|B1]}, create([H2|B2])
-%     :- {[H1, H2, +(A) | B1]}, {t(A)} , create(B2). 
-
-%[+(B)], {t(B)}.
-%[H1|B1], create([H2|B2])
-%	:- [H1, H2, +(A) | B1], {t(A)} , create(B2). 
+root({[+(T)],num(0)}),{t(T)}. 
+root({[+(H1)|B1],num(N),$p[B1|*Z]}), create([H2|B2])
+     :- int(N)|root({[+(A),H2, +(H1)| B1],num(N+1),$p[B1|*Z]}), {t(A)} , create(B2). 
