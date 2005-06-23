@@ -1,0 +1,7 @@
+// array のサンプル hara
+
+{
+	r=set(0, array.new(3)).
+	R=set(I, Array) :- I<3 | R=set(I+1, array.put(Array, I, I)).
+	R=set(3, Array) :- R=Array.
+}
