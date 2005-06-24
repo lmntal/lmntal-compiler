@@ -7,11 +7,18 @@
 % Ret=reverse([], L) :- Ret=L.
 % create(X) :- create1(reverse(X)).
 
+% B木の根
+root({r=[+(T)],num(0)}),{t(T)}. 
+
+% rootに次々と値を代入する
 create([6,9,15,20,81,92]).
 create([]) :-.
-root({r=[+(T)],num(0)}),{t(T)}. 
 root({R=[+(T1)|B1],num(N),$p[R,B1|*Z]}), create([H|B2])
     :- int(N) | root({R=[+(T2),H, +(T1)| B1],num(N+1),$p[R,B1|*Z]}), {t(T2)} , create(B2). 
+    
+% レコード内をsort（未完成）
 {R=[+(T1), H1, +(T2), H2 | B],$p[R,B|*Z]}
 	:- H1<H2 | {R=[+(T2), H2, +(T1), H1 | B],$p[R,B|*Z]}.
 
+% レコードの分割
+{num(N),$p} :- N>3 |
