@@ -1,0 +1,40 @@
+/*
+
+fibonacci_lazy.lmn: count fibonacchi number (< N) by lazy evaluation
+
+original:
+  go(Target, Answer) :- true |
+    fibonacci_lazy(0, 1, Stream), 
+    consume(Stream, Target, 0, Answer).
+
+  fibonacci_lazy(N1, N2, []) :- true | true.
+  fibonacci_lazy(N1, N2, [make(X)|Stream]) :- true | 
+    X = N2, N3 := N1+N2, fibonacci_lazy(N2, N3, Stream).
+
+  consume(Stream, Target, Count, Answer) :- true |
+    Stream = [make(X)|StreamN], consume(StreamN, Target, Count, Answer, X).
+
+  consume(Stream, Target, Count, Answer, X) :- Target =< X |
+    Stream = [], Answer = Count.
+  consume(Stream, Target, Count, Answer, X) :- Target > X |
+    CountN := Count+1,
+    consume(Stream, Target, CountN, Answer).
+
+*/
+
+Answer = go(Target) :- 
+  fibonacci_lazy(0, 1, Stream), Answer = consume(Stream, Target, 0).
+
+fibonacci_lazy(N1, N2, []) :- int(N1), int(N2) |.
+fibonacci_lazy(N1, N2, [make(X)|Stream]) :- 
+  int(N1), int(N2) | X = N2, fibonacci_lazy(N2, N1+N2, Stream).
+
+Answer = consume(Stream, Target, Count) :- 
+  Stream = [make(X)|StreamN], Answer = consume(StreamN, Target, Count, X).
+
+Answer = consume(Stream, Target, Count, X) :- 
+  Target =< X | Stream = [], Answer = Count.
+Answer = consume(Stream, Target, Count, X) :- 
+  Target > X | Answer = consume(Stream, Target, Count+1).
+
+n = go(10). //m = go(100).

@@ -1,0 +1,38 @@
+/*
+
+naive.lmn: naive evaluation
+
+original:
+  main :- true | 
+    eval(T, E), io:outstream([print(E), nl]),
+    T = and(and(and(t, or(f, or(t, f))), f), or(t, or(and(t, f), f))).
+
+  eval(and(L, R), E) :- true | eval(L, EL), eval(E, ER), and_node(EL, ER, E).
+  eval(or(L, R), E) :- true | eval(L, EL), eval(E, ER), or_node(EL, ER, E).
+  eval(t, E) :- true | E = t.
+  eval(f, E) :- true | E = f.
+
+  and_node(t, t, E) :- true | E = t
+  and_node(_, f, E) :- true | E = f.
+  and_node(f, _, E) :- true | E = f.
+
+  or_node(t, _, E) :- E = t.
+  or_node(_, t, E) :- E = f.
+  or_node(f, f, E) :- E = f.
+
+*/
+
+E = eval(and(L, R)) :- E = and_node(eval(L), eval(R)).
+E = eval(or(L, R)) :- E = or_node(eval(L), eval(R)).
+E = eval(t) :- E = t.
+E = eval(f) :- E = f.
+
+E = and_node(t, t) :- E = t.
+E = and_node(X, f) :- unary(X) | E = f.
+E = and_node(f, Y) :- unary(Y) | E = f.
+
+E = or_node(t, Y) :- unary(Y) | E = t.
+E = or_node(X, t) :- unary(X) | E = f.
+E = or_node(f, f) :- E = f.
+
+e = eval(and(and(and(t, or(f, or(t, f))), f), or(t, or(and(t, f), f)))).

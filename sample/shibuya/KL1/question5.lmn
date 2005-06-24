@@ -1,0 +1,54 @@
+/*
+
+qestion5.lmn: histgram (by quicksort) -> quick sort
+
+original:
+  :- module main.
+
+  main :- data:sort(X), qsort(X).
+
+  qsort(In) :- true | term1(In, Mid, []), term2(Mid, Out, []), io:outstream(Out).
+
+  node1([], V, N, L, R, Xs, Ys) :- true | L = [], R = [], Xs = [(N-V)|Ys].
+  node1([H|T], V, N, L, R, Xs, Ys) :- H < V | L = [H|NL], node1(T, V, N, NL, R, Xs, Ys). 
+  node1([H|T], V, N, L, R, Xs, Ys) :- H > V | R = [H|NR], node1(T, V, N, L, NR, Xs, Ys).
+  node1([H|T], V, N, L, R, Xs, Ys) :- H =:= V | M:=N+1, node1(T, V, M, L, R, Xs, Ys). 
+
+  term1([], Xs, Ys) :- true | Xs = Ys.
+  term1([H|T], Xs0, Ys) :- true |
+    term1(L, Xs0, Xs1), node1(T, H, 1, L, R, Xs1, Xs2), term1(R, Xs2, Ys).
+
+  node2([], V, L, R,) :- true | L = [], R = [].
+  node2([(K-M)|T], V, L, R) :- K =< V | R = [(K-M)|NR], node2(T, V, L, NR).
+  node2([(K-M)|T], V, L, R) :- K > V | L = [(K-M)|NL], node2(T, V, NL, R).
+
+  term2([], Xs, Ys) :- true | Xs = Ys.
+  term2([(K-M)|T], Xs0, Ys) :- true |
+    term2(L, Xs0, Xs1), Xs1 = [print(hist(M, K), nl | Xs2], 
+    node2(T, K, L, R), term2(R, Xs2, Ys).
+
+*/
+
+Out = qsort(In) :- Mid = term1(In, []), Out = term2(Mid, []).
+
+Xs = node1([], V, N, L, R, Ys) :- L = [], R = [], Xs = [(N, V)|Ys].
+Xs = node1([H|T], V, N, L, R, Ys) :- H < V | L = [H|NL], Xs = node1(T, V, N, NL, R, Ys).
+Xs = node1([H|T], V, N, L, R, Ys) :- H > V | R = [H|NR], Xs = node1(T, V, N, L, NR, Ys).
+Xs = node1([H|T], V, N, L, R, Ys) :- H = V | Xs = node1(T, V, N+1, L, R, Ys).
+
+Xs = term1([], Ys) :- Xs = Ys.
+Xs = term1([H|T], Ys) :- 
+  Xs = term1(L, node1(T, H, 1, L, R, term1(R, Ys))).
+
+node2([], V, L, R,) :- unary(V) | L = [], R = [].
+node2([(K, M)|T], V, L, R) :- K =< V | R = [(K, M)|NR], node2(T, V, L, NR).
+node2([(K, M)|T], V, L, R) :- K > V | L = [(K, M)|NL], node2(T, V, NL, R).
+
+Xs = term2([], Ys) :- Xs = Ys.
+Xs = term2([(K, M)|T], Ys) :- int(K) |
+  Xs = term2(L, [hist(M, K)|term2(R, Ys)]), node2(T, K, L, R).
+
+r = qsort([3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9, 3, 2, 3, 8, 4, 6, 2, 6, 4, 3, 3, 
+              8, 3, 2, 7, 9, 5, 0, 2, 8, 8, 4, 1, 9, 7, 1, 6, 9, 3, 9, 9, 3, 7, 5, 1, 0,
+              5, 8, 2, 0, 9, 7, 4, 9, 4, 4, 5, 9, 2, 3, 0, 7, 8, 1, 6, 4, 0, 6, 2, 8, 6,
+              2, 0, 8, 9, 9, 8, 6, 2, 8, 0, 3, 4, 8, 2, 5, 3, 4, 2, 1, 1, 7, 0, 6, 9]).

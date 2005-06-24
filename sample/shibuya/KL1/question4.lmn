@@ -1,0 +1,39 @@
+/*
+
+qestion4.lmn: histgram (by quick sort)
+
+original:
+  :- module main.
+
+  main :- data:sort(X), qsort(X).
+
+  qsort(In) :- true | terminal(In, Out, []), io:outstream(Out).
+
+  node([], V, N, L, R, Xs, Ys) :- 
+    true | L = [], R = [], Xs = [print(hist(V, N)), n1|Ys].
+  node([H|T], V, N, L, R, Xs, Ys) :- H < V | L = [H|NL], node(T, V, N, NL, R, Xs, Ys). 
+  node([H|T], V, N, L, R, Xs, Ys) :- H > V | R = [H|NR], node(T, V, N, L, NR, Xs, Ys).
+  node([H|T], V, N, L, R, Xs, Ys) :- H =:= V | M:=N+1, node(T, V, M, L, R, Xs, Ys). 
+
+  terminal([], Xs, Ys) :- true | Xs = Ys.
+  terminal([H|T], Xs0, Ys) :- true |
+    terminal(L, Xs0, Xs1), node(T, H, 1, L, R, Xs1, Xs2), terminal(R, Xs2, Ys).
+
+*/
+
+Out = qsort(In) :- Out = terminal(In, []).
+
+Xs = node([], V, N, L, R, Ys) :-
+   L = [], R = [], Xs = [hist(V, N)|Ys].
+Xs = node([H|T], V, N, L, R, Ys) :- H < V | L = [H|NL],Xs =  node(T, V, N, NL, R, Ys).
+Xs = node([H|T], V, N, L, R, Ys) :- H > V | R = [H|NR], Xs = node(T, V, N, L, NR, Ys).
+Xs = node([H|T], V, N, L, R, Ys) :- H = V | Xs = node(T, V, N+1, L, R, Ys).
+
+Xs = terminal([], Ys) :- Xs = Ys.
+Xs = terminal([H|T], Ys) :- 
+  Xs = terminal(L, node(T, H, 1, L, R, terminal(R, Ys))).
+
+r = qsort([3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9, 3, 2, 3, 8, 4, 6, 2, 6, 4, 3, 3, 
+              8, 3, 2, 7, 9, 5, 0, 2, 8, 8, 4, 1, 9, 7, 1, 6, 9, 3, 9, 9, 3, 7, 5, 1, 0,
+              5, 8, 2, 0, 9, 7, 4, 9, 4, 4, 5, 9, 2, 3, 0, 7, 8, 1, 6, 4, 0, 6, 2, 8, 6,
+              2, 0, 8, 9, 9, 8, 6, 2, 8, 0, 3, 4, 8, 2, 5, 3, 4, 2, 1, 1, 7, 0, 6, 9]).

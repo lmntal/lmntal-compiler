@@ -1,0 +1,30 @@
+/*
+
+fibonacci.lmn: count fibonacchi number (< N)
+
+original:
+  go(Target, Answer) :- true |
+    fibonacci(0, 1, Stream, Target), consume(Stream, 0, Answer).
+
+  fibonacci(N1, N2, Stream, Target) :- N2 >= Target | Stream = [].
+  fibonacci(N1, N2, Stream, Target) :- N2 < Target | 
+    Stream = [N2|StreamN], N3 := N1+N2, fibonacci(N2, N3, StreamN, Target).
+
+  consume([], Count, Answer) :- true | Answer = Count.
+  consume([X|StreamN], Count, Answer) :- true |
+    Count := Count+1, consume(StreamN, CountN, Answer).
+
+*/
+
+Answer = go(Target) :- Answer = consume(fibonacci(0, 1, Target), 0).
+  //Stream = fibonacci(0, 1, Target), Answer = consume(Stream, 0).
+
+Stream = fibonacci(N1, N2, Target) :- int(N1), N2 >= Target | Stream = [].
+Stream = fibonacci(N1, N2, Target) :- N2 < Target | 
+  Stream = [N2 | fibonacci(N2, N1+N2, Target)].
+  //Stream = [N2|StreamN], fibonacci(N2, N1+N2, StreamN, Target).
+
+Answer = consume([], Count) :- Answer = Count.
+Answer = consume([X|StreamN], Count) :- int(X) | Answer = consume(StreamN, Count+1).
+
+n = go(10). m = go(100).

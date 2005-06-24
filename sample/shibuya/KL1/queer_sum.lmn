@@ -1,0 +1,53 @@
+/*
+
+queer_sum.lmn: sum up of n^2 + n^3(n: element)
+
+original:
+  cube([], Out) :- Out = [].
+  cube([One|Rest], Out) :- 
+    Cube:=One*One*One, Out = [Cube|OutTail], square(Rest, OutTail).
+
+  append([], In2, Out) :- Out = In2.
+  append([Msg|In1], In2, Out) :- Out = [Msg|OutTail], append(In1, In2, OutTail).
+
+  queer_sum(N, Sum) :-
+    naturals(N, Naturals), square(Naturals, Squares), cube(Naturals, Cubes),
+    append(Squares, Cubes, Both), sum(Both, Sum).
+
+*/
+
+% n^3
+Out = cube([]) :- Out = [].
+Out = cube([One|Rest]) :- int(One) | Out = [One*One*One|cube(Rest)].
+
+% n^2
+Out = square([]) :- Out = [].
+Out = square([One|Rest]) :- int(One) | Out = [One*One|square(Rest)].
+
+% append two stream
+Out = append([], In2) :- Out = In2.
+Out = append([Msg|In1], In2) :- Out = [Msg|append(In1, In2)].
+
+% sum of elements in the list
+Sum = sum([], PSum) :- Sum = PSum.
+Sum = sum([One|Rest], PSum) :- Sum = sum(Rest, PSum+One).
+
+Sum = sum(List) :- Sum = sum(List, 0).
+
+% make integer's list
+List = naturals(N, M) :- N>=M | List = [].
+List = naturals(N, M) :- N<M | List = [N|naturals(N+1, M)].
+
+List = naturals(M) :- List = naturals(0, M).
+
+% sum up n^2 + n^3
+Sum = queer_sum(N) :- 
+  int(N) | Sum = sum(append(square(naturals(N)), cube(naturals(N)))).
+
+/*
+Sum = queer_sum(N) :- int(N) |
+  N1 = naturals(N), N2 = naturals(N), Squares = square(N1), Cubes = cube(N2),
+  Both = append(Squares, Cubes), Sum = sum(Both).
+*/
+
+s = queer_sum(5). t = queer_sum(11).

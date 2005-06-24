@@ -1,0 +1,47 @@
+/*
+
+question2.lmn: count natural number represented by 2^l * 3^m * 5^n
+
+original:
+  main(Target, Answer) :- true |
+    naturals(1, Target, Stream0), filter(2, Stream0, Stream1),
+    filter(3, Stream1, Stream2), filter(5, Stream2, Stream3),
+    counter(0, Stream3, Answer).
+
+  naturals(N, M, List) :- N >= M | List = [].
+  naturals(N, M, List) :- N < M | List = [N|Rest], N1:=N+1, naturals(N1, M, Rest).
+
+  filter(_, [], Out) :- true | Out = [].
+  filter(X, [E|InN], Out) :- true | filter(X, E, InN, Out).
+
+  filter(X, E, InN, Out) :- E mod X =:= 0 |
+    EN := E/X, filter(X, EN, InN, Out).
+  filter(X, E, InN, Out) :- E mod X =\= 0 |
+    Out = [E|OutN], filter(X, InN, OutN).
+
+  counter(C, [], Res) :- true | Res = C.
+  counter(C, [1|InN], Res) :- true | CN := C+1, counter(CN, InN, Res).
+  counter(C, [E|InN], Res) :- E =\= 1 | counter(C, InN, Res).
+
+*/
+
+Answer = answer(Target) :- 
+  Stream0 = naturals(1, Target), Stream1 = filter(2, Stream0),
+  Stream2 = filter(3, Stream1), Stream3 = filter(5, Stream2),
+  Answer = counter(0, Stream3).
+
+List = naturals(N, M) :- N >= M | List = [].
+List = naturals(N, M) :- N < M | List = [N | naturals(N+1, M)].
+
+Out = filter(X, []) :- unary(X) | Out = [].
+Out = filter(X, [E|InN]) :- Out = filter(X, E, InN).
+
+Out = filter(X, E, InN) :- E mod X = 0 | Out = filter(X, E/X, InN).
+Out = filter(X, E, InN) :- E mod X \= 0 | Out = [E|filter(X, InN)].
+
+Res = counter(C, []) :- Res = C.
+Res = counter(C, [1|InN]) :- Res = counter(C+1, InN).
+Res = counter(C, [E|InN]) :- E \= 1 | Res = counter(C, InN).
+
+s = answer(100). 
+t = answer(1000).

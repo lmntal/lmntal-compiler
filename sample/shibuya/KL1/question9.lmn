@@ -1,0 +1,60 @@
+/*
+
+question9.lmn: make the list of prime number
+
+original:
+  :- module main.
+  main :- primes:primes(1000, C), io:outstream([print(c), nl]).
+
+  :- module primes.
+  primes(Max, C) :- gen_primes(Max, Ps), count(Ps, C).
+
+  % make the list of prime number
+  gen_primes(Max, Ps) :- gen(2, Max, Ns), sift(Ns, Ps).
+
+  % make the list of natural numbers from N0 to Max
+  gen(N0, Max, Ns0) :- N0 =< Max | Ns0 = [Ns0|Ns1], N1:=N0+1, gen(N1, Max, Ns1).
+  gen(N0, Max, Ns0) :- N0 > Max | Ns0 = [].
+  
+  % generate filter process
+  sift([], Zs0) :- Zs0 = [].
+  sift([P|Xs1], Zs0) :- Zs0 = [P|Zs1], filter(P, Xs1, Ys), sift(Ys, Zs1).
+
+  % filter
+  filter(_, [], Ys0) :- Ys0 = [].
+  filter(P, [X|Xs1], Ys0) :- X mod P =\= 0 | Ys0 = [X|Ys1], filter(P, Xs1, Ys1).
+  filter(P, [X|Xs1], Ys0) :- X mod P =:= 0 | filter(P, Xs1, Ys0).
+
+  % count number of prime numbers
+  count(L, C) :- count(L, 0, C).
+
+  count([], C0, C) :- C = C0.
+  count([_|T], C0, C) :- C1:=C0+1, count(T, C1, C).
+
+*/
+
+C = primes(Max) :- C = count(gen_primes(Max)).
+
+% make the list of prime number
+Ps = gen_primes(Max) :- Ps = sift(gen(2, Max)).
+
+% make the list of natural numbers from N0 to Max
+Ns = gen(N0, Max) :- N0 =< Max | Ns = [N0|gen(N0+1, Max)].
+Ns = gen(N0, Max) :- N0 > Max | Ns = [].
+
+% generate filter process
+Zs = sift([]) :- Zs = [].
+Zs = sift([P|Xs1]) :- int(P) | Zs = [P | sift(filter(P, Xs1))].
+
+% filter
+Ys = filter(X, []) :- int(X) | Ys = [].
+Ys = filter(P, [X|Xs1]) :- X mod P \= 0 | Ys = [X|filter(P, Xs1)].
+Ys = filter(P, [X|Xs1]) :- X mod P = 0 | Ys = filter(P, Xs1).
+
+% count number of prime numbers
+C = count(L) :- C = count(L, 0).
+
+C = count([], C0) :- C = C0.
+C = count([X|T], C0) :- int(X) | C = count(T, C0+1).
+
+c = primes(100).

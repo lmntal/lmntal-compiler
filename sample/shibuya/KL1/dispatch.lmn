@@ -1,0 +1,57 @@
+/*
+
+dispatch.lmn: dispatcher
+
+original:
+  dispatch([], Odd, Even) :- Odd = [], Even = [].
+  dispatch([One|Rest], Odd, Even) :- One mod 2 =:= 0 |
+    Odd = [One|OddTail], dispatch(Rest, OddTail, Even).
+  dispatch([One|Rest], Odd, Even) :- One mod 2 =\= 0 |
+    Even = [One|EvenTail], dispatch(Rest, Odd, EvenTail).
+
+  queer_sum(N, Sum) :-
+    naturals(N, Naturals), dispatch(Naturals, Odd, Even),
+    square(Naturals, Squares), cube(Naturals, Cubes),
+    merge(Squares, Cubes, Both), sum(Both, Sum).
+
+*/
+
+
+% dispatcher
+dispatch([], Odd, Even) :- Odd = [], Even = [].
+dispatch([One|Rest], Odd, Even) :- One mod 2 = 1 |
+  Odd = [One|OddTail], dispatch(Rest, OddTail, Even).
+dispatch([One|Rest], Odd, Even) :- One mod 2 = 0 |
+  Even = [One|EvenTail], dispatch(Rest, Odd, EvenTail).
+
+% n^3
+Out = cube([]) :- Out = [].
+Out = cube([One|Rest]) :- int(One) | Out = [One*One*One|cube(Rest)].
+
+% n^2
+Out = square([]) :- Out = [].
+Out = square([One|Rest]) :- int(One) | Out = [One*One|square(Rest)].
+
+% merge two stream
+Out = merge([], In2) :- Out = In2.
+Out = merge(In1, []) :- Out = In1.
+Out = merge([Msg|In1], In2) :- Out = [Msg|merge(In1, In2)].
+Out = merge(In1, [Msg|In2]) :- Out = [Msg|merge(In1, In2)].
+
+% sum of elements in the list
+Sum = sum([], PSum) :- Sum = PSum.
+Sum = sum([One|Rest], PSum) :- Sum = sum(Rest, PSum+One).
+
+Sum = sum(List) :- Sum = sum(List, 0).
+
+% make integer's list
+List = naturals(N, M) :- N>=M | List = [].
+List = naturals(N, M) :- N<M | List = [N|naturals(N+1, M)].
+
+List = naturals(M) :- List = naturals(0, M).
+
+% sum up n^2 + n^3
+Sum = queer_sum(N) :- int(N) |
+  dispatch(naturals(N), Odd, Even), Sum = sum(merge(square(Even), cube(Odd))).
+
+s = queer_sum(5). t = queer_sum(11).

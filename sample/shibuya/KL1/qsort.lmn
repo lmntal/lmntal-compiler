@@ -1,0 +1,31 @@
+/*
+
+qsort.lmn: quick sort by fifo
+
+original:
+  qsort(In, Out) :- true | terminal(In, Out, []).
+
+  node([], V, L, R) :- true | L = [], R = [].
+  node([H|T], V, L, R) :- H > V | R = [H|NR], node(T, V, L, NR).
+  node([H|T], V, L, R) :- H < V | L = [H|NL], node(T, V, NL, R). 
+  node([H|T], V, L, R) :- H =:= V | node(T, V, L, R). 
+
+  terminal([], Xs, Ys) :- true | Xs = Ys.
+  terminal([H|T], Xs0, Ys) :- true |
+    terminal(L, Xs0, Xs1), node(T, H, L, R), Xs1 = [H|Xs2], node(R, Xs2, Ys).
+
+*/
+
+Out = qsort(In) :- Out = terminal(In, []).
+
+node([], V, L, R) :- int(V) | L = [], R = [].
+node([H|T], V, L, R) :- H > V | R = [H|NR], node(T, V, L, NR).
+node([H|T], V, L, R) :- H < V | L = [H|NL], node(T, V, NL, R).
+node([H|T], V, L, R) :- H = V | node(T, V, L, R).
+//node([H|T], V, L, R) :- H =< V | L = [H|NL], node(T, V, NL, R).
+
+Xs = terminal([], Ys) :- Xs = Ys.
+Xs = terminal([H|T], Ys) :- int(H) |
+  Xs = terminal(L, [H|terminal(R, Ys)]), node(T, H, L, R).
+
+r = qsort([3, 8, 0, 4, 2, 1, 6, 5, 7, 9, 0, 3]).
