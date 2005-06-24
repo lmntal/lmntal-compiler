@@ -1,17 +1,17 @@
 /*
- 無向グラフがconnectedか調べる
+ 無向グラフがconnectedかどうか調べる
  vertex: v(X)
  edge: e(X,Y)
 */
 
 /*
  usage:
-   connected({{vertexes},init-vertex,edges}).
+   connected({{vertexes},initial_vertex,edges}).
  return:
-   boolen
+   If connected then true else false.
 */
 
-connected({{v(2),v(3),v(4),v(5)},v(1),e(2,1),e(5,3),e(4,2),e(4,5)}).
+connected({{v(2),v(3),v(4),v(5)},v(1),/*e(2,1),*/e(5,3),e(4,2),e(4,5)}).
   
 connected({$p,@p}) :- {con,$p,@p}.
 {con,v(X),e(V,W),{v(Y), $p,@p},$q,@q} :- 
@@ -19,8 +19,5 @@ connected({$p,@p}) :- {con,$p,@p}.
 {con,v(X),e(V,W),{v(Y), $p,@p},$q,@q} :- 
   X=W,Y=V | {con,v(X),v(Y),{$p,@p},$q, @q}.
 
-/* 本当は {con,{},$p,@p} :- {true}. と書きたい… */
-{con,{},$p,@p} :- {true,$p,@p}.
-{true,v(X),$p,@p} :- unary(X) | {true,$p,@p}.
-
-/* ↑falseを返すにはどうしよう？ */
+{con,{},$p[],@p} :- {true}.
+{con,{$p[],@p},$q[],@q}/ :- \+($p=()) | {false}. 

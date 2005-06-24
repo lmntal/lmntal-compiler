@@ -3,7 +3,7 @@
 question1.lmn: sum up of n^2 + n^3 (n: fibonacchi number < N)
 
 original:
-  main(Target, Amswer) :- true |
+  main(Target, Answer) :- true |
     fibonacci(0, 1, Fibo, Target),
     square(Fibo, Squares), cube(Fibo, Cubes),
     merge(Squares, Cubes, Both),
