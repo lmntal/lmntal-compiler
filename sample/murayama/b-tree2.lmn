@@ -12,8 +12,8 @@ root({R=[H1|B1],num(N),$p[R,B1|*Z]}), create([H2|B2])
 	:- H1<H2 | {R=[H2, H1 | B],$p[R,B|*Z]}.
 
 % レコードの分割
-{r=[H1,H2,H3 | [B]],num(N),$p[B]}
-	:- N=5,int(H1),int(H2),int(H3)
+{r=[H1,H2,H3 | B],num(5),$p[B|*Z]}
+	:-
 	| {r=[+(T1),H3,+(T2)],num(1)},
 	  {+(T1),r=[H1,H2],num(2)},
-	  {+(T2),r=[B],num(2),$p[B]}.
+	  {+(T2),r(B),num(2),$p[B|*Z]}.
