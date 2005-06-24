@@ -134,9 +134,9 @@ public class Graph3DLayout implements Runnable{
 		geometry.setCoordinates(0, vertex);
 		
 		/* 各頂点ごとに色を指定 */
-		geometry.setColor(0, new Color3f(Color.magenta));
-		geometry.setColor(1, new Color3f(Color.cyan));
-
+		geometry.setColor(0, new Color3f((float)me.getPosition3d().z,(float)me.getPosition3d().z,(float)me.getPosition3d().z));
+		geometry.setColor(1, new Color3f((float)you.getPosition3d().z,(float)you.getPosition3d().z,(float)you.getPosition3d().z));
+		
 		/* 作成したGeometryを元に物体を作成 */
 		Shape3D shape = new Shape3D(geometry);
 		shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
@@ -240,8 +240,10 @@ public class Graph3DLayout implements Runnable{
     			geometry = new LineArray(vertex.length, 
     					GeometryArray.COORDINATES | GeometryArray.COLOR_3);
     			geometry.setCoordinates(0, vertex);
-    			geometry.setColor(0, new Color3f(Color.magenta));
-    			geometry.setColor(1, new Color3f(Color.cyan));
+    			float fromz=(float)((j.from.getPosition3d().z/2) + 1);
+    			float toz=(float)((j.to.getPosition3d().z/2) + 1);
+    			geometry.setColor(0, new Color3f(fromz,fromz,fromz));
+    			geometry.setColor(1, new Color3f(toz,toz,toz));
     			shape.setGeometry(geometry);
     			//System.out.println("geometry reset");
     		}

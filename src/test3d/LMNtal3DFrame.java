@@ -165,6 +165,11 @@ public class LMNtal3DFrame extends JFrame {
 		objRoot.addChild( translator );
 		//objRoot.addChild( zoomer );
 		
+		
+		Background background=new Background(new Color3f(1.0f,1.0f,1.0f));
+			
+		background.setApplicationBounds(bounds);
+		objRoot.addChild(background);
 		/*以下、objTrans関連の操作*/
 		
 		/*objTransの生成＆objKeyのChildに登録*/
