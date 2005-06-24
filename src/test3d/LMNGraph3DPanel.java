@@ -1,6 +1,11 @@
 package test3d;
 
+import java.awt.*;
+import java.awt.event.*;
+
 import javax.media.j3d.BranchGroup;
+import javax.swing.BorderFactory;
+import javax.swing.border.BevelBorder;
 
 
 
@@ -12,6 +17,7 @@ public class LMNGraph3DPanel implements Runnable{
 	private Graph3DLayout gLayout;
 	private Thread th = null;
 	private BranchGroup objB;
+	Node3D movingNode;
 	
 	
 	public LMNGraph3DPanel(LMNtal3DFrame f){

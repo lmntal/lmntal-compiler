@@ -1,6 +1,6 @@
 package test3d;
 
-import java.awt.BorderLayout;
+import java.awt.*;
 import javax.swing.*;
 
 import java.awt.event.*;
@@ -50,11 +50,11 @@ class MyThread extends Thread {
 		}
 	}
 }
-public class LMNtal3DFrame extends JFrame {
+public class LMNtal3DFrame extends JFrame  implements KeyListener {
 	public static boolean fWindow=false;
 	public boolean busy = true;
 	public boolean running = true;
-	public LMNGraph3DPanel lmnPanel;
+	public LMNGraph3DPanel lmnPanel = null;
 	private static BranchGroup objRoot;
 	public TransformGroup objKey;
 	public static BranchGroup objBranch;
@@ -241,9 +241,11 @@ public class LMNtal3DFrame extends JFrame {
     	/*タイトル設定*/
     	setTitle("It's 3D-LMNtal");
     	/*Go aheadボタンの追加。*/
+		lmnPanel = new LMNGraph3DPanel(this);
     	JButton bt;
 		getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
-		//bt.addActionListener(new ActionAdapter(this));
+		bt.addActionListener(new ActionAdapter(this));
+		
 		/* サイズ指定 */
 		setBounds( 10, 10, 580, 580);
 		/* 終了処理を追加 */
@@ -253,4 +255,37 @@ public class LMNtal3DFrame extends JFrame {
 		/* 実際に表示する */
 		setVisible(true);
     }
+
+	public void keyPressed(KeyEvent e) {
+	}
+	
+	public void keyReleased(KeyEvent e) {
+	}
+	
+	public void keyTyped(KeyEvent e) {
+		System.out.println(e.getKeyChar());
+	}
+
+}
+
+class ActionAdapter implements ActionListener {
+	LMNtal3DFrame frame;
+	ActionAdapter(LMNtal3DFrame f) {
+		frame = f;
+	}
+	public void actionPerformed(ActionEvent e) {
+//		e.getSource();
+		frame.busy = false;
+	}
+}
+
+class MyKeyAdapter extends KeyAdapter {
+	LMNtal3DFrame frame;
+	MyKeyAdapter(LMNtal3DFrame f) {
+		frame = f;
+	}
+	public void keyPressed(KeyEvent e) {
+		frame.busy = false;
+//		super.keyPressed(e);
+	}
 }
