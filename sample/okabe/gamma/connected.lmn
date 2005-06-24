@@ -1,17 +1,26 @@
-/* 無向グラフ  */
-/* vertex: X   */
-/* edge: (X,Y) */
+/*
+ 無向グラフがconnectedか調べる
+ vertex: v(X)
+ edge: e(X,Y)
+*/
 
-/* return: bool */
-/* →膜内のアトム数を数えたい */
+/*
+ usage:
+   connected({{vertexes},init-vertex,edges}).
+ return:
+   boolen
+*/
 
-/* 初期状態: 膜が空ならば勝手に取ってきた節点を１つ膜に入れる */
-e(X,Y), {$p, @p} :-  unary(X),unary(Y)| {e(X,Y), $p, @p}.
-e(2,1). e(5,3). e(4,2). e(4,5).
-v(2). v(3). v(4). v(5). {v(1)}.
+connected({{v(2),v(3),v(4),v(5)},v(1),e(2,1),e(5,3),e(4,2),e(4,5)}).
+  
+connected({$p,@p}) :- {con,$p,@p}.
+{con,v(X),e(V,W),{v(Y), $p,@p},$q,@q} :- 
+  X=V,Y=W | {con,v(X),v(Y),{$p,@p},$q,@q}.
+{con,v(X),e(V,W),{v(Y), $p,@p},$q,@q} :- 
+  X=W,Y=V | {con,v(X),v(Y),{$p,@p},$q, @q}.
 
+/* 本当は {con,{},$p,@p} :- {true}. と書きたい… */
+{con,{},$p,@p} :- {true,$p,@p}.
+{true,v(X),$p,@p} :- unary(X) | {true,$p,@p}.
 
-/* 膜の外の勝手に取ってきた１つの節点が膜の中の節点と繋がっていたら膜の中に入れる */
-v(X), {v(Y), e(V,W), $p, @p} :-  X=V, Y=W | {v(X), v(Y), $p, @p}.
-v(X), {v(Y), e(V,W), $p, @p} :-  X=W, Y=V | {v(X), v(Y), $p, @p}.                        
-
+/* ↑falseを返すにはどうしよう？ */
