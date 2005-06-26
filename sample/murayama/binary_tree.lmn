@@ -1,3 +1,4 @@
+% Ì¤´°À®
 root(null).
 %insert(X), root(A) :- unary(A) | insert(X)=root(A).
 %insert(X)=root(null) :- int(X) | root=n(X,null,null).

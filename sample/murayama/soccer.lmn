@@ -1,3 +1,4 @@
+% Ì¤´°À®
 fix3(12),fix3(9),fix3(6),fix3(3).
 gen_pentagon(12).
 %gen_pentagon(0) :- fix3(12).
