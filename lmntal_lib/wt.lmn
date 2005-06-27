@@ -1,3 +1,9 @@
+%window tool kit
+%author
+%  Yoshiyuki OHNO
+%  Ryo OKABE
+
+
 [:/*inline_define*/
 import javax.swing.*;
 import java.awt.*;
@@ -33,11 +39,11 @@ class PriorityQueue{
 :].
 
 {
-module(lwt).
+module(wt).
 
-lwt.newFrame({$p, @r}) :- {lwt.createFrame,$p, @r}.
+wt.newFrame({$p, @r}) :- {wt.createFrame,$p, @r}.
 
-lwt.createFrame :- [:/*inline*/
+wt.createFrame :- [:/*inline*/
     LMNtalFrame frame = new LMNtalFrame((Membrane)mem);
     Atom a = mem.newAtom(new Functor("frame",1));
     Atom b = mem.newAtom(new ObjectFunctor(frame));

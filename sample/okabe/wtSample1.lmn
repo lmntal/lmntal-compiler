@@ -1,4 +1,4 @@
-lwt.newFrame({size(800,500),
+wt.newFrame({size(800,500),
                show,
                title("sampleGrid"),
                gridPanel(2,2),

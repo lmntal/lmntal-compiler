@@ -1,4 +1,4 @@
-lwt.newFrame(
+wt.newFrame(
 {
 %frame
 size(500,500),
@@ -64,7 +64,7 @@ update, lastOp(V,OP), pre(P) :- int(V), unary(OP), unary(P) |
     int i = Integer.parseInt(me.nth(0));
     String op = me.nthAtom(1).toString();
     if(op.equals("=")){
-      System.out.print(" ÅÀ\n"+i);
+      System.out.print(" !)\n"+i);
     }else{
       System.out.print(" "+op+" ");
     }

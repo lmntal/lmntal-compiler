@@ -1,4 +1,4 @@
-lwt.newFrame({size(200,200),
+wt.newFrame({size(200,200),
                show,
                title("sampleBorder"),
                borderPanel,
