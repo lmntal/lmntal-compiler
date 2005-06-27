@@ -1,0 +1,14 @@
+% 深さnのtreeを作る。
+
+T=tree(N) :- N>1 | T=n(tree(N-1),tree(N-1)).  % groundを使わない版(適用回数2^n回)
+T=tree(N) :- N=1 | T=n.
+
+not_ground_tree = tree(5).
+
+T=tree(G,N) :- N>1, ground(G) | T=tree(n(G,G),N-1). % groundを使う版(適用回数n回)
+T=tree(G,N) :- N=1,           | T=G.
+
+ground_tree = tree(n,5).
+
+% groundを使うと、ルール適用の回数は減る。つまりマッチングに要する時間は減る。
+% でもたぶん操作は、検査の分だけgroundのほうが重い気がする。

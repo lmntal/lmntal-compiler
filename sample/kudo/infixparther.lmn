@@ -1,0 +1,17 @@
+% 中置記法パーザ by kudo
+% 乾君のInteraction Nets の例題の例に倣った
+
+% (1+1)-1
+y('('('1'('+'('1'(')'('-'('1'(x)))))))).
+user(parse).
+
+ '1'(X, Y) :- parsed(1,X,Y).
+ '0'(X, Y) :- parsed(0,X,Y).
+ '('(L, Y), parsed(O, R, L), ')'(X, R) :- parsed(O, X, Y).
+ '/'(L, R), parsed(N1, X, L), parsed(N2, R, Y2), '('(Y2,Y) :- '('(Y2, Y), parsed(N2/N1, X, Y2).
+ '/'(L, R), parsed(N1, X, L), parsed(N2, R, Y), y(Y) :- y(Y), parsed(N2/N1, X, Y).
+ '*'(L, R), parsed(N1, X, L), parsed(N2, R, Y) :- parsed(N2 * N1, X, Y).
+ '-'(L, R), parsed(N1, X, L), parsed(N2, R, Y2), '('(Y2,Y) :- '('(Y2, Y), parsed(N2-N1, X, Y2).
+ '-'(L, R), parsed(N1, X, L), parsed(N2, R, Y), y(Y) :- y(Y), parsed(N2-N1, X, Y).
+ '+'(L, R), parsed(N1, X, L), parsed(N2, R, Y) :- parsed(N2 + N1, X, Y).
+ U = parse, y(Y), parsed(O,X,Y), x(X) :- y(x), U = O.

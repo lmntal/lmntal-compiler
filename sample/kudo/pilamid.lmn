@@ -1,0 +1,26 @@
+% 格子状に（違うか）ピラミッドのような図形を作る。
+% ほとんどソースは暗号だが、やってることは大して複雑ではない。格子形成の六角形バージョン。
+% つまり、上三角形形成と、下三角形形成の二パターンがあるというだけ。
+
+top = p(7).
+
+P=p(N) :- N>0| P = s(n,n,p(N-1)).
+P=p(N) :- N=0| P = e.
+
+%top(s(n,S)) :- top(s(n(N),S),N).
+
+s(N11,n,S,T),s(n,N22,SN,S) :- s(N11,L1,S,T),s(L2,N22,SN,S),n(n,n,n,L2,L1,n).
+
+s(N1,N2,S,T),n(L1,L2,n,N1,L3,L4),n(L5,L6,L7,L8,N2,n) :- s(NN1,NN2,S,T),n(L1,L2,X,NN1,L3,L4),n(L5,L6,L7,L8,NN2,X).
+
+n(L1,n,N,L2,L3,L4),n(n,L5,L6,L7,L8,N) :- n(L1,X,NN,L2,L3,L4),n(Y,L5,L6,L7,L8,NN),n(n,n,n,Y,X,n).
+
+n(N1,N2,L1,L2,L3,L4),n(L5,L6,n,N1,L7,L8),n(L9,L10,L11,L12,N2,n) :- n(NN1,NN2,L1,L2,L3,L4),n(L5,L6,X,NN1,L7,L8),n(L9,L10,L11,L12,NN2,X).
+
+s(N,n,e,T) :- s(N,z(Z),e(Z),T).
+
+z(E,ZZ),s(N,ZZ,L1,L2),n(L3,L4,n,N,L5,L6) :- s(NN,ZZZ,L1,L2),n(L3,L4,Z,NN,L5,L6),z(E,ZZZ,Z).
+
+z(L1,L2,N),n(L3,n,N,L4,L5,L6) :- z(L1,L2,NN,Z),z(Z,ZN),n(L3,ZN,NN,L4,L5,L6).
+
+z(L1,Z),n(N,Z,L2,L3,L4,L5),n(L6,L7,n,N,L8,L9) :- z(L1,ZZ,X),n(NN,ZZ,L2,L3,L4,L5),n(L6,L7,X,NN,L8,L9).

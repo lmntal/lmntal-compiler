@@ -214,7 +214,7 @@ H=input_integer(Message) :- H= [:/*inline*/
 	    mem.newAtom(new IntegerFunctor(n)):
 	    mem.newAtom(new Functor("nil",1));
         }
-	mem.relink(result,0,me,1);
-	me.nthAtom(0).remove();
-	me.remove();
+	mem.relinkAtomArgs(result,0,me,1);
+	//me.nthAtom(0).remove();
+	//me.remove();
 	:](Message).

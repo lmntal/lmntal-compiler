@@ -55,6 +55,7 @@ start,full=F,boat=B :- int(B),ground(F) | un , unsaved_state(B,F,[[],[],[]],[],l
 %正解判定(もっとも優先される必要がある)
 un,state(B,[[],[],[]],OS,[],left,N,movin(M)),full = F :- OS=F,int(B),int(N) | solution=M.
 
+
 %狼が羊を食べる,キャベツが羊を食べる(下の二つのルールより優先される必要がある)
 un,unsaved_state(B,S,[[w|W],[g|G],   C ],[],BS,N,{$m[]}) :- ground(S),ground(W),ground(G),ground(C),int(B),int(N),unary(BS) | un.
 un,unsaved_state(B,S,[   W ,[g|G],[c|C]],[],BS,N,{$m[]}) :- ground(S),ground(W),ground(G),ground(C),int(B),int(N),unary(BS) | un.
@@ -66,6 +67,7 @@ un,                                     saved(BSS,SS,OSS,NS).
 %過去に辿ってない状態の保存
 un,unsaved_state(B,S,OS,[],BS,N,M) :- ground(S),ground(OS),unary(BS),int(N) |
 un,        state(B,S,OS,[],BS,N,M), saved(BS,S,OS,N).
+
 
 %以下複製ルール. 次の5つしかない筈. ボートの空席が埋まるまで繰り返す筈.
 
