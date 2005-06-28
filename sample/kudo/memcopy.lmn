@@ -1,12 +1,12 @@
 % 「非線形プロセス文脈with非明示自由リンク」の代わりをinlineで書いてみる by kudo
 %
 % 非線形プロセス文脈with非明示自由リンク:
-% {$p[|*Z]} :- {$p[|*Z1]},{$p[|*Z2]}, *Z=*Z1, *copy(*Z2)
+% {$p[|*Z]} :- {$p[|*Z1]},{$p[|*Z2]}, *Z=*Z1, copy(*Z2)
 %
 % とりあえず仕様としては，
 % R=mem.copy(M), {$p[M|*Z]}
 % ->
-% R=copied(M,M'), {$p[M|*Z]}, {$p[M'|*Z']}, *nil(*Z')
+% R=copied(M,M'), {$p[M|*Z]}, {$p[M'|*Z']}, nil(*Z')
 % という感じでやってみる
 % ...nilでいいのか?
 %
@@ -40,12 +40,12 @@
 % copied({a(A)},{a(NIL_1)}) = copied({b(A)},{b(NIL_2)}), nil(NIL_1), nil(NIL_2)
 %
 
+% TODO モジュル化
+
 % とりあえずこの三つのケースはうまくいった
 %ret = memcopy({}).
 %ret = memcopy({a,{}}).
 %ret = memcopy({a(A)}),b(A).
-
-% TODO モジュル化
 
   R=memcopy(M) :-
   R=[:/*inline*/
@@ -80,6 +80,46 @@
   		mem.relink(copied, 2, me,1);
   		mem.relink(copied, 0, me,0);
   		mem.newLink(newosp,1,copied,1);
+  		mem.removeAtom(me);
+  	}
+  :](M).
+  
+% 膜の破棄
+%
+% R=memdrop(M),{$p[M|*Z]} -> R=droped, droped(*Z)
+%
+
+%これらのケースではうまくいった
+%ret = memdrop({}).
+%ret = memdrop({a,{b,{}}}).
+%ret = memdrop({a(A),{b(B)}}),c(A,B).
+
+  R=memdrop(M) :-
+  R=[:/*inline*/
+  	Atom osp = me.nthAtom(0);
+  	if(!osp.getFunctor().equals(Functor.OUTSIDE_PROXY)){ // 子膜に繋がっていない
+  		Atom er = mem.newAtom(new Functor("drop_error",1));
+  		mem.relink(er, 0, me, 1);
+  		mem.removeAtom(me.nthAtom(0));
+  		mem.removeAtom(me);
+  	}
+  	else{
+  		Atom isp = osp.nthAtom(0);
+  		AbstractMembrane origmem = isp.getMem();
+  		origmem.recursiveLock();
+  		Iterator it = origmem.atomIteratorOfFunctor(Functor.INSIDE_PROXY);
+  		while(it.hasNext()){
+  			Atom origisp = (Atom)it.next();
+  			if(origisp == isp)continue;
+  			Atom origosp = origisp.nthAtom(0);
+  			Atom dropped = mem.newAtom(new Functor("dropped",1));
+  			mem.relink(dropped,0,origosp,1);
+  			mem.removeAtom(origosp);
+  		}
+  		mem.removeMem(origmem);
+  		Atom dropped = mem.newAtom(new Functor("dropped",1));
+  		mem.relink(dropped, 0, me, 1);
+		mem.removeAtom(me.nthAtom(0));
   		mem.removeAtom(me);
   	}
   :](M).
