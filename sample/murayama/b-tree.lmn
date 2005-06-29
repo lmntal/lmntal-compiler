@@ -6,8 +6,6 @@ root({r=[0],num(1),leaf}).
 	:- H1>H2 | {R=[H2, H1 | B],$p[R,B|*Z]}.
 
 % レコードの分割
-root({num(5),$p}) :- \+($p=(+(A),$q)) | root({r=[+(T2)],num(0)}).
-{num(5),$p} :- \+($p=(+(A),$q)) | {num(5),$p,+(T2)},{r=[+(T2)],num(0)}.
 {R=[+(T2)|B2],$q[R,B2|*Z],num(N)},
 {leaf,+(T2),r=[H1,H2,H3 | B1],num(5),$p}
 	:- ground(B1) ,int(H1),int(H2),int(H3),int(N)
@@ -20,6 +18,8 @@ root({num(5),$p}) :- \+($p=(+(A),$q)) | root({r=[+(T2)],num(0)}).
 	| {R=[+(T1),H3,+(T2)|B2],$q[R,B2|*Z],num(N+1)}
 	  {+(T1),r=[+(T3),H1,+(T4),H2,+(T5)],num(2)},
 	  {+(T2),r(B1),num(2),$p[B1|*Z2]}.
+root({num(5),$p}) :- {num(5),$p,+(T2)},root({r=[+(T2)],num(0)}).
+{num(5),$p} :- {num(5),$p,+(T2)},{r=[+(T2)],num(0)}.
 
 % レコードに値を追加
 {leaf,spread(H,ins),$p} :- int(H)|{leaf,ins(H),$p}.
