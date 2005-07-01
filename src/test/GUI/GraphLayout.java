@@ -193,8 +193,8 @@ public class GraphLayout implements Runnable {
 					//                      1/(2 * arity[の最大値])だとなおよい。
 					// [の最大値]を消してもよい。
 					// その場合、アリティがアトムの質量のようなものとして計算される
-					double ddx = 0.5 * f * edge.getVx()/l;
-					double ddy = 0.5 * f * edge.getVy()/l;
+					double ddx = 0.05 * f * edge.getVx()/l;
+					double ddy = 0.05 * f * edge.getVy()/l;
 					
 					edge.from.setMoveDelta(ddx, ddy);
 					edge.to.setMoveDelta(-ddx, -ddy);
@@ -243,7 +243,7 @@ public class GraphLayout implements Runnable {
 		}
 		
 		for(Iterator i1 = m.atomIterator();i1.hasNext();){
-			double teisuu = 1;
+			double teisuu = 2;
 			double dx = 0;
 			double dy = 0;
 			
