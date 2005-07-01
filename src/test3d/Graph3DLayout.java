@@ -10,7 +10,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Color3f;
 import javax.vecmath.Vector3d;
-import java.awt.Color;
 
 
 
@@ -325,6 +324,12 @@ public class Graph3DLayout implements Runnable{
 					translation.setTranslation(new Vector3d(mex,mey,mez));
 					me.getObj().setTransform(translation);
 					me.setPosition3d(new Double3DPoint(mex,mey,mez));
+
+					if(ne[j].getObj().getVisible()){
+						translation.setTranslation(new Vector3d(youx,youy,youz));
+						ne[j].getObj().setTransform(translation);
+						ne[j].setPosition3d(new Double3DPoint(youx,youy,youz));
+					}
 					//translation.setTranslation(new Vector3d(youx,youy,youz));
 					//ne[j].getObj().setTransform(translation);
 					//ne[j].setPosition3d(new Double3DPoint(youx,youy,youz));
@@ -340,26 +345,32 @@ public class Graph3DLayout implements Runnable{
 					if(dEdge>1.0)dEdge=1.0;
 					if(dx > dy && dx > dz){
 						if(mex < youx){
-							mex += DELTAEDGE * dEdge * dEdge;
+							mex += DELTAEDGE * dEdge * dEdge / 2;
+							youx -= DELTAEDGE * dEdge * dEdge / 2;
 						}
 						else{ 
-							mex -= DELTAEDGE * dEdge * dEdge;
+							mex -= DELTAEDGE * dEdge * dEdge / 2;
+							youx += DELTAEDGE * dEdge * dEdge / 2;
 						}
 					}
 					else if(dy > dx && dy > dz){
 						if(mey < youy){
-							mey += DELTAEDGE * dEdge * dEdge;
+							mey += DELTAEDGE * dEdge * dEdge / 2;
+							youy -= DELTAEDGE * dEdge * dEdge / 2;
 						}
 						else{
-							mey -= DELTAEDGE * dEdge * dEdge;
+							mey -= DELTAEDGE * dEdge * dEdge / 2;
+							youy += DELTAEDGE * dEdge * dEdge / 2;
 						}
 					}
 					else{
 						if(mez < youz){
-							mez += DELTAEDGE * dEdge * dEdge;
+							mez += DELTAEDGE * dEdge * dEdge / 2;
+							youz -= DELTAEDGE * dEdge * dEdge / 2;
 						}
 						else{
-							mez -= DELTAEDGE * dEdge * dEdge;
+							mez -= DELTAEDGE * dEdge * dEdge / 2;
+							youz += DELTAEDGE * dEdge * dEdge / 2;
 						}
 					}
 	
@@ -367,6 +378,12 @@ public class Graph3DLayout implements Runnable{
 					translation.setTranslation(new Vector3d(mex,mey,mez));
 					me.getObj().setTransform(translation);
 					me.setPosition3d(new Double3DPoint(mex,mey,mez));
+					
+					if(ne[j].getObj().getVisible()){
+						translation.setTranslation(new Vector3d(youx,youy,youz));
+						ne[j].getObj().setTransform(translation);
+						ne[j].setPosition3d(new Double3DPoint(youx,youy,youz));
+					}
 					//translation.setTranslation(new Vector3d(youx,youy,youz));
 					//ne[j].getObj().setTransform(translation);
 					//ne[j].setPosition3d(new Double3DPoint(youx,youy,youz));
@@ -403,25 +420,31 @@ public class Graph3DLayout implements Runnable{
 						if(dEdge>1.0)dEdge=1.0;
 						if(dx < dy && dx < dz){
 							if(mex < youx){
-								mex -= DELTAEDGE * dEdge * dEdge;
+								mex -= DELTAEDGE * dEdge * dEdge / 2;
+								youx += DELTAEDGE * dEdge * dEdge / 2;
 							}else{ 
-								mex += DELTAEDGE * dEdge * dEdge;
+								mex += DELTAEDGE * dEdge * dEdge / 2;
+								youx -= DELTAEDGE * dEdge * dEdge / 2;
 							}
 						}
 						else if(dy < dx && dy < dz){
 							if(mey < youy){
-								mey -= DELTAEDGE * dEdge * dEdge;
+								mey -= DELTAEDGE * dEdge * dEdge / 2;
+								youy += DELTAEDGE * dEdge * dEdge / 2;
 							}
 							else{
-								mey += DELTAEDGE * dEdge * dEdge;
+								mey += DELTAEDGE * dEdge * dEdge / 2;
+								youy -= DELTAEDGE * dEdge * dEdge / 2;
 							}
 						}
 						else{
 							if(mez < youz){
-								mez -= DELTAEDGE * dEdge * dEdge;
+								mez -= DELTAEDGE * dEdge * dEdge / 2;
+								youz += DELTAEDGE * dEdge * dEdge / 2;
 							}
 							else{
-								mez += DELTAEDGE * dEdge * dEdge;
+								mez += DELTAEDGE * dEdge * dEdge / 2;
+								youz -= DELTAEDGE * dEdge * dEdge / 2;
 							}
 						}
 		
@@ -430,6 +453,12 @@ public class Graph3DLayout implements Runnable{
 						translation.setTranslation(new Vector3d(mex,mey,mez));
 						me.getObj().setTransform(translation);
 						me.setPosition3d(new Double3DPoint(mex,mey,mez));
+						
+						if(you.getObj().getVisible()){
+							translation.setTranslation(new Vector3d(youx,youy,youz));
+							you.getObj().setTransform(translation);
+							you.setPosition3d(new Double3DPoint(youx,youy,youz));
+						}
 					}
 				}
 			}

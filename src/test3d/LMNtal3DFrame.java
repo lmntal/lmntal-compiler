@@ -140,6 +140,7 @@ public class LMNtal3DFrame extends JFrame  implements KeyListener {
 		translator.setupCallback(new PickingCallback(){
             Vector3d vect = new Vector3d();   // 座標を格納する
             Transform3D t3d = new Transform3D();
+            //boolean picked=this.picked;
             public void transformChanged(int type,TransformGroup tg){
                 if(type == PickingCallback.TRANSLATE){
                     //tg.getTransform(t3d);
@@ -153,10 +154,8 @@ public class LMNtal3DFrame extends JFrame  implements KeyListener {
                     Double3DPoint p = new Double3DPoint(vect);
                     //System.out.println(lmntg.getEdgeNum());
                     lmntg.getMe().setPosition3d(p);
-                    lmntg.setVisible(false);
+                    //lmntg.setVisible(false);
                     lmnPanel.getGraph3DLayout().edgerelax(lmntg.getMe());
-                    lmntg.setVisible(true);
-                    
                 }
             }
         });
