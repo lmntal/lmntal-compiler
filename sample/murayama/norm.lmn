@@ -1,0 +1,12 @@
+threadnum(3).
+threadnum(Num) :- Num>0 | threadnum(Num-1),{ 
+	generate(10000).
+	bench(X),{+(X).
+		go :- norm(0).
+		norm(Y),n(X) :- int(X) | norm(X*X+Y)
+	}.
+	generate(X),bench({$p,@p}) :- X>0| bench({n(integer.rnd(100)),$p,@p}),generate(X-1).
+	generate(0),bench({$p,@p}) :- 
+		timer:benchmark(X,"Elapsed Time"),
+		bench({ +X, $p,@p}).
+}@"localhost".
