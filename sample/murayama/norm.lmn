@@ -1,3 +1,7 @@
+% スレッドを複数たててノルムの計算をする
+% -s0モードだとエラーが出る
+% 並列効果は薄いようだ
+
 threadnum(4).
 createthread(4).
 world({
@@ -7,7 +11,7 @@ world({
 createthread(Num),world({$p,@p}) :- Num>0 | createthread(Num-1),
 	world({
 		thread({ 
-			generate(1000).
+			generate(2500).
 			start :- started,norm(0).
 			norm(Y),n(X) :- int(X) | norm(X*X+Y).
 			generate(X) :- X>0 | n(integer.rnd(100)), generate(X-1).
@@ -23,5 +27,5 @@ world({ready(R),$p,@p}),threadnum(T) :- R=:=T |
 		go, thread({$r,@r}) :- \+($r=(started,$q)) | go, thread({start,$r,@r}).
 		return(0).
 		thread({norm(X),started,@r}/),return(Y) :- int(X),int(Y) | return(X+Y).
-		$p,@p.
+		$p.
  	}).

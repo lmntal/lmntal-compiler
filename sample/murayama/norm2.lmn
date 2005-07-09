@@ -1,0 +1,9 @@
+createthread(4).
+createthread(Num) :- Num>0 |
+	createthread(Num-1),
+	thread({ 
+		generate(100).
+		generate(X) :- X>0 | n(integer.rnd(100)), generate(X-1).
+		norm(0).
+		norm(Y),n(X) :- int(X) | norm(X*X+Y).
+	}@"localhost").
