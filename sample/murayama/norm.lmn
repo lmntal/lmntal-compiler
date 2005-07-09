@@ -1,12 +1,27 @@
-threadnum(3).
-threadnum(Num) :- Num>0 | threadnum(Num-1),{ 
-	generate(10000).
-	bench(X),{+(X).
-		go :- norm(0).
-		norm(Y),n(X) :- int(X) | norm(X*X+Y)
-	}.
-	generate(X),bench({$p,@p}) :- X>0| bench({n(integer.rnd(100)),$p,@p}),generate(X-1).
-	generate(0),bench({$p,@p}) :- 
-		timer:benchmark(X,"Elapsed Time"),
-		bench({ +X, $p,@p}).
-}@"localhost".
+threadnum(4).
+createthread(4).
+world({
+	ready(0).
+	thread({generate(0),$p1,@p1}),ready(X) :- thread({$p1,@p1}),ready(X+1).
+}).
+createthread(Num),world({$p,@p}) :- Num>0 | createthread(Num-1),
+	world({
+		thread({ 
+			generate(1000).
+			start :- started,norm(0).
+			norm(Y),n(X) :- int(X) | norm(X*X+Y).
+			generate(X) :- X>0 | n(integer.rnd(100)), generate(X-1).
+		}@"localhost").
+		$p,@p
+	}).
+createthread(0) :-.
+
+world({ready(R),$p,@p}),threadnum(T) :- R=:=T | 
+	timer:benchmark(X,"Elapsed Time"),
+	wolrd({
+		+(X).
+		go, thread({$r,@r}) :- \+($r=(started,$q)) | go, thread({start,$r,@r}).
+		return(0).
+		thread({norm(X),started,@r}/),return(Y) :- int(X),int(Y) | return(X+Y).
+		$p,@p.
+ 	}).
