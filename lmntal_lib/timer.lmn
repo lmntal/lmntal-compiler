@@ -1,4 +1,6 @@
 % timer, time, benchmark, long の開発者向けサンプル by n-kato
+% "AbstractMembrane mem = me.getMem();"のmemが他の変数と被っているようで、
+% mem1に置き換えました by kei murayama
 
 {
 module(timer).
@@ -15,15 +17,15 @@ module(timer).
 			
 	timer:subtract(Time1,Time2,Res) :- class(Time1,"java.lang.Long"), class(Time2,"java.lang.Long") |
 		[:/*inline*/
-			AbstractMembrane mem = me.getMem();
-			mem.removeAtom(me);
-			mem.removeAtom(me.getArg(0).getAtom());
-			mem.removeAtom(me.getArg(1).getAtom());
+			AbstractMembrane mem1 = me.getMem();
+			mem1.removeAtom(me);
+			mem1.removeAtom(me.getArg(0).getAtom());
+			mem1.removeAtom(me.getArg(1).getAtom());
 			long time1 = ((Long)((ObjectFunctor)me.getArg(0).getAtom().getFunctor()).getObject()).longValue();
 			long time2 = ((Long)((ObjectFunctor)me.getArg(1).getAtom().getFunctor()).getObject()).longValue();
 			double res = (time1 - time2) / 1000.0;
-			Atom resatom = mem.newAtom(new FloatingFunctor(res));
-			mem.relinkAtomArgs(resatom,0,me,2);:](Time1,Time2,Res).
+			Atom resatom = mem1.newAtom(new FloatingFunctor(res));
+			mem1.relinkAtomArgs(resatom,0,me,2);:](Time1,Time2,Res).
 
 	timer:benchmark(X,Res) :- timer:gettime(Start), timer:benchmark2(X,Start,Res).
 	timer:benchmark2(X,Start,Res), {+X,$p,@p} :- class(Start,"java.lang.Long") |
