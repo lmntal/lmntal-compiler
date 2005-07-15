@@ -31,6 +31,14 @@ cube([One|Rest],Out) :-
 
 %cube([1,2,3,4,5],result).
 
+append([],In2,Out) :- Out=In2.
+append([Msg|In1]In2,Out) :- Out=[Msg|OutTail],append(In1,In2,OutTail).
+
+append_sum(N,Sum) :- naturals(N,Naturals1),naturals(N,Naturals2),
+  square(Naturals1,Squares),cube(Naturals2,Cubes),
+    append(Squares,Cubes,Both),sum(Both,Sum).
+
+/* merger */
 merge([],In2,Out) :- Out=In2.
 merge(In1,[],Out) :- Out=In1.
 merge([Msg|In1],In2,Out) :- Out=[Msg|OutTail],merge(In1,In2,OutTail).
@@ -38,13 +46,14 @@ merge(In1,[Msg|In2],Out) :- Out=[Msg|OutTail],merge(In1,In2,OutTail).
 
 %merge([1,3,5,7],[2,4,6,8],result).
 
-queer_sum(N,Sum) :-
+merge_sum(N,Sum) :-
   int(N) | naturals(N,Naturals1),naturals(N,Naturals2),
     square(Naturals1,Squares),cube(Naturals2,Cubes),
       merge(Squares,Cubes,Both),sum(Both,Sum).
 
-%queer_sum(5,result).
+%merge_sum(5,result).
 
+/* dispatcher */
 dispatch([],Odd,Even) :- Odd=[],Even=[].
 dispatch([One|Rest],Odd,Even) :- One mod 2=\=0 | 
   Odd=[One|OddTail],dispatch(Rest,OddTail,Even).
@@ -53,3 +62,8 @@ dispatch([One|Rest],Odd,Even) :- One mod 2=:=0 |
 
 %dispatch([1,8,2,7,5,4,9,6,3],odd,even).
 
+queer_sum(N,Sum) :- naturals(N,Naturals),dispatch(Naturals,Odd,Even),
+  square(Even,Squares),cube(Odd,Cubes),merge(Squares,Cubes,Both),
+    sum(Both,Sum).
+
+queer_sum(5,result).

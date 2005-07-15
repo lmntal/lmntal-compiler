@@ -1,0 +1,4 @@
+not(In,Out) :- In=0|Out=1.
+not(In,Out) :- In=1|Out=0.
+% 変数の共有
+not(X,y).not(1,X).

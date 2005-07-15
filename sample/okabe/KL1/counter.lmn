@@ -1,0 +1,5 @@
+counter(Stream):-counter(Stream,0).
+counter([],Count).
+counter([up(N),Stream],Count):-counter(Stream,Count+N).
+counter([down(N)|Stream],Count):-counter(Stream,Count-N).
+counter([show(V)|Stream],Count):-V=Count,counter(Stream,Count).
