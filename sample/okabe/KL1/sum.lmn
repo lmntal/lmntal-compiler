@@ -32,11 +32,12 @@ cube([One|Rest],Out) :-
 %cube([1,2,3,4,5],result).
 
 append([],In2,Out) :- Out=In2.
-append([Msg|In1]In2,Out) :- Out=[Msg|OutTail],append(In1,In2,OutTail).
+append([Msg|In1],In2,Out) :- Out=[Msg|OutTail],append(In1,In2,OutTail).
 
-append_sum(N,Sum) :- naturals(N,Naturals1),naturals(N,Naturals2),
-  square(Naturals1,Squares),cube(Naturals2,Cubes),
-    append(Squares,Cubes,Both),sum(Both,Sum).
+append_sum(N,Sum) :- 
+  int(N) | naturals(N,Naturals1),naturals(N,Naturals2),
+    square(Naturals1,Squares),cube(Naturals2,Cubes),
+      append(Squares,Cubes,Both),sum(Both,Sum).
 
 /* merger */
 merge([],In2,Out) :- Out=In2.
