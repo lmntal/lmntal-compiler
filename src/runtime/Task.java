@@ -104,6 +104,7 @@ class Task extends AbstractTask {
 	
 	////////////////////////////////////////////////////////////////
 
+	private int count = 1; // 行番号表示@トレースモード okabe
 	/** このタスクの本膜のルールを実行する */
 	void exec() {
 		Membrane mem; // 本膜
@@ -156,7 +157,10 @@ class Task extends AbstractTask {
 							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
 							// memToDump = getRoot();
 //							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
+							{
+								System.out.print((count++) + "");
 								Env.p( " --> \n" + Dumper.dump( memToDump ) );
+							}
 						}
 					}
 					if (!Env.guiTrace()) break;
@@ -203,7 +207,10 @@ class Task extends AbstractTask {
 							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
 							// memToDump = getRoot();
 //							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
+							{
+								System.out.print((count++) + "");
 								Env.p( " ==> \n" + Dumper.dump( memToDump ) );
+							}
 						}
 					}
 					if (!Env.guiTrace()) break;
