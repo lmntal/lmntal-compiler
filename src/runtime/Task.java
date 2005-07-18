@@ -158,7 +158,7 @@ class Task extends AbstractTask {
 							// memToDump = getRoot();
 //							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
 							{
-								System.out.print((count++) + "");
+								System.out.print("#" + (count++) + "");
 								Env.p( " --> \n" + Dumper.dump( memToDump ) );
 							}
 						}
@@ -208,7 +208,7 @@ class Task extends AbstractTask {
 							// memToDump = getRoot();
 //							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
 							{
-								System.out.print((count++) + "");
+								System.out.print("#" + (count++) + "");
 								Env.p( " ==> \n" + Dumper.dump( memToDump ) );
 							}
 						}
