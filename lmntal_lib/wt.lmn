@@ -190,8 +190,8 @@ terminate,frame(F):- class(F,"LMNtalFrame") | [:/*inline*/
   :](F),
   terminated.
 
-{terminated,grid(P,Q),$p,@r} :- class(P,"java.awt.Panel"),class(Q,"PriorityQueue") |{$p}.
-{terminated,border(B),$p,@r} :- class(B,"java.awt.Panel")|{$p}.
+{terminated,grid(P,Q),$p[],@r} :- class(P,"java.awt.Panel"),class(Q,"PriorityQueue") |.
+{terminated,border(B),$p[],@r} :- class(B,"java.awt.Panel")|.
 
 }.
 
