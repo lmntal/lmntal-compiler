@@ -52,22 +52,24 @@ public final class RuleStructure {
 	}
 
 	public String toString() {
-		String text = "( " + leftMem.toStringWithoutBrace() + " :- ";
-		String guard = "";
-		if (!guardMem.atoms.isEmpty()) {
-			guard += guardMem.toStringAsGuardTypeConstraints() + " ";
-		}
-		Iterator it = guardNegatives.iterator();
-		while (it.hasNext()) {
-			String eqstext = "";
-			Iterator it2 = ((LinkedList)it.next()).iterator();
-			while (it2.hasNext()) {
-				eqstext += "," + ((ProcessContextEquation)it2.next()).toString();
-			}
-			if (eqstext.length() > 0)  eqstext = eqstext.substring(1);
-			guard += "\\+(" + eqstext + ") ";
-		}
-		if (guard.length() > 0)  text += guard + "| ";
-		return text + rightMem.toStringWithoutBrace() + " )";
+		// 050719 okabe トレースモード用に変更
+		return "(" + leftMem.toStringWithoutBrace() + "):-";
+		//String text = "( " + leftMem.toStringWithoutBrace() + " :- ";
+		//String guard = "";
+		//if (!guardMem.atoms.isEmpty()) {
+		//	guard += guardMem.toStringAsGuardTypeConstraints() + " ";
+		//}
+		//Iterator it = guardNegatives.iterator();
+		//while (it.hasNext()) {
+		//	String eqstext = "";
+		//	Iterator it2 = ((LinkedList)it.next()).iterator();
+		//	while (it2.hasNext()) {
+		//		eqstext += "," + ((ProcessContextEquation)it2.next()).toString();
+		//	}
+		//	if (eqstext.length() > 0)  eqstext = eqstext.substring(1);
+		//	guard += "\\+(" + eqstext + ") ";
+		//}
+		//if (guard.length() > 0)  text += guard + "| ";
+		//return text + rightMem.toStringWithoutBrace() + " )";
 	}
 }

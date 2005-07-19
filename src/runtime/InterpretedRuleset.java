@@ -70,6 +70,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			if (r.atomMatch.size() == 1) continue; // debug表示抑制用
 			if (matchTest(mem, atom, r.atomMatch)) {
 				result = true;
+				// トレースモードでルール（の左辺）を表示する
+				if(Env.fTrace) System.out.println(r.toString());
 				//if (!mem.isCurrent()) return true;
 				return true;
 			}
@@ -88,6 +90,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			Rule r = (Rule) it.next();
 			if (matchTest(mem, null, r.memMatch)) {
 				result = true;
+				// トレースモードでルール（の左辺）を表示する
+				if(Env.fTrace) System.out.println(r.toString());
 				return true;
 				//if (!mem.isCurrent()) return true;
 			}
