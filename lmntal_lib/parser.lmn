@@ -1,0 +1,28 @@
+
+ans([begin,123,กว+กว,45,กว*กว,67,กว+กว,8,end]).
+
+// parser
+X0=[$opL,exp(E1),$op,exp(E2),$opR|X],
+op($opL1,$pL),op($op1,$p),op($opR1,$pR) :-
+$opL1=$opL, $op1=$op, $opR1=$opR,
+$pL =< $p, $p >= $pR |
+X0=[$opL,exp(e($op,E1,E2)),$opR|X],
+op($opL1,$pL),op($op1,$p),op($opR1,$pR).
+X0=[N|X] :- int(N) | X0=[exp(N)|X].
+
+
+// unparser
+X0=[$opL,exp(e($op,E1,E2)),$opR|X],
+op($opL1,$pL),op($op1,$p),op($opR1,$pR) :-
+$opL1=$opL, $op1=$op, $opR1=$opR,
+$pL =< $p, $p >= $pR |
+X0=[$opL,exp(E1),$op,exp(E2),$opR|X],
+op($opL1,$pL),op($op1,$p),op($opR1,$pR).
+X0=[exp(N)|X] :- int(N) | X0=[N|X].
+
+
+// ฑ้ปปปาษฝ
+op(กว*กว,4). op(กว*กว,4). op(กว*กว,4).
+op(กว+กว,3). op(กว+กว,3). op(กว+กว,3).
+op(begin,0). op(end,0).
+
