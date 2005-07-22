@@ -77,7 +77,7 @@ public final class Env {
 	//public static final int SHUFFLE_TASKS = 5;
 
 	/** -sオプション無指定時のランダム実行レベル */
-	public static final int SHUFFLE_INIT  = 1;
+	public static final int SHUFFLE_INIT  = 0;
 	/** -sオプション指定時のデフォルトのランダム実行レベル */
 	public static final int SHUFFLE_DEFAULT = 3;
 	/** ランダム実行レベル */
