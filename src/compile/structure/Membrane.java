@@ -182,6 +182,27 @@ public final class Membrane {
 		while(it.hasNext()) ((Membrane)it.next()).showAllRules();
 	}
 	
+	/*
+	 * okabe
+	 * この膜に含まれるアトムのうち一番最初のアトムのアトム名を返す
+	 * ルールの左辺が膜の場合は再帰呼び出し
+	 * トレースモードで使用
+	 */
+	public String getFirstAtomName(){
+		Iterator atomIt = atoms.iterator();
+		Iterator memIt= mems.iterator();
+		if (atomIt.hasNext()) {
+			return ((Atom) atomIt.next()).getName();
+		} else if (memIt.hasNext()) {
+			// 再帰はまずいかも…
+			return ((Membrane) memIt.next()).getFirstAtomName();
+			// 代替案：膜の場合はそのまま表示
+			//return ((Membrane) memIt.next()).toString();
+		} else {
+			return "null";
+		}
+	}
+	
 	/**
 	 * 与えられた膜の中身をこの膜に追加する。
 	 * @param m
