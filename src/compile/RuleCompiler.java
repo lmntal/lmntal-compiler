@@ -85,7 +85,15 @@ public class RuleCompiler {
 		Env.c("compile");
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
-		theRule = new Rule(rs.toString());
+//		theRule = new Rule(rs.toString());
+		/**
+		 * okabe
+		 * ルールオブジェクトを生成する際の引数を変更
+		 * 左辺膜の一番最初のアトム
+		 * トレースモードで出力
+		 */
+		theRule = new Rule(rs.leftMem.getFirstAtomName());
+
 		
 		hc = new HeadCompiler();//rs.leftMem;
 		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
