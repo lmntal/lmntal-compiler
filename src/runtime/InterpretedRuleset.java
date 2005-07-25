@@ -670,7 +670,7 @@ class InterpretiveReactor {
 				    lockedMemList.add(mems[inst.getIntArg1()]);
 					break;//nakajima 2004-01-04, n-kato
 
-				case Instruction.COPYCELLS : //[-dstmap, -dstmem, srcmem]
+				case Instruction.COPYCELLS : //[-dstmap, dstmem, srcmem]
 					// <strike>自由リンクを持たない膜（その子膜とのリンクはOK）のみ</strike>
 					vars.set(inst.getIntArg1(), mems[inst.getIntArg2()].copyCellsFrom(mems[inst.getIntArg3()]));
 					break; //kudo 2004-09-29
