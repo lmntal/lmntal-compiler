@@ -3,8 +3,10 @@ package runtime;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Map;
+import java.util.Stack;
 //import java.util.ArrayList;
 //import java.util.Iterator;
 //import java.util.List;
@@ -75,30 +77,53 @@ public final class Link implements Cloneable, Serializable {
 	
 	/** 
 	 * by kudo
-	 * 再帰的に基底項プロセスかどうかを検査する。
-	 * リンク先を辿って出会った、srcSetに未登録のアトムの数を返す。
-	 * ただし、自由リンク管理アトムに出会った場合は、-1を返す。
-	 * @param srcSet 基底項プロセスを構成するアトムのSet
+	 * 基底項プロセスかどうかを検査する．(Stackを使うように修正 2005/07/26)
+	 * (それに伴い引数に受け取っていたSetを廃止)
+	 * 基底項プロセスを構成するアトムの数を返す．
+	 * 引数には，(左辺出現アトム等)基底項プロセスに含まれてはいけないアトムのSetを指定する．
+	 * ただし、自由リンク管理アトムに出会った場合は、-1を返す．
 	 * @param avoSet 基底項プロセスに出てきてはいけないアトムのSet
 	 * @return 基底項プロセスを構成するアトム数
 	 */
-	public int isGround(Set srcSet,Set avoSet){
-		if(srcSet.contains(atom))return 0; //基底項を構成するアトムに辿りついたら
-		if(avoSet.contains(atom))return -1; //避けるべきアトムに辿り着いたら
-		if(atom.getFunctor().equals(Functor.INSIDE_PROXY)||
-			atom.getFunctor().equals(Functor.OUTSIDE_PROXY))
-			return -1; //自由リンク管理アトムに出会ったら失敗
-		srcSet.add(atom); // 自分を追加
-		int ac=1; //構成するアトム数:まず自分を含む
-		for(int i=0;i<atom.getArity();i++){
-			if(i==pos)continue; // 来し方は辿らない
-			int gr=atom.getArg(i).isGround(srcSet,avoSet);
-			if(gr == -1)return -1; //どっかで$in,$outに出会ったら失敗
-			else ac+=gr; //各リンク先に新しく検出されたアトム数を合計する
+//	public int isGround(Set srcSet,Set avoSet){
+//		if(srcSet.contains(atom))return 0; //基底項を構成するアトムに辿りついたら
+//		if(avoSet.contains(atom))return -1; //避けるべきアトムに辿り着いたら
+//		if(atom.getFunctor().equals(Functor.INSIDE_PROXY)||
+//			atom.getFunctor().equals(Functor.OUTSIDE_PROXY))
+//			return -1; //自由リンク管理アトムに出会ったら失敗
+//		srcSet.add(atom); // 自分を追加
+//		int ac=1; //構成するアトム数:まず自分を含む
+//		for(int i=0;i<atom.getArity();i++){
+//			if(i==pos)continue; // 来し方は辿らない
+//			int gr=atom.getArg(i).isGround(srcSet,avoSet);
+//			if(gr == -1)return -1; //どっかで$in,$outに出会ったら失敗
+//			else ac+=gr; //各リンク先に新しく検出されたアトム数を合計する
+//		}
+//		return ac;
+//	}
+	public int isGround(Set avoSet){
+		Set srcSet = new HashSet();
+		Stack s = new Stack();
+		s.push(this);
+		int c=0;
+		while(!s.isEmpty()){
+			Link l = (Link)s.pop();
+			Atom a = l.getAtom();
+			if(srcSet.contains(a))continue;
+			if(avoSet.contains(a))return -1;
+			if(a.getFunctor().equals(Functor.INSIDE_PROXY)||
+				a.getFunctor().equals(Functor.OUTSIDE_PROXY))
+				return -1;
+			c++;
+			srcSet.add(a);
+			for(int i=0;i<a.getArity();i++){
+				if(i==l.getPos())continue;
+				s.push(a.getArg(i));
+			}
 		}
-		return ac;
+		return c;
 	}
-	
+
 	/**
 	 * by kudo
 	 * 再帰的に同じ構造を持った基底項プロセスかどうか検査する
