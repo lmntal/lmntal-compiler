@@ -814,7 +814,7 @@ class InterpretiveReactor {
 
 					//====型検査のためのガード命令====ここから====
 				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
-					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround(new HashSet(),((Set)vars.get(inst.getIntArg3())));
+					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround(((Set)vars.get(inst.getIntArg3())));
 					if(isground_ret == -1)return false;
 					vars.set(inst.getIntArg1(),new IntegerFunctor(isground_ret));
 					break; //kudo 2004-12-03
