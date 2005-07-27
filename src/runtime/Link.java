@@ -3,6 +3,7 @@ package runtime;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Map;
@@ -103,16 +104,16 @@ public final class Link implements Cloneable, Serializable {
 //	}
 	public int isGround(Set avoSet){
 		Set srcSet = new HashSet();
-		Stack s = new Stack();
+		Stack s = new Stack(); //リンクを積むスタック
 		s.push(this);
 		int c=0;
 		while(!s.isEmpty()){
 			Link l = (Link)s.pop();
 			Atom a = l.getAtom();
-			if(srcSet.contains(a))continue;
-			if(avoSet.contains(a))return -1;
+			if(srcSet.contains(a))continue; //既に辿ったアトム
+			if(avoSet.contains(a))return -1; //出現してはいけないアトム
 			if(a.getFunctor().equals(Functor.INSIDE_PROXY)||
-				a.getFunctor().equals(Functor.OUTSIDE_PROXY))
+				a.getFunctor().equals(Functor.OUTSIDE_PROXY)) //プロキシに至ってはいけない
 				return -1;
 			c++;
 			srcSet.add(a);
@@ -126,25 +127,45 @@ public final class Link implements Cloneable, Serializable {
 
 	/**
 	 * by kudo
-	 * 再帰的に同じ構造を持った基底項プロセスかどうか検査する
+	 * 同じ構造を持った基底項プロセスかどうか検査する(Stackを使うように修正 2005/07/27)
+	 * ( それに伴い引数に受け取っていたMapを廃止)
 	 * どちらか片方についてgroundかどうかの検査は済んでいるものとする
 	 * @param srcLink 比較対象のリンク
-	 * @param srcMap 比較元アトムから比較先アトムへのmap
 	 * @return
 	 */
-	public boolean eqGround(Link srcLink,Map srcMap){
-		if(srcLink.getPos() != pos)return false; // これは不要か?
-		if(!srcLink.getAtom().getFunctor().equals(atom.getFunctor()))return false;
-		if(!srcMap.containsKey(atom))srcMap.put(atom,srcLink.getAtom());
-		else if(srcMap.get(atom) != srcLink.getAtom())return false;
-		else return true;
-		boolean flgequal = true;
-		for(int i=0;i<atom.getArity();i++){
-			if(i==pos)continue;
-			flgequal &= atom.getArg(i).eqGround(srcLink.getAtom().getArg(i),srcMap);
-			if(!flgequal)return false;
+	public boolean eqGround(Link srcLink){//,Map srcMap){
+		Map map = new HashMap(); //比較元アトムから比較先アトムへのマップ
+		Stack s1 = new Stack();  //比較元リンクを入れるスタック
+		Stack s2 = new Stack();  //比較先リンクを入れるスタック
+		s1.push(this);
+		s2.push(srcLink);
+		while(!s1.isEmpty()){
+			Link l1 = (Link)s1.pop();
+			Link l2 = (Link)s2.pop();
+			if(l1.getPos() != l2.getPos())return false; //引数位置の一致を検査
+			if(!l1.getAtom().getFunctor().equals(l2.getAtom().getFunctor()))return false; //ファンクタの一致を検査
+			if(!map.containsKey(l1.getAtom()))map.put(l1.getAtom(),l2.getAtom()); //未出
+			else if(map.get(l1.getAtom()) != l2.getAtom())return false;         //既出なれど不一致
+			else continue;
+			for(int i=0;i<l1.getAtom().getArity();i++){
+				if(i==l1.getPos())continue;
+				s1.push(l1.getAtom().getArg(i));
+				s2.push(l2.getAtom().getArg(i));
+			}
 		}
-		return flgequal;
+		return true;
+//		if(srcLink.getPos() != pos)return false; // これは不要か?
+//		if(!srcLink.getAtom().getFunctor().equals(atom.getFunctor()))return false;
+//		if(!srcMap.containsKey(atom))srcMap.put(atom,srcLink.getAtom());
+//		else if(srcMap.get(atom) != srcLink.getAtom())return false;
+//		else return true;
+//		boolean flgequal = true;
+//		for(int i=0;i<atom.getArity();i++){
+//			if(i==pos)continue;
+//			flgequal &= atom.getArg(i).eqGround(srcLink.getAtom().getArg(i),srcMap);
+//			if(!flgequal)return false;
+//		}
+//		return flgequal;
 	}
 
 	///////////////////////////////
