@@ -799,7 +799,7 @@ class InterpretiveReactor {
 
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
-					boolean eqground_ret = ((Link)vars.get(inst.getIntArg1())).eqGround(((Link)vars.get(inst.getIntArg2())),new HashMap());
+					boolean eqground_ret = ((Link)vars.get(inst.getIntArg1())).eqGround(((Link)vars.get(inst.getIntArg2())));
 					if(!eqground_ret)return false;
 					break; //kudo 2004-12-03
 				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
