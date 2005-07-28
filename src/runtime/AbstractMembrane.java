@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import util.QueuedEntity;
 import util.RandomIterator;
@@ -762,21 +763,48 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/**
 	 * by kudo
 	 * 基底項プロセスを複製する(検査は済んでいる)
+	 * ( Stackを使うように変更し，それに伴い引数のMapを廃止 2005/07/28)
 	 * @param srcGround コピー元の基底項プロセス
-	 * @param srcMap コピー元のアトムからコピー先のアトムへのマップ
 	 * @return コピー先のリンク
 	 */
-	public Link copyGroundFrom(Link srcGround,Map srcMap){
-		if(!srcMap.containsKey(srcGround.getAtom())){
-			Atom cpAtom = newAtom(srcGround.getAtom().getFunctor());
-			srcMap.put(srcGround.getAtom(),cpAtom);
-			for(int i=0;i<cpAtom.getArity();i++){
-				if(i==srcGround.getPos())continue;
-				cpAtom.args[i] = copyGroundFrom(srcGround.getAtom().getArg(i),srcMap);
-				cpAtom.getArg(i).getAtom().args[srcGround.getAtom().getArg(i).getPos()] = new Link(cpAtom,i);
+	public Link copyGroundFrom(Link srcGround){//,Map srcMap){
+		Stack s = new Stack();
+		Map map = new HashMap();
+		Atom cpAtom = newAtom(srcGround.getAtom().getFunctor());
+		map.put(srcGround.getAtom(),cpAtom);
+		for(int i=0;i<cpAtom.getArity();i++){
+			if(srcGround.getPos()==i)continue;
+			s.push(srcGround.getAtom().getArg(i));
+		}
+		while(!s.isEmpty()){
+			Link l = (Link)s.pop();
+			if(!map.containsKey(l.getAtom())){
+				cpAtom = newAtom(l.getAtom().getFunctor());
+				map.put(l.getAtom(),cpAtom);
+				Atom a = ((Atom)map.get(l.getAtom().getArg(l.getPos()).getAtom())); //リンクの根
+				a.args[l.getAtom().getArg(l.getPos()).getPos()]=new Link(cpAtom,l.getPos());
+				for(int i=0;i<cpAtom.getArity();i++){
+					s.push(l.getAtom().getArg(i));
+				}
+			}
+			else{
+				cpAtom = (Atom)map.get(l.getAtom());
+				Atom a = ((Atom)map.get(l.getAtom().getArg(l.getPos()).getAtom()));
+				a.args[l.getAtom().getArg(l.getPos()).getPos()]=new Link(cpAtom,l.getPos());
 			}
 		}
-		return new Link(((Atom)srcMap.get(srcGround.getAtom())),srcGround.getPos());
+		return new Link(((Atom)map.get(srcGround.getAtom())),srcGround.getPos());
+//		
+//		if(!srcMap.containsKey(srcGround.getAtom())){
+//			Atom cpAtom = newAtom(srcGround.getAtom().getFunctor());
+//			srcMap.put(srcGround.getAtom(),cpAtom);
+//			for(int i=0;i<cpAtom.getArity();i++){
+//				if(i==srcGround.getPos())continue;
+//				cpAtom.args[i] = copyGroundFrom(srcGround.getAtom().getArg(i),srcMap);
+//				cpAtom.getArg(i).getAtom().args[srcGround.getAtom().getArg(i).getPos()] = new Link(cpAtom,i);
+//			}
+//		}
+//		return new Link(((Atom)srcMap.get(srcGround.getAtom())),srcGround.getPos());
 	}
 	
 //	/**
