@@ -799,14 +799,14 @@ class InterpretiveReactor {
 
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
-					boolean eqground_ret = ((Link)vars.get(inst.getIntArg1())).eqGround(((Link)vars.get(inst.getIntArg2())));
+					boolean eqground_ret = ((Link)vars.get(inst.getIntArg1())).eqGround((Link)vars.get(inst.getIntArg2()));
 					if(!eqground_ret)return false;
 					break; //kudo 2004-12-03
 				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
 					vars.set(inst.getIntArg1(),mems[inst.getIntArg3()].copyGroundFrom((Link)vars.get(inst.getIntArg2())));
 					break; //kudo 2004-12-03
 				case Instruction.REMOVEGROUND : //[srclink,srcmem]
-					mems[inst.getIntArg2()].removeGround(((Link)vars.get(inst.getIntArg1())),new HashSet());
+					mems[inst.getIntArg2()].removeGround((Link)vars.get(inst.getIntArg1()));
 					break; //kudo 2004-12-08
 				case Instruction.FREEGROUND : //[srclink]
 					break; //kudo 2004-12-08
@@ -814,7 +814,7 @@ class InterpretiveReactor {
 
 					//====型検査のためのガード命令====ここから====
 				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
-					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround(((Set)vars.get(inst.getIntArg3())));
+					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround((Set)vars.get(inst.getIntArg3()));
 					if(isground_ret == -1)return false;
 					vars.set(inst.getIntArg1(),new IntegerFunctor(isground_ret));
 					break; //kudo 2004-12-03
