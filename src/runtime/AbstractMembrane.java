@@ -3,6 +3,7 @@ package runtime;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -276,21 +277,27 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom.mem = null;
 	}
 	
-	/** 指定された基底項プロセスをこの膜から除去する。
+	/** 指定された基底項プロセスをこの膜から除去する。by kudo
+	 * ( Stackを使うように修正し，伴って引数を修正 2005/08/01 )
 	 * @param srcGround
-	 * @param srcSet 既に辿ったアトムの集合
 	 * @return
 	 */
-	public void removeGround(Link srcGround,Set srcSet){
-		if(srcSet.contains(srcGround.getAtom()))return;
-		srcSet.add(srcGround.getAtom());
-		for(int i=0;i<srcGround.getAtom().getArity();i++){
-			if(i==srcGround.getPos())continue;
-			removeGround(srcGround.getAtom().getArg(i),srcSet);
+	public void removeGround(Link srcGround){//,Set srcSet){
+		Stack s = new Stack();
+		s.push(srcGround);
+		Set srcSet = new HashSet();
+		while(!s.isEmpty()){
+			Link l = (Link)s.pop();
+			if(srcSet.contains(l.getAtom()))continue;
+			srcSet.add(l.getAtom());
+			for(int i=0;i<l.getAtom().getArity();i++){
+				if(i==l.getPos())continue;
+				s.push(l.getAtom().getArg(i));
+			}
+			atoms.remove(l.getAtom());
+			l.getAtom().mem = null;
+			l.getAtom().dequeue();
 		}
-		atoms.remove(srcGround.getAtom());
-		srcGround.getAtom().mem = null;
-		srcGround.getAtom().dequeue();
 	}
 	
 	// 以下は AbstractMembrane の final メソッド
