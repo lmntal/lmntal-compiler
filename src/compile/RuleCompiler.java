@@ -530,6 +530,8 @@ public class RuleCompiler {
 			Context pc = def.lhsOcc;
 			if (pc != null) { // ヘッドのときのみ除去する
 				if (gc.typedcxttypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
+					//dequeueされていなかったので追加(2005/08/27) by mizuno
+					body.add(new Instruction( Instruction.DEQUEUEATOM, typedcxtToSrcPath(def) ));
 					body.add(new Instruction( Instruction.REMOVEATOM,
 						typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
