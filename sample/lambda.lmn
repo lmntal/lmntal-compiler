@@ -13,7 +13,7 @@
 
 { lambda.use.
 	// (lambda f . (lambda x . f (f x) ) ) succ 0 => succ (succ 0)
-	r=apply(apply(lambda(cp(F0, F1), lambda(X, apply(F0, apply(F1, X)))), succ), 0).
+//	r=apply(apply(lambda(cp(F0, F1), lambda(X, apply(F0, apply(F1, X)))), succ), 0).
 }
 
 /**
@@ -23,44 +23,32 @@
  * 
  * (lambda mult . (lambda square . square 5) (lambda x . mult x x) ) (lambda x . (lambda y . * x y) ) 
  */
-{
-	integer.use. lambda.use.
-	
-//	r=apply(lambda(mult,
-//		apply(lambda(square, M), 
-//			lambda(x, apply(apply(mult, x), x))
-//		)), lambda_0([A], lambda_0([B], '*'(ref(A), ref(B))))    // 組み込みの機能 '*' はラムダ式じゃないので内部形式で表しておく 
-//		).
-//	M=apply(square, 5).
-}
-/**
- * let mult = fun x -> fun y -> * x y in mult 5 6
- * 
- * (lambda mult . mult 5 6) (lambda x . (lambda y . x*y) )
- */
-{
-	integer.use. lambda.use.
-	
-//	r=apply(lambda(mult, M1), 
-//		lambda_0([A], lambda_0([B], '*'(ref(A), ref(B)))) ).
-//	M1=apply(apply(mult, 5), 6).
-}
-
-
 //{
-//	lambda.use.
+//	integer.use. lambda.use.
 //	
-//	Num0=lambda(cp(F00, F01), lambda(X0, apply(F00, apply(F01, X0)))).
-//	Num1=lambda(cp(F10, F11), lambda(X1, apply(F10, apply(F11, X1)))).
-//	
-//	//Num0=lambda(cp(F00, cp(F01, F02)), lambda(X0, apply(F00, apply(F01, apply(F02, X0))))).
-//	//Num1=lambda(cp(F10, F11), lambda(X1, apply(F10, apply(F11, X1)))).
-//	
-//	//r=apply(apply(apply(Num0, Num1), s), 0).
-//	r=apply(apply(apply(lambda(cp(A, B), apply(A, B)), apply(Num0, Num1)), s), 0).
-//	
-//	//Num0=lambda(F0, lambda(X0, apply(F0, X0))).
-//	//Num1=lambda(F1, lambda(X1, apply(F1, X1))).
-//	H=apply(s, I) :- int(I) | H=I+1.
+//	r=apply(lambda(Mult,
+//		apply(lambda(Square, apply(Square, 5)), lambda(cp(X0, X1), apply(apply(Mult, X0), X1)))), 
+//		lambda(A, lambda(B, '*'(A, B)))).
 //}
+
+
+{
+	lambda.use.
+	
+	// Church Encodings のべき乗
+	// (lambda f . (lambda x . f (f x) ) ) (lambda f . (lambda x . f (f x) ) ) s 0
+	// 
+	Num0=lambda(cp(F00, F01), lambda(X0, apply(F00, apply(F01, X0)))).
+	Num1=lambda(cp(F10, F11), lambda(X1, apply(F10, apply(F11, X1)))).
+	
+	//Num0=lambda(cp(F00, cp(F01, F02)), lambda(X0, apply(F00, apply(F01, apply(F02, X0))))).
+	//Num1=lambda(cp(F10, F11), lambda(X1, apply(F10, apply(F11, X1)))).
+	
+	//r=apply(apply(apply(Num0, Num1), s), 0).
+	r=apply(apply(apply(Num0, Num1), s), 0).
+	
+	//Num0=lambda(F0, lambda(X0, apply(F0, X0))).
+	//Num1=lambda(F1, lambda(X1, apply(F1, X1))).
+	H=apply(s, I) :- int(I) | H=I+1.
+}
 
