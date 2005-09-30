@@ -1,0 +1,70 @@
+/*
+----------------------------------------------------------------------
+Lambda calculus simulator
+                                              Koji Hara
+                                              2004/12/26(Sun) 06:48:03
+                                              2004/12/21(Tue) 21:26:18
+----------------------------------------------------------------------
+
+
+----------------------------------------------------------------------
+概要
+----------------------------------------------------------------------
+ラムダ計算の定義そのまま。
+
+束縛変数はコピーされる。（要groundガード命令）
+
+----------------------------------------------------------------------
+内部表現(1)
+----------------------------------------------------------------------
+
+LAMBDA_EXPR ::= 
+        Var : (unary) atom
+      | apply(LAMBDA_EXPR, LAMBDA_EXPR)
+      | lambda(Term, LAMBDA_EXPR)
+
+----------------------------------------------------------------------
+内部表現(2)
+----------------------------------------------------------------------
+
+LAMBDA_EXPR ::= 
+        Var
+      | apply(LAMBDA_EXPR, LAMBDA_EXPR)
+      | lambda_0(Term, LAMBDA_EXPR)
+
+Var ::= 
+        自由変数       : (unary) atom
+      | 束縛変数の定義 : [R0, R1, ..., Rn]
+      | 束縛変数の出現 : ref(R0), ref(R1), ..., ref(Rn)
+
+----------------------------------------------------------------------
+TODO
+----------------------------------------------------------------------
+-定義する : if ! fib plus mult power differential...
+-変換器（文字列表現 <==> 内部表現） : 束縛変数の管理が厄介そう
+--ここは手で書くとしたら ground を使わないグラフリダクションのやつ(_old)も書けたっぽい
+
+*/
+{
+	module(lambda).
+	H=apply(lambda_0(A, M), Expr) :- H=M, A=Expr.
+//	H=apply(lambda_0([A|R], M), Expr), E=ref(A) :- ground(Expr) | H=apply(lambda_0(R, M), Expr), E=Expr.
+//	H=apply(lambda_0([   ], M), Expr)           :- ground(Expr) | H=M.
+	
+	// 内部表現(1) ==> 内部表現(2) 
+	H=lambda(A, B) :- unary(A) | H=lambda_0([Msg], agent(A, Msg, B)).
+	H=agent(A, Msg, B) :- A=B  | H=ref(Msg).
+	H=agent(A, Msg, B) :- A\=B | H=B, rm(Msg).
+	H=agent(A, Msg, ref(B)) :- unary(A) | H=ref(B), rm(Msg).
+	H=agent(A, Msg, apply(B, C)) :- unary(A) | H=apply(agent(A, dup(Msg, New), B), agent(A, New, C)).
+	// agent が１つ内側の lambda に入る事象は、常に内側の lambda に対応する agent が生成されるより遅い。
+	// なので追い越し( λx.(λx.x) が λy.(λx.y) と解釈される)は起きない。
+	H=agent(A, Msg, lambda_0(A1, B)) :- H=lambda_0(A1, agent(A, Msg, B)).
+	H=[Msg|R], Some=dup(Msg, New) :- H=[Msg, New|R], Some=Msg.
+	H=[rm|R] :- H=R.
+	
+	lambda_0(A, B)=cp(T1, T2) :- T1=lambda_0(C00, C10), T2=lambda_0(C01, C11), A=cp(C00, C01), B=cp(C10, C11).
+	apply(A, B)=cp(T1, T2) :- T1=apply(C00, C10), T2=apply(C01, C11), A=cp(C00, C01), B=cp(C10, C11).
+//	T0=cp(T1, T2) :- ground(T0) | T1=T0, T2=T0.
+}
+
