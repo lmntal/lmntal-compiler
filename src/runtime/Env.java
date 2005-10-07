@@ -103,6 +103,21 @@ public final class Env {
 	public static boolean fTrace = false;
 	
 	/**
+	 * REPL で、文を実行するためのアクション
+	 *  null_line : null 行がきたときに実行（Enter を２回押すことになる）
+	 *  immediate : 文の行がきたときに実行（Enter を１回押すことになる）
+	 * hara
+	 */
+	public static String replTerm = "null_line";
+	
+	/**
+	 * REPL で、特殊コマンドにつけるべきプレフィックス
+	 * 例：この値 + "q" で終了
+	 * hara
+	 */
+	public static String replCommandPrefix = "#";
+	
+	/**
 	 * one liner
 	 */
 	public static String oneLiner;

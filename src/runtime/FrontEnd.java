@@ -195,6 +195,11 @@ public class FrontEnd {
 							/// --remain
 							/// Processes remain.
 							Env.fREMAIN = true;
+						} else if(args[i].equals("--immediate")){
+							/// --immediate
+							/// 文の末尾で改行すると実行する
+							/// デフォルトでは改行２個で実行
+							Env.replTerm = "immediate";
 						} else if(args[i].equals("--start-daemon")){
 							/// --start-daemon
 							/// Start LMNtalDaemon
