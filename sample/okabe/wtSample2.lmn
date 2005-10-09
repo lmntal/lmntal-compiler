@@ -1,5 +1,4 @@
-wt.newFrame({size(200,200),
-               show,
+wt.newFrame({size(400,300),
                title("sampleBorder"),
                borderPanel,
                addButton("b1","North","b01"),addButton("b2","South","b02"),
