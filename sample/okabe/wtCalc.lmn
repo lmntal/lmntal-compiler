@@ -1,8 +1,25 @@
-wt.newFrame(
-{
-%frame
+/*
+
+NAME
+
+	calculator with Window Toolkit (wt) module
+
+SYNOPSIS
+
+AUTHOR
+
+	Yoshiyuki Ohno
+
+HISTORY
+
+	2005/10/09(Sun)
+
+*/
+
+wt.newFrame({
+
+%frame condition
 size(500,500),
-show,
 title("calc"),
 gridPanel(5,4),
 addButton("7",0,"seven"),        addButton("8",1,"eight"),
@@ -18,8 +35,7 @@ addButton("OFF",16,"terminate").
 %default atom
 allclear.
 
-
-%rule
+%rules
 zero  :- n(0).  one   :- n(1).
 two   :- n(2).  three :- n(3).
 four  :- n(4).  five  :- n(5).
@@ -34,18 +50,21 @@ devide   :- ope("/").
 
 allclear :- lastOp(0,"="),screen(0),state(fresh),pre(ac).
 
-screen(S),n(N),state(int), pre(P):- int(S),int(N),unary(P)| V=10*S, screen(V+N),state(int), print_n(N),pre(num).
-screen(S),n(N),state(fresh) :- int(S),int(N)| screen(N),state(int), print_n(N).
-lastOp(D,"="),screen(S),ope(OP) :- int(D)| setOp(S,OP).
+screen(S),n(N),state(int),pre(P) :- int(S),int(N),unary(P) | 
+  V=10*S,screen(V+N),state(int),print_n(N),pre(num).
+screen(S),n(N),state(fresh) :- int(S),int(N) | 
+  screen(N),state(int),print_n(N).
+lastOp(D,"="),screen(S),ope(OP) :- int(D) | setOp(S,OP).
 lastOp(D,"+"),screen(S),ope(OP) :- V=D+S | setOp(V,OP).
 lastOp(D,"-"),screen(S),ope(OP) :- V=D-S | setOp(V,OP).
 lastOp(D,"*"),screen(S),ope(OP) :- V=D*S | setOp(V,OP).
 lastOp(D,"/"),screen(S),ope(OP) :- V=D/S | setOp(V,OP).
-lastOp(D,OP), screen(S),ac,state(F),pre(P) :-int(D),unary(OP),unary(S),unary(F),unary(P) | allclear, print_clear.
-setOp(V,OP),state(F) :- int(V),unary(F) | update,lastOp(V,OP),screen(V),state(fresh).
+lastOp(D,OP),screen(S),ac,state(F),pre(P) :- 
+  int(D),unary(OP),unary(S),unary(F),unary(P) | allclear,print_clear.
+setOp(V,OP),state(F) :- int(V),unary(F) | 
+  update,lastOp(V,OP),screen(V),state(fresh).
 
-
-print_n(N), pre(P) :- int(N), unary(P) |
+print_n(N),pre(P) :- int(N),unary(P) | 
   pre(P),
   [:/*inline*/
     int i = Integer.parseInt(me.nth(0));
@@ -57,14 +76,13 @@ print_n(N), pre(P) :- int(N), unary(P) |
     mem.removeAtom(me); 
   :](N,P).
 
-update, lastOp(V,OP), pre(P) :- int(V), unary(OP), unary(P) |
-  lastOp(V,OP),
-  pre(OP),
+update,lastOp(V,OP),pre(P) :- int(V),unary(OP),unary(P) | 
+  lastOp(V,OP),pre(OP),
   [:/*inline*/
     int i = Integer.parseInt(me.nth(0));
     String op = me.nthAtom(1).toString();
     if(op.equals("=")){
-      System.out.print(" !)\n"+i);
+      System.out.print(" =\n"+i);
     }else{
       System.out.print(" "+op+" ");
     }
@@ -78,7 +96,4 @@ print_clear :-
     System.out.print("\n\n");
     mem.removeAtom(me); 
   :].
-
-
 }).
-
