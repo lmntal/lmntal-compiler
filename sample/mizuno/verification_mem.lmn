@@ -1,0 +1,37 @@
+%スレッド1つ、膜は変化しない
+%スレッドが1つなので、stableとreactableを両方利用する必要はない
+{p(nil),stable(off),reactable(true),locked(false),st(S1),c(M2),c(M3)}.
+{p(M2),stable(off),reactable(true),locked(false),st(S2),c(M4)}.
+{p(M3),stable(off),reactable(true),locked(false),st(S3)}.
+{p(M4),stable(off),reactable(true),locked(false),st(S4)}.
+
+%実行膜スタック
+stack([S4,S3,S2,S1]).
+%活性化処理で膜階層をtraverseするためのスタック
+activate([]).
+
+stack([H|T]), {st(H),locked(false),$p} :-
+    stack0(T), current({locked(true),$p}).
+
+%子膜を操作しないルールを0個以上適用し、適用できるルールがなくなった
+activate([]),stack([H|T]), {st(H),stable(S),reactable(R),$p}
+ :- unary(S),unary(R) |
+    stack(T), {st(nil),stable(on),reactable(false),$p}.
+
+%子膜を操作するルールを1つ適用した
+%activate([]),stack([H|T]), {st(H),stable(S),reactable(true),$p}
+% :- unary(S) |
+%    stack([H|T]), activate([{st(H),stable(off),reactable(true),$p}]).
+stack([H|T]), {st(H),stable(S),reactable(true),$p}
+ :- unary(S) |
+    stack_t([H|T]), lock
+    stack([H|T]), activate([{st(H),stable(off),reactable(true),$p}]).
+%上のルール適用に伴う子孫膜の変更
+activate([H|T]), H={$p}
+ :- activate(T), {$p}.
+activate([H|T]),stack(ST), H={c(C),$p},{p(C),stable(S),reactable(R),st(nil),$q}
+ :- unary(S),unary(R) |
+    activate([H,B|T]), stack([A|ST]),H={c(C),$p},B={p(C),stable(off),reactable(true),st(A),$q}.
+activate([H|T]),stack(ST), H={c(C),$p},{p(C),stable(S),reactable(R),st(nil),$q}
+ :- unary(S),unary(R) |
+    activate([H,B|T]), stack([A|ST]),H={c(C),$p},B={p(C),stable(off),reactable(false),st(A),$q}.
