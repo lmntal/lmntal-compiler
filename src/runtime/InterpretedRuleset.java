@@ -1,3 +1,9 @@
+/*
+ * ※重要※
+ * このファイルの内容を修正した場合、Transrator.java にも同様の修正を加えること。
+ * 大きな変更を加えた場合、TranslatorGenerator を利用すると良いかもしれない。
+ */
+
 package runtime;
 
 import java.io.IOException;
@@ -571,17 +577,22 @@ class InterpretiveReactor {
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
-				case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
 					// mem = mems[0]; // 昔のコード
-					// mem = (AbstractMembrane)inst.getArg5(); // 正規のコード
-					mem = atoms[inst.getIntArg1()].args[inst.getIntArg2()]
-							.getAtom().getMem(); // 代用コード
-					if (mem != null) {
-						mem.unifyAtomArgs(
-							atoms[inst.getIntArg1()], inst.getIntArg2(),
-							atoms[inst.getIntArg3()], inst.getIntArg4() );
-					}
+					//2005/10/11 mizuno
+					//必ず第五引数を利用するようにコンパイラを修正し、正規のコードに変更
+					mem = mems[inst.getIntArg5()]; // 正規のコード
+					//mem = atoms[inst.getIntArg1()].args[inst.getIntArg2()]
+					//		.getAtom().getMem(); // 代用コード
+					mem.unifyAtomArgs(
+						atoms[inst.getIntArg1()], inst.getIntArg2(),
+						atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break; //n-kato
+				case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
+					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
+					mems[0].unifyAtomArgs(
+						atoms[inst.getIntArg1()], inst.getIntArg2(),
+						atoms[inst.getIntArg3()], inst.getIntArg4() );
+					break; //mizuno
 
 				case Instruction.INHERITLINK:		 //[atom1, pos1, link2, mem]
 				case Instruction.LOCALINHERITLINK:	 //[atom1, pos1, link2 (,mem)]
@@ -591,15 +602,20 @@ class InterpretiveReactor {
 					break; //n-kato
 
 				case Instruction.UNIFYLINKS:		//[link1, link2, mem]
-				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
-					// mem = (AbstractMembrane)inst.getArg3(); // 正規のコード
-					mem = ((Link)vars.get(inst.getIntArg1())).getAtom().getMem(); // 代用コード
-					if (mem != null) {
-						mem.unifyLinkBuddies(
-							((Link)vars.get(inst.getIntArg1())),
-							((Link)vars.get(inst.getIntArg2())));
-					}
+					//2005/10/11 mizuno
+					//必ず第五引数を利用するようにコンパイラを修正し、正規のコードに変更
+					mem = mems[inst.getIntArg3()]; // 正規のコード
+					//mem = ((Link)vars.get(inst.getIntArg1())).getAtom().getMem(); // 代用コード
+					mem.unifyLinkBuddies(
+						((Link)vars.get(inst.getIntArg1())),
+						((Link)vars.get(inst.getIntArg2())));
 					break; //n-kato
+				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
+					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
+					mems[0].unifyLinkBuddies(
+						((Link)vars.get(inst.getIntArg1())),
+						((Link)vars.get(inst.getIntArg2())));
+					break; //mizuno
 
 					//====リンクを操作するボディ命令====ここまで====
 

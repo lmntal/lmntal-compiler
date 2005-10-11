@@ -707,7 +707,7 @@ public class Instruction implements Cloneable, Serializable {
 	// リンクを操作するボディ命令 (65--69)
 	// [local]newlink     [atom1, pos1, atom2, pos2, mem1]
 	// [local]relink      [atom1, pos1, atom2, pos2, mem]
-	// [local]unify       [atom1, pos1, atom2, pos2]
+	// [local]unify       [atom1, pos1, atom2, pos2, mem]
 	// [local]inheritlink [atom1, pos1, link2, mem]
 	// [local]unifylinks  [link1, link2, mem]
 
@@ -747,10 +747,12 @@ public class Instruction implements Cloneable, Serializable {
 
 	/** unify [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
-	 * アトム$atom1の第pos1引数のリンク先（膜$memにある）の引数と、
-	 * アトム$atom2の第pos2引数のリンク先（膜$memにある）の引数を接続する。
-	 * ただし$atom1および$atom2のリンク先がどちらも所属膜を持たない場合も許されており、
-	 * この場合、何もしないで終わってもよいことになっている。これは f(A,A),(f(X,Y):-X=Y) の書き換えなどで起こる。
+	 * アトム$atom1の第pos1引数のリンク先<strike>（膜$memにある）</strike>の引数と、
+	 * アトム$atom2の第pos2引数のリンク先<strike>（膜$memにある）</strike>の引数を接続する。
+	 * <strike>ただし$atom1および$atom2のリンク先がどちらも所属膜を持たない場合も許されており、
+	 * この場合、何もしないで終わってもよいことになっている。これは f(A,A),(f(X,Y):-X=Y) の書き換えなどで起こる。</strike>
+	 * $atom1 と $atom2 の両方もしくは一方が所属膜を持たない場合もある。
+	 * これは a(A),f(A,B),(a(X),f(Y,Z):-Y=Z,b(X)) の書き換えなどで起こる。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。
 	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalunifyが使用できる。
 	 * <p>getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
@@ -1647,11 +1649,11 @@ public class Instruction implements Cloneable, Serializable {
 	public static Instruction newmem(int ret, int srcmem) {
 		return new Instruction(NEWMEM,ret,srcmem);
 	}
-	/** newlink 命令を生成する
-	 * @deprecated */
-	public static Instruction newlink(int atom1, int pos1, int atom2, int pos2) {
-		return new Instruction(NEWLINK,atom1,pos1,atom2,pos2);
-	}
+//	/** newlink 命令を生成する
+//	 * @deprecated */
+//	public static Instruction newlink(int atom1, int pos1, int atom2, int pos2) {
+//		return new Instruction(NEWLINK,atom1,pos1,atom2,pos2);
+//	}
 	/** newlink 命令を生成する */
 	public static Instruction newlink(int atom1, int pos1, int atom2, int pos2, int mem1) {
 		return new Instruction(NEWLINK,atom1,pos1,atom2,pos2,mem1);

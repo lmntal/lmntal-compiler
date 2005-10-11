@@ -1,3 +1,7 @@
+/*
+ * ※重要※このファイルの内容を修正した場合、InterpretedRuleset.java にも同様の修正を加えること。
+ */
+
 package compile;
 
 import java.io.BufferedOutputStream;
@@ -787,17 +791,17 @@ public class Translator {
 					writer.write(tabs + "	((Atom)var" + inst.getIntArg3() + "), " + inst.getIntArg4() + " );\n");
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
-				case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
-					// mem = mems[0]; // 昔のコード
-					// mem = (AbstractMembrane)inst.getArg5(); // 正規のコード
-					writer.write(tabs + "mem = ((Atom)var" + inst.getIntArg1() + ").getArg(" + inst.getIntArg2() + ")\n");
-					writer.write(tabs + "		.getAtom().getMem(); // 代用コード\n");
-					writer.write(tabs + "if (mem != null) {\n");
-					writer.write(tabs + "	mem.unifyAtomArgs(\n");
-					writer.write(tabs + "		((Atom)var" + inst.getIntArg1() + "), " + inst.getIntArg2() + ",\n");
-					writer.write(tabs + "		((Atom)var" + inst.getIntArg3() + "), " + inst.getIntArg4() + " );\n");
-					writer.write(tabs + "}\n");
+					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg5() + "); // 正規のコード\n");
+					writer.write(tabs + "mem.unifyAtomArgs(\n");
+					writer.write(tabs + "	((Atom)var" + inst.getIntArg1() + "), " + inst.getIntArg2() + ",\n");
+					writer.write(tabs + "	((Atom)var" + inst.getIntArg3() + "), " + inst.getIntArg4() + " );\n");
 					break; //n-kato
+				case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
+					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
+					writer.write(tabs + "((AbstractMembrane)var0).unifyAtomArgs(\n");
+					writer.write(tabs + "	((Atom)var" + inst.getIntArg1() + "), " + inst.getIntArg2() + ",\n");
+					writer.write(tabs + "	((Atom)var" + inst.getIntArg3() + "), " + inst.getIntArg4() + " );\n");
+					break; //mizuno
 				case Instruction.INHERITLINK:		 //[atom1, pos1, link2, mem]
 				case Instruction.LOCALINHERITLINK:	 //[atom1, pos1, link2 (,mem)]
 					writer.write(tabs + "((Atom)var" + inst.getIntArg1() + ").getMem().inheritLink(\n");
@@ -805,15 +809,19 @@ public class Translator {
 					writer.write(tabs + "	(Link)var" + inst.getIntArg3() + " );\n");
 					break; //n-kato
 				case Instruction.UNIFYLINKS:		//[link1, link2, mem]
-				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
-					// mem = (AbstractMembrane)inst.getArg3(); // 正規のコード
-					writer.write(tabs + "mem = ((Link)var" + inst.getIntArg1() + ").getAtom().getMem(); // 代用コード\n");
-					writer.write(tabs + "if (mem != null) {\n");
-					writer.write(tabs + "	mem.unifyLinkBuddies(\n");
-					writer.write(tabs + "		((Link)var" + inst.getIntArg1() + "),\n");
-					writer.write(tabs + "		((Link)var" + inst.getIntArg2() + "));\n");
-					writer.write(tabs + "}\n");
+					//2005/10/11 mizuno
+					//必ず第五引数を利用するようにコンパイラを修正し、正規のコードに変更
+					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg3() + "); // 正規のコード\n");
+					writer.write(tabs + "mem.unifyLinkBuddies(\n");
+					writer.write(tabs + "	((Link)var" + inst.getIntArg1() + "),\n");
+					writer.write(tabs + "	((Link)var" + inst.getIntArg2() + "));\n");
 					break; //n-kato
+				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
+					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
+					writer.write(tabs + "((AbstractMembrane)var0).unifyLinkBuddies(\n");
+					writer.write(tabs + "	((Link)var" + inst.getIntArg1() + "),\n");
+					writer.write(tabs + "	((Link)var" + inst.getIntArg2() + "));\n");
+					break; //mizuno
 					//====リンクを操作するボディ命令====ここまで====
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここから====
 				case Instruction.REMOVEPROXIES : //[srcmem]

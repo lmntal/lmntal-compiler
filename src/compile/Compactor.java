@@ -170,9 +170,8 @@ public class Compactor {
 				insts.remove(i); insts.remove(i); insts.remove(i);
 				inst = new Instruction(Instruction.UNIFY,
 								inst0.getIntArg2(), inst0.getIntArg3(),
-								inst1.getIntArg2(), inst1.getIntArg3() );
+								inst1.getIntArg2(), inst1.getIntArg3(), inst2.getIntArg3() );
 				insts.add(i,inst);
-				if (inst2.data.size() == 3) inst.add(inst2.getArg3());
 				size -= 2;
 				continue;
 			}
@@ -188,9 +187,8 @@ public class Compactor {
 				insts.remove(i); insts.remove(i); insts.remove(i);
 				inst = new Instruction(Instruction.NEWLINK,
 								inst0.getIntArg2(), inst0.getIntArg3(),
-								inst1.getIntArg2(), inst1.getIntArg3() );
+								inst1.getIntArg2(), inst1.getIntArg3(), inst2.getIntArg3() );
 				insts.add(i,inst);
-				if (inst2.data.size() == 3) inst.add(inst2.getArg3());
 				size -= 2;
 				continue;
 			}
@@ -206,9 +204,8 @@ public class Compactor {
 				insts.remove(i); insts.remove(i); insts.remove(i);
 				inst = new Instruction(Instruction.RELINK,
 								inst0.getIntArg2(), inst0.getIntArg3(),
-								inst1.getIntArg2(), inst1.getIntArg3() );
+								inst1.getIntArg2(), inst1.getIntArg3(), inst2.getIntArg3() );
 				insts.add(i,inst);
-				if (inst2.data.size() == 3) inst.add(inst2.getArg3());
 				size -= 2;
 				continue;
 			}
@@ -224,9 +221,8 @@ public class Compactor {
 				insts.remove(i); insts.remove(i); insts.remove(i);
 				inst = new Instruction(Instruction.RELINK,
 								inst1.getIntArg2(), inst1.getIntArg3(),
-								inst0.getIntArg2(), inst0.getIntArg3() );
+								inst0.getIntArg2(), inst0.getIntArg3(), inst2.getIntArg3() );
 				insts.add(i,inst);
-				if (inst2.data.size() == 3) inst.add(inst2.getArg3());
 				size -= 2;
 				continue;
 			}

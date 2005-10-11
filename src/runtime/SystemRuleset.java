@@ -174,7 +174,7 @@ public final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  3,0));
 		insts.add(new Instruction(Instruction.LOCALADDATOM,  0,4));
-		insts.add(new Instruction(Instruction.RELINK,        4,0,1,2));
+		insts.add(new Instruction(Instruction.RELINK,        4,0,1,2,0));
 		insts.add(new Instruction(Instruction.FREEATOM,      1));
 		insts.add(new Instruction(Instruction.FREEATOM,      2));
 		insts.add(new Instruction(Instruction.FREEATOM,      3));
@@ -199,7 +199,7 @@ public final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
 		insts.add(new Instruction(Instruction.LOCALADDATOM,  0,3));
-		insts.add(new Instruction(Instruction.RELINK,        3,0,1,1));
+		insts.add(new Instruction(Instruction.RELINK,        3,0,1,1,0));
 		insts.add(new Instruction(Instruction.FREEATOM,      1));
 		insts.add(new Instruction(Instruction.FREEATOM,      2));
 		insts.add(new Instruction(Instruction.PROCEED));
@@ -238,8 +238,8 @@ public final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts.add(new Instruction(Instruction.COPYATOM,  3,0,2));
-		insts.add(new Instruction(Instruction.RELINK,    2,0,1,1));
-		insts.add(new Instruction(Instruction.RELINK,    3,0,1,2));
+		insts.add(new Instruction(Instruction.RELINK,    2,0,1,1,0));
+		insts.add(new Instruction(Instruction.RELINK,    3,0,1,2,0));
 		insts.add(new Instruction(Instruction.FREEATOM,    1));
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);

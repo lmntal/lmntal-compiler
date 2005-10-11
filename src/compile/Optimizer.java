@@ -1136,11 +1136,7 @@ public class Optimizer {
 							if (l1.equals(alreadyLinked.get(l2)) || l2.equals(alreadyLinked.get(l1))) {
 								loopIterator.remove();
 							} else {
-								try {
-									loopIterator.set(Instruction.newlink(l1.atom, l1.pos, l2.atom, l2.pos, inst.getIntArg5()));
-								} catch (IndexOutOfBoundsException e) {
-									loopIterator.set(new Instruction(Instruction.NEWLINK, l1.atom, l1.pos, l2.atom, l2.pos));
-								}
+								loopIterator.set(Instruction.newlink(l1.atom, l1.pos, l2.atom, l2.pos, inst.getIntArg5()));
 							}
 						}
 					}
