@@ -574,7 +574,7 @@ public class Optimizer {
 		// removeatom/newatom/getlink命令の情報を調べる
 		AtomSet removedAtoms = new AtomSet();
 		AtomSet createdAtoms = new AtomSet();
-		HashMap getlinkInsts = new HashMap(); // linkId -> getlink instruction
+//		HashMap getlinkInsts = new HashMap(); // linkId -> getlink instruction
 		
 		Iterator it = body.iterator();
 		while (it.hasNext()) {
@@ -1061,7 +1061,7 @@ public class Optimizer {
 		}
 
 		HashMap changeToNewlink = new HashMap(); //newlinkに変更するリンク -> リンク先
-		HashMap changeLink = new HashMap(); //inheritlinkの移動に伴い削除されたgetlink命令の第2引数の前回ループ時変数→第1引数
+//		HashMap changeLink = new HashMap(); //inheritlinkの移動に伴い削除されたgetlink命令の第2引数の前回ループ時変数→第1引数
 		HashSet movableEnqueue = new HashSet(); //enqueue命令をループ後に移動できるアトム
 		baseIterator = body.listIterator(1); //１回目用命令列
 		//loopIteratorはさっきの続き
@@ -1181,8 +1181,8 @@ public class Optimizer {
 			}
 		}
 		//ループの最後にresetvars命令を挿入
-		int memmax = ((List)react.getArg2()).size();
-		int atommax = memmax + ((List)react.getArg3()).size();
+//		int memmax = ((List)react.getArg2()).size();
+//		int atommax = memmax + ((List)react.getArg3()).size();
 
 		ArrayList memvars2 = new ArrayList();
 		ArrayList atomvars2 = new ArrayList();

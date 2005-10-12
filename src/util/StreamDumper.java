@@ -14,8 +14,7 @@ import java.io.InputStreamReader;
 public class StreamDumper implements Runnable {
 	private InputStream childIn;
 	private String processName;
-	private String[] lines;
-	private int nextLine, lineCount;
+//	private int nextLine, lineCount;
 	
 	public StreamDumper(String processName, InputStream in){
 		this.childIn = in;

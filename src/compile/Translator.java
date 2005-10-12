@@ -479,7 +479,7 @@ public class Translator {
 	 */
 	private void translate(Iterator it, String tabs, int iteratorNo, int varnum, String breakLabel) throws IOException {
 		while (it.hasNext()) {
-			Functor func;
+//			Functor func;
 			InstructionList label; 
 			Instruction inst = (Instruction)it.next();
 
