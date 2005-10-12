@@ -120,6 +120,7 @@ public class Translator {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(baseDir, "Main.java")));
 		writer.write("public class Main {\n");
 		writer.write("	public static void main(String[] args) {\n");
+		writer.write("		runtime.FrontEnd.processOptions(args);\n");
 		writer.write("		runtime.FrontEnd.run(translated." + getClassName(initialRuleset) + ".getInstance());\n"); //todo 引数の処理
 		writer.write("	}\n");
 		writer.write("}\n");

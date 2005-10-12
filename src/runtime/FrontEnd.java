@@ -3,14 +3,27 @@
  */
 package runtime;
 
-import java.io.*;
-import java.lang.SecurityException;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.SequenceInputStream;
+import java.io.StringReader;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
 import util.StreamDumper;
 
-import compile.*;
-import compile.parser.*;
+import compile.RulesetCompiler;
+import compile.Translator;
+import compile.parser.LMNParser;
+import compile.parser.ParseException;
 
 /**
  * LMNtal のメイソ
@@ -45,10 +58,38 @@ public class FrontEnd {
 				Inline.terminate();
 			}
 		});
+
+//    	//TODO REPL で LMNtal プログラムを実行中の場合は、実行を中止してプロンプトに戻るようにする。
+//		//Ctrl-C のハンドラ
+//        Signal.handle(new Signal("INT"), new SignalHandler () {
+//            public void handle(Signal sig) {
+//            }
+//        });
+
+		processOptions(args);
 		
-		/**
-		 * コマンドライン引数があったらファイルの中身を解釈実行
-		 */
+		// 実行
+
+		if(Env.oneLiner!=null) {
+			// 一行実行の場合はそれを優先
+			REPL.processLine(Env.oneLiner);
+			return;
+		}
+		
+		// ソースありならソースを解釈実行、なしなら REPL。
+		if(Env.argv.isEmpty()) {
+			REPL.run();
+		} else {
+			run(Env.argv);
+			if(Env.fREMAIN) REPL.run();
+		}
+	}
+	
+	/**
+	 * コマンドライン引数の処理
+	 * @param args 引数
+	 */
+	public static void processOptions(String[] args) {
 		for(int i = 0; i < args.length;i++){
 			// 必ずlength>0, '-'ならオプション
 			// -> 引数を "" にすると長さ 0 になるのでチェックする。
@@ -274,8 +315,6 @@ public class FrontEnd {
 			System.out.println("Content-type: text/html\n");
 		}
 		
-		// 実行
-
 		//start LMNtalDaemon
 		if(Env.startDaemon){
 			String classpath = System.getProperty("java.class.path");
@@ -321,20 +360,6 @@ public class FrontEnd {
 				e1.printStackTrace();
 				System.exit(-1);
 			}
-		}
-		
-		if(Env.oneLiner!=null) {
-			// 一行実行の場合はそれを優先
-			REPL.processLine(Env.oneLiner);
-			return;
-		}
-		
-		// ソースありならソースを解釈実行、なしなら REPL。
-		if(Env.argv.isEmpty()) {
-			REPL.run();
-		} else {
-			run(Env.argv);
-			if(Env.fREMAIN) REPL.run();
 		}
 	}
 	
