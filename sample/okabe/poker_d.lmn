@@ -1,0 +1,164 @@
+% 分散の仕様を検討するために書いたサンプル
+% sample/kudo_trump/poker2.lmn を分散用に書き換えてみたもの
+% たぶん動かない（未確認）
+
+%%%
+% ホストに関するワイルドカードが欲しい（中島修論に出てくる"@R"のこと？ ）
+
+% 普通のルールを書いたときにリモートまで調べるかローカルに限定するか？
+% {a,b}. {c,d}@"banon". {c,$p,@r}:-{d,$p,@r}.
+% {a,b}. {c,d}@"banon". {c,$p,@r}@R:-{d,$p,@r}@R
+% 前者ならプログラムの書き直しが楽
+% 後者はランタイムの継承というらしい（中島修論より）
+
+% 処理系とはあまり関係ないけど
+% リモートを子膜として実現するか（ルールは親膜の中）
+% それとも同じ階層の膜として実現するか（ルールは膜の外） 
+%%%
+
+% ディーラー膜（ローカルホスト）
+dealer={
+% カードを生成する
+gen_all.
+gen_all :- gen(13,spade),gen(13,club),gen(13,heart),gen(13,diamond).
+gen(N,Mark) :- unary(Mark),N>0 | gen(N-1,Mark), card(N,Mark).
+gen(N,Mark) :- unary(Mark),N=0 | ().
+
+changable(1000).
+
+% カードを配る．
+L=want(N),card(N1,M1) :- N>0 | L=[changed(N1,M1)|want(N-1)].
+L=want(N) :- N=0 | L=[].
+
+% プレーヤーから送られてきたカードを交換する
+C=change(N1,M1),card(N2,M2) :-  C=changed(N2,M2),card(N1,M1).
+
+% 上で交換したカードを送信する．
+received(D,CS) :- send(D,CS).
+sended(D) :- receive(D).
+}.
+
+% プレーヤールール
+% 膜の中身だけがリモートに転送される
+player_rule={
+% 交換するカードを送信リストに繋ぐ
+changable(C),hand={card(notkeep,N,M),$h,@h}/,send(D,REST) :- int(N),unary(M),C>0 |
+changable(C),hand={$h,@h},send(D,[change(N,M)|REST]).
+
+% 交換されたカードを手に持つ．
+received(D,[changed(N,M)|REST]),hand={$h,@h}/ :- int(N),unary(M) |
+received(D,REST),hand={card(notkeep,N,M),$h,@h}.
+
+% 受信準備
+sended(D) :- receive(D).
+
+% 送信準備
+received(D,[]) :- send(D,[]).
+
+% 交換可能回数が０なら全てキープする
+send(D,[]),hand={$h,@h}/,changable(C) :- C=0 | send(D,[]), hand={allkeep,$h,@h}.
+
+% 決まったら手を開く
+hand={end,$h,@h}/ :- $h.
+
+% 余計なアトムを消すルール
+allkeep :- ().
+nostraight :- ().
+noflush :- ().
+one(N) :- int(N) | ().
+}.
+
+% プレーヤーの手札に関するルール
+% 膜ごとリモートに転送される
+hand_rule={
+% 初期化
+hand_init :- nostraight,noflush,notend.
+
+% ストレート
+nostraight,
+card(K1,N1,Mark1),
+card(K2,N2,Mark2),
+card(K3,N3,Mark3),
+card(K4,N4,Mark4),
+card(K5,N5,Mark5) :-
+(((N1-1) mod 13) = ((N2-1) mod 13) +1),
+(((N2-1) mod 13) = ((N3-1) mod 13) +1),
+(((N3-1) mod 13) = ((N4-1) mod 13) +1),
+(((N4-1) mod 13) = ((N5-1) mod 13) +1),
+unary(K1),unary(K2),unary(K3),unary(K4),unary(K5) |
+card(keep,N1,Mark1),
+card(keep,N2,Mark2),
+card(keep,N3,Mark3),
+card(keep,N4,Mark4),
+card(keep,N5,Mark5),
+straight(N5).
+
+% フラッシュ
+noflush,
+card(K1,N1,Mark1),
+card(K2,N2,Mark2),
+card(K3,N3,Mark3),
+card(K4,N4,Mark4),
+card(K5,N5,Mark5)} :-
+Mark1=Mark2,Mark2=Mark3,Mark3=Mark4,Mark4=Mark5,
+int(N1),int(N2),int(N3),int(N4),int(N5),
+unary(K1),unary(K2),unary(K3),unary(K4),unary(K5) |
+card(keep,N1,Mark1),
+card(keep,N2,Mark2),
+card(keep,N3,Mark3),
+card(keep,N4,Mark4),
+card(keep,N5,Mark5),
+flush(N1+N2+N3+N4+N5,Mark1).
+
+% ペア
+card(notkeep,N1,Mark1),card(K2,N2,Mark2) :- N1=:=N2 |
+card(keep,N1,Mark1),card(K2,N2,Mark2),one(N1).
+
+one(N1),one(N2)        :- N1=:=N2 | pair(N1).
+pair(N1),pair(N2)      :- N1=\=N2 | twopair(N1,N2).
+one(N1),pair(N2)       :- N1=:=N2 | threecard(N1).
+one(N1),threecard(N2)  :- N1=:=N2 | fourcard(N1).
+pair(N1),pair(N2)      :- N1=:=N2 | fourcard(N1).
+twopair(N1,N2),one(N3) :- N2=:=N3 | fullhouse(N1,N2).
+twopair(N1,N2),one(N3) :- N1=:=N3 | fullhouse(N2,N1).
+pair(N1),threecard(N2) :- N1=\=N2 | fullhouse(N1,N2).
+
+% ストレートかフラッシュかフルハウスが決まれば終了
+straight,notend :- straight,end.
+flush,notend :- flush,end.
+fullhouse,notend :- fullhouse,end.
+
+% 全部キープする
+allkeep,notkeep(K) :- allkeep,keep(K).
+
+% 全部キープならおしまい
+notend,keep(K1),keep(K2),keep(K3),keep(K4),keep(K5) :- 
+end,keep(K1),keep(K2),keep(K3),keep(K4),keep(K5).
+}.
+
+% 送受信（カードのやり取り）
+% ホスト間の通信は膜の外に書く
+{receive(D),$p,@p}/,{send(D,CS),changable(C),$d,@d}/ :- ground(CS),C>0 |
+{received(D,CS),$p,@p},{sended(D),changable(C-1),$d,@d}.
+
+% リモートにプレーヤーを追加する
+% ディーラー膜とプレーヤー膜は同じ階層
+% 選択されるリモートノードはランダム
+player_size(4),add_players.
+add_players,player_size(PS) :- int(PS) | player_size(PS),add_players(PS,integer.rnd(3)).
+
+add_players(P,H),hand_rule={@h},player_rule={@p},dealer={$d,@d}/ :- P>0, H=!=0 |
+add_players(P-1),hand_rule={@h},player_rule={@p},dealer={$d,receive(D),@d},
+%リモートに送る膜
+{pl={hand={hand_init,@h},changable(5),@p,send(D,want(5))}}@"banon".
+
+add_players(P,H),hand_rule={@h},player_rule={@p},dealer={$d,@d}/ :- P>0, H=!=1 |
+add_players(P-1),hand_rule={@h},player_rule={@p},dealer={$d,receive(D),@d},
+{pl={hand={hand_init,@h},changable(5),@p,send(D,want(5))}}@"pave".
+
+add_players(P,H),hand_rule={@h},player_rule={@p},dealer={$d,@d}/ :- P>0, H=!=2 |
+add_players(P-1),hand_rule={@h},player_rule={@p},dealer={$d,receive(D),@d},
+{pl={hand={hand_init,@h},changable(5),@p,send(D,want(5))}}@"brie".
+
+add_players(P):- P=0 | ().
+
