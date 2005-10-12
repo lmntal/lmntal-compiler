@@ -1063,7 +1063,6 @@ public class Translator {
 					break; //n-kato
 					//====型検査のためのガード命令====ここまで====
 					//====組み込み機能に関する命令====ここから====
-//未実装
 				case Instruction.INLINE : //[atom, inlineref]
 					writer.write(tabs + "do{ Atom me = (Atom)var" + inst.getIntArg1() + ";\n");
 					writer.write(tabs + "  mem = (AbstractMembrane)var0;\n");
@@ -1071,8 +1070,6 @@ public class Translator {
 					writer.write(tabs + "}while(false);\n"); // インラインコードは switch の中にある前提で書かれている。
 					
 					break;
-//					writer.write(tabs + "Inline.callInline( ((Atom)var" + inst.getIntArg1() + "), \"" + escapeString((String)inst.getArg2()) + "\", " + inst.getIntArg3() + " );\n");
-//					break; //hara
 					//====組み込み機能に関する命令====ここまで====
 //分散機能は未実装
 //					//====分散拡張用の命令====ここから====
