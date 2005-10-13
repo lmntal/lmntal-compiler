@@ -2,6 +2,6 @@
 setlocal
 
 call set_cp
-set jar=%1
+set CLASSPATH=%1;%CLASSPATH%
 shift
-java -cp %CLASSPATH%;%jar% Main %*
+java Main %*
