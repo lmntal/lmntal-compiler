@@ -1,10 +1,19 @@
-ret=solid(5).
+atom(X).
+pic(X,Y,Z,V).
+getpic(Y,"c:\sample.gif").
+position(Z,100,100).
+enable(V).
 
-R=solid(N):-N>1|R=solid(N-1),a(N).
-R=solid(N):-N=1,R=R|a(1).
+vx(1). vy(1).
+
+position(Z,X,Y),vx(1):-X >= 300|position(Z,X,Y),vx(0).
+position(Z,X,Y),vy(1):-Y >= 300|position(Z,X,Y),vy(0).
+
+position(Z,X,Y),vx(0):-X =< 0|position(Z,X,Y),vx(1).
+position(Z,X,Y),vy(0):-Y =< 0|position(Z,X,Y),vy(1).
 
 
-a(X),a(Y):-X=Y+1|a(A),a(A).
-a(X),a(X),a(Y),a(Y):-a(A,B,C),a(A,D,E),a(C,E,F),a(B,D,F).
-a(A,B,C),a(A,D,E),a(C,E,F),a(B,D,F),a(X):-X=X|a(A,B,C),a(A,D,E,H),a(C,E,F,I),a(B,D,F,J),a(H,I,J).
-a(A,B,C),a(A,D,E),a(C,E,F),a(B,D,F),a(X):-X=X|a(A,B,C),a(A,D,E,H),a(C,E,F,I),a(B,D,F,J),a(H,I,J).
+position(Z,X,Y),vx(1),vy(1):-X<300,Y<300 | position(Z,X+50,Y+50),vx(1),vy(1).
+position(Z,X,Y),vx(0),vy(1):-X>0,Y<300 | position(Z,X-50,Y+50),vx(0),vy(1).
+position(Z,X,Y),vx(1),vy(0):-X<300,Y>0 | position(Z,X+50,Y-50),vx(1),vy(0).
+position(Z,X,Y),vx(0),vy(0):-X>0,Y>0 | position(Z,X-50,Y-50),vx(0),vy(0).
