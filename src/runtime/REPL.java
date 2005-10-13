@@ -104,7 +104,7 @@ public class REPL {
 					else Env.optimize = line.charAt(line.length() - 1) - '0';
 					Env.p("optimization level " + Env.optimize);
 					continue;
-				} else if(line.matches(Env.replCommandPrefix+"zoptimize( [0-9])?")){ //ガード関係の最適化　そのうちoptimizeと統合 sakurai
+				} else if(line.matches(Env.replCommandPrefix+"nozoptimize|zoptimize( [0-9])?")){ //ガード関係の最適化　そのうちoptimizeと統合 sakurai
 					if (line.charAt(line.length() - 1) == 'e') Env.zoptimize = 0;
 					else Env.zoptimize = line.charAt(line.length() - 1) - '0';
 					Env.p("zoptimization level " + Env.zoptimize);

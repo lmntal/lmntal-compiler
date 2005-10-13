@@ -18,19 +18,37 @@ import runtime.Rule;
 public class Optimizer {
 	/** ルールオブジェクトを最適化する */
 	public static void optimizeRule(Rule rule) {
-		if(Env.zoptimize >= 1) Env.optimize = 1;
+		if(Env.zoptimize >= 1 && Env.optimize == 0) Env.optimize = 1;
 //		if (Env.optimize == 9) Compactor.compactRule(rule); else // （テスト用）
 		Compactor.compactRule(rule);
 		if (Env.optimize == 1) {
 			inlineExpandTailJump(rule.memMatch);	// TODO 最適化器を統合する
-			if (Env.zoptimize >= 1 && Env.zoptimize < 4) GuardOptimizer.guardMove(rule.memMatch); 
-			if (Env.zoptimize >= 4) {
-				Grouping grouping = new Grouping(rule.memMatch);
-			}
 		} else {
 			inlineExpandTailJump(rule.memMatch);
 			optimize(rule.memMatch, rule.body);
 		}
+		if(Env.zoptimize == 1) Optimizer2.guardMove(rule.memMatch);
+			else if(Env.zoptimize == 2) Optimizer2.grouping(rule.memMatch);
+			else if(Env.zoptimize >= 3) {
+				Optimizer2.grouping(rule.memMatch);
+				Optimizer2.guardMove(rule.memMatch);
+			}
+		/*
+		else if(Env.zoptimize == 4) Optimizer2.mapping(rule.memMatch);
+		else if(Env.zoptimize == 5) {
+				Optimizer2.mapping(rule.memMatch);
+				Optimizer2.guardMove(rule.memMatch);
+			}
+		else if(Env.zoptimize == 6) {
+				Optimizer2.mapping(rule.memMatch);
+				Optimizer2.grouping(rule.memMatch);
+			}
+		else if(Env.zoptimize >= 7) {
+				Optimizer2.mapping(rule.memMatch);
+				Optimizer2.grouping(rule.memMatch);
+				Optimizer2.guardMove(rule.memMatch);
+			}
+		*/
 	}
 	/**	
 	 * 渡された命令列を、現在の最適化レベルに応じて最適化する。<br>
