@@ -1,3 +1,3 @@
 #!/bin/bash
 
-lmntal --translate $*
+lmntal.sh --translate $*
