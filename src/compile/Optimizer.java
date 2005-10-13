@@ -19,13 +19,11 @@ public class Optimizer {
 	/** ルールオブジェクトを最適化する */
 	public static void optimizeRule(Rule rule) {
 		if(Env.zoptimize >= 1 && Env.optimize == 0) Env.optimize = 1;
-//		if (Env.optimize == 9) Compactor.compactRule(rule); else // （テスト用）
 		Compactor.compactRule(rule);
-		if (Env.optimize == 1) {
-			inlineExpandTailJump(rule.memMatch);	// TODO 最適化器を統合する
-		} else {
+		if (Env.optimize >= 1) {
+			inlineExpandTailJump(rule.guard);// TODO 最適化器を統合する
+			optimize(rule.memMatch, rule.guard);
 			inlineExpandTailJump(rule.memMatch);
-			optimize(rule.memMatch, rule.body);
 		}
 		if(Env.zoptimize == 1) Optimizer2.guardMove(rule.memMatch);
 			else if(Env.zoptimize == 2) Optimizer2.grouping(rule.memMatch);
@@ -274,11 +272,6 @@ public class Optimizer {
 			Instruction inst = (Instruction)lit.next();
 			switch (inst.getKind()) {
 				case Instruction.REMOVEMEM:
-					if (set.contains(inst.getArg1())) {
-						lit.remove();
-					}
-					break;
-				case Instruction.REMOVEPROXIES:
 					if (set.contains(inst.getArg1())) {
 						lit.remove();
 					}
@@ -658,13 +651,36 @@ public class Optimizer {
 		//
 
 		//情報取得
+		HashMap varInBody = new HashMap(); // ヘッドでの変数名→ボディでの変数名
+		
+		Instruction react = (Instruction)head.get(head.size() - 1);
+		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
+			return;
+		}
+		int i = 0;
+		List args = (List)react.getArg3();
+		it = args.iterator();
+		while (it.hasNext()) {
+			varInBody.put((Integer)it.next(), new Integer(i++));
+		}
+
 		HashMap links = new HashMap();
 		it = head.iterator();
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
 			if (inst.getKind() == Instruction.DEREF) {
-				Link l1 = new Link(inst.getIntArg2(), inst.getIntArg3());
-				Link l2 = new Link(inst.getIntArg1(), inst.getIntArg4());
+				if (!varInBody.containsKey(inst.getArg2()) || !varInBody.containsKey(inst.getArg1())) {
+					//ボディ命令列に渡されない変数に関する情報。
+					//リンク構造が循環している場合に現れる。
+					//無駄が発生する場合があるが、バグにはならないのでとりあえず放置。
+					//TODO 適切に処理する
+					continue;
+				}
+				int atom1, atom2;
+				atom1 = ((Integer)varInBody.get(inst.getArg2())).intValue();
+				atom2 = ((Integer)varInBody.get(inst.getArg1())).intValue();
+				Link l1 = new Link(atom1, inst.getIntArg3());
+				Link l2 = new Link(atom2, inst.getIntArg4());
 				links.put(l1, l2);
 				links.put(l2, l1);
 			}
