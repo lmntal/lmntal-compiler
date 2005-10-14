@@ -73,57 +73,61 @@ public class REPL {
 						processLine(lb.toString());
 						lb.setLength(0);
 					}
-				} else if(line.equals(Env.replCommandPrefix+"q")) {
-					break;
-				} else if(line.equals(Env.replCommandPrefix+"h")) {
-					System.out.println("Commands:");
-					System.out.println("  "+Env.replCommandPrefix+"[no]debug    [0-9] - set debug level");
-					System.out.println("  "+Env.replCommandPrefix+"[no]optimize [0-9] - set optimization level");
-					System.out.println("  "+Env.replCommandPrefix+"[no]verbose  [0-9] - set verbose level");
-					System.out.println("  "+Env.replCommandPrefix+"[no]shuffle  [0-4] - set shuffle level");
-					System.out.println("  "+Env.replCommandPrefix+"[no]trace          - set trace mode");					
-					System.out.println("  "+Env.replCommandPrefix+"h                  - help");
-					System.out.println("  "+Env.replCommandPrefix+"q                  - quit");
-					continue;
-				} else if(line.matches(Env.replCommandPrefix+"nodebug|debug( [0-9])?")) {
-					if (line.length() == 5) Env.debug = Env.DEBUG_DEFAULT;
-					else if (line.charAt(0) == 'n') Env.debug = 0;
-					else Env.debug = line.charAt(line.length() - 1) - '0';
-					Env.p("debug level " + Env.debug);
-					continue;
-				} else if(line.matches(Env.replCommandPrefix+"noverbose|verbose( [0-9])?")) {
-					int old = Env.verbose;
-					if (line.charAt(0) == 'n') Env.verbose = 0;
-					else if (line.charAt(line.length() - 1) == 'e') Env.verbose = Env.VERBOSE_DEFAULT;
-					else Env.verbose = line.charAt(line.length() - 1) - '0';
-					Env.p("verbose level set to " + Env.verbose + " (previously " + old + ")");
-					continue;
-				} else if(line.matches(Env.replCommandPrefix+"nooptimize|optimize( [0-9])?")) {
-					if (line.charAt(0) == 'n') Env.optimize = 0;
-					else if (line.charAt(line.length() - 1) == 'e') Env.optimize = 5;
-					else Env.optimize = line.charAt(line.length() - 1) - '0';
-					Env.p("optimization level " + Env.optimize);
-					continue;
-				} else if(line.matches(Env.replCommandPrefix+"nozoptimize|zoptimize( [0-9])?")){ //ガード関係の最適化　そのうちoptimizeと統合 sakurai
-					if (line.charAt(line.length() - 1) == 'e') Env.zoptimize = 0;
-					else Env.zoptimize = line.charAt(line.length() - 1) - '0';
-					Env.p("zoptimization level " + Env.zoptimize);
-					continue;
-				} else if(line.matches(Env.replCommandPrefix+"noshuffle|shuffle( [0-9])?")) {
-					int old = Env.shuffle;
-					if (line.charAt(0) == 'n') Env.shuffle = Env.SHUFFLE_INIT;
-					else if (line.charAt(line.length() - 1) == 'e') Env.shuffle = Env.SHUFFLE_DEFAULT;
-					else Env.shuffle = line.charAt(line.length() - 1) - '0';
-					Env.p("shuffle level " + Env.shuffle + " (previously " + old + ")");
-					continue;
-				} else if(line.equals(Env.replCommandPrefix+"trace")) {
-					Env.p("trace mode on");
-					Env.fTrace = true;
-					continue;
-				} else if(line.equals(Env.replCommandPrefix+"notrace")) {
-					Env.p("trace mode off");
-					Env.fTrace = false;
-					continue;
+				} else if(line.startsWith(Env.replCommandPrefix)) {
+					// 特殊コマンドの処理
+					String nline = line.replace(Env.replCommandPrefix, "");
+					if(nline.equals("q")) {
+						break;
+					} else if(nline.equals("h")) {
+						System.out.println("Commands:");
+						System.out.println("  "+"[no]debug    [0-9] - set debug level");
+						System.out.println("  "+"[no]optimize [0-9] - set optimization level");
+						System.out.println("  "+"[no]verbose  [0-9] - set verbose level");
+						System.out.println("  "+"[no]shuffle  [0-4] - set shuffle level");
+						System.out.println("  "+"[no]trace          - set trace mode");					
+						System.out.println("  "+"h                  - help");
+						System.out.println("  "+"q                  - quit");
+						continue;
+					} else if(nline.matches("nodebug|debug( [0-9])?")) {
+						if (nline.length() == 5) Env.debug = Env.DEBUG_DEFAULT;
+						else if (nline.charAt(0) == 'n') Env.debug = 0;
+						else Env.debug = nline.charAt(nline.length() - 1) - '0';
+						Env.p("debug level " + Env.debug);
+						continue;
+					} else if(nline.matches("noverbose|verbose( [0-9])?")) {
+						int old = Env.verbose;
+						if (nline.charAt(0) == 'n') Env.verbose = 0;
+						else if (nline.charAt(nline.length() - 1) == 'e') Env.verbose = Env.VERBOSE_DEFAULT;
+						else Env.verbose = nline.charAt(nline.length() - 1) - '0';
+						Env.p("verbose level set to " + Env.verbose + " (previously " + old + ")");
+						continue;
+					} else if(nline.matches("nooptimize|optimize( [0-9])?")) {
+						if (nline.charAt(0) == 'n') Env.optimize = 0;
+						else if (nline.charAt(nline.length() - 1) == 'e') Env.optimize = 5;
+						else Env.optimize = nline.charAt(nline.length() - 1) - '0';
+						Env.p("optimization level " + Env.optimize);
+						continue;
+					} else if(nline.matches("nozoptimize|zoptimize( [0-9])?")){ //ガード関係の最適化　そのうちoptimizeと統合 sakurai
+						if (nline.charAt(nline.length() - 1) == 'e') Env.zoptimize = 0;
+						else Env.zoptimize = nline.charAt(nline.length() - 1) - '0';
+						Env.p("zoptimization level " + Env.zoptimize);
+						continue;
+					} else if(nline.matches("noshuffle|shuffle( [0-9])?")) {
+						int old = Env.shuffle;
+						if (nline.charAt(0) == 'n') Env.shuffle = Env.SHUFFLE_INIT;
+						else if (nline.charAt(nline.length() - 1) == 'e') Env.shuffle = Env.SHUFFLE_DEFAULT;
+						else Env.shuffle = nline.charAt(nline.length() - 1) - '0';
+						Env.p("shuffle level " + Env.shuffle + " (previously " + old + ")");
+						continue;
+					} else if(nline.equals("trace")) {
+						Env.p("trace mode on");
+						Env.fTrace = true;
+						continue;
+					} else if(nline.equals("notrace")) {
+						Env.p("trace mode off");
+						Env.fTrace = false;
+						continue;
+					}
 				} else {
 					if(Env.replTerm.equals("null_line")) {
 						lb.append(line);
