@@ -57,6 +57,8 @@ public class Translator {
 	private static File moduleDir;
 	/** 変換したファイルをおくディレクトリ */
 	private static File dir;
+	/** 変換したファイルのパッケージ名 */
+	private static String packageName;
 	/** LMNtalソースファイル名 */
 	private static String sourceName;
 
@@ -105,8 +107,10 @@ public class Translator {
 		if (Env.fLibrary) {
 			dir = new File(moduleDir, sourceName);
 			dir.mkdir();
+			packageName = "translated." + sourceName;
 		} else {
 			dir = moduleDir;
+			packageName = "translated";
 		}
 	}
 	/**
@@ -157,6 +161,20 @@ public class Translator {
 			writer.write("	}\n");
 			writer.write("}\n");
 			writer.close();
+		}
+	}
+	/**
+	 * インラインコードを生成する。
+	 * @throws IOException IOエラーが発生した場合
+	 */
+	public static void genInlineCode() throws IOException {
+		if (Inline.inlineSet.size() > 1) {
+			Env.e("Translator supports only one InlienUnit.");
+			return;
+		}
+		Iterator it = Inline.inlineSet.values().iterator();
+		while (it.hasNext()) {
+			((InlineUnit)it.next()).makeCode(packageName, "Inline", new File(dir, "Inline.java"), false);
 		}
 	}
 
@@ -293,18 +311,18 @@ public class Translator {
 		writer.write("import java.io.*;\n");
 		writer.write("import daemon.IDConverter;\n");
 		writer.write("import module.*;\n");
-		writer.write("\n");
-		{
-			Iterator il0 = Inline.inlineSet.values().iterator();
-			while(il0.hasNext()) {
-				runtime.InlineUnit iu = (runtime.InlineUnit)il0.next();
-				Iterator il1 = iu.defs.iterator();
-				while(il1.hasNext()) {
-					writer.write((String)il1.next());
-					writer.write("\n");
-				}
-			}
-		}
+//		writer.write("\n");
+//		{
+//			Iterator il0 = Inline.inlineSet.values().iterator();
+//			while(il0.hasNext()) {
+//				runtime.InlineUnit iu = (runtime.InlineUnit)il0.next();
+//				Iterator il1 = iu.defs.iterator();
+//				while(il1.hasNext()) {
+//					writer.write((String)il1.next());
+//					writer.write("\n");
+//				}
+//			}
+//		}
 		writer.write("\n");
 		writer.write("public class " + className + " extends Ruleset {\n");
 		writer.write("	private static final " + className + " theInstance = new " + className + "();\n");
@@ -989,23 +1007,23 @@ public class Translator {
 					//====制御命令====ここまで====
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
-					writer.write(tabs + "eqground_ret = ((Link)var" + inst.getIntArg1() + ").eqGround(((Link)var" + inst.getIntArg2() + "),new HashMap());\n");
+					writer.write(tabs + "eqground_ret = ((Link)var" + inst.getIntArg1() + ").eqGround(((Link)var" + inst.getIntArg2() + "));\n");
 					writer.write(tabs + "if (!(!eqground_ret)) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-03
 				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
-					writer.write(tabs + "var" + inst.getIntArg1() + " = ((AbstractMembrane)var" + inst.getIntArg3() + ").copyGroundFrom(((Link)var" + inst.getIntArg2() + "),new HashMap());\n");
+					writer.write(tabs + "var" + inst.getIntArg1() + " = ((AbstractMembrane)var" + inst.getIntArg3() + ").copyGroundFrom(((Link)var" + inst.getIntArg2() + "));\n");
 					break; //kudo 2004-12-03
 				case Instruction.REMOVEGROUND : //[srclink,srcmem]
-					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg2() + ").removeGround(((Link)var" + inst.getIntArg1() + "),new HashSet());\n");
+					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg2() + ").removeGround(((Link)var" + inst.getIntArg1() + "));\n");
 					break; //kudo 2004-12-08
 				case Instruction.FREEGROUND : //[srclink]
 					break; //kudo 2004-12-08
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 					//====型検査のためのガード命令====ここから====
 				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
-					writer.write(tabs + "isground_ret = ((Link)var" + inst.getIntArg2() + ").isGround(new HashSet(),((Set)var" + inst.getIntArg3() + "));\n");
+					writer.write(tabs + "isground_ret = ((Link)var" + inst.getIntArg2() + ").isGround(((Set)var" + inst.getIntArg3() + "));\n");
 					writer.write(tabs + "if (!(isground_ret == -1)) {\n");
 					writer.write(tabs + "	var" + inst.getIntArg1() + " = new IntegerFunctor(isground_ret);\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
@@ -1065,11 +1083,11 @@ public class Translator {
 					//====型検査のためのガード命令====ここまで====
 					//====組み込み機能に関する命令====ここから====
 				case Instruction.INLINE : //[atom, inlineref]
-					writer.write(tabs + "do{ Atom me = (Atom)var" + inst.getIntArg1() + ";\n");
-					writer.write(tabs + "  mem = (AbstractMembrane)var0;\n");
-					writer.write(tabs + Inline.getCode(inst.getIntArg1(), (String)inst.getArg2(), inst.getIntArg3()));
-					writer.write(tabs + "}while(false);\n"); // インラインコードは switch の中にある前提で書かれている。
-					
+					writer.write(tabs + "Inline.run((Atom)var" + inst.getArg1() + ", " + inst.getArg3() + ");\n");
+//					writer.write(tabs + "do{ Atom me = (Atom)var" + inst.getIntArg1() + ";\n");
+//					writer.write(tabs + "  mem = (AbstractMembrane)var0;\n");
+//					writer.write(tabs + Inline.getCode(inst.getIntArg1(), (String)inst.getArg2(), inst.getIntArg3()));
+//					writer.write(tabs + "}while(false);\n"); // インラインコードは switch の中にある前提で書かれている。
 					break;
 					//====組み込み機能に関する命令====ここまで====
 //分散機能は未実装
@@ -1503,12 +1521,16 @@ public class Translator {
 					writer.write(tabs + "			((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(rulesets[i]);\n");
 					writer.write(tabs + "		}\n");
 					writer.write(tabs + "	} catch (ClassNotFoundException e) {\n");
+					writer.write(tabs + "		Env.d(e);\n");
 					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
 					writer.write(tabs + "	} catch (NoSuchMethodException e) {\n");
+					writer.write(tabs + "		Env.d(e);\n");
 					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
 					writer.write(tabs + "	} catch (IllegalAccessException e) {\n");
+					writer.write(tabs + "		Env.d(e);\n");
 					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
 					writer.write(tabs + "	} catch (java.lang.reflect.InvocationTargetException e) {\n");
+					writer.write(tabs + "		Env.d(e);\n");
 					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
 					writer.write(tabs + "	}\n");
 //					writer.write(tabs + "{\n");
