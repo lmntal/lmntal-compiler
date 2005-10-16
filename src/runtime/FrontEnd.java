@@ -417,9 +417,11 @@ public class FrontEnd {
 				Translator.init(unitName);
 			}
 			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
-			Inline.makeCode();
-			if (!Env.fInterpret) {
+			if (Env.fInterpret) {
+				Inline.makeCode();
+			} else {
 				try {
+					Translator.genInlineCode();
 					Translator.genModules();
 					Translator.genMain((InterpretedRuleset)rs);
 					Translator.genJAR();

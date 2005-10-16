@@ -93,57 +93,75 @@ public class InlineUnit {
 			break;
 		}
 	}
-	
+
 	/**
-	 * コードを生成する。
+	 * コードを生成する。解釈実行時に利用する。
 	 */
 	public void makeCode() {
 		if(isCached()) return;
 		try {
-			if(codes.isEmpty() && defs.isEmpty()) return;
-			Iterator i;
-			
 			String className = className(name);
 			File outputFile = srcFile(name);
 			if(!outputFile.getParentFile().exists()) {
 				outputFile.getParentFile().mkdirs();
 			}
-			PrintWriter p = new PrintWriter(new FileOutputStream(outputFile));
-//			Env.d("make inline code "+name);
-			
-			//p.println("package runtime;");
-			p.println("import runtime.*;");
-			p.println("import java.util.*;");
-			
-			i = defs.iterator();
-			while(i.hasNext()) {
-				String s = (String)i.next();
-				p.println(s);
-			}
-			p.println("public class "+className+" implements InlineCode {");
-			p.println("\tpublic void run(Atom me, int codeID) {");
-			p.println("\t\tAbstractMembrane mem = me.getMem();");
-			//p.println("\t\tEnv.p(\"-------------------------- \");");
-			//p.println("\t\tEnv.d(\"Exec Inline \"+me+codeID);");
-			p.println("\t\tswitch(codeID) {");
-			i = codes.keySet().iterator();
-			while(i.hasNext()) {
-				String s = (String)i.next();
-				int codeID = ((Integer)(codes.get(s))).intValue();
-				p.println("\t\tcase "+codeID+": {");
-				//p.println("\t\t\t/*"+s.replaceAll("\\*\\/", "* /").replaceAll("\\/\\*", "/ *")+"*/");
-				p.println("\t\t\t"+s);
-				p.println("\t\t\tbreak; }");
-			}
-			p.println("\t\t}");
-			p.println("\t}");
-			p.println("}");
-			p.close();
-			
-			Env.d("Class "+className+" written to "+outputFile);
+	//		Env.d("make inline code "+name);
+	
+			makeCode(null, className, outputFile, true);
 		} catch (Exception e) {
 			Env.d(e);
 		}
+	}
+	
+	/**
+	 * コードを生成する。
+	 */
+	public void makeCode(String packageName, String className, File outputFile, boolean interpret) throws IOException {
+		if(codes.isEmpty() && defs.isEmpty()) return;
+		Iterator i;
+		
+		PrintWriter p = new PrintWriter(new FileOutputStream(outputFile));
+
+		//p.println("package runtime;");
+		if (packageName != null) {
+			p.println("package " + packageName + ";");
+		}
+		p.println("import runtime.*;");
+		p.println("import java.util.*;");
+		
+		i = defs.iterator();
+		while(i.hasNext()) {
+			String s = (String)i.next();
+			p.println(s);
+		}
+		if (interpret) {
+			//InlineCode クラスのインスタンスとして使う
+			p.println("public class "+className+" implements InlineCode {");
+			p.println("\tpublic void run(Atom me, int codeID) {");
+		} else {
+			//直接呼び出すので、static でよい
+			p.println("public class "+className+" {");
+			p.println("\tpublic static void run(Atom me, int codeID) {");
+		}
+		p.println("\t\tAbstractMembrane mem = me.getMem();");
+		//p.println("\t\tEnv.p(\"-------------------------- \");");
+		//p.println("\t\tEnv.d(\"Exec Inline \"+me+codeID);");
+		p.println("\t\tswitch(codeID) {");
+		i = codes.keySet().iterator();
+		while(i.hasNext()) {
+			String s = (String)i.next();
+			int codeID = ((Integer)(codes.get(s))).intValue();
+			p.println("\t\tcase "+codeID+": {");
+			//p.println("\t\t\t/*"+s.replaceAll("\\*\\/", "* /").replaceAll("\\/\\*", "/ *")+"*/");
+			p.println("\t\t\t"+s);
+			p.println("\t\t\tbreak; }");
+		}
+		p.println("\t\t}");
+		p.println("\t}");
+		p.println("}");
+		p.close();
+		
+		Env.d("Class "+className+" written to "+outputFile);
 	}
 	
 	/****** 実行時に使う ******/
