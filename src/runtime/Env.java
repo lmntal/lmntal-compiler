@@ -182,7 +182,8 @@ public final class Env {
 	////////////////////////////////////////////////////////////////
 	
 	// PROXY を表示させない 2005/02/03 T.Nagata オプション --hideproxy
-	public static boolean hideProxy = false;
+	// デフォルトで有効 2005/10/14 mizuno
+	public static boolean hideProxy = true;
 	
 	/**
 	 * General error report
