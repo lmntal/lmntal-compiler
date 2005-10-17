@@ -22,6 +22,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import runtime.Env;
+import runtime.FloatingFunctor;
 import runtime.Functor;
 import runtime.Inline;
 import runtime.InlineUnit;
@@ -84,13 +85,16 @@ public class Translator {
 			sourceName = "a";
 		} else {
 			sourceName = new File(unitName).getName();
-			if (sourceName.startsWith(".")) {
-				sourceName = sourceName.substring(1);
+			if (sourceName.endsWith(".lmn")) {
+				sourceName = sourceName.substring(0, sourceName.length() - 4);
 			}
-			int pos = sourceName.indexOf('.');
-			if (pos >= 0) {
-				sourceName = sourceName.substring(0, pos);
-			}
+//			if (sourceName.startsWith(".")) {
+//				sourceName = sourceName.substring(1);
+//			}
+//			int pos = sourceName.indexOf('.');
+//			if (pos >= 0) {
+//				sourceName = sourceName.substring(0, pos);
+//			}
 		}
 		//作業用ディレクトリ作成
 		String s = System.getProperty("java.io.tmpdir") + "lmn_translate";
@@ -105,9 +109,10 @@ public class Translator {
 		moduleDir = new File(baseDir, "translated");
 		moduleDir.mkdir();
 		if (Env.fLibrary) {
-			dir = new File(moduleDir, sourceName);
+			//パッケージ名として使えない文字はライブラリ名として使うな、ということで。
+			dir = new File(moduleDir, "module_" + sourceName);
 			dir.mkdir();
-			packageName = "translated." + sourceName;
+			packageName = "translated." + "module_" + sourceName;
 		} else {
 			dir = moduleDir;
 			packageName = "translated";
@@ -144,7 +149,7 @@ public class Translator {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(moduleDir, "Module_" + moduleName + ".java")));
 			writer.write("package translated;\n");
 			if (Env.fLibrary) {
-				writer.write("import translated." + sourceName + ".*;\n");
+				writer.write("import translated.module_" + sourceName + ".*;\n");
 			}
 			writer.write("import runtime.Ruleset;\n");
 			writer.write("public class Module_" + moduleName + "{\n");
@@ -174,7 +179,8 @@ public class Translator {
 		}
 		Iterator it = Inline.inlineSet.values().iterator();
 		while (it.hasNext()) {
-			((InlineUnit)it.next()).makeCode(packageName, "Inline", new File(dir, "Inline.java"), false);
+			InlineUnit iu = (InlineUnit)it.next();
+			iu.makeCode(packageName, InlineUnit.className(sourceName + ".lmn"), new File(dir, InlineUnit.className(sourceName + ".lmn") + ".java"), false);
 		}
 	}
 
@@ -302,7 +308,7 @@ public class Translator {
 	 */
 	public void translate() throws IOException {
 		if (Env.fLibrary) {
-			writer.write("package translated." + sourceName + ";\n");
+			writer.write("package translated.module_" + sourceName + ";\n");
 		} else {
 			writer.write("package translated;\n");
 		}
@@ -393,10 +399,12 @@ public class Translator {
 			writer.write("	private static final Functor " + funcVarMap.get(func));
 			if (func instanceof StringFunctor) {
 				writer.write(" = new StringFunctor(\"" + escapeString((String)func.getValue()) + "\");\n");
-			} else if (func instanceof ObjectFunctor) {
-				throw new RuntimeException("ObjectFunctor is not supported");
 			} else if (func instanceof IntegerFunctor) {
-				writer.write(" = new IntegerFunctor(" + ((IntegerFunctor)func).getValue() + ");\n");
+				writer.write(" = new IntegerFunctor(" + ((IntegerFunctor)func).intValue() + ");\n");
+			} else if (func instanceof FloatingFunctor) {
+				writer.write(" = new FloatingFunctor(" + ((FloatingFunctor)func).floatValue() + ");\n");
+			} else if (func instanceof ObjectFunctor) {
+				throw new RuntimeException("Static ObjectFunctor is not supported");
 			} else {
 				String path = "null";
 				if (func.getPath() != null) {
@@ -1074,8 +1082,10 @@ public class Translator {
 				case Instruction.GETCLASS: //[-stringatom, atom]
 					writer.write(tabs + "if (!(!(((Atom)var" + inst.getIntArg2() + ").getFunctor() instanceof ObjectFunctor))) {\n");
 					writer.write(tabs + "	{\n");
+					//再帰呼び出ししていないので、ブロック内で変数宣言しても大丈夫
 					writer.write(tabs + "		Object obj = ((ObjectFunctor)((Atom)var" + inst.getIntArg2() + ").getFunctor()).getObject();\n");
-					writer.write(tabs + "		var" + inst.getIntArg1() + " = new Atom(null, new StringFunctor( obj.getClass().toString().substring(6) ));\n");
+					writer.write(tabs + "		String className = obj.getClass().getName().replaceAll(\"" + packageName + ".\", \"\");\n");
+					writer.write(tabs + "		var" + inst.getIntArg1() + " = new Atom(null, new StringFunctor( className ));\n");
 					writer.write(tabs + "	}\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
 					writer.write(tabs + "}\n");
@@ -1083,7 +1093,7 @@ public class Translator {
 					//====型検査のためのガード命令====ここまで====
 					//====組み込み機能に関する命令====ここから====
 				case Instruction.INLINE : //[atom, inlineref]
-					writer.write(tabs + "Inline.run((Atom)var" + inst.getArg1() + ", " + inst.getArg3() + ");\n");
+					writer.write(tabs + InlineUnit.className((String)inst.getArg2()) + ".run((Atom)var" + inst.getArg1() + ", " + inst.getArg3() + ");\n");
 //					writer.write(tabs + "do{ Atom me = (Atom)var" + inst.getIntArg1() + ";\n");
 //					writer.write(tabs + "  mem = (AbstractMembrane)var0;\n");
 //					writer.write(tabs + Inline.getCode(inst.getIntArg1(), (String)inst.getArg2(), inst.getIntArg3()));

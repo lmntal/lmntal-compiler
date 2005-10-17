@@ -1209,14 +1209,16 @@ public class Instruction implements Cloneable, Serializable {
 	 * <br>出力するガード命令<br>
 	 * アトム$atomがObjectFunctorまたはそのサブクラスのファンクタを持つことを確認し、
 	 * 格納されたオブジェクトのクラスの完全修飾名文字列を表すファンクタを持つアトムを生成し、
-	 * $stringatomに代入する。*/
+	 * $stringatomに代入する。
+	 * ただし、Translator を利用した場合、同一ソースのInlineコードで定義されたクラスに関しては単純名を取得する。(2005/10/17 Mizuno )*/
 	public static final int GETCLASS = 228;
 	static {setArgType(GETCLASS, new ArgType(true, ARG_ATOM, ARG_ATOM));}
 	/** getclassfunc [-stringfunc, func]
 	 * <br>出力するガード命令<br>
 	 * ファンクタ$funcがObjectFunctorまたはそのサブクラスであることを確認し、
 	 * 格納されたオブジェクトのクラスの完全限定（修飾）名文字列を表すファンクタを生成し、
-	 * $stringfuncに代入する。*/
+	 * $stringfuncに代入する。
+	 * ただし、Translator を利用した場合、同一ソースのInlineコードで定義されたクラスに関しては単純名を取得する。(2005/10/17 Mizuno )*/
 	public static final int GETCLASSFUNC = 228 + OPT;
 	static {setArgType(GETCLASSFUNC, new ArgType(true, ARG_VAR, ARG_VAR));}
 
