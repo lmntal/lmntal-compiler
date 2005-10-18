@@ -37,8 +37,8 @@ public class Module {
 	static {
 		//libPath.add("hoge");
 		//libPath.add("FOO");
-		libPath.add(new File("./lmntal_lib"));
-		libPath.add(new File("../lmntal_lib"));
+		libPath.add(new File("./lmntal_lib/src"));
+		libPath.add(new File("../lmntal_lib/src"));
 		libPath.add(new File("."));
 	}
 	

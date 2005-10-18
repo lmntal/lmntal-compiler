@@ -1,1 +1,1 @@
-for %%f in (*.lmn) do lmnc --library %%f
+for %%f in (src\*.lmn) do lmnc --library %%f

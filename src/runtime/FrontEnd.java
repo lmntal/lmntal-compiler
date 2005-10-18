@@ -281,9 +281,15 @@ public class FrontEnd {
 							/// --debug-daemon
 							/// dump debug message of LMNtalDaemon
 							Env.debugDaemon = Env.DEBUG_DEFAULT;
-						} else if (args[i].equals("--translate")) {
-							// 暫定オプション
-							Env.fInterpret = false;
+						} else if (args[i].equals("--interpret")) {
+							/// --interpret
+							/// Interpret intermediate instruction sequences without translating into Java.
+							/// In REPL mode and one-liner, alwas interpret.
+							Env.fInterpret = true;
+						} else if (args[i].equals("--use-source-library")) {
+							/// --use-source-library
+							/// Use source library in lmntal_lib/src.
+							Env.fUseSourceLibrary = true;
 						} else if (args[i].equals("--library")) {
 							/// --library
 							/// Generate library.
@@ -308,6 +314,10 @@ public class FrontEnd {
 			}else{ // '-'以外で始まるものは (実行ファイル名, argv[0], arg[1], ...) とみなす
 				Env.argv.add(args[i]);
 			}
+		}
+		//REPL と one-liner では常に解釈実行
+		if (Env.oneLiner != null || Env.argv.isEmpty()) {
+			Env.fInterpret = true;
 		}
 		
 		if(Env.fCGI) {

@@ -60,8 +60,7 @@ public class RulesetCompiler {
 		rs.rightMem = m;
 		root.rules.add(rs);
 		processMembrane(root, unitName);
-		// TODO 安定してきたら、解釈実行する場合でもライブラリは Java に変換したものを利用するようにする。
-		if (Env.fInterpret) {
+		if (Env.fUseSourceLibrary) {
 			Module.resolveModules(root);
 		}
 		return root;

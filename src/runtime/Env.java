@@ -90,12 +90,17 @@ public final class Env {
 	/**
 	 * 解釈実行
 	 */
-	public static boolean fInterpret = true;
+	public static boolean fInterpret = false;
 
 	/**
 	 * ライブラリ用Jarファイル生成
 	 */
 	public static boolean fLibrary = false;
+	
+	/**
+	 * 未コンパイルライブラリを利用する
+	 */
+	public static boolean fUseSourceLibrary = false;
 	
 	/**
 	 * トレース実行

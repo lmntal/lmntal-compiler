@@ -1,5 +1,6 @@
 @echo off
 
+set LMNTAL_HOME=%~dp0
 set CLASSPATH=%LMNTAL_HOME%\bin
 for %%f in (%LMNTAL_HOME%\lmntal_lib\*.jar) do call :append %%f
 
