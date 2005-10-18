@@ -1,0 +1,129 @@
+/*
+----------------------------------------------------------------------
+CHR
+                                              Koji Hara
+                                              2005/10/18(火) 23:03:38
+
+操作的意味論をそのまま LMNtal で書いてみたもの
+
+関連：
+ http://www.ueda.info.waseda.ac.jp/localpage/siryou2005/embeddingCHRinLMNtal.ppt
+ Operational Semantics and Confluence of Constraint Propagation Rules[Abd97]
+----------------------------------------------------------------------
+
+
+
+
+State : <Gs, Cu, cb, T, V>
+	Gs : ゴールストア
+	Cu : ユーザ定義制約ストア
+	Cb : 組み込み制約ストア
+	T  : トークン : Set of ルール名 @ 反応できるユーザ定義制約
+	V  : Gs, Cu, Cb に出てくる変数
+	
+	実装:
+	states({}, {}, {}, {}, {}).
+
+Initial :
+	<Gx, T, true, 0, V>
+
+Final :
+	<T, Cu, Cb, T, V> with false not \in Cb
+	<Gs, Cu, false, T, V>
+
+token/2 は gdound と膜を受け取ってトークンを計算し、同レベルに展開する。
+
+*/
+
+/*
+
+r1 @ leq(X, X) <=> true.
+r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
+r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
+r4 @ leq(X, Y), leq(X, Y) <=> leq(X, Y).
+
+に
+
+leq(A, B), leq(B, C), leq(C, A).
+
+を食わせる。
+
+本来は計算ステップのルールと CHR ルールを分けたいが、
+手始めにハードコーディングした（コンパイル済みとも言える）ルールを書いてみる。
+
+*/
+
+{ module(chr).
+
+
+// Solve
+state({eq(X, Y), $gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @t}, {$v})
+:- unary(X), unary(Y) | 
+nstate({$gs}, {$cu[], @cu}, {eq=[X,Y], eq(X, Y), $cb}, {$t, @t}, {$v}).
+
+
+// Introduce
+state({leq(X, Y), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v})
+:- unary(X), unary(Y) | 
+nstate({$gs}, {leq(X, Y), $cu[], @cu}, {$cb}, {$t, token(leq(X, Y), {$cu[]}), @tr}, {$v}).
+
+
+// Simplify
+// r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
+state({$gs}, {leq(X0, Y0), leq(Y1, X1), $cu[], @cu}, {$cb}, {$t, @tr}, {$v})
+:- unary(X0), unary(Y0), unary(X1), unary(Y1), X0=X1, Y0=Y1 | 
+nstate({eq(X0, Y0), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
+
+
+
+//----------------------------------------------------------------------
+// Normalize - '=' の伝播
+//----------------------------------------------------------------------
+
+// eq
+nstate({$gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @tr}, {$v})
+:- 
+state({$gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @tr}, {$v}).
+
+
+nstate({$gs}, {$cu[], @cu}, {eq=[X], $cb}, {$t, @tr}, {$v})
+:- unary(X) |
+state({$gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @tr}, {$v}).
+
+
+nstate({$gs}, {$cu[], @cu}, {eq=[A,B|R], $cb[R]}, {$t, @tr}, {$v})
+:- unary(A), unary(B) | 
+nstate1({$gs}, {replace(B, A), $cu[], @cu}, {eq=[A|R], $cb[R]}, {$t, @tr}, {$v}).
+
+
+nstate1({$gs}, {replace(B, A), $cu[], @cu}/, {$cb}, {$t, @tr}, {$v})
+:- unary(A), unary(B) | 
+nstate({$gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
+
+
+// Terminate
+H={ state({}, {$cu[], @cu}, {eq=[], $cb}, {$t[], @tr}, {$v[]}), $etc[], @etc }/
+:-
+H={$cu[], $cb}.
+
+// Start
+H=chr.run({$gs}) :- 
+H={
+	chr.use.
+	state({$gs}, {
+		replace(B, A), leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), X=B | replace(B, A), leq(A, Y).
+		replace(B, A), leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), Y=B | replace(B, A), leq(X, A).
+	}, {eq=[]}, {
+		// token/2
+		token(A, {$b[]}) :- ground(A) | .
+	}, {})
+}.
+
+}. // End of CHR module
+
+
+
+// sample
+
+results=chr.run({leq(a, b), leq(c, b), leq(b, c), leq(c, a)}).
+//chr.run({leq(a, b), leq(b, a)}).
