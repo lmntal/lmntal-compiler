@@ -13,13 +13,16 @@ HISTORY
 
 */
 
-%public class Buffer {
-%  public async Put(string s);
-%
-%  public string Get() & Put(string s) {
-%    return s;
-%  }
-%}
+/*
+//Cwのプログラム
+public class Buffer {
+	public async Put(string s);
+
+	public string Get() & Put(string s) {
+		return s;
+	}
+}
+*/
 
 put(1).
 put(2).
