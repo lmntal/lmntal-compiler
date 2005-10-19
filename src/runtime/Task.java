@@ -62,7 +62,9 @@ import util.Stack;
  * システムコールは現在はまだ実装されていない。
  */
 
-class Task extends AbstractTask {
+class Task extends AbstractTask implements Runnable {
+	/** このタスクのルールスレッド */
+	protected Thread thread = new Thread(this, "Task");
 	/** 実行膜スタック。読み書きはsynchronized(this)内に限る。*/
 	Stack memStack = new Stack();
 	/** 仮の実行膜スタック */
@@ -72,6 +74,10 @@ class Task extends AbstractTask {
 	 * ルールスレッドが適用できるルールが無かったときにtrue。
 	 * <p>falseの書き込みはsynchronized(this)内に限る。*/
 	boolean idle = false;
+	/** タスクの優先度（正確には、このタスクのルールスレッドの優先度）
+	 * <p>ロックの制御に使用する予定。将来的にはタスクのスケジューリングにも使用される予定。
+	 * <p>10以上の値でなければならない。*/
+	int priority = 32;
 	
 	boolean isIdle(){
 		return idle;
@@ -80,7 +86,7 @@ class Task extends AbstractTask {
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）*/
 	Task(AbstractLMNtalRuntime runtime) {
-		super(runtime, Task.ROOT_PRIORITY);
+		super(runtime);
 		root = new Membrane(this);
 		memStack.push(root);
 	}
@@ -89,13 +95,13 @@ class Task extends AbstractTask {
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）
 	 * @param parent 親膜 */
 	Task(AbstractLMNtalRuntime runtime, AbstractMembrane parent) {
-		super(runtime, parent.getTask().getPriority() - Task.PRIORITY_DELTA);
+		super(runtime);
 		root = new Membrane(this);
 		root.lockThread = Thread.currentThread();
 		root.remote = parent.remote;
 		root.activate(); 		// 仮の実行膜スタックに積む
 		parent.addMem(root);	// タスクは膜の作成時に設定した
-//		thread.start();
+		thread.start();
 	}
 	/** 親膜の無い膜を作成し、このタスクが管理する膜にする。 */
 	public Membrane createFreeMembrane() {
@@ -103,15 +109,25 @@ class Task extends AbstractTask {
 	}
 	
 	////////////////////////////////////////////////////////////////
-
+	/** このタスクのルールスレッドを実行する。
+	 * 実行が終了するまで戻らない。
+	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
+	public void execAsMasterTask() {
+		thread.start();
+		try {
+			thread.join();
+		}
+		catch (InterruptedException e) {}
+	}
+	
 	private int count = 1; // 行番号表示@トレースモード okabe
 	/** このタスクの本膜のルールを実行する */
 	void exec() {
 		Membrane mem; // 本膜
 		//System.out.println(getRoot().getAtomCount() + ": exec1 ");
 		synchronized(this) {
-			// ルールスレッド（現在のスレッド）に対してこのタスクのロック要求があるときは何もしない
-			if (!lockRequestQueue.isEmpty()) {
+			// このタスクを実行するルールスレッド（現在のスレッド）に停止要求があるときは何もしない
+			if (lockRequestCount > 0) {
 				idle = true;
 				return;
 			}
@@ -128,10 +144,7 @@ class Task extends AbstractTask {
 		//System.out.println(mem.getAtomCount() + ": exec2");
 		// 実行
 		AbstractMembrane memToActivate = null;
-		for(int i=0; i < maxLoop && mem == memStack.peek(); i++){
-			synchronized(this) {
-				if (!lockRequestQueue.isEmpty()) break;
-			}
+		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
 //			System.out.println("mems  = " + memStack);
 //			System.out.println("atoms = " + mem.getReadyStackStatus());
@@ -222,7 +235,7 @@ class Task extends AbstractTask {
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
 		synchronized(this) {
 			mem.unlock();
-			if (!lockRequestQueue.isEmpty()) {
+			if (lockRequestCount > 0) {
 				signal();
 			}
 			if (memStack.isEmpty()) {
@@ -248,94 +261,81 @@ class Task extends AbstractTask {
 			}.activate(memToActivate);
 		}
 	}
-//	/** このタスク固有のルールスレッドが実行する処理 */
-//	public void run() {
-//		Membrane root = null; // ルートタスクのときのみルート膜が入る。それ以外はnull
-//		if (runtime instanceof MasterLMNtalRuntime) {
-//			root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
-//			if (root.getTask() != this) root = null;			
-//		}
-//		if (root != null) { 	
-//			if (Env.fTrace) {
-//				Env.p( Dumper.dump(root) );
-//			}
-//		}
-//		while (true) {
-//			while (true) {
-//				exec();
-//				if (((LocalLMNtalRuntime)runtime).isTerminated()) return;
-//				if (root != null && root.isStable()) return;
-//				if (!isIdle()) continue;
-//				synchronized(this) {
-//					if (awakened) {
-//						awakened = false;
-//						continue;
-//					}
-//					try {
-//						//System.out.println(getRoot().getAtomCount() + " Thread suspended");
-//						wait();
-//						//System.out.println(getRoot().getAtomCount() + " Thread resumed");
-//					}
-//					catch (InterruptedException e) {}
-//					awakened = false;
-//				}
-//				break;
-//			}
-//			if (root != null) { 	
-//				if (Env.fTrace) {
-//					if (asyncFlag) {
-//						asyncFlag = false;
-//						Env.p( " ==>* \n" + Dumper.dump(root) );
-//					}
-//				}
-//			}
-//		}	
-//	}
+	
+	/** このタスク固有のルールスレッドが実行する処理 */
+	public void run() {
+		Membrane root = null; // ルートタスクのときのみルート膜が入る。それ以外はnull
+		if (runtime instanceof MasterLMNtalRuntime) {
+			root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
+			if (root.getTask() != this) root = null;			
+		}
+		if (root != null) { 	
+			if (Env.fTrace) {
+				Env.p( Dumper.dump(root) );
+			}
+		}
+		while (true) {
+			while (true) {
+				exec();
+				if (((LocalLMNtalRuntime)runtime).isTerminated()) return;
+				if (root != null && root.isStable()) return;
+				if (!isIdle()) continue;
+				synchronized(this) {
+					if (awakened) {
+						awakened = false;
+						continue;
+					}
+					try {
+						//System.out.println(getRoot().getAtomCount() + " Thread suspended");
+						wait();
+						//System.out.println(getRoot().getAtomCount() + " Thread resumed");
+					}
+					catch (InterruptedException e) {}
+					awakened = false;
+				}
+				break;
+			}
+			if (root != null) { 	
+				if (Env.fTrace) {
+					if (asyncFlag) {
+						asyncFlag = false;
+						Env.p( " ==>* \n" + Dumper.dump(root) );
+					}
+				}
+			}
+		}	
+	}
 
 	////////////////////////////////////////////////////////////////
 
-	// ルールスレッドに対するこのタスクの実行の停止要求
+	// タスクのルールスレッドに対する停止要求
 
-	/** このタスクのルート膜をロックしようとしてブロックしているThreadのリスト。
-	 * synchronized(this)内で読み書きすること。*/
-	LinkedList lockRequestQueue = new LinkedList();
-
-	/** このタスクのルート膜のロックを取得する。取得できるまでブロックする。
-	 * <p>Membrane.blockingLock から呼ばれる。*/
-	synchronized public void lockRootMembrane() {
-		Thread me = Thread.currentThread();
-		synchronized(root) {
-			if (root.lock()) return;
-			lockRequestQueue.addLast(me);
-		}
-		do {
-			do {
-				try {
-					wait();
-				}
-				catch (InterruptedException e) {}
-			} while (lockRequestQueue.getFirst() != me);
-		} while (!root.lock());
-		lockRequestQueue.removeFirst();
+	/** このタスクのルールスレッドに対して停止要求を発行しているスレッドの個数
+	 * todo LinkedListを使ってスレッドをキューで管理することにより飢餓を無くす。
+	 * これには Membrane#blockingLock() を書き直すことが含まれる。*/
+	private int lockRequestCount = 0;
+	/** このタスクのルールスレッドに対して停止要求を発行する。
+	 * <p>キューで管理していないことによる実装の都合により、
+	 * 呼び出しは物理マシンに関するsynchronizedブロック内でなければならない（と思う）*/
+	synchronized public void requestLock() {
+		lockRequestCount++;
 	}
-//	/** このタスクのルート膜のロックを解除する。*/
-//	synchronized public void unlockRootMembrane() {
-//		lockRequestQueue.removeFirst();
-//		Object next = lockRequestQueue.getFirst();
-//		if (next != null) next.notify();
-//	}
-
+	/** このタスクのルールスレッドに対して発行した停止要求を解除する。*/
+	synchronized public void retractLock() {
+		lockRequestCount--;
+	}
+	
 	////////////////////////////////////////////////////////////////
 	
+	/** この抽象タスクのルールスレッドの再実行が要求されたかどうか */
+	protected boolean awakened = false;
+
 	/** このタスクに対してシグナルを発行する。
 	 * すなわち、このタスクのルート膜のロックの取得をするためにブロックしているスレッドが存在するならば
 	 * そのスレッドを再開してロックの取得を試みることを要求し、
 	 * 存在しないならばこのタスクのルールスレッドの再実行を要求する。*/
 	synchronized public final void signal() {
-		if (!lockRequestQueue.isEmpty()) {
-			notifyAll();
-		} else {
-			((LocalLMNtalRuntime)runtime).activateTask(this);
-		}
+		awakened = true;
+		notify();
 	}
 }

@@ -482,10 +482,10 @@ public class FrontEnd {
 
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
 			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
-			root.asyncLock();
+//			root.asyncLock();
 			rs.react(root);
-			root.asyncUnlock();
-			rt.asyncFlag = false;
+//			root.asyncUnlock();
+//			rt.asyncFlag = false;
 
 			boolean ready = true;
 			if (Env.gui != null) {
@@ -498,7 +498,7 @@ public class FrontEnd {
 				if (!Env.threed.onTrace())  ready = false;
 			}
 			if (ready) {
-				rt.exec(); // ((Task)root.getTask()).execAsMasterTask();
+				((Task)root.getTask()).execAsMasterTask(); //rt.exec();
 
 				if (!Env.fTrace && Env.verbose > 0) {
 					Env.d( "Execution Result:" );

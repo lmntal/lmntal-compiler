@@ -49,15 +49,6 @@ public final class MasterLMNtalRuntime extends LocalLMNtalRuntime {
 //		}
 //		RemoteLMNtalRuntime.terminateAll();
 //	}
-	/** マスタランタイムとして実行する。FrontEnd.run から呼ばれる。*/
-	public void exec() {
-//		RemoteLMNtalRuntime.init();
-		thread.start();
-		try {
-			thread.join();
-		}
-		catch (InterruptedException e) {}
-//		RemoteLMNtalRuntime.terminateAll();
-	}
+
 }
 

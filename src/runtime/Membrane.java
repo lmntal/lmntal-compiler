@@ -192,7 +192,6 @@ public final class Membrane extends AbstractMembrane {
 		else {
 			// ASSERT(t.bufferedStack.isEmpty());
 			t.bufferedStack.push(this);
-			((LocalLMNtalRuntime)t.runtime).activateTask(t);
 		}
 	}	
 	
@@ -223,8 +222,19 @@ public final class Membrane extends AbstractMembrane {
 	 * <p>成功したら親膜のリモートを継承する。
 	 * @return つねにtrue */
 	public boolean blockingLock() {
-		if (!isRoot()) return lock();
-		((Task)task).lockRootMembrane();
+		//(mizuno) ここでロックが解放されると、デッドロックする。
+		//         上の分をsynchronizedの中に入れると大丈夫なようだが、それでよいのか？
+		//(n-kato) 修正しました。
+		synchronized(task) {
+			((Task)task).requestLock();
+			while (!lock()) {
+				try {
+					task.wait();
+				}
+				catch (InterruptedException e) {}
+			}
+			((Task)task).retractLock();
+		}
 		return true;
 	}
 	/**
@@ -320,7 +330,7 @@ public final class Membrane extends AbstractMembrane {
 			mem = mem.parent;
 		}
 		// task.async = null;
-		((LocalLMNtalRuntime)task.getMachine()).asyncFlag = true;
+		task.asyncFlag = true;
 		mem.unlock();
 	}
 	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/
