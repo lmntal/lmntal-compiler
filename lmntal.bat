@@ -1,5 +1,5 @@
 @echo off
 setlocal
 
-call set_cp
+call %~dp0\set_cp
 java runtime.FrontEnd %*
