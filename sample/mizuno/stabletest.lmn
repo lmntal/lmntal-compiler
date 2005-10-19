@@ -1,0 +1,5 @@
+start.
+start :- {a. b :- c. d :- e.}.
+{a,@p}/ :- {b,@p}.
+{b,@p}/ :- ng.
+{c,@p}/ :- ok.

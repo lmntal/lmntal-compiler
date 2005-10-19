@@ -24,7 +24,6 @@ activate([]),stack([H|T]), {st(H),stable(S),reactable(R),$p}
 %    stack([H|T]), activate([{st(H),stable(off),reactable(true),$p}]).
 stack([H|T]), {st(H),stable(S),reactable(true),$p}
  :- unary(S) |
-    stack_t([H|T]), lock
     stack([H|T]), activate([{st(H),stable(off),reactable(true),$p}]).
 %上のルール適用に伴う子孫膜の変更
 activate([H|T]), H={$p}

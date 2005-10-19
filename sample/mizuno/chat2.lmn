@@ -2,20 +2,24 @@
 	{client1, o=["11","12","13"], i},
 	{client2}
 	{client3}
+, chat.use.
 }.
 
 {room2, {data(nil)},
 	{client4},
 	{client5}
+, chat.use.
 }.
 
 # マージ・配分ルーチン
+{module(chat).
 
-{
-I=[D|L],{data(nil),i(I),$p} :- 
+{data(nil),i([D|L]),$p} :- 
 	string(D),\+($p=(o2(X),$pp)) | I=L,{data(D),i(I),$p}.
 {data(D),o(O),$p} :- 
 	string(D) | {data(D),o2(O2),$p},O=[D|O2].
 {data(D),$p} :-
 	string(D),\+($p=(o(X),$pp)) | {data(nil),$p}.
 {data(nil),o2(O),$p} :- {data(nil),o(O),$p}.
+
+}

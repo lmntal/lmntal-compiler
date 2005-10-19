@@ -24,6 +24,6 @@ HISTORY
 	
 	// constructor
 	H=circle.new(Radius) :- H=circle(vars(radius(Radius))).
-	H=msg(circle(vars(radius(Radius)), area, args(), Return) :- int(Radius) | Return='*'(Radius, 3.1415), circle(vars(radius(Radius)).
+	H=msg(circle(vars(radius(Radius))), area, args(), Return) :- int(Radius) | Return='*'(Radius, 3.1415), H=circle(vars(radius(Radius))).
 }
 

@@ -1,0 +1,26 @@
+{
+	module(lambda3).
+
+	H=apply(lambda_0(X,M), Expr),{$p,'-'(X)} :- H=M, {$p,'-'(Expr)}.
+	H=apply({'-'(E)}, Expr),E=lambda_0(X,M),{$p,'-'(X)} :- H=M, {$p,'-'(Expr)}.
+
+	// “à•”•\Œ»(1) ==> “à•”•\Œ»(2) 
+	H=lambda(A, B) :- unary(A) | H=lambda_0(X, agent(A, {'-'(X)}, B)).
+	H=agent(A, {$p}, B) :- A=B  | H={$p}.
+	H=agent(A, {$p}, B) :- A\=B | H=B, {$p}.
+	H=agent(A, {$p}, {$q}) :- unary(A) | H={$q}, {$p}.
+	H=agent(A, {$p}, apply(B, C)) :- unary(A) | H=apply(agent(A, {$p,'+'(L)}, B), agent(A, L, C)).
+	H=agent(A, {$p}, lambda_0(A1, B)) :- H=lambda_0(A1, agent(A, {$p}, B)).
+
+	{$p,'-'(X)}, X={$q} :- {$p,$q}
+}.
+
+lambda3.use.
+R=gen(N) :- R=lambda(f, lambda(x, gen2(N))).
+R=gen2(N) :- N>0 | R=apply(f, gen2(N-1)).
+R=gen2(0) :- R=x.
+
+//Inc = lambda(n, (lambda(f, lambda(x, apply(apply(n, f), apply(f, x)))))).
+//t=apply(Inc, gen(2)).
+
+t=apply(gen(3),gen(2)).

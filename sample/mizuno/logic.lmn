@@ -1,0 +1,15 @@
+and({hoge.use,or({t},{f})},{hoge.use,or({hoge.use,not({f})},{f})}).
+
+hoge.use.
+{module(hoge).
+hoge.use :- .
+not({f,@p}) :- t.
+not({t,@p}) :- f.
+and({t,@p},{t,@q}) :- t.
+and({f,@p},{$q[],@q}) :- f.
+and({$q[],@p},{f,@q}) :- f.
+or({t,@p},{t,@q}) :- t.
+or({t,@p},{f,@q}) :- t.
+or({f,@p},{t,@q}) :- t.
+or({f,@p},{f,@q}) :- f.
+}

@@ -1,22 +1,16 @@
-//[:/*inline_define*/
-//:],
-//io.print([:
-//
-//abcdefg
-//
-//end
-//
-//:]).
-//
-//a.
-//(a :- b, io.fopen(h1, [:tmp_a:])).
-//(b :- c, io.fprint(h1, [:hahahahahahaha:])).
-//(c :-    io.fclose(h1)).
-//
+[:/*inline_define*/
+class Hoge {
+static void f() {
+System.out.println("ok.");
+}
+}
+:].
 
 
 io.a.
-
+hoge.
+hoge :- [:/*inline*/
+Hoge.f();:].
 r=[fileReader.new("../sample/io.lmn")].
 
 p(10).

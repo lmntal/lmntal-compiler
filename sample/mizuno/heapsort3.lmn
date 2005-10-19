@@ -1,5 +1,5 @@
 %ret=sort(gen(600)).
-ret=gen(600).
+ret=sort(gen(10)).
 
 %R=test([D1,D2|L]) :- D1 =< D2 | R=[D1|test([D2|L])].
 %R=test([D1,D2|L]) :- D1 > D2 | false(D1), R=[D1|test([D2|L])].
