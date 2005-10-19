@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set_cp.sh
+source `dirname $0`/set_cp.sh
 export CLASSPATH=$1:$CLASSPATH
 shift
 java Main $*

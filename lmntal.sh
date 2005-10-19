@@ -1,4 +1,4 @@
 #!/bin/bash
 
-set_cp.sh
+source `dirname $0`/set_cp.sh
 java runtime.FrontEnd $*
