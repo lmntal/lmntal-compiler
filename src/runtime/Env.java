@@ -57,6 +57,9 @@ public final class Env {
 	public static final int VERBOSE_DEFAULT = 5;
 	/** verbose level. */
 	public static int verbose = VERBOSE_INIT;
+	
+	public static int indent = 0;
+	public static boolean dumpEnable = true;
 
 	////////////////////////////////////////////////////////////////
 

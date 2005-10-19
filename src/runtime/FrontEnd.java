@@ -106,6 +106,7 @@ public class FrontEnd {
 						/// ===========================================================
 						/// screen    max        full screen mode
 						/// auto      on         reaction auto proceed mode when GUI on
+						/// dump      1          indent mem (etc...)
 						if (i + 2 < args.length) {
 							String name  = i+1<args.length ? args[i+1] : "";
 							String value = i+2<args.length ? args[i+2] : "";

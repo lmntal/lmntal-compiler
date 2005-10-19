@@ -172,8 +172,14 @@ class Task extends AbstractTask implements Runnable {
 //							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
 							{
 								// ルール適用の連番
-								System.out.print(" #" + (count++));
-								Env.p( "--> \n" + Dumper.dump( memToDump ) );
+								if(Env.dumpEnable) {
+									if(Env.getExtendedOption("dump").equals("1")) {
+										Env.p( Dumper.dump( memToDump ) );
+									} else {
+										System.out.print(" #" + (count++));
+										Env.p( "--> \n" + Dumper.dump( memToDump ) );
+									}
+								}
 							}
 						}
 					}
@@ -223,8 +229,14 @@ class Task extends AbstractTask implements Runnable {
 //							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
 							{
 								// ルール適用の連番
-								System.out.print(" #" + (count++));
-								Env.p( "==> \n" + Dumper.dump( memToDump ) );
+								if(Env.dumpEnable) {
+									if(Env.getExtendedOption("dump").equals("1")) {
+										Env.p( Dumper.dump( memToDump ) );
+									} else {
+										System.out.print(" #" + (count++));
+										Env.p( "==> \n" + Dumper.dump( memToDump ) );
+									}
+								}
 							}
 						}
 					}

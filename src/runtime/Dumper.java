@@ -236,11 +236,17 @@ public class Dumper {
 		it = mem.memIterator();
 		while (it.hasNext()) {
 			AbstractMembrane m = (AbstractMembrane)it.next();
-			if(commaFlag) buf.append(", "); else commaFlag = true;
+			if(commaFlag) {
+				buf.append(", "); 
+				if(Env.getExtendedOption("dump").equals("1")) buf.append("\n");
+			} else commaFlag = true;
+			if(Env.getExtendedOption("dump").equals("1")) Env.indent++;
+			if(Env.getExtendedOption("dump").equals("1")) for(int k=0;k<Env.indent;k++) buf.append("  ");
 			if(m.name!=null) buf.append(m.name+":");
 			buf.append("{");
 			buf.append(dump(m));
 			buf.append("}");
+			if(Env.getExtendedOption("dump").equals("1")) Env.indent--;
 		}
 		
 		// #3 - ルールの出力

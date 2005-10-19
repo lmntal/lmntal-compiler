@@ -22,7 +22,8 @@ State : <Gs, Cu, cb, T, V>
 	V  : Gs, Cu, Cb に出てくる変数
 	
 	実装:
-	states({}, {}, {}, {}, {}).
+		state : states({}, {}, {}, {token}, {}).
+		token : {rule=ルール名, leq(x, y), leq(y, x), ...}
 
 Initial :
 	<Gx, T, true, 0, V>
@@ -57,22 +58,28 @@ leq(A, B), leq(B, C), leq(C, A).
 
 
 // Solve
-state({eq(X, Y), $gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @t}, {$v})
+solve, state({eq(X, Y), $gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @t}, {$v})
 :- unary(X), unary(Y) | 
-nstate({$gs}, {$cu[], @cu}, {eq=[X,Y], eq(X, Y), $cb}, {$t, @t}, {$v}).
+solve, nstate({$gs}, {$cu[], @cu}, {eq=[X,Y], eq(X, Y), $cb}, {$t, @t}, {$v}).
 
 
 // Introduce
-state({leq(X, Y), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v})
+introduce, state({leq(X, Y), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v})
 :- unary(X), unary(Y) | 
-nstate({$gs}, {leq(X, Y), $cu[], @cu}, {$cb}, {$t, token(leq(X, Y), {$cu[]}), @tr}, {$v}).
+introduce, nstate({$gs}, {leq(X, Y), $cu[], @cu}, {$cb}, {$t, token({leq(X, Y)}, {$cu[]}), @tr}, {$v}).
 
 
 // Simplify
 // r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
-state({$gs}, {leq(X0, Y0), leq(Y1, X1), $cu[], @cu}, {$cb}, {$t, @tr}, {$v})
+simplify, state({$gs}, {leq(X0, Y0), leq(Y1, X1), $cu[], @cu}, {$cb}, {$t, @tr}, {$v})
 :- unary(X0), unary(Y0), unary(X1), unary(Y1), X0=X1, Y0=Y1 | 
-nstate({eq(X0, Y0), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
+simplify, nstate({eq(X0, Y0), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
+
+// Propagate
+// r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
+propagate, state({$gs}, {leq(X, Y0), leq(Y1, Z), $cu[], @cu}, {$cb}, {{rule=r3, leq(TX, TY0), leq(TY1, TZ)}, $t, @tr}, {$v})
+:- Y0=Y1, X=TX, Y0=TY0, Y1=TY1, Z=TZ |
+nstate({leq(X, Z), $gs}, {leq(X, Y0), leq(Y1, Z), $cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
 
 
 
@@ -110,12 +117,22 @@ H={$cu[], $cb}.
 H=chr.run({$gs}) :- 
 H={
 	chr.use.
+	solve.
+	introduce.
+	simplify.
+	propagate.
 	state({$gs}, {
 		replace(B, A), leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), X=B | replace(B, A), leq(A, Y).
 		replace(B, A), leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), Y=B | replace(B, A), leq(X, A).
 	}, {eq=[]}, {
-		// token/2
-		token(A, {$b[]}) :- ground(A) | .
+		// token/2 - トークンを計算する
+		token({$c[]}, {$cu[]}) :- token0({$c[], $cu[], {}.
+			// r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
+			{}, leq(X, Y0), leq(Y1, Z) :- unary(X), unary(Y0), unary(Y1), unary(Z), Y0=Y1 | {rule=r3, leq(X, Y0), leq(Y1, Z)}.
+		}).
+		token0({$c[], {$result}, @c}/) :- {$result}.
+		
+		
 	}, {})
 }.
 
@@ -125,5 +142,5 @@ H={
 
 // sample
 
-results=chr.run({leq(a, b), leq(c, b), leq(b, c), leq(c, a)}).
+results=chr.run({leq(a, b), leq(b, c), leq(c, a)}).
 //chr.run({leq(a, b), leq(b, a)}).
