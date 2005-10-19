@@ -2,8 +2,8 @@
 % -s0モードだとエラーが出る
 % 並列効果は薄いようだ
 
-threadnum(4).
-createthread(4).
+threadnum(8).
+createthread(8).
 world({
 	ready(0).
 	thread({generate(0),$p1,@p1}),ready(X) :- thread({$p1,@p1}),ready(X+1).
@@ -11,9 +11,9 @@ world({
 createthread(Num),world({$p,@p}) :- Num>0 | createthread(Num-1),
 	world({
 		thread({ 
-			generate(2500).
+			generate(5000).
 			start :- started,norm(0).
-			norm(Y),n(X) :- int(X) | norm(X*X+Y).
+			norm(Y),n(X) :- int(X),Z=X*X+Y | norm(Z).
 			generate(X) :- X>0 | n(integer.rnd(100)), generate(X-1).
 		}@"localhost").
 		$p,@p
