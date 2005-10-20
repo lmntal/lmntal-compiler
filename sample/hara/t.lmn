@@ -1,0 +1,29 @@
+/*
+
+要素数 n 個のリストから k 個順不同で取り出す全ての組み合わせをリストにして返す。
+
+*/
+
+r=choose_k([a, b, c], 2).
+
+
+H=choose_k(L, K) :- ground(L), K=0 | H=[].
+
+H=choose_k([], K) :- int(K) | H=[].
+
+H=choose_k([Hd|R], K) :- K=1 | H=[[Hd]|choose_k(R, K)].
+
+H=choose_k([Hd|R], K) :- ground(Hd), K>1, ground(R) |
+H=product( choose_k([Hd|R], 1), choose_k(R, K-1) ).
+
+
+//H=choose_k([], K, Res) :- int(K) | H=Res.
+
+/*
+
+n>1
+	choose 1 from L  -> [a] [b] [c]
+	times
+	X cdr L k-1
+
+*/
