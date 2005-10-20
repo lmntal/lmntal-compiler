@@ -4,15 +4,13 @@
  */
 package runtime;
 
+import java.io.BufferedReader;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 
-//import org.gnu.readline.Readline;
-//import org.gnu.readline.ReadlineLibrary;
-
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import compile.Optimizer;
 class Readline {
 	static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 	static void load(int dummy) {}
@@ -102,10 +100,29 @@ public class REPL {
 						Env.p("verbose level set to " + Env.verbose + " (previously " + old + ")");
 						continue;
 					} else if(nline.matches("nooptimize|optimize( [0-9])?")) {
-						if (nline.charAt(0) == 'n') Env.optimize = 0;
-						else if (nline.charAt(nline.length() - 1) == 'e') Env.optimize = 5;
-						else Env.optimize = nline.charAt(nline.length() - 1) - '0';
-						Env.p("optimization level " + Env.optimize);
+						Optimizer.clearFlag();
+						int level;
+						if (nline.charAt(0) == 'n') level = 0;
+						else if (nline.charAt(nline.length() - 1) == 'e') level = 5;
+						else level = nline.charAt(nline.length() - 1) - '0';
+						Optimizer.setLevel(level);
+						Env.p("optimization level " + level);
+						continue;
+					} else if(nline.equals("optimize-inlining")) {
+						Optimizer.fInlining = true;
+						Env.p("optimize inlining on");
+						continue;
+					} else if(nline.equals("optimize-reuse-atom")) {
+						Optimizer.fReuseAtom = true;
+						Env.p("optimize reuse atom on");
+						continue;
+					} else if(nline.equals("optimize-reuse-mem")) {
+						Optimizer.fReuseMem = true;
+						Env.p("optimize reuse mem on");
+						continue;
+					} else if(nline.equals("optimize-loop")) {
+						Optimizer.fLoop = true;
+						Env.p("optimize loop on");
 						continue;
 					} else if(nline.matches("nozoptimize|zoptimize( [0-9])?")){ //ガード関係の最適化　そのうちoptimizeと統合 sakurai
 						if (nline.charAt(nline.length() - 1) == 'e') Env.zoptimize = 0;

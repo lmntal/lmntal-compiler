@@ -16,21 +16,71 @@ import runtime.Rule;
  * @author Mizuno
  */
 public class Optimizer {
+	/** 命令列のインライニングを行う*/
+	public static boolean fInlining;
+	/** 膜の再利用を行う */
+	public static boolean fReuseMem;
+	/** アトムの再利用を行う */
+	public static boolean fReuseAtom;
+	/** 命令列のループ化を行う */
+	public static boolean fLoop;
+
+	/**
+	 * 全ての最適化フラグをオフにする
+	 * Optimizer2 にはまだ対応していない。
+	 */
+	public static void clearFlag() {
+		fInlining = fReuseMem = fReuseAtom = fLoop = false;
+	}
+	/**
+	 * 最適化レベルを設定する。
+	 * レベルに応じて最適化フラグをオンにする。
+	 * 低いレベルを指定しても、すでにオンにしてあるフラグをオフにすることはない。
+	 * Optimizer2 にはまだ対応していない。
+	 * @param level 最適化レベル
+	 */
+	public static void setLevel(int level) {
+		if (level >= 1) {
+			//コンパイル時間を増加させるが、コードサイズを増加させないもの
+			fReuseAtom = fReuseMem = true;
+//			fGuardMove = true;
+		}
+		if (level >= 2) {
+			//コードサイズが若干増加するもの
+//		ループ化はまだバグがいるので、個別に指定しない限り実行しない
+//			fLoop = true;
+//			fGrouping = true;
+		}
+		if (level >= 3) {
+			//コードサイズが増加するもの
+			fInlining = true;
+		}
+	}
+
 	/** ルールオブジェクトを最適化する */
 	public static void optimizeRule(Rule rule) {
-		if(Env.zoptimize >= 1 && Env.optimize == 0) Env.optimize = 1;
+		// TODO 最適化器を統合する
+		if(Env.zoptimize >= 1 && !fInlining) {
+			fInlining = true;
+		}
 		Compactor.compactRule(rule);
-		if (Env.optimize >= 1) {
-			inlineExpandTailJump(rule.guard);// TODO 最適化器を統合する
-			optimize(rule.memMatch, rule.guard);
+		//コンパイル時間のオーバーヘッドが少なく（命令列の長さに対してO(1)）、
+		//実行時間のトレードオフもないので、無条件に行う
+		inlineExpandTailJump(rule.guard);
+		rule.body = null; //GC対象にする
+		optimize(rule.memMatch, rule.guard);
+		if (fInlining) {
 			inlineExpandTailJump(rule.memMatch);
+			//現状ではアトム主導テストのインライン展開には対応していない
+//			inlineExpandTailJump(rule.atomMatch);
+//			rule.guard = null;
 		}
 		if(Env.zoptimize == 1) Optimizer2.guardMove(rule.memMatch);
-			else if(Env.zoptimize == 2) Optimizer2.grouping(rule.memMatch);
-			else if(Env.zoptimize >= 3) {
-				Optimizer2.grouping(rule.memMatch);
-				Optimizer2.guardMove(rule.memMatch);
-			}
+		else if(Env.zoptimize == 2) Optimizer2.grouping(rule.memMatch);
+		else if(Env.zoptimize >= 3) {
+			Optimizer2.grouping(rule.memMatch);
+			Optimizer2.guardMove(rule.memMatch);
+		}
 		/*
 		else if(Env.zoptimize == 4) Optimizer2.mapping(rule.memMatch);
 		else if(Env.zoptimize == 5) {
@@ -56,20 +106,17 @@ public class Optimizer {
 	 * @param body ボディ命令列
 	 */
 	public static void optimize(List head, List body) {
-		if (Env.optimize > 0) {
-			if (Env.optimize >= 4) {
-				reuseMem(head, body);
+		if (fReuseMem) {
+			reuseMem(head, body);
+		}
+		if (fReuseAtom) {
+			if (changeOrder(body)) {
+				reuseAtom(head, body);
+				removeUnnecessaryRelink(body);
 			}
-			if (Env.optimize >= 2) {
-				if (changeOrder(body)) {
-					reuseAtom(head, body);
-					removeUnnecessaryRelink(body);
-				}
-			}
-			if (Env.optimize >= 7) {
-				//ガード付きのルールに対応していないので、無効化
-//				makeLoop(head, body);
-			}
+		}
+		if (fLoop) {
+			makeLoop(head, body);
 		}
 	}
 	///////////////////////////////////////////////////////

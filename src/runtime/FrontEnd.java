@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 
 import util.StreamDumper;
 
+import compile.Optimizer;
 import compile.RulesetCompiler;
 import compile.Translator;
 import compile.parser.LMNParser;
@@ -194,10 +195,15 @@ public class FrontEnd {
 						/// -O<0-9>
 						/// Optimize level.
 						/// Intermediate instruction sequences are optimized.
-						if (args[i].length() == 2) {
-							Env.optimize = 5;
-						} else if (args[i].matches("-O[0-9]")) {
-							Env.optimize = args[i].charAt(2) - '0';
+						int level = -1;
+						if (args[i].length() == 2)
+							level = 5;
+						else if (args[i].length() == 3)
+							level = args[i].charAt(2) - '0';
+						
+						if (level >= 0 && level <= 9) {
+							Optimizer.setLevel(level);
+							break;
 						} else {
 							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
@@ -301,6 +307,22 @@ public class FrontEnd {
 						} else if(args[i].equals("--showproxy")){
 							// 暫定オプション PROXYを表示する
 							Env.hideProxy = false;
+						} else if(args[i].equals("--optimize-inlining")) {
+							/// --optimize-inlining
+							/// Inlining tail jump.
+							Optimizer.fInlining = true;
+						} else if(args[i].equals("--optimize-reuse-atom")) {
+							/// --optimize-reuse-atom
+							/// Reuse atoms.
+							Optimizer.fReuseAtom = true;
+						} else if(args[i].equals("--optimize-reuse-mem")) {
+							/// --optimize-reuse-mem
+							/// Reuse mems.
+							Optimizer.fReuseMem = true;
+						} else if(args[i].equals("--optimize-loop")) {
+							/// --optimize-loop
+							/// Use loop instruction. (EXPERIMENT)
+							Optimizer.fLoop = true;
 						} else {
 							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
