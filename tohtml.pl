@@ -55,15 +55,29 @@ print <<END;
 <html>
 <head>
 <title>LMNtal Trace Viewer - @{[scalar localtime]}</title>
-<style>
+<style id="style_add">
 .add {
 	background-color: #ddffff;
 }
+</style>
+<style id="style_del">
 .del {
 	background-color: #ffdddd;
 }
 </style>
 <script>
+
+style_set("add", 0);
+style_set("del", 1);
+
+function style_sw(n) {
+	style_set(n, !o("style_"+n).disabled);
+}
+
+function style_set(n, v) {
+	o("style_"+n).disabled = v;
+}
+
 function sw(n) {
 	set(n, o(n).style.display=='none');
 }
@@ -76,6 +90,11 @@ function o(n) {return document.getElementById(n);}
 </script>
 </head>
 <body style="font-family: monospace">
+
+<button onClick="style_sw('add');" class="add" style="width: 10em; height: 2em;">toggle [added]</button>
+<button onClick="style_sw('del');" class="del" style="width: 10em; height: 2em;">toggle [removed]</button>
+<br>
+<br>
 END
 
 
