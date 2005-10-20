@@ -97,10 +97,11 @@ public class Translator {
 //			}
 		}
 		//作業用ディレクトリ作成
-		String s = System.getProperty("java.io.tmpdir") + "lmn_translate";
+		String s = System.getProperty("java.io.tmpdir");
 		int i = 1;
 		while (true) {
-			baseDir = new File(s + i).getCanonicalFile();
+			baseDir = new File(s, "lmn_translate" + i);
+			Env.d("trying to create temporary directory : " + baseDir);
 			if (baseDir.mkdir()) {
 				break;
 			}
