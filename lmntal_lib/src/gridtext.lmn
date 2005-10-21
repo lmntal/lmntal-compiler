@@ -19,7 +19,7 @@ module(gridtext).
 
 [:/*inline_define*/ import java.io.*;:].
 
-/* convert a textfile to a list of atoms representing lines */
+/* convert a textfile into a list of atoms representing lines */
 gridtext:stdin(X,Y) :- [:/*inline*/
    try {
       BufferedReader reader =
@@ -79,7 +79,8 @@ gridtext:expand(X,Y), $p[X] :- unary($p)  | [:/*inline*/
    }
 :](X,Y), $p[X].
 
-/* initial setup */
+/* main program -- read a textfile from stdin and build a 2D grid (mesh) 
+   of one-character atoms corresponding to the textfile */
 gridtext:gridtext :-
    gridtext:stdin(X0,Y), gridtext:expand_line(X0,X), gridtext:ans(X,Y).
 
