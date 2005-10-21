@@ -480,8 +480,19 @@ public class Translator {
 		writer.write("		AbstractMembrane mem;\n");
 		writer.write("		int x, y;\n");
 		writer.write("		double u, v;\n");
-		writer.write("		int isground_ret;");
-		writer.write("		boolean eqground_ret;");
+		writer.write("		int isground_ret;\n");
+		writer.write("		boolean eqground_ret;\n");
+		
+		//2005-10-21 by kudo (INSERTCONNECTORS,DELETECONNECTORS,LOOKUPLINKで使う)
+		writer.write("		Set insset;\n");
+		writer.write("		Set delset;\n");
+		writer.write("		Map srcmap;\n");
+		writer.write("		Map delmap;\n");
+		writer.write("		Atom orig;\n");
+		writer.write("		Atom copy;\n");
+		writer.write("		Link a;\n");
+		writer.write("		Link b;\n");
+		writer.write("		Iterator it_deleteconnectors;\n");
 
 		writer.write("		boolean ret = false;\n");
 		writer.write(instList.label + ":\n");
@@ -908,44 +919,51 @@ public class Translator {
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").drop();\n");
 					break; //kudo 2004-09-29
 				case Instruction.LOOKUPLINK : //[-dstlink, srcmap, srclink]
-					writer.write(tabs + "HashMap srcmap = (HashMap)var" + inst.getIntArg2() + ";\n");
-					writer.write(tabs + "Link srclink = (Link)var" + inst.getIntArg3() + ";\n");
-					writer.write(tabs + "Atom la = (Atom) srcmap.get(srclink.getAtom());\n");
-					writer.write(tabs + "var" + inst.getIntArg1() + " = new Link(la, srclink.getPos());\n");
+					writer.write(tabs + "srcmap = (HashMap)var" + inst.getIntArg2() + ";\n");
+					writer.write(tabs + "link = (Link)var" + inst.getIntArg3() + ";\n");
+					writer.write(tabs + "atom = (Atom) srcmap.get(link.getAtom());\n");
+					writer.write(tabs + "var" + inst.getIntArg1() + " = new Link(atom, link.getPos());\n");
 					break; //kudo 2004-10-10
 //未対応。変数は、配列に持たなければならなかったらしい。
-//				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
-//					writer.write(tabs + "func = " + getFuncVarName(new Functor("=",2) + ";\n");
-//					writer.write(tabs + "linklist=(List)var" + inst.getIntArg2() + ";\n");
-//					writer.write(tabs + "insset=new HashSet();\n");
-//					writer.write(tabs + "mem=((AbstractMembrane)var" + inst.getIntArg3() + ");\n");
+//対応。二番目の引数は実行時ではなくコンパイル時に参照するみたい。 って自分で作った命令なんだけど。 by kudo
+				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
+					writer.write(tabs + "func = "+ getFuncVarName(new Functor("=",2))+";\n");
+					List linklist = (List)inst.getArg2();
+//					writer.write(tabs + "linklist=(List)var" + inst.getArg2() + ";\n");
+					writer.write(tabs + "insset = new HashSet();\n");
+					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg3() + ");\n");
+//					writer.write(tabs + "   Link a, b;\n");
+//					writer.write(tabs + "   Atom eq;");
 //					writer.write(tabs + "for(int i=0;i<linklist.size();i++)\n");
+					for(int i=0;i<linklist.size();i++)
 //					writer.write(tabs + "	for(int j=i+1;j<linklist.size();j++){\n");
-//					writer.write(tabs + "		Link a=(Link)var((Integerlinklist.get(i)).intValue());\n");
-//					writer.write(tabs + "		Link b=(Link)var((Integerlinklist.get(j)).intValue());\n");
-//					writer.write(tabs + "		if(a==b.getBuddy()){\n");
-//					writer.write(tabs + "			Atom eq=srcmem.newAtom(FUNC_UNIFY);\n");
-//					writer.write(tabs + "			srcmem.unifyLinkBuddies(a,new Link(eq,0));\n");
-//					writer.write(tabs + "			srcmem.unifyLinkBuddies(b,new Link(eq,1));\n");
-//					writer.write(tabs + "			insset.add(eq);\n");
-//					writer.write(tabs + "		}\n");
+						for(int j=i+1;j<linklist.size();j++){
+					writer.write(tabs + "		a = (Link)var"+((Integer)linklist.get(i)).intValue()+";\n");
+					writer.write(tabs + "		b = (Link)var"+((Integer)linklist.get(j)).intValue()+";\n");
+					writer.write(tabs + "		if(a == b.getAtom().getArg(b.getPos())){\n");
+					writer.write(tabs + "			atom = mem.newAtom(func);\n");//"+getFuncVarName(new Functor("=",2))+");\n");
+					writer.write(tabs + "			mem.unifyLinkBuddies(a,new Link(atom,0));\n");
+					writer.write(tabs + "			mem.unifyLinkBuddies(b,new Link(atom,1));\n");
+					writer.write(tabs + "			insset.add(atom);\n");
+					writer.write(tabs + "		}\n");
 //					writer.write(tabs + "	}\n");
-//					writer.write(tabs + "var" + inst.getIntArg1() + " = insset;\n");
-//					break; //kudo 2004-12-29
-//				case Instruction.DELETECONNECTORS : //[srcset,srcmap,srcmem]
-//					writer.write(tabs + "Set delset = (Set)var" + inst.getIntArg1() + ";\n");
-//					writer.write(tabs + "Map delmap = (Map)var" + inst.getIntArg2() + ";\n");
-//					writer.write(tabs + "srcmem = ((AbstractMembrane)var" + inst.getIntArg3() + ");\n");
-//					writer.write(tabs + "Iterator it" + iteratorNo + " = delset.iterator();\n");
-//					writer.write(tabs + "while(it" + iteratorNo + ".hasNext()){\n");
-//					writer.write(tabs + "	Atom orig=(Atom)it" + iteratorNo + ".next();\n");
-//					writer.write(tabs + "	Atom copy=(Atom)delmap.get(orig);//new Integer(orig.id));\n");
-//					writer.write(tabs + "	srcmem.unifyLinkBuddies(copy.getArg(0), copy.getArg(1));\n");
-////						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
-////						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
-//					writer.write(tabs + "	srcmem.removeAtom(copy);\n");
-//					writer.write(tabs + "}\n");
-//					break; //kudo 2004-12-29
+						}
+					writer.write(tabs + "var" + inst.getIntArg1() + " = insset;\n");
+					break; //kudo 2004-12-29
+				case Instruction.DELETECONNECTORS : //[srcset,srcmap,srcmem]
+					writer.write(tabs + "delset = (Set)var" + inst.getIntArg1() + ";\n");
+					writer.write(tabs + "delmap = (Map)var" + inst.getIntArg2() + ";\n");
+					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg3() + ");\n");
+					writer.write(tabs + "it_deleteconnectors = delset.iterator();\n");
+					writer.write(tabs + "while(it_deleteconnectors.hasNext()){\n");
+					writer.write(tabs + "	orig = (Atom)it_deleteconnectors.next();\n");
+					writer.write(tabs + "	copy = (Atom)delmap.get(orig);\n");
+					writer.write(tabs + "	mem.unifyLinkBuddies(copy.getArg(0), copy.getArg(1));\n");
+//						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
+//						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
+					writer.write(tabs + "	mem.removeAtom(copy);\n");
+					writer.write(tabs + "}\n");
+					break; //kudo 2004-12-29
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 					//====制御命令====ここから====
 				case Instruction.COMMIT :
