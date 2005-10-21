@@ -62,6 +62,10 @@ public class Translator {
 	private static String packageName;
 	/** LMNtalソースファイル名 */
 	private static String sourceName;
+	/** 変換後の Java ソースを削除するかどうか */
+	public static boolean fKeepSource = false;
+	/** 一時ディレクトリとして利用するディレクトリ名 */
+	public static String baseDirName;
 
 	//////////////////////////////////////////////////////////////////
 	// static メソッド
@@ -79,8 +83,9 @@ public class Translator {
 	 * Translator を初期化する。
 	 * 同一のソースに対する一連の Translator の前に呼び出す必要がある。
 	 * @param unitName LMNtalソースファイル名
+	 * @return 初期化に成功した場合はtrue
 	 */
-	public static void init(String unitName) throws IOException {
+	public static boolean init(String unitName) throws IOException {
 		if (unitName.equals(InlineUnit.DEFAULT_UNITNAME)) {
 			sourceName = "a";
 		} else {
@@ -97,15 +102,27 @@ public class Translator {
 //			}
 		}
 		//作業用ディレクトリ作成
-		String s = System.getProperty("java.io.tmpdir");
-		int i = 1;
-		while (true) {
-			baseDir = new File(s, "lmn_translate" + i);
-			Env.d("trying to create temporary directory : " + baseDir);
-			if (baseDir.mkdir()) {
-				break;
+		if (baseDirName != null) {
+			//ユーザー指定
+			baseDir = new File(baseDirName);
+			if (!baseDir.exists() && !baseDir.mkdir()) {
+				Env.e("Failed to create temporary directory");
+				return false;
 			}
-			i++;
+		} else {
+			//ユーザー指定がない場合は、システムの一時ディレクトリに作成
+			String s = System.getProperty("java.io.tmpdir");
+			int i = 1;
+			while (true) {
+				File f = new File(s, "lmn_translate" + i);
+	//			Env.d("trying to create temporary directory : " + f);
+				if (f.mkdir()) {
+					Env.d("Using temporary directory : " + f);
+					baseDir = f;
+					break;
+				}
+				i++;
+			}
 		}
 		moduleDir = new File(baseDir, "translated");
 		moduleDir.mkdir();
@@ -118,6 +135,7 @@ public class Translator {
 			dir = moduleDir;
 			packageName = "translated";
 		}
+		return true;
 	}
 	/**
 	 * メイン関数を生成する。
@@ -214,12 +232,18 @@ public class Translator {
 		JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(sourceName + ".jar")), mf);
 		putToJar(out, "", baseDir);
 		out.close();
-		
-		//一時ファイルの削除
-		if (!delete(baseDir)) {
+	}
+
+	/**
+	 * 一時ファイルの削除。
+	 * init メソッド内で作成した一時ディレクトリを再帰的に削除します。
+	 */
+	public static void deleteTemporaryFiles() {
+		if (baseDir != null && !delete(baseDir)) {
 			Env.warning("failed to delete temprary files");
 		}
 	}
+	
 	/**
 	 * 変換したファイルをコンパイルする。
 	 * @param file コンパイルするファイル

@@ -127,7 +127,7 @@ public class FrontEnd {
 						compile.Module.libPath.add(new File(args[++i]));
 						break;
 					case 'c':
-						/// -cgi
+						/// -c
 						/// CGI mode.  Output the header 'Content-type:text/html'
 						if (args[i].equals("-cgi")) {
 							Env.fCGI = true;
@@ -288,6 +288,14 @@ public class FrontEnd {
 							/// --debug-daemon
 							/// dump debug message of LMNtalDaemon
 							Env.debugDaemon = Env.DEBUG_DEFAULT;
+						} else if (args[i].equals("--keep-temporary-files")) {
+							/// --keep-temporary-files
+							/// Do not delete the translated Java source.
+							Translator.fKeepSource = true;
+						} else if (args[i].startsWith("--temporary-dir=")) {
+							/// --temporary-dir=<dir>
+							/// use <dir> as temporary directory
+							Translator.baseDirName = args[i].substring(16);
 						} else if (args[i].equals("--interpret")) {
 							/// --interpret
 							/// Interpret intermediate instruction sequences without translating into Java.
@@ -446,26 +454,39 @@ public class FrontEnd {
 				Env.p("Compilation Failed");
 				return;	
 			}
-			if (!Env.fInterpret) {
-				Translator.init(unitName);
-			}
-			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
+			
+			Ruleset rs;
 			if (Env.fInterpret) {
+				rs = RulesetCompiler.compileMembrane(m, unitName);
 				Inline.makeCode();
+				if (Env.nErrors > 0) {
+					Env.p("Compilation Failed");
+					return;
+				}
 			} else {
 				try {
+					if (!Translator.init(unitName)) {
+						//エラーメッセージは出力済み
+						return;
+					}
+					rs = RulesetCompiler.compileMembrane(m, unitName);
+					if (Env.nErrors > 0) {
+						Env.p("Compilation Failed");
+						return;
+					}
 					Translator.genInlineCode();
 					Translator.genModules();
 					Translator.genMain((InterpretedRuleset)rs);
 					Translator.genJAR();
 				} catch (IOException e) {
 					Env.e("Failed to write Translated File. " + e.getLocalizedMessage());
+					return;
+				} finally {
+					if (!Translator.fKeepSource)
+						Translator.deleteTemporaryFiles();
 				}
 			}
-			if (Env.nErrors > 0) {
-				Env.p("Compilation Failed");
-				return;
-			}
+
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
 
