@@ -41,18 +41,16 @@ public class Optimizer {
 	 */
 	public static void setLevel(int level) {
 		if (level >= 1) {
-			//コンパイル時間を増加させるが、コードサイズを増加させないもの
 			fReuseAtom = fReuseMem = true;
 //			fGuardMove = true;
 		}
 		if (level >= 2) {
-			//コードサイズが若干増加するもの
-//		ループ化はまだバグがいるので、個別に指定しない限り実行しない
+//			ループ化はまだバグがいるので、個別に指定しない限り実行しない
 //			fLoop = true;
 //			fGrouping = true;
 		}
 		if (level >= 3) {
-			//コードサイズが増加するもの
+			//明示的に指定すると、ボディもくっつける
 			fInlining = true;
 		}
 	}
@@ -60,21 +58,17 @@ public class Optimizer {
 	/** ルールオブジェクトを最適化する */
 	public static void optimizeRule(Rule rule) {
 		// TODO 最適化器を統合する
-		if(Env.zoptimize >= 1 && !fInlining) {
-			fInlining = true;
-		}
 		Compactor.compactRule(rule);
-		//コンパイル時間のオーバーヘッドが少なく（命令列の長さに対してO(1)）、
-		//実行時間のトレードオフもないので、無条件に行う
-		inlineExpandTailJump(rule.guard);
-		rule.body = null; //GC対象にする
-		optimize(rule.memMatch, rule.guard);
-		if (fInlining) {
+		// TODO 本質的にインライン展開が必要ないものは、展開しなくてもできるようにする
+		if (fInlining || Env.zoptimize >= 1 || fReuseMem || fReuseAtom || fLoop) {
+			//head と gaurd をくっつける
 			inlineExpandTailJump(rule.memMatch);
 			//現状ではアトム主導テストのインライン展開には対応していない
 //			inlineExpandTailJump(rule.atomMatch);
+//			rule.guardLabel = null;
 //			rule.guard = null;
 		}
+		optimize(rule.memMatch, rule.body);
 		if(Env.zoptimize == 1) Optimizer2.guardMove(rule.memMatch);
 		else if(Env.zoptimize == 2) Optimizer2.grouping(rule.memMatch);
 		else if(Env.zoptimize >= 3) {
@@ -97,6 +91,15 @@ public class Optimizer {
 				Optimizer2.guardMove(rule.memMatch);
 			}
 		*/
+		if (fInlining) {
+			// head(+guard) と body をくっつける
+			inlineExpandTailJump(rule.memMatch);
+//			inlineExpandTailJump(rule.atomMatch);
+			inlineExpandTailJump(rule.guard); //代替コード
+
+			rule.bodyLabel = null; 
+			rule.body = null;
+		}
 	}
 	/**	
 	 * 渡された命令列を、現在の最適化レベルに応じて最適化する。<br>
