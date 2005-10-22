@@ -11,9 +11,8 @@ import java.util.Iterator;
 import runtime.Env;
 import runtime.InlineUnit;
 import runtime.InterpretedRuleset;
-import runtime.Rule;
 import runtime.Ruleset;
-import runtime.SystemRuleset;
+import runtime.SystemRulesets;
 
 import compile.structure.Atom;
 import compile.structure.Membrane;
@@ -136,11 +135,7 @@ public class RulesetCompiler {
 			Iterator ri = mem.rulesets.iterator();
 			while(ri.hasNext()) {
 				InterpretedRuleset ir = (InterpretedRuleset)ri.next();
-				Iterator rii = ir.rules.iterator();
-				while(rii.hasNext()) {
-					Rule r = (Rule)rii.next();
-					SystemRuleset.ruleset.rules.add(r);
-				}
+				SystemRulesets.addUserDefinedSystemRuleset(ir);
 			}
 		}
 	}

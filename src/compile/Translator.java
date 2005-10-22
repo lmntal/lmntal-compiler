@@ -11,6 +11,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +36,7 @@ import runtime.InterpretedRuleset;
 import runtime.ObjectFunctor;
 import runtime.Rule;
 import runtime.StringFunctor;
+import runtime.SystemRulesets;
 
 /**
  * 中間命令列からJavaへの変換を行うクラス。
@@ -93,13 +97,6 @@ public class Translator {
 			if (sourceName.endsWith(".lmn")) {
 				sourceName = sourceName.substring(0, sourceName.length() - 4);
 			}
-//			if (sourceName.startsWith(".")) {
-//				sourceName = sourceName.substring(1);
-//			}
-//			int pos = sourceName.indexOf('.');
-//			if (pos >= 0) {
-//				sourceName = sourceName.substring(0, pos);
-//			}
 		}
 		//作業用ディレクトリ作成
 		if (baseDirName != null) {
@@ -137,18 +134,48 @@ public class Translator {
 		}
 		return true;
 	}
+	
+	private static void genLoadModuleFunc(Writer writer, compile.structure.Membrane m) throws IOException {
+		writer.write("	public static void loadUserDefinedSystemRuleset() {\n");
+		Iterator it = SystemRulesets.userDefinedSystemRulesetIterator();
+		while (it.hasNext()) {
+			writer.write("		SystemRulesets.addUserDefinedSystemRuleset(" + getClassName((InterpretedRuleset)it.next()) + ".getInstance());\n");
+		}
+
+		//利用しているモジュールに対して再帰呼び出し
+		ArrayList modules = new ArrayList();
+		Module.getNeedModules(m, modules);
+		for (int i = 0; i < modules.size(); i++) {
+			writer.write("		loadSystemRulesetFromModule(\"" + modules.get(i) + "\");\n");
+		}
+		writer.write("	}\n");
+
+		writer.write("	private static void loadSystemRulesetFromModule(String moduleName) {\n");
+		writer.write("		try {\n");
+		writer.write("			Class c = Class.forName(\"translated.Module_\" + moduleName);\n");
+		writer.write("			java.lang.reflect.Method method = c.getMethod(\"loadUserDefinedSystemRuleset\", null);\n");
+		writer.write("			method.invoke(null, null);\n");
+		writer.write("		} catch (ClassNotFoundException e) {\n");
+		writer.write("		} catch (NoSuchMethodException e) {\n");
+		writer.write("		} catch (IllegalAccessException e) {\n");
+		writer.write("		} catch (java.lang.reflect.InvocationTargetException e) {\n");
+		writer.write("		}\n");
+		writer.write("	}\n");
+	}
+
 	/**
 	 * メイン関数を生成する。
 	 * @param initialRuleset 初期データ生成ルールセット
+	 * @param m 全世界が入った膜構造
 	 * @throws IOException IOエラーが発生した場合
 	 */
-	public static void genMain(InterpretedRuleset initialRuleset) throws IOException {
-		if (Env.fLibrary) return;
-		
+	public static void genMain(InterpretedRuleset initialRuleset, compile.structure.Membrane m) throws IOException {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(baseDir, "Main.java")));
 		writer.write("public class Main {\n");
+		genLoadModuleFunc(writer, m);
 		writer.write("	public static void main(String[] args) {\n");
 		writer.write("		runtime.FrontEnd.processOptions(args);\n");
+		writer.write("		loadUserDefinedSystemRuleset();\n");
 		writer.write("		runtime.FrontEnd.run(translated." + getClassName(initialRuleset) + ".getInstance());\n"); //todo 引数の処理
 		writer.write("	}\n");
 		writer.write("}\n");
@@ -156,9 +183,10 @@ public class Translator {
 	}
 	/**
 	 * モジュールクラスを生成する。
+	 * @param m 全世界が入った膜構造
 	 * @throws IOException IOエラーが発生した場合
 	 */
-	public static void genModules() throws IOException {
+	public static void genModules(compile.structure.Membrane m) throws IOException {
 		Iterator moduleIterator = Module.memNameTable.keySet().iterator();
 		while (moduleIterator.hasNext()) {
 			String moduleName = (String)moduleIterator.next();
@@ -169,6 +197,7 @@ public class Translator {
 			writer.write("package translated;\n");
 			if (Env.fLibrary) {
 				writer.write("import translated.module_" + sourceName + ".*;\n");
+				writer.write("import runtime.SystemRulesets;\n");
 			}
 			writer.write("import runtime.Ruleset;\n");
 			writer.write("public class Module_" + moduleName + "{\n");
@@ -183,6 +212,9 @@ public class Translator {
 			writer.write("	public static Ruleset[] getRulesets() {\n");
 			writer.write("		return rulesets;\n");
 			writer.write("	}\n");
+			if (Env.fLibrary) {
+				genLoadModuleFunc(writer, m);
+			}
 			writer.write("}\n");
 			writer.close();
 		}
@@ -315,6 +347,8 @@ public class Translator {
 	
 	////////////////////////////////////////////////////////////////////////
 	// インスタンスメソッド
+
+	private boolean globalSystemRuleset = false;
 	
 	/**
 	 * 指定された InterpretedRuleset を Java に変換するためのインスタンスを生成する。
@@ -327,16 +361,31 @@ public class Translator {
 		writer = new BufferedWriter(new FileWriter(outputFile));
 		this.ruleset = ruleset;
 	}
+
+	/**
+	 * 標準のシステムルールセットを生成するためのインスタンスを生成する。
+	 * @param ruleset システムルールセット
+	 * @param system コンストラクタを分けるための引数。必ず true を指定すること
+	 * @throws IOException Java ソースの出力に失敗した場合
+	 */
+	public Translator(InterpretedRuleset ruleset, boolean system) throws IOException {
+		if (!system)
+			throw new RuntimeException();
+
+		packageName = "runtime";
+		className = "GlobalSystemRuleset";
+		writer = new BufferedWriter(new OutputStreamWriter(System.out, Charset.forName("EUC_JP")));
+		writer.write("//GlobalSystemRulesetGeneratorによって自動生成されたファイル\n\n");
+		this.ruleset = ruleset;
+		globalSystemRuleset = true;
+	}
+	
 	/**
 	 * Javaソースを出力する。
 	 * @throws IOException Java ソースの出力に失敗した場合
 	 */
 	public void translate() throws IOException {
-		if (Env.fLibrary) {
-			writer.write("package translated.module_" + sourceName + ";\n");
-		} else {
-			writer.write("package translated;\n");
-		}
+		writer.write("package " + packageName + ";\n");
 		writer.write("import runtime.*;\n");
 		writer.write("import java.util.*;\n");
 		writer.write("import java.io.*;\n");
@@ -355,6 +404,11 @@ public class Translator {
 //			}
 //		}
 		writer.write("\n");
+		if (globalSystemRuleset) {
+			writer.write("/**\n");
+			writer.write(" * コンパイル済みシステムルールセット。GlobalSystemRulesetGenerator によって生成される。\n");
+			writer.write(" */\n");
+		}
 		writer.write("public class " + className + " extends Ruleset {\n");
 		writer.write("	private static final " + className + " theInstance = new " + className + "();\n");
 		writer.write("	private " + className + "() {}\n");
@@ -362,18 +416,27 @@ public class Translator {
 		writer.write("		return theInstance;\n");
 		writer.write("	}\n");
 		writer.write("	private int id = " + ruleset.getId() + ";\n");
-		writer.write("	private String globalRulesetID;\n");
-		writer.write("	public String getGlobalRulesetID() {\n");
-		writer.write("		if (globalRulesetID == null) {\n");
-		String libname = (Env.fLibrary ? sourceName : "");
-		writer.write("			globalRulesetID = Env.theRuntime.getRuntimeID() + \":" + libname + "\" + id;\n");
-		writer.write("			IDConverter.registerRuleset(globalRulesetID, this);\n");
-		writer.write("		}\n");
-		writer.write("		return globalRulesetID;\n");
-		writer.write("	}\n");
-		writer.write("	public String toString() {\n");
-		writer.write("		return \"@" + libname + "\" + id;\n");
-		writer.write("	}\n");
+		if (globalSystemRuleset) {
+			writer.write("	public String getGlobalRulesetID() {\n");
+			writer.write("		return \"" + Env.LMNTAL_VERSION + "$systemruleset\";\n");
+			writer.write("	}\n");
+			writer.write("	public String toString() {\n");
+			writer.write("		return \"System Ruleset Object\";\n");
+			writer.write("	}\n");
+		} else {
+			writer.write("	private String globalRulesetID;\n");
+			writer.write("	public String getGlobalRulesetID() {\n");
+			writer.write("		if (globalRulesetID == null) {\n");
+			String libname = (Env.fLibrary ? sourceName : "");
+			writer.write("			globalRulesetID = Env.theRuntime.getRuntimeID() + \":" + libname + "\" + id;\n");
+			writer.write("			IDConverter.registerRuleset(globalRulesetID, this);\n");
+			writer.write("		}\n");
+			writer.write("		return globalRulesetID;\n");
+			writer.write("	}\n");
+			writer.write("	public String toString() {\n");
+			writer.write("		return \"@" + libname + "\" + id;\n");
+			writer.write("	}\n");
+		}
 
 		//膜手動テスト
 		writer.write("	public boolean react(Membrane mem, Atom atom) {\n");
@@ -475,6 +538,13 @@ public class Translator {
 	 */
 	private void translate(InstructionList instList) throws IOException {
 		writer.write("	public boolean exec" + instList.label + "(");
+		if (globalSystemRuleset && instList.insts.size() == 0) {
+			//GlobalSystemRuleset の生成では、アトム主導テストが空のことがある
+			writer.write("Object var0, Object var1) {\n");
+			writer.write("		return false;\n");
+			writer.write("	}\n");
+			return;
+		}
 		Instruction spec = (Instruction)instList.insts.get(0);
 		if (spec.getKind() != Instruction.SPEC) {
 			throw new RuntimeException("first instructio is not SPEC but " + spec);
@@ -560,7 +630,7 @@ public class Translator {
 					a = a.substring(0, pos_b) + "[ ... ]";
 				}
 			}
-			writer.write("// " + a + "\n");
+//			writer.write("// " + a + "\n");
 
 			switch (inst.getKind()) {
 				//====アトムに関係する出力する基本ガード命令====ここから====
@@ -854,7 +924,7 @@ public class Translator {
 					writer.write(tabs + "	((Atom)var" + inst.getIntArg3() + "), " + inst.getIntArg4() + " );\n");
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
-					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg5() + "); // 正規のコード\n");
+					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg5() + ");\n");
 					writer.write(tabs + "mem.unifyAtomArgs(\n");
 					writer.write(tabs + "	((Atom)var" + inst.getIntArg1() + "), " + inst.getIntArg2() + ",\n");
 					writer.write(tabs + "	((Atom)var" + inst.getIntArg3() + "), " + inst.getIntArg4() + " );\n");
@@ -874,7 +944,7 @@ public class Translator {
 				case Instruction.UNIFYLINKS:		//[link1, link2, mem]
 					//2005/10/11 mizuno
 					//必ず第五引数を利用するようにコンパイラを修正し、正規のコードに変更
-					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg3() + "); // 正規のコード\n");
+					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg3() + ");\n");
 					writer.write(tabs + "mem.unifyLinkBuddies(\n");
 					writer.write(tabs + "	((Link)var" + inst.getIntArg1() + "),\n");
 					writer.write(tabs + "	((Link)var" + inst.getIntArg2() + "));\n");
@@ -1060,7 +1130,10 @@ public class Translator {
 					writer.write(tabs + "	{\n");
 					//再帰呼び出ししていないので、ブロック内で変数宣言しても大丈夫
 					writer.write(tabs + "		Object obj = ((ObjectFunctor)((Atom)var" + inst.getIntArg2() + ").getFunctor()).getObject();\n");
-					writer.write(tabs + "		String className = obj.getClass().getName().replaceAll(\"" + packageName + ".\", \"\");\n");
+					writer.write(tabs + "		String className = obj.getClass().getName();\n");
+					if (packageName != null) { //GlobalSystemRuleset のコンパイル時には null
+						writer.write(tabs + "		className = className.replaceAll(\"" + packageName + ".\", \"\");\n");
+					}
 					writer.write(tabs + "		var" + inst.getIntArg1() + " = new Atom(null, new StringFunctor( className ));\n");
 					writer.write(tabs + "	}\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);

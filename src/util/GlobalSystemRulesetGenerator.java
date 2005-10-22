@@ -1,8 +1,16 @@
-package runtime;
+package util;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.Iterator;
 import java.util.List;
 
-import java.io.*;
-import java.util.*;
+import runtime.Functor;
+import runtime.Instruction;
+import runtime.InterpretedRuleset;
+import runtime.Rule;
+
+import compile.Translator;
 
 /** システムルールセット
  * <p>todo インスタンスを誰が生成するのか決める</p>
@@ -14,30 +22,9 @@ import java.util.*;
  * 
  * @author n-kato, hara
  */
-public final class SystemRuleset extends Ruleset {
+public final class GlobalSystemRulesetGenerator {
 	public static InterpretedRuleset ruleset;
-	public String toString() {
-		return "System Ruleset Object";
-	}
-	/**
-	 * アトム主導テストを行い、マッチすれば適用する
-	 * @return ルールを適用した場合はtrue
-	 */
-	public boolean react(Membrane mem, Atom atom) {
-		return false;
-	}
-	/**
-	 * 膜主導テストを行い、マッチすれば適用する
-	 * @return ルールを適用した場合はtrue
-	 */
-	public boolean react(Membrane mem) {
-		return ruleset.react(mem);
-	}
-	/** システムルールセット（なぜか今はSystemRulesetオブジェクトではない）を返す */
-	public static Ruleset getInstance() {
-		return ruleset;
-	}
-	static {
+	public static void main(String[] args) {
 		ruleset = new InterpretedRuleset();
 		// === System Rule #1 ===
 		//    1:$outside(B,A), 3:{2:$inside(B,C), 4:$inside(D,C), $p,@p}, 5:$outside(D,E)
@@ -114,7 +101,11 @@ public final class SystemRuleset extends Ruleset {
 			text += generateUnaryFloatingFunctionRuleText("sin");
 			compileAndLoadRules(ruleset,text);
 		}
-		//ruleset.compile();
+		try {
+			new Translator(ruleset, true).translate();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	static String generateUnaryFloatingFunctionRuleText(String func) {
 		String text = " Res=" + func + "(X) :- float(X) | [[/*inline*/";
@@ -244,5 +235,4 @@ public final class SystemRuleset extends Ruleset {
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 	}
-	public String getGlobalRulesetID() { return "version+$systemruleset"; }
 }

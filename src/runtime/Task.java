@@ -193,7 +193,14 @@ class Task extends AbstractTask implements Runnable {
 				{
 					int debugvalue = Env.debug; // todo spy機能を実装する
 					if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
-					flag = SystemRuleset.getInstance().react(mem);
+//					flag = SystemRuleset.getInstance().react(mem);
+					Iterator itsys = SystemRulesets.iterator();
+					while (itsys.hasNext()) {
+						if (((Ruleset)itsys.next()).react(mem)) {
+							flag = true;
+							break;
+						}
+					}
 					Env.debug = debugvalue;
 				}
 				if (flag == false) {				
