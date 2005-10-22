@@ -904,8 +904,6 @@ public class Translator {
 //下で手動生成
 //				case Instruction.LOADRULESET:
 //				case Instruction.LOCALLOADRULESET: //[dstmem, ruleset]
-//					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset((Ruleset)inst.getArg2() );\n");
-//					break; //n-kato
 				case Instruction.COPYRULES:
 				case Instruction.LOCALCOPYRULES:   //[dstmem, srcmem]
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").copyRulesFrom(((AbstractMembrane)var" + inst.getIntArg2() + "));\n");
@@ -916,17 +914,6 @@ public class Translator {
 					break; //n-kato
 //下で手動生成
 //				case Instruction.LOADMODULE: //[dstmem, module_name]
-//					// モジュール膜直属のルールセットを全部読み込む
-//					writer.write(tabs + "compile.structure.Membrane m = (compile.structure.Membrane)compile.Module.memNameTable.get(\"" + escapeString((String)inst.getArg2()) + "\");\n");
-//					writer.write(tabs + "if(m==null) {\n");
-//					writer.write(tabs + "	Env.e(\"Undefined module " + escapeString((String)inst.getArg2()) + "\");\n");
-//					writer.write(tabs + "} else {\n");
-//					writer.write(tabs + "	Iterator i = m.rulesets.iterator();\n");
-//					writer.write(tabs + "	while (i.hasNext()) {\n");
-//					writer.write(tabs + "		((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset((Ruleset)i.next() );\n");
-//					writer.write(tabs + "	}\n");
-//					writer.write(tabs + "}\n");
-//					break;
 					//====ルールを操作するボディ命令====ここまで====
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここから====
 				case Instruction.RECURSIVELOCK : //[srcmem]
@@ -953,25 +940,20 @@ public class Translator {
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
 					writer.write(tabs + "func = "+ getFuncVarName(new Functor("=",2))+";\n");
 					List linklist = (List)inst.getArg2();
-//					writer.write(tabs + "linklist=(List)var" + inst.getArg2() + ";\n");
 					writer.write(tabs + "insset = new HashSet();\n");
 					writer.write(tabs + "mem = ((AbstractMembrane)var" + inst.getIntArg3() + ");\n");
-//					writer.write(tabs + "   Link a, b;\n");
-//					writer.write(tabs + "   Atom eq;");
-//					writer.write(tabs + "for(int i=0;i<linklist.size();i++)\n");
-					for(int i=0;i<linklist.size();i++)
-//					writer.write(tabs + "	for(int j=i+1;j<linklist.size();j++){\n");
-						for(int j=i+1;j<linklist.size();j++){
-					writer.write(tabs + "		a = (Link)var"+((Integer)linklist.get(i)).intValue()+";\n");
-					writer.write(tabs + "		b = (Link)var"+((Integer)linklist.get(j)).intValue()+";\n");
-					writer.write(tabs + "		if(a == b.getAtom().getArg(b.getPos())){\n");
-					writer.write(tabs + "			atom = mem.newAtom(func);\n");//"+getFuncVarName(new Functor("=",2))+");\n");
-					writer.write(tabs + "			mem.unifyLinkBuddies(a,new Link(atom,0));\n");
-					writer.write(tabs + "			mem.unifyLinkBuddies(b,new Link(atom,1));\n");
-					writer.write(tabs + "			insset.add(atom);\n");
-					writer.write(tabs + "		}\n");
-//					writer.write(tabs + "	}\n");
+					for(int i=0;i<linklist.size();i++) {
+						for(int j=i+1;j<linklist.size();j++) {
+							writer.write(tabs + "		a = (Link)var"+((Integer)linklist.get(i)).intValue()+";\n");
+							writer.write(tabs + "		b = (Link)var"+((Integer)linklist.get(j)).intValue()+";\n");
+							writer.write(tabs + "		if(a == b.getAtom().getArg(b.getPos())){\n");
+							writer.write(tabs + "			atom = mem.newAtom(func);\n");//"+getFuncVarName(new Functor("=",2))+");\n");
+							writer.write(tabs + "			mem.unifyLinkBuddies(a,new Link(atom,0));\n");
+							writer.write(tabs + "			mem.unifyLinkBuddies(b,new Link(atom,1));\n");
+							writer.write(tabs + "			insset.add(atom);\n");
+							writer.write(tabs + "		}\n");
 						}
+					}
 					writer.write(tabs + "var" + inst.getIntArg1() + " = insset;\n");
 					break; //kudo 2004-12-29
 				case Instruction.DELETECONNECTORS : //[srcset,srcmap,srcmem]
@@ -983,8 +965,6 @@ public class Translator {
 					writer.write(tabs + "	orig = (Atom)it_deleteconnectors.next();\n");
 					writer.write(tabs + "	copy = (Atom)delmap.get(orig);\n");
 					writer.write(tabs + "	mem.unifyLinkBuddies(copy.getArg(0), copy.getArg(1));\n");
-//						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
-//						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
 					writer.write(tabs + "	mem.removeAtom(copy);\n");
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-29
@@ -995,66 +975,19 @@ public class Translator {
 					break;//
 //一部は未実装、一部は下の方で手動生成
 //				case Instruction.REACT :
-//					writer.write(tabs + "Rule rule = (Rule) inst.getArg1();\n");
-//					writer.write(tabs + "List bodyInsts = (List) rule.body;\n");
-//					writer.write(tabs + "Instruction spec = (Instruction) bodyInsts.get(0);\n");
-//					writer.write(tabs + "int formals = spec.getIntArg1();\n");
-//					writer.write(tabs + "int locals  = spec.getIntArg2();\n");
-//// // ArrayIndexOutOfBoundsException がでたので一時的に変更
-//// if (locals < 10) locals = 10;
-//					writer.write(tabs + "InterpretiveReactor ir = new InterpretiveReactor(locals);\n");
-//					writer.write(tabs + "ir.reloadVars(this, locals, (List)inst.getArg2(),\n");
-//					writer.write(tabs + "	(List)inst.getArg3(), (List)inst.getArg4());\n");
-//					writer.write(tabs + "if (ir.interpret(bodyInsts, 0)) return true;\n");
-//					writer.write(tabs + "if (Env.debug == 9) Env.p(\"info: body execution failed\");\n");
 //				case Instruction.JUMP: {
-//					writer.write(tabs + "InstructionList label = (InstructionList) inst.getArg1();\n");
-//					writer.write(tabs + "List bodyInsts = (List) label.insts;\n");
-//					writer.write(tabs + "Instruction spec = (Instruction) bodyInsts.get(0);\n");
-//					writer.write(tabs + "int formals = spec.getIntArg1();\n");
-//					writer.write(tabs + "int locals  = spec.getIntArg2();					\n");
-//					writer.write(tabs + "InterpretiveReactor ir = new InterpretiveReactor(locals);\n");
-//					writer.write(tabs + "ir.reloadVars(this, locals, (List)inst.getArg2(),\n");
-//					writer.write(tabs + "	(List)inst.getArg3(), (List)inst.getArg4());\n");
-//					writer.write(tabs + "if (ir.interpret(bodyInsts, 0)) return true;\n");
-//					writer.write(tabs + "}\n");
 //				case Instruction.RESETVARS :
-//					writer.write(tabs + "reloadVars(this, vars.size(), (List)inst.getArg1(),\n");
-//					writer.write(tabs + "		(List)inst.getArg2(), (List)inst.getArg3());\n");
-//					break;
 //				case Instruction.CHANGEVARS :
-//					writer.write(tabs + "changeVars(this, (List)inst.getArg1(),\n");
-//					writer.write(tabs + "		(List)inst.getArg2(), (List)inst.getArg3());\n");
-//					break; //n-kato
 				case Instruction.PROCEED:
 //					writer.write(tabs + "return true; //n-kato\n");
 					writer.write(tabs + "ret = true;\n");
 					writer.write(tabs + "break " + breakLabel + ";\n");
 					return;// true;
 //				case Instruction.SPEC://[formals,locals]
-//					writer.write(tabs + "extendVector(" + inst.getIntArg2() + ");\n");
-//					break;//n-kato
 //				case Instruction.BRANCH :
-//					writer.write(tabs + "List subinsts;\n");
-//					writer.write(tabs + "subinsts = ((InstructionList)inst.getArg1()).insts;\n");
-//**					if (interpret(subinsts, 0))
-//**						return true;
-//					break; //nakajima, n-kato
 //				case Instruction.LOOP :
-//					writer.write(tabs + "subinsts = (List) ((List) inst.getArg1()).get(0); // reverted by n-kato: remove \".get(0)\" by mizuno\n");
-//					writer.write(tabs + "while (interpret(subinsts, 0)) {\n");
-//					writer.write(tabs + "}\n");
-//					break; //nakajima, n-kato
 //				case Instruction.RUN :
-//					writer.write(tabs + "subinsts = (List) ((List) inst.getArg1()).get(0);\n");
-//					writer.write(tabs + "interpret(subinsts, 0);\n");
-//					break; //nakajima
 //				case Instruction.NOT :
-//					writer.write(tabs + "subinsts = ((InstructionList)inst.getArg1()).insts;\n");
-//					writer.write(tabs + "if (!(interpret(subinsts, 0))) {\n");
-//					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
-//					writer.write(tabs + "}\n");
-//					break; //n-kato
 					//====制御命令====ここまで====
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
@@ -1137,33 +1070,12 @@ public class Translator {
 					//====組み込み機能に関する命令====ここから====
 				case Instruction.INLINE : //[atom, inlineref]
 					writer.write(tabs + InlineUnit.className((String)inst.getArg2()) + ".run((Atom)var" + inst.getArg1() + ", " + inst.getArg3() + ");\n");
-//					writer.write(tabs + "do{ Atom me = (Atom)var" + inst.getIntArg1() + ";\n");
-//					writer.write(tabs + "  mem = (AbstractMembrane)var0;\n");
-//					writer.write(tabs + Inline.getCode(inst.getIntArg1(), (String)inst.getArg2(), inst.getIntArg3()));
-//					writer.write(tabs + "}while(false);\n"); // インラインコードは switch の中にある前提で書かれている。
 					break;
 					//====組み込み機能に関する命令====ここまで====
 //分散機能は未実装
 //					//====分散拡張用の命令====ここから====
 //				case Instruction.CONNECTRUNTIME: //[srcatom] // todo StringFunctorに変える（ISSTRINGも）
-//					writer.write(tabs + "func = ((Atom)var" + inst.getIntArg1() + ").getFunctor();\n");
-//					writer.write(tabs + "if (!(!(func instanceof ObjectFunctor))) {\n");
-//					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
-//					writer.write(tabs + "}\n");
-//					writer.write(tabs + "if (!(!(((ObjectFunctor)func).getObject() instanceof String))) {\n");
-//					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
-//					writer.write(tabs + "}\n");
-//					writer.write(tabs + "if (func.getName().equals(\"\")) break; // 空文字列の場合はつねに成功とする\n");
-//					writer.write(tabs + "if (!(LMNtalRuntimeManager.connectRuntime(func.getName()) == null)) {\n");
-//					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
-//					writer.write(tabs + "}\n");
-//					break; //n-kato
 //				case Instruction.GETRUNTIME: //[-dstatom,srcmem] // todo StringFunctorに変える（ISSTRINGも）
-//					writer.write(tabs + "String hostname = \"\";\n");
-//**					if (mems[inst.getIntArg2()].isRoot())
-//**						hostname = mems[inst.getIntArg2()].getTask().getMachine().hostname;
-//					writer.write(tabs + "var" + inst.getIntArg1() + " = new Atom(null, new StringFunctor(hostname));\n");
-//					break; //n-kato
 //					//====分散拡張用の命令====ここまで====
 					//====アトムセットを操作するための命令====ここから====
 				case Instruction.NEWSET : //[-dstset]
@@ -1525,23 +1437,6 @@ public class Translator {
 					break; // n-kato
 //未実装
 //				case Instruction.GROUP:
-//					writer.write(tabs + "subinsts = ((InstructionList)inst.getArg1()).insts;\n");
-//					writer.write(tabs + "if(!interpret(subinsts, 0)){\n");
-//						//現状では必ずここに入る
-//						//GROUP内の命令が成功することはない
-//						//System.out.println("failed");
-//					writer.write(tabs + "}\n");
-//					break;
-//					//現状ではまともに動かない。
-//					//sakurai
-//					writer.write(tabs + "				default :\n");
-//					writer.write(tabs + "System.out.println(\n");
-//					writer.write(tabs + "	\"SYSTEM ERROR: Invalid instruction: \" + inst);\n");
-//					break;
-//					writer.write(tabs + "			}\n");
-//					writer.write(tabs + "		}\n");
-//					writer.write(tabs + "	}\n");
-//					writer.write(tabs + "}\n");
 
 //以下は手動生成コード
 				case Instruction.RESETVARS: {
@@ -1586,12 +1481,6 @@ public class Translator {
 					writer.write(tabs + "		Env.d(e);\n");
 					writer.write(tabs + "		Env.e(\"Undefined module " + inst.getArg2() + "\");\n");
 					writer.write(tabs + "	}\n");
-//					writer.write(tabs + "{\n");
-//					writer.write(tabs + "	Ruleset[] rulesets = Module" + inst.getArg2() + ".getRulesets();\n");
-//					writer.write(tabs + "	for (int i = 0; i < rulesets.length; i++) {\n");
-//					writer.write(tabs + "		((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(rulesets[i]);\n");
-//					writer.write(tabs + "	}\n");
-//					writer.write(tabs + "}\n");
 					break;
 				case Instruction.JUMP:
 					label = (InstructionList)inst.getArg1();
@@ -1635,16 +1524,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //nakajima, n-kato
 				case Instruction.NOT :
-//					label = (InstructionList)inst.getArg1();
-//					add(label);
-//					writer.write(tabs + "if (!exec" + label.label + "(var0");
-//					for (int i = 1; i < varnum; i++) {
-//						writer.write(", var" + i);
-//					}
-//					writer.write(")) {\n");
-//					translate(it, tabs + "	", iteratorNo, varnum, breakLabel);
-//					writer.write(tabs + "}\n");
-//					break; //n-kato
 					label = (InstructionList)inst.getArg1();
 					writer.write(label.label + ":\n");
 					writer.write(tabs + "{\n");
@@ -1659,8 +1538,6 @@ public class Translator {
 				case Instruction.LOADRULESET:
 				case Instruction.LOCALLOADRULESET:
 					InterpretedRuleset rs = (InterpretedRuleset)inst.getArg2();
-//					Translator t = new Translator(rs);
-//					t.translate();
 					String name = getClassName(rs);
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(" + name + ".getInstance());\n"); 
 					break;
@@ -1668,7 +1545,6 @@ public class Translator {
 					Env.e("Unsupported Instruction : " + inst);
 			}
 		}
-//		return false;
 	}
 	private int nextFuncVarNum = 0;
 	private String getFuncVarName(Functor func) {
