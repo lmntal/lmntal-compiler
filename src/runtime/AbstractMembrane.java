@@ -67,7 +67,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** アトムの集合 */
 	protected AtomSet atoms = new AtomSet();
 	/** 子膜の集合 */
-	protected Set mems = new RandomSet();
+	protected Set mems;
 //	/** このセルの自由リンクの数 */
 //	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
@@ -98,6 +98,11 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 指定されたタスクに所属する膜を作成する。
 	 */
 	protected AbstractMembrane(AbstractTask task, AbstractMembrane parent) {
+		if (Env.shuffle >= Env.SHUFFLE_MEMS)
+			mems = new RandomSet();
+		else
+			mems = new HashSet();
+		
 		this.task = task;
 		this.parent = parent;
 		id = nextId++;

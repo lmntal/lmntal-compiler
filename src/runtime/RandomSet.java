@@ -100,11 +100,9 @@ public class RandomSet implements Set {
 	}
 
 	public Iterator iterator() {
-		if (Env.shuffle >= Env.SHUFFLE_MEMS) {
-			return new RandomIterator(array);
-		} else {
-			return array.iterator();
-		}
+//2005/10/23 Mizuno
+//ランダムにしたくないときは、このクラスのインスタンスは利用しない
+		return new RandomIterator(array);
 	}
 
 	public Object[] toArray(Object[] a) {
