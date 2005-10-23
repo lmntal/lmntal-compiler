@@ -20,12 +20,11 @@ public class Functor implements Serializable {
 	public static final Functor STAR = new Functor("$star",2,null,"$star_2");
 	
 	/** シンボル名。このクラスのオブジェクトの場合は、名前の表示名が格納される。
+	 * 常に intern した値を格納する。
 	 * 空文字列のときは、サブクラスのオブジェクトであることを表す。*/
 	private String name;
 	/** アリティ（引数の個数）*/
 	private int arity;
-	/** シンボルファンクタとしてのID。各種メソッドで使うために保持しておく。整合性要注意 */
-	private String strFunctor;
 	/** ファンクタが所属するモジュール名（明示的に指定されていない場合はnull）*/
 	private String path = null;
 	
@@ -41,7 +40,7 @@ public class Functor implements Serializable {
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
 	public String getQuotedFunctorName() {
 		String text = getAbbrName();
-		if (strFunctor.startsWith("$")) return text;	// 臨時
+		if (name.startsWith("$")) return text;	// 臨時
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 			text = quoteName(text);
 		}
@@ -99,19 +98,15 @@ public class Functor implements Serializable {
 	 * @param path モジュール名（またはnull）
 	 */
 	public Functor(String name, int arity, String path) {
-		this.name  = name;
 		this.arity = arity;
 		this.path  = path;
-		name = escapeName(name);
-		if (path != null) name = escapeName(path) + "." + name;
+		this.name = (path == null ? "" : escapeName(path) + ".") + escapeName(name);
 		// == で比較できるようにするためにinternしておく。
-		strFunctor = (name + "_" + arity).intern();
+		this.name = this.name.intern();
 	}
 	private Functor(String name, int arity, String path, String strFunctor) {
-		this.name  = name;
-		this.arity = arity;
-		this.path  = path;
-		this.strFunctor = strFunctor;
+		//strFunctor 廃止
+		this(name, arity, path);
 	}
 
 	/**
@@ -140,7 +135,6 @@ public class Functor implements Serializable {
 		name = src.name;
 		arity = src.arity;
 		path = src.path;
-		strFunctor = src.strFunctor;
 	}
 	/**
 	 * 直列化復元時に呼ばれる。
@@ -156,7 +150,7 @@ public class Functor implements Serializable {
 			copyFrom(STAR);
 		} else {
 			in.defaultReadObject();
-			strFunctor = strFunctor.intern();
+			name = name.intern();
 		}
 	}
 	////////////////////////////////////////////////////////////////
@@ -171,11 +165,6 @@ public class Functor implements Serializable {
 	public final String getSymbolName() {
 		return name;
 	}
-	/** シンボルファンクタとしてのIDを取得する。
-	 * @return strFunctorフィールドの値。*/
-	public final String getSymbolFunctorID() {
-		return strFunctor;
-	}
 	/** 名前の表示名を取得する。サブクラスは空文字列が出力されないようにオーバーライドすること。*/
 	public String getName() {
 		return name;
@@ -187,10 +176,10 @@ public class Functor implements Serializable {
 	/** このファンクタがアクティブかどうかを取得する。*/
 	public boolean isActive() {
 		// （仮）
-		if (getSymbolFunctorID().equals("n_1")) return false;
-		if (getSymbolFunctorID().equals("c_3")) return false;
 		if (arity == 0) return true;
-		return getSymbolFunctorID().matches("^[a-z].*$");
+		if (name.equals("")) return false;
+		char c = name.charAt(0);
+		return c >= 'a' && c <= 'z';
 	}
 	/** このクラスのオブジェクトかどうかを調べる。*/
 	public boolean isSymbol() {
@@ -201,12 +190,13 @@ public class Functor implements Serializable {
 		return getAbbrName() + "_" + getArity();
 	}
 	public int hashCode() {
-		return strFunctor.hashCode();
+		return name.hashCode() + arity;
 	}
 	public boolean equals(Object o) {
 		// コンストラクタでinternしているので、==で比較できる。
 		// 引数oがFunctorのサブクラスの場合、falseを返す。
-		return ((Functor)o).strFunctor == this.strFunctor;
+		Functor f = (Functor)o;
+		return f.name == name && f.arity == arity;
 	}
 	public String getPath() {
 		return path;

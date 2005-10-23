@@ -203,12 +203,12 @@ public class GuardCompiler extends HeadCompiler {
 				if (func.getArity() > 1)  def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
 				if (func.getArity() > 2)  def3 = ((ProcessContext)cstr.args[2].buddy.atom).def;
 
-				if (func.getSymbolFunctorID().equals("unary_1")) {
+				if (func.equals(new Functor("unary", 1))) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					match.add(new Instruction(Instruction.ISUNARY, atomid1));
 				}
-				else if (func.getSymbolFunctorID().equals("ground_1")){
+				else if (func.equals(new Functor("ground", 1))){
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					checkGroundLink(def1);
 				}
@@ -226,7 +226,7 @@ public class GuardCompiler extends HeadCompiler {
 					match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
 					match.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
 				}
-				else if (func.getSymbolFunctorID().equals("class_2")) {
+				else if (func.equals(new Functor("class", 2))) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					int atomid2 = varcount++;
