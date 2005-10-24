@@ -63,17 +63,21 @@ public class Optimizer {
 		if (fInlining || Env.zoptimize >= 1 || fReuseMem || fReuseAtom || fLoop) {
 			//head と gaurd をくっつける
 			inlineExpandTailJump(rule.memMatch);
-			//現状ではアトム主導テストのインライン展開には対応していない
-//			inlineExpandTailJump(rule.atomMatch);
-//			rule.guardLabel = null;
-//			rule.guard = null;
+			//現状ではアトム主導テストのインライン展開には対応していない -> 一応対応(sakurai)
+			inlineExpandTailJump(rule.atomMatch);
+			rule.guardLabel = null;
+			rule.guard = null;
 		}
 		optimize(rule.memMatch, rule.body);
-		if(Env.zoptimize == 1) Optimizer2.guardMove(rule.memMatch);
-		else if(Env.zoptimize == 2) Optimizer2.grouping(rule.memMatch);
+		if(Env.zoptimize == 1) {
+			Optimizer2.guardMove(rule.atomMatch, rule.memMatch);
+		} 
+		else if(Env.zoptimize == 2) {
+			Optimizer2.grouping(rule.atomMatch, rule.memMatch);
+		} 
 		else if(Env.zoptimize >= 3) {
-			Optimizer2.grouping(rule.memMatch);
-			Optimizer2.guardMove(rule.memMatch);
+			Optimizer2.grouping(rule.atomMatch, rule.memMatch);
+			Optimizer2.guardMove(rule.atomMatch, rule.memMatch);
 		}
 		/*
 		else if(Env.zoptimize == 4) Optimizer2.mapping(rule.memMatch);
@@ -135,6 +139,14 @@ public class Optimizer {
 		if (insts.isEmpty()) return;
 		Instruction spec = (Instruction)insts.get(0);
 		if (spec.getKind() != Instruction.SPEC) return;
+		//アトム主導テスト用
+		for(int i = 1; i<insts.size(); i++){
+			Instruction branch = (Instruction)insts.get(i);
+			if (branch.getKind() != Instruction.BRANCH) break;
+			InstructionList label = (InstructionList)branch.getArg1();
+			inlineExpandTailJump(label.insts);
+		}			
+		
 		int formals = spec.getIntArg1();
 		int locals  = spec.getIntArg2();
 		locals = inlineExpandTailJump(insts, locals);

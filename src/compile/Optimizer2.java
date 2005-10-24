@@ -16,17 +16,17 @@ import runtime.InstructionList;
  */
 public class Optimizer2 {
 	
-	public static void instsRearrangement(List atom, List mem){
+	public static void guardMove(List atom, List mem){
 		//instsRearrangementForAtomMatch(atom);
-		instsRearrangement(atom);
-		instsRearrangement(mem);
+		guardMove(atom);
+		guardMove(mem);
 	}
 	
 	/** 
 	 * ガード命令を可能な限り前に移動させる.
 	 * ボディ命令は並び替えない
 	 */
-	public static void instsRearrangement(List insts){
+	public static void guardMove(List insts){
 		for(int i=1; i<insts.size(); i++){
 			boolean moveok = true; //移動可能判定フラグ
 			Instruction inst = (Instruction)insts.get(i);
@@ -41,12 +41,13 @@ public class Optimizer2 {
 			//その他位置を変えたくない命令
 			else if(inst.getKind() == Instruction.FINDATOM
 				|| inst.getKind() == Instruction.ANYMEM
-				|| inst.getKind() == Instruction.PROCEED) continue;
+				|| inst.getKind() == Instruction.PROCEED
+				|| inst.getKind() == Instruction.JUMP) continue;
 				
 			else if(inst.getKind() == Instruction.GROUP
 					|| inst.getKind() == Instruction.BRANCH){
 				InstructionList subinsts = (InstructionList)inst.getArg1();
-				instsRearrangement(subinsts.insts);
+				guardMove(subinsts.insts);
 			}
 			else
 				for(int i2=i-1; i2>0; i2--){
@@ -124,7 +125,8 @@ class Group {
 			//否定条件がある場合はグループ化は無効 暫定的処置
 			if(inst.getKind() == Instruction.NOT) return;
 			//ボディ命令列はグループ化しない
-			if(inst.getKind() == Instruction.COMMIT) break;
+			if(inst.getKind() == Instruction.COMMIT
+				|| inst.getKind() == Instruction.JUMP) break;
 			//グループ番号を割り振る	  
 			Inst2GroupId.put(inst, new Integer(i));
 			//変数番号→命令にマップを張る
@@ -154,7 +156,8 @@ class Group {
 	private void createGroup(List insts, boolean isAtomMatch){
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = (Instruction)insts.get(i);
-			if(inst.getKind() == Instruction.COMMIT) break;
+			if(inst.getKind() == Instruction.COMMIT
+				|| inst.getKind() == Instruction.JUMP) break;
 			Object group = null;
 			Object changegroup = null;
 			ArrayList list = inst.getVarArgs();
@@ -177,7 +180,8 @@ class Group {
 				//どう区別する?
 				for(int i2 = 1; i2 < insts.size(); i2++){
 					Instruction inst2 = (Instruction)insts.get(i2);
-					if(inst2.getKind() == Instruction.COMMIT) break;
+					if(inst2.getKind() == Instruction.COMMIT
+					    || inst.getKind() == Instruction.JUMP) break;
 					if(inst2.getKind() == Instruction.ANYMEM
 						|| inst.getKind() == Instruction.LOCKMEM){
 							group = Inst2GroupId.get(inst);
@@ -193,14 +197,16 @@ class Group {
 		//GROUP生成
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = (Instruction)insts.get(i);
-			if(inst.getKind() == Instruction.COMMIT) break;
+			if(inst.getKind() == Instruction.COMMIT
+				|| inst.getKind() == Instruction.JUMP) break;
 			//if(inst.getKind() == Instruction.LOADMAP) continue;
 			Object group = Inst2GroupId.get(inst);
 			InstructionList subinsts = new InstructionList();
 			subinsts.add(new Instruction(Instruction.SPEC, 0, 0));
 			for(int i2=i; i2<insts.size(); i2++){
 				Instruction inst2 = (Instruction)insts.get(i2);
-				if(inst2.getKind() == Instruction.COMMIT) break;
+				if(inst2.getKind() == Instruction.COMMIT
+					|| inst.getKind() == Instruction.JUMP) break;
 				if(group.equals(Inst2GroupId.get(inst2))){
 					subinsts.add(inst2);
 					insts.remove(i2);
