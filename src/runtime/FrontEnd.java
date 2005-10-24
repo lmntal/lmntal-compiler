@@ -108,7 +108,6 @@ public class FrontEnd {
 						/// screen    max        full screen mode
 						/// auto      on         reaction auto proceed mode when GUI on
 						/// dump      1          indent mem (etc...)
-						/// is        1          equal to --interpret --use-source-library
 						if (i + 2 < args.length) {
 							String name  = i+1<args.length ? args[i+1] : "";
 							String value = i+2<args.length ? args[i+2] : "";
@@ -347,10 +346,6 @@ public class FrontEnd {
 				Env.argv.add(args[i]);
 			}
 		}
-		if(Env.getExtendedOption("is").equals("1")) {
-			Env.fUseSourceLibrary = Env.fInterpret = true;
-		}
-		
 		//REPL と one-liner では常に解釈実行
 		if (Env.oneLiner != null || Env.argv.isEmpty()) {
 			Env.fInterpret = true;
