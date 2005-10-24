@@ -131,6 +131,34 @@ Res=list.flatten(cons(A, B), R) :- Res=list.flatten(A, list.flatten(B, R)).
 
 
 
+
+
+/*
+
+要素数 n 個のリストから k 個順不同で取り出す全ての組み合わせをリストにして返す。
+
+*/
+
+//r=choose_k([a, b, c, d, e], 3).
+//r=choose_k([b, c], 1).
+
+
+H=list.choose_k(L, K) :- H=choose_k(L, K).
+H=choose_k(L, K) :- ground(L), K=0 | H=[].
+H=choose_k([], K) :- int(K) | H=[].
+
+H=choose_k([Hd|R], K) :- K=1 | H=[[Hd]|choose_k(R, K)].
+
+// Hd を選ぶ場合とそうでない場合の全組み合わせをくっつける
+H=choose_k([Hd|Tl], K) :- ground(Hd), K>1, ground(Tl) |
+H=list.append(dist(Hd, choose_k(Tl, K-1)), choose_k(Tl, K)).
+
+// map (cons A) L
+H=dist(A, []) :- ground(A) | H=[].
+H=dist(A, [Hd|Tl]) :- ground(A) | H=[[A|Hd]|dist(A, Tl)].
+
+
+
 }.
 //res = list.flatten(cons(cons(int(1),cons(int(2),int(3))), int(4)), nil).
 

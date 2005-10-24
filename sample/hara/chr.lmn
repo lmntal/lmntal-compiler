@@ -3,6 +3,7 @@
 CHR
                                               Koji Hara
                                               2005/10/18(火) 23:03:38
+                                              2005/10/24(月) 14:26:43
 
 操作的意味論をそのまま LMNtal で書いてみたもの
 
@@ -15,15 +16,20 @@ CHR
 
 
 State : <Gs, Cu, cb, T, V>
-	Gs : ゴールストア
-	Cu : ユーザ定義制約ストア
+	Gs : ゴールストア : Set of c=制約 | eq/2
+	Cu : ユーザ定義制約ストア : Set of c=制約
 	Cb : 組み込み制約ストア
-	T  : トークン : Set of ルール名 @ 反応できるユーザ定義制約
-	V  : Gs, Cu, Cb に出てくる変数
+	T  : トークン : Set of ルール名 | c=反応できるユーザ定義制約
+	V  : Gs, Cu, Cb に出てくる変数 : 未使用
 	
 	実装:
-		state : states({}, {}, {}, {token}, {}).
-		token : {rule=ルール名, leq(x, y), leq(y, x), ...}
+		state : states(Gs, Cu, Cb, T, V).
+		Gs={c=制約, eq(変数, 変数), ...}.
+		Cu={c=制約, ...}.
+		Cb={eq(変数, 変数), ...}.
+		T ={ {rule=ルール名, c=制約, ...}, ... }.
+		V ={}.
+		token : 
 
 Initial :
 	<Gx, T, true, 0, V>
@@ -32,25 +38,69 @@ Final :
 	<T, Cu, Cb, T, V> with false not \in Cb
 	<Gs, Cu, false, T, V>
 
-token/2 は gdound と膜を受け取ってトークンを計算し、同レベルに展開する。
+
+組み込み制約は、今のところ eq のみ
 
 */
 
 /*
 
-r1 @ leq(X, X) <=> true.
-r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
+----------------------------------------------------------------------
+HISTORY / 備忘録
+----------------------------------------------------------------------
+
+コマンドライン例
+$ java -cp bin runtime/FrontEnd -x dump 1 --interpret --use-source-library sample/hara/chr.lmn -t | perl tohtml.pl .* +prop > result.html
+
+
+★マークがついたルールは CHR プログラムに依存（要手動コンパイル）
+
+
+◆等式伝播
+
+Cb に eq(a, b) があって Cu に leq(a, b) などがある場合、a=b だから leq(a, a) などと伝播させなければならない。
+意味論では正規化関数でやっている。nstate を追加。
+
+
+◆トークンの計算方法
+
+token/2 は ground と膜を受け取ってトークンを計算し、同レベルに展開する。
+
+leq の例だと偶然うまくいっていたが、Token の計算が不完全だったので修正した。
+T(C, Cu) は {C, Cu} の中から Propagation rule の左辺にマッチするものを全て出力する。
+実装は {C, Cu} 内にルールを置いて、マッチしたものを別の膜に入れて出力としている。
+これだと {C, Cu} 内で反応したものは消えてしまうので、本来計算されるべきものが計算されていない可能性がある。
+
+例：
 r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
-r4 @ leq(X, Y), leq(X, Y) <=> leq(X, Y).
+{C, Cu} = leq(a, b), leq(b, c), leq(c, d)
 
-に
+の時
 
-leq(A, B), leq(B, C), leq(C, A).
+T(C, Cu) = { r3@{X=a, Y=b, Z=c}, r3@{X=b, Y=c, Z=d} }
 
-を食わせる。
+となるべきだが１個だけしか返されていなかった。
 
-本来は計算ステップのルールと CHR ルールを分けたいが、
-手始めにハードコーディングした（コンパイル済みとも言える）ルールを書いてみる。
+解決案
+ある Propagation rule の左辺の要素数（アトムグループ数）が k 個の時、
+Cu から選ばれるのは k-1 個。（C は新しく追加されたものなのでマッチするなら必ず含まれる）
+count(Cu) 個から k-1 個を選ぶ全通りについて左辺とマッチするか調べればよい。
+
+
+気づいたこと：
+
+- LMNtal はルール間で引数を引きまわすため、複数ルールに対する引数仕様の変化に弱い。
+-- 関数呼び出し（の気分）した際の引数は、とりあえず全部最初の引数につないだ膜とかに入れておくと後で使えるので新たに使う引数が出てきたときに複数ルールの書き直しが必要なくなる。。
+- 対象データがリストになってないと嫌な部分と、膜内の多重集合になってた方がいい部分がある。簡単に変換できると便利。
+--１個のデータを入れた膜をリストの要素にすればいい。list=[{a}, {b}].
+---が、こういうリストは ground じゃないので扱いが悪い。こういうものにマッチする型付きプロセス文脈がほしい。
+
+続き：
+k-1 個の選び方リストまではうまくいっている。それぞれに対してどういう膜を生成するかから始めること。
+2005/10/23(日) 02:17:55
+
+うまくいった。edge の例題も書いてみること。
+2005/10/24(月) 02:20:31
 
 */
 
@@ -64,22 +114,11 @@ solve, nstate({$gs}, {$cu[], @cu}, {eq=[X,Y], eq(X, Y), $cb}, {$t, @t}, {$v}).
 
 
 // Introduce
-introduce, state({leq(X, Y), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v})
-:- unary(X), unary(Y) | 
-introduce, nstate({$gs}, {leq(X, Y), $cu[], @cu}, {$cb}, {$t, token({leq(X, Y)}, {$cu[]}), @tr}, {$v}).
+introduce, state({c=Con, $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v})
+:- ground(Con) | 
+introduce, tstate({$gs}, {c=Con, $cu[], @cu}, {$cb}, {$t, token({c=Con}, {$cu[]}), @tr}, {$v}).
 
 
-// Simplify
-// r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
-simplify, state({$gs}, {leq(X0, Y0), leq(Y1, X1), $cu[], @cu}, {$cb}, {$t, @tr}, {$v})
-:- unary(X0), unary(Y0), unary(X1), unary(Y1), X0=X1, Y0=Y1 | 
-simplify, nstate({eq(X0, Y0), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
-
-// Propagate
-// r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
-propagate, state({$gs}, {leq(X, Y0), leq(Y1, Z), $cu[], @cu}, {$cb}, {{rule=r3, leq(TX, TY0), leq(TY1, TZ)}, $t, @tr}, {$v})
-:- Y0=Y1, X=TX, Y0=TY0, Y1=TY1, Z=TZ |
-nstate({leq(X, Z), $gs}, {leq(X, Y0), leq(Y1, Z), $cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
 
 
 
@@ -114,33 +153,51 @@ H={ state({}, {$cu[], @cu}, {eq=[], $cb}, {$t[], @tr}, {$v[]}), $etc[], @etc }/
 H={$cu[], $cb}.
 
 // Start
-H=chr.run({$gs}) :- 
+H=chr.run({$gs}, {@simplify}, {@replace}, {@find_token}, Prop_head_count) :- int(Prop_head_count) |
 H={
 	chr.use.
 	solve.
 	introduce.
 	simplify.
 	propagate.
-	state({$gs}, {
-		replace(B, A), leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), X=B | replace(B, A), leq(A, Y).
-		replace(B, A), leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), Y=B | replace(B, A), leq(X, A).
-	}, {eq=[]}, {
+	@simplify.
+	state(Gs, Cu, Cb, T, V).
+	Gs={$gs}.
+	Cu={
+		@replace.
+	}.
+	Cb={eq=[]}.
+	T={
+		found_token.
+		prop_head_count=Prop_head_count.
+		
 		// token/2 - トークンを計算する
-		token({$c[]}, {$cu[]}) :- token0({$c[], $cu[], {}.
-			// r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
-			{}, leq(X, Y0), leq(Y1, Z) :- unary(X), unary(Y0), unary(Y1), unary(Z), Y0=Y1 | {rule=r3, leq(X, Y0), leq(Y1, Z)}.
-		}).
-		token0({$c[], {$result}, @c}/) :- {$result}.
+		token({$c[]}, {$cu[]}) :- token0({{$c[]}, {$cu[]}}, {list=[], $cu[]}).
 		
+		// リスト処理するためにリスト化
+		token0(ARG, {list=L, c=Con, $c[L]}) :- ground(Con) | 
+		token0(ARG, {list=[Con|L], $c[L]}).
 		
-	}, {})
+		token0(ARG, {list=L}), prop_head_count=N :- ground(L), int(N) | 
+		token1(ARG, {list=list.choose_k(L, N-1)}, {}), prop_head_count=N.
+		
+		// 候補を作る
+		token1({{c=Con}, {$cu[]}}, {list=[Hd|Tl], $p[Tl], @r}, {$w}) :- ground(Hd), ground(Con) | 
+		token1({{c=Con}, {$cu[]}}, {list=Tl, $p[Tl], @r}, {$w, {l=Hd, l=Con}}).
+		
+		token1(ARG, {list=[], @r}, {$w}) :- |
+		token2(ARG, {$w}).
+		
+		@find_token.
+		
+	}.
+	V={}.
+	// トークン計算が終わったら次
+	tstate(Gs, Cu, Cb, {$p, token2({{$c[]}, {$cu[]}}, {$w[]}), @r}/, V) :- 
+	nstate(Gs, Cu, Cb, {$p, @r}, V).
 }.
 
 }. // End of CHR module
 
 
 
-// sample
-
-results=chr.run({leq(a, b), leq(b, c), leq(c, a)}).
-//chr.run({leq(a, b), leq(b, a)}).

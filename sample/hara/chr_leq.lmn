@@ -1,0 +1,45 @@
+/*
+
+r1 @ leq(X, X) <=> true.
+r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
+r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
+r4 @ leq(X, Y), leq(X, Y) <=> leq(X, Y).
+
+に
+
+leq(A, B), leq(B, C), leq(C, A).
+
+を食わせる。
+
+本来は計算ステップのルールと CHR ルールを分けたいが、
+手始めにハードコーディングした（コンパイル済みとも言える）ルールを書いてみる。
+
+
+*/
+results=chr.run({c=leq(a, b), c=leq(b, c), c=leq(c, a)}, Simp, Replace, Find_token, 2).
+Simp={
+	// Simplify : ★
+	// r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
+	simplify, state({$gs}, {c=leq(X0, Y0), c=leq(Y1, X1), $cu[], @cu}, {$cb}, {$t, @tr}, {$v})
+	:- unary(X0), unary(Y0), unary(X1), unary(Y1), X0=X1, Y0=Y1 | 
+	simplify, nstate({eq(X0, Y0), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
+
+	// Propagate : ★
+	// r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
+	propagate, state({$gs}, {c=leq(X, Y0), c=leq(Y1, Z), $cu[], @cu}, {$cb}, {{rule=r3, leq(TX, TY0), leq(TY1, TZ), $r_etc[]}, $t, @tr}, {$v})
+	:- Y0=Y1, X=TX, Y0=TY0, Y1=TY1, Z=TZ |
+	nstate({c=leq(X, Z), $gs}, {c=leq(X, Y0), c=leq(Y1, Z), $cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
+}.
+Replace={
+	// replace(B, A), X=B :- と書きたいが、型付きプロセス文脈のマッチングは具体的なアトムを要求するので今のところ無理
+	// ★
+	replace(B, A), C=leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), X=B | replace(B, A), C=leq(A, Y).
+	replace(B, A), C=leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), Y=B | replace(B, A), C=leq(X, A).
+}.
+Find_token={
+	// トークン生成 r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
+	// ★
+	found_token, token2(ARG, {$w, {T0=leq(X, Y0), T1=leq(Y1, Z), $p[T0, T1]}}) :- unary(X), unary(Y0), unary(Y1), unary(Z), Y0=Y1 | 
+	found_token, token2(ARG, {$w}), {rule=r3, leq(X, Y0), leq(Y1, Z), T0=kill, T1=kill, $p[T0, T1]}.
+}.
+//chr.run({leq(a, b), leq(b, a)}).

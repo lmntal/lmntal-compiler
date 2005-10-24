@@ -4,26 +4,21 @@
 
 */
 
-r=choose_k([a, b, c], 2).
+//r=choose_k([a, b, c, d, e], 3).
+//r=choose_k([b, c], 1).
 
 
+H=list.choose_k(L, K) :- H=choose_k(L, K).
 H=choose_k(L, K) :- ground(L), K=0 | H=[].
-
 H=choose_k([], K) :- int(K) | H=[].
 
 H=choose_k([Hd|R], K) :- K=1 | H=[[Hd]|choose_k(R, K)].
 
-H=choose_k([Hd|R], K) :- ground(Hd), K>1, ground(R) |
-H=product( choose_k([Hd|R], 1), choose_k(R, K-1) ).
+// Hd を選ぶ場合とそうでない場合の全組み合わせをくっつける
+H=choose_k([Hd|Tl], K) :- ground(Hd), K>1, ground(Tl) |
+H=list.append(dist(Hd, choose_k(Tl, K-1)), choose_k(Tl, K)).
 
+// map (cons A) L
+H=dist(A, []) :- ground(A) | H=[].
+H=dist(A, [Hd|Tl]) :- ground(A) | H=[[A|Hd]|dist(A, Tl)].
 
-//H=choose_k([], K, Res) :- int(K) | H=Res.
-
-/*
-
-n>1
-	choose 1 from L  -> [a] [b] [c]
-	times
-	X cdr L k-1
-
-*/

@@ -73,5 +73,22 @@ sys.perpetual(on) :- [:/*inline*/
 	:].
 
 
+/**
+ * sys.atomCount : String -> int -> int
+ * 同一膜内で、指定した名前と arity を持つアトムの数を数える。
+ */
+H=sys.atomCount(Name, Arity) :- unary(Name), int(Arity) | H=[:/*inline*/
+	try {
+		int count = mem.getAtomCountOfFunctor(new Functor(me.nth(0), ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue()));
+		Atom p = mem.newAtom(new IntegerFunctor(count));
+		me.nthAtom(0).remove();
+		me.nthAtom(1).remove();
+		mem.relink(p, 0, me, 2);
+		me.remove();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	:](Name, Arity).
+
 }.
 

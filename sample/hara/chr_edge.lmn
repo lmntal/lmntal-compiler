@@ -1,0 +1,23 @@
+// 
+results=chr.run({c=e(0, 1), c=e(1, 2), c=e(2, 0), c=e(0, 3), c=e(3, 2)}, Simp, Replace, Find_token, 3).
+Simp={
+	// Propagate : ★
+	// r3 @ edge(E0, E1), edge(E1, E2), edge(E2, E3) ==> loop(E0, E1, E2).
+	propagate, state({$gs}, {c=e(E00, E10), c=e(E11, E20), c=e(E21, E01), $cu[], @cu}, {$cb}, {{rule=r3, e(T00, T10), e(T11, T20), e(T21, T01), $r_etc[]}, $t, @tr}, {$v})
+	:- E00=E01, E10=E11, E20=E21, T00=T01, T10=T11, T20=T21, E00=T00, E10=T10, E20=T20,  |
+	propagate, nstate({c=loop(E00, E10, E20), $gs}, {c=e(E00, E10), c=e(E11, E20), c=e(E21, E01), $cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
+}.
+Replace={
+}.
+Find_token={
+	// トークン生成 r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
+	// ★
+	found_token, token2(ARG, {$w, {C0=e(E00, E10), C1=e(E11, E20), C2=e(E21, E01), $p[C0, C1, C2]}}) :- 
+	E00=E01, E10=E11, E20=E21 | 
+	found_token, token2(ARG, {$w}), {rule=r3, e(E00, E10), e(E11, E20), e(E21, E01), C0=kill, C1=kill, C2=kill, $p[C0, C1, C2]}.
+}.
+
+
+
+
+
