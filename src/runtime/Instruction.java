@@ -192,7 +192,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * <p>アトム主導テストで使用される。*/
 	public static final int GETPARENT = 9;
 	// LOCALGETPARENTは不要
-	static {setArgType(GETPARENT, new ArgType(true, ARG_MEM));}
+	static {setArgType(GETPARENT, new ArgType(true, ARG_MEM, ARG_MEM));}
 
     // 膜に関係する出力しない基本ガード命令 (10--19)
 	//  ----- testmem    [dstmem, srcatom]
@@ -1440,6 +1440,7 @@ public class Instruction implements Cloneable, Serializable {
     public static final int GROUP = 2000;
 	static {setArgType(GROUP, new ArgType(false, ARG_INSTS));}
     
+   
     /** 命令の種類を取得する。*/
 	public int getKind() {
 		return kind;
@@ -2187,6 +2188,11 @@ public class Instruction implements Cloneable, Serializable {
 				buffer.append("[\n");
 				int i;
 				for(i = 0; i < insts.size()-1; i++){
+					//アトム主導テストの命令列を見やすく(?)する sakurai
+					if(((Instruction)insts.get(i)).getKind() == Instruction.GROUP
+						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
+						buffer.append("\n");
+					}
 					buffer.append("                  ");
 					buffer.append(insts.get(i));
 					//TODO 出力引数だったらインデントを下げる.
