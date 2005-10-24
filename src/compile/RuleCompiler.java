@@ -766,9 +766,7 @@ public class RuleCompiler {
 	private void dequeueLHSAtoms() {
 		for (int i = 0; i < lhsatoms.size(); i++) {
 			Atom atom = (Atom)lhsatoms.get(i);
-			if (!atom.functor.equals(Functor.INSIDE_PROXY)
-			 && !atom.functor.equals(Functor.OUTSIDE_PROXY)
-			 && atom.functor.isSymbol() ) {
+			if (atom.functor.isSymbol() ) {
 				body.add( Instruction.dequeueatom(
 					lhsatomToPath(atom) // ¢« lhsmems.size() + i ¤Ë°ìÃ×¤¹¤ë
 					));
@@ -990,10 +988,7 @@ public class RuleCompiler {
 		Iterator it = rhsatoms.iterator();
 		while(it.hasNext()) {
 			Atom atom = (Atom)it.next();
-			if (!atom.functor.equals(Functor.INSIDE_PROXY)
-			 && !atom.functor.equals(Functor.OUTSIDE_PROXY) 
-			 && atom.functor.isSymbol()
-			 && atom.functor.isActive() ) {
+			if (atom.functor.isSymbol() && atom.functor.isActive() ) {
 				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
 			}
 		}

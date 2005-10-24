@@ -12,19 +12,19 @@ import compile.parser.SrcName;
 public class Functor implements Serializable {
 	//**注意**：特殊なFunctorを追加した場合、readObjectメソッドを変更する事。
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
-	public static final Functor INSIDE_PROXY = new Functor("$in",2,null,"$in_2");
+	public static final Functor INSIDE_PROXY = new SpecialFunctor("$in",2);
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
-	public static final Functor OUTSIDE_PROXY = new Functor("$out",2,null,"$out_2");
+	public static final Functor OUTSIDE_PROXY = new SpecialFunctor("$out",2);
 	/** $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム
 	 * を表すファンクタ transient_inside_proxy （通称:star）*/
-	public static final Functor STAR = new Functor("$star",2,null,"$star_2");
+	public static final Functor STAR = new SpecialFunctor("$star",2);
 	
 	/** シンボル名。このクラスのオブジェクトの場合は、名前の表示名が格納される。
 	 * 常に intern した値を格納する。
 	 * 空文字列のときは、サブクラスのオブジェクトであることを表す。*/
 	private String name;
 	/** アリティ（引数の個数）*/
-	private int arity;
+	protected int arity;
 	/** ファンクタが所属するモジュール名（明示的に指定されていない場合はnull）*/
 	private String path = null;
 	
@@ -40,7 +40,6 @@ public class Functor implements Serializable {
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
 	public String getQuotedFunctorName() {
 		String text = getAbbrName();
-		if (name.startsWith("$")) return text;	// 臨時
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 			text = quoteName(text);
 		}
@@ -98,60 +97,21 @@ public class Functor implements Serializable {
 	 * @param path モジュール名（またはnull）
 	 */
 	public Functor(String name, int arity, String path) {
+		this.name = name.intern();
 		this.arity = arity;
-		this.path  = path;
-		this.name = (path == null ? "" : escapeName(path) + ".") + escapeName(name);
-		// == で比較できるようにするためにinternしておく。
-		this.name = this.name.intern();
-	}
-	private Functor(String name, int arity, String path, String strFunctor) {
-		//strFunctor 廃止
-		this(name, arity, path);
+		if (path != null)
+			this.path = path.intern();
 	}
 
-	/**
-	 * 直列化時に呼ばれる。
-	 * @param out
-	 * @throws IOException
-	 */
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException{
-		if (this == INSIDE_PROXY) {
-			out.writeObject("INSIDE_PROXY");
-		} else if (this == OUTSIDE_PROXY) {
-			out.writeObject("OUTSIDE_PROXY");
-		} else if (this == STAR) {
-			out.writeObject("STAR");
-		} else {
-			out.writeObject("NORMAL");
-			out.defaultWriteObject();
-		}
-	}
-
-	/**
-	 * フィールドの値をコピーする。readObject内で利用。
-	 * @param src コピー元
-	 */
-	private void copyFrom(Functor src) {
-		name = src.name;
-		arity = src.arity;
-		path = src.path;
-	}
 	/**
 	 * 直列化復元時に呼ばれる。
 	 * author mizuno
 	 */
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		String type = (String)in.readObject();
-		if (type.equals("INSIDE_PROXY")) {
-			copyFrom(INSIDE_PROXY);
-		} else if (type.equals("OUTSIDE_PROXY")) {
-			copyFrom(OUTSIDE_PROXY);
-		} else if (type.equals("STAR")) {
-			copyFrom(STAR);
-		} else {
-			in.defaultReadObject();
-			name = name.intern();
-		}
+		in.defaultReadObject();
+		name = name.intern();
+		if (path != null)
+			path = path.intern();
 	}
 	////////////////////////////////////////////////////////////////
 
@@ -190,13 +150,13 @@ public class Functor implements Serializable {
 		return getAbbrName() + "_" + getArity();
 	}
 	public int hashCode() {
-		return name.hashCode() + arity;
+		return (path == null ? 0 : path.hashCode()) + name.hashCode() + arity;
 	}
 	public boolean equals(Object o) {
 		// コンストラクタでinternしているので、==で比較できる。
 		// 引数oがFunctorのサブクラスの場合、falseを返す。
 		Functor f = (Functor)o;
-		return f.name == name && f.arity == arity;
+		return f.path == path && f.name == name && f.arity == arity;
 	}
 	public String getPath() {
 		return path;
@@ -255,6 +215,37 @@ public class Functor implements Serializable {
 			}
 		}
 		return new Functor(name, arity, path);
+	}
+}
+
+class SpecialFunctor extends Functor {
+	private String name;
+	SpecialFunctor(String name, int arity) {
+		super("", arity);
+		this.name = name;
+	}
+	public int hashCode() {
+		return name.hashCode() + arity;
+	}
+	public boolean equals(Object o) {
+		return this == o;
+	}
+	public String getName() {
+		return name; 
+	}
+
+	/**
+	 * 直列化復元時に呼ばれる。
+	 * author mizuno
+	 */
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		name = name.intern();
+	}
+
+	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
+	public String getQuotedFunctorName() {
+		return getAbbrName();
 	}
 }
 
