@@ -5,12 +5,14 @@
 package compile;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -115,7 +117,7 @@ public class Translator {
 	//			Env.d("trying to create temporary directory : " + f);
 				if (f.mkdir()) {
 					Env.d("Using temporary directory : " + f);
-					baseDir = f;
+					baseDir = f.getCanonicalFile(); //Windows て8.3形式の名前になっているのがなんか嫌なので正規化している
 					break;
 				}
 				i++;
@@ -284,12 +286,19 @@ public class Translator {
 	 */
 	private static boolean compile(File file) throws IOException {
 		String classpath = System.getProperty("java.class.path");
-		//TODO クラスパスに空白が含まれている場合への対処
-		String command = "javac -cp " + classpath + " -sourcepath \"" + baseDir + "\" \"" + file.getCanonicalPath() + "\"";
-		Env.d(command);
+		String[] command = {"javac", "-cp", classpath, "-sourcepath", baseDir.getPath(), file.getPath()};
 		Process javac = Runtime.getRuntime().exec(command);
 		javac.getInputStream().close();
-		javac.getErrorStream().close();
+		if (Env.debug > 0) {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(javac.getErrorStream()));
+			while (true) {
+				String line = reader.readLine();
+				if (line == null) break;
+				Env.e(line);
+			}
+		} else {
+			javac.getErrorStream().close();
+		}
 		try {
 			if (javac.waitFor() != 0) {
 				Env.e("Failed to compile the translated files."); 
