@@ -1,1 +1,1 @@
-@%~dp0\lmntal %*
+@"%~dp0\lmntal" %*

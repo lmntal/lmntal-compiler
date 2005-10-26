@@ -8,4 +8,3 @@ goto :EOF
 
 :append
 set CLASSPATH=%CLASSPATH%;%1
-echo %1
