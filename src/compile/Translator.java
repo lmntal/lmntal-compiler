@@ -630,7 +630,8 @@ public class Translator {
 					a = a.substring(0, pos_b) + "[ ... ]";
 				}
 			}
-//			writer.write("// " + a + "\n");
+			if (Env.debug > 0)
+				writer.write("// " + a + "\n");
 
 			switch (inst.getKind()) {
 				//====アトムに関係する出力する基本ガード命令====ここから====
