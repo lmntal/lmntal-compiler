@@ -2,9 +2,12 @@
 
 set CLASSPATH=%~dp0bin
 REM set CLASSPATH=%~dp0dist\lmntal.jar
-for %%f in (%~dp0lmntal_lib\*.jar) do call :append %%f
+
+pushd %~dp0
+for %%f in (lmntal_lib\*.jar) do call :append %%f
+popd
 
 goto :EOF
 
 :append
-set CLASSPATH=%CLASSPATH%;%1
+set CLASSPATH=%CLASSPATH%;%~dp0%*
