@@ -1,8 +1,8 @@
 @echo off
 
-set CLASSPATH=bin
-REM set CLASSPATH=dist\lmntal.jar
-for %%f in (lmntal_lib\*.jar) do call :append %%f
+set CLASSPATH=%~dp0bin
+REM set CLASSPATH=%~dp0dist\lmntal.jar
+for %%f in (%~dp0lmntal_lib\*.jar) do call :append %%f
 
 goto :EOF
 
