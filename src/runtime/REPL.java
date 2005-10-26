@@ -73,7 +73,7 @@ public class REPL {
 					}
 				} else if(line.startsWith(Env.replCommandPrefix)) {
 					// 特殊コマンドの処理
-					String nline = line.replace(Env.replCommandPrefix, "");
+					String nline = line.replaceAll(Env.replCommandPrefix, "");
 					if(nline.equals("q")) {
 						break;
 					} else if(nline.equals("h")) {
