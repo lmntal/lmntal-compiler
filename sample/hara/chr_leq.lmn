@@ -16,25 +16,25 @@ leq(A, B), leq(B, C), leq(C, A).
 
 
 */
-results=chr.run({c=leq(a, b), c=leq(b, c), c=leq(c, a)}, Simp, Replace, Find_token, 2).
+results=chr.run({c_=leq(a, b), c_=leq(b, c), c_=leq(c, a)}, Simp, Replace, Find_token, 2).
 Simp={
 	// Simplify : ★
 	// r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
-	simplify, state({$gs}, {c=leq(X0, Y0), c=leq(Y1, X1), $cu[], @cu}, {$cb}, {$t, @tr}, {$v})
+	simplify, state({$gs}, {c_=leq(X0, Y0), c_=leq(Y1, X1), $cu[], @cu}, {$cb}, {$t, @tr}, {$v})
 	:- unary(X0), unary(Y0), unary(X1), unary(Y1), X0=X1, Y0=Y1 | 
 	simplify, nstate({eq(X0, Y0), $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
 
 	// Propagate : ★
 	// r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
-	propagate, state({$gs}, {c=leq(X, Y0), c=leq(Y1, Z), $cu[], @cu}, {$cb}, {{rule=r3, leq(TX, TY0), leq(TY1, TZ), $r_etc[]}, $t, @tr}, {$v})
+	propagate, state({$gs}, {c_=leq(X, Y0), c_=leq(Y1, Z), $cu[], @cu}, {$cb}, {{rule=r3, leq(TX, TY0), leq(TY1, TZ), $r_etc[]}, $t, @tr}, {$v})
 	:- Y0=Y1, X=TX, Y0=TY0, Y1=TY1, Z=TZ |
-	nstate({c=leq(X, Z), $gs}, {c=leq(X, Y0), c=leq(Y1, Z), $cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
+	nstate({c_=leq(X, Z), $gs}, {c_=leq(X, Y0), c_=leq(Y1, Z), $cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
 }.
 Replace={
 	// replace(B, A), X=B :- と書きたいが、型付きプロセス文脈のマッチングは具体的なアトムを要求するので今のところ無理
 	// ★
-	replace(B, A), C=leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), X=B | replace(B, A), C=leq(A, Y).
-	replace(B, A), C=leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), Y=B | replace(B, A), C=leq(X, A).
+	replace(B, A), c_=leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), X=B | replace(B, A), c_=leq(A, Y).
+	replace(B, A), c_=leq(X, Y) :- unary(X), unary(Y), unary(A), unary(B), Y=B | replace(B, A), c_=leq(X, A).
 }.
 Find_token={
 	// トークン生成 r3 @ leq(X, Y), leq(Y, Z) ==> leq(X, Z).
