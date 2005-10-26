@@ -208,6 +208,12 @@ public class Optimizer {
 		if (last.getKind() != Instruction.PROCEED) {
 			return;
 		}
+		//バグ回避
+		Iterator itb = body.iterator();
+		while (itb.hasNext()) {
+			if (((Instruction)itb.next()).getKind() == Instruction.COPYCELLS)
+				return;
+		}
 		
 		HashMap reuseMap = new HashMap();
 		HashSet reuseMems = new HashSet(); // 再利用される膜のIDの集合
@@ -232,12 +238,6 @@ public class Optimizer {
 					addToMap(createdChildren, inst.getArg2(), inst.getArg1());
 					break;
 				case Instruction.MOVECELLS:
-//					//すでに再利用で生成する事が決まっている膜でなければ、再利用で生成する
-//					if (!reuseMap.containsKey(inst.getArg1())) {
-//						reuseMap.put(inst.getArg1(), inst.getArg2());
-//						reuseMems.add(inst.getArg2());
-//						break;
-//					}
 					addToMap(pourMap, inst.getArg1(), inst.getArg2());
 					pourMems.add(inst.getArg2());
 					break;
