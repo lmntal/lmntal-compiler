@@ -116,7 +116,7 @@ solve, nstate({$gs}, {$cu[], @cu}, {eq=[X,Y], eq(X, Y), $cb}, {$t, @t}, {$v}).
 // Introduce
 introduce, state({c=Con, $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v})
 :- ground(Con) | 
-introduce, tstate({$gs}, {c=Con, $cu[], @cu}, {$cb}, {$t, token({c=Con}, {$cu[]}), @tr}, {$v}).
+introduce, tstate({$gs}, {c=Con, $cu[], @cu}, {$cb}, {$t, token({c_store. c=Con}, {$cu[]}), @tr}, {$v}).
 
 
 
@@ -172,7 +172,7 @@ H={
 		prop_head_count=Prop_head_count.
 		
 		// token/2 - トークンを計算する
-		token({$c[]}, {$cu[]}) :- token0({{$c[]}, {$cu[]}}, {list=[], $cu[]}).
+		token({c_store. $c[]}, {$cu[]}) :- token0({{c_store. $c[]}, {$cu[]}}, {list=[], $cu[]}).
 		
 		// リスト処理するためにリスト化
 		token0(ARG, {list=L, c=Con, $c[L]}) :- ground(Con) | 
@@ -182,8 +182,8 @@ H={
 		token1(ARG, {list=list.choose_k(L, N-1)}, {}), prop_head_count=N.
 		
 		// 候補を作る
-		token1({{c=Con}, {$cu[]}}, {list=[Hd|Tl], $p[Tl], @r}, {$w}) :- ground(Hd), ground(Con) | 
-		token1({{c=Con}, {$cu[]}}, {list=Tl, $p[Tl], @r}, {$w, {l=Hd, l=Con}}).
+		token1({{c_store. c=Con}, {$cu[]}}, {list=[Hd|Tl], $p[Tl], @r}, {$w}) :- ground(Hd), ground(Con) | 
+		token1({{c_store. c=Con}, {$cu[]}}, {list=Tl, $p[Tl], @r}, {$w, {l=Hd, l=Con}}).
 		
 		token1(ARG, {list=[], @r}, {$w}) :- |
 		token2(ARG, {$w}).
