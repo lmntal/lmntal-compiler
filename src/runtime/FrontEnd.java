@@ -197,7 +197,7 @@ public class FrontEnd {
 						/// Intermediate instruction sequences are optimized.
 						int level = -1;
 						if (args[i].length() == 2)
-							level = 5;
+							level = 1;
 						else if (args[i].length() == 3)
 							level = args[i].charAt(2) - '0';
 						
