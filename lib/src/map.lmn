@@ -1,0 +1,133 @@
+/*
+NAME
+	Map module
+
+SYNOPSIS
+	r=get(put(put(put(map.new, jack, enigma), nina, myers), jack, bauer), jack, jack_is)
+	===>
+	jack_is(bauer), r(map.new(_72)), {myers('.'(nina)), bauer('.'(jack)), obj(_72)}, @602
+	
+	r=map.of_queue(push(push(push(push(queue.new,k0),v0),k1),v1))
+	===>
+	r(map.new(_144)), nil(queue.new(_156,_156)), {v0('.'(k0)), v1('.'(k1)), obj(_144)}, @602, @604
+	
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/05/22(Sat)
+
+*/
+
+{
+module(map).
+
+/**
+ * new : unit -> Map
+ * 
+ */
+H=map.new :- H=map.new(X), { obj(X) }.
+
+/**
+ * put
+ * 
+ */
+H=put(map.new(X), Key, Value), {obj(X), '.'(E_Key, E_Value), $o} :-
+	unary(Key), unary(Value), Key=E_Key, unary(E_Value) |
+	H=map.new(X), {obj(X), '.'(Key, Value), $o}.
+H=put(map.new(X), Key, Value), {obj(X), $o} :-
+	unary(Key), unary(Value) |
+	H=map.new(X), {obj(X), '.'(Key, Value), $o}.
+
+/**
+ * get
+ * 
+ */
+H=get(map.new(X), Key, Return), {obj(X), '.'(E_Key, E_Value), $o}
+	:- unary(Key), unary(E_Value), Key=E_Key |
+	H=map.new(X), {obj(X), '.'(E_Key, E_Value), $o}, Return=E_Value.
+
+/**
+ * remove
+ * 
+ */
+H=get(map.new(X), Key), {obj(X), '.'(E_Key, E_Value), $o}
+	:- unary(Key), unary(E_Value), Key=E_Key |
+	H=map.new(X), {obj(X), $o}.
+
+/**
+ * remove_all
+ * 
+ * FEATURE NOT IMPLEMENTED: untyped process context must be linear: $o
+ * SYSTEM ERROR: error recovery for the previous error is not implemented
+ */
+//H=remove_all(map.new(X)), {obj(X), $o} :-
+//	H=map.new(X), {obj(X)}.
+
+/**
+ * is_empty
+ * 
+ */
+H=is_empty(map.new(X), Return), {obj(X)} :-
+	H=map.new(X), {obj(X)}, Return=true.
+
+/**
+ * keys
+ * 
+ * Map -> List of keys
+ */
+
+/**
+ * values
+ * 
+ * Map -> List of values
+ */
+
+
+/**
+ * of_queue
+ * 
+ * Queue -> Map
+ * [k0, v0, k1, v1] -> { k0 => v0, k1 => v1 }
+ */
+H=map.of_queue(queue.new(Head, Tail)) :-
+	H=map.of_queue_s0(queue.new(Head, Tail), map.new).
+
+H=map.of_queue_s0(Queue, Map) :-
+	H=map.of_queue_s0(is_empty(Queue, IsEmpty), Map, IsEmpty).
+
+H=map.of_queue_s0(Queue, Map, true) :-
+	H=Map, nil(Queue).
+
+H=map.of_queue_s0(Queue, Map, false) :-
+	H=map.of_queue_s0(shift(shift(Queue, K), V), put(Map, K, V)).
+
+map.test :-
+	t0=get(put(put(put(map.new, jack, enigma), nina, myers), jack, bauer), jack, jack_is),
+	t1=map.of_queue(push(push(push(push(queue.new,k0),v0),k1),v1)).
+
+}
+
+
+
+/*
+
+// unary map
+// can be ground map if ground() implemented
+map : {
+	map.new($self)
+	 :- unary($self)|{name($self)}.
+	 
+	// override exist key
+	map.put($self, $k, $v), {name($name), assoc($ok, $ov), $p}
+	 :- unary($k),unary($v),$name=$self,$ok=$k,unary($ov) | {name($name), assoc($k, $v), $p}.
+	
+	// add new key
+	map.put($self, $k, $v), {name($name), $p}
+	 :- unary($k),unary($v),$name=$self | {name($name), assoc($k, $v), $p}.
+	
+	map.get($self, $k, V), {name($name), assoc($mk, $mv), $p}
+	 :- unary($k),$name=$self,$k=$mk,unary($mv) | V=$mv, {name($name), assoc($mk, $mv), $p}.
+}.
+
+*/

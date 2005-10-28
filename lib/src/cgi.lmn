@@ -1,0 +1,43 @@
+/*
+NAME
+	CGI module
+
+SYNOPSIS
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/05/23(Sun)
+
+TODO
+	query_string を取得する部分だけを inline で書けば、他はライブラリを使ってかける。かく。
+
+*/
+
+{
+module(cgi).
+
+/**
+ * parse_query : unit -> Map
+ * 
+ */
+H=cgi.parse_query :- H=map.of_queue(queue.of_list([:/*inline*/
+//	System.out.println("QS = "+Env.getExtendedOption("query_string"));
+	String q = Env.getExtendedOption("query_string");
+//	String r[] = q.split("[&=]");
+	StringTokenizer st = new StringTokenizer(q, "&=");
+	List l = new ArrayList();
+	while(st.hasMoreTokens()) {
+		l.add(st.nextToken());
+	}
+	
+//	util.Util.makeList(me.getArg(0), java.util.Arrays.asList(r));
+	util.Util.makeList(me.getArg(0), l);
+	
+	mem.removeAtom(me);
+	:])).
+
+
+}.
+

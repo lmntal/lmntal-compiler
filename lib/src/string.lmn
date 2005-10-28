@@ -1,0 +1,140 @@
+/*
+NAME
+	String module
+
+SYNOPSIS
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2004/05/31(Mon)
+		replace
+	2004/05/12(Wed)
+		split join concat
+
+*/
+
+{
+module(string).
+
+//H=string.t(String, Times) :- unary(String), int(Times) |
+//	t_s0(String, Times, 1, "").
+//H=t_s0(String, Times, I, Result) :- int(Times), I0=I*2 |
+//	t_s1(string.t(String, 2), Times, I0, Result).
+//H=t_s1(String, Times, I, Result) :- int(Times), I0=I*2 |
+//	t_s1(string.t(String, 2), Times, I0, Result).
+
+/**
+ * times : String -> Int -> String
+ * 
+ * r=string.times("ab", 5)  ==>  r="ababababab"
+ */
+H=string.times(String, Times) :-
+	unary(String), int(Times) | H=[:/*inline*/
+	StringBuffer b = new StringBuffer(me.nth(0));
+	StringBuffer r = new StringBuffer("");
+	int times = Integer.parseInt(me.nth(1));
+	for(int i=1;i<=times;i<<=1, b.append(b)) {
+		if((i&times)>0) r.append(b);
+	}
+	Atom result = mem.newAtom(new Functor(r.toString(), 1));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](String, Times).
+
+/**
+ * replace : String -> String -> String -> String
+ * 
+ * パターン文字列が変だったときは元の文字列を返す
+ */
+H=string.replace(String, Regexp, Replacement) :-
+	unary(String), unary(Regexp), unary(Replacement) | H=[:/*inline*/
+	String s=null;
+	try {
+		s = me.nth(0).replaceAll(me.nth(1), me.nth(2));
+	} catch(Exception e) {}
+	if(s==null) s = me.nth(0);
+	Atom result = mem.newAtom(new Functor(s, 1));
+	mem.relink(result, 0, me, 3);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.nthAtom(2).remove();
+	me.remove();
+	:](String, Regexp, Replacement).
+
+/**
+ * match : String -> String -> Bool
+ * 
+ * 部分的にマッチするかどうかをかえす。
+ * （String.match は全体とマッチするかどうかなので微妙に違う。）
+ * パターン文字列が変だったときは false
+ */
+H=string.match(String, Regexp) :-
+	unary(String), unary(Regexp) | H=[:/*inline*/
+	boolean b=false;
+	try {
+		b = java.util.regex.Pattern.compile(me.nth(1)).matcher(me.nth(0)).find();
+	} catch(Exception e) {e.printStackTrace();}
+	Atom result = mem.newAtom(new Functor(b?"true":"false", 1));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](String, Regexp).
+
+/**
+ * split : String -> String -> List
+ * 
+ * H=split([:\s+:], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
+ */
+H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[:/*inline*/
+	String r[] = me.nth(1).split(me.nth(0));
+	
+	util.Util.makeList(me.getArg(2), java.util.Arrays.asList(r));
+	
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me.nthAtom(1));
+	mem.removeAtom(me);
+	:](Regexp, S).
+
+/**
+ * join : String -> List -> String
+ * 
+ * H=join("_", [1,2,3])  ==>  H="1_2_3"
+ */
+H=string.concat(Glue0,string.join(Glue1, [])) :- unary(Glue0), unary(Glue1) | H=[::].
+H=string.join(Glue, [CAR|CDR]) :- unary(Glue) |
+	H=string.concat(CAR, string.concat(Glue, string.join(Glue, CDR))).
+
+
+/**
+ * concat : String -> String -> String
+ * 
+ * H='^'("abc", "de")  ==>  H="abcde"
+ */
+H=string.concat(S1, S2) :- unary(S1), unary(S2) | H=[:/*inline*/
+	Atom cat = mem.newAtom(new Functor(me.nth(0) + me.nth(1), 1));
+	mem.relinkAtomArgs(cat, 0, me, 2);
+	
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me.nthAtom(1));
+	mem.removeAtom(me);
+	:](S1, S2).
+
+H=int_of_str(S) :- unary(S) | H=[:/*inline*/
+	int n=0;
+	try{
+		n = Integer.parseInt(me.nth(0));
+	} catch(Exception e) {}
+	Atom res = mem.newAtom(new IntegerFunctor(n));
+	mem.relinkAtomArgs(res, 0, me, 1);
+	
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	:](S).
+
+}.
+

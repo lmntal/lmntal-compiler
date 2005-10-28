@@ -1,0 +1,41 @@
+/*
+NAME
+	Base module
+
+SYNOPSIS
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2005/03/11(Fri) 12:07:47
+
+*/
+
+{
+module(base).
+
+// constructor
+base.use :- bool.use.
+
+//  if(Bool,  Te)     :-   if(Bool, Te, nil).
+//  if(true,  Te, Fe) :- ground(Te), ground(Fe) |   Te.
+//  if(false, Te, Fe) :- ground(Te), ground(Fe) |   Fe.
+
+H=if(Bool,  Te)     :- H=if(Bool, Te, nil).
+H=if(true,  Te, Fe) :- ground(Te), ground(Fe) | H=Te.
+H=if(false, Te, Fe) :- ground(Te), ground(Fe) | H=Fe.
+
+// ground ·¿¤Î != 
+H=ground_neq(G0, G1) :- H=[:/*inline*/
+	boolean r = me.getArg(0).eqGround(me.getArg(1));
+//	System.out.println("RESULT : "+r);
+	Atom result = mem.newAtom(new Functor(!r ? "true" : "false", 1));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+:](G0, G1).
+
+}.
+

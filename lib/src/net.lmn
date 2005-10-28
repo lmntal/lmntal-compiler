@@ -1,0 +1,49 @@
+[:/*inline_define*/
+import java.net.*;
+import java.io.*;
+:].
+
+{
+module(net).
+
+	( H=net.get(S) :- unary(S) | H=[:/*inline*/
+		try {
+			URL url = new URL(me.nth(0));
+			HttpURLConnection hc = (HttpURLConnection)url.openConnection();
+			hc.setRequestProperty("USER-AGENT", "DoCoMo/1.0/D505i/c10");
+			hc.connect();
+			BufferedReader br = new BufferedReader(new InputStreamReader(hc.getInputStream(), "JISAutoDetect"));
+			String s;
+			StringBuffer b=new StringBuffer();
+			while((s=br.readLine())!=null) {
+				b.append(s);
+			}
+//			System.out.println(b);
+			me.nthAtom(0).remove();
+			me.setFunctor(b.toString()
+				.replaceAll("<script>.*?</script>", "")
+				.replaceAll("<br>", "\n")
+				.replaceAll("<.*?>", "")
+				.replaceAll("&#\\d{5}", "")
+				.replaceAll("&.*;"," ")
+				, 1);
+		} catch (Exception e) {
+		}
+		:](S) ).
+}.
+
+sports_news : {
+	( H=sports_news.get() :- H=net.get([:http://news.mobile.yahoo.co.jp/fc/sports/?k=:]) ).
+}.
+
+//s(H).
+//H=net.get([:http://google.co.jp:]).
+//H=net.get([:http://news.mobile.yahoo.co.jp/fc/sports/:]).
+
+
+//H=sports_news.get.
+//io.print(sports_news.get).
+
+//( s(net_got(S)) :- unary(S) | io.print(S) ).
+
+

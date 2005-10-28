@@ -1,0 +1,21 @@
+/*
+
+AUTHOR
+	Kudo
+
+HISTORY
+	2005/05/16(Mon)
+
+*/
+
+{
+
+module(rule).
+
+% ルールを消す.
+
+rule.killRules :- [:/*inline*/
+	mem.clearRules();
+	mem.removeAtom(me);
+:].
+}

@@ -1,0 +1,240 @@
+/*
+
+NAME
+
+	Window Toolkit(wt) module
+
+SYNOPSIS
+
+	r=wt.newFrame({$p,@r}).
+
+AUTHOR
+
+	Yoshiyuki Ohno
+	Ryo Okabe
+
+HISTORY
+
+	2005/10/09(Sun)
+
+*/
+
+
+[:/*inline_define*/
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+
+class LMNtalFrame extends JFrame{
+  final Membrane mem;
+
+  public LMNtalFrame(Membrane targetMem){
+    this.mem = targetMem;
+    addWindowListener(new WindowAdapter(){
+      public void windowClosing(WindowEvent e){
+        mem.asyncLock();
+        mem.newAtom(new Functor("terminate",0));
+        mem.asyncUnlock();
+      }
+    });
+  }
+}
+
+class PriorityQueue{
+  ArrayList list = new ArrayList();
+  
+  public int insert(int priority){
+    int i;
+    for(i=0;i<list.size()&&priority>((Integer)list.get(i)).intValue();i++);
+    list.add(i,new Integer(priority));
+    return(i);
+  }
+}
+:].
+
+{
+module(wt).
+
+wt.newFrame({$p,@r}) :- {wt.createFrame,$p,@r}.
+
+% フレームを作成
+wt.createFrame :- 
+  [:/*inline*/
+    LMNtalFrame frame = new LMNtalFrame((Membrane)mem);
+    Atom a = mem.newAtom(new Functor("frame",1));
+    Atom b = mem.newAtom(new ObjectFunctor(frame));
+    mem.newLink(a,0,b,0);
+    mem.removeAtom(me);
+    mem.makePerpetual();
+  :].
+
+% フレームのサイズを設定
+size(W,H),frame(F) :- class(F,"LMNtalFrame"),int(W),int(H) |
+  frame(F),
+  [:/*inline*/
+    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+    int w = Integer.parseInt(me.nth(1));
+    int h = Integer.parseInt(me.nth(2));
+    frame.setSize(w,h);
+    mem.removeAtom(me.nthAtom(0));
+    mem.removeAtom(me.nthAtom(1));
+    mem.removeAtom(me.nthAtom(2));
+    mem.removeAtom(me); 
+  :](F,W,H).
+    
+% フレームにタイトルを付与
+title(T),frame(F) :- class(F,"LMNtalFrame"),string(T) | 
+  frame(F),
+  [:/*inline*/
+    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+    String title = me.nthAtom(1).toString();
+    frame.setTitle(title);
+    mem.removeAtom(me.nthAtom(0));
+    mem.removeAtom(me.nthAtom(1));
+    mem.removeAtom(me);
+  :](F,T).
+    
+% グリッドパネルの作成
+gridPanel(R,C),frame(F) :- class(F,"LMNtalFrame"),int(R),int(C) | 
+  frame(F),
+  [:/*inline*/
+    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+    int rows = Integer.parseInt(me.nth(1));
+    int cols = Integer.parseInt(me.nth(2));
+    Panel grid = new Panel(new GridLayout(rows,cols));
+    frame.getContentPane().add(grid);
+    PriorityQueue pQueue = new PriorityQueue();
+    Atom a = mem.newAtom(new Functor("grid",2));
+    Atom b = mem.newAtom(new ObjectFunctor(grid));
+    Atom c = mem.newAtom(new ObjectFunctor(pQueue));
+    mem.newLink(a,0,b,0);
+    mem.newLink(a,1,c,0);
+    mem.removeAtom(me.nthAtom(0));
+    mem.removeAtom(me.nthAtom(1));
+    mem.removeAtom(me.nthAtom(2));
+    mem.removeAtom(me); 
+  :](F,R,C).
+
+% ボーダーパネルの作成
+borderPanel,frame(F) :- class(F,"LMNtalFrame") | 
+  frame(F),
+  [:/*inline*/
+    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+    Panel border = new Panel(new BorderLayout());
+    frame.getContentPane().add(border);
+    Atom a = mem.newAtom(new Functor("border",1));
+    Atom b = mem.newAtom(new ObjectFunctor(border));
+    mem.newLink(a,0,b,0);
+    mem.removeAtom(me.nthAtom(0));
+    mem.removeAtom(me);
+  :](F).
+
+% ボタンの配置（グリッドパネル版）
+% ボタンを１つ配置するごとにフレームをsetVisible(true)で再表示している
+% 効率が悪いので代案が必要
+addButton(T,L,E),grid(P,Q),frame(F) :- 
+  class(P,"java.awt.Panel"),class(Q,"PriorityQueue"),class(F,"LMNtalFrame"),
+    string(T),int(L),string(E) | 
+      grid(P,Q),frame(F),
+      [:/*inline*/
+        final Membrane memb = (Membrane)mem;
+        ObjectFunctor panelfunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+        Panel grid = (Panel)panelfunc.getObject();
+        ObjectFunctor queuefunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
+        PriorityQueue pQueue = (PriorityQueue)queuefunc.getObject();
+        String title = me.nthAtom(2).toString();
+        int location = Integer.parseInt(me.nth(3));
+        final String event = me.nthAtom(4).toString();
+        Button bt = new Button(title);
+        bt.setVisible(true);
+        bt.addActionListener(new ActionListener(){
+          public void actionPerformed(ActionEvent e) {
+            memb.asyncLock();
+            memb.newAtom(new Functor(event,0));
+            memb.asyncUnlock();
+          }
+        });
+        int index = pQueue.insert(location);
+        grid.add(bt,index);
+        ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(5).getFunctor();
+        LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+        frame.setVisible(true);
+        mem.removeAtom(me.nthAtom(0));
+        mem.removeAtom(me.nthAtom(1));
+        mem.removeAtom(me.nthAtom(2));
+        mem.removeAtom(me.nthAtom(3));
+        mem.removeAtom(me.nthAtom(4));
+        mem.removeAtom(me.nthAtom(5));
+        mem.removeAtom(me); 
+      :](P,Q,T,L,E,F).
+
+% ボタンの配置（ボーダーパネル版）
+% グリッドパネル版と同様
+addButton(T,L,E),border(B),frame(F) :- 
+  class(B,"java.awt.Panel"),class(F,"LMNtalFrame"),
+    string(T),string(L),string(E) | 
+      border(B),frame(F),
+      [:/*inline*/
+        final Membrane memb = (Membrane)mem;
+        ObjectFunctor panelfunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+        Panel border = (Panel)panelfunc.getObject();
+        String title = me.nthAtom(1).toString();
+        String location = me.nthAtom(2).toString();
+        final String event = me.nthAtom(3).toString();
+        Button bt = new Button(title);
+        bt.setVisible(true);
+        bt.addActionListener(new ActionListener(){
+          public void actionPerformed(ActionEvent e){
+            memb.asyncLock();
+            memb.newAtom(new Functor(event,0));
+            memb.asyncUnlock();
+          }
+        });
+        border.add(location,bt);
+        ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(4).getFunctor();
+        LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+        frame.setVisible(true);
+        mem.removeAtom(me.nthAtom(0));
+        mem.removeAtom(me.nthAtom(1));
+        mem.removeAtom(me.nthAtom(2));
+        mem.removeAtom(me.nthAtom(3));
+        mem.removeAtom(me.nthAtom(4));
+        mem.removeAtom(me); 
+      :](B,T,L,E,F).
+
+%% show
+%% これを使うとコンポーネントが追加される前にフレームを表示してしまう
+%show,frame(F) :- class(F,"LMNtalFrame") | 
+%  frame(F),
+%  [:/*inline*/
+%    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+%    LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+%    frame.setVisible(true);
+%    mem.removeAtom(me.nthAtom(0));
+%    mem.removeAtom(me); 
+%  :](F).
+
+% terminate
+% フレームの消去と開放
+terminate,frame(F) :- class(F,"LMNtalFrame") | 
+  [:/*inline*/
+    ObjectFunctor framefunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
+    frame.setVisible(false);
+    frame.dispose();
+    mem.removeAtom(me.nthAtom(0));
+    mem.removeAtom(me);
+  :](F),
+  terminated.
+
+% ゴミの処理
+% 出力用のアトム(out)を用意して結果が出力できるようにする？
+{terminated,$p[],@r} :- |.
+{terminated,$p[],@r} :- |.
+}.
+
