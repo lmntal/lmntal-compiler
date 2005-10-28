@@ -4,7 +4,7 @@ set CLASSPATH=%~dp0..\classes
 REM set CLASSPATH=%~dp0dist\lmntal.jar
 
 pushd %~dp0..
-for %%f in (lmntal_lib\*.jar) do call :append %%f
+for %%f in (lib\*.jar) do call :append %%f
 popd
 
 goto :EOF
