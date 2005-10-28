@@ -98,8 +98,7 @@ public class Optimizer {
 		if (fInlining) {
 			// head(+guard) と body をくっつける
 			inlineExpandTailJump(rule.memMatch);
-//			inlineExpandTailJump(rule.atomMatch);
-			inlineExpandTailJump(rule.guard); //代替コード
+			inlineExpandTailJump(rule.atomMatch);
 
 			rule.bodyLabel = null; 
 			rule.body = null;
