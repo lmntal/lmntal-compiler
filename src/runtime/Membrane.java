@@ -210,6 +210,9 @@ public final class Membrane extends AbstractMembrane {
 			return false;
 		} else {
 			lockThread = Thread.currentThread();
+			//parent==null になるのは、グローバルルートの場合とこの膜が除去されていた場合。
+			//ルールスレッドなので、どちらの場合もこの膜は本膜になる。
+			//したがって、ここでは設定しなくても問題ない
 			if (parent != null) remote = parent.remote;
 			return true;
 		}
