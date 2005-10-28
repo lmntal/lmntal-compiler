@@ -79,9 +79,6 @@ class Task extends AbstractTask implements Runnable {
 	 * <p>10以上の値でなければならない。*/
 	int priority = 32;
 	
-	/** マスタータスクか否か */
-	boolean isMasterTask = false;
-	
 	boolean isIdle(){
 		return idle;
 	}
@@ -296,7 +293,6 @@ class Task extends AbstractTask implements Runnable {
 		if (runtime instanceof MasterLMNtalRuntime) {
 			root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
 			if (root.getTask() != this) root = null;
-			else isMasterTask = true;
 		}
 		if (root != null) { 	
 			if (Env.fTrace) {
@@ -305,17 +301,6 @@ class Task extends AbstractTask implements Runnable {
 		}
 		while (true) {
 			while (true) {
-				/** exec()の実行時間を計る
-				long start,stop,def;
-				start = System.currentTimeMillis();
-				exec();
-				stop = System.currentTimeMillis();
-				def = stop-start;
-				if(isMasterTask)
-					System.out.println(" TIME="+def+"ms "+" ROOT");
-				else
-					System.out.println(" TIME="+def+"ms ");
-				*/
 				exec();
 				if (((LocalLMNtalRuntime)runtime).isTerminated()) return;
 				if (root != null && root.isStable()) return;
