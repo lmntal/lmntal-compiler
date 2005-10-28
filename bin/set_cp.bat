@@ -7,7 +7,6 @@ pushd %~dp0..
 for %%f in (lmntal_lib\*.jar) do call :append %%f
 popd
 
-echo %CLASSPATH%
 goto :EOF
 
 :append
