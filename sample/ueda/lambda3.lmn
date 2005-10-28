@@ -1,0 +1,6 @@
+ lambda.use.
+    Power = abs(m, abs(n, app(n,m))),
+    Two1 = abs(f, abs(x, app(f,app(f,x)))), 
+    Two2 = abs(f, abs(x, app(f,app(f,x)))), 
+    r=app(app(Power,Two1),Two2)
+

@@ -1,0 +1,23 @@
+/* prime number generator a la concurrent logic programming
+   Kazunori Ueda, 2004-03-12
+*/
+
+gen(N,Max,Ns) :- N > Max | Ns=[].
+gen(N,Max,Ns) :- N =<Max | Ns=[N|Ns1], gen(N+1,Max,Ns1).
+
+sift(Max,[],Zs) :- int(Max) | Zs=[].
+sift(Max,[P|Xs],Zs) :- int(Max), int(P), P*P<Max |
+  Zs=[P|Zs1], filter(P,Xs,Ys), sift(Max,Ys,Zs1).
+sift(Max,[P|Xs],Zs) :- int(Max), int(P), P*P>=Max |
+  Zs=[P|Zs1], sift(Max,Xs,Zs1).
+
+filter(P,[],Ys) :- int(P) | Ys=[].
+filter(P,[X|Xs],Ys) :- X mod P=:=0 | filter(P,Xs,Ys).
+filter(P,[X|Xs],Ys) :- X mod P=\=0 | Ys=[X|Ys1], filter(P,Xs,Ys1).
+
+primes(Max,Ps) :- int(Max) | gen(2,Max,Ns), sift(Max,Ns,Ps).
+
+// primes(1000,X), io.printList(X,'*'). //,
+primes(2000,answer).
+
+% filter(2,[3,4,5,6,7],result)

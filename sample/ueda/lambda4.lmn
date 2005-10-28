@@ -1,0 +1,4 @@
+{ lambda.use.
+	// (lambda y . y y) x => x x
+	r=app(abs(x, app(x, x)), a).
+}

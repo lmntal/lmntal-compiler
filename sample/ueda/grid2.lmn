@@ -1,0 +1,14 @@
+/* Self-organizing 2-D grid
+   Kazunori Ueda, 2004-10-07
+*/
+
+c(X010,Y010,X00,Y00 ), c(X02,n,X010,Y10),
+c(n,   Y02, X10,Y010) :-
+        c(X01,Y01,X00,Y00), c(X02,Y11,X01,Y10),
+        c(X11,Y02,X10,Y01), c(n,  n,  X11,Y11).
+
+c(A,E,nl,nt),c(B,n,A,nt),c(C,n,B,nt),c(D,n,C,nt),c(n,n,D,nt),
+c(n,G,nl,E),
+c(n,H,nl,G),
+c(n,I,nl,H),
+c(n,n,nl,I).

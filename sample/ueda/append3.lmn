@@ -1,0 +1,4 @@
+append([11,22,33],[44,55],result),
+( Z = append([],Y) :- Z = Y ),
+( Z = append([A|X1],Y) :- Z = [A|append(X1,Y)] )
+

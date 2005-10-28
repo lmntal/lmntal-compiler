@@ -1,0 +1,158 @@
+% c(E, P, L, R, B, X)
+% E: 要素(整数)
+% P: 親へのリンク
+% L: 左の子へのリンク
+% R: 右の子へのリンク
+% B: 部分木の高さの差(left, right, even)
+%    left: 左が右より1高い
+%   right: 右が左より1高い
+%    even: 左右の高さが同じ
+% X: 挿入や探索などの操作の命令が入るリンク
+
+% insert(IE, X)
+% IE: 挿入する要素
+% X: AVL 木と繋がるリンク
+
+% 挿入
+%% AVL 木が空の場合(最初のノード)
+insert(IE, n) :- c(IE, root, n, n, even, n).
+
+%% IE = E の場合 %% エラーを返す
+c(E, P, L, R, B, insert(IE)) :- IE=E | c(E, P, L, R, B, n), print(error).
+
+%% IE < E の場合
+
+%%% 左ノードがある場合 %%% insert を左ノードに移して探索続行
+c(E, P, L, R, B, insert(IE)), c(LE, L, LL, LR, LB, n) :- IE<E |
+   c(E, P, L, R, B, n), c(LE, L, LL, LR, LB, insert(IE)).
+
+%%% 左ノードが空の場合(L=n) %%% データ(LL=n, LR=n, LB=even)を挿入
+c(E, P, n, R, B, insert(IE)) :- IE<E |
+   c(E, P, L, R, B, rebalance(left)), c(IE, L, n, n, even, n).
+
+%% IE > E の場合
+
+%%% 右ノードがある場合 %%% insert を右ノードに移して探索続行
+c(E, P, L, R, B, insert(IE)), c(RE, R, RL, RR, RB, n) :- E<IE |
+   c(E, P, L, R, B, n), c(RE, R, RL, RR, RB, insert(IE)).
+
+%%% 右ノードが空の場合(R=n) %%% データ(LL=n, LR=n, LB=even)を挿入
+c(E, P, L, n, B, insert(IE)) :- E<IE |
+   c(E, P, L, R, B, rebalance(right)), c(IE, R, n, n, even, n).
+
+
+% 再構成
+
+%% データを挿入したが再構成する必要がない場合
+%% 右部分木の方が高いノード(B=right)の左部分木のデータを挿入した場合
+%% (rebalance(left))+、木のバランスは even となる。このとき、高さは変
+%% 化しないため、祖先のノードも再構成する可能性がなくなるため処理は終
+%% 了する。逆の場合もまた同様である。
+
+
+%%% 右部分木の方が高いノードの左部分木に挿入した場合
+c(E, P, L, R, right, rebalance(left)) :- c(E, P, L, R, even, n).
+
+%%% 左部分木の方が高いノードの右部分木に挿入した場合
+c(E, P, L, R, left, rebalance(right)) :- c(E, P, L, R, even, n).
+
+
+%% 自分自身は再構成しないが、祖先が再構成する可能性がある場合
+%% 木のバランスが even で、左部分木にに挿入した場合(rebalance(left))、木
+%% のバランスはleftとなる。この木自身のバランスは保たれたままだが、高さが
+%% 変更されたので祖先が再構成する必要がある可能性がある。そこでrebalance
+%% を親に移し、再構成が必要かどうかのチェックを続行する。その再、親の
+%% 左ノードだった場合は rebalance(left) となり、右ノードだった場合は
+%% rebalance(right) となる。ただし、ルートノードで親がない場合をは木のバ
+%% ランスを left に直すのみで処理が終了する。
+
+
+%%% 挿入が左部分木で親の左ノードだった場合
+c(E, P, L, R, even, rebalance(left)), c(PE, PP, P, PR, PB, n) :-
+   c(E, P, L, R, left, n), c(PE, PP, P, PR, PB, rebalance(left)).
+
+%%% 挿入が左部分木で親の右ノードだった場合
+c(E, P, L, R, even, rebalance(left)), c(PE, PP, PL, P, PB, n) :-
+   c(E, P, L, R, left, n), c(PE, PP, PL, P, PB, rebalance(right)).
+
+%%% 挿入が右部分木で親の左ノードだった場合
+c(E, P, L, R,  even, rebalance(right)), c(PE, PP, P, PR, PB, n) :-
+   c(E, P, L, R, right, n), c(PE, PP, P, PR, PB, rebalance(left)).
+
+%%% 挿入が右部分木で親の右ノードだった場合
+c(E, P, L, R,  even, rebalance(right)), c(PE, PP, PL, P, PB, n) :-
+   c(E, P, L, R, right, n), c(PE, PP, PL, P, PB, rebalance(right)).
+
+%%%% 例外として、左(右)部分木に挿入したが、親がルートノードであったた
+%%%% め、バランスを left(right) に直して操作終了
+rebalance( left, X), c(E, root, L, R, even, X) :- c(E, root, L, R, left, n).
+rebalance(right, X), c(E, root, L, R, even, X) :- c(E, root, L, R, right, n).
+
+%%% 木のバランスが崩れたので自分自身を再構成する場合
+
+%%%% 一重回転の場合(論文の図を参照)
+%%%%% 木のバランスが left で、左に挿入した場合
+c( E, P,  L,  R, left, rebalance(left)), c(LE,  L, LL, LR, left, n) :-
+   c(LE, P, LL, R0, even, rebalance(up)), c( E, R0, LR,  R, even, n).
+
+%%%%% 木のバランスが right で、右に挿入した場合
+c( E, P,  L,  R, right, rebalance(right)), c(RE,  R, RL, RR, right, n) :-
+   c(RE, P, L0, RR,  even, rebalance(up)), c( E, L0,  L, RL, even, n).
+
+%%%% 回転後、その木の親も再構成のチェックが必要
+%%%%% 親の左(右)ノードだった場合、親の左(右)部分木の高さが増えたことになるから
+%%%%% rebalance(left, X) となる(rebalance(right, X) となる)
+c(E, P, L, R, B, rebalance(up)), c(PE, PP, P, PR, PB, n) :-
+   c(E, P, L, R, B, n), c(PE, PP, P, PR, PB, rebalance(left)).
+c(E, P, L, R, B, rebalance(up)), c(PE, PP, PL, P, PB, n) :-
+   c(E, P, L, R, B, n), c(PE, PP, PL, P, PB, rebalance(right)).
+
+%%%%% 例外として、ルートノードだった場合は親がないので終了
+c(E, root, L, R, B, rebalance(up)) :- c(E, root, L, R, B, n).
+
+%%%% 二重回転の場合(論文の図を参照)
+%%%%% 木のバランスが left で右に挿入した場合
+%%%%%% 図の C のバランスが even だった場合
+c(E, P, L, R, left, rebalance(left)), c(LE, L, LL, LR, right, n),
+c(LRE, LR, LRL, LRR, even, n) :-
+   c(LRE, P, L0, R0, even, rebalance(up)), c(LE, L0, LL, LRL, even, n),
+   c(E, R0, LRR, R, even, n).
+
+%%%%%% 図の C のバランスが left だった場合
+c(E, P, L, R, left, rebalance(left)), c(LE, L, LL, LR, right, n),
+c(LRE, LR, LRL, LRR, left, n) :-
+   c(LRE, P, L0, R0, even, rebalance(up)), c(LE, L0, LL, LRL, even, n),
+   c(E, R0, LRR, R, right, n).
+
+%%%%%% 図の C のバランスが right だった場合
+c(E, P, L, R, left, rebalance(left)), c(LE, L, LL, LR, right, n),
+c(LRE, LR, LRL, LRR, right, n) :-
+   c(LRE, P, L0, R0, even, rebalance(up)), c(LE, L0, LL, LRL, left, n),
+   c(E, R0, LRR, R, even, n).
+
+%%%%% 木のバランスが right で 左に挿入した場合
+%%%%%% 図の C のバランスが even だった場合
+c(E, P, L, R, right, rebalance(right)), c(RE, R, RL, RR, left, n),
+c(RLE, RL, RLL, RLR, even, n) :-
+   c(RLE, P, L0, R0, even, rebalance(up)), c(RE, R0, RLR, RR, even, n),
+   c(E, L0, L, RLL, even, n).
+
+%%%%%% 図の C のバランスが left だった場合
+c(E, P, L, R, right, rebalance(right)), c(RE, R, RL, RR, left, n),
+c(RLE, RL, RLL, RLR, left, n) :-
+   c(RLE, P, L0, R0, even, rebalance(up)), c(RE, R0, RLR, RR, right, n),
+   c(E, L0, L, RLL, even, n).
+
+%%%%%% 図の C のバランスが right だった場合
+c(E, P, L, R, right, rebalance(right)), c(RE, R, RL, RR, left, n),
+c(RLE, RL, RLL, RLR, right, n) :-
+   c(RLE, P, L0, R0, even, rebalance(up)), c(RE, R0, RLR, RR, even, n),
+   c(E, L0, L, RLL, left, n).
+
+% 一重回転の例
+n(c(5,X,n,n,even)), n(c(20,Y,n,n,even)), n(c(15,W,n,n,even)),
+n(c(17,Z,W,Y,even)), c(10,root,X,Z,right, insert(31)).
+
+% 二重回転の例
+n(c(5,XX,n,n,even)), n(c(20,YY,n,n,even)), n(c(15,WW,n,n,even)),
+n(c(17,ZZ,WW,YY,even)), c(10,root,XX,ZZ,right, insert(14)).

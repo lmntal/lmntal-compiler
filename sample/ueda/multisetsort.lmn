@@ -1,0 +1,8 @@
+/* multiset rewriting -- sort an array represented as a multiset
+   array elements are represented as  a(index, value)
+   Kazunori Ueda, 2004-11-17
+*/
+
+a(I,X), a(J,Y) :- I<J, X<Y | a(I,Y), a(J,X).
+
+a(7,33),a(1,11), a(2,44), a(3,11), a(4,55), a(5,99), a(6,22).

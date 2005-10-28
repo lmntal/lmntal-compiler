@@ -1,0 +1,9 @@
+/* multiset rewriting -- changer and vending machine
+   Kazunori Ueda, 2004-12-16
+*/
+
+10,10,10,10,10,10,10,10,10,10,10,10,10.
+10,10,10,10,10, up :- 50, up.
+up.
+
+50,50, 10 :- juice.

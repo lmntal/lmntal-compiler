@@ -1,0 +1,49 @@
+// original version by Koji Hara
+
+{ lambda.use.
+	// (lambda y . y y) x => x x
+	r=app(abs(x, app(x, x)), x).
+}
+
+// { lambda.use.
+	// (lambda x . x x) (lambda x . x x) => self => self ...
+	// とまらないので注意 
+//	r=app(abs(x, app(x, x)), abs(x, app(x, x))).
+// }
+
+{ lambda.use.
+	// (lambda f . (lambda x . f (f x) ) ) succ 0 => succ (succ 0)
+	r=app(app(abs(f, abs(x, app(f, app(f, x)))), succ), 0).
+}
+
+/**
+ * let square = fun x -> mult x x in
+ *     let mult = fun x -> fun y -> * x y in
+ *         square 5
+ * 
+ * (lambda mult . (lambda square . square 5) (lambda x . mult x x) ) (lambda x . (lambda y . * x y) ) 
+ */
+{
+	integer.use. lambda.use.
+	
+	r=app(abs(mult,
+		app(abs(square, M), 
+			abs(x, app(app(mult, x), x))
+		)), abs_0([A], abs_0([B], '*'(ref(A), ref(B))))    // 組み込みの機能 '*' はラムダ式じゃないので内部形式で表しておく 
+		).
+	M=app(square, 5).
+}
+/**
+ * let mult = fun x -> fun y -> * x y in mult 5 6
+ * 
+ * (lambda mult . mult 5 6) (lambda x . (lambda y . x*y) )
+ */
+{
+	integer.use. lambda.use.
+	
+	r=app(abs(mult, M1), 
+		abs_0([A], abs_0([B], '*'(ref(A), ref(B)))) ).
+	M1=app(app(mult, 5), 6).
+}
+
+

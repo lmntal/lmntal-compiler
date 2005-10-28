@@ -1,0 +1,45 @@
+/* Resource-conscious mergesort
+   all rules are balanced w.r.t. list constructors
+   Kazunori Ueda, 2004-10-19
+*/
+
+mergesort([9,6,5,4,3,2,1],[ [],[],[] ],result1,result2).
+%    io:outstream([print(Ys),nl,print(Rs),nl]).
+
+mergesort(Xs,InitNs,Ys,FinalNs) :-
+    append(InitNs,ReturnedNs,Ns,N),
+    wrapElem(Xs,Ns,Ws,FinalNs),
+    mergeMany(Ws,Ys,ReturnedNs,N).
+
+wrapElem([],Ns0,Ws,Ns) :- Ws=[], Ns=Ns0.
+wrapElem([X|Xs],[N|Ns0],Ws0,Ns), N=[] :-
+    Ws0=[W|Ws], W=[X], wrapElem(Xs,Ns0,Ws,Ns).
+
+mergeMany([], Ys,Ns,N) :- Ys=[], Ns=N.
+mergeMany([W],Ys,Ns,N) :- Ys=W,  Ns=[N0|N], N0=[].
+mergeMany([W1,W2|Ws],Ys,Ns,N) :-
+    mergeOneLevel([W1,W2|Ws],Zs,Ns0,N1),
+    mergeMany(Zs,Ys,Ns1,N),
+    merge(Ns0,Ns1,Ns,N1).
+
+mergeOneLevel([], Ys,Ns,N) :- Ys=[], Ns=N.
+mergeOneLevel([W],Ys,Ns,N) :- Ys=[W], Ns=N.
+mergeOneLevel([W1,W2|Ws],Ys0,Ns0,N) :-
+    mergeTwo(W1,W2,W,N0), Ys0=[W|Ys], Ns0=[N0|Ns],
+    mergeOneLevel(Ws,Ys,Ns,N).
+
+mergeTwo([],Ys,Zs,N) :- Zs=Ys, N=[].
+mergeTwo(Xs,[],Zs,N) :- Zs=Xs, N=[].
+mergeTwo([X|Xs],[Y|Ys],Zs0,N) :- X=<Y |
+    Zs0=[X|Zs], mergeTwo(Xs,[Y|Ys],Zs,N).
+mergeTwo([X|Xs],[Y|Ys],Zs0,N) :- X >Y |
+    Zs0=[Y|Zs], mergeTwo([X|Xs],Ys,Zs,N).
+
+
+merge([],Y,Z,N) :- Z=Y, N=[].
+merge(X,[],Z,N) :- Z=X, N=[].
+merge([A|X1],Y,Z,N) :- Z=[A|Z1], merge(X1,Y,Z1,N).
+merge(X,[A|Y1],Z,N) :- Z=[A|Z1], merge(X,Y1,Z1,N).
+
+append([],Y,Z,N) :- Z=Y, N=[].
+append([A|X1],Y,Z,N) :- Z=[A|Z1], append(X1,Y,Z1,N).

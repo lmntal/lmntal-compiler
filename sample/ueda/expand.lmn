@@ -1,0 +1,28 @@
+expand(X,Y), $p[X] :- unary($p)  | [[/*inline*/ 
+   me.changeName("expanded");
+   AbstractMembrane mem = me.getMem(); 
+   Atom target = me.nthAtom(0);
+   String s = target.toString();
+   target.dequeue();
+   mem.removeAtom(target);
+   Atom head = mem.newAtom(new Functor("string", 3));
+   mem.newLink(head, 0, head, 1);
+   mem.newLink(me, 0, head, 2);
+   int n = s.length();
+   if (n != 0) {
+     Atom a0 = mem.newAtom(new Functor(s.substring(0,1), 1));
+     Atom current = mem.newAtom(new Functor(".", 3));
+     mem.newLink(current, 0, a0, 0);
+     mem.relinkAtomArgs(current, 2, head, 1);
+     for (int i = 1; i < n; i++) {
+       Atom a = mem.newAtom(new Functor(s.substring(i,i+1), 1));
+       Atom cons = mem.newAtom(new Functor(".", 3));
+       mem.newLink(cons, 0, a, 0);
+       mem.newLink(cons, 2, current, 1);
+       current = cons;
+     }
+     mem.newLink(current, 1, head, 1);
+   }
+]](X,Y), $p[X].
+
+expand(cdr,X), ans(X).

@@ -1,0 +1,4 @@
+% append(cons(aa,c(bb,c(cc,n))),c(dd,c(ee,n)),result),
+( append(X,Y,Z), nil(X)      :- Y=Z ),
+( append(X,Y,Z), cons(A,X1,X) :-
+     cons(A,Z1,Z), append(X1,Y,Z1) )
