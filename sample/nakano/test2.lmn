@@ -1,0 +1,205 @@
+[:/*inline_define*/
+import java.util.*;
+import javax.swing.*;
+import javax.swing.UIManager;
+import java.awt.*;
+import java.awt.event.*;
+class Sample {
+	public static Control control = new Control();
+}
+class Control {
+	Object[] objects;
+	int objectid;
+	public static Bound bound;
+	public Control(){
+		objects = new Object[100];
+		objectid = 0;
+		addPanel();
+		bound = new Bound(240,200);
+	}
+
+	public String addPanel(){
+		LMNtalpanel g = new LMNtalpanel();
+		Frame lmntalframe = new LMNtalframe(g);
+		objects[objectid] = g;
+		objectid++;
+		lmntalframe.show();
+		return Integer.toString(objectid-1);
+	}
+
+	public void addLine(String x1,String x2,String y1,String y2,Stringn){
+		Line line = new Line(Integer.parseInt(x1),Integer.parseInt(x2),
+		Integer.parseInt(y1),Integer.parseInt(y2));
+		((LMNtalpanel)objects[Integer.parseInt(n)]).addDraw(line);
+		((LMNtalpanel)objects[Integer.parseInt(n)]).repaint();
+	}
+
+	public void addAtom(String x,String y,String s,String n){
+		Atomm atom = new Atomm(Integer.parseInt(x),Integer.parseInt(y),s);
+		((LMNtalpanel)objects[Integer.parseInt(n)]).addDraw(atom);
+		((LMNtalpanel)objects[Integer.parseInt(n)]).repaint();
+	}
+
+	public String addButton(String a,String b){
+		JButton button = new JButton(a);
+		((LMNtalpanel)objects[Integer.parseInt(b)]).add(button);
+		((LMNtalpanel)objects[Integer.parseInt(b)]).repaint();
+		objects[objectid] = button;
+		objectid++;
+		return Integer.toString(objectid-1);
+	}
+
+	public void addListener(String id,AbstractMembrane mem){
+	}
+}
+
+class LMNtalframe extends JFrame{
+	LMNtalpanel g;
+	public LMNtalframe(LMNtalpanel g1){
+		setTitle("LMNtal");
+		setSize(240,200);
+		g = g1;
+		addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent E){
+				System.exit(0);
+			}
+		});
+
+		Container contentPane = getContentPane();
+		contentPane.add(g);
+	}
+}
+
+class LMNtalpanel extends JPanel{
+	Draw ldraw,cdraw;
+
+	public LMNtalpanel(){
+	}
+
+	public void paintComponent(Graphics g){
+		cdraw = ldraw;
+		while(cdraw != null){
+			cdraw.draw(g);
+			cdraw = cdraw.ndraw;
+		}
+	}
+
+	public void addDraw(Draw draw){
+		draw.ndraw = ldraw;
+		ldraw = draw;
+		repaint();
+	}
+
+	public void resetdraw(){
+		ldraw = null;
+	}
+}
+
+class ButtonListener implements ActionListener{
+	AbstractMembrane mem;
+	JButton button;
+	String label;
+	
+	public ButtonListener(JButton button1,AbstractMembrane mem1){
+		button = button1;
+		label = button.getText();
+		mem = mem1;
+		button.addActionListener(this);
+	}
+	
+	public void actionPerformed(ActionEvent evt){
+		Functor f1 = new Functor("buttonevent",1);
+		Functor f2 = new Functor(label,1);
+		Atom a = mem.newAtom(f1);
+		Atom b = mem.newAtom(f2);
+		Link l1 = new Link(a,0);
+		Link l2 = new Link(b,0);
+		a.args[0] = l2;
+		b.args[0] = l1;
+	}
+}
+
+class Draw{
+	Draw ndraw;
+	public void draw(Graphics g){
+	}
+}
+
+class Line extends Draw{
+	int x1,x2,y1,y2;
+	public Line(int xx1,int xx2,int yy1,int yy2){
+		x1 = xx1;x2 = xx2;y1 = yy1;y2 = yy2;
+	}
+	public void draw(Graphics g){
+		g.drawLine(x1,x2,y1,y2);
+	}
+}
+
+class Atomm extends Draw{
+	int x,y;
+	String s;
+	public Atomm(int xx,int yy,String ss){
+		x = xx;y = yy;s = ss;
+	}
+	public void draw(Graphics g){
+		g.setColor(Color.black);
+		g.fillOval(x,y,30,30);
+		g.setColor(Color.blue);
+		g.fillOval(x+2,y+2,26,26);
+		g.setColor(Color.black);
+		g.drawString(s,x+10,y+18);
+	}
+}
+
+class Bound{
+	int x1,y1;
+	boolean xb,yb;
+	public Bound(int xx,int yy){
+		x1 = xx; y1 = yy;
+	}
+	public String[] next(String x2,String y2){
+		int x = Integer.parseInt(x2);
+		int y = Integer.parseInt(y2);
+		if(!xb){
+			x = x+5;
+			if(x>x1)xb = true;
+		}else{
+			x = x-5;
+			if(x<0)xb = false;
+		}
+		if(!yb){
+			y = y+5;
+			if(y>y1)yb = true;
+		}else{
+			y = y-5;
+			if(y<0)yb = false;
+		}
+		String[] s = new String[2];
+		s[0] = Integer.toString(x);
+		s[1] = Integer.toString(y);
+		return s;
+	}
+}
+]],
+
+(atom(X,Y,L):-[[/*inline*/
+Sample.control.addAtom(me.getArg(0).getAtom().toString(),
+me.getArg(1).getAtom().toString(),
+me.getArg(2).getAtom().toString(),
+"0");
+]](X,Y,L)),
+(a(X,Y):-[[/*inline*/String[] ss =
+Sample.control.bound.next(me.nth(0),me.nth(1));
+me.getArg(0).getAtom().changeName(ss[0]);
+me.getArg(1).getAtom().changeName(ss[1]);
+me.changeName("az");
+]](X,Y)),
+(az(X,Y):-[[/*inline*/
+((LMNtalpanel)Sample.control.objects[0]).resetdraw();
+Sample.control.addAtom(me.getArg(0).getAtom().toString(),
+me.getArg(1).getAtom().toString(),
+"1","0");
+me.changeName("a");
+Thread.sleep(100);
+]](X,Y)),
+a(10,10)
