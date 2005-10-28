@@ -1,31 +1,35 @@
 % スレッドを複数たててノルムの計算をする
-% -s0モードだとエラーが出る
-% 並列効果は薄いようだ
 
 threadnum(8).
-createthread(8).
+generate(10000).
+threadnum(X),generate(Y) :- int(X),int(Y) |
+        threadnum(X),createthread(X),gen(Y/X).
 world({
-	ready(0).
-	thread({generate(0),$p1,@p1}),ready(X) :- thread({$p1,@p1}),ready(X+1).
+        ready(0).
+        thread({generate(0),$p1,@p1}@T),ready(X) :- thread({$p1,@p1}@T),ready(X+1).
 }).
-createthread(Num),world({$p,@p}) :- Num>0 | createthread(Num-1),
-	world({
-		thread({ 
-			generate(5000).
-			start :- started,norm(0).
-			norm(Y),n(X) :- int(X),Z=X*X+Y | norm(Z).
-			generate(X) :- X>0 | n(integer.rnd(100)), generate(X-1).
-		}@"localhost").
-		$p,@p
-	}).
+createthread(Num),world({$p,@p}),gen(Num2) :- Num>0, Num2>0 |
+        createthread(Num-1), gen(Num2),
+        world({
+                thread({
+		                a.
+		                a :-[:/*inline*/System.out.println("start" + Thread.currentThread().getId());:].
+                        generate(Num2).
+                        start :- started,norm(0),[:/*inline*/System.out.println("start2" + Thread.currentThread().getId());:].
+                        norm(Y),n(X) :- int(X),Z=X*X+Y | norm(Z).
+                        generate(X) :- X>0 | n(integer.rnd(100)), generate(X-1).
+                }@"localhost").
+                $p,@p
+        }).
 createthread(0) :-.
 
-world({ready(R),$p,@p}),threadnum(T) :- R=:=T | 
-	timer:benchmark(X,"Elapsed Time"),
-	wolrd({
-		+(X).
-		go, thread({$r,@r}) :- \+($r=(started,$q)) | go, thread({start,$r,@r}).
-		return(0).
-		thread({norm(X),started,@r}/),return(Y) :- int(X),int(Y) | return(X+Y).
-		$p.
- 	}).
+world({ready(R),$p,@p}),threadnum(T) :- R=:=T |
+        timer:benchmark(X,"Elapsed Time"),
+        wolrd({
+                +(X).
+                go, thread({$r,@r}@T) :- \+($r=(started,$q)),\+($r=(start,$q)) | go, thread({start,$r,@r}@T).
+                return(0).
+                thread({norm(X),started,@r}/),return(Y) :- int(X),int(Y) | return(X+Y).
+                $p.
+        }).
+
