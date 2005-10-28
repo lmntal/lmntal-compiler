@@ -79,6 +79,9 @@ class Task extends AbstractTask implements Runnable {
 	 * <p>10以上の値でなければならない。*/
 	int priority = 32;
 	
+	/** マスタータスクか否か */
+	boolean isMasterTask = false;
+	
 	boolean isIdle(){
 		return idle;
 	}
@@ -141,6 +144,7 @@ class Task extends AbstractTask implements Runnable {
 			}
 			mem.remote = null;
 		}
+
 		//System.out.println(mem.getAtomCount() + ": exec2");
 		// 実行
 		AbstractMembrane memToActivate = null;
@@ -251,6 +255,7 @@ class Task extends AbstractTask implements Runnable {
 				}
 			}
 		}
+
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
 		synchronized(this) {
 			mem.unlock();
@@ -270,8 +275,12 @@ class Task extends AbstractTask implements Runnable {
 			new Thread() {
 				AbstractMembrane mem;
 				public void run() {
-					if (mem.asyncLock())
+					if (mem.asyncLock()){
 						mem.asyncUnlock();
+					}else {
+						//TODO 分散環境への対応
+						((Task)(mem.task)).signal();
+					}
 				}
 				public void activate(AbstractMembrane mem) {
 					this.mem = mem;
@@ -286,7 +295,8 @@ class Task extends AbstractTask implements Runnable {
 		Membrane root = null; // ルートタスクのときのみルート膜が入る。それ以外はnull
 		if (runtime instanceof MasterLMNtalRuntime) {
 			root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
-			if (root.getTask() != this) root = null;			
+			if (root.getTask() != this) root = null;
+			else isMasterTask = true;
 		}
 		if (root != null) { 	
 			if (Env.fTrace) {
@@ -295,6 +305,17 @@ class Task extends AbstractTask implements Runnable {
 		}
 		while (true) {
 			while (true) {
+				/** exec()の実行時間を計る
+				long start,stop,def;
+				start = System.currentTimeMillis();
+				exec();
+				stop = System.currentTimeMillis();
+				def = stop-start;
+				if(isMasterTask)
+					System.out.println(" TIME="+def+"ms "+" ROOT");
+				else
+					System.out.println(" TIME="+def+"ms ");
+				*/
 				exec();
 				if (((LocalLMNtalRuntime)runtime).isTerminated()) return;
 				if (root != null && root.isStable()) return;

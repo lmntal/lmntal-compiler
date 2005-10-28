@@ -90,7 +90,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 
 	public String getName() { return name; }
 	void setName(String name) { this.name = name; } // 仕様が固まったらコンストラクタで渡すようにすべきかも
-	
+
+	public boolean alive = true;
 	///////////////////////////////
 	// コンストラクタ
 
@@ -351,6 +352,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <strike>実行膜スタックは操作しない。</strike>
 	 * 実行膜スタックに積まれていれば取り除く。 */
 	public void removeMem(AbstractMembrane mem) {
+		mem.alive = false;
 		mems.remove(mem);
 		mem.dequeue();
 		mem.parent = null;

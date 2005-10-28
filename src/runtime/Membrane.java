@@ -223,22 +223,24 @@ public final class Membrane extends AbstractMembrane {
 	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
 	 * <p>ルールスレッド以外のスレッドが2つ目以降のロックとしてこの膜のロックを取得するときに使用する。
 	 * <p>成功したら親膜のリモートを継承する。
-	 * @return つねにtrue */
+	 * @return 常にtrue */
 	public boolean blockingLock() {
-		//(mizuno) ここでロックが解放されると、デッドロックする。
-		//         上の分をsynchronizedの中に入れると大丈夫なようだが、それでよいのか？
-		//(n-kato) 修正しました。
 		synchronized(task) {
 			((Task)task).requestLock();
-			while (!lock()) {
-				try {
-					task.wait();
+			try {
+				while (true) {
+					synchronized(this) {
+						if (lock()) return true;
+					}
+					try {
+						task.wait();
+					}
+					catch (InterruptedException e) {}
 				}
-				catch (InterruptedException e) {}
+			} finally {
+				((Task)task).retractLock();
 			}
-			((Task)task).retractLock();
 		}
-		return true;
 	}
 	/**
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックを取得し、実行膜スタックから除去する。
@@ -247,8 +249,14 @@ public final class Membrane extends AbstractMembrane {
 	 * @return この膜がルート膜かルート膜の子孫ならば（要するにremoveされていなければ）つねにtrue */
 	public boolean asyncLock() {
 		if (!isRoot()) {
-			if (parent == null) return false;
-			if (!parent.asyncLock()) return false;
+			AbstractMembrane mem = parent;
+			if (mem == null) return false;
+			if (!mem.asyncLock()) return false;
+			//上２行の間でこの膜がremoveされる場合があるので、再度検査
+			if (parent == null) {
+				mem.asyncUnlock();
+				return false;
+			}
 		}
 		blockingLock();
 		remote = null;
@@ -297,7 +305,9 @@ public final class Membrane extends AbstractMembrane {
 	 */
 	public void quietUnlock() {
 		Task task = (Task)getTask();
-		lockThread = null;
+		synchronized (this) {
+			lockThread = null;
+		}
 		if (isRoot()) {
 			task.idle = false;
 			// このタスクのルールスレッドまたはその停止を待ってブロックしているスレッドを再開する。
@@ -329,7 +339,9 @@ public final class Membrane extends AbstractMembrane {
 		activate();
 		AbstractMembrane mem = this;
 		while (!mem.isRoot()) {
-			mem.lockThread = null;
+			synchronized (mem) {
+				mem.lockThread = null;
+			}
 			mem = mem.parent;
 		}
 		// task.async = null;

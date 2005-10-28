@@ -39,6 +39,8 @@ public class Module {
 		//libPath.add("FOO");
 		libPath.add(new File("./lib/src"));
 		libPath.add(new File("../lib/src"));
+		libPath.add(new File("./lib/public"));
+		libPath.add(new File("../lib/public"));
 		libPath.add(new File("."));
 	}
 	
