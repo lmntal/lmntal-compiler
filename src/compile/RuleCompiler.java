@@ -93,7 +93,7 @@ public class RuleCompiler {
 		 * トレースモードで出力
 		 */
 		theRule = new Rule(rs.leftMem.getFirstAtomName());
-
+		theRule.name = rs.name;
 		
 		hc = new HeadCompiler();//rs.leftMem;
 		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る

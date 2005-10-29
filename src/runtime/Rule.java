@@ -31,6 +31,9 @@ public final class Rule implements Serializable {
 	/** このルールの表示用文字列 */
 	private String text;
 	
+	/** ルール名 */
+	public String name;
+	
 	// todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 	
 	/**
@@ -95,6 +98,8 @@ public final class Rule implements Serializable {
 	}
 	
 	public String toString() {
-		return text;
+//		return text;
+		return name!=null && !name.equals("") ? name : text;
+//		return name;
 	}
 }

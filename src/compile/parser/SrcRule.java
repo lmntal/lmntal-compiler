@@ -7,6 +7,7 @@ import java.util.LinkedList;
 
 class SrcRule {
 	
+	public String name; // ルール名
 	public LinkedList head;			// ヘッドプロセス
 	public LinkedList body;			// ボディプロセス
 	public LinkedList guard;			// ガードプロセス
@@ -16,8 +17,8 @@ class SrcRule {
 	 * @param head ヘッドのリスト
 	 * @param body ボディのリスト
 	 */
-	public SrcRule(LinkedList head, LinkedList body) {
-		this(head, new LinkedList(), body);
+	public SrcRule(String name, LinkedList head, LinkedList body) {
+		this(name, head, new LinkedList(), body);
 	}
 	
 	/**
@@ -26,7 +27,8 @@ class SrcRule {
 	 * @param gurad ガードのリスト
 	 * @param body ボディのリスト
 	 */
-	public SrcRule(LinkedList head, LinkedList guard, LinkedList body) {
+	public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body) {
+		this.name = name;
 		this.head = head;
 		this.guard = guard;
 		this.guardNegatives = new LinkedList();
@@ -71,6 +73,6 @@ class SrcRule {
 	}
 	
 	public String toString() {
-		return "(rule)";
+		return "(rule:"+name+")";
 	}
 }

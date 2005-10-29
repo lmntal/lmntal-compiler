@@ -12,6 +12,10 @@ public final class RuleStructure {
 	 * <p>todo parentはいずれmemに名称変更する */
 	public Membrane parent;
 	
+	/** ルール名
+	 */
+	public String name;
+	
 	/** 左辺が空のときの警告を抑制するかどうか */
 	public boolean fSuppressEmptyHeadWarning = false;
 
@@ -52,7 +56,9 @@ public final class RuleStructure {
 	}
 
 	public String toString() {
-		String text = "( " + leftMem.toStringWithoutBrace() + " :- ";
+		String text="";
+		if(name!=null) text+=name+" @@ ";
+		text += "( " + leftMem.toStringWithoutBrace() + " :- ";
 		String guard = "";
 		if (!guardMem.atoms.isEmpty()) {
 			guard += guardMem.toStringAsGuardTypeConstraints() + " ";

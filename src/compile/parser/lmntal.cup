@@ -25,7 +25,7 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
-				ASTERISK, SLASH, PLUS, MINUS;
+				ASTERISK, SLASH, PLUS, MINUS, RULENAMESEP;
 terminal		QUOTED_STRING;
 terminal String RELOP, STRING;
 terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
@@ -34,6 +34,7 @@ terminal String CHAR_CODE_LITERAL;
 non terminal SrcLink			Link;
 non terminal SrcName			FuncName;
 non terminal String				AtomName;
+non terminal String				RuleName;
 non terminal Object				QuotedOperatorAtom;
 non terminal Object				UnitAtom;
 non terminal Object				UnaryOpAtom;
@@ -92,6 +93,12 @@ FuncName	::=   ATOM_NAME:name
 AtomName    ::= ATOM_NAME:name
 					{: RESULT = name.toString(); :};
 
+RuleName    ::= 
+				  ATOM_NAME:name
+					{: RESULT = name.toString(); :}
+				| LINK_NAME:name
+					{: RESULT = name.toString(); :};
+
 // 演算子が付いていない項
 UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
@@ -105,6 +112,20 @@ UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = list; :}
 //				| LPAREN Rule:rule RPAREN
 //					{: RESULT = rule; :}
+				| LPAREN RuleName:name RULENAMESEP ProcessList:list ProcessListContinuation:rule
+					{: rule.name = name;
+					   if (rule == null) {
+					     if (list.size() == 1) {
+					     	RESULT = list.getFirst();
+					     }
+					     else {
+					     	RESULT = list;
+					     }
+					   }
+					   else {
+						 rule.setHead(list);
+						 RESULT = rule;
+					   } :}
 				| LPAREN ProcessList:list ProcessListContinuation:rule
 					{: if (rule == null) {
 					     if (list.size() == 1) {
@@ -290,18 +311,24 @@ Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 				;
 					
 // 丸カッコなしのルール構文
+// ルール名に対応 by Hara
 Rule		::=	  ProcessList:head RULE ProcessList:body 
-					{: RESULT = new SrcRule(head, body); :}
+					{: RESULT = new SrcRule(null, head, body); :}
+				| RuleName:name RULENAMESEP ProcessList:head RULE ProcessList:body 
+					{: RESULT = new SrcRule(name, head, body); :}
 			    | ProcessList:head RULE ProcessList:guard GUARD ProcessList:body 
-					{: RESULT = new SrcRule(head, guard, body); :};
+					{: RESULT = new SrcRule(null, head, guard, body); :}
+			    | RuleName:name RULENAMESEP ProcessList:head RULE ProcessList:guard GUARD ProcessList:body 
+					{: RESULT = new SrcRule(name, head, guard, body); :};
 
 // 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
+// こっちはルール名には非対応。(a,b,c :- 
 ProcessListContinuation ::= RPAREN
 					{: RESULT = null; :}
 				| RULE ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, body); :}
+					{: RESULT = new SrcRule(null, null, body); :}
 				| RULE ProcessList:guard GUARD ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, guard, body); :};
+					{: RESULT = new SrcRule(null, null, guard, body); :};
 
 ProcessContext	::= PROCVAR AtomName:name
 					 {: RESULT = new SrcProcessContext(name); :}

@@ -303,6 +303,7 @@ public class LMNParser {
 	 */
 	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
 		RuleStructure rule = new RuleStructure(mem);
+		rule.name = sRule.name;
 		// 略記法の展開		
 		expander.expandRuleAbbreviations(sRule);
 		// todo 左辺のルールを構文エラーとして除去する
