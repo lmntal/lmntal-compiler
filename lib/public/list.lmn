@@ -149,8 +149,8 @@ H=choose_k([], K) :- int(K) | H=[].
 
 H=choose_k([Hd|R], K) :- K=1 | H=[[Hd]|choose_k(R, K)].
 
-// Hd を選ぶ場合とそうでない場合の全組み合わせをくっつける
-H=choose_k([Hd|Tl], K) :- ground(Hd), K>1, ground(Tl) |
+// Hd を選ぶ場合とそうでない場合の全組み合わせをくっつける 
+H=choose_k([Hd|Tl], K) :- K>1, ground(Tl) |
 H=list.append(dist(Hd, choose_k(Tl, K-1)), choose_k(Tl, K)).
 
 // map (cons A) L

@@ -107,16 +107,16 @@ k-1 個の選び方リストまではうまくいっている。それぞれに対してどういう膜を生成する
 { module(chr).
 
 
-// Solve
-solve, state({eq(X, Y), $gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @t}, {$v})
+Solve @@
+state({eq(X, Y), $gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @t}, {$v})
 :- unary(X), unary(Y) | 
-solve, nstate({$gs}, {$cu[], @cu}, {eq=[X,Y], eq(X, Y), $cb}, {$t, @t}, {$v}).
+nstate({$gs}, {$cu[], @cu}, {eq=[X,Y], eq(X, Y), $cb}, {$t, @t}, {$v}).
 
 
-// Introduce
-introduce, state({c_=Con, $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v})
+Introduce @@
+state({c_=Con, $gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v})
 :- ground(Con) | 
-introduce, tstate({$gs}, {c_=Con, $cu[], @cu}, {$cb}, {$t, token({c_store. c_=Con}, {$cu[]}), @tr}, {$v}).
+tstate({$gs}, {c_=Con, $cu[], @cu}, {$cb}, {$t, token({c_store. c_=Con}, {$cu[]}), @tr}, {$v}).
 
 
 
@@ -126,33 +126,36 @@ introduce, tstate({$gs}, {c_=Con, $cu[], @cu}, {$cb}, {$t, token({c_store. c_=Co
 // Normalize - '=' の伝播
 //----------------------------------------------------------------------
 
-// eq
+Eq @@
 nstate({$gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @tr}, {$v})
 :- 
 state({$gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @tr}, {$v}).
 
 
+Eq @@
 nstate({$gs}, {$cu[], @cu}, {eq=[X], $cb}, {$t, @tr}, {$v})
 :- unary(X) |
 state({$gs}, {$cu[], @cu}, {eq=[], $cb}, {$t, @tr}, {$v}).
 
 
+Eq @@
 nstate({$gs}, {$cu[], @cu}, {eq=[A,B|R], $cb[R]}, {$t, @tr}, {$v})
 :- unary(A), unary(B) | 
 nstate1({$gs}, {replace(B, A), $cu[], @cu}, {eq=[A|R], $cb[R]}, {$t, @tr}, {$v}).
 
 
+Eq @@
 nstate1({$gs}, {replace(B, A), $cu[], @cu}/, {$cb}, {$t, @tr}, {$v})
 :- unary(A), unary(B) | 
 nstate({$gs}, {$cu[], @cu}, {$cb}, {$t, @tr}, {$v}).
 
 
-// Terminate
+Terminate @@
 H={ state({}, {$cu[], @cu}, {eq=[], $cb}, {$t[], @tr}, {$v[]}), $etc[], @etc }/
 :-
 H={$cu[], $cb}.
 
-// Start
+Start @@
 H=chr.run({$gs}, {@simplify}, {@replace}, {@find_token}, Prop_head_count) :- int(Prop_head_count) |
 H={
 	chr.use.
@@ -193,6 +196,7 @@ H={
 	}.
 	V={}.
 	// トークン計算が終わったら次
+	TokenFinished @@
 	tstate(Gs, Cu, Cb, {$p, token2({{$c[]}, {$cu[]}}, {$w[]}), @r}/, V) :- 
 	nstate(Gs, Cu, Cb, {$p, @r}, V).
 }.
