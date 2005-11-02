@@ -1768,7 +1768,7 @@ public class Instruction implements Cloneable, Serializable {
 			Object o = it.next();
 			if (o instanceof ArrayList) {
 				c.data.add(((ArrayList)o).clone());
-			} else if (o instanceof InstructionList) {
+			} else if (kind != Instruction.JUMP && o instanceof InstructionList) {
 				c.data.add(((InstructionList)o).clone());
 			} else {
 				c.data.add(o);
