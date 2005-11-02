@@ -210,9 +210,7 @@ public final class Membrane extends AbstractMembrane {
 			return false;
 		} else {
 			lockThread = Thread.currentThread();
-			//parent==null になるのは、グローバルルートの場合とこの膜が除去されていた場合。
-			//ルールスレッドなので、どちらの場合もこの膜は本膜になる。
-			//したがって、ここでは設定しなくても問題ない
+			//除去された膜はロックされているので、parent==null になるのはグローバルルートのみ
 			if (parent != null) remote = parent.remote;
 			return true;
 		}
@@ -229,9 +227,8 @@ public final class Membrane extends AbstractMembrane {
 			((Task)task).requestLock();
 			try {
 				while (true) {
-					synchronized(this) {
-						if (lock()) return true;
-					}
+					if (lock()) return true;
+					
 					try {
 						task.wait();
 					}
@@ -305,9 +302,7 @@ public final class Membrane extends AbstractMembrane {
 	 */
 	public void quietUnlock() {
 		Task task = (Task)getTask();
-		synchronized (this) {
-			lockThread = null;
-		}
+		lockThread = null;
 		if (isRoot()) {
 			task.idle = false;
 			// このタスクのルールスレッドまたはその停止を待ってブロックしているスレッドを再開する。
@@ -339,9 +334,7 @@ public final class Membrane extends AbstractMembrane {
 		activate();
 		AbstractMembrane mem = this;
 		while (!mem.isRoot()) {
-			synchronized (mem) {
-				mem.lockThread = null;
-			}
+			mem.lockThread = null;
 			mem = mem.parent;
 		}
 		// task.async = null;
