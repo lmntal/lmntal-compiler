@@ -51,6 +51,7 @@ public class Optimizer {
 		}
 		if (level >= 3) {
 			//明示的に指定すると、ボディもくっつける
+			//やるべきじゃないかも
 			fInlining = true;
 		}
 	}
