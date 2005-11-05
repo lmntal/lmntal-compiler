@@ -1,9 +1,26 @@
 /*
-----------------------------------------------------------------------
-Array
-                                           Koji Hara and Kazunori Ueda
-                                           2005/11/05(Sat) 16:50:00
-----------------------------------------------------------------------
+
+NAME
+
+	Array module
+
+SYNOPSIS
+
+	array.new(Size,Array)
+	array.put(Array,Index,NewInt,NewArray)
+	array.get(Array,Index,OldInt,NewArray)
+	array.update(Array,Index,OldValue,NewValue,NewArray)	
+
+AUTHOR
+
+	Koji Hara and Kazunori Ueda
+
+HISTORY
+
+	2005/06/24 original
+	2005/11/05 representation changed and array.update added
+
+COMMENTS
 
 - representation: int_array('@'(A0,...,An-1), Out)
   or array('@'(A0,...,An-1), Out) after general values are stored.
@@ -14,6 +31,7 @@ Array
   the array.
 - once array.update is used, int_array('@'(...), Out) becomes
   array('@'(...), Out).
+  
 */
 {
 	module(array).
