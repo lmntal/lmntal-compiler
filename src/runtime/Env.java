@@ -14,7 +14,7 @@ import test3d.*;
  */
 public final class Env {
 
-	public static final String LMNTAL_VERSION = "0.65.20041216";
+	public static final String LMNTAL_VERSION = "0.66.20051105";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
