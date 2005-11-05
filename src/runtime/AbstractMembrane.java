@@ -405,6 +405,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
 	}
+	/** atom1の第pos1引数と、atom2の第pos2引数を交換する。--ueda */
+	public void swapAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
+		Link tmp = atom1.args[pos1];
+		atom1.args[pos1] = atom2.args[pos2];
+		atom2.args[pos2] = tmp;											
+		atom1.args[pos1].getBuddy().set(atom1,pos1);
+		atom2.args[pos2].getBuddy().set(atom2,pos2);
+	}
 	
 	// 拡張
 	
