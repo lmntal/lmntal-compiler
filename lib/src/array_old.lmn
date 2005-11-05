@@ -1,0 +1,61 @@
+/*
+----------------------------------------------------------------------
+Array
+                                              Koji Hara
+                                              2005/06/24(Fri) 03:01:53
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+TODO
+----------------------------------------------------------------------
+array.put が入れ子になると、外側のものが先に評価されてしまう。
+
+{r(array.put(array.put(array(0,0,0),1,1),2,2)), @601, @603}
+ ==>
+{r(array.put(array(0,0,0),1,2)), @601, @603}
+
+そろそろガードのインラインか組み込みガードテスト（つながってるアトムの名前テスト）を追加すべきかも
+
+
+*/
+{
+	module(array).
+	
+	H=array.new(Length) :- int(Length) | H=[:/*inline*/
+		int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+		Atom result = mem.newAtom(new Functor("array", l+1));
+		for(int i=0;i<l;i++) {
+			Atom el = mem.newAtom(new IntegerFunctor(0));
+			mem.newLink(el, 0, result, i);
+		}
+		mem.relink(result, l, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+		:](Length).
+	
+	H=array.get(Array, I, Result) :- int(I), unary(Result) | H=[:/*inline*/
+		int i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+		int len = me.nthAtom(0).getFunctor().getArity()-1;
+		i = (i+len) % len;
+		
+		int v = ((IntegerFunctor)me.nthAtom(0).nthAtom(i).getFunctor()).intValue();
+		Atom result = mem.newAtom(new IntegerFunctor(v));
+		mem.relink(result, 0, me, 2);
+		mem.unifyAtomArgs(me, 3, me, 0);
+		me.nthAtom(1).remove();
+		me.remove();
+		:](Array, I, Result).
+	
+	H=array.put(Array, I, Value) :- int(I), int(Value) | H=[:/*inline*/
+		int i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+		int len = me.nthAtom(0).getFunctor().getArity()-1;
+		i = (i+len) % len;
+		
+		me.nthAtom(0).nthAtom(i).remove();
+		mem.relink(me.nthAtom(0), i, me, 2);
+		mem.unifyAtomArgs(me, 3, me, 0);
+		me.nthAtom(1).remove();
+		me.remove();
+		:](Array, I, Value).
+}
+
