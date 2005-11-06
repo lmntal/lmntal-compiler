@@ -5,10 +5,10 @@ package test.GUI;
  * 
  * @author 
  */
-class Edge implements Comparable {
-	Node from, to;
+public class Edge implements Comparable {
+	public Node from, to;
 	
-	Edge(Node f, Node t) {
+	public Edge(Node f, Node t) {
 		from = f;
 		to = t;
 	}
