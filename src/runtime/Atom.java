@@ -247,6 +247,9 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	public void initMoveDelta3d() {
 		vx = vy = vz = 0;
 	}
+	public DoublePoint getMoveDelta(){
+		return new DoublePoint(vx,vy);
+	}
 	public void move(Rectangle area) {
 		//if (n.isFixed()) return;
 		final int M = 100;

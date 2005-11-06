@@ -12,6 +12,7 @@ public interface Node {
 	
 	public void setMoveDelta(double dx, double dy);
 	public void initMoveDelta();
+	public DoublePoint getMoveDelta();
 	public void move(Rectangle area);
 	public void paintNode(Graphics g);
 	public void paintEdge(Graphics g);
