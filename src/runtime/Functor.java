@@ -156,7 +156,7 @@ public class Functor implements Serializable {
 		// コンストラクタでinternしているので、==で比較できる。
 		// 引数oがFunctorのサブクラスの場合、falseを返す。
 		Functor f = (Functor)o;
-		return f.path == path && f.name == name && f.arity == arity;
+		return o.getClass().equals(Functor.class) && f.path == path && f.name == name && f.arity == arity;
 	}
 	public String getPath() {
 		return path;
