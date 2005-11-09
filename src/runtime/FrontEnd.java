@@ -74,15 +74,18 @@ public class FrontEnd {
 		if(Env.oneLiner!=null) {
 			// 一行実行の場合はそれを優先
 			REPL.processLine(Env.oneLiner);
-			return;
+		} else {
+			// ソースありならソースを解釈実行、なしなら REPL。
+			if(Env.argv.isEmpty()) {
+				REPL.run();
+			} else {
+				run(Env.argv);
+				if(Env.fREMAIN) REPL.run();
+			}
 		}
 		
-		// ソースありならソースを解釈実行、なしなら REPL。
-		if(Env.argv.isEmpty()) {
+		if(Env.fREPL) {
 			REPL.run();
-		} else {
-			run(Env.argv);
-			if(Env.fREMAIN) REPL.run();
 		}
 	}
 	
@@ -244,6 +247,11 @@ public class FrontEnd {
 						  else if(args[i].equals("--remain")){
 							/// --remain
 							/// Processes remain.
+							Env.fREMAIN = true;
+						} else if(args[i].equals("--REPL")){
+							/// --REPL
+							/// REPL(Read-Eval-Print-Loop) mode
+							Env.fREPL = true;
 							Env.fREMAIN = true;
 						} else if(args[i].equals("--graphic")){
 							/// --remain

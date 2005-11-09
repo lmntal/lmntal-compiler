@@ -178,6 +178,11 @@ public final class Env {
 	public static boolean fREMAIN = false;
 	public static MasterLMNtalRuntime remainedRuntime;
 	
+	/**
+	 * REPL モード
+	 */
+	public static boolean fREPL = false;
+	
 	public static boolean preProcess0 = false;
 	
 	/** アトム名の表示する長さ */
