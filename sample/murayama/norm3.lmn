@@ -2,7 +2,7 @@
 
 threadnum(4).
 {
-		generate(300).
+		generate(1000).
         generate(X) :- X>0 | n(integer.rnd(100)), generate(X-1).
         generate(0) :- generated.
 }.
@@ -15,6 +15,7 @@ threadnum(4).
 		        createthread(T).
 				go, createthread(Num) :- Num>0 |
 					go,
+					[:/*inline*/System.out.println("start");:],
 			        createthread(Num-1),
 	                thread({
     	                    start :- started,norm(0).
