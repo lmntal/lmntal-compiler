@@ -7,6 +7,7 @@ import java.util.*;
 
 import test.GUI.*;
 import test3d.*;
+import graphic.*;
 
 /**
  * 環境。デバッグ用。
@@ -142,7 +143,16 @@ public final class Env {
 		Env.threed = new LMNtal3DFrame();
 		
 	}
+	/**
+	 * Graphic Mode 有効　nakano 
+	 */
+	public static boolean fGraphic = false;
+	public static LMNtalGFrame LMNgraphic;
 	
+	public static void initGraphic(){
+		if(!Env.fGraphic) return;
+		LMNgraphic = new LMNtalGFrame();
+	}
 	/**
 	 * GUI 有効。仮仮仮仮
 	 */
