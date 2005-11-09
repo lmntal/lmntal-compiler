@@ -92,7 +92,8 @@ public class RuleCompiler {
 		 * 左辺膜の一番最初のアトム
 		 * トレースモードで出力
 		 */
-		theRule = new Rule(rs.leftMem.getFirstAtomName());
+//		theRule = new Rule(rs.leftMem.getFirstAtomName());
+		theRule = new Rule(rs.toString());
 		theRule.name = rs.name;
 		
 		hc = new HeadCompiler();//rs.leftMem;
