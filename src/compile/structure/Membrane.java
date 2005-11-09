@@ -109,7 +109,7 @@ public final class Membrane {
 		list.addAll(typedProcessContexts);
 		
 		//return list.toString().replaceAll("^.|.$","");
-		return Env.parray(list).toString();
+		return Env.parray(list, ", ").toString();
 	}
 	public String toString() {
 		String ret = "{ " + toStringWithoutBrace() + " }" + (stable ? "/" : "");

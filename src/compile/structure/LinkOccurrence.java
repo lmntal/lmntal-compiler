@@ -38,6 +38,6 @@ public final class LinkOccurrence {
 	}
 	
 	public String toString() {
-		return name;
+		return name.replaceAll("~", "_");
 	}
 }
