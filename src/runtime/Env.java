@@ -125,7 +125,7 @@ public final class Env {
 	 * 例：この値 + "q" で終了
 	 * hara
 	 */
-	public static String replCommandPrefix = "#";
+	public static String replCommandPrefix = ":";
 	
 	/**
 	 * one liner
