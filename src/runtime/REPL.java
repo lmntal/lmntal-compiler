@@ -9,6 +9,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.Iterator;
 
 import compile.Optimizer;
 class Readline {
@@ -77,14 +78,7 @@ public class REPL {
 					if(nline.equals("q")) {
 						break;
 					} else if(nline.equals("h")) {
-						System.out.println("Commands:");
-						System.out.println("  "+"[no]debug    [0-9] - set debug level");
-						System.out.println("  "+"[no]optimize [0-9] - set optimization level");
-						System.out.println("  "+"[no]verbose  [0-9] - set verbose level");
-						System.out.println("  "+"[no]shuffle  [0-4] - set shuffle level");
-						System.out.println("  "+"[no]trace          - set trace mode");					
-						System.out.println("  "+"h                  - help");
-						System.out.println("  "+"q                  - quit");
+						showHelp();
 						continue;
 					} else if(nline.matches("nodebug|debug( [0-9])?")) {
 						if (nline.length() == 5) Env.debug = Env.DEBUG_DEFAULT;
@@ -144,6 +138,37 @@ public class REPL {
 						Env.p("trace mode off");
 						Env.fTrace = false;
 						continue;
+					} else if(nline.equals("remain")) {
+						Env.p("remain mode on");
+						Env.fREMAIN = true;
+						continue;
+					} else if(nline.equals("noremain")) {
+						Env.p("remain mode off");
+						Env.fREMAIN = false;
+						continue;
+					} else if(nline.equals("r") || nline.equals("rules")) {
+						showRules();
+						continue;
+					} else if(nline.startsWith("rm") || nline.startsWith("remove")) {
+						if(Env.remainedRuntime!=null) {
+							String s[] = nline.split(" ");
+							if(s.length==1) Env.p("rm [ruleset number ...]");
+							for(int i=1;i<s.length;i++) {
+								Iterator it=Env.remainedRuntime.getGlobalRoot().rulesets.iterator();
+								while(it.hasNext()) {
+									InterpretedRuleset rs = (InterpretedRuleset)it.next();
+									if(rs.toString().matches(".*?"+s[i]+".*")) {
+										Env.p(rs+" has removed.");
+										it.remove();
+									}
+								}
+							}
+							showRules();
+						}
+						continue;
+					} else {
+						Env.p("Unknown command "+nline+".");
+						showHelp();
 					}
 				} else {
 					if(Env.replTerm.equals("null_line")) {
@@ -171,5 +196,44 @@ public class REPL {
 	public static void processLine(String line) {
 		FrontEnd.run(new StringReader(line));
 		//System.out.println(line+"  =>  {a, b, {c}}, ({b, $p}:-{c, $p})");
+	}
+	
+	/**
+	 * --remain モードの時、今あるルール一覧を表示する
+	 *
+	 */
+	public static void showRules() {
+		if(Env.remainedRuntime!=null) {
+			Iterator it=Env.remainedRuntime.getGlobalRoot().rulesets.iterator();
+			while(it.hasNext()) {
+				InterpretedRuleset rs = (InterpretedRuleset)it.next();
+				Env.p(rs);
+				Iterator it2 = rs.rules.iterator();
+				while(it2.hasNext()) {
+					Rule r = (Rule)it2.next();
+					Env.p("  "+r.text);
+					r.showDetail();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 特殊コマンドの説明を印字する
+	 *
+	 */
+	public static void showHelp() {
+		System.out.println("Commands:");
+		System.out.println("  "+"[no]debug    [0-9] - set debug level");
+		System.out.println("  "+"[no]optimize [0-9] - set optimization level");
+		System.out.println("  "+"[no]verbose  [0-9] - set verbose level");
+		System.out.println("  "+"[no]shuffle  [0-4] - set shuffle level");
+		System.out.println("  "+"[no]trace          - set trace mode");					
+		System.out.println("  "+"[no]remain         - set remain mode");					
+		System.out.println("  "+"r | rules          - show current rules");					
+		System.out.println("  "+"(rm | remove) [ruleset number...]");					
+		System.out.println("  "+"                   - remove specified rulesets  (ex: rm 601)");					
+		System.out.println("  "+"h                  - help");
+		System.out.println("  "+"q                  - quit");
 	}
 }

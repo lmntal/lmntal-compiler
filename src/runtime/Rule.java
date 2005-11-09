@@ -29,7 +29,7 @@ public final class Rule implements Serializable {
 	/** ラベル付きボディ命令列またはnull */
 	public InstructionList bodyLabel;
 	/** このルールの表示用文字列 */
-	private String text;
+	public String text;
 	
 	/** ルール名 */
 	public String name;
