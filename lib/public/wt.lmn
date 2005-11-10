@@ -81,7 +81,8 @@ size(W,H),frame(F) :- class(F,"LMNtalFrame"),int(W),int(H) |
     mem.removeAtom(me.nthAtom(0));
     mem.removeAtom(me.nthAtom(1));
     mem.removeAtom(me.nthAtom(2));
-    mem.removeAtom(me); 
+    mem.removeAtom(me);
+    frame.setVisible(true); 
   :](F,W,H).
     
 % フレームにタイトルを付与
@@ -234,7 +235,7 @@ terminate,frame(F) :- class(F,"LMNtalFrame") |
 
 % ゴミの処理
 % 出力用のアトム(out)を用意して結果が出力できるようにする？
-{terminated,$p[],@r} :- |.
-{terminated,$p[],@r} :- |.
+{terminated,$p[],@r} :- | $p[].
+% {terminated,$p[],@r} :- |.
 }.
 
