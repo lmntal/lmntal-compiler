@@ -1,0 +1,8 @@
+lambda.use.
+/* omega */
+// r=apply(lambda(cp(X0, X1), apply(X0, X1)),
+//         lambda(cp(X2, X3), apply(X2, X3))).
+
+r=apply(lambda(cp(X0, X1), apply(X0, X1)), apply(f, a)).
+
+        
