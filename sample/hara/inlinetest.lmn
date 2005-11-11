@@ -1,0 +1,27 @@
+// 何のために作ったか忘れた。
+// 
+
+start=nil.
+
+start(A):-nil(A),[:/*inline*/System.out.println(me.getName());:].
+init :- [:/*inline*/Env.gui.lmnPanel.addKeyListener(new KeyInput());:]
+nil(A),nil(A):-.
+
+
+[:/*inline_define*/
+import java.util.*;
+import test.GUI.*;
+
+class KeyInput extends KeyAdapter{
+	runtime.Membrane membrane;
+	
+	public KeyInput(){
+		membrane = 	me.getMem();
+	}
+
+}
+
+
+:]
+
+
