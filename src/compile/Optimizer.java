@@ -24,13 +24,17 @@ public class Optimizer {
 	public static boolean fReuseAtom;
 	/** 命令列のループ化を行う */
 	public static boolean fLoop;
+	/** 命令列の並び替えを行う */
+	public static boolean fGuardMove;
+	/** 命令列のグループ化を行う */
+	public static boolean fGrouping;
 
 	/**
 	 * 全ての最適化フラグをオフにする
-	 * Optimizer2 にはまだ対応していない。
 	 */
 	public static void clearFlag() {
 		fInlining = fReuseMem = fReuseAtom = fLoop = false;
+		fGuardMove = fGrouping = false;
 	}
 	/**
 	 * 最適化レベルを設定する。
@@ -42,7 +46,7 @@ public class Optimizer {
 	public static void setLevel(int level) {
 		if (level >= 1) {
 			fReuseAtom = fReuseMem = true;
-//			fGuardMove = true;
+			fGuardMove = true;
 		}
 		if (level >= 2) {
 //			ループ化はまだバグがいるので、個別に指定しない限り実行しない
@@ -70,13 +74,13 @@ public class Optimizer {
 			rule.guard = null;
 		}
 		optimize(rule.memMatch, rule.body);
-		if(Env.zoptimize == 1) {
+		if(fGuardMove || Env.zoptimize == 1) {
 			Optimizer2.guardMove(rule.atomMatch, rule.memMatch);
 		} 
-		else if(Env.zoptimize == 2) {
+		else if(fGrouping || Env.zoptimize == 2) {
 			Optimizer2.grouping(rule.atomMatch, rule.memMatch);
 		} 
-		else if(Env.zoptimize >= 3) {
+		else if((fGuardMove && fGrouping) || Env.zoptimize >= 3) {
 			Optimizer2.grouping(rule.atomMatch, rule.memMatch);
 			Optimizer2.guardMove(rule.atomMatch, rule.memMatch);
 		}
