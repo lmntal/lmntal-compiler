@@ -538,14 +538,10 @@ public class FrontEnd {
 			
 			Env.initGUI();
 			Env.init3D();
-
-			boolean ready = true;
-			
-			/*グラフィック表示用　nakano*/
 			Env.initGraphic();
-			if (Env.LMNgraphic != null) {
-				if (!Env.LMNgraphic.onTrace())  ready = false;
-			}
+
+			
+
 			
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
 
@@ -556,10 +552,17 @@ public class FrontEnd {
 //			root.asyncUnlock();
 //			rt.asyncFlag = false;
 
+			boolean ready = true;
 			if (Env.gui != null) {
 				Env.gui.lmnPanel.getGraphLayout().calc();
 				if (!Env.gui.onTrace())  ready = false;
 			}
+			
+			/*グラフィック表示用　nakano*/
+			if (Env.LMNgraphic != null) {
+				if (!Env.LMNgraphic.onTrace())  ready = false;
+			}
+			
 			/*TODO:3d calc*/
 			/*nakano*
 			if (Env.threed != null) {
@@ -576,6 +579,10 @@ public class FrontEnd {
 				}
 				if (Env.gui != null) {
 					while(Env.gui.running) Env.gui.onTrace();
+				}
+				/*graphic mode　用 nakano*/
+				if (Env.LMNgraphic != null) {
+					while(Env.LMNgraphic.running) Env.LMNgraphic.onTrace();
 				}
 			}
 			if(Env.fREMAIN) {
