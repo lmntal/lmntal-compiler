@@ -546,6 +546,7 @@ public class FrontEnd {
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
 
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
+			if(Env.fGraphic) Env.LMNgraphic.lmnPanel.setRootMem(root);
 			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			rs.react(root);
@@ -588,8 +589,9 @@ public class FrontEnd {
 			if(Env.fREMAIN) {
 				Env.remainedRuntime = rt;
 			}
-			
+
 			if (Env.gui != null)  Env.gui = null;
+			if (Env.LMNgraphic != null)  Env.LMNgraphic = null;
 //			LMNtalRuntimeManager.terminateAll();
 			LMNtalRuntimeManager.terminateAllThreaded();
 			//if(true) System.out.println("FrontEnd: terminateAll() finished!");

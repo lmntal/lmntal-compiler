@@ -35,7 +35,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			}
 
 		});
-		//start();
+		start();
 	}
 	public void paint(Graphics g) {
 
@@ -89,8 +89,17 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 //				System.out.print(ga.filename + "\n");
 			}else if(a.getName()=="position"){
 				if(a.getEdgeCount() != 2)continue;
-				ga.posx = Integer.parseInt(a.getNthNode(0).getName());
-				ga.posy = Integer.parseInt(a.getNthNode(1).getName());
+				try{
+					ga.posx = Integer.parseInt(a.getNthNode(0).getName());
+				}catch(NumberFormatException error){
+					
+				}
+
+				try{
+					ga.posy = Integer.parseInt(a.getNthNode(1).getName());
+				}catch(NumberFormatException error){
+					
+				}
 //				System.out.print(ga.posx + "," + ga.posy + "\n");
 				
 			}else if(a.getName()=="enable"){

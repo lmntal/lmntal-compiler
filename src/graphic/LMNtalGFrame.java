@@ -62,9 +62,9 @@ public class LMNtalGFrame extends JFrame{
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public boolean onTrace() {
 		if(Env.fGraphic) {
-			lmnPanel.start();
+//			lmnPanel.start();
 			waitBusy();
-			lmnPanel.stop();
+//			lmnPanel.stop();
 		}
 		return running;
 	}

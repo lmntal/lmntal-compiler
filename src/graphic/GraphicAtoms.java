@@ -25,11 +25,10 @@ public class GraphicAtoms{
 	
 	public boolean drawatom(Graphics g){
 		if(posx < 0 || posy < 0 || atomimg == null){
-			System.out.print("boo");
 			return false;
 		}
 			
-		System.out.println(g.drawImage(atomimg,posx,posy,null));
+		g.drawImage(atomimg,posx,posy,null);
 		return true;
 	}
 	

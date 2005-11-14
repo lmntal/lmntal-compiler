@@ -1,5 +1,8 @@
-{draw.
-draw :- notdraw.
-getpic("c:\\test.jpg").
-position(10,20).
-enable.}
+{
+draw.
+getpic("C:\\WINDOWS\\test.jpg").
+position(10,10).
+enable.
+position(X,Y) :- int(X),int(Y) , X < 100 , Y < 100 | position( X + 10, Y + 10).
+
+}
