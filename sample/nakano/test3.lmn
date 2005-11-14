@@ -1,0 +1,5 @@
+{draw.
+draw :- notdraw.
+getpic("c:\\test.jpg").
+position(10,20).
+enable.}
