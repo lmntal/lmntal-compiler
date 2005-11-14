@@ -251,6 +251,8 @@ class Task extends AbstractTask implements Runnable {
 						}
 					}
 					if (!Env.guiTrace()) break;
+					/**nakano graphicÍÑ*/
+					if (!Env.graphicTrace()) break;
 				}
 			}
 		}
