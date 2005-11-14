@@ -45,7 +45,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  4,3,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,0,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.LOCALUNIFY,  1,1,5,1,0));
-		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // TODO （効率改善）子膜を活性化しないようにする
+		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // 子膜を活性化する必要はない
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 		//
@@ -69,7 +69,8 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  3,4,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,4,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.UNIFY,       3,1,5,1,4)); // memo: 本質的にリモートのUNIFY
-		insts.add(new Instruction(Instruction.UNLOCKMEM,   4)); // ここでは子膜の活性化が必要
+		insts.add(new Instruction(Instruction.ENQUEUEMEM,  4)); // ここでは子膜の活性化が必要
+		insts.add(new Instruction(Instruction.UNLOCKMEM,   4));
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 

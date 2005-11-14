@@ -18,7 +18,7 @@ public class GlobalSystemRuleset extends Ruleset {
 	}
 	private int id = 601;
 	public String getGlobalRulesetID() {
-		return "0.65.20041216$systemruleset";
+		return "0.66.20051105$systemruleset";
 	}
 	public String toString() {
 		return "System Ruleset Object";
@@ -896,6 +896,7 @@ L103:
 							mem.unifyAtomArgs(
 								((Atom)var3), 1,
 								((Atom)var5), 1 );
+							((AbstractMembrane)var4).activate();
 							((AbstractMembrane)var4).forceUnlock();
 							ret = true;
 							break L103;
@@ -976,15 +977,15 @@ L101:
 		return false;
 	}
 	private static final Functor f9 = new Functor("*", 3, null);
-	private static final Functor f1 = new Functor("float", 2, null);
-	private static final Functor f11 = new Functor("+", 3, null);
-	private static final Functor f10 = new Functor("-", 3, null);
-	private static final Functor f2 = new Functor("int", 2, null);
 	private static final Functor f6 = new Functor("+.", 3, null);
-	private static final Functor f4 = new Functor("*.", 3, null);
-	private static final Functor f7 = new Functor("mod", 3, null);
-	private static final Functor f0 = new Functor("cp", 3, null);
-	private static final Functor f3 = new Functor("/.", 3, null);
+	private static final Functor f1 = new Functor("float", 2, null);
 	private static final Functor f5 = new Functor("-.", 3, null);
+	private static final Functor f2 = new Functor("int", 2, null);
+	private static final Functor f3 = new Functor("/.", 3, null);
 	private static final Functor f8 = new Functor("/", 3, null);
+	private static final Functor f4 = new Functor("*.", 3, null);
+	private static final Functor f0 = new Functor("cp", 3, null);
+	private static final Functor f10 = new Functor("-", 3, null);
+	private static final Functor f11 = new Functor("+", 3, null);
+	private static final Functor f7 = new Functor("mod", 3, null);
 }
