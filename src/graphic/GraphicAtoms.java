@@ -15,8 +15,6 @@ public class GraphicAtoms{
 	
 	public boolean SetPic(String filename){
 		if(filename == null || filename ==""){
-
-			System.out.print("nostring");
 			return false;
 		}
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -26,12 +24,12 @@ public class GraphicAtoms{
 	}
 	
 	public boolean drawatom(Graphics g){
-		if(posx < 0 || posy < 0 || name == null || atomimg == null){
+		if(posx < 0 || posy < 0 || atomimg == null){
 			System.out.print("boo");
 			return false;
 		}
 			
-		g.drawImage(atomimg,posx,posy,null);
+		System.out.println(g.drawImage(atomimg,posx,posy,null));
 		return true;
 	}
 	

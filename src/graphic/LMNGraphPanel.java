@@ -42,8 +42,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		//画面を白地で初期化（塗りつぶす）
 		OSG.setColor(Color.WHITE);
 		OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
-		g.drawImage(OSI,0,0,this);
 		paintlayout();
+		g.drawImage(OSI,0,0,this);
 	}
 	/**
 	 * 指定された名称のアトムが存在するか検索。
@@ -130,6 +130,16 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				ga = getgraphicatoms(m);
 				drawlist.add(ga);
 				ga.drawatom(OSG);
+				
+
+//				Toolkit toolkit = Toolkit.getDefaultToolkit();
+////				Imageオブジェクトの生成
+//				Image img = toolkit.getImage("C:\\WINDOWS\\test.jpg");
+//				System.out.println(OSG.drawImage(img,0,0,128,128,null));
+				
+
+//				OSG.setColor(Color.BLACK);
+//				OSG.fillRect(0,0,50, 50);
 			}
 		}
 		

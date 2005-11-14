@@ -185,6 +185,8 @@ class Task extends AbstractTask implements Runnable {
 						}
 					}
 					if (!Env.guiTrace()) break;
+					/**nakano graphic用*/
+					if (!Env.graphicTrace()) break;
 				}// システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行アトムスタックが空の時
 				flag = false;

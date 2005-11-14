@@ -321,6 +321,11 @@ public final class Env {
 		if(gui==null) return true;
 		return gui.onTrace();
 	}
+	/**graphic版 nakano ルールスレッドの実行を継続してよいかどうか*/
+	public static boolean graphicTrace() {
+		if(LMNgraphic==null) return true;
+		return LMNgraphic.onTrace();
+	}
 	
 	/**
 	 * 拡張コマンドライン引数をこれに格納する
