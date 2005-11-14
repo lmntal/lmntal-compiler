@@ -174,6 +174,7 @@ public final class Membrane extends AbstractMembrane {
 
 	/** 膜の活性化 */
 	public void activate() {
+		stable = false;
 		if (isQueued()) {
 			return;
 		}
@@ -320,6 +321,7 @@ public final class Membrane extends AbstractMembrane {
 		if (isRoot()) {
 			synchronized(task) {
 				task.memStack.moveFrom(task.bufferedStack);
+//System.out.println(Thread.currentThread() + "moved contents of buffered stack to memstack : " + getLocalID());
 			}
 		}
 		quietUnlock();
