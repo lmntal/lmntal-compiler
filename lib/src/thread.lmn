@@ -1,0 +1,66 @@
+/*
+NAME
+	Thread module
+	
+AUTHOR
+	Kei Murayama
+
+HISTORY
+	2005/11/11(Fri)
+
+*/
+
+
+{
+module(thread).
+
+	{
+		system_ruleset.
+		{thread(N,{$p,@p}), $q,@q}/@T :- int(N) | {$p,$q,@q}@T.
+	}.
+	/*
+		thread.create(N).
+		Create N threads.
+	*/
+	thread.create(N) :- N>0 | thread.num(N), thread.cre(N).
+	thread.cre(N) :- N>0 | thread.cre(N-1), thread(N,{}@"localhost").
+	thread.cre(0) :-.
+
+	/*
+		thread.at(N, {atoms or rules}).
+		Create atoms or rules at a thread numbered N.
+	*/
+	thread.at(N,{$p,@p}), thread(M,{$q,@q}@T) :- int(N),int(M), M=:=(N+1) |
+		thread(N+1,{$p,$q,@p,@q}@T).
+	
+	/*
+		thread.any({atoms or rules}).
+		Create atoms or rules at a thread randomly selected.
+	*/
+	thread.any({$p,@p}), thread(M,{$q,@q}@T) :- int(M) |
+		thread(M, {$p,$q,@p,@q}@T).
+
+	/*
+		thread.all({atoms or rules}).
+		Create atoms or rules at all threads.
+	*/
+	thread.all({$p,@p}), thread.num(N) :- int(N) |
+		thread.allcre(N, {$p,@p}), thread.num(N).
+	thread.allcre(N, {$p[],@p}), thread(M,{$q,@q}@T) :- M>0, N>0, M=:=N |
+		thread.allcre(N-1, {$p[],@p}), thread(M,{$p[],$q,@p,@q}@T).
+	thread.allcre(0,{$p[],@p}):-.
+}.
+
+
+/*
+	example showing the use.
+*/
+
+%{
+%	thread.create(4).
+%	thread.all({norm(0)}).
+%	generate(500).
+%	generate(X) :- X>0 | thread.at(X mod 4,{n(integer.rnd(100))}), generate(X-1).
+%	thread.all({norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z)}).
+%	norm(N0), norm(N1), norm(N2), norm(N3) :- norm(N0+N1+N2+N3).
+%}
