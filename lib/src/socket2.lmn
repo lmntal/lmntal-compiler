@@ -1,0 +1,145 @@
+[:/*inline_define*/
+import java.io.*;
+import java.net.*;
+
+/*
+ * ServerDaemon
+ * accept connection from client
+ * after acception, create process 'socket(in,out)'
+ */
+class ServerDaemon extends Thread {
+  ServerSocket serverSock;
+  final Membrane mem;
+  ServerDaemon(ServerSocket serverSock, Membrane mem) {
+    this.serverSock = serverSock;
+    this.mem = mem;
+  }
+  public void run() {
+    try {
+      Socket socket = serverSock.accept();
+      //System.out.println("socket accepted: " + socket.toString());
+      ReaderThread reader = new ReaderThread(socket,mem);
+      reader.start();
+      PrintWriter writer = new PrintWriter(socket.getOutputStream());
+      //System.out.println("writer created: " + writer.toString());
+      mem.asyncLock();
+      Functor rFunc = new ObjectFunctor(reader);
+      Functor wFunc = new ObjectFunctor(writer);
+      Atom socketAtom = mem.newAtom(new Functor("socket",2));
+      Atom readerAtom = mem.newAtom(rFunc);
+      Atom writerAtom = mem.newAtom(wFunc);
+      mem.newLink(socketAtom,0,readerAtom,0);
+      mem.newLink(socketAtom,1,writerAtom,0);
+      mem.asyncUnlock();
+      System.out.println("mem: " + mem.getAtomCount());
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+  }
+}
+
+/* 
+ * ReaderThread
+ * daemon to read input stream
+ */
+class ReaderThread extends Thread {
+  BufferedReader reader;
+  final Membrane mem;
+  ReaderThread(Socket sock, Membrane mem) {
+    this.mem = mem;
+    try {
+      BufferedReader reader = 
+        new BufferedReader(new InputStreamReader(sock.getInputStream()));
+      this.reader = reader;
+      //System.out.println("created reader: " + reader.toString());
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+  }
+  public void run(){
+    while(true) {
+      try {
+        if(reader.ready()) {
+          String msg = reader.readLine();
+          System.out.println(msg);
+          mem.asyncLock();
+          mem.newAtom(new Functor(msg,0));
+          mem.asyncUnlock();
+        }
+        System.out.println("a");
+      } catch(IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+}
+:].
+
+{
+module(socket2).
+
+// connect to server
+socket2.connect(Host,Port) :- unary(Host),int(Port) |
+  socket2.socket(in,out),
+  [:/*inline*/
+    String host = me.nth(0);
+    try {
+      InetAddress ip = InetAddress.getByName(host);
+      int port = Integer.parseInt(me.nth(1));
+      Socket socket = new Socket(host,port);
+      //System.out.println("socket created: " + socket.toString());
+      ReaderThread reader = new ReaderThread(socket,(Membrane)mem);
+      reader.start();
+      System.out.println("reader: start");
+      PrintWriter writer = 
+        new PrintWriter(socket.getOutputStream());
+      System.out.println("writer created: " + writer.toString());
+      mem.asyncLock();
+      Functor rFunc = new ObjectFunctor(reader);
+      Functor wFunc = new ObjectFunctor(writer);
+      Atom socketAtom = mem.newAtom(new Functor("socket",2));
+      System.out.println("new atom: socketAtom");
+      Atom readerAtom = mem.newAtom(rFunc);
+      Atom writerAtom = mem.newAtom(wFunc);
+      mem.newLink(socketAtom,0,readerAtom,0);
+      mem.newLink(socketAtom,1,writerAtom,0);
+      mem.asyncUnlock();
+      System.out.println("mem: " + mem.getAtomCount());
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+  :](Host,Port).
+
+// read data from socket
+socket2.socket([H|T],Out) :- string(H) |
+  socket2.socket(T,Out),
+  [:/*inline*/
+    String msg = me.nth(0);
+    //create atom H
+    System.out.println(msg);
+  :](H).
+
+// write data to socket
+socket2.socket(In,[H|T]) :- string(H) |
+  socket2.socket(In,T),
+  [:/*inline*/
+    String msg = me.nth(0);
+    //writer.println(msg);
+    //writer.flush();
+  :](H).
+
+// wait for connection from client
+// ok
+socket2.accept(Port) :- int(Port) |
+  [:/*inline*/
+    int port = Integer.parseInt(me.nth(0));
+    try {
+      ServerSocket serverSock = new ServerSocket(port);
+      ServerDaemon daemon = new ServerDaemon(serverSock,(Membrane)mem);
+      daemon.start();
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+  :](Port).
+}
+
