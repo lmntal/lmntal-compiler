@@ -2187,27 +2187,32 @@ public class Instruction implements Cloneable, Serializable {
 			if(insts.size() == 0) {
 				buffer.append("[]");
 			} else {
-				buffer.append("[\n");
+				if(Env.compileonly) buffer.append("[");
+				else buffer.append("[\n");
 				int i;
 				for(i = 0; i < insts.size()-1; i++){
 					//アトム主導テストの命令列を見やすく(?)する sakurai
-					if(((Instruction)insts.get(i)).getKind() == Instruction.GROUP
-						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
-						buffer.append("\n");
-					}
-					buffer.append("                  ");
+//					if(((Instruction)insts.get(i)).getKind() == Instruction.GROUP
+//						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
+//						buffer.append("\n");
+//					}
+					if(Env.compileonly) buffer.append("                ");
+					else buffer.append("                  ");
 					buffer.append(insts.get(i));
 					//TODO 出力引数だったらインデントを下げる.
-					buffer.append(", \n");
+					if(Env.compileonly) buffer.append("\n");
+					else buffer.append(", \n");
 				}
-				buffer.append("                  ");
+				if(Env.compileonly) buffer.append("                ");
+				else buffer.append("                  ");
 				buffer.append(insts.get(i));
 				for(int j = 1; j < data.size(); j++){
 					buffer.append("                  ");
 					buffer.append("     ");
 					buffer.append(", " + data.get(j));
 				}
-				buffer.append(" ]");
+				if(Env.compileonly) buffer.append("\n]");
+				else buffer.append(" ]");
 				return buffer.toString();
 			}
 		}

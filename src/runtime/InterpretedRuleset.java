@@ -141,7 +141,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	}
 	public String toString() {
 		String ret = "@" + id;
-		if (Env.verbose >= Env.VERBOSE_EXPANDRULES) {
+		if (Env.verbose >= Env.VERBOSE_EXPANDRULES || Env.compileonly) {
 			ret += dumpRules();
 		}
 		return ret;
@@ -157,7 +157,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	}
 
 	public void showDetail() {
-		if (Env.verbose >= Env.VERBOSE_SHOWRULES)
+		if (Env.verbose >= Env.VERBOSE_SHOWRULES || Env.compileonly)
 			Env.p("Compiled Ruleset @" + id + dumpRules());
 		Iterator l;
 		l = rules.listIterator();

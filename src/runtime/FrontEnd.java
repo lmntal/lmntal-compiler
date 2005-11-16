@@ -345,7 +345,10 @@ public class FrontEnd {
 							/// --optimize-loop
 							/// Use loop instruction. (EXPERIMENT)
 							Optimizer.fLoop = true;
-						} else {
+						} else if(args[i].equals("--compileonly")){
+						/// コンパイル後の中間命令列を出力するモード
+							Env.compileonly = true;
+						}else {
 							System.out.println("Invalid option: " + args[i]);
 							System.exit(-1);
 						}
@@ -502,10 +505,11 @@ public class FrontEnd {
 						Translator.deleteTemporaryFiles();
 				}
 			}
-
+			
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
 
+			if(Env.compileonly) System.exit(1);
 			if (Env.fInterpret) {
 				run(rs);
 			}

@@ -40,6 +40,8 @@ public final class Env {
 	/** 暫定的最適化オプション　ガード,グループ関係 sakurai**/
 	public static int zoptimize = 0;
 	
+	/** OCaMNtal用の入力ファイルを生成するモード */
+	public static boolean compileonly = false;
 	////////////////////////////////////////////////////////////////
 	
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/
