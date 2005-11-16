@@ -141,7 +141,7 @@ public class Translator {
 		writer.write("	public static void loadUserDefinedSystemRuleset() {\n");
 		Iterator it = SystemRulesets.userDefinedSystemRulesetIterator();
 		while (it.hasNext()) {
-			writer.write("		SystemRulesets.addUserDefinedSystemRuleset(" + getClassName((InterpretedRuleset)it.next()) + ".getInstance());\n");
+			writer.write("		runtime.SystemRulesets.addUserDefinedSystemRuleset(" + packageName + "." + getClassName((InterpretedRuleset)it.next()) + ".getInstance());\n");
 		}
 
 		//利用しているモジュールに対して再帰呼び出し
@@ -152,6 +152,7 @@ public class Translator {
 		}
 		writer.write("	}\n");
 
+		//TODO このメソッドは動的にな要素がないので、SystemRulesets クラスに作るべきだった。
 		writer.write("	private static void loadSystemRulesetFromModule(String moduleName) {\n");
 		writer.write("		try {\n");
 		writer.write("			Class c = Class.forName(\"translated.Module_\" + moduleName);\n");
