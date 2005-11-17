@@ -1,8 +1,19 @@
 {
 draw.
-getpic("C:\\WINDOWS\\test.jpg").
-position(10,10).
+name("hoge").
+getpic("C:\\WINDOWS\\test2.jpg").
+position(20,50).
+sequence(2).
 enable.
-position(X,Y) :- int(X),int(Y) , X < 100 , Y < 100 | position( X + 10, Y + 10).
+vx(1).
+vy(1).
+}.
+{position(X,Y),vx(1),vy(1),$p} :-  X < 300 ,Y < 300|{position( X + 5, Y + 7),vx(1),vy(1),$p}.
+{position(X,Y),vx(0),vy(1),$p} :-  X > 10 ,Y < 300|{position( X - 5, Y + 7),vx(0),vy(1),$p}.
+{position(X,Y),vx(1),vy(0),$p} :-  X < 300 , Y > 10 | {position( X + 5, Y - 7),vx(1),vy(0),$p}.
+{position(X,Y),vx(0),vy(0),$p} :-  X > 10 , Y > 10 |{position( X - 5, Y - 7),vx(0),vy(0),$p}.
 
-}
+{position(X,Y),vx(1),$p} :-  X >= 300, int(Y) | {position( X , Y ),vx(0),$p}.
+{position(X,Y),vx(0),$p} :-  X =< 10, int(Y) | {position( X , Y ),vx(1),$p}.
+{position(X,Y),vy(1),$p} :-  Y >= 300, int(X) | {position( X , Y ),vy(0),$p}.
+{position(X,Y),vy(0),$p} :-  Y =< 10, int(X) | {position( X , Y ),vy(1),$p}.

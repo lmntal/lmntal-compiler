@@ -71,10 +71,11 @@ public class LMNtalGFrame extends JFrame{
 	
 	public void waitBusy() {
 		busy = true;
-		System.out.print("waitbusy");
+//		System.out.print("*");
 		while(busy) {
 			try {
-				this.wait(100);
+				if(!lmnPanel.locked)lmnPanel.th.sleep(100);
+				busy = false;
 			} catch (Exception e) {
 			}
 		}

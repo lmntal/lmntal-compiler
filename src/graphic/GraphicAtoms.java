@@ -7,6 +7,7 @@ public class GraphicAtoms{
 	boolean enable;
 	int posx = -1;
 	int posy = -1;
+	int sequence = 0;
 	Image atomimg = null;
 	
 	public GraphicAtoms(){
