@@ -43,6 +43,14 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		id = ++lastId;
 	}
 	
+	/** 中間命令列をパーズして生成するときに利用するコンストラクタ */
+	public InterpretedRuleset(int id, List rules) {
+		this.id = id;
+		this.rules = rules;
+		if (lastId < id)
+			lastId = id;
+	}
+	
 	////////////////////////////////////////////////////////////////
 
 	/** グローバルルールセットID（未定義の場合はnull）*/

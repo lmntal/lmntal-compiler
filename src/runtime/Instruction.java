@@ -2221,7 +2221,28 @@ public class Instruction implements Cloneable, Serializable {
 
 		return buffer.toString();
     }
+    
+    //////////////////////////////////////////////
+    // パーザー用
 
+	/** 命令名から命令番号へのハッシュ */
+	static HashMap nameTable = new HashMap();
+	static {
+		Iterator it = instructionTable.keySet().iterator();
+		while (it.hasNext()) {
+			Integer i = (Integer)it.next();
+			String name = (String)instructionTable.get(i);
+			nameTable.put(name, i);
+		}
+	}
+
+	/** パーザー用コンストラクタ */
+    public Instruction(String name, List data) {
+    	this.kind = ((Integer)nameTable.get(name)).intValue();
+    	this.data = data;
+    }
+
+    ///////////////////////////////////////////////
     
     /** spec命令の引数値を新しい値に更新する（暫定的措置）*/
     public void updateSpec(int formals, int locals) {

@@ -55,6 +55,19 @@ public final class Rule implements Serializable {
 	public Rule(String text) {
 		this.text = text;
 	}
+	/** パーザーで利用するコンストラクタ */
+	public Rule(InstructionList atomMatchLabel, InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel) {
+		this.atomMatchLabel = atomMatchLabel;
+		this.memMatchLabel = memMatchLabel;
+		this.guardLabel = guardLabel;
+		this.bodyLabel = bodyLabel;
+		atomMatch = atomMatchLabel.insts;
+		memMatch = memMatchLabel.insts;
+		if (guardLabel != null)
+			guard = guardLabel.insts;
+		if (bodyLabel != null)
+			body = bodyLabel.insts;
+	}
 	
 	/**
 	 * 命令列の詳細を出力する

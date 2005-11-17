@@ -4,8 +4,10 @@
  */
 package runtime;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * ラベル付き命令列を表すクラス。
@@ -19,9 +21,9 @@ public class InstructionList implements Cloneable, Serializable {
 	/** ラベル */
 	public String label;
 	/** 仮引数の個数 */
-	public int formals;
+	private int formals;
 	/** 局所変数の個数（仮引数の個数を含む） */
-	public int locals;
+	private int locals;
 	/** 命令列 (InstructionのList) */
 	public List insts = new ArrayList();
 //	/** 親命令列またはnull */
@@ -42,6 +44,20 @@ public class InstructionList implements Cloneable, Serializable {
 	public InstructionList() {
 		label = "L" + nextId++;
 //		this.parent = parent;
+	}
+
+	/** パーザーで利用するコンストラクタ */
+	public InstructionList(ArrayList insts) {
+		this();
+		this.insts = insts;
+	}
+	/** パーザーで利用するコンストラクタ */
+	public InstructionList(int id, ArrayList insts) {
+		this.label = "L" + id;
+		this.insts = insts;
+		//もっと賢い方法はないものだろうか。
+		if (nextId <= id)
+			nextId = id+1;
 	}
 	
 	public Object clone() {
