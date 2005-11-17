@@ -112,9 +112,9 @@ Functor			::=	  SQUOTED_STRING:name UNDERBAR NUMBER:arity
 						{: assert arity==1; RESULT = new FloatingFunctor(v.doubleValue()); :}
 					| DQUOTED_STRING:v UNDERBAR NUMBER:arity
 						{: assert arity==1; RESULT = new StringFunctor(v); :}
-					| INSIDE_PROXY:func
+					| INSIDE_PROXY
 						{: RESULT = Functor.INSIDE_PROXY; :}
-					| OUTSIDE_PROXY:fulc
+					| OUTSIDE_PROXY
 						{: RESULT = Functor.OUTSIDE_PROXY; :};
 NumberList		::=	  /*empty*/
 						{: RESULT = new ArrayList(); :}
