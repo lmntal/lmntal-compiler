@@ -1,3 +1,8 @@
+/* socket(reader,writer,In,Out)
+ *
+ */
+
+
 [:/*inline_define*/
 import java.io.*;
 import java.net.*;
@@ -5,7 +10,7 @@ import java.net.*;
 /*
  * ServerDaemon
  * accept connection from client
- * after acception, create process 'socket(in,out)'
+ * after acception, create socket-process
  */
 class ServerDaemon extends Thread {
   ServerSocket serverSock;
@@ -17,12 +22,14 @@ class ServerDaemon extends Thread {
   public void run() {
     try {
       Socket socket = serverSock.accept();
-      //System.out.println("socket accepted: " + socket.toString());
+      System.out.println("socket accepted: " + socket.toString());
       ReaderThread reader = new ReaderThread(socket,mem);
       reader.start();
+      System.out.println("reader: start");
       PrintWriter writer = new PrintWriter(socket.getOutputStream());
-      //System.out.println("writer created: " + writer.toString());
+      System.out.println("writer created: " + writer.toString());
       mem.asyncLock();
+      // create socket-process
       Functor rFunc = new ObjectFunctor(reader);
       Functor wFunc = new ObjectFunctor(writer);
       Atom socketAtom = mem.newAtom(new Functor("socket",2));
@@ -31,7 +38,6 @@ class ServerDaemon extends Thread {
       mem.newLink(socketAtom,0,readerAtom,0);
       mem.newLink(socketAtom,1,writerAtom,0);
       mem.asyncUnlock();
-      System.out.println("mem: " + mem.getAtomCount());
     } catch(IOException e) {
       e.printStackTrace();
     }
@@ -51,22 +57,23 @@ class ReaderThread extends Thread {
       BufferedReader reader = 
         new BufferedReader(new InputStreamReader(sock.getInputStream()));
       this.reader = reader;
-      //System.out.println("created reader: " + reader.toString());
+      //System.out.println("reader created: " + reader.toString());
     } catch(IOException e) {
       e.printStackTrace();
     }
   }
   public void run(){
     while(true) {
+      yield();
       try {
         if(reader.ready()) {
+          System.out.println("reader is ready");
           String msg = reader.readLine();
           System.out.println(msg);
           mem.asyncLock();
           mem.newAtom(new Functor(msg,0));
           mem.asyncUnlock();
         }
-        System.out.println("a");
       } catch(IOException e) {
         e.printStackTrace();
       }
@@ -78,9 +85,8 @@ class ReaderThread extends Thread {
 {
 module(socket2).
 
-// connect to server
+// connect
 socket2.connect(Host,Port) :- unary(Host),int(Port) |
-  socket2.socket(in,out),
   [:/*inline*/
     String host = me.nth(0);
     try {
@@ -95,41 +101,43 @@ socket2.connect(Host,Port) :- unary(Host),int(Port) |
         new PrintWriter(socket.getOutputStream());
       System.out.println("writer created: " + writer.toString());
       mem.asyncLock();
+      // create socket-process
       Functor rFunc = new ObjectFunctor(reader);
       Functor wFunc = new ObjectFunctor(writer);
       Atom socketAtom = mem.newAtom(new Functor("socket",2));
-      System.out.println("new atom: socketAtom");
       Atom readerAtom = mem.newAtom(rFunc);
       Atom writerAtom = mem.newAtom(wFunc);
       mem.newLink(socketAtom,0,readerAtom,0);
       mem.newLink(socketAtom,1,writerAtom,0);
       mem.asyncUnlock();
-      System.out.println("mem: " + mem.getAtomCount());
+      //System.out.println("mem: " + mem.getAtomCount());
     } catch(IOException e) {
       e.printStackTrace();
     }
   :](Host,Port).
 
 // read data from socket
-socket2.socket([H|T],Out) :- string(H) |
-  socket2.socket(T,Out),
-  [:/*inline*/
-    String msg = me.nth(0);
-    //create atom H
-    System.out.println(msg);
-  :](H).
+//socket2.socket([H|T],Out) :- string(H) |
+//  socket2.socket(T,Out),
+//  [:/*inline*/
+//    String msg = me.nth(0);
+//    //create atom H
+//    System.out.println(msg);
+//  :](H).
 
 // write data to socket
+// UNDER CONSTRUCTION
 socket2.socket(In,[H|T]) :- string(H) |
   socket2.socket(In,T),
   [:/*inline*/
     String msg = me.nth(0);
-    //writer.println(msg);
-    //writer.flush();
+    ObjectFunctor func = (ObjectFunctor)***.nthAtom(1).getFunctor();
+    PrintWriter writer = func.getObject();
+    writer.println(msg);
+    writer.flush();
   :](H).
 
-// wait for connection from client
-// ok
+// accept
 socket2.accept(Port) :- int(Port) |
   [:/*inline*/
     int port = Integer.parseInt(me.nth(0));
