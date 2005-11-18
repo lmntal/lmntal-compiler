@@ -14,18 +14,20 @@ import java_cup.runtime.Symbol;
 %{
 	private final boolean _DEBUG = true;
 	StringBuffer string = new StringBuffer();
+	StringBuffer token = new StringBuffer();
+	int startline, startcol;
 
-    /* To create a new java_cup.runtime.Symbol with information about
-       the current token, the token will have no value in this
-       case. */
     private Symbol symbol(int type) {
-        return new Symbol(type, yyline, yycolumn);
+    	return symbol(type, null, yytext(), yyline, yycolumn);
     }
-    
-    /* Also creates a new java_cup.runtime.Symbol with information
-       about the current token, but this object has a value. */
     private Symbol symbol(int type, Object value) {
-        return new Symbol(type, yyline, yycolumn, value);
+    	return symbol(type, value, yytext(), yyline, yycolumn);
+    }
+    private Symbol symbol(int type, Object value, String token) {
+    	return symbol(type, value, token, yyline, yycolumn);
+    }
+    private Symbol symbol(int type, Object value, String token, int line, int col) {
+        return new MySymbol(token, type, line+1, col+1, value);
     }
 %}
 
@@ -116,8 +118,8 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	"mod" 				{ return symbol(sym.MOD); }
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
-	"[:" 				{ string.setLength(0); yybegin(QUOTED); }
-	"\""				{ string.setLength(0); yybegin(STRING); }
+	"[:" 				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(QUOTED); }
+	"\""				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(STRING); }
 	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext()); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME,		yytext()); }
 	{CharCodeLiteral}	{ return symbol(sym.CHAR_CODE_LITERAL,	yytext()); }
@@ -129,21 +131,23 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 }
 
 <QUOTED> {
-	":]"                { yybegin(YYINITIAL); return symbol(sym.QUOTED_STRING, string.toString()); }
-	.|{LineTerminator}  { string.append( yytext() ); }
+	":]"                { token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.QUOTED_STRING, string.toString(), token.toString(), startline, startcol); }
+	<<EOF>>             { throw new Error("EOF in quoted name"); }
+	.|{LineTerminator}  { token.append(yytext()); string.append( yytext() ); }
 }
 
 <STRING> {
-	"\""                { yybegin(YYINITIAL); return symbol(sym.STRING, string.toString()); }
-	"\\\\"				{ string.append("\\"); }
+	"\""                { token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.STRING, string.toString(), token.toString(), startline, startcol); }
+	"\\\\"				{ token.append(yytext()); string.append("\\"); }
 	"\\"[\r]?"\n"		{ /* just skip */ }			// 行末の \ および引き続く改行は無視する
-	"\\\""				{ string.append("\""); }
-	"\\r"				{ string.append("\r"); }
-	"\\n"				{ string.append("\n"); }
-	"\\f"				{ string.append("\f"); }
-	"\\t"				{ string.append("\t"); }
+	"\\\""				{ token.append(yytext()); string.append("\""); }
+	"\\r"				{ token.append(yytext()); string.append("\r"); }
+	"\\n"				{ token.append(yytext()); string.append("\n"); }
+	"\\f"				{ token.append(yytext()); string.append("\f"); }
+	"\\t"				{ token.append(yytext()); string.append("\t"); }
 	{LineTerminator}	{ /* just skip */ }			// 改行は無視する。仮仕様なので必要ならば変更してよい
-	.					{ string.append( yytext() ); }
+	<<EOF>>             { throw new Error("EOF in string"); }
+	.					{ token.append(yytext()); string.append( yytext() ); }
 }												
 												
 <COMMENT> {
@@ -157,4 +161,4 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 
 /* No token was found for the input so through an error.  Print out an
    Illegal character message with the illegal character that was found. */
-[^]                    { throw new Error("Illegal character <"+yytext()+"> at line "+yyline); }
+[^]                    { throw new Error("Illegal character <"+yytext()+"> at line "+(yyline+1)); }
