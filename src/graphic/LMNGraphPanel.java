@@ -46,7 +46,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		//画面を白地で初期化（塗りつぶす）
 		OSG.setColor(Color.WHITE);
 		OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
-		getlayout();
+//		getlayout();
 		paintlayout();
 		g.drawImage(OSI,0,0,this);
 	}
@@ -174,30 +174,54 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		
 		locked = false;
 		/*すべての膜に対して行う*/
-		while(ite.hasNext()){
-			m = (AbstractMembrane)ite.next();
-			if(searchatom(m , "draw")){
-				ga = getgraphicatoms(m);
-				if(ga == null) continue;
-				/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
-				for(int i = 0; i < drawlist.size(); i++){
-					GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
-
-					if(ga.name.equals(ga2.name)){
-						drawlist.set(i, ga);
-						break;
-					}
-					if(ga.sequence < ga2.sequence){
-						drawlist.add(i, ga);
-						break;
-					}
-				}
-				if(drawlist.size() == 0)
-					drawlist.add(ga);
-			}
-		}
+//		while(ite.hasNext()){
+//			m = (AbstractMembrane)ite.next();
+//			if(searchatom(m , "draw")){
+//				ga = getgraphicatoms(m);
+//				if(ga == null) continue;
+//				/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
+//				for(int i = 0; i < drawlist.size(); i++){
+//					GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
+//
+//					if(ga.name.equals(ga2.name)){
+//						drawlist.set(i, ga);
+//						break;
+//					}
+//					if(ga.sequence < ga2.sequence){
+//						drawlist.add(i, ga);
+//						break;
+//					}
+//				}
+//				if(drawlist.size() == 0)
+//					drawlist.add(ga);
+//			}
+//		}
 	}
 
+	public synchronized void setgraphicmem(AbstractMembrane m){
+		GraphicAtoms ga;
+		
+		if(searchatom(m , "draw")){
+			ga = getgraphicatoms(m);
+			if(ga == null) return;
+			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
+			for(int i = 0; i < drawlist.size(); i++){
+				GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
+
+				if(ga.name.equals(ga2.name)){
+					drawlist.set(i, ga);
+					break;
+				}
+				if(ga.sequence < ga2.sequence){
+					drawlist.add(i, ga);
+					break;
+				}
+			}
+			if(drawlist.size() == 0)
+				drawlist.add(ga);
+		}
+	}
+	
 	private void paintlayout(){
 		Iterator ite = drawlist.iterator();
 		while(ite.hasNext()){

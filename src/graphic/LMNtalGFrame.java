@@ -74,7 +74,8 @@ public class LMNtalGFrame extends JFrame{
 //		System.out.print("*");
 		while(busy) {
 			try {
-				if(!lmnPanel.locked)lmnPanel.th.sleep(100);
+				//if(!lmnPanel.locked)
+				lmnPanel.th.sleep(10);
 				busy = false;
 			} catch (Exception e) {
 			}
