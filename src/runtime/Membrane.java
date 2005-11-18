@@ -324,6 +324,9 @@ public final class Membrane extends AbstractMembrane {
 //System.out.println(Thread.currentThread() + "moved contents of buffered stack to memstack : " + getLocalID());
 			}
 		}
+		if(Env.LMNgraphic != null)
+			if(Env.LMNgraphic.lmnPanel != null)
+				Env.LMNgraphic.lmnPanel.setgraphicmem(this);
 		quietUnlock();
 	}
 	public void forceUnlock() {
