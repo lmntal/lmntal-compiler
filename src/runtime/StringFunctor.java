@@ -8,4 +8,7 @@ public class StringFunctor extends ObjectFunctor {
 	public StringFunctor(String data) { super(data); }
 	public String getQuotedAtomName() { return getStringLiteralText(getName()); }
 	public String getQuotedFunctorName() { return getQuotedAtomName(); }
+	public String toString() {
+			return "\""+getAbbrName()+"\"" + "_" + getArity();
+		}
 }

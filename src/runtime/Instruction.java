@@ -2201,7 +2201,7 @@ public class Instruction implements Cloneable, Serializable {
 			if(insts.size() == 0) {
 				buffer.append("[]");
 			} else {
-				if(Env.compileonly) buffer.append("[");
+				if(Env.compileonly) buffer.append("[[\n");
 				else buffer.append("[\n");
 				int i;
 				for(i = 0; i < insts.size()-1; i++){
@@ -2210,23 +2210,19 @@ public class Instruction implements Cloneable, Serializable {
 //						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
 //						buffer.append("\n");
 //					}
-					if(Env.compileonly) buffer.append("                ");
-					else buffer.append("                  ");
+					buffer.append("                  ");
 					buffer.append(insts.get(i));
 					//TODO 出力引数だったらインデントを下げる.
-					if(Env.compileonly) buffer.append("\n");
-					else buffer.append(", \n");
+					buffer.append(", \n");
 				}
-				if(Env.compileonly) buffer.append("                ");
-				else buffer.append("                  ");
+				buffer.append("                  ");
 				buffer.append(insts.get(i));
 				for(int j = 1; j < data.size(); j++){
 					buffer.append("                  ");
 					buffer.append("     ");
 					buffer.append(", " + data.get(j));
 				}
-				if(Env.compileonly) buffer.append("\n]");
-				else buffer.append(" ]");
+				buffer.append(" ]]");
 				return buffer.toString();
 			}
 		}
@@ -2235,8 +2231,7 @@ public class Instruction implements Cloneable, Serializable {
 
 		return buffer.toString();
     }
-    
-    ///////////////////////////////////////////////
+
     
     /** spec命令の引数値を新しい値に更新する（暫定的措置）*/
     public void updateSpec(int formals, int locals) {

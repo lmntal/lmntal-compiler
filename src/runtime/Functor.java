@@ -147,7 +147,7 @@ public class Functor implements Serializable {
 	}
 	/** オーバーライドしない限り getAbbrName()+"_"+getArity() を返す */
 	public String toString() {
-		return getAbbrName() + "_" + getArity();
+		return "'"+getAbbrName()+"'" + "_" + getArity();
 	}
 	public int hashCode() {
 		return (path == null ? 0 : path.hashCode()) + name.hashCode() + arity;

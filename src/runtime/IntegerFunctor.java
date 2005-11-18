@@ -44,4 +44,7 @@ public class IntegerFunctor extends Functor {
 		mem.inheritLink(atom,0,links[1]);
 		return true;
 	}
+	public String toString() {
+			return getAbbrName() + "_" + getArity();
+		}
 }
