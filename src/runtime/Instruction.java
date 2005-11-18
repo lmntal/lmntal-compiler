@@ -1760,7 +1760,21 @@ public class Instruction implements Cloneable, Serializable {
 		add(arg5);
 	}
 	
-	public Object clone() {
+	/** パーザー用コンストラクタ */
+	public Instruction(String name, List data) {
+		try {
+	    	Field f = Instruction.class.getField(name.toUpperCase());
+	    	this.kind = f.getInt(null);
+	    	this.data = data;
+	    	return;
+		} catch (NoSuchFieldException e) {
+		} catch (IllegalAccessException e) {
+		}
+		//例外発生時
+		throw new RuntimeException("invalid instruction name : " + name);
+    }
+
+    public Object clone() {
 		Instruction c = new Instruction();
 		c.kind = this.kind;
 		Iterator it = this.data.iterator();
@@ -2222,26 +2236,6 @@ public class Instruction implements Cloneable, Serializable {
 		return buffer.toString();
     }
     
-    //////////////////////////////////////////////
-    // パーザー用
-
-	/** 命令名から命令番号へのハッシュ */
-	static HashMap nameTable = new HashMap();
-	static {
-		Iterator it = instructionTable.keySet().iterator();
-		while (it.hasNext()) {
-			Integer i = (Integer)it.next();
-			String name = (String)instructionTable.get(i);
-			nameTable.put(name, i);
-		}
-	}
-
-	/** パーザー用コンストラクタ */
-    public Instruction(String name, List data) {
-    	this.kind = ((Integer)nameTable.get(name)).intValue();
-    	this.data = data;
-    }
-
     ///////////////////////////////////////////////
     
     /** spec命令の引数値を新しい値に更新する（暫定的措置）*/

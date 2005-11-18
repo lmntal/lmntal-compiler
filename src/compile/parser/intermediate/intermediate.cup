@@ -2,29 +2,33 @@ package compile.parser.intermediate;
 
 import java.util.*;
 import runtime.*;
+import compile.parser.MySymbol;
 
 parser code {: 
+	private static boolean debug = false;
 	public static void main(String[] args) throws Exception {
 //		Lexer.debug = true;
-		Env.debug = 1;
+		debug = true;
 		Lexer lexer = new Lexer(System.in);
 		parser parser = new parser(lexer);
 		ArrayList list = (ArrayList)parser.parse().value;
+
+		Env.debug = 1;
 		for (int i = 0; i < list.size(); i++) {
 			((InterpretedRuleset)list.get(i)).showDetail();
 		}
 	}
 
 	public void report_error(String message, Object info) {
-		System.err.print(message);
-		if (info instanceof java_cup.runtime.Symbol)
-			if (((java_cup.runtime.Symbol)info).left > 0)
-				System.err.print(" at line " + ((java_cup.runtime.Symbol)info).left);
-		System.err.println("");
+		System.err.println(message);
+		if (info instanceof MySymbol) {
+			MySymbol symbol = (MySymbol)info;
+			System.err.print("Unexpected Token at line " + symbol.left + " column " + symbol.right);
+			System.err.println(" : " + symbol.token);
+			if (debug)
+				System.err.print("\n token ID is " + symbol.sym);
+		}
     }
-    public void unrecovered_syntax_error(java_cup.runtime.Symbol cur_token) throws Exception {
-    	report_fatal_error("Couldn't repair and continue parse", null);
-	}
 :};
 
 
@@ -105,13 +109,13 @@ Arg				::=	  NUMBER:num
 					| LABEL:label
 						{: RESULT = new RuleRef(label); :};
 Functor			::=	  SQUOTED_STRING:name UNDERBAR NUMBER:arity
-						{: RESULT = new Functor(name, arity); :}
+						{: RESULT = new Functor(name, arity.intValue()); :}
 					| NUMBER:v UNDERBAR NUMBER:arity
-						{: assert arity==1; RESULT = new IntegerFunctor(v.intValue()); :}
+						{: /*assert(arity.intValue()==1);*/ RESULT = new IntegerFunctor(v.intValue()); :}
 					| FLOAT:v UNDERBAR NUMBER:arity
-						{: assert arity==1; RESULT = new FloatingFunctor(v.doubleValue()); :}
+						{: /*assert(arity.intValue()==1);*/ RESULT = new FloatingFunctor(v.doubleValue()); :}
 					| DQUOTED_STRING:v UNDERBAR NUMBER:arity
-						{: assert arity==1; RESULT = new StringFunctor(v); :}
+						{: /*assert(arity.intValue()==1);*/ RESULT = new StringFunctor(v); :}
 					| INSIDE_PROXY
 						{: RESULT = Functor.INSIDE_PROXY; :}
 					| OUTSIDE_PROXY

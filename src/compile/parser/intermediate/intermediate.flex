@@ -1,5 +1,6 @@
 /* --------------------------Usercode Section------------------------ */
 package compile.parser.intermediate;
+import compile.parser.MySymbol;
 import java_cup.runtime.Symbol;
 
 %%
@@ -12,7 +13,7 @@ import java_cup.runtime.Symbol;
 //%standalone
 
 %{
-	StringBuffer string = new StringBuffer();
+	StringBuffer token = new StringBuffer(), value = new StringBuffer();
 
 	static boolean debug = false;
 	public static void main(String[] args) throws Exception {
@@ -22,12 +23,14 @@ import java_cup.runtime.Symbol;
 	}
 	
     private Symbol symbol(int type) {
-    	if (debug) System.out.println(type);
-        return new Symbol(type, yyline, yycolumn);
+    	return symbol(type, null, null);
     }
     private Symbol symbol(int type, Object value) {
-    	if (debug) System.out.println(type + ":" + value);
-        return new Symbol(type, yyline, yycolumn, value);
+    	return symbol(type, value, null);
+    }
+    private Symbol symbol(int type, Object value, String token) {
+    	if (debug) System.out.println("(" + (yyline+1) + "," + (yycolumn+1) + ") " + type + ":" + value);
+        return new MySymbol(token, type, yyline+1, yycolumn+1, value);
     }
 %}
 
@@ -55,31 +58,43 @@ WhiteSpace		= {LineTerminator} | [ \t]
 	","					{return symbol(sym.COMMA); }
 	":"					{return symbol(sym.COLON); }
 	@[0-9]+				{return symbol(sym.RULESET_ID, Integer.valueOf(yytext().substring(1))); }
-	"\""				{string.setLength(0); yybegin(DQUOTE); }
-	"'"					{string.setLength(0); yybegin(SQUOTE); }
-	[a-z]+				{return symbol(sym.INST_NAME, yytext()); }
+	"\""				{token.setLength(0); value.setLength(0); value.append(yytext()); yybegin(DQUOTE); }
+	"'"					{token.setLength(0); value.setLength(0); value.append(yytext()); yybegin(SQUOTE); }
+	[a-zA-Z]+			{return symbol(sym.INST_NAME, yytext()); }
 	L[0-9]+				{return symbol(sym.LABEL, Integer.valueOf(yytext().substring(1))); }
 	[0-9]+				{return symbol(sym.NUMBER, Integer.valueOf(yytext())); }
 	[0-9]+\.[0-9]+		{return symbol(sym.FLOAT, Double.valueOf(yytext())); }
 	{LineTerminator}	{}
+	.					{return symbol(sym.error); }
 }
 <BEGIN_RULESET> {
 	@[0-9]+				{yybegin(SKIP_LINE); return symbol(sym.RULESET_ID, Integer.valueOf(yytext().substring(1))); }
 	{WhiteSpace}		{}
+	.					{return symbol(sym.error); }
 }
 <SKIP_LINE> {
 	{LineTerminator}	{yybegin(YYINITIAL); }
 	.					{}
 }
 <DQUOTE> {
-	"\""				{yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, string.toString()); }
-	"\\\\"				{string.append("\\"); }
-	"\\\""				{string.append("\""); }
-	.					{ string.append( yytext() ); }
+	"\""				{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString()); }
+	"\\\""				{token.append(yytext()); value.append("\""); }
+	"\\\\"				{token.append(yytext()); value.append("\\"); }
+	"\\r"				{token.append(yytext()); value.append("\r"); }
+	"\\n"				{token.append(yytext()); value.append("\n"); }
+	"\\f"				{token.append(yytext()); value.append("\f"); }
+	"\\t"				{token.append(yytext()); value.append("\t"); }
+	{LineTerminator}	{return symbol(sym.error, null, "end of line in quoted string"); }
+	.					{token.append(yytext()); value.append( yytext() ); }
 }
 <SQUOTE> {
-	"'"					{yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, string.toString()); }
-	"\\\\"				{string.append("\\"); }
-	"\\\'"				{string.append("'"); }
-	.					{ string.append( yytext() ); }
+	"'"					{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString()); }
+	"\\\'"				{token.append(yytext()); value.append("'"); }
+	"\\\\"				{token.append(yytext()); value.append("\\"); }
+	"\\r"				{token.append(yytext()); value.append("\r"); }
+	"\\n"				{token.append(yytext()); value.append("\n"); }
+	"\\f"				{token.append(yytext()); value.append("\f"); }
+	"\\t"				{token.append(yytext()); value.append("\t"); }
+	{LineTerminator}	{return symbol(sym.error, null, "end of line in quoted string"); }
+	.					{token.append(yytext()); value.append( yytext() ); }
 }
