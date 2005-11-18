@@ -14,6 +14,7 @@ import java_cup.runtime.Symbol;
 
 %{
 	StringBuffer token = new StringBuffer(), value = new StringBuffer();
+	int startpos;
 
 	static boolean debug = false;
 	public static void main(String[] args) throws Exception {
@@ -23,14 +24,17 @@ import java_cup.runtime.Symbol;
 	}
 	
     private Symbol symbol(int type) {
-    	return symbol(type, null, null);
+    	return symbol(type, null, yytext(), yycolumn);
     }
     private Symbol symbol(int type, Object value) {
-    	return symbol(type, value, null);
+    	return symbol(type, value, yytext(), yycolumn);
     }
     private Symbol symbol(int type, Object value, String token) {
-    	if (debug) System.out.println("(" + (yyline+1) + "," + (yycolumn+1) + ") " + type + ":" + value);
-        return new MySymbol(token, type, yyline+1, yycolumn+1, value);
+    	return symbol(type, value, token, yycolumn);
+    }
+    private Symbol symbol(int type, Object value, String token, int pos) {
+    	if (debug) System.out.println("(" + (yyline+1) + "," + (pos+1) + ") " + type + ":" + value);
+        return new MySymbol(token, type, yyline+1, pos+1, value);
     }
 %}
 
@@ -58,14 +62,13 @@ WhiteSpace		= {LineTerminator} | [ \t]
 	","					{return symbol(sym.COMMA); }
 	":"					{return symbol(sym.COLON); }
 	@[0-9]+				{return symbol(sym.RULESET_ID, Integer.valueOf(yytext().substring(1))); }
-	"\""				{token.setLength(0); value.setLength(0); value.append(yytext()); yybegin(DQUOTE); }
-	"'"					{token.setLength(0); value.setLength(0); value.append(yytext()); yybegin(SQUOTE); }
+	"\""				{token.setLength(0); value.setLength(0); startpos = yycolumn; token.append(yytext()); yybegin(DQUOTE); }
+	"'"					{token.setLength(0); value.setLength(0); startpos = yycolumn; token.append(yytext()); yybegin(SQUOTE); }
 	[a-zA-Z]+			{return symbol(sym.INST_NAME, yytext()); }
 	L[0-9]+				{return symbol(sym.LABEL, Integer.valueOf(yytext().substring(1))); }
 	[0-9]+				{return symbol(sym.NUMBER, Integer.valueOf(yytext())); }
 	[0-9]+\.[0-9]+		{return symbol(sym.FLOAT, Double.valueOf(yytext())); }
 	{LineTerminator}	{}
-	.					{return symbol(sym.error); }
 }
 <BEGIN_RULESET> {
 	@[0-9]+				{yybegin(SKIP_LINE); return symbol(sym.RULESET_ID, Integer.valueOf(yytext().substring(1))); }
@@ -77,24 +80,28 @@ WhiteSpace		= {LineTerminator} | [ \t]
 	.					{}
 }
 <DQUOTE> {
-	"\""				{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString()); }
+	"\""				{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString(), startpos); }
 	"\\\""				{token.append(yytext()); value.append("\""); }
 	"\\\\"				{token.append(yytext()); value.append("\\"); }
 	"\\r"				{token.append(yytext()); value.append("\r"); }
 	"\\n"				{token.append(yytext()); value.append("\n"); }
 	"\\f"				{token.append(yytext()); value.append("\f"); }
 	"\\t"				{token.append(yytext()); value.append("\t"); }
-	{LineTerminator}	{return symbol(sym.error, null, "end of line in quoted string"); }
+	{LineTerminator}	{throw new RuntimeException("end of line in quoted string at line " + (yyline+1)); }
 	.					{token.append(yytext()); value.append( yytext() ); }
 }
 <SQUOTE> {
-	"'"					{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString()); }
+	"'"					{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString(), startpos); }
 	"\\\'"				{token.append(yytext()); value.append("'"); }
 	"\\\\"				{token.append(yytext()); value.append("\\"); }
 	"\\r"				{token.append(yytext()); value.append("\r"); }
 	"\\n"				{token.append(yytext()); value.append("\n"); }
 	"\\f"				{token.append(yytext()); value.append("\f"); }
 	"\\t"				{token.append(yytext()); value.append("\t"); }
-	{LineTerminator}	{return symbol(sym.error, null, "end of line in quoted string"); }
+	{LineTerminator}	{throw new RuntimeException("end of line in quoted string at line " + (yyline+1)); }
 	.					{token.append(yytext()); value.append( yytext() ); }
 }
+
+/* No token was found for the input so through an error.  Print out an
+   Illegal character message with the illegal character that was found. */
+[^]                    { throw new RuntimeException("Illegal character <"+yytext()+"> at line "+(yyline+1)); }
