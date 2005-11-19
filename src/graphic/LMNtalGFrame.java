@@ -62,9 +62,22 @@ public class LMNtalGFrame extends JFrame{
 	
 	protected void initComponents() {
 		lmnPanel = new LMNGraphPanel(this);
+		JButton bt;
 		
 		setTitle("It's Graphical LMNtal");
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
+		getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
+		bt.addActionListener(new ActionAdapter(this));
+	}
+}
+class ActionAdapter implements ActionListener {
+	LMNtalGFrame frame;
+	ActionAdapter(LMNtalGFrame f) {
+		frame = f;
+	}
+	public void actionPerformed(ActionEvent e) {
+//		e.getSource();
+		frame.busy = true;
 	}
 }

@@ -1,35 +1,60 @@
 package graphic;
 
 import java.awt.*;
+import java.io.File;
 
 public class GraphicAtoms{
-	String name = null;
+	public String name = null;
 	boolean enable;
-	int posx = -1;
-	int posy = -1;
+	int posx = 0;
+	int posy = 0;
+	int sizex = 0;
+	int sizey = 0;
 	int sequence = 0;
 	Image atomimg = null;
+	public String atomobj = null;
 	
 	public GraphicAtoms(){
 		enable = false;
+	}
+	
+	public boolean isset(){
+		if((atomimg == null & atomobj == null) || name == null){
+			return false;
+		}
+		return true;
 	}
 	
 	public boolean SetPic(String filename){
 		if(filename == null || filename ==""){
 			return false;
 		}
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-//		Imageオブジェクトの生成
-		atomimg = toolkit.getImage(filename);
+		File file = new File(filename);
+		if(file.exists()){
+			Toolkit toolkit = Toolkit.getDefaultToolkit();
+	//		Imageオブジェクトの生成
+			atomimg = toolkit.getImage(filename);
+		}else{
+			atomobj=filename;
+		}
 		return true;
 	}
 	
 	public boolean drawatom(Graphics g){
-		if(posx < 0 || posy < 0 || atomimg == null){
+		if(atomimg == null & atomobj == null){
 			return false;
 		}
-			
-		g.drawImage(atomimg,posx,posy,null);
+		if(atomobj != null){
+			g.setColor(Color.BLACK);
+			if(atomobj.equals("circle") || atomobj.equals("oval"))
+				g.drawOval(posx, posy, sizex, sizey);
+			else if (atomobj.equals("rect"))
+				g.drawRect(posx, posy, sizex, sizey);
+			else if (atomobj.equals("line"))
+				g.drawLine(posx, posy, sizex, sizey);
+		}
+		else if(atomimg != null)	
+			g.drawImage(atomimg,posx,posy,sizex,sizey,null);
 		return true;
 	}
 	

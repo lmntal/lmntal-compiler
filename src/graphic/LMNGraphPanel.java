@@ -117,11 +117,30 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				}
 				
 			}
+			/**描画するサイズの取得*/
+			else if(a.getName()=="size"){
+				if(a.getEdgeCount() != 2)continue;
+				try{
+					ga.sizex = Integer.parseInt(a.getNthNode(0).getName());
+				}catch(NumberFormatException error){
+					return null;
+				}
+
+				try{
+					ga.sizey = Integer.parseInt(a.getNthNode(1).getName());
+				}catch(NumberFormatException error){
+					return null;
+					
+				}
+				
+			}
 			/**描画するかどうかの取得*/
 			else if(a.getName()=="enable"){
 				ga.enable = true;				
 			}
 		}
+		if(!ga.isset())
+			return null;
 		return ga;
 	}
 	
@@ -140,18 +159,21 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
 			for(int i = 0; i < drawlist.size(); i++){
 				GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
-
+				if(ga2==null) continue;
 				if(ga.name.equals(ga2.name)){
 					drawlist.set(i, ga);
 					break;
-				}
-				if(ga.sequence < ga2.sequence){
+				}else if(ga.sequence < ga2.sequence){
 					drawlist.add(i, ga);
 					break;
+				}else if(i == drawlist.size() - 1){
+					drawlist.addLast(ga);
+					break;					
 				}
 			}
-			if(drawlist.size() == 0)
+			if(drawlist.size() == 0){
 				drawlist.add(ga);
+			}
 		}
 	}
 	
