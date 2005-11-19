@@ -25,6 +25,7 @@ import compile.RulesetCompiler;
 import compile.Translator;
 import compile.parser.LMNParser;
 import compile.parser.ParseException;
+import compile.parser.intermediate.RulesetParser;
 
 /**
  * LMNtal のメイソ
@@ -60,12 +61,13 @@ public class FrontEnd {
 			}
 		});
 
-//    	//TODO REPL で LMNtal プログラムを実行中の場合は、実行を中止してプロンプトに戻るようにする。
+//		//TODO REPL で LMNtal プログラムを実行中の場合は、実行を中止してプロンプトに戻るようにする。
+//		//注意 : ハンドラを追加しても、標準入力には EOF が送られてくるので、EOF を読んでも終了しないように変更する必要がある。
 //		//Ctrl-C のハンドラ
-//        Signal.handle(new Signal("INT"), new SignalHandler () {
-//            public void handle(Signal sig) {
-//            }
-//        });
+//		Signal.handle(new Signal("INT"), new SignalHandler () {
+//			public void handle(Signal sig) {
+//			}
+//		});
 
 		processOptions(args);
 		
@@ -447,7 +449,16 @@ public class FrontEnd {
 		}
 		// 複数のファイルのときはファイル名が１つに決められない。
 		String unitName = files.size()==1 ? (String)files.get(0) : InlineUnit.DEFAULT_UNITNAME;
-		run( new BufferedReader(new InputStreamReader(is)), unitName );
+		if (((String)files.get(0)).endsWith(".tal")) {
+			//中間命令列
+			try {
+				Ruleset rs = RulesetParser.parse(new BufferedReader(new InputStreamReader(is)));
+				((InterpretedRuleset)rs).showDetail();
+				run(rs);
+			} catch (ParseException e) {/*メッセージは出力済み*/}
+		} else {
+			run( new BufferedReader(new InputStreamReader(is)), unitName );
+		}
 	}
 	/**
 	 * 与えられたソースについて、一連の実行を行う。
