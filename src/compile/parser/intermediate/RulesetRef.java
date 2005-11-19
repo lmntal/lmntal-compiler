@@ -9,4 +9,7 @@ class RulesetRef {
 	RulesetRef(Integer id) {
 		this.id = id;
 	}
+	Integer getId() {
+		return id;
+	}
 }

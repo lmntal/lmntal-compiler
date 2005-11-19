@@ -90,7 +90,7 @@ WhiteSpace		= {LineTerminator} | [ \t]
 	.					{token.append(yytext()); value.append( yytext() ); }
 }
 <SQUOTE> {
-	"'"					{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString(), startpos); }
+	"'"					{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.SQUOTED_STRING, value.toString(), token.toString(), startpos); }
 	"\\r"				{token.append(yytext()); value.append("\r"); }
 	"\\n"				{token.append(yytext()); value.append("\n"); }
 	"\\f"				{token.append(yytext()); value.append("\f"); }

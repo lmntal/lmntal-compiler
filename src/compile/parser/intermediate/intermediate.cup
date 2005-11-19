@@ -104,7 +104,7 @@ Arg				::=	  NUMBER:num
 					| RULESET_ID:id
 						{: RESULT = new RulesetRef(id); :}
 					| LABEL:label
-						{: RESULT = new RuleRef(label); :};
+						{: RESULT = new LabelRef(label); :};
 Functor			::=	  SQUOTED_STRING:name UNDERBAR NUMBER:arity
 						{: RESULT = new Functor(name, arity.intValue()); :}
 					| NUMBER:v UNDERBAR NUMBER:arity
