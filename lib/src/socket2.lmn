@@ -1,45 +1,58 @@
-/* socket(reader,writer,In,Out)
- *
- */
-
-
 [:/*inline_define*/
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 /*
- * ServerDaemon
- * accept connection from client
- * after acception, create socket-process
+ * AcceptThread
  */
-class ServerDaemon extends Thread {
+class AcceptThread extends Thread {
   ServerSocket serverSock;
+  HashMap connectTable;
   final Membrane mem;
-  ServerDaemon(ServerSocket serverSock, Membrane mem) {
+  AcceptThread(ServerSocket serverSock, HashMap connectTable, Membrane mem) {
     this.serverSock = serverSock;
+    this.connectTable = connectTable;
     this.mem = mem;
   }
   public void run() {
-    try {
-      Socket socket = serverSock.accept();
-      System.out.println("socket accepted: " + socket.toString());
-      ReaderThread reader = new ReaderThread(socket,mem);
-      reader.start();
-      System.out.println("reader: start");
-      PrintWriter writer = new PrintWriter(socket.getOutputStream());
-      System.out.println("writer created: " + writer.toString());
-      mem.asyncLock();
-      // create socket-process
-      Functor rFunc = new ObjectFunctor(reader);
-      Functor wFunc = new ObjectFunctor(writer);
-      Atom socketAtom = mem.newAtom(new Functor("socket",2));
-      Atom readerAtom = mem.newAtom(rFunc);
-      Atom writerAtom = mem.newAtom(wFunc);
-      mem.newLink(socketAtom,0,readerAtom,0);
-      mem.newLink(socketAtom,1,writerAtom,0);
-      mem.asyncUnlock();
-    } catch(IOException e) {
-      e.printStackTrace();
+    while(true) {
+      try {
+        Socket socket = serverSock.accept();
+        connectTable.put(socket.getInetAddress().toString()+" "+socket.getPort(),socket);
+        System.out.println("socket accepted: " + socket.toString());
+        ReaderThread reader = new ReaderThread(socket,mem);
+        System.out.println("reader created");
+        PrintWriter writer = new PrintWriter(socket.getOutputStream());
+        System.out.println("writer created");
+        mem.asyncLock();
+        makeSocketProcess.create((Membrane)mem,socket,reader,writer);
+        //Functor mFunc = new Functor("socket",5,"socket2");
+        //Functor sFunc = new ObjectFunctor(socket);
+        //Functor rFunc = new ObjectFunctor(reader);
+        //Functor wFunc = new ObjectFunctor(writer);
+        //Atom moduleAtom = mem.newAtom(mFunc);
+        //Atom socketAtom = mem.newAtom(sFunc);
+        //Atom readerAtom = mem.newAtom(rFunc);
+        //Atom writerAtom = mem.newAtom(wFunc);
+        //Atom nilIn = mem.newAtom(new Functor("[]", 1));
+        //Atom nilOut = mem.newAtom(new Functor("[]", 1));
+        //mem.newLink(moduleAtom,0,socketAtom,0);
+        //mem.newLink(moduleAtom,1,readerAtom,0);
+        //mem.newLink(moduleAtom,2,writerAtom,0);
+        //mem.newLink(moduleAtom,3,nilIn,0);
+        //mem.newLink(moduleAtom,4,nilOut,0);
+        mem.asyncUnlock();
+        reader.start();
+        System.out.println("reader: started");
+      } catch(IOException e) {
+        e.printStackTrace();
+      }
+      try {
+        sleep(100);
+      } catch(InterruptedException e) {
+        e.printStackTrace();
+      }
     }
   }
 }
@@ -52,7 +65,6 @@ class ReaderThread extends Thread {
   BufferedReader reader;
   final Membrane mem;
   ReaderThread(Socket sock, Membrane mem) {
-    this.mem = mem;
     try {
       BufferedReader reader = 
         new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -61,13 +73,13 @@ class ReaderThread extends Thread {
     } catch(IOException e) {
       e.printStackTrace();
     }
+    this.mem = mem;
   }
   public void run(){
     while(true) {
-      yield();
       try {
         if(reader.ready()) {
-          System.out.println("reader is ready");
+          //System.out.println("reader is ready");
           String msg = reader.readLine();
           System.out.println(msg);
           mem.asyncLock();
@@ -77,77 +89,201 @@ class ReaderThread extends Thread {
       } catch(IOException e) {
         e.printStackTrace();
       }
+      try {
+        sleep(100);
+      } catch(InterruptedException e) {
+        e.printStackTrace();
+      }
     }
   }
 }
+
+class makeSocketProcess {
+  static void create(Membrane mem, Socket socket, ReaderThread reader, PrintWriter writer) {
+    System.out.println("socket-process creating");
+    //mem.asyncLock();
+    //System.out.println("membrane: asyncLock");
+    Functor mFunc = new Functor("socket",5,"socket2");
+    Functor sFunc = new ObjectFunctor(socket);
+    Functor rFunc = new ObjectFunctor(reader);
+    Functor wFunc = new ObjectFunctor(writer);
+    Atom moduleAtom = mem.newAtom(mFunc);
+    Atom socketAtom = mem.newAtom(sFunc);
+    Atom readerAtom = mem.newAtom(rFunc);
+    Atom writerAtom = mem.newAtom(wFunc);
+    Atom nilIn = mem.newAtom(new Functor("[]", 1));
+    Atom nilOut = mem.newAtom(new Functor("[]", 1));
+    mem.newLink(moduleAtom,0,socketAtom,0);
+    mem.newLink(moduleAtom,1,readerAtom,0);
+    mem.newLink(moduleAtom,2,writerAtom,0);
+    mem.newLink(moduleAtom,3,nilIn,0);
+    mem.newLink(moduleAtom,4,nilOut,0);
+    //mem.asyncUnlock();
+    //System.out.println("membrane: asyncUnlock");
+  }
+}
+
+
+
 :].
 
 {
 module(socket2).
 
 // connect
-socket2.connect(Host,Port) :- unary(Host),int(Port) |
-  [:/*inline*/
-    String host = me.nth(0);
-    try {
-      InetAddress ip = InetAddress.getByName(host);
-      int port = Integer.parseInt(me.nth(1));
-      Socket socket = new Socket(host,port);
-      //System.out.println("socket created: " + socket.toString());
-      ReaderThread reader = new ReaderThread(socket,(Membrane)mem);
-      reader.start();
-      System.out.println("reader: start");
-      PrintWriter writer = 
-        new PrintWriter(socket.getOutputStream());
-      System.out.println("writer created: " + writer.toString());
-      mem.asyncLock();
-      // create socket-process
-      Functor rFunc = new ObjectFunctor(reader);
-      Functor wFunc = new ObjectFunctor(writer);
-      Atom socketAtom = mem.newAtom(new Functor("socket",2));
-      Atom readerAtom = mem.newAtom(rFunc);
-      Atom writerAtom = mem.newAtom(wFunc);
-      mem.newLink(socketAtom,0,readerAtom,0);
-      mem.newLink(socketAtom,1,writerAtom,0);
-      mem.asyncUnlock();
-      //System.out.println("mem: " + mem.getAtomCount());
-    } catch(IOException e) {
-      e.printStackTrace();
-    }
-  :](Host,Port).
+// not use soon
+//socket2.connect(Host,Port) :- unary(Host),int(Port) |
+//  [:/*inline*/
+//    String host = me.nth(0);
+//    try {
+//      InetAddress ip = InetAddress.getByName(host);
+//      int port = Integer.parseInt(me.nth(1));
+//      Socket socket = new Socket(host,port);
+//      System.out.println("socket created: " + socket.toString());
+//      ReaderThread reader = new ReaderThread(socket,(Membrane)mem);
+//      // reader.start() to move to bottom of this block.
+//      reader.start();
+//      System.out.println("reader: start");
+//      PrintWriter writer = 
+//        new PrintWriter(socket.getOutputStream());
+//     System.out.println("writer created: " + writer.toString());
+//      mem.asyncLock();
+//      // create socket-process
+//      Functor mFunc = new Functor("socket",5,"socket2");
+//      Functor sFunc = new ObjectFunctor(socket);
+//      Functor rFunc = new ObjectFunctor(reader);
+//      Functor wFunc = new ObjectFunctor(writer);
+//      Atom moduleAtom = mem.newAtom(mFunc);
+//      Atom socketAtom = mem.newAtom(sFunc);
+//      Atom readerAtom = mem.newAtom(rFunc);
+//      Atom writerAtom = mem.newAtom(wFunc);
+//      Atom nilIn = mem.newAtom(new Functor("[]", 1));
+//      Atom nilOut = mem.newAtom(new Functor("[]", 1));
+//      mem.newLink(moduleAtom,0,socketAtom,0);
+//      mem.newLink(moduleAtom,1,readerAtom,0);
+//      mem.newLink(moduleAtom,2,writerAtom,0);
+//      mem.newLink(moduleAtom,3,nilIn,0);
+//      mem.newLink(moduleAtom,4,nilOut,0);
+//      mem.asyncUnlock();
+//      //should reader wait until socket-process is created?
+//      //synchronized(reader) {
+//      //reader.notify();
+//      //}
+//    } catch(IOException e) {
+//      e.printStackTrace();
+//    }
+//  :](Host,Port).
 
 // read data from socket
-//socket2.socket([H|T],Out) :- string(H) |
-//  socket2.socket(T,Out),
+// should be changed to socket(S,R,In,Out)?
+//socket2.socket(S,R,W,[H|T],Out) :-
+//  class(S,"Socket"),class(R,"ReadThread"),class(W,"PrintWriter"),string(H) |
+//  socket2.socket(S,R,W,T,Out),
 //  [:/*inline*/
 //    String msg = me.nth(0);
-//    //create atom H
+//    //In the future, compile and interpret "msg" here.
 //    System.out.println(msg);
 //  :](H).
 
 // write data to socket
-// UNDER CONSTRUCTION
-socket2.socket(In,[H|T]) :- string(H) |
-  socket2.socket(In,T),
-  [:/*inline*/
-    String msg = me.nth(0);
-    ObjectFunctor func = (ObjectFunctor)***.nthAtom(1).getFunctor();
-    PrintWriter writer = func.getObject();
-    writer.println(msg);
-    writer.flush();
-  :](H).
+// should be changed to socket(S,R,In,Out)?
+//socket2.socket(S,R,W,In,[H|T]) :-
+//  class(S,"Socket"),class(R,"ReaderThread"),class(W,"PrintWriter"),string(H) |
+//  socket2.socket(S,R,W,In,T),
+//  [:/*inline*/
+//    String msg = me.nth(0);
+//    ObjectFunctor func = (ObjectFunctor)me.nthAtom(1).getFunctor();
+//    PrintWriter writer = (PrintWriter)func.getObject();
+//    writer.println(msg);
+//    writer.flush();
+//  :](H,W).
 
-// accept
-socket2.accept(Port) :- int(Port) |
+// init
+// create server socket and connect table
+socket2.init(Port) :- int(Port) |
   [:/*inline*/
     int port = Integer.parseInt(me.nth(0));
     try {
       ServerSocket serverSock = new ServerSocket(port);
-      ServerDaemon daemon = new ServerDaemon(serverSock,(Membrane)mem);
+      HashMap<String,Socket> connectTable = new HashMap();
+      System.out.println("connectTable: created");
+      AcceptThread daemon = new AcceptThread(serverSock,connectTable,(Membrane)mem);
+      Functor cFunc = new ObjectFunctor(connectTable);
+      Atom connectTableAtom = mem.newAtom(cFunc);
+      Atom nameAtom = mem.newAtom(new Functor("connectTable",1));
+      mem.newLink(connectTableAtom,0,nameAtom,0);
       daemon.start();
+      System.out.println("daemon: started");
     } catch(IOException e) {
       e.printStackTrace();
     }
   :](Port).
+
+//send
+//check connect table
+//if connect table contains socket, use it
+//if not, create new socket
+socket2.send(Host,Port,Msg),connectTable(T) :-
+  string(Host),int(Port),string(Msg),class(T,"java.util.HashMap") |
+  [:/*inline*/
+    System.out.println("now sending");
+    String host = me.nth(0);
+    try {
+      InetAddress ip = InetAddress.getByName(host);
+      int port = Integer.parseInt(me.nth(1));
+      ObjectFunctor cFunc = (ObjectFunctor)me.nthAtom(2).getFunctor();
+      HashMap connectTable = (HashMap)cFunc.getObject();
+      String msg = me.nth(3);
+      
+      if(connectTable.containsKey(ip.toString()+" "+port)) {
+        Socket socket = (Socket)connectTable.get(ip.toString()+" "+port);
+        Iterator it = mem.atomIteratorOfFunctor(new ObjectFunctor(socket));
+        if(it.hasNext()) {
+          Atom a = (Atom)it.next();
+          ObjectFunctor wFunc = (ObjectFunctor)a.nthAtom(2).getFunctor();
+          PrintWriter writer = (PrintWriter)wFunc.getObject();
+          writer.println(msg);
+          writer.flush();
+        }
+      } else {
+        Socket socket = new Socket(host,port);
+        System.out.println("socket created");
+        connectTable.put(socket.getInetAddress().toString()+" "+socket.getPort(),socket);
+        //System.out.println("socket created: " + socket.toString());
+        ReaderThread reader = new ReaderThread(socket,(Membrane)mem);
+        System.out.println("reader created");
+        PrintWriter writer = 
+          new PrintWriter(socket.getOutputStream());
+        System.out.println("writer created");
+        makeSocketProcess.create((Membrane)mem,socket,reader,writer);
+        //mem.asyncLock();
+        //System.out.println("membrane: asyncLock");
+        //Functor mFunc = new Functor("socket",5,"socket2");
+        //Functor sFunc = new ObjectFunctor(socket);
+        //Functor rFunc = new ObjectFunctor(reader);
+        //Functor wFunc = new ObjectFunctor(writer);
+        //Atom moduleAtom = mem.newAtom(mFunc);
+        //Atom socketAtom = mem.newAtom(sFunc);
+        //Atom readerAtom = mem.newAtom(rFunc);
+        //Atom writerAtom = mem.newAtom(wFunc);
+        //Atom nilIn = mem.newAtom(new Functor("[]", 1));
+        //Atom nilOut = mem.newAtom(new Functor("[]", 1));
+        //mem.newLink(moduleAtom,0,socketAtom,0);
+        //mem.newLink(moduleAtom,1,readerAtom,0);
+        //mem.newLink(moduleAtom,2,writerAtom,0);
+        //mem.newLink(moduleAtom,3,nilIn,0);
+        //mem.newLink(moduleAtom,4,nilOut,0);
+        //mem.asyncUnlock();
+        //System.out.println("membrane: asyncUnlock");
+        reader.start();
+        System.out.println("reader: started");
+        writer.println(msg);
+        writer.flush();
+      }
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+  :](Host,Port,T,Msg).
 }
+
 
