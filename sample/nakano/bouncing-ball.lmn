@@ -1,0 +1,62 @@
+/*
+
+	nakano ---
+	跳ねるボール。
+	オプション　--graphic をつけて実行すること。
+	このプログラムは無限ループします。
+	
+	ライブラリintegerを使用しています。
+
+*/
+
+{
+draw.
+name("rect").
+getpic("rect").
+position(10,10).
+sequence(3).
+enable.
+size(340,340).
+}.
+
+{
+a.
+draw.
+name("hoge").
+getpic("circle").
+position(200,150).
+sequence(2).
+enable.
+size(50,50).
+vx(5).
+vy(5).
+}.
+
+{
+b.
+draw.
+name("moge").
+getpic("circle").
+position(80,15).
+sequence(1).
+enable.
+size(50,50).
+vx(5).
+vy(5).
+}.
+c.
+
+{a,position(X,Y),vx(VX),vy(VY), $p , @p},c :-  VX > 0 , VY > 0 , X < 300 ,Y < 300 | {a,position( X + VX, Y + VY),vx(VX),vy(VY),$p},d.
+{a,position(X,Y),vx(VX),vy(VY), $p , @p},c :-  VX < 0 , VY > 0 , X > 10 ,Y < 300  | {a,position( X + VX, Y + VY),vx(VX),vy(VY),$p},d.
+{a,position(X,Y),vx(VX),vy(VY), $p , @p},c :-  VX > 0 , VY < 0 , X < 300 , Y > 10 | {a,position( X + VX, Y + VY),vx(VX),vy(VY),$p},d.
+{a,position(X,Y),vx(VX),vy(VY), $p , @p},c :-  VX < 0 , VY < 0 , X > 10 , Y > 10  | {a,position( X + VX, Y + VY),vx(VX),vy(VY),$p},d.
+
+{position(X,Y),vx(VX), $p , @p} :-  VX > 0 , X >= 300, int(Y) | {position( X , Y ),vx(-1 * integer.rnd(15) - 1),$p}.
+{position(X,Y),vx(VX), $p , @p} :-  VX < 0 , X =< 10, int(Y)  | {position( X , Y ),vx(integer.rnd(15) + 1),$p}.
+{position(X,Y),vy(VY), $p , @p} :-  VY > 0 , Y >= 300, int(X) | {position( X , Y ),vy(-1 * integer.rnd(15) - 1),$p}.
+{position(X,Y),vy(VY), $p , @p} :-  VY < 0 , Y =< 10, int(X)  | {position( X , Y ),vy(integer.rnd(15) + 1),$p}.
+
+{b,position(X,Y),vx(VX),vy(VY), $p , @p},d :-  VX > 0 , VY > 0 , X < 300 ,Y < 300 | {b,position( X + VX, Y + VY),vx(VX),vy(VY),$p},c.
+{b,position(X,Y),vx(VX),vy(VY), $p , @p},d :-  VX < 0 , VY > 0 , X > 10 ,Y < 300  | {b,position( X + VX, Y + VY),vx(VX),vy(VY),$p},c.
+{b,position(X,Y),vx(VX),vy(VY), $p , @p},d :-  VX > 0 , VY < 0 , X < 300 , Y > 10 | {b,position( X + VX, Y + VY),vx(VX),vy(VY),$p},c.
+{b,position(X,Y),vx(VX),vy(VY), $p , @p},d :-  VX < 0 , VY < 0 , X > 10 , Y > 10  | {b,position( X + VX, Y + VY),vx(VX),vy(VY),$p},c.
