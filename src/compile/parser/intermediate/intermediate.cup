@@ -5,15 +5,11 @@ import runtime.*;
 import compile.parser.MySymbol;
 
 parser code {: 
-	private static boolean debug = false;
 	public static void main(String[] args) throws Exception {
-//		Lexer.debug = true;
-//		debug = true;
 		Lexer lexer = new Lexer(System.in);
 		parser parser = new parser(lexer);
 		ArrayList list = (ArrayList)parser.parse().value;
 
-		Env.debug = 1;
 		for (int i = 0; i < list.size(); i++) {
 			((InterpretedRuleset)list.get(i)).showDetail();
 		}
