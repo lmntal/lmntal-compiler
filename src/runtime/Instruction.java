@@ -2227,7 +2227,24 @@ public class Instruction implements Cloneable, Serializable {
 			}
 		}
 
-		buffer.append(data.toString());
+		buffer.append("[");
+		//パーズできるようにエスケープ by mizuno
+		for (int i = 0; i < data.size(); i++) {
+			if (i != 0) buffer.append(", ");
+			Object o = data.get(i);
+			String str = o.toString();
+			if (o instanceof String || o instanceof Rule) {
+				//commit の引数は二重にエスケープしてしまう。
+				//無視するから問題はないけど、気持ち悪いなあ
+				str = str.replaceAll("\\\\", "\\\\\\\\");
+				str = str.replaceAll("\"", "\\\\\"");
+				str = str.replaceAll("\r", "\\\\r");
+				str = str.replaceAll("\n", "\\\\n");
+				str = "\"" + str + "\"";
+			}
+			buffer.append(str);
+		}
+		buffer.append("]");
 
 		return buffer.toString();
     }
