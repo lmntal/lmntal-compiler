@@ -1,1 +1,2 @@
-socket2.connect("192.168.1.7",60000).
+socket2.init(60000).
+socket2.send("127.0.0.1",60001,"from port 60000").

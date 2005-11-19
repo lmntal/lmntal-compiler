@@ -1,1 +1,2 @@
-socket2.accept(60000).
+socket2.init(60001).
+socket2.send("127.0.0.1",60000,"from port 60001").
