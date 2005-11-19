@@ -347,11 +347,11 @@ public final class Env {
 		nWarnings = 0;
 	}
 	public static void error(String text) {
-		System.out.println(text);
+		System.err.println(text);
 		nErrors++;
 	}
 	public static void warning(String text) {
-		System.out.println(text);
+		System.err.println(text);
 		nWarnings++;
 	}
 }
