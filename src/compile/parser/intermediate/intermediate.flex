@@ -16,11 +16,13 @@ import java_cup.runtime.Symbol;
 	StringBuffer token = new StringBuffer(), value = new StringBuffer();
 	int startpos;
 
-	static boolean debug = false;
 	public static void main(String[] args) throws Exception {
 		Lexer lexer = new Lexer(System.in);
-		lexer.debug = true;
-		while (lexer.next_token().sym != sym.EOF);
+		while (true) {
+			Symbol symbol = lexer.next_token();
+			if (symbol.sym == sym.EOF) break;
+	    	System.out.println("(" + symbol.left + "," + symbol.right + ") " + symbol.sym + ":" + symbol.value);
+	    }
 	}
 	
     private Symbol symbol(int type) {
@@ -33,7 +35,6 @@ import java_cup.runtime.Symbol;
     	return symbol(type, value, token, yycolumn);
     }
     private Symbol symbol(int type, Object value, String token, int pos) {
-    	if (debug) System.out.println("(" + (yyline+1) + "," + (pos+1) + ") " + type + ":" + value);
         return new MySymbol(token, type, yyline+1, pos+1, value);
     }
 %}
@@ -68,7 +69,6 @@ WhiteSpace		= {LineTerminator} | [ \t]
 	L[0-9]+				{return symbol(sym.LABEL, Integer.valueOf(yytext().substring(1))); }
 	[0-9]+				{return symbol(sym.NUMBER, Integer.valueOf(yytext())); }
 	[0-9]+\.[0-9]+		{return symbol(sym.FLOAT, Double.valueOf(yytext())); }
-	{LineTerminator}	{}
 }
 <BEGIN_RULESET> {
 	@[0-9]+				{yybegin(SKIP_LINE); return symbol(sym.RULESET_ID, Integer.valueOf(yytext().substring(1))); }
@@ -81,23 +81,21 @@ WhiteSpace		= {LineTerminator} | [ \t]
 }
 <DQUOTE> {
 	"\""				{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString(), startpos); }
-	"\\\""				{token.append(yytext()); value.append("\""); }
-	"\\\\"				{token.append(yytext()); value.append("\\"); }
 	"\\r"				{token.append(yytext()); value.append("\r"); }
 	"\\n"				{token.append(yytext()); value.append("\n"); }
 	"\\f"				{token.append(yytext()); value.append("\f"); }
 	"\\t"				{token.append(yytext()); value.append("\t"); }
+	\\.					{token.append(yytext()); value.append(yytext().charAt(1)); }
 	{LineTerminator}	{throw new RuntimeException("end of line in quoted string at line " + (yyline+1)); }
 	.					{token.append(yytext()); value.append( yytext() ); }
 }
 <SQUOTE> {
 	"'"					{token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.DQUOTED_STRING, value.toString(), token.toString(), startpos); }
-	"\\\'"				{token.append(yytext()); value.append("'"); }
-	"\\\\"				{token.append(yytext()); value.append("\\"); }
 	"\\r"				{token.append(yytext()); value.append("\r"); }
 	"\\n"				{token.append(yytext()); value.append("\n"); }
 	"\\f"				{token.append(yytext()); value.append("\f"); }
 	"\\t"				{token.append(yytext()); value.append("\t"); }
+	\\.					{token.append(yytext()); value.append(yytext().charAt(1)); }
 	{LineTerminator}	{throw new RuntimeException("end of line in quoted string at line " + (yyline+1)); }
 	.					{token.append(yytext()); value.append( yytext() ); }
 }
