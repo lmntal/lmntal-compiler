@@ -1,4 +1,5 @@
-/* Multiset rewriting -- compute the largest integer of a multiset of integers 
+/* Multiset rewriting -- compute the largest
+   integer of a multiset of integers 
    Kazunori Ueda, 2004-11-17
 */
 

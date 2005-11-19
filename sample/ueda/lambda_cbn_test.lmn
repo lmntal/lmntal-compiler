@@ -1,0 +1,56 @@
+// lambda calculus
+
+/*
+{ lambda_cbn.use. example1.
+  // (lambda y . y y) x => x x
+  dn(r)=apply(lambda(cp(Y0,Y1), apply(Y0,Y1)), x).
+  r=up(A) :- r=A.
+}
+
+{ lambda_cbn.use. example2.
+  // (lambda f . (lambda x . f (f x) ) ) succ 0
+  // => succ (succ 0)
+  dn(r)=apply(apply(lambda(cp(F0,F1),
+                lambda(X, apply(F0,apply(F1,X)))),
+    succ), 0).
+  // H=apply(succ, I) :- int(I) | H=I+1.
+  r=up(A) :- r=A.
+}
+
+{ lambda_cbn.use. example3.
+  // (lambda mul . (lambda sqr . sqr 5) (lambda x . mul x x)) 
+  //     (lambda x . (lambda y . * x y) ) 
+  dn(r)=apply(
+     lambda(Mul,
+       apply(lambda(Sqr, apply(Sqr,5)),
+         lambda(cp(X0,X1), apply(apply(Mul,X0),X1)))),
+     lambda(A, lambda(B, '*'(A,B)))).
+  r=up(A) :- r=A.
+  r=upo(A) :- r=A.
+}
+
+{ lambda_cbn.use.  example4.
+  // exponentiation of natural numbers in Church encoding
+  // n is encoded as f^n x
+  // then n^m is encoded as lambda n m -> m n
+
+  N=n(0) :- N=lambda(rm, lambda(X, X)).
+  N=n(1) :- N=lambda(F, lambda(X, apply(F,X))).
+  N=n(2) :- N=lambda(cp(F0,F1), lambda(X,
+              apply(F0,apply(F1,X)))).
+  N=n(3) :- N=lambda(cp(F0,cp(F1,F2)), lambda(X,
+              apply(F0,apply(F1,apply(F2,X))))).
+  N=n(4) :- N=lambda(cp(F0,cp(F1,cp(F2,F3))), lambda(X,
+              apply(F0,apply(F1,apply(F2,apply(F3,X)))))).
+
+  dn(r)=apply(apply(apply(n(2), n(2)), s), 0).
+  
+  H=apply(s, I) :- int(I) | H=I+1.
+
+  r=up(A) :- r=A.
+  r=upo(A) :- r=A.
+}
+*/
+lambda_cbn.use.
+dn(r)=apply(a,apply(lambda(X,X),lambda(Y,Y))).
+

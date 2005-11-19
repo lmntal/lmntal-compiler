@@ -9,4 +9,5 @@ map({i(I), {$p[I,O]}, o(O)}, [H0|T], R0) :-
     R0 = [H|R], $p[H0,H],
     map({i(I), {$p[I,O]}, o(O)}, T, R).
 
-map({i(I), {"*"(2,I,O)}, o(O)}, [2,3,5,7,11], result) .
+map({i(I), {"*"(2,I,O)}, o(O)}, [2,3,5,7,11],
+    result) .
