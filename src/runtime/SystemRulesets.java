@@ -11,6 +11,12 @@ public final class SystemRulesets {
 	private static ArrayList all = new ArrayList();
 	private static ArrayList userDefined = new ArrayList();
 	static {
+		clear();
+	}
+	/** 初期化。登録されたユーザー定義システムルールセットを除去する。 */
+	public static void clear() {
+		all.clear();
+		userDefined.clear();
 		all.add(GlobalSystemRuleset.getInstance());
 	}
 	/**

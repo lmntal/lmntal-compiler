@@ -28,6 +28,7 @@ import java.util.jar.Manifest;
 
 import runtime.Env;
 import runtime.FloatingFunctor;
+import runtime.FrontEnd;
 import runtime.Functor;
 import runtime.Inline;
 import runtime.InlineUnit;
@@ -47,6 +48,77 @@ import runtime.SystemRulesets;
  * @author mizuno
  */
 public class Translator {
+	private static boolean fStandardLibrary = false;
+	
+	/**
+	 * std_lib.jar を作るための main 関数
+	 * @param args FrontEnd に渡すオプション
+	 */
+	public static void main(String[] args) throws Exception {
+		FrontEnd.processOptions(args);
+		Env.fInterpret = false;
+		Env.fLibrary = true;
+
+		// public/*.lmn から std_lib.jar を作成
+		fStandardLibrary = true;
+		fKeepSource = true;
+		baseDirName = "public/tmp";
+
+		File publicDir = new File("public");
+		File outDir = new File(baseDirName);
+		if (!outDir.exists()) outDir.mkdir();
+		File transDir = new File(outDir, "translated");
+		if (!transDir.exists()) transDir.mkdir();
+		
+		ArrayList l = new ArrayList();
+		l.add(null);
+		
+		String[] files = publicDir.list();
+		for (int i = 0; i < files.length; i++) {
+			if (!files[i].endsWith(".lmn")) continue;
+			File f = new File(publicDir, files[i]);
+			if (f.isDirectory()) continue;
+			long modified = f.lastModified();
+			
+			File moduleClass = new File(transDir, "Module_" + files[i].substring(0, files[i].length() - 4) + ".class");
+			//修正されていなければ何もしない
+			if (moduleClass.exists() && moduleClass.lastModified() >= modified) continue; 
+
+			Inline.inlineSet.clear();
+			SystemRulesets.clear();
+			l.set(0, "public/" + files[i]);
+			System.out.println("processing " + l.get(0));
+			FrontEnd.run(l);
+		}
+		baseDir = outDir;
+		genJAR("std_lib.jar");
+		
+		// src/*.lmn から通常のライブラリの作成
+		fStandardLibrary = false;
+		fKeepSource = false;
+		baseDirName = null;
+		baseDir = null;
+		
+		File srcDir = new File("src");
+		files = srcDir.list();
+		for (int i = 0; i < files.length; i++) {
+			if (!files[i].endsWith(".lmn")) continue;
+			File f = new File(srcDir, files[i]);
+			if (f.isDirectory()) continue;
+			long modified = f.lastModified();
+			
+			File jar = new File(files[i].substring(0, files[i].length() - 4) + ".jar");
+			//修正されていなければ何もしない
+			if (jar.exists() && jar.lastModified() >= modified) continue;
+			
+			Inline.inlineSet.clear();
+			SystemRulesets.clear();
+			l.set(0, "src/" + files[i]);
+			System.out.println("processing " + l.get(0));
+			FrontEnd.run(l);
+		}
+	}
+	
 	private String className;
 	private File outputFile;
 	private BufferedWriter writer;
@@ -228,7 +300,7 @@ public class Translator {
 	 */
 	public static void genInlineCode() throws IOException {
 		if (Inline.inlineSet.size() > 1) {
-			Env.e("Translator supports only one InlienUnit.");
+			Env.e("Translator supports only one InlineUnit.");
 			return;
 		}
 		Iterator it = Inline.inlineSet.values().iterator();
@@ -261,10 +333,14 @@ public class Translator {
 		}
 
 		//JARの生成
+		if (!fStandardLibrary)
+			genJAR(sourceName + ".jar");
+	}
+	private static void genJAR(String outName) throws IOException {
 		Manifest mf = new Manifest();
 		Attributes att = mf.getMainAttributes();
 		att.put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(sourceName + ".jar")), mf);
+		JarOutputStream out = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(outName)), mf);
 		putToJar(out, "", baseDir);
 		out.close();
 	}
@@ -274,6 +350,7 @@ public class Translator {
 	 * init メソッド内で作成した一時ディレクトリを再帰的に削除します。
 	 */
 	public static void deleteTemporaryFiles() {
+		if (fKeepSource) return;
 		if (baseDir != null && !delete(baseDir)) {
 			Env.warning("failed to delete temprary files");
 		}
@@ -311,7 +388,7 @@ public class Translator {
 		}
 	}
 	/**
-	 * ディレクトリ内のファイル Jar ファイルに出力する。ディレクトリは再帰的に処理される。
+	 * ディレクトリ内の class ファイルを Jar ファイルに出力する。ディレクトリは再帰的に処理される。
 	 * @param out 出力する JarOutputStream
 	 * @param relativeDir "/"で区切られた、相対パス。Jar への出力に利用する。
 	 * @param directory 処理するディレクトリを表す File インスタンス。
@@ -325,7 +402,7 @@ public class Translator {
 			if (f.isDirectory()) {
 				out.putNextEntry(new JarEntry(relativeDir + files[i] + "/"));
 				putToJar(out, relativeDir + files[i] + "/", f);
-			} else {
+			} else if (files[i].endsWith(".class")) {
 				out.putNextEntry(new JarEntry(relativeDir + files[i]));
 				FileInputStream in = new FileInputStream(f);
 				int size;

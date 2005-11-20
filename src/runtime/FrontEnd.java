@@ -515,8 +515,7 @@ public class FrontEnd {
 					Env.e("Failed to write Translated File. " + e.getLocalizedMessage());
 					return;
 				} finally {
-					if (!Translator.fKeepSource)
-						Translator.deleteTemporaryFiles();
+					Translator.deleteTemporaryFiles();
 				}
 			}
 			

@@ -1,1 +1,1 @@
-for %%f in (src\*.lmn) do lmnc --library %%f
+java -cp ..\classes compile.Translator
