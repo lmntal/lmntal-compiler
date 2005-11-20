@@ -3,6 +3,12 @@ package graphic;
 import java.awt.*;
 import java.io.File;
 
+
+/**
+ * 
+ * @author nakano
+ * 描画用の膜を、画像オブジェクト（アトム？）にする
+ */
 public class GraphicAtoms{
 	public String name = null;
 	boolean enable;

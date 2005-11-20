@@ -18,12 +18,13 @@ public class LMNtalGFrame extends JFrame{
 	public LMNGraphPanel lmnPanel = null;
 	public boolean busy = true;
 	public boolean running = true;
+	public boolean waitawhile = false;
 	
     public LMNtalGFrame(){
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				running = busy = false;
+				running = busy = waitawhile = false;
 				runtime.LMNtalRuntimeManager.terminateAllThreaded();
 				//閉じる際に、lmnPanelを殺す。
 				if(lmnPanel!=null)
@@ -54,7 +55,7 @@ public class LMNtalGFrame extends JFrame{
 		while(busy) {
 			try {
 				lmnPanel.th.sleep(10);
-				busy = false;
+				busy = waitawhile;
 			} catch (Exception e) {
 			}
 		}
@@ -67,7 +68,7 @@ public class LMNtalGFrame extends JFrame{
 		setTitle("It's Graphical LMNtal");
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
-		getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
+		getContentPane().add(bt=new JButton("Wait a While"), BorderLayout.SOUTH);
 		bt.addActionListener(new ActionAdapter(this));
 	}
 }
@@ -78,6 +79,6 @@ class ActionAdapter implements ActionListener {
 	}
 	public void actionPerformed(ActionEvent e) {
 //		e.getSource();
-		frame.busy = true;
+		frame.waitawhile = !frame.waitawhile;
 	}
 }

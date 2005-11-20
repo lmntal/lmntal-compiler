@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -46,7 +45,6 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		//画面を白地で初期化（塗りつぶす）
 		OSG.setColor(Color.WHITE);
 		OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
-//		getlayout();
 		paintlayout();
 		g.drawImage(OSI,0,0,this);
 	}
@@ -54,17 +52,19 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	 * 指定された名称のアトムが存在するか検索。
 	 * あれば真を、なければ偽を返す。
 	 */
-	private boolean searchatom(AbstractMembrane m , String sstring){
+	private String searchatom(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
 
 		while(ite.hasNext()){
 			a = (Node)ite.next();
-			if(a.getName() == sstring){
-				return true;
+			if(a.getName() == "draw"){
+				return "draw";
+			}else if(a.getName() == "remove"){
+				return "remove";
 			}
 		}
-		return false;
+		return null;
 				
 	}
 	
@@ -74,7 +74,6 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	private GraphicAtoms getgraphicatoms(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
-		LinkedList atoms = new LinkedList();
 		GraphicAtoms ga = new GraphicAtoms();
 
 		if(m.getLockThread() != null) locked = true;
@@ -152,8 +151,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 
 	public synchronized void setgraphicmem(AbstractMembrane m){
 		GraphicAtoms ga;
-		
-		if(searchatom(m , "draw")){
+		String mode = searchatom(m);
+		if(mode == "draw"){
 			ga = getgraphicatoms(m);
 			if(ga == null) return;
 			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
@@ -174,6 +173,18 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			if(drawlist.size() == 0){
 				drawlist.add(ga);
 			}
+		}else if(mode == "remove"){
+			ga = getgraphicatoms(m);
+			if(ga == null) return;
+			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
+			for(int i = 0; i < drawlist.size(); i++){
+				GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
+				if(ga2==null) continue;
+				if(ga.name.equals(ga2.name)){
+					drawlist.remove(i);
+					break;
+				}
+			}			
 		}
 	}
 	
