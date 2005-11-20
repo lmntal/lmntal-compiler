@@ -94,7 +94,7 @@ public final class GlobalSystemRulesetGenerator {
 			text += " Res=X/.Y     :- Z=X/.Y     | Res=Z.    \n";
 			text += " Res=int(X)   :- Z=int(X)   | Res=Z.    \n";
 			text += " Res=float(X) :- Z=float(X) | Res=Z.    \n";
-			text += " cp(X,Y,Z)    :- unary(X)   | Y=X, Z=X. \n";
+//			text += " cp(X,Y,Z)    :- unary(X)   | Y=X, Z=X. \n";
 			compileAndLoadRules(ruleset,text);
 		}
 		if (false) {
@@ -217,23 +217,23 @@ public final class GlobalSystemRulesetGenerator {
 		ruleset.rules.add(buildUnaryOpRule("int",  Instruction.ISFLOAT,Instruction.FLOAT2INT));
 		ruleset.rules.add(buildUnaryOpRule("float",Instruction.ISINT,  Instruction.INT2FLOAT));
 		
-		// 1:cp(A,B,C), 2:$n[A] :- unary($n) | $3:$n[B], $4:$n[C].
-		// reuse { 2->4 }
-		rule = new Rule();
-		insts = rule.memMatch;
-		// match		
-		insts.add(new Instruction(Instruction.SPEC,        1,4));
-		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor("cp",3)));
-		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
-		insts.add(new Instruction(Instruction.ISUNARY,     2));
-		// react
-		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
-		insts.add(new Instruction(Instruction.COPYATOM,  3,0,2));
-		insts.add(new Instruction(Instruction.RELINK,    2,0,1,1,0));
-		insts.add(new Instruction(Instruction.RELINK,    3,0,1,2,0));
-		insts.add(new Instruction(Instruction.FREEATOM,    1));
-		insts.add(new Instruction(Instruction.PROCEED));
-		ruleset.rules.add(rule);
+//		// 1:cp(A,B,C), 2:$n[A] :- unary($n) | $3:$n[B], $4:$n[C].
+//		// reuse { 2->4 }
+//		rule = new Rule();
+//		insts = rule.memMatch;
+//		// match		
+//		insts.add(new Instruction(Instruction.SPEC,        1,4));
+//		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor("cp",3)));
+//		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
+//		insts.add(new Instruction(Instruction.ISUNARY,     2));
+//		// react
+//		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+//		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+//		insts.add(new Instruction(Instruction.COPYATOM,  3,0,2));
+//		insts.add(new Instruction(Instruction.RELINK,    2,0,1,1,0));
+//		insts.add(new Instruction(Instruction.RELINK,    3,0,1,2,0));
+//		insts.add(new Instruction(Instruction.FREEATOM,    1));
+//		insts.add(new Instruction(Instruction.PROCEED));
+//		ruleset.rules.add(rule);
 	}
 }
