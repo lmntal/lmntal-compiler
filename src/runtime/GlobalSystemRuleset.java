@@ -64,6 +64,18 @@ public class GlobalSystemRuleset extends Ruleset {
 		if (execL124(mem, atom)) {
 			return true;
 		}
+		if (execL126(mem, atom)) {
+			return true;
+		}
+		if (execL128(mem, atom)) {
+			return true;
+		}
+		if (execL130(mem, atom)) {
+			return true;
+		}
+		if (execL132(mem, atom)) {
+			return true;
+		}
 		return result;
 	}
 	public boolean react(Membrane mem) {
@@ -107,9 +119,21 @@ public class GlobalSystemRuleset extends Ruleset {
 		if (execL125(mem)) {
 			return true;
 		}
+		if (execL127(mem)) {
+			return true;
+		}
+		if (execL129(mem)) {
+			return true;
+		}
+		if (execL131(mem)) {
+			return true;
+		}
+		if (execL133(mem)) {
+			return true;
+		}
 		return result;
 	}
-	public boolean execL125(Object var0) {
+	public boolean execL133(Object var0) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -131,7 +155,7 @@ public class GlobalSystemRuleset extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L125:
+L133:
 		{
 			func = f0;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -154,16 +178,16 @@ L125:
 						((Atom)var3), 0,
 						((Atom)var1), 1 );
 					ret = true;
-					break L125;
+					break L133;
 				}
 			}
 		}
 		return ret;
 	}
-	public boolean execL124(Object var0, Object var1) {
+	public boolean execL132(Object var0, Object var1) {
 		return false;
 	}
-	public boolean execL123(Object var0) {
+	public boolean execL131(Object var0) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -185,7 +209,7 @@ L125:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L123:
+L131:
 		{
 			func = f1;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -206,6 +230,224 @@ L123:
 					((AbstractMembrane)var0).addAtom(((Atom)var3));
 					((Atom)var3).getMem().relinkAtomArgs(
 						((Atom)var3), 0,
+						((Atom)var1), 1 );
+					ret = true;
+					break L131;
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL130(Object var0, Object var1) {
+		return false;
+	}
+	public boolean execL129(Object var0) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L129:
+		{
+			func = f2;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
+					u = ((FloatingFunctor)((Atom)var2).getFunctor()).floatValue();
+					var3 = new Atom(null, new FloatingFunctor(-u));
+					atom = ((Atom)var1);
+					atom.dequeue();
+					atom = ((Atom)var1);
+					atom.getMem().removeAtom(atom);
+					atom = ((Atom)var2);
+					atom.getMem().removeAtom(atom);
+					((AbstractMembrane)var0).addAtom(((Atom)var3));
+					((Atom)var3).getMem().relinkAtomArgs(
+						((Atom)var3), 0,
+						((Atom)var1), 1 );
+					ret = true;
+					break L129;
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL128(Object var0, Object var1) {
+		return false;
+	}
+	public boolean execL127(Object var0) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L127:
+		{
+			func = f3;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				if (!(!(((Atom)var2).getFunctor() instanceof IntegerFunctor))) {
+					x = ((IntegerFunctor)((Atom)var2).getFunctor()).intValue();
+					var3 = new Atom(null, new IntegerFunctor(-x));				
+					atom = ((Atom)var1);
+					atom.dequeue();
+					atom = ((Atom)var1);
+					atom.getMem().removeAtom(atom);
+					atom = ((Atom)var2);
+					atom.getMem().removeAtom(atom);
+					((AbstractMembrane)var0).addAtom(((Atom)var3));
+					((Atom)var3).getMem().relinkAtomArgs(
+						((Atom)var3), 0,
+						((Atom)var1), 1 );
+					ret = true;
+					break L127;
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL126(Object var0, Object var1) {
+		return false;
+	}
+	public boolean execL125(Object var0) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L125:
+		{
+			func = f4;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
+					var3 =  ((Atom)var2).getFunctor();
+					var4 = new Atom(null, (Functor)(var3));
+					atom = ((Atom)var1);
+					atom.dequeue();
+					atom = ((Atom)var1);
+					atom.getMem().removeAtom(atom);
+					atom = ((Atom)var2);
+					atom.getMem().removeAtom(atom);
+					((AbstractMembrane)var0).addAtom(((Atom)var4));
+					((Atom)var4).getMem().relinkAtomArgs(
+						((Atom)var4), 0,
+						((Atom)var1), 1 );
+					ret = true;
+					break L125;
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL124(Object var0, Object var1) {
+		return false;
+	}
+	public boolean execL123(Object var0) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L123:
+		{
+			func = f5;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				if (!(!(((Atom)var2).getFunctor() instanceof IntegerFunctor))) {
+					var3 =  ((Atom)var2).getFunctor();
+					var4 = new Atom(null, (Functor)(var3));
+					atom = ((Atom)var1);
+					atom.dequeue();
+					atom = ((Atom)var1);
+					atom.getMem().removeAtom(atom);
+					atom = ((Atom)var2);
+					atom.getMem().removeAtom(atom);
+					((AbstractMembrane)var0).addAtom(((Atom)var4));
+					((Atom)var4).getMem().relinkAtomArgs(
+						((Atom)var4), 0,
 						((Atom)var1), 1 );
 					ret = true;
 					break L123;
@@ -242,7 +484,7 @@ L123:
 		boolean ret = false;
 L121:
 		{
-			func = f2;
+			func = f6;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -305,7 +547,7 @@ L121:
 		boolean ret = false;
 L119:
 		{
-			func = f3;
+			func = f7;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -367,7 +609,7 @@ L119:
 		boolean ret = false;
 L117:
 		{
-			func = f4;
+			func = f8;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -429,7 +671,7 @@ L117:
 		boolean ret = false;
 L115:
 		{
-			func = f5;
+			func = f9;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -491,7 +733,7 @@ L115:
 		boolean ret = false;
 L113:
 		{
-			func = f6;
+			func = f10;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -556,7 +798,7 @@ L113:
 		boolean ret = false;
 L111:
 		{
-			func = f7;
+			func = f11;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -621,7 +863,7 @@ L111:
 		boolean ret = false;
 L109:
 		{
-			func = f8;
+			func = f12;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -683,7 +925,7 @@ L109:
 		boolean ret = false;
 L107:
 		{
-			func = f9;
+			func = f13;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -745,7 +987,7 @@ L107:
 		boolean ret = false;
 L105:
 		{
-			func = f10;
+			func = f14;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -916,15 +1158,19 @@ L101:
 	public boolean execL100(Object var0, Object var1) {
 		return false;
 	}
-	private static final Functor f8 = new Functor("*", 3, null);
-	private static final Functor f5 = new Functor("+.", 3, null);
-	private static final Functor f0 = new Functor("float", 2, null);
-	private static final Functor f4 = new Functor("-.", 3, null);
+	private static final Functor f3 = new Functor("-", 2, null);
+	private static final Functor f8 = new Functor("-.", 3, null);
 	private static final Functor f1 = new Functor("int", 2, null);
-	private static final Functor f2 = new Functor("/.", 3, null);
-	private static final Functor f7 = new Functor("/", 3, null);
-	private static final Functor f3 = new Functor("*.", 3, null);
-	private static final Functor f9 = new Functor("-", 3, null);
-	private static final Functor f10 = new Functor("+", 3, null);
-	private static final Functor f6 = new Functor("mod", 3, null);
+	private static final Functor f6 = new Functor("/.", 3, null);
+	private static final Functor f11 = new Functor("/", 3, null);
+	private static final Functor f13 = new Functor("-", 3, null);
+	private static final Functor f4 = new Functor("+.", 2, null);
+	private static final Functor f10 = new Functor("mod", 3, null);
+	private static final Functor f5 = new Functor("+", 2, null);
+	private static final Functor f12 = new Functor("*", 3, null);
+	private static final Functor f0 = new Functor("float", 2, null);
+	private static final Functor f9 = new Functor("+.", 3, null);
+	private static final Functor f7 = new Functor("*.", 3, null);
+	private static final Functor f14 = new Functor("+", 3, null);
+	private static final Functor f2 = new Functor("-.", 2, null);
 }

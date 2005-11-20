@@ -92,6 +92,10 @@ public final class GlobalSystemRulesetGenerator {
 			text += " Res=X-.Y     :- Z=X-.Y     | Res=Z.    \n";
 			text += " Res=X*.Y     :- Z=X*.Y     | Res=Z.    \n";
 			text += " Res=X/.Y     :- Z=X/.Y     | Res=Z.    \n";
+			text += " Res=+X       :- int(X)     | Res=X.    \n";
+			text += " Res=-X       :- Z=-X       | Res=Z.    \n";
+			text += " Res=+.X      :- float(X)   | Res=X.    \n";
+			text += " Res=-.X      :- Z=-.X      | Res=Z.    \n";
 			text += " Res=int(X)   :- Z=int(X)   | Res=Z.    \n";
 			text += " Res=float(X) :- Z=float(X) | Res=Z.    \n";
 //			text += " cp(X,Y,Z)    :- unary(X)   | Y=X, Z=X. \n";
@@ -173,6 +177,44 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.PROCEED));
 		return rule;
 	}
+	static Rule f() {
+		Rule rule = new Rule();
+		List insts = rule.memMatch;
+		insts.add(new Instruction(Instruction.SPEC,      1, 0));
+		insts.add(new Instruction(Instruction.FINDATOM,  1, 0, new Functor("+",2)));
+		insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 0));
+		insts.add(new Instruction(Instruction.ISINT,     2));
+		insts.add(new Instruction(Instruction.GETFUNC,   3, 2));
+		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 4, 3));
+
+		return rule;
+	}
+	
+	/**
+	 * 仮メソッド。	
+	 */
+	static Rule buildUnaryPlusRule(String name, int typechecker) {
+		Rule rule = new Rule();
+		List insts = rule.memMatch;
+		// match		
+		insts.add(new Instruction(Instruction.SPEC,        1,5));
+		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,2)));
+		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
+		insts.add(new Instruction(typechecker,             2));
+		insts.add(new Instruction(Instruction.GETFUNC,   3,2));
+		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 4,3));
+		// react
+		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
+		insts.add(new Instruction(Instruction.LOCALADDATOM,  0,4));
+		insts.add(new Instruction(Instruction.RELINK,        4,0,1,1,0));
+		insts.add(new Instruction(Instruction.FREEATOM,      1));
+		insts.add(new Instruction(Instruction.FREEATOM,      2));
+		insts.add(new Instruction(Instruction.PROCEED));
+		return rule;
+	}
+
 	/**
 	 * 仮メソッド。	
 	 */
@@ -214,6 +256,10 @@ public final class GlobalSystemRulesetGenerator {
 		ruleset.rules.add(buildBinOpRule("*.",	Instruction.ISFLOAT,Instruction.FMUL));
 		ruleset.rules.add(buildBinOpRule("/.",	Instruction.ISFLOAT,Instruction.FDIV));
 
+		ruleset.rules.add(buildUnaryPlusRule("+",  Instruction.ISINT));
+		ruleset.rules.add(buildUnaryPlusRule("+.", Instruction.ISFLOAT));
+		ruleset.rules.add(buildUnaryOpRule("-",    Instruction.ISINT,  Instruction.INEG));
+		ruleset.rules.add(buildUnaryOpRule("-.",   Instruction.ISFLOAT,Instruction.FNEG));
 		ruleset.rules.add(buildUnaryOpRule("int",  Instruction.ISFLOAT,Instruction.FLOAT2INT));
 		ruleset.rules.add(buildUnaryOpRule("float",Instruction.ISINT,  Instruction.INT2FLOAT));
 		
