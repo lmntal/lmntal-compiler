@@ -164,6 +164,14 @@ UnaryOpAtom	::=	  UnitAtom:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom);
 					   RESULT = new SrcAtom("-", list); :}
+				| PLUS_DOT UnitAtom:atom
+					{: LinkedList list = new LinkedList();
+					   list.add(atom);
+					   RESULT = new SrcAtom("+.", list); :}
+				| MINUS_DOT UnitAtom:atom
+					{: LinkedList list = new LinkedList();
+					   list.add(atom);
+					   RESULT = new SrcAtom("-.", list); :}
 				;
 
 Atom200		::=   UnaryOpAtom:atom

@@ -70,6 +70,10 @@ public class GuardCompiler extends HeadCompiler {
 		guardLibrary1.put(new Functor("int",   1), new int[]{ISINT});
 		guardLibrary1.put(new Functor("string",1), new int[]{ISSTRING});
 		guardLibrary1.put(new Functor("float", 1), new int[]{ISFLOAT});
+		guardLibrary1.put(new Functor("+",     2), new int[]{ISINT,          -1,                    ISINT});
+		guardLibrary1.put(new Functor("-",     2), new int[]{ISINT,          Instruction.INEG,      ISINT});
+		guardLibrary1.put(new Functor("+.",    2), new int[]{ISFLOAT,        -1,                    ISFLOAT});
+		guardLibrary1.put(new Functor("-.",    2), new int[]{ISFLOAT,        Instruction.FNEG,      ISFLOAT});
 		guardLibrary1.put(new Functor("float", 2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
 		guardLibrary1.put(new Functor("int",   2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
 		guardLibrary1.put(new Functor("connectRuntime",1), new int[]{ISSTRING, Instruction.CONNECTRUNTIME});
@@ -283,8 +287,14 @@ public class GuardCompiler extends HeadCompiler {
 						if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
 					}
 					else { // {t1,inst,t2} --> p(+X1,-X2)
-						int atomid2 = varcount++;
-						match.add(new Instruction(desc[1], atomid2, atomid1));
+						int atomid2;
+						if (desc[1] == -1) { // 単項 + と +. だけ特別扱い 
+							atomid2 = atomid1;
+							//bindToUnaryAtom 内で、実際に使うアトムを生成している。
+						} else {
+							atomid2 = varcount++;
+							match.add(new Instruction(desc[1], atomid2, atomid1));
+						}
 						bindToUnaryAtom(def2, atomid2);
 						typedcxtdatatypes.put(def2, new Integer(desc[2]));
 					}
