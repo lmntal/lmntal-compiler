@@ -202,6 +202,7 @@ public class Functor implements Serializable {
 		if (arity == 1 && path == null) {
 			if (nametype == SrcName.PLAIN || nametype == SrcName.SYMBOL) {
 				try {
+					if (name.matches("\\+[0-9]+")) name = name.substring(1);
 					return new IntegerFunctor(Integer.parseInt(name));
 				}
 				catch (NumberFormatException e) {}
