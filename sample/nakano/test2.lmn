@@ -1,2 +1,13 @@
-a.
-a :- a( mouse.pointx ).
+{
+draw.
+name("hoge").
+getpic("circle").
+position(200,150).
+sequence(1).
+size(50,50).
+}.
+
+{position(X,Y),$p,@p} :- X < mouse.framepointx , Y < mouse.pointy | {position(X + 5,Y + 5),$p}.
+{position(X,Y),$p,@p} :- X < mouse.framepointx , Y > mouse.pointy | {position(X + 5,Y - 5),$p}.
+{position(X,Y),$p,@p} :- X > mouse.framepointx , Y < mouse.pointy | {position(X - 5,Y + 5),$p}.
+{position(X,Y),$p,@p} :- X > mouse.framepointx , Y > mouse.pointy | {position(X - 5,Y - 5),$p}.
