@@ -1,0 +1,39 @@
+/*
+
+Ì¤´°À®
+NAME
+	Mouse module
+	
+AUTHOR
+	Atsushi Nakano
+
+HISTORY
+	2005/11/21
+
+*/
+[:/*inline_define*/
+	import java.awt.MouseInfo;
+	import java.awt.PointerInfo;
+
+:].
+
+{
+module(mouse).
+
+H=mouse.pointx:- H=[:/*inline*/
+    PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+  int point = (int)(pointerInfo.getLocation().x);
+  Atom atom = mem.newAtom(new IntegerFunctor(point));
+	mem.relink(atom,0,me,0);
+	mem.removeAtom(me);
+  :].
+
+
+H=mouse.pointy :- H=[:/*inline*/
+    PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+  int point = (int)(pointerInfo.getLocation().y);
+  Atom atom = mem.newAtom(new IntegerFunctor(point));
+	mem.relink(atom,0,me,0);
+	mem.removeAtom(me);
+  :].
+}.
