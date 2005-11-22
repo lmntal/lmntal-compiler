@@ -175,23 +175,25 @@ public final class Membrane extends AbstractMembrane {
 	/** 膜の活性化 */
 	public void activate() {
 		stable = false;
-		if (isQueued()) {
-			return;
-		}
 		Task t = (Task)task;
 		if (!isRoot()) {
 			((Membrane)parent).activate();
 			synchronized(task) {
 				if (t.bufferedStack.isEmpty()) {
+					if (isQueued()) {
+						return;
+					}
 					t.memStack.push(this);
 				}
 				else {
+					dequeue();
 					t.bufferedStack.push(this);
 				}
 			}
 		}
 		else {
 			// ASSERT(t.bufferedStack.isEmpty());
+			dequeue();
 			t.bufferedStack.push(this);
 		}
 	}	
