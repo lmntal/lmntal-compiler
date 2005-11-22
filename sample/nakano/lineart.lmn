@@ -1,0 +1,89 @@
+/*
+
+	nakano ---
+	オプション　--graphic をつけて実行すること。
+	このプログラムは無限ループします。
+	
+	ライブラリintegerを使用しています。
+
+*/
+%定数
+
+width(640).
+height(480).
+max_v(15).
+min_v(3).
+now(1).
+{
+draw.
+name(0).
+getpic("line").
+position(0,0).
+color(0,255,0).
+size(0,0).
+}.
+a.
+v1(5,5).
+v2(7,7).
+pos(600,470,50,500).
+
+%線の生成
+{name(0),$p[]}:-{name(1),$p[]},{name(2),$p[]},{name(3),$p[]},{name(4),$p[]},{name(5),$p[]},{name(6),$p[]},{name(7),$p[]},{name(8),$p[]},{name(9),$p[]},{name(10),$p[]},{name(11),$p[]},{name(12),$p[]},{name(13),$p[]},{name(14),$p[]},{name(15),$p[]}.
+
+%端（１）の移動
+a,now(N){draw,name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
+:-  N=M,VX1 > 0 , VY1 > 0 ,PX1 < W ,PY1 < H , int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
+b,now(N),{name(M),position( PX1, PY1),$p},pos(PX1+VX1,PY1+VY1,PX2,PY2),v1(VX1,VY1),width(W),height(H).
+
+a,now(N),{draw,name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
+:-  N=M,VX1 < 0 , VY1 > 0 ,PX1 > 0 ,PY1 < H , int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
+b,now(N),{name(M),position( PX1, PY1),$p},pos(PX1+VX1,PY1+VY1,PX2,PY2),v1(VX1,VY1),width(W),height(H).
+
+a,now(N),{draw,name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
+:-  N=M,VX1 > 0 , VY1 < 0 ,PX1 < W ,PY1 > 0 , int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
+b,now(N),{name(M),position( PX1, PY1),$p},pos(PX1+VX1,PY1+VY1,PX2,PY2),v1(VX1,VY1),width(W),height(H).
+
+a,now(N),{draw,name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
+:-  N=M,VX1 < 0 , VY1 < 0 ,PX1 > 0 ,PY1 > 0 , int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
+b,now(N),{name(M),position( PX1, PY1),$p},pos(PX1+VX1,PY1+VY1,PX2,PY2),v1(VX1,VY1),width(W),height(H).
+
+%端（２）の移動
+b,now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
+:-  N=M,VX2 > 0 , VY2 > 0 ,PX2 < W ,PY2 < H , int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
+c,now(N+1),{draw,name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+
+b,now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
+:-  N=M,VX2 < 0 , VY2 > 0 ,PX2 > 0 ,PY2 < H ,int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
+c,now(N+1),{draw,name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+
+b,now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
+:-  N=M,VX2 > 0 , VY2 < 0 ,PX2 < W ,PY2 > 0 , int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
+c,now(N+1),{draw,name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+
+b,now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
+:-  N=M,VX2 < 0 , VY2 < 0 ,PX2 > 0 ,PY2 > 0 , int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
+c,now(N+1),{draw,name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+%ターゲットの監視
+now(N):-N>15|now(1).
+%次の色の決定
+c,{color(R,G,B),$p} :- R=255, G<255, B=  0 | a,{color(R   ,G+51,B   ),$p}.
+c,{color(R,G,B),$p} :- R>  0, G=255, B=  0 | a,{color(R-51,G   ,B   ),$p}.
+c,{color(R,G,B),$p} :- R=  0, G=255, B<255 | a,{color(R   ,G   ,B+51),$p}.
+c,{color(R,G,B),$p} :- R=  0, G>  0, B=255 | a,{color(R   ,G-51,B   ),$p}.
+c,{color(R,G,B),$p} :- R<255, G=  0, B=255 | a,{color(R+51,G   ,B   ),$p}.
+c,{color(R,G,B),$p} :- R=255, G=  0, B>  0 | a,{color(R   ,G   ,B-51),$p}.
+
+%速度をランダムに決定
+Ret=rand_v, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
+	Ret=integer.rnd(MaxV-MinV+1)+MinV, min_v(MinV), max_v(MaxV).
+
+%v1の反転
+pos(X1,Y1,X2,Y2),v1(VX,VY),width(W), min_v(MinV), max_v(MaxV)  :- VX > 0, X1 >= W ,int(X1),int(Y1),int(X2),int(Y2),int(VX),int(VY),int(MaxV),int(MinV)| pos(X1,Y1,X2,Y2),v1(-rand_v,VY),width(W), min_v(MinV), max_v(MaxV).
+pos(X1,Y1,X2,Y2),v1(VX,VY),height(H), min_v(MinV), max_v(MaxV) :- VY > 0, Y1 >= H ,int(X1),int(Y1),int(X2),int(Y2),int(VX),int(VY),int(MaxV),int(MinV)| pos(X1,Y1,X2,Y2),v1(VX,-rand_v),height(H), min_v(MinV), max_v(MaxV).
+pos(X1,Y1,X2,Y2),v1(VX,VY), min_v(MinV), max_v(MaxV) :- VX < 0, X1 =< 0 ,int(X1),int(Y1),int(X2),int(Y2),int(VX),int(VY),int(MaxV),int(MinV)| pos(X1,Y1,X2,Y2),v1(rand_v,VY), min_v(MinV), max_v(MaxV).
+pos(X1,Y1,X2,Y2),v1(VX,VY), min_v(MinV), max_v(MaxV) :- VY < 0, Y1 =< 0 ,int(X1),int(Y1),int(X2),int(Y2),int(VX),int(VY),int(MaxV),int(MinV)| pos(X1,Y1,X2,Y2),v1(VX,rand_v), min_v(MinV), max_v(MaxV).
+%ｖ２の反転
+pos(X1,Y1,X2,Y2),v2(VX,VY),width(W), min_v(MinV), max_v(MaxV)   :- VX > 0,X2 >= W ,int(X1),int(Y1),int(X2),int(Y2),int(VX),int(VY),int(MaxV),int(MinV)| pos(X1,Y1,X2,Y2),v2(-rand_v,VY),width(W), min_v(MinV), max_v(MaxV) .
+pos(X1,Y1,X2,Y2),v2(VX,VY),height(H), min_v(MinV), max_v(MaxV)  :- VY > 0,Y2 >= H ,int(X1),int(Y1),int(X2),int(Y2),int(VX),int(VY),int(MaxV),int(MinV)| pos(X1,Y1,X2,Y2),v2(VX,-rand_v),height(H), min_v(MinV), max_v(MaxV) .
+pos(X1,Y1,X2,Y2),v2(VX,VY), min_v(MinV), max_v(MaxV)  :- VX < 0, X2 =< 0 ,int(X1),int(Y1),int(X2),int(Y2),int(VX),int(VY),int(MaxV),int(MinV)| pos(X1,Y1,X2,Y2),v2(rand_v,VY), min_v(MinV), max_v(MaxV) .
+pos(X1,Y1,X2,Y2),v2(VX,VY), min_v(MinV), max_v(MaxV)  :- VY < 0, Y2 =< 0 ,int(X1),int(Y1),int(X2),int(Y2),int(VX),int(VY),int(MaxV),int(MinV)| pos(X1,Y1,X2,Y2),v2(VX,rand_v), min_v(MinV), max_v(MaxV) .
