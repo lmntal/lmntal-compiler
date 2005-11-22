@@ -112,6 +112,7 @@ public final class Rule implements Serializable {
 	
 	public String toString() {
 //		return text;
+		if (Env.compileonly) return "";
 		return name!=null && !name.equals("") ? name : text;
 //		return name;
 	}
