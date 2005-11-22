@@ -37,4 +37,23 @@ H=mouse.pointy :- H=[:/*inline*/
 	mem.removeAtom(me);
   :].
 
+  
+  
+H=mouse.framepointx :- H=[:/*inline*/
+	int point = -1;
+	if(Env.LMNgraphic != null & Env.LMNgraphic.getMousePosition()!=null)
+		point = (int)(Env.LMNgraphic.getMousePosition().x);
+	Atom atom = mem.newAtom(new IntegerFunctor(point));
+	mem.relink(atom,0,me,0);
+	mem.removeAtom(me);
+  :].
+  
+H=mouse.framepointy :- H=[:/*inline*/
+	int point = -1;
+	if(Env.LMNgraphic != null & Env.LMNgraphic.getMousePosition()!=null	)
+		point = (int)(Env.LMNgraphic.getMousePosition().y);
+	Atom atom = mem.newAtom(new IntegerFunctor(point));
+	mem.relink(atom,0,me,0);
+	mem.removeAtom(me);
+  :].
 }.
