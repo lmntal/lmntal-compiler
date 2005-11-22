@@ -54,7 +54,7 @@ public class LMNtalGFrame extends JFrame{
 //		System.out.print("*");
 		while(busy) {
 			try {
-				lmnPanel.th.sleep(1);
+				lmnPanel.th.sleep(5);
 				busy = waitawhile;
 			} catch (Exception e) {
 			}
