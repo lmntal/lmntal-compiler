@@ -21,19 +21,20 @@ HISTORY
 module(mouse).
 
 H=mouse.pointx:- H=[:/*inline*/
-    PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-  int point = (int)(pointerInfo.getLocation().x);
-  Atom atom = mem.newAtom(new IntegerFunctor(point));
+	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+	int point = (int)(pointerInfo.getLocation().x);
+	Atom atom = mem.newAtom(new IntegerFunctor(point));
 	mem.relink(atom,0,me,0);
 	mem.removeAtom(me);
   :].
 
 
 H=mouse.pointy :- H=[:/*inline*/
-    PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-  int point = (int)(pointerInfo.getLocation().y);
-  Atom atom = mem.newAtom(new IntegerFunctor(point));
+	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+	int point = (int)(pointerInfo.getLocation().y);
+	Atom atom = mem.newAtom(new IntegerFunctor(point));
 	mem.relink(atom,0,me,0);
 	mem.removeAtom(me);
   :].
+
 }.
