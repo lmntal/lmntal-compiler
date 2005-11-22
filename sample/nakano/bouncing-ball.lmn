@@ -32,20 +32,9 @@ vx(5).
 vy(5).
 }.
 
-{
-a(-1).
-draw.
-name("moge").
-getpic("circle").
-position(80,15).
-sequence(1).
-enable.
-size(50,50).
-vx(5).
-vy(5).
-}.
+b.
 
-b(1).
+{name("hoge"),a(1),$p[]},b :- b(1),{name("hoge"),a(1),$p[]},{name("moge"),a(-1),$p[]}.
 
 {a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX > 0 , VY > 0 , X < 350 ,Y < 350 | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
 {a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX < 0 , VY > 0 , X > 60 ,Y < 350  | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).

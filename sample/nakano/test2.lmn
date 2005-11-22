@@ -8,7 +8,7 @@ size(50,50).
 }.
 mx(0).my(0).
 
-{position(X,Y),$p,@p},mx(MX),my(MY) :- X < MX - 25 , Y < MY - 50 | {position(X + 5,Y + 5),$p},mx(mouse.pointx),my(mouse.pointy).
-{position(X,Y),$p,@p},mx(MX),my(MY) :- X < MX - 25 , Y >= MY - 50 | {position(X + 5,Y - 5),$p},mx(mouse.pointx),my(mouse.pointy).
-{position(X,Y),$p,@p},mx(MX),my(MY) :- X >= MX - 25 , Y < MY - 50 | {position(X - 5,Y + 5),$p},mx(mouse.pointx),my(mouse.pointy).
-{position(X,Y),$p,@p},mx(MX),my(MY) :- X >= MX - 25 , Y >= MY - 50 | {position(X - 5,Y - 5),$p},mx(mouse.pointx),my(mouse.pointy).
+{position(X,Y),$p,@p},mx(MX),my(MY) :- X < MX - 25 , Y < MY - 50 | {position(X + 5,Y + 5),$p},mx(mouse.framepointx),my(mouse.framepointy).
+{position(X,Y),$p,@p},mx(MX),my(MY) :- X < MX - 25 , Y >= MY - 50 | {position(X + 5,Y - 5),$p},mx(mouse.framepointx),my(mouse.framepointy).
+{position(X,Y),$p,@p},mx(MX),my(MY) :- X >= MX - 25 , Y < MY - 50 | {position(X - 5,Y + 5),$p},mx(mouse.framepointx),my(mouse.framepointy).
+{position(X,Y),$p,@p},mx(MX),my(MY) :- X >= MX - 25 , Y >= MY - 50 | {position(X - 5,Y - 5),$p},mx(mouse.framepointx),my(mouse.framepointy).
