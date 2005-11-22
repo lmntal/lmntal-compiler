@@ -149,7 +149,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	}
 	public String toString() {
 		String ret = "@" + id;
-		if (Env.verbose >= Env.VERBOSE_EXPANDRULES || Env.compileonly) {
+		if (Env.verbose >= Env.VERBOSE_EXPANDRULES) {
 			ret += dumpRules();
 		}
 		return ret;
@@ -559,7 +559,6 @@ class InterpretiveReactor {
 					break; //nakajima 2004-01-04, n-kato, n-kato 2004-11-10
 				case Instruction.ENQUEUEMEM:
 					mems[inst.getIntArg1()].activate();
-//					mems[inst.getIntArg1()].enqueueAllAtoms();
 					break;
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
@@ -1012,6 +1011,7 @@ class InterpretiveReactor {
 					y = ((IntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor(x >>> y));	
 					break; //nakajima 2004-01-21	
+				
 				case Instruction.IADDFUNC : //[-dstintfunc, intfunc1, intfunc2]
 					x = ((IntegerFunctor)vars.get(inst.getIntArg2())).intValue();
 					y = ((IntegerFunctor)vars.get(inst.getIntArg3())).intValue();
