@@ -84,18 +84,24 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				if(a.getEdgeCount() != 1)continue;
 				ga.SetPic( a.getNthNode(0).getName() );
 			}
-			/**描画の順番（前後関係）の取得*/
+			/**名前の取得*/
 			else if(a.getName()=="name"){
-				ga.name = a.getNthNode(0).getName();
-			}else if(a.getName()=="sequence"){
+				ga.setname(a.getNthNode(0).getName());
+			}
+			/**描画の順番（前後関係）の取得*/
+			else if(a.getName()=="sequence"){
 				try{
 					ga.sequence = Integer.parseInt(a.getNthNode(0).getName());
-				}catch(NumberFormatException error){
-					try{
-						ga.sequence = Integer.parseInt(a.getNthNode(0).getNthNode(0).getName());
-					}catch(NumberFormatException e){
-						
-					}						
+				}catch(NumberFormatException error){					
+				}
+				
+			}
+			/**描画の順番（前後関係）の取得*/
+			else if(a.getName()=="color"){
+				if(a.getEdgeCount() != 3)continue;
+				try{
+					ga.setcolor( Integer.parseInt(a.getNthNode(0).getName()),Integer.parseInt(a.getNthNode(1).getName()),Integer.parseInt(a.getNthNode(2).getName()));
+				}catch(NumberFormatException error){			
 				}
 				
 			}
