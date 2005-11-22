@@ -1,6 +1,7 @@
 /*
 
 	nakano ---
+	ラインアート。
 	オプション　--graphic をつけて実行すること。
 	このプログラムは無限ループします。
 	
@@ -18,60 +19,63 @@ now(1).
 draw.
 name(0).
 getpic("line").
-position(0,0).
-color(0,255,0).
-size(0,0).
+position(1,1).
+color(0,0,0).
+size(1,1).
 }.
 a.
+color(255,0,0).
 v1(5,5).
 v2(7,7).
 pos(600,470,50,500).
 
 %線の生成
-{name(0),$p[]}:-{name(1),$p[]},{name(2),$p[]},{name(3),$p[]},{name(4),$p[]},{name(5),$p[]},{name(6),$p[]},{name(7),$p[]},{name(8),$p[]},{name(9),$p[]},{name(10),$p[]},{name(11),$p[]},{name(12),$p[]},{name(13),$p[]},{name(14),$p[]},{name(15),$p[]}.
+{name(0),$p[]}:-{name(1),$p[]},{name(2),$p[]},{name(3),$p[]},{name(4),$p[]},{name(5),$p[]},{name(6),$p[]},{name(7),$p[]},{name(8),$p[]},{name(9),$p[]},{name(10),$p[]},{name(11),$p[]},{name(12),$p[]},{name(13),$p[]},{name(14),$p[]},{name(15),$p[]},{name(16),$p[]},{name(17),$p[]},{name(18),$p[]},{name(19),$p[]},{name(20),$p[]}.
 
 %端（１）の移動
-a,now(N){draw,name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
-:-  N=M,VX1 > 0 , VY1 > 0 ,PX1 < W ,PY1 < H , int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
+a,now(N){draw,color(R,G,B),name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
+:-  N=M,VX1 > 0 , VY1 > 0 ,PX1 < W ,PY1 < H , int(R),int(G),int(B),int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
 b,now(N),{name(M),position( PX1, PY1),$p},pos(PX1+VX1,PY1+VY1,PX2,PY2),v1(VX1,VY1),width(W),height(H).
 
-a,now(N),{draw,name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
-:-  N=M,VX1 < 0 , VY1 > 0 ,PX1 > 0 ,PY1 < H , int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
+a,now(N),{draw,color(R,G,B),name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
+:-  N=M,VX1 < 0 , VY1 > 0 ,PX1 > 0 ,PY1 < H , int(R),int(G),int(B),int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
 b,now(N),{name(M),position( PX1, PY1),$p},pos(PX1+VX1,PY1+VY1,PX2,PY2),v1(VX1,VY1),width(W),height(H).
 
-a,now(N),{draw,name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
-:-  N=M,VX1 > 0 , VY1 < 0 ,PX1 < W ,PY1 > 0 , int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
+a,now(N),{draw,color(R,G,B),name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
+:-  N=M,VX1 > 0 , VY1 < 0 ,PX1 < W ,PY1 > 0 , int(R),int(G),int(B),int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
 b,now(N),{name(M),position( PX1, PY1),$p},pos(PX1+VX1,PY1+VY1,PX2,PY2),v1(VX1,VY1),width(W),height(H).
 
-a,now(N),{draw,name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
-:-  N=M,VX1 < 0 , VY1 < 0 ,PX1 > 0 ,PY1 > 0 , int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
+a,now(N),{draw,color(R,G,B),name(M),position(X,Y), $p},pos(PX1,PY1,PX2,PY2),v1(VX1,VY1),width(W),height(H) 
+:-  N=M,VX1 < 0 , VY1 < 0 ,PX1 > 0 ,PY1 > 0 , int(R),int(G),int(B),int(X),int(Y),int(PX1),int(PY1),int(PX2),int(PY2),int(VX1),int(VY1),int(W),int(H)|
 b,now(N),{name(M),position( PX1, PY1),$p},pos(PX1+VX1,PY1+VY1,PX2,PY2),v1(VX1,VY1),width(W),height(H).
 
 %端（２）の移動
-b,now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
-:-  N=M,VX2 > 0 , VY2 > 0 ,PX2 < W ,PY2 < H , int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
-c,now(N+1),{draw,name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+b,color(R,G,B),now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
+:-  N=M,VX2 > 0 , VY2 > 0 ,PX2 < W ,PY2 < H , int(R),int(G),int(B),int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
+a,nextcolor(R,G,B),now(N+1),{draw,color(R,G,B),name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
 
-b,now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
-:-  N=M,VX2 < 0 , VY2 > 0 ,PX2 > 0 ,PY2 < H ,int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
-c,now(N+1),{draw,name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+b,color(R,G,B),now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
+:-  N=M,VX2 < 0 , VY2 > 0 ,PX2 > 0 ,PY2 < H , int(R),int(G),int(B),int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
+a,nextcolor(R,G,B),now(N+1),{draw,color(R,G,B),name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
 
-b,now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
-:-  N=M,VX2 > 0 , VY2 < 0 ,PX2 < W ,PY2 > 0 , int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
-c,now(N+1),{draw,name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+b,color(R,G,B),now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
+:-  N=M,VX2 > 0 , VY2 < 0 ,PX2 < W ,PY2 > 0 , int(R),int(G),int(B),int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
+a,nextcolor(R,G,B),now(N+1),{draw,color(R,G,B),name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
 
-b,now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
-:-  N=M,VX2 < 0 , VY2 < 0 ,PX2 > 0 ,PY2 > 0 , int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
-c,now(N+1),{draw,name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+b,color(R,G,B),now(N),{name(M),size(SX,SY),$p},pos(PX1,PY1,PX2,PY2),v2(VX2,VY2),width(W),height(H) 
+:-  N=M,VX2 < 0 , VY2 < 0 ,PX2 > 0 ,PY2 > 0 , int(R),int(G),int(B),int(SX),int(SY),int(PX1),int(PY1),int(PX2),int(PY2),int(VX2),int(VY2),int(W),int(H)|
+a,nextcolor(R,G,B),now(N+1),{draw,color(R,G,B),name(M),size(PX2,PY2),$p},pos(PX1,PY1,PX2+VX2,PY2+VY2),v2(VX2,VY2),width(W),height(H).
+
 %ターゲットの監視
-now(N):-N>15|now(1).
+now(N):-N>20|now(1).
+
 %次の色の決定
-c,{color(R,G,B),$p} :- R=255, G<255, B=  0 | a,{color(R   ,G+51,B   ),$p}.
-c,{color(R,G,B),$p} :- R>  0, G=255, B=  0 | a,{color(R-51,G   ,B   ),$p}.
-c,{color(R,G,B),$p} :- R=  0, G=255, B<255 | a,{color(R   ,G   ,B+51),$p}.
-c,{color(R,G,B),$p} :- R=  0, G>  0, B=255 | a,{color(R   ,G-51,B   ),$p}.
-c,{color(R,G,B),$p} :- R<255, G=  0, B=255 | a,{color(R+51,G   ,B   ),$p}.
-c,{color(R,G,B),$p} :- R=255, G=  0, B>  0 | a,{color(R   ,G   ,B-51),$p}.
+nextcolor(R,G,B) :- R=255, G<255, B=  0 | color(R   ,G+51,B   ).
+nextcolor(R,G,B) :- R>  0, G=255, B=  0 | color(R-51,G   ,B   ).
+nextcolor(R,G,B) :- R=  0, G=255, B<255 | color(R   ,G   ,B+51).
+nextcolor(R,G,B) :- R=  0, G>  0, B=255 | color(R   ,G-51,B   ).
+nextcolor(R,G,B) :- R<255, G=  0, B=255 | color(R+51,G   ,B   ).
+nextcolor(R,G,B) :- R=255, G=  0, B>  0 | color(R   ,G   ,B-51).
 
 %速度をランダムに決定
 Ret=rand_v, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
