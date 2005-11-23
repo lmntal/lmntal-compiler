@@ -1,0 +1,60 @@
+/*
+
+	nakano ---
+	ラインアート。
+	オプション　--graphic をつけて実行すること。
+	このプログラムは無限ループします。
+	
+	ライブラリintegerを使用しています。
+
+
+	簡単な流れ
+	1.描画膜（線）を20本生成
+	2.nowに繋がってる値と同じ値を持つnameアトムを持つ膜を操作
+	3.端（１）を操作するときは、drawとcolorアトムを消す
+	4.端（２）を操作するときに、drawアトムを生成し、colorアトムをコピーする。膜外のcolorはnextcolorに置き換える
+	5.nextcolorを次のcolorにする。
+	6.nowを一つすすめる（20を超えたら1に戻す）
+	7.posが規定値を超えたらv1,v2をそれぞれ反転させる
+*/
+%定数
+max_v(15).
+min_v(3).
+now(1).
+{
+draw.
+name(0).
+getpic("line").
+position(1,1).
+color(0,0,0).
+size(1,1).
+}.
+a.
+color(255,0,0).
+%data(x1,y1,x2,y2)next(現在値、速度、最大値)。
+data(next(600,5,640),next(470,5,480),next(50,7,640),next(500,7,480)).
+%線の生成
+{name(0),$p[]}:-{name(1),$p[]},{name(2),$p[]},{name(3),$p[]},{name(4),$p[]},{name(5),$p[]},{name(6),$p[]},{name(7),$p[]},{name(8),$p[]},{name(9),$p[]},{name(10),$p[]},{name(11),$p[]},{name(12),$p[]},{name(13),$p[]},{name(14),$p[]},{name(15),$p[]},{name(16),$p[]},{name(17),$p[]},{name(18),$p[]},{name(19),$p[]},{name(20),$p[]}.
+
+%端（１）の移動
+now(N),data(next(X1,VX1,W1),next(Y1,VY1,H1),next(X2,VX2,W2),next(Y2,VY2,H2)),color(R,G,B),{color(CR,CG,CB),name(M),position(PX,PY),size(SX,SY),$p} :- N=M ,int(X1),int(X2),int(Y1),int(Y2),int(PX),int(PY),int(SX),int(SY),int(R),int(G),int(B),int(CR),int(CG),int(CB)|
+now(N+1),data(calc(X1,VX1,W1),calc(Y1,VY1,H1),calc(X2,VX2,W2),calc(Y2,VY2,H2)),nextcolor(R,G,B),{color(R,G,B),name(M),position(X1,Y1),size(X2,Y2),$p}.
+
+Ret=calc(POS, V , MAX) :- N = POS + V , N >=0 , N =< MAX | Ret=next(N , V, MAX).
+Ret=calc(POS, V , MAX) :- N = POS + V , N < 0 , int(MAX) | Ret=next(0 , rand_v, MAX).
+Ret=calc(POS, V , MAX) :- N = POS + V , N > MAX          | Ret=next(MAX , -rand_v, MAX).
+
+%ターゲットの監視
+now(N):-N>20|now(1).
+
+%次の色の決定
+nextcolor(R,G,B) :- R=255, G<255, B=  0 | color(R   ,G+51,B   ).
+nextcolor(R,G,B) :- R>  0, G=255, B=  0 | color(R-51,G   ,B   ).
+nextcolor(R,G,B) :- R=  0, G=255, B<255 | color(R   ,G   ,B+51).
+nextcolor(R,G,B) :- R=  0, G>  0, B=255 | color(R   ,G-51,B   ).
+nextcolor(R,G,B) :- R<255, G=  0, B=255 | color(R+51,G   ,B   ).
+nextcolor(R,G,B) :- R=255, G=  0, B>  0 | color(R   ,G   ,B-51).
+
+%速度をランダムに決定
+Ret=rand_v, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
+	Ret=integer.rnd(MaxV-MinV+1)+MinV, min_v(MinV), max_v(MaxV).
