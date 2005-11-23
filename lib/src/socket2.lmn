@@ -265,6 +265,7 @@ init@@ socket2.init(Port) :- int(Port) |
  *  module: send
  *  TODO: connect に失敗したときの処理
  *        例外周辺
+ *  DONE: ループをまわす
  *  TODO: message が命令列である場合と文字列である場合で区別できるようにする
  */
 send@@ socket2.send(Host,Port,Msg) :- string(Host),int(Port),string(Msg) |
@@ -280,47 +281,53 @@ send@@ socket2.send(Host,Port,Msg) :- string(Host),int(Port),string(Msg) |
       ObjectFunctor cFunc = (ObjectFunctor)atom.nthAtom(1).getFunctor();
       HashMap connectTable = (HashMap)cFunc.getObject();
       Socket socket;
-      try {
-        InetAddress ip = InetAddress.getByName(host);
-        System.out.println("connectTable search: " + ip.toString() + " " + port);
-        if(connectTable.containsKey(ip.toString() + " " + port)) {
-          System.out.println("true");
-          socket = (Socket)connectTable.get(ip.toString() + " " + port);
-          Iterator i2 = mem.atomIteratorOfFunctor(new ObjectFunctor(socket));
-          if(i2.hasNext()) {
-            Atom sAtom = (Atom)i2.next();
-            Atom socketAtom = sAtom.nthAtom(0);
-            ObjectFunctor wFunc = (ObjectFunctor)socketAtom.nthAtom(2).getFunctor();
-            PrintWriter writer = (PrintWriter)wFunc.getObject();
+
+      for(int j = 0; j < 10; j++){
+        try {
+          InetAddress ip = InetAddress.getByName(host);
+          System.out.println("connectTable search: " + ip.toString() + " " + port);
+          if(connectTable.containsKey(ip.toString() + " " + port)) {
+            System.out.println("true");
+            socket = (Socket)connectTable.get(ip.toString() + " " + port);
+            Iterator i2 = mem.atomIteratorOfFunctor(new ObjectFunctor(socket));
+            if(i2.hasNext()) {
+              Atom sAtom = (Atom)i2.next();
+              Atom socketAtom = sAtom.nthAtom(0);
+              ObjectFunctor wFunc = (ObjectFunctor)socketAtom.nthAtom(2).getFunctor();
+              PrintWriter writer = (PrintWriter)wFunc.getObject();
+              writer.println(msg);
+              writer.flush();
+              System.out.println("sended: " + msg);
+              break;
+            }
+          } else {
+            System.out.println("false");
+            // TODO: connect が失敗したときの処理
+            //      →DONE
+            socket = new Socket(host,port);
+            //System.out.println("socket created: " + socket.toString());
+            synchronized(connectTable) {
+              connectTable.put(ip.toString() + " " + port,socket);
+              System.out.println("connectTable put: " + ip.toString() + " " + port);
+            }
+            BufferedReader reader = 
+              new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            //System.out.println("reader created: " + reader.toString());
+            PrintWriter writer = 
+              new PrintWriter(socket.getOutputStream());
+            //System.out.println("writer created: " + writer.toString());
+            ReaderThread readerThread = new ReaderThread(socket,reader,(Membrane)mem);
+            makeSocketProcess.create((Membrane)mem,socket,readerThread,writer);
+            readerThread.start();
+            System.out.println("readerThread: started");
             writer.println(msg);
             writer.flush();
             System.out.println("sended: " + msg);
+            break;
           }
-        } else {
-          System.out.println("false");
-          // TODO: connect が失敗したときの処理
-          socket = new Socket(host,port);
-          //System.out.println("socket created: " + socket.toString());
-          synchronized(connectTable) {
-            connectTable.put(ip.toString() + " " + port,socket);
-            System.out.println("connectTable put: " + ip.toString() + " " + port);
-          }
-          BufferedReader reader = 
-            new BufferedReader(new InputStreamReader(socket.getInputStream()));
-          //System.out.println("reader created: " + reader.toString());
-          PrintWriter writer = 
-            new PrintWriter(socket.getOutputStream());
-          //System.out.println("writer created: " + writer.toString());
-          ReaderThread readerThread = new ReaderThread(socket,reader,(Membrane)mem);
-          makeSocketProcess.create((Membrane)mem,socket,readerThread,writer);
-          readerThread.start();
-          System.out.println("readerThread: started");
-          writer.println(msg);
-          writer.flush();
-          System.out.println("sended: " + msg);
+        } catch(IOException e) {
+          e.printStackTrace();
         }
-      } catch(IOException e) {
-        e.printStackTrace();
       }
     }
     me.nthAtom(0).remove();
