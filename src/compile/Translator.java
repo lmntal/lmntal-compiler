@@ -65,6 +65,10 @@ public class Translator {
 		baseDirName = "public/tmp";
 
 		File publicDir = new File("public");
+		if (!publicDir.exists() || !publicDir.isDirectory()) {
+			System.err.println("public directory does not exists. (" + publicDir.getCanonicalPath() + ")");
+			System.exit(1);
+		}
 		File outDir = new File(baseDirName);
 		if (!outDir.exists()) outDir.mkdir();
 		File transDir = new File(outDir, "translated");
@@ -72,7 +76,7 @@ public class Translator {
 		
 		ArrayList l = new ArrayList();
 		l.add(null);
-		
+
 		String[] files = publicDir.list();
 		for (int i = 0; i < files.length; i++) {
 			if (!files[i].endsWith(".lmn")) continue;

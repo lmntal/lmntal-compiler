@@ -82,6 +82,7 @@ class Help {
 			+"                    Reuse mems.\n"
 			+"    --optimize-loop\n"
 			+"                    Use loop instruction. (EXPERIMENT)\n"
+			+"                    コンパイル後の中間命令列を出力するモード\n"
 		);
 	}
 }
