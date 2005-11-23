@@ -279,6 +279,8 @@ class Task extends AbstractTask implements Runnable {
 					if (mem.asyncLock()){
 						mem.asyncUnlock();
 					}else {
+						//親膜が無効になっていた場合、asyncLock によって停止したタスクを再開する必要がある。
+						//（活性化に成功した場合は、asyncUnlock の中で行っている。）
 						//TODO 分散環境への対応
 						((Task)(mem.task)).signal();
 					}
