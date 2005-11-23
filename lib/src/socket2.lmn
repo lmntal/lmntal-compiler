@@ -3,19 +3,19 @@
 NAME
 
 	未定
-	socket2は冴えない
+	socket2 は冴えない
 
 SYNOPSIS
 
 	socekt2.init(acceptPort)
-	 初期化
+	  初期化
 	socket2.send(remoteHost,remotePort,messege)
-	 メッセージ送信
+	  メッセージを送信
 	socket2.close(remoteHost,remotePort)
-	 ソケットを閉じる
+	  ソケットを閉じる
 	socket2.terminate
-	 全て終了(未実装)
-	サンプルはsample/okabe/socket2c.lmn とsample/okabe/socket2s.lmn
+	  終了
+	サンプルはsample/okabe/socket2c.lmn とsample/okabe/socket2s.lmn にあります
 
 AUTHOR
 
@@ -23,7 +23,7 @@ AUTHOR
 
 HISTORY
 
-	未公開
+	1.0  2005/11/23(Wed)
 
 */
 
@@ -37,42 +37,61 @@ import compile.parser.ParseException;
 import compile.parser.intermediate.RulesetParser;
 
 /*
- * AcceptThread
+ *  class: AcceptThread
  */
 class AcceptThread implements Runnable {
   volatile Thread th = null;
   ServerSocket serverSock;
   HashMap connectTable;
   final Membrane mem;
+  
+  /*
+   *  constructor
+   */
   AcceptThread(ServerSocket serverSock, HashMap connectTable, Membrane mem) {
     this.serverSock = serverSock;
     this.connectTable = connectTable;
     this.mem = mem;
   }
+  
+  /*
+   *  method: start
+   */
   public void start() {
     if(th == null) {
       th = new Thread(this);
       th.start();
     }
   }
+  
+  /*
+   *  method: run
+   */
   public void run() {
     Thread thisThread = Thread.currentThread();
     while(th == thisThread) {
       try {
         Socket socket = serverSock.accept();
-        System.out.println("socket accepted: "+socket.toString());
+        System.out.println("socket accepted: " + socket.toString());
         synchronized(connectTable) {
-          connectTable.put(socket.getInetAddress().toString()+" "+socket.getPort(),socket);
+          connectTable.put(socket.getInetAddress().toString() + " " + socket.getPort(),socket);
+          System.out.println("connectTable put: " + socket.getInetAddress().toString() + " " + socket.getPort());
         }
-        ReaderThread reader = new ReaderThread(socket,mem);
+        BufferedReader reader = 
+          new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        //System.out.println("reader created: " + reader.toString());
         PrintWriter writer = new PrintWriter(socket.getOutputStream());
-        System.out.println("writer created: "+writer.toString());
-        mem.asyncLock(); 
-        makeSocketProcess.create((Membrane)mem,socket,reader,writer);
+        //System.out.println("writer created: " + writer.toString());
+        ReaderThread readerThread = new ReaderThread(socket,reader,mem);
+        mem.asyncLock();
+        makeSocketProcess.create((Membrane)mem,socket,readerThread,writer);
         mem.asyncUnlock();
-        reader.start();
+        readerThread.start();
         System.out.println("readerThread: started");
       } catch(IOException e) {
+        e.printStackTrace();
+      } catch(SecurityException e) {
+        System.out.println("RuntimeException: " + e.getMessage());
         e.printStackTrace();
       }
       try {
@@ -83,68 +102,75 @@ class AcceptThread implements Runnable {
     }
     th = null;
   }
+  
+  /*
+   *  method: stop
+   *  TODO: ここでServerSocket をclose するべきか？
+   */
   public void stop() {
     th = null;
-    System.out.println("acceptThread: sotopped");
+    System.out.println("acceptThread: stopped");
   }
 }
 
 /* 
- * ReaderThread
- * daemon to read input stream
+ *  class ReaderThread
  */
 class ReaderThread implements Runnable {
   volatile Thread th = null;
+  Socket socket;
   BufferedReader reader;
   final Membrane mem;
-  ReaderThread(Socket sock, Membrane mem) {
-    try {
-      BufferedReader reader = 
-        new BufferedReader(new InputStreamReader(sock.getInputStream()));
-      this.reader = reader;
-      System.out.println("reader created: "+reader.toString());
-    } catch(IOException e) {
-      e.printStackTrace();
-    }
+  
+  /*
+   *  constructor
+   */
+  ReaderThread(Socket sock, BufferedReader reader, Membrane mem) {
+    this.socket = socket;
+    this.reader = reader;
     this.mem = mem;
   }
+  
+  /*
+   *  method: start
+   */
   public void start() {
     if(th == null) {
       th = new Thread(this);
       th.start();
     }
   }
+  
+  /*
+   *  method: run
+   *  TODO: message を別処理にする（文字列受信にも対応させるため）
+   */
   public void run(){
     Thread thisThread = Thread.currentThread();
+    LMNParser lp;
     compile.structure.Membrane m;
+    Ruleset rs;
     while(th == thisThread) {
       try {
         if(reader.ready()) {
-          System.out.print("reader ready: ");
+          System.out.println("reader: ready");
           String msg = reader.readLine();
-//          System.out.println(" messege: " + msg);
-          // 標準出力に出力＆アトムを生成
-          // todo 解釈実行をしたい
-          LMNParser lp = new LMNParser(new StringReader(msg));
+          System.out.println("message received: " + msg);
+          // TODO: 別処理にする
+          lp = new LMNParser(new StringReader(msg));
           m = lp.parse();
           System.out.println("parse succeeded: " + m.toString());
-          Ruleset rs =
-            RulesetCompiler.compileMembrane(m,InlineUnit.DEFAULT_UNITNAME);
-          System.out.println("ruleset generted: "+rs.toString());
+          rs = RulesetCompiler.compileMembrane(m);
+          System.out.println("ruleset generated: " + rs.toString());
           mem.asyncLock();
           rs.react(mem);
           mem.asyncUnlock();
-          System.out.println(""+mem.toString());
-          System.out.println("rule react succeeded");
-          //mem.asyncLock();
-          //mem.newAtom(new Functor(msg,0));
-          //mem.asyncUnlock();
+          System.out.println("react succeeded" + m.toString());
         }
-      } catch(IOException ie) {
-        ie.printStackTrace();
-      } catch(ParseException pe) {
-        System.out.println("parse failed");
-        pe.printStackTrace();
+      } catch(IOException e) {
+        e.printStackTrace();
+      } catch(ParseException e) {
+        e.printStackTrace();
       }
       try {
         th.sleep(100);
@@ -154,30 +180,47 @@ class ReaderThread implements Runnable {
     }
     th = null;
   }
+  
+  /*
+   *  method: stop
+   *  TODO: Socket, BufferedReader はここでclose するべきか？
+   */
   public void stop() {
     th = null;
+    try {
+      reader.close();
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
     System.out.println("readerThread: sotopped");
   }
 }
 
+/*
+ *  class: makeSocketProcess
+ */
 class makeSocketProcess {
+  
+  /*
+   *  method: create
+   */
   static void create(Membrane mem, Socket socket, ReaderThread reader, PrintWriter writer) {
-    Functor mFunc = new Functor("socket",5,"socket2");
+    Functor func = new Functor("socket",5);
     Functor sFunc = new ObjectFunctor(socket);
     Functor rFunc = new ObjectFunctor(reader);
     Functor wFunc = new ObjectFunctor(writer);
-    Atom moduleAtom = mem.newAtom(mFunc);
+    Atom atom = mem.newAtom(func);
     Atom socketAtom = mem.newAtom(sFunc);
     Atom readerAtom = mem.newAtom(rFunc);
     Atom writerAtom = mem.newAtom(wFunc);
-    Atom nilIn = mem.newAtom(new Functor("[]", 1));
-    Atom nilOut = mem.newAtom(new Functor("[]", 1));
-    mem.newLink(moduleAtom,0,socketAtom,0);
-    mem.newLink(moduleAtom,1,readerAtom,0);
-    mem.newLink(moduleAtom,2,writerAtom,0);
-    mem.newLink(moduleAtom,3,nilIn,0);
-    mem.newLink(moduleAtom,4,nilOut,0);
-    System.out.println("socket-process created: "+socket.toString());
+    Atom nilIn = mem.newAtom(new Functor("[]",1));
+    Atom nilOut = mem.newAtom(new Functor("[]",1));
+    mem.newLink(atom,0,socketAtom,0);
+    mem.newLink(atom,1,readerAtom,0);
+    mem.newLink(atom,2,writerAtom,0);
+    mem.newLink(atom,3,nilIn,0);
+    mem.newLink(atom,4,nilOut,0);
+    //System.out.println("socket-process created: " + socket.toString());
   }
 }
 :].
@@ -185,22 +228,30 @@ class makeSocketProcess {
 {
 module(socket2).
 
-// init
-// create server socket and connect table
-init@@
-socket2.init(Port) :- int(Port) |
+/* 
+ *  module: init
+ *  TODO: bind に失敗したときの処理
+ *        例外周辺
+ */
+init@@ socket2.init(Port) :- int(Port) |
   [:/*inline*/
     int port = Integer.parseInt(me.nth(0));
     try {
       ServerSocket serverSock = new ServerSocket(port);
-      System.out.println("serverSock created: "+serverSock.toString());
+      //System.out.println("serverSock created: " + serverSock.toString());
       HashMap<String,Socket> connectTable = new HashMap();
-      System.out.println("connectTable created: "+connectTable.toString());
+      //System.out.println("connectTable created: " + connectTable.toString());
       AcceptThread daemon = new AcceptThread(serverSock,connectTable,(Membrane)mem);
+      Functor sFunc = new ObjectFunctor(serverSock);
       Functor cFunc = new ObjectFunctor(connectTable);
-      Atom connectTableAtom = mem.newAtom(cFunc);
-      Atom nameAtom = mem.newAtom(new Functor("connectTable",1));
-      mem.newLink(connectTableAtom,0,nameAtom,0);
+      Functor dFunc = new ObjectFunctor(daemon);
+      Atom sAtom = mem.newAtom(sFunc);
+      Atom cAtom = mem.newAtom(cFunc);
+      Atom dAtom = mem.newAtom(dFunc);
+      Atom atom = mem.newAtom(new Functor("connectTable",3));
+      mem.newLink(atom,0,sAtom,0);
+      mem.newLink(atom,1,cAtom,0);
+      mem.newLink(atom,2,dAtom,0);
       daemon.start();
       System.out.println("daemon: started");
     } catch(IOException e) {
@@ -210,50 +261,59 @@ socket2.init(Port) :- int(Port) |
     me.remove();
   :](Port).
 
-// module: send
-// todo ConnectException がスローされたときの動作
-send@@
-socket2.send(Host,Port,Msg) :-
-  string(Host),int(Port),string(Msg) |
+/*
+ *  module: send
+ *  TODO: connect に失敗したときの処理
+ *        例外周辺
+ *  TODO: message が命令列である場合と文字列である場合で区別できるようにする
+ */
+send@@ socket2.send(Host,Port,Msg) :- string(Host),int(Port),string(Msg) |
   [:/*inline*/
     String host = me.nth(0);
     int port = Integer.parseInt(me.nth(1));
     String msg = me.nth(2);
     System.out.println("now sending: " + msg);
-    Iterator i1 = mem.atomIteratorOfFunctor(new Functor("connectTable",1));
+    Iterator i1 = mem.atomIteratorOfFunctor(new Functor("connectTable",3));
+    // connectTable は各膜に高々１つ
     if(i1.hasNext()) {
-      Atom hashMapAtom = (Atom)i1.next();
-      ObjectFunctor hashMapFunc = (ObjectFunctor)hashMapAtom.nthAtom(0).getFunctor();
-      HashMap connectTable = (HashMap)hashMapFunc.getObject();
+      Atom atom = (Atom)i1.next();
+      ObjectFunctor cFunc = (ObjectFunctor)atom.nthAtom(1).getFunctor();
+      HashMap connectTable = (HashMap)cFunc.getObject();
       Socket socket;
       try {
         InetAddress ip = InetAddress.getByName(host);
         System.out.println("connectTable search: " + ip.toString() + " " + port);
         if(connectTable.containsKey(ip.toString() + " " + port)) {
+          System.out.println("true");
           socket = (Socket)connectTable.get(ip.toString() + " " + port);
           Iterator i2 = mem.atomIteratorOfFunctor(new ObjectFunctor(socket));
           if(i2.hasNext()) {
-            Atom socketObjectAtom = (Atom)i2.next();
-            Atom socketAtom = socketObjectAtom.nthAtom(0);
+            Atom sAtom = (Atom)i2.next();
+            Atom socketAtom = sAtom.nthAtom(0);
             ObjectFunctor wFunc = (ObjectFunctor)socketAtom.nthAtom(2).getFunctor();
             PrintWriter writer = (PrintWriter)wFunc.getObject();
             writer.println(msg);
             writer.flush();
+            System.out.println("sended: " + msg);
           }
         } else {
-          // todo ConnectException がスローされたときの動作
+          System.out.println("false");
+          // TODO: connect が失敗したときの処理
           socket = new Socket(host,port);
-          System.out.println("socket created: " + socket.toString());
+          //System.out.println("socket created: " + socket.toString());
           synchronized(connectTable) {
-            connectTable.put(ip.toString() +" " + port,socket);
+            connectTable.put(ip.toString() + " " + port,socket);
             System.out.println("connectTable put: " + ip.toString() + " " + port);
           }
-          ReaderThread reader = new ReaderThread(socket,(Membrane)mem);
+          BufferedReader reader = 
+            new BufferedReader(new InputStreamReader(socket.getInputStream()));
+          //System.out.println("reader created: " + reader.toString());
           PrintWriter writer = 
             new PrintWriter(socket.getOutputStream());
-          System.out.println("writer created: " + writer.toString());
-          makeSocketProcess.create((Membrane)mem,socket,reader,writer);
-          reader.start();
+          //System.out.println("writer created: " + writer.toString());
+          ReaderThread readerThread = new ReaderThread(socket,reader,(Membrane)mem);
+          makeSocketProcess.create((Membrane)mem,socket,readerThread,writer);
+          readerThread.start();
           System.out.println("readerThread: started");
           writer.println(msg);
           writer.flush();
@@ -269,43 +329,48 @@ socket2.send(Host,Port,Msg) :-
     me.remove();
   :](Host,Port,Msg).
 
-// module:close
-// close socket
-// todo 接続先に通信路を閉じることを伝える
-close@@
-socket2.close(Host,Port) :- string(Host),int(Port) |
+/*
+ *  module:close
+ *  TODO: 接続先に通信路を閉じることを伝える
+ */
+close@@ socket2.close(Host,Port) :- string(Host),int(Port) |
   [:/*inline*/
     String host = me.nth(0);
     int port = Integer.parseInt(me.nth(1));
-    Iterator i1 = mem.atomIteratorOfFunctor(new Functor("connectTable",1));
-    // コネクトテーブルは各膜について高々１つ
+    Iterator i1 = mem.atomIteratorOfFunctor(new Functor("connectTable",3));
+    // connectTable は各膜に高々１つ
     if(i1.hasNext()) {
-      Atom hashMapAtom = (Atom)i1.next();
-      ObjectFunctor hashMapFunc = (ObjectFunctor)hashMapAtom.nthAtom(0).getFunctor();
-      HashMap connectTable = (HashMap)hashMapFunc.getObject();
+      Atom atom = (Atom)i1.next();
+      ObjectFunctor cFunc = (ObjectFunctor)atom.nthAtom(1).getFunctor();
+      HashMap connectTable = (HashMap)cFunc.getObject();
       try {
         InetAddress ip = InetAddress.getByName(host);
+        System.out.println("connectTable search: " + ip.toString() + " " + port);
         if(connectTable.containsKey(ip.toString() + " " + port)) {
+          System.out.println("true");
           Socket socket = (Socket)connectTable.get(ip.toString() + " " + port);
-          // todo tell 接続先に通信路を閉じることを伝える
+          // TODO: 接続先に通信路を閉じることを伝える
           socket.close();
           Iterator i2 = mem.atomIteratorOfFunctor(new ObjectFunctor(socket));
-          // todo socket-process を特定できているか？
           if(i2.hasNext()) {
-            Atom socketObjectAtom = (Atom)i2.next();
-            Atom socketAtom = socketObjectAtom.nthAtom(0);
+            Atom sAtom = (Atom)i2.next();
+            Atom socketAtom = sAtom.nthAtom(0);
             socketAtom.nthAtom(0).remove();
-            Atom readerThreadAtom = socketAtom.nthAtom(1);
-            ObjectFunctor readerThreadFunc = (ObjectFunctor)readerThreadAtom.getFunctor();
-            ReaderThread reader = (ReaderThread)readerThreadFunc.getObject();
-            reader.stop();
-            readerThreadAtom.remove();
+            Atom rAtom = socketAtom.nthAtom(1);
+            ObjectFunctor rFunc = (ObjectFunctor)rAtom.getFunctor();
+            ReaderThread readerThread = (ReaderThread)rFunc.getObject();
+            readerThread.stop();
+            rAtom.remove();
+            Atom wAtom = socketAtom.nthAtom(2);
+            ObjectFunctor wFunc = (ObjectFunctor)wAtom.getFunctor();
+            PrintWriter writer = (PrintWriter)wFunc.getObject();
+            writer.close();
             socketAtom.nthAtom(2).remove();
             socketAtom.nthAtom(3).remove();
             socketAtom.nthAtom(4).remove();
             socketAtom.remove();
             synchronized(connectTable) {
-              connectTable.remove(ip.toString()+" "+port);
+              connectTable.remove(ip.toString() + " " + port);
               System.out.println("connectTable remove: " + ip.toString() + " " + port);
             }
           }
@@ -314,20 +379,50 @@ socket2.close(Host,Port) :- string(Host),int(Port) |
         e.printStackTrace();
       }
     }
+    me.nthAtom(0).remove();
+    me.nthAtom(1).remove();
     me.remove();
-  :](Host,Port)
+  :](Host,Port).
 
-// terminate
-// stop acceptThread, close ServerSocket,and remove connectTable
-// todo acceptThread の停止, ServerSocket を閉じる, HashMapオブジェクト の破棄
-//terminate@@
-//socket2.terminate :-
-// [:/*inline*/
-//   Iterator i = mem.atomIteratorOfFunctor(new Functor("connectTable",1));
-//   if(i.hasNext()) {
-//     Atom ct = (Atom)i.next();
-//     ct.remove();
-//   }
+/*
+ *  module: terminate
+ *  TODO: ServerSocket を閉じるタイミング
+ */
+terminate@@ socket2.terminate :-
+  [:/*inline*/
+    Iterator i = mem.atomIteratorOfFunctor(new Functor("connectTable",3));
+    // connectTable は各膜に高々１つ
+    if(i.hasNext()) {
+      Atom atom = (Atom)i.next();
+      ObjectFunctor cFunc = (ObjectFunctor)atom.nthAtom(1).getFunctor();
+      HashMap connectTable = (HashMap)cFunc.getObject();
+      if(connectTable.isEmpty()) {
+        System.out.println("connectTable: empty");
+        Atom sAtom = atom.nthAtom(0);
+        Atom dAtom = atom.nthAtom(2);
+        ObjectFunctor sFunc = (ObjectFunctor)sAtom.getFunctor();
+        ObjectFunctor dFunc = (ObjectFunctor)dAtom.getFunctor();
+        ServerSocket serverSock = (ServerSocket)sFunc.getObject();
+        // TODO: AcceptThread.stop() に移すべきか？
+        if(!serverSock.isClosed()) {
+          System.out.println("serverSock: not closed"); 
+          try {
+            serverSock.close();
+          } catch(IOException e) {
+            e.printStackTrace();
+          }
+        }
+        //System.out.println("serverSock.isClosed(): " + serverSock.isClosed());
+        AcceptThread daemon = (AcceptThread)dFunc.getObject();
+        daemon.stop();
+        sAtom.remove();
+        atom.nthAtom(1).remove();
+        dAtom.remove();
+        atom.remove();
+      }
+    }
+    me.remove();
+  :].
 
 // read data from socket
 // should be changed to socket(S,R,In,Out)?
