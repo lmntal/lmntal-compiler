@@ -1,19 +1,2 @@
-atom(X).
-pic(X,Y,Z,V).
-getpic(Y,"c:\sample.gif").
-position(Z,100,100).
-enable(V).
-
-vx(1). vy(1).
-
-position(Z,X,Y),vx(1):-X >= 300|position(Z,X,Y),vx(0).
-position(Z,X,Y),vy(1):-Y >= 300|position(Z,X,Y),vy(0).
-
-position(Z,X,Y),vx(0):-X =< 0|position(Z,X,Y),vx(1).
-position(Z,X,Y),vy(0):-Y =< 0|position(Z,X,Y),vy(1).
-
-
-position(Z,X,Y),vx(1),vy(1):-X<300,Y<300 | position(Z,X+50,Y+50),vx(1),vy(1).
-position(Z,X,Y),vx(0),vy(1):-X>0,Y<300 | position(Z,X-50,Y+50),vx(0),vy(1).
-position(Z,X,Y),vx(1),vy(0):-X<300,Y>0 | position(Z,X+50,Y-50),vx(1),vy(0).
-position(Z,X,Y),vx(0),vy(0):-X>0,Y>0 | position(Z,X-50,Y-50),vx(0),vy(0).
+{a,b,c}.
+{a,b,$p}:-{a,$p}.
