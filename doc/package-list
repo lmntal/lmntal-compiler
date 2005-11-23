@@ -1,7 +1,15 @@
 compile
 compile.parser
+compile.parser.intermediate
 compile.structure
+daemon
+graphic
 java_cup.runtime
+module
 runtime
 test
+test.GUI
+test.distribute
+test.graph
+test3d
 util
