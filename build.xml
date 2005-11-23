@@ -82,15 +82,15 @@
 	</target>
 
 	<!-- distribution -->
-	<target name="zip">
-		<zip destfile="lmntal.zip">
-			<zipfileset dir="${bin}" prefix="bin"/>
-			<zipfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>
-			<zipfileset dir="${lmntal_lib}/public" includes="*.lmn" prefix="lib/src"/>
-			<zipfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
-		</zip>
+	<target name="archive">
+		<tar destfile="lmntal.tgz" compression="gzip">
+			<tarfileset dir="${bin}" prefix="bin"/>
+			<tarfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>
+			<tarfileset dir="${lmntal_lib}/public" includes="*.lmn" prefix="lib/src"/>
+			<tarfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
+		</tar>
 	</target>
-	<target name="dist" depends="jar,lib,zip" description="generate the distribution"/>
+	<target name="dist" depends="jar,lib,archive" description="generate the distribution"/>
 
 	
 	<target name="clean" depends="lib_clean" description="clean up">
