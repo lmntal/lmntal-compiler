@@ -2,83 +2,178 @@ package graphic;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 
 import javax.swing.*;
+
+import runtime.AbstractMembrane;
 import runtime.Env;
+import test.GUI.Node;
 /**
  * 
  * @author nakano
- *	ウィンドウを生成。
+ *	ウィンドウをクラスを管理。
+ *　　ウィンドウ生成はLMNWindowに一任。
  *	塗りつぶしや、配置などはLMNGraphPanelに一任。
  *
  */
 
-public class LMNtalGFrame extends JFrame{
+public class LMNtalGFrame implements Runnable{
 
 	public LMNGraphPanel lmnPanel = null;
-	public boolean busy = true;
-	public boolean running = true;
-	public boolean waitawhile = false;
+	boolean busy;
+	Thread th;
+	runtime.Membrane rootMem;
+	LinkedList windowlist=new LinkedList();
+	LinkedList tmplist = new LinkedList();
+	
 	
     public LMNtalGFrame(){
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				running = busy = waitawhile = false;
-				runtime.LMNtalRuntimeManager.terminateAllThreaded();
-				//閉じる際に、lmnPanelを殺す。
-				if(lmnPanel!=null)
-					lmnPanel.stop();
+    	this.start();
+    }
+
+	/**
+	 * 指定された名称のアトムが存在するか検索。
+	 * あれば真を、なければ偽を返す。
+	 */
+	private String searchatom(AbstractMembrane m){
+		Iterator ite = m.atomIterator();
+		Node a;
+
+		while(ite.hasNext()){
+			a = (Node)ite.next();
+			if(a.getName() == "window"){
+				return "window";
+			}else if(a.getName() == "remove"){
+				return "remove";
+			}else if(a.getName() == "draw"){
+				return "draw";
 			}
-		});
-		initComponents();
-		setSize(800,600);
-		if(Env.getExtendedOption("screen").equals("max")) {
-			setExtendedState(Frame.MAXIMIZED_BOTH | getExtendedState());
 		}
-		setVisible(true);
+		return null;
+				
+	}
+	
+	public void setRootMem(runtime.Membrane rootMem) {
+		this.rootMem = rootMem;
+		
+	}
+	
+    public synchronized void setmem(AbstractMembrane m){
+    	String s = searchatom(m);
+    	/*ウィンドウ膜の登録*/
+    	if(s == "window"){
+    		WindowSet win = new WindowSet();
+    		win.mem = m;
+    		win.window = new LMNtalWindow(m);
+    		for(int i = 0; i < windowlist.size(); i++){
+    			WindowSet win2 = (WindowSet)windowlist.get(i);
+    			if(win.window.name.equals(win2.window.name)){
+    				break;
+    			}
+    			if(i == windowlist.size() - 1){
+    				windowlist.add(win);
+    				win.window.makewindow();
+    				break;
+    			}
+    		}
+    		if(windowlist.size()==0){
+				windowlist.add(win);
+				win.window.makewindow();
+    		}
+    	}
+    	/*描画膜の登録*/
+    	else if(s=="draw"){
+    		if(m == rootMem)return;
+    		else if(m.getParent() == rootMem) return;
+  
+    		if(windowlist.size()==0){
+    			tmplist.add(m);
+    		}
+    		else{
+//    			for(int i = 0; i < windowlist.size(); i++){
+//    				WindowSet win = (WindowSet)windowlist.get(i);
+//    				if(win.mem==m.getParent()){
+//    					win.window.setgraphicmem(m);
+//    					return;
+//    				}
+//    			}
+    			tmplist.addFirst(m);
+    			searchtmp();
+    		}
+    	}
     }
     
+   private void searchtmp(){
+	   if(tmplist.size()==0)return;
+	   AbstractMembrane tmp = (AbstractMembrane)tmplist.removeFirst();
+	   if(tmp == null || tmp.isRoot())return;
+	   for(int i = 0; i < windowlist.size(); i++){
+		   WindowSet win = (WindowSet)windowlist.get(i);
+		   AbstractMembrane m = tmp.getParent();
+		   if(m==null)return;
+		   while(!m.isRoot()){
+				if(win.mem == m){
+					if(win.window.setgraphicmem(tmp))
+						return;
+					else
+						break;
+				}
+				m = m.getParent();
+		   }
+		} 
+
+	   //tmplist.add(tmp);
+   }
+    
+	/**
+	 * スレッド関係
+	 */
+	public void start() {
+		if (th == null) {
+			th = new Thread(this);
+			th.start();
+		}
+	}
+
+
+	public void run() {
+		Thread me = Thread.currentThread();
+		while (me == th) {
+			try {
+				Thread.sleep(100);
+	    		searchtmp();
+			} catch (InterruptedException e) {
+			}
+		}
+	}
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public boolean onTrace() {
 		if(Env.fGraphic) {
-//			lmnPanel.start();
+////			lmnPanel.start();
 			waitBusy();
-//			lmnPanel.stop();
+////			lmnPanel.stop();
 		}
-		return running;
+//		return running;
+		return true;
 	}
 	
 	public void waitBusy() {
 		busy = true;
-//		System.out.print("*");
-		while(busy) {
+////		System.out.print("*");
+//		while(busy) {
 			try {
-				lmnPanel.th.sleep(5);
-				busy = waitawhile;
+				th.sleep(10);
+				//busy = waitawhile;
 			} catch (Exception e) {
 			}
-		}
-	}
-	
-	protected void initComponents() {
-		lmnPanel = new LMNGraphPanel(this);
-		JButton bt;
-		
-		setTitle("It's Graphical LMNtal");
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
-		getContentPane().add(bt=new JButton("Wait a While"), BorderLayout.SOUTH);
-		bt.addActionListener(new ActionAdapter(this));
+//		}
 	}
 }
-class ActionAdapter implements ActionListener {
-	LMNtalGFrame frame;
-	ActionAdapter(LMNtalGFrame f) {
-		frame = f;
-	}
-	public void actionPerformed(ActionEvent e) {
-//		e.getSource();
-		frame.waitawhile = !frame.waitawhile;
+
+class WindowSet{
+	public AbstractMembrane mem;
+	public LMNtalWindow window;
+	WindowSet(){
 	}
 }

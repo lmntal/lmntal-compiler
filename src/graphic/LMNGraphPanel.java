@@ -16,17 +16,16 @@ import test.GUI.Node;
  * LMNGraphPanel で背景を塗りつぶす
  */
 public class LMNGraphPanel extends JPanel implements Runnable {
-	LMNtalGFrame frame;
+	LMNtalWindow frame;
 	public Thread th = null;
 	/**ロックされている描画膜があるかどうか*/
 	public boolean locked = false;
 	private Image OSI = null;
 	private Graphics OSG = null;
-	runtime.Membrane rootMem;
 	/**描画するオブジェクトリスト*/
 	LinkedList drawlist = new LinkedList();
 	
-	public LMNGraphPanel(LMNtalGFrame f) {
+	public LMNGraphPanel(LMNtalWindow f) {
 		super();
 		frame = f;
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -203,10 +202,6 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		
 	}
 
-	public void setRootMem(runtime.Membrane rootMem) {
-		this.rootMem = rootMem;
-		
-	}
 	
 	/**
 	 * スレッド関係
@@ -227,8 +222,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 			}
-			if(!frame.waitawhile)
-				repaint();
+			repaint();
 		}
 	}
 
