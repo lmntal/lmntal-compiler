@@ -7,12 +7,14 @@ package util;
  */
 public class QueuedEntity {
 	QueuedEntity next, prev;
+	protected Stack stack;
+	
 	protected QueuedEntity() {
 		next = prev = null;
 	}
 	/** スタックに積まれている場合はtrueを返す */
 	public boolean isQueued() {
-		return next != null;
+		return stack != null;
 	}
 	/** スタックに積まれていれば除去する */
 	public void dequeue() {
@@ -24,5 +26,6 @@ public class QueuedEntity {
 		prev.next = next;
 		prev = null;
 		next = null;
+		stack = null;
 	}
 }

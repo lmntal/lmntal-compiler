@@ -13,22 +13,32 @@ public class StackTest extends TestCase {
 	public void testStack() {
 		Stack s = new Stack();
 		QueuedEntity[] data = {
-			new QueuedEntity(), new QueuedEntity(), new QueuedEntity(), new QueuedEntity(),
+			new QueuedEntity(), new QueuedEntity(), new QueuedEntity(), new QueuedEntity()
 		};
 		for (int i = 1; i < 4; i++) {
 			s.push(data[i]);
 		}
-		s.pushToBottom(data[0]);
+//		s.pushToBottom(data[0]);
 		assertEquals(s.pop(), data[3]);
 		assertEquals(s.peek(), data[2]);
 		assertEquals(s.pop(), data[2]);
-		s.pushToBottom(data[3]);
+//		s.pushToBottom(data[3]);
+		assertEquals(s.pop(), data[1]);
+//		assertEquals(s.pop(), data[0]);
+//		assertEquals(s.pop(), data[3]);
+//		s.pushToBottom(data[0]);
+		s.push(data[1]);
+		assertEquals(s.pop(), data[1]);
+		
+		s.push(data[0]);
+		s.push(data[1]);
+		Stack s2 = new Stack();
+		s2.push(data[2]);
+		s2.push(data[3]);
+		s.moveFrom(s2);
 		assertEquals(s.pop(), data[1]);
 		assertEquals(s.pop(), data[0]);
 		assertEquals(s.pop(), data[3]);
-		s.pushToBottom(data[0]);
-		s.push(data[1]);
-		assertEquals(s.pop(), data[1]);
-		assertEquals(s.pop(), data[0]);
+		assertEquals(s.pop(), data[2]);
 	}
 }

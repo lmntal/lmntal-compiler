@@ -18,41 +18,32 @@ public final class Stack {
 			System.out.println("SYSTEM ERROR: enqueued entity is already in a queue");
 			entity.dequeue();
 		}
+		entity.stack = this;
 		entity.prev = tail.prev;
 		entity.next = tail;
 		entity.prev.next = entity;
 		tail.prev = entity;
 	}
-//	public void pushAll(Collection entities) {
-//		Iterator i = entities.iterator();
-//		QueuedEntity last = tail.prev;
-//		while (i.hasNext()) {
-//			QueuedEntity e = (QueuedEntity)i.next();
-//			last.next = e;
-//			e.prev = last;
-//			last = e;
-//		}
-//		last.next = tail;
-//		tail.prev = last;
-//	}
 	/** スタックstackの内容をこのスタックの底に移動する */
 	public void moveFrom(Stack stack) {
 		if (stack.isEmpty()) return;
 		QueuedEntity oldFirst = head.next;
 		QueuedEntity addedLast = stack.tail.prev;
+
+		//先頭
 		head.next = stack.head.next;
 		stack.head.next.prev = head;
+		
+		//(引数に渡されたstackの)最後
 		addedLast.next = oldFirst;
 		oldFirst.prev = addedLast;
 		stack.head.next = stack.tail;
 		stack.tail.prev = stack.head;
-	}
-	/** このメソッドは使わないかもしれない */
-	public void pushToBottom(QueuedEntity entity) {
-		entity.prev = head;
-		entity.next = head.next;
-		head.next = entity;
-		entity.next.prev = entity;
+
+		//途中
+		for (QueuedEntity t = head.next; t != oldFirst; t = t.next) {
+			t.stack = this;
+		}
 	}
 	public QueuedEntity pop() {
 		if(isEmpty()) return null;
@@ -62,6 +53,7 @@ public final class Stack {
 		ret.prev.next = tail;
 
 		ret.next = ret.prev = null;
+		ret.stack = null;
 		return ret;
 	}
 	public QueuedEntity peek() {
@@ -69,7 +61,7 @@ public final class Stack {
 		return tail.prev;
 	}
 	/** スタックが空ならtrue */
-	public boolean isEmpty(){
+	public boolean isEmpty() {
 		return tail.prev == head;
 	}
 //	/**@deprecated*/
