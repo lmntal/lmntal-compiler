@@ -1,0 +1,71 @@
+/**
+ * nakano ----
+ * ラインアート複数ウィンドウ版
+ * 結構重いです。
+ * オプション--graphicをつけて実行すること。
+ * 無限ループします。
+ */
+{
+window.
+size(400,400).
+name(1).
+	{
+	name(0).
+	getpic("line").
+	position(1,1).
+	color(0,0,0).
+	size(1,1).
+	}.
+	now(1).
+	color(255,0,0).
+	
+	%xとyの対応を維持。data(x1,y1,x2,y2)  : next(現在値、速度、最大値)。
+	data(next(300,5,400),next(270,5,350),next(50,7,400),next(200,7,350)).
+}.
+{
+window.
+size(400,400).
+name(-1).
+	{
+	name(0).
+	getpic("line").
+	position(0,0).
+	color(0,0,0).
+	size(0,0).
+	}.
+	now(1).
+	color(255,0,0).
+	%xとyの対応を維持。data(x1,y1,x2,y2)  : next(現在値、速度、最大値)。
+	data(next(200,5,400),next(320,5,350),next(50,7,400),next(200,7,350)).
+}.
+a(1).
+%定数
+max_v(15).
+min_v(3).
+
+%線の生成
+{{name(0),$p[]},$r} :- {{name(1),draw,$p[]},{name(2),draw,$p[]},{name(3),draw,$p[]},{name(4),draw,$p[]},{name(5),draw,$p[]},{name(6),draw,$p[]},{name(7),draw,$p[]},{name(8),draw,$p[]},{name(9),draw,$p[]},{name(10),draw,$p[]},{name(11),draw,$p[]},{name(12),draw,$p[]},{name(13),draw,$p[]},{name(14),draw,$p[]},{name(15),draw,$p[]},{name(16),draw,$p[]},{name(17),draw,$p[]},{name(18),draw,$p[]},{name(19),draw,$p[]},{name(20),draw,$p[]},$r}.
+
+%移動
+a(A),{name(NB),now(N),data(next(X1,VX1,W1),next(Y1,VY1,H1),next(X2,VX2,W2),next(Y2,VY2,H2)),color(R,G,B),{color(CR,CG,CB),name(M),position(PX,PY),size(SX,SY),$p,@p},$r,@r} :- N=M ,A=NB,int(X1),int(X2),int(Y1),int(Y2),int(VX1),int(VX2),int(VY1),int(VY2),int(H1),int(H2),int(W1),int(W2),int(PX),int(PY),int(SX),int(SY),int(R),int(G),int(B),int(CR),int(CG),int(CB)|
+a(-A),{name(NB),now(N+1),data(calc(X1,VX1,W1),calc(Y1,VY1,H1),calc(X2,VX2,W2),calc(Y2,VY2,H2)),nextcolor(R,G,B),{color(R,G,B),name(M),position(X1,Y1),size(X2,Y2),$p},$r}.
+
+%次の地点の計算
+{Ret=calc(POS, V , MAX),$p[Ret|*X],@p} :- N = POS + V , N >=0 , N =< MAX | {Ret=next(N , V, MAX),$p[Ret|*X],@p}.
+{Ret=calc(POS, V , MAX),$p[Ret|*X],@p} :- N = POS + V , N < 0 , int(MAX) | {Ret=next(0 , rand_v, MAX),$p[Ret|*X],@p}.
+{Ret=calc(POS, V , MAX),$p[Ret|*X],@p} :- N = POS + V , N > MAX          | {Ret=next(MAX , -rand_v, MAX),$p[Ret|*X],@p}.
+
+%ターゲットの監視
+{now(N),$p,@p}:-N > 20|{now(1),$p,@p}.
+
+%次の色の決定
+{nextcolor(R,G,B),$p} :- R=255, G<255, B=  0 | {color(R   ,G+51,B   ),$p}.
+{nextcolor(R,G,B),$p} :- R>  0, G=255, B=  0 | {color(R-51,G   ,B   ),$p}.
+{nextcolor(R,G,B),$p} :- R=  0, G=255, B<255 | {color(R   ,G   ,B+51),$p}.
+{nextcolor(R,G,B),$p} :- R=  0, G>  0, B=255 | {color(R   ,G-51,B   ),$p}.
+{nextcolor(R,G,B),$p} :- R<255, G=  0, B=255 | {color(R+51,G   ,B   ),$p}.
+{nextcolor(R,G,B),$p} :- R=255, G=  0, B>  0 | {color(R   ,G   ,B-51),$p}.
+
+%速度をランダムに決定
+{Ret=rand_v,$p[Ret|*X]}, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
+	{Ret=integer.rnd(MaxV-MinV+1)+MinV,$p[Ret|*X]}, min_v(MinV), max_v(MaxV).
