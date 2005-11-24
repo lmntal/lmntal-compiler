@@ -80,6 +80,8 @@ Body			::=	  /*empty*/
 InstructionList	::=   Instruction:inst
 						{: ArrayList list = new ArrayList(); list.add(inst); RESULT = list; :}
 					| InstructionList:list Instruction:inst
+						{: list.add(inst); RESULT = list; :}
+					| InstructionList:list COMMA Instruction:inst
 						{: list.add(inst); RESULT = list; :};
 Instruction		::=	  INST_NAME:name LBRACKET ArgList:args RBRACKET
 						{: RESULT = new Instruction(name, args); :};
