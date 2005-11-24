@@ -176,25 +176,37 @@ public final class Membrane extends AbstractMembrane {
 	public void activate() {
 		stable = false;
 		Task t = (Task)task;
-		if (!isRoot()) {
-			((Membrane)parent).activate();
+		if (isRoot()) {
+			dequeue();
+			t.bufferedStack.push(this);
+		} else {
+			Stack s = ((Membrane)parent).activate2();
 			synchronized(task) {
-				if (t.bufferedStack.isEmpty()) {
-					if (isQueued()) {
-						return;
-					}
-					t.memStack.push(this);
-				}
-				else {
+				if (s == t.bufferedStack) {
 					dequeue();
-					t.bufferedStack.push(this);
+					s.push(this);
+				} else {
+					if (!isQueued())
+						s.push(this);
 				}
 			}
 		}
-		else {
+	}
+	private Stack activate2() {
+		Task t = (Task)task;
+		if (isQueued())
+			return t.bufferedStack.isEmpty() ? t.memStack : t.bufferedStack;//TODO
+
+		if (isRoot()) {
 			// ASSERT(t.bufferedStack.isEmpty());
-			dequeue();
 			t.bufferedStack.push(this);
+			return t.bufferedStack;
+		} else {
+			Stack s = ((Membrane)parent).activate2();
+			synchronized(task) { //TODO ¤Ê¤¼ synchronized?
+				s.push(this);
+				return s;
+			}
 		}
 	}	
 	
