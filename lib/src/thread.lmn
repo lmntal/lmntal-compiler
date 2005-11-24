@@ -16,39 +16,39 @@ module(thread).
 
 	{
 		system_ruleset.
-		{thread(N,{$p,@p}), $q,@q}/@T :- int(N) | {$p,$q,@q}@T.
+		{thread(N,{$p,@p}_), $q,@q}/ :- int(N) | {$p,$q,@q}.
 	}.
 	/*
 		thread.create(N).
 		Create N threads.
 	*/
 	thread.create(N) :- N>0 | thread.num(N), thread.cre(N).
-	thread.cre(N) :- N>0 | thread.cre(N-1), thread(N,{}@"localhost").
+	thread.cre(N) :- N>0 | thread.cre(N-1), thread(N,{}_@"localhost").
 	thread.cre(0) :-.
 
 	/*
 		thread.at(N, {atoms or rules}).
 		Create atoms or rules at a thread numbered N.
 	*/
-	thread.at(N,{$p,@p}), thread(M,{$q,@q}@T) :- int(N),int(M), M=:=(N+1) |
-		thread(N+1,{$p,$q,@p,@q}@T).
+	thread.at(N,{$p,@p}_), thread(M,{$q,@q}_@T) :- int(N),int(M), M=:=(N+1) |
+		thread(N+1,{$p,$q,@p,@q}_@T).
 	
 	/*
 		thread.any({atoms or rules}).
 		Create atoms or rules at a thread randomly selected.
 	*/
-	thread.any({$p,@p}), thread(M,{$q,@q}@T) :- int(M) |
-		thread(M, {$p,$q,@p,@q}@T).
+	thread.any({$p,@p}_), thread(M,{$q,@q}_@T) :- int(M) |
+		thread(M, {$p,$q,@p,@q}_@T).
 
 	/*
 		thread.all({atoms or rules}).
 		Create atoms or rules at all threads.
 	*/
-	thread.all({$p,@p}), thread.num(N) :- int(N) |
-		thread.allcre(N, {$p,@p}), thread.num(N).
-	thread.allcre(N, {$p[],@p}), thread(M,{$q,@q}@T) :- M>0, N>0, M=:=N |
-		thread.allcre(N-1, {$p[],@p}), thread(M,{$p[],$q,@p,@q}@T).
-	thread.allcre(0,{$p[],@p}):-.
+	thread.all({$p,@p}_), thread.num(N) :- int(N) |
+		thread.allcre(N, {$p,@p}_), thread.num(N).
+	thread.allcre(N, {$p[],@p}_), thread(M,{$q,@q}_@T) :- M>0, N>0, M=:=N |
+		thread.allcre(N-1, {$p[],@p}_), thread(M,{$p[],$q,@p,@q}_@T).
+	thread.allcre(0,{$p[],@p}_):-.
 }.
 
 

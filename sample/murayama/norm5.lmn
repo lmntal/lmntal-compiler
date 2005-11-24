@@ -1,8 +1,9 @@
 {
+	{$p} :- $p.
 	thread.create(4).
-	thread.all({norm(0)}).
-	thread.all({norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z)}).
+	thread.all({norm(0)}_).
+	thread.all({norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z)}_).
 	generate(1000).
-	generate(X) :- X>0 | thread.any({n(integer.rnd(100))}), generate(X-1).
-	norm(N0), norm(N1), norm(N2), norm(N3) :- norm(N0+N1+N2+N3).
+	generate(X) :- X>0 | thread.at(X mod 4, {n(integer.rnd(100))}_), generate(X-1).
+	norm(N), norm(M) :- norm(N+M).
 }
