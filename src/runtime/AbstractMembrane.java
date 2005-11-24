@@ -550,11 +550,20 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * ただしルート膜以下のタスクは変更しない。つまりルート膜に対して呼ばれた場合は何もしない。*/
 	protected void setTask(AbstractTask newTask) {
 		if (isRoot()) return;
+		blockingLock();
+		boolean queued = false;
+		if (isQueued()) {
+			dequeue();
+			queued = true;
+		}
 		task = newTask;
+		if (queued)
+			activate();
 		Iterator it = memIterator();
 		while (it.hasNext()) {
 			((AbstractMembrane)it.next()).setTask(newTask);
 		}
+		unlock();
 		// TODO (A) ホスト間移動時にGlobalMembraneIDは変更しなくて大丈夫か調べる
 	}
 //	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
