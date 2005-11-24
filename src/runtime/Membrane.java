@@ -172,7 +172,10 @@ public final class Membrane extends AbstractMembrane {
 	
 	// ボディ操作5 - 膜自身や移動に関する操作
 
-	/** 膜の活性化 */
+	/**
+	 * 膜の活性化。
+	 * @inheritDoc AbstractMembrane.activate()
+	 */
 	public void activate() {
 		stable = false;
 		Task t = (Task)task;
@@ -192,10 +195,15 @@ public final class Membrane extends AbstractMembrane {
 			}
 		}
 	}
+	/** 
+	 * activate 内で親膜を活性化するときに利用する。
+	 * すでにスタックに積まれているときは何しない。
+	 * @return この要素が積まれているスタック。task.memStack か task.bufferedStack の一方。
+	 */
 	private Stack activate2() {
 		Task t = (Task)task;
 		if (isQueued())
-			return t.bufferedStack.isEmpty() ? t.memStack : t.bufferedStack;//TODO
+			return stack;
 
 		if (isRoot()) {
 			// ASSERT(t.bufferedStack.isEmpty());
