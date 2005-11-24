@@ -2169,7 +2169,7 @@ public class Instruction implements Cloneable, Serializable {
 			indent -= data.get(0).toString().length() + 2;
 			buffer.delete(indent,14);
 		}
-		if( tmp.length() > indent ) {
+		if( tmp.length() > indent && !Env.compileonly) {
 			buffer.replace(0, indent, tmp.substring(0, indent - 2) + "..");
 		} else {
 			buffer.replace(0, tmp.length(), tmp);
