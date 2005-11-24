@@ -563,7 +563,7 @@ public class FrontEnd {
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
 
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
-			if(Env.fGraphic) Env.LMNgraphic.lmnPanel.setRootMem(root);
+			if(Env.fGraphic) Env.LMNgraphic.setRootMem(root);
 			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			rs.react(root);
@@ -599,9 +599,9 @@ public class FrontEnd {
 					while(Env.gui.running) Env.gui.onTrace();
 				}
 				/*graphic mode¡¡ÍÑ nakano*/
-				if (Env.LMNgraphic != null) {
-					while(Env.LMNgraphic.running) Env.LMNgraphic.onTrace();
-				}
+//				if (Env.LMNgraphic != null) {
+//					while(Env.LMNgraphic.running) Env.LMNgraphic.onTrace();
+//				}
 			}
 			if(Env.fREMAIN) {
 				Env.remainedRuntime = rt;
