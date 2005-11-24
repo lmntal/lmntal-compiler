@@ -3,14 +3,13 @@ package runtime;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
+import java.util.Set;
 
 import util.QueuedEntity;
 import util.RandomIterator;
@@ -284,12 +283,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	
 	/** 指定された基底項プロセスをこの膜から除去する。by kudo
-	 * ( Stackを使うように修正し，伴って引数を修正 2005/08/01 )
+	 * ( java.util.Stackを使うように修正し，伴って引数を修正 2005/08/01 )
 	 * @param srcGround
 	 * @return
 	 */
 	public void removeGround(Link srcGround){//,Set srcSet){
-		Stack s = new Stack();
+		java.util.Stack s = new java.util.Stack();
 		s.push(srcGround);
 		Set srcSet = new HashSet();
 		while(!s.isEmpty()){
@@ -785,12 +784,12 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/**
 	 * by kudo
 	 * 基底項プロセスを複製する(検査は済んでいる)
-	 * ( Stackを使うように変更し，それに伴い引数のMapを廃止 2005/07/28)
+	 * ( java.util.Stackを使うように変更し，それに伴い引数のMapを廃止 2005/07/28)
 	 * @param srcGround コピー元の基底項プロセス
 	 * @return コピー先のリンク
 	 */
 	public Link copyGroundFrom(Link srcGround){//,Map srcMap){
-		Stack s = new Stack();
+		java.util.Stack s = new java.util.Stack();
 		Map map = new HashMap();
 		Atom cpAtom = newAtom(srcGround.getAtom().getFunctor());
 		map.put(srcGround.getAtom(),cpAtom);
