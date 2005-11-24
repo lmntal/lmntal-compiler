@@ -27,6 +27,13 @@ public class LMNtalWindow extends JFrame{
     	ready = setatoms(m);
     }
     
+	public void setname(int n){
+		name = Integer.toString(n);
+	}
+	public void setname(String n){
+		name = n;
+	}
+    
 	public boolean makewindow(){
 		if(!ready)return false;
 		
@@ -79,7 +86,7 @@ public class LMNtalWindow extends JFrame{
 			/**描画するファイルの取得*/
 			if(a.getName()=="name"){
 				if(a.getEdgeCount() != 1)return false;
-				name = a.getNthNode(0).getName();
+				setname(a.getNthNode(0).getName());
 			}
 			/**サイズの取得*/
 			else if(a.getName()=="size"){

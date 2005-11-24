@@ -79,6 +79,7 @@ public class GraphicAtoms{
 				g.drawRect(posx, posy, sizex, sizey);
 			else if (atomobj.equals("line"))
 				g.drawLine(posx, posy, sizex, sizey);
+//			System.out.println(posx+"," +posy+"," +sizex+", "+sizey);
 		}
 		else if(atomimg != null)	
 			g.drawImage(atomimg,posx,posy,sizex,sizey,null);

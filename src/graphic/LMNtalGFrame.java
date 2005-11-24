@@ -91,13 +91,6 @@ public class LMNtalGFrame implements Runnable{
     			tmplist.add(m);
     		}
     		else{
-//    			for(int i = 0; i < windowlist.size(); i++){
-//    				WindowSet win = (WindowSet)windowlist.get(i);
-//    				if(win.mem==m.getParent()){
-//    					win.window.setgraphicmem(m);
-//    					return;
-//    				}
-//    			}
     			tmplist.addFirst(m);
     			searchtmp();
     		}
@@ -113,7 +106,8 @@ public class LMNtalGFrame implements Runnable{
 		   AbstractMembrane m = tmp.getParent();
 		   if(m==null)return;
 		   while(!m.isRoot()){
-				if(win.mem == m){
+			   String n = getname(m);
+				if(win.window.name.equals(n)){
 					if(win.window.setgraphicmem(tmp))
 						return;
 					else
@@ -123,8 +117,24 @@ public class LMNtalGFrame implements Runnable{
 		   }
 		} 
 
-	   //tmplist.add(tmp);
+	   tmplist.add(tmp);
    }
+   
+   private String getname(AbstractMembrane m){
+		Iterator ite = m.atomIterator();
+		Node a;
+
+		while(ite.hasNext()){
+			a = (Node)ite.next();
+			/**描画するファイルの取得*/
+			if(a.getName()=="name"){
+				if(a.getEdgeCount() != 1)return null;
+				return a.getNthNode(0).getName().toString();
+			}
+			
+		}
+		return null;
+	}
     
 	/**
 	 * スレッド関係
@@ -163,7 +173,7 @@ public class LMNtalGFrame implements Runnable{
 ////		System.out.print("*");
 //		while(busy) {
 			try {
-				th.sleep(10);
+				th.sleep(1);
 				//busy = waitawhile;
 			} catch (Exception e) {
 			}
