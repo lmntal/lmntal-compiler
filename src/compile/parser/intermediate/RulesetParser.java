@@ -64,6 +64,7 @@ public class RulesetParser {
 	}
 	
 	private static void updateRef(List insts, Map map, InstructionList guard, InstructionList body) {
+		if (insts == null) return;
 		Integer guardLabel, bodyLabel;
 		guardLabel = (guard == null) ? null : Integer.valueOf(guard.label.substring(1));
 		bodyLabel = (body == null) ? null : Integer.valueOf(body.label.substring(1));
