@@ -39,10 +39,12 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		});
 		start();
 	}
+	
+	
 	public void paint(Graphics g) {
 
 		//画面を白地で初期化（塗りつぶす）
-		OSG.setColor(Color.WHITE);
+		OSG.setColor(new Color(frame.color_r,frame.color_g,frame.color_r));
 		OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
 		paintlayout();
 		g.drawImage(OSI,0,0,this);

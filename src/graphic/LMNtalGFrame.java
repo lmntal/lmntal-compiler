@@ -120,6 +120,18 @@ public class LMNtalGFrame implements Runnable{
 	   tmplist.add(tmp);
    }
    
+   public void closewindow(){
+	   for(int i = 0; i < windowlist.size(); i++){
+		   WindowSet win = (WindowSet)windowlist.get(i);
+		   win.window.lmnPanel.stop();
+		   windowlist.remove(i);
+		   i--;
+		   if(windowlist.size()==0){
+			   th=null;   
+		   }
+		}
+   }
+   
    private String getname(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;

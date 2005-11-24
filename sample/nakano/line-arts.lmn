@@ -9,6 +9,7 @@
 window.
 size(400,400).
 name(1).
+bgcolor(0,0,0).
 	{
 	name(0).
 	getpic("line").
@@ -67,5 +68,5 @@ a(-A),{name(NB),now(N+1),data(calc(X1,VX1,W1),calc(Y1,VY1,H1),calc(X2,VX2,W2),ca
 {nextcolor(R,G,B),$p} :- R=255, G=  0, B>  0 | {color(R   ,G   ,B-51),$p}.
 
 %速度をランダムに決定
-{Ret=rand_v,$p[Ret|*X]}, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
+{Ret=rand_v,$p[Ret|*X],@p}, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
 	{Ret=integer.rnd(MaxV-MinV+1)+MinV,$p[Ret|*X]}, min_v(MinV), max_v(MaxV).

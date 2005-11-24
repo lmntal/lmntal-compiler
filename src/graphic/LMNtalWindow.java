@@ -22,6 +22,23 @@ public class LMNtalWindow extends JFrame{
 	public String name = null;
 	int sizex = 0;
 	int sizey = 0;
+	public int color_r = 255;
+	public int color_g = 255;
+	public int color_b = 255;
+	
+	public void setcolor(int a, int b , int c){
+		if(a > 255) color_r = 255;
+		else if(a < 0)color_r = 0;
+		else color_r = a;
+		
+		if(b > 255) color_g =255;
+		else if(b < 0)color_g = 0;
+		else color_g = b;
+		
+		if(c > 255) color_b = 255;
+		else if(c < 0)color_b = 0;
+		else color_b = c;
+	}
 	
     public LMNtalWindow(AbstractMembrane m){
     	ready = setatoms(m);
@@ -45,6 +62,8 @@ public class LMNtalWindow extends JFrame{
 				//閉じる際に、lmnPanelを殺す。
 				if(lmnPanel!=null)
 					lmnPanel.stop();
+				Env.LMNgraphic.closewindow();
+				
 			}
 		});
 		initComponents();
@@ -53,7 +72,7 @@ public class LMNtalWindow extends JFrame{
 			setExtendedState(Frame.MAXIMIZED_BOTH | getExtendedState());
 		}
 		setVisible(true);
-		System.out.println("make window");
+//		System.out.println("make window");
 		return true;
 	}
 	
@@ -104,19 +123,18 @@ public class LMNtalWindow extends JFrame{
 					
 				}
 			}
+			/**背景色の取得*/
+			else if(a.getName()=="bgcolor"){
+				if(a.getEdgeCount() != 3)return false;
+				try{
+					setcolor(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()), Integer.parseInt(a.getNthNode(2).getName()));
+				}catch(NumberFormatException error){
+					return false;
+				}
+			}
 		}
 		if(name!=null & sizex > 0 & sizey > 0)
 			return true;
 		return false;
-	}
-}
-class ActionAdapter implements ActionListener {
-	LMNtalWindow frame;
-	ActionAdapter(LMNtalWindow f) {
-		frame = f;
-	}
-	public void actionPerformed(ActionEvent e) {
-//		e.getSource();
-		frame.waitawhile = !frame.waitawhile;
 	}
 }

@@ -1,40 +1,92 @@
-%定数
-width(640).
-height(480).
-max_v(15).
-min_v(3).
+{
+window.
+size(640,530).
+name("hoge").
 
-%デバッグ用
-start.
-%線の膜
+
 {
 draw.
-getpic("line").
-name("1").
-position(0,0).
-size(10,10).
-color(100,100,100).
+name("rect").
+getpic("rect").
+position(60,60).
+color(255,0,0).
+sequence(3).
+enable.
+size(340,340).
 }.
 
-pos(100,100,200,200).
-color(0,0,0).
-speed(rand_v,rand_v,rand_v,rand_v).
+{
+a(1).
+draw.
+name("hoge").
+getpic("circle").
+position(200,150).
+color(0,255,0).
+sequence(2).
+enable.
+size(50,50).
+vx(5).
+vy(5).
+}.
 
-%線を増やす
-%{name("0"),$p[]} :- start,{name("1"),$p[]},{name("2"),$p[]},{name("3"),$p[]},{name("4"),$p[]},{name("5"),$p[]},{name("6"),$p[]},{name("7"),$p[]},{name("8"),$p[]},{name("9"),$p[]},{name("10"),$p[]},{name("11"),$p[]},{name("12"),$p[]},{name("13"),$p[]},{name("14"),$p[]},{name("15"),$p[]}.
+b.
 
-%速度をランダムに決定
-Ret = rand_v, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
-	Ret = integer.rnd(MaxV-MinV+1)+MinV, min_v(MinV), max_v(MaxV).
+{name("hoge"),color(0,255,0),a(1),$p[]},b :- b(1),{name("hoge"),color(0,255,0),a(1),$p[]},{name("moge"),color(0,0,255),a(-1),$p[]}.
 
-%次の位置を決定
-nextpos(X1,Y1,X2,Y2),width(W),height(H),speed(VX1,VY1,VX2,VY2) :- X1 < W ,X1 > 0 ,Y1 < H, Y1 > 0, X2 < W,X2 > 0, Y2 < H, Y2 > 0 ,int(VX1),int(VY1),int(VX2),int(VY2)| pos(X1+VX1, Y1+VY1, X2+VX2, Y2+VY2),width(W),height(H),speed(VX1,VY1,VX2,VY2).
-nextpos(X1,Y1,X2,Y2),width(W),speed(VX1,VY1,VX2,VY2) :- X1 > W ,X1 < 0 ,int(Y1),int(X2),int(Y2) ,int(VX1),int(VY1),int(VX2),int(VY2) | pos(X1,Y1,X2,Y2),width(W),speed(-rand_v,VY1,VX2,VY2).
-nextpos(X1,Y1,X2,Y2),height(H),speed(VX1,VY1,VX2,VY2) :- Y1 > H ,Y1 < 0 ,int(X1),int(X2),int(Y2) ,int(VX1),int(VY1),int(VX2),int(VY2) | pos(X1,Y1,X2,Y2),height(H),speed(VX1,-rand_v,VX2,VY2).
-nextpos(X1,Y1,X2,Y2),width(W),speed(VX1,VY1,VX2,VY2) :- X2 > W ,X2 < 0 ,int(X1),int(Y1),int(Y2) ,int(VX1),int(VY1),int(VX2),int(VY2) | pos(X1,Y1,X2,Y2),width(W),speed(VX1,VY1,-rand_v,VY2).
-nextpos(X1,Y1,X2,Y2),height(H),speed(VX1,VY1,VX2,VY2) :- Y2 > H ,Y2 < 0 ,int(X1),int(Y1),int(X2) ,int(VX1),int(VY1),int(VX2),int(VY2) | pos(X1,Y1,X2,Y2),height(H),speed(VX1,VY1,VX2,-rand_v).
+{a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX > 0 , VY > 0 , X < 350 ,Y < 350 | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
+{a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX < 0 , VY > 0 , X > 60 ,Y < 350  | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
+{a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX > 0 , VY < 0 , X < 350 , Y > 60 | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
+{a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX < 0 , VY < 0 , X > 60 , Y > 60  | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
 
-	
-start, speed(SPX1,SPY1,SPX2,SPY2), color(CR,CG,CB), pos(X1,Y1,X2,Y2), {name("1"),position(PX,PY),size(SX,SY),color(R,G,B),$p}
- :- int(SPX1),int(SPY1),int(SPX2),int(SPY2),int(CR),int(CB),int(CG),int(X1),int(Y1),int(X2),int(Y2),int(R),int(G),int(B),int(PX),int(PY),int(SX),int(SY)|
- start,speed(SPX1,SPY1,SPX2,SPY2),color(CR,CG,CB),nextpos(X1,Y1,X2,Y2),{name("1"),position(X1,Y1),size(X2,Y2),color(CR,CG,CB),$p}.
+{position(X,Y),vx(VX), $p , @p} :-  VX > 0 , X >= 350, int(Y) | {position( X , Y ),vx(-1 * integer.rnd(15) - 1),$p}.
+{position(X,Y),vx(VX), $p , @p} :-  VX < 0 , X =< 60, int(Y)  | {position( X , Y ),vx(integer.rnd(15) + 1),$p}.
+{position(X,Y),vy(VY), $p , @p} :-  VY > 0 , Y >= 350, int(X) | {position( X , Y ),vy(-1 * integer.rnd(15) - 1),$p}.
+{position(X,Y),vy(VY), $p , @p} :-  VY < 0 , Y =< 60, int(X)  | {position( X , Y ),vy(integer.rnd(15) + 1),$p}.
+
+}@"localhost".
+{
+window.
+size(640,530).
+name(2).
+
+
+{
+draw.
+name("rect").
+getpic("rect").
+position(60,60).
+color(255,0,0).
+sequence(3).
+enable.
+size(340,340).
+}.
+
+{
+a(1).
+draw.
+name("hoge").
+getpic("circle").
+position(200,150).
+color(0,255,0).
+sequence(2).
+enable.
+size(50,50).
+vx(5).
+vy(5).
+}.
+
+b.
+
+{name("hoge"),color(0,255,0),a(1),$p[]},b :- b(1),{name("hoge"),color(0,255,0),a(1),$p[]},{name("moge"),color(0,0,255),a(-1),$p[]}.
+
+{a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX > 0 , VY > 0 , X < 350 ,Y < 350 | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
+{a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX < 0 , VY > 0 , X > 60 ,Y < 350  | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
+{a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX > 0 , VY < 0 , X < 350 , Y > 60 | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
+{a(Z),position(X,Y),vx(VX),vy(VY), $p , @p},b(ZZ) :-  Z=ZZ ,VX < 0 , VY < 0 , X > 60 , Y > 60  | {a(Z),position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(-ZZ).
+
+{position(X,Y),vx(VX), $p , @p} :-  VX > 0 , X >= 350, int(Y) | {position( X , Y ),vx(-1 * integer.rnd(15) - 1),$p}.
+{position(X,Y),vx(VX), $p , @p} :-  VX < 0 , X =< 60, int(Y)  | {position( X , Y ),vx(integer.rnd(15) + 1),$p}.
+{position(X,Y),vy(VY), $p , @p} :-  VY > 0 , Y >= 350, int(X) | {position( X , Y ),vy(-1 * integer.rnd(15) - 1),$p}.
+{position(X,Y),vy(VY), $p , @p} :-  VY < 0 , Y =< 60, int(X)  | {position( X , Y ),vy(integer.rnd(15) + 1),$p}.
+
+}.
