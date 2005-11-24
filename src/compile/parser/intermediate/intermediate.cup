@@ -44,7 +44,7 @@ non terminal InterpretedRuleset	Ruleset;
 non terminal ArrayList			RuleList;
 non terminal Rule				Rule;
 non terminal InstructionList	AtomMatch, MemMatch, Guard, Body;
-non terminal ArrayList			InstructionList;
+non terminal InstructionList	InstructionList;
 non terminal Instruction		Instruction;
 non terminal ArrayList			ArgList, ArgList2;
 non terminal Object				Arg;
@@ -66,19 +66,19 @@ RuleList		::=	  Rule:rule
 Rule			::=	  KW_COMPILED_RULE AtomMatch:atomMatch MemMatch:memMatch Guard:guard Body:body
 						{: RESULT = new Rule(atomMatch, memMatch, guard, body); :};
 AtomMatch		::=	  KW_ATOM_MATCH InstructionList:list
-						{: RESULT = new InstructionList(list); :};
+						{: RESULT = list; :};
 MemMatch		::=	  KW_MEM_MATCH InstructionList:list
-						{: RESULT = new InstructionList(list); :};
+						{: RESULT = list; :};
 Guard			::=	  /*empty*/
 						{: RESULT = null; :}
 					| KW_GUARD LABEL:label COLON InstructionList:list
-						{: RESULT = new InstructionList(label.intValue(), list); :};
+						{: list.setLabel(label.intValue()); RESULT = list; :};
 Body			::=	  /*empty*/
 						{: RESULT = null; :}
 					| KW_BODY LABEL:label COLON InstructionList:list
-						{: RESULT = new InstructionList(label.intValue(), list); :};
+						{: list.setLabel(label.intValue()); RESULT = list; :};
 InstructionList	::=   Instruction:inst
-						{: ArrayList list = new ArrayList(); list.add(inst); RESULT = list; :}
+						{: InstructionList list = new InstructionList(); list.add(inst); RESULT = list; :}
 					| InstructionList:list Instruction:inst
 						{: list.add(inst); RESULT = list; :}
 					| InstructionList:list COMMA Instruction:inst

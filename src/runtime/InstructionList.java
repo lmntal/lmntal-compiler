@@ -53,8 +53,11 @@ public class InstructionList implements Cloneable, Serializable {
 	}
 	/** パーザーで利用するコンストラクタ */
 	public InstructionList(int id, ArrayList insts) {
+		this(insts);
+		setLabel(id);
+	}
+	public void setLabel(int id) {
 		this.label = "L" + id;
-		this.insts = insts;
 		//もっと賢い方法はないものだろうか。
 		if (nextId <= id)
 			nextId = id+1;
