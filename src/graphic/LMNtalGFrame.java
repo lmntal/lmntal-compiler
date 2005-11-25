@@ -97,7 +97,7 @@ public class LMNtalGFrame implements Runnable{
     	}
     }
     
-   private void searchtmp(){
+   private synchronized void searchtmp(){
 	   if(tmplist.size()==0)return;
 	   AbstractMembrane tmp = (AbstractMembrane)tmplist.removeFirst();
 	   if(tmp == null || tmp.isRoot())return;
