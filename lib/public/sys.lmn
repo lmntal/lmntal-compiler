@@ -72,6 +72,10 @@ sys.perpetual(on) :- [:/*inline*/
 	me.setName("nil");
 	:].
 
+sys.perpetual(off) :- [:/*inline*/
+	mem.perpetual = false;
+	me.setName("nil");
+	:].
 
 /**
  * sys.atomCount : String -> int -> int
