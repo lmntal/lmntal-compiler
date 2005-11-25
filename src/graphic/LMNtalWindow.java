@@ -25,6 +25,9 @@ public class LMNtalWindow extends JFrame{
 	public int color_r = 255;
 	public int color_g = 255;
 	public int color_b = 255;
+	private int win_x = 0;
+	private int win_y = 0;
+	private boolean win_loc = false;
 	
 	public void setcolor(int a, int b , int c){
 		if(a > 255) color_r = 255;
@@ -50,6 +53,11 @@ public class LMNtalWindow extends JFrame{
 	public void setname(String n){
 		name = n;
 	}
+	public void setwinloc(int x, int y){
+		win_x=x;
+		win_y=y;
+		win_loc=true;
+	}
     
 	public boolean makewindow(){
 		if(!ready)return false;
@@ -71,6 +79,9 @@ public class LMNtalWindow extends JFrame{
 		if(Env.getExtendedOption("screen").equals("max")) {
 			setExtendedState(Frame.MAXIMIZED_BOTH | getExtendedState());
 		}
+//		setLocationByPlatform(true);
+		if(win_loc)
+			setLocation(win_x,win_y);
 		setVisible(true);
 //		System.out.println("make window");
 		return true;
@@ -128,6 +139,15 @@ public class LMNtalWindow extends JFrame{
 				if(a.getEdgeCount() != 3)return false;
 				try{
 					setcolor(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()), Integer.parseInt(a.getNthNode(2).getName()));
+				}catch(NumberFormatException error){
+					return false;
+				}
+			}
+			/**«ÿ∑ øß§ŒºË∆¿*/
+			else if(a.getName()=="position"){
+				if(a.getEdgeCount() != 2)return false;
+				try{
+					setwinloc(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()));
 				}catch(NumberFormatException error){
 					return false;
 				}
