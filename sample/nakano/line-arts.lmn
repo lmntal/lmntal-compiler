@@ -7,7 +7,8 @@
  */
 {
 window.
-size(400,400).
+position(400,0).
+size(500,500).
 name(1).
 bgcolor(0,0,0).
 	{
@@ -21,12 +22,13 @@ bgcolor(0,0,0).
 	color(255,0,0).
 	
 	%xとyの対応を維持。data(x1,y1,x2,y2)  : next(現在値、速度、最大値)。
-	data(next(300,5,400),next(270,5,350),next(50,7,400),next(200,7,350)).
+	data(next(300,5,490),next(270,5,465),next(50,7,490),next(200,7,465)).
 }.
 {
 window.
 size(400,400).
 name(-1).
+bgcolor(128,128,128).
 	{
 	name(0).
 	getpic("line").
@@ -37,7 +39,7 @@ name(-1).
 	now(1).
 	color(255,0,0).
 	%xとyの対応を維持。data(x1,y1,x2,y2)  : next(現在値、速度、最大値)。
-	data(next(200,5,400),next(320,5,350),next(50,7,400),next(200,7,350)).
+	data(next(200,5,390),next(320,5,365),next(50,7,390),next(200,7,365)).
 }.
 a(1).
 %定数
