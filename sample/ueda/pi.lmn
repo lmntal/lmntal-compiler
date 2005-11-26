@@ -1,0 +1,30 @@
+/* asynchronous pi calculus 
+   2005-11-13, Kazunori Ueda
+
+   (local) channel: multiset of chanel occurrences
+   snd(channel, message)
+   get(channel, formal), {body using the formal}
+*/
+
+snd@@ snd({$y[|*V]},X) :- {$y[|*V], m(X)}.
+get@@ get({m(X),$y},Z), {$body[Z|*V]} :- {$y}, $body[X|*V].
+
+cp@@ {name(N), $p[N|*Y], +Z}, Z=cpy(Z0,Z1) :- {name(N), $p[N|*Y], +Z0, +Z1}.
+rm@@ {name(N), $p[N|*Y], +Z}, Z=rm :- {name(N), $p[N|*Y]}.
+
+% get(A0,Z),{snd(C0,Z)}, get(C1,Y),{ans(Y)}, snd(A1,D),
+% {name(a), +A0,+A1}, {name(c), +C0,+C1}, {name(99), +D}
+
+% p(A,C0,C1) :- get(A,Z), {Z=cpy(Z0,Z1), snd(C0,Z0), snd(C1,Z1)}.
+% q(C) :- get(C,Y),{ans1(Y)}.
+
+% get(A0,Z), {Z=cpy(Z0,Z1), snd(C0,Z0), snd(C1,Z1)},
+% get(C2,Y),{ans1(Y)}, get(C3,U),{ans2(U)}, 
+
+% p(A0,C0,C1), q(C2), q(C3), snd(A1,D),
+% {name(a), +A0,+A1}, {name(c), +C0,+C1,+C2,+C3}, {name(99), +D}
+
+get(A0,Z), {get(B0,Y), {snd(Z,Y)}}.
+snd(A1,C).
+snd(B1,D).
+{name(a),+A0,+A1}, {name(b),+B0,+B1}, {name(c),+C}, {name(d),+D}.
