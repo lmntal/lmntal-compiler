@@ -108,19 +108,54 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			}
 			/**描画する位置の取得*/
 			else if(a.getName()=="position"){
-				if(a.getEdgeCount() != 2)continue;
-				try{
-					ga.posx = Integer.parseInt(a.getNthNode(0).getName());
-				}catch(NumberFormatException error){
-					return null;
-				}
-
-				try{
-					ga.posy = Integer.parseInt(a.getNthNode(1).getName());
-				}catch(NumberFormatException error){
-					return null;
-					
-				}
+				if(a.getEdgeCount() ==2){
+					try{
+						ga.setarraypos(Integer.parseInt(a.getNthNode(0).getName()),
+								Integer.parseInt(a.getNthNode(1).getName()),
+								0,0,0,0,0,0
+								);
+					}catch(NumberFormatException error){
+						return null;
+					}
+				}else if(a.getEdgeCount() ==4){
+					try{
+						ga.setarraypos(Integer.parseInt(a.getNthNode(0).getName()),
+								Integer.parseInt(a.getNthNode(1).getName()),
+								Integer.parseInt(a.getNthNode(2).getName()),
+								Integer.parseInt(a.getNthNode(3).getName()),
+								0,0,0,0
+								);
+					}catch(NumberFormatException error){
+						return null;
+					}
+				}else if(a.getEdgeCount() ==6){
+					try{
+						ga.setarraypos(Integer.parseInt(a.getNthNode(0).getName()),
+								Integer.parseInt(a.getNthNode(1).getName()),
+								Integer.parseInt(a.getNthNode(2).getName()),
+								Integer.parseInt(a.getNthNode(3).getName()),
+								Integer.parseInt(a.getNthNode(4).getName()),
+								Integer.parseInt(a.getNthNode(5).getName()),
+								0,0
+								);
+					}catch(NumberFormatException error){
+						return null;
+					}
+				}else if(a.getEdgeCount() ==8){
+					try{
+						ga.setarraypos(Integer.parseInt(a.getNthNode(0).getName()),
+								Integer.parseInt(a.getNthNode(1).getName()),
+								Integer.parseInt(a.getNthNode(2).getName()),
+								Integer.parseInt(a.getNthNode(3).getName()),
+								Integer.parseInt(a.getNthNode(4).getName()),
+								Integer.parseInt(a.getNthNode(5).getName()),
+								Integer.parseInt(a.getNthNode(6).getName()),
+								Integer.parseInt(a.getNthNode(7).getName())
+								);
+					}catch(NumberFormatException error){
+						return null;
+					}
+				}else continue;
 				
 			}
 			/**描画するサイズの取得*/

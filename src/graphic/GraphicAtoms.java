@@ -12,10 +12,10 @@ import java.io.File;
 public class GraphicAtoms{
 	public String name = null;
 	boolean enable;
-	int posx = 0;
-	int posy = 0;
 	int sizex = 0;
 	int sizey = 0;
+	int[] array_x = new int[4] ;
+	int[] array_y = new int[4];
 	int sequence = 0;
 	private int color_r = 0;
 	private int color_g = 0;
@@ -66,6 +66,17 @@ public class GraphicAtoms{
 		}
 		return true;
 	}
+
+	public void setarraypos(int x1, int y1,int x2, int y2, int x3,int y3,int x4,int y4){
+		array_x[0] = x1;
+		array_x[1] = x2;
+		array_x[2] = x3;
+		array_x[3] = x4;
+		array_y[0] = y1;
+		array_y[1] = y2;
+		array_y[2] = y3;
+		array_y[3] = y4;
+	}
 	
 	public boolean drawatom(Graphics g){
 		if(atomimg == null & atomobj == null){
@@ -74,15 +85,16 @@ public class GraphicAtoms{
 		if(atomobj != null){
 			g.setColor(new Color(color_r, color_g, color_b));
 			if(atomobj.equals("circle") || atomobj.equals("oval"))
-				g.drawOval(posx, posy, sizex, sizey);
+				g.drawOval(array_x[0], array_y[0], sizex, sizey);
 			else if (atomobj.equals("rect"))
-				g.drawRect(posx, posy, sizex, sizey);
-			else if (atomobj.equals("line"))
-				g.drawLine(posx, posy, sizex, sizey);
+				g.drawRect(array_x[0], array_y[0], sizex, sizey);
+			else if (atomobj.equals("line")){
+				g.drawLine(array_x[0], array_y[0], array_x[1], array_y[1]);
+			}
 //			System.out.println(posx+"," +posy+"," +sizex+", "+sizey);
 		}
 		else if(atomimg != null)	
-			g.drawImage(atomimg,posx,posy,sizex,sizey,null);
+			g.drawImage(atomimg,array_x[0], array_y[0],sizex,sizey,null);
 		return true;
 	}
 	
