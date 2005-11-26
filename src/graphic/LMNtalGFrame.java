@@ -65,7 +65,7 @@ public class LMNtalGFrame implements Runnable{
     	if(s == "window"){
     		WindowSet win = new WindowSet();
     		win.mem = m;
-    		win.window = new LMNtalWindow(m);
+    		win.window = new LMNtalWindow(m, this);
     		for(int i = 0; i < windowlist.size(); i++){
     			WindowSet win2 = (WindowSet)windowlist.get(i);
     			if(win.window.name.equals(win2.window.name)){
@@ -120,14 +120,20 @@ public class LMNtalGFrame implements Runnable{
 	   tmplist.add(tmp);
    }
    
-   public void closewindow(){
+   public void closewindow(String killme){
+	   int j=0;
 	   for(int i = 0; i < windowlist.size(); i++){
 		   WindowSet win = (WindowSet)windowlist.get(i);
-		   win.window.lmnPanel.stop();
-		   windowlist.remove(i);
-		   i--;
-		   if(windowlist.size()==0){
-			   th=null;   
+		   if(win.window.name.equals(killme)){
+			   win.killed=true;
+//			   windowlist.remove(i);
+		   }
+		   if(win.killed){
+			   j++;
+			   if(j==windowlist.size()){
+				   runtime.LMNtalRuntimeManager.terminateAllThreaded();
+				   th=null;  
+			   }
 		   }
 		}
    }
@@ -163,7 +169,7 @@ public class LMNtalGFrame implements Runnable{
 		Thread me = Thread.currentThread();
 		while (me == th) {
 			try {
-				Thread.sleep(100);
+				Thread.sleep(1);
 	    		searchtmp();
 			} catch (InterruptedException e) {
 			}
@@ -196,6 +202,7 @@ public class LMNtalGFrame implements Runnable{
 class WindowSet{
 	public AbstractMembrane mem;
 	public LMNtalWindow window;
+	public boolean killed = false;
 	WindowSet(){
 	}
 }

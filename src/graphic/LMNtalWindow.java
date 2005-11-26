@@ -13,9 +13,11 @@ import test.GUI.Node;
 public class LMNtalWindow extends JFrame{
 
 	public LMNGraphPanel lmnPanel = null;
+	private LMNtalGFrame lmnframe = null;
 	public boolean busy = true;
 	public boolean running = true;
 	public boolean waitawhile = false;
+	private boolean killed = false;
 	
 	/*ウィンドウ生成に必要*/
 	private boolean ready = false; 
@@ -43,8 +45,9 @@ public class LMNtalWindow extends JFrame{
 		else color_b = c;
 	}
 	
-    public LMNtalWindow(AbstractMembrane m){
+    public LMNtalWindow(AbstractMembrane m, LMNtalGFrame frame){
     	ready = setatoms(m);
+    	lmnframe = frame;
     }
     
 	public void setname(int n){
@@ -66,11 +69,13 @@ public class LMNtalWindow extends JFrame{
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				running = busy = waitawhile = false;
-				runtime.LMNtalRuntimeManager.terminateAllThreaded();
 				//閉じる際に、lmnPanelを殺す。
-				if(lmnPanel!=null)
+				if(lmnPanel!=null){
 					lmnPanel.stop();
-				Env.LMNgraphic.closewindow();
+					lmnPanel = null;
+				}
+				lmnframe.closewindow(name);
+				killed = true;
 				
 			}
 		});
@@ -88,6 +93,7 @@ public class LMNtalWindow extends JFrame{
 	}
 	
 	public boolean setgraphicmem(AbstractMembrane m){
+		if(killed) return true;
 		if(lmnPanel == null)return false;
 		lmnPanel.setgraphicmem(m);
 		return true;
@@ -95,13 +101,10 @@ public class LMNtalWindow extends JFrame{
 	
 	protected void initComponents() {
 		lmnPanel = new LMNGraphPanel(this);
-//		JButton bt;
 		
 		setTitle("It's Graphical LMNtal");
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
-//		getContentPane().add(bt=new JButton("Wait a While"), BorderLayout.SOUTH);
-//		bt.addActionListener(new ActionAdapter(this));
 	}
 	
 	/**

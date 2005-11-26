@@ -9,7 +9,7 @@
 	name("hoge").
 
 	now(1).
-	a(179,140,400,350, 10).
+	a(179,140,400,350, 9).
 	
 	a(AX,AY,BX,BY,N) :- CX = AX+(BX-AX+AY-BY)/2 , CY=BY+(BX-AX+AY-BY)/2 ,N > 0 | a(AX,AY,CX,CY,N-1),a(BX,BY,CX,CY,N-1).
 	
