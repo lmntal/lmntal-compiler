@@ -8,6 +8,7 @@ window.
 size(800,600).
 name("hoge").
 now(0).
+bgcolor(255,255,255).
 
 a(350,0,0,400,700,400, 5).
 b(350,0,0,400,350,550, 5).
@@ -21,82 +22,19 @@ c(AX,AY,BX,BY,CX,CY,N):- N>0,DX=(AX+BX)/2,DY=(AY+BY)/2,EX=(AX+CX)/2,EY=(AY+CY)/2
  c(AX,AY,DX,DY,EX,EY,N-1),c(DX,DY,BX,BY,FX,FY,N-1),c(EX,EY,FX,FY,CX,CY,N-1).
 
 now(NOW),b(AX,AY,BX,BY,CX,CY,N):-N=0,int(AX),int(AY),int(BX),int(BY),int(CX),int(CY),int(NOW)|
-	{
-	draw.
-	name(NOW).
-	getpic("line").
-	position(AX,AY).
-	size(BX,BY).
-	color(255,0,0).
-	sequence(1).
-	},{
-	draw.
-	name(NOW+1).
-	getpic("line").
-	position(AX,AY).
-	size(CX,CY).
-	color(255,0,0).
-	sequence(1).
-	},{
-	draw.
-	name(NOW+2).
-	getpic("line").
-	position(BX,BY).
-	size(CX,CY).
-	color(255,0,0).
-	sequence(1).
-	},now(NOW+3).
+	{draw,name(NOW),getpic("line"),	position(AX,AY),size(BX,BY),color(255,0,0),sequence(1)},
+	{draw,name(NOW+1),getpic("line"),position(AX,AY),size(CX,CY),color(255,0,0),sequence(1)},
+	{draw,name(NOW+2),getpic("line"),position(BX,BY),size(CX,CY),color(255,0,0),sequence(1)},
+	now(NOW+3).
 now(NOW),a(AX,AY,BX,BY,CX,CY,N):-N=0,int(AX),int(AY),int(BX),int(BY),int(CX),int(CY),int(NOW)|
-	{
-	draw.
-	name(NOW).
-	getpic("line").
-	position(AX,AY).
-	size(BX,BY).
-	color(0,255,0).
-	sequence(0).
-	},{
-	draw.
-	name(NOW+1).
-	getpic("line").
-	position(AX,AY).
-	size(CX,CY).
-	color(0,255,0).
-	sequence(0).
-	},{
-	draw.
-	name(NOW+2).
-	getpic("line").
-	position(BX,BY).
-	size(CX,CY).
-	color(0,255,0).
-	sequence(0).
-	},now(NOW+3).
+	{draw,name(NOW),getpic("line"),position(AX,AY),size(BX,BY),color(0,255,0),sequence(0)},
+	{draw,name(NOW+1),getpic("line"),position(AX,AY),size(CX,CY),color(0,255,0),sequence(0)},
+	{draw,name(NOW+2),getpic("line"),position(BX,BY),size(CX,CY),color(0,255,0),sequence(0)},
+	now(NOW+3).
 now(NOW),c(AX,AY,BX,BY,CX,CY,N):-N=0,int(AX),int(AY),int(BX),int(BY),int(CX),int(CY),int(NOW)|
-	{
-	draw.
-	name(NOW).
-	getpic("line").
-	position(AX,AY).
-	size(BX,BY).
-	color(0,0,255).
-	sequence(1).
-	},{
-	draw.
-	name(NOW+1).
-	getpic("line").
-	position(AX,AY).
-	size(CX,CY).
-	color(0,0,255).
-	sequence(1).
-	},{
-	draw.
-	name(NOW+2).
-	getpic("line").
-	position(BX,BY).
-	size(CX,CY).
-	color(0,0,255).
-	sequence(1).
-	},now(NOW+3).
+	{draw,name(NOW),getpic("line"),position(AX,AY),size(BX,BY),color(0,0,255),sequence(1)},
+	{draw,name(NOW+1),getpic("line"),position(AX,AY),size(CX,CY),color(0,0,255),sequence(1)},
+	{draw,name(NOW+2),getpic("line"),position(BX,BY),size(CX,CY),color(0,0,255),sequence(1)},
+	now(NOW+3).
 
 }.
