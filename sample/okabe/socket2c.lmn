@@ -1,4 +1,6 @@
 socket2.init(60000).
-socket2.send("127.0.0.1",60001,"{c. c:-cc}").
-socket2.send("127.0.0.1",60001,"{d. d:-dd}").
-%socket2.close("127.0.0.1",60001).
+socket2.connect("127.0.0.1",60001).
+socket2.send("127.0.0.1","{c. c:-cc}").
+socket2.send("127.0.0.1","{d. d:-dd}").
+socket2.close("127.0.0.1").
+socket2.terminate.
