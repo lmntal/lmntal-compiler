@@ -91,6 +91,12 @@ public class GraphicAtoms{
 			else if (atomobj.equals("line")){
 				g.drawLine(array_x[0], array_y[0], array_x[1], array_y[1]);
 			}
+			else if (atomobj.equals("filltriangle")){
+				g.fillPolygon(array_x, array_y, 3);
+			}
+			else if (atomobj.equals("triangle")){
+				g.drawPolygon(array_x, array_y, 3);
+			}
 //			System.out.println(posx+"," +posy+"," +sizex+", "+sizey);
 		}
 		else if(atomimg != null)	
