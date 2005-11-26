@@ -1,0 +1,49 @@
+/*
+  nakano---
+   シェルピンスキーのギャスケット　カラー版
+ 
+*/
+{
+window.
+size(800,600).
+name("hoge").
+now(0).
+color(255,0,0).
+a(350,0,0,500,700,500, 5).
+bgcolor(0,0,0).
+
+a(AX,AY,BX,BY,CX,CY,N):- N>0,DX=(AX+BX)/2,DY=(AY+BY)/2,EX=(AX+CX)/2,EY=(AY+CY)/2,FX=(BX+CX)/2,FY=(BY+CY)/2|
+ a(AX,AY,DX,DY,EX,EY,N-1),a(DX,DY,BX,BY,FX,FY,N-1),a(EX,EY,FX,FY,CX,CY,N-1).
+
+now(NOW),a(AX,AY,BX,BY,CX,CY,N),color(R,G,B):-N=0,int(R),int(G),int(B),int(AX),int(AY),int(BX),int(BY),int(CX),int(CY),int(NOW)|
+	{
+	draw.
+	name(NOW).
+	getpic("line").
+	position(AX,AY).
+	size(BX,BY).
+	color(R,G,B).
+	},{
+	draw.
+	name(NOW+1).
+	getpic("line").
+	position(AX,AY).
+	size(CX,CY).
+	color(R,G,B).
+	},{
+	draw.
+	name(NOW+2).
+	getpic("line").
+	position(BX,BY).
+	size(CX,CY).
+	color(R,G,B).
+	},nextcolor(R,G,B),now(NOW+3).
+
+%次の色の決定
+nextcolor(R,G,B) :- R=255, G<255, B=  0 | color(R   ,G+51,B   ).
+nextcolor(R,G,B) :- R>  0, G=255, B=  0 | color(R-51,G   ,B   ).
+nextcolor(R,G,B) :- R=  0, G=255, B<255 | color(R   ,G   ,B+51).
+nextcolor(R,G,B) :- R=  0, G>  0, B=255 | color(R   ,G-51,B   ).
+nextcolor(R,G,B) :- R<255, G=  0, B=255 | color(R+51,G   ,B   ).
+nextcolor(R,G,B) :- R=255, G=  0, B>  0 | color(R   ,G   ,B-51).
+}.
