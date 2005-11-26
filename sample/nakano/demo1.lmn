@@ -1,0 +1,13 @@
+{
+  window.
+  size(640,530).
+  name("hoge").
+  {
+  draw.
+  name(0).
+  getpic("rect").
+  position(10,10).
+  color(255,0,0).
+  size(100,100).
+  }.
+}.
