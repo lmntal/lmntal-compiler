@@ -195,7 +195,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		}
 	}
 	
-	private void paintlayout(){
+	private synchronized void paintlayout(){
 		Iterator ite = drawlist.iterator();
 		while(ite.hasNext()){
 			GraphicAtoms ga = (GraphicAtoms)ite.next();
