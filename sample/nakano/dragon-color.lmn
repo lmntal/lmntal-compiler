@@ -10,13 +10,13 @@
 	bgcolor(0,0,0).
 
 	now(1).
-	a(179,140,400,350, 12).
+	a(179,140,400,350, 7).
 	color(255,0,0).
 	
 	a(AX,AY,BX,BY,N) :- CX = AX+(BX-AX+AY-BY)/2 , CY=BY+(BX-AX+AY-BY)/2 ,N > 0 | a(AX,AY,CX,CY,N-1),a(BX,BY,CX,CY,N-1).
 	a(AX,AY,BX,BY,N),color(R,G,B),now(NOW) :- int(R),int(G),int(B),CX = AX+(BX-AX+AY-BY)/2 , CY=BY+(BX-AX+AY-BY)/2 ,N = 0,int(NOW) |
-	{draw,name(NOW),getpic("line"),position(AX,AY),size(CX,CY),color(R,G,B)},
-	{draw,name(NOW+1),getpic("line"),position(BX,BY),size(CX,CY),color(R,G,B)},
+	{draw,name(NOW),getpic("line"),position(AX,AY,CX,CY),color(R,G,B)},
+	{draw,name(NOW+1),getpic("line"),position(BX,BY,CX,CY),color(R,G,B)},
 	nextcolor(R,G,B),now(NOW+2).
 
 	%次の色の決定

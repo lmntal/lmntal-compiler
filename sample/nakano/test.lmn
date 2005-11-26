@@ -1,0 +1,20 @@
+/*
+  nakano---
+   シェルピンスキーのギャスケット
+ 
+*/
+{
+window.
+size(800,600).
+name("hoge").
+now(0).
+bgcolor(255,255,255).
+
+	{draw,
+	name(0),
+	getpic("line"),
+	position(10,10,100,100),
+	color(0,0,255)
+	}.
+
+}.
