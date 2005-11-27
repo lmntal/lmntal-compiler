@@ -48,13 +48,16 @@ import runtime.SystemRulesets;
  * @author mizuno
  */
 public class Translator {
-	private static boolean fStandardLibrary = false;
+	private static boolean fStandardLibrary;
+	private static int success, count;
+	private static boolean gen_all_lib;
 	
 	/**
 	 * std_lib.jar を作るための main 関数
 	 * @param args FrontEnd に渡すオプション
 	 */
 	public static void main(String[] args) throws Exception {
+		gen_all_lib = true;
 		FrontEnd.processOptions(args);
 		Env.fInterpret = false;
 		Env.fLibrary = true;
@@ -92,6 +95,7 @@ public class Translator {
 			SystemRulesets.clear();
 			l.set(0, "public/" + files[i]);
 			System.out.println("processing " + l.get(0));
+			count++;
 			FrontEnd.run(l);
 		}
 		baseDir = outDir;
@@ -119,8 +123,10 @@ public class Translator {
 			SystemRulesets.clear();
 			l.set(0, "src/" + files[i]);
 			System.out.println("processing " + l.get(0));
+			count++;
 			FrontEnd.run(l);
 		}
+		System.out.println("success : " + success + ", failure : " + (count - success));
 	}
 	
 	private String className;
@@ -301,17 +307,22 @@ public class Translator {
 	/**
 	 * インラインコードを生成する。
 	 * @throws IOException IOエラーが発生した場合
+	 * @return コンパイルに成功したらtrue
 	 */
-	public static void genInlineCode() throws IOException {
+	public static boolean genInlineCode() throws IOException {
 		if (Inline.inlineSet.size() > 1) {
 			Env.e("Translator supports only one InlineUnit.");
-			return;
+			return false;
 		}
 		Iterator it = Inline.inlineSet.values().iterator();
-		while (it.hasNext()) {
+		if (it.hasNext()) {
 			InlineUnit iu = (InlineUnit)it.next();
-			iu.makeCode(packageName, InlineUnit.className(sourceName + ".lmn"), new File(dir, InlineUnit.className(sourceName + ".lmn") + ".java"), false);
+			File f = new File(dir, InlineUnit.className(sourceName + ".lmn") + ".java");
+			iu.makeCode(packageName, InlineUnit.className(sourceName + ".lmn"), f, false);
+			//エラーメッセージを出力するため、インラインコードは先にコンパイルする。
+			return compile(f, !gen_all_lib);
 		}
+		return true;
 	}
 
 	/**
@@ -321,7 +332,7 @@ public class Translator {
 	public static void genJAR() throws IOException {
 		//コンパイル
 		if (!Env.fLibrary) {
-			if (!compile(new File(baseDir, "Main.java"))) {
+			if (!compile(new File(baseDir, "Main.java"), Env.debug > 0)) {
 				return;
 			}
 		}
@@ -331,11 +342,12 @@ public class Translator {
 			if (Env.fLibrary && !moduleName.equals(sourceName)) {
 				continue;
 			}
-			if (!compile(new File(moduleDir, "Module_" + moduleName + ".java"))) {
+			if (!compile(new File(moduleDir, "Module_" + moduleName + ".java"), Env.debug > 0)) {
 				return;
 			}
 		}
 
+		success++;
 		//JARの生成
 		if (!fStandardLibrary)
 			genJAR(sourceName + ".jar");
@@ -363,21 +375,23 @@ public class Translator {
 	/**
 	 * 変換したファイルをコンパイルする。
 	 * @param file コンパイルするファイル
+	 * @param outputErrorMessage コンパイルエラー発生時にエラーメッセージを出力するかどうか
 	 * @throws IOException IOエラーが発生した場合
 	 * @return コンパイルに成功した場合true
 	 */
-	private static boolean compile(File file) throws IOException {
+	private static boolean compile(File file, boolean outputErrorMessage) throws IOException {
 		String classpath = System.getProperty("java.class.path");
-		String[] command = {"javac", "-cp", classpath, "-sourcepath", baseDir.getPath(), file.getPath()};
+		String[] command = {"javac", "-cp", classpath, "-sourcepath", baseDir.getPath(), file.getPath(), "-source", "1.4", "-target", "1.4"}; //1.5 の機能を使う場合は最後の 4 つをコメントアウトしてください。
 		Process javac = Runtime.getRuntime().exec(command);
 		javac.getInputStream().close();
-		if (Env.debug > 0) {
+		if (outputErrorMessage) {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(javac.getErrorStream()));
 			while (true) {
 				String line = reader.readLine();
 				if (line == null) break;
 				Env.e(line);
 			}
+			reader.close();
 		} else {
 			javac.getErrorStream().close();
 		}
@@ -509,7 +523,7 @@ public class Translator {
 		writer.write("	private int id = " + ruleset.getId() + ";\n");
 		if (globalSystemRuleset) {
 			writer.write("	public String getGlobalRulesetID() {\n");
-			writer.write("		return \"" + Env.LMNTAL_VERSION + "$systemruleset\";\n");
+			writer.write("		return \"$systemruleset\";\n");
 			writer.write("	}\n");
 			writer.write("	public String toString() {\n");
 			writer.write("		return \"System Ruleset Object\";\n");

@@ -505,12 +505,13 @@ public class FrontEnd {
 						Env.p("Compilation Failed");
 						return;
 					}
-					Translator.genInlineCode();
-					Translator.genModules(m);
-					if (!Env.fLibrary) {
-						Translator.genMain((InterpretedRuleset)rs, m);
+					if (Translator.genInlineCode()) {
+						Translator.genModules(m);
+						if (!Env.fLibrary) {
+							Translator.genMain((InterpretedRuleset)rs, m);
+						}
+						Translator.genJAR();
 					}
-					Translator.genJAR();
 				} catch (IOException e) {
 					Env.e("Failed to write Translated File. " + e.getLocalizedMessage());
 					return;
