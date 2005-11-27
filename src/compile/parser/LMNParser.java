@@ -87,6 +87,7 @@ public class LMNParser {
 		} catch (Exception e) {
 //			throw new ParseException(e.getMessage()+" "+runtime.Env.parray(java.util.Arrays.asList(e.getStackTrace()), "\n"));	
 //			error("PARSE ERROR: " + p.error_sym());
+			Env.nErrors++;
 			result = new LinkedList();
 		} catch (Error e) {
 			error("ERROR: " + e.getMessage());
