@@ -234,6 +234,10 @@ class SpecialFunctor extends Functor {
 	public String getName() {
 		return name; 
 	}
+	
+	public String toString() {
+		return name + "_" + arity;
+	}
 
 	/**
 	 * 直列化復元時に呼ばれる。
