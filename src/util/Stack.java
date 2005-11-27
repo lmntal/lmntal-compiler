@@ -13,7 +13,7 @@ public final class Stack {
 		head.prev = tail.prev = head;
 		head.next = tail.next = tail;
 	}
-	public void push(QueuedEntity entity) {
+	synchronized public void push(QueuedEntity entity) {
 		if (entity.isQueued()) {
 			System.out.println("SYSTEM ERROR: enqueued entity is already in a queue");
 			entity.dequeue();
@@ -25,7 +25,10 @@ public final class Stack {
 		tail.prev = entity;
 	}
 	/** スタックstackの内容をこのスタックの底に移動する */
-	public void moveFrom(Stack stack) {
+	synchronized public void moveFrom(Stack stack) {
+		//stack は仮スタックであり、ルート膜をロックしているスレッド以外操作しいないので
+		//排他制御の必要はない。
+
 		if (stack.isEmpty()) return;
 		QueuedEntity oldFirst = head.next;
 		QueuedEntity addedLast = stack.tail.prev;
@@ -45,7 +48,7 @@ public final class Stack {
 			t.stack = this;
 		}
 	}
-	public QueuedEntity pop() {
+	synchronized public QueuedEntity pop() {
 		if(isEmpty()) return null;
 		
 		QueuedEntity ret = tail.prev;
@@ -56,7 +59,7 @@ public final class Stack {
 		ret.stack = null;
 		return ret;
 	}
-	public QueuedEntity peek() {
+	synchronized public QueuedEntity peek() {
 		if(isEmpty()) return null;
 		return tail.prev;
 	}

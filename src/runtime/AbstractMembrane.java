@@ -558,6 +558,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		blockingLock();
 		boolean queued = false;
 		if (isQueued()) {
+			//ロックしているので、この間でdequeueされている事はない。
 			dequeue();
 			queued = true;
 		}

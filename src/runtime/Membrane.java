@@ -135,13 +135,7 @@ public final class Membrane extends AbstractMembrane {
 		Membrane m = new Membrane(task, this);
 		mems.add(m);
 		// 親膜と同じ実行膜スタックに積む
-		Task t = (Task)task;
-		if (t.bufferedStack.isEmpty()) {
-			t.memStack.push(m);
-		}
-		else {
-			t.bufferedStack.push(m);
-		}		
+		stack.push(m);
 		return m;
 	}
 	/** newMemと同じ。ただし親膜（メソッドが呼ばれたこの膜）は仮でない実行膜スタックに積まれている。
@@ -184,14 +178,14 @@ public final class Membrane extends AbstractMembrane {
 			t.bufferedStack.push(this);
 		} else {
 			Stack s = ((Membrane)parent).activate2();
-			synchronized(task) {
-				if (s == t.bufferedStack) {
-					dequeue();
+			if (s == t.bufferedStack) {
+				dequeue();
+				s.push(this);
+			} else {
+				//方法7では、この膜をロックしていれば非同期にpushされている事はない。
+				//方法8では、下2行をsynchronized(memStack)内に入れる。
+				if (!isQueued())
 					s.push(this);
-				} else {
-					if (!isQueued())
-						s.push(this);
-				}
 			}
 		}
 	}
@@ -202,6 +196,8 @@ public final class Membrane extends AbstractMembrane {
 	 */
 	private Stack activate2() {
 		Task t = (Task)task;
+		//方法7では、この膜をロックしていれば非同期にpushされている事はない。
+		//方法8では、この下を全てsynchronized(memStack)内に入れる。
 		if (isQueued())
 			return stack;
 
@@ -211,10 +207,8 @@ public final class Membrane extends AbstractMembrane {
 			return t.bufferedStack;
 		} else {
 			Stack s = ((Membrane)parent).activate2();
-			synchronized(task) { //TODO なぜ synchronized?
-				s.push(this);
-				return s;
-			}
+			s.push(this);
+			return s;
 		}
 	}	
 	
@@ -341,10 +335,7 @@ public final class Membrane extends AbstractMembrane {
 	public void unlock() {
 		Task task = (Task)getTask();
 		if (isRoot()) {
-			synchronized(task) {
-				task.memStack.moveFrom(task.bufferedStack);
-//System.out.println(Thread.currentThread() + "moved contents of buffered stack to memstack : " + getLocalID());
-			}
+			task.memStack.moveFrom(task.bufferedStack);
 		}
 		if(Env.LMNgraphic != null)
 			Env.LMNgraphic.setmem(this);

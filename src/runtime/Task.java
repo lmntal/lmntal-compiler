@@ -65,14 +65,13 @@ import util.Stack;
 class Task extends AbstractTask implements Runnable {
 	/** このタスクのルールスレッド */
 	protected Thread thread = new Thread(this, "Task");
-	/** 実行膜スタック。読み書きはsynchronized(this)内に限る。*/
+	/** 実行膜スタック。*/
 	Stack memStack = new Stack();
 	/** 仮の実行膜スタック */
 	Stack bufferedStack = new Stack();
 	static final int maxLoop = 100;
 	/** 本膜が存在しないことを確かめたか、または本膜や子孫膜のロックが取得できないため、
-	 * ルールスレッドが適用できるルールが無かったときにtrue。
-	 * <p>falseの書き込みはsynchronized(this)内に限る。*/
+	 * ルールスレッドが適用できるルールが無かったときにtrue。*/
 	boolean idle = false;
 	/** タスクの優先度（正確には、このタスクのルールスレッドの優先度）
 	 * <p>ロックの制御に使用する予定。将来的にはタスクのスケジューリングにも使用される予定。
@@ -125,7 +124,7 @@ class Task extends AbstractTask implements Runnable {
 	void exec() {
 		Membrane mem; // 本膜
 		//System.out.println(getRoot().getAtomCount() + ": exec1 ");
-		synchronized(this) {
+		synchronized(this) { //多分、この synchronized 節はいらないと思う。mizuno
 			// このタスクを実行するルールスレッド（現在のスレッド）に停止要求があるときは何もしない
 			if (lockRequestCount > 0) {
 				idle = true;
@@ -153,7 +152,7 @@ class Task extends AbstractTask implements Runnable {
 			Iterator it = mem.rulesetIterator();
 			boolean flag;
 //			mem.atoms.print();
-			if(a != null){ // 実行アトムスタックが空でないとき
+			if(Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
 				flag = false;
 				while(it.hasNext()){ // 本膜のもつルールをaに適用
 					if (((Ruleset)it.next()).react(mem, a)) {
@@ -258,7 +257,7 @@ class Task extends AbstractTask implements Runnable {
 		}
 
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
-		synchronized(this) {
+		synchronized(this) { //多分、この synchronized 節はいらないと思う。mizuno
 			mem.unlock();
 			if (lockRequestCount > 0) {
 				signal();

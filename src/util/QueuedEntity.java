@@ -16,16 +16,24 @@ public class QueuedEntity {
 	public boolean isQueued() {
 		return stack != null;
 	}
-	/** スタックに積まれていれば除去する */
+	/**
+	 * スタックに積まれていれば除去する。
+	 */
 	public void dequeue() {
 		if (!isQueued()) {
 			//System.out.println("SYSTEM ERROR: dequeued entity is not in a queue");
 			return;
 		}
-		next.prev = prev;
-		prev.next = next;
-		prev = null;
-		next = null;
-		stack = null;
+		try {
+			synchronized (stack) {
+				next.prev = prev;
+				prev.next = next;
+				prev = null;
+				next = null;
+				stack = null;
+			}
+		} catch (NullPointerException e) {
+			//非同期に除去されていたので、何もしない。
+		}
 	}
 }
