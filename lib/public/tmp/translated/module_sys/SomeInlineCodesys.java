@@ -5,7 +5,7 @@ public class SomeInlineCodesys {
 	public static void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {
-		case 6: {
+		case 7: {
 			/*inline*/
 	try {
 		int count = mem.getAtomCountOfFunctor(new Functor(me.nth(0), ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue()));
@@ -22,6 +22,12 @@ public class SomeInlineCodesys {
 		case 2: {
 			/*inline*/
 	Env.fTrace=false;
+	me.setName("nil");
+	
+			break; }
+		case 6: {
+			/*inline*/
+	mem.perpetual = false;
 	me.setName("nil");
 	
 			break; }
