@@ -1,6 +1,6 @@
 @echo off
 
-set CLASSPATH=%~dp0..\classes
+set CLASSPATH=%~dp0lmntal.jar
 
 pushd %~dp0..
 for %%f in (lib\*.jar) do call :append %%f

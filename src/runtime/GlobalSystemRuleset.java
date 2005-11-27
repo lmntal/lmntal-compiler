@@ -18,7 +18,7 @@ public class GlobalSystemRuleset extends Ruleset {
 	}
 	private int id = 601;
 	public String getGlobalRulesetID() {
-		return "0.66.20051105$systemruleset";
+		return "$systemruleset";
 	}
 	public String toString() {
 		return "System Ruleset Object";
