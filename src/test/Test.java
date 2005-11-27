@@ -57,7 +57,7 @@ public class Test {
 		JFrame fr = new JFrame("test");
 		fr.setSize(200,300);
 		fr.getContentPane().add(new Button("hello"));
-		fr.show();
+		fr.setVisible(true);
 	}
 	public static void h() {
 		PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out));
@@ -68,7 +68,7 @@ public class Test {
 		if(false) {
 			Frame fr = new Frame("test");
 			fr.setSize(200,300);
-			fr.show();
+			fr.setVisible(true);
 		}
 		if(true) {
 			Class cl = Class.forName("java.awt.Frame");
