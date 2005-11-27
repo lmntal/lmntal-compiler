@@ -104,11 +104,12 @@ public class LMNtalDaemon implements Runnable {
 			myhostaddress =  "DEFERRED";	// とりあえず放置
 			e.printStackTrace();
 		}
-		
-		if(myhostaddress.equals("127.0.0.1")){
-			//throw new RuntimeException("cannot resolve hostname. contact your system adminitrator and configure your DNS settings");
-			myhostaddress =  "DEFERRED";	// とりあえず放置
-		}
+
+//2005/11/26 mizuno ネットワークに接続していない環境でも、@"localhost" は使えるようにするためにコメントアウト
+//		if(myhostaddress.equals("127.0.0.1")){
+//			//throw new RuntimeException("cannot resolve hostname. contact your system adminitrator and configure your DNS settings");
+//			myhostaddress =  "DEFERRED";	// とりあえず放置
+//		}
 	}
 	
 	/**
