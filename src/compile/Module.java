@@ -44,13 +44,8 @@ public class Module {
 	public static Object EXIST = new Object();
 	
 	static {
-		//libPath.add("hoge");
-		//libPath.add("FOO");
-		libPath.add(new File("./lib/src"));
-		libPath.add(new File("../lib/src"));
-		libPath.add(new File("./lib/public"));
-		libPath.add(new File("../lib/public"));
-		libPath.add(new File("."));
+		libPath.add(new File(System.getenv("LMNTAL_HOME") + "/lib/src"));
+		libPath.add(new File(System.getenv("LMNTAL_HOME") + "/lib/public"));
 	}
 	
 	/**
