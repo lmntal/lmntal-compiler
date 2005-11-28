@@ -3,12 +3,16 @@
  */
 package compile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+
+import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
-import runtime.Functor;
-import runtime.Env;
-
 import runtime.Rule;
 
 /**
@@ -65,7 +69,7 @@ public class Optimizer {
 		// TODO 最適化器を統合する
 		Compactor.compactRule(rule);
 		// TODO 本質的にインライン展開が必要ないものは、展開しなくてもできるようにする
-		if (fInlining || Env.zoptimize >= 1 || fReuseMem || fReuseAtom || fLoop) {
+		if (fInlining || fGuardMove || fGrouping || fReuseMem || fReuseAtom || fLoop) {
 			//head と gaurd をくっつける
 			inlineExpandTailJump(rule.memMatch);
 			//現状ではアトム主導テストのインライン展開には対応していない -> 一応対応(sakurai)
@@ -74,32 +78,12 @@ public class Optimizer {
 			rule.guard = null;
 		}
 		optimize(rule.memMatch, rule.body);
-		if(fGuardMove || Env.zoptimize == 1) {
-			Optimizer2.guardMove(rule.atomMatch, rule.memMatch);
-		} 
-		else if(fGrouping || Env.zoptimize == 2) {
+		if(fGrouping) {
 			Optimizer2.grouping(rule.atomMatch, rule.memMatch);
 		} 
-		else if((fGuardMove && fGrouping) || Env.zoptimize >= 3) {
-			Optimizer2.grouping(rule.atomMatch, rule.memMatch);
+		if(fGuardMove) {
 			Optimizer2.guardMove(rule.atomMatch, rule.memMatch);
-		}
-		/*
-		else if(Env.zoptimize == 4) Optimizer2.mapping(rule.memMatch);
-		else if(Env.zoptimize == 5) {
-				Optimizer2.mapping(rule.memMatch);
-				Optimizer2.guardMove(rule.memMatch);
-			}
-		else if(Env.zoptimize == 6) {
-				Optimizer2.mapping(rule.memMatch);
-				Optimizer2.grouping(rule.memMatch);
-			}
-		else if(Env.zoptimize >= 7) {
-				Optimizer2.mapping(rule.memMatch);
-				Optimizer2.grouping(rule.memMatch);
-				Optimizer2.guardMove(rule.memMatch);
-			}
-		*/
+		} 
 		if (fInlining) {
 			// head(+guard) と body をくっつける
 			inlineExpandTailJump(rule.memMatch);

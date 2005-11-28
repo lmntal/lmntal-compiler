@@ -136,7 +136,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		int formals = spec.getIntArg1();
 		int locals  = spec.getIntArg2();
 		if (locals == 0) {
-			System.out.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
+			System.err.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
 			locals = formals;
 		}
 // ArrayIndexOutOfBoundsException がでたので一時的に変更
@@ -309,7 +309,7 @@ class InterpretiveReactor {
 
 				//====その他====ここから====
 				case Instruction.DUMMY :
-					System.out.println(
+					System.err.println(
 						"SYSTEM ERROR: dummy instruction remains: " + inst);
 					break;
 					//case Instruction.UNDEF:
@@ -1277,7 +1277,7 @@ class InterpretiveReactor {
 
 
 				default :
-					System.out.println(
+					System.err.println(
 						"SYSTEM ERROR: Invalid instruction: " + inst);
 					break;
 			}

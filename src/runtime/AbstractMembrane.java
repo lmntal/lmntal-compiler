@@ -529,7 +529,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 */
 	public AbstractMembrane moveTo(AbstractMembrane dstMem) {
 		if (parent != null) {
-			System.out.println("Warning: membrane with parent was moved");
+			System.err.println("Warning: membrane with parent was moved");
 			parent.removeMem(this);
 		} 
 		if (dstMem instanceof Membrane) {

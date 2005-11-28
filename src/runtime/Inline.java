@@ -62,8 +62,8 @@ public class Inline {
 				cp.waitFor();
 				Env.d("Compile result :  "+cp.exitValue());
 				if(cp.exitValue()==1) {
-					System.out.println("Failed in compiling. Commandline was :");
-					System.out.println(compileCommand);
+					System.err.println("Failed in compiling. Commandline was :");
+					System.err.println(compileCommand);
 				} 
 				cp = null;
 			}
@@ -164,7 +164,7 @@ public class Inline {
 				cp = Runtime.getRuntime().exec(cmd);
 			}
 		} catch (java.io.IOException e) {
-			System.out.println("\n*** Compile failed. javac not found on PATH. javac is necessary for compiling inline code. ***\n");
+			System.err.println("\n*** Compile failed. javac not found on PATH. javac is necessary for compiling inline code. ***\n");
 			Env.d(e);
 		}
 	}

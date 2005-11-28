@@ -28,20 +28,9 @@ public final class Env {
 
 	////////////////////////////////////////////////////////////////
 
-//	/** 命令列のインライニングを行う最適化レベル */
-//	public static final int OPTIMIZE_INLINING = 1;
-//	/** 冗長な命令を除去する最適化レベル */
-//	public static final int OPTIMIZE_RE = 1;
-//	/** 検査命令を持ち上げる最適化レベル */
-//	public static final int OPTIMIZE_FF = 1;
-//	/** Optimization level. */
-//	public static int optimize = 0;
-//	
-	/** 暫定的最適化オプション　ガード,グループ関係 sakurai**/
-	public static int zoptimize = 0;
-	
-	/** OCaMNtal用の入力ファイルを生成するモード */
+	/** 中間命令列を出力するモード。Java への変換や実行は行わない。 */
 	public static boolean compileonly = false;
+
 	////////////////////////////////////////////////////////////////
 	
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/

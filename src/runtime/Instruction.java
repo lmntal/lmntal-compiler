@@ -2119,7 +2119,7 @@ public class Instruction implements Cloneable, Serializable {
 				 && f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {
 					Integer idobj = new Integer(kind);
 					if (instructionTable.containsKey(idobj)) {
-						System.out.println("WARNING: collision detected on instruction kind = " 
+						System.err.println("WARNING: collision detected on instruction kind = " 
 							+ idobj.intValue());
 					}
 					instructionTable.put(idobj, f.getName().toLowerCase());

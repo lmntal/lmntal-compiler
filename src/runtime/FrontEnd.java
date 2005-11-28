@@ -102,7 +102,7 @@ public class FrontEnd {
 			// -> 引数を "" にすると長さ 0 になるのでチェックする。
 			if(args[i].length()>0 && args[i].charAt(0) == '-'){
 				if(args[i].length() < 2){ // '-'のみの時
-					System.out.println("不明なオプション:" + args[i]);
+					System.err.println("不明なオプション:" + args[i]);
 					System.exit(-1);
 				} else { // オプション解釈部
 					switch(args[i].charAt(1)){
@@ -192,7 +192,7 @@ public class FrontEnd {
 						} else {
 							Env.shuffle = Env.SHUFFLE_DEFAULT;
 						}
-						if(Env.compileonly == false) System.out.println("shuffle level " + Env.shuffle);
+						System.err.println("shuffle level " + Env.shuffle);
 						break;
 					case 'e':
 						/// -e <LMNtal program>
@@ -202,8 +202,13 @@ public class FrontEnd {
 						break;
 					case 'O':
 						/// -O<0-9>
-						/// Optimize level.
+						/// Optimization level.
 						/// Intermediate instruction sequences are optimized.
+						/// Default level is 1.
+						/// -O1 is equivalent to --optimize-reuse-atom --optimize-reuse-mem,
+						///  --optimize-guard-move.
+						/// -O2 is equivalent to -O1 now.
+						/// -O3 is equivalent to --O2 --optimize-inlining
 						int level = -1;
 						if (args[i].length() == 2)
 							level = 1;
@@ -214,21 +219,10 @@ public class FrontEnd {
 							Optimizer.setLevel(level);
 							break;
 						} else {
-							System.out.println("Invalid option: " + args[i]);
+							System.err.println("Invalid option: " + args[i]);
 							System.exit(-1);
 						}
 						break;
-					//暫定的最適化オプション ガード、グループ関係 sakurai
-					case 'Z':
-					    if(args[i].length() == 2){
-					    	Env.zoptimize = 0;	
-					    } else if(args[i].matches("-Z[0-9]")){
-					    	Env.zoptimize = args[i].charAt(2) - '0';
-					    } else {
-					    	System.out.println("不明なオプション:" + args[i]);
-					    	System.exit(-1);
-					    }
-					    break;
 					case '-': // 文字列オプション
 						if(args[i].equals("--help")){
 							/// --help
@@ -286,19 +280,19 @@ public class FrontEnd {
 									 */
 									int portnum = Integer.parseInt(args[i+1]);
 									if(portnum < 49152 || portnum > 65535){
-										System.out.println("Invalid option: " + args[i] + " " + args[i+1]);
-										System.out.println("only port 49152 through 65535 is available");
+										System.err.println("Invalid option: " + args[i] + " " + args[i+1]);
+										System.err.println("only port 49152 through 65535 is available");
 										System.exit(-1);
 									}
 									Env.daemonListenPort = portnum;
 								} catch (NumberFormatException e){
 									//e.printStackTrace();
-									System.out.println("Invalid option: " + args[i] + " " + args[i+1]);
-									System.out.println("Cannot parse as integer: " + args[i+1]);
+									System.err.println("Invalid option: " + args[i] + " " + args[i+1]);
+									System.err.println("Cannot parse as integer: " + args[i+1]);
 									System.exit(-1);
 								}
 							} else {
-								System.out.println("Invalid option: " + args[i] + " " + args[i+1]);
+								System.err.println("Invalid option: " + args[i] + " " + args[i+1]);
 								System.exit(-1);
 							}
 							
@@ -348,21 +342,29 @@ public class FrontEnd {
 							Optimizer.fReuseMem = true;
 						} else if(args[i].equals("--optimize-loop")) {
 							/// --optimize-loop
-							/// Use loop instruction. (EXPERIMENT)
+							/// Use loop instruction. (EXPERIMENTAL)
 							Optimizer.fLoop = true;
+						} else if(args[i].equals("--optimize-guard-move")) {
+							/// --optimize-guard-move
+							/// Move up the guard instructions.
+							Optimizer.fGuardMove = true;
+						} else if(args[i].equals("--optimize-grouping")) {
+							/// --optimize-grouping
+							/// Group the head instructions. (EXPERIMENTAL)
+							Optimizer.fGrouping = true;
 						} else if(args[i].equals("--compileonly")){
-						/// コンパイル後の中間命令列を出力するモード
+						// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.fInterpret = true;
 							Env.debug = 1;
 						}else {
-							System.out.println("Invalid option: " + args[i]);
+							System.err.println("Invalid option: " + args[i]);
 							System.exit(-1);
 						}
 						break;
 					default:
-						System.out.println("Invalid option: " + args[i]);
-						System.out.println("Use option --help to see a long list of options.");
+						System.err.println("Invalid option: " + args[i]);
+						System.err.println("Use option --help to see a long list of options.");
 						System.exit(-1);						
 					}
 				}

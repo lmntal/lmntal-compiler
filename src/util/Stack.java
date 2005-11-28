@@ -15,7 +15,7 @@ public final class Stack {
 	}
 	synchronized public void push(QueuedEntity entity) {
 		if (entity.isQueued()) {
-			System.out.println("SYSTEM ERROR: enqueued entity is already in a queue");
+			System.err.println("SYSTEM ERROR: enqueued entity is already in a queue");
 			entity.dequeue();
 		}
 		entity.stack = this;

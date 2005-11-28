@@ -97,7 +97,7 @@ public class REPL {
 						Optimizer.clearFlag();
 						int level;
 						if (nline.charAt(0) == 'n') level = 0;
-						else if (nline.charAt(nline.length() - 1) == 'e') level = 5;
+						else if (nline.charAt(nline.length() - 1) == 'e') level = 1;
 						else level = nline.charAt(nline.length() - 1) - '0';
 						Optimizer.setLevel(level);
 						Env.p("optimization level " + level);
@@ -117,11 +117,6 @@ public class REPL {
 					} else if(nline.equals("optimize-loop")) {
 						Optimizer.fLoop = true;
 						Env.p("optimize loop on");
-						continue;
-					} else if(nline.matches("nozoptimize|zoptimize( [0-9])?")){ //ガード関係の最適化　そのうちoptimizeと統合 sakurai
-						if (nline.charAt(nline.length() - 1) == 'e') Env.zoptimize = 0;
-						else Env.zoptimize = nline.charAt(nline.length() - 1) - '0';
-						Env.p("zoptimization level " + Env.zoptimize);
 						continue;
 					} else if(nline.matches("noshuffle|shuffle( [0-9])?")) {
 						int old = Env.shuffle;

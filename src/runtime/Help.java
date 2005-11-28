@@ -39,8 +39,13 @@ class Help {
 			+"                    One liner code execution like Perl.\n"
 			+"                    Example: -e 'a,(a:-b)'\n"
 			+"    -O<0-9>\n"
-			+"                    Optimize level.\n"
+			+"                    Optimization level.\n"
 			+"                    Intermediate instruction sequences are optimized.\n"
+			+"                    Default level is 1.\n"
+			+"    -O1 is equivalent to --optimize-reuse-atom --optimize-reuse-mem,\n"
+			+"                     --optimize-guard-move.\n"
+			+"    -O2 is equivalent to -O1 now.\n"
+			+"    -O3 is equivalent to --O2 --optimize-inlining\n"
 			+"    --help\n"
 			+"                    Show usage (this).\n"
 			+"    --demo\n"
@@ -81,8 +86,11 @@ class Help {
 			+"    --optimize-reuse-mem\n"
 			+"                    Reuse mems.\n"
 			+"    --optimize-loop\n"
-			+"                    Use loop instruction. (EXPERIMENT)\n"
-			+"                    コンパイル後の中間命令列を出力するモード\n"
+			+"                    Use loop instruction. (EXPERIMENTAL)\n"
+			+"    --optimize-guard-move\n"
+			+"                    Move up the guard instructions.\n"
+			+"    --optimize-grouping\n"
+			+"                    Group the head instructions. (EXPERIMENTAL)\n"
 		);
 	}
 }
