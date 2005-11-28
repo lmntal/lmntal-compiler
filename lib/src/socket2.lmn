@@ -47,7 +47,7 @@ class AcceptThread implements Runnable {
   final Membrane mem;
   
   /*
-   *  constructor
+   *  AcceptThread.AcceptThread()
    */
   AcceptThread(ServerSocket servSock, Membrane mem) {
     this.servSock = servSock;
@@ -55,7 +55,7 @@ class AcceptThread implements Runnable {
   }
   
   /*
-   *  method: start
+   *  AcceptThread.start()
    */
   public void start() {
     if(th == null) {
@@ -65,26 +65,28 @@ class AcceptThread implements Runnable {
   }
   
   /*
-   *  method: AcceptThread.run()
+   *  AcceptThread.run()
    */
   public void run() {
     Thread thisThread = Thread.currentThread();
     while(th == thisThread) {
       try {
         Socket sock = servSock.accept();
-        System.out.println("socket accepted: " + sock.toString());
+        System.out.println("ServerSocket accepted: " + sock.toString());
         BufferedReader reader = 
           new BufferedReader(new InputStreamReader(sock.getInputStream()));
         //System.out.println("reader created: " + reader.toString());
         PrintWriter writer = new PrintWriter(sock.getOutputStream());
         //System.out.println("writer created: " + writer.toString());
         ReaderThread rThread = new ReaderThread(sock,reader,mem);
+        String ipstr = sock.getInetAddress().getHostAddress().toString();
         mem.asyncLock();
-        makeSocketProcess.create((Membrane)mem,sock,sock.getInetAddress(),rThread,writer);
-        mem.newAtom(new Functor("connectOK",0));
+        makeSocketProcess.create((Membrane)mem,sock,rThread,writer,ipstr);
+        Atom a1 = mem.newAtom(new Functor("connectOK",1));
+        Atom a2 = mem.newAtom(new StringFunctor(ipstr));
+        mem.newLink(a1,0,a2,0);
         mem.asyncUnlock();
         rThread.start();
-        
         System.out.println("ReaderThread: started");
       } catch(IOException e) {
         e.printStackTrace();
@@ -101,7 +103,7 @@ class AcceptThread implements Runnable {
   }
   
   /*
-   *  method: stop
+   *  AcceptThread.stop
    */
   public void stop() {
     th = null;
@@ -112,12 +114,12 @@ class AcceptThread implements Runnable {
         e.printStackTrace();
       }
     }
-    System.out.println("acceptThread: stopped");
+    System.out.println("AcceptThread: stopped");
   }
 }
 
 /* 
- *  class ReaderThread
+ *  class: ReaderThread
  */
 class ReaderThread implements Runnable {
   volatile Thread th = null;
@@ -126,7 +128,7 @@ class ReaderThread implements Runnable {
   final Membrane mem;
   
   /*
-   *  constructor
+   *  ReaderThread.ReaderThread
    */
   ReaderThread(Socket sock, BufferedReader reader, Membrane mem) {
     this.sock = sock;
@@ -135,7 +137,7 @@ class ReaderThread implements Runnable {
   }
   
   /*
-   *  method: start
+   *  ReaderThread.start
    */
   public void start() {
     if(th == null) {
@@ -145,7 +147,7 @@ class ReaderThread implements Runnable {
   }
   
   /*
-   *  method: ReaderThread.run()
+   *  ReaderThread.run
    */
   public void run(){
     Thread thisThread = Thread.currentThread();
@@ -155,38 +157,28 @@ class ReaderThread implements Runnable {
           System.out.println("reader: ready");
           String msg = reader.readLine();
           System.out.println("message received: " + msg);
-    LMNParser lp;
-    compile.structure.Membrane m;
-    Ruleset rs;
-    try {
-      lp = new LMNParser(new StringReader(msg));
-      m = lp.parse();
-      System.out.println("parse succeeded: " + m.toString());
-      rs = RulesetCompiler.compileMembrane(m);
-      System.out.println("ruleset generated: " + rs.toString());
-      rs.react((Membrane)mem);
-      System.out.println(mem.toString());
-      System.out.println("react succeeded" + m.toString());
-    } catch(ParseException e) {
-      e.printStackTrace();
-    }
-    // TODO: リストにつなぐ
-//          Iterator i1 = mem.atomIteratorOfFunctor(new ObjectFunctor(sock));
-//          if(i1.hasNext()) {
-//            System.out.println("hasNext()=true");
-//            Atom sAtom = (Atom)i1.next();
-//            System.out.println("sAtom");
-//           Atom nameAtom = sAtom.nthAtom(0);
-//            Atom headAtom = nameAtom.nthAtom(3);
-//            mem.asyncLock();
-//            System.out.println("asyncLock");
-//            Atom msgAtom = mem.newAtom(new StringFunctor(msg));
-//            Atom consAtom = mem.newAtom(new Functor(".",3));
-//            mem.newLink(msgAtom,0,consAtom,0);
-//            mem.newLink(consAtom,2,headAtom,1);
-//            mem.newLink(consAtom,1,nameAtom,3);
-//            mem.asyncUnlock();
-//          }
+          Iterator i1 = mem.atomIteratorOfFunctor(new ObjectFunctor(sock));
+          if(i1.hasNext()) {
+            Atom sAtom = (Atom)i1.next();
+            Atom nameAtom = sAtom.nthAtom(0);
+            Atom tempAtom = nameAtom.nthAtom(3);
+            mem.asyncLock();
+            Atom msgAtom = mem.newAtom(new StringFunctor(msg));
+            Atom consAtom = mem.newAtom(new Functor(".",3));
+            mem.newLink(consAtom,0,msgAtom,0);
+            Functor nilFunc = new Functor("[]",1);
+            if(tempAtom.getFunctor().equals(nilFunc)) {
+              mem.newLink(consAtom,1,tempAtom,0);
+              mem.newLink(consAtom,2,nameAtom,3);
+            } else {
+              while(!tempAtom.getFunctor().equals(nilFunc)) {
+                tempAtom = tempAtom.nthAtom(1);
+              }
+              mem.newLink(consAtom,2,tempAtom.nthAtom(0),1);
+              mem.newLink(consAtom,1,tempAtom,0);
+            }
+            mem.asyncUnlock();
+          }
         }
       } catch(IOException e) {
         e.printStackTrace();
@@ -201,7 +193,7 @@ class ReaderThread implements Runnable {
   }
   
   /*
-   *  method: stop
+   *  ReaderThread.stop
    */
   public void stop() {
     th = null;
@@ -210,7 +202,7 @@ class ReaderThread implements Runnable {
     } catch(IOException e) {
       e.printStackTrace();
     }
-    System.out.println("readerThread: sotopped");
+    System.out.println("ReaderThread: sotopped");
   }
 }
 
@@ -220,29 +212,26 @@ class ReaderThread implements Runnable {
 class makeSocketProcess {
   
   /*
-   *  method: create
+   *  makeSocketProcess.create()
    */
-  static void create(Membrane mem, Socket sock, InetAddress ip, ReaderThread rThread, PrintWriter writer) {
+  static void create(Membrane mem, Socket sock, ReaderThread rThread, PrintWriter writer, String ipstr) {
     Functor sFunc = new ObjectFunctor(sock);
     Functor rtFunc = new ObjectFunctor(rThread);
     Functor wFunc = new ObjectFunctor(writer);
-    Atom nameAtom = mem.newAtom(new Functor("socket " + ip.getHostAddress().toString(),5));
-    System.out.println("newFunctor: in create: socket " + ip.getHostAddress().toString());
+    StringFunctor ipFunc = new StringFunctor(ipstr);
+    Atom nameAtom = mem.newAtom(new Functor("socket "+ipstr,6));
     Atom sAtom = mem.newAtom(sFunc);
     Atom rtAtom = mem.newAtom(rtFunc);
     Atom wAtom = mem.newAtom(wFunc);
-    //Atom consIn = mem.newAtom(new Functor(".",2));
+    Atom ipAtom = mem.newAtom(ipFunc);
     Atom nilIn = mem.newAtom(new Functor("[]",1));
-    //Atom consOut = mem.newAtom(new Functor(".",2));
     Atom nilOut = mem.newAtom(new Functor("[]",1));
     mem.newLink(nameAtom,0,sAtom,0);
     mem.newLink(nameAtom,1,rtAtom,0);
     mem.newLink(nameAtom,2,wAtom,0);
     mem.newLink(nameAtom,3,nilIn,0);
     mem.newLink(nameAtom,4,nilOut,0);
-    //mem.newLink(consIn,0,nilIn,0);
-    //mem.newLink(consOut,0,nilOut,0);
-    System.out.println("newAtom: socket " + ip.getHostAddress().toString());
+    mem.newLink(nameAtom,5,ipAtom,0);
   }
 }
 :].
@@ -259,7 +248,7 @@ init@@ socket2.init(Port) :- int(Port) |
     try {
       ServerSocket servSock = new ServerSocket(port);
       mem.perpetual = true;
-      //System.out.println("servSock created: " + servSock.toString());
+      //System.out.println("ServerSocket created: " + servSock.toString());
       AcceptThread aThread = new AcceptThread(servSock,(Membrane)mem);
       Functor sFunc = new ObjectFunctor(servSock);
       Functor atFunc = new ObjectFunctor(aThread);
@@ -269,8 +258,8 @@ init@@ socket2.init(Port) :- int(Port) |
       mem.newLink(nameAtom,0,sAtom,0);
       mem.newLink(nameAtom,1,atAtom,0);
       aThread.start();
-      mem.newAtom(new Functor(initOK));
-      System.out.println("AcceptThread: started");
+      mem.newAtom(new Functor("initOK",0));
+      //System.out.println("AcceptThread: started");
     } catch(IOException e) {
       e.printStackTrace();
     }
@@ -278,7 +267,11 @@ init@@ socket2.init(Port) :- int(Port) |
     me.remove();
   :](Port).
 
+/*
+ *  module: connect
+ */
 socket@@ socket2.connect(Host,Port),initOK :- string(Host),int(Port) |
+  initOK,
   [:/*inline*/
     System.out.println("now connecting");
     String host = me.nth(0);
@@ -286,24 +279,38 @@ socket@@ socket2.connect(Host,Port),initOK :- string(Host),int(Port) |
     for(int j = 0; j < 10; j++) {
       try {
         InetAddress ip = InetAddress.getByName(host);
-        System.out.println("new Functor: socket " + ip.getHostAddress().toString());
-        Functor nameFunc = new Functor("socket " + ip.getHostAddress().toString(),5);
-        Iterator it = mem.atomIteratorOfFunctor(nameFunc);
-        System.out.println("searchFunctor: socket " + ip.getHostAddress().toString());
-        if(!it.hasNext()) {
+        String ipstr = ip.getHostAddress().toString();
+        StringFunctor ipFunc = new StringFunctor(ipstr);
+//        Iterator it = mem.atomIteratorOfFunctor(ipFunc);
+Iterator it = mem.atomIteratorOfFunctor(new Functor("connectOK",1));
+Atom tempAtom; boolean connected = false;
+while(it.hasNext()) {
+tempAtom = (Atom)it.next();
+if(tempAtom.getFunctor().equals(ipFunc)) {
+connected = true;break;
+}
+}
+        // 接続が確立していない場合
+//        if(!it.hasNext()) {
+if(!connected){
           Socket sock = new Socket(ip,port);
-          System.out.println("newSocket: socket " + ip.getHostAddress().toString());
           BufferedReader reader = 
             new BufferedReader(new InputStreamReader(sock.getInputStream()));
           //System.out.println("reader created: " + reader.toString());
           PrintWriter writer = new PrintWriter(sock.getOutputStream());
           //System.out.println("writer created: " + writer.toString());
           ReaderThread rThread = new ReaderThread(sock,reader,(Membrane)mem);
-          makeSocketProcess.create((Membrane)mem,sock,ip,rThread,writer);
+          makeSocketProcess.create((Membrane)mem,sock,rThread,writer,ipstr);
           rThread.start();
           System.out.println("ReaderThread: started");
-          mem.newAtom(new Functor ("connectOK",0));
+          System.out.println("before connectOK");
+          Atom a1 = mem.newAtom(new Functor("connectOK",1));
+          Atom a2 = mem.newAtom(ipFunc);
+          System.out.println("before link");
+          mem.newLink(a1,0,a2,0);
+          System.out.println("after connecting");
           break;
+        // 接続が確立している場合
         } else {
           System.out.println("already connected");
           break;
@@ -315,26 +322,48 @@ socket@@ socket2.connect(Host,Port),initOK :- string(Host),int(Port) |
     me.nthAtom(0).remove();
     me.nthAtom(1).remove();
     me.remove();
-    System.out.println("connected");
+    System.out.println("connect: succeeded");
   :](Host,Port).
 
 /*
  *  module: send
- *  TODO: message が命令列である場合と文字列である場合で区別できるようにする
  */
-send@@ socket2.send(Host,Msg) :- string(Host),string(Msg) |
+socket2.send(Host,Msg) :- string(Host),string(Msg) |
   [:/*inline*/
     String host = me.nth(0);
     String msg = me.nth(1);
-    System.out.println("now sending: " + msg);
+    Functor msgFunc = new StringFunctor(msg);
+    Atom msgAtom = mem.newAtom(msgFunc);
     try {
       InetAddress ip = InetAddress.getByName(host);
-      System.out.println("new Functor: socket " + ip.getHostAddress().toString());
-      Functor nameFunc = new Functor("socket " + ip.getHostAddress().toString(),5);
-      Iterator it = mem.atomIteratorOfFunctor(nameFunc);
-      System.out.println("searchFunctor: socket " + ip.getHostAddress().toString());
+      String ipstr = ip.getHostAddress().toString();
+      Atom nameAtom = mem.newAtom(new Functor ("send",2));
+      Atom ipAtom = mem.newAtom(new StringFunctor(ipstr));
+      mem.newLink(nameAtom,0,ipAtom,0);
+      mem.newLink(nameAtom,1,msgAtom,0);
+      System.out.println("send ready");
+    } catch(UnknownHostException e) {
+      e.printStackTrace();
+    }
+    me.nthAtom(0).remove();
+    me.nthAtom(1).remove();
+    me.remove();
+  :](Host,Msg).
+
+send(Ipstr1,Msg),connectOK(Ipstr2) :- 
+  Ipstr1=Ipstr2,string(Msg) |
+  connectOK(Ipstr2),
+  [:/*inline*/
+    System.out.println("now sending");
+    String ipstr = me.nth(0);
+    String msg = me.nth(1);
+    System.out.println("now sending: " + msg);
+      Functor ipFunc = new Functor("socket "+ipstr,6);
+      Iterator it = mem.atomIteratorOfFunctor(ipFunc);
+      System.out.println("iterator ok");
       if(it.hasNext()) {
         Atom nameAtom = (Atom)it.next();
+        //Atom nameAtom = ipAtom.nthAtom(0);
         ObjectFunctor wFunc = (ObjectFunctor)nameAtom.nthAtom(2).getFunctor();
         PrintWriter writer = (PrintWriter)wFunc.getObject();
         writer.println(msg);
@@ -343,13 +372,10 @@ send@@ socket2.send(Host,Msg) :- string(Host),string(Msg) |
       } else {
         System.out.println("not connected");
       }
-    } catch(IOException e) {
-          e.printStackTrace();
-    }
     me.nthAtom(0).remove();
     me.nthAtom(1).remove();
     me.remove();
-  :](Host,Msg).
+  :](Ipstr1,Msg).
 
 /*
  *  module:close
@@ -417,32 +443,50 @@ terminate@@ socket2.terminate :-
   :].
 
 /*  
- *  module: read
- *  TODO: get コマンドで取得できるようにする
+ *  module: get
  */
-//read@@ socket(S,R,W,[H|T],Out) :-
-//  class(S,"java.net.Socket"),class(R,"ReadThread"),class(W,"java.io.writer.PrintWriter"),string(H) |
-//  socket(S,R,W,T,Out),
-//  [:/*inline*/
-//    String msg = me.nth(0);
-//    // 以下は別ライブラリ化する
-//    LMNParser lp;
-//    compile.structure.Membrane m;
-//    Ruleset rs;
-//    try {
-//      lp = new LMNParser(new StringReader(msg));
-//      m = lp.parse();
-//      System.out.println("parse succeeded: " + m.toString());
-//      rs = RulesetCompiler.compileMembrane(m);
-//      System.out.println("ruleset generated: " + rs.toString());
-//      rs.react((Membrane)mem);
-//      System.out.println(mem.toString());
-//      System.out.println("react succeeded" + m.toString());
-//    } catch(ParseException e) {
-//      e.printStackTrace();
-//    }
-//      me.nthAtom(0).remove();
-//      me.remove();
-//  :](H).
+socket2.get(Host) :- string(Host) |
+  [:/*inline*/
+    String host = me.nth(0);
+    try {
+      InetAddress ip = InetAddress.getByName(host);
+      String ipstr = ip.getHostAddress().toString();
+      Atom nameAtom = mem.newAtom(new Functor ("get",1));
+      Atom ipAtom = mem.newAtom(new StringFunctor(ipstr));
+      mem.newLink(nameAtom,0,ipAtom,0);
+      System.out.println("get ready");
+    } catch(UnknownHostException e) {
+      e.printStackTrace();
+    } 
+    me.nthAtom(0).remove();
+    me.remove();
+  :](Host).
+
+//get(Ipstr1),socket(S,R,W,[H|T],Out,Ipstr2) :-
+//  Ipstr1=Ipstr2,class(S,"java.net.Socket"),class(R,"ReaderThread"),class(W,"java.io.writer.PrintWriter"),string(H) |
+O=[H|T] :- string(H) |
+O=T,
+//  socket(S,R,W,T,Out,Ipstr2),
+  [:/*inline*/
+    String msg = me.nth(0);
+    // 以下は別ライブラリ化する
+    LMNParser lp;
+    compile.structure.Membrane m;
+    Ruleset rs;
+    try {
+      lp = new LMNParser(new StringReader(msg));
+      m = lp.parse();
+      System.out.println("parse succeeded: " + m.toString());
+      rs = RulesetCompiler.compileMembrane(m);
+      System.out.println("ruleset generated: " + rs.toString());
+      rs.react((Membrane)mem);
+      System.out.println(mem.toString());
+      System.out.println("react succeeded" + m.toString());
+    } catch(ParseException e) {
+      e.printStackTrace();
+    }
+      me.nthAtom(0).remove();
+      me.remove();
+  :](H).
 }
 
