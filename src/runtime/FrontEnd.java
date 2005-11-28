@@ -191,7 +191,7 @@ public class FrontEnd {
 						} else {
 							Env.shuffle = Env.SHUFFLE_DEFAULT;
 						}
-						System.out.println("shuffle level " + Env.shuffle);
+						if(Env.compileonly == false) System.out.println("shuffle level " + Env.shuffle);
 						break;
 					case 'e':
 						/// -e <LMNtal program>

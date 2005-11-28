@@ -128,7 +128,7 @@ public class REPL {
 						if (nline.charAt(0) == 'n') Env.shuffle = Env.SHUFFLE_INIT;
 						else if (nline.charAt(nline.length() - 1) == 'e') Env.shuffle = Env.SHUFFLE_DEFAULT;
 						else Env.shuffle = nline.charAt(nline.length() - 1) - '0';
-						Env.p("shuffle level " + Env.shuffle + " (previously " + old + ")");
+						if(Env.compileonly == false)Env.p("shuffle level " + Env.shuffle + " (previously " + old + ")");
 						continue;
 					} else if(nline.equals("trace")) {
 						Env.p("trace mode on");
