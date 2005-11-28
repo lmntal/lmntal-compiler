@@ -30,8 +30,9 @@ parser code {:
 
 
 terminal			KW_COMPILED_RULESET, KW_COMPILED_RULE, KW_ATOM_MATCH, KW_MEM_MATCH, KW_GUARD, KW_BODY;
+terminal			KW_MODULE;
 terminal			INSIDE_PROXY, OUTSIDE_PROXY;
-terminal			LBRACKET, RBRACKET, UNDERBAR, COMMA, COLON;
+terminal			LBRACKET, RBRACKET, UNDERBAR, COMMA, COLON, LBRACE, RBRACE, DOT;
 terminal Integer	RULESET_ID;
 terminal String		SQUOTED_STRING, DQUOTED_STRING;
 terminal String		INST_NAME;
@@ -39,6 +40,7 @@ terminal Integer	LABEL;
 terminal Integer	NUMBER;
 terminal Double		FLOAT;
 
+non terminal Object[]			File;
 non terminal ArrayList			RulesetList;
 non terminal InterpretedRuleset	Ruleset;
 non terminal ArrayList			RuleList;
@@ -50,9 +52,16 @@ non terminal ArrayList			ArgList, ArgList2;
 non terminal Object				Arg;
 non terminal Functor			Functor;
 non terminal ArrayList			NumberList, NumberList2;
+non terminal ArrayList			ModuleList;
+non terminal compile.structure.Membrane		Module;
+non terminal ArrayList			RuleRefList;
 
-start with RulesetList;
+start with File;
 
+File			::=	  RulesetList:rulesets ModuleList:modules
+						{: RESULT = new Object[] {rulesets, modules}; :}
+					| RulesetList:rulesets
+						{: RESULT = new Object[] {rulesets, new ArrayList()}; :};
 RulesetList		::=	  Ruleset:rs
 						{: ArrayList list = new ArrayList(); list.add(rs); RESULT = list; :}
 					| RulesetList:list Ruleset:rs
@@ -109,6 +118,8 @@ Arg				::=	  NUMBER:num
 						{: RESULT = new LabelRef(label); :};
 Functor			::=	  SQUOTED_STRING:name UNDERBAR NUMBER:arity
 						{: RESULT = new Functor(name, arity.intValue()); :}
+					| SQUOTED_STRING:path DOT SQUOTED_STRING:name UNDERBAR NUMBER:arity
+						{: RESULT = new Functor(name, arity.intValue(), path); :}
 					| NUMBER:v UNDERBAR NUMBER:arity
 						{: /*assert(arity.intValue()==1);*/ RESULT = new IntegerFunctor(v.intValue()); :}
 					| FLOAT:v UNDERBAR NUMBER:arity
@@ -127,3 +138,19 @@ NumberList2		::=	  NUMBER:v
 						{: ArrayList list = new ArrayList(); list.add(v); RESULT = list; :}
 					| NumberList2:list COMMA NUMBER:v
 						{: list.add(v); RESULT = list; :};
+ModuleList		::=	  KW_MODULE
+						{: RESULT = new ArrayList(); :}
+					| ModuleList:list Module:module
+						{: list.add(module); RESULT = list; :};
+Module			::=	  SQUOTED_STRING:name LBRACE RuleRefList:rules RBRACE
+						{: compile.structure.Membrane mem = new compile.structure.Membrane(null);
+						   mem.name = name;
+						   mem.rulesets.addAll(rules);
+						   RESULT = mem;
+						:};
+RuleRefList		::=	  /*empty*/
+						{: RESULT = new ArrayList(); :}
+					| RULESET_ID: ruleset
+						{: ArrayList list = new ArrayList(); list.add(ruleset); RESULT=list; :}
+					| RuleRefList:list COMMA RULESET_ID:ruleset
+						{: list.add(ruleset); RESULT = list; :};

@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 
 import util.StreamDumper;
 
+import compile.Module;
 import compile.Optimizer;
 import compile.RulesetCompiler;
 import compile.Translator;
@@ -352,6 +353,7 @@ public class FrontEnd {
 						} else if(args[i].equals("--compileonly")){
 						/// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
+							Env.fInterpret = true;
 							Env.debug = 1;
 						}else {
 							System.out.println("Invalid option: " + args[i]);
@@ -500,6 +502,8 @@ public class FrontEnd {
 						//エラーメッセージは出力済み
 						return;
 					}
+					//実際の Translate は、compileMembrane の中で、ルールセットを生成した後に行っている。
+					//わかりにくいのでなおした方が良いかもしれない。
 					rs = RulesetCompiler.compileMembrane(m, unitName);
 					if (Env.nErrors > 0) {
 						Env.p("Compilation Failed");
@@ -522,14 +526,14 @@ public class FrontEnd {
 			
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
-
-			if(Env.compileonly) System.exit(1);
+			if (Env.compileonly) {
+				Module.showModuleList();
+				return;
+			}
+			
 			if (Env.fInterpret) {
 				run(rs);
 			}
-//			else {
-//				new Translator((InterpretedRuleset)rs).translate(true);
-//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));

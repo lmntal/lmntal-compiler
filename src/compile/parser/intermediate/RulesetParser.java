@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import runtime.Env;
@@ -15,7 +16,9 @@ import runtime.InterpretedRuleset;
 import runtime.Rule;
 import runtime.Ruleset;
 
+import compile.Module;
 import compile.parser.ParseException;
+import compile.structure.Membrane;
 
 public class RulesetParser {
 	/** 
@@ -26,10 +29,12 @@ public class RulesetParser {
 	public static Ruleset parse(Reader reader) throws ParseException {
 		Lexer lexer = new Lexer(reader);
 		parser parser = new parser(lexer);
-		ArrayList list;
+		ArrayList rulesets, modules;
 		
 		try {
-			list = (ArrayList)parser.parse().value;
+			Object[] t = (Object[])parser.parse().value;
+			rulesets = (ArrayList)t[0];
+			modules = (ArrayList)t[1];
 		} catch (IOException e) {
 			Env.error("ERROR: failed to read input data.");
 			throw new ParseException();
@@ -40,14 +45,14 @@ public class RulesetParser {
 
 		// id -> 実体のマップ生成
 		HashMap rulesetMap = new HashMap();
-		Iterator rsIt = list.iterator();
+		Iterator rsIt = rulesets.iterator();
 		while (rsIt.hasNext()) {
 			InterpretedRuleset rs = (InterpretedRuleset)rsIt.next();
 			rulesetMap.put(new Integer(rs.getId()), rs);
 		}
 		
 		// RulesetRef を、実際のルールセットに置き換える
-		rsIt = list.iterator();
+		rsIt = rulesets.iterator();
 		while (rsIt.hasNext()) {
 			InterpretedRuleset rs = (InterpretedRuleset)rsIt.next();
 			Iterator ruleIt = rs.rules.iterator();
@@ -60,7 +65,19 @@ public class RulesetParser {
 			}
 		}
 		
-		return (Ruleset)list.get(0);
+		// モジュールの処理
+		Iterator modIt = modules.iterator();
+		while (modIt.hasNext()) {
+			Membrane mem = (Membrane)modIt.next();
+			ListIterator lit = mem.rulesets.listIterator();
+			while (lit.hasNext()) {
+				Integer id = (Integer)lit.next();
+				lit.set(rulesetMap.get(id));
+			}
+			Module.regMemName(mem.name, mem);
+		}
+
+		return (Ruleset)rulesets.get(0);
 	}
 	
 	private static void updateRef(List insts, Map map, InstructionList guard, InstructionList body) {

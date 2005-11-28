@@ -55,12 +55,16 @@ WhiteSpace		= {LineTerminator} | [ \t]
 	"--memmatch:"		{return symbol(sym.KW_MEM_MATCH); }
 	"--guard:"			{return symbol(sym.KW_GUARD); }
 	"--body:"			{return symbol(sym.KW_BODY); }
+	"Module"			{return symbol(sym.KW_MODULE); }
 	"$in_2"				{return symbol(sym.INSIDE_PROXY); }
 	"$out_2"			{return symbol(sym.OUTSIDE_PROXY); }
 	"["					{return symbol(sym.LBRACKET); }
 	"]"					{return symbol(sym.RBRACKET); }
+	"{"					{return symbol(sym.LBRACE); }
+	"}"					{return symbol(sym.RBRACE); }
 	"_"					{return symbol(sym.UNDERBAR); }
 	","					{return symbol(sym.COMMA); }
+	"."					{return symbol(sym.DOT); }
 	":"					{return symbol(sym.COLON); }
 	@[0-9]+				{return symbol(sym.RULESET_ID, Integer.valueOf(yytext().substring(1))); }
 	"\""				{token.setLength(0); value.setLength(0); startpos = yycolumn; token.append(yytext()); yybegin(DQUOTE); }

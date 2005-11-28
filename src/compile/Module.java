@@ -4,13 +4,22 @@
  */
 package compile;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-//import runtime.Functor;
 import runtime.Env;
+
 import compile.parser.LMNParser;
-import compile.structure.*;
+import compile.structure.Atom;
+import compile.structure.Membrane;
+import compile.structure.RuleStructure;
 
 /**
  * モジュールシステムを実現するクラス。<br><br>
@@ -122,6 +131,32 @@ public class Module {
 		i = m.mems.listIterator();
 		while(i.hasNext()) {
 			getNeedModules((Membrane)i.next(), need);
+		}
+	}
+	
+	/** モジュールが持つルールセット一覧を出力する。*/
+	public static void showModuleList() {
+		if (memNameTable.size() == 0) return;
+		
+		System.out.println("Module");
+		Iterator it = memNameTable.keySet().iterator();
+		while (it.hasNext()) {
+			String name = (String)it.next();
+			Membrane mem = (Membrane)memNameTable.get(name);
+			name = name.replaceAll("\\\\", "\\\\\\\\");
+			name = name.replaceAll("'", "\\\\'");
+			name = name.replaceAll("\r", "\\\\r");
+			name = name.replaceAll("\n", "\\\\n");
+			System.out.print("'" + name + "'");
+			System.out.print(" {");
+			if (mem.rulesets.size() > 0) {
+				Iterator it2 = mem.rulesets.iterator();
+				System.out.print(it2.next());
+				while (it2.hasNext()) {
+					System.out.print(", " + it2.next());
+				}
+			}
+			System.out.println("}");
 		}
 	}
 }
