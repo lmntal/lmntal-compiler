@@ -5,37 +5,20 @@
  * オプション--graphicをつけて実行すること。
  * 無限ループします。
  */
+ 
 {
-window.
-position(400,0).
-size(400,400).
-name(1).
-bgcolor(0,0,0).
-	{
-	name(0).
-	getpic("line").
-	position(1,1,1,1).
-	color(0,0,0).
-	}.
-	now(1).
-	color(255,0,0).
+window,position(400,0),size(400,400),name(1),bgcolor(0,0,0).
+	{ name(0),getpic("line"),position(1,1,1,1),color(0,0,0) }.
+	now(1),color(255,0,0).
 }.
 {
-window.
-size(400,400).
-name(-1).
-bgcolor(128,128,128).
-	{
-	name(0).
-	getpic("line").
-	position(0,0,0,0).
-	color(0,0,0).
-	}.
-	now(1).
-	color(255,0,0).
+window,size(400,400),name(-1),bgcolor(128,128,128).
+	{ name(0),getpic("line"),position(0,0,0,0),color(0,0,0)	}.
+	now(1),	color(255,0,0).
 }.
-	%xとyの対応を維持。data(x1,y1,x2,y2)  : next(現在値、速度、最大値)。
-	data(next(200,-5,390),next(320,5,365),next(50,-7,390),next(200,7,365)).
+
+%xとyの対応を維持。data(x1,y1,x2,y2)  : next(現在値、速度、最大値)。
+data(next(200,-5,390),next(320,5,365),next(50,-7,390),next(200,7,365)).
 a(1).
 %定数
 max_v(15).
