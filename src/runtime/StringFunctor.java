@@ -1,5 +1,7 @@
 package runtime;
 
+import util.Util;
+
 /** 定数文字列を表現するための1引数ファンクタを表すクラス
  * todo inlineの扱いがおかしいので何とかする
  * @author n-kato
@@ -9,6 +11,6 @@ public class StringFunctor extends ObjectFunctor {
 	public String getQuotedAtomName() { return getStringLiteralText(getName()); }
 	public String getQuotedFunctorName() { return getQuotedAtomName(); }
 	public String toString() {
-			return "\""+getAbbrName()+"\"" + "_" + getArity();
-		}
+		return Util.quoteString((String)data, '"') + "_" + getArity();
+	}
 }

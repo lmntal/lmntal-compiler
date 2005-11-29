@@ -40,6 +40,7 @@ import runtime.ObjectFunctor;
 import runtime.Rule;
 import runtime.StringFunctor;
 import runtime.SystemRulesets;
+import util.Util;
 
 /**
  * 中間命令列からJavaへの変換を行うクラス。
@@ -591,7 +592,7 @@ public class Translator {
 			Functor func = (Functor)it.next();
 			writer.write("	private static final Functor " + funcVarMap.get(func));
 			if (func instanceof StringFunctor) {
-				writer.write(" = new StringFunctor(\"" + escapeString((String)func.getValue()) + "\");\n");
+				writer.write(" = new StringFunctor(" + Util.quoteString((String)func.getValue(), '"') + ");\n");
 			} else if (func instanceof IntegerFunctor) {
 				writer.write(" = new IntegerFunctor(" + ((IntegerFunctor)func).intValue() + ");\n");
 			} else if (func instanceof FloatingFunctor) {
@@ -601,9 +602,9 @@ public class Translator {
 			} else {
 				String path = "null";
 				if (func.getPath() != null) {
-					path = "\"" + escapeString(func.getPath()) + "\"";
+					path = Util.quoteString(func.getPath(), '"');
 				}
-				writer.write(" = new Functor(\"" + escapeString(func.getName()) + "\", " + func.getArity() + ", " + path + ");\n");
+				writer.write(" = new Functor(" + Util.quoteString(func.getName(), '"') + ", " + func.getArity() + ", " + path + ");\n");
 			}
 		}
 		
@@ -622,18 +623,6 @@ public class Translator {
 		}
 		instLists.add(instList);
 		instListsToTranslate.add(instList);
-	}
-	/**
-	 * 文字列リテラル用にエスケープ処理をする。
-	 * @param data 処理する文字列
-	 * @return エスケープした文字列
-	 */
-	private String escapeString(String data) {
-		data = data.replaceAll("\r", "\\\\r");
-		data = data.replaceAll("\n", "\\\\n");
-		data = data.replaceAll("\\\\", "\\\\\\\\"); // \ -> \\
-		data = data.replaceAll("\"", "\\\\\"");		// " -> \"
-		return data;
 	}
 
 	/**
@@ -1003,7 +992,7 @@ public class Translator {
 					break; //n-kato
 				case Instruction.LOCALSETMEMNAME: //[dstmem, name]
 				case Instruction.SETMEMNAME: //[dstmem, name]
-					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").setName(\"" + escapeString((String)inst.getArg2()) + "\");\n");
+					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").setName(" + Util.quoteString((String)inst.getArg2(), '"') + ");\n");
 					break; //n-kato
 					//====膜を操作する基本ボディ命令====ここまで====
 					//====リンクに関係する出力するガード命令====ここから====

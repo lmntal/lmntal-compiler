@@ -79,4 +79,21 @@ abstract public class Util {
 //		System.out.println("list = "+l);
 		return l.toArray();
 	}
+	
+	/**
+	 * 指定された文字列を表す文字列リテラルのテキスト表現を取得する。
+	 * 特殊文字と quoter を、バックスラッシュでエスケープする。
+	 * @param text 変換する文字列
+	 * @param quoter クォート文字。普通は " や ' を使う。
+	 * @return 変換後の文字列
+	 */ 
+	public static String quoteString(String text, char quoter) {
+		text = text.replaceAll("\\\\", "\\\\\\\\");
+		text = text.replaceAll("" + quoter, "\\\\" + quoter);
+		text = text.replaceAll("\n", "\\\\n");
+		text = text.replaceAll("\t", "\\\\t");
+		text = text.replaceAll("\f", "\\\\f");
+		text = text.replaceAll("\r", "\\\\r");
+		return quoter + text + quoter;
+	}
 }

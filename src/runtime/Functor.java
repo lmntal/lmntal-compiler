@@ -1,6 +1,9 @@
 package runtime;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
+
+import util.Util;
 
 import compile.parser.SrcName;
 
@@ -30,14 +33,10 @@ public class Functor implements Serializable {
 	
 	////////////////////////////////////////////////////////////////
 	
-	/** シンボルの表示名に対する内部名を取得する。
-	 * 現在の仕様では、内部名とは . と $ がエスケープされた名前を表す。*/
-	public static String escapeName(String name) {
-		name = name.replaceAll("\\.","..");
-		name = name.replaceAll("\\$",".\\$");
-		return name;
-	}
-	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
+	/**
+	 * 引数をもつアトムの名前として表示名を印字するための文字列を返す。
+	 * 通常の名前以外（数値や記号）の場合、クォートして返す。
+	 */
 	public String getQuotedFunctorName() {
 		String text = getAbbrName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
@@ -46,7 +45,10 @@ public class Functor implements Serializable {
 		if (path != null) text = path + "." + text;
 		return text;
 	}
-	/** 引数をもたないアトムの名前として表示名を印字するための文字列を返す */
+	/**
+	 * 引数をもたないアトムの名前として表示名を印字するための文字列を返す。
+	 * 通常の名前以外のもののうち、リスト構成要素や数値以外のものはクォートして返す。
+	 */
 	public String getQuotedAtomName() {
 		String text = getAbbrName();
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\])$")) {
@@ -58,28 +60,15 @@ public class Functor implements Serializable {
 		return text;
 	}
 	/** 指定された文字列を表すシンボルリテラルのテキスト表現を取得する。
-	 * 例えば a'b を渡すと 'a''b' が返る。*/
+	 * 例えば a'b を渡すと 'a\'b' が返る。*/
 	static final String quoteName(String text) {
-		if (text.equals("")) return "\"\"";
-		if (text.indexOf('\n') == -1) {
-			text = text.replaceAll("'","''");
-			text = "'" + text + "'";
-			return text;
-		}
-		return getStringLiteralText(text);
+		return Util.quoteString(text, '\'');
 	}
 	/** 指定された文字列を表す文字列リテラルのテキスト表現を取得する。
 	 * 例えば a"b を渡すと "a\"b" が返る。
 	 * <p>StringFunctorクラスのクラスメソッドにするのが正しい。*/
 	static final String getStringLiteralText(String text) {
-		text = text.replaceAll("\\\\","\\\\\\\\");
-		text = text.replaceAll("\"","\\\\\"");
-		text = text.replaceAll("\n","\\\\n");
-		text = text.replaceAll("\t","\\\\t");
-		text = text.replaceAll("\f","\\\\f");
-		text = text.replaceAll("\r","\\\\r");
-		text = "\"" + text + "\"";
-		return text;
+		return Util.quoteString(text, '\"');
 	}
 	public Object getValue() {
 		return name;
@@ -116,14 +105,9 @@ public class Functor implements Serializable {
 	////////////////////////////////////////////////////////////////
 
 	/** 適切に省略された表示名を取得 */
-	public String getAbbrName() {
+	protected String getAbbrName() {
 		String full = getName();
 		return full.length() > Env.printLength ? full.substring(0, Env.printLength-2) + ".." : full;
-	}
-	/** シンボル名を取得する。
-	 * @return nameフィールドの値。サブクラスのオブジェクトのときそのときに限り空文字列が返る。*/
-	public final String getSymbolName() {
-		return name;
 	}
 	/** 名前の表示名を取得する。サブクラスは空文字列が出力されないようにオーバーライドすること。*/
 	public String getName() {
@@ -143,14 +127,18 @@ public class Functor implements Serializable {
 	}
 	/** このクラスのオブジェクトかどうかを調べる。*/
 	public boolean isSymbol() {
-		return !name.equals("");
+		return getClass().equals(Functor.class);
 	}
-	/** オーバーライドしない限り getAbbrName()+"_"+getArity() を返す */
 	public String toString() {
-		return (path==null ? "" : "'"+path+"'.") + "'"+getAbbrName()+"'" + "_" + getArity();
+		if (Env.compileonly) {
+			return (path==null ? "" : Util.quoteString(path, '\'') + ".")
+							+ Util.quoteString(name, '\'') + "_" + getArity();
+		} else {
+			return getQuotedFunctorName() + "_" + getArity();
+		}
 	}
 	public int hashCode() {
-		return (path == null ? 0 : path.hashCode()) + name.hashCode() + arity;
+		return (path == null ? 0 : path.hashCode() * 2) + name.hashCode() + arity;
 	}
 	public boolean equals(Object o) {
 		// コンストラクタでinternしているので、==で比較できる。

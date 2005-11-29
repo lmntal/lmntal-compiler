@@ -4,10 +4,19 @@
  */
 package runtime;
 
-import java.util.*;
-import java.lang.reflect.Modifier;
+import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.io.*;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+import util.Util;
 
 /*
  * <p><b>注意</b>　方法4の文書に対して、「ロックしたまま実行膜スタックに積む」という操作
@@ -2233,14 +2242,8 @@ public class Instruction implements Cloneable, Serializable {
 			if (i != 0) buffer.append(", ");
 			Object o = data.get(i);
 			String str = o.toString();
-			if (o instanceof String || o instanceof Rule) {
-				//commit の引数は二重にエスケープしてしまう。
-				//無視するから問題はないけど、気持ち悪いなあ
-				str = str.replaceAll("\\\\", "\\\\\\\\");
-				str = str.replaceAll("\"", "\\\\\"");
-				str = str.replaceAll("\r", "\\\\r");
-				str = str.replaceAll("\n", "\\\\n");
-				str = "\"" + str + "\"";
+			if (o instanceof String || (Env.compileonly && o instanceof Rule)) {
+				str = Util.quoteString(str, '"');
 			}
 			buffer.append(str);
 		}

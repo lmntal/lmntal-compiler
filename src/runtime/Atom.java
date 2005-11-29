@@ -135,10 +135,6 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	public String getName() {
 		return functor.getName();
 	}
-	/** 適切に省略された名前を取得 */
-	public String getAbbrName() {
-		return functor.getAbbrName();
-	}
 	/** リンク数を取得 */
 	int getArity() {
 		return functor.getArity();
