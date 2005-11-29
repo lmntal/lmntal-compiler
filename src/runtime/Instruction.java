@@ -2222,7 +2222,8 @@ public class Instruction implements Cloneable, Serializable {
 					buffer.append("                  ");
 					buffer.append(insts.get(i));
 					//TODO 出力引数だったらインデントを下げる.
-					buffer.append(", \n");
+					if(Env.compileonly) buffer.append("\n");
+					else buffer.append(", \n");
 				}
 				buffer.append("                  ");
 				buffer.append(insts.get(i));
