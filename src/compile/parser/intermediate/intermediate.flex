@@ -56,6 +56,7 @@ WhiteSpace		= {LineTerminator} | [ \t]
 	"--guard:"			{return symbol(sym.KW_GUARD); }
 	"--body:"			{return symbol(sym.KW_BODY); }
 	"Module"			{return symbol(sym.KW_MODULE); }
+	"Inline"			{return symbol(sym.KW_INLINE); }
 	"$in_2"				{return symbol(sym.INSIDE_PROXY); }
 	"$out_2"			{return symbol(sym.OUTSIDE_PROXY); }
 	"["					{return symbol(sym.LBRACKET); }
@@ -71,8 +72,8 @@ WhiteSpace		= {LineTerminator} | [ \t]
 	"'"					{token.setLength(0); value.setLength(0); startpos = yycolumn; token.append(yytext()); yybegin(SQUOTE); }
 	[a-zA-Z]+			{return symbol(sym.INST_NAME, yytext()); }
 	L[0-9]+				{return symbol(sym.LABEL, Integer.valueOf(yytext().substring(1))); }
-	[0-9]+				{return symbol(sym.NUMBER, Integer.valueOf(yytext())); }
-	[0-9]+\.[0-9]+		{return symbol(sym.FLOAT, Double.valueOf(yytext())); }
+	[\+\-]?[0-9]+				{return symbol(sym.NUMBER, Integer.valueOf(yytext())); }
+	[\+\-]?[0-9]+\.[0-9]+		{return symbol(sym.FLOAT, Double.valueOf(yytext())); }
 }
 <BEGIN_RULESET> {
 	@[0-9]+				{yybegin(SKIP_LINE); return symbol(sym.RULESET_ID, Integer.valueOf(yytext().substring(1))); }

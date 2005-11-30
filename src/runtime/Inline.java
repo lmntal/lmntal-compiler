@@ -1,7 +1,16 @@
 package runtime;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import util.Util;
 
 /**
  * インラインの方針<BR>
@@ -47,6 +56,17 @@ public class Inline {
 	}
 	
 	/****** コンパイル時に使う ******/
+	
+	/**
+	 * InlineUnit の名前とクラスファイルの組を出力する。
+	 */
+	public static void showInlineList() {
+		System.out.println("Inline");
+		Iterator it = inlineSet.keySet().iterator();
+		while (it.hasNext()) {
+			System.out.println(Util.quoteString((String)it.next(), '"'));
+		}
+	}
 	
 	/**
 	 * コンパイルされたインラインコードを読み込んで InlineUnit に関連付ける

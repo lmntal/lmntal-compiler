@@ -30,7 +30,7 @@ parser code {:
 
 
 terminal			KW_COMPILED_RULESET, KW_COMPILED_RULE, KW_ATOM_MATCH, KW_MEM_MATCH, KW_GUARD, KW_BODY;
-terminal			KW_MODULE;
+terminal			KW_MODULE, KW_INLINE;
 terminal			INSIDE_PROXY, OUTSIDE_PROXY;
 terminal			LBRACKET, RBRACKET, UNDERBAR, COMMA, COLON, LBRACE, RBRACE, DOT;
 terminal Integer	RULESET_ID;
@@ -52,16 +52,16 @@ non terminal ArrayList			ArgList, ArgList2;
 non terminal Object				Arg;
 non terminal Functor			Functor;
 non terminal ArrayList			NumberList, NumberList2;
-non terminal ArrayList			ModuleList;
+non terminal ArrayList			ModuleList, ModuleList2;
 non terminal compile.structure.Membrane		Module;
 non terminal ArrayList			RuleRefList;
+non terminal ArrayList			InlineList, InlineList2;
+non terminal String				Inline;
 
 start with File;
 
-File			::=	  RulesetList:rulesets ModuleList:modules
-						{: RESULT = new Object[] {rulesets, modules}; :}
-					| RulesetList:rulesets
-						{: RESULT = new Object[] {rulesets, new ArrayList()}; :};
+File			::=	  RulesetList:rulesets ModuleList:modules InlineList:inlines
+						{: RESULT = new Object[] {rulesets, modules, inlines}; :};
 RulesetList		::=	  Ruleset:rs
 						{: ArrayList list = new ArrayList(); list.add(rs); RESULT = list; :}
 					| RulesetList:list Ruleset:rs
@@ -138,9 +138,13 @@ NumberList2		::=	  NUMBER:v
 						{: ArrayList list = new ArrayList(); list.add(v); RESULT = list; :}
 					| NumberList2:list COMMA NUMBER:v
 						{: list.add(v); RESULT = list; :};
-ModuleList		::=	  KW_MODULE
+ModuleList		::=	  /*empty*/
 						{: RESULT = new ArrayList(); :}
-					| ModuleList:list Module:module
+					| ModuleList2:list
+						{: RESULT = list; :};
+ModuleList2		::=	  KW_MODULE
+						{: RESULT = new ArrayList(); :}
+					| ModuleList2:list Module:module
 						{: list.add(module); RESULT = list; :};
 Module			::=	  SQUOTED_STRING:name LBRACE RuleRefList:rules RBRACE
 						{: compile.structure.Membrane mem = new compile.structure.Membrane(null);
@@ -154,3 +158,13 @@ RuleRefList		::=	  /*empty*/
 						{: ArrayList list = new ArrayList(); list.add(ruleset); RESULT=list; :}
 					| RuleRefList:list COMMA RULESET_ID:ruleset
 						{: list.add(ruleset); RESULT = list; :};
+InlineList		::=	  /*empty*/
+						{: RESULT = new ArrayList(); :}
+					| InlineList2:list
+						{: RESULT = list; :};
+InlineList2		::=	  KW_INLINE
+						{: RESULT = new ArrayList(); :}
+					| InlineList2:list Inline:inline
+						{: list.add(inline); RESULT = list; :};
+Inline			::=	  DQUOTED_STRING:name
+						{: RESULT = name; :};

@@ -74,40 +74,32 @@ public final class Rule implements Serializable {
 	 *
 	 */
 	public void showDetail() {
+		if (Env.debug == 0 && !Env.compileonly) return;
+		
 		Iterator l;
-		Env.d("Compiled Rule " + this);
+		Env.p("Compiled Rule " + this);
 		
-		/*
 		l = atomMatch.listIterator();
-		Env.d("--atommatches:", 1);
-		while(l.hasNext()) {
-			Iterator ll = ((List)l.next()).iterator();
-			while(ll.hasNext()) Env.d(indent+(Instruction)ll.next());
-		}
-		*/
-		
-	
-		l = atomMatch.listIterator();
-		Env.d("--atommatch:", 1);
-		while(l.hasNext()) Env.d((Instruction)l.next(), 2);
+		Env.p("--atommatch:", 1);
+		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
 
 		l = memMatch.listIterator();
-		Env.d("--memmatch:", 1);
-		while(l.hasNext()) Env.d((Instruction)l.next(), 2);
+		Env.p("--memmatch:", 1);
+		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
 		
 		if (guard != null) {
 			l = guard.listIterator();
-			Env.d("--guard:" + guardLabel + ":", 1);
-			while(l.hasNext()) Env.d((Instruction)l.next(), 2);
+			Env.p("--guard:" + guardLabel + ":", 1);
+			while(l.hasNext()) Env.p((Instruction)l.next(), 2);
 		}
 		
 		if (body != null) {
 			l = body.listIterator();
-			Env.d("--body:" + bodyLabel + ":", 1);
-			while(l.hasNext()) Env.d((Instruction)l.next(), 2);
+			Env.p("--body:" + bodyLabel + ":", 1);
+			while(l.hasNext()) Env.p((Instruction)l.next(), 2);
 		}
 			
-		Env.d("");
+		Env.p("");
 	}
 	
 	public String toString() {

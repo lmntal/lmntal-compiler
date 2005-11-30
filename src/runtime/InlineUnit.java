@@ -53,7 +53,7 @@ public class InlineUnit {
 		return src.lastModified() <= dst.lastModified();
 	}
 	
-	InlineUnit(String name) {
+	public InlineUnit(String name) {
 		this.name = name;
 	}
 	
@@ -119,7 +119,6 @@ public class InlineUnit {
 	public void makeCode(String packageName, String className, File outputFile, boolean interpret) throws IOException {
 		if(codes.isEmpty() && defs.isEmpty()) return;
 		Iterator i;
-		
 		PrintWriter p = new PrintWriter(new FileOutputStream(outputFile));
 
 		//p.println("package runtime;");

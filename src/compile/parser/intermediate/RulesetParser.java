@@ -10,6 +10,8 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import runtime.Env;
+import runtime.Inline;
+import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.InterpretedRuleset;
@@ -29,12 +31,13 @@ public class RulesetParser {
 	public static Ruleset parse(Reader reader) throws ParseException {
 		Lexer lexer = new Lexer(reader);
 		parser parser = new parser(lexer);
-		ArrayList rulesets, modules;
+		ArrayList rulesets, modules, inlines;	
 		
 		try {
 			Object[] t = (Object[])parser.parse().value;
 			rulesets = (ArrayList)t[0];
 			modules = (ArrayList)t[1];
+			inlines = (ArrayList)t[2];
 		} catch (IOException e) {
 			Env.error("ERROR: failed to read input data.");
 			throw new ParseException();
@@ -66,15 +69,24 @@ public class RulesetParser {
 		}
 		
 		// モジュールの処理
-		Iterator modIt = modules.iterator();
-		while (modIt.hasNext()) {
-			Membrane mem = (Membrane)modIt.next();
+		Iterator it = modules.iterator();
+		while (it.hasNext()) {
+			Membrane mem = (Membrane)it.next();
 			ListIterator lit = mem.rulesets.listIterator();
 			while (lit.hasNext()) {
 				Integer id = (Integer)lit.next();
 				lit.set(rulesetMap.get(id));
 			}
 			Module.regMemName(mem.name, mem);
+		}
+		
+		// インラインの処理
+		it = inlines.iterator();
+		while (it.hasNext()) {
+			String name = (String)it.next();
+			InlineUnit iu = new InlineUnit(name);
+			iu.attach();
+			Inline.inlineSet.put(name, iu);
 		}
 
 		return (Ruleset)rulesets.get(0);

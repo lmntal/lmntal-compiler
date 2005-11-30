@@ -142,12 +142,10 @@ public class FrontEnd {
 					case 'd':
 						/// -d[<0-9>]
 						/// Debug output level.
-						if(!Env.compileonly){
-							if (args[i].matches("-d[0-9]")) {
-								Env.debug = args[i].charAt(2) - '0';
-							} else {
-								Env.debug = Env.DEBUG_DEFAULT;
-							}
+						if (args[i].matches("-d[0-9]")) {
+							Env.debug = args[i].charAt(2) - '0';
+						} else {
+							Env.debug = Env.DEBUG_DEFAULT;
 						}
 //						System.out.println("debug level " + Env.debug);
 						break;
@@ -356,7 +354,6 @@ public class FrontEnd {
 						// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.fInterpret = true;
-							Env.debug = 1;
 						}else {
 							System.err.println("Invalid option: " + args[i]);
 							System.exit(-1);
@@ -495,7 +492,7 @@ public class FrontEnd {
 				rs = RulesetCompiler.compileMembrane(m, unitName);
 				Inline.makeCode();
 				if (Env.nErrors > 0) {
-					Env.p("Compilation Failed");
+					Env.e("Compilation Failed");
 					return;
 				}
 			} else {
@@ -508,7 +505,7 @@ public class FrontEnd {
 					//わかりにくいのでなおした方が良いかもしれない。
 					rs = RulesetCompiler.compileMembrane(m, unitName);
 					if (Env.nErrors > 0) {
-						Env.p("Compilation Failed");
+						Env.e("Compilation Failed");
 						return;
 					}
 					if (Translator.genInlineCode()) {
@@ -529,7 +526,21 @@ public class FrontEnd {
 			((InterpretedRuleset)rs).showDetail();
 			m.showAllRules();
 			if (Env.compileonly) {
+				//ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
+				Iterator it = Module.loaded.keySet().iterator();
+				while (it.hasNext()) {
+					String libName = (String)it.next();
+					compile.structure.Membrane mem = (compile.structure.Membrane)Module.memNameTable.get(libName);
+					Iterator it2 = mem.rulesets.iterator();
+					while (it2.hasNext()) {
+						((InterpretedRuleset)it2.next()).showDetail();
+					}
+				}
+				//モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
 				Module.showModuleList();
+				//インラインコード一覧を出力
+				Inline.initInline();
+				Inline.showInlineList();
 				return;
 			}
 			
