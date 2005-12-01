@@ -3,4 +3,4 @@ setlocal
 
 call "%~dp0set_cp"
 set CLASSPATH=%1;%CLASSPATH%
-java Main %*
+java -DLMNTAL_HOME=%LMNATL_HOME% Main %*

@@ -44,8 +44,18 @@ public class Module {
 	public static Object EXIST = new Object();
 	
 	static {
-		libPath.add(new File(System.getenv("LMNTAL_HOME") + "/lib/src"));
-		libPath.add(new File(System.getenv("LMNTAL_HOME") + "/lib/public"));
+		String home = System.getProperty("LMNTAL_HOME");
+		if (home == null) {
+			Env.e("Warning : LMNTAL_HOME is not setted. Using relativa path.");
+			libPath.add(new File("./lib/src"));
+			libPath.add(new File("../lib/src"));
+			libPath.add(new File("./lib/public"));
+			libPath.add(new File("../lib/public"));
+			libPath.add(new File("."));
+		} else {
+			libPath.add(new File(System.getenv("LMNTAL_HOME") + "/lib/src"));
+			libPath.add(new File(System.getenv("LMNTAL_HOME") + "/lib/public"));
+		}
 	}
 	
 	/**
