@@ -53,8 +53,8 @@ public class Module {
 			libPath.add(new File("../lib/public"));
 			libPath.add(new File("."));
 		} else {
-			libPath.add(new File(System.getenv("LMNTAL_HOME") + "/lib/src"));
-			libPath.add(new File(System.getenv("LMNTAL_HOME") + "/lib/public"));
+			libPath.add(new File(home + "/lib/src"));
+			libPath.add(new File(home + "/lib/public"));
 		}
 	}
 	
