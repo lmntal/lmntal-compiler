@@ -53,7 +53,9 @@
 				encoding="${encoding}" target="${java_ver}" source="${java_ver}"
 				includes="util/GlobalSystemRulesetGenerator.java"/>
 		<java classname="util.GlobalSystemRulesetGenerator" 
-			classpath="${build}" output="${src}/runtime/GlobalSystemRuleset.java" fork="true"/>
+				classpath="${build}" output="${src}/runtime/GlobalSystemRuleset.java" fork="true">
+			<sysproperty key="LMNTAL_HOME" value="${basedir}"/>
+		</java>
 	</target>
 	
 	<!-- java compile -->
@@ -74,6 +76,7 @@
 	<!-- lmntal library -->
 	<target name="lib" depends="compile" description="compile lmntal libraries">
 		<java classname="compile.Translator" dir="${lmntal_lib}" classpath="${build}" fork="true">
+			<sysproperty key="LMNTAL_HOME" value="${basedir}"/>
 			<arg value="-O" />
 		</java>
 	</target>
@@ -109,7 +112,9 @@
 	</target>
 	
 	<target name="run">
-		<java jar="${bin}/lmntal.jar" fork="true"/>
+		<java jar="${bin}/lmntal.jar" fork="true">
+			<sysproperty key="LMNTAL_HOME" value="${basedir}"/>
+		</java>
 	</target>
 	
 	<target name="doc">
