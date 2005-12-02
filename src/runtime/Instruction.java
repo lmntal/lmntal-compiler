@@ -1113,7 +1113,7 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int NOT = 209;
 	static {setArgType(NOT, new ArgType(false, ARG_LABEL));}
 
-	// 組み込み機能に関する命令（仮） (210--215)
+	// 組み込み機能に関する命令（仮） (210--213)
 	//  -----  inline  [atom, inlineref]
 	//  -----  builtin [class, method, [links...]]
 
@@ -1135,6 +1135,18 @@ public class Instruction implements Cloneable, Serializable {
 	 * ボディに2回出現するリンクは、X=Xで初期化された後、各出現をヘッドでの出現と見なして渡される。*/
 	public static final int BUILTIN = 211;
 	static {setArgType(BUILTIN, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));} // あってる。
+
+	///////////////////////////////////////////////////////////////////////
+
+	// 型付きプロセス文脈を扱うための追加命令 (214--215)	
+
+	/** uniq [ [Links...] ]
+     * <br>拡張ガード命令<br>
+     * 型付きプロセス文脈 Links... に対して、過去にこの組み合わせで反応が起きていたら失敗する。
+     * 起きていなかったら履歴にこの組み合わせを記録して成功する。
+     */
+    public static final int UNIQ = 214;
+	static {setArgType(UNIQ, new ArgType(false, ARG_VARS));}
 
 	///////////////////////////////////////////////////////////////////////
 
@@ -1731,6 +1743,11 @@ public class Instruction implements Cloneable, Serializable {
 		add(arg2);
 	}
 	public Instruction(int kind, Object arg1, int arg2) {
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+	}
+	public Instruction(int kind, Object arg1, Object arg2) {
 		this.kind = kind;
 		add(arg1);
 		add(arg2);

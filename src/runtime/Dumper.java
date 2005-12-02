@@ -68,12 +68,17 @@ public class Dumper {
 	
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	public static String dump(AbstractMembrane mem) {
+		return dump(mem, true);
+	}
+	public static String dump(AbstractMembrane mem, boolean doLock) {
 		boolean locked = false;
-		if (mem.getLockThread() != Thread.currentThread()) {
-			if (!mem.lock()) {
-				return "...";
+		if(doLock) {
+			if (mem.getLockThread() != Thread.currentThread()) {
+				if (!mem.lock()) {
+					return "...";
+				}
+				locked = true;
 			}
-			locked = true;
 		}
 
 		Unlexer buf = new Unlexer();
