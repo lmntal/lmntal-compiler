@@ -353,7 +353,7 @@ class InterpretiveReactor {
 						mems[inst.getIntArg1()] = mem;
 						if (interpret(insts, pc))
 							return true;
-						mem.unlock();
+						mem.unlock(true);
 					}
 					return false; //n-kato
 

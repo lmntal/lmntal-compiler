@@ -918,6 +918,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <p>ただしこの膜がリモート膜の場合は仮解放するだけで何もしないかも知れない。
 	 * <p><strike>todo unlock は weakUnlock に名称変更する</strike> */
 	public abstract void unlock();
+	public abstract void unlock(boolean changed);
 	
 	/** この膜のロックを強制的に解放する。リモート膜の場合も仮解放しない。
 	 * ローカル膜の場合はunlock()と同じ。*/

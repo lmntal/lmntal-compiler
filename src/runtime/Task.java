@@ -258,7 +258,7 @@ class Task extends AbstractTask implements Runnable {
 
 		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
 		synchronized(this) { //多分、この synchronized 節はいらないと思う。mizuno
-			mem.unlock();
+			mem.unlock(true);
 			if (lockRequestCount > 0) {
 				signal();
 			}
