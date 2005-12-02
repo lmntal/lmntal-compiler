@@ -28,7 +28,7 @@ public class GuardCompiler extends HeadCompiler {
 	/** 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
 	 * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。*/
 	List typedcxtdefs = new ArrayList();
-
+	
 	int typedcxtToSrcPath(ContextDef def) {
 		if (!typedcxtsrcs.containsKey(def)) return UNBOUND;
 		return ((Integer)typedcxtsrcs.get(def)).intValue();
@@ -215,6 +215,17 @@ public class GuardCompiler extends HeadCompiler {
 				else if (func.equals(new Functor("ground", 1))){
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					checkGroundLink(def1);
+				}
+				else if (func.getName().equals("uniq")){
+					ArrayList uniqVars = new ArrayList();
+					for(int k=0;k<cstr.args.length;k++) {
+						ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
+						if (!identifiedCxtdefs.contains(defK)) continue;
+						checkGroundLink(defK);
+//						Env.p("VAR# "+groundToSrcPath(defK));
+						uniqVars.add(new Integer(groundToSrcPath(defK)));
+					}
+					match.add(new Instruction(Instruction.UNIQ, uniqVars));
 				}
 				else if (func.equals(new Functor("\\=",2))) {
 					// NSAMEFUNC を作るか？
