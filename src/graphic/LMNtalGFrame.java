@@ -99,25 +99,31 @@ public class LMNtalGFrame implements Runnable{
     
    private synchronized void searchtmp(){
 	   if(tmplist.size()==0)return;
-	   AbstractMembrane tmp = (AbstractMembrane)tmplist.removeFirst();
-	   if(tmp == null || tmp.isRoot())return;
-	   for(int i = 0; i < windowlist.size(); i++){
-		   WindowSet win = (WindowSet)windowlist.get(i);
-		   AbstractMembrane m = tmp.getParent();
-		   if(m==null)return;
-		   while(!m.isRoot()){
-			   String n = getname(m);
-				if(win.window.name.equals(n)){
-					if(win.window.setgraphicmem(tmp))
-						return;
-					else
-						break;
-				}
-				m = m.getParent();
-		   }
-		} 
+//	   AbstractMembrane tmp = (AbstractMembrane)tmplist.removeFirst();
+	   for(int j = 0; j < tmplist.size(); j++){
+		   AbstractMembrane tmp = (AbstractMembrane)tmplist.get(j);
+		   if(tmp == null || tmp.isRoot())return;
+		   for(int i = 0; i < windowlist.size(); i++){
+			   WindowSet win = (WindowSet)windowlist.get(i);
+			   AbstractMembrane m = tmp.getParent();
+			   if(m==null)return;
+			   while(!m.isRoot()){
+				   String n = getname(m);
+					if(win.window.name.equals(n)){
+						if(win.window.setgraphicmem(tmp)){
+							tmplist.remove(j);
+							j--;
+							return;
+						}
+						else
+							break;
+					}
+					m = m.getParent();
+			   }
+			} 
 
-	   tmplist.add(tmp);
+//	   tmplist.add(tmp);
+	   }
    }
    
    public void closewindow(String killme){
@@ -170,7 +176,7 @@ public class LMNtalGFrame implements Runnable{
 		while (me == th) {
 			try {
 				Thread.sleep(1);
-	    		searchtmp();
+//	    		searchtmp();
 			} catch (InterruptedException e) {
 			}
 		}
@@ -191,7 +197,7 @@ public class LMNtalGFrame implements Runnable{
 ////		System.out.print("*");
 //		while(busy) {
 			try {
-				th.sleep(1);
+//				th.sleep(1);
 				//busy = waitawhile;
 			} catch (Exception e) {
 			}

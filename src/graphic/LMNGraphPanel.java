@@ -255,7 +255,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		Thread me = Thread.currentThread();
 		while (me == th) {
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 			}
 			repaint();
