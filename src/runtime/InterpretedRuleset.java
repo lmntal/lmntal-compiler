@@ -34,6 +34,9 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	/** とりあえずルールの配列として実装 */
 	public List rules;
 
+	/** 現在実行中のルール */
+	public Rule currentRule;
+	
 	/**
 	 * RuleCompiler では、まず生成してからデータを入れ込む。
 	 * ので、特になにもしない
@@ -80,7 +83,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		boolean result = false;
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
-			Rule r = (Rule) it.next();
+			Rule r = currentRule = (Rule) it.next();
 			if (r.atomMatch.size() == 1) continue; // debug表示抑制用
 			if (matchTest(mem, atom, r.atomMatch)) {
 				result = true;
@@ -108,7 +111,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		boolean result = false;
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
-			Rule r = (Rule) it.next();
+			Rule r = currentRule = (Rule) it.next();
 			if (matchTest(mem, null, r.memMatch)) {
 				result = true;
 				// トレースモードでルールを表示する
@@ -142,7 +145,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 // ArrayIndexOutOfBoundsException がでたので一時的に変更
 //if (formals < 10) formals = 10;
 		
-		InterpretiveReactor ir = new InterpretiveReactor(locals);
+		InterpretiveReactor ir = new InterpretiveReactor(locals, this);
 		ir.mems[0] = mem;
 		if (atom != null) { ir.atoms[1] = atom; }
 		return ir.interpret(matchInsts, 0);
@@ -210,7 +213,10 @@ class InterpretiveReactor {
 	/** ロックした膜のリスト　グループ化時に使用**/
 	List lockedMemList = new ArrayList();
 	
-	InterpretiveReactor(int size) {
+	InterpretedRuleset currentInterpretedRuleset;
+	
+	InterpretiveReactor(int size, InterpretedRuleset ir) {
+		this.currentInterpretedRuleset = ir;
 		initVector(size);
 	}
 	private void initVector(int size) {
@@ -772,7 +778,7 @@ class InterpretiveReactor {
 // // ArrayIndexOutOfBoundsException がでたので一時的に変更
 // if (locals < 10) locals = 1 ;
 					
-					InterpretiveReactor ir = new InterpretiveReactor(locals);
+					InterpretiveReactor ir = new InterpretiveReactor(locals, this.currentInterpretedRuleset);
 					ir.reloadVars(this, locals, (List)inst.getArg2(),
 						(List)inst.getArg3(), (List)inst.getArg4());
 					if (ir.interpret(bodyInsts, 0)) return true;
@@ -785,7 +791,7 @@ class InterpretiveReactor {
 					Instruction spec = (Instruction) bodyInsts.get(0);
 					int formals = spec.getIntArg1();
 					int locals  = spec.getIntArg2();					
-					InterpretiveReactor ir = new InterpretiveReactor(locals);
+					InterpretiveReactor ir = new InterpretiveReactor(locals, this.currentInterpretedRuleset);
 					ir.reloadVars(this, locals, (List)inst.getArg2(),
 						(List)inst.getArg3(), (List)inst.getArg4());
 					if (ir.interpret(bodyInsts, 0)) return true;
@@ -834,6 +840,24 @@ class InterpretiveReactor {
 
 					//====制御命令====ここまで====
 
+					//====重複適用をカットする命令====ここから====
+				case Instruction.UNIQ : //[ [link1,link2...] ]
+					Uniq uniq = currentInterpretedRuleset.currentRule.uniq;
+					if(uniq==null) {
+						uniq = currentInterpretedRuleset.currentRule.uniq = new Uniq();
+					}
+					ArrayList uniqVars = (ArrayList)inst.getArg(0);
+					Link[] hEntry = new Link[uniqVars.size()];
+					for(int i=0;i<uniqVars.size();i++) {
+						int v = ((Integer)uniqVars.get(i)).intValue();
+//						Env.p("var# "+v);
+						hEntry[i] = (Link)vars.get(v);
+//						Env.p("LINK "+hEntry[i]);
+					}
+					if(!uniq.check(hEntry)) return false;
+					break; //hara 2005-12-02
+					//====重複適用をカットする命令====ここまで====
+					
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
 					boolean eqground_ret = ((Link)vars.get(inst.getIntArg1())).eqGround((Link)vars.get(inst.getIntArg2()));

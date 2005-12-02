@@ -34,6 +34,9 @@ public final class Rule implements Serializable {
 	/** ルール名 */
 	public String name;
 	
+	/** 履歴 */
+	Uniq uniq;
+	
 	// todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 	
 	/**

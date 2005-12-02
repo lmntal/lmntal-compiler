@@ -40,8 +40,11 @@ public final class Membrane extends AbstractMembrane {
 	protected Membrane(Task task) {
 		super(task, null);
 	}
+	public Membrane() {
+		super(null, null);
+	}
 
-	public String getGlobalMemID() { return task.runtime.hostname + ":" + getLocalID(); }
+	public String getGlobalMemID() { return (task==null ? "":task.runtime.hostname) + ":" + getLocalID(); }
 	public String getAtomID(Atom atom) { return atom.getLocalID(); }
 
 	///////////////////////////////
@@ -333,19 +336,14 @@ public final class Membrane extends AbstractMembrane {
 	 * この膜を管理するタスクに対してシグナルを発行する。
 	 * <p>lockおよびblockingLockの呼び出しに対応する。asyncLockにはasyncUnlockが対応する。*/
 	public void unlock() {
-		unlock(false);
-	}
-	
-	public void unlock(boolean changed) {
 		Task task = (Task)getTask();
 		if (isRoot()) {
 			task.memStack.moveFrom(task.bufferedStack);
 		}
-		if(changed & Env.LMNgraphic != null)
+		if(Env.LMNgraphic != null)
 			Env.LMNgraphic.setmem(this);
 		quietUnlock();
 	}
-	
 	public void forceUnlock() {
 		unlock();
 	}
