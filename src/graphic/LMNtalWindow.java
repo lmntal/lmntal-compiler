@@ -13,7 +13,7 @@ import test.GUI.Node;
 public class LMNtalWindow extends JFrame{
 
 	public LMNGraphPanel lmnPanel = null;
-	private LMNtalGFrame lmnframe = null;
+	public LMNtalGFrame lmnframe = null;
 	public boolean busy = true;
 	public boolean running = true;
 	public boolean waitawhile = false;

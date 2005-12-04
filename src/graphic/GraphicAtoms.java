@@ -2,6 +2,7 @@ package graphic;
 
 import java.awt.*;
 import java.io.File;
+import java.util.HashMap;
 
 
 /**
@@ -25,7 +26,7 @@ public class GraphicAtoms{
 	public String atomobj = null;
 	/**它奴件玉它咘午及覃峊*/
 	int distance;
-	public Relativemem remem = null;
+	public String remem = null;
 	
 	public GraphicAtoms(){
 		enable = false;
@@ -82,14 +83,15 @@ public class GraphicAtoms{
 		array_y[3] = y4;
 	}
 	
-	public boolean drawatom(Graphics g){
+	public boolean drawatom(Graphics g, HashMap m){
 		int dx=0,dy=0;
 		if(atomimg == null & atomobj == null){
 			return false;
 		}
 		if(remem!=null){
-			dx = remem.getx();
-			dy = remem.gety();
+			Relativemem rm = (Relativemem)m.get(remem);
+			dx = rm.getx(m);
+			dy = rm.gety(m);
 		}
 		int[] x={array_x[0]+dx,array_x[1]+dx,array_x[2]+dx,array_x[3]+dx};
 		int[] y={array_y[0]+dy,array_y[1]+dy,array_y[2]+dy,array_y[3]+dy};
@@ -103,12 +105,17 @@ public class GraphicAtoms{
 				g.drawLine(x[0], y[0], x[1],y[1]);
 			}
 			else if (atomobj.equals("filltriangle")){
-				g.fillPolygon(array_x, array_y, 3);
+				g.fillPolygon(x, y, 3);
 			}
 			else if (atomobj.equals("triangle")){
-				g.drawPolygon(array_x, array_y, 3);
+				g.drawPolygon(x, y, 3);
 			}
-//			System.out.println(posx+"," +posy+"," +sizex+", "+sizey);
+			else if(atomobj.equals("fillrect")){
+				g.fillRect(x[0], y[0], sizex, sizey);
+			}
+			else if (atomobj.equals("fillcircle") || atomobj.equals("filloval")){
+				g.fillOval(x[0], y[0], sizex, sizey);
+			}
 		}
 		else if(atomimg != null)	
 			g.drawImage(atomimg,array_x[0], array_y[0],sizex,sizey,null);

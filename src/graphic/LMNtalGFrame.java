@@ -26,6 +26,7 @@ public class LMNtalGFrame implements Runnable{
 	runtime.Membrane rootMem;
 	HashMap windowmap=new HashMap();
 	LinkedList tmplist = new LinkedList();
+	int killednum=0;
 	public static Object lock = new Object();
 	public static Object lock2 = new Object();
 	
@@ -73,10 +74,11 @@ public class LMNtalGFrame implements Runnable{
 	    		win.mem = m;
 	    		win.window = new LMNtalWindow(m, this);
 	    		
-	    		if(!windowmap.containsKey(win.window.name))
-					win.window.makewindow();
-	    			
-	    		windowmap.put(win.window.name, win);
+	    		if(!windowmap.containsKey(win.window.name)){
+						win.window.makewindow();
+		    			
+		    		windowmap.put(win.window.name, win);
+	    		}
 	    		
 	    	}
 	    	/*描画膜の登録*/
@@ -96,20 +98,21 @@ public class LMNtalGFrame implements Runnable{
     }
     
    private synchronized void searchtmp(){
-	   if(tmplist.size()==0)return;
-	   
-	   for(int j = 0; j < tmplist.size(); j++){
-		   AbstractMembrane tmp = (AbstractMembrane)tmplist.get(j);
-		   if(tmp == null || tmp.isRoot())return;
-		   for(int i = 0; i < windowlist.size(); i++){
-			   WindowSet win = (WindowSet)windowlist.get(i);
+	   synchronized(lock){
+		   if(tmplist.size()==0)return;
+		   
+		   for(int j = 0; j < tmplist.size(); j++){
+			   AbstractMembrane tmp = (AbstractMembrane)tmplist.get(j);
+			   if(tmp == null || tmp.isRoot())return;
 			   AbstractMembrane m = tmp.getParent();
 			   int distance = 0;
-			   if(m==null)return;
 			   
-			   while(!m.isRoot()){
-				   String n = getname(m);
-					if(win.window.name.equals(n)){
+			   while(m!=null){
+				   if(m.isRoot())
+					   return;
+				   String n = getname(m);	
+				   if(windowmap.containsKey(n)){
+					   	WindowSet win = (WindowSet)windowmap.get(n);
 						if(win.window.setgraphicmem(tmp,distance)){
 							tmplist.remove(j);
 							j--;
@@ -121,27 +124,24 @@ public class LMNtalGFrame implements Runnable{
 					m = m.getParent();
 					distance++;
 			   }
-			   
-			} 
+	
+		   }
 	   }
    }
    
    public void closewindow(String killme){
-	   int j=0;
-	   for(int i = 0; i < windowlist.size(); i++){
-		   WindowSet win = (WindowSet)windowlist.get(i);
-		   if(win.window.name.equals(killme)){
-			   win.killed=true;
-//			   windowlist.remove(i);
-		   }
-		   if(win.killed){
-			   j++;
-			   if(j==windowlist.size()){
-				   runtime.LMNtalRuntimeManager.terminateAllThreaded();
-				   th=null;  
-			   }
-		   }
-		}
+	   if(!windowmap.containsKey(killme))
+		   return;
+	   
+	   WindowSet win = (WindowSet)windowmap.get(killme);
+	   win.killed = true;
+	   //windowmap.put(killme, win);
+	   
+	   killednum++;
+	   if(killednum == windowmap.size()){
+		   runtime.LMNtalRuntimeManager.terminateAllThreaded();
+		   th=null;  
+	   }
    }
    
    private String getname(AbstractMembrane m){
@@ -153,7 +153,7 @@ public class LMNtalGFrame implements Runnable{
 			/**描画するファイルの取得*/
 			if(a.getName()=="name"){
 				if(a.getEdgeCount() != 1)return null;
-				return a.getNthNode(0).getName().toString();
+				return a.getNthNode(0).getName();
 			}
 			
 		}
