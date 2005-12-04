@@ -24,9 +24,10 @@ public class LMNtalGFrame implements Runnable{
 	boolean busy;
 	Thread th;
 	runtime.Membrane rootMem;
-	LinkedList windowlist=new LinkedList();
+	HashMap windowmap=new HashMap();
 	LinkedList tmplist = new LinkedList();
-	
+	public static Object lock = new Object();
+	public static Object lock2 = new Object();
 	
     public LMNtalGFrame(){
     	this.start();
@@ -37,17 +38,21 @@ public class LMNtalGFrame implements Runnable{
 	 * あれば真を、なければ偽を返す。
 	 */
 	private String searchatom(AbstractMembrane m){
-		Iterator ite = m.atomIterator();
-		Node a;
-
-		while(ite.hasNext()){
-			a = (Node)ite.next();
-			if(a.getName() == "window"){
-				return "window";
-			}else if(a.getName() == "remove"){
-				return "remove";
-			}else if(a.getName() == "draw"){
-				return "draw";
+		synchronized(lock){
+			Iterator ite = m.atomIterator();
+			Node a;
+	
+			while(ite.hasNext()){
+				a = (Node)ite.next();
+				if(a.getName() == "window"){
+					return "window";
+				}else if(a.getName() == "draw"){
+					return "draw";
+				}else if(a.getName() == "graphic"){
+					return "graphic";
+				}else if(a.getName() == "remove"){
+					return "remove";
+				}
 			}
 		}
 		return null;
@@ -59,41 +64,34 @@ public class LMNtalGFrame implements Runnable{
 		
 	}
 	
-    public synchronized void setmem(AbstractMembrane m){
+    public void setmem(AbstractMembrane m){
     	String s = searchatom(m);
-    	/*ウィンドウ膜の登録*/
-    	if(s == "window"){
-    		WindowSet win = new WindowSet();
-    		win.mem = m;
-    		win.window = new LMNtalWindow(m, this);
-    		for(int i = 0; i < windowlist.size(); i++){
-    			WindowSet win2 = (WindowSet)windowlist.get(i);
-    			if(win.window.name.equals(win2.window.name)){
-    				break;
-    			}
-    			if(i == windowlist.size() - 1){
-    				windowlist.add(win);
-    				win.window.makewindow();
-    				break;
-    			}
-    		}
-    		if(windowlist.size()==0){
-				windowlist.add(win);
-				win.window.makewindow();
-    		}
-    	}
-    	/*描画膜の登録*/
-    	else if(s=="draw"){
-    		if(m == rootMem)return;
-    		else if(m.getParent() == rootMem) return;
-  
-    		if(windowlist.size()==0){
-    			tmplist.add(m);
-    		}
-    		else{
-    			tmplist.addFirst(m);
-//    			searchtmp();
-    		}
+    	synchronized (lock) {
+    		/*ウィンドウ膜の登録*/
+	    	if(s == "window"){
+	    		WindowSet win = new WindowSet();
+	    		win.mem = m;
+	    		win.window = new LMNtalWindow(m, this);
+	    		
+	    		if(!windowmap.containsKey(win.window.name))
+					win.window.makewindow();
+	    			
+	    		windowmap.put(win.window.name, win);
+	    		
+	    	}
+	    	/*描画膜の登録*/
+	    	else if(s=="draw" || s=="graphic"){
+	    		if(m == rootMem)return;
+	    		else if(m.getParent() == rootMem) return;
+	  
+	    		if(windowmap.size()==0){
+	    			tmplist.add(m);
+	    		}
+	    		else{
+	    			tmplist.addFirst(m);
+	//    			searchtmp();
+	    		}
+	    	}
     	}
     }
     
