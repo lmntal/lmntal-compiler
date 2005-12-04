@@ -23,6 +23,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	private Graphics OSG = null;
 	/**描画するオブジェクトリスト*/
 	LinkedList drawlist = new LinkedList();
+	/**レラティブ膜のリスト*/
+	LinkedList relativelist = new LinkedList();
 	
 	public LMNGraphPanel(LMNtalWindow f) {
 		super();
@@ -60,6 +62,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			a = (Node)ite.next();
 			if(a.getName() == "draw"){
 				return "draw";
+			}else if(a.getName() == "graphic"){
+				return "graphic";
 			}else if(a.getName() == "remove"){
 				return "remove";
 			}
@@ -68,6 +72,35 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				
 	}
 	
+	/**レラティブ膜情報の取得*/
+	private Relativemem getrelativemem(AbstractMembrane m){
+		Iterator ite = m.atomIterator();
+		Node a;
+		Relativemem rm = new Relativemem();
+
+		if(m.getLockThread() != null) locked = true;
+		while(ite.hasNext()){
+			a = (Node)ite.next();
+			/**位置情報の取得*/
+			if(a.getName()=="position"){
+				if(a.getEdgeCount() != 2)continue;
+				try{
+					rm.setloc(Integer.parseInt(a.getNthNode(0).getName()),Integer.parseInt(a.getNthNode(1).getName()));
+				}catch(NumberFormatException error){			
+				}
+			}
+			/**名前の取得*/
+			else if(a.getName()=="name"){
+				rm.name=a.getNthNode(0).getName().toString();
+			}
+//			/**名前の取得*/
+//			else if(a.getName()=="name"){
+//				ga.setname(a.getNthNode(0).getName());
+//			}
+		}
+
+		return rm;
+	}
 	/**
 	 * 描画用のアトム郡の取得
 	 */
@@ -184,18 +217,56 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		return ga;
 	}
 	
+	private Relativemem searchrelativemem(AbstractMembrane relativetmp , int distance){
+
+		while(distance > 0){
+			distance--;
+			relativetmp = relativetmp.getParent();
+			/*レラティブ膜発見*/
+			if(searchatom(relativetmp)=="graphic"){
+				Relativemem remem = getrelativemem(relativetmp);
+				
+				/*レラティブ膜の登録*/
+				if(relativelist.size()==0){
+					relativelist.add(remem);
+					if(distance>0)
+						remem.parentremem=searchrelativemem(relativetmp,distance);
+					return remem;
+				}else{
+					for(int i = 0; i < relativelist.size(); i++){
+						Relativemem remem2 = (Relativemem)relativelist.get(i);
+						if(remem2==null)continue;
+						if(remem.name.equals(remem2.name)){
+							return remem2;
+						}else if(i == relativelist.size() -1 ){
+							relativelist.add(remem);
+							if(distance>0)
+								remem.parentremem=searchrelativemem(relativetmp,distance);
+							return remem;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * 実際の描画処理
 	 *
 	 */
 
-	public synchronized void setgraphicmem(AbstractMembrane m){
+	public synchronized void setgraphicmem(AbstractMembrane m, int distance){
 		GraphicAtoms ga;
 		String mode = searchatom(m);
 		if(mode == "draw"){
 			ga = getgraphicatoms(m);
 			if(ga == null) return;
+			
+			/**レラティブ膜のチェック*/
+			if(distance > 0){
+				ga.remem=searchrelativemem(m, distance);
+			}
 			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
 			for(int i = 0; i < drawlist.size(); i++){
 				GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
@@ -244,8 +315,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	 */
 	public void start() {
 		if (th == null) {
-			th = new Thread(this);
-			th.start();
+//			th = new Thread(this);
+//			th.start();
 		}
 	}
 	public void stop() {
@@ -256,10 +327,35 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		while (me == th) {
 			try {
 				Thread.sleep(10);
+//				this.wait();
 			} catch (InterruptedException e) {
 			}
-			repaint();
+//			repaint();
 		}
 	}
 
+}
+
+class Relativemem{
+	private int x = 0, y = 0;
+	public String name;
+	public Relativemem parentremem = null;
+	
+	public void setloc(int a, int b){
+		x=a;
+		y=b;
+	}
+	public int getx(){
+		if(parentremem==null)
+			return x;
+		else
+			return x+parentremem.getx();
+	}
+	public int gety(){
+		if(parentremem==null)
+			return y;
+		else
+			return y+parentremem.gety();
+	}
+	
 }

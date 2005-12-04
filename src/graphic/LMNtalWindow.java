@@ -92,10 +92,11 @@ public class LMNtalWindow extends JFrame{
 		return true;
 	}
 	
-	public boolean setgraphicmem(AbstractMembrane m){
+	public boolean setgraphicmem(AbstractMembrane m, int distance){
 		if(killed) return true;
 		if(lmnPanel == null)return false;
-		lmnPanel.setgraphicmem(m);
+		lmnPanel.setgraphicmem(m, distance);
+		lmnPanel.repaint();
 		return true;
 	}
 	

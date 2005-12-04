@@ -17,11 +17,15 @@ public class GraphicAtoms{
 	int[] array_x = new int[4] ;
 	int[] array_y = new int[4];
 	int sequence = 0;
+	/**色の設定*/
 	private int color_r = 0;
 	private int color_g = 0;
 	private int color_b = 0;
 	Image atomimg = null;
 	public String atomobj = null;
+	/**ウィンドウ膜との距離*/
+	int distance;
+	public Relativemem remem = null;
 	
 	public GraphicAtoms(){
 		enable = false;
@@ -79,17 +83,24 @@ public class GraphicAtoms{
 	}
 	
 	public boolean drawatom(Graphics g){
+		int dx=0,dy=0;
 		if(atomimg == null & atomobj == null){
 			return false;
 		}
+		if(remem!=null){
+			dx = remem.getx();
+			dy = remem.gety();
+		}
+		int[] x={array_x[0]+dx,array_x[1]+dx,array_x[2]+dx,array_x[3]+dx};
+		int[] y={array_y[0]+dy,array_y[1]+dy,array_y[2]+dy,array_y[3]+dy};
 		if(atomobj != null){
 			g.setColor(new Color(color_r, color_g, color_b));
 			if(atomobj.equals("circle") || atomobj.equals("oval"))
-				g.drawOval(array_x[0], array_y[0], sizex, sizey);
+				g.drawOval(x[0], y[0], sizex, sizey);
 			else if (atomobj.equals("rect"))
-				g.drawRect(array_x[0], array_y[0], sizex, sizey);
+				g.drawRect(x[0], y[0], sizex, sizey);
 			else if (atomobj.equals("line")){
-				g.drawLine(array_x[0], array_y[0], array_x[1], array_y[1]);
+				g.drawLine(x[0], y[0], x[1],y[1]);
 			}
 			else if (atomobj.equals("filltriangle")){
 				g.fillPolygon(array_x, array_y, 3);
