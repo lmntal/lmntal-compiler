@@ -55,19 +55,17 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	 * あれば真を、なければ偽を返す。
 	 */
 	private String searchatom(AbstractMembrane m){
-		synchronized(frame.lmnframe.lock2){
-			Iterator ite = m.atomIterator();
-			Node a;
-	
-			while(ite.hasNext()){
-				a = (Node)ite.next();
-				if(a.getName() == "draw"){
-					return "draw";
-				}else if(a.getName() == "graphic"){
-					return "graphic";
-				}else if(a.getName() == "remove"){
-					return "remove";
-				}
+		Iterator ite = m.atomIterator();
+		Node a;
+
+		while(ite.hasNext()){
+			a = (Node)ite.next();
+			if(a.getName() == "draw"){
+				return "draw";
+			}else if(a.getName() == "graphic"){
+				return "graphic";
+			}else if(a.getName() == "remove"){
+				return "remove";
 			}
 		}
 		return null;

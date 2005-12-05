@@ -70,66 +70,78 @@ public class LMNtalGFrame implements Runnable{
     	synchronized (lock) {
     		/*ウィンドウ膜の登録*/
 	    	if(s == "window"){
-	    		WindowSet win = new WindowSet();
-	    		win.mem = m;
-	    		win.window = new LMNtalWindow(m, this);
-	    		
-	    		if(!windowmap.containsKey(win.window.name)){
-						win.window.makewindow();
-		    			
-		    		windowmap.put(win.window.name, win);
-	    		}
-	    		
+	    		setwindowmem(m);    		
 	    	}
 	    	/*描画膜の登録*/
 	    	else if(s=="draw" || s=="graphic"){
-	    		if(m == rootMem)return;
-	    		else if(m.getParent() == rootMem) return;
-	  
-	    		if(windowmap.size()==0){
-	    			tmplist.add(m);
-	    		}
-	    		else{
-	    			tmplist.addFirst(m);
-	//    			searchtmp();
-	    		}
+	    		setgraphicmem(m);
 	    	}
     	}
     }
-    
-   private synchronized void searchtmp(){
+   
+    private void setwindowmem(AbstractMembrane m){
+		WindowSet win = new WindowSet();
+		win.mem = m;
+		win.window = new LMNtalWindow(m, this);
+		if(!windowmap.containsKey(win.window.name)){
+			win.window.makewindow();
+			
+		windowmap.put(win.window.name, win);
+		}
+    }
+    private void setgraphicmem(AbstractMembrane tmp){
 	   synchronized(lock){
-		   if(tmplist.size()==0)return;
-		   
-		   for(int j = 0; j < tmplist.size(); j++){
-			   AbstractMembrane tmp = (AbstractMembrane)tmplist.get(j);
+
 			   if(tmp == null || tmp.isRoot())return;
 			   AbstractMembrane m = tmp.getParent();
+			   /*ウィンドウ膜との距離*/
 			   int distance = 0;
 			   
 			   while(m!=null){
 				   if(m.isRoot())
 					   return;
-				   String n = getname(m);	
+				   String n = getname(m);
+				   /*ウィンドウ膜が登録済み*/
 				   if(windowmap.containsKey(n)){
 					   	WindowSet win = (WindowSet)windowmap.get(n);
-						if(win.window.setgraphicmem(tmp,distance)){
-							tmplist.remove(j);
-							j--;
-							return;
-						}
-						else
-							break;
+						win.window.setgraphicmem(tmp,distance);
+						return;
 					}
+				   /*ウィンドウ膜が未登録*/
+				   else{
+					   if(searchwinmem(m)){
+						   n = getname(m);
+						   if(windowmap.containsKey(n)){
+							   	WindowSet win = (WindowSet)windowmap.get(n);
+								win.window.setgraphicmem(tmp,distance);
+								return;
+							}
+					   }
+				   }
 					m = m.getParent();
 					distance++;
 			   }
-	
-		   }
 	   }
    }
+    
+    /**再帰的に親膜を探索しウィンドウ膜を探す。発見できれば真。出来なければ偽を返す。*/
+    private boolean searchwinmem(AbstractMembrane m){
+
+    	String s = searchatom(m);
+		/*ウィンドウ膜の登録*/
+    	if(s == "window"){
+    		setwindowmem(m);
+    		return true;
+    	}else{
+    		if(m.getParent()!=null & !m.getParent().isRoot()){
+    			searchwinmem(m.getParent());
+    		}
+    	}
+    	return false;
+    }
    
-   public void closewindow(String killme){
+    /**ウィンドウが閉じられたときの動作。すべてのウィンドウが閉じたら終了。*/
+   public synchronized void closewindow(String killme){
 	   if(!windowmap.containsKey(killme))
 		   return;
 	   
@@ -144,6 +156,7 @@ public class LMNtalGFrame implements Runnable{
 	   }
    }
    
+   /**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
    private String getname(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
@@ -175,8 +188,7 @@ public class LMNtalGFrame implements Runnable{
 		Thread me = Thread.currentThread();
 		while (me == th) {
 			try {
-				Thread.sleep(1);
-	    		searchtmp();
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 			}
 		}
@@ -204,7 +216,7 @@ public class LMNtalGFrame implements Runnable{
 //		}
 	}
 }
-
+/**ウィンドウ膜クラス。膜と、生存フラグ、ウィンドウを保持*/
 class WindowSet{
 	public AbstractMembrane mem;
 	public LMNtalWindow window;
