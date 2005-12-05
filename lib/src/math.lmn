@@ -1,0 +1,160 @@
+/*
+
+未完成
+NAME
+	Mouse module
+	
+AUTHOR
+	Atsushi Nakano
+
+HISTORY
+	2005/11/21
+
+*/
+[:/*inline_define*/
+	import java.awt.MouseInfo;
+	import java.awt.PointerInfo;
+
+:].
+
+{
+module(math).
+
+/*integer module　からコピー*/
+H = math.intrnd(N) :- int(N) | H=[:/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  Random rand = new Random();
+  int rn = (int)(n*Math.random());
+  Atom result = mem.newAtom(new IntegerFunctor(rn));
+  mem.relink(result, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+  :](N).
+  
+H = math.cos(N) :- int(N) | H=[:/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  float rn = (float)Math.cos(n);
+  Atom result = mem.newAtom(new FloatingFunctor(rn));
+  mem.relink(result, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+  :](N).  
+  
+%cos(N)の値をM倍してint型で返す
+H = math.cos(N,M) :- int(N),int(M) | H=[:/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  int m = 
+  ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+  double dm = new Integer(m).doubleValue();
+  double rn = (double)Math.cos(n);
+  rn= rn * dm;
+  int res = new Double(rn).intValue();
+  Atom result = mem.newAtom(new IntegerFunctor(res));
+  mem.relink(result, 0, me, 2);
+  me.nthAtom(0).remove();
+  me.nthAtom(1).remove();
+  me.remove();
+  :](N,M).
+  
+%cos(N)の値をM倍してint型で返す
+H = math.cos(N,M) :- float(N),int(M) | H=[:/*inline*/
+  double n = 
+  ((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
+  int m = 
+  ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+  double dm = new Integer(m).doubleValue();
+  double rn = (double)Math.cos(n);
+  rn= rn * dm;
+  int res = new Double(rn).intValue();
+  Atom result = mem.newAtom(new IntegerFunctor(res));
+  mem.relink(result, 0, me, 2);
+  me.nthAtom(0).remove();
+  me.nthAtom(1).remove();
+  me.remove();
+  :](N,M).  
+  
+H = math.tan(N) :- int(N) | H=[:/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  float rn = (float)Math.tan(n);
+  Atom result = mem.newAtom(new FloatingFunctor(rn));
+  mem.relink(result, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+  :](N).
+  
+%tan(N)の値をM倍してint型で返す
+H = math.tan(N,M) :- int(N),int(M) | H=[:/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  int m = 
+  ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+  double dm = new Integer(m).doubleValue();
+  double rn = (double)Math.tan(n);
+  rn= rn * dm;
+  int res = new Double(rn).intValue();
+  Atom result = mem.newAtom(new IntegerFunctor(res));
+  mem.relink(result, 0, me, 2);
+  me.nthAtom(0).remove();
+  me.nthAtom(1).remove();
+  me.remove();
+  :](N,M).  
+  
+H = math.sin(N) :- int(N) | H=[:/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  float rn = (float)Math.sin(n);
+  Atom result = mem.newAtom(new FloatingFunctor(rn));
+  mem.relink(result, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+  :](N).
+  
+%sin(N)の値をM倍してint型で返す
+H = math.sin(N,M) :- float(N),int(M) | H=[:/*inline*/
+  double n = 
+  ((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
+  int m = 
+  ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+  double dm = new Integer(m).doubleValue();
+  double rn = (double)Math.sin(n);
+  rn= rn * dm;
+  int res = new Double(rn).intValue();
+  Atom result = mem.newAtom(new IntegerFunctor(res));
+  mem.relink(result, 0, me, 2);
+  me.nthAtom(0).remove();
+  me.nthAtom(1).remove();
+  me.remove();
+  :](N,M).  
+  
+%cos(N)の値をM倍してint型で返す
+H = math.sin(N,M) :- int(N),int(M) | H=[:/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  int m = 
+  ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+  double dm = new Integer(m).doubleValue();
+  double rn = (double)Math.sin(n);
+  rn= rn * dm;
+  int res = new Double(rn).intValue();
+  Atom result = mem.newAtom(new IntegerFunctor(res));
+  mem.relink(result, 0, me, 2);
+  me.nthAtom(0).remove();
+  me.nthAtom(1).remove();
+  me.remove();
+  :](N,M).  
+  
+%floatをint型にキャストして返す。
+H = math.f2i(N) :- float(N) | H=[:/*inline*/
+  double n = 
+  ((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
+  int rn = new Double(n).intValue();
+  Atom result = mem.newAtom(new IntegerFunctor(rn));
+  mem.relink(result, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+  :](N).
+}.
