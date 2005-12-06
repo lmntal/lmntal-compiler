@@ -1,0 +1,31 @@
+{
+window,position(0,0),size(500,500),name("window").
+	{graphic,position(0,0),name("all"),
+		{draw,name("oval"),getpic("filloval"),position(0,0),size(50,50),sequence(1)},
+		{draw,name("rect"),getpic("fillrect"),position(0,0),size(150,150),sequence(0),color(255,0,0)}
+	}
+}.
+a(1).
+max_v(15).
+min_v(3).
+%xとyの対応を維持。data(x1,y1,x2,y2)  : next(現在値、速度、最大値)。
+data(next(200,-5,350),next(320,5,320),next(0,-5,100),next(0,5,100)).
+
+
+%%%%%ルール%%%%%%%%%%%%%%%%%%%%%%%%
+%移動
+a(1),data(next(X,VX,W),next(Y,VY,H),next(X2,VX2,W2),next(Y2,VY2,H2)),{{name("all"),position(PX,PY),$p,@p},$r,@r} :- int(X),int(VX),int(W),int(Y),int(VY),int(H),int(X2),int(VX2),int(W2),int(Y2),int(VY2),int(H2),int(PX),int(PY) |
+a(-1),data(calc(X,VX,W),calc(Y,VY,H),next(X2,VX2,W2),next(Y2,VY2,H2)),{{name("all"),position(X,Y),$p,@p},$r,@r}.
+
+a(-1),data(next(X,VX,W),next(Y,VY,H),next(X2,VX2,W2),next(Y2,VY2,H2)),{{{name("oval"),position(PX,PY),$p,@p},$r,@r},$q,@q} :- int(X),int(VX),int(W),int(Y),int(VY),int(H),int(X2),int(VX2),int(W2),int(Y2),int(VY2),int(H2),int(PX),int(PY) |
+a(1),data(next(X,VX,W),next(Y,VY,H),calc(X2,VX2,W2),calc(Y2,VY2,H2)),{{{name("oval"),position(X2,Y2),$p,@p},$r,@r},$q,@q}.
+
+
+%次の地点の計算
+Ret=calc(POS, V , MAX) :- N = POS + V , N >=0 , N =< MAX | Ret=next(N , V, MAX).
+Ret=calc(POS, V , MAX) :- N = POS + V , N < 0 , int(MAX) | Ret=next(0 , rand_v, MAX).
+Ret=calc(POS, V , MAX) :- N = POS + V , N > MAX          | Ret=	next(MAX , -rand_v, MAX).
+
+%速度をランダムに決定
+Ret=rand_v, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
+	Ret=integer.rnd(MaxV-MinV+1)+MinV, min_v(MinV), max_v(MaxV).
