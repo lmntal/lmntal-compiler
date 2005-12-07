@@ -38,7 +38,7 @@ H=string.times(String, Times) :-
 	for(int i=1;i<=times;i<<=1, b.append(b)) {
 		if((i&times)>0) r.append(b);
 	}
-	Atom result = mem.newAtom(new Functor(r.toString(), 1));
+	Atom result = mem.newAtom(new StringFunctor(r.toString()));
 	mem.relink(result, 0, me, 2);
 	me.nthAtom(0).remove();
 	me.nthAtom(1).remove();
