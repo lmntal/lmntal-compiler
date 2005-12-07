@@ -1,66 +1,31 @@
-/*
-NAME
-	Thread module
-	
-AUTHOR
-	Kei Murayama
+ makep(20).
+ makep(X) :- X>0 | makep(X-1), p(X-1, {}).
+ makep(0) :-.
+ 
+ r(0)=io.fileReader([:flat20_3_0.col:]).
+ r(X,O) :- class(O,"java.io.BufferedReader"),X<66 | r(X+1,O), readline(O).
 
-HISTORY
-	2005/11/11(Fri)
+ 
+ 
+readline(Object) :- class(Object, "java.io.BufferedReader") |
+	[:/*inline*/
+		try {
+			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			String s = br.readLine();
+		 	String r[] = s.split(" ");
+			Atom e = mem.newAtom(new Functor("e", 2));
+			Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
+			Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[2])));
+//			Atom result1 = mem.newAtom(new Functor(s==null?"":r[1], 1));
+//			Atom result2 = mem.newAtom(new Functor(s==null?"":r[2], 1));
+			mem.newLink(e, 0, result1, 0);
+			mem.newLink(e, 1, result2, 0);
+			
+			me.nthAtom(0).remove();
+			me.remove();
+		} catch(Exception e) {Env.e(e);}
+	:](Object).
 
-*/
-
-
-{
-module(thread).
-
-	{
-		system_ruleset.
-		{thread(N,{$p,@p}_), $q,@q}/ :- int(N) | {$p,$q,@q}.
-	}.
-	/*
-		thread.create(N).
-		Create N threads.
-	*/
-	thread.create(N) :- N>0 | thread.num(N), thread.cre(N).
-	thread.cre(N) :- N>0 | thread.cre(N-1), thread(N,{}_@"localhost").
-	thread.cre(0) :-.
-
-	/*
-		thread.at(N, {atoms or rules}).
-		Create atoms or rules at a thread numbered N.
-	*/
-	thread.at(N,{$p,@p}), thread(M,{$q,@q}_@T) :- int(N),int(M), M=:=(N+1) |
-		thread(N+1,{$p,$q,@p,@q}_@T).
-	
-	/*
-		thread.any({atoms or rules}).
-		Create atoms or rules at a thread randomly selected.
-	*/
-	thread.any({$p,@p}), thread(M,{$q,@q}_@T) :- int(M) |
-		thread(M, {$p,$q,@p,@q}_@T).
-
-	/*
-		thread.all({atoms or rules}).
-		Create atoms or rules at all threads.
-	*/
-	thread.all({$p,@p}), thread.num(N) :- int(N) |
-		thread.allcre(N, {$p,@p}_), thread.num(N).
-	thread.allcre(N, {$p[],@p}_), thread(M,{$q,@q}_@T) :- M>0, N>0, M=:=N |
-		thread.allcre(N-1, {$p[],@p}_), thread(M,{$p[],$q,@p,@q}_@T).
-	thread.allcre(0,{$p[],@p}_):-.
-}.
-
-
-/*
-	example showing the use.
-*/
-
-{
-	thread.create(4).
-	thread.all({norm(0)}).
-	thread.all({norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z)}).
-	generate(2000).
-	generate(X) :- X>0 | thread.at(X mod 4, {n(100)}), generate(X-1).
-	norm(N), norm(M) :- norm(N+M).
-}
+p(X1, {$p}), e(X2,Y2) :- X1==X2 | p(X1, {+(X), $p}), e(X,Y2).
+p(Y1, {$p}), e(X2,Y2) :- Y1==Y2 | p(Y1, {+(Y), $p}), e(X2,Y).
+%p(X1, {$p}), p(Y1, {$q}), e(X2,Y2) :- X1==X2, Y1==Y2 | p(X1, {+(X), $p}), p(Y1, {+(Y), $q}), e(X,Y).
