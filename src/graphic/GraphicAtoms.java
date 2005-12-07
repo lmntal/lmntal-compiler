@@ -84,17 +84,32 @@ public class GraphicAtoms{
 	}
 	
 	public boolean drawatom(Graphics g, HashMap m){
-		int dx=0,dy=0;
+		int[] x;
+		int[] y;
 		if(atomimg == null & atomobj == null){
 			return false;
 		}
 		if(remem!=null){
 			Relativemem rm = (Relativemem)m.get(remem);
+			int dx=0,dy=0;
 			dx = rm.getx(m);
 			dy = rm.gety(m);
+			x=new int[]{
+					(new Double((new Integer(array_x[0]).doubleValue())* Math.cos(rm.getangle()) - (new Integer(array_y[0]).doubleValue()) * Math.sin(rm.getangle())).intValue()) + dx,
+					(new Double((new Integer(array_x[1]).doubleValue())* Math.cos(rm.getangle()) - (new Integer(array_y[1]).doubleValue()) * Math.sin(rm.getangle())).intValue()) + dx,
+					(new Double((new Integer(array_x[2]).doubleValue())* Math.cos(rm.getangle()) - (new Integer(array_y[2]).doubleValue()) * Math.sin(rm.getangle())).intValue()) + dx,
+					(new Double((new Integer(array_x[3]).doubleValue())* Math.cos(rm.getangle()) - (new Integer(array_y[3]).doubleValue()) * Math.sin(rm.getangle())).intValue()) + dx,
+					};
+			y=new int[]{
+					(new Double((new Integer(array_x[0]).doubleValue())* Math.sin(rm.getangle()) + (new Integer(array_y[0]).doubleValue()) * Math.cos(rm.getangle())).intValue()) + dy,
+					(new Double((new Integer(array_x[1]).doubleValue())* Math.sin(rm.getangle()) + (new Integer(array_y[1]).doubleValue()) * Math.cos(rm.getangle())).intValue()) + dy,
+					(new Double((new Integer(array_x[2]).doubleValue())* Math.sin(rm.getangle()) + (new Integer(array_y[2]).doubleValue()) * Math.cos(rm.getangle())).intValue()) + dy,
+					(new Double((new Integer(array_x[3]).doubleValue())* Math.sin(rm.getangle()) + (new Integer(array_y[3]).doubleValue()) * Math.cos(rm.getangle())).intValue()) + dy,
+					};
+		}else{
+			x=new int[]{array_x[0],array_x[1],array_x[2],array_x[3]};
+			y=new int[]{array_y[0],array_y[1],array_y[2],array_y[3]};
 		}
-		int[] x={array_x[0]+dx,array_x[1]+dx,array_x[2]+dx,array_x[3]+dx};
-		int[] y={array_y[0]+dy,array_y[1]+dy,array_y[2]+dy,array_y[3]+dy};
 		if(atomobj != null){
 			g.setColor(new Color(color_r, color_g, color_b));
 			if(atomobj.equals("circle") || atomobj.equals("oval"))

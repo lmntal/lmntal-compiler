@@ -94,7 +94,13 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				}
 				/**名前の取得*/
 				else if(a.getName()=="name"){
+					if(a.getEdgeCount() != 1)continue;
 					rm.name=a.getNthNode(0).getName().toString();
+				}
+				/**回転角度の取得*/
+				else if(a.getName()=="angle"){
+					if(a.getEdgeCount() != 1)continue;
+					rm.setangle(Integer.parseInt(a.getNthNode(0).getName().toString()));
 				}
 	//			/**名前の取得*/
 	//			else if(a.getName()=="name"){
@@ -123,6 +129,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			}
 			/**名前の取得*/
 			else if(a.getName()=="name"){
+				if(a.getEdgeCount() != 1)continue;
 				ga.setname(a.getNthNode(0).getName());
 			}
 			/**描画の順番（前後関係）の取得*/
@@ -231,8 +238,10 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				
 				/*レラティブ膜の登録*/
 				relativemap.put(remem.name,remem);
-				if(distance >= 0)
+				if(distance >= 0){
 					remem.parentremem = searchrelativemem(relativetmp,distance);
+					System.out.println(remem.parentremem);
+				}
 				return remem.name;
 			}
 		}
@@ -330,22 +339,39 @@ class Relativemem{
 	private int x = 0, y = 0;
 	public String name;
 	public String parentremem = null;
+	private double angle = 0.0;
 	
+	public double getangle(){
+		return Math.PI / 180 * angle;
+	}
 	public void setloc(int a, int b){
 		x=a;
 		y=b;
 	}
+	public void setangle(int a){
+		angle = a;
+	}
+	
 	public int getx(HashMap m){
 		if(parentremem==null)
 			return x;
 		Relativemem remem = (Relativemem)m.get(parentremem);
-		return x + remem.getx(m);
+		double resx = new Integer(x).doubleValue();
+		double resy = new Integer(y).doubleValue();
+		System.out.println(angle);
+		
+		int res = new Double(resx * Math.cos(remem.getangle()) - resy * Math.sin(remem.getangle())).intValue();
+		return remem.getx(m) + res;
 	}
+	
 	public int gety(HashMap m){
 		if(parentremem==null)
 			return y;
 		Relativemem remem = (Relativemem)m.get(parentremem);
-		return y + remem.gety(m);
+		double resx = new Integer(x).doubleValue();
+		double resy = new Integer(y).doubleValue();
+		int res = new Double(resx * Math.sin(remem.getangle()) + resy * Math.cos(remem.getangle())).intValue();
+		return remem.gety(m) + res;
 	}
 	
 }
