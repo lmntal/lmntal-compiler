@@ -93,7 +93,7 @@ public class LMNtalWindow extends JFrame{
 	}
 	
 	public boolean setgraphicmem(AbstractMembrane m, int distance){
-		synchronized(lmnframe.lock2){
+		synchronized(Global.lock){
 			if(killed) return true;
 			if(lmnPanel == null)return false;
 			lmnPanel.setgraphicmem(m, distance);
@@ -163,4 +163,8 @@ public class LMNtalWindow extends JFrame{
 			return true;
 		return false;
 	}
+}
+
+class Global{
+	public static Object lock =new Object();
 }
