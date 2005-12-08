@@ -15,6 +15,11 @@ public final class Stack {
 	}
 	synchronized public void push(QueuedEntity entity) {
 		if (entity.isQueued()) {
+			//タスクが、アトム主導テストに失敗した後で親膜のアトムスタックに積むとき、
+			//他のスレッドがすでに他のスタックに積んでいる可能性がある。
+			//…が、システムコールアトムを実装しないとそう言う状況は発生しない。
+			//タスクが移動するのは、自分が管理する膜のアトムのみ。
+			//子タスクは操作できないし、親タスクも（このタスクが本膜をロックしているので）操作できない。
 			System.err.println("SYSTEM ERROR: enqueued entity is already in a queue");
 			entity.dequeue();
 		}

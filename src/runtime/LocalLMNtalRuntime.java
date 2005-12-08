@@ -55,7 +55,10 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime{
 		while (it.hasNext()) {
 			Task task = (Task)it.next();
 //			if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate(): sending signal to " + task); //todo Env
-			task.signal();
+//			task.signal();
+			synchronized(task) {
+				task.notifyAll();
+			}
 			try {
 //				if(Env.debug > 0)System.out.println("LocalLMNtalRuntime.terminate(): now going to wait for thread " + task); //todo Env
 				task.thread.join();

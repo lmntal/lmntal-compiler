@@ -70,17 +70,17 @@ class Task extends AbstractTask implements Runnable {
 	/** 仮の実行膜スタック */
 	Stack bufferedStack = new Stack();
 	static final int maxLoop = 100;
-	/** 本膜が存在しないことを確かめたか、または本膜や子孫膜のロックが取得できないため、
-	 * ルールスレッドが適用できるルールが無かったときにtrue。*/
-	boolean idle = false;
+//	/** 本膜が存在しないことを確かめたか、または本膜や子孫膜のロックが取得できないため、
+//	 * ルールスレッドが適用できるルールが無かったときにtrue。*/
+//	boolean idle = false;
 	/** タスクの優先度（正確には、このタスクのルールスレッドの優先度）
 	 * <p>ロックの制御に使用する予定。将来的にはタスクのスケジューリングにも使用される予定。
 	 * <p>10以上の値でなければならない。*/
 	int priority = 32;
 	
-	boolean isIdle(){
-		return idle;
-	}
+//	boolean isIdle(){
+//		return idle;
+//	}
 	
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）*/
@@ -121,37 +121,13 @@ class Task extends AbstractTask implements Runnable {
 	
 	private int count = 1; // 行番号表示@トレースモード okabe
 	/** このタスクの本膜のルールを実行する */
-	void exec() {
-		Membrane mem; // 本膜
-		//System.out.println(getRoot().getAtomCount() + ": exec1 ");
-		synchronized(this) { //多分、この synchronized 節はいらないと思う。mizuno
-			// このタスクを実行するルールスレッド（現在のスレッド）に停止要求があるときは何もしない
-			if (lockRequestCount > 0) {
-				idle = true;
-				return;
-			}
-			// 本膜のロックを取得する
-			mem = (Membrane)memStack.peek();
-			if(mem == null || !mem.lock()) {
-				// 本膜が無いかまたは本膜のロックを取得できないとき
-//				if (Env.debug > 7) if (mem != null) Env.p("cannot acquire lock");
-				idle = true;
-				return;
-			}
-			mem.remote = null;
-		}
-
-		//System.out.println(mem.getAtomCount() + ": exec2");
+	void exec(Membrane mem) {
 		// 実行
-		AbstractMembrane memToActivate = null;
 		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
-//			System.out.println("mems  = " + memStack);
-//			System.out.println("atoms = " + mem.getReadyStackStatus());
 			Atom a = mem.popReadyAtom();
 			Iterator it = mem.rulesetIterator();
 			boolean flag;
-//			mem.atoms.print();
 			if(Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
 				flag = false;
 				while(it.hasNext()){ // 本膜のもつルールをaに適用
@@ -192,19 +168,17 @@ class Task extends AbstractTask implements Runnable {
 				// アトム主導テストしないときに足し算を先に行うために、順番を変えてみた。
 				// アトム主導テストするときは、+ を先に実行した後、再帰呼び出しが実行される。
 				// 理想では、組み込みの + はインライン展開されるべきである。
-				{
-					int debugvalue = Env.debug; // todo spy機能を実装する
-					if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
-//					flag = SystemRuleset.getInstance().react(mem);
-					Iterator itsys = SystemRulesets.iterator();
-					while (itsys.hasNext()) {
-						if (((Ruleset)itsys.next()).react(mem)) {
-							flag = true;
-							break;
-						}
+				int debugvalue = Env.debug; // todo spy機能を実装する
+				if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
+				Iterator itsys = SystemRulesets.iterator();
+				while (itsys.hasNext()) {
+					if (((Ruleset)itsys.next()).react(mem)) {
+						flag = true;
+						break;
 					}
-					Env.debug = debugvalue;
 				}
+				Env.debug = debugvalue;
+
 				if (flag == false) {				
 					while(it.hasNext()){ // 膜主導テストを行う
 						if(((Ruleset)it.next()).react(mem)) {
@@ -216,10 +190,6 @@ class Task extends AbstractTask implements Runnable {
 				}
 				if(flag == false){ // ルールが適用できなかった時
 					memStack.pop(); // 本膜をpop
-					// 本膜がroot膜かつ親膜を持つなら、親膜を活性化
-					if(mem.isRoot() && mem.getParent() != null) {
-						memToActivate = mem.getParent();
-					}
 					if (!mem.perpetual) {
 						// 子膜が全てstableなら、この膜をstableにする。
 						it = mem.memIterator();
@@ -234,17 +204,13 @@ class Task extends AbstractTask implements Runnable {
 					if (Env.fTrace) {
 						if (getMachine() instanceof MasterLMNtalRuntime) {
 							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
-							// memToDump = getRoot();
-//							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
-							{
-								// ルール適用の連番
-								if(Env.dumpEnable) {
-									if(Env.getExtendedOption("dump").equals("1")) {
-										Env.p( Dumper.dump( memToDump ) );
-									} else {
-										System.out.print(" #" + (count++));
-										Env.p( "==> \n" + Dumper.dump( memToDump ) );
-									}
+							// ルール適用の連番
+							if(Env.dumpEnable) {
+								if(Env.getExtendedOption("dump").equals("1")) {
+									Env.p( Dumper.dump( memToDump ) );
+								} else {
+									System.out.print(" #" + (count++));
+									Env.p( "==> \n" + Dumper.dump( memToDump ) );
 								}
 							}
 						}
@@ -256,40 +222,6 @@ class Task extends AbstractTask implements Runnable {
 			}
 		}
 
-		// 本膜が変わったor指定回数繰り返したら、ロックを解放して終了
-		synchronized(this) { //多分、この synchronized 節はいらないと思う。mizuno
-			mem.unlock(true);
-			if (lockRequestCount > 0) {
-				signal();
-			}
-			if (memStack.isEmpty()) {
-				idle = true;
-			}
-		}
-		//System.out.println(mem.getAtomCount() + ": exec3");
-		
-		// この膜のロック解放前に親膜を活性化しても、親膜のルールがこの膜に適用できずに
-		// 親膜が再び安定状態に入ることがあるため、この膜のロック解放後に親膜を活性化する。
-		// そのとき、親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
-		if (memToActivate != null) {
-			new Thread() {
-				AbstractMembrane mem;
-				public void run() {
-					if (mem.asyncLock()){
-						mem.asyncUnlock();
-					}else {
-						//親膜が無効になっていた場合、asyncLock によって停止したタスクを再開する必要がある。
-						//（活性化に成功した場合は、asyncUnlock の中で行っている。）
-						//TODO 分散環境への対応
-						((Task)(mem.task)).signal();
-					}
-				}
-				public void activate(AbstractMembrane mem) {
-					this.mem = mem;
-					start();
-				}
-			}.activate(memToActivate);
-		}
 	}
 	
 	/** このタスク固有のルールスレッドが実行する処理 */
@@ -304,36 +236,43 @@ class Task extends AbstractTask implements Runnable {
 				Env.p( Dumper.dump(root) );
 			}
 		}
+		LocalLMNtalRuntime r = (LocalLMNtalRuntime)runtime;
 		while (true) {
-			while (true) {
-				exec();
-				if (((LocalLMNtalRuntime)runtime).isTerminated()) return;
-				if (root != null && root.isStable()) return;
-				if (!isIdle()) continue;
-				synchronized(this) {
-					if (awakened) {
-						awakened = false;
-						continue;
-					}
+			Membrane mem;
+			synchronized(this) {
+				while (lockRequestCount > 0 || (mem = (Membrane)memStack.peek()) == null || !mem.lock()) {
+					if (r.isTerminated()) return;
 					try {
-						//System.out.println(getRoot().getAtomCount() + " Thread suspended");
 						wait();
-						//System.out.println(getRoot().getAtomCount() + " Thread resumed");
-					}
-					catch (InterruptedException e) {}
-					awakened = false;
+					} catch (InterruptedException e) {}
 				}
-				break;
+				running = true;
 			}
-			if (root != null) { 	
-				if (Env.fTrace) {
-					if (asyncFlag) {
-						asyncFlag = false;
-						Env.p( " ==>* \n" + Dumper.dump(root) );
+			mem.remote = null;
+			exec(mem);
+			mem.unlock(true);
+
+			synchronized(this) {
+				running = false;
+				//このタスクの停止を待っているスレッドを起こす。
+				notifyAll();
+			}
+			if (root != null && root.isStable()) break;
+
+			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化
+			if(memStack.isEmpty() && mem.isRoot()) {
+				AbstractMembrane memToActivate = mem.getParent();
+				// この膜のロック解放前に親膜を活性化しても、親膜のルールがこの膜に適用できずに
+				// 親膜が再び安定状態に入ることがあるため、この膜のロック解放後に親膜を活性化する。
+				// そのとき、親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
+				// TODO stable フラグの処理は大丈夫か？
+				if (memToActivate != null) {
+					if (memToActivate.asyncLock()){
+						memToActivate.asyncUnlock();
 					}
 				}
 			}
-		}	
+		}
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -344,28 +283,26 @@ class Task extends AbstractTask implements Runnable {
 	 * todo LinkedListを使ってスレッドをキューで管理することにより飢餓を無くす。
 	 * これには Membrane#blockingLock() を書き直すことが含まれる。*/
 	private int lockRequestCount = 0;
-	/** このタスクのルールスレッドに対して停止要求を発行する。
-	 * <p>キューで管理していないことによる実装の都合により、
-	 * 呼び出しは物理マシンに関するsynchronizedブロック内でなければならない（と思う）*/
-	synchronized public void requestLock() {
-		lockRequestCount++;
-	}
-	/** このタスクのルールスレッドに対して発行した停止要求を解除する。*/
-	synchronized public void retractLock() {
-		lockRequestCount--;
-	}
+	private boolean running = false;
 	
-	////////////////////////////////////////////////////////////////
-	
-	/** この抽象タスクのルールスレッドの再実行が要求されたかどうか */
-	protected boolean awakened = false;
-
-	/** このタスクに対してシグナルを発行する。
-	 * すなわち、このタスクのルート膜のロックの取得をするためにブロックしているスレッドが存在するならば
-	 * そのスレッドを再開してロックの取得を試みることを要求し、
-	 * 存在しないならばこのタスクのルールスレッドの再実行を要求する。*/
-	synchronized public final void signal() {
-		awakened = true;
-		notify();
+	public void suspend() {
+		synchronized(this) {
+			lockRequestCount++;
+			while (running) {
+				try {
+					wait();
+				} catch (InterruptedException e) {}
+			}
+		}
+	}
+	public void resume() {
+		synchronized(this) {
+			lockRequestCount--;
+			if (lockRequestCount == 0) {
+				//タスクを起こす。
+				//suspend 中で待っているタスク以外のスレッドは、再開した後すぐにまた停止する。
+				notifyAll();
+			}
+		}
 	}
 }

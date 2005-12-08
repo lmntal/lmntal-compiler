@@ -99,6 +99,7 @@ public final class Membrane extends AbstractMembrane {
 	 * <p>Ruby版ではmovedTo(task,dstMem)を再帰呼び出ししていたが、
 	 * キューし直すべきかどうかの判断の手間が掛かりすぎるため子孫の膜に対する処理は廃止された。 
 	 * <p>
+	 * 現在このメソッドを使っている場所はない。(2005/11/30 mizuno)
 	 * <p>
 	 * 移動された後、この膜のアクティブアトムを実行アトムスタックに入れるために呼び出される。
 	 * <p><b>注意</b>　Ruby版のmovedtoと異なり、子孫の膜にあるアトムに対しては何もしない。*/
@@ -116,16 +117,16 @@ public final class Membrane extends AbstractMembrane {
 			}
 		}
 	}
-
-	/** 指定されたアトムをこの膜から除去する。
-	 * <strike>実行アトムスタックに入っている場合、スタックから取り除く。</strike>*/
-	public void removeAtom(Atom atom) {
-		if(Env.fGUI) {
-			Env.gui.lmnPanel.getGraphLayout().removedAtomPos.add(atom.getPosition());
-		}
-		atoms.remove(atom);
-		atom.mem = null;
-	}
+//
+//	/** 指定されたアトムをこの膜から除去する。
+//	 * <strike>実行アトムスタックに入っている場合、スタックから取り除く。</strike>*/
+//	public void removeAtom(Atom atom) {
+//		if(Env.fGUI) {
+//			Env.gui.lmnPanel.getGraphLayout().removedAtomPos.add(atom.getPosition());
+//		}
+//		atoms.remove(atom);
+//		atom.mem = null;
+//	}
 
 	// ボディ操作3 - 子膜の操作
 
@@ -243,21 +244,18 @@ public final class Membrane extends AbstractMembrane {
 	 * <p>成功したら親膜のリモートを継承する。
 	 * @return 常にtrue */
 	public boolean blockingLock() {
-		synchronized(task) {
-			((Task)task).requestLock();
-			try {
-				while (true) {
-					if (lock()) return true;
-					
-					try {
-						task.wait();
-					}
-					catch (InterruptedException e) {}
-				}
-			} finally {
-				((Task)task).retractLock();
+		//TODO ロック取得前に所属タスクが変わったらどうする？
+		Task t = (Task)task;
+		t.suspend();
+		synchronized(this) {
+			while (!lock()) {
+				try {
+					wait();
+				} catch (InterruptedException e) {}
 			}
 		}
+		t.resume();
+		return true;
 	}
 	/**
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックを取得し、実行膜スタックから除去する。
@@ -265,23 +263,30 @@ public final class Membrane extends AbstractMembrane {
 	 * <p>成功したらリモートをnullに設定する。
 	 * @return この膜がルート膜かルート膜の子孫ならば（要するにremoveされていなければ）つねにtrue */
 	public boolean asyncLock() {
-		if (!isRoot()) {
-			AbstractMembrane mem = parent;
-			if (mem == null) return false;
-			if (!mem.asyncLock()) return false;
-			//上２行の間でこの膜がremoveされる場合があるので、再度検査
+		Task t = (Task)task;
+		t.suspend();
+		try {
+			//TODO ルート膜がremoveされていたらどうする？
+			AbstractMembrane root = t.getRoot();
+			root.blockingLock();
+	
 			if (parent == null) {
-				mem.asyncUnlock();
+				//removeされていた。
+				//このスレッドがロックしていた事によって検査が失敗している場合があるので、
+				//活性化しておかないといけない。
+				root.activate();
+				root.unlock();
 				return false;
 			}
+			for (AbstractMembrane mem = this; mem != root; mem = mem.parent) {
+				boolean ret = mem.lock();
+				if (!ret)
+					throw new RuntimeException("SYSTEM ERROR : failed to asyncLock" + mem.lockThread + mem.task);
+			}
+			return true;
+		} finally {
+			t.resume();
 		}
-		blockingLock();
-		remote = null;
-		if (isRoot()) {
-			// task.async = new Async();
-		}
-		dequeue();
-		return true;
 	}
 
 	/** このロックした膜の全ての子孫の膜のロックを再帰的にブロッキングで取得する。
@@ -324,9 +329,16 @@ public final class Membrane extends AbstractMembrane {
 		Task task = (Task)getTask();
 		lockThread = null;
 		if (isRoot()) {
-			task.idle = false;
-			// このタスクのルールスレッドまたはその停止を待ってブロックしているスレッドを再開する。
-			task.signal();
+//			task.idle = false;
+//			// このタスクのルールスレッドを再開する。
+//			task.signal();
+			synchronized(task) {
+				task.notify();
+			}
+		}
+		//blockingLock でブロックしているスレッドを起こす
+		synchronized(this) {
+			notify();
 		}
 	}
 	
