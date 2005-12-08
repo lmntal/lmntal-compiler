@@ -1,7 +1,6 @@
 package runtime;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 
 import util.Stack;
 
@@ -70,17 +69,10 @@ class Task extends AbstractTask implements Runnable {
 	/** 仮の実行膜スタック */
 	Stack bufferedStack = new Stack();
 	static final int maxLoop = 100;
-//	/** 本膜が存在しないことを確かめたか、または本膜や子孫膜のロックが取得できないため、
-//	 * ルールスレッドが適用できるルールが無かったときにtrue。*/
-//	boolean idle = false;
 	/** タスクの優先度（正確には、このタスクのルールスレッドの優先度）
 	 * <p>ロックの制御に使用する予定。将来的にはタスクのスケジューリングにも使用される予定。
 	 * <p>10以上の値でなければならない。*/
 	int priority = 32;
-	
-//	boolean isIdle(){
-//		return idle;
-//	}
 	
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）*/
@@ -120,6 +112,27 @@ class Task extends AbstractTask implements Runnable {
 	}
 	
 	private int count = 1; // 行番号表示@トレースモード okabe
+	private boolean trace(String arrow) {
+		if (Env.fTrace) {
+			if (getMachine() instanceof MasterLMNtalRuntime) {
+				Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
+				// ルール適用の連番
+				if(Env.dumpEnable) {
+					if(Env.getExtendedOption("dump").equals("1")) {
+						Env.p( Dumper.dump( memToDump ) );
+					} else {
+						System.out.print(" #" + (count++));
+						Env.p( arrow + " \n" + Dumper.dump( memToDump ) );
+					}
+				}
+			}
+		}
+		if (!Env.guiTrace()) return false;
+		/**nakano graphic用*/
+		if (!Env.graphicTrace()) return false;
+		
+		return true;
+	}
 	/** このタスクの本膜のルールを実行する */
 	void exec(Membrane mem) {
 		// 実行
@@ -127,59 +140,30 @@ class Task extends AbstractTask implements Runnable {
 			// 本膜が変わらない間 & ループ回数を越えない間
 			Atom a = mem.popReadyAtom();
 			Iterator it = mem.rulesetIterator();
-			boolean flag;
+			boolean flag = false;
 			if(Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
-				flag = false;
 				while(it.hasNext()){ // 本膜のもつルールをaに適用
 					if (((Ruleset)it.next()).react(mem, a)) {
 						flag = true;
 						//if (memStack.peek() != mem) break;
 						break; // ルールセットが変わっているかもしれないため
+						//ルールセットが追加されている可能性はあるが、削除される事はないので
+						//そのまま処理を続けてもいいと思う。 2005/12/08 mizuno
 					}
 				}
-				if(flag == false){ // ルールが適用できなかった時
+				
+				if(flag){
+					if (!trace("-->")) break;
+				} else {
 					if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
 				}
-				else {
-					if (Env.fTrace) {
-						if (getMachine() instanceof MasterLMNtalRuntime) {
-							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
-							// memToDump = getRoot();
-//							if (memToDump == getRoot()) // Dumperが膜をロックするようになるまでの仮措置
-							{
-								// ルール適用の連番
-								if(Env.dumpEnable) {
-									if(Env.getExtendedOption("dump").equals("1")) {
-										Env.p( Dumper.dump( memToDump ) );
-									} else {
-										System.out.print(" #" + (count++));
-										Env.p( "--> \n" + Dumper.dump( memToDump ) );
-									}
-								}
-							}
-						}
-					}
-					if (!Env.guiTrace()) break;
-					/**nakano graphic用*/
-					if (!Env.graphicTrace()) break;
-				}// システムコールアトムなら親膜につみ、親膜を活性化
+				// TODO システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行アトムスタックが空の時
-				flag = false;
-				// アトム主導テストしないときに足し算を先に行うために、順番を変えてみた。
-				// アトム主導テストするときは、+ を先に実行した後、再帰呼び出しが実行される。
+				// 今のところ、システムルールセットは膜主導テストでしか実行されない。
 				// 理想では、組み込みの + はインライン展開されるべきである。
-				int debugvalue = Env.debug; // todo spy機能を実装する
-				if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
-				Iterator itsys = SystemRulesets.iterator();
-				while (itsys.hasNext()) {
-					if (((Ruleset)itsys.next()).react(mem)) {
-						flag = true;
-						break;
-					}
-				}
-				Env.debug = debugvalue;
+				flag = SystemRulesets.react(mem);
 
-				if (flag == false) {				
+				if (!flag) {				
 					while(it.hasNext()){ // 膜主導テストを行う
 						if(((Ruleset)it.next()).react(mem)) {
 							flag = true;
@@ -188,7 +172,10 @@ class Task extends AbstractTask implements Runnable {
 						}
 					}
 				}
-				if(flag == false){ // ルールが適用できなかった時
+				
+				if(flag){
+					if (!trace("==>")) break;
+				} else {
 					memStack.pop(); // 本膜をpop
 					if (!mem.perpetual) {
 						// 子膜が全てstableなら、この膜をstableにする。
@@ -200,24 +187,6 @@ class Task extends AbstractTask implements Runnable {
 						}
 						if(flag == false) mem.toStable();
 					}
-				} else {
-					if (Env.fTrace) {
-						if (getMachine() instanceof MasterLMNtalRuntime) {
-							Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
-							// ルール適用の連番
-							if(Env.dumpEnable) {
-								if(Env.getExtendedOption("dump").equals("1")) {
-									Env.p( Dumper.dump( memToDump ) );
-								} else {
-									System.out.print(" #" + (count++));
-									Env.p( "==> \n" + Dumper.dump( memToDump ) );
-								}
-							}
-						}
-					}
-					if (!Env.guiTrace()) break;
-					/**nakano graphic用*/
-					if (!Env.graphicTrace()) break;
 				}
 			}
 		}
@@ -231,11 +200,11 @@ class Task extends AbstractTask implements Runnable {
 			root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
 			if (root.getTask() != this) root = null;
 		}
-		if (root != null) { 	
-			if (Env.fTrace) {
-				Env.p( Dumper.dump(root) );
-			}
+		
+		if (root != null && Env.fTrace) {
+			Env.p( Dumper.dump(root) );
 		}
+		
 		LocalLMNtalRuntime r = (LocalLMNtalRuntime)runtime;
 		while (true) {
 			Membrane mem;
@@ -249,6 +218,12 @@ class Task extends AbstractTask implements Runnable {
 				running = true;
 			}
 			mem.remote = null;
+			if (root != null && Env.fTrace && asyncFlag) {
+				//非ルールスレッドが変更した内容を出力する。
+				asyncFlag = false;
+				Env.p( " ==>* \n" + Dumper.dump(root) );
+			}
+			
 			exec(mem);
 			mem.unlock(true);
 

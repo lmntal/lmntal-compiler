@@ -42,4 +42,23 @@ public final class SystemRulesets {
 	public static Iterator iterator() {
 		return all.iterator();
 	}
+
+	/**
+	 * 膜主導テストによるシステムルールの適用を試みる。
+	 * @return 適用した場合はtrue
+	 */
+	public static boolean react(Membrane mem) {
+		boolean flag = false;
+		int debugvalue = Env.debug; // todo spy機能を実装する
+		if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
+		Iterator itsys = SystemRulesets.iterator();
+		while (itsys.hasNext()) {
+			if (((Ruleset)itsys.next()).react(mem)) {
+				flag = true;
+				break;
+			}
+		}
+		Env.debug = debugvalue;
+		return flag;
+	}
 }
