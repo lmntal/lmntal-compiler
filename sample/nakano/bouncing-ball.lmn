@@ -8,7 +8,7 @@
 	ライブラリintegerを使用しています。
 
 */
-
+{window,name("window"),size(500,500),
 {
 draw.
 name("rect").
@@ -47,3 +47,4 @@ b.
 {position(X,Y),vx(VX), $p , @p} :-  VX < 0 , X =< 60, int(Y)  | {position( X , Y ),vx(integer.rnd(15) + 1),$p}.
 {position(X,Y),vy(VY), $p , @p} :-  VY > 0 , Y >= 350, int(X) | {position( X , Y ),vy(-1 * integer.rnd(15) - 1),$p}.
 {position(X,Y),vy(VY), $p , @p} :-  VY < 0 , Y =< 60, int(X)  | {position( X , Y ),vy(integer.rnd(15) + 1),$p}.
+}
