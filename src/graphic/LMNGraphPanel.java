@@ -227,8 +227,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			return null;
 		return ga;
 	}
-	
-	private String searchrelativemem(AbstractMembrane relativetmp , int distance){
+	/**再帰的にレラティブ膜を探す。レラティブ膜自身のunlock時はこちらを呼ぶ。*/
+	private String searchrelativemem_self(AbstractMembrane relativetmp , int distance){
 
 		while(distance >= 0){
 			distance--;
@@ -239,8 +239,30 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				/*レラティブ膜の登録*/
 				relativemap.put(remem.name,remem);
 				if(distance >= 0){
-					remem.parentremem = searchrelativemem(relativetmp,distance);
-					System.out.println(remem.parentremem);
+					remem.parentremem = searchrelativemem(relativetmp.getParent(),distance);
+				}
+				return remem.name;
+			}
+		}
+		return null;
+	}
+	/**再帰的にレラティブ膜を探す*/
+	private String searchrelativemem(AbstractMembrane relativetmp , int distance){
+
+		while(distance >= 0){
+			distance--;
+			/*レラティブ膜発見*/
+			if(searchatom(relativetmp)=="graphic"){
+				Relativemem remem = getrelativemem(relativetmp);
+				/*すでに登録済みなら名前だけ返して終了*/
+				if(relativemap.containsKey(remem.name)){
+					return remem.name;
+				}
+				/*未登録ならば、再帰的にレラティブ膜の探索*/
+				/*レラティブ膜の登録*/
+				relativemap.put(remem.name,remem);
+				if(distance >= 0){
+					remem.parentremem = searchrelativemem(relativetmp.getParent(),distance);
 				}
 				return remem.name;
 			}
@@ -296,7 +318,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			}			
 		}
 		else
-			searchrelativemem(m, distance);
+			searchrelativemem_self(m, distance);
 	}
 	
 	private synchronized void paintlayout(){
@@ -341,8 +363,13 @@ class Relativemem{
 	public String parentremem = null;
 	private double angle = 0.0;
 	
-	public double getangle(){
-		return Math.PI / 180 * angle;
+	public double getangle(HashMap m){
+		if(parentremem==null || !m.containsKey(parentremem))
+			return Math.PI / 180 * angle;
+
+		Relativemem remem = (Relativemem)m.get(parentremem);
+		return (Math.PI / 180 * angle) + remem.getangle(m);
+		
 	}
 	public void setloc(int a, int b){
 		x=a;
@@ -353,24 +380,22 @@ class Relativemem{
 	}
 	
 	public int getx(HashMap m){
-		if(parentremem==null)
+		if(parentremem==null || !m.containsKey(parentremem))
 			return x;
 		Relativemem remem = (Relativemem)m.get(parentremem);
 		double resx = new Integer(x).doubleValue();
 		double resy = new Integer(y).doubleValue();
-		System.out.println(angle);
-		
-		int res = new Double(resx * Math.cos(remem.getangle()) - resy * Math.sin(remem.getangle())).intValue();
+		int res = new Double(resx * Math.cos(remem.getangle(m)) - resy * Math.sin(remem.getangle(m))).intValue();
 		return remem.getx(m) + res;
 	}
 	
 	public int gety(HashMap m){
-		if(parentremem==null)
+		if(parentremem==null || !m.containsKey(parentremem))
 			return y;
 		Relativemem remem = (Relativemem)m.get(parentremem);
 		double resx = new Integer(x).doubleValue();
 		double resy = new Integer(y).doubleValue();
-		int res = new Double(resx * Math.sin(remem.getangle()) + resy * Math.cos(remem.getangle())).intValue();
+		int res = new Double(resx * Math.sin(remem.getangle(m)) + resy * Math.cos(remem.getangle(m))).intValue();
 		return remem.gety(m) + res;
 	}
 	

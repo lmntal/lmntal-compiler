@@ -95,16 +95,16 @@ public class GraphicAtoms{
 			dx = rm.getx(m);
 			dy = rm.gety(m);
 			x=new int[]{
-					(new Double((new Integer(array_x[0]).doubleValue())* Math.cos(rm.getangle()) - (new Integer(array_y[0]).doubleValue()) * Math.sin(rm.getangle())).intValue()) + dx,
-					(new Double((new Integer(array_x[1]).doubleValue())* Math.cos(rm.getangle()) - (new Integer(array_y[1]).doubleValue()) * Math.sin(rm.getangle())).intValue()) + dx,
-					(new Double((new Integer(array_x[2]).doubleValue())* Math.cos(rm.getangle()) - (new Integer(array_y[2]).doubleValue()) * Math.sin(rm.getangle())).intValue()) + dx,
-					(new Double((new Integer(array_x[3]).doubleValue())* Math.cos(rm.getangle()) - (new Integer(array_y[3]).doubleValue()) * Math.sin(rm.getangle())).intValue()) + dx,
+					(new Double((new Integer(array_x[0]).doubleValue())* Math.cos(rm.getangle(m)) - (new Integer(array_y[0]).doubleValue()) * Math.sin(rm.getangle(m))).intValue()) + dx,
+					(new Double((new Integer(array_x[1]).doubleValue())* Math.cos(rm.getangle(m)) - (new Integer(array_y[1]).doubleValue()) * Math.sin(rm.getangle(m))).intValue()) + dx,
+					(new Double((new Integer(array_x[2]).doubleValue())* Math.cos(rm.getangle(m)) - (new Integer(array_y[2]).doubleValue()) * Math.sin(rm.getangle(m))).intValue()) + dx,
+					(new Double((new Integer(array_x[3]).doubleValue())* Math.cos(rm.getangle(m)) - (new Integer(array_y[3]).doubleValue()) * Math.sin(rm.getangle(m))).intValue()) + dx,
 					};
 			y=new int[]{
-					(new Double((new Integer(array_x[0]).doubleValue())* Math.sin(rm.getangle()) + (new Integer(array_y[0]).doubleValue()) * Math.cos(rm.getangle())).intValue()) + dy,
-					(new Double((new Integer(array_x[1]).doubleValue())* Math.sin(rm.getangle()) + (new Integer(array_y[1]).doubleValue()) * Math.cos(rm.getangle())).intValue()) + dy,
-					(new Double((new Integer(array_x[2]).doubleValue())* Math.sin(rm.getangle()) + (new Integer(array_y[2]).doubleValue()) * Math.cos(rm.getangle())).intValue()) + dy,
-					(new Double((new Integer(array_x[3]).doubleValue())* Math.sin(rm.getangle()) + (new Integer(array_y[3]).doubleValue()) * Math.cos(rm.getangle())).intValue()) + dy,
+					(new Double((new Integer(array_x[0]).doubleValue())* Math.sin(rm.getangle(m)) + (new Integer(array_y[0]).doubleValue()) * Math.cos(rm.getangle(m))).intValue()) + dy,
+					(new Double((new Integer(array_x[1]).doubleValue())* Math.sin(rm.getangle(m)) + (new Integer(array_y[1]).doubleValue()) * Math.cos(rm.getangle(m))).intValue()) + dy,
+					(new Double((new Integer(array_x[2]).doubleValue())* Math.sin(rm.getangle(m)) + (new Integer(array_y[2]).doubleValue()) * Math.cos(rm.getangle(m))).intValue()) + dy,
+					(new Double((new Integer(array_x[3]).doubleValue())* Math.sin(rm.getangle(m)) + (new Integer(array_y[3]).doubleValue()) * Math.cos(rm.getangle(m))).intValue()) + dy,
 					};
 		}else{
 			x=new int[]{array_x[0],array_x[1],array_x[2],array_x[3]};
