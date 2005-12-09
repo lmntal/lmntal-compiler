@@ -78,7 +78,15 @@ public class LMNtalGFrame implements Runnable{
 	    	}
     	}
     }
-   
+    
+    /***/
+   public Point getMousePoint(AbstractMembrane m){
+	   String memname = getname(m);
+	   if(!windowmap.containsKey(memname)) return null;
+	   WindowSet winset = (WindowSet)windowmap.get(memname);
+	   return winset.window.getMousePosition();
+   }
+    /**ウィンドウオブジェクトを生成*/
     private void setwindowmem(AbstractMembrane m){
 		WindowSet win = new WindowSet();
 		win.mem = m;
