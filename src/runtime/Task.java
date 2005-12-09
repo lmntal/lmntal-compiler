@@ -156,8 +156,8 @@ class Task extends AbstractTask implements Runnable {
 					if (!trace("-->")) break;
 				} else {
 					if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
+					// TODO システムコールアトムなら、本膜ルート膜でも親膜につみ、親膜を活性化
 				}
-				// TODO システムコールアトムなら親膜につみ、親膜を活性化
 			}else{ // 実行アトムスタックが空の時
 				// 今のところ、システムルールセットは膜主導テストでしか実行されない。
 				// 理想では、組み込みの + はインライン展開されるべきである。
@@ -223,13 +223,12 @@ class Task extends AbstractTask implements Runnable {
 				asyncFlag = false;
 				Env.p( " ==>* \n" + Dumper.dump(root) );
 			}
-			
 			exec(mem);
 			mem.unlock(true);
 
 			synchronized(this) {
 				running = false;
-				//このタスクの停止を待っているスレッドを起こす。
+				//このタスクの停止を待っているスレッドを全て起こす。
 				notifyAll();
 			}
 			if (root != null && root.isStable()) break;
@@ -240,7 +239,8 @@ class Task extends AbstractTask implements Runnable {
 				// この膜のロック解放前に親膜を活性化しても、親膜のルールがこの膜に適用できずに
 				// 親膜が再び安定状態に入ることがあるため、この膜のロック解放後に親膜を活性化する。
 				// そのとき、親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
-				// TODO stable フラグの処理は大丈夫か？
+				// todo stable フラグの処理は大丈夫か？
+				//  → asyncLock 内でタスクを止めているので、大丈夫。
 				if (memToActivate != null) {
 					if (memToActivate.asyncLock()){
 						memToActivate.asyncUnlock();

@@ -244,8 +244,8 @@ public final class Membrane extends AbstractMembrane {
 	 * <p>成功したら親膜のリモートを継承する。
 	 * @return 常にtrue */
 	public boolean blockingLock() {
-		//TODO ロック取得前に所属タスクが変わったらどうする？
 		Task t = (Task)task;
+		//TODO 必要のない時はタスクを止めないようにする。
 		t.suspend();
 		synchronized(this) {
 			while (!lock()) {
@@ -264,28 +264,43 @@ public final class Membrane extends AbstractMembrane {
 	 * @return この膜がルート膜かルート膜の子孫ならば（要するにremoveされていなければ）つねにtrue */
 	public boolean asyncLock() {
 		Task t = (Task)task;
+		AbstractMembrane root = t.getRoot();;
 		t.suspend();
-		try {
-			//TODO ルート膜がremoveされていたらどうする？
-			AbstractMembrane root = t.getRoot();
-			root.blockingLock();
-	
-			if (parent == null) {
-				//removeされていた。
-				//このスレッドがロックしていた事によって検査が失敗している場合があるので、
-				//活性化しておかないといけない。
-				root.activate();
-				root.unlock();
-				return false;
+		while (true) {
+			boolean ret = root.lock();
+			if (parent == null || t != task) {
+				//状況が変化していた場合のキャンセル処理
+				if (ret) {
+					root.activate();
+					root.unlock();
+				}
+				t.resume();
+
+				if (parent == null) {
+					//この膜が除去された
+					return false;
+				} else {
+					//所属タスクが変化していた
+					t = (Task)task;
+					root = t.getRoot();
+					t.suspend();
+				}
+			} else if (ret) {
+				//ルート膜のロックに成功。この膜からルート膜までの間を全てロックする。
+				for (AbstractMembrane mem = this; mem != root; mem = mem.parent) {
+					ret = mem.lock();
+					if (!ret)
+						throw new RuntimeException("SYSTEM ERROR : failed to asyncLock" + mem.lockThread + mem.task);
+				}
+				t.resume();
+				return true;
+			} else {
+				//ルート膜のロックが解放されるのを待つ。
+				//「ルート膜のロック解放」と「この膜の所属タスク変更」の2つを待つ必要があるので、wait() は使えない。
+				//ロックしているスレッドはおそらく活発に動いているはずだし、asyncLock にそんなに時間がかかるはずはないので、
+				//CPUリソースを浪費する事にはならないと思う。
+				Thread.yield();
 			}
-			for (AbstractMembrane mem = this; mem != root; mem = mem.parent) {
-				boolean ret = mem.lock();
-				if (!ret)
-					throw new RuntimeException("SYSTEM ERROR : failed to asyncLock" + mem.lockThread + mem.task);
-			}
-			return true;
-		} finally {
-			t.resume();
 		}
 	}
 
@@ -327,18 +342,20 @@ public final class Membrane extends AbstractMembrane {
 	 */
 	public void quietUnlock() {
 		Task task = (Task)getTask();
-		lockThread = null;
-		if (isRoot()) {
-//			task.idle = false;
-//			// このタスクのルールスレッドを再開する。
-//			task.signal();
-			synchronized(task) {
-				task.notify();
-			}
-		}
-		//blockingLock でブロックしているスレッドを起こす
 		synchronized(this) {
+			lockThread = null;
+			//blockingLock でブロックしているスレッドを起こす。
+			//一つ起こせば十分。
 			notify();
+		}
+		if (isRoot()) {
+			// このタスクのルールスレッドを再開する。
+			// このタスク以外のスレッドは必ずルート膜からロックしているので、ルート膜のロック解放時に起こせば十分。
+			// ロックを解放してからここに来るまでの間に所属タスクが変わって場合があるが、特に問題はない。
+			synchronized(task) {
+				// タスク以外にも、suspend メソッド中で wait しているスレッドがあるかもしれないので、全て起こす。
+				task.notifyAll();
+			}
 		}
 	}
 	
@@ -374,7 +391,6 @@ public final class Membrane extends AbstractMembrane {
 			mem.lockThread = null;
 			mem = mem.parent;
 		}
-		// task.async = null;
 		task.asyncFlag = true;
 		mem.unlock();
 	}
