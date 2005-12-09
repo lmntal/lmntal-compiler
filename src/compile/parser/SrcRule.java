@@ -40,7 +40,7 @@ class SrcRule {
 	
 	/**
 	 * リンク名が_IXなど、頭に_Iがつくと自動でガードにint(_IX)を加える.
-	 * nakano
+	 * hara. nakano.
 	 * */
 	public void addTypeConstraint(LinkedList l){
 		for(int i = 0; i < l.size(); i++){
