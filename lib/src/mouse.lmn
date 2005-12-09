@@ -13,14 +13,14 @@ HISTORY
 */
 [:/*inline_define*/
 	import java.awt.MouseInfo;
-	import java.awt.PointerInfo;
+	import java.awt.*;
 
 :].
 
 {
 module(mouse).
 
-H=mouse.pointx:- H=[:/*inline*/
+H=mouse.pointX:- H=[:/*inline*/
 	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 	int point = (int)(pointerInfo.getLocation().x);
 	Atom atom = mem.newAtom(new IntegerFunctor(point));
@@ -29,7 +29,7 @@ H=mouse.pointx:- H=[:/*inline*/
   :].
 
 
-H=mouse.pointy :- H=[:/*inline*/
+H=mouse.pointY :- H=[:/*inline*/
 	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 	int point = (int)(pointerInfo.getLocation().y);
 	Atom atom = mem.newAtom(new IntegerFunctor(point));
@@ -39,19 +39,24 @@ H=mouse.pointy :- H=[:/*inline*/
 
   
   
-H=mouse.framepointx :- H=[:/*inline*/
-	int point = -1;
-	if(Env.LMNgraphic != null & Env.LMNgraphic.getMousePosition()!= null)
-		point = (int)(Env.LMNgraphic.getMousePosition().x);
-	Atom atom = mem.newAtom(new IntegerFunctor(point));
+H=mouse.framePointX :- H=[:/*inline*/
+	int pointX = -1;
+	Point p = null;
+	if(Env.LMNgraphic != null){
+		p= Env.LMNgraphic.getMousePoint(mem);
+	}
+	if(p != null)
+		pointX = (int)(p.x);
+	System.out.println(pointX);
+	Atom atom = mem.newAtom(new IntegerFunctor(pointX));
 	mem.relink(atom,0,me,0);
 	mem.removeAtom(me);
   :].
   
-H=mouse.framepointy :- H=[:/*inline*/
+H=mouse.framePointY :- H=[:/*inline*/
 	int point = -1;
-	if(Env.LMNgraphic != null & Env.LMNgraphic.getMousePosition()!= null)
-		point = (int)(Env.LMNgraphic.getMousePosition().y);
+//	if(Env.LMNgraphic != null & Env.LMNgraphic.getMousePosition()!= null)
+//		point = (int)(Env.LMNgraphic.getMousePosition().y);
 	Atom atom = mem.newAtom(new IntegerFunctor(point));
 	mem.relink(atom,0,me,0);
 	mem.removeAtom(me);
