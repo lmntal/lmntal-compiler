@@ -1,0 +1,34 @@
+% times server simulation
+% 分散シミュレーション (案２:wiki参照)
+
+{% brie
+connect("gouda",60000,I,[out(O1),out(O2),get,get]).
+I=[].
+O1=["brie","hoge","moge"].
+O2=["foo","bar"].
+}.
+
+{% gouda
+port(60000,G).
+G=[accept([],[get,get]),close].
+socket(S,[in(H)|T],O) :-
+  socket(S,T,list.append(O,[out(times(H))])).
+X=times([H|T]) :- string(H) | X=[string.times(H,3)|times(T)].
+X=times([]) :- X=[].
+}.
+
+% connect and accept rule
+{connect(Host,Port1,I1,O1),$p[I1,O1|*S],@p},
+{port(Port2,[accept(I2,O2)|T]),$q[I2,O2,T|*S],@q} :- 
+  string(Host),Port1=:=Port2 |
+    {socket(S,I1,O1),$p[I1,O1|*S],@p},
+    {port(Port2,T),socket(S,I2,O2),$q[I2,O2,T|*S],@q}.
+
+% send and receive rule
+{socket(S,I1,[out(O1)|T1]),$p[I1,T1|*S],@p},
+{socket(S,I2,[get|T2]),$q[I2,T2|*S],@q} :- ground(O1) |
+    {socket(S,I1,T1),$p[I1,T1|*S],@p},
+    {socket(S,list.append(I2,[in(O1)]),T2),$q[I2,T2|*S],@q}.
+    
+% close rule
+{port(Port,[close|T]),$p[|*X],@p} :- int(Port),ground(T) | {$p[|*X],@p}.
