@@ -59,12 +59,17 @@ import util.Stack;
  * 非同期で膜のロックを取得することにより実現可能。
  * ただし子膜の取得がブロッキングになるようにタスクに優先度を設ける必要があるはずである。
  * システムコールは現在はまだ実装されていない。
+ * 
+ * <p>
+ * <b>排他制御</b>
+ * <p>
+ * タスクの停止・再開の待ち合わせ処理のために、このクラスのインスタンスに関する synchronized 節を利用する。
  */
 
 class Task extends AbstractTask implements Runnable {
 	/** このタスクのルールスレッド */
 	protected Thread thread = new Thread(this, "Task");
-	/** 実行膜スタック。*/
+	/** 実行膜スタック*/
 	Stack memStack = new Stack();
 	/** 仮の実行膜スタック */
 	Stack bufferedStack = new Stack();
@@ -280,7 +285,7 @@ class Task extends AbstractTask implements Runnable {
 			lockRequestCount--;
 			if (lockRequestCount == 0) {
 				//タスクを起こす。
-				//suspend 中で待っているタスク以外のスレッドは、再開した後すぐにまた停止する。
+				//notifyAll を使ってはいるが、wait しているスレッドはルールスレッドのみのはずである。
 				notifyAll();
 			}
 		}

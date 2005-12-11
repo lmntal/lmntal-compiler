@@ -13,10 +13,15 @@ import daemon.IDConverter;
 /**
  * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。
  * todo （効率改善） 最適化用に、子孫にルート膜を持つことができない（実行時エラーを出す）「データ膜」クラスを作る。
+ * <p><b>排他制御</b></p>
+ * <p>lockThread フィールドへの代入（すなわちロックの取得・解放）と、ロック解放の待ち合わせのために
+ * このクラスのインスタンスに関する synchronized 節を利用する。
  * @author Mizuno, n-kato
  */
 public final class Membrane extends AbstractMembrane {
-	/** 実行アトムスタック */
+	/** 実行アトムスタック。
+	 * 操作する際にこの膜のロックを取得している必要はない。
+	 * 排他制御には、Stack インスタンスに関する synchronized 節を利用している。 */
 	private Stack ready = new Stack();
 	
 	/** リモートホストとの通信でこの膜のアトムを同定するときに使用されるatomidの表。
@@ -242,8 +247,10 @@ public final class Membrane extends AbstractMembrane {
 	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
 	 * <p>ルールスレッド以外のスレッドが2つ目以降のロックとしてこの膜のロックを取得するときに使用する。
 	 * <p>成功したら親膜のリモートを継承する。
+	 * 親膜のロックはすでに取得している必要がある。
 	 * @return 常にtrue */
 	public boolean blockingLock() {
+		//親膜のロックを取得しているので、タスクが変化したりこの膜が除去されたりする事はない。
 		Task t = (Task)task;
 		//TODO 必要のない時はタスクを止めないようにする。
 		t.suspend();
@@ -261,7 +268,7 @@ public final class Membrane extends AbstractMembrane {
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックを取得し、実行膜スタックから除去する。
 	 * <p>ルールスレッド以外のスレッドが最初のロックとしてこの膜のロックを取得するときに使用する。
 	 * <p>成功したらリモートをnullに設定する。
-	 * @return この膜がルート膜かルート膜の子孫ならば（要するにremoveされていなければ）つねにtrue */
+	 * @return 成功したら true。失敗するのは、この膜がすでにremoveされている場合のみ。 */
 	public boolean asyncLock() {
 		Task t = (Task)task;
 		AbstractMembrane root = t.getRoot();;
