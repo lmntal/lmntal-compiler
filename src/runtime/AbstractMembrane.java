@@ -55,13 +55,16 @@ import util.RandomIterator;
 
 
 /**
- * 抽象膜クラス。ローカル膜クラスおよびリモート膜クラスの親クラス
+ * 抽象膜クラス。ローカル膜クラスおよびリモート膜クラスの親クラス。
+ * フィールドへの代入をする時は、特に記述がない限りこの膜のロックを取得している必要がある。
  * @author Mizuno, n-kato
  */
 abstract public class AbstractMembrane extends QueuedEntity {
-	/** この膜を管理するタスク */
+	/** この膜を管理するタスク。修正するときは、親膜のロックを取得している必要がある。 */
 	protected AbstractTask task;
-	/** 親膜。リモートにあるならばRemoteMembraneオブジェクトを参照する。GlobalRootならばnull */
+	/** 親膜。リモートにあるならばRemoteMembraneオブジェクトを参照する。GlobalRootならばnull。
+	 * 修正するときは、親膜のロックを取得している必要がある。
+	 * null を代入する（=この膜を除去する）時は、この膜と親膜の両方のロックを取得している必要がある。 */
 	protected AbstractMembrane parent;
 	/** アトムの集合 */
 	protected AtomSet atoms = new AtomSet();
@@ -90,7 +93,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public String getName() { return name; }
 	void setName(String name) { this.name = name; } // 仕様が固まったらコンストラクタで渡すようにすべきかも
 
-	public boolean alive = true;
 	///////////////////////////////
 	// コンストラクタ
 
@@ -351,7 +353,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <strike>実行膜スタックは操作しない。</strike>
 	 * 実行膜スタックに積まれていれば取り除く。 */
 	public void removeMem(AbstractMembrane mem) {
-		mem.alive = false;
 		mems.remove(mem);
 		mem.dequeue();
 		mem.parent = null;
