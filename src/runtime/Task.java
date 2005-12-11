@@ -235,16 +235,21 @@ class Task extends AbstractTask implements Runnable {
 
 			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化
 			if(memStack.isEmpty() && mem.isRoot()) {
-				AbstractMembrane memToActivate = mem.getParent();
+				final AbstractMembrane memToActivate = mem.getParent();
 				// この膜のロック解放前に親膜を活性化しても、親膜のルールがこの膜に適用できずに
 				// 親膜が再び安定状態に入ることがあるため、この膜のロック解放後に親膜を活性化する。
 				// そのとき、親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
-				// todo stable フラグの処理は大丈夫か？
-				//  → asyncLock 内でタスクを止めているので、大丈夫。
+				// todo stable フラグの処理は大丈夫か？ → asyncLock 内でタスクを止めているので、大丈夫。
 				if (memToActivate != null) {
-					if (memToActivate.asyncLock()){
-						memToActivate.asyncUnlock();
-					}
+					// 親膜のロックを取得するまでブロックするのは
+					// （特にマルチプロセッサ環境で）もったいないので別スレッドで実行する。
+					new Thread() {
+						public void run() {
+							if (memToActivate.asyncLock()){
+								memToActivate.asyncUnlock();
+							}
+						}
+					}.start();
 				}
 			}
 		}
