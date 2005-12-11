@@ -156,7 +156,7 @@ class Task extends AbstractTask implements Runnable {
 					if (!trace("-->")) break;
 				} else {
 					if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
-					// TODO システムコールアトムなら、本膜ルート膜でも親膜につみ、親膜を活性化
+					// TODO システムコールアトムなら、本膜がルート膜でも親膜につみ、親膜を活性化
 				}
 			}else{ // 実行アトムスタックが空の時
 				// 今のところ、システムルールセットは膜主導テストでしか実行されない。
