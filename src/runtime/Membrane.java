@@ -266,40 +266,42 @@ public final class Membrane extends AbstractMembrane {
 		Task t = (Task)task;
 		AbstractMembrane root = t.getRoot();;
 		t.suspend();
-		while (true) {
-			boolean ret = root.lock();
-			if (parent == null || t != task) {
-				//状況が変化していた場合のキャンセル処理
-				if (ret) {
-					root.activate();
-					root.unlock();
-				}
-				t.resume();
-
-				if (parent == null) {
-					//この膜が除去された
-					return false;
+		synchronized(this) {
+			while (true) {
+				boolean ret = root.lock();
+				if (parent == null || t != task) {
+					//状況が変化していた場合のキャンセル処理
+					if (ret) {
+						root.activate();
+						root.unlock();
+					}
+					t.resume();
+	
+					if (parent == null) {
+						//この膜が除去された
+						return false;
+					} else {
+						//所属タスクが変化していた
+						t = (Task)task;
+						root = t.getRoot();
+						t.suspend();
+					}
+				} else if (ret) {
+					//ルート膜のロックに成功。この膜からルート膜までの間を全てロックする。
+					for (AbstractMembrane mem = this; mem != root; mem = mem.parent) {
+						ret = mem.lock();
+						if (!ret)
+							throw new RuntimeException("SYSTEM ERROR : failed to asyncLock" + mem.lockThread + mem.task);
+					}
+					t.resume();
+					return true;
 				} else {
-					//所属タスクが変化していた
-					t = (Task)task;
-					root = t.getRoot();
-					t.suspend();
+					//ルート膜のロックが解放されるのを待つ。
+					//所属タスクが変化していないかを時々検査するために、タイムアウトを設定している。
+					try {
+						wait(1);
+					} catch (InterruptedException e) {}
 				}
-			} else if (ret) {
-				//ルート膜のロックに成功。この膜からルート膜までの間を全てロックする。
-				for (AbstractMembrane mem = this; mem != root; mem = mem.parent) {
-					ret = mem.lock();
-					if (!ret)
-						throw new RuntimeException("SYSTEM ERROR : failed to asyncLock" + mem.lockThread + mem.task);
-				}
-				t.resume();
-				return true;
-			} else {
-				//ルート膜のロックが解放されるのを待つ。
-				//「ルート膜のロック解放」と「この膜の所属タスク変更」の2つを待つ必要があるので、wait() は使えない。
-				//ロックしているスレッドはおそらく活発に動いているはずだし、asyncLock にそんなに時間がかかるはずはないので、
-				//CPUリソースを浪費する事にはならないと思う。
-				Thread.yield();
 			}
 		}
 	}
