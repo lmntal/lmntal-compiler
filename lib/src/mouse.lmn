@@ -12,7 +12,7 @@ HISTORY
 
 */
 [:/*inline_define*/
-	import java.awt.MouseInfo;
+	import java.awt.MouseInfo.*;
 	import java.awt.*;
 
 :].
@@ -47,17 +47,20 @@ H=mouse.framePointX :- H=[:/*inline*/
 	}
 	if(p != null)
 		pointX = (int)(p.x);
-	System.out.println(pointX);
 	Atom atom = mem.newAtom(new IntegerFunctor(pointX));
 	mem.relink(atom,0,me,0);
 	mem.removeAtom(me);
   :].
   
 H=mouse.framePointY :- H=[:/*inline*/
-	int point = -1;
-//	if(Env.LMNgraphic != null & Env.LMNgraphic.getMousePosition()!= null)
-//		point = (int)(Env.LMNgraphic.getMousePosition().y);
-	Atom atom = mem.newAtom(new IntegerFunctor(point));
+	int pointY = -1;
+	Point p = null;
+	if(Env.LMNgraphic != null){
+		p= Env.LMNgraphic.getMousePoint(mem);
+	}
+	if(p != null)
+		pointY = (int)(p.y);
+	Atom atom = mem.newAtom(new IntegerFunctor(pointY));
 	mem.relink(atom,0,me,0);
 	mem.removeAtom(me);
   :].

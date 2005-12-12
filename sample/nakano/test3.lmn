@@ -1,7 +1,6 @@
 {
-window.
-size(640,530).
-name("hoge").
-a.
-a :- a(math.cos(90)).
+window,size(640,530),name("window"),timer(1000).
+  {draw,name("oval"),getpic("filloval"),position(0,300),size(50,50)}.
+  
+  {position(_IX,_IY),$p,@p} :- {position(mouse.framePointX,mouse.framePointY),$p,@p}.
 }.

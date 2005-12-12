@@ -18,6 +18,7 @@ public class LMNtalWindow extends JFrame{
 	public boolean running = true;
 	public boolean waitawhile = false;
 	private boolean killed = false;
+	public long timer = 0;
 	
 	/*ウィンドウ生成に必要*/
 	private boolean ready = false; 
@@ -149,11 +150,20 @@ public class LMNtalWindow extends JFrame{
 					return false;
 				}
 			}
-			/**背景色の取得*/
+			/**ウィンドウ生成位置の取得*/
 			else if(a.getName()=="position"){
 				if(a.getEdgeCount() != 2)return false;
 				try{
 					setwinloc(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()));
+				}catch(NumberFormatException error){
+					return false;
+				}
+			}
+			/**計算後の待機時間の取得*/
+			else if(a.getName()=="timer"){
+				if(a.getEdgeCount() != 1)return false;
+				try{
+					timer=(Long.parseLong(a.getNthNode(0).getName()));
 				}catch(NumberFormatException error){
 					return false;
 				}

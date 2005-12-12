@@ -29,6 +29,8 @@ public class LMNtalGFrame implements Runnable{
 	int killednum=0;
 	public static Object lock = new Object();
 	public static Object lock2 = new Object();
+	long start ,stop,diff;
+
 	
     public LMNtalGFrame(){
     	this.start();
@@ -79,13 +81,14 @@ public class LMNtalGFrame implements Runnable{
     	}
     }
     
-    /***/
+   /**マウスの位置を検出する。ライブラリmouseで使用*/
    public Point getMousePoint(AbstractMembrane m){
 	   String memname = getname(m);
 	   if(!windowmap.containsKey(memname)) return null;
 	   WindowSet winset = (WindowSet)windowmap.get(memname);
 	   return winset.window.getMousePosition();
    }
+   
     /**ウィンドウオブジェクトを生成*/
     private void setwindowmem(AbstractMembrane m){
 		WindowSet win = new WindowSet();
@@ -94,7 +97,10 @@ public class LMNtalGFrame implements Runnable{
 		if(!windowmap.containsKey(win.window.name)){
 			win.window.makewindow();
 			
-		windowmap.put(win.window.name, win);
+			windowmap.put(win.window.name, win);
+		}else{
+			WindowSet tmpwin = (WindowSet)windowmap.get(win.window.name);
+			tmpwin.window.timer = win.window.timer;
 		}
     }
     private void setgraphicmem(AbstractMembrane tmp){
@@ -112,7 +118,17 @@ public class LMNtalGFrame implements Runnable{
 				   /*ウィンドウ膜が登録済み*/
 				   if(windowmap.containsKey(n)){
 					   	WindowSet win = (WindowSet)windowmap.get(n);
+					   	
+						waitBusy(win.window.timer);
+						/*描画間隔の測定用*/
+						stop = System.currentTimeMillis();
+						diff = stop - start;
+						start = System.currentTimeMillis();
+						System.out.println("実行時間 : "+diff+"ミリ秒");
+						
 						win.window.setgraphicmem(tmp,distance);
+						
+
 						return;
 					}
 				   /*ウィンドウ膜が未登録*/
@@ -120,7 +136,14 @@ public class LMNtalGFrame implements Runnable{
 					   if(searchwinmem(m)){
 						   n = getname(m);
 						   if(windowmap.containsKey(n)){
+								
 							   	WindowSet win = (WindowSet)windowmap.get(n);
+								waitBusy(win.window.timer);
+								/*描画間隔の測定用*/
+								stop = System.currentTimeMillis();
+								diff = stop - start;
+								start = System.currentTimeMillis();
+								System.out.println("実行時間 : "+diff+"ミリ秒");
 								win.window.setgraphicmem(tmp,distance);
 								return;
 							}
@@ -158,7 +181,7 @@ public class LMNtalGFrame implements Runnable{
 	   //windowmap.put(killme, win);
 	   
 	   killednum++;
-	   if(killednum == windowmap.size()){
+	   if(killednum >= windowmap.size()){
 		   runtime.LMNtalRuntimeManager.terminateAllThreaded();
 		   th=null;  
 	   }
@@ -187,7 +210,7 @@ public class LMNtalGFrame implements Runnable{
 	public void start() {
 		if (th == null) {
 			th = new Thread(this);
-			th.start();
+//			th.start();
 		}
 	}
 
@@ -195,29 +218,30 @@ public class LMNtalGFrame implements Runnable{
 	public void run() {
 		Thread me = Thread.currentThread();
 		while (me == th) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-			}
+//			try {
+//				Thread.sleep(10000);
+//			} catch (InterruptedException e) {
+//			}
 		}
 	}
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public boolean onTrace() {
 		if(Env.fGraphic) {
 ////			lmnPanel.start();
-			waitBusy();
+			//waitBusy();
 ////			lmnPanel.stop();
 		}
 //		return running;
 		return true;
 	}
 	
-	public void waitBusy() {
+	public void waitBusy(long s) {
 		busy = true;
 ////		System.out.print("*");
 //		while(busy) {
 			try {
-				th.sleep(1);
+				th.sleep(s);
+				//System.out.println("wait");
 				//busy = waitawhile;
 			} catch (Exception e) {
 			}
