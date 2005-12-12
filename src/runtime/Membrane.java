@@ -253,6 +253,7 @@ public final class Membrane extends AbstractMembrane {
 		//親膜のロックを取得しているので、タスクが変化したりこの膜が除去されたりする事はない。
 		Task t = (Task)task;
 		//TODO 必要のない時はタスクを止めないようにする。
+		//TODO 停止要求を送ってすぐに復帰するメソッドを実装し、それを利用しても良い。
 		t.suspend();
 		synchronized(this) {
 			while (!lock()) {
@@ -272,6 +273,7 @@ public final class Membrane extends AbstractMembrane {
 	public boolean asyncLock() {
 		Task t = (Task)task;
 		AbstractMembrane root = t.getRoot();;
+		//blockingLock と違い、停止するまで待つ必要がある。
 		t.suspend();
 		synchronized(this) {
 			while (true) {

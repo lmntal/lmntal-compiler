@@ -264,9 +264,10 @@ class Task extends AbstractTask implements Runnable {
 
 	// タスクのルールスレッドに対する停止要求
 
-	/** このタスクのルールスレッドに対して停止要求を発行しているスレッドの個数
-	 * todo LinkedListを使ってスレッドをキューで管理することにより飢餓を無くす。
-	 * これには Membrane#blockingLock() を書き直すことが含まれる。*/
+	/**
+	 *  このタスクのルールスレッドに対して停止要求を発行しているスレッドの個数。
+	 *  複数のスレッドで操作するため、Task に関する synchronized 節内で操作する必要がある。
+	 */
 	private int lockRequestCount = 0;
 	private boolean running = false;
 	
