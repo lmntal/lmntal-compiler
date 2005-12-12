@@ -1,5 +1,5 @@
 {
-window,position(0,0),size(500,500),name("window").
+window,position(0,0),size(500,500),name("window").timer(1000).
 	{graphic,position(200,200),name("global"),
 	    {draw,name("oval"),getpic("oval"),position(-70,-70),size(140,140),sequence(0),color(0,0,255)},
 		{graphic,position(0,0),name("all"),angle(0),

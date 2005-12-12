@@ -1,10 +1,8 @@
 package graphic;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.util.*;
 
-import javax.swing.*;
 
 import runtime.AbstractMembrane;
 import runtime.Env;
@@ -18,7 +16,8 @@ import test.GUI.Node;
  *
  */
 
-public class LMNtalGFrame implements Runnable{
+//public class LMNtalGFrame{
+	public class LMNtalGFrame implements Runnable{
 
 	public LMNGraphPanel lmnPanel = null;
 	boolean busy;
@@ -27,7 +26,6 @@ public class LMNtalGFrame implements Runnable{
 	HashMap windowmap=new HashMap();
 	LinkedList tmplist = new LinkedList();
 	int killednum=0;
-	public static Object lock = new Object();
 	public static Object lock2 = new Object();
 	long start ,stop,diff;
 
@@ -40,22 +38,20 @@ public class LMNtalGFrame implements Runnable{
 	 * 指定された名称のアトムが存在するか検索。
 	 * あれば真を、なければ偽を返す。
 	 */
-	private String searchatom(AbstractMembrane m){
-		synchronized(lock){
-			Iterator ite = m.atomIterator();
-			Node a;
-	
-			while(ite.hasNext()){
-				a = (Node)ite.next();
-				if(a.getName() == "window"){
-					return "window";
-				}else if(a.getName() == "draw"){
-					return "draw";
-				}else if(a.getName() == "graphic"){
-					return "graphic";
-				}else if(a.getName() == "remove"){
-					return "remove";
-				}
+	private synchronized String searchatom(AbstractMembrane m){
+		Iterator ite = m.atomIterator();
+		Node a;
+
+		while(ite.hasNext()){
+			a = (Node)ite.next();
+			if(a.getName() == "window"){
+				return "window";
+			}else if(a.getName() == "draw"){
+				return "draw";
+			}else if(a.getName() == "graphic"){
+				return "graphic";
+			}else if(a.getName() == "remove"){
+				return "remove";
 			}
 		}
 		return null;
@@ -67,10 +63,9 @@ public class LMNtalGFrame implements Runnable{
 		
 	}
 	
-    public void setmem(AbstractMembrane m){
-    	String s = searchatom(m);
-    	synchronized (lock) {
-    		/*ウィンドウ膜の登録*/
+    public synchronized void setmem(AbstractMembrane m){
+		String s = searchatom(m);
+			/*ウィンドウ膜の登録*/
 	    	if(s == "window"){
 	    		setwindowmem(m);    		
 	    	}
@@ -78,7 +73,6 @@ public class LMNtalGFrame implements Runnable{
 	    	else if(s=="draw" || s=="graphic"){
 	    		setgraphicmem(m);
 	    	}
-    	}
     }
     
    /**マウスの位置を検出する。ライブラリmouseで使用*/
@@ -103,55 +97,56 @@ public class LMNtalGFrame implements Runnable{
 			tmpwin.window.timer = win.window.timer;
 		}
     }
-    private void setgraphicmem(AbstractMembrane tmp){
-	   synchronized(lock){
+    private synchronized void setgraphicmem(AbstractMembrane tmp){
+	   if(tmp == null || tmp.isRoot() )return;
+	   AbstractMembrane m = tmp.getParent();
+	   /*ウィンドウ膜との距離*/
+	   int distance = 0;
+	   
+	   while(m!=null){
+		   if(m.isRoot())
+			   return;
+		   String n = getname(m);
+		   /*ウィンドウ膜が登録済み*/
+		   if(windowmap.containsKey(n)){
+			   	WindowSet win = (WindowSet)windowmap.get(n);
+			   	
+				/*描画間隔の測定用*/
+				stop = System.currentTimeMillis();
+				diff = stop - start;
+				long diff2 = win.window.timer - diff;
+				if(diff2 > 0)
+					waitBusy(diff2);
+				System.out.println("実行時間 : "+diff+"ミリ秒");
+				start = System.currentTimeMillis();
+				
+				win.window.setgraphicmem(tmp,distance);
+				
 
-			   if(tmp == null || tmp.isRoot())return;
-			   AbstractMembrane m = tmp.getParent();
-			   /*ウィンドウ膜との距離*/
-			   int distance = 0;
-			   
-			   while(m!=null){
-				   if(m.isRoot())
-					   return;
-				   String n = getname(m);
-				   /*ウィンドウ膜が登録済み*/
+				return;
+			}
+		   /*ウィンドウ膜が未登録*/
+		   else{
+			   if(searchwinmem(m)){
+				   n = getname(m);
 				   if(windowmap.containsKey(n)){
+						
 					   	WindowSet win = (WindowSet)windowmap.get(n);
-					   	
-						waitBusy(win.window.timer);
 						/*描画間隔の測定用*/
 						stop = System.currentTimeMillis();
 						diff = stop - start;
-						start = System.currentTimeMillis();
+						long diff2 = win.window.timer - diff;
+						if(diff2 > 0)
+							waitBusy(diff2);
 						System.out.println("実行時間 : "+diff+"ミリ秒");
-						
+						start = System.currentTimeMillis();
 						win.window.setgraphicmem(tmp,distance);
-						
-
 						return;
 					}
-				   /*ウィンドウ膜が未登録*/
-				   else{
-					   if(searchwinmem(m)){
-						   n = getname(m);
-						   if(windowmap.containsKey(n)){
-								
-							   	WindowSet win = (WindowSet)windowmap.get(n);
-								waitBusy(win.window.timer);
-								/*描画間隔の測定用*/
-								stop = System.currentTimeMillis();
-								diff = stop - start;
-								start = System.currentTimeMillis();
-								System.out.println("実行時間 : "+diff+"ミリ秒");
-								win.window.setgraphicmem(tmp,distance);
-								return;
-							}
-					   }
-				   }
-					m = m.getParent();
-					distance++;
 			   }
+		   }
+			m = m.getParent();
+			distance++;
 	   }
    }
     
@@ -172,19 +167,17 @@ public class LMNtalGFrame implements Runnable{
     }
    
     /**ウィンドウが閉じられたときの動作。すべてのウィンドウが閉じたら終了。*/
-   public synchronized void closewindow(String killme){
-	   if(!windowmap.containsKey(killme))
+   public void closewindow(String killme){
+	   if(!windowmap.containsKey(killme)){
 		   return;
+	   }
 	   
 	   WindowSet win = (WindowSet)windowmap.get(killme);
 	   win.killed = true;
-	   //windowmap.put(killme, win);
+//	   windowmap.put(killme, win);
 	   
 	   killednum++;
-	   if(killednum >= windowmap.size()){
-		   runtime.LMNtalRuntimeManager.terminateAllThreaded();
-		   th=null;  
-	   }
+
    }
    
    /**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
@@ -210,7 +203,7 @@ public class LMNtalGFrame implements Runnable{
 	public void start() {
 		if (th == null) {
 			th = new Thread(this);
-//			th.start();
+			th.start();
 		}
 	}
 
@@ -218,10 +211,14 @@ public class LMNtalGFrame implements Runnable{
 	public void run() {
 		Thread me = Thread.currentThread();
 		while (me == th) {
-//			try {
-//				Thread.sleep(10000);
-//			} catch (InterruptedException e) {
-//			}
+			try {
+				th.sleep(1000);
+				if(killednum == windowmap.size()){
+				   runtime.LMNtalRuntimeManager.terminateAllThreaded();
+				   th=null;  
+			   }
+			} catch (InterruptedException e) {
+			}
 		}
 	}
 	/** @return ルールスレッドの実行を継続してよいかどうか */
@@ -236,11 +233,12 @@ public class LMNtalGFrame implements Runnable{
 	}
 	
 	public void waitBusy(long s) {
-		busy = true;
+//		busy = true;
 ////		System.out.print("*");
 //		while(busy) {
 			try {
 				th.sleep(s);
+//				th.wait(s);
 				//System.out.println("wait");
 				//busy = waitawhile;
 			} catch (Exception e) {

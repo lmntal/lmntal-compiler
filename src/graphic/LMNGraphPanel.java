@@ -336,8 +336,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	 */
 	public void start() {
 		if (th == null) {
-//			th = new Thread(this);
-//			th.start();
+			th = new Thread(this);
+			th.start();
 		}
 	}
 	public void stop() {

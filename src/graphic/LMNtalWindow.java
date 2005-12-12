@@ -75,8 +75,9 @@ public class LMNtalWindow extends JFrame{
 					lmnPanel.stop();
 					lmnPanel = null;
 				}
-				lmnframe.closewindow(name);
 				killed = true;
+				System.out.println("killed");
+				lmnframe.closewindow(name);
 				
 			}
 		});
