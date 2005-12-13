@@ -33,8 +33,7 @@ size(50,50).
 vx(5).
 vy(5).
 }.
-
-b.
+b.+(X).
 
 {name("hoge"),color(0,255,0),a(1),$p[]},b :- b(1),{name("hoge"),color(0,255,0),a(1),$p[]},{name("moge"),color(0,0,255),a(-1),$p[]}.
 
@@ -47,4 +46,5 @@ b.
 {position(X,Y),vx(VX), $p , @p} :-  VX < 0 , X =< 60, int(Y)  | {position( X , Y ),vx(integer.rnd(15) + 1),$p}.
 {position(X,Y),vy(VY), $p , @p} :-  VY > 0 , Y >= 350, int(X) | {position( X , Y ),vy(-1 * integer.rnd(15) - 1),$p}.
 {position(X,Y),vy(VY), $p , @p} :-  VY < 0 , Y =< 60, int(X)  | {position( X , Y ),vy(integer.rnd(15) + 1),$p}.
-}
+},
+timer:benchmark(X,"Elapsed Time")

@@ -1,20 +1,5 @@
 {
   window,size(640,530),name("hoge"),bgcolor(0,0,0).
-  
-  
-	%枝の角度
-	angle(30).
-	%繰り返し回数、X、Y、長さ、枝の初期角度
-	tree(3,530,320,50,90).
-	now(0).
-	
-	tree(N,X,Y,L,R),angle(R2),now(NOW) :-
-	 int(NOW),int(R),int(R2),int(L),int(N),int(X),int(Y),
-	 N > 0,
-	 R3 = 17453 * R / 100000|
-	tree(N-1,L * math.cos(R3,10000)/10000 + X,L * math.sin(R3,10000)/10000 + Y,L,R - R2),
-	tree(N-1,L * math.cos(R3,10000)/10000 + X,L * math.sin(R3,10000)/10000 + Y,L,R + R2),
-	angle(R2),now(NOW+1),
-	{draw,name(NOW),getpic("line"),position(X,530-Y,L * math.cos(R3,10000)/10000 + X,530-L * math.sin(R3,10000)/10000 + Y),color(255,0,0)}.
-	
+  a.
+  a:-b(mouse.framePointX).
 }.
