@@ -1,4 +1,4 @@
-{window,position(0,0),size(500,500),name("window").
+{window,position(0,0),size(500,500),name("window"),timer(50).
 
 %ソートルール
 {name(_IN),size(_IS,10),$p},{name(_IN2),size(_IS2,10),$q} :-
