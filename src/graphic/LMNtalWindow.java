@@ -73,7 +73,7 @@ public class LMNtalWindow extends JFrame{
 				//閉じる際に、lmnPanelを殺す。
 				if(lmnPanel!=null){
 					lmnPanel.stop();
-					lmnPanel = null;
+//					lmnPanel = null;
 				}
 				killed = true;
 				System.out.println("killed");

@@ -28,6 +28,7 @@ import test.GUI.Node;
 	int killednum=0;
 	public static Object lock2 = new Object();
 	long start ,stop,diff;
+	public boolean running = true;
 
 	
     public LMNtalGFrame(){
@@ -117,7 +118,7 @@ import test.GUI.Node;
 				long diff2 = win.window.timer - diff;
 				if(diff2 > 0)
 					waitBusy(diff2);
-				System.out.println("実行時間 : "+diff+"ミリ秒");
+//				System.out.println("実行時間 : "+diff+"ミリ秒");
 				start = System.currentTimeMillis();
 				
 				win.window.setgraphicmem(tmp,distance);
@@ -138,7 +139,7 @@ import test.GUI.Node;
 						long diff2 = win.window.timer - diff;
 						if(diff2 > 0)
 							waitBusy(diff2);
-						System.out.println("実行時間 : "+diff+"ミリ秒");
+//						System.out.println("実行時間 : "+diff+"ミリ秒");
 						start = System.currentTimeMillis();
 						win.window.setgraphicmem(tmp,distance);
 						return;
@@ -177,6 +178,9 @@ import test.GUI.Node;
 //	   windowmap.put(killme, win);
 	   
 	   killednum++;
+	   if(killednum == windowmap.size()){
+		  busy=true;  
+	   }
 
    }
    
@@ -213,10 +217,6 @@ import test.GUI.Node;
 		while (me == th) {
 			try {
 				th.sleep(1000);
-				if(killednum == windowmap.size()){
-				   runtime.LMNtalRuntimeManager.terminateAllThreaded();
-				   th=null;  
-			   }
 			} catch (InterruptedException e) {
 			}
 		}
@@ -228,6 +228,9 @@ import test.GUI.Node;
 			//waitBusy();
 ////			lmnPanel.stop();
 		}
+//		System.out.println(busy);
+		if(busy)return false;
+		
 //		return running;
 		return true;
 	}
@@ -241,7 +244,7 @@ import test.GUI.Node;
 //				th.wait(s);
 				//System.out.println("wait");
 				//busy = waitawhile;
-			} catch (Exception e) {
+			} catch (InterruptedException e) {
 			}
 //		}
 	}

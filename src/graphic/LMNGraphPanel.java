@@ -28,6 +28,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	
 	public LMNGraphPanel(LMNtalWindow f) {
 		super();
+		System.out.println("initpanel");
 		frame = f;
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
