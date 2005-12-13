@@ -229,8 +229,8 @@ import test.GUI.Node;
 ////			lmnPanel.stop();
 		}
 //		System.out.println(busy);
-		if(busy)return false;
-		
+//		if(busy)return false;
+		if(busy)System.exit(0);		
 //		return running;
 		return true;
 	}
