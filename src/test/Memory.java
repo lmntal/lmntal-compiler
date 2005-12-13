@@ -2,7 +2,9 @@ package test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import runtime.Atom;
 import runtime.AtomSet;
@@ -27,6 +29,14 @@ public class Memory {
 			if (i % 100 == 0)
 				show(i);
 			map.put(data[i], data[i]);
+		}
+		show(N);
+		
+		Set set2= new HashSet();
+		for (int i = 0; i < N; i++) {
+			if (i % 100 == 0)
+				show(i);
+			set2.add(data[i]);
 		}
 		show(N);
 		
