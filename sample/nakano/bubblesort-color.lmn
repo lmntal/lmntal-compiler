@@ -1,0 +1,27 @@
+{window,position(0,0),size(500,500),name("window"),timer(50).
+
+%ソートルール
+done(_ID),
+{name(_ID2),size(_IS2,10),color(_IRD,0,0),$r,@r},
+{name(_IN),size(_IS,10),color(_IR,0,0),$p,@p},
+{name(_IN2),size(_IS2,10),color(_IR2,0,0),$q,@q} :-
+	 _ID=_ID2,_IN = _IN2 - 1  ,_IS > _IS2 | done(_ID),
+	 {name(_IN),size(_IS2,10),color(0,0,0),$p},
+	 {name(_IN),size(_IS2,10),color(255,0,0),$p},
+	 {name(_IN2),size(_IS,10),color(0,0,0),$q}.
+
+
+done(_ID),
+{name(_IN),size(_IS,10),color(_IR,0,0),$p,@p},
+{name(_IN2),size(_IS2,10),color(_IR2,0,0),$q,@q} :-
+	 _ID=_IN,_IN = _IN2 - 1  ,_IS > _IS2 | done(_ID),
+	 {name(_IN),size(_IS2,10),color(0,0,0),$r},
+	 {name(_IN),size(_IS2,10),color(255,0,0),$p},
+	 {name(_IN2),size(_IS,10),color(0,0,0),$q}.
+
+
+%要素生成ルール
+ret=gen(45).
+ret=gen(N) :- N > 0 | ret=gen(N-1),{name(N),position(0,(N-1)*10),size((integer.rnd(44)+1)*10,10),draw,getpic("fillrect"),color(0,0,0)}.
+ret=gen(N) :- N = 0 | done(0).
+}.
