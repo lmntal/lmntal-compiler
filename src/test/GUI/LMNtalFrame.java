@@ -119,7 +119,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public boolean onTrace() {
-		if(Env.fGUI) {
+		if(Env.fGUI && Env.gui.running) {
 			lmnPanel.start();
 //			Env.gui.lmnPanel.setMembrane((runtime.Membrane)Env.theRuntime.getGlobalRoot());
 			Env.gui.waitBusy();
