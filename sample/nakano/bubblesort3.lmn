@@ -1,6 +1,7 @@
-{window,position(0,0),size(500,500),name("window"),timer(1000).
+{window,position(0,0),size(500,500),name("window"),timer(1).
+
 %要素数
-max_num(10).
+max_num(45).
 
 
 %ソートルール
