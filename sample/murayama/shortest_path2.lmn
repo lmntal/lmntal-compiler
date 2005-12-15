@@ -17,16 +17,15 @@ module(thread).
 		thread.at(N, {atoms or rules}).
 		Create atoms or rules at a thread numbered N.
 	*/
-	thread.at(N,{$p,@p}), thread(M,{$q,@q}) :- int(N),int(M), M=:=(N+1) |
-		thread(N+1,{$p,$q,@p,@q}).
-		
+	thread.at(N,{$p,@p}), thread(M,{$q,@q}@T) :- int(N),int(M), M=:=(N+1) |
+		thread(N+1,{$p,$q,@p,@q}@T).
 	
 	/*
 		thread.any({atoms or rules}).
 		Create atoms or rules at a thread randomly selected.
 	*/
-	thread.any({$p,@p}), thread(M,{$q,@q}@T) :- int(M) |
-		thread(M, {$p,$q,@p,@q}@T).
+	thread.any({$p,@p}), thread(M,{$q,@q}) :- int(M) |
+		thread(M, {$p,$q,@p,@q}).
 
 	/*
 		thread.all({atoms or rules}).
