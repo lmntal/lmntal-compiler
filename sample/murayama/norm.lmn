@@ -1,7 +1,7 @@
 % スレッドを複数たててノルムの計算をする
 
 threadnum(4).
-generate(100).
+generate(10000).
 threadnum(X),generate(Y) :- int(X),int(Y) |
         threadnum(X),createthread(X),gen(Y/X).
 {

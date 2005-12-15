@@ -27,7 +27,7 @@ timer:benchmark(X,"Elapsed Time")
 			norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z).
 			norm(N0), norm(N1), norm(N2), norm(N3) :- norm(N0+N1+N2+N3).
 		}@"localhost").
-	generate(10000).
+	generate(1000).
 	generate(X),thread(N, {$p,@p}@T) :- X>0, N==(X mod 4) |
 		 thread(N, {n(integer.rnd(100)),$p,@p}@T), generate(X-1).
 	norm(N0), norm(N1), norm(N2), norm(N3) :- norm(N0+N1+N2+N3).

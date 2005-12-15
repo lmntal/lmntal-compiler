@@ -2,7 +2,7 @@
 
 threadnum(4).
 {
-		generate(1000).
+		generate(5000).
         generate(X) :- X>0 | n(integer.rnd(100)), generate(X-1).
         generate(0) :- generated.
 }.

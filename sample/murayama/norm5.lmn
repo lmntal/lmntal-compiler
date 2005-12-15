@@ -1,9 +1,10 @@
+timer:benchmark(X,"Elapsed Time"),
 {
-	{$p} :- $p.
+	+(X).
 	thread.create(4).
-	thread.all({norm(0)}_).
-	thread.all({norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z)}_).
-	generate(1000).
-	generate(X) :- X>0 | thread.at(X mod 4, {n(integer.rnd(100))}_), generate(X-1).
+	thread.all({norm(0)}).
+	go, generate(0) :- thread.all({norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z)}).
+	generate(1500).
+	generate(X) :- X>0 | thread.at(X mod 4, {n(integer.rnd(100))}), generate(X-1).
 	norm(N), norm(M) :- norm(N+M).
 }
