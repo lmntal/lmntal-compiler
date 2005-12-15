@@ -252,17 +252,27 @@ public final class Membrane extends AbstractMembrane {
 	public boolean blockingLock() {
 		//親膜のロックを取得しているので、タスクが変化したりこの膜が除去されたりする事はない。
 		Task t = (Task)task;
-		//TODO 必要のない時はタスクを止めないようにする。
-		//TODO 停止要求を送ってすぐに復帰するメソッドを実装し、それを利用しても良い。
-		t.suspend();
-		synchronized(this) {
-			while (!lock()) {
-				try {
-					wait();
-				} catch (InterruptedException e) {}
+		boolean stopped = false;
+		while (true) {
+			if (lockThread == t.thread) {
+				//管理タスクのルールスレッドがロックしているかもしれない時は停止要求を送る
+				//suspend を呼んだときはすでに解放済みかもしれないが、問題はない。
+				//タスクに関する synchronized 節を利用するので、下の synchronized 節に入れる事はできない。
+				t.suspend();
+				stopped = true;
+			}
+			synchronized(this) {
+				if (lock()) {
+					break;
+				} else {
+					try {
+						wait();
+					} catch (InterruptedException e) {}
+				}
 			}
 		}
-		t.resume();
+		if (stopped)
+			t.resume();
 		return true;
 	}
 	/**
