@@ -8,6 +8,8 @@ class SrcMembrane {
 	LinkedList process = null;
 	/** 終了フラグの有無 */
 	public boolean stable = false;
+	/** 膜のタイプ */
+	public int kind = 0;
 	/** ＠指定またはnull */
 	Object pragma = null;
 	

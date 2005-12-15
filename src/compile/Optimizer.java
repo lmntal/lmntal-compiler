@@ -673,9 +673,7 @@ public class Optimizer {
 			while (functorIterator.hasNext()) {
 				Functor functor = (Functor)functorIterator.next();
 				//removeproxies・insertproxiesがあるので、再利用できない
-				if (functor.equals(Functor.INSIDE_PROXY) ||
-					functor.equals(Functor.OUTSIDE_PROXY) ||
-					functor.equals(Functor.STAR)) {
+				if (functor instanceof runtime.SpecialFunctor) {
 					continue;
 				}
 				Iterator removedAtomIterator = removedAtoms.iterator(mem, functor);

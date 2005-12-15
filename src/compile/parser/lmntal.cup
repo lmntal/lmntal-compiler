@@ -25,6 +25,8 @@ parser code {:
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
 terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE, RBRACE_SLASH, RBRACE_AT, RBRACE_SLASH_AT,
+				RBRACE_UNDERBAR, RBRACE_UNDERBAR_SLASH,
+				RBRACE_UNDERBAR_AT, RBRACE_UNDERBAR_SLASH_AT,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
@@ -317,6 +319,26 @@ Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 					   RESULT = sMem; :}
 				| LBRACE WorldProcessList:list RBRACE_AT UnitAtom:atom
 					{: SrcMembrane sMem = new SrcMembrane(list);
+					   sMem.pragma = atom;
+					   RESULT = sMem; :}
+				| LBRACE WorldProcessList:list RBRACE_UNDERBAR_SLASH
+					{: SrcMembrane sMem = new SrcMembrane(list);
+					   sMem.stable = true;
+					   sMem.kind = 1;
+					   RESULT = sMem; :}
+				| LBRACE WorldProcessList:list RBRACE_UNDERBAR
+					{: SrcMembrane sMem = new SrcMembrane(list);
+					   sMem.kind = 1;
+					   RESULT = sMem; :}
+				| LBRACE WorldProcessList:list RBRACE_UNDERBAR_SLASH_AT UnitAtom:atom
+					{: SrcMembrane sMem = new SrcMembrane(list);
+					   sMem.stable = true;
+					   sMem.kind = 1;
+					   sMem.pragma = atom;
+					   RESULT = sMem; :}
+				| LBRACE WorldProcessList:list RBRACE_UNDERBAR_AT UnitAtom:atom
+					{: SrcMembrane sMem = new SrcMembrane(list);
+					   sMem.kind = 1;
 					   sMem.pragma = atom;
 					   RESULT = sMem; :}
 				;

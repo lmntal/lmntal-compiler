@@ -123,14 +123,18 @@ public final class RemoteMembrane extends AbstractMembrane {
 	// ボディ操作3 - 子膜の操作
 
 	/** 新しい子膜を作成する */
-	public AbstractMembrane newMem() {
+	public AbstractMembrane newMem(int k) {
 		String newglobalid = remote.generateNewID();
 		RemoteMembrane submem = new RemoteMembrane((RemoteTask)task, this, newglobalid);
+		submem.changeKind(k);
 		//memids.put(submem.globalid, newglobalid);
 		mems.add(submem);
 		remote.send("NEWMEM", newglobalid, this);
 		remote.registerMem(newglobalid, submem);
 		return submem;
+	}
+	public AbstractMembrane newMem() {
+		return newMem(0);
 	}
 
 	public void removeMem(AbstractMembrane mem) {

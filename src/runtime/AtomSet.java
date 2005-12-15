@@ -22,6 +22,8 @@ public final class AtomSet implements Serializable {
 	private int size = 0;
 	/** 実際にアトムの集合を管理している変数 */
 	private Map atoms = new HashMap();
+	/** OUTSIDE_PROXYの集合を管理している変数 */
+	private Map outs = new HashMap();
 
 	/** アトム数の取得 */
 	public int size() {
@@ -30,16 +32,26 @@ public final class AtomSet implements Serializable {
 	/** 自由リンク管理アトム以外のアトムの数の取得 */
 	public int getNormalAtomCount() {
 		return size - getAtomCountOfFunctor(Functor.INSIDE_PROXY)
-					 - getAtomCountOfFunctor(Functor.OUTSIDE_PROXY);
+					 - getOutCount();
 	}
 	/** 指定されたFunctorを持つアトムの数の取得 */
 	public int getAtomCountOfFunctor(Functor f) {
-		Collection c = (Collection)atoms.get(f);
+		Collection c = f.isOUTSIDE_PROXY() ? (Collection)outs.get(f)
+										   : (Collection)atoms.get(f);
 		if (c == null) {
 			return 0;
 		} else {
 			return c.size();
 		}
+	}
+	/** OUTSIDE_PROXYの数の取得 */
+	public int getOutCount() {
+		Iterator i = outs.values().iterator();
+		int k=0;
+		while(i.hasNext()){
+			k += ((Collection)i.next()).size();
+		}
+		return k;
 	}
 	/** 空かどうかを返す */
 	public boolean isEmpty() {
@@ -52,7 +64,7 @@ public final class AtomSet implements Serializable {
 
 	/** この集合内にあるアトムの反復子を返す */
 	public Iterator iterator() {
-		return new AtomIterator(atoms);
+		return new AtomIterator(atoms, outs);
 	}
 	
 	/** 与えられた名前を持つアトムの反復子を返す。所属膜指定を無視する版 */
@@ -61,16 +73,21 @@ public final class AtomSet implements Serializable {
 //	}
 	
 	/** 与えられた名前を持つアトムの反復子を返す */
-	public Iterator iteratorOfFunctor(Functor functor) {
-		Collection c = (Collection)atoms.get(functor);
+	public Iterator iteratorOfFunctor(Functor f) {
+		Collection c = f.isOUTSIDE_PROXY() ? (Collection)outs.get(f)
+										   : (Collection)atoms.get(f);
 		if (c == null) {
 			return Util.NULL_ITERATOR;
 		} else {
 			return c.iterator();
 		}
 	}
+	/** OUTSIDE_PROXYの反復氏を返す */
+	public Iterator iteratorOfOUTSIDE_PROXY() {
+		return new OutIterator(outs);
+	}
 	/** 
-	 * Functorの反復子を返す。
+	 * OUTSIDE_PROXYを除くFunctorの反復子を返す。
 	 * この集合内にあるアトムのFunctorは全てこの反復子を使って取得できるが、
 	 * この反復子で取得できるFunctorを持つアトムが必ずこの集合内にあるとは限らない。
 	 * 
@@ -121,13 +138,17 @@ public final class AtomSet implements Serializable {
 	 */
 	public boolean add(Object o) {
 		Functor f = ((Atom)o).getFunctor();
-		Collection c = (Collection)atoms.get(f);
+		Collection c = f.isOUTSIDE_PROXY() ? (Collection)outs.get(f)
+										   : (Collection)atoms.get(f);
 		if (c == null) {
 			if (Env.shuffle >= Env.SHUFFLE_ATOMS)
 				c = new RandomSet();
 			else
 				c = new HashSet();
-			atoms.put(f, c);
+			if(f.isOUTSIDE_PROXY())
+				outs.put(f, c);
+			else
+				atoms.put(f, c);
 		}
 		if (c.add(o)) {
 			size++;
@@ -142,7 +163,8 @@ public final class AtomSet implements Serializable {
 	 */
 	public boolean remove(Object o) {
 		Functor f = ((Atom)o).getFunctor();
-		Collection c = (Collection)atoms.get(f);
+		Collection c = f.isOUTSIDE_PROXY() ? (Collection)outs.get(f)
+										   : (Collection)atoms.get(f);
 		if (c.remove(o)) {
 			size--;
 			return true;
@@ -201,6 +223,7 @@ public final class AtomSet implements Serializable {
 	/** 全ての要素を除去する */
 	protected void clear() {
 		atoms.clear();
+		outs.clear();
 		size = 0;
 	}
 	
@@ -227,37 +250,106 @@ public final class AtomSet implements Serializable {
 /** AtomSetの要素に対して使用する反復子 */
 final class AtomIterator implements Iterator {
 	/** Functorをキーとし、アトムの集合（Set）を値とするMap */
-	Map atoms;
+	Map atoms, outs;
 	/** あるFunctorを持つアトムの集合の反復子 */
-	Iterator atomSetIterator;
+	Iterator atomSetIterator, outSetIterator;
 	/** あるFunctorを持つアトムを列挙する反復子。 */
 	Iterator atomIterator;
-
+	/** atomSetIteratorのhasNext()がfalseになったらtrue */
+	boolean atomSet_null = false;
+	
 	/** 指定されたMap内にあるアトムを列挙する反復子を生成する */
-	AtomIterator(Map atoms) {
+	AtomIterator(Map atoms, Map outs) {
 		this.atoms = atoms;
+		this.outs = outs;
 		atomSetIterator = atoms.values().iterator();
+		outSetIterator = outs.values().iterator();
 		if (atomSetIterator.hasNext()) {
 			atomIterator = ((Collection)atomSetIterator.next()).iterator();
+		} else if(outSetIterator.hasNext()) {
+			atomSet_null = true;
+			atomIterator = ((Collection)outSetIterator.next()).iterator();
 		} else {
 			atomIterator = Util.NULL_ITERATOR;
 		}
 	}
 	public boolean hasNext() {
+		if(atomSet_null)
+			return hasNext2();
 		while (atomIterator.hasNext() == false) {
 			if (atomSetIterator.hasNext() == false) {
-				return false;
+				atomSet_null = true;
+				return hasNext2();
 			}
 			atomIterator = ((Collection)atomSetIterator.next()).iterator();
+		}
+		return true;
+	}
+	private boolean hasNext2() {
+		while (atomIterator.hasNext() == false) {
+			if (outSetIterator.hasNext() == false) {
+				return false;
+			}
+			atomIterator = ((Collection)outSetIterator.next()).iterator();
 		}
 		return true;
 	}
 	public Object next() {
 		while (atomIterator.hasNext() == false) {
 			// 最後まで来ていた場合、ここでNoSuchElementExceptionが発生する
-			atomIterator = ((Collection)atomSetIterator.next()).iterator();
+			if(atomSet_null)				
+				atomIterator = ((Collection)outSetIterator.next()).iterator();
+			else if(atomSetIterator.hasNext())
+				atomIterator = ((Collection)atomSetIterator.next()).iterator();
+			else{
+				atomSet_null = true;
+				atomIterator = ((Collection)outSetIterator.next()).iterator();
+			}
+				
 		}
 		return atomIterator.next();
+	}
+	/** サポートしないので、UnsupportedOperationExceptionを投げる */
+	public void remove() {
+		throw new UnsupportedOperationException();
+	}
+	
+}
+
+/** AtomSetのOUTSIDE_PROXYの要素に対して使用する反復子 */
+final class OutIterator implements Iterator {
+	/** Functorをキーとし、アトムの集合（Set）を値とするMap */
+	Map outs;
+	/** あるFunctorを持つアトムの集合の反復子 */
+	Iterator outSetIterator;
+	/** あるFunctorを持つアトムを列挙する反復子。 */
+	Iterator outIterator;
+
+	/** 指定されたMap内にあるアトムを列挙する反復子を生成する */
+	OutIterator(Map outs) {
+		this.outs = outs;
+		outSetIterator = outs.values().iterator();
+		if (outSetIterator.hasNext()) {
+			outIterator = ((Collection)outSetIterator.next()).iterator();
+		} else {
+			outIterator = Util.NULL_ITERATOR;
+		}
+	}
+	public boolean hasNext() {
+		while (outIterator.hasNext() == false) {
+			if (outSetIterator.hasNext() == false) {
+				return false;
+			}
+			outIterator = ((Collection)outSetIterator.next()).iterator();
+		}
+		return true;
+	}
+	public Object next() {
+		while (outIterator.hasNext() == false) {
+			// 最後まで来ていた場合、ここでNoSuchElementExceptionが発生する
+			outIterator = ((Collection)outSetIterator.next()).iterator();
+		}
+		return outIterator.next();
 	}
 	/** サポートしないので、UnsupportedOperationExceptionを投げる */
 	public void remove() {

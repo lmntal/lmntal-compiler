@@ -161,13 +161,13 @@ public class Instruction implements Cloneable, Serializable {
      * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
      * <p><b>注意</b>　ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。*/
 	public static final int ANYMEM = 6;
-	static {setArgType(ANYMEM, new ArgType(true, ARG_MEM, ARG_MEM));}
+	static {setArgType(ANYMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));}
 	
 	/** localanymem [-dstmem, srcmem]
      * <br>反復するロック取得する最適化用ガード命令<br>
 	 * anymemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定されない。*/
 	public static final int LOCALANYMEM = LOCAL + ANYMEM;
-	static {setArgType(LOCALANYMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
+	static {setArgType(LOCALANYMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT));}
 
 	/** lock [srcmem]
 	 * <br>ロック取得するガード命令<br>
@@ -192,7 +192,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * @see lock */
 	public static final int GETMEM = 8;
 	// LOCALGETMEMは不要
-	static {setArgType(GETMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
+	static {setArgType(GETMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT));}
 	
 	/** getparent [-dstmem, srcmem]
 	 * <br>ガード命令<br>
@@ -572,13 +572,13 @@ public class Instruction implements Cloneable, Serializable {
 	 * @see newroot
 	 * @see addmem */
 	public static final int NEWMEM = 51;
-	static {setArgType(NEWMEM, new ArgType(true, ARG_MEM, ARG_MEM));}
+	static {setArgType(NEWMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));}
 
 	/** localnewmem [-dstmem, srcmem]
 	* <br>最適化用ボディ命令<br>
 	* newmemと同じ。ただし$srcmemは<B>本膜と同じタスクによって管理される</B>。*/
 	public static final int LOCALNEWMEM = LOCAL + NEWMEM;
-	static {setArgType(LOCALNEWMEM, new ArgType(true, ARG_MEM, ARG_MEM));}
+	static {setArgType(LOCALNEWMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));}
 
 	/** allocmem [-dstmem]
 	 * <br>最適化用ボディ命令<br>
@@ -598,7 +598,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * @see unlockmem */
 	public static final int NEWROOT = 53;
 	// LOCALNEWROOTは最適化の効果が無いため却下
-	static {setArgType(NEWROOT, new ArgType(true, ARG_MEM, ARG_MEM, ARG_ATOM));}
+	static {setArgType(NEWROOT, new ArgType(true, ARG_MEM, ARG_MEM, ARG_ATOM, ARG_INT));}
 	
 	/** movecells [dstmem, srcmem]
 	 * <br>ボディ命令<br>
@@ -1656,8 +1656,12 @@ public class Instruction implements Cloneable, Serializable {
 	}	
     /** anymem 命令を生成する */
     public static Instruction anymem(int dstmem, int srcmem) {
-		return new Instruction(ANYMEM,dstmem,srcmem);
+		return anymem(dstmem, srcmem, 0);
     }
+    public static Instruction anymem(int dstmem, int srcmem, int kind) {
+		return new Instruction(ANYMEM,dstmem,srcmem,kind);
+    }
+
     /** newatom 命令を生成する */
     public static Instruction newatom(int dstatom, int srcmem, Functor func) {
 		return new Instruction(NEWATOM,dstatom,srcmem,func);
@@ -1671,7 +1675,11 @@ public class Instruction implements Cloneable, Serializable {
     }
 	/** newmem 命令を生成する */
 	public static Instruction newmem(int ret, int srcmem) {
-		return new Instruction(NEWMEM,ret,srcmem);
+		return new Instruction(NEWMEM,ret,srcmem,0);
+	}
+	/** newmem 命令を生成する */
+	public static Instruction newmem(int ret, int srcmem, int kind) {
+		return new Instruction(NEWMEM,ret,srcmem,kind);
 	}
 //	/** newlink 命令を生成する
 //	 * @deprecated */
@@ -1687,8 +1695,11 @@ public class Instruction implements Cloneable, Serializable {
 		return new Instruction(LOADRULESET,mem,rs);
     }
     /** getmem 命令を生成する */
+    public static Instruction getmem(int ret, int atom, int kind) {
+		return new Instruction(GETMEM,ret,atom,kind);
+    }	
     public static Instruction getmem(int ret, int atom) {
-		return new Instruction(GETMEM,ret,atom);
+		return new Instruction(GETMEM,ret,atom,0);
     }	
     /** removeatom 命令を生成する @deprecated*/
 	public static Instruction removeatom(int atom) {
@@ -2101,7 +2112,6 @@ public class Instruction implements Cloneable, Serializable {
 			case Instruction.DEREFATOM:
 			case Instruction.DEREFFUNC:
 			case Instruction.GETFUNC:
-			case Instruction.GETMEM:
 			case Instruction.LOADFUNC:
 			case Instruction.GETLINK:
 			case Instruction.ALLOCLINK:
@@ -2109,6 +2119,7 @@ public class Instruction implements Cloneable, Serializable {
 			case Instruction.LOOKUPLINK:
 			case Instruction.IADD: case Instruction.IADDFUNC:
 				return false;
+			case Instruction.GETMEM:
 			case Instruction.DEREF:
 			case Instruction.DEREFLINK:
 			case Instruction.IDIV: case Instruction.IDIVFUNC:

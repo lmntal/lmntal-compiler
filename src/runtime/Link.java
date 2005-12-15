@@ -113,7 +113,7 @@ public final class Link implements Cloneable, Serializable {
 			if(srcSet.contains(a))continue; //既に辿ったアトム
 			if(avoSet.contains(a))return -1; //出現してはいけないアトム
 			if(a.getFunctor().equals(Functor.INSIDE_PROXY)||
-				a.getFunctor().equals(Functor.OUTSIDE_PROXY)) //プロキシに至ってはいけない
+				a.getFunctor().isOUTSIDE_PROXY()) //プロキシに至ってはいけない
 				return -1;
 			c++;
 			srcSet.add(a);

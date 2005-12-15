@@ -16,8 +16,10 @@ import java.util.Iterator;
 import java.util.ListIterator;
 
 import runtime.Functor;
+import runtime.SpecialFunctor;
 import runtime.Env;
 import compile.structure.*;
+
 
 public class LMNParser {
 
@@ -187,6 +189,7 @@ public class LMNParser {
 	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) throws ParseException {
 		Membrane submem = new Membrane(mem);
 		submem.stable = sMem.stable;
+		submem.kind = sMem.kind;
 		if (sMem.pragma instanceof SrcProcessContext) {
 			SrcProcessContext sProc = (SrcProcessContext)sMem.pragma;
 			String name = sProc.getQualifiedName();
@@ -383,7 +386,7 @@ public class LMNParser {
 				// Xがsubmemの子膜への直通リンクであり、そこでの膜間リンク名が1^Xの場合は、2^Xとする。
 				String index = "1";
 				if (freeLink.atom instanceof Atom
-				 && ((Atom)freeLink.atom).functor.equals(ProxyAtom.OUTSIDE_PROXY)
+				 && ((Atom)freeLink.atom).functor.isOUTSIDE_PROXY()
 				 && freeLink.atom.args[0].name.startsWith("1") ) {
 				 	index = "2";
 				}
@@ -403,7 +406,7 @@ public class LMNParser {
 				// 新しい自由リンク名を新しい自由リンク一覧に追加する
 				newFreeLinks.put(proxyLinkName, inside.args[0]);			
 				// この膜にoutside_proxyを追加
-				ProxyAtom outside = new ProxyAtom(mem, ProxyAtom.OUTSIDE_PROXY);
+				ProxyAtom outside = new ProxyAtom(mem, new SpecialFunctor("$out", 2, submem.kind));
 				outside.args[0] = new LinkOccurrence(proxyLinkName, outside, 0); // 内側
 				outside.args[1] = new LinkOccurrence(freeLink.name, outside, 1); // 外側
 				outside.args[0].buddy = inside.args[0];

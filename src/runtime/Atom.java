@@ -184,7 +184,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		pos3d = new Double3DPoint();
 	}
 	public boolean isVisible() {
-		return !(functor.equals(Functor.INSIDE_PROXY) || functor.equals(Functor.OUTSIDE_PROXY));
+		return !(functor instanceof SpecialFunctor);
 	}
 	public DoublePoint getPosition() {
 		return pos;
@@ -207,7 +207,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	}
 	public Node getNthNode(int index) {
 		Atom a = nthAtom(index);
-		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
+		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().isOUTSIDE_PROXY()) {
 //			System.out.println(a.nthAtom(0).nthAtom(0));
 //			System.out.println(a.nthAtom(0).nthAtom(1));
 			a = a.nthAtom(0).nthAtom(1);
@@ -217,7 +217,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	}
 	public Node3D getNthNode3d(int index) {
 		Atom a = nthAtom(index);
-		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
+		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().isOUTSIDE_PROXY()) {
 //			System.out.println(a.nthAtom(0).nthAtom(0));
 //			System.out.println(a.nthAtom(0).nthAtom(1));
 			a = a.nthAtom(0).nthAtom(1);
@@ -314,7 +314,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		if (functor.equals(Functor.INSIDE_PROXY)) {
 			//親膜へのリンクは送信しない
 			out.writeObject(args[1]);
-		} else if (functor.equals(Functor.OUTSIDE_PROXY)) {
+		} else if (functor.isOUTSIDE_PROXY()) {
 			//子膜へのリンクは、接続先atomID/memIDのみ送信。接続先はINSIDE_PROXYの第１引数なので、アトムのIDのみで十分。
 			Atom a = args[0].getAtom();
 			AbstractMembrane mem = a.mem;
@@ -343,7 +343,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		if (functor.equals(Functor.INSIDE_PROXY)) {
 			//とりあえず復元しておく。後でRemoteMembrane内でつなぎ直され、このアトムは使われなくなる。
 			args[1] = (Link)in.readObject();
-		} else if (functor.equals(Functor.OUTSIDE_PROXY)) {
+		} else if (functor.isOUTSIDE_PROXY()) {
 			//子膜内のINSIDE_PROXYは送信されてこないので、ここで生成する。
 			String hostname = (String)in.readObject();
 			String localid = (String)in.readObject();

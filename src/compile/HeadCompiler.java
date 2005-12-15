@@ -7,6 +7,7 @@ package compile;
 import java.util.*;
 import runtime.Env;
 import runtime.Functor;
+import runtime.SpecialFunctor;
 import runtime.Instruction;
 import runtime.InstructionList;
 import compile.structure.*;
@@ -231,7 +232,7 @@ public class HeadCompiler {
 					}
 					while (!buddySupermems.isEmpty()) {
 						mem = (Membrane)buddySupermems.removeFirst();
-						match.add( new Instruction(Instruction.FUNC, buddyatompath, Functor.OUTSIDE_PROXY) );
+						match.add( new Instruction(Instruction.FUNC, buddyatompath, new SpecialFunctor("$out",2, mem.kind) ) );
 						match.add( new Instruction(Instruction.DEREF, buddyatompath + 1, buddyatompath,     0, 0) );
 						match.add( new Instruction(Instruction.TESTMEM, memToPath(mem), buddyatompath + 1) );
 						match.add( new Instruction(Instruction.DEREF, buddyatompath + 2, buddyatompath + 1, 1, 1) );
@@ -294,7 +295,7 @@ public class HeadCompiler {
 				
 				// リンク先の膜の特定
 				
-				if (atom.functor.equals(runtime.Functor.OUTSIDE_PROXY) && pos == 0) {
+				if (atom.functor.isOUTSIDE_PROXY() && pos == 0) {
 					// 子膜へのリンクの場合、子膜の同一性を検査しなければならない
 					Membrane buddymem = buddyatom.mem;								
 					int buddymempath = memToPath(buddyatom.mem);
@@ -409,7 +410,7 @@ public class HeadCompiler {
 		
 				// 子膜を変数に取得する
 				submempath = varcount++;
-				match.add(Instruction.anymem(submempath, thismempath));
+				match.add(Instruction.anymem(submempath, thismempath, submem.kind));
 // NEQMEM は不要になっているが、参考のためにコードは残しておく。
 //				Iterator it2 = mem.mems.iterator();
 //				while (it2.hasNext()) {

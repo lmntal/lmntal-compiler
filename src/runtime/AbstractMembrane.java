@@ -74,6 +74,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
 	protected List rulesets = new ArrayList();
+	/** 膜のタイプ */
+	protected int kind = 0;
 	/** trueならばこの膜以下に適用できるルールが無い */
 	protected boolean stable = false;
 	/** 永続フラグ（trueならばルール適用できなくてもstableにならない）*/
@@ -169,6 +171,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** このセルの自由リンクの数を取得 */
 	public int getFreeLinkCount() {
 		return atoms.getAtomCountOfFunctor(Functor.INSIDE_PROXY);
+	}
+	/** 膜のタイプを取得 */
+	public int getKind() {
+		return kind;
+	}
+	/** 膜のタイプを変更 */
+	public void changeKind(int k) {
+		kind = k;
 	}
 	/** この膜とその子孫に適用できるルールがない場合にtrue */
 	public boolean isStable() {
@@ -343,6 +353,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/** 新しい子膜を作成し、活性化する */
 	public abstract AbstractMembrane newMem();
+	public abstract AbstractMembrane newMem(int k);
 	/** [final] 指定された（親膜の無い）膜をこの膜の子膜として追加する。
 	 * 実行膜スタックは操作しない。子膜のタスクについては何もしない。*/
 	public final void addMem(AbstractMembrane mem) {
@@ -357,14 +368,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		mem.dequeue();
 		mem.parent = null;
 	}
-	/** 指定されたノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
+	/** 指定されたノードで実行されるロックされたkind==kのルート膜を作成し、この膜の子膜にし、活性化する。
 	 * @param nodedesc ノード名を表す文字列
 	 * @return 作成されたルート膜 */
-	public AbstractMembrane newRoot(String nodedesc) {
+	public AbstractMembrane newRoot(String nodedesc, int k) {
 		if(Env.debug > 0)System.out.println("AbstraceMembrane.newRoot(" + nodedesc + ")");
 		
 		if (nodedesc.equals("")) {
 			AbstractMembrane mem = newMem();
+			mem.changeKind(k);
 			mem.lock();
 			return mem;
 		}
@@ -373,7 +385,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		
 		// ↓TODO (効率改善【除去可能であることを確かめる】)connectRuntimeはガードですでに呼ばれているので冗長かもしれない
 		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(nodedesc);
-		return machine.newTask(this).getRoot();
+		AbstractMembrane mem = machine.newTask(this).getRoot();
+		mem.changeKind(k);
+		return mem;
+	}
+	/** 指定されたノードで実行されるロックされたkind==0のルート膜を作成し、この膜の子膜にし、活性化する。
+	 * @param nodedesc ノード名を表す文字列
+	 * @return 作成されたルート膜 */
+	public AbstractMembrane newRoot(String nodedesc) {
+		return newRoot(nodedesc, 0);
 	}
 	
 	// ボディ操作4 - リンクの操作
@@ -984,7 +1004,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		//      読みやすい＆効率が良いかもしれない ←リモートの場合に適用するのは難しいかも知れない
 		LinkedList changeList = new LinkedList();	// star化するアトムのリスト
 		LinkedList removeList = new LinkedList();
-		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
+		Iterator it = atoms.iteratorOfOUTSIDE_PROXY();
 		while (it.hasNext()) {
 			Atom outside = (Atom)it.next();
 			Atom a0 = outside.args[0].getAtom();
@@ -999,7 +1019,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 				}
 				else {
 					// この膜を通過して無関係な膜に入っていくリンクを除去
-					if (a1.getFunctor().equals(Functor.OUTSIDE_PROXY)
+					if (a1.getFunctor().isOUTSIDE_PROXY()
 					 && a1.args[0].getAtom().getMem().getParent() != this) {
 						if (!removeList.contains(outside)) {
 							unifyLocalAtomArgs(outside, 0, a1, 0);
@@ -1043,7 +1063,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public void removeToplevelProxies() {
 		// (*) は ( {$p[i(A)]},{$q[|*V]},E=o(A) :- ... ) でEが*Vに含まれる場合などへの対策（安全側に近似）
 		ArrayList removeList = new ArrayList();
-		Iterator it = atoms.iteratorOfFunctor(Functor.OUTSIDE_PROXY);
+		Iterator it = atoms.iteratorOfOUTSIDE_PROXY();
 		while (it.hasNext()) {
 			Atom outside = (Atom)it.next();
 			// outsideの第1引数のリンク先が子膜でない場合			
@@ -1051,7 +1071,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			 && outside.args[0].getAtom().getMem().getParent() != this) {
 				// outsideの第2引数のリンク先がoutsideの場合
 				Atom a1 = outside.args[1].getAtom();
-				if (a1.getFunctor().equals(Functor.OUTSIDE_PROXY)) {
+				if (a1.getFunctor().isOUTSIDE_PROXY()) {
 					// 2つめのoutsideの第1引数のリンク先が子膜でない場合
 					if (a1.args[0].getAtom().getMem() != null // 追加 n-kato 2004-10-30 (*)
 					 && a1.args[0].getAtom().getMem().getParent() != this) {
@@ -1131,10 +1151,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 				// このときstarが消えるかもしれないので、starをキューで実装するときはバグに注意。
 				if (oldstar.getMem() == this) {
 					//changeList.add(star);
-					alterAtomFunctor(oldstar, Functor.OUTSIDE_PROXY);
+					alterAtomFunctor(oldstar, new SpecialFunctor("$out",2, this.kind));
 					newLink(oldstar, 0, star, 0);
 				} else {
-					Atom outside = newAtom(Functor.OUTSIDE_PROXY); // o
+					Atom outside = newAtom(new SpecialFunctor("$out",2, this.kind)); // o
 					Atom newstar = newAtom(Functor.STAR); // m
 					newLink(newstar, 1, outside, 1);
 					relinkAtomArgs(newstar, 0, star, 0); // これによりstar[0]が無効になる

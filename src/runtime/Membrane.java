@@ -135,25 +135,35 @@ public final class Membrane extends AbstractMembrane {
 
 	// ボディ操作3 - 子膜の操作
 
-	/** 新しい子膜を作成し、活性化する */
-	public AbstractMembrane newMem() {
-//		if (remote != null) {
-//			remote.send("NEWMEM",this);
-//			return null; // todo
-//		}
+	/** 新しいタイプがkの子膜を作成し、活性化する */
+	public AbstractMembrane newMem(int k){
+	//		if (remote != null) {
+	//		remote.send("NEWMEM",this);
+	//		return null; // todo
+	//	}
 		Membrane m = new Membrane(task, this);
+		m.changeKind(k);
 		mems.add(m);
 		// 親膜と同じ実行膜スタックに積む
 		stack.push(m);
 		return m;
 	}
+	/** 新しいデフォルトタイプの子膜を作成し、活性化する */
+	public AbstractMembrane newMem() {
+		return newMem(0);
+	}
+	
 	/** newMemと同じ。ただし親膜（メソッドが呼ばれたこの膜）は仮でない実行膜スタックに積まれている。
 	 * <p>最適化用。しかし実際には最適化の効果は無い気がする。*/
-	public AbstractMembrane newLocalMembrane() {
+	public AbstractMembrane newLocalMembrane(int k) {
 		Membrane m = new Membrane(task, this);
+		m.changeKind(k);
 		mems.add(m);
 		((Task)task).memStack.push(m);
 		return m;		
+	}
+	public AbstractMembrane newLocalMembrane() {
+		return newLocalMembrane(0);
 	}
 	
 //	/** 指定された子膜をこの膜から除去する。

@@ -368,6 +368,12 @@ class InterpretiveReactor {
 					it = mems[inst.getIntArg2()].mems.iterator();
 					while (it.hasNext()) {
 						AbstractMembrane submem = (AbstractMembrane) it.next();
+						while ((submem.kind != inst.getIntArg3())) {
+							if(it.hasNext())
+								submem = (AbstractMembrane) it.next();
+							else
+								return false;
+						}
 						if (submem.lock()) {
 							mems[inst.getIntArg1()] = submem;
 							lockedMemList.add(submem);
@@ -389,8 +395,11 @@ class InterpretiveReactor {
 					return false; //n-kato
 
 				case Instruction.GETMEM : //[-dstmem, srcatom]
+					if(atoms[inst.getIntArg2()].mem.kind != inst.getIntArg3())
+						return false;
 					mems[inst.getIntArg1()] = atoms[inst.getIntArg2()].mem;
-					break; //n-kato
+					return true;
+
 				case Instruction.GETPARENT : //[-dstmem, srcmem]
 					mem = mems[inst.getIntArg2()].parent;
 					if (mem == null) return false;
@@ -534,11 +543,11 @@ class InterpretiveReactor {
 					mem.parent.removeMem(mem);
 					break; //n-kato
 				case Instruction.NEWMEM: //[-dstmem, srcmem]
-					mem = mems[inst.getIntArg2()].newMem();
+					mem = mems[inst.getIntArg2()].newMem(inst.getIntArg3());
 					mems[inst.getIntArg1()] = mem;
 					break; //n-kato
 				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
-					mem = ((Membrane)mems[inst.getIntArg2()]).newLocalMembrane();
+					mem = ((Membrane)mems[inst.getIntArg2()]).newLocalMembrane(inst.getIntArg3());
 					mems[inst.getIntArg1()] = mem;
 					break; //n-kato
 				case Instruction.ALLOCMEM: //[-dstmem]
@@ -548,7 +557,7 @@ class InterpretiveReactor {
 
 				case Instruction.NEWROOT : //[-dstmem, srcmem, nodeatom]
 					String nodedesc = atoms[inst.getIntArg3()].getFunctor().getName();
-					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newRoot(nodedesc);
+					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newRoot(nodedesc, inst.getIntArg3());
 					break; //n-kato 2004-09-17
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
 					mems[inst.getIntArg1()].moveCellsFrom(mems[inst.getIntArg2()]);

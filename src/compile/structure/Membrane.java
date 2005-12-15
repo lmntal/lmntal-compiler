@@ -17,6 +17,8 @@ public final class Membrane {
 	public Membrane parent = null;
 	/** 終了フラグがセットされているかどうかを表す */
 	public boolean stable = false;
+	/** 膜のタイプ */
+	public int kind = 0;
 	/** ＠指定またはnull
 	 * <p><b>仮仕様</b>
 	 * ホスト指定を表す文字列が入る型付きプロセス文脈名を持った
@@ -76,7 +78,7 @@ public final class Membrane {
 		int c=0;
 		while(it.hasNext()) {
 			Atom a = (Atom)it.next();
-			if(!(a.functor.equals(Functor.INSIDE_PROXY) || a.functor.equals(Functor.OUTSIDE_PROXY))) c++;
+			if(!(a.functor.equals(Functor.INSIDE_PROXY) || a.functor.isOUTSIDE_PROXY())) c++;
 		}
 		return c;
 	}
@@ -112,7 +114,7 @@ public final class Membrane {
 		return Env.parray(list, ", ").toString();
 	}
 	public String toString() {
-		String ret = "{ " + toStringWithoutBrace() + " }" + (stable ? "/" : "");
+		String ret = "{ " + toStringWithoutBrace() + " }" + (kind==1 ? "_" : "") + (stable ? "/" : "");
 		if (pragmaAtHost != null) {
 			ret += "@" + ((ProcessContext)pragmaAtHost).getQualifiedName();
 		}

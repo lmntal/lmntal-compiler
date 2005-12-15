@@ -51,6 +51,7 @@ public class SrcDumper {
 		String s = (dumpIndent(indent)+"{" + BR);
 		s += dumpLinkedList(mem.getProcess(), indent+1);
 		s += dumpIndent(indent)+"}";
+		if (mem.kind==1) s += "_";
 		if (mem.stable) s += "/";
 		if (mem.pragma != null)  s += dump(mem.pragma, indent + 1);
 		s += BR;

@@ -153,7 +153,7 @@ public class RuleCompiler {
 					hc.match.add(new Instruction(Instruction.TESTMEM, 0, 1));
 				}
 				else {
-					hc.match.add(new Instruction(Instruction.GETMEM, hc.varcount, 1));
+					hc.match.add(new Instruction(Instruction.GETMEM, hc.varcount, 1, mem.kind));
 					hc.match.add(new Instruction(Instruction.LOCK,   hc.varcount));
 					hc.mempaths.put(mem, new Integer(hc.varcount++));
 					mem = mem.parent;
@@ -843,10 +843,10 @@ public class RuleCompiler {
 				}
 				int nodedescatomid = typedcxtToSrcPath(submem.pragmaAtHost.def);
 				body.add( new Instruction(Instruction.NEWROOT, submempath, rhsmemToPath(mem),
-					nodedescatomid) );
+					nodedescatomid, submem.kind) );
 			}
 			else { // 通常の右辺膜の場合
-				body.add( Instruction.newmem(submempath, rhsmemToPath(mem) ) );
+				body.add( Instruction.newmem(submempath, rhsmemToPath(mem), submem.kind ) );
 			}
 			if (submem.name != null)
 				body.add(new Instruction( Instruction.SETMEMNAME, submempath, submem.name.intern() ));

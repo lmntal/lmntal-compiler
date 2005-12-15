@@ -147,6 +147,9 @@ public class Functor implements Serializable {
 		Functor f = (Functor)o;
 		return o.getClass().equals(Functor.class) && f.path == path && f.name == name && f.arity == arity;
 	}
+	public boolean isOUTSIDE_PROXY() {
+		return false;
+	}
 	public String getPath() {
 		return path;
 	}
@@ -205,41 +208,6 @@ public class Functor implements Serializable {
 			}
 		}
 		return new Functor(name, arity, path);
-	}
-}
-
-class SpecialFunctor extends Functor {
-	private String name;
-	SpecialFunctor(String name, int arity) {
-		super("", arity);
-		this.name = name;
-	}
-	public int hashCode() {
-		return name.hashCode() + arity;
-	}
-	public boolean equals(Object o) {
-		return this == o;
-	}
-	public String getName() {
-		return name; 
-	}
-	
-	public String toString() {
-		return name + "_" + arity;
-	}
-
-	/**
-	 * 直列化復元時に呼ばれる。
-	 * author mizuno
-	 */
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
-		name = name.intern();
-	}
-
-	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
-	public String getQuotedFunctorName() {
-		return getAbbrName();
 	}
 }
 

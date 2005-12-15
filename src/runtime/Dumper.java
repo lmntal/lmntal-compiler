@@ -134,7 +134,7 @@ public class Dumper {
 				    if (!a.getFunctor().isSymbol()) continue; // 通常のファンクタを起点にしたい
 					if (a.getName().matches("^[A-Z].*")) continue; // 補完された自由リンクは引数に置きたい
 					if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
-					if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
+					if (a.getFunctor().isOUTSIDE_PROXY()) continue;
 					if (a.getFunctor().equals(FUNC_NIL) ) continue; // []は整数と同じ表示的な扱い
 					if (a.getArity() == 1) {
 						predAtoms[2].add(a);
@@ -187,13 +187,13 @@ public class Dumper {
 						if (!a.getFunctor().isSymbol()) continue;
 						if (a.getName().matches("^[A-Z].*")) continue;
 						if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
-						if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
+						if (a.getFunctor().isOUTSIDE_PROXY()) continue;
 						if (a.getFunctor().equals(FUNC_NIL)) continue;
 					}
 					// プロキシを省略できるときは、プロキシができるだけ引数に来るようにする
 					if (Env.verbose < Env.VERBOSE_EXPANDPROXIES) {
 						if (a.getFunctor().equals(Functor.INSIDE_PROXY)) continue;
-						if (a.getFunctor().equals(Functor.OUTSIDE_PROXY)) continue;
+						if (a.getFunctor().isOUTSIDE_PROXY()) continue;
 					}
 					// ここまで残った1引数のアトムはデータの可能性が高いので、できるだけ引数に来るようにする
 					if (a.getArity() == 1) continue;
@@ -215,7 +215,7 @@ public class Dumper {
 					Atom a = (Atom)it.next();
 					if (a.getArity() == 1) {
 						if (a.getLastArg().getAtom().getFunctor() == Functor.INSIDE_PROXY
-						 || a.getLastArg().getAtom().getFunctor() == Functor.OUTSIDE_PROXY) {
+						 || a.getLastArg().getAtom().getFunctor().isOUTSIDE_PROXY()) {
 							if(commaFlag) buf.append(", "); else commaFlag = true;
 							buf.append(dumpAtomGroup(a, atoms));
 							changed = true;
@@ -251,6 +251,8 @@ public class Dumper {
 			buf.append("{");
 			buf.append(dump(m));
 			buf.append("}");
+			if(m.kind==1)
+				buf.append("_");
 			if(Env.getExtendedOption("dump").equals("1")) Env.indent--;
 		}
 		
@@ -290,7 +292,7 @@ public class Dumper {
 			return func.getQuotedAtomName(); // func.getAbbrName();
 		}
 		if (Env.verbose < Env.VERBOSE_EXPANDPROXIES && arity == 1
-		 && ( func.equals(Functor.INSIDE_PROXY) || func.equals(Functor.OUTSIDE_PROXY) )) {
+		 && ( func.equals(Functor.INSIDE_PROXY) || func.isOUTSIDE_PROXY() )) {
 		 	return dumpLink(a.args[0], atoms, outerprio);
 		}
 		Unlexer buf = new Unlexer();
