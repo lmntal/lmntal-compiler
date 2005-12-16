@@ -29,6 +29,9 @@ public class SpecialFunctor extends Functor {
 	public String getName() {
 		return name; 
 	}
+	public String toString() {
+		return name + (kind!=0 ? "" : ""+kind) + "_" + arity;
+	}
 	public int getKind() {
 		return kind;
 	}
