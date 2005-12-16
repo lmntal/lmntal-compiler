@@ -134,7 +134,13 @@ class Task extends AbstractTask implements Runnable {
 		}
 		if (!Env.guiTrace()) return false;
 		/**nakano graphicÕ—*/
-		if (!Env.graphicTrace()) return false;
+		if (!Env.graphicTrace()){
+			/*ª√ƒÍ»«*/
+			Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
+			Env.p( Dumper.dump( memToDump ) );
+			System.exit(0);
+//			return false;
+		}
 		
 		return true;
 	}
