@@ -127,7 +127,7 @@ public class Instruction implements Cloneable, Serializable {
 
 	// 膜に関係する出力する基本ガード命令 (5--9)
 	// [local]lockmem    [-dstmem, freelinkatom]
-	// [local]anymem     [-dstmem, srcmem] 
+	// [local]anymem     [-dstmem, srcmem, memtype] 
 	// [local]lock       [srcmem]
 	//  ----- getmem     [-dstmem, srcatom]
 	//  ----- getparent  [-dstmem, srcmem]
@@ -153,11 +153,11 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int LOCALLOCKMEM = LOCAL + LOCKMEM;
 	static {setArgType(LOCALLOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
 
-    /** anymem [-dstmem, srcmem] 
+    /** anymem [-dstmem, srcmem, memtype] 
      * <br>反復するロック取得するガード命令<br>
-     * 膜$srcmemの子膜のうちまだロックを取得していない膜に対して次々に、
+     * 膜$srcmemの子膜のうち、$memtypeで表せるタイプのまだロックを取得していない膜に対して次々に、
      * ノンブロッキングでのロック取得を試みる。
-     * そして、ロック取得に成功した各子膜への参照を$dstmemに代入する。
+     * そして、ロック取得に成功した$memtypeで表せるタイプの各子膜への参照を$dstmemに代入する。
      * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
      * <p><b>注意</b>　ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。*/
 	public static final int ANYMEM = 6;
@@ -185,9 +185,10 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int LOCALLOCK = LOCAL + LOCK;
 	static {setArgType(LOCALLOCK, new ArgType(false, ARG_MEM));}
 
-	/** getmem [-dstmem, srcatom]
-	 * <br>失敗しないガード命令<br>
+	/** getmem [-dstmem, srcatom. memtype]
+	 * <br>ガード命令<br>
 	 * アトム$srcatomの所属膜への参照をロックせずに$dstmemに代入する。
+	 * 所属膜が$memtypeで表せるタイプでは無い場合は失敗する。
 	 * <p>アトム主導テストで使用される。
 	 * @see lock */
 	public static final int GETMEM = 8;
@@ -539,9 +540,9 @@ public class Instruction implements Cloneable, Serializable {
 	
 	// 膜を操作する基本ボディ命令 (50--59)    
 	// [local]removemem                [srcmem, parentmem]
-	// [local]newmem          [-dstmem, srcmem]
+	// [local]newmem          [-dstmem, srcmem, memtype]
 	//  ----- allocmem        [-dstmem]
-	//  ----- newroot         [-dstmem, srcmem, node]
+	//  ----- newroot         [-dstmem, srcmem, node, memtype]
 	//  ----- movecells                [dstmem, srcmem]
 	//  ----- enqueueallatoms          [srcmem]
 	//  ----- freemem                  [srcmem]
@@ -565,16 +566,17 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
 	static {setArgType(LOCALREMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
-	/** newmem [-dstmem, srcmem]
+	/** newmem [-dstmem, srcmem, memtype]
 	 * <br>ボディ命令<br>
-	 * （活性化された）膜$srcmemに新しい（ルート膜でない）子膜を作成し、$dstmemに代入し、活性化する。
+	 * （活性化された）膜$srcmemに新しい（ルート膜でない）$memtypeで表せるタイプの子膜を作成し、
+	 *  $dstmemに代入し、活性化する。
 	 * この場合の活性化は、$srcmemと同じ実行膜スタックに積むことを意味する。
 	 * @see newroot
 	 * @see addmem */
 	public static final int NEWMEM = 51;
 	static {setArgType(NEWMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));}
 
-	/** localnewmem [-dstmem, srcmem]
+	/** localnewmem [-dstmem, srcmem, memtype]
 	* <br>最適化用ボディ命令<br>
 	* newmemと同じ。ただし$srcmemは<B>本膜と同じタスクによって管理される</B>。*/
 	public static final int LOCALNEWMEM = LOCAL + NEWMEM;
@@ -587,10 +589,10 @@ public class Instruction implements Cloneable, Serializable {
 	// LOCALALLOCMEMは不要
 	static {setArgType(ALLOCMEM, new ArgType(true, ARG_MEM));}
 
-	/** newroot [-dstmem, srcmem, nodeatom]
+	/** newroot [-dstmem, srcmem, nodeatom, memtype]
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemの子膜にアトム$nodeatomの名前で指定された計算ノードで実行される新しいロックされた
-	 * ルート膜を作成し、参照を$dstmemに代入し、（ロックしたまま）活性化する。
+	 * $memtypeで表せるタイプのルート膜を作成し、参照を$dstmemに代入し、（ロックしたまま）活性化する。
 	 * この場合の活性化は、仮の実行膜スタックに積むことを意味する。
 	 * <p>ただし上記の仕様は計算ノード指定が空文字列でないときのみ。
 	 * 空文字列の場合は、newmemと同じだがロックされた状態で作られる。
