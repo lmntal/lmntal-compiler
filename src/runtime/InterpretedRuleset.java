@@ -368,12 +368,8 @@ class InterpretiveReactor {
 					it = mems[inst.getIntArg2()].mems.iterator();
 					while (it.hasNext()) {
 						AbstractMembrane submem = (AbstractMembrane) it.next();
-						while ((submem.kind != inst.getIntArg3())) {
-							if(it.hasNext())
-								submem = (AbstractMembrane) it.next();
-							else
-								return false;
-						}
+						if ((submem.kind != inst.getIntArg3())) 
+							continue;
 						if (submem.lock()) {
 							mems[inst.getIntArg1()] = submem;
 							lockedMemList.add(submem);
@@ -557,7 +553,7 @@ class InterpretiveReactor {
 
 				case Instruction.NEWROOT : //[-dstmem, srcmem, nodeatom]
 					String nodedesc = atoms[inst.getIntArg3()].getFunctor().getName();
-					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newRoot(nodedesc, inst.getIntArg3());
+					mems[inst.getIntArg1()] = mems[inst.getIntArg2()].newRoot(nodedesc, inst.getIntArg4());
 					break; //n-kato 2004-09-17
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
 					mems[inst.getIntArg1()].moveCellsFrom(mems[inst.getIntArg2()]);
@@ -687,23 +683,25 @@ class InterpretiveReactor {
 					// モジュール膜直属のルールセットを全部読み込む
 					compile.structure.Membrane m = (compile.structure.Membrane)compile.Module.memNameTable.get(inst.getArg2());
 					if(m==null) {
-						//ライブラリモジュールの読み込み
-						try {
-							Class c = Class.forName("translated.Module_" + inst.getArg2());
-							Method method = c.getMethod("getRulesets", null);
-							Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
-							for (int i = 0; i < rulesets.length; i++) {
-								mems[inst.getIntArg1()].loadRuleset(rulesets[i]);
-							}
-							break;
-						} catch (ClassNotFoundException e) {
-						} catch (NoSuchMethodException e) {
-						} catch (IllegalAccessException e) {
-						} catch (InvocationTargetException e) {	}
-						//例外が発生した場合
+						if (!Env.fUseSourceLibrary) { 
+							//ライブラリモジュールの読み込み
+							try {
+								Class c = Class.forName("translated.Module_" + inst.getArg2());
+								Method method = c.getMethod("getRulesets", null);
+								Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+								for (int i = 0; i < rulesets.length; i++) {
+									mems[inst.getIntArg1()].loadRuleset(rulesets[i]);
+								}
+								break;
+							} catch (ClassNotFoundException e) {
+							} catch (NoSuchMethodException e) {
+							} catch (IllegalAccessException e) {
+							} catch (InvocationTargetException e) {	}
+							//例外発生時は読み込み失敗
+						}
 						Env.e("Undefined module "+inst.getArg2());
 					} else {
-						//同一ソース内でモジュール膜を定義している場合
+						//同一ソース内のモジュール or ソースライブラリの場合
 						Iterator i = m.rulesets.iterator();
 						while (i.hasNext()) {
 							mems[inst.getIntArg1()].loadRuleset((Ruleset)i.next() );
