@@ -65,6 +65,7 @@ import test.GUI.Node;
 	}
 	
     public synchronized void setmem(AbstractMembrane m){
+    	
 		String s = searchatom(m);
 			/*ウィンドウ膜の登録*/
 	    	if(s == "window"){
@@ -78,8 +79,9 @@ import test.GUI.Node;
     
    /**マウスの位置を検出する。ライブラリmouseで使用*/
    public Point getMousePoint(AbstractMembrane m){
+	   if(m.isRoot())return null;
 	   String memname = getname(m);
-	   if(!windowmap.containsKey(memname)) return null;
+	   if(!windowmap.containsKey(memname)) return getMousePoint(m.getParent());
 	   WindowSet winset = (WindowSet)windowmap.get(memname);
 	   return winset.window.getMousePosition();
    }
