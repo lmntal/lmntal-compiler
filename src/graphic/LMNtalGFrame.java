@@ -179,7 +179,9 @@ import test.GUI.Node;
 	   
 	   killednum++;
 	   if(killednum == windowmap.size()){
-		  busy=true;  
+		  busy=true;
+		  runtime.LMNtalRuntimeManager.terminateAllThreaded();
+		   System.exit(0);
 	   }
 
    }
@@ -229,8 +231,8 @@ import test.GUI.Node;
 ////			lmnPanel.stop();
 		}
 //		System.out.println(busy);
-//		if(busy)return false;
-		if(busy)System.exit(0);		
+		if(busy)return false;
+//		if(busy)System.exit(0);		
 //		return running;
 		return true;
 	}

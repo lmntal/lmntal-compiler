@@ -27,8 +27,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	HashMap relativemap = new HashMap();
 	
 	public LMNGraphPanel(LMNtalWindow f) {
-		super();
-		System.out.println("initpanel");
+//		super();
 		frame = f;
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
