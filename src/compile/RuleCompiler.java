@@ -447,6 +447,7 @@ public class RuleCompiler {
 		gc.checkMembraneStatus();
 		varcount = gc.varcount;
 		compileNegatives();
+		fixUniqOrder();
 		guard.add( 0, Instruction.spec(formals,varcount) );
 		guard.add( Instruction.jump(theRule.bodyLabel, gc.getMemActuals(),
 			gc.getAtomActuals(), gc.getVarActuals()) );
@@ -454,6 +455,24 @@ public class RuleCompiler {
 		//ガード命令列の局所変数の数とボディ命令列の引数の数が一致しなくなった。by mizuno
 		varcount = gc.getMemActuals().size() + gc.getAtomActuals().size() 
 					+ gc.getVarActuals().size();
+	}
+	/**
+	 * uniq 命令を一つにまとめてガード命令列の最後に移動する。
+	 * hara
+	 */
+	void fixUniqOrder() {
+		boolean found = false;
+		List vars = new ArrayList();
+		Iterator it = guard.iterator();
+		while(it.hasNext()) {
+			Instruction inst = (Instruction)it.next();
+			if(inst.getKind() == Instruction.UNIQ) {
+				found = true;
+				vars.addAll((ArrayList)inst.getArg(0));
+				it.remove();
+			}
+		}
+		if(found) guard.add(new Instruction(Instruction.UNIQ, vars));
 	}
 	void compileNegatives() throws CompileException{
 		Iterator it = rs.guardNegatives.iterator();
