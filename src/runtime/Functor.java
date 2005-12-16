@@ -122,8 +122,11 @@ public class Functor implements Serializable {
 		// （仮）
 		if (arity == 0) return true;
 		if (name.equals("")) return false;
-		char c = name.charAt(0);
-		return c >= 'a' && c <= 'z';
+//		char c = name.charAt(0);
+//		return c >= 'a' && c <= 'z';
+		if (name.equals(".") && arity == 3) return false;
+		if (name.equals("[]") && arity == 1) return false;
+		return getClass().equals(Functor.class);
 	}
 	/** このクラスのオブジェクトかどうかを調べる。*/
 	public boolean isSymbol() {
