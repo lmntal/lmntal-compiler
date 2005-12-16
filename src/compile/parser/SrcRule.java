@@ -43,6 +43,7 @@ class SrcRule {
 	 * hara. nakano.
 	 * */
 	public void addTypeConstraint(LinkedList l){
+		if(l==null)return;
 		for(int i = 0; i < l.size(); i++){
 			Object o = l.get(i);
 			if(o instanceof SrcLink){
