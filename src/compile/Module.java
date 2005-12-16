@@ -95,6 +95,10 @@ public class Module {
 				//Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 			}
 		}
+		//Translate する場合は、--use-source-library オプション指定時も
+		//コンパイル済みライブラリを読みに行ってしまうので、ここで警告を出しておく。
+		if (!Env.fInterpret)
+			Env.e("WARNING: Undefined module " + mod_name);
 	}
 	
 	/**
