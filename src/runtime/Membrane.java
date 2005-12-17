@@ -109,7 +109,7 @@ public final class Membrane extends AbstractMembrane {
 	 * 移動された後、この膜のアクティブアトムを実行アトムスタックに入れるために呼び出される。
 	 * <p><b>注意</b>　Ruby版のmovedtoと異なり、子孫の膜にあるアトムに対しては何もしない。*/
 	public void enqueueAllAtoms() {
-		Iterator i = atoms.functorIterator();
+		Iterator i = atoms.activeFunctorIterator();
 		while (i.hasNext()) {
 			Functor f = (Functor)i.next();
 			if (f.isActive()) {
@@ -275,6 +275,7 @@ public final class Membrane extends AbstractMembrane {
 				if (lock()) {
 					break;
 				} else {
+					//非ルールスレッドや親タスクなら解放するのを待つ
 					try {
 						wait();
 					} catch (InterruptedException e) {}

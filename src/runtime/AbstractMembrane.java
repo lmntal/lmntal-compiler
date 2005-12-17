@@ -1151,10 +1151,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 				// このときstarが消えるかもしれないので、starをキューで実装するときはバグに注意。
 				if (oldstar.getMem() == this) {
 					//changeList.add(star);
-					alterAtomFunctor(oldstar, new SpecialFunctor("$out",2, this.kind));
+					alterAtomFunctor(oldstar, new SpecialFunctor("$out",2, childMemWithStar.kind));
 					newLink(oldstar, 0, star, 0);
 				} else {
-					Atom outside = newAtom(new SpecialFunctor("$out",2, this.kind)); // o
+					Atom outside = newAtom(new SpecialFunctor("$out",2, childMemWithStar.kind)); // o
 					Atom newstar = newAtom(Functor.STAR); // m
 					newLink(newstar, 1, outside, 1);
 					relinkAtomArgs(newstar, 0, star, 0); // これによりstar[0]が無効になる
