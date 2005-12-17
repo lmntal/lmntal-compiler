@@ -1,0 +1,6 @@
+/*
+ *  sample: lib/src/decoder.lmn
+ */
+
+decoder.stringDecoder("a. a:-b. b:-c").
+decoder.fileDecoder("wtCalc.lmn").
