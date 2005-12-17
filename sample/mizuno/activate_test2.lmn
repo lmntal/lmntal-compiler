@@ -13,5 +13,4 @@ gen :-
 	  {c,@p}:-{a}.
 	}
 }@"localhost".
-//ルート膜をロックし、仮の実行膜スタックに積んだ状態で1秒待つ
-{do,$p} :- {$p}, [:/*inline*/try{Thread.sleep(1000);}catch(Exception e){}:].
+{do,$p} :- {$p}, [:/*inline*/System.out.println("start");try{Thread.sleep(1000);}catch(Exception e){}System.out.println("done");:].

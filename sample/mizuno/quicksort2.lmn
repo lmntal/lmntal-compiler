@@ -1,8 +1,10 @@
 % appendを利用しないようにした改良版。
+timer:benchmark(X,"Elapsed Time").
+X={
+ret=sort2(gen(3000)).
+go, X=sort2(L) :- X=sort(L).
 
-ret=sort(gen(100)).
-
-R=gen(N) :- N > 0 | R=[integer.rnd(100)|gen(N-1)].
+R=gen(N) :- N > 0 | R=[integer.rnd(1000)|gen(N-1)].
 R=gen(N) :- N = 0 | R=[].
 
 R=sort(L) :- R=sort(L,[]).
@@ -12,3 +14,4 @@ R=sort([],Done)    :- R=Done.
 devide([D|L],B,L1,L2) :- D <  B | devide(L,B,LL1,L2), L1=[D|LL1].
 devide([D|L],B,L1,L2) :- D >= B | devide(L,B,L1,LL2), L2=[D|LL2].
 devide([],   B,L1,L2) :- int(B) | L1=[], L2=[].
+}

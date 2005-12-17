@@ -1,0 +1,13 @@
+do(100, 500).
+st1.
+st1, do(N,M) :- N =< M, N2=N+50 | timer.benchmark({
+	L=[X,Y|L2], go :- X>Y | L=[Y,X|L2], go.
+	
+	R=gen(N) :- N > 0 | R=[integer.rnd(10000)|gen(N-1)].
+	R=gen(N) :- N = 0 | R=[].
+
+	ret=gen(N).
+}, ret(N)), do(N2, M), st2.
+st2, ret(N,T), {$p[],@p}/ :- x=print(string.concat(string.concat(N, "\t"), T)), st3.
+st3, done(x) :- st1.
+io.use.
