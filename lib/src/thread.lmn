@@ -30,21 +30,21 @@ module(thread).
 		thread.at(N, {atoms or rules}).
 		Create atoms or rules at a thread numbered N.
 	*/
-	thread.at(N,{$p,@p}_), thread(M,{$q,@q}_@T) :- int(N),int(M), M=:=(N+1) |
+	thread.at(N,{$p,@p}), thread(M,{$q,@q}_@T) :- int(N),int(M), M=:=(N+1) |
 		thread(N+1,{$p,$q,@p,@q}_@T).
 	
 	/*
 		thread.any({atoms or rules}).
 		Create atoms or rules at a thread randomly selected.
 	*/
-	thread.any({$p,@p}_), thread(M,{$q,@q}_@T) :- int(M) |
+	thread.any({$p,@p}), thread(M,{$q,@q}_@T) :- int(M) |
 		thread(M, {$p,$q,@p,@q}_@T).
 
 	/*
 		thread.all({atoms or rules}).
 		Create atoms or rules at all threads.
 	*/
-	thread.all({$p,@p}_), thread.num(N) :- int(N) |
+	thread.all({$p,@p}), thread.num(N) :- int(N) |
 		thread.allcre(N, {$p,@p}_), thread.num(N).
 	thread.allcre(N, {$p[],@p}_), thread(M,{$q,@q}_@T) :- M>0, N>0, M=:=N |
 		thread.allcre(N-1, {$p[],@p}_), thread(M,{$p[],$q,@p,@q}_@T).
