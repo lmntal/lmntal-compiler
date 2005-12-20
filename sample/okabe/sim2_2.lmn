@@ -1,35 +1,34 @@
 % chat simulation
 % 分散シミュレーション（チャット）
-% 受信リスト正順
+% 受信リスト逆順
 
 {% brie: client
 connect("gouda",60000,S,R).
 S=["hello,brie!","brie to gouda."].
-R=[].
+R=recv.
 }.
 
 {% pave: client
 connect("gouda",60000,S,R).
 S=["hello,pave!","pave to gouda."].
-R=[].
+R=recv.
 }.
 
 {% murol: client
 connect("gouda",60000,S,R).
 S=["hello,murol!","murol to gouda"].
-R=[].
+R=recv.
 }.
 
 {% gouda: server
 port(60000,G).
 G=[accept(S1,R1),accept(S2,R2),accept(S3,R3)].
-S1=[],S2=[],S3=[],R1=[],R2=[],R3=[].
+recv(R1,S1),recv(R2,S2),recv(R3,S3).
 % server's rule
-socket(C1,S1,[H|T]),socket(C2,S2,R2),socket(C3,S3,R3) :-
-  string(H) |
-    socket(C1,list.append(S1,[H]),T),
-    socket(C2,list.append(S2,[H]),R2),
-    socket(C3,list.append(S3,[H]),R3).
+S1=recv([H|T]),S2=recv(R2),S3=recv(R3):- string(H) |
+  S1=[H|recv(T)],
+  S2=[H|recv(R2)],
+  S3=[H|recv(R3)].
 }.
 
 % connect and accept rule
@@ -41,7 +40,19 @@ socket(C1,S1,[H|T]),socket(C2,S2,R2),socket(C3,S3,R3) :-
 
 % send and receive rule
 {socket(C,[H|T],R1),$p[T,R1|*C],@p},
-{socket(C,S2,R2),$q[S2,R2|*C],@q} :- 
+{socket(C,S2,R2),$q[S2,R2|*C],@q} :-
   string(H) |
     {socket(C,T,R1),$p[T,R1|*C],@p},
-    {socket(C,S2,list.append(R2,[H])),$q[S2,R2|*C],@q}.
+    {socket(C,S2,RR2),$q[S2,R2|*C],@q,
+      RR2 = 
+      [:/*inline*/
+        String str = me.nth(0);
+        Atom dataAtom = mem.newAtom(new StringFunctor(str));
+        Atom consAtom = mem.newAtom(new Functor(".",3));
+        mem.newLink(consAtom,0,dataAtom,0);
+        mem.unifyAtomArgs(me,1,me,2);
+        mem.relinkAtomArgs(consAtom,2,me.nthAtom(2),2);
+        mem.newLink(consAtom,1,me.nthAtom(2),2);
+        me.nthAtom(0).remove();
+        me.remove();
+      :](H,R2)}.
