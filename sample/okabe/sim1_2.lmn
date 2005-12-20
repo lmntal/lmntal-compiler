@@ -1,34 +1,43 @@
 % times server simulation
-% 分散シミュレーション (案２:wiki参照)
+% 分散シミュレーション
+% リスト逆順
 
-{% brie
-connect("gouda",60000,I,[out(O1),out(O2),get,get]).
-I=[].
-O1=["brie","hoge","moge"].
-O2=["foo","bar"].
+{% brie: client
+connect("gouda",60000,S,R).
+S=["hoge","moge"].
+R=ret.
 }.
 
-{% gouda
-port(60000,G).
-G=[accept([],[get,get]),close].
-socket(S,[in(H)|T],O) :-
-  socket(S,T,list.append(O,[out(times(H))])).
-X=times([H|T]) :- string(H) | X=[string.times(H,3)|times(T)].
-X=times([]) :- X=[].
+{% gouda: server
+port(60000,P).
+P=[accept(S,R)].
+S=times(R,3).
+% server's rule
+Ret=times([H|T],N) :- int(N),string(H) | Ret=[string.times(H,N)|times(T,N)].
 }.
 
 % connect and accept rule
-{connect(Host,Port1,I1,O1),$p[I1,O1|*S],@p},
-{port(Port2,[accept(I2,O2)|T]),$q[I2,O2,T|*S],@q} :- 
+{connect(Host,Port1,S1,R1),$p[S1,R1|*C],@p},
+{port(Port2,[accept(S2,R2)|T]),$q[S2,R2,T|*C],@q} :- 
   string(Host),Port1=:=Port2 |
-    {socket(S,I1,O1),$p[I1,O1|*S],@p},
-    {port(Port2,T),socket(S,I2,O2),$q[I2,O2,T|*S],@q}.
+    {socket(C,S1,R1),$p[S1,R1|*C],@p},
+    {port(Port2,T),socket(C,S2,R2),$q[S2,R2,T|*C],@q}.
 
 % send and receive rule
-{socket(S,I1,[out(O1)|T1]),$p[I1,T1|*S],@p},
-{socket(S,I2,[get|T2]),$q[I2,T2|*S],@q} :- ground(O1) |
-    {socket(S,I1,T1),$p[I1,T1|*S],@p},
-    {socket(S,list.append(I2,[in(O1)]),T2),$q[I2,T2|*S],@q}.
-    
-% close rule
-{port(Port,[close|T]),$p[|*X],@p} :- int(Port),ground(T) | {$p[|*X],@p}.
+{socket(C,[H|T],R1),$p[T,R1|*C],@p},
+{socket(C,S2,R2),$q[S2,R2|*C],@q} :-
+  string(H) |
+    {socket(C,T,R1),$p[T,R1|*C],@p},
+    {socket(C,S2,RR2),$q[S2,R2|*C],@q,
+      RR2 = 
+      [:/*inline*/
+        String str = me.nth(0);
+        Atom dataAtom = mem.newAtom(new StringFunctor(str));
+        Atom consAtom = mem.newAtom(new Functor(".",3));
+        mem.newLink(consAtom,0,dataAtom,0);
+        mem.unifyAtomArgs(me,1,me,2);
+        mem.relinkAtomArgs(consAtom,2,me.nthAtom(2),2);
+        mem.newLink(consAtom,1,me.nthAtom(2),2);
+        me.nthAtom(0).remove();
+        me.remove();
+      :](H,R2)}.
