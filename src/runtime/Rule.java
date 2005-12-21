@@ -34,6 +34,13 @@ public final class Rule implements Serializable {
 	/** ルール名 */
 	public String name;
 	
+	/* ルール適用回数 */
+	public int apply = 0;
+	/* ルール適用の成功回数 */
+	public int succeed = 0;
+	/* ルール適用の合計時間 */
+	public long time = 0;
+	
 	/** 履歴 */
 	Uniq uniq;
 	
@@ -108,7 +115,9 @@ public final class Rule implements Serializable {
 	public String toString() {
 //		return text;
 		if (Env.compileonly) return "";
+//		if (Env.compileonly) return (name!=null) ? name : "";
 		return name!=null && !name.equals("") ? name : text;
 //		return name;
 	}
+	
 }

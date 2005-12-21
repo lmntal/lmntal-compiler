@@ -85,7 +85,27 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		while (it.hasNext()) {
 			Rule r = currentRule = (Rule) it.next();
 			if (r.atomMatch.size() == 1) continue; // debug表示抑制用
-			if (matchTest(mem, atom, r.atomMatch)) {
+
+			
+			boolean success;
+			if(Env.profile){
+				long start,stop;
+				if(Env.majorVersion==1 &&Env.minorVersion>4) {
+			        start = System.nanoTime();
+					success = matchTest(mem, atom, r.atomMatch);
+			        stop = System.nanoTime();
+				} else {
+			        start = System.currentTimeMillis();
+					success = matchTest(mem, atom, r.atomMatch);
+			        stop = System.currentTimeMillis();					
+				}
+		        r.time += (stop>start)?(stop-start):0;
+				r.apply++;
+			} else {
+				success = matchTest(mem, atom, r.atomMatch);
+			}
+			if (success) {
+				if(Env.profile)r.succeed ++;
 				result = true;
 				// トレースモードでルールを表示する
 				if(Env.fTrace) {
@@ -112,7 +132,25 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
 			Rule r = currentRule = (Rule) it.next();
-			if (matchTest(mem, null, r.memMatch)) {
+			boolean success;
+			if(Env.profile){
+				long start,stop;
+				if(Env.majorVersion==1 &&Env.minorVersion>4) {
+			        start = System.nanoTime();
+					success = matchTest(mem, null, r.memMatch);
+			        stop = System.nanoTime();
+				} else {
+			        start = System.currentTimeMillis();
+					success = matchTest(mem, null, r.memMatch);
+			        stop = System.currentTimeMillis();					
+				}
+		        r.time += (stop>start)?(stop-start):0;
+				r.apply++;
+			} else {
+				success = matchTest(mem, null, r.memMatch);
+			}
+			if (success) {
+				if(Env.profile)r.succeed++;
 				result = true;
 				// トレースモードでルールを表示する
 				if(Env.fTrace) {

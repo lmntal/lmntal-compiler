@@ -262,6 +262,27 @@ public class Dumper {
 			if(commaFlag) buf.append(", "); else commaFlag = true;
 			buf.append(((Ruleset)it.next()).toString());
 		}
+		it = mem.rulesetIterator();
+		while (it.hasNext()) {
+			Ruleset rs = (Ruleset)it.next();
+			if(rs instanceof InterpretedRuleset){
+				InterpretedRuleset ir = (InterpretedRuleset)rs; 
+				Iterator it2 = ir.rules.iterator();
+				while (it2.hasNext()) {
+					Rule r = (Rule)it2.next();
+					if(r.name!=null){
+						if(commaFlag) buf.append(", "); else commaFlag = true;
+						buf.append("@"+r.toString()+"@");
+						if(Env.profile){
+							if(Env.majorVersion==1 && Env.minorVersion>4)
+								buf.append("_"+r.succeed+"/"+r.apply+"("+r.time/1000000+"msec)");
+							else
+								buf.append("_"+r.succeed+"/"+r.apply+"("+r.time+"msec)");								
+						}								
+					}
+				}
+			}
+		}
 		
 		if (locked) {
 			mem.quietUnlock();

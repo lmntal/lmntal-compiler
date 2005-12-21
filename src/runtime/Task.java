@@ -144,6 +144,14 @@ class Task extends AbstractTask implements Runnable {
 		
 		return true;
 	}
+	
+	/* アトム主導テストの合計実行時間 */
+	long atomtime = 0;
+	/* 膜主導テストの合計実行時間 */
+	long memtime = 0;
+	/* 実行時間取得のためのパラメータ */
+	long start,stop;
+	
 	/** このタスクの本膜のルールを実行する */
 	void exec(Membrane mem) {
 		// 実行
@@ -153,6 +161,13 @@ class Task extends AbstractTask implements Runnable {
 			Iterator it = mem.rulesetIterator();
 			boolean flag = false;
 			if(Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
+				if(Env.profile){
+					if(Env.majorVersion==1 && Env.minorVersion>4){
+				        start = System.nanoTime();
+					}else{
+				        start = System.currentTimeMillis();
+					}				
+				}
 				while(it.hasNext()){ // 本膜のもつルールをaに適用
 					if (((Ruleset)it.next()).react(mem, a)) {
 						flag = true;
@@ -169,7 +184,22 @@ class Task extends AbstractTask implements Runnable {
 					if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
 					// TODO システムコールアトムなら、本膜がルート膜でも親膜につみ、親膜を活性化
 				}
+				if(Env.profile){
+					if(Env.majorVersion==1 && Env.minorVersion>4){
+				        stop = System.nanoTime();
+					}else{
+				        stop = System.currentTimeMillis();
+					}				
+			        atomtime+=(stop>start)?(stop-start):0;
+				}
 			}else{ // 実行アトムスタックが空の時
+				if(Env.profile){
+					if(Env.majorVersion==1 && Env.minorVersion>4){
+				        start = System.nanoTime();
+					}else{
+				        start = System.currentTimeMillis();
+					}				
+				}
 				// 今のところ、システムルールセットは膜主導テストでしか実行されない。
 				// 理想では、組み込みの + はインライン展開されるべきである。
 				flag = SystemRulesets.react(mem);
@@ -198,6 +228,14 @@ class Task extends AbstractTask implements Runnable {
 						}
 						if(flag == false) mem.toStable();
 					}
+				}
+				if(Env.profile){
+					if(Env.majorVersion==1 && Env.minorVersion>4){
+				        stop = System.nanoTime();
+					}else{
+				        stop = System.currentTimeMillis();
+					}				
+			        memtime+=(stop>start)?(stop-start):0;
 				}
 			}
 		}
@@ -235,14 +273,15 @@ class Task extends AbstractTask implements Runnable {
 				Env.p( " ==>* \n" + Dumper.dump(root) );
 			}
 			exec(mem);
-			mem.unlock(true);
+	        mem.unlock(true);
 
 			synchronized(this) {
 				running = false;
 				//このタスクの停止を待っているスレッドを全て起こす。
 				notifyAll();
 			}
-			if (root != null && root.isStable()) break;
+			if (root != null && root.isStable())
+				break;
 
 			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化
 			if(memStack.isEmpty() && mem.isRoot()) {
@@ -264,6 +303,13 @@ class Task extends AbstractTask implements Runnable {
 				}
 			}
 		}
+	}
+
+	public void outTime(){
+		if(Env.majorVersion==1 && Env.minorVersion>4)
+			System.out.println("threadID="+thread.getId()+" atomtime=" + atomtime/1000000 + "msec memtime=" + memtime/1000000 +"msec");
+		else
+			System.out.println("threadID="+thread.hashCode()+" atomtime=" + atomtime + "msec memtime=" + memtime +"msec");
 	}
 
 	////////////////////////////////////////////////////////////////

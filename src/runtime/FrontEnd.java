@@ -50,6 +50,8 @@ public class FrontEnd {
 				System.err.println("use jre 1.4 or higher!!");
 				System.exit(-1);
 			}
+			Env.majorVersion=major;
+			Env.minorVersion=minor;
 		// うまくいかなかった場合は無視する
 		} catch (SecurityException e) {
 		} catch (NoSuchElementException e) {
@@ -346,6 +348,10 @@ public class FrontEnd {
 						// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.fInterpret = true;
+						} else if(args[i].equals("--profile")){
+							/// --profile
+							/// Profiling applying counts and execution times of rules.
+							Env.profile = true;
 						}else {
 							System.err.println("Invalid option: " + args[i]);
 							System.exit(-1);

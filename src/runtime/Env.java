@@ -125,6 +125,13 @@ public final class Env {
 	 * one liner
 	 */
 	public static String oneLiner;
+	
+	/**
+	 * ルールの適用回数、成功回数、実行時間が出力される
+	 */
+	public static boolean profile = false;
+	public static int majorVersion = 0;
+	public static int minorVersion = 0;
 	/**
 	 * 3D mode　有効
 	 */
