@@ -1,9 +1,11 @@
+graphic.use.
+go:-
 {
 b.
   window,size(640,530),name("hoge"),bgcolor(0,0,0),timer(10).
   {draw,name("oval"),getpic("filloval"),position(60,60),color(255,0,0),sequence(3),size(40,40)}.
   b,{position(_IX,_IY),$p,@q}:-{position(mouse.framePointX(_IX+20)-20,mouse.framePointY(_IY+45)-45),$p},a.
-}.
+},
 {
 b.
   window,size(640,530),name("moge"),bgcolor(0,0,0),timer(10).
