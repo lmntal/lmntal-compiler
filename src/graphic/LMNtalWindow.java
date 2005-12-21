@@ -14,9 +14,8 @@ public class LMNtalWindow extends JFrame{
 
 	public LMNGraphPanel lmnPanel = null;
 	public LMNtalGFrame lmnframe = null;
-	public boolean busy = true;
-	public boolean running = true;
-	public boolean waitawhile = false;
+//	public boolean busy = true;
+//	public boolean running = true;
 	private boolean killed = false;
 	public long timer = 0;
 	
@@ -69,7 +68,6 @@ public class LMNtalWindow extends JFrame{
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				running = busy = waitawhile = false;
 				//閉じる際に、lmnPanelを殺す。
 				if(lmnPanel!=null){
 					lmnPanel.stop();
@@ -106,9 +104,16 @@ public class LMNtalWindow extends JFrame{
 	protected void initComponents() {
 		lmnPanel = new LMNGraphPanel(this);
 		
-		setTitle("It's Graphical LMNtal");
+		setTitle(name);
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
+//		this.addKeyListener(new MyKeyAdapter(lmnframe,name));
+//		getContentPane().addKeyListener(new KeyAdapter(){
+//			public void keyPressed(KeyEvent e) {
+//				System.out.println(e.getKeyChar());
+//			}
+//		});
+
 	}
 	
 	/**
@@ -174,7 +179,20 @@ public class LMNtalWindow extends JFrame{
 		return false;
 	}
 }
-
+class MyKeyAdapter extends KeyAdapter{
+	LMNtalGFrame frame;
+	String name;
+	MyKeyAdapter(LMNtalGFrame f, String n) {
+		frame = f;
+		name = n;
+	}
+	public void keyPressed(KeyEvent e) {
+//		window.busy = false;
+		super.keyPressed(e);
+		frame.addAtom(name);
+		//System.out.println(e.getKeyChar());
+	}
+}
 class Global{
 	public static Object lock =new Object();
 }

@@ -21,6 +21,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	public boolean locked = false;
 	private Image OSI = null;
 	private Graphics OSG = null;
+	private boolean ready=false;
 	/**描画するオブジェクトリスト*/
 	LinkedList drawlist = new LinkedList();
 	/**レラティブ膜のリスト*/
@@ -34,7 +35,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				OSI = createImage((int) getSize().getWidth(), (int) getSize().getHeight());
-				OSG = OSI.getGraphics();			
+				OSG = OSI.getGraphics();
 			}
 
 		});
@@ -43,12 +44,13 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	
 	
 	public void paint(Graphics g) {
-
-		//画面を白地で初期化（塗りつぶす）
-		OSG.setColor(new Color(frame.color_r,frame.color_g,frame.color_r));
-		OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
-		paintlayout();
-		g.drawImage(OSI,0,0,this);
+		try{
+			//画面を白地で初期化（塗りつぶす）
+			OSG.setColor(new Color(frame.color_r,frame.color_g,frame.color_r));
+			OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
+			paintlayout();
+			g.drawImage(OSI,0,0,this);
+		}catch(NullPointerException e){repaint();}
 	}
 	/**
 	 * 指定された名称のアトムが存在するか検索。

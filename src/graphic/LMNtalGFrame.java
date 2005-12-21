@@ -5,7 +5,7 @@ import java.util.*;
 
 
 import runtime.AbstractMembrane;
-import runtime.Env;
+import runtime.*;
 import test.GUI.Node;
 /**
  * 
@@ -21,7 +21,7 @@ import test.GUI.Node;
 
 	public LMNGraphPanel lmnPanel = null;
 	boolean busy;
-	Thread th;
+	private Thread th;
 	runtime.Membrane rootMem;
 	HashMap windowmap=new HashMap();
 	LinkedList tmplist = new LinkedList();
@@ -97,7 +97,9 @@ import test.GUI.Node;
 			windowmap.put(win.window.name, win);
 		}else{
 			WindowSet tmpwin = (WindowSet)windowmap.get(win.window.name);
+			tmpwin.mem = win.mem;
 			tmpwin.window.timer = win.window.timer;
+			
 		}
     }
     private synchronized void setgraphicmem(AbstractMembrane tmp){
@@ -120,7 +122,7 @@ import test.GUI.Node;
 				long diff2 = win.window.timer - diff;
 				if(diff2 > 0)
 					waitBusy(diff2);
-//				System.out.println("実行時間 : "+diff+"ミリ秒");
+//				System.out.println("実行時間 : "+diff+"+"+diff2+"="+(diff+diff2)+"ミリ秒");
 				start = System.currentTimeMillis();
 				
 				win.window.setgraphicmem(tmp,distance);
@@ -141,7 +143,7 @@ import test.GUI.Node;
 						long diff2 = win.window.timer - diff;
 						if(diff2 > 0)
 							waitBusy(diff2);
-//						System.out.println("実行時間 : "+diff+"ミリ秒");
+//						System.out.println("実行時間 : "+diff+"+"+diff2+"="+(diff+diff2)+"ミリ秒");
 						start = System.currentTimeMillis();
 						win.window.setgraphicmem(tmp,distance);
 						return;
@@ -188,6 +190,20 @@ import test.GUI.Node;
 
    }
    
+   public void addAtom(String memName){
+	   if(!windowmap.containsKey(memName)){
+		   System.out.println("なし！");
+		   return;
+	   }
+	   WindowSet win = (WindowSet)windowmap.get(memName);
+	   win.mem.asyncLock();
+	   win.mem.newAtom(new StringFunctor("aha"));
+	   win.mem.asyncUnlock();
+	   System.out.println(win.mem.getAtomCount());
+//	   win.mem.addAtom(a);
+	   System.out.println("あり！");
+   }
+   
    /**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
    private String getname(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
@@ -227,30 +243,17 @@ import test.GUI.Node;
 	}
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public boolean onTrace() {
-		if(Env.fGraphic) {
-////			lmnPanel.start();
-			//waitBusy();
-////			lmnPanel.stop();
-		}
-//		System.out.println(busy);
+//		if(Env.fGraphic) {
+//			//waitBusy();
+//		}
 		if(busy)return false;
-//		if(busy)System.exit(0);		
-//		return running;
 		return true;
 	}
 	
-	public void waitBusy(long s) {
-//		busy = true;
-////		System.out.print("*");
-//		while(busy) {
-			try {
-				th.sleep(s);
-//				th.wait(s);
-				//System.out.println("wait");
-				//busy = waitawhile;
-			} catch (InterruptedException e) {
-			}
-//		}
+	public void waitBusy(long s) {	
+		try {
+			th.sleep(s);
+		} catch (InterruptedException e) {}
 	}
 }
 /**ウィンドウ膜クラス。膜と、生存フラグ、ウィンドウを保持*/
