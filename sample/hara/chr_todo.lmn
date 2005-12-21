@@ -1,0 +1,29 @@
+(36): transitivity @ X leq Y, Y leq Z ==> X \== Y, Y \== Z, X \== Z | X leq Z. 
+(47): transitivity @ X lss Y, Y lss Z ==> X \== Y, Y \== Z | X lss Z. 
+(48): transitivity @ X leq Y, Y lss Z ==> X \== Y, Y \== Z | X lss Z. 
+(49): transitivity @ X lss Y, Y leq Z ==> X \== Y, Y \== Z | X lss Z. 
+(99): propagation @ minimum(X, Y, Z) ==> X\==Y | Z leq X, Z leq Y. 
+(123): propagation @ maximum(X, Y, Z) ==> X\==Y | X leq Z, Y leq Z. 
+
+leq(X, Y0), leq(Y1, Z) :- uniq(X, Y0, Y1, Z), Y0=Y1,X=\=Y, Y=\=Z, X=\=Z | leq(X, Y0), leq(Y0, Z), leq(X, Z). 
+
+mimimum(_IX, _IY, _IZ) :- uniq(_IX, _IY, _IZ), _IX=\=_IY | 
+mimimum(_IX, _IY, _IZ), leq(_IZ, _IX), leq(_IZ, _IY). 
+
+maximum(_IX, _IY, _IZ) :- uniq(_IX, _IY, _IZ), _IX=\=_IY | 
+maximum(_IX, _IY, _IZ), leq(_IX, _IZ), leq(_IY, _IZ). 
+
+X le Y, X::L1, Y::L2 ==> is_list(L1),is_list(L2), 
+min_list(L1,MinX), min_list(L2,MinY), MinX > MinY | 
+max_list(L2,MaxY), Y::MinX..MaxY. 
+
+'::'(Y, ..(X,Y))
+
+? 
+
+leq(X, Y), leq(Z, W) :- Y=Z, uniq(X, Y, Z, W) | leq(X, Y), leq(Z, W), leq(X, W).
+
+8 queen
+
+たとえば x in 3..10   y in 3..10   x+y in 15..20  ===> x in 5 .. 10 とかになおすとか
+

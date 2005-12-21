@@ -458,6 +458,7 @@ public class RuleCompiler {
 	}
 	/**
 	 * uniq 命令を一つにまとめてガード命令列の最後に移動する。
+	 * uniq 命令は、全ての失敗しうるガード命令のうち最後尾にないといけない。
 	 * hara
 	 */
 	void fixUniqOrder() {
