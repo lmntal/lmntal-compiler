@@ -1,0 +1,34 @@
+/*
+NAME
+	Option module
+
+AUTHOR
+	Atsushi Nakano
+
+HISTORY
+	2005/12/21
+
+---------------------------------
+概要
+---------------------------------
+graphic=option.use.
+とやると、グラフィックモードを実行しgoアトムを生成する。
+かならず、グラフィックモードを実行されてから反応が始まってほしい場合は、goアトムを利用する。
+
+*/
+{
+module(option).
+
+option.use(O) :- [:/*inline*/
+	String option = me.nth(0);
+		
+	if(option=="graphic"){
+		Env.fGraphic = true;
+		Env.initGraphic();
+	}
+		
+		
+    me.nthAtom(0).remove();
+    me.setFunctor("go",0);
+:](O).
+}
