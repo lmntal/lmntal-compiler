@@ -17,18 +17,11 @@ graphic=option.use.
 
 */
 {
-module(option).
+module(graphic).
 
-option.use(O) :- [:/*inline*/
-	String option = me.nth(0);
-		
-	if(option=="graphic"){
-		Env.fGraphic = true;
-		Env.initGraphic();
-	}
-		
-		
-    me.nthAtom(0).remove();
-    me.setFunctor("go",0);
-:](O).
+graphic.use :- [:/*inline*/
+	Env.fGraphic = true;
+	Env.initGraphic();
+	me.setFunctor("go",0);
+:].
 }
