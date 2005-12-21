@@ -251,8 +251,8 @@ public class FrontEnd {
 							Env.fREPL = true;
 							Env.fREMAIN = true;
 						} else if(args[i].equals("--graphic")){
-							/// --remain
-							/// Processes remain.
+							/// --graphic
+							/// Graphic LMNtal mode.
 							Env.fGraphic = true;
 						} else if(args[i].equals("--immediate")){
 							/// --immediate
