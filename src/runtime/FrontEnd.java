@@ -165,14 +165,6 @@ public class FrontEnd {
 						/// Click button to proceed reaction. Close the window to quit.
 						Env.fGUI = true;
 						break;
-					/*nakano* case '3':
-						/// -3
-						/// 3d mode.
-						//System.out.println("f3D true");
-						Env.fGUI = false;
-						Env.f3D = true;
-						break;
-					*/
 					case 't':
 						/// -t
 						/// Trace mode.
