@@ -25,7 +25,7 @@ public final class Env {
 	static final int DEBUG_SYSTEMRULESET = 7;
 	/** Debug level. */
 	public static int debug = 0;
-
+	
 	////////////////////////////////////////////////////////////////
 
 	/** 中間命令列を出力するモード。Java への変換や実行は行わない。 */
@@ -34,6 +34,9 @@ public final class Env {
 	/** メモリ使用量を最小化する */
 	public static boolean fMemory = true;
 
+	/** 非決定的LMNtalモード */
+	public static boolean fNonDeterministic = false;
+	
 	////////////////////////////////////////////////////////////////
 	
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/

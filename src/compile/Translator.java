@@ -652,7 +652,7 @@ public class Translator {
 			}
 		}
 		writer.write(") {\n");
-		
+
 		for (int i = formals; i < locals; i++) {
 			writer.write("		Object var" + i + " = null;\n");
 		}
@@ -1136,7 +1136,7 @@ public class Translator {
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 					//====制御命令====ここから====
 				case Instruction.COMMIT :
-					// トレーサをよぶ
+					// TODO トレーサをよぶ
 					break;//
 //一部は未実装、一部は下の方で手動生成
 //				case Instruction.REACT :
@@ -1653,12 +1653,18 @@ public class Translator {
 				case Instruction.JUMP:
 					label = (InstructionList)inst.getArg1();
 					add(label);
-					writer.write(tabs + "if (exec" + label.label + "(");
-					genArgList((List)inst.getArg2(), (List)inst.getArg3(), (List)inst.getArg4());
-					writer.write(")) {\n");
-					writer.write(tabs + "	ret = true;\n");
-					writer.write(tabs + "	break " + breakLabel + ";\n");
-					writer.write(tabs + "}\n");
+					if (Env.fNonDeterministic && ((Instruction)label.insts.get(1)).getKind() == Instruction.COMMIT) {
+						writer.write(tabs + "Task.states.add(new Object[] {theInstance, \"" + label.label + "\",");
+						genArgList((List)inst.getArg2(), (List)inst.getArg3(), (List)inst.getArg4());
+						writer.write("});\n");
+					} else {
+						writer.write(tabs + "if (exec" + label.label + "(");
+						genArgList((List)inst.getArg2(), (List)inst.getArg3(), (List)inst.getArg4());
+						writer.write(")) {\n");
+						writer.write(tabs + "	ret = true;\n");
+						writer.write(tabs + "	break " + breakLabel + ";\n");
+						writer.write(tabs + "}\n");
+					}
 					return;// false;
 				case Instruction.SPEC://[formals,locals]
 					break;//n-kato

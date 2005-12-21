@@ -253,6 +253,10 @@ public class FrontEnd {
 							/// 文の末尾で改行すると実行する
 							/// デフォルトでは改行２個で実行
 							Env.replTerm = "immediate";
+						} else if (args[i].equals("--non-deterministic")) {
+							/// --non-deterministic
+							/// Execute the all reduction path.
+							Env.fNonDeterministic = true;
 						} else if(args[i].equals("--start-daemon")){
 							/// --start-daemon
 							/// Start LMNtalDaemon
@@ -366,6 +370,15 @@ public class FrontEnd {
 			}else{ // '-'以外で始まるものは (実行ファイル名, argv[0], arg[1], ...) とみなす
 				Env.argv.add(args[i]);
 			}
+		}
+		//オプションの正規化
+		if (Env.fNonDeterministic) {
+			if (Env.fInterpret) {
+				System.err.println("Non Deterministic execution is not supported in interpreted mode");
+				System.exit(-1);
+			}
+			if (Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS)
+				Env.shuffle = Env.SHUFFLE_DONTUSEATOMSTACKS;
 		}
 		//REPL と one-liner では常に解釈実行
 		if (Env.oneLiner != null || Env.argv.isEmpty()) {
@@ -583,6 +596,10 @@ public class FrontEnd {
 			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			rs.react(root);
+			if (Env.fNonDeterministic) {
+				Iterator it = Task.states.iterator();
+				Task.react(root, (Object[])it.next(), null, null);
+			}
 //			root.asyncUnlock();
 //			rt.asyncFlag = false;
 

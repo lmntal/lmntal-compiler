@@ -1,6 +1,12 @@
 package runtime;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import util.Stack;
 
@@ -66,7 +72,7 @@ import util.Stack;
  * タスクの停止・再開の待ち合わせ処理のために、このクラスのインスタンスに関する synchronized 節を利用する。
  */
 
-class Task extends AbstractTask implements Runnable {
+public class Task extends AbstractTask implements Runnable {
 	/** このタスクのルールスレッド */
 	protected Thread thread = new Thread(this, "Task");
 	/** 実行膜スタック*/
@@ -109,11 +115,15 @@ class Task extends AbstractTask implements Runnable {
 	 * 実行が終了するまで戻らない。
 	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
 	public void execAsMasterTask() {
-		thread.start();
-		try {
-			thread.join();
+		if (Env.fNonDeterministic) {
+			nonDeterministicExec();
+		} else {
+			thread.start();
+			try {
+				thread.join();
+			}
+			catch (InterruptedException e) {}
 		}
-		catch (InterruptedException e) {}
 	}
 	
 	private int count = 1; // 行番号表示@トレースモード okabe
@@ -154,7 +164,6 @@ class Task extends AbstractTask implements Runnable {
 	
 	/** このタスクの本膜のルールを実行する */
 	void exec(Membrane mem) {
-		// 実行
 		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
 			Atom a = mem.popReadyAtom();
@@ -203,7 +212,7 @@ class Task extends AbstractTask implements Runnable {
 				// 今のところ、システムルールセットは膜主導テストでしか実行されない。
 				// 理想では、組み込みの + はインライン展開されるべきである。
 				flag = SystemRulesets.react(mem);
-
+	
 				if (!flag) {				
 					while(it.hasNext()){ // 膜主導テストを行う
 						if(((Ruleset)it.next()).react(mem)) {
@@ -257,6 +266,7 @@ class Task extends AbstractTask implements Runnable {
 		LocalLMNtalRuntime r = (LocalLMNtalRuntime)runtime;
 		while (true) {
 			Membrane mem;
+			//本膜をロック
 			synchronized(this) {
 				while (lockRequestCount > 0 || (mem = (Membrane)memStack.peek()) == null || !mem.lock()) {
 					if (r.isTerminated()) return;
@@ -267,32 +277,28 @@ class Task extends AbstractTask implements Runnable {
 				running = true;
 			}
 			mem.remote = null;
+			//非ルールスレッドが変更した内容を出力する。
 			if (root != null && Env.fTrace && asyncFlag) {
-				//非ルールスレッドが変更した内容を出力する。
 				asyncFlag = false;
 				Env.p( " ==>* \n" + Dumper.dump(root) );
 			}
+			//実行
 			exec(mem);
 	        mem.unlock(true);
 
+			//このタスクの停止を待っているスレッドを全て起こす。
 			synchronized(this) {
 				running = false;
-				//このタスクの停止を待っているスレッドを全て起こす。
 				notifyAll();
 			}
 			if (root != null && root.isStable())
 				break;
 
-			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化
+			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化。本膜ロック解放後に行う必要がある。
 			if(memStack.isEmpty() && mem.isRoot()) {
 				final AbstractMembrane memToActivate = mem.getParent();
-				// この膜のロック解放前に親膜を活性化しても、親膜のルールがこの膜に適用できずに
-				// 親膜が再び安定状態に入ることがあるため、この膜のロック解放後に親膜を活性化する。
-				// そのとき、親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
-				// todo stable フラグの処理は大丈夫か？ → asyncLock 内でタスクを止めているので、大丈夫。
+				// 親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
 				if (memToActivate != null) {
-					// 親膜のロックを取得するまでブロックするのは
-					// （特にマルチプロセッサ環境で）もったいないので別スレッドで実行する。
 					new Thread() {
 						public void run() {
 							if (memToActivate.asyncLock()){
@@ -341,6 +347,80 @@ class Task extends AbstractTask implements Runnable {
 				//notifyAll を使ってはいるが、wait しているスレッドはルールスレッドのみのはずである。
 				notifyAll();
 			}
+		}
+	}
+	
+	////////////////////////////////////
+	// non deterministic LMNtal
+
+	public static HashSet states = new HashSet();
+	void nonDeterministicExec() {
+		Env.fMemory = false;
+		HashMap idMap = new HashMap();
+		int id = 0;
+		ArrayList st = new ArrayList();
+		st.add(getRoot());
+		idMap.put(getRoot(), new Integer(id++));
+
+		while (st.size() > 0) {
+			Membrane mem = (Membrane)st.remove(st.size() - 1);
+			//ルール適用の全可能性を検査
+			if (mem != getRoot())
+				memStack.push(mem);
+			root = mem;
+			states.clear();
+			exec(mem);
+			//それぞれ適用した結果を作成
+			System.out.print(idMap.get(mem) + ":");
+			Iterator it = states.iterator();
+			while (it.hasNext()) {
+				//複製
+				Membrane mem2 = new Membrane();
+				mem2.task = this;
+				Map map = mem2.copyCellsFrom(mem);
+				mem2.copyRulesFrom(mem);
+				//適用
+				react(mem2, (Object[])it.next(), mem, map);
+				
+				if (idMap.containsKey(mem2)) {
+					System.out.print(" " + idMap.get(mem2));
+				} else {
+					System.out.print(" " + id);
+					st.add(mem2);
+					idMap.put(mem2, new Integer(id++));
+				}
+			}
+			System.out.println();
+		}
+		Iterator it = idMap.keySet().iterator();
+		while (it.hasNext()) {
+			Membrane mem = (Membrane)it.next();
+			System.out.println(idMap.get(mem) + " = " + mem);
+		}
+	}
+	static void react(Membrane mem, Object[] state, Membrane origMem, Map atomMap) {
+		Ruleset rs = (Ruleset)state[0];
+		Class[] parameterTypes = new Class[state.length - 2];
+		Object[] args = new Object[state.length - 2];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypes[i] = Object.class;
+			args[i] = state[i+2];
+//if (args[i] instanceof Atom && atomMap != null)
+//	System.out.println(i + "/" + args[i] + "/" + atomMap.get(args[i]));
+			if (args[i] instanceof Atom && atomMap != null && atomMap.containsKey(args[i]))
+				args[i] = atomMap.get(args[i]);
+			if (origMem == args[i])
+				args[i] = mem;
+		}
+		try {
+			Method m = rs.getClass().getMethod("exec" + state[1], parameterTypes);
+			m.invoke(rs, args);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

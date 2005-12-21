@@ -4,7 +4,10 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -276,5 +279,86 @@ public final class AtomSet implements Serializable {
 			throw new UnsupportedOperationException();
 		}
 	}
+	
+	/////////////////////////////////
+	// non deterministic LMNtal
+	private HashSet checked1 = new HashSet(), checked2 = new HashSet();
+	public boolean equals(Object o) {
+		if (Env.fNonDeterministic) {
+			AtomSet s = (AtomSet)o;
+			ArrayList funcs = getCanonicalFunctorList();
+			if (funcs.size() != s.getCanonicalFunctorList().size()) return false;
+			Collections.sort(funcs, sizeComparator);
+			checked1.clear();
+			checked2.clear();
+			for (int i = 0; i < funcs.size(); i++) {
+				Functor f = (Functor)funcs.get(i);
+				ArrayList l1 = (ArrayList)atoms.get(f);
+				ArrayList l2 = (ArrayList)s.atoms.get(f);
+				if (l1.size() != l2.size()) return false;
+				for (int j = 0; j < l1.size(); j++) {
+					if (checked1.contains(l1.get(j))) continue;
+					boolean flg = false;
+					for (int k = 0; k < l2.size(); k++) {
+						if (checked2.contains(l2.get(k))) continue;
+						HashMap map = new HashMap();
+						if (compare((Atom)l1.get(j), (Atom)l2.get(k), map)) {
+							flg = true;
+							checked1.addAll(map.keySet());
+							checked2.addAll(map.values());
+							break;
+						}
+					}
+					if (!flg) return false;
+				}
+			}
+			return true;
+		} else {
+			return super.equals(o);
+		}
+	}
+	private ArrayList getCanonicalFunctorList() {
+		ArrayList list = new ArrayList();
+		Iterator it = atoms.keySet().iterator();
+		while (it.hasNext()) {
+			Functor f = (Functor)it.next();
+			if (((ArrayList)atoms.get(f)).size() > 0)
+				list.add(f);
+		}
+		return list;
+	}
+	private final Comparator sizeComparator = new Comparator() {
+		public int compare(Object f0, Object f1) {
+			return ((ArrayList)atoms.get(f0)).size() - ((ArrayList)atoms.get(f1)).size();
+		}
+	};
+	private boolean compare(Atom a1, Atom a2, HashMap map) {
+		if (!a1.getFunctor().equals(a2.getFunctor()))
+			return false;
+		if (map.containsKey(a1)) {
+			return a2 == map.get(a1);
+		}
+		if (checked1.contains(a1) || checked2.contains(a2)) throw new RuntimeException();
+		map.put(a1, a2);
+		for (int i = 0; i < a1.getArity(); i++) {
+			if (!compare(a1.nthAtom(i), a2.nthAtom(i), map))
+				return false;
+		}
+		return true;
+	}
+	public int hashCode() {
+		int ret = 0;
+		Iterator it = atoms.values().iterator();
+		while (it.hasNext()) {
+			ArrayList l = (ArrayList)it.next();
+			for (int i = 0; i < l.size(); i++) {
+				Atom a = (Atom)l.get(i);
+				int t = a.getFunctor().hashCode();
+				for (int j = 0; j < a.getArity(); j++) {
+					ret += t * a.nthAtom(j).getFunctor().hashCode();
+				}
+			}
+		}
+		return ret;
+	}
 }
-
