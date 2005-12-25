@@ -190,6 +190,7 @@ public final class Membrane extends AbstractMembrane {
 	 * @inheritDoc AbstractMembrane.activate()
 	 */
 	public void activate() {
+		if (isNondeterministic()) return;
 		stable = false;
 		Task t = (Task)task;
 		if (isRoot()) {

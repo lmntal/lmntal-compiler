@@ -12,6 +12,8 @@ class SrcMembrane {
 	public int kind = 0;
 	/** ＠指定またはnull */
 	Object pragma = null;
+	/** 非決定的実行膜 */
+	boolean nondeterministic = false;
 	
 	/**
 	 * 空の膜を作成します 

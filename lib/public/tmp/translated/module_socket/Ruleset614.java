@@ -25,19 +25,22 @@ public class Ruleset614 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL1068(mem, atom)) {
+		if (execL1111(mem, atom, false)) {
 			return true;
 		}
 		return result;
 	}
 	public boolean react(Membrane mem) {
+		return react(mem, false);
+	}
+	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL1069(mem)) {
+		if (execL1112(mem, nondeterministic)) {
 			return true;
 		}
 		return result;
 	}
-	public boolean execL1069(Object var0) {
+	public boolean execL1112(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -56,16 +59,16 @@ public class Ruleset614 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1069:
+L1112:
 		{
-			if (execL1066(var0)) {
+			if (execL1109(var0,nondeterministic)) {
 				ret = true;
-				break L1069;
+				break L1112;
 			}
 		}
 		return ret;
 	}
-	public boolean execL1066(Object var0) {
+	public boolean execL1109(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -84,16 +87,18 @@ L1069:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1066:
+L1109:
 		{
-			if (execL1067(var0)) {
+			if (nondeterministic) {
+				Task.states.add(new Object[] {theInstance, "L1110",var0});
+			} else if (execL1110(var0,nondeterministic)) {
 				ret = true;
-				break L1066;
+				break L1109;
 			}
 		}
 		return ret;
 	}
-	public boolean execL1067(Object var0) {
+	public boolean execL1110(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -118,7 +123,7 @@ L1066:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1067:
+L1110:
 		{
 			mem = ((AbstractMembrane)var0).newMem();
 			var1 = mem;
@@ -144,11 +149,11 @@ L1067:
 			atom = ((Atom)var2);
 			atom.getMem().enqueueAtom(atom);
 			ret = true;
-			break L1067;
+			break L1110;
 		}
 		return ret;
 	}
-	public boolean execL1068(Object var0, Object var1) {
+	public boolean execL1111(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -167,12 +172,12 @@ L1067:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1068:
+L1111:
 		{
 		}
 		return ret;
 	}
 	private static final Functor f1 = new Functor("module", 1, null);
-	private static final Functor f2 = new Functor("/*inline_define*/\\r\\nimport java.net.*;\\r\\nimport java.io.*;\\r\\n\\r\\nclass AcceptThread extends Thread {\\r\\n	ServerSocket ss;\\r\\n	Atom ssAtom;\\r\\n	AcceptThread(ServerSocket ss, Atom ssAtom) {\\r\\n		this.ss = ss;\\r\\n		this.ssAtom = ssAtom;\\r\\n	}\\r\\n	public void run() {\\r\\n		try {\\r\\n			Socket soc = ss.accept();\\r\\n			AbstractMembrane mem = ssAtom.getMem();\\r\\n			mem.asyncLock();\\r\\n			Atom dot = ssAtom.nthAtom(1);\\r\\n			Atom acceptingAtom = dot.nthAtom(0);\\r\\n			ReadThread sr = new ReadThread(soc);\\r\\n			//make client socket\\r\\n			Atom s = mem.newAtom(new Functor(\"socket\", 4, \"socket\"));\\r\\n			Atom o = mem.newAtom(new ObjectFunctor(sr));\\r\\n			sr.me = o;\\r\\n			Atom nil1 = mem.newAtom(new Functor(\"nil\", 1));\\r\\n			Atom nil2 = mem.newAtom(new Functor(\"[]\", 1));\\r\\n			mem.newLink(s, 0, o, 0);\\r\\n			mem.newLink(s, 1, nil1, 0); \\r\\n			mem.newLink(s, 2, nil2, 0); \\r\\n			mem.relink(s, 3, acceptingAtom, 0);\\r\\n			\\r\\n			//relink command list\\r\\n			mem.unifyAtomArgs(dot, 1, dot, 2);\\r\\n			dot.remove();\\r\\n			acceptingAtom.remove();\\r\\n\\r\\n			mem.asyncUnlock();\\r\\n		} catch (IOException e) {\\r\\n			e.printStackTrace();\\r\\n		}\\r\\n	}\\r\\n}\\r\\n\\r\\nclass ReadThread extends Thread {\\r\\n	Socket socket;\\r\\n	Atom me;\\r\\n	boolean flgClosing = false;\\r\\n	ReadThread(Socket socket) {\\r\\n		this.socket = socket;\\r\\n		this.me = me;\\r\\n	}\\r\\n	ReadThread(String host, int port) throws IOException {\\r\\n		this.socket = new Socket(host, port);\\r\\n		this.me = me;\\r\\n	}\\r\\n	public void run() {\\r\\n		try {\\r\\n			BufferedReader reader = new BufferedReader(\\r\\n				new InputStreamReader(socket.getInputStream()));\\r\\nL:\\r\\n			while (true) {\\r\\n				String data;\\r\\n				while (true) {\\r\\n					if (flgClosing) {\\r\\n						break L;\\r\\n					}\\r\\n					if (reader.ready()) {\\r\\n						data = reader.readLine();\\r\\n						break;\\r\\n					}\\r\\n					Thread.sleep(50);\\r\\n				}\\r\\n				AbstractMembrane mem = me.getMem();\\r\\n				mem.asyncLock();\\r\\n				Atom socAtom = me.nthAtom(0);\\r\\n				Atom dataAtom = mem.newAtom(new StringFunctor(data));\\r\\n				Atom dot = mem.newAtom(new Functor(\".\", 3));\\r\\n				mem.newLink(dot, 0, dataAtom, 0);\\r\\n				mem.relink(dot, 2, socAtom, 1);\\r\\n				mem.newLink(dot, 1, socAtom, 1);\\r\\n				mem.asyncUnlock();\\r\\n			}\\r\\n			AbstractMembrane mem = me.getMem();\\r\\n			mem.asyncLock();\\r\\n			Atom socAtom = me.nthAtom(0);\\r\\n			Atom nil = mem.newAtom(new Functor(\"[]\", 1));\\r\\n			mem.relink(nil, 0, socAtom, 1);\\r\\n			Atom closed = mem.newAtom(new Functor(\"nil\", 1));\\r\\n			mem.newLink(closed, 0, socAtom, 1);\\r\\n			mem.asyncUnlock();\\r\\n		} catch (Exception e) {\\r\\n			e.printStackTrace();\\r\\n		}\\r\\n	}\\r\\n}\\r\\n", 0, null);
+	private static final Functor f2 = new Functor("/*inline_define*/\r\nimport java.net.*;\r\nimport java.io.*;\r\n\r\nclass AcceptThread extends Thread {\r\n\tServerSocket ss;\r\n\tAtom ssAtom;\r\n\tAcceptThread(ServerSocket ss, Atom ssAtom) {\r\n\t\tthis.ss = ss;\r\n\t\tthis.ssAtom = ssAtom;\r\n\t}\r\n\tpublic void run() {\r\n\t\ttry {\r\n\t\t\tSocket soc = ss.accept();\r\n\t\t\tAbstractMembrane mem = ssAtom.getMem();\r\n\t\t\tmem.asyncLock();\r\n\t\t\tAtom dot = ssAtom.nthAtom(1);\r\n\t\t\tAtom acceptingAtom = dot.nthAtom(0);\r\n\t\t\tReadThread sr = new ReadThread(soc);\r\n\t\t\t//make client socket\r\n\t\t\tAtom s = mem.newAtom(new Functor(\"socket\", 4, \"socket\"));\r\n\t\t\tAtom o = mem.newAtom(new ObjectFunctor(sr));\r\n\t\t\tsr.me = o;\r\n\t\t\tAtom nil1 = mem.newAtom(new Functor(\"nil\", 1));\r\n\t\t\tAtom nil2 = mem.newAtom(new Functor(\"[]\", 1));\r\n\t\t\tmem.newLink(s, 0, o, 0);\r\n\t\t\tmem.newLink(s, 1, nil1, 0); \r\n\t\t\tmem.newLink(s, 2, nil2, 0); \r\n\t\t\tmem.relink(s, 3, acceptingAtom, 0);\r\n\t\t\t\r\n\t\t\t//relink command list\r\n\t\t\tmem.unifyAtomArgs(dot, 1, dot, 2);\r\n\t\t\tdot.remove();\r\n\t\t\tacceptingAtom.remove();\r\n\r\n\t\t\tmem.asyncUnlock();\r\n\t\t} catch (IOException e) {\r\n\t\t\te.printStackTrace();\r\n\t\t}\r\n\t}\r\n}\r\n\r\nclass ReadThread extends Thread {\r\n\tSocket socket;\r\n\tAtom me;\r\n\tboolean flgClosing = false;\r\n\tReadThread(Socket socket) {\r\n\t\tthis.socket = socket;\r\n\t\tthis.me = me;\r\n\t}\r\n\tReadThread(String host, int port) throws IOException {\r\n\t\tthis.socket = new Socket(host, port);\r\n\t\tthis.me = me;\r\n\t}\r\n\tpublic void run() {\r\n\t\ttry {\r\n\t\t\tBufferedReader reader = new BufferedReader(\r\n\t\t\t\tnew InputStreamReader(socket.getInputStream()));\r\nL:\r\n\t\t\twhile (true) {\r\n\t\t\t\tString data;\r\n\t\t\t\twhile (true) {\r\n\t\t\t\t\tif (flgClosing) {\r\n\t\t\t\t\t\tbreak L;\r\n\t\t\t\t\t}\r\n\t\t\t\t\tif (reader.ready()) {\r\n\t\t\t\t\t\tdata = reader.readLine();\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\r\n\t\t\t\t\tThread.sleep(50);\r\n\t\t\t\t}\r\n\t\t\t\tAbstractMembrane mem = me.getMem();\r\n\t\t\t\tmem.asyncLock();\r\n\t\t\t\tAtom socAtom = me.nthAtom(0);\r\n\t\t\t\tAtom dataAtom = mem.newAtom(new StringFunctor(data));\r\n\t\t\t\tAtom dot = mem.newAtom(new Functor(\".\", 3));\r\n\t\t\t\tmem.newLink(dot, 0, dataAtom, 0);\r\n\t\t\t\tmem.relink(dot, 2, socAtom, 1);\r\n\t\t\t\tmem.newLink(dot, 1, socAtom, 1);\r\n\t\t\t\tmem.asyncUnlock();\r\n\t\t\t}\r\n\t\t\tAbstractMembrane mem = me.getMem();\r\n\t\t\tmem.asyncLock();\r\n\t\t\tAtom socAtom = me.nthAtom(0);\r\n\t\t\tAtom nil = mem.newAtom(new Functor(\"[]\", 1));\r\n\t\t\tmem.relink(nil, 0, socAtom, 1);\r\n\t\t\tAtom closed = mem.newAtom(new Functor(\"nil\", 1));\r\n\t\t\tmem.newLink(closed, 0, socAtom, 1);\r\n\t\t\tmem.asyncUnlock();\r\n\t\t} catch (Exception e) {\r\n\t\t\te.printStackTrace();\r\n\t\t}\r\n\t}\r\n}\r\n", 0, null);
 	private static final Functor f0 = new Functor("socket", 1, null);
 }

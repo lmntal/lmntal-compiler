@@ -1,0 +1,2 @@
+//nd.reduct({{r([a,a,a,a]). a(X) :- b(X).}*}, java.new("java.util.HashMap"), map).
+nd.exec({{r([a,a,a,a]). a(X) :- b(X).}*}).

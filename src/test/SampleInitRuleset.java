@@ -8,6 +8,9 @@ public final class SampleInitRuleset extends Ruleset {
 	public String toString() {
 		return "Ruleset Sample";
 	}
+	public boolean react(Membrane mem, boolean nondeterministic) {
+		return false;
+	}
 	/**
 	 * アトム主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue
@@ -57,6 +60,9 @@ final class SampleRuleset extends Ruleset {
 	 * @return ルールを適用した場合はtrue
 	 */
 	public boolean react(Membrane mem, Atom atom) {
+		return false;
+	}
+	public boolean react(Membrane mem, boolean nondeterministic) {
 		return false;
 	}
 	/**

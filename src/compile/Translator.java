@@ -544,13 +544,13 @@ public class Translator {
 			writer.write("	}\n");
 		}
 
-		//膜手動テスト
+		//アトム手動テスト
 		writer.write("	public boolean react(Membrane mem, Atom atom) {\n");
 		writer.write("		boolean result = false;\n");
 		Iterator it = ruleset.rules.iterator();
 		while (it.hasNext()) {
 			Rule rule = (Rule) it.next();
-			writer.write("		if (exec" + rule.atomMatchLabel.label + "(mem, atom)) {\n");
+			writer.write("		if (exec" + rule.atomMatchLabel.label + "(mem, atom, false)) {\n");
 			//writer.write("			result = true;\n");
 			writer.write("			return true;\n");
 			//writer.write("			if (!mem.isCurrent()) return true;\n");
@@ -558,13 +558,16 @@ public class Translator {
 		}
 		writer.write("		return result;\n");
 		writer.write("	}\n");
-		//アトム手動テスト
+		//膜手動テスト
 		writer.write("	public boolean react(Membrane mem) {\n");
+		writer.write("		return react(mem, false);\n");
+		writer.write("	}\n");
+		writer.write("	public boolean react(Membrane mem, boolean nondeterministic) {\n");
 		writer.write("		boolean result = false;\n");
 		it = ruleset.rules.iterator();
 		while (it.hasNext()) {
 			Rule rule = (Rule) it.next();
-			writer.write("		if (exec" + rule.memMatchLabel.label + "(mem)) {\n");
+			writer.write("		if (exec" + rule.memMatchLabel.label + "(mem, nondeterministic)) {\n");
 			//writer.write("			result = true;\n");
 			writer.write("			return true;\n");
 			//writer.write("			if (!mem.isCurrent()) return true;\n");
@@ -634,7 +637,7 @@ public class Translator {
 		writer.write("	public boolean exec" + instList.label + "(");
 		if (globalSystemRuleset && instList.insts.size() == 0) {
 			//GlobalSystemRuleset の生成では、アトム主導テストが空のことがある
-			writer.write("Object var0, Object var1) {\n");
+			writer.write("Object var0, Object var1, boolean nondeterministic) {\n");
 			writer.write("		return false;\n");
 			writer.write("	}\n");
 			return;
@@ -651,7 +654,7 @@ public class Translator {
 				writer.write(", Object var" + i);
 			}
 		}
-		writer.write(") {\n");
+		writer.write(", boolean nondeterministic) {\n");
 
 		for (int i = formals; i < locals; i++) {
 			writer.write("		Object var" + i + " = null;\n");
@@ -994,6 +997,9 @@ public class Translator {
 				case Instruction.SETMEMNAME: //[dstmem, name]
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").setName(" + Util.quoteString((String)inst.getArg2(), '"') + ");\n");
 					break; //n-kato
+				case Instruction.NONDETERMINISTIC: //[mem]
+					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").setNondeterministic(true);\n");
+					break; //mizuno
 					//====膜を操作する基本ボディ命令====ここまで====
 					//====リンクに関係する出力するガード命令====ここから====
 				case Instruction.GETLINK : //[-link, atom, pos]
@@ -1653,18 +1659,21 @@ public class Translator {
 				case Instruction.JUMP:
 					label = (InstructionList)inst.getArg1();
 					add(label);
-					if (Env.fNonDeterministic && ((Instruction)label.insts.get(1)).getKind() == Instruction.COMMIT) {
-						writer.write(tabs + "Task.states.add(new Object[] {theInstance, \"" + label.label + "\",");
-						genArgList((List)inst.getArg2(), (List)inst.getArg3(), (List)inst.getArg4());
+					if (((Instruction)label.insts.get(1)).getKind() == Instruction.COMMIT) {
+						writer.write(tabs + "if (nondeterministic) {\n");
+						writer.write(tabs + "	Task.states.add(new Object[] {theInstance, \"" + label.label + "\",");
+						genArgList((List)inst.getArg2(), (List)inst.getArg3(), (List)inst.getArg4(), false);
 						writer.write("});\n");
+						writer.write(tabs + "} else ");
 					} else {
-						writer.write(tabs + "if (exec" + label.label + "(");
-						genArgList((List)inst.getArg2(), (List)inst.getArg3(), (List)inst.getArg4());
-						writer.write(")) {\n");
-						writer.write(tabs + "	ret = true;\n");
-						writer.write(tabs + "	break " + breakLabel + ";\n");
-						writer.write(tabs + "}\n");
+						writer.write(tabs);
 					}
+					writer.write("if (exec" + label.label + "(");
+					genArgList((List)inst.getArg2(), (List)inst.getArg3(), (List)inst.getArg4());
+					writer.write(")) {\n");
+					writer.write(tabs + "	ret = true;\n");
+					writer.write(tabs + "	break " + breakLabel + ";\n");
+					writer.write(tabs + "}\n");
 					return;// false;
 				case Instruction.SPEC://[formals,locals]
 					break;//n-kato
@@ -1679,7 +1688,7 @@ public class Translator {
 					for (int i = 1; i < in_spec.getIntArg1(); i++) {
 						writer.write(", var" + i);
 					}
-					writer.write(")) {\n");
+					writer.write(", nondeterministic)) {\n");
 					writer.write(tabs + "	ret = true;\n");
 					writer.write(tabs + "	break " + breakLabel + ";\n");
 					writer.write(tabs + "}\n");
@@ -1738,8 +1747,11 @@ public class Translator {
 			return varname;
 		}
 	}
-	
+
 	private void genArgList(List l1, List l2, List l3) throws IOException {
+		genArgList(l1, l2, l3, true);
+	}
+	private void genArgList(List l1, List l2, List l3, boolean genNdFlag) throws IOException {
 		boolean fFirst = true;
 		Iterator it = l1.iterator();
 		while (it.hasNext()) {
@@ -1764,6 +1776,11 @@ public class Translator {
 			}
 			fFirst = false;
 			writer.write("var" + it.next());
+		}
+		if (genNdFlag) {
+			if (!fFirst)
+				writer.write(",");
+			writer.write("nondeterministic");
 		}
 	}
 }

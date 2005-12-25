@@ -1,0 +1,26 @@
+{
+	nondeterministic.exec({r([a,a,a,a]). a(X) :- b(X).}).
+}.
+
+{
+	{r([a,a,a,a]), +L00,+L01,+L02,+L03}.
+
+	{r([b,a,a,a]), +L10,+L11,+L12,+L13}.
+	{r([a,b,a,a]), +L20, todo}.
+	{r([a,a,b,a]), +L30, todo}.
+	{r([a,a,a,b]), +L40, todo}.
+
+	{r([b,b,a,a]), +L50, todo}.
+	{r([b,a,b,a]), +L60, todo}.
+	{r([b,a,a,b]), +L70, todo}.
+	
+	reduct_to(L00, L10).
+	reduct_to(L01, L20).
+	reduct_to(L02, L30).
+	reduct_to(L03, L40).
+	reduct_to(L11, L50).
+	reduct_to(L12, L60).
+	reduct_to(L13, L70).
+	
+	{todo, $p} :- X={$p}, [:/*inline*/:](X).
+}.

@@ -25,19 +25,22 @@ public class Ruleset604 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL265(mem, atom)) {
+		if (execL283(mem, atom, false)) {
 			return true;
 		}
 		return result;
 	}
 	public boolean react(Membrane mem) {
+		return react(mem, false);
+	}
+	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL266(mem)) {
+		if (execL284(mem, nondeterministic)) {
 			return true;
 		}
 		return result;
 	}
-	public boolean execL266(Object var0) {
+	public boolean execL284(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -56,16 +59,16 @@ public class Ruleset604 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L266:
+L284:
 		{
-			if (execL263(var0)) {
+			if (execL281(var0,nondeterministic)) {
 				ret = true;
-				break L266;
+				break L284;
 			}
 		}
 		return ret;
 	}
-	public boolean execL263(Object var0) {
+	public boolean execL281(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -84,16 +87,18 @@ L266:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L263:
+L281:
 		{
-			if (execL264(var0)) {
+			if (nondeterministic) {
+				Task.states.add(new Object[] {theInstance, "L282",var0});
+			} else if (execL282(var0,nondeterministic)) {
 				ret = true;
-				break L263;
+				break L281;
 			}
 		}
 		return ret;
 	}
-	public boolean execL264(Object var0) {
+	public boolean execL282(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -117,7 +122,7 @@ L263:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L264:
+L282:
 		{
 			mem = ((AbstractMembrane)var0).newMem();
 			var1 = mem;
@@ -139,11 +144,11 @@ L264:
 			atom = ((Atom)var2);
 			atom.getMem().enqueueAtom(atom);
 			ret = true;
-			break L264;
+			break L282;
 		}
 		return ret;
 	}
-	public boolean execL265(Object var0, Object var1) {
+	public boolean execL283(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -162,7 +167,7 @@ L264:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L265:
+L283:
 		{
 		}
 		return ret;

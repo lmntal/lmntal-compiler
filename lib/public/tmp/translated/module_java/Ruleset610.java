@@ -25,19 +25,22 @@ public class Ruleset610 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL710(mem, atom)) {
+		if (execL753(mem, atom, false)) {
 			return true;
 		}
 		return result;
 	}
 	public boolean react(Membrane mem) {
+		return react(mem, false);
+	}
+	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL711(mem)) {
+		if (execL754(mem, nondeterministic)) {
 			return true;
 		}
 		return result;
 	}
-	public boolean execL711(Object var0) {
+	public boolean execL754(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -56,16 +59,16 @@ public class Ruleset610 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L711:
+L754:
 		{
-			if (execL708(var0)) {
+			if (execL751(var0,nondeterministic)) {
 				ret = true;
-				break L711;
+				break L754;
 			}
 		}
 		return ret;
 	}
-	public boolean execL708(Object var0) {
+	public boolean execL751(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -84,16 +87,18 @@ L711:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L708:
+L751:
 		{
-			if (execL709(var0)) {
+			if (nondeterministic) {
+				Task.states.add(new Object[] {theInstance, "L752",var0});
+			} else if (execL752(var0,nondeterministic)) {
 				ret = true;
-				break L708;
+				break L751;
 			}
 		}
 		return ret;
 	}
-	public boolean execL709(Object var0) {
+	public boolean execL752(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -118,7 +123,7 @@ L708:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L709:
+L752:
 		{
 			mem = ((AbstractMembrane)var0).newMem();
 			var1 = mem;
@@ -144,11 +149,11 @@ L709:
 			atom = ((Atom)var2);
 			atom.getMem().enqueueAtom(atom);
 			ret = true;
-			break L709;
+			break L752;
 		}
 		return ret;
 	}
-	public boolean execL710(Object var0, Object var1) {
+	public boolean execL753(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -167,12 +172,12 @@ L709:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L710:
+L753:
 		{
 		}
 		return ret;
 	}
 	private static final Functor f1 = new Functor("module", 1, null);
-	private static final Functor f2 = new Functor("/*inline_define*/\\r\\nimport java.lang.reflect.Constructor;\\r\\nimport java.lang.reflect.Method;\\r\\nclass Java {\\r\\n	static Object doInvoke(Object obj, String methodName) {\\r\\n		return doInvoke(obj, methodName, null);\\r\\n	}\\r\\n	static Object doInvoke(Object obj, String methodName, Object argv[]) {\\r\\n		Object r = null;\\r\\n		if(argv==null) argv=new Object[0];\\r\\n		Class cl[] = new Class[argv.length];\\r\\n		\\r\\n		if(false) { // 速いけどだめな方法。add(Button) が add(Component) にマッチしない\\r\\n			try {\\r\\n				// 必要に応じて追加する\\r\\n				Class IntegerClass = Class.forName(\"java.lang.Integer\");\\r\\n				// メソッドを識別するためにクラスの配列をつくる\\r\\n				for(int i=0;i<cl.length;i++) {\\r\\n					cl[i] = argv[i].getClass();\\r\\n					if(cl[i].equals(IntegerClass)) cl[i] = Integer.TYPE;\\r\\n//					System.out.println(argv[i].getClass());\\r\\n				}\\r\\n			} catch (Exception e) {\\r\\n			}\\r\\n		\\r\\n			try {\\r\\n//				Method mm[] = obj.getClass().getMethods();\\r\\n//				for(int j=0;j<mm.length;j++) System.out.println(mm[j].getName());\\r\\n				Method m = obj.getClass().getMethod(methodName, cl);\\r\\n				r = m.invoke(obj, argv);\\r\\n			} catch (Exception e) {\\r\\n				e.printStackTrace();\\r\\n			}\\r\\n		} else { // 遅いけどよさそうな方法\\r\\n			Method mm[] = obj.getClass().getMethods();\\r\\n			for(int j=0;j<mm.length;j++) {\\r\\n				try {\\r\\n					if(!mm[j].getName().equals(methodName)) continue;\\r\\n					if(mm[j].getParameterTypes().length != argv.length) continue;\\r\\n					System.out.println(\"----------\"+ mm[j]);\\r\\n					r = mm[j].invoke(obj, argv);\\r\\n					break;\\r\\n				} catch (Exception e) {\\r\\n//					e.printStackTrace();\\r\\n				}\\r\\n			}\\r\\n		}\\r\\n		return r;\\r\\n	}\\r\\n	static Object doNew(String className) {\\r\\n		return doNew(className, null);\\r\\n	}\\r\\n	static Object doNew(String className, Object argv[]) {\\r\\n		Object r = null;\\r\\n		if(argv==null) argv=new Object[0];\\r\\n		try {\\r\\n			Class cl = Class.forName(className);\\r\\n			Constructor cn[] = cl.getConstructors();\\r\\n			for(int i=0;i<cn.length;i++) {\\r\\n				try {\\r\\n//					System.out.println(\"-----------------------\\n\"+cn[i]);\\r\\n					r = cn[i].newInstance(argv);\\r\\n					break;\\r\\n				} catch (Exception e) {\\r\\n//					e.printStackTrace();\\r\\n				}\\r\\n			}\\r\\n		} catch (Exception e) {\\r\\n			e.printStackTrace();\\r\\n		}\\r\\n		return r;\\r\\n	}\\r\\n}\\r\\n", 0, null);
+	private static final Functor f2 = new Functor("/*inline_define*/\r\nimport java.lang.reflect.Constructor;\r\nimport java.lang.reflect.Method;\r\nclass Java {\r\n\tstatic Object doInvoke(Object obj, String methodName) {\r\n\t\treturn doInvoke(obj, methodName, null);\r\n\t}\r\n\tstatic Object doInvoke(Object obj, String methodName, Object argv[]) {\r\n\t\tObject r = null;\r\n\t\tif(argv==null) argv=new Object[0];\r\n\t\tClass cl[] = new Class[argv.length];\r\n\t\t\r\n\t\tif(false) { // 速いけどだめな方法。add(Button) が add(Component) にマッチしない\r\n\t\t\ttry {\r\n\t\t\t\t// 必要に応じて追加する\r\n\t\t\t\tClass IntegerClass = Class.forName(\"java.lang.Integer\");\r\n\t\t\t\t// メソッドを識別するためにクラスの配列をつくる\r\n\t\t\t\tfor(int i=0;i<cl.length;i++) {\r\n\t\t\t\t\tcl[i] = argv[i].getClass();\r\n\t\t\t\t\tif(cl[i].equals(IntegerClass)) cl[i] = Integer.TYPE;\r\n//\t\t\t\t\tSystem.out.println(argv[i].getClass());\r\n\t\t\t\t}\r\n\t\t\t} catch (Exception e) {\r\n\t\t\t}\r\n\t\t\r\n\t\t\ttry {\r\n//\t\t\t\tMethod mm[] = obj.getClass().getMethods();\r\n//\t\t\t\tfor(int j=0;j<mm.length;j++) System.out.println(mm[j].getName());\r\n\t\t\t\tMethod m = obj.getClass().getMethod(methodName, cl);\r\n\t\t\t\tr = m.invoke(obj, argv);\r\n\t\t\t} catch (Exception e) {\r\n\t\t\t\te.printStackTrace();\r\n\t\t\t}\r\n\t\t} else { // 遅いけどよさそうな方法\r\n\t\t\tMethod mm[] = obj.getClass().getMethods();\r\n\t\t\tfor(int j=0;j<mm.length;j++) {\r\n\t\t\t\ttry {\r\n\t\t\t\t\tif(!mm[j].getName().equals(methodName)) continue;\r\n\t\t\t\t\tif(mm[j].getParameterTypes().length != argv.length) continue;\r\n\t\t\t\t\tSystem.out.println(\"----------\"+ mm[j]);\r\n\t\t\t\t\tr = mm[j].invoke(obj, argv);\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t} catch (Exception e) {\r\n//\t\t\t\t\te.printStackTrace();\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn r;\r\n\t}\r\n\tstatic Object doNew(String className) {\r\n\t\treturn doNew(className, null);\r\n\t}\r\n\tstatic Object doNew(String className, Object argv[]) {\r\n\t\tObject r = null;\r\n\t\tif(argv==null) argv=new Object[0];\r\n\t\ttry {\r\n\t\t\tClass cl = Class.forName(className);\r\n\t\t\tConstructor cn[] = cl.getConstructors();\r\n\t\t\tfor(int i=0;i<cn.length;i++) {\r\n\t\t\t\ttry {\r\n//\t\t\t\t\tSystem.out.println(\"-----------------------\\n\"+cn[i]);\r\n\t\t\t\t\tr = cn[i].newInstance(argv);\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t} catch (Exception e) {\r\n//\t\t\t\t\te.printStackTrace();\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t} catch (Exception e) {\r\n\t\t\te.printStackTrace();\r\n\t\t}\r\n\t\treturn r;\r\n\t}\r\n}\r\n", 0, null);
 	private static final Functor f0 = new Functor("java", 1, null);
 }

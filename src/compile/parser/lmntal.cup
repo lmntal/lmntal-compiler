@@ -27,6 +27,7 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE, RBRACE_SLASH, RBRACE_AT, RBRACE_SLASH_AT,
 				RBRACE_UNDERBAR, RBRACE_UNDERBAR_SLASH,
 				RBRACE_UNDERBAR_AT, RBRACE_UNDERBAR_SLASH_AT,
+				RBRACE_ASTERISK,
 				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
@@ -341,6 +342,10 @@ Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 					   sMem.kind = 1;
 					   sMem.pragma = atom;
 					   RESULT = sMem; :}
+				| LBRACE WorldProcessList:list RBRACE_ASTERISK
+					{: SrcMembrane sMem = new SrcMembrane(list);
+						sMem.nondeterministic = true;
+						RESULT = sMem; :}
 				;
 					
 // 丸カッコなしのルール構文

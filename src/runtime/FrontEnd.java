@@ -253,10 +253,10 @@ public class FrontEnd {
 							/// 文の末尾で改行すると実行する
 							/// デフォルトでは改行２個で実行
 							Env.replTerm = "immediate";
-						} else if (args[i].equals("--non-deterministic")) {
-							/// --non-deterministic
+						} else if (args[i].equals("--nondeterministic")) {
+							/// --nondeterministic
 							/// Execute the all reduction path.
-							Env.fNonDeterministic = true;
+							Env.fNondeterministic = true;
 						} else if(args[i].equals("--start-daemon")){
 							/// --start-daemon
 							/// Start LMNtalDaemon
@@ -297,14 +297,15 @@ public class FrontEnd {
 							/// --debug-daemon
 							/// dump debug message of LMNtalDaemon
 							Env.debugDaemon = Env.DEBUG_DEFAULT;
-						} else if (args[i].equals("--keep-temporary-files")) {
-							/// --keep-temporary-files
-							/// Do not delete the translated Java source.
-							Translator.fKeepSource = true;
+//						} else if (args[i].equals("--keep-temporary-files")) {
+//							// --keep-temporary-files
+//							// Do not delete the translated Java source.
+//							Translator.fKeepSource = true;
 						} else if (args[i].startsWith("--temporary-dir=")) {
 							/// --temporary-dir=<dir>
 							/// use <dir> as temporary directory
 							Translator.baseDirName = args[i].substring(16);
+							Translator.fKeepSource = true;
 						} else if (args[i].equals("--interpret")) {
 							/// --interpret
 							/// Interpret intermediate instruction sequences without translating into Java.
@@ -372,7 +373,7 @@ public class FrontEnd {
 			}
 		}
 		//オプションの正規化
-		if (Env.fNonDeterministic) {
+		if (Env.fNondeterministic) {
 			if (Env.fInterpret) {
 				System.err.println("Non Deterministic execution is not supported in interpreted mode");
 				System.exit(-1);
@@ -596,10 +597,6 @@ public class FrontEnd {
 			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			rs.react(root);
-			if (Env.fNonDeterministic) {
-				Iterator it = Task.states.iterator();
-				Task.react(root, (Object[])it.next(), null, null);
-			}
 //			root.asyncUnlock();
 //			rt.asyncFlag = false;
 

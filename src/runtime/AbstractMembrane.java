@@ -88,6 +88,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public RemoteTask remote = null; // publicは仮
 	/** この膜の名前（internされた文字列またはnull） */
 	String name;
+	/** 非決定的実行膜 */
+	private boolean nondeterministic = false;
 
 	private static int nextId = 0;
 	private int id;
@@ -135,7 +137,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * インスタンスごとにユニークなidを用意してハッシュコードとして利用する。
 	 */
 	public int hashCode() {
-		if (Env.fNonDeterministic) {
+		if (Env.fNondeterministic || nondeterministic) {
 			return atoms.hashCode() + rulesets.hashCode();
 		}
 		return id;
@@ -209,6 +211,9 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	public boolean isRoot() {
 		return task.getRoot() == this;
+	}
+	public boolean isNondeterministic() {
+		return nondeterministic;
 	}
 	
 	// 反復子
@@ -600,6 +605,13 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		if (locked)
 			unlock();
 		// TODO (A) ホスト間移動時にGlobalMembraneIDは変更しなくて大丈夫か調べる
+	}
+	public void setNondeterministic(boolean f) {
+		nondeterministic = f;
+		if (f) {
+			dequeue();
+			toStable();
+		}
 	}
 //	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
 //	 * <p>いずれ、
@@ -1232,7 +1244,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	////////////////////////////////////////
 	// non deterministic LMNtal
 	public boolean equals(Object o) {
-		if (Env.fNonDeterministic) {
+		if (Env.fNondeterministic || nondeterministic) {
 			AbstractMembrane m = (AbstractMembrane)o;
 			return atoms.equals(m.atoms) && rulesets.equals(m.rulesets);
 			//ルールセットを集合として比較していないので、実勢には同じでもちがうと判断される事がある。

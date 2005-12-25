@@ -115,8 +115,8 @@ public class Task extends AbstractTask implements Runnable {
 	 * 実行が終了するまで戻らない。
 	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
 	public void execAsMasterTask() {
-		if (Env.fNonDeterministic) {
-			nonDeterministicExec();
+		if (Env.fNondeterministic) {
+			nondeterministicExec();
 		} else {
 			thread.start();
 			try {
@@ -166,89 +166,94 @@ public class Task extends AbstractTask implements Runnable {
 	void exec(Membrane mem) {
 		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
-			Atom a = mem.popReadyAtom();
-			Iterator it = mem.rulesetIterator();
-			boolean flag = false;
-			if(Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
-				if(Env.profile){
-					if(Env.majorVersion==1 && Env.minorVersion>4){
-				        start = System.nanoTime();
-					}else{
-				        start = System.currentTimeMillis();
-					}				
+			if (!exec(mem, false)) break;
+		}
+	}
+	boolean exec(Membrane mem, boolean nondeterministic) {
+		Atom a = mem.popReadyAtom();
+		Iterator it = mem.rulesetIterator();
+		boolean flag = false;
+		if(!nondeterministic && Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
+			if(Env.profile){
+				if(Env.majorVersion==1 && Env.minorVersion>4){
+			        start = System.nanoTime();
+				}else{
+			        start = System.currentTimeMillis();
+				}				
+			}
+			while(it.hasNext()){ // 本膜のもつルールをaに適用
+				if (((Ruleset)it.next()).react(mem, a)) {
+					flag = true;
+					//if (memStack.peek() != mem) break;
+					break; // ルールセットが変わっているかもしれないため
+					//ルールセットが追加されている可能性はあるが、削除される事はないので
+					//そのまま処理を続けてもいいと思う。 2005/12/08 mizuno
 				}
-				while(it.hasNext()){ // 本膜のもつルールをaに適用
-					if (((Ruleset)it.next()).react(mem, a)) {
+			}
+			
+			if(flag){
+				if (!trace("-->")) return false;
+			} else {
+				if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
+				// TODO システムコールアトムなら、本膜がルート膜でも親膜につみ、親膜を活性化
+			}
+			if(Env.profile){
+				if(Env.majorVersion==1 && Env.minorVersion>4){
+			        stop = System.nanoTime();
+				}else{
+			        stop = System.currentTimeMillis();
+				}				
+		        atomtime+=(stop>start)?(stop-start):0;
+			}
+		}else{ // 実行アトムスタックが空の時
+			if(Env.profile){
+				if(Env.majorVersion==1 && Env.minorVersion>4){
+			        start = System.nanoTime();
+				}else{
+			        start = System.currentTimeMillis();
+				}				
+			}
+			// 今のところ、システムルールセットは膜主導テストでしか実行されない。
+			// 理想では、組み込みの + はインライン展開されるべきである。
+			flag = SystemRulesets.react(mem, nondeterministic);
+			if (!flag) {				
+				while(it.hasNext()){ // 膜主導テストを行う
+					if(((Ruleset)it.next()).react(mem, nondeterministic)) {
 						flag = true;
 						//if (memStack.peek() != mem) break;
 						break; // ルールセットが変わっているかもしれないため
-						//ルールセットが追加されている可能性はあるが、削除される事はないので
-						//そのまま処理を続けてもいいと思う。 2005/12/08 mizuno
 					}
-				}
-				
-				if(flag){
-					if (!trace("-->")) break;
-				} else {
-					if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
-					// TODO システムコールアトムなら、本膜がルート膜でも親膜につみ、親膜を活性化
-				}
-				if(Env.profile){
-					if(Env.majorVersion==1 && Env.minorVersion>4){
-				        stop = System.nanoTime();
-					}else{
-				        stop = System.currentTimeMillis();
-					}				
-			        atomtime+=(stop>start)?(stop-start):0;
-				}
-			}else{ // 実行アトムスタックが空の時
-				if(Env.profile){
-					if(Env.majorVersion==1 && Env.minorVersion>4){
-				        start = System.nanoTime();
-					}else{
-				        start = System.currentTimeMillis();
-					}				
-				}
-				// 今のところ、システムルールセットは膜主導テストでしか実行されない。
-				// 理想では、組み込みの + はインライン展開されるべきである。
-				flag = SystemRulesets.react(mem);
-	
-				if (!flag) {				
-					while(it.hasNext()){ // 膜主導テストを行う
-						if(((Ruleset)it.next()).react(mem)) {
-							flag = true;
-							//if (memStack.peek() != mem) break;
-							break; // ルールセットが変わっているかもしれないため
-						}
-					}
-				}
-				
-				if(flag){
-					if (!trace("==>")) break;
-				} else {
-					memStack.pop(); // 本膜をpop
-					if (!mem.perpetual) {
-						// 子膜が全てstableなら、この膜をstableにする。
-						it = mem.memIterator();
-						flag = false;
-						while(it.hasNext()){
-							if(((AbstractMembrane)it.next()).isStable() == false)
-								flag = true;
-						}
-						if(flag == false) mem.toStable();
-					}
-				}
-				if(Env.profile){
-					if(Env.majorVersion==1 && Env.minorVersion>4){
-				        stop = System.nanoTime();
-					}else{
-				        stop = System.currentTimeMillis();
-					}				
-			        memtime+=(stop>start)?(stop-start):0;
 				}
 			}
+			
+			if(flag){
+				if (!trace("==>")) return false;
+			} else if (!nondeterministic){
+				memStack.pop(); // 本膜をpop
+				if (!mem.isNondeterministic() && !mem.perpetual) {
+					// 子膜が全てstableなら、この膜をstableにする。
+					it = mem.memIterator();
+					flag = false;
+					while(it.hasNext()){
+						if(((AbstractMembrane)it.next()).isStable() == false)
+							flag = true;
+					}
+					if(flag == false) {
+						mem.toStable();
+					} else {
+					}
+				}
+			}
+			if(Env.profile){
+				if(Env.majorVersion==1 && Env.minorVersion>4){
+			        stop = System.nanoTime();
+				}else{
+			        stop = System.currentTimeMillis();
+				}				
+		        memtime+=(stop>start)?(stop-start):0;
+			}
 		}
-
+		return true;
 	}
 	
 	/** このタスク固有のルールスレッドが実行する処理 */
@@ -354,7 +359,80 @@ public class Task extends AbstractTask implements Runnable {
 	// non deterministic LMNtal
 
 	public static HashSet states = new HashSet();
-	void nonDeterministicExec() {
+	private static final Functor FUNC_FROM = new Functor("from", 1, "nd");
+	private static final Functor FUNC_TO = new Functor("to", 1, "nd");
+	/** 
+	 * 指定された膜に関するリダクショングラフを生成する。
+	 * 結果は、指定された膜の親膜の親膜に生成される。
+	 * @param memExec2 非同期実行する膜
+	 */
+	public void nondeterministicExec(Membrane memExec2) {
+		ArrayList l = new ArrayList();
+		l.add(memExec2);
+		HashMap memMap = new HashMap();
+		memMap.put(memExec2, memExec2.getParent());
+		while (l.size() > 0) {
+			Membrane mem2 = (Membrane)l.remove(l.size() - 1);
+			nondeterministicExec(mem2, memMap, l);
+		}
+	}
+	/**
+	 * 指定された膜を、非決定的に 1 段階実行する。
+	 * @param memExec2 実行する膜
+	 * @param memMap すでに生成された膜が入ったマップ。実行した結果が同一の場合に、同一の膜を利用するためのもの。
+	 * @param newMems 新しく生成した膜を追加するリスト。実行した結果が memMap 内になかった場合に、ここに追加される。
+	 *         nullが指定された場合は何もしない。
+	 */
+	public void nondeterministicExec(Membrane memExec2, HashMap memMap, ArrayList newMems) {
+		Membrane memExec = (Membrane)memExec2.getParent();
+		Membrane memGraph = (Membrane)memExec.getParent();
+		states.clear();
+		exec(memExec2, true);
+		//それぞれ適用した結果を作成
+		Iterator it = states.iterator();
+		while (it.hasNext()) {
+			//複製
+			Membrane memResult = (Membrane)memGraph.newMem();
+			Membrane memResult2 = (Membrane)memResult.newMem();
+			memResult2.setNondeterministic(true);
+			Map atomMap = memResult2.copyCellsFrom(memExec2);
+			memResult2.copyRulesFrom(memExec2);
+			//適用
+			react(memResult2, (Object[])it.next(), memExec2, atomMap);
+			
+			//同一の膜を調べる
+			Membrane memOut = (Membrane)memMap.get(memResult2);
+			boolean flg = memOut == null;
+			if (flg) {
+				memMap.put(memResult2, memResult);
+				memOut = memResult;
+				if (newMems != null) newMems.add(memResult2);
+			} else {
+				memGraph.removeMem(memResult);
+				memResult.drop();
+				memOut.blockingLock();
+			}
+			//リンク生成
+			Atom f = memExec.newAtom(FUNC_FROM);
+			Atom fi = memExec.newAtom(Functor.INSIDE_PROXY);
+			Atom fo = memGraph.newAtom(Functor.OUTSIDE_PROXY);
+			Atom to = memGraph.newAtom(Functor.OUTSIDE_PROXY);
+			Atom ti = memOut.newAtom(Functor.INSIDE_PROXY);
+			Atom t = memOut.newAtom(FUNC_TO);
+			memExec.newLink(f, 0, fi, 1);
+			memGraph.newLink(fi, 0, fo, 0);
+			memGraph.newLink(fo, 1, to, 1);
+			memGraph.newLink(to, 0, ti, 0);
+			memOut.newLink(ti, 1, t, 0);
+			if (!flg) {
+				memOut.unlock();
+			}
+		}
+	}
+	/**
+	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
+	 */
+	void nondeterministicExec() {
 		Env.fMemory = false;
 		HashMap idMap = new HashMap();
 		int id = 0;
@@ -369,7 +447,7 @@ public class Task extends AbstractTask implements Runnable {
 				memStack.push(mem);
 			root = mem;
 			states.clear();
-			exec(mem);
+			exec(mem, true);
 			//それぞれ適用した結果を作成
 			System.out.print(idMap.get(mem) + ":");
 			Iterator it = states.iterator();
@@ -398,20 +476,28 @@ public class Task extends AbstractTask implements Runnable {
 			System.out.println(idMap.get(mem) + " = " + mem);
 		}
 	}
+	/**
+	 * exec(origMem, true) によって得られた情報を元に、実際に 1 段階のルール適用を行う。
+	 * @param mem 実行する対象の膜
+	 * @param state exec(origMem, true) の実行時に states に生成した適用情報 
+	 * @param origMem exec に渡した膜。state 内の origMem は、mem に書き換えられる。
+	 * @param atomMap origMem 内のアトムから mem 内のアトムへのマップ。state 内のアトムはこのマップにしたがって書き換えられる。
+	 */
 	static void react(Membrane mem, Object[] state, Membrane origMem, Map atomMap) {
 		Ruleset rs = (Ruleset)state[0];
-		Class[] parameterTypes = new Class[state.length - 2];
-		Object[] args = new Object[state.length - 2];
-		for (int i = 0; i < parameterTypes.length; i++) {
+		Class[] parameterTypes = new Class[state.length - 2 + 1];
+		Object[] args = new Object[state.length - 2 + 1];
+		int i;
+		for (i = 0; i < state.length - 2; i++) {
 			parameterTypes[i] = Object.class;
 			args[i] = state[i+2];
-//if (args[i] instanceof Atom && atomMap != null)
-//	System.out.println(i + "/" + args[i] + "/" + atomMap.get(args[i]));
 			if (args[i] instanceof Atom && atomMap != null && atomMap.containsKey(args[i]))
 				args[i] = atomMap.get(args[i]);
 			if (origMem == args[i])
 				args[i] = mem;
 		}
+		parameterTypes[i] = boolean.class;
+		args[i] = Boolean.FALSE;
 		try {
 			Method m = rs.getClass().getMethod("exec" + state[1], parameterTypes);
 			m.invoke(rs, args);

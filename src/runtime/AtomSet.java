@@ -284,38 +284,34 @@ public final class AtomSet implements Serializable {
 	// non deterministic LMNtal
 	private HashSet checked1 = new HashSet(), checked2 = new HashSet();
 	public boolean equals(Object o) {
-		if (Env.fNonDeterministic) {
-			AtomSet s = (AtomSet)o;
-			ArrayList funcs = getCanonicalFunctorList();
-			if (funcs.size() != s.getCanonicalFunctorList().size()) return false;
-			Collections.sort(funcs, sizeComparator);
-			checked1.clear();
-			checked2.clear();
-			for (int i = 0; i < funcs.size(); i++) {
-				Functor f = (Functor)funcs.get(i);
-				ArrayList l1 = (ArrayList)atoms.get(f);
-				ArrayList l2 = (ArrayList)s.atoms.get(f);
-				if (l1.size() != l2.size()) return false;
-				for (int j = 0; j < l1.size(); j++) {
-					if (checked1.contains(l1.get(j))) continue;
-					boolean flg = false;
-					for (int k = 0; k < l2.size(); k++) {
-						if (checked2.contains(l2.get(k))) continue;
-						HashMap map = new HashMap();
-						if (compare((Atom)l1.get(j), (Atom)l2.get(k), map)) {
-							flg = true;
-							checked1.addAll(map.keySet());
-							checked2.addAll(map.values());
-							break;
-						}
+		AtomSet s = (AtomSet)o;
+		ArrayList funcs = getCanonicalFunctorList();
+		if (funcs.size() != s.getCanonicalFunctorList().size()) return false;
+		Collections.sort(funcs, sizeComparator);
+		checked1.clear();
+		checked2.clear();
+		for (int i = 0; i < funcs.size(); i++) {
+			Functor f = (Functor)funcs.get(i);
+			ArrayList l1 = (ArrayList)atoms.get(f);
+			ArrayList l2 = (ArrayList)s.atoms.get(f);
+			if (l1.size() != l2.size()) return false;
+			for (int j = 0; j < l1.size(); j++) {
+				if (checked1.contains(l1.get(j))) continue;
+				boolean flg = false;
+				for (int k = 0; k < l2.size(); k++) {
+					if (checked2.contains(l2.get(k))) continue;
+					HashMap map = new HashMap();
+					if (compare((Atom)l1.get(j), (Atom)l2.get(k), map)) {
+						flg = true;
+						checked1.addAll(map.keySet());
+						checked2.addAll(map.values());
+						break;
 					}
-					if (!flg) return false;
 				}
+				if (!flg) return false;
 			}
-			return true;
-		} else {
-			return super.equals(o);
 		}
+		return true;
 	}
 	private ArrayList getCanonicalFunctorList() {
 		ArrayList list = new ArrayList();

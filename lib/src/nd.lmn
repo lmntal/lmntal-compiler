@@ -1,0 +1,35 @@
+{module(nd).
+
+nd.reduct({$p,@p,{$q,@q}},MI, MO)
+	:- 	class(MI,"java.util.HashMap")| [:/*inline*/
+			Atom out = me.nthAtom(0);
+			Atom in = out.nthAtom(0);
+			Atom plus = in.nthAtom(1);
+			Membrane mem1 = (Membrane)in.getMem();
+			Iterator it = mem1.memIterator();
+			Membrane mem2 = (Membrane)it.next();
+			HashMap map = (HashMap)((ObjectFunctor)me.nthAtom(1).getFunctor()).getValue();
+			((Task)mem.getTask()).nondeterministicExec(mem2, map, null);
+			mem.removeAtom(me);
+			mem.removeAtom(out);
+			mem1.removeAtom(in);
+			mem1.removeAtom(plus);
+			mem.unifyAtomArgs(me, 1, me, 2);
+		:]({$p,@p,{$q,@q}}, MI, MO).
+
+nd.exec({$p,@p,{$q,@q}})
+	:- 	[:/*inline*/
+			Atom out = me.nthAtom(0);
+			Atom in = out.nthAtom(0);
+			Atom plus = in.nthAtom(1);
+			Membrane mem1 = (Membrane)in.getMem();
+			Iterator it = mem1.memIterator();
+			Membrane mem2 = (Membrane)it.next();
+			((Task)mem.getTask()).nondeterministicExec(mem2);
+			mem.removeAtom(me);
+			mem.removeAtom(out);
+			mem1.removeAtom(in);
+			mem1.removeAtom(plus);
+		:]({$p,@p,{$q,@q}}).
+
+}

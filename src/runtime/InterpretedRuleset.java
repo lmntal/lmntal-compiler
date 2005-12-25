@@ -75,6 +75,16 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	
 	////////////////////////////////////////////////////////////////
 
+	public boolean react(Membrane mem, boolean nondeterministic) {
+		if (nondeterministic) {
+			Env.e("Nondeterministic execution is not supported by interpreter.");
+			System.exit(-1);
+			return false;
+		} else {
+			return react(mem);
+		}
+	}
+	
 	/**
 	 * あるルールについてアトム主導テストを行い、マッチすれば適用する
 	 * @return ルールを適用した場合はtrue

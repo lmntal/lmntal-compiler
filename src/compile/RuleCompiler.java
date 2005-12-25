@@ -868,6 +868,8 @@ public class RuleCompiler {
 			else { // 通常の右辺膜の場合
 				body.add( Instruction.newmem(submempath, rhsmemToPath(mem), submem.kind ) );
 			}
+			if (submem.nondeterministic)
+				body.add(new Instruction(Instruction.NONDETERMINISTIC, submempath));
 			if (submem.name != null)
 				body.add(new Instruction( Instruction.SETMEMNAME, submempath, submem.name.intern() ));
 			int subcount = buildRHSMem(submem);

@@ -17,14 +17,24 @@ abstract public class Ruleset {
 	abstract public String toString();
 	/**
 	 * アトム主導テストを行い、マッチすれば適用する
+	 * @param mem 本膜
+	 * @param atom 主導するアトム
 	 * @return ルールを適用した場合はtrue
 	 */
 	abstract public boolean react(Membrane mem, Atom atom);
 	/**
 	 * 膜主導テストを行い、マッチすれば適用する
+	 * @param mem 本膜
 	 * @return ルールを適用した場合はtrue
 	 */
 	abstract public boolean react(Membrane mem);
+	/**
+	 * 膜主導テストを行い、マッチすれば適用する
+	 * @param mem 本膜
+	 * @param nondeterministic 非決定的実行の適用検査を行う場合はtrue
+	 * @return ルールを適用した場合はtrue
+	 */
+	abstract public boolean react(Membrane mem, boolean nondeterministic);
 	/** new束縛された名前の具体値を指定して新しいRulesetを作成する。
 	 * @return 新しいRuleset */
 	//abstract

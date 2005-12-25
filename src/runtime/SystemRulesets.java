@@ -47,13 +47,13 @@ public final class SystemRulesets {
 	 * 膜主導テストによるシステムルールの適用を試みる。
 	 * @return 適用した場合はtrue
 	 */
-	public static boolean react(Membrane mem) {
+	public static boolean react(Membrane mem, boolean nondeterministic) {
 		boolean flag = false;
 		int debugvalue = Env.debug; // todo spy機能を実装する
 		if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
 		Iterator itsys = SystemRulesets.iterator();
 		while (itsys.hasNext()) {
-			if (((Ruleset)itsys.next()).react(mem)) {
+			if (((Ruleset)itsys.next()).react(mem, nondeterministic)) {
 				flag = true;
 				break;
 			}

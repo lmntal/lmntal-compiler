@@ -35,7 +35,7 @@ public final class Env {
 	public static boolean fMemory = true;
 
 	/** 非決定的LMNtalモード */
-	public static boolean fNonDeterministic = false;
+	public static boolean fNondeterministic = false;
 	
 	////////////////////////////////////////////////////////////////
 	

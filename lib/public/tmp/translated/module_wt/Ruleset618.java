@@ -25,19 +25,22 @@ public class Ruleset618 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL1224(mem, atom)) {
+		if (execL1277(mem, atom, false)) {
 			return true;
 		}
 		return result;
 	}
 	public boolean react(Membrane mem) {
+		return react(mem, false);
+	}
+	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL1225(mem)) {
+		if (execL1278(mem, nondeterministic)) {
 			return true;
 		}
 		return result;
 	}
-	public boolean execL1225(Object var0) {
+	public boolean execL1278(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -56,16 +59,16 @@ public class Ruleset618 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1225:
+L1278:
 		{
-			if (execL1222(var0)) {
+			if (execL1275(var0,nondeterministic)) {
 				ret = true;
-				break L1225;
+				break L1278;
 			}
 		}
 		return ret;
 	}
-	public boolean execL1222(Object var0) {
+	public boolean execL1275(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -84,16 +87,18 @@ L1225:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1222:
+L1275:
 		{
-			if (execL1223(var0)) {
+			if (nondeterministic) {
+				Task.states.add(new Object[] {theInstance, "L1276",var0});
+			} else if (execL1276(var0,nondeterministic)) {
 				ret = true;
-				break L1222;
+				break L1275;
 			}
 		}
 		return ret;
 	}
-	public boolean execL1223(Object var0) {
+	public boolean execL1276(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -118,7 +123,7 @@ L1222:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1223:
+L1276:
 		{
 			mem = ((AbstractMembrane)var0).newMem();
 			var1 = mem;
@@ -144,11 +149,11 @@ L1223:
 			atom = ((Atom)var2);
 			atom.getMem().enqueueAtom(atom);
 			ret = true;
-			break L1223;
+			break L1276;
 		}
 		return ret;
 	}
-	public boolean execL1224(Object var0, Object var1) {
+	public boolean execL1277(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -167,12 +172,12 @@ L1223:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1224:
+L1277:
 		{
 		}
 		return ret;
 	}
 	private static final Functor f1 = new Functor("module", 1, null);
-	private static final Functor f2 = new Functor("/*inline_define*/\\r\\nimport javax.swing.*;\\r\\nimport java.awt.*;\\r\\nimport java.awt.event.*;\\r\\nimport java.util.*;\\r\\n\\r\\nclass LMNtalFrame extends JFrame{\\r\\n  final Membrane mem;\\r\\n\\r\\n  public LMNtalFrame(Membrane targetMem){\\r\\n    this.mem = targetMem;\\r\\n    addWindowListener(new WindowAdapter(){\\r\\n      public void windowClosing(WindowEvent e){\\r\\n        mem.asyncLock();\\r\\n        mem.newAtom(new Functor(\"terminate\",0));\\r\\n        mem.asyncUnlock();\\r\\n      }\\r\\n    });\\r\\n  }\\r\\n}\\r\\n\\r\\nclass PriorityQueue{\\r\\n  ArrayList list = new ArrayList();\\r\\n  \\r\\n  public int insert(int priority){\\r\\n    int i;\\r\\n    for(i=0;i<list.size()&&priority>((Integer)list.get(i)).intValue();i++);\\r\\n    list.add(i,new Integer(priority));\\r\\n    return(i);\\r\\n  }\\r\\n}\\r\\n", 0, null);
+	private static final Functor f2 = new Functor("/*inline_define*/\r\nimport javax.swing.*;\r\nimport java.awt.*;\r\nimport java.awt.event.*;\r\nimport java.util.*;\r\n\r\nclass LMNtalFrame extends JFrame{\r\n  final Membrane mem;\r\n\r\n  public LMNtalFrame(Membrane targetMem){\r\n    this.mem = targetMem;\r\n    addWindowListener(new WindowAdapter(){\r\n      public void windowClosing(WindowEvent e){\r\n        mem.asyncLock();\r\n        mem.newAtom(new Functor(\"terminate\",0));\r\n        mem.asyncUnlock();\r\n      }\r\n    });\r\n  }\r\n}\r\n\r\nclass PriorityQueue{\r\n  ArrayList list = new ArrayList();\r\n  \r\n  public int insert(int priority){\r\n    int i;\r\n    for(i=0;i<list.size()&&priority>((Integer)list.get(i)).intValue();i++);\r\n    list.add(i,new Integer(priority));\r\n    return(i);\r\n  }\r\n}\r\n", 0, null);
 	private static final Functor f0 = new Functor("wt", 1, null);
 }

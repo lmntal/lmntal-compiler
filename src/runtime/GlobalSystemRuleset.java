@@ -25,115 +25,118 @@ public class GlobalSystemRuleset extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL100(mem, atom)) {
+		if (execL100(mem, atom, false)) {
 			return true;
 		}
-		if (execL102(mem, atom)) {
+		if (execL102(mem, atom, false)) {
 			return true;
 		}
-		if (execL104(mem, atom)) {
+		if (execL104(mem, atom, false)) {
 			return true;
 		}
-		if (execL106(mem, atom)) {
+		if (execL106(mem, atom, false)) {
 			return true;
 		}
-		if (execL108(mem, atom)) {
+		if (execL108(mem, atom, false)) {
 			return true;
 		}
-		if (execL110(mem, atom)) {
+		if (execL110(mem, atom, false)) {
 			return true;
 		}
-		if (execL112(mem, atom)) {
+		if (execL112(mem, atom, false)) {
 			return true;
 		}
-		if (execL114(mem, atom)) {
+		if (execL114(mem, atom, false)) {
 			return true;
 		}
-		if (execL116(mem, atom)) {
+		if (execL116(mem, atom, false)) {
 			return true;
 		}
-		if (execL118(mem, atom)) {
+		if (execL118(mem, atom, false)) {
 			return true;
 		}
-		if (execL120(mem, atom)) {
+		if (execL120(mem, atom, false)) {
 			return true;
 		}
-		if (execL122(mem, atom)) {
+		if (execL122(mem, atom, false)) {
 			return true;
 		}
-		if (execL124(mem, atom)) {
+		if (execL124(mem, atom, false)) {
 			return true;
 		}
-		if (execL126(mem, atom)) {
+		if (execL126(mem, atom, false)) {
 			return true;
 		}
-		if (execL128(mem, atom)) {
+		if (execL128(mem, atom, false)) {
 			return true;
 		}
-		if (execL130(mem, atom)) {
+		if (execL130(mem, atom, false)) {
 			return true;
 		}
-		if (execL132(mem, atom)) {
+		if (execL132(mem, atom, false)) {
 			return true;
 		}
 		return result;
 	}
 	public boolean react(Membrane mem) {
+		return react(mem, false);
+	}
+	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL101(mem)) {
+		if (execL101(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL103(mem)) {
+		if (execL103(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL105(mem)) {
+		if (execL105(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL107(mem)) {
+		if (execL107(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL109(mem)) {
+		if (execL109(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL111(mem)) {
+		if (execL111(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL113(mem)) {
+		if (execL113(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL115(mem)) {
+		if (execL115(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL117(mem)) {
+		if (execL117(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL119(mem)) {
+		if (execL119(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL121(mem)) {
+		if (execL121(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL123(mem)) {
+		if (execL123(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL125(mem)) {
+		if (execL125(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL127(mem)) {
+		if (execL127(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL129(mem)) {
+		if (execL129(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL131(mem)) {
+		if (execL131(mem, nondeterministic)) {
 			return true;
 		}
-		if (execL133(mem)) {
+		if (execL133(mem, nondeterministic)) {
 			return true;
 		}
 		return result;
 	}
-	public boolean execL133(Object var0) {
+	public boolean execL133(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -184,10 +187,10 @@ L133:
 		}
 		return ret;
 	}
-	public boolean execL132(Object var0, Object var1) {
+	public boolean execL132(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL131(Object var0) {
+	public boolean execL131(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -238,10 +241,10 @@ L131:
 		}
 		return ret;
 	}
-	public boolean execL130(Object var0, Object var1) {
+	public boolean execL130(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL129(Object var0) {
+	public boolean execL129(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -292,10 +295,10 @@ L129:
 		}
 		return ret;
 	}
-	public boolean execL128(Object var0, Object var1) {
+	public boolean execL128(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL127(Object var0) {
+	public boolean execL127(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -346,10 +349,10 @@ L127:
 		}
 		return ret;
 	}
-	public boolean execL126(Object var0, Object var1) {
+	public boolean execL126(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL125(Object var0) {
+	public boolean execL125(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -401,10 +404,10 @@ L125:
 		}
 		return ret;
 	}
-	public boolean execL124(Object var0, Object var1) {
+	public boolean execL124(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL123(Object var0) {
+	public boolean execL123(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -456,10 +459,10 @@ L123:
 		}
 		return ret;
 	}
-	public boolean execL122(Object var0, Object var1) {
+	public boolean execL122(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL121(Object var0) {
+	public boolean execL121(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -519,10 +522,10 @@ L121:
 		}
 		return ret;
 	}
-	public boolean execL120(Object var0, Object var1) {
+	public boolean execL120(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL119(Object var0) {
+	public boolean execL119(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -581,10 +584,10 @@ L119:
 		}
 		return ret;
 	}
-	public boolean execL118(Object var0, Object var1) {
+	public boolean execL118(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL117(Object var0) {
+	public boolean execL117(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -643,10 +646,10 @@ L117:
 		}
 		return ret;
 	}
-	public boolean execL116(Object var0, Object var1) {
+	public boolean execL116(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL115(Object var0) {
+	public boolean execL115(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -705,10 +708,10 @@ L115:
 		}
 		return ret;
 	}
-	public boolean execL114(Object var0, Object var1) {
+	public boolean execL114(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL113(Object var0) {
+	public boolean execL113(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -770,10 +773,10 @@ L113:
 		}
 		return ret;
 	}
-	public boolean execL112(Object var0, Object var1) {
+	public boolean execL112(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL111(Object var0) {
+	public boolean execL111(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -835,10 +838,10 @@ L111:
 		}
 		return ret;
 	}
-	public boolean execL110(Object var0, Object var1) {
+	public boolean execL110(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL109(Object var0) {
+	public boolean execL109(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -897,10 +900,10 @@ L109:
 		}
 		return ret;
 	}
-	public boolean execL108(Object var0, Object var1) {
+	public boolean execL108(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL107(Object var0) {
+	public boolean execL107(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -959,10 +962,10 @@ L107:
 		}
 		return ret;
 	}
-	public boolean execL106(Object var0, Object var1) {
+	public boolean execL106(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL105(Object var0) {
+	public boolean execL105(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -1021,10 +1024,10 @@ L105:
 		}
 		return ret;
 	}
-	public boolean execL104(Object var0, Object var1) {
+	public boolean execL104(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL103(Object var0) {
+	public boolean execL103(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -1090,10 +1093,10 @@ L103:
 		}
 		return ret;
 	}
-	public boolean execL102(Object var0, Object var1) {
+	public boolean execL102(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
-	public boolean execL101(Object var0) {
+	public boolean execL101(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -1155,7 +1158,7 @@ L101:
 		}
 		return ret;
 	}
-	public boolean execL100(Object var0, Object var1) {
+	public boolean execL100(Object var0, Object var1, boolean nondeterministic) {
 		return false;
 	}
 	private static final Functor f3 = new Functor("-", 2, null);

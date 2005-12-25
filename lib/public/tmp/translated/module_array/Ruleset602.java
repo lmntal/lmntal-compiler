@@ -25,19 +25,22 @@ public class Ruleset602 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL145(mem, atom)) {
+		if (execL145(mem, atom, false)) {
 			return true;
 		}
 		return result;
 	}
 	public boolean react(Membrane mem) {
+		return react(mem, false);
+	}
+	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL146(mem)) {
+		if (execL146(mem, nondeterministic)) {
 			return true;
 		}
 		return result;
 	}
-	public boolean execL146(Object var0) {
+	public boolean execL146(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -58,14 +61,14 @@ public class Ruleset602 extends Ruleset {
 		boolean ret = false;
 L146:
 		{
-			if (execL143(var0)) {
+			if (execL143(var0,nondeterministic)) {
 				ret = true;
 				break L146;
 			}
 		}
 		return ret;
 	}
-	public boolean execL143(Object var0) {
+	public boolean execL143(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -86,14 +89,16 @@ L146:
 		boolean ret = false;
 L143:
 		{
-			if (execL144(var0)) {
+			if (nondeterministic) {
+				Task.states.add(new Object[] {theInstance, "L144",var0});
+			} else if (execL144(var0,nondeterministic)) {
 				ret = true;
 				break L143;
 			}
 		}
 		return ret;
 	}
-	public boolean execL144(Object var0) {
+	public boolean execL144(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -143,7 +148,7 @@ L144:
 		}
 		return ret;
 	}
-	public boolean execL145(Object var0, Object var1) {
+	public boolean execL145(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;

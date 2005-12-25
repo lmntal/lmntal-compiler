@@ -99,6 +99,7 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	"}_/"				{ return symbol(sym.RBRACE_UNDERBAR_SLASH); }
 	"}_@"				{ return symbol(sym.RBRACE_UNDERBAR_AT); }
 	"}_/@"				{ return symbol(sym.RBRACE_UNDERBAR_SLASH_AT); }
+	"}*"				{ return symbol(sym.RBRACE_ASTERISK); }
 	":"					{ return symbol(sym.COLON); }
 	":-"				{ return symbol(sym.RULE); }
 	"."					{ return symbol(sym.PERIOD); }
