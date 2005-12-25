@@ -639,6 +639,7 @@ public class Translator {
 		}
 		instLists.add(instList);
 		instListsToTranslate.add(instList);
+		insts2rule.put(instList, rule);
 	}
 
 	/**
