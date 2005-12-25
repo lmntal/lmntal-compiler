@@ -13,6 +13,7 @@ nd.reduct({$p,@p,{$q,@q}},MI, MO)
 			mem.removeAtom(me);
 			mem.removeAtom(out);
 			mem1.removeAtom(in);
+			plus.dequeue();
 			mem1.removeAtom(plus);
 			mem.unifyAtomArgs(me, 1, me, 2);
 		:]({$p,@p,{$q,@q}}, MI, MO).
@@ -29,6 +30,7 @@ nd.exec({$p,@p,{$q,@q}})
 			mem.removeAtom(me);
 			mem.removeAtom(out);
 			mem1.removeAtom(in);
+			plus.dequeue();
 			mem1.removeAtom(plus);
 		:]({$p,@p,{$q,@q}}).
 
