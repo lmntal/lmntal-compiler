@@ -42,7 +42,7 @@ public final class Rule implements Serializable {
 	public long time = 0;
 	
 	/** 履歴 */
-	Uniq uniq;
+	public Uniq uniq;
 	
 	// todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 	
