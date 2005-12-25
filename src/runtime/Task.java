@@ -410,7 +410,8 @@ public class Task extends AbstractTask implements Runnable {
 			} else {
 				memGraph.removeMem(memResult);
 				memResult.drop();
-				memOut.blockingLock();
+				if (memOut.lockThread != Thread.currentThread()) 
+					memOut.blockingLock();
 			}
 			//リンク生成
 			Atom f = memExec.newAtom(FUNC_FROM);
