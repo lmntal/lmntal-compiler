@@ -294,7 +294,7 @@ public final class AtomSet implements Serializable {
 			Functor f = (Functor)funcs.get(i);
 			ArrayList l1 = (ArrayList)atoms.get(f);
 			ArrayList l2 = (ArrayList)s.atoms.get(f);
-			if (l1.size() != l2.size()) return false;
+			if (l2 == null || l1.size() != l2.size()) return false;
 			for (int j = 0; j < l1.size(); j++) {
 				if (checked1.contains(l1.get(j))) continue;
 				boolean flg = false;
