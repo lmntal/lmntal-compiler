@@ -1,0 +1,33 @@
+//Needham-Schroderの公開鍵プロトコル
+
+//ネットワーク状態
+nodeset([p1,p2]).
+next_nonce(0).
+knonce(p1,[]).
+knonce(p2,[]).
+
+//命令
+conn(p1,p2).
+
+//通信
+R=send([H|T],D) :- unary(H),ground(D) | R=[H|send(T,D)], recv(H,D).
+R=send([],D) :- ground(D) | R=[].
+
+//鍵交換
+//A->B : {Na,A}Kb
+conn(ID1,ID2),next_nonce(N),nodeset(Nodes),knonce(KID1,Ns)
+  :- N2=N+1,unary(ID1),unary(ID2),ID1=KID1 |
+	state_send(ID1,ID2), nodeset(send(Nodes,enc(ID2,[nonce(N),id(ID1)]))),
+	knonce(KID1,[N|Ns]), next_nonce(N2).
+//B->A : {Na,Nb}Ka	
+recv(ID2,enc(EID2,[nonce(N),id(ID1)])),knonce(KID2,Ns),nodeset(Nodes),next_nonce(N2) :- ID2=EID2,EID2=KID2,unary(ID1),unary(N),N3=N2+1 |
+	nodeset(send(Nodes,enc(ID1,[nonce(N2),nonce(N)]))),knonce(KID2,[N2,N|Ns]),next_nonce(N3),state_recv(ID2,ID1).
+//A->B : {Nb}Kb
+state_send(SID1,SID2), nodeset(Nodes), knonce(KID1,Ns), recv(ID1,enc(EID1,[nonce(N2),nonce(N1)])) :- ID1=KID1,ID1=SID1,ID1=EID1,unary(N1),unary(N2),unary(SID2) |
+	nodeset(send(Nodes,enc(SID2,[nonce(N2)]))), knonce(KID1,[N2|Ns]), est_to(ID1,SID2).
+//上のメッセージの受信
+state_recv(SID2,SID1),recv(ID2,enc(EID2,[nonce(N)])) :- ID2=EID2,ID2=SID2, unary(N) | est_from(ID2,SID1).
+
+know(ID,enc(ID2,D)) :- ID=ID2,uniq(ID,D) | know(ID,enc(ID2,D)),know(ID,D).
+know(ID,d([H|T])) :- unary(ID) | know(ID,H),know(ID,d(T)).
+know(ID,d([])) :- unary(ID) | .
