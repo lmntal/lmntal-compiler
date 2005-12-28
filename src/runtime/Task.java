@@ -216,6 +216,7 @@ public class Task extends AbstractTask implements Runnable {
 			// 今のところ、システムルールセットは膜主導テストでしか実行されない。
 			// 理想では、組み込みの + はインライン展開されるべきである。
 			flag = SystemRulesets.react(mem, nondeterministic);
+
 			if (!flag) {				
 				while(it.hasNext()){ // 膜主導テストを行う
 					if(((Ruleset)it.next()).react(mem, nondeterministic)) {
@@ -434,7 +435,6 @@ public class Task extends AbstractTask implements Runnable {
 	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
 	 */
 	void nondeterministicExec() {
-		Env.fMemory = false;
 		HashMap idMap = new HashMap();
 		int id = 0;
 		ArrayList st = new ArrayList();
