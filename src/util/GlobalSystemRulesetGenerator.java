@@ -2,11 +2,13 @@ package util;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import runtime.Functor;
 import runtime.Instruction;
+import runtime.InstructionList;
 import runtime.InterpretedRuleset;
 import runtime.Rule;
 
@@ -155,7 +157,10 @@ public final class GlobalSystemRulesetGenerator {
 	static Rule buildBinOpRule(String name, int typechecker, int op) {
 		// 1:'+'(X,Y,Res), 2:$x[X], 3:$y[Y] :- int($x),int($y), (4:$z)=$x+$y | 5:$z[Res].
 		Rule rule = new Rule();
-		List insts = rule.memMatch;
+		rule.bodyLabel = new InstructionList();
+		rule.body = rule.bodyLabel.insts;
+		
+		List insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,5));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,3)));
@@ -164,17 +169,27 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.DEREFATOM, 3,1,1));
 		insts.add(new Instruction(typechecker,             3));
 		insts.add(new Instruction(op,                    4,2,3));
+		ArrayList mems = new ArrayList();
+		mems.add(new Integer(0));
+		ArrayList atoms = new ArrayList();
+		atoms.add(new Integer(1));
+		atoms.add(new Integer(2));
+		atoms.add(new Integer(3));
+		atoms.add(new Integer(4));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
-		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  3,0));
-		insts.add(new Instruction(Instruction.LOCALADDATOM,  0,4));
-		insts.add(new Instruction(Instruction.RELINK,        4,0,1,2,0));
-		insts.add(new Instruction(Instruction.FREEATOM,      1));
-		insts.add(new Instruction(Instruction.FREEATOM,      2));
-		insts.add(new Instruction(Instruction.FREEATOM,      3));
-		insts.add(new Instruction(Instruction.PROCEED));
+		insts2.add(new Instruction(Instruction.SPEC,        5,5));
+		insts2.add(new Instruction(Instruction.COMMIT));
+		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  3,0));
+		insts2.add(new Instruction(Instruction.LOCALADDATOM,  0,4));
+		insts2.add(new Instruction(Instruction.RELINK,        4,0,1,2,0));
+		insts2.add(new Instruction(Instruction.FREEATOM,      1));
+		insts2.add(new Instruction(Instruction.FREEATOM,      2));
+		insts2.add(new Instruction(Instruction.FREEATOM,      3));
+		insts2.add(new Instruction(Instruction.PROCEED));
 		return rule;
 	}
 	static Rule f() {
@@ -195,15 +210,31 @@ public final class GlobalSystemRulesetGenerator {
 	 */
 	static Rule buildUnaryPlusRule(String name, int typechecker) {
 		Rule rule = new Rule();
-		List insts = rule.memMatch;
+		rule.bodyLabel = new InstructionList();
+		rule.body = rule.bodyLabel.insts;
+
+		List insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,5));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,2)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(typechecker,             2));
-		insts.add(new Instruction(Instruction.GETFUNC,   3,2));
-		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 4,3));
+		insts.add(new Instruction(Instruction.GETFUNC,   4,2));
+		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
+
+		ArrayList mems = new ArrayList();
+		mems.add(new Integer(0));
+		ArrayList atoms = new ArrayList();
+		atoms.add(new Integer(1));
+		atoms.add(new Integer(2));
+		atoms.add(new Integer(3));
+		ArrayList vars= new ArrayList();
+		vars.add(new Integer(4));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, vars));
 		// react
+		insts2.add(new Instruction(Instruction.SPEC,        5,5));
+		insts2.add(new Instruction(Instruction.COMMIT));
+
 		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
@@ -221,14 +252,28 @@ public final class GlobalSystemRulesetGenerator {
 	static Rule buildUnaryOpRule(String name, int typechecker, int op) {
 		// 1:float(X,Res), 2:$x[X] :- int($x), (3:$y)=float($x) | 4:$y[Res].
 		Rule rule = new Rule();
-		List insts = rule.memMatch;
+		rule.bodyLabel = new InstructionList();
+		rule.body = rule.bodyLabel.insts;
+
+		List insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,4));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,2)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(typechecker,             2));
 		insts.add(new Instruction(op,                    3,2));
+
+		ArrayList mems = new ArrayList();
+		mems.add(new Integer(0));
+		ArrayList atoms = new ArrayList();
+		atoms.add(new Integer(1));
+		atoms.add(new Integer(2));
+		atoms.add(new Integer(3));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
+		insts2.add(new Instruction(Instruction.SPEC,        4,4));
+		insts2.add(new Instruction(Instruction.COMMIT));
+
 		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
