@@ -295,21 +295,25 @@ public final class AtomSet implements Serializable {
 			ArrayList l1 = (ArrayList)atoms.get(f);
 			ArrayList l2 = (ArrayList)s.atoms.get(f);
 			if (l2 == null || l1.size() != l2.size()) return false;
-			for (int j = 0; j < l1.size(); j++) {
-				if (checked1.contains(l1.get(j))) continue;
-				boolean flg = false;
-				for (int k = 0; k < l2.size(); k++) {
-					if (checked2.contains(l2.get(k))) continue;
-					HashMap map = new HashMap();
-					if (compare((Atom)l1.get(j), (Atom)l2.get(k), map)) {
-						flg = true;
-						checked1.addAll(map.keySet());
-						checked2.addAll(map.values());
-						break;
-					}
+			if (!check(l1, l2)) return false;
+		}
+		return check(dataAtoms, s.dataAtoms);
+	}
+	private boolean check(ArrayList l1, ArrayList l2) {
+		for (int j = 0; j < l1.size(); j++) {
+			if (checked1.contains(l1.get(j))) continue;
+			boolean flg = false;
+			for (int k = 0; k < l2.size(); k++) {
+				if (checked2.contains(l2.get(k))) continue;
+				HashMap map = new HashMap();
+				if (compare((Atom)l1.get(j), (Atom)l2.get(k), map)) {
+					flg = true;
+					checked1.addAll(map.keySet());
+					checked2.addAll(map.values());
+					break;
 				}
-				if (!flg) return false;
 			}
+			if (!flg) return false;
 		}
 		return true;
 	}
