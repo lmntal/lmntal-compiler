@@ -442,8 +442,7 @@ class InterpretiveReactor {
 					if(atoms[inst.getIntArg2()].mem.kind != inst.getIntArg3())
 						return false;
 					mems[inst.getIntArg1()] = atoms[inst.getIntArg2()].mem;
-					return true;
-
+					break;
 				case Instruction.GETPARENT : //[-dstmem, srcmem]
 					mem = mems[inst.getIntArg2()].parent;
 					if (mem == null) return false;
