@@ -86,14 +86,7 @@ public class RuleCompiler {
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
 //		theRule = new Rule(rs.toString());
-		/**
-		 * okabe
-		 * ルールオブジェクトを生成する際の引数を変更
-		 * 左辺膜の一番最初のアトム
-		 * トレースモードで出力
-		 */
-//		theRule = new Rule(rs.leftMem.getFirstAtomName());
-		theRule = new Rule(rs.toString());
+		theRule = new Rule(rs.leftMem.getFirstAtomName());
 		theRule.name = rs.name;
 		
 		hc = new HeadCompiler();//rs.leftMem;
