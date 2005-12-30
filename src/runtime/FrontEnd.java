@@ -596,7 +596,10 @@ public class FrontEnd {
 			if(Env.fGraphic) Env.LMNgraphic.setRootMem(root);
 			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
+			boolean t = Env.fTrace;
+			Env.fTrace = false;
 			rs.react(root);
+			Env.fTrace = t;
 //			root.asyncUnlock();
 //			rt.asyncFlag = false;
 

@@ -29,7 +29,7 @@ public final class Rule implements Serializable {
 	/** ラベル付きボディ命令列またはnull */
 	public InstructionList bodyLabel;
 	/** このルールの表示用文字列 */
-	public String text;
+	public String text = "";
 	
 	/** ルール名 */
 	public String name;
@@ -63,6 +63,7 @@ public final class Rule implements Serializable {
 	 * @param text ルールの文字列表現
 	 */
 	public Rule(String text) {
+		this();
 		this.text = text;
 	}
 	/** パーザーで利用するコンストラクタ */

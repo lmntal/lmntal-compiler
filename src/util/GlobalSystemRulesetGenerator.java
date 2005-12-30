@@ -31,7 +31,7 @@ public final class GlobalSystemRulesetGenerator {
 		// === System Rule #1 ===
 		//    1:$outside(B,A), 3:{2:$inside(B,C), 4:$inside(D,C), $p,@p}, 5:$outside(D,E)
 		// :-                  3:{                                $p,@p}, A=E.
-		Rule rule = new Rule();
+		Rule rule = new Rule("proxy");
 		List insts = rule.memMatch;
 		// match
 		insts.add(new Instruction(Instruction.SPEC,        1,6));
@@ -54,7 +54,7 @@ public final class GlobalSystemRulesetGenerator {
 		// === System Rule #2 ===
 		//    1:$outside(A,B), 2:$outside(C,B), 4:{3:$inside(C,D), 5:$inside(A,E), $p,@p}
 		// :-                                   4:{                          D=E,  $p,@p}.
-		rule = new Rule();
+		rule = new Rule("proxy");
 		insts = rule.memMatch;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,6));
@@ -156,7 +156,7 @@ public final class GlobalSystemRulesetGenerator {
 	 */
 	static Rule buildBinOpRule(String name, int typechecker, int op) {
 		// 1:'+'(X,Y,Res), 2:$x[X], 3:$y[Y] :- int($x),int($y), (4:$z)=$x+$y | 5:$z[Res].
-		Rule rule = new Rule();
+		Rule rule = new Rule(name);
 		rule.bodyLabel = new InstructionList();
 		rule.body = rule.bodyLabel.insts;
 		
@@ -209,7 +209,7 @@ public final class GlobalSystemRulesetGenerator {
 	 * 仮メソッド。	
 	 */
 	static Rule buildUnaryPlusRule(String name, int typechecker) {
-		Rule rule = new Rule();
+		Rule rule = new Rule(name);
 		rule.bodyLabel = new InstructionList();
 		rule.body = rule.bodyLabel.insts;
 
@@ -251,7 +251,7 @@ public final class GlobalSystemRulesetGenerator {
 	 */
 	static Rule buildUnaryOpRule(String name, int typechecker, int op) {
 		// 1:float(X,Res), 2:$x[X] :- int($x), (3:$y)=float($x) | 4:$y[Res].
-		Rule rule = new Rule();
+		Rule rule = new Rule(name);
 		rule.bodyLabel = new InstructionList();
 		rule.body = rule.bodyLabel.insts;
 

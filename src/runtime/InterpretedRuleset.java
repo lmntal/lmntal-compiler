@@ -117,15 +117,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			if (success) {
 				if(Env.profile)r.succeed ++;
 				result = true;
-				// トレースモードでルールを表示する
-				if(Env.fTrace) {
-					if(Env.getExtendedOption("dump").equals("1")) {
-						System.out.println(" ----- @" + r.toString() + " ---------------------------------------");
-					} else {
-						System.out.println(" @" + r.toString());
-					}
-					Env.dumpEnable = Env.getExtendedOption("hide").equals("") || !r.toString().matches(Env.getExtendedOption("hide"));
-				}
+				if (Env.fTrace)
+					Task.trace("-->", "@" + id, r.toString());
 				//if (!mem.isCurrent()) return true;
 				return true;
 			}
@@ -162,15 +155,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			if (success) {
 				if(Env.profile)r.succeed++;
 				result = true;
-				// トレースモードでルールを表示する
-				if(Env.fTrace) {
-					if(Env.getExtendedOption("dump").equals("1")) {
-						System.out.println(" ----- @" + r.toString() + " ---------------------------------------");
-					} else {
-						System.out.println(" @" + r.toString());
-					}
-					Env.dumpEnable = Env.getExtendedOption("hide").equals("") || !r.toString().matches(Env.getExtendedOption("hide"));
-				}
+				if(Env.fTrace)
+					Task.trace("==>", "@" + id, r.toString());
 				return true;
 				//if (!mem.isCurrent()) return true;
 			}

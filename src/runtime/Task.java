@@ -126,22 +126,21 @@ public class Task extends AbstractTask implements Runnable {
 		}
 	}
 	
-	private int count = 1; // 行番号表示@トレースモード okabe
-	private boolean trace(String arrow) {
-		if (Env.fTrace) {
-			if (getMachine() instanceof MasterLMNtalRuntime) {
-				Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
-				// ルール適用の連番
-				if(Env.dumpEnable) {
-					if(Env.getExtendedOption("dump").equals("1")) {
-						Env.p( Dumper.dump( memToDump ) );
-					} else {
-						System.out.print(" #" + (count++));
-						Env.p( arrow + " \n" + Dumper.dump( memToDump ) );
-					}
-				}
+	private static int count = 1; // 行番号表示@トレースモード okabe
+	// 出力と count の排他制御のため、static synchronized
+	synchronized public static void trace(String arrow, String rulesetName, String ruleName) {
+		boolean dumpEnable = Env.getExtendedOption("hide").equals("") || !ruleName.matches(Env.getExtendedOption("hide"));
+		if(dumpEnable && Env.theRuntime instanceof MasterLMNtalRuntime) {
+			if(Env.getExtendedOption("dump").equals("1")) {
+				System.out.println(" ----- " + rulesetName + "/" + ruleName + " ---------------------------------------");
+			} else {
+				System.out.println(" " + arrow + "  #" + (count++) + ": " + rulesetName + "/" + ruleName);
 			}
+			Membrane memToDump = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot();
+			Env.p( Dumper.dump( memToDump ) );
 		}
+	}
+	private boolean guiTrace() {
 		if (!Env.guiTrace()) return false;
 		/**nakano graphic用*/
 		if (!Env.graphicTrace()){
@@ -151,7 +150,6 @@ public class Task extends AbstractTask implements Runnable {
 			System.exit(0);
 //			return false;
 		}
-		
 		return true;
 	}
 	
@@ -164,7 +162,7 @@ public class Task extends AbstractTask implements Runnable {
 	
 	/** このタスクの本膜のルールを実行する */
 	void exec(Membrane mem) {
-		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0; i++){
+		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0 ; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
 			if (!exec(mem, false)) break;
 		}
@@ -192,7 +190,7 @@ public class Task extends AbstractTask implements Runnable {
 			}
 			
 			if(flag){
-				if (!trace("-->")) return false;
+				if (!guiTrace()) return false;
 			} else {
 				if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
 				// TODO システムコールアトムなら、本膜がルート膜でも親膜につみ、親膜を活性化
@@ -228,7 +226,7 @@ public class Task extends AbstractTask implements Runnable {
 			}
 			
 			if(flag){
-				if (!trace("==>")) return false;
+				if (!guiTrace()) return false;
 			} else if (!nondeterministic){
 				memStack.pop(); // 本膜をpop
 				if (!mem.isNondeterministic() && !mem.perpetual) {
@@ -236,12 +234,13 @@ public class Task extends AbstractTask implements Runnable {
 					it = mem.memIterator();
 					flag = false;
 					while(it.hasNext()){
-						if(((AbstractMembrane)it.next()).isStable() == false)
+						if(!((AbstractMembrane)it.next()).isStable()) {
 							flag = true;
+							break;
+						}
 					}
-					if(flag == false) {
+					if(!flag) {
 						mem.toStable();
-					} else {
 					}
 				}
 			}
@@ -270,7 +269,7 @@ public class Task extends AbstractTask implements Runnable {
 		}
 		
 		LocalLMNtalRuntime r = (LocalLMNtalRuntime)runtime;
-		while (true) {
+		while (!r.isTerminated()) {
 			Membrane mem;
 			//本膜をロック
 			synchronized(this) {
@@ -360,8 +359,8 @@ public class Task extends AbstractTask implements Runnable {
 	// non deterministic LMNtal
 
 	public static HashSet states = new HashSet();
-	private static final Functor FUNC_FROM = new Functor("from", 1, "nd");
-	private static final Functor FUNC_TO = new Functor("to", 1, "nd");
+	private static final Functor PLUS = new Functor("+", 1);
+	private static final Functor REDUCT = new Functor("reduct", 3);
 	/** 
 	 * 指定された膜に関するリダクショングラフを生成する。
 	 * 結果は、指定された膜の親膜の親膜に生成される。
@@ -399,7 +398,7 @@ public class Task extends AbstractTask implements Runnable {
 			Map atomMap = memResult2.copyCellsFrom(memExec2);
 			memResult2.copyRulesFrom(memExec2);
 			//適用
-			react(memResult2, (Object[])it.next(), memExec2, atomMap);
+			String name = react(memResult2, (Object[])it.next(), memExec2, atomMap);
 			
 			//同一の膜を調べる
 			Membrane memOut = (Membrane)memMap.get(memResult2);
@@ -415,15 +414,19 @@ public class Task extends AbstractTask implements Runnable {
 					memOut.blockingLock();
 			}
 			//リンク生成
-			Atom f = memExec.newAtom(FUNC_FROM);
+			Atom f = memExec.newAtom(PLUS);
 			Atom fi = memExec.newAtom(Functor.INSIDE_PROXY);
 			Atom fo = memGraph.newAtom(Functor.OUTSIDE_PROXY);
+			Atom r = memGraph.newAtom(REDUCT);
+			Atom n = memGraph.newAtom(new StringFunctor(name));
 			Atom to = memGraph.newAtom(Functor.OUTSIDE_PROXY);
 			Atom ti = memOut.newAtom(Functor.INSIDE_PROXY);
-			Atom t = memOut.newAtom(FUNC_TO);
+			Atom t = memOut.newAtom(PLUS);
 			memExec.newLink(f, 0, fi, 1);
 			memGraph.newLink(fi, 0, fo, 0);
-			memGraph.newLink(fo, 1, to, 1);
+			memGraph.newLink(fo, 1, r, 0);
+			memGraph.newLink(r, 1, to, 1);
+			memGraph.newLink(r, 2, n, 0);
 			memGraph.newLink(to, 0, ti, 0);
 			memOut.newLink(ti, 1, t, 0);
 			if (!flg) {
@@ -431,6 +434,7 @@ public class Task extends AbstractTask implements Runnable {
 			}
 		}
 	}
+	private static final int MAX_COUNT = 300;
 	/**
 	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
 	 */
@@ -442,6 +446,10 @@ public class Task extends AbstractTask implements Runnable {
 		idMap.put(getRoot(), new Integer(id++));
 
 		while (st.size() > 0) {
+			if (idMap.size() > MAX_COUNT) {
+				System.out.println("ERROR : max count reached.");
+				break;
+			}
 			Membrane mem = (Membrane)st.remove(st.size() - 1);
 			//ルール適用の全可能性を検査
 			if (mem != getRoot())
@@ -483,15 +491,18 @@ public class Task extends AbstractTask implements Runnable {
 	 * @param state exec(origMem, true) の実行時に states に生成した適用情報 
 	 * @param origMem exec に渡した膜。state 内の origMem は、mem に書き換えられる。
 	 * @param atomMap origMem 内のアトムから mem 内のアトムへのマップ。state 内のアトムはこのマップにしたがって書き換えられる。
+	 * @return 適用したルールの名前
 	 */
-	static void react(Membrane mem, Object[] state, Membrane origMem, Map atomMap) {
+	static String react(Membrane mem, Object[] state, Membrane origMem, Map atomMap) {
 		Ruleset rs = (Ruleset)state[0];
-		Class[] parameterTypes = new Class[state.length - 2 + 1];
-		Object[] args = new Object[state.length - 2 + 1];
+		String name = (String)state[1];
+		String label = (String)state[2];
+		Class[] parameterTypes = new Class[state.length - 3 + 1];
+		Object[] args = new Object[state.length - 3 + 1];
 		int i;
-		for (i = 0; i < state.length - 2; i++) {
+		for (i = 0; i < state.length - 3; i++) {
 			parameterTypes[i] = Object.class;
-			args[i] = state[i+2];
+			args[i] = state[i+3];
 			if (args[i] instanceof Atom && atomMap != null && atomMap.containsKey(args[i]))
 				args[i] = atomMap.get(args[i]);
 			if (origMem == args[i])
@@ -500,7 +511,7 @@ public class Task extends AbstractTask implements Runnable {
 		parameterTypes[i] = boolean.class;
 		args[i] = Boolean.FALSE;
 		try {
-			Method m = rs.getClass().getMethod("exec" + state[1], parameterTypes);
+			Method m = rs.getClass().getMethod("exec" + label, parameterTypes);
 			m.invoke(rs, args);
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException(e);
@@ -509,5 +520,6 @@ public class Task extends AbstractTask implements Runnable {
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
+		return name;
 	}
 }

@@ -26,54 +26,88 @@ public class GlobalSystemRuleset extends Ruleset {
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
 		if (execL100(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "proxy");
 			return true;
 		}
 		if (execL102(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "proxy");
 			return true;
 		}
 		if (execL104(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "+");
 			return true;
 		}
 		if (execL107(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "-");
 			return true;
 		}
 		if (execL110(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "*");
 			return true;
 		}
 		if (execL113(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "/");
 			return true;
 		}
 		if (execL116(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "mod");
 			return true;
 		}
 		if (execL119(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "+.");
 			return true;
 		}
 		if (execL122(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "-.");
 			return true;
 		}
 		if (execL125(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "*.");
 			return true;
 		}
 		if (execL128(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "/.");
 			return true;
 		}
 		if (execL131(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "+");
 			return true;
 		}
 		if (execL134(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "+.");
 			return true;
 		}
 		if (execL137(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "-");
 			return true;
 		}
 		if (execL140(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "-.");
 			return true;
 		}
 		if (execL143(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "int");
 			return true;
 		}
 		if (execL146(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@system", "float");
 			return true;
 		}
 		return result;
@@ -84,54 +118,88 @@ public class GlobalSystemRuleset extends Ruleset {
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
 		if (execL101(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "proxy");
 			return true;
 		}
 		if (execL103(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "proxy");
 			return true;
 		}
 		if (execL105(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "+");
 			return true;
 		}
 		if (execL108(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "-");
 			return true;
 		}
 		if (execL111(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "*");
 			return true;
 		}
 		if (execL114(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "/");
 			return true;
 		}
 		if (execL117(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "mod");
 			return true;
 		}
 		if (execL120(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "+.");
 			return true;
 		}
 		if (execL123(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "-.");
 			return true;
 		}
 		if (execL126(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "*.");
 			return true;
 		}
 		if (execL129(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "/.");
 			return true;
 		}
 		if (execL132(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "+");
 			return true;
 		}
 		if (execL135(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "+.");
 			return true;
 		}
 		if (execL138(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "-");
 			return true;
 		}
 		if (execL141(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "-.");
 			return true;
 		}
 		if (execL144(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "int");
 			return true;
 		}
 		if (execL147(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@system", "float");
 			return true;
 		}
 		return result;
@@ -171,7 +239,7 @@ L147:
 					x = ((IntegerFunctor)((Atom)var2).getFunctor()).intValue();
 					var3 = new Atom(null, new FloatingFunctor((double)x));
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "L148",var0,var1,var2,var3});
+						Task.states.add(new Object[] {theInstance, "float", "L148",var0,var1,var2,var3});
 					} else if (execL148(var0,var1,var2,var3,nondeterministic)) {
 						ret = true;
 						break L147;
@@ -255,7 +323,7 @@ L144:
 					u = ((FloatingFunctor)((Atom)var2).getFunctor()).floatValue();
 					var3 = new Atom(null, new IntegerFunctor((int)u));
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "L145",var0,var1,var2,var3});
+						Task.states.add(new Object[] {theInstance, "int", "L145",var0,var1,var2,var3});
 					} else if (execL145(var0,var1,var2,var3,nondeterministic)) {
 						ret = true;
 						break L144;
@@ -339,7 +407,7 @@ L141:
 					u = ((FloatingFunctor)((Atom)var2).getFunctor()).floatValue();
 					var3 = new Atom(null, new FloatingFunctor(-u));
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "L142",var0,var1,var2,var3});
+						Task.states.add(new Object[] {theInstance, "-.", "L142",var0,var1,var2,var3});
 					} else if (execL142(var0,var1,var2,var3,nondeterministic)) {
 						ret = true;
 						break L141;
@@ -423,7 +491,7 @@ L138:
 					x = ((IntegerFunctor)((Atom)var2).getFunctor()).intValue();
 					var3 = new Atom(null, new IntegerFunctor(-x));				
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "L139",var0,var1,var2,var3});
+						Task.states.add(new Object[] {theInstance, "-", "L139",var0,var1,var2,var3});
 					} else if (execL139(var0,var1,var2,var3,nondeterministic)) {
 						ret = true;
 						break L138;
@@ -508,7 +576,7 @@ L135:
 					var4 =  ((Atom)var2).getFunctor();
 					var3 = new Atom(null, (Functor)(var4));
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "L136",var0,var1,var2,var3,var4});
+						Task.states.add(new Object[] {theInstance, "+.", "L136",var0,var1,var2,var3,var4});
 					} else if (execL136(var0,var1,var2,var3,var4,nondeterministic)) {
 						ret = true;
 						break L135;
@@ -593,7 +661,7 @@ L132:
 					var4 =  ((Atom)var2).getFunctor();
 					var3 = new Atom(null, (Functor)(var4));
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "L133",var0,var1,var2,var3,var4});
+						Task.states.add(new Object[] {theInstance, "+", "L133",var0,var1,var2,var3,var4});
 					} else if (execL133(var0,var1,var2,var3,var4,nondeterministic)) {
 						ret = true;
 						break L132;
@@ -683,7 +751,7 @@ L129:
 						func = new FloatingFunctor(u / v);
 						var4 = new Atom(null, func);				
 						if (nondeterministic) {
-							Task.states.add(new Object[] {theInstance, "L130",var0,var1,var2,var3,var4});
+							Task.states.add(new Object[] {theInstance, "/.", "L130",var0,var1,var2,var3,var4});
 						} else if (execL130(var0,var1,var2,var3,var4,nondeterministic)) {
 							ret = true;
 							break L129;
@@ -775,7 +843,7 @@ L126:
 						v = ((FloatingFunctor)((Atom)var3).getFunctor()).floatValue();
 						var4 = new Atom(null, new FloatingFunctor(u * v));	
 						if (nondeterministic) {
-							Task.states.add(new Object[] {theInstance, "L127",var0,var1,var2,var3,var4});
+							Task.states.add(new Object[] {theInstance, "*.", "L127",var0,var1,var2,var3,var4});
 						} else if (execL127(var0,var1,var2,var3,var4,nondeterministic)) {
 							ret = true;
 							break L126;
@@ -867,7 +935,7 @@ L123:
 						v = ((FloatingFunctor)((Atom)var3).getFunctor()).floatValue();
 						var4 = new Atom(null, new FloatingFunctor(u-v));	
 						if (nondeterministic) {
-							Task.states.add(new Object[] {theInstance, "L124",var0,var1,var2,var3,var4});
+							Task.states.add(new Object[] {theInstance, "-.", "L124",var0,var1,var2,var3,var4});
 						} else if (execL124(var0,var1,var2,var3,var4,nondeterministic)) {
 							ret = true;
 							break L123;
@@ -959,7 +1027,7 @@ L120:
 						v = ((FloatingFunctor)((Atom)var3).getFunctor()).floatValue();
 						var4 = new Atom(null, new FloatingFunctor(u+v));
 						if (nondeterministic) {
-							Task.states.add(new Object[] {theInstance, "L121",var0,var1,var2,var3,var4});
+							Task.states.add(new Object[] {theInstance, "+.", "L121",var0,var1,var2,var3,var4});
 						} else if (execL121(var0,var1,var2,var3,var4,nondeterministic)) {
 							ret = true;
 							break L120;
@@ -1053,7 +1121,7 @@ L117:
 							func = new IntegerFunctor(x % y);
 							var4 = new Atom(null, func);						
 							if (nondeterministic) {
-								Task.states.add(new Object[] {theInstance, "L118",var0,var1,var2,var3,var4});
+								Task.states.add(new Object[] {theInstance, "mod", "L118",var0,var1,var2,var3,var4});
 							} else if (execL118(var0,var1,var2,var3,var4,nondeterministic)) {
 								ret = true;
 								break L117;
@@ -1148,7 +1216,7 @@ L114:
 							func = new IntegerFunctor(x / y);
 							var4 = new Atom(null, func);				
 							if (nondeterministic) {
-								Task.states.add(new Object[] {theInstance, "L115",var0,var1,var2,var3,var4});
+								Task.states.add(new Object[] {theInstance, "/", "L115",var0,var1,var2,var3,var4});
 							} else if (execL115(var0,var1,var2,var3,var4,nondeterministic)) {
 								ret = true;
 								break L114;
@@ -1241,7 +1309,7 @@ L111:
 						y = ((IntegerFunctor)((Atom)var3).getFunctor()).intValue();
 						var4 = new Atom(null, new IntegerFunctor(x * y));	
 						if (nondeterministic) {
-							Task.states.add(new Object[] {theInstance, "L112",var0,var1,var2,var3,var4});
+							Task.states.add(new Object[] {theInstance, "*", "L112",var0,var1,var2,var3,var4});
 						} else if (execL112(var0,var1,var2,var3,var4,nondeterministic)) {
 							ret = true;
 							break L111;
@@ -1333,7 +1401,7 @@ L108:
 						y = ((IntegerFunctor)((Atom)var3).getFunctor()).intValue();
 						var4 = new Atom(null, new IntegerFunctor(x-y));	
 						if (nondeterministic) {
-							Task.states.add(new Object[] {theInstance, "L109",var0,var1,var2,var3,var4});
+							Task.states.add(new Object[] {theInstance, "-", "L109",var0,var1,var2,var3,var4});
 						} else if (execL109(var0,var1,var2,var3,var4,nondeterministic)) {
 							ret = true;
 							break L108;
@@ -1425,7 +1493,7 @@ L105:
 						y = ((IntegerFunctor)((Atom)var3).getFunctor()).intValue();
 						var4 = new Atom(null, new IntegerFunctor(x+y));
 						if (nondeterministic) {
-							Task.states.add(new Object[] {theInstance, "L106",var0,var1,var2,var3,var4});
+							Task.states.add(new Object[] {theInstance, "+", "L106",var0,var1,var2,var3,var4});
 						} else if (execL106(var0,var1,var2,var3,var4,nondeterministic)) {
 							ret = true;
 							break L105;

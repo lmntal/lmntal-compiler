@@ -36,12 +36,10 @@ import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.IntegerFunctor;
 import runtime.InterpretedRuleset;
-import runtime.Link;
 import runtime.ObjectFunctor;
 import runtime.Rule;
 import runtime.StringFunctor;
 import runtime.SystemRulesets;
-import runtime.Uniq;
 import util.Util;
 
 /**
@@ -551,6 +549,13 @@ public class Translator {
 			writer.write("	}\n");
 		}
 
+		String rulesetName;
+		if (globalSystemRuleset) {
+			rulesetName = "@system";
+		} else {
+			rulesetName = "@" + ruleset.getId();
+		}
+		
 		//アトム手動テスト
 		writer.write("	public boolean react(Membrane mem, Atom atom) {\n");
 		writer.write("		boolean result = false;\n");
@@ -559,6 +564,8 @@ public class Translator {
 			Rule rule = (Rule) it.next();
 			writer.write("		if (exec" + rule.atomMatchLabel.label + "(mem, atom, false)) {\n");
 			//writer.write("			result = true;\n");
+			writer.write("			if (Env.fTrace)\n");
+			writer.write("				Task.trace(\"-->\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
 			writer.write("			return true;\n");
 			//writer.write("			if (!mem.isCurrent()) return true;\n");
 			writer.write("		}\n");
@@ -576,6 +583,8 @@ public class Translator {
 			Rule rule = (Rule) it.next();
 			writer.write("		if (exec" + rule.memMatchLabel.label + "(mem, nondeterministic)) {\n");
 			//writer.write("			result = true;\n");
+			writer.write("			if (Env.fTrace)\n");
+			writer.write("				Task.trace(\"==>\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
 			writer.write("			return true;\n");
 			//writer.write("			if (!mem.isCurrent()) return true;\n");
 			writer.write("		}\n");
@@ -1675,7 +1684,8 @@ public class Translator {
 					add(label, rule);
 					if (((Instruction)label.insts.get(1)).getKind() == Instruction.COMMIT) {
 						writer.write(tabs + "if (nondeterministic) {\n");
-						writer.write(tabs + "	Task.states.add(new Object[] {theInstance, \"" + label.label + "\",");
+						writer.write(tabs + "	Task.states.add(new Object[] {theInstance, "
+								+ Util.quoteString(rule.toString(), '"') + ", \"" + label.label + "\",");
 						genArgList((List)inst.getArg2(), (List)inst.getArg3(), (List)inst.getArg4(), false);
 						writer.write("});\n");
 						writer.write(tabs + "} else ");
