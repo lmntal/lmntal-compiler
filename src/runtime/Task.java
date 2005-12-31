@@ -116,7 +116,7 @@ public class Task extends AbstractTask implements Runnable {
 	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
 	public void execAsMasterTask() {
 		if (Env.fNondeterministic) {
-			nondeterministicExec();
+			nondeterministicExec(true);
 		} else {
 			thread.start();
 			try {
@@ -434,20 +434,21 @@ public class Task extends AbstractTask implements Runnable {
 			}
 		}
 	}
-	private static final int MAX_COUNT = 300;
+	private static final int MAX_COUNT = 1500;
 	/**
 	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
 	 */
-	void nondeterministicExec() {
+	void nondeterministicExec(boolean removeDup) {
 		HashMap idMap = new HashMap();
-		int id = 0;
+		int nextId = 0;
 		ArrayList st = new ArrayList();
 		st.add(getRoot());
-		idMap.put(getRoot(), new Integer(id++));
+		idMap.put(getRoot(), new Integer(nextId++));
+		int i = 0, max_w = 0,t = 0;
 
 		while (st.size() > 0) {
 			if (idMap.size() > MAX_COUNT) {
-				System.out.println("ERROR : max count reached.");
+				System.err.println("ERROR : max count reached.");
 				break;
 			}
 			Membrane mem = (Membrane)st.remove(st.size() - 1);
@@ -457,33 +458,47 @@ public class Task extends AbstractTask implements Runnable {
 			root = mem;
 			states.clear();
 			exec(mem, true);
+			memStack.pop();
 			//それぞれ適用した結果を作成
-			System.out.print(idMap.get(mem) + ":");
+			System.out.println(idMap.get(mem) + " : " + mem);
 			Iterator it = states.iterator();
+			int w = 0;
+			t++;
 			while (it.hasNext()) {
+				i++;
+				w++;
 				//複製
-				Membrane mem2 = new Membrane();
-				mem2.task = this;
+				Membrane mem2 = new Membrane(this);
 				Map map = mem2.copyCellsFrom(mem);
+				mem2.memToCopyMap = null;
+				mem2.memToCopiedMem = null;
 				mem2.copyRulesFrom(mem);
 				//適用
-				react(mem2, (Object[])it.next(), mem, map);
+				String ruleName = react(mem2, (Object[])it.next(), mem, map);
 				
+				Integer id;
 				if (idMap.containsKey(mem2)) {
-					System.out.print(" " + idMap.get(mem2));
+					id = (Integer)idMap.get(mem2);
+					mem2.drop();
+					mem2.free();
 				} else {
-					System.out.print(" " + id);
+					id = new Integer(nextId++);
 					st.add(mem2);
-					idMap.put(mem2, new Integer(id++));
+					idMap.put(mem2, id);
 				}
+				System.out.print(" " + id + "(" + ruleName + ")");
 			}
+			if (w > max_w) max_w = w;
 			System.out.println();
+			if (!removeDup) {
+				idMap.remove(mem);
+				mem.drop();
+				mem.free();
+			}
+			System.out.println(idMap.size() + "/" + st.size() + "/" + max_w);
 		}
-		Iterator it = idMap.keySet().iterator();
-		while (it.hasNext()) {
-			Membrane mem = (Membrane)it.next();
-			System.out.println(idMap.get(mem) + " = " + mem);
-		}
+		System.out.println("state count is " + i + ", unique count is " + nextId);
+		System.out.println("average width is " + (i / t) + ", max width is " + max_w);
 	}
 	/**
 	 * exec(origMem, true) によって得られた情報を元に、実際に 1 段階のルール適用を行う。

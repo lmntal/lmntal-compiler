@@ -829,6 +829,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			// atom.free();
 			// it.remove();
 		}
+		atoms.clear();
 		it = memIterator();
 		while(it.hasNext()){
 			AbstractMembrane mem = (AbstractMembrane)it.next();

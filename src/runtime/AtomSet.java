@@ -288,8 +288,6 @@ public final class AtomSet implements Serializable {
 		ArrayList funcs = getCanonicalFunctorList();
 		if (funcs.size() != s.getCanonicalFunctorList().size()) return false;
 		Collections.sort(funcs, sizeComparator);
-		checked1.clear();
-		checked2.clear();
 		for (int i = 0; i < funcs.size(); i++) {
 			Functor f = (Functor)funcs.get(i);
 			ArrayList l1 = (ArrayList)atoms.get(f);
@@ -297,7 +295,10 @@ public final class AtomSet implements Serializable {
 			if (l2 == null || l1.size() != l2.size()) return false;
 			if (!check(l1, l2)) return false;
 		}
-		return check(dataAtoms, s.dataAtoms);
+		boolean ret = check(dataAtoms, s.dataAtoms);
+		checked1.clear();
+		checked2.clear();
+		return ret;
 	}
 	private boolean check(ArrayList l1, ArrayList l2) {
 		for (int j = 0; j < l1.size(); j++) {
