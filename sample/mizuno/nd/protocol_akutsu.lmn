@@ -1,0 +1,49 @@
+//Needham-Schroderの公開鍵プロトコル
+
+//ネットワーク状態
+nodeset([p1,p2,p3]).
+next_nonce(0).
+knonce(p1,[]).
+knonce(p2,[]).
+
+//命令
+conn(p1,p2).
+
+//通信
+s1 @@ R=send([H|T],D) :- unary(H),ground(D) | R=[H|send(T,D)], recv(H,D).
+s2 @@ R=send([],D) :- ground(D) | R=[].
+
+//鍵交換
+//A->B : {Na,A}Kb
+k1 @@ conn(ID1,ID2),next_nonce(N),nodeset(Nodes),knonce(KID1,Ns)
+  :- N2=N+1,unary(ID1),unary(ID2),ID1=KID1 |
+	state_send(ID1,ID2,N), nodeset(send(Nodes,enc(ID2,[nonce(N),id(ID1)]))),
+	knonce(KID1,[N|Ns]), next_nonce(N2).
+//B->A : {Na,Nb}Ka	
+k2 @@ recv(ID2,enc(EID2,[nonce(N),id(ID1)])),knonce(KID2,Ns),nodeset(Nodes),next_nonce(N2)
+ :- ID2=EID2,EID2=KID2,unary(ID1),unary(N),N3=N2+1 |
+	nodeset(send(Nodes,enc(ID1,[nonce(N2),nonce(N)]))),knonce(KID2,[N2,N|Ns]),next_nonce(N3),state_recv(ID2,ID1,N2).
+//A->B : {Nb}Kb
+k3 @@ state_send(SID1,SID2,SN), nodeset(Nodes), knonce(KID1,Ns), recv(ID1,enc(EID1,[nonce(N2),nonce(N1)]))
+ :- ID1=KID1,ID1=SID1,ID1=EID1,SN=N1,unary(N1),unary(N2),unary(SID2) |
+	nodeset(send(Nodes,enc(SID2,[nonce(N2)]))), knonce(KID1,[N2|Ns]), est_to(ID1,SID2).
+//上のメッセージの受信
+k4 @@ state_recv(SID2,SID1,SN),recv(ID2,enc(EID2,[nonce(N)])) :- ID2=EID2,ID2=SID2,SN=N,unary(N) | est_from(ID2,SID1).
+
+//////////
+//攻撃者
+//知識獲得
+n1 @@ recv(p3,D) :- know(p3,D).
+n2 @@ know(ID,enc(ID2,D)) :- ID=ID2  | know(ID,D).
+n3 @@ know(ID,[H|T]) :- unary(ID) | know(ID,H),know(ID,T).
+n4 @@ know(ID,[]) :- unary(ID) | .
+
+//なりすまし
+to(1,p1,p2), to(1,p2,p1). //to(1,p3,p1). to(1,p3,p2).
+to(2,p1,p2), to(2,p2,p1). //to(2,p3,p1). to(2,p3,p2).
+node(p1). node(p2).
+know(p3,nonce(-1)). know(p3,nonce(-2)).
+i1 @@ to(1,TID1,TID2), know(ID,nonce(N)),node(ID1),node(ID2),nodeset(Nodes) :- TID1=ID1,TID2=ID2,unary(N) |
+	know(ID,nonce(N)),node(ID1),node(ID2),nodeset(send(Nodes,enc(ID1,[nonce(N),id(ID2)]))).
+i2 @@ to(2,TID1,TID2), know(ID,nonce(N1)),know(KID,nonce(N2)),node(ID1),nodeset(Nodes) :- ID=KID,unary(N1),unary(N2),ID1=TID1,unary(TID2) |
+	know(ID,nonce(N1)),know(ID,used_nonce(N2)),node(ID1),nodeset(send(Nodes,enc(ID1,[nonce(N1),nonce(N2)]))).
