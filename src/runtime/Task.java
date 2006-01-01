@@ -360,7 +360,7 @@ public class Task extends AbstractTask implements Runnable {
 
 	public static HashSet states = new HashSet();
 	private static final Functor PLUS = new Functor("+", 1);
-	private static final Functor REDUCT = new Functor("reduct", 3);
+	private static final Functor FUNCTOR_REDUCE = new Functor("reduce", 3);
 	/** 
 	 * 指定された膜に関するリダクショングラフを生成する。
 	 * 結果は、指定された膜の親膜の親膜に生成される。
@@ -417,7 +417,7 @@ public class Task extends AbstractTask implements Runnable {
 			Atom f = memExec.newAtom(PLUS);
 			Atom fi = memExec.newAtom(Functor.INSIDE_PROXY);
 			Atom fo = memGraph.newAtom(Functor.OUTSIDE_PROXY);
-			Atom r = memGraph.newAtom(REDUCT);
+			Atom r = memGraph.newAtom(FUNCTOR_REDUCE);
 			Atom n = memGraph.newAtom(new StringFunctor(name));
 			Atom to = memGraph.newAtom(Functor.OUTSIDE_PROXY);
 			Atom ti = memOut.newAtom(Functor.INSIDE_PROXY);
