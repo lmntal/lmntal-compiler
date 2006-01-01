@@ -25,61 +25,99 @@ public class Ruleset603 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL150(mem, atom, false)) {
-			return true;
-		}
-		if (execL157(mem, atom, false)) {
-			return true;
-		}
 		if (execL164(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", ">");
 			return true;
 		}
-		if (execL171(mem, atom, false)) {
+		if (execL173(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "<");
 			return true;
 		}
-		if (execL178(mem, atom, false)) {
+		if (execL182(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "=<");
 			return true;
 		}
-		if (execL185(mem, atom, false)) {
+		if (execL191(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", ">=");
 			return true;
 		}
-		if (execL192(mem, atom, false)) {
+		if (execL200(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "==");
 			return true;
 		}
-		if (execL199(mem, atom, false)) {
+		if (execL209(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "!=");
 			return true;
 		}
-		if (execL206(mem, atom, false)) {
-			return true;
-		}
-		if (execL213(mem, atom, false)) {
-			return true;
-		}
-		if (execL220(mem, atom, false)) {
+		if (execL218(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "abs");
 			return true;
 		}
 		if (execL227(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "+");
 			return true;
 		}
-		if (execL234(mem, atom, false)) {
+		if (execL236(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "+");
 			return true;
 		}
-		if (execL241(mem, atom, false)) {
+		if (execL245(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "+");
 			return true;
 		}
-		if (execL248(mem, atom, false)) {
+		if (execL254(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "-");
 			return true;
 		}
-		if (execL255(mem, atom, false)) {
+		if (execL263(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "-");
 			return true;
 		}
-		if (execL262(mem, atom, false)) {
+		if (execL272(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "-");
 			return true;
 		}
-		if (execL269(mem, atom, false)) {
+		if (execL281(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "*");
 			return true;
 		}
-		if (execL276(mem, atom, false)) {
+		if (execL290(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "*");
+			return true;
+		}
+		if (execL299(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "*");
+			return true;
+		}
+		if (execL308(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "/");
+			return true;
+		}
+		if (execL317(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "/");
+			return true;
+		}
+		if (execL326(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "/");
 			return true;
 		}
 		return result;
@@ -89,66 +127,104 @@ public class Ruleset603 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL153(mem, nondeterministic)) {
-			return true;
-		}
-		if (execL160(mem, nondeterministic)) {
-			return true;
-		}
 		if (execL167(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", ">");
 			return true;
 		}
-		if (execL174(mem, nondeterministic)) {
+		if (execL176(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "<");
 			return true;
 		}
-		if (execL181(mem, nondeterministic)) {
+		if (execL185(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "=<");
 			return true;
 		}
-		if (execL188(mem, nondeterministic)) {
+		if (execL194(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", ">=");
 			return true;
 		}
-		if (execL195(mem, nondeterministic)) {
+		if (execL203(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "==");
 			return true;
 		}
-		if (execL202(mem, nondeterministic)) {
+		if (execL212(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "!=");
 			return true;
 		}
-		if (execL209(mem, nondeterministic)) {
-			return true;
-		}
-		if (execL216(mem, nondeterministic)) {
-			return true;
-		}
-		if (execL223(mem, nondeterministic)) {
+		if (execL221(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "abs");
 			return true;
 		}
 		if (execL230(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "+");
 			return true;
 		}
-		if (execL237(mem, nondeterministic)) {
+		if (execL239(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "+");
 			return true;
 		}
-		if (execL244(mem, nondeterministic)) {
+		if (execL248(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "+");
 			return true;
 		}
-		if (execL251(mem, nondeterministic)) {
+		if (execL257(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "-");
 			return true;
 		}
-		if (execL258(mem, nondeterministic)) {
+		if (execL266(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "-");
 			return true;
 		}
-		if (execL265(mem, nondeterministic)) {
+		if (execL275(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "-");
 			return true;
 		}
-		if (execL272(mem, nondeterministic)) {
+		if (execL284(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "*");
 			return true;
 		}
-		if (execL279(mem, nondeterministic)) {
+		if (execL293(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "*");
+			return true;
+		}
+		if (execL302(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "*");
+			return true;
+		}
+		if (execL311(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "/");
+			return true;
+		}
+		if (execL320(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "/");
+			return true;
+		}
+		if (execL329(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "/");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL279(Object var0, boolean nondeterministic) {
+	public boolean execL329(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -170,7 +246,7 @@ public class Ruleset603 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L279:
+L329:
 		{
 			func = f0;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -183,9 +259,9 @@ L279:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof IntegerFunctor))) {
-						if (execL275(var0,var1,var2,var3,nondeterministic)) {
+						if (execL325(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L279;
+							break L329;
 						}
 					}
 				}
@@ -193,7 +269,7 @@ L279:
 		}
 		return ret;
 	}
-	public boolean execL275(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL325(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -216,7 +292,7 @@ L279:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L275:
+L325:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -249,11 +325,11 @@ L275:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 18);
 			ret = true;
-			break L275;
+			break L325;
 		}
 		return ret;
 	}
-	public boolean execL276(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL326(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -275,16 +351,16 @@ L275:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L276:
+L326:
 		{
-			if (execL278(var0, var1, nondeterministic)) {
+			if (execL328(var0, var1, nondeterministic)) {
 				ret = true;
-				break L276;
+				break L326;
 			}
 		}
 		return ret;
 	}
-	public boolean execL278(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL328(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -308,7 +384,7 @@ L276:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L278:
+L328:
 		{
 			if (!(!(f0).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -324,9 +400,9 @@ L278:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof IntegerFunctor))) {
-							if (execL275(var0,var1,var5,var6,nondeterministic)) {
+							if (execL325(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L278;
+								break L328;
 							}
 						}
 					}
@@ -335,7 +411,7 @@ L278:
 		}
 		return ret;
 	}
-	public boolean execL272(Object var0, boolean nondeterministic) {
+	public boolean execL320(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -357,7 +433,7 @@ L278:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L272:
+L320:
 		{
 			func = f0;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -370,9 +446,9 @@ L272:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof IntegerFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL268(var0,var1,var2,var3,nondeterministic)) {
+						if (execL316(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L272;
+							break L320;
 						}
 					}
 				}
@@ -380,7 +456,7 @@ L272:
 		}
 		return ret;
 	}
-	public boolean execL268(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL316(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -403,7 +479,7 @@ L272:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L268:
+L316:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -436,11 +512,11 @@ L268:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 17);
 			ret = true;
-			break L268;
+			break L316;
 		}
 		return ret;
 	}
-	public boolean execL269(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL317(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -462,16 +538,16 @@ L268:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L269:
+L317:
 		{
-			if (execL271(var0, var1, nondeterministic)) {
+			if (execL319(var0, var1, nondeterministic)) {
 				ret = true;
-				break L269;
+				break L317;
 			}
 		}
 		return ret;
 	}
-	public boolean execL271(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL319(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -495,7 +571,7 @@ L269:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L271:
+L319:
 		{
 			if (!(!(f0).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -511,9 +587,9 @@ L271:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof IntegerFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL268(var0,var1,var5,var6,nondeterministic)) {
+							if (execL316(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L271;
+								break L319;
 							}
 						}
 					}
@@ -522,7 +598,7 @@ L271:
 		}
 		return ret;
 	}
-	public boolean execL265(Object var0, boolean nondeterministic) {
+	public boolean execL311(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -544,7 +620,7 @@ L271:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L265:
+L311:
 		{
 			func = f0;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -557,9 +633,9 @@ L265:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL261(var0,var1,var2,var3,nondeterministic)) {
+						if (execL307(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L265;
+							break L311;
 						}
 					}
 				}
@@ -567,7 +643,7 @@ L265:
 		}
 		return ret;
 	}
-	public boolean execL261(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL307(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -590,7 +666,7 @@ L265:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L261:
+L307:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -623,11 +699,11 @@ L261:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 16);
 			ret = true;
-			break L261;
+			break L307;
 		}
 		return ret;
 	}
-	public boolean execL262(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL308(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -649,16 +725,16 @@ L261:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L262:
+L308:
 		{
-			if (execL264(var0, var1, nondeterministic)) {
+			if (execL310(var0, var1, nondeterministic)) {
 				ret = true;
-				break L262;
+				break L308;
 			}
 		}
 		return ret;
 	}
-	public boolean execL264(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL310(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -682,7 +758,7 @@ L262:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L264:
+L310:
 		{
 			if (!(!(f0).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -698,9 +774,9 @@ L264:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL261(var0,var1,var5,var6,nondeterministic)) {
+							if (execL307(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L264;
+								break L310;
 							}
 						}
 					}
@@ -709,7 +785,7 @@ L264:
 		}
 		return ret;
 	}
-	public boolean execL258(Object var0, boolean nondeterministic) {
+	public boolean execL302(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -731,7 +807,7 @@ L264:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L258:
+L302:
 		{
 			func = f4;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -744,9 +820,9 @@ L258:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof IntegerFunctor))) {
-						if (execL254(var0,var1,var2,var3,nondeterministic)) {
+						if (execL298(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L258;
+							break L302;
 						}
 					}
 				}
@@ -754,7 +830,7 @@ L258:
 		}
 		return ret;
 	}
-	public boolean execL254(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL298(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -777,7 +853,7 @@ L258:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L254:
+L298:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -810,11 +886,11 @@ L254:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 15);
 			ret = true;
-			break L254;
+			break L298;
 		}
 		return ret;
 	}
-	public boolean execL255(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL299(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -836,16 +912,16 @@ L254:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L255:
+L299:
 		{
-			if (execL257(var0, var1, nondeterministic)) {
+			if (execL301(var0, var1, nondeterministic)) {
 				ret = true;
-				break L255;
+				break L299;
 			}
 		}
 		return ret;
 	}
-	public boolean execL257(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL301(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -869,7 +945,7 @@ L255:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L257:
+L301:
 		{
 			if (!(!(f4).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -885,9 +961,9 @@ L257:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof IntegerFunctor))) {
-							if (execL254(var0,var1,var5,var6,nondeterministic)) {
+							if (execL298(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L257;
+								break L301;
 							}
 						}
 					}
@@ -896,7 +972,7 @@ L257:
 		}
 		return ret;
 	}
-	public boolean execL251(Object var0, boolean nondeterministic) {
+	public boolean execL293(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -918,7 +994,7 @@ L257:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L251:
+L293:
 		{
 			func = f4;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -931,9 +1007,9 @@ L251:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof IntegerFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL247(var0,var1,var2,var3,nondeterministic)) {
+						if (execL289(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L251;
+							break L293;
 						}
 					}
 				}
@@ -941,7 +1017,7 @@ L251:
 		}
 		return ret;
 	}
-	public boolean execL247(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL289(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -964,7 +1040,7 @@ L251:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L247:
+L289:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -997,11 +1073,11 @@ L247:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 14);
 			ret = true;
-			break L247;
+			break L289;
 		}
 		return ret;
 	}
-	public boolean execL248(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL290(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1023,16 +1099,16 @@ L247:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L248:
+L290:
 		{
-			if (execL250(var0, var1, nondeterministic)) {
+			if (execL292(var0, var1, nondeterministic)) {
 				ret = true;
-				break L248;
+				break L290;
 			}
 		}
 		return ret;
 	}
-	public boolean execL250(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL292(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1056,7 +1132,7 @@ L248:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L250:
+L292:
 		{
 			if (!(!(f4).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -1072,9 +1148,9 @@ L250:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof IntegerFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL247(var0,var1,var5,var6,nondeterministic)) {
+							if (execL289(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L250;
+								break L292;
 							}
 						}
 					}
@@ -1083,7 +1159,7 @@ L250:
 		}
 		return ret;
 	}
-	public boolean execL244(Object var0, boolean nondeterministic) {
+	public boolean execL284(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -1105,7 +1181,7 @@ L250:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L244:
+L284:
 		{
 			func = f4;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -1118,9 +1194,9 @@ L244:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL240(var0,var1,var2,var3,nondeterministic)) {
+						if (execL280(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L244;
+							break L284;
 						}
 					}
 				}
@@ -1128,7 +1204,7 @@ L244:
 		}
 		return ret;
 	}
-	public boolean execL240(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL280(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -1151,7 +1227,7 @@ L244:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L240:
+L280:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -1184,11 +1260,11 @@ L240:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 13);
 			ret = true;
-			break L240;
+			break L280;
 		}
 		return ret;
 	}
-	public boolean execL241(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL281(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1210,16 +1286,16 @@ L240:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L241:
+L281:
 		{
-			if (execL243(var0, var1, nondeterministic)) {
+			if (execL283(var0, var1, nondeterministic)) {
 				ret = true;
-				break L241;
+				break L281;
 			}
 		}
 		return ret;
 	}
-	public boolean execL243(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL283(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1243,7 +1319,7 @@ L241:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L243:
+L283:
 		{
 			if (!(!(f4).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -1259,9 +1335,9 @@ L243:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL240(var0,var1,var5,var6,nondeterministic)) {
+							if (execL280(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L243;
+								break L283;
 							}
 						}
 					}
@@ -1270,7 +1346,7 @@ L243:
 		}
 		return ret;
 	}
-	public boolean execL237(Object var0, boolean nondeterministic) {
+	public boolean execL275(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -1292,7 +1368,7 @@ L243:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L237:
+L275:
 		{
 			func = f8;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -1305,9 +1381,9 @@ L237:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof IntegerFunctor))) {
-						if (execL233(var0,var1,var2,var3,nondeterministic)) {
+						if (execL271(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L237;
+							break L275;
 						}
 					}
 				}
@@ -1315,7 +1391,7 @@ L237:
 		}
 		return ret;
 	}
-	public boolean execL233(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL271(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -1338,7 +1414,7 @@ L237:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L233:
+L271:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -1371,11 +1447,11 @@ L233:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 12);
 			ret = true;
-			break L233;
+			break L271;
 		}
 		return ret;
 	}
-	public boolean execL234(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL272(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1397,16 +1473,16 @@ L233:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L234:
+L272:
 		{
-			if (execL236(var0, var1, nondeterministic)) {
+			if (execL274(var0, var1, nondeterministic)) {
 				ret = true;
-				break L234;
+				break L272;
 			}
 		}
 		return ret;
 	}
-	public boolean execL236(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL274(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1430,7 +1506,7 @@ L234:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L236:
+L274:
 		{
 			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -1446,9 +1522,757 @@ L236:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof IntegerFunctor))) {
-							if (execL233(var0,var1,var5,var6,nondeterministic)) {
+							if (execL271(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L236;
+								break L274;
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL266(Object var0, boolean nondeterministic) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L266:
+		{
+			func = f8;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				link = ((Atom)var1).getArg(1);
+				var3 = link.getAtom();
+				if (!(!(((Atom)var3).getFunctor() instanceof IntegerFunctor))) {
+					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
+						if (execL262(var0,var1,var2,var3,nondeterministic)) {
+							ret = true;
+							break L266;
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL262(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L262:
+		{
+			link = ((Atom)var1).getArg(2);
+			var7 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var3);
+			atom.dequeue();
+			atom = ((Atom)var3);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
+			func = f10;
+			var6 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 0,
+				((Atom)var5), 0 );
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 1,
+				((Atom)var4), 0 );
+			((Atom)var6).getMem().inheritLink(
+				((Atom)var6), 2,
+				(Link)var7 );
+			atom = ((Atom)var6);
+			atom.getMem().enqueueAtom(atom);
+			SomeInlineCodedouble.run((Atom)var6, 11);
+			ret = true;
+			break L262;
+		}
+		return ret;
+	}
+	public boolean execL263(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L263:
+		{
+			if (execL265(var0, var1, nondeterministic)) {
+				ret = true;
+				break L263;
+			}
+		}
+		return ret;
+	}
+	public boolean execL265(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L265:
+		{
+			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
+				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
+					link = ((Atom)var1).getArg(0);
+					var2 = link;
+					link = ((Atom)var1).getArg(1);
+					var3 = link;
+					link = ((Atom)var1).getArg(2);
+					var4 = link;
+					link = ((Atom)var1).getArg(0);
+					var5 = link.getAtom();
+					link = ((Atom)var1).getArg(1);
+					var6 = link.getAtom();
+					if (!(!(((Atom)var6).getFunctor() instanceof IntegerFunctor))) {
+						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
+							if (execL262(var0,var1,var5,var6,nondeterministic)) {
+								ret = true;
+								break L265;
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL257(Object var0, boolean nondeterministic) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L257:
+		{
+			func = f8;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				link = ((Atom)var1).getArg(1);
+				var3 = link.getAtom();
+				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
+					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
+						if (execL253(var0,var1,var2,var3,nondeterministic)) {
+							ret = true;
+							break L257;
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL253(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L253:
+		{
+			link = ((Atom)var1).getArg(2);
+			var7 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var3);
+			atom.dequeue();
+			atom = ((Atom)var3);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
+			func = f11;
+			var6 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 0,
+				((Atom)var5), 0 );
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 1,
+				((Atom)var4), 0 );
+			((Atom)var6).getMem().inheritLink(
+				((Atom)var6), 2,
+				(Link)var7 );
+			atom = ((Atom)var6);
+			atom.getMem().enqueueAtom(atom);
+			SomeInlineCodedouble.run((Atom)var6, 10);
+			ret = true;
+			break L253;
+		}
+		return ret;
+	}
+	public boolean execL254(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L254:
+		{
+			if (execL256(var0, var1, nondeterministic)) {
+				ret = true;
+				break L254;
+			}
+		}
+		return ret;
+	}
+	public boolean execL256(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L256:
+		{
+			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
+				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
+					link = ((Atom)var1).getArg(0);
+					var2 = link;
+					link = ((Atom)var1).getArg(1);
+					var3 = link;
+					link = ((Atom)var1).getArg(2);
+					var4 = link;
+					link = ((Atom)var1).getArg(0);
+					var5 = link.getAtom();
+					link = ((Atom)var1).getArg(1);
+					var6 = link.getAtom();
+					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
+						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
+							if (execL253(var0,var1,var5,var6,nondeterministic)) {
+								ret = true;
+								break L256;
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL248(Object var0, boolean nondeterministic) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L248:
+		{
+			func = f12;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				link = ((Atom)var1).getArg(1);
+				var3 = link.getAtom();
+				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
+					if (!(!(((Atom)var2).getFunctor() instanceof IntegerFunctor))) {
+						if (execL244(var0,var1,var2,var3,nondeterministic)) {
+							ret = true;
+							break L248;
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL244(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L244:
+		{
+			link = ((Atom)var1).getArg(2);
+			var7 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var3);
+			atom.dequeue();
+			atom = ((Atom)var3);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
+			func = f13;
+			var6 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 0,
+				((Atom)var5), 0 );
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 1,
+				((Atom)var4), 0 );
+			((Atom)var6).getMem().inheritLink(
+				((Atom)var6), 2,
+				(Link)var7 );
+			atom = ((Atom)var6);
+			atom.getMem().enqueueAtom(atom);
+			SomeInlineCodedouble.run((Atom)var6, 9);
+			ret = true;
+			break L244;
+		}
+		return ret;
+	}
+	public boolean execL245(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L245:
+		{
+			if (execL247(var0, var1, nondeterministic)) {
+				ret = true;
+				break L245;
+			}
+		}
+		return ret;
+	}
+	public boolean execL247(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L247:
+		{
+			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
+				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
+					link = ((Atom)var1).getArg(0);
+					var2 = link;
+					link = ((Atom)var1).getArg(1);
+					var3 = link;
+					link = ((Atom)var1).getArg(2);
+					var4 = link;
+					link = ((Atom)var1).getArg(0);
+					var5 = link.getAtom();
+					link = ((Atom)var1).getArg(1);
+					var6 = link.getAtom();
+					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
+						if (!(!(((Atom)var5).getFunctor() instanceof IntegerFunctor))) {
+							if (execL244(var0,var1,var5,var6,nondeterministic)) {
+								ret = true;
+								break L247;
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL239(Object var0, boolean nondeterministic) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L239:
+		{
+			func = f12;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				link = ((Atom)var1).getArg(1);
+				var3 = link.getAtom();
+				if (!(!(((Atom)var3).getFunctor() instanceof IntegerFunctor))) {
+					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
+						if (execL235(var0,var1,var2,var3,nondeterministic)) {
+							ret = true;
+							break L239;
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL235(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L235:
+		{
+			link = ((Atom)var1).getArg(2);
+			var7 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var3);
+			atom.dequeue();
+			atom = ((Atom)var3);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
+			func = f14;
+			var6 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 0,
+				((Atom)var5), 0 );
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 1,
+				((Atom)var4), 0 );
+			((Atom)var6).getMem().inheritLink(
+				((Atom)var6), 2,
+				(Link)var7 );
+			atom = ((Atom)var6);
+			atom.getMem().enqueueAtom(atom);
+			SomeInlineCodedouble.run((Atom)var6, 8);
+			ret = true;
+			break L235;
+		}
+		return ret;
+	}
+	public boolean execL236(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L236:
+		{
+			if (execL238(var0, var1, nondeterministic)) {
+				ret = true;
+				break L236;
+			}
+		}
+		return ret;
+	}
+	public boolean execL238(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L238:
+		{
+			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
+				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
+					link = ((Atom)var1).getArg(0);
+					var2 = link;
+					link = ((Atom)var1).getArg(1);
+					var3 = link;
+					link = ((Atom)var1).getArg(2);
+					var4 = link;
+					link = ((Atom)var1).getArg(0);
+					var5 = link.getAtom();
+					link = ((Atom)var1).getArg(1);
+					var6 = link.getAtom();
+					if (!(!(((Atom)var6).getFunctor() instanceof IntegerFunctor))) {
+						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
+							if (execL235(var0,var1,var5,var6,nondeterministic)) {
+								ret = true;
+								break L238;
 							}
 						}
 					}
@@ -1481,7 +2305,7 @@ L236:
 		boolean ret = false;
 L230:
 		{
-			func = f8;
+			func = f12;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -1490,7 +2314,7 @@ L230:
 				var2 = link.getAtom();
 				link = ((Atom)var1).getArg(1);
 				var3 = link.getAtom();
-				if (!(!(((Atom)var3).getFunctor() instanceof IntegerFunctor))) {
+				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
 						if (execL226(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
@@ -1543,7 +2367,7 @@ L226:
 			atom.getMem().removeAtom(atom);
 			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
 			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f10;
+			func = f15;
 			var6 = ((AbstractMembrane)var0).newAtom(func);
 			((Atom)var6).getMem().newLink(
 				((Atom)var6), 0,
@@ -1556,7 +2380,7 @@ L226:
 				(Link)var7 );
 			atom = ((Atom)var6);
 			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var6, 11);
+			SomeInlineCodedouble.run((Atom)var6, 7);
 			ret = true;
 			break L226;
 		}
@@ -1619,7 +2443,7 @@ L227:
 		boolean ret = false;
 L229:
 		{
-			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
@@ -1631,7 +2455,7 @@ L229:
 					var5 = link.getAtom();
 					link = ((Atom)var1).getArg(1);
 					var6 = link.getAtom();
-					if (!(!(((Atom)var6).getFunctor() instanceof IntegerFunctor))) {
+					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
 							if (execL226(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
@@ -1644,8 +2468,98 @@ L229:
 		}
 		return ret;
 	}
-	public boolean execL223(Object var0, boolean nondeterministic) {
+	public boolean execL221(Object var0, boolean nondeterministic) {
 		Object var1 = null;
+		Object var2 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L221:
+		{
+			func = f16;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
+					if (execL217(var0,var1,var2,nondeterministic)) {
+						ret = true;
+						break L221;
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL217(Object var0, Object var1, Object var2, boolean nondeterministic) {
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L217:
+		{
+			link = ((Atom)var1).getArg(1);
+			var5 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			var3 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
+			func = f17;
+			var4 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var4).getMem().newLink(
+				((Atom)var4), 0,
+				((Atom)var3), 0 );
+			((Atom)var4).getMem().inheritLink(
+				((Atom)var4), 1,
+				(Link)var5 );
+			atom = ((Atom)var4);
+			atom.getMem().enqueueAtom(atom);
+			SomeInlineCodedouble.run((Atom)var4, 6);
+			ret = true;
+			break L217;
+		}
+		return ret;
+	}
+	public boolean execL218(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Atom atom;
@@ -1666,86 +2580,12 @@ L229:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L223:
+L218:
 		{
-			func = f8;
-			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
-			while (it1.hasNext()) {
-				atom = (Atom) it1.next();
-				var1 = atom;
-				link = ((Atom)var1).getArg(0);
-				var2 = link.getAtom();
-				link = ((Atom)var1).getArg(1);
-				var3 = link.getAtom();
-				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
-					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL219(var0,var1,var2,var3,nondeterministic)) {
-							ret = true;
-							break L223;
-						}
-					}
-				}
+			if (execL220(var0, var1, nondeterministic)) {
+				ret = true;
+				break L218;
 			}
-		}
-		return ret;
-	}
-	public boolean execL219(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Object var7 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L219:
-		{
-			link = ((Atom)var1).getArg(2);
-			var7 = link;
-			atom = ((Atom)var1);
-			atom.dequeue();
-			atom = ((Atom)var1);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var3);
-			atom.dequeue();
-			atom = ((Atom)var3);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var2);
-			atom.dequeue();
-			atom = ((Atom)var2);
-			atom.getMem().removeAtom(atom);
-			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
-			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f11;
-			var6 = ((AbstractMembrane)var0).newAtom(func);
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 0,
-				((Atom)var5), 0 );
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 1,
-				((Atom)var4), 0 );
-			((Atom)var6).getMem().inheritLink(
-				((Atom)var6), 2,
-				(Link)var7 );
-			atom = ((Atom)var6);
-			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var6, 10);
-			ret = true;
-			break L219;
 		}
 		return ret;
 	}
@@ -1773,57 +2613,18 @@ L219:
 		boolean ret = false;
 L220:
 		{
-			if (execL222(var0, var1, nondeterministic)) {
-				ret = true;
-				break L220;
-			}
-		}
-		return ret;
-	}
-	public boolean execL222(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L222:
-		{
-			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f16).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
 					link = ((Atom)var1).getArg(1);
 					var3 = link;
-					link = ((Atom)var1).getArg(2);
-					var4 = link;
 					link = ((Atom)var1).getArg(0);
-					var5 = link.getAtom();
-					link = ((Atom)var1).getArg(1);
-					var6 = link.getAtom();
-					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
-						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL219(var0,var1,var5,var6,nondeterministic)) {
-								ret = true;
-								break L222;
-							}
+					var4 = link.getAtom();
+					if (!(!(((Atom)var4).getFunctor() instanceof FloatingFunctor))) {
+						if (execL217(var0,var1,var4,nondeterministic)) {
+							ret = true;
+							break L220;
 						}
 					}
 				}
@@ -1831,56 +2632,10 @@ L222:
 		}
 		return ret;
 	}
-	public boolean execL216(Object var0, boolean nondeterministic) {
+	public boolean execL212(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L216:
-		{
-			func = f12;
-			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
-			while (it1.hasNext()) {
-				atom = (Atom) it1.next();
-				var1 = atom;
-				link = ((Atom)var1).getArg(0);
-				var2 = link.getAtom();
-				link = ((Atom)var1).getArg(1);
-				var3 = link.getAtom();
-				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
-					if (!(!(((Atom)var2).getFunctor() instanceof IntegerFunctor))) {
-						if (execL212(var0,var1,var2,var3,nondeterministic)) {
-							ret = true;
-							break L216;
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL212(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Object var7 = null;
 		Atom atom;
 		Functor func;
 		Link link;
@@ -1901,148 +2656,7 @@ L216:
 		boolean ret = false;
 L212:
 		{
-			link = ((Atom)var1).getArg(2);
-			var7 = link;
-			atom = ((Atom)var1);
-			atom.dequeue();
-			atom = ((Atom)var1);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var3);
-			atom.dequeue();
-			atom = ((Atom)var3);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var2);
-			atom.dequeue();
-			atom = ((Atom)var2);
-			atom.getMem().removeAtom(atom);
-			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
-			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f13;
-			var6 = ((AbstractMembrane)var0).newAtom(func);
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 0,
-				((Atom)var5), 0 );
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 1,
-				((Atom)var4), 0 );
-			((Atom)var6).getMem().inheritLink(
-				((Atom)var6), 2,
-				(Link)var7 );
-			atom = ((Atom)var6);
-			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var6, 9);
-			ret = true;
-			break L212;
-		}
-		return ret;
-	}
-	public boolean execL213(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L213:
-		{
-			if (execL215(var0, var1, nondeterministic)) {
-				ret = true;
-				break L213;
-			}
-		}
-		return ret;
-	}
-	public boolean execL215(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L215:
-		{
-			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
-				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
-					link = ((Atom)var1).getArg(0);
-					var2 = link;
-					link = ((Atom)var1).getArg(1);
-					var3 = link;
-					link = ((Atom)var1).getArg(2);
-					var4 = link;
-					link = ((Atom)var1).getArg(0);
-					var5 = link.getAtom();
-					link = ((Atom)var1).getArg(1);
-					var6 = link.getAtom();
-					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
-						if (!(!(((Atom)var5).getFunctor() instanceof IntegerFunctor))) {
-							if (execL212(var0,var1,var5,var6,nondeterministic)) {
-								ret = true;
-								break L215;
-							}
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL209(Object var0, boolean nondeterministic) {
-		Object var1 = null;
-		Object var2 = null;
-		Object var3 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L209:
-		{
-			func = f12;
+			func = f18;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -2051,11 +2665,11 @@ L209:
 				var2 = link.getAtom();
 				link = ((Atom)var1).getArg(1);
 				var3 = link.getAtom();
-				if (!(!(((Atom)var3).getFunctor() instanceof IntegerFunctor))) {
+				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL205(var0,var1,var2,var3,nondeterministic)) {
+						if (execL208(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L209;
+							break L212;
 						}
 					}
 				}
@@ -2063,103 +2677,11 @@ L209:
 		}
 		return ret;
 	}
-	public boolean execL205(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL208(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
 		Object var7 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L205:
-		{
-			link = ((Atom)var1).getArg(2);
-			var7 = link;
-			atom = ((Atom)var1);
-			atom.dequeue();
-			atom = ((Atom)var1);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var3);
-			atom.dequeue();
-			atom = ((Atom)var3);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var2);
-			atom.dequeue();
-			atom = ((Atom)var2);
-			atom.getMem().removeAtom(atom);
-			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
-			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f14;
-			var6 = ((AbstractMembrane)var0).newAtom(func);
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 0,
-				((Atom)var5), 0 );
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 1,
-				((Atom)var4), 0 );
-			((Atom)var6).getMem().inheritLink(
-				((Atom)var6), 2,
-				(Link)var7 );
-			atom = ((Atom)var6);
-			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var6, 8);
-			ret = true;
-			break L205;
-		}
-		return ret;
-	}
-	public boolean execL206(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L206:
-		{
-			if (execL208(var0, var1, nondeterministic)) {
-				ret = true;
-				break L206;
-			}
-		}
-		return ret;
-	}
-	public boolean execL208(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
 		Atom atom;
 		Functor func;
 		Link link;
@@ -2179,452 +2701,6 @@ L206:
 		Iterator it_deleteconnectors;
 		boolean ret = false;
 L208:
-		{
-			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
-				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
-					link = ((Atom)var1).getArg(0);
-					var2 = link;
-					link = ((Atom)var1).getArg(1);
-					var3 = link;
-					link = ((Atom)var1).getArg(2);
-					var4 = link;
-					link = ((Atom)var1).getArg(0);
-					var5 = link.getAtom();
-					link = ((Atom)var1).getArg(1);
-					var6 = link.getAtom();
-					if (!(!(((Atom)var6).getFunctor() instanceof IntegerFunctor))) {
-						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL205(var0,var1,var5,var6,nondeterministic)) {
-								ret = true;
-								break L208;
-							}
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL202(Object var0, boolean nondeterministic) {
-		Object var1 = null;
-		Object var2 = null;
-		Object var3 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L202:
-		{
-			func = f12;
-			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
-			while (it1.hasNext()) {
-				atom = (Atom) it1.next();
-				var1 = atom;
-				link = ((Atom)var1).getArg(0);
-				var2 = link.getAtom();
-				link = ((Atom)var1).getArg(1);
-				var3 = link.getAtom();
-				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
-					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL198(var0,var1,var2,var3,nondeterministic)) {
-							ret = true;
-							break L202;
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL198(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Object var7 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L198:
-		{
-			link = ((Atom)var1).getArg(2);
-			var7 = link;
-			atom = ((Atom)var1);
-			atom.dequeue();
-			atom = ((Atom)var1);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var3);
-			atom.dequeue();
-			atom = ((Atom)var3);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var2);
-			atom.dequeue();
-			atom = ((Atom)var2);
-			atom.getMem().removeAtom(atom);
-			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
-			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f15;
-			var6 = ((AbstractMembrane)var0).newAtom(func);
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 0,
-				((Atom)var5), 0 );
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 1,
-				((Atom)var4), 0 );
-			((Atom)var6).getMem().inheritLink(
-				((Atom)var6), 2,
-				(Link)var7 );
-			atom = ((Atom)var6);
-			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var6, 7);
-			ret = true;
-			break L198;
-		}
-		return ret;
-	}
-	public boolean execL199(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L199:
-		{
-			if (execL201(var0, var1, nondeterministic)) {
-				ret = true;
-				break L199;
-			}
-		}
-		return ret;
-	}
-	public boolean execL201(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L201:
-		{
-			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
-				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
-					link = ((Atom)var1).getArg(0);
-					var2 = link;
-					link = ((Atom)var1).getArg(1);
-					var3 = link;
-					link = ((Atom)var1).getArg(2);
-					var4 = link;
-					link = ((Atom)var1).getArg(0);
-					var5 = link.getAtom();
-					link = ((Atom)var1).getArg(1);
-					var6 = link.getAtom();
-					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
-						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL198(var0,var1,var5,var6,nondeterministic)) {
-								ret = true;
-								break L201;
-							}
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL195(Object var0, boolean nondeterministic) {
-		Object var1 = null;
-		Object var2 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L195:
-		{
-			func = f16;
-			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
-			while (it1.hasNext()) {
-				atom = (Atom) it1.next();
-				var1 = atom;
-				link = ((Atom)var1).getArg(0);
-				var2 = link.getAtom();
-				if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-					if (execL191(var0,var1,var2,nondeterministic)) {
-						ret = true;
-						break L195;
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL191(Object var0, Object var1, Object var2, boolean nondeterministic) {
-		Object var3 = null;
-		Object var4 = null;
-		Object var5 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L191:
-		{
-			link = ((Atom)var1).getArg(1);
-			var5 = link;
-			atom = ((Atom)var1);
-			atom.dequeue();
-			atom = ((Atom)var1);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var2);
-			atom.dequeue();
-			atom = ((Atom)var2);
-			atom.getMem().removeAtom(atom);
-			var3 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f17;
-			var4 = ((AbstractMembrane)var0).newAtom(func);
-			((Atom)var4).getMem().newLink(
-				((Atom)var4), 0,
-				((Atom)var3), 0 );
-			((Atom)var4).getMem().inheritLink(
-				((Atom)var4), 1,
-				(Link)var5 );
-			atom = ((Atom)var4);
-			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var4, 6);
-			ret = true;
-			break L191;
-		}
-		return ret;
-	}
-	public boolean execL192(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L192:
-		{
-			if (execL194(var0, var1, nondeterministic)) {
-				ret = true;
-				break L192;
-			}
-		}
-		return ret;
-	}
-	public boolean execL194(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L194:
-		{
-			if (!(!(f16).equals(((Atom)var1).getFunctor()))) {
-				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
-					link = ((Atom)var1).getArg(0);
-					var2 = link;
-					link = ((Atom)var1).getArg(1);
-					var3 = link;
-					link = ((Atom)var1).getArg(0);
-					var4 = link.getAtom();
-					if (!(!(((Atom)var4).getFunctor() instanceof FloatingFunctor))) {
-						if (execL191(var0,var1,var4,nondeterministic)) {
-							ret = true;
-							break L194;
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL188(Object var0, boolean nondeterministic) {
-		Object var1 = null;
-		Object var2 = null;
-		Object var3 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L188:
-		{
-			func = f18;
-			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
-			while (it1.hasNext()) {
-				atom = (Atom) it1.next();
-				var1 = atom;
-				link = ((Atom)var1).getArg(0);
-				var2 = link.getAtom();
-				link = ((Atom)var1).getArg(1);
-				var3 = link.getAtom();
-				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
-					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL184(var0,var1,var2,var3,nondeterministic)) {
-							ret = true;
-							break L188;
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL184(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Object var7 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L184:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -2657,11 +2733,11 @@ L184:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 5);
 			ret = true;
-			break L184;
+			break L208;
 		}
 		return ret;
 	}
-	public boolean execL185(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL209(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -2683,16 +2759,16 @@ L184:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L185:
+L209:
 		{
-			if (execL187(var0, var1, nondeterministic)) {
+			if (execL211(var0, var1, nondeterministic)) {
 				ret = true;
-				break L185;
+				break L209;
 			}
 		}
 		return ret;
 	}
-	public boolean execL187(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL211(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -2716,7 +2792,7 @@ L185:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L187:
+L211:
 		{
 			if (!(!(f18).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -2732,9 +2808,9 @@ L187:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL184(var0,var1,var5,var6,nondeterministic)) {
+							if (execL208(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L187;
+								break L211;
 							}
 						}
 					}
@@ -2743,7 +2819,7 @@ L187:
 		}
 		return ret;
 	}
-	public boolean execL181(Object var0, boolean nondeterministic) {
+	public boolean execL203(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -2765,7 +2841,7 @@ L187:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L181:
+L203:
 		{
 			func = f20;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -2778,9 +2854,9 @@ L181:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL177(var0,var1,var2,var3,nondeterministic)) {
+						if (execL199(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L181;
+							break L203;
 						}
 					}
 				}
@@ -2788,7 +2864,7 @@ L181:
 		}
 		return ret;
 	}
-	public boolean execL177(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL199(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -2811,7 +2887,7 @@ L181:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L177:
+L199:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -2844,11 +2920,11 @@ L177:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 4);
 			ret = true;
-			break L177;
+			break L199;
 		}
 		return ret;
 	}
-	public boolean execL178(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL200(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -2870,16 +2946,16 @@ L177:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L178:
+L200:
 		{
-			if (execL180(var0, var1, nondeterministic)) {
+			if (execL202(var0, var1, nondeterministic)) {
 				ret = true;
-				break L178;
+				break L200;
 			}
 		}
 		return ret;
 	}
-	public boolean execL180(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL202(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -2903,7 +2979,7 @@ L178:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L180:
+L202:
 		{
 			if (!(!(f20).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -2919,9 +2995,9 @@ L180:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL177(var0,var1,var5,var6,nondeterministic)) {
+							if (execL199(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L180;
+								break L202;
 							}
 						}
 					}
@@ -2930,7 +3006,7 @@ L180:
 		}
 		return ret;
 	}
-	public boolean execL174(Object var0, boolean nondeterministic) {
+	public boolean execL194(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -2952,7 +3028,7 @@ L180:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L174:
+L194:
 		{
 			func = f22;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -2965,9 +3041,9 @@ L174:
 				var3 = link.getAtom();
 				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
 					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL170(var0,var1,var2,var3,nondeterministic)) {
+						if (execL190(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L174;
+							break L194;
 						}
 					}
 				}
@@ -2975,7 +3051,7 @@ L174:
 		}
 		return ret;
 	}
-	public boolean execL170(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL190(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -2998,7 +3074,7 @@ L174:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L170:
+L190:
 		{
 			link = ((Atom)var1).getArg(2);
 			var7 = link;
@@ -3031,11 +3107,11 @@ L170:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedouble.run((Atom)var6, 3);
 			ret = true;
-			break L170;
+			break L190;
 		}
 		return ret;
 	}
-	public boolean execL171(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL191(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -3057,16 +3133,16 @@ L170:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L171:
+L191:
 		{
-			if (execL173(var0, var1, nondeterministic)) {
+			if (execL193(var0, var1, nondeterministic)) {
 				ret = true;
-				break L171;
+				break L191;
 			}
 		}
 		return ret;
 	}
-	public boolean execL173(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL193(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -3090,7 +3166,7 @@ L171:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L173:
+L193:
 		{
 			if (!(!(f22).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -3106,9 +3182,383 @@ L173:
 					var6 = link.getAtom();
 					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
 						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL170(var0,var1,var5,var6,nondeterministic)) {
+							if (execL190(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
-								break L173;
+								break L193;
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL185(Object var0, boolean nondeterministic) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L185:
+		{
+			func = f24;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				link = ((Atom)var1).getArg(1);
+				var3 = link.getAtom();
+				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
+					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
+						if (execL181(var0,var1,var2,var3,nondeterministic)) {
+							ret = true;
+							break L185;
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL181(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L181:
+		{
+			link = ((Atom)var1).getArg(2);
+			var7 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var3);
+			atom.dequeue();
+			atom = ((Atom)var3);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
+			func = f25;
+			var6 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 0,
+				((Atom)var5), 0 );
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 1,
+				((Atom)var4), 0 );
+			((Atom)var6).getMem().inheritLink(
+				((Atom)var6), 2,
+				(Link)var7 );
+			atom = ((Atom)var6);
+			atom.getMem().enqueueAtom(atom);
+			SomeInlineCodedouble.run((Atom)var6, 2);
+			ret = true;
+			break L181;
+		}
+		return ret;
+	}
+	public boolean execL182(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L182:
+		{
+			if (execL184(var0, var1, nondeterministic)) {
+				ret = true;
+				break L182;
+			}
+		}
+		return ret;
+	}
+	public boolean execL184(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L184:
+		{
+			if (!(!(f24).equals(((Atom)var1).getFunctor()))) {
+				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
+					link = ((Atom)var1).getArg(0);
+					var2 = link;
+					link = ((Atom)var1).getArg(1);
+					var3 = link;
+					link = ((Atom)var1).getArg(2);
+					var4 = link;
+					link = ((Atom)var1).getArg(0);
+					var5 = link.getAtom();
+					link = ((Atom)var1).getArg(1);
+					var6 = link.getAtom();
+					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
+						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
+							if (execL181(var0,var1,var5,var6,nondeterministic)) {
+								ret = true;
+								break L184;
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL176(Object var0, boolean nondeterministic) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L176:
+		{
+			func = f26;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				var2 = link.getAtom();
+				link = ((Atom)var1).getArg(1);
+				var3 = link.getAtom();
+				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
+					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
+						if (execL172(var0,var1,var2,var3,nondeterministic)) {
+							ret = true;
+							break L176;
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL172(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L172:
+		{
+			link = ((Atom)var1).getArg(2);
+			var7 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var3);
+			atom.dequeue();
+			atom = ((Atom)var3);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
+			func = f27;
+			var6 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 0,
+				((Atom)var5), 0 );
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 1,
+				((Atom)var4), 0 );
+			((Atom)var6).getMem().inheritLink(
+				((Atom)var6), 2,
+				(Link)var7 );
+			atom = ((Atom)var6);
+			atom.getMem().enqueueAtom(atom);
+			SomeInlineCodedouble.run((Atom)var6, 1);
+			ret = true;
+			break L172;
+		}
+		return ret;
+	}
+	public boolean execL173(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L173:
+		{
+			if (execL175(var0, var1, nondeterministic)) {
+				ret = true;
+				break L173;
+			}
+		}
+		return ret;
+	}
+	public boolean execL175(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L175:
+		{
+			if (!(!(f26).equals(((Atom)var1).getFunctor()))) {
+				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
+					link = ((Atom)var1).getArg(0);
+					var2 = link;
+					link = ((Atom)var1).getArg(1);
+					var3 = link;
+					link = ((Atom)var1).getArg(2);
+					var4 = link;
+					link = ((Atom)var1).getArg(0);
+					var5 = link.getAtom();
+					link = ((Atom)var1).getArg(1);
+					var6 = link.getAtom();
+					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
+						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
+							if (execL172(var0,var1,var5,var6,nondeterministic)) {
+								ret = true;
+								break L175;
 							}
 						}
 					}
@@ -3141,7 +3591,7 @@ L173:
 		boolean ret = false;
 L167:
 		{
-			func = f24;
+			func = f28;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -3203,7 +3653,7 @@ L163:
 			atom.getMem().removeAtom(atom);
 			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
 			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f25;
+			func = f29;
 			var6 = ((AbstractMembrane)var0).newAtom(func);
 			((Atom)var6).getMem().newLink(
 				((Atom)var6), 0,
@@ -3216,7 +3666,7 @@ L163:
 				(Link)var7 );
 			atom = ((Atom)var6);
 			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var6, 2);
+			SomeInlineCodedouble.run((Atom)var6, 0);
 			ret = true;
 			break L163;
 		}
@@ -3279,7 +3729,7 @@ L164:
 		boolean ret = false;
 L166:
 		{
-			if (!(!(f24).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f28).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
@@ -3296,380 +3746,6 @@ L166:
 							if (execL163(var0,var1,var5,var6,nondeterministic)) {
 								ret = true;
 								break L166;
-							}
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL160(Object var0, boolean nondeterministic) {
-		Object var1 = null;
-		Object var2 = null;
-		Object var3 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L160:
-		{
-			func = f26;
-			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
-			while (it1.hasNext()) {
-				atom = (Atom) it1.next();
-				var1 = atom;
-				link = ((Atom)var1).getArg(0);
-				var2 = link.getAtom();
-				link = ((Atom)var1).getArg(1);
-				var3 = link.getAtom();
-				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
-					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL156(var0,var1,var2,var3,nondeterministic)) {
-							ret = true;
-							break L160;
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL156(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Object var7 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L156:
-		{
-			link = ((Atom)var1).getArg(2);
-			var7 = link;
-			atom = ((Atom)var1);
-			atom.dequeue();
-			atom = ((Atom)var1);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var3);
-			atom.dequeue();
-			atom = ((Atom)var3);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var2);
-			atom.dequeue();
-			atom = ((Atom)var2);
-			atom.getMem().removeAtom(atom);
-			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
-			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f27;
-			var6 = ((AbstractMembrane)var0).newAtom(func);
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 0,
-				((Atom)var5), 0 );
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 1,
-				((Atom)var4), 0 );
-			((Atom)var6).getMem().inheritLink(
-				((Atom)var6), 2,
-				(Link)var7 );
-			atom = ((Atom)var6);
-			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var6, 1);
-			ret = true;
-			break L156;
-		}
-		return ret;
-	}
-	public boolean execL157(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L157:
-		{
-			if (execL159(var0, var1, nondeterministic)) {
-				ret = true;
-				break L157;
-			}
-		}
-		return ret;
-	}
-	public boolean execL159(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L159:
-		{
-			if (!(!(f26).equals(((Atom)var1).getFunctor()))) {
-				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
-					link = ((Atom)var1).getArg(0);
-					var2 = link;
-					link = ((Atom)var1).getArg(1);
-					var3 = link;
-					link = ((Atom)var1).getArg(2);
-					var4 = link;
-					link = ((Atom)var1).getArg(0);
-					var5 = link.getAtom();
-					link = ((Atom)var1).getArg(1);
-					var6 = link.getAtom();
-					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
-						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL156(var0,var1,var5,var6,nondeterministic)) {
-								ret = true;
-								break L159;
-							}
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL153(Object var0, boolean nondeterministic) {
-		Object var1 = null;
-		Object var2 = null;
-		Object var3 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L153:
-		{
-			func = f28;
-			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
-			while (it1.hasNext()) {
-				atom = (Atom) it1.next();
-				var1 = atom;
-				link = ((Atom)var1).getArg(0);
-				var2 = link.getAtom();
-				link = ((Atom)var1).getArg(1);
-				var3 = link.getAtom();
-				if (!(!(((Atom)var3).getFunctor() instanceof FloatingFunctor))) {
-					if (!(!(((Atom)var2).getFunctor() instanceof FloatingFunctor))) {
-						if (execL149(var0,var1,var2,var3,nondeterministic)) {
-							ret = true;
-							break L153;
-						}
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	public boolean execL149(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Object var7 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L149:
-		{
-			link = ((Atom)var1).getArg(2);
-			var7 = link;
-			atom = ((Atom)var1);
-			atom.dequeue();
-			atom = ((Atom)var1);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var3);
-			atom.dequeue();
-			atom = ((Atom)var3);
-			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var2);
-			atom.dequeue();
-			atom = ((Atom)var2);
-			atom.getMem().removeAtom(atom);
-			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
-			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f29;
-			var6 = ((AbstractMembrane)var0).newAtom(func);
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 0,
-				((Atom)var5), 0 );
-			((Atom)var6).getMem().newLink(
-				((Atom)var6), 1,
-				((Atom)var4), 0 );
-			((Atom)var6).getMem().inheritLink(
-				((Atom)var6), 2,
-				(Link)var7 );
-			atom = ((Atom)var6);
-			atom.getMem().enqueueAtom(atom);
-			SomeInlineCodedouble.run((Atom)var6, 0);
-			ret = true;
-			break L149;
-		}
-		return ret;
-	}
-	public boolean execL150(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L150:
-		{
-			if (execL152(var0, var1, nondeterministic)) {
-				ret = true;
-				break L150;
-			}
-		}
-		return ret;
-	}
-	public boolean execL152(Object var0, Object var1, boolean nondeterministic) {
-		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
-		Object var5 = null;
-		Object var6 = null;
-		Atom atom;
-		Functor func;
-		Link link;
-		AbstractMembrane mem;
-		int x, y;
-		double u, v;
-		int isground_ret;
-		boolean eqground_ret;
-		Set insset;
-		Set delset;
-		Map srcmap;
-		Map delmap;
-		Atom orig;
-		Atom copy;
-		Link a;
-		Link b;
-		Iterator it_deleteconnectors;
-		boolean ret = false;
-L152:
-		{
-			if (!(!(f28).equals(((Atom)var1).getFunctor()))) {
-				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
-					link = ((Atom)var1).getArg(0);
-					var2 = link;
-					link = ((Atom)var1).getArg(1);
-					var3 = link;
-					link = ((Atom)var1).getArg(2);
-					var4 = link;
-					link = ((Atom)var1).getArg(0);
-					var5 = link.getAtom();
-					link = ((Atom)var1).getArg(1);
-					var6 = link.getAtom();
-					if (!(!(((Atom)var6).getFunctor() instanceof FloatingFunctor))) {
-						if (!(!(((Atom)var5).getFunctor() instanceof FloatingFunctor))) {
-							if (execL149(var0,var1,var5,var6,nondeterministic)) {
-								ret = true;
-								break L152;
 							}
 						}
 					}
