@@ -44,6 +44,18 @@ public class Atom extends Atomic {
 		}
 		return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
 	}
+	// 2006.01.02 okabe
+	/**
+	 * @return String アトム名やファンクタ名を省略しない
+	 */
+	public String encode() {
+		if (args.length == 0) return functor.getQuotedFullyAtomName();
+		String argstext = "";
+		for (int i = 0; i < args.length; i++) {
+			argstext += "," + args[i];
+		}
+		return functor.getQuotedFullyFunctorName() + "(" + argstext.substring(1) + ")";
+	}
 	public String toStringAsTypeConstraint() {
 		if (args.length == 0) return functor.getQuotedAtomName();
 		String argstext = "";
