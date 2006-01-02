@@ -201,6 +201,18 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		return s.toString();
 	}
 
+	// 2006.01.02 okabe
+	public String encode() {
+		StringBuffer s = new StringBuffer("");
+		Iterator it = rules.iterator();
+		while(it.hasNext()) {
+			s.append(((Rule)it.next()).encode());
+			if(it.hasNext())
+				s.append(", ");
+		}
+		return s.toString();
+	}
+	
 	public void showDetail() {
 		if (Env.verbose >= Env.VERBOSE_SHOWRULES || Env.compileonly)
 			Env.p("Compiled Ruleset @" + id + dumpRules());

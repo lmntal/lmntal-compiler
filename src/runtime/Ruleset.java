@@ -15,6 +15,8 @@ abstract public class Ruleset {
 	/** new束縛された名前の具体値を格納する配列 */
 	protected Functor[] holes;
 	abstract public String toString();
+	// 2006.01.02 okabe
+	abstract public String encode();
 	/**
 	 * アトム主導テストを行い、マッチすれば適用する
 	 * @param mem 本膜

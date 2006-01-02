@@ -115,6 +115,23 @@ public final class Membrane {
 		//return list.toString().replaceAll("^.|.$","");
 		return Env.parray(list, ", ").toString();
 	}
+	// 2006.01.02 okabe
+	public String encode() {
+		LinkedList list = new LinkedList();
+		list.addAll(atoms);
+		list.addAll(mems);
+		Iterator it = rules.iterator();
+		LinkedList encodedRules = new LinkedList();
+		while(it.hasNext()) {
+			RuleStructure rs = (RuleStructure) it.next();
+			encodedRules.add(rs.encode());
+		}
+		list.addAll(encodedRules);
+		list.addAll(processContexts);
+		list.addAll(ruleContexts);
+		list.addAll(typedProcessContexts);
+		return Env.parray(list, ", ").toString();
+	}
 	public String toString() {
 		String ret = "{ " + toStringWithoutBrace() + " }" + (kind==1 ? "_" : "") + (stable ? "/" : "");
 		if (pragmaAtHost != null) {
