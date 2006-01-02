@@ -198,11 +198,9 @@ public final class Membrane {
 		if (atomIt.hasNext()) {
 			return ((Atom) atomIt.next()).getName();
 		} else if (memIt.hasNext()) {
-			// 再帰はまずいかも…
 			return ((Membrane) memIt.next()).getFirstAtomName();
-			// 代替案：膜の場合はそのまま表示
-			//return ((Membrane) memIt.next()).toString();
 		} else {
+			// プロキシとかプロセス文脈のときはとりあえず放置
 			return "null";
 		}
 	}
