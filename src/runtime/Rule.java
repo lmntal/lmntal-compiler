@@ -30,6 +30,8 @@ public final class Rule implements Serializable {
 	public InstructionList bodyLabel;
 	/** このルールの表示用文字列 */
 	public String text = "";
+	/** このルールの表示用文字列（省略なし） */
+	public String fullText ="";
 	
 	/** ルール名 */
 	public String name;
@@ -121,4 +123,19 @@ public final class Rule implements Serializable {
 //		return name;
 	}
 	
+	// 2006.01.02 okabe
+	/**
+	 * @return String ルールのコンパイル可能な文字列表現
+	 * name を返すとまずいのでtoString() とは別メソッド
+	 */
+	public String encode() {
+		// プロキシの非表示（ずいぶんad-hocだけどこれでいいのだろうか）
+		// $in(X^Y,Z) -> (_Y=Z)
+		// $out(X^Y,Z) -> (_Y=Z)
+		String regexp1 = "\\$in\\([^\\^]+\\^([^,]+),([^\\)]+)\\)";
+		String regexp2 = "\\$out\\([^\\^]+\\^([^,]+),([^\\)]+)\\)";
+		String replace1 = "(_$1=$2)";
+		String replace2 = "(_$1=$2)";
+		return fullText.replaceAll(regexp1, replace1).replaceAll(regexp2, replace2);
+	}
 }
