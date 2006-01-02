@@ -140,10 +140,10 @@ public final class Rule implements Serializable {
 	 */
 	public String encode() {
 		// プロキシの非表示（ずいぶんad-hocだけどこれでいいのだろうか）
-		// $in(X^Y,Z) -> (_Y=Z)
-		// $out(X^Y,Z) -> (_Y=Z)
-		String regexp1 = "\\$in\\([^\\^]+\\^([^,]+),([^\\)]+)\\)";
-		String regexp2 = "\\$out\\([^\\^]+\\^([^,]+),([^\\)]+)\\)";
+		// '$in'(X^Y,Z) -> (_Y=Z)
+		// '$out'(X^Y,Z) -> (_Y=Z)
+		String regexp1 = "'*\\$in'*\\([^\\^]+\\^([^,]+),([^\\)]+)\\)";
+		String regexp2 = "'*\\$out'*\\([^\\^]+\\^([^,]+),([^\\)]+)\\)";
 		String replace1 = "(_$1=$2)";
 		String replace2 = "(_$1=$2)";
 		return fullText.replaceAll(regexp1, replace1).replaceAll(regexp2, replace2);

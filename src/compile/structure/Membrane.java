@@ -116,14 +116,27 @@ public final class Membrane {
 		return Env.parray(list, ", ").toString();
 	}
 	// 2006.01.02 okabe
+	/**
+	 * toStringWithoutBrace()のフル表示版
+	 * 名前の長いアトムやファンクタを省略しない
+	 * @return String
+	 */
 	public String encode() {
 		LinkedList list = new LinkedList();
-		list.addAll(atoms);
+		// atoms
+		Iterator it1 = atoms.iterator();
+		LinkedList encodedAtoms = new LinkedList();
+		while(it1.hasNext()) {
+			Atom a = (Atom) it1.next();
+			encodedAtoms.add(a.encode());
+		}
+		list.addAll(encodedAtoms);
 		list.addAll(mems);
-		Iterator it = rules.iterator();
+		// rules
+		Iterator it2 = rules.iterator();
 		LinkedList encodedRules = new LinkedList();
-		while(it.hasNext()) {
-			RuleStructure rs = (RuleStructure) it.next();
+		while(it2.hasNext()) {
+			RuleStructure rs = (RuleStructure) it2.next();
 			encodedRules.add(rs.encode());
 		}
 		list.addAll(encodedRules);
