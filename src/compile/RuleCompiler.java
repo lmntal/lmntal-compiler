@@ -86,7 +86,8 @@ public class RuleCompiler {
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
 //		theRule = new Rule(rs.toString());
-		theRule = new Rule(rs.leftMem.getFirstAtomName());
+		// 2006.01.02 okabe
+		theRule = new Rule(rs.leftMem.getFirstAtomName(),rs.encode());
 		theRule.name = rs.name;
 		
 		hc = new HeadCompiler();//rs.leftMem;

@@ -69,7 +69,6 @@ public final class Rule implements Serializable {
 		this.text = text;
 	}
 	// 2006.01.02 okabe
-	
 	/**
 	 * ルール文字列（省略なし）つきコンストラクタ
 	 * @param text ルールの文字列表現

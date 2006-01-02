@@ -23,6 +23,10 @@ public class GlobalSystemRuleset extends Ruleset {
 	public String toString() {
 		return "System Ruleset Object";
 	}
+	// 2006.01.02 okabe
+	public String encode() {
+		return "";
+	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
 		if (execL100(mem, atom, false)) {
