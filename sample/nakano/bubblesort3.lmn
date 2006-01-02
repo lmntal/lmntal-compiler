@@ -1,4 +1,5 @@
-{window,position(0,0),size(500,500),name("window"),timer(10).
+graphic.use.
+go:-{window,position(0,0),size(500,500),name("window"),timer(10).
 
 %мваг©Т
 max_num(45).

@@ -1,4 +1,5 @@
-{
+graphic.use.
+go:-{
 window,position(0,0),size(500,500),name("window").
 	{graphic,position(0,0),name("all"),
 		{draw,name("oval"),getpic("filloval"),position(0,0),size(50,50),sequence(1)},

@@ -4,7 +4,8 @@
    塗りつぶし三角形版
  
 */
-{
+graphic.use.
+go:-{
 window.
 size(800,600).
 name("hoge").

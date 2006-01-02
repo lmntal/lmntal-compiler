@@ -1,4 +1,5 @@
-{window,position(0,0),size(500,500),name("window"),timer(1000).
+graphic.use.
+go:-{window,position(0,0),size(500,500),name("window"),timer(1000).
 
 %ソートルール
 done,{name(_IN),size(_IS,10),$p,@p},{name(_IN2),size(_IS2,10),$q,@q} :-

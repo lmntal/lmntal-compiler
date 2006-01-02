@@ -3,7 +3,8 @@
    シェルピンスキーのギャスケット　カラー版
  
 */
-{
+graphic.use.
+go:-{
 window.
 size(800,600).
 name("hoge").

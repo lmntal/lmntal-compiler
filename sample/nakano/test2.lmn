@@ -1,6 +1,2 @@
-option.use.
-{
-window,position(0,0),size(500,500),name("window"),timer(1000).	
-%мваг
-{name(0),position(0,0),size(10,10),draw,getpic("fillrect")}.
-}.
+g(f(d(s(a(a(keyListener))))),[]).
+hoge([a,b,c]).

@@ -8,6 +8,8 @@
 	ライブラリintegerを使用しています。
 
 */
+graphic.use.
+go:-
 {window,name("window"),size(500,500),
 {
 draw.

@@ -5,7 +5,8 @@
  * オプション--graphicをつけて実行すること。
  * 無限ループします。
  */
-{
+graphic.use.
+go:-{
 window.
 position(400,0).
 size(500,500).

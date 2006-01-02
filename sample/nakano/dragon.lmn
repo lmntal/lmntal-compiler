@@ -3,7 +3,8 @@
   ドラゴン曲線を描画します。
 
 */
-{
+graphic.use.
+go:-{
 	window.
 	size(640,530).
 	name("hoge").

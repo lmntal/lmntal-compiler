@@ -5,7 +5,8 @@
  * オプション--graphicをつけて実行すること。
  * 無限ループします。
  */
- 
+graphic.use.
+go:- 
 {
 window,position(400,0),size(400,400),name(1),bgcolor(0,0,0).
 	{ name(0),getpic("line"),position(1,1,1,1),color(0,0,0) }.
