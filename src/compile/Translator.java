@@ -547,6 +547,11 @@ public class Translator {
 			writer.write("	public String toString() {\n");
 			writer.write("		return \"@" + libname + "\" + id;\n");
 			writer.write("	}\n");
+			// 2006.01.02 okabe
+			writer.write("	private String encodedRuleset = \n\"" + ruleset.encode() + "\";\n");
+			writer.write("	public String encode() {\n");
+			writer.write("		return encodedRuleset;\n");
+			writer.write("	}\n");
 		}
 
 		String rulesetName;
