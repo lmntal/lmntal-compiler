@@ -8,6 +8,10 @@ public final class SampleInitRuleset extends Ruleset {
 	public String toString() {
 		return "Ruleset Sample";
 	}
+	// 2006.01.02 okabe
+	public String encode() {
+		return "";
+	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		return false;
 	}
@@ -54,6 +58,10 @@ public final class SampleInitRuleset extends Ruleset {
 final class SampleRuleset extends Ruleset {
 	public String toString() {
 		return "(x :- y)";
+	}
+	// 2006.01.02 okabe
+	public String encode() {
+		return "";
 	}
 	/**
 	 * アトム主導テストを行い、マッチすれば適用する
