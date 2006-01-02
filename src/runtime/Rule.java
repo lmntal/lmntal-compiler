@@ -68,6 +68,17 @@ public final class Rule implements Serializable {
 		this();
 		this.text = text;
 	}
+	// 2006.01.02 okabe
+	
+	/**
+	 * ルール文字列（省略なし）つきコンストラクタ
+	 * @param text ルールの文字列表現
+	 * @param fullText ルールの文字列表現（省略なし）
+	 */
+	public Rule(String text, String fullText) {
+		this(text);
+		this.fullText = fullText;
+	}
 	/** パーザーで利用するコンストラクタ */
 	public Rule(InstructionList atomMatchLabel, InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel) {
 		this.atomMatchLabel = atomMatchLabel;

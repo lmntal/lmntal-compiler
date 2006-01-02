@@ -1234,7 +1234,15 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public String toString() {
 		return "{ " + toStringWithoutBrace() + " }";
 	}
-	
+
+	// 2006.01.02 okabe
+	/**
+	 * @return String 膜のコンパイル可能な文字列表現
+	 */
+	public String encode() {
+		return "{" + Dumper.encode(this, true) + "}";
+	}
+		
 	/* *** *** *** *** *** BEGIN GUI *** *** *** *** *** */
 	public java.awt.geom.Rectangle2D.Double rect;
 	
