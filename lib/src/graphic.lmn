@@ -16,6 +16,9 @@ graphic=option.use.
 かならず、グラフィックモードを実行されてから反応が始まってほしい場合は、goアトムを利用する。
 
 */
+[:/*inline_define*/
+	import java.awt.event.*;
+:]
 {
 module(graphic).
 
@@ -24,4 +27,52 @@ graphic.use :- [:/*inline*/
 	Env.initGraphic();
 	me.setFunctor("go",0);
 :].
+
+H=graphic.mouse_pointX:- H=[:/*inline*/
+	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+	int point = (int)(pointerInfo.getLocation().x);
+	Atom atom = mem.newAtom(new IntegerFunctor(point));
+	mem.relink(atom,0,me,0);
+	mem.removeAtom(me);
+  :].
+
+
+H=graphic.mouse_pointY :- H=[:/*inline*/
+	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+	int point = (int)(pointerInfo.getLocation().y);
+	Atom atom = mem.newAtom(new IntegerFunctor(point));
+	mem.relink(atom,0,me,0);
+	mem.removeAtom(me);
+  :].
+
+  
+ /**ウィンドウ上にマウスがある場合はその位置を返す。なければ-1を返す*/
+H=graphic.mouse_framePointX(X) :- int(X)|H=[:/*inline*/
+
+	int x = ((IntegerFunctor)(me.nthAtom(0).getFunctor())).intValue();
+	Point p = null;
+	if(Env.LMNgraphic != null)
+		p= Env.LMNgraphic.getMousePoint(mem);
+	if(p != null)
+		x = (int)(p.x);
+	Atom atom = mem.newAtom(new IntegerFunctor(x));
+	mem.relink(atom, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	
+	
+	:](X).
+  
+H=graphic.mouse_framePointY(Y) :- int(Y)|H=[:/*inline*/
+	int y = ((IntegerFunctor)(me.nthAtom(0).getFunctor())).intValue();
+	Point p = null;
+	if(Env.LMNgraphic != null)
+		p= Env.LMNgraphic.getMousePoint(mem);
+	if(p != null)
+		y = (int)(p.y);
+	Atom atom = mem.newAtom(new IntegerFunctor(y));
+	mem.relink(atom, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Y).
 }
