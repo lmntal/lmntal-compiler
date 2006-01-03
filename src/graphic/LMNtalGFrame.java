@@ -16,9 +16,8 @@ import test.GUI.Node;
  *
  */
 
-//public class LMNtalGFrame{
-	public class LMNtalGFrame implements Runnable{
-
+public class LMNtalGFrame{
+	
 	public LMNGraphPanel lmnPanel = null;
 	boolean busy;
 	private Thread th;
@@ -29,12 +28,12 @@ import test.GUI.Node;
 	public static Object lock2 = new Object();
 	long start ,stop,diff;
 	public boolean running = true;
-
+	public LinkedList atomlist = new LinkedList();
 	
-    public LMNtalGFrame(){
-    	this.start();
-    }
-
+	
+	public LMNtalGFrame(){
+	}
+	
 	/**
 	 * 指定された名称のアトムが存在するか検索。
 	 * あれば真を、なければ偽を返す。
@@ -42,7 +41,7 @@ import test.GUI.Node;
 	private synchronized String searchatom(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
-
+		
 		while(ite.hasNext()){
 			a = (Node)ite.next();
 			if(a.getName() == "window"){
@@ -56,7 +55,7 @@ import test.GUI.Node;
 			}
 		}
 		return null;
-				
+		
 	}
 	
 	public void setRootMem(runtime.Membrane rootMem) {
@@ -64,58 +63,98 @@ import test.GUI.Node;
 		
 	}
 	
-    public synchronized void setmem(AbstractMembrane m){
-    	
+	public synchronized void setmem(AbstractMembrane m){
+		
 		String s = searchatom(m);
-			/*ウィンドウ膜の登録*/
-	    	if(s == "window"){
-	    		setwindowmem(m);    		
-	    	}
-	    	/*描画膜の登録*/
-	    	else if(s=="draw" || s=="graphic"){
-	    		setgraphicmem(m);
-	    	}
-    }
-    
-   /**マウスの位置を検出する。ライブラリmouseで使用*/
-   public Point getMousePoint(AbstractMembrane m){
-	   if(m.isRoot())return null;
-	   String memname = getname(m);
-	   if(!windowmap.containsKey(memname)) return getMousePoint(m.getParent());
-	   WindowSet winset = (WindowSet)windowmap.get(memname);
-	   return winset.window.getMousePosition();
-   }
-   
-    /**ウィンドウオブジェクトを生成*/
-    private void setwindowmem(AbstractMembrane m){
+		/*ウィンドウ膜の登録*/
+		if(s == "window"){
+			setwindowmem(m);
+			doAddAtom();		
+		}
+		/*描画膜の登録*/
+		else if(s=="draw" || s=="graphic"){
+			setgraphicmem(m);
+		}
+	}
+	
+	/**マウスの位置を検出する。ライブラリmouseで使用*/
+	public Point getMousePoint(AbstractMembrane m){
+		if(m.isRoot())return null;
+		String memname = getname(m);
+		if(!windowmap.containsKey(memname)) return getMousePoint(m.getParent());
+		WindowSet winset = (WindowSet)windowmap.get(memname);
+		return winset.window.getMousePosition();
+	}
+	
+	/**ウィンドウオブジェクトを生成*/
+	private void setwindowmem(AbstractMembrane m){
 		WindowSet win = new WindowSet();
-		win.mem = m;
 		win.window = new LMNtalWindow(m, this);
+		win.window.setmem(m);
 		if(!windowmap.containsKey(win.window.name)){
 			win.window.makewindow();
-			
 			windowmap.put(win.window.name, win);
 		}else{
 			WindowSet tmpwin = (WindowSet)windowmap.get(win.window.name);
-			tmpwin.mem = win.mem;
+			tmpwin.window.setmem(m);
 			tmpwin.window.timer = win.window.timer;
+//			WindowSet tmpwin2 = (WindowSet)windowmap.get(win.window.name);
+		}
+	}
+	
+	public LMNtalWindow getWindow(String name){
+		if(!windowmap.containsKey(name))return null;
+		WindowSet tmpwin = (WindowSet)windowmap.get(name);
+		return tmpwin.window;
+	}
+	public void setAddAtom(Functor a, String win){
+		WaitingAtomSet wa = new WaitingAtomSet(a,win);
+		atomlist.add(wa);
+	}
+	public void doAddAtom(){
+		while(!atomlist.isEmpty()){
+			WaitingAtomSet wa = (WaitingAtomSet)atomlist.removeFirst();
+			
+			if(windowmap.containsKey(wa.window)){
+				WindowSet win = (WindowSet)windowmap.get(wa.window);
+				Atom addedAtom = win.window.getmem().newAtom(wa.functor);
+				Iterator ite = win.window.getmem().atomIterator();
+				while(ite.hasNext()){
+					Atom a = (Atom)ite.next();
+					if(a.getName()=="keyListener"){
+						Atom nth1 = a;
+						Atom nth2 = null;
+						while(true){
+							nth2 = nth1.getArg(nth1.getFunctor().getArity()-1).getAtom();
+							System.out.println(nth2.getName());
+							if(nth2.getName().equals("[]")){
+								win.window.getmem().newLink(nth1, nth1.getFunctor().getArity()-1, addedAtom, 0);
+								win.window.getmem().newLink(nth2, 0, addedAtom, 1);
+								break;
+							}
+							nth1 = nth2;
+						}
+						break;
+					}
+				}
+			}
 			
 		}
-    }
-    private synchronized void setgraphicmem(AbstractMembrane tmp){
-	   if(tmp == null || tmp.isRoot() )return;
-	   AbstractMembrane m = tmp.getParent();
-	   /*ウィンドウ膜との距離*/
-	   int distance = 0;
-	   
-	   while(m!=null){
-		   if(m.isRoot())
-			   return;
-		   String n = getname(m);
-		   /*ウィンドウ膜が登録済み*/
-		   if(windowmap.containsKey(n)){
-			   	WindowSet win = (WindowSet)windowmap.get(n);
-			   	
+	}
+	private synchronized void setgraphicmem(AbstractMembrane tmp){
+		if(tmp == null || tmp.isRoot() )return;
+		AbstractMembrane m = tmp.getParent();
+		/*ウィンドウ膜との距離*/
+		int distance = 0;
+		
+		while(m!=null){
+			if(m.isRoot())
+				return;
+			String n = getname(m);
+			/*ウィンドウ膜が登録済み*/
+			if(windowmap.containsKey(n)){
+				WindowSet win = (WindowSet)windowmap.get(n);
+				
 				/*描画間隔の測定用*/
 				stop = System.currentTimeMillis();
 				diff = stop - start;
@@ -127,16 +166,16 @@ import test.GUI.Node;
 				
 				win.window.setgraphicmem(tmp,distance);
 				
-
+				
 				return;
 			}
-		   /*ウィンドウ膜が未登録*/
-		   else{
-			   if(searchwinmem(m)){
-				   n = getname(m);
-				   if(windowmap.containsKey(n)){
+			/*ウィンドウ膜が未登録*/
+			else{
+				if(searchwinmem(m)){
+					n = getname(m);
+					if(windowmap.containsKey(n)){
 						
-					   	WindowSet win = (WindowSet)windowmap.get(n);
+						WindowSet win = (WindowSet)windowmap.get(n);
 						/*描画間隔の測定用*/
 						stop = System.currentTimeMillis();
 						diff = stop - start;
@@ -148,67 +187,52 @@ import test.GUI.Node;
 						win.window.setgraphicmem(tmp,distance);
 						return;
 					}
-			   }
-		   }
+				}
+			}
 			m = m.getParent();
 			distance++;
-	   }
-   }
-    
-    /**再帰的に親膜を探索しウィンドウ膜を探す。発見できれば真。出来なければ偽を返す。*/
-    private boolean searchwinmem(AbstractMembrane m){
-
-    	String s = searchatom(m);
+		}
+	}
+	
+	/**再帰的に親膜を探索しウィンドウ膜を探す。発見できれば真。出来なければ偽を返す。*/
+	private boolean searchwinmem(AbstractMembrane m){
+		
+		String s = searchatom(m);
 		/*ウィンドウ膜の登録*/
-    	if(s == "window"){
-    		setwindowmem(m);
-    		return true;
-    	}else{
-    		if(m.getParent()!=null & !m.getParent().isRoot()){
-    			searchwinmem(m.getParent());
-    		}
-    	}
-    	return false;
-    }
-   
-    /**ウィンドウが閉じられたときの動作。すべてのウィンドウが閉じたら終了。*/
-   public void closewindow(String killme){
-	   if(!windowmap.containsKey(killme)){
-		   return;
-	   }
-	   
-	   WindowSet win = (WindowSet)windowmap.get(killme);
-	   win.killed = true;
-//	   windowmap.put(killme, win);
-	   
-	   killednum++;
-	   if(killednum == windowmap.size()){
-		  busy=true;
-		  runtime.LMNtalRuntimeManager.terminateAllThreaded();
-		   System.exit(0);
-	   }
-
-   }
-   
-   public void addAtom(String memName){
-	   if(!windowmap.containsKey(memName)){
-		   System.out.println("なし！");
-		   return;
-	   }
-	   WindowSet win = (WindowSet)windowmap.get(memName);
-	   win.mem.asyncLock();
-	   win.mem.newAtom(new StringFunctor("aha"));
-	   win.mem.asyncUnlock();
-	   System.out.println(win.mem.getAtomCount());
-//	   win.mem.addAtom(a);
-	   System.out.println("あり！");
-   }
-   
-   /**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
-   private String getname(AbstractMembrane m){
+		if(s == "window"){
+			setwindowmem(m);
+			return true;
+		}else{
+			if(m.getParent()!=null & !m.getParent().isRoot()){
+				searchwinmem(m.getParent());
+			}
+		}
+		return false;
+	}
+	
+	/**ウィンドウが閉じられたときの動作。すべてのウィンドウが閉じたら終了。*/
+	public void closewindow(String killme){
+		if(!windowmap.containsKey(killme)){
+			return;
+		}
+		
+		WindowSet win = (WindowSet)windowmap.get(killme);
+		win.killed = true;
+		
+		killednum++;
+		if(killednum == windowmap.size()){
+			busy=true;
+			runtime.LMNtalRuntimeManager.terminateAllThreaded();
+			System.exit(0);
+		}
+		
+	}
+	
+	/**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
+	public String getname(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
-
+		
 		while(ite.hasNext()){
 			a = (Node)ite.next();
 			/**描画するファイルの取得*/
@@ -216,36 +240,12 @@ import test.GUI.Node;
 				if(a.getEdgeCount() != 1)return null;
 				return a.getNthNode(0).getName();
 			}
-			
 		}
 		return null;
 	}
-    
-	/**
-	 * スレッド関係
-	 */
-	public void start() {
-		if (th == null) {
-			th = new Thread(this);
-			th.start();
-		}
-	}
 
-
-	public void run() {
-		Thread me = Thread.currentThread();
-		while (me == th) {
-			try {
-				th.sleep(1000);
-			} catch (InterruptedException e) {
-			}
-		}
-	}
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public boolean onTrace() {
-//		if(Env.fGraphic) {
-//			//waitBusy();
-//		}
 		if(busy)return false;
 		return true;
 	}
@@ -258,9 +258,15 @@ import test.GUI.Node;
 }
 /**ウィンドウ膜クラス。膜と、生存フラグ、ウィンドウを保持*/
 class WindowSet{
-	public AbstractMembrane mem;
 	public LMNtalWindow window;
 	public boolean killed = false;
-	WindowSet(){
+}
+
+class WaitingAtomSet{
+	public Functor functor;
+	public String window;
+	public WaitingAtomSet(Functor f, String w){
+		functor=f;
+		window=w;
 	}
 }

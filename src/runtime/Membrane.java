@@ -406,9 +406,9 @@ public final class Membrane extends AbstractMembrane {
 		if (isRoot()) {
 			task.memStack.moveFrom(task.bufferedStack);
 		}
+		quietUnlock();
 		if(changed & Env.LMNgraphic != null)
 			Env.LMNgraphic.setmem(this);
-		quietUnlock();
 	}
 	
 	public void forceUnlock() {

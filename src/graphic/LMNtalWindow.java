@@ -7,17 +7,22 @@ import java.util.Iterator;
 import javax.swing.*;
 
 import runtime.AbstractMembrane;
+import runtime.Membrane;
 import runtime.Env;
+import runtime.Functor;
+import runtime.Atom;
 import test.GUI.Node;
 
 public class LMNtalWindow extends JFrame{
-
+	
 	public LMNGraphPanel lmnPanel = null;
 	public LMNtalGFrame lmnframe = null;
-//	public boolean busy = true;
-//	public boolean running = true;
+	private boolean busy = false;
 	private boolean killed = false;
 	public long timer = 0;
+	private AbstractMembrane mem=null;
+	private Thread th;
+	private boolean keyListener = false;
 	
 	/*ウィンドウ生成に必要*/
 	private boolean ready = false; 
@@ -31,6 +36,22 @@ public class LMNtalWindow extends JFrame{
 	private int win_y = 0;
 	private boolean win_loc = false;
 	
+	public boolean getBusy(){
+		return busy;
+	}
+	public void setBusy(boolean b){
+		busy = b;
+	}
+	
+	public void setmem(AbstractMembrane m){
+		mem=m;
+		try{
+			notifyAll();
+		}catch(IllegalMonitorStateException e){}
+	}
+	public AbstractMembrane getmem(){
+		return mem;
+	}
 	public void setcolor(int a, int b , int c){
 		if(a > 255) color_r = 255;
 		else if(a < 0)color_r = 0;
@@ -45,11 +66,11 @@ public class LMNtalWindow extends JFrame{
 		else color_b = c;
 	}
 	
-    public LMNtalWindow(AbstractMembrane m, LMNtalGFrame frame){
-    	ready = setatoms(m);
-    	lmnframe = frame;
-    }
-    
+	public LMNtalWindow(AbstractMembrane m, LMNtalGFrame frame){
+		ready = setatoms(m);
+		lmnframe = frame;
+	}
+	
 	public void setname(int n){
 		name = Integer.toString(n);
 	}
@@ -61,7 +82,7 @@ public class LMNtalWindow extends JFrame{
 		win_y=y;
 		win_loc=true;
 	}
-    
+	
 	public boolean makewindow(){
 		if(!ready)return false;
 		
@@ -71,7 +92,6 @@ public class LMNtalWindow extends JFrame{
 				//閉じる際に、lmnPanelを殺す。
 				if(lmnPanel!=null){
 					lmnPanel.stop();
-//					lmnPanel = null;
 				}
 				killed = true;
 				lmnframe.closewindow(name);
@@ -85,19 +105,32 @@ public class LMNtalWindow extends JFrame{
 		}
 //		setLocationByPlatform(true);
 		if(win_loc)
-			setLocation(win_x,win_y);
+			setLocation(win_x, win_y);
+		
+		if(keyListener)
+			this.addKeyListener(new MyKeyAdapter(this));
+		
+		Iterator ite = mem.atomIterator();
+		while(ite.hasNext()){
+			Atom a = (Atom)ite.next();
+			if(a.getName()=="keyListener"){
+				a.remove();
+				Atom key = mem.newAtom(new Functor("keyListener", 1));
+				Atom nil = mem.newAtom(new Functor("[]", 1));
+				mem.newLink(key, 0, nil, 0);
+
+				break;
+			}
+		}
 		setVisible(true);
-//		System.out.println("make window");
 		return true;
 	}
 	
-	public boolean setgraphicmem(AbstractMembrane m, int distance){
-		synchronized(Global.lock){
-			if(killed) return true;
-			if(lmnPanel == null)return false;
-			lmnPanel.setgraphicmem(m, distance);
-			lmnPanel.repaint();
-		}
+	public synchronized boolean setgraphicmem(AbstractMembrane m, int distance){
+		if(killed) return true;
+		if(lmnPanel == null)return false;
+		lmnPanel.setgraphicmem(m, distance);
+		lmnPanel.repaint();
 		return true;
 	}
 	
@@ -107,13 +140,6 @@ public class LMNtalWindow extends JFrame{
 		setTitle(name);
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
-//		this.addKeyListener(new MyKeyAdapter(lmnframe,name));
-//		getContentPane().addKeyListener(new KeyAdapter(){
-//			public void keyPressed(KeyEvent e) {
-//				System.out.println(e.getKeyChar());
-//			}
-//		});
-
 	}
 	
 	/**
@@ -122,29 +148,33 @@ public class LMNtalWindow extends JFrame{
 	private boolean setatoms(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
-
+		
 		while(ite.hasNext()){
 			a = (Node)ite.next();
 			/**描画するファイルの取得*/
-			if(a.getName()=="name"){
+			if(a.getName() == "name"){
 				if(a.getEdgeCount() != 1)return false;
 				setname(a.getNthNode(0).getName());
 			}
 			/**サイズの取得*/
-			else if(a.getName()=="size"){
+			else if(a.getName() == "size"){
 				if(a.getEdgeCount() != 2)return false;
 				try{
 					sizex = Integer.parseInt(a.getNthNode(0).getName());
 				}catch(NumberFormatException error){
 					return false;
 				}
-
+				
 				try{
 					sizey = Integer.parseInt(a.getNthNode(1).getName());
 				}catch(NumberFormatException error){
 					return false;
 					
 				}
+			}
+			/**キーアダプタの設置*/
+			else if(a.getName() == "keyListener"){
+				keyListener = true;
 			}
 			/**背景色の取得*/
 			else if(a.getName()=="bgcolor"){
@@ -179,20 +209,20 @@ public class LMNtalWindow extends JFrame{
 		return false;
 	}
 }
+
 class MyKeyAdapter extends KeyAdapter{
-	LMNtalGFrame frame;
-	String name;
-	MyKeyAdapter(LMNtalGFrame f, String n) {
-		frame = f;
-		name = n;
+	LMNtalWindow window;
+	MyKeyAdapter(LMNtalWindow w) {
+		window = w;
 	}
+	
+	
 	public void keyPressed(KeyEvent e) {
-//		window.busy = false;
 		super.keyPressed(e);
-		frame.addAtom(name);
-		//System.out.println(e.getKeyChar());
+		String input;
+		if(e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)input = String.valueOf(e.getKeyCode());
+		else input = String.valueOf(e.getKeyChar());
+		window.lmnframe.setAddAtom((new Functor(input,1)), window.name);
+		
 	}
-}
-class Global{
-	public static Object lock =new Object();
 }

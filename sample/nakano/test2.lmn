@@ -1,2 +1,4 @@
 g(f(d(s(a(a(keyListener))))),[]).
 hoge([a,b,c]).
+ []=[[[[[[[keyListener|s]|s]|d]|f]|s]|d]|a].
+keyListener([D1,D2|L]):-ground(D1)|keyListener([D2|L]).
