@@ -28,7 +28,7 @@ public class LMNtalGFrame{
 	public static Object lock2 = new Object();
 	long start ,stop,diff;
 	public boolean running = true;
-	public LinkedList atomlist = new LinkedList();
+//	public LinkedList atomlist = new LinkedList();
 	
 	
 	public LMNtalGFrame(){
@@ -69,7 +69,7 @@ public class LMNtalGFrame{
 		/*ウィンドウ膜の登録*/
 		if(s == "window"){
 			setwindowmem(m);
-			doAddAtom();		
+//			doAddAtom();		
 		}
 		/*描画膜の登録*/
 		else if(s=="draw" || s=="graphic"){
@@ -98,6 +98,7 @@ public class LMNtalGFrame{
 			WindowSet tmpwin = (WindowSet)windowmap.get(win.window.name);
 			tmpwin.window.setmem(m);
 			tmpwin.window.timer = win.window.timer;
+			tmpwin.window.doAddAtom();
 //			WindowSet tmpwin2 = (WindowSet)windowmap.get(win.window.name);
 		}
 	}
@@ -107,51 +108,53 @@ public class LMNtalGFrame{
 		WindowSet tmpwin = (WindowSet)windowmap.get(name);
 		return tmpwin.window;
 	}
-	public void setAddAtom(Functor a, String win){
-		WaitingAtomSet wa = new WaitingAtomSet(a,win);
-		atomlist.add(wa);
-	}
-	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
-	public void doAddAtom(){
-		while(!atomlist.isEmpty()){
-			WaitingAtomSet wa = (WaitingAtomSet)atomlist.removeFirst();
-			
-			/*膜発見*/
-			if(windowmap.containsKey(wa.window)){
-				WindowSet win = (WindowSet)windowmap.get(wa.window);
-				Iterator ite = win.window.getmem().atomIterator();
-				/*積まれたアトムを追加するリストを検索*/
-				while(ite.hasNext()){
-					Atom a = (Atom)ite.next();
-					if(a.getName()=="keyChar" || a.getName()=="keyCode"){
-						Atom nth1 = a;
-						Atom nth2 = null;
-						while(true){
-							int nth1_arg=1;
-							if(nth1.getFunctor().getArity()==1)
-								nth1_arg=0;
-							try{
-								nth2 = nth1.getArg(nth1_arg).getAtom();
-							}catch(ArrayIndexOutOfBoundsException e){
-								break;
-							}
-							if(nth2.getName().equals("[]")){
-								Atom data = win.window.getmem().newAtom(wa.functor);
-								Atom dot = win.window.getmem().newAtom(new Functor(".", 3));
-								win.window.getmem().newLink(dot, 0, data, 0);
-								win.window.getmem().newLink(nth1, nth1_arg, dot, 2);
-								win.window.getmem().newLink(nth2, 0, dot, 1);
-								break;
-							}
-							nth1 = nth2;
-						}
-						break;
-					}
-				}
-			}
-			
-		}
-	}
+//	public void setAddAtom(Functor a, String win){
+//		WaitingAtomSet wa = new WaitingAtomSet(a,win);
+//		atomlist.add(wa);
+//		/*lockが出来る（unlockされない可能性がある）場合はすぐ追加してしまう。*/
+//		
+//	}
+//	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
+//	public void doAddAtom(){
+//		while(!atomlist.isEmpty()){
+//			WaitingAtomSet wa = (WaitingAtomSet)atomlist.removeFirst();
+//			
+//			/*膜発見*/
+//			if(windowmap.containsKey(wa.window)){
+//				WindowSet win = (WindowSet)windowmap.get(wa.window);
+//				Iterator ite = win.window.getmem().atomIterator();
+//				/*積まれたアトムを追加するリストを検索*/
+//				while(ite.hasNext()){
+//					Atom a = (Atom)ite.next();
+//					if(a.getName()=="keyChar" || a.getName()=="keyCode"){
+//						Atom nth1 = a;
+//						Atom nth2 = null;
+//						while(true){
+//							int nth1_arg=1;
+//							if(nth1.getFunctor().getArity()==1)
+//								nth1_arg=0;
+//							try{
+//								nth2 = nth1.getArg(nth1_arg).getAtom();
+//							}catch(ArrayIndexOutOfBoundsException e){
+//								break;
+//							}
+//							if(nth2.getName().equals("[]")){
+//								Atom data = win.window.getmem().newAtom(wa.functor);
+//								Atom dot = win.window.getmem().newAtom(new Functor(".", 3));
+//								win.window.getmem().newLink(dot, 0, data, 0);
+//								win.window.getmem().newLink(nth1, nth1_arg, dot, 2);
+//								win.window.getmem().newLink(nth2, 0, dot, 1);
+//								break;
+//							}
+//							nth1 = nth2;
+//						}
+//						break;
+//					}
+//				}
+//			}
+//			
+//		}
+//	}
 	private synchronized void setgraphicmem(AbstractMembrane tmp){
 		if(tmp == null || tmp.isRoot() )return;
 		AbstractMembrane m = tmp.getParent();
@@ -273,11 +276,11 @@ class WindowSet{
 	public boolean killed = false;
 }
 
-class WaitingAtomSet{
-	public Functor functor;
-	public String window;
-	public WaitingAtomSet(Functor f, String w){
-		functor=f;
-		window=w;
-	}
-}
+//class WaitingAtomSet{
+//	public Functor functor;
+//	public String window;
+//	public WaitingAtomSet(Functor f, String w){
+//		functor=f;
+//		window=w;
+//	}
+//}

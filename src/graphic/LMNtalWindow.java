@@ -3,6 +3,7 @@ package graphic;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.swing.*;
 
@@ -36,6 +37,7 @@ public class LMNtalWindow extends JFrame{
 	private int win_x = 0;
 	private int win_y = 0;
 	private boolean win_loc = false;
+	private LinkedList atomlist = new LinkedList();
 	
 	public boolean getBusy(){
 		return busy;
@@ -215,6 +217,53 @@ public class LMNtalWindow extends JFrame{
 			return true;
 		return false;
 	}
+	public void setAddAtom(Functor f){
+		atomlist.add(f);
+		/*lockが出来る（unlockされない可能性がある）場合はすぐ追加してしまう。*/
+		if(getmem().lock()){
+			System.out.println("hoge");
+			doAddAtom();
+			/*リストに繋げるだけなので、描画関係の変更はないためfalseでunlock*/
+			getmem().unlock(false);
+		}
+	}
+	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
+	public void doAddAtom(){
+		while(!atomlist.isEmpty()){
+			Functor fa = (Functor)atomlist.removeFirst();
+			
+//			WindowSet win = (WindowSet)windowmap.get(wa.window);
+			Iterator ite = getmem().atomIterator();
+			/*積まれたアトムを追加するリストを検索*/
+			while(ite.hasNext()){
+				Atom a = (Atom)ite.next();
+				if(a.getName()=="keyChar" || a.getName()=="keyCode"){
+					Atom nth1 = a;
+					Atom nth2 = null;
+					while(true){
+						int nth1_arg=1;
+						if(nth1.getFunctor().getArity()==1)
+							nth1_arg=0;
+						try{
+							nth2 = nth1.getArg(nth1_arg).getAtom();
+						}catch(ArrayIndexOutOfBoundsException e){
+							break;
+						}
+						if(nth2.getName().equals("[]")){
+							Atom data = getmem().newAtom(fa);
+							Atom dot = getmem().newAtom(new Functor(".", 3));
+							getmem().newLink(dot, 0, data, 0);
+							getmem().newLink(nth1, nth1_arg, dot, 2);
+							getmem().newLink(nth2, 0, dot, 1);
+							break;
+						}
+						nth1 = nth2;
+					}
+					break;
+				}
+			}
+		}
+	}
 }
 
 class MyKeyAdapter extends KeyAdapter{
@@ -233,10 +282,10 @@ class MyKeyAdapter extends KeyAdapter{
 			String input;
 			if(e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)input = String.valueOf(e.getKeyCode());
 			else input = String.valueOf(e.getKeyChar());
-			window.lmnframe.setAddAtom((new Functor(input, 1)), window.name);
+			window.setAddAtom((new Functor(input, 1)));
 		}else{
 			int input = e.getKeyCode();
-			window.lmnframe.setAddAtom((new IntegerFunctor(input)), window.name);
+			window.setAddAtom((new IntegerFunctor(input)));
 		}
 	}
 }
