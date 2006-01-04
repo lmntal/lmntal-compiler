@@ -123,7 +123,7 @@ public class LMNtalGFrame{
 				/*積まれたアトムを追加するリストを検索*/
 				while(ite.hasNext()){
 					Atom a = (Atom)ite.next();
-					if(a.getName()=="keyByChar" || a.getName()=="keyByCode"){
+					if(a.getName()=="keyChar" || a.getName()=="keyCode"){
 						Atom nth1 = a;
 						Atom nth2 = null;
 						while(true){

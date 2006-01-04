@@ -22,7 +22,7 @@ public class LMNtalWindow extends JFrame{
 	public long timer = 0;
 	private AbstractMembrane mem=null;
 //	private Thread th;
-	private boolean keyByChar = false;
+	private boolean keyChar = false;
 	private boolean keyListener = false;
 	
 	/*ウィンドウ生成に必要*/
@@ -108,15 +108,15 @@ public class LMNtalWindow extends JFrame{
 		if(win_loc)
 			setLocation(win_x, win_y);
 		
-		if(keyListener && keyByChar)
+		if(keyListener && keyChar)
 			this.addKeyListener(new MyKeyAdapter(this, true));
-		else if(keyListener && !keyByChar)
+		else if(keyListener && !keyChar)
 			this.addKeyListener(new MyKeyAdapter(this, false));
 		
 		Iterator ite = mem.atomIterator();
 		while(ite.hasNext()){
 			Atom a = (Atom)ite.next();
-			if(a.getName()=="keyByChar" || a.getName()=="keyByCode"){
+			if(a.getName()=="keyChar" || a.getName()=="keyCode"){
 				Atom key = mem.newAtom(new Functor(a.getName(), 1));
 				a.remove();
 				Atom nil = mem.newAtom(new Functor("[]", 1));
@@ -175,13 +175,13 @@ public class LMNtalWindow extends JFrame{
 				}
 			}
 			/**キーアダプタの設置*/
-			else if(a.getName() == "keyByChar"){
+			else if(a.getName() == "keyChar"){
 				keyListener = true;
-				keyByChar = true;
+				keyChar = true;
 			}
-			else if(a.getName() == "keyByCode"){
+			else if(a.getName() == "keyCode"){
 				keyListener = true;
-				keyByChar = false;
+				keyChar = false;
 			}
 			/**背景色の取得*/
 			else if(a.getName()=="bgcolor"){
