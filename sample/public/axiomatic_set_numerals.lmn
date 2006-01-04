@@ -1,0 +1,8 @@
+/* natural numbers in axiomatic set theory 
+   2005-11-22, Kazunori Ueda
+   run with the --remain option and give as many inc's as you like!
+*/
+
+inc, {$p[]} :- {$p[], {$p[]}}.
+// {}.
+
