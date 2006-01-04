@@ -108,35 +108,9 @@ public class FrontEnd {
 					System.exit(-1);
 				} else { // オプション解釈部
 					switch(args[i].charAt(1)){
-					case 'x':
-						/// -x <name> <value>
-						/// User defined option.
-						/// <name>    <value>    description
-						/// ===========================================================
-						/// screen    max        full screen mode
-						/// auto      on         reaction auto proceed mode when GUI on
-						/// dump      1          indent mem (etc...)
-						if (i + 2 < args.length) {
-							String name  = i+1<args.length ? args[i+1] : "";
-							String value = i+2<args.length ? args[i+2] : "";
-							Env.extendedOption.put(name, value);
-						}
-						i+=2;
-						break;
-					case 'L':
-						/// -L <path>
-						/// Additional path for classpath (inline code compile time)
-						Inline.classPath.add(0, new File(args[++i]));
-						break;
-					case 'I':
-						/// -I <path>
-						/// Additional path for LMNtal library
-						/// The default path is ./lmntal_lib and ../lmntal_lib
-						compile.Module.libPath.add(new File(args[++i]));
-						break;
 					case 'c':
-						/// -c
-						/// CGI mode.  Output the header 'Content-type:text/html'
+						// -c
+						// CGI mode.  Output the header 'Content-type:text/html'
 						if (args[i].equals("-cgi")) {
 							Env.fCGI = true;
 						}
@@ -151,15 +125,11 @@ public class FrontEnd {
 						}
 //						System.out.println("debug level " + Env.debug);
 						break;
-					case 'v':
-						/// -v[<0-9>]
-						/// Verbose output level.
-						if (args[i].matches("-v[0-9]")) {
-							Env.verbose = args[i].charAt(2) - '0';
-						} else {
-							Env.verbose = Env.VERBOSE_DEFAULT;
-						}
-//						System.out.println("verbose level " + Env.verbose);
+					case 'e':
+						/// -e <LMNtal program>
+						/// One liner code execution like Perl.
+						/// Example: -e 'a,(a:-b)'
+						if (++i < args.length)  Env.oneLiner = args[i];
 						break;
 					case 'g':
 						/// -g
@@ -167,30 +137,16 @@ public class FrontEnd {
 						/// Click button to proceed reaction. Close the window to quit.
 						Env.fGUI = true;
 						break;
-					case 't':
-						/// -t
-						/// Trace mode.
-						Env.fTrace = true;
+					case 'I':
+						/// -I <path>
+						/// Additional path for LMNtal library
+						/// The default path is ./lmntal_lib and ../lmntal_lib
+						compile.Module.libPath.add(new File(args[++i]));
 						break;
-					case 's':
-						/// -s[<0-9>]  (-s=-s3)
-						/// Shuffle level.  Select a strategy of rule application.
-						///   0: use an atom stack for each membrane (LIFO)
-						///   1: default (atoms are selected in some arbitrary manner)
-						///   2: select atoms and membranes randomly from a membrane
-						///   3: select atoms, mems and rules randomly from a membrane
-						if (args[i].matches("-s[0-9]")) {
-							Env.shuffle = args[i].charAt(2) - '0';
-						} else {
-							Env.shuffle = Env.SHUFFLE_DEFAULT;
-						}
-						System.err.println("shuffle level " + Env.shuffle);
-						break;
-					case 'e':
-						/// -e <LMNtal program>
-						/// One liner code execution like Perl.
-						/// Example: -e 'a,(a:-b)'
-						if (++i < args.length)  Env.oneLiner = args[i];
+					case 'L':
+						/// -L <path>
+						/// Additional path for classpath (inline code compile time)
+						Inline.classPath.add(0, new File(args[++i]));
 						break;
 					case 'O':
 						/// -O<0-9>
@@ -215,8 +171,74 @@ public class FrontEnd {
 							System.exit(-1);
 						}
 						break;
-					case '-': // 文字列オプション
-						if(args[i].equals("--help")){
+					case 's':
+						/// -s[<0-9>]  (-s=-s3)
+						/// Shuffle level.  Select a strategy of rule application.
+						///   0: use an atom stack for each membrane (LIFO)
+						///   1: default (atoms are selected in some arbitrary manner)
+						///   2: select atoms and membranes randomly from a membrane
+						///   3: select atoms, mems and rules randomly from a membrane
+						if (args[i].matches("-s[0-9]")) {
+							Env.shuffle = args[i].charAt(2) - '0';
+						} else {
+							Env.shuffle = Env.SHUFFLE_DEFAULT;
+						}
+						System.err.println("shuffle level " + Env.shuffle);
+						break;
+					case 't':
+						/// -t
+						/// Trace mode.
+						Env.fTrace = true;
+						break;
+					case 'v':
+						/// -v[<0-9>]
+						/// Verbose output level.
+						if (args[i].matches("-v[0-9]")) {
+							Env.verbose = args[i].charAt(2) - '0';
+						} else {
+							Env.verbose = Env.VERBOSE_DEFAULT;
+						}
+//						System.out.println("verbose level " + Env.verbose);
+						break;
+					case 'x':
+						/// -x <name> <value>
+						/// User defined option.
+						/// <name>    <value>    description
+						/// ===========================================================
+						/// screen    max        full screen mode
+						/// auto      on         reaction auto proceed mode when GUI on
+						/// dump      1          indent mem (etc...)
+						if (i + 2 < args.length) {
+							String name  = i+1<args.length ? args[i+1] : "";
+							String value = i+2<args.length ? args[i+2] : "";
+							Env.extendedOption.put(name, value);
+						}
+						i+=2;
+						break;
+					case '-': // 文字列オプション						
+						/*nakano* if(args[i].equals("--3d")){
+						// --3d
+						// 3d mode.
+						Env.fGUI = false;
+						Env.f3D = true;
+						} else */
+					    if(args[i].equals("--compileonly")){
+					    	// コンパイル後の中間命令列を出力するモード
+							Env.compileonly = true;
+							Env.fInterpret = true;
+						} else if(args[i].equals("--debug-daemon")){
+							// --debug-daemon
+							// dump debug message of LMNtalDaemon
+							Env.debugDaemon = Env.DEBUG_DEFAULT;
+					    } else if(args[i].equals("--demo")){
+							/// --demo
+							/// Demo mode.  Draw atoms and text larger.
+							Env.fDEMO = true;
+						} else if(args[i].equals("--graphic")){
+							/// --graphic
+							/// Graphic LMNtal mode.
+							Env.fGraphic = true;
+						} else if(args[i].equals("--help")){
 							/// --help
 							/// Show usage (this).
 							System.out.println("usage: java -jar lmntal.jar [options...] [filenames...]");
@@ -225,42 +247,52 @@ public class FrontEnd {
 							// commandline: perl src/help_gen.pl < src/runtime/FrontEnd.java > src/runtime/Help.java
 							Help.show();
 					        System.exit(-1);
-						} else if(args[i].equals("--demo")){
-							/// --demo
-							/// Demo mode.  Draw atoms and text larger.
-							Env.fDEMO = true;
-						}/*nakano* else if(args[i].equals("--3d")){
-							/// --3d
-							/// 3d mode.
-							Env.fGUI = false;
-							Env.f3D = true;
-						}*/ 
-						  else if(args[i].equals("--remain")){
-							/// --remain
-							/// Processes remain.
-							Env.fREMAIN = true;
-						} else if(args[i].equals("--REPL")){
-							/// --REPL
-							/// REPL(Read-Eval-Print-Loop) mode
-							Env.fREPL = true;
-							Env.fREMAIN = true;
-						} else if(args[i].equals("--graphic")){
-							/// --graphic
-							/// Graphic LMNtal mode.
-							Env.fGraphic = true;
 						} else if(args[i].equals("--immediate")){
 							/// --immediate
-							/// 文の末尾で改行すると実行する
-							/// デフォルトでは改行２個で実行
+							/// Use a single newline (rather than two newlines)
+							/// to start execution in the REPL mode
 							Env.replTerm = "immediate";
+						} else if (args[i].equals("--interpret")) {
+							/// --interpret
+							/// Interpret intermediate instruction sequences without translating into Java.
+							/// In REPL mode and one-liner, alwas interpret.
+							Env.fInterpret = true;
+//							} else if (args[i].equals("--keep-temporary-files")) {
+//							// --keep-temporary-files
+//							// Do not delete the translated Java source.
+//							Translator.fKeepSource = true;
+						} else if (args[i].equals("--library")) {
+							/// --library
+							/// Generate library.
+							Env.fLibrary = true;
 						} else if (args[i].equals("--nondeterministic")) {
 							/// --nondeterministic
-							/// Execute the all reduction path.
+							/// Execute the all reduction paths.
 							Env.fNondeterministic = true;
-						} else if(args[i].equals("--start-daemon")){
-							/// --start-daemon
-							/// Start LMNtalDaemon
-							Env.startDaemon = true;			
+						} else if(args[i].equals("--optimize-grouping")) {
+							/// --optimize-grouping
+							/// Group the head instructions. (EXPERIMENTAL)
+							Optimizer.fGrouping = true;
+						} else if(args[i].equals("--optimize-guard-move")) {
+							/// --optimize-guard-move
+							/// Move up the guard instructions.
+							Optimizer.fGuardMove = true;
+						} else if(args[i].equals("--optimize-inlining")) {
+							/// --optimize-inlining
+							/// Inlining tail jump.
+							Optimizer.fInlining = true;
+						} else if(args[i].equals("--optimize-loop")) {
+							/// --optimize-loop
+							/// Use loop instruction. (EXPERIMENTAL)
+							Optimizer.fLoop = true;
+						} else if(args[i].equals("--optimize-reuse-atom")) {
+							/// --optimize-reuse-atom
+							/// Reuse atoms.
+							Optimizer.fReuseAtom = true;
+						} else if(args[i].equals("--optimize-reuse-mem")) {
+							/// --optimize-reuse-mem
+							/// Reuse mems.
+							Optimizer.fReuseMem = true;
 						} else if(args[i].matches("--port")){
 							/// --port portnumber
 							/// Specifies the port number that LMNtalDaemon listens on. The default is 60000. 
@@ -293,70 +325,39 @@ public class FrontEnd {
 							}
 							
 							i++;
-						} else if(args[i].equals("--debug-daemon")){
-							/// --debug-daemon
-							/// dump debug message of LMNtalDaemon
-							Env.debugDaemon = Env.DEBUG_DEFAULT;
-//						} else if (args[i].equals("--keep-temporary-files")) {
-//							// --keep-temporary-files
-//							// Do not delete the translated Java source.
-//							Translator.fKeepSource = true;
+						} else if (args[i].equals("--pp0")) {
+							// 暫定オプション
+							Env.preProcess0 = true;
+						} else if(args[i].equals("--profile")){
+							/// --profile
+							/// Profiling applying counts and execution times of rules.
+							Env.profile = true;
+						} else if(args[i].equals("--remain")){
+							/// --remain
+							/// Processes remain in REPL mode
+							Env.fREMAIN = true;
+						} else if(args[i].equals("--REPL")){
+							/// --REPL
+							/// REPL(Read-Eval-Print-Loop) mode
+							Env.fREPL = true;
+							Env.fREMAIN = true;
+						} else if(args[i].equals("--start-daemon")){
+							/// --start-daemon
+							/// Start LMNtalDaemon
+							Env.startDaemon = true;			
+						} else if(args[i].equals("--showproxy")){
+							/// --showproxy
+							/// Show proxy atoms
+							Env.hideProxy = false;
 						} else if (args[i].startsWith("--temporary-dir=")) {
 							/// --temporary-dir=<dir>
 							/// use <dir> as temporary directory
 							Translator.baseDirName = args[i].substring(16);
 							Translator.fKeepSource = true;
-						} else if (args[i].equals("--interpret")) {
-							/// --interpret
-							/// Interpret intermediate instruction sequences without translating into Java.
-							/// In REPL mode and one-liner, alwas interpret.
-							Env.fInterpret = true;
 						} else if (args[i].equals("--use-source-library")) {
 							/// --use-source-library
 							/// Use source library in lmntal_lib/src.
 							Env.fUseSourceLibrary = true;
-						} else if (args[i].equals("--library")) {
-							/// --library
-							/// Generate library.
-							Env.fLibrary = true;
-						} else if (args[i].equals("--pp0")) {
-							// 暫定オプション
-							Env.preProcess0 = true;
-						} else if(args[i].equals("--showproxy")){
-							// 暫定オプション PROXYを表示する
-							Env.hideProxy = false;
-						} else if(args[i].equals("--optimize-inlining")) {
-							/// --optimize-inlining
-							/// Inlining tail jump.
-							Optimizer.fInlining = true;
-						} else if(args[i].equals("--optimize-reuse-atom")) {
-							/// --optimize-reuse-atom
-							/// Reuse atoms.
-							Optimizer.fReuseAtom = true;
-						} else if(args[i].equals("--optimize-reuse-mem")) {
-							/// --optimize-reuse-mem
-							/// Reuse mems.
-							Optimizer.fReuseMem = true;
-						} else if(args[i].equals("--optimize-loop")) {
-							/// --optimize-loop
-							/// Use loop instruction. (EXPERIMENTAL)
-							Optimizer.fLoop = true;
-						} else if(args[i].equals("--optimize-guard-move")) {
-							/// --optimize-guard-move
-							/// Move up the guard instructions.
-							Optimizer.fGuardMove = true;
-						} else if(args[i].equals("--optimize-grouping")) {
-							/// --optimize-grouping
-							/// Group the head instructions. (EXPERIMENTAL)
-							Optimizer.fGrouping = true;
-						} else if(args[i].equals("--compileonly")){
-						// コンパイル後の中間命令列を出力するモード
-							Env.compileonly = true;
-							Env.fInterpret = true;
-						} else if(args[i].equals("--profile")){
-							/// --profile
-							/// Profiling applying counts and execution times of rules.
-							Env.profile = true;
 						}else {
 							System.err.println("Invalid option: " + args[i]);
 							System.exit(-1);
