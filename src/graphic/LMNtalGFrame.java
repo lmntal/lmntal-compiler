@@ -111,13 +111,16 @@ public class LMNtalGFrame{
 		WaitingAtomSet wa = new WaitingAtomSet(a,win);
 		atomlist.add(wa);
 	}
+	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
 	public void doAddAtom(){
 		while(!atomlist.isEmpty()){
 			WaitingAtomSet wa = (WaitingAtomSet)atomlist.removeFirst();
 			
+			/*膜発見*/
 			if(windowmap.containsKey(wa.window)){
 				WindowSet win = (WindowSet)windowmap.get(wa.window);
 				Iterator ite = win.window.getmem().atomIterator();
+				/*積まれたアトムを追加するリストを検索*/
 				while(ite.hasNext()){
 					Atom a = (Atom)ite.next();
 					if(a.getName()=="keyByChar" || a.getName()=="keyByCode"){
@@ -127,8 +130,11 @@ public class LMNtalGFrame{
 							int nth1_arg=1;
 							if(nth1.getFunctor().getArity()==1)
 								nth1_arg=0;
-							nth2 = nth1.getArg(nth1_arg).getAtom();
-							System.out.println(nth2.getName());
+							try{
+								nth2 = nth1.getArg(nth1_arg).getAtom();
+							}catch(ArrayIndexOutOfBoundsException e){
+								break;
+							}
 							if(nth2.getName().equals("[]")){
 								Atom data = win.window.getmem().newAtom(wa.functor);
 								Atom dot = win.window.getmem().newAtom(new Functor(".", 3));
@@ -248,7 +254,7 @@ public class LMNtalGFrame{
 		}
 		return null;
 	}
-
+	
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public boolean onTrace() {
 		if(busy)return false;
