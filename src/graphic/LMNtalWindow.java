@@ -7,10 +7,10 @@ import java.util.Iterator;
 import javax.swing.*;
 
 import runtime.AbstractMembrane;
-import runtime.Membrane;
 import runtime.Env;
 import runtime.Functor;
 import runtime.Atom;
+import runtime.SpecialFunctor;
 import test.GUI.Node;
 
 public class LMNtalWindow extends JFrame{
@@ -21,7 +21,7 @@ public class LMNtalWindow extends JFrame{
 	private boolean killed = false;
 	public long timer = 0;
 	private AbstractMembrane mem=null;
-	private Thread th;
+//	private Thread th;
 	private boolean keyListener = false;
 	
 	/*ウィンドウ生成に必要*/
@@ -169,7 +169,6 @@ public class LMNtalWindow extends JFrame{
 					sizey = Integer.parseInt(a.getNthNode(1).getName());
 				}catch(NumberFormatException error){
 					return false;
-					
 				}
 			}
 			/**キーアダプタの設置*/

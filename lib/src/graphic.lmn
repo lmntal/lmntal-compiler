@@ -17,7 +17,9 @@ graphic=option.use.
 
 */
 [:/*inline_define*/
+	import java.awt.*;
 	import java.awt.event.*;
+	import java.awt.MouseInfo.*;
 :]
 {
 module(graphic).
@@ -28,7 +30,7 @@ graphic.use :- [:/*inline*/
 	me.setFunctor("go",0);
 :].
 
-H=graphic.mouse_pointX:- H=[:/*inline*/
+H=graphic.mousePointX:- H=[:/*inline*/
 	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 	int point = (int)(pointerInfo.getLocation().x);
 	Atom atom = mem.newAtom(new IntegerFunctor(point));
@@ -37,7 +39,7 @@ H=graphic.mouse_pointX:- H=[:/*inline*/
   :].
 
 
-H=graphic.mouse_pointY :- H=[:/*inline*/
+H=graphic.mousePointY :- H=[:/*inline*/
 	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 	int point = (int)(pointerInfo.getLocation().y);
 	Atom atom = mem.newAtom(new IntegerFunctor(point));
@@ -47,7 +49,7 @@ H=graphic.mouse_pointY :- H=[:/*inline*/
 
   
  /**ウィンドウ上にマウスがある場合はその位置を返す。なければ-1を返す*/
-H=graphic.mouse_framePointX(X) :- int(X)|H=[:/*inline*/
+H=graphic.mouseFramePointX(X) :- int(X)|H=[:/*inline*/
 
 	int x = ((IntegerFunctor)(me.nthAtom(0).getFunctor())).intValue();
 	Point p = null;
@@ -63,7 +65,7 @@ H=graphic.mouse_framePointX(X) :- int(X)|H=[:/*inline*/
 	
 	:](X).
   
-H=graphic.mouse_framePointY(Y) :- int(Y)|H=[:/*inline*/
+H=graphic.mouseFramePointY(Y) :- int(Y)|H=[:/*inline*/
 	int y = ((IntegerFunctor)(me.nthAtom(0).getFunctor())).intValue();
 	Point p = null;
 	if(Env.LMNgraphic != null)
@@ -75,4 +77,4 @@ H=graphic.mouse_framePointY(Y) :- int(Y)|H=[:/*inline*/
 	me.nthAtom(0).remove();
 	me.remove();
 	:](Y).
-}
+}.
