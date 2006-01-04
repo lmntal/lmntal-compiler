@@ -117,23 +117,24 @@ public class LMNtalGFrame{
 			
 			if(windowmap.containsKey(wa.window)){
 				WindowSet win = (WindowSet)windowmap.get(wa.window);
-				Atom data = win.window.getmem().newAtom(wa.functor);
 				Iterator ite = win.window.getmem().atomIterator();
 				while(ite.hasNext()){
 					Atom a = (Atom)ite.next();
-					if(a.getName()=="keyListener"){
+					if(a.getName()=="keyByChar" || a.getName()=="keyByCode"){
 						Atom nth1 = a;
 						Atom nth2 = null;
 						while(true){
-							nth2 = nth1.getArg(nth1.getFunctor().getArity()-1).getAtom();
+							int nth1_arg=1;
+							if(nth1.getFunctor().getArity()==1)
+								nth1_arg=0;
+							nth2 = nth1.getArg(nth1_arg).getAtom();
 							System.out.println(nth2.getName());
 							if(nth2.getName().equals("[]")){
+								Atom data = win.window.getmem().newAtom(wa.functor);
 								Atom dot = win.window.getmem().newAtom(new Functor(".", 3));
 								win.window.getmem().newLink(dot, 0, data, 0);
-								win.window.getmem().relink(dot, 2, nth2, 1);
-								win.window.getmem().newLink(dot, 1, nth2, 1);
-//								win.window.getmem().newLink(nth1, nth1.getFunctor().getArity()-1, addedAtom, 0);
-//								win.window.getmem().newLink(nth2, 0, addedAtom, 1);
+								win.window.getmem().newLink(nth1, nth1_arg, dot, 2);
+								win.window.getmem().newLink(nth2, 0, dot, 1);
 								break;
 							}
 							nth1 = nth2;

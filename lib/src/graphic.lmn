@@ -77,4 +77,31 @@ H=graphic.mouseFramePointY(Y) :- int(Y)|H=[:/*inline*/
 	me.nthAtom(0).remove();
 	me.remove();
 	:](Y).
+	
+	  
+ /**ウィンドウ上にマウスがある場合はその位置を返す。なければ-1を返す*/
+H=graphic.mouseFramePointX :- H=[:/*inline*/
+	int x = -1;
+	Point p = null;
+	if(Env.LMNgraphic != null)
+		p= Env.LMNgraphic.getMousePoint(mem);
+	if(p != null)
+		x = (int)(p.x);
+	Atom atom = mem.newAtom(new IntegerFunctor(x));
+	mem.relink(atom,0,me,0);
+	mem.removeAtom(me);
+	
+	:].
+  
+H=graphic.mouseFramePointY :- H=[:/*inline*/
+	int y = -1;
+	Point p = null;
+	if(Env.LMNgraphic != null)
+		p= Env.LMNgraphic.getMousePoint(mem);
+	if(p != null)
+		y = (int)(p.y);
+	Atom atom = mem.newAtom(new IntegerFunctor(y));
+	mem.relink(atom,0,me,0);
+	mem.removeAtom(me);
+	:].
 }.

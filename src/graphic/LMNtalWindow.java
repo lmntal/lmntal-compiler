@@ -9,8 +9,8 @@ import javax.swing.*;
 import runtime.AbstractMembrane;
 import runtime.Env;
 import runtime.Functor;
+import runtime.IntegerFunctor;
 import runtime.Atom;
-import runtime.SpecialFunctor;
 import test.GUI.Node;
 
 public class LMNtalWindow extends JFrame{
@@ -22,6 +22,7 @@ public class LMNtalWindow extends JFrame{
 	public long timer = 0;
 	private AbstractMembrane mem=null;
 //	private Thread th;
+	private boolean keyByChar = false;
 	private boolean keyListener = false;
 	
 	/*ウィンドウ生成に必要*/
@@ -107,15 +108,17 @@ public class LMNtalWindow extends JFrame{
 		if(win_loc)
 			setLocation(win_x, win_y);
 		
-		if(keyListener)
-			this.addKeyListener(new MyKeyAdapter(this));
+		if(keyListener && keyByChar)
+			this.addKeyListener(new MyKeyAdapter(this, true));
+		else if(keyListener && !keyByChar)
+			this.addKeyListener(new MyKeyAdapter(this, false));
 		
 		Iterator ite = mem.atomIterator();
 		while(ite.hasNext()){
 			Atom a = (Atom)ite.next();
-			if(a.getName()=="keyListener"){
+			if(a.getName()=="keyByChar" || a.getName()=="keyByCode"){
+				Atom key = mem.newAtom(new Functor(a.getName(), 1));
 				a.remove();
-				Atom key = mem.newAtom(new Functor("keyListener", 1));
 				Atom nil = mem.newAtom(new Functor("[]", 1));
 				mem.newLink(key, 0, nil, 0);
 
@@ -172,8 +175,13 @@ public class LMNtalWindow extends JFrame{
 				}
 			}
 			/**キーアダプタの設置*/
-			else if(a.getName() == "keyListener"){
+			else if(a.getName() == "keyByChar"){
 				keyListener = true;
+				keyByChar = true;
+			}
+			else if(a.getName() == "keyByCode"){
+				keyListener = true;
+				keyByChar = false;
 			}
 			/**背景色の取得*/
 			else if(a.getName()=="bgcolor"){
@@ -211,17 +219,24 @@ public class LMNtalWindow extends JFrame{
 
 class MyKeyAdapter extends KeyAdapter{
 	LMNtalWindow window;
-	MyKeyAdapter(LMNtalWindow w) {
+	boolean byChar;
+	
+	MyKeyAdapter(LMNtalWindow w, boolean c) {
 		window = w;
+		byChar = c;
 	}
 	
 	
 	public void keyPressed(KeyEvent e) {
 		super.keyPressed(e);
-		String input;
-		if(e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)input = String.valueOf(e.getKeyCode());
-		else input = String.valueOf(e.getKeyChar());
-		window.lmnframe.setAddAtom((new Functor(input,1)), window.name);
-		
+		if(byChar){
+			String input;
+			if(e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)input = String.valueOf(e.getKeyCode());
+			else input = String.valueOf(e.getKeyChar());
+			window.lmnframe.setAddAtom((new Functor(input, 1)), window.name);
+		}else{
+			int input = e.getKeyCode();
+			window.lmnframe.setAddAtom((new IntegerFunctor(input)), window.name);
+		}
 	}
 }
