@@ -548,7 +548,7 @@ public class Translator {
 			writer.write("		return \"@" + libname + "\" + id;\n");
 			writer.write("	}\n");
 			// 2006.01.02 okabe
-			writer.write("	private String encodedRuleset = \n\"" + ruleset.encode() + "\";\n");
+			writer.write("	private String encodedRuleset = \n" + Util.quoteString(ruleset.encode(), '"') + ";\n");
 			writer.write("	public String encode() {\n");
 			writer.write("		return encodedRuleset;\n");
 			writer.write("	}\n");
