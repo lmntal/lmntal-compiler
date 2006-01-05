@@ -1157,6 +1157,8 @@ public class Instruction implements Cloneable, Serializable {
      */
     public static final int UNIQ = 214;
 	static {setArgType(UNIQ, new ArgType(false, ARG_VARS));}
+    public static final int NOT_UNIQ = 215; // なんとも
+	static {setArgType(NOT_UNIQ, new ArgType(false, ARG_VARS));}
 
 	///////////////////////////////////////////////////////////////////////
 

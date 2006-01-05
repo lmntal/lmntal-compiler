@@ -13,7 +13,7 @@ public class Uniq {
 	public ArrayList history = new ArrayList();
 	
 	/**
-	 * 型付きプロセス文脈に束縛された構造の実態を保存する膜。タスク==null
+	 * 型付きプロセス文脈に束縛された構造の実体を保存する膜。タスク==null
 	 */
 	public AbstractMembrane mem = new Membrane();
 	

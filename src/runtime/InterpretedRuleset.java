@@ -6,6 +6,7 @@
 
 package runtime;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -894,6 +895,7 @@ class InterpretiveReactor {
 
 					//====重複適用をカットする命令====ここから====
 				case Instruction.UNIQ : //[ [link1,link2...] ]
+				case Instruction.NOT_UNIQ : //[ [link1,link2...] ]
 					Uniq uniq = currentInterpretedRuleset.currentRule.uniq;
 					if(uniq==null) {
 						uniq = currentInterpretedRuleset.currentRule.uniq = new Uniq();
@@ -906,7 +908,11 @@ class InterpretiveReactor {
 						hEntry[i] = (Link)vars.get(v);
 //						Env.p("LINK "+hEntry[i]);
 					}
-					if(!uniq.check(hEntry)) return false;
+					if(inst.getKind()==Instruction.UNIQ) {
+						if(!uniq.check(hEntry)) return false;
+					} else {
+						if(uniq.check(hEntry)) return false;
+					}
 					break; //hara 2005-12-02
 					//====重複適用をカットする命令====ここまで====
 					
