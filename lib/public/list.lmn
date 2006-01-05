@@ -158,6 +158,30 @@ H=dist(A, []) :- ground(A) | H=[].
 H=dist(A, [Hd|Tl]) :- ground(A) | H=[[A|Hd]|dist(A, Tl)].
 
 
+/**
+ * list.uniq
+ * 
+ * List -> List
+ * 
+ * uniq でないことが書けないので膜の反応終了を条件に not の動作をさせるようにした。
+ */
+//H=list.uniq(L) :- ground(L) | H={r=list.uniq0(L)}.
+//H=list.uniq0([]) :- H=[], fin.
+//H={fin, r=R, $p[], @r} :- ground(R) | H=R.
+//H=list.uniq0([Hd|Tl]) :- uniq(Hd) | H=[Hd|list.uniq0(Tl)].
+//H={HH=list.uniq0([Hd|Tl]), $p[HH,Tl], @r}/ :- ground(Hd) | H={HH=list.uniq0(Tl), $p[HH,Tl], @r}.
+
+/**
+ * list.uniq
+ * 
+ * List -> List
+ * 
+ * not_uniq を追加したのでこう書ける
+ * 現状、uniq() の履歴が共有されてしまう。
+ */
+H=list.uniq([     ]) :-                H=[                ].
+H=list.uniq([Hd|Tl]) :-     uniq(Hd) | H=[Hd|list.uniq(Tl)].
+H=list.uniq([Hd|Tl]) :- not_uniq(Hd) | H=    list.uniq(Tl) .
 
 }.
 //res = list.flatten(cons(cons(int(1),cons(int(2),int(3))), int(4)), nil).

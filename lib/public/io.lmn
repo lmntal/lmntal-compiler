@@ -4,6 +4,12 @@ NAME
 
 SYNOPSIS
 
+	io.use.
+	handle = io.list_of_stdin.
+	
+		==>
+	
+	handle = [Line0, Line1, ...].
 
 AUTHOR
 	Koji Hara
@@ -121,25 +127,28 @@ H=io.reader(Process) :- unary(Process) | H=[:/*inline*/
 
 
 /**
- * readLine : ?
+ * readLine(Object, ReadString, Result)
  * 
+ * Object     : java.io.BufferedReader
+ * ReadString : One line string
+ * Result     : "done" when succeeded. "nil" when EOF.
  */
 H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
 	H=readline(STDIN, Result), io.stdin(STDIN).
 
-H=readline(Object, Result) :- class(Object, "java.io.BufferedReader") |
+H=readline(Object, ReadString) :- class(Object, "java.io.BufferedReader") |
 	H=[:/*inline*/
 		try {
 			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			String s = br.readLine();
-			Atom result = mem.newAtom(new Functor(s==null?"":s, 1));
+			Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
 			mem.relink(result, 0, me, 1);
 			Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
 			mem.relink(res, 0, me, 2);
 			me.nthAtom(0).remove();
 			me.remove();
 		} catch(Exception e) {Env.e(e);}
-	:](Object, Result).
+	:](Object, ReadString).
 
 /**
  * print : String -> unit
@@ -180,16 +189,16 @@ H=close(Object) :- class(Object, "java.io.PrintWriter") |
  * io.list_of_stdin : unit -> List of String
  * 
  */
-H=io.list_of_stdin, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, []), io.stdin(STDIN).
+H=io.list_of_stdin, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, [], done), io.stdin(STDIN).
 
 /**
  * io.list_of_file : unit -> List of String
  * 
  */
-H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), []).
-H=list_of_dev_s0(Obj, List) :- class(Obj, "java.io.BufferedReader") |
-	H=[String|list_of_dev_s0(readline(Obj, String), List)].
-H=list_of_dev_s0(nil, List) :- H=List.
+H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), [], done).
+
+H=list_of_dev_s0(Obj, List, done) :- class(Obj, "java.io.BufferedReader") | H=[String|list_of_dev_s0(Obj, List, readline(Obj, String))].
+H=list_of_dev_s0(Obj, List, nil ) :- class(Obj, "java.io.BufferedReader") | H=List.
 
 /**
  * io.toFile : String -> List of String -> unit

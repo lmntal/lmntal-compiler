@@ -1,0 +1,13 @@
+out={r=done. io.use.}.
+out={r=done, $p[],@r}/ :- out={$p[], @r, r=readline(Line), one_line_processor.run(Line)}.
+
+
+
+{
+module(one_line_processor).
+
+one_line_processor.run(Line) :- string(Line) | runtime={decoder.stringDecoder(Line).}.
+
+runtime={$p[], @r}/ :- kill={sys.dump, $p[], @r}.
+
+}

@@ -194,6 +194,7 @@ public class GuardCompiler extends HeadCompiler {
 		it = typeConstraints.iterator();
 		while (it.hasNext()) cstrs.add(it.next());
 		boolean changed;
+		FixType:
 		do {
 			changed = false;
 			ListIterator lit = cstrs.listIterator();
@@ -216,16 +217,22 @@ public class GuardCompiler extends HeadCompiler {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					checkGroundLink(def1);
 				}
-				else if (func.getName().equals("uniq")){
+				else if (func.getName().equals("uniq") || func.getName().equals("not_uniq")){
 					ArrayList uniqVars = new ArrayList();
 					for(int k=0;k<cstr.args.length;k++) {
 						ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
-						if (!identifiedCxtdefs.contains(defK)) continue;
+						if (!identifiedCxtdefs.contains(defK)) continue FixType;
 						checkGroundLink(defK);
-//						Env.p("VAR# "+groundToSrcPath(defK));
-						uniqVars.add(new Integer(groundToSrcPath(defK)));
+						int srcPath = groundToSrcPath(defK);
+//						Env.p("VAR# "+srcPath);
+						if(srcPath==UNBOUND) continue FixType;
+						uniqVars.add(new Integer(srcPath));
 					}
-					match.add(new Instruction(Instruction.UNIQ, uniqVars));
+					if(func.getName().equals("uniq")) {
+						match.add(new Instruction(Instruction.UNIQ, uniqVars));
+					} else {
+						match.add(new Instruction(Instruction.NOT_UNIQ, uniqVars));
+					}
 				}
 				else if (func.equals(new Functor("\\=",2))) {
 					// NSAMEFUNC を作るか？

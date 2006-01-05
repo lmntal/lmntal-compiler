@@ -1,0 +1,66 @@
+/*
+NAME
+	Prolog-like Variable module
+
+SYNOPSIS
+
+	var.use.
+	area = var(width) * var(height).
+	var.bind(width, 3).
+	var.unify(width, height).
+	
+	%% result is area(9).
+	
+	Able to bind some ground process to some variable identified by unary atom.
+	Able to unify 2 some variables.
+	Unable to rebind.
+
+INTERNAL
+
+	var.unify rules use Union-Find algorithm. (Just 2 rules)
+
+AUTHOR
+	Koji Hara
+
+HISTORY
+	2006/01/04(Wed)
+
+*/
+
+{
+module(var).
+
+Module_Constructor_Var @@
+var.use :- var_mem({
+	// Union-Find
+	// unify(A, B) means node A is parent of node B.
+	Unify_Pre_Find_Root @@
+	unify(_UA, _UB), unify_pre(_UC, _UD) :- _UB=_UD | unify(_UA, _UB), unify_pre(_UC, _UA).
+	
+	Unify_Pre_Compress_Path @@
+	unify(_UA, _UB), unify(_UC, _UD) :- _UB=_UC | unify(_UA, _UB), unify(_UA, _UD).
+	
+	Unify_Bind @@
+	unify(_UA, _UB), bind(_UV, _GV) :- _UB=_UV | unify(_UA, _UB), bind(_UA, _GV).
+}).
+Unify_Pre_OK @@
+var_mem({unify_pre(_UC, _UD), $e, @e}/) :- 
+var_mem({unify(_UC, _UD), $e, @e}).
+
+Var_New_Bind @@
+var.bind(_UVar0, _GValue), var_mem({$e, @e}) :- 
+                            var_mem({$e, @e, bind(_UVar0, _GValue)}).
+
+Var_New_Unify @@
+var.unify(_UVar0, _UVar1), var_mem({$e, @e}) :- 
+                           var_mem({$e, @e, unify_pre(_UVar0, _UVar1)}).
+
+Var_Unify @@
+var_mem({ unify(_UA, _UB), $e, @e }), H=var(_UC) :- _UB=_UC |
+var_mem({ unify(_UA, _UB), $e, @e }), H=var(_UA).
+
+Var_Bind @@
+var_mem({ bind(_UV, _GV), $e, @e }), H=var(_UA) :- _UA=_UV |
+var_mem({ bind(_UV, _GV), $e, @e }), H=_GV.
+
+}.

@@ -1,24 +1,12 @@
-/*
-
-要素数 n 個のリストから k 個順不同で取り出す全ての組み合わせをリストにして返す。
-
-*/
-
-//r=choose_k([a, b, c, d, e], 3).
-//r=choose_k([b, c], 1).
+//r=list.uniq([a,a,b,a,a,b,c]).
 
 
-H=list.choose_k(L, K) :- H=choose_k(L, K).
-H=choose_k(L, K) :- ground(L), K=0 | H=[].
-H=choose_k([], K) :- int(K) | H=[].
+var.use.
 
-H=choose_k([Hd|R], K) :- K=1 | H=[[Hd]|choose_k(R, K)].
+r=[var(a),var(b),var(c),var(d)].
 
-// Hd を選ぶ場合とそうでない場合の全組み合わせをくっつける
-H=choose_k([Hd|Tl], K) :- ground(Hd), K>1, ground(Tl) |
-H=list.append(dist(Hd, choose_k(Tl, K-1)), choose_k(Tl, K)).
+var.unify(a, b).
+var.unify(c, d).
+var.unify(b, d).
 
-// map (cons A) L
-H=dist(A, []) :- ground(A) | H=[].
-H=dist(A, [Hd|Tl]) :- ground(A) | H=[[A|Hd]|dist(A, Tl)].
-
+var.bind(a, 3).

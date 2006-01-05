@@ -1754,8 +1754,9 @@ public class Translator {
 					writer.write(tabs + "((AbstractMembrane)var" + inst.getIntArg1() + ").loadRuleset(" + name + ".getInstance());\n"); 
 					break;
 				case Instruction.UNIQ:
+				case Instruction.NOT_UNIQ:
 					//Uniqオブジェクト取得
-					String uniq;
+ 					String uniq;
 					if (uniqVarName.containsKey(rule)) {
 						uniq = (String)uniqVarName.get(rule);
 					} else {
@@ -1763,16 +1764,20 @@ public class Translator {
 						uniqVarName.put(rule, uniq);
 					}
 					//コード出力
-					writer.write(tabs + "if(" + uniq + ".check(new Link[] {");
+					writer.write(tabs + "boolean goAhead = " + uniq + ".check(new Link[] {");
 					//引数リスト生成
 					ArrayList uniqVars = (ArrayList)inst.getArg(0);
 					for(int i=0;i<uniqVars.size();i++) {
 						if (i > 0) writer.write(",");
 						writer.write("(Link)var" + (Integer)uniqVars.get(i));
 					}
-					writer.write("})) {\n");
+					writer.write(tabs+"});\n");
+					if(inst.getKind()==Instruction.NOT_UNIQ) {
+						writer.write(tabs+"goAhead = !goAhead;\n");
+					}
+					writer.write(tabs+"if(!goAhead) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
-					writer.write(tabs + "}\n");
+					writer.write(tabs+"}\n");
 					break;
 				default:
 					Env.e("Unsupported Instruction : " + inst);
