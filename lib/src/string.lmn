@@ -116,7 +116,7 @@ H=string.join(Glue, [CAR|CDR]) :- unary(Glue) |
  * H='^'("abc", "de")  ==>  H="abcde"
  */
 H=string.concat(S1, S2) :- unary(S1), unary(S2) | H=[:/*inline*/
-	Atom cat = mem.newAtom(new Functor(me.nth(0) + me.nth(1), 1));
+	Atom cat = mem.newAtom(new StringFunctor(me.nth(0) + me.nth(1)));
 	mem.relinkAtomArgs(cat, 0, me, 2);
 	
 	mem.removeAtom(me.nthAtom(0));
