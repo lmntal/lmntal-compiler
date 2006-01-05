@@ -1,0 +1,63 @@
+M={
+	nd.exec({{
+		thread(n,1).
+		thread(n,2).
+	
+		critical(0).
+		thread(n,T1) :- thread(w,T1).
+		thread(w,T1),critical(0) :- thread(c,T1),critical(1).
+		%thread(c,T1),critical(1) :- thread(n,T1),critical(0).
+		thread(c,T1),thread(w,T2) :- thread(n,T1),thread(c,T2).
+		thread(c,T1),thread(n,T2),critical(1) :- thread(n,T1),thread(n,T2),critical(0).
+	}*}).
+}.
+
+check({$p,@p}/,[{$q,@q}|L]) :- check({$p,@p,$q,@q},L).
+check({$p,@p},[]) :- {$p,@p}.
+
+check(M,[C1,C2,C3]).
+
+C1={
+	//uniq用のID生成
+	nextid(0).
+	nextid(N), {$p,@p} :- \+($p=(id(X),$pp)), N2=N+1 | nextid(N2), {id(N),$p,@p}.
+%	//遷移のリスト化
+%	{id(N),$p,@p} :- uniq(N) | {id(N),fl([]),tl([]),$p,@p,(fl(L),from(F) :- fl([F|L])),(tl(L),to(F) :- tl([F|L]))}.
+
+	//safety
+	{id(N), {thread(c,T1),thread(c,T2),$p,@p}, $q,@q} :- uniq(N) | fail(safety, N), {id(N), {thread(c,T1),thread(c,T2),$p,@p}*, $q,@q}.
+	//liveness
+	{id(N),$p,@p} :- uniq(N) | {id(N),check_fc(1),check_fc(2),$p,@p}.
+	{id(N),check_fc(T1),{thread(c,T2),$p,@p},$q,@q} :- T1=T2,uniq(N,T1) | {id(N),fc(T1,true),{thread(c,T1),$p,@p}*,$q,@q}.
+	reduce(F,T,R),{id(NF),from(F),check_fc(T1),$p,@p},{id(NT),to(T),$q,@q} :- uniq(NF,NT,T1) |
+		reduce(F,T,R),{id(NF),from(F),check_fc(T1),check_fc2(NT,T1),$p,@p},{id(NT),to(T),$q,@q}.
+	{check_fc2(N,T1),$p,@p},{id(N2),fc(T2,true),$q,@q} :- N=N2,T1=T2 | {$p,@p},{id(N2),fc(T2,true),$q,@q}.
+
+%遷移のリスト化を使おうとしたバージョン		
+%	{id(N),{thread(S,T1),$p[S|*X],@p},$q[L|*Y],@q} :- T1=T2,\+($p=(c(S),$pp)),uniq(N,T1) |
+%		{id(N),fl(check_fc(L,T1)),{thread(S,T2),$p[S|*X],@p}*,$q[L|*Y],@q}.
+%	reduce(F,T,N),{R=check_fc([F|Tail],T1),$q[R,Tail|*Y],@q}, {fc(T2,true),$r[T|*X],@r} :- T1=T2 |
+%		reduce(F,T,N),{R=[F|check_fc(Tail,T1)],$q[R,Tail|*Y],@q}, {fc(T2,true),$r[T|*X],@r}.
+%	{R=check_fc([],T1),$q[R,T1|*Y],@q} :- {R=[],fc(T1,true),$q[R,T1|*Y],@q}.
+
+%	{id(N), {thread(t,T1),$p,@p}, $q,@q} :- uniq(N,T1) | {id(N),check(liveness,T1),{thread(t,T1),$p,@p}*, $q,@q}.
+%	{id(I),check(liveness,T1),{thread(c,T2),$p,@p}, $q,@q} :- T1 = T2 | {id(I),{thread(c,T1),$p,@p}, $q,@q}.
+%	reduce(F,T,R), {from(F),check(liveness,T1),{thread(t,T2),$p,@p}, $q,@q}, {id(N),to(T), {$p,@p},$q,@q}
+%		:- T1=T1,uniq(N,T1) | reduce(F,T,R), {from(F),check(liveness,T1),{thread(t,T1),$p,@p}*, $q,@q}, {id(N),to(T),check(liveness,T1),{$p,@p}*,$q,@q}.
+}.
+
+C2={
+	//liveness
+	{id(N),$p,@p} :- uniq(N) | {id(N),fc2(1,true),fc2(2,true),$p,@p}.
+	{fc2(T1,true),check_fc2(N,T2),$p,@p} :- T1=T2,int(N) | {check_fc2(N,T2),$p,@p}.
+	//GC
+%	{check_fc(T1),$p,@p} :- int(T1) | {$p,@p}.
+}.
+
+C3={
+	//liveness
+%	{fc2(T1,true),$p[T1|*W],@p} :- {fc(T1,true),$p[T1|*W],@p}.
+	//GC
+%	{fc(T1,true),fc(T2,true),$p,@p} :- T1=T2 | {fc(T1,true),$p,@p}.
+%	{check_fc2(N,T1),$p,@p} :- int(T1),int(N) | {$p,@p}.
+}.
