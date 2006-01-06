@@ -7,6 +7,7 @@ import java.util.List;
 
 import runtime.AbstractMembrane;
 import runtime.Atom;
+import runtime.Env;
 import runtime.Functor;
 import runtime.Link;
 
@@ -95,5 +96,12 @@ abstract public class Util {
 		text = text.replaceAll("\f", "\\\\f");
 		text = text.replaceAll("\r", "\\\\r");
 		return quoter + text + quoter;
+	}
+	
+	public static long getTime(){
+		if(Env.majorVersion==1 &&Env.minorVersion>4)
+	        return System.nanoTime();
+		else
+	        return System.currentTimeMillis();
 	}
 }
