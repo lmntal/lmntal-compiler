@@ -10,6 +10,7 @@ public class StringFunctor extends ObjectFunctor {
 	public StringFunctor(String data) { super(data); }
 	public String getQuotedAtomName() { return getStringLiteralText(getName()); }
 	public String getQuotedFunctorName() { return getQuotedAtomName(); }
+	public String stringValue() {return getName();}
 	public String toString() {
 		return Util.quoteString((String)data, '"') + "_" + getArity();
 	}
