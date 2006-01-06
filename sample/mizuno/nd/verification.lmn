@@ -1,3 +1,6 @@
+{
+model.
+nd.exec({{
 %mem(Stable,Locked,Parent,Children,Stack,Lock)
 mem(false, false, nil, [L1,L2], M1, nil).
 mem(false, false, L1 , [L3]   , M2, nil).
@@ -43,10 +46,12 @@ state(locking), lock2([],[],[]) :- state(not_matched).
 %ロックした膜のロック解放・活性化
 state(activate), lock_list([mem(S,true,P,Ch,nil),M2|L]), stack(St)
  :- state(activate), lock_list([M2|L]), mem(S,false,P,Ch,M,nil), stack([M|St]).
+state(activate), lock_list([mem(S,true,P,Ch,M),M2|L]), X=[M|Y]
+ :- state(activate), lock_list([M2|L]), mem(S,false,P,Ch,M,nil), X=[M|Y].
 state(activate), lock_list([mem(S,true,P,Ch,M)])
  :- state(start), mem(S,false,P,Ch,M,nil).
-state(not_matched), lock_list([mem(S,true,P,Ch,nil),M2|L])
- :- state(not_matched), lock_list([M2|L]), mem(S,false,P,Ch,nil,nil).
+state(not_matched), lock_list([mem(S,true,P,Ch,St),M2|L])
+ :- state(not_matched), lock_list([M2|L]), mem(S,false,P,Ch,St,nil).
 state(not_matched), lock_list([mem(S,true,P,Ch,M)])
  :- state(start), mem(S,false,P,Ch,M,nil).
 
@@ -59,3 +64,22 @@ state(lock_fail), lock2([],[],[]) :- state(lock_fail2).
 state(lock_fail2), lock_list([mem(S,true,M,Ch,St)|L])
  :- state(lock_fail2), mem(S,false,M,Ch,St), lock_list(L).
 state(lock_fail2), lock_list([]) :- state(start).
+}*}).
+}.
+
+{model,$p,@p}/, {check,$q,@q} :- {$p,@p,$q,@q}.
+
+{check.
+//uniq用のID生成
+nextid(0).
+nextid(N), {$p,@p} :- \+($p=(id(X),$pp)), N2=N+1 | nextid(N2), {id(N),$p,@p}.
+
+//終了状態検出
+{id(I),$p,@p} :- \+($p=(from(T),$pp)),uniq(I) | {id(I),$p,@p}, end(I).
+
+//終了状態で満たすべき性質の検証
+end(E), {{mem(false,LF,P,C,S,L),$q[LF,P,C,S,L],@q},id(I),$p,@p} :- E=I,uniq(I) |
+	{{mem(false,LF,P,C,S,L),$q[LF,P,C,S,L],@q}*, id(I),$p,@p}, fail(I).
+end(E), {{mem(St,true,P,C,S,L),$q[St,P,C,S,L],@q},id(I),$p,@p}  :-E=I,uniq(I) |
+	{{mem(St,true,P,C,S,L),$q[St,P,C,S,L],@q}*, id(I),$p,@p}, fail2(I)
+}. 
