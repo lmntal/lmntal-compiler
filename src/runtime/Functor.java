@@ -42,7 +42,16 @@ public class Functor implements Serializable {
 	 * 引数をもつアトムの名前として表示名を印字するための文字列を返す。 通常の名前以外（数値や記号）の場合、クォートして返す。
 	 */
 	public String getQuotedFunctorName() {
-		String text = getAbbrName();
+		return QuoteFunctorName(getAbbrName());
+	}
+
+	// 2005.01.02 okabe
+	public String getQuotedFullyFunctorName() {
+		// \rや\nがparseの際に邪魔になるため
+		return QuoteFunctorName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
+	}
+
+	private String QuoteFunctorName(String text) {
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 			text = quoteName(text);
 		}
@@ -50,25 +59,22 @@ public class Functor implements Serializable {
 			text = path + "." + text;
 		return text;
 	}
-
-	// 2005.01.02 okabe
-	public String getQuotedFullyFunctorName() {
-		String text = getName();
-		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
-			text = quoteName(text);
-		}
-		if (path != null)
-			text = path + "." + text;
-		// \rや\nがparseの際に邪魔になるため
-		return text.replace("\\r", "").replace("\\n", "");
-	}
-
+	
 	/**
 	 * 引数をもたないアトムの名前として表示名を印字するための文字列を返す。
 	 * 通常の名前以外のもののうち、リスト構成要素や数値以外のものはクォートして返す。
 	 */
 	public String getQuotedAtomName() {
-		String text = getAbbrName();
+		return QuoteAtomName(getAbbrName());
+	}
+
+	// 2006.01.02 okabe
+	public String getQuotedFullyAtomName() {
+		// \rや\nがparseの際に邪魔になるため
+		return QuoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
+	}
+
+	private String QuoteAtomName(String text) {
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\])$")) {
 			if (!text
 					.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
@@ -79,22 +85,7 @@ public class Functor implements Serializable {
 			text = path + "." + text;
 		return text;
 	}
-
-	// 2006.01.02 okabe
-	public String getQuotedFullyAtomName() {
-		String text = getName();
-		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\])$")) {
-			if (!text
-					.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
-				text = quoteName(text);
-			}
-		}
-		if (path != null)
-			text = path + "." + text;
-		// \rや\nがparseの際に邪魔になるため
-		return text.replace("\\r", "").replace("\\n", "");
-	}
-
+	
 	/**
 	 * 指定された文字列を表すシンボルリテラルのテキスト表現を取得する。 例えば a'b を渡すと 'a\'b' が返る。
 	 */
