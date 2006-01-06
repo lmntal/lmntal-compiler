@@ -149,10 +149,9 @@ public class FrontEnd {
 						Inline.classPath.add(0, new File(args[++i]));
 						break;
 					case 'O':
-						/// -O<0-9>
+						/// -O[<0-9>]  (-O=-O1)
 						/// Optimization level.
 						/// Intermediate instruction sequences are optimized.
-						/// Default level is 1.
 						/// -O1 is equivalent to --optimize-reuse-atom --optimize-reuse-mem,
 						///  --optimize-guard-move.
 						/// -O2 is equivalent to -O1 now.
@@ -174,8 +173,8 @@ public class FrontEnd {
 					case 's':
 						/// -s[<0-9>]  (-s=-s3)
 						/// Shuffle level.  Select a strategy of rule application.
-						///   0: use an atom stack for each membrane (LIFO)
-						///   1: default (atoms are selected in some arbitrary manner)
+						///   0: default. use an atom stack for each membrane (LIFO)
+						///   1: atoms are selected in some arbitrary manner
 						///   2: select atoms and membranes randomly from a membrane
 						///   3: select atoms, mems and rules randomly from a membrane
 						if (args[i].matches("-s[0-9]")) {
