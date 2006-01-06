@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import util.Stack;
+import util.Util;
 
 /** タスク
  * todo タスクに優先度を設定する。これはルールスレッドによるロックがブロッキングになるかどうかの決定に影響させる。
@@ -173,11 +174,7 @@ public class Task extends AbstractTask implements Runnable {
 		boolean flag = false;
 		if(!nondeterministic && Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
 			if(Env.profile){
-				if(Env.majorVersion==1 && Env.minorVersion>4){
-			        start = System.nanoTime();
-				}else{
-			        start = System.currentTimeMillis();
-				}				
+		        start = Util.getTime();
 			}
 			while(it.hasNext()){ // 本膜のもつルールをaに適用
 				if (((Ruleset)it.next()).react(mem, a)) {
@@ -196,20 +193,12 @@ public class Task extends AbstractTask implements Runnable {
 				// TODO システムコールアトムなら、本膜がルート膜でも親膜につみ、親膜を活性化
 			}
 			if(Env.profile){
-				if(Env.majorVersion==1 && Env.minorVersion>4){
-			        stop = System.nanoTime();
-				}else{
-			        stop = System.currentTimeMillis();
-				}				
+		        stop = Util.getTime();
 		        atomtime+=(stop>start)?(stop-start):0;
 			}
 		}else{ // 実行アトムスタックが空の時
 			if(Env.profile){
-				if(Env.majorVersion==1 && Env.minorVersion>4){
-			        start = System.nanoTime();
-				}else{
-			        start = System.currentTimeMillis();
-				}				
+		        start = Util.getTime();
 			}
 			// 今のところ、システムルールセットは膜主導テストでしか実行されない。
 			// 理想では、組み込みの + はインライン展開されるべきである。
@@ -245,11 +234,7 @@ public class Task extends AbstractTask implements Runnable {
 				}
 			}
 			if(Env.profile){
-				if(Env.majorVersion==1 && Env.minorVersion>4){
-			        stop = System.nanoTime();
-				}else{
-			        stop = System.currentTimeMillis();
-				}				
+		        stop = Util.getTime();
 		        memtime+=(stop>start)?(stop-start):0;
 			}
 		}

@@ -6,7 +6,6 @@
 
 package runtime;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import util.Util;
 import daemon.IDConverter;
 
 /**
@@ -101,22 +101,18 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			boolean success;
 			if(Env.profile){
 				long start,stop;
-				if(Env.majorVersion==1 &&Env.minorVersion>4) {
-			        start = System.nanoTime();
-					success = matchTest(mem, atom, r.atomMatch);
-			        stop = System.nanoTime();
-				} else {
-			        start = System.currentTimeMillis();
-					success = matchTest(mem, atom, r.atomMatch);
-			        stop = System.currentTimeMillis();					
-				}
-		        r.time += (stop>start)?(stop-start):0;
-				r.apply++;
+		        start = Util.getTime();
+				success = matchTest(mem, atom, r.atomMatch);
+		        stop = Util.getTime();
+		        synchronized(r){
+		        	r.time += (stop>start)?(stop-start):0;
+		        	r.apply++;
+					if (success)r.succeed ++;
+		        }
 			} else {
 				success = matchTest(mem, atom, r.atomMatch);
 			}
 			if (success) {
-				if(Env.profile)r.succeed ++;
 				result = true;
 				if (Env.fTrace)
 					Task.trace("-->", "@" + id, r.toString());
@@ -139,22 +135,18 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			boolean success;
 			if(Env.profile){
 				long start,stop;
-				if(Env.majorVersion==1 &&Env.minorVersion>4) {
-			        start = System.nanoTime();
-					success = matchTest(mem, null, r.memMatch);
-			        stop = System.nanoTime();
-				} else {
-			        start = System.currentTimeMillis();
-					success = matchTest(mem, null, r.memMatch);
-			        stop = System.currentTimeMillis();					
-				}
-		        r.time += (stop>start)?(stop-start):0;
-				r.apply++;
+		        start = Util.getTime();
+				success = matchTest(mem, null, r.memMatch);
+		        stop = Util.getTime();
+		        synchronized(r){
+			        r.time += (stop>start)?(stop-start):0;
+					r.apply++;
+					if(success)r.succeed++;
+		        }
 			} else {
 				success = matchTest(mem, null, r.memMatch);
 			}
 			if (success) {
-				if(Env.profile)r.succeed++;
 				result = true;
 				if(Env.fTrace)
 					Task.trace("==>", "@" + id, r.toString());

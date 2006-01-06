@@ -52,11 +52,15 @@ module(thread).
 	*/
 	thread_all@@
 	thread.all({$p,@p}), thread.num(N) :- int(N) |
-		thread.allcre(N, {{$p,@p}}), thread.num(N).
-	thread_all2@@
-	thread.allcre(N, {{$p[],@p}}), thread(M,{$q,@q}) :- M>0, N>0, M=:=N, N2=N-1 |
-		thread.allcre(N2, {{$p[],@p}}), thread(M,{$p[],$q,@p,@q}).
-	thread.allcre(0,{{$p[],@p}}):-.
+			thread.allc(N, {$p,@p}), thread.num(N).
+	thread_allc@@
+	thread.allc(N, {$p[],@p}) :- N>0, N2=N-1 |
+			thread.allcre(N, {{$p[],@p}}), thread.allc(N2, {$p[], @p}).
+	thread.allc(0, {$p[],@p}) :-.
+	thread_allcre@@
+	thread.allcre(N,{{$p[],@p}}), thread(M,{$q,@q}) :- int(N),int(M),N=:=M |
+			thread(M, {$p[],$q,@p,@q}).
+	thread.allcre(0,{{$p[],@p}}) :-.
 }.
 
 
