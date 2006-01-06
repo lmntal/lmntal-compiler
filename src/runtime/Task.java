@@ -359,7 +359,8 @@ public class Task extends AbstractTask implements Runnable {
 	// non deterministic LMNtal
 
 	public static HashSet states = new HashSet();
-	private static final Functor PLUS = new Functor("+", 1);
+	private static final Functor FROM = new Functor("from", 1);
+	private static final Functor TO = new Functor("to", 1);
 	private static final Functor FUNCTOR_REDUCE = new Functor("reduce", 3);
 	/** 
 	 * 指定された膜に関するリダクショングラフを生成する。
@@ -414,14 +415,14 @@ public class Task extends AbstractTask implements Runnable {
 					memOut.blockingLock();
 			}
 			//リンク生成
-			Atom f = memExec.newAtom(PLUS);
+			Atom f = memExec.newAtom(FROM);
 			Atom fi = memExec.newAtom(Functor.INSIDE_PROXY);
 			Atom fo = memGraph.newAtom(Functor.OUTSIDE_PROXY);
 			Atom r = memGraph.newAtom(FUNCTOR_REDUCE);
 			Atom n = memGraph.newAtom(new StringFunctor(name));
 			Atom to = memGraph.newAtom(Functor.OUTSIDE_PROXY);
 			Atom ti = memOut.newAtom(Functor.INSIDE_PROXY);
-			Atom t = memOut.newAtom(PLUS);
+			Atom t = memOut.newAtom(TO);
 			memExec.newLink(f, 0, fi, 1);
 			memGraph.newLink(fi, 0, fo, 0);
 			memGraph.newLink(fo, 1, r, 0);
