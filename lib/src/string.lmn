@@ -124,7 +124,31 @@ H=string.concat(S1, S2) :- unary(S1), unary(S2) | H=[:/*inline*/
 	mem.removeAtom(me);
 	:](S1, S2).
 
-H=string.int_of_str(S) :- unary(S) | H=[:/*inline*/
+H=string.substring(S,Begin) :- string(S), int(Begin) | H=[:/*inline*/
+	int b = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Atom sub = mem.newAtom(new StringFunctor(s.substring(b)));
+	mem.relinkAtomArgs(sub, 0, me, 2);
+	
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me.nthAtom(1));
+	mem.removeAtom(me);
+	:](S, Begin).
+
+H=string.substring(S,Begin,End) :- string(S), int(Begin), int(End) | H=[:/*inline*/
+	int b = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+	int e = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Atom sub = mem.newAtom(new StringFunctor(s.substring(b,e)));
+	mem.relinkAtomArgs(sub, 0, me, 3);
+	
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me.nthAtom(1));
+	mem.removeAtom(me.nthAtom(2));
+	mem.removeAtom(me);
+	:](S, Begin, End).
+
+H=string.int_of_str(S) :- string(S) | H=[:/*inline*/
 	int n=0;
 	try{
 		n = Integer.parseInt(me.nth(0));
@@ -136,10 +160,21 @@ H=string.int_of_str(S) :- unary(S) | H=[:/*inline*/
 	mem.removeAtom(me);
 	:](S).
 
-H=string.str_of_int(I) :- unary(I) | H=[:/*inline*/
+H=string.str_of_int(I) :- int(I) | H=[:/*inline*/
 	String s = "";
 	try{
 		s = Integer.toString(((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue());
+	} catch(Exception e) {}
+	Atom res = mem.newAtom(new StringFunctor(s));
+	mem.relinkAtomArgs(res, 0, me, 1);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	:](I).
+
+H=string.str_of_float(I) :- float(I) | H=[:/*inline*/
+	String s = "";
+	try{
+		s = Double.toString(((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue());
 	} catch(Exception e) {}
 	Atom res = mem.newAtom(new StringFunctor(s));
 	mem.relinkAtomArgs(res, 0, me, 1);
