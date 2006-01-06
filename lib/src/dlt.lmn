@@ -1,0 +1,315 @@
+/*
+
+NAME
+
+	Distributed LMNtal Toolkit
+
+SYNOPSIS
+
+    Server:
+      dlt.bind(50000,[accept([],ret),close]).
+    Client:
+      dlt.connect("127.0.0.1",50000,["hoge","moge",close],ret).
+    =>*
+    Server:
+      dlt.socket([],["hoge","moge"],ret,Obj),closed=[].
+    Client:
+      closed([],ret).
+AUTHOR
+
+	Ryo Okabe
+
+HISTORY
+
+	06/01/07 released
+
+*/
+
+[:/*inline_define*/
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.InetAddress;
+
+/**
+ *  class: AcceptThread
+ */
+class AcceptThread extends Thread {
+  private ServerSocket servSock;
+  private final Membrane mem;
+  private Atom atAtom = null;
+
+  /**
+   *  AcceptThread#AcceptThread()
+   *  @param servSock
+   *  @param mem
+   */
+  AcceptThread(ServerSocket servSock, Membrane mem) {
+    this.servSock = servSock;
+    this.mem = mem;
+  }
+
+  /**
+   *  AcceptThread#setObjAtom()
+   *  @param atAtom
+   */
+  public void setObjAtom(Atom atAtom) {
+    this.atAtom = atAtom;
+  }
+  
+  /**
+   *  AcceptThread#run()
+   */
+  public void run() {
+    try {
+      Socket sock = servSock.accept();
+      BufferedReader reader = 
+        new BufferedReader(new InputStreamReader(sock.getInputStream()));
+      PrintWriter writer = new PrintWriter(sock.getOutputStream());
+      ReaderThread rt = new ReaderThread(sock,reader,mem);
+      Vector obj = new Vector(3);
+      obj.add(sock);
+      obj.add(writer);
+      obj.add(rt);
+      Functor objFunc = new ObjectFunctor(obj);
+System.out.println("before asyncLock: "+mem);
+      mem.asyncLock();
+      Atom objAtom = mem.newAtom(objFunc);
+      rt.setObjAtom(objAtom);
+      Atom sockAtom = mem.newAtom(new Functor("socket",3,"dlt"));
+      Atom consAtom = atAtom.nthAtom(0).nthAtom(0);
+      Atom cmdAtom = consAtom.nthAtom(0);
+      mem.relinkAtomArgs(sockAtom,0,cmdAtom,0);
+      mem.relinkAtomArgs(sockAtom,1,cmdAtom,1);
+      mem.newLink(sockAtom,2,objAtom,0);
+      mem.unifyAtomArgs(consAtom,1,consAtom,2);
+      consAtom.remove();
+      cmdAtom.remove();
+      mem.asyncUnlock();
+System.out.println("after asyncLock: "+mem);
+      mem.makePerpetual();
+      System.out.println("mem.perpetual = "+mem.perpetual);
+      rt.start();
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+  }
+}
+
+/** 
+ *  class: ReaderThread
+ */
+class ReaderThread implements Runnable {
+  volatile Thread th = null;
+  private Socket sock;
+  private BufferedReader reader;
+  private final Membrane mem;
+  private Atom objAtom = null;
+  
+  /**
+   *  ReaderThread#ReaderThread()
+   *  @param sock
+   *  @param reader
+   *  @param mem
+   */
+  ReaderThread(Socket sock, BufferedReader reader, Membrane mem) {
+    this.sock = sock;
+    this.reader = reader;
+    this.mem = mem;
+  }
+  
+  /**
+   *  ReaderThread#setObjAtom()
+   *  @param objAtom
+   */
+  public void setObjAtom(Atom objAtom) {
+    this.objAtom = objAtom;
+  }
+  
+  /**
+   *  ReaderThread#start()
+   */
+  public void start() {
+    if(th == null) {
+      th = new Thread(this);
+      th.start();
+    }
+  }
+  
+  /**
+   *  ReaderThread#run()
+   */
+  public void run(){
+    Thread thisThread = Thread.currentThread();
+    while(th == thisThread) {
+      try {
+        if(reader.ready()) {
+          String data = reader.readLine();
+System.out.println("readLine: "+data);
+          Atom sockAtom = objAtom.nthAtom(0);
+          System.out.println("before asyncLock: "+mem);
+          mem.asyncLock();
+          Atom dataAtom = mem.newAtom(new StringFunctor(data));
+          Atom consAtom = mem.newAtom(new Functor(".",3));
+          mem.newLink(dataAtom,0,consAtom,0);
+          mem.relinkAtomArgs(consAtom,2,sockAtom,1);
+          mem.newLink(consAtom,1,sockAtom,1);
+          mem.asyncUnlock();
+          System.out.println("after asyncUnlock: "+mem);
+        }
+      } catch(IOException e) {
+        e.printStackTrace();
+      }
+      try {
+        th.sleep(100);
+      } catch(InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+    th = null;
+  }
+  
+  /**
+   *  ReaderThread#stop()
+   */
+  public void stop() {
+    th = null;
+    try {
+      reader.close();
+      sock.close();
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+  }
+}
+:]
+
+{
+module(dlt).
+
+/**
+ *  module: bind
+ *    create ServerSocket and AcceptThread
+ */
+dlt.bind(Port,Cmd) :- int(Port) |
+  dlt.bound(Cmd,Obj),
+  Obj = [:/*inline*/
+    int port = Integer.parseInt(me.nth(0));
+    try {
+      ServerSocket servSock = new ServerSocket(port);
+      AcceptThread at = new AcceptThread(servSock,(Membrane)mem);
+      Functor atFunc = new ObjectFunctor(at);
+      Atom atAtom = mem.newAtom(atFunc);
+      at.setObjAtom(atAtom);
+      mem.relinkAtomArgs(atAtom,0,me,1);
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+    me.nthAtom(0).remove();
+    me.remove();
+  :](Port).
+
+/**
+ *  module: bound
+ *    AcceptThread starts running
+ */
+dlt.bound([accept(Send,Recv)|T],Obj) :- 
+  dlt.bound([accepting(Send,Recv)|T],O),
+  O=[:/*inline*/
+    ObjectFunctor atFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    AcceptThread at = (AcceptThread)atFunc.getObject();
+    at.start();
+    mem.unifyAtomArgs(me,0,me,1);
+    me.remove();
+  :](Obj).
+  
+/**
+ *  rule: close
+ *    close ServerSocket
+ */
+close @@
+dlt.bound([close|T],Obj) :-
+  closed(T),
+  [:/*inline*/
+    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    ServerSocket servSock = (ServerSocket)objFunc.getObject();
+    try {
+      servSock.close();
+    } catch(IOException e) {
+      e.printStackTrace();
+    } 
+  :](Obj).
+  
+  
+/**
+ *  module: connect
+ *    connect to remote server
+ */
+ 
+dlt.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
+  dlt.socket(Send,Recv,Obj),
+  Obj = [:/*inline*/
+    String host = me.nth(0);
+    int port = Integer.parseInt(me.nth(1));
+    try {
+      InetAddress ip = InetAddress.getByName(host);
+      Socket sock = new Socket(ip,port);
+      BufferedReader reader = 
+        new BufferedReader(new InputStreamReader(sock.getInputStream()));
+      PrintWriter writer = new PrintWriter(sock.getOutputStream());
+      ReaderThread rt = new ReaderThread(sock,reader,(Membrane)mem);
+      Vector obj = new Vector(3);
+      obj.add(sock);
+      obj.add(writer);
+      obj.add(rt);
+      Functor objFunc = new ObjectFunctor(obj);
+      Atom objAtom = mem.newAtom(objFunc);
+      rt.setObjAtom(objAtom);
+      mem.relinkAtomArgs(objAtom,0,me,2);
+      mem.makePerpetual();
+      System.out.println("mem.perpetual = "+mem.perpetual);
+      rt.start();
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+    me.nthAtom(0).remove();
+    me.nthAtom(1).remove();
+    me.remove();
+  :](Host,Port).
+
+/**
+ *  rule: send
+ *    send data to remote socket
+ */
+send @@
+dlt.socket([H|T],Recv,Obj) :- string(H) |
+  dlt.socket(T,Recv,O),
+  O = [:/*inline*/
+    String data = me.nth(0);
+    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(1).getFunctor();
+    Vector obj = (Vector)objFunc.getObject();
+    PrintWriter writer = (PrintWriter)obj.get(1);
+    writer.println(data);
+    writer.flush();
+    mem.unifyAtomArgs(me,1,me,2);
+    me.nthAtom(0).remove();
+    me.remove();
+  :](H,Obj).
+
+/**
+ *  rule: close
+ *    close Socket and stop ReaderThread
+ */
+close @@
+dlt.socket([close|T],Recv,Obj) :- 
+  closed(T,Recv),
+  [:/*inline*/
+    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    Vector obj = (Vector)objFunc.getObject();
+    ((PrintWriter)obj.get(1)).close();
+    ((ReaderThread)obj.get(2)).stop();
+  :](Obj).
+}
