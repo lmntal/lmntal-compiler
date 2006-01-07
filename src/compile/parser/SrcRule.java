@@ -136,37 +136,5 @@ class SrcRule {
 	}
 	void setText() {
 		text = SrcDumper.dump(this);
-		System.out.println(text);
-//		StringBuffer buf = new StringBuffer();
-//		
-//		if (name != null && !name.equals("")) {
-//			buf.append(name + " @@ ");
-//		}
-//		if (head.size() > 0) {
-//			Iterator it = head.iterator();
-//			buf.append(it.next());
-//			while (it.hasNext()) {
-//				buf.append(", " + it.next());
-//			}
-//		}
-//		buf.append(" :- ");
-//		if (guard.size() > 0) {
-//			Iterator it = guard.iterator();
-//			buf.append(it.next());
-//			while (it.hasNext()) {
-//				buf.append(", " + it.next());
-//			}
-//			buf.append(" | ");
-//		}
-//		if (body.size() > 0) {
-//			Iterator it = body.iterator();
-//			buf.append(it.next());
-//			while (it.hasNext()) {
-//				buf.append(", " + it.next());
-//			}
-//		}
-//		buf.append(".");
-//	
-//		return buf.toString();
 	}
 }
