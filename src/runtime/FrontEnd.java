@@ -137,9 +137,16 @@ public class FrontEnd {
 						/// Click button to proceed reaction. Close the window to quit.
 						Env.fGUI = true;
 						break;
+					case 'o':
+						/// -o <file>
+						/// Specify the output JAR file name.
+						Translator.outputName = args[++i];
+						break;
 					case 'I':
 						/// -I <path>
-						/// Additional path for LMNtal library
+						/// Additional path for LMNtal library. 
+						/// This option is vailable only when --use-source-library option is specified.
+						/// Othorwise, LMNtal library must be in your CLASSPATH environment variable. 
 						/// The default path is ./lmntal_lib and ../lmntal_lib
 						compile.Module.libPath.add(new File(args[++i]));
 						break;

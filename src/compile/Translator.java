@@ -62,6 +62,7 @@ public class Translator {
 		FrontEnd.processOptions(args);
 		Env.fInterpret = false;
 		Env.fLibrary = true;
+		outputName = null;
 
 		// public/*.lmn から std_lib.jar を作成
 		fStandardLibrary = true;
@@ -143,6 +144,8 @@ public class Translator {
 	private static String packageName;
 	/** LMNtalソースファイル名 */
 	private static String sourceName;
+	/** 出力するJARファイル名*/
+	public static String outputName;
 	/** 変換後の Java ソースを削除するかどうか */
 	public static boolean fKeepSource = false;
 	/** 一時ディレクトリとして利用するディレクトリ名 */
@@ -339,8 +342,12 @@ public class Translator {
 
 		success++;
 		//JARの生成
-		if (!fStandardLibrary)
-			genJAR(sourceName + ".jar");
+		if (!fStandardLibrary) {
+			if (outputName == null)
+				genJAR(sourceName + ".jar");
+			else
+				genJAR(outputName);
+		}
 	}
 	private static void genJAR(String outName) throws IOException {
 		Manifest mf = new Manifest();
