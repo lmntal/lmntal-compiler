@@ -15,6 +15,8 @@ public final class RuleStructure {
 	/** ルール名
 	 */
 	public String name;
+	/** テキスト表現 */
+	private  String text;
 	
 	/** 左辺が空のときの警告を抑制するかどうか */
 	public boolean fSuppressEmptyHeadWarning = false;
@@ -47,34 +49,17 @@ public final class RuleStructure {
 	 * コンストラクタ
 	 * @param mem 所属膜
 	 */
-	public RuleStructure(Membrane mem) {
+	public RuleStructure(Membrane mem, String text) {
 		this.parent = mem;
 		// io:{(print:-inline)} の print は io.print にしたい。
 		// が、print は io 膜直属ではなくルール左辺の膜に所属するのでルールの膜も同じ名前をつけておく。
 		leftMem.name = mem.name;
 		rightMem.name = mem.name;
+		this.text = text;
 	}
 
 	public String toString() {
-		String text="";
-		if(name!=null) text+=name+" @@ ";
-		text += "( " + leftMem.toStringWithoutBrace() + " :- ";
-		String guard = "";
-		if (!guardMem.atoms.isEmpty()) {
-			guard += guardMem.toStringAsGuardTypeConstraints() + " ";
-		}
-		Iterator it = guardNegatives.iterator();
-		while (it.hasNext()) {
-			String eqstext = "";
-			Iterator it2 = ((LinkedList)it.next()).iterator();
-			while (it2.hasNext()) {
-				eqstext += "," + ((ProcessContextEquation)it2.next()).toString();
-			}
-			if (eqstext.length() > 0)  eqstext = eqstext.substring(1);
-			guard += "\\+(" + eqstext + ") ";
-		}
-		if (guard.length() > 0)  text += guard + "| ";
-		return text + rightMem.toStringWithoutBrace() + " )";
+		return text;
 	}
 	// 2006.01.02 okabe
 	/**

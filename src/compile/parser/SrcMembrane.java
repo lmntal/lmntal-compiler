@@ -35,5 +35,5 @@ class SrcMembrane {
 	 * @return 子プロセスのリスト
 	 */
 	public LinkedList getProcess() { return process; }
-	public String toString() { return SrcDumper.dumpMembrane(this,0); }
+	public String toString() { return SrcDumper.dumpMembrane(this); }
 }

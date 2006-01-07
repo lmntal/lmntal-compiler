@@ -53,7 +53,7 @@ public class RulesetCompiler {
 		Env.c("RulesetGenerator.runStartWithNull");
 		// 世界を生成する
 		Membrane root = new Membrane(null);
-		RuleStructure rs = new RuleStructure(root);
+		RuleStructure rs = new RuleStructure(root, "(initial rule)");
 		rs.fSuppressEmptyHeadWarning = true;
 		rs.leftMem  = new Membrane(null);
 		rs.rightMem = m;

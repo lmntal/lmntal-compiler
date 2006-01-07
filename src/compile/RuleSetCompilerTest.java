@@ -86,7 +86,7 @@ public class RuleSetCompilerTest {
 	 */
 	static Membrane getTestStructure1() {
 		// ルート膜の親膜は null
-		RuleStructure rs = new RuleStructure(new Membrane(null));
+		RuleStructure rs = new RuleStructure(new Membrane(null), null);
 		
 		Membrane m = new Membrane(null);
 		
@@ -130,11 +130,11 @@ public class RuleSetCompilerTest {
 	 */
 	static RuleStructure getTestRule() {
 		// ルート膜の親膜は null
-		RuleStructure rs = new RuleStructure(null);
+		RuleStructure rs = new RuleStructure(null, null);
 		Membrane m = new Membrane(null);
 		
 		// ルール
-		RuleStructure r = new RuleStructure(null);
+		RuleStructure r = new RuleStructure(null, null);
 		r.leftMem.atoms.add( new Atom(m, "v", 0) );
 		r.rightMem.atoms.add( new Atom(m, "w", 0) );
 		r.rightMem.atoms.add( new Atom(m, "w", 0) );

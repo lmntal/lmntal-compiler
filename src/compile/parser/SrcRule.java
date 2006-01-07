@@ -3,6 +3,7 @@
  */
 
 package compile.parser;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 class SrcRule {
@@ -12,6 +13,7 @@ class SrcRule {
 	public LinkedList body;			// ボディプロセス
 	public LinkedList guard;			// ガードプロセス
 	public LinkedList guardNegatives;	// ガード否定条件構文のリスト
+	private String text; //ルールのテキスト表現
 	/**
 	 * 指定されたヘッドルールとボディルールと空のガードでルールを初期化します
 	 * @param head ヘッドのリスト
@@ -35,7 +37,6 @@ class SrcRule {
 		this.guardNegatives = new LinkedList();
 		this.body = body;
 		addTypeConstraint(head);
-		
 	}
 	
 	/**
@@ -127,5 +128,45 @@ class SrcRule {
 	
 	public String toString() {
 		return "(rule:"+name+")";
+	}
+	
+	/**LMNtalソース形式のテキスト表現を取得する。*/
+	public String getText() {
+		return text;
+	}
+	void setText() {
+		text = SrcDumper.dump(this);
+		System.out.println(text);
+//		StringBuffer buf = new StringBuffer();
+//		
+//		if (name != null && !name.equals("")) {
+//			buf.append(name + " @@ ");
+//		}
+//		if (head.size() > 0) {
+//			Iterator it = head.iterator();
+//			buf.append(it.next());
+//			while (it.hasNext()) {
+//				buf.append(", " + it.next());
+//			}
+//		}
+//		buf.append(" :- ");
+//		if (guard.size() > 0) {
+//			Iterator it = guard.iterator();
+//			buf.append(it.next());
+//			while (it.hasNext()) {
+//				buf.append(", " + it.next());
+//			}
+//			buf.append(" | ");
+//		}
+//		if (body.size() > 0) {
+//			Iterator it = body.iterator();
+//			buf.append(it.next());
+//			while (it.hasNext()) {
+//				buf.append(", " + it.next());
+//			}
+//		}
+//		buf.append(".");
+//	
+//		return buf.toString();
 	}
 }

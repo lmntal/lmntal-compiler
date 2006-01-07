@@ -1,6 +1,8 @@
 package compile.parser;
 import java.util.LinkedList;
 
+import util.Util;
+
 /** ソースファイル中のアトム表現 */
 class SrcAtom {
 	protected LinkedList process = null;
@@ -79,6 +81,10 @@ class SrcAtom {
 
 	/** アトム名を取得する */
 	public String getName() { return srcname.getName(); }
+	/** アトム名のソースコード中の表現を取得する。*/
+	public String getSourceName() {
+		return srcname.getSourceName();
+	}
 	/** アトム名トークンの種類を取得する */
 	public int getNameType() { return srcname.getType(); }
 	
@@ -88,5 +94,5 @@ class SrcAtom {
 	 */
 	public LinkedList getProcess() { return process; }
 	
-	public String toString() { return SrcDumper.dumpAtom(this,0); }
+	public String toString() { return SrcDumper.dump(this); }
 }

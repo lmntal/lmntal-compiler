@@ -64,6 +64,7 @@ public class LMNParser {
 	 */
 	public Membrane parse() throws ParseException {
 		LinkedList srcProcess = parseSrc();
+		setRuleText(srcProcess);
 		Membrane mem = new Membrane(null);
 		expander.incorporateSignSymbols(srcProcess);
 		expander.incorporateModuleNames(srcProcess);
@@ -81,24 +82,40 @@ public class LMNParser {
 		@return 解析されたソースコードのリスト
 		@throws ParseException 
 	*/
-	protected LinkedList parseSrc() { // throws ParseException {
+	protected LinkedList parseSrc() throws ParseException {
 		parser p = new parser(lex);
 		LinkedList result = null;
 		try {
 			result = (LinkedList)p.parse().value;
-		} catch (Exception e) {
-//			throw new ParseException(e.getMessage()+" "+runtime.Env.parray(java.util.Arrays.asList(e.getStackTrace()), "\n"));	
-//			error("PARSE ERROR: " + p.error_sym());
-			Env.nErrors++;
-			result = new LinkedList();
 		} catch (Error e) {
 			error("ERROR: " + e.getMessage());
 			result = new LinkedList();
+		} catch (Throwable e) {
+			throw new ParseException(e.getMessage(), e);	
 		}
 		return result;
 	}
 
 	////////////////////////////////////////////////////////////////
+
+	/** ルールのテキスト表現を決定する */
+	void setRuleText(LinkedList process) {
+		ListIterator it = process.listIterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcAtom) {
+				setRuleText(((SrcAtom)obj).getProcess());
+			} else if (obj instanceof SrcMembrane) {
+				setRuleText(((SrcMembrane)obj).getProcess());
+			} else if (obj instanceof LinkedList) {
+				setRuleText((LinkedList)obj);
+			} else if (obj instanceof SrcRule) {
+				SrcRule rule = (SrcRule)obj;
+				rule.setText();
+				setRuleText(rule.body);
+			}
+		}
+	}
 
 	/** ユニークな新しいリンク名を生成する */
 	String generateNewLinkName() {
@@ -307,7 +324,7 @@ public class LMNParser {
 	 * @param mem 追加先の膜
 	 */
 	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
-		RuleStructure rule = new RuleStructure(mem);
+		RuleStructure rule = new RuleStructure(mem, sRule.getText());
 		rule.name = sRule.name;
 		// 略記法の展開		
 		expander.expandRuleAbbreviations(sRule);
@@ -613,7 +630,7 @@ public class LMNParser {
 			it = links.keySet().iterator();
 			while (it.hasNext()) {
 				LinkOccurrence link = (LinkOccurrence)links.get(it.next());
-				error("SYNTAX ERROR: rule with free variable: "+ link.name);
+				error("SYNTAX ERROR: rule with free variable: "+ link.name + "\n    in " + rule);
 				LinkedList process = new LinkedList();
 				process.add(new SrcLink(link.name));
 				SrcAtom sAtom = new SrcAtom(link.name, process);
@@ -1101,7 +1118,7 @@ class SyntaxExpander {
 						if (lhs instanceof SrcProcessContext) {
 							if (((SrcProcessContext)lhs).args != null) {
 								warning("WARNING: argument of constrained process context is ignored: "
-									+ SrcDumper.dump(lhs,0).replaceAll("\n",""));
+									+ SrcDumper.dump(lhs).replaceAll("\n",""));
 								((SrcProcessContext)lhs).args = null;
 							}
 							Object rhs = sAtom.getProcess().get(1);
@@ -1116,7 +1133,7 @@ class SyntaxExpander {
 					}
 				}
 				error("SYNTAX ERROR: process context equation expected rather than: "
-					+ SrcDumper.dump(obj2,0).replaceAll("\n",""));
+					+ SrcDumper.dump(obj2).replaceAll("\n",""));
 			}
 		}
 	}

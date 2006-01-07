@@ -496,6 +496,7 @@ public class FrontEnd {
 			}	
 			catch (ParseException e) {
 				Env.p("Compilation Failed");
+				Env.d(e);
 				return;	
 			}
 			

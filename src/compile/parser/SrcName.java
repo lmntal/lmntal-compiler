@@ -1,5 +1,7 @@
 package compile.parser;
 
+import util.Util;
+
 /**
  * ソースファイル中の名前トークン（アトムの名前の記述に使用される文字列）を表すクラス
  * <p>このクラスは現在、プロセス文脈名およびルール文脈名では使用されない。
@@ -22,7 +24,7 @@ public class SrcName {
 	public static final int PLAIN  = 0; // aaa 12 -12 3.14 -3.14e-1 ＜クオータなしの名前トークン＞
 	public static final int SYMBOL = 1; // 'aaa' 'AAA' '12' '-12' '3.14' '-3.14e-1'
 	public static final int STRING = 2; // "aaa" "AAA" "12" "-12" "3.14" "-3.14e-1"
-	public static final int QUOTED = 3; // [[aaa]] [[AAA]] [[12]] [[-12]] [[3.14]] [[-3.14e-1]]
+	public static final int QUOTED = 3; // [:aaa:] [:AAA:] [:12:] [:-12:] [:3.14:] [:-3.14e-1:]
 	public static final int PATHED = 4; // module.p module:p
 
 	/** 標準の名前トークンの表現を生成する。
@@ -43,5 +45,22 @@ public class SrcName {
 	/** トークンの種類を返す */
 	public int getType() {
 		return type;
+	}
+	/** ソースコード中の表現を取得する。*/
+	public String getSourceName() {
+		switch (type) {
+		case SYMBOL:
+			return Util.quoteString(name, '\'');
+		case STRING:
+			return Util.quoteString(name, '"');
+		case QUOTED:
+			return "[:" + name + ":]";
+		default:
+			//中置記法のアトムも通常の記法になってしまうので、特殊名はクォートしておく。
+			if (name.matches("^([a-z0-9][A-Za-z0-9_]*)$"))
+				return name;
+			else
+				return Util.quoteString(name, '\'');
+		}
 	}
 }
