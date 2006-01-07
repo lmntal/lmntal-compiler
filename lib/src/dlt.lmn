@@ -26,13 +26,8 @@ HISTORY
 */
 
 [:/*inline_define*/
-import java.io.BufferedReader;
-import java.io.PrintWriter;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.InetAddress;
+import java.io.*;
+import java.net.*;
 
 /**
  *  class: AcceptThread
@@ -91,7 +86,6 @@ System.out.println("before asyncLock: "+mem);
       mem.asyncUnlock();
 System.out.println("after asyncLock: "+mem);
       mem.makePerpetual();
-      System.out.println("mem.perpetual = "+mem.perpetual);
       rt.start();
     } catch(IOException e) {
       e.printStackTrace();
@@ -144,7 +138,7 @@ class ReaderThread implements Runnable {
    */
   public void run(){
     Thread thisThread = Thread.currentThread();
-    while(th == thisThread) {
+    while(th == thisThread && !(sock.isClosed())) {
       try {
         if(reader.ready()) {
           String data = reader.readLine();
@@ -180,6 +174,7 @@ System.out.println("readLine: "+data);
     try {
       reader.close();
       sock.close();
+      System.out.println("ReaderThread: stopped");
     } catch(IOException e) {
       e.printStackTrace();
     }
@@ -197,19 +192,26 @@ module(dlt).
 dlt.bind(Port,Cmd) :- int(Port) |
   dlt.bound(Cmd,Obj),
   Obj = [:/*inline*/
+    // throws NumberFormatException 
     int port = Integer.parseInt(me.nth(0));
     try {
+      // throws IOException and SecurityException
       ServerSocket servSock = new ServerSocket(port);
       AcceptThread at = new AcceptThread(servSock,(Membrane)mem);
       Functor atFunc = new ObjectFunctor(at);
       Atom atAtom = mem.newAtom(atFunc);
       at.setObjAtom(atAtom);
       mem.relinkAtomArgs(atAtom,0,me,1);
+      me.nthAtom(0).remove();
+      me.remove();
     } catch(IOException e) {
       e.printStackTrace();
+      Atom failedAtom = mem.newAtom(new Functor("failed",2));
+      mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);
+      mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);
+      me.nthAtom(1).remove();
+      me.remove();
     }
-    me.nthAtom(0).remove();
-    me.remove();
   :](Port).
 
 /**
@@ -221,6 +223,7 @@ dlt.bound([accept(Send,Recv)|T],Obj) :-
   O=[:/*inline*/
     ObjectFunctor atFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     AcceptThread at = (AcceptThread)atFunc.getObject();
+    at.setName("at");
     at.start();
     mem.unifyAtomArgs(me,0,me,1);
     me.remove();
@@ -231,7 +234,7 @@ dlt.bound([accept(Send,Recv)|T],Obj) :-
  *    close ServerSocket
  */
 close @@
-dlt.bound([close|T],Obj) :-
+dlt.bound([close|T],Obj) :- class(Obj,"AcceptThread") |
   closed(T),
   [:/*inline*/
     ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
@@ -255,7 +258,9 @@ dlt.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
     String host = me.nth(0);
     int port = Integer.parseInt(me.nth(1));
     try {
+      // throws UnknownHostException and SecurityException
       InetAddress ip = InetAddress.getByName(host);
+      // throws IOException and SecurityException
       Socket sock = new Socket(ip,port);
       BufferedReader reader = 
         new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -270,14 +275,20 @@ dlt.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
       rt.setObjAtom(objAtom);
       mem.relinkAtomArgs(objAtom,0,me,2);
       mem.makePerpetual();
-      System.out.println("mem.perpetual = "+mem.perpetual);
       rt.start();
+      me.nthAtom(0).remove();
+      me.nthAtom(1).remove();
+      me.remove();
     } catch(IOException e) {
       e.printStackTrace();
+      Atom failedAtom = mem.newAtom(new Functor("failed",4));
+      mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);
+      mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);
+      mem.relinkAtomArgs(failedAtom,2,me.nthAtom(2),0);
+      mem.relinkAtomArgs(failedAtom,3,me.nthAtom(2),1);
+      me.nthAtom(2).remove();
+      me.remove();
     }
-    me.nthAtom(0).remove();
-    me.nthAtom(1).remove();
-    me.remove();
   :](Host,Port).
 
 /**
@@ -304,12 +315,14 @@ dlt.socket([H|T],Recv,Obj) :- string(H) |
  *    close Socket and stop ReaderThread
  */
 close @@
-dlt.socket([close|T],Recv,Obj) :- 
+dlt.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
   closed(T,Recv),
   [:/*inline*/
     ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     Vector obj = (Vector)objFunc.getObject();
     ((PrintWriter)obj.get(1)).close();
     ((ReaderThread)obj.get(2)).stop();
+    me.nthAtom(0).remove();
+    me.remove();
   :](Obj).
 }
