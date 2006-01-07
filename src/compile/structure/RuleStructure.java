@@ -61,29 +61,4 @@ public final class RuleStructure {
 	public String toString() {
 		return text;
 	}
-	// 2006.01.02 okabe
-	/**
-	 * @return String　ルール構造の文字列表現（アトム名やファンクタ名は省略しない）
-	 */
-	public String encode() {
-		String text="";
-		if(name!=null) text+=name+" @@ ";
-		text += "( " + leftMem.encode() + " :- ";
-		String guard = "";
-		if (!guardMem.atoms.isEmpty()) {
-			guard += guardMem.toStringAsGuardTypeConstraints() + " ";
-		}
-		Iterator it = guardNegatives.iterator();
-		while (it.hasNext()) {
-			String eqstext = "";
-			Iterator it2 = ((LinkedList)it.next()).iterator();
-			while (it2.hasNext()) {
-				eqstext += "," + ((ProcessContextEquation)it2.next()).toString();
-			}
-			if (eqstext.length() > 0)  eqstext = eqstext.substring(1);
-			guard += "\\+(" + eqstext + ") ";
-		}
-		if (guard.length() > 0)  text += guard + "| ";
-		return text + rightMem.encode() + " )";
-	}
 }

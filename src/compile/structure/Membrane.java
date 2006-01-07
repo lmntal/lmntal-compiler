@@ -132,14 +132,7 @@ public final class Membrane {
 		}
 		list.addAll(encodedAtoms);
 		list.addAll(mems);
-		// rules
-		Iterator it2 = rules.iterator();
-		LinkedList encodedRules = new LinkedList();
-		while(it2.hasNext()) {
-			RuleStructure rs = (RuleStructure) it2.next();
-			encodedRules.add(rs.encode());
-		}
-		list.addAll(encodedRules);
+		list.addAll(rules);
 		list.addAll(processContexts);
 		list.addAll(ruleContexts);
 		list.addAll(typedProcessContexts);
