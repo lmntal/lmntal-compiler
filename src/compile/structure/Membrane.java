@@ -115,29 +115,7 @@ public final class Membrane {
 		//return list.toString().replaceAll("^.|.$","");
 		return Env.parray(list, ", ").toString();
 	}
-	// 2006.01.02 okabe
-	/**
-	 * toStringWithoutBrace()のフル表示版
-	 * 名前の長いアトムやファンクタを省略しない
-	 * @return String
-	 */
-	public String encode() {
-		LinkedList list = new LinkedList();
-		// atoms
-		Iterator it1 = atoms.iterator();
-		LinkedList encodedAtoms = new LinkedList();
-		while(it1.hasNext()) {
-			Atom a = (Atom) it1.next();
-			encodedAtoms.add(a.encode());
-		}
-		list.addAll(encodedAtoms);
-		list.addAll(mems);
-		list.addAll(rules);
-		list.addAll(processContexts);
-		list.addAll(ruleContexts);
-		list.addAll(typedProcessContexts);
-		return Env.parray(list, ", ").toString();
-	}
+
 	public String toString() {
 		String ret = "{ " + toStringWithoutBrace() + " }" + (kind==1 ? "_" : "") + (stable ? "/" : "");
 		if (pragmaAtHost != null) {
