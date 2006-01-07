@@ -1,0 +1,5 @@
+%level1
+dlt.connect("127.0.0.1",50000,["I","am","hoge",close],recv).
+
+%level2
+%dlt.connect("127.0.0.1",50000,["1","2","3"],ret).
