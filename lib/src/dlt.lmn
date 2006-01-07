@@ -232,6 +232,7 @@ dlt.bound([accept(Send,Recv)|T],Obj) :-
 /**
  *  rule: close
  *    close ServerSocket
+ *  TODO: delete 跡形もなく消し去る
  */
 close @@
 dlt.bound([close|T],Obj) :- class(Obj,"AcceptThread") |
@@ -313,6 +314,7 @@ dlt.socket([H|T],Recv,Obj) :- string(H) |
 /**
  *  rule: close
  *    close Socket and stop ReaderThread
+ *  TODO: delete 跡形もなく消し去る
  */
 close @@
 dlt.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
