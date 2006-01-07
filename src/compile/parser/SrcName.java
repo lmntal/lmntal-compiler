@@ -57,10 +57,18 @@ public class SrcName {
 			return "[:" + name + ":]";
 		default:
 			//中置記法のアトムも通常の記法になってしまうので、特殊名はクォートしておく。
-			if (name.matches("^([a-z0-9][A-Za-z0-9_]*)$"))
-				return name;
-			else
-				return Util.quoteString(name, '\'');
+			String path, n;
+			int pos = name.indexOf('.');
+			if (pos > 0) {
+				path = name.substring(0, pos);
+				n = name.substring(pos+1);
+			} else {
+				path = null;
+				n = name;
+			}
+			if (!n.matches("^([a-z0-9][A-Za-z0-9_]*)$"))
+				n = Util.quoteString(name, '\'');
+			return (path == null ? "" : path + ".") + n;
 		}
 	}
 }
