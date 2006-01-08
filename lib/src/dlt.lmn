@@ -56,6 +56,17 @@ class AcceptThread extends Thread {
   }
   
   /**
+   *  AcceptThread#closeServerSocket()
+   */
+  public void closeServerSocket() {
+    try {
+      servSock.close();
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  /**
    *  AcceptThread#run()
    */
   public void run() {
@@ -70,7 +81,7 @@ class AcceptThread extends Thread {
       obj.add(writer);
       obj.add(rt);
       Functor objFunc = new ObjectFunctor(obj);
-System.out.println("before asyncLock: "+mem);
+//System.out.println("before asyncLock: "+mem);
       mem.asyncLock();
       Atom objAtom = mem.newAtom(objFunc);
       rt.setObjAtom(objAtom);
@@ -84,7 +95,7 @@ System.out.println("before asyncLock: "+mem);
       consAtom.remove();
       cmdAtom.remove();
       mem.asyncUnlock();
-System.out.println("after asyncLock: "+mem);
+//System.out.println("after asyncLock: "+mem);
       mem.makePerpetual();
       rt.start();
     } catch(IOException e) {
@@ -142,9 +153,8 @@ class ReaderThread implements Runnable {
       try {
         if(reader.ready()) {
           String data = reader.readLine();
-System.out.println("readLine: "+data);
           Atom sockAtom = objAtom.nthAtom(0);
-          System.out.println("before asyncLock: "+mem);
+//System.out.println("before asyncLock: "+mem);
           mem.asyncLock();
           Atom dataAtom = mem.newAtom(new StringFunctor(data));
           Atom consAtom = mem.newAtom(new Functor(".",3));
@@ -152,7 +162,7 @@ System.out.println("readLine: "+data);
           mem.relinkAtomArgs(consAtom,2,sockAtom,1);
           mem.newLink(consAtom,1,sockAtom,1);
           mem.asyncUnlock();
-          System.out.println("after asyncUnlock: "+mem);
+//System.out.println("after asyncUnlock: "+mem);
         }
       } catch(IOException e) {
         e.printStackTrace();
@@ -239,14 +249,11 @@ dlt.bound([close|T],Obj) :- class(Obj,"AcceptThread") |
   closed(T),
   [:/*inline*/
     ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
-    ServerSocket servSock = (ServerSocket)objFunc.getObject();
-    try {
-      servSock.close();
-    } catch(IOException e) {
-      e.printStackTrace();
-    } 
+    AcceptThread at = (AcceptThread)objFunc.getObject();
+    at.closeServerSocket();
+    me.nthAtom(0).remove();
+    me.remove();
   :](Obj).
-  
   
 /**
  *  module: connect
