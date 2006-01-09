@@ -1,0 +1,98 @@
+/*
+
+NAME
+
+	codec module
+
+SYNOPSIS
+
+    Ret=codec.memEncoder({a. a:-b}),
+    codec.memDecoder(Ret).
+    
+Sample
+
+        sample/okabe/codec.lmn
+
+AUTHOR
+
+	Ryo Okabe
+
+HISTORY
+
+	1.0  2006/01/10(Tue)
+
+*/
+
+
+[:/*inline_define*/
+import java.io.*;
+import compile.*;
+import compile.parser.LMNParser;
+import compile.parser.ParseException;
+import compile.parser.intermediate.RulesetParser;
+:].
+
+{
+module(codec).
+
+EncodeMembrane @@
+Ret=codec.memEncoder({$p,@p}) :-
+  {Ret=codec.encodeMem,$p,@p}.
+
+EncodeMembrane @@
+{Ret=codec.encodeMem,$p,@p} :-
+  {Ret=[:/*inline*/
+    me.remove();
+    StringFunctor sFunc = new StringFunctor(mem.encode());
+    Atom sAtom = mem.newAtom(sFunc);
+    mem.relinkAtomArgs(sAtom,0,me,0);
+  :],$p,@p}.
+
+DecodeMembrane @@
+codec.memDecoder(X),{X=_S,$p,@p} :-
+  codec.strDecoder(_S),{$p,@p}.
+
+DecodeString @@
+codec.strDecoder(S) :- string(S) |
+  [:/*inline*/
+    String str = me.nth(0);
+    LMNParser lp;
+    compile.structure.Membrane m;
+    Ruleset rs;
+    try {
+      lp = new LMNParser(new StringReader(str));
+      m = lp.parse();
+      rs = RulesetCompiler.compileMembrane(m);
+      rs.react((Membrane)mem);
+    } catch(ParseException e) {
+      e.printStackTrace();
+    }
+    me.nthAtom(0).remove();
+    me.remove();
+  :](S).
+
+DecodeFile @@
+codec.fileDecoder(S) :- string(S) |
+  [:/*inline*/
+    try {
+      String filename = me.nth(0);
+      FileInputStream fis = new FileInputStream(filename);
+      InputStreamReader isr = new InputStreamReader(fis);
+      BufferedReader br = new BufferedReader(isr);
+      LMNParser lp;
+      compile.structure.Membrane m;
+      Ruleset rs;
+      lp = new LMNParser(br);
+      m = lp.parse();
+      rs = RulesetCompiler.compileMembrane(m);
+      rs.react((Membrane)mem);
+      br.close();
+    } catch(IOException e) {
+      e.printStackTrace();
+    } catch(ParseException e) {
+      e.printStackTrace();
+    }
+    me.nthAtom(0).remove();
+    me.remove();
+  :](S).
+}
