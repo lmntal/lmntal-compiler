@@ -43,7 +43,7 @@ EncodeMembrane @@
 {Ret=codec.encodeMem,$p,@p} :-
   {Ret=[:/*inline*/
     me.remove();
-    StringFunctor sFunc = new StringFunctor(mem.encode());
+    StringFunctor sFunc = new StringFunctor(((Membrane)mem).encode());
     Atom sAtom = mem.newAtom(sFunc);
     mem.relinkAtomArgs(sAtom,0,me,0);
   :],$p,@p}.
