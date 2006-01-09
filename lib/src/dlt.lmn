@@ -7,14 +7,16 @@ NAME
 SYNOPSIS
 
     Server:
-      dlt.bind(50000,[accept([],ret),close]).
+      dlt.bind(50000,[accept([],recv),close]).
     Client:
-      dlt.connect("127.0.0.1",50000,["hoge","moge",close],ret).
-    =>*
+      recv(dlt.connect("127.0.0.1",50000,["I","am","hoge",close]))
+    ->
     Server:
-      dlt.socket([],["hoge","moge"],ret,Obj),closed=[].
+      recv(["I","am","hoge"|_52]), closed([]), 
+      dlt.socket([],_52,'[Socket[addr..').
     Client:
-      closed([],ret).
+      recv(closed([]))
+      
 AUTHOR
 
 	Ryo Okabe
@@ -61,6 +63,7 @@ class AcceptThread extends Thread {
   public void closeServerSocket() {
     try {
       servSock.close();
+      System.out.println("ServerSocket: closed");
     } catch(IOException e) {
       e.printStackTrace();
     }
@@ -96,7 +99,7 @@ class AcceptThread extends Thread {
       cmdAtom.remove();
       mem.asyncUnlock();
 //System.out.println("after asyncLock: "+mem);
-      mem.makePerpetual();
+      Thread t = new Thread(rt,"rt");
       rt.start();
     } catch(IOException e) {
       e.printStackTrace();
@@ -149,12 +152,12 @@ class ReaderThread implements Runnable {
    */
   public void run(){
     Thread thisThread = Thread.currentThread();
-    while(th == thisThread && !(sock.isClosed())) {
+    String data;
+    while(th == thisThread) {
       try {
-        if(reader.ready()) {
-          String data = reader.readLine();
+        while(reader.ready()) {
+          data = reader.readLine();
           Atom sockAtom = objAtom.nthAtom(0);
-//System.out.println("before asyncLock: "+mem);
           mem.asyncLock();
           Atom dataAtom = mem.newAtom(new StringFunctor(data));
           Atom consAtom = mem.newAtom(new Functor(".",3));
@@ -162,13 +165,12 @@ class ReaderThread implements Runnable {
           mem.relinkAtomArgs(consAtom,2,sockAtom,1);
           mem.newLink(consAtom,1,sockAtom,1);
           mem.asyncUnlock();
-//System.out.println("after asyncUnlock: "+mem);
         }
       } catch(IOException e) {
         e.printStackTrace();
       }
       try {
-        th.sleep(100);
+        th.sleep(50);
       } catch(InterruptedException e) {
         e.printStackTrace();
       }
@@ -231,12 +233,13 @@ dlt.bind(Port,Cmd) :- int(Port) |
 dlt.bound([accept(Send,Recv)|T],Obj) :- 
   dlt.bound([accepting(Send,Recv)|T],O),
   O=[:/*inline*/
+    mem.makePerpetual();
     ObjectFunctor atFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     AcceptThread at = (AcceptThread)atFunc.getObject();
     at.setName("at");
-    at.start();
     mem.unifyAtomArgs(me,0,me,1);
     me.remove();
+    at.start();
   :](Obj).
   
 /**
@@ -264,14 +267,17 @@ dlt.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
   dlt.socket(Send,Recv,Obj),
   Obj = [:/*inline*/
     String host = me.nth(0);
+    // throws NumberFormatException 
     int port = Integer.parseInt(me.nth(1));
     try {
       // throws UnknownHostException and SecurityException
       InetAddress ip = InetAddress.getByName(host);
       // throws IOException and SecurityException
       Socket sock = new Socket(ip,port);
+      // throws IOException
       BufferedReader reader = 
         new BufferedReader(new InputStreamReader(sock.getInputStream()));
+      // throws IOException
       PrintWriter writer = new PrintWriter(sock.getOutputStream());
       ReaderThread rt = new ReaderThread(sock,reader,(Membrane)mem);
       Vector obj = new Vector(3);
@@ -283,6 +289,7 @@ dlt.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
       rt.setObjAtom(objAtom);
       mem.relinkAtomArgs(objAtom,0,me,2);
       mem.makePerpetual();
+      Thread t = new Thread(rt,"rt");
       rt.start();
       me.nthAtom(0).remove();
       me.nthAtom(1).remove();
@@ -320,8 +327,7 @@ dlt.socket([H|T],Recv,Obj) :- string(H) |
 
 /**
  *  rule: close
- *    close Socket and stop ReaderThread
- *  TODO: delete 跡形もなく消し去る
+ *    close PrintWriter and stop ReaderThread
  */
 close @@
 dlt.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
@@ -334,4 +340,13 @@ dlt.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
     me.nthAtom(0).remove();
     me.remove();
   :](Obj).
+
+/**
+ *  rule: terminate
+ */   
+dlt.terminate :-
+  [:/*inline*/
+    mem.perpetual = false;
+    me.remove();
+  :].
 }
