@@ -54,7 +54,7 @@ H=graphic.mouseFramePointX(X) :- int(X)|H=[:/*inline*/
 	int x = ((IntegerFunctor)(me.nthAtom(0).getFunctor())).intValue();
 	Point p = null;
 	if(Env.LMNgraphic != null)
-		p= Env.LMNgraphic.getMousePoint(mem);
+		p= Env.LMNgraphic.getMousePoint((Membrane)mem);
 	if(p != null)
 		x = (int)(p.x);
 	Atom atom = mem.newAtom(new IntegerFunctor(x));
@@ -69,7 +69,7 @@ H=graphic.mouseFramePointY(Y) :- int(Y)|H=[:/*inline*/
 	int y = ((IntegerFunctor)(me.nthAtom(0).getFunctor())).intValue();
 	Point p = null;
 	if(Env.LMNgraphic != null)
-		p= Env.LMNgraphic.getMousePoint(mem);
+		p= Env.LMNgraphic.getMousePoint((Membrane)mem);
 	if(p != null)
 		y = (int)(p.y);
 	Atom atom = mem.newAtom(new IntegerFunctor(y));
@@ -84,7 +84,7 @@ H=graphic.mouseFramePointX :- H=[:/*inline*/
 	int x = -1;
 	Point p = null;
 	if(Env.LMNgraphic != null)
-		p= Env.LMNgraphic.getMousePoint(mem);
+		p= Env.LMNgraphic.getMousePoint((Membrane)mem);
 	if(p != null)
 		x = (int)(p.x);
 	Atom atom = mem.newAtom(new IntegerFunctor(x));
@@ -97,7 +97,7 @@ H=graphic.mouseFramePointY :- H=[:/*inline*/
 	int y = -1;
 	Point p = null;
 	if(Env.LMNgraphic != null)
-		p= Env.LMNgraphic.getMousePoint(mem);
+		p= Env.LMNgraphic.getMousePoint((Membrane)mem);
 	if(p != null)
 		y = (int)(p.y);
 	Atom atom = mem.newAtom(new IntegerFunctor(y));
