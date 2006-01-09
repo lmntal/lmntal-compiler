@@ -2,8 +2,8 @@ graphic.use.
 go:-{
 window,size(640,530),name("window"),timer(10).
   {draw,name("oval"),getpic("filloval"),position(0,300),size(50,50)}.
-%  keyByCode([_IX]):-keyByCode([]),a.
-  keyByCode.
+  keyCode([_IX]):-keyCode([]),a.
+  keyCode.
    {position(_IX,_IY),$p,@p} :- {position(graphic.mouseFramePointX,graphic.mouseFramePointY),$p,@p}.
 }.
  % {{position(_IX,_IY),$p,@p},$r,@r} :- {{position(graphic.mouse_framePointX,graphic.mouse_.framePointY),$p,@p},$r,@r}.

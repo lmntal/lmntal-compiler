@@ -220,12 +220,11 @@ public class LMNtalWindow extends JFrame{
 	public void setAddAtom(Functor f){
 		atomlist.add(f);
 		/*lockが出来る（unlockされない可能性がある）場合はすぐ追加してしまう。*/
-		if(getmem().lock()){
-			System.out.println("hoge");
-			doAddAtom();
-			/*リストに繋げるだけなので、描画関係の変更はないためfalseでunlock*/
-			getmem().unlock(false);
-		}
+//		if(getmem().lock()){
+//			doAddAtom();
+//			/*リストに繋げるだけなので、描画関係の変更はないためfalseでunlock*/
+//			getmem().unlock(false);
+//		}
 	}
 	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
 	public void doAddAtom(){

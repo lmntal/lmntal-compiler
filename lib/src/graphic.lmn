@@ -24,9 +24,19 @@ graphic=option.use.
 {
 module(graphic).
 
+//グラフィックオプション指定無でグラフィックモードにする
 graphic.use :- [:/*inline*/
 	Env.fGraphic = true;
 	Env.initGraphic();
+	me.setFunctor("go",0);
+:].
+
+//グラフィックオプション指定無でグラフィックモードにする
+//反応するものがない場合でも終了しない
+graphic.perpetualUse :- [:/*inline*/
+	Env.fGraphic = true;
+	Env.initGraphic();
+	mem.makePerpetual();
 	me.setFunctor("go",0);
 :].
 
