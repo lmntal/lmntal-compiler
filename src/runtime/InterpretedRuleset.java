@@ -199,7 +199,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		StringBuffer s = new StringBuffer("");
 		Iterator it = rules.iterator();
 		while(it.hasNext()) {
-			s.append(((Rule)it.next()).getFullText());
+			s.append(((Rule)it.next()).getFullText().
+					replaceAll("\\n","").replaceAll("\\r",""));
 			if(it.hasNext())
 				s.append(", ");
 		}
