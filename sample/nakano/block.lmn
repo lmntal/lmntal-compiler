@@ -5,16 +5,16 @@ go:-
 window,name("Block"),size(500,500),timer(1).
 b(1).
 %ボール関連
-{draw,name("ball"),getpic("circle"),position(200,150),color(0,255,0),size(50,50),vx(5),vy(5)}.
-{position(X,Y),vx(VX),vy(VY), $p , @p},b(1) :-  VX > 0 , VY > 0 , X < 350 ,Y < 350 | {position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(0).
-{position(X,Y),vx(VX),vy(VY), $p , @p},b(1) :-  VX < 0 , VY > 0 , X > 60 ,Y < 350  | {position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(0).
-{position(X,Y),vx(VX),vy(VY), $p , @p},b(1) :-  VX > 0 , VY < 0 , X < 350 , Y > 60 | {position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(0).
-{position(X,Y),vx(VX),vy(VY), $p , @p},b(1) :-  VX < 0 , VY < 0 , X > 60 , Y > 60  | {position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(0).
+{draw,name("ball"),getpic("fillcircle"),position(200,150),color(0,255,0),size(50,50),vx(1),vy(1)}.
+{position(X,Y),vx(VX),vy(VY), $p , @p},b(1) :-  VX > 0 , VY > 0 , X < 425 ,Y < 550 | {position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(0).
+{position(X,Y),vx(VX),vy(VY), $p , @p},b(1) :-  VX < 0 , VY > 0 , X > 0 ,Y < 550  | {position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(0).
+{position(X,Y),vx(VX),vy(VY), $p , @p},b(1) :-  VX > 0 , VY < 0 , X < 425 , Y > 25 | {position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(0).
+{position(X,Y),vx(VX),vy(VY), $p , @p},b(1) :-  VX < 0 , VY < 0 , X > 0 , Y > 25  | {position( X + VX, Y + VY),vx(VX),vy(VY),$p},b(0).
 
-{position(X,Y),vx(VX), $p , @p} :-  VX > 0 , X >= 350, int(Y) | {position( X , Y ),vx(-1 * integer.rnd(15) - 1),$p}.
-{position(X,Y),vx(VX), $p , @p} :-  VX < 0 , X =< 60, int(Y)  | {position( X , Y ),vx(integer.rnd(15) + 1),$p}.
-{position(X,Y),vy(VY), $p , @p} :-  VY > 0 , Y >= 350, int(X) | {position( X , Y ),vy(-1 * integer.rnd(15) - 1),$p}.
-{position(X,Y),vy(VY), $p , @p} :-  VY < 0 , Y =< 60, int(X)  | {position( X , Y ),vy(integer.rnd(15) + 1),$p}.
+{position(X,Y),vx(VX), $p , @p} :-  VX > 0 , X >= 425, int(Y) | {position( X , Y ),vx(-1 * integer.rnd(5) - 1),$p}.
+{position(X,Y),vx(VX), $p , @p} :-  VX < 0 , X =< 0, int(Y)  | {position( X , Y ),vx(integer.rnd(5) + 1),$p}.
+{position(X,Y),vy(VY), $p , @p} :-  VY > 0 , Y >= 550, int(X) | {position( X , Y ),vy(-1 * integer.rnd(5) - 1),$p}.
+{position(X,Y),vy(VY), $p , @p} :-  VY < 0 , Y =< 25, int(X)  | {position( X , Y ),vy(integer.rnd(5) + 1),$p}.
 
 %板関連
 {draw,name("board"),getpic("fillrect"),position(60,420),size(200,20).}.
@@ -23,6 +23,6 @@ b(1).
 keyCode.
 b(0),keyCode([]):-keyCode([]),b(1).
 b(0),keyCode([_IH|L]):-_IH=\=37 ,_IH=\=39|keyCode(L),b(1).
-b(0),keyCode([_IH|L]),{position(_IX,_IY),$p,@p}:-_IH==37|keyCode(L),{position(_IX - 20,_IY),$p,@p},b(1).
-b(0),keyCode([_IH|L]),{position(_IX,_IY),$p,@p}:-_IH==39|keyCode(L),{position(_IX + 20,_IY),$p,@p},b(1).
+b(0),keyCode([_IH|L]),{name("board"),position(_IX,_IY),$p,@p}:-_IH==37|keyCode(L),{name("board"),position(_IX - 20,_IY),$p,@p},b(1).
+b(0),keyCode([_IH|L]),{name("board"),position(_IX,_IY),$p,@p}:-_IH==39|keyCode(L),{name("board"),position(_IX + 20,_IY),$p,@p},b(1).
 }.
