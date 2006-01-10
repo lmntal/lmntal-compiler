@@ -24,6 +24,7 @@ AUTHOR
 HISTORY
 
 	06/01/07 released
+	06/01/10 1.1
 
 */
 
@@ -37,36 +38,18 @@ import java.net.*;
 class AcceptThread extends Thread {
   private ServerSocket servSock;
   private final Membrane mem;
-  private Atom atAtom = null;
+  private Atom ssAtom = null;
 
   /**
    *  AcceptThread#AcceptThread()
    *  @param servSock
    *  @param mem
+   *  @param ssAtom
    */
-  AcceptThread(ServerSocket servSock, Membrane mem) {
+  AcceptThread(ServerSocket servSock, Membrane mem, Atom ssAtom) {
     this.servSock = servSock;
     this.mem = mem;
-  }
-
-  /**
-   *  AcceptThread#setObjAtom()
-   *  @param atAtom
-   */
-  public void setObjAtom(Atom atAtom) {
-    this.atAtom = atAtom;
-  }
-  
-  /**
-   *  AcceptThread#closeServerSocket()
-   */
-  public void closeServerSocket() {
-    try {
-      servSock.close();
-      System.out.println("ServerSocket: closed");
-    } catch(IOException e) {
-      e.printStackTrace();
-    }
+    this.ssAtom = ssAtom;
   }
   
   /**
@@ -89,7 +72,7 @@ class AcceptThread extends Thread {
       Atom objAtom = mem.newAtom(objFunc);
       rt.setObjAtom(objAtom);
       Atom sockAtom = mem.newAtom(new Functor("socket",3,"dlt"));
-      Atom consAtom = atAtom.nthAtom(0).nthAtom(0);
+      Atom consAtom = ssAtom.nthAtom(0).nthAtom(0);
       Atom cmdAtom = consAtom.nthAtom(0);
       mem.relinkAtomArgs(sockAtom,0,cmdAtom,0);
       mem.relinkAtomArgs(sockAtom,1,cmdAtom,1);
@@ -157,7 +140,6 @@ class ReaderThread implements Runnable {
       try {
         while(reader.ready()) {
           data = reader.readLine();
-//System.out.println("recv: "+data);
           Atom sockAtom = objAtom.nthAtom(0);
           mem.asyncLock();
           Atom dataAtom = mem.newAtom(new StringFunctor(data));
@@ -210,11 +192,9 @@ dlt.bind(Port,Cmd) :- int(Port) |
     try {
       // throws IOException and SecurityException
       ServerSocket servSock = new ServerSocket(port);
-      AcceptThread at = new AcceptThread(servSock,(Membrane)mem);
-      Functor atFunc = new ObjectFunctor(at);
-      Atom atAtom = mem.newAtom(atFunc);
-      at.setObjAtom(atAtom);
-      mem.relinkAtomArgs(atAtom,0,me,1);
+      Functor ssFunc = new ObjectFunctor(servSock);
+      Atom ssAtom = mem.newAtom(ssFunc);
+      mem.relinkAtomArgs(ssAtom,0,me,1);
       me.nthAtom(0).remove();
       me.remove();
     } catch(IOException e) {
@@ -235,8 +215,10 @@ dlt.bound([accept(Send,Recv)|T],Obj) :-
   dlt.bound([accepting(Send,Recv)|T],O),
   O=[:/*inline*/
     mem.makePerpetual();
-    ObjectFunctor atFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
-    AcceptThread at = (AcceptThread)atFunc.getObject();
+    ObjectFunctor ssFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
+    ServerSocket servSock = (ServerSocket)ssFunc.getObject();
+    AcceptThread at = 
+      new AcceptThread(servSock,(Membrane)mem,me.nthAtom(0));
     at.setName("at");
     mem.unifyAtomArgs(me,0,me,1);
     me.remove();
@@ -249,12 +231,17 @@ dlt.bound([accept(Send,Recv)|T],Obj) :-
  *  TODO: delete 跡形もなく消し去る
  */
 close @@
-dlt.bound([close|T],Obj) :- class(Obj,"AcceptThread") |
+dlt.bound([close|T],Obj) :- class(Obj,"java.net.ServerSocket") |
   closed(T),
   [:/*inline*/
     ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
-    AcceptThread at = (AcceptThread)objFunc.getObject();
-    at.closeServerSocket();
+    ServerSocket servSock = (ServerSocket)objFunc.getObject();
+    try {
+      servSock.close();
+      System.out.println("ServerSocket: closed");
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
     me.nthAtom(0).remove();
     me.remove();
   :](Obj).
