@@ -69,6 +69,7 @@ codec.strDecoder(S) :- string(S) |
     }
     me.nthAtom(0).remove();
     me.remove();
+System.out.println(mem);
   :](S).
 
 DecodeFile @@

@@ -157,6 +157,7 @@ class ReaderThread implements Runnable {
       try {
         while(reader.ready()) {
           data = reader.readLine();
+//System.out.println("recv: "+data);
           Atom sockAtom = objAtom.nthAtom(0);
           mem.asyncLock();
           Atom dataAtom = mem.newAtom(new StringFunctor(data));
