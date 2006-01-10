@@ -1,0 +1,31 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	nakano ---
+%	ドラゴン曲線色つきを描画します。
+%	
+%	ライブラリgraphicを使用しています。
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+graphic.use.
+go:-{
+	window.
+	size(640,530).
+	name("hoge").
+	bgcolor(0,0,0).
+
+	now(1).
+	a(179,140,400,350, 7).
+	color(255,0,0).
+	
+	a(AX,AY,BX,BY,N) :- CX = AX+(BX-AX+AY-BY)/2 , CY=BY+(BX-AX+AY-BY)/2 ,N > 0 | a(AX,AY,CX,CY,N-1),a(BX,BY,CX,CY,N-1).
+	a(AX,AY,BX,BY,N),color(R,G,B),now(NOW) :- int(R),int(G),int(B),CX = AX+(BX-AX+AY-BY)/2 , CY=BY+(BX-AX+AY-BY)/2 ,N = 0,int(NOW) |
+	{draw,name(NOW),getpic("line"),position(AX,AY,CX,CY),color(R,G,B)},
+	{draw,name(NOW+1),getpic("line"),position(BX,BY,CX,CY),color(R,G,B)},
+	nextcolor(R,G,B),now(NOW+2).
+
+	%次の色の決定
+	nextcolor(R,G,B) :- R=255, G<255, B=  0 | color(R   ,G+51,B   ).
+	nextcolor(R,G,B) :- R>  0, G=255, B=  0 | color(R-51,G   ,B   ).
+	nextcolor(R,G,B) :- R=  0, G=255, B<255 | color(R   ,G   ,B+51).
+	nextcolor(R,G,B) :- R=  0, G>  0, B=255 | color(R   ,G-51,B   ).
+	nextcolor(R,G,B) :- R<255, G=  0, B=255 | color(R+51,G   ,B   ).
+	nextcolor(R,G,B) :- R=255, G=  0, B>  0 | color(R   ,G   ,B-51).
+}.
