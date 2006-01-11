@@ -6,7 +6,7 @@ AUTHOR
 	Kei Murayama
 
 HISTORY
-	2005/11/11(Fri)
+	2005/1/11(Wed)
 
 */
 
@@ -16,7 +16,7 @@ module(thread).
 
 	{
 		system_ruleset.
-%		{thread(N,{$p,@p}), $q,@q}/ :- int(N) | {$p,$q,@q}.
+		{thread(N,{$p,@p}), $q,@q}/ :- int(N) | {$p,$q,@q}.
 	}.
 	/*
 		thread.create(N).
