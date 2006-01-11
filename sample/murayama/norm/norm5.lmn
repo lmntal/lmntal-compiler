@@ -1,7 +1,7 @@
 {
 	thread.create(4).
 	thread.all({norm(0)}).
-	generate(100).
+	generate(10000).
 	gen@@
 		generate(X) :- X>0,Y=X-1,MOD=X mod 4 | at(MOD, integer.rnd(100)), generate(Y).
 	all@@

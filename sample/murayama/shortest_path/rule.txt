@@ -1,0 +1,9 @@
+start,
+thread.any({e(V1, V2, Weight)}),
+ thread.any({{+(V1), w(X1, PoA), $p1}}),
+ thread.any({{+(V2), w(X2, PoB), $p2}})
+				:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
+					start,
+					thread.any({e(V1, V2, Weight)}),
+					thread.any({{+(V1), w(X1, PoA), $p1}}),
+					thread.any({{+(V2), w(X2, PoB2), $p2}}).
