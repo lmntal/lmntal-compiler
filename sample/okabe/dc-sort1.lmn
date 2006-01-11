@@ -1,0 +1,27 @@
+/**
+ *  Distributed LMNtal sample(#1)
+ *  distributed sort
+ *    クライアントがサーバからソートプログラムをダウンロードして実行し，
+ *    その結果をサーバがマージする．
+ *  server file: ds-sort.lmn
+ *
+ *  06/01/12 okabe
+ */
+
+dlt.connect("127.0.0.1",50000,[],strDec).
+
+% リストのデコードフィルタ
+strDec([_SH|T]) :- 
+  strDec(T),codec.strDecoder(_SH).
+
+% 送信
+send(N),dlt.socket(Send,Recv,Obj),{list(L),$p[L],@p} :- N>0 |
+  dlt.socket([Mem,close|Send],Recv,Obj),
+  Mem=codec.memEncoder({list(L),$p[L],@p}).
+
+% 送信可能回数
+send(1).
+
+% 送信の前処理
+%dlt.socket([H|T],Recv,Obj),{H=_S,$p,@p} :- 
+%  dlt.socket([H|T],Recv,Obj),H=_S,{$p,@p}.
