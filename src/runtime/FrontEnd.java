@@ -355,6 +355,10 @@ public class FrontEnd {
 							/// --showproxy
 							/// Show proxy atoms
 							Env.hideProxy = false;
+						} else if(args[i].equals("--hiderule")){
+							/// --hiderule
+							/// Hide rule names
+							Env.showrule = false;
 						} else if (args[i].startsWith("--temporary-dir=")) {
 							/// --temporary-dir=<dir>
 							/// use <dir> as temporary directory
