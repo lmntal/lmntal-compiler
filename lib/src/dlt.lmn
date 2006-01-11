@@ -334,7 +334,7 @@ dlt.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
  */   
 dlt.terminate :-
   [:/*inline*/
-    mem.perpetual = false;
+    ((Membrane)mem).perpetual = false;
     me.remove();
   :].
 }
