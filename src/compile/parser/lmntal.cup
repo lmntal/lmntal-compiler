@@ -85,6 +85,8 @@ Link		::=   LINK_NAME:name
 // 引数なしまたは引数ありのアトムの名前として使用できるリテラル
 FuncName	::=   ATOM_NAME:name
 					{: RESULT = new SrcName(name); :}
+				| MOD
+					{: RESULT = new SrcName("mod"); :}
 				| QUOTED_STRING:name
 					{: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
 				| SYMBOL_NAME:name
@@ -97,7 +99,9 @@ FuncName	::=   ATOM_NAME:name
 
 // [a-z][A-Za-z_0-9]* | [0-9]+
 AtomName    ::= ATOM_NAME:name
-					{: RESULT = name.toString(); :};
+					{: RESULT = name.toString(); :}
+				| MOD
+					{: RESULT = "mod"; :};
 
 RuleName    ::= 
 				  ATOM_NAME:name
@@ -262,7 +266,7 @@ QuotedOperatorAtom ::=
 				| MINUS_DOT		{: RESULT = new SrcAtom("-.");	:}
 				| ASTERISK_DOT	{: RESULT = new SrcAtom("*.");	:}
 				| SLASH_DOT		{: RESULT = new SrcAtom("/.");	:}
-				| MOD			{: RESULT = new SrcAtom("mod");	:}
+//				| MOD			{: RESULT = new SrcAtom("mod");	:} //通常のアトム名として処理
 				| RELOP:op		{: RESULT = new SrcAtom(op);	:}
 				| HAT			{: RESULT = new SrcAtom("^");	:}
 				| TILDE			{: RESULT = new SrcAtom("~");	:}
