@@ -22,7 +22,7 @@ public class SrcDumper {
 	}
 
 	public static String dumpLinkedList(LinkedList list) {
-		if (list == null) return "";
+		if (list == null || list.size() == 0) return "";
 		String s ="";
 		s += dump(list.get(0));
 		for (int i=1;i<list.size();i++) s += ", " + dump(list.get(i));
