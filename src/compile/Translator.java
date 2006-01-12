@@ -1782,7 +1782,7 @@ public class Translator {
 					if(inst.getKind()==Instruction.NOT_UNIQ) {
 						writer.write(tabs+"goAhead = !goAhead;\n");
 					}
-					writer.write(tabs+"if(!goAhead) {\n");
+					writer.write(tabs+"if(goAhead) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs+"}\n");
 					break;
