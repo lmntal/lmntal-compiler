@@ -250,6 +250,24 @@ H=string.str_of_float(I) :- float(I) | H=[:/*inline*/
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
 	:](I).
+	
+/**
+ * int_to_str : Int -> String
+ * 
+ * H=string.int_to_str(92)  ==>  H="a"
+ */
+H=string.int_to_str(I) :- int(I) | H=[:/*inline*/
+	String s = "";
+	char c;
+	try{
+		c = (char)((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+		s = Character.toString(c);
+	} catch(Exception e) {}
+	Atom res = mem.newAtom(new StringFunctor(s));
+	mem.relinkAtomArgs(res, 0, me, 1);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	:](I).
 
 /**
  * float_of_str : String -> float
