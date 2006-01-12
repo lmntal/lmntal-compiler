@@ -1,0 +1,11 @@
+/**
+ *  Distributed LMNtal sample(#2)
+ *  chat
+ *    クライアントがサーバに文字列を送信すると，
+ *    サーバが受信した文字列をすべてのクライアントに対して送信する．
+ *  server file: ds-chat.lmn
+ *
+ *  06/01/12 okabe
+ */
+
+dlt.connect("127.0.0.1",50000,["You","are","moge"],recv).
