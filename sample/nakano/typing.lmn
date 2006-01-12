@@ -1,0 +1,21 @@
+graphic.use.
+go:-
+{
+%ウィンドウ生成
+window,name("LMNtal Typing"),size(800,600),timer(1000).
+keyChar.
+a(0).
+now(0).
+a(0):-a(-1),seed(integer.rnd(25)+97).
+
+a(-1),seed(_ISEED):-seed(string.int_to_str(_ISEED)),a(1).
+
+a(1),now(_IN),seed(_SSEED):- 
+a(2),now(_IN+1),item(_SSEED,A),
+{+A,draw,name(_IN),getpic(string(_SSEED,20)),
+  position(integer.rnd(700)+50,integer.rnd(500)+50),color(0,255,0)}.
+
+a(2),keyChar([]):-keyChar([]),a(0).
+a(2),keyChar([_SH|L]),item(_SS,X),{+X,draw,$p[],@p}:-_SS=_SH|keyChar(L),a(0).
+a(2),keyChar([_SH|L]):-keyChar(L),a(0).
+}.

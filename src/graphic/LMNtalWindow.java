@@ -10,6 +10,7 @@ import javax.swing.*;
 import runtime.AbstractMembrane;
 import runtime.Env;
 import runtime.Functor;
+import runtime.StringFunctor;
 import runtime.IntegerFunctor;
 import runtime.Atom;
 import test.GUI.Node;
@@ -25,6 +26,8 @@ public class LMNtalWindow extends JFrame{
 //	private Thread th;
 	private boolean keyChar = false;
 	private boolean keyListener = false;
+	private Functor keyAtomFunctor = null;
+	private boolean keyCache = true;
 	
 	/*ウィンドウ生成に必要*/
 	private boolean ready = false; 
@@ -186,10 +189,22 @@ public class LMNtalWindow extends JFrame{
 			else if(a.getName() == "keyChar"){
 				keyListener = true;
 				keyChar = true;
+				keyCache = true;
 			}
 			else if(a.getName() == "keyCode"){
 				keyListener = true;
 				keyChar = false;
+				keyCache = true;
+			}
+			else if(a.getName() == "keyCharNoChache"){
+				keyListener = true;
+				keyChar = true;
+				keyCache = false;
+			}
+			else if(a.getName() == "keyCodeNoCache"){
+				keyListener = true;
+				keyChar = false;
+				keyCache = false;
 			}
 			/**背景色の取得*/
 			else if(a.getName()=="bgcolor"){
@@ -224,7 +239,10 @@ public class LMNtalWindow extends JFrame{
 		return false;
 	}
 	public void setAddAtom(Functor f){
-		atomlist.add(f);
+		if(keyCache)
+			atomlist.add(f);
+		else
+			keyAtomFunctor = f;
 		/*lockが出来る（unlockされない可能性がある）場合はすぐ追加してしまう。*/
 //		if(getmem().lock()){
 //			doAddAtom();
@@ -234,11 +252,28 @@ public class LMNtalWindow extends JFrame{
 	}
 	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
 	public void doAddAtom(){
+		Iterator ite = getmem().atomIterator();
+		/*keyCacheがfalseのとき*/
+		if(!keyCache){
+			/*積まれたアトムを追加するリストを検索*/
+			while(keyAtomFunctor!=null && ite.hasNext()){
+				Atom a = (Atom)ite.next();
+				if(a.getName()=="keyCharNoCache" || a.getName()=="keyCodeNoCache"){
+					Atom data = getmem().newAtom(keyAtomFunctor);
+					Atom key = mem.newAtom(new Functor(a.getName(), 1));
+					getmem().newLink(key, 0, data, 0);
+					a.remove();
+					keyAtomFunctor = null;
+					break;
+				}
+			}
+			return;
+		}
+		/*keyCacheがtrueのとき*/
 		while(!atomlist.isEmpty()){
 			Functor fa = (Functor)atomlist.removeFirst();
 			
 //			WindowSet win = (WindowSet)windowmap.get(wa.window);
-			Iterator ite = getmem().atomIterator();
 			/*積まれたアトムを追加するリストを検索*/
 			while(ite.hasNext()){
 				Atom a = (Atom)ite.next();
@@ -271,6 +306,7 @@ public class LMNtalWindow extends JFrame{
 	}
 }
 
+
 class MyKeyAdapter extends KeyAdapter{
 	LMNtalWindow window;
 	boolean byChar;
@@ -287,7 +323,7 @@ class MyKeyAdapter extends KeyAdapter{
 			String input;
 			if(e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)input = String.valueOf(e.getKeyCode());
 			else input = String.valueOf(e.getKeyChar());
-			window.setAddAtom((new Functor(input, 1)));
+			window.setAddAtom((new StringFunctor(input)));
 		}else{
 			int input = e.getKeyCode();
 			window.setAddAtom((new IntegerFunctor(input)));

@@ -1,6 +1,9 @@
-graphic.use.
-go:-{
-window,size(640,530),name("window1"),timer(10).
-  {draw,name("oval2"),getpic("filloval"),position(0,300),size(50,50)}.
-  {name("oval2"). $p[]}:-.
+{
+%ウィンドウ生成
+window,name("LMNtal Typing"),size(800,600),timer(5).
+keyChar([h]).
+a("h",X),{+X,draw,name("h"),getpic(string("h",20)),position(50,50),color(0,255,0),size(50,50),vx(5),vy(5)}.
+%keyChar([]):-keyChar([]).
+keyChar([_SH]),a(_SS,X),{+X,$p[]}:-_SS=_SH|keyChar([]).
+
 }.

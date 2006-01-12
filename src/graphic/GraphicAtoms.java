@@ -3,6 +3,9 @@ package graphic;
 import java.awt.*;
 import java.io.File;
 import java.util.HashMap;
+import java.util.Random;
+
+import runtime.RandomSet;
 
 
 /**
@@ -12,6 +15,8 @@ import java.util.HashMap;
  */
 public class GraphicAtoms{
 	public String name = null;
+	private String atomString = null;
+	private int atomStringPoint = 15;
 	boolean enable;
 	int sizex = 0;
 	int sizey = 0;
@@ -70,6 +75,17 @@ public class GraphicAtoms{
 			atomobj=filename;
 		}
 		return true;
+	}
+	
+	public void setString(String s){
+		atomString = s;
+	}
+	
+	public void setString(String s, String i){
+		atomString = s;
+		try{
+			atomStringPoint = Integer.parseInt(i);
+		}catch(NumberFormatException e){}
 	}
 
 	public void setarraypos(int x1, int y1,int x2, int y2, int x3,int y3,int x4,int y4){
@@ -130,6 +146,10 @@ public class GraphicAtoms{
 			}
 			else if (atomobj.equals("fillcircle") || atomobj.equals("filloval")){
 				g.fillOval(x[0], y[0], sizex, sizey);
+			}
+			else if (atomobj.equals("string")){
+				g.setFont(new Font("myFont",Font.PLAIN,atomStringPoint));
+				g.drawString(atomString, x[0], y[0]);
 			}
 		}
 		else if(atomimg != null)	

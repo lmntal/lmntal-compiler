@@ -127,7 +127,20 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			/**描画するファイルの取得*/
 			if(a.getName()=="getpic"){
 				if(a.getEdgeCount() != 1)continue;
-				ga.SetPic( a.getNthNode(0).getName() );
+				String picName = a.getNthNode(0).getName();
+				if(picName.equals("string")){
+					if(a.getNthNode(0).getEdgeCount()==2){
+//						System.out.println("Nth0"+a.getNthNode(0).getNthNode(0).getName());
+//						System.out.println("Nth1"+a.getNthNode(0).getNthNode(1).getName());
+						ga.setString(a.getNthNode(0).getNthNode(0).getName());
+					}else if(a.getNthNode(0).getEdgeCount()==3){
+//						System.out.println("Nth0"+a.getNthNode(0).getNthNode(0).getName());
+//						System.out.println("Nth1"+a.getNthNode(0).getNthNode(1).getName());
+//						System.out.println("Nth2"+a.getNthNode(0).getNthNode(2).getName());
+						ga.setString(a.getNthNode(0).getNthNode(0).getName(),a.getNthNode(0).getNthNode(1).getName());
+					}
+				}
+				ga.SetPic( picName );
 			}
 			/**名前の取得*/
 			else if(a.getName()=="name"){

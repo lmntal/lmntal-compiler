@@ -36,11 +36,18 @@ board2(60,920).
 {draw,name("board2"),getpic("fillrect"),position(60,920),size(200,20).}.
 
 %キー関連
-keyCode.
-b(0),keyCode([]):-keyCode([]),b(1).
-b(0),keyCode([_IH|L]):-_IH=\=37 ,_IH=\=39,_IH=\=90 ,_IH=\=88|keyCode(L),b(1).
-b(0),board1(_IBX,_IBY),keyCode([_IH|L]),{name("board1"),position(_IX,_IY),$p,@p}:-_IH==90|keyCode(L),{name("board1"),position(_IX - 20,_IY),$p,@p},b(1),board1(_IX - 20,_IY).
-b(0),board1(_IBX,_IBY),keyCode([_IH|L]),{name("board1"),position(_IX,_IY),$p,@p}:-_IH==88|keyCode(L),{name("board1"),position(_IX + 20,_IY),$p,@p},b(1),board1(_IX + 20,_IY).
-b(0),board2(_IBX,_IBY),keyCode([_IH|L]),{name("board2"),position(_IX,_IY),$p,@p}:-_IH==37|keyCode(L),{name("board2"),position(_IX - 20,_IY),$p,@p},b(1),board2(_IX - 20,_IY).
-b(0),board2(_IBX,_IBY),keyCode([_IH|L]),{name("board2"),position(_IX,_IY),$p,@p}:-_IH==39|keyCode(L),{name("board2"),position(_IX + 20,_IY),$p,@p},b(1),board2(_IX + 20,_IY).
+keyCodeNoCache.
+b(0),keyCodeNoCache:-keyCodeNoCache,b(1).
+b(0),keyCodeNoCache(_IH):-_IH=\=37 ,_IH=\=39,_IH=\=90 ,_IH=\=88|keyCodeNoCache,b(1).
+b(0),board1(_IBX,_IBY),keyCodeNoCache(_IH),{name("board1"),position(_IX,_IY),$p,@p}:-_IH==90|keyCodeNoCache,{name("board1"),position(_IX - 20,_IY),$p,@p},b(1),board1(_IX - 20,_IY).
+b(0),board1(_IBX,_IBY),keyCodeNoCache(_IH),{name("board1"),position(_IX,_IY),$p,@p}:-_IH==88|keyCodeNoCache,{name("board1"),position(_IX + 20,_IY),$p,@p},b(1),board1(_IX + 20,_IY).
+b(0),board2(_IBX,_IBY),keyCodeNoCache(_IH),{name("board2"),position(_IX,_IY),$p,@p}:-_IH==37|keyCodeNoCache,{name("board2"),position(_IX - 20,_IY),$p,@p},b(1),board2(_IX - 20,_IY).
+b(0),board2(_IBX,_IBY),keyCodeNoCache(_IH),{name("board2"),position(_IX,_IY),$p,@p}:-_IH==39|keyCodeNoCache,{name("board2"),position(_IX + 20,_IY),$p,@p},b(1),board2(_IX + 20,_IY).
+
+%b(0),keyCode([]):-keyCode([]),b(1).
+%b(0),keyCode([_IH|L]):-_IH=\=37 ,_IH=\=39,_IH=\=90 ,_IH=\=88|keyCode(L),b(1).
+%b(0),board1(_IBX,_IBY),keyCode([_IH|L]),{name("board1"),position(_IX,_IY),$p,@p}:-_IH==90|keyCode(L),{name("board1"),position(_IX - 20,_IY),$p,@p},b(1),board1(_IX - 20,_IY).
+%b(0),board1(_IBX,_IBY),keyCode([_IH|L]),{name("board1"),position(_IX,_IY),$p,@p}:-_IH==88|keyCode(L),{name("board1"),position(_IX + 20,_IY),$p,@p},b(1),board1(_IX + 20,_IY).
+%b(0),board2(_IBX,_IBY),keyCode([_IH|L]),{name("board2"),position(_IX,_IY),$p,@p}:-_IH==37|keyCode(L),{name("board2"),position(_IX - 20,_IY),$p,@p},b(1),board2(_IX - 20,_IY).
+%b(0),board2(_IBX,_IBY),keyCode([_IH|L]),{name("board2"),position(_IX,_IY),$p,@p}:-_IH==39|keyCode(L),{name("board2"),position(_IX + 20,_IY),$p,@p},b(1),board2(_IX + 20,_IY).
 }.
