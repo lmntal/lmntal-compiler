@@ -86,6 +86,8 @@ class Help {
 			+"                    Start LMNtalDaemon\n"
 			+"    --showproxy\n"
 			+"                    Show proxy atoms\n"
+			+"    --hiderule\n"
+			+"                    Hide rule names\n"
 			+"    --temporary-dir=<dir>\n"
 			+"                    use <dir> as temporary directory\n"
 			+"    --use-source-library\n"

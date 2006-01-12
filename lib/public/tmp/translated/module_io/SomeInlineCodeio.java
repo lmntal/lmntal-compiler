@@ -46,20 +46,6 @@ public class SomeInlineCodeio {
 	mem.removeAtom(me);
 	
 			break; }
-		case 10: {
-			/*inline*/
-		try {
-			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
-			String s = br.readLine();
-			Atom result = mem.newAtom(new Functor(s==null?"":s, 1));
-			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
-			mem.relink(res, 0, me, 2);
-			me.nthAtom(0).remove();
-			me.remove();
-		} catch(Exception e) {Env.e(e);}
-	
-			break; }
 		case 9: {
 			/*inline*/
 	try {
@@ -75,6 +61,20 @@ public class SomeInlineCodeio {
 		me.nthAtom(0).remove();
 		me.remove();
 	} catch(Exception e) {e.printStackTrace();}
+	
+			break; }
+		case 10: {
+			/*inline*/
+		try {
+			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			String s = br.readLine();
+			Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
+			mem.relink(result, 0, me, 1);
+			Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
+			mem.relink(res, 0, me, 2);
+			me.nthAtom(0).remove();
+			me.remove();
+		} catch(Exception e) {Env.e(e);}
 	
 			break; }
 		case 11: {

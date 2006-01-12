@@ -1,16 +1,13 @@
 package translated;
-import translated.module_list.*;
+import translated.module_graphic.*;
 import runtime.SystemRulesets;
 import runtime.Ruleset;
-public class Module_list{
-	private static Ruleset[] rulesets = {Ruleset605.getInstance()};
+public class Module_graphic{
+	private static Ruleset[] rulesets = {Ruleset601.getInstance()};
 	public static Ruleset[] getRulesets() {
 		return rulesets;
 	}
 	public static void loadUserDefinedSystemRuleset() {
-		loadSystemRulesetFromModule("queue");
-		loadSystemRulesetFromModule("queue");
-		loadSystemRulesetFromModule("queue");
 	}
 	private static void loadSystemRulesetFromModule(String moduleName) {
 		try {
