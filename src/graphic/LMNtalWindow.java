@@ -48,9 +48,6 @@ public class LMNtalWindow extends JFrame{
 	
 	public void setmem(AbstractMembrane m){
 		mem=m;
-		try{
-			notifyAll();
-		}catch(IllegalMonitorStateException e){}
 	}
 	public AbstractMembrane getmem(){
 		return mem;
@@ -137,6 +134,15 @@ public class LMNtalWindow extends JFrame{
 		lmnPanel.setgraphicmem(m, distance);
 		lmnPanel.repaint();
 		return true;
+	}
+	
+	public synchronized boolean removegraphicmem(AbstractMembrane m){
+		if(killed) return true;
+		if(lmnPanel == null)return false;
+		lmnPanel.removegraphicmem(m);
+		lmnPanel.repaint();
+		return true;
+		
 	}
 	
 	protected void initComponents() {

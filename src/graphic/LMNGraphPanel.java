@@ -229,6 +229,23 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			return null;
 		return ga;
 	}
+	
+	/**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
+	public String getname(AbstractMembrane m){
+		Iterator ite = m.atomIterator();
+		Node a;
+		
+		while(ite.hasNext()){
+			a = (Node)ite.next();
+			/**描画するファイルの取得*/
+			if(a.getName()=="name"){
+				if(a.getEdgeCount() != 1)return null;
+				return a.getNthNode(0).getName();
+			}
+		}
+		return null;
+	}
+	
 	/**再帰的にレラティブ膜を探す。レラティブ膜自身のunlock時はこちらを呼ぶ。*/
 	private String searchrelativemem_self(AbstractMembrane relativetmp , int distance){
 
@@ -322,7 +339,17 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		else
 			searchrelativemem_self(m, distance);
 	}
-	
+	public synchronized void removegraphicmem(AbstractMembrane m){
+		String name = getname(m);
+		for(int i = 0; i < drawlist.size(); i++){
+			GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
+			if(ga2==null) continue;
+			if(ga2.name.equals(name)){
+				drawlist.remove(i);
+				break;
+			}
+		}
+	}
 	private synchronized void paintlayout(){
 		Iterator ite = drawlist.iterator();
 		while(ite.hasNext()){

@@ -5,7 +5,6 @@ import java.util.*;
 
 
 import runtime.AbstractMembrane;
-import runtime.*;
 import test.GUI.Node;
 /**
  * 
@@ -35,8 +34,8 @@ public class LMNtalGFrame{
 	}
 	
 	/**
-	 * 指定された名称のアトムが存在するか検索。
-	 * あれば真を、なければ偽を返す。
+	 * 特定の名称のアトムが存在するか検索。
+	 * あればアトム名を、なければnullを返す。
 	 */
 	private synchronized String searchatom(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
@@ -75,6 +74,10 @@ public class LMNtalGFrame{
 		else if(s=="draw" || s=="graphic"){
 			setgraphicmem(m);
 		}
+		/*描画膜の削除*/
+		else if(s=="remove"){
+			removegraphicmem(m);
+		}
 	}
 	
 	/**マウスの位置を検出する。ライブラリmouseで使用*/
@@ -108,53 +111,18 @@ public class LMNtalGFrame{
 		WindowSet tmpwin = (WindowSet)windowmap.get(name);
 		return tmpwin.window;
 	}
-//	public void setAddAtom(Functor a, String win){
-//		WaitingAtomSet wa = new WaitingAtomSet(a,win);
-//		atomlist.add(wa);
-//		/*lockが出来る（unlockされない可能性がある）場合はすぐ追加してしまう。*/
-//		
-//	}
-//	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
-//	public void doAddAtom(){
-//		while(!atomlist.isEmpty()){
-//			WaitingAtomSet wa = (WaitingAtomSet)atomlist.removeFirst();
-//			
-//			/*膜発見*/
-//			if(windowmap.containsKey(wa.window)){
-//				WindowSet win = (WindowSet)windowmap.get(wa.window);
-//				Iterator ite = win.window.getmem().atomIterator();
-//				/*積まれたアトムを追加するリストを検索*/
-//				while(ite.hasNext()){
-//					Atom a = (Atom)ite.next();
-//					if(a.getName()=="keyChar" || a.getName()=="keyCode"){
-//						Atom nth1 = a;
-//						Atom nth2 = null;
-//						while(true){
-//							int nth1_arg=1;
-//							if(nth1.getFunctor().getArity()==1)
-//								nth1_arg=0;
-//							try{
-//								nth2 = nth1.getArg(nth1_arg).getAtom();
-//							}catch(ArrayIndexOutOfBoundsException e){
-//								break;
-//							}
-//							if(nth2.getName().equals("[]")){
-//								Atom data = win.window.getmem().newAtom(wa.functor);
-//								Atom dot = win.window.getmem().newAtom(new Functor(".", 3));
-//								win.window.getmem().newLink(dot, 0, data, 0);
-//								win.window.getmem().newLink(nth1, nth1_arg, dot, 2);
-//								win.window.getmem().newLink(nth2, 0, dot, 1);
-//								break;
-//							}
-//							nth1 = nth2;
-//						}
-//						break;
-//					}
-//				}
-//			}
-//			
-//		}
-//	}
+	public synchronized void removegraphicmem(AbstractMembrane tmp){
+		if(tmp == null || tmp.isRoot() )return;
+
+		String n = searchwinname(tmp);
+		/*ウィンドウ膜が登録済み*/
+		if(windowmap.containsKey(n)){
+			WindowSet win=(WindowSet)windowmap.get(n);
+			win.window.removegraphicmem(tmp);
+			return;
+		}
+	}
+	
 	private synchronized void setgraphicmem(AbstractMembrane tmp){
 		if(tmp == null || tmp.isRoot() )return;
 		AbstractMembrane m = tmp.getParent();
@@ -218,10 +186,25 @@ public class LMNtalGFrame{
 			return true;
 		}else{
 			if(m.getParent()!=null & !m.getParent().isRoot()){
-				searchwinmem(m.getParent());
+				return searchwinmem(m.getParent());
 			}
 		}
 		return false;
+	}
+	
+	/**再帰的に親膜を探索しウィンドウ膜を探す。発見できればウィンドウ膜の名前。出来なければnullを返す。*/
+	private String searchwinname(AbstractMembrane m){
+		
+		String s = searchatom(m);
+		/*ウィンドウ膜の登録*/
+		if(s == "window"){
+			return getname(m);
+		}else{
+			if(m.getParent()!=null & !m.getParent().isRoot()){
+				return searchwinname(m.getParent());
+			}
+		}
+		return null;
 	}
 	
 	/**ウィンドウが閉じられたときの動作。すべてのウィンドウが閉じたら終了。*/
@@ -275,12 +258,3 @@ class WindowSet{
 	public LMNtalWindow window;
 	public boolean killed = false;
 }
-
-//class WaitingAtomSet{
-//	public Functor functor;
-//	public String window;
-//	public WaitingAtomSet(Functor f, String w){
-//		functor=f;
-//		window=w;
-//	}
-//}

@@ -298,6 +298,11 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		if(Env.fGUI) {
 			Env.gui.lmnPanel.getGraphLayout().removedAtomPos.add(atom.getPosition());
 		}
+		if(Env.LMNgraphic != null && atom.getName().equals("draw")){
+			Env.LMNgraphic.removegraphicmem(atom.mem);
+//			System.out.println(Env.LMNgraphic.getname(atom.mem));
+		}
+		
 		atoms.remove(atom);
 		atom.mem = null;
 	}
