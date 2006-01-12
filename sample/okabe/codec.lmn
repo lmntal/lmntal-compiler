@@ -1,9 +1,0 @@
-/*
- *  sample: lib/src/codec.lmn
- */
-
-%codec.strDecoder("a. a:-b. b:-c").
-%codec.fileDecoder("wtCalc.lmn").
-
-codec.memDecoder(codec.memEncoder({a. a:-b})).
-{b,$p,@p}:-{c,$p,@p}.
