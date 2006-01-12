@@ -5,13 +5,15 @@ NAME
 SYNOPSIS
 
 AUTHOR
-	Koji Hara
+	Koji Hara, Shintaro Kudo
 
 HISTORY
 	2004/05/31(Mon)
 		replace
 	2004/05/12(Wed)
 		split join concat
+	.. 2006/01/12(Thu)
+		substring str_of_int int_of_str str_of_float float_of_str
 
 */
 
@@ -31,10 +33,10 @@ module(string).
  * r=string.times("ab", 5)  ==>  r="ababababab"
  */
 H=string.times(String, Times) :-
-	unary(String), int(Times) | H=[:/*inline*/
-	StringBuffer b = new StringBuffer(me.nth(0));
+	string(String), int(Times) | H=[:/*inline*/
+	StringBuffer b = new StringBuffer(((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
 	StringBuffer r = new StringBuffer("");
-	int times = Integer.parseInt(me.nth(1));
+	int times = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
 	for(int i=1;i<=times;i<<=1, b.append(b)) {
 		if((i&times)>0) r.append(b);
 	}
@@ -51,12 +53,15 @@ H=string.times(String, Times) :-
  * パターン文字列が変だったときは元の文字列を返す
  */
 H=string.replace(String, Regexp, Replacement) :-
-	unary(String), unary(Regexp), unary(Replacement) | H=[:/*inline*/
+	string(String), string(Regexp), string(Replacement) | H=[:/*inline*/
 	String s=null;
 	try {
-		s = me.nth(0).replaceAll(me.nth(1), me.nth(2));
+		s = me.nth(0).replaceAll(
+		((StringFunctor)me.nthAtom(1).getFunctor()).stringValue(),
+		((StringFunctor)me.nthAtom(2).getFunctor()).stringValue()
+		);
 	} catch(Exception e) {}
-	if(s==null) s = me.nth(0);
+	if(s==null) s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
 	Atom result = mem.newAtom(new Functor(s, 1));
 	mem.relink(result, 0, me, 3);
 	me.nthAtom(0).remove();
@@ -73,10 +78,12 @@ H=string.replace(String, Regexp, Replacement) :-
  * パターン文字列が変だったときは false
  */
 H=string.match(String, Regexp) :-
-	unary(String), unary(Regexp) | H=[:/*inline*/
+	string(String), string(Regexp) | H=[:/*inline*/
 	boolean b=false;
 	try {
-		b = java.util.regex.Pattern.compile(me.nth(1)).matcher(me.nth(0)).find();
+		b = java.util.regex.Pattern.compile(
+		((StringFunctor)me.nthAtom(1).getFunctor()).stringValue() ).matcher(
+		((StringFunctor)me.nthAtom(0).getFunctor()).stringValue() ).find();
 	} catch(Exception e) {e.printStackTrace();}
 	Atom result = mem.newAtom(new Functor(b?"true":"false", 1));
 	mem.relink(result, 0, me, 2);
@@ -90,10 +97,39 @@ H=string.match(String, Regexp) :-
  * 
  * H=split([:\s+:], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
  */
-H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[:/*inline*/
-	String r[] = me.nth(1).split(me.nth(0));
-	
-	util.Util.makeList(me.getArg(2), java.util.Arrays.asList(r));
+H=string.split(Regexp, S) :- string(Regexp), string(S) | H=[:/*inline*/
+	String r[] = ((StringFunctor)me.nthAtom(1).getFunctor()).stringValue().split(
+	((StringFunctor)me.nthAtom(0).getFunctor()).stringValue() );
+
+//	util.Util.makeList(me.getArg(2), java.util.Arrays.asList(r));
+
+// util.Util.makeListのcopy&paste&修正
+	List l = java.util.Arrays.asList(r);
+	Link link = me.getArg(2);
+
+	Iterator it = l.iterator();
+	//AbstractMembrane mem = link.getAtom().getMem();
+	Atom parent=null;
+	boolean first=true;
+	while(it.hasNext()) {
+		Atom c = mem.newAtom(new Functor(".", 3));  // .(Value Next Parent)
+		Atom v = mem.newAtom(new StringFunctor(it.next().toString()));
+		//new Functor(it.next().toString(), 1)); // value(Value)
+		mem.newLink(c, 0, v, 0);
+		if(first) {
+			mem.inheritLink(c, 2, link);
+		} else {
+			mem.newLink(c, 2, parent, 1);
+		}
+		parent = c;
+		first=false;
+	}
+	Atom nil = mem.newAtom(new Functor("[]", 1));
+	if(first) {
+		mem.inheritLink(nil, 0, link);
+	} else {
+		mem.newLink(nil, 0, parent, 1);
+	}
 	
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me.nthAtom(1));
@@ -105,8 +141,8 @@ H=string.split(Regexp, S) :- unary(Regexp), unary(S) | H=[:/*inline*/
  * 
  * H=join("_", [1,2,3])  ==>  H="1_2_3"
  */
-H=string.concat(Glue0,string.join(Glue1, [])) :- unary(Glue0), unary(Glue1) | H=[::].
-H=string.join(Glue, [CAR|CDR]) :- unary(Glue) |
+H=string.concat(Glue0,string.join(Glue1, [])) :- string(Glue0), string(Glue1) | H=[::].
+H=string.join(Glue, [CAR|CDR]) :- string(Glue) |
 	H=string.concat(CAR, string.concat(Glue, string.join(Glue, CDR))).
 
 
@@ -115,8 +151,10 @@ H=string.join(Glue, [CAR|CDR]) :- unary(Glue) |
  * 
  * H='^'("abc", "de")  ==>  H="abcde"
  */
-H=string.concat(S1, S2) :- unary(S1), unary(S2) | H=[:/*inline*/
-	Atom cat = mem.newAtom(new StringFunctor(me.nth(0) + me.nth(1)));
+H=string.concat(S1, S2) :- string(S1), string(S2) | H=[:/*inline*/
+	Atom cat = mem.newAtom(new StringFunctor(
+	((StringFunctor)me.nthAtom(0).getFunctor()).stringValue() +
+	((StringFunctor)me.nthAtom(1).getFunctor()).stringValue() ));
 	mem.relinkAtomArgs(cat, 0, me, 2);
 	
 	mem.removeAtom(me.nthAtom(0));
@@ -124,10 +162,18 @@ H=string.concat(S1, S2) :- unary(S1), unary(S2) | H=[:/*inline*/
 	mem.removeAtom(me);
 	:](S1, S2).
 
+/**
+ * substring : String -> int -> String
+ *
+ * H=string.substring("abc", 1) ==> H="bc"
+ */
 H=string.substring(S,Begin) :- string(S), int(Begin) | H=[:/*inline*/
 	int b = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
 	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
-	Atom sub = mem.newAtom(new StringFunctor(s.substring(b)));
+	Atom sub = null;
+	try{
+		sub = mem.newAtom(new StringFunctor(s.substring(b)));
+	} catch(Exception e){}
 	mem.relinkAtomArgs(sub, 0, me, 2);
 	
 	mem.removeAtom(me.nthAtom(0));
@@ -135,11 +181,19 @@ H=string.substring(S,Begin) :- string(S), int(Begin) | H=[:/*inline*/
 	mem.removeAtom(me);
 	:](S, Begin).
 
+/**
+ * substring : String -> int -> int -> String
+ *
+ * H=string.substring("abc", 1, 2) ==> H="b"
+ */
 H=string.substring(S,Begin,End) :- string(S), int(Begin), int(End) | H=[:/*inline*/
 	int b = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
 	int e = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
 	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
-	Atom sub = mem.newAtom(new StringFunctor(s.substring(b,e)));
+	Atom sub = null;
+	try{
+		sub = mem.newAtom(new StringFunctor(s.substring(b,e)));
+	} catch(Exception exc) {}
 	mem.relinkAtomArgs(sub, 0, me, 3);
 	
 	mem.removeAtom(me.nthAtom(0));
@@ -148,10 +202,15 @@ H=string.substring(S,Begin,End) :- string(S), int(Begin), int(End) | H=[:/*inlin
 	mem.removeAtom(me);
 	:](S, Begin, End).
 
+/**
+ * int_of_str : String -> int
+ *
+ * H=string.int_of_str("13") ==> H=13
+ */
 H=string.int_of_str(S) :- string(S) | H=[:/*inline*/
 	int n=0;
 	try{
-		n = Integer.parseInt(me.nth(0));
+		n = Integer.parseInt( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
 	} catch(Exception e) {}
 	Atom res = mem.newAtom(new IntegerFunctor(n));
 	mem.relinkAtomArgs(res, 0, me, 1);
@@ -160,6 +219,11 @@ H=string.int_of_str(S) :- string(S) | H=[:/*inline*/
 	mem.removeAtom(me);
 	:](S).
 
+/**
+ * str_of_int : int -> String
+ *
+ * H=string.str_of_int(6) ==> H="6"
+ */
 H=string.str_of_int(I) :- int(I) | H=[:/*inline*/
 	String s = "";
 	try{
@@ -171,6 +235,11 @@ H=string.str_of_int(I) :- int(I) | H=[:/*inline*/
 	mem.removeAtom(me);
 	:](I).
 
+/**
+ * str_of_float : float -> String
+ *
+ * H=string.str_of_float(3.5) ==> H="3.5"
+ */
 H=string.str_of_float(I) :- float(I) | H=[:/*inline*/
 	String s = "";
 	try{
@@ -181,6 +250,23 @@ H=string.str_of_float(I) :- float(I) | H=[:/*inline*/
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
 	:](I).
+
+/**
+ * float_of_str : String -> float
+ *
+ * H=string.float_of_str("2.6") ==> H=2.6
+ */
+H=string.float_of_str(S) :- string(S) | H=[:/*inline*/
+	double d = 0.0;
+	try{
+		d = Double.parseDouble( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
+	} catch(Exception e) {}
+	Atom res = mem.newAtom(new FloatingFunctor(d));
+	mem.relinkAtomArgs(res, 0, me, 1);
+
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	:](S).
 
 }.
 
