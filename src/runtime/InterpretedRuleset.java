@@ -955,8 +955,9 @@ class InterpretiveReactor {
 					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof FloatingFunctor)) return false;
 					break; //n-kato
 				case Instruction.ISSTRING : //[atom] // todo StringFunctorに変える（CONNECTRUNTIMEも）
-					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof ObjectFunctor)) return false;
-					if (!(((ObjectFunctor)atoms[inst.getIntArg1()].getFunctor()).getObject() instanceof String)) return false;
+					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof StringFunctor)) return false;
+//					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof ObjectFunctor)) return false;
+//					if (!(((ObjectFunctor)atoms[inst.getIntArg1()].getFunctor()).getObject() instanceof String)) return false;
 					break; //n-kato
 				case Instruction.ISINTFUNC : //[func]
 					if (!(vars.get(inst.getIntArg1()) instanceof IntegerFunctor)) return false;
