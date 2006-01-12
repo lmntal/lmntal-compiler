@@ -137,9 +137,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * インスタンスごとにユニークなidを用意してハッシュコードとして利用する。
 	 */
 	public int hashCode() {
-		if (Env.fNondeterministic || nondeterministic) {
-			return atoms.hashCode() + rulesets.hashCode();
-		}
 		return id;
 	}
 	/** この膜のローカルIDを取得する */
@@ -1257,15 +1254,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	////////////////////////////////////////
 	// non deterministic LMNtal
-	public boolean equals(Object o) {
-		if (Env.fNondeterministic || nondeterministic) {
-			AbstractMembrane m = (AbstractMembrane)o;
-			return atoms.equals(m.atoms) && rulesets.equals(m.rulesets);
-			//ルールセットを集合として比較していないので、実勢には同じでもちがうと判断される事がある。
-			//そもそもルールセットを動的に変化させるような例はほとんどないので、とりあえずは良い事にする。
-		} else {
-			return super.equals(o);
-		}
+	AtomSet getAtoms() {
+		return atoms;
 	}
-	
 }

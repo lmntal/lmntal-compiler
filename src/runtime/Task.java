@@ -353,10 +353,12 @@ public class Task extends AbstractTask implements Runnable {
 	 * @param memExec2 非同期実行する膜
 	 */
 	public void nondeterministicExec(Membrane memExec2) {
+		AtomSet atoms = memExec2.getAtoms();
+		atoms.freeze();
 		ArrayList l = new ArrayList();
 		l.add(memExec2);
 		HashMap memMap = new HashMap();
-		memMap.put(memExec2, memExec2.getParent());
+		memMap.put(atoms, memExec2.getParent());
 		while (l.size() > 0) {
 			Membrane mem2 = (Membrane)l.remove(l.size() - 1);
 			nondeterministicExec(mem2, memMap, l);
@@ -385,12 +387,14 @@ public class Task extends AbstractTask implements Runnable {
 			memResult2.copyRulesFrom(memExec2);
 			//適用
 			String name = react(memResult2, (Object[])it.next(), memExec2, atomMap);
+			AtomSet atoms = memResult2.getAtoms();
+			atoms.freeze();
 			
 			//同一の膜を調べる
-			Membrane memOut = (Membrane)memMap.get(memResult2);
+			Membrane memOut = (Membrane)memMap.get(atoms);
 			boolean flg = memOut == null;
 			if (flg) {
-				memMap.put(memResult2, memResult);
+				memMap.put(atoms, memResult);
 				memOut = memResult;
 				if (newMems != null) newMems.add(memResult2);
 			} else {
@@ -429,7 +433,9 @@ public class Task extends AbstractTask implements Runnable {
 		int nextId = 0;
 		ArrayList st = new ArrayList();
 		st.add(getRoot());
-		idMap.put(getRoot(), new Integer(nextId++));
+		AtomSet atoms = getRoot().getAtoms();
+		atoms.freeze();
+		idMap.put(atoms, new Integer(nextId++));
 		int i = 0, max_w = 0,t = 0;
 
 		while (st.size() > 0) {
@@ -446,7 +452,7 @@ public class Task extends AbstractTask implements Runnable {
 			exec(mem, true);
 			memStack.pop();
 			//それぞれ適用した結果を作成
-			System.out.println(idMap.get(mem) + " : " + mem);
+			System.out.println(idMap.get(mem.getAtoms()) + " : " + mem);
 			Iterator it = states.iterator();
 			int w = 0;
 			t++;
@@ -461,23 +467,25 @@ public class Task extends AbstractTask implements Runnable {
 				mem2.copyRulesFrom(mem);
 				//適用
 				String ruleName = react(mem2, (Object[])it.next(), mem, map);
+				atoms = mem2.getAtoms();
+				atoms.freeze();
 				
 				Integer id;
-				if (idMap.containsKey(mem2)) {
-					id = (Integer)idMap.get(mem2);
+				if (idMap.containsKey(atoms)) {
+					id = (Integer)idMap.get(atoms);
 					mem2.drop();
 					mem2.free();
 				} else {
 					id = new Integer(nextId++);
 					st.add(mem2);
-					idMap.put(mem2, id);
+					idMap.put(atoms, id);
 				}
 				System.out.print(" " + id + "(" + ruleName + ")");
 			}
 			if (w > max_w) max_w = w;
 			System.out.println();
 			if (!removeDup) {
-				idMap.remove(mem);
+				idMap.remove(mem.getAtoms());
 				mem.drop();
 				mem.free();
 			}

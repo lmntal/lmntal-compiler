@@ -280,36 +280,83 @@ public final class AtomSet implements Serializable {
 		}
 	}
 	
+	public void gc() {
+		Iterator it = atoms.keySet().iterator();
+		while (it.hasNext()) {
+			Functor f = (Functor)it.next();
+			if (((ArrayList)atoms.get(f)).size() == 0)
+				it.remove();
+		}
+	}
 	/////////////////////////////////
 	// non deterministic LMNtal
-	private HashSet checked1 = new HashSet(), checked2 = new HashSet();
+	private final Comparator sizeComparator = new Comparator() {
+		public int compare(Object f0, Object f1) {
+			return ((ArrayList)atoms.get(f0)).size() - ((ArrayList)atoms.get(f1)).size();
+		}
+	};
+	private ArrayList startAtoms; 
+	/**
+	 * このアトムセットがもう変更されない事を宣言する。
+	 * アトムセット間の比較を行う際の前準備と、ハッシュコードの計算を行う。
+	 */
+	public void freeze() {
+		gc();
+		//比較のための準備
+		ArrayList funcs = new ArrayList();
+		funcs.addAll(atoms.keySet());
+		Collections.sort(funcs, sizeComparator);
+		HashSet checked = new HashSet();
+		startAtoms = new ArrayList();
+		for (int i = 0; i < funcs.size(); i++) {
+			searchAtomGroup((ArrayList)atoms.get(funcs.get(i)), checked);
+		}
+		searchAtomGroup(dataAtoms, checked);
+
+		calcHashCode();
+	}
+	private void searchAtomGroup(ArrayList l, HashSet checked) {
+		for (int j = 0; j < l.size(); j++) {
+			Atom a = (Atom)l.get(j);
+			if (!checked.contains(a)) {
+				searchAtomGroup(a, checked);
+				startAtoms.add(a);
+			}
+		}
+	}
+	private void searchAtomGroup(Atom a, HashSet checked) {
+		checked.add(a);
+		for (int i = 0; i < a.getArity(); i++) {
+			Atom a2 = a.nthAtom(i);
+			if (!checked.contains(a2))
+				searchAtomGroup(a2, checked);
+		}
+	}
+	
 	public boolean equals(Object o) {
 		AtomSet s = (AtomSet)o;
-		ArrayList funcs = getCanonicalFunctorList();
-		if (funcs.size() != s.getCanonicalFunctorList().size()) return false;
-		Collections.sort(funcs, sizeComparator);
-		for (int i = 0; i < funcs.size(); i++) {
-			Functor f = (Functor)funcs.get(i);
-			ArrayList l1 = (ArrayList)atoms.get(f);
-			ArrayList l2 = (ArrayList)s.atoms.get(f);
-			if (l2 == null || l1.size() != l2.size()) return false;
-			if (!check(l1, l2)) return false;
-		}
-		boolean ret = check(dataAtoms, s.dataAtoms);
-		checked1.clear();
-		checked2.clear();
-		return ret;
-	}
-	private boolean check(ArrayList l1, ArrayList l2) {
-		for (int j = 0; j < l1.size(); j++) {
-			if (checked1.contains(l1.get(j))) continue;
+		if (size() != s.size()) return false;
+		if (atoms.size() != s.atoms.size()) return false;
+		if (dataAtoms.size() != s.dataAtoms.size()) return false;
+
+		HashSet checked2 = new HashSet();
+		HashMap map = new HashMap();
+		for (int i = 0; i < startAtoms.size(); i++) {
+			Atom a1 = (Atom)startAtoms.get(i);
+			Functor f = a1.getFunctor();
+			ArrayList l2;
+			if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
+				l2 = (ArrayList)s.atoms.get(f);
+				if (l2 == null || ((ArrayList)atoms.get(f)).size() != l2.size()) return false;
+			} else {
+				l2 = s.dataAtoms;
+			}
 			boolean flg = false;
-			for (int k = 0; k < l2.size(); k++) {
-				if (checked2.contains(l2.get(k))) continue;
-				HashMap map = new HashMap();
-				if (compare((Atom)l1.get(j), (Atom)l2.get(k), map)) {
+			for (int j = 0; j < l2.size(); j++) {
+				if (checked2.contains(l2.get(j))) continue;
+				map.clear();
+				if (compare(a1, (Atom)l2.get(j), map, checked2)) {
 					flg = true;
-					checked1.addAll(map.keySet());
 					checked2.addAll(map.values());
 					break;
 				}
@@ -318,37 +365,25 @@ public final class AtomSet implements Serializable {
 		}
 		return true;
 	}
-	private ArrayList getCanonicalFunctorList() {
-		ArrayList list = new ArrayList();
-		Iterator it = atoms.keySet().iterator();
-		while (it.hasNext()) {
-			Functor f = (Functor)it.next();
-			if (((ArrayList)atoms.get(f)).size() > 0)
-				list.add(f);
-		}
-		return list;
-	}
-	private final Comparator sizeComparator = new Comparator() {
-		public int compare(Object f0, Object f1) {
-			return ((ArrayList)atoms.get(f0)).size() - ((ArrayList)atoms.get(f1)).size();
-		}
-	};
-	private boolean compare(Atom a1, Atom a2, HashMap map) {
+	private boolean compare(Atom a1, Atom a2, HashMap map, HashSet checked2) {
 		if (!a1.getFunctor().equals(a2.getFunctor()))
 			return false;
 		if (map.containsKey(a1)) {
 			return a2 == map.get(a1);
 		}
-		if (checked1.contains(a1) || checked2.contains(a2)) throw new RuntimeException();
+		if (checked2.contains(a2)) throw new RuntimeException();
 		map.put(a1, a2);
 		for (int i = 0; i < a1.getArity(); i++) {
-			if (!compare(a1.nthAtom(i), a2.nthAtom(i), map))
+			if (!compare(a1.nthAtom(i), a2.nthAtom(i), map, checked2))
 				return false;
 		}
 		return true;
 	}
-	public int hashCode() {
-		int ret = 0;
+
+	/*--------------------ハッシュコード--------------*/
+	private int hashCode;
+	private void calcHashCode() {
+		hashCode = 0;
 		Iterator it = atoms.values().iterator();
 		while (it.hasNext()) {
 			ArrayList l = (ArrayList)it.next();
@@ -356,10 +391,12 @@ public final class AtomSet implements Serializable {
 				Atom a = (Atom)l.get(i);
 				int t = a.getFunctor().hashCode();
 				for (int j = 0; j < a.getArity(); j++) {
-					ret += t * a.nthAtom(j).getFunctor().hashCode();
+					hashCode += t * j * a.nthAtom(j).getFunctor().hashCode();
 				}
 			}
 		}
-		return ret;
+	}
+	public int hashCode() {
+		return hashCode;
 	}
 }
