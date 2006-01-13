@@ -25,6 +25,7 @@ HISTORY
 
 	06/01/07 released
 	06/01/10 1.1
+	06/01/12 2.0 add termination processing
 
 */
 
@@ -142,11 +143,18 @@ class ReaderThread implements Runnable {
           data = reader.readLine();
           Atom sockAtom = objAtom.nthAtom(0);
           mem.asyncLock();
-          Atom dataAtom = mem.newAtom(new StringFunctor(data));
           Atom consAtom = mem.newAtom(new Functor(".",3));
-          mem.newLink(dataAtom,0,consAtom,0);
-          mem.relinkAtomArgs(consAtom,2,sockAtom,1);
-          mem.newLink(consAtom,1,sockAtom,1);
+          if(data.equals("CLOSE")) {
+            Atom closeAtom = mem.newAtom(new Functor("close",1));
+            mem.newLink(closeAtom,0,consAtom,0);
+            mem.relinkAtomArgs(consAtom,1,sockAtom,0);
+            mem.newLink(consAtom,2,sockAtom,0);
+          } else {
+            Atom dataAtom = mem.newAtom(new StringFunctor(data));
+            mem.newLink(dataAtom,0,consAtom,0);
+            mem.relinkAtomArgs(consAtom,2,sockAtom,1);
+            mem.newLink(consAtom,1,sockAtom,1);
+          }
           mem.asyncUnlock();
         }
       } catch(IOException e) {
@@ -228,7 +236,6 @@ dlt.bound([accept(Send,Recv)|T],Obj) :-
 /**
  *  rule: close
  *    close ServerSocket
- *  TODO: delete 跡形もなく消し去る
  */
 close @@
 dlt.bound([close|T],Obj) :- class(Obj,"java.net.ServerSocket") |
@@ -250,7 +257,6 @@ dlt.bound([close|T],Obj) :- class(Obj,"java.net.ServerSocket") |
  *  module: connect
  *    connect to remote server
  */
- 
 dlt.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
   dlt.socket(Send,Recv,Obj),
   Obj = [:/*inline*/
@@ -315,7 +321,7 @@ dlt.socket([H|T],Recv,Obj) :- string(H) |
 
 /**
  *  rule: close
- *    close PrintWriter and stop ReaderThread
+ *    close local socket
  */
 close @@
 dlt.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
@@ -323,7 +329,9 @@ dlt.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
   [:/*inline*/
     ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     Vector obj = (Vector)objFunc.getObject();
-    ((PrintWriter)obj.get(1)).close();
+    PrintWriter writer = (PrintWriter)obj.get(1);
+    writer.println("CLOSE");
+    writer.close();
     ((ReaderThread)obj.get(2)).stop();
     me.nthAtom(0).remove();
     me.remove();
@@ -331,7 +339,9 @@ dlt.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
 
 /**
  *  rule: terminate
+ *    set current membrane's perpetual flag off
  */   
+terminate @@
 dlt.terminate :-
   [:/*inline*/
     ((Membrane)mem).perpetual = false;
