@@ -1,6 +1,7 @@
 % timer, time, benchmark, long の開発者向けサンプル by n-kato
 % "AbstractMembrane mem = me.getMem();"のmemが他の変数と被っているようで、
 % mem1に置き換えました by kei murayama
+% 時間をint型で取得するgetinttimeを加えましたby Atsushi Nakano(2006/1/14)
 
 {
 module(timer).
@@ -11,6 +12,10 @@ module(timer).
 %	timer:subtract(+Long,+Long,-Float)
 %	timer:benchmark(Link,-Float),{'+'(Link), ... }
 
+	timer:getinttime(Time) :-
+		[:/*inline*/me.getMem().alterAtomFunctor( me,
+			new IntegerFunctor(new Long(System.currentTimeMillis()).intValue()) );:](Time).
+			
 	timer:gettime(Time) :-
 		[:/*inline*/me.getMem().alterAtomFunctor( me,
 			new ObjectFunctor(new Long(System.currentTimeMillis())) );:](Time).
