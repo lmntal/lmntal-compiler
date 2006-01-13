@@ -119,7 +119,10 @@ public class LMNtalWindow extends JFrame{
 		while(ite.hasNext()){
 			Atom a = (Atom)ite.next();
 			if(a.getName()=="keyChar" || a.getName()=="keyCode"){
-				Atom key = mem.newAtom(new Functor(a.getName(), 1));
+				Atom key = mem.newAtom(new Functor(a.getName(), a.getFunctor().getArity()+1));
+				for(int i=0;i < a.getFunctor().getArity();i++){
+					mem.relink(key,i+1,a,i);
+				}
 				a.remove();
 				Atom nil = mem.newAtom(new Functor("[]", 1));
 				mem.newLink(key, 0, nil, 0);
@@ -260,7 +263,11 @@ public class LMNtalWindow extends JFrame{
 				Atom a = (Atom)ite.next();
 				if(a.getName()=="keyCharNoCache" || a.getName()=="keyCodeNoCache"){
 					Atom data = getmem().newAtom(keyAtomFunctor);
-					Atom key = mem.newAtom(new Functor(a.getName(), 1));
+//					Atom key = mem.newAtom(new Functor(a.getName(), 1));
+					Atom key = mem.newAtom(new Functor(a.getName(), a.getFunctor().getArity()+1));
+					for(int i=0;i < a.getFunctor().getArity();i++){
+						mem.relink(key,i+1,a,i);
+					}
 					getmem().newLink(key, 0, data, 0);
 					a.remove();
 					keyAtomFunctor = null;
@@ -280,10 +287,8 @@ public class LMNtalWindow extends JFrame{
 				if(a.getName()=="keyChar" || a.getName()=="keyCode"){
 					Atom nth1 = a;
 					Atom nth2 = null;
+					int nth1_arg=0;
 					while(true){
-						int nth1_arg=1;
-						if(nth1.getFunctor().getArity()==1)
-							nth1_arg=0;
 						try{
 							nth2 = nth1.getArg(nth1_arg).getAtom();
 						}catch(ArrayIndexOutOfBoundsException e){
@@ -298,6 +303,9 @@ public class LMNtalWindow extends JFrame{
 							break;
 						}
 						nth1 = nth2;
+						nth1_arg=1;
+//						if(nth1.getFunctor().getArity()==1)
+//							nth1_arg=0;
 					}
 					break;
 				}
