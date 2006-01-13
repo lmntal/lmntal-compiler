@@ -1,7 +1,0 @@
-dlt.bind(50000,[accept([],decList),close]).
-
-decList([_SH|T]):-decList(T),codec.strDecoder(_SH).
-
-start,{$p,@p} :- {graphic.use,$p,@p}.
-
-start.
