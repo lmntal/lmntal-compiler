@@ -348,7 +348,7 @@ Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 					   RESULT = sMem; :}
 				| LBRACE WorldProcessList:list RBRACE_ASTERISK
 					{: SrcMembrane sMem = new SrcMembrane(list);
-						sMem.nondeterministic = true;
+						sMem.kind = runtime.Membrane.KIND_ND;
 						RESULT = sMem; :}
 				;
 					

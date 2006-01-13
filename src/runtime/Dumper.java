@@ -301,6 +301,8 @@ public class Dumper {
 			buf.append("}");
 			if (m.kind == 1)
 				buf.append("_");
+			else if (m.kind == Membrane.KIND_ND)
+				buf.append("*");
 			if (Env.getExtendedOption("dump").equals("1"))
 				Env.indent--;
 		}

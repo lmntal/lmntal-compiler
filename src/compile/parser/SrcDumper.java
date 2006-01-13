@@ -37,7 +37,7 @@ public class SrcDumper {
 		s += "}";
 		if (mem.kind==1) s += "_";
 		if (mem.stable) s += "/";
-		if (mem.nondeterministic) s += "*";
+		if (mem.kind==runtime.Membrane.KIND_ND) s += "*";
 		if (mem.pragma != null)  s += dump(mem.pragma);
 		return s;
 	}

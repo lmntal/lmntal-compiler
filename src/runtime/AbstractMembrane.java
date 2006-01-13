@@ -76,6 +76,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	protected List rulesets = new ArrayList();
 	/** 膜のタイプ */
 	protected int kind = 0;
+	public static final int KIND_ND = 2;
 	/** trueならばこの膜以下に適用できるルールが無い */
 	protected boolean stable = false;
 	/** 永続フラグ（trueならばルール適用できなくてもstableにならない）*/
@@ -88,8 +89,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public RemoteTask remote = null; // publicは仮
 	/** この膜の名前（internされた文字列またはnull） */
 	String name;
-	/** 非決定的実行膜 */
-	private boolean nondeterministic = false;
 
 	private static int nextId = 0;
 	private int id;
@@ -181,6 +180,11 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** 膜のタイプを変更 */
 	public void changeKind(int k) {
 		kind = k;
+		if (kind == KIND_ND) {
+			//非決定的実行膜は、普通の方法では実行しない
+			dequeue();
+			toStable();
+		}
 	}
 	/** この膜とその子孫に適用できるルールがない場合にtrue */
 	public boolean isStable() {
@@ -210,7 +214,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return task.getRoot() == this;
 	}
 	public boolean isNondeterministic() {
-		return nondeterministic;
+		return kind == KIND_ND;
 	}
 	
 	// 反復子
@@ -607,13 +611,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		if (locked)
 			unlock();
 		// TODO (A) ホスト間移動時にGlobalMembraneIDは変更しなくて大丈夫か調べる
-	}
-	public void setNondeterministic(boolean f) {
-		nondeterministic = f;
-		if (f) {
-			dequeue();
-			toStable();
-		}
 	}
 //	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
 //	 * <p>いずれ、

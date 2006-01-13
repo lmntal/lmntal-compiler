@@ -381,8 +381,7 @@ public class Task extends AbstractTask implements Runnable {
 		while (it.hasNext()) {
 			//йёю╫
 			Membrane memResult = (Membrane)memGraph.newMem();
-			Membrane memResult2 = (Membrane)memResult.newMem();
-			memResult2.setNondeterministic(true);
+			Membrane memResult2 = (Membrane)memResult.newMem(Membrane.KIND_ND);
 			Map atomMap = memResult2.copyCellsFrom(memExec2);
 			memResult2.copyRulesFrom(memExec2);
 			//е╛мя

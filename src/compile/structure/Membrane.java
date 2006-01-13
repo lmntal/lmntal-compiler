@@ -19,8 +19,6 @@ public final class Membrane {
 	public boolean stable = false;
 	/** 膜のタイプ */
 	public int kind = 0;
-	/** 非同期的実行膜 */
-	public boolean nondeterministic = false;
 	/** ＠指定またはnull
 	 * <p><b>仮仕様</b>
 	 * ホスト指定を表す文字列が入る型付きプロセス文脈名を持った

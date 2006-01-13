@@ -145,7 +145,8 @@ public final class Membrane extends AbstractMembrane {
 		m.changeKind(k);
 		mems.add(m);
 		// 親膜と同じ実行膜スタックに積む
-		stack.push(m);
+		if (k != KIND_ND)
+			stack.push(m);
 		return m;
 	}
 	/** 新しいデフォルトタイプの子膜を作成し、活性化する */
@@ -159,7 +160,8 @@ public final class Membrane extends AbstractMembrane {
 		Membrane m = new Membrane(task, this);
 		m.changeKind(k);
 		mems.add(m);
-		((Task)task).memStack.push(m);
+		if (k != KIND_ND)
+			((Task)task).memStack.push(m);
 		return m;		
 	}
 	public AbstractMembrane newLocalMembrane() {

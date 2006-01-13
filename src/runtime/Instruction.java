@@ -538,7 +538,7 @@ public class Instruction implements Cloneable, Serializable {
 	// 一般の ADDATOM は存在しない。
 	static {setArgType(LOCALADDATOM, new ArgType(false, ARG_MEM, ARG_ATOM));}
 	
-	// 膜を操作する基本ボディ命令 (50--61)    
+	// 膜を操作する基本ボディ命令 (50--60)    
 	// [local]removemem                [srcmem, parentmem]
 	// [local]newmem          [-dstmem, srcmem, memtype]
 	//  ----- allocmem        [-dstmem]
@@ -550,7 +550,6 @@ public class Instruction implements Cloneable, Serializable {
 	// [local]enququmem                [srcmem]
 	// [local]unlockmem                [srcmem]
 	// [local]setmemname               [dstmem, name]
-	// ------ nondeterministic         [mem]
 
 	/** removemem [srcmem, parentmem]
 	 * <br>ボディ命令<br>
@@ -693,14 +692,7 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int LOCALSETMEMNAME = LOCAL + SETMEMNAME;
 	static {setArgType(LOCALSETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));}
 	
-	/** nondeterministic [mem]
-	 * <br>ボディ命令</br>
-	 * 膜$memを、非決定的執行膜にする。
-	 */
-	public static final int NONDETERMINISTIC = 61;
-	static {setArgType(NONDETERMINISTIC, new ArgType(false, ARG_MEM));}
-
-	// 予約 (62--62)
+	// 予約 (61--62)
 
 	// リンクに関係する出力するガード命令 (63--64)
 	
