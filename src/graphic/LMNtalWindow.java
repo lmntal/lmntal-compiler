@@ -242,8 +242,11 @@ public class LMNtalWindow extends JFrame{
 		return false;
 	}
 	public void setAddAtom(Functor f){
-		if(keyCache)
-			atomlist.add(f);
+		if(keyCache){
+			synchronized(this){
+				atomlist.add(f);
+			}
+		}
 		else
 			keyAtomFunctor = f;
 		/*lockが出来る（unlockされない可能性がある）場合はすぐ追加してしまう。*/
@@ -254,60 +257,62 @@ public class LMNtalWindow extends JFrame{
 //		}
 	}
 	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
-	public void doAddAtom(){
-		Iterator ite = getmem().atomIterator();
-		/*keyCacheがfalseのとき*/
-		if(!keyCache){
-			/*積まれたアトムを追加するリストを検索*/
-			while(keyAtomFunctor!=null && ite.hasNext()){
-				Atom a = (Atom)ite.next();
-				if(a.getName()=="keyCharNoCache" || a.getName()=="keyCodeNoCache"){
-					Atom data = getmem().newAtom(keyAtomFunctor);
-//					Atom key = mem.newAtom(new Functor(a.getName(), 1));
-					Atom key = mem.newAtom(new Functor(a.getName(), a.getFunctor().getArity()+1));
-					for(int i=0;i < a.getFunctor().getArity();i++){
-						mem.relink(key,i+1,a,i);
+	public synchronized void doAddAtom(){
+		synchronized(this){
+			Iterator ite = getmem().atomIterator();
+			/*keyCacheがfalseのとき*/
+			if(!keyCache){
+				/*積まれたアトムを追加するリストを検索*/
+				while(keyAtomFunctor!=null && ite.hasNext()){
+					Atom a = (Atom)ite.next();
+					if(a.getName()=="keyCharNoCache" || a.getName()=="keyCodeNoCache"){
+						Atom data = getmem().newAtom(keyAtomFunctor);
+//						Atom key = mem.newAtom(new Functor(a.getName(), 1));
+						Atom key = mem.newAtom(new Functor(a.getName(), a.getFunctor().getArity()+1));
+						for(int i=0;i < a.getFunctor().getArity();i++){
+							mem.relink(key,i+1,a,i);
+						}
+						getmem().newLink(key, 0, data, 0);
+						a.remove();
+						keyAtomFunctor = null;
+						break;
 					}
-					getmem().newLink(key, 0, data, 0);
-					a.remove();
-					keyAtomFunctor = null;
-					break;
 				}
+				return;
 			}
-			return;
-		}
-		/*keyCacheがtrueのとき*/
-		while(!atomlist.isEmpty()){
-			Functor fa = (Functor)atomlist.removeFirst();
-			
-//			WindowSet win = (WindowSet)windowmap.get(wa.window);
-			/*積まれたアトムを追加するリストを検索*/
-			while(ite.hasNext()){
-				Atom a = (Atom)ite.next();
-				if(a.getName()=="keyChar" || a.getName()=="keyCode"){
-					Atom nth1 = a;
-					Atom nth2 = null;
-					int nth1_arg=0;
-					while(true){
-						try{
-							nth2 = nth1.getArg(nth1_arg).getAtom();
-						}catch(ArrayIndexOutOfBoundsException e){
-							break;
-						}
-						if(nth2.getName().equals("[]")){
-							Atom data = getmem().newAtom(fa);
-							Atom dot = getmem().newAtom(new Functor(".", 3));
-							getmem().newLink(dot, 0, data, 0);
-							getmem().newLink(nth1, nth1_arg, dot, 2);
-							getmem().newLink(nth2, 0, dot, 1);
-							break;
-						}
-						nth1 = nth2;
-						nth1_arg=1;
-//						if(nth1.getFunctor().getArity()==1)
+			/*keyCacheがtrueのとき*/
+			while(!atomlist.isEmpty()){
+				Functor fa = (Functor)atomlist.removeFirst();
+				
+//				WindowSet win = (WindowSet)windowmap.get(wa.window);
+				/*積まれたアトムを追加するリストを検索*/
+				while(ite.hasNext()){
+					Atom a = (Atom)ite.next();
+					if(a.getName()=="keyChar" || a.getName()=="keyCode"){
+						Atom nth1 = a;
+						Atom nth2 = null;
+						int nth1_arg=0;
+						while(true){
+							try{
+								nth2 = nth1.getArg(nth1_arg).getAtom();
+							}catch(ArrayIndexOutOfBoundsException e){
+								break;
+							}
+							if(nth2.getName().equals("[]")){
+								Atom data = getmem().newAtom(fa);
+								Atom dot = getmem().newAtom(new Functor(".", 3));
+								getmem().newLink(dot, 0, data, 0);
+								getmem().newLink(nth1, nth1_arg, dot, 2);
+								getmem().newLink(nth2, 0, dot, 1);
+								break;
+							}
+							nth1 = nth2;
+							nth1_arg=1;
+//							if(nth1.getFunctor().getArity()==1)
 //							nth1_arg=0;
+						}
+						break;
 					}
-					break;
 				}
 			}
 		}
