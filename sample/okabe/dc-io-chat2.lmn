@@ -1,0 +1,35 @@
+/**
+ *  Distributed LMNtal sample(#3)
+ *  io-chat
+ *    チャット改良版
+ *    ユーザは標準入出力を使用する
+ *  server file: ds-chat.lmn
+ *
+ *  06/01/14 okabe
+ */
+
+% 入力はlib/public/io.lmnを用いる
+io.use.
+
+dlt.connect("127.0.0.1",50000,filter(io.list_of_stdin),print).
+
+% ""は受信しても表示しない
+Ret=filter([H|T]) :- string(H) | 
+  Ret=[H2|filter(T)],
+  H2=[:/*inline*/
+    String s = me.nth(0);
+    if(s.equals("")) {
+      Atom consAtom = me.nthAtom(1);
+      mem.unifyAtomArgs(consAtom,1,consAtom,2);
+      consAtom.remove();
+      me.nthAtom(0).remove();
+    } else {
+      mem.relinkAtomArgs(me.nthAtom(0),0,me,1);
+    }
+    me.remove();
+  :](H).
+
+% 標準出力に印字  
+print([H|T]) :- string(H) |
+  [:/*inline*/ System.out.println("> "+me.nth(0)); me.remove();:](H),
+  print(T).
