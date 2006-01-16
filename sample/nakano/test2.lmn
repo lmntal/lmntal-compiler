@@ -1,10 +1,8 @@
-%a([1,2,3,4,5]).
-%L=[_IX|L2]:-_IX=2,ground(L),ground(L2)|L=L2.
-
-%L=["b","c"|L2]:-ground(L),ground(L2)|L=L2.
-%[_IX|L2]:-_IX==2,ground(L2)|ok.
-
-
-a([4]).
-b([1,2,3]).
-a(L),b(L2):-c(list.append(L,L2)).
+graphic.use.
+go:-
+{
+%%make window
+window,name("LMNtal Typing"),size(800,600),timer(10).
+keyCode.
+keyCode([]):-ok.
+}

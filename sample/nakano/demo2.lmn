@@ -1,7 +1,7 @@
 graphic.use.
 go:-{
 window,position(0,0),size(500,500),name("window").
-	{graphic,position(0,0),name("all"),
+	{relative,position(0,0),name("all"),
 		{draw,name("oval"),getpic("filloval"),position(0,0),size(50,50),sequence(1)},
 		{draw,name("rect"),getpic("fillrect"),position(0,0),size(150,150),sequence(0),color(255,0,0)}
 	}
