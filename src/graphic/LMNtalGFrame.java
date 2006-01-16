@@ -47,8 +47,8 @@ public class LMNtalGFrame{
 				return "window";
 			}else if(a.getName() == "draw"){
 				return "draw";
-			}else if(a.getName() == "graphic"){
-				return "graphic";
+			}else if(a.getName() == "relative"){
+				return "relative";
 			}else if(a.getName() == "remove"){
 				return "remove";
 			}
@@ -71,7 +71,7 @@ public class LMNtalGFrame{
 //			doAddAtom();		
 		}
 		/*ÉÁ²èËì¤ÎÅÐÏ¿*/
-		else if(s=="draw" || s=="graphic"){
+		else if(s=="draw" || s=="relative"){
 			setgraphicmem(m);
 		}
 		/*ÉÁ²èËì¤Îºï½ü*/

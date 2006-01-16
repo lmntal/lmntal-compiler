@@ -126,6 +126,7 @@ public class LMNtalWindow extends JFrame{
 				a.remove();
 				Atom nil = mem.newAtom(new Functor("[]", 1));
 				mem.newLink(key, 0, nil, 0);
+				mem.activate();
 
 				break;
 			}

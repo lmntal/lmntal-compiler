@@ -13,7 +13,7 @@ import runtime.RandomSet;
  * @author nakano
  * 描画用の膜を、画像オブジェクト（アトム？）にする
  */
-public class GraphicAtoms{
+public class GraphicObj{
 	public String name = null;
 	private String atomString = null;
 	private int atomStringPoint = 15;
@@ -33,7 +33,7 @@ public class GraphicAtoms{
 	int distance;
 	public String remem = null;
 	
-	public GraphicAtoms(){
+	public GraphicObj(){
 		enable = false;
 	}
 	public void setcolor(int a, int b , int c){

@@ -64,8 +64,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			a = (Node)ite.next();
 			if(a.getName() == "draw"){
 				return "draw";
-			}else if(a.getName() == "graphic"){
-				return "graphic";
+			}else if(a.getName() == "relative"){
+				return "relative";
 			}else if(a.getName() == "remove"){
 				return "remove";
 			}
@@ -116,10 +116,10 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	/**
 	 * 描画用のアトム郡の取得
 	 */
-	private GraphicAtoms getgraphicatoms(AbstractMembrane m){
+	private GraphicObj getgraphicatoms(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
-		GraphicAtoms ga = new GraphicAtoms();
+		GraphicObj ga = new GraphicObj();
 
 		if(m.getLockThread() != null) locked = true;
 		while(ite.hasNext()){
@@ -265,7 +265,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		while(distance >= 0){
 			distance--;
 			/*レラティブ膜発見*/
-			if(searchatom(relativetmp)=="graphic"){
+			if(searchatom(relativetmp)=="relative"){
 				Relativemem remem = getrelativemem(relativetmp);
 				
 				/*レラティブ膜の登録*/
@@ -284,7 +284,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		while(distance >= 0){
 			distance--;
 			/*レラティブ膜発見*/
-			if(searchatom(relativetmp)=="graphic"){
+			if(searchatom(relativetmp)=="relative"){
 				Relativemem remem = getrelativemem(relativetmp);
 				/*すでに登録済みなら名前だけ返して終了*/
 				if(relativemap.containsKey(remem.name)){
@@ -308,7 +308,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	 */
 
 	public synchronized void setgraphicmem(AbstractMembrane m, int distance){
-		GraphicAtoms ga;
+		GraphicObj ga;
 		String mode = searchatom(m);
 		if(mode == "draw"){
 			ga = getgraphicatoms(m);
@@ -320,7 +320,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			}
 			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
 			for(int i = 0; i < drawlist.size(); i++){
-				GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
+				GraphicObj ga2 = (GraphicObj)drawlist.get(i);
 				if(ga2==null) continue;
 				if(ga.name.equals(ga2.name)){
 					drawlist.set(i, ga);
@@ -341,7 +341,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			if(ga == null) return;
 			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
 			for(int i = 0; i < drawlist.size(); i++){
-				GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
+				GraphicObj ga2 = (GraphicObj)drawlist.get(i);
 				if(ga2==null) continue;
 				if(ga.name.equals(ga2.name)){
 					drawlist.remove(i);
@@ -355,7 +355,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	public synchronized void removegraphicmem(AbstractMembrane m){
 		String name = getname(m);
 		for(int i = 0; i < drawlist.size(); i++){
-			GraphicAtoms ga2 = (GraphicAtoms)drawlist.get(i);
+			GraphicObj ga2 = (GraphicObj)drawlist.get(i);
 			if(ga2==null) continue;
 			if(ga2.name.equals(name)){
 				drawlist.remove(i);
@@ -366,7 +366,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	private synchronized void paintlayout(){
 		Iterator ite = drawlist.iterator();
 		while(ite.hasNext()){
-			GraphicAtoms ga = (GraphicAtoms)ite.next();
+			GraphicObj ga = (GraphicObj)ite.next();
 			ga.drawatom(OSG, relativemap);
 		}
 		
