@@ -107,7 +107,7 @@ public class RuleCompiler {
 		compile_l();
 		compile_g();
 		compile_r();
-
+		
 		theRule.memMatch  = memMatch;
 		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;

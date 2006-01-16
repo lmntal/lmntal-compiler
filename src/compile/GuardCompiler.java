@@ -193,11 +193,27 @@ public class GuardCompiler extends HeadCompiler {
 		LinkedList cstrs = new LinkedList();
 		it = typeConstraints.iterator();
 		while (it.hasNext()) cstrs.add(it.next());
+		
+		{
+			// uniq, not_uniq を最初に（少なくともint, unary などの前に）処理する
+			Iterator it0 = cstrs.iterator();
+			LinkedList tmp = new LinkedList();
+			while(it0.hasNext()) {
+				Atom a = (Atom)it0.next();
+				if(a.functor.getName().endsWith("uniq")) {
+					tmp.add(a);
+					it0.remove();
+				}
+			}
+			tmp.addAll(cstrs);
+			cstrs = tmp;
+		}
+		
 		boolean changed;
-		FixType:
 		do {
 			changed = false;
 			ListIterator lit = cstrs.listIterator();
+			FixType:
 			while (lit.hasNext()) {
 				Atom cstr = (Atom)lit.next();
 				Functor func = cstr.functor;
@@ -222,9 +238,14 @@ public class GuardCompiler extends HeadCompiler {
 					for(int k=0;k<cstr.args.length;k++) {
 						ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
 						if (!identifiedCxtdefs.contains(defK)) continue FixType;
-						checkGroundLink(defK);
-						int srcPath = groundToSrcPath(defK);
+						int srcPath;
+//						srcPath = typedcxtToSrcPath(defK);
 //						Env.p("VAR# "+srcPath);
+//						if(srcPath==UNBOUND) {
+							checkGroundLink(defK);
+							srcPath = groundToSrcPath(defK);
+//						}
+//						Env.p("VAR## "+srcPath);
 						if(srcPath==UNBOUND) continue FixType;
 						uniqVars.add(new Integer(srcPath));
 					}

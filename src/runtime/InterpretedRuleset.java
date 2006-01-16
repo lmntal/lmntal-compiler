@@ -895,6 +895,9 @@ class InterpretiveReactor {
 					}
 					ArrayList uniqVars = (ArrayList)inst.getArg(0);
 					Link[] hEntry = new Link[uniqVars.size()];
+//					for(int i=0;i<atoms.length;i++) System.out.println("atoms "+atoms[i]);
+//					System.out.println(vars);
+//					for(int i=0;i<mems.length;i++) System.out.println("mems "+mems[i]);
 					for(int i=0;i<uniqVars.size();i++) {
 						int v = ((Integer)uniqVars.get(i)).intValue();
 //						Env.p("var# "+v);
@@ -933,16 +936,6 @@ class InterpretiveReactor {
 					
 				case Instruction.ISUNARY: // [atom]
 					Functor f = atoms[inst.getIntArg1()].getFunctor();
-					// まくを超えたリンクが unary かどうかが判断できない。OUTSIDE_PROXY を見てる
-					// DEREF も？
-					
-					// (n-kato)
-					// すべて仕様です。というか、リンク先は親膜にあるかもしれないわけですし、
-					// 本膜の親膜にあるアトムを調べることは許されていません。
-					// (hara) じゃそういうときは「失敗」ということでいいですかねぇ
-					// (n-kato) はい。失敗して下さい。ちなみに$in,$outのarityは2なので次の2行は省略しました。
-					//if(f.equals(Functor.OUTSIDE_PROXY)) return false;
-					//if(f.equals(Functor.INSIDE_PROXY)) return false;
 					if (f.getArity() != 1) return false;
 					break; // n-kato
 //				case Instruction.ISUNARYFUNC: // [func]
