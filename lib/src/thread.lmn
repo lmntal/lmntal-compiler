@@ -74,5 +74,5 @@ module(thread).
 %	generate(500).
 %	generate(X) :- X>0 | thread.at(X mod 4,{n(integer.rnd(100))}), generate(X-1).
 %	thread.all({norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z)}).
-%	norm(N0), norm(N1), norm(N2), norm(N3) :- norm(N0+N1+N2+N3).
+%	norm(N0), norm(N1) :- norm(N0+N1).
 %}

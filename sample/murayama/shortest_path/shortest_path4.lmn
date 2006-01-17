@@ -75,53 +75,27 @@ scatter({
 
 /* Moore-Bellman-Fordのアルゴリズムによる最短経路探索 */
 mbf({
-	go :-
-		started,
-		thread.all({
-			inner_mbf1@@
-			e(V1, V2, Weight), {+(V1), w(X1, PoA), $p1}, {+(V2), w(X2, PoB), $p2}
-				:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
-					e(V1, V2, Weight), {+(V1), w(X1, PoA), $p1}, {+(V2), w(X2, PoB2), $p2}.
-			inner_mbf2@@
-			e(V2, V1, Weight), {+(V1), w(X1, PoA), $p1}, {+(V2), w(X2, PoB), $p2}
-				:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
-					e(V2, V1, Weight), {+(V1), w(X1, PoA), $p1}, {+(V2), w(X2, PoB2), $p2}.
-					}).
+	mbf1 @@
+	go,
+	 thread.any({e(V1, V2, Weight)}),
+	 thread.any({{+(V1), w(X1, PoA), $p1}}),
+	 thread.any({{+(V2), w(X2, PoB), $p2}})
+					:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
+						go,
+						thread.any({e(V1, V2, Weight)}),
+						thread.any({{+(V1), w(X1, PoA), $p1}}),
+						thread.any({{+(V2), w(X2, PoB2), $p2}}).
 
-	outer_mbf1@@
- 	started
- 	, thread(X,{e(V1, V2, Weight), {+(V1), w(X1, PoA), $p1}, $p, @p})
- 	, thread(Y, {{+(V2), w(X2, PoB), $p2}, $q, @q})
- 		:- int(X), int(Y), PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
- 			started
- 			, thread(X,{e(V1, V2, Weight), {+(V1), w(X1, PoA), $p1}, $p, @p})
- 			, thread(Y,{{+(V2), w(X2, PoB2), $p2}, $q, @q}).
-	outer_mbf2@@
- 	started
- 	, thread(X,{{+(V1), w(X1, PoA), $p1}, $p, @p})
- 	, thread(Y, {e(V1, V2, Weight), {+(V2), w(X2, PoB), $p2}, $q, @q})
- 		:- int(X), int(Y), PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
- 			started
- 			, thread(X,{{+(V1), w(X1, PoA), $p1}, $p, @p})
- 			, thread(Y,{e(V1, V2, Weight), {+(V2), w(X2, PoB2), $p2}, $q, @q}).
-
-	outer_mbf3@@
- 	started
- 	, thread(X,{e(V2, V1, Weight), {+(V1), w(X1, PoA), $p1}, $p, @p})
- 	, thread(Y, {{+(V2), w(X2, PoB), $p2}, $q, @q})
- 		:- int(X), int(Y), PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
- 			started
- 			, thread(X,{e(V2, V1, Weight), {+(V1), w(X1, PoA), $p1}, $p, @p})
- 			, thread(Y,{{+(V2), w(X2, PoB2), $p2}, $q, @q}).
-
-	outer_mbf4@@
- 	started
- 	, thread(X,{{+(V1), w(X1, PoA), $p1}, $p, @p})
- 	, thread(Y, {e(V2, V1, Weight), {+(V2), w(X2, PoB), $p2}, $q, @q})
- 		:- int(X), int(Y), PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
- 			started
- 			, thread(X,{{+(V1), w(X1, PoA), $p1}, $p, @p})
- 			, thread(Y,{e(V2, V1, Weight), {+(V2), w(X2, PoB2), $p2}, $q, @q}).
+	mbf2 @@
+	go,
+	 thread.any({e(V2, V1, Weight)}),
+	 thread.any({{+(V1), w(X1, PoA), $p1}}),
+	 thread.any({{+(V2), w(X2, PoB), $p2}})
+					:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
+						go,
+						thread.any({e(V2, V1, Weight)}),
+						thread.any({{+(V1), w(X1, PoA), $p1}}),
+						thread.any({{+(V2), w(X2, PoB2), $p2}}).
 }).
 
 init({$p, @p}/), scatter({@q}) :- scattering({$p,@p,@q}).
