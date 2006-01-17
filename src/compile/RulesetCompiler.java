@@ -5,15 +5,18 @@
 package compile;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import runtime.Env;
 import runtime.InlineUnit;
 import runtime.InterpretedRuleset;
+import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRulesets;
 
+import compile.parser.*;
 import compile.structure.Atom;
 import compile.structure.Membrane;
 import compile.structure.RuleStructure;
@@ -24,6 +27,9 @@ import compile.structure.RuleStructure;
  * 
  */
 public class RulesetCompiler {
+	
+	private static boolean recursived = false;
+	
 	/**
 	 * 与えられた膜構造を生成するreactメソッドを実装するルールセットを生成する。
 	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
@@ -91,14 +97,33 @@ public class RulesetCompiler {
 			processMembrane(rs.leftMem, unitName); // 一応左辺も
 			processMembrane(rs.rightMem, unitName);
 			//
+			RuleCompiler rc = null;
 			try {
-				RuleCompiler rc = new RuleCompiler(rs, unitName);
+				rc = new RuleCompiler(rs, unitName);
 				rc.compile();				
 //				rc.theRule.showDetail();
-				rules.add(rc.theRule);
 			}
 			catch (CompileException e) {
 				Env.p("    in " + rs.toString() + "\n");
+			}
+			if(rc.theRule.getFullText().matches(".*thread.*") && !recursived){
+				RuleConverter conv = new RuleConverter();
+				Iterator ite = conv.convert(rc.theRule.getFullText());
+				while(ite.hasNext()){
+					String s = (String)ite.next();
+					try {
+						LMNParser lp = new LMNParser(new StringReader(s));
+						Membrane m = lp.parse();
+						recursived = true;
+						compileMembrane(m);
+						recursived = false;
+						rules.add(((InterpretedRuleset)m.rulesets.get(0)).rules.get(0));
+					} catch(ParseException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				rules.add(rc.theRule);
 			}
 		}
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
