@@ -64,7 +64,7 @@ keyCode([_IH|L]),item(L2):-keyCode(L),check(_IH,L2,[]).
 %%アイテムのインデックスをすべてチェック
 check(_IH,[_IS,X|L1],L2):-_IH=\=_IS|check(_IH,L1,[_IS,X|L2]).
 %%ヒット無し。アイテムインデックスを再生成
-check(_IH,[],L):-item(L).
+score(S),check(_IH,[],L),{+S,getpic(string(_ISCO,_IP)),$q,@q}:-item(L),score(S),{+S,getpic(string(_ISCO-1,_IP)),$q,@q}.
 %%ヒットあり。得点を加算しアイテムインデックスを再生成
 score(S),check(_IH,[_IS,X|L1],L2),{+X,draw,$p[],@p},{+S,getpic(string(_ISCO,_IP)),$q,@q}:-_IH=_IS|score(S),item(list.append(L1,L2)),{+S,getpic(string(_ISCO+1,_IP)),$q,@q}.
 %key(ok),score(S),keyCode([_IH|L]),item([_IS,X|L2]),{+X,draw,$p[],@p},{+S,getpic(string(_ISCO,_IP)),$q,@q}:-_IH==_IS|key(no),score(S),keyCode(L),item(L2),{+S,getpic(string(_ISCO+1,_IP)),$q,@q}.
