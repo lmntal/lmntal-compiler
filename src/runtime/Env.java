@@ -136,6 +136,12 @@ public final class Env {
 	public static boolean profile = false;
 	public static int majorVersion = 0;
 	public static int minorVersion = 0;
+	
+	/**
+	 * ルール左辺に出現する、スレッド数の上限を設定
+	 */
+	public static int threadMax = 128;
+	
 	/**
 	 * 3D mode　有効
 	 */

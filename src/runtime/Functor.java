@@ -179,6 +179,8 @@ public class Functor implements Serializable {
 			return false;
 		if (name.equals("[]") && arity == 1)
 			return false;
+		if (name.equals("thread"))
+			return false;
 		return getClass().equals(Functor.class);
 	}
 

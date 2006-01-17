@@ -359,6 +359,10 @@ public class FrontEnd {
 							/// --hiderule
 							/// Hide rule names
 							Env.showrule = false;
+						} else if (args[i].startsWith("--thread-max=")) {
+							/// --thread-max=<integer>
+							/// set <integer> as the upper limit of threads occured in leftside rules.
+							Env.threadMax = Integer.parseInt(args[i].substring(13));
 						} else if (args[i].startsWith("--temporary-dir=")) {
 							/// --temporary-dir=<dir>
 							/// use <dir> as temporary directory
