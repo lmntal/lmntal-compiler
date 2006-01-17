@@ -1,7 +1,7 @@
 import java.io.*;
 
 class Rulechanger {
-	static String[] head, guard, body, submems;
+	static String[] name, head, guard, body, submems;
 	static int[] anyreduct;
 	static int memuse = 0;
 	
@@ -16,6 +16,7 @@ class Rulechanger {
             }
 
             submems = new String[128];
+            name = new String[128];
             head = new String[128];
             guard = new String[128];
             body = new String[128];
@@ -39,11 +40,31 @@ class Rulechanger {
             		i-= end-start;
             	}
             }
-		 	String rule1[] = rule.split(":-");
-		 	String rule2[] = rule1[1].split("\\|");
+            String[] rule0, rule1, rule2;
+            rule0 = rule.split("@@");
+		 	if(rule0.length == 1)
+			 	rule1 = rule0[0].split(":-");
+		 	else
+		 		rule1 = rule0[1].split(":-");
+		 	if(rule1.length == 1)
+		 		rule2 = rule1[0].split("\\|");
+		 	else
+		 		rule2 = rule1[1].split("\\|");
+
+		 	if(rule0.length == 1)
+		 		name[0] = "";
+		 	else
+		 		name[0] = rule0[0].trim().replace("\t","");
+		 	
 		 	head[0] = rule1[0].trim().replace("\t","");
-		 	guard[0] = rule2[0].trim().replace("\t","");
-		 	body[0] = rule2[1].trim().substring(0, rule2[1].trim().length()-1).replace("\t","");
+
+		 	if(rule2.length == 1){
+		 		guard[0] = "";
+		 		body[0] = rule2[0].trim().substring(0, rule2[0].trim().length()-1).replace("\t","");
+		 	} else {
+			 	guard[0] = rule2[0].trim().replace("\t","");
+			 	body[0] = rule2[1].trim().substring(0, rule2[1].trim().length()-1).replace("\t","");
+		 	}
 		 	
 		 	int i;
 		 	for(int mnum = 0; mnum<=memuse; mnum++){
@@ -110,7 +131,7 @@ class Rulechanger {
 */
 		 	for(int k=0; k<=memuse; k++){
 		 		System.out.println("______________________________rule"+k+"___________________________");
-			 	System.out.println(toRule(head[k],guard[k],body[k])+".");
+			 	System.out.println(toRule(name[k], head[k],guard[k],body[k])+".");
 		 	}
 		 	
 		 	br.close();
@@ -213,13 +234,20 @@ class Rulechanger {
     	 	}
     	}
     }
-    static String toRule(String head, String guard, String body){
-    	if(head.trim().equals(""))
-    		return body.trim();
-    	else if(guard.trim().equals(""))
-    		return head.trim() + " :- " + body.trim();
-    	else
-    		return head.trim() + " :- " + guard.trim() + " | " + body.trim();
+    static String toRule(String name, String head, String guard, String body){
+    	if(name.trim().equals("")){
+	    	if(head.trim().equals(""))
+	    		return body.trim();
+	    	else if(guard.trim().equals(""))
+	    		return head.trim() + " :- " + body.trim();
+	    	else
+	    		return head.trim() + " :- " + guard.trim() + " | " + body.trim();
+    	} else {
+    		if(guard.trim().equals(""))
+	    		return name.trim() + " @@ " + head.trim() + " :- " + body.trim();
+	    	else
+	    		return name.trim() + " @@ " + head.trim() + " :- " + guard.trim() + " | " + body.trim();
+    	}
     }
     
     static void ruleANY1(int i, int mnum){
@@ -240,6 +268,7 @@ class Rulechanger {
 			st = e;
 			StringBuffer buf = new StringBuffer(head[mnum]);
 			buf.insert(e+1, "?" + memnum +"?, ");
+			name[spacenum] = name[mnum];
 			head[spacenum] = buf.toString();
 			body[spacenum] = body[mnum];
 			guard[spacenum] = guard[mnum];
@@ -267,9 +296,9 @@ class Rulechanger {
 		}
 		int minld = 65536;
 		int ins = -1;
-		Distance dis = new Distance();
+		LD dis = new LD();
 		for(k--;k>=0;k--){
-			int ld = dis.LD(submems[memnum], submems[thdid[k][0]]);
+			int ld = dis.getLD(submems[memnum], submems[thdid[k][0]]);
 			if(minld > ld) {
 				minld = ld;
 				ins = thdid[k][1];
@@ -295,7 +324,10 @@ class Rulechanger {
     	int gend = gbuf.indexOf(" ,int(THD");
     	hbuf = new StringBuffer(hbuf);
     	bbuf = new StringBuffer(bbuf);
-    	gbuf = new StringBuffer(gbuf.substring(0,gend));
+    	if(gend<0)
+        	gbuf = new StringBuffer("");
+    	else
+    		gbuf = new StringBuffer(gbuf.substring(0,gend));
     	StringBuffer hbuf2 = new StringBuffer(hbuf.substring(hst,hend));
     	StringBuffer bbuf2 = new StringBuffer(bbuf.substring(bst,bend));
     	head[mnum] = hbuf.delete(hst,hend+1).toString();
@@ -305,9 +337,55 @@ class Rulechanger {
     	bst = bbuf2.indexOf("?");
     	hend = hbuf2.indexOf("$");
     	bend = bbuf2.indexOf("$");
+    	String nm =name[mnum];
     	String hs = hbuf2.substring(hst,hend-2);
     	String bs = bbuf2.substring(bst,bend-2);
-    	bodyAdd("thread.all({"+toRule(hs,gbuf.toString(),bs)+"})", mnum);
+    	bodyAdd("thread.all({"+toRule(nm, hs,gbuf.toString(),bs)+"})", mnum);
     }
-}			
-					
+}
+
+class LD {
+	  
+  private int min(int x, int y, int z) {
+    int min;
+    min = x;
+    if (y < min) {
+      min = y;
+    }
+    if (z < min) {
+      min = z;
+    }
+    return min;
+  }
+
+  public int getLD(String s1, String s2) {
+    int i,j;
+    int mat[][];
+    int cost;
+    char s1_c, s2_c;
+        
+    int s1_l = s1.length();
+    int s2_l = s2.length();
+    if (s1_l == 0) return s2_l;
+    if (s2_l == 0) return s1_l;
+
+    mat = new int[s1_l+1][s2_l+1];
+    for (i=0; i <= s1_l; i++) {
+      mat[i][0] = i;
+    }
+    for (j=0; j <= s2_l; j++) {
+      mat[0][j] = j;
+    }
+
+    for (i=0; i < s1_l; i++) {
+      s1_c = s1.charAt(i);
+      for (j=0; j < s2_l; j++) {
+        s2_c = s2.charAt(j);
+        cost = s1_c==s2_c ? 0 : 1;
+        mat[i+1][j+1] = min(mat[i][j+1]+1, mat[i+1][j]+1, mat[i][j] + cost);
+      }
+    }
+
+    return mat[s1_l][s2_l];
+  }
+}
