@@ -23,9 +23,9 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	private Graphics OSG = null;
 	private boolean ready=false;
 	/**描画するオブジェクトリスト*/
-	LinkedList drawlist = new LinkedList();
+	private LinkedList drawlist = new LinkedList();
 	/**レラティブ膜のリスト*/
-	HashMap relativemap = new HashMap();
+	private HashMap relativemap = new HashMap();
 	
 	public LMNGraphPanel(LMNtalWindow f) {
 //		super();
@@ -46,7 +46,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	public void paint(Graphics g) {
 		try{
 			//画面を白地で初期化（塗りつぶす）
-			OSG.setColor(new Color(frame.color_r,frame.color_g,frame.color_r));
+			OSG.setColor(frame.getColor());
 			OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
 			paintlayout();
 			g.drawImage(OSI,0,0,this);
@@ -80,7 +80,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		Node a;
 		Relativemem rm = new Relativemem();
 		
-		synchronized(frame.lmnframe.lock2){
+		synchronized(this){
 			Iterator ite = m.atomIterator();
 	
 			if(m.getLockThread() != null) locked = true;

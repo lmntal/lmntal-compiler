@@ -410,7 +410,7 @@ public final class Membrane extends AbstractMembrane {
 		}
 		quietUnlock();
 		if(changed & Env.LMNgraphic != null)
-			Env.LMNgraphic.setmem(this);
+			Env.LMNgraphic.setMem(this);
 	}
 	
 	public void forceUnlock() {

@@ -17,13 +17,12 @@ import test.GUI.Node;
 
 public class LMNtalWindow extends JFrame{
 	
-	public LMNGraphPanel lmnPanel = null;
-	public LMNtalGFrame lmnframe = null;
-	private boolean busy = false;
+	private LMNGraphPanel lmnPanel = null;
+	private LMNtalGFrame lmnframe = null;
+//	private boolean busy = false;
 	private boolean killed = false;
 	public long timer = 0;
 	private AbstractMembrane mem=null;
-//	private Thread th;
 	private boolean keyChar = false;
 	private boolean keyListener = false;
 	private Functor keyAtomFunctor = null;
@@ -31,31 +30,34 @@ public class LMNtalWindow extends JFrame{
 	
 	/*ウィンドウ生成に必要*/
 	private boolean ready = false; 
-	public String name = null;
-	int sizex = 0;
-	int sizey = 0;
-	public int color_r = 255;
-	public int color_g = 255;
-	public int color_b = 255;
+	private String name = null;
+	private int sizex = 0;
+	private int sizey = 0;
+	private int color_r = 255;
+	private int color_g = 255;
+	private int color_b = 255;
 	private int win_x = 0;
 	private int win_y = 0;
 	private boolean win_loc = false;
 	private LinkedList atomlist = new LinkedList();
 	
-	public boolean getBusy(){
-		return busy;
+	public Color getColor(){
+		return (new Color(color_r,color_g,color_b));
 	}
-	public void setBusy(boolean b){
-		busy = b;
-	}
+//	public boolean getBusy(){
+//		return busy;
+//	}
+//	public void setBusy(boolean b){
+//		busy = b;
+//	}
 	
-	public void setmem(AbstractMembrane m){
+	public void setMem(AbstractMembrane m){
 		mem=m;
 	}
-	public AbstractMembrane getmem(){
+	public AbstractMembrane getMem(){
 		return mem;
 	}
-	public void setcolor(int a, int b , int c){
+	public void setColor(int a, int b , int c){
 		if(a > 255) color_r = 255;
 		else if(a < 0)color_r = 0;
 		else color_r = a;
@@ -70,23 +72,26 @@ public class LMNtalWindow extends JFrame{
 	}
 	
 	public LMNtalWindow(AbstractMembrane m, LMNtalGFrame frame){
-		ready = setatoms(m);
+		ready = setAtoms(m);
 		lmnframe = frame;
 	}
 	
-	public void setname(int n){
+	public void setName(int n){
 		name = Integer.toString(n);
 	}
-	public void setname(String n){
+	public void setName(String n){
 		name = n;
 	}
-	public void setwinloc(int x, int y){
+	public String getName(){
+		return name;
+	}
+	public void setWinLoc(int x, int y){
 		win_x=x;
 		win_y=y;
 		win_loc=true;
 	}
 	
-	public boolean makewindow(){
+	public boolean makeWindow(){
 		if(!ready)return false;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -135,7 +140,7 @@ public class LMNtalWindow extends JFrame{
 		return true;
 	}
 	
-	public synchronized boolean setgraphicmem(AbstractMembrane m, int distance){
+	public synchronized boolean setGraphicMem(AbstractMembrane m, int distance){
 		if(killed) return true;
 		if(lmnPanel == null)return false;
 		lmnPanel.setgraphicmem(m, distance);
@@ -143,7 +148,7 @@ public class LMNtalWindow extends JFrame{
 		return true;
 	}
 	
-	public synchronized boolean removegraphicmem(AbstractMembrane m){
+	public synchronized boolean removeGraphicMem(AbstractMembrane m){
 		if(killed) return true;
 		if(lmnPanel == null)return false;
 		lmnPanel.removegraphicmem(m);
@@ -163,7 +168,7 @@ public class LMNtalWindow extends JFrame{
 	/**
 	 * 描画用のアトム郡の取得
 	 */
-	private boolean setatoms(AbstractMembrane m){
+	private boolean setAtoms(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
 		
@@ -172,7 +177,7 @@ public class LMNtalWindow extends JFrame{
 			/**描画するファイルの取得*/
 			if(a.getName() == "name"){
 				if(a.getEdgeCount() != 1)return false;
-				setname(a.getNthNode(0).getName());
+				setName(a.getNthNode(0).getName());
 			}
 			/**サイズの取得*/
 			else if(a.getName() == "size"){
@@ -214,7 +219,7 @@ public class LMNtalWindow extends JFrame{
 			else if(a.getName()=="bgcolor"){
 				if(a.getEdgeCount() != 3)return false;
 				try{
-					setcolor(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()), Integer.parseInt(a.getNthNode(2).getName()));
+					setColor(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()), Integer.parseInt(a.getNthNode(2).getName()));
 				}catch(NumberFormatException error){
 					return false;
 				}
@@ -223,7 +228,7 @@ public class LMNtalWindow extends JFrame{
 			else if(a.getName()=="position"){
 				if(a.getEdgeCount() != 2)return false;
 				try{
-					setwinloc(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()));
+					setWinLoc(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()));
 				}catch(NumberFormatException error){
 					return false;
 				}
@@ -250,30 +255,24 @@ public class LMNtalWindow extends JFrame{
 		}
 		else
 			keyAtomFunctor = f;
-		/*lockが出来る（unlockされない可能性がある）場合はすぐ追加してしまう。*/
-//		if(getmem().lock()){
-//			doAddAtom();
-//			/*リストに繋げるだけなので、描画関係の変更はないためfalseでunlock*/
-//			getmem().unlock(false);
-//		}
 	}
 	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
 	public synchronized void doAddAtom(){
 		synchronized(this){
-			Iterator ite = getmem().atomIterator();
+			Iterator ite = getMem().atomIterator();
 			/*keyCacheがfalseのとき*/
 			if(!keyCache){
 				/*積まれたアトムを追加するリストを検索*/
 				while(keyAtomFunctor!=null && ite.hasNext()){
 					Atom a = (Atom)ite.next();
 					if(a.getName()=="keyCharNoCache" || a.getName()=="keyCodeNoCache"){
-						Atom data = getmem().newAtom(keyAtomFunctor);
+						Atom data = getMem().newAtom(keyAtomFunctor);
 //						Atom key = mem.newAtom(new Functor(a.getName(), 1));
 						Atom key = mem.newAtom(new Functor(a.getName(), a.getFunctor().getArity()+1));
 						for(int i=0;i < a.getFunctor().getArity();i++){
 							mem.relink(key,i+1,a,i);
 						}
-						getmem().newLink(key, 0, data, 0);
+						getMem().newLink(key, 0, data, 0);
 						a.remove();
 						keyAtomFunctor = null;
 						break;
@@ -300,11 +299,11 @@ public class LMNtalWindow extends JFrame{
 								break;
 							}
 							if(nth2.getName().equals("[]")){
-								Atom data = getmem().newAtom(fa);
-								Atom dot = getmem().newAtom(new Functor(".", 3));
-								getmem().newLink(dot, 0, data, 0);
-								getmem().newLink(nth1, nth1_arg, dot, 2);
-								getmem().newLink(nth2, 0, dot, 1);
+								Atom data = getMem().newAtom(fa);
+								Atom dot = getMem().newAtom(new Functor(".", 3));
+								getMem().newLink(dot, 0, data, 0);
+								getMem().newLink(nth1, nth1_arg, dot, 2);
+								getMem().newLink(nth2, 0, dot, 1);
 								break;
 							}
 							nth1 = nth2;

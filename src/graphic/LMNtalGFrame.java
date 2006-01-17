@@ -17,27 +17,21 @@ import test.GUI.Node;
 
 public class LMNtalGFrame{
 	
-	public LMNGraphPanel lmnPanel = null;
 	boolean busy;
 	private Thread th;
 	runtime.Membrane rootMem;
 	HashMap windowmap=new HashMap();
-	LinkedList tmplist = new LinkedList();
+//	LinkedList tmplist = new LinkedList();
 	int killednum=0;
-	public static Object lock2 = new Object();
 	long start ,stop,diff;
 	public boolean running = true;
-//	public LinkedList atomlist = new LinkedList();
 	
-	
-	public LMNtalGFrame(){
-	}
 	
 	/**
 	 * 特定の名称のアトムが存在するか検索。
 	 * あればアトム名を、なければnullを返す。
 	 */
-	private synchronized String searchatom(AbstractMembrane m){
+	private synchronized String searchAtom(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
 		
@@ -62,44 +56,44 @@ public class LMNtalGFrame{
 		
 	}
 	
-	public synchronized void setmem(AbstractMembrane m){
+	public synchronized void setMem(AbstractMembrane m){
 		
-		String s = searchatom(m);
+		String s = searchAtom(m);
 		/*ウィンドウ膜の登録*/
 		if(s == "window"){
-			setwindowmem(m);
+			setWindowMem(m);
 //			doAddAtom();		
 		}
 		/*描画膜の登録*/
 		else if(s=="draw" || s=="relative"){
-			setgraphicmem(m);
+			setGraphicMem(m);
 		}
 		/*描画膜の削除*/
 		else if(s=="remove"){
-			removegraphicmem(m);
+			removeGraphicMem(m);
 		}
 	}
 	
 	/**マウスの位置を検出する。ライブラリmouseで使用*/
 	public Point getMousePoint(AbstractMembrane m){
 		if(m.isRoot())return null;
-		String memname = getname(m);
+		String memname = getName(m);
 		if(!windowmap.containsKey(memname)) return getMousePoint(m.getParent());
 		WindowSet winset = (WindowSet)windowmap.get(memname);
 		return winset.window.getMousePosition();
 	}
 	
 	/**ウィンドウオブジェクトを生成*/
-	private void setwindowmem(AbstractMembrane m){
+	private void setWindowMem(AbstractMembrane m){
 		WindowSet win = new WindowSet();
 		win.window = new LMNtalWindow(m, this);
-		win.window.setmem(m);
-		if(!windowmap.containsKey(win.window.name)){
-			win.window.makewindow();
-			windowmap.put(win.window.name, win);
+		win.window.setMem(m);
+		if(!windowmap.containsKey(win.window.getName())){
+			win.window.makeWindow();
+			windowmap.put(win.window.getName(), win);
 		}else{
-			WindowSet tmpwin = (WindowSet)windowmap.get(win.window.name);
-			tmpwin.window.setmem(m);
+			WindowSet tmpwin = (WindowSet)windowmap.get(win.window.getName());
+			tmpwin.window.setMem(m);
 			tmpwin.window.timer = win.window.timer;
 			tmpwin.window.doAddAtom();
 //			WindowSet tmpwin2 = (WindowSet)windowmap.get(win.window.name);
@@ -111,19 +105,19 @@ public class LMNtalGFrame{
 		WindowSet tmpwin = (WindowSet)windowmap.get(name);
 		return tmpwin.window;
 	}
-	public synchronized void removegraphicmem(AbstractMembrane tmp){
+	public synchronized void removeGraphicMem(AbstractMembrane tmp){
 		if(tmp == null || tmp.isRoot() )return;
 
-		String n = searchwinname(tmp);
+		String n = searchWinName(tmp);
 		/*ウィンドウ膜が登録済み*/
 		if(windowmap.containsKey(n)){
 			WindowSet win=(WindowSet)windowmap.get(n);
-			win.window.removegraphicmem(tmp);
+			win.window.removeGraphicMem(tmp);
 			return;
 		}
 	}
 	
-	private synchronized void setgraphicmem(AbstractMembrane tmp){
+	private synchronized void setGraphicMem(AbstractMembrane tmp){
 		if(tmp == null || tmp.isRoot() )return;
 		AbstractMembrane m = tmp.getParent();
 		/*ウィンドウ膜との距離*/
@@ -132,7 +126,7 @@ public class LMNtalGFrame{
 		while(m!=null){
 			if(m.isRoot())
 				return;
-			String n = getname(m);
+			String n = getName(m);
 			/*ウィンドウ膜が登録済み*/
 			if(windowmap.containsKey(n)){
 				WindowSet win = (WindowSet)windowmap.get(n);
@@ -146,15 +140,15 @@ public class LMNtalGFrame{
 //				System.out.println("実行時間 : "+diff+"+"+diff2+"="+(diff+diff2)+"ミリ秒");
 				start = System.currentTimeMillis();
 				
-				win.window.setgraphicmem(tmp,distance);
+				win.window.setGraphicMem(tmp,distance);
 				
 				
 				return;
 			}
 			/*ウィンドウ膜が未登録*/
 			else{
-				if(searchwinmem(m)){
-					n = getname(m);
+				if(searchWinMem(m)){
+					n = getName(m);
 					if(windowmap.containsKey(n)){
 						
 						WindowSet win = (WindowSet)windowmap.get(n);
@@ -166,7 +160,7 @@ public class LMNtalGFrame{
 							waitBusy(diff2);
 //						System.out.println("実行時間 : "+diff+"+"+diff2+"="+(diff+diff2)+"ミリ秒");
 						start = System.currentTimeMillis();
-						win.window.setgraphicmem(tmp,distance);
+						win.window.setGraphicMem(tmp,distance);
 						return;
 					}
 				}
@@ -177,31 +171,31 @@ public class LMNtalGFrame{
 	}
 	
 	/**再帰的に親膜を探索しウィンドウ膜を探す。発見できれば真。出来なければ偽を返す。*/
-	private boolean searchwinmem(AbstractMembrane m){
+	private boolean searchWinMem(AbstractMembrane m){
 		
-		String s = searchatom(m);
+		String s = searchAtom(m);
 		/*ウィンドウ膜の登録*/
 		if(s == "window"){
-			setwindowmem(m);
+			setWindowMem(m);
 			return true;
 		}else{
 			if(m.getParent()!=null & !m.getParent().isRoot()){
-				return searchwinmem(m.getParent());
+				return searchWinMem(m.getParent());
 			}
 		}
 		return false;
 	}
 	
 	/**再帰的に親膜を探索しウィンドウ膜を探す。発見できればウィンドウ膜の名前。出来なければnullを返す。*/
-	private String searchwinname(AbstractMembrane m){
+	private String searchWinName(AbstractMembrane m){
 		
-		String s = searchatom(m);
+		String s = searchAtom(m);
 		/*ウィンドウ膜の登録*/
 		if(s == "window"){
-			return getname(m);
+			return getName(m);
 		}else{
 			if(m.getParent()!=null & !m.getParent().isRoot()){
-				return searchwinname(m.getParent());
+				return searchWinName(m.getParent());
 			}
 		}
 		return null;
@@ -226,7 +220,7 @@ public class LMNtalGFrame{
 	}
 	
 	/**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
-	public String getname(AbstractMembrane m){
+	public String getName(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
 		
