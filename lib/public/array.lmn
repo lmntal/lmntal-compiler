@@ -1,4 +1,4 @@
-/*
+/**
 
 NAME
 
@@ -35,7 +35,13 @@ COMMENTS
 */
 {
 	module(array).
-	
+
+/**
+ * array.new(Length, Res):
+ *
+ * Lengthで指定された長さの配列を生成してResにつなぎます。
+ */	
+
 	H=array.new(Length) :- int(Length) | H=[:/*inline*/
 		int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 		Atom result = mem.newAtom(new Functor("int_array", 2));
@@ -49,7 +55,14 @@ COMMENTS
 		me.nthAtom(0).remove();
 		me.remove();
 		:](Length).
-		
+
+/**
+ * array.update(Array, Index, OldValue, NewValue, NewArray):
+ *
+ * 配列ArrayのIndexで指定された要素をNewValueにつなぎ、
+ * OldValueに与えられた要素が代わりにセットされた配列を
+ * NewArrayにつなぎます。
+ */
   H=array.update(int_array(A), I, OldValue, NewValue) :- int(I) |
 	  H=array(X), [:/*inline*/
 		int i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
@@ -62,6 +75,12 @@ COMMENTS
 		me.nthAtom(1).remove();
 		me.remove();
 		:](A, I, OldValue, NewValue, X).
+
+/*
+ * array.update(Array, Index, OldValue, NewValue):
+ * 
+ * ?
+ */
 		
   H=array.update(array(A), I, OldValue, NewValue) :- int(I) |
   /* just duplicating the array.update(int_array(A),...) case */
@@ -76,7 +95,12 @@ COMMENTS
 		me.nthAtom(1).remove();
 		me.remove();
 		:](A, I, OldValue, NewValue, X).
-	
+
+/**
+ * array.get(+Array, +Index, -Res, -NewArray):
+ * 配列ArrayのIndexで指定された要素をResにつなぎ、
+ * (更新されていない)配列をNewArrayにつなぎます。
+ */	
 	H=array.get(int_array(A), I, Result) :- int(I)/*, unary(Result)*/ |
 	  H=int_array(X), [:/*inline*/
 		int i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
@@ -93,6 +117,11 @@ COMMENTS
 		me.remove();
 		:](A, I, Result, X).
 	
+/**
+ * array.put(Array, Index, Value, NewArray):
+ * 配列ArrayのIndexにValueをセットし、
+ * 更新された配列をNewArrayにつなぎます。
+ */
 	H=array.put(int_array(A), I, Value) :- int(I), int(Value) |
 	  H=int_array(X), [:/*inline*/
 		int i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
