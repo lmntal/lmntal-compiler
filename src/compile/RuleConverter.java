@@ -64,16 +64,16 @@ class RuleConverter {
 	 	if(rule0.length == 1)
 	 		name[0] = "";
 	 	else
-	 		name[0] = rule0[0].trim().replace("\t","");
+	 		name[0] = rule0[0].trim().replaceAll("\t","");
 	 	
-	 	head[0] = rule1[0].trim().replace("\t","");
+	 	head[0] = rule1[0].trim().replaceAll("\t","");
 
 	 	if(rule2.length == 1){
 	 		guard[0] = "";
-	 		body[0] = rule2[0].trim().substring(0, rule2[0].trim().length()-1).replace("\t","");
+	 		body[0] = rule2[0].trim().substring(0, rule2[0].trim().length()-1).replaceAll("\t","");
 	 	} else {
-		 	guard[0] = rule2[0].trim().replace("\t","");
-		 	body[0] = rule2[1].trim().substring(0, rule2[1].trim().length()-1).replace("\t","");
+		 	guard[0] = rule2[0].trim().replaceAll("\t","");
+		 	body[0] = rule2[1].trim().substring(0, rule2[1].trim().length()-1).replaceAll("\t","");
 	 	}
 	 	
 	 	int i=0;
@@ -146,7 +146,7 @@ class RuleConverter {
 	 	for(int k=0; k<=memuse; k++){
 //	 		if(k!=0 || memuse==0){
 	 			lst.add("("+toRule(name[k], head[k],guard[k],body[k])+")");
-	 			System.out.println(toRule(name[k], head[k],guard[k],body[k]));
+//	 			System.out.println(toRule(name[k], head[k],guard[k],body[k]));
 //	 		}
 	 	}
 	 	return lst.iterator();
