@@ -370,8 +370,6 @@ class RuleConverter {
     	if(body[mnum].length()==bend)
     		while(0<bst && body[mnum].charAt(bst)!=',')bst--;
     	int gend = gbuf.indexOf(" ,int(THD");
-    	hbuf = new StringBuffer(hbuf);
-    	bbuf = new StringBuffer(bbuf);
     	if(gend<0)
         	gbuf = new StringBuffer("");
     	else
