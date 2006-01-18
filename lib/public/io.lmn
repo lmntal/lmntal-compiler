@@ -147,7 +147,7 @@ H=io.fileWriter(Filename) :- unary(Filename) | H=[:/*inline*/
 //io.reader : String -> java::BufferedReader
 /**
  * io.reader(+Process, -Res):
- * 第一引数に与えたプロセスからの入力を生成します。
+ * 第一引数に与えたプロセスからの入力オブジェクトを生成します。
  */
 H=io.reader(Process) :- unary(Process) | H=[:/*inline*/
 	try {
@@ -247,14 +247,14 @@ H=close(Object) :- class(Object, "java.io.PrintWriter") |
 //io.list_of_stdin : unit -> List of String
 /**
  * io.list_of_stdin(-Res):
- * 標準入力からの一行入力を順次リストに格納します。
+ * 標準入力からの入力を一行ずつ順次リストに格納します。
  */
 H=io.list_of_stdin, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, [], done), io.stdin(STDIN).
 
 //io.list_of_file : unit -> List of String
 /**
  * io.list_of_file(+Filename, -Res):
- * ファイル名を指定されたファイルからの入力を順次リストに格納します。
+ * 指定されたファイル名のファイルからの入力を一行ずつ順次リストに格納します。
  */
 H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), [], done).
 
@@ -264,7 +264,7 @@ H=list_of_dev_s0(Obj, List, nil ) :- class(Obj, "java.io.BufferedReader") | H=Li
 //io.toFile : String -> List of String -> unit
 /**
  * io.toFile(+Filename, +List, -Res):
- * ファイル名を指定されたファイルへ文字列のリストから順次出力します。
+ * 文字列のリストを受け取って、指定されたファイル名のファイルへ一行ずつ順次出力します。
  * 
  * @example r=io.toFile(b, io.fromFile(a))
  */
@@ -274,7 +274,7 @@ H=toFile_s0(Obj, []) :- H=close(Obj).
 
 /**
  * io.eager(+In, -Res)
- * 与えられた入力オブジェクトからの入力が逆順に並んだリストを生成します。
+ * 与えられた入力オブジェクトからの入力が一行ずつ逆順に並んだリストを生成します。
  */
 H=io.eager(In) :- H=io.eager(In, [], done).
 H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], readline(In, Res)).
