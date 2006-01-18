@@ -174,7 +174,7 @@ H=io.reader(Process) :- unary(Process) | H=[:/*inline*/
  * Result     : "done" when succeeded. "nil" when EOF.
  */
 H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
-	H=readline(STDIN, Result), io.stdin(STDIN).
+	H=readline(STDIN, Result, 0), io.stdin(STDIN).
 
 /**
  * readline(-Atom,-Res):
@@ -185,28 +185,36 @@ H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
  * and connects done/1 or nil/1 to Res, depending on whether the string could be read. 
  * To be used with io.use.
  */
-H=readline(Object, ReadString) :- class(Object, "java.io.BufferedReader") |
+Readline @@
+H=readline(Object, ReadString) :- H=readline(Object, ReadString, 0).
+Readline @@
+H=readline(Object, ReadString, ASync) :- int(ASync), class(Object, "java.io.BufferedReader") |
 	H=[:/*inline*/
 		try {
 			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			int async = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
 			// このチェックはガードでやるべき
-			if(br.ready()) {
+			if((async!=0 && br.ready()) || async==0) {
 				String s = br.readLine();
 				Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
 				mem.relink(result, 0, me, 1);
 				Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
-				mem.relink(res, 0, me, 2);
+				mem.relink(res, 0, me, 3);
 				me.nthAtom(0).remove();
+				me.nthAtom(2).remove();
 				me.remove();
 			} else {
 				me.setName("readline");
 			}
 		} catch(Exception e) {Env.e(e);}
-	:](Object, ReadString).
+	:](Object, ReadString, ASync).
 
 
 H=print(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
 	H=print(STDOUT, String), io.stdout(STDOUT).
+
+H=print([String|Rest]), io.stdout(STDOUT) :- string(String), class(STDOUT, "java.io.PrintWriter") |
+	H=print(STDOUT, [String|Rest]), io.stdout(STDOUT).
 
 /**
  * print(+Atom,-Res):
@@ -215,7 +223,7 @@ H=print(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
  * into standard output, and connects done/1 to Res.
  * To be used witn io.use. 
  */
-H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
+H=print(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) |
 	H=[:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -224,6 +232,19 @@ H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 				pw.println(me.nth(1));
 			}
 			mem.relink(done, 0, me, 2);
+			me.nthAtom(1).remove();
+			me.remove();
+		} catch(Exception e) {e.printStackTrace();}
+	:](Object, String).
+
+H=print(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter"), string(String) |
+	H=print(Object, Rest), [:/*inline*/
+		try {
+			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			if(pw!=null) {
+				pw.println(me.nth(1));
+			}
+			me.nthAtom(0).remove();
 			me.nthAtom(1).remove();
 			me.remove();
 		} catch(Exception e) {e.printStackTrace();}
@@ -248,18 +269,25 @@ H=close(Object) :- class(Object, "java.io.PrintWriter") |
 /**
  * io.list_of_stdin(-Res):
  * 標準入力からの入力を一行ずつ順次リストに格納します。
+ * ブロックします。
  */
-H=io.list_of_stdin, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, [], done), io.stdin(STDIN).
+H=io.list_of_stdin,       io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, [], done, 0), io.stdin(STDIN).
+/**
+ * io.list_of_stdin_async(-Res):
+ * 標準入力からの入力を一行ずつ順次リストに格納します。
+ * ブロックしません。
+ */
+H=io.list_of_stdin_async, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, [], done, 1), io.stdin(STDIN).
 
 //io.list_of_file : unit -> List of String
 /**
  * io.list_of_file(+Filename, -Res):
  * 指定されたファイル名のファイルからの入力を一行ずつ順次リストに格納します。
  */
-H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), [], done).
+H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), [], done, 0).
 
-H=list_of_dev_s0(Obj, List, done) :- class(Obj, "java.io.BufferedReader") | H=[String|list_of_dev_s0(Obj, List, readline(Obj, String))].
-H=list_of_dev_s0(Obj, List, nil ) :- class(Obj, "java.io.BufferedReader") | H=List.
+H=list_of_dev_s0(Obj, List, done, ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=[String|list_of_dev_s0(Obj, List, readline(Obj, String, ASync), ASync)].
+H=list_of_dev_s0(Obj, List, nil , ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=List.
 
 //io.toFile : String -> List of String -> unit
 /**
