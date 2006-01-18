@@ -1,6 +1,6 @@
-/*
+/**
 NAME
-	List module
+	IO module
 
 SYNOPSIS
 
@@ -24,8 +24,11 @@ HISTORY
 module(io).
 
 /**
- * initializer
- * 
+ * io.use:
+ *
+ * (initializer)
+ * Enables the use of standard input (System.in) and standard output (System.out).
+ * The result consists of two molecules representing standard input and standard output.
  */
 io.use :-
 	io.stdin=[:/*inline*/
@@ -39,25 +42,54 @@ io.use :-
 		me.remove();
 		:].
 
-
 //io.print(String) :- unary(String)|[:/*inline*/
 //	System.out.println(me.nth(0));
 //	me.setName("nil");
 //	:](String).
+
+/**
+ * io.input(+Atom):
+ *
+ * Displays the name of the unary Atom on a pop-up window
+ * and reads an atom name typed into the window.
+ * The result is a two-atom molecule with done/1 and a unary atom with the given name.
+ */
 io.input(Message) :- [:/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
 	me.setName(s);
 	me.nthAtom(0).setName("done");
 	:](Message).
+
+/**
+ * io.input(+Atom,-X):
+ *
+ * Dislays the name of the unary Atom on a pop-up window
+ * and reads an atom name typed into the window.
+ * The result is a two-atom radical with done/2 and a unary atom with the givne name, of the form newAtom(Y), done(Y,X).
+ */
 io.input(Message, X) :- [:/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
 	me.setName("done");
 	me.nthAtom(0).setName(s);
 	:](Message, X).
+
+/**
+ * io.input:
+ *
+ * Reads an atom name typed into a pop-up window.
+ * The result is a new nullary atom with the given name.
+ */
 io.input :- [:/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, "Input text.");
 	me.setName(s);
 	:].
+
+/**
+ * io.inputInteger(+Atom,-X):
+ *
+ * Same as above, except that the result is Int(X),
+ * where Int is an integer (which is a unary atom in LMNtal) that has been typed in.
+ */
 R=io.inputInteger(Message) :- R=[:/*inline*/
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
 	Atom atom = mem.newAtom(new IntegerFunctor(Integer.parseInt(s)));
@@ -68,7 +100,11 @@ R=io.inputInteger(Message) :- R=[:/*inline*/
 //io.popup(String) :- unary(String)|[:/*inline*/
 //	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
 //	:](String).
-	
+
+/**
+ * io.popup(+Str):
+ * Displays the string Str in a pop-up window.
+ */
 io.popup(String) :- string(String) | [:/*inline*/
 	javax.swing.JOptionPane.showMessageDialog(null, me.nth(0));
 	mem.newAtom(new Functor("done",0));
@@ -76,9 +112,10 @@ io.popup(String) :- string(String) | [:/*inline*/
 	mem.removeAtom(me);
 	:](String).
 
+//(String -> java::BufferedReader)
 /**
- * io.fileReader : String -> java::BufferedReader
- * 
+ * io.fileReader(+Filename, -Res):
+ * 与えられたファイル名からそのファイルから読み込む為のオブジェクトを生成します。
  */
 H=io.fileReader(Filename) :- unary(Filename) | H=[:/*inline*/
 	try {
@@ -90,8 +127,10 @@ H=io.fileReader(Filename) :- unary(Filename) | H=[:/*inline*/
 	} catch(Exception e) {}
 	:](Filename).
 
+//io.fileWriter : String -> java.io.PrintWriter
 /**
- * io.fileWriter : String -> java.io.PrintWriter
+ * io.fileWriter(+Filename, -Res):
+ * 与えられたファイル名からそのファイルへ書き込む為のオブジェクトを生成します。
  * 
  * @example r=close(print(io.fileWriter(a), abc))
  */
@@ -105,9 +144,10 @@ H=io.fileWriter(Filename) :- unary(Filename) | H=[:/*inline*/
 	} catch(Exception e) {}
 	:](Filename).
 
+//io.reader : String -> java::BufferedReader
 /**
- * io.reader : String -> java::BufferedReader
- * 
+ * io.reader(+Process, -Res):
+ * 第一引数に与えたプロセスからの入力を生成します。
  */
 H=io.reader(Process) :- unary(Process) | H=[:/*inline*/
 	try {
@@ -125,9 +165,9 @@ H=io.reader(Process) :- unary(Process) | H=[:/*inline*/
 	} catch(Exception e) {e.printStackTrace();}
 	:](Process).
 
-
+//readLine(Object, ReadString, Result)
 /**
- * readLine(Object, ReadString, Result)
+ * readLine(+Object, -ReadString, -Result)
  * 
  * Object     : java.io.BufferedReader
  * ReadString : One line string
@@ -136,6 +176,15 @@ H=io.reader(Process) :- unary(Process) | H=[:/*inline*/
 H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
 	H=readline(STDIN, Result), io.stdin(STDIN).
 
+/**
+ * readline(-Atom,-Res):
+ *
+ * reads one line from standard input, 
+ * connnecting to Atom a unary atom whose name is the input string
+ * (or an empty string if the string can't be read), 
+ * and connects done/1 or nil/1 to Res, depending on whether the string could be read. 
+ * To be used with io.use.
+ */
 H=readline(Object, ReadString) :- class(Object, "java.io.BufferedReader") |
 	H=[:/*inline*/
 		try {
@@ -155,13 +204,17 @@ H=readline(Object, ReadString) :- class(Object, "java.io.BufferedReader") |
 		} catch(Exception e) {Env.e(e);}
 	:](Object, ReadString).
 
-/**
- * print : String -> unit
- * 
- */
+
 H=print(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
 	H=print(STDOUT, String), io.stdout(STDOUT).
 
+/**
+ * print(+Atom,-Res):
+ *
+ * prints the name of the unary Atom (a string or a non-string atom)
+ * into standard output, and connects done/1 to Res.
+ * To be used witn io.use. 
+ */
 H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 	H=[:/*inline*/
 		try {
@@ -176,9 +229,10 @@ H=print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 		} catch(Exception e) {e.printStackTrace();}
 	:](Object, String).
 
+//close : unit -> unit
 /**
- * close : unit -> unit
- * 
+ * close(+Object, -Res):
+ * 与えられた入力/出力オブジェクトをクローズします。
  */
 H=close(Object) :- class(Object, "java.io.PrintWriter") |
 	H=[:/*inline*/
@@ -190,23 +244,27 @@ H=close(Object) :- class(Object, "java.io.PrintWriter") |
 		} catch(Exception e) {Env.e(e);}
 	:](Object).
 
+//io.list_of_stdin : unit -> List of String
 /**
- * io.list_of_stdin : unit -> List of String
- * 
+ * io.list_of_stdin(-Res):
+ * 標準入力からの一行入力を順次リストに格納します。
  */
 H=io.list_of_stdin, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, [], done), io.stdin(STDIN).
 
+//io.list_of_file : unit -> List of String
 /**
- * io.list_of_file : unit -> List of String
- * 
+ * io.list_of_file(+Filename, -Res):
+ * ファイル名を指定されたファイルからの入力を順次リストに格納します。
  */
 H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), [], done).
 
 H=list_of_dev_s0(Obj, List, done) :- class(Obj, "java.io.BufferedReader") | H=[String|list_of_dev_s0(Obj, List, readline(Obj, String))].
 H=list_of_dev_s0(Obj, List, nil ) :- class(Obj, "java.io.BufferedReader") | H=List.
 
+//io.toFile : String -> List of String -> unit
 /**
- * io.toFile : String -> List of String -> unit
+ * io.toFile(+Filename, +List, -Res):
+ * ファイル名を指定されたファイルへ文字列のリストから順次出力します。
  * 
  * @example r=io.toFile(b, io.fromFile(a))
  */
@@ -215,8 +273,8 @@ H=toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=toFile_s0(print(Obj, CAR), CDR).
 H=toFile_s0(Obj, []) :- H=close(Obj).
 
 /**
- * io.eager
- * 
+ * io.eager(+In, -Res)
+ * 与えられた入力オブジェクトからの入力が逆順に並んだリストを生成します。
  */
 H=io.eager(In) :- H=io.eager(In, [], done).
 H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], readline(In, Res)).
