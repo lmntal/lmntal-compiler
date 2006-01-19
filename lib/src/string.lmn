@@ -1,4 +1,4 @@
-/*
+/**
 NAME
 	String module
 
@@ -14,8 +14,19 @@ HISTORY
 		split join concat
 	.. 2006/01/12(Thu)
 		substring str_of_int int_of_str str_of_float float_of_str
-
+		
+COMMENT
+	文字列アトムの表現方法は、
+	"abc"
+	[:abc:]
+	の二種類があり、後者は改行が入っても良い。
+	'abc'
+	は、あくまでアトムの名前であり文字列ではないが、
+	昔の名残で混同されていることがあるので注意。
 */
+
+//気になったこと
+//1. int_to_strは紛らわしい。文字コードから変換するんだからchar_of_intかな
 
 {
 module(string).
@@ -28,9 +39,13 @@ module(string).
 //	t_s1(string.t(String, 2), Times, I0, Result).
 
 /**
- * times : String -> Int -> String
- * 
- * r=string.times("ab", 5)  ==>  r="ababababab"
+ * string.times(+String, +Times, -Res)
+ *
+ * 与えられた文字列を指定回数繰り返し連結した文字列を返します。
+ * @param +String 繰り返す文字列
+ * @param +Times 繰り返す回数
+ * @param -Res 結果(文字列)
+ * @example r=string.times("ab", 5)  ==>  r="ababababab"
  */
 H=string.times(String, Times) :-
 	string(String), int(Times) | H=[:/*inline*/
@@ -48,9 +63,12 @@ H=string.times(String, Times) :-
 	:](String, Times).
 
 /**
- * replace : String -> String -> String -> String
+ * string.replace(+String, +Regexp, +Replacement, -Res):
  * 
- * パターン文字列が変だったときは元の文字列を返す
+ * 与えられた文字列の指定されたパターン文字列にマッチする部分を指定文字列で置き換えます。
+ * @param +String 元の文字列
+ * @param +Regexp パターン文字列(正規表現)
+ * @param -Res 結果 (パターン文字列が変だったときは元の文字列を返す)
  */
 H=string.replace(String, Regexp, Replacement) :-
 	string(String), string(Regexp), string(Replacement) | H=[:/*inline*/
@@ -71,12 +89,14 @@ H=string.replace(String, Regexp, Replacement) :-
 	:](String, Regexp, Replacement).
 
 /**
- * match : String -> String -> Bool
+ * string.match(+String, +Regexp, -Res):
  * 
- * 部分的にマッチするかどうかをかえす。
- * （String.match は全体とマッチするかどうかなので微妙に違う。）
- * パターン文字列が変だったときは false
+ * 与えられた文字列に指定されたパターン文字列が部分的にマッチするかどうかをかえす。
+ * @param +String 元の文字列
+ * @param +Regexp パターン文字列
+ * @param -Res 結果 (マッチする時 true/1 マッチしない時 false/1 (パターン文字列が変だったときは false) )
  */
+//（String.match は全体とマッチするかどうかなので微妙に違う。）
 H=string.match(String, Regexp) :-
 	string(String), string(Regexp) | H=[:/*inline*/
 	boolean b=false;
@@ -93,9 +113,13 @@ H=string.match(String, Regexp) :-
 	:](String, Regexp).
 
 /**
- * split : String -> String -> List
- * 
- * H=split([:\s+:], [[1 2 3]])  ==>  H='.'(1, '.'(2, '.'(3, '[]')))
+ * string.split(+Regexp, +String, -Res):
+ *
+ * 指定されたパターン文字列で区切られた文字列のリストを返す。
+ * @param +Regexp パターン文字列
+ * @param +String 元の文字列
+ * @param -Res 結果(文字列のリスト)
+ * @example H=split([:\s+:], [:1 2 3:])  ==>  H='.'("1", '.'("2", '.'("3", '[]')))
  */
 H=string.split(Regexp, S) :- string(Regexp), string(S) | H=[:/*inline*/
 	String r[] = ((StringFunctor)me.nthAtom(1).getFunctor()).stringValue().split(
@@ -137,19 +161,24 @@ H=string.split(Regexp, S) :- string(Regexp), string(S) | H=[:/*inline*/
 	:](Regexp, S).
 
 /**
- * join : String -> List -> String
- * 
- * H=join("_", [1,2,3])  ==>  H="1_2_3"
+ * string.join(+Glue, +StringList, -Res):
+ *
+ * 与えられた文字列のリストを指定された結合子で結合した文字列を返す。 
+ * @param +Glue 結合子
+ * @param +StringList 文字列のリスト
+ * @param -Res 結果(文字列)
+ * @example H=join("_", ["1","2","3"])  ==>  H="1_2_3"
  */
 H=string.concat(Glue0,string.join(Glue1, [])) :- string(Glue0), string(Glue1) | H=[::].
 H=string.join(Glue, [CAR|CDR]) :- string(Glue) |
 	H=string.concat(CAR, string.concat(Glue, string.join(Glue, CDR))).
 
-
 /**
- * concat : String -> String -> String
+ * string.concat(+String1, +String2, -Res):
  * 
- * H='^'("abc", "de")  ==>  H="abcde"
+ * 文字列を結合する。
+ * @param +String1,+String2 文字列
+ * @example H='^'("abc", "de")  ==>  H="abcde"
  */
 H=string.concat(S1, S2) :- string(S1), string(S2) | H=[:/*inline*/
 	Atom cat = mem.newAtom(new StringFunctor(
@@ -163,18 +192,23 @@ H=string.concat(S1, S2) :- string(S1), string(S2) | H=[:/*inline*/
 	:](S1, S2).
 
 /**
- * substring : String -> int -> String
- *
- * H=string.substring("abc", 1) ==> H="bc"
+ * string.substring(+String, +Begin, -Res):
+ * 
+ * 文字列の指定された開始位置から始まり終端までの部分文字列を返す
+ * @param +String 元の文字列
+ * @param +Begin 開始位置
+ * @param -Res 結果(エラー時は空文字列)
+ * @example H=string.substring("abc", 1) ==> H="bc"
  */
 H=string.substring(S,Begin) :- string(S), int(Begin) | H=[:/*inline*/
 	int b = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
 	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
-	Atom sub = null;
+	String sub = null;
 	try{
-		sub = mem.newAtom(new StringFunctor(s.substring(b)));
+		sub =s.substring(b);
 	} catch(Exception e){}
-	mem.relinkAtomArgs(sub, 0, me, 2);
+	Atom suba = mem.newAtom(new StringFunctor((sub==null)?"":sub));
+	mem.relinkAtomArgs(suba, 0, me, 2);
 	
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me.nthAtom(1));
@@ -182,19 +216,25 @@ H=string.substring(S,Begin) :- string(S), int(Begin) | H=[:/*inline*/
 	:](S, Begin).
 
 /**
- * substring : String -> int -> int -> String
- *
- * H=string.substring("abc", 1, 2) ==> H="b"
+ * string.substring(+String, +Begin, +End, -Res):
+ * 
+ * 文字列の指定された開始位置から終了位置までの部分文字列を返す。
+ * @param +String 元の文字列
+ * @param +Begin 開始位置
+ * @param +End 終了位置
+ * @param -Res 結果(エラー時は空文字列)
+ * @example H=string.substring("abc", 1, 2) ==> H="b"
  */
 H=string.substring(S,Begin,End) :- string(S), int(Begin), int(End) | H=[:/*inline*/
 	int b = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
 	int e = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
 	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
-	Atom sub = null;
+	String sub = null;
 	try{
-		sub = mem.newAtom(new StringFunctor(s.substring(b,e)));
+		sub = s.substring(b,e);
 	} catch(Exception exc) {}
-	mem.relinkAtomArgs(sub, 0, me, 3);
+	Atom suba = mem.newAtom(new StringFunctor((sub==null)?"":sub));
+	mem.relinkAtomArgs(suba, 0, me, 3);
 	
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me.nthAtom(1));
@@ -203,16 +243,21 @@ H=string.substring(S,Begin,End) :- string(S), int(Begin), int(End) | H=[:/*inlin
 	:](S, Begin, End).
 
 /**
- * int_of_str : String -> int
- *
- * H=string.int_of_str("13") ==> H=13
+ * string.int_of_str(+String, -Res):
+ * 
+ * @param +String 文字列
+ * @param -Res 結果(失敗時は nil/1)
+ * @example H=string.int_of_str("13") ==> H=13
  */
 H=string.int_of_str(S) :- string(S) | H=[:/*inline*/
 	int n=0;
+	Atom res = null;
 	try{
 		n = Integer.parseInt( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
-	} catch(Exception e) {}
-	Atom res = mem.newAtom(new IntegerFunctor(n));
+		res = mem.newAtom(new IntegerFunctor(n));
+	} catch(Exception e) {
+		res = mem.newAtom(new Functor("nil",1));
+	}
 	mem.relinkAtomArgs(res, 0, me, 1);
 	
 	mem.removeAtom(me.nthAtom(0));
@@ -220,41 +265,68 @@ H=string.int_of_str(S) :- string(S) | H=[:/*inline*/
 	:](S).
 
 /**
- * str_of_int : int -> String
- *
- * H=string.str_of_int(6) ==> H="6"
+ * string.str_of_int(+Int, -Res):
+ * 
+ * @param +Int 数字
+ * @param -Res 結果(エラー時は空文字列)
+ * @example H=string.str_of_int(6) ==> H="6"
  */
 H=string.str_of_int(I) :- int(I) | H=[:/*inline*/
-	String s = "";
+	String s = null;
 	try{
 		s = Integer.toString(((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue());
 	} catch(Exception e) {}
-	Atom res = mem.newAtom(new StringFunctor(s));
+	Atom res = mem.newAtom(new StringFunctor((s==null)?"":s));
 	mem.relinkAtomArgs(res, 0, me, 1);
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
 	:](I).
 
 /**
- * str_of_float : float -> String
- *
- * H=string.str_of_float(3.5) ==> H="3.5"
+ * string.str_of_float(+Float, -Res):
+ * 
+ * @param +Float 浮動小数点数
+ * @param -Res 結果(エラー時は空文字列)
+ * @example H=string.str_of_float(3.5) ==> H="3.5"
  */
 H=string.str_of_float(I) :- float(I) | H=[:/*inline*/
-	String s = "";
+	String s = null;
 	try{
 		s = Double.toString(((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue());
 	} catch(Exception e) {}
-	Atom res = mem.newAtom(new StringFunctor(s));
+	Atom res = mem.newAtom(new StringFunctor((s==null)?"":s));
 	mem.relinkAtomArgs(res, 0, me, 1);
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
 	:](I).
-	
+
 /**
- * int_to_str : Int -> String
+ * string.float_of_str(+String, -Res):
  * 
- * H=string.int_to_str(92)  ==>  H="a"
+ * @param +String 文字列
+ * @param -Res 結果(エラー時はnil/1)
+ * @example H=string.float_of_str("2.6") ==> H=2.6
+ */
+H=string.float_of_str(S) :- string(S) | H=[:/*inline*/
+	double d = 0.0;
+	Atom res = null;
+	try{
+		d = Double.parseDouble( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
+		res = mem.newAtom(new FloatingFunctor(d));
+	} catch(Exception e) {
+		res = mem.newAtom(new Functor("nil", 1));
+	}
+	mem.relinkAtomArgs(res, 0, me, 1);
+
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	:](S).
+
+/**
+ * string.int_to_str(+Int, -Res):
+ *
+ * 整数を受け取ってその文字コードが表す1文字からなる文字列を返します。
+ * @example H=string.int_to_str(65)  ==>  H="A"
  */
 H=string.int_to_str(I) :- int(I) | H=[:/*inline*/
 	String s = "";
@@ -268,23 +340,6 @@ H=string.int_to_str(I) :- int(I) | H=[:/*inline*/
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
 	:](I).
-
-/**
- * float_of_str : String -> float
- *
- * H=string.float_of_str("2.6") ==> H=2.6
- */
-H=string.float_of_str(S) :- string(S) | H=[:/*inline*/
-	double d = 0.0;
-	try{
-		d = Double.parseDouble( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
-	} catch(Exception e) {}
-	Atom res = mem.newAtom(new FloatingFunctor(d));
-	mem.relinkAtomArgs(res, 0, me, 1);
-
-	mem.removeAtom(me.nthAtom(0));
-	mem.removeAtom(me);
-	:](S).
 
 }.
 
