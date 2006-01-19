@@ -1,17 +1,31 @@
-% 素数ストリーム
-% KL1の例題にあったやつ(どこで見つけたか忘れた．誰かもう作ってるか)
+% 素数ストリーム from KL1の例題
+%
+% =と略記法を使うと少し短くなる。
+% わかりやすいかどうかは場合による。
 
-primes(Max,Ps) :- gen(2,Max,Ns),sift(Ns,Ps).
+%primes(Max,Ps) :- gen(2,Max,Ns),sift(Ns,Ps).
 
-gen(N0,Max,Ns0) :- int(N0), int(Max), N0=<Max | Ns0=[N0|Ns1],gen(N0+1,Max,Ns1).
-gen(N0,Max,Ns0) :- int(N0), int(Max), N0> Max | Ns0=[      ].
+Ps=primes(Max) :- Ps=sift(gen(2,Max)).
 
-sift([P|Xs1],Zs0) :- int(P) | Zs0=[P|Zs1],filter(P,Xs1,Ys),sift(Ys,Zs1).
-sift([     ],Zs0) :-          Zs0=[     ].
+%gen(N0,Max,Ns0) :- int(N0), int(Max), N0=<Max | Ns0=[N0|Ns1],gen(N0+1,Max,Ns1).
+%gen(N0,Max,Ns0) :- int(N0), int(Max), N0> Max | Ns0=[      ].
 
-filter(P,[X|Xs1],Ys0) :- int(X), int(P), X mod P =\= 0 | Ys0=[X|Ys1],filter(P,Xs1,Ys1).
-filter(P,[X|Xs1],Ys0) :- int(X), int(P), X mod P  =  0 |             filter(P,Xs1,Ys0).
-filter(P,[     ],Ys0) :-         int(P)                | Ys0=[     ].
+Ns0=gen(N0,Max) :- N0=<Max | Ns0=[N0|gen(N0+1,Max)].
+Ns0=gen(N0,Max) :- N0> Max | Ns0=[].
 
+%sift([P|Xs1],Zs0) :- int(P) | Zs0=[P|Zs1],filter(P,Xs1,Ys),sift(Ys,Zs1).
+%sift([     ],Zs0) :-          Zs0=[     ].
 
+Zs0=sift([P|Xs1]) :- int(P) | Zs0=[P|sift(filter(P,Xs1))].
+Zs0=sift([])      :-        | Zs0=[].
+
+%filter(P,[X|Xs1],Ys0) :- int(X), int(P), X mod P =\= 0 | Ys0=[X|Ys1],filter(P,Xs1,Ys1).
+%filter(P,[X|Xs1],Ys0) :- int(X), int(P), X mod P  =  0 |             filter(P,Xs1,Ys0).
+%filter(P,[     ],Ys0) :-         int(P)                | Ys0=[     ].
+
+Ys0=filter(P,[X|Xs1]) :- X mod P =\= 0 | Ys0=[X|filter(P,Xs1)].
+Ys0=filter(P,[X|Xs1]) :- X mod P  =  0 | Ys0=   filter(P,Xs1).
+Ys0=filter(P,[])      :- int(P)        | Ys0=[].
+
+% test case 100
 p_stream = primes(100).
