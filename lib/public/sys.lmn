@@ -1,4 +1,4 @@
-/*
+/**
 NAME
 	System module
 
@@ -15,16 +15,26 @@ HISTORY
 {
 module(sys).
 
+//dump : unit -> unit
 /**
- * dump : unit -> unit
+ * sys.dump :
  * 
- * Dump this membrane
+ * Dump this membrane.
  */
 sys.dump :- [:/*inline*/
 	me.setName("nil");
 	System.out.println(Dumper.dump(mem));
 	:].
 
+/**
+ * sys.trace(+Flag):
+ * 
+ * Flagがonの時、trace modeに入ります。
+ * Flagがoffの時、trace modeから抜けます。
+ * @example
+ *   sys.trace(on) ==> nil (trace mode on)
+ *   sys.trace(off) ==> nil (trace mode off)
+ */
 sys.trace(on) :- [:/*inline*/
 	Env.fTrace=true;
 	me.setName("nil");
@@ -35,7 +45,7 @@ sys.trace(off) :- [:/*inline*/
 	:].
 
 /**
- * sys.argv : unit -> List
+ * sys.argv(-Res) :
  * 
  * Return argv
  */
@@ -45,8 +55,9 @@ H=sys.argv :- H=[:/*inline*/
 	:].
 
 /**
- * sys.exec : String -> List of String -> Process
+ * sys.exec(+Cmd, +Argv, -Res) : String -> List of String -> Process
  * 
+ * コマンドCmdをArgvに与えられた引数列とともに実行します。
  */
 H=sys.exec(Cmd, Argv) :- unary(Cmd) | H=[:/*inline*/
 	try {
@@ -63,23 +74,24 @@ H=sys.exec(Cmd, Argv) :- unary(Cmd) | H=[:/*inline*/
 	:](Cmd, Argv).
 
 /**
- * sys.perpetual : unit -> unit
+ * sys.perpetual(+Flag) :
  * 
- * Return argv
+ * Flagがonの時、この膜を永続化(ルール適用できなくてもstableにならない)し、
+ * Flagがoffの時、子の膜の永続化を解除します。
  */
 sys.perpetual(on) :- [:/*inline*/
 	mem.makePerpetual();
 	me.setName("nil");
 	:].
-
 sys.perpetual(off) :- [:/*inline*/
 	mem.perpetual = false;
 	me.setName("nil");
 	:].
 
 /**
- * sys.atomCount : String -> int -> int
- * 同一膜内で、指定した名前と arity を持つアトムの数を数える。
+ * sys.atomCount(+Name, +Arity, -Res)
+ *
+ * この膜内で、指定した名前と arity を持つアトムの数を数え、Resに返します。
  */
 H=sys.atomCount(Name, Arity) :- unary(Name), int(Arity) | H=[:/*inline*/
 	try {
