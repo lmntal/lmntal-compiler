@@ -111,7 +111,7 @@ H=java.new(Class) :- H=java.new(Class, []).
  * 指定したクラスの新しいインスタンスを返す。
  * Classにはクラス名を持つアトムを、
  * Listにはコンストラクタの引数が並んだリストを与える。
- **/
+ */
 H=java.new(Class, List) :- unary(Class) | H=[:/*inline*/
 //	System.out.println(me.nth(0));
 	Object obj = Java.doNew(me.nth(0), util.Util.arrayOfList(me.getArg(1)));
