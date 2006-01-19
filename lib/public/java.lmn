@@ -94,12 +94,24 @@ class Java {
 }
 :].
 
+//new : String -> List of Object -> Object
 /**
- * new : String -> List of Object -> Object
+ * java.new(+Class, -Res)
+ *
+ * 指定したクラスの新しいインスタンスを返す。
+ * Classにはクラス名を持つアトムを与え、
+ * コンストラクタは0引数で呼び出される。
  * 
- * 指定したクラスの新しいインスタンスを返す
  */
 H=java.new(Class) :- H=java.new(Class, []).
+
+/**
+ * java.new(+Class, +List, -Res)
+ * 
+ * 指定したクラスの新しいインスタンスを返す。
+ * Classにはクラス名を持つアトムを、
+ * Listにはコンストラクタの引数が並んだリストを与える。
+ **/
 H=java.new(Class, List) :- unary(Class) | H=[:/*inline*/
 //	System.out.println(me.nth(0));
 	Object obj = Java.doNew(me.nth(0), util.Util.arrayOfList(me.getArg(1)));
@@ -112,12 +124,25 @@ H=java.new(Class, List) :- unary(Class) | H=[:/*inline*/
 	me.remove();
 	:](Class, List).
 
+//invoke : Object -> String -> List of Object -> Object
 /**
- * invoke : Object -> String -> List of Object -> Object
+ * java.invoke(+Object, +Method, -Res)
  * 
  * 指定したオブジェクトのメソッドを呼び出し、結果を返す
+ * Objectにはオブジェクトを表すアトムを与え、
+ * Methodには呼び出すメソッド名を与える。
+ * メソッドは0引数で呼び出される。
  */
 H=java.invoke(Object, Method) :- H=java.invoke(Object, Method, []).
+
+/**
+ * java.invoke(+Object, +Method, +Args, -Res)
+ *
+ * 指定したオブジェクトのメソッドを呼び出し、結果を返す
+ * Objectにはオブジェクトを表すアトムを与え、
+ * Methodには呼び出すメソッド名を与え、
+ * Argsにメソッドの引数が並んだリストを与える。
+ */
 H=java.invoke(Object, Method, List) :- unary(Method), unary(Object) | H=[:/*inline*/
 //		System.out.println(me.nth(0));
 	Object obj = me.nthAtom(0).getFunctor().getValue();
