@@ -15,7 +15,6 @@ HISTORY
 {
 module(sys).
 
-//dump : unit -> unit
 /**
  * sys.dump :
  * 
