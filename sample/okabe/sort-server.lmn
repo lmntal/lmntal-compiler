@@ -3,19 +3,19 @@
  *  distributed sort
  *    クライアントがサーバからソートプログラムをダウンロードして実行し，
  *    その結果をサーバがマージする．
- *  client file: dc-sort1.lmn,dc-sort2.lmn
+ *  client file: sort-client.lmn
  *
  *  06/01/12 okabe
  */
 
 % サーバソケット
-dlt.bind(50000,[accept(Send1,strDec),accept(Send2,strDec),close]).
+dlmntal.bind(50000,[accept(Send1,strDec),accept(Send2,strDec),close]).
 
 % ユーザがダウンロードして実行する文字列形式のプログラム
 % リストを生成してクイックソートで昇順に整列する
 Send1=
 ["{
-  gen(50,[]).
+  gen(200,[]).
   gen(I,L) :- I2=I-1,I>0 | gen(I2,[(integer.rnd(10000))|L]).
   gen(I,L) :- I=:=0 | list=sort(L).
   R=sort(L) :- R=sort(L,[]).
