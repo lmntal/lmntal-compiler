@@ -1,9 +1,9 @@
-/*
+/**
 NAME
 	Double module
 
 SYNOPSIS
-	
+
 AUTHOR
 	Shintaro Kudo
 
@@ -12,14 +12,22 @@ HISTORY
 
 */
 
+//いくつか気になること:
+//1. doubleというモジュール名は適当ではない。(floatにすべき)
+//2. 演算子があちこちで定義されている。(組み込み、integer, double)
+//3. 中置記法演算子はともかく、absはfloat.absとかのほうがいいのか?
 
 {
 
 module(double).
 
 /**
- * >
- * 
+ * '>'(+Operand1, +Operand2, -Res) :
+ *
+ * @param +Operand1,+Operand2 浮動小数点数アトム
+ * @param -Res 結果(true/1 or false/1)
+ * @example r(3.5 > 2.5) ==> r=true
+ * @example r(3.0 > 3.5) ==> r=false
  */
 H= '>'(A,B) :- float(A),float(B) | H = [:/*inline*/		
 
@@ -39,8 +47,12 @@ H= '>'(A,B) :- float(A),float(B) | H = [:/*inline*/
 	:](A,B).
 
 /**
- * <
- * 
+ * '<'(+Operand1, +Operand2, -Res):
+ *
+ * @param +Operand1,+Operand2 浮動小数点アトム
+ * @param -Res 結果(true/1 or false/1)
+ * @example r(3.5 < 3.0) ==> r=false
+ * @example r(2.5 < 3.5) ==> r=true
  */
 H= '<'(A,B) :- float(A),float(B) | H = [:/*inline*/		
 
@@ -60,8 +72,12 @@ H= '<'(A,B) :- float(A),float(B) | H = [:/*inline*/
 	:](A,B).
 
 /**
- * =<
+ * '=<'(+Operand1, +Operand2, -Res):
  * 
+ * @param +Operand1,+Operand2 浮動小数点アトム
+ * @param -Res 結果(true/1 or false/1)
+ * @example r(3.5 =< 3.0) ==> r=false
+ * @example r(2.5 =< 3.5) ==> r=true
  */
 H= '=<'(A,B) :- float(A),float(B) | H = [:/*inline*/		
 
@@ -81,8 +97,12 @@ H= '=<'(A,B) :- float(A),float(B) | H = [:/*inline*/
 	:](A,B).
 
 /**
- * >=
+ * '>='(+Operand1, +Operand2, -Res):
  * 
+ * @param +Operand1,+Operand2 浮動小数点アトム
+ * @param -Res 結果(true/1 or false/1)
+ * @example r(3.5 >= 3.0) ==> r=true
+ * @example r(2.5 >= 3.5) ==> r=false
  */
 H= '>='(A,B) :- float(A),float(B) | H = [:/*inline*/		
 
@@ -102,8 +122,12 @@ H= '>='(A,B) :- float(A),float(B) | H = [:/*inline*/
 	:](A,B).
 
 /**
- * ==
+ * '=='(+Operand1, +Operand2, -Res):
  *
+ * @param +Operand1,+Operand2 浮動小数点アトム
+ * @param -Res 結果(true/1 or false/1)
+ * @example r(3.5 == 3.0) ==> r=false
+ * @example r(2.5 == 2.5) ==> r=true
  */
 H= '=='(A,B) :- float(A),float(B) | H= [:/*inline*/
 
@@ -123,8 +147,12 @@ H= '=='(A,B) :- float(A),float(B) | H= [:/*inline*/
 	:](A,B).
 	
 /**
- * !=
+ * '!='(+Operand1, +Operand2, -Res):
  *
+ * @param +Operand1,+Operand2 浮動小数点アトム
+ * @param -Res 結果(true/1 or false/1)
+ * @example r(3.5 != 3.0) ==> r=false
+ * @example r(2.5 != 2.5) ==> r=true
  */
 H= '!='(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
@@ -141,8 +169,11 @@ H= '!='(A,B) :- float(A),float(B) | H= [:/*inline*/
 	:](A,B).
 
 /**
- * abs
+ * abs(+Float, -Res):
  *
+ * 浮動小数点数Floatの絶対値をResに返します。
+ * @param +Float 浮動小数点数アトム
+ * @param -Res 結果
  */
 H= abs(A) :- float(A) | H= [:/*inline*/
 		double a0=
@@ -154,8 +185,12 @@ H= abs(A) :- float(A) | H= [:/*inline*/
 	:](A).
 
 /**
- * + (float , float)
+ * '+'(+Operand1, +Operand2, -Res):
  *
+ * 浮動小数点数と整数もしくは浮動小数点数の加算結果を返します。
+ * @param +Operand1,+Operand2 整数もしくは浮動小数点数
+ * @param -Res 結果 (浮動小数点数)
+ * @example r=(1.5 + 2) ==> r=(3.5)
  */
 H= '+'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
@@ -168,11 +203,6 @@ H= '+'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
-
-/**
- * + (float, int)
- *
- */
 H= '+'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -184,11 +214,6 @@ H= '+'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
-
-/**
- * + (int , float)
- *
- */
 H= '+'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		double a0=
 		((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
@@ -202,8 +227,12 @@ H= '+'(A,B) :- int(A),float(B) | H= [:/*inline*/
 	:](A,B).
 
 /**
- * - (float , float)
+ * '-'(+Operand1, +Operand2, -Res):
  *
+ * 浮動小数点数と整数もしくは浮動小数点数の減算結果を返します。
+ * @param +Operand1,+Operand2 整数もしくは浮動小数点数
+ * @param -Res 結果 (浮動小数点数)
+ * @example r=(2.5 - 2) ==> r=(0.5)
  */
 H= '-'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
@@ -216,11 +245,6 @@ H= '-'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
-
-/**
- * - (float, int)
- *
- */
 H= '-'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -232,11 +256,6 @@ H= '-'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
-
-/**
- * - (int , float)
- *
- */
 H= '-'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		double a0=
 		((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
@@ -250,8 +269,12 @@ H= '-'(A,B) :- int(A),float(B) | H= [:/*inline*/
 	:](A,B).
 
 /**
- * * (float , float)
+ * '*'(+Operand1, +Operand2, -Res):
  *
+ * 浮動小数点数と整数もしくは浮動小数点数の乗算結果を返します。
+ * @param +Operand1,+Operand2 整数もしくは浮動小数点数
+ * @param -Res 結果 (浮動小数点数)
+ * @example r=(1.5 * 2) ==> r=(3.0)
  */
 H= '*'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
@@ -264,11 +287,6 @@ H= '*'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
-
-/**
- * * (float, int)
- *
- */
 H= '*'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -280,11 +298,6 @@ H= '*'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
-
-/**
- * * (int , float)
- *
- */
 H= '*'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		double a0=
 		((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
@@ -298,8 +311,12 @@ H= '*'(A,B) :- int(A),float(B) | H= [:/*inline*/
 	:](A,B).
 	
 /**
- * / (float , float)
+ * '/'(+Operand1, +Operand2, -Res):
  *
+ * 浮動小数点数と整数もしくは浮動小数点数の除算結果を返します。
+ * @param +Operand1,+Operand2 整数もしくは浮動小数点数
+ * @param -Res 結果 (浮動小数点数)
+ * @example r=(3.0 / 2) ==> r=(1.5)
  */
 H= '/'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a0=
@@ -312,11 +329,6 @@ H= '/'(A,B) :- float(A),float(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
-
-/**
- * / (float, int)
- *
- */
 H= '/'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
@@ -328,11 +340,6 @@ H= '/'(A,B) :- float(A),int(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
-
-/**
- * / (int , float)
- *
- */
 H= '/'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		double a0=
 		((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
