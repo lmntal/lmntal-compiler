@@ -1,4 +1,4 @@
-/*
+/**
 NAME
 	List module
 
@@ -16,45 +16,50 @@ HISTORY
 {
 module(list).
 
+//new : unit -> List
 /**
- * new : unit -> List
- * 
+ * list.new(-Res)
+ *
+ * 空のリストを返します。
  */
 H=list.new :- H=[].
 
 /**
- * is_empty
+ * is_empty(+List, -Res)
  * 
+ * Listが空かどうか検査し、空ならばtrue/1を、空でないならfalse/1をResに返します。
  */
 H=is_empty([], Return) :- H=[], Return=true.
 H=is_empty('.'(Value, Next), Return) :- H='.'(Value, Next), Return=false.
 
 /**
- * unshift
- * 
+ * unshift(+List, +Obj, -NewList)
+ * リストListの先頭にObjを格納し、Resに返します。
  */
 H=unshift([], Obj) :- H='.'(Obj, []).
 H=unshift('.'(Value, Next), Obj) :- H='.'(Obj, '.'(Value, Next)).
 
 /**
- * shift
- * 
+ * shift(+List, -Ret, -NewList)
+ *
+ * リストListの先頭要素を取り出してRetに返し、NewListに更新されたリストを返します。
  */
 H=shift([], Return) :- H=[], Return=nil.
 H=shift('.'(Value, Next), Return) :- H=Next, Return=Value.
 
 /**
- * append
- * 
+ * list.append(+List1, +List2, -Res)
+ *
+ * リストList1の後ろにリストList2を結合したリストをResに返します。
  */
 H=list.append([], B) :- H=B.
 H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
 
 
 /**
- * of_queue
+ * list.of_queue(+Queue, -List)
  * 
- * Queue -> List
+ * キューQueueをリストに変換し、Listに返します。
  */
 H=list.of_queue(queue.new(Head, Head)) :- H=[].
 H=list.of_queue(queue.new(Head, Tail)) :-
@@ -62,10 +67,9 @@ H=list.of_queue(queue.new(Head, Tail)) :-
 
 
 /**
- * grep
- * 
- * (a -> Bool) -> List -> List
- * 
+ * list.grep(+F, +List, -Res):
+ *
+ * リストListの要素のうちFによってtrueが返るもののみを含むリストをResに返します。
  * @example r=list.grep(f, [1,2,3,4,5]).
  *          H=[f,N] :- N<3 | H=[true, N].
  *          H=[f,N]:-N>=3 | H=[false,N].
@@ -75,17 +79,20 @@ H=grep_s0([ [true, El] | CDR ]) :- H=[El | grep_s0(CDR)].
 H=grep_s0([ [false, El] | CDR ]) :- H=grep_s0(CDR), nil(El).
 H=grep_s0([]) :- H=[].
 
+//Functor -> List -> List
 /**
- * map
- * 
- * Functor -> List -> List
+ * list.map(+F, +List, -Res):
+ *
+ * FとリストListの各要素との2要素リストからなるリストをResに返します。
+ * H=list.map(F, [B1, ..., Bn]) は H=[[F, B1], [F, B2], ..., [F, Bn]]です。
  */
 H=list.map(F, List) :- H=list.fold(F, [], List).
 
+//Functor -> Functor -> List -> List
 /**
- * fold
+ * list.fold(+F, +I, +List, -Res):
  * 
- * Functor -> Functor -> List -> List
+ * H=list.fold(F, I, [B1, ..., Bn]) は H=[[F, B1], [F, B2], ..., [F, Bn]|I] です。
  */
 H=list.fold(F, I, []) :- unary(F), unary(I) | H=I.
 H=list.fold(F, I, [CAR|CDR]) :- unary(F), unary(I) | H=[ [F, CAR] | list.fold(F, I, CDR)].
@@ -124,29 +131,33 @@ H=list.unfold_s0(P, F, G, Seed, Tailgen, false) :-
 
 // r=list.fold("+", 0, [1,2,3]). (H=[ ["+",A]|B] :- A+B=C | H=C).
 
-Res=list.flatten(nil, R) :- Res=R.
-Res=list.flatten(int(N), R) :- Res=cons(int(N), R).
-Res=list.flatten(cons(A, B), R) :- Res=list.flatten(A, list.flatten(B, R)).
+/**
+ * list.flatten(+List, -Res)
+ *
+ * @example
+ *  r=list.flatten([0,[a,b,c],[["a",["b"],["c","d"]]]])
+ *    ==>
+ *  r=list.flatten([0,a,b,c,"a","b","c","d"])
+ */
+H=list.flatten([]) :- H=[].
+H=list.flatten([CAR|CDR]) :- unary(CAR) | H=[CAR|list.flatten(CDR)].
+H=list.flatten([[CAR|CADR]|CDR]) :- H=list.flatten([CAR|list.append(CADR,CDR)]).
+//Res=list.flatten(nil, R) :- Res=R.
+//Res=list.flatten(int(N), R) :- Res=cons(int(N), R).
+//Res=list.flatten(cons(A, B), R) :- Res=list.flatten(A, list.flatten(B, R)).
 
-
-
-
-
-
-/*
-
-要素数 n 個のリストから k 個順不同で取り出す全ての組み合わせをリストにして返す。
-
-*/
+/**
+ * list.choose_k(+List, +K, -Res)
+ *
+ * 要素数 n 個のリストListから k 個順不同で取り出す全ての組み合わせをリストにしてResに返す。
+ *
+ */
 
 //r=choose_k([a, b, c, d, e], 3).
 //r=choose_k([b, c], 1).
-
-
 H=list.choose_k(L, K) :- H=choose_k(L, K).
 H=choose_k(L, K) :- ground(L), K=0 | H=[].
 H=choose_k([], K) :- int(K) | H=[].
-
 H=choose_k([Hd|R], K) :- K=1 | H=[[Hd]|choose_k(R, K)].
 
 // Hd を選ぶ場合とそうでない場合の全組み合わせをくっつける 
