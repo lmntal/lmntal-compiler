@@ -21,7 +21,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	public boolean locked = false;
 	private Image OSI = null;
 	private Graphics OSG = null;
-	private boolean ready=false;
+//	private boolean ready=false;
 	/**描画するオブジェクトリスト*/
 	private LinkedList drawlist = new LinkedList();
 	/**レラティブ膜のリスト*/
@@ -48,7 +48,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			//画面を白地で初期化（塗りつぶす）
 			OSG.setColor(frame.getColor());
 			OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
-			paintlayout();
+			paintLayout();
 			g.drawImage(OSI,0,0,this);
 		}catch(NullPointerException e){repaint();}
 	}
@@ -56,7 +56,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	 * 指定された名称のアトムが存在するか検索。
 	 * あれば真を、なければ偽を返す。
 	 */
-	private String searchatom(AbstractMembrane m){
+	private String searchAtom(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
 
@@ -75,7 +75,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	}
 	
 	/**レラティブ膜情報の取得*/
-	private Relativemem getrelativemem(AbstractMembrane m){
+	private Relativemem getRelativeMem(AbstractMembrane m){
 
 		Node a;
 		Relativemem rm = new Relativemem();
@@ -116,135 +116,16 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	/**
 	 * 描画用のアトム郡の取得
 	 */
-	private GraphicObj getgraphicatoms(AbstractMembrane m){
-		Iterator ite = m.atomIterator();
-		Node a;
-		GraphicObj ga = new GraphicObj();
-
-		if(m.getLockThread() != null) locked = true;
-		while(ite.hasNext()){
-			a = (Node)ite.next();
-			/**描画するファイルの取得*/
-			if(a.getName()=="getpic"){
-				if(a.getEdgeCount() != 1)continue;
-				String picName = a.getNthNode(0).getName();
-				if(picName.equals("string")){
-					if(a.getNthNode(0).getEdgeCount()==2){
-//						System.out.println("Nth0"+a.getNthNode(0).getNthNode(0).getName());
-//						System.out.println("Nth1"+a.getNthNode(0).getNthNode(1).getName());
-						ga.setString(a.getNthNode(0).getNthNode(0).getName());
-					}else if(a.getNthNode(0).getEdgeCount()==3){
-//						System.out.println("Nth0"+a.getNthNode(0).getNthNode(0).getName());
-//						System.out.println("Nth1"+a.getNthNode(0).getNthNode(1).getName());
-//						System.out.println("Nth2"+a.getNthNode(0).getNthNode(2).getName());
-						ga.setString(a.getNthNode(0).getNthNode(0).getName(),a.getNthNode(0).getNthNode(1).getName());
-					}
-				}
-				ga.SetPic( picName );
-			}
-			/**名前の取得*/
-			else if(a.getName()=="name"){
-				if(a.getEdgeCount() != 1)continue;
-				ga.setname(a.getNthNode(0).getName());
-			}
-			/**描画の順番（前後関係）の取得*/
-			else if(a.getName()=="sequence"){
-				try{
-					ga.sequence = Integer.parseInt(a.getNthNode(0).getName());
-				}catch(NumberFormatException error){					
-				}
-				
-			}
-			/**描画の順番（前後関係）の取得*/
-			else if(a.getName()=="color"){
-				if(a.getEdgeCount() != 3)continue;
-				try{
-					ga.setcolor( Integer.parseInt(a.getNthNode(0).getName()),Integer.parseInt(a.getNthNode(1).getName()),Integer.parseInt(a.getNthNode(2).getName()));
-				}catch(NumberFormatException error){			
-				}
-				
-			}
-			/**描画する位置の取得*/
-			else if(a.getName()=="position"){
-				if(a.getEdgeCount() ==2){
-					try{
-						ga.setarraypos(Integer.parseInt(a.getNthNode(0).getName()),
-								Integer.parseInt(a.getNthNode(1).getName()),
-								0,0,0,0,0,0
-								);
-					}catch(NumberFormatException error){
-						return null;
-					}
-				}else if(a.getEdgeCount() ==4){
-					try{
-						ga.setarraypos(Integer.parseInt(a.getNthNode(0).getName()),
-								Integer.parseInt(a.getNthNode(1).getName()),
-								Integer.parseInt(a.getNthNode(2).getName()),
-								Integer.parseInt(a.getNthNode(3).getName()),
-								0,0,0,0
-								);
-					}catch(NumberFormatException error){
-						return null;
-					}
-				}else if(a.getEdgeCount() ==6){
-					try{
-						ga.setarraypos(Integer.parseInt(a.getNthNode(0).getName()),
-								Integer.parseInt(a.getNthNode(1).getName()),
-								Integer.parseInt(a.getNthNode(2).getName()),
-								Integer.parseInt(a.getNthNode(3).getName()),
-								Integer.parseInt(a.getNthNode(4).getName()),
-								Integer.parseInt(a.getNthNode(5).getName()),
-								0,0
-								);
-					}catch(NumberFormatException error){
-						return null;
-					}
-				}else if(a.getEdgeCount() ==8){
-					try{
-						ga.setarraypos(Integer.parseInt(a.getNthNode(0).getName()),
-								Integer.parseInt(a.getNthNode(1).getName()),
-								Integer.parseInt(a.getNthNode(2).getName()),
-								Integer.parseInt(a.getNthNode(3).getName()),
-								Integer.parseInt(a.getNthNode(4).getName()),
-								Integer.parseInt(a.getNthNode(5).getName()),
-								Integer.parseInt(a.getNthNode(6).getName()),
-								Integer.parseInt(a.getNthNode(7).getName())
-								);
-					}catch(NumberFormatException error){
-						return null;
-					}
-				}else continue;
-				
-			}
-			/**描画するサイズの取得*/
-			else if(a.getName()=="size"){
-				if(a.getEdgeCount() != 2)continue;
-				try{
-					ga.sizex = Integer.parseInt(a.getNthNode(0).getName());
-				}catch(NumberFormatException error){
-					return null;
-				}
-
-				try{
-					ga.sizey = Integer.parseInt(a.getNthNode(1).getName());
-				}catch(NumberFormatException error){
-					return null;
-					
-				}
-				
-			}
-			/**描画するかどうかの取得*/
-			else if(a.getName()=="enable"){
-				ga.enable = true;				
-			}
-		}
-		if(!ga.isset())
+	private GraphicObj getGraphicAtoms(AbstractMembrane m){
+		GraphicObj ga = new GraphicObj(m);
+		if(ga.isset())
+			return ga;
+		else
 			return null;
-		return ga;
 	}
 	
 	/**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
-	public String getname(AbstractMembrane m){
+	public String getName(AbstractMembrane m){
 		Iterator ite = m.atomIterator();
 		Node a;
 		
@@ -260,18 +141,18 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	}
 	
 	/**再帰的にレラティブ膜を探す。レラティブ膜自身のunlock時はこちらを呼ぶ。*/
-	private String searchrelativemem_self(AbstractMembrane relativetmp , int distance){
+	private String searchRelativeMem_self(AbstractMembrane relativetmp , int distance){
 
 		while(distance >= 0){
 			distance--;
 			/*レラティブ膜発見*/
-			if(searchatom(relativetmp)=="relative"){
-				Relativemem remem = getrelativemem(relativetmp);
+			if(searchAtom(relativetmp)=="relative"){
+				Relativemem remem = getRelativeMem(relativetmp);
 				
 				/*レラティブ膜の登録*/
 				relativemap.put(remem.name,remem);
 				if(distance >= 0){
-					remem.parentremem = searchrelativemem(relativetmp.getParent(),distance);
+					remem.parentremem = searchRelativeMem(relativetmp.getParent(),distance);
 				}
 				return remem.name;
 			}
@@ -279,13 +160,13 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		return null;
 	}
 	/**再帰的にレラティブ膜を探す*/
-	private String searchrelativemem(AbstractMembrane relativetmp , int distance){
+	private String searchRelativeMem(AbstractMembrane relativetmp , int distance){
 
 		while(distance >= 0){
 			distance--;
 			/*レラティブ膜発見*/
-			if(searchatom(relativetmp)=="relative"){
-				Relativemem remem = getrelativemem(relativetmp);
+			if(searchAtom(relativetmp)=="relative"){
+				Relativemem remem = getRelativeMem(relativetmp);
 				/*すでに登録済みなら名前だけ返して終了*/
 				if(relativemap.containsKey(remem.name)){
 					return remem.name;
@@ -294,7 +175,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				/*レラティブ膜の登録*/
 				relativemap.put(remem.name,remem);
 				if(distance >= 0){
-					remem.parentremem = searchrelativemem(relativetmp.getParent(),distance);
+					remem.parentremem = searchRelativeMem(relativetmp.getParent(),distance);
 				}
 				return remem.name;
 			}
@@ -307,16 +188,16 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	 *
 	 */
 
-	public synchronized void setgraphicmem(AbstractMembrane m, int distance){
+	public synchronized void setGraphicMem(AbstractMembrane m, int distance){
 		GraphicObj ga;
-		String mode = searchatom(m);
+		String mode = searchAtom(m);
 		if(mode == "draw"){
-			ga = getgraphicatoms(m);
+			ga = getGraphicAtoms(m);
 			if(ga == null) return;
 			
 			/**レラティブ膜のチェック*/
 			if(distance > 0){
-				ga.remem=searchrelativemem(m.getParent(), distance - 1);
+				ga.remem=searchRelativeMem(m.getParent(), distance - 1);
 			}
 			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
 			for(int i = 0; i < drawlist.size(); i++){
@@ -337,7 +218,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 				drawlist.add(ga);
 			}
 		}else if(mode == "remove"){
-			ga = getgraphicatoms(m);
+			ga = getGraphicAtoms(m);
 			if(ga == null) return;
 			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
 			for(int i = 0; i < drawlist.size(); i++){
@@ -350,10 +231,10 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			}			
 		}
 		else
-			searchrelativemem_self(m, distance);
+			searchRelativeMem_self(m, distance);
 	}
-	public synchronized void removegraphicmem(AbstractMembrane m){
-		String name = getname(m);
+	public synchronized void removeGraphicMem(AbstractMembrane m){
+		String name = getName(m);
 		for(int i = 0; i < drawlist.size(); i++){
 			GraphicObj ga2 = (GraphicObj)drawlist.get(i);
 			if(ga2==null) continue;
@@ -363,11 +244,11 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			}
 		}
 	}
-	private synchronized void paintlayout(){
+	private synchronized void paintLayout(){
 		Iterator ite = drawlist.iterator();
 		while(ite.hasNext()){
 			GraphicObj ga = (GraphicObj)ite.next();
-			ga.drawatom(OSG, relativemap);
+			ga.drawAtom(OSG, relativemap);
 		}
 		
 	}

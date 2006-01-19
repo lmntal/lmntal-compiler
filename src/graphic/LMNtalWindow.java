@@ -143,7 +143,7 @@ public class LMNtalWindow extends JFrame{
 	public synchronized boolean setGraphicMem(AbstractMembrane m, int distance){
 		if(killed) return true;
 		if(lmnPanel == null)return false;
-		lmnPanel.setgraphicmem(m, distance);
+		lmnPanel.setGraphicMem(m, distance);
 		lmnPanel.repaint();
 		return true;
 	}
@@ -151,7 +151,7 @@ public class LMNtalWindow extends JFrame{
 	public synchronized boolean removeGraphicMem(AbstractMembrane m){
 		if(killed) return true;
 		if(lmnPanel == null)return false;
-		lmnPanel.removegraphicmem(m);
+		lmnPanel.removeGraphicMem(m);
 		lmnPanel.repaint();
 		return true;
 		
