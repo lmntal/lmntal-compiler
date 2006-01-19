@@ -9,6 +9,7 @@ import java.awt.Button;
 import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -42,10 +43,17 @@ public class Test {
 //		h();
 //		i();
 //		j();
-		k();
+//		k();
+		l();
 	}
 	
-	public static void k() {
+	public static void l() throws Exception {
+		BufferedReader br0 = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader br1 = new BufferedReader(new FileReader("demo.sh"));
+		System.out.println(br0.getClass());
+		System.out.println(br1.getClass());
+	}
+	public static void k()  {
 		byte b;
 		b = (byte)255;
 		System.out.println(b&0xff);

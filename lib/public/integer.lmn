@@ -215,4 +215,24 @@ H = integer.lcm(M, N) :- int(M),int(N) | H = M*N/integer.gcd(M, N).
  */
 H = integer.factorial(N) :- N =< 1 | H = 1.
 H = integer.factorial(N) :- N >= 2 | H = N*integer.factorial(N-1).
+
+/*
+ * integer.parse : String -> int
+ * 
+ *
+ */
+H = integer.parse(S) :- string(S) | H=[:/*inline*/
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Random rand = new Random();
+	int v=0;
+	try{
+		v = Integer.parseInt(s);
+	} catch(NumberFormatException e) {
+	}
+	Atom result = mem.newAtom(new IntegerFunctor(v));
+	mem.relink(result, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](S).
+
 }.
