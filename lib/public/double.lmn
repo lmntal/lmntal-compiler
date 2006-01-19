@@ -15,7 +15,6 @@ HISTORY
 //いくつか気になること:
 //1. doubleというモジュール名は適当ではない。(floatにすべき)
 //2. 演算子があちこちで定義されている。(組み込み、integer, double)
-//3. 中置記法演算子はともかく、absはfloat.absとかのほうがいいのか?
 
 {
 
@@ -169,13 +168,13 @@ H= '!='(A,B) :- float(A),float(B) | H= [:/*inline*/
 	:](A,B).
 
 /**
- * abs(+Float, -Res):
+ * double.abs(+Float, -Res):
  *
  * 浮動小数点数Floatの絶対値をResに返します。
  * @param +Float 浮動小数点数アトム
  * @param -Res 結果
  */
-H= abs(A) :- float(A) | H= [:/*inline*/
+H= double.abs(A) :- float(A) | H= [:/*inline*/
 		double a0=
 		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
 		Atom result = mem.newAtom(new FloatingFunctor((a0 >= 0 )?a0:-a0));
