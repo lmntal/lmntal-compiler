@@ -1,6 +1,6 @@
 /**
 NAME
-	Double module
+	Float module
 
 SYNOPSIS
 
@@ -8,17 +8,16 @@ AUTHOR
 	Shintaro Kudo
 
 HISTORY
-	2004/06/04(Fri)
+
+	... 2006/01/20(Fri) < =< > >= == != + - * / abs
 
 */
 
-//いくつか気になること:
-//1. doubleというモジュール名は適当ではない。(floatにすべき)
-//2. 演算子があちこちで定義されている。(組み込み、integer, double)
+//TODO : 
 
 {
 
-module(double).
+module(float).
 
 /**
  * '>'(+Operand1, +Operand2, -Res) :
@@ -168,20 +167,22 @@ H= '!='(A,B) :- float(A),float(B) | H= [:/*inline*/
 	:](A,B).
 
 /**
- * double.abs(+Float, -Res):
+ * float.abs(+Float, -Res):
  *
  * 浮動小数点数Floatの絶対値をResに返します。
  * @param +Float 浮動小数点数アトム
  * @param -Res 結果
  */
-H= double.abs(A) :- float(A) | H= [:/*inline*/
-		double a0=
-		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
-		Atom result = mem.newAtom(new FloatingFunctor((a0 >= 0 )?a0:-a0));
-		mem.relink(result, 0, me, 1);
-		me.nthAtom(0).remove();
-		me.remove();
-	:](A).
+H=float.abs(A) :- A >=. 0.0 | H=A.
+H=float.abs(A) :- A <. 0.0 | H='-.'(A).
+//H= float.abs(A) :- float(A) | H= [:/*inline*/
+//		double a0=
+//		((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
+//		Atom result = mem.newAtom(new FloatingFunctor((a0 >= 0 )?a0:-a0));
+//		mem.relink(result, 0, me, 1);
+//		me.nthAtom(0).remove();
+//		me.remove();
+//	:](A).
 
 /**
  * '+'(+Operand1, +Operand2, -Res):
