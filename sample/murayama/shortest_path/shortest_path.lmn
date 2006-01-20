@@ -51,14 +51,7 @@ mbf({
 	started, e(V2, V1, Weight), {+(V1), w(X1, PoA), $p1}, {+(V2), w(X2, PoB), $p2}
 		:- PoA + Weight < PoB, int(X1), int(X2) |
 			started, e(V1, V2, Weight), {+(V1), w(X1, PoA), $p1}, {+(V2), w(X2, PoA+Weight), $p2}.
-%	e(V1, V2, Weight), p(X1, {+(V1), $p1}, PoA), p(X2, {+(V2), $p2}, PoB)
-%		:- PoA + Weight < PoB, int(X1), int(X2) |
-%			e(V1, V2, Weight), p(X1, {+(V1), $p1}, PoA), p(X2, {+(V2), $p2}, PoA+Weight).
-	/* 有向グラフの場合、コメントアウト */
-%	e(V2, V1, Weight), p(X1, {+(V1), $p1}, PoA), p(X2, {+(V2), $p2}, PoB)
-%		:- PoA + Weight < PoB, int(X1), int(X2) |
-%			e(V1, V2, Weight), p(X1, {+(V1), $p1}, PoA), p(X2, {+(V2), $p2}, PoA+Weight).
 }).
 
 init({$p, @p}/), shr({@q}) :- shrink({$p,@p,@q}).
-shrink({$p, @p}/), mbf({@q}) :- timer:benchmark(X,"Elapsed Time"), search({+(X),$p,@p,@q}).
+//shrink({$p, @p}/), mbf({@q}) :- timer:benchmark(X,"Elapsed Time"), search({+(X),$p,@p,@q}).
