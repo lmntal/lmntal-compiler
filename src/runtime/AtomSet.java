@@ -321,7 +321,7 @@ public final class AtomSet implements Serializable {
 			if (!checked.contains(a)) {
 				searchAtomGroup(a, checked);
 				startAtoms.add(a);
-			}
+				}
 		}
 	}
 	private void searchAtomGroup(Atom a, HashSet checked) {
@@ -391,8 +391,9 @@ public final class AtomSet implements Serializable {
 				Atom a = (Atom)l.get(i);
 				int t = a.getFunctor().hashCode();
 				for (int j = 0; j < a.getArity(); j++) {
-					hashCode += t * j * a.nthAtom(j).getFunctor().hashCode();
+					t = t * 31 + a.nthAtom(j).getFunctor().hashCode();
 				}
+				hashCode += t;
 			}
 		}
 	}
