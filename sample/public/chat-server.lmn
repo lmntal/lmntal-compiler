@@ -1,0 +1,20 @@
+/**
+ *  Distributed LMNtal sample(#3)
+ *    chat-server.lmn
+ *  client file: chat-client.lmn
+ *
+ *  06/01/14 released by okabe
+ *  06/01/17 update
+ */
+
+dlmntal.bind(50000,
+  [accept(Send1,Recv1),accept(Send2,Recv2),close]).
+
+merge(Recv1,Recv2,S).
+cp(S,Send1,Send2).
+
+% メッセージの分配に関するルール（sample/mizuno/chat3.lmn より拝借）．
+% TODO: ここはリストを用いて不特定多数人数に対応できると思う．
+O=merge([D|I1],I2) :- O=[D|merge(I1,I2)].
+O=merge(I1,[D|I2]) :- O=[D|merge(I1,I2)].
+cp([D|I],O1,O2) :- string(D) | O1=[D|OO1],O2=[D|OO2],cp(I,OO1,OO2).
