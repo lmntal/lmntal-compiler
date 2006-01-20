@@ -18,7 +18,7 @@ public class GraphDialog extends JDialog implements ActionListener{
 	
 	public GraphDialog(JFrame parent){
 		super(parent,"It's LMNtal",true);
-		setSize(400,400);
+		setSize(400,250);
 	}
 	public void initButtons(){
 		Container contentPane = getContentPane();

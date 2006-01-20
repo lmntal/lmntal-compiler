@@ -51,7 +51,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			atomgroup = (AtomGroup)it.next();
 			
 			if(!doesCutAcrossMembrane(atomgroup,m))
-			if(getFlag(10))
+			if(getFlag(6))//10))
 				atomgroup.rotateAtomGroup();
 			for (Iterator i=atomgroup.atoms.iterator();i.hasNext();) {
 				Node me = (Node)i.next();
@@ -85,7 +85,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			if(getFlag(1))
 			attractToCenter(atomgroup,m);
 			//子膜は他のアトムより下側に来る【仮】
-			if(getFlag(2))
+			if(getFlag(4))//2))
 			upForceAtomGroup(atomgroup,m,mems);
 //			//膜に含まれるアトム同士の斥力
 //			for(Iterator i1 =atomgroup.atoms.iterator();i1.hasNext();){
@@ -120,7 +120,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			if(!me.isVisible())continue;
 			//所属しない膜の範囲から出るように力をかける。
 			//膜の範囲を描画するマージンより小さく判定するためにノードの座標を外側に調整した値を使う。
-			if(getFlag(3))
+			if(getFlag(2))//3))
 			repulseAtomFromMembrane(me,mems);
 		}
 		
@@ -138,12 +138,12 @@ public class GraphLayout extends AbstractGraphLayout {
 				atomgroup2 = (AtomGroup)atoms.get(k);
 				
 				//グループが重なっていた場合に斥力をかける
-				if(getFlag(4))
+				if(getFlag(2))//4))
 				repulsiveForceBetweenAtomgroups(atomgroup1,atomgroup2);
 								
 				//個数の多いアトムグループが少ないものより上に来るように力をかける。
 				//5個以上 > 4,3個 > 2個　> 1個　　とりあえず
-				if(getFlag(5))
+				if(getFlag(3))//5))
 				sortAtomGroupBySize(atomgroup1,atomgroup2,m);
 					
 				
@@ -231,10 +231,10 @@ public class GraphLayout extends AbstractGraphLayout {
 			for(int k = 0;k < mems.length;k++){
 				mem1 = (AbstractMembrane)mems[k];
 				//子膜は他のアトムより下側に来る【仮】
-				if(getFlag(6))
+				if(getFlag(4))//6))
 				downForceMems(mem1,maxy,length);
 				//親膜の中心に向かう力をかける
-				if(getFlag(7))
+				if(getFlag(1))//7))
 				attractToCenter(mem1,m);
 			}
 
@@ -244,7 +244,7 @@ public class GraphLayout extends AbstractGraphLayout {
 				for(int l = k+1;l < mems.length;l++){
 					mem1 = (AbstractMembrane)mems[k];mem2 = (AbstractMembrane)mems[l];
 					// 膜同士で重なっているものを移動
-					if(getFlag(8))
+					if(getFlag(2))//8))
 					repulsiveForceBetweenMems(mem1,mem2);
 				}
 			}
@@ -259,7 +259,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			
 			//摩擦力をかける。かかっている力がある値より小さい場合に移動量を０にする。
 			//また力がある程度以上に大きい場合に一定の値まで小さくする。
-			if(getFlag(9))
+			if(getFlag(5))//9))
 				frictionalForce(me);
 		}
 		
@@ -1051,27 +1051,39 @@ public class GraphLayout extends AbstractGraphLayout {
 	 
 	 public void initGraphDialog(JFrame frame){
 	 	dialog = new GraphDialog(frame);
-	 	boolean flags[] = new boolean[11];
-	 	flags[0] = true;flags[1] = false;flags[2] = false;flags[3] = true;
-	 	flags[4] = true;flags[5] = false;flags[6] = false;flags[7] = false;
-	 	flags[8] = true;flags[9] = true;flags[10] = false;
+	 	int length = 7;
+	 	boolean flags[] = new boolean[length];
+	 	flags[0] = true;flags[1] = false;flags[2] = true;flags[3] = false;
+	 	flags[4] = false;flags[5] = true;flags[6] = false;
+//	 	flags[0] = true;flags[1] = false;flags[2] = false;flags[3] = true;
+//	 	flags[4] = true;flags[5] = false;flags[6] = false;flags[7] = false;
+//	 	flags[8] = true;flags[9] = true;flags[10] = false;
 	 	
-	 	String names[] = new String[11];
-	 	for(int i = 0;i<11;i++){
+	 	String names[] = new String[length];
+	 	for(int i = 0;i<length;i++){
 	 		names[i] = Integer.toString(i);
 	 	}
+	 	
 	 	names[0] = "辺の長さと角度を一定にする";
-	 	names[1] = "アトムに膜の中心へ力をかける";
-	 	names[2] = "アトムを子膜より上に配置";
-	 	names[3] = "アトムが子膜に重ならないようにする";
-	 	names[4] = "アトムのグラフ同士が重ならない";
-	 	names[5] = "アトム数の多いグラフが上に来る";
-	 	names[6] = "子膜を他のアトムより下に配置";
-	 	names[7] = "膜に親膜の中心へ力をかける";
-	 	names[8] = "膜同士が重ならないようにする";
-	 	names[9] = "摩擦力をかける";
-	 	names[10] = "水平になるように回転する";
-	 	dialog.setLength(11);
+	 	names[1] = "中心へ力をかける";
+	 	names[2] = "アトムや膜が重ならないようにする";
+	 	names[3] = "アトム数の多いグラフが上に来る";
+	 	names[4] = "膜を他のアトムより下に配置する";
+	 	names[5] = "摩擦力をかける";
+	 	names[6] = "水平になるように回転する";
+
+//	 	names[0] = "辺の長さと角度を一定にする";
+//	 	names[1] = "アトムに膜の中心へ力をかける";
+//	 	names[2] = "アトムを子膜より上に配置";
+//	 	names[3] = "アトムが子膜に重ならないようにする";
+//	 	names[4] = "アトムのグラフ同士が重ならない";
+//	 	names[5] = "アトム数の多いグラフが上に来る";
+//	 	names[6] = "子膜を他のアトムより下に配置";
+//	 	names[7] = "膜に親膜の中心へ力をかける";
+//	 	names[8] = "膜同士が重ならないようにする";
+//	 	names[9] = "摩擦力をかける";
+//	 	names[10] = "水平になるように回転する";
+	 	dialog.setLength(length);
 	 	dialog.setFlags(flags);
 	 	dialog.setNames(names);
 	 	dialog.initButtons();
