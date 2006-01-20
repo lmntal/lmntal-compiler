@@ -1,5 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	nakano ---
+%   $Author: nakano $
 %	タイピングソフト。
 %   無限ループします。
 %	
@@ -41,10 +42,13 @@ keyCode([]),waittime(_IW),now(_IN+1),itemcount([_ISEED,A|L],[],0),
 nowtime(_INOWT),oldtime(_INOWT).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%アイテムの反転
+itemrev([_IT,T|L1],L2):-itemrev(L1,[_IT,T|L2]).
+itemrev([],L):-item(L).
 %%%アイテム数を数える
 itemcount([_ISEED,A|L],L2,_ICOUNT):-_ICOUNT<20|itemcount(L,[_ISEED,A|L2],_ICOUNT+1).
 %%アイテムが一定数以下。セーフ。
-waittime(_IW),itemcount([],L2,_ICOUNT):-_ICOUNT < 20|waittime(_IW-5),item(L2),item_done.
+waittime(_IW),itemcount([],L2,_ICOUNT):-_ICOUNT < 20|waittime(_IW-5),itemrev(L2,[]),item_done.
 %%アイテムが一定数を超えた。アウト。
 score(S),
 {+S,getpic(string(_IPOINT,_IS)),position(_IPX,_IPY),+M,$p,@p},
