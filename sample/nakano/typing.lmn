@@ -1,11 +1,13 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%	nakano ---
-%   $Author: nakano $
-%	タイピングソフト。
-%   無限ループします。
-%	
-%	ライブラリgraphic、timer、string、list、integerを使用しています。
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/**
+  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+  $Author: nakano $
+
+  SYNOPSIS
+	タイピングゲーム。
+	無限ループします。
+	ライブラリgraphic、timer、string、list、integerを使用しています。
+*/
+
 graphic.use.
 go:-
 {
@@ -37,18 +39,25 @@ keyCode([]),seed(_ISEED):-keyCode([]),seed(string.int_to_str(_ISEED)),iseed(_ISE
 %key(ok),waittime(_IW),nowtime(timer:getinttime),oldtime(_IOLDT).
 %%一定時間後にアイテム生成。生成時にアイテム数を数える
 keyCode([]),waittime(_IW),now(_IN),iseed(_ISEED),seed(_SSEED),item(L),nowtime(_INOWT),oldtime(_IOLDT):- _INOWT - _IOLDT > _IW | 
-keyCode([]),waittime(_IW),now(_IN+1),itemcount([_ISEED,A|L],[],0),
+keyCode([]),waittime(_IW),now(_IN+1),itemcount([_ISEED,A|reverse(L,[])],[],0),
 {+A,draw,name(_IN),getpic(string(_SSEED,20)),position(integer.rnd(700)+50,integer.rnd(500)+50),color(255,0,0)},
 nowtime(_INOWT),oldtime(_INOWT).
 
+%%%改良案
+%list(F,L), F=[1,2,3|L]
+%list(F,L) :- list(F,L2), L=[1|L2].
+%list(F,L) :- list(rm(F),L).
+%R=rm([H|T]) :- ground(H) | R=rm(T).
+%R=rm(L), list(F,L) :- list(F,R).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%アイテムの反転
-itemrev([_IT,T|L1],L2):-itemrev(L1,[_IT,T|L2]).
-itemrev([],L):-item(L).
+H=reverse([_IT,T|L1],L2):-H=reverse(L1,[_IT,T|L2]).
+H=reverse([],L):-H=L.
 %%%アイテム数を数える
 itemcount([_ISEED,A|L],L2,_ICOUNT):-_ICOUNT<20|itemcount(L,[_ISEED,A|L2],_ICOUNT+1).
 %%アイテムが一定数以下。セーフ。
-waittime(_IW),itemcount([],L2,_ICOUNT):-_ICOUNT < 20|waittime(_IW-5),itemrev(L2,[]),item_done.
+waittime(_IW),itemcount([],L2,_ICOUNT):-_ICOUNT < 20|waittime(_IW-5),item(L2),item_done.
 %%アイテムが一定数を超えた。アウト。
 score(S),
 {+S,getpic(string(_IPOINT,_IS)),position(_IPX,_IPY),+M,$p,@p},
@@ -70,7 +79,7 @@ check(_IH,[_IS,X|L1],L2):-_IH=\=_IS|check(_IH,L1,[_IS,X|L2]).
 %%ヒット無し。アイテムインデックスを再生成
 score(S),check(_IH,[],L),{+S,getpic(string(_ISCO,_IP)),$q,@q}:-item(L),score(S),{+S,getpic(string(_ISCO-1,_IP)),$q,@q}.
 %%ヒットあり。得点を加算しアイテムインデックスを再生成
-score(S),check(_IH,[_IS,X|L1],L2),{+X,draw,$p[],@p},{+S,getpic(string(_ISCO,_IP)),$q,@q}:-_IH=_IS|score(S),item(list.append(L1,L2)),{+S,getpic(string(_ISCO+1,_IP)),$q,@q}.
+score(S),check(_IH,[_IS,X|L1],L2),{+X,draw,$p[],@p},{+S,getpic(string(_ISCO,_IP)),$q,@q}:-_IH=_IS|score(S),item(list.append(reverse(L2,[]),L1)),{+S,getpic(string(_ISCO+1,_IP)),$q,@q}.
 %key(ok),score(S),keyCode([_IH|L]),item([_IS,X|L2]),{+X,draw,$p[],@p},{+S,getpic(string(_ISCO,_IP)),$q,@q}:-_IH==_IS|key(no),score(S),keyCode(L),item(L2),{+S,getpic(string(_ISCO+1,_IP)),$q,@q}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
