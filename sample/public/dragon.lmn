@@ -1,9 +1,11 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%	nakano ---
-%	ドラゴン曲線を描画します。
-%	
-%	ライブラリgraphicを使用しています。
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/**
+  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+  $Author: Atsushi NAKANO $
+
+  SYNOPSIS
+	ドラゴン曲線を描画します。
+	ライブラリgraphicを使用しています。
+*/
 graphic.use.
 go:-{
 	window.

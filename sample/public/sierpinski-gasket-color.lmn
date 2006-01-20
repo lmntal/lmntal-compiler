@@ -1,9 +1,11 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%	nakano ---
-%	 シェルピンスキーのギャスケット色つき版
-%	
-%	ライブラリgraphicを使用しています。
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/**
+  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+  $Author: Atsushi NAKANO $
+
+  SYNOPSIS
+	シェルピンスキーのギャスケット色つき版
+	ライブラリgraphicを使用しています。
+*/
 graphic.use.
 go:-{
 window.

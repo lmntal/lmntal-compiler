@@ -1,20 +1,11 @@
-/*
-NAME
-	Option module
+/**
+  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+  $Author: Atsushi NAKANO $
 
-AUTHOR
-	Atsushi Nakano
-
-HISTORY
-	2005/12/21
-
----------------------------------
-概要
----------------------------------
-graphic=option.use.
-とやると、グラフィックモードを実行しgoアトムを生成する。
-かならず、グラフィックモードを実行されてから反応が始まってほしい場合は、goアトムを利用する。
-
+  SYNOPSIS
+	graphic=option.use.
+	とやると、グラフィックモードを実行しgoアトムを生成する。
+	かならず、グラフィックモードを実行されてから反応が始まってほしい場合は、goアトムを利用する。
 */
 [:/*inline_define*/
 	import java.awt.*;

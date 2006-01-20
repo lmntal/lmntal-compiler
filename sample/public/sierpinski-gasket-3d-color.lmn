@@ -1,9 +1,11 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%	nakano ---
-%	 シェルピンスキーのギャスケット色つき３次元版
-%	
-%	ライブラリgraphicを使用しています。
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/**
+  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+  $Author: Atsushi NAKANO $
+
+  SYNOPSIS
+	シェルピンスキーのギャスケット色つき三次元
+	ライブラリgraphicを使用しています。
+*/
 graphic.use.
 go:-{
 window,size(800,600),name("hoge"),now(0),bgcolor(255,255,255).
