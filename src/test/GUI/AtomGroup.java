@@ -9,7 +9,7 @@ import java.util.Vector;
 
 import runtime.Env;
 
-class AtomGroup {
+public class AtomGroup {
 	public  static final double margin = runtime.Env.atomSize * 1.5;
 	public Vector atoms = new Vector();
 	

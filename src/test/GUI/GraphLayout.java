@@ -3,218 +3,23 @@ package test.GUI;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Vector;
+
+import javax.swing.JFrame;
 
 import runtime.AbstractMembrane;
 import runtime.Env;
 
-public class GraphLayout implements Runnable {
+public class GraphLayout extends AbstractGraphLayout {
+	private GraphDialog dialog;
 	
-	private Vector nodes = new Vector();
-	private Thread th = null;
-	private static final int DELAY = 50;
-	private Component parent = null;
-	private Rectangle area;// = new Rectangle(25,25,400,400);
-	runtime.Membrane rootMem;
-	
-	public GraphLayout(Component parent) {
-		this.parent = parent;
-		area = parent.getBounds();
-//		System.out.println("area = "+area);
+	public GraphLayout(Component parent){
+		super(parent);
 	}
 	
-	public void setRootMem(runtime.Membrane rootMem) {
-		this.rootMem = rootMem;
-//		System.out.println("setRootMem"+rootMem);
-	}
-	
-	public Rectangle getPreferredArea() {
-		return this.area;
-	}
-	
-//	public void addNode(GraphNode node) {
-//		nodes.add(node);
-//	}
-	
-	public void removeAllNodes() {
-		nodes.removeAllElements();
-	}
-	
-	class D_N_tuple {
-		double d = Double.MAX_VALUE;
-		Node n   = null;
-	}
-	
-	/**
-	 * PROXY を除く全アトムのうち p に最も近い Node を返す。
-	 * @param p
-	 * @return Node
-	 */
-	public Node getNearestNode(Point p) {
-		D_N_tuple t = new D_N_tuple();
-		getNearestNode(p, rootMem, t);
-		return t.n;
-	}
-	
-	/**
-	 * 膜 m 内にある Node と t.n のうち p に最も近い Node を t.n に代入する。t.d にはその距離を代入する。
-	 * @param p
-	 * @param m
-	 * @param t
-	 */
-	public void getNearestNode(Point p, runtime.AbstractMembrane m, D_N_tuple t) {
-		for(Iterator i=m.atomIterator();i.hasNext();) {
-			Node n = (Node)i.next();
-			if(!n.isVisible()) continue;
-			double d = p.distance(n.getPosition().toPoint());
-			if(t.d>d) {
-				t.d = d;
-				t.n = n;
-			}
-		}
-		Object[] mems = m.getMemArray();
-		for(int i=0;i<mems.length;i++) {
-			getNearestNode(p, (AbstractMembrane)mems[i], t);
-		}
-	}
-	
-	/**
-	 * 膜に含まれるアトムをリンクでつながったまとまり毎に分ける。
-	 * リンクでつながった塊ごとにVecotrに分けられ、そのVectorを要素として持つVectorが返される。
-	 *
-	 */
-	private Vector separateAtomGroup(AbstractMembrane m){
-		Node a;
-		Vector tmpSeparated;
-		Iterator ite = m.atomIterator();
-		LinkedList atoms = new LinkedList();
-		Vector separatedAtoms = new Vector();
-		LinkedList tmpQueue = new LinkedList();
-		
-		while(ite.hasNext()){
-			atoms.add(ite.next());
-		}
-		
-		while(atoms.size() > 0){
-			a = (Node)atoms.removeFirst();
-			tmpQueue.add(a);
-			tmpSeparated = new Vector();
-			
-			while(tmpQueue.size() > 0){
-				a = (Node)tmpQueue.removeFirst();
-				//if(!a.isVisible())continue;
-				tmpSeparated.add(a);
-				
-				for(int i = 0;i < a.getEdgeCount();i++){
-					if(!tmpSeparated.contains(a.getNthNode(i))&&!tmpQueue.contains(a.getNthNode(i))){
-						tmpQueue.add(a.getNthNode(i));
-						atoms.remove(a.getNthNode(i));
-					}
-				}
-			}
-			
-			separatedAtoms.add(new AtomGroup(tmpSeparated));
-		}
-		
-		return separatedAtoms;
-		
-	}
-	
-
-	
-	public void start() {
-		if (th == null) {
-			th = new Thread(this);
-			th.start();
-		}
-	}
-	
-	public void stop() {
-		th = null;
-	}
-	
-	public void calc() {
-		setAllowRelax(true);
-		for(int i=0;i<100;i++) {
-			relax();
-		}
-		setAllowRelax(false);
-	}
-	
-	public void run() {
-		Thread me = Thread.currentThread();
-		while (th == me) {
-			relax();
-			
-			try {
-				Thread.sleep(DELAY);
-			} catch (InterruptedException e) {
-				break;
-			}
-		}
-	}
-	
-	public List removedAtomPos = Collections.synchronizedList(new LinkedList());
-	public Rectangle getAtomsBound() {
-		final int m=1;
-		Rectangle r=null;
-		if(!removedAtomPos.isEmpty()) {
-			return new Rectangle(((DoublePoint)removedAtomPos.remove(0)).toPoint());
-		}
-		r = new Rectangle((parent.getWidth() - parent.getWidth()/m)/2, (parent.getHeight() - parent.getHeight()/m)/2, parent.getWidth()/m, parent.getHeight()/m);
-//		if(rootMem.getAtomCount()==0) {
-//		} else {
-//		}
-		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
-			Node n = (Node)i.next();
-			Point p = n.getPosition().toPoint();
-//			System.out.println(r+" "+p);
-//			if(r==null) r = new Rectangle(p);
-			if(!r.contains(p)) {
-				r.add(p);
-			}
-		}
-//		int w = r.width, h = r.height;
-//		r.x += w/4;
-//		r.y += h/4;
-//		r.width -= w/2;
-//		r.height -= h/2;
-		return r;
-	}
-	
-	private volatile boolean allowRelax;
-	public synchronized void setAllowRelax(boolean v) {
-		allowRelax = v;
-	}
-	public synchronized boolean getAllowRelax() {
-		return allowRelax;
-	}
-	
-
-	/**
-	 * すべてのアトムについて力を作用させる。
-	 *
-	 */
-	protected synchronized void relax() {
-		if(!getAllowRelax()) return;
-		relax(rootMem);
-	}
-	
-	private Vector atoms;
-	
-	public Vector getAtoms(){
-		return atoms;
-	}
 	
 	/**
 	 * 膜 m にあるアトムについて力を作用させる。
@@ -228,107 +33,35 @@ public class GraphLayout implements Runnable {
 		AtomGroup atomgroup;
 		
 		//アトムグループテスト出力
-		if(!testf){
-			testf = true;
-			int testi = 0;
-			for(Iterator it = atoms.iterator();it.hasNext();testi++){
-				atomgroup = (AtomGroup)it.next();
-				System.out.print("Group"+(testi+1)+":");
-				for(Iterator it2 = atomgroup.atoms.iterator();it2.hasNext();){
-					System.out.print(((Node)it2.next()).getName()+":");
-				}
-				System.out.println("\n");
-			}
-		}
-		
+//		if(!testf){
+//			testf = true;
+//			int testi = 0;
+//			for(Iterator it = atoms.iterator();it.hasNext();testi++){
+//				atomgroup = (AtomGroup)it.next();
+//				System.out.print("Group"+(testi+1)+":");
+//				for(Iterator it2 = atomgroup.atoms.iterator();it2.hasNext();){
+//					System.out.print(((Node)it2.next()).getName()+":");
+//				}
+//				System.out.println("\n");
+//			}
+//		}
+//		
 		//アトムグループを一つずつ取り出し、含まれるアトムに処理を行う。
 		for(Iterator it = atoms.iterator();it.hasNext();){
 			atomgroup = (AtomGroup)it.next();
 			
 			if(!doesCutAcrossMembrane(atomgroup,m))
-			atomgroup.rotateAtomGroup();
+			if(getFlag(10))
+				atomgroup.rotateAtomGroup();
 			for (Iterator i=atomgroup.atoms.iterator();i.hasNext();) {
 				Node me = (Node)i.next();
 				if(!me.isVisible()) continue;
-				double dx = 0;
-				double dy = 0;
 				
-	//			System.out.println(i+" "+me.getName());
-				
-				// angle でソート
-				Edge ie[] = new Edge[me.getEdgeCount()];
-	//			System.out.println("arround "+me+"  "+me.getEdgeCount());
-				for(int j=0;j<ie.length;j++) {
-					ie[j]=new Edge(me, me.getNthNode(j));
-	//				System.out.println(ie[j]);
-				}
-				Arrays.sort(ie);
-				
-				for (int j=0;j<ie.length;j++) {
-					Edge edge = ie[j];
-					
-					// デフォルトの長さに伸縮する
-					if(me.hashCode() < edge.to.hashCode()){
-						double l = edge.getLen();
-						double f = (l - edge.getStdLen());// / (edge.getStdLen() * 1);
-						//膜を超える辺の場合力を弱くする。
-						if(((runtime.Atom)edge.from).getMem() != ((runtime.Atom)edge.to).getMem()){
-							l = l * 1.5;
-							f = f/10;
-						}
-						// TODO 0.5のところを、1/arity[の最大値] にすると振動しない。
-						//                      1/(2 * arity[の最大値])だとなおよい。
-						// [の最大値]を消してもよい。
-						// その場合、アリティがアトムの質量のようなものとして計算される
-						double ddx = 0.05 * f * edge.getVx()/l;
-						double ddy = 0.05 * f * edge.getVy()/l;
-						
-						edge.from.setMoveDelta(ddx, ddy);
-						edge.to.setMoveDelta(-ddx, -ddy);
-					}
-					
-					if(me.getEdgeCount()<=1) continue;
-					
-					// cur.to にかかる力を計算する
-					{
-						Edge cur = ie[j];
-		//				System.out.println(cur);
-						Node you = cur.to;
-						
-						Edge prev = ie[(j-1+ie.length)%ie.length];
-						Edge next = ie[(j+1)%ie.length];
-		//				System.out.println("  p : "+ prev);
-		//				System.out.println("  n : "+ next);
-						
-						// 次の辺との角度
-						double a_p = regulate(cur.getAngle() - prev.getAngle());
-						// 前の辺との角度
-						double a_n = regulate(next.getAngle() - cur.getAngle());
-						double a_r = a_n-a_p;
-		//				System.out.println("  a_p : "+ a_p*180/Math.PI);
-		//				System.out.println("  a_n : "+ a_n*180/Math.PI);
-		//				System.out.println("   a_r : "+ a_r*180/Math.PI);
-						
-						double l = cur.getLen();
-						
-						// 時計周りを正にした、動かす対象と自分を結ぶ線分に垂直で長さ１のベクトル
-						// これが you に働く力の単位ベクトルになる
-						double tx = -cur.getVy() / l;
-						double ty =  cur.getVx() / l;
-		//				System.out.println("   tx : "+ tx);
-		//				System.out.println("   ty : "+ ty);
-						
-						// move = t times diff
-						dx = 1.5 * tx * a_r;
-						dy = 1.5 * ty * a_r;
-						
-						me.setMoveDelta(-dx,-dy);
-						you.setMoveDelta(dx,dy);
-					}
-				
-				}
-				
+				//辺の長さと角度を一定にする。
+				if(getFlag(0))
+				calculateEdge(me);
 
+				
 				//膜の中心に力をかける
 				//アトムグループごとに変更
 				/*double d;
@@ -348,6 +81,12 @@ public class GraphLayout implements Runnable {
 				me.setMoveDelta(-dx,-dy);*/
 			}
 			
+			//膜の中心へ力をかける
+			if(getFlag(1))
+			attractToCenter(atomgroup,m);
+			//子膜は他のアトムより下側に来る【仮】
+			if(getFlag(2))
+			upForceAtomGroup(atomgroup,m,mems);
 //			//膜に含まれるアトム同士の斥力
 //			for(Iterator i1 =atomgroup.atoms.iterator();i1.hasNext();){
 //				double teisuu = 2;
@@ -370,67 +109,6 @@ public class GraphLayout implements Runnable {
 //				}				
 //					
 //			}
-			//膜の中心へ力をかける
-			Label1:
-			{
-				Node n;
-				double d;
-				double dx = atomgroup.getCenterPos().x;
-				double dy = atomgroup.getCenterPos().y;
-				
-				//グループが子膜に含まれるアトムを含む場合処理しない
-				if(doesCutAcrossMembrane(atomgroup,m))break Label1;
-				
-				if(m == rootMem){
-					dx -= 400;dy -= 300;
-					//dx -= area.getCenterX();dy -= area.getCenterY();
-				} else {
-					dx -= m.rect.getCenterX();dy -= m.rect.getCenterY();
-				}
-				d = Math.sqrt(dx*dx + dy*dy);
-				
-				//既に中心にいるときは力をかけない
-				if(d >= 10){
-					dx = 1.0*dx/d;
-					dy = 1.0*dy/d;
-				} else {
-					dx = 0;
-					dy = 0;
-				}
-				for(Iterator i1 = atomgroup.atoms.iterator();i1.hasNext();){
-					n = (Node)i1.next();
-					n.setMoveDelta(-dx,-dy);
-				}
-
-			}
-			
-			//子膜は他のアトムより下側に来る【仮】
-			Label2:
-			{
-				double length =  AtomGroup.margin * 1.5;
-				double miny = 0,dx = 0,dy = 0;
-				if(mems.length == 0){
-					break Label2;
-				} else {
-					miny = ((AbstractMembrane)mems[0]).rect.getMinY();
-				}
-				for(int i = 1;i < mems.length;i++){
-					if(miny >((AbstractMembrane)mems[i]).rect.getMinY()){
-						miny = ((AbstractMembrane)mems[i]).rect.getMinY();
-					}
-				}
-				
-				if(doesCutAcrossMembrane(atomgroup,m))break Label2;
-				
-				if(atomgroup.getMaxPos().y  > miny - AtomGroup.margin - length){
-					dy += force(miny,atomgroup.getMaxPos().y);
-				}
-	
-				setMoveDelta(atomgroup,dx,-dy);
-			}
-
-			
-			
 		}
 		
 		
@@ -442,28 +120,8 @@ public class GraphLayout implements Runnable {
 			if(!me.isVisible())continue;
 			//所属しない膜の範囲から出るように力をかける。
 			//膜の範囲を描画するマージンより小さく判定するためにノードの座標を外側に調整した値を使う。
-			for(int j = 0;j < mems.length;j++){
-				if(!((AbstractMembrane)mems[j]).rect.isEmpty()&&
-					((AbstractMembrane)mems[j]).rect.contains(me.getPosition().x,me.getPosition().y)){
-					double d,dx,dy,f;
-					
-					DoublePoint pos = me.getPosition();
-					dx = pos.x;dy = pos.y;
-					pos = new DoublePoint(((AbstractMembrane)mems[j]).rect.getCenterX(),((AbstractMembrane)mems[j]).rect.getCenterY());
-					dx -= pos.x;dy -= pos.y;
-					d = Math.sqrt(dx*dx + dy*dy);
-					f = repulsiveForce(me,(AbstractMembrane)mems[j]);
-					if(d >= 3){
-						dx = f*dx/d;
-						dy = f*dy/d;
-					} else {
-						dx = f/2;
-						dy = f/2;
-					}
-					
-					me.setMoveDelta(dx,dy);
-				}
-			}
+			if(getFlag(3))
+			repulseAtomFromMembrane(me,mems);
 		}
 		
 		
@@ -473,40 +131,21 @@ public class GraphLayout implements Runnable {
 		 * 
 		 * 膜 m に含まれるアトムグループの全ての一対一の組合わせに対して処理をするループ。
 		 */
+		AtomGroup atomgroup1,atomgroup2;
 		for(int j = 0;j < atoms.size()-1;j++){
 			for(int k = j+1;k < atoms.size();k++){
+				atomgroup1 = (AtomGroup)atoms.get(j);
+				atomgroup2 = (AtomGroup)atoms.get(k);
+				
 				//グループが重なっていた場合に斥力をかける
-				
-				if(((AtomGroup)atoms.get(j)).doesOverLap((AtomGroup)atoms.get(k))){
-					double dx,dy,d,f;
-					Node n;
+				if(getFlag(4))
+				repulsiveForceBetweenAtomgroups(atomgroup1,atomgroup2);
+								
+				//個数の多いアトムグループが少ないものより上に来るように力をかける。
+				//5個以上 > 4,3個 > 2個　> 1個　　とりあえず
+				if(getFlag(5))
+				sortAtomGroupBySize(atomgroup1,atomgroup2,m);
 					
-					f = ((AtomGroup)atoms.get(j)).repulsiveForce((AtomGroup)atoms.get(k));
-					DoublePoint pos = ((AtomGroup)atoms.get(j)).getCenterPos();
-					dx = pos.x;dy = pos.y;
-					pos = ((AtomGroup)atoms.get(k)).getCenterPos();
-					dx -= pos.x;dy -= pos.y;
-					d = Math.sqrt(dx*dx + dy*dy);
-					
-					if(d >= 3){
-						dx = f*dx/d;
-						dy = f*dy/d;
-					} else {
-						dx = f/2;
-						dy = f/2;
-					}
-					
-					for(Iterator i1 = ((AtomGroup)atoms.get(j)).atoms.iterator();i1.hasNext();){
-						n = (Node)i1.next();
-						n.setMoveDelta(dx,dy);
-					}
-					
-					for(Iterator i1 = ((AtomGroup)atoms.get(k)).atoms.iterator();i1.hasNext();){
-						n = (Node)i1.next();
-						n.setMoveDelta(-1*dx,-1*dy);
-					}
-				}
-				
 				
 				//同じ個数のグループ同士で引き付けあう力を加える。
 				/*
@@ -532,73 +171,6 @@ public class GraphLayout implements Runnable {
 						n.setMoveDelta(dx,dy);
 					}	
 				}*/
-				
-				//個数の多いアトムグループが少ないものより上に来るように力をかける。
-				//5個以上 > 4,3個 > 2個　> 1個　　とりあえず
-				Label1:
-				{
-					boolean fl1 = false;boolean fl2 = false;
-					double dx,dy,f1,f2,l,d,margin;
-					int s1,s2;
-					
-					Node n;
-					dx = 0;dy = 0;l = 30;margin = 0;
-					f1 = 1.6;f2 = 6.0;
-					s1 = ((AtomGroup)atoms.get(j)).atoms.size();
-					s2 = ((AtomGroup)atoms.get(k)).atoms.size();
-					
-					//どちらかのグループが子膜を超えるリンクを含むときは処理しない。
-					if(doesCutAcrossMembrane((AtomGroup)atoms.get(j),m) || doesCutAcrossMembrane((AtomGroup)atoms.get(k),m))
-						break Label1;
-					
-					if(s1 == 1){
-						if(s2 != 1){
-							fl2 = true;
-						}
-					} else if(s1 == 2){
-						if(s2 == 1){
-							fl1 = true;
-						} else if(s2 > 2){
-							fl2 = true;
-						}
-					} else if(s1 <= 4){
-						if(s2 <= 2){
-							fl1 = true;
-						} else if(s2 > 4){
-							fl2 = true;
-						}
-					} else if(s1 >= 5){
-						if(s2 < 5){
-							fl1 = true;
-						}
-					}
-					if(fl1){
-						if(((AtomGroup)atoms.get(j)).getMaxPos().y + l  > ((AtomGroup)atoms.get(k)).getMinPos().y){
-							d = ((AtomGroup)atoms.get(j)).getMaxPos().y - ((AtomGroup)atoms.get(k)).getMinPos().y;
-							d = f1 - (d+ margin*15)/15;
-							if(d <= 0)dy = -1 * f2;
-							else dy =  -1 * f1 / d;
-						}
-					} else 	if(fl2){
-						if(((AtomGroup)atoms.get(k)).getMaxPos().y  + l > ((AtomGroup)atoms.get(j)).getMinPos().y){
-							d = ((AtomGroup)atoms.get(k)).getMaxPos().y - ((AtomGroup)atoms.get(j)).getMinPos().y;
-							d = f1 - (d + margin*15)/15;
-							if(d <= 0)dy = f2;
-							else dy =  f1 / d;
-						}
-					}
-					if(dy != 0){
-							for(Iterator i1 = ((AtomGroup)atoms.get(j)).atoms.iterator();i1.hasNext();){
-								n = (Node)i1.next();
-								n.setMoveDelta(dx,dy);
-							}
-							for(Iterator i1 = ((AtomGroup)atoms.get(k)).atoms.iterator();i1.hasNext();){
-								n = (Node)i1.next();
-								n.setMoveDelta(-dx,-dy);
-							}	
-					}
-				}
-					
 				
 			}
 
@@ -630,17 +202,14 @@ public class GraphLayout implements Runnable {
 		
 		//子膜の処理
 		{
-			double d,dx,dy;
-			double length,f,f1,f2;
+			double length;
 			double maxy;
 			double margin = Env.atomSize;
 			double mx,my;
 			AbstractMembrane mem1,mem2;
 			
-			//子膜一つずつへの処理
-			dx = 0;dy = 0;
 			length = margin * 1.5;
-			f1 = 1.6;f2 = 6.0;
+
 
 			AtomGroup atomgorup;
 			
@@ -658,106 +227,42 @@ public class GraphLayout implements Runnable {
 			maxy += margin;
 
 			
+			//子膜一つずつへの処理
 			for(int k = 0;k < mems.length;k++){
 				mem1 = (AbstractMembrane)mems[k];
-				dx = 0;dy = 0;
-				
 				//子膜は他のアトムより下側に来る【仮】
-				if(mem1.rect.getMinY()  < maxy + AtomGroup.margin + length){
-					dy += force(mem1.rect.getMinY(),maxy);
-//					d = mem1.rect.getMinY() - maxy;
-//					d = f1 + d/15;
-//					if(d <= 0){
-//						dy += f2;
-//					} else {
-//						f = f1 / d;
-//						if(f < f2){
-//							dy += f;
-//						} else {
-//							dy += f2;
-//						}
-//					}
-				}
+				if(getFlag(6))
+				downForceMems(mem1,maxy,length);
 				//親膜の中心に向かう力をかける
-				mx = mem1.rect.getCenterX();
-				my = mem1.rect.getCenterY();
-				
-				if(m == rootMem){
-					mx -= 400;my -= 300;
-					//mx -= area.getCenterX();my -= area.getCenterY();
-				} else {
-					mx -= m.rect.getCenterX();my -= m.rect.getCenterY();
-				}
-				d = Math.sqrt(mx*mx + my*my);
-				
-				//既に中心にいるときは力をかけない
-				if(d >= 10){
-					dx -= 1.0*mx/d;
-					dy -= 1.0*my/d;
-				}
-	
-				setMoveDelta(mem1,dx,dy);
+				if(getFlag(7))
+				attractToCenter(mem1,m);
 			}
 
 			
 			//子膜同士の処理
-			// 膜同士で重なっているものを移動
-			dx = 0;dy = 0;
 			for(int k =0;k < mems.length - 1;k++){
 				for(int l = k+1;l < mems.length;l++){
-					dx = 0;dy = 0;
 					mem1 = (AbstractMembrane)mems[k];mem2 = (AbstractMembrane)mems[l];
-					
-					f = repulsiveForce(mem1,mem2);
-					mx = mem1.rect.getCenterX();my = mem1.rect.getCenterY();
-					mx -= mem2.rect.getCenterX();my -= mem2.rect.getCenterY();
-					d = Math.sqrt(mx*mx + my*my);
-					if(d >= 1){
-						dx += f*mx/d;
-						dy += f*my/d;
-					} else {
-						dx += f/2;
-						dy += f/2;
-					}
-
-					setMoveDelta(mem1,dx,dy);
-					setMoveDelta(mem2,-dx,-dy);
+					// 膜同士で重なっているものを移動
+					if(getFlag(8))
+					repulsiveForceBetweenMems(mem1,mem2);
 				}
 			}
 			
 			
 		}
 	
-		//摩擦力をかける。かかっている力がある値より小さい場合に移動量を０にする。
-		//また力がある程度以上に大きい場合に一定の値まで小さくする。
+		//摩擦力などの処理を膜 m のなかの全てのアトムに行う。
 		for (Iterator i = m.atomIterator();i.hasNext();){
-			double masaturyoku = 0.9;
-			double maxpower = 10;
-			double tempd;
 			Node me = (Node)i.next();
 			if(!me.isVisible()) continue;
-			if(me==((LMNGraphPanel)parent).movingNode) continue;
-			DoublePoint p = me.getMoveDelta();
-			tempd = Math.sqrt(p.x*p.x + p.y*p.y);
-			if(tempd < masaturyoku){
-				me.initMoveDelta();
-//			}
-			}else if(tempd > maxpower){
-				me.initMoveDelta();
-//				System.out.println("maxpowerrrrr");
-//				System.out.println("p.x "+p.x+":p.y "+p.y);
-//				System.out.println("x*m/t "+ (p.x*(maxpower/tempd)) + ":y*m/t "+ (p.y*(maxpower/tempd)));
-//				System.out.println("tempd "+ tempd + ":d2 " + (Math.sqrt(p.x*(maxpower/tempd)*p.x*(maxpower/tempd) + p.y*(maxpower/tempd)*p.y*(maxpower/tempd))) );
-				me.setMoveDelta(p.x*(maxpower/tempd),p.y*(maxpower/tempd));
-			}else {
-//				System.out.println("notmaxpowerrrrr");
-//				System.out.println("tempd "+ tempd);
-			//	me.setMoveDelta(p.x*(maxpower/tempd),p.y*(maxpower/tempd));
-				
-				
-			}
 			
+			//摩擦力をかける。かかっている力がある値より小さい場合に移動量を０にする。
+			//また力がある程度以上に大きい場合に一定の値まで小さくする。
+			if(getFlag(9))
+				frictionalForce(me);
 		}
+		
 		// 実際に移動する
 		for (Iterator i=m.atomIterator();i.hasNext();) {
 			Node me = (Node)i.next();
@@ -1192,5 +697,390 @@ public class GraphLayout implements Runnable {
 			g.drawRoundRect((int)m.rect.x, (int)m.rect.y, (int)m.rect.width, (int)m.rect.height, ROUND, ROUND);
 		}
 	}
+	
+	
+	
+	//ここから力の計算メソッド
+	/**
+	 * 辺の長さと角度を調整する。
+	 */
+	public void calculateEdge(Node me){
+		double dx = 0;
+		double dy = 0;
+		
+//			System.out.println(i+" "+me.getName());
+		
+		// angle でソート
+		Edge ie[] = new Edge[me.getEdgeCount()];
+//			System.out.println("arround "+me+"  "+me.getEdgeCount());
+		for(int j=0;j<ie.length;j++) {
+			ie[j]=new Edge(me, me.getNthNode(j));
+//				System.out.println(ie[j]);
+		}
+		Arrays.sort(ie);
+		
+		for (int j=0;j<ie.length;j++) {
+			Edge edge = ie[j];
+			
+			// デフォルトの長さに伸縮する
+			if(me.hashCode() < edge.to.hashCode()){
+				double l = edge.getLen();
+				double f = (l - edge.getStdLen());// / (edge.getStdLen() * 1);
+				//膜を超える辺の場合力を弱くする。
+				if(((runtime.Atom)edge.from).getMem() != ((runtime.Atom)edge.to).getMem()){
+					l = l * 1.5;
+					f = f/10;
+				}
+				// TODO 0.5のところを、1/arity[の最大値] にすると振動しない。
+				//                      1/(2 * arity[の最大値])だとなおよい。
+				// [の最大値]を消してもよい。
+				// その場合、アリティがアトムの質量のようなものとして計算される
+				double ddx = 0.05 * f * edge.getVx()/l;
+				double ddy = 0.05 * f * edge.getVy()/l;
+				
+				edge.from.setMoveDelta(ddx, ddy);
+				edge.to.setMoveDelta(-ddx, -ddy);
+			}
+			
+			if(me.getEdgeCount()<=1) continue;
+			
+			// cur.to にかかる力を計算する
+			{
+				Edge cur = ie[j];
+//				System.out.println(cur);
+				Node you = cur.to;
+				
+				Edge prev = ie[(j-1+ie.length)%ie.length];
+				Edge next = ie[(j+1)%ie.length];
+//				System.out.println("  p : "+ prev);
+//				System.out.println("  n : "+ next);
+				
+				// 次の辺との角度
+				double a_p = regulate(cur.getAngle() - prev.getAngle());
+				// 前の辺との角度
+				double a_n = regulate(next.getAngle() - cur.getAngle());
+				double a_r = a_n-a_p;
+//				System.out.println("  a_p : "+ a_p*180/Math.PI);
+//				System.out.println("  a_n : "+ a_n*180/Math.PI);
+//				System.out.println("   a_r : "+ a_r*180/Math.PI);
+				
+				double l = cur.getLen();
+				
+				// 時計周りを正にした、動かす対象と自分を結ぶ線分に垂直で長さ１のベクトル
+				// これが you に働く力の単位ベクトルになる
+				double tx = -cur.getVy() / l;
+				double ty =  cur.getVx() / l;
+//				System.out.println("   tx : "+ tx);
+//				System.out.println("   ty : "+ ty);
+				
+				// move = t times diff
+				dx = 1.5 * tx * a_r;
+				dy = 1.5 * ty * a_r;
+				
+				me.setMoveDelta(-dx,-dy);
+				you.setMoveDelta(dx,dy);
+			}
+		
+		}
+	}
+	
+	/**
+	 * アトムグループに膜の中心に向かう力をかける。
+	 */
+	public void attractToCenter(AtomGroup atomgroup,AbstractMembrane m){
+		Node n;
+		double d;
+		double dx = atomgroup.getCenterPos().x;
+		double dy = atomgroup.getCenterPos().y;
+		
+		//グループが子膜に含まれるアトムを含む場合処理しない
+		if(doesCutAcrossMembrane(atomgroup,m))return;
+		
+		if(m == rootMem){
+			dx -= 400;dy -= 300;
+			//dx -= area.getCenterX();dy -= area.getCenterY();
+		} else {
+			dx -= m.rect.getCenterX();dy -= m.rect.getCenterY();
+		}
+		d = Math.sqrt(dx*dx + dy*dy);
+		
+		//既に中心にいるときは力をかけない
+		if(d >= 10){
+			dx = 1.0*dx/d;
+			dy = 1.0*dy/d;
+		} else {
+			dx = 0;
+			dy = 0;
+		}
+		setMoveDelta(atomgroup,-dx,-dy);
+	}
+	
+	public void attractToCenter(AbstractMembrane mem,AbstractMembrane m){
+		double mx,my,d,dx,dy;
+		dx = 0;dy = 0;
+		mx = mem.rect.getCenterX();
+		my = mem.rect.getCenterY();
+		
+		if(m == rootMem){
+			mx -= 400;my -= 300;
+			//mx -= area.getCenterX();my -= area.getCenterY();
+		} else {
+			mx -= m.rect.getCenterX();my -= m.rect.getCenterY();
+		}
+		d = Math.sqrt(mx*mx + my*my);
+		
+		//既に中心にいるときは力をかけない
+		if(d >= 10){
+			dx -= 1.0*mx/d;
+			dy -= 1.0*my/d;
+		}
+
+		setMoveDelta(mem,dx,dy);
+	}
+	/**
+	 * アトムグループに子膜より上に来るように力をかける。
+	 */
+	public void upForceAtomGroup(AtomGroup atomgroup,AbstractMembrane m,Object[] mems){
+		double length =  AtomGroup.margin * 1.5;
+		double miny = 0,dx = 0,dy = 0;
+		if(mems.length == 0){
+			return;
+		} else {
+			miny = ((AbstractMembrane)mems[0]).rect.getMinY();
+		}
+		for(int i = 1;i < mems.length;i++){
+			if(miny >((AbstractMembrane)mems[i]).rect.getMinY()){
+				miny = ((AbstractMembrane)mems[i]).rect.getMinY();
+			}
+		}
+		
+		if(doesCutAcrossMembrane(atomgroup,m))return;
+		
+		if(atomgroup.getMaxPos().y  > miny - AtomGroup.margin - length){
+			dy += force(miny,atomgroup.getMaxPos().y);
+		}
+
+		setMoveDelta(atomgroup,dx,-dy);
+	}
+	
+	/**
+	 *膜 m に含まれるアトムを子膜の外にはじく 
+	 */
+	public void repulseAtomFromMembrane(Node me,Object[] mems){
+		for(int j = 0;j < mems.length;j++){
+			if(!((AbstractMembrane)mems[j]).rect.isEmpty()&&
+				((AbstractMembrane)mems[j]).rect.contains(me.getPosition().x,me.getPosition().y)){
+				double d,dx,dy,f;
+				
+				DoublePoint pos = me.getPosition();
+				dx = pos.x;dy = pos.y;
+				pos = new DoublePoint(((AbstractMembrane)mems[j]).rect.getCenterX(),((AbstractMembrane)mems[j]).rect.getCenterY());
+				dx -= pos.x;dy -= pos.y;
+				d = Math.sqrt(dx*dx + dy*dy);
+				f = repulsiveForce(me,(AbstractMembrane)mems[j]);
+				if(d >= 3){
+					dx = f*dx/d;
+					dy = f*dy/d;
+				} else {
+					dx = f/2;
+					dy = f/2;
+				}
+				
+				me.setMoveDelta(dx,dy);
+			}
+		}
+	}
+	
+	/**
+	 * アトムグループ同士が重なっている場合に斥力をかける。
+	 * @param atomgroup1
+	 * @param atomgroup2
+	 */
+	public void repulsiveForceBetweenAtomgroups(AtomGroup atomgroup1,AtomGroup atomgroup2){
+		if(atomgroup1.doesOverLap(atomgroup2)){
+			double dx,dy,d,f;
+			Node n;
+			
+			f = atomgroup1.repulsiveForce(atomgroup2);
+			DoublePoint pos = atomgroup1.getCenterPos();
+			dx = pos.x;dy = pos.y;
+			pos = atomgroup2.getCenterPos();
+			dx -= pos.x;dy -= pos.y;
+			d = Math.sqrt(dx*dx + dy*dy);
+			
+			if(d >= 3){
+				dx = f*dx/d;
+				dy = f*dy/d;
+			} else {
+				dx = f/2;
+				dy = f/2;
+			}
+			
+			setMoveDelta(atomgroup1,dx,dy);
+			setMoveDelta(atomgroup2,-dx,-dy);
+
+		}
+	}
+	
+	/**
+	 * 子膜同士が重なっている場合に斥力をかける。
+	 */
+	public void repulsiveForceBetweenMems(AbstractMembrane mem1,AbstractMembrane mem2){
+		double f,mx,my,dx,dy,d;
+		dx = 0;dy = 0;
+		
+		f = repulsiveForce(mem1,mem2);
+		mx = mem1.rect.getCenterX();my = mem1.rect.getCenterY();
+		mx -= mem2.rect.getCenterX();my -= mem2.rect.getCenterY();
+		d = Math.sqrt(mx*mx + my*my);
+		if(d >= 1){
+			dx += f*mx/d;
+			dy += f*my/d;
+		} else {
+			dx += f/2;
+			dy += f/2;
+		}
+
+		setMoveDelta(mem1,dx,dy);
+		setMoveDelta(mem2,-dx,-dy);
+	}
+	/**
+	 * 個数の多いアトムグループが上になるように力をかける。
+	 */
+	public void sortAtomGroupBySize(AtomGroup atomgroup1,AtomGroup atomgroup2,AbstractMembrane m){
+
+		boolean fl1 = false;boolean fl2 = false;
+		double dx,dy,f1,f2,l,d,margin;
+		int s1,s2;
+		
+		Node n;
+		dx = 0;dy = 0;l = 30;margin = 0;
+		f1 = 1.6;f2 = 6.0;
+		s1 = atomgroup1.atoms.size();
+		s2 = atomgroup2.atoms.size();
+		
+		//どちらかのグループが子膜を超えるリンクを含むときは処理しない。
+		if(doesCutAcrossMembrane(atomgroup1,m) || doesCutAcrossMembrane(atomgroup2,m))
+			return;
+		
+		if(s1 == 1){
+			if(s2 != 1){
+				fl2 = true;
+			}
+		} else if(s1 == 2){
+			if(s2 == 1){
+				fl1 = true;
+			} else if(s2 > 2){
+				fl2 = true;
+			}
+		} else if(s1 <= 4){
+			if(s2 <= 2){
+				fl1 = true;
+			} else if(s2 > 4){
+				fl2 = true;
+			}
+		} else if(s1 >= 5){
+			if(s2 < 5){
+				fl1 = true;
+			}
+		}
+		if(fl1){
+			if(atomgroup1.getMaxPos().y + l  > atomgroup2.getMinPos().y){
+				d = atomgroup1.getMaxPos().y - atomgroup2.getMinPos().y;
+				d = f1 - (d+ margin*15)/15;
+				if(d <= 0)dy = -1 * f2;
+				else dy =  -1 * f1 / d;
+			}
+		} else 	if(fl2){
+			if(atomgroup2.getMaxPos().y  + l > atomgroup1.getMinPos().y){
+				d = atomgroup2.getMaxPos().y - atomgroup1.getMinPos().y;
+				d = f1 - (d + margin*15)/15;
+				if(d <= 0)dy = f2;
+				else dy =  f1 / d;
+			}
+		}
+		
+		if(dy != 0){
+			setMoveDelta(atomgroup1,dx,dy);
+			setMoveDelta(atomgroup2,-dx,-dy);
+			}
+		
+	}
+	
+	/**
+	 * 子膜に指定したY座標より下側に来るように力をかける。
+	 */
+	public void downForceMems(AbstractMembrane mem,double maxy,double length){
+		double dy = 0;
+		if(mem.rect.getMinY()  < maxy + AtomGroup.margin + length){
+			dy += force(mem.rect.getMinY(),maxy);
+		}
+		setMoveDelta(mem,0,dy);
+	}
+	
+	/**
+	 * 摩擦力をかける。
+	 * 一定より弱い力を0にし、一定より強い力を小さくする。
+	 */
+	 public void frictionalForce(Node me){
+		double masaturyoku = 0.9;
+		double maxpower = 10;
+		double tempd;
+
+		if(me==((LMNGraphPanel)parent).movingNode) return;
+		DoublePoint p = me.getMoveDelta();
+		tempd = Math.sqrt(p.x*p.x + p.y*p.y);
+		if(tempd < masaturyoku){
+			me.initMoveDelta();
+//		}
+		}else if(tempd > maxpower){
+			me.initMoveDelta();
+//			System.out.println("maxpowerrrrr");
+//			System.out.println("p.x "+p.x+":p.y "+p.y);
+//			System.out.println("x*m/t "+ (p.x*(maxpower/tempd)) + ":y*m/t "+ (p.y*(maxpower/tempd)));
+//			System.out.println("tempd "+ tempd + ":d2 " + (Math.sqrt(p.x*(maxpower/tempd)*p.x*(maxpower/tempd) + p.y*(maxpower/tempd)*p.y*(maxpower/tempd))) );
+			me.setMoveDelta(p.x*(maxpower/tempd),p.y*(maxpower/tempd));
+		}else {
+//			System.out.println("notmaxpowerrrrr");
+//			System.out.println("tempd "+ tempd);
+		//	me.setMoveDelta(p.x*(maxpower/tempd),p.y*(maxpower/tempd));
+			
+			
+		}
+	 }
+	 
+	 public void initGraphDialog(JFrame frame){
+	 	dialog = new GraphDialog(frame);
+	 	boolean flags[] = new boolean[11];
+	 	flags[0] = true;flags[1] = false;flags[2] = false;flags[3] = true;
+	 	flags[4] = true;flags[5] = false;flags[6] = false;flags[7] = false;
+	 	flags[8] = true;flags[9] = true;flags[10] = false;
+	 	
+	 	String names[] = new String[11];
+	 	for(int i = 0;i<11;i++){
+	 		names[i] = Integer.toString(i);
+	 	}
+	 	names[0] = "辺の長さと角度を一定にする";
+	 	names[1] = "アトムに膜の中心へ力をかける";
+	 	names[2] = "アトムを子膜より上に配置";
+	 	names[3] = "アトムが子膜に重ならないようにする";
+	 	names[4] = "アトムのグラフ同士が重ならない";
+	 	names[5] = "アトム数の多いグラフが上に来る";
+	 	names[6] = "子膜を他のアトムより下に配置";
+	 	names[7] = "膜に親膜の中心へ力をかける";
+	 	names[8] = "膜同士が重ならないようにする";
+	 	names[9] = "摩擦力をかける";
+	 	names[10] = "水平になるように回転する";
+	 	dialog.setLength(11);
+	 	dialog.setFlags(flags);
+	 	dialog.setNames(names);
+	 	dialog.initButtons();
+	 }
+	 public void showGraphDialog(){
+	 	dialog.setVisible(true);
+	 }
+	 private boolean getFlag(int i){
+	 	return dialog.flags[i];
+	 }
 }
 

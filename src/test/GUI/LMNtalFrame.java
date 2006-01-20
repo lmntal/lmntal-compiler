@@ -67,6 +67,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	protected void initComponents() {
 		lmnPanel = new LMNGraphPanel(this);
+		lmnPanel.getGraphLayout().initGraphDialog(this);
 		JButton bt;
 //		try {
 //			;
