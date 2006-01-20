@@ -488,7 +488,7 @@ public class Task extends AbstractTask implements Runnable {
 				mem.drop();
 				mem.free();
 			}
-			System.out.println(idMap.size() + "/" + st.size() + "/" + max_w);
+//			System.out.println(idMap.size() + "/" + st.size() + "/" + max_w);
 		}
 		System.out.println("state count is " + i + ", unique count is " + nextId);
 		System.out.println("average width is " + (i / t) + ", max width is " + max_w);
