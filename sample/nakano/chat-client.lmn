@@ -15,9 +15,9 @@ graphic.use.
 go:-{  window.  size(300,600). name(hoge).
 io.use.
 
-dlmntal.connect("127.0.0.1",50000,io.list_of_stdin_async,Out).
+dlmntal.connect("127.0.0.1",50000,[],Out).
 r=print(out(Out)).
-%keyChar.
+keyChar.
 now(0).
 index(0,A),  {+A. draw.  name(0).  getpic(string("",20)).  position(10,30). }.
 index(1,B),  {+B. draw.  name(1).  getpic(string("",20)).  position(10,60). }.
@@ -59,6 +59,17 @@ index(8,I),  {+I. draw.  name(8).  getpic(string(_S9,20)).  position(10,270). },
 index(9,J),  {+J. draw.  name(9).  getpic(string(_S10,20)).  position(10,300). },
 index(10,K),  {+K. draw.  name(10).  getpic(string(_S11,20)).  position(10,330). },
 index(11,L),  {+L. draw.  name(11).  getpic(string("",20)).  position(10,360). }.
+
+index(100,Z),  {+Z. draw.  name(100).  getpic(string("",20)). color(255,0,0). position(10,450). }.
+
+keyChar([_ST|H]),index(100,Z),{+Z,getpic(string(_SS,20)),@p,$p} :-
+		_ST \= "\n"|
+	keyChar(H),index(100,Z),{+Z,getpic(string(string.concat(_SS,_ST),20)),@p,$p}.
+
+keyChar([_ST|H]),index(100,Z),{+Z,getpic(string(_SS,20)),@p,$p},dlmntal.socket(S,A,B):-
+_ST = "\n"|
+	keyChar(H),index(100,Z),{+Z,getpic(string("",20)),@p,$p},dlmntal.socket(list.append(S,[_SS]),A,B).
+
 
 R=out([]) :- R=[].
 R=out([_SH|T]),now(_IN),index(_IA, I),{+I,getpic(string(_SM,20)),@p,$p} :- 
