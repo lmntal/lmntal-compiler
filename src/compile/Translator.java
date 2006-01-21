@@ -525,6 +525,7 @@ public class Translator {
 		if (globalSystemRuleset) {
 			writer.write("/**\n");
 			writer.write(" * コンパイル済みシステムルールセット。GlobalSystemRulesetGenerator によって生成される。\n");
+			writer.write(" * このファイルは直接修正しないでください。\n");
 			writer.write(" */\n");
 		}
 		writer.write("public class " + className + " extends Ruleset {\n");
@@ -541,6 +542,7 @@ public class Translator {
 			writer.write("	public String toString() {\n");
 			writer.write("		return \"System Ruleset Object\";\n");
 			writer.write("	}\n");
+			writer.write("	private String encodedRuleset = \"\";\n");
 		} else {
 			writer.write("	private String globalRulesetID;\n");
 			writer.write("	public String getGlobalRulesetID() {\n");
@@ -556,10 +558,10 @@ public class Translator {
 			writer.write("	}\n");
 			// 2006.01.02 okabe
 			writer.write("	private String encodedRuleset = \n" + Util.quoteString(ruleset.encode(), '"') + ";\n");
-			writer.write("	public String encode() {\n");
-			writer.write("		return encodedRuleset;\n");
-			writer.write("	}\n");
 		}
+		writer.write("	public String encode() {\n");
+		writer.write("		return encodedRuleset;\n");
+		writer.write("	}\n");
 
 		String rulesetName;
 		if (globalSystemRuleset) {

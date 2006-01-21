@@ -9,6 +9,7 @@ import module.*;
 
 /**
  * コンパイル済みシステムルールセット。GlobalSystemRulesetGenerator によって生成される。
+ * このファイルは直接修正しないでください。
  */
 public class GlobalSystemRuleset extends Ruleset {
 	private static final GlobalSystemRuleset theInstance = new GlobalSystemRuleset();
@@ -23,9 +24,9 @@ public class GlobalSystemRuleset extends Ruleset {
 	public String toString() {
 		return "System Ruleset Object";
 	}
-	// 2006.01.02 okabe
+	private String encodedRuleset = "";
 	public String encode() {
-		return "";
+		return encodedRuleset;
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
@@ -249,18 +250,6 @@ L147:
 						break L147;
 					}
 				}
-				atom = ((Atom)var1);
-				atom.dequeue();
-				atom = ((Atom)var1);
-				atom.getMem().removeAtom(atom);
-				atom = ((Atom)var2);
-				atom.getMem().removeAtom(atom);
-				((AbstractMembrane)var0).addAtom(((Atom)var3));
-				((Atom)var3).getMem().relinkAtomArgs(
-					((Atom)var3), 0,
-					((Atom)var1), 1 );
-				ret = true;
-				break L147;
 			}
 		}
 		return ret;
@@ -286,6 +275,18 @@ L147:
 		boolean ret = false;
 L148:
 		{
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			((AbstractMembrane)var0).addAtom(((Atom)var3));
+			((Atom)var3).getMem().relinkAtomArgs(
+				((Atom)var3), 0,
+				((Atom)var1), 1 );
+			ret = true;
+			break L148;
 		}
 		return ret;
 	}
@@ -333,18 +334,6 @@ L144:
 						break L144;
 					}
 				}
-				atom = ((Atom)var1);
-				atom.dequeue();
-				atom = ((Atom)var1);
-				atom.getMem().removeAtom(atom);
-				atom = ((Atom)var2);
-				atom.getMem().removeAtom(atom);
-				((AbstractMembrane)var0).addAtom(((Atom)var3));
-				((Atom)var3).getMem().relinkAtomArgs(
-					((Atom)var3), 0,
-					((Atom)var1), 1 );
-				ret = true;
-				break L144;
 			}
 		}
 		return ret;
@@ -370,6 +359,18 @@ L144:
 		boolean ret = false;
 L145:
 		{
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			((AbstractMembrane)var0).addAtom(((Atom)var3));
+			((Atom)var3).getMem().relinkAtomArgs(
+				((Atom)var3), 0,
+				((Atom)var1), 1 );
+			ret = true;
+			break L145;
 		}
 		return ret;
 	}
@@ -417,18 +418,6 @@ L141:
 						break L141;
 					}
 				}
-				atom = ((Atom)var1);
-				atom.dequeue();
-				atom = ((Atom)var1);
-				atom.getMem().removeAtom(atom);
-				atom = ((Atom)var2);
-				atom.getMem().removeAtom(atom);
-				((AbstractMembrane)var0).addAtom(((Atom)var3));
-				((Atom)var3).getMem().relinkAtomArgs(
-					((Atom)var3), 0,
-					((Atom)var1), 1 );
-				ret = true;
-				break L141;
 			}
 		}
 		return ret;
@@ -454,6 +443,18 @@ L141:
 		boolean ret = false;
 L142:
 		{
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			((AbstractMembrane)var0).addAtom(((Atom)var3));
+			((Atom)var3).getMem().relinkAtomArgs(
+				((Atom)var3), 0,
+				((Atom)var1), 1 );
+			ret = true;
+			break L142;
 		}
 		return ret;
 	}
@@ -501,18 +502,6 @@ L138:
 						break L138;
 					}
 				}
-				atom = ((Atom)var1);
-				atom.dequeue();
-				atom = ((Atom)var1);
-				atom.getMem().removeAtom(atom);
-				atom = ((Atom)var2);
-				atom.getMem().removeAtom(atom);
-				((AbstractMembrane)var0).addAtom(((Atom)var3));
-				((Atom)var3).getMem().relinkAtomArgs(
-					((Atom)var3), 0,
-					((Atom)var1), 1 );
-				ret = true;
-				break L138;
 			}
 		}
 		return ret;
@@ -538,6 +527,18 @@ L138:
 		boolean ret = false;
 L139:
 		{
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			((AbstractMembrane)var0).addAtom(((Atom)var3));
+			((Atom)var3).getMem().relinkAtomArgs(
+				((Atom)var3), 0,
+				((Atom)var1), 1 );
+			ret = true;
+			break L139;
 		}
 		return ret;
 	}
@@ -580,29 +581,17 @@ L135:
 					var4 =  ((Atom)var2).getFunctor();
 					var3 = new Atom(null, (Functor)(var4));
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "+.", "L136",var0,var1,var2,var3,var4});
-					} else if (execL136(var0,var1,var2,var3,var4,nondeterministic)) {
+						Task.states.add(new Object[] {theInstance, "+.", "L136",var0,var1,var2,var3});
+					} else if (execL136(var0,var1,var2,var3,nondeterministic)) {
 						ret = true;
 						break L135;
 					}
 				}
-				atom = ((Atom)var1);
-				atom.dequeue();
-				atom = ((Atom)var1);
-				atom.getMem().removeAtom(atom);
-				atom = ((Atom)var2);
-				atom.getMem().removeAtom(atom);
-				((AbstractMembrane)var0).addAtom(((Atom)var4));
-				((Atom)var4).getMem().relinkAtomArgs(
-					((Atom)var4), 0,
-					((Atom)var1), 1 );
-				ret = true;
-				break L135;
 			}
 		}
 		return ret;
 	}
-	public boolean execL136(Object var0, Object var1, Object var2, Object var3, Object var4, boolean nondeterministic) {
+	public boolean execL136(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -623,6 +612,18 @@ L135:
 		boolean ret = false;
 L136:
 		{
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			((AbstractMembrane)var0).addAtom(((Atom)var3));
+			((Atom)var3).getMem().relinkAtomArgs(
+				((Atom)var3), 0,
+				((Atom)var1), 1 );
+			ret = true;
+			break L136;
 		}
 		return ret;
 	}
@@ -665,29 +666,17 @@ L132:
 					var4 =  ((Atom)var2).getFunctor();
 					var3 = new Atom(null, (Functor)(var4));
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "+", "L133",var0,var1,var2,var3,var4});
-					} else if (execL133(var0,var1,var2,var3,var4,nondeterministic)) {
+						Task.states.add(new Object[] {theInstance, "+", "L133",var0,var1,var2,var3});
+					} else if (execL133(var0,var1,var2,var3,nondeterministic)) {
 						ret = true;
 						break L132;
 					}
 				}
-				atom = ((Atom)var1);
-				atom.dequeue();
-				atom = ((Atom)var1);
-				atom.getMem().removeAtom(atom);
-				atom = ((Atom)var2);
-				atom.getMem().removeAtom(atom);
-				((AbstractMembrane)var0).addAtom(((Atom)var4));
-				((Atom)var4).getMem().relinkAtomArgs(
-					((Atom)var4), 0,
-					((Atom)var1), 1 );
-				ret = true;
-				break L132;
 			}
 		}
 		return ret;
 	}
-	public boolean execL133(Object var0, Object var1, Object var2, Object var3, Object var4, boolean nondeterministic) {
+	public boolean execL133(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -708,6 +697,18 @@ L132:
 		boolean ret = false;
 L133:
 		{
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var1);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			((AbstractMembrane)var0).addAtom(((Atom)var3));
+			((Atom)var3).getMem().relinkAtomArgs(
+				((Atom)var3), 0,
+				((Atom)var1), 1 );
+			ret = true;
+			break L133;
 		}
 		return ret;
 	}

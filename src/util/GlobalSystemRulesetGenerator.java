@@ -228,21 +228,18 @@ public final class GlobalSystemRulesetGenerator {
 		atoms.add(new Integer(1));
 		atoms.add(new Integer(2));
 		atoms.add(new Integer(3));
-		ArrayList vars= new ArrayList();
-		vars.add(new Integer(4));
-		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, vars));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
-		insts2.add(new Instruction(Instruction.SPEC,        5,5));
+		insts2.add(new Instruction(Instruction.SPEC,        4,4));
 		insts2.add(new Instruction(Instruction.COMMIT));
-
-		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
-		insts.add(new Instruction(Instruction.LOCALADDATOM,  0,4));
-		insts.add(new Instruction(Instruction.RELINK,        4,0,1,1,0));
-		insts.add(new Instruction(Instruction.FREEATOM,      1));
-		insts.add(new Instruction(Instruction.FREEATOM,      2));
-		insts.add(new Instruction(Instruction.PROCEED));
+		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
+		insts2.add(new Instruction(Instruction.LOCALADDATOM,  0,3));
+		insts2.add(new Instruction(Instruction.RELINK,        3,0,1,1,0));
+		insts2.add(new Instruction(Instruction.FREEATOM,      1));
+		insts2.add(new Instruction(Instruction.FREEATOM,      2));
+		insts2.add(new Instruction(Instruction.PROCEED));
 		return rule;
 	}
 
@@ -273,15 +270,14 @@ public final class GlobalSystemRulesetGenerator {
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));
 		insts2.add(new Instruction(Instruction.COMMIT));
-
-		insts.add(new Instruction(Instruction.DEQUEUEATOM, 1));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0));
-		insts.add(new Instruction(Instruction.LOCALADDATOM,  0,3));
-		insts.add(new Instruction(Instruction.RELINK,        3,0,1,1,0));
-		insts.add(new Instruction(Instruction.FREEATOM,      1));
-		insts.add(new Instruction(Instruction.FREEATOM,      2));
-		insts.add(new Instruction(Instruction.PROCEED));
+		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
+		insts2.add(new Instruction(Instruction.LOCALADDATOM,  0,3));
+		insts2.add(new Instruction(Instruction.RELINK,        3,0,1,1,0));
+		insts2.add(new Instruction(Instruction.FREEATOM,      1));
+		insts2.add(new Instruction(Instruction.FREEATOM,      2));
+		insts2.add(new Instruction(Instruction.PROCEED));
 		return rule;
 	}
 	
