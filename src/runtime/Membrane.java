@@ -420,13 +420,16 @@ public final class Membrane extends AbstractMembrane {
 	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。ルート膜の場合はunlock()と同じになる。
 	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。*/
 	public void asyncUnlock() {
+		asyncUnlock(true);
+	}
+	public void asyncUnlock(boolean asyncFlag) {
 		activate();
 		AbstractMembrane mem = this;
 		while (!mem.isRoot()) {
 			mem.lockThread = null;
 			mem = mem.parent;
 		}
-		task.asyncFlag = true;
+		task.asyncFlag = asyncFlag;
 		mem.unlock();
 	}
 	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/

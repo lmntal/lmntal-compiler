@@ -281,8 +281,10 @@ public class Task extends AbstractTask implements Runnable {
 				running = false;
 				notifyAll();
 			}
-			if (root != null && root.isStable())
-				break;
+			if (root != null && root.isStable()) break;
+			if(root!=null && memStack.isEmpty()) {
+				activatePerpetualMem(root);
+			}
 
 			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化。本膜ロック解放後に行う必要がある。
 			if(memStack.isEmpty() && mem.isRoot()) {
@@ -301,6 +303,27 @@ public class Task extends AbstractTask implements Runnable {
 		}
 	}
 
+	/**
+	 * Perpetual な膜を活性化する。
+	 * hara
+	 * @param mem
+	 */
+	void activatePerpetualMem(Membrane mem) {
+		Iterator it = mem.memIterator();
+		while(it.hasNext()) {
+			final Membrane m = (Membrane)it.next();
+			if(m.perpetual) {
+				new Thread() {
+					public void run() {
+						if (m.asyncLock()){
+							m.asyncUnlock(false);
+						}
+					}
+				}.start();
+			}
+			activatePerpetualMem(m);
+		}
+	}
 	public void outTime(){
 		if(Env.majorVersion==1 && Env.minorVersion>4)
 			System.out.println("threadID="+thread.getId()+" atomtime=" + atomtime/1000000 + "msec memtime=" + memtime/1000000 +"msec");
