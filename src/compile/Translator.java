@@ -1284,6 +1284,20 @@ public class Translator {
 				case Instruction.INLINE : //[atom, inlineref]
 					writer.write(tabs + InlineUnit.className((String)inst.getArg2()) + ".run((Atom)var" + inst.getArg1() + ", " + inst.getArg3() + ");\n");
 					break;
+				case Instruction.GUARD_INLINE : //[obj]
+
+// TODO かく
+//					writer.write(tabs + "					ArrayList gvars = (ArrayList)inst.getArg2();\n");
+//					writer.write(tabs + "					ArrayList gvars2 = new ArrayList();\n");
+//					writer.write(tabs + "					for(int i=0;i<gvars.size();i++) {\n");
+//					writer.write(tabs + "						gvars2.add(atoms[((Integer)gvars.get(i)).intValue()]);\n");
+//					writer.write(tabs + "					}\n");
+//					writer.write(tabs + "					if(! Inline.callGuardInline( (String)inst.getArg1(), (Membrane)mems[0], gvars2 ) ) return false;\n");
+//					writer.write(tabs + "					// ガードで値が変わったかもしれないので戻す\n");
+//					writer.write(tabs + "					for(int i=0;i<gvars2.size();i++) {\n");
+//					writer.write(tabs + "						atoms[((Integer)gvars.get(i)).intValue()] = (Atom)gvars2.get(i);\n");
+//					writer.write(tabs + "					}\n");
+					break;
 					//====組み込み機能に関する命令====ここまで====
 //分散機能は未実装
 //					//====分散拡張用の命令====ここから====

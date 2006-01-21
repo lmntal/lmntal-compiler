@@ -1,13 +1,19 @@
-out={r=done. io.use.}.
-out={r=done, $p[],@r}/ :- out={$p[], @r, r=readline(Line), one_line_processor.run(Line)}.
+/**
+ *  Distributed LMNtal sample(#1)
+ *  distributed sort
+ *    クライアントがサーバからソートプログラムをダウンロードして実行し，
+ *    その結果をサーバがマージする．
+ *  server file: sort-server.lmn
+ *
+ *  06/01/12 okabe
+ */
 
+io.use.
 
+r=run(io.list_of_stdin_async).
 
-{
-module(one_line_processor).
+Runtime_Run@@
+R=run([H|T]), runtime_dumped={$p[], @p}/ :- R=run(T), runtime_run={decoder.stringDecoder(H)}.
 
-one_line_processor.run(Line) :- string(Line) | runtime={decoder.stringDecoder(Line).}.
-
-runtime={$p[], @r}/ :- kill={sys.dump, $p[], @r}.
-
-}
+Dump@@
+runtime_run={$p[], @r} :- runtime_run={$p[], @r, sys.dump}.

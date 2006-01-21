@@ -1,0 +1,43 @@
+[:/*inline_define*/
+class CustomGuardImpl implements CustomGuard {
+	public boolean run(String guardID, Membrane mem, Object obj) {
+//		System.out.println("guardID "+guardID);
+		ArrayList ary = (ArrayList)obj;
+//		for(int i=0;i<ary.size();i++) {
+//			System.out.println(ary.get(i).getClass());
+//		}
+//		System.out.println("CustomGuardImpl "+ary);
+		
+		if(guardID.equals("isReady")) {
+			Atom a = (Atom)ary.get(1);
+			try {
+				boolean res = ((java.io.BufferedReader)((ObjectFunctor)a.getFunctor()).getObject()).ready();
+//				Thread.sleep(500);
+				return res;
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			return false;
+		}
+		else if(guardID.equals("x5")) {
+			Atom a = (Atom)ary.get(0);
+			int v = ((IntegerFunctor)a.getFunctor()).intValue();
+			// ガードでアトムを生成するときは mem.newAtom ではなく new Atom を使う
+			ary.set(1, new Atom(null, new IntegerFunctor(v * 5)));
+//			System.out.println("CustomGuardImpl "+ary);
+			return true;
+		}
+		return false;
+	}
+}
+:].
+
+//io.use.
+//sys.perpetual(on).
+
+//a(_IX), io.stdin(O):-class(O, "java.io.BufferedReader"), custom_isReady(_IX, O)|
+//io.stdin(O), r=readline(print), b(_IX).
+a(5).
+
+a(_I) :- R=custom_x5(_I) | b(R).
+//a(_I) :- mod(_I, 2, R) | b(R).

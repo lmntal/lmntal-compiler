@@ -16,7 +16,7 @@ leq(A, B), leq(B, C), leq(C, A).
 
 
 */
-results=chr.run({c_=leq(a, b), c_=leq(b, c), c_=leq(c, a)}, Simp, Replace, Find_token, 2).
+results=lmntalchr.run({c_=leq(a, b), c_=leq(b, c), c_=leq(c, a)}, Simp, Replace, Find_token, 2).
 Simp={
 	// r2 @ leq(X, Y), leq(Y, X) <=> X=Y.
 	r2_Simplify @@
