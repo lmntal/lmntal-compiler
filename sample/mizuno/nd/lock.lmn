@@ -28,15 +28,15 @@ C1={
 }.
 C2={
 	//safety
-	{id(N), {thread(c,T1),thread(c,T2),$p,@p}, $q,@q} :- uniq(N) | fail(safety, N), {id(N), {thread(c,T1),thread(c,T2),$p,@p}*, $q,@q}.
+	{id(N), {thread(c,T1),thread(c,T2),$p,@p}*, $q,@q} :- uniq(N) | fail(safety, N), {id(N), {thread(c,T1),thread(c,T2),$p,@p}*, $q,@q}.
 	//liveness
-	{id(N),{thread(c,T1),$p,@p},$q,@q} :- uniq(N,T1) | {id(N),fc(T1,true),{thread(c,T1),$p,@p}*,$q,@q}.
-	{id(N),fl(L),{thread(S,T1),$p[S|*X],@p},$q,@q} :- \+($p=(c(S),$pp)),uniq(N,T1),ground(L) |
+	{id(N),{thread(c,T1),$p,@p}*,$q,@q} :- uniq(N,T1) | {id(N),fc(T1,true),{thread(c,T1),$p,@p}*,$q,@q}.
+	{id(N),fl(L),{thread(S,T1),$p[S|*X],@p}*,$q,@q} :- \+($p=(c(S),$pp)),uniq(N,T1),ground(L) |
 		{id(N),fl(L),check_fc(L,T1),fc(T1,false),{thread(S,T1),$p[S|*X],@p}*,$q,@q}.
 	{check_fc([N|Tail],T1),$q[Tail|*Y],@q}, {id(N2),fc(T2,true),$r,@r} :- T1=T2,N=N2 |
 		{check_fc(Tail,T1),$q[Tail|*Y],@q}, {id(N2),fc(T2,true),$r,@r}.
 	{check_fc([],T1),fc(T2,false),$q,@q} :- T1=T2 | {fc(T1,true),$q,@q}.
 }.
 C3={
-	{id(N),fc(T1,false),{thread(w,T2),$p,@p},$q,@q} :- T1=T2,uniq(N,T1) | {id(N),fc(T1,false),{thread(w,T2),$p,@p}*,$q,@q}, fail(liveness, N,T1).
+	{id(N),fc(T1,false),{thread(w,T2),$p,@p}*,$q,@q} :- T1=T2,uniq(N,T1) | {id(N),fc(T1,false),{thread(w,T2),$p,@p}*,$q,@q}, fail(liveness, N,T1).
 }.

@@ -1,26 +1,19 @@
-{
-	nondeterministic.exec({r([a,a,a,a]). a(X) :- b(X).}).
-}.
-
-{
-	{r([a,a,a,a]), +L00,+L01,+L02,+L03}.
-
-	{r([b,a,a,a]), +L10,+L11,+L12,+L13}.
-	{r([a,b,a,a]), +L20, todo}.
-	{r([a,a,b,a]), +L30, todo}.
-	{r([a,a,a,b]), +L40, todo}.
-
-	{r([b,b,a,a]), +L50, todo}.
-	{r([b,a,b,a]), +L60, todo}.
-	{r([b,a,a,b]), +L70, todo}.
-	
-	reduct_to(L00, L10).
-	reduct_to(L01, L20).
-	reduct_to(L02, L30).
-	reduct_to(L03, L40).
-	reduct_to(L11, L50).
-	reduct_to(L12, L60).
-	reduct_to(L13, L70).
-	
-	{todo, $p} :- X={$p}, [:/*inline*/:](X).
-}.
+ng, ng, ng, ng, loop, nextid(9), end(3), end(7), end(8), end(5), reduce2(_756,_758), reduce2(_1148,_1150), reduce2(_1289,_1291), reduce2(_927,_929), reduce2(_1293,_1295), reduce2(_1575,_1577), reduce2(_1285,_1287), reduce2(_1379,_1381), reduce2(_1375,_1377), reduce2(_1514,_1516), reduce2(_1518,_1520), reduce2(_1522,_1524), reduce2(_1729,_1731), reduce2(_1733,_1735), reduce2(_1737,_1739), reduce2(_1792,_1794), reduce(_922,_924,"b"), reduce(_1084,_1086,"c"), reduce(_119,_127,"a"), reduce(_154,_162,"a"), reduce(_1143,_1145,"b"), reduce(_1025,_1027,"c"), reduce(_259,_267,"a"), reduce(_680,_682,"a"), reduce(_1570,_1572,"b"), reduce(_644,_652,"a"), reduce(_1206,_1208,"b"), reduce(_796,_798,"c"), reduce(_1646,_1648,"b"), reduce(_1433,_1435,"b"), reduce(_539,_547,"a"), reduce(_875,_877,"c"), reduce(_751,_753,"c"), reduce(_1787,_1789,"c"), 
+  {from(_259), from(_756), from(_751), from(_1646), from(_1733), id(1), to(_267), to(_1086), to(_1731), 
+    {r([c,a]), @601}*}, 
+  {id(3), to(_758), to(_753), to(_798), to(_1291), to(_1295), 
+    {r([c,c]), @601}*}, 
+  {id(8), to(_1739), to(_1648), to(_1735), to(_1789), to(_1794), 
+    {r([c,b]), @601}*}, 
+  {from(_1575), from(_539), from(_1570), from(_1787), from(_1792), id(4), to(_547), to(_1145), to(_1150), 
+    {r([a,b]), @601}*}, 
+  {id(7), to(_1524), to(_1435), to(_1520), to(_1572), to(_1577), 
+    {r([b,b]), @601}*}, 
+  {from(_927), from(_644), from(_796), from(_922), from(_1289), id(2), to(_652), to(_1027), to(_1287), 
+    {r([a,c]), @601}*}, 
+  {from(_1293), from(_1522), from(_119), from(_154), from(_1148), from(_1025), from(_1084), from(_1143), from(_1206), from(_1285), from(_1379), from(_1514), from(_1729), from(_1737), id(6), to(_127), to(_162), 
+    {r([a,a]), @601}*}, 
+  {from(_680), from(_1375), from(_875), from(_1433), from(_1518), id(0), to(_682), to(_1208), to(_1516), 
+    {r([b,a]), @601}*}, 
+  {id(5), to(_929), to(_877), to(_924), to(_1377), to(_1381), 
+    {r([b,c]), @601}*}, @602, @nd601

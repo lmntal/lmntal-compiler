@@ -78,8 +78,8 @@ nextid(N), {$p,@p} :- \+($p=(id(X),$pp)), N2=N+1 | nextid(N2), {id(N),$p,@p}.
 {id(I),$p,@p} :- \+($p=(from(T),$pp)),uniq(I) | {id(I),$p,@p}, end(I).
 
 //終了状態で満たすべき性質の検証
-end(E), {{mem(false,LF,P,C,S,L),$q[LF,P,C,S,L],@q},id(I),$p,@p} :- E=I,uniq(I) |
+end(E), {{mem(false,LF,P,C,S,L),$q[LF,P,C,S,L],@q}*,id(I),$p,@p} :- E=I,uniq(I) |
 	{{mem(false,LF,P,C,S,L),$q[LF,P,C,S,L],@q}*, id(I),$p,@p}, fail(I).
-end(E), {{mem(St,true,P,C,S,L),$q[St,P,C,S,L],@q},id(I),$p,@p}  :-E=I,uniq(I) |
+end(E), {{mem(St,true,P,C,S,L),$q[St,P,C,S,L],@q}*,id(I),$p,@p}  :-E=I,uniq(I) |
 	{{mem(St,true,P,C,S,L),$q[St,P,C,S,L],@q}*, id(I),$p,@p}, fail2(I)
 }. 

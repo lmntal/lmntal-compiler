@@ -1,4 +1,4 @@
-ret=sort(gen(100)).
+ret=sort(gen(10)).
 
 R=gen(N) :- N > 0 | R=[integer.rnd(100)|gen(N-1)].
 R=gen(N) :- N = 0 | R=[].

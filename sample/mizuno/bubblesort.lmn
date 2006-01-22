@@ -1,6 +1,3 @@
 L=[X,Y|L2] :- X>Y | L=[Y,X|L2].
 
-R=gen(N) :- N > 0 | R=[integer.rnd(10000)|gen(N-1)].
-R=gen(N) :- N = 0 | R=[].
-
-ret=gen(100).
+ret=[30,25,36,16].

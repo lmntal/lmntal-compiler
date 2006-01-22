@@ -1,5 +1,7 @@
 //  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
-//  $Author: mizuno $
+//  Author: mizuno
+
+{module(nd).
 
 /**
  * nd.exec(MemWithNDMem).
@@ -11,9 +13,6 @@
  *
  *  @param MemWithNDMem 非決定的実行膜をちょうど1つもつ膜
  */
-
-{module(nd).
-
 nd.exec({$p,@p,{$q,@q}})
 	:- 	[:/*inline*/
 			Atom out = me.nthAtom(0);

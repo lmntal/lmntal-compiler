@@ -1,7 +1,9 @@
-//nd.reduce({{r([a,a,a,a]). a(X) :- b(X).}*}, java.new("java.util.HashMap"), map).
-//nd.exec({{r([a,a]). a(X) :- b(X). a(X) :- c(X). a(X) :- a(X)}*}).
-//nd.exec({{r([a,a]). a(X) :- a(X).}*}).
-//nd.exec({{a, (a:-b)}*}).
+nd.exec({{
+	r([a,a]).
+	b @@ a(X) :- b(X).
+	c @@ a(X) :- c(X).
+	a @@ a(X) :- a(X).
+}*}).
 
 //uniq用のID生成
 nextid(0).
