@@ -202,4 +202,24 @@ public class Inline {
 			((InlineUnit)inlineSet.get(unitName)).callInline(atom, codeID);
 		}
 	}
+	/**
+	 * ガードインライン命令を実行する。
+	 * @param obj
+	 * @return
+	 */
+	public static boolean callGuardInline(String guardID, Membrane mem, Object obj) {
+//		System.out.println(Inline.inlineSet);
+		Iterator it = Inline.inlineSet.values().iterator();
+		boolean res = false;
+		while(it.hasNext()) {
+			InlineUnit iu = (InlineUnit)it.next();
+//System.out.println("iu.name "+iu.name);
+			try {
+				res = iu.inlineCode.runGuard(guardID, mem, obj);
+//				System.out.println("GUARD result = "+res);
+				return res;
+			} catch(Exception e) {e.printStackTrace();}
+		}
+		return false;
+	}
 }

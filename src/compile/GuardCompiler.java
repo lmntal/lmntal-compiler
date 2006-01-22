@@ -197,16 +197,22 @@ public class GuardCompiler extends HeadCompiler {
 		{
 			// uniq, not_uniq を最初に（少なくともint, unary などの前に）処理する
 			Iterator it0 = cstrs.iterator();
-			LinkedList tmp = new LinkedList();
+			LinkedList tmpFirst = new LinkedList();
+			LinkedList tmpLast = new LinkedList();
 			while(it0.hasNext()) {
 				Atom a = (Atom)it0.next();
-				if(a.functor.getName().endsWith("uniq")) {
-					tmp.add(a);
+				if(a.functor.getName().endsWith("uniq") || a.functor.getName().equals("custom")) {
+					tmpFirst.add(a);
+					it0.remove();
+				}
+				if(a.functor.getName().startsWith("custom")) {
+					tmpLast.add(a);
 					it0.remove();
 				}
 			}
-			tmp.addAll(cstrs);
-			cstrs = tmp;
+			tmpFirst.addAll(cstrs);
+			tmpFirst.addAll(tmpLast);
+			cstrs = tmpFirst;
 		}
 		
 		boolean changed;
@@ -233,11 +239,58 @@ public class GuardCompiler extends HeadCompiler {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					checkGroundLink(def1);
 				}
+				// ガードインライン
+				else if (func.getName().startsWith("custom_")) {
+					boolean hasError=false;
+					if(func.getName().length()<7+func.getArity()+1) hasError=true;
+					boolean[] isIn = new boolean[func.getArity()];
+					if(func.getName().charAt(7+isIn.length)!='_') hasError=true;
+					for(int i=0;i<isIn.length;i++) {
+						char ch = func.getName().charAt(7+i);
+						if(ch!='i' && ch!='o') hasError=true;
+						isIn[i] = ch=='i';
+					}
+					if(hasError) {
+						String mo = "";
+						for(int i=0;i<isIn.length;i++) mo += "?";
+						error("Guard "+func.getName()+" should be custom_"+mo+"_xxxx. (? : 'i' when input, 'o' when output)");
+					}
+					
+					String guardID = func.getName().substring(7+func.getArity()+1);
+					ArrayList vars = new ArrayList();
+					ArrayList out = new ArrayList(); // 出力引数
+					for(int k=0;k<cstr.args.length;k++) {
+						ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
+						// 入力引数が未束縛なら延期
+						if (isIn[k] && !identifiedCxtdefs.contains(defK)) {
+							continue FixType;
+						}
+						int aid;
+						if (identifiedCxtdefs.contains(defK)) {
+							aid = loadUnaryAtom(defK);
+						} else {
+							int atomid = varcount++;
+							bindToUnaryAtom(defK, atomid);
+							typedcxtdatatypes.put(def3, new Integer(ISINT));
+							aid = typedcxtToSrcPath(defK);
+							out.add(new Integer(atomid));
+						}
+						vars.add(new Integer(aid));
+//						vars.add(new Integer(loadUnaryAtom(def1)));
+//						System.out.println("varcount "+varcount);
+//						System.out.println("1 "+typedcxtdatatypes);
+//						System.out.println("1 "+typedcxtdefs);
+//						System.out.println("1 "+typedcxtsrcs);
+//						System.out.println("1 "+typedcxttypes);
+					}
+//					System.out.println("vars "+vars);
+					match.add(new Instruction(Instruction.GUARD_INLINE, guardID, vars, out));
+				}
 				else if (func.getName().equals("uniq") || func.getName().equals("not_uniq")){
 					ArrayList uniqVars = new ArrayList();
 					for(int k=0;k<cstr.args.length;k++) {
 						ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
-						if (!identifiedCxtdefs.contains(defK)) continue FixType;
+						if (!identifiedCxtdefs.contains(defK)) continue FixType; // 未割り当てのプロセス（表記に-が付くもの）は認めない
 						int srcPath;
 //						srcPath = typedcxtToSrcPath(defK);
 //						Env.p("VAR# "+srcPath);

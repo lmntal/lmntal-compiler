@@ -136,6 +136,15 @@ public class InlineUnit {
 		if (interpret) {
 			//InlineCode クラスのインスタンスとして使う
 			p.println("public class "+className+" implements InlineCode {");
+			p.println("\tpublic boolean runGuard(String guardID, Membrane mem, Object obj) throws Exception {");
+//			p.println("\t\ttry {");
+			p.println("\t\t	CustomGuard cg=(CustomGuard)Class.forName(\"CustomGuardImpl\").newInstance();");
+//			p.println("\t\t	System.out.println(\"CG\"+cg);");
+			p.println("\t\t	if(cg==null) return false;");
+			p.println("\t\t	return cg.run(guardID, mem, obj);");
+//			p.println("\t\t} catch(Exception e) {}");
+//			p.println("\t\treturn false;");
+			p.println("\t}");
 			p.println("\tpublic void run(Atom me, int codeID) {");
 		} else {
 			//直接呼び出すので、static でよい

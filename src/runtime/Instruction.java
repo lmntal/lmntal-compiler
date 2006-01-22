@@ -1138,6 +1138,14 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int BUILTIN = 211;
 	static {setArgType(BUILTIN, new ArgType(false, ARG_OBJ, ARG_OBJ, ARG_OBJ));} // あってる。
 
+	/** guard_inline [string, [Links...], [OutLinks...]]
+	 * <br>ガード命令<br>
+	 * string で識別されるカスタムガード制約を実行し、成功することを確認する。
+	 * Links はプロセス文脈の Unary 型である必要がある。
+	 * 未束縛のプロセス文脈（の番号）は OutLinks に追加される。これらはインラインコードで束縛しないといけない。*/
+	public static final int GUARD_INLINE = 212;
+	static {setArgType(GUARD_INLINE, new ArgType(false, ARG_OBJ, ARG_VARS, ARG_OBJ));}
+
 	///////////////////////////////////////////////////////////////////////
 
 	// 型付きプロセス文脈を扱うための追加命令 (214--215)	
@@ -1780,6 +1788,12 @@ public class Instruction implements Cloneable, Serializable {
 		add(arg3);
 	}
 	public Instruction(int kind, int arg1, int arg2, Object arg3) {
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+	}
+	public Instruction(int kind, Object arg1, Object arg2, Object arg3) {
 		this.kind = kind;
 		add(arg1);
 		add(arg2);

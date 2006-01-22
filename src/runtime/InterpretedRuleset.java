@@ -981,6 +981,18 @@ class InterpretiveReactor {
 //					add(A,B,C) :- int(A),int(B),$builtin:iadd(A,B,C), 
 //					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
 //					break;
+				case Instruction.GUARD_INLINE : //[obj]
+					ArrayList gvars = (ArrayList)inst.getArg2();
+					ArrayList gvars2 = new ArrayList();
+					for(int i=0;i<gvars.size();i++) {
+						gvars2.add(atoms[((Integer)gvars.get(i)).intValue()]);
+					}
+					if(! Inline.callGuardInline( (String)inst.getArg1(), (Membrane)mems[0], gvars2 ) ) return false;
+					// ガードで値が変わったかもしれないので戻す
+					for(int i=0;i<gvars2.size();i++) {
+						atoms[((Integer)gvars.get(i)).intValue()] = (Atom)gvars2.get(i);
+					}
+					break;
 					//====組み込み機能に関する命令====ここまで====
 
 					//====分散拡張用の命令====ここから====

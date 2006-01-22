@@ -282,25 +282,45 @@ public class Compactor {
 				int sub = renumberLocalsSub(subinsts, locals, varcount);
 				if(sub > max)max = sub;
 			}
-			if (inst.getOutputType() == -1) continue;
-			if (inst.getIntArg1() != locals) {
-				Integer src = (Integer)inst.getArg1();
-				Integer dst = new Integer(locals);
-				Integer tmp = new Integer(varcount);
-				HashMap map1 = new HashMap();
-				HashMap map2 = new HashMap();
-				HashMap map3 = new HashMap();
-				map1.put(src, tmp);
-				map2.put(dst, src);
-				map3.put(tmp, dst);
-				Instruction.applyVarRewriteMapFrom(insts,map1,i);
-				Instruction.applyVarRewriteMapFrom(insts,map2,i);
-				Instruction.applyVarRewriteMapFrom(insts,map3,i);
+			if(inst.getKind()==Instruction.GUARD_INLINE) {
+				// ガードインラインの場合は、出力変数が複数ある場合がある。hara
+				ArrayList out = (ArrayList)inst.getArg3();
+				for(int j=0;j<out.size();j++) {
+					renumberLocalsSub2(((Integer)out.get(j)).intValue(), locals, varcount, insts, i);
+				}
+			} else {
+				if (inst.getOutputType() == -1) continue;
+				if (inst.getIntArg1() != locals) {
+					renumberLocalsSub2(inst.getIntArg1(), locals, varcount, insts, i);
+				}
 			}
 			locals++;
 		}
 		if(locals > max)max = locals;
 		return max;
+	}
+	
+	/**
+	 * 命令列 insts の begin 番地以降について、変数番号 isrc と locals の出現をすべて交換する。
+	 * @param isrc
+	 * @param locals
+	 * @param varcount
+	 * @param insts
+	 * @param begin
+	 */
+	static void renumberLocalsSub2(int isrc, int locals, int varcount, List insts, int begin) {
+		Integer src = new Integer(isrc);
+		Integer dst = new Integer(locals);
+		Integer tmp = new Integer(varcount);
+		HashMap map1 = new HashMap();
+		HashMap map2 = new HashMap();
+		HashMap map3 = new HashMap();
+		map1.put(src, tmp);
+		map2.put(dst, src);
+		map3.put(tmp, dst);
+		Instruction.applyVarRewriteMapFrom(insts,map1,begin);
+		Instruction.applyVarRewriteMapFrom(insts,map2,begin);
+		Instruction.applyVarRewriteMapFrom(insts,map3,begin);
 	}
 	
 	////////////////////////////////////////////////////////////////
