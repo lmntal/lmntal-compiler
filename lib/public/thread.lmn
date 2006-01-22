@@ -1,0 +1,72 @@
+
+/**
+  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+  $Author: Kei MURAYAMA $
+
+*/
+
+{
+module(thread).
+
+	{
+		system_ruleset.
+		{thread(N,{$p,@p}), $q,@q}/ :- int(N) | {$p,$q,@q}.
+	}.
+	/*
+		thread.create(N).
+		Create N threads.
+	*/
+	thread.create(N) :- N>0 | thread.num(N), thread.cre(N).
+	thread.cre(N) :- N>0 | thread.cre(N-1), thread(N,{}@"localhost").
+	thread.cre(0) :-.
+
+	/*
+		thread.at(N, {atoms or rules}).
+		Create atoms or rules at a thread numbered N.
+	*/
+	thread_at@@
+	thread.at(N,{$p,@p}) :- int(N) | thread.at2(N,{{$p,@p}}).
+	thread_at2@@
+	thread.at2(N,{{$p,@p}}), thread(M,{$q,@q}) :- int(N),int(M), M=:=(N+1) |
+		thread(M,{$p,$q,@p,@q}).
+	
+	/*
+		thread.any({atoms or rules}).
+		Create atoms or rules at a thread randomly selected.
+	*/
+	thread_any@@
+	thread.any({$p,@p}) :- thread.any({{$p,@p}}).
+	thread_any2@@
+	thread.any({{$p,@p}}), thread(M,{$q,@q}@T) :- int(M) |
+		thread(M, {$p,$q,@p,@q}@T).
+
+	/*
+		thread.all({atoms or rules}).
+		Create atoms or rules at all threads.
+	*/
+	thread_all@@
+	thread.all({$p,@p}), thread.num(N) :- int(N) |
+			thread.allc(N, {$p,@p}), thread.num(N).
+	thread_allc@@
+	thread.allc(N, {$p[],@p}) :- N>0, N2=N-1 |
+			thread.allcre(N, {{$p[],@p}}), thread.allc(N2, {$p[], @p}).
+	thread.allc(0, {$p[],@p}) :-.
+	thread_allcre@@
+	thread.allcre(N,{{$p[],@p}}), thread(M,{$q,@q}) :- int(N),int(M),N=:=M |
+			thread(M, {$p[],$q,@p,@q}).
+	thread.allcre(0,{{$p[],@p}}) :-.
+}.
+
+
+/*
+	example showing the use.
+*/
+
+%{
+%	thread.create(4).
+%	thread.all({norm(0)}).
+%	generate(500).
+%	generate(X) :- X>0 | thread.at(X mod 4,{n(integer.rnd(100))}), generate(X-1).
+%	thread.all({norm(Y), n(X) :- int(X),Z=X*X+Y | norm(Z)}).
+%	norm(N0), norm(N1) :- norm(N0+N1).
+%}

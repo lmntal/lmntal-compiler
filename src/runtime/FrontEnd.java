@@ -359,6 +359,10 @@ public class FrontEnd {
 							/// --hiderule
 							/// Hide rule names
 							Env.showrule = false;
+						} else if(args[i].equals("--dump-converted-rules")){
+							/// --show-converted_rules
+							/// Dump converted rules
+							Env.dumpConvertedRules = true;
 						} else if (args[i].startsWith("--thread-max=")) {
 							/// --thread-max=<integer>
 							/// set <integer> as the upper limit of threads occured in leftside rules.

@@ -143,6 +143,11 @@ public final class Env {
 	public static int threadMax = 128;
 	
 	/**
+	 * スレッド曖昧指定を使用したときの、変換後のルールをダンプ
+	 */
+	public static boolean dumpConvertedRules = false;
+	
+	/**
 	 * 3D mode　有効
 	 */
 	public static boolean f3D = false;
