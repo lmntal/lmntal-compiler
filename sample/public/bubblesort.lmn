@@ -1,0 +1,21 @@
+//  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+//  Author: mizuno
+
+/**
+ * バブルソート
+ * リストがあったら、ソートする。
+ * O(n^2) で動かすためにはリスト構成子をアクティブアトムにする必要があるので、リスト記法は使えない。
+ */
+L=c(X,c(Y,L2)) :- X>Y | L=c(Y,c(X,L2)).
+
+ret=gen(100).
+
+/**
+ * R=gen(N)
+ * 乱数リスト生成。integerモジュールを利用しています。
+ * @param N 生成するリストの長さを表す整数アトム
+ * @param R 生成したリストの出力先
+ */
+R=gen(N) :- N > 0 | R=c(integer.rnd(10000),gen(N-1)).
+R=gen(N) :- N = 0 | R=nil.
+
