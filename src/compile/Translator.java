@@ -52,6 +52,7 @@ public class Translator {
 	private static boolean fStandardLibrary;
 	private static int success, count;
 	private static boolean gen_all_lib;
+
 	
 	/**
 	 * std_lib.jar を作るための main 関数
@@ -710,6 +711,8 @@ public class Translator {
 		writer.write("		double u, v;\n");
 		writer.write("		int isground_ret;\n");
 		writer.write("		boolean eqground_ret;\n");
+		writer.write("		boolean guard_inline_ret;\n");
+		writer.write("		ArrayList guard_inline_gvar2;\n");
 		
 		//2005-10-21 by kudo (INSERTCONNECTORS,DELETECONNECTORS,LOOKUPLINKで使う)
 		writer.write("		Set insset;\n");
@@ -1225,15 +1228,6 @@ public class Translator {
 					break; //kudo 2004-12-03
 				case Instruction.ISUNARY: // [atom]
 					writer.write(tabs + "func = ((Atom)var" + inst.getIntArg1() + ").getFunctor();\n");
-					// まくを超えたリンクが unary かどうかが判断できない。OUTSIDE_PROXY を見てる
-					// DEREF も？
-					// (n-kato)
-					// すべて仕様です。というか、リンク先は親膜にあるかもしれないわけですし、
-					// 本膜の親膜にあるアトムを調べることは許されていません。
-					// (hara) じゃそういうときは「失敗」ということでいいですかねぇ
-					// (n-kato) はい。失敗して下さい。ちなみに$in,$outのarityは2なので次の2行は省略しました。
-					//if(f.equals(Functor.OUTSIDE_PROXY)) return false;
-					//if(f.equals(Functor.INSIDE_PROXY)) return false;
 					writer.write(tabs + "if (!(func.getArity() != 1)) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
@@ -1286,17 +1280,32 @@ public class Translator {
 					break;
 				case Instruction.GUARD_INLINE : //[obj]
 
-// TODO かく
-//					writer.write(tabs + "					ArrayList gvars = (ArrayList)inst.getArg2();\n");
-//					writer.write(tabs + "					ArrayList gvars2 = new ArrayList();\n");
-//					writer.write(tabs + "					for(int i=0;i<gvars.size();i++) {\n");
-//					writer.write(tabs + "						gvars2.add(atoms[((Integer)gvars.get(i)).intValue()]);\n");
-//					writer.write(tabs + "					}\n");
-//					writer.write(tabs + "					if(! Inline.callGuardInline( (String)inst.getArg1(), (Membrane)mems[0], gvars2 ) ) return false;\n");
-//					writer.write(tabs + "					// ガードで値が変わったかもしれないので戻す\n");
-//					writer.write(tabs + "					for(int i=0;i<gvars2.size();i++) {\n");
-//					writer.write(tabs + "						atoms[((Integer)gvars.get(i)).intValue()] = (Atom)gvars2.get(i);\n");
-//					writer.write(tabs + "					}\n");
+					ArrayList gvars = (ArrayList)inst.getArg2();
+					writer.write(tabs + "{\n");
+					writer.write(tabs + "	guard_inline_gvar2 = new ArrayList();\n");
+					for(int i=0;i<gvars.size();i++) {
+						writer.write(tabs + "	guard_inline_gvar2.add(var"+((Integer)gvars.get(i)).intValue()+");\n");
+					}
+//					writer.write(tabs + "	System.out.println(\"GUARD_INLINE\"+guard_inline_gvar2);\n");
+					
+					writer.write(tabs + "	guard_inline_ret = false;\n");
+					writer.write(tabs + "	try {\n");
+					writer.write(tabs + "		CustomGuard cg=(CustomGuard)Class.forName(\"translated.CustomGuardImpl\").newInstance();\n");
+//					writer.write(tabs + "		System.out.println(\"CG\"+cg);\n");
+					writer.write(tabs + "		if(cg!=null) {\n");
+					writer.write(tabs + "			guard_inline_ret = cg.run( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
+					writer.write(tabs + "		}\n");
+					writer.write(tabs + "	} catch(Exception e) {e.printStackTrace();}\n");
+					
+//					writer.write(tabs + "	guard_inline_ret = Inline.callGuardInline( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
+					writer.write(tabs + "	// ガードで値が変わったかもしれないので戻す\n");
+					for(int i=0;i<gvars.size();i++) {
+						writer.write(tabs + "	var"+((Integer)gvars.get(i)).intValue()+" = guard_inline_gvar2.get("+i+");\n");
+					}
+					writer.write(tabs + "	if(guard_inline_ret) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "	}\n");
+					writer.write(tabs + "}\n");
 					break;
 					//====組み込み機能に関する命令====ここまで====
 //分散機能は未実装

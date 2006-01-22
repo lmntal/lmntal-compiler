@@ -28,7 +28,7 @@ class CustomGuardImpl implements CustomGuard {
 			return true;
 		}
 		else if(guardID.equals("genInt")) {
-			ary.set(0, new Atom(null, new IntegerFunctor(11)));
+			ary.set(0, new Atom(null, new IntegerFunctor(13)));
 			return true;
 		}
 		return false;
@@ -36,12 +36,12 @@ class CustomGuardImpl implements CustomGuard {
 }
 :].
 
-//io.use.
-//sys.perpetual(on).
+io.use.
+sys.perpetual(on).
 
-//a(_IX), io.stdin(O):-class(O, "java.io.BufferedReader"), custom_isReady(_IX, O)|
-//io.stdin(O), r=readline(print), b(_IX).
+a(_IX), io.stdin(O):-class(O, "java.io.BufferedReader"), custom_ii_isReady(_IX, O)|
+io.stdin(O), r=readline(print), b(_IX).
 a(5).
 
-a(_I) :- R=custom_io_x5(A), custom_o_genInt(A) | b(R).
+//a(_I) :- R=custom_io_x5(A), custom_o_genInt(A) | b(R).
 //a(_I) :- mod(_I, 2, R) | b(R).
