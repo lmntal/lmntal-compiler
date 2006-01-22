@@ -1,0 +1,45 @@
+/**
+  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+  $Author: nakano $
+
+  SYNOPSIS
+	バブルソート。
+	要素自動生成、色つき、先頭から検索版
+	ライブラリintegerとgraphicを使用しています。
+*/
+graphic.use.
+go:-{window,position(0,0),size(500,500),name("window"),timer(10).
+
+%要素数
+max_num(45).
+
+
+%ソートルール
+done(_ID),now(_INOW),
+{name(_IN),size(_IS,10),color(_IR,0,0),$p,@p},
+{name(_IN2),size(_IS2,10),color(_IR2,0,0),$q,@q} :-
+	 _ID > _INOW, _INOW=_IN, _IN = _IN2 - 1  ,_IS > _IS2 | 
+done(_ID),now(_INOW+1),
+{name(_IN),size(_IS2,10),color(0,0,0),$p},
+{name(_IN2),size(_IS,10),color(255,0,0),$q}.
+
+done(_ID),now(_INOW),
+{name(_IN),size(_IS,10),color(_IR,0,0),$p,@p},
+{name(_IN2),size(_IS2,10),color(_IR2,0,0),$q,@q} :-
+	 _ID > _INOW, _INOW=_IN, _IN = _IN2 - 1  ,_IS =< _IS2 | 
+done(_ID),now(_INOW+1),
+{name(_IN),size(_IS,10),color(0,0,0),$p},
+{name(_IN2),size(_IS2,10),color(255,0,0),$q}.
+
+%done(_ID),now(_IN),{name(_INAME),size(_IS,10),color(_IR,0,0),$p[],@p}
+%:-_ID=_IN,_IN=_INAME|done(_ID-1),now(1).
+done(_ID),now(_IN)
+:-_ID=_IN|done(_ID-1),now(1).
+
+done(_ID),{name(1),size(_IS,10),color(_IR,0,0),$p[],@p}:-_ID=0|{name(1),size(_IS,10),color(255,0,0),$p[],@p}.
+
+%要素生成ルール
+max_num(_IN):-max(_IN),gen(_IN).
+max(_IN),gen(N) :- N > 0 | max(_IN),gen(N-1),{name(N),position(0,(N-1)*10),size((integer.rnd(_IN-1)+1)*10,10),draw,getpic("fillrect"),color(0,0,0)}.
+max(_IN),gen(N) :- N = 0 | done(_IN),max(_IN),now(1).
+}.
