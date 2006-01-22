@@ -52,7 +52,11 @@ var.bind(_UVar0, _GValue), var_mem({$e, @e}) :-
                             var_mem({$e, @e, bind(_UVar0, _GValue)}).
 
 Var_New_Unify @@
-var.unify(_UVar0, _UVar1), var_mem({$e, @e}) :- 
+var.unify(_UVar0, _UVar1), var_mem({$e, @e}) :- _UVar0=_UVar1 |
+                           var_mem({$e, @e}).
+
+Var_New_Unify @@
+var.unify(_UVar0, _UVar1), var_mem({$e, @e}) :- _UVar0\=_UVar1 |
                            var_mem({$e, @e, unify_pre(_UVar0, _UVar1)}).
 
 Var_Unify @@

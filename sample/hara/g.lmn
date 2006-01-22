@@ -27,6 +27,10 @@ class CustomGuardImpl implements CustomGuard {
 //			System.out.println("CustomGuardImpl "+ary);
 			return true;
 		}
+		else if(guardID.equals("genInt")) {
+			ary.set(0, new Atom(null, new IntegerFunctor(11)));
+			return true;
+		}
 		return false;
 	}
 }
@@ -39,5 +43,5 @@ class CustomGuardImpl implements CustomGuard {
 //io.stdin(O), r=readline(print), b(_IX).
 a(5).
 
-a(_I) :- R=custom_x5(_I) | b(R).
+a(_I) :- R=custom_io_x5(A), custom_o_genInt(A) | b(R).
 //a(_I) :- mod(_I, 2, R) | b(R).

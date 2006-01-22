@@ -11,50 +11,54 @@
 %% con(X,Y,C) means that constraint C holds between variables X and Y
 
 intersect_xy_xy @@
-con(X, Y, C1), con(X, Y, C2) :- inter(C1, C2, C3), con(X,Y,C3).
+con(X0, Y0, C1), con(X1, Y1, C2) :- X0=X1, Y0=Y1, C1=C2 | con(X0,Y0,C1).
 
 intersect_xy_yx @@
-con(X, Y, C1), con(Y, X, CR) :- invert(CR, C2), inter(C1, C2, C3), con(X,Y,C3).
+con(X0, Y0, C1), con(Y1, X1, CR) :- X0=X1, Y0=Y1, C1=1-CR | con(X0,Y0,C1).
 
 propagate_xy_yz @@
-con(_UX, _UY0, _UC1), con(_UY1, _UZ, _UC2) :- Y0=Y1, uniq(X, Y0, Z, C1, C2) |
-con(_UX, _UY0, _UC1), con(_UY1, _UZ, _UC2), con(_UX, _UZ, _UC1).
+con(X, Y0, C1), con(Y1, Z, C2) :- Y0=Y1, uniq(X, Y0, Z, C1, C2) |
+con(X, Y0, C1), con(Y1, Z, C2), con(X, Z, C1).
 
 propagate_xy_xz @@
-con(_UX0, _UY, _UCR), con(_UX1, _UZ, _UC2) :- Y0=Y1, uniq(X, Y0, Z, C1, C2) |
-con(_UX0, _UY, _UCR), con(_UX1, _UZ, _UC2), con(_UY, _UZ, invert(_UCR)).
-
-con(X, Y, CR), con(X, Z, C2) :-
-uniq(X, Y, Z, C1, C2),
-invert(CR,C1),
-trans(C1, C2, C3)
-|
-con(X, Y, CR), con(X, Z, C2), 
-con(Y, Z, C3).
+con(X0, Y, CR), con(X1, Z, C2) :- X0=X1, C2=1-CR, uniq(X0, Y, Z, CR, C2) |
+con(X0, Y, CR), con(X1, Z, C2), con(X0, Z, C2).
 
 propagate_xy_zy @@
-con(X, Y, C1), con(Z, Y, CR) :-
-uniq(X, Y, Z, C1, C2),
-invert(CR,C2),
-trans(C1, C2, C3)
-| 
-con(X, Y, C1), con(Z, Y, CR), 
-con(X, Z, C3).
+con(X, Y0, C1), con(Z, Y1, CR) :- Y0=Y1, C1=1-CR, uniq(X, Y0, Z, CR, C1) |
+con(X, Y0, C1), con(Z, Y1, CR), con(X, Z, C1).
 
 
+%% Example
+%% constraints are < and >  (< is 0, > is 1)
+con(a, b, 1).
+con(a, c, 1).
+con(b, d, 1).
+con(c, d, 1).
 
-%% Example ---------------------------------
-%% constraints are < and >
+% a > b/c > d
 
-invert(<,>).
-invert(>,<).
+%  ==>*  con(b,d,1), con(c,d,1), con(a,b,1), con(a,c,1), con(a,d,1)
 
-%% fail if empty constraint would be produced
-inter(C,C,C).
+//%% Example ---------------------------------
+//%% constraints are < and >
+//
+//invert(<,>).
+//invert(>,<).
+//
+//%% fail if empty constraint would be produced
+//inter(C,C,C).
+//
+//%% fail if most general constraint would be produced
+//trans(C,C,C).
+//
+//%% ?- con(A,B,>),con(A,C,>),con(B,D,>),con(C,D,>).
+//
+//Result:
+//con(A,D,>)
+//con(C,D,>)
+//con(B,D,>)
+//con(A,C,>)
+//con(A,B,>)
 
-%% fail if most general constraint would be produced
-trans(C,C,C).
-
-%% ?- con(A,B,>),con(A,C,>),con(B,D,>),con(C,D,>).
-%a bc d 
 /*--------------- eof path.pl ----------------------------------------------*/

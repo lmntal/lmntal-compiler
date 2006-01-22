@@ -1,0 +1,24 @@
+and(var(A),var(B),var(C)) :- A=B, uniq(A, B, C) |
+and(var(A),var(B),var(C)), var.unify(A, C).
+
+and(var(A),var(B),1) :- uniq(A, B) |
+and(var(A),var(B),1), var.unify(A, B).
+
+and(var(A),1,var(B)) :- uniq(A, B) |
+and(var(A),1,var(B)), var.unify(A, B).
+
+and(A,0,var(B)) :- uniq(A, B) |
+and(A,0,var(B)), var.bind(B, 0).
+
+and(1,var(A),var(B)) :- uniq(A, B) |
+and(1,var(A),var(B)), var.unify(A, B).
+
+and(0,A,var(B)) :- uniq(A, B) |
+and(0,A,var(B)), var.bind(B, 0).
+
+
+
+var.use.
+
+var(a) = and(var(b), 1).
+
