@@ -16,6 +16,6 @@ ret=gen(100).
  * @param N 生成するリストの長さを表す整数アトム
  * @param R 生成したリストの出力先
  */
-R=gen(N) :- N > 0 | R=c(integer.rnd(10000),gen(N-1)).
+R=gen(N) :- N > 0 | R=c(integer.rnd(100),gen(N-1)).
 R=gen(N) :- N = 0 | R=nil.
 

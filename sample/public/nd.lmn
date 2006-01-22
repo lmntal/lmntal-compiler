@@ -1,0 +1,24 @@
+//  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+//  Author: mizuno
+
+nd.exec({{r([a,a]). a(X) :- b(X). a(X) :- c(X). a(X) :- a(X)}*}).
+
+//uniq用のID生成
+nextid(0).
+nextid(N), {$p,@p} :- \+($p=(id(X),$pp)), N2=N+1 | nextid(N2), {id(N),$p,@p}.
+
+//ループ検出
+reduce(F,T,N), {id(I1),from(F),$p,@p}, {id(I2),to(T),$q,@q} :- uniq(I1,I2) |
+	reduce(F,T,N), reduce2(F2,T2), {from(F),from(F2),id(I1),$p,@p}, {to(T),to(T2),id(I2),$q,@q}.
+reduce2(F1,T1), reduce2(F2,T2), {from(F1),id(I1),$p,@p}, {to(T1),from(F2),id(I2),$q,@q}, {to(T2),id(I3),$r,@r} :- unary(I2), uniq(I1,I3) |
+	reduce2(F1,T1), reduce2(F2,T2), reduce2(F3,T3),
+	{from(F1),from(F3),id(I1),$p,@p}, {to(T1),from(F2),id(I2),$q,@q}, {to(T2),to(T3),id(I3),$r,@r}.
+reduce2(F1,T1), reduce2(F2,T2), {from(F1),to(T2),id(I1),$p,@p}, {to(T1),from(F2),id(I2),$q,@q}
+ :- unary(I1), unary(I2), uniq |
+	reduce2(F1,T1), reduce2(F2,T2), {from(F1),to(T2),id(I1),$p,@p}, {to(T1),from(F2),id(I2),$q,@q}, loop.
+reduce(F,T,N), {from(F),to(T),id(I),$p,@p}
+ :- unary(I), uniq | reduce(F,T,N),{from(F),to(T),id(I),$p,@p}, loop.
+
+//終了状態検出
+{id(I),$p,@p} :- \+($p=(from(T),$pp)),uniq(I) | {id(I),$p,@p}, end(I).
+end(I1),end(I2) :- uniq(I1) | end(I1), end(I2), ng.
