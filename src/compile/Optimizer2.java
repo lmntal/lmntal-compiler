@@ -42,7 +42,10 @@ public class Optimizer2 {
 			else if(inst.getKind() == Instruction.FINDATOM
 				|| inst.getKind() == Instruction.ANYMEM
 				|| inst.getKind() == Instruction.PROCEED
-				|| inst.getKind() == Instruction.JUMP) continue;
+				|| inst.getKind() == Instruction.JUMP
+				|| inst.getKind() == Instruction.UNIQ
+				|| inst.getKind() == Instruction.NOT_UNIQ
+				|| inst.getKind() == Instruction.GUARD_INLINE) continue;
 				
 			else if(inst.getKind() == Instruction.GROUP
 					|| inst.getKind() == Instruction.BRANCH){
