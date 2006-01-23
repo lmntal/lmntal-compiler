@@ -1,0 +1,119 @@
+/*
+
+NAME
+
+	codec module
+
+SYNOPSIS
+    
+Sample
+
+        sample/okabe/codec.lmn
+
+AUTHOR
+
+	Ryo Okabe
+
+HISTORY
+
+	1.0  2006/01/10(Tue)
+	2.0  2006/01/12(Thu)
+
+*/
+
+[:/*inline_define*/
+import java.io.*;
+import compile.*;
+import compile.parser.LMNParser;
+import compile.parser.ParseException;
+import compile.parser.intermediate.RulesetParser;
+:].
+
+{
+module(codec).
+
+/**
+ *  module: memEncoder
+ *  membrane -> string
+ *  Example
+ *    ret=codec.memEncoder({a. a:-b}) -> "{a. a:-b}"
+ */
+memEncoder @@
+Ret=codec.memEncoder({$p,@p}) :-
+  Ret=codec.encoded(X),{X=codec.encode,$p,@p}.
+
+encode @@
+{Ret=codec.encode,$p,@p} :-
+  {Ret=
+  [:/*inline*/
+    me.remove();
+    StringFunctor sFunc =
+      new StringFunctor(((Membrane)mem).encode());
+    Atom sAtom = mem.newAtom(sFunc);
+    mem.relinkAtomArgs(sAtom,0,me,0);
+  :],$p,@p}.
+
+encoded @@
+Ret=codec.encoded(X),{X=S,$p,@p} :- string(S) | 
+  Ret=S,{$p,@p}.
+
+%memDecoder @@
+%codec.memDecoder(X),{X=_S,$p,@p} :-
+%  codec.strDecoder(_S),{$p,@p}.
+
+/**
+ *  module: strDecoder
+ *  string -> membrane
+ *  Example
+ *    strDecoder("{a. a:-b}") -> {a. a:-b}
+ */
+strDecoder @@
+codec.strDecoder(S) :- string(S) |
+  [:/*inline*/
+    String str = me.nth(0);
+    LMNParser lp;
+    compile.structure.Membrane m;
+    Ruleset rs;
+    try {
+      lp = new LMNParser(new StringReader(str));
+      m = lp.parse();
+      rs = RulesetCompiler.compileMembrane(m);
+      rs.react((Membrane)mem);
+    } catch(ParseException e) {
+      e.printStackTrace();
+    }
+    me.nthAtom(0).remove();
+    me.remove();
+  :](S).
+
+/**
+ *  module: fileDecoder
+ *  file(.lmn) -> membrane
+ *  Example
+ *    codec.fileDecoder("hoge.lmn") -> {a. a:-b}
+ */
+fileDecoder @@
+codec.fileDecoder(S) :- string(S) |
+  [:/*inline*/
+    try {
+      String filename = me.nth(0);
+      FileInputStream fis = new FileInputStream(filename);
+      InputStreamReader isr = new InputStreamReader(fis);
+      BufferedReader br = new BufferedReader(isr);
+      LMNParser lp;
+      compile.structure.Membrane m;
+      Ruleset rs;
+      lp = new LMNParser(br);
+      m = lp.parse();
+      rs = RulesetCompiler.compileMembrane(m);
+      rs.react((Membrane)mem);
+      br.close();
+    } catch(IOException e) {
+      e.printStackTrace();
+    } catch(ParseException e) {
+      e.printStackTrace();
+    }
+    me.nthAtom(0).remove();
+    me.remove();
+  :](S).
+}
