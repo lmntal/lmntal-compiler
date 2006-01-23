@@ -99,6 +99,17 @@
 			<tarfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
 		</tar>
 	</target>
+	<target name="zip">
+		<zip destfile="lmntal.zip" >
+			<zipfileset dir="${bin}" excludes="set_cp*,*.bat,lmntal.jar" prefix="bin" filemode="755"/>
+			<zipfileset dir="${bin}" includes="*.bat,lmntal.jar" excludes="set_cp*" prefix="bin"/>
+			<zipfileset file="${bin}/set_cp_jar.bat" fullpath="bin/set_cp.bat"/>
+			<zipfileset file="${bin}/set_cp_jar.sh" fullpath="bin/set_cp.sh" filemode="755"/>
+			<zipfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>
+			<zipfileset dir="${lmntal_lib}/public" includes="*.lmn" prefix="lib/src"/>
+			<zipfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
+		</zip>
+	</target>
 	<target name="dist" depends="help,jar,lib,archive" description="generate the distribution"/>
 
 	
