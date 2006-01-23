@@ -3,7 +3,7 @@ import translated.module_integer.*;
 import runtime.SystemRulesets;
 import runtime.Ruleset;
 public class Module_integer{
-	private static Ruleset[] rulesets = {Ruleset607.getInstance()};
+	private static Ruleset[] rulesets = {Ruleset611.getInstance()};
 	public static Ruleset[] getRulesets() {
 		return rulesets;
 	}

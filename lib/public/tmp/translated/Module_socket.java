@@ -3,7 +3,7 @@ import translated.module_socket.*;
 import runtime.SystemRulesets;
 import runtime.Ruleset;
 public class Module_socket{
-	private static Ruleset[] rulesets = {Ruleset613.getInstance()};
+	private static Ruleset[] rulesets = {Ruleset625.getInstance()};
 	public static Ruleset[] getRulesets() {
 		return rulesets;
 	}
