@@ -156,9 +156,9 @@ H={ state({}, {$cu[], @cu}, {eq=[], $cb}, {$t[], @tr}, {$v[]}), $etc[], @etc }/
 H={$cu[], $cb}.
 
 Start @@
-H=chr.run({$gs}, {@simplify}, {@replace}, {@find_token}, Prop_head_count) :- int(Prop_head_count) |
+H=lmntalchr.run({$gs}, {@simplify}, {@replace}, {@find_token}, Prop_head_count) :- int(Prop_head_count) |
 H={
-	chr.use.
+	lmntalchr.use.
 	solve.
 	introduce.
 	simplify.
