@@ -1,9 +1,9 @@
 package translated;
-import translated.module_io.*;
+import translated.module_float.*;
 import runtime.SystemRulesets;
 import runtime.Ruleset;
-public class Module_io{
-	private static Ruleset[] rulesets = {Ruleset609.getInstance()};
+public class Module_float{
+	private static Ruleset[] rulesets = {Ruleset603.getInstance()};
 	public static Ruleset[] getRulesets() {
 		return rulesets;
 	}

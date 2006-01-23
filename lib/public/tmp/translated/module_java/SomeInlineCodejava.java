@@ -13,11 +13,11 @@ class Java {
 		if(argv==null) argv=new Object[0];
 		Class cl[] = new Class[argv.length];
 		
-		if(false) { // 速いけどだめな方法。add(Button) が add(Component) にマッチしない
+		if(false) { // ﾂｮ､､､ｱ､ﾉ､ﾀ､皃ﾊﾊ?ﾋ｡｡｣add(Button) ､ｬ add(Component) ､ﾋ･ﾞ･ﾃ･ﾁ､ｷ､ﾊ､､
 			try {
-				// 必要に応じて追加する
+				// ﾉｬﾍﾗ､ﾋｱ?､ｸ､ﾆﾄﾉｲﾃ､ｹ､?
 				Class IntegerClass = Class.forName("java.lang.Integer");
-				// メソッドを識別するためにクラスの配列をつくる
+				// ･皈ｽ･ﾃ･ﾉ､ｱﾊﾌ､ｹ､?､ｿ､皃ﾋ･ｯ･鬣ｹ､ﾎﾇﾛﾎﾄ､ｯ､?
 				for(int i=0;i<cl.length;i++) {
 					cl[i] = argv[i].getClass();
 					if(cl[i].equals(IntegerClass)) cl[i] = Integer.TYPE;
@@ -34,7 +34,7 @@ class Java {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else { // 遅いけどよさそうな方法
+		} else { // ﾃﾙ､､､ｱ､ﾉ､隍ｵ､ｽ､ｦ､ﾊﾊ?ﾋ｡
 			Method mm[] = obj.getClass().getMethods();
 			for(int j=0;j<mm.length;j++) {
 				try {

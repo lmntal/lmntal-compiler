@@ -71,6 +71,21 @@ public class SomeInlineCodeinteger {
   me.remove();
  
 			break; }
+		case 5: {
+			/*inline*/
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Random rand = new Random();
+	int v=0;
+	try{
+		v = Integer.parseInt(s);
+	} catch(NumberFormatException e) {
+	}
+	Atom result = mem.newAtom(new IntegerFunctor(v));
+	mem.relink(result, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	
+			break; }
 		}
 	}
 }

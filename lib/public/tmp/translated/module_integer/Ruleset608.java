@@ -1,27 +1,27 @@
-package translated.module_sys;
+package translated.module_integer;
 import runtime.*;
 import java.util.*;
 import java.io.*;
 import daemon.IDConverter;
 import module.*;
 
-public class Ruleset616 extends Ruleset {
-	private static final Ruleset616 theInstance = new Ruleset616();
-	private Ruleset616() {}
-	public static Ruleset616 getInstance() {
+public class Ruleset608 extends Ruleset {
+	private static final Ruleset608 theInstance = new Ruleset608();
+	private Ruleset608() {}
+	public static Ruleset608 getInstance() {
 		return theInstance;
 	}
-	private int id = 616;
+	private int id = 608;
 	private String globalRulesetID;
 	public String getGlobalRulesetID() {
 		if (globalRulesetID == null) {
-			globalRulesetID = Env.theRuntime.getRuntimeID() + ":sys" + id;
+			globalRulesetID = Env.theRuntime.getRuntimeID() + ":integer" + id;
 			IDConverter.registerRuleset(globalRulesetID, this);
 		}
 		return globalRulesetID;
 	}
 	public String toString() {
-		return "@sys" + id;
+		return "@integer" + id;
 	}
 	private String encodedRuleset = 
 "(initial rule)";
@@ -30,9 +30,9 @@ public class Ruleset616 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL1185(mem, atom, false)) {
+		if (execL765(mem, atom, false)) {
 			if (Env.fTrace)
-				Task.trace("-->", "@616", "null");
+				Task.trace("-->", "@608", "null");
 			return true;
 		}
 		return result;
@@ -42,14 +42,14 @@ public class Ruleset616 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL1186(mem, nondeterministic)) {
+		if (execL766(mem, nondeterministic)) {
 			if (Env.fTrace)
-				Task.trace("==>", "@616", "null");
+				Task.trace("==>", "@608", "null");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL1186(Object var0, boolean nondeterministic) {
+	public boolean execL766(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -70,16 +70,16 @@ public class Ruleset616 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1186:
+L766:
 		{
-			if (execL1183(var0,nondeterministic)) {
+			if (execL763(var0,nondeterministic)) {
 				ret = true;
-				break L1186;
+				break L766;
 			}
 		}
 		return ret;
 	}
-	public boolean execL1183(Object var0, boolean nondeterministic) {
+	public boolean execL763(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -100,18 +100,18 @@ L1186:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1183:
+L763:
 		{
 			if (nondeterministic) {
-				Task.states.add(new Object[] {theInstance, "null", "L1184",var0});
-			} else if (execL1184(var0,nondeterministic)) {
+				Task.states.add(new Object[] {theInstance, "null", "L764",var0});
+			} else if (execL764(var0,nondeterministic)) {
 				ret = true;
-				break L1183;
+				break L763;
 			}
 		}
 		return ret;
 	}
-	public boolean execL1184(Object var0, boolean nondeterministic) {
+	public boolean execL764(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -137,11 +137,11 @@ L1183:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1184:
+L764:
 		{
 			mem = ((AbstractMembrane)var0).newMem(0);
 			var1 = mem;
-			((AbstractMembrane)var1).loadRuleset(Ruleset615.getInstance());
+			((AbstractMembrane)var1).loadRuleset(Ruleset607.getInstance());
 			func = f0;
 			var2 = ((AbstractMembrane)var1).newAtom(func);
 			func = f1;
@@ -159,11 +159,11 @@ L1184:
 			atom = ((Atom)var2);
 			atom.getMem().enqueueAtom(atom);
 			ret = true;
-			break L1184;
+			break L764;
 		}
 		return ret;
 	}
-	public boolean execL1185(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL765(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -184,11 +184,11 @@ L1184:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1185:
+L765:
 		{
 		}
 		return ret;
 	}
 	private static final Functor f1 = new Functor("module", 1, null);
-	private static final Functor f0 = new Functor("sys", 1, null);
+	private static final Functor f0 = new Functor("integer", 1, null);
 }

@@ -5,7 +5,7 @@ public class SomeInlineCodeio {
 	public static void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {
-		case 12: {
+		case 13: {
 			/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -46,6 +46,27 @@ public class SomeInlineCodeio {
 	mem.removeAtom(me);
 	
 			break; }
+		case 10: {
+			/*inline*/
+		try {
+			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			int async = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
+			// ¤³¤Î¥Á¥§¥Ã¥¯¤Ï¥¬¡¼¥É¤Ç¤ä¤?¤Ù¤­
+			if((async!=0 && br.ready()) || async==0) {
+				String s = br.readLine();
+				Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
+				mem.relink(result, 0, me, 1);
+				Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
+				mem.relink(res, 0, me, 3);
+				me.nthAtom(0).remove();
+				me.nthAtom(2).remove();
+				me.remove();
+			} else {
+				me.setName("readline");
+			}
+		} catch(Exception e) {Env.e(e);}
+	
+			break; }
 		case 9: {
 			/*inline*/
 	try {
@@ -63,20 +84,6 @@ public class SomeInlineCodeio {
 	} catch(Exception e) {e.printStackTrace();}
 	
 			break; }
-		case 10: {
-			/*inline*/
-		try {
-			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
-			String s = br.readLine();
-			Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
-			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
-			mem.relink(res, 0, me, 2);
-			me.nthAtom(0).remove();
-			me.remove();
-		} catch(Exception e) {Env.e(e);}
-	
-			break; }
 		case 11: {
 			/*inline*/
 		try {
@@ -86,6 +93,19 @@ public class SomeInlineCodeio {
 				pw.println(me.nth(1));
 			}
 			mem.relink(done, 0, me, 2);
+			me.nthAtom(1).remove();
+			me.remove();
+		} catch(Exception e) {e.printStackTrace();}
+	
+			break; }
+		case 12: {
+			/*inline*/
+		try {
+			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			if(pw!=null) {
+				pw.println(me.nth(1));
+			}
+			me.nthAtom(0).remove();
 			me.nthAtom(1).remove();
 			me.remove();
 		} catch(Exception e) {e.printStackTrace();}

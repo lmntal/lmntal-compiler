@@ -23,6 +23,11 @@ public class Ruleset601 extends Ruleset {
 	public String toString() {
 		return "@array" + id;
 	}
+	private String encodedRuleset = 
+"('='(H, array.new(Length)) :- int(Length) | '='(H, [:/*inline*/\t\tint l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();\t\tAtom result = mem.newAtom(new Functor(\"int_array\", 2));\t\tAtom result2 = mem.newAtom(new Functor(\"@\", l+1));\t\tfor(int i=0;i<l;i++) {\t\t\tAtom el = mem.newAtom(new IntegerFunctor(0));\t\t\tmem.newLink(el, 0, result2, i);\t\t}\t\tmem.newLink(result, 0, result2, l);\t\tmem.relink(result, 1, me, 1);\t\tme.nthAtom(0).remove();\t\tme.remove();\t\t:](Length))), ('='(H, array.update(int_array(A), I, OldValue, NewValue)) :- int(I) | '='(H, array(X)), [:/*inline*/\t\tint i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();\t\tint len = me.nthAtom(0).getFunctor().getArity()-1;\t\ti = (i+len) % len;\t\t\t\tmem.swapAtomArgs(me.nthAtom(0), i, me, 3);\t\tmem.unifyAtomArgs(me, 4, me, 0);\t\tmem.unifyAtomArgs(me, 3, me, 2);\t\tme.nthAtom(1).remove();\t\tme.remove();\t\t:](A, I, OldValue, NewValue, X)), ('='(H, array.update(array(A), I, OldValue, NewValue)) :- int(I) | '='(H, array(X)), [:/*inline*/\t  int i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();\t\tint len = me.nthAtom(0).getFunctor().getArity()-1;\t\ti = (i+len) % len;\t\t\t\tmem.swapAtomArgs(me.nthAtom(0), i, me, 3);\t\tmem.unifyAtomArgs(me, 4, me, 0);\t\tmem.unifyAtomArgs(me, 3, me, 2);\t\tme.nthAtom(1).remove();\t\tme.remove();\t\t:](A, I, OldValue, NewValue, X)), ('='(H, array.get(int_array(A), I, Result)) :- int(I) | '='(H, int_array(X)), [:/*inline*/\t\tint i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();\t\tint len = me.nthAtom(0).getFunctor().getArity()-1;\t\ti = (i+len) % len;\t\t\t  int v = ((IntegerFunctor)me.nthAtom(0).nthAtom(i).getFunctor()).intValue();\t\tAtom result = mem.newAtom(new IntegerFunctor(v));\t\t/* Functor f = me.nthAtom(0).nthAtom(i).getFunctor(); */\t\t/* Atom result = mem.newAtom(f); */\t\tmem.relink(result, 0, me, 2);\t\tmem.unifyAtomArgs(me, 3, me, 0);\t\tme.nthAtom(1).remove();\t\tme.remove();\t\t:](A, I, Result, X)), ('='(H, array.put(int_array(A), I, Value)) :- int(I), int(Value) | '='(H, int_array(X)), [:/*inline*/\t\tint i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();\t\tint len = me.nthAtom(0).getFunctor().getArity()-1;\t\ti = (i+len) % len;\t\t\t\tme.nthAtom(0).nthAtom(i).remove();\t\tmem.relink(me.nthAtom(0), i, me, 2);\t\tmem.unifyAtomArgs(me, 3, me, 0);\t\tme.nthAtom(1).remove();\t\tme.remove();\t\t:](A, I, Value, X))";
+	public String encode() {
+		return encodedRuleset;
+	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
 		if (execL104(mem, atom, false)) {
@@ -97,6 +102,8 @@ public class Ruleset601 extends Ruleset {
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -151,6 +158,8 @@ L151:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -226,6 +235,8 @@ L145:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -267,6 +278,8 @@ L146:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -334,6 +347,8 @@ L150:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -395,6 +410,8 @@ L148:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -445,6 +462,8 @@ L140:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -517,6 +536,8 @@ L134:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -557,6 +578,8 @@ L135:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -619,6 +642,8 @@ L139:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -676,6 +701,8 @@ L137:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -727,6 +754,8 @@ L129:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -805,6 +834,8 @@ L123:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -846,6 +877,8 @@ L124:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -911,6 +944,8 @@ L128:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -970,6 +1005,8 @@ L126:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1021,6 +1058,8 @@ L118:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1103,6 +1142,8 @@ L112:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1144,6 +1185,8 @@ L113:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1209,6 +1252,8 @@ L117:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1267,6 +1312,8 @@ L115:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1308,6 +1355,8 @@ L107:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1358,6 +1407,8 @@ L103:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1389,6 +1440,8 @@ L104:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;

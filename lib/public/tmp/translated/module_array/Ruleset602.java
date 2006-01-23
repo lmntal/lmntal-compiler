@@ -23,6 +23,11 @@ public class Ruleset602 extends Ruleset {
 	public String toString() {
 		return "@array" + id;
 	}
+	private String encodedRuleset = 
+"(initial rule)";
+	public String encode() {
+		return encodedRuleset;
+	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
 		if (execL157(mem, atom, false)) {
@@ -53,6 +58,8 @@ public class Ruleset602 extends Ruleset {
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -81,6 +88,8 @@ L158:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -116,6 +125,8 @@ L155:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -128,7 +139,7 @@ L155:
 		boolean ret = false;
 L156:
 		{
-			mem = ((AbstractMembrane)var0).newMem();
+			mem = ((AbstractMembrane)var0).newMem(0);
 			var1 = mem;
 			((AbstractMembrane)var1).loadRuleset(Ruleset601.getInstance());
 			func = f0;
@@ -161,6 +172,8 @@ L156:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
 		Set insset;
 		Set delset;
 		Map srcmap;

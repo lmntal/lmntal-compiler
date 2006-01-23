@@ -1,27 +1,27 @@
-package translated.module_sys;
+package translated.module_graphic;
 import runtime.*;
 import java.util.*;
 import java.io.*;
 import daemon.IDConverter;
 import module.*;
 
-public class Ruleset616 extends Ruleset {
-	private static final Ruleset616 theInstance = new Ruleset616();
-	private Ruleset616() {}
-	public static Ruleset616 getInstance() {
+public class Ruleset606 extends Ruleset {
+	private static final Ruleset606 theInstance = new Ruleset606();
+	private Ruleset606() {}
+	public static Ruleset606 getInstance() {
 		return theInstance;
 	}
-	private int id = 616;
+	private int id = 606;
 	private String globalRulesetID;
 	public String getGlobalRulesetID() {
 		if (globalRulesetID == null) {
-			globalRulesetID = Env.theRuntime.getRuntimeID() + ":sys" + id;
+			globalRulesetID = Env.theRuntime.getRuntimeID() + ":graphic" + id;
 			IDConverter.registerRuleset(globalRulesetID, this);
 		}
 		return globalRulesetID;
 	}
 	public String toString() {
-		return "@sys" + id;
+		return "@graphic" + id;
 	}
 	private String encodedRuleset = 
 "(initial rule)";
@@ -30,9 +30,9 @@ public class Ruleset616 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL1185(mem, atom, false)) {
+		if (execL423(mem, atom, false)) {
 			if (Env.fTrace)
-				Task.trace("-->", "@616", "null");
+				Task.trace("-->", "@606", "null");
 			return true;
 		}
 		return result;
@@ -42,14 +42,14 @@ public class Ruleset616 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL1186(mem, nondeterministic)) {
+		if (execL424(mem, nondeterministic)) {
 			if (Env.fTrace)
-				Task.trace("==>", "@616", "null");
+				Task.trace("==>", "@606", "null");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL1186(Object var0, boolean nondeterministic) {
+	public boolean execL424(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -70,16 +70,16 @@ public class Ruleset616 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1186:
+L424:
 		{
-			if (execL1183(var0,nondeterministic)) {
+			if (execL421(var0,nondeterministic)) {
 				ret = true;
-				break L1186;
+				break L424;
 			}
 		}
 		return ret;
 	}
-	public boolean execL1183(Object var0, boolean nondeterministic) {
+	public boolean execL421(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -100,23 +100,24 @@ L1186:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1183:
+L421:
 		{
 			if (nondeterministic) {
-				Task.states.add(new Object[] {theInstance, "null", "L1184",var0});
-			} else if (execL1184(var0,nondeterministic)) {
+				Task.states.add(new Object[] {theInstance, "null", "L422",var0});
+			} else if (execL422(var0,nondeterministic)) {
 				ret = true;
-				break L1183;
+				break L421;
 			}
 		}
 		return ret;
 	}
-	public boolean execL1184(Object var0, boolean nondeterministic) {
+	public boolean execL422(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
 		Object var5 = null;
+		Object var6 = null;
 		Atom atom;
 		Functor func;
 		Link link;
@@ -137,33 +138,37 @@ L1183:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1184:
+L422:
 		{
 			mem = ((AbstractMembrane)var0).newMem(0);
 			var1 = mem;
-			((AbstractMembrane)var1).loadRuleset(Ruleset615.getInstance());
+			((AbstractMembrane)var1).loadRuleset(Ruleset605.getInstance());
 			func = f0;
 			var2 = ((AbstractMembrane)var1).newAtom(func);
 			func = f1;
 			var3 = ((AbstractMembrane)var1).newAtom(func);
+			func = f2;
+			var4 = ((AbstractMembrane)var0).newAtom(func);
 			link = new Link(((Atom)var2), 0);
-			var4 = link;
-			link = new Link(((Atom)var3), 0);
 			var5 = link;
+			link = new Link(((Atom)var3), 0);
+			var6 = link;
 			mem = ((AbstractMembrane)var1);
 			mem.unifyLinkBuddies(
-				((Link)var4),
-				((Link)var5));
+				((Link)var5),
+				((Link)var6));
+			atom = ((Atom)var4);
+			atom.getMem().enqueueAtom(atom);
 			atom = ((Atom)var3);
 			atom.getMem().enqueueAtom(atom);
 			atom = ((Atom)var2);
 			atom.getMem().enqueueAtom(atom);
 			ret = true;
-			break L1184;
+			break L422;
 		}
 		return ret;
 	}
-	public boolean execL1185(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL423(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -184,11 +189,12 @@ L1184:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L1185:
+L423:
 		{
 		}
 		return ret;
 	}
 	private static final Functor f1 = new Functor("module", 1, null);
-	private static final Functor f0 = new Functor("sys", 1, null);
+	private static final Functor f2 = new Functor("/*inline_define*/\r\n\timport java.awt.*;\r\n\timport java.awt.event.*;\r\n\timport java.awt.MouseInfo.*;\r\n", 0, null);
+	private static final Functor f0 = new Functor("graphic", 1, null);
 }
