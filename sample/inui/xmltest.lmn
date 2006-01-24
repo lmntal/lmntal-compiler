@@ -1,0 +1,5 @@
+% XMLファイルを開く
+r=xml.open("sample.xml").
+
+% valueを持つタグを表すアトムを取り出すルール
+value(X, Y), node(A, B, X) :- value(Y), node(A, B).
