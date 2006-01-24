@@ -1,4 +1,4 @@
-/**
+/*
  * Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved. 
  * $Author$
  *
@@ -7,6 +7,7 @@
  * 
  * HISTORY
  *	2006.1.23 作成開始
+ *  2006.1.24 ノードの表現を膜に変更
  */
 
 {
@@ -20,9 +21,10 @@ module(xml).
  * @example r=xml.open("sample.xml").
  */
 H=xml.open(Filename) :- unary(Filename) | H=[:/*inline*/
-	Atom a = LMNtalXML.read(me.nth(0), mem);
-	mem.addAtom(a);
+	Atom a = LMNtalXML.open(me.nth(0), mem);
 	mem.relink(a, 0, me, 1);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
 	:](Filename).
 }.
 
@@ -41,11 +43,12 @@ import runtime.*;
  * @since 2006.1.23
  */
 class LMNtalXML {
-	protected static final Functor nameFunctor = new Functor("name", 2);
-	protected static final Functor valueFunctor = new Functor("value", 2);
+	protected static final Functor nameFunctor = new Functor("name", 1);
+	protected static final Functor valueFunctor = new Functor("value", 1);
 	
 	protected AbstractMembrane mem;
 	protected Document doc;
+	protected String filename;
 
 	/**
 	 * コンストラクタ
@@ -53,6 +56,7 @@ class LMNtalXML {
 	 * @param mem データ構造を追加したい膜
 	 */
 	private LMNtalXML(String filename, AbstractMembrane mem) {
+		this.filename = filename;
 		this.mem = mem;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -64,7 +68,7 @@ class LMNtalXML {
 		}
 	}
 	
-	public static Atom read(String filename, AbstractMembrane mem) {
+	public static Atom open(String filename, AbstractMembrane mem) {
 		LMNtalXML xml = new LMNtalXML(filename, mem);
 		return xml.walkThrough();
 	}
@@ -74,19 +78,16 @@ class LMNtalXML {
 	 * @param node ノード
 	 * @return このノードに対応するアトム
 	 */
-	private Atom newNodeAtom(Node node) {
-		Atom atom = mem.newAtom(new Functor("node", getValidChildNodesLength(node)+3));
+	private AbstractMembrane newNodeMembrane(Node node, AbstractMembrane mem) {
+		AbstractMembrane m = mem.newMem();
+		Atom nameAtom1 = m.newAtom(nameFunctor);
+		Atom nameAtom2 = m.newAtom(new StringFunctor(node.getNodeName()+""));
+		m.newLink(nameAtom1, 0, nameAtom2, 0);
 		
-		Atom nameAtom1 = mem.newAtom(nameFunctor);
-		mem.newLink(atom, 1, nameAtom1, 1);
-		Atom nameAtom2 = mem.newAtom(new StringFunctor(node.getNodeName()+""));
-		mem.newLink(nameAtom1, 0, nameAtom2, 0);
-		
-		Atom valueAtom1 = mem.newAtom(valueFunctor);
-		mem.newLink(atom, 2, valueAtom1, 1);
-		Atom valueAtom2 = mem.newAtom(new StringFunctor(node.getNodeValue()+""));
+		Atom valueAtom1 = m.newAtom(valueFunctor);
+		Atom valueAtom2 = m.newAtom(new StringFunctor(node.getNodeValue()+""));
 		mem.newLink(valueAtom1, 0, valueAtom2, 0);
-		return atom;
+		return m;
 	}
 
 	/**
@@ -95,9 +96,9 @@ class LMNtalXML {
 	 */
 	private Atom walkThrough() {
 		Node root = doc.getDocumentElement();
-		Atom atom = newNodeAtom(root);
-		recursiveWalk(root, atom);
-		return atom;
+		AbstractMembrane m = mem.newMem();
+		traverse(root, m);
+		return m.newAtom(new Functor(filename, 1));
 	}
 	
 	/**
@@ -114,28 +115,26 @@ class LMNtalXML {
 	 * @param node ノード
 	 * @return 子ノードの数
 	 */
-	private int getValidChildNodesLength(Node node) {
-		int length = 0;
-		for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
-			if (isValidNode(child)) length++;
-		}
-		return length;
-	}
+//	private int getValidChildNodesLength(Node node) {
+//		int length = 0;
+//		for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
+//			if (isValidNode(child)) length++;
+//		}
+//		return length;
+//	}
 
 	/**
 	 * 再帰的にノードをたどる
 	 * @param node ノード
 	 * @param atom アトム
 	 */
-	private void recursiveWalk(Node node, Atom atom) {
-		int i = 3;
+	private void traverse(Node node, AbstractMembrane mem) {
 		for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
 			if (!isValidNode(child)) continue;
 			
-			Atom a = newNodeAtom(child);
-			mem.newLink(atom, i++, a, 0);
+			AbstractMembrane m = newNodeMembrane(child, mem);
 			
-			recursiveWalk(child, a);
+			traverse(child, m);
 		}
 	}
 
