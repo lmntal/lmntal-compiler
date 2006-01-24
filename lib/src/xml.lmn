@@ -41,6 +41,9 @@ import runtime.*;
  * @since 2006.1.23
  */
 class LMNtalXML {
+	protected static final Functor nameFunctor = new Functor("name", 2);
+	protected static final Functor valueFunctor = new Functor("value", 2);
+	
 	protected AbstractMembrane mem;
 	protected Document doc;
 
@@ -74,15 +77,15 @@ class LMNtalXML {
 	private Atom newNodeAtom(Node node) {
 		Atom atom = mem.newAtom(new Functor("node", getValidChildNodesLength(node)+3));
 		
-		Atom nameAtom1 = mem.newAtom(new Functor("name", 2));
-		mem.newLink(atom, 1, nameAtom1, 0);
-		Atom nameAtom2 = mem.newAtom(new Functor(node.getNodeName()+"", 1));
-		mem.newLink(nameAtom1, 1, nameAtom2, 0);
+		Atom nameAtom1 = mem.newAtom(nameFunctor);
+		mem.newLink(atom, 1, nameAtom1, 1);
+		Atom nameAtom2 = mem.newAtom(new StringFunctor(node.getNodeName()+""));
+		mem.newLink(nameAtom1, 0, nameAtom2, 0);
 		
-		Atom valueAtom1 = mem.newAtom(new Functor("value", 2));
-		mem.newLink(atom, 2, valueAtom1, 0);
-		Atom valueAtom2 = mem.newAtom(new Functor(node.getNodeValue()+"", 1));
-		mem.newLink(valueAtom1, 1, valueAtom2, 0);
+		Atom valueAtom1 = mem.newAtom(valueFunctor);
+		mem.newLink(atom, 2, valueAtom1, 1);
+		Atom valueAtom2 = mem.newAtom(new StringFunctor(node.getNodeValue()+""));
+		mem.newLink(valueAtom1, 0, valueAtom2, 0);
 		return atom;
 	}
 
