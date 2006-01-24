@@ -24,13 +24,13 @@ public class Ruleset608 extends Ruleset {
 		return "@thread" + id;
 	}
 	private String encodedRuleset = 
-"(_0 @@ thread.cre(0) :- )";
+"(_0 @@ thread.create(N) :- '>'(N, 0) | thread.num(N), thread.cre(N))";
 	public String encode() {
 		return encodedRuleset;
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL239(mem, atom, false)) {
+		if (execL224(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@608", "_0");
 			return true;
@@ -42,16 +42,17 @@ public class Ruleset608 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL243(mem, nondeterministic)) {
+		if (execL227(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@608", "_0");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL243(Object var0, boolean nondeterministic) {
+	public boolean execL227(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
+		Object var3 = null;
 		Atom atom;
 		Functor func;
 		Link link;
@@ -72,22 +73,25 @@ public class Ruleset608 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L243:
+L227:
 		{
-			func = f0;
+			var2 = new Atom(null, f0);
+			func = f1;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var1 = atom;
 				link = ((Atom)var1).getArg(0);
-				if (!(link.getPos() != 0)) {
-					var2 = link.getAtom();
-					if (!(!(f1).equals(((Atom)var2).getFunctor()))) {
+				var3 = link.getAtom();
+				if (!(!(((Atom)var3).getFunctor() instanceof IntegerFunctor))) {
+					x = ((IntegerFunctor)((Atom)var3).getFunctor()).intValue();
+					y = ((IntegerFunctor)((Atom)var2).getFunctor()).intValue();	
+					if (!(!(x > y))) {
 						if (nondeterministic) {
-							Task.states.add(new Object[] {theInstance, "_0", "L238",var0,var1,var2});
-						} else if (execL238(var0,var1,var2,nondeterministic)) {
+							Task.states.add(new Object[] {theInstance, "_0", "L223",var0,var1,var2,var3});
+						} else if (execL223(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L243;
+							break L227;
 						}
 					}
 				}
@@ -95,7 +99,11 @@ L243:
 		}
 		return ret;
 	}
-	public boolean execL238(Object var0, Object var1, Object var2, boolean nondeterministic) {
+	public boolean execL223(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
 		Atom atom;
 		Functor func;
 		Link link;
@@ -116,23 +124,79 @@ L243:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L238:
+L223:
 		{
 			atom = ((Atom)var1);
 			atom.dequeue();
 			atom = ((Atom)var1);
 			atom.getMem().removeAtom(atom);
-			atom = ((Atom)var2);
+			atom = ((Atom)var3);
+			atom.dequeue();
+			atom = ((Atom)var3);
 			atom.getMem().removeAtom(atom);
+			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			var5 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			func = f2;
+			var6 = ((AbstractMembrane)var0).newAtom(func);
+			func = f3;
+			var7 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 0,
+				((Atom)var4), 0 );
+			((Atom)var7).getMem().newLink(
+				((Atom)var7), 0,
+				((Atom)var5), 0 );
+			atom = ((Atom)var7);
+			atom.getMem().enqueueAtom(atom);
+			atom = ((Atom)var6);
+			atom.getMem().enqueueAtom(atom);
+				try {
+					Class c = Class.forName("translated.Module_thread");
+					java.lang.reflect.Method method = c.getMethod("getRulesets", null);
+					Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+					for (int i = 0; i < rulesets.length; i++) {
+						((AbstractMembrane)var0).loadRuleset(rulesets[i]);
+					}
+				} catch (ClassNotFoundException e) {
+					Env.d(e);
+					Env.e("Undefined module thread");
+				} catch (NoSuchMethodException e) {
+					Env.d(e);
+					Env.e("Undefined module thread");
+				} catch (IllegalAccessException e) {
+					Env.d(e);
+					Env.e("Undefined module thread");
+				} catch (java.lang.reflect.InvocationTargetException e) {
+					Env.d(e);
+					Env.e("Undefined module thread");
+				}
+				try {
+					Class c = Class.forName("translated.Module_thread");
+					java.lang.reflect.Method method = c.getMethod("getRulesets", null);
+					Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+					for (int i = 0; i < rulesets.length; i++) {
+						((AbstractMembrane)var0).loadRuleset(rulesets[i]);
+					}
+				} catch (ClassNotFoundException e) {
+					Env.d(e);
+					Env.e("Undefined module thread");
+				} catch (NoSuchMethodException e) {
+					Env.d(e);
+					Env.e("Undefined module thread");
+				} catch (IllegalAccessException e) {
+					Env.d(e);
+					Env.e("Undefined module thread");
+				} catch (java.lang.reflect.InvocationTargetException e) {
+					Env.d(e);
+					Env.e("Undefined module thread");
+				}
 			ret = true;
-			break L238;
+			break L223;
 		}
 		return ret;
 	}
-	public boolean execL239(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL224(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
-		Object var3 = null;
-		Object var4 = null;
 		Atom atom;
 		Functor func;
 		Link link;
@@ -153,16 +217,16 @@ L238:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L239:
+L224:
 		{
-			if (execL241(var0, var1, nondeterministic)) {
+			if (execL226(var0, var1, nondeterministic)) {
 				ret = true;
-				break L239;
+				break L224;
 			}
 		}
 		return ret;
 	}
-	public boolean execL241(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL226(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -186,23 +250,24 @@ L239:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L241:
+L226:
 		{
-			if (!(!(f0).equals(((Atom)var1).getFunctor()))) {
+			var3 = new Atom(null, f0);
+			if (!(!(f1).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
 					link = ((Atom)var1).getArg(0);
-					if (!(link.getPos() != 0)) {
-						var3 = link.getAtom();
-						if (!(!(f1).equals(((Atom)var3).getFunctor()))) {
-							link = ((Atom)var3).getArg(0);
-							var4 = link;
+					var4 = link.getAtom();
+					if (!(!(((Atom)var4).getFunctor() instanceof IntegerFunctor))) {
+						x = ((IntegerFunctor)((Atom)var4).getFunctor()).intValue();
+						y = ((IntegerFunctor)((Atom)var3).getFunctor()).intValue();	
+						if (!(!(x > y))) {
 							if (nondeterministic) {
-								Task.states.add(new Object[] {theInstance, "_0", "L238",var0,var1,var3});
-							} else if (execL238(var0,var1,var3,nondeterministic)) {
+								Task.states.add(new Object[] {theInstance, "_0", "L223",var0,var1,var3,var4});
+							} else if (execL223(var0,var1,var3,var4,nondeterministic)) {
 								ret = true;
-								break L241;
+								break L226;
 							}
 						}
 					}
@@ -211,6 +276,8 @@ L241:
 		}
 		return ret;
 	}
-	private static final Functor f0 = new Functor("cre", 1, "thread");
-	private static final Functor f1 = new IntegerFunctor(0);
+	private static final Functor f1 = new Functor("create", 1, "thread");
+	private static final Functor f3 = new Functor("cre", 1, "thread");
+	private static final Functor f2 = new Functor("num", 1, "thread");
+	private static final Functor f0 = new IntegerFunctor(0);
 }

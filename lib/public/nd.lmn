@@ -13,7 +13,7 @@
  *
  *  @param MemWithNDMem 非決定的実行膜をちょうど1つもつ膜
  */
-nd.exec({$p,@p,{$q,@q}})
+nd.exec({$p,@p,{$q,@q}*})
 	:- 	[:/*inline*/
 			Atom out = me.nthAtom(0);
 			Atom in = out.nthAtom(0);
@@ -27,5 +27,5 @@ nd.exec({$p,@p,{$q,@q}})
 			mem1.removeAtom(in);
 			plus.dequeue();
 			mem1.removeAtom(plus);
-		:]({$p,@p,{$q,@q}}).
-}
+		:]({$p,@p,{$q,@q}*}).
+}.

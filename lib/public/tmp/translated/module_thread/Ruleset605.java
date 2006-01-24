@@ -30,7 +30,7 @@ public class Ruleset605 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL176(mem, atom, false)) {
+		if (execL196(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@605", "_0");
 			return true;
@@ -42,14 +42,14 @@ public class Ruleset605 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL182(mem, nondeterministic)) {
+		if (execL202(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@605", "_0");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL182(Object var0, boolean nondeterministic) {
+	public boolean execL202(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -77,7 +77,7 @@ public class Ruleset605 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L182:
+L202:
 		{
 			Iterator it1 = ((AbstractMembrane)var0).memIterator();
 			while (it1.hasNext()) {
@@ -111,10 +111,10 @@ L182:
 														var6 = link.getAtom();
 														if (!(!(f1).equals(((Atom)var6).getFunctor()))) {
 															if (nondeterministic) {
-																Task.states.add(new Object[] {theInstance, "_0", "L175",var0,var1,var5,var2,var3,var6,var4,var7});
-															} else if (execL175(var0,var1,var5,var2,var3,var6,var4,var7,nondeterministic)) {
+																Task.states.add(new Object[] {theInstance, "_0", "L195",var0,var1,var5,var2,var3,var6,var4,var7});
+															} else if (execL195(var0,var1,var5,var2,var3,var6,var4,var7,nondeterministic)) {
 																ret = true;
-																break L182;
+																break L202;
 															}
 														}
 													}
@@ -133,7 +133,7 @@ L182:
 		}
 		return ret;
 	}
-	public boolean execL175(Object var0, Object var1, Object var2, Object var3, Object var4, Object var5, Object var6, Object var7, boolean nondeterministic) {
+	public boolean execL195(Object var0, Object var1, Object var2, Object var3, Object var4, Object var5, Object var6, Object var7, boolean nondeterministic) {
 		Object var8 = null;
 		Atom atom;
 		Functor func;
@@ -155,7 +155,7 @@ L182:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L175:
+L195:
 		{
 			atom = ((Atom)var3);
 			atom.dequeue();
@@ -184,11 +184,11 @@ L175:
 			((AbstractMembrane)var2).free();
 			((AbstractMembrane)var1).forceUnlock();
 			ret = true;
-			break L175;
+			break L195;
 		}
 		return ret;
 	}
-	public boolean execL176(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL196(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -222,16 +222,16 @@ L175:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L176:
+L196:
 		{
-			if (execL180(var0, var1, nondeterministic)) {
+			if (execL200(var0, var1, nondeterministic)) {
 				ret = true;
-				break L176;
+				break L196;
 			}
 		}
 		return ret;
 	}
-	public boolean execL180(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL200(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -266,7 +266,7 @@ L176:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L180:
+L200:
 		{
 			if (!(!(f1).equals(((Atom)var1).getFunctor()))) {
 				if(((Atom)var1).getMem().getKind() == 0) {
@@ -313,10 +313,10 @@ L180:
 																if (!(!((AbstractMembrane)var3).isStable())) {
 																	if (!(((AbstractMembrane)var0) != ((AbstractMembrane)var4))) {
 																		if (nondeterministic) {
-																			Task.states.add(new Object[] {theInstance, "_0", "L175",var0,var3,var2,var12,var9,var1,var6,var15});
-																		} else if (execL175(var0,var3,var2,var12,var9,var1,var6,var15,nondeterministic)) {
+																			Task.states.add(new Object[] {theInstance, "_0", "L195",var0,var3,var2,var12,var9,var1,var6,var15});
+																		} else if (execL195(var0,var3,var2,var12,var9,var1,var6,var15,nondeterministic)) {
 																			ret = true;
-																			break L180;
+																			break L200;
 																		}
 																	}
 																}
