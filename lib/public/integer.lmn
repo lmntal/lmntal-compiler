@@ -235,4 +235,12 @@ H = integer.parse(S) :- string(S) | H=[:/*inline*/
 	me.remove();
 	:](S).
 
+/*
+ * Generate a list of random number.
+ * _IMax : random max
+ * Count : List length
+ */
+H=integer.rndList(_IMax, Count) :- Count=0 | H=[].
+H=integer.rndList(_IMax, Count) :- Count>0 | H=[integer.rnd(_IMax)|integer.rndList(_IMax, Count-1)].
+
 }.

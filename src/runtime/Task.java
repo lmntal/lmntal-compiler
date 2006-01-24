@@ -282,9 +282,10 @@ public class Task extends AbstractTask implements Runnable {
 				notifyAll();
 			}
 			if (root != null && root.isStable()) break;
-			if(root!=null && memStack.isEmpty()) {
-				activatePerpetualMem(root);
-			}
+			// TODO perpetual じゃないもうひとつのフラグをつくってその膜を活性化させる hara
+//			if(root!=null && memStack.isEmpty()) {
+//				activatePerpetualMem(root);
+//			}
 
 			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化。本膜ロック解放後に行う必要がある。
 			if(memStack.isEmpty() && mem.isRoot()) {
