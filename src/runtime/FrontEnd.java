@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import util.StreamDumper;
 
@@ -253,6 +255,10 @@ public class FrontEnd {
 							// commandline: perl src/help_gen.pl < src/runtime/FrontEnd.java > src/runtime/Help.java
 							Help.show();
 					        System.exit(-1);
+						} else if (args[i].equals("--if")) {//by inui
+							/// --if
+							/// Interpret if-statements.
+							Env.fIf = true;
 						} else if(args[i].equals("--immediate")){
 							/// --immediate
 							/// Use a single newline (rather than two newlines)
@@ -499,6 +505,46 @@ public class FrontEnd {
 	public static void run(Reader src) {
 		run(src, InlineUnit.DEFAULT_UNITNAME);
 	}
+	
+	//by inui
+	/**
+	 * 与えられたソースについて、if文をガードに変換する
+	 * @param src Reader 型で表されたソース
+	 * @return 変換後のソース
+	 * */
+	private static Reader convertIf2Guard(Reader src) {
+		StringBuffer buf = new StringBuffer();
+		BufferedReader br = new BufferedReader(src);
+		String s;
+		try {
+			while ((s = br.readLine()) != null) {
+				Matcher m = Pattern.compile("(.*)if\\s*\\(([^\\(\\)]*)\\)(.*)else(.*)").matcher(s);
+				if (m.matches()) {
+					String strIf = m.group(1)+m.group(2)+" |"+m.group(3);
+					String strElse = m.group(1)+m.group(2)+" |"+m.group(4);
+					
+					// 条件式を逆転
+					if (strElse.matches(".*>.*")) strElse = strElse.replaceAll(">", "=<");
+					else strElse = strElse.replaceAll("=<", ">");
+//					if (strElse.matches(".*>=.*")) strElse = strElse.replaceAll(">=", "<");
+//					else strElse = strElse.replaceAll("<", ">=");
+//					if (strElse.matches(".*=\\\\=.*")) strElse = strElse.replaceAll("=\\\\=", " = ");
+//					else strElse = strElse.replaceAll(" = ", "=\\\\=");
+					
+					if (!strIf.endsWith(".")) strIf += ".";
+					if (!strElse.endsWith(".")) strElse += ".";
+					buf.append(strIf+"\n"+strElse+"\n");
+				} else {
+					buf.append(s+"\n");
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		//System.err.println(buf.toString());
+		return new StringReader(buf.toString());
+	}
+	
 	/**
 	 * 与えられたソースについて、一連の実行を行う。
 	 * @param src Reader 型で表されたソース
@@ -506,6 +552,8 @@ public class FrontEnd {
 	 */
 	public static void run(Reader src, String unitName) {
 		if(Env.preProcess0) src = preProcess0(src);
+		if (Env.fIf) src = convertIf2Guard(src); //by inui
+	
 		try {
 			compile.structure.Membrane m;
 			Env.clearErrors();
