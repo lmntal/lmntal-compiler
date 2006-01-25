@@ -25,7 +25,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	protected static final int DELAY = 50;
 	protected Component parent = null;
 	protected Rectangle area;// = new Rectangle(25,25,400,400);
-
+	protected Vector fixedNode = new Vector();
 	runtime.Membrane rootMem;
 	
 	public AbstractGraphLayout(Component parent) {
@@ -166,6 +166,30 @@ public abstract class AbstractGraphLayout implements Runnable {
 	}
 	
 	public List removedAtomPos = Collections.synchronizedList(new LinkedList());
+	/**
+	 * fixedNodeに含まれているNodeなら true を返す。
+	 * @param me
+	 * @return
+	 */
+	public boolean isFixed(Node me){
+		if(fixedNode.contains(me))return true;
+		return false;
+	}
+	public boolean isFixed(AtomGroup atomgroup){
+		for(Iterator it = atomgroup.atoms.iterator();it.hasNext();){
+			if(isFixed((Node)it.next())){
+				return true;
+			}
+		}
+		return false;
+	}
+	public void nodeDoubleClick(Node me){
+		if(fixedNode.contains(me)){
+			fixedNode.remove(me);
+		} else {
+			fixedNode.add(me);
+		}
+	}
 	public Rectangle getAtomsBound() {
 		final int m=1;
 		Rectangle r=null;

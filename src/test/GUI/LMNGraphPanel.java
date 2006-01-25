@@ -24,6 +24,11 @@ public class LMNGraphPanel extends GraphPanel {
 			public void mousePressed(MouseEvent e) {
 				//determine nearest node
 				if(e.getButton() == MouseEvent.BUTTON1)
+					if(e.getClickCount() == 2){
+						System.out.println("clicked");
+						getGraphLayout().nodeDoubleClick(getGraphLayout().getNearestNode(e.getPoint()));
+						return;
+					}
 				movingNode = getGraphLayout().getNearestNode(e.getPoint());
 				if(e.getButton() == MouseEvent.BUTTON3)
 				getGraphLayout().showGraphDialog();

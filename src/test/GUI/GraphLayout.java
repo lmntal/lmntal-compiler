@@ -2,6 +2,9 @@ package test.GUI;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
@@ -52,16 +55,18 @@ public class GraphLayout extends AbstractGraphLayout {
 			
 			if(!doesCutAcrossMembrane(atomgroup,m))
 			if(getFlag(6))//10))
-				atomgroup.rotateAtomGroup();
+				if(!isFixed(atomgroup)){
+					atomgroup.rotateAtomGroup();
+				}
 			for (Iterator i=atomgroup.atoms.iterator();i.hasNext();) {
 				Node me = (Node)i.next();
 				if(!me.isVisible()) continue;
 				
 				//辺の長さと角度を一定にする。
 				if(getFlag(0)){
-				calculateEdge(me);
-//				calculateEdgeLength(me);
-//				
+			//	calculateEdge(me);
+				calculateEdgeLength(me);
+				
 				calculateEdge2(me);
 				}
 				//膜の中心に力をかける
@@ -270,6 +275,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			Node me = (Node)i.next();
 			if(!me.isVisible()) continue;
 			if(me==((LMNGraphPanel)parent).movingNode) continue;
+			if(isFixed(me))continue;
 			me.move(parent.getBounds());
 		}
 		// 子膜
@@ -681,6 +687,9 @@ public class GraphLayout extends AbstractGraphLayout {
 		}
 		for(int i=0;i<nodes.length;i++) {
 			if(!nodes[i].isVisible()) continue;
+			if(isFixed(nodes[i])){
+				paintSelectedNode(g,nodes[i]);
+			}
 			nodes[i].paintNode(g);
 		}
 		// 子膜
@@ -700,7 +709,26 @@ public class GraphLayout extends AbstractGraphLayout {
 		}
 	}
 	
-	
+	/**
+	 * ダブルクリックで固定されているアトムの後ろに色をつけます。
+	 */
+	public void paintSelectedNode(Graphics g,Node me){
+
+		double paintMargin = 1.5;
+		int wh = Env.fDEMO ? 40 : 16;
+		Dimension size = new Dimension(wh, wh);
+//			g.setColor(new Color(64,128,255));
+		// 適当に色分けする！
+
+		
+//			System.out.println(label + "  " + ir + "  " + ig + "  " + ib);
+		g.setColor(Color.GRAY);
+		
+		g.fillOval((int)(me.getPosition().x - size.width/2), (int)(me.getPosition().y - size.height/ 2), (int)(size.width * paintMargin), (int)(size.height * paintMargin));
+		
+		g.setColor(Color.BLACK);
+
+	}
 	
 	//ここから力の計算メソッド
 	/**
@@ -875,7 +903,7 @@ public class GraphLayout extends AbstractGraphLayout {
 						}
 						tmp++;
 					}
-					if(prev == next)continue;
+					//if(prev == next)continue;
 				}
 //				System.out.println("  p : "+ prev);
 //				System.out.println("  n : "+ next);
@@ -902,6 +930,8 @@ public class GraphLayout extends AbstractGraphLayout {
 				dx = 1.5 * tx * a_r;
 				dy = 1.5 * ty * a_r;
 
+				dx = dx * 2;
+				dy = dy *2;
 				me.setMoveDelta(-dx,-dy);
 				you.setMoveDelta(dx,dy);
 			}
