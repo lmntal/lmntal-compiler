@@ -199,6 +199,11 @@ public final class Env {
 	 */
 	public static boolean fREPL = false;
 	
+	/**
+	 * if文の解釈をするかどうか by inui
+	 */
+	public static boolean fIf = false;
+	
 	public static boolean preProcess0 = false;
 	
 	/** アトム名の表示する長さ */
