@@ -58,10 +58,12 @@ public class GraphLayout extends AbstractGraphLayout {
 				if(!me.isVisible()) continue;
 				
 				//辺の長さと角度を一定にする。
-				if(getFlag(0))
+				if(getFlag(0)){
 				calculateEdge(me);
-
-				
+//				calculateEdgeLength(me);
+//				
+				calculateEdge2(me);
+				}
 				//膜の中心に力をかける
 				//アトムグループごとに変更
 				/*double d;
@@ -784,6 +786,128 @@ public class GraphLayout extends AbstractGraphLayout {
 		}
 	}
 	
+	/**
+	 * 辺の長さを一定にする。
+	 */
+	public void calculateEdgeLength(Node me){
+		
+//			System.out.println(i+" "+me.getName());
+		
+		// angle でソート
+		Edge ie[] = new Edge[me.getEdgeCount()];
+//			System.out.println("arround "+me+"  "+me.getEdgeCount());
+		for(int j=0;j<ie.length;j++) {
+			ie[j]=new Edge(me, me.getNthNode(j));
+//				System.out.println(ie[j]);
+		}
+		Arrays.sort(ie);
+		
+		for (int j=0;j<ie.length;j++) {
+			Edge edge = ie[j];
+			
+			// デフォルトの長さに伸縮する
+			if(me.hashCode() < edge.to.hashCode()){
+				double l = edge.getLen();
+				double f = (l - edge.getStdLen());// / (edge.getStdLen() * 1);
+				//膜を超える辺の場合力を弱くする。
+				if(((runtime.Atom)edge.from).getMem() != ((runtime.Atom)edge.to).getMem()){
+					l = l * 1.5;
+					f = f/10;
+				}
+				// TODO 0.5のところを、1/arity[の最大値] にすると振動しない。
+				//                      1/(2 * arity[の最大値])だとなおよい。
+				// [の最大値]を消してもよい。
+				// その場合、アリティがアトムの質量のようなものとして計算される
+				double ddx = 0.05 * f * edge.getVx()/l;
+				double ddy = 0.05 * f * edge.getVy()/l;
+				
+				edge.from.setMoveDelta(ddx, ddy);
+				edge.to.setMoveDelta(-ddx, -ddy);
+			}
+		}
+	}
+	
+	public void calculateEdge2(Node me){
+		double dx = 0;
+		double dy = 0;
+		
+//			System.out.println(i+" "+me.getName());
+		
+		// angle でソート
+		Edge ie[] = new Edge[me.getEdgeCount()];
+//			System.out.println("arround "+me+"  "+me.getEdgeCount());
+		for(int j=0;j<ie.length;j++) {
+			ie[j]=new Edge(me, me.getNthNode(j));
+//				System.out.println(ie[j]);
+		}
+		Arrays.sort(ie);
+		
+		for (int j=0;j<ie.length;j++) {
+			Edge edge = ie[j];
+			
+			
+			// cur.to にかかる力を計算する
+			{
+				boolean f1 = false;
+				Edge cur = ie[j];
+//				System.out.println(cur);
+				Node you = cur.to;
+				
+				Edge prev = null;
+				Edge next = null;
+				if(you.getEdgeCount() == 1){
+					prev = ie[(j-1+ie.length)%ie.length];
+					next = ie[(j+1)%ie.length];
+				} else {
+					int tmp = 1;
+					f1 = true;
+					
+					while(prev == null){
+						if(ie[(j-tmp+ie.length)%ie.length].to.getEdgeCount()!=1){
+							prev = ie[(j-tmp+ie.length)%ie.length];
+						}
+						tmp++;
+					}
+					tmp = 1;
+					while(next == null){
+						if(ie[(j+tmp+ie.length)%ie.length].to.getEdgeCount()!=1){
+							next = ie[(j+tmp+ie.length)%ie.length];
+						}
+						tmp++;
+					}
+					if(prev == next)continue;
+				}
+//				System.out.println("  p : "+ prev);
+//				System.out.println("  n : "+ next);
+				
+				// 次の辺との角度
+				double a_p = regulate(cur.getAngle() - prev.getAngle());
+				// 前の辺との角度
+				double a_n = regulate(next.getAngle() - cur.getAngle());
+				double a_r = a_n-a_p;
+//				System.out.println("  a_p : "+ a_p*180/Math.PI);
+//				System.out.println("  a_n : "+ a_n*180/Math.PI);
+//				System.out.println("   a_r : "+ a_r*180/Math.PI);
+				
+				double l = cur.getLen();
+				
+				// 時計周りを正にした、動かす対象と自分を結ぶ線分に垂直で長さ１のベクトル
+				// これが you に働く力の単位ベクトルになる
+				double tx = -cur.getVy() / l;
+				double ty =  cur.getVx() / l;
+//				System.out.println("   tx : "+ tx);
+//				System.out.println("   ty : "+ ty);
+				
+				// move = t times diff
+				dx = 1.5 * tx * a_r;
+				dy = 1.5 * ty * a_r;
+
+				me.setMoveDelta(-dx,-dy);
+				you.setMoveDelta(dx,dy);
+			}
+		
+		}
+	}
 	/**
 	 * アトムグループに膜の中心に向かう力をかける。
 	 */
