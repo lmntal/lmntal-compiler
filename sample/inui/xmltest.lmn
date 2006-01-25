@@ -2,8 +2,14 @@
 r=xml.open("sample.xml").
 
 % valueを持つタグを表すアトムを取り出すルール
-%value(node(X, Y), Z) :- value(Z), node(X, Y).
+%{value(X), $p} :- unary(X) | value(X), {$p}.
 
+%value(X), {$p[|*Z]} :- value(X), $p[|*Z], {}.
+//value(X), {$p[|X], 
+%name(X) :- {name
+
+%{value(a), name(b).}
+%a(X), {value(X), name(b).}
 % nameを持つタグを表すアトムを取り出すルール
 %name(node(X, Y), Z) :- name(Z), node(X, Y).
 

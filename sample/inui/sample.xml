@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Shift_JIS" ?>
+<drinks>
+    <drink type="soft">
+        <name>Apple</name>
+        <taste>Good</taste>
+    </drink>
+
+    <drink type="alcohol">
+        <name>Beer</name>
+	<taste>Bitter</taste>
+    </drink>
+
+    <drink type="alcohol">
+        <name>Whiskey</name>
+    </drink>
+</drinks>

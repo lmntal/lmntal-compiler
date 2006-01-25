@@ -26,12 +26,26 @@ H=xml.open(Filename) :- unary(Filename) | H=[:/*inline*/
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
 	:](Filename).
+
+/**
+ * xml.open(+Filename, -Res):
+ * 与えられたファイル名にXML形式で膜構造を書き出します
+ * @param +Filename XMLファイル名
+ * @param -Res ルートアトムを返します。
+ * @example r=xml.open("sample.xml").
+ */
+H=xml.write(Filename) :- unary(Filename) | H=[:/*inline*/
+	LMNtalXML.write(me.nth(0));
+	:](Filename).
 }.
 
 [:/*inline_define*/
-import java.io.FileInputStream;
+import java.io.*;
 
 import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.*;
 
@@ -48,7 +62,8 @@ class LMNtalXML {
 	
 	protected AbstractMembrane mem;
 	protected Document doc;
-	protected String filename;
+	
+	private static LMNtalXML xml;
 
 	/**
 	 * コンストラクタ
@@ -56,21 +71,33 @@ class LMNtalXML {
 	 * @param mem データ構造を追加したい膜
 	 */
 	private LMNtalXML(String filename, AbstractMembrane mem) {
-		this.filename = filename;
 		this.mem = mem;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			//XML文書を読み込む
 			doc = db.parse(new FileInputStream(filename));
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public static Atom open(String filename, AbstractMembrane mem) {
-		LMNtalXML xml = new LMNtalXML(filename, mem);
+		xml = new LMNtalXML(filename, mem);
 		return xml.walkThrough();
+	}
+	
+	public static void write(String filename) {
+		try {
+		    TransformerFactory transFactory = TransformerFactory.newInstance();
+		    Transformer transformer = transFactory.newTransformer();
+		    Source source = new DOMSource(xml.doc);
+		    Result result = new StreamResult(new File(filename));
+		    transformer.transform(source, result);
+		} catch (TransformerConfigurationException e) {
+		} catch (TransformerException e) {
+		}
 	}
 	
 	/**
@@ -96,9 +123,8 @@ class LMNtalXML {
 	 */
 	private Atom walkThrough() {
 		Node root = doc.getDocumentElement();
-		AbstractMembrane m = mem.newMem();
-		traverse(root, m);
-		return m.newAtom(new Functor(filename, 1));
+		traverse(root, mem);
+		return mem.newAtom(new Functor("roor", 1));
 	}
 	
 	/**
@@ -136,11 +162,6 @@ class LMNtalXML {
 			
 			traverse(child, m);
 		}
-	}
-
-	public static void main(String args[]) {
-		LMNtalXML xml = new LMNtalXML(args[0], new Membrane());
-		xml.walkThrough();
 	}
 }
 :]
