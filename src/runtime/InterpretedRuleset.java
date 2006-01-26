@@ -200,7 +200,6 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		return s.toString();
 	}
 
-	// 2006.01.02 okabe
 	public String encode() {
 		StringBuffer s = new StringBuffer("");
 		Iterator it = rules.iterator();

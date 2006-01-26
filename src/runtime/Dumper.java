@@ -352,7 +352,6 @@ public class Dumper {
 		return buf.toString();
 	}
 
-	// 2006.01.02 okabe
 	/**
 	 * @param AbstractMembrane
 	 *            mem
@@ -592,7 +591,6 @@ public class Dumper {
 		Functor func = a.getFunctor();
 		int arity = func.getArity() - reducedArgCount;
 		if (arity == 0) {
-			// 2006.01.02 okabe
 			if (!fully)
 				return func.getQuotedAtomName();
 			return func.getQuotedFullyAtomName();
@@ -633,7 +631,6 @@ public class Dumper {
 				return buf.toString();
 			}
 		}
-		// 2006.01.02 okabe
 		if (!fully)
 			buf.append(func.getQuotedFunctorName());
 		else

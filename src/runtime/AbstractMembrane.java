@@ -1234,7 +1234,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		return "{ " + toStringWithoutBrace() + " }";
 	}
 
-	// 2006.01.02 okabe
 	/**
 	 * @return String 膜のコンパイル可能な文字列表現
 	 */

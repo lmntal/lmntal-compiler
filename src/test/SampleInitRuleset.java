@@ -8,7 +8,6 @@ public final class SampleInitRuleset extends Ruleset {
 	public String toString() {
 		return "Ruleset Sample";
 	}
-	// 2006.01.02 okabe
 	public String encode() {
 		return "";
 	}

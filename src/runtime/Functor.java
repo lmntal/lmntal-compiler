@@ -45,7 +45,6 @@ public class Functor implements Serializable {
 		return QuoteFunctorName(getAbbrName());
 	}
 
-	// 2005.01.02 okabe
 	public String getQuotedFullyFunctorName() {
 		// \rや\nがparseの際に邪魔になるため
 		return QuoteFunctorName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
@@ -68,7 +67,6 @@ public class Functor implements Serializable {
 		return QuoteAtomName(getAbbrName());
 	}
 
-	// 2006.01.02 okabe
 	public String getQuotedFullyAtomName() {
 		// \rや\nがparseの際に邪魔になるため
 		return QuoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
