@@ -28,10 +28,11 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE_UNDERBAR, RBRACE_UNDERBAR_SLASH,
 				RBRACE_UNDERBAR_AT, RBRACE_UNDERBAR_SLASH_AT,
 				RBRACE_ASTERISK,
-				RULE, COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
+				COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
 				ASTERISK, SLASH, PLUS, MINUS, RULENAMESEP;
+terminal Integer	RULE;
 terminal		QUOTED_STRING;
 terminal String RELOP, STRING;
 terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
@@ -354,23 +355,25 @@ Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 					
 // 丸カッコなしのルール構文
 // ルール名に対応 by Hara
-Rule		::=	  ProcessList:head RULE ProcessList:body 
-					{: RESULT = new SrcRule(null, head, body); :}
-				| RuleName:name RULENAMESEP ProcessList:head RULE ProcessList:body 
-					{: RESULT = new SrcRule(name, head, body); :}
-			    | ProcessList:head RULE ProcessList:guard GUARD ProcessList:body 
-					{: RESULT = new SrcRule(null, head, guard, body); :}
-			    | RuleName:name RULENAMESEP ProcessList:head RULE ProcessList:guard GUARD ProcessList:body 
-					{: RESULT = new SrcRule(name, head, guard, body); :};
+// 出現した行番号を追加 by Inui
+Rule		::=	  ProcessList:head RULE:lineno ProcessList:body 
+					{: RESULT = new SrcRule(null, head, body, lineno); :}
+				| RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:body 
+					{: RESULT = new SrcRule(name, head, body, lineno); :}
+			    | ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body 
+					{: RESULT = new SrcRule(null, head, guard, body, lineno); :}
+			    | RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body 
+					{: RESULT = new SrcRule(name, head, guard, body, lineno); :};
 
 // 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
 // こっちはルール名には非対応。(a,b,c :- 
+// 出現した行番号を追加 by Inui
 ProcessListContinuation ::= RPAREN
 					{: RESULT = null; :}
-				| RULE ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, body); :}
-				| RULE ProcessList:guard GUARD ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, guard, body); :};
+				| RULE:lineno ProcessList:body RPAREN
+					{: RESULT = new SrcRule(null, null, body, lineno); :}
+				| RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
+					{: RESULT = new SrcRule(null, null, guard, body, lineno); :};
 
 ProcessContext	::= PROCVAR AtomName:name
 					 {: RESULT = new SrcProcessContext(name); :}

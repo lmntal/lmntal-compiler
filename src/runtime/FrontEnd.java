@@ -382,6 +382,12 @@ public class FrontEnd {
 							/// --use-source-library
 							/// Use source library in lmntal_lib/src.
 							Env.fUseSourceLibrary = true;
+						} else if (args[i].equals("--debug")) {
+							/// --debug
+							/// debug mode.
+							Env.debugOption = true;
+							Env.fInterpret = true;
+							Env.fGUI = true;
 						}else {
 							System.err.println("Invalid option: " + args[i]);
 							System.exit(-1);
@@ -625,6 +631,7 @@ public class FrontEnd {
 			}
 			
 			if (Env.fInterpret) {
+				Debug.setUnitName(unitName);
 				run(rs);
 			}
 		} catch (Exception e) {
@@ -670,6 +677,9 @@ public class FrontEnd {
 			Env.fTrace = t;
 //			root.asyncUnlock();
 //			rt.asyncFlag = false;
+			
+			//by inui
+			if (Env.debugOption) Debug.init();
 
 			boolean ready = true;
 			if (Env.gui != null) {

@@ -323,7 +323,8 @@ public class LMNParser {
 	 * @param mem 追加先の膜
 	 */
 	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
-		RuleStructure rule = new RuleStructure(mem, sRule.getText());
+		//2006.1.22 linenoを追加 by inui
+		RuleStructure rule = new RuleStructure(mem, sRule.getText(), sRule.lineno);
 		rule.name = sRule.name;
 		// 略記法の展開		
 		expander.expandRuleAbbreviations(sRule);

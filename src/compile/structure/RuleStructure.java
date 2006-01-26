@@ -44,6 +44,9 @@ public final class RuleStructure {
 
 	/** 型付きプロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef) */
 	public HashMap typedProcessContexts = new HashMap();
+	
+	/** 行番号 2006.1.22 by inui */
+	public int lineno;
 
 	/**
 	 * コンストラクタ
@@ -56,6 +59,17 @@ public final class RuleStructure {
 		leftMem.name = mem.name;
 		rightMem.name = mem.name;
 		this.text = text;
+	}
+	
+	//2006.1.22 by inui
+	/**
+	 * コンストラクタ
+	 * @param mem 所属膜
+	 * @param lineno 行番号
+	 */
+	public RuleStructure(Membrane mem, String text, int lineno) {
+		this(mem, text);
+		this.lineno = lineno;
 	}
 
 	public String toString() {

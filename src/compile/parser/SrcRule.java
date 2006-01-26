@@ -9,6 +9,7 @@ import java.util.LinkedList;
 class SrcRule {
 	
 	public String name; // ルール名
+	public int lineno;	//行番号 2006.1.22 by inui
 	public LinkedList head;			// ヘッドプロセス
 	public LinkedList body;			// ボディプロセス
 	public LinkedList guard;			// ガードプロセス
@@ -21,6 +22,18 @@ class SrcRule {
 	 */
 	public SrcRule(String name, LinkedList head, LinkedList body) {
 		this(name, head, new LinkedList(), body);
+	}
+	
+	//2006.1.22 by inui
+	/**
+	 * 指定されたヘッドルールとボディルールと空のガードでルールを初期化します
+	 * @param head ヘッドのリスト
+	 * @param body ボディのリスト
+	 * @param lineno 行番号
+	 */
+	public SrcRule(String name, LinkedList head, LinkedList body, int lineno) {
+		this(name, head, new LinkedList(), body);
+		this.lineno = lineno;
 	}
 	
 	/**
@@ -37,6 +50,19 @@ class SrcRule {
 		this.guardNegatives = new LinkedList();
 		this.body = body;
 		addTypeConstraint(head);
+	}
+	
+	//2006.1.22 by inui
+	/**
+	 * 指定されたヘッドルールとボディルールとガードでルールを初期化します
+	 * @param head ヘッドのリスト
+	 * @param gurad ガードのリスト
+	 * @param body ボディのリスト
+	 * @param lineno 行番号
+	 */
+	public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body, int lineno) {
+		this(name, head, guard, body);
+		this.lineno = lineno;
 	}
 	
 	/**

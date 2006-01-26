@@ -114,8 +114,11 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			}
 			if (success) {
 				result = true;
-				if (Env.fTrace)
-					Task.trace("-->", "@" + id, r.toString());
+				if (Env.fTrace) Task.trace("-->", "@" + id, r.toString());
+				if (Env.debugOption) {//2006.1.26 by inui
+					Debug.breakPoint(r, Debug.ATOM);
+					//if (Debug.isBreakPoint()) Task.trace("-->", "@" + id, r.toString());
+				}
 				//if (!mem.isCurrent()) return true;
 				return true;
 			}
@@ -148,8 +151,11 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			}
 			if (success) {
 				result = true;
-				if(Env.fTrace)
-					Task.trace("==>", "@" + id, r.toString());
+				if(Env.fTrace) Task.trace("==>", "@" + id, r.toString());
+				if (Env.debugOption) {//2006.1.26 by inui
+					Debug.breakPoint(r, Debug.MEMBRANE);
+					//if (Debug.isBreakPoint()) Task.trace("==>", "@" + id, r.toString());
+				}
 				return true;
 				//if (!mem.isCurrent()) return true;
 			}

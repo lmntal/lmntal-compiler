@@ -111,6 +111,11 @@ public final class Env {
 	public static boolean fTrace = false;
 	
 	/**
+	 * デバッグ実行オプションの有無 by inui
+	 */
+	public static boolean debugOption = false;
+		
+	/**
 	 * REPL で、文を実行するためのアクション
 	 *  null_line : null 行がきたときに実行（Enter を２回押すことになる）
 	 *  immediate : 文の行がきたときに実行（Enter を１回押すことになる）
@@ -180,7 +185,8 @@ public final class Env {
 	public static void initGUI() {
 		if(!Env.fGUI) return;
 		atomSize = Env.fDEMO ? 40 : 16;
-		Env.gui = new LMNtalFrame();
+		if (Env.debugOption) Env.gui = new LMNtalDebugFrame();//by inui
+		else Env.gui = new LMNtalFrame();
 	}
 	
 	/**
@@ -340,6 +346,7 @@ public final class Env {
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public static boolean guiTrace() {
 		if(gui==null) return true;
+		gui.repaint();//2006.1.26 inui
 		return gui.onTrace();
 	}
 	/**graphic版 nakano ルールスレッドの実行を継続してよいかどうか*/

@@ -36,6 +36,9 @@ public final class Rule implements Serializable {
 	/** ルール名 */
 	public String name;
 	
+	/** 行番号 by inui */
+	public int lineno;
+	
 	/* ルール適用回数 */
 	public int apply = 0;
 	/* ルール適用の成功回数 */

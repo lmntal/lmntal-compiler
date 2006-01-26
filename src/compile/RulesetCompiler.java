@@ -100,7 +100,9 @@ public class RulesetCompiler {
 			RuleCompiler rc = null;
 			try {
 				rc = new RuleCompiler(rs, unitName);
-				rc.compile();				
+				rc.compile();
+				//2006.1.22 Ruleに行番号を渡す by inui
+				rc.theRule.lineno = rs.lineno;
 //				rc.theRule.showDetail();
 			}
 			catch (CompileException e) {

@@ -187,7 +187,11 @@ public class Task extends AbstractTask implements Runnable {
 			}
 			
 			if(flag){
-				if (!guiTrace()) return false;
+				if (Env.debugOption) {//by inui
+					if (Debug.isBreakPoint() && !guiTrace()) return false;
+				} else {
+					if (!guiTrace()) return false;
+				}
 			} else {
 				if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
 				// TODO システムコールアトムなら、本膜がルート膜でも親膜につみ、親膜を活性化
@@ -215,7 +219,11 @@ public class Task extends AbstractTask implements Runnable {
 			}
 			
 			if(flag){
-				if (!guiTrace()) return false;
+				if (Env.debugOption) {//by inui
+					if (Debug.isBreakPoint() && !guiTrace()) return false;
+				} else {
+					if (!guiTrace()) return false;
+				}
 			} else if (!nondeterministic){
 				memStack.pop(); // 本膜をpop
 				if (!mem.isNondeterministic() && !mem.perpetual) {

@@ -101,7 +101,7 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	"}_/@"				{ return symbol(sym.RBRACE_UNDERBAR_SLASH_AT); }
 	"}*"				{ return symbol(sym.RBRACE_ASTERISK); }
 	":"					{ return symbol(sym.COLON); }
-	":-"				{ return symbol(sym.RULE); }
+	":-"				{ return symbol(sym.RULE, new Integer(yyline+1)); }
 	"."					{ return symbol(sym.PERIOD); }
 	"|"					{ return symbol(sym.GUARD); }
 	{RelativeOp}		{ return symbol(sym.RELOP, yytext()); }
