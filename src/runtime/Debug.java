@@ -44,10 +44,10 @@ public class Debug {
 	private static int testType;
 	
 	/** ブレークポイント */
-	private static List<Rule> breakPoints = new ArrayList();
+	private static List breakPoints = new ArrayList();
 	
 	/** 全ルール */
-	private static Set<Rule> rules = null;
+	private static Set rules = null;
 	
 	/** 実行中のファイル名(ファイルが1つであると仮定) */
 	private static String unitName;
@@ -60,20 +60,20 @@ public class Debug {
 	 * @param mem ルート膜
 	 */
 	private static void collectAllRules(Membrane mem) {
-		Iterator<InterpretedRuleset> itr = mem.rulesetIterator();
+		Iterator itr = mem.rulesetIterator();
 		while (itr.hasNext()) {
-			InterpretedRuleset ruleset = itr.next();
-			List<Rule> rules = ruleset.rules;
-			Iterator<Rule> ruleIterator = rules.iterator();
+			InterpretedRuleset ruleset = (InterpretedRuleset)itr.next();
+			List rules = ruleset.rules;
+			Iterator ruleIterator = rules.iterator();
 			while (ruleIterator.hasNext()) {
-				Rule rule = ruleIterator.next();
+				Rule rule = (Rule)ruleIterator.next();
 				Debug.rules.add(rule);
 			}
 		}
 		
-		Iterator<Membrane> memIterator = mem.mems.iterator();
+		Iterator memIterator = mem.mems.iterator();
 		while (memIterator.hasNext()) {
-			collectAllRules(memIterator.next());
+			collectAllRules((Membrane)memIterator.next());
 		}
 	}
 	
@@ -90,7 +90,7 @@ public class Debug {
 			buf.append("<style>pre {font-size:10px; font-family:monospace;}</style>\n");
 			buf.append("<pre>\n");
 			while ((s = br.readLine()) != null) {
-				buf.append(String.format("  %s\n", s.replace(":-", "<font color=red>:-</font>")));
+				buf.append("  "+s.replace(":-", "<font color=red>:-</font>")+"\n");
 				lineno++;
 			}
 			buf.append("</pre>\n");
@@ -104,7 +104,7 @@ public class Debug {
 		}
 		
 		//全てのルールを収集する
-		Debug.rules = new HashSet<Rule>();
+		Debug.rules = new HashSet();
 		Membrane rootMem = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot();
 		collectAllRules(rootMem);
 		
@@ -123,15 +123,15 @@ public class Debug {
 	public static void toggleBreakPointAt(int lineno) {
 		//すでに存在するブレークポイントなら削除
 		for (int i = 0; i < breakPoints.size(); i++) {
-			if (breakPoints.get(i).lineno == lineno) {
+			if (((Rule)breakPoints.get(i)).lineno == lineno) {
 				breakPoints.remove(i);
 				return;
 			}
 		}
 		
-		Iterator<Rule> itr = rules.iterator();
+		Iterator itr = rules.iterator();
 		while (itr.hasNext()) {
-			Rule rule = itr.next();
+			Rule rule = (Rule)itr.next();
 			if (rule.lineno == lineno) {
 				breakPoints.add(rule);
 				System.out.println("Breakpoint "+breakPoints.size()+" at "+rule.name+": file "+unitName+", line "+lineno);
@@ -180,7 +180,7 @@ public class Debug {
 	 * セットされているブレークポイントのiteratorを返します。
 	 * @return iterator
 	 */
-	public static Iterator<Rule> breakPointIterator() {
+	public static Iterator breakPointIterator() {
 		return breakPoints.iterator();
 	}
 	

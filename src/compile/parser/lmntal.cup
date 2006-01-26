@@ -357,13 +357,13 @@ Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 // ルール名に対応 by Hara
 // 出現した行番号を追加 by Inui
 Rule		::=	  ProcessList:head RULE:lineno ProcessList:body 
-					{: RESULT = new SrcRule(null, head, body, lineno); :}
+					{: RESULT = new SrcRule(null, head, body, lineno.intValue()); :}
 				| RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:body 
-					{: RESULT = new SrcRule(name, head, body, lineno); :}
+					{: RESULT = new SrcRule(name, head, body, lineno.intValue()); :}
 			    | ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body 
-					{: RESULT = new SrcRule(null, head, guard, body, lineno); :}
+					{: RESULT = new SrcRule(null, head, guard, body, lineno.intValue()); :}
 			    | RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body 
-					{: RESULT = new SrcRule(name, head, guard, body, lineno); :};
+					{: RESULT = new SrcRule(name, head, guard, body, lineno.intValue()); :};
 
 // 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
 // こっちはルール名には非対応。(a,b,c :- 
@@ -371,9 +371,9 @@ Rule		::=	  ProcessList:head RULE:lineno ProcessList:body
 ProcessListContinuation ::= RPAREN
 					{: RESULT = null; :}
 				| RULE:lineno ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, body, lineno); :}
+					{: RESULT = new SrcRule(null, null, body, lineno.intValue()); :}
 				| RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, guard, body, lineno); :};
+					{: RESULT = new SrcRule(null, null, guard, body, lineno.intValue()); :};
 
 ProcessContext	::= PROCVAR AtomName:name
 					 {: RESULT = new SrcProcessContext(name); :}

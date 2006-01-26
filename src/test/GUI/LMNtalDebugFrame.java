@@ -38,9 +38,9 @@ public class LMNtalDebugFrame extends LMNtalFrame {
 				
 				// ブレークポイントの表示
 				g.setColor(Color.red);
-				Iterator<Rule> iter = Debug.breakPointIterator();
+				Iterator iter = Debug.breakPointIterator();
 				while (iter.hasNext()) {
-					g.fillRect(0, SIZE*(iter.next().lineno-1)+8, SIZE-8, SIZE-2);
+					g.fillRect(0, SIZE*(((Rule)iter.next()).lineno-1)+8, SIZE-8, SIZE-2);
 				}
 				
 				// 現在停止中のルールの表示
@@ -82,7 +82,6 @@ public class LMNtalDebugFrame extends LMNtalFrame {
 	/**
 	 * コンポーネントを初期化します。
 	 */
-	@Override
 	protected void initComponents() {
 		lmnPanel = new LMNGraphPanel(this);
 		lmnPanel.getGraphLayout().initGraphDialog(this);
