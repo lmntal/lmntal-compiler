@@ -135,7 +135,6 @@ public final class Rule implements Serializable {
 //		return name;
 	}
 	
-	// 2006.01.02 okabe
 	/**
 	 * @return fullText ルールのコンパイル可能な文字列表現
 	 */
