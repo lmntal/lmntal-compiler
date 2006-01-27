@@ -9,6 +9,7 @@
  *  HISTORY
  *    06/01/14 released
  *    06/01/17 update
+ *    06/01/27 update クライアントの動的増減に対応．
  */
 
 io.use.
