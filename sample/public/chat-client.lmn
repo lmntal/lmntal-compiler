@@ -1,21 +1,23 @@
 /**
- *  Distributed LMNtal sample(#3)
+ *  Distributed LMNtal sample
  *    chat-client.lmn
- *  server file: chat-server.lmn
+ *    @see chat-server.lmn
  *
- *  06/01/14 released by okabe
- *  06/01/17 update
+ *  AUTHOR
+ *    Ryo Okabe
+ *
+ *  HISTORY
+ *    06/01/14 released
+ *    06/01/17 update
  */
 
-% use lib/public/io.lmn to get data from stdin.
 io.use.
 
-dlmntal.connect("127.0.0.1",50000,io.list_of_stdin_async,/*Out*/out).
-%r=print(out(Out)).
-
-% print received data to stdout.
-%R=out([]) :- R=[].
-%R=out([H|T]) :- string(H) | R=[string.join("", ["> ", H]) | out(T)].
+dlmntal.connect("127.0.0.1",50000,io.list_of_stdin_async,out).
 
 out=[H|T] :- string(H) | out=T,
-[:/*inline*/ System.out.println("> "+me.nth(0)); :](H).
+[:/*inline*/
+  System.out.println("> "+me.nth(0));
+  me.nthAtom(0).remove();
+  me.remove();
+:](H).
