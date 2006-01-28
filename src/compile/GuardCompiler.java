@@ -266,14 +266,19 @@ public class GuardCompiler extends HeadCompiler {
 							continue FixType;
 						}
 						int aid;
-						if (identifiedCxtdefs.contains(defK)) {
-							aid = loadUnaryAtom(defK);
+						if(identifiedCxtdefs.contains(defK)) {
+							aid = typedcxtToSrcPath(defK);
+							if(aid==UNBOUND) {
+								checkGroundLink(defK);
+								aid = groundToSrcPath(defK);
+							}
+//							aid = loadUnaryAtom(defK);
 						} else {
 							int atomid = varcount++;
 							bindToUnaryAtom(defK, atomid);
 							typedcxtdatatypes.put(def3, new Integer(ISINT));
 							aid = typedcxtToSrcPath(defK);
-							out.add(new Integer(atomid));
+							out.add(new Integer(aid));
 						}
 						vars.add(new Integer(aid));
 //						vars.add(new Integer(loadUnaryAtom(def1)));
