@@ -280,7 +280,9 @@ public class FrontEnd {
 						} else if (args[i].equals("--nondeterministic")) {
 							/// --nondeterministic
 							/// Execute the all reduction paths.
-							Env.fNondeterministic = true;
+							Env.ndMode = Env.ND_MODE_ND_ALL;
+						} else if (args[i].equals("--nondeterministic2")) {
+							Env.ndMode = Env.ND_MODE_ND_ANSCESTOR;
 						} else if(args[i].equals("--optimize-grouping")) {
 							/// --optimize-grouping
 							/// Group the head instructions. (EXPERIMENTAL)
@@ -404,7 +406,7 @@ public class FrontEnd {
 			}
 		}
 		//オプションの正規化
-		if (Env.fNondeterministic) {
+		if (Env.ndMode != Env.ND_MODE_D) {
 			if (Env.fInterpret) {
 				System.err.println("Non Deterministic execution is not supported in interpreted mode");
 				System.exit(-1);

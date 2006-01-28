@@ -34,8 +34,14 @@ public final class Env {
 	/** メモリ使用量を最小化する */
 	public static boolean fMemory = true;
 
+	/** 通常の実行 */
+	public static final int ND_MODE_D = 0;
+	/** 全履歴を管理する */
+	public static final int ND_MODE_ND_ALL = 1;
+	/** 先祖とその兄弟のみ */
+	public static final int ND_MODE_ND_ANSCESTOR = 2;
 	/** 非決定的LMNtalモード */
-	public static boolean fNondeterministic = false;
+	public static int ndMode = ND_MODE_D;
 	
 	////////////////////////////////////////////////////////////////
 	

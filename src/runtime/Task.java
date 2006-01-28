@@ -116,14 +116,20 @@ public class Task extends AbstractTask implements Runnable {
 	 * 実行が終了するまで戻らない。
 	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
 	public void execAsMasterTask() {
-		if (Env.fNondeterministic) {
-			nondeterministicExec(true);
-		} else {
+		switch (Env.ndMode) {
+		case 0:
 			thread.start();
 			try {
 				thread.join();
 			}
 			catch (InterruptedException e) {}
+			break;
+		case 1:
+			nondeterministicExec();
+			break;
+		case 2:
+			nondeterministicExec2();
+			break;
 		}
 	}
 	
@@ -456,7 +462,7 @@ public class Task extends AbstractTask implements Runnable {
 	/**
 	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
 	 */
-	void nondeterministicExec(boolean removeDup) {
+	void nondeterministicExec() {
 		HashMap idMap = new HashMap();
 		int nextId = 0;
 		ArrayList st = new ArrayList();
@@ -512,16 +518,75 @@ public class Task extends AbstractTask implements Runnable {
 			}
 			if (w > max_w) max_w = w;
 			System.out.println();
-			if (!removeDup) {
-				idMap.remove(mem.getAtoms());
-				mem.drop();
-				mem.free();
-			}
 //			System.out.println(idMap.size() + "/" + st.size() + "/" + max_w);
 		}
 		System.out.println("state count is " + i + ", unique count is " + nextId);
 		System.out.println("average width is " + (i / t) + ", max width is " + max_w);
 	}
+
+	private int nextId;
+	/**
+	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
+	 * 重複除去の対象は、先祖とその兄弟のみ
+	 */
+	void nondeterministicExec2() {
+		HashMap idMap = new HashMap();
+		nextId = 0;
+
+		Membrane mem = (Membrane)getRoot();
+		AtomSet atoms = mem.getAtoms();
+		atoms.freeze();
+		idMap.put(atoms, new Integer(nextId++));
+
+		nondeterministicExec2(idMap, mem);
+	}
+	void nondeterministicExec2(HashMap idMap, Membrane mem) {
+		//ルール適用の全可能性を検査
+		if (mem != getRoot())
+			memStack.push(mem);
+		root = mem;
+		states.clear();
+		exec(mem, true);
+		memStack.pop();
+		//それぞれ適用した結果を作成
+		ArrayList children = new ArrayList();
+		System.out.println(idMap.get(mem.getAtoms()) + " : " + mem);
+		Iterator it = states.iterator();
+		while (it.hasNext()) {
+			//複製
+			Membrane mem2 = new Membrane(this);
+			Map map = mem2.copyCellsFrom(mem);
+			mem2.memToCopyMap = null;
+			mem2.memToCopiedMem = null;
+			mem2.copyRulesFrom(mem);
+			//適用
+			String ruleName = react(mem2, (Object[])it.next(), mem, map);
+
+			AtomSet atoms2 = mem2.getAtoms();
+			atoms2.freeze();
+			Integer id;
+			if (idMap.containsKey(atoms2)) {
+				id = (Integer)idMap.get(atoms2);
+				mem2.drop();
+				mem2.free();
+			} else {
+				id = new Integer(nextId++);
+				children.add(mem2);
+				idMap.put(atoms2, id);
+			}
+			System.out.print(" " + id + "(" + ruleName + ")");
+		}
+		System.out.println();
+		System.out.println(idMap.size());
+		
+		for (int i = 0; i < children.size(); i++) {
+			nondeterministicExec2(idMap, (Membrane)children.get(i));
+		}
+		idMap.remove(mem.getAtoms());
+		mem.drop();
+		mem.free();
+	}
+
 	/**
 	 * exec(origMem, true) によって得られた情報を元に、実際に 1 段階のルール適用を行う。
 	 * @param mem 実行する対象の膜
