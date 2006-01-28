@@ -140,7 +140,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		return functor.getArity();
 	}
 	/** 最終引数を取得 */
-	Link getLastArg() {
+	public Link getLastArg() {
 		return args[getArity() - 1];
 	}
 	/** 第pos引数に格納されたリンクオブジェクトを取得 */

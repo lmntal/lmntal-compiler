@@ -68,7 +68,7 @@ public final class Link implements Cloneable, Serializable {
 		return pos;
 	}
 	/** このリンクと対をなす逆向きのリンクを取得する */
-	Link getBuddy() {
+	public Link getBuddy() {
 		return atom.args[pos];
 	}
 	/** リンク先が最終リンクの場合にtrueを返す */

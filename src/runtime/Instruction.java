@@ -1144,7 +1144,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * Links はプロセス文脈の Unary 型である必要がある。
 	 * 未束縛のプロセス文脈（の番号）は OutLinks に追加される。これらはインラインコードで束縛しないといけない。*/
 	public static final int GUARD_INLINE = 212;
-	static {setArgType(GUARD_INLINE, new ArgType(false, ARG_OBJ, ARG_VARS, ARG_OBJ));}
+	static {setArgType(GUARD_INLINE, new ArgType(false, ARG_OBJ, ARG_VARS, ARG_VARS));}
 
 	///////////////////////////////////////////////////////////////////////
 

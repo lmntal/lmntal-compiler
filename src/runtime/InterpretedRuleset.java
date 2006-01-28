@@ -988,14 +988,25 @@ class InterpretiveReactor {
 //					break;
 				case Instruction.GUARD_INLINE : //[obj]
 					ArrayList gvars = (ArrayList)inst.getArg2();
+					ArrayList gOutVars = (ArrayList)inst.getArg3();
 					ArrayList gvars2 = new ArrayList();
 					for(int i=0;i<gvars.size();i++) {
-						gvars2.add(atoms[((Integer)gvars.get(i)).intValue()]);
+						int idx = ((Integer)gvars.get(i)).intValue();
+						if(vars.size()>idx && vars.get(idx)!=null) {
+							gvars2.add(vars.get(idx));
+						} else {
+							gvars2.add(atoms[idx]);
+						}
 					}
 					if(! Inline.callGuardInline( (String)inst.getArg1(), (Membrane)mems[0], gvars2 ) ) return false;
 					// ガードで値が変わったかもしれないので戻す
 					for(int i=0;i<gvars2.size();i++) {
-						atoms[((Integer)gvars.get(i)).intValue()] = (Atom)gvars2.get(i);
+						int v = ((Integer)gvars.get(i)).intValue();
+						if(gOutVars.contains(gvars.get(i))) {
+							atoms[v] = (Atom)gvars2.get(i);
+						} else {
+							vars.set(v, gvars2.get(i));
+						}
 					}
 					break;
 					//====組み込み機能に関する命令====ここまで====

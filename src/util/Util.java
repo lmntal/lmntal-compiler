@@ -9,7 +9,9 @@ import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Env;
 import runtime.Functor;
+import runtime.IntegerFunctor;
 import runtime.Link;
+import runtime.Membrane;
 
 /**
  * @author mizuno
@@ -17,6 +19,7 @@ import runtime.Link;
  */
 abstract public class Util {
 	public static Functor DOT = new Functor(".", 3);
+	public static Functor NIL = new Functor("[]", 1);
 	public static final Iterator NULL_ITERATOR = Collections.EMPTY_SET.iterator();
 	public static void systemError(String msg) {
 		System.err.println(msg);
@@ -79,6 +82,111 @@ abstract public class Util {
 		}
 //		System.out.println("list = "+l);
 		return l.toArray();
+	}
+	
+	/**
+	 * リストかどうかを返す
+	 * @param link
+	 * @return
+	 */
+	public static boolean isList(Link link) {
+		Atom a;
+		while(true) {
+			a = link.getAtom();
+			if(a.getFunctor().equals(NIL)) return true;
+			if(!a.getFunctor().equals(DOT)) return false;
+			link = a.getArg(1);
+		}
+	}
+	
+	/**
+	 * リスト中の最大値を求め、result に IntegerFunctor としてセットする
+	 * @param link
+	 * @param result
+	 * @return
+	 */
+	public static boolean listMax(Link link, Atom result) {
+		int max = Integer.MIN_VALUE;
+		boolean b=true;
+		Atom a;
+		while(true) {
+			a = link.getAtom();
+			if(a.getFunctor().equals(NIL)) {
+				break;
+			}
+			if(!a.getFunctor().equals(DOT)) {
+				b=false;
+				break;
+			}
+			if(!(a.nthAtom(0).getFunctor() instanceof IntegerFunctor)) {
+				b=false;
+				break;
+			}
+			int v = ((IntegerFunctor)a.nthAtom(0).getFunctor()).intValue();
+			if(max < v) max=v;
+			link = a.getArg(1);
+		}
+		result.setFunctor(new IntegerFunctor(max));
+		return b;
+	}
+	
+	/**
+	 * リスト中の最小値を求め、result に IntegerFunctor としてセットする
+	 * @param link
+	 * @param result
+	 * @return
+	 */
+	public static boolean listMin(Link link, Atom result) {
+		int min = Integer.MAX_VALUE;
+		boolean b=true;
+		Atom a;
+		while(true) {
+			a = link.getAtom();
+			if(a.getFunctor().equals(NIL)) {
+				break;
+			}
+			if(!a.getFunctor().equals(DOT)) {
+				b=false;
+				break;
+			}
+			if(!(a.nthAtom(0).getFunctor() instanceof IntegerFunctor)) {
+				b=false;
+				break;
+			}
+			int v = ((IntegerFunctor)a.nthAtom(0).getFunctor()).intValue();
+			if(min > v) min=v;
+			link = a.getArg(1);
+		}
+		result.setFunctor(new IntegerFunctor(min));
+		return b;
+	}
+	
+	/**
+	 * link0 が link1 のリスト中に含まれるかどうかを返す 
+	 * @param link
+	 * @param result
+	 * @return
+	 */
+	public static boolean listMember(Atom base, Link link1) {
+		Functor v = base.getFunctor();
+		boolean b=false;
+		Atom a;
+		while(true) {
+			a = link1.getAtom();
+			if(a.getFunctor().equals(NIL)) {
+				break;
+			}
+			if(!a.getFunctor().equals(DOT)) {
+				b=false;
+				break;
+			}
+			if(a.nthAtom(0).getFunctor().equals(v)) {
+				b=true;
+				break;
+			}
+			link1 = a.getArg(1);
+		}
+		return b;
 	}
 	
 	/**
