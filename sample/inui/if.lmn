@@ -1,2 +1,9 @@
-m(X) :- if (X > 10) else m(X+1), n(X*X).
-m(1).
+//if構文を入れた場合
+%m(X) :- if (X > 10) else m(X+1), n(X*X).
+%m(X) :- X > 10 -> (); m(X+1), n(X*X).
+%m(1).
+
+//baseモジュール
+base.use. integer.use.
+R=m(X) - int(X) | R=if(X > 10, (), (m(X+1), n(X*X))).
+ret=m(1).
