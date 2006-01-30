@@ -14,6 +14,7 @@
 
 dlmntal.bind(50000,
   [accept(S1,R1),accept(S2,R2),accept(S3,R3),accept(S4,R4)]).
+  
 {in(R1),in(R2),in(R3),in(R4),out(Z)}.
 Z=cp([S1,S2,S3,S4]).
 

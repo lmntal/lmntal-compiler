@@ -14,8 +14,11 @@
 
 io.use.
 
+% ローカルホストの50000番に接続する．
+% 違うソケットに接続したい場合はここを変更しましょう．
 dlmntal.connect("127.0.0.1",50000,io.list_of_stdin_async,out).
 
+% rule: print
 out=[H|T] :- string(H) | out=T,
 [:/*inline*/
   System.out.println("> "+me.nth(0));
