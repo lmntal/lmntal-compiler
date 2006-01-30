@@ -1,24 +1,31 @@
 /**
- *  Distributed LMNtal sample(#1)
- *  distributed sort
- *    クライアントがサーバからソートプログラムをダウンロードして実行し，
- *    その結果をサーバがマージする．
- *  server file: sort-server.lmn
+ *  Distributed LMNtal sample
+ *    sort-client.lmn
+ *    @see sort-server.lmn
  *
- *  06/01/12 okabe
+ *  AUTHOR
+ *    Ryo Okabe
+ *
+ *  HISTORY
+ *    06/01/12 released
+ *    06/01/30 update クライアントに終了処理を追加
  */
 
+% ローカルホストの50000番に接続する．
+% 違うソケットに接続したい場合はここを変更しましょう．
 dlmntal.connect("127.0.0.1",50000,[],strDec).
 
-% リストのデコードフィルタ
+% リストのデコードフィルタ．
 strDec([_SH|T]) :- 
   strDec(T),codec.strDecoder(_SH).
 
-% 送信
-send(N),dlmntal.socket(Send,Recv,Obj),{list(L),$p[L],@p} :- N>0 |
-  dlmntal.socket([Mem,close|Send],Recv,Obj),
-  Mem=codec.memEncoder({list(L),$p[L],@p}).
+% ソートが終わったらそれをサーバに送信してプログラムを終了する．
+send(N),dlmntal.socket(Send,Recv,Obj),{list(L),$p,@p} :-
+  N>0,ground(L) |
+    dlmntal.socket([Mem,close|Send],Recv,Obj),
+    Mem=codec.memEncoder({list(L),$p,@p}),
+    dlmntal.terminate.
 
-% 送信可能回数
+% 送信可能回数(無限に送信されることを防ぐため)．
 send(1).
 
