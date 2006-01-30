@@ -357,9 +357,11 @@ public class Dumper {
 	 *            mem
 	 * @param boolean
 	 *            doLock
+	 * @param int
+	 *            mode
 	 * @return String 膜のコンパイル可能な文字列表現
 	 */
-	public static String encode(AbstractMembrane mem, boolean doLock) {
+	public static String encode(AbstractMembrane mem, boolean doLock, int mode) {
 		boolean locked = false;
 		if (doLock) {
 			if (mem.getLockThread() != Thread.currentThread()) {
@@ -373,164 +375,167 @@ public class Dumper {
 		Unlexer buf = new Unlexer();
 		boolean commaFlag = false;
 
+		if(mode==0 | mode==2) {
 		// #1 - アトムの出力
 
-		// proxyを表示しないのでこれで十分
-		Set atoms = new HashSet(mem.getAtomCount());
+			// proxyを表示しないのでこれで十分
+			Set atoms = new HashSet(mem.getAtomCount());
 
-		Iterator it = mem.atomIterator();
-		while (it.hasNext()) {
-			Atom a = (Atom) it.next();
-			if (!a.isVisible()) {
-				// PROXYを表示させない
-				continue;
-			}
-			atoms.add(a);
-		}
-
-		List predAtoms[] = { new LinkedList(), new LinkedList(),
-				new LinkedList(), new LinkedList(), new LinkedList() };
-
-		// 起点にするアトムとその優先順位:
-		// 0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
-		// 1. 結合度が = 以下の2引数演算子のアトム（臨時：およびinlineアトム）
-		// 2. 通常のシンボル名でリンク先が最終引数の1引数アトム
-		// 3. 通常のシンボル名で最終引数のリンク先が最終引数の2引数以上のアトム
-		// 4. 第3引数のリンク先が最終引数のconsアトム
-
-		// 通常でないアトム名（起点にしないアトムの名前）:
-		// - $in,$out,[],整数,実数,およびA-Zで始まるアトム
-
-		it = mem.atomIterator();
-		while (it.hasNext()) {
-			Atom a = (Atom) it.next();
-			if (a.getArity() == 0 || a.getLastArg().getAtom().getMem() != mem) {
-				predAtoms[0].add(a);
-			} else if (a.getArity() == 2 && isInfixOperator(a.getName())
-					&& getBinopPrio(a.getName()) >= 700
-					|| a.getName().startsWith("/*inline*/")) {
-				predAtoms[1].add(a);
-			} else if (a.getLastArg().isFuncRef()) {
-				// todo コードが気持ち悪いのでなんとかする (1)
-				if (!a.getFunctor().isSymbol())
-					continue; // 通常のファンクタを起点にしたい
-				if (a.getName().matches("^[A-Z].*"))
-					continue; // 補完された自由リンクは引数に置きたい
-				if (a.getFunctor().equals(Functor.INSIDE_PROXY))
-					continue;
-				if (a.getFunctor().isOUTSIDE_PROXY())
-					continue;
-				if (a.getFunctor().equals(FUNC_NIL))
-					continue; // []は整数と同じ表示的な扱い
-				if (a.getArity() == 1) {
-					predAtoms[2].add(a);
-				} else if (!a.getFunctor().equals(FUNC_CONS)) {
-					predAtoms[3].add(a);
-				} else { // consはできるだけデータとして扱う
-					predAtoms[4].add(a);
-				}
-			}
-		}
-
-		// predAtoms内のアトムを起点に出力
-		for (int phase = 0; phase < predAtoms.length; phase++) {
-			it = predAtoms[phase].iterator();
+			Iterator it = mem.atomIterator();
 			while (it.hasNext()) {
 				Atom a = (Atom) it.next();
-				if (atoms.contains(a)) { // まだ出力されていない場合
-					if (commaFlag)
-						buf.append(", ");
-					else
-						commaFlag = true;
-					// 3引数演算子の強制 s=t 表示は、演算子展開表示しないときのみ行う
-					// consは演算子と同じ表示的な扱い
-					if (a.getFunctor().equals(FUNC_CONS)
-							|| (a.getArity() == 3 && isInfixOperator(a
-									.getName()))) {
-						buf.append(dumpLink(a.getLastArg(), atoms, 700));
-						buf.append("=");
-						buf.append(dumpAtomGroupWithoutLastArg(a, atoms, 700,
-								true));
+				if (!a.isVisible()) {
+					// PROXYを表示させない
+					continue;
+				}
+				atoms.add(a);
+			}
+
+			List predAtoms[] = { new LinkedList(), new LinkedList(),
+					new LinkedList(), new LinkedList(), new LinkedList() };
+
+			// 起点にするアトムとその優先順位:
+			// 0. 引数なしのアトム、および最終引数がこの膜以外へのリンクであるアトム
+			// 1. 結合度が = 以下の2引数演算子のアトム（臨時：およびinlineアトム）
+			// 2. 通常のシンボル名でリンク先が最終引数の1引数アトム
+			// 3. 通常のシンボル名で最終引数のリンク先が最終引数の2引数以上のアトム
+			// 4. 第3引数のリンク先が最終引数のconsアトム
+
+			// 通常でないアトム名（起点にしないアトムの名前）:
+			// - $in,$out,[],整数,実数,およびA-Zで始まるアトム
+
+			it = mem.atomIterator();
+			while (it.hasNext()) {
+				Atom a = (Atom) it.next();
+				if (a.getArity() == 0
+						|| a.getLastArg().getAtom().getMem() != mem) {
+					predAtoms[0].add(a);
+				} else if (a.getArity() == 2 && isInfixOperator(a.getName())
+						&& getBinopPrio(a.getName()) >= 700
+						|| a.getName().startsWith("/*inline*/")) {
+					predAtoms[1].add(a);
+				} else if (a.getLastArg().isFuncRef()) {
+					// todo コードが気持ち悪いのでなんとかする (1)
+					if (!a.getFunctor().isSymbol())
+						continue; // 通常のファンクタを起点にしたい
+					if (a.getName().matches("^[A-Z].*"))
+						continue; // 補完された自由リンクは引数に置きたい
+					if (a.getFunctor().equals(Functor.INSIDE_PROXY))
 						continue;
+					if (a.getFunctor().isOUTSIDE_PROXY())
+						continue;
+					if (a.getFunctor().equals(FUNC_NIL))
+						continue; // []は整数と同じ表示的な扱い
+					if (a.getArity() == 1) {
+						predAtoms[2].add(a);
+					} else if (!a.getFunctor().equals(FUNC_CONS)) {
+						predAtoms[3].add(a);
+					} else { // consはできるだけデータとして扱う
+						predAtoms[4].add(a);
 					}
-					buf.append(dumpAtomGroup(a, atoms, true));
 				}
 			}
-		}
 
-		// todo このchangedループもpredAtomsに統合する
-
-		// 閉路がある場合にはまだ残っているので、適当な所から出力。
-		// 閉路の部分を探した方がいいが、とりあえずこのまま。
-		boolean changed;
-		do {
-			changed = false;
-			it = atoms.iterator();
-			while (it.hasNext()) {
-				Atom a = (Atom) it.next();
-				// todo コードが気持ち悪いのでなんとかする (2)
-				if (!a.getFunctor().isSymbol())
-					continue;
-				if (a.getName().matches("^[A-Z].*"))
-					continue;
-				if (a.getFunctor().equals(Functor.INSIDE_PROXY))
-					continue;
-				if (a.getFunctor().isOUTSIDE_PROXY())
-					continue;
-				if (a.getFunctor().equals(FUNC_NIL))
-					continue;
-				// ここまで残った1引数のアトムはデータの可能性が高いので、できるだけ引数に来るようにする
-				if (a.getArity() == 1)
-					continue;
-				if (commaFlag)
-					buf.append(", ");
-				else
-					commaFlag = true;
-				buf.append(dumpAtomGroup(a, atoms, true));
-				changed = true;
-				break;
-			}
-		} while (changed);
-
-		// 残った1引数のアトム（データだと思って保留していた整数など）を起点にして出力する。
-		// ただしリンク先が自由リンク管理アトムのときに限る
-		do {
-			changed = false;
-			it = atoms.iterator();
-			while (it.hasNext()) {
-				Atom a = (Atom) it.next();
-				if (a.getArity() == 1) {
-					if (a.getLastArg().getAtom().getFunctor() == Functor.INSIDE_PROXY
-							|| a.getLastArg().getAtom().getFunctor()
-									.isOUTSIDE_PROXY()) {
+			// predAtoms内のアトムを起点に出力
+			for (int phase = 0; phase < predAtoms.length; phase++) {
+				it = predAtoms[phase].iterator();
+				while (it.hasNext()) {
+					Atom a = (Atom) it.next();
+					if (atoms.contains(a)) { // まだ出力されていない場合
 						if (commaFlag)
 							buf.append(", ");
 						else
 							commaFlag = true;
+						// 3引数演算子の強制 s=t 表示は、演算子展開表示しないときのみ行う
+						// consは演算子と同じ表示的な扱い
+						if (a.getFunctor().equals(FUNC_CONS)
+								|| (a.getArity() == 3 && isInfixOperator(a
+										.getName()))) {
+							buf.append(dumpLink(a.getLastArg(), atoms, 700));
+							buf.append("=");
+							buf.append(dumpAtomGroupWithoutLastArg(a, atoms,
+									700, true));
+							continue;
+						}
 						buf.append(dumpAtomGroup(a, atoms, true));
-						changed = true;
-						break;
 					}
 				}
 			}
-		} while (changed);
 
-		// 残ったアトムを s=t の形式で出力する。
-		while (!atoms.isEmpty()) {
-			it = atoms.iterator();
-			Atom a = (Atom) it.next();
-			if (commaFlag)
-				buf.append(", ");
-			else
-				commaFlag = true;
-			buf.append(dumpAtomGroupWithoutLastArg(a, atoms, 700, true));
-			buf.append("=");
-			buf.append(dumpAtomGroupWithoutLastArg(a.getLastArg().getAtom(),
-					atoms, 700, true));
+			// todo このchangedループもpredAtomsに統合する
+
+			// 閉路がある場合にはまだ残っているので、適当な所から出力。
+			// 閉路の部分を探した方がいいが、とりあえずこのまま。
+			boolean changed;
+			do {
+				changed = false;
+				it = atoms.iterator();
+				while (it.hasNext()) {
+					Atom a = (Atom) it.next();
+					// todo コードが気持ち悪いのでなんとかする (2)
+					if (!a.getFunctor().isSymbol())
+						continue;
+					if (a.getName().matches("^[A-Z].*"))
+						continue;
+					if (a.getFunctor().equals(Functor.INSIDE_PROXY))
+						continue;
+					if (a.getFunctor().isOUTSIDE_PROXY())
+						continue;
+					if (a.getFunctor().equals(FUNC_NIL))
+						continue;
+					// ここまで残った1引数のアトムはデータの可能性が高いので、できるだけ引数に来るようにする
+					if (a.getArity() == 1)
+						continue;
+					if (commaFlag)
+						buf.append(", ");
+					else
+						commaFlag = true;
+					buf.append(dumpAtomGroup(a, atoms, true));
+					changed = true;
+					break;
+				}
+			} while (changed);
+
+			// 残った1引数のアトム（データだと思って保留していた整数など）を起点にして出力する。
+			// ただしリンク先が自由リンク管理アトムのときに限る
+			do {
+				changed = false;
+				it = atoms.iterator();
+				while (it.hasNext()) {
+					Atom a = (Atom) it.next();
+					if (a.getArity() == 1) {
+						if (a.getLastArg().getAtom().getFunctor() == Functor.INSIDE_PROXY
+								|| a.getLastArg().getAtom().getFunctor()
+										.isOUTSIDE_PROXY()) {
+							if (commaFlag)
+								buf.append(", ");
+							else
+								commaFlag = true;
+							buf.append(dumpAtomGroup(a, atoms, true));
+							changed = true;
+							break;
+						}
+					}
+				}
+			} while (changed);
+
+			// 残ったアトムを s=t の形式で出力する。
+			while (!atoms.isEmpty()) {
+				it = atoms.iterator();
+				Atom a = (Atom) it.next();
+				if (commaFlag)
+					buf.append(", ");
+				else
+					commaFlag = true;
+				buf.append(dumpAtomGroupWithoutLastArg(a, atoms, 700, true));
+				buf.append("=");
+				buf.append(dumpAtomGroupWithoutLastArg(
+						a.getLastArg().getAtom(), atoms, 700, true));
+			}
 		}
 
 		// #2 子膜の出力
-		it = mem.memIterator();
+		Iterator it = mem.memIterator();
 		while (it.hasNext()) {
 			AbstractMembrane m = (AbstractMembrane) it.next();
 			if (commaFlag) {
@@ -538,23 +543,25 @@ public class Dumper {
 			} else
 				commaFlag = true;
 			buf.append("{");
-			buf.append(encode(m, true));
+			buf.append(encode(m, true, mode));
 			buf.append("}");
 			if (m.kind == 1)
 				buf.append("_");
 		}
 
+		if(mode <= 1) {
 		// #3 ルールの出力
-		it = mem.rulesetIterator();
-		while (it.hasNext()) {
-			if (commaFlag)
-				buf.append(", ");
-			else
-				commaFlag = true;
-			// Translator が作成したファイルのencode()メソッドを呼び出す
-			buf.append(((Ruleset) it.next()).encode());
+			it = mem.rulesetIterator();
+			while (it.hasNext()) {
+				if (commaFlag)
+					buf.append(", ");
+				else
+					commaFlag = true;
+				// Translator が作成したファイルのencode()メソッドを呼び出す
+				buf.append(((Ruleset) it.next()).encode());
+			}
 		}
-
+		
 		if (locked) {
 			mem.quietUnlock();
 		}
