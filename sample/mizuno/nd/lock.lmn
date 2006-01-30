@@ -19,8 +19,10 @@ check(M,[C1,C2,C3]).
 
 C1={
 	//uniq用のID生成
-	nextid(0).
-	nextid(N), {$p,@p} :- \+($p=(id(X),$pp)), N2=N+1 | nextid(N2), {id(N),$p,@p}.
+//	nextid(0).
+//	nextid(N), {$p,@p} :- \+($p=(id(X),$pp)), N2=N+1 | nextid(N2), {id(N),$p,@p}.
+	nd.genid.
+	
 	//遷移のリスト化
 	{id(N),$p,@p} :- uniq(N) | {id(N),fl([]),$p,@p}.
 	reduce(F,T,R),{id(N),from(F),fl(FL),$p[FL|*W],@p},{id(N2),to(T),$q,@q} :- uniq(N,N2) |

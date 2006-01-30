@@ -30,7 +30,7 @@ public class Ruleset611 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL269(mem, atom, false)) {
+		if (execL614(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@611", "null");
 			return true;
@@ -42,14 +42,14 @@ public class Ruleset611 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL270(mem, nondeterministic)) {
+		if (execL615(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@611", "null");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL270(Object var0, boolean nondeterministic) {
+	public boolean execL615(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -70,16 +70,16 @@ public class Ruleset611 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L270:
+L615:
 		{
-			if (execL267(var0,nondeterministic)) {
+			if (execL612(var0,nondeterministic)) {
 				ret = true;
-				break L270;
+				break L615;
 			}
 		}
 		return ret;
 	}
-	public boolean execL267(Object var0, boolean nondeterministic) {
+	public boolean execL612(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -100,18 +100,18 @@ L270:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L267:
+L612:
 		{
 			if (nondeterministic) {
-				Task.states.add(new Object[] {theInstance, "null", "L268",var0});
-			} else if (execL268(var0,nondeterministic)) {
+				Task.states.add(new Object[] {theInstance, "null", "L613",var0});
+			} else if (execL613(var0,nondeterministic)) {
 				ret = true;
-				break L267;
+				break L612;
 			}
 		}
 		return ret;
 	}
-	public boolean execL268(Object var0, boolean nondeterministic) {
+	public boolean execL613(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -132,15 +132,15 @@ L267:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L268:
+L613:
 		{
 			((AbstractMembrane)var0).loadRuleset(Ruleset610.getInstance());
 			ret = true;
-			break L268;
+			break L613;
 		}
 		return ret;
 	}
-	public boolean execL269(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL614(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -161,7 +161,7 @@ L268:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L269:
+L614:
 		{
 		}
 		return ret;

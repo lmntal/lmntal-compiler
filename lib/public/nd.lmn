@@ -28,4 +28,8 @@ nd.exec({$p,@p,{$q,@q}*})
 			plus.dequeue();
 			mem1.removeAtom(plus);
 		:]({$p,@p,{$q,@q}*}).
+
+nd.genid :- nd.nextid(0).
+nd.nextid(N), {$p,@p} :- \+($p=(id(X),$pp)), N2=N+1 | nd.nextid(N2), {id(N),$p,@p}.
+
 }.
