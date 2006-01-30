@@ -9,13 +9,12 @@ SYNOPSIS
     Server:
       dlmntal.bind(50000,[accept([],recv),close]).
     Client:
-      recv(dlmntal.connect("127.0.0.1",50000,["I","am","hoge",close]))
+      recv(dlmntal.connect("127.0.0.1",50000,["I","am","data",close])).
     ->
     Server:
-      recv(["I","am","hoge"|_52]), closed([]), 
-      dlmntal.socket([],_52,'[Socket[addr..').
+      recv(["I","am","data"|closed([])]), closed([]).
     Client:
-      recv(closed([]))
+      recv(closed([])).
       
 AUTHOR
 
@@ -26,7 +25,7 @@ HISTORY
 	06/01/07 released
 	06/01/10 1.1
 	06/01/12 2.0 add termination processing
-	06/01/19 3.0 change module name (dlmntal -> dlmntal)
+	06/01/19 3.0 change module name (dlt -> dlmntal)
 
 */
 
@@ -44,9 +43,9 @@ class AcceptThread extends Thread {
 
   /**
    *  AcceptThread#AcceptThread()
-   *  @param servSock
-   *  @param mem
-   *  @param ssAtom
+   *  @param ServerSocket servSock
+   *  @param Membrane mem
+   *  @param Atom ssAtom
    */
   AcceptThread(ServerSocket servSock, Membrane mem, Atom ssAtom) {
     this.servSock = servSock;
@@ -102,9 +101,9 @@ class ReaderThread implements Runnable {
   
   /**
    *  ReaderThread#ReaderThread()
-   *  @param sock
-   *  @param reader
-   *  @param mem
+   *  @param Socket sock
+   *  @param BufferedReader reader
+   *  @param Membrane mem
    */
   ReaderThread(Socket sock, BufferedReader reader, Membrane mem) {
     this.sock = sock;
@@ -114,7 +113,7 @@ class ReaderThread implements Runnable {
   
   /**
    *  ReaderThread#setObjAtom()
-   *  @param objAtom
+   *  @param Atom objAtom
    */
   public void setObjAtom(Atom objAtom) {
     this.objAtom = objAtom;
@@ -176,7 +175,6 @@ class ReaderThread implements Runnable {
     try {
       reader.close();
       sock.close();
-      System.out.println("ReaderThread: stopped");
     } catch(IOException e) {
       e.printStackTrace();
     }
@@ -189,8 +187,9 @@ module(dlmntal).
 
 /**
  *  module: bind
- *    create ServerSocket and AcceptThread
+ *    create ServerSocket
  */
+bind @@
 dlmntal.bind(Port,Cmd) :- int(Port) |
   dlmntal.bound(Cmd,Obj),
   Obj = [:/*inline*/
@@ -216,8 +215,9 @@ dlmntal.bind(Port,Cmd) :- int(Port) |
 
 /**
  *  module: bound
- *    AcceptThread starts running
+ *    start AcceptThread
  */
+bound @@
 dlmntal.bound([accept(Send,Recv)|T],Obj) :- 
   dlmntal.bound([accepting(Send,Recv)|T],O),
   O=[:/*inline*/
@@ -244,7 +244,6 @@ dlmntal.bound([close|T],Obj) :- class(Obj,"java.net.ServerSocket") |
     ServerSocket servSock = (ServerSocket)objFunc.getObject();
     try {
       servSock.close();
-      System.out.println("ServerSocket: closed");
     } catch(IOException e) {
       e.printStackTrace();
     }
@@ -254,8 +253,9 @@ dlmntal.bound([close|T],Obj) :- class(Obj,"java.net.ServerSocket") |
   
 /**
  *  module: connect
- *    connect to remote server
+ *    connect to server
  */
+connect @@
 dlmntal.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
   dlmntal.socket(Send,Recv,Obj),
   Obj = [:/*inline*/
