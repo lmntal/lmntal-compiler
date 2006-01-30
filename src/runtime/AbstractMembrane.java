@@ -1235,10 +1235,25 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 
 	/**
+	 * 膜をエンコードする．
 	 * @return String 膜のコンパイル可能な文字列表現
 	 */
 	public String encode() {
-		return "{" + Dumper.encode(this, true) + "}";
+		return "{" + Dumper.encode(this, true, 0) + "}";
+	}
+	/**
+	 * 膜をエンコードする．ただしルールセットのみ．
+	 * @return String 膜のコンパイル可能な文字列表現
+	 */
+	public String encodeRulesets() {
+		return "{" + Dumper.encode(this, true, 1) + "}";
+	}
+	/**
+	 * 膜をエンコードする．ただしルールセットは除く．
+	 * @return String 膜のコンパイル可能な文字列表現
+	 */
+	public String encodeProcess() {
+		return "{" + Dumper.encode(this, true, 2) + "}";
 	}
 		
 	/* *** *** *** *** *** BEGIN GUI *** *** *** *** *** */
