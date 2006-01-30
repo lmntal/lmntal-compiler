@@ -5,19 +5,23 @@ NAME
 	codec module
 
 SYNOPSIS
-    
-Sample
 
-        sample/okabe/codec.lmn
-
+    ret1=codec.memEncoder({a. b:-c}).
+      encode 'a' and 'b:-c'
+    ret2=codec.memRulesetsEncoder({a. b:-c}).
+      encode 'b:-c'
+    ret3=codec.memProcessEncoder({a. b:-c}).
+      encode 'a'
+      
 AUTHOR
 
 	Ryo Okabe
 
 HISTORY
 
-	1.0  2006/01/10(Tue)
-	2.0  2006/01/12(Thu)
+    06/01/10 released
+	06/01/12 2.0
+	06/01/30 3.0 memRulesetsEncoder,memProcessEncoder¤òÄÉ²Ã
 
 */
 
@@ -53,13 +57,51 @@ encode @@
     mem.relinkAtomArgs(sAtom,0,me,0);
   :],$p,@p}.
 
+/**
+ *  module: memRulesetsEncoder
+ *  membrane -> string
+ *  Example
+ *    ret=codec.memRulesetsEncoder({a. a:-b}) -> "{a:-b}"
+ */
+memRulesetsEncoder @@
+Ret=codec.memRulesetsEncoder({$p,@p}) :-
+  Ret=codec.encoded(X),{X=codec.encodeRulesets,$p,@p}.
+
+encodeRulesets @@
+{Ret=codec.encodeRulesets,$p,@p} :-
+  {Ret=
+  [:/*inline*/
+    me.remove();
+    StringFunctor sFunc =
+      new StringFunctor(((Membrane)mem).encodeRulesets());
+    Atom sAtom = mem.newAtom(sFunc);
+    mem.relinkAtomArgs(sAtom,0,me,0);
+  :],$p,@p}.
+
+/**
+ *  module: memProcessEncoder
+ *  membrane -> string
+ *  Example
+ *    ret=codec.memProcessEncoder({a. a:-b}) -> "{a}"
+ */
+memProcessEncoder @@
+Ret=codec.memProcessEncoder({$p,@p}) :-
+  Ret=codec.encoded(X),{X=codec.encodeProcess,$p,@p}.
+
+encodeProcess @@
+{Ret=codec.encodeProcess,$p,@p} :-
+  {Ret=
+  [:/*inline*/
+    me.remove();
+    StringFunctor sFunc =
+      new StringFunctor(((Membrane)mem).encodeProcess());
+    Atom sAtom = mem.newAtom(sFunc);
+    mem.relinkAtomArgs(sAtom,0,me,0);
+  :],$p,@p}.
+
 encoded @@
 Ret=codec.encoded(X),{X=S,$p,@p} :- string(S) | 
   Ret=S,{$p,@p}.
-
-%memDecoder @@
-%codec.memDecoder(X),{X=_S,$p,@p} :-
-%  codec.strDecoder(_S),{$p,@p}.
 
 /**
  *  module: strDecoder
