@@ -43,6 +43,8 @@ public final class Env {
 	/** 非決定的LMNtalモード */
 	public static int ndMode = ND_MODE_D;
 	
+	public static boolean fThread = true;
+	
 	////////////////////////////////////////////////////////////////
 	
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/

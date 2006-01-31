@@ -108,7 +108,7 @@ public class RulesetCompiler {
 			catch (CompileException e) {
 				Env.p("    in " + rs.toString() + "\n");
 			}
-			if(rc.theRule.getFullText().matches(".*thread.*") && !recursived){
+			if(Env.fThread && rc.theRule.getFullText().matches(".*thread.*") && !recursived){
 				RuleConverter conv = new RuleConverter();
 				Iterator ite = conv.convert(rc.theRule.getFullText());
 				while(ite.hasNext()){

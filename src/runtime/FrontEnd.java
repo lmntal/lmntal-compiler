@@ -394,6 +394,10 @@ public class FrontEnd {
 							Env.debugOption = true;
 							Env.fInterpret = true;
 							Env.fGUI = true;
+						} else if (args[i].equals("--nothread")) {
+							// 暫定オプション
+							// スレッドルールの変換を行わない
+							Env.fThread = false;
 						}else {
 							System.err.println("Invalid option: " + args[i]);
 							System.exit(-1);
