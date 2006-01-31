@@ -308,13 +308,15 @@ public class Dumper {
 		}
 
 		// #3 - ルールの出力
-		it = mem.rulesetIterator();
-		while (it.hasNext()) {
-			if (commaFlag)
-				buf.append(", ");
-			else
-				commaFlag = true;
-			buf.append(((Ruleset) it.next()).toString());
+		if(Env.showruleset){
+			it = mem.rulesetIterator();
+			while (it.hasNext()) {
+				if (commaFlag)
+					buf.append(", ");
+				else
+					commaFlag = true;
+				buf.append(((Ruleset) it.next()).toString());
+			}
 		}
 		if(Env.showrule){
 			it = mem.rulesetIterator();

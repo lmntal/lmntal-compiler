@@ -363,6 +363,10 @@ public class FrontEnd {
 							/// --showproxy
 							/// Show proxy atoms
 							Env.hideProxy = false;
+						} else if(args[i].equals("--hideruleset")){
+							/// --hideruleset
+							/// Hide ruleset
+							Env.showruleset = false;
 						} else if(args[i].equals("--hiderule")){
 							/// --hiderule
 							/// Hide rule names

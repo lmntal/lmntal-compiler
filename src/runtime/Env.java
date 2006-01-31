@@ -67,6 +67,8 @@ public final class Env {
 	
 	public static boolean showrule = true;
 
+	public static boolean showruleset = true;
+	
 	////////////////////////////////////////////////////////////////
 
 	/** 実行アトムスタックを使わないランダム実行レベル */
