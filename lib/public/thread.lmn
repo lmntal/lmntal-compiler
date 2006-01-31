@@ -8,10 +8,15 @@
 {
 module(thread).
 
+	/*
+		If the membrane using threads becomes stable,
+		collect processes from threads.
+	*/
 	{
 		system_ruleset.
-		{thread(N,{$p,@p}), $q,@q}/ :- int(N) | {$p,$q,@q}.
+		{thread(N,{$p,@p}), $q,@q}/ :- int(N) | {$p,$q,@p,@q}.
 	}.
+	
 	/*
 		thread.create(N).
 		Create N threads.
@@ -37,8 +42,8 @@ module(thread).
 	thread_any@@
 	thread.any({$p,@p}) :- thread.any({{$p,@p}}).
 	thread_any2@@
-	thread.any({{$p,@p}}), thread(M,{$q,@q}@T) :- int(M) |
-		thread(M, {$p,$q,@p,@q}@T).
+	thread.any({{$p,@p}}), thread(M,{$q,@q}) :- int(M) |
+		thread(M, {$p,$q,@p,@q}).
 
 	/*
 		thread.all({atoms or rules}).

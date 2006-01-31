@@ -145,9 +145,11 @@ class RuleConverter {
 	 	ArrayList lst = new ArrayList();
 	 	for(int k=0; k<=memuse; k++){
 //	 		if(k!=0 || memuse==0){
-	 			lst.add("("+toRule(name[k] + "_" + k, head[k],guard[k],body[k])+")");
+	 			if(!name[k].trim().equals(""))
+	 				name[k] += "_" + k;
+	 			lst.add("("+toRule(name[k], head[k],guard[k],body[k])+")");
 	 			if(Env.dumpConvertedRules)
-	 				System.out.println(toRule(name[k] + "_" + k, head[k],guard[k],body[k]));
+	 				System.out.println(toRule(name[k], head[k],guard[k],body[k]));
 //	 		}
 	 	}
 	 	return lst.iterator();
@@ -252,7 +254,7 @@ class RuleConverter {
      private String toRule(String name, String head, String guard, String body){
     	if(name.trim().equals("")){
 	    	if(head.trim().equals(""))
-	    		return body.trim();
+	    		return ":- uniq | " + body.trim();
 	    	else if(guard.trim().equals(""))
 	    		return head.trim() + " :- " + body.trim();
 	    	else
@@ -384,7 +386,7 @@ class RuleConverter {
     	bst = bbuf2.indexOf("?");
     	hend = hbuf2.indexOf("$");
     	bend = bbuf2.indexOf("$");
-    	String nm =name[mnum] + "_inner";
+    	String nm = (name[mnum].trim().equals("")) ? name[mnum] : name[mnum] + "_inner" ;
     	String hs = hbuf2.substring(hst,hend-2);
     	String bs = bbuf2.substring(bst,bend-2);
     	guardAdd("uniq", mnum);
