@@ -4,17 +4,15 @@ import java.awt.*;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Random;
 
 import runtime.AbstractMembrane;
-import runtime.RandomSet;
 import test.GUI.Node;
 
 
 /**
  * 
  * @author nakano
- * 描画用の膜を、画像オブジェクト（アトム？）にする
+ * 描画用の膜を、画像オブジェクトにする
  */
 public class GraphicObj{
 	public String name = null;
