@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 import runtime.AbstractMembrane;
+import runtime.Functor;
 import test.GUI.Node;
 /**
  * 
@@ -21,7 +22,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	public boolean locked = false;
 	private Image OSI = null;
 	private Graphics OSG = null;
-//	private boolean ready=false;
+//	private boolean ready=false; 
+	private final Functor NAME_ATOM = new Functor("name",1); 
 	/**描画するオブジェクトリスト*/
 	private LinkedList drawlist = new LinkedList();
 	/**レラティブ膜のリスト*/
@@ -126,7 +128,8 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	
 	/**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
 	public String getName(AbstractMembrane m){
-		Iterator ite = m.atomIterator();
+//		Iterator ite = m.atomIterator();
+		Iterator ite = m.atomIteratorOfFunctor(NAME_ATOM);
 		Node a;
 		
 		while(ite.hasNext()){

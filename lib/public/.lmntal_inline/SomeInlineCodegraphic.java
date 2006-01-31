@@ -6,6 +6,11 @@ import java.util.*;
 	import java.awt.MouseInfo.*;
 
 public class SomeInlineCodegraphic implements InlineCode {
+	public boolean runGuard(String guardID, Membrane mem, Object obj) throws Exception {
+			CustomGuard cg=(CustomGuard)Class.forName("CustomGuardImpl").newInstance();
+			if(cg==null) return false;
+			return cg.run(guardID, mem, obj);
+	}
 	public void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {

@@ -1,3 +1,4 @@
+{
 graphic.use.
 go:-{
 window,position(0,0),size(500,500),name("window").
@@ -30,3 +31,5 @@ Ret=calc(POS, V , MAX) :- N = POS + V , N > MAX          | Ret=	next(MAX , -rand
 %速度をランダムに決定
 Ret=rand_v, min_v(MinV), max_v(MaxV) :- int(MinV), int(MaxV) |
 	Ret=integer.rnd(MaxV-MinV+1)+MinV, min_v(MinV), max_v(MaxV).
+	
+}.

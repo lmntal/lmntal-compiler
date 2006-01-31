@@ -1,12 +1,8 @@
-/*graphic.use.
+graphic.use.
 go:-
 {
 %%make window
-window,name("LMNtal Typing"),size(800,600),timer(10).
-hoge=keyCode.
-H=keyCode([]):-H=keyCode([]).
+a,name("LMNtal Typing"),size(800,600),timer(10).
+ a:- {draw,name("oval"),getpic("filloval"),position(0,300),size(50,50)},b.
+ b:-window.
 }
-*/
-
-b(a([a,b,c])).
-H=a(L):-H=L.

@@ -27,6 +27,7 @@ public class LMNtalWindow extends JFrame{
 	private boolean keyListener = false;
 	private Functor keyAtomFunctor = null;
 	private boolean keyCache = true;
+	private boolean norepaint=false;
 	
 	/*ウィンドウ生成に必要*/
 	private boolean ready = false; 
@@ -41,6 +42,9 @@ public class LMNtalWindow extends JFrame{
 	private boolean win_loc = false;
 	private LinkedList atomlist = new LinkedList();
 	
+	public void setNoRepaint(boolean f){
+		norepaint=f;
+	}
 	public Color getColor(){
 		return (new Color(color_r,color_g,color_b));
 	}
@@ -143,8 +147,11 @@ public class LMNtalWindow extends JFrame{
 	public synchronized boolean setGraphicMem(AbstractMembrane m, int distance){
 		if(killed) return true;
 		if(lmnPanel == null)return false;
+
 		lmnPanel.setGraphicMem(m, distance);
-		lmnPanel.repaint();
+
+		if(!norepaint)
+			lmnPanel.repaint();
 		return true;
 	}
 	
@@ -152,7 +159,8 @@ public class LMNtalWindow extends JFrame{
 		if(killed) return true;
 		if(lmnPanel == null)return false;
 		lmnPanel.removeGraphicMem(m);
-		lmnPanel.repaint();
+		if(!norepaint)
+			lmnPanel.repaint();
 		return true;
 		
 	}

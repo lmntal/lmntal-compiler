@@ -1,6 +1,11 @@
 import runtime.*;
 import java.util.*;
 public class SomeInlineCodeinteger implements InlineCode {
+	public boolean runGuard(String guardID, Membrane mem, Object obj) throws Exception {
+			CustomGuard cg=(CustomGuard)Class.forName("CustomGuardImpl").newInstance();
+			if(cg==null) return false;
+			return cg.run(guardID, mem, obj);
+	}
 	public void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {
@@ -69,6 +74,21 @@ public class SomeInlineCodeinteger implements InlineCode {
   me.nthAtom(1).remove();
   me.remove();
  
+			break; }
+		case 5: {
+			/*inline*/
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Random rand = new Random();
+	int v=0;
+	try{
+		v = Integer.parseInt(s);
+	} catch(NumberFormatException e) {
+	}
+	Atom result = mem.newAtom(new IntegerFunctor(v));
+	mem.relink(result, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	
 			break; }
 		}
 	}
