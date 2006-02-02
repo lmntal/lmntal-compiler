@@ -1,0 +1,35 @@
+/*
+
+reflexivity  @ X leq X <=> true.
+antisymmetry @ X leq Y , Y leq X <=> X=Y.
+idempotence  @ X leq Y \ X leq Y <=> true.
+transitivity @ X leq Y , Y leq Z ==> X leq Z.
+*/
+
+reflexivity @@
+leq(var(X0), var(X1)) :- X0=X1 | var.unify(X0, X1).
+//leq(X0, X1) :- X0=X1, uniq(X0) | leq(X0, X1), eq(X0, X1).
+antisymmetry @@
+leq(var(X0), var(Y0)), leq(var(Y1), var(X1)) :- X0=X1, Y0=Y1 | var.unify(X0, Y0).
+//leq(X0, Y0), leq(Y1, X1) :- X0=X1, Y0=Y1 | eq(X0, Y0).
+//idempotence @@
+//leq(var(X0), var(Y0)), leq(var(X1), var(Y1)) :- X0=X1, Y0=Y1 | leq(var(X0), var(Y0)).
+transitivity @@
+leq(var(X), var(Y0)), leq(var(Y1), var(Z)) :- Y0=Y1, uniq(X, Y0, Z) | leq(var(X), var(Y0)), leq(var(Y1), var(Z)), leq(var(X), var(Z)).
+
+genleq(N) :- N>0, M=N-1 | leq(var(N), var(M)), genleq(M).
+
+var.use.
+
+time(N) :- M=N-1 |
+	leq(var(0), var(M)), genleq(M).
+
+time(20).
+
+/*
+
+Result
+
+leq(a, b), eq(c, b), eq(c, a).
+
+*/

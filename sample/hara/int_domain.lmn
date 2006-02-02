@@ -35,35 +35,35 @@ X0 :: remove_higher(_IMax, remove_lower(_IMin, L)).
 %% interaction with inequalities
 
 Le0@@
-le(X0, Y0), '::'(X1, L1), '::'(Y1, L2) :- 
+le(X0, Y0), X1::L1, Y1::L2 :- 
 X0=X1, Y0=Y1, uniq(X0, Y0, L1, L2), 
 custom_i_is_list(L1), custom_i_is_list(L2),
 custom_io_list_min(L1, MinX),
 custom_io_list_min(L2, MinY),
 custom_io_list_max(L2, MaxY),
 MinX > MinY |
-le(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(Y0, '..'(MinX, MaxY)).
+le(X0, Y0), X1::L1, Y1::L2, Y0::'..'(MinX, MaxY).
 
 Le1@@
-le(X0, Y0), '::'(X1, L1), '::'(Y1, L2) :- 
+le(X0, Y0), X1::L1, Y1::L2 :- 
 X0=X1, Y0=Y1, uniq(X0, Y0, L1, L2), 
 custom_i_is_list(L1), custom_i_is_list(L2),
 custom_io_list_max(L1, MaxX),
 custom_io_list_max(L2, MaxY),
 custom_io_list_min(L1, MinX),
 MaxX > MaxY |
-le(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(X0, '..'(MinX, MaxY)).
+le(X0, Y0), X1::L1, Y1::L2, X0::'..'(MinX, MaxY).
 
 
 Lt0@@
-lt(X0, Y0), '::'(X1, L1), '::'(Y1, L2) :-
+lt(X0, Y0), X1::L1, Y1::L2 :-
 X0=X1, Y0=Y1, uniq(X0, Y0, L1, L2), 
 custom_i_is_list(L1), custom_i_is_list(L2),
 custom_io_list_max(L1, MaxX),
 custom_io_list_max(L2, MaxY),
 custom_io_list_min(L1, MinX),
 MaxY1=MaxY-1, MaxY1<MaxX |
-lt(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(X0, '..'(MinX, MaxY1)).
+lt(X0, Y0), X1::L1, Y1::L2, X0::'..'(MinX, MaxY1).
 
 
 
@@ -74,14 +74,14 @@ lt(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(X0, '..'(MinX, MaxY1)).
 
 
 Lt1@@
-lt(X0, Y0), '::'(X1, L1), '::'(Y1, L2) :-
+lt(X0, Y0), X1::L1, Y1::L2 :-
 X0=X1, Y0=Y1, uniq(X0, Y0, L1, L2), 
 custom_i_is_list(L1), custom_i_is_list(L2),
 custom_io_list_min(L1, MinX),
 custom_io_list_min(L2, MinY),
 custom_io_list_max(L2, MaxY),
 MinX1=MinX+1, MinX1>MinY |
-lt(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(Y0, '..'(MinX1, MaxY)).
+lt(X0, Y0), X1::L1, Y1::L2, Y0::'..'(MinX1, MaxY).
 
 
 //X ne Y \  Y::D <=> ground(X), is_list(D), member(X,D) | select(X,D,D1), Y::D1.
@@ -97,10 +97,10 @@ lt(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(Y0, '..'(MinX1, MaxY)).
 //all_addition(L1,L2,L3), Z::L3.
 
 Add@@
-Z=add(X0, Y0), '::'(X1, L1), '::'(Y1, L2) :-
+Z=add(X0, Y0), X1::L1, Y1::L2 :-
 uniq(Z, X0, Y0, L1, L2), 
 custom_i_is_list(L1), custom_i_is_list(L2) |
-Z=add(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(Z, all_addition(L1, L2)).
+Z=add(X0, Y0), X1::L1, Y1::L2, Z::all_addition(L1, L2).
 
 %% interaction with multiplication
 %% no backpropagation yet!
@@ -109,10 +109,10 @@ Z=add(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(Z, all_addition(L1, L2)).
 //all_multiplication(L1,L2,L3), Z::L3.
 
 Mult@@
-Z=mult(X0, Y0), '::'(X1, L1), '::'(Y1, L2) :-
+Z=mult(X0, Y0), X1::L1, Y1::L2 :-
 uniq(Z, X0, Y0, L1, L2), 
 custom_i_is_list(L1), custom_i_is_list(L2) |
-Z=mult(X0, Y0), '::'(X1, L1), '::'(Y1, L2), '::'(Z, all_multiplication(L1, L2)).
+Z=mult(X0, Y0), X1::L1, Y1::L2, Z::all_multiplication(L1, L2).
 
 
 %% auxiliary predicates =============================================

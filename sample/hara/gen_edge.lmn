@@ -1,0 +1,13 @@
+time(N) :- int(N) | genMem(N), gen(integer.rndList(N, N*10)).
+gen([]) :-.
+gen([A,B|T]) :- e(A, B), gen(T).
+
+time(30).
+
+//genMem(0) :-.
+//genMem(N) :- N>0, M=N-1 | genMem(M), {id(M)}.
+//
+//e(_I0, _I1), {id(N0),$p0}, {id(N1),$p1} :- N0=_I0, N1=_I1 |
+//e(E0, E1), {+E0,id(N0),$p0}, {+E1,id(N1),$p1}.
+//
+//e(A, B) :- A=B |.
