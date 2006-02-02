@@ -167,6 +167,42 @@ public final class Link implements Cloneable, Serializable {
 //		}
 //		return flgequal;
 	}
+	/**
+	 * ground構造に対して一意な文字列を返す。
+	 * ground チェック済みでなければならない。
+	 * hara
+	 * @return
+	 */
+	public String groundString(){
+		Set srcSet = new HashSet();
+		Stack s = new Stack(); //リンクを積むスタック
+		HashMap linkStr = new HashMap();
+		StringBuffer sb = new StringBuffer();
+		int linkNo=0;
+		s.push(this);
+		while(!s.isEmpty()){
+			Link l = (Link)s.pop();
+			Atom a = l.getAtom();
+			if(srcSet.contains(a))continue; //既に辿ったアトム
+			sb.append(a.getFunctor().getName());
+			sb.append("(");
+			srcSet.add(a);
+			for(int i=0;i<a.getArity();i++){
+				Link l0 = a.args[i];
+				Link l1 = l0.getBuddy();
+				if(!linkStr.containsKey(l0)) {
+					String ss="L"+(linkNo++);
+					linkStr.put(l0, ss);
+					linkStr.put(l1, ss);
+				}
+				sb.append(linkStr.get(l0));
+				if(i==l.getPos())continue;
+				s.push(a.getArg(i));
+			}
+			sb.append(")");
+		}
+		return sb.toString();
+	}
 
 	///////////////////////////////
 	// 操作

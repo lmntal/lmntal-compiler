@@ -1,6 +1,8 @@
 package runtime;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import runtime.AbstractMembrane;
 import runtime.Membrane;
@@ -11,6 +13,7 @@ public class Uniq {
 	 * 要素は Link[] 型
 	 */
 	public ArrayList history = new ArrayList();
+	public HashSet historyH = new HashSet();
 	
 	/**
 	 * 型付きプロセス文脈に束縛された構造の実体を保存する膜。タスク==null
@@ -24,7 +27,8 @@ public class Uniq {
 	 * @param el
 	 * @return
 	 */
-	public boolean check(Link[] el) {
+	public boolean checkOld(Link[] el) {
+		// しょぼい実装 O(N)
 		for(int i=0;i<history.size();i++) {
 			int NG=0;
 			for(int j=0;j<el.length;j++) {
@@ -43,6 +47,26 @@ public class Uniq {
 		}
 		history.add(el);
 //		Env.p("MEM>> "+Dumper.dump(mem, false));
+		return true;
+	}
+	/**
+	 * el が history に含まれるかどうか検査する。
+	 * 含まれるなら false を返す
+	 * 含まれなければ新たに追加して true を返す
+	 * @param el
+	 * @return
+	 */
+	public boolean check(Link[] el) {
+		// O(1) のはず
+		StringBuffer cur=new StringBuffer();
+		for(int j=0;j<el.length;j++) {
+			cur.append(el[j].groundString());
+			cur.append(":");
+		}
+		String curI = cur.toString();
+//		System.out.println(historyH);
+		if(historyH.contains(curI)) return false;
+		historyH.add(curI);
 		return true;
 	}
 }
