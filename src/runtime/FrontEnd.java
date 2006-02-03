@@ -283,6 +283,8 @@ public class FrontEnd {
 							Env.ndMode = Env.ND_MODE_ND_ALL;
 						} else if (args[i].equals("--nondeterministic2")) {
 							Env.ndMode = Env.ND_MODE_ND_ANSCESTOR;
+						} else if (args[i].equals("--nondeterministic3")) {
+							Env.ndMode = Env.ND_MODE_ND_NOTHING;
 						} else if(args[i].equals("--optimize-grouping")) {
 							/// --optimize-grouping
 							/// Group the head instructions. (EXPERIMENTAL)
@@ -421,6 +423,7 @@ public class FrontEnd {
 			}
 			if (Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS)
 				Env.shuffle = Env.SHUFFLE_DONTUSEATOMSTACKS;
+			Env.fMemory = false;
 		}
 		//REPL と one-liner では常に解釈実行
 		if (Env.oneLiner != null || Env.argv.isEmpty()) {

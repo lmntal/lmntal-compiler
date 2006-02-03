@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import util.Stack;
@@ -116,21 +117,28 @@ public class Task extends AbstractTask implements Runnable {
 	 * 実行が終了するまで戻らない。
 	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
 	public void execAsMasterTask() {
+		long start = System.nanoTime();
+		
 		switch (Env.ndMode) {
-		case 0:
+		case Env.ND_MODE_D:
 			thread.start();
 			try {
 				thread.join();
 			}
 			catch (InterruptedException e) {}
 			break;
-		case 1:
+		case Env.ND_MODE_ND_ALL:
 			nondeterministicExec();
 			break;
-		case 2:
+		case Env.ND_MODE_ND_ANSCESTOR:
 			nondeterministicExec2();
 			break;
+		case Env.ND_MODE_ND_NOTHING:
+			nondeterministicExec3();
+			break;
 		}
+		
+		System.err.println((System.nanoTime() - start) / 1000000);
 	}
 	
 	private static int count = 1; // 行番号表示@トレースモード okabe
@@ -458,7 +466,6 @@ public class Task extends AbstractTask implements Runnable {
 			}
 		}
 	}
-	private static final int MAX_COUNT = 1500;
 	/**
 	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
 	 */
@@ -473,10 +480,6 @@ public class Task extends AbstractTask implements Runnable {
 		int i = 0, max_w = 0,t = 0;
 
 		while (st.size() > 0) {
-			if (idMap.size() > MAX_COUNT) {
-				System.err.println("ERROR : max count reached.");
-				break;
-			}
 			Membrane mem = (Membrane)st.remove(st.size() - 1);
 			//ルール適用の全可能性を検査
 			if (mem != getRoot())
@@ -486,7 +489,7 @@ public class Task extends AbstractTask implements Runnable {
 			exec(mem, true);
 			memStack.pop();
 			//それぞれ適用した結果を作成
-			System.out.println(idMap.get(mem.getAtoms()) + " : " + mem);
+			System.out.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
 			Iterator it = states.iterator();
 			int w = 0;
 			t++;
@@ -550,7 +553,7 @@ public class Task extends AbstractTask implements Runnable {
 		memStack.pop();
 		//それぞれ適用した結果を作成
 		ArrayList children = new ArrayList();
-		System.out.println(idMap.get(mem.getAtoms()) + " : " + mem);
+		System.out.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
 		Iterator it = states.iterator();
 		while (it.hasNext()) {
 			//複製
@@ -585,6 +588,47 @@ public class Task extends AbstractTask implements Runnable {
 		idMap.remove(mem.getAtoms());
 		mem.drop();
 		mem.free();
+	}
+	/**
+	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
+	 */
+	void nondeterministicExec3() {
+		int nextId = 1, nowId = 0;
+//long t = 0;
+		LinkedList queue = new LinkedList();
+		queue.addLast(getRoot());
+		while (queue.size() > 0) {
+			Membrane mem = (Membrane)queue.removeFirst();
+			//ルール適用の全可能性を検査
+			if (mem != getRoot())
+				memStack.push(mem);
+			root = mem;
+			states.clear();
+			exec(mem, true);
+			memStack.pop();
+			//それぞれ適用した結果を作成
+//			System.out.println(nowId++ + " : " + Dumper.dump(mem));
+			Iterator it = states.iterator();
+			while (it.hasNext()) {
+				//複製
+				Membrane mem2 = new Membrane(this);
+				Map map = mem2.copyCellsFrom(mem);
+				mem2.memToCopyMap = null;
+				mem2.memToCopiedMem = null;
+				mem2.copyRulesFrom(mem);
+				//適用
+				String ruleName = react(mem2, (Object[])it.next(), mem, map);
+				
+				queue.addLast(mem2);
+//				System.out.print(" " + nextId++ + "(" + ruleName + ")");
+			}
+//long s = System.nanoTime();
+//			mem.drop();
+//			mem.free();
+//t += System.nanoTime() - s;
+//			System.out.println();
+		}
+//System.err.println(t / 1000000);
 	}
 
 	/**

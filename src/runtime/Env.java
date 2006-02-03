@@ -40,6 +40,8 @@ public final class Env {
 	public static final int ND_MODE_ND_ALL = 1;
 	/** 先祖とその兄弟のみ */
 	public static final int ND_MODE_ND_ANSCESTOR = 2;
+	/** 一切行わない */
+	public static final int ND_MODE_ND_NOTHING= 3;
 	/** 非決定的LMNtalモード */
 	public static int ndMode = ND_MODE_D;
 	
