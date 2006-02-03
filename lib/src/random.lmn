@@ -1,0 +1,65 @@
+/**
+NAME
+	Random module
+
+SYNOPSIS
+
+AUTHOR
+	Atsuyuki Inui
+
+HISTORY
+	2006/02/03(Fri) 至急必要な random.init, random.nextInt を実装
+*/
+{
+module(random).
+
+/**
+ * int 型のシードを使って乱数ジェネレータを作成します。
+ */
+random.init(SEED) :- int(SEED) |
+	random.generator=[:/*inline*/
+		int seed = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+		me.nthAtom(0).remove();
+		
+		Atom random = mem.newAtom(new ObjectFunctor(new java.util.Random(seed)));
+		mem.relink(random, 0, me, 1);
+		me.remove();
+		:](SEED).
+
+/**
+ * 新規乱数ジェネレータを作成します。
+ */
+random.init :-
+	random.generator=[:/*inline*/
+		Atom random = mem.newAtom(new ObjectFunctor(new java.util.Random()));
+		mem.relink(random, 0, me, 0);
+		me.remove();
+		:].
+
+/**
+ * 乱数ジェネレータのシーケンスを使って、一様分布の int 型の擬似乱数を返します。
+ */		
+H=random.nextInt, random.generator(Random) :- class(Random, "java.util.Random") |
+	H=random.nextInt(Random), random.generator(Random).
+
+
+% ここから下は private
+% 言語レベルでpublicとprivateを指定したい
+
+H=random.nextInt(Random) :- class(Random, "java.util.Random") |
+	H=[:/*inline*/
+		java.util.Random random = (java.util.Random) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+		int n = random.nextInt();
+		mem.relink(me.nthAtom(0), 0, me, 1);
+		
+		Atom result = mem.newAtom(new IntegerFunctor(n));
+		mem.relink(result, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+	:](Random).
+}.
+
+//テスト用コード
+%random.init().
+%ret1=random.nextInt().
+%ret2=random.nextInt().
