@@ -1,0 +1,6 @@
+random.init(0), count(1000), ret=[random.nextInt].
+
+count(N) :- N = 1 | .
+count(N), ret=[X|Z] :- N > 1 | ret=[X,random.nextInt|Z], count(N-1).
+
+L=[X,Y|L2] :- X>Y | L=[Y,X|L2].
