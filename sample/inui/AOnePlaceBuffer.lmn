@@ -32,13 +32,31 @@ public class OnePlaceBuffer {
 }
 */
 
-put(1).
-put(2).
-put(3).
-get.
-get.
-get.
+//古いコード
+%buffer={empty}.
+%put(S), buffer={empty} :- buffer={contains(S)}.
+%get,buffer={contains(S)} :- get(S),buffer={empty}.
+%
+%put(1).
+%put(2).
+%put(3).
+%get.
+%get.
+%get.
 
-buffer={empty}.
-put(S), buffer={empty} :- buffer={contains(S)}.
-get,buffer={contains(S)} :- get(S),buffer={empty}.
+
+//モジュール版
+//onePlaceBufferが1個しか作れない
+{
+module(onePlaceBuffer).
+
+onePlaceBuffer.init :- onePlaceBuffer.buffer={empty}.
+onePlaceBuffer.put(S), onePlaceBuffer.buffer={empty} :- onePlaceBuffer.buffer={contains(S)}.
+H=onePlaceBuffer.get, onePlaceBuffer.buffer={contains(S)} :- H=S,onePlaceBuffer.buffer={empty}.
+}.
+
+onePlaceBuffer.init().
+onePlaceBuffer.put(1).
+onePlaceBuffer.put(2).
+ret1=onePlaceBuffer.get().
+ret2=onePlaceBuffer.get().
