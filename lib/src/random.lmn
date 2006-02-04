@@ -9,6 +9,7 @@ AUTHOR
 
 HISTORY
 	2006/02/03(Fri) 至急必要な random.init, random.nextInt を実装
+	2006/02/04(Sat) random.nextInt(N)
 */
 {
 module(random).
@@ -42,6 +43,13 @@ random.init :-
 H=random.nextInt, random.generator(Random) :- class(Random, "java.util.Random") |
 	H=random.nextInt(Random), random.generator(Random).
 
+/**
+ * 乱数ジェネレータのシーケンスを使って、0 から指定された値の範囲 (0 は含むが、
+ * その指定された値は含まない) で一様分布の int 型の擬似乱数を返します。
+ */		
+H=random.nextInt(N), random.generator(Random) :- int(N), class(Random, "java.util.Random") |
+	H=random.nextInt(Random, N), random.generator(Random).
+
 
 % ここから下は private
 % 言語レベルでpublicとprivateを指定したい
@@ -57,9 +65,24 @@ H=random.nextInt(Random) :- class(Random, "java.util.Random") |
 		me.nthAtom(0).remove();
 		me.remove();
 	:](Random).
+
+H=random.nextInt(Random, N) :- int(N), class(Random, "java.util.Random") |
+	H=[:/*inline*/
+		java.util.Random random = (java.util.Random) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+		int n = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+		me.nthAtom(1).remove();
+		
+		int rn = random.nextInt(n);
+		mem.relink(me.nthAtom(0), 0, me, 2);
+		
+		Atom result = mem.newAtom(new IntegerFunctor(rn));
+		mem.relink(result, 0, me, 2);
+		me.nthAtom(0).remove();
+		me.remove();
+	:](Random, N).
 }.
 
 //テスト用コード
 %random.init().
-%ret1=random.nextInt().
-%ret2=random.nextInt().
+%ret1=random.nextInt(10).
+%ret2=random.nextInt(10).
