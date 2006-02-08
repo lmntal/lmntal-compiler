@@ -46,13 +46,13 @@ public class OnePlaceBuffer {
 
 
 //モジュール版
-//onePlaceBufferが1個しか作れない
+//何か違う
 {
 module(onePlaceBuffer).
 
-onePlaceBuffer.init :- onePlaceBuffer.buffer={empty}.
-onePlaceBuffer.put(S), onePlaceBuffer.buffer={empty} :- onePlaceBuffer.buffer={contains(S)}.
-H=onePlaceBuffer.get, onePlaceBuffer.buffer={contains(S)} :- H=S,onePlaceBuffer.buffer={empty}.
+onePlaceBuffer.init :- {empty}.
+onePlaceBuffer.put(S), {empty}:- {contains(S)}.
+H=onePlaceBuffer.get, {contains(S)} :- H=S, {empty}.
 }.
 
 onePlaceBuffer.init().
