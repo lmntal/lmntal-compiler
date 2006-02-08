@@ -141,6 +141,14 @@ public class REPL {
 						Env.p("remain mode off");
 						Env.fREMAIN = false;
 						continue;
+					} else if(nline.equals("gui")) {//2006.2.8 inui
+						Env.p("gui mode on");
+						Env.fGUI = true;
+						continue;
+					} else if(nline.equals("nogui")) {//2006.2.8 inui
+						Env.p("gui mode off");
+						Env.fGUI = false;
+						continue;
 					} else if(nline.equals("r") || nline.equals("rules")) {
 						showRules();
 						continue;
@@ -224,7 +232,8 @@ public class REPL {
 		System.out.println("  "+"[no]verbose  [0-9] - set verbose level");
 		System.out.println("  "+"[no]shuffle  [0-4] - set shuffle level");
 		System.out.println("  "+"[no]trace          - set trace mode");					
-		System.out.println("  "+"[no]remain         - set remain mode");					
+		System.out.println("  "+"[no]remain         - set remain mode");
+		System.out.println("  "+"[no]gui            - set gui mode");//2006.2.9 inui
 		System.out.println("  "+"r | rules          - show current rules");					
 		System.out.println("  "+"(rm | remove) [ruleset number...]");					
 		System.out.println("  "+"                   - remove specified rulesets  (ex: rm 601)");					
