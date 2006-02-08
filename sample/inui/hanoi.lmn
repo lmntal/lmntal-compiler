@@ -8,7 +8,6 @@ R=do(hanoi(N, From, To)) :- int(N), int(From), int(To), N > 1 |
 
 //function pr
 R=do(pr(S)):-R=print(S).
-%R=do(pr([L|Z])):-R=print([L|Z]).
 
 //main
 r=do(hanoi(3, 1, 2)).
@@ -18,3 +17,12 @@ L=do([C|R]):-L=[do(C)|R].
 L=[done|R]:-L=do(R).
 L=do([]):-L=done.
 L=[done]:-L=done.
+
+//こういう風に単純に書きたい
+//右辺でアトムが生成される度にルール適用を行えば可能か
+%io.use.
+%hanoi(N, From, To) :- int(N), int(From), int(To), N = 1 |
+%	ret=print([string.of_int(N),string.of_int(From),string.of_int(To),"\n"]).
+%hanoi(N, From, To) :- int(N), int(From), int(To), N > 1 |
+%	hanoi(N-1, From, 6-From-To), ret=print([string.of_int(N),string.of_int(From),string.of_int(To),"\n"]), hanoi(N-1, 6-From-To, To).
+%hanoi(3, 1, 2).
