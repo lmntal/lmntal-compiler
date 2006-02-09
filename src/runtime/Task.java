@@ -117,7 +117,6 @@ public class Task extends AbstractTask implements Runnable {
 	 * 実行が終了するまで戻らない。
 	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
 	public void execAsMasterTask() {
-		long start = System.nanoTime();
 		
 		switch (Env.ndMode) {
 		case Env.ND_MODE_D:
@@ -138,7 +137,6 @@ public class Task extends AbstractTask implements Runnable {
 			break;
 		}
 		
-		System.err.println((System.nanoTime() - start) / 1000000);
 	}
 	
 	private static int count = 1; // 行番号表示@トレースモード okabe
