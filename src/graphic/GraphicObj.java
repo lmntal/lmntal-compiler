@@ -42,6 +42,7 @@ public class GraphicObj{
 		while(ite.hasNext()){
 			a = (Node)ite.next();
 			/**描画するファイルの取得*/
+			setName(m.getGlobalMemID());
 			if(a.getName()=="getpic"){
 				if(a.getEdgeCount() != 1)continue;
 				String picName = a.getNthNode(0).getName();
@@ -55,10 +56,10 @@ public class GraphicObj{
 				SetPic( picName );
 			}
 			/**名前の取得*/
-			else if(a.getName()=="name"){
-				if(a.getEdgeCount() != 1)continue;
-				setName(a.getNthNode(0).getName());
-			}
+//			else if(a.getName()=="name"){
+//				if(a.getEdgeCount() != 1)continue;
+//				setName(a.getNthNode(0).getName());
+//			}
 			/**描画の順番（前後関係）の取得*/
 			else if(a.getName()=="sequence"){
 				try{

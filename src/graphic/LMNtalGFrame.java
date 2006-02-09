@@ -260,6 +260,7 @@ public class LMNtalGFrame{
 //		Iterator ite = m.atomIterator();
 		Iterator ite = m.atomIteratorOfFunctor(NAME_ATOM);
 		Node a;
+//		System.out.println("memname"+m.getLocalID());
 		while(ite.hasNext()){
 			a = (Node)ite.next();
 			/**描画するファイルの取得*/

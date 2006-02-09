@@ -88,6 +88,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 			if(m.getLockThread() != null) locked = true;
 			while(ite.hasNext()){
 				a = (Node)ite.next();
+				rm.name=m.getGlobalMemID();
 				/**位置情報の取得*/
 				if(a.getName()=="position"){
 					if(a.getEdgeCount() != 2)continue;
@@ -97,10 +98,10 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 					}
 				}
 				/**名前の取得*/
-				else if(a.getName()=="name"){
-					if(a.getEdgeCount() != 1)continue;
-					rm.name=a.getNthNode(0).getName().toString();
-				}
+//				else if(a.getName()=="name"){
+//					if(a.getEdgeCount() != 1)continue;
+//					rm.name=a.getNthNode(0).getName().toString();
+//				}
 				/**回転角度の取得*/
 				else if(a.getName()=="angle"){
 					if(a.getEdgeCount() != 1)continue;
@@ -129,18 +130,19 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 	/**nameアトムがあればそれに繋がったアトム名を取得。なければnullを返す。*/
 	public String getName(AbstractMembrane m){
 //		Iterator ite = m.atomIterator();
-		Iterator ite = m.atomIteratorOfFunctor(NAME_ATOM);
-		Node a;
-		
-		while(ite.hasNext()){
-			a = (Node)ite.next();
-			/**描画するファイルの取得*/
-			if(a.getName()=="name"){
-				if(a.getEdgeCount() != 1)return null;
-				return a.getNthNode(0).getName();
-			}
-		}
-		return null;
+//		Iterator ite = m.atomIteratorOfFunctor(NAME_ATOM);
+//		Node a;
+//		
+//		while(ite.hasNext()){
+//			a = (Node)ite.next();
+//			/**描画するファイルの取得*/
+//			if(a.getName()=="name"){
+//				if(a.getEdgeCount() != 1)return null;
+//				return a.getNthNode(0).getName();
+//			}
+//		}
+//		return null;
+		return m.getGlobalMemID();
 	}
 	
 	/**再帰的にレラティブ膜を探す。レラティブ膜自身のunlock時はこちらを呼ぶ。*/
@@ -223,6 +225,7 @@ public class LMNGraphPanel extends JPanel implements Runnable {
 		}else if(mode == "remove"){
 			ga = getGraphicAtoms(m);
 			if(ga == null) return;
+			System.out.println("find relative");
 			/**同一atomがなければ、リストに追加（表示優先順位考慮）*/
 			for(int i = 0; i < drawlist.size(); i++){
 				GraphicObj ga2 = (GraphicObj)drawlist.get(i);
