@@ -378,6 +378,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <strike>実行膜スタックは操作しない。</strike>
 	 * 実行膜スタックに積まれていれば取り除く。 */
 	public void removeMem(AbstractMembrane mem) {
+		if(Env.LMNgraphic != null)
+			Env.LMNgraphic.removeGraphicMem(mem);
 		mems.remove(mem);
 		mem.dequeue();
 		mem.parent = null;
