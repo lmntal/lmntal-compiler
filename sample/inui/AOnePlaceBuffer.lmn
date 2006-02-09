@@ -46,17 +46,27 @@ public class OnePlaceBuffer {
 
 
 //モジュール版
-//何か違う
 {
-module(onePlaceBuffer).
+module(onepb).
 
-onePlaceBuffer.init :- {empty}.
-onePlaceBuffer.put(S), {empty}:- {contains(S)}.
-H=onePlaceBuffer.get, {contains(S)} :- H=S, {empty}.
+H=onepb.new :- H={empty}.
+onepb.put(Buf,S),B={empty} :- unary(Buf),unary(B),Buf=B | B={contains(S)}.
+H=onepb.get(Buf), B={contains(S)} :- unary(Buf), Buf=B | H=S, B={empty}.
 }.
 
-onePlaceBuffer.init().
-onePlaceBuffer.put(1).
-onePlaceBuffer.put(2).
-ret1=onePlaceBuffer.get().
-ret2=onePlaceBuffer.get().
+buf1=onepb.new().
+buf2=onepb.new().
+
+onepb.put(buf1,1).
+onepb.put(buf1,2).
+onepb.put(buf1,3).
+onepb.put(buf2,4).
+onepb.put(buf2,5).
+onepb.put(buf2,6).
+
+ret1=onepb.get(buf1).
+ret2=onepb.get(buf1).
+ret3=onepb.get(buf1).
+ret4=onepb.get(buf2).
+ret5=onepb.get(buf2).
+ret6=onepb.get(buf2).
