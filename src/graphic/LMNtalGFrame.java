@@ -92,7 +92,14 @@ public class LMNtalGFrame{
 		WindowSet winset = (WindowSet)windowmap.get(memname);
 		return winset.window.getMousePosition();
 	}
-	
+	/**マウスの位置を検出する。ライブラリmouseで使用*/
+	public void setNoRepaint(AbstractMembrane m, boolean f){
+		if(m.isRoot())return;
+		String memname = getName(m);
+		if(!windowmap.containsKey(memname)) setNoRepaint(m.getParent(),f);
+		WindowSet winset = (WindowSet)windowmap.get(memname);
+		winset.window.setNoRepaint(f);
+	}
 	/**ウィンドウオブジェクトを生成*/
 	private void setWindowMem(AbstractMembrane m){
 		WindowSet win = new WindowSet();
@@ -104,10 +111,14 @@ public class LMNtalGFrame{
 //			long start ,stop,diff;
 //
 //			start = System.currentTimeMillis();
-
-			win.window.setNoRepaint(true);
-			searchAllMem(m);
-			win.window.setNoRepaint(false);
+			/*すでに更新が止められていれば，探索のみ*/
+			if(!win.window.getNoRepaint()){
+				win.window.setNoRepaint(true);
+				searchAllMem(m);
+				win.window.setNoRepaint(false);
+			}else
+				searchAllMem(m);
+				
 
 //			stop = System.currentTimeMillis();
 //			diff = stop - start;

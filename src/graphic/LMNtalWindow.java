@@ -45,6 +45,9 @@ public class LMNtalWindow extends JFrame{
 	public void setNoRepaint(boolean f){
 		norepaint=f;
 	}
+	public boolean getNoRepaint(){
+		return norepaint;
+	}
 	public Color getColor(){
 		return (new Color(color_r,color_g,color_b));
 	}

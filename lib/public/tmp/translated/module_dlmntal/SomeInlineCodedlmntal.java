@@ -15,9 +15,9 @@ class AcceptThread extends Thread {
 
   /**
    *  AcceptThread#AcceptThread()
-   *  @param servSock
-   *  @param mem
-   *  @param ssAtom
+   *  @param ServerSocket servSock
+   *  @param Membrane mem
+   *  @param Atom ssAtom
    */
   AcceptThread(ServerSocket servSock, Membrane mem, Atom ssAtom) {
     this.servSock = servSock;
@@ -73,9 +73,9 @@ class ReaderThread implements Runnable {
   
   /**
    *  ReaderThread#ReaderThread()
-   *  @param sock
-   *  @param reader
-   *  @param mem
+   *  @param Socket sock
+   *  @param BufferedReader reader
+   *  @param Membrane mem
    */
   ReaderThread(Socket sock, BufferedReader reader, Membrane mem) {
     this.sock = sock;
@@ -85,7 +85,7 @@ class ReaderThread implements Runnable {
   
   /**
    *  ReaderThread#setObjAtom()
-   *  @param objAtom
+   *  @param Atom objAtom
    */
   public void setObjAtom(Atom objAtom) {
     this.objAtom = objAtom;
@@ -147,7 +147,6 @@ class ReaderThread implements Runnable {
     try {
       reader.close();
       sock.close();
-      System.out.println("ReaderThread: stopped");
     } catch(IOException e) {
       e.printStackTrace();
     }
@@ -164,7 +163,6 @@ public class SomeInlineCodedlmntal {
     ServerSocket servSock = (ServerSocket)objFunc.getObject();
     try {
       servSock.close();
-      System.out.println("ServerSocket: closed");
     } catch(IOException e) {
       e.printStackTrace();
     }

@@ -5,8 +5,9 @@
 %	
 %	ライブラリintegerとgraphicを使用しています。
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-graphic.use.
-go:-{window,position(0,0),size(500,500),name("window"),timer(10).
+%graphic.use.
+%go:-
+{window,position(0,0),size(500,500),name("window"),timer(0).
 
 %要素数
 max_num(15).

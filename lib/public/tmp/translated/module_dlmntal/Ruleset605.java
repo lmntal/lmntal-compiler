@@ -24,43 +24,43 @@ public class Ruleset605 extends Ruleset {
 		return "@dlmntal" + id;
 	}
 	private String encodedRuleset = 
-"(dlmntal.bind(Port, Cmd) :- int(Port) | dlmntal.bound(Cmd, Obj), '='(Obj, [:/*inline*/    // throws NumberFormatException     int port = Integer.parseInt(me.nth(0));    try {      // throws IOException and SecurityException      ServerSocket servSock = new ServerSocket(port);      Functor ssFunc = new ObjectFunctor(servSock);      Atom ssAtom = mem.newAtom(ssFunc);      mem.relinkAtomArgs(ssAtom,0,me,1);      me.nthAtom(0).remove();      me.remove();    } catch(IOException e) {      e.printStackTrace();      Atom failedAtom = mem.newAtom(new Functor(\"failed\",2));      mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);      mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);      me.nthAtom(1).remove();      me.remove();    }  :](Port))), (dlmntal.bound('.'(accept(Send, Recv), T), Obj) :- dlmntal.bound('.'(accepting(Send, Recv), T), O), '='(O, [:/*inline*/    mem.makePerpetual();    ObjectFunctor ssFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();    ServerSocket servSock = (ServerSocket)ssFunc.getObject();    AcceptThread at =       new AcceptThread(servSock,(Membrane)mem,me.nthAtom(0));    at.setName(\"at\");    mem.unifyAtomArgs(me,0,me,1);    me.remove();    at.start();  :](Obj))), (close @@ dlmntal.bound('.'(close, T), Obj) :- class(Obj, \"java.net.ServerSocket\") | closed(T), [:/*inline*/    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();    ServerSocket servSock = (ServerSocket)objFunc.getObject();    try {      servSock.close();      System.out.println(\"ServerSocket: closed\");    } catch(IOException e) {      e.printStackTrace();    }    me.nthAtom(0).remove();    me.remove();  :](Obj)), (dlmntal.connect(Host, Port, Send, Recv) :- string(Host), int(Port) | dlmntal.socket(Send, Recv, Obj), '='(Obj, [:/*inline*/    String host = me.nth(0);    // throws NumberFormatException     int port = Integer.parseInt(me.nth(1));    try {      // throws UnknownHostException and SecurityException      InetAddress ip = InetAddress.getByName(host);      // throws IOException and SecurityException      Socket sock = new Socket(ip,port);      // throws IOException      BufferedReader reader =         new BufferedReader(new InputStreamReader(sock.getInputStream()));      // throws IOException      PrintWriter writer = new PrintWriter(sock.getOutputStream());      ReaderThread rt = new ReaderThread(sock,reader,(Membrane)mem);      Vector obj = new Vector(3);      obj.add(sock);      obj.add(writer);      obj.add(rt);      Functor objFunc = new ObjectFunctor(obj);      Atom objAtom = mem.newAtom(objFunc);      rt.setObjAtom(objAtom);      mem.relinkAtomArgs(objAtom,0,me,2);      mem.makePerpetual();      Thread t = new Thread(rt,\"rt\");      rt.start();      me.nthAtom(0).remove();      me.nthAtom(1).remove();      me.remove();    } catch(IOException e) {      e.printStackTrace();      Atom failedAtom = mem.newAtom(new Functor(\"failed\",4));      mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);      mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);      mem.relinkAtomArgs(failedAtom,2,me.nthAtom(2),0);      mem.relinkAtomArgs(failedAtom,3,me.nthAtom(2),1);      me.nthAtom(2).remove();      me.remove();    }  :](Host, Port))), (send @@ dlmntal.socket('.'(H, T), Recv, Obj) :- string(H) | dlmntal.socket(T, Recv, O), '='(O, [:/*inline*/    String data = me.nth(0);    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(1).getFunctor();    Vector obj = (Vector)objFunc.getObject();    PrintWriter writer = (PrintWriter)obj.get(1);    writer.println(data);    writer.flush();    mem.unifyAtomArgs(me,1,me,2);    me.nthAtom(0).remove();    me.remove();  :](H, Obj))), (close @@ dlmntal.socket('.'(close, T), Recv, Obj) :- class(Obj, \"java.util.Vector\") | closed(T, Recv), [:/*inline*/    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();    Vector obj = (Vector)objFunc.getObject();    PrintWriter writer = (PrintWriter)obj.get(1);    writer.println(\"CLOSE\");    writer.close();    ((ReaderThread)obj.get(2)).stop();    me.nthAtom(0).remove();    me.remove();  :](Obj)), (terminate @@ dlmntal.terminate :- [:/*inline*/    ((Membrane)mem).perpetual = false;    me.remove();  :])";
+"(bind @@ dlmntal.bind(Port, Cmd) :- int(Port) | dlmntal.bound(Cmd, Obj), '='(Obj, [:/*inline*/    // throws NumberFormatException     int port = Integer.parseInt(me.nth(0));    try {      // throws IOException and SecurityException      ServerSocket servSock = new ServerSocket(port);      Functor ssFunc = new ObjectFunctor(servSock);      Atom ssAtom = mem.newAtom(ssFunc);      mem.relinkAtomArgs(ssAtom,0,me,1);      me.nthAtom(0).remove();      me.remove();    } catch(IOException e) {      e.printStackTrace();      Atom failedAtom = mem.newAtom(new Functor(\"failed\",2));      mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);      mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);      me.nthAtom(1).remove();      me.remove();    }  :](Port))), (bound @@ dlmntal.bound('.'(accept(Send, Recv), T), Obj) :- dlmntal.bound('.'(accepting(Send, Recv), T), O), '='(O, [:/*inline*/    mem.makePerpetual();    ObjectFunctor ssFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();    ServerSocket servSock = (ServerSocket)ssFunc.getObject();    AcceptThread at =       new AcceptThread(servSock,(Membrane)mem,me.nthAtom(0));    at.setName(\"at\");    mem.unifyAtomArgs(me,0,me,1);    me.remove();    at.start();  :](Obj))), (close @@ dlmntal.bound('.'(close, T), Obj) :- class(Obj, \"java.net.ServerSocket\") | closed(T), [:/*inline*/    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();    ServerSocket servSock = (ServerSocket)objFunc.getObject();    try {      servSock.close();    } catch(IOException e) {      e.printStackTrace();    }    me.nthAtom(0).remove();    me.remove();  :](Obj)), (connect @@ dlmntal.connect(Host, Port, Send, Recv) :- string(Host), int(Port) | dlmntal.socket(Send, Recv, Obj), '='(Obj, [:/*inline*/    String host = me.nth(0);    // throws NumberFormatException     int port = Integer.parseInt(me.nth(1));    try {      // throws UnknownHostException and SecurityException      InetAddress ip = InetAddress.getByName(host);      // throws IOException and SecurityException      Socket sock = new Socket(ip,port);      // throws IOException      BufferedReader reader =         new BufferedReader(new InputStreamReader(sock.getInputStream()));      // throws IOException      PrintWriter writer = new PrintWriter(sock.getOutputStream());      ReaderThread rt = new ReaderThread(sock,reader,(Membrane)mem);      Vector obj = new Vector(3);      obj.add(sock);      obj.add(writer);      obj.add(rt);      Functor objFunc = new ObjectFunctor(obj);      Atom objAtom = mem.newAtom(objFunc);      rt.setObjAtom(objAtom);      mem.relinkAtomArgs(objAtom,0,me,2);      mem.makePerpetual();      Thread t = new Thread(rt,\"rt\");      rt.start();      me.nthAtom(0).remove();      me.nthAtom(1).remove();      me.remove();    } catch(IOException e) {      e.printStackTrace();      Atom failedAtom = mem.newAtom(new Functor(\"failed\",4));      mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);      mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);      mem.relinkAtomArgs(failedAtom,2,me.nthAtom(2),0);      mem.relinkAtomArgs(failedAtom,3,me.nthAtom(2),1);      me.nthAtom(2).remove();      me.remove();    }  :](Host, Port))), (send @@ dlmntal.socket('.'(H, T), Recv, Obj) :- string(H) | dlmntal.socket(T, Recv, O), '='(O, [:/*inline*/    String data = me.nth(0);    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(1).getFunctor();    Vector obj = (Vector)objFunc.getObject();    PrintWriter writer = (PrintWriter)obj.get(1);    writer.println(data);    writer.flush();    mem.unifyAtomArgs(me,1,me,2);    me.nthAtom(0).remove();    me.remove();  :](H, Obj))), (close @@ dlmntal.socket('.'(close, T), Recv, Obj) :- class(Obj, \"java.util.Vector\") | closed(T, Recv), [:/*inline*/    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();    Vector obj = (Vector)objFunc.getObject();    PrintWriter writer = (PrintWriter)obj.get(1);    writer.println(\"CLOSE\");    writer.close();    ((ReaderThread)obj.get(2)).stop();    me.nthAtom(0).remove();    me.remove();  :](Obj)), (terminate @@ dlmntal.terminate :- [:/*inline*/    ((Membrane)mem).perpetual = false;    me.remove();  :])";
 	public String encode() {
 		return encodedRuleset;
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL224(mem, atom, false)) {
+		if (execL272(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@605", "bind");
 			return true;
 		}
-		if (execL233(mem, atom, false)) {
+		if (execL281(mem, atom, false)) {
 			if (Env.fTrace)
-				Task.trace("-->", "@605", "accept");
+				Task.trace("-->", "@605", "bound");
 			return true;
 		}
-		if (execL245(mem, atom, false)) {
+		if (execL293(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@605", "close");
 			return true;
 		}
-		if (execL257(mem, atom, false)) {
+		if (execL305(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@605", "connect");
 			return true;
 		}
-		if (execL266(mem, atom, false)) {
+		if (execL314(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@605", "send");
 			return true;
 		}
-		if (execL276(mem, atom, false)) {
+		if (execL324(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@605", "close");
 			return true;
 		}
-		if (execL288(mem, atom, false)) {
+		if (execL336(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@605", "terminate");
 			return true;
@@ -72,44 +72,44 @@ public class Ruleset605 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL227(mem, nondeterministic)) {
+		if (execL275(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@605", "bind");
 			return true;
 		}
-		if (execL239(mem, nondeterministic)) {
+		if (execL287(mem, nondeterministic)) {
 			if (Env.fTrace)
-				Task.trace("==>", "@605", "accept");
+				Task.trace("==>", "@605", "bound");
 			return true;
 		}
-		if (execL251(mem, nondeterministic)) {
+		if (execL299(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@605", "close");
 			return true;
 		}
-		if (execL260(mem, nondeterministic)) {
+		if (execL308(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@605", "connect");
 			return true;
 		}
-		if (execL270(mem, nondeterministic)) {
+		if (execL318(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@605", "send");
 			return true;
 		}
-		if (execL282(mem, nondeterministic)) {
+		if (execL330(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@605", "close");
 			return true;
 		}
-		if (execL291(mem, nondeterministic)) {
+		if (execL339(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@605", "terminate");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL291(Object var0, boolean nondeterministic) {
+	public boolean execL339(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Atom atom;
 		Functor func;
@@ -131,7 +131,7 @@ public class Ruleset605 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L291:
+L339:
 		{
 			func = f0;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -139,16 +139,16 @@ L291:
 				atom = (Atom) it1.next();
 				var1 = atom;
 				if (nondeterministic) {
-					Task.states.add(new Object[] {theInstance, "terminate", "L287",var0,var1});
-				} else if (execL287(var0,var1,nondeterministic)) {
+					Task.states.add(new Object[] {theInstance, "terminate", "L335",var0,var1});
+				} else if (execL335(var0,var1,nondeterministic)) {
 					ret = true;
-					break L291;
+					break L339;
 				}
 			}
 		}
 		return ret;
 	}
-	public boolean execL287(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL335(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Atom atom;
 		Functor func;
@@ -170,7 +170,7 @@ L291:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L287:
+L335:
 		{
 			atom = ((Atom)var1);
 			atom.dequeue();
@@ -182,11 +182,11 @@ L287:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedlmntal.run((Atom)var2, 6);
 			ret = true;
-			break L287;
+			break L335;
 		}
 		return ret;
 	}
-	public boolean execL288(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL336(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -207,16 +207,16 @@ L287:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L288:
+L336:
 		{
-			if (execL290(var0, var1, nondeterministic)) {
+			if (execL338(var0, var1, nondeterministic)) {
 				ret = true;
-				break L288;
+				break L336;
 			}
 		}
 		return ret;
 	}
-	public boolean execL290(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL338(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -237,22 +237,22 @@ L288:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L290:
+L338:
 		{
 			if (!(!(f0).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					if (nondeterministic) {
-						Task.states.add(new Object[] {theInstance, "terminate", "L287",var0,var1});
-					} else if (execL287(var0,var1,nondeterministic)) {
+						Task.states.add(new Object[] {theInstance, "terminate", "L335",var0,var1});
+					} else if (execL335(var0,var1,nondeterministic)) {
 						ret = true;
-						break L290;
+						break L338;
 					}
 				}
 			}
 		}
 		return ret;
 	}
-	public boolean execL282(Object var0, boolean nondeterministic) {
+	public boolean execL330(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -279,7 +279,7 @@ L290:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L282:
+L330:
 		{
 			var4 = new Atom(null, f2);
 			func = f3;
@@ -305,9 +305,9 @@ L282:
 										var6 = new Atom(null, new StringFunctor( className ));
 									}
 									if (!(!((Atom)var6).getFunctor().equals(((Atom)var4).getFunctor()))) {
-										if (execL275(var0,var1,var3,var2,var4,var5,nondeterministic)) {
+										if (execL323(var0,var1,var3,var2,var4,var5,nondeterministic)) {
 											ret = true;
-											break L282;
+											break L330;
 										}
 									}
 								}
@@ -319,7 +319,7 @@ L282:
 		}
 		return ret;
 	}
-	public boolean execL275(Object var0, Object var1, Object var2, Object var3, Object var4, Object var5, boolean nondeterministic) {
+	public boolean execL323(Object var0, Object var1, Object var2, Object var3, Object var4, Object var5, boolean nondeterministic) {
 		Object var6 = null;
 		Object var7 = null;
 		Object var8 = null;
@@ -345,7 +345,7 @@ L282:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L275:
+L323:
 		{
 			link = ((Atom)var3).getArg(1);
 			var9 = link;
@@ -385,11 +385,11 @@ L275:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedlmntal.run((Atom)var8, 5);
 			ret = true;
-			break L275;
+			break L323;
 		}
 		return ret;
 	}
-	public boolean execL276(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL324(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -419,20 +419,20 @@ L275:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L276:
+L324:
 		{
-			if (execL278(var0, var1, nondeterministic)) {
+			if (execL326(var0, var1, nondeterministic)) {
 				ret = true;
-				break L276;
+				break L324;
 			}
-			if (execL280(var0, var1, nondeterministic)) {
+			if (execL328(var0, var1, nondeterministic)) {
 				ret = true;
-				break L276;
+				break L324;
 			}
 		}
 		return ret;
 	}
-	public boolean execL280(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL328(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -465,7 +465,7 @@ L276:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L280:
+L328:
 		{
 			var11 = new Atom(null, f2);
 			if (!(!(f5).equals(((Atom)var1).getFunctor()))) {
@@ -502,9 +502,9 @@ L280:
 										if (!(!(f3).equals(((Atom)var9).getFunctor()))) {
 											link = ((Atom)var9).getArg(0);
 											var10 = link;
-											if (execL275(var0,var9,var1,var5,var11,var12,nondeterministic)) {
+											if (execL323(var0,var9,var1,var5,var11,var12,nondeterministic)) {
 												ret = true;
-												break L280;
+												break L328;
 											}
 										}
 									}
@@ -517,7 +517,7 @@ L280:
 		}
 		return ret;
 	}
-	public boolean execL278(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL326(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -550,7 +550,7 @@ L280:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L278:
+L326:
 		{
 			var11 = new Atom(null, f2);
 			if (!(!(f3).equals(((Atom)var1).getFunctor()))) {
@@ -587,9 +587,9 @@ L278:
 											var13 = new Atom(null, new StringFunctor( className ));
 										}
 										if (!(!((Atom)var13).getFunctor().equals(((Atom)var11).getFunctor()))) {
-											if (execL275(var0,var1,var7,var3,var11,var12,nondeterministic)) {
+											if (execL323(var0,var1,var7,var3,var11,var12,nondeterministic)) {
 												ret = true;
-												break L278;
+												break L326;
 											}
 										}
 									}
@@ -602,7 +602,7 @@ L278:
 		}
 		return ret;
 	}
-	public boolean execL270(Object var0, boolean nondeterministic) {
+	public boolean execL318(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -626,7 +626,7 @@ L278:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L270:
+L318:
 		{
 			func = f5;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -641,9 +641,9 @@ L270:
 						var3 = link.getAtom();
 						if (((Atom)var3).getFunctor() instanceof ObjectFunctor &&
 						    ((ObjectFunctor)((Atom)var3).getFunctor()).getObject() instanceof String) {
-							if (execL265(var0,var1,var2,var3,nondeterministic)) {
+							if (execL313(var0,var1,var2,var3,nondeterministic)) {
 								ret = true;
-								break L270;
+								break L318;
 							}
 						}
 					}
@@ -652,7 +652,7 @@ L270:
 		}
 		return ret;
 	}
-	public boolean execL265(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL313(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -679,7 +679,7 @@ L270:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L265:
+L313:
 		{
 			link = ((Atom)var2).getArg(1);
 			var7 = link;
@@ -736,11 +736,11 @@ L265:
 					Env.e("Undefined module dlmntal");
 				}
 			ret = true;
-			break L265;
+			break L313;
 		}
 		return ret;
 	}
-	public boolean execL266(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL314(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -768,16 +768,16 @@ L265:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L266:
+L314:
 		{
-			if (execL268(var0, var1, nondeterministic)) {
+			if (execL316(var0, var1, nondeterministic)) {
 				ret = true;
-				break L266;
+				break L314;
 			}
 		}
 		return ret;
 	}
-	public boolean execL268(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL316(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -806,7 +806,7 @@ L266:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L268:
+L316:
 		{
 			if (!(!(f5).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -830,9 +830,9 @@ L268:
 							var9 = link.getAtom();
 							if (((Atom)var9).getFunctor() instanceof ObjectFunctor &&
 							    ((ObjectFunctor)((Atom)var9).getFunctor()).getObject() instanceof String) {
-								if (execL265(var0,var1,var5,var9,nondeterministic)) {
+								if (execL313(var0,var1,var5,var9,nondeterministic)) {
 									ret = true;
-									break L268;
+									break L316;
 								}
 							}
 						}
@@ -842,7 +842,7 @@ L268:
 		}
 		return ret;
 	}
-	public boolean execL260(Object var0, boolean nondeterministic) {
+	public boolean execL308(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -866,7 +866,7 @@ L268:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L260:
+L308:
 		{
 			func = f9;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -880,9 +880,9 @@ L260:
 				if (!(!(((Atom)var3).getFunctor() instanceof IntegerFunctor))) {
 					if (((Atom)var2).getFunctor() instanceof ObjectFunctor &&
 					    ((ObjectFunctor)((Atom)var2).getFunctor()).getObject() instanceof String) {
-						if (execL256(var0,var1,var2,var3,nondeterministic)) {
+						if (execL304(var0,var1,var2,var3,nondeterministic)) {
 							ret = true;
-							break L260;
+							break L308;
 						}
 					}
 				}
@@ -890,7 +890,7 @@ L260:
 		}
 		return ret;
 	}
-	public boolean execL256(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL304(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -917,7 +917,7 @@ L260:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L256:
+L304:
 		{
 			link = ((Atom)var1).getArg(2);
 			var8 = link;
@@ -982,11 +982,11 @@ L256:
 					Env.e("Undefined module dlmntal");
 				}
 			ret = true;
-			break L256;
+			break L304;
 		}
 		return ret;
 	}
-	public boolean execL257(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL305(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1011,16 +1011,16 @@ L256:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L257:
+L305:
 		{
-			if (execL259(var0, var1, nondeterministic)) {
+			if (execL307(var0, var1, nondeterministic)) {
 				ret = true;
-				break L257;
+				break L305;
 			}
 		}
 		return ret;
 	}
-	public boolean execL259(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL307(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1047,7 +1047,7 @@ L257:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L259:
+L307:
 		{
 			if (!(!(f9).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -1066,9 +1066,9 @@ L259:
 					if (!(!(((Atom)var7).getFunctor() instanceof IntegerFunctor))) {
 						if (((Atom)var6).getFunctor() instanceof ObjectFunctor &&
 						    ((ObjectFunctor)((Atom)var6).getFunctor()).getObject() instanceof String) {
-							if (execL256(var0,var1,var6,var7,nondeterministic)) {
+							if (execL304(var0,var1,var6,var7,nondeterministic)) {
 								ret = true;
-								break L259;
+								break L307;
 							}
 						}
 					}
@@ -1077,7 +1077,7 @@ L259:
 		}
 		return ret;
 	}
-	public boolean execL251(Object var0, boolean nondeterministic) {
+	public boolean execL299(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -1104,7 +1104,7 @@ L259:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L251:
+L299:
 		{
 			var4 = new Atom(null, f11);
 			func = f3;
@@ -1130,9 +1130,9 @@ L251:
 										var6 = new Atom(null, new StringFunctor( className ));
 									}
 									if (!(!((Atom)var6).getFunctor().equals(((Atom)var4).getFunctor()))) {
-										if (execL244(var0,var1,var3,var2,var4,var5,nondeterministic)) {
+										if (execL292(var0,var1,var3,var2,var4,var5,nondeterministic)) {
 											ret = true;
-											break L251;
+											break L299;
 										}
 									}
 								}
@@ -1144,7 +1144,7 @@ L251:
 		}
 		return ret;
 	}
-	public boolean execL244(Object var0, Object var1, Object var2, Object var3, Object var4, Object var5, boolean nondeterministic) {
+	public boolean execL292(Object var0, Object var1, Object var2, Object var3, Object var4, Object var5, boolean nondeterministic) {
 		Object var6 = null;
 		Object var7 = null;
 		Object var8 = null;
@@ -1169,7 +1169,7 @@ L251:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L244:
+L292:
 		{
 			link = ((Atom)var3).getArg(1);
 			var9 = link;
@@ -1204,11 +1204,11 @@ L244:
 			atom.getMem().enqueueAtom(atom);
 			SomeInlineCodedlmntal.run((Atom)var8, 2);
 			ret = true;
-			break L244;
+			break L292;
 		}
 		return ret;
 	}
-	public boolean execL245(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL293(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1237,20 +1237,20 @@ L244:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L245:
+L293:
 		{
-			if (execL247(var0, var1, nondeterministic)) {
+			if (execL295(var0, var1, nondeterministic)) {
 				ret = true;
-				break L245;
+				break L293;
 			}
-			if (execL249(var0, var1, nondeterministic)) {
+			if (execL297(var0, var1, nondeterministic)) {
 				ret = true;
-				break L245;
+				break L293;
 			}
 		}
 		return ret;
 	}
-	public boolean execL249(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL297(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1282,7 +1282,7 @@ L245:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L249:
+L297:
 		{
 			var10 = new Atom(null, f11);
 			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
@@ -1317,9 +1317,9 @@ L249:
 										if (!(!(f3).equals(((Atom)var8).getFunctor()))) {
 											link = ((Atom)var8).getArg(0);
 											var9 = link;
-											if (execL244(var0,var8,var1,var4,var10,var11,nondeterministic)) {
+											if (execL292(var0,var8,var1,var4,var10,var11,nondeterministic)) {
 												ret = true;
-												break L249;
+												break L297;
 											}
 										}
 									}
@@ -1332,7 +1332,7 @@ L249:
 		}
 		return ret;
 	}
-	public boolean execL247(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL295(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1364,7 +1364,7 @@ L249:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L247:
+L295:
 		{
 			var10 = new Atom(null, f11);
 			if (!(!(f3).equals(((Atom)var1).getFunctor()))) {
@@ -1399,9 +1399,9 @@ L247:
 											var12 = new Atom(null, new StringFunctor( className ));
 										}
 										if (!(!((Atom)var12).getFunctor().equals(((Atom)var10).getFunctor()))) {
-											if (execL244(var0,var1,var7,var3,var10,var11,nondeterministic)) {
+											if (execL292(var0,var1,var7,var3,var10,var11,nondeterministic)) {
 												ret = true;
-												break L247;
+												break L295;
 											}
 										}
 									}
@@ -1414,7 +1414,7 @@ L247:
 		}
 		return ret;
 	}
-	public boolean execL239(Object var0, boolean nondeterministic) {
+	public boolean execL287(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -1438,7 +1438,7 @@ L247:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L239:
+L287:
 		{
 			func = f15;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -1453,9 +1453,9 @@ L239:
 						if (!(link.getPos() != 0)) {
 							var3 = link.getAtom();
 							if (!(!(f12).equals(((Atom)var3).getFunctor()))) {
-								if (execL232(var0,var1,var3,var2,nondeterministic)) {
+								if (execL280(var0,var1,var3,var2,nondeterministic)) {
 									ret = true;
-									break L239;
+									break L287;
 								}
 							}
 						}
@@ -1465,7 +1465,7 @@ L239:
 		}
 		return ret;
 	}
-	public boolean execL232(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+	public boolean execL280(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
 		Object var4 = null;
 		Object var5 = null;
 		Object var6 = null;
@@ -1494,7 +1494,7 @@ L239:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L232:
+L280:
 		{
 			link = ((Atom)var1).getArg(0);
 			var8 = link;
@@ -1560,11 +1560,11 @@ L232:
 					Env.e("Undefined module dlmntal");
 				}
 			ret = true;
-			break L232;
+			break L280;
 		}
 		return ret;
 	}
-	public boolean execL233(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL281(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1595,20 +1595,20 @@ L232:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L233:
+L281:
 		{
-			if (execL235(var0, var1, nondeterministic)) {
+			if (execL283(var0, var1, nondeterministic)) {
 				ret = true;
-				break L233;
+				break L281;
 			}
-			if (execL237(var0, var1, nondeterministic)) {
+			if (execL285(var0, var1, nondeterministic)) {
 				ret = true;
-				break L233;
+				break L281;
 			}
 		}
 		return ret;
 	}
-	public boolean execL237(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL285(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1639,7 +1639,7 @@ L233:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L237:
+L285:
 		{
 			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -1667,9 +1667,9 @@ L237:
 									var10 = link;
 									link = ((Atom)var8).getArg(2);
 									var11 = link;
-									if (execL232(var0,var8,var1,var4,nondeterministic)) {
+									if (execL280(var0,var8,var1,var4,nondeterministic)) {
 										ret = true;
-										break L237;
+										break L285;
 									}
 								}
 							}
@@ -1680,7 +1680,7 @@ L237:
 		}
 		return ret;
 	}
-	public boolean execL235(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL283(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1711,7 +1711,7 @@ L237:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L235:
+L283:
 		{
 			if (!(!(f15).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -1739,9 +1739,9 @@ L235:
 									var10 = link;
 									link = ((Atom)var9).getArg(1);
 									var11 = link;
-									if (execL232(var0,var1,var9,var5,nondeterministic)) {
+									if (execL280(var0,var1,var9,var5,nondeterministic)) {
 										ret = true;
-										break L235;
+										break L283;
 									}
 								}
 							}
@@ -1752,7 +1752,7 @@ L235:
 		}
 		return ret;
 	}
-	public boolean execL227(Object var0, boolean nondeterministic) {
+	public boolean execL275(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Atom atom;
@@ -1775,7 +1775,7 @@ L235:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L227:
+L275:
 		{
 			func = f18;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
@@ -1785,16 +1785,16 @@ L227:
 				link = ((Atom)var1).getArg(0);
 				var2 = link.getAtom();
 				if (!(!(((Atom)var2).getFunctor() instanceof IntegerFunctor))) {
-					if (execL223(var0,var1,var2,nondeterministic)) {
+					if (execL271(var0,var1,var2,nondeterministic)) {
 						ret = true;
-						break L227;
+						break L275;
 					}
 				}
 			}
 		}
 		return ret;
 	}
-	public boolean execL223(Object var0, Object var1, Object var2, boolean nondeterministic) {
+	public boolean execL271(Object var0, Object var1, Object var2, boolean nondeterministic) {
 		Object var3 = null;
 		Object var4 = null;
 		Object var5 = null;
@@ -1819,7 +1819,7 @@ L227:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L223:
+L271:
 		{
 			link = ((Atom)var1).getArg(1);
 			var6 = link;
@@ -1871,11 +1871,11 @@ L223:
 					Env.e("Undefined module dlmntal");
 				}
 			ret = true;
-			break L223;
+			break L271;
 		}
 		return ret;
 	}
-	public boolean execL224(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL272(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Atom atom;
@@ -1898,16 +1898,16 @@ L223:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L224:
+L272:
 		{
-			if (execL226(var0, var1, nondeterministic)) {
+			if (execL274(var0, var1, nondeterministic)) {
 				ret = true;
-				break L224;
+				break L272;
 			}
 		}
 		return ret;
 	}
-	public boolean execL226(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL274(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -1931,7 +1931,7 @@ L224:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L226:
+L274:
 		{
 			if (!(!(f18).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
@@ -1942,9 +1942,9 @@ L226:
 					link = ((Atom)var1).getArg(0);
 					var4 = link.getAtom();
 					if (!(!(((Atom)var4).getFunctor() instanceof IntegerFunctor))) {
-						if (execL223(var0,var1,var4,nondeterministic)) {
+						if (execL271(var0,var1,var4,nondeterministic)) {
 							ret = true;
-							break L226;
+							break L274;
 						}
 					}
 				}
@@ -1954,7 +1954,7 @@ L226:
 	}
 	private static final Functor f10 = new Functor("/*inline*/\r\n    String host = me.nth(0);\r\n    // throws NumberFormatException \r\n    int port = Integer.parseInt(me.nth(1));\r\n    try {\r\n      // throws UnknownHostException and SecurityException\r\n      InetAddress ip = InetAddress.getByName(host);\r\n      // throws IOException and SecurityException\r\n      Socket sock = new Socket(ip,port);\r\n      // throws IOException\r\n      BufferedReader reader = \r\n        new BufferedReader(new InputStreamReader(sock.getInputStream()));\r\n      // throws IOException\r\n      PrintWriter writer = new PrintWriter(sock.getOutputStream());\r\n      ReaderThread rt = new ReaderThread(sock,reader,(Membrane)mem);\r\n      Vector obj = new Vector(3);\r\n      obj.add(sock);\r\n      obj.add(writer);\r\n      obj.add(rt);\r\n      Functor objFunc = new ObjectFunctor(obj);\r\n      Atom objAtom = mem.newAtom(objFunc);\r\n      rt.setObjAtom(objAtom);\r\n      mem.relinkAtomArgs(objAtom,0,me,2);\r\n      mem.makePerpetual();\r\n      Thread t = new Thread(rt,\"rt\");\r\n      rt.start();\r\n      me.nthAtom(0).remove();\r\n      me.nthAtom(1).remove();\r\n      me.remove();\r\n    } catch(IOException e) {\r\n      e.printStackTrace();\r\n      Atom failedAtom = mem.newAtom(new Functor(\"failed\",4));\r\n      mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);\r\n      mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);\r\n      mem.relinkAtomArgs(failedAtom,2,me.nthAtom(2),0);\r\n      mem.relinkAtomArgs(failedAtom,3,me.nthAtom(2),1);\r\n      me.nthAtom(2).remove();\r\n      me.remove();\r\n    }\r\n  ", 3, null);
 	private static final Functor f12 = new Functor("bound", 2, "dlmntal");
-	private static final Functor f14 = new StringFunctor("/*inline*/\r\n    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();\r\n    ServerSocket servSock = (ServerSocket)objFunc.getObject();\r\n    try {\r\n      servSock.close();\r\n      System.out.println(\"ServerSocket: closed\");\r\n    } catch(IOException e) {\r\n      e.printStackTrace();\r\n    }\r\n    me.nthAtom(0).remove();\r\n    me.remove();\r\n  ");
+	private static final Functor f14 = new StringFunctor("/*inline*/\r\n    ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();\r\n    ServerSocket servSock = (ServerSocket)objFunc.getObject();\r\n    try {\r\n      servSock.close();\r\n    } catch(IOException e) {\r\n      e.printStackTrace();\r\n    }\r\n    me.nthAtom(0).remove();\r\n    me.remove();\r\n  ");
 	private static final Functor f18 = new Functor("bind", 2, "dlmntal");
 	private static final Functor f3 = new Functor("close", 1, null);
 	private static final Functor f11 = new StringFunctor("java.net.ServerSocket");

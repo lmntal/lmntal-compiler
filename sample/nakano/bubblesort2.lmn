@@ -5,7 +5,10 @@
 %	
 %	ライブラリintegerとgraphicを使用しています。
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-graphic.use.
+timer:benchmark(X,"Elapsed Time"), {+(X).
+% a.
+%a,go:-graphic.use,b.
+%b,
 go:-{window,position(0,0),size(500,500),name("window"),timer(10).
 
 %ソートルール
@@ -16,4 +19,5 @@ done,{name(_IN),size(_IS,10),$p,@p},{name(_IN2),size(_IS2,10),$q,@q} :-
 ret=gen(45).
 ret=gen(N) :- N > 0 | ret=gen(N-1),{name(N),position(0,(N-1)*10),size((integer.rnd(44)+1)*10,10),draw,getpic("fillrect")}.
 ret=gen(N) :- N = 0 | done.
-}.
+}
+}

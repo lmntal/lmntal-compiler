@@ -24,15 +24,15 @@ public class Ruleset609 extends Ruleset {
 		return "@thread" + id;
 	}
 	private String encodedRuleset = 
-"(_0 @@ {thread(N, {$p, @p}), $q, @q}/ :- int(N) | {$p, $q, @q})";
+"({thread(N, {$p, @p}), $q, @q}/ :- int(N) | {$p, $q, @p, @q})";
 	public String encode() {
 		return encodedRuleset;
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL577(mem, atom, false)) {
+		if (execL720(mem, atom, false)) {
 			if (Env.fTrace)
-				Task.trace("-->", "@609", "_0");
+				Task.trace("-->", "@609", "thread");
 			return true;
 		}
 		return result;
@@ -42,14 +42,14 @@ public class Ruleset609 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL583(mem, nondeterministic)) {
+		if (execL726(mem, nondeterministic)) {
 			if (Env.fTrace)
-				Task.trace("==>", "@609", "_0");
+				Task.trace("==>", "@609", "thread");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL583(Object var0, boolean nondeterministic) {
+	public boolean execL726(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -77,7 +77,7 @@ public class Ruleset609 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L583:
+L726:
 		{
 			Iterator it1 = ((AbstractMembrane)var0).memIterator();
 			while (it1.hasNext()) {
@@ -111,10 +111,10 @@ L583:
 														var6 = link.getAtom();
 														if (!(!(f1).equals(((Atom)var6).getFunctor()))) {
 															if (nondeterministic) {
-																Task.states.add(new Object[] {theInstance, "_0", "L576",var0,var1,var5,var2,var3,var6,var4,var7});
-															} else if (execL576(var0,var1,var5,var2,var3,var6,var4,var7,nondeterministic)) {
+																Task.states.add(new Object[] {theInstance, "thread", "L719",var0,var1,var5,var2,var3,var6,var4,var7});
+															} else if (execL719(var0,var1,var5,var2,var3,var6,var4,var7,nondeterministic)) {
 																ret = true;
-																break L583;
+																break L726;
 															}
 														}
 													}
@@ -133,7 +133,7 @@ L583:
 		}
 		return ret;
 	}
-	public boolean execL576(Object var0, Object var1, Object var2, Object var3, Object var4, Object var5, Object var6, Object var7, boolean nondeterministic) {
+	public boolean execL719(Object var0, Object var1, Object var2, Object var3, Object var4, Object var5, Object var6, Object var7, boolean nondeterministic) {
 		Object var8 = null;
 		Atom atom;
 		Functor func;
@@ -155,7 +155,7 @@ L583:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L576:
+L719:
 		{
 			atom = ((Atom)var3);
 			atom.dequeue();
@@ -181,14 +181,15 @@ L576:
 			((AbstractMembrane)var1).activate();
 			((AbstractMembrane)var1).moveCellsFrom(((AbstractMembrane)var2));
 			((AbstractMembrane)var0).insertProxies(((AbstractMembrane)var1));
+			((AbstractMembrane)var1).copyRulesFrom(((AbstractMembrane)var2));
 			((AbstractMembrane)var2).free();
 			((AbstractMembrane)var1).forceUnlock();
 			ret = true;
-			break L576;
+			break L719;
 		}
 		return ret;
 	}
-	public boolean execL577(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL720(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -222,16 +223,16 @@ L576:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L577:
+L720:
 		{
-			if (execL581(var0, var1, nondeterministic)) {
+			if (execL724(var0, var1, nondeterministic)) {
 				ret = true;
-				break L577;
+				break L720;
 			}
 		}
 		return ret;
 	}
-	public boolean execL581(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL724(Object var0, Object var1, boolean nondeterministic) {
 		Object var2 = null;
 		Object var3 = null;
 		Object var4 = null;
@@ -266,7 +267,7 @@ L577:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L581:
+L724:
 		{
 			if (!(!(f1).equals(((Atom)var1).getFunctor()))) {
 				if(((Atom)var1).getMem().getKind() == 0) {
@@ -313,10 +314,10 @@ L581:
 																if (!(!((AbstractMembrane)var3).isStable())) {
 																	if (!(((AbstractMembrane)var0) != ((AbstractMembrane)var4))) {
 																		if (nondeterministic) {
-																			Task.states.add(new Object[] {theInstance, "_0", "L576",var0,var3,var2,var12,var9,var1,var6,var15});
-																		} else if (execL576(var0,var3,var2,var12,var9,var1,var6,var15,nondeterministic)) {
+																			Task.states.add(new Object[] {theInstance, "thread", "L719",var0,var3,var2,var12,var9,var1,var6,var15});
+																		} else if (execL719(var0,var3,var2,var12,var9,var1,var6,var15,nondeterministic)) {
 																			ret = true;
-																			break L581;
+																			break L724;
 																		}
 																	}
 																}

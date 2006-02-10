@@ -1,0 +1,7 @@
+p(UP,DOWN,LEFT,RIGHT).
+up(UP).
+down(DOWN).
+left(LEFT).
+right(RIGHT).
+
+p(UP,DOWN,LEFT,RIGHT),down(DOWN),right(RIGHT):-p(UP,DOWN,LEFT,RIGHT),down(DOWN,L),right(RIGHT,L2),p(L2,L,LEFT2,RIGHT2),rigth(RIGHT2),left(LEFT2).

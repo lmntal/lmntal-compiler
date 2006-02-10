@@ -12,7 +12,7 @@ public class SomeInlineCodecodec {
 	public static void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {
-		case 2: {
+		case 4: {
 			/*inline*/
     try {
       String filename = me.nth(0);
@@ -45,7 +45,25 @@ public class SomeInlineCodecodec {
     mem.relinkAtomArgs(sAtom,0,me,0);
   
 			break; }
+		case 2: {
+			/*inline*/
+    me.remove();
+    StringFunctor sFunc =
+      new StringFunctor(((Membrane)mem).encodeProcess());
+    Atom sAtom = mem.newAtom(sFunc);
+    mem.relinkAtomArgs(sAtom,0,me,0);
+  
+			break; }
 		case 1: {
+			/*inline*/
+    me.remove();
+    StringFunctor sFunc =
+      new StringFunctor(((Membrane)mem).encodeRulesets());
+    Atom sAtom = mem.newAtom(sFunc);
+    mem.relinkAtomArgs(sAtom,0,me,0);
+  
+			break; }
+		case 3: {
 			/*inline*/
     String str = me.nth(0);
     LMNParser lp;
