@@ -97,7 +97,7 @@ public class Debug {
 			s = buf.toString();
 			s = s.replaceAll("/\\*", "<font color=green>/*");
 			s = s.replaceAll("\\*/", "</font>*/");
-			((LMNtalDebugFrame)Env.gui).setSourceText(s, lineno);
+			Env.guiDebug.setSourceText(s, lineno);
 			Env.gui.repaint();
 		} catch (IOException e) {
 			System.err.println(e);

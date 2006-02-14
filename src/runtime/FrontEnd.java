@@ -395,7 +395,6 @@ public class FrontEnd {
 							/// debug mode.
 							Env.debugOption = true;
 							Env.fInterpret = true;
-							Env.fGUI = true;
 						} else if (args[i].equals("--nothread")) {
 							// 暫定オプション
 							// スレッドルールの変換を行わない

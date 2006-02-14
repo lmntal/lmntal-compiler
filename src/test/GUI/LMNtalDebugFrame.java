@@ -17,7 +17,10 @@ import runtime.*;
  * @author inui
  * デバッグ時に使用するフレーム
  */
-public class LMNtalDebugFrame extends LMNtalFrame {
+public class LMNtalDebugFrame extends JFrame {
+	/** LMNtalFrame */
+	private LMNtalFrame lmntalFrame;
+	
 	/** ソースを表示する */
 	private JTextPane jt;
 	
@@ -26,6 +29,20 @@ public class LMNtalDebugFrame extends LMNtalFrame {
 	
 	/** 行番号を表示するテキストエリア */
 	private JTextPane linenoArea;
+	
+	/**
+	 * コンストラクタです
+	 */
+	public LMNtalDebugFrame(LMNtalFrame lmntalFrame) {
+		this.lmntalFrame = lmntalFrame;
+		
+		lmntalFrame.setSize(600, 400);
+		
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		initComponents();
+		setSize(600, 600);
+		setVisible(true);
+	}
 	
 	/**
 	 * デバッグ時ソース表示用のテキストエリアを生成する
@@ -83,8 +100,6 @@ public class LMNtalDebugFrame extends LMNtalFrame {
 	 * コンポーネントを初期化します。
 	 */
 	protected void initComponents() {
-		lmnPanel = new LMNGraphPanel(this);
-		lmnPanel.getGraphLayout().initGraphDialog(this);
 		setTitle("It's LMNtal Debugger");
 		getContentPane().setLayout(new BorderLayout());
 		
@@ -97,8 +112,7 @@ public class LMNtalDebugFrame extends LMNtalFrame {
 		linenoArea.setContentType("text/html");
 
 		JScrollPane jsp = new JScrollPane(p);
-		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, lmnPanel, jsp);
-		getContentPane().add(split, BorderLayout.CENTER);
+		getContentPane().add(jsp, BorderLayout.CENTER);
 		
 		//コンソール
 //		console = new JTextArea(5, 10);
@@ -109,11 +123,11 @@ public class LMNtalDebugFrame extends LMNtalFrame {
 		JToolBar toolBar = new JToolBar();
 		JButton nextButton = new JButton("Next");
 		nextButton.setToolTipText("apply a rule only one time");
-		nextButton.addActionListener(new NextButtonActionListener(this));
+		nextButton.addActionListener(new NextButtonActionListener(lmntalFrame));
 		toolBar.add(nextButton);
 		JButton continueButton = new JButton("Continue");
 		continueButton.setToolTipText("apply rules until a break point");
-		continueButton.addActionListener(new ContinueButtonActionListener(this));
+		continueButton.addActionListener(new ContinueButtonActionListener(lmntalFrame));
 		toolBar.add(continueButton);
 		JCheckBox linenoCheckBox = new JCheckBox("LineNumber");
 		linenoCheckBox.setSelected(true);

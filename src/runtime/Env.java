@@ -193,12 +193,13 @@ public final class Env {
 	public static LMNtalFrame gui;
 	public static boolean fDEMO;
 	public static int atomSize;
+	public static LMNtalDebugFrame guiDebug;//2006.1.31 by inui
 	
 	public static void initGUI() {
 		if(!Env.fGUI) return;
 		atomSize = Env.fDEMO ? 40 : 16;
-		if (Env.debugOption) Env.gui = new LMNtalDebugFrame();//by inui
-		else Env.gui = new LMNtalFrame();
+		Env.gui = new LMNtalFrame();
+		if (Env.debugOption) Env.guiDebug = new LMNtalDebugFrame(Env.gui);//2006.1.31 by inui
 	}
 	
 	/**
@@ -218,9 +219,9 @@ public final class Env {
 	public static boolean fREPL = false;
 	
 	/**
-	 * if文の解釈をするかどうか by inui
+	 * if文の解釈をするかどうか
 	 */
-	public static boolean fIf = false;
+	public static boolean fIf = false;//by inui
 	
 	public static boolean preProcess0 = false;
 	
@@ -358,7 +359,7 @@ public final class Env {
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public static boolean guiTrace() {
 		if(gui==null) return true;
-		gui.repaint();//2006.1.26 inui
+		if(Env.guiDebug != null) Env.guiDebug.repaint();//2006.1.31 inui
 		return gui.onTrace();
 	}
 	/**graphic版 nakano ルールスレッドの実行を継続してよいかどうか*/
