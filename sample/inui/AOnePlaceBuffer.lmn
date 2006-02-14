@@ -50,8 +50,8 @@ public class OnePlaceBuffer {
 module(onepb).
 
 H=onepb.new :- H={empty}.
-onepb.put(Buf,S),B={empty} :- unary(Buf),unary(B),Buf=B | B={contains(S)}.
-H=onepb.get(Buf), B={contains(S)} :- unary(Buf), Buf=B | H=S, B={empty}.
+onepb.put(Buf,S),B={empty} :- Buf=B | B={contains(S)}.
+H=onepb.get(Buf), B={contains(S)} :- Buf=B | H=S, B={empty}.
 }.
 
 buf1=onepb.new().
@@ -59,14 +59,10 @@ buf2=onepb.new().
 
 onepb.put(buf1,1).
 onepb.put(buf1,2).
-onepb.put(buf1,3).
+onepb.put(buf2,3).
 onepb.put(buf2,4).
-onepb.put(buf2,5).
-onepb.put(buf2,6).
 
 ret1=onepb.get(buf1).
 ret2=onepb.get(buf1).
-ret3=onepb.get(buf1).
+ret3=onepb.get(buf2).
 ret4=onepb.get(buf2).
-ret5=onepb.get(buf2).
-ret6=onepb.get(buf2).
