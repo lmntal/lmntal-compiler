@@ -1,0 +1,10 @@
+{
+class(onepb).
+
+H=new(onepb) :- H={empty}. //コンストラクタ
+put(S), H={empty} :- H={contains(S)}.
+//H=get(), B={contains(S)} :- H=S, B={empty}.
+}.
+
+buf1=new(onepb). buf2=new(onepb).
+buf1#put(1). buf2#put(4).
