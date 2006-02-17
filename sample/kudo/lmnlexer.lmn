@@ -1,0 +1,323 @@
+% LMNtalソース用トップダウン字句解析器 by kudo
+%
+% ガードインラインを使っています。thanksです。 > haraさん
+%
+% 2006/02/17
+{
+module(lmnlexer).
+
+lmnlexer.use :- lmnlexer.use_guard.
+
+R=lmnlexer.rev_str([S|SR]):-R=string.concat(lmnlexer.rev_str(SR),S).
+R=lmnlexer.rev_str([]):-R="".
+R=lmnlexer.rev_num(NS):-R=string.int_of_str(lmnlexer.rev_str(NS)).
+R=lmnlexer.rev_float(FS):-R=string.float_of_str(lmnlexer.rev_str(FS)).
+
+% コメント外
+L=lmnlexer.lex(["{"|R])	:- L=[lbrace|lmnlexer.lex(R)]. // {
+L=lmnlexer.lex(["}"|R])	:- L=[rbrace|lmnlexer.lex(R)]. // }
+L=lmnlexer.lex(["("|R])	:- L=[lparen|lmnlexer.lex(R)]. // (
+L=lmnlexer.lex([")"|R])	:- L=[rparen|lmnlexer.lex(R)]. // )
+//L=lmnlexer.lex(["["|R])	:- L=[lbracket|lmnlexer.lex(R)]. // [
+L=lmnlexer.lex(["]"|R])	:- L=[rbracket|lmnlexer.lex(R)]. // ]
+L=lmnlexer.lex(["|"|R])	:- L=[bar|lmnlexer.lex(R)]. // |
+//L=lmnlexer.lex(["="|R])	:- L=[equal|lmnlexer.lex(R)]. // =
+//L=lmnlexer.lex(["+"|R])	:- L=[plus|lmnlexer.lex(R)]. // +
+//L=lmnlexer.lex(["-"|R])	:- L=[minus|lmnlexer.lex(R)]. // -
+//L=lmnlexer.lex(["*"|R])	:- L=[asterisk|lmnlexer.lex(R)]. // *
+//L=lmnlexer.lex(["/"|R])	:- L=[slash|lmnlexer.lex(R)]. // /
+L=lmnlexer.lex([" "|R])	:- L=lmnlexer.lex(R). //
+L=lmnlexer.lex(["\n"|R])	:- L=lmnlexer.lex(R). // \n
+L=lmnlexer.lex([","|R])	:- L=[comma|lmnlexer.lex(R)]. // ,
+L=lmnlexer.lex(["$"|R])	:- L=[dollar|lmnlexer.lex(R)]. // $
+L=lmnlexer.lex(["."|R])	:- L=[dot|lmnlexer.lex(R)]. // .
+//L=lmnlexer.lex(["\\"|R])	:- L=[backslash|lmnlexer.lex(R)]. // \\
+//L=lmnlexer.lex(["\""|R])	:- L=[doublequote|lmnlexer.lex(R)]. // "
+L=lmnlexer.lex([])			:- L=[].
+
+% atom name, link name, pathed name, num, float
+L=lmnlexer.lex([C|R]):-custom_i_lowerletter(C)|L=lmnlexer.lex_atomname([C],R).
+L=lmnlexer.lex([C|R]):-custom_i_upperletter(C)|L=lmnlexer.lex_linkname([C],R).
+L=lmnlexer.lex([C|R]):-custom_i_digitletter(C)|L=lmnlexer.lex_num([C],R).
+
+% [a-z][a-zA-Z_1-9]*
+L=lmnlexer.lex_atomname(AN,[C|R])		:- custom_i_letter(C)|			L=lmnlexer.lex_atomname([C|AN],R).
+L=lmnlexer.lex_atomname(AN,["_"|R])		:-							L=lmnlexer.lex_atomname(["_"|AN],R).
+L=lmnlexer.lex_atomname(AN,["."|R])		:-							L=lmnlexer.lex_pathedname(AN,[],R).
+L=lmnlexer.lex_atomname(AN,[])			:-							L=[atomname(lmnlexer.rev_str(AN))].
+L=lmnlexer.lex_atomname(AN,[C|R])		:- custom_i_unletter(C)|		L=[atomname(lmnlexer.rev_str(AN))|lmnlexer.lex([C|R])].
+
+% [a-z][a-zA-Z_1-9]'.'[a-z][a-zA-Z_1-9]
+L=lmnlexer.lex_pathedname(P,AN,[C|R])	:- custom_i_letter(C)|			L=lmnlexer.lex_pathedname(P,[C|AN],R).
+L=lmnlexer.lex_pathedname(P,AN,["_"|R])	:-							L=lmnlexer.lex_pathedname(P,["_"|AN],R).
+L=lmnlexer.lex_pathedname(P,[AC|AN],[C|R]):- custom_i_unletter(C)|		L=[pathedname(lmnlexer.rev_str(P),lmnlexer.rev_str([AC|AN]))|lmnlexer.lex(R)].
+L=lmnlexer.lex_pathedname(P,[AC|AN],[])	:-							L=[pathedname(lmnlexer.rev_str(P),lmnlexer.rev_str([AC|AN]))].
+L=lmnlexer.lex_pathedname(P,[],[C|R])	:- custom_i_unletter(C)|		L=[atomname(lmnlexer.rev_str(P)),dot|lmnlexer.lex(R)].
+L=lmnlexer.lex_pathedname(P,[],[])		:-							L=[atomname(lmnlexer.rev_str(P)),dot].
+
+% [A-Z][a-zA-Z_1-9]
+L=lmnlexer.lex_linkname(LN,[C|R])		:- custom_i_letter(C)|			L=lmnlexer.lex_linkname([C|LN],R).
+L=lmnlexer.lex_linkname(LN,["_"|R])		:-							L=lmnlexer.lex_linkname(["_"|LN],R).
+L=lmnlexer.lex_linkname(LN,[C|R])		:- custom_i_unletter(C)|		L=[linkname(lmnlexer.rev_str(LN))|lmnlexer.lex([C|R])].
+
+% 数字 [1-9]+
+L=lmnlexer.lex_num(D,[C|R])				:- custom_i_digitletter(C)|		L=lmnlexer.lex_num([C|D],R).
+L=lmnlexer.lex_num(D,["."|R])			:-							L=lmnlexer.lex_float(D,[],R).
+L=lmnlexer.lex_num(D,[C|R])				:- custom_i_undigitletter(C)|	L=[num(lmnlexer.rev_num(D))|lmnlexer.lex([C|R])].
+L=lmnlexer.lex_num(D,[])				:-							L=[num(lmnlexer.rev_num(D))].
+
+% 浮動小数点数 [1-9]+'.'[1-9]*
+L=lmnlexer.lex_float(N,F,[C|R])			:- custom_i_digitletter(C)|		L=lmnlexer.lex_float(N,[C|F],R).
+L=lmnlexer.lex_float(N,[F|FR],[C|R])		:- custom_i_undigitletter(C)|	L=[floatnum(lmnlexer.rev_float(N,[F|FR]))|lmnlexer.lex([C|R])].
+L=lmnlexer.lex_float(N,[F|FR],[])		:-							L=[floatnum(lmnlexer.rev_float(N,[F|FR]))].
+L=lmnlexer.lex_float(N,[],[C|R])		:- custom_i_undigitletter(C)|	L=[num(lmnlexer.rev_num(N)),dot|lmnlexer.lex([C|R])].
+L=lmnlexer.lex_float(N,[],[])			:- 							L=[num(lmnlexer.rev_num(N)),dot].
+L=lmnlexer.rev_float(N,F) :- L=lmnlexer.rev_float(append(F,["."|N])).
+
+% 文字列 ( '"'[^'"']*'"' <- ちょっと違う)
+L=lmnlexer.lex(["\""|R])				:-					L=lmnlexer.lex_dq_string([],R). // "
+L=lmnlexer.lex_dq_string(DS,["\""|R])	:-					L=[dq_string(lmnlexer.rev_str(DS))|lmnlexer.lex(R)]. // "
+L=lmnlexer.lex_dq_string(DS,["\\"|R])	:-					L=lmnlexer.lex_dq_string_esc(DS,R). // \
+L=lmnlexer.lex_dq_string_esc(DS,["\\"|R]):-					L=lmnlexer.lex_dq_string(["\\"|DS],R). // \\
+L=lmnlexer.lex_dq_string_esc(DS,["\""|R]):-					L=lmnlexer.lex_dq_string(["\""|DS],R). // \"
+L=lmnlexer.lex_dq_string_esc(DS,[C|R])	:- C\="\\", C\="\""|	L=lmnlexer.lex_dq_string(["\\"|DS],[C|R]).
+L=lmnlexer.lex_dq_string(DS,[C|R])		:- C\="\\", C\="\""|	L=lmnlexer.lex_dq_string([C|DS],R).
+
+% symbol ( '\''[^'\'']*'\'' <- ちょっと違う)
+L=lmnlexer.lex(["'"|R])				:-					L=lmnlexer.lex_sq_string([],R). // "
+L=lmnlexer.lex_sq_string(DS,["'"|R])		:-					L=[sq_string(lmnlexer.rev_str(DS))|lmnlexer.lex(R)]. // "
+L=lmnlexer.lex_sq_string(DS,["\\"|R])	:-					L=lmnlexer.lex_sq_string_esc(DS,R). // \
+L=lmnlexer.lex_sq_string_esc(DS,["\\"|R]):-					L=lmnlexer.lex_sq_string(["\\"|DS],R). // \\
+L=lmnlexer.lex_sq_string_esc(DS,["'"|R])	:-					L=lmnlexer.lex_sq_string(["'"|DS],R). // \"
+L=lmnlexer.lex_sq_string_esc(DS,[C|R])	:- C\="\\", C\="'"|	L=lmnlexer.lex_sq_string(["\\"|DS],[C|R]).
+L=lmnlexer.lex_sq_string(DS,[C|R])		:- C\="\\", C\="'"|	L=lmnlexer.lex_sq_string([C|DS],R).
+
+% = == =< =:= =\= =:=. =\=.
+L=lmnlexer.lex(["="|R])				:-								L=lmnlexer.lex_equal(R).
+L=lmnlexer.lex_equal(["="|R])			:-								L=[equal_equal|lmnlexer.lex(R)].
+L=lmnlexer.lex_equal(["<"|R])			:-								L=lmnlexer.lex_leq(R).
+L=lmnlexer.lex_leq(["."|R])				:-								L=[leq_dot|lmnlexer.lex(R)].
+L=lmnlexer.lex_leq([C|R])				:- C\="."|						L=[leq|lmnlexer.lex([C|R])].
+L=lmnlexer.lex_equal([":"|R])			:-								L=lmnlexer.lex_equal_colon(R).
+L=lmnlexer.lex_equal_colon(["="|R])		:-								L=lmnlexer.lex_equal_colon_equal(R).
+L=lmnlexer.lex_equal_colon_equal(["."|R])	:-								L=[equal_colon_equal_dot|lmnlexer.lex(R)].
+L=lmnlexer.lex_equal_colon_equal([C|R])	:- C\="."|						L=[equal_colon_equal|lmnlexer.lex([C|R])].
+L=lmnlexer.lex_equal_colon([C|R])		:- C\="="|						L=[euqal, colon|lmnlexer.lex([C|R])].
+L=lmnlexer.lex_equal(["\\"|R])			:-								L=lmnlexer.lex_equal_backslash(R).
+L=lmnlexer.lex_equal_backslash(["="|R])	:- 								L=lmnlexer.lex_equal_backslash_equal(R).
+L=lmnlexer.lex_equal_backslash_equal(["."|R])	:-							L=[equal_backslash_equal_dot|lmnlexer.lex(R)].
+L=lmnlexer.lex_equal_backslash_equal([C|R]):- C\="."|						L=[equal_backslash_equal|lmnlexer.lex([C|R])].
+L=lmnlexer.lex_equal_backslash([C|R])	:- C\="="|						L=[equal, backslash|lmnlexer.lex([C|R])].
+L=lmnlexer.lex_equal([C|R])				:- C\="=", C\="<", C\=":", C\="\\"|	L=[equal|lmnlexer.lex([C|R])].
+
+% < <.
+L=lmnlexer.lex(["<"|R])			:-		L=lmnlexer.lex_les(R).
+L=lmnlexer.lex_les(["."|R])			:-		L=[les_dot|lmnlexer.lex(R)].
+L=lmnlexer.lex_les([C|R])			:-		L=[les|lmnlexer.lex([C|R])].
+
+% >= >. >=. >
+L=lmnlexer.lex([">"|R])			:-		L=lmnlexer.lex_grt(R).
+L=lmnlexer.lex_grt(["="|R])			:-		L=lmnlexer.lex_grt_equal(R).
+L=lmnlexer.lex_grt_equal(["."|R])	:-		L=[grt_equal_dot|lmnlexer.lex(R)]. // >=.
+L=lmnlexer.lex_grt_equal([C|R])		:-C\="."|L=[grt_equal|lmnlexer.lex([C|R])]. // >=
+L=lmnlexer.lex_grt(["."|R])			:-		L=[grt_dot|lmnlexer.lex(R)]. // >.
+L=lmnlexer.lex_grt([C|R])			:-C\="="|L-[grt|lmnlexer.lex(R)]. // >
+
+% [ [:...:]
+L=lmnlexer.lex(["["|R])		:-		L=lmnlexer.lex_lbracket(R).
+L=lmnlexer.lex_lbracket([":"|R]):-		L=lmnlexer.lex_bracket_string([],R). // [:
+L=lmnlexer.lex_bracket_string(BS,[":"|R])	:-	L=lmnlexer.lex_bracket_string_colon(BS,R).
+L=lmnlexer.lex_bracket_string_colon(BS,["]"|R])	:- L=[bracket_string(lmnlexer.rev_str(BS))|lmnlexer.lex(R)].
+L=lmnlexer.lex_bracket_string_colon(BS,[C|R]):-C\="]"|L=lmnlexer.lex_bracket_string([":"|BS],[C|R]).
+L=lmnlexer.lex_bracket_string(BS,[C|R]):- C\=":"|L=lmnlexer.lex_bracket_string([C|BS],R).
+L=lmnlexer.lex_lbracket([C|R])	:-C\=":"|	L=[lbracket|lmnlexer.lex([C|R])]. // [
+
+% \+ \=
+L=lmnlexer.lex(["\\"|R])			:-				L=lmnlexer.lex_backslash(R).
+L=lmnlexer.lex_backslash(["+"|R])	:-				L=[backslash_plus|lmnlexer.lex(R)]. // \+
+L=lmnlexer.lex_backslash(["="|R])	:-				L=[backslash_equal|lmnlexer.lex(R)]. // \=
+L=lmnlexer.lex_backslash([C|R])		:- C\="+",C\="="|	L=[backslash|lmnlexer.lex([C|R])]. // \ (?)
+
+% @ @@
+L=lmnlexer.lex(["@"|R])	:-		L=lmnlexer.lex_at(R).
+L=lmnlexer.lex_at(["@"|R])	:-		L=[at_at|lmnlexer.lex(R)]. // :-
+L=lmnlexer.lex_at([C|R])	:-C\="@"|L=[at|lmnlexer.lex([C|R])]. // :
+
+% : :-
+L=lmnlexer.lex([":"|R])		:-		L=lmnlexer.lex_colon(R).
+L=lmnlexer.lex_colon(["-"|R])	:-		L=[colon_minus|lmnlexer.lex(R)]. // :-
+L=lmnlexer.lex_colon([C|R])		:-C\="-"|L=[colon|lmnlexer.lex([C|R])]. // :
+
+% } }/ }@ }/@ }_ }_/ }_@ }_/@
+L=lmnlexer.lex(["}"|R])					:-					L=lmnlexer.lex_rbrace(R).
+L=lmnlexer.lex_rbrace(["_"|R])				:-					L=lmnlexer.lex_rbrace_underbar(R).
+L=lmnlexer.lex_rbrace(["/"|R])				:-					L=lmnlexer.lex_rbrace_slash(R).
+L=lmnlexer.lex_rbrace(["@"|R])				:-					L=[rbrace_at|lmnlexer.lex(R)]. // }@
+L=lmnlexer.lex_rbrace([C|R])				:-C\="/",C\="@",C\="_"|L=[rbrace|lmnlexer.lex([C|R])]. // }
+L=lmnlexer.lex_rbrace_slash(["@"|R])			:-					L=[rbrace_slash_at|lmnlexer.lex(R)]. // }/@
+L=lmnlexer.lex_rbrace_slash([C|R])			:-C\="@"|				L=[rbrace_slash|lmnlexer.lex([C|R])]. // }/
+L=lmnlexer.lex_rbrace_underbar(["/"|R])		:-					L=lmnlexer.lex_rbrace_underbar_slash(R).
+L=lmnlexer.lex_rbrace_underbar(["@"|R])		:-					L=[rbrace_underbar_at|lmnlexer.lex(R)]. // }_@
+L=lmnlexer.lex_rbrace_underbar([C|R])		:-C\="/",C\="@"|		L=[rbrace_underbar|lmnlexer.lex([C|R])]. // }_
+L=lmnlexer.lex_rbrace_underbar_slash(["@"|R])	:-					L=[rbrace_underbar_slash_at|lmnlexer.lex(R)]. // }_/@
+L=lmnlexer.lex_rbrace_underbar_slash([C|R])	:-C\="@"|				L=[rbrace_underbar_slash|lmnlexer.lex([C|R])]. // }_/
+
+% +. +
+L=lmnlexer.lex(["+"|R])		:-		L=lmnlexer.lex_plus(R).
+L=lmnlexer.lex_plus(["."|R])	:-		L=[plus_dot|lmnlexer.lex(R)]. // +.
+L=lmnlexer.lex_plus([C|R])		:-C\="."|	L=[plus|lmnlexer.lex(R)]. // +
+
+% -. -
+L=lmnlexer.lex(["-"|R])		:-		L=lmnlexer.lex_minus(R). // -
+L=lmnlexer.lex_minus(["."|R])	:-		L=[minus_dot|lmnlexer.lex(R)]. // -.
+L=lmnlexer.lex_minus([C|R])		:-C\="."|	L=[minus|lmnlexer.lex(R)].
+
+% *. ** *
+L=lmnlexer.lex(["*"|R])		:-				L=lmnlexer.lex_asterisk(R). // *
+L=lmnlexer.lex_asterisk(["."|R]):-				L=[asterisk_dot|lmnlexer.lex(R)]. // *.
+L=lmnlexer.lex_asterisk(["*"|R]):-				L=[asterisk_asterisk|lmnlexer.lex(R)]. // **
+L=lmnlexer.lex_asterisk([C|R])	:-C\=".", C\="*"|	L=[asterisk|lmnlexer.lex(R)].
+
+% // /* /. /
+L=lmnlexer.lex(["/"|R])		:-						L=lmnlexer.lex_slash(R).
+L=lmnlexer.lex_slash(["/"|R])	:-						L=lmnlexer.lex_line_comment(R). // //
+L=lmnlexer.lex_slash(["*"|R])	:-						L=lmnlexer.lex_oldstyle_comment(R).// /*
+L=lmnlexer.lex_slash(["."|R])	:-						L=[slash_dot|lmnlexer.lex(R)]. // /.
+L=lmnlexer.lex_slash([C|R])		:-C\="/", C\="*", C\="."|	L=[slash|lmnlexer.lex([C|R])]. // /
+
+% %
+L=lmnlexer.lex(["%"|R]):-L=lmnlexer.lex_line_comment(R). // %
+
+% コメント内
+L=lmnlexer.lex_line_comment(["\n"|R])			:-				L=lmnlexer.lex(R). // \n
+L=lmnlexer.lex_line_comment(["\r"|R])			:-				L=lmnlexer.lex(R). // \r
+L=lmnlexer.lex_line_comment([])					:-				L=[].
+L=lmnlexer.lex_line_comment([C|R])				:-C\="\n", C\="r"|L=lmnlexer.lex_line_comment(R).
+L=lmnlexer.lex_oldstyle_comment(["*"|R])			:-				L=lmnlexer.lex_oldstyle_comment_asterisk(R). // *
+L=lmnlexer.lex_oldstyle_comment_asterisk(["/"|R])	:-				L=lmnlexer.lex(R). // */
+L=lmnlexer.lex_oldstyle_comment_asterisk([C|R])	:- C\="/"|		L=lmnlexer.lex_oldstyle_comment([C|R]).
+L=lmnlexer.lex_oldstyle_comment([C|R])			:- C\="*"|		L=lmnlexer.lex_oldstyle_comment(R).
+
+lmnlexer.use_guard :-
+[:/*inline_define*/
+	import util.Util;
+	class CustomGuardImpl implements CustomGuard {
+		public boolean run(String guardID, Membrane mem, Object obj) {
+	//		System.out.println("guardID "+guardID);
+			ArrayList ary = (ArrayList)obj;
+	//		for(int i=0;i<ary.size();i++) {
+	//			System.out.println(ary.get(i).getClass());
+	//		}
+	//		System.out.println("CustomGuardImpl "+ary);
+			
+			if(guardID.equals("lowerletter")) {
+				Atom a = ((Link)ary.get(0)).getAtom();
+				if(a.getFunctor() instanceof StringFunctor){
+					String sv = ((StringFunctor)a.getFunctor()).stringValue();
+					if(sv.length() > 1)return false;
+					else{
+						char c = sv.charAt(0);
+						if(Character.isLowerCase(c))return true;
+						else return false;
+					}
+				}
+				else return false;
+			}
+			else if(guardID.equals("upperletter")) {
+				Atom a = ((Link)ary.get(0)).getAtom();
+				if(a.getFunctor() instanceof StringFunctor){
+					String sv = ((StringFunctor)a.getFunctor()).stringValue();
+					if(sv.length() > 1)return false;
+					else{
+						char c = sv.charAt(0);
+						if(Character.isUpperCase(c))return true;
+						else return false;
+					}
+				}
+				else return false;
+			}
+			else if(guardID.equals("digitletter")) {
+				Atom a = ((Link)ary.get(0)).getAtom();
+				if(a.getFunctor() instanceof StringFunctor){
+					String sv = ((StringFunctor)a.getFunctor()).stringValue();
+					if(sv.length() > 1)return false;
+					else{
+						char c = sv.charAt(0);
+						if(Character.isDigit(c))return true;
+						else return false;
+					}
+				}
+				else return false;
+			}
+			else if(guardID.equals("undigitletter")) {
+				Atom a = ((Link)ary.get(0)).getAtom();
+				if(a.getFunctor() instanceof StringFunctor){
+					String sv = ((StringFunctor)a.getFunctor()).stringValue();
+					if(sv.length() > 1)return false;
+					else{
+						char c = sv.charAt(0);
+						if(Character.isDigit(c))return false;
+						else return true;
+					}
+				}
+				else return false;
+			}
+			else if(guardID.equals("letter")) {
+				Atom a = ((Link)ary.get(0)).getAtom();
+				if(a.getFunctor() instanceof StringFunctor){
+					String sv = ((StringFunctor)a.getFunctor()).stringValue();
+					if(sv.length() > 1)return false;
+					else{
+						char c = sv.charAt(0);
+						if(Character.isLowerCase(c) || Character.isUpperCase(c) || Character.isDigit(c))return true;
+						else return false;
+					}
+				}
+				else return false;
+			}
+			else if(guardID.equals("unletter")) {
+				Atom a = ((Link)ary.get(0)).getAtom();
+				if(a.getFunctor() instanceof StringFunctor){
+					String sv = ((StringFunctor)a.getFunctor()).stringValue();
+					if(sv.length() > 1)return false;
+					else{
+						char c = sv.charAt(0);
+						if(Character.isLowerCase(c) || Character.isUpperCase(c) || Character.isDigit(c))return false;
+						else return true;
+					}
+				}
+				else return false;
+			}
+			return false;
+		}
+	}
+:].
+}.
+
+R=append([C|L1],L2):-R=[C|append(L1,L2)].
+R=append([],L2):-R=L2.
+
+{
+module(char).
+C=char.charlist_of_string(S) :- S \= "" |
+C=[ string.substring(S,0,1)|char.charlist_of_string(string.substring(S,1))].
+C=char.charlist_of_string(S) :- S = "" | C=[].
+
+C=char.charlist_of_stringlist([S|SR]):-C
+=append(
+char.charlist_of_string(S),["\n"|
+char.charlist_of_stringlist(SR)]).
+C=char.charlist_of_stringlist([]):-C=[].
+
+C=char.string_of_charlist([S|L]) :- C=string.concat(S,(char.string_of_charlist(L))).
+C=char.string_of_charlist([]) :- C="".
+}.
+
+lmnlexer.use.
+io.use.
+
+I=input :- I=char.charlist_of_stringlist(io.readline(result)).
+I=done, result(S) :- string(S)|I = [S|io.readline(result)].
+I=nil, result(""):-I=[].
+
+l = lmnlexer.lex(input).
