@@ -1,0 +1,20 @@
+% LMNtalソース用構文解析器
+% 2006/02/17(Fri.)
+
+% なぜかunaryの否定比較がうまくいかない。。。
+
+{
+module(lmnparser).
+
+lmnparser.use :- lmnparser.mem(lbrace,rbrace). % 最初は膜ごとに切り分ける
+
+lmnparser.mem(LB,RB), L=[lbrace|R] :-
+	lmnparser.mem(LB,RB), L=[mem_begin({proc=[]})|R].
+lmnparser.mem(LB,RB), L=[mem_begin({proc=MT,$m[MT]}),Token|R] :- LB\=Token, RB\=Token|
+	lmnparser.mem(LB,RB), L=[mem_begin({proc=[Token|MT],$m[MT]})|R].
+lmnparser.mem(LB,RB), L=[mem_begin({proc=MT,$m[MT]}), rbrace|R] :-
+	lmnparser.mem(LB,RB), L=[mem(M)|R], $m[M].
+lmnparser.mem(LB,RB), L=[mem_begin({proc=MT,$m[MT]}), Token|R] :- ground(Token)|
+	lmnparser.mem(LB,RB), L=[mem_begin({proc=[Token|MT],$m[MT]})|R].
+
+}.
