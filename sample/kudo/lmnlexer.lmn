@@ -38,6 +38,7 @@ L=lmnlexer.lex([])			:- L=[].
 % atom name, link name, pathed name, num, float
 L=lmnlexer.lex([C|R]):-custom_i_lowerletter(C)|L=lmnlexer.lex_atomname([C],R).
 L=lmnlexer.lex([C|R]):-custom_i_upperletter(C)|L=lmnlexer.lex_linkname([C],R).
+L=lmnlexer.lex(["_"|R]):-					|L=lmnlexer.lex_linkname(["_"],R).
 L=lmnlexer.lex([C|R]):-custom_i_digitletter(C)|L=lmnlexer.lex_num([C],R).
 
 % [a-z][a-zA-Z_1-9]*
@@ -138,7 +139,7 @@ L=lmnlexer.lex_backslash(["+"|R])	:-				L=[backslash_plus|lmnlexer.lex(R)]. // \
 L=lmnlexer.lex_backslash(["="|R])	:-				L=[backslash_equal|lmnlexer.lex(R)]. // \=
 L=lmnlexer.lex_backslash([C|R])		:- C\="+",C\="="|	L=[backslash|lmnlexer.lex([C|R])]. // \ (?)
 
-% @ @@
+% @@ @
 L=lmnlexer.lex(["@"|R])	:-		L=lmnlexer.lex_at(R).
 L=lmnlexer.lex_at(["@"|R])	:-		L=[at_at|lmnlexer.lex(R)]. // :-
 L=lmnlexer.lex_at([C|R])	:-C\="@"|L=[at|lmnlexer.lex([C|R])]. // :
