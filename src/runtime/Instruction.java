@@ -1162,7 +1162,7 @@ public class Instruction implements Cloneable, Serializable {
 
 	///////////////////////////////////////////////////////////////////////
 
-	// 型付きプロセス文脈を扱うための追加命令 (216--219)	
+	// 型付きプロセス文脈を扱うための追加命令 (216--220)	
 
 	/** eqground [link1,link2]
 	 * <br>（予約された）拡張ガード命令<br>
@@ -1173,26 +1173,35 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int EQGROUND = 216;
 	static {setArgType(EQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
 
+	/** neqground [link1,link2]
+	 * <br>拡張ガード命令<br>
+	 * （どちらかが基底項プロセスを指すとわかっている）
+	 * 2つのリンクlink1とlink2に対して、
+	 * それらが同じ形状の基底項プロセスでないことを確認する。
+	 * @see isground */
+	public static final int NEQGROUND = 217;
+	static {setArgType(NEQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
+
 	/** copyground [-dstlink, srclink, dstmem]
 	 * （基底項プロセスを指す）リンク$srclinkを$dstmemに複製し、$dstlinkに格納する。
 	 * @see isground */
-	public static final int COPYGROUND = 217;
+	public static final int COPYGROUND = 218;
 	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM));}
 		
 	/** removeground [srclink,srcmem]
 	 * $srcmemに属する（基底項プロセスを指す）リンク$srclinkを現在の膜から取り出す。
 	 * 実行アトムスタックは操作しない。
 	 */
-	public static final int REMOVEGROUND = 218;
+	public static final int REMOVEGROUND = 219;
 	static {setArgType(REMOVEGROUND, new ArgType(false, ARG_VAR, ARG_MEM));}
 	
 	/** freeground [srclink]
 	 * 基底項プロセス$srclinkがどの膜にも属さず、かつスタックに積まれていないことを表す。
 	 */
-	public static final int FREEGROUND = 219;
+	public static final int FREEGROUND = 220;
 	static {setArgType(FREEGROUND, new ArgType(false, ARG_VAR));}
 	
-	// 型検査のためのガード命令 (220--229)	
+	// 型検査のためのガード命令 (221--229)	
 
 	/** isground [-natomsfunc, link, srcset]
 	 * <br>（予約された）ロック取得する拡張ガード命令<br>
@@ -1207,13 +1216,13 @@ public class Instruction implements Cloneable, Serializable {
      * 
      * groundには膜は含まれないことになったので、上記は不要
      * */
-	public static final int ISGROUND = 220;
+	public static final int ISGROUND = 221;
 	static {setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
 	
 	/** isunary [atom]
 	 * <br>ガード命令<br>
 	 * アトム$atomが1引数のアトムであることを確認する。*/
-	public static final int ISUNARY     = 221;
+	public static final int ISUNARY     = 222;
 	public static final int ISUNARYFUNC = ISUNARY + OPT;
 	static {setArgType(ISUNARY, new ArgType(false, ARG_ATOM));}
 	static {setArgType(ISUNARYFUNC, new ArgType(false, ARG_ATOM));}

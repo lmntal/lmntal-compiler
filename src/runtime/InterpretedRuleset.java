@@ -922,6 +922,10 @@ class InterpretiveReactor {
 					boolean eqground_ret = ((Link)vars.get(inst.getIntArg1())).eqGround((Link)vars.get(inst.getIntArg2()));
 					if(!eqground_ret)return false;
 					break; //kudo 2004-12-03
+				case Instruction.NEQGROUND : //[link1,link2]
+					boolean neqground_ret = !((Link)vars.get(inst.getIntArg1())).eqGround((Link)vars.get(inst.getIntArg2()));
+					if(!neqground_ret)return false;
+					break; //kudo 2006-02-18
 				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
 					vars.set(inst.getIntArg1(),mems[inst.getIntArg3()].copyGroundFrom((Link)vars.get(inst.getIntArg2())));
 					break; //kudo 2004-12-03

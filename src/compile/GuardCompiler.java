@@ -317,15 +317,35 @@ public class GuardCompiler extends HeadCompiler {
 					// NSAMEFUNC を作るか？
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
-					int atomid1 = loadUnaryAtom(def1);
-					int atomid2 = loadUnaryAtom(def2);
-					match.add(new Instruction(Instruction.ISUNARY, atomid1));
-					match.add(new Instruction(Instruction.ISUNARY, atomid2));
-					int funcid1 = varcount++;
-					int funcid2 = varcount++;
-					match.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
-					match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
-					match.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
+					
+					//groundの否定にした。(2006-02-18 by kudo)
+					// .. :- unary(A),A\=B | ..
+					//の場合、Bがgroundで構わない。Aがunaryで、かつBが異なる構造の時に反応する。
+					//この点は、==とは違う。==の場合、そもそも同じ型でなければマッチしないため。
+					//Bがunaryの時に限定したければ、unary(B)を書き加えればよい。
+					//(何も考えずに実装したらそうなったのだが、結果的に一番柔軟で直感的な形だと思う。)
+					if(!GROUND_ALLOWED ||
+							typedcxttypes.get(def1) == UNARY_ATOM_TYPE ||
+							typedcxttypes.get(def2) == UNARY_ATOM_TYPE){
+						int atomid1 = loadUnaryAtom(def1);
+						int atomid2 = loadUnaryAtom(def2);
+						match.add(new Instruction(Instruction.ISUNARY, atomid1));
+						match.add(new Instruction(Instruction.ISUNARY, atomid2));
+						int funcid1 = varcount++;
+						int funcid2 = varcount++;
+						match.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
+						match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+						match.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
+					}
+					else{
+						checkGroundLink(def1);
+						checkGroundLink(def2);
+						int linkid1 = loadGroundLink(def1);
+						int linkid2 = loadGroundLink(def2);
+//						match.add(new Instruction(Instruction.ISGROUND,linkid1));
+//						match.add(new Instruction(Instruction.ISGROUND,linkid2));
+						match.add(new Instruction(Instruction.NEQGROUND,linkid1,linkid2));
+					}
 				}
 				else if (func.equals(new Functor("class", 2))) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
