@@ -2,15 +2,20 @@
 %
 % ガードインラインを使っています。thanksです。 > haraさん
 %
-% 2006/02/17
+% 200行目付近までがLMNtalで、以降100行くらいがガードインライン。
+% ':-' : 149個
+%
+% SINCE 2006/02/17(Fri.)
+
 {
 module(lmnlexer).
 
 lmnlexer.use :- lmnlexer.use_guard.
 
+%文字列、数値、小数部分の後処理。ひっくり返してそれぞれの型に戻す
 R=lmnlexer.rev_str([S|SR]):-R=string.concat(lmnlexer.rev_str(SR),S).
-R=lmnlexer.rev_str([]):-R="".
-R=lmnlexer.rev_num(NS):-R=string.int_of_str(lmnlexer.rev_str(NS)).
+R=lmnlexer.rev_str([]) :- R="".
+R=lmnlexer.rev_num(NS) :- R=string.int_of_str(lmnlexer.rev_str(NS)).
 R=lmnlexer.rev_float(FS):-R=string.float_of_str(lmnlexer.rev_str(FS)).
 
 % コメント外
@@ -27,7 +32,7 @@ L=lmnlexer.lex(["|"|R])	:- L=[bar|lmnlexer.lex(R)]. // |
 //L=lmnlexer.lex(["*"|R])	:- L=[asterisk|lmnlexer.lex(R)]. // *
 //L=lmnlexer.lex(["/"|R])	:- L=[slash|lmnlexer.lex(R)]. // /
 L=lmnlexer.lex([" "|R])	:- L=lmnlexer.lex(R). //
-L=lmnlexer.lex(["\n"|R])	:- L=lmnlexer.lex(R). // \n
+L=lmnlexer.lex(["\\n"|R])	:- L=lmnlexer.lex(R). // \n
 L=lmnlexer.lex([","|R])	:- L=[comma|lmnlexer.lex(R)]. // ,
 L=lmnlexer.lex(["$"|R])	:- L=[dollar|lmnlexer.lex(R)]. // $
 L=lmnlexer.lex(["."|R])	:- L=[dot|lmnlexer.lex(R)]. // .
@@ -122,7 +127,7 @@ L=lmnlexer.lex_grt(["="|R])			:-		L=lmnlexer.lex_grt_equal(R).
 L=lmnlexer.lex_grt_equal(["."|R])	:-		L=[grt_equal_dot|lmnlexer.lex(R)]. // >=.
 L=lmnlexer.lex_grt_equal([C|R])		:-C\="."|L=[grt_equal|lmnlexer.lex([C|R])]. // >=
 L=lmnlexer.lex_grt(["."|R])			:-		L=[grt_dot|lmnlexer.lex(R)]. // >.
-L=lmnlexer.lex_grt([C|R])			:-C\="="|L-[grt|lmnlexer.lex(R)]. // >
+L=lmnlexer.lex_grt([C|R])			:-C\="="|L=[grt|lmnlexer.lex([C|R])]. // >
 
 % [ [:...:]
 L=lmnlexer.lex(["["|R])		:-		L=lmnlexer.lex_lbracket(R).
@@ -166,18 +171,18 @@ L=lmnlexer.lex_rbrace_underbar_slash([C|R])	:-C\="@"|				L=[rbrace_underbar_slas
 % +. +
 L=lmnlexer.lex(["+"|R])		:-		L=lmnlexer.lex_plus(R).
 L=lmnlexer.lex_plus(["."|R])	:-		L=[plus_dot|lmnlexer.lex(R)]. // +.
-L=lmnlexer.lex_plus([C|R])		:-C\="."|	L=[plus|lmnlexer.lex(R)]. // +
+L=lmnlexer.lex_plus([C|R])		:-C\="."|	L=[plus|lmnlexer.lex([C|R])]. // +
 
 % -. -
 L=lmnlexer.lex(["-"|R])		:-		L=lmnlexer.lex_minus(R). // -
 L=lmnlexer.lex_minus(["."|R])	:-		L=[minus_dot|lmnlexer.lex(R)]. // -.
-L=lmnlexer.lex_minus([C|R])		:-C\="."|	L=[minus|lmnlexer.lex(R)].
+L=lmnlexer.lex_minus([C|R])		:-C\="."|	L=[minus|lmnlexer.lex([C|R])].
 
 % *. ** *
 L=lmnlexer.lex(["*"|R])		:-				L=lmnlexer.lex_asterisk(R). // *
 L=lmnlexer.lex_asterisk(["."|R]):-				L=[asterisk_dot|lmnlexer.lex(R)]. // *.
 L=lmnlexer.lex_asterisk(["*"|R]):-				L=[asterisk_asterisk|lmnlexer.lex(R)]. // **
-L=lmnlexer.lex_asterisk([C|R])	:-C\=".", C\="*"|	L=[asterisk|lmnlexer.lex(R)].
+L=lmnlexer.lex_asterisk([C|R])	:-C\=".", C\="*"|	L=[asterisk|lmnlexer.lex([C|R])].
 
 % // /* /. /
 L=lmnlexer.lex(["/"|R])		:-						L=lmnlexer.lex_slash(R).
@@ -190,15 +195,16 @@ L=lmnlexer.lex_slash([C|R])		:-C\="/", C\="*", C\="."|	L=[slash|lmnlexer.lex([C|
 L=lmnlexer.lex(["%"|R]):-L=lmnlexer.lex_line_comment(R). // %
 
 % コメント内
-L=lmnlexer.lex_line_comment(["\n"|R])			:-				L=lmnlexer.lex(R). // \n
-L=lmnlexer.lex_line_comment(["\r"|R])			:-				L=lmnlexer.lex(R). // \r
+L=lmnlexer.lex_line_comment(["\\n"|R])			:-				L=lmnlexer.lex(R). // \n
+//L=lmnlexer.lex_line_comment(["\r"|R])			:-				L=lmnlexer.lex(R). // \r
 L=lmnlexer.lex_line_comment([])					:-				L=[].
-L=lmnlexer.lex_line_comment([C|R])				:-C\="\n", C\="r"|L=lmnlexer.lex_line_comment(R).
+L=lmnlexer.lex_line_comment([C|R])				:- C \= "\\n" /* , C\="\r" */ |L=lmnlexer.lex_line_comment(R).
 L=lmnlexer.lex_oldstyle_comment(["*"|R])			:-				L=lmnlexer.lex_oldstyle_comment_asterisk(R). // *
 L=lmnlexer.lex_oldstyle_comment_asterisk(["/"|R])	:-				L=lmnlexer.lex(R). // */
 L=lmnlexer.lex_oldstyle_comment_asterisk([C|R])	:- C\="/"|		L=lmnlexer.lex_oldstyle_comment([C|R]).
 L=lmnlexer.lex_oldstyle_comment([C|R])			:- C\="*"|		L=lmnlexer.lex_oldstyle_comment(R).
 
+%% ガードインライン
 lmnlexer.use_guard :-
 [:/*inline_define*/
 	import util.Util;
@@ -254,14 +260,14 @@ lmnlexer.use_guard :-
 				Atom a = ((Link)ary.get(0)).getAtom();
 				if(a.getFunctor() instanceof StringFunctor){
 					String sv = ((StringFunctor)a.getFunctor()).stringValue();
-					if(sv.length() > 1)return false;
+					if(sv.length() > 1)return true;
 					else{
 						char c = sv.charAt(0);
 						if(Character.isDigit(c))return false;
 						else return true;
 					}
 				}
-				else return false;
+				else return false; //?
 			}
 			else if(guardID.equals("letter")) {
 				Atom a = ((Link)ary.get(0)).getAtom();
@@ -280,7 +286,7 @@ lmnlexer.use_guard :-
 				Atom a = ((Link)ary.get(0)).getAtom();
 				if(a.getFunctor() instanceof StringFunctor){
 					String sv = ((StringFunctor)a.getFunctor()).stringValue();
-					if(sv.length() > 1)return false;
+					if(sv.length() > 1)return true;
 					else{
 						char c = sv.charAt(0);
 						if(Character.isLowerCase(c) || Character.isUpperCase(c) || Character.isDigit(c))return false;
@@ -295,30 +301,3 @@ lmnlexer.use_guard :-
 :].
 }.
 
-R=append([C|L1],L2):-R=[C|append(L1,L2)].
-R=append([],L2):-R=L2.
-
-{
-module(char).
-C=char.charlist_of_string(S) :- S \= "" |
-C=[ string.substring(S,0,1)|char.charlist_of_string(string.substring(S,1))].
-C=char.charlist_of_string(S) :- S = "" | C=[].
-
-C=char.charlist_of_stringlist([S|SR]):-C
-=append(
-char.charlist_of_string(S),["\n"|
-char.charlist_of_stringlist(SR)]).
-C=char.charlist_of_stringlist([]):-C=[].
-
-C=char.string_of_charlist([S|L]) :- C=string.concat(S,(char.string_of_charlist(L))).
-C=char.string_of_charlist([]) :- C="".
-}.
-
-lmnlexer.use.
-io.use.
-
-I=input :- I=char.charlist_of_stringlist(io.readline(result)).
-I=done, result(S) :- string(S)|I = [S|io.readline(result)].
-I=nil, result(""):-I=[].
-
-l = lmnlexer.lex(input).
