@@ -117,17 +117,17 @@ L=lmnlexer.lex_equal_backslash([C|R])	:- C\="="|						L=[equal, backslash|lmnlex
 L=lmnlexer.lex_equal([C|R])				:- C\="=", C\="<", C\=":", C\="\\"|	L=[equal|lmnlexer.lex([C|R])].
 
 % < <.
-L=lmnlexer.lex(["<"|R])			:-		L=lmnlexer.lex_les(R).
+L=lmnlexer.lex(["<"|R])				:-		L=lmnlexer.lex_les(R).
 L=lmnlexer.lex_les(["."|R])			:-		L=[les_dot|lmnlexer.lex(R)].
 L=lmnlexer.lex_les([C|R])			:-		L=[les|lmnlexer.lex([C|R])].
 
 % >= >. >=. >
-L=lmnlexer.lex([">"|R])			:-		L=lmnlexer.lex_grt(R).
-L=lmnlexer.lex_grt(["="|R])			:-		L=lmnlexer.lex_grt_equal(R).
-L=lmnlexer.lex_grt_equal(["."|R])	:-		L=[grt_equal_dot|lmnlexer.lex(R)]. // >=.
-L=lmnlexer.lex_grt_equal([C|R])		:-C\="."|L=[grt_equal|lmnlexer.lex([C|R])]. // >=
-L=lmnlexer.lex_grt(["."|R])			:-		L=[grt_dot|lmnlexer.lex(R)]. // >.
-L=lmnlexer.lex_grt([C|R])			:-C\="="|L=[grt|lmnlexer.lex([C|R])]. // >
+L=lmnlexer.lex([">"|R])				:-			L=lmnlexer.lex_grt(R).
+L=lmnlexer.lex_grt(["="|R])			:-			L=lmnlexer.lex_grt_equal(R).
+L=lmnlexer.lex_grt_equal(["."|R])	:-			L=[geq_dot|lmnlexer.lex(R)]. // >=.
+L=lmnlexer.lex_grt_equal([C|R])		:-C\="."|	L=[geq|lmnlexer.lex([C|R])]. // >=
+L=lmnlexer.lex_grt(["."|R])			:-			L=[grt_dot|lmnlexer.lex(R)]. // >.
+L=lmnlexer.lex_grt([C|R])			:-C\="="|	L=[grt|lmnlexer.lex([C|R])]. // >
 
 % [ [:...:]
 L=lmnlexer.lex(["["|R])		:-		L=lmnlexer.lex_lbracket(R).
