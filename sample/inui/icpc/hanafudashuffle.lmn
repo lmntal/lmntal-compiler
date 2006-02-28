@@ -15,9 +15,7 @@ io.use.
 
 ready.
 
-cards=[].
-
-ready :- r=readline(s).
+ready :- r=readline(s), cards=[], shuffles=[].
 s(X) :- string.split(" ", X, ss).
 ss=[N,R] :- string(N), string(R) | n=string.int_of_str(N), r=string.int_of_str(R).
 n(N), cards(X) :- N>0 | cards=list.append(X,[N]), n(N-1).
