@@ -246,6 +246,15 @@ class CustomGuardImpl implements CustomGuard {
 }
 :].
 
+/**
+ * list.split(+List, +N, -Tail, -Head)
+ *
+ * リストをN番目で２つに分割して，分割後のリストをTail, Headに返します
+ * 2006.2.28 by inui
+ */
+H=list.split(List,  X, Tail) :- X=0    | H=[], Tail=List.
+H=list.split([   ], X, Tail) :- int(X) | H=[], Tail=[].
+H=list.split([Y|Z], X, Tail) :- X>0    | H=[Y|list.split(Z,X-1,Tail)].
+
 }.
 //res = list.flatten(cons(cons(int(1),cons(int(2),int(3))), int(4)), nil).
-
