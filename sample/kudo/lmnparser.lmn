@@ -48,8 +48,8 @@ lmnparser.parse_funcnames({$s.
 	Parse_NormalAtomName@@
 	L=[atomname(AN)|R] :- L=[funcname(normalfunc(AN))|R].
 
-	Parse_Num@@
-	L=[num(N)|R] :- L=[funcname(numfunc(N))|R].
+	Parse_Int@@
+	L=[num(N)|R] :- L=[funcname(intfunc(N))|R].
 	
 	Parse_Float@@
 	L=[floatnum(FN)|R] :- L=[funcname(floatfunc(FN))|R].
@@ -465,15 +465,23 @@ lmnparser.parse_something2({$s.
 	
 	Parse_Bundle@@
 	L=[asterisk, srclink(LN)|R] :- L=[srcbundle(LN)|R].
-	
-	Parse_Aggregate@@
-	L=[srcatom(AN,[clause([srcbundle])])|R] :- L=[srcaggregate(AN,[clause([srcbundle])])|R].
+
+% この処理はLMNParserにまわす。1引数とは限らないし、、、今は認めないので。
+%	Parse_Aggregate@@
+%	L=[srcatom(AN,[clause([srcbundle])])|R] :- L=[srcaggregate(AN,[clause([srcbundle])])|R].
 
 	ParseCons@@
 	L=srccons(Car, Cdr) :- L=srcatom(normalfunc(".",2),[Car,Cdr]).
 	
 	ParseNil@@
 	L=srcnil :- L=srcatom(normalfunc("[]",0),[]).	
+	
+	% この辺は演算子のパーズの時にやるべきかも
+/* = */	L=srcatom(equal, Args) 		:- L=srcatom(normalfunc("="), Args).
+/* + */	L=srcatom(plus, Args) 		:- L=srcatom(normalfunc("+"), Args).
+/* - */ L=srcatom(minus, Args)		:- L=srcatom(normalfunc("-"), Args).
+/* * */ L=srcatom(asterisk, Args)	:- L=srcatom(normalfunc("*"), Args).
+/* / */ L=srcatom(slash, Args)		:- L=srcatom(normalfunc("/"), Args).
 }).
 
 lmnparser.parse_something2({$s, @s}/) :-
@@ -499,4 +507,7 @@ lmnparser.parse_atom_with_arity({$s.
 lmnparser.parse_atom_with_arity({$s, @s}/) :-
 
 lmnparser.parsed({$s}).
+
+lmnparser.parsed({src=SrcTree, syntax_ok, $s[]}) :- ground(SrcTree)|
+	lmnparser.parsed(SrcTree).
 }.

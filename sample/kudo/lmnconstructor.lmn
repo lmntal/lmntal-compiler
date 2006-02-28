@@ -1,0 +1,130 @@
+% これはLMNParserに相当する。
+
+% 入力:抽象構文木
+% 構文規則:
+%   プロセス := [] | [プロセス要素|プロセス] % プロセスはプロセス要素のリスト
+%   プロセス要素 := アトム | 膜 | リンク | ルール | プロセス文脈 | ルール文脈 | リンク束
+%   アトム := srcatom(アトム名, 子プロセス)
+%   膜 := srcmem(子プロセス)
+%   リンク := srclink(リンク名)
+%   ルール := srcrule(ルール名, プロセス, プロセス, プロセス) %ヘッド、ガード、ボディ
+%   プロセス文脈 := srcproccxt(プロセス文脈名, プロセス, プロセス) %明示プロセス、非明示プロセス)
+%   ルール文脈 := srcrulecxt(ルール文脈名)
+%   リンク束 := srcbundle(リンク束名)
+% ※リンク名、リンク束名、アトム名、ルール名、プロセス文脈名、ルール文脈名は、全て文字列アトム
+% 特殊な中置記法演算子は、equalとかbackslashとかの名前のアトムになっているが、なんで区別したのかよくわからん
+%
+% what to do:
+%   - アトムの引数の展開とcheck
+%     -- アトム引数のアトム展開
+%       a(..,b(..),..)  --> a(..,NEW_LINK,..), b(..,NEW_LINK)
+%     -- アトム引数の膜の展開
+%       a(..,{..},..)  --> a(..,NEW_LINK,..), {'+'(NEW_LINK),..}
+%     -- アトム引数にsrcatom, srcmem, srclink以外があったらエラー
+%     -- アトム引数にsrcbundleがあったら、アトム集団にする(今はエラーでいいや)
+%   - プロセス文脈の引数のcheck
+%     -- プロセス文脈の明示プロセスにsrclink以外があったらエラー
+%     -- プロセス文脈の非明示プロセスにsrcbundle以外があったらエラー
+%   - 膜の引数のcheck
+%     -- srclink, srcbundleがあったらエラー
+%   - ルールの引数のcheck
+%     -- ヘッド、ガード、ボディにsrclink,srcbundleが出たらエラー
+%   - 同名のリンクはつなぐ
+%     -- 同じ膜内にリンクが双方あれば、つなぐ
+%     -- その膜に一個しか無ければ、$inを作ってつなぎ、膜の外に$outを作ってそこにリンクを作る
+%       ..,X,.. --> ..,X,.. $in(NEWLINK,X) }, $out(NEWLINK, NEWLINK2)
+%     -- 三個出現したら、それはプロセス文脈とする
+%       ..,X,.. --> ..,NEW_LINK,.. $X[NEWLINK]
+%   - プロセス文脈からプロセス文脈定義を生成する
+%     -- 
+%
+% how to do
+%   - ルールごとに個別に処理するべきだが、一方でそのどこからでも使いたいルールというものがあるわけで、さてどうしたものか…。
+
+{ module(lmnconstructor).
+
+Construct_GlobalRule1@@
+lmnconstructor.construct(Src) :- ground(Src) |
+% 
+lmnconstructor.construct1({global=srcrule("",[],[],Src).
+	linkcount(0).
+	{$link1[L1|*Link1]}, {$link2[L2|*Link2]}, lmnconstructor.new_linknames(L1,L2), linkcount(LN) :- LN1=LN+1|
+		{$link1[L1|*Link1], L1=string.concat("~", string.str_of_int(LN)), with_rule},
+		{$link2[L2|*Link2], L2=string.concat("~", string.str_of_int(LN)), with_rule},
+		linkcount(LN1).
+	
+	link={with_rule, @link, $link}/ :- link={$link}.
+
+	Construct_Rule@@
+	S=srcrule(Name, Head, Guard, Body) :- string(Name) |
+		S=rule({ name(Name), lhs(LhsMem), guard(GuardMem), rhs(RhsMem)}),
+		mem={'+'(LhsMem), childs(Head)},
+		mem={'+'(GuardMem), childs(Guard)},
+		mem={'+'(RhsMem), childs(Body)}.
+
+	Construct_Atom@@
+	S=srcatom(Functor, Childs) :- ground(Functor) | 
+		atom={'+'(S), functorkind(Functor), childs(0, Childs)}.
+		
+	Construct_Mem@@
+	S=srcmem(Childs) :- mem={childs(Childs), '+'(S)}.
+
+	CreateChild1@@
+	{$mem, childs(C)}, C=[Child|R] :- {$mem, child(Child), childs=R}.
+	
+	CreateChild1_1@@
+	{$mem, childs(C)}, C=[] :- {$mem}.
+
+	CreateChild2@@
+	{$process, childs(N, C)}, C=[Child|R] :- M=N+1|{$process, child(N, Child), childs(M,R)}.
+
+	mem={$mem, child(A)}, atom={'+'(A), $atom} :-
+		mem={$mem, atom(A), '+'(M)}, atom={mem(M), '+'(A), $atom}.
+	
+	mem={$mem, child(M)}, mem={'+'(M), $childmem} :-
+		mem={$mem, mem(C), '+'(M)}, mem={parent(M), '+'(C), $childmem}.
+
+	CreateFunctor@@
+	atom={$atom, functorkind(K), childs(A,C)},C=[] :- ground(K), int(A)|
+		atom={$atom, functor(K,A)}.
+	
+	NewLink@@
+	lmnconstructor.newlink(L1,A1,P1,L2,A2,P2) :- int(P1), int(P2) |
+		link={name(NN1), '+'(L1), buddy(B1), '+'(B2), atom(A1), pos(P1)},
+		link={name(NN2), '+'(L2), buddy(B2), '+'(B1), atom(A2), pos(P2)},
+		lmnconstructor.new_linknames(NN1,NN2).
+	
+	ExpandAtom@@
+	mem={$mem, atom(Atom)},
+	atom={'+'(Atom), $atom, child(P,C)}, atom={'+'(C), functor(K,Arity), $child[K|*Child]} :- A1=Arity+1, int(P) |
+		mem={$mem, atom(Atom1), atom(Atom2), '+'(M2)},
+		atom={$atom, '+'(A), link(P,L1), '+'(Atom1)},
+		atom={$child[K|*Child], '+'(CA), link(Arity, L2), functor(K, A1), '+'(Atom2), mem(M2)},
+		lmnconstructor.newlink(L1,A,P,L2,CA,Arity).
+
+	% a(..,{..},..) --> a(..,L1,..),$out(U1,L1),{$in(U1,L2),'+'(L2),..}
+	ExpandMem@@
+	mem={$mem, atom(Atom)},
+	atom={'+'(Atom), $atom, child(P,C)}, mem={'+'(C), $child} :- int(P) |
+		mem={$mem, atom(Atom1), mem(Mem), '+'(M2), atom(Out), '+'(OutM)},
+		atom={$atom, '+'(A), link(P,L1), '+'(Atom1)},
+		atom={'+'(Out), '+'(L_O), '+'(L_UO), functor(normalfunc("$out",2)),
+			link(0, L_Out0), link(1, L_Out1), mem(OutM)},
+		lmnconstructor.newlink(L1,A,P,L_Out1,L_O,1),
+		atom={'+'(In), '+'(L_I), '+'(L_UI), functor(normalfunc("$in",2)),
+			link(0, L_In0), link(1, L_In1), mem(InM)},
+		lmnconstructor.newlink(L_Out0,L_UO,0,L_In0,L_UI,0),
+		atom={'+'(Plus), '+'(L_P),functor(normalfunc("+",1)), link(0, L_Plus0), mem(PlusM)},
+		lmnconstructor.newlink(L_In1,L_I,1, L_Plus0, L_P, 0),
+		mem={'+'(Mem), parent(M2), '+'(PlusM), atom(Plus), '+'(InM), atom(In), $child}.
+}).
+
+lmnconstructor.construct1({$g, linkcount(LN), @g}/) :- int(LN) |
+%
+lmnconstructor.constructed_({$g}).
+
+lmnconstructor.constructed_({global(G), $g[G]}/) :-
+
+lmnconstructor.constructed(G),$g[G].
+
+}.
