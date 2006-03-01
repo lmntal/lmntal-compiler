@@ -1,25 +1,41 @@
-%cards=[5,4,3,2,1].
-%shuffle(3,1).
-%shuffle(3,1).
+/*
+ * ???????花札シャッフル
+ * http://ccserv.adm.ehime-u.ac.jp/ICPC/problems/domestic/d2004/A.jp/A.html
+ *
+ * cardsリストの先頭要素が答え
+ *
+ * History
+ * 2006.02.28 作成
+ *            1回分のデータしか実行できない
+ * 2006.03.01 shuffle手順をリストにつないだ
+ *            まだ1回分のデータしか実行できない
+ */
 
-%cards=[10,9,8,7,6,5,4,3,2,1].
-%shuffle(1,10).
-%shuffle(10,1).
-%shuffle(8,3).
+//publicのリストモジュールが使えないとき用
+/*{
+module(list).
+H=list.split(List,  X, Tail) :- X=0    | H=[], Tail=List.
+H=list.split([   ], X, Tail) :- int(X) | H=[], Tail=[].
+H=list.split([Y|Z], X, Tail) :- X>0    | H=[Y|list.split(Z,X-1,Tail)].
 
-shuffle(P,C), cards=[X|Z] :- int(P) | head=list.split([X|Z], P-1, tail), shuffle(C).
-shuffle(C), tail(X) :- int(C) | head2=list.split(X, C, tail2).
-head(X), tail2(Y), head2(Z) :- cards=list.append(Z,list.append(X,Y)).
+H=list.append([], B) :- H=B.
+H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
+}.*/
 
+//データ入力＆データ生成???????????
 io.use.
 
 ready.
-
-ready :- r=readline(s), cards=[], shuffles=[].
+ready :- r=readline(s), cards=[], order=[].
 s(X) :- string.split(" ", X, ss).
 ss=[N,R] :- string(N), string(R) | n=string.int_of_str(N), r=string.int_of_str(R).
 n(N), cards(X) :- N>0 | cards=list.append(X,[N]), n(N-1).
 
 r(R) :- R > 0 | r=readline(s2), r(R-1).
 s2(X) :- string.split(" ", X, ss2).
-ss2=[P,C] :- string(P), string(C) | shuffle(string.int_of_str(P), string.int_of_str(C)).
+ss2=[P,C], order(X) :- string(P), string(C) | order=list.append(X, [shuffle(string.int_of_str(P), string.int_of_str(C))]).
+
+//?????手順に従ってシャッフル??????
+order=[shuffle(P,C)|ZZ], cards=[X|Z] :- int(P) | head=list.split([X|Z], P-1, tail), order=[shuffle(C)|ZZ].
+order=[shuffle(C)|ZZ], tail(X) :- int(C) | head2=list.split(X, C, tail2), order(ZZ).
+head(X), tail2(Y), head2(Z) :- cards=list.append(Z,list.append(X,Y)).
