@@ -1,0 +1,39 @@
+%predsucc, succpred
+R=pred(succ(N)) :- R=N.
+R=succ(pred(N)) :- R=N.
+%²Ã»»
+R=plus(N,zero) :- R=N.
+R=plus(N,succ(M)) :- R=plus(succ(N),M).
+R=plus(N,pred(M)) :- R=plus(pred(N),M).
+%ÀµÉéÈ¿Å¾Éä¹æ
+R=minus(zero):-R=zero.
+R=minus(succ(N)):-R=pred(minus(N)).
+R=minus(pred(N)):-R=succ(minus(N)).
+%¸º»»
+R=sub(M,N):-R=plus(M,minus(N)).
+%succ,pred¤Î¥³¥Ô¡¼
+suprcp(succ(N),N1,N2):-suprcp(N,S1,S2),N1=succ(S1),N2=succ(S2).
+suprcp(pred(N),N1,N2):-suprcp(N,P1,P2),N1=pred(P1),N2=pred(P2).
+suprcp(zero,N1,N2):-N1=zero,N2=zero.
+%succ,pred¤Î¾Ãµî
+suprrm(succ(N)) :- suprrm(N).
+suprrm(pred(N)) :- suprrm(N).
+suprrm(zero) :- ().
+%¾è»»
+R=mul(M,zero):-R=zero, suprrm(M).
+R=mul(M,succ(zero)):-R=M.
+R=mul(M,pred(zero)):-R=minus(M).
+R=mul(M,succ(succ(N))):-R=plus(mul(M1,succ(N)),M2),suprcp(M,M1,M2).
+R=mul(M,pred(pred(N))):-R=sub(mul(M1,pred(N)),M2),suprcp(M,M1,M2).
+
+% ÁÈ¤ß¹þ¤ß¤Îint¤È¤ÎÊÑ´¹
+R=to_embeded(succ(N)):-R=to_embeded(N)+1.
+R=to_embeded(pred(N)):-R=to_embeded(N)-1.
+R=to_embeded(zero):-R=0.
+R=of_embeded(N):-N>0|R=succ(of_embeded(N-1)).
+R=of_embeded(N):-N<0|R=pred(of_embeded(N+1)).
+R=of_embeded(N):-N=:=0|R=zero.
+
+plustest=to_embeded(plus(of_embeded(8),of_embeded(-9))).
+subtest=to_embeded(sub(of_embeded(10),of_embeded(5))).
+multest=to_embeded(mul(of_embeded(-10),of_embeded(-10))).
