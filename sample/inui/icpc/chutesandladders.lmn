@@ -1,0 +1,68 @@
+/*
+ * [1059] Chutes and Ladders 
+ * http://acm.pku.edu.cn/JudgeOnline/showproblem?problem_id=1059
+ * 
+ * すごろくのシミュレーション問題
+ * サイコロの目はあらかじめ用意されていて，
+ * 一気に進んだり戻ったりするはしごや
+ * 1回休み，続けてもう１回などのイベントがある．
+ *
+ * ansアトムの引数が答え
+ *
+ * History
+ * 2006.03.03 イベントの処理がまだ出来てない
+ */
+
+io.use.
+
+dice=[].
+
+//サイコロを読み込む
+r1=readline(s1).
+r1(done), s1(X) :- ss=string.split(" ", X).
+ss=[X|Y], dice(D) :- string(X) | dice=list.append(D, [string.int_of_str(X)]), ss=Y.
+
+//nを読み込む
+ss=[] :- r2=readline(s2).
+r2(done), s2(X) :- n(string.int_of_str(X)), input_ladders.
+
+//nの数だけプレイヤーを生成
+//ただしnの値はあとで使うので一時的にnnを作っている
+n(N) :- uniq(N) | nn(N).
+nn(0) :- .
+nn(N) :- int(N) | nn(N-1), players(N, 0).
+
+//ladderを読み込む
+input_ladders :- r3=readline(s3).
+r3(done), s3(X) :- ss3=string.split(" ", X).
+ss3=[X,Y] :- string(X), string(Y) | ss3=[string.int_of_str(X), string.int_of_str(Y)].
+ss3=[0,0] :- input_events.
+ss3=[X,Y] :- X=\=0, Y=\=0 | ladder(X, Y), input_ladders.
+
+//eを読み込む
+input_events :- r4=readline(s4).
+r4(done), s4(X) :- s4(string.int_of_str(X)).
+s4(0) :- start.
+s4(X) :- X =\= 0 | event(X), input_events.
+
+//シミュレーション開始
+start :- p(1).
+
+//パスかどうかチェック
+pass(P1), p(P2) :- P1=P2 | p(P2), next.
+
+//サイコロの目に従って進む
+p(P1), dice=[D|Z], players(P2, Q) :- P1=P2, D+Q > 100 | p(P1), dice=[D|Z], players(P2,Q), next.
+p(P1), dice=[D|Z], players(P2, Q) :- P1=P2, D+Q = 100 | ans(P1), dice=Z.
+p(P1), dice=[D|Z], players(P2, Q) :- P1=P2, D+Q < 100 | p(P1), dice=Z, players(P2, D+Q), next.
+
+//ladderのチェック
+p(P1), players(P2, Q), ladder(From, To) :- P1=P2, Q=From, int(To) | p(P1), players(P2, To), ladder(From, To), next.
+
+//次のプレイヤーに移動
+next, p(P), n(N) :- int(N) | p((P+1) mod N), n(N).
+
+//イベントのチェック
+//TODO nonext?
+p(P1), players(P2, Q), event(E) :- P1=P2, Q= E | nonext.
+p(P1), players(P2, Q), event(E) :- P1=P2, Q=-E | pass(P1), players(P2,Q),event(E).
