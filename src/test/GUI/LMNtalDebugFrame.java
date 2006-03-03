@@ -1,7 +1,3 @@
-/*
- * 作成日: 2006/01/25
- *
- */
 package test.GUI;
 
 import java.awt.*;
@@ -49,7 +45,7 @@ public class LMNtalDebugFrame extends JFrame {
 	 */
 	private JTextPane createJTextArea() {
 		final JTextPane jt=new JTextPane() {
-			final int SIZE = 16;
+			final int SIZE = 18;
 			public void paint(Graphics g) {
 				super.paint(g);
 				
@@ -57,7 +53,7 @@ public class LMNtalDebugFrame extends JFrame {
 				g.setColor(Color.red);
 				Iterator iter = Debug.breakPointIterator();
 				while (iter.hasNext()) {
-					g.fillRect(0, SIZE*(((Rule)iter.next()).lineno-1)+8, SIZE-8, SIZE-2);
+					g.fillRect(0, SIZE*(((Rule)iter.next()).lineno-1)+9, SIZE-8, SIZE-2);
 				}
 				
 				// 現在停止中のルールの表示
@@ -65,10 +61,10 @@ public class LMNtalDebugFrame extends JFrame {
 				g.setFont(new Font("Monospace", Font.PLAIN, 12));
 				int lineno = Debug.getCurrentRuleLineno();
 				if (lineno > 0) {
-					String arrow = ">";
-					if (Debug.getTestType() == Debug.ATOM) arrow = "->";
-					else if (Debug.getTestType() == Debug.MEMBRANE) arrow = "=>";
-					g.drawString(arrow, 0, SIZE*(lineno-1)+19);
+					g.setColor(Color.blue);
+					g.setXORMode(Color.black);
+					g.fillRect(SIZE-8, SIZE*(lineno-1)+9, 600, SIZE-2);
+					g.setPaintMode();
 				}
 			}
 		};
