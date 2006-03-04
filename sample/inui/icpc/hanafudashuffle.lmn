@@ -12,7 +12,7 @@
  */
 
 //publicのリストモジュールが使えないとき
-/*{
+{
 module(list).
 H=list.split(List,  X, Tail) :- X=0    | H=[], Tail=List.
 H=list.split([   ], X, Tail) :- int(X) | H=[], Tail=[].
@@ -20,25 +20,22 @@ H=list.split([Y|Z], X, Tail) :- X>0    | H=[Y|list.split(Z,X-1,Tail)].
 
 H=list.append([], B) :- H=B.
 H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
-}.*/
+}.
 
 //データ入力＆データ生成
 io.use.
 
 ready.
-ready :- cards=[], order=[], r=readline(s).
-s(X) :- ss=string.split(" ", X).
+ready :- cards=[], order=[], r1=readline(s).
+r1(done), s(X) :- ss=string.split(" ", X).
 ss=[N,R] :- string(N), string(R) | n=string.int_of_str(N), r=string.int_of_str(R).
 n(N), cards(X) :- N>0 | cards=list.append(X,[N]), n(N-1).
 
-r(R) :- R > 0 | r=readline(s2), r(R-1).
-s2(X) :- ss2=string.split(" ", X).
+r(R) :- R > 0 | r2=readline(s2), r(R-1).
+r2(done), s2(X) :- ss2=string.split(" ", X).
 ss2=[P,C], order(X) :- string(P), string(C) | order=list.append(X, [shuffle(string.int_of_str(P), string.int_of_str(C))]).
 
 //手順に従ってシャッフル
 order=[shuffle(P,C)|ZZ], cards=[X|Z] :- int(P) | head=list.split([X|Z], P-1, tail), order=[shuffle(C)|ZZ].
 order=[shuffle(C)|ZZ], tail(X) :- int(C) | head2=list.split(X, C, tail2), order(ZZ).
 head(X), tail2(Y), head2(Z) :- cards=list.append(Z,list.append(X,Y)).
-
-//ごみを削除
-r(done) :- .
