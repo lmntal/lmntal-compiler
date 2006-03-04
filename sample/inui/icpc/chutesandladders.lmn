@@ -11,6 +11,7 @@
  *
  * History
  * 2006.03.03 イベントの処理がまだ出来てない
+ * 2006.03.04 最初の問題セットは解けるようになった
  */
 
 io.use.
@@ -28,9 +29,9 @@ r2(done), s2(X) :- n(string.int_of_str(X)), input_ladders.
 
 //nの数だけプレイヤーを生成
 //ただしnの値はあとで使うので一時的にnnを作っている
-n(N) :- uniq(N) | nn(N).
+n(N) :- N>0, uniq(N) | n(N), nn(N).
 nn(0) :- .
-nn(N) :- int(N) | nn(N-1), players(N, 0).
+nn(N) :- int(N) | nn(N-1), player(N-1, 0).
 
 //ladderを読み込む
 input_ladders :- r3=readline(s3).
@@ -46,23 +47,23 @@ s4(0) :- start.
 s4(X) :- X =\= 0 | event(X), input_events.
 
 //シミュレーション開始
-start :- p(1).
+start :- p(0), go.
 
 //パスかどうかチェック
-pass(P1), p(P2) :- P1=P2 | p(P2), next.
+pass(P1), p(P2), n(N) :- P1=P2, int(N) | p((P2+1) mod N), n(N), go.
 
 //サイコロの目に従って進む
-p(P1), dice=[D|Z], players(P2, Q) :- P1=P2, D+Q > 100 | p(P1), dice=[D|Z], players(P2,Q), next.
-p(P1), dice=[D|Z], players(P2, Q) :- P1=P2, D+Q = 100 | ans(P1), dice=Z.
-p(P1), dice=[D|Z], players(P2, Q) :- P1=P2, D+Q < 100 | p(P1), dice=Z, players(P2, D+Q), next.
+go, p(P1), dice=[D|Z], player(P2, Q) :- P1=P2, D+Q > 100 | p(P1), dice=[D|Z], player(P2,Q), next.
+go, p(P1), dice=[D|Z], player(P2, Q) :- P1=P2, D+Q = 100 | ans(P1+1), dice=Z.
+go, p(P1), dice=[D|Z], player(P2, Q) :- P1=P2, D+Q < 100 | p(P1), dice=Z, player(P2, D+Q), check_ladder.
 
 //ladderのチェック
-p(P1), players(P2, Q), ladder(From, To) :- P1=P2, Q=From, int(To) | p(P1), players(P2, To), ladder(From, To), next.
-
-//次のプレイヤーに移動
-next, p(P), n(N) :- int(N) | p((P+1) mod N), n(N).
+check_ladder, p(P1), player(P2, Q), ladder(From, To) :- P1=P2, Q = From, int(To) | p(P1), player(P2, To), ladder(From, To), next.
+check_ladder, p(P1), player(P2, Q), ladder(From, To) :- P1=P2, Q=\=From, int(To) | p(P1), player(P2, Q) , ladder(From, To), next.
 
 //イベントのチェック
-//TODO nonext?
-p(P1), players(P2, Q), event(E) :- P1=P2, Q= E | nonext.
-p(P1), players(P2, Q), event(E) :- P1=P2, Q=-E | pass(P1), players(P2,Q),event(E).
+next, p(P1), player(P2, Q), event(E) :- P1=P2, Q =  E | p(P1), player(P2, Q), event(E), go.
+next, p(P1), player(P2, Q), event(E), n(N) :- P1=P2, Q = -E, int(N) | p((P1+1) mod N), player(P2, Q), event(E), pass(P1), n(N), go.
+
+//次のプレイヤーに移動
+next, p(P), n(N) :- int(N) | p((P+1) mod N), n(N), go.
