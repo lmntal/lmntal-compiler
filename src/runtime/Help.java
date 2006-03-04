@@ -51,6 +51,8 @@ class Help {
 			+"                    Graphic LMNtal mode.\n"
 			+"    --help\n"
 			+"                    Show usage (this).\n"
+			+"    --if\n"
+			+"                    Interpret if-statements.\n"
 			+"    --immediate\n"
 			+"                    Use a single newline (rather than two newlines)\n"
 			+"                    to start execution in the REPL mode\n"
@@ -86,6 +88,8 @@ class Help {
 			+"                    Start LMNtalDaemon\n"
 			+"    --showproxy\n"
 			+"                    Show proxy atoms\n"
+			+"    --hideruleset\n"
+			+"                    Hide ruleset\n"
 			+"    --hiderule\n"
 			+"                    Hide rule names\n"
 			+"    --show-converted_rules\n"
@@ -96,6 +100,8 @@ class Help {
 			+"                    use <dir> as temporary directory\n"
 			+"    --use-source-library\n"
 			+"                    Use source library in lmntal_lib/src.\n"
+			+"    --debug\n"
+			+"                    debug mode.\n"
 		);
 	}
 }
