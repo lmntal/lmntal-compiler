@@ -137,7 +137,7 @@ class LMNtalXML {
 	private Atom walkThrough() {
 		Node root = doc.getDocumentElement();
 		traverse(root, mem);
-		return mem.newAtom(new Functor("roor", 1));
+		return mem.newAtom(new Functor("root", 1));
 	}
 	
 	/**
