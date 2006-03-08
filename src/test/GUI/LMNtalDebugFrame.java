@@ -26,6 +26,8 @@ public class LMNtalDebugFrame extends JFrame {
 	/** 行番号を表示するテキストエリア */
 	private JTextPane linenoArea;
 	
+	private boolean showProfile = false;
+	
 	/**
 	 * コンストラクタです
 	 */
@@ -33,7 +35,8 @@ public class LMNtalDebugFrame extends JFrame {
 		this.lmntalFrame = lmntalFrame;
 		
 		lmntalFrame.setSize(600, 400);
-		
+		lmntalFrame.getContentPane().remove(1);
+			//nextボタンがあるのでGo aheadボタンを削除
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		initComponents();
 		setSize(600, 600);
@@ -61,13 +64,27 @@ public class LMNtalDebugFrame extends JFrame {
 				
 				// 現在停止中のルールの表示
 				g.setColor(Color.blue);
-				//g.setFont(new Font("Monospace", Font.PLAIN, SIZE));
 				int lineno = Debug.getCurrentRuleLineno();
 				if (lineno > 0) {
 					g.setColor(Color.blue);
 					g.setXORMode(Color.black);
-					g.fillRect(SIZE-4, SIZE*(lineno-1)+9, 600, SIZE-2);
+					g.fillRect(SIZE-4, SIZE*(lineno-1)+9, getWidth(), SIZE-2);
 					g.setPaintMode();
+				}
+				
+				if (Env.profile && showProfile) {
+					g.setColor(Color.blue);
+					//g.setFont(new Font("Monospace", Font.PLAIN, SIZE));
+					g.setFont(getFont());
+					Iterator rules = Debug.ruleIterator();
+					if (rules != null) {
+						while (rules.hasNext()) {
+							Rule r = (Rule)rules.next();
+							double time = (Env.majorVersion == 1 && Env.minorVersion > 4) ? r.time / 1000000 : r.time;
+							String s = r.succeed + "/" + r.apply+ "(" + time + "msec)";
+							g.drawString(s, getWidth()-80, SIZE*r.lineno+4);
+						}
+					}
 				}
 			}
 		};
@@ -91,7 +108,6 @@ public class LMNtalDebugFrame extends JFrame {
 		});
 		jt.setContentType("text/html");
 		jt.setEditable(false);
-		jt.setFont(new Font("Monospaced", Font.PLAIN, SIZE));
 		return jt;
 	}
 	
@@ -102,13 +118,15 @@ public class LMNtalDebugFrame extends JFrame {
 		setTitle("It's LMNtal Debugger");
 		getContentPane().setLayout(new BorderLayout());
 		
-		//ソースビュー
 		final JPanel p = new JPanel(new BorderLayout());
+		
 		linenoArea = new JTextPane();
+		linenoArea.setContentType("text/html");
 		p.add("West", linenoArea);
+
+		//ソースビュー
 		jt = createJTextArea();
 		p.add("Center", jt);
-		linenoArea.setContentType("text/html");
 
 		JScrollPane jsp = new JScrollPane(p);
 		getContentPane().add(jsp, BorderLayout.CENTER);
@@ -128,30 +146,50 @@ public class LMNtalDebugFrame extends JFrame {
 		continueButton.setToolTipText("apply rules until a break point");
 		continueButton.addActionListener(new ContinueButtonActionListener(lmntalFrame));
 		toolBar.add(continueButton);
-		JCheckBox linenoCheckBox = new JCheckBox("LineNumber");
-		linenoCheckBox.setSelected(true);
-		linenoCheckBox.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) p.add("West", linenoArea);
-				else p.remove(linenoArea);
-				getContentPane().validate();
-			}
-		});
-		toolBar.add(linenoCheckBox);
 		
-		JCheckBox demoCheckBox = new JCheckBox("Demo");
-		demoCheckBox.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					Env.atomSize = 40;
-					Env.fDEMO = true;
-				} else {p.remove(linenoArea);
+		//行番号チェックボックス
+		{
+			JCheckBox linenoCheckBox = new JCheckBox("LineNumber");
+
+			linenoCheckBox.setSelected(true);
+			linenoCheckBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) p.add("West", linenoArea);
+					else p.remove(linenoArea);
+					getContentPane().validate();
+				}
+			});
+			toolBar.add(linenoCheckBox);
+		}
+		
+		//デモオプション切り替えチェックボックス
+		{
+			JCheckBox checkBox = new JCheckBox("Demo");
+			checkBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) {
+						Env.atomSize = 40;//TODO どこかに定数を用意する
+						Env.fDEMO = true;
+					} else {p.remove(linenoArea);
 					Env.atomSize = 16;
 					Env.fDEMO = false;
+					}
 				}
-			}
-		});
-		toolBar.add(demoCheckBox);
+			});
+			toolBar.add(checkBox);
+		}
+		
+		//プロファイルの表示オプションチェックボックス
+		{
+			JCheckBox checkBox = new JCheckBox("ShowProfile");
+			checkBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					showProfile = (e.getStateChange() == ItemEvent.SELECTED);
+					jt.repaint();
+				}
+			});
+			toolBar.add(checkBox);
+		}
 		
 		getContentPane().add("North", toolBar);
 	}

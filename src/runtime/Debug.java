@@ -208,4 +208,12 @@ public class Debug {
 	public static int getTestType() {
 		return testType;
 	}
+	
+	/**
+	 * ルールのイテレータを返します
+	 */
+	public static Iterator ruleIterator() {
+		if (rules == null) return null;
+		return rules.iterator();
+	}
 }
