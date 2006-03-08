@@ -1,10 +1,23 @@
+//¥¯¥é¥¹ÄêµÁ
 {
-class(onepb).
+class(onepb).//¥¯¥é¥¹Ì¾Àë¸À
 
-H=new(onepb) :- H={empty}. //ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-put(S), H={empty} :- H={contains(S)}.
-//H=get(), B={contains(S)} :- H=S, B={empty}.
+buf={empty}.//¥Õ¥£¡¼¥ë¥É
+
+//¥á¥½¥Ã¥ÉÄêµÁ
+put(S), buf={empty} :- buf={contains(S)}.
+get(), buf={contains(S)} :- ret(S), buf={empty}.
 }.
 
-buf1=new(onepb). buf2=new(onepb).
-buf1#put(1). buf2#put(4).
+buf1=new(onepb).
+buf2=new(onepb).
+
+buf1#put(1).
+buf1#put(2).
+buf2#put(3).
+buf2#put(4).
+
+ret1=buf1#get().
+ret2=buf1#get().
+ret3=buf2#get().
+ret4=buf2#get().
