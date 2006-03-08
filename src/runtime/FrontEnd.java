@@ -13,9 +13,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -285,6 +287,10 @@ public class FrontEnd {
 							Env.ndMode = Env.ND_MODE_ND_ANSCESTOR;
 						} else if (args[i].equals("--nondeterministic3")) {
 							Env.ndMode = Env.ND_MODE_ND_NOTHING;
+						} else if(args[i].equals("--object")) {//2006.3.8 by inui
+							/// --object
+							/// enable object (class declaration).
+							Env.object = true;
 						} else if(args[i].equals("--optimize-grouping")) {
 							/// --optimize-grouping
 							/// Group the head instructions. (EXPERIMENTAL)
@@ -566,6 +572,87 @@ public class FrontEnd {
 	}
 	
 	/**
+	 * 与えられたソース中のclass定義を通常のLMNtalプログラムに変換する
+	 * @param src Reader 型で表されたソース
+	 * @return 変換後のソース
+	 */
+	//2006.3.8 by inui
+	private static Reader convertObjectToPureLMNtal(Reader src) {
+		StringBuffer buf = new StringBuffer();
+		StringBuffer classMem = new StringBuffer();
+		BufferedReader br = new BufferedReader(src);
+		String s;
+		HashMap instances = new HashMap();
+		int state = 0;
+		
+		try {
+			while ((s = br.readLine()) != null) {
+				switch (state) {
+				case 0:
+					if (s.equals("{")) {
+						state = 1;
+						break;
+					}
+					Matcher m = Pattern.compile("(.*)\\=new\\((.*)\\).*").matcher(s);
+					if (m.matches()) {
+						instances.put(m.group(1), classMem.toString());
+						//System.out.println(m.group(1)+" -> "+m.group(2));
+						break;
+					}
+					
+					m = Pattern.compile("(.*)\\=(.*)\\#(.*)").matcher(s);
+					if (m.matches()) {
+						String s2 = (String)instances.get(m.group(2));
+						instances.put(m.group(2), s2+m.group(1)+"="+m.group(3)+"\n");
+						//System.out.println(m.group(1)+","+m.group(2));
+						break;
+					}
+					
+					m = Pattern.compile("(.*)\\#(.*)").matcher(s);
+					if (m.matches()) {
+						String s2 = (String)instances.get(m.group(1));
+						instances.put(m.group(1), s2+m.group(2)+"\n");
+						//System.out.println(m.group(1)+","+m.group(2));
+						break;
+					}
+					
+					buf.append(s+"\n");
+					break;
+				case 1:
+					Matcher m2 = Pattern.compile("class\\((.*)\\).*").matcher(s);
+					if (m2.matches()) {
+						state = 2;
+						classMem.append("{\n");
+					} else {
+						state = 0;
+					}
+					break;
+				case 2:
+					if (s.equals("}.")) {
+						state = 0;
+					} else if (!s.equals("")) {
+						classMem.append(s+"\n");
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Set sets = instances.keySet();
+		Iterator iter = sets.iterator();
+		while (iter.hasNext()) {
+			String s2 = (String)instances.get(iter.next());
+			buf.append(s2+"}.\n");
+		}
+		System.out.println("=====\n"+buf.toString()+"======\n");
+		return new StringReader(buf.toString());
+	}
+	
+	/**
 	 * 与えられたソースについて、一連の実行を行う。
 	 * @param src Reader 型で表されたソース
 	 * @param unitName String ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
@@ -573,6 +660,7 @@ public class FrontEnd {
 	public static void run(Reader src, String unitName) {
 		if(Env.preProcess0) src = preProcess0(src);
 		if (Env.fIf) src = convertIf2Guard(src); //by inui
+		if (Env.object) src = convertObjectToPureLMNtal(src); //2006.3.8 by inui
 	
 		try {
 			compile.structure.Membrane m;

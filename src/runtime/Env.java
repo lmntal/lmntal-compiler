@@ -223,6 +223,11 @@ public final class Env {
 	 */
 	public static boolean fIf = false;//by inui
 	
+	/**
+	 * オブジェクト(class宣言)を有効にするかどうか
+	 */
+	public static boolean object = false;//2006.3.8 by inui
+	
 	public static boolean preProcess0 = false;
 	
 	/** アトム名の表示する長さ */
