@@ -44,8 +44,9 @@ public class LMNtalDebugFrame extends JFrame {
 	 * デバッグ時ソース表示用のテキストエリアを生成する
 	 */
 	private JTextPane createJTextArea() {
+		final int SIZE = 18;
+		
 		final JTextPane jt=new JTextPane() {
-			final int SIZE = 18;
 			public void paint(Graphics g) {
 				super.paint(g);
 				
@@ -53,17 +54,19 @@ public class LMNtalDebugFrame extends JFrame {
 				g.setColor(Color.red);
 				Iterator iter = Debug.breakPointIterator();
 				while (iter.hasNext()) {
-					g.fillRect(0, SIZE*(((Rule)iter.next()).lineno-1)+9, SIZE-8, SIZE-2);
+					//g.fillRect(0, SIZE*(((Rule)iter.next()).lineno-1)+9, SIZE-8, SIZE-2);
+					g.fillOval(0, SIZE*(((Rule)iter.next()).lineno-1)+9, SIZE-2, SIZE-2);
+					
 				}
 				
 				// 現在停止中のルールの表示
 				g.setColor(Color.blue);
-				g.setFont(new Font("Monospace", Font.PLAIN, 12));
+				//g.setFont(new Font("Monospace", Font.PLAIN, SIZE));
 				int lineno = Debug.getCurrentRuleLineno();
 				if (lineno > 0) {
 					g.setColor(Color.blue);
 					g.setXORMode(Color.black);
-					g.fillRect(SIZE-8, SIZE*(lineno-1)+9, 600, SIZE-2);
+					g.fillRect(SIZE-4, SIZE*(lineno-1)+9, 600, SIZE-2);
 					g.setPaintMode();
 				}
 			}
@@ -79,7 +82,7 @@ public class LMNtalDebugFrame extends JFrame {
 							lineno++;
 					}
 					Debug.toggleBreakPointAt(lineno);
-					System.out.println("lineno"+lineno);
+					//System.out.println("lineno"+lineno);
 				} catch (BadLocationException e1) {
 					e1.printStackTrace();
 				}
@@ -88,7 +91,7 @@ public class LMNtalDebugFrame extends JFrame {
 		});
 		jt.setContentType("text/html");
 		jt.setEditable(false);
-		//jt.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		jt.setFont(new Font("Monospaced", Font.PLAIN, SIZE));
 		return jt;
 	}
 	
@@ -135,6 +138,21 @@ public class LMNtalDebugFrame extends JFrame {
 			}
 		});
 		toolBar.add(linenoCheckBox);
+		
+		JCheckBox demoCheckBox = new JCheckBox("Demo");
+		demoCheckBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					Env.atomSize = 40;
+					Env.fDEMO = true;
+				} else {p.remove(linenoArea);
+					Env.atomSize = 16;
+					Env.fDEMO = false;
+				}
+			}
+		});
+		toolBar.add(demoCheckBox);
+		
 		getContentPane().add("North", toolBar);
 	}
 	

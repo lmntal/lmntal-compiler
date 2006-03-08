@@ -6,6 +6,8 @@ package runtime;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import test.GUI.*;
 
@@ -90,13 +92,19 @@ public class Debug {
 			buf.append("<style>pre {font-size:10px; font-family:monospace;}</style>\n");
 			buf.append("<pre>\n");
 			while ((s = br.readLine()) != null) {
-				buf.append("  "+s.replace(":-", "<font color=red>:-</font>")+"\n");
+				Matcher m = Pattern.compile("(//|%)(.*)").matcher(s);
+				if (m.matches()) {
+					s = "<font color=green>"+m.group(1)+m.group(2)+"</font>";
+				} else {
+					s = s.replace(":-", "<font color=red>:-</font>");
+				}
+				buf.append("  "+s+"\n");
 				lineno++;
 			}
 			buf.append("</pre>\n");
 			s = buf.toString();
 			s = s.replaceAll("/\\*", "<font color=green>/*");
-			s = s.replaceAll("\\*/", "</font>*/");
+			s = s.replaceAll("\\*/", "*/</font>");
 			Env.guiDebug.setSourceText(s, lineno);
 			Env.gui.repaint();
 		} catch (IOException e) {
@@ -134,7 +142,7 @@ public class Debug {
 			Rule rule = (Rule)itr.next();
 			if (rule.lineno == lineno) {
 				breakPoints.add(rule);
-				System.out.println("Breakpoint "+breakPoints.size()+" at "+rule.name+": file "+unitName+", line "+lineno);
+				//System.out.println("Breakpoint "+breakPoints.size()+" at "+rule.name+": file "+unitName+", line "+lineno);
 			}
 		}
 	}

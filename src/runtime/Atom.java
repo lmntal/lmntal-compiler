@@ -276,6 +276,8 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		FontMetrics fm = g.getFontMetrics();
 		if(Env.fDEMO) {
 			g.setFont(new Font(null, Font.PLAIN, 30));
+		} else {//2006.3.8 by inui
+			g.setFont(new Font(null, Font.PLAIN, 12));
 		}
 		int w = fm.stringWidth(label);
 		int h = fm.getHeight();
