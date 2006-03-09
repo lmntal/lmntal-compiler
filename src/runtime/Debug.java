@@ -89,7 +89,7 @@ public class Debug {
 			StringBuffer buf = new StringBuffer();
 			String s = null;
 			int lineno = 0;
-			buf.append("<style>pre {font-size:10px; font-family:monospace;}</style>\n");
+			buf.append("<style>pre {font-size:"+(Env.fDEMO ? 14 : 10)+"px; font-family:monospace;}</style>\n");
 			buf.append("<pre>\n");
 			while ((s = br.readLine()) != null) {
 				Matcher m = Pattern.compile("(//|%)(.*)").matcher(s);
@@ -215,5 +215,9 @@ public class Debug {
 	public static Iterator ruleIterator() {
 		if (rules == null) return null;
 		return rules.iterator();
+	}
+	
+	public static String getUnitName() {
+		return unitName;
 	}
 }

@@ -13,19 +13,17 @@ import runtime.*;
  * @author inui
  * デバッグ時に使用するフレーム
  */
-public class LMNtalDebugFrame extends JFrame {
+public class LMNtalDebugFrame extends JFrame {	
 	/** LMNtalFrame */
 	private LMNtalFrame lmntalFrame;
 	
 	/** ソースを表示する */
 	private JTextPane jt;
 	
-	/** コンソール */
-	private JTextArea console;
-	
 	/** 行番号を表示するテキストエリア */
 	private JTextPane linenoArea;
 	
+	/** プロファイル情報を表示するかどうか */
 	private boolean showProfile = false;
 	
 	/**
@@ -36,7 +34,7 @@ public class LMNtalDebugFrame extends JFrame {
 		
 		lmntalFrame.setSize(600, 400);
 		lmntalFrame.getContentPane().remove(1);
-			//nextボタンがあるのでGo aheadボタンを削除
+			//通常時と動作が変わるのでGo aheadボタンを削除
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		initComponents();
 		setSize(600, 600);
@@ -47,19 +45,24 @@ public class LMNtalDebugFrame extends JFrame {
 	 * デバッグ時ソース表示用のテキストエリアを生成する
 	 */
 	private JTextPane createJTextArea() {
-		final int SIZE = 18;
+		//final int SIZE = (Env.fDEMO  ? 30 : 18);
 		
 		final JTextPane jt=new JTextPane() {
 			public void paint(Graphics g) {
 				super.paint(g);
+				
+				final int SIZE = (Env.fDEMO  ? 25 : 18);
 				
 				// ブレークポイントの表示
 				g.setColor(Color.red);
 				Iterator iter = Debug.breakPointIterator();
 				while (iter.hasNext()) {
 					//g.fillRect(0, SIZE*(((Rule)iter.next()).lineno-1)+9, SIZE-8, SIZE-2);
-					g.fillOval(0, SIZE*(((Rule)iter.next()).lineno-1)+9, SIZE-2, SIZE-2);
-					
+					final int x = 0;
+					final int y = SIZE*(((Rule)iter.next()).lineno-1)+9;
+					final int w = SIZE-(Env.fDEMO ? 5 : 2);
+					final int h = SIZE-(Env.fDEMO ? 5 : 2);
+					g.fillOval(x, y, w, h);
 				}
 				
 				// 現在停止中のルールの表示
@@ -75,14 +78,15 @@ public class LMNtalDebugFrame extends JFrame {
 				if (Env.profile && showProfile) {
 					g.setColor(Color.blue);
 					//g.setFont(new Font("Monospace", Font.PLAIN, SIZE));
-					g.setFont(getFont());
+					Font font = new Font(getFont().getName(), Font.PLAIN, Env.fDEMO ? 16 : 12);
+					g.setFont(font);
 					Iterator rules = Debug.ruleIterator();
 					if (rules != null) {
 						while (rules.hasNext()) {
 							Rule r = (Rule)rules.next();
 							double time = (Env.majorVersion == 1 && Env.minorVersion > 4) ? r.time / 1000000 : r.time;
-							String s = r.succeed + "/" + r.apply+ "(" + time + "msec)";
-							g.drawString(s, getWidth()-80, SIZE*r.lineno+4);
+							String s = r.succeed + "/" + r.apply+ "(" + time + "ms)";
+							g.drawString(s, getWidth()-(Env.fDEMO ? 110 : 70), SIZE*r.lineno+(Env.fDEMO ? 2 : 4));
 						}
 					}
 				}
@@ -115,11 +119,12 @@ public class LMNtalDebugFrame extends JFrame {
 	 * コンポーネントを初期化します。
 	 */
 	protected void initComponents() {
-		setTitle("It's LMNtal Debugger");
+		setTitle("It's LMNtal Debugger - "+Debug.getUnitName());
 		getContentPane().setLayout(new BorderLayout());
 		
 		final JPanel p = new JPanel(new BorderLayout());
 		
+		//行番号表示領域
 		linenoArea = new JTextPane();
 		linenoArea.setContentType("text/html");
 		p.add("West", linenoArea);
@@ -130,11 +135,6 @@ public class LMNtalDebugFrame extends JFrame {
 
 		JScrollPane jsp = new JScrollPane(p);
 		getContentPane().add(jsp, BorderLayout.CENTER);
-		
-		//コンソール
-//		console = new JTextArea(5, 10);
-//		jsp = new JScrollPane(console);
-//		getContentPane().add("South", jsp);
 		
 		// ツールバーの生成
 		JToolBar toolBar = new JToolBar();
@@ -170,10 +170,12 @@ public class LMNtalDebugFrame extends JFrame {
 					if (e.getStateChange() == ItemEvent.SELECTED) {
 						Env.atomSize = 40;//TODO どこかに定数を用意する
 						Env.fDEMO = true;
-					} else {p.remove(linenoArea);
-					Env.atomSize = 16;
-					Env.fDEMO = false;
+					} else {
+						Env.atomSize = 16;
+						Env.fDEMO = false;
 					}
+					changeFontSize(jt);
+					changeFontSize(linenoArea);
 				}
 			});
 			toolBar.add(checkBox);
@@ -194,6 +196,13 @@ public class LMNtalDebugFrame extends JFrame {
 		getContentPane().add("North", toolBar);
 	}
 	
+	private void changeFontSize(JTextPane jt) {
+		String s = jt.getText();
+		if (Env.fDEMO) s = s.replaceFirst("10px", "14px");
+		else s = s.replaceFirst("14px", "10px");
+		jt.setText(s);
+	}
+	
 	/**
 	 * ソースエリアにテキストをセットします
 	 * @param s ソーステキスト
@@ -206,12 +215,8 @@ public class LMNtalDebugFrame extends JFrame {
 		buf.append("<pre>\n");
 		for (int i = 1; i <= lineno; i++)
 			buf.append(i+"\n");
-		buf.append("</pre>");
+		buf.append("</pre>\n");
 		linenoArea.setText(buf.toString());			
-	}
-	
-	public JTextArea getConsole() {
-		return console;
 	}
 
 	/** Nextボタンを押したときのAction */
