@@ -5,5 +5,5 @@
 io.use.
 
 o=done.
-o=done:-i=readline(data).
-i=done, data(D):-o=print(D).
+o=done:-i=io.readline(data).
+i=done, data(D):-o=io.print(D).

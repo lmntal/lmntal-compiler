@@ -173,11 +173,11 @@ H=io.reader(Process) :- unary(Process) | H=[:/*inline*/
  * ReadString : One line string
  * Result     : "done" when succeeded. "nil" when EOF.
  */
-H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
-	H=readline(STDIN, Result, 0), io.stdin(STDIN).
+H=io.readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
+	H=io.readline(STDIN, Result, 0), io.stdin(STDIN).
 
 /**
- * readline(-Atom,-Res):
+ * io.readline(-Atom,-Res):
  *
  * reads one line from standard input, 
  * connnecting to Atom a unary atom whose name is the input string
@@ -186,9 +186,9 @@ H=readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader") |
  * To be used with io.use.
  */
 Readline @@
-H=readline(Object, ReadString) :- H=readline(Object, ReadString, 0).
+H=io.readline(Object, ReadString) :- H=io.readline(Object, ReadString, 0).
 Readline @@
-H=readline(Object, ReadString, ASync) :- int(ASync), class(Object, "java.io.BufferedReader") |
+H=io.readline(Object, ReadString, ASync) :- int(ASync), class(Object, "java.io.BufferedReader") |
 	H=[:/*inline*/
 		try {
 			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -204,26 +204,26 @@ H=readline(Object, ReadString, ASync) :- int(ASync), class(Object, "java.io.Buff
 				me.nthAtom(2).remove();
 				me.remove();
 			} else {
-				me.setName("readline");
+				mem.alterAtomFunctor(me, new Functor("readline", 4, "io"));
 			}
 		} catch(Exception e) {Env.e(e);}
 	:](Object, ReadString, ASync).
 
 
-H=print(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
-	H=print(STDOUT, String), io.stdout(STDOUT).
+H=io.print(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
+	H=io.print(STDOUT, String), io.stdout(STDOUT).
 
-H=print([String|Rest]), io.stdout(STDOUT) :- string(String), class(STDOUT, "java.io.PrintWriter") |
-	H=print(STDOUT, [String|Rest]), io.stdout(STDOUT).
+H=io.print([String|Rest]), io.stdout(STDOUT) :- string(String), class(STDOUT, "java.io.PrintWriter") |
+	H=io.print(STDOUT, [String|Rest]), io.stdout(STDOUT).
 
 /**
- * print(+Atom,-Res):
+ * io.print(+Atom,-Res):
  *
  * prints the name of the unary Atom (a string or a non-string atom)
  * into standard output, and connects done/1 to Res.
  * To be used witn io.use. 
  */
-H=print(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) |
+H=io.print(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) |
 	H=[:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -232,12 +232,13 @@ H=print(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) 
 				pw.println(me.nth(1));
 			}
 			mem.relink(done, 0, me, 2);
+			me.nthAtom(0).remove();
 			me.nthAtom(1).remove();
 			me.remove();
 		} catch(Exception e) {e.printStackTrace();}
 	:](Object, String).
 
-H=print(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter"), string(String) |
+H=io.print(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter"), string(String) |
 	H=print(Object, Rest), [:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -286,7 +287,7 @@ H=io.list_of_stdin_async, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STD
  */
 H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), [], done, 0).
 
-H=list_of_dev_s0(Obj, List, done, ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=[String|list_of_dev_s0(Obj, List, readline(Obj, String, ASync), ASync)].
+H=list_of_dev_s0(Obj, List, done, ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=[String|list_of_dev_s0(Obj, List, io.readline(Obj, String, ASync), ASync)].
 H=list_of_dev_s0(Obj, List, nil , ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=List.
 
 //io.toFile : String -> List of String -> unit
@@ -297,7 +298,7 @@ H=list_of_dev_s0(Obj, List, nil , ASync) :- int(ASync), class(Obj, "java.io.Buff
  * @example r=io.toFile(b, io.fromFile(a))
  */
 H=io.toFile(Filename, List) :- unary(Filename) | H=toFile_s0(io.fileWriter(Filename), List).
-H=toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=toFile_s0(print(Obj, CAR), CDR).
+H=toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=toFile_s0(io.print(Obj, CAR), CDR).
 H=toFile_s0(Obj, []) :- H=close(Obj).
 
 /**
@@ -305,7 +306,7 @@ H=toFile_s0(Obj, []) :- H=close(Obj).
  * 与えられた入力オブジェクトからの入力が一行ずつ逆順に並んだリストを生成します。
  */
 H=io.eager(In) :- H=io.eager(In, [], done).
-H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], readline(In, Res)).
+H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], io.readline(In, Res)).
 
 
 // Sample

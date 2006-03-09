@@ -26,7 +26,7 @@ $ java -cp bin runtime.FrontEnd sample/sat_read.lmn < data.cnf
 
 r=seq.run({
 	io.use.
-	h=readline(l1).
+	h=io.readline(l1).
 	co=1.
 }, [
 	{
@@ -37,7 +37,7 @@ r=seq.run({
 		// seq.run はルールを除去してしまうので io のルールを再び読み込む
 		// io.use は io.stdin を生成する。これは１こだけあるべきなのでここでは import としている。（ややこしい!）
 		io.import.
-		go_next :- h=readline(l1).
+		go_next :- h=io.readline(l1).
 		// 今のところ int_of_str は string モジュール内に定義されているので string.use する
 		co=N, l1(L) :- int(N)|l2=string.split([:\s:], L), co=N, c(N, {string.use. x(N) :- N<0, M=-1*N | notx(M). x(0):-.}).
 		co=CO, c(C, {$p,@q}), l2=[N|R] :- unary(N),int(CO),CO=C | l2=R, co=CO, c(C, {x(int_of_str(N)), $p,@q}).
