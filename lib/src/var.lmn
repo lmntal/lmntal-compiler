@@ -11,60 +11,35 @@ SYNOPSIS
 	
 	%% result is area(9).
 	
-	Able to bind some ground process to some variable identified by unary atom.
+	Able to bind some ground process to some variable identified by ground atom.
 	Able to unify 2 some variables.
 	Unable to rebind.
-
-INTERNAL
-
-	var.unify rules use Union-Find algorithm. (Just 2 rules)
 
 AUTHOR
 	Koji Hara
 
 HISTORY
-	2006/01/04(Wed)
+	2006/02/09(Thu)
 
 */
 
 {
 module(var).
 
-Module_Constructor_Var @@
-var.use :- var_mem({
-	// Union-Find
-	// unify(A, B) means node A is parent of node B.
-	Unify_Pre_Find_Root @@
-	unify(_UA, _UB), unify_pre(_UC, _UD) :- _UB=_UD | unify(_UA, _UB), unify_pre(_UC, _UA).
-	
-	Unify_Pre_Compress_Path @@
-	unify(_UA, _UB), unify(_UC, _UD) :- _UB=_UC | unify(_UA, _UB), unify(_UA, _UD).
-	
-	Unify_Bind @@
-	unify(_UA, _UB), bind(_UV, _GV) :- _UB=_UV | unify(_UA, _UB), bind(_UA, _GV).
-}).
-Unify_Pre_OK @@
-var_mem({unify_pre(_UC, _UD), $e, @e}/) :- 
-var_mem({unify(_UC, _UD), $e, @e}).
+VarDeclare @@
+H=var(_GName) :- H=v({name=_GName}).
 
-Var_New_Bind @@
-var.bind(_UVar0, _GValue), var_mem({$e, @e}) :- 
-                            var_mem({$e, @e, bind(_UVar0, _GValue)}).
+VarUnify @@
+{name=_GName0, $e0}, {name=_GName1, $e1} :- _GName0=_GName1 | {name=_GName0, $e0, $e1}.
 
-Var_New_Unify @@
-var.unify(_UVar0, _UVar1), var_mem({$e, @e}) :- _UVar0=_UVar1 |
-                           var_mem({$e, @e}).
+VarBind @@
+var.bind(_GName0, _GValue), {name=_GName1, $e} :- {name=_GName1, value=_GValue, $e}.
 
-Var_New_Unify @@
-var.unify(_UVar0, _UVar1), var_mem({$e, @e}) :- _UVar0\=_UVar1 |
-                           var_mem({$e, @e, unify_pre(_UVar0, _UVar1)}).
+VarBindEach @@
+H=v({name=_GName1, value=_GValue, $e}) :- H=_GValue, {name=_GName1, value=_GValue, $e}.
 
-Var_Unify @@
-var_mem({ unify(_UA, _UB), $e, @e }), H=var(_UC) :- _UB=_UC |
-var_mem({ unify(_UA, _UB), $e, @e }), H=var(_UA).
-
-Var_Bind @@
-var_mem({ bind(_UV, _GV), $e, @e }), H=var(_UA) :- _UA=_UV |
-var_mem({ bind(_UV, _GV), $e, @e }), H=_GV.
+VarUnify @@
+var.unify(_GName0, _GName1), {name=_GName2, $e0}, {name=_GName3, $e1} :- _GName0=_GName2, _GName1=_GName3 |
+{name=_GName3, $e0, $e1}.
 
 }.

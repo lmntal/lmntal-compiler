@@ -13,8 +13,6 @@ HISTORY
 
 */
 
-list.use_guard.
-
 %% Slim Abdennadher, Thom Fruehwirth, LMU, July 1998
 %% Finite (enumeration, list) domain solver over integers
 
@@ -135,6 +133,50 @@ Intersection2 @@ L3=intersection([H|T], L2) :- unary(H), custom_ii_not_member(H,
 //all_multiplication(L1,L2,L3) :-
 //	setof(Z, X^Y^(member(X,L1), member(Y,L2), Z is X * Y), L3).
 
+[:/*inline_define*/
+import util.Util;
+class CustomGuardImpl implements CustomGuard {
+	public boolean run(String guardID, Membrane mem, Object obj) {
+//		System.out.println("guardID "+guardID);
+		ArrayList ary = (ArrayList)obj;
+//		for(int i=0;i<ary.size();i++) {
+//			System.out.println(ary.get(i).getClass());
+//		}
+//		System.out.println("CustomGuardImpl "+ary);
+		
+		if(guardID.equals("is_list")) {
+			return Util.isList((Link)ary.get(0));
+		}
+		else if(guardID.equals("list_max")) {
+			Atom a = new Atom(null, new IntegerFunctor(0));
+			boolean b = Util.listMax((Link)ary.get(0), a);
+			ary.set(1, a);
+			return b;
+		}
+		else if(guardID.equals("list_min")) {
+			Atom a = new Atom(null, new IntegerFunctor(0));
+			boolean b = Util.listMin((Link)ary.get(0), a);
+			ary.set(1, a);
+			return b;
+		}
+		else if(guardID.equals("member")) {
+			return Util.listMember((Atom)ary.get(0), (Link)ary.get(1));
+		}
+		else if(guardID.equals("not_member")) {
+			return !Util.listMember((Atom)ary.get(0), (Link)ary.get(1));
+		}
+		else if(guardID.equals("test")) {
+//			boolean b = Util.listMin((Link)ary.get(0), a);
+			Atom aa = mem.newAtom(new IntegerFunctor(777));
+			Link link = (Link)ary.get(0);
+//			link.getAtom().remove();
+			mem.inheritLink(aa, 0, link);
+			return true;
+		}
+		return false;
+	}
+}
+:].
 
 /*
 %% EXAMPLE ==========================================================
@@ -165,12 +207,36 @@ w::[3,4,5,6,7].
 lt(x,y),lt(y,z),lt(z,w),lt(w,x).
 ==> y(lt(x)), y(fail), z(lt(y)), x(lt(w)), w(lt(z)), '::'(z,[4]),'::'(w,[5]), '::'(x,[6])
 
+x::[2,4,6,8].
+y::[1,3,5,7,9].
+z::[5,6,7,8,9].
+w::[1,2,3,4,5,6].
+lt(x,y),lt(y,z),lt(z,w).
+==> y(lt(x)), z(lt(y)), w(lt(z)), '::'(z,[5]), '::'(x,[2]), '::'(y,[3]), '::'(w,[6])
 
 %% end of handler listdom.pl =================================================
 %% ===========================================================================
 */
-x::[3,4,5,6,7].
-y::[3,4,5,6,7].
-z::[3,4,5,6,7].
-w::[3,4,5,6,7].
+
+x::[2,4,6,8].
+y::[1,3,5,7,9].
+z::[5,6,7,8,9].
+w::[1,2,3,4,5,6].
 lt(x,y),lt(y,z),lt(z,w).
+//==> y(lt(x)), z(lt(y)), w(lt(z)), '::'(z,[5]), '::'(x,[2]), '::'(y,[3]), '::'(w,[6])
+
+
+//argv = sys.usage("\n\nUsage : <This file> <Num variables>\n\n", sys.argv).
+argv=[_S] :- go(string.int_of_str(_S)).
+
+go(_I) :- l=genLt(genDom(genVar(_I), _I)).
+
+H=genVar(0) :- H=[].
+H=genVar(_I) :- N=_I-1 | H=[N|genVar(N)].
+
+H=genDom([], _I) :- H=[].
+R=genDom([_UH|T], _I) :- _UH::genVar(_I), R=[_UH|genDom(T, _I)].
+
+H=genLt([_U]) :- H=[_U].
+R=genLt([_UA, _UB|T]) :- lt(_UA, _UB), R=[_UA|genLt([_UB|T])].
+

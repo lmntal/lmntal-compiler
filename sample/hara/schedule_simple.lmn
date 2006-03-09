@@ -15,12 +15,13 @@ leq(X+N,Y) means: task X starts at least N time units before task Y
 
 // 最も早く終わらせたときの時間を決めて変数に束縛する
 Optimize @@
-{leq(_IN, var(_UV0)), dependCheck(_UV1, _IX), $e, @e}/ :- _UV0=_UV1 | {var.bind(_UV0, _IN), $e, @e}.
+{leq(_IN, v({name=_UV0, $e0})), dependCheck(_UV1, _IX), $e, @e}/ :- _UV0=_UV1 |
+{var.bind(_UV0, _IN), {name=_UV0, $e0}, $e, @e}.
 
 
 {
 	Redundant @@
-	leq(N,var(Y0)), leq(M,var(Y1)) :- M=<N, Y0=Y1 | leq(N,var(Y0)).
+	leq(N,v(Y0)), leq(M,v(Y1)), {+Y0, +Y1, $e} :- M=<N | leq(N,v(Y0)), {+Y0, $e}.
 	
 	// 変数の依存関係を調べる
 	PRE_1 @@ H=var_(_UV) :- uniq(_UV) | H=var_(_UV), dependCheck(_UV, 0).

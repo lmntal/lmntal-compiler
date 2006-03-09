@@ -11,7 +11,7 @@ import runtime.Env;
 import runtime.Functor;
 import runtime.IntegerFunctor;
 import runtime.Link;
-import runtime.Membrane;
+import runtime.StringFunctor;
 
 /**
  * @author mizuno
@@ -40,7 +40,7 @@ abstract public class Util {
 		boolean first=true;
 		while(it.hasNext()) {
 			Atom c = mem.newAtom(new Functor(".", 3));  // .(Value Next Parent)
-			Atom v = mem.newAtom(new Functor(it.next().toString(), 1)); // value(Value)
+			Atom v = mem.newAtom(new StringFunctor(it.next().toString())); // value(Value)
 			mem.newLink(c, 0, v, 0);
 			if(first) {
 				mem.inheritLink(c, 2, link);

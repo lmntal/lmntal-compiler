@@ -6,17 +6,17 @@ idempotence  @ X leq Y \ X leq Y <=> true.
 transitivity @ X leq Y , Y leq Z ==> X leq Z.
 */
 
-reflexivity @@
-leq(var(X0), var(X1)) :- X0=X1 | var.unify(X0, X1).
-//leq(X0, X1) :- X0=X1, uniq(X0) | leq(X0, X1), eq(X0, X1).
+rule={
+//reflexivity @@
+//leq(v(X0), v(X1)), {+X0, +X1, $e} :- {$e}.
 antisymmetry @@
-leq(var(X0), var(Y0)), leq(var(Y1), var(X1)) :- X0=X1, Y0=Y1 | var.unify(X0, Y0).
-//leq(X0, Y0), leq(Y1, X1) :- X0=X1, Y0=Y1 | eq(X0, Y0).
-//idempotence @@
-//leq(var(X0), var(Y0)), leq(var(X1), var(Y1)) :- X0=X1, Y0=Y1 | leq(var(X0), var(Y0)).
+leq(v(X0), v(Y0)), leq(v(Y1), v(X1)), {+X0, +X1, $e0}, {+Y0, +Y1, $e1} :- {$e0, $e1}.
 transitivity @@
-leq(var(X), var(Y0)), leq(var(Y1), var(Z)) :- Y0=Y1, uniq(X, Y0, Z) | leq(var(X), var(Y0)), leq(var(Y1), var(Z)), leq(var(X), var(Z)).
+leq(v({name=_UX, $e0}), v(Y0)), leq(v(Y1), v({name=_UZ, $e1})), {name=_UY, +Y0, +Y1, $e2} :- uniq(_UX, _UY, _UZ) |
+leq(v({name=_UX, +NX, $e0}), v(Y0)), leq(v(Y1), v({name=_UZ, +NZ, $e1})), {name=_UY, +Y0, +Y1, $e2}, leq(v(NX), v(NZ)).
+}.
 
+workspace={
 genleq(N) :- N>0, M=N-1 | leq(var(N), var(M)), genleq(M).
 
 var.use.
@@ -24,12 +24,22 @@ var.use.
 time(N) :- M=N-1 |
 	leq(var(0), var(M)), genleq(M).
 
-time(20).
+argv = sys.usage("\n\nUsage : <This file> <Num of leq>\n\n", sys.argv).
+argv=[_S] :- time(string.int_of_str(_S)).
+}.
+
+BeginCHR @@
+workspace={$e, @e}/, rule={@r} :- workspace={$e, @e, @r}.
+
+//leq(var(a), var(b)), leq(var(b), var(c)), leq(var(c), var(a)).
 
 /*
+$ bin/lmnc_cyg sample/hara/leq_time.lmn
+$ bin/lmnr_cyg leq_time.jar --args 10
 
 Result
 
-leq(a, b), eq(c, b), eq(c, a).
+var.use, genleq(0),
+  {name(2), name(7), name(8), name(0), name(5), name(4), name(6), name(1), name(9), name(3)}
 
 */

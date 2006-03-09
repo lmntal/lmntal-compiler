@@ -100,7 +100,15 @@ public final class Env {
 	
 	////////////////////////////////////////////////////////////////
 	
+	/**
+	 * プログラムに与える引数
+	 */
 	public static List argv = new ArrayList();
+	
+	/**
+	 * ソースファイル
+	 */
+	public static List srcs = new ArrayList();
 	
 	/**
 	 * 解釈実行
