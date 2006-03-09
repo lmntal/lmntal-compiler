@@ -105,5 +105,9 @@ H=sys.atomCount(Name, Arity) :- unary(Name), int(Arity) | H=[:/*inline*/
 	}
 	:](Name, Arity).
 
+R=sys.usage(_S, []) :- R=nil, io.use, r=print(_S).
+
+R=sys.usage(_S, [H|T]) :- R=[H|T].
+
 }.
 

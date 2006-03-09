@@ -85,10 +85,10 @@ public class FrontEnd {
 			REPL.processLine(Env.oneLiner);
 		} else {
 			// ソースありならソースを解釈実行、なしなら REPL。
-			if(Env.argv.isEmpty()) {
+			if(Env.srcs.isEmpty()) {
 				REPL.run();
 			} else {
-				run(Env.argv);
+				run(Env.srcs);
 				if(Env.fREMAIN) REPL.run();
 			}
 		}
@@ -103,6 +103,7 @@ public class FrontEnd {
 	 * @param args 引数
 	 */
 	public static void processOptions(String[] args) {
+		boolean isSrcs = true;
 		for(int i = 0; i < args.length;i++){
 			// 必ずlength>0, '-'ならオプション
 			// -> 引数を "" にすると長さ 0 になるのでチェックする。
@@ -407,7 +408,9 @@ public class FrontEnd {
 							// 暫定オプション
 							// スレッドルールの変換を行わない
 							Env.fThread = false;
-						}else {
+						} else if (args[i].equals("--args")) {
+							isSrcs = false;
+						} else {
 							System.err.println("Invalid option: " + args[i]);
 							System.exit(-1);
 						}
@@ -419,7 +422,11 @@ public class FrontEnd {
 					}
 				}
 			}else{ // '-'以外で始まるものは (実行ファイル名, argv[0], arg[1], ...) とみなす
-				Env.argv.add(args[i]);
+				if(isSrcs) {
+					Env.srcs.add(args[i]);
+				} else {
+					Env.argv.add(args[i]);
+				}
 			}
 		}
 		//オプションの正規化
