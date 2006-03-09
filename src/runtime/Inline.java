@@ -218,7 +218,9 @@ public class Inline {
 				res = iu.inlineCode.runGuard(guardID, mem, obj);
 //				System.out.println("GUARD result = "+res);
 				return res;
-			} catch(Exception e) {e.printStackTrace();}
+			} catch(Exception e) {
+//				e.printStackTrace();
+			}
 		}
 		return false;
 	}

@@ -1,5 +1,5 @@
 [:/*inline_define*/
-class CustomGuardImpl implements CustomGuard {
+class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
 	public boolean run(String guardID, Membrane mem, Object obj) {
 //		System.out.println("guardID "+guardID);
 		ArrayList ary = (ArrayList)obj;
@@ -40,7 +40,7 @@ io.use.
 sys.perpetual(on).
 
 a(_IX), io.stdin(O):-class(O, "java.io.BufferedReader"), custom_ii_isReady(_IX, O)|
-io.stdin(O), r=readline(print), b(_IX).
+io.stdin(O), r=io.readline(print), b(_IX).
 a(5).
 
 //a(_I) :- R=custom_io_x5(A), custom_o_genInt(A) | b(R).

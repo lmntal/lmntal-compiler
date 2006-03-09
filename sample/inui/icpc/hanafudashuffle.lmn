@@ -26,12 +26,12 @@ H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
 io.use.
 
 ready.
-ready :- cards=[], order=[], r1=readline(s).
+ready :- cards=[], order=[], r1=io.readline(s).
 r1(done), s(X) :- ss=string.split(" ", X).
 ss=[N,R] :- string(N), string(R) | n=string.int_of_str(N), r=string.int_of_str(R).
 n(N), cards(X) :- N>0 | cards=list.append(X,[N]), n(N-1).
 
-r(R) :- R > 0 | r2=readline(s2), r(R-1).
+r(R) :- R > 0 | r2=io.readline(s2), r(R-1).
 r2(done), s2(X) :- ss2=string.split(" ", X).
 ss2=[P,C], order(X) :- string(P), string(C) | order=list.append(X, [shuffle(string.int_of_str(P), string.int_of_str(C))]).
 

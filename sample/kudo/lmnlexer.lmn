@@ -208,7 +208,7 @@ L=lmnlexer.lex_oldstyle_comment([C|R])			:- C\="*"|		L=lmnlexer.lex_oldstyle_com
 lmnlexer.use_guard :-
 [:/*inline_define*/
 	import util.Util;
-	class CustomGuardImpl implements CustomGuard {
+	class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
 		public boolean run(String guardID, Membrane mem, Object obj) {
 	//		System.out.println("guardID "+guardID);
 			ArrayList ary = (ArrayList)obj;

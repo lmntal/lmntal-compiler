@@ -19,12 +19,12 @@ io.use.
 dice=[].
 
 //サイコロを読み込む
-r1=readline(s1).
+r1=io.readline(s1).
 r1(done), s1(X) :- ss=string.split(" ", X).
 ss=[X|Y], dice(D) :- string(X) | dice=list.append(D, [string.int_of_str(X)]), ss=Y.
 
 //nを読み込む
-ss=[] :- r2=readline(s2).
+ss=[] :- r2=io.readline(s2).
 r2(done), s2(X) :- n(string.int_of_str(X)), input_ladders.
 
 //nの数だけプレイヤーを生成
@@ -34,14 +34,14 @@ nn(0) :- .
 nn(N) :- int(N) | nn(N-1), player(N-1, 0).
 
 //ladderを読み込む
-input_ladders :- r3=readline(s3).
+input_ladders :- r3=io.readline(s3).
 r3(done), s3(X) :- ss3=string.split(" ", X).
 ss3=[X,Y] :- string(X), string(Y) | ss3=[string.int_of_str(X), string.int_of_str(Y)].
 ss3=[0,0] :- input_events.
 ss3=[X,Y] :- X=\=0, Y=\=0 | ladder(X, Y), input_ladders.
 
 //eを読み込む
-input_events :- r4=readline(s4).
+input_events :- r4=io.readline(s4).
 r4(done), s4(X) :- s4(string.int_of_str(X)).
 s4(0) :- start.
 s4(X) :- X =\= 0 | event(X), input_events.

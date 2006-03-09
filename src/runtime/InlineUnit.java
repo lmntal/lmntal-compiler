@@ -129,16 +129,38 @@ public class InlineUnit {
 		p.println("import java.util.*;");
 		
 		i = defs.iterator();
+		PrintWriter defaultPW = p;
 		while(i.hasNext()) {
 			String s = (String)i.next();
+			s = s.replaceAll("\\/\\*__UNITNAME__\\*\\/", className(name));
+//			System.out.println(s);
 			p.println(s);
+//			BufferedReader obr = new BufferedReader(new StringReader(s));
+//			String ss;
+//			while((ss=obr.readLine())!=null) {
+//				if(ss.startsWith("//#")) {
+//					if(p!=defaultPW) p.close();
+//					String fname = ss.substring(3);
+//					System.out.println(fname);
+//					if(fname.equals("")) {
+//						p = defaultPW;
+//					} else {
+//						File ofile = new File(outputFile.getParentFile()+"/"+fname);
+//						System.out.println(ofile);
+//						p = new PrintWriter(new FileOutputStream(ofile));
+//					}
+//				}
+//				p.println(ss);
+//			}
 		}
+		p = defaultPW;
+		
 		if (interpret) {
 			//InlineCode クラスのインスタンスとして使う
 			p.println("public class "+className+" implements InlineCode {");
 			p.println("\tpublic boolean runGuard(String guardID, Membrane mem, Object obj) throws Exception {");
 //			p.println("\t\ttry {");
-			p.println("\t\t	CustomGuard cg=(CustomGuard)Class.forName(\"CustomGuardImpl\").newInstance();");
+			p.println("\t\t	CustomGuard cg=(CustomGuard)Class.forName(\""+className(name)+"CustomGuardImpl\").newInstance();");
 //			p.println("\t\t	System.out.println(\"CG\"+cg);");
 			p.println("\t\t	if(cg==null) return false;");
 			p.println("\t\t	return cg.run(guardID, mem, obj);");
