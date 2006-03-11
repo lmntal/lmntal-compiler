@@ -440,7 +440,7 @@ public class FrontEnd {
 			Env.fMemory = false;
 		}
 		//REPL と one-liner では常に解釈実行
-		if (Env.oneLiner != null || Env.argv.isEmpty()) {
+		if (Env.oneLiner != null || Env.srcs.isEmpty()) {
 			Env.fInterpret = true;
 		}
 		
@@ -668,7 +668,6 @@ public class FrontEnd {
 		if(Env.preProcess0) src = preProcess0(src);
 		if (Env.fIf) src = convertIf2Guard(src); //by inui
 		if (Env.object) src = convertObjectToPureLMNtal(src); //2006.3.8 by inui
-	
 		try {
 			compile.structure.Membrane m;
 			Env.clearErrors();

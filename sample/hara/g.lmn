@@ -36,12 +36,16 @@ class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
 }
 :].
 
-io.use.
-sys.perpetual(on).
+//io.use.
+//sys.perpetual(on).
 
-a(_IX), io.stdin(O):-class(O, "java.io.BufferedReader"), custom_ii_isReady(_IX, O)|
-io.stdin(O), r=io.readline(print), b(_IX).
-a(5).
+//a(_IX), io.stdin(O):-class(O, "java.io.BufferedReader"), custom_ii_isReady(_IX, O)|
+//io.stdin(O), r=io.readline(print), b(_IX).
 
-//a(_I) :- R=custom_io_x5(A), custom_o_genInt(A) | b(R).
+//a(5).
+
+a(_I) :- B=custom_io_x5(_I), custom_o_genInt(A) | generated(A), x5ed(B).
 //a(_I) :- mod(_I, 2, R) | b(R).
+
+a. a :- N=custom_o_genInt | generated(N).
+b. b :- N=custom_io_x5(10) | generated(N).
