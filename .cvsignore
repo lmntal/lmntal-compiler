@@ -3,3 +3,5 @@
 bin
 dist
 .lmntal_inline
+.settings
+classes
