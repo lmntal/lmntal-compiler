@@ -31,6 +31,7 @@ import runtime.FloatingFunctor;
 import runtime.FrontEnd;
 import runtime.Functor;
 import runtime.Inline;
+import runtime.InlineCode;
 import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
@@ -52,6 +53,7 @@ public class Translator {
 	private static boolean fStandardLibrary;
 	private static int success, count;
 	private static boolean gen_all_lib;
+	private static String unitName;
 
 	
 	/**
@@ -168,6 +170,7 @@ public class Translator {
 	 * @return 初期化に成功した場合はtrue
 	 */
 	public static boolean init(String unitName) throws IOException {
+		Translator.unitName = unitName;
 		if (unitName.equals(InlineUnit.DEFAULT_UNITNAME)) {
 			sourceName = "a";
 		} else {
@@ -225,7 +228,9 @@ public class Translator {
 		Module.getNeedModules(m, modules);
 		for (int i = 0; i < modules.size(); i++) {
 			writer.write("		loadSystemRulesetFromModule(\"" + modules.get(i) + "\");\n");
+			writer.write("		runtime.Inline.inlineSet.put(\"module_"+modules.get(i)+".lmn\", new runtime.InlineUnit(\""+modules.get(i)+".lmn\"));\n");
 		}
+		writer.write("		runtime.Inline.inlineSet.put(\""+unitName+"\", new runtime.InlineUnit(\""+unitName+"\"));\n");
 		writer.write("	}\n");
 
 		//TODO このメソッドは動的にな要素がないので、SystemRulesets クラスに作るべきだった。
@@ -713,6 +718,7 @@ public class Translator {
 		writer.write("		boolean eqground_ret;\n");
 		writer.write("		boolean guard_inline_ret;\n");
 		writer.write("		ArrayList guard_inline_gvar2;\n");
+		writer.write("		Iterator it_guard_inline;\n");
 		
 		//2005-10-21 by kudo (INSERTCONNECTORS,DELETECONNECTORS,LOOKUPLINKで使う)
 		writer.write("		Set insset;\n");
@@ -1288,14 +1294,39 @@ public class Translator {
 					}
 //					writer.write(tabs + "	System.out.println(\"GUARD_INLINE\"+guard_inline_gvar2);\n");
 					
+//					writer.write("	try {\n");
+//					writer.write("		runtime.CustomGuard cg=(runtime.CustomGuard)Class.forName(\"translated."+InlineUnit.className(Translator.unitName)+"CustomGuardImpl\").newInstance();\n");
+//					writer.write("		runtime.Inline.inlineSet.put(\""+Translator.unitName+"\", cg);\n");
+//					writer.write("	} catch(Exception e) {e.printStackTrace();}\n");
+					
 					writer.write(tabs + "	guard_inline_ret = false;\n");
-					writer.write(tabs + "	try {\n");
-					writer.write(tabs + "		CustomGuard cg=(CustomGuard)Class.forName(\"translated.CustomGuardImpl\").newInstance();\n");
-//					writer.write(tabs + "		System.out.println(\"CG\"+cg);\n");
-					writer.write(tabs + "		if(cg!=null) {\n");
-					writer.write(tabs + "			guard_inline_ret = cg.run( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
+//					writer.write(tabs + "	guard_inline_ret = Inline.callGuardInline( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
+					writer.write(tabs + "	it_guard_inline = Inline.inlineSet.keySet().iterator();\n");
+					writer.write(tabs + "	while(it_guard_inline.hasNext()) {\n");
+					writer.write(tabs + "		String uName = (String)it_guard_inline.next();\n");
+					writer.write(tabs + "		InlineUnit iu=(InlineUnit)Inline.inlineSet.get(uName);\n");
+					writer.write(tabs + "		if(iu.customGuard==null) {\n");
+					writer.write(tabs + "			String className;\n");
+					writer.write(tabs + "			try {\n");
+					writer.write(tabs + "				if(uName.startsWith(\"module_\")) {\n");
+					writer.write(tabs + "					uName = uName.substring(7);\n");
+					writer.write(tabs + "					className = \"translated.module_\"+InlineUnit.FileNameWithoutExt(uName)+\".\"+InlineUnit.className(uName)+\"CustomGuardImpl\";\n");
+					writer.write(tabs + "				} else {\n");
+					writer.write(tabs + "					className = \"translated.\"+InlineUnit.className(uName)+\"CustomGuardImpl\";\n");
+					writer.write(tabs + "				}\n");
+//					writer.write(tabs + "				System.out.println(className);\n");
+					writer.write(tabs + "				iu.customGuard = (CustomGuard)Class.forName(className).newInstance();\n");
+					writer.write(tabs + "			} catch(ClassNotFoundException e) {\n");
+					writer.write(tabs + "			} catch(IllegalAccessException e) {\n");
+					writer.write(tabs + "			} catch(Exception e) {e.printStackTrace();}\n");
 					writer.write(tabs + "		}\n");
-					writer.write(tabs + "	} catch(Exception e) {e.printStackTrace();}\n");
+					writer.write(tabs + "		if(iu.customGuard!=null) {\n");
+					writer.write(tabs + "			try {\n");
+					writer.write(tabs + "				guard_inline_ret = iu.customGuard.run( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
+					writer.write(tabs + "			} catch(GuardNotFoundException e) {\n");
+					writer.write(tabs + "			} catch(Exception e) {e.printStackTrace();}\n");
+					writer.write(tabs + "		}\n");
+					writer.write(tabs + "	}\n");
 					
 //					writer.write(tabs + "	guard_inline_ret = Inline.callGuardInline( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
 					writer.write(tabs + "	// ガードで値が変わったかもしれないので戻す\n");

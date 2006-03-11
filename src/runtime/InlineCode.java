@@ -11,7 +11,7 @@ package runtime;
  *
  */
 public interface InlineCode {
-	public boolean runGuard(String guardID, Membrane mem, Object obj) throws Exception;
+	public boolean runGuard(String guardID, Membrane mem, Object obj) throws GuardNotFoundException;
 	public void run(Atom a, int codeID);
 }
 

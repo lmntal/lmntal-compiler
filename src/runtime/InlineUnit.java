@@ -18,6 +18,9 @@ public class InlineUnit {
 	/** インラインクラスが使用可能の時、そのオブジェクトが入る。*/
 	public InlineCode inlineCode;
 	
+	/** カスタムガードクラスが使用可能の時、そのオブジェクトが入る。*/
+	public CustomGuard customGuard;
+	
 	/** Hash { インラインコード文字列 => 一意な連番 } */
 	public Map codes = new HashMap(); 
 	/** codes の逆 */
@@ -141,11 +144,11 @@ public class InlineUnit {
 //				if(ss.startsWith("//#")) {
 //					if(p!=defaultPW) p.close();
 //					String fname = ss.substring(3);
-//					System.out.println(fname);
 //					if(fname.equals("")) {
 //						p = defaultPW;
 //					} else {
 //						File ofile = new File(outputFile.getParentFile()+"/"+fname);
+//						Inline.othersToCompile.add(ofile.toString());
 //						System.out.println(ofile);
 //						p = new PrintWriter(new FileOutputStream(ofile));
 //					}
@@ -156,21 +159,34 @@ public class InlineUnit {
 		p = defaultPW;
 		
 		if (interpret) {
-			//InlineCode クラスのインスタンスとして使う
 			p.println("public class "+className+" implements InlineCode {");
-			p.println("\tpublic boolean runGuard(String guardID, Membrane mem, Object obj) throws Exception {");
-//			p.println("\t\ttry {");
-			p.println("\t\t	CustomGuard cg=(CustomGuard)Class.forName(\""+className(name)+"CustomGuardImpl\").newInstance();");
-//			p.println("\t\t	System.out.println(\"CG\"+cg);");
-			p.println("\t\t	if(cg==null) return false;");
-			p.println("\t\t	return cg.run(guardID, mem, obj);");
-//			p.println("\t\t} catch(Exception e) {}");
-//			p.println("\t\treturn false;");
-			p.println("\t}");
+		} else {
+			p.println("public class "+className+" {");
+		}
+		p.println("\tpublic boolean runGuard(String guardID, Membrane mem, Object obj) throws GuardNotFoundException {");
+		p.println("\t\ttry {");
+		p.println("\t\tString name = \""+className(name)+"CustomGuardImpl\";\n");
+//		p.println("\t\tSystem.out.println(\"Load \"+name);\n");
+		p.println("\t\t	CustomGuard cg=(CustomGuard)Class.forName(name).newInstance();\n");
+//		p.println("\t\t	System.out.println(\"CG\"+cg);");
+		p.println("\t\t	if(cg==null) throw new GuardNotFoundException();\n");
+		p.println("\t\t	return cg.run(guardID, mem, obj);\n");
+		p.println("\t\t} catch(GuardNotFoundException e) {");
+		p.println("\t\t	throw new GuardNotFoundException();\n");
+		p.println("\t\t} catch(ClassNotFoundException e) {");
+		p.println("\t\t} catch(InstantiationException e) {");
+		p.println("\t\t} catch(IllegalAccessException e) {");
+		p.println("\t\t} catch(Exception e) {\n");
+		p.println("\t\t	e.printStackTrace();\n");
+		p.println("\t\t}\n");
+		p.println("\t\tthrow new GuardNotFoundException();\n");
+		p.println("\t}");
+		
+		if (interpret) {
+			//InlineCode クラスのインスタンスとして使う
 			p.println("\tpublic void run(Atom me, int codeID) {");
 		} else {
 			//直接呼び出すので、static でよい
-			p.println("public class "+className+" {");
 			p.println("\tpublic static void run(Atom me, int codeID) {");
 		}
 		p.println("\t\tAbstractMembrane mem = me.getMem();");
@@ -205,20 +221,37 @@ public class InlineUnit {
 		FileClassLoader.addPath(srcPath(name));
 		FileClassLoader cl = new FileClassLoader();
 		Env.d("Try loading "+className(name));
-		try {
-			Object o = cl.loadClass(className(name)).newInstance();
-//			Object o = cl.loadClass(name).newInstance();
-			if (o instanceof InlineCode) {
-				inlineCode = (InlineCode)o;
-			}
-		} catch (Exception e) {
-			//Env.e("!! catch !! "+e.getMessage()+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
-		}
+		Object o;
+		o = newInstance(cl, className(name));
+		if (o instanceof InlineCode) inlineCode = (InlineCode)o;
+		// ガード実装クラスはpublicクラスではない。そのため、ここからは読み込むことができない。
+		// 生成したインラインクラスで生成することになる。
+//		o = newInstance(cl, className(name)+"CustomGuardImpl");
+//		if (o instanceof CustomGuard) customGuard = (CustomGuard)o;
+//		o = newInstance(cl, "translated."+className(name)+"CustomGuardImpl");
+//		if (o instanceof CustomGuard) customGuard = (CustomGuard)o;
+		
 		if (inlineCode == null) {
 			Env.d("Failed in loading "+cname);
 		} else {
 			Env.d(cname+" Loaded");
 		}
+	}
+	private Object newInstance(FileClassLoader cl, String name) {
+		try {
+//			System.out.print(name+"   ");
+			Object o = cl.loadClass(name).newInstance();
+//			System.out.println("OK");
+			return o;
+		} catch (Exception e) {
+//			e.printStackTrace();
+//		} catch (ClassNotFoundException e) {
+//		} catch (IllegalAccessException e) {
+//		} catch (InstantiationException e) {
+//		} catch (NullPointerException e) {
+		}
+//		System.out.println("Fail");
+		return null;
 	}
 	
 	/**
@@ -262,6 +295,17 @@ public class InlineUnit {
 			// クラス名に使えない文字を削除
 			o = o.replaceAll("\\-", "");
 			o = "SomeInlineCode"+o;
+		}
+		return o;
+	}
+	
+	public static String FileNameWithoutExt(String unitName) {
+		// あやしい
+		String o = new File(unitName).getName();
+		if(unitName.endsWith(".lmn") || unitName.equals(InlineUnit.DEFAULT_UNITNAME)) {
+			o = o.replaceAll("\\.lmn$", "");
+			// クラス名に使えない文字を削除
+			o = o.replaceAll("\\-", "");
 		}
 		return o;
 	}

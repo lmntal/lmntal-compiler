@@ -55,6 +55,8 @@ public class Inline {
 //		classPath.add(new File("lmntal.jar"));
 	}
 	
+	static ArrayList othersToCompile = new ArrayList();
+	
 	/****** コンパイル時に使う ******/
 	
 	/**
@@ -175,6 +177,7 @@ public class Inline {
 					do_compile = true;
 				}
 			}
+			compileCommand.addAll(othersToCompile);
 			if(do_compile) {
 				Env.d("Compile command line: "+compileCommand);
 				String cmd[] = new String[compileCommand.size()];
@@ -218,8 +221,9 @@ public class Inline {
 				res = iu.inlineCode.runGuard(guardID, mem, obj);
 //				System.out.println("GUARD result = "+res);
 				return res;
+			} catch(GuardNotFoundException e) {
 			} catch(Exception e) {
-//				e.printStackTrace();
+				e.printStackTrace();
 			}
 		}
 		return false;

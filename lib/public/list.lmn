@@ -204,7 +204,7 @@ list.use_guard :-
 [:/*inline_define*/
 import util.Util;
 class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
-	public boolean run(String guardID, Membrane mem, Object obj) {
+	public boolean run(String guardID, Membrane mem, Object obj) throws GuardNotFoundException {
 //		System.out.println("guardID "+guardID);
 		ArrayList ary = (ArrayList)obj;
 //		for(int i=0;i<ary.size();i++) {
@@ -241,7 +241,7 @@ class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
 			mem.inheritLink(aa, 0, link);
 			return true;
 		}
-		return false;
+		throw new GuardNotFoundException();
 	}
 }
 :].

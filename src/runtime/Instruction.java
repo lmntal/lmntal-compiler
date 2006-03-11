@@ -1815,6 +1815,13 @@ public class Instruction implements Cloneable, Serializable {
 		add(arg3);
 		add(arg4);
 	}
+	public Instruction(int kind, Object arg1, Object arg2, Object arg3, Object arg4) {
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+		add(arg4);
+	}
 	public Instruction(int kind, int arg1, int arg2, int arg3, int arg4, int arg5) {
 		this.kind = kind;
 		add(arg1);
