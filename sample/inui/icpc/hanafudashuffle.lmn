@@ -3,13 +3,15 @@
  * http://acm.pku.edu.cn/JudgeOnline/showproblem?problem_id=1978
  * (http://ccserv.adm.ehime-u.ac.jp/ICPC/problems/domestic/d2004/A.jp/A.html)
  *
- * cardsリストの先頭要素が答え
+ * -v0オプションをつけると問題の指示通りに答えが表示される
  *
  * History
  * 2006.02.28 作成
  *            1回分のデータしか実行できない
  * 2006.03.01 shuffle手順をリストにつないだ
  *            まだ1回分のデータしか実行できない
+ * 2006.03.11 sample inputは全部解けた
+ *            io.list_of_stdinを使っているので入力が大きいと解けない
  */
 
 //publicのリストモジュールが使えないとき
@@ -23,21 +25,32 @@ H=list.append([], B) :- H=B.
 H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
 }.
 
-//データ入力＆データ生成
 io.use.
 
-ready.
-ready :- cards=[], order=[], r1=io.readline(s).
-r1(done), s(X) :- ss=string.split(" ", X).
-ss=[N,R] :- n=string.int_of_str(N), r=string.int_of_str(R), make_cards.
-make_cards, n(0), r(0) :- end.
+//膜を使ってみた
+//cards=[5,4,3,2,1]を作りたいときn(5)をこの膜につっこむ
+{
+make_cards.
 n(N), cards(X) :- N>0 | cards=list.append(X,[N]), n(N-1).
+}.
+//上で出来たcardsを外に出すルール
+{make_cards, cards(X), n(0), @p} :- ground(X) | {make_cards, @p}, cards(X).
 
-r(R) :- R > 0 | r2=io.readline(s2), r(R-1).
-r2(done), s2(X) :- ss2=string.split(" ", X).
-ss2=[P,C], order(X) :- string(P), string(C) | order=list.append(X, [shuffle(string.int_of_str(P), string.int_of_str(C))]).
+//ここから始まる
+s=io.list_of_stdin(), next_set.
+
+//1行読み込んでP, Cを取り出す
+next_set, s=[X|Z] :- ss=string.split(" ", X), s(Z), input_nr.
+input_nr, ss=[N,R] :- n=string.int_of_str(N), r=string.int_of_str(R).
+{make_cards, @p}, n(N) :- int(N) | {make_cards, n(N), cards=[], @p}, do_shuffle.
 
 //手順に従ってシャッフル
-order=[shuffle(P,C)|ZZ], cards=[X|Z] :- int(P) | head=list.split([X|Z], P-1, tail), order=[shuffle(C)|ZZ].
-order=[shuffle(C)|ZZ], tail(X) :- int(C) | head2=list.split(X, C, tail2), order(ZZ).
-head(X), tail2(Y), head2(Z) :- cards=list.append(Z,list.append(X,Y)).
+do_shuffle, r(R), s=[X|Z] :- R > 0 | ss2=string.split(" ", X), s(Z), r(R-1).
+ss2=[P,C] :- shuffle(string.int_of_str(P), string.int_of_str(C)).
+shuffle(P,C), cards=[X|Z] :- int(P), int(C) | head=list.split([X|Z], P-1, tail), shuffle(C).
+shuffle(C), tail(X) :- int(C) | head2=list.split(X, C, tail2).
+r(R), head(X), tail2(Y), head2(Z) :- R > 0 | r(R), cards=list.append(Z,list.append(X,Y)), do_shuffle.
+r(R), head(X), tail2(Y), head2(Z) :- R = 0 | cards=list.append(Z,list.append(X,Y)), shuffle_end.
+
+//シャッフルが済んだら答えを表示して次の問題セットへ
+shuffle_end, cards=[X|Z] :- ground(Z), r=io.print(string.str_of_int(X)), next_set.
