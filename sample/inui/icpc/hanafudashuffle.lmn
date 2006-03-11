@@ -1,6 +1,7 @@
 /*
  * 花札シャッフル
- * http://ccserv.adm.ehime-u.ac.jp/ICPC/problems/domestic/d2004/A.jp/A.html
+ * http://acm.pku.edu.cn/JudgeOnline/showproblem?problem_id=1978
+ * (http://ccserv.adm.ehime-u.ac.jp/ICPC/problems/domestic/d2004/A.jp/A.html)
  *
  * cardsリストの先頭要素が答え
  *
@@ -28,7 +29,8 @@ io.use.
 ready.
 ready :- cards=[], order=[], r1=io.readline(s).
 r1(done), s(X) :- ss=string.split(" ", X).
-ss=[N,R] :- string(N), string(R) | n=string.int_of_str(N), r=string.int_of_str(R).
+ss=[N,R] :- n=string.int_of_str(N), r=string.int_of_str(R), make_cards.
+make_cards, n(0), r(0) :- end.
 n(N), cards(X) :- N>0 | cards=list.append(X,[N]), n(N-1).
 
 r(R) :- R > 0 | r2=io.readline(s2), r(R-1).
