@@ -200,8 +200,12 @@ list.guard_use.
 
 
 [:/*inline_define*/
+//#/*__UNITNAME__*/CustomGuardImpl.java
+/*__PACKAGE__*/
+import runtime.*;
+import java.util.*;
 import util.Util;
-class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
+public class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
 	public boolean run(String guardID, Membrane mem, Object obj) throws GuardNotFoundException {
 //		System.out.println("guardID "+guardID);
 		ArrayList ary = (ArrayList)obj;
@@ -213,4 +217,5 @@ class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
 		throw new GuardNotFoundException();
 	}
 }
+//#
 :].

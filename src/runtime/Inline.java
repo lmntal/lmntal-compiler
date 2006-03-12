@@ -55,7 +55,11 @@ public class Inline {
 //		classPath.add(new File("lmntal.jar"));
 	}
 	
-	static ArrayList othersToCompile = new ArrayList();
+	/**
+	 * ほかにコンパイルすべきファイル。
+	 * //# 行により別ファイルに出力されたjavaファイルがこれに入る。
+	 */
+	public static ArrayList othersToCompile = new ArrayList();
 	
 	/****** コンパイル時に使う ******/
 	
@@ -218,9 +222,12 @@ public class Inline {
 			InlineUnit iu = (InlineUnit)it.next();
 //System.out.println("iu.name "+iu.name);
 			try {
-				res = iu.inlineCode.runGuard(guardID, mem, obj);
+//				res = iu.inlineCode.runGuard(guardID, mem, obj);
+				if(iu.customGuard!=null) {
+					res = iu.customGuard.run(guardID, mem, obj);
+					return res;
+				}
 //				System.out.println("GUARD result = "+res);
-				return res;
 			} catch(GuardNotFoundException e) {
 			} catch(Exception e) {
 				e.printStackTrace();

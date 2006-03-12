@@ -136,25 +136,30 @@ public class InlineUnit {
 		while(i.hasNext()) {
 			String s = (String)i.next();
 			s = s.replaceAll("\\/\\*__UNITNAME__\\*\\/", className(name));
+			if (packageName != null) {
+				s = s.replaceAll("\\/\\*__PACKAGE__\\*\\/", "package " + packageName + ";");
+			}
 //			System.out.println(s);
-			p.println(s);
-//			BufferedReader obr = new BufferedReader(new StringReader(s));
-//			String ss;
-//			while((ss=obr.readLine())!=null) {
-//				if(ss.startsWith("//#")) {
-//					if(p!=defaultPW) p.close();
-//					String fname = ss.substring(3);
-//					if(fname.equals("")) {
-//						p = defaultPW;
-//					} else {
-//						File ofile = new File(outputFile.getParentFile()+"/"+fname);
-//						Inline.othersToCompile.add(ofile.toString());
+//			p.println(s);
+			BufferedReader obr = new BufferedReader(new StringReader(s));
+			String ss;
+			while((ss=obr.readLine())!=null) {
+				// //# で始まる行は、その行のそれ以降の内容をファイル名とみなし、その行以降を指定されたファイルに出力される。
+				// その際、__UNITNAME__, __PACKAGE__ はそれぞれの内容に置換される。
+				if(ss.startsWith("//#")) {
+					if(p!=defaultPW) p.close();
+					String fname = ss.substring(3);
+					if(fname.equals("")) {
+						p = defaultPW;
+					} else {
+						File ofile = new File(outputFile.getParentFile()+"/"+fname);
+						Inline.othersToCompile.add(ofile.toString());
 //						System.out.println(ofile);
-//						p = new PrintWriter(new FileOutputStream(ofile));
-//					}
-//				}
-//				p.println(ss);
-//			}
+						p = new PrintWriter(new FileOutputStream(ofile));
+					}
+				}
+				p.println(ss);
+			}
 		}
 		p = defaultPW;
 		
@@ -224,12 +229,12 @@ public class InlineUnit {
 		Object o;
 		o = newInstance(cl, className(name));
 		if (o instanceof InlineCode) inlineCode = (InlineCode)o;
-		// ガード実装クラスはpublicクラスではない。そのため、ここからは読み込むことができない。
-		// 生成したインラインクラスで生成することになる。
-//		o = newInstance(cl, className(name)+"CustomGuardImpl");
-//		if (o instanceof CustomGuard) customGuard = (CustomGuard)o;
-//		o = newInstance(cl, "translated."+className(name)+"CustomGuardImpl");
-//		if (o instanceof CustomGuard) customGuard = (CustomGuard)o;
+		o = newInstance(cl, className(name)+"CustomGuardImpl");
+		if (o instanceof CustomGuard) customGuard = (CustomGuard)o;
+		o = newInstance(cl, "translated."+className(name)+"CustomGuardImpl");
+		if (o instanceof CustomGuard) customGuard = (CustomGuard)o;
+		o = newInstance(cl, "translated.module_"+FileNameWithoutExt(name)+"."+className(name)+"CustomGuardImpl");
+		if (o instanceof CustomGuard) customGuard = (CustomGuard)o;
 		
 		if (inlineCode == null) {
 			Env.d("Failed in loading "+cname);

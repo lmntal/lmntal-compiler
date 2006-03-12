@@ -318,6 +318,13 @@ public class Translator {
 			InlineUnit iu = (InlineUnit)it.next();
 			File f = new File(dir, InlineUnit.className(sourceName + ".lmn") + ".java");
 			iu.makeCode(packageName, InlineUnit.className(sourceName + ".lmn"), f, false);
+			
+			// ガードインラインのコンパイル hara
+			Iterator it2 = Inline.othersToCompile.iterator();
+			while(it2.hasNext()) {
+				String fname = (String)it2.next();
+				compile(new File(fname), true);
+			}
 			//エラーメッセージを出力するため、インラインコードは先にコンパイルする。
 			return compile(f, !gen_all_lib);
 		}

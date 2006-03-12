@@ -1,5 +1,6 @@
 [:/*inline_define*/
 //#/*__UNITNAME__*/CustomGuardImpl.java
+/*__PACKAGE__*/
 import runtime.*;
 import java.util.*;
 public class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
