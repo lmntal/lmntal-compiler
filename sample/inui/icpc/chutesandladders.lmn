@@ -7,63 +7,95 @@
  * 一気に進んだり戻ったりするはしごや
  * 1回休み，続けてもう１回などのイベントがある．
  *
- * ansアトムの引数が答え
+ * -v0オプションをつけると問題の指示通りに答えが表示される
  *
  * History
  * 2006.03.03 イベントの処理がまだ出来てない
  * 2006.03.04 最初の問題セットは解けるようになった
+ * 2006.03.10 サンプルインプットの問題セットが全部解けた
+ *            arrayモジュールを使いました
  */
 
 io.use.
 
-dice=[].
+//Set（実装はリスト・・・）
+{
+module(set).
 
-//サイコロを読み込む
+H=set.new :- H=[].
+H=set.put(Set, X) :- int(X) | H=[X|Set].
+H=set.contains(Set, X, Res) :- ground(Set) | H=set.contains(Set, X, Res, Set).
+H=set.contains([], X, Res, Set) :- int(X) | H=Set, Res=false.
+H=set.contains([Y|Z], X, Res, Set) :- X = Y, ground(Z) | H=Set, Res=true.
+H=set.contains([Y|Z], X, Res, Set) :- X=\=Y | H=set.contains(Z, X, Res, Set).
+}.
+
+//サイコロの目を読み込む
 r1=io.readline(s1).
-r1(done), s1(X) :- ss=string.split(" ", X).
-ss=[X|Y], dice(D) :- string(X) | dice=list.append(D, [string.int_of_str(X)]), ss=Y.
+r1(done), s1(X) :- ss=string.split(" ", X), next_set.
+//リストの各要素をmap関数でint型に直す
+//ss(X) :- dice=list.map(string.int_of_str, X).
+H=[[string.int_of_str,X]|Z] :- H=[string.int_of_str(X)|Z].
 
-//nを読み込む
-ss=[] :- r2=io.readline(s2).
-r2(done), s2(X) :- n(string.int_of_str(X)), input_ladders.
+//n
+next_set, ss(X) :- ground(X) | dice=list.map(string.int_of_str, X), r2=io.readline(s2), ss(X).
+r2(done), s2(X) :- nn(string.int_of_str(X)).
 
-//nの数だけプレイヤーを生成
-//ただしnの値はあとで使うので一時的にnnを作っている
-n(N) :- N>0, uniq(N) | n(N), nn(N).
-nn(0) :- .
-nn(N) :- int(N) | nn(N-1), player(N-1, 0).
+//n人のプレイヤー配列を生成
+nn(N) :- N > 0 | players=array.new(N), input_ladders, ladders=[], n(N).
 
-//ladderを読み込む
+%ladderを読み込む
+%ここは繰り返しなので一目で分かるように繰り返し構造が欲しいなぁ
 input_ladders :- r3=io.readline(s3).
 r3(done), s3(X) :- ss3=string.split(" ", X).
 ss3=[X,Y] :- string(X), string(Y) | ss3=[string.int_of_str(X), string.int_of_str(Y)].
-ss3=[0,0] :- input_events.
-ss3=[X,Y] :- X=\=0, Y=\=0 | ladder(X, Y), input_ladders.
+ss3=[0,0] :- events=set.new(), input_events.
+ss3=[X,Y], ladders(Z) :- X=\=0, Y=\=0 | ladders=[(X,Y)|Z], input_ladders.
 
-//eを読み込む
+%eを読み込む
+%ここも繰り返し構造が欲しいなぁ
 input_events :- r4=io.readline(s4).
 r4(done), s4(X) :- s4(string.int_of_str(X)).
 s4(0) :- start.
-s4(X) :- X =\= 0 | event(X), input_events.
+events(E), s4(X) :- X =\= 0 | events=set.put(E, X), input_events.
 
 //シミュレーション開始
 start :- p(0), go.
 
-//パスかどうかチェック
-pass(P1), p(P2), n(N) :- P1=P2, int(N) | p((P2+1) mod N), n(N), go.
+%現在のプレイヤーを取り出す
+go, pass(Pass), p(P) :- P=Pass | p(P+1), go.
+go, p(P), players(X) :- int(P) | players=array.get(X, P, player), p(P).
 
-//サイコロの目に従って進む
-go, p(P1), dice=[D|Z], player(P2, Q) :- P1=P2, D+Q > 100 | p(P1), dice=[D|Z], player(P2,Q), next.
-go, p(P1), dice=[D|Z], player(P2, Q) :- P1=P2, D+Q = 100 | ans(P1+1), dice=Z.
-go, p(P1), dice=[D|Z], player(P2, Q) :- P1=P2, D+Q < 100 | p(P1), dice=Z, player(P2, D+Q), check_ladder.
+%サイコロの目に従って進む
+p(P), player(Pos), dice=[D|Z] :- int(P), D+Pos > 100 | dice=Z, next, p(P).
+p(P), player(X), dice=[D|Z] :- int(P), D+X = 100 | ans(P+1), dice=Z.
+player(Pos), dice=[D|Z] :- D+Pos < 100 | player2(Pos+D), dice=Z.
 
-//ladderのチェック
-check_ladder, p(P1), player(P2, Q), ladder(From, To) :- P1=P2, Q = From, int(To) | p(P1), player(P2, To), ladder(From, To), next.
-check_ladder, p(P1), player(P2, Q), ladder(From, To) :- P1=P2, Q=\=From, int(To) | p(P1), player(P2, Q) , ladder(From, To), next.
+//ladderのcheck
+//本当はsetに比較関数?が渡せれば良いのだが
+H=contains(Ladders, Pos, Res) :- ground(Ladders) | H=contains(Ladders, Pos, Res, Ladders).
+H=contains([], Pos, Res, Ladders) :- int(Pos) | H=Ladders, Res=0.
+H=contains([(From,To)|Z], Pos, Res, Ladders) :- From = Pos, ground(Z) | H=Ladders, Res=To.
+H=contains([(From,To)|Z], Pos, Res, Ladders) :- From=\=Pos, int(To) | H=contains(Z, Pos, Res, Ladders).
 
-//イベントのチェック
-next, p(P1), player(P2, Q), event(E) :- P1=P2, Q =  E | p(P1), player(P2, Q), event(E), go.
-next, p(P1), player(P2, Q), event(E), n(N) :- P1=P2, Q = -E, int(N) | p((P1+1) mod N), player(P2, Q), event(E), pass(P1), n(N), go.
+%ladderのチェック
+p(P), player2(Pos), ladders(Ladders) :- int(Pos) | 
+	ladders=contains(Ladders, Pos, to), player10(Pos), p(P).
+to(To), p(P), player10(Pos), players(Players) :- int(P), int(Pos), To > 0 |
+	players=array.put(Players, P, To ), p(P), player3(To).
+to(To), p(P), player10(Pos), players(Players) :- int(P), int(Pos), To = 0 |
+	players=array.put(Players, P, Pos), p(P), player3(Pos).
 
-//次のプレイヤーに移動
+%イベントのチェック
+player3(P), events(E) :- int(P) | events=set.contains(E, P, res1), player4(P).
+res1(true), player4(P) :- int(P) | go.
+res1(false), player4(P), events(E) :- int(P) | events=set.contains(E, -P, res2), player5(P).
+res2(true),  player5(Pos), p(P) :- int(P), int(Pos) | next, pass(P), p(P).
+res2(false), player5(P) :- int(P) | next.
+
+%次のプレイヤーに移動
 next, p(P), n(N) :- int(N) | p((P+1) mod N), n(N), go.
+
+%答えが出たら答えを表示して次の問題セットのためにデータを全部削除
+ans(Ans), events(E), n(N), players(Players), ladders(Ladders), dice(Dice) :-
+	ground(E), ground(Players), ground(Ladders), ground(Dice), int(N) | rp=io.print(string.str_of_int(Ans)), next_set.
