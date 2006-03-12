@@ -207,8 +207,12 @@ L=lmnlexer.lex_oldstyle_comment([C|R])			:- C\="*"|		L=lmnlexer.lex_oldstyle_com
 %% ガードインライン
 lmnlexer.use_guard :-
 [:/*inline_define*/
+//#/*__UNITNAME__*/CustomGuardImpl.java
+	/*__PACKAGE__*/
+	import runtime.*;
+	import java.util.*;
 	import util.Util;
-	class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
+	public class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
 		public boolean run(String guardID, Membrane mem, Object obj) {
 	//		System.out.println("guardID "+guardID);
 			ArrayList ary = (ArrayList)obj;
@@ -298,6 +302,7 @@ lmnlexer.use_guard :-
 			return false;
 		}
 	}
+//#
 :].
 }.
 
