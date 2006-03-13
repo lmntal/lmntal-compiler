@@ -18,16 +18,51 @@
 
 io.use.
 
-//Set（実装はリスト・・・）
 {
+%containsメソッドを持ったデータ構造
+%int専用
 module(set).
 
+%リストによる実装
 H=set.new :- H=[].
 H=set.put(Set, X) :- int(X) | H=[X|Set].
-H=set.contains(Set, X, Res) :- ground(Set) | H=set.contains(Set, X, Res, Set).
+/*H=set.contains(Set, X, Res) :- ground(Set) |
+	H=set.contains(Set, X, Res, Set).
 H=set.contains([], X, Res, Set) :- int(X) | H=Set, Res=false.
-H=set.contains([Y|Z], X, Res, Set) :- X = Y, ground(Z) | H=Set, Res=true.
-H=set.contains([Y|Z], X, Res, Set) :- X=\=Y | H=set.contains(Z, X, Res, Set).
+H=set.contains([Y|Z], X, Res, Set) :- X = Y, ground(Z) |
+	H=Set, Res=true.
+H=set.contains([Y|Z], X, Res, Set) :- X=\=Y |
+	H=set.contains(Z, X, Res, Set).*/
+%比較をcompareメソッドで行うバージョン
+H=set.contains(Set, X, Res) :- ground(Set) |
+	H=set.contains(Set, X, Res, Set).
+H=set.contains([], X, Res, Set) :- ground(X) | H=Set, Res=false.
+H=set.contains([Y|Z], X, Res, Set) :- int(X) |
+	H=set.contains(compare(X, Y), X, Z, Res, Set).
+H=set.contains(true, X, Z, Res, Set) :- ground(Z), int(X) |
+	H=Set, Res=true.
+H=set.contains(false, X, Z, Res, Set) :-
+	H=set.contains(Z, X, Res, Set).
+H=compare(X, Y) :- X = Y | H=true.
+H=compare(X, Y) :- X=\=Y | H=false.
+
+%膜で実装(実行時間はリスト版の2倍)
+%X=YとX=\=Yの部分がちゃんと動くか心配
+/*H=set.new :- H={}.
+H=set.put({$p}, X) :- int(X) | H={$p, element(X)}.
+H=set.contains({$p, element(Y)}, X, Res) :- X = Y |
+    H={$p, element(Y)}, Res=true.
+H=set.contains({$p, element(Y)}, X, Res) :- X=\=Y |
+    H={$p, element(Y)}, Res=false.
+H=set.contains({}, X, Res) :- int(X) |
+    H={}, Res=false.*/
+%比較をcompareメソッドで行うバージョン(未完成)
+/*H=set.contains({$p, element(Y)}, X, Res) :- int(Y) |
+    H={$p, element(Y)}, Res=compare(X, Y).
+H=set.contains({}, X, Res) :- int(X) |
+    H={}, Res=false.
+H=compare(X, Y) :- X = Y | H=true.
+H=compare(X, Y) :- X=\=Y | H=false.*/
 }.
 
 //サイコロの目を読み込む
@@ -97,5 +132,9 @@ res2(false), player5(P) :- int(P) | next.
 next, p(P), n(N) :- int(N) | p((P+1) mod N), n(N), go.
 
 %答えが出たら答えを表示して次の問題セットのためにデータを全部削除
+%膜実装のsetのときはこっち
+//ans(Ans), events({$p[]}), n(N), players(Players), ladders(Ladders), dice(Dice) :-
+//	ground(Players), ground(Ladders), ground(Dice), int(N) | rp=io.print(string.str_of_int(Ans)), next_set.
+%list実装のsetのときはこっち
 ans(Ans), events(E), n(N), players(Players), ladders(Ladders), dice(Dice) :-
-	ground(E), ground(Players), ground(Ladders), ground(Dice), int(N) | rp=io.print(string.str_of_int(Ans)), next_set.
+	ground(Players), ground(E), ground(Ladders), ground(Dice), int(N) | rp=io.print(string.str_of_int(Ans)), next_set.
