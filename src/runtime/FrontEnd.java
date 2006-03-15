@@ -404,6 +404,7 @@ public class FrontEnd {
 							Env.fInterpret = true;
 							Env.fGUI = true;
 							Env.profile = true;
+							Env.fTrace = true;
 						} else if (args[i].equals("--nothread")) {
 							// 暫定オプション
 							// スレッドルールの変換を行わない

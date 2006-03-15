@@ -11,22 +11,6 @@ import java.util.regex.Pattern;
 
 import test.GUI.*;
 
-//class ConsolePrintStream extends PrintStream {
-//	private JTextArea jt;
-//	
-//	public ConsolePrintStream(OutputStream os, JTextArea jt) throws FileNotFoundException {
-//		super(os);
-//		this.jt = jt;
-//	}
-//
-//	@Override
-//	public void println(String s) {
-//		super.println(s);
-//		jt.append(s+"\n");
-//	}
-//	
-//}
-
 /**
  * LMNtalデバッガ
  * @author inui
@@ -93,10 +77,12 @@ public class Debug {
 			buf.append("<pre>\n");
 			while ((s = br.readLine()) != null) {
 				Matcher m = Pattern.compile("(//|%)(.*)").matcher(s);
-				if (m.matches()) {
+				if (m.matches()) {//コメントだったらその他の色付けはしない
 					s = "<font color=green>"+m.group(1)+m.group(2)+"</font>";
 				} else {
 					s = s.replace(":-", "<font color=red>:-</font>");
+					s = s.replace("{", "<font color=blue>{</font>");
+					s = s.replace("}", "<font color=blue>}</font>");
 				}
 				buf.append("  "+s+"\n");
 				lineno++;

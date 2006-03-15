@@ -2,12 +2,32 @@ package test.GUI;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.*;
 
 import javax.swing.*;
 import javax.swing.text.*;
 
 import runtime.*;
+
+class ConsolePrintStream extends PrintStream {
+	private JTextArea jt;
+	private JScrollPane scroll;
+	
+	public ConsolePrintStream(OutputStream os, JTextArea jt, JScrollPane scroll) throws FileNotFoundException {
+		super(os);
+		this.jt = jt;
+		this.scroll = scroll;
+	}
+
+	public void println(String s) {
+		//super.println(s);
+		jt.append(s+"\n");
+		scroll.getVerticalScrollBar().setValue(scroll.getVerticalScrollBar().getMaximum());
+	}
+}
 
 /**
  * @author inui
@@ -25,6 +45,9 @@ public class LMNtalDebugFrame extends JFrame {
 	
 	/** プロファイル情報を表示するかどうか */
 	private boolean showProfile = false;
+	
+	/** コンソール */
+	private JTextArea console;
 	
 	/**
 	 * コンストラクタです
@@ -132,9 +155,23 @@ public class LMNtalDebugFrame extends JFrame {
 		//ソースビュー
 		jt = createJTextArea();
 		p.add("Center", jt);
-
-		JScrollPane jsp = new JScrollPane(p);
-		getContentPane().add(jsp, BorderLayout.CENTER);
+		JScrollPane scroll1 = new JScrollPane(p);
+		//getContentPane().add(jsp, BorderLayout.CENTER);
+		
+		//コンソール
+		console = new JTextArea();
+		console.setFont(new Font("Monospaced", Font.PLAIN, Env.fDEMO ? 16 : 12));
+		JScrollPane scroll2 = new JScrollPane(console);
+		scroll2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		//標準出力を切り替える
+		try {
+			System.setOut(new ConsolePrintStream(System.out, console, scroll2));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scroll1, scroll2);
+		getContentPane().add(split, BorderLayout.CENTER);
 		
 		// ツールバーの生成
 		JToolBar toolBar = new JToolBar();
@@ -176,6 +213,7 @@ public class LMNtalDebugFrame extends JFrame {
 					}
 					changeFontSize(jt);
 					changeFontSize(linenoArea);
+					console.setFont(new Font("Monospaced", Font.PLAIN, Env.fDEMO ? 16 : 12));
 				}
 			});
 			toolBar.add(checkBox);
@@ -211,6 +249,7 @@ public class LMNtalDebugFrame extends JFrame {
 	public void setSourceText(String s, int lineno) {
 		jt.setText(s);
 		StringBuffer buf = new StringBuffer();
+		//buf.append("<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; CHARSET=EUC-JP\">\n");
 		buf.append("<style>pre {font-size:10px; font-family:monospace;}</style>\n");
 		buf.append("<pre>\n");
 		for (int i = 1; i <= lineno; i++)
