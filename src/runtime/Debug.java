@@ -28,7 +28,7 @@ public class Debug {
 	public static final int MEMBRANE = 5;
 	
 	/** 直前に適用されたルール */
-	private static Rule currentRule;
+	private static int currentRule;
 	
 	/** 直前に適用されたルールのテストの種類 */
 	private static int testType;
@@ -71,6 +71,8 @@ public class Debug {
 	 * 少なくとも最初に1回実行する
 	 */
 	public static void init() {
+		if (Env.guiDebug.restart) return;
+		
 		try {
 			FileReader fr = new FileReader(unitName);
 			BufferedReader br = new BufferedReader(fr);
@@ -115,20 +117,13 @@ public class Debug {
 	public static void toggleBreakPointAt(int lineno) {
 		//すでに存在するブレークポイントなら削除
 		for (int i = 0; i < breakPoints.size(); i++) {
-			if (((Rule)breakPoints.get(i)).lineno == lineno) {
+			if (((Integer)breakPoints.get(i)).intValue() == lineno) {
 				breakPoints.remove(i);
 				return;
 			}
 		}
 		
-		Iterator itr = rules.iterator();
-		while (itr.hasNext()) {
-			Rule rule = (Rule)itr.next();
-			if (rule.lineno == lineno) {
-				breakPoints.add(rule);
-				//System.out.println("Breakpoint "+breakPoints.size()+" at "+rule.name+": file "+unitName+", line "+lineno);
-			}
-		}
+		breakPoints.add(lineno);
 	}
 	
 	/**
@@ -139,7 +134,7 @@ public class Debug {
 		if (state == NEXT) return true;
 		Iterator itr = breakPointIterator();
 		while (itr.hasNext()) {
-			if (currentRule != null && currentRule.equals(itr.next())) {
+			if (currentRule == ((Integer)itr.next()).intValue()) {
 				return true;
 			}
 		}
@@ -152,7 +147,7 @@ public class Debug {
 	 * @param testType アトム主導テストか膜主導テストかを表す定数
 	 * ATOM, MEMBRANE
 	 */
-	public static void breakPoint(Rule r, int testType) {
+	public static void breakPoint(int r, int testType) {
 		currentRule = r;
 		Debug.testType = testType;
 	}
@@ -164,7 +159,7 @@ public class Debug {
 	 *
 	 */
 	public static void endBreakPoint(int state) {
-		currentRule = null;
+		currentRule = 0;
 		Debug.state = state;
 	}
 	
@@ -177,8 +172,8 @@ public class Debug {
 	}
 	
 	public static int getCurrentRuleLineno() {
-		if (currentRule == null) return -1;
-		return currentRule.lineno;
+		if (currentRule == 0) return -1;
+		return currentRule;
 	}
 
 	/**

@@ -153,6 +153,12 @@ public class Task extends AbstractTask implements Runnable {
 			Env.p( Dumper.dump( memToDump ) );
 		}
 	}
+	
+	//2006.3.16 by inui
+	public static void initTrace() {
+		count = 1;
+	}
+	
 	private boolean guiTrace() {
 		if (!Env.guiTrace()) return false;
 		/**nakano graphicÍÑ*/

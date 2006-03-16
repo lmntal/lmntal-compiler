@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import test.GUI.LMNtalDebugFrame;
 import util.StreamDumper;
 
 import compile.Module;
@@ -405,6 +406,7 @@ public class FrontEnd {
 							Env.fGUI = true;
 							Env.profile = true;
 							Env.fTrace = true;
+							Env.guiDebug = new LMNtalDebugFrame();//2006.3.16 by inui
 						} else if (args[i].equals("--nothread")) {
 							// 暫定オプション
 							// スレッドルールの変換を行わない
@@ -788,7 +790,10 @@ public class FrontEnd {
 //			rt.asyncFlag = false;
 			
 			//by inui
-			if (Env.debugOption) Debug.init();
+			if (Env.debugOption) {
+				Task.initTrace();
+				Debug.init();
+			}
 
 			boolean ready = true;
 			if (Env.gui != null) {

@@ -207,7 +207,7 @@ public final class Env {
 		if(!Env.fGUI) return;
 		atomSize = Env.fDEMO ? 40 : 16;
 		Env.gui = new LMNtalFrame();
-		if (Env.debugOption) Env.guiDebug = new LMNtalDebugFrame(Env.gui);//2006.1.31 by inui
+		if (Env.debugOption) Env.guiDebug.setLMNtalFrame(Env.gui);//2006.3.16 by inui
 	}
 	
 	/**

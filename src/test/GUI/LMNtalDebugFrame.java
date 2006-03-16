@@ -17,13 +17,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.util.Iterator;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -35,8 +35,6 @@ import javax.swing.text.BadLocationException;
 import runtime.Debug;
 import runtime.Env;
 import runtime.FrontEnd;
-import runtime.MasterLMNtalRuntime;
-import runtime.Membrane;
 import runtime.Rule;
 
 /**
@@ -65,6 +63,8 @@ class ConsolePrintStream extends PrintStream {
  * デバッグ時に使用するフレーム
  */
 public class LMNtalDebugFrame extends JFrame {	
+	public boolean restart;
+	
 	/** LMNtalFrame */
 	private LMNtalFrame lmntalFrame;
 	
@@ -81,14 +81,14 @@ public class LMNtalDebugFrame extends JFrame {
 	private JTextArea console;
 	
 	private JCheckBox guiCheckBox;
+	private JButton nextButton;
+	private JButton continueButton;
+	private Thread th;
 	
 	/**
 	 * コンストラクタです
 	 */
-	public LMNtalDebugFrame(LMNtalFrame lmntalFrame) {
-		this.lmntalFrame = lmntalFrame;
-		
-		//lmntalFrame.getContentPane().remove(1);//通常時と動作が変わるのでGo aheadボタンを削除
+	public LMNtalDebugFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		initComponents();
 		setSize(600, 600);
@@ -111,7 +111,7 @@ public class LMNtalDebugFrame extends JFrame {
 				while (iter.hasNext()) {
 					//g.fillRect(0, SIZE*(((Rule)iter.next()).lineno-1)+9, SIZE-8, SIZE-2);
 					final int x = 0;
-					final int y = SIZE*(((Rule)iter.next()).lineno-1)+9;
+					final int y = SIZE*(((Integer)iter.next()).intValue()-1)+9;
 					final int w = SIZE-(Env.fDEMO ? 5 : 2);
 					final int h = SIZE-(Env.fDEMO ? 5 : 2);
 					g.fillOval(x, y, w, h);
@@ -204,16 +204,23 @@ public class LMNtalDebugFrame extends JFrame {
 		getContentPane().add(split, BorderLayout.CENTER);
 		split.setDividerLocation(400);
 		
-		// ツールバーの生成
+		//ツールバーの生成
 		JToolBar toolBar = new JToolBar();
-		JButton nextButton = new JButton("Next");
+
+		nextButton = new JButton("Next");
 		nextButton.setToolTipText("apply a rule only one time");
-		nextButton.addActionListener(new NextButtonActionListener(lmntalFrame));
 		toolBar.add(nextButton);
-		JButton continueButton = new JButton("Continue");
+		continueButton = new JButton("Continue");
 		continueButton.setToolTipText("apply rules until a break point");
-		continueButton.addActionListener(new ContinueButtonActionListener(lmntalFrame));
 		toolBar.add(continueButton);
+		
+//		JButton openButton = new JButton("Open");
+//		openButton.addActionListener(new OpenButtonActionListener());
+//		toolBar.add(openButton);
+		
+		JButton restartButton = new JButton("Restart");
+		restartButton.addActionListener(new RestartButtonActionListener());
+		toolBar.add(restartButton);
 		
 		//行番号チェックボックス
 		{
@@ -304,6 +311,17 @@ public class LMNtalDebugFrame extends JFrame {
 		buf.append("</pre>\n");
 		linenoArea.setText(buf.toString());			
 	}
+	
+	public void setLMNtalFrame(LMNtalFrame lmntalFrame) {
+		this.lmntalFrame = lmntalFrame;
+		nextButton.addActionListener(new NextButtonActionListener(lmntalFrame));
+		continueButton.addActionListener(new ContinueButtonActionListener(lmntalFrame));
+		lmntalFrame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				guiCheckBox.setSelected(false);
+			}
+		});
+	}
 
 	/** Nextボタンを押したときのAction */
 	class NextButtonActionListener implements ActionListener {
@@ -330,6 +348,56 @@ public class LMNtalDebugFrame extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			frame.busy = false;
 			Debug.endBreakPoint(Debug.CONTINUE);
+		}
+	}
+	
+	/** Openボタンを押したときのAction */
+	class OpenButtonActionListener implements ActionListener, Runnable {
+		Reader r;
+		String name;
+		
+		public void actionPerformed(ActionEvent e) {
+			if (lmntalFrame != null) lmntalFrame.dispose();
+			console.setText("");
+			JFileChooser fc = new JFileChooser();
+			fc.showOpenDialog(null);
+			File f = fc.getSelectedFile();
+			Debug.setUnitName(f.getName());
+			try {
+				r = new FileReader(f);
+				name = f.getName();
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			}
+			th = new Thread(this);
+			th.start();
+			guiCheckBox.setSelected(false);
+		}
+		
+		public void run() {
+			restart = false;
+			FrontEnd.run(r, name);
+		}
+	}
+	
+	/** Restartボタンを押したときのAction */
+	class RestartButtonActionListener implements ActionListener, Runnable {
+		public void actionPerformed(ActionEvent e) {
+			if (lmntalFrame != null) lmntalFrame.dispose();
+			console.setText("");
+			guiCheckBox.setSelected(false);
+			th = new Thread(this);
+			th.start();
+		}
+		
+		public void run() {
+			restart = true;
+			try {
+				FileReader r = new FileReader(Debug.getUnitName());
+				FrontEnd.run(r, Debug.getUnitName());
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

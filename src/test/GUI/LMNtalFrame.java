@@ -132,6 +132,14 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		}
 		return Env.gui.running;
 	}
+	
+	public void dispose() {
+		super.dispose();
+		if (Env.debugOption) {
+			running = busy = false;
+			runtime.LMNtalRuntimeManager.terminateAllThreaded();
+		}
+	}
 }
 
 class ActionAdapter implements ActionListener {
