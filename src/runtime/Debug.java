@@ -52,7 +52,9 @@ public class Debug {
 	private static void collectAllRules(Membrane mem) {
 		Iterator itr = mem.rulesetIterator();
 		while (itr.hasNext()) {
-			InterpretedRuleset ruleset = (InterpretedRuleset)itr.next();
+			Object o = itr.next();
+			if (!(o instanceof InterpretedRuleset)) continue;
+			InterpretedRuleset ruleset = (InterpretedRuleset)o;
 			List rules = ruleset.rules;
 			Iterator ruleIterator = rules.iterator();
 			while (ruleIterator.hasNext()) {
