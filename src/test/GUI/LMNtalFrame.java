@@ -34,20 +34,22 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	public boolean running = true;
 	
 	public LMNtalFrame() {
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(Env.debugOption ? JFrame.HIDE_ON_CLOSE : JFrame.DISPOSE_ON_CLOSE);
 //		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				running = busy = false;
-				runtime.LMNtalRuntimeManager.terminateAllThreaded();	// 追加 n-kato 2004-10-30
-			}
-		});
+		if (!Env.debugOption) {//2006.3.16 by inui
+			addWindowListener(new WindowAdapter() {
+				public void windowClosing(WindowEvent e) {
+					running = busy = false;
+					runtime.LMNtalRuntimeManager.terminateAllThreaded();	// 追加 n-kato 2004-10-30
+				}
+			});
+		}
 		initComponents();
 		setSize(800,600);
 		if(Env.getExtendedOption("screen").equals("max")) {
 			setExtendedState(Frame.MAXIMIZED_BOTH | getExtendedState());
 		}
-		setVisible(true);
+		if (!Env.debugOption) setVisible(true);
 		if(!Env.getExtendedOption("auto").equals("")) {
 			th = new MyThread(this);
 			th.start();
@@ -80,8 +82,10 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		getContentPane().setLayout(new BorderLayout());
 //		getContentPane().add(jt=new JTextArea(5, 80), BorderLayout.NORTH);
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
-		getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
-		bt.addActionListener(new ActionAdapter(this));
+		if (!Env.debugOption) {//2006.3.16 by inui
+			getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
+			bt.addActionListener(new ActionAdapter(this));
+		}
 //		getContentPane().addKeyListener(new MyKeyAdapter(this));
 		
 //		addKeyListener(this);

@@ -1,17 +1,48 @@
 package test.GUI;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Iterator;
 
-import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.JToolBar;
+import javax.swing.text.BadLocationException;
 
-import runtime.*;
+import runtime.Debug;
+import runtime.Env;
+import runtime.FrontEnd;
+import runtime.MasterLMNtalRuntime;
+import runtime.Membrane;
+import runtime.Rule;
 
+/**
+ * @author inui
+ * 標準出力をJTextAreaに切替えるためのクラス
+ */
 class ConsolePrintStream extends PrintStream {
 	private JTextArea jt;
 	private JScrollPane scroll;
@@ -49,16 +80,16 @@ public class LMNtalDebugFrame extends JFrame {
 	/** コンソール */
 	private JTextArea console;
 	
+	private JCheckBox guiCheckBox;
+	
 	/**
 	 * コンストラクタです
 	 */
 	public LMNtalDebugFrame(LMNtalFrame lmntalFrame) {
 		this.lmntalFrame = lmntalFrame;
 		
-		lmntalFrame.setSize(600, 400);
-		lmntalFrame.getContentPane().remove(1);
-			//通常時と動作が変わるのでGo aheadボタンを削除
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		//lmntalFrame.getContentPane().remove(1);//通常時と動作が変わるのでGo aheadボタンを削除
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		initComponents();
 		setSize(600, 600);
 		setVisible(true);
@@ -67,9 +98,7 @@ public class LMNtalDebugFrame extends JFrame {
 	/**
 	 * デバッグ時ソース表示用のテキストエリアを生成する
 	 */
-	private JTextPane createJTextArea() {
-		//final int SIZE = (Env.fDEMO  ? 30 : 18);
-		
+	private JTextPane createJTextArea() {		
 		final JTextPane jt=new JTextPane() {
 			public void paint(Graphics g) {
 				super.paint(g);
@@ -161,6 +190,7 @@ public class LMNtalDebugFrame extends JFrame {
 		//コンソール
 		console = new JTextArea();
 		console.setFont(new Font("Monospaced", Font.PLAIN, Env.fDEMO ? 16 : 12));
+		console.setEditable(false);
 		JScrollPane scroll2 = new JScrollPane(console);
 		scroll2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		//標準出力を切り替える
@@ -172,6 +202,7 @@ public class LMNtalDebugFrame extends JFrame {
 		
 		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scroll1, scroll2);
 		getContentPane().add(split, BorderLayout.CENTER);
+		split.setDividerLocation(400);
 		
 		// ツールバーの生成
 		JToolBar toolBar = new JToolBar();
@@ -229,6 +260,22 @@ public class LMNtalDebugFrame extends JFrame {
 				}
 			});
 			toolBar.add(checkBox);
+		}
+		
+		//gオプション切替えチェックボックス
+		{
+			guiCheckBox = new JCheckBox("GUI");
+			guiCheckBox.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) {
+						lmntalFrame.setVisible(true);
+					} else {
+						lmntalFrame.setVisible(false);
+					}
+					
+				}
+			});
+			toolBar.add(guiCheckBox);
 		}
 		
 		getContentPane().add("North", toolBar);

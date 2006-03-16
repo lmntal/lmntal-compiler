@@ -4,12 +4,16 @@
  */
 package runtime;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import test.GUI.*;
 
 /**
  * LMNtalデバッガ
@@ -76,11 +80,12 @@ public class Debug {
 			buf.append("<style>pre {font-size:"+(Env.fDEMO ? 14 : 10)+"px; font-family:monospace;}</style>\n");
 			buf.append("<pre>\n");
 			while ((s = br.readLine()) != null) {
-				Matcher m = Pattern.compile("(//|%)(.*)").matcher(s);
+				Matcher m = Pattern.compile("(.*)(//|%)(.*)").matcher(s);
 				if (m.matches()) {//コメントだったらその他の色付けはしない
-					s = "<font color=green>"+m.group(1)+m.group(2)+"</font>";
+					s = m.group(1)+"<font color=green>"+m.group(2)+m.group(3)+"</font>";
 				} else {
-					s = s.replace(":-", "<font color=red>:-</font>");
+					s = s.replace("=", "<font color=fuchsia>=</font>");
+					s = s.replace(":-", "<font color=fuchsia>:-</font>");
 					s = s.replace("{", "<font color=blue>{</font>");
 					s = s.replace("}", "<font color=blue>}</font>");
 				}
@@ -101,13 +106,6 @@ public class Debug {
 		Debug.rules = new HashSet();
 		Membrane rootMem = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot();
 		collectAllRules(rootMem);
-		
-		//標準出力を切り替える
-//		try {
-//			System.setOut(new ConsolePrintStream(System.out, ((LMNtalDebugFrame)Env.gui).getConsole()));
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
 	}
 	
 	/**
