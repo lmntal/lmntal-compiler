@@ -272,7 +272,7 @@ public class DebugFrame extends JFrame {
 	public void updateScrollBar(int lineno) {
 		if (lineno == -1) return;
 		int value = scroll1.getVerticalScrollBar().getValue();
-		System.err.println("lineno="+lineno);
+		//System.err.println("lineno="+lineno);
 		final int SIZE = (Env.fDEMO  ? 25 : 18);
 		final int height = split.getDividerLocation();
 		if (SIZE*(lineno-1)+9 > value && SIZE*(lineno-1)+9+(SIZE-2) < value+height) return;
