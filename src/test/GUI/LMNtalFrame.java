@@ -124,7 +124,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	public void waitBusy() {
 //		lmnPanel.getGraphLayout().calc();
 		lmnPanel.getGraphLayout().setAllowRelax(true);
-		Env.debugFrame.updateScrollBar(Debug.getCurrentRuleLineno());
+		if (Env.debugFrame != null) Env.debugFrame.updateScrollBar(Debug.getCurrentRuleLineno());
 		busy = true;
 		while(busy) {
 			try {
