@@ -5,6 +5,8 @@
 package runtime;
 import java.util.*;
 
+import debug.DebugFrame;
+
 import test.GUI.*;
 import test3d.*;
 import graphic.*;
@@ -201,13 +203,13 @@ public final class Env {
 	public static LMNtalFrame gui;
 	public static boolean fDEMO;
 	public static int atomSize;
-	public static LMNtalDebugFrame guiDebug;//2006.1.31 by inui
+	public static DebugFrame debugFrame;//2006.1.31 by inui
 	
 	public static void initGUI() {
 		if(!Env.fGUI) return;
 		atomSize = Env.fDEMO ? 40 : 16;
 		Env.gui = new LMNtalFrame();
-		if (Env.debugOption) Env.guiDebug.setLMNtalFrame(Env.gui);//2006.3.16 by inui
+		if (Env.debugOption) Env.debugFrame.setLMNtalFrame(Env.gui);//2006.3.16 by inui
 	}
 	
 	/**
@@ -372,7 +374,7 @@ public final class Env {
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public static boolean guiTrace() {
 		if(gui==null) return true;
-		if(Env.guiDebug != null) Env.guiDebug.repaint();//2006.1.31 inui
+		if(Env.debugFrame != null) Env.debugFrame.repaint();//2006.1.31 inui
 		return gui.onTrace();
 	}
 	/**graphic版 nakano ルールスレッドの実行を継続してよいかどうか*/

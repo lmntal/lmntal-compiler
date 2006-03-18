@@ -22,7 +22,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import test.GUI.LMNtalDebugFrame;
 import util.StreamDumper;
 
 import compile.Module;
@@ -32,6 +31,8 @@ import compile.Translator;
 import compile.parser.LMNParser;
 import compile.parser.ParseException;
 import compile.parser.intermediate.RulesetParser;
+import debug.Debug;
+import debug.DebugFrame;
 
 /**
  * LMNtal のメイソ
@@ -406,7 +407,7 @@ public class FrontEnd {
 							Env.fGUI = true;
 							Env.profile = true;
 							Env.fTrace = true;
-							Env.guiDebug = new LMNtalDebugFrame();//2006.3.16 by inui
+							Env.debugFrame = new DebugFrame();//2006.3.16 by inui
 						} else if (args[i].equals("--nothread")) {
 							// 暫定オプション
 							// スレッドルールの変換を行わない
