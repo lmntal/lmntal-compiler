@@ -17,7 +17,7 @@ import graphic.*;
  */
 public final class Env {
 
-	public static final String LMNTAL_VERSION = "0.70.20060105";
+	public static final String LMNTAL_VERSION = "0.80.20060319";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
