@@ -46,6 +46,8 @@ public final class Env {
 	public static final int ND_MODE_ND_NOTHING= 3;
 	/** 非決定的LMNtalモード */
 	public static int ndMode = ND_MODE_D;
+	/** 非決定的LMNtalにおけるインタラクティブモード*/
+	public static boolean fInteractive = false;
 	
 	public static boolean fThread = true;
 	

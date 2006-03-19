@@ -282,14 +282,18 @@ public class FrontEnd {
 							/// --library
 							/// Generate library.
 							Env.fLibrary = true;
-						} else if (args[i].equals("--nondeterministic")) {
-							/// --nondeterministic
-							/// Execute the all reduction paths.
+						} else if (args[i].equals("--nd")) {
+							/// --nd
+							/// Nondeterministic mode. Execute the all reduction paths.
 							Env.ndMode = Env.ND_MODE_ND_ALL;
-						} else if (args[i].equals("--nondeterministic2")) {
+						} else if (args[i].equals("--nd2")) {
 							Env.ndMode = Env.ND_MODE_ND_ANSCESTOR;
-						} else if (args[i].equals("--nondeterministic3")) {
+						} else if (args[i].equals("--nd3")) {
 							Env.ndMode = Env.ND_MODE_ND_NOTHING;
+						} else if (args[i].equals("--interactive")) {
+							/// --interactive
+							/// Interactive mode. This option is available only in the nondeterministic mode.
+							Env.fInteractive = true;
 						} else if(args[i].equals("--object")) {//2006.3.8 by inui
 							/// --object
 							/// enable object (class declaration).
@@ -817,7 +821,7 @@ public class FrontEnd {
 			if (ready) {
 				((Task)root.getTask()).execAsMasterTask(); //rt.exec();
 
-				if (!Env.fTrace && Env.verbose > 0) {
+				if (!Env.fTrace && Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
 					Env.d( "Execution Result:" );
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );
 				}

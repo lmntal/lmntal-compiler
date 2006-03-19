@@ -1,5 +1,8 @@
 package runtime;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -476,6 +479,7 @@ public class Task extends AbstractTask implements Runnable {
 	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
 	 */
 	void nondeterministicExec() {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		HashMap idMap = new HashMap();
 		int nextId = 0;
 		ArrayList st = new ArrayList();
@@ -483,54 +487,76 @@ public class Task extends AbstractTask implements Runnable {
 		AtomSet atoms = getRoot().getAtoms();
 		atoms.freeze();
 		idMap.put(atoms, new Integer(nextId++));
-		int i = 0, max_w = 0,t = 0;
+//		int i = 0, max_w = 0,t = 0;
 
-		while (st.size() > 0) {
-			Membrane mem = (Membrane)st.remove(st.size() - 1);
-			//ルール適用の全可能性を検査
-			if (mem != getRoot())
-				memStack.push(mem);
-			root = mem;
-			states.clear();
-			exec(mem, true);
-			memStack.pop();
-			//それぞれ適用した結果を作成
-			System.out.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
-			Iterator it = states.iterator();
-			int w = 0;
-			t++;
-			while (it.hasNext()) {
-				i++;
-				w++;
-				//複製
-				Membrane mem2 = new Membrane(this);
-				Map map = mem2.copyCellsFrom(mem);
-				mem2.memToCopyMap = null;
-				mem2.memToCopiedMem = null;
-				mem2.copyRulesFrom(mem);
-				//適用
-				String ruleName = react(mem2, (Object[])it.next(), mem, map);
-				atoms = mem2.getAtoms();
-				atoms.freeze();
-				
-				Integer id;
-				if (idMap.containsKey(atoms)) {
-					id = (Integer)idMap.get(atoms);
-					mem2.drop();
-					mem2.free();
-				} else {
-					id = new Integer(nextId++);
-					st.add(mem2);
-					idMap.put(atoms, id);
+		try {
+			while (st.size() > 0) {
+				Membrane mem = (Membrane)st.remove(st.size() - 1);
+				//ルール適用の全可能性を検査
+				if (mem != getRoot())
+					memStack.push(mem);
+				root = mem;
+				states.clear();
+				exec(mem, true);
+				memStack.pop();
+				//適用した結果を作成
+				if (!Env.fInteractive)
+					System.out.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
+				if (states.size() > 0) {
+					Iterator it = states.iterator();
+		//			int w = 0;
+		//			t++;
+					while (it.hasNext()) {
+		//				i++;
+		//				w++;
+						//複製
+						Membrane mem2 = new Membrane(this);
+						Map map = mem2.copyCellsFrom(mem);
+						mem2.memToCopyMap = null;
+						mem2.memToCopiedMem = null;
+						mem2.copyRulesFrom(mem);
+						//適用
+						String ruleName = react(mem2, (Object[])it.next(), mem, map);
+						atoms = mem2.getAtoms();
+						atoms.freeze();
+						
+						Integer id;
+						if (idMap.containsKey(atoms)) {
+							id = (Integer)idMap.get(atoms);
+							mem2.drop();
+							mem2.free();
+						} else {
+							id = new Integer(nextId++);
+							st.add(mem2);
+							idMap.put(atoms, id);
+						}
+						if (!Env.fInteractive)
+							System.out.print(" " + id + "(" + ruleName + ")");
+					}
+				} else if (Env.fInteractive) {
+					System.out.print(Dumper.dump(mem) + " ? ");
+					String str = reader.readLine();
+					if (str == null || str.equals("") || str.equals("y")) {
+						Env.p("yes");
+						idMap.remove(mem.getAtoms());
+						mem.drop();
+						mem.free();
+						return;
+					}
 				}
-				System.out.print(" " + id + "(" + ruleName + ")");
+	//			if (w > max_w) max_w = w;
+				if (!Env.fInteractive)
+					System.out.println();
+	//			System.out.println(idMap.size() + "/" + st.size() + "/" + max_w);
 			}
-			if (w > max_w) max_w = w;
-			System.out.println();
-//			System.out.println(idMap.size() + "/" + st.size() + "/" + max_w);
+			if (Env.fInteractive)
+				Env.p("no");
+	//		System.out.println("state count is " + i + ", unique count is " + nextId);
+	//		System.out.println("average width is " + (i / t) + ", max width is " + max_w);
+		} catch (IOException e) {
+			Env.e("I/O Error");
+			Env.d(e);
 		}
-		System.out.println("state count is " + i + ", unique count is " + nextId);
-		System.out.println("average width is " + (i / t) + ", max width is " + max_w);
 	}
 
 	private int nextId;
@@ -547,9 +573,17 @@ public class Task extends AbstractTask implements Runnable {
 		atoms.freeze();
 		idMap.put(atoms, new Integer(nextId++));
 
-		nondeterministicExec2(idMap, mem);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			boolean ret = nondeterministicExec2(idMap, mem, reader);
+			if (Env.fInteractive)
+				Env.p(ret ? "yes" : "no");
+		} catch (IOException e) {
+			Env.e("I/O Error");
+			Env.d(e);
+		}
 	}
-	void nondeterministicExec2(HashMap idMap, Membrane mem) {
+	boolean nondeterministicExec2(HashMap idMap, Membrane mem, BufferedReader reader) throws IOException {
 		//ルール適用の全可能性を検査
 		if (mem != getRoot())
 			memStack.push(mem);
@@ -557,9 +591,20 @@ public class Task extends AbstractTask implements Runnable {
 		states.clear();
 		exec(mem, true);
 		memStack.pop();
-		//それぞれ適用した結果を作成
+		if (!Env.fInteractive)
+			System.out.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
+		//適用した結果を作成
 		ArrayList children = new ArrayList();
-		System.out.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
+		if (Env.fInteractive && states.size() == 0) {
+			System.out.print(Dumper.dump(mem) + " ? ");
+			String str = reader.readLine();
+			if (str == null || str.equals("") || str.equals("y")) {
+				idMap.remove(mem.getAtoms());
+				mem.drop();
+				mem.free();
+				return true;
+			}
+		}
 		Iterator it = states.iterator();
 		while (it.hasNext()) {
 			//複製
@@ -583,56 +628,80 @@ public class Task extends AbstractTask implements Runnable {
 				children.add(mem2);
 				idMap.put(atoms2, id);
 			}
-			System.out.print(" " + id + "(" + ruleName + ")");
+			if (!Env.fInteractive)
+				System.out.print(" " + id + "(" + ruleName + ")");
 		}
-		System.out.println();
-		System.out.println(idMap.size());
+		if (!Env.fInteractive)
+			System.out.println();
 		
 		for (int i = 0; i < children.size(); i++) {
-			nondeterministicExec2(idMap, (Membrane)children.get(i));
+			if (nondeterministicExec2(idMap, (Membrane)children.get(i), reader))
+				return true;
 		}
 		idMap.remove(mem.getAtoms());
 		mem.drop();
 		mem.free();
+		return false;
 	}
 	/**
 	 * ルート膜を非同期実行し、リダクショングラフを標準出力に出力する。
 	 */
 	void nondeterministicExec3() {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		int nextId = 1, nowId = 0;
 //long t = 0;
 		LinkedList queue = new LinkedList();
 		queue.addLast(getRoot());
-		while (queue.size() > 0) {
-			Membrane mem = (Membrane)queue.removeFirst();
-			//ルール適用の全可能性を検査
-			if (mem != getRoot())
-				memStack.push(mem);
-			root = mem;
-			states.clear();
-			exec(mem, true);
-			memStack.pop();
-			//それぞれ適用した結果を作成
-//			System.out.println(nowId++ + " : " + Dumper.dump(mem));
-			Iterator it = states.iterator();
-			while (it.hasNext()) {
-				//複製
-				Membrane mem2 = new Membrane(this);
-				Map map = mem2.copyCellsFrom(mem);
-				mem2.memToCopyMap = null;
-				mem2.memToCopiedMem = null;
-				mem2.copyRulesFrom(mem);
-				//適用
-				String ruleName = react(mem2, (Object[])it.next(), mem, map);
-				
-				queue.addLast(mem2);
-//				System.out.print(" " + nextId++ + "(" + ruleName + ")");
+		try {
+			while (queue.size() > 0) {
+				Membrane mem = (Membrane)queue.removeFirst();
+				//ルール適用の全可能性を検査
+				if (mem != getRoot())
+					memStack.push(mem);
+				root = mem;
+				states.clear();
+				exec(mem, true);
+				memStack.pop();
+				if (!Env.fInteractive)
+					System.out.println(nowId++ + " : " + Dumper.dump(mem));
+				//適用した結果を作成
+				if (states.size() > 0) {
+					Iterator it = states.iterator();
+					while (it.hasNext()) {
+						//複製
+						Membrane mem2 = new Membrane(this);
+						Map map = mem2.copyCellsFrom(mem);
+						mem2.memToCopyMap = null;
+						mem2.memToCopiedMem = null;
+						mem2.copyRulesFrom(mem);
+						//適用
+						String ruleName = react(mem2, (Object[])it.next(), mem, map);
+						
+						queue.addLast(mem2);
+						if (!Env.fInteractive)
+							System.out.print(" " + nextId++ + "(" + ruleName + ")");
+					}
+				} else 	if (Env.fInteractive) {
+					System.out.print(Dumper.dump(mem) + " ? ");
+					String str = reader.readLine();
+					if (str == null || str.equals("") || str.equals("y")) {
+						Env.p("yes");
+						mem.drop();
+						mem.free();
+						return;
+					}
+				}
+	//long s = System.nanoTime();
+				mem.drop();
+				mem.free();
+	//t += System.nanoTime() - s;
+				if (!Env.fInteractive)
+					System.out.println();
 			}
-//long s = System.nanoTime();
-//			mem.drop();
-//			mem.free();
-//t += System.nanoTime() - s;
-//			System.out.println();
+			Env.p("no");
+		} catch (IOException e) {
+			Env.e("I/O Error");
+			Env.d(e);
 		}
 //System.err.println(t / 1000000);
 	}
