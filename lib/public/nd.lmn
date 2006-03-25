@@ -29,7 +29,16 @@ nd.exec({$p,@p,{$q,@q}*})
 			mem1.removeAtom(plus);
 		:]({$p,@p,{$q,@q}*}).
 
+//ID生成
 nd.genid :- nd.nextid(0).
 nd.nextid(N), {$p,@p} :- \+($p=(id(X),$pp)), N2=N+1 | nd.nextid(N2), {id(N),$p,@p}.
 
+//from のリスト化
+nd.gen_from_list, {id(N),$p,@p} :- uniq(N) | nd.gen_from_list, {id(N),fl([]),$p,@p}.
+reduce(F,T,R),{id(N),from(F),fl(FL),$p[FL|*W],@p},{id(N2),to(T),$q,@q} :- uniq(N,N2) |
+	reduce(F,T,R),{id(N),from(F),fl([N2|FL]),$p[FL|*W],@p},{id(N2),to(T),$q,@q}.
+//to のリスト化
+nd.gen_to_list, {id(N),$p,@p} :- uniq(N) | nd.gen_to_list, {id(N),tl([]),$p,@p}.
+reduce(F,T,R),{id(NF),from(F),$p,@p},{id(NT),to(T),tl(TL),$q[TL|*W],@q} :- uniq(NF,NT) |
+	reduce(F,T,R),{id(NF),from(F),$p,@p},{id(NT),to(T),tl([NF|TL]),$q[TL|*W],@q}.
 }.
