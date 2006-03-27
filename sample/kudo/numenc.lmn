@@ -26,6 +26,81 @@ R=mul(M,pred(zero)):-R=minus(M).
 R=mul(M,succ(succ(N))):-R=plus(mul(M1,succ(N)),M2),suprcp(M,M1,M2).
 R=mul(M,pred(pred(N))):-R=sub(mul(M1,pred(N)),M2),suprcp(M,M1,M2).
 
+%normalization
+R=normalize(M):-R=normalize(zero,zero,M).
+R=normalize(N,P,succ(M)):-R=normalize(N,succ(P),M).
+R=normalize(N,P,pred(M)):-R=normalize(pred(N),P,M).
+R=normalize(pred(N),succ(P),M):-R=normalize(N,P,M).
+R=normalize(zero,zero,zero):-R=zero(zero).
+R=normalize(zero,succ(P),zero):-R=pos(succ(P)).
+R=normalize(pred(N),zero,zero):-R=neg(pred(N)).
+
+%power
+R=power(N,M):-R=power_0(N,normalize(M)).
+R=power_0(N,zero(zero)):-R=succ(zero),suprrm(N).
+R=power_0(N,pos(succ(M))):-R=mul(power_0(N1,pos(M)),N2),suprcp(N,N1,N2).
+R=power_0(N,neg(M)):-R=succ(zero), suprrm(N),suprrm(M).
+
+%division
+R=div(N,M):-R=q_only(div_0(normalize(N),normalize(M))).
+%R=div_0(N,zero(zero)):-R=error.
+R=div_0(neg(N),M):-R=minus(div_0(pos(minus(N)),M)).
+R=div_0(N,neg(M)):-R=minus(div_0(N,pos(minus(M)))).
+R=div_0(pos(N),pos(M)):-R=div_1(N,M1,M2,zero),suprcp(M,M1,M2).
+R=div_1(succ(N),succ(M),E,Q):-R=div_1(N,M,E,Q).
+R=div_1(succ(N),zero,E,Q):-R=div_1(succ(N),E1,E2,succ(Q)),suprcp(E,E1,E2).
+R=div_1(zero,succ(M),E,Q):-R=div_ans(Q,sub(E,succ(M))).
+R=div_1(zero,zero,E,Q):-R=div_ans(succ(Q),zero), suprrm(E).
+R=q_only(div_ans(Q,E)):-R=Q, suprrm(E).
+
+%mod
+R=mod(N,M):-R=e_only(div_0(normalize(N),normalize(M))).
+R=e_only(div_ans(Q,E)):-R=E,suprrm(Q).
+
+%abs
+R=abs(N):-R=abs_0(normalize(N)).
+R=abs_0(zero(zero)):-R=zero.
+R=abs_0(pos(N)):-R=N.
+R=abs_0(neg(N)):-R=minus(N).
+
+%bool
+R=not(true):-R=false.
+R=not(false):-R=true.
+R=and(true,B):-R=B.
+R=and(false,B):-R=false, boolrm(B).
+R=or(true,B):-R=true, boolrm(B).
+R=or(false,B):-R=B.
+R=xor(true,B):-R=not(B).
+R=xor(false,B):-R=B.
+boolrm(true):-().
+boolrm(false):-().
+
+R=is_neg(N):-R=is_neg_0(normalize(N)).
+R=is_neg_0(neg(N)):-R=true, suprrm(N).
+R=is_neg_0(pos(N)):-R=false, suprrm(N).
+R=is_neg_0(zero(zero)):-R=false.
+R=is_pos(N):-R=is_pos_0(normalize(N)).
+R=is_pos_0(pos(N)):-R=true, suprrm(N).
+R=is_pos_0(neg(N)):-R=false, suprrm(N).
+R=is_pos_0(zero(zero)):-R=false.
+R=is_zero(N):-R=is_zero_0(normalize(N)).
+R=is_zero_0(zero(zero)):-R=true.
+R=is_zero_0(pos(M)):-R=false, suprrm(M).
+R=is_zero_0(neg(M)):-R=false, suprrm(M).
+
+%==
+R=eq(N,M):-R=is_zero(sub(N,M)).
+%!=
+R=neq(N,M):-R=not(eq(N,M)).
+% <
+R=les(N,M):-R=is_neg(sub(N,M)).
+% >
+R=grt(N,M):-R=is_pos(sub(N,M)).
+% =<
+R=leq(N,M):-R=or(les(N1,M1),eq(N2,M2)),suprcp(N,N1,N2),suprcp(M,M1,M2).
+% >=
+R=geq(N,M):-R=or(grt(N1,M1),eq(N2,M2)),suprcp(N,N1,N2),suprcp(M,M1,M2).
+
 % 組み込みのintとの変換
 R=to_embeded(succ(N)):-R=to_embeded(N)+1.
 R=to_embeded(pred(N)):-R=to_embeded(N)-1.
@@ -34,6 +109,14 @@ R=of_embeded(N):-N>0|R=succ(of_embeded(N-1)).
 R=of_embeded(N):-N<0|R=pred(of_embeded(N+1)).
 R=of_embeded(N):-N=:=0|R=zero.
 
-plustest=to_embeded(plus(of_embeded(8),of_embeded(-9))).
-subtest=to_embeded(sub(of_embeded(10),of_embeded(5))).
-multest=to_embeded(mul(of_embeded(-10),of_embeded(-10))).
+% 組み込みのbool(?)との変換
+R=to_embeded(true) :- R=true.
+R=to_embeded(false) :- R=false.
+
+%plustest=to_embeded(plus(of_embeded(8),of_embeded(-9))).
+%subtest=to_embeded(sub(of_embeded(10),of_embeded(5))).
+%multest=to_embeded(mul(of_embeded(-10),of_embeded(-10))).
+
+%qtest = to_embeded(mod(of_embeded(10), of_embeded(5))).
+%abstest = to_embeded(abs(of_embeded(-10))).
+%leqtest = to_embeded(leq(mul(of_embeded(5), of_embeded(3)), of_embeded(25))).
