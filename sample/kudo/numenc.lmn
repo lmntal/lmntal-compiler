@@ -35,6 +35,9 @@ R=normalize(zero,zero,zero):-R=zero(zero).
 R=normalize(zero,succ(P),zero):-R=pos(succ(P)).
 R=normalize(pred(N),zero,zero):-R=neg(pred(N)).
 
+R=pos(zero) :- R=zero(zero).
+R=neg(zero) :- R=zero(zero).
+
 %power
 R=power(N,M):-R=power_0(N,normalize(M)).
 R=power_0(N,zero(zero)):-R=succ(zero),suprrm(N).
@@ -116,6 +119,7 @@ R=to_embeded(false) :- R=false.
 %plustest=to_embeded(plus(of_embeded(8),of_embeded(-9))).
 %subtest=to_embeded(sub(of_embeded(10),of_embeded(5))).
 %multest=to_embeded(mul(of_embeded(-10),of_embeded(-10))).
+powertest = to_embeded(power(of_embeded(2),of_embeded(5))).
 
 %qtest = to_embeded(mod(of_embeded(10), of_embeded(5))).
 %abstest = to_embeded(abs(of_embeded(-10))).
