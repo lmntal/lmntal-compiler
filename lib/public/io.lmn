@@ -239,7 +239,7 @@ H=io.print(Object, String) :- class(Object, "java.io.PrintWriter"), string(Strin
 	:](Object, String).
 
 H=io.print(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter"), string(String) |
-	H=print(Object, Rest), [:/*inline*/
+	H=io.print(Object, Rest), [:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			if(pw!=null) {
