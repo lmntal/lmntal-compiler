@@ -265,10 +265,19 @@ public final class RemoteMembrane extends AbstractMembrane {
 		remote.send("UNLOCK",this);
 		onUnlock(false);
 	}
-	public void asyncUnlock() {
+	
+	// 060401 okabe
+	// Membrane クラスと整合性をとるために，引数のあるasyncFlag と引数のないasyncFlag を用意．
+	// 現時点では引数は使われていないけど，将来的には膜の中身をダンプできるようにしたいので．
+	public void asyncUnlock(boolean asyncFlag) {
 		remote.send("ASYNCUNLOCK",this);
 		onUnlock(true);
 	}
+	
+	public void asyncUnlock() {
+		asyncUnlock(false);
+	}
+	
 	public void recursiveUnlock() {
 		remote.send("RECURSIVEUNLOCK",this);
 	}

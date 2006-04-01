@@ -320,9 +320,7 @@ public class Task extends AbstractTask implements Runnable {
 
 			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化。本膜ロック解放後に行う必要がある。
 			if(memStack.isEmpty() && mem.isRoot()) {
-				// 分散でClassCastException
-				// TODO mem が RemoteMembrane のインスタンスの場合
-				Membrane memToActivate = (Membrane)mem.getParent();
+				AbstractMembrane memToActivate = mem.getParent();
 				// 親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
 				if (memToActivate != null) {
 					doAsyncLock(memToActivate);
@@ -345,16 +343,21 @@ public class Task extends AbstractTask implements Runnable {
 			activatePerpetualMem(m);
 		}
 	}
-	void doAsyncLock(Membrane mem) {
-		final Membrane m = mem;
+	
+	// 060401 okabe
+	// Membrane -> AbstractMembrane
+	// 他も順次変更していく予定
+	void doAsyncLock(AbstractMembrane mem) {
+		final AbstractMembrane m = mem;
 		new Thread() {
 			public void run() {
-				if (m.asyncLock()){
+				if (m.asyncLock()) {
 					m.asyncUnlock(false);
 				}
 			}
 		}.start();
 	}
+
 	public void outTime(){
 		if(Env.majorVersion==1 && Env.minorVersion>4)
 			System.out.println("threadID="+thread.getId()+" atomtime=" + atomtime/1000000 + "msec memtime=" + memtime/1000000 +"msec");

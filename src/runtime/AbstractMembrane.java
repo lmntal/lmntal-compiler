@@ -971,6 +971,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * 仮の実行膜スタックの内容を実行膜スタックに転送する。ルート膜の場合はunlock()と同じになる。
 	 * <p>ルールスレッド以外のスレッドが最初に取得した膜のロックを解放するときに使用する。*/
 	public abstract void asyncUnlock();
+	
+	public abstract void asyncUnlock(boolean asyncFlag);
 
 	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/
 	public abstract void recursiveUnlock();
