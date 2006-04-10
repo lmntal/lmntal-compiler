@@ -126,7 +126,7 @@ R=nlmem.copy(M) :- R=nlmem.copy(M, nil).
  * @param +Mem ÇË´þ¤¹¤ëËì
  * @example nlmem.kill(M),{$p[M|*Z]} ==> killed(*Z)
  */
-nlmem.kill({$p}), :- nlmem.kill({$p}, killed).
+nlmem.kill({$p,@p}), :- nlmem.kill({$p,@p}, killed).
 
 /**
  * nlmem.kill(+Mem, +KillTagAtom)
