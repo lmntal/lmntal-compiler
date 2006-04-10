@@ -21,7 +21,8 @@ HISTORY
 
     06/01/10 released
 	06/01/12 2.0
-	06/01/30 3.0 memRulesetsEncoder,memProcessEncoderを追加
+	06/01/30 3.0 memRulesetsEncoder,memProcessEncoderを追加．
+	06/04/11 3.1 decodeFilter とencodeFilter を追加．encoded @@ でlib/src/nlmem.lmn のnlmem.kill を使うように変更．
 
 */
 
@@ -100,8 +101,8 @@ encodeProcess @@
   :],$p,@p}.
 
 encoded @@
-Ret=codec.encoded(X),{X=S,$p,@p} :- string(S) | 
-  Ret=S,{$p,@p}.
+Ret=codec.encoded(X),{X=S,$p[|*X],@p} :- string(S) | 
+  Ret=S,nlmem.kill({$p[|*X]}).
 
 /**
  *  module: strDecoder
@@ -158,4 +159,24 @@ codec.fileDecoder(S) :- string(S) |
     me.nthAtom(0).remove();
     me.remove();
   :](S).
+
+/**
+ *  module: encodeFilter
+ *  membrane list -> string list
+ *  Example
+ *    nothing
+ */
+encodeFilter @@
+Ret=codec.encodeFilter([H|T]) :-
+  Ret=[codec.memEncoder(H)|codec.encodeFilter(T)].
+  
+/**
+ *  module: decodeFilter
+ *  list -> membrane
+ *  Example
+ *    codec.decodeFilter([M1,M2]),M1="{a}",M2="{b}" -> {a},{b}
+ */
+decodeFilter @@
+codec.decodeFilter([H|T]) :- string(H) | 
+  codec.decodeFilter(T),codec.strDecoder(H).
 }
