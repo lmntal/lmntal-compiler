@@ -81,6 +81,13 @@ public class DebugFrame extends JFrame {
 		item.addActionListener(new OpenActionListener());
 		menu.add(item);
 		menubar.add(menu);
+		
+		menu = new JMenu("Help");
+		item = new JMenuItem("Help");
+		item.addActionListener(new HelpActionListener());
+		menu.add(item);
+		menubar.add(menu);
+		
 		return menubar;
 	}
 	
@@ -353,6 +360,12 @@ public class DebugFrame extends JFrame {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	class HelpActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			new HelpFrame();
 		}
 	}
 }
