@@ -705,7 +705,7 @@ public class Optimizer {
 		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
 			return;
 		}
-		int i = 0;
+		int i = ((List)react.getArg2()).size();
 		List args = (List)react.getArg3();
 		it = args.iterator();
 		while (it.hasNext()) {
