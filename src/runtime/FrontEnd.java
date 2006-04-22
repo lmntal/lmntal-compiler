@@ -520,7 +520,8 @@ public class FrontEnd {
 				else         is = new SequenceInputStream(is, fis);
 			}
 		} catch(FileNotFoundException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
+			System.out.println(e.getMessage());
 			System.exit(-1);
 		} catch(SecurityException e) {
 			e.printStackTrace();
