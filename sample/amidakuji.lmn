@@ -22,5 +22,5 @@ goal1(R12).         goal2(R23).         goal3(R31).
 // Main program
 io.input([:This is amidakuji. Where to start today? Input start1, start2 or start3.:], input_str).
 input_str(done(You)) :- amidakuji.start_at(You).
-amidakuji.done($goal) :- unary($goal) | io.popup($goal).
 
+amidakuji.done($goal) :- unary($goal) | io.popup(string.unary_to_str($goal)).
