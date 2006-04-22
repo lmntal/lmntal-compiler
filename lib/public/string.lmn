@@ -323,6 +323,20 @@ H=string.float_of_str(S) :- string(S) | H=[:/*inline*/
 	:](S).
 
 /**
+ * string.unary_to_str(+Unary, -Res)
+ *
+ * Unary 型を受け取って，そのtoString() を返します．
+ * @example sample/amidakuji.lmn
+ */
+H=string.unary_to_str(I) :- unary(I) | H=[:/*inline*/
+    String s = me.nth(0);
+	Atom res = mem.newAtom(new StringFunctor(s));
+	mem.relinkAtomArgs(res, 0, me, 1);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	:](I).
+
+/**
  * string.int_to_str(+Int, -Res):
  *
  * 整数を受け取ってその文字コードが表す1文字からなる文字列を返します。
