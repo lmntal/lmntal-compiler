@@ -2,4 +2,4 @@
 setlocal
 
 call "%~dp0set_cp"
-java -DLMNTAL_HOME=%LMNTAL_HOME% runtime.FrontEnd %*
+java -DLMNTAL_HOME=%LMNTAL_HOME% runtime.FrontEnd %* --interpret
