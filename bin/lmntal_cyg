@@ -3,4 +3,4 @@
 source `dirname $0`/set_cp.sh
 CLASSPATH=`cygpath -wp $CLASSPATH` 
 #echo $CLASSPATH
-java -DLMNTAL_HOME=$LMNTAL_HOME runtime.FrontEnd $*
+java -DLMNTAL_HOME=$LMNTAL_HOME runtime.FrontEnd $* --interpret
