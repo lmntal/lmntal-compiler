@@ -1,335 +1,320 @@
 package graphic;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.swing.*;
 
 import runtime.AbstractMembrane;
+import runtime.Atom;
 import runtime.Env;
 import runtime.Functor;
-import runtime.StringFunctor;
 import runtime.IntegerFunctor;
-import runtime.Atom;
-import test.GUI.Node;
+import runtime.StringFunctor;
+import runtime.Membrane;
 
 public class LMNtalWindow extends JFrame{
+	final static
+	private Functor NAME_ATOM = new Functor("name",1); 
 	
-	private LMNGraphPanel lmnPanel = null;
-	private LMNtalGFrame lmnframe = null;
-//	private boolean busy = false;
-	private boolean killed = false;
-	public long timer = 0;
-	private AbstractMembrane mem=null;
-	private boolean keyChar = false;
-	private boolean keyListener = false;
-	private Functor keyAtomFunctor = null;
-	private boolean keyCache = true;
-	private boolean norepaint=false;
+	final static
+	private Functor SIZE_ATOM = new Functor("size", 2);
 	
-	/*ウィンドウ生成に必要*/
-	private boolean ready = false; 
-	private String name = null;
-	private int sizex = 0;
-	private int sizey = 0;
-	private int color_r = 255;
-	private int color_g = 255;
-	private int color_b = 255;
-	private int win_x = 0;
-	private int win_y = 0;
-	private boolean win_loc = false;
-	private LinkedList atomlist = new LinkedList();
+	final static
+	private Functor BGCOLOR_ATOM = new Functor("bgcolor", 3);
 	
-	public void setNoRepaint(boolean f){
-		norepaint=f;
-	}
-	public boolean getNoRepaint(){
-		return norepaint;
-	}
-	public Color getColor(){
-		return (new Color(color_r,color_g,color_b));
-	}
-//	public boolean getBusy(){
-//		return busy;
-//	}
-//	public void setBusy(boolean b){
-//		busy = b;
-//	}
+	final static
+	private Functor POSITION_ATOM = new Functor("position", 2);
 	
-	public void setMem(AbstractMembrane m){
-		mem=m;
+	final static
+	private Functor TIMER_ATOM = new Functor("timer", 1);
+	
+	final static
+	private Functor KILLER_ATOM = new Functor("killer", 0);
+	
+	final static
+	private Functor KEY_CHAR_ATOM = new Functor("keyChar", 0);
+	
+	final static
+	private Functor KEY_CODE_ATOM = new Functor("keyCode", 0);
+	
+	final static
+	private Functor KEY_CHAR_ATOM_CREATED = new Functor("keyChar", 1);
+	
+	final static
+	private Functor KEY_CODE_ATOM_CREATED = new Functor("keyCode", 1);
+	
+	
+	private LMNtalPanel lmnPanel = null;
+	private Atom keyAtom = null;
+	private Functor keyFunctor = null;
+	private LinkedList waitingAtomlist = new LinkedList();
+	
+	private String memID;
+	private String windowName;
+	private int sizeX = 0;
+	private int sizeY = 0;
+	private Color bgcolor = Color.WHITE;
+	private int posX = 0;
+	private int posY = 0;
+	private long timer = 1;
+	private boolean killer = false;
+	private long time;
+	
+	///////////////////////////////////////////////////////////////////////////
+	// コンストラクタ
+	public LMNtalWindow(AbstractMembrane mem){
+		resetMembrane(mem);
+		makeWindow();
+		Iterator childMem = mem.memIterator();
+		while(childMem.hasNext()){
+			Membrane child = (Membrane)childMem.next();
+			setChildMem(child);
+		}
+		mem.activate();
 	}
-	public AbstractMembrane getMem(){
-		return mem;
-	}
-	public void setColor(int a, int b , int c){
-		if(a > 255) color_r = 255;
-		else if(a < 0)color_r = 0;
-		else color_r = a;
+	///////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * 膜の情報をすべて取得し，再設定する．
+	 * 受け取る膜はウィンドウ膜であること保証がされていること．
+	 * @param mem
+	 */
+	public void resetMembrane(AbstractMembrane mem){
+		Iterator atomIte;
+		Atom targetAtom;
 		
-		if(b > 255) color_g =255;
-		else if(b < 0)color_g = 0;
-		else color_g = b;
-		
-		if(c > 255) color_b = 255;
-		else if(c < 0)color_b = 0;
-		else color_b = c;
-	}
-	
-	public LMNtalWindow(AbstractMembrane m, LMNtalGFrame frame){
-		ready = setAtoms(m);
-		lmnframe = frame;
-	}
-	
-	public void setName(int n){
-		name = Integer.toString(n);
-	}
-	public void setName(String n){
-		name = n;
-	}
-	public String getName(){
-		return name;
-	}
-	public void setWinLoc(int x, int y){
-		win_x=x;
-		win_y=y;
-		win_loc=true;
-	}
-	
-	public boolean makeWindow(){
-		if(!ready)return false;
-		
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				//閉じる際に、lmnPanelを殺す。
-				if(lmnPanel!=null){
-					lmnPanel.stop();
-				}
-				killed = true;
-				lmnframe.closewindow(name);
+		// membrane ID
+		memID = mem.getGlobalMemID();
 				
-			}
-		});
-		initComponents();
-		setSize(sizex,sizey);
-		if(Env.getExtendedOption("screen").equals("max")) {
-			setExtendedState(Frame.MAXIMIZED_BOTH | getExtendedState());
+		// name atom
+		atomIte= mem.atomIteratorOfFunctor(NAME_ATOM);
+		if(atomIte.hasNext()){
+			targetAtom = (Atom)atomIte.next();
+			windowName = ((null != targetAtom) ? targetAtom.nth(0) : "");
 		}
-//		setLocationByPlatform(true);
-		if(win_loc)
-			setLocation(win_x, win_y);
+			
+		// size atom
+		atomIte= mem.atomIteratorOfFunctor(SIZE_ATOM);
+		if(atomIte.hasNext()){
+			targetAtom = (Atom)atomIte.next();
+			try{
+				sizeX = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(0)) : 0);
+				sizeY = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(1)) : 0);
+			}
+			catch(NumberFormatException e){}
+		}
 		
-		if(keyListener && keyChar)
-			this.addKeyListener(new MyKeyAdapter(this, true));
-		else if(keyListener && !keyChar)
-			this.addKeyListener(new MyKeyAdapter(this, false));
+		// bgcolor
+		atomIte= mem.atomIteratorOfFunctor(BGCOLOR_ATOM);
+		if(atomIte.hasNext()){
+			targetAtom = (Atom)atomIte.next();
+			try{
+				bgcolor = ((null != targetAtom) ?
+						new Color(Integer.parseInt(targetAtom.nth(0)),
+								  Integer.parseInt(targetAtom.nth(1)),
+								  Integer.parseInt(targetAtom.nth(2)))
+						: Color.WHITE);
+			}
+			catch(NumberFormatException e){}
+		}
 		
-		Iterator ite = mem.atomIterator();
-		while(ite.hasNext()){
-			Atom a = (Atom)ite.next();
-			if(a.getName()=="keyChar" || a.getName()=="keyCode"){
-				Atom key = mem.newAtom(new Functor(a.getName(), a.getFunctor().getArity()+1));
-				for(int i=0;i < a.getFunctor().getArity();i++){
-					mem.relink(key,i+1,a,i);
-				}
-				a.remove();
+		// killer
+		atomIte= mem.atomIteratorOfFunctor(KILLER_ATOM);
+		if(atomIte.hasNext()){
+			killer = true;
+		}
+		
+		// position
+		atomIte= mem.atomIteratorOfFunctor(POSITION_ATOM);
+		if(atomIte.hasNext()){
+			targetAtom = (Atom)atomIte.next();
+			try{
+				posX = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(0)) : 0);
+				posY = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(1)) : 0);
+			}
+			catch(NumberFormatException e){}
+		}
+
+		// timer
+		atomIte= mem.atomIteratorOfFunctor(TIMER_ATOM);
+		if(atomIte.hasNext()){
+			targetAtom = (Atom)atomIte.next();
+			try{
+				timer = ((null != targetAtom) ? Long.parseLong(targetAtom.nth(0)) : 0);
+			}
+			catch(NumberFormatException e){}
+		}
+		
+		if(null == keyAtom){
+			// keyChar
+			atomIte= mem.atomIteratorOfFunctor(KEY_CHAR_ATOM);
+			if(atomIte.hasNext()){
+				Atom head = (Atom)atomIte.next();
+				keyAtom = mem.newAtom(new Functor(head.getName(), 1)); 
 				Atom nil = mem.newAtom(new Functor("[]", 1));
-				mem.newLink(key, 0, nil, 0);
-				mem.activate();
-
-				break;
+				mem.newLink(keyAtom, 0, nil, 0);
+				mem.removeAtom(head);
+				keyFunctor = KEY_CHAR_ATOM;
+			}
+			// keyCode
+			atomIte= mem.atomIteratorOfFunctor(KEY_CODE_ATOM);
+			if(atomIte.hasNext()){
+				Atom head = (Atom)atomIte.next();
+				keyAtom = mem.newAtom(new Functor(head.getName(), 1));
+				Atom nil = mem.newAtom(new Functor("[]", 1));
+				mem.newLink(keyAtom, 0, nil, 0);
+				mem.removeAtom(head);
+				keyFunctor = KEY_CODE_ATOM;
 			}
 		}
-		setVisible(true);
-		return true;
-	}
-	
-	public synchronized boolean setGraphicMem(AbstractMembrane m, int distance){
-		if(killed) return true;
-		if(lmnPanel == null)return false;
-
-		lmnPanel.setGraphicMem(m, distance);
-
-		if(!norepaint)
-			lmnPanel.repaint();
-		return true;
-	}
-	
-	public synchronized boolean removeGraphicMem(AbstractMembrane m){
-		if(killed) return true;
-		if(lmnPanel == null)return false;
-		lmnPanel.removeGraphicMem(m);
-		if(!norepaint)
-			lmnPanel.repaint();
-		return true;
+		else{
+			// keyChar
+			atomIte= mem.atomIteratorOfFunctor(KEY_CHAR_ATOM_CREATED);
+			if(atomIte.hasNext()){
+				keyAtom = (Atom)atomIte.next(); 
+			}
+			// keyCode
+			atomIte= mem.atomIteratorOfFunctor(KEY_CODE_ATOM_CREATED);
+			if(atomIte.hasNext()){
+				keyAtom = (Atom)atomIte.next(); 
+			}
+		}
 		
-	}
-	
-	protected void initComponents() {
-		lmnPanel = new LMNGraphPanel(this);
-		
-		setTitle(name);
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
+		doAddAtom(mem);
 	}
 	
 	/**
-	 * 描画用のアトム郡の取得
+	 * ウィンドウを生成する．
 	 */
-	private boolean setAtoms(AbstractMembrane m){
-		Iterator ite = m.atomIterator();
-		Node a;
+	public void makeWindow(){
 		
-		while(ite.hasNext()){
-			a = (Node)ite.next();
-			/**描画するファイルの取得*/
-			if(a.getName() == "name"){
-				if(a.getEdgeCount() != 1)return false;
-				setName(a.getNthNode(0).getName());
-			}
-			/**サイズの取得*/
-			else if(a.getName() == "size"){
-				if(a.getEdgeCount() != 2)return false;
-				try{
-					sizex = Integer.parseInt(a.getNthNode(0).getName());
-				}catch(NumberFormatException error){
-					return false;
-				}
-				
-				try{
-					sizey = Integer.parseInt(a.getNthNode(1).getName());
-				}catch(NumberFormatException error){
-					return false;
-				}
-			}
-			/**キーアダプタの設置*/
-			else if(a.getName() == "keyChar"){
-				keyListener = true;
-				keyChar = true;
-				keyCache = true;
-			}
-			else if(a.getName() == "keyCode"){
-				keyListener = true;
-				keyChar = false;
-				keyCache = true;
-			}
-			else if(a.getName() == "keyCharNoChache"){
-				keyListener = true;
-				keyChar = true;
-				keyCache = false;
-			}
-			else if(a.getName() == "keyCodeNoCache"){
-				keyListener = true;
-				keyChar = false;
-				keyCache = false;
-			}
-			/**背景色の取得*/
-			else if(a.getName()=="bgcolor"){
-				if(a.getEdgeCount() != 3)return false;
-				try{
-					setColor(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()), Integer.parseInt(a.getNthNode(2).getName()));
-				}catch(NumberFormatException error){
-					return false;
-				}
-			}
-			/**ウィンドウ生成位置の取得*/
-			else if(a.getName()=="position"){
-				if(a.getEdgeCount() != 2)return false;
-				try{
-					setWinLoc(Integer.parseInt(a.getNthNode(0).getName()), Integer.parseInt(a.getNthNode(1).getName()));
-				}catch(NumberFormatException error){
-					return false;
-				}
-			}
-			/**計算後の待機時間の取得*/
-			else if(a.getName()=="timer"){
-				if(a.getEdgeCount() != 1)return false;
-				try{
-					timer=(Long.parseLong(a.getNthNode(0).getName()));
-				}catch(NumberFormatException error){
-					return false;
-				}
-			}
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		if(keyFunctor == KEY_CHAR_ATOM){
+			addKeyListener(new MyKeyAdapter(this, true));
 		}
-		if(name!=null & sizex > 0 & sizey > 0)
-			return true;
-		return false;
-	}
-	public void setAddAtom(Functor f){
-		if(keyCache){
-			synchronized(this){
-				atomlist.add(f);
-			}
+		else if(keyFunctor == KEY_CODE_ATOM){
+			addKeyListener(new MyKeyAdapter(this, false));
 		}
-		else
-			keyAtomFunctor = f;
-	}
-	/**キー入力でリストに積まれたアトム（Functor）を膜に追加する*/
-	public synchronized void doAddAtom(){
-		synchronized(this){
-			Iterator ite = getMem().atomIterator();
-			/*keyCacheがfalseのとき*/
-			if(!keyCache){
-				/*積まれたアトムを追加するリストを検索*/
-				while(keyAtomFunctor!=null && ite.hasNext()){
-					Atom a = (Atom)ite.next();
-					if(a.getName()=="keyCharNoCache" || a.getName()=="keyCodeNoCache"){
-						Atom data = getMem().newAtom(keyAtomFunctor);
-//						Atom key = mem.newAtom(new Functor(a.getName(), 1));
-						Atom key = mem.newAtom(new Functor(a.getName(), a.getFunctor().getArity()+1));
-						for(int i=0;i < a.getFunctor().getArity();i++){
-							mem.relink(key,i+1,a,i);
-						}
-						getMem().newLink(key, 0, data, 0);
-						a.remove();
-						keyAtomFunctor = null;
-						break;
-					}
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				// 閉じる際の処理
+				if(killer){
+					System.exit(0);
 				}
-				return;
 			}
-			/*keyCacheがtrueのとき*/
-			while(!atomlist.isEmpty()){
-				Functor fa = (Functor)atomlist.removeFirst();
-				
-//				WindowSet win = (WindowSet)windowmap.get(wa.window);
-				/*積まれたアトムを追加するリストを検索*/
-				while(ite.hasNext()){
-					Atom a = (Atom)ite.next();
-					if(a.getName()=="keyChar" || a.getName()=="keyCode"){
-						Atom nth1 = a;
-						Atom nth2 = null;
-						int nth1_arg=0;
-						while(true){
-							try{
-								nth2 = nth1.getArg(nth1_arg).getAtom();
-							}catch(ArrayIndexOutOfBoundsException e){
-								break;
-							}
-							if(nth2.getName().equals("[]")){
-								Atom data = getMem().newAtom(fa);
-								Atom dot = getMem().newAtom(new Functor(".", 3));
-								getMem().newLink(dot, 0, data, 0);
-								getMem().newLink(nth1, nth1_arg, dot, 2);
-								getMem().newLink(nth2, 0, dot, 1);
-								break;
-							}
-							nth1 = nth2;
-							nth1_arg=1;
-//							if(nth1.getFunctor().getArity()==1)
-//							nth1_arg=0;
-						}
-						break;
-					}
+		});
+		
+		lmnPanel = new LMNtalPanel(bgcolor);
+		
+		setTitle(windowName);
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
+		
+		setSize(sizeX,sizeY);
+		if(Env.getExtendedOption("screen").equals("max")) {
+			setExtendedState(Frame.MAXIMIZED_BOTH | getExtendedState());
+		}
+		
+		setLocation(posX, posY);
+
+		setVisible(true);
+	}
+	
+	/**
+	 * ウィンドウの情報を再セットする．
+	 * @param mem
+	 */
+	public void resetWindow(AbstractMembrane mem){
+		resetMembrane(mem);
+		// TODO: ウィンドウの設定に変更があった場合，更新．サイズの位置で更新を分けるべき？
+		//setSize(sizeX,sizeY);
+		//setLocation(posX, posY);
+	}
+	
+	/**
+	 * 管理する子孫膜を記憶する．
+	 * @param mem
+	 */
+	public void setChildMem(Membrane mem){
+		boolean res = lmnPanel.setChildMem(mem);
+		// パネルクラスが作業中または最短更新時間に満てないときは待つ
+		while(res && ((timer > System.currentTimeMillis() - time) || lmnPanel.isBusy())){}
+		lmnPanel.repaint();
+		// 最終更新時間のセット
+		time = System.currentTimeMillis();
+	}
+	
+	/**
+	 * 管理する子孫膜を削除する．
+	 * @param mem
+	 */
+	public void removeChildMem(AbstractMembrane mem){
+		lmnPanel.removeChildMem(mem);
+		// パネルクラスが作業中または最短更新時間に満てないときは待つ
+		while(timer > System.currentTimeMillis() - time || lmnPanel.isBusy()){}
+		//lmnPanel.repaint();
+		// 最終更新時間のセット
+		time = System.currentTimeMillis();
+	}
+	
+	/**
+	 * ライブラリで前回描いたものを消さないモードに変更するためのメソッド．
+	 * @param flag
+	 */
+	public void setRepaint(boolean flag){
+		if(null != lmnPanel){
+			lmnPanel.setRepaint(flag);
+		}
+	}
+	
+	/**
+	 * キーアダプタから追加するアトムのファンクターを受け取り予約する
+	 * @param functor
+	 */
+	public void setAddAtom(Functor functor){
+		waitingAtomlist.add(functor);
+	}
+	
+	/**
+	 * 予約されているファンクターをアトムとして膜に追加する
+	 * @param mem
+	 */
+	private void doAddAtom(AbstractMembrane mem){
+		if(null == keyAtom){ return; }
+		while(!waitingAtomlist.isEmpty()){
+			Functor fa = (Functor)waitingAtomlist.removeFirst();
+			Atom nth1 = keyAtom;
+			Atom nth2 = null;
+			int nth1_arg=0;
+			
+			while(true){
+				try{
+					nth2 = nth1.getArg(nth1_arg).getAtom();
+				}catch(ArrayIndexOutOfBoundsException e){
+					break;
 				}
+				if(nth2.getName().equals("[]")){
+					Atom data = mem.newAtom(fa);
+					Atom dot = mem.newAtom(new Functor(".", 3));
+					mem.newLink(dot, 0, data, 0);
+					mem.newLink(nth1, nth1_arg, dot, 2);
+					mem.newLink(nth2, 0, dot, 1);
+					break;
+				}
+				nth1 = nth2;
+				nth1_arg=1;
 			}
 		}
 	}
 }
-
 
 class MyKeyAdapter extends KeyAdapter{
 	LMNtalWindow window;
@@ -344,9 +329,11 @@ class MyKeyAdapter extends KeyAdapter{
 	public void keyPressed(KeyEvent e) {
 		super.keyPressed(e);
 		if(byChar){
-			String input;
-			if(e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)input = String.valueOf(e.getKeyCode());
-			else input = String.valueOf(e.getKeyChar());
+			String input =
+			(e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
+			? String.valueOf(e.getKeyCode())
+			: String.valueOf(e.getKeyChar());
+			
 			window.setAddAtom((new StringFunctor(input)));
 		}else{
 			int input = e.getKeyCode();
