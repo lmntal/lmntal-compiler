@@ -31,6 +31,7 @@ import compile.Translator;
 import compile.parser.LMNParser;
 import compile.parser.ParseException;
 import compile.parser.intermediate.RulesetParser;
+
 import debug.Debug;
 import debug.DebugFrame;
 
@@ -79,6 +80,7 @@ public class FrontEnd {
 //		});
 
 		processOptions(args);
+		if (Env.debugOption) Debug.openSocket(); //2006.4.27 by inui
 		
 		// 実行
 
@@ -247,6 +249,9 @@ public class FrontEnd {
 							/// --demo
 							/// Demo mode.  Draw atoms and text larger.
 							Env.fDEMO = true;
+					    } else if (args[i].matches("--event-port")) {//2006.4.27 by inui
+					    	Debug.setEventPort(Integer.parseInt(args[i+1]));	
+							i++;
 						} else if(args[i].equals("--graphic")){
 							/// --graphic
 							/// Graphic LMNtal mode.
@@ -370,6 +375,9 @@ public class FrontEnd {
 							/// REPL(Read-Eval-Print-Loop) mode
 							Env.fREPL = true;
 							Env.fREMAIN = true;
+						} else if (args[i].matches("--request-port")) {//2006.4.27 by inui
+							Debug.setRequestPort(Integer.parseInt(args[i+1]));
+							i++;
 						} else if(args[i].equals("--start-daemon")){
 							/// --start-daemon
 							/// Start LMNtalDaemon
@@ -403,15 +411,20 @@ public class FrontEnd {
 							/// --use-source-library
 							/// Use source library in lmntal_lib/src.
 							Env.fUseSourceLibrary = true;
-						} else if (args[i].equals("--debug")) {
+						} else if (args[i].equals("--gdebug")) {
 							/// --debug
-							/// debug mode.
+							/// graphical debug mode.
 							Env.debugOption = true;
 							Env.fInterpret = true;
 							Env.fGUI = true;
 							Env.profile = true;
 							Env.fTrace = true;
 							Env.debugFrame = new DebugFrame();//2006.3.16 by inui
+						} else if (args[i].equals("--debug")) {
+							/// --debug
+							/// debug mode.
+							Env.debugOption = true;
+							Env.fInterpret = true;
 						} else if (args[i].equals("--nothread")) {
 							// 暫定オプション
 							// スレッドルールの変換を行わない
@@ -799,6 +812,7 @@ public class FrontEnd {
 			if (Env.debugOption) {
 				Task.initTrace();
 				Debug.init();
+				if (Env.debugFrame == null) Debug.inputCommand();//2006.4.27 by inui
 			}
 
 			boolean ready = true;
@@ -844,6 +858,9 @@ public class FrontEnd {
 			LMNtalRuntimeManager.terminateAllThreaded();
 			//if(true) System.out.println("FrontEnd: terminateAll() finished!");
 			LMNtalRuntimeManager.disconnectFromDaemon();
+			
+			if (Env.debugOption) //2006.4.26 by inui
+				Debug.terminate();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

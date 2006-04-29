@@ -295,7 +295,7 @@ public class DebugFrame extends JFrame {
 		
 		public void actionPerformed(ActionEvent e) {
 			frame.busy = false;
-			Debug.endBreakPoint(Debug.NEXT);
+			Debug.step();
 		}
 	}
 	
@@ -308,7 +308,7 @@ public class DebugFrame extends JFrame {
 		
 		public void actionPerformed(ActionEvent e) {
 			frame.busy = false;
-			Debug.endBreakPoint(Debug.CONTINUE);
+			Debug.doContinue();
 		}
 	}
 	
