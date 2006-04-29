@@ -299,10 +299,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		if(Env.fGUI) {
 			Env.gui.lmnPanel.getGraphLayout().removedAtomPos.add(atom.getPosition());
 		}
-		if(Env.LMNgraphic != null && atom.getName().equals("draw")){
-			Env.LMNgraphic.removeGraphicMem(atom.mem);
-//			System.out.println(Env.LMNgraphic.getname(atom.mem));
-		}
 		
 		atoms.remove(atom);
 		atom.mem = null;
@@ -378,7 +374,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <strike>実行膜スタックは操作しない。</strike>
 	 * 実行膜スタックに積まれていれば取り除く。 */
 	public void removeMem(AbstractMembrane mem) {
-		if(Env.LMNgraphic != null)
+		if(Env.LMNgraphic != null && !mem.isRoot())
 			Env.LMNgraphic.removeGraphicMem(mem);
 		mems.remove(mem);
 		mem.dequeue();

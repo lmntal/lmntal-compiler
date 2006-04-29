@@ -166,14 +166,14 @@ public class Task extends AbstractTask implements Runnable {
 	
 	private boolean guiTrace() {
 		if (!Env.guiTrace()) return false;
-		/**nakano graphic用*/
-		if (!Env.graphicTrace()){
-			/*暫定版*/
-			Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
-			Env.p( Dumper.dump( memToDump ) );
-			System.exit(0);
-//			return false;
-		}
+//		/**nakano graphic用*/
+//		if (!Env.graphicTrace()){
+//			/*暫定版*/
+//			Membrane memToDump = ((MasterLMNtalRuntime)getMachine()).getGlobalRoot();
+//			Env.p( Dumper.dump( memToDump ) );
+//			System.exit(0);
+////			return false;
+//		}
 		return true;
 	}
 	

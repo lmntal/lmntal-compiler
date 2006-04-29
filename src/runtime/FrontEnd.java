@@ -798,8 +798,7 @@ public class FrontEnd {
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
 
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
-			if(Env.fGraphic) Env.LMNgraphic.setRootMem(root);
-			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
+//			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			boolean t = Env.fTrace;
 			Env.fTrace = false;
@@ -819,11 +818,6 @@ public class FrontEnd {
 			if (Env.gui != null) {
 				Env.gui.lmnPanel.getGraphLayout().calc();
 				if (!Env.gui.onTrace())  ready = false;
-			}
-			
-			/*グラフィック表示用　nakano*/
-			if (Env.LMNgraphic != null) {
-				if (!Env.LMNgraphic.onTrace())  ready = false;
 			}
 			
 			/*TODO:3d calc*/

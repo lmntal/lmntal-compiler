@@ -379,12 +379,7 @@ public final class Env {
 		if(Env.debugFrame != null) Env.debugFrame.repaint();//2006.1.31 inui
 		return gui.onTrace();
 	}
-	/**graphic版 nakano ルールスレッドの実行を継続してよいかどうか*/
-	public static boolean graphicTrace() {
-		if(LMNgraphic==null) return true;
-		return LMNgraphic.onTrace();
-	}
-	
+
 	/**
 	 * 拡張コマンドライン引数をこれに格納する
 	 */
