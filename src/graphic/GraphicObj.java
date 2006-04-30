@@ -44,10 +44,17 @@ public abstract class GraphicObj{
 	public void setPosition(Point position){ this.position = position;}
 	
 	/**
+	 * 描画する座標をを返す
+	 * @return　Point
+	 */
+	public Point getPosition(){ return position;}
+	
+	/**
 	 * オブジェクトを描画する．
 	 * @param g
+	 * @param delta - 原点をdeltaとして描画を行う
 	 */
-	abstract public void drawAtom(Graphics g);
+	abstract public void drawAtom(Graphics g, Point delta);
 	
 	/**
 	 * 膜から必要な情報を取得する．

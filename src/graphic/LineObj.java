@@ -23,9 +23,9 @@ public class LineObj extends GraphicObj{
 	}
 	///////////////////////////////////////////////////////////////////////////
 	
-	public void drawAtom(Graphics g){
+	public void drawAtom(Graphics g, Point delta){
 		g.setColor(color);
-		g.drawLine((int)position.getX(),(int)position.getY(), (int)position2.getX(),(int)position2.getY());		
+		g.drawLine(position.x + delta.x,position.y + delta.y, position2.x + delta.x, position2.y + delta.y);		
 	}
 	
 	public void setMembrane(Membrane mem){

@@ -24,9 +24,9 @@ public class FillRectObj extends GraphicObj{
 	}
 	///////////////////////////////////////////////////////////////////////////
 	
-	public void drawAtom(Graphics g){
+	public void drawAtom(Graphics g, Point delta){
 		g.setColor(color);
-		g.drawRect((int)position.getX(),(int)position.getY(), sizeX, sizeY);		
+		g.drawRect(position.x + delta.x, position.y + delta.y, sizeX, sizeY);		
 	}
 	
 	public void setMembrane(Membrane mem){

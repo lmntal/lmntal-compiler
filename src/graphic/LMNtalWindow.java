@@ -247,6 +247,7 @@ public class LMNtalWindow extends JFrame{
 		boolean res = lmnPanel.setChildMem(mem);
 		// パネルクラスが作業中または最短更新時間に満てないときは待つ
 		while(res && ((timer > System.currentTimeMillis() - time) || lmnPanel.isBusy())){}
+		lmnPanel.setWindowID(memID);
 		lmnPanel.repaint();
 		// 最終更新時間のセット
 		time = System.currentTimeMillis();
@@ -259,10 +260,10 @@ public class LMNtalWindow extends JFrame{
 	public void removeChildMem(AbstractMembrane mem){
 		lmnPanel.removeChildMem(mem);
 		// パネルクラスが作業中または最短更新時間に満てないときは待つ
-		while(timer > System.currentTimeMillis() - time || lmnPanel.isBusy()){}
+		//while(timer > System.currentTimeMillis() - time || lmnPanel.isBusy()){}
 		//lmnPanel.repaint();
-		// 最終更新時間のセット
-		time = System.currentTimeMillis();
+		//// 最終更新時間のセット
+		//time = System.currentTimeMillis();
 	}
 	
 	/**

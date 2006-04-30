@@ -1,7 +1,6 @@
 package graphic;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.util.Iterator;
@@ -10,33 +9,22 @@ import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
 
-public class StringObj extends GraphicObj{
+public class RelativeObj extends GraphicObj{
 
 	final static
-	private Functor GETPIC_ATOM = new Functor("getpic", 1);
-
-	final static
-	private Functor STRING_ATOM = new Functor("string", 3);
+	private Functor SIZE_ATOM = new Functor("size", 2);
 	
-	final static
-	private int DEFAULT_SIZE = 15;
-	
-	private int size;
-	private String msg;
+	private int sizeX;
+	private int sizeY;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public StringObj(Membrane mem){
+	public RelativeObj(Membrane mem){
 		super(mem);
 	}
 	///////////////////////////////////////////////////////////////////////////
 	
-	public void drawAtom(Graphics g, Point delta){
-		if(null == msg){ return; }
-		g.setColor(color);
-		g.setFont(new Font("myFont",Font.PLAIN,size));
-		g.drawString(msg, position.x + delta.x, position.y + delta.y);
-	}
+	public void drawAtom(Graphics g, Point delta){}
 	
 	public void setMembrane(Membrane mem){
 		Iterator atomIte;
@@ -58,19 +46,15 @@ public class StringObj extends GraphicObj{
 			catch(NumberFormatException e){}
 		}
 		
-		// getpic
-		atomIte = mem.atomIteratorOfFunctor(STRING_ATOM);
+		// size atom
+		atomIte= mem.atomIteratorOfFunctor(SIZE_ATOM);
 		if(atomIte.hasNext()){
-			Iterator atomGetpicIte = mem.atomIteratorOfFunctor(GETPIC_ATOM);
-			if(atomGetpicIte.hasNext()){
-				targetAtom = (Atom)atomIte.next();
-				if(targetAtom.nthAtom(2) == (Atom)atomGetpicIte.next()){
-					msg = (targetAtom).nth(0);
-					try{ size = Integer.parseInt(targetAtom.nth(1)); }
-					catch(NumberFormatException e){ size = DEFAULT_SIZE; };
-				}
-			
+			targetAtom = (Atom)atomIte.next();
+			try{
+				sizeX = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(0)) : 0);
+				sizeY = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(1)) : 0);
 			}
+			catch(NumberFormatException e){}
 		}
 		
 		// color

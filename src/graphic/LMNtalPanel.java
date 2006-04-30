@@ -4,12 +4,13 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.*;
@@ -30,9 +31,6 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	
 	final 
 	private Functor GETPIC_ATOM = new Functor("getpic",1); 
-	
-	final 
-	private Functor GETPIC2_ATOM = new Functor("getpic",2);
 	
 	final 
 	private Functor STRING_ATOM = new Functor("string",3);
@@ -76,6 +74,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	private Image OSI = null;
 	private Graphics OSG = null;
 	private Thread th = null;
+	private String windowID = null;	
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラク
@@ -100,6 +99,14 @@ public class LMNtalPanel extends JPanel implements Runnable {
 		start();
 	}
 	///////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * ウィンドウ膜のIDをセットする．
+	 * @param id - paintやrepaintではウィンドウ膜を根に膜を描画するので，描画処理の前にかならず呼ぶこと．
+	 */
+	public void setWindowID(String id){
+		windowID = id;
+	}
 	
 	/**
 	 * 管理する子孫膜を記憶する．
@@ -113,15 +120,9 @@ public class LMNtalPanel extends JPanel implements Runnable {
 			if(mem.getAtomCountOfFunctor(DRAW_MEM)>0){
 				gObj = setGraphicMem(mem);
 			}
-			// 登録済み
-			if(memMap.containsKey(mem.getGlobalMemID())){
-				if(null != gObj){ objMap.put(mem.getGlobalMemID(), gObj); }
-			}
-			// 未登録
-			else{
-				memMap.put(mem.getGlobalMemID(), mem.getParent().getGlobalMemID());
-				if(null != gObj){ objMap.put(mem.getGlobalMemID(), gObj); }
-			}
+			else{ gObj = new RelativeObj(mem); }
+			memMap.put(mem.getGlobalMemID(), mem.getParent().getGlobalMemID());
+			objMap.put(mem.getGlobalMemID(), gObj);
 		}
 		busy = false;
 		return ((null != gObj) ? true : false);
@@ -150,7 +151,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 			else if(FILL_TRIANGLE.compareToIgnoreCase(getpic) == 0){ return (new FillTriangleObj(mem)); }
 			else if(atomGetpic.nthAtom(0).getFunctor().equals(STRING_ATOM)){ return (new StringObj(mem)); }
 		}
-		return null;
+		return (new RelativeObj(mem));
 	}
 	
 	/**
@@ -175,26 +176,51 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	public void paint(Graphics g) {
 		busy = true;
 		synchronized (memMap) {
-//			try{
-				//画面を白地で初期化（塗りつぶす）
-				if(repaintFlag){
-					OSG.setColor(bgcolor);
-					OSG.fillRect(0,
-							0,
-							(int)getSize().getWidth(),
-							(int)getSize().getHeight());
-				}
-				
-				// 描画オブジェクトを描画
-				Iterator ite = objMap.values().iterator();
-				while(ite.hasNext()){
-					GraphicObj gObj = (GraphicObj)ite.next();
-					gObj.drawAtom(OSG);
-				}
-				g.drawImage(OSI,0,0,this);
-//			}catch(NullPointerException e){System.out.println("null!");}
+			//画面を白地で初期化（塗りつぶす）
+			if(repaintFlag){
+				OSG.setColor(bgcolor);
+				OSG.fillRect(0,
+						0,
+						(int)getSize().getWidth(),
+						(int)getSize().getHeight());
+			}
+			// 描画オブジェクトを描画
+			drawChildren(windowID, new Point());
+			g.drawImage(OSI,0,0,this);
 		}
 		busy = false;
+	}
+	
+	/**
+	 * 子膜を描画する
+	 * @param id - 親膜のIDがidと等しいものを描画する
+	 */
+	private void drawChildren(String id, Point delta){
+		Iterator ite = memMap.keySet().iterator();
+		ArrayList list = new ArrayList();
+//		System.out.println(delta.toString() + id);
+//		OSG.translate(delta.x, delta.y);
+//		System.out.println(delta.toString() + id);
+		
+		// 値がidと等しいkey（膜のid）をリストに格納
+		while(ite.hasNext()){
+			String target = (String)ite.next();
+			if(((String)memMap.get(target)).equals(id)){
+				list.add(target);
+				GraphicObj gObj = (GraphicObj)objMap.get(target);
+				if(null != gObj){
+					gObj.drawAtom(OSG, delta);
+				}
+			}
+		}
+		
+		// リストに格納されたIDを元に子膜の描画
+		ite = list.iterator();
+		while(ite.hasNext()){
+			String target = (String)ite.next();
+			Point parentPoint = ((GraphicObj)objMap.get(target)).getPosition();
+			drawChildren(target, (new Point(delta.x + parentPoint.x, delta.y + parentPoint.y)));
+		}
 	}
 	
 	public void setRepaint(boolean flag){

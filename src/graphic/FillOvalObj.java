@@ -24,9 +24,9 @@ public class FillOvalObj extends GraphicObj{
 	}
 	///////////////////////////////////////////////////////////////////////////
 	
-	public void drawAtom(Graphics g){
+	public void drawAtom(Graphics g, Point delta){
 		g.setColor(color);
-		g.fillOval((int)position.getX(),(int)position.getY(), sizeX, sizeY);		
+		g.fillOval(position.x + delta.x, position.y + delta.y, sizeX, sizeY);		
 	}
 	
 	public void setMembrane(Membrane mem){

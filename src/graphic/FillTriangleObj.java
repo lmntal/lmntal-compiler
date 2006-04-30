@@ -2,6 +2,7 @@ package graphic;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.util.Iterator;
 
 import runtime.Atom;
@@ -23,10 +24,24 @@ public class FillTriangleObj extends GraphicObj{
 	}
 	///////////////////////////////////////////////////////////////////////////
 	
-	public void drawAtom(Graphics g){
+	public void drawAtom(Graphics g, Point delta){
 		g.setColor(color);
-		g.fillPolygon(posX, posY, 3);	
+		int[] x = new int[3];
+		int[] y = new int[3];
+		x[0] = posX[0] + delta.x;
+		x[1] = posX[1] + delta.x;
+		x[2] = posX[2] + delta.x;
+		y[0] = posY[0] + delta.y;
+		y[1] = posY[1] + delta.y;
+		y[2] = posY[2] + delta.y;
+		g.fillPolygon(x, y, 3);	
 	}
+	
+	/**
+	 * 描画する座標をを返す
+	 * @return　Point
+	 */
+	public Point getPosition(){ return (new Point(posX[0], posY[0]));}
 	
 	public void setMembrane(Membrane mem){
 		Iterator atomIte;
