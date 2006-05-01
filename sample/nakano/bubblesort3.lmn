@@ -7,7 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %graphic.use.
 %go:-
-{window,position(0,0),size(500,500),name("window"),timer(0).
+{window,position(0,0),size(500,500),name("window"),timer(0),killer.
 
 %мваг©Т
 max_num(15).

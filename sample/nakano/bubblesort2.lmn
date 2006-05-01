@@ -9,7 +9,7 @@ timer:benchmark(X,"Elapsed Time"), {+(X).
 % a.
 %a,go:-graphic.use,b.
 %b,
-go:-{window,position(0,0),size(500,500),name("window"),timer(10).
+go:-{window,position(0,0),size(500,500),name("window"),timer(10),killer.
 
 %ソートルール
 done,{name(_IN),size(_IS,10),$p,@p},{name(_IN2),size(_IS2,10),$q,@q} :-

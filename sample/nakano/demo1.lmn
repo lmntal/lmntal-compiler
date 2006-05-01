@@ -7,13 +7,13 @@
 */
 {
   window.
-  size(200,200).
+  size(500,200).
   name(hoge).
   {
   draw.
   name(0).
   getpic("rect").
-  position(10,10).
+  position(100,10).
   size(100,100).
   }.
 }.

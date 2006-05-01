@@ -1,5 +1,3 @@
-graphic.use.
-go:-
 {
 %ウィンドウ生成
 window,name("Block"),size(500,1000),timer(5).
