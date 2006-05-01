@@ -23,15 +23,15 @@ graphic.use :- [:/*inline*/
 :].
 
 //再描画を停止する
-graphic.noRepaint :- [:/*inline*/
-	Env.LMNgraphic.setNoRepaint((Membrane)mem,true);
-	me.setFunctor("norepaint_go",0);
-:].
+//graphic.noRepaint :- [:/*inline*/
+//	Env.LMNgraphic.setRepaint((Membrane)mem, false);
+//	me.setFunctor("norepaint_go",0);
+//:].
 //再描画を再開する
-graphic.noRepaint :- [:/*inline*/
-	Env.LMNgraphic.setNoRepaint((Membrane)mem,false);
-	me.setFunctor("repaint_go",0);
-:].
+//graphic.Repaint :- [:/*inline*/
+//	Env.LMNgraphic.setRepaint((Membrane)mem, true);
+//	me.setFunctor("repaint_go",0);
+//:].
 
 //グラフィックオプション指定無でグラフィックモードにする
 //反応するものがない場合でも終了しない

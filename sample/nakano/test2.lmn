@@ -2,7 +2,6 @@ graphic.use.
 go:-
 {
 %%make window
-a,name("LMNtal Typing"),size(800,600),timer(10).
- a:- {draw,name("oval"),getpic("filloval"),position(0,300),size(50,50)},b.
- b:-window.
+window. name("LMNtal Typing"),size(800,600),timer(10).
+ {draw,name("oval"),getpic("c:\live0000.jpg"),position(100,0),size(160,120)}.
 }

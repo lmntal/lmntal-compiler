@@ -9,14 +9,17 @@ import runtime.Membrane;
 
 public abstract class GraphicObj{
 	final static
-	protected Functor POSITION_ATOM = new Functor("position",2); 
+	protected Functor POSITION_ATOM = new Functor("position", 2); 
 
 	final static
-	protected Functor COLOR_ATOM = new Functor("color",3); 
+	protected Functor COLOR_ATOM = new Functor("color", 3); 
+	final static
+	protected Functor ANGLE_ATOM = new Functor("angle", 1); 
 	
 	protected Color color = Color.BLACK;
 	protected Point position = new Point(0,0);
 	protected String memID = null;
+	protected int angle = 0;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
