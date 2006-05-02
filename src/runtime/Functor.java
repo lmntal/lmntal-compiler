@@ -51,8 +51,12 @@ public class Functor implements Serializable {
 	}
 
 	private String QuoteFunctorName(String text) {
-		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
-			text = quoteName(text);
+		if (Env.verbose > Env.VERBOSE_SIMPLELINK) {
+			if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$"))
+				text = quoteName(text);
+		} else {
+			if (!text.matches("^([a-z0-9-\\+][A-Za-z0-9_]*)$"))
+				text = quoteName(text);
 		}
 		if (path != null)
 			text = path + "." + text;

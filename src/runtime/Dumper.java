@@ -644,13 +644,15 @@ public class Dumper {
 			buf.append(func.getQuotedFunctorName());
 		else
 			buf.append(func.getQuotedFullyFunctorName());
-		buf.append("(");
+		if (Env.verbose > Env.VERBOSE_SIMPLELINK || !func.getName().matches("[-\\+]"))
+			buf.append("(");
 		buf.append(dumpLink(a.args[0], atoms));
 		for (int i = 1; i < arity; i++) {
 			buf.append(",");
 			buf.append(dumpLink(a.args[i], atoms));
 		}
-		buf.append(")");
+		if (Env.verbose > Env.VERBOSE_SIMPLELINK || !func.getName().matches("[-\\+]"))
+			buf.append(")");
 		return buf.toString();
 	}
 
