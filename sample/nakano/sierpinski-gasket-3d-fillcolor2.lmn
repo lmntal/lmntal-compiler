@@ -12,7 +12,7 @@ name("hoge").
 now(0).
 bgcolor(255,255,255).
 
-a(500,0,0,750,1000,750, 7 , 0,0,100,0).
+a(500,0,0,750,1000,750, 5 , 0,0,100,0).
 
 a(_IAX,_IAY,_IBX,_IBY,_ICX,_ICY,_IN,_IR,_IG,_IB,_IS),now(_INOW):- _IN = 0|
 	{draw,name(_INOW),getpic("filltriangle"),	position(_IAX,_IAY,_IBX,_IBY,_ICX,_ICY),color(_IR,_IG,_IB),sequence(_IS)},

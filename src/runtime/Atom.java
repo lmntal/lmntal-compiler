@@ -37,13 +37,14 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	AbstractMembrane mem;
 	
 	/** 所属膜のAtomSet内でのインデックス */
-	int index = -1;
+	public int index = -1;
 
 	private NodeParameter  nodeParam;
 	
 	public int getid(){
 		return id;
 	}
+	
 	/** ファンクタ（名前とリンク数） */
 	private Functor functor;
 	

@@ -32,14 +32,20 @@ public class FileObj extends GraphicObj{
 	///////////////////////////////////////////////////////////////////////////
 	
 	public void drawAtom(Graphics g, Point delta){
-		while(!g.drawImage(img, position.x + delta.x, position.y + delta.y, sizeX, sizeY, null)){}
+		while(!g.drawImage(img, position.x + delta.x, position.y + delta.y, sizeX, sizeY, null)){
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void setImg(){
 		if(file.exists()){
 			Toolkit toolkit = Toolkit.getDefaultToolkit();
 			//Imageオブジェクトの生成
-			System.out.println(file.getPath());
 			img = toolkit.getImage(file.getPath());
 		}
 	}
