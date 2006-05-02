@@ -17,6 +17,7 @@ import java.io.Serializable;
 
 import test.GUI.DoublePoint;
 import test.GUI.Node;
+import test.GUI.NodeParameter;
 import test3d.Double3DPoint;
 import test3d.LMNTransformGroup;
 import test3d.Node3D;
@@ -29,20 +30,28 @@ import daemon.IDConverter;
  * @author Mizuno
  */
 public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.Node3D, Serializable {
+	
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
-	 * ただし値を変更するときはindexも同時に更新すること。(null,-1)は所属膜なしを表す。*/
+	 * ただし値を変更するときはindexも同時に更新すること。(null, -1)は所属膜なしを表す。
+	 */
 	AbstractMembrane mem;
+	
 	/** 所属膜のAtomSet内でのインデックス */
 	int index = -1;
+
+	private NodeParameter  nodeParam;
+	
 	public int getid(){
 		return id;
 	}
 	/** ファンクタ（名前とリンク数） */
 	private Functor functor;
+	
 	/** リンク */
 	Link[] args;
 	
 	private static int lastId = 0;
+	
 	/** このアトムのローカルID */
 	int id;
 	
@@ -68,13 +77,14 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		this.functor = functor;
 		args = new Link[functor.getArity()];
 		id = lastId++;
-
+		nodeParam = null;
 		if(Env.fGUI) {
+			nodeParam = new NodeParameter();
 			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
-			pos = new DoublePoint(Math.random()*r.width + r.x, Math.random()*r.height + r.y);
+			nodeParam.pos = new DoublePoint(Math.random()*r.width + r.x, Math.random()*r.height + r.y);
 		}
 		if(Env.f3D) {
-			pos3d = new Double3DPoint(Math.random(), Math.random(), Math.random());
+			nodeParam.pos3d = new Double3DPoint(Math.random(), Math.random(), Math.random());
 		}
 	}
 
@@ -172,38 +182,39 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	///////////////////////////////////////////////////////////////
 	
 	/* *** *** *** *** *** BEGIN GUI *** *** *** *** *** */
-
-	DoublePoint pos;
-	Double3DPoint pos3d;
-	LMNTransformGroup objTrans;
-	double vx, vy, vz;
+//
+//	DoublePoint pos;
+//	Double3DPoint pos3d;
+//	LMNTransformGroup objTrans;
+//	double vx, vy, vz;
+	
 	public void initNode() {
-		pos = new DoublePoint();
+		nodeParam.pos = new DoublePoint();
 	}
 	public void initNode3d() {
-		pos3d = new Double3DPoint();
+		nodeParam.pos3d = new Double3DPoint();
 	}
 	public boolean isVisible() {
 		return !(functor instanceof SpecialFunctor);
 	}
 	public DoublePoint getPosition() {
-		return pos;
+		return nodeParam.pos;
 	}
 
 	public void setObj(LMNTransformGroup obj){
-		objTrans=obj;
+		nodeParam.objTrans = obj;
 	}
 	public LMNTransformGroup getObj(){
-		return objTrans;
+		return nodeParam.objTrans;
 	}
 	public Double3DPoint getPosition3d() {
-		return pos3d;
+		return nodeParam.pos3d;
 	}
 	public void setPosition(DoublePoint p) {
-		pos = p;
+		nodeParam.pos = p;
 	}
 	public void setPosition3d(Double3DPoint p) {
-		pos3d = p;
+		nodeParam.pos3d = p;
 	}
 	public Node getNthNode(int index) {
 		Atom a = nthAtom(index);
@@ -229,38 +240,38 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		return functor.getArity();
 	}
 	public void setMoveDelta(double dx, double dy) {
-		vx += dx;
-		vy += dy;
+		nodeParam.vx += dx;
+		nodeParam.vy += dy;
 	}
 	public void setMoveDelta3d(double dx, double dy, double dz) {
-		vx += dx;
-		vy += dy;
-		vz += dz;
+		nodeParam.vx += dx;
+		nodeParam.vy += dy;
+		nodeParam.vz += dz;
 	}
 	public void initMoveDelta() {
-		vx = vy = 0;
+		nodeParam.vx = nodeParam.vy = 0;
 	}
 	public void initMoveDelta3d() {
-		vx = vy = vz = 0;
+		nodeParam.vx = nodeParam.vy = nodeParam.vz = 0;
 	}
 	public DoublePoint getMoveDelta(){
-		return new DoublePoint(vx,vy);
+		return new DoublePoint(nodeParam.vx, nodeParam.vy);
 	}
 	public void move(Rectangle area) {
 		//if (n.isFixed()) return;
 		final int M = 100;
-		pos.x += Math.max(-M, Math.min(M, vx));
-		pos.y += Math.max(-M, Math.min(M, vy));
+		nodeParam.pos.x += Math.max(-M, Math.min(M, nodeParam.vx));
+		nodeParam.pos.y += Math.max(-M, Math.min(M, nodeParam.vy));
 		
-		if (pos.x < area.getMinX())		pos.x = (int)area.getMinX();
-		else if (pos.x > area.getMaxX())	pos.x = (int)area.getMaxX();
+		if (nodeParam.pos.x < area.getMinX())		nodeParam.pos.x = (int)area.getMinX();
+		else if (nodeParam.pos.x > area.getMaxX())	nodeParam.pos.x = (int)area.getMaxX();
 		
-		if (pos.y < area.getMinY())		pos.y = (int)area.getMinY();
-		else if (pos.y > area.getMaxY())	pos.y = (int)area.getMaxY();
+		if (nodeParam.pos.y < area.getMinY())		nodeParam.pos.y = (int)area.getMinY();
+		else if (nodeParam.pos.y > area.getMaxY())	nodeParam.pos.y = (int)area.getMaxY();
 		
 //		vx=vy=0;
-		vx /= 2;
-		vy /= 2;
+		nodeParam.vx /= 2;
+		nodeParam.vy /= 2;
 	}
 	public void paintEdge(Graphics g) {
 		g.setColor(Color.BLACK);
@@ -295,11 +306,11 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 //		System.out.println(label + "  " + ir + "  " + ig + "  " + ib);
 		g.setColor(new Color(ir, ig, ib));
 		
-		g.fillOval((int)(pos.x - size.width/2), (int)(pos.y - size.height/ 2), size.width, size.height);
+		g.fillOval((int)(nodeParam.pos.x - size.width/2), (int)(nodeParam.pos.y - size.height/ 2), size.width, size.height);
 		
 		g.setColor(Color.BLACK);
-		g.drawOval((int)(pos.x - size.width/2), (int)(pos.y - size.height/ 2), size.width, size.height);
-		g.drawString(label, (int)(pos.x - (w-10)/2), (int)(pos.y - (h-4)/2) + fm.getAscent()+size.height);
+		g.drawOval((int)(nodeParam.pos.x - size.width/2), (int)(nodeParam.pos.y - size.height/ 2), size.width, size.height);
+		g.drawString(label, (int)(nodeParam.pos.x - (w-10)/2), (int)(nodeParam.pos.y - (h-4)/2) + fm.getAscent()+size.height);
 	}
 	
 	/* *** *** *** *** *** END GUI *** *** *** *** *** */
