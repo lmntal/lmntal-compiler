@@ -1,0 +1,19 @@
+{module(lmnnumberer).
+
+	lmnnumberer.number(Root), {$g[Root]} :- lmnnumberer.phase1(Root), {$g[Root].
+		count(1).
+		root={'+'(M), $root}, mem(M) :- {number(0), $root}.
+	}.
+	
+	lmnnumberer.phase1(Root), {$g[Root], @g}/ :- lmnnumberer.phase2(Root), {$g[Root].
+		mem={$mem}, count(C) :- C1=C+1 | {number(C), $mem}, count(C1).
+		atom={$atom}, count(C) :- C1=C+1 | {number(C), $atom}, count(C1).
+		link={$link}, count(C) :- C1=C+1 | {number(C), $link}, count(C1).
+	
+		{number(N), $process, '+'(Ref)} :- int(N) | {number(N), $process}, Ref=N.
+	}.
+	
+	lmnnumberer.phase2(Root), {$g[Root], @g}/ :- numbered(Root), {$g[Root]}.
+
+
+}.

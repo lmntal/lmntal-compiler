@@ -1,0 +1,32 @@
+% 左辺のコンパイル
+
+{module(lmnheadcompiler).
+
+	% 1st Phase
+	lmnheadcompiler.phase1 :- 
+
+	% 左辺を見つける
+	( R=lmnheadcompiler.compile({$lhs}) :-
+		R=lmnheadcompiler.find(Fi), {$lhs, '+'(Fi)}  ),
+
+	% FINDATOM
+	(
+	Find1@@
+	R=lmnheadcompiler.find({$lhs, atom(A)}) :-
+		R=[lmheadcompiler.findatom(A)|lmnheadcompiler.find({$lhs})] ),
+
+	(
+	FindAtom@@
+	R=lmnheadcompiler.findatom({$atom, mem(M), functor(F, A)}) :- ground(F), int(A) |
+		R=findatom({$atom, functor(F, A), mem(M1)},
+		M2, common.str_of_functor(F, A)), common.cpref(M1, M2, M) ),
+	
+	().
+	
+	% 2nd Phase
+	lmnheadcompiler.phase2 :-
+	( R=lmnheadcompiler.find(Fi), {'+'(Fi), $lhs} :- R=[], root={$lhs} ),
+	
+	().
+	
+}.

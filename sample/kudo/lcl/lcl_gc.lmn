@@ -1,0 +1,14 @@
+% gcっぽいことをする．コンパイラの最後で，残った膜を消しまくる．
+
+{module(lcl_gc).
+
+	% 左辺，右辺のgcを呼ぶ
+	lcl_gc.use :- (). %lmnheadcompiler.gc, lmnbodycompiler.gc.
+
+	mem(N) :- int(N) | ().
+	atom(N) :- int(N) | ().
+	{$atom, functor(F, A)} :- ground(F), int(A) | {$atom}.
+	{$atom, mem(M)} :- {$atom}, common.rmref(M).
+	{number(N)} :- int(N) | ().
+	
+}.

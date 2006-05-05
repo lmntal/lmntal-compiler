@@ -1,0 +1,51 @@
+% プログラムを表すグラフ構造を，命令列に変換する
+% 
+
+{ module(lmncompiler).
+
+	% 全体のコンパイル
+
+	% 1st Phase
+	lmncompiler.compile={$g} :- lmncompiler.compiling1={$g.
+	
+		CompileRuleset1@@
+		ruleset(RID, Rules) :- compiling_ruleset(RID, compile_rules(Rules)).
+		CompileRuleset2@@
+		R=compile_rules([Rule|Rest]) :- R=[lmncompiler.compile_rule(Rule)|compile_rules(Rest)].
+		CompileRuleset3@@
+		R=compile_rules([]) :- R=[].
+		
+		lmnheadcompiler.phase1, lmnguardcompiler.phase1, lmnbodycompiler.phase1
+	}.
+
+	% 2nd Phase
+	lmncompiler.compiling1={$g, @g}/ :-
+		lmncompiler.compiling2={$g.
+		lmnheadcompiler.phase2, lmnguardcompiler.phase2, lmnbodycompiler.phase2
+	}.
+	
+	lmncompiler.compiling2={$g, @g}/ :- lmnnumberer.number={$g}.
+	
+	numbered={$g, @g}/ :- lmncompiler.gcing={$g, lcl_gc.use}.
+
+	lmncompiler.gcing={$g, @g}/ :-
+	
+	lmncompiler.gather_compiled_ruleset={$g.
+		compiled_rulesets=[].
+		compiling_ruleset(RID, RULES), compiled_rulesets=Rest :-
+			compiled_rulesets=[compiled_ruleset(RID, RULES)|Rest].
+	}.
+	
+	lmncompiler.gather.compiled_ruleset={$g, @g}/ :-
+		lmncompiler.compiled={$g}.
+	
+	% 個々のルールのコンパイル
+	rule(Rule),
+	R=lmncompiler.compile_rule({'+'(Rule), lhs(Lhs), guard(Gua), rhs(Rhs), name(Rulename), 
+		$rule[Lhs, Gua, Rhs]}) :-
+		string(Rulename) |
+		R=compiling_rule({
+		compiled_rule(Rulename,[]),
+		$rule[Lhs, Gua, Rhs].
+	
+}.

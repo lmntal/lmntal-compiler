@@ -1,0 +1,4 @@
+*使い方
+ /bin$ lmntal -I ../sample/kudo/lcl --use-source-library ../sample/kudo/lcl/frontend.lmn
+で，標準入力にプログラムを入力．[EOF]で終わること．
+

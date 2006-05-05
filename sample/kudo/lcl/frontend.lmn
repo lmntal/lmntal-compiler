@@ -1,3 +1,5 @@
+% lcl : LMNtal Compiler on LMNtal
+
 % 以下はいずれ別ファイルに
 
 {
@@ -38,4 +40,6 @@ lexing={l=Lexed, $l[Lexed],@l}/ :-
 parsing={lmnparser.parsed(Parsed), $p[Parsed], @p}/ :-
 	constructing={lmnconstructor.construct(Parsed), $p[Parsed]}.
 constructing={lmnconstructor.constructed(Constructed), $c[Constructed], @c}/ :-
-	constructed(Constructed), $c[Constructed].
+	compiling={lmncompiler.compile({global(Constructed), $c[Constructed]}) }.
+compiling={lmncompiler.compiled(Compiled), $c[Compiled], @c}/ :-
+	compiled(Compiled), $c[Compiled].

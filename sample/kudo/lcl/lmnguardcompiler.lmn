@@ -1,0 +1,16 @@
+{module(lmnguardcompiler).
+
+	% 1st Phase
+	lmnguardcompiler.phase1 :-
+
+	%( R=lmnguardcompiler.compile({$guard}) :- () ),
+	
+	().
+
+	% 2nd Phase
+	lmnguardcompiler.phase2 :-
+	( R=lmnguardcompiler.compile({$guard}) :- R=[], root={$guard} ),
+	
+	().
+
+}.

@@ -1,0 +1,53 @@
+{module(lmnbodycompiler).
+
+	% 1st Phase
+	lmnbodycompiler.phase1 :-
+
+	(
+	R=lmnbodycompiler.compile({$lhs}, {$rhs}) :-
+		R=list.append(lmnbodycompiler.remove({$lhs}),lmnbodycompiler.make({$rhs})) ),
+	
+	(
+	R=lmnbodycompiler.make({$rhs, atom(A)}) :-
+		R=[lmnbodycompiler.makeatom(A)|lmnbodycompiler.make({$rhs})] ),
+	
+	(
+	MakeAtom@@
+	R=lmnbodycompiler.makeatom({$atom, functor(F, A), mem(M)}) :- ground(F), int(A) |
+		R=newatom({$atom, functor(F, A), mem(M1)}, M2, common.str_of_functor(F,A)), 
+		common.cpref(M1, M2, M) ),
+	
+	% alloclinkの発行
+	( R=newatom({$atom, link(P1, L1)}, M, F) :- int(P1) |
+		R=[newatom({$atom}, M, F), alloclink(L1)] ),
+	( R=alloclink({$link, pos(P), atom(A)}) :- int(P) | R=alloclink({$link}, A, P) ),
+	( R=[[newatom(A,M,F), alloclink(L,A1,P1)]|Rest] :- R=[newatom(A,M,F), alloclink(L,A1,P1)|Rest] ),
+
+	% unifylinksの発行
+	%b( R=[alloclink
+
+	% REMOVE
+	(
+	Remove1@@
+	R=lmnbodycompiler.remove({$lhs, atom(A)}) :-
+		R=[lmnbodycompiler.removeatom(A)|lmnbodycompiler.remove({$lhs})] ),
+
+	(
+	RemoveAtom@@
+	R=lmnbodycompiler.removeatom({$atom, mem(M), functor(F, A)}) :- ground(F), int(A) |
+		R=removeatom({$atom, functor(F, A), mem(M1)},
+		M2, common.str_of_functor(F, A)), common.cpref(M1, M2, M) ),
+	
+	().
+	
+	% 2nd Phase
+	lmnbodycompiler.phase2 :-
+	
+	list.use,
+
+	( R=lmnbodycompiler.make({$rhs}) :- R=[], root={$rhs} ),
+	( R=lmnbodycompiler.remove({$lhs}) :- R=[], {$lhs} ),
+	
+	().
+
+}.
