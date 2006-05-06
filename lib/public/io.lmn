@@ -167,7 +167,7 @@ H=io.reader(Process) :- unary(Process) | H=[:/*inline*/
 
 //readLine(Object, ReadString, Result)
 /**
- * readLine(+Object, -ReadString, -Result)
+ * io.readLine(+Object, -ReadString, -Result)
  * 
  * Object     : java.io.BufferedReader
  * ReadString : One line string
