@@ -1,19 +1,28 @@
 {module(lmnnumberer).
 
-	lmnnumberer.number(Root), {$g[Root]} :- lmnnumberer.phase1(Root), {$g[Root].
+	R=lmnnumberer.number({$g}) :- R=lmnnumberer.phase1({$g.
+%	lmnnumberer.number :-
 		count(1).
+		lhs=Lhs :- root=Lhs. % 左辺膜は本膜なので0番
+		rhs=Rhs :- root=Rhs. % 右辺膜は本膜なので0番
 		root={'+'(M), $root}, mem(M) :- {number(0), $root}.
-	}.
+		
+		guard={'+'(M)}, mem=M :- () % ガードが全て処理されていなければこの時点で警告を出すべき
+		
+	}).
 	
-	lmnnumberer.phase1(Root), {$g[Root], @g}/ :- lmnnumberer.phase2(Root), {$g[Root].
+	R=lmnnumberer.phase1({$g, @g}/) :- R=lmnnumberer.phase2({$g.
+	
+		% 膜，アトム，リンクにそれぞれ番号をふる(順番適当)
 		mem={$mem}, count(C) :- C1=C+1 | {number(C), $mem}, count(C1).
 		atom={$atom}, count(C) :- C1=C+1 | {number(C), $atom}, count(C1).
 		link={$link}, count(C) :- C1=C+1 | {number(C), $link}, count(C1).
 	
+		% 参照を番号におきかえる
 		{number(N), $process, '+'(Ref)} :- int(N) | {number(N), $process}, Ref=N.
-	}.
+	}).
 	
-	lmnnumberer.phase2(Root), {$g[Root], @g}/ :- numbered(Root), {$g[Root]}.
+	R=lmnnumberer.phase2({$g, count(C), @g}/) :- int(C) | R=numbered({$g}).
 
 
 }.

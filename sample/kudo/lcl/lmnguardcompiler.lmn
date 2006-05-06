@@ -2,14 +2,19 @@
 
 	% 1st Phase
 	lmnguardcompiler.phase1 :-
+	
+		lmnguardcompiler.compile,
+		
+		( lmnguardcompiler.compile, guard({$guard}) :-
+			lmnguardcompiler.compile(G), guard({'+'(G), $guard}) ),
 
 	%( R=lmnguardcompiler.compile({$guard}) :- () ),
 	
-	().
+		().
 
 	% 2nd Phase
 	lmnguardcompiler.phase2 :-
-	( R=lmnguardcompiler.compile({$guard}) :- R=[], root={$guard} ),
+	( lmnguardcompiler.compile({$guard}) :- {$guard} ),
 	
 	().
 

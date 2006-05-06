@@ -35,11 +35,15 @@ lexing = {
 
 % 全入力tokenをlmnparserにかける(ここは、本当は全部わたす必要はなく、並列処理できる。
 % でも、そもそもここまではinlineでもいいかもしれない)
+
+% main
 lexing={l=Lexed, $l[Lexed],@l}/ :-
 	parsing={lmnparser.parse(Lexed), $l[Lexed]}.
 parsing={lmnparser.parsed(Parsed), $p[Parsed], @p}/ :-
 	constructing={lmnconstructor.construct(Parsed), $p[Parsed]}.
 constructing={lmnconstructor.constructed(Constructed), $c[Constructed], @c}/ :-
 	compiling={lmncompiler.compile({global(Constructed), $c[Constructed]}) }.
-compiling={lmncompiler.compiled(Compiled), $c[Compiled], @c}/ :-
-	compiled(Compiled), $c[Compiled].
+compiling={lmncompiler.compiled(Compiled), {$c[Compiled], @c}/, @cc}/ :-
+	dumping={lmndumper.dump(Compiled), {$c[Compiled]}}.
+dumping={lmndumper.dumped(Dumped), {$d[Dumped]}/, @dd}/ :-
+	end=Dumped, {$d[Dumped]}.

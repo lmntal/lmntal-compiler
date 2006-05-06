@@ -71,7 +71,7 @@ lmnconstructor.collect_rules({$g, rulesetcount=RC, @g}/) :- int(RC) |
 lmnconstructor.construct_rule({$g.
 
 	S=srcrule(N,H,G,B) :- string(N), ground(H), ground(G), ground(B) |
-		rule={name(N), '+'(S),
+		rule={rulename(N), '+'(S),
 		mem={childs(He), '+'(L)}, He=H, lhs=L,
 		mem={childs(Gu), '+'(C)}, Gu=G, guard=C,
 		mem={childs(Bo), '+'(R)}, Bo=B, rhs=R.
@@ -119,6 +119,9 @@ lmnconstructor.construct1({$g.
 		% 膜オブジェクトの子要素のうち，膜はmemで参照する
 		mem={$mem, child(M)}, mem={'+'(M), $childmem} :-
 			mem={$mem, mem(C), '+'(M)}, mem={parent(M), '+'(C), $childmem}.
+		% 膜オブジェクトの子要素のうち，ルールセットはrulesで参照する
+		mem={$mem, child(R)}, R=rulesetid(RID) :-
+			mem={$mem, rules(R)}, R=rulesetid(RID).
 	
 		% 子要素がつきた時のindex番号がそのアトムの引数数．ファンクタを作る
 		CreateFunctor@@

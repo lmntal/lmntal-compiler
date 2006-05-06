@@ -1,52 +1,92 @@
 {module(lmnbodycompiler).
 
-	% 1st Phase
-	lmnbodycompiler.phase1 :-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% 1st Phase %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	(
-	R=lmnbodycompiler.compile({$lhs}, {$rhs}) :-
-		R=list.append(lmnbodycompiler.remove({$lhs}),lmnbodycompiler.make({$rhs})) ),
+	lmnbodycompiler.phase1 :-
 	
-	(
-	R=lmnbodycompiler.make({$rhs, atom(A)}) :-
-		R=[lmnbodycompiler.makeatom(A)|lmnbodycompiler.make({$rhs})] ),
+	lmnbodycompiler.remove, 
+	lmnbodycompiler.make, 
+	lmnbodycompiler.enqueue, 
+	lmnbodycompiler.free.
 	
-	(
-	MakeAtom@@
-	R=lmnbodycompiler.makeatom({$atom, functor(F, A), mem(M)}) :- ground(F), int(A) |
-		R=newatom({$atom, functor(F, A), mem(M1)}, M2, common.str_of_functor(F,A)), 
+	( lmnbodycompiler.remove, lhs={$lhs} :- lmnbodycompiler.remove(R), lhs={'+'(R), $lhs} ),
+	( lmnbodycompiler.make, rhs={$rhs} :- lmnbodycompiler.make(M), rhs={'+'(M), $rhs} ),
+	( lmnbodycompiler.enqueue, rhs={$rhs} :- lmnbodycompiler.enqueue(M), rhs={'+'(M), $rhs} ),
+	( lmnbodycompiler.free, lhs={$lhs} :- lmnbodycompiler.free(F), lhs={'+'(F), $lhs} ),
+	
+%%%%%% M A K E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	% make for atom
+	( lmnbodycompiler.make={$rhs, atom(A)} :-
+		lmnbodycompiler.makeatom(A1), 
+		lmnbodycompiler.make={$rhs, made_atom(A2)}, common.cpref(A1, A2, A) ),
+	
+%	NEWATOM
+	( MakeAtom@@
+	lmnbodycompiler.makeatom({$atom, functor(F, A), mem(M)}) :- ground(F), int(A) |
+		newatom({$atom, functor(F, A), mem(M1)}, M2, common.str_of_functor(F, A)),
 		common.cpref(M1, M2, M) ),
 	
-	% alloclinkの発行
-	( R=newatom({$atom, link(P1, L1)}, M, F) :- int(P1) |
-		R=[newatom({$atom}, M, F), alloclink(L1)] ),
-	( R=alloclink({$link, pos(P), atom(A)}) :- int(P) | R=alloclink({$link}, A, P) ),
-	( R=[[newatom(A,M,F), alloclink(L,A1,P1)]|Rest] :- R=[newatom(A,M,F), alloclink(L,A1,P1)|Rest] ),
+	% ALLOCLINK
+	( newatom({$atom, link(P1, L1)}, M, F) :- int(P1) |
+		newatom({$atom}, M, F), lmnbodycompiler.alloclink(L1) ),
+	( lmnbodycompiler.alloclink({$link, pos(P), atom(A)}) :- int(P) | alloclink({$link}, A, P) ),
 
-	% unifylinksの発行
-	%b( R=[alloclink
+	% UNIFYLINKS
+	( {buddy(B1), '+'(B2), $link}, {'+'(B1), buddy(B2), $buddy} :- unifylinks({$link}, {$buddy}) ),	
 
-	% REMOVE
-	(
-	Remove1@@
-	R=lmnbodycompiler.remove({$lhs, atom(A)}) :-
-		R=[lmnbodycompiler.removeatom(A)|lmnbodycompiler.remove({$lhs})] ),
+	% LOADRULESET
+	( lmnbodycompiler.make={$rhs, rules(RID)} :- 
+		loadruleset(M, RID), lmnbodycompiler.make={$rhs, '+'(M)} ),
 
-	(
-	RemoveAtom@@
-	R=lmnbodycompiler.removeatom({$atom, mem(M), functor(F, A)}) :- ground(F), int(A) |
-		R=removeatom({$atom, functor(F, A), mem(M1)},
+%%%%%% E N Q U E U E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	( Enqueue1@@
+	lmnbodycompiler.enqueue({$rhs, made_atom(A)}) :-
+		lmnbodycompiler.enqueueatom(A),
+		lmnbodycompiler.enqueue({$rhs}) ),
+	
+	% ENQUEUEATOM
+	( EnqueueAtom@@
+	lmnbodycompiler.enqueueatom({$atom}) :- enqueueatom({$atom}) ),
+
+%%%%%% R E M O V E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	( Remove1@@
+	lmnbodycompiler.remove({$lhs, found_atom(A)}) :-
+		lmnbodycompiler.removeatom(A1), 
+		lmnbodycompiler.remove({$lhs,removed_atom(A2)}), common.cpref(A1, A2, A) ),
+
+	% REMOVEATOM
+	( RemoveAtom@@
+	lmnbodycompiler.removeatom({$atom, mem(M), functor(F, A)}) :- ground(F), int(A) |
+		removeatom({$atom, functor(F, A), mem(M1)},
 		M2, common.str_of_functor(F, A)), common.cpref(M1, M2, M) ),
+
+%%%%%% F R E E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	( Free1@@
+	lmnbodycompiler.free({$lhs, removed_atom(A)}) :-
+		lmnbodycompiler.freeatom(A), lmnbodycompiler.free({$lhs}) ),
 	
+	% FREEATOM
+	( FreeAtom@@
+	lmnbodycompiler.freeatom({$atom}) :- freeatom({$atom}) ),
+
 	().
-	
-	% 2nd Phase
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%%%%%% 2nd Phase %%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	lmnbodycompiler.phase2 :-
 	
-	list.use,
-
-	( R=lmnbodycompiler.make({$rhs}) :- R=[], root={$rhs} ),
-	( R=lmnbodycompiler.remove({$lhs}) :- R=[], {$lhs} ),
+	( lmnbodycompiler.make({$rhs}) :- {$rhs} ),
+	( lmnbodycompiler.enqueue({$rhs}) :- {$rhs} ),
+	( lmnbodycompiler.remove({$rhs}) :- {$rhs} ),
+	( lmnbodycompiler.free({$rhs}) :- {$rhs} ),
 	
 	().
 

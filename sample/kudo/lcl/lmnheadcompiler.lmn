@@ -4,28 +4,27 @@
 
 	% 1st Phase
 	lmnheadcompiler.phase1 :- 
+	
+	lmnheadcompiler.compile,
 
 	% 左辺を見つける
-	( R=lmnheadcompiler.compile({$lhs}) :-
-		R=lmnheadcompiler.find(Fi), {$lhs, '+'(Fi)}  ),
+	( lmnheadcompiler.compile, lhs={$lhs} :- lmnheadcompiler.find(F), lhs={'+'(F), $lhs} ),
+
+	( Find1@@
+	lmnheadcompiler.find({$lhs, atom(A)}) :-
+		lmnheadcompiler.findatom(A1), lmnheadcompiler.find({$lhs, found_atom(A2)}), common.cpref(A1, A2, A) ),
 
 	% FINDATOM
-	(
-	Find1@@
-	R=lmnheadcompiler.find({$lhs, atom(A)}) :-
-		R=[lmheadcompiler.findatom(A)|lmnheadcompiler.find({$lhs})] ),
-
-	(
-	FindAtom@@
-	R=lmnheadcompiler.findatom({$atom, mem(M), functor(F, A)}) :- ground(F), int(A) |
-		R=findatom({$atom, functor(F, A), mem(M1)},
+	( FindAtom@@
+	lmnheadcompiler.findatom({$atom, mem(M), functor(F, A)}) :- ground(F), int(A) |
+		findatom({$atom, functor(F, A), mem(M1)},
 		M2, common.str_of_functor(F, A)), common.cpref(M1, M2, M) ),
 	
 	().
 	
 	% 2nd Phase
 	lmnheadcompiler.phase2 :-
-	( R=lmnheadcompiler.find(Fi), {'+'(Fi), $lhs} :- R=[], root={$lhs} ),
+	( lmnheadcompiler.find({$lhs}) :- {$lhs} ),
 	
 	().
 	
