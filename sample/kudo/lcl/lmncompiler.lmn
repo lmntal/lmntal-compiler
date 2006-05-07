@@ -20,8 +20,9 @@
 	lmncompiler.compiling1={$g, @g}/ :-
 	lmncompiler.compiling2={$g.
 	
-		R=lmncompiler.compiled_rule({$rule, compiled_rule(RuleName, Insts)}) :- string(RuleName), ground(Insts) |
-			R=compiled_rule(RuleName, Insts), $rule.
+		R=lmncompiler.compiled_rule({$rule, compiled_rule(RuleName, AM, MM, G, B)}) :- 
+			string(RuleName), ground(AM), ground(MM), ground(G), ground(B) |
+			R=compiled_rule(RuleName, AM, MM, G, B), $rule.
 		
 		rule('+') :- ().
 	}.

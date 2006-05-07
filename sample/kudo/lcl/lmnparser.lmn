@@ -240,9 +240,16 @@ lmnparser.parse_rule2({$s.
 	
 	Parse_NamingRule@@
 	L=[srcrule("", [rulename(RN)|H], G, B)] :- L=[srcrule(RN, H, G, B)].
+	
+	no_rule.
+	
+	no_rule, T=colon_minus :- T=colon_minus, rule_exists.
 }).
 
-lmnparser.parse_rule2({$s, @s}/) :-
+lmnparser.parse_rule2({$s, rule_exists, @s}/) :- % ':-'があるかぎり上の2stepを繰り返す
+	lmnparser.parse_process_context({$s}).
+
+lmnparser.parse_rule2({$s, no_rule, @s}/) :- % ':-'がないなら次へ
 %各リストの終わりに','を挿入する
 %TODO : この前の段階で、終わりに','があるリストは構文エラーにする
 lmnparser.insert_comma({$s. syntax_ok.
@@ -499,6 +506,9 @@ lmnparser.break_nest({$s.
 	
 	Break_Parens@@
 	L=[parens([S|SR])|R] :- L=[S|append(SR,R)].
+	
+	Break_Parens2@@
+	L=[parens([])|R] :- L=R.
 }).
 lmnparser.break_nest({$s, @s}/):-
 lmnparser.parse_atom_with_arity({$s.

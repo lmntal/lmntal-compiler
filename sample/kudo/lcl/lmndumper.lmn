@@ -30,11 +30,24 @@
 	
 	lmndumper.dumping_rules([]) :- lmndumper.dumped.
 
-	lmndumper.dumping_rules([compiled_rule(RuleName, Insts)|Rest]) :- string(RuleName) |
-		lmndumper.dumping_rulename(io.print("Compiled Rule "++RuleName), Insts, Rest).
+	lmndumper.dumping_rules([compiled_rule(RuleName, AtomMatch, MemMatch, Guard, Body)|Rest]) :-
+		string(RuleName) |
+		lmndumper.dumping_rulename(io.print("Compiled Rule "++RuleName), AtomMatch, MemMatch, Guard, Body, Rest).
 
-	lmndumper.dumping_rulename(done, Insts, Rest) :-
-		lmndumper.dumping_insts(lmndumper.dump_insts(Insts), Rest).
+	lmndumper.dumping_rulename(done, AtomMatch, MemMatch, Guard, Body, Rest) :-
+		lmndumper.dumping_atommatch(io.print("\t--atommatch:"), AtomMatch, MemMatch, Guard, Body, Rest).
+	lmndumper.dumping_atommatch(done, AtomMatch, MemMatch, Guard, Body, Rest) :-
+		lmndumper.dumping_atommatch_insts(lmndumper.dump_insts(AtomMatch), MemMatch, Guard, Body, Rest).
+	lmndumper.dumping_atommatch_insts(done, MemMatch, Guard, Body, Rest) :-
+		lmndumper.dumping_memmatch(io.print("\t--memmatch:"), MemMatch, Guard, Body, Rest).
+	lmndumper.dumping_memmatch(done, MemMatch, Guard, Body, Rest) :-
+		lmndumper.dumping_memmatch_insts(lmndumper.dump_insts(MemMatch), Guard, Body, Rest).
+	lmndumper.dumping_memmatch_insts(done, Guard, Body, Rest) :-
+		lmndumper.dumping_guard(Guard, Body, Rest).
+	lmndumper.dumping_guard(none, Body, Rest) :-
+		lmndumper.dumping_body(Body, Rest).
+	lmndumper.dumping_body(none, Rest) :-
+		lmndumper.dumping_rules(Rest).
 
 	lmndumper.dumping_insts(done, Rest) :- lmndumper.dumping_rules(Rest).
 
@@ -44,24 +57,40 @@
 	R=lmndumper.dump_insts([Inst|Rest]) :- R=lmndumper.dumping_inst(io.print("\t\t"++str_of_inst(Inst)),Rest).
 	R=lmndumper.dumping_inst(done, Rest) :- R=lmndumper.dump_insts(Rest).
 
+	R=var_str(v(N)) :- R=string.str_of_int(N).
 
-	R=str_of_inst(findatom(A, M, F)) :- int(A), int(M), string(F) |
-		R="findatom    ["++string.str_of_int(A)++", "++string.str_of_int(M)++", "++F++"]".
-	R=str_of_inst(newatom(A, M, F)) :- int(A), int(M), string(F) |
-		R="newatom     ["++string.str_of_int(A)++", "++string.str_of_int(M)++", "++F++"]".
-	R=str_of_inst(removeatom(A, M, F)) :- int(A), int(M), string(F) |
-		R="removeatom  ["++string.str_of_int(A)++", "++string.str_of_int(M)++", "++F++"]".
-	R=str_of_inst(enqueueatom(A)) :- int(A) |
-		R="enqueueatom ["++string.str_of_int(A)++"]".
-	R=str_of_inst(freeatom(A)) :- int(A) |
-		R="freeatom    ["++string.str_of_int(A)++"]".
-	R=str_of_inst(loadruleset(M,rulesetid(RID))) :- int(M), int(RID) |
-		R="loadruleset ["++string.str_of_int(M)++", "++"@"++string.str_of_int(RID)++"]".
-	R=str_of_inst(alloclink(L, A, P)) :- int(L), int(A), int(P) |
-		R="alloclink   ["++string.str_of_int(L)++", "++string.str_of_int(A)++", "++string.str_of_int(P)++"]".
-	R=str_of_inst(unifylinks(L1,L2)) :- int(L1), int(L2) |
-		R="unifylinks  ["++string.str_of_int(L1)++", "++string.str_of_int(L2)++"]".
-
+	R=str_of_inst(findatom(A, M, F)) :- string(F) |
+		R="findatom    ["++var_str(A)++", "++var_str(M)++", "++F++"]".
+	R=str_of_inst(newatom(A, M, F)) :- string(F) |
+		R="newatom     ["++var_str(A)++", "++var_str(M)++", "++F++"]".
+	R=str_of_inst(removeatom(A, M, F)) :- string(F) |
+		R="removeatom  ["++var_str(A)++", "++var_str(M)++", "++F++"]".
+	R=str_of_inst(enqueueatom(A)) :- 
+		R="enqueueatom ["++var_str(A)++"]".
+	R=str_of_inst(freeatom(A)) :- 
+		R="freeatom    ["++var_str(A)++"]".
+	R=str_of_inst(loadruleset(M,rulesetid(RID))) :- int(RID) |
+		R="loadruleset ["++var_str(M)++", "++"@"++string.str_of_int(RID)++"]".
+	R=str_of_inst(alloclink(L, A, P)) :- int(P) |
+		R="alloclink   ["++var_str(L)++", "++var_str(A)++", "++string.str_of_int(P)++"]".
+	R=str_of_inst(getlink(L, A, P)) :- int(P) |
+		R="getlink     ["++var_str(L)++", "++var_str(A)++", "++string.str_of_int(P)++"]".
+	R=str_of_inst(unifylinks(L1,L2)) :- 
+		R="unifylinks  ["++var_str(L1)++", "++var_str(L2)++"]".
+	R=str_of_inst(testmem(M, A)) :- 
+		R="testmem     ["++var_str(M)++", "++var_str(A)++"]".
+	R=str_of_inst(dereflink(L, A, P)) :- int(P) |
+		R="dereflink   ["++var_str(L)++", "++var_str(A)++", "++string.str_of_int(P)++"]".
+	R=str_of_inst(func(A, F)) :- string(F) |
+		R="func        ["++var_str(A)++", "++F++"]".
+	R=str_of_inst(eqatom(A1, A2)) :- 
+		R="eqatom      ["++var_str(A1)++", "++var_str(A2)++"]".
+	R=str_of_inst(spec(F, L)) :- 
+		R="spec        ["++string.str_of_int(F)++", "++string.str_of_int(L)++"]".
+	R=str_of_inst(proceed) :- 
+		R="proceed     []".
+	R=str_of_inst(commit(RN)) :- string(RN) |
+		R="commit      [\""++RN++"\"]".
 
 
 }.

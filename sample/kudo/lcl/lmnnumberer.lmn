@@ -17,12 +17,21 @@
 		mem={$mem}, count(C) :- C1=C+1 | {number(C), $mem}, count(C1).
 		atom={$atom}, count(C) :- C1=C+1 | {number(C), $atom}, count(C1).
 		link={$link}, count(C) :- C1=C+1 | {number(C), $link}, count(C1).
+		{diff_num={$num},$proc}, count(C) :- C1=C+1 | {number(C), $num}, {$proc}, count(C1).
 	
 		% 参照を番号におきかえる
-		{number(N), $process, '+'(Ref)} :- int(N) | {number(N), $process}, Ref=N.
+		{number(N), $process, '+'(Ref)} :- int(N) | {number(N), $process}, Ref=v(N).
 	}).
 	
-	R=lmnnumberer.phase2({$g, count(C), @g}/) :- int(C) | R=numbered({$g}).
+	R=lmnnumberer.phase2({$g, count(C), @g}/) :- int(C) | 
+	
+	R=lmnnumberer.phase_spec({$g.
+		spec(1, C).
+	}).
+	
+	R=lmnnumberer.phase_spec({$g, @g}/) :-
+	
+	R=numbered({$g}).
 
 
 }.

@@ -3,70 +3,109 @@
 	R=lmninstcollector.collect_insts({$g}) :-
 	
 		R=lmninstcollector.init({$g.
-			rulename(RN) :- string(RN) | compiled_rule(RN, []).
+			rulename(RN) :- string(RN) | compiled_rule(RN, []), proceed, commit(RN).
 		}).
 		
 		R=lmninstcollector.init({$g,@g}/) :-
+		R=lmninstcollector.collect_proceed({$g.
+
+			compiled_rule(RN, Rest), proceed :- compiled_rule(RN, [proceed|Rest]).
+		
+		}).
+		
+		R=lmninstcollector.collect_proceed({$g,@g}/) :-
 		R=lmninstcollector.collect_free({$g.
 
-			compiled_rule(RN, Rest), freeatom(A) :- int(A) |
-				compiled_rule(RN, [freeatom(A)|Rest]).
+			compiled_rule(RN, Rest), freeatom(A) :- compiled_rule(RN, [freeatom(A)|Rest]).
 		
 		}).
 		
 		R=lmninstcollector.collect_free({$g,@g}/) :-
 		R=lmninstcollector.collect_enqueue({$g.
 
-			compiled_rule(RN, Rest), enqueueatom(A) :- int(A) |
-				compiled_rule(RN, [enqueueatom(A)|Rest]).
+			compiled_rule(RN, Rest), enqueueatom(A) :- compiled_rule(RN, [enqueueatom(A)|Rest]).
 		
 		}).
 		
 		R=lmninstcollector.collect_enqueue({$g,@g}/) :-
 		R=lmninstcollector.collect_make3({$g.
 		
-			compiled_rule(RN, Rest), unifylinks(L1, L2) :- int(L1), int(L2) |
-				compiled_rule(RN, [unifylinks(L1, L2)|Rest]).
+			compiled_rule(RN, Rest), unifylinks(L1, L2) :- compiled_rule(RN, [unifylinks(L1, L2)|Rest]).
 		
 		}).
 		
 		R=lmninstcollector.collect_make3({$g, @g}/) :-
 		R=lmninstcollector.collect_make2({$g.
 		
-			compiled_rule(RN, Rest), alloclink(L, A, P) :- int(L), int(A), int(P) |
-				compiled_rule(RN, [alloclink(L, A, P)|Rest]).
+			compiled_rule(RN, Rest), alloclink(L, A, P) :- compiled_rule(RN, [alloclink(L, A, P)|Rest]).
 
 		}).
 		
 		R=lmninstcollector.collect_make2({$g,@g}/) :-
 		R=lmninstcollector.collect_make({$g.
 
-			compiled_rule(RN, Rest), newatom(A, M, F) :- int(A), int(M), ground(F) |
-				compiled_rule(RN, [newatom(A, M, F)|Rest]).
+			compiled_rule(RN, Rest), newatom(A, M, F) :- compiled_rule(RN, [newatom(A, M, F)|Rest]).
 
-			compiled_rule(RN, Rest), loadruleset(M, RID) :- int(M), ground(RID) |
-				compiled_rule(RN, [loadruleset(M, RID)|Rest]).
+			compiled_rule(RN, Rest), loadruleset(M, RID) :- compiled_rule(RN, [loadruleset(M, RID)|Rest]).
 		
 		}).
 		
 		R=lmninstcollector.collect_make({$g,@g}/) :-
 		R=lmninstcollector.collect_remove({$g.
 
-			compiled_rule(RN, Rest), removeatom(A, M, F) :- int(A), int(M), ground(F) |
-				compiled_rule(RN, [removeatom(A, M, F)|Rest]).
+			compiled_rule(RN, Rest), removeatom(A, M, F) :- compiled_rule(RN, [removeatom(A, M, F)|Rest]).
 		
 		}).
 		
 		R=lmninstcollector.collect_remove({$g,@g}/) :-
+		R=lmninstcollector.collect_commit({$g.
+		
+			compiled_rule(RN, Rest), commit(C) :- compiled_rule(RN, [commit(C)|Rest]).
+
+		}).
+		
+		R=lmninstcollector.collect_commit({$g,@g}/) :-
+		R=lmninstcollector.collect_find4({$g.
+		
+			compiled_rule(RN, Rest), func(A, F) :- compiled_rule(RN, [func(A,F)|Rest]).
+			compiled_rule(RN, Rest), testmem(M, A) :- compiled_rule(RN, [testmem(M, A)|Rest]).
+			compiled_rule(RN, Rest), eqatom(A1, A2) :- compiled_rule(RN, [eqatom(A1,A2)|Rest]).
+
+		}).
+		
+		R=lmninstcollector.collect_find4({$g,@g}/) :-
+		R=lmninstcollector.collect_find3({$g.
+		
+			compiled_rule(RN, Rest), dereflink(A, L, P) :- compiled_rule(RN, [dereflink(A, L, P)|Rest]).
+
+		}).
+		
+		R=lmninstcollector.collect_find3({$g,@g}/) :-
+		R=lmninstcollector.collect_find2({$g.
+		
+			compiled_rule(RN, Rest), getlink(L, A, P) :- compiled_rule(RN, [getlink(L, A, P)|Rest]).
+
+		}).
+		
+		R=lmninstcollector.collect_find2({$g,@g}/) :-
 		R=lmninstcollector.collect_find({$g.
 		
-			compiled_rule(RN, Rest), findatom(A, M, F) :- int(A), int(M), ground(F) |
-				compiled_rule(RN, [findatom(A, M, F)|Rest]).
+			compiled_rule(RN, Rest), findatom(A, M, F) :- compiled_rule(RN, [findatom(A, M, F)|Rest]).
 
 		}).
 		
 		R=lmninstcollector.collect_find({$g,@g}/) :-
+		R=lmninstcollector.collect_spec({$g.
+		
+			compiled_rule(RN, Rest), spec(F, L) :- compiled_rule(RN, [spec(F, L)|Rest]).
+
+		}).
+		
+		R=lmninstcollector.collect_spec({$g,@g}/) :-
 		R=lmninstcollector.last_phase({$g.
+		
+			compiled_rule(RN, Insts) :- compiled_rule(RN,
+				[spec(2,2),proceed],Insts,none,none). % 膜主導テスト命令列として返す
 		
 		}).
 		

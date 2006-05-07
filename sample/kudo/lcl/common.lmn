@@ -4,7 +4,7 @@ module(common).
 
 	% 参照を消す
 	common.rmref(R), {'+'(R), $data} :- {$data}.
-	common.rmref(N) :- int(N) | ().
+	common.rmref(v(N)) :- int(N) | ().
 
 	% 参照を複製する
 	common.cpref(R1, R2, R), {'+'(R), $data} :- {'+'(R1), '+'(R2), $data}.
