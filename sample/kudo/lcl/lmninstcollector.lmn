@@ -33,6 +33,7 @@
 		R=lmninstcollector.collect_make3({$g.
 		
 			compiled_rule(RN, Rest), unifylinks(L1, L2) :- compiled_rule(RN, [unifylinks(L1, L2)|Rest]).
+			compiled_rule(RN, Rest), copyrules(M1, M2) :- compiled_rule(RN, [copyrules(M1, M2)|Rest]).
 		
 		}).
 		
@@ -47,7 +48,7 @@
 		R=lmninstcollector.collect_make({$g.
 
 			compiled_rule(RN, Rest), newatom(A, M, F) :- compiled_rule(RN, [newatom(A, M, F)|Rest]).
-			compiled_rule(RN, Rest), newmem(M, P) :- compiled_rule(RN, [newmem(M, P)|Rest]).
+			compiled_rule(RN, Rest), newmem(M, P, S) :- compiled_rule(RN, [newmem(M, P, S)|Rest]).
 			compiled_rule(RN, Rest), loadruleset(M, RID) :- compiled_rule(RN, [loadruleset(M, RID)|Rest]).
 		
 		}).

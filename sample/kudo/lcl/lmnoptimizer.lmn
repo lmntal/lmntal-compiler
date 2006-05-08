@@ -1,3 +1,25 @@
+% 未最適化時に出現する命令:
+%
+%%%%%%%%%%%%%%%%%%%%%% HEAD命令
+% FINDATOM, ANYMEM
+% GETLINK, ISBUDDY
+% NATOMS, NMEMS
+% NORULES
+%%%%%%%%%%%%%%%%%%%%%% BODY命令 
+% NEWATOM, NEWMEM
+% REMOVEATOM, REMOVEMEM
+% ENQUEUEATOM, ENQUEUEMEM
+% FREEATOM, FREEMEM
+% ALLOCLINK, UNIFYLINKS
+% LOADRULESET, COPYRULES
+%%%%%%%%%%%%%%%%%%%%%% その他, この後便宜的に挿入される命令
+% SPEC, COMMIT, PROCEED
+
+
+% TODO: isbuddy, findatom, getlinkをdereflink, func, testmemに変換
+% TODO: isbuddy, getlinkをdereflink, eqatomに変換 ( eqatomでは番号に注意(diff_numを使うこと))
+% TODO: よく考えると他にもeqatomを挟まなきゃならない場面もあるのでちゃんと考え直すこと
+
 {module(lmnoptimizer).
 
 	lmnoptimizer.optimize1 :-

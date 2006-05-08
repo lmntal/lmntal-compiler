@@ -5,16 +5,31 @@
 	% GC 1
 	lcl_gc.use1 :- 
 
-	( mem(N) :- int(N) | () ),
-	( atom(N) :- int(N) | () ),
+	% アトムオブジェクトの残ったフィールドを消す
 	( {$atom, functor(F, A)} :- ground(F), int(A) | {$atom} ), 
+	% アトム，文脈オブジェクトの残ったmemフィールドを消す
 	( {$atom, mem(M)} :- {$atom}, common.rmref(M) ), 
+
+	% リンクオブジェクト, 文脈定義オブジェクト等の残ったnameフィールドを消す
 	( {$link, name(N)} :- string(N) | {$link} ),
+
+	% 膜オブジェクトの残ったフィールドを消す
 	( {$mem, parent(P)} :- {$mem}, common.rmref(P) ),
 	( {$mem, rulecxt(R)} :- {$mem}, common.rmref(R) ),
 	
+	% 文脈オブジェクトの残ったdefフィールドを消す
+	( {$cxt, def(D)} :- {$cxt}, common.rmref(D) ),
+	
+	% 文脈定義オブジェクトの残ったlhsoccフィールドを消す
+	( {$def, lhsocc(L)} :- {$def}, common.rmref(L) ),
+	
+	% ルール文脈を消す
 	( rulecxt={} :- () ),
 	
+	% 文脈定義を消す
+	( cxtdef={} :- () ),
+	
+	% 数値化されたオブジェクトを消す
 	( {number(N)} :- int(N) | () ),
 	
 	().

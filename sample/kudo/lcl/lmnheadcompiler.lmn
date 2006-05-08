@@ -2,17 +2,15 @@
 
 {module(lmnheadcompiler).
 
-	% 1st Phase
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% 1st Phase %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 	lmnheadcompiler.phase1 :- 
 	
 	lmnheadcompiler.compile,
 
-	% 左辺のアトム数，膜数を数える
-	( lmnheadcompiler.compile, lhs={$lhs} :-
-	% lmnheadcompiler.count_lhs={$lhs} ),
-	
-%	( lmnheadcompiler.compile, lmnheadcompiler.counted_lhs={$lhs} :-
-		lmnheadcompiler.find(F), lhs={'+'(F), $lhs} ),
+	( lmnheadcompiler.compile, lhs={$lhs} :- lmnheadcompiler.find(F), lhs={'+'(F), $lhs} ),
 
 %%%%%% F I N D %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -67,6 +65,7 @@
 	
 	().
 
+	% Counting Phase 1 ( 通常Phaseの前に呼ばれる )
 	lmnheadcompiler.count_phase1 :-
 
 	( Count1@@
@@ -103,13 +102,15 @@
 	R=lmnheadcompiler.counted_lhsmem({$lhsmem, @lhsmem}/) :- R={$lhsmem} ),
 	
 	().
-	
-	% 2nd Phase
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% 2nd Phase %%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	lmnheadcompiler.phase2 :-
 	( lmnheadcompiler.find({$lhs}) :- {$lhs} ),
 	
 	( findatom_neq(A, M, F) :- findatom(A, M, F) ),
 	
 	().
-	
+
 }.

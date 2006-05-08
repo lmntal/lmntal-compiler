@@ -37,9 +37,10 @@
 		common.cpref(M1, M2, M) ),
 	
 	% NEWMEM
+	% 種類0以外は未対応
 	( NewMem@@
 	lmnbodycompiler.makemem({$mem, parent(P)}) :- 
-		lmnbodycompiler.make(M), newmem({$mem, parent(P1), '+'(M)}, P2), common.cpref(P1, P2, P) ),
+		lmnbodycompiler.make(M), newmem({$mem, parent(P1), '+'(M)}, P2, 0), common.cpref(P1, P2, P) ),
 	
 	% ALLOCLINK
 	( newatom({$atom, link(P1, L1)}, M, F) :- int(P1) |
@@ -52,6 +53,12 @@
 	% LOADRULESET
 	( lmnbodycompiler.make={$rhs, rules(RID)} :- 
 		loadruleset(M, RID), lmnbodycompiler.make={$rhs, '+'(M)} ),
+	
+	% COPYRULES
+	( cxtdef={$def, lhsocc=L, rhsocc=R}, 
+		rulecxt={'+'(L), mem(LM), $lcxt}, LM={$lmem}, rulecxt={'+'(R), mem(RM), $rcxt}, RM={$rmem} :-
+		rulecxt={'+'(L), mem(LM), $lcxt}, LM={$lmem, '+'(LC)}, rulecxt={$rcxt}, {$rmem, '+'(RC)},
+		copyrules(RC, LC), cxtdef={$def, lhsocc=L} ),
 
 %%%%%% E N Q U E U E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

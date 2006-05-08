@@ -478,10 +478,10 @@ lmnparser.parse_something2({$s.
 %	L=[srcatom(AN,[clause([srcbundle])])|R] :- L=[srcaggregate(AN,[clause([srcbundle])])|R].
 
 	ParseCons@@
-	L=srccons(Car, Cdr) :- L=srcatom(normalfunc(".",2),[Car,Cdr]).
+	L=srccons(Car, Cdr) :- L=srcatom(normalfunc("."),[Car,Cdr]).
 	
 	ParseNil@@
-	L=srcnil :- L=srcatom(normalfunc("[]",0),[]).	
+	L=srcnil :- L=srcatom(normalfunc("[]"),[]).	
 
 	% この辺は演算子のパーズの時にやるべきかも
 /* = */	L=srcatom(equal, Args) 		:- L=srcatom(normalfunc("="), Args).

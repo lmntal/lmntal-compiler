@@ -2,8 +2,9 @@
 
 	lmndumper.dump={$g, global=[rulesetid(GID)]} :- int(GID) |
 	lmndumper.dump_first={$g.
-		lmndumper.now(GID).
+		lmndumper.now(GID). % 初期生成ルールを最初に出力する
 		
+		% 初期生成ルールセットIDを持つルールセットを探してきて出力
 		lmndumper.now(N), compiled_ruleset(RID, Rules) :- N=:=RID |
 			lmndumper.dump_rules(RID, Rules).
 	}.
@@ -11,11 +12,10 @@
 	lmndumper.dump_first={$g, lmndumper.dumped, @g}/ :-
 	lmndumper.dump_rest={$g.
 		
-		lmndumper.dump.
-		
-		lmndumper.dump, compiled_ruleset(RID, Rules) :- lmndumper.dump_rules(RID, Rules).
-		
-		lmndumper.dumped :- lmndumper.dump.
+		lmndumper.dumped.
+
+		% 残ったルールセットを順に出力(lmndumper.dumpedは排他制御の為のアトム)		
+		lmndumper.dumped, compiled_ruleset(RID, Rules) :- lmndumper.dump_rules(RID, Rules).
 		
 	}.
 	
@@ -77,8 +77,8 @@
 		R="anymem      ["++var_str(M)++", "++var_str(P)++", "++string.str_of_int(S)++"]".
 	R=str_of_inst(newatom(A, M, F)) :- string(F) |
 		R="newatom     ["++var_str(A)++", "++var_str(M)++", "++F++"]".
-	R=str_of_inst(newmem(M, P)) :- 
-		R="newmem      ["++var_str(M)++", "++var_str(P)++"]".
+	R=str_of_inst(newmem(M, P, S)) :- 
+		R="newmem      ["++var_str(M)++", "++var_str(P)++", "++string.str_of_int(S)++"]".
 	R=str_of_inst(removeatom(A, M, F)) :- string(F) |
 		R="removeatom     ["++var_str(A)++", "++var_str(M)++", "++F++"]".
 	R=str_of_inst(removemem(M, P)) :- 
@@ -97,8 +97,10 @@
 		R="alloclink   ["++var_str(L)++", "++var_str(A)++", "++string.str_of_int(P)++"]".
 	R=str_of_inst(getlink(L, A, P)) :- int(P) |
 		R="getlink     ["++var_str(L)++", "++var_str(A)++", "++string.str_of_int(P)++"]".
-	R=str_of_inst(unifylinks(L1,L2)) :- 
+	R=str_of_inst(unifylinks(L1, L2)) :- 
 		R="unifylinks     ["++var_str(L1)++", "++var_str(L2)++"]".
+	R=str_of_inst(copyrules(M1, M2)) :- 
+		R="copyrules      ["++var_str(M1)++", "++var_str(M2)++"]".
 	R=str_of_inst(isbuddy(L1,L2)) :- 
 		R="isbuddy        ["++var_str(L1)++", "++var_str(L2)++"]".
 	R=str_of_inst(testmem(M, A)) :- 

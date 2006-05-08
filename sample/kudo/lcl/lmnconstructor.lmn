@@ -20,7 +20,7 @@
 %       a(..,b(..),..)  --> a(..,NEW_LINK,..), b(..,NEW_LINK)
 %     -- アトム引数の膜の展開
 %       a(..,{..},..)  --> a(..,NEW_LINK,..), {'+'(NEW_LINK),..}
-%     -- アトム引数にsrcatom, srcmem, srclink以外があったらエラー
+%     -- アトム引数にsrcrule, srcrulecxtがあったらエラー
 %     -- アトム引数にsrcbundleがあったら、アトム集団にする(今はエラーでいいや)
 %   - プロセス文脈の引数のcheck
 %     -- プロセス文脈の明示プロセスにsrclink以外があったらエラー
@@ -105,7 +105,12 @@ lmnconstructor.construct1({$g.
 		
 		% ルール文脈オブジェクトを作る
 		Construct_RuleCxt@@
-		S=srcrulecxt($rn) :- string($rn) | rulecxt={'+'(S), name=$rn}.
+		S=srcrulecxt($rn) :- string($rn) | 
+			rulecxt={'+'(S), def(D), '+'(O)}, cxtdef={'+'(D), occ=O, name=$rn}.
+		
+		% 同名の文脈定義を単一化する
+		cxtdef={$cxtdef1, name=$n1}, cxtdef={$cxtdef2, name=$n2} :- string($n1), string($n2), $n1=$n2 |
+			cxtdef={$cxtdef1, $cxtdef2, name=$n1}.
 	
 		% 膜オブジェクトの子要素のリストを切り離す
 		CreateChild1@@
@@ -185,6 +190,7 @@ lmnconstructor.construct1({$g.
 			:- string(Name1), string(Name2), Name1=Name2 |
 			link={$link1, atom(A1), name(Name1), buddy(B1), '+'(B2)},
 			link={$link2, atom(A2), name(Name2), buddy(B2), '+'(B1)}.
+		
 	}.
 	
 }).
@@ -193,12 +199,48 @@ lmnconstructor.construct1({$g, @g}/) :-
 
 lmnconstructor.construct2({$g. 
 
-	constructing_rule={$rule, linkcount(LC), @rule}/ :- int(LC) | rule={$rule}.
+	constructing_rule={$rule, linkcount(LC), @rule}/ :- int(LC) | constructing_rule={$rule.
+
+		% 左辺の膜か，右辺の膜かという情報を配る
+		lhs={$lhs, mem(M)}, rhs={$rhs}, mem={'+'(M), $mem} :-
+			lhs={$lhs, mem(M)}, rhs={$rhs}, lhsmem={'+'(M), $mem}.
+		rhs={$rhs, mem(M)}, lhs={$lhs}, mem={'+'(M), $mem} :- 
+			rhs={$rhs, mem(M)}, lhs={$lhs}, rhsmem={'+'(M), $mem}.
+		lhs={$lhs}, rhs={$rhs}, lhsmem={$lhsmem, mem(M)}, mem={'+'(M), $mem} :-
+			lhs={$lhs}, rhs={$rhs}, lhsmem={$lhsmem, mem(M)}, lhsmem={'+'(M), $mem}.
+		rhs={$rhs}, lhs={$lhs}, rhsmem={$rhsmem, mem(M)}, mem={'+'(M), $mem} :- 
+			rhs={$rhs}, lhs={$lhs}, rhsmem={$rhsmem, mem(M)}, rhsmem={'+'(M), $mem}.
+
+		% 文脈定義に対し，左辺出現か右辺出現かという情報を配る	
+		cxtdef={$def, occ=O}, O={$cxt, mem=M}, lhsmem={'+'(M), $mem} :-
+			cxtdef={$def, lhsocc=O}, O={$cxt, mem=M}, lhsmem={'+'(M), $mem}.
+	
+		cxtdef={$def, occ=O}, O={$cxt, mem=M}, rhsmem={'+'(M), $mem} :-
+			cxtdef={$def, rhsocc=O}, O={$cxt, mem=M}, rhsmem={'+'(M), $mem}.
+		
+		cxtdef={$def, occ=O}, O={$cxt, mem=M}, rhs={'+'(M), $mem} :-
+			cxtdef={$def, rhsocc=O}, O={$cxt, mem=M}, rhs={'+'(M), $mem}.
+		
+	}.
 
 }).
 
 lmnconstructor.construct2({$g, @g}/) :-
 
+lmnconstructor.construct3({$g.
+
+	constructing_rule={$rule, @rule}/ :- constructing2_rule={$rule.
+	
+		lhsmem(M) :- mem(M).
+		rhsmem(M) :- mem(M).
+		
+	}.
+	
+	constructing2_rule={$rule, @rule}/ :- rule={$rule}.
+
+}).
+
+lmnconstructor.construct3({$g, @g}/) :-
 %
 lmnconstructor.constructed_({$g}).
 

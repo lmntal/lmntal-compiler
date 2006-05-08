@@ -20,10 +20,12 @@
 	lmncompiler.compiling1={$g, @g}/ :-
 	lmncompiler.compiling2={$g.
 	
+		% コンパイルされたルール（命令列）を膜から取り出す
 		R=lmncompiler.compiled_rule({$rule, compiled_rule(RuleName, AM, MM, G, B)}) :- 
 			string(RuleName), ground(AM), ground(MM), ground(G), ground(B) |
 			R=compiled_rule(RuleName, AM, MM, G, B), $rule.
 		
+		% ルールを表す膜への参照を消す ( この参照はもっと前の段階で消してもいいかもしれない )
 		rule('+') :- ().
 	}.
 	
