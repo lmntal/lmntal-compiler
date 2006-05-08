@@ -31,7 +31,7 @@ lmnparser.parse_names({$s.
 	L=[dollar, atomname(AN)|R] :- L=[proccxtname(AN)|R].
 	
 	At_AtomName@@
-	L=[at, atomname(AN)|R] :- L=[rulecxtname(AN)|R].
+	L=[at, atomname(AN)|R] :- L=[srcrulecxt(AN)|R].
 	
 	Mod@@
 	L=[atomname("mod")|R] :- L=[mod|R].
@@ -482,7 +482,7 @@ lmnparser.parse_something2({$s.
 	
 	ParseNil@@
 	L=srcnil :- L=srcatom(normalfunc("[]",0),[]).	
-	
+
 	% この辺は演算子のパーズの時にやるべきかも
 /* = */	L=srcatom(equal, Args) 		:- L=srcatom(normalfunc("="), Args).
 /* + */	L=srcatom(plus, Args) 		:- L=srcatom(normalfunc("+"), Args).

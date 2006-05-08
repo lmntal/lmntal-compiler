@@ -1,0 +1,19 @@
+{module(lmnoptimizer).
+
+	lmnoptimizer.optimize1 :-
+
+%	%左辺出現同士のunifylinksとfindatomを、dereflink, func, testmemに変換する
+%	( getlink({$link1, '+'(L1)}, A1, P1), getlink({$link2, '+'(L2)}, A2, P2), 
+%		unifylinks(L1, L2), findatom({'+'(A2), $atom}, M, F), findatom({'+'(A1), $atom1}, M1, F1) :-
+%		getlink({$link1, '+'(L1)}, A1, P1), dereflink({$atom, '+'(AF), '+'(AT)}, L1, P2), 
+%		testmem(M, AT), func(AF,F), {$link2}, findatom({'+'(A1), $atom1}, M1, F1) ),
+	
+%	%左辺の同一アトムへのunifylinksはdereflink, eqatomへと変換する
+%	( getlink({$link1, '+'(L1)}, {$atom, '+'(A)}, P1), getlink({$link2, '+'(L2)}, A, P2),
+%		unifylinks(L1, L2) :-
+%		getlink({$link1, '+'(L1)}, {$atom, '+'(A), diff_num={'+'(D), '+'(A2)}}, P1), dereflink(D, L1, P2), 
+%		eqatom(A, A2), {$link2} ),
+	
+	().
+
+}.

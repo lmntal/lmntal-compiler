@@ -17,6 +17,7 @@
 		R=lmninstcollector.collect_free({$g.
 
 			compiled_rule(RN, Rest), freeatom(A) :- compiled_rule(RN, [freeatom(A)|Rest]).
+			compiled_rule(RN, Rest), freemem(M) :- compiled_rule(RN, [freemem(M)|Rest]).
 		
 		}).
 		
@@ -24,6 +25,7 @@
 		R=lmninstcollector.collect_enqueue({$g.
 
 			compiled_rule(RN, Rest), enqueueatom(A) :- compiled_rule(RN, [enqueueatom(A)|Rest]).
+			compiled_rule(RN, Rest), enqueuemem(M) :- compiled_rule(RN, [enqueuemem(M)|Rest]).
 		
 		}).
 		
@@ -45,7 +47,7 @@
 		R=lmninstcollector.collect_make({$g.
 
 			compiled_rule(RN, Rest), newatom(A, M, F) :- compiled_rule(RN, [newatom(A, M, F)|Rest]).
-
+			compiled_rule(RN, Rest), newmem(M, P) :- compiled_rule(RN, [newmem(M, P)|Rest]).
 			compiled_rule(RN, Rest), loadruleset(M, RID) :- compiled_rule(RN, [loadruleset(M, RID)|Rest]).
 		
 		}).
@@ -54,6 +56,7 @@
 		R=lmninstcollector.collect_remove({$g.
 
 			compiled_rule(RN, Rest), removeatom(A, M, F) :- compiled_rule(RN, [removeatom(A, M, F)|Rest]).
+			compiled_rule(RN, Rest), removemem(M, P) :- compiled_rule(RN, [removemem(M, P)|Rest]).
 		
 		}).
 		
@@ -65,18 +68,29 @@
 		}).
 		
 		R=lmninstcollector.collect_commit({$g,@g}/) :-
+		R=lmninstcollector.collect_numcheck({$g.
+		
+			compiled_rule(RN, Rest), natoms(M, C) :- compiled_rule(RN, [natoms(M, C)|Rest]).
+			compiled_rule(RN, Rest), nmems(M, C) :- compiled_rule(RN, [nmems(M, C)|Rest]).
+			compiled_rule(RN, Rest), norules(M) :- compiled_rule(RN, [norules(M)|Rest]).
+
+		}).
+		
+		R=lmninstcollector.collect_numcheck({$g,@g}/) :-
 		R=lmninstcollector.collect_find4({$g.
 		
 			compiled_rule(RN, Rest), func(A, F) :- compiled_rule(RN, [func(A,F)|Rest]).
 			compiled_rule(RN, Rest), testmem(M, A) :- compiled_rule(RN, [testmem(M, A)|Rest]).
-			compiled_rule(RN, Rest), eqatom(A1, A2) :- compiled_rule(RN, [eqatom(A1,A2)|Rest]).
+%			compiled_rule(RN, Rest), eqatom(A1, A2) :- compiled_rule(RN, [eqatom(A1,A2)|Rest]).
+			compiled_rule(RN, Rest), neqatom(A1, A2) :- compiled_rule(RN, [neqatom(A1,A2)|Rest]).
 
 		}).
 		
 		R=lmninstcollector.collect_find4({$g,@g}/) :-
 		R=lmninstcollector.collect_find3({$g.
 		
-			compiled_rule(RN, Rest), dereflink(A, L, P) :- compiled_rule(RN, [dereflink(A, L, P)|Rest]).
+%			compiled_rule(RN, Rest), dereflink(A, L, P) :- compiled_rule(RN, [dereflink(A, L, P)|Rest]).
+			compiled_rule(RN, Rest), isbuddy(L1, L2) :- compiled_rule(RN, [isbuddy(L1, L2)|Rest]).
 
 		}).
 		
@@ -91,6 +105,7 @@
 		R=lmninstcollector.collect_find({$g.
 		
 			compiled_rule(RN, Rest), findatom(A, M, F) :- compiled_rule(RN, [findatom(A, M, F)|Rest]).
+			compiled_rule(RN, Rest), anymem(M, P, S) :- compiled_rule(RN, [anymem(M, P, S)|Rest]).
 
 		}).
 		

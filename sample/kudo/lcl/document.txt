@@ -2,3 +2,15 @@
  /bin$ lmntal -I ../sample/kudo/lcl --use-source-library ../sample/kudo/lcl/frontend.lmn
 で，標準入力にプログラムを入力．[EOF]で終わること．
 
+TODO:
+-specをはさむ
+-commitをはさむ
+-左辺へのunifylinksをderefとかに置き換える．
+-膜対応
+
+意味解析:
+-プロセス文脈
+-ルール文脈
+
+正しく構文解析されてない:
+- a:-(b:-c)

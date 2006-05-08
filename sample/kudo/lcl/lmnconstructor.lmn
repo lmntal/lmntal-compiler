@@ -102,6 +102,10 @@ lmnconstructor.construct1({$g.
 		% 膜オブジェクトを作る		
 		Construct_Mem@@
 		S=srcmem(Childs) :- mem={childs(Childs), '+'(S)}.
+		
+		% ルール文脈オブジェクトを作る
+		Construct_RuleCxt@@
+		S=srcrulecxt($rn) :- string($rn) | rulecxt={'+'(S), name=$rn}.
 	
 		% 膜オブジェクトの子要素のリストを切り離す
 		CreateChild1@@
@@ -122,6 +126,9 @@ lmnconstructor.construct1({$g.
 		% 膜オブジェクトの子要素のうち，ルールセットはrulesで参照する
 		mem={$mem, child(R)}, R=rulesetid(RID) :-
 			mem={$mem, rules(R)}, R=rulesetid(RID).
+		% 膜オブジェクトの子要素のうち，ルール文脈はrulecxtで参照する
+		mem={$mem, child(R)}, rulecxt={'+'(R), $rulecxt} :-
+			mem={$mem, rulecxt(R), '+'(M)}, rulecxt={'+'(R), mem(M), $rulecxt}.
 	
 		% 子要素がつきた時のindex番号がそのアトムの引数数．ファンクタを作る
 		CreateFunctor@@

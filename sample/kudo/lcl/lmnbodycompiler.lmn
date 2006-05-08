@@ -19,15 +19,27 @@
 %%%%%% M A K E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	% make for atom
-	( lmnbodycompiler.make={$rhs, atom(A)} :-
+	( MakeAtom@@
+	lmnbodycompiler.make={$rhs, atom(A)} :-
 		lmnbodycompiler.makeatom(A1), 
 		lmnbodycompiler.make={$rhs, made_atom(A2)}, common.cpref(A1, A2, A) ),
 	
-%	NEWATOM
-	( MakeAtom@@
+	% make for mem
+	( MakeMem@@
+	lmnbodycompiler.make={$rhs, mem(M)} :-
+		lmnbodycompiler.makemem(M1),
+		lmnbodycompiler.make={$rhs, made_mem(M2)}, common.cpref(M1, M2, M) ),
+	
+	% NEWATOM
+	( NewAtom@@
 	lmnbodycompiler.makeatom({$atom, functor(F, A), mem(M)}) :- ground(F), int(A) |
 		newatom({$atom, functor(F, A), mem(M1)}, M2, common.str_of_functor(F, A)),
 		common.cpref(M1, M2, M) ),
+	
+	% NEWMEM
+	( NewMem@@
+	lmnbodycompiler.makemem({$mem, parent(P)}) :- 
+		lmnbodycompiler.make(M), newmem({$mem, parent(P1), '+'(M)}, P2), common.cpref(P1, P2, P) ),
 	
 	% ALLOCLINK
 	( newatom({$atom, link(P1, L1)}, M, F) :- int(P1) |
@@ -50,20 +62,39 @@
 	
 	% ENQUEUEATOM
 	( EnqueueAtom@@
-	lmnbodycompiler.enqueueatom({$atom}) :- enqueueatom({$atom}) ),
+		lmnbodycompiler.enqueueatom({$atom}) :- enqueueatom({$atom}) ),
+
+	( Enqueue2@@
+	lmnbodycompiler.enqueue({$rhs, made_mem(M)}) :-
+		lmnbodycompiler.enqueuemem(M),
+		lmnbodycompiler.enqueue({$rhs}) ),
+	
+	% ENQUEUEMEM
+	( EnqueueMem@@
+		lmnbodycompiler.enqueuemem({$mem}) :- lmnbodycompiler.enqueue(E), enqueuemem({$mem, '+'(E)}) ),
 
 %%%%%% R E M O V E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	( Remove1@@
 	lmnbodycompiler.remove({$lhs, found_atom(A)}) :-
 		lmnbodycompiler.removeatom(A1), 
-		lmnbodycompiler.remove({$lhs,removed_atom(A2)}), common.cpref(A1, A2, A) ),
+		lmnbodycompiler.remove({$lhs, removed_atom(A2)}), common.cpref(A1, A2, A) ),
+	
+	( Remove2@@
+	lmnbodycompiler.remove({$lhs, found_mem(M)}) :-
+		lmnbodycompiler.removemem(M1),
+		lmnbodycompiler.remove({$lhs, removed_mem(M2)}), common.cpref(M1, M2, M) ),
 
 	% REMOVEATOM
 	( RemoveAtom@@
 	lmnbodycompiler.removeatom({$atom, mem(M), functor(F, A)}) :- ground(F), int(A) |
 		removeatom({$atom, functor(F, A), mem(M1)},
 		M2, common.str_of_functor(F, A)), common.cpref(M1, M2, M) ),
+
+	% REMOVEMEM
+	( RemoveMem@@
+	lmnbodycompiler.removemem({$mem, parent(P)}) :-
+		lmnbodycompiler.remove(R), removemem({$mem, parent(P1), '+'(R)}, P2), common.cpref(P1, P2, P) ),
 
 %%%%%% F R E E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -74,6 +105,14 @@
 	% FREEATOM
 	( FreeAtom@@
 	lmnbodycompiler.freeatom({$atom}) :- freeatom({$atom}) ),
+
+	( Free2@@
+	lmnbodycompiler.free({$lhs, removed_mem(M)}) :-
+		lmnbodycompiler.freemem(M), lmnbodycompiler.free({$lhs}) ),
+	
+	% FREEMEM
+	( FreeMem@@
+	lmnbodycompiler.freemem({$mem}) :- lmnbodycompiler.free(F), freemem({$mem, '+'(F)}) ),
 
 	().
 

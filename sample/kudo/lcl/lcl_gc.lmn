@@ -10,6 +10,11 @@
 	( {$atom, functor(F, A)} :- ground(F), int(A) | {$atom} ), 
 	( {$atom, mem(M)} :- {$atom}, common.rmref(M) ), 
 	( {$link, name(N)} :- string(N) | {$link} ),
+	( {$mem, parent(P)} :- {$mem}, common.rmref(P) ),
+	( {$mem, rulecxt(R)} :- {$mem}, common.rmref(R) ),
+	
+	( rulecxt={} :- () ),
+	
 	( {number(N)} :- int(N) | () ),
 	
 	().

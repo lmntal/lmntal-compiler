@@ -30,14 +30,25 @@
 	lmncompiler.compiling2={$g, @g}/ :- lmncompiler.compiled={ $g}.
 	
 	% 個々のルールのコンパイル
+
+	% Counting Phase 1
+	R=lmncompiler.compile_rule({$rule}) :-
+		R=lmncompiler.counting1_rule({$rule.
+			lmnheadcompiler.count_phase1.
+		}).
+	
+	% Counting Phase 2
+	R=lmncompiler.counting1_rule({$rule, @rule}/) :-
+		R=lmncompiler.counting2_rule({$rule.
+			lmnheadcompiler.count_phase2.
+		}).
+
 	% 1st Phase
-	R=lmncompiler.compile_rule({
-		$rule}) :-
-		R=lmncompiler.compiling1_rule({
+	R=lmncompiler.counting2_rule({$rule, @rule}/) :-
+		R=lmncompiler.compiling1_rule({$rule.
 			lmnheadcompiler.phase1,
 			lmnguardcompiler.phase1,
-			lmnbodycompiler.phase1,
-			$rule.
+			lmnbodycompiler.phase1.
 		}).
 	
 	% 2nd Phase
@@ -48,11 +59,17 @@
 			lmnbodycompiler.phase2.
 		}).
 	
-	% Numbering Phase
+	% Optimizing Phase 1
 	R=lmncompiler.compiling2_rule({$rule, @rule}/) :-
+		R=lmncompiler.optimizing1_rule({$rule.
+			lmnoptimizer.optimize1.
+		}).
+	
+	% Numbering Phase
+	R=lmncompiler.optimizing1_rule({$rule, @rule}/) :-
 		R=lmnnumberer.number({$rule}).
 
-	% GC 1 Phase
+	% GC Phase 1
 	R=numbered({$rule, @rule}/) :-
 		R=lmncompiler.gcing1_rule({$rule.
 			lcl_gc.use1.
@@ -62,7 +79,7 @@
 	R=lmncompiler.gcing1_rule({$rule, @rule}/) :-
 		R=lmninstcollector.collect_insts({$rule}).
 
-	% GC 2 Phase
+	% GC Phase 2
 	R=insts_collected({$rule, @rule}/) :-
 		R=lmncompiler.gcing2_rule({$rule.
 			lcl_gc.use2.
