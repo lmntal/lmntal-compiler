@@ -108,6 +108,11 @@ lmnconstructor.construct1({$g.
 		S=srcrulecxt($rn) :- string($rn) | 
 			rulecxt={'+'(S), def(D), '+'(O)}, cxtdef={'+'(D), occ=O, name=$rn}.
 		
+		% プロセス文脈オブジェクトを作る
+		Construct_ProcCxt@@
+		S=srcproccxt($pn, Ex, Im) :- string($pn) |
+			proccxt={'+'(S), def(D), '+'(O), expls(Ex), impls(Im)}, cxtdef={'+'(D), occ=O, name=$pn}.
+		
 		% 同名の文脈定義を単一化する
 		cxtdef={$cxtdef1, name=$n1}, cxtdef={$cxtdef2, name=$n2} :- string($n1), string($n2), $n1=$n2 |
 			cxtdef={$cxtdef1, $cxtdef2, name=$n1}.
@@ -122,16 +127,16 @@ lmnconstructor.construct1({$g.
 		CreateChild2@@
 		atom={$process, childs(N, C)}, C=[Child|R] :- M=N+1|atom={$process, child(N, Child), childs(M,R)}.
 	
-		% 膜オブジェクトの子要素のうち，アトムはatomで参照する
+		% 膜オブジェクトの子要素のうち，アトムはatomで参照し，逆に所属膜としてmemで参照させる
 		mem={$mem, child(A)}, atom={'+'(A), $atom} :-
 			mem={$mem, atom(A), '+'(M)}, atom={mem(M), '+'(A), $atom}.
-		% 膜オブジェクトの子要素のうち，膜はmemで参照する
+		% 膜オブジェクトの子要素のうち，膜はmemで参照し，逆に親膜としてparentで参照させる
 		mem={$mem, child(M)}, mem={'+'(M), $childmem} :-
 			mem={$mem, mem(C), '+'(M)}, mem={parent(M), '+'(C), $childmem}.
 		% 膜オブジェクトの子要素のうち，ルールセットはrulesで参照する
 		mem={$mem, child(R)}, R=rulesetid(RID) :-
 			mem={$mem, rules(R)}, R=rulesetid(RID).
-		% 膜オブジェクトの子要素のうち，ルール文脈はrulecxtで参照する
+		% 膜オブジェクトの子要素のうち，ルール文脈はrulecxtで参照し，逆に所属膜としてmemで参照させる
 		mem={$mem, child(R)}, rulecxt={'+'(R), $rulecxt} :-
 			mem={$mem, rulecxt(R), '+'(M)}, rulecxt={'+'(R), mem(M), $rulecxt}.
 	

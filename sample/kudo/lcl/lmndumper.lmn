@@ -19,7 +19,7 @@
 		
 	}.
 	
-	lmndumper.dump_rest={$g, lmndumper.dump, @g}/ :-
+	lmndumper.dump_rest={$g, lmndumper.dumped, @g}/ :-
 		lmndumper.dumped={$g}.
 
 	% ルールセットの出力
@@ -62,7 +62,8 @@
 	% 命令の順次出力
 	R=lmndumper.dump_insts([Inst|Rest]) :- R=lmndumper.dumping_inst(io.print("\t\t"++str_of_inst(Inst)),Rest).
 	R=lmndumper.dumping_inst(done, Rest) :- R=lmndumper.dump_insts(Rest).
-	R=lmndumper.dump_insts([]) :- R=done.
+	R=lmndumper.dump_insts([]) :- R=lmndumper.dump_ln(io.print("")).
+	R=lmndumper.dump_ln(done) :- R=done.
 	lmndumper.dumping_insts(done, Rest) :- lmndumper.dumping_rules(Rest).
 
 	% 変数番号出力
@@ -122,7 +123,7 @@
 	R=str_of_inst(spec(F, L)) :- 
 		R="spec           ["++string.str_of_int(F)++", "++string.str_of_int(L)++"]".
 	R=str_of_inst(proceed) :- 
-		R="proceed        []\n".
+		R="proceed        []".
 	R=str_of_inst(commit(RN)) :- string(RN) |
 		R="commit         [\""++RN++"\"]".
 

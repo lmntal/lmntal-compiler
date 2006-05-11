@@ -35,6 +35,9 @@
 %		unifylinks(L1, L2) :-
 %		getlink({$link1, '+'(L1)}, {$atom, '+'(A), diff_num={'+'(D), '+'(A2)}}, P1), dereflink(D, L1, P2), 
 %		eqatom(A, A2), {$link2} ),
+
+	( copyrules(M11, M12), copyrules(M21, M22), {'+'(M11), '+'(M21), $mem1}, {'+'(M12), '+'(M22), $mem2} :-
+		copyrules(M1, M2), {'+'(M1), $mem1}, {'+'(M2), $mem2} ),
 	
 	().
 

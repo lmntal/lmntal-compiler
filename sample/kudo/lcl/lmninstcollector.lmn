@@ -121,7 +121,7 @@
 		R=lmninstcollector.last_phase({$g.
 		
 			compiled_rule(RN, Insts) :- compiled_rule(RN,
-				[spec(2,2),proceed],Insts,none,none). % 膜主導テスト命令列として返す
+				[spec(2,2)],Insts,none,none). % 膜主導テスト命令列として返す
 		
 		}).
 		
