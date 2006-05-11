@@ -4,7 +4,7 @@
 	
 		R=lmninstcollector.init({$g.
 
-			rulename(RN) :- string(RN) | compiled_rule(RN, eoi), proceed, commit(RN), usable(v(0)).			
+			rulename($rn) :- string($rn) | compiled_rule($rn, eoi), proceed, commit($rn), usable(v(0)).			
 
 		}).
 		

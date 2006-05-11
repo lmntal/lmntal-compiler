@@ -50,7 +50,7 @@
 	lmnheadcompiler.findmem({$mem, parent(P)}) :- 
 		lmnheadcompiler.find(F), anymem({$mem, parent(P1), '+'(F)}, P2, 0), common.cpref(P1, P2, P) ),
 
-	% GETLINK ( プロセス文脈に出現するもの )
+%	% GETLINK ( プロセス文脈に出現するもの )
 %	cxtdef={$def, lhsocc=LOC}, proccxt={$lhsocc, '+'(LOC), impl(IL)} :-
 %		cxtdef={$def, lhsocc=LOC}, proccxt={$lhsocc, getlinked_impl(IL)}, lmnheadcompiler.getlink(IL)
 	
