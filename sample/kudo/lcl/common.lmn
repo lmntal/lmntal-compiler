@@ -11,6 +11,8 @@ module(common).
 	
 	R=common.str_of_functor(normalfunc(Name), Arity) :-
 		R=string.concat("'", string.concat(Name, string.concat("'_", string.str_of_int(Arity)))).
+	R=common.str_of_functor(out, 2) :- R="$out_2".
+	R=common.str_of_functor(in, 2) :- R="$in_2".	
 	
 %	R=common.flatten([[C|R1]|R2]) :- R=[C|common.flatten([R1|R2])].
 %	R=common.flatten([[]|R2]) :- R=common.flatten(R2).

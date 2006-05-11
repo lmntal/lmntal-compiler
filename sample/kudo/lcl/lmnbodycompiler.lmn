@@ -9,11 +9,13 @@
 	lmnbodycompiler.remove, 
 	lmnbodycompiler.make, 
 	lmnbodycompiler.enqueue, 
+	lmnbodycompiler.dequeue,
 	lmnbodycompiler.free.
 	
 	( lmnbodycompiler.remove, lhs={$lhs} :- lmnbodycompiler.remove(R), lhs={'+'(R), $lhs} ),
 	( lmnbodycompiler.make, rhs={$rhs} :- lmnbodycompiler.make(M), rhs={'+'(M), $rhs} ),
 	( lmnbodycompiler.enqueue, rhs={$rhs} :- lmnbodycompiler.enqueue(M), rhs={'+'(M), $rhs} ),
+	( lmnbodycompiler.dequeue, lhs={$lhs} :- lmnbodycompiler.dequeue(D), lhs={'+'(D), $lhs} ),
 	( lmnbodycompiler.free, lhs={$lhs} :- lmnbodycompiler.free(F), lhs={'+'(F), $lhs} ),
 	
 %%%%%% M A K E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,6 +40,7 @@
 	
 	% NEWMEM
 	% 種類0以外は未対応
+	% newmemの最後の引数は依存関係を表す
 	( NewMem@@
 	lmnbodycompiler.makemem({$mem, parent(P)}) :- 
 		lmnbodycompiler.make(M), newmem({$mem, parent(P1), '+'(M)}, P2, 0), common.cpref(P1, P2, P) ),
@@ -59,6 +62,27 @@
 		rulecxt={'+'(L), mem(LM), $lcxt}, LM={$lmem}, rulecxt={'+'(R), mem(RM), $rcxt}, RM={$rmem} :-
 		rulecxt={'+'(L), mem(LM), $lcxt}, LM={$lmem, '+'(LC)}, rulecxt={$rcxt}, {$rmem, '+'(RC)},
 		copyrules(RC, LC), cxtdef={$def, lhsocc=L} ),
+	
+	% INSERTCONNECTORS
+	( cxtdef={$def, lhsocc=L}, proccxt={'+'(L), $lhsocc, mem=M} :- 
+		cxtdef={$def, connector_inserted_lhsocc=L, connector_set=S}, connector_set=CS,
+		insertconnectors({'+'(S), '+'(CS)}, [], M1), proccxt={'+'(L), $lhsocc, mem=M2}, common.cpref(M1, M2, M) ),
+	
+	% プロセス文脈の明示的な自由リンクの相方は既にアトムの引数としてGETLINKが発行されている
+	( insertconnectors(S, Rest, {$lhsmem, proccxt=P}), P={$lhsocc, impl(PI, L)}, {$link, '+'(L)} :- int(PI) |
+		insertconnectors(S, [C|Rest], {$lhsmem, proccxt=P}), P={$lhsocc, connector_inserted_impl(PI, L)}, {$link, '+'(L), '+'(C)} ), 
+	
+	% DELETECONNECTORS, COPYCELLS
+	( cxtdef={$def, connector_inserted_lhsocc=L, rhsocc=R, connector_set=S},S={$set},
+		proccxt={'+'(L), mem(LM), $lcxt}, LM={$lmem}, proccxt={'+'(R), mem(RM), $rcxt}, RM={$rmem} :-
+		proccxt={'+'(L), mem(LM), $lcxt}, LM={$lmem, '+'(LC)}, proccxt={$rcxt}, {$rmem, '+'(RC), '+'(RD)},
+		deleteconnectors(SD, CM2, RD), S={$set, '+'(SD)},
+		copycells(CM, RC, LC), cellmap={'+'(CM), '+'(CM2)},
+		cxtdef={$def, connector_inserted_lhsocc=L, connector_set=S} ),
+
+	% DROPMEM
+	( cxtdef={$def, connector_inserted_lhsocc=LO}, LO={$lhsocc, mem(M)}, M={$mem} :-
+		cxtdef={$def}, {$lhsocc, mem(M)}, M={$mem, '+'(D)}, dropmem(D) ),
 
 %%%%%% E N Q U E U E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -102,11 +126,21 @@
 	( RemoveMem@@
 	lmnbodycompiler.removemem({$mem, parent(P)}) :-
 		lmnbodycompiler.remove(R), removemem({$mem, parent(P1), '+'(R)}, P2), common.cpref(P1, P2, P) ),
+		
+%%%%%% D E Q U E U E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	( Dequeue@@
+	lmnbodycompiler.dequeue({$lhs, removed_atom(A)}) :-
+		lmnbodycompiler.dequeueatom(A1), lmnbodycompiler.dequeue({$lhs, dequeued_atom(A2)}), common.cpref(A1, A2, A) ),
+	
+	% DEQUEUEATOM
+	( DequeueAtom@@
+	lmnbodycompiler.dequeueatom(A) :- dequeueatom(A) ),
 
 %%%%%% F R E E %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	( Free1@@
-	lmnbodycompiler.free({$lhs, removed_atom(A)}) :-
+	lmnbodycompiler.free({$lhs, dequeued_atom(A)}) :-
 		lmnbodycompiler.freeatom(A), lmnbodycompiler.free({$lhs}) ),
 	
 	% FREEATOM
@@ -131,8 +165,9 @@
 	
 	( lmnbodycompiler.make({$rhs}) :- {$rhs} ),
 	( lmnbodycompiler.enqueue({$rhs}) :- {$rhs} ),
-	( lmnbodycompiler.remove({$rhs}) :- {$rhs} ),
-	( lmnbodycompiler.free({$rhs}) :- {$rhs} ),
+	( lmnbodycompiler.remove({$lhs}) :- {$lhs} ),
+	( lmnbodycompiler.dequeue({$lhs}) :- {$lhs} ),
+	( lmnbodycompiler.free({$lhs}) :- {$lhs} ),
 	
 	().
 

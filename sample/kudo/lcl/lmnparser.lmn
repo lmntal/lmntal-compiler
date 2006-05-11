@@ -81,18 +81,29 @@ lmnparser.check_names({$s.
 }).
 
 lmnparser.check_names({$s, syntax_ok, @s}/) :-
-% まず、'{', '}', '(', ')', '[', ']' で切り分ける
+% まず、'{', '}' で切り分ける
 lmnparser.parse_braces({$s. syntax_ok.
-	% groundの比較に定数項が使えない為
+	% ground,unaryの比較に定数項が使えない為
 	braces_token(lbrace, rbrace).
 
+	% '{'は膜の始まり
 	Parse_Braces1@@
 	L=[lbrace|R] :- L=[srcmem_begin({proc(B,B)})|R].
 	
+	% '}'は膜の終わり
 	Parse_Braces2@@
-	L=[srcmem_begin({proc(MH,MT),$m[MH,MT]}), rbrace|R] :-
-		L=[srcmem(MH)|R], $m[MH,MT], MT=[].
+	L=[srcmem_begin({proc(MH, MT),$m[MH, MT]}), rbrace|R] :-
+		L=[srcmem(MH, false, none, 0)|R], $m[MH, MT], MT=[].
 	
+	% '}/'
+	Parse_Braces2_1@@
+	L=[srcmem_begin({proc(MH, MT), $m[MH, MT]}), rbrace_slash|R] :-
+		L=[srcmem(MH, true, none, 0)|R], $m[MH, MT], MT=[].
+	
+	% TODO : '}@', '/@', '}_', '}_@', '}_/', '}_/@'
+	
+	% '{', '}'以外が出てきたら膜の中に入れる
+	% ※ '{'もはじくことによって、階層構造にも対応できている
 	Parse_Braces3@@
 	braces_token(LBrace, RBrace), L=[srcmem_begin({proc(MH,MT), $m[MH, MT]}),Token|R] :-
 		Token \= LBrace, Token \= RBrace|

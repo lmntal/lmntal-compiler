@@ -3,122 +3,142 @@
 	R=lmninstcollector.collect_insts({$g}) :-
 	
 		R=lmninstcollector.init({$g.
-			rulename(RN) :- string(RN) | compiled_rule(RN, []), proceed, commit(RN).
+
+			rulename(RN) :- string(RN) | compiled_rule(RN, eoi), proceed, commit(RN), usable(v(0)).			
+
 		}).
 		
 		R=lmninstcollector.init({$g,@g}/) :-
-		R=lmninstcollector.collect_proceed({$g.
-
-			compiled_rule(RN, Rest), proceed :- compiled_rule(RN, [proceed|Rest]).
-		
-		}).
-		
-		R=lmninstcollector.collect_proceed({$g,@g}/) :-
-		R=lmninstcollector.collect_free({$g.
-
-			compiled_rule(RN, Rest), freeatom(A) :- compiled_rule(RN, [freeatom(A)|Rest]).
-			compiled_rule(RN, Rest), freemem(M) :- compiled_rule(RN, [freemem(M)|Rest]).
-		
-		}).
-		
-		R=lmninstcollector.collect_free({$g,@g}/) :-
-		R=lmninstcollector.collect_enqueue({$g.
-
-			compiled_rule(RN, Rest), enqueueatom(A) :- compiled_rule(RN, [enqueueatom(A)|Rest]).
-			compiled_rule(RN, Rest), enqueuemem(M) :- compiled_rule(RN, [enqueuemem(M)|Rest]).
-		
-		}).
-		
-		R=lmninstcollector.collect_enqueue({$g,@g}/) :-
-		R=lmninstcollector.collect_make3({$g.
-		
-			compiled_rule(RN, Rest), unifylinks(L1, L2) :- compiled_rule(RN, [unifylinks(L1, L2)|Rest]).
-			compiled_rule(RN, Rest), copyrules(M1, M2) :- compiled_rule(RN, [copyrules(M1, M2)|Rest]).
-		
-		}).
-		
-		R=lmninstcollector.collect_make3({$g, @g}/) :-
-		R=lmninstcollector.collect_make2({$g.
-		
-			compiled_rule(RN, Rest), alloclink(L, A, P) :- compiled_rule(RN, [alloclink(L, A, P)|Rest]).
-
-		}).
-		
-		R=lmninstcollector.collect_make2({$g,@g}/) :-
-		R=lmninstcollector.collect_make({$g.
-
-			compiled_rule(RN, Rest), newatom(A, M, F) :- compiled_rule(RN, [newatom(A, M, F)|Rest]).
-			compiled_rule(RN, Rest), newmem(M, P, S) :- compiled_rule(RN, [newmem(M, P, S)|Rest]).
-			compiled_rule(RN, Rest), loadruleset(M, RID) :- compiled_rule(RN, [loadruleset(M, RID)|Rest]).
-		
-		}).
-		
-		R=lmninstcollector.collect_make({$g,@g}/) :-
-		R=lmninstcollector.collect_remove({$g.
-
-			compiled_rule(RN, Rest), removeatom(A, M, F) :- compiled_rule(RN, [removeatom(A, M, F)|Rest]).
-			compiled_rule(RN, Rest), removemem(M, P) :- compiled_rule(RN, [removemem(M, P)|Rest]).
-		
-		}).
-		
-		R=lmninstcollector.collect_remove({$g,@g}/) :-
-		R=lmninstcollector.collect_commit({$g.
-		
-			compiled_rule(RN, Rest), commit(C) :- compiled_rule(RN, [commit(C)|Rest]).
-
-		}).
-		
-		R=lmninstcollector.collect_commit({$g,@g}/) :-
-		R=lmninstcollector.collect_numcheck({$g.
-		
-			compiled_rule(RN, Rest), natoms(M, C) :- compiled_rule(RN, [natoms(M, C)|Rest]).
-			compiled_rule(RN, Rest), nmems(M, C) :- compiled_rule(RN, [nmems(M, C)|Rest]).
-			compiled_rule(RN, Rest), norules(M) :- compiled_rule(RN, [norules(M)|Rest]).
-
-		}).
-		
-		R=lmninstcollector.collect_numcheck({$g,@g}/) :-
-		R=lmninstcollector.collect_find4({$g.
-		
-			compiled_rule(RN, Rest), func(A, F) :- compiled_rule(RN, [func(A,F)|Rest]).
-			compiled_rule(RN, Rest), testmem(M, A) :- compiled_rule(RN, [testmem(M, A)|Rest]).
-%			compiled_rule(RN, Rest), eqatom(A1, A2) :- compiled_rule(RN, [eqatom(A1,A2)|Rest]).
-			compiled_rule(RN, Rest), neqatom(A1, A2) :- compiled_rule(RN, [neqatom(A1,A2)|Rest]).
-
-		}).
-		
-		R=lmninstcollector.collect_find4({$g,@g}/) :-
-		R=lmninstcollector.collect_find3({$g.
-		
-%			compiled_rule(RN, Rest), dereflink(A, L, P) :- compiled_rule(RN, [dereflink(A, L, P)|Rest]).
-			compiled_rule(RN, Rest), isbuddy(L1, L2) :- compiled_rule(RN, [isbuddy(L1, L2)|Rest]).
-
-		}).
-		
-		R=lmninstcollector.collect_find3({$g,@g}/) :-
-		R=lmninstcollector.collect_find2({$g.
-		
-			compiled_rule(RN, Rest), getlink(L, A, P) :- compiled_rule(RN, [getlink(L, A, P)|Rest]).
-
-		}).
-		
-		R=lmninstcollector.collect_find2({$g,@g}/) :-
-		R=lmninstcollector.collect_find({$g.
-		
-			compiled_rule(RN, Rest), findatom(A, M, F) :- compiled_rule(RN, [findatom(A, M, F)|Rest]).
-			compiled_rule(RN, Rest), anymem(M, P, S) :- compiled_rule(RN, [anymem(M, P, S)|Rest]).
-
-		}).
-		
-		R=lmninstcollector.collect_find({$g,@g}/) :-
 		R=lmninstcollector.collect_spec({$g.
 		
-			compiled_rule(RN, Rest), spec(F, L) :- compiled_rule(RN, [spec(F, L)|Rest]).
+			E=eoi, spec(F, L) :- E=[spec(F, L)|eoi].
 
 		}).
 		
 		R=lmninstcollector.collect_spec({$g,@g}/) :-
+		R=lmninstcollector.collect_find({$g.
+		
+			anymem($m, $p, K), usable($p1), E=eoi :- ground($m), $p1 = $p | E=[anymem($m, $p, K)|eoi], usable($p1), usable($m).
+			findatom($a, $m, F), usable($m1), E=eoi :- ground($a), $m1 = $m | E=[findatom($a, $m, F)|eoi], usable($m1), usable($a).
+			getlink($l, $a, P), usable($a1), E=eoi :- ground($l), $a1 = $a | E=[getlink($l, $a, P)|eoi], usable($a1), usable($l).
+			isbuddy($l1, $l2), usable($lu1), usable($lu2), E=eoi :- $lu1 = $l1, $lu2 = $l2 | E=[isbuddy($l1, $l2)|eoi], usable($lu1), usable($lu2).
+			neqatom($a1, $a2), usable($au1), usable($au2), E=eoi :- $a1 = $au1, $a2 = $au2 | E=[neqatom($a1,$a2)|eoi], usable($au1), usable($au2).
+
+		}).
+		
+		R=lmninstcollector.collect_find({$g,@g}/) :-
+		R=lmninstcollector.collect_find4({$g.
+		
+%			E=eoi, dereflink(A, L, P) :- E=[dereflink(A, L, P)|eoi].
+%			E=eoi, func(A, F) :- E=[func(A,F)|eoi].
+%			E=eoi, testmem(M, A) :- E=[testmem(M, A)|eoi].
+%			E=eoi, eqatom(A1, A2) :- E=[eqatom(A1,A2)|eoi].
+
+		}).
+		
+		R=lmninstcollector.collect_find4({$g,@g}/) :-
+		R=lmninstcollector.collect_numcheck({$g.
+		
+			natoms(M, C), E=eoi :- E=[natoms(M, C)|eoi].
+			nmems(M, C), E=eoi :- E=[nmems(M, C)|eoi].
+			norules(M), E=eoi :- E=[norules(M)|eoi].
+			nfreelinks(M, C), E=eoi :- E=[nfreelinks(M, C)|eoi].
+
+		}).
+		
+		R=lmninstcollector.collect_numcheck({$g,@g}/) :-
+		R=lmninstcollector.collect_stable({$g.
+		
+			E=eoi, stable(M) :- E=[stable(M)|eoi].
+
+		}).
+		
+		R=lmninstcollector.collect_stable({$g,@g}/) :-
+		R=lmninstcollector.collect_commit({$g.
+		
+			E=eoi, commit(C) :- E=[commit(C)|eoi].
+
+		}).
+		
+		R=lmninstcollector.collect_commit({$g,@g}/) :-
+		R=lmninstcollector.collect_dequeue({$g.
+		
+			dequeueatom(A), E=eoi :- E=[dequeueatom(A)|eoi].
+		}).
+		
+		R=lmninstcollector.collect_dequeue({$g,@g}/) :-
+		R=lmninstcollector.collect_remove({$g.
+
+			E=eoi, removeatom(A, M, F) :- E=[removeatom(A, M, F)|eoi].
+			E=eoi, removemem(M, P) :- E=[removemem(M, P)|eoi].
+		
+		}).
+		
+		R=lmninstcollector.collect_remove({$g,@g}/) :-
+		R=lmninstcollector.collect_insertconnectors({$g.
+
+			E=eoi, insertconnectors($cs, LL, M) :- ground($cs) | E=[insertconnectors($cs, LL, M)|eoi], usable($cs).
+%			E=eoi, removemem(M, P) :- E=[removemem(M, P)|eoi].
+		
+		}).
+		
+		R=lmninstcollector.collect_insertconnectors({$g,@g}/) :-
+		R=lmninstcollector.collect_make({$g.
+
+			newatom($a, $m, F), usable($m1), E=eoi :- ground($a), $m1 = $m | E=[newatom($a, $m, F)|eoi], usable($m1), usable($a).
+			newmem($m, $p, S), usable($p1), E=eoi :- ground($m), $p = $p1 | E=[newmem($m, $p, S)|eoi], usable($p1), usable($m).
+			alloclink($l, $a, P), usable($a1), E=eoi :- ground($l), $a1 = $a | E=[alloclink($l, $a, P)|eoi], usable($a1), usable($l).
+			unifylinks($l1, $l2), usable($lu1), usable($lu2), E=eoi :- $l1 = $lu1, $l2 = $lu2 | 
+				E=[unifylinks($l1, $l2)|eoi], usable($lu1), usable($lu2).
+			loadruleset($m, RID), usable($m1), E=eoi :- $m1 = $m | E=[loadruleset($m, RID)|eoi], usable($m1).
+			copyrules($m1, $m2), usable($mu1), usable($mu2), E=eoi :- $mu1 = $m1, $mu2 = $m2 | 
+				E=[copyrules($m1, $m2)|eoi], usable($mu1), usable($mu2).
+			copycells($cmap, $m1, $m2), usable($mu1), usable($mu2), E=eoi :- ground($cmap), $mu1 = $m1, $mu2 = $m2 | 
+				E=[copycells($cmap, $m1, $m2)|eoi], usable($mu1), usable($mu2), usable($cmap).
+		}).
+		
+		R=lmninstcollector.collect_make({$g,@g}/) :-
+		R=lmninstcollector.collect_deleteconnectors({$g.
+
+			E=eoi, deleteconnectors(CS, CM, M) :- E=[deleteconnectors(CS, CM, M)|eoi].
+%			E=eoi, enqueuemem(M) :- E=[enqueuemem(M)|eoi].
+		
+		}).
+		
+		R=lmninstcollector.collect_deleteconnectors({$g,@g}/) :-
+		R=lmninstcollector.collect_enqueue({$g.
+
+			E=eoi, enqueueatom(A) :- E=[enqueueatom(A)|eoi].
+			E=eoi, enqueuemem(M) :- E=[enqueuemem(M)|eoi].
+		
+		}).
+		
+		R=lmninstcollector.collect_enqueue({$g,@g}/) :-
+		R=lmninstcollector.collect_drop({$g.
+
+			E=eoi, dropmem(M) :- E=[dropmem(M)|eoi].
+		
+		}).
+		
+		R=lmninstcollector.collect_drop({$g,@g}/) :-
+		R=lmninstcollector.collect_free({$g.
+
+			E=eoi, freeatom(A) :- E=[freeatom(A)|eoi].
+			E=eoi, freemem(M) :- E=[freemem(M)|eoi].
+		
+		}).
+		
+		R=lmninstcollector.collect_free({$g,@g}/) :-
+		R=lmninstcollector.collect_proceed({$g.
+
+			E=eoi, proceed :- E=[proceed|eoi].
+		
+		}).
+		
+		R=lmninstcollector.collect_proceed({$g,@g}/) :-
 		R=lmninstcollector.last_phase({$g.
+		
+			E=eoi :- E=[].
 		
 			compiled_rule(RN, Insts) :- compiled_rule(RN,
 				[spec(2,2)],Insts,none,none). % 膜主導テスト命令列として返す

@@ -17,7 +17,10 @@
 		mem={$mem}, count(C) :- C1=C+1 | {number(C), $mem}, count(C1).
 		atom={$atom}, count(C) :- C1=C+1 | {number(C), $atom}, count(C1).
 		link={$link}, count(C) :- C1=C+1 | {number(C), $link}, count(C1).
-		{diff_num={$num},$proc}, count(C) :- C1=C+1 | {number(C), $num}, {$proc}, count(C1).
+		%{diff_num={$num},$proc}, count(C) :- C1=C+1 | {number(C), $num}, {$proc}, count(C1).
+
+		connector_set={$cset}, count(C) :- C1=C+1 | {number(C), $cset}, count(C1).
+		cellmap={$cmap}, count(C) :- C1=C+1 | {number(C), $cmap}, count(C1).
 	
 		% 参照を番号におきかえる
 		{number(N), $process, '+'(Ref)} :- int(N) | {number(N), $process}, Ref=v(N).

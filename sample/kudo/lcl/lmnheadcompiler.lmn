@@ -28,6 +28,7 @@
 	findatom({$atom, link(P, L)}, M, F) :- int(P) |
 		findatom({$atom}, M, F), lmnheadcompiler.getlink(L) ),
 	
+	% GETLINK
 	( GetLink1@@
 	lmnheadcompiler.getlink({$link, pos(P), atom(A)}) :- int(P) | getlink({$link}, A, P) ),
 
@@ -49,6 +50,14 @@
 	lmnheadcompiler.findmem({$mem, parent(P)}) :- 
 		lmnheadcompiler.find(F), anymem({$mem, parent(P1), '+'(F)}, P2, 0), common.cpref(P1, P2, P) ),
 
+	% GETLINK ( プロセス文脈に出現するもの )
+%	cxtdef={$def, lhsocc=LOC}, proccxt={$lhsocc, '+'(LOC), impl(IL)} :-
+%		cxtdef={$def, lhsocc=LOC}, proccxt={$lhsocc, getlinked_impl(IL)}, lmnheadcompiler.getlink(IL)
+	
+	% STABLE
+	( Stable@@
+	{$mem, stable} :- stable({$mem}) ),
+
 %%%%%% C O U N T %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	% NATOMS
@@ -62,6 +71,13 @@
 	% NORULES
 	( Norules@@
 	{$lhsmem, norules} :- norules({$lhsmem}) ),
+	
+	( Nfreelinks@@
+	{$lhsmem, nfreelinks(free)} :- {$lhsmem} ),
+
+	% NFREELINKS
+	( Nfreelinks1@@
+	{$lhsmem, nfreelinks(NF)} :- int(NF) | nfreelinks({$lhsmem}, NF) ),
 	
 	().
 
@@ -77,7 +93,10 @@
 			natoms(0), nmems(0), norules.
 			natoms(CA), atom(A) :- CA1=CA+1 | natoms(CA1), counted_atom(A).
 			nmems(CM), mem(M) :- CM1=CM+1 | nmems(CM1), counted_mem(M).
-			rulecxt(RCN), norules :- rulecxt(RCN).
+			rulecxt(RCN), norules :- rulecxt(RCN). % ルール文脈があったらnorulesは削除
+			proccxt=P :- count_proc_impls(P).
+			count_proc_impls(P), natoms(NA) :- int(NA) | count_proc_impls(P). % プロセス文脈があったらnatomsは削除
+			count_proc_impls(P), nmems(NM) :- int(NM) | count_proc_impls(P). % プロセス文脈があったらnmemsは削除
 		}) ),
 	
 	( Count3@@
@@ -90,16 +109,31 @@
 	( Count4@@
 	{$lhsmem, @lhsmem, count_mem(M)}/ :-
 		{$lhsmem, @lhsmem, counting_mem(M1)}, M1=lmnheadcompiler.count_lhsmem(M) ),
+
+	( Count4_1@@
+	{$lhsmem, @lhsmem, count_proc_impls(P)}/, P={$lhsocc} :-
+		{$lhsmem, @lhsmem, counting_proc_impls(P)}, P={$lhsocc.
+			nfreelinks(0).
+			expl(EN, E), nfreelinks(0) :- expl(EN, E), nfreelinks(free).
+			impl(IN, I), nfreelinks(NF) :- IN=:=NF, NF1=NF+1 | impl(IN, I), nfreelinks(NF1).
+		} ),
+	
+	( Count4_2@@
+	{$lhsmem, @lhsmem, counting_proc_impls(P)}, P={$lhsocc, @lhsocc, nfreelinks(NF)}/ :- unary(NF) | 
+		{$lhsmem, @lhsmem, counted_proccxt(P), nfreelinks(NF)}, P={$lhsocc} ),
 	
 	().
 	
 	lmnheadcompiler.count_phase2 :-
 	
 	( Count5@@
-	{$lhsmem, counting_mem(M)} :- {$lhsmem, mem(M)} ),
+	{$lhsmem, @lhsmem, counting_mem(M)} :- {$lhsmem, mem(M)} ),
 	
 	( Count6@@
 	R=lmnheadcompiler.counted_lhsmem({$lhsmem, @lhsmem}/) :- R={$lhsmem} ),
+	
+	( Count7@@
+	{$lhsmem, @lhsmem, counted_proccxt(P)} :- {$lhsmem, proccxt(P)} ),
 	
 	().
 

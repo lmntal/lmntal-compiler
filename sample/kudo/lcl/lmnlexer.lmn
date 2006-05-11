@@ -20,7 +20,7 @@ R=lmnlexer.rev_float(FS):-R=string.float_of_str(lmnlexer.rev_str(FS)).
 
 % コメント外
 L=lmnlexer.lex(["{"|R])	:- L=[lbrace|lmnlexer.lex(R)]. // {
-L=lmnlexer.lex(["}"|R])	:- L=[rbrace|lmnlexer.lex(R)]. // }
+%L=lmnlexer.lex(["}"|R])	:- L=[rbrace|lmnlexer.lex(R)]. // }
 L=lmnlexer.lex(["("|R])	:- L=[lparen|lmnlexer.lex(R)]. // (
 L=lmnlexer.lex([")"|R])	:- L=[rparen|lmnlexer.lex(R)]. // )
 //L=lmnlexer.lex(["["|R])	:- L=[lbracket|lmnlexer.lex(R)]. // [
@@ -160,7 +160,7 @@ L=lmnlexer.lex_rbrace(["_"|R])				:-					L=lmnlexer.lex_rbrace_underbar(R).
 L=lmnlexer.lex_rbrace(["/"|R])				:-					L=lmnlexer.lex_rbrace_slash(R).
 L=lmnlexer.lex_rbrace(["@"|R])				:-					L=[rbrace_at|lmnlexer.lex(R)]. // }@
 L=lmnlexer.lex_rbrace([C|R])				:-C\="/",C\="@",C\="_"|L=[rbrace|lmnlexer.lex([C|R])]. // }
-L=lmnlexer.lex_rbrace_slash(["@"|R])			:-					L=[rbrace_slash_at|lmnlexer.lex(R)]. // }/@
+L=lmnlexer.lex_rbrace_slash(["@"|R])		:-					L=[rbrace_slash_at|lmnlexer.lex(R)]. // }/@
 L=lmnlexer.lex_rbrace_slash([C|R])			:-C\="@"|				L=[rbrace_slash|lmnlexer.lex([C|R])]. // }/
 L=lmnlexer.lex_rbrace_underbar(["/"|R])		:-					L=lmnlexer.lex_rbrace_underbar_slash(R).
 L=lmnlexer.lex_rbrace_underbar(["@"|R])		:-					L=[rbrace_underbar_at|lmnlexer.lex(R)]. // }_@

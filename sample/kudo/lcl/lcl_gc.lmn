@@ -16,6 +16,9 @@
 	% 膜オブジェクトの残ったフィールドを消す
 	( {$mem, parent(P)} :- {$mem}, common.rmref(P) ),
 	( {$mem, rulecxt(R)} :- {$mem}, common.rmref(R) ),
+	( {$mem, proccxt(R)} :- {$mem}, common.rmref(R) ),
+	( {$mem, host(H)} :- ground(H) | {$mem} ),
+	( {$mem, kind(K)} :- int(K) | {$mem} ),
 	
 	% 文脈オブジェクトの残ったdefフィールドを消す
 	( {$cxt, def(D)} :- {$cxt}, common.rmref(D) ),
@@ -23,8 +26,14 @@
 	% 文脈定義オブジェクトの残ったlhsoccフィールドを消す
 	( {$def, lhsocc(L)} :- {$def}, common.rmref(L) ),
 	
+	% プロセス文脈定義オブジェクトの残ったconnector_setフィールドを消す
+	( {$def, connector_set(C)} :- {$def}, common.rmref(C) ),
+	
 	% ルール文脈を消す
 	( rulecxt={} :- () ),
+
+	% プロセス文脈を消す
+	( proccxt={} :- () ),
 	
 	% 文脈定義を消す
 	( cxtdef={} :- () ),
@@ -36,6 +45,9 @@
 	
 	% GC 2
 	lcl_gc.use2 :-
+	
+	% 命令列が回収された後の処理
+	( usable(V) :- ground(V) | () ),
 	
 	().
 	

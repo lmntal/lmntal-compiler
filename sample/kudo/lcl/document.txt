@@ -2,26 +2,59 @@
  /bin$ lmntal -I ../sample/kudo/lcl --use-source-library ../sample/kudo/lcl/frontend.lmn
 で，標準入力にプログラムを入力．[EOF]で終わること．
 
-ISBUDDY命令はリンクがbuddyであることを検査する命令．Java版には無いので追加するか，最適化で削除する
+*基本方針
+-正しいプログラムに対して正しい命令列を吐く、ということができていればよい
+--間違ったプログラムに対しての動作は未定義とする
+
+*注意事項
+-ISBUDDY命令はリンクがbuddyであることを検査する命令．Java版には無いので追加するか，最適化で削除する
+-未最適化時にはfindatom, anymem, getlink, isbuddyで全ての左辺の構造を見つける。当然効率が悪いので最適化必須。
+
+*DONE
+**意味解析部での前処理
+-アトム引数、膜引数の略記法の展開
+-プロキシを挟む
+**左辺
+-findatom, anymem
+-getlink, isbuddy
+-stable
+-natoms, nmems, norules
+**右辺
+-newatom, newmem
+-dequeueatom
+-removeatom, removemem
+-enqueueatom, enqueuemem
+-freeatom, freemem
+-copyrules
+-alloclink, unifylinks
+**その他
+-spec, commit, proceed
+
+*依存関係について
+-同種の命令でも依存関係がある場合がある->命令の種類でソートするだけではだめ。
+-例:NEWMEM, deref系, proxy関係等。
+-そこで、命令を表すアトムの最終引数に依存関係項を作る。
+--依存関係項は膜で表現し、例えば
+ .. :- a:{b:{c:{}}}          /* (a,b,cは膜の名前(仮に)) */
+というルールに対しては、
+ newmem(MA, PA, SA, NA), newmem(MB, PB, SB, NB), newmem(MC, PC, SC, NC),
+ {-NA}, {+NA, -NB}, {+NB, -NB}
+というような構造が設定される。解決は、
+ {-L} :- ok(L).
+とでもしておいて、okになったらlmninstcollectorによって回収される、という感じで。
 
 *TODO
 
-**debug
--命令列のソートを依存関係に従ってやる
---種類でのソートだと，NEWMEM同士の依存関係などがうまくいかない
---dereflink, findatom間も
-
 **最適化
--isbuddyをderef, eqatomとかに置き換える．
+-isbuddyをderef, eqatomとかに置き換える． ==> 依存関係に注意
 -Java版で行われている最適化
 --CISC化
 --再利用
 --並び替えによる最適化
 --ループ化
+-アトム主導テスト
 
 **意味解析
--プロセス文脈
--膜をまたぐリンクにプロキシをはさむ
 -同一ルールに同名リンクが三個出現する場合エラーに
 -左辺に同名文脈が二つ以上出現する場合エラーに
 -左辺に文脈が膜外に出現する場合エラーに

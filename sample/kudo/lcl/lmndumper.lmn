@@ -69,6 +69,12 @@
 	% 変数番号出力
 	R=var_str(v(N)) :- R=string.str_of_int(N).
 
+	R=varlist_str(VL) :- R="["++varlist_commasep(VL)++"]".
+	
+	R=varlist_commasep([]) :- R="".
+	R=varlist_commasep([V|Rest]) :- R=var_str(V)++varlist_commasep_rest(Rest).
+	R=varlist_commasep_rest([C|Rest]) :- R=", "++varlist_commasep([C|Rest]).
+	R=varlist_commasep_rest([]) :- R="".
 
 	% 各命令ごとの出力ルール
 
@@ -86,12 +92,16 @@
 		R="removemem      ["++var_str(M)++", "++var_str(P)++"]".
 	R=str_of_inst(enqueueatom(A)) :- 
 		R="enqueueatom    ["++var_str(A)++"]".
+	R=str_of_inst(dequeueatom(A)) :- 
+		R="dequeueatom    ["++var_str(A)++"]".
 	R=str_of_inst(enqueuemem(M)) :- 
 		R="enqueuemem     ["++var_str(M)++"]".
 	R=str_of_inst(freeatom(A)) :- 
 		R="freeatom       ["++var_str(A)++"]".
 	R=str_of_inst(freemem(M)) :- 
 		R="freemem        ["++var_str(M)++"]".
+	R=str_of_inst(dropmem(M)) :- 
+		R="dropmem        ["++var_str(M)++"]".
 	R=str_of_inst(loadruleset(M,rulesetid(RID))) :- int(RID) |
 		R="loadruleset    ["++var_str(M)++", "++"@"++string.str_of_int(RID)++"]".
 	R=str_of_inst(alloclink(L, A, P)) :- int(P) |
@@ -102,6 +112,12 @@
 		R="unifylinks     ["++var_str(L1)++", "++var_str(L2)++"]".
 	R=str_of_inst(copyrules(M1, M2)) :- 
 		R="copyrules      ["++var_str(M1)++", "++var_str(M2)++"]".
+	R=str_of_inst(copycells(CS, M1, M2)) :- 
+		R="copycells      ["++var_str(CS)++", "++var_str(M1)++", "++var_str(M2)++"]".
+	R=str_of_inst(insertconnectors(CMAP, LL, M)) :- 
+		R="insertconnectors["++var_str(CMAP)++", "++varlist_str(LL)++", "++var_str(M)++"]".
+	R=str_of_inst(deleteconnectors(CM, CS, M)) :- 
+		R="deleteconnectors["++var_str(CM)++", "++var_str(CS)++", "++var_str(M)++"]".
 	R=str_of_inst(isbuddy(L1,L2)) :- 
 		R="isbuddy        ["++var_str(L1)++", "++var_str(L2)++"]".
 	R=str_of_inst(testmem(M, A)) :- 
@@ -118,8 +134,12 @@
 		R="natoms         ["++var_str(M)++", "++string.str_of_int(C)++"]".
 	R=str_of_inst(nmems(M, C)) :- 
 		R="nmems          ["++var_str(M)++", "++string.str_of_int(C)++"]".
+	R=str_of_inst(nfreelinks(M, C)) :- 
+		R="nfreelinks     ["++var_str(M)++", "++string.str_of_int(C)++"]".
 	R=str_of_inst(norules(M)) :- 
 		R="norules        ["++var_str(M)++"]".
+	R=str_of_inst(stable(M)) :- 
+		R="stable         ["++var_str(M)++"]".
 	R=str_of_inst(spec(F, L)) :- 
 		R="spec           ["++string.str_of_int(F)++", "++string.str_of_int(L)++"]".
 	R=str_of_inst(proceed) :- 
