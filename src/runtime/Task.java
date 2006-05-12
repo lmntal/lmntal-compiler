@@ -86,7 +86,7 @@ public class Task extends AbstractTask implements Runnable {
 	Stack memStack = new Stack();
 	/** 仮の実行膜スタック */
 	Stack bufferedStack = new Stack();
-	static final int maxLoop = 100;
+	static final private int MAX_LOOP = 100;
 	/** タスクの優先度（正確には、このタスクのルールスレッドの優先度）
 	 * <p>ロックの制御に使用する予定。将来的にはタスクのスケジューリングにも使用される予定。
 	 * <p>10以上の値でなければならない。*/
@@ -186,7 +186,7 @@ public class Task extends AbstractTask implements Runnable {
 	
 	/** このタスクの本膜のルールを実行する */
 	void exec(Membrane mem) {
-		for(int i=0; i < maxLoop && mem == memStack.peek() && lockRequestCount == 0 ; i++){
+		for(int i=0; i < MAX_LOOP && mem == memStack.peek() && lockRequestCount == 0 ; i++){
 			// 本膜が変わらない間 & ループ回数を越えない間
 			if (!exec(mem, false)) break;
 		}
