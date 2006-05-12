@@ -133,6 +133,13 @@
 	lmnbodycompiler.dequeue({$lhs, removed_atom(A)}) :-
 		lmnbodycompiler.dequeueatom(A1), lmnbodycompiler.dequeue({$lhs, dequeued_atom(A2)}), common.cpref(A1, A2, A) ),
 	
+	( Dequeue1@@
+	lmnbodycompiler.dequeue({$lhs, removed_mem(M)}) :-
+		lmnbodycompiler.dequeuemem(M1), lmnbodycompiler.dequeue({$lhs, dequeued_mem(M2)}), common.cpref(M1, M2, M) ),
+	
+	( DequeueMem@@
+	lmnbodycompiler.dequeuemem({$mem}) :- lmnbodycompiler.dequeue({$mem}) ),
+	
 	% DEQUEUEATOM
 	( DequeueAtom@@
 	lmnbodycompiler.dequeueatom(A) :- dequeueatom(A) ),
@@ -148,7 +155,7 @@
 	lmnbodycompiler.freeatom({$atom}) :- freeatom({$atom}) ),
 
 	( Free2@@
-	lmnbodycompiler.free({$lhs, removed_mem(M)}) :-
+	lmnbodycompiler.free({$lhs, dequeued_mem(M)}) :-
 		lmnbodycompiler.freemem(M), lmnbodycompiler.free({$lhs}) ),
 	
 	% FREEMEM
