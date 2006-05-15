@@ -276,6 +276,8 @@ public class Debug {
 				} else if (s.startsWith("c")) {//実行を再開
 					System.out.println("Continuing.");
 					break;
+				} else if (s.startsWith("h")) {
+					showHelp();
 				} else if (s.startsWith("n")) {//ステップ実行
 					if (!isRunning)	System.out.println("The program is not being run.");
 					else isStepping = true;
@@ -363,6 +365,19 @@ public class Debug {
 		} catch (IOException e) {
 			System.err.println(e);
 		}
+	}
+	
+	public static void showHelp() {
+		System.out.println("List of commands:");
+		System.out.println("");
+		System.out.println("break -- Set breakpoint at specified line or function");
+		System.out.println("continue -- Continue program being debugged");
+		System.out.println("help -- Print list of commands");
+		System.out.println("next -- Step program");
+		System.out.println("print -- dump membrane");
+		System.out.println("run -- Start debugged program");					
+		//System.out.println("frame -- Select and print a stack frame");
+		System.out.println("quit -- Exit ldb");
 	}
 	
 	///////////////////////////////////////////////////
