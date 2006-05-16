@@ -17,12 +17,14 @@ AUTHOR
 
 HISTORY
 
-	2006/01/20 copy, kill
+	2006/01/20 kill
+	2006/05/16 copy
 
 COMMENT
 
 	明示的でない自由リンクを持つプロセス文脈の複製/破棄:
-	R=nlmem.copy(X),{$p[X|*Z]} :- R=copied(X1, X2), {$p[X1|*Z1]},{$p[X2|*Z2]}, *Z=*Z1, nil(*Z2)
+	%R=nlmem.copy(X),{$p[X|*Z]} :- R=copied(X1, X2), {$p[X1|*Z1]},{$p[X2|*Z2]}, *Z=*Z1, nil(*Z2)
+	R=nlmem.copy(X),{$p[X|*Z]} :- R=copied(X1, X2), {$p[X1|*Z1]},{$p[X2|*Z2]}, copied(*Z1, *Z2, *Z)
 	nlmem.kill(X),{$p[X|*Z]} :- killed(*Z).
 */
 
@@ -34,48 +36,38 @@ COMMENT
 % ret = copied({test},{test}) 
 %
 % (2)
-% ret = nlmem.copy(M), M={a(A)},b(A)
+% ret = nlmem.copy(M), M={a(A)}, b(A)
 % ->
-% ret = copied(M1,M2),M1={a(A1)},b(A1), M2={a(A2)}, nil(A2)
+% ret = copied(M1,M2),M1={a(A1)}, M2={a(A2)}, b(copied(A1, A2))
 %
 % (3)
-% ret1 = nlmem.copy(M1), ret2 = nlmem.copy(M2), {'+'(M1), '+'(M2), hello}
-% ->
-% ret1 = copied(M11,M12), ret2 = nlmem.copy(M2), {'+'(M11), '+'(M2), hello},
-%                                              {'+'(M12), '+'(NIL_1), hello}, nil(NIL_1)
-% ->
-% ret1 = copied(M11,M12), ret2 = copied(M21,M22),
-%                                              {'+'(M11), '+'(M21), hello},
-%                                              {'+'(M12), '+'(NIL_1), hello}, nil(NIL_1),
-%                                              {'+'(M22), '+'(NIL_2), hello}, nil(NIL_2)
-%
-% (4)
 % nlmem.copy({a(A)}) = nlmem.copy({b(A)})
 % ->
-% copied({a(A1)},{a(A2)}) = nlmem.copy({b(A1)}), nil(A2)
+% copied({a(A1)},{a(A2)}) = nlmem.copy({b(A)}), A=copied(A1, A2)
 % ->
-% copied({a(A1)},{a(A2)}) = copied({b(A1)},{b(A2)}), nil(A1), nil(A2)
+% copied({a(A1)},{a(A2)}) = copied({b(B1)},{b(B2)}), copied(B1, B2)=copied(A1, A2)
 
 /**
  * nlmem.copy(+Mem, -Res):
  *
- * 与えられた膜を複製する．複製された膜のMem以外の自由リンクはnil/1に接続される．
+ * 与えられた膜を複製する．複製された膜の全ての自由リンクはcopied/3の第二引数に接続され、元の膜の対応する自由リンクがそれぞれcopied/3の第一引数に接続される．
+ * また、対応する外側のリンクにcopied/3の題さん引数が接続される。
  * @param +Mem 複製する膜
  * @param -Res 結果( 成功時 copied(Mem, Mem_copied, Res) 失敗時 copy_error(Mem, Res) )
  * @example
  * R=nlmem.copy(M), {$p[M|*Z]}
  * ==>
- * R=copied(M,M'), {$p[M|*Z]}, {$p[M'|*Z']}, nil(*Z')
+ * R=copied(M1,M2), {$p[M1|*Z1]}, {$p[M2|*Z2]}, copied(*Z1,*Z2,*Z)
  */
-R=nlmem.copy(M) :- R=nlmem.copy(M, nil).
+R=nlmem.copy(M) :- R=nlmem.copy(M, copied).
 
 /**
  * nlmem.copy(+Mem, +CopyTagAtom, -Res):
  *
  * 与えられた膜を複製する．複製された膜のMem以外の自由リンクは
- * それぞれ、指定されたunaryアトムの複製に接続される．
+ * それぞれ、指定されたunaryアトムと同名の三引数アトムの複製に接続される．
  * @param +Mem 複製する膜
- * @param +CopyTagAtom 複製された膜の自由リンクに接続されるunaryアトム
+ * @param +CopyTagAtom 複製された膜の自由リンクに接続される三引数アトムと同名のunaryアトム
  * @param -Res 結果( 成功時 copied(Mem, Mem_copied, Res) 失敗時 copy_error(Mem, Res) )
  * @example
  * R=nlmem.copy(M, cpd), {$p[M|*Z]}
@@ -85,35 +77,32 @@ R=nlmem.copy(M) :- R=nlmem.copy(M, nil).
   R=nlmem.copy(M, CopyTag) :- unary(CopyTag) |
   R=[:/*inline*/
   	Atom osp = me.nthAtom(0);
-  	if(!osp.getFunctor().equals(Functor.OUTSIDE_PROXY)){ // 子膜に繋がっていない
+  	if(!osp.getFunctor().equals(Functor.OUTSIDE_PROXY)){
   		me.setName("copy_error");
   	}
   	else{
   		Atom isp = osp.nthAtom(0);
   		AbstractMembrane origmem = isp.getMem();
-  		Functor copyTagF = me.nthAtom(1).getFunctor();
+  		Functor copyTagF_unary = me.nthAtom(1).getFunctor();
+  		Functor copyTagF = new Functor(copyTagF_unary.getName(),3);
   		origmem.recursiveLock();
   		AbstractMembrane targmem = mem.newMem();
   		Map origToTarg = targmem.copyCellsFrom(origmem);
-  		Atom newisp = (Atom)origToTarg.get(isp);
-  		Atom newosp = mem.newAtom(Functor.OUTSIDE_PROXY);
-  		mem.newLink(newisp, 0, newosp, 0);
   		Iterator it = origmem.atomIteratorOfFunctor(Functor.INSIDE_PROXY);
   		while(it.hasNext()){
   			Atom origisp = (Atom)it.next();
-  			if(origisp == isp)continue;
+  			Atom origosp = origisp.nthAtom(0);
   			Atom targisp = (Atom)origToTarg.get(origisp);
   			Atom targosp = mem.newAtom(Functor.OUTSIDE_PROXY);
   			mem.newLink(targisp, 0, targosp, 0);
-  			Atom nil = mem.newAtom(copyTagF);
-  			mem.newLink(targosp, 1, nil, 0);
+  			Atom copied = mem.newAtom(copyTagF);
+  			mem.relink(copied, 2, origosp, 1);
+  			mem.newLink(copied, 0, origosp, 1);
+  			mem.newLink(copied, 1, targosp, 1);
   		}
   		origmem.recursiveUnlock();
-  		Atom copied = mem.newAtom(new Functor("copied",3));
-  		mem.relink(copied, 2, me,2);
-  		mem.relink(copied, 0, me,0);
-  		mem.newLink(newosp,1,copied,1);
   		mem.removeAtom(me.nthAtom(1));
+  		mem.relink(me.nthAtom(0), 2, me, 2);
   		mem.removeAtom(me);
   	}
   :](M, CopyTag).
@@ -141,7 +130,7 @@ nlmem.kill({$p,@p}), :- nlmem.kill({$p,@p}, killed).
   nlmem.kill(M, KillTag) :- unary(KillTag) |
   [:/*inline*/
   	Atom osp = me.nthAtom(0);
-  	if(!osp.getFunctor().equals(Functor.OUTSIDE_PROXY)){ // 子膜に繋がっていない
+  	if(!osp.getFunctor().equals(Functor.OUTSIDE_PROXY)){
   		me.setName("kill_error");
   	}
   	else{
