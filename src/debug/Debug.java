@@ -56,6 +56,10 @@ public class Debug {
 	//ソースプログラム
 	private static Vector source;
 	
+	//最後に表示した行番号
+	private static int lastLineno;
+	private static int listsize = 10;
+	
 	//ポート番号
 	private static int requestPort = -1;
 	private static int eventPort = -1;
@@ -106,6 +110,8 @@ public class Debug {
 			Env.debugFrame.repaint();
 			return;
 		}
+		
+		lastLineno = 1;
 		
 		//TODO DebugFrameに任せるべき処理
 		try {
@@ -249,6 +255,17 @@ public class Debug {
 	public static String getUnitName() {
 		return unitName;
 	}
+	
+	/**
+	 * プログラムリストを表示します
+	 */
+	public static void showList() {
+		int i;
+		for (i = lastLineno; i < Math.min(lastLineno+listsize, source.size()); i++) {
+			System.out.println(i+"\t"+source.get(i));
+		}
+		lastLineno = i;
+	}
 
 	/**
 	 * コマンド受付
@@ -270,6 +287,7 @@ public class Debug {
 				if (s.equals("")) {
 				} else if (s.startsWith("b")) {//ブレークポイントの切り替え
 					String[] ss = s.split("[ \t]+");
+					if (ss.length < 2) continue;
 					int lineNumber = Integer.parseInt(ss[1]);
 					if (addBreakPoint(lineNumber)) System.out.println("Breakpoint "+breakPoints.size()+", line"+lineNumber);
 					else System.out.println("No rlue at line "+lineNumber);
@@ -278,6 +296,18 @@ public class Debug {
 					break;
 				} else if (s.startsWith("h")) {
 					showHelp();
+				} else if (s.startsWith("l")) {
+					String[] ss = s.split("[ \t]+");
+					if (ss.length >= 2) {
+						try {
+							int lineNumber = Integer.parseInt(ss[1]);
+							lastLineno = Math.max(1, lineNumber-listsize/2);
+						} catch (NumberFormatException e) {
+							System.out.println("Rule \""+ss[1]+"\" not defined.");
+							continue;
+						}
+					}
+					showList();
 				} else if (s.startsWith("n")) {//ステップ実行
 					if (!isRunning)	System.out.println("The program is not being run.");
 					else isStepping = true;
@@ -297,6 +327,14 @@ public class Debug {
 					System.out.println(currentLineNumber);
 				} else if (s.startsWith("q")) {//デバッグ終了
 					System.exit(0);//TODO exitしちゃって良いかな？
+				} else if (s.startsWith("set l")) {
+					String[] ss = s.split("[ \t]+");
+					if (ss.length < 3) continue;
+					try {
+						listsize = Integer.parseInt(ss[2]);
+					} catch (NumberFormatException e) {
+						System.out.println("No symbol \""+ss[2]+"\" in current context.");
+					}
 				} else {
 					System.out.println("Undefined command: \""+s+"\".  Try \"help\".");
 				}
@@ -373,6 +411,7 @@ public class Debug {
 		System.out.println("break -- Set breakpoint at specified line or function");
 		System.out.println("continue -- Continue program being debugged");
 		System.out.println("help -- Print list of commands");
+		System.out.println("list -- List specified line");
 		System.out.println("next -- Step program");
 		System.out.println("print -- dump membrane");
 		System.out.println("run -- Start debugged program");					
