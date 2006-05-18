@@ -1,0 +1,21 @@
+Reflexivity @@
+ leq(v(X0),v(X1)), {+X0,+X1,$e} :- {$e}.
+Antisymmetry @@
+ leq(v(X0),v(Y0)), leq(v(Y1),v(X1)),
+ {+X0,+X1,$e0}, {+Y0,+Y1,$e1} :-
+     {$e0, $e1}.
+Transitivity @@
+ leq(v({name(_UX),$e0}),v(Y0)), leq(v(Y1),v({name(_UZ),$e1})),
+ {name(_UY),+Y0,+Y1,$e2} :- uniq(_UX,_UY,_UZ) |
+     leq(v({name(_UX),+NX,$e0}),v(Y0)), leq(v(Y1),v({name(_UZ),+NZ,$e1})),
+     {name(_UY),+Y0,+Y1,$e2}, leq(v(NX),v(NZ)).
+
+VarDeclare @@
+ H=var(_UName) :- H=v({name(_UName)}).
+VarUnify @@
+ {name(_UName0),$e0}, {name(_UName1),$e1} :- _UName0=_UName1 |
+     {name(_UName0),$e0,$e1}.
+
+leq(var(a),var(b)).
+leq(var(b),var(c)).
+leq(var(c),var(a)).

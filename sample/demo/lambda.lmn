@@ -1,0 +1,27 @@
+H=apply(lambda(A,B), C) :- H=B, A=C.
+
+lambda(A,B)=cp(C,D) :-
+	C=lambda(E,F), D=lambda(G,H), A=dp(E,G), B=dp(F,H).
+apply(A,B)=cp(C,D) :-
+	C= apply(E,F), D= apply(G,H), A=cp(E,G), B=cp(F,H).
+lambda(A,B)=dp(C,D) :- 
+	C=lambda(E,F), D=lambda(G,H), A=dp(E,G), B=dp(F,H).
+apply(A, B)=dp(C, D) :- 
+	C= apply(E,F), D= apply(G,H), A=dp(E,G), B=dp(F,H).
+dp(A,B)=dp(C,D) :- A=C, B=D.
+cp(A,B)=dp(C,D) :- C=cp(E,F), D=cp(G,H), A=dp(E,G), B=dp(F,H).
+cp(A,B)=cp(C,D) :- C=cp(E,F), D=cp(G,H), A=cp(E,G), B=cp(F,H).
+U=cp(A,B) :- unary(U) | A=U, B=U.
+U=dp(A,B) :- unary(U) | A=U, B=U.
+
+N=n(2) :- N=lambda(cp(F0,F1),
+  lambda(X, apply(F0,apply(F1,X)))).
+N=n(3) :- N=lambda(cp(F0,cp(F1,F2)),
+  lambda(X, apply(F0,apply(F1,apply(F2,X))))).
+N=n(4) :- N=lambda(cp(F0,cp(F1,cp(F2,F3))),
+  lambda(X, apply(F0,apply(F1,apply(F2,apply(F3,X)))))).
+
+res=apply(n(3), n(4)).
+res=lambda(X, Y) :- res=apply(apply(lambda(X, Y), succ), 0).
+
+H=apply(succ, I) :- int(I) | H=I+1. 

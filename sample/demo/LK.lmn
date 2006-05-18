@@ -1,0 +1,59 @@
+/* Propositional Sequent Calculus
+   Kazunori Ueda, 2005-12-29
+*/
+
+axiom@@
+sequent({+$a,$gamma[]},{+$b,$delta[]}) :-
+    ground($a), ground($b), $a=$b | .
+
+notR@@
+sequent({$gamma[]},{$delta[],+not($a)}) :-
+    ground($a) |
+    sequent({+$a,$gamma[]},{$delta[]}).
+
+notL@@
+sequent({+not($a),$gamma[]},{$delta[]}) :-
+    ground($a) |
+    sequent({$gamma[]},{$delta[],+$a}).
+
+andR@@
+sequent({$gamma[]},{$delta[],+and($a,$b)}) :-
+    ground($a), ground($b) |
+    sequent({$gamma[]},{$delta[],+$a}),
+    sequent({$gamma[]},{$delta[],+$b}).
+
+andL@@
+sequent({+and($a,$b),$gamma[]},{$delta[]}) :-
+    ground($a), ground($b) |
+    sequent({+$a,+$b,$gamma[]},{$delta[]}).
+
+orR@@
+sequent({$gamma[]},{$delta[],+or($a,$b)}) :-
+    ground($a), ground($b) |
+    sequent({$gamma[]},{$delta[],+$a,+$b}).
+
+orL@@
+sequent({+or($a,$b),$gamma[]},{$delta[]}) :-
+    ground($a), ground($b) |
+    sequent({+$a,$gamma[]},{$delta[]}),
+    sequent({+$b,$gamma[]},{$delta[]}).
+
+impliesR@@
+sequent({$gamma[]},{$delta[],+implies($a,$b)}) :-
+    ground($a), ground($b) |
+    sequent({+$a,$gamma[]},{$delta[],+$b}).
+
+impliesL@@
+sequent({+implies($a,$b),$gamma[]},{$delta[]}) :-
+    ground($a), ground($b) |
+    sequent({$gamma[]},{$delta[],+$a}),
+    sequent({+$b,$gamma[]},{$delta[]}).
+
+// Example 1:  A, A=>B |- B
+// sequent({+a,+implies(a,b)},{+b}).
+
+// Example 2:  P&~Q=>R, ~R, P |- Q.
+// sequent({+implies(and(p,not(q)),r), +not(r), +p},{+q}).
+
+// Example 3:  |- ((A=>B)=>A)=>A
+sequent({},{+implies(implies(implies(a,b),a),a)}).

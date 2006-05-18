@@ -1,0 +1,7 @@
+snd({$y[|*V]},X) :- {$y[|*V], m(X)}.
+get({m(X),$y},Z), {$body[Z|*V]} :- {$y}, $body[X|*V].
+
+get(A0,Z), {get(B0,Y), {snd(Z,Y)}}.
+snd(A1,C).  snd(B1,D).
+{name(a),+A0,+A1}, {name(b),+B0,+B1},
+{name(c),+C}, {name(d),+D}.

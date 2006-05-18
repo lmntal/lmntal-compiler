@@ -1,0 +1,4 @@
+H=append([],Y) :- H=Y.
+H=append([A|X],Y) :- H=[A|append(X,Y)].
+
+ret=append([1,2,3], [4,5]).

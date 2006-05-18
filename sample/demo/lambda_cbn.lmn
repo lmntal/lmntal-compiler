@@ -1,0 +1,172 @@
+/*
+------------------------------------------------------------------
+Call-by-name lambda calculus
+                                       Koji Hara and Kazunori Ueda
+                                       2005-11-16 08:45
+------------------------------------------------------------------
+*/
+
+{ module(lambda_cbn).
+
+// beta reduction (at-lambda)
+beta@@ H=at(lambda(A, B), C) :- B=dn(H), A=C.
+
+// dn-lambda -> up-lambda
+dn_lm@@ lambda(A,B)=dn(C) :- C=up(D), D=lambda(A,B).
+
+// dn-apply -> at-dn
+dn_ap@@ apply(A,B)=dn(C) :- A=dn(D), C=at(D,B).
+
+// at-up -> at
+at_up@@ C=at(D,B), D=up(A) :- C=at(A,B).
+
+// dn-name -> upo-name (indicating a free name)
+dn_un@@ dn(A)=B :- unary(B) | A=upo(B).
+
+// dn-call -> upf-call (external functions are prefixed by +)
+dn_un@@ dn(A)= +F :- A=upf(F).
+
+// at-upo -> upo-apply 
+at_uo@@ C=at(D,B), D=upo(A) :- C=upo(E), E=apply(A,B).
+
+// at_upf -> external function call
+at_uf@@ C=at(D,B), D=upf(F) :- C=call(F,B).
+
+// at-upo -> ap-dn 
+// at_uo@@ C=at(D,B), D=upo(A) :- C=apply(A,F), B=dn(F).
+// ap_up@@ C=apply(A,D), D=up(B) :- C=upo(E), E=apply(A,B).
+// ap_uo@@ C=apply(A,D), D=upo(B) :- C=upo(E), E=apply(A,B).
+
+// cp-lambda -> lambda-dp
+// cp-? -> ?-cp
+cp_lm@@ lambda(A,B)=cp(C,D) :-
+         C=lambda(E,F), D=lambda(G,H), A=dp(E,G), B=dp(F,H).
+cp_ap@@  apply(A,B)=cp(C,D) :-
+         C= apply(E,F), D= apply(G,H), A=cp(E,G), B=cp(F,H).
+cp_at@@  at(A,B)=cp(C,D) :-
+         C= at(E,F), D= at(G,H), A=cp(E,G), B=cp(F,H).
+dp_lm@@ lambda(A,B)=dp(C,D) :-
+         C=lambda(E,F), D=lambda(G,H), A=dp(E,G), B=dp(F,H).
+dp_ap@@  apply(A,B)=dp(C,D) :-
+         C= apply(E,F), D= apply(G,H), A=dp(E,G), B=dp(F,H).
+dp_at@@  at(A,B)=dp(C,D) :-
+         C= at(E,F), D= at(G,H), A=dp(E,G), B=dp(F,H).
+rm_lm@@ lambda(A,B)=rm :- A=rm, B=rm.
+rm_ap@@  apply(A,B)=rm :- A=rm, B=rm.
+rm_at@@     at(A,B)=rm :- A=rm, B=rm.
+rm_cp@@     cp(A,B)=rm :- A=rm, B=rm.
+rm_dp@@     dp(A,B)=rm :- A=rm, B=rm.
+rm_rm@@         rm=rm :- .
+
+dp_dp@@ dp(A,B)=dp(C,D) :- A=C, B=D.
+cp_dp@@ cp(A,B)=dp(C,D) :- C=cp(E,F), D=cp(G,H), A=dp(E,G), B=dp(F,H).
+cp_cp@@ cp(A,B)=cp(C,D) :- C=cp(E,F), D=cp(G,H), A=cp(E,G), B=cp(F,H).
+
+cp_un@@ U=cp(A,B) :- unary(U) | A=U, B=U.
+dp_un@@ U=dp(A,B) :- unary(U) | A=U, B=U.
+rm_un@@ U=rm      :- unary(U) | .
+
+cp_un@@ +F=cp(A,B) :- unary(F) | A=+F, B=+F.
+dp_un@@ +F=dp(A,B) :- unary(F) | A=+F, B=+F.
+rm_un@@ +F=rm      :- unary(F) | .
+
+}
+
+// samples
+
+{ lambda_cbn.use. example1.
+  // (lambda y . y y) I => I I
+  dn(r)=apply(lambda(cp(Y0,Y1), apply(Y0,Y1)), lambda(X,X)).
+}
+
+{ lambda_cbn.use. example2.
+  // (lambda y . y y) a => a a
+  dn(r)=apply(lambda(cp(Y0,Y1), apply(Y0,Y1)), a).
+}
+
+{ lambda_cbn.use. example3.
+  // (lambda f . (lambda x . f (f x) ) ) succ 0
+  dn(r)=apply(apply(lambda(cp(F0,F1),
+                lambda(X, apply(F0,apply(F1,X)))),
+    succ), 0).
+  // H=apply(succ, I) :- int(I) | H=I+1.
+}
+
+{ lambda_cbn.use.  example4.
+  // exponentiation of natural numbers in Church encoding
+  // n is encoded as lambda f x . f^n x
+  // then n^m is encoded as lambda n m . m n
+
+  N=n(0) :- N=lambda(rm, lambda(X, X)).
+  N=n(1) :- N=lambda(F, lambda(X, apply(F,X))).
+  N=n(2) :- N=lambda(cp(F0,F1), lambda(X,
+              apply(F0,apply(F1,X)))).
+  N=n(3) :- N=lambda(cp(F0,cp(F1,F2)), lambda(X,
+              apply(F0,apply(F1,apply(F2,X))))).
+  N=n(4) :- N=lambda(cp(F0,cp(F1,cp(F2,F3))), lambda(X,
+              apply(F0,apply(F1,apply(F2,apply(F3,X)))))).
+
+  dn(r)=apply(apply(apply(n(2), n(3)), +s), 0).
+  
+  H=call(s,N) :- | NN=normalize(N), H=upo(NN+1).
+  
+  NN=normalize(N) :- N=dn(NNN), NN=n2(NNN).
+  NN=n2(upo(A)) :- NN=A.
+
+r=up(A) :- r=A.
+r=upo(A) :- r=A.
+}
+
+{ lambda_cbn.use.  example5.
+  // y = (lambda f . (lambda x . f(x x)) (lambda x . f(x x)))
+  // fact = (lambda f . (lambda n . (eqn0 1 n * f(n-1)))) 
+  // true = (lambda t . (lambda f . t))
+  // false = (lambda t . (lambda f . f))
+  H=call(zerop,N) :- H=zerop(normalize(N)).
+  H=zerop(0) :- H=up(lambda(T, lambda(rm, T))).  // true
+  H=zerop(N) :- N=\=0 | H=up(lambda(rm, lambda(F, F))).  // false
+  H=call(pred,N) :- H=upo(normalize(N)-1).
+  H=call(mul,N)  :- H=upf(mul(normalize(N))).
+  H=call(mul(M),N) :- H=upo(M*normalize(N)).
+    
+  NN=normalize(N) :- N=dn(NNN), NN=n2(NNN).
+  NN=n2(upo(A)) :- NN=A.
+    
+  dn(r) = apply(apply(
+    lambda(cp(F0,F1),                                   // Y
+      apply(lambda(cp(X0,X1),apply(F0,apply(X0,X1))),   // Y
+            lambda(cp(X2,X3),apply(F1,apply(X2,X3))))), // Y
+    lambda(F, lambda(cp(N0,cp(N1,N2)),                  // factotial
+      apply(apply(apply(+zerop,N0),1),                  // factorial
+      apply(apply(+mul,N1),apply(F,apply(+pred,N2)))))) // factorial
+    ), 9).
+  r=upo(A) :- r=A.
+}
+
+{ lambda_cbn.use.  example6.
+	// theta = (lambda x y . y ((x x) y)) (lambda x y . y ((x x) y))
+	// fact = (lambda f . (lambda n . (eqn0 1 n * f(n-1)))) 
+	// true = (lambda t . (lambda f . t))
+	// false = (lambda t . (lambda f . f))
+	H=call(zerop,N) :- H=zerop(normalize(N)).
+	H=zerop(0) :-         H=up(lambda(T, lambda(rm, T))).  // true
+	H=zerop(N) :- N=\=0 | H=up(lambda(rm, lambda(F, F))).  // false
+	H=call(pred,N) :-   H=upo(normalize(N)-1).
+	H=call(mul,N) :-    H=upf(mul(normalize(N))).
+	H=call(mul(M),N) :- H=upo(M*normalize(N)).
+	
+	NN=normalize(N) :- N=dn(NNN), NN=n2(NNN).
+	NN=n2(upo(A)) :- NN=A.
+	
+	dn(r) = apply(apply(
+          apply(                                                  // theta
+            lambda(cp(X0,X1),lambda(cp(Y0,Y1),                    // theta
+              apply(Y0,apply(apply(X0,X1),Y1)))),                 // theta
+            lambda(cp(X2,X3),lambda(cp(Y2,Y3),                    // theta
+              apply(Y2,apply(apply(X2,X3),Y3))))),                // theta
+	  lambda(F, lambda(cp(N0,cp(N1,N2)),                      // factotial
+	    apply(apply(apply(+zerop,N0),1),                      // factorial
+	        apply(apply(+mul,N1),apply(F,apply(+pred,N2)))))) // factorial
+	  ), 9).
+	r=upo(A) :- r=A.
+}

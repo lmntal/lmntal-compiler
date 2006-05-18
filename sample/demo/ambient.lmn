@@ -1,0 +1,27 @@
+{ system_ruleset.
+
+in@@
+{name($n), in($m,X),{+X,$p}, $q}, {name($m2), $r} :-
+   unary($n), unary($m), unary($m2), $m=$m2 |
+   {name($m), {name($n), {$p,$q}}, $r}.
+
+out@@
+{name($m), {name($n), out($m2,X),{+X,$p}, $q}, $r} :-
+   unary($n), unary($m), unary($m2), $m=$m2 |
+   {name($n), $p, $q}, {name($m), $r}.
+
+open@@
+open($m,X),{+X,$p}, {name($m2), $q} :-
+   unary($m), unary($m2), $m=$m2 |   
+   $p, $q.
+
+acquire($n,P) :- unary($n) | open($n,P).
+release($n,X), {+X,$p} :- unary($n) | {name($n)}, $p.
+
+}.
+
+
+acquire(nn,X),{+X,release(mm,Y),{+Y,pp}},
+release(nn,U),{+U,acquire(mm,V),{+V,qq}}.
+
+ 
