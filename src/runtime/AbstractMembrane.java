@@ -69,7 +69,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** アトムの集合 */
 	protected AtomSet atoms = new AtomSet();
 	/** 子膜の集合 */
-	protected Set mems;
+	protected Set mems = null;
 //	/** このセルの自由リンクの数 */
 //	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
@@ -88,11 +88,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * ロックを必要とするランタイムのみが使用し、転送するランタイムは使用しない。*/
 	public RemoteTask remote = null; // publicは仮
 	/** この膜の名前（internされた文字列またはnull） */
-	String name;
+	String name = null;
 
 	private static int nextId = 0;
 	private int id;
-
+	
+	/** 子膜->(コピー元のアトムin子膜->コピー先のアトムinコピーされた子膜) */
+	HashMap memToCopyMap = null; 
+	
 	public String getName() { return name; }
 	void setName(String name) { this.name = name; } // 仕様が固まったらコンストラクタで渡すようにすべきかも
 
@@ -735,8 +738,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 //		return retHashMap;
 //	}
 	
-	HashMap memToCopyMap; //子膜->(コピー元のアトムin子膜->コピー先のアトムinコピーされた子膜)
-	HashMap memToCopiedMem; //子膜->コピー先の子膜
 	
 	/**
 	 * 指定された膜より,その子膜及びアトムをこの膜にコピーする.
@@ -752,12 +753,10 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 */
 	public Map copyCellsFrom(AbstractMembrane srcmem){
 		memToCopyMap = new HashMap();
-		memToCopiedMem = new HashMap();
 		Iterator it = srcmem.memIterator();
 		while(it.hasNext()){
 			AbstractMembrane omem = (AbstractMembrane)it.next();
 			AbstractMembrane nmem = newMem();
-			memToCopiedMem.put(omem,nmem);
 			memToCopyMap.put(omem,nmem.copyCellsFrom(omem));
 			nmem.copyRulesFrom(omem);
 		}
@@ -795,7 +794,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 				if(atom.args[i].getAtom().mem != atom.mem){//リンク先がこの膜でない
 					if(atom.args[i].getAtom().mem != null &&
 					atom.args[i].getAtom().mem.parent == atom.mem){//子膜へ繋がっている
-						AbstractMembrane copiedmem = (AbstractMembrane)memToCopiedMem.get(atom.args[i].getAtom().mem);
+						//AbstractMembrane copiedmem = (AbstractMembrane)memToCopiedMem.get(atom.args[i].getAtom().mem);
 						Map copymap = (Map)memToCopyMap.get(atom.args[i].getAtom().mem);
 						Atom copiedatom = (Atom)copymap.get(atom.args[i].getAtom());
 						newLink(((Atom)map.get(atom)),i,

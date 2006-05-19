@@ -1,7 +1,29 @@
 graphic.use.
-go:-
-{
-%%make window
-window. name("LMNtal Typing"),size(800,600),timer(10).
- {draw,name("oval"),getpic("c:\live0000.jpg"),position(100,0),size(160,120)}.
-}
+go :-
+{window, name("LMNtal Typing"), size(800,600), killer, keyCode, timer(10), bgcolor(255,255,255).
+page(1), view(1), {}.
+%ページ送り
+keyCode([_IT|L]), page(_IX) :- _IT=\=37 | keyCode(L), page(_IX + 1), view(_IX + 1).
+%ページ戻し
+keyCode([_IT|L]), page(_IX) :- _IT=37 | keyCode(L), page(_IX - 1), view(_IX - 1).
+%ページMAX維持
+page(_IX) :- _IX > 2 | page(2).
+%ページMIN維持
+page(_IX) :- _IX < 1 | page(1).
+%実行維持
+keyCode([]),page(_IX) :- _IX >= 1, _IX =< 2 | keyCode([]), page(_IX).
+view(_IX), {$p[]} :- _IX = 1 | 
+{draw, getpic(string("hoge",60)), position(30,90), color(0,0,0), 
+{draw, getpic(string("moge 
+",30)), position(0,60), color(0,0,0) 
+{draw, getpic(string("",30)), position(0,60), color(0,0,0) 
+}. 
+}. 
+}. 
+
+view(_IX), {$p[]} :- _IX = 2 |
+{draw, getpic(string("ほげ",60)), position(30,90), color(0,0,0),
+{draw, getpic(string("もげ",30)), position(0,60), color(0,0,0)
+}.
+}.
+}.

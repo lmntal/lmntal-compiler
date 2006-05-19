@@ -39,7 +39,7 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	/** 所属膜のAtomSet内でのインデックス */
 	public int index = -1;
 
-	private NodeParameter  nodeParam;
+	private NodeParameter  nodeParam = null;
 	
 	public int getid(){
 		return id;
@@ -78,13 +78,13 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		this.functor = functor;
 		args = new Link[functor.getArity()];
 		id = lastId++;
-		nodeParam = null;
 		if(Env.fGUI) {
 			nodeParam = new NodeParameter();
 			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
 			nodeParam.pos = new DoublePoint(Math.random()*r.width + r.x, Math.random()*r.height + r.y);
 		}
 		if(Env.f3D) {
+			nodeParam = new NodeParameter();
 			nodeParam.pos3d = new Double3DPoint(Math.random(), Math.random(), Math.random());
 		}
 	}

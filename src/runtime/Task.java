@@ -528,7 +528,6 @@ public class Task extends AbstractTask implements Runnable {
 						Membrane mem2 = new Membrane(this);
 						Map map = mem2.copyCellsFrom(mem);
 						mem2.memToCopyMap = null;
-						mem2.memToCopiedMem = null;
 						mem2.copyRulesFrom(mem);
 						//適用
 						String ruleName = react(mem2, (Object[])it.next(), mem, map);
@@ -626,7 +625,6 @@ public class Task extends AbstractTask implements Runnable {
 			Membrane mem2 = new Membrane(this);
 			Map map = mem2.copyCellsFrom(mem);
 			mem2.memToCopyMap = null;
-			mem2.memToCopiedMem = null;
 			mem2.copyRulesFrom(mem);
 			//適用
 			String ruleName = react(mem2, (Object[])it.next(), mem, map);
@@ -687,7 +685,6 @@ public class Task extends AbstractTask implements Runnable {
 						Membrane mem2 = new Membrane(this);
 						Map map = mem2.copyCellsFrom(mem);
 						mem2.memToCopyMap = null;
-						mem2.memToCopiedMem = null;
 						mem2.copyRulesFrom(mem);
 						//適用
 						String ruleName = react(mem2, (Object[])it.next(), mem, map);

@@ -22,7 +22,7 @@ public final class Membrane extends AbstractMembrane {
 	/** 実行アトムスタック。
 	 * 操作する際にこの膜のロックを取得している必要はない。
 	 * 排他制御には、Stack インスタンスに関する synchronized 節を利用している。 */
-	private Stack ready = new Stack();
+	private Stack ready = null;
 	
 	/** リモートホストとの通信でこの膜のアトムを同定するときに使用されるatomidの表。
 	 * <p>atomid (String) -> Atom
@@ -32,9 +32,8 @@ public final class Membrane extends AbstractMembrane {
 	 * $inside_proxyアトムの場合、命令ブロックの返答のタイミングでローカルIDで上書きされる。
 	 * $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
 	 * @see Atom.remoteid */
-	protected HashMap atomTable = new HashMap();
+	protected HashMap atomTable = null;
 
-	//
 	
 	/** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
 	private Membrane(AbstractTask task, AbstractMembrane parent) {
@@ -98,6 +97,7 @@ public final class Membrane extends AbstractMembrane {
 	 * @param atom 実行アトムスタックに追加するアトム
 	 */
 	public void enqueueAtom(Atom atom) {
+		if(null == ready){ ready = new Stack(); }
 		ready.push(atom);
 	}
 	/** この膜が移動された後、アクティブアトムを実行アトムスタックに入れるために呼び出される。
@@ -115,6 +115,7 @@ public final class Membrane extends AbstractMembrane {
 			if (f.isActive()) {
 				Iterator i2 = atoms.iteratorOfFunctor(f);
 				while (i2.hasNext()) {
+					if(null == ready){ ready = new Stack(); }
 					Atom a = (Atom)i2.next();
 					a.dequeue();
 					ready.push(a);
@@ -453,7 +454,10 @@ public final class Membrane extends AbstractMembrane {
 
 	/** 実行アトムスタックの先頭のアトムを取得し、実行アトムスタックから除去 */
 	Atom popReadyAtom() {
-		return (Atom)ready.pop();
+		if(null == ready){ return null; }
+		Atom atom = (Atom)ready.pop();
+		if(ready.isEmpty()){ ready = null; }
+		return atom;
 	}
 
 //	/** 膜の活性化。ただしこの膜はルート膜ではなく、スタックに積まれておらず、
@@ -466,6 +470,7 @@ public final class Membrane extends AbstractMembrane {
 	/** この膜のキャッシュを表すバイト列を取得する。
 	 * @see RemoteMembrane#updateCache(byte[]) */
 	public byte[] cache() {
+		if(null == atomTable){ atomTable = new HashMap(); }
 		
 		// atomTableを更新する // 子膜の自由リンクについては要検討
 		atomTable.clear();
@@ -474,6 +479,7 @@ public final class Membrane extends AbstractMembrane {
 			Atom atom = (Atom)it.next();
 			atomTable.put(atom.getLocalID(), atom);
 		}
+		if(atomTable.isEmpty()){atomTable = null; }
 
 		try {
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -520,6 +526,7 @@ public final class Membrane extends AbstractMembrane {
 	}
 	/** アトムIDに対応するアトムを登録する */
 	public void registerAtom(String atomid, Atom atom) {
+		if(null == atomTable){ atomTable = new HashMap(); }
 		atomTable.put(atomid, atom);
 	}
 	

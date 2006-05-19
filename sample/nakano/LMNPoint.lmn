@@ -8,7 +8,7 @@ window, name("LMNtal Typing"), size(800,600), killer, keyCode, timer(10), bgcolo
 %ページ送り
  keyCode([_IT|L]), page(_IX) :- keyCode(L), page(_IX + 1), view(_IX + 1).
 %終了条件
-% view(_IX), {$p[]}, bgcolor(255,255,255) :- _IX = 5 | bgcolor(0,0,0).
+ view(_IX), {$p[]}, bgcolor(255,255,255) :- _IX = 5 | bgcolor(0,0,0).
 %実行維持
  keyCode([]) :- keyCode([]).
  
