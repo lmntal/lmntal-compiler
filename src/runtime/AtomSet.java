@@ -14,6 +14,7 @@ import java.util.Map;
 import util.MultiMapIterator;
 import util.NestedIterator;
 import util.Util;
+import util.RandomIterator;
 
 /**
  * アトムの集合を管理するためのクラス。
@@ -86,7 +87,8 @@ public final class AtomSet implements Serializable {
 			if (l == null) {
 				return Util.NULL_ITERATOR;
 			} else {
-				return l.iterator();
+				if (Env.shuffle >= Env.SHUFFLE_ATOMS) return new RandomIterator(l);
+				else return l.iterator();
 			}
 		} else {
 			return new DataAtomIterator(f);
