@@ -76,7 +76,10 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	public Atom(AbstractMembrane mem, Functor functor) {
 		this.mem = mem;
 		this.functor = functor;
-		args = new Link[functor.getArity()];
+		if(functor.getArity() > 0)
+			args = new Link[functor.getArity()];
+		else
+			args = null;
 		id = lastId++;
 		if(Env.fGUI) {
 			nodeParam = new NodeParameter();
