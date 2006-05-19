@@ -1,5 +1,12 @@
+/* asynchronous pi calculus
+   Kazunori Ueda
+*/
+
 snd({$y[|*V]},X) :- {$y[|*V], m(X)}.
 get({m(X),$y},Z), {$body[Z|*V]} :- {$y}, $body[X|*V].
+
+/*           _      _      _              */
+/* a(z).b(y).z(y) | a(c) | b(d) -->* c(d) */
 
 get(A0,Z), {get(B0,Y), {snd(Z,Y)}}.
 snd(A1,C).  snd(B1,D).

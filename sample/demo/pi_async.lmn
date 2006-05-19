@@ -1,0 +1,37 @@
+/* asynchronous pi calculus
+   Kazunori Ueda, 2006-05-19
+
+   R ::= \Sigma_j R_j x_j(y_j).P_j
+         _
+   P ::= x(y)
+      |  new a P
+      |  P1 | P2
+      |  R
+      |  !R
+*/
+
+{ module(pi).
+  snd@@ {$y,+C}, snd(C,X) :- {$y, m(X)}.
+  get@@ {m(X),$y,+C}, {get(C,Z), {$body[Z|*V]}, $c} :-
+	    {$y}, $body[X|*V], {$c,kill}.
+//  get_repl@@ {m(X),$y,+C}, {get_repl(C,Z), {$body[Z|*V]}, $c} :-
+//	    {$y,+C2}, $body[X|*V1],
+//          {get_repl(C2,Z2), {$body[Z2|*V2]}, $c},
+//          cp(*V1,*V2,*V).
+  cp1@@ {+C,$c}, cp(C1,C2,C) :- {+C1,+C2,$c}.
+  gc1@@ {name($n)} :- unary($n) | .
+  gc2@@ pi.use :- .
+  gc3@@ { module(pi), @a} :- .
+  gc4@@ {kill, $p[]} :- .
+}.
+
+pi.use.
+/*           _      _      _              */
+/* a(z).b(y).z(y) | a(c) | b(d) -->* c(d) */
+{ example1. pi.use.
+  {get(A0,Z), {{get(B0,Y), {snd(Z,Y)}}}
+  }.
+  snd(A1,C).  snd(B1,D).
+  {name(a),+A0,+A1}, {name(b),+B0,+B1},
+  {name(c),+C}, {name(d),+D}.
+}.

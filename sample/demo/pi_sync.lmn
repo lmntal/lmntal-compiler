@@ -1,0 +1,49 @@
+/* (synchronous) pi-calculus
+   Kazunori Ueda, 2006-05-19
+   Examples are taken from "The Polyadic pi-Calculus, a Tutorial"
+                _
+   p ::= x(y) | xy
+
+   R ::= \Sigma_j R_j p_j.P_j
+         
+   P ::= new a P
+      |  P1 | P2
+      |  R
+      |  !R
+*/
+
+{ module(pi).
+  comm1@@ {$x,+C1,+C2}, {get(C1,Y), {$b1[Y|*V1]}, $c1},
+                        {snd(C2,Z), {$b2[|*V2]}, $c2} :-
+          {$x}, $b1[Z|*V], $b2, {$c1,$c2,kill}.
+
+//  get_repl@@ {m(X),$y,+C}, {get_repl(C,Z), {$body[Z|*V]}, $c} :-
+//	    {$y,+C2}, $body[X|*V1],
+//          {get_repl(C2,Z2), {$body[Z2|*V2]}, $c},
+//          cp(*V1,*V2,*V).
+//  cp1@@ {+C,$c}, cp(C1,C2,C) :- {+C1,+C2,$c}.
+  gc1@@ {name($n)} :- unary($n) | .
+  gc2@@ pi.use :- .
+  gc3@@ { module(pi), @a} :- .
+  gc4@@ {kill, $p[]} :- .
+}.
+
+pi.use.
+/* _             _      _             _    _       _    _   */
+/* x(y).0 | x(u).uv.0 | x(z).0  -->*  yv | xz  or  xy | zv  */
+{ example1. pi.use.
+  {snd(X0,Y), {}},
+  {get(X1,U), {{snd(U,V), {}}}},
+  {snd(X2,Z), {}},
+  {name(x),+X0,+X1,+X2}, {name(y),+Y}, {name(z),+Z}, {name(v),+V}
+}.
+
+/*         _             _       _              _    _   */
+/* (new x)(x(y).0 | x(u).uv.0) | x(z).0  -->*  yv | xz   */
+{ example2. pi.use.
+  {snd(LX0,Y), {}},
+  {get(LX1,U), {{snd(U,V), {}}}},
+  {snd(X2,Z), {}},
+  {+LX0,+LX1},
+  {name(x),+X2}, {name(y),+Y}, {name(z),+Z}, {name(v),+V}
+}.
