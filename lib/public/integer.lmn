@@ -17,6 +17,39 @@ HISTORY
 module(integer).
 
 /**
+ * a(set(1:100))
+ * -> a(1),...,a(100)
+ * by Nakano
+ */
+H = integer.set(A, B) :- A =< B , int(A), int(B)| H=[:/*inline*/
+  
+  int start =
+ ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  int stop =
+ ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+
+  Atom result = mem.newAtom(new IntegerFunctor(start));
+  mem.relink(result, 0, me, 2);
+  me.nthAtom(0).remove();
+  me.nthAtom(1).remove();
+  me.remove();
+  Atom toLink = result.nthAtom(0);
+  for(int i = start; i < stop; i++){
+    /*Ê£À½*/
+    Map atomMap = new HashMap();
+    atomMap.put(result, mem.newAtom(result.getFunctor()));
+    atomMap = mem.copyAtoms(result, atomMap);
+    mem.copyAtoms(result, atomMap);
+    
+    result.remove();
+    result = mem.newAtom(new IntegerFunctor(i+1));
+    mem.newLink(result, 0, toLink, 0);
+    toLink = result.nthAtom(0);
+  }
+
+ :](A, B).
+
+/**
  * +
  * 
  */
