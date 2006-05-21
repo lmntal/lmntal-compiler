@@ -21,32 +21,44 @@ module(integer).
  * -> a(1),...,a(100)
  * by Nakano
  */
-H = integer.set(A, B) :- A =< B , int(A), int(B)| H=[:/*inline*/
-  
+H = integer.set(A, B) :- int(A), int(B)| H=[:/*inline*/
   int start =
  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   int stop =
  ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
-
+  if(start > stop){
+    int tmp = start;
+    start = stop;
+    stop = tmp;
+  }
+  
   Atom result = mem.newAtom(new IntegerFunctor(start));
   mem.relink(result, 0, me, 2);
   me.nthAtom(0).remove();
   me.nthAtom(1).remove();
   me.remove();
   Atom toLink = result.nthAtom(0);
+  int toArg=0;
+  
+  for(int i = 0; i < toLink.getEdgeCount(); i++){
+    if(toLink.nthAtom(i) == result){
+      toArg = i;
+      break;
+    }
+  }
+
   for(int i = start; i < stop; i++){
     /*Ê£À½*/
-    Map atomMap = new HashMap();
+  	Map atomMap = new HashMap();
     atomMap.put(result, mem.newAtom(result.getFunctor()));
     atomMap = mem.copyAtoms(result, atomMap);
-    mem.copyAtoms(result, atomMap);
+    //mem.copyAtoms(result, atomMap);
     
     result.remove();
     result = mem.newAtom(new IntegerFunctor(i+1));
-    mem.newLink(result, 0, toLink, 0);
+    mem.newLink(result, 0, toLink, toArg);
     toLink = result.nthAtom(0);
   }
-
  :](A, B).
 
 /**
