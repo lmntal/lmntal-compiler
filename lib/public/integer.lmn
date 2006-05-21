@@ -17,7 +17,7 @@ HISTORY
 module(integer).
 
 /**
- * a(set(1:100))
+ * a(set(1,100))
  * -> a(1),...,a(100)
  * by Nakano
  */
