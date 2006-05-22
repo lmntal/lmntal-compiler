@@ -8,10 +8,15 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -244,7 +249,38 @@ public class DebugFrame extends JFrame {
 	 * @param s ソーステキスト
 	 * @param lineno 行番号
 	 */
-	public void setSourceText(String s, int lineno) {
+	public void setSourceText(String unitName) {
+		String s = null;
+		int lineno = 0;
+		try {
+			FileReader fr = new FileReader(unitName);
+			BufferedReader br = new BufferedReader(fr);
+			StringBuffer buf = new StringBuffer();
+			buf.append("<style>pre {font-size:"+(Env.fDEMO ? 14 : 10)+"px; font-family:monospace;}</style>\n");
+			buf.append("<pre>\n");
+			while ((s = br.readLine()) != null) {
+				Matcher m = Pattern.compile("(.*)(//|%)(.*)").matcher(s);
+				if (m.matches()) {//コメントだったらその他の色付けはしない
+					s = m.group(1)+"<font color=green>"+m.group(2)+m.group(3)+"</font>";
+				} else {
+					s = s.replace("=", "<font color=fuchsia>=</font>");
+					s = s.replace(":-", "<font color=fuchsia>:-</font>");
+					s = s.replace("|", "<font color=fuchsia>|</font>");
+					s = s.replace("{", "<font color=blue>{</font>");
+					s = s.replace("}", "<font color=blue>}</font>");
+				}
+				buf.append("  "+s+"\n");
+				lineno++;
+			}
+			buf.append("</pre>\n");
+			s = buf.toString();
+			s = s.replaceAll("/\\*", "<font color=green>/*");
+			s = s.replaceAll("\\*/", "*/</font>");
+			repaint();
+		} catch (IOException e) {
+			System.err.println(e);
+		}
+		
 		jt.setText(s);
 		StringBuffer buf = new StringBuffer();
 		buf.append("<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; CHARSET=EUC-JP\">\n");
@@ -253,7 +289,7 @@ public class DebugFrame extends JFrame {
 		for (int i = 1; i <= lineno; i++)
 			buf.append(i+"\n");
 		buf.append("</pre>\n");
-		linenoArea.setText(buf.toString());			
+		linenoArea.setText(buf.toString());
 	}
 	
 	public void setLMNtalFrame(LMNtalFrame lmntalFrame) {

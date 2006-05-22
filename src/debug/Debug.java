@@ -5,6 +5,7 @@
 package debug;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -113,40 +114,16 @@ public class Debug {
 		
 		lastLineno = 1;
 		
-		//TODO DebugFrameに任せるべき処理
 		try {
-			FileReader fr = new FileReader(unitName);
-			BufferedReader br = new BufferedReader(fr);
-			StringBuffer buf = new StringBuffer();
+			BufferedReader br = new BufferedReader(new FileReader(unitName));
 			String s = null;
-			int lineno = 0;
-			buf.append("<style>pre {font-size:"+(Env.fDEMO ? 14 : 10)+"px; font-family:monospace;}</style>\n");
-			buf.append("<pre>\n");
 			source = new Vector();
-			source.add("*System Rule*");
-			while ((s = br.readLine()) != null) {
+			while ((s = br.readLine()) != null)
 				source.add(s);
-				Matcher m = Pattern.compile("(.*)(//|%)(.*)").matcher(s);
-				if (m.matches()) {//コメントだったらその他の色付けはしない
-					s = m.group(1)+"<font color=green>"+m.group(2)+m.group(3)+"</font>";
-				} else {
-					s = s.replace("=", "<font color=fuchsia>=</font>");
-					s = s.replace(":-", "<font color=fuchsia>:-</font>");
-					s = s.replace("|", "<font color=fuchsia>|</font>");
-					s = s.replace("{", "<font color=blue>{</font>");
-					s = s.replace("}", "<font color=blue>}</font>");
-				}
-				buf.append("  "+s+"\n");
-				lineno++;
-			}
-			buf.append("</pre>\n");
-			s = buf.toString();
-			s = s.replaceAll("/\\*", "<font color=green>/*");
-			s = s.replaceAll("\\*/", "*/</font>");
-			if (Env.debugFrame != null) Env.debugFrame.setSourceText(s, lineno);
-			if (Env.gui != null) Env.gui.repaint();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.err.println(e);
+			e.printStackTrace();
 		}
 		
 		//全てのルールを収集する
