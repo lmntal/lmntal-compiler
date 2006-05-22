@@ -1,0 +1,119 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - 基本テスト
+
+append(c(1,c(2,c(3,n))),c(4,c(5,n)),result), ( append(X,Y,Z), n(X) :- Y=Z ), ( append(X,Y,Z), c(A,X1,X) :- c(A,Z1,Z), append(X1,Y,Z1) ). %result(c(1,c(2,c(3,c(4,c(5,n)))))) %ok
+append(c(1,c(2,c(3,n))),c(4,c(5,n)),result). append(X,Y,Z), n(X) :- Y=Z. append(X,Y,Z), c(A,X1,X) :- c(A,Z1,Z), append(X1,Y,Z1). %result(c(1,c(2,c(3,c(4,c(5,n)))))) %ok
+append([1,2,3],[4,5],result), ( Z=append([],Y) :- Y=Z ), ( Z=append([A|X],Y) :- Z=[A|append(X,Y)] ) %result([1,2,3,4,5]) %ok
+append([1,2,3],[4,5],result). Z=append([],Y) :- Y=Z. Z=append([A|X],Y) :- Z=[A|append(X,Y)]. %result([1,2,3,4,5]) %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - アトム同一性検査のテスト
+
+f(A),a(A,B),f(C),a(D,C) :- end(B,D). a(f,f),a(f,f). %end(f,f) %ok
+f(A),a(A,B),f(C),a(C,D) :- end(B,D). a(f,f),a(f,f). %end(f,f) %ok
+f(A),a(A,B),a(D,C),f(C) :- end(B,D). a(f,f),a(f,f). %end(f,f) %ok
+p(A),f(X),p(X) :- unary(A) | .  p(f),p(f),p(f). %p(f) %ok
+{p(A),f(X),p(X),$s[A]} :- {$s[X],q(X)}.{p(f),p(f),p(f)}. %{p(f),q(f)} %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - 単一化 = のテスト
+
+p(X,X). %p(X,X) %ok
+p(X,Y),Y=X. %p(X,X) %ok
+X=X.  %() %ok
+X=Y,Y=X. %() %ok
+[1]=res. %res([1]) %ok
+X=[1|X]. %'.'(1,X,X) %ok
+
+
+p(a,b), ( p(X,Y)     :- X=Y     ). %a(b) %ok
+p(a,b), ( Y=p(X)     :- X=Y     ). %a(b) %ok
+p(a,b), ( Y=E,E=p(X) :- X=F,F=Y ). %a(b) %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - 自由リンク管理アトムのテスト
+
+% 生成のテスト
+b(X),{c(X)}. %b(X), {c(X)} %ok
+% マッチングのテスト
+b(X),{c(X)}, (b(X),{c(X)}:- ok). %ok %ok
+% 生成とマッチングのテスト
+a, (a:-b(X),{c(X)}), (b(X),{c(X)}:-d(Y),{e(Y)}) %d(X),{e(X)}. %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - プロセス文脈のテスト
+
+1,1,1,1,1,{},({$p},1:-{$p,1}).   %{1,1,1,1,1}  %ok
+{{a(X)},b(X,Y),1},{c(Y)}, ({$p,1} :- {$p}). %{{a(X)},b(X,Y)},{c(Y)} %ok
+
+% RemoveProxies のテスト
+{{a(X)},b(X,Y)},{c(Y)}, ({$p},{$q} :- {$p,$q}). %{{a(X)},c(b(X))} %ok
+% RemoveToplevelProxies のテスト
+{a(  X)},{b(X)},        ({$p},{$q} :-  $p,$q ). %a(b)   %ok
+{a(A,X)},{b(X)},c(A),   ({$p},{$q} :-  $p,$q ). %b(a(c))  %ok
+
+% InsertProxies のテスト
+{{a(A,X)},b(B,X)},c(A,B),    ({{$p},$q} :- {$p,$q}). %{b(B,a(A))},c(A,B) %ok
+
+% 全般
+{{a(A,X)},b(B,X)},{d(B)},c(A),  ( {{$p},$q},{$r}   :- {{$p},$q,  $r} ). %{{a(A,X)},b(d,X)},c(A)  %ok
+{{a(A,X)},b(B,X)},{d(B)},c(A),a,( {{$p},$q},{$r},a :- {{$p},$q},{$r} ). %{{a(A,X)},b(B,X)},{d(B)},c(A) %ok
+{{a(A,X)},b(B,X)},{d(B)},c(A),  ( {{$p},$q},{$r}   :- {$p,$q,$r}     ). %{a(X,b(d))},c(X)  %ok
+{{a(A,X)},b(B,X)},{d(B)},c(A),  ( {{$p},$q},{$r}   :-  $p,$q,$r      ). %a(c)=b(d)   %ok
+
+{{a(X)},b(X)},               ({{$p},$q} :- $p,$q). %a(b)  %ok
+{{a(X)},b(X,Y)}, c(Y),       ({{$p},$q} :- $p,$q). %c(b(a)) %ok
+{{a(A,X)},b(B,X)},1(A),2(B), ({{$p},$q} :- $p,$q). %a(1)=b(2) %ok
+
+{a(A,X)},{b(X)},{c(A)},      ({$p},{$q} :- {$p,$q}). %{b(a(c))} %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - ルール文脈のテスト
+
+{@p}:-@p. a. {a:-b}. %b  %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 明示的な自由リンク引数付きのプロセス文脈のテスト
+
+( {$p[X],   a(X)} :- $p[X],   ok(X) ), {a(4)}.        %ok(4)  %ok
+( {$p[X],   a(X)} :- $p[X],   ok(X) ), {a(X),{4(X)}}. %ok(X),{4(X)} %ok
+( {$p[X],   a(X)} :- $p[X],   ok(X) ), {a(X)},4(X).   %{a(X)},4(X) %ok
+
+( {$p[Y|*A],a(Y)} :- $a=4 | $p[X|*A], $a=X ), {a(b)}. %b(4)  %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 諸々のテスト
+
+  A=f(f(f(f(A)))),    c,c, ( c, X=f(Y) :- X=g(Y) ).                      %f(g(g(f(A))),A) %ok
+{ A=f(f(f(f(A)))) },  c,c, ( c,{X=f(Y),$p[X,Y]} :- { X=g(Y),$p[X,Y] } ). %{ f(g(g(f(A))),A) } %ok
+
+{$p[X]}:-$p[X], $p[Y],f(Y), $p[Z],$p[Z].  {p(X)},g(X). %f(p), p(g), p(p) %ok
+
+{ pi(X), res(X), ( pi(X) :- X=3.14 ) }, ( {res($p),@r} :- result=$p ). %result(3.14) %ok
+
+%( go :- { pi(X), res(X), ( pi(X) :- X=3.14 ) }@"localhost" ), ( {res($p),@r} :- result=$p ), ( result(pi) :- e,go ), go. %e,e,e,result(3.14)  %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,Z),g(X,Z)}. %g(A,A),g(B,B) %ok
+{$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,Z),g(X,Z)}. %g(A,A)  %ok
+{$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,X)}.  %  %ok
+{$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,Y)},u(X,Y). %u(X,Y), {f(X,Y)} %ok
+
+
+{$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,X)}.   %  %ok
+
+{$p[X,Y]} :- $p[X,Y],$p[A,A].  {f(X,Y)},g(X,Y). % f(X,Y),g(X,Y),f(A,A)  %ok
+
+{$p[X,Y,Z],f(X),f(Y),f(Z)} :- $p[V,V,W],g(W).   {f(A),f(A),f(C),f(C)}. %f(g)  %ok
+{$p[X,Y,Z],f(X,$x),f(Y,$y),f(Z,$z)} :- int($x),int($y),int($z) | $p[V,V,W],g(W). {f(A,1),f(A,2),f(C,3),f(C,4)}. %f(g,3) %ok
+
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,B,C,C)}. %e(g) %ok
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,C,B)}. %e(g) %ok
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,D,E),h(B,C,D,E)}. %g(h(e,C,C)) %ok
+
+p(A,B,C,D,E) :- A=B,C=D,g(E).  e(A),p(A,B,B,C,C). %e(g)  %ok
+
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N), $p[A,A,B,B,C],g(C).  {e(A),f(A,B,B,C,C)}. %g(e), g(e) %ok
+{$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N), $p[A,A,B,B,C],g(C).  {e(A,B,C,D,E),f(A,B,C,D,E)}. %g(e(_14,_14,_16,_16)), g(e(_18,_18,_20,_20)) %ok
+
+%EOF
