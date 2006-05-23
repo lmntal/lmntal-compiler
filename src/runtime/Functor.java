@@ -214,7 +214,7 @@ public class Functor implements Serializable {
 	}
 
 	public boolean isOUTSIDE_PROXY() {
-		return false;
+		return equals(Functor.OUTSIDE_PROXY);
 	}
 
 	public String getPath() {
