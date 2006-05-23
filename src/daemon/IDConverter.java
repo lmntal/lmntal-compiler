@@ -13,9 +13,9 @@ import runtime.*;
  */
 public class IDConverter {
 	/** グローバルルールセットID (String) -> Ruleset */
-	static HashMap rulesetTable = new HashMap();
+	static HashMap rulesetTable = null;
 	/** グローバル膜ID (String) -> AbstractMembrane */
-	static HashMap memTable = new HashMap();
+	static HashMap memTable = null;
 
 	////////////////////////////////////////////////////////////////	
 
@@ -26,28 +26,34 @@ public class IDConverter {
 
 	/** 指定されたルールセットを表に登録する */
 	public static void registerRuleset(String globalid, Ruleset rs){
+		if(null == rulesetTable){ rulesetTable = new HashMap(); }
 		rulesetTable.put(globalid, rs);
 	}
 	/** 指定されたglobalRulesetIDを持つルールセットを探す
 	 * @return Ruleset（見つからなかった場合はnull）*/
 	public static Ruleset lookupRuleset(String globalRulesetID){
+		if(null == rulesetTable){ return null; }
 		return (Ruleset)rulesetTable.get(globalRulesetID);
 	}
 
 	/** 指定された膜を表に登録する */
 	public static void registerGlobalMembrane(String globalMemID, AbstractMembrane mem) {
 		if(Env.debugDaemon > 0) System.out.println("IDConverter.registerGlobalMembrane(" + globalMemID + ", " + mem.toString() + ")"); //todo use Env
+		if(null == memTable){ memTable = new HashMap(); }
 		memTable.put(globalMemID, mem);
 	}
 	/** 指定された膜を表から削除する */
 	public static void unregisterGlobalMembrane(String globalMemID) {
+		if(null == memTable){ return; }
 		memTable.remove(globalMemID);
+		if(memTable.isEmpty()){ memTable = null; }
 	}
 	
 	
 	/** 指定されたglobalMemIDを持つ膜を探す
 	 * @return AbstractMembrane（見つからなかった場合はnull）*/
 	public static AbstractMembrane lookupGlobalMembrane(String globalMemID){
+		if(null == memTable){ return null; }
 		return (AbstractMembrane)memTable.get(globalMemID);
 	}
 

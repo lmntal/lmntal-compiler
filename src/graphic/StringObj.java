@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.Iterator;
 
+import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
@@ -26,7 +27,7 @@ public class StringObj extends GraphicObj{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public StringObj(Membrane mem){
+	public StringObj(AbstractMembrane mem){
 		super(mem);
 	}
 	///////////////////////////////////////////////////////////////////////////
@@ -38,7 +39,7 @@ public class StringObj extends GraphicObj{
 		g.drawString(msg, position.x + delta.x, position.y + delta.y);
 	}
 	
-	public void setMembrane(Membrane mem){
+	public void setMembrane(AbstractMembrane mem){
 		Iterator atomIte;
 		Atom targetAtom;
 		

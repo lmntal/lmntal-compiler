@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.Iterator;
 
+import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
@@ -19,7 +20,7 @@ public class FillTriangleObj extends GraphicObj{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public FillTriangleObj(Membrane mem){
+	public FillTriangleObj(AbstractMembrane mem){
 		super(mem);
 	}
 	///////////////////////////////////////////////////////////////////////////
@@ -43,7 +44,7 @@ public class FillTriangleObj extends GraphicObj{
 	 */
 	public Point getPosition(){ return (new Point(posX[0], posY[0]));}
 	
-	public void setMembrane(Membrane mem){
+	public void setMembrane(AbstractMembrane mem){
 		Iterator atomIte;
 		Atom targetAtom;
 		

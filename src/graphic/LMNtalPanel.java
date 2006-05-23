@@ -20,12 +20,11 @@ import javax.swing.border.BevelBorder;
 import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Functor;
-import runtime.Membrane;
 
 public class LMNtalPanel extends JPanel implements Runnable {
 	
 	final
-	private int SLEEP_TIME = 10;
+	private int SLEEP_TIME = 0;
 	
 	final
 	private Functor DRAW_MEM = new Functor("draw",0); 
@@ -113,7 +112,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	 * 管理する子孫膜を記憶する．
 	 * @param mem
 	 */
-	public boolean setChildMem(Membrane mem){
+	public boolean setChildMem(AbstractMembrane mem){
 		busy = true;
 		GraphicObj gObj = null;
 		
@@ -134,7 +133,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	 * 受け取る膜はウィンドウ膜以外の膜であることが保証されていること．
 	 * @param mem
 	 */
-	private GraphicObj setGraphicMem(Membrane mem){
+	private GraphicObj setGraphicMem(AbstractMembrane mem){
 		// get getpic
 		Iterator atomIte = mem.atomIteratorOfFunctor(GETPIC_ATOM);
 		if(atomIte.hasNext()){
@@ -176,6 +175,8 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	 * @param g
 	 */
 	public void paint(Graphics g) {
+		if(null == g){ return; }
+		if(null == OSG){ return; }
 		busy = true;
 		synchronized (memMap) {
 			//画面を白地で初期化（塗りつぶす）
@@ -211,6 +212,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 				list.add(target);
 				GraphicObj gObj = (GraphicObj)objMap.get(target);
 				if(null != gObj){
+					while(null == OSG){ }
 					gObj.drawAtom(OSG, delta);
 				}
 			}

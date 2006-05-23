@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 
+import runtime.AbstractMembrane;
 import runtime.Functor;
-import runtime.Membrane;
 
 public abstract class GraphicObj{
 	final static
@@ -23,7 +23,7 @@ public abstract class GraphicObj{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public GraphicObj(Membrane mem){
+	public GraphicObj(AbstractMembrane mem){
 		memID = mem.getGlobalMemID();
 		setMembrane(mem);
 	}
@@ -63,5 +63,5 @@ public abstract class GraphicObj{
 	 * 膜から必要な情報を取得する．
 	 * @param mem
 	 */
-	abstract public void setMembrane(Membrane mem);
+	abstract public void setMembrane(AbstractMembrane mem);
 }

@@ -1,0 +1,27 @@
+graphic.use.
+go:-{
+  window.
+  size(1000,1000).
+  name(hoge).
+  killer.
+  graphic.norepaint.
+  norepaint_go:-
+  {
+  draw.
+  getpic("rect").
+  position(0,0).
+  size(10,10).
+  color(255,0,0)
+  }.
+float.use.
+mandel(X, Y, ZX, ZY, _IN) :-float(X), float(Y), float(ZX), float(ZY), (_IZX*_IZX) + (_IZY*_IZY) > 2550 | . 
+mandel(X, Y, ZX, ZY, _IN) :-float(X), float(Y), float(ZX), float(ZY), _IN >= 1000 | pos(X, Y, _IZX + _IZY / 20).
+mandel(X, Y, ZX, ZY, _IN) :-float(X), float(Y), float(ZX), float(ZY), _IZX =< 2550 , _IN < 1000 | mandel(float.abs(X), Y, _IZX + X, _IZY + Y, _IN + 1).
+
+seed(integer.set(0,20), integer.set(0,20)).
+
+seed(X, Y) :- mandel((X / 10.0)-1.5, (Y / 10.0)-1.5, 0.0, 0.0, 0).
+
+ {position(X, Y), color(_IR, _IG, _IB), $p}, pos(PX, PY, _IZ) :- int(X),int(Y) |
+  {position(float.intValue(PX)*10, float.intValue(PY)*10), color(_IZ, _IZ, _IZ), $p}.
+}.

@@ -327,6 +327,6 @@ p(A,B,C,D,E) :- A=B,C=D,g(E).  e(A),p(A,B,B,C,C). % ==> e(g) ¡ÚUPDATELINKS¤Çgetl
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N), $p[A,A,B,B,C],g(C).  {e(A,B,C,D,E),f(A,B,C,D,E)} % ==> ¡ÚNull¡Û
 
 
-rule with empty head due to syntax error -> must stop!
+%rule with empty head due to syntax error -> must stop!
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

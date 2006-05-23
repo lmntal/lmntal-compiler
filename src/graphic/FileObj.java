@@ -8,6 +8,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.util.Iterator;
 
+import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
@@ -24,7 +25,7 @@ public class FileObj extends GraphicObj{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public FileObj(Membrane mem, String pass){
+	public FileObj(AbstractMembrane mem, String pass){
 		super(mem);
 		file = new File(pass);
 		setImg();
@@ -50,7 +51,7 @@ public class FileObj extends GraphicObj{
 		}
 	}
 	
-	public void setMembrane(Membrane mem){
+	public void setMembrane(AbstractMembrane mem){
 		Iterator atomIte;
 		Atom targetAtom;
 		

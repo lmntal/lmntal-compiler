@@ -2,11 +2,13 @@ package graphic;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -67,6 +69,11 @@ public class LMNtalWindow extends JFrame{
 	private long timer = 1;
 	private boolean killer = false;
 	private long time;
+	private boolean sizeUpdate = false;
+	private boolean positionUpdate = false;
+	private Atom sizeAtom = null;
+	private Dimension d;
+	private boolean windowStateUpdate = false;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -106,6 +113,10 @@ public class LMNtalWindow extends JFrame{
 		if(atomIte.hasNext()){
 			targetAtom = (Atom)atomIte.next();
 			try{
+				if( sizeX != ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(0)) : sizeX) ||
+					sizeY != ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(1)) : sizeY) ){
+					sizeUpdate = true;
+				}
 				sizeX = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(0)) : 0);
 				sizeY = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(1)) : 0);
 			}
@@ -137,6 +148,10 @@ public class LMNtalWindow extends JFrame{
 		if(atomIte.hasNext()){
 			targetAtom = (Atom)atomIte.next();
 			try{
+				if( posX != ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(0)) : posX) ||
+					posY != ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(1)) : posY) ){
+						positionUpdate = true;
+				}
 				posX = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(0)) : 0);
 				posY = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(1)) : 0);
 			}
@@ -235,20 +250,26 @@ public class LMNtalWindow extends JFrame{
 	public void resetWindow(AbstractMembrane mem){
 		resetMembrane(mem);
 		// TODO: ウィンドウの設定に変更があった場合，更新．サイズの位置で更新を分けるべき？
-		//setSize(sizeX,sizeY);
-		//setLocation(posX, posY);
+		if(sizeUpdate){
+			setSize(sizeX,sizeY);
+			sizeUpdate = false;
+		}
+		if(positionUpdate){
+			setLocation(posX, posY);
+			positionUpdate = false;
+		}
 	}
 	
 	/**
 	 * 管理する子孫膜を記憶する．
 	 * @param mem
 	 */
-	public void setChildMem(Membrane mem){
+	public void setChildMem(AbstractMembrane mem){
 		boolean res = lmnPanel.setChildMem(mem);
 		// パネルクラスが作業中または最短更新時間に満てないときは待つ
 		while(res && ((timer > System.currentTimeMillis() - time) || lmnPanel.isBusy())){}
 		lmnPanel.setWindowID(memID);
-		lmnPanel.repaint();
+		lmnPanel.paint(lmnPanel.getGraphics());
 		// 最終更新時間のセット
 		time = System.currentTimeMillis();
 	}
@@ -289,6 +310,23 @@ public class LMNtalWindow extends JFrame{
 	 * @param mem
 	 */
 	private void doAddAtom(AbstractMembrane mem){
+		// ウィンドウの状態変更
+//		d = getSize();
+//		if(d.width != sizeX ||
+//				d.height != sizeY){
+//			// size atom
+//			Iterator atomIte= mem.atomIteratorOfFunctor(SIZE_ATOM);
+//			if(atomIte.hasNext()){
+//				Atom sizeAtom = (Atom)atomIte.next();
+//				Atom atomW = sizeAtom.getMem().newAtom(new IntegerFunctor(d.width));
+//				Atom atomH = sizeAtom.getMem().newAtom(new IntegerFunctor(d.height));
+//				sizeAtom.getMem().relink(atomW,0,sizeAtom,0);
+//				sizeAtom.getMem().relink(atomH,0,sizeAtom,1);
+//			}
+//			sizeX = d.width;
+//			sizeY = d.height;
+//		}
+
 		if(null == keyAtom){ return; }
 		while(!waitingAtomlist.isEmpty()){
 			Functor fa = (Functor)waitingAtomlist.removeFirst();

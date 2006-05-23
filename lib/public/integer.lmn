@@ -52,7 +52,6 @@ H = integer.set(A, B) :- int(A), int(B)| H=[:/*inline*/
   	Map atomMap = new HashMap();
     atomMap.put(result, mem.newAtom(result.getFunctor()));
     atomMap = mem.copyAtoms(result, atomMap);
-    //mem.copyAtoms(result, atomMap);
     
     result.remove();
     result = mem.newAtom(new IntegerFunctor(i+1));

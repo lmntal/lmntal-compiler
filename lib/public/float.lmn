@@ -354,5 +354,12 @@ H= '/'(A,B) :- int(A),float(B) | H= [:/*inline*/
 		me.nthAtom(1).remove();
 		me.remove();
 	:](A,B).
+H= float.intValue(A) :- float(A) | H= [:/*inline*/
+		Double a = new Double(((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue());
+		Atom result = mem.newAtom(new IntegerFunctor(a.intValue()));
+		mem.relink(result, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+	:](A).
 
 }

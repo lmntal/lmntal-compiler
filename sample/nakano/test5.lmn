@@ -1,0 +1,19 @@
+graphic.use.
+go:-{
+  window.
+  size(1000,1000).
+  name(hoge).
+  killer.
+  graphic.norepaint.
+  norepaint_go:-
+  {
+  draw.
+  getpic("rect").
+  position(0,0).
+  size(10,10).
+  color(255,0,0)
+  }.
+  pos(integer.set(0,100), integer.set(0,100)).
+  {position(_IX, _IY), color(_IR, _IG, _IB), $p}, pos(_IPX, _IPY) :-
+   {position(_IPX*10, _IPY*10), color((_IPX + 25) * 2, (_IPY + 25) * 2, _IPX + _IPY + 55), $p}.
+}.

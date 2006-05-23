@@ -1,5 +1,6 @@
 package graphic;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ public class LMNtalGFrame{
 	 * 受け取った膜はグラフィック膜であるとは限らない．
 	 * @param mem
 	 */
-	public void setMem(Membrane mem){
+	public void setMem(AbstractMembrane mem){
 		// windowアトムがあればウィンドウ膜の登録
 		if(mem.getAtomCountOfFunctor(WINDOW_MEM)>0){
 			setWindowMem(mem);
@@ -107,8 +108,11 @@ public class LMNtalGFrame{
 	}
 	
 	public void setRepaint(Membrane mem, boolean flag){
-		if(windowMap.containsKey(mem.getGlobalMemID())){
-			LMNtalWindow window = (LMNtalWindow)windowMap.get(mem.getGlobalMemID());
+		setMem(mem);
+		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
+		if(nameAtomIte.hasNext()){
+			String windowName = ((Atom)nameAtomIte.next()).nth(0);
+			LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);
 			window.setRepaint(flag);
 		}
 	}
@@ -119,6 +123,7 @@ public class LMNtalGFrame{
 	  
 	public Point getMousePoint(AbstractMembrane mem){
 		if(mem.isRoot())return null;
+		setMem(mem);
 		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
 		if(nameAtomIte.hasNext()){
 			String windowName = ((Atom)nameAtomIte.next()).nth(0);
@@ -128,6 +133,20 @@ public class LMNtalGFrame{
 			}
 		}
 		return getMousePoint(mem.getParent());
+	}
+	
+	public Dimension getWindowSize(AbstractMembrane mem){
+		if(mem.isRoot())return null;
+		setMem(mem);
+		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
+		if(nameAtomIte.hasNext()){
+			String windowName = ((Atom)nameAtomIte.next()).nth(0);
+			LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);
+			if(null != window){
+				return window.getSize();
+			}
+		}
+		return getWindowSize(mem.getParent());
 	}
 	
 }

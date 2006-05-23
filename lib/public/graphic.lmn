@@ -19,19 +19,26 @@ module(graphic).
 graphic.use :- [:/*inline*/
 	Env.fGraphic = true;
 	Env.initGraphic();
-	me.setFunctor("go",0);
+	Atom atom = mem.newAtom(new Functor("go", 0));
+	me.remove();
 :].
 
 //再描画を停止する
-//graphic.noRepaint :- [:/*inline*/
-//	Env.LMNgraphic.setRepaint((Membrane)mem, false);
-//	me.setFunctor("norepaint_go",0);
-//:].
+graphic.norepaint :- [:/*inline*/
+	if(null != Env.LMNgraphic){
+		Env.LMNgraphic.setRepaint((Membrane)mem, false);
+		Atom atom = mem.newAtom(new Functor("norepaint_go", 0));
+		me.remove();
+	}	
+:].
 //再描画を再開する
-//graphic.Repaint :- [:/*inline*/
-//	Env.LMNgraphic.setRepaint((Membrane)mem, true);
-//	me.setFunctor("repaint_go",0);
-//:].
+graphic.repaint :- [:/*inline*/
+	if(null != Env.LMNgraphic){
+		Env.LMNgraphic.setRepaint((Membrane)mem, true);
+		Atom atom = mem.newAtom(new Functor("repaint_go", 0));
+		me.remove();
+	}
+:].
 
 //グラフィックオプション指定無でグラフィックモードにする
 //反応するものがない場合でも終了しない
@@ -39,7 +46,8 @@ graphic.perpetualUse :- [:/*inline*/
 	Env.fGraphic = true;
 	Env.initGraphic();
 	mem.makePerpetual();
-	me.setFunctor("go",0);
+	Atom atom = mem.newAtom(new Functor("go", 0));
+	me.remove();
 :].
 
 H=graphic.mousePointX:- H=[:/*inline*/
@@ -116,4 +124,27 @@ H=graphic.mouseFramePointY :- H=[:/*inline*/
 	mem.relink(atom,0,me,0);
 	mem.removeAtom(me);
 	:].
+	
+/** ウィンドウサイズを取得する */
+H=graphic.windowWidth :- H=[:/*inline*/
+	int width = 0;
+	if(Env.LMNgraphic != null){
+		Dimension d = (Dimension)Env.LMNgraphic.getWindowSize((Membrane)mem);
+		if(null != d){ width = d.width; }
+	}
+	Atom atom = mem.newAtom(new IntegerFunctor(width));
+	mem.relink(atom,0,me,0);
+	me.remove();
+  :].
+  
+H=graphic.windowHeight :- H=[:/*inline*/
+	int height = 0;
+	if(Env.LMNgraphic != null){
+		Dimension d = (Dimension)Env.LMNgraphic.getWindowSize((Membrane)mem);
+		if(null != d){ height = d.height; }
+	}
+	Atom atom = mem.newAtom(new IntegerFunctor(height));
+	mem.relink(atom,0,me,0);
+	me.remove();
+  :].
 }.
