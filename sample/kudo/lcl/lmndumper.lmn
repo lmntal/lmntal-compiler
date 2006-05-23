@@ -25,7 +25,7 @@
 	% ルールセットの出力
 	% ルールセットID
 	lmndumper.dump_rules(RID, Rules) :- int(RID) |
-		lmndumper.dumping_rules_id(io.print("Compiled Ruleset @"++string.str_of_int(RID)), Rules).
+		lmndumper.dumping_rules_id(io.println("Compiled Ruleset @"++string.str_of_int(RID)), Rules).
 	% ルール列の出力
 	lmndumper.dumping_rules_id(done, Rules) :- lmndumper.dumping_rules(Rules).
 	lmndumper.dumping_rules([]) :- lmndumper.dumped.
@@ -34,15 +34,15 @@
 	% ルール名の出力
 	lmndumper.dumping_rules([compiled_rule(RuleName, AtomMatch, MemMatch, Guard, Body)|Rest]) :-
 		string(RuleName) |
-		lmndumper.dumping_rulename(io.print("Compiled Rule "++RuleName), AtomMatch, MemMatch, Guard, Body, Rest).
+		lmndumper.dumping_rulename(io.println("Compiled Rule "++RuleName), AtomMatch, MemMatch, Guard, Body, Rest).
 	% アトム主導テスト命令列出力
 	lmndumper.dumping_rulename(done, AtomMatch, MemMatch, Guard, Body, Rest) :-
-		lmndumper.dumping_atommatch(io.print("\t--atommatch:"), AtomMatch, MemMatch, Guard, Body, Rest).
+		lmndumper.dumping_atommatch(io.println("\t--atommatch:"), AtomMatch, MemMatch, Guard, Body, Rest).
 	lmndumper.dumping_atommatch(done, AtomMatch, MemMatch, Guard, Body, Rest) :-
 		lmndumper.dumping_atommatch_insts(lmndumper.dump_insts(AtomMatch), MemMatch, Guard, Body, Rest).
 	% 膜主導テスト命令列出力
 	lmndumper.dumping_atommatch_insts(done, MemMatch, Guard, Body, Rest) :-
-		lmndumper.dumping_memmatch(io.print("\t--memmatch:"), MemMatch, Guard, Body, Rest).
+		lmndumper.dumping_memmatch(io.println("\t--memmatch:"), MemMatch, Guard, Body, Rest).
 	lmndumper.dumping_memmatch(done, MemMatch, Guard, Body, Rest) :-
 		lmndumper.dumping_memmatch_insts(lmndumper.dump_insts(MemMatch), Guard, Body, Rest).
 	% ガード命令列出力(未実装)
@@ -60,9 +60,9 @@
 	R=S1++S2 :- string(S1), string(S2) | R=string.concat(S1, S2).
 
 	% 命令の順次出力
-	R=lmndumper.dump_insts([Inst|Rest]) :- R=lmndumper.dumping_inst(io.print("\t\t"++str_of_inst(Inst)),Rest).
+	R=lmndumper.dump_insts([Inst|Rest]) :- R=lmndumper.dumping_inst(io.println("\t\t"++str_of_inst(Inst)),Rest).
 	R=lmndumper.dumping_inst(done, Rest) :- R=lmndumper.dump_insts(Rest).
-	R=lmndumper.dump_insts([]) :- R=lmndumper.dump_ln(io.print("")).
+	R=lmndumper.dump_insts([]) :- R=lmndumper.dump_ln(io.println("")).
 	R=lmndumper.dump_ln(done) :- R=done.
 	lmndumper.dumping_insts(done, Rest) :- lmndumper.dumping_rules(Rest).
 
