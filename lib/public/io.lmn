@@ -209,21 +209,69 @@ H=io.readline(Object, ReadString, ASync) :- int(ASync), class(Object, "java.io.B
 		} catch(Exception e) {Env.e(e);}
 	:](Object, ReadString, ASync).
 
-
 H=io.print(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
 	H=io.print(STDOUT, String), io.stdout(STDOUT).
 
 H=io.print([String|Rest]), io.stdout(STDOUT) :- string(String), class(STDOUT, "java.io.PrintWriter") |
 	H=io.print(STDOUT, [String|Rest]), io.stdout(STDOUT).
 
+H=io.print([]) :- H=done.
+
 /**
  * io.print(+Atom,-Res):
  *
- * prints the name of the unary Atom (a string or a non-string atom)
+ * prints the name of the string Atom
  * into standard output, and connects done/1 to Res.
  * To be used witn io.use. 
  */
 H=io.print(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) |
+	H=[:/*inline*/
+		try {
+			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			Atom done = mem.newAtom(new Functor("done", 1));
+			if(pw!=null) {
+				pw.print(me.nth(1));
+				pw.flush();
+			}
+			mem.relink(done, 0, me, 2);
+			me.nthAtom(0).remove();
+			me.nthAtom(1).remove();
+			me.remove();
+		} catch(Exception e) {e.printStackTrace();}
+	:](Object, String).
+
+H=io.print(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter") |
+	H=io.print(Object, Rest), [:/*inline*/
+		try {
+			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			if(pw!=null) {
+				pw.print(me.nth(1));
+				pw.flush();
+			}
+			me.nthAtom(0).remove();
+			me.nthAtom(1).remove();
+			me.remove();
+		} catch(Exception e) {e.printStackTrace();}
+	:](Object, String).
+
+H=io.print(Object, []) :- class(Object, "java.io.PrintWriter") | H=done.
+
+H=io.println(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
+	H=io.println(STDOUT, String), io.stdout(STDOUT).
+
+H=io.println([String|Rest]), io.stdout(STDOUT) :- string(String), class(STDOUT, "java.io.PrintWriter") |
+	H=io.println(STDOUT, [String|Rest]), io.stdout(STDOUT).
+
+H=io.println([]) :- H=done.
+
+/**
+ * io.println(+Atom,-Res):
+ *
+ * prints the name of the string Atom and line delimiter
+ * into standard output, and connects done/1 to Res.
+ * To be used witn io.use. 
+ */
+H=io.println(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) |
 	H=[:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -238,8 +286,8 @@ H=io.print(Object, String) :- class(Object, "java.io.PrintWriter"), string(Strin
 		} catch(Exception e) {e.printStackTrace();}
 	:](Object, String).
 
-H=io.print(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter"), string(String) |
-	H=io.print(Object, Rest), [:/*inline*/
+H=io.println(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter"), string(String) |
+	H=io.println(Object, Rest), [:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			if(pw!=null) {
@@ -251,12 +299,14 @@ H=io.print(Object, [String|Rest]) :- string(String), class(Object, "java.io.Prin
 		} catch(Exception e) {e.printStackTrace();}
 	:](Object, String).
 
-//close : unit -> unit
+H=io.println(Object, []) :- class(Object, "java.io.PrintWriter") | H=done.
+
+//io.close : unit -> unit
 /**
- * close(+Object, -Res):
+ * io.close(+Object, -Res):
  * 与えられた入力/出力オブジェクトをクローズします。
  */
-H=close(Object) :- class(Object, "java.io.PrintWriter") |
+H=io.close(Object) :- class(Object, "java.io.PrintWriter") |
 	H=[:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -272,23 +322,23 @@ H=close(Object) :- class(Object, "java.io.PrintWriter") |
  * 標準入力からの入力を一行ずつ順次リストに格納します。
  * ブロックします。
  */
-H=io.list_of_stdin,       io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, [], done, 0), io.stdin(STDIN).
+H=io.list_of_stdin,       io.stdin(STDIN) :- unary(STDIN) | H=io.list_of_dev_s0(STDIN, [], done, 0), io.stdin(STDIN).
 /**
  * io.list_of_stdin_async(-Res):
  * 標準入力からの入力を一行ずつ順次リストに格納します。
  * ブロックしません。
  */
-H=io.list_of_stdin_async, io.stdin(STDIN) :- unary(STDIN) | H=list_of_dev_s0(STDIN, [], done, 1), io.stdin(STDIN).
+H=io.list_of_stdin_async, io.stdin(STDIN) :- unary(STDIN) | H=io.list_of_dev_s0(STDIN, [], done, 1), io.stdin(STDIN).
 
 //io.list_of_file : unit -> List of String
 /**
  * io.list_of_file(+Filename, -Res):
  * 指定されたファイル名のファイルからの入力を一行ずつ順次リストに格納します。
  */
-H=io.list_of_file(Filename) :- H=list_of_dev_s0(io.fileReader(Filename), [], done, 0).
+H=io.list_of_file(Filename) :- H=io.list_of_dev_s0(io.fileReader(Filename), [], done, 0).
 
-H=list_of_dev_s0(Obj, List, done, ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=[String|list_of_dev_s0(Obj, List, io.readline(Obj, String, ASync), ASync)].
-H=list_of_dev_s0(Obj, List, nil , ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=List.
+H=io.list_of_dev_s0(Obj, List, done, ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=[String|io.list_of_dev_s0(Obj, List, io.readline(Obj, String, ASync), ASync)].
+H=io.list_of_dev_s0(Obj, List, nil , ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=List.
 
 //io.toFile : String -> List of String -> unit
 /**
@@ -297,9 +347,9 @@ H=list_of_dev_s0(Obj, List, nil , ASync) :- int(ASync), class(Obj, "java.io.Buff
  * 
  * @example r=io.toFile(b, io.fromFile(a))
  */
-H=io.toFile(Filename, List) :- unary(Filename) | H=toFile_s0(io.fileWriter(Filename), List).
-H=toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=toFile_s0(io.print(Obj, CAR), CDR).
-H=toFile_s0(Obj, []) :- H=close(Obj).
+H=io.toFile(Filename, List) :- unary(Filename) | H=io.toFile_s0(io.fileWriter(Filename), List).
+H=io.toFile_s0(Obj, [CAR|CDR]) :- unary(CAR) | H=io.toFile_s0(io.print(Obj, CAR), CDR).
+H=io.toFile_s0(Obj, []) :- H=io.close(Obj).
 
 /**
  * io.eager(+In, -Res)
