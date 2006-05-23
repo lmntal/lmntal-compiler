@@ -114,11 +114,13 @@ public class Dumper {
 		if (Env.verbose >= Env.VERBOSE_EXPANDATOMS) {
 			it = mem.atomIterator();
 			while (it.hasNext()) {
+				Atom a = (Atom)it.next();
+				if(!atoms.contains(a))continue;
 				if (commaFlag)
 					buf.append(", ");
 				else
 					commaFlag = true;
-				buf.append(dumpAtomGroup((Atom) it.next(), atoms, false));
+				buf.append(dumpAtomGroup(a, atoms, false));
 			}
 		} else {
 			List predAtoms[] = { new LinkedList(), new LinkedList(),
@@ -221,7 +223,7 @@ public class Dumper {
 							continue;
 					}
 					// プロキシを省略できるときは、プロキシができるだけ引数に来るようにする
-					if (Env.verbose < Env.VERBOSE_EXPANDPROXIES) {
+					if (Env.hideProxy/*Env.verbose < Env.VERBOSE_EXPANDPROXIES*/) {
 						if (a.getFunctor().equals(Functor.INSIDE_PROXY))
 							continue;
 						if (a.getFunctor().isOUTSIDE_PROXY())
@@ -604,7 +606,7 @@ public class Dumper {
 				return func.getQuotedAtomName();
 			return func.getQuotedFullyAtomName();
 		}
-		if (Env.verbose < Env.VERBOSE_EXPANDPROXIES
+		if (Env.hideProxy //Env.verbose < Env.VERBOSE_EXPANDPROXIES
 				&& arity == 1
 				&& (func.equals(Functor.INSIDE_PROXY) || func.isOUTSIDE_PROXY())) {
 			return dumpLink(a.args[0], atoms, outerprio);

@@ -57,8 +57,8 @@ public final class Env {
 	public static final int VERBOSE_SIMPLELINK = 1;
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/
 	public static final int VERBOSE_SHOWRULES = 3;
-	/** 自由リンク管理アトムを表示する冗長表示レベル（EXPANDATOMS未満に限る）*/
-	public static final int VERBOSE_EXPANDPROXIES = 3;
+//	/** 自由リンク管理アトムを表示する冗長表示レベル（EXPANDATOMS未満に限る）*/
+//	public static final int VERBOSE_EXPANDPROXIES = 3;
 	/** 演算子を展開する冗長表示レベル（EXPANDATOMS未満に限る） <pre> X+Y --> '+'(X,Y) </pre> */
 	public static final int VERBOSE_EXPANDOPS = 4;
 	/** アトム引数を展開する冗長表示レベル <pre> a(b) --> a(_2),b(_2) </pre> */
@@ -78,6 +78,10 @@ public final class Env {
 	public static boolean showrule = true;
 
 	public static boolean showruleset = true;
+
+	// PROXY を表示させない 2005/02/03 T.Nagata オプション --hideproxy
+	// デフォルトで有効 2005/10/14 mizuno
+	public static boolean hideProxy = true;
 	
 	////////////////////////////////////////////////////////////////
 
@@ -263,10 +267,6 @@ public final class Env {
 	public static int daemonListenPort = DAEMON_DEFAULT_LISTENPORT;
 	
 	////////////////////////////////////////////////////////////////
-	
-	// PROXY を表示させない 2005/02/03 T.Nagata オプション --hideproxy
-	// デフォルトで有効 2005/10/14 mizuno
-	public static boolean hideProxy = true;
 	
 	/**
 	 * General error report
