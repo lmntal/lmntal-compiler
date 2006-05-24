@@ -1,0 +1,18 @@
+a(A, X1, Z1).
+b(A, B, X2).
+c(B, C, X3).
+d(C, D, X4).
+b(SA, B, X2).
+c(B, C, X3).
+d(C, D, X4).
+e(D, X5, Z2).
+
+f(AA, X1, Z2).
+g(AA, BA, X2).
+h(BA, CA, X3).
+i(CA, DA, X4).
+b(A, B, X2).
+c(B, C, X3).
+d(C, D, X4).
+j(DA, X5, Z1).
+

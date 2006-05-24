@@ -22,6 +22,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import chorus.Output;
+
 import util.StreamDumper;
 
 import compile.Module;
@@ -223,6 +225,7 @@ public class FrontEnd {
 						/// screen    max        full screen mode
 						/// auto      on         reaction auto proceed mode when GUI on
 						/// dump      1          indent mem (etc...)
+						/// chorus    filename   output chorus file
 						if (i + 2 < args.length) {
 							String name  = i+1<args.length ? args[i+1] : "";
 							String value = i+2<args.length ? args[i+2] : "";
@@ -834,6 +837,7 @@ public class FrontEnd {
 					Env.d( "Execution Result:" );
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );
 				}
+				if(Env.getExtendedOption("chorus") != ""){ Output.out(Env.getExtendedOption("chorus"), rt.getGlobalRoot()); }
 				if (Env.gui != null) {
 					while(Env.gui.running) Env.gui.onTrace();
 				}
@@ -845,9 +849,9 @@ public class FrontEnd {
 			if(Env.fREMAIN) {
 				Env.remainedRuntime = rt;
 			}
-
 			if (Env.gui != null)  Env.gui = null;
 			if (Env.LMNgraphic != null)  Env.LMNgraphic = null;
+			
 //			LMNtalRuntimeManager.terminateAll();
 			LMNtalRuntimeManager.terminateAllThreaded();
 			//if(true) System.out.println("FrontEnd: terminateAll() finished!");
