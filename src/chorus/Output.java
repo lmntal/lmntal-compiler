@@ -69,7 +69,7 @@ public final class Output{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("output");
+		System.out.println("output:"+file+".java");
 	}
 	
 	private static String getAtomName(int i){
