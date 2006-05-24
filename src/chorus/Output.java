@@ -18,12 +18,12 @@ public final class Output{
 			String msg;
 			HashSet linkSet = new HashSet();
 			
-			FileOutputStream fos = new FileOutputStream(file);
+			FileOutputStream fos = new FileOutputStream(file+".java");
 			OutputStreamWriter osw = new OutputStreamWriter(fos , "MS932");
 			BufferedWriter bw = new BufferedWriter(osw);
 			Iterator atomIte = mem.atomIterator();
 			
-			msg = header();
+			msg = header(file);
 			bw.write(msg);
 			
 			while(atomIte.hasNext()){
@@ -76,7 +76,7 @@ public final class Output{
 		return "n" + i;
 	}
 	
-	private static String header(){
+	private static String header(String file){
 		return "import java.util.*;\n" +
 		"import java.awt.*;\n" +
 		"import java.awt.event.*;\n" +
@@ -92,7 +92,7 @@ public final class Output{
 		"import com.sun.j3d.utils.applet.*; \n" +
 		"import jp.ac.nii.chorus3d.*;\n" +
 		"\n" +
-		"public class GraphLayout extends Applet implements PickingCallback {\n" +
+		"public class "+file+" extends Applet implements PickingCallback {\n" +
 		"\n" +
 		"    private class GraphNode {\n" +
 		"\n" +
