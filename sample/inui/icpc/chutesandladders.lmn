@@ -134,7 +134,7 @@ next, p(P), n(N) :- int(N) | p((P+1) mod N), n(N), go.
 %答えが出たら答えを表示して次の問題セットのためにデータを全部削除
 %膜実装のsetのときはこっち
 //ans(Ans), events({$p[]}), n(N), players(Players), ladders(Ladders), dice(Dice) :-
-//	ground(Players), ground(Ladders), ground(Dice), int(N) | rp=io.print(string.str_of_int(Ans)), next_set.
+//	ground(Players), ground(Ladders), ground(Dice), int(N) | rp=io.println(string.str_of_int(Ans)), next_set.
 %list実装のsetのときはこっち
 ans(Ans), events(E), n(N), players(Players), ladders(Ladders), dice(Dice) :-
-	ground(Players), ground(E), ground(Ladders), ground(Dice), int(N) | rp=io.print(string.str_of_int(Ans)), next_set.
+	ground(Players), ground(E), ground(Ladders), ground(Dice), int(N) | rp=io.println(string.str_of_int(Ans)), next_set.

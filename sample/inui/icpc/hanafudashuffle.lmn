@@ -53,4 +53,4 @@ r(R), head(X), tail2(Y), head2(Z) :- R > 0 | r(R), cards=list.append(Z,list.appe
 r(R), head(X), tail2(Y), head2(Z) :- R = 0 | cards=list.append(Z,list.append(X,Y)), shuffle_end.
 
 //シャッフルが済んだら答えを表示して次の問題セットへ
-shuffle_end, cards=[X|Z] :- ground(Z), r=io.print(string.str_of_int(X)), next_set.
+shuffle_end, cards=[X|Z] :- ground(Z), r=io.println(string.str_of_int(X)), next_set.
