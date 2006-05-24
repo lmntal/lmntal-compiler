@@ -29,18 +29,18 @@ public final class Output{
 			while(atomIte.hasNext()){
 				Atom atom = (Atom)atomIte.next();
 				String atomName = getAtomName(atom.getid());
-				msg = "GraphNode " + atomName + " = new GraphNode(greenApp, root);\n" +
-				"graphNodes.addElement(" + atomName + ");";
+				msg = "        GraphNode " + atomName + " = new GraphNode(greenApp, root);\n" +
+				"        graphNodes.addElement(" + atomName + ");\n";
 				bw.write(msg);
 				for(int i = 0; i < atom.getEdgeCount(); i++){
 					Atom atom2 = atom.nthAtom(i);
 					String atomName2 = getAtomName(atom2.getid());
 					if(atomName.compareTo(atomName2) > 0){
-						linkSet.add("graphEdges.addElement(new GraphEdge(" +
+						linkSet.add("        graphEdges.addElement(new GraphEdge(" +
 								atomName +
 								", " +
 								atomName2 +
-								", whiteApp, root));");
+								", whiteApp, root));\n");
 					}
 				}
 			}
