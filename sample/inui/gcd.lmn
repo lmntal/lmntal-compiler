@@ -1,0 +1,5 @@
+base.use.
+integer.use.
+
+H=gcd(M, N) :- int(M), int(N) | H=if(M>N, gcd(M-N, N), if(M<N, gcd(M,N-M), M)).
+ret=gcd(4, 18).

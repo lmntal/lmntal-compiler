@@ -4,9 +4,10 @@
 
 //baseモジュール
 base.use. integer.use.
-R=m(X) - int(X) | R=if(X > 10, (), (m(X+1), n(X*X))).
+H=(m(X), n(Y)) :- H=m(X), n(Y).
+H=m(X) :- int(X) | H=if(X>10, nil, (m(X+1), n(X*X))).
 ret=m(1).
 
-//prolog流
-m(X) :- X > 10 -> (); m(X+1), n(X*X).
-m(1).
+//prolog流?
+//m(X) :- X > 10 -> (); m(X+1), n(X*X).
+//m(1).
