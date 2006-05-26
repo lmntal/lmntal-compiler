@@ -61,17 +61,19 @@ public final class Output{
 			osw.close();
 			fos.close();
 			
-//			Runtime runtime = Runtime.getRuntime();
-////			runtime.exec("cp ./"+file+".java C:\\cygwin\\home\\くも\\chorus3d-0.5.6\\javademo\\");
-//			try {
-//				Process p = runtime.exec("make GraphLayout.class", null, new File("C:\\cygwin\\home\\くも\\chorus3d-0.5.6\\javademo\\"));
-//				p.waitFor();
-//				p = runtime.exec("cmd.exe /c start cmd.exe /c make GraphLayout_run", null, new File("C:\\cygwin\\home\\くも\\chorus3d-0.5.6\\javademo\\"));
-//				p.waitFor();
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			Runtime runtime = Runtime.getRuntime();
+			Process p;
+			p = runtime.exec("cp ./"+file+".java C:\\cygwin\\home\\Nakano\\chorus3d-0.5.6\\javademo\\");
+			try {
+				p.waitFor();
+				p = runtime.exec("make GraphLayout.class", null, new File("C:\\cygwin\\home\\Nakano\\chorus3d-0.5.6\\javademo\\"));
+				p.waitFor();
+				p = runtime.exec("cmd.exe /c start cmd.exe /c make GraphLayout_run", null, new File("C:\\cygwin\\home\\Nakano\\chorus3d-0.5.6\\javademo\\"));
+				p.waitFor();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
