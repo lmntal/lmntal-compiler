@@ -662,7 +662,6 @@ public class FrontEnd {
 			}
 			
 			Env.initGUI();
-			Env.init3D();
 			Env.initGraphic();
 
 			

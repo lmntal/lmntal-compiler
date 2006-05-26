@@ -1,18 +1,26 @@
-a(A, X1, Z1).
-b(A, B, X2).
-c(B, C, X3).
-d(C, D, X4).
-b(SA, B, X2).
-c(B, C, X3).
-d(C, D, X4).
-e(D, X5, Z2).
+a(   A, X1, X44).
+b(A, B, X2, X33).
+c(B, C, X3, X22).
+d(C,    X4, X11).
 
-f(AA, X1, Z2).
-g(AA, BA, X2).
-h(BA, CA, X3).
-i(CA, DA, X4).
-b(A, B, X2).
-c(B, C, X3).
-d(C, D, X4).
-j(DA, X5, Z1).
+a(    AA, X1, X11).
+b(AA, BB, X2, X22).
+c(BB, CC, X3, X33).
+d(CC,     X4, X44).
 
+gen(integer.set(1,5)).
+
+gen(_IX),
+a(   A, X1, X11),
+b(A, B, X2, X22),
+c(B, C, X3, X33),
+d(C,    X4, X44)
+:-
+a(   A, Y1, X11),
+b(A, B, Y2, X22),
+c(B, C, Y3, X33),
+d(C,    Y4, X44),
+a(    AA, Y1, X1),
+b(AA, BB, Y2, X2),
+c(BB, CC, Y3, X3),
+d(CC,     Y4, X4).

@@ -123,7 +123,7 @@ public final class Output{
 		"            grp.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);\n" +
 		"            grp.setCapability(TransformGroup.ENABLE_PICK_REPORTING);\n" +
 		"            parentGrp.addChild(grp);\n" +
-		"            Sphere sphere = new Sphere(.1f, app);\n" +
+		"            Sphere sphere = new Sphere(.3f, app);\n" +
 		"            grp.addChild(sphere);\n" +
 		"\n" +
 		"            pos = new C3Variable3D(\n" +

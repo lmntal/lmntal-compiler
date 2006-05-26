@@ -8,7 +8,6 @@ import java.util.*;
 import debug.DebugFrame;
 
 import test.GUI.*;
-import test3d.*;
 import graphic.*;
 
 /**
@@ -182,18 +181,6 @@ public final class Env {
 	 */
 	public static boolean dumpConvertedRules = false;
 	
-	/**
-	 * 3D mode　有効
-	 */
-	public static boolean f3D = false;
-	public static LMNtal3DFrame threed;
-	
-	public static void init3D(){
-		if(!Env.f3D)return;
-		atomSize = Env.fDEMO ? 40 : 16;
-		Env.threed = new LMNtal3DFrame();
-		
-	}
 	/**
 	 * Graphic Mode 有効　nakano 
 	 */

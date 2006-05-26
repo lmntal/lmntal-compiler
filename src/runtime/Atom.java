@@ -18,9 +18,6 @@ import java.io.Serializable;
 import test.GUI.DoublePoint;
 import test.GUI.Node;
 import test.GUI.NodeParameter;
-import test3d.Double3DPoint;
-import test3d.LMNTransformGroup;
-import test3d.Node3D;
 import util.QueuedEntity;
 import daemon.IDConverter;
 //import util.Stack;
@@ -29,7 +26,7 @@ import daemon.IDConverter;
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
  * @author Mizuno
  */
-public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.Node3D, Serializable {
+public final class Atom extends QueuedEntity implements test.GUI.Node, Serializable {
 	
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
 	 * ただし値を変更するときはindexも同時に更新すること。(null, -1)は所属膜なしを表す。
@@ -85,10 +82,6 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 			nodeParam = new NodeParameter();
 			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
 			nodeParam.pos = new DoublePoint(Math.random()*r.width + r.x, Math.random()*r.height + r.y);
-		}
-		if(Env.f3D) {
-			nodeParam = new NodeParameter();
-			nodeParam.pos3d = new Double3DPoint(Math.random(), Math.random(), Math.random());
 		}
 	}
 
@@ -195,9 +188,6 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 	public void initNode() {
 		nodeParam.pos = new DoublePoint();
 	}
-	public void initNode3d() {
-		nodeParam.pos3d = new Double3DPoint();
-	}
 	public boolean isVisible() {
 		return !(functor instanceof SpecialFunctor);
 	}
@@ -205,32 +195,11 @@ public final class Atom extends QueuedEntity implements test.GUI.Node, test3d.No
 		return nodeParam.pos;
 	}
 
-	public void setObj(LMNTransformGroup obj){
-		nodeParam.objTrans = obj;
-	}
-	public LMNTransformGroup getObj(){
-		return nodeParam.objTrans;
-	}
-	public Double3DPoint getPosition3d() {
-		return nodeParam.pos3d;
-	}
 	public void setPosition(DoublePoint p) {
 		nodeParam.pos = p;
 	}
-	public void setPosition3d(Double3DPoint p) {
-		nodeParam.pos3d = p;
-	}
+
 	public Node getNthNode(int index) {
-		Atom a = nthAtom(index);
-		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().isOUTSIDE_PROXY()) {
-//			System.out.println(a.nthAtom(0).nthAtom(0));
-//			System.out.println(a.nthAtom(0).nthAtom(1));
-			a = a.nthAtom(0).nthAtom(1);
-		}
-//		System.out.println(this+" 's "+index+"th atom is "+a);
-		return a;
-	}
-	public Node3D getNthNode3d(int index) {
 		Atom a = nthAtom(index);
 		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().isOUTSIDE_PROXY()) {
 //			System.out.println(a.nthAtom(0).nthAtom(0));
