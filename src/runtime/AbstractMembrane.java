@@ -766,7 +766,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 			Atom oatom = (Atom)it.next();
 			if(oldAtomToNewAtom.containsKey(oatom))continue;
 			oldAtomToNewAtom.put(oatom,newAtom(oatom.getFunctor()));
-			oldAtomToNewAtom = copyAtoms(oatom,oldAtomToNewAtom);
+			//0引数アトムならば引数走査なし　(2006/05/26 kudo)
+			if(oatom.getArity()>0)oldAtomToNewAtom = copyAtoms(oatom,oldAtomToNewAtom);
 		}
 		return oldAtomToNewAtom;
 	}
