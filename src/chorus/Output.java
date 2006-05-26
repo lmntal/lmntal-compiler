@@ -13,14 +13,31 @@ import java.util.Iterator;
 import runtime.AbstractMembrane;
 import runtime.Atom;
 
+/**
+ * Chorus3Dのソースを出力する
+ * @author nakano
+ *
+ */
 public final class Output{
+	
+	final static
+	private String ENCODE = "MS932";
+	private static Setting setting;
+	static{
+		setting = new Setting();
+	}
+	/**
+	 * Chorus3Dのソースを出力する
+	 * @param file　出力するファイル名
+	 * @param mem　出力する膜（子膜は無視される）
+	 */
 	public static void out(String file, AbstractMembrane mem){
 		try {
 			String msg;
 			HashSet linkSet = new HashSet();
 			
 			FileOutputStream fos = new FileOutputStream(file+".java");
-			OutputStreamWriter osw = new OutputStreamWriter(fos , "MS932");
+			OutputStreamWriter osw = new OutputStreamWriter(fos , ENCODE);
 			BufferedWriter bw = new BufferedWriter(osw);
 			Iterator atomIte = mem.atomIterator();
 			
@@ -54,21 +71,26 @@ public final class Output{
 
 			
 			
-			msg = footer();
+			msg = footer(file);
 			bw.write(msg);
 			
 			bw.close();
 			osw.close();
 			fos.close();
 			
+			File javaFile = new File(file+".java");
+			if(!javaFile.exists()){ return; }
+			String filePath = javaFile.getAbsolutePath().substring(0, javaFile.getAbsolutePath().length() - file.length() - ".java".length());
+			
+			makeMakefile(file, filePath);
 			Runtime runtime = Runtime.getRuntime();
 			Process p;
-			p = runtime.exec("cp ./"+file+".java C:\\cygwin\\home\\Nakano\\chorus3d-0.5.6\\javademo\\");
+//			p = runtime.exec("cp ./"+file+".java C:\\cygwin\\home\\Nakano\\chorus3d-0.5.6\\javademo\\");
 			try {
+//				p.waitFor();
+				p = runtime.exec("make " + file + ".class", null, new File(filePath));
 				p.waitFor();
-				p = runtime.exec("make GraphLayout.class", null, new File("C:\\cygwin\\home\\Nakano\\chorus3d-0.5.6\\javademo\\"));
-				p.waitFor();
-				p = runtime.exec("cmd.exe /c start cmd.exe /c make GraphLayout_run", null, new File("C:\\cygwin\\home\\Nakano\\chorus3d-0.5.6\\javademo\\"));
+				p = runtime.exec("cmd.exe /c start cmd.exe /c make " + file + "_run", null, new File(filePath));
 				p.waitFor();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -88,10 +110,82 @@ public final class Output{
 		System.out.println("output:"+file+".java");
 	}
 	
+	private static void makeMakefile(String file, String parentPath){
+		System.out.println(Setting.getRelativeAddress(setting.getValue("JNIDIR"), file));
+		String msg =
+			"LIBDIR=" + Setting.getRelativeAddress(setting.getValue("JNIDIR"), file) + "\n" +
+			"#\n" +
+			"# Linux\n" +
+			"#\n" +
+			"#CLASSPATH=.:$(LIBDIR):" + setting.getValue("JDKDIR") + "/lib/ext/vecmath.jar\n" +
+			"#\n" +
+			"# Windows\n" +
+			"#\n" +
+			"CLASSPATH=.\\;$(LIBDIR)\\;" + setting.getValue("JDKDIR") + "/lib/ext/vecmath.jar\\;" + setting.getValue("JDKDIR") + "/lib/ext/j3dcore.jar\\;" + setting.getValue("JDKDIR") + "/lib/ext/j3dutils.jar\n" +
+			"#\n" +
+			"# common\n" +
+			"#\n" +
+			"#JAVAC=javac -g -classpath $(CLASSPATH)\n" +
+			"JAVAC=javac -O -classpath $(CLASSPATH)\n" +
+			"JAVA=java -classpath $(CLASSPATH)\n" +
+			"JDB=jdb -classpath $(CLASSPATH)\n" +
+			"RM=rm -f\n" +
+			"\n" +
+			"all: " + file + ".class\n" +
+			"\n" +
+			"chorus3d: \n" +
+			"#	cd $(LIBDIR); make chorus3d\n" +
+			"\n" +
+			"" + file + ".class: chorus3d " + file + ".java\n" +
+			"	$(JAVAC) " + file + ".java\n" +
+			"\n" +
+			"" + file + "_run: #" + file + ".class\n" +
+			"	LD_LIBRARY_PATH=$(LIBDIR) PATH=\"$(LIBDIR):$(PATH)\" $(JAVA) " + file + "\n" +
+			"\n" +
+			"" + file + "_debug: " + file + ".class\n" +
+			"	LD_LIBRARY_PATH=$(LIBDIR) PATH=\"$(LIBDIR):$(PATH)\" $(JDB) " + file + "\n" +
+			"\n" +
+			"clean:\n" +
+			"	cd $(LIBDIR); make clean\n" +
+			"	$(RM) *.class\n";
+		
+		try {
+			System.out.println(parentPath + "Makefile");
+			FileOutputStream fos = new FileOutputStream(parentPath + "Makefile");
+			OutputStreamWriter osw = new OutputStreamWriter(fos , ENCODE);
+			BufferedWriter bw = new BufferedWriter(osw);
+			
+			bw.write(msg);
+			
+			bw.close();
+			osw.close();
+			fos.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * アトム名を返す
+	 * @param i
+	 * @return
+	 */
 	private static String getAtomName(int i){
 		return "n" + i;
 	}
 	
+	/**
+	 * ソースのヘッダー
+	 * @param file　ソースのファイル名
+	 * @return
+	 */
 	private static String header(String file){
 		return "import java.util.*;\n" +
 		"import java.awt.*;\n" +
@@ -169,7 +263,7 @@ public final class Output{
 		"\n" +
 		"    private C3Solver s;\n" +
 		"\n" +
-		"    public GraphLayout()\n" +
+		"    public " + file + "()\n" +
 		"    {\n" +
 		"        // canvas\n" +
 		"        setLayout(new BorderLayout());\n" +
@@ -229,7 +323,11 @@ public final class Output{
 		"        // graph nodes\n";
 	}
 	
-	private static String footer(){
+	/**
+	 * ソースのフッター
+	 * @return
+	 */
+	private static String footer(String file){
 		return "\n" +
 		"        // picking\n" +
 		"        PickTranslateBehavior pickTranslate\n" +
@@ -347,7 +445,7 @@ public final class Output{
 		"\n" +
 		"    public static void main(String[] args)\n" +
 		"    {\n" +
-		"        Frame frame = new MainFrame(new GraphLayout(), 500, 500);\n" +
+		"        Frame frame = new MainFrame(new " + file + "(), 500, 500);\n" +
 		"    }\n" +
 		"\n" +
 		"}\n";

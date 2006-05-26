@@ -10,7 +10,7 @@ public class Setting {
 	private HashMap settingMap = new HashMap();
 	
 	final static 
-	private String FILE_NAME = "../../Chorus.ini";
+	private String FILE_NAME = "../../chorus.conf";
 	
 	public Setting(){ 
 		try {
