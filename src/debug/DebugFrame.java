@@ -1,5 +1,7 @@
 package debug;
 
+import gui.LMNtalFrame;
+
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -14,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,6 @@ import javax.swing.JToolBar;
 
 import runtime.Env;
 import runtime.FrontEnd;
-import test.GUI.LMNtalFrame;
 
 /**
  * @author inui

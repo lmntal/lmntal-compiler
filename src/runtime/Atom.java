@@ -4,6 +4,10 @@ package runtime;
 //import java.util.Iterator;
 //import java.util.List;
 
+import gui.DoublePoint;
+import gui.Node;
+import gui.NodeParameter;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -15,9 +19,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import test.GUI.DoublePoint;
-import test.GUI.Node;
-import test.GUI.NodeParameter;
 import util.QueuedEntity;
 import daemon.IDConverter;
 //import util.Stack;
@@ -26,7 +27,7 @@ import daemon.IDConverter;
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
  * @author Mizuno
  */
-public final class Atom extends QueuedEntity implements test.GUI.Node, Serializable {
+public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
 	 * ただし値を変更するときはindexも同時に更新すること。(null, -1)は所属膜なしを表す。

@@ -3,12 +3,17 @@
  *
  */
 package runtime;
-import java.util.*;
+import graphic.LMNtalGFrame;
+import gui.LMNtalFrame;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import debug.DebugFrame;
-
-import test.GUI.*;
-import graphic.*;
 
 /**
  * 環境。デバッグ用。
