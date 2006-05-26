@@ -1,13 +1,14 @@
 package translated;
-import translated.module_double.*;
+import translated.module_boolean.*;
 import runtime.SystemRulesets;
 import runtime.Ruleset;
-public class Module_double{
-	private static Ruleset[] rulesets = {Ruleset603.getInstance()};
+public class Module_boolean{
+	private static Ruleset[] rulesets = {Ruleset607.getInstance()};
 	public static Ruleset[] getRulesets() {
 		return rulesets;
 	}
 	public static void loadUserDefinedSystemRuleset() {
+		runtime.Inline.inlineSet.put("public/boolean.lmn", new runtime.InlineUnit("public/boolean.lmn"));
 	}
 	private static void loadSystemRulesetFromModule(String moduleName) {
 		try {
