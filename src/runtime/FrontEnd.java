@@ -156,9 +156,9 @@ public class FrontEnd {
 					case 'I':
 						/// -I <path>
 						/// Additional path for LMNtal library. 
-						/// This option is vailable only when --use-source-library option is specified.
-						/// Othorwise, LMNtal library must be in your CLASSPATH environment variable. 
-						/// The default path is ./lmntal_lib and ../lmntal_lib
+						/// This option is available only when --use-source-library option is specified.
+						/// Otherwise, LMNtal library must be in your CLASSPATH environment variable. 
+						/// The default path is ./lib and ../lib
 						compile.Module.libPath.add(new File(args[++i]));
 						break;
 					case 'L':
@@ -404,7 +404,7 @@ public class FrontEnd {
 							Translator.fKeepSource = true;
 						} else if (args[i].equals("--use-source-library")) {
 							/// --use-source-library
-							/// Use source library in lmntal_lib/src.
+							/// Use source library in lib/src.
 							Env.fUseSourceLibrary = true;
 						} else if (args[i].equals("--gdebug")) {
 							/// --gdebug
