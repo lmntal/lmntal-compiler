@@ -1,4 +1,4 @@
-package test.GUI;
+package gui;
 
 import java.awt.*;
 public interface Node {

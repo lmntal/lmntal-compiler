@@ -1,4 +1,4 @@
-package test.GUI;
+package gui;
 
 /**
  * 有向グラフの辺。

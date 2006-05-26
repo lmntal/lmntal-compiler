@@ -1,4 +1,4 @@
-package test.GUI;
+package gui;
 
 /**
  * 単体で動かす場合のメイソ

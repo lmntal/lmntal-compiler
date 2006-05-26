@@ -1,4 +1,4 @@
-package test.GUI;
+package gui;
 
 import java.awt.Point;
 public class DoublePoint {
