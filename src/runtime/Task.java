@@ -370,9 +370,9 @@ public class Task extends AbstractTask implements Runnable {
 
 	public void outTime(){
 		if(Env.majorVersion==1 && Env.minorVersion>4)
-			System.out.println("threadID="+thread.getId()+" atomtime=" + atomtime/1000000 + "msec memtime=" + memtime/1000000 +"msec");
+			System.out.println("threadID="+thread.getId()+" atomtime=" + atomtime/1000000 + "msec memtime=" + memtime/1000000 +"msec totaltime="+(atomtime+memtime)/1000000+"msec");
 		else
-			System.out.println("threadID="+thread.hashCode()+" atomtime=" + atomtime + "msec memtime=" + memtime +"msec");
+			System.out.println("threadID="+thread.hashCode()+" atomtime=" + atomtime + "msec memtime=" + memtime +"msec totaltime" + (atomtime+memtime) + "msec");
 	}
 
 	////////////////////////////////////////////////////////////////
