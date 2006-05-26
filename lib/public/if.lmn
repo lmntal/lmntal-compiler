@@ -1,0 +1,25 @@
+/**
+  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
+  $Author: inui $
+  
+NAME
+	If module
+
+SYNOPSIS
+
+AUTHOR
+	Kazunori Ueda
+
+HISTORY
+	2006/05/26(Fri) 21:22:23
+*/
+
+{
+module(if).
+
+// constructor
+if.use :- boolean.use.
+
+H=if(true,  T, F), {$t[T]}, {$f[F]} :- $t[H].
+H=if(false, T, F), {$t[T]}, {$f[F]} :- $f[H].
+}.
