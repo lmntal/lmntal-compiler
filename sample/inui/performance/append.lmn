@@ -1,8 +1,11 @@
 m(400), n(400).
 a=[], b=[].
+
+//m要素とn要素のリストを生成
 m($m), a($z) :-$m > 0, ground($z) | a=[$m|$z], m($m-1).
 n($n), b($z) :-$n > 0, ground($z) | b=[$n|$z], n($n-1).
 
+//appendする
 m(0), n(0), a($a), b($b) :- ground($a), ground($b) | r=list.append($a, $b).
 
 //計測結果
