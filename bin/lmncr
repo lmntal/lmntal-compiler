@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source `dirname $0`/set_cp.sh
+java -DLMNTAL_HOME=$LMNTAL_HOME runtime.FrontEnd "$@"
+
+JAR="${1%.lmn}.jar"
+export CLASSPATH=$JAR:$CLASSPATH
+shift
+java -DLMNTAL_HOME=$LMNTAL_HOME Main $JAR "$@"
