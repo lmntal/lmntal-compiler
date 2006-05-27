@@ -1,0 +1,11 @@
+//フィボナッチ数列
+H=fib(0) :- H=1.
+H=fib(1) :- H=1.
+H=fib(N) :- N > 1 | H=fib(N-1)+fib(N-2).
+ret=fib(15).
+
+//計測結果
+//			interpret	translator
+//fib(10)	140			84
+//fib(15)	766			310
+//fib(20)	5844		1139
