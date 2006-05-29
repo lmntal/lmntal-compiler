@@ -1,14 +1,14 @@
-a(   A, X1, X44).
-b(A, B, X2, X33).
-c(B, C, X3, X22).
-d(C,    X4, X11).
+a(   A, X1, X11).
+b(A, B, X2, X22).
+c(B, C, X3, X33).
+d(C,    X4, X44).
 
 a(    AA, X1, X11).
 b(AA, BB, X2, X22).
-c(BB, CC, X3, X33).
-d(CC,     X4, X44).
+c(BB, CCC, X3, X33).
+d(CCC,     X4, X44).
 
-gen(integer.set(1,5)).
+gen(integer.set(1,50)).
 
 gen(_IX),
 a(   A, X1, X11),
@@ -24,3 +24,31 @@ a(    AA, Y1, X1),
 b(AA, BB, Y2, X2),
 c(BB, CC, Y3, X3),
 d(CC,     Y4, X4).
+
+ %炭素なのになぜか3引数(実際はこれらのリンクは二本ずつであるべき)
+ 
+ % C60 (各行が五角形を表していると思いねえ)
+ C1=c(L11,c(L12,c(L13,c(L14,c(L15,C1))))).
+ C2=dd(L21,dd(L22,dd(L23,dd(L24,dd(L25,C2))))).
+ C3=eee(L31,eee(L32,eee(L33,eee(L34,eee(L35,C3))))).
+ C4=ffff(L41,ffff(L42,ffff(L43,ffff(L44,ffff(L45,C4))))).
+ C5=ggggg(L51,ggggg(L52,ggggg(L53,ggggg(L54,ggggg(L55,C5))))).
+ C6=h(L61,h(L62,h(L63,h(L64,h(L65,C6))))).
+ C7=ii(L71,ii(L72,ii(L73,ii(L74,ii(L75,C7))))).
+ C8=jjj(L81,jjj(L82,jjj(L83,jjj(L84,jjj(L85,C8))))).
+ C9=kkkk(L91,kkkk(L92,kkkk(L93,kkkk(L94,kkkk(L95,C9))))).
+ CA=lllll(LA1,lllll(LA2,lllll(LA3,lllll(LA4,lllll(LA5,CA))))).
+ CB=m(LB1,m(LB2,m(LB3,m(LB4,m(LB5,CB))))).
+ CC=nn(LC1,nn(LC2,nn(LC3,nn(LC4,nn(LC5,CC))))).
+ 
+ L11=LB1,L12=L25,L13=L63,L14=LA4,L15=L52.
+ L21=LB2,L22=L35,L23=L73,L24=L64        .
+ L31=LB3,L32=L45,L33=L83,L34=L74        .
+ L41=LB4,L42=L55,L43=L93,L44=L84        .
+ L51=LB5,        L53=LA3,L54=L94        .
+ L61=LC1,L62=LA5                        .
+ L71=LC2,L72=L65                        .
+ L81=LC3,L82=L75                        .
+ L91=LC4,L92=L85                        .
+ LA1=LC5,LA2=L95                        .
+ 

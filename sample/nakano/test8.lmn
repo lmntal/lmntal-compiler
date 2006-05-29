@@ -1,1 +1,1 @@
-a(integer.set(1,100)).
+a(integer.set(10,1)).

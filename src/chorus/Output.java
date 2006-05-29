@@ -7,8 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 import runtime.AbstractMembrane;
 import runtime.Atom;
@@ -22,6 +24,7 @@ public final class Output{
 	
 	final static
 	private String ENCODE = "MS932";
+	
 	private static Setting setting;
 	static{
 		setting = new Setting();
@@ -35,24 +38,41 @@ public final class Output{
 		try {
 			String msg;
 			HashSet linkSet = new HashSet();
+			HashMap atomMap = new HashMap();
+			TreeMap idMap = new TreeMap();
+			boolean afterRelease = true;
+			int sequence = 0;
 			
 			FileOutputStream fos = new FileOutputStream(file+".java");
 			OutputStreamWriter osw = new OutputStreamWriter(fos , ENCODE);
 			BufferedWriter bw = new BufferedWriter(osw);
 			Iterator atomIte = mem.atomIterator();
 			
-			msg = header(file);
-			bw.write(msg);
-			
 			while(atomIte.hasNext()){
 				Atom atom = (Atom)atomIte.next();
-				String atomName = getAtomName(atom.getid());
-				msg = "        GraphNode " + atomName + " = new GraphNode(greenApp, root);\n" +
-				"        graphNodes.addElement(" + atomName + ");\n";
+				Integer atomName = new Integer(sequence);
+				sequence++;
+				atomMap.put(atom, atomName);
+				idMap.put(atomName, atom);
+			}
+			
+			if(sequence < Integer.parseInt(setting.getValue("AFTER_RELEASE"))){ afterRelease = false;}
+			msg = header(file, afterRelease);
+			bw.write(msg);
+			
+			atomIte = idMap.keySet().iterator();
+			while(atomIte.hasNext()){
+				Integer atomID = (Integer)atomIte.next();
+				Atom atom = (Atom)idMap.get(atomID);
+				String atomName = getAtomName(atomID.intValue());
+
+				msg = "        GraphNode " + getAtomName(atomID.intValue()) + " = new GraphNode(atomApp, root);\n" +
+				"        graphNodes.addElement(" + getAtomName(atomID.intValue()) + ");\n";
 				bw.write(msg);
+				
 				for(int i = 0; i < atom.getEdgeCount(); i++){
 					Atom atom2 = atom.nthAtom(i);
-					String atomName2 = getAtomName(atom2.getid());
+					String atomName2 = getAtomName(((Integer)atomMap.get(atom2)).intValue());
 					if(atomName.compareTo(atomName2) > 0){
 						linkSet.add("        graphEdges.addElement(new GraphEdge(" +
 								atomName +
@@ -85,31 +105,30 @@ public final class Output{
 			makeMakefile(file, filePath);
 			Runtime runtime = Runtime.getRuntime();
 			Process p;
-//			p = runtime.exec("cp ./"+file+".java C:\\cygwin\\home\\Nakano\\chorus3d-0.5.6\\javademo\\");
 			try {
-//				p.waitFor();
 				p = runtime.exec("make " + file + ".class", null, new File(filePath));
 				p.waitFor();
 				p = runtime.exec("cmd.exe /c start cmd.exe /c make " + file + "_run", null, new File(filePath));
 				p.waitFor();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("output:"+file+".java");
 	}
 	
+	/**
+	 * Makefileを出力する
+	 * @param file　出力するjavaファイルのファイル名．
+	 * @param parentPath 出力するディレクトリ
+	 */
 	private static void makeMakefile(String file, String parentPath){
 		System.out.println(Setting.getRelativeAddress(setting.getValue("JNIDIR"), file));
 		String msg =
@@ -186,7 +205,7 @@ public final class Output{
 	 * @param file　ソースのファイル名
 	 * @return
 	 */
-	private static String header(String file){
+	private static String header(String file, boolean afterRelease){
 		return "import java.util.*;\n" +
 		"import java.awt.*;\n" +
 		"import java.awt.event.*;\n" +
@@ -217,7 +236,7 @@ public final class Output{
 		"            grp.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);\n" +
 		"            grp.setCapability(TransformGroup.ENABLE_PICK_REPORTING);\n" +
 		"            parentGrp.addChild(grp);\n" +
-		"            Sphere sphere = new Sphere(.3f, app);\n" +
+		"            Sphere sphere = new Sphere(" + setting.getValue("ATOM_SIZE") + "f, app);\n" +
 		"            grp.addChild(sphere);\n" +
 		"\n" +
 		"            pos = new C3Variable3D(\n" +
@@ -226,6 +245,52 @@ public final class Output{
 		"\n" +
 		"    }\n" +
 		"\n" +
+		"    private class ThickLineGroup extends TransformGroup {\n" +
+		"    \n" +
+		"        Cylinder cylinder;\n" +
+		"\n" +
+		"        ThickLineGroup(Appearance app)\n" +
+		"        {\n" +
+		"            cylinder = new Cylinder(.025f, 2f, app);\n" +
+		"            addChild(cylinder);\n" +
+		"        }\n" +
+		"\n" +
+		"        void setCoordinates(Point3d c0, Point3d c1)\n" +
+		"        {\n" +
+		"            // compute translation\n" +
+		"            Vector3d mid = new Vector3d((c0.x + c1.x) / 2,\n" +
+		"                                        (c0.y + c1.y) / 2,\n" +
+		"                                        (c0.z + c1.z) / 2);\n" +
+		"\n" +
+		"            // compute axes\n" +
+		"            Vector3d y = new Vector3d();\n" +
+		"            y.sub(c0, mid);\n" +
+		"            Vector3d x = new Vector3d();\n" +
+		"            x.cross(y, new Vector3d(0, 0, 1));\n" +
+		"            Vector3d z = new Vector3d();\n" +
+		"            if (x.lengthSquared() > .01) {\n" +
+		"                x.normalize();\n" +
+		"                z.cross(x, y);\n" +
+		"                z.normalize();\n" +
+		"            }\n" +
+		"            else {\n" +
+		"                z.cross(new Vector3d(1, 0, 0), y);\n" +
+		"                z.normalize();\n" +
+		"                x.cross(y, z);\n" +
+		"                x.normalize();\n" +
+		"            }\n" +
+		"\n" +
+		"            // generate matrix\n" +
+		"            Matrix3d m = new Matrix3d();\n" +
+		"            m.setColumn(0, x);\n" +
+		"            m.setColumn(1, y);\n" +
+		"            m.setColumn(2, z);\n" +
+		"            Transform3D t = new Transform3D(m, mid, 1);\n" +
+		"\n" +
+		"            setTransform(t);\n" +
+		"        }\n" +
+		"\n" +
+		"    }\n" +
 		"    private class GraphEdge {\n" +
 		"\n" +
 		"        /*\n" +
@@ -260,6 +325,8 @@ public final class Output{
 		"\n" +
 		"    private Vector graphNodes = new Vector();\n" +
 		"    private Vector graphEdges = new Vector();\n" +
+		"    private TransformGroup needResolve = null;\n" +
+		"    final static private boolean RESOLVE_AFTER_RELEASE = "+ afterRelease +";\n" +
 		"\n" +
 		"    private C3Solver s;\n" +
 		"\n" +
@@ -270,6 +337,59 @@ public final class Output{
 		"        GraphicsConfiguration config\n" +
 		"            = SimpleUniverse.getPreferredConfiguration();\n" +
 		"        canvas = new Canvas3D(config);\n" +
+		"        canvas.addMouseListener(new MouseListener() {\n" +
+		"		\n" +
+		"			public void mouseExited(MouseEvent e) {\n" +
+		"				// TODO Auto-generated method stub\n" +
+		"		\n" +
+		"			}\n" +
+		"		\n" +
+		"			public void mouseEntered(MouseEvent e) {\n" +
+		"				// TODO Auto-generated method stub\n" +
+		"		\n" +
+		"			}\n" +
+		"		\n" +
+		"			public void mouseReleased(MouseEvent e) {\n" +
+		"				// TODO Auto-generated method stub\n" +
+		"		    	if(null != needResolve){\n" +
+		"\n" +
+		"                   GraphNode node = null;\n" +
+		"                   for (int i = 0; i < graphNodes.size(); i++) {\n" +
+		"                       GraphNode n = (GraphNode) graphNodes.elementAt(i);\n" +
+		"                       if (n.grp == needResolve) {\n" +
+		"                           node = n;\n" +
+		"                           break;\n" +
+		"                       }\n" +
+		"                   }\n" +
+		"\n" +
+		"                   // get new position\n" +
+		"                   Transform3D t = new Transform3D();\n" +
+		"                   needResolve.getTransform(t);\n" +
+		"                   Vector3d tln = new Vector3d();\n" +
+		"                   t.get(tln);\n" +
+		"\n" +
+		"                   // suggest new position\n" +
+		"                   s.addEditVar(node.pos);\n" +
+		"                   s.beginEdit();\n" +
+		"                   s.suggestValue(node.pos, tln);\n" +
+		"		    	    solve(true);\n" +
+		"		    	    needResolve = null;\n" +
+		"		    	    if (node != null)\n" +
+		"		    	        s.endEdit();\n" +
+		"		    	}\n" +
+		"			}\n" +
+		"		\n" +
+		"			public void mousePressed(MouseEvent e) {\n" +
+		"				// TODO Auto-generated method stub\n" +
+		"		\n" +
+		"			}\n" +
+		"		\n" +
+		"			public void mouseClicked(MouseEvent e) {\n" +
+		"				// TODO Auto-generated method stub\n" +
+		"		\n" +
+		"			}\n" +
+		"		\n" +
+		"		});\n" +
 		"        add(\"Center\", canvas);\n" +
 		"\n" +
 		"        //\n" +
@@ -296,14 +416,6 @@ public final class Output{
 		"        al.setInfluencingBounds(bounds);\n" +
 		"        root.addChild(al);\n" +
 		"\n" +
-		"        // appearance for red\n" +
-		"        Appearance redApp = new Appearance();\n" +
-		"        Material redMat = new Material();\n" +
-		"        redMat.setSpecularColor(new Color3f(1f, .4f, .1f));\n" +
-		"        redMat.setDiffuseColor(new Color3f(1f, .4f, .1f));\n" +
-		"        redMat.setAmbientColor(new Color3f(.25f, .1f, .025f));\n" +
-		"        redApp.setMaterial(redMat);\n" +
-		"\n" +
 		"        // appearance for white\n" +
 		"        Appearance whiteApp = new Appearance();\n" +
 		"        Material whiteMat = new Material();\n" +
@@ -312,13 +424,13 @@ public final class Output{
 		"        whiteMat.setAmbientColor(new Color3f(.25f, .25f, .25f));\n" +
 		"        whiteApp.setMaterial(whiteMat);\n" +
 		"\n" +
-		"        // appearance for green\n" +
-		"        Appearance greenApp = new Appearance();\n" +
-		"        Material greenMat = new Material();\n" +
-		"        greenMat.setSpecularColor(new Color3f(.4f, 1f, .2f));\n" +
-		"        greenMat.setDiffuseColor(new Color3f(.4f, 1f, .2f));\n" +
-		"        greenMat.setAmbientColor(new Color3f(.1f, .25f, .05f));\n" +
-		"        greenApp.setMaterial(greenMat);\n" +
+		"        // appearance for atom\n" +
+		"        Appearance atomApp = new Appearance();\n" +
+		"        Material atomMat = new Material();\n" +
+		"        atomMat.setSpecularColor(new Color3f(" + setting.getValue("SPECULAR_COLOR") + "));\n" +
+		"        atomMat.setDiffuseColor(new Color3f(" + setting.getValue("DIFFUSE_COLOR") + "));\n" +
+		"        atomMat.setAmbientColor(new Color3f(" + setting.getValue("AMBIENT_COLOR") + "));\n" +
+		"        atomApp.setMaterial(atomMat);\n" +
 		"\n" +
 		"        // graph nodes\n";
 	}
@@ -386,33 +498,38 @@ public final class Output{
 		"    public void transformChanged(int type, TransformGroup tg)\n" +
 		"    {\n" +
 		"        System.out.println(\"\" + type + \": \" + tg);\n" +
-		"\n" +
-		"        GraphNode node = null;\n" +
-		"        if (tg != null) {\n" +
-		"            for (int i = 0; i < graphNodes.size(); i++) {\n" +
-		"                GraphNode n = (GraphNode) graphNodes.elementAt(i);\n" +
-		"                if (n.grp == tg) {\n" +
-		"                    node = n;\n" +
-		"                    break;\n" +
+		"        if(RESOLVE_AFTER_RELEASE){\n" +
+		"        	needResolve = tg;\n" +
+		"        }\n" +
+		"        else{\n" +
+		"            GraphNode node = null;\n" +
+		"            if (tg != null) {\n" +
+		"                for (int i = 0; i < graphNodes.size(); i++) {\n" +
+		"                    GraphNode n = (GraphNode) graphNodes.elementAt(i);\n" +
+		"                    if (n.grp == tg) {\n" +
+		"                        node = n;\n" +
+		"                        break;\n" +
+		"                    }\n" +
 		"                }\n" +
-		"            }\n" +
-		"            \n" +
-		"            // get new position\n" +
-		"            Transform3D t = new Transform3D();\n" +
-		"            tg.getTransform(t);\n" +
-		"            Vector3d tln = new Vector3d();\n" +
-		"            t.get(tln);\n" +
+		"                \n" +
+		"                // get new position\n" +
+		"                Transform3D t = new Transform3D();\n" +
+		"                tg.getTransform(t);\n" +
+		"                Vector3d tln = new Vector3d();\n" +
+		"                t.get(tln);\n" +
 		"\n" +
-		"            // suggest new position\n" +
-		"            s.addEditVar(node.pos);\n" +
-		"            s.beginEdit();\n" +
-		"            s.suggestValue(node.pos, tln);\n" +
+		"                // suggest new position\n" +
+		"                s.addEditVar(node.pos);\n" +
+		"                s.beginEdit();\n" +
+		"                s.suggestValue(node.pos, tln);\n" +
+		"            }\n" +
+		"\n" +
+		"            solve(true);\n" +
+		"\n" +
+		"            if (node != null)\n" +
+		"                s.endEdit();\n" +
 		"        }\n" +
 		"\n" +
-		"        solve(true);\n" +
-		"\n" +
-		"        if (node != null)\n" +
-		"            s.endEdit();\n" +
 		"    }\n" +
 		"\n" +
 		"    private void solve(boolean resolve)\n" +

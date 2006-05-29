@@ -65,16 +65,33 @@ public class Setting {
 		String key = null;
 		String value = null;
 		boolean isKey = true;
+		boolean isComment = false;
 		try {
 			while((i = file.read()) != -1){
+				//　コメント処理
+				if((char)i == '#'){
+					isComment = true;
+				}
+				if(((char)i != '\n' && (char)i != '\r') && isComment){
+					continue;
+				}
+				else if(((char)i == '\n' || (char)i == '\r') && isComment){
+					isComment = false;
+					continue;
+				}
+				
+				// key読み込み
 				if((char)i == '='){
 					if(!isKey){ System.err.println("設定ファイルが不正です"); }
 					key = s.toString();
 					s = new StringBuffer();
+					// key読み込みフラグ終了
 					isKey = false;
 					continue;
 				}
+				// value読み込み
 				else if((char)i == '\n' || (char)i == '\r'){
+					// keyが取得できていなければ破棄
 					if(isKey || key == null){
 						key = value = null;
 						continue;
@@ -86,6 +103,7 @@ public class Setting {
 					key = value = null;
 					continue;
 				}
+				// 文字取得
 				s.append((char)i);
 			}
 		} catch (IOException e) {

@@ -13,7 +13,7 @@ import com.sun.j3d.utils.picking.behaviors.*;
 import com.sun.j3d.utils.applet.*; 
 import jp.ac.nii.chorus3d.*;
 
-public class test extends Applet implements PickingCallback {
+public class test7 extends Applet implements PickingCallback {
 
     private class GraphNode {
 
@@ -28,7 +28,7 @@ public class test extends Applet implements PickingCallback {
             grp.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
             grp.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
             parentGrp.addChild(grp);
-            Sphere sphere = new Sphere(1f, app);
+            Sphere sphere = new Sphere(.3f, app);
             grp.addChild(sphere);
 
             pos = new C3Variable3D(
@@ -37,52 +37,6 @@ public class test extends Applet implements PickingCallback {
 
     }
 
-    private class ThickLineGroup extends TransformGroup {
-    
-        Cylinder cylinder;
-
-        ThickLineGroup(Appearance app)
-        {
-            cylinder = new Cylinder(.025f, 2f, app);
-            addChild(cylinder);
-        }
-
-        void setCoordinates(Point3d c0, Point3d c1)
-        {
-            // compute translation
-            Vector3d mid = new Vector3d((c0.x + c1.x) / 2,
-                                        (c0.y + c1.y) / 2,
-                                        (c0.z + c1.z) / 2);
-
-            // compute axes
-            Vector3d y = new Vector3d();
-            y.sub(c0, mid);
-            Vector3d x = new Vector3d();
-            x.cross(y, new Vector3d(0, 0, 1));
-            Vector3d z = new Vector3d();
-            if (x.lengthSquared() > .01) {
-                x.normalize();
-                z.cross(x, y);
-                z.normalize();
-            }
-            else {
-                z.cross(new Vector3d(1, 0, 0), y);
-                z.normalize();
-                x.cross(y, z);
-                x.normalize();
-            }
-
-            // generate matrix
-            Matrix3d m = new Matrix3d();
-            m.setColumn(0, x);
-            m.setColumn(1, y);
-            m.setColumn(2, z);
-            Transform3D t = new Transform3D(m, mid, 1);
-
-            setTransform(t);
-        }
-
-    }
     private class GraphEdge {
 
         /*
@@ -117,71 +71,16 @@ public class test extends Applet implements PickingCallback {
 
     private Vector graphNodes = new Vector();
     private Vector graphEdges = new Vector();
-    private TransformGroup needResolve = null;
-    final static private boolean RESOLVE_AFTER_RELEASE = false;
 
     private C3Solver s;
 
-    public test()
+    public test7()
     {
         // canvas
         setLayout(new BorderLayout());
         GraphicsConfiguration config
             = SimpleUniverse.getPreferredConfiguration();
         canvas = new Canvas3D(config);
-        canvas.addMouseListener(new MouseListener() {
-		
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-		
-			}
-		
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-		
-			}
-		
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-		    	if(null != needResolve){
-
-                   GraphNode node = null;
-                   for (int i = 0; i < graphNodes.size(); i++) {
-                       GraphNode n = (GraphNode) graphNodes.elementAt(i);
-                       if (n.grp == needResolve) {
-                           node = n;
-                           break;
-                       }
-                   }
-
-                   // get new position
-                   Transform3D t = new Transform3D();
-                   needResolve.getTransform(t);
-                   Vector3d tln = new Vector3d();
-                   t.get(tln);
-
-                   // suggest new position
-                   s.addEditVar(node.pos);
-                   s.beginEdit();
-                   s.suggestValue(node.pos, tln);
-		    	    solve(true);
-		    	    needResolve = null;
-		    	    if (node != null)
-		    	        s.endEdit();
-		    	}
-			}
-		
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-		
-			}
-		
-			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-		
-			}
-		
-		});
         add("Center", canvas);
 
         //
@@ -208,6 +107,14 @@ public class test extends Applet implements PickingCallback {
         al.setInfluencingBounds(bounds);
         root.addChild(al);
 
+        // appearance for red
+        Appearance redApp = new Appearance();
+        Material redMat = new Material();
+        redMat.setSpecularColor(new Color3f(1f, .4f, .1f));
+        redMat.setDiffuseColor(new Color3f(1f, .4f, .1f));
+        redMat.setAmbientColor(new Color3f(.25f, .1f, .025f));
+        redApp.setMaterial(redMat);
+
         // appearance for white
         Appearance whiteApp = new Appearance();
         Material whiteMat = new Material();
@@ -216,55 +123,55 @@ public class test extends Applet implements PickingCallback {
         whiteMat.setAmbientColor(new Color3f(.25f, .25f, .25f));
         whiteApp.setMaterial(whiteMat);
 
-        // appearance for atom
-        Appearance atomApp = new Appearance();
-        Material atomMat = new Material();
-        atomMat.setSpecularColor(new Color3f(0.4f,1f,1f));
-        atomMat.setDiffuseColor(new Color3f(0.4f,1f,1f));
-        atomMat.setAmbientColor(new Color3f(0.1f,0.25f,0.05f));
-        atomApp.setMaterial(atomMat);
+        // appearance for green
+        Appearance greenApp = new Appearance();
+        Material greenMat = new Material();
+        greenMat.setSpecularColor(new Color3f(.4f, 1f, .2f));
+        greenMat.setDiffuseColor(new Color3f(.4f, 1f, .2f));
+        greenMat.setAmbientColor(new Color3f(.1f, .25f, .05f));
+        greenApp.setMaterial(greenMat);
 
         // graph nodes
-        GraphNode n0 = new GraphNode(atomApp, root);
+        GraphNode n0 = new GraphNode(greenApp, root);
         graphNodes.addElement(n0);
-        GraphNode n1 = new GraphNode(atomApp, root);
+        GraphNode n1 = new GraphNode(greenApp, root);
         graphNodes.addElement(n1);
-        GraphNode n2 = new GraphNode(atomApp, root);
+        GraphNode n2 = new GraphNode(greenApp, root);
         graphNodes.addElement(n2);
-        GraphNode n3 = new GraphNode(atomApp, root);
+        GraphNode n3 = new GraphNode(greenApp, root);
         graphNodes.addElement(n3);
-        GraphNode n4 = new GraphNode(atomApp, root);
+        GraphNode n4 = new GraphNode(greenApp, root);
         graphNodes.addElement(n4);
-        GraphNode n5 = new GraphNode(atomApp, root);
+        GraphNode n5 = new GraphNode(greenApp, root);
         graphNodes.addElement(n5);
-        GraphNode n6 = new GraphNode(atomApp, root);
+        GraphNode n6 = new GraphNode(greenApp, root);
         graphNodes.addElement(n6);
-        GraphNode n7 = new GraphNode(atomApp, root);
-        graphNodes.addElement(n7);
-        GraphNode n8 = new GraphNode(atomApp, root);
-        graphNodes.addElement(n8);
-        GraphNode n9 = new GraphNode(atomApp, root);
-        graphNodes.addElement(n9);
-        GraphNode n10 = new GraphNode(atomApp, root);
-        graphNodes.addElement(n10);
-        GraphNode n11 = new GraphNode(atomApp, root);
-        graphNodes.addElement(n11);
-        GraphNode n12 = new GraphNode(atomApp, root);
-        graphNodes.addElement(n12);
-        GraphNode n13 = new GraphNode(atomApp, root);
+        GraphNode n13 = new GraphNode(greenApp, root);
         graphNodes.addElement(n13);
-        graphEdges.addElement(new GraphEdge(n13, n0, whiteApp, root));
+        GraphNode n7 = new GraphNode(greenApp, root);
+        graphNodes.addElement(n7);
+        GraphNode n8 = new GraphNode(greenApp, root);
+        graphNodes.addElement(n8);
+        GraphNode n9 = new GraphNode(greenApp, root);
+        graphNodes.addElement(n9);
+        GraphNode n10 = new GraphNode(greenApp, root);
+        graphNodes.addElement(n10);
+        GraphNode n11 = new GraphNode(greenApp, root);
+        graphNodes.addElement(n11);
+        GraphNode n12 = new GraphNode(greenApp, root);
+        graphNodes.addElement(n12);
+        graphEdges.addElement(new GraphEdge(n12, n0, whiteApp, root));
         graphEdges.addElement(new GraphEdge(n9, n8, whiteApp, root));
-        graphEdges.addElement(new GraphEdge(n3, n10, whiteApp, root));
-        graphEdges.addElement(new GraphEdge(n8, n6, whiteApp, root));
-        graphEdges.addElement(new GraphEdge(n2, n11, whiteApp, root));
+        graphEdges.addElement(new GraphEdge(n8, n4, whiteApp, root));
         graphEdges.addElement(new GraphEdge(n12, n11, whiteApp, root));
-        graphEdges.addElement(new GraphEdge(n7, n13, whiteApp, root));
+        graphEdges.addElement(new GraphEdge(n2, n10, whiteApp, root));
+        graphEdges.addElement(new GraphEdge(n8, n7, whiteApp, root));
         graphEdges.addElement(new GraphEdge(n11, n10, whiteApp, root));
-        graphEdges.addElement(new GraphEdge(n12, n1, whiteApp, root));
+        graphEdges.addElement(new GraphEdge(n7, n6, whiteApp, root));
         graphEdges.addElement(new GraphEdge(n9, n10, whiteApp, root));
-        graphEdges.addElement(new GraphEdge(n9, n4, whiteApp, root));
-        graphEdges.addElement(new GraphEdge(n8, n5, whiteApp, root));
+        graphEdges.addElement(new GraphEdge(n11, n1, whiteApp, root));
+        graphEdges.addElement(new GraphEdge(n7, n5, whiteApp, root));
+        graphEdges.addElement(new GraphEdge(n9, n3, whiteApp, root));
         graphEdges.addElement(new GraphEdge(n13, n12, whiteApp, root));
 
         // picking
@@ -321,38 +228,33 @@ public class test extends Applet implements PickingCallback {
     public void transformChanged(int type, TransformGroup tg)
     {
         System.out.println("" + type + ": " + tg);
-        if(RESOLVE_AFTER_RELEASE){
-        	needResolve = tg;
-        }
-        else{
-            GraphNode node = null;
-            if (tg != null) {
-                for (int i = 0; i < graphNodes.size(); i++) {
-                    GraphNode n = (GraphNode) graphNodes.elementAt(i);
-                    if (n.grp == tg) {
-                        node = n;
-                        break;
-                    }
+
+        GraphNode node = null;
+        if (tg != null) {
+            for (int i = 0; i < graphNodes.size(); i++) {
+                GraphNode n = (GraphNode) graphNodes.elementAt(i);
+                if (n.grp == tg) {
+                    node = n;
+                    break;
                 }
-                
-                // get new position
-                Transform3D t = new Transform3D();
-                tg.getTransform(t);
-                Vector3d tln = new Vector3d();
-                t.get(tln);
-
-                // suggest new position
-                s.addEditVar(node.pos);
-                s.beginEdit();
-                s.suggestValue(node.pos, tln);
             }
+            
+            // get new position
+            Transform3D t = new Transform3D();
+            tg.getTransform(t);
+            Vector3d tln = new Vector3d();
+            t.get(tln);
 
-            solve(true);
-
-            if (node != null)
-                s.endEdit();
+            // suggest new position
+            s.addEditVar(node.pos);
+            s.beginEdit();
+            s.suggestValue(node.pos, tln);
         }
 
+        solve(true);
+
+        if (node != null)
+            s.endEdit();
     }
 
     private void solve(boolean resolve)
@@ -385,7 +287,7 @@ public class test extends Applet implements PickingCallback {
 
     public static void main(String[] args)
     {
-        Frame frame = new MainFrame(new test(), 500, 500);
+        Frame frame = new MainFrame(new test7(), 500, 500);
     }
 
 }
