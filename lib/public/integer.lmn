@@ -21,16 +21,12 @@ module(integer).
  * -> a(1),...,a(100)
  * by Nakano
  */
-H = integer.set(A, B) :- int(A), int(B)| H=[:/*inline*/
+H = integer.set(A, B) :- ground(H), int(A), int(B), A >= B | .
+H = integer.set(A, B) :- int(A), int(B), A < B | H=[:/*inline*/
   int start =
  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   int stop =
  ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
-  if(start > stop){
-    int tmp = start;
-    start = stop;
-    stop = tmp;
-  }
   
   Atom result = mem.newAtom(new IntegerFunctor(start));
   mem.relink(result, 0, me, 2);
