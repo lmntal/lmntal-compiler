@@ -1,7 +1,0 @@
-#!/bin/bash
-
-source `dirname $0`/set_cp.sh
-export CLASSPATH=$1:$CLASSPATH
-CLASSPATH=`cygpath -wp $CLASSPATH` 
-shift
-java -DLMNTAL_HOME=$LMNTAL_HOME Main $*
