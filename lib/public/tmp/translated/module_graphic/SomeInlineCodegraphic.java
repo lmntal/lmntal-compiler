@@ -5,20 +5,54 @@ import java.util.*;
 	import java.awt.*;
 	import java.awt.event.*;
 	import java.awt.MouseInfo.*;
-
 public class SomeInlineCodegraphic {
+	public boolean runGuard(String guardID, Membrane mem, Object obj) throws GuardNotFoundException {
+		try {
+		String name = "SomeInlineCodegraphicCustomGuardImpl";
+
+			CustomGuard cg=(CustomGuard)Class.forName(name).newInstance();
+
+			if(cg==null) throw new GuardNotFoundException();
+
+			return cg.run(guardID, mem, obj);
+
+		} catch(GuardNotFoundException e) {
+			throw new GuardNotFoundException();
+
+		} catch(ClassNotFoundException e) {
+		} catch(InstantiationException e) {
+		} catch(IllegalAccessException e) {
+		} catch(Exception e) {
+
+			e.printStackTrace();
+
+		}
+
+		throw new GuardNotFoundException();
+
+	}
 	public static void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {
-		case 1: {
+		case 2: {
 			/*inline*/
-	Env.fGraphic = true;
-	Env.initGraphic();
-	mem.makePerpetual();
-	me.setFunctor("go",0);
+	if(null != Env.LMNgraphic){
+		Env.LMNgraphic.setRepaint((Membrane)mem, true);
+		Atom atom = mem.newAtom(new Functor("repaint_go", 0));
+		me.remove();
+	}
 
 			break; }
-		case 5: {
+		case 1: {
+			/*inline*/
+	if(null != Env.LMNgraphic){
+		Env.LMNgraphic.setRepaint((Membrane)mem, false);
+		Atom atom = mem.newAtom(new Functor("norepaint_go", 0));
+		me.remove();
+	}	
+
+			break; }
+		case 7: {
 			/*inline*/
 	int y = ((IntegerFunctor)(me.nthAtom(0).getFunctor())).intValue();
 	Point p = null;
@@ -32,7 +66,7 @@ public class SomeInlineCodegraphic {
 	me.remove();
 	
 			break; }
-		case 4: {
+		case 6: {
 			/*inline*/
 
 	int x = ((IntegerFunctor)(me.nthAtom(0).getFunctor())).intValue();
@@ -49,7 +83,7 @@ public class SomeInlineCodegraphic {
 	
 	
 			break; }
-		case 6: {
+		case 8: {
 			/*inline*/
 	int x = -1;
 	Point p = null;
@@ -63,7 +97,7 @@ public class SomeInlineCodegraphic {
 	
 	
 			break; }
-		case 7: {
+		case 9: {
 			/*inline*/
 	int y = -1;
 	Point p = null;
@@ -80,10 +114,11 @@ public class SomeInlineCodegraphic {
 			/*inline*/
 	Env.fGraphic = true;
 	Env.initGraphic();
-	me.setFunctor("go",0);
+	Atom atom = mem.newAtom(new Functor("go", 0));
+	me.remove();
 
 			break; }
-		case 3: {
+		case 5: {
 			/*inline*/
 	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 	int point = (int)(pointerInfo.getLocation().y);
@@ -92,7 +127,7 @@ public class SomeInlineCodegraphic {
 	mem.removeAtom(me);
   
 			break; }
-		case 2: {
+		case 4: {
 			/*inline*/
 	PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 	int point = (int)(pointerInfo.getLocation().x);
@@ -100,6 +135,39 @@ public class SomeInlineCodegraphic {
 	mem.relink(atom,0,me,0);
 	mem.removeAtom(me);
   
+			break; }
+		case 11: {
+			/*inline*/
+	int height = 0;
+	if(Env.LMNgraphic != null){
+		Dimension d = (Dimension)Env.LMNgraphic.getWindowSize((Membrane)mem);
+		if(null != d){ height = d.height; }
+	}
+	Atom atom = mem.newAtom(new IntegerFunctor(height));
+	mem.relink(atom,0,me,0);
+	me.remove();
+  
+			break; }
+		case 10: {
+			/*inline*/
+	int width = 0;
+	if(Env.LMNgraphic != null){
+		Dimension d = (Dimension)Env.LMNgraphic.getWindowSize((Membrane)mem);
+		if(null != d){ width = d.width; }
+	}
+	Atom atom = mem.newAtom(new IntegerFunctor(width));
+	mem.relink(atom,0,me,0);
+	me.remove();
+  
+			break; }
+		case 3: {
+			/*inline*/
+	Env.fGraphic = true;
+	Env.initGraphic();
+	mem.makePerpetual();
+	Atom atom = mem.newAtom(new Functor("go", 0));
+	me.remove();
+
 			break; }
 		}
 	}

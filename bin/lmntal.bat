@@ -1,5 +1,1 @@
-@echo off
-setlocal
-
-call "%~dp0set_cp"
-java -DLMNTAL_HOME=%LMNTAL_HOME% runtime.FrontEnd %* --interpret
+@"%~dp0\lmnc" %* --interpret

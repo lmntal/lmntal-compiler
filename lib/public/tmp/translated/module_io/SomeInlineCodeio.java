@@ -2,6 +2,31 @@ package translated.module_io;
 import runtime.*;
 import java.util.*;
 public class SomeInlineCodeio {
+	public boolean runGuard(String guardID, Membrane mem, Object obj) throws GuardNotFoundException {
+		try {
+		String name = "SomeInlineCodeioCustomGuardImpl";
+
+			CustomGuard cg=(CustomGuard)Class.forName(name).newInstance();
+
+			if(cg==null) throw new GuardNotFoundException();
+
+			return cg.run(guardID, mem, obj);
+
+		} catch(GuardNotFoundException e) {
+			throw new GuardNotFoundException();
+
+		} catch(ClassNotFoundException e) {
+		} catch(InstantiationException e) {
+		} catch(IllegalAccessException e) {
+		} catch(Exception e) {
+
+			e.printStackTrace();
+
+		}
+
+		throw new GuardNotFoundException();
+
+	}
 	public static void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {
@@ -20,6 +45,21 @@ public class SomeInlineCodeio {
 	String s = javax.swing.JOptionPane.showInputDialog(null, me.nth(0));
 	me.setName("done");
 	me.nthAtom(0).setName(s);
+	
+			break; }
+		case 11: {
+			/*inline*/
+		try {
+			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			Atom done = mem.newAtom(new Functor("done", 1));
+			if(pw!=null) {
+				pw.println(me.nth(1));
+			}
+			mem.relink(done, 0, me, 2);
+			me.nthAtom(0).remove();
+			me.nthAtom(1).remove();
+			me.remove();
+		} catch(Exception e) {e.printStackTrace();}
 	
 			break; }
 		case 1: {
@@ -46,27 +86,6 @@ public class SomeInlineCodeio {
 	mem.removeAtom(me);
 	
 			break; }
-		case 10: {
-			/*inline*/
-		try {
-			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
-			int async = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
-			// ¤³¤Î¥Á¥§¥Ã¥¯¤Ï¥¬¡¼¥É¤Ç¤ä¤?¤Ù¤­
-			if((async!=0 && br.ready()) || async==0) {
-				String s = br.readLine();
-				Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
-				mem.relink(result, 0, me, 1);
-				Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
-				mem.relink(res, 0, me, 3);
-				me.nthAtom(0).remove();
-				me.nthAtom(2).remove();
-				me.remove();
-			} else {
-				me.setName("readline");
-			}
-		} catch(Exception e) {Env.e(e);}
-	
-			break; }
 		case 9: {
 			/*inline*/
 	try {
@@ -84,20 +103,6 @@ public class SomeInlineCodeio {
 	} catch(Exception e) {e.printStackTrace();}
 	
 			break; }
-		case 11: {
-			/*inline*/
-		try {
-			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
-			Atom done = mem.newAtom(new Functor("done", 1));
-			if(pw!=null) {
-				pw.println(me.nth(1));
-			}
-			mem.relink(done, 0, me, 2);
-			me.nthAtom(1).remove();
-			me.remove();
-		} catch(Exception e) {e.printStackTrace();}
-	
-			break; }
 		case 12: {
 			/*inline*/
 		try {
@@ -109,6 +114,27 @@ public class SomeInlineCodeio {
 			me.nthAtom(1).remove();
 			me.remove();
 		} catch(Exception e) {e.printStackTrace();}
+	
+			break; }
+		case 10: {
+			/*inline*/
+		try {
+			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			int async = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
+			// ¤³¤Î¥Á¥§¥Ã¥¯¤Ï¥¬¡¼¥É¤Ç¤ä¤?¤Ù¤­
+			if((async!=0 && br.ready()) || async==0) {
+				String s = br.readLine();
+				Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
+				mem.relink(result, 0, me, 1);
+				Atom res = mem.newAtom(new Functor(s==null ? "nil" : "done", 1));
+				mem.relink(res, 0, me, 3);
+				me.nthAtom(0).remove();
+				me.nthAtom(2).remove();
+				me.remove();
+			} else {
+				mem.alterAtomFunctor(me, new Functor("readline", 4, "io"));
+			}
+		} catch(Exception e) {Env.e(e);}
 	
 			break; }
 		case 4: {

@@ -487,9 +487,9 @@ public final class Output{
 		"        }\n" +
 		"\n" +
 		"        //s.addStay(nd.tfm.translation(), C3.REQUIRED);\n" +
-//		"        s.add(new C3LinearConstraint(1, n0.pos.x(), C3.EQ, 0, C3.REQUIRED));\n" +
-//		"        s.add(new C3LinearConstraint(1, n0.pos.y(), C3.EQ, 0, C3.REQUIRED));\n" +
-//		"        s.add(new C3LinearConstraint(1, n0.pos.z(), C3.EQ, 0, C3.REQUIRED));\n" +
+		"        s.add(new C3LinearConstraint(1, n0.pos.x(), C3.EQ, 0, C3.REQUIRED));\n" +
+		"        s.add(new C3LinearConstraint(1, n0.pos.y(), C3.EQ, 0, C3.REQUIRED));\n" +
+		"        s.add(new C3LinearConstraint(1, n0.pos.z(), C3.EQ, 0, C3.REQUIRED));\n" +
 		"\n" +
 		"        // solve the system\n" +
 		"        solve(false);\n" +

@@ -8,6 +8,7 @@ public class Module_dlmntal{
 		return rulesets;
 	}
 	public static void loadUserDefinedSystemRuleset() {
+		runtime.Inline.inlineSet.put("public/dlmntal.lmn", new runtime.InlineUnit("public/dlmntal.lmn"));
 	}
 	private static void loadSystemRulesetFromModule(String moduleName) {
 		try {

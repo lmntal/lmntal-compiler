@@ -2,71 +2,34 @@ package translated.module_string;
 import runtime.*;
 import java.util.*;
 public class SomeInlineCodestring {
+	public boolean runGuard(String guardID, Membrane mem, Object obj) throws GuardNotFoundException {
+		try {
+		String name = "SomeInlineCodestringCustomGuardImpl";
+
+			CustomGuard cg=(CustomGuard)Class.forName(name).newInstance();
+
+			if(cg==null) throw new GuardNotFoundException();
+
+			return cg.run(guardID, mem, obj);
+
+		} catch(GuardNotFoundException e) {
+			throw new GuardNotFoundException();
+
+		} catch(ClassNotFoundException e) {
+		} catch(InstantiationException e) {
+		} catch(IllegalAccessException e) {
+		} catch(Exception e) {
+
+			e.printStackTrace();
+
+		}
+
+		throw new GuardNotFoundException();
+
+	}
 	public static void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {
-		case 7: {
-			/*inline*/
-	int n=0;
-	Atom res = null;
-	try{
-		n = Integer.parseInt( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
-		res = mem.newAtom(new IntegerFunctor(n));
-	} catch(Exception e) {
-		res = mem.newAtom(new Functor("nil",1));
-	}
-	mem.relinkAtomArgs(res, 0, me, 1);
-	
-	mem.removeAtom(me.nthAtom(0));
-	mem.removeAtom(me);
-	
-			break; }
-		case 1: {
-			/*inline*/
-	String s=null;
-	try {
-		s = me.nth(0).replaceAll(
-		((StringFunctor)me.nthAtom(1).getFunctor()).stringValue(),
-		((StringFunctor)me.nthAtom(2).getFunctor()).stringValue()
-		);
-	} catch(Exception e) {}
-	if(s==null) s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
-	Atom result = mem.newAtom(new Functor(s, 1));
-	mem.relink(result, 0, me, 3);
-	me.nthAtom(0).remove();
-	me.nthAtom(1).remove();
-	me.nthAtom(2).remove();
-	me.remove();
-	
-			break; }
-		case 10: {
-			/*inline*/
-	double d = 0.0;
-	Atom res = null;
-	try{
-		d = Double.parseDouble( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
-		res = mem.newAtom(new FloatingFunctor(d));
-	} catch(Exception e) {
-		res = mem.newAtom(new Functor("nil", 1));
-	}
-	mem.relinkAtomArgs(res, 0, me, 1);
-
-	mem.removeAtom(me.nthAtom(0));
-	mem.removeAtom(me);
-	
-			break; }
-		case 8: {
-			/*inline*/
-	String s = null;
-	try{
-		s = Integer.toString(((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue());
-	} catch(Exception e) {}
-	Atom res = mem.newAtom(new StringFunctor((s==null)?"":s));
-	mem.relinkAtomArgs(res, 0, me, 1);
-	mem.removeAtom(me.nthAtom(0));
-	mem.removeAtom(me);
-	
-			break; }
 		case 6: {
 			/*inline*/
 	int b = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
@@ -83,33 +46,6 @@ public class SomeInlineCodestring {
 	mem.removeAtom(me.nthAtom(1));
 	mem.removeAtom(me.nthAtom(2));
 	mem.removeAtom(me);
-	
-			break; }
-		case 9: {
-			/*inline*/
-	String s = null;
-	try{
-		s = Double.toString(((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue());
-	} catch(Exception e) {}
-	Atom res = mem.newAtom(new StringFunctor((s==null)?"":s));
-	mem.relinkAtomArgs(res, 0, me, 1);
-	mem.removeAtom(me.nthAtom(0));
-	mem.removeAtom(me);
-	
-			break; }
-		case 2: {
-			/*inline*/
-	boolean b=false;
-	try {
-		b = java.util.regex.Pattern.compile(
-		((StringFunctor)me.nthAtom(1).getFunctor()).stringValue() ).matcher(
-		((StringFunctor)me.nthAtom(0).getFunctor()).stringValue() ).find();
-	} catch(Exception e) {e.printStackTrace();}
-	Atom result = mem.newAtom(new Functor(b?"true":"false", 1));
-	mem.relink(result, 0, me, 2);
-	me.nthAtom(0).remove();
-	me.nthAtom(1).remove();
-	me.remove();
 	
 			break; }
 		case 5: {
@@ -168,6 +104,124 @@ public class SomeInlineCodestring {
 	mem.removeAtom(me);
 	
 			break; }
+		case 0: {
+			/*inline*/
+	StringBuffer b = new StringBuffer(((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
+	StringBuffer r = new StringBuffer("");
+	int times = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+	for(int i=1;i<=times;i<<=1, b.append(b)) {
+		if((i&times)>0) r.append(b);
+	}
+	Atom result = mem.newAtom(new StringFunctor(r.toString()));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	
+			break; }
+		case 12: {
+			/*inline*/
+	String s = "";
+	char c;
+	try{
+		c = (char)((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+		s = Character.toString(c);
+	} catch(Exception e) {}
+	Atom res = mem.newAtom(new StringFunctor(s));
+	mem.relinkAtomArgs(res, 0, me, 1);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	
+			break; }
+		case 7: {
+			/*inline*/
+	int n=0;
+	Atom res = null;
+	try{
+		n = Integer.parseInt( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
+		res = mem.newAtom(new IntegerFunctor(n));
+	} catch(Exception e) {
+		res = mem.newAtom(new Functor("nil",1));
+	}
+	mem.relinkAtomArgs(res, 0, me, 1);
+	
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	
+			break; }
+		case 1: {
+			/*inline*/
+	String s=null;
+	try {
+		s = me.nth(0).replaceAll(
+		((StringFunctor)me.nthAtom(1).getFunctor()).stringValue(),
+		((StringFunctor)me.nthAtom(2).getFunctor()).stringValue()
+		);
+	} catch(Exception e) {}
+	if(s==null) s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Atom result = mem.newAtom(new Functor(s, 1));
+	mem.relink(result, 0, me, 3);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.nthAtom(2).remove();
+	me.remove();
+	
+			break; }
+		case 8: {
+			/*inline*/
+	String s = null;
+	try{
+		s = Integer.toString(((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue());
+	} catch(Exception e) {}
+	Atom res = mem.newAtom(new StringFunctor((s==null)?"":s));
+	mem.relinkAtomArgs(res, 0, me, 1);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	
+			break; }
+		case 10: {
+			/*inline*/
+	double d = 0.0;
+	Atom res = null;
+	try{
+		d = Double.parseDouble( ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
+		res = mem.newAtom(new FloatingFunctor(d));
+	} catch(Exception e) {
+		res = mem.newAtom(new Functor("nil", 1));
+	}
+	mem.relinkAtomArgs(res, 0, me, 1);
+
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	
+			break; }
+		case 9: {
+			/*inline*/
+	String s = null;
+	try{
+		s = Double.toString(((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue());
+	} catch(Exception e) {}
+	Atom res = mem.newAtom(new StringFunctor((s==null)?"":s));
+	mem.relinkAtomArgs(res, 0, me, 1);
+	mem.removeAtom(me.nthAtom(0));
+	mem.removeAtom(me);
+	
+			break; }
+		case 2: {
+			/*inline*/
+	boolean b=false;
+	try {
+		b = java.util.regex.Pattern.compile(
+		((StringFunctor)me.nthAtom(1).getFunctor()).stringValue() ).matcher(
+		((StringFunctor)me.nthAtom(0).getFunctor()).stringValue() ).find();
+	} catch(Exception e) {e.printStackTrace();}
+	Atom result = mem.newAtom(new Functor(b?"true":"false", 1));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	
+			break; }
 		case 4: {
 			/*inline*/
 	Atom cat = mem.newAtom(new StringFunctor(
@@ -182,31 +236,11 @@ public class SomeInlineCodestring {
 			break; }
 		case 11: {
 			/*inline*/
-	String s = "";
-	char c;
-	try{
-		c = (char)((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
-		s = Character.toString(c);
-	} catch(Exception e) {}
+    String s = me.nth(0);
 	Atom res = mem.newAtom(new StringFunctor(s));
 	mem.relinkAtomArgs(res, 0, me, 1);
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me);
-	
-			break; }
-		case 0: {
-			/*inline*/
-	StringBuffer b = new StringBuffer(((StringFunctor)me.nthAtom(0).getFunctor()).stringValue());
-	StringBuffer r = new StringBuffer("");
-	int times = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
-	for(int i=1;i<=times;i<<=1, b.append(b)) {
-		if((i&times)>0) r.append(b);
-	}
-	Atom result = mem.newAtom(new StringFunctor(r.toString()));
-	mem.relink(result, 0, me, 2);
-	me.nthAtom(0).remove();
-	me.nthAtom(1).remove();
-	me.remove();
 	
 			break; }
 		}

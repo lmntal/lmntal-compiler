@@ -30,7 +30,7 @@ public class Ruleset604 extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		boolean result = false;
-		if (execL265(mem, atom, false)) {
+		if (execL285(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@604", "null");
 			return true;
@@ -42,14 +42,14 @@ public class Ruleset604 extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		boolean result = false;
-		if (execL266(mem, nondeterministic)) {
+		if (execL286(mem, nondeterministic)) {
 			if (Env.fTrace)
 				Task.trace("==>", "@604", "null");
 			return true;
 		}
 		return result;
 	}
-	public boolean execL266(Object var0, boolean nondeterministic) {
+	public boolean execL286(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -60,6 +60,7 @@ public class Ruleset604 extends Ruleset {
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -70,16 +71,16 @@ public class Ruleset604 extends Ruleset {
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L266:
+L286:
 		{
-			if (execL263(var0,nondeterministic)) {
+			if (execL283(var0,nondeterministic)) {
 				ret = true;
-				break L266;
+				break L286;
 			}
 		}
 		return ret;
 	}
-	public boolean execL263(Object var0, boolean nondeterministic) {
+	public boolean execL283(Object var0, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -90,6 +91,7 @@ L266:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -100,18 +102,18 @@ L266:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L263:
+L283:
 		{
 			if (nondeterministic) {
-				Task.states.add(new Object[] {theInstance, "null", "L264",var0});
-			} else if (execL264(var0,nondeterministic)) {
+				Task.states.add(new Object[] {theInstance, "null", "L284",var0});
+			} else if (execL284(var0,nondeterministic)) {
 				ret = true;
-				break L263;
+				break L283;
 			}
 		}
 		return ret;
 	}
-	public boolean execL264(Object var0, boolean nondeterministic) {
+	public boolean execL284(Object var0, boolean nondeterministic) {
 		Object var1 = null;
 		Object var2 = null;
 		Object var3 = null;
@@ -128,6 +130,7 @@ L263:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -138,7 +141,7 @@ L263:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L264:
+L284:
 		{
 			mem = ((AbstractMembrane)var0).newMem(0);
 			var1 = mem;
@@ -164,11 +167,11 @@ L264:
 			atom = ((Atom)var2);
 			atom.getMem().enqueueAtom(atom);
 			ret = true;
-			break L264;
+			break L284;
 		}
 		return ret;
 	}
-	public boolean execL265(Object var0, Object var1, boolean nondeterministic) {
+	public boolean execL285(Object var0, Object var1, boolean nondeterministic) {
 		Atom atom;
 		Functor func;
 		Link link;
@@ -179,6 +182,7 @@ L264:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -189,7 +193,7 @@ L264:
 		Link b;
 		Iterator it_deleteconnectors;
 		boolean ret = false;
-L265:
+L285:
 		{
 		}
 		return ret;

@@ -60,6 +60,7 @@ public class Ruleset602 extends Ruleset {
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -90,6 +91,7 @@ L158:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -127,6 +129,7 @@ L155:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -174,6 +177,7 @@ L156:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;

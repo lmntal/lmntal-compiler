@@ -24,7 +24,7 @@ public class Ruleset603 extends Ruleset {
 		return "@codec" + id;
 	}
 	private String encodedRuleset = 
-"(memEncoder @@ '='(Ret, codec.memEncoder({$p, @p})) :- '='(Ret, codec.encoded(X)), {'='(X, codec.encode), $p, @p}), (encode @@ {'='(Ret, codec.encode), $p, @p} :- {'='(Ret, [:/*inline*/    me.remove();    StringFunctor sFunc =      new StringFunctor(((Membrane)mem).encode());    Atom sAtom = mem.newAtom(sFunc);    mem.relinkAtomArgs(sAtom,0,me,0);  :]), $p, @p}), (memRulesetsEncoder @@ '='(Ret, codec.memRulesetsEncoder({$p, @p})) :- '='(Ret, codec.encoded(X)), {'='(X, codec.encodeRulesets), $p, @p}), (encodeRulesets @@ {'='(Ret, codec.encodeRulesets), $p, @p} :- {'='(Ret, [:/*inline*/    me.remove();    StringFunctor sFunc =      new StringFunctor(((Membrane)mem).encodeRulesets());    Atom sAtom = mem.newAtom(sFunc);    mem.relinkAtomArgs(sAtom,0,me,0);  :]), $p, @p}), (memProcessEncoder @@ '='(Ret, codec.memProcessEncoder({$p, @p})) :- '='(Ret, codec.encoded(X)), {'='(X, codec.encodeProcess), $p, @p}), (encodeProcess @@ {'='(Ret, codec.encodeProcess), $p, @p} :- {'='(Ret, [:/*inline*/    me.remove();    StringFunctor sFunc =      new StringFunctor(((Membrane)mem).encodeProcess());    Atom sAtom = mem.newAtom(sFunc);    mem.relinkAtomArgs(sAtom,0,me,0);  :]), $p, @p}), (encoded @@ '='(Ret, codec.encoded(X)), {'='(X, S), $p, @p} :- string(S) | '='(Ret, S), {$p, @p}), (strDecoder @@ codec.strDecoder(S) :- string(S) | [:/*inline*/    String str = me.nth(0);    LMNParser lp;    compile.structure.Membrane m;    Ruleset rs;    try {      lp = new LMNParser(new StringReader(str));      m = lp.parse();      rs = RulesetCompiler.compileMembrane(m);      rs.react((Membrane)mem);    } catch(ParseException e) {      e.printStackTrace();    }    me.nthAtom(0).remove();    me.remove();  :](S)), (fileDecoder @@ codec.fileDecoder(S) :- string(S) | [:/*inline*/    try {      String filename = me.nth(0);      FileInputStream fis = new FileInputStream(filename);      InputStreamReader isr = new InputStreamReader(fis);      BufferedReader br = new BufferedReader(isr);      LMNParser lp;      compile.structure.Membrane m;      Ruleset rs;      lp = new LMNParser(br);      m = lp.parse();      rs = RulesetCompiler.compileMembrane(m);      rs.react((Membrane)mem);      br.close();    } catch(IOException e) {      e.printStackTrace();    } catch(ParseException e) {      e.printStackTrace();    }    me.nthAtom(0).remove();    me.remove();  :](S))";
+"(memEncoder @@ '='(Ret, codec.memEncoder({$p, @p})) :- '='(Ret, codec.encoded(X)), {'='(X, codec.encode), $p, @p}), (encode @@ {'='(Ret, codec.encode), $p, @p} :- {'='(Ret, [:/*inline*/    me.remove();    StringFunctor sFunc =      new StringFunctor(((Membrane)mem).encode());    Atom sAtom = mem.newAtom(sFunc);    mem.relinkAtomArgs(sAtom,0,me,0);  :]), $p, @p}), (memRulesetsEncoder @@ '='(Ret, codec.memRulesetsEncoder({$p, @p})) :- '='(Ret, codec.encoded(X)), {'='(X, codec.encodeRulesets), $p, @p}), (encodeRulesets @@ {'='(Ret, codec.encodeRulesets), $p, @p} :- {'='(Ret, [:/*inline*/    me.remove();    StringFunctor sFunc =      new StringFunctor(((Membrane)mem).encodeRulesets());    Atom sAtom = mem.newAtom(sFunc);    mem.relinkAtomArgs(sAtom,0,me,0);  :]), $p, @p}), (memProcessEncoder @@ '='(Ret, codec.memProcessEncoder({$p, @p})) :- '='(Ret, codec.encoded(X)), {'='(X, codec.encodeProcess), $p, @p}), (encodeProcess @@ {'='(Ret, codec.encodeProcess), $p, @p} :- {'='(Ret, [:/*inline*/    me.remove();    StringFunctor sFunc =      new StringFunctor(((Membrane)mem).encodeProcess());    Atom sAtom = mem.newAtom(sFunc);    mem.relinkAtomArgs(sAtom,0,me,0);  :]), $p, @p}), (encoded @@ '='(Ret, codec.encoded(X)), {'='(X, S), $p[|*X], @p} :- string(S) | '='(Ret, S), nlmem.kill({$p[|*X]})), (strDecoder @@ codec.strDecoder(S) :- string(S) | [:/*inline*/    String str = me.nth(0);    LMNParser lp;    compile.structure.Membrane m;    Ruleset rs;    try {      lp = new LMNParser(new StringReader(str));      m = lp.parse();      rs = RulesetCompiler.compileMembrane(m);      rs.react((Membrane)mem);    } catch(ParseException e) {      e.printStackTrace();    }    me.nthAtom(0).remove();    me.remove();  :](S)), (fileDecoder @@ codec.fileDecoder(S) :- string(S) | [:/*inline*/    try {      String filename = me.nth(0);      FileInputStream fis = new FileInputStream(filename);      InputStreamReader isr = new InputStreamReader(fis);      BufferedReader br = new BufferedReader(isr);      LMNParser lp;      compile.structure.Membrane m;      Ruleset rs;      lp = new LMNParser(br);      m = lp.parse();      rs = RulesetCompiler.compileMembrane(m);      rs.react((Membrane)mem);      br.close();    } catch(IOException e) {      e.printStackTrace();    } catch(ParseException e) {      e.printStackTrace();    }    me.nthAtom(0).remove();    me.remove();  :](S)), (encodeFilter @@ '='(Ret, codec.encodeFilter('.'(H, T))) :- '='(Ret, '.'(codec.memEncoder(H), codec.encodeFilter(T)))), (decodeFilter @@ codec.decodeFilter('.'(H, T)) :- string(H) | codec.decodeFilter(T), codec.strDecoder(H))";
 	public String encode() {
 		return encodedRuleset;
 	}
@@ -73,6 +73,16 @@ public class Ruleset603 extends Ruleset {
 		if (execL256(mem, atom, false)) {
 			if (Env.fTrace)
 				Task.trace("-->", "@603", "fileDecoder");
+			return true;
+		}
+		if (execL265(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "encodeFilter");
+			return true;
+		}
+		if (execL275(mem, atom, false)) {
+			if (Env.fTrace)
+				Task.trace("-->", "@603", "decodeFilter");
 			return true;
 		}
 		return result;
@@ -127,7 +137,507 @@ public class Ruleset603 extends Ruleset {
 				Task.trace("==>", "@603", "fileDecoder");
 			return true;
 		}
+		if (execL269(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "encodeFilter");
+			return true;
+		}
+		if (execL279(mem, nondeterministic)) {
+			if (Env.fTrace)
+				Task.trace("==>", "@603", "decodeFilter");
+			return true;
+		}
 		return result;
+	}
+	public boolean execL279(Object var0, boolean nondeterministic) {
+		Object var1 = null;
+		Object var2 = null;
+		Object var3 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L279:
+		{
+			func = f0;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				if (!(link.getPos() != 2)) {
+					var2 = link.getAtom();
+					if (!(!(f1).equals(((Atom)var2).getFunctor()))) {
+						link = ((Atom)var2).getArg(0);
+						var3 = link.getAtom();
+						if (((Atom)var3).getFunctor() instanceof ObjectFunctor &&
+						    ((ObjectFunctor)((Atom)var3).getFunctor()).getObject() instanceof String) {
+							if (execL274(var0,var1,var2,var3,nondeterministic)) {
+								ret = true;
+								break L279;
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL274(Object var0, Object var1, Object var2, Object var3, boolean nondeterministic) {
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L274:
+		{
+			link = ((Atom)var2).getArg(1);
+			var7 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.getMem().removeAtom(atom);
+			atom = ((Atom)var3);
+			atom.dequeue();
+			atom = ((Atom)var3);
+			atom.getMem().removeAtom(atom);
+			var4 = ((AbstractMembrane)var0).newAtom(((Atom)var3).getFunctor());
+			func = f2;
+			var6 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var1).getMem().inheritLink(
+				((Atom)var1), 0,
+				(Link)var7 );
+			((Atom)var6).getMem().newLink(
+				((Atom)var6), 0,
+				((Atom)var4), 0 );
+			atom = ((Atom)var6);
+			atom.getMem().enqueueAtom(atom);
+			atom = ((Atom)var1);
+			atom.getMem().enqueueAtom(atom);
+				try {
+					Class c = Class.forName("translated.Module_codec");
+					java.lang.reflect.Method method = c.getMethod("getRulesets", null);
+					Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+					for (int i = 0; i < rulesets.length; i++) {
+						((AbstractMembrane)var0).loadRuleset(rulesets[i]);
+					}
+				} catch (ClassNotFoundException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (NoSuchMethodException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (IllegalAccessException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (java.lang.reflect.InvocationTargetException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				}
+				try {
+					Class c = Class.forName("translated.Module_codec");
+					java.lang.reflect.Method method = c.getMethod("getRulesets", null);
+					Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+					for (int i = 0; i < rulesets.length; i++) {
+						((AbstractMembrane)var0).loadRuleset(rulesets[i]);
+					}
+				} catch (ClassNotFoundException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (NoSuchMethodException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (IllegalAccessException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (java.lang.reflect.InvocationTargetException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				}
+			ret = true;
+			break L274;
+		}
+		return ret;
+	}
+	public boolean execL275(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L275:
+		{
+			if (execL277(var0, var1, nondeterministic)) {
+				ret = true;
+				break L275;
+			}
+		}
+		return ret;
+	}
+	public boolean execL277(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L277:
+		{
+			if (!(!(f0).equals(((Atom)var1).getFunctor()))) {
+				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
+					link = ((Atom)var1).getArg(0);
+					var2 = link;
+					link = ((Atom)var1).getArg(0);
+					if (!(link.getPos() != 2)) {
+						var3 = link.getAtom();
+						if (!(!(f1).equals(((Atom)var3).getFunctor()))) {
+							link = ((Atom)var3).getArg(0);
+							var4 = link;
+							link = ((Atom)var3).getArg(1);
+							var5 = link;
+							link = ((Atom)var3).getArg(2);
+							var6 = link;
+							link = ((Atom)var3).getArg(0);
+							var7 = link.getAtom();
+							if (((Atom)var7).getFunctor() instanceof ObjectFunctor &&
+							    ((ObjectFunctor)((Atom)var7).getFunctor()).getObject() instanceof String) {
+								if (execL274(var0,var1,var3,var7,nondeterministic)) {
+									ret = true;
+									break L277;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL269(Object var0, boolean nondeterministic) {
+		Object var1 = null;
+		Object var2 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L269:
+		{
+			func = f3;
+			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
+			while (it1.hasNext()) {
+				atom = (Atom) it1.next();
+				var1 = atom;
+				link = ((Atom)var1).getArg(0);
+				if (!(link.getPos() != 2)) {
+					var2 = link.getAtom();
+					if (!(!(f1).equals(((Atom)var2).getFunctor()))) {
+						if (execL264(var0,var1,var2,nondeterministic)) {
+							ret = true;
+							break L269;
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+	public boolean execL264(Object var0, Object var1, Object var2, boolean nondeterministic) {
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Object var8 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L264:
+		{
+			link = ((Atom)var2).getArg(0);
+			var6 = link;
+			link = ((Atom)var2).getArg(1);
+			var7 = link;
+			link = ((Atom)var1).getArg(1);
+			var8 = link;
+			atom = ((Atom)var1);
+			atom.dequeue();
+			atom = ((Atom)var2);
+			atom.dequeue();
+			func = f4;
+			var3 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var3).getMem().inheritLink(
+				((Atom)var3), 0,
+				(Link)var6 );
+			((Atom)var3).getMem().newLink(
+				((Atom)var3), 1,
+				((Atom)var2), 0 );
+			((Atom)var1).getMem().inheritLink(
+				((Atom)var1), 0,
+				(Link)var7 );
+			((Atom)var1).getMem().newLink(
+				((Atom)var1), 1,
+				((Atom)var2), 1 );
+			((Atom)var2).getMem().inheritLink(
+				((Atom)var2), 2,
+				(Link)var8 );
+			atom = ((Atom)var1);
+			atom.getMem().enqueueAtom(atom);
+			atom = ((Atom)var3);
+			atom.getMem().enqueueAtom(atom);
+				try {
+					Class c = Class.forName("translated.Module_codec");
+					java.lang.reflect.Method method = c.getMethod("getRulesets", null);
+					Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+					for (int i = 0; i < rulesets.length; i++) {
+						((AbstractMembrane)var0).loadRuleset(rulesets[i]);
+					}
+				} catch (ClassNotFoundException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (NoSuchMethodException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (IllegalAccessException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (java.lang.reflect.InvocationTargetException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				}
+				try {
+					Class c = Class.forName("translated.Module_codec");
+					java.lang.reflect.Method method = c.getMethod("getRulesets", null);
+					Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+					for (int i = 0; i < rulesets.length; i++) {
+						((AbstractMembrane)var0).loadRuleset(rulesets[i]);
+					}
+				} catch (ClassNotFoundException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (NoSuchMethodException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (IllegalAccessException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				} catch (java.lang.reflect.InvocationTargetException e) {
+					Env.d(e);
+					Env.e("Undefined module codec");
+				}
+			ret = true;
+			break L264;
+		}
+		return ret;
+	}
+	public boolean execL265(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L265:
+		{
+			if (execL267(var0, var1, nondeterministic)) {
+				ret = true;
+				break L265;
+			}
+		}
+		return ret;
+	}
+	public boolean execL267(Object var0, Object var1, boolean nondeterministic) {
+		Object var2 = null;
+		Object var3 = null;
+		Object var4 = null;
+		Object var5 = null;
+		Object var6 = null;
+		Object var7 = null;
+		Atom atom;
+		Functor func;
+		Link link;
+		AbstractMembrane mem;
+		int x, y;
+		double u, v;
+		int isground_ret;
+		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		Set insset;
+		Set delset;
+		Map srcmap;
+		Map delmap;
+		Atom orig;
+		Atom copy;
+		Link a;
+		Link b;
+		Iterator it_deleteconnectors;
+		boolean ret = false;
+L267:
+		{
+			if (!(!(f3).equals(((Atom)var1).getFunctor()))) {
+				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
+					link = ((Atom)var1).getArg(0);
+					var2 = link;
+					link = ((Atom)var1).getArg(1);
+					var3 = link;
+					link = ((Atom)var1).getArg(0);
+					if (!(link.getPos() != 2)) {
+						var4 = link.getAtom();
+						if (!(!(f1).equals(((Atom)var4).getFunctor()))) {
+							link = ((Atom)var4).getArg(0);
+							var5 = link;
+							link = ((Atom)var4).getArg(1);
+							var6 = link;
+							link = ((Atom)var4).getArg(2);
+							var7 = link;
+							if (execL264(var0,var1,var4,nondeterministic)) {
+								ret = true;
+								break L267;
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
 	}
 	public boolean execL259(Object var0, boolean nondeterministic) {
 		Object var1 = null;
@@ -142,6 +652,7 @@ public class Ruleset603 extends Ruleset {
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -154,7 +665,7 @@ public class Ruleset603 extends Ruleset {
 		boolean ret = false;
 L259:
 		{
-			func = f0;
+			func = f5;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -187,6 +698,7 @@ L259:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -208,7 +720,7 @@ L255:
 			atom = ((Atom)var2);
 			atom.getMem().removeAtom(atom);
 			var3 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f1;
+			func = f6;
 			var4 = ((AbstractMembrane)var0).newAtom(func);
 			((Atom)var4).getMem().newLink(
 				((Atom)var4), 0,
@@ -231,6 +743,7 @@ L255:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -263,6 +776,7 @@ L256:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -275,7 +789,7 @@ L256:
 		boolean ret = false;
 L258:
 		{
-			if (!(!(f0).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f5).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
@@ -308,6 +822,7 @@ L258:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -353,6 +868,7 @@ L250:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -374,7 +890,7 @@ L246:
 			atom = ((Atom)var2);
 			atom.getMem().removeAtom(atom);
 			var3 = ((AbstractMembrane)var0).newAtom(((Atom)var2).getFunctor());
-			func = f3;
+			func = f7;
 			var4 = ((AbstractMembrane)var0).newAtom(func);
 			((Atom)var4).getMem().newLink(
 				((Atom)var4), 0,
@@ -397,6 +913,7 @@ L246:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -429,6 +946,7 @@ L247:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -477,6 +995,7 @@ L249:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -489,7 +1008,7 @@ L249:
 		boolean ret = false;
 L241:
 		{
-			func = f4;
+			func = f8;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -528,6 +1047,10 @@ L241:
 		Object var6 = null;
 		Object var7 = null;
 		Object var8 = null;
+		Object var9 = null;
+		Object var10 = null;
+		Object var11 = null;
+		Object var12 = null;
 		Atom atom;
 		Functor func;
 		Link link;
@@ -538,6 +1061,7 @@ L241:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -551,7 +1075,8 @@ L241:
 L235:
 		{
 			link = ((Atom)var2).getArg(1);
-			var8 = link;
+			var12 = link;
+			((AbstractMembrane)var1).clearRules();
 			atom = ((Atom)var2);
 			atom.dequeue();
 			atom = ((Atom)var2);
@@ -568,9 +1093,50 @@ L235:
 			((AbstractMembrane)var1).activate();
 			((AbstractMembrane)var0).insertProxies(((AbstractMembrane)var1));
 			var7 = ((AbstractMembrane)var0).newAtom(((Atom)var5).getFunctor());
+			func = f9;
+			var8 = ((AbstractMembrane)var1).newAtom(func);
+			func = Functor.INSIDE_PROXY;
+			var9 = ((AbstractMembrane)var1).newAtom(func);
+			func = f10;
+			var10 = ((AbstractMembrane)var0).newAtom(func);
+			func = Functor.OUTSIDE_PROXY;
+			var11 = ((AbstractMembrane)var0).newAtom(func);
+			((Atom)var8).getMem().newLink(
+				((Atom)var8), 0,
+				((Atom)var9), 1 );
+			((Atom)var10).getMem().newLink(
+				((Atom)var10), 0,
+				((Atom)var11), 1 );
+			((Atom)var11).getMem().newLink(
+				((Atom)var11), 0,
+				((Atom)var9), 0 );
 			((Atom)var7).getMem().inheritLink(
 				((Atom)var7), 0,
-				(Link)var8 );
+				(Link)var12 );
+			atom = ((Atom)var10);
+			atom.getMem().enqueueAtom(atom);
+			atom = ((Atom)var8);
+			atom.getMem().enqueueAtom(atom);
+				try {
+					Class c = Class.forName("translated.Module_nlmem");
+					java.lang.reflect.Method method = c.getMethod("getRulesets", null);
+					Ruleset[] rulesets = (Ruleset[])method.invoke(null, null);
+					for (int i = 0; i < rulesets.length; i++) {
+						((AbstractMembrane)var0).loadRuleset(rulesets[i]);
+					}
+				} catch (ClassNotFoundException e) {
+					Env.d(e);
+					Env.e("Undefined module nlmem");
+				} catch (NoSuchMethodException e) {
+					Env.d(e);
+					Env.e("Undefined module nlmem");
+				} catch (IllegalAccessException e) {
+					Env.d(e);
+					Env.e("Undefined module nlmem");
+				} catch (java.lang.reflect.InvocationTargetException e) {
+					Env.d(e);
+					Env.e("Undefined module nlmem");
+				}
 			((AbstractMembrane)var1).forceUnlock();
 			ret = true;
 			break L235;
@@ -597,6 +1163,7 @@ L235:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -637,6 +1204,7 @@ L236:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -649,7 +1217,7 @@ L236:
 		boolean ret = false;
 L238:
 		{
-			if (!(!(f4).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
@@ -709,6 +1277,7 @@ L238:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -728,7 +1297,7 @@ L230:
 					continue;
 				if (mem.lock()) {
 					var1 = mem;
-					func = f5;
+					func = f11;
 					Iterator it2 = ((AbstractMembrane)var1).atomIteratorOfFunctor(func);
 					while (it2.hasNext()) {
 						atom = (Atom) it2.next();
@@ -772,6 +1341,7 @@ L230:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -797,7 +1367,7 @@ L224:
 			((AbstractMembrane)var1).removeProxies();
 			((AbstractMembrane)var1).activate();
 			((AbstractMembrane)var0).insertProxies(((AbstractMembrane)var1));
-			func = f6;
+			func = f12;
 			var6 = ((AbstractMembrane)var1).newAtom(func);
 			func = Functor.INSIDE_PROXY;
 			var7 = ((AbstractMembrane)var1).newAtom(func);
@@ -839,6 +1409,7 @@ L224:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -878,6 +1449,7 @@ L225:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -890,7 +1462,7 @@ L225:
 		boolean ret = false;
 L228:
 		{
-			if (!(!(f5).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f11).equals(((Atom)var1).getFunctor()))) {
 				if(((Atom)var1).getMem().getKind() == 0) {
 					var2 = ((Atom)var1).getMem();
 					link = ((Atom)var1).getArg(0);
@@ -950,6 +1522,7 @@ L228:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -962,7 +1535,7 @@ L228:
 		boolean ret = false;
 L219:
 		{
-			func = f7;
+			func = f13;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -981,7 +1554,7 @@ L219:
 									link = ((Atom)var3).getArg(1);
 									if (!(link.getPos() != 0)) {
 										var5 = link.getAtom();
-										if (!(!(f8).equals(((Atom)var5).getFunctor()))) {
+										if (!(!(f9).equals(((Atom)var5).getFunctor()))) {
 											if (execL211(var0,var4,var1,var2,var5,var3,nondeterministic)) {
 												ret = true;
 												break L219;
@@ -1015,6 +1588,7 @@ L219:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1044,11 +1618,11 @@ L211:
 			((AbstractMembrane)var1).removeProxies();
 			((AbstractMembrane)var1).activate();
 			((AbstractMembrane)var0).insertProxies(((AbstractMembrane)var1));
-			func = f5;
+			func = f11;
 			var7 = ((AbstractMembrane)var1).newAtom(func);
 			func = Functor.INSIDE_PROXY;
 			var8 = ((AbstractMembrane)var1).newAtom(func);
-			func = f4;
+			func = f8;
 			var9 = ((AbstractMembrane)var0).newAtom(func);
 			func = Functor.OUTSIDE_PROXY;
 			var10 = ((AbstractMembrane)var0).newAtom(func);
@@ -1137,6 +1711,7 @@ L211:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1183,6 +1758,7 @@ L212:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1195,7 +1771,7 @@ L212:
 		boolean ret = false;
 L217:
 		{
-			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f9).equals(((Atom)var1).getFunctor()))) {
 				if(((Atom)var1).getMem().getKind() == 0) {
 					var2 = ((Atom)var1).getMem();
 					link = ((Atom)var1).getArg(0);
@@ -1219,7 +1795,7 @@ L217:
 									link = ((Atom)var8).getArg(1);
 									if (!(link.getPos() != 0)) {
 										var11 = link.getAtom();
-										if (!(!(f7).equals(((Atom)var11).getFunctor()))) {
+										if (!(!(f13).equals(((Atom)var11).getFunctor()))) {
 											link = ((Atom)var11).getArg(0);
 											var12 = link;
 											link = ((Atom)var11).getArg(1);
@@ -1271,6 +1847,7 @@ L217:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1283,7 +1860,7 @@ L217:
 		boolean ret = false;
 L214:
 		{
-			if (!(!(f7).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f13).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
@@ -1311,7 +1888,7 @@ L214:
 										link = ((Atom)var7).getArg(1);
 										if (!(link.getPos() != 0)) {
 											var11 = link.getAtom();
-											if (!(!(f8).equals(((Atom)var11).getFunctor()))) {
+											if (!(!(f9).equals(((Atom)var11).getFunctor()))) {
 												link = ((Atom)var11).getArg(0);
 												var12 = link;
 												if (execL211(var0,var8,var1,var4,var11,var7,nondeterministic)) {
@@ -1346,6 +1923,7 @@ L214:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1365,7 +1943,7 @@ L206:
 					continue;
 				if (mem.lock()) {
 					var1 = mem;
-					func = f9;
+					func = f14;
 					Iterator it2 = ((AbstractMembrane)var1).atomIteratorOfFunctor(func);
 					while (it2.hasNext()) {
 						atom = (Atom) it2.next();
@@ -1409,6 +1987,7 @@ L206:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1434,7 +2013,7 @@ L200:
 			((AbstractMembrane)var1).removeProxies();
 			((AbstractMembrane)var1).activate();
 			((AbstractMembrane)var0).insertProxies(((AbstractMembrane)var1));
-			func = f10;
+			func = f15;
 			var6 = ((AbstractMembrane)var1).newAtom(func);
 			func = Functor.INSIDE_PROXY;
 			var7 = ((AbstractMembrane)var1).newAtom(func);
@@ -1476,6 +2055,7 @@ L200:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1515,6 +2095,7 @@ L201:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1527,7 +2108,7 @@ L201:
 		boolean ret = false;
 L204:
 		{
-			if (!(!(f9).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f14).equals(((Atom)var1).getFunctor()))) {
 				if(((Atom)var1).getMem().getKind() == 0) {
 					var2 = ((Atom)var1).getMem();
 					link = ((Atom)var1).getArg(0);
@@ -1587,6 +2168,7 @@ L204:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1599,7 +2181,7 @@ L204:
 		boolean ret = false;
 L195:
 		{
-			func = f11;
+			func = f16;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -1618,7 +2200,7 @@ L195:
 									link = ((Atom)var3).getArg(1);
 									if (!(link.getPos() != 0)) {
 										var5 = link.getAtom();
-										if (!(!(f8).equals(((Atom)var5).getFunctor()))) {
+										if (!(!(f9).equals(((Atom)var5).getFunctor()))) {
 											if (execL187(var0,var4,var1,var2,var5,var3,nondeterministic)) {
 												ret = true;
 												break L195;
@@ -1652,6 +2234,7 @@ L195:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1681,11 +2264,11 @@ L187:
 			((AbstractMembrane)var1).removeProxies();
 			((AbstractMembrane)var1).activate();
 			((AbstractMembrane)var0).insertProxies(((AbstractMembrane)var1));
-			func = f9;
+			func = f14;
 			var7 = ((AbstractMembrane)var1).newAtom(func);
 			func = Functor.INSIDE_PROXY;
 			var8 = ((AbstractMembrane)var1).newAtom(func);
-			func = f4;
+			func = f8;
 			var9 = ((AbstractMembrane)var0).newAtom(func);
 			func = Functor.OUTSIDE_PROXY;
 			var10 = ((AbstractMembrane)var0).newAtom(func);
@@ -1774,6 +2357,7 @@ L187:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1820,6 +2404,7 @@ L188:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1832,7 +2417,7 @@ L188:
 		boolean ret = false;
 L193:
 		{
-			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f9).equals(((Atom)var1).getFunctor()))) {
 				if(((Atom)var1).getMem().getKind() == 0) {
 					var2 = ((Atom)var1).getMem();
 					link = ((Atom)var1).getArg(0);
@@ -1856,7 +2441,7 @@ L193:
 									link = ((Atom)var8).getArg(1);
 									if (!(link.getPos() != 0)) {
 										var11 = link.getAtom();
-										if (!(!(f11).equals(((Atom)var11).getFunctor()))) {
+										if (!(!(f16).equals(((Atom)var11).getFunctor()))) {
 											link = ((Atom)var11).getArg(0);
 											var12 = link;
 											link = ((Atom)var11).getArg(1);
@@ -1908,6 +2493,7 @@ L193:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1920,7 +2506,7 @@ L193:
 		boolean ret = false;
 L190:
 		{
-			if (!(!(f11).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f16).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
@@ -1948,7 +2534,7 @@ L190:
 										link = ((Atom)var7).getArg(1);
 										if (!(link.getPos() != 0)) {
 											var11 = link.getAtom();
-											if (!(!(f8).equals(((Atom)var11).getFunctor()))) {
+											if (!(!(f9).equals(((Atom)var11).getFunctor()))) {
 												link = ((Atom)var11).getArg(0);
 												var12 = link;
 												if (execL187(var0,var8,var1,var4,var11,var7,nondeterministic)) {
@@ -1983,6 +2569,7 @@ L190:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2002,7 +2589,7 @@ L182:
 					continue;
 				if (mem.lock()) {
 					var1 = mem;
-					func = f12;
+					func = f17;
 					Iterator it2 = ((AbstractMembrane)var1).atomIteratorOfFunctor(func);
 					while (it2.hasNext()) {
 						atom = (Atom) it2.next();
@@ -2046,6 +2633,7 @@ L182:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2071,7 +2659,7 @@ L176:
 			((AbstractMembrane)var1).removeProxies();
 			((AbstractMembrane)var1).activate();
 			((AbstractMembrane)var0).insertProxies(((AbstractMembrane)var1));
-			func = f13;
+			func = f18;
 			var6 = ((AbstractMembrane)var1).newAtom(func);
 			func = Functor.INSIDE_PROXY;
 			var7 = ((AbstractMembrane)var1).newAtom(func);
@@ -2113,6 +2701,7 @@ L176:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2152,6 +2741,7 @@ L177:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2164,7 +2754,7 @@ L177:
 		boolean ret = false;
 L180:
 		{
-			if (!(!(f12).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f17).equals(((Atom)var1).getFunctor()))) {
 				if(((Atom)var1).getMem().getKind() == 0) {
 					var2 = ((Atom)var1).getMem();
 					link = ((Atom)var1).getArg(0);
@@ -2224,6 +2814,7 @@ L180:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2236,7 +2827,7 @@ L180:
 		boolean ret = false;
 L171:
 		{
-			func = f14;
+			func = f4;
 			Iterator it1 = ((AbstractMembrane)var0).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
@@ -2255,7 +2846,7 @@ L171:
 									link = ((Atom)var3).getArg(1);
 									if (!(link.getPos() != 0)) {
 										var5 = link.getAtom();
-										if (!(!(f8).equals(((Atom)var5).getFunctor()))) {
+										if (!(!(f9).equals(((Atom)var5).getFunctor()))) {
 											if (execL163(var0,var4,var1,var2,var5,var3,nondeterministic)) {
 												ret = true;
 												break L171;
@@ -2289,6 +2880,7 @@ L171:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2318,11 +2910,11 @@ L163:
 			((AbstractMembrane)var1).removeProxies();
 			((AbstractMembrane)var1).activate();
 			((AbstractMembrane)var0).insertProxies(((AbstractMembrane)var1));
-			func = f12;
+			func = f17;
 			var7 = ((AbstractMembrane)var1).newAtom(func);
 			func = Functor.INSIDE_PROXY;
 			var8 = ((AbstractMembrane)var1).newAtom(func);
-			func = f4;
+			func = f8;
 			var9 = ((AbstractMembrane)var0).newAtom(func);
 			func = Functor.OUTSIDE_PROXY;
 			var10 = ((AbstractMembrane)var0).newAtom(func);
@@ -2411,6 +3003,7 @@ L163:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2457,6 +3050,7 @@ L164:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2469,7 +3063,7 @@ L164:
 		boolean ret = false;
 L169:
 		{
-			if (!(!(f8).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f9).equals(((Atom)var1).getFunctor()))) {
 				if(((Atom)var1).getMem().getKind() == 0) {
 					var2 = ((Atom)var1).getMem();
 					link = ((Atom)var1).getArg(0);
@@ -2493,7 +3087,7 @@ L169:
 									link = ((Atom)var8).getArg(1);
 									if (!(link.getPos() != 0)) {
 										var11 = link.getAtom();
-										if (!(!(f14).equals(((Atom)var11).getFunctor()))) {
+										if (!(!(f4).equals(((Atom)var11).getFunctor()))) {
 											link = ((Atom)var11).getArg(0);
 											var12 = link;
 											link = ((Atom)var11).getArg(1);
@@ -2545,6 +3139,7 @@ L169:
 		boolean eqground_ret;
 		boolean guard_inline_ret;
 		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -2557,7 +3152,7 @@ L169:
 		boolean ret = false;
 L166:
 		{
-			if (!(!(f14).equals(((Atom)var1).getFunctor()))) {
+			if (!(!(f4).equals(((Atom)var1).getFunctor()))) {
 				if (!(((AbstractMembrane)var0) != ((Atom)var1).getMem())) {
 					link = ((Atom)var1).getArg(0);
 					var2 = link;
@@ -2585,7 +3180,7 @@ L166:
 										link = ((Atom)var7).getArg(1);
 										if (!(link.getPos() != 0)) {
 											var11 = link.getAtom();
-											if (!(!(f8).equals(((Atom)var11).getFunctor()))) {
+											if (!(!(f9).equals(((Atom)var11).getFunctor()))) {
 												link = ((Atom)var11).getArg(0);
 												var12 = link;
 												if (execL163(var0,var8,var1,var4,var11,var7,nondeterministic)) {
@@ -2605,19 +3200,23 @@ L166:
 		}
 		return ret;
 	}
-	private static final Functor f9 = new Functor("encodeRulesets", 1, "codec");
-	private static final Functor f12 = new Functor("encode", 1, "codec");
-	private static final Functor f1 = new StringFunctor("/*inline*/\r\n    try {\r\n      String filename = me.nth(0);\r\n      FileInputStream fis = new FileInputStream(filename);\r\n      InputStreamReader isr = new InputStreamReader(fis);\r\n      BufferedReader br = new BufferedReader(isr);\r\n      LMNParser lp;\r\n      compile.structure.Membrane m;\r\n      Ruleset rs;\r\n      lp = new LMNParser(br);\r\n      m = lp.parse();\r\n      rs = RulesetCompiler.compileMembrane(m);\r\n      rs.react((Membrane)mem);\r\n      br.close();\r\n    } catch(IOException e) {\r\n      e.printStackTrace();\r\n    } catch(ParseException e) {\r\n      e.printStackTrace();\r\n    }\r\n    me.nthAtom(0).remove();\r\n    me.remove();\r\n  ");
-	private static final Functor f13 = new StringFunctor("/*inline*/\r\n    me.remove();\r\n    StringFunctor sFunc =\r\n      new StringFunctor(((Membrane)mem).encode());\r\n    Atom sAtom = mem.newAtom(sFunc);\r\n    mem.relinkAtomArgs(sAtom,0,me,0);\r\n  ");
-	private static final Functor f10 = new StringFunctor("/*inline*/\r\n    me.remove();\r\n    StringFunctor sFunc =\r\n      new StringFunctor(((Membrane)mem).encodeRulesets());\r\n    Atom sAtom = mem.newAtom(sFunc);\r\n    mem.relinkAtomArgs(sAtom,0,me,0);\r\n  ");
-	private static final Functor f3 = new StringFunctor("/*inline*/\r\n    String str = me.nth(0);\r\n    LMNParser lp;\r\n    compile.structure.Membrane m;\r\n    Ruleset rs;\r\n    try {\r\n      lp = new LMNParser(new StringReader(str));\r\n      m = lp.parse();\r\n      rs = RulesetCompiler.compileMembrane(m);\r\n      rs.react((Membrane)mem);\r\n    } catch(ParseException e) {\r\n      e.printStackTrace();\r\n    }\r\n    me.nthAtom(0).remove();\r\n    me.remove();\r\n  ");
-	private static final Functor f5 = new Functor("encodeProcess", 1, "codec");
-	private static final Functor f8 = new Functor("+", 1, null);
-	private static final Functor f7 = new Functor("memProcessEncoder", 2, "codec");
-	private static final Functor f11 = new Functor("memRulesetsEncoder", 2, "codec");
-	private static final Functor f14 = new Functor("memEncoder", 2, "codec");
+	private static final Functor f14 = new Functor("encodeRulesets", 1, "codec");
+	private static final Functor f10 = new Functor("kill", 1, "nlmem");
+	private static final Functor f17 = new Functor("encode", 1, "codec");
+	private static final Functor f6 = new StringFunctor("/*inline*/\r\n    try {\r\n      String filename = me.nth(0);\r\n      FileInputStream fis = new FileInputStream(filename);\r\n      InputStreamReader isr = new InputStreamReader(fis);\r\n      BufferedReader br = new BufferedReader(isr);\r\n      LMNParser lp;\r\n      compile.structure.Membrane m;\r\n      Ruleset rs;\r\n      lp = new LMNParser(br);\r\n      m = lp.parse();\r\n      rs = RulesetCompiler.compileMembrane(m);\r\n      rs.react((Membrane)mem);\r\n      br.close();\r\n    } catch(IOException e) {\r\n      e.printStackTrace();\r\n    } catch(ParseException e) {\r\n      e.printStackTrace();\r\n    }\r\n    me.nthAtom(0).remove();\r\n    me.remove();\r\n  ");
+	private static final Functor f18 = new StringFunctor("/*inline*/\r\n    me.remove();\r\n    StringFunctor sFunc =\r\n      new StringFunctor(((Membrane)mem).encode());\r\n    Atom sAtom = mem.newAtom(sFunc);\r\n    mem.relinkAtomArgs(sAtom,0,me,0);\r\n  ");
+	private static final Functor f0 = new Functor("decodeFilter", 1, "codec");
+	private static final Functor f15 = new StringFunctor("/*inline*/\r\n    me.remove();\r\n    StringFunctor sFunc =\r\n      new StringFunctor(((Membrane)mem).encodeRulesets());\r\n    Atom sAtom = mem.newAtom(sFunc);\r\n    mem.relinkAtomArgs(sAtom,0,me,0);\r\n  ");
+	private static final Functor f1 = new Functor(".", 3, null);
+	private static final Functor f7 = new StringFunctor("/*inline*/\r\n    String str = me.nth(0);\r\n    LMNParser lp;\r\n    compile.structure.Membrane m;\r\n    Ruleset rs;\r\n    try {\r\n      lp = new LMNParser(new StringReader(str));\r\n      m = lp.parse();\r\n      rs = RulesetCompiler.compileMembrane(m);\r\n      rs.react((Membrane)mem);\r\n    } catch(ParseException e) {\r\n      e.printStackTrace();\r\n    }\r\n    me.nthAtom(0).remove();\r\n    me.remove();\r\n  ");
+	private static final Functor f9 = new Functor("+", 1, null);
+	private static final Functor f11 = new Functor("encodeProcess", 1, "codec");
+	private static final Functor f3 = new Functor("encodeFilter", 2, "codec");
+	private static final Functor f16 = new Functor("memRulesetsEncoder", 2, "codec");
+	private static final Functor f13 = new Functor("memProcessEncoder", 2, "codec");
+	private static final Functor f4 = new Functor("memEncoder", 2, "codec");
 	private static final Functor f2 = new Functor("strDecoder", 1, "codec");
-	private static final Functor f6 = new StringFunctor("/*inline*/\r\n    me.remove();\r\n    StringFunctor sFunc =\r\n      new StringFunctor(((Membrane)mem).encodeProcess());\r\n    Atom sAtom = mem.newAtom(sFunc);\r\n    mem.relinkAtomArgs(sAtom,0,me,0);\r\n  ");
-	private static final Functor f0 = new Functor("fileDecoder", 1, "codec");
-	private static final Functor f4 = new Functor("encoded", 2, "codec");
+	private static final Functor f12 = new StringFunctor("/*inline*/\r\n    me.remove();\r\n    StringFunctor sFunc =\r\n      new StringFunctor(((Membrane)mem).encodeProcess());\r\n    Atom sAtom = mem.newAtom(sFunc);\r\n    mem.relinkAtomArgs(sAtom,0,me,0);\r\n  ");
+	private static final Functor f5 = new Functor("fileDecoder", 1, "codec");
+	private static final Functor f8 = new Functor("encoded", 2, "codec");
 }

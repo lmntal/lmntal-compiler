@@ -8,6 +8,9 @@ public class Module_codec{
 		return rulesets;
 	}
 	public static void loadUserDefinedSystemRuleset() {
+		loadSystemRulesetFromModule("nlmem");
+		runtime.Inline.inlineSet.put("module_nlmem.lmn", new runtime.InlineUnit("nlmem.lmn"));
+		runtime.Inline.inlineSet.put("public/codec.lmn", new runtime.InlineUnit("public/codec.lmn"));
 	}
 	private static void loadSystemRulesetFromModule(String moduleName) {
 		try {

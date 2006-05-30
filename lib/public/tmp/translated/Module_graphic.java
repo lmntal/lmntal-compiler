@@ -3,11 +3,12 @@ import translated.module_graphic.*;
 import runtime.SystemRulesets;
 import runtime.Ruleset;
 public class Module_graphic{
-	private static Ruleset[] rulesets = {Ruleset609.getInstance()};
+	private static Ruleset[] rulesets = {Ruleset607.getInstance()};
 	public static Ruleset[] getRulesets() {
 		return rulesets;
 	}
 	public static void loadUserDefinedSystemRuleset() {
+		runtime.Inline.inlineSet.put("public/graphic.lmn", new runtime.InlineUnit("public/graphic.lmn"));
 	}
 	private static void loadSystemRulesetFromModule(String moduleName) {
 		try {

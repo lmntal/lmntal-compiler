@@ -3,11 +3,12 @@ import translated.module_sys.*;
 import runtime.SystemRulesets;
 import runtime.Ruleset;
 public class Module_sys{
-	private static Ruleset[] rulesets = {Ruleset629.getInstance()};
+	private static Ruleset[] rulesets = {Ruleset619.getInstance()};
 	public static Ruleset[] getRulesets() {
 		return rulesets;
 	}
 	public static void loadUserDefinedSystemRuleset() {
+		runtime.Inline.inlineSet.put("public/sys.lmn", new runtime.InlineUnit("public/sys.lmn"));
 	}
 	private static void loadSystemRulesetFromModule(String moduleName) {
 		try {

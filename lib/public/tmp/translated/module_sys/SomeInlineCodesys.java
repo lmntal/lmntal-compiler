@@ -2,6 +2,31 @@ package translated.module_sys;
 import runtime.*;
 import java.util.*;
 public class SomeInlineCodesys {
+	public boolean runGuard(String guardID, Membrane mem, Object obj) throws GuardNotFoundException {
+		try {
+		String name = "SomeInlineCodesysCustomGuardImpl";
+
+			CustomGuard cg=(CustomGuard)Class.forName(name).newInstance();
+
+			if(cg==null) throw new GuardNotFoundException();
+
+			return cg.run(guardID, mem, obj);
+
+		} catch(GuardNotFoundException e) {
+			throw new GuardNotFoundException();
+
+		} catch(ClassNotFoundException e) {
+		} catch(InstantiationException e) {
+		} catch(IllegalAccessException e) {
+		} catch(Exception e) {
+
+			e.printStackTrace();
+
+		}
+
+		throw new GuardNotFoundException();
+
+	}
 	public static void run(Atom me, int codeID) {
 		AbstractMembrane mem = me.getMem();
 		switch(codeID) {

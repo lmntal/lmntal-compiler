@@ -8,6 +8,7 @@ public class Module_array{
 		return rulesets;
 	}
 	public static void loadUserDefinedSystemRuleset() {
+		runtime.Inline.inlineSet.put("public/array.lmn", new runtime.InlineUnit("public/array.lmn"));
 	}
 	private static void loadSystemRulesetFromModule(String moduleName) {
 		try {
