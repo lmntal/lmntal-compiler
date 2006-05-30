@@ -31,7 +31,6 @@ import runtime.FloatingFunctor;
 import runtime.FrontEnd;
 import runtime.Functor;
 import runtime.Inline;
-import runtime.InlineCode;
 import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
@@ -70,7 +69,7 @@ public class Translator {
 		// public/*.lmn から std_lib.jar を作成
 		fStandardLibrary = true;
 		fKeepSource = true;
-		baseDirName = "public/tmp";
+		baseDirName = "public";
 
 		File publicDir = new File("public");
 		if (!publicDir.exists() || !publicDir.isDirectory()) {

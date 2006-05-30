@@ -88,7 +88,7 @@
 	<target name="lib_clean" description="delete compiled lmntal libraries">
 		<delete>
 			<fileset dir="${lmntal_lib}" includes="*.jar" />
-			<fileset dir="${lmntal_lib}/public/tmp/translated" includes="*.class" />
+			<fileset dir="${lmntal_lib}/public/translated" includes="*.class" />
 		</delete>
 	</target>
 
