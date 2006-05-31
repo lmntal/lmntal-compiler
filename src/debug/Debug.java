@@ -118,6 +118,7 @@ public class Debug {
 			BufferedReader br = new BufferedReader(new FileReader(unitName));
 			String s = null;
 			source = new Vector();
+			source.add("** system rule **");
 			while ((s = br.readLine()) != null)
 				source.add(s);
 		} catch (FileNotFoundException e) {
@@ -161,9 +162,26 @@ public class Debug {
 	public static boolean addBreakPoint(int lineno) {
 		Iterator iter = ruleIterator();
 		while (iter.hasNext()) {
-			int r = ((Rule)iter.next()).lineno;
-			if (r == lineno) {
+			Rule r = (Rule)iter.next();
+			if (r.lineno == lineno) {
 				breakPoints.add(new Integer(lineno));
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * ルール名を指定してブレークポイントを追加する
+	 * @param name ルール名
+	 * @return 指定されたルール名がなかったらfalse
+	 */
+	public static boolean addBreakPoint(String name) {
+		Iterator iter = ruleIterator();
+		while (iter.hasNext()) {
+			Rule r = (Rule)iter.next();
+			if (r.name != null && r.name.equals(name)) {
+				breakPoints.add(new Integer(r.lineno));
 				return true;
 			}
 		}
@@ -265,9 +283,14 @@ public class Debug {
 				} else if (s.startsWith("b")) {//ブレークポイントの切り替え
 					String[] ss = s.split("[ \t]+");
 					if (ss.length < 2) continue;
-					int lineNumber = Integer.parseInt(ss[1]);
-					if (addBreakPoint(lineNumber)) System.out.println("Breakpoint "+breakPoints.size()+", line"+lineNumber);
-					else System.out.println("No rlue at line "+lineNumber);
+					try {
+						int lineNumber = Integer.parseInt(ss[1]);
+						if (addBreakPoint(lineNumber)) System.out.println("Breakpoint "+breakPoints.size()+", line"+lineNumber);
+						else System.out.println("No rlue at line "+lineNumber);
+					} catch (NumberFormatException e) {
+						if (addBreakPoint(ss[1])) System.out.println("Breakpoint "+breakPoints.size()+", "+ss[1]);
+						else System.out.println("No rlue "+ss[1]);
+					}
 				} else if (s.startsWith("c")) {//実行を再開
 					System.out.println("Continuing.");
 					break;
