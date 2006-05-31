@@ -6,8 +6,10 @@ package runtime;
 
 import java.io.BufferedReader;
 import java.io.EOFException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.Iterator;
 
@@ -149,6 +151,20 @@ public class REPL {
 						Env.p("gui mode off");
 						Env.fGUI = false;
 						continue;
+					} else if(nline.startsWith("l")) {//2006.5.25 by inui
+						String ss[] = nline.split(" ");
+						if (ss.length == 1) {
+							Env.p("load [file ...]");
+							continue;
+						}
+						for (int i = 1; i < ss.length; i++) {
+							BufferedReader br = new BufferedReader(new FileReader(ss[i]));
+							String s = null;
+							while ((s = br.readLine()) != null)	Env.p(s);
+							FrontEnd.run(new FileReader(ss[i]));
+						}
+						Env.fREMAIN = true;
+						Env.p("remain mode on");
 					} else if(nline.equals("r") || nline.equals("rules")) {
 						showRules();
 						continue;
@@ -236,7 +252,8 @@ public class REPL {
 		System.out.println("  "+"[no]gui            - set gui mode");//2006.2.9 inui
 		System.out.println("  "+"r | rules          - show current rules");					
 		System.out.println("  "+"(rm | remove) [ruleset number...]");					
-		System.out.println("  "+"                   - remove specified rulesets  (ex: rm 601)");					
+		System.out.println("  "+"                   - remove specified rulesets  (ex: rm 601)");
+		System.out.println("  "+"l | load [file...]- load specified files (and remain mode on)");
 		System.out.println("  "+"h                  - help");
 		System.out.println("  "+"q                  - quit");
 	}
