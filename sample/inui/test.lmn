@@ -1,0 +1,4 @@
+H=gcd($m, $n) :- $m > $n | H=gcd($m-$n, $n).
+H=gcd($m, $n) :- $m < $n | H=gcd($m, $n-$m).
+H=gcd($m, $n) :- $m = $n | H=$m.
+ret=gcd(8, 20).
