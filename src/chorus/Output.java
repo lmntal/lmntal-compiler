@@ -106,9 +106,9 @@ public final class Output{
 			Runtime runtime = Runtime.getRuntime();
 			Process p;
 			try {
-				p = runtime.exec("make " + file + ".class", null, new File(filePath));
+				p = runtime.exec("make -f " + file + "_Makefile " + file + ".class", null, new File(filePath));
 				p.waitFor();
-				p = runtime.exec("cmd.exe /c start cmd.exe /c make " + file + "_run", null, new File(filePath));
+				p = runtime.exec("cmd.exe /c start cmd.exe /c make -f " + file + "_Makefile " + file + "_run", null, new File(filePath));
 				p.waitFor();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -130,7 +130,6 @@ public final class Output{
 	 * @param parentPath 出力するディレクトリ
 	 */
 	private static void makeMakefile(String file, String parentPath){
-		System.out.println(Setting.getRelativeAddress(setting.getValue("JNIDIR"), file));
 		String msg =
 			"LIBDIR=" + Setting.getRelativeAddress(setting.getValue("JNIDIR"), file) + "\n" +
 			"#\n" +
@@ -169,8 +168,8 @@ public final class Output{
 			"	$(RM) *.class\n";
 		
 		try {
-			System.out.println(parentPath + "Makefile");
-			FileOutputStream fos = new FileOutputStream(parentPath + "Makefile");
+			System.out.println("output:" + file + "_Makefile");
+			FileOutputStream fos = new FileOutputStream(parentPath + file + "_Makefile");
 			OutputStreamWriter osw = new OutputStreamWriter(fos , ENCODE);
 			BufferedWriter bw = new BufferedWriter(osw);
 			
