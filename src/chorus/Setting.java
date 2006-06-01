@@ -6,6 +6,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * 設定ファイルから各種設定を読み込む
+ * @author nakano
+ *
+ */
 public class Setting {
 	private HashMap settingMap = new HashMap();
 	
@@ -22,6 +27,10 @@ public class Setting {
 	}
 	
 	public String getValue(String key){
+		if(!settingMap.containsKey(key)){
+			System.err.println("項目\"" + key + "\"が存在しません．");
+			System.exit(0);
+		}
 		return (String)settingMap.get(key);
 	}
 
@@ -35,7 +44,15 @@ public class Setting {
 	 */
 	public static String getRelativeAddress(String file1, String file2){
 		File f1 = new File(file1);
-		File f2 = new File(file2);
+		File f2 = new File(file2 + ".java");
+		if(!f1.exists()){
+			System.err.println(file1+"　が存在しません．");
+			System.exit(0);
+		}
+		if(!f2.exists()){
+			System.err.println(file2+"　が存在しません．");
+			System.exit(0);
+		}
 		StringBuffer s1 = new StringBuffer(f1.getAbsolutePath());
 		StringBuffer s2 = new StringBuffer(f2.getAbsolutePath());
 		StringBuffer result = new StringBuffer();
