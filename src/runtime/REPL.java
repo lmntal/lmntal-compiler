@@ -6,10 +6,10 @@ package runtime;
 
 import java.io.BufferedReader;
 import java.io.EOFException;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringReader;
 import java.util.Iterator;
 
@@ -157,13 +157,13 @@ public class REPL {
 							Env.p("load [file ...]");
 							continue;
 						}
+						Env.fREMAIN = true;
 						for (int i = 1; i < ss.length; i++) {
-							BufferedReader br = new BufferedReader(new FileReader(ss[i]));
-							String s = null;
-							while ((s = br.readLine()) != null)	Env.p(s);
+//							BufferedReader br = new BufferedReader(new FileReader(ss[i]));
+//							String s = null;
+//							while ((s = br.readLine()) != null)	Env.p(s);
 							FrontEnd.run(new FileReader(ss[i]));
 						}
-						Env.fREMAIN = true;
 						Env.p("remain mode on");
 					} else if(nline.equals("r") || nline.equals("rules")) {
 						showRules();
@@ -199,6 +199,8 @@ public class REPL {
 				}
 			} catch (EOFException e) {
 				break;
+			} catch (FileNotFoundException e) {//2006.6.1 by inui
+				System.err.println(e);
 			} catch (Exception e) {
 				e.printStackTrace();
 				//doSomething();
