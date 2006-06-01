@@ -9,6 +9,7 @@ import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.Iterator;
@@ -168,6 +169,17 @@ public class REPL {
 					} else if(nline.equals("r") || nline.equals("rules")) {
 						showRules();
 						continue;
+					} else if(nline.startsWith("!")) {//2006.6.1 by inui
+						String command = nline.substring(1).trim();//!のあとはスペースはあってもなくてもok
+						ProcessBuilder pb = new ProcessBuilder(command.split("[ \t]+"));
+						Process p = pb.start();						
+						//出力を受け取って表示する
+						InputStream is = p.getInputStream();
+						BufferedReader br = new BufferedReader(new InputStreamReader(is));
+						String s = null;
+						while ((s = br.readLine()) != null) {
+							System.out.println(s);
+						}
 					} else if(nline.startsWith("rm") || nline.startsWith("remove")) {
 						if(Env.remainedRuntime!=null) {
 							String s[] = nline.split(" ");
@@ -201,9 +213,11 @@ public class REPL {
 				break;
 			} catch (FileNotFoundException e) {//2006.6.1 by inui
 				System.err.println(e);
-			} catch (Exception e) {
-				e.printStackTrace();
-				//doSomething();
+			} catch (IOException e) {
+				System.err.println(e);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				//doSomething();
 			}
 		}
 		Readline.cleanup();  // see note above about addShutdownHook
