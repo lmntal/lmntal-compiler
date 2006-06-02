@@ -39,6 +39,13 @@ public class Setting {
 		return (String)settingMap.get(key);
 	}
 	
+	public String tryGetValue(String key){
+		if(!settingMap.containsKey(key)){
+			return null;
+		}
+		return (String)settingMap.get(key);
+	}
+	
 	/**
 	 * 項目の値を取得する
 	 * 取得する際に値をパスと解釈して，存在するパスかどうかをチェックする．

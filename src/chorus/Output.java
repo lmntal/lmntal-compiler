@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -60,11 +59,12 @@ public final class Output{
 			msg = header(file, afterRelease);
 			bw.write(msg);
 			
-			msg = "        LinkedList nodeList = new LinkedList();\n";
+			msg = "        LinkedList nodeList = new LinkedList();\n" +
+				"        HashMap atomMap = getAtom();\n";
 			bw.write(msg);
 			
 			msg = "        for(int nodeCount = 0; nodeCount < " + idMap.size() + "; nodeCount++){\n"+
-			"        	GraphNode node = new GraphNode(atomApp, root);\n"+
+			"        	GraphNode node = new GraphNode(atomApp, root, (Float)atomMap.get(nodeCount));\n"+
 			"        	graphNodes.addElement(node);\n"+
 			"        	nodeList.add(node);\n"+
 			"        }\n";
@@ -82,6 +82,7 @@ public final class Output{
 			String filePath = javaFile.getAbsolutePath().substring(0, javaFile.getAbsolutePath().length() - file.length() - ".java".length());
 			
 			outPutEdgeFile(idMap, atomMap, file);
+			outPutAtomFile(idMap, atomMap, file);
 			makeMakefile(file, filePath);
 			Runtime runtime = Runtime.getRuntime();
 			Process p;
@@ -102,6 +103,54 @@ public final class Output{
 			e.printStackTrace();
 		}
 		System.out.println("output:"+file+".java");
+	}
+	
+	/**
+	 * リンクの設定ファイルを出力する．
+	 * @param idMap IDとアトムを対応させたマップ
+	 * @param atomMap　アトムとIDを対応させたマップ
+	 * @param file
+	 */
+	private static void outPutAtomFile(Map idMap, Map atomMap, String file){
+		String msg;
+		Iterator atomIte = idMap.keySet().iterator();
+
+		try {
+			FileOutputStream fos = new FileOutputStream(file+"_Atom.dat");
+			OutputStreamWriter osw = new OutputStreamWriter(fos , ENCODE);
+			BufferedWriter bw = new BufferedWriter(osw);
+			
+			while(atomIte.hasNext()){
+				Integer atomID = (Integer)atomIte.next();
+				Atom atom = (Atom)idMap.get(atomID);
+				String size =
+					(null != setting.tryGetValue(atom.getName()))
+					? setting.tryGetValue(atom.getName())
+					: setting.getValue("ATOM_SIZE");
+
+				for(int i = 0; i < atom.getEdgeCount(); i++){
+					msg = atomID +
+					"," +
+					size +
+					"\n";
+					bw.write(msg);
+				}
+			}
+			
+			bw.close();
+			osw.close();
+			fos.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("output:" + file + "_Atom.dat");
 	}
 	
 	private static void outPutEdgeFile(Map idMap, Map atomMap, String file){
@@ -259,14 +308,14 @@ public final class Output{
 		"\n" +
 		"        C3Variable3D pos;\n" +
 		"\n" +
-		"        GraphNode(Appearance app, Group parentGrp)\n" +
+		"        GraphNode(Appearance app, Group parentGrp, float size)\n" +
 		"        {\n" +
 		"            grp = new TransformGroup();\n" +
 		"            grp.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);\n" +
 		"            grp.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);\n" +
 		"            grp.setCapability(TransformGroup.ENABLE_PICK_REPORTING);\n" +
 		"            parentGrp.addChild(grp);\n" +
-		"            Sphere sphere = new Sphere(" + setting.getValue("ATOM_SIZE") + "f, app);\n" +
+		"            Sphere sphere = new Sphere(size, app);\n" +
 		"            grp.addChild(sphere);\n" +
 		"\n" +
 		"            pos = new C3Variable3D(\n" +
@@ -410,6 +459,46 @@ public final class Output{
 		"			e.printStackTrace();\n" +
 		"		}\n" +
 		"       return edgeList;\n" +
+		"	}\n" +
+		"	private HashMap getAtom(){\n" +
+		"        //  Atom取得\n" +
+		"		int i;\n" +
+		"		StringBuffer s = new StringBuffer();\n" +
+		"		String key = null;\n" +
+		"		String value = null;\n" +
+		"		boolean isKey = true;\n" +
+		"		HashMap atomMap = new HashMap();\n" +
+		"		try {\n" +
+		"			FileReader file = new FileReader(\""+ file +"_Atom.dat\");\n" +
+		"			while((i = file.read()) != -1){\n" +
+		"				// key\n" +
+		"				if((char)i == ','){\n" +
+		"					key = s.toString();\n" +
+		"					s = new StringBuffer();\n" +
+		"					isKey = false;\n" +
+		"					continue;\n" +
+		"				}\n" +
+		"				// value\n" +
+		"				else if((char)i == '\\n' || (char)i == '\\r'){\n" +
+		"					if(isKey || key == null){\n" +
+		"						key = value = null;\n" +
+		"						continue;\n" +
+		"					}\n" +
+		"					value = s.toString();\n" +
+		"					s = new StringBuffer();\n" +
+		"					isKey = true;\n" +
+		"					atomMap.put(Integer.parseInt(key), Float.parseFloat(value));\n" +
+		"					key = value = null;\n" +
+		"					continue;\n" +
+		"				}\n" +
+		"				// 文字取得\n" +
+		"				s.append((char)i);\n" +
+		"			}\n" +
+		"		} catch (IOException e) {\n" +
+		"			// TODO Auto-generated catch block\n" +
+		"			e.printStackTrace();\n" +
+		"		}\n" +
+		"       return atomMap;\n" +
 		"	}\n" +
 		"    public " + file + "()\n" +
 		"    {\n" +
