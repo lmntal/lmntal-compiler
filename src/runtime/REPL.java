@@ -189,7 +189,7 @@ public class REPL {
 								while(it.hasNext()) {
 									InterpretedRuleset rs = (InterpretedRuleset)it.next();
 									if(rs.toString().matches(".*?"+s[i]+".*")) {
-										Env.p(rs+" has removed.");
+										Env.p(rs+" removed.");
 										it.remove();
 									}
 								}
