@@ -68,16 +68,16 @@ pi.use.
 */
 
 /*         _           _            _      _                    */
-/* (new z)(x<y> + z(w).w<y>) | x<u>.u<v> | x<z>                 */
-/*               _      _                _         _      _     */
-/*  -->* (new z)(y(v) | x(z)) or (new z)(xy + z(w).w(y) | z(v)) */
+/* (new z)(x<y> + z(w).w<y>) | x(u).u<v> | x<z>                 */
+/*               _      _          _                            */
+/*  -->* (new z)(y(v) | x(z))  or  v(y)                         */
 /*
 { example3. pi.use.
-  {snd(X0,Y0,{}),get(Z0,W0,{{snd(W1,Y1,{})}})},
+  {once,snd(X0,Y0,{}),get(Z0,W,{{snd(W,Y1,{})}})},
   {once,get(X1,U,{{snd(U,V,{})}})},
-  {snd(X2,Z1,{})},
+  {once,snd(X2,Z1,{})},
   {name(x),+X0,+X1,+X2}, {name(y),+Y0,+Y1}, {name,+Z0,+Z1},
-  {name(v),+V}, {name(w),+W0,+W1} 
+  {name(v),+V}
 }.
 */
 

@@ -1,0 +1,16 @@
+/* generate primes in a membrane */
+{ n(integer.set(2,12)).
+  n($m), n($n) :- $m mod $n =:= 0 | n($n).
+}.
+
+/* extract prime numbers out of the membrane */
+{n($prime),$p,@p}/ :- int($prime) | {$p,@p}, t($prime,12,0).
+{@p} :- .
+
+/* factorize */
+t($p,$a,$k) :- $a mod $p =:= 0, int($k) | t($p, $a/$p, $k+1).
+t($p,$a,$k) :- $a mod $p =\= 0, int($k) | p($p, $k).
+p($p,0) :- int($p) | .
+
+% /* display */
+% p($x,$y) :- int($x), $y > 0 | n($x), p($x,$y-1).
