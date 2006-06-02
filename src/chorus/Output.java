@@ -178,7 +178,7 @@ public final class Output{
 						msg = atomID +
 								"," +
 								((Integer)atomMap.get(atom2)).intValue() +
-								",2" +
+								",1" +
 								"\n";
 						bw.write(msg);
 					}
