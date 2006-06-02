@@ -1,1 +1,43 @@
-a(integer.set(10,1)).
+gen(integer.set(1,10)).
+
+a(L1, L2, L7).
+b(L1, L6, A).
+c(L5, L6).
+d(L4, L5, L9).
+e(L3, L4, B).
+f(L2, L3).
+g(L7, L8, X).
+h(L8, L9, Y).
+
+aa(M1, M2, M7).
+bb(M1, M6, AA).
+cc(M5, M6).
+dd(M4, M5, M9).
+ee(M3, M4, BB).
+ff(M2, M3).
+gg(M7, M8, X).
+hh(M8, M9, Y).
+
+a(A, a, a).
+a(AA).
+b(B, b, b).
+b(BB).
+
+a(A),b(B),gen(_IX) :- 
+a(AA),b(BB),
+a(L1, L2, L7),
+b(L1, L6, AA),
+c(L5, L6),
+d(L4, L5, L9),
+e(L3, L4, BB),
+f(L2, L3),
+g(L7, L8, X),
+h(L8, L9, Y),
+aa(M1, M2, M7),
+bb(M1, M6, A),
+cc(M5, M6),
+dd(M4, M5, M9),
+ee(M3, M4, B),
+ff(M2, M3),
+gg(M7, M8, X),
+hh(M8, M9, Y).

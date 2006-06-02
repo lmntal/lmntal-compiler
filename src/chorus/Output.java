@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
 
 import runtime.AbstractMembrane;
@@ -37,7 +38,6 @@ public final class Output{
 	public static void out(String file, AbstractMembrane mem){
 		try {
 			String msg;
-			HashSet linkSet = new HashSet();
 			HashMap atomMap = new HashMap();
 			TreeMap idMap = new TreeMap();
 			boolean afterRelease = true;
@@ -60,36 +60,15 @@ public final class Output{
 			msg = header(file, afterRelease);
 			bw.write(msg);
 			
-			atomIte = idMap.keySet().iterator();
-			while(atomIte.hasNext()){
-				Integer atomID = (Integer)atomIte.next();
-				Atom atom = (Atom)idMap.get(atomID);
-				String atomName = getAtomName(atomID.intValue());
-
-				msg = "        GraphNode " + getAtomName(atomID.intValue()) + " = new GraphNode(atomApp, root);\n" +
-				"        graphNodes.addElement(" + getAtomName(atomID.intValue()) + ");\n";
-				bw.write(msg);
-				
-				for(int i = 0; i < atom.getEdgeCount(); i++){
-					Atom atom2 = atom.nthAtom(i);
-					String atomName2 = getAtomName(((Integer)atomMap.get(atom2)).intValue());
-					if(atomName.compareTo(atomName2) > 0){
-						linkSet.add("        graphEdges.addElement(new GraphEdge(" +
-								atomName +
-								", " +
-								atomName2 +
-								", whiteApp, root));\n");
-					}
-				}
-			}
+			msg = "        LinkedList nodeList = new LinkedList();\n";
+			bw.write(msg);
 			
-			Iterator linkIte = linkSet.iterator();
-			while(linkIte.hasNext()){
-				msg = (String)linkIte.next();
-				bw.write(msg);
-			}
-
-			
+			msg = "        for(int nodeCount = 0; nodeCount < " + idMap.size() + "; nodeCount++){\n"+
+			"        	GraphNode node = new GraphNode(atomApp, root);\n"+
+			"        	graphNodes.addElement(node);\n"+
+			"        	nodeList.add(node);\n"+
+			"        }\n";
+			bw.write(msg);
 			
 			msg = footer(file);
 			bw.write(msg);
@@ -102,6 +81,7 @@ public final class Output{
 			if(!javaFile.exists()){ return; }
 			String filePath = javaFile.getAbsolutePath().substring(0, javaFile.getAbsolutePath().length() - file.length() - ".java".length());
 			
+			outPutEdgeFile(idMap, atomMap, file);
 			makeMakefile(file, filePath);
 			Runtime runtime = Runtime.getRuntime();
 			Process p;
@@ -124,6 +104,54 @@ public final class Output{
 		System.out.println("output:"+file+".java");
 	}
 	
+	private static void outPutEdgeFile(Map idMap, Map atomMap, String file){
+		String msg;
+		Iterator atomIte = idMap.keySet().iterator();
+
+		try {
+			FileOutputStream fos = new FileOutputStream(file+"_Edge.dat");
+			OutputStreamWriter osw = new OutputStreamWriter(fos , ENCODE);
+			BufferedWriter bw = new BufferedWriter(osw);
+			
+			while(atomIte.hasNext()){
+				Integer atomID = (Integer)atomIte.next();
+				Atom atom = (Atom)idMap.get(atomID);
+				String atomName = getAtomName(atomID.intValue());
+
+//			msg = "        GraphNode " + getAtomName(atomID.intValue()) + " = new GraphNode(atomApp, root);\n" +
+//			"        graphNodes.addElement(" + getAtomName(atomID.intValue()) + ");\n";
+//			bw.write(msg);
+				
+				for(int i = 0; i < atom.getEdgeCount(); i++){
+					Atom atom2 = atom.nthAtom(i);
+					String atomName2 = getAtomName(((Integer)atomMap.get(atom2)).intValue());
+					if(atomName.compareTo(atomName2) > 0){
+						msg = atomID +
+								"," +
+								((Integer)atomMap.get(atom2)).intValue() +
+								",2" +
+								"\n";
+						bw.write(msg);
+					}
+				}
+			}
+			
+			bw.close();
+			osw.close();
+			fos.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("output:" + file + "_Edge.dat");
+	}
+	
 	/**
 	 * Makefileを出力する
 	 * @param file　出力するjavaファイルのファイル名．
@@ -131,15 +159,15 @@ public final class Output{
 	 */
 	private static void makeMakefile(String file, String parentPath){
 		String msg =
-			"LIBDIR=" + Setting.getRelativeAddress(setting.getValue("JNIDIR"), file) + "\n" +
+			"LIBDIR=" + Setting.getRelativeAddress(setting.getFilePass("JNIDIR"), file) + "\n" +
 			"#\n" +
 			"# Linux\n" +
 			"#\n" +
-			"#CLASSPATH=.:$(LIBDIR):" + setting.getValue("JDKDIR") + "/lib/ext/vecmath.jar\n" +
+			"#CLASSPATH=.:$(LIBDIR):" + setting.getFilePass("JDKDIR") + "/lib/ext/vecmath.jar\n" +
 			"#\n" +
 			"# Windows\n" +
 			"#\n" +
-			"CLASSPATH=.\\;$(LIBDIR)\\;" + setting.getValue("JDKDIR") + "/lib/ext/vecmath.jar\\;" + setting.getValue("JDKDIR") + "/lib/ext/j3dcore.jar\\;" + setting.getValue("JDKDIR") + "/lib/ext/j3dutils.jar\n" +
+			"CLASSPATH=.\\;$(LIBDIR)\\;" + setting.getFilePass("JDKDIR") + "/lib/ext/vecmath.jar\\;" + setting.getFilePass("JDKDIR") + "/lib/ext/j3dcore.jar\\;" + setting.getFilePass("JDKDIR") + "/lib/ext/j3dutils.jar\n" +
 			"#\n" +
 			"# common\n" +
 			"#\n" +
@@ -209,6 +237,7 @@ public final class Output{
 		"import java.awt.*;\n" +
 		"import java.awt.event.*;\n" +
 		"import java.applet.*;\n" +
+		"import java.util.LinkedList;\n" +
 		"import javax.vecmath.*;\n" +
 		"import javax.media.j3d.*;\n" +
 		"import com.sun.j3d.utils.geometry.*;\n" +
@@ -219,6 +248,8 @@ public final class Output{
 		"import com.sun.j3d.utils.picking.behaviors.*;\n" +
 		"import com.sun.j3d.utils.applet.*; \n" +
 		"import jp.ac.nii.chorus3d.*;\n" +
+		"import java.io.FileReader;\n" +
+		"import java.io.IOException;\n" +
 		"\n" +
 		"public class "+file+" extends Applet implements PickingCallback {\n" +
 		"\n" +
@@ -297,11 +328,12 @@ public final class Output{
 		"        */\n" +
 		"        ThickLineGroup lineGrp;\n" +
 		"\n" +
+		"        double edgeLength;\n" +
 		"        GraphNode node0;\n" +
 		"        GraphNode node1;\n" +
 		"\n" +
 		"        GraphEdge(GraphNode node0, GraphNode node1,\n" +
-		"                  Appearance app, Group parentGrp)\n" +
+		"                  Appearance app, Group parentGrp, double length)\n" +
 		"        {\n" +
 		"            /*            \n" +
 		"            line = new LineArray(2, GeometryArray.COORDINATES);\n" +
@@ -316,6 +348,7 @@ public final class Output{
 		"\n" +
 		"            this.node0 = node0;\n" +
 		"            this.node1 = node1;\n" +
+		"            edgeLength = length;\n" +
 		"        }\n" +
 		"\n" +
 		"    }\n" +
@@ -329,6 +362,55 @@ public final class Output{
 		"\n" +
 		"    private C3Solver s;\n" +
 		"\n" +
+		"	private LinkedList getEdge(){\n" +
+		"        //  Edge取得\n" +
+		"		int i;\n" +
+		"		StringBuffer s = new StringBuffer();\n" +
+		"		String key = null;\n" +
+		"		String value = null;\n" +
+		"		String length = null;\n" +
+		"		boolean isKey = true;\n" +
+		"		LinkedList edgeList = new LinkedList();\n" +
+		"		try {\n" +
+		"			FileReader file = new FileReader(\""+ file +"_Edge.dat\");\n" +
+		"			while((i = file.read()) != -1){\n" +
+		"				// key\n" +
+		"				if((char)i == ',' && isKey){\n" +
+		"					key = s.toString();\n" +
+		"					s = new StringBuffer();\n" +
+		"					isKey = false;\n" +
+		"					continue;\n" +
+		"				}\n" +
+		"				// value\n" +
+		"				if((char)i == ',' && !isKey){\n" +
+		"					value = s.toString();\n" +
+		"					s = new StringBuffer();\n" +
+		"					continue;\n" +
+		"				}\n" +
+		"				// value\n" +
+		"				else if((char)i == '\\n' || (char)i == '\\r'){\n" +
+		"					if(isKey || key == null){\n" +
+		"						key = value = length = null;\n" +
+		"						continue;\n" +
+		"					}\n" +
+		"					length = s.toString();\n" +
+		"					s = new StringBuffer();\n" +
+		"					isKey = true;\n" +
+		"					edgeList.add(Integer.parseInt(key));\n" +
+		"					edgeList.add(Integer.parseInt(value));\n" +
+		"					edgeList.add(Integer.parseInt(length));\n" +
+		"					key = value = length = null;\n" +
+		"					continue;\n" +
+		"				}\n" +
+		"				// 文字取得\n" +
+		"				s.append((char)i);\n" +
+		"			}\n" +
+		"		} catch (IOException e) {\n" +
+		"			// TODO Auto-generated catch block\n" +
+		"			e.printStackTrace();\n" +
+		"		}\n" +
+		"       return edgeList;\n" +
+		"	}\n" +
 		"    public " + file + "()\n" +
 		"    {\n" +
 		"        // canvas\n" +
@@ -440,6 +522,13 @@ public final class Output{
 	 */
 	private static String footer(String file){
 		return "\n" +
+		"        // graph edges\n" +
+		"        LinkedList edgeList = getEdge();\n" +
+		"        for(int edgeCount = 0; edgeCount < edgeList.size(); edgeCount = edgeCount + 3){\n" +
+		"        	GraphNode node1 = (GraphNode)nodeList.get(((Integer)edgeList.get(edgeCount)).intValue());\n" +
+		"        	GraphNode node2 = (GraphNode)nodeList.get(((Integer)edgeList.get(edgeCount + 1)).intValue());\n" +
+		"            graphEdges.addElement(new GraphEdge(node1, node2, whiteApp, root, ((Integer)edgeList.get(edgeCount + 2)).intValue()));\n" +
+		"        }\n" +	
 		"        // picking\n" +
 		"        PickTranslateBehavior pickTranslate\n" +
 		"            = new PickTranslateBehavior(root, canvas, bounds);\n" +
@@ -481,14 +570,14 @@ public final class Output{
 		"        for (int i = 0; i < graphEdges.size(); i++) {\n" +
 		"            GraphEdge e = (GraphEdge) graphEdges.elementAt(i);\n" +
 		"            C3GraphLayoutConstraint c\n" +
-		"                = new C3GraphLayoutConstraint(e.node0.pos, e.node1.pos, 1);\n" +
+		"                = new C3GraphLayoutConstraint(e.node0.pos, e.node1.pos, e.edgeLength);\n" +
 		"            s.add(c);\n" +
 		"        }\n" +
 		"\n" +
 		"        //s.addStay(nd.tfm.translation(), C3.REQUIRED);\n" +
-		"        s.add(new C3LinearConstraint(1, n0.pos.x(), C3.EQ, 0, C3.REQUIRED));\n" +
-		"        s.add(new C3LinearConstraint(1, n0.pos.y(), C3.EQ, 0, C3.REQUIRED));\n" +
-		"        s.add(new C3LinearConstraint(1, n0.pos.z(), C3.EQ, 0, C3.REQUIRED));\n" +
+		"        s.add(new C3LinearConstraint(1, ((GraphNode)nodeList.get(0)).pos.x(), C3.EQ, 0, C3.REQUIRED));\n" +
+		"        s.add(new C3LinearConstraint(1, ((GraphNode)nodeList.get(0)).pos.y(), C3.EQ, 0, C3.REQUIRED));\n" +
+		"        s.add(new C3LinearConstraint(1, ((GraphNode)nodeList.get(0)).pos.z(), C3.EQ, 0, C3.REQUIRED));\n" +
 		"\n" +
 		"        // solve the system\n" +
 		"        solve(false);\n" +

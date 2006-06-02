@@ -1,0 +1,3 @@
+gen(integer.set(1,100)).
+a(a).
+gen(_IX), a(X) :- a(X,Y),a(Y).

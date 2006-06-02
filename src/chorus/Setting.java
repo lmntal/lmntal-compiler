@@ -26,6 +26,11 @@ public class Setting {
 		}
 	}
 	
+	/**
+	 * 項目の値を取得する
+	 * @param key 項目名
+	 * @return 項目に対応する値
+	 */
 	public String getValue(String key){
 		if(!settingMap.containsKey(key)){
 			System.err.println("項目\"" + key + "\"が存在しません．");
@@ -33,7 +38,25 @@ public class Setting {
 		}
 		return (String)settingMap.get(key);
 	}
-
+	
+	/**
+	 * 項目の値を取得する
+	 * 取得する際に値をパスと解釈して，存在するパスかどうかをチェックする．
+	 * @param key　項目名
+	 * @return　項目に対応する値
+	 */
+	public String getFilePass(String key){
+		if(!settingMap.containsKey(key)){
+			System.err.println("項目\"" + key + "\"が存在しません．");
+			System.exit(0);
+		}
+		if(!(new File(((String)settingMap.get(key)).replaceAll("\\\\",""))).exists()){
+			System.err.println(((String)settingMap.get(key)).replaceAll("\\\\","")+"　が存在しません．");
+			System.exit(0);
+		}
+		return (String)settingMap.get(key);
+		
+	}
 	/**
 	 * file2からみたfile1の相対アドレスを返す．
 	 * 引数のディレクトリ区切りは"\"．
