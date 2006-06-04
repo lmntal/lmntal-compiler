@@ -12,12 +12,14 @@ import java.util.HashMap;
  *
  */
 public class Setting {
-	private HashMap settingMap = new HashMap();
+	private static HashMap settingMap = new HashMap();
+	private static HashMap atomSize = new HashMap();
+	private static HashMap linkLength = new HashMap();
 	
 	final static 
 	private String FILE_NAME = "../../chorus.conf";
 	
-	public Setting(){ 
+	static{
 		try {
 			getSetting(new FileReader(FILE_NAME));
 		} catch (FileNotFoundException e) {
@@ -31,7 +33,7 @@ public class Setting {
 	 * @param key 項目名
 	 * @return 項目に対応する値
 	 */
-	public String getValue(String key){
+	public static String getValue(String key){
 		if(!settingMap.containsKey(key)){
 			System.err.println("項目\"" + key + "\"が存在しません．");
 			System.exit(0);
@@ -39,7 +41,7 @@ public class Setting {
 		return (String)settingMap.get(key);
 	}
 	
-	public String tryGetValue(String key){
+	public static String tryGetValue(String key){
 		if(!settingMap.containsKey(key)){
 			return null;
 		}
@@ -52,7 +54,7 @@ public class Setting {
 	 * @param key　項目名
 	 * @return　項目に対応する値
 	 */
-	public String getFilePass(String key){
+	public static String getFilePass(String key){
 		if(!settingMap.containsKey(key)){
 			System.err.println("項目\"" + key + "\"が存在しません．");
 			System.exit(0);
@@ -64,6 +66,7 @@ public class Setting {
 		return (String)settingMap.get(key);
 		
 	}
+	
 	/**
 	 * file2からみたfile1の相対アドレスを返す．
 	 * 引数のディレクトリ区切りは"\"．
@@ -106,7 +109,7 @@ public class Setting {
 		
 	}
 	
-	private void getSetting(FileReader file){
+	private static void getSetting(FileReader file){
 		int i;
 		StringBuffer s = new StringBuffer();
 		String key = null;
@@ -157,5 +160,34 @@ public class Setting {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public static String getAtomSize(String atom) {
+		if(atomSize.containsKey(atom)){
+			return ((Float)atomSize.get(atom)).toString();
+		}
+		else{
+			return getValue("ATOM_SIZE");
+		}
+	}
+
+	public static void setAtomSize(String atom, float size) {
+		atomSize.put(atom, new Float(size));
+	}
+
+	public static String getLinkLength(String atom1, String atom2) {
+		if(linkLength.containsKey(atom1+","+atom2)){
+			return ((Float)linkLength.get(atom1+","+atom2)).toString();
+		}
+		else if(linkLength.containsKey(atom2+","+atom1)){
+			return ((Float)linkLength.get(atom2+","+atom1)).toString();
+		}
+		else{
+			return getValue("LINK_LENGTH");
+		}
+	}
+
+	public static void setLinkLength(String atom1, String atom2,float length) {
+		linkLength.put(atom1 + "," + atom2, new Float(length));
 	}
 }

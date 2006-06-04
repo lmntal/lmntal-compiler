@@ -25,10 +25,6 @@ public final class Output{
 	final static
 	private String ENCODE = "MS932";
 	
-	private static Setting setting;
-	static{
-		setting = new Setting();
-	}
 	/**
 	 * Chorus3Dのソースを出力する
 	 * @param file　出力するファイル名
@@ -55,7 +51,7 @@ public final class Output{
 				idMap.put(atomName, atom);
 			}
 			
-			if(sequence < Integer.parseInt(setting.getValue("AFTER_RELEASE"))){ afterRelease = false;}
+			if(sequence < Integer.parseInt(Setting.getValue("AFTER_RELEASE"))){ afterRelease = false;}
 			msg = header(file, afterRelease);
 			bw.write(msg);
 			
@@ -123,10 +119,7 @@ public final class Output{
 			while(atomIte.hasNext()){
 				Integer atomID = (Integer)atomIte.next();
 				Atom atom = (Atom)idMap.get(atomID);
-				String size =
-					(null != setting.tryGetValue(atom.getName()))
-					? setting.tryGetValue(atom.getName())
-					: setting.getValue("ATOM_SIZE");
+				String size = Setting.getAtomSize(atom.getName());
 
 				for(int i = 0; i < atom.getEdgeCount(); i++){
 					msg = atomID +
@@ -170,15 +163,17 @@ public final class Output{
 //			msg = "        GraphNode " + getAtomName(atomID.intValue()) + " = new GraphNode(atomApp, root);\n" +
 //			"        graphNodes.addElement(" + getAtomName(atomID.intValue()) + ");\n";
 //			bw.write(msg);
-				
 				for(int i = 0; i < atom.getEdgeCount(); i++){
 					Atom atom2 = atom.nthAtom(i);
-					String atomName2 = getAtomName(((Integer)atomMap.get(atom2)).intValue());
+					Integer atom2ID = (Integer)atomMap.get(atom2);
+					String atomName2 = getAtomName(atom2ID.intValue());
+					String edgeLength = Setting.getLinkLength(atom.getName(), atom2.getName());
 					if(atomName.compareTo(atomName2) > 0){
 						msg = atomID +
 								"," +
 								((Integer)atomMap.get(atom2)).intValue() +
-								",1" +
+								"," +
+								edgeLength +
 								"\n";
 						bw.write(msg);
 					}
@@ -208,15 +203,15 @@ public final class Output{
 	 */
 	private static void makeMakefile(String file, String parentPath){
 		String msg =
-			"LIBDIR=" + Setting.getRelativeAddress(setting.getFilePass("JNIDIR"), file) + "\n" +
+			"LIBDIR=" + Setting.getRelativeAddress(Setting.getFilePass("JNIDIR"), file) + "\n" +
 			"#\n" +
 			"# Linux\n" +
 			"#\n" +
-			"#CLASSPATH=.:$(LIBDIR):" + setting.getFilePass("JDKDIR") + "/lib/ext/vecmath.jar\n" +
+			"#CLASSPATH=.:$(LIBDIR):" + Setting.getFilePass("JDKDIR") + "/lib/ext/vecmath.jar\n" +
 			"#\n" +
 			"# Windows\n" +
 			"#\n" +
-			"CLASSPATH=.\\;$(LIBDIR)\\;" + setting.getFilePass("JDKDIR") + "/lib/ext/vecmath.jar\\;" + setting.getFilePass("JDKDIR") + "/lib/ext/j3dcore.jar\\;" + setting.getFilePass("JDKDIR") + "/lib/ext/j3dutils.jar\n" +
+			"CLASSPATH=.\\;$(LIBDIR)\\;" + Setting.getFilePass("JDKDIR") + "/lib/ext/vecmath.jar\\;" + Setting.getFilePass("JDKDIR") + "/lib/ext/j3dcore.jar\\;" + Setting.getFilePass("JDKDIR") + "/lib/ext/j3dutils.jar\n" +
 			"#\n" +
 			"# common\n" +
 			"#\n" +
@@ -447,7 +442,7 @@ public final class Output{
 		"					isKey = true;\n" +
 		"					edgeList.add(Integer.parseInt(key));\n" +
 		"					edgeList.add(Integer.parseInt(value));\n" +
-		"					edgeList.add(Integer.parseInt(length));\n" +
+		"					edgeList.add(Float.parseFloat(length));\n" +
 		"					key = value = length = null;\n" +
 		"					continue;\n" +
 		"				}\n" +
@@ -597,9 +592,9 @@ public final class Output{
 		"        // appearance for atom\n" +
 		"        Appearance atomApp = new Appearance();\n" +
 		"        Material atomMat = new Material();\n" +
-		"        atomMat.setSpecularColor(new Color3f(" + setting.getValue("SPECULAR_COLOR") + "));\n" +
-		"        atomMat.setDiffuseColor(new Color3f(" + setting.getValue("DIFFUSE_COLOR") + "));\n" +
-		"        atomMat.setAmbientColor(new Color3f(" + setting.getValue("AMBIENT_COLOR") + "));\n" +
+		"        atomMat.setSpecularColor(new Color3f(" + Setting.getValue("SPECULAR_COLOR") + "));\n" +
+		"        atomMat.setDiffuseColor(new Color3f(" + Setting.getValue("DIFFUSE_COLOR") + "));\n" +
+		"        atomMat.setAmbientColor(new Color3f(" + Setting.getValue("AMBIENT_COLOR") + "));\n" +
 		"        atomApp.setMaterial(atomMat);\n" +
 		"\n" +
 		"        // graph nodes\n";
@@ -616,7 +611,7 @@ public final class Output{
 		"        for(int edgeCount = 0; edgeCount < edgeList.size(); edgeCount = edgeCount + 3){\n" +
 		"        	GraphNode node1 = (GraphNode)nodeList.get(((Integer)edgeList.get(edgeCount)).intValue());\n" +
 		"        	GraphNode node2 = (GraphNode)nodeList.get(((Integer)edgeList.get(edgeCount + 1)).intValue());\n" +
-		"            graphEdges.addElement(new GraphEdge(node1, node2, whiteApp, root, ((Integer)edgeList.get(edgeCount + 2)).intValue()));\n" +
+		"            graphEdges.addElement(new GraphEdge(node1, node2, whiteApp, root, ((Float)edgeList.get(edgeCount + 2)).floatValue()));\n" +
 		"        }\n" +	
 		"        // picking\n" +
 		"        PickTranslateBehavior pickTranslate\n" +

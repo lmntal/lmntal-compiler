@@ -1,0 +1,40 @@
+/**
+
+NAME
+	Chorus module
+
+SYNOPSIS
+
+AUTHOR
+	Atsushi Nakano
+
+*/
+[:/*inline_define*/
+	import chorus.Setting;
+:]
+{
+
+module(chorus).
+
+chorus.atomSize(A, SIZE) :- float(SIZE) | [:/*inline*/
+		String name = me.nth(0);
+		Double size = new Double(((FloatingFunctor)me.nthAtom(1).getFunctor()).floatValue());
+		Atom result = mem.newAtom(new Functor("size", 2));
+		Setting.setAtomSize(name, size.floatValue());
+		mem.relink(result, 0, me, 0);
+		mem.relink(result, 1, me, 1);
+		me.remove();
+	:](A, SIZE).
+	
+chorus.linkLength(A, B, SIZE) :- float(SIZE) | [:/*inline*/
+		String name1 = me.nth(0);
+		String name2 = me.nth(1);
+		Double length = new Double(((FloatingFunctor)me.nthAtom(2).getFunctor()).floatValue());
+		Atom result = mem.newAtom(new Functor("length", 3));
+		Setting.setLinkLength(name1, name2, length.floatValue());
+		mem.relink(result, 0, me, 0);
+		mem.relink(result, 1, me, 1);
+		mem.relink(result, 2, me, 2);
+		me.remove();
+	:](A, B, SIZE).
+}
