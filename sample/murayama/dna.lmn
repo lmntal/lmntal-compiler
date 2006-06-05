@@ -1,4 +1,5 @@
-dna = ['A','T','G','G','A','A','T','T','C','T','C','G','C','T','C'].
+//dna = ['A','T','G','G','A','A','T','T','C','T','C','G','C','T','C'].
+dna = ['A','T','C','G'].
 
 strand({
 	o(A,B),c(B,o(h),h,E),c(E,h,h,H),c(H,o(h,act),h,K),c(K,c(h,h,o(h)),h,A).
@@ -96,7 +97,7 @@ hydrogenBond({
 		o(A3,B3),c(B3,C3,D3,E3),c(E3,F3,G3,H3),c(H3,o(Li4,act),J3,K3),c(K3,L3,M3,A3),
 		o(A4,B4),c(B4,o(Lin2),D4,E4),c(E4,F4,G4,H4),c(H4,o(AC2,pas),J4,K4),c(K4,c(X4,X5,o(Li3)),M4,A4),
 		p(Li3,o,o(h),Li4),
-		c(A5,n(h,h(Link1)),C5),c(C5,D5,E5),c(E5,F5,G5),n(G5,Lin2,I5),c(I5,o(Link2),K5),n(K5,Link3,A5).
+		c(A5,n(h,h(Link1)),C5),c(C5,D5,E5),c(E5,F5,G5),n(G5,Lin2,I5),c(I5,o(Link3),K5),n(K5,Link2,A5).
 }).
 
 hydrogenBondLast({
@@ -122,7 +123,7 @@ hydrogenBondLast({
 		c(A,o(Link1),C),c(C,D,E),c(E,F,G),n(G,H),c(H,n(h,h(Link3)),J),n(J,Link2,A),
 				n(D,K),c(K,L,M),n(M,Lin1,F),
 		o(A4,B4),c(B4,o(Lin2),D4,E4),c(E4,F4,G4,H4),c(H4,o(AC2,pas),J4,K4),c(K4,c(X4,X5,o(Li3)),M4,A4),
-		c(A5,n(h,h(Link1)),C5),c(C5,D5,E5),c(E5,F5,G5),n(G5,Lin2,I5),c(I5,o(Link2),K5),n(K5,Link3,A5).
+		c(A5,n(h,h(Link1)),C5),c(C5,D5,E5),c(E5,F5,G5),n(G5,Lin2,I5),c(I5,o(Link3),K5),n(K5,Link2,A5).
 }).
 
 L = ['A' | R], strand1({$p,@p}/), strand2({$q,@q}/) :-
