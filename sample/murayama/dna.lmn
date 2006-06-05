@@ -1,14 +1,17 @@
 {
 o(A,B),c(B,o(h),h,E),c(E,h,h,H),c(H,o(h,act),h,K),c(K,c(h,h,o(h)),h,A).
+makeDeoxyribose@@
 makeDeoxyribose(4).
 makeDeoxyribose(N) :- N>0 | makeDeoxyribose(N-1), 
 	o(A,B),c(B,o(h),h,E),c(E,h,h,H),c(H,o(h,pas),h,K),c(K,c(h,h,o(h)),h,A).
 
+makeAdenine@@
 makeAdenine(5).
 makeAdenine(N) :- N>0 | makeAdenine(N-1), 
 	c(A,n(h,h),C),c(C,D,E),c(E,F,G),n(G,H),c(H,h,J),n(J,A),
 				n(D,K),c(K,h,M),n(M,h,F).
 
+AdenineWithDeoxyribose@@
 o(A,B),c(B,o(h),D,E),c(E,F,G,H),c(H,I,J,K),c(K,L,M,A),
 c(A2,B2,C2),c(C2,D2,E2),c(E2,F2,G2),n(G2,H2),c(H2,I2,J2),n(J2,A2),
 				n(D2,K2),c(K2,L2,M2),n(M2,h,F2) :-
@@ -16,7 +19,7 @@ c(A2,B2,C2),c(C2,D2,E2),c(E2,F2,G2),n(G2,H2),c(H2,I2,J2),n(J2,A2),
 	c(A2,B2,C2),c(C2,D2,E2),c(E2,F2,G2),n(G2,H2),c(H2,I2,J2),n(J2,A2),
 					n(D2,K2),c(K2,L2,M2),n(M2,Link,F2).
 
-
+makeFrame@@
 o(A1,B1),c(B1,C1,D1,E1),c(E1,F1,G1,H1),c(H1,o(h,act),J1,K1),c(K1,L1,M1,A1),
 o(A2,B2),c(B2,C2,D2,E2),c(E2,F2,G2,H2),c(H2,o(h,pas),J2,K2),c(K2,c(X2,X3,o(h)),M2,A2) :-
 	o(A1,B1),c(B1,C1,D1,E1),c(E1,F1,G1,H1),c(H1,o(Link2,pas),J1,K1),c(K1,L1,M1,A1),
@@ -27,20 +30,23 @@ o(A2,B2),c(B2,C2,D2,E2),c(E2,F2,G2,H2),c(H2,o(h,pas),J2,K2),c(K2,c(X2,X3,o(h)),M
 
 {
 o(A,B),c(B,o(h),h,E),c(E,h,h,H),c(H,o(h,act),h,K),c(K,c(h,h,o(h)),h,A).
+makeDeoxyribose@@
 makeDeoxyribose(4).
 makeDeoxyribose(N) :- N>0 | makeDeoxyribose(N-1), 
 	o(A,B),c(B,o(h),h,E),c(E,h,h,H),c(H,o(h,pas),h,K),c(K,c(h,h,o(h)),h,A).
 
+makeThymine@@
 makeThymine(5).
 makeThymine(N) :- N>0 | makeThymine(N-1), 
 	c(A,o,C),c(C,c(h,h,h),E),c(E,h,G),n(G,h,I),c(I,o,K),n(K,h,A).
 
+ThymineWithDeoxyribose@@
 o(A,B),c(B,o(h),D,E),c(E,F,G,H),c(H,I,J,K),c(K,L,M,A),
 c(A2,o,C2),c(C2,c(h,h,h),E2),c(E2,h,G2),n(G2,h,I2),c(I2,o,K2),n(K2,h,A2) :-
 	o(A,B),c(B,o(Link),D,E),c(E,F,G,H),c(H,I,J,K),c(K,L,M,A),
 	c(A2,o,C2),c(C2,c(h,h,h),E2),c(E2,h,G2),n(G2,Link,I2),c(I2,o,K2),n(K2,h,A2).
 
-
+makeFrame@@
 o(A1,B1),c(B1,C1,D1,E1),c(E1,F1,G1,H1),c(H1,o(h,act),J1,K1),c(K1,L1,M1,A1),
 o(A2,B2),c(B2,C2,D2,E2),c(E2,F2,G2,H2),c(H2,o(h,pas),J2,K2),c(K2,c(X2,X3,o(h)),M2,A2) :-
 	o(A1,B1),c(B1,C1,D1,E1),c(E1,F1,G1,H1),c(H1,o(Link2,pas),J1,K1),c(K1,L1,M1,A1),
@@ -49,8 +55,9 @@ o(A2,B2),c(B2,C2,D2,E2),c(E2,F2,G2,H2),c(H2,o(h,pas),J2,K2),c(K2,c(X2,X3,o(h)),M
 
 }.
 
-{$p,@p} :- $p.
-asdf@@
+{$p,@p}/ :- $p.
+
+makeDNA@@
 o(A1,B1),c(B1,C1,D1,E1),c(E1,F1,G1,H1),c(H1,o(Li2,pas),J1,K1),c(K1,L1,M1,A1),
 o(A2,B2),c(B2,o(Lin1),D2,E2),c(E2,F2,G2,H2),c(H2,o(AC1,act),J2,K2),c(K2,c(X2,X3,o(Li1)),M2,A2),
 p(Li1,o,o(h),Li2),
@@ -63,9 +70,9 @@ c(A5,o,C5),c(C5,D5,E5),c(E5,h,G5),n(G5,Lin2,I5),c(I5,J5,K5),n(K5,h,A5) :-
 	o(A1,B1),c(B1,C1,D1,E1),c(E1,F1,G1,H1),c(H1,o(Li2,act),J1,K1),c(K1,L1,M1,A1),
 	o(A2,B2),c(B2,o(Lin1),D2,E2),c(E2,F2,G2,H2),c(H2,o(AC1,pas),J2,K2),c(K2,c(X2,X3,o(Li1)),M2,A2),
 	p(Li1,o,o(h),Li2),
-	c(A,n(h,h(h(h(h(h(h(Link1))))))),C),c(C,D,E),c(E,F,G),n(G,H),c(H,I,J),n(J,Link2,A),
+	c(A,n(h(Link1)),C),c(C,D,E),c(E,F,G),n(G,H),c(H,I,J),n(J,Link2,A),
 				n(D,K),c(K,L,M),n(M,Lin1,F),
 	o(A3,B3),c(B3,C3,D3,E3),c(E3,F3,G3,H3),c(H3,o(Li4,act),J3,K3),c(K3,L3,M3,A3),
 	o(A4,B4),c(B4,o(Lin2),D4,E4),c(E4,F4,G4,H4),c(H4,o(AC2,pas),J4,K4),c(K4,c(X4,X5,o(Li3)),M4,A4),
 	p(Li3,o,o(h),Li4),
-	c(A5,Link1,C5),c(C5,D5,E5),c(E5,h,G5),n(G5,Lin2,I5),c(I5,J5,K5),n(K5,h(h(h(h(h(h(h(Link2))))))),A5).
+	c(A5,Link1,C5),c(C5,D5,E5),c(E5,h,G5),n(G5,Lin2,I5),c(I5,J5,K5),n(K5,h(Link2),A5).
