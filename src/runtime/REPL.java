@@ -180,6 +180,8 @@ public class REPL {
 						while ((s = br.readLine()) != null) {
 							System.out.println(s);
 						}
+					} else if (nline.equals("clear")) {//2006.6.6 by inui
+						Env.remainedRuntime = null;//全プロセスを消去
 					} else if(nline.startsWith("rm") || nline.startsWith("remove")) {
 						if(Env.remainedRuntime!=null) {
 							String s[] = nline.split(" ");
@@ -212,7 +214,7 @@ public class REPL {
 			} catch (EOFException e) {
 				break;
 			} catch (FileNotFoundException e) {//2006.6.1 by inui
-				System.err.println(e);
+				System.err.println("No such file or directory");
 			} catch (IOException e) {
 				System.err.println(e);
 //			} catch (Exception e) {
@@ -269,7 +271,8 @@ public class REPL {
 		System.out.println("  "+"r | rules          - show current rules");					
 		System.out.println("  "+"(rm | remove) [ruleset number...]");					
 		System.out.println("  "+"                   - remove specified rulesets  (ex: rm 601)");
-		System.out.println("  "+"l | load [file...]- load specified files (and remain mode on)");
+		System.out.println("  "+"l | load [file...] - load specified files (and remain mode on)");
+		System.out.println("  "+"clear              - clear all processes");
 		System.out.println("  "+"h                  - help");
 		System.out.println("  "+"q                  - quit");
 	}
