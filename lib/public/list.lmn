@@ -271,15 +271,15 @@ H=list.length([Head|Tail], Len) :- H=[Head|list.length(Tail,Len1)], Len=Len1+1.
 H=list.length([],Len) :- H=[], Len=0.
 
 /**
- *  list.set(List, N, X, NewList)
+ *  list.set(List, N, X, NewList, Old)
  *
- *  ListのN番目(N=0,1,2,...)に新たな要素Xを挿入し、NewListとして返します。
- *  N > list.length(List) の場合は、Listの末尾にXを付け足します。
+ *  ListのN番目(N=0,1,2,...)の要素を新要素Xで置換し、置換対象となった要素Oldを返します。
+ *  ただし、N > list.length(List) の場合は置換は行わず、Xをそのまま返します。
  *  2006/06/07 佐々木
  */
-H=list.set([], N, X)          :- N>0 | H=[X].
-H=list.set(List, N, X)        :- N=0 | H=[X|List].
-H=list.set([Head|Tail], N, X) :- N>0 | H=[Head|list.set(Tail,N-1,X)].
+H=list.set([], N, X, Ls) :- N>0 | H=X, Ls=[].
+H=list.set([Head|Tail], N, X, Ls) :- N=0 | H=Head, Ls=[X|Tail].
+H=list.set([Head|Tail], N, X, Ls) :- N>0 | H=list.set(Tail,N-1,X,Ls1), Ls=[Head|Ls1].
 
 /**
  *  list.get(List, N, Got, NewList)
