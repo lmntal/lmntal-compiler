@@ -261,5 +261,35 @@ H=list.split(List,  X, Tail) :- X=0    | H=[], Tail=List.
 H=list.split([   ], X, Tail) :- int(X) | H=[], Tail=[].
 H=list.split([Y|Z], X, Tail) :- X>0    | H=[Y|list.split(Z,X-1,Tail)].
 
+/**
+ *  list.length(List, Len, NewList)
+ *  
+ *  Listの長さをLenに返します。
+ *  2006/06/07 佐々木
+ */
+H=list.length([Head|Tail], Len) :- H=[Head|list.length(Tail,Len1)], Len=Len1+1.
+H=list.length([],Len) :- H=[], Len=0.
+
+/**
+ *  list.set(List, N, X, NewList)
+ *
+ *  ListのN番目(N=0,1,2,...)に新たな要素Xを挿入し、NewListとして返します。
+ *  N > list.length(List) の場合は、Listの末尾にXを付け足します。
+ *  2006/06/07 佐々木
+ */
+H=list.set([], N, X)          :- N>0 | H=[X].
+H=list.set(List, N, X)        :- N=0 | H=[X|List].
+H=list.set([Head|Tail], N, X) :- N>0 | H=[Head|list.set(Tail,N-1,X)].
+
+/**
+ *  list.get(List, N, Got, NewList)
+ *
+ *  ListのN番目(N=0,1,2,...)の要素を参照し、Gotとして返します。
+ *  もとのListからGotを取り除いたものを、NewListとして返します。
+ *  2006/06/07 佐々木
+ */
+H=list.get([Head|Tail], N, Got) :- N=0 | Got=Head, H=Tail.
+H=list.get([Head|Tail], N, Got) :- N>0 | H=[Head|list.get(Tail,N-1,Got)].
+
 }.
 //res = list.flatten(cons(cons(int(1),cons(int(2),int(3))), int(4)), nil).
