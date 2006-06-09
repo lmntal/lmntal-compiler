@@ -92,7 +92,7 @@ hydrogenBond({
 		o(A1,B1),c(B1,C1,D1,E1),c(E1,F1,G1,H1),c(H1,o(Li2,act),J1,K1),c(K1,L1,M1,A1),
 		o(A2,B2),c(B2,o(Lin1),D2,E2),c(E2,F2,G2,H2),c(H2,o(AC1,pas),J2,K2),c(K2,c(X2,X3,o(Li1)),M2,A2),
 		p(Li1,o,o(h),Li2),
-		c(A,o(Link1),C),c(C,D,E),c(E,F,G),n(G,H),c(H,n(h,h(Link3)),J),n(J,Link2,A),
+		c(A,o(Link1),C),c(C,D,E),c(E,F,G),n(G,H),c(H,n(h,h(Link3)),J),n(J,h(Link2),A),
 				n(D,K),c(K,L,M),n(M,Lin1,F),
 		o(A3,B3),c(B3,C3,D3,E3),c(E3,F3,G3,H3),c(H3,o(Li4,act),J3,K3),c(K3,L3,M3,A3),
 		o(A4,B4),c(B4,o(Lin2),D4,E4),c(E4,F4,G4,H4),c(H4,o(AC2,pas),J4,K4),c(K4,c(X4,X5,o(Li3)),M4,A4),
@@ -120,7 +120,7 @@ hydrogenBondLast({
 	o(A4,B4),c(B4,o(Lin2),D4,E4),c(E4,F4,G4,H4),c(H4,o(AC2,act),J4,K4),c(K4,c(X4,X5,o(Li3)),M4,A4),
 	c(A5,n(h,h),C5),c(C5,D5,E5),c(E5,F5,G5),n(G5,Lin2,I5),c(I5,o,K5),n(K5,h,A5) :-
 		o(A2,B2),c(B2,o(Lin1),D2,E2),c(E2,F2,G2,H2),c(H2,o(AC1,pas),J2,K2),c(K2,c(X2,X3,o(Li1)),M2,A2),
-		c(A,o(Link1),C),c(C,D,E),c(E,F,G),n(G,H),c(H,n(h,h(Link3)),J),n(J,Link2,A),
+		c(A,o(Link1),C),c(C,D,E),c(E,F,G),n(G,H),c(H,n(h,h(Link3)),J),n(J,h(Link2),A),
 				n(D,K),c(K,L,M),n(M,Lin1,F),
 		o(A4,B4),c(B4,o(Lin2),D4,E4),c(E4,F4,G4,H4),c(H4,o(AC2,pas),J4,K4),c(K4,c(X4,X5,o(Li3)),M4,A4),
 		c(A5,n(h,h(Link1)),C5),c(C5,D5,E5),c(E5,F5,G5),n(G5,Lin2,I5),c(I5,o(Link3),K5),n(K5,Link2,A5).
