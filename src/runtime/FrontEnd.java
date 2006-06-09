@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
 
 import chorus.Output;
 
+import type.TypeConstraintException;
+import type.TypeConstraintsInferer;
 import util.StreamDumper;
 
 import compile.Module;
@@ -424,6 +426,10 @@ public class FrontEnd {
 							// 暫定オプション
 							// スレッドルールの変換を行わない
 							Env.fThread = false;
+						} else if (args[i].equals("--type")){
+							Env.flgShowConstraints = true;
+							Env.flgShowAllConstraints = false;
+							Env.fType = true;
 						} else if (args[i].equals("--args")) {
 							isSrcs = false;
 						} else {
@@ -574,6 +580,20 @@ public class FrontEnd {
 				Env.p("Compilation Failed");
 				Env.d(e);
 				return;	
+			}
+
+			/* 2006/06/09 by kudo */
+			if(Env.fType){
+				TypeConstraintsInferer tci = new TypeConstraintsInferer(m);
+				try{
+					tci.infer();
+					tci.printAllConstraints();
+				}catch (TypeConstraintException e){
+					Env.p("Type Inference Failed");
+					Env.e(e.getMessage());
+					tci.printAllConstraints();
+					return;
+				}
 			}
 			
 			Ruleset rs;

@@ -374,6 +374,17 @@ public final class Env {
 	}
 	
 	////////////////////////////////////////////////////////////////
+	/* type inference 関係 */
+	/** */
+	public static boolean fType = false;
+	
+	/** 推論された全ての情報を表示 */
+	public static boolean flgShowAllConstraints = false;
+	
+	/** 推論結果を表示 */
+	public static boolean flgShowConstraints = false;
+	
+	////////////////////////////////////////////////////////////////
 	
 	public static int nErrors = 0;
 	public static int nWarnings = 0;
