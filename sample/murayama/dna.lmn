@@ -140,8 +140,8 @@ L = ['C' | R], strand1({$p,@p}/), strand2({$q,@q}/) :-
 	 strand2({makeDeoxyribose, makeGuanine, $q,@q}).
 L = ['G' | R], strand1({$p,@p}/), strand2({$q,@q}/) :-
 	 L = R,
-	 strand1({makeDeoxyribose, makeGuanine, $q,@q}),
-	 strand2({makeDeoxyribose, makeCytosine, $p,@p}).
+	 strand1({makeDeoxyribose, makeGuanine, $p,@p}),
+	 strand2({makeDeoxyribose, makeCytosine, $q,@q}).
 
 strand({$p}), strand({$q}), rules({@p}) :-
 	strand1({remove, $p,@p}), strand2({remove, $q,@p}).
