@@ -7,6 +7,7 @@ SYNOPSIS
 AUTHOR
 	Koji Hara
 	Ken Sakurai
+	Atsushi Nakano
 
 HISTORY
 	2004/06/04(Fri)
@@ -21,8 +22,8 @@ module(integer).
  * -> a(1),...,a(100)
  * by Nakano
  */
-H = integer.set(A, B) :- ground(H), int(A), int(B), A >= B | .
-H = integer.set(A, B) :- int(A), int(B), A < B | H=[:/*inline*/
+H = integer.set(A, B) :- ground(H), int(A), int(B), A > B | .
+H = integer.set(A, B) :- int(A), int(B), A =< B | H=[:/*inline*/
   int start =
  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
   int stop =
