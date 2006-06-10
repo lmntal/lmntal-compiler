@@ -1,0 +1,12 @@
+//graphic.perpetualUse.
+graphic.use.
+go:-
+{window,size(800,600),name("hoge"),bgcolor(0,0,0),killer,timer(1),position(100,100).
+  getClicked.
+  sys.perpetual(on).
+  {draw,ls,getpic("fillrect"),position(20,20),color(255,0,0),size(40,40)
+  {draw,getpic(string("ls", 20)),position(10,25),color(255,255,255)}.
+  }.
+  
+  clicked(_IX, _IY), {ls, position(_IPX, _IPY), $p, @q} :- res(sys.exec("explorer .\\", ".\\")), {ls, position(_IPX, _IPY), $p, @q}.
+}.

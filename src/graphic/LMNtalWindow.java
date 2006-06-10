@@ -4,8 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
@@ -13,14 +16,17 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.swing.*;
+import javax.swing.event.MouseInputAdapter;
 
 import runtime.AbstractMembrane;
 import runtime.Atom;
+import runtime.Dumper;
 import runtime.Env;
 import runtime.Functor;
 import runtime.IntegerFunctor;
 import runtime.StringFunctor;
 import runtime.Membrane;
+import runtime.Task;
 
 public class LMNtalWindow extends JFrame{
 	final static
@@ -42,6 +48,9 @@ public class LMNtalWindow extends JFrame{
 	private Functor KILLER_ATOM = new Functor("killer", 0);
 	
 	final static
+	private Functor GET_CLICKED_ATOM = new Functor("getClicked", 0);
+	
+	final static
 	private Functor KEY_CHAR_ATOM = new Functor("keyChar", 0);
 	
 	final static
@@ -60,6 +69,7 @@ public class LMNtalWindow extends JFrame{
 	private LinkedList waitingAtomlist = new LinkedList();
 	
 	private String memID;
+	private AbstractMembrane mymem;
 	private String windowName;
 	private int sizeX = 0;
 	private int sizeY = 0;
@@ -71,6 +81,7 @@ public class LMNtalWindow extends JFrame{
 	private long time;
 	private boolean sizeUpdate = false;
 	private boolean positionUpdate = false;
+	private boolean getClicked = false;
 	private Atom sizeAtom = null;
 	private Dimension d;
 	private boolean windowStateUpdate = false;
@@ -98,6 +109,7 @@ public class LMNtalWindow extends JFrame{
 		Iterator atomIte;
 		Atom targetAtom;
 		
+		mymem = mem;
 		// membrane ID
 		memID = mem.getGlobalMemID();
 				
@@ -167,6 +179,11 @@ public class LMNtalWindow extends JFrame{
 			}
 			catch(NumberFormatException e){}
 		}
+
+		// get Clicked
+		atomIte= mem.atomIteratorOfFunctor(GET_CLICKED_ATOM);
+		if(atomIte.hasNext() && !getClicked){ getClicked = true; }
+		else if(getClicked){ getClicked = false; }
 		
 		if(null == keyAtom){
 			// keyChar
@@ -222,6 +239,11 @@ public class LMNtalWindow extends JFrame{
 			public void windowClosing(WindowEvent e) {
 				// 閉じる際の処理
 				if(killer){
+					String dump = Dumper.dump(mymem.getTask().getRoot()).toString();
+					dump = dump.replaceAll("\\}", "\\}\n");
+					dump = dump.replaceAll("\\{", "\n\\{");
+					dump = dump.substring(1);
+					System.out.println(dump);
 					System.exit(0);
 				}
 			}
@@ -327,29 +349,45 @@ public class LMNtalWindow extends JFrame{
 //			sizeY = d.height;
 //		}
 
-		if(null == keyAtom){ return; }
-		while(!waitingAtomlist.isEmpty()){
-			Functor fa = (Functor)waitingAtomlist.removeFirst();
-			Atom nth1 = keyAtom;
-			Atom nth2 = null;
-			int nth1_arg=0;
-			
-			while(true){
-				try{
-					nth2 = nth1.getArg(nth1_arg).getAtom();
-				}catch(ArrayIndexOutOfBoundsException e){
-					break;
+		if(null != lmnPanel && getClicked && lmnPanel.hasClickedPoint()){
+			Point point;// = lmnPanel.getClickedPoint();
+			while(null != (point = lmnPanel.getClickedPoint())){
+				Atom px = mem.newAtom(new IntegerFunctor(point.x));
+				Atom py = mem.newAtom(new IntegerFunctor(point.y));
+				Atom clickedAtom = mem.newAtom(new Functor("clicked", 2));
+				mem.newLink(px, 0, clickedAtom, 0);
+				mem.newLink(py, 0, clickedAtom, 1);
+	//			lmnPanel.clearClikedPoint();
+//				mem.activate();
+			}
+//			String s = mem.toString();
+//			System.out.println(s.replaceAll("\\{", "\n\\{").replaceAll("\\}", "\\}\n"));
+//			Task.activatePerpetualMem(mem);
+		}
+		if(null != keyAtom){ 
+			while(!waitingAtomlist.isEmpty()){
+				Functor fa = (Functor)waitingAtomlist.removeFirst();
+				Atom nth1 = keyAtom;
+				Atom nth2 = null;
+				int nth1_arg=0;
+				
+				while(true){
+					try{
+						nth2 = nth1.getArg(nth1_arg).getAtom();
+					}catch(ArrayIndexOutOfBoundsException e){
+						break;
+					}
+					if(nth2.getName().equals("[]")){
+						Atom data = mem.newAtom(fa);
+						Atom dot = mem.newAtom(new Functor(".", 3));
+						mem.newLink(dot, 0, data, 0);
+						mem.newLink(nth1, nth1_arg, dot, 2);
+						mem.newLink(nth2, 0, dot, 1);
+						break;
+					}
+					nth1 = nth2;
+					nth1_arg=1;
 				}
-				if(nth2.getName().equals("[]")){
-					Atom data = mem.newAtom(fa);
-					Atom dot = mem.newAtom(new Functor(".", 3));
-					mem.newLink(dot, 0, data, 0);
-					mem.newLink(nth1, nth1_arg, dot, 2);
-					mem.newLink(nth2, 0, dot, 1);
-					break;
-				}
-				nth1 = nth2;
-				nth1_arg=1;
 			}
 		}
 	}
