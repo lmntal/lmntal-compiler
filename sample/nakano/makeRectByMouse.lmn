@@ -2,9 +2,9 @@
 graphic.use.
 go:-
 {window,size(220,200),name("hoge"),bgcolor(0,0,0),killer,timer(1),position(100,100).
-  getClicked.
+  clickListener.
   sys.perpetual(on).
-/*  {draw,name("oval"),getpic("fillrect"),position(20,20),color(255,0,0),size(40,40)
+/*  {draw,name("oval"),getpic("rect"),position(20,20),color(255,0,0),size(40,40)
   {draw,name("oval"),getpic("filloval"),position(20,20),color(0,255,0),size(40,40)
   {draw,name("oval"),getpic("filloval"),position(20,20),color(0,0,255),size(40,40)
   {draw,name("oval"),getpic("filloval"),position(20,20),color(255,0,0),size(40,40)

@@ -342,6 +342,12 @@ public class Task extends AbstractTask implements Runnable {
 //			}
 			// TODO perpetual じゃないもうひとつのフラグをつくってその膜を活性化させる hara
 			if(root!=null && memStack.isEmpty()) {
+				try {
+					this.thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				activatePerpetualMem(root);
 			}
 
@@ -361,7 +367,7 @@ public class Task extends AbstractTask implements Runnable {
 	 * hara
 	 * @param mem
 	 */
-	void activatePerpetualMem(Membrane mem) {
+	static public void activatePerpetualMem(AbstractMembrane mem) {
 		if(mem.perpetual) doAsyncLock(mem);
 		Iterator it = mem.memIterator();
 		while(it.hasNext()) {
@@ -396,7 +402,7 @@ public class Task extends AbstractTask implements Runnable {
 	// 060401 okabe
 	// Membrane -> AbstractMembrane
 	// 他も順次変更していく予定
-	void doAsyncLock(AbstractMembrane mem) {
+	static public void doAsyncLock(AbstractMembrane mem) {
 		final AbstractMembrane m = mem;
 		new Thread() {
 			public void run() {

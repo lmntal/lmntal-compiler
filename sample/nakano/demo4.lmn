@@ -2,7 +2,7 @@
 graphic.use.
 go:-
 {window,size(800,600),name("hoge"),bgcolor(0,0,0),killer,timer(1),position(100,100).
-  getClicked.
+  clickListner.
   sys.perpetual(on).
   {draw,ls,getpic("fillrect"),position(20,20),color(255,0,0),size(40,40)
   {draw,getpic(string("ls", 20)),position(10,25),color(255,255,255)}.

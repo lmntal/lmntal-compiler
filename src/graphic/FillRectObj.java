@@ -8,7 +8,6 @@ import java.util.Iterator;
 import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Functor;
-import runtime.Membrane;
 
 public class FillRectObj extends GraphicObj{
 
@@ -27,7 +26,7 @@ public class FillRectObj extends GraphicObj{
 	
 	public void drawAtom(Graphics g, Point delta){
 		g.setColor(color);
-		g.drawRect(position.x + delta.x, position.y + delta.y, sizeX, sizeY);		
+		g.fillRect(position.x + delta.x, position.y + delta.y, sizeX, sizeY);	
 	}
 	
 	public void setMembrane(AbstractMembrane mem){

@@ -7,11 +7,14 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.*;
@@ -24,7 +27,7 @@ import runtime.Functor;
 public class LMNtalPanel extends JPanel implements Runnable {
 	
 	final
-	private int SLEEP_TIME = 0;
+	private int SLEEP_TIME = 10;
 	
 	final
 	private Functor DRAW_MEM = new Functor("draw",0); 
@@ -75,6 +78,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	private Graphics OSG = null;
 	private Thread th = null;
 	private String windowID = null;	
+	private LinkedList clickedPoint = new LinkedList();
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラク
@@ -84,6 +88,11 @@ public class LMNtalPanel extends JPanel implements Runnable {
 		
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+		addMouseListener(new MouseAdapter(){
+			public void mouseClicked(MouseEvent e){
+				setClickedPoint(e.getPoint());
+			}
+		});
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				OSI = createImage((int) getSize().getWidth(),
@@ -229,6 +238,26 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	
 	public void setRepaint(boolean flag){
 		repaintFlag = flag;
+	}
+	
+	private void setClickedPoint(Point p){
+		clickedPoint.add(p);
+	}
+	
+	public Point getClickedPoint(){
+		if(!clickedPoint.isEmpty()){
+			return (Point)clickedPoint.remove();
+		}
+		return null;
+	}
+	
+	public boolean hasClickedPoint(){
+		if(clickedPoint.isEmpty()){ return false; }
+		return true;
+	}
+	
+	public void clearClikedPoint(){
+		clickedPoint = null;
 	}
 	
 	public boolean isBusy(){

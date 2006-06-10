@@ -48,7 +48,7 @@ public class LMNtalWindow extends JFrame{
 	private Functor KILLER_ATOM = new Functor("killer", 0);
 	
 	final static
-	private Functor GET_CLICKED_ATOM = new Functor("getClicked", 0);
+	private Functor CLICK_LISTENER_ATOM = new Functor("clickListener", 0);
 	
 	final static
 	private Functor KEY_CHAR_ATOM = new Functor("keyChar", 0);
@@ -181,7 +181,7 @@ public class LMNtalWindow extends JFrame{
 		}
 
 		// get Clicked
-		atomIte= mem.atomIteratorOfFunctor(GET_CLICKED_ATOM);
+		atomIte= mem.atomIteratorOfFunctor(CLICK_LISTENER_ATOM);
 		if(atomIte.hasNext() && !getClicked){ getClicked = true; }
 		else if(getClicked){ getClicked = false; }
 		
