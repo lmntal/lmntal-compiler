@@ -92,6 +92,13 @@ public class Task extends AbstractTask implements Runnable {
 	 * <p>10以上の値でなければならない。*/
 	int priority = 32;
 	
+	/**
+	 * 新・永久フラグ．
+	 * <p>すべてのルールが適応し終わった状態で，このフラグが真の場合，すべての膜を再度活性化させる．
+	 */
+	// by nakano
+	static private boolean perpetual = false;
+	
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）*/
 	Task(AbstractLMNtalRuntime runtime) {
@@ -322,7 +329,16 @@ public class Task extends AbstractTask implements Runnable {
 				running = false;
 				notifyAll();
 			}
-			if (root != null && root.isStable()) break;
+			if (root != null && root.isStable() && !perpetual) break;
+			if (root != null && root.isStable() && perpetual){
+				activateAllMem(root);
+				try {
+					this.thread.sleep(10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			// TODO perpetual じゃないもうひとつのフラグをつくってその膜を活性化させる hara
 //			if(root!=null && memStack.isEmpty()) {
 //				activatePerpetualMem(root);
@@ -351,6 +367,28 @@ public class Task extends AbstractTask implements Runnable {
 			final Membrane m = (Membrane)it.next();
 			if(m.perpetual) doAsyncLock(m);
 			activatePerpetualMem(m);
+		}
+	}
+	
+	/**
+	 * 新・永久フラグのセット
+	 * @param f
+	 */
+	static public void setPerpetual(boolean f){
+		perpetual = f;
+	}
+	
+	/**
+	 * 自膜を含めたすべての子膜を活性化させる．
+	 * @param mem
+	 */
+	private void activateAllMem(Membrane mem){
+		Iterator it = mem.memIterator();
+		while(it.hasNext()) {
+			final Membrane m = (Membrane)it.next();
+			doAsyncLock(m);
+			//m.activate();
+			activateAllMem(m);
 		}
 	}
 	
