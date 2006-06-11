@@ -1221,6 +1221,12 @@ public class Translator {
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-03
+				case Instruction.NEQGROUND : //[link1,link2]
+					writer.write(tabs + "eqground_ret = ((Link)var" + inst.getIntArg1() + ").eqGround(((Link)var" + inst.getIntArg2() + "));\n");
+					writer.write(tabs + "if (!eqground_ret) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; //kudo 2004-12-03
 				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
 					writer.write(tabs + "var" + inst.getIntArg1() + " = ((AbstractMembrane)var" + inst.getIntArg3() + ").copyGroundFrom(((Link)var" + inst.getIntArg2() + "));\n");
 					break; //kudo 2004-12-03
