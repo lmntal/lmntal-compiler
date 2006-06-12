@@ -80,17 +80,12 @@ H=sys.exec(Cmd, Argv) :- unary(Cmd) | H=[:/*inline*/
  */
 sys.perpetual(on) :- [:/*inline*/
 	mem.makePerpetual();
-	Atom result = mem.newAtom(new Functor("nil", 0));
-	//me.setName("nil");
-	me.nthAtom(0).remove();
-	me.remove();
+	me.setName("nil");
+
 	:](on).
 sys.perpetual(off) :- [:/*inline*/
 	mem.perpetual = false;
-	Atom result = mem.newAtom(new Functor("nil", 1));
-	mem.relink(result, 0, me, 1);
-	//me.setName("nil");
-	me.remove();
+	me.setName("nil");
 	:].
 
 /**
