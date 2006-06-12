@@ -1,26 +1,16 @@
-/* multiset rewriting -- factorizer
-   Kazunori Ueda, 2004-11-17
-*/
-
 /* generate primes in a membrane */
-{ gen(12).
-  gen(N) :- N>=2 | n(N), gen(N-1).
-  gen(N) :- N<2  | .
-
-  n(M), n(N) :- M mod N =:= 0 | n(N).
+{ n(integer.set(2,12)).
+  n($m), n($n) :- $m mod $n =:= 0 | n($n).
 }.
 
 /* extract prime numbers out of the membrane */
-{n(P), $p, @p}/ :- int(P) | {$p, @p}, t(P,12,0).
+{n($prime),$p,@p}/ :- int($prime) | {$p,@p}, t($prime,12,0).
 {@p} :- .
 
 /* factorize */
-t(P,A,K) :- A mod P =:= 0 | t(P,A/P,K+1).
-t(P,A,K) :- A mod P =\= 0 | p(P,K).
-p(P,0) :- int(P) | .
-// p(P,K) :- int(P), K>0 | n(P), p(P,K-1).
+t($p,$a,$k) :- $a mod $p =:= 0, int($k) | t($p, $a/$p, $k+1).
+t($p,$a,$k) :- $a mod $p =\= 0, int($k) | p($p, $k).
+p($p,0) :- int($p) | .
 
-
-
-
-
+% /* display */
+% p($x,$y) :- int($x), $y > 0 | n($x), p($x,$y-1).

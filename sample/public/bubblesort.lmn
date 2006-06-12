@@ -6,7 +6,7 @@
  * リストがあったら、ソートする。
  * O(n^2) で動かすためにはリスト構成子をアクティブアトムにする必要があるので、リスト記法は使えない。
  */
-L=c(X,c(Y,L2)) :- X>Y | L=c(Y,c(X,L2)).
+L=c($x,c($y,L2)) :- $x>$y | L=c($y,c($x,L2)).
 
 ret=gen(100).
 
@@ -16,6 +16,6 @@ ret=gen(100).
  * @param N 生成するリストの長さを表す整数アトム
  * @param R 生成したリストの出力先
  */
-R=gen(N) :- N > 0 | R=c(integer.rnd(100),gen(N-1)).
-R=gen(N) :- N = 0 | R=nil.
+R=gen($n) :- $n > 0 | R=c(integer.rnd(100),gen($n-1)).
+R=gen($n) :- $n = 0 | R=nil.
 
