@@ -21,7 +21,7 @@ import debug.DebugFrame;
  */
 public final class Env {
 
-	public static final String LMNTAL_VERSION = "0.80.20060319";
+	public static final String LMNTAL_VERSION = "0.81.20060613";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
@@ -71,7 +71,7 @@ public final class Env {
 	public static final int VERBOSE_EXPANDRULES = 6;
 
 	/** -vオプション無指定時の冗長表示レベル */
-	public static final int VERBOSE_INIT = 2;
+	public static final int VERBOSE_INIT = 1;
 	/** -vオプション指定時のデフォルトの冗長表示レベル */
 	public static final int VERBOSE_DEFAULT = 5;
 	/** verbose level. */
