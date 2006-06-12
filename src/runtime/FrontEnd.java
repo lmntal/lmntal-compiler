@@ -367,11 +367,11 @@ public class FrontEnd {
 							/// --remain
 							/// Processes remain in REPL mode
 							Env.fREMAIN = true;
-						} else if(args[i].equals("--REPL")){
-							/// --REPL
-							/// REPL(Read-Eval-Print-Loop) mode
-							Env.fREPL = true;
-							Env.fREMAIN = true;
+//						} else if(args[i].equals("--REPL")){
+//							/// --REPL
+//							/// REPL(Read-Eval-Print-Loop) mode
+//							Env.fREPL = true;
+//							Env.fREMAIN = true;
 						} else if (args[i].matches("--request-port")) {//2006.4.27 by inui
 							Debug.setRequestPort(Integer.parseInt(args[i+1]));
 							i++;
