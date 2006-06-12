@@ -79,12 +79,12 @@ H=sys.exec(Cmd, Argv) :- unary(Cmd) | H=[:/*inline*/
  * Flagがoffの時、子の膜の永続化を解除します。
  */
 sys.perpetual(on) :- [:/*inline*/
-	mem.makePerpetual();
+	mem.makePerpetual(true);
 	me.setName("nil");
 
 	:](on).
 sys.perpetual(off) :- [:/*inline*/
-	mem.perpetual = false;
+	mem.makePerpetual(false);
 	me.setName("nil");
 	:].
 

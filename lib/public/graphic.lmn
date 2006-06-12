@@ -45,7 +45,7 @@ graphic.repaint :- [:/*inline*/
 graphic.perpetualUse :- [:/*inline*/
 	Env.fGraphic = true;
 	Env.initGraphic();
-	mem.makePerpetual();
+	mem.makePerpetual(true);
 	Atom atom = mem.newAtom(new Functor("go", 0));
 	me.remove();
 :].

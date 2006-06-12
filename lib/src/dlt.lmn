@@ -222,7 +222,7 @@ dlt.bind(Port,Cmd) :- int(Port) |
 dlt.bound([accept(Send,Recv)|T],Obj) :- 
   dlt.bound([accepting(Send,Recv)|T],O),
   O=[:/*inline*/
-    mem.makePerpetual();
+    mem.makePerpetual(true);
     ObjectFunctor ssFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     ServerSocket servSock = (ServerSocket)ssFunc.getObject();
     AcceptThread at = 
@@ -282,7 +282,7 @@ dlt.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
       Atom objAtom = mem.newAtom(objFunc);
       rt.setObjAtom(objAtom);
       mem.relinkAtomArgs(objAtom,0,me,2);
-      mem.makePerpetual();
+      mem.makePerpetual(true);
       Thread t = new Thread(rt,"rt");
       rt.start();
       me.nthAtom(0).remove();

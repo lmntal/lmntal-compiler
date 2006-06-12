@@ -198,8 +198,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 		stable = true;
 	}
 	/** 永続フラグをONにする */
-	public void makePerpetual() {
-		perpetual = true;
+	public void makePerpetual(boolean f) {
+		perpetual = f;
 	}
 //	/** 永続フラグをOFFにする */
 //	public void makeNotPerpetual() {

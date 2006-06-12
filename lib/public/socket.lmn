@@ -150,7 +150,7 @@ socket.serversocket(O,[accept(A)|C]) :-
 	O2=[:/*inline*/
 		ServerSocket ss = (ServerSocket)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 		AcceptThread t = new AcceptThread(ss,me.nthAtom(1));
-		mem.makePerpetual();
+		mem.makePerpetual(true);
 		t.start();
 		mem.unifyAtomArgs(me, 0, me, 1);
 		me.remove();

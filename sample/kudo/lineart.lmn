@@ -332,7 +332,7 @@ start, screen_width(W), screen_height(H) :- int(W), int(H) | [:/*inline*/
 	mem.removeAtom(me.nthAtom(0));
 	mem.removeAtom(me.nthAtom(1));
 	mem.removeAtom(me);
-	mem.makePerpetual();
+	mem.makePerpetual(true);
 :](W, H), initialize_leader, screen_width(W), screen_height(H).
 
 wait, frame(F) :- class(F, "LineArtFrame") |
