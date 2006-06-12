@@ -171,7 +171,7 @@ public class ConstraintSet /* implements Set */{
 	public void printAllConstraints() {
 		if (!Env.flgShowConstraints)
 			return;
-		Env.p("---Infered Constraints : ");
+		Env.p("---Inferred Constraints : ");
 		Env.p("-----HasActiveAtomConstraints :");
 		Iterator it = hasActiveAtomConstraintsMap.values().iterator();
 		while (it.hasNext()) {
