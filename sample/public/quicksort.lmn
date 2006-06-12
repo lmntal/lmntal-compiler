@@ -1,5 +1,5 @@
 //  Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
-//  Author: mizuno
+//  Author: mizuno, ueda
 
 ret=sort(gen(100)).
 
@@ -9,20 +9,20 @@ ret=sort(gen(100)).
  * @param L ソートするリスト
  * @param R 結果の出力先
  */
-R=sort([D|L]) :- int(D) | devide(L,D,L1,L2), R=list.append(sort(L1),[D|sort(L2)]).
+R=sort([D|L]) :- int(D) | divide(L,D,L1,L2), R=list.append(sort(L1),[D|sort(L2)]).
 R=sort([])    :- R=[].
 
 /**
- * devide(L,B,L1,L2)
+ * divide(L,B,L1,L2)
  * 与えられたリストを、与えられた閾値によって分割する。
  * @param L 分割するリスト
  * @param B 閾値
  * @param L1 閾値未満の要素からなるリストの出力先
  * @param L2 閾値以上の要素からなるリストの出力先
  */
-devide([D|L],B,L1,L2) :- D <  B | devide(L,B,LL1,L2), L1=[D|LL1].
-devide([D|L],B,L1,L2) :- D >= B | devide(L,B,L1,LL2), L2=[D|LL2].
-devide([],   B,L1,L2) :- int(B) | L1=[], L2=[].
+divide([D|L],B,L1,L2) :- D <  B | divide(L,B,LL1,L2), L1=[D|LL1].
+divide([D|L],B,L1,L2) :- D >= B | divide(L,B,L1,LL2), L2=[D|LL2].
+divide([],   B,L1,L2) :- int(B) | L1=[], L2=[].
 
 
 /**
