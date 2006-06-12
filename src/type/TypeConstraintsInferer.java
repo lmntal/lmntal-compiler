@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import runtime.Env;
 import runtime.FloatingFunctor;
 import runtime.Functor;
 import runtime.IntegerFunctor;
@@ -14,6 +13,7 @@ import runtime.StringFunctor;
 import compile.structure.Atom;
 import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
+import compile.structure.ProcessContext;
 import compile.structure.RuleStructure;
 
 /**
@@ -136,6 +136,18 @@ public class TypeConstraintsInferer {
 			LinkOccurrence b = getRealBuddy(lo);
 			if (freelinksRight.contains(b))
 				addConstraintAboutLinks(1, lo, b);
+			else if(b.atom instanceof ProcessContext){
+				ProcessContext pc = (ProcessContext)b.atom;
+//				ContextDef def = pc.def;
+				Iterator it2 = pc.def.rhsOccs.iterator();
+				while(it2.hasNext()){
+					ProcessContext rhsocc = (ProcessContext)it2.next();
+					LinkOccurrence rb = getRealBuddy(rhsocc.args[b.pos]);
+					if(rb.atom instanceof Atom){
+						addConstraintAboutLinks(1, lo, rb);
+					}
+				}
+			}
 		}
 	}
 
@@ -178,7 +190,12 @@ public class TypeConstraintsInferer {
 		if (lo.atom instanceof Atom) {
 			int out = outOfPassiveAtom(((Atom) lo.atom));
 			if (out == lo.pos) {
-				addReceiveConstraint(-sign, getRealBuddy(lo),
+				LinkOccurrence bl = getRealBuddy(lo);
+				if(bl.atom instanceof ProcessContext){
+					ProcessContext pc = (ProcessContext)bl.atom;
+					bl = getRealBuddy(pc.def.lhsOcc.args[bl.pos]);
+				}
+				addReceiveConstraint(-sign, bl,
 						((Atom) lo.atom).functor);
 				return;
 			}
@@ -186,7 +203,12 @@ public class TypeConstraintsInferer {
 		if (b.atom instanceof Atom) {
 			int out = outOfPassiveAtom(((Atom) b.atom));
 			if (out == b.pos) {
-				addReceiveConstraint(-sign, getRealBuddy(b),
+				LinkOccurrence bl = getRealBuddy(b);
+				if(bl.atom instanceof ProcessContext){
+					ProcessContext pc = (ProcessContext)bl.atom;
+					bl = getRealBuddy(pc.def.lhsOcc.args[bl.pos]);
+				}
+				addReceiveConstraint(-sign, bl,
 						((Atom) b.atom).functor);
 				return;
 			}
