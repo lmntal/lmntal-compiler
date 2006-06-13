@@ -12,6 +12,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.media.j3d.View;
+
 import runtime.AbstractMembrane;
 import runtime.Atom;
 
@@ -60,7 +62,18 @@ public final class Output{
 			bw.write(msg);
 			
 			msg = "        for(int nodeCount = 0; nodeCount < " + idMap.size() + "; nodeCount++){\n"+
-			"        	GraphNode node = new GraphNode(atomApp, root, (Float)atomMap.get(nodeCount));\n"+
+			"        	LinkedList value = (LinkedList)atomMap.get(nodeCount);\n"+
+			"        // appearance for atom\n" +
+			"        Appearance atomApp2 = new Appearance();\n" +
+			"        Material atomMat2 = new Material();\n" +
+			"        atomMat2.setSpecularColor(new Color3f(" + Setting.getValue("SPECULAR_COLOR") + "));\n" +
+//			"        atomMat2.setSpecularColor(new Color3f(((Float)value.get(1)).floatValue(), ((Float)value.get(2)).floatValue(), ((Float)value.get(3)).floatValue()));\n" +
+//			"        atomMat2.setDiffuseColor(new Color3f(((Float)value.get(1)).floatValue(), ((Float)value.get(2)).floatValue(), ((Float)value.get(3)).floatValue()));\n" +
+			"        atomMat2.setDiffuseColor(new Color3f(" + Setting.getValue("DIFFUSE_COLOR") + "));\n" +
+//			"        atomMat2.setAmbientColor(new Color3f(" + Setting.getValue("AMBIENT_COLOR") + "));\n" +
+			"        atomMat2.setAmbientColor(new Color3f(((Float)value.get(1)).floatValue(), ((Float)value.get(2)).floatValue(), ((Float)value.get(3)).floatValue()));\n" +
+			"        atomApp2.setMaterial(atomMat2);\n" +
+			"        	GraphNode node = new GraphNode(atomApp2, root, Float.parseFloat((String)value.get(0)));\n"+
 			"        	graphNodes.addElement(node);\n"+
 			"        	nodeList.add(node);\n"+
 			"        }\n";
@@ -85,7 +98,7 @@ public final class Output{
 			try {
 				p = runtime.exec("make -f " + file + "_Makefile " + file + ".class", null, new File(filePath));
 				p.waitFor();
-				p = runtime.exec("cmd.exe /c start cmd.exe /c make -f " + file + "_Makefile " + file + "_run", null, new File(filePath));
+				p = runtime.exec("cmd.exe /c start cmd.exe /c make -f " + file + "_Makefile run", null, new File(filePath));
 				p.waitFor();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -125,6 +138,8 @@ public final class Output{
 					msg = atomID +
 					"," +
 					size +
+					"," +
+					Setting.getAtomColor(atom.getName()) +
 					"\n";
 					bw.write(msg);
 				}
@@ -229,10 +244,10 @@ public final class Output{
 			"" + file + ".class: chorus3d " + file + ".java\n" +
 			"	$(JAVAC) " + file + ".java\n" +
 			"\n" +
-			"" + file + "_run: #" + file + ".class\n" +
+			"run: #" + file + ".class\n" +
 			"	LD_LIBRARY_PATH=$(LIBDIR) PATH=\"$(LIBDIR):$(PATH)\" $(JAVA) " + file + "\n" +
 			"\n" +
-			"" + file + "_debug: " + file + ".class\n" +
+			"debug: " + file + ".class\n" +
 			"	LD_LIBRARY_PATH=$(LIBDIR) PATH=\"$(LIBDIR):$(PATH)\" $(JDB) " + file + "\n" +
 			"\n" +
 			"clean:\n" +
@@ -460,30 +475,55 @@ public final class Output{
 		"		int i;\n" +
 		"		StringBuffer s = new StringBuffer();\n" +
 		"		String key = null;\n" +
-		"		String value = null;\n" +
-		"		boolean isKey = true;\n" +
+		"		String size = null;\n" +
+		"		float r = 0.0f;\n" +
+		"		float g = 0.0f;\n" +
+		"		float b = 0.0f;\n" +
+		"		LinkedList value = new LinkedList();\n" +
+		"		int flag = 0;\n" +
 		"		HashMap atomMap = new HashMap();\n" +
 		"		try {\n" +
 		"			FileReader file = new FileReader(\""+ file +"_Atom.dat\");\n" +
 		"			while((i = file.read()) != -1){\n" +
 		"				// key\n" +
-		"				if((char)i == ','){\n" +
+		"				if((char)i == ',' && flag == 0){\n" +
 		"					key = s.toString();\n" +
 		"					s = new StringBuffer();\n" +
-		"					isKey = false;\n" +
+		"					flag = 1;\n" +
 		"					continue;\n" +
 		"				}\n" +
-		"				// value\n" +
-		"				else if((char)i == '\\n' || (char)i == '\\r'){\n" +
-		"					if(isKey || key == null){\n" +
-		"						key = value = null;\n" +
-		"						continue;\n" +
-		"					}\n" +
-		"					value = s.toString();\n" +
+		"				// size\n" +
+		"				else if((char)i == ',' && flag == 1){\n" +
+		"					size = s.toString();\n" +
 		"					s = new StringBuffer();\n" +
-		"					isKey = true;\n" +
-		"					atomMap.put(Integer.parseInt(key), Float.parseFloat(value));\n" +
-		"					key = value = null;\n" +
+		"					flag = 2;\n" +
+		"					value.add(size);\n" +
+		"					continue;\n" +
+		"				}\n" +
+		"				// color R\n" +
+		"				else if((char)i == ',' && flag == 2){\n" +
+		"					r = Float.parseFloat(s.toString());\n" +
+		"					s = new StringBuffer();\n" +
+		"					flag = 3;\n" +
+		"					value.add(r);\n" +
+		"					continue;\n" +
+		"				}\n" +
+		"				// color G\n" +
+		"				else if((char)i == ',' && flag == 3){\n" +
+		"					g = Float.parseFloat(s.toString());\n" +
+		"					s = new StringBuffer();\n" +
+		"					flag = 4;\n" +
+		"					value.add(g);\n" +
+		"					continue;\n" +
+		"				}\n" +
+		"				// color B\n" +
+		"				else if((char)i == '\\n' || (char)i == '\\r'){\n" +
+		"					b = Float.parseFloat(s.toString());\n" +
+		"					s = new StringBuffer();\n" +
+		"					flag = 0;\n" +
+		"					value.add(b);\n" +
+		"					atomMap.put(Integer.parseInt(key), value);\n" +
+		"					value = new LinkedList();\n" +
 		"					continue;\n" +
 		"				}\n" +
 		"				// 文字取得\n" +
@@ -628,6 +668,8 @@ public final class Output{
 		"        */\n" +
 		"\n" +
 		"        SimpleUniverse univ = new SimpleUniverse(canvas);\n" +
+		"        univ.getViewer().getView().setBackClipPolicy(View.VIRTUAL_EYE);\n" +
+		"        univ.getViewer().getView().setBackClipDistance(1000.0);\n" +
 		"\n" +
 		"        // navigation\n" +
 		"        univ.getViewingPlatform().setNominalViewingTransform();\n" +

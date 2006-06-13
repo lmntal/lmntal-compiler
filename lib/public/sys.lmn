@@ -6,6 +6,7 @@ SYNOPSIS
 
 AUTHOR
 	Koji Hara
+	Atsushi Nakano
 
 HISTORY
 	2004/05/23(Sun)
@@ -71,6 +72,24 @@ H=sys.exec(Cmd, Argv) :- unary(Cmd) | H=[:/*inline*/
 		e.printStackTrace();
 	}
 	:](Cmd, Argv).
+
+/**
+ * sys.exec(+Cmd, -Res) : String -> List of String -> Process
+ * 
+ * コマンドCmdを実行します。
+ * by Nakano
+ */	
+H=sys.exec(Cmd) :- unary(Cmd) | H=[:/*inline*/
+	try {
+		Runtime.getRuntime().exec( me.nth(0));
+//	System.out.println(p);
+		//me.nthAtom(0).remove();
+		mem.relink(me.nthAtom(0), 0, me, 1);
+		me.remove();
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	:](Cmd).
 
 /**
  * sys.perpetual(+Flag) :

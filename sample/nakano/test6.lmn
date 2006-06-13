@@ -8,7 +8,7 @@ b(AA, BB, X2, X22).
 c(BB, CCC, X3, X33).
 d(CCC,     X4, X44).
 
-gen(integer.set(1,50)).
+//gen(integer.set(1,50)).
 
 gen(_IX),
 a(   A, X1, X11),
@@ -28,6 +28,7 @@ d(CC,     Y4, X4).
  %炭素なのになぜか3引数(実際はこれらのリンクは二本ずつであるべき)
  
  % C60 (各行が五角形を表していると思いねえ)
+/*
  C1=c(L11,c(L12,c(L13,c(L14,c(L15,C1))))).
  C2=dd(L21,dd(L22,dd(L23,dd(L24,dd(L25,C2))))).
  C3=eee(L31,eee(L32,eee(L33,eee(L34,eee(L35,C3))))).
@@ -51,4 +52,4 @@ d(CC,     Y4, X4).
  L81=LC3,L82=L75                        .
  L91=LC4,L92=L85                        .
  LA1=LC5,LA2=L95                        .
- 
+ */

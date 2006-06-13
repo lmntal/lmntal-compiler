@@ -15,6 +15,7 @@ public class Setting {
 	private static HashMap settingMap = new HashMap();
 	private static HashMap atomSize = new HashMap();
 	private static HashMap linkLength = new HashMap();
+	private static HashMap atomColor = new HashMap();
 	
 	final static 
 	private String FILE_NAME = "../../chorus.conf";
@@ -189,5 +190,18 @@ public class Setting {
 
 	public static void setLinkLength(String atom1, String atom2,float length) {
 		linkLength.put(atom1 + "," + atom2, new Float(length));
+	}
+
+	public static String getAtomColor(String atom) {
+		if(atomColor.containsKey(atom)){
+			return (String)atomColor.get(atom);
+		}
+		else{
+			return getValue("DIFFUSE_COLOR");
+		}
+	}
+
+	public static void setAtomColor(String atom, float r, float g, float b) {
+		atomColor.put(atom, r + "," + g + "," + b);
 	}
 }
