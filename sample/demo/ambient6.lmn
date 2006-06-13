@@ -100,7 +100,7 @@ release(N1,{acquire(M1,{qq})}),
 //   Firewall =def (new w) w[k[out w.in k'.in w] | open k'.open k''.P]
 //   Agent    =def k'[open k.k''[Q]]
 //////////////////////////////////////////////////////////////////////////
-/*
+
 {id,name(k),+K9,+K3}, {id,name(kk),+L3,+L9}, {id,name(kkk),+M9,+M3}, {id,+W9},
 {a.use. amb(W0),
   {id,+W0,+W8,-W9}, {id,+K8,-K9}, {id,+L1,+L8,-L9}, {id,+M0,-M9},
@@ -111,7 +111,7 @@ release(N1,{acquire(M1,{qq})}),
 {a.use. amb(L2), {id,+L2,-L3}, {id,+K2,-K3}, {id,+M2,-M3},
   open(K2,{{amb(M1), {id,+M1,-M2}, qq}})
 }.
-*/
+
 
 // Objective Moves ///////////////////////////////////////////////////////
 //   allow n    =def !open n
@@ -157,7 +157,7 @@ b.use.
 //                        p[in m.out m.q[out p.open r.Q]] |
 //                        open q | r[])
 //////////////////////////////////////////////////////////////////////////
-
+/*
 choice@@
 choice(N,{$p},M,{$q}) :-
   {id,+P9,+P8}, {id,+Q1,+Q3,+Q9}, {id,+R1,+R3,+R8},
@@ -171,7 +171,7 @@ choice(N,{$p},M,{$q}) :-
 
 {id,name(n),+N,+N1}, {id,name(m),+M},
 choice(N,{pp},M,{qq}), {a.use, amb(N0), {id,+N0,-N1}, rr}.
-
+*/
 
 
 // Renaming //////////////////////////////////////////////////////////////
