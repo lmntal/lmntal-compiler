@@ -1,5 +1,7 @@
-/* the (synchronous) pi-calculus
+/*------------------------------------------------------------------
+   the (synchronous) pi-calculus
    Kazunori Ueda, 2006-05-20
+   Coyright(C) 2006, Kazunori Ueda
 
    Examples are taken from 
    [1] Milner, R., The Polyadic pi-Calculus, a Tutorial
@@ -15,7 +17,7 @@
       |  P1 | P2
       |  R
       |  !R
-*/
+------------------------------------------------------------------*/
 
 { module(pi).
   comm@@ {$x,+C1,+C2}, {once, get(C1,Y,{$b1[Y|*V1]}), $c1},
