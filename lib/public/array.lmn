@@ -14,6 +14,7 @@ SYNOPSIS
 AUTHOR
 
 	Koji Hara and Kazunori Ueda
+	and Atsushi Nakano
 
 HISTORY
 
@@ -55,6 +56,30 @@ COMMENTS
 		me.nthAtom(0).remove();
 		me.remove();
 		:](Length).
+
+/**
+ * array.new(Length, Value, Res):
+ *
+ * Lengthで指定された長さの配列を生成してResにつなぎます。
+ * 生成されたリストの初期値にValueが繋がる．int型のみ．
+ * by nakano
+ */	
+
+	H=array.new(Length, Value) :- int(Length), int(Value) | H=[:/*inline*/
+		int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+		int value = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+		Atom result = mem.newAtom(new Functor("int_array", 2));
+		Atom result2 = mem.newAtom(new Functor("@", l+1));
+		for(int i=0;i<l;i++) {
+			Atom el = mem.newAtom(new IntegerFunctor(value));
+			mem.newLink(el, 0, result2, i);
+		}
+		mem.newLink(result, 0, result2, l);
+		mem.relink(result, 1, me, 2);
+		me.nthAtom(0).remove();
+		me.nthAtom(1).remove();
+		me.remove();
+		:](Length, Value).
 
 /**
  * array.update(Array, Index, OldValue, NewValue, NewArray):
