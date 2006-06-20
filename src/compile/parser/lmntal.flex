@@ -125,7 +125,7 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
 	"[:" 				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(QUOTED); }
 	"\""				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(STRING); }
-	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext()); }
+	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext(), yytext(), yyline, yycolumn); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME,		yytext()); }
 	{CharCodeLiteral}	{ return symbol(sym.CHAR_CODE_LITERAL,	yytext()); }
 	{SymbolName}		{ return symbol(sym.SYMBOL_NAME,		yytext()); }

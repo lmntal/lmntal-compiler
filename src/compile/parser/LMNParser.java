@@ -190,7 +190,8 @@ public class LMNParser {
 		}
 		// リンク
 		else if (obj instanceof SrcLink) {
-			error("SYNTAX ERROR: top-level variable occurrence: " + ((SrcLink)obj).getName());
+			SrcLink link = (SrcLink)obj;
+			error("SYNTAX ERROR: top-level variable occurrence: " + link.getName()+", at line "+link.lineno);
 		}
 		// その他 
 		else {
@@ -630,7 +631,8 @@ public class LMNParser {
 			it = links.keySet().iterator();
 			while (it.hasNext()) {
 				LinkOccurrence link = (LinkOccurrence)links.get(it.next());
-				error("SYNTAX ERROR: rule with free variable: "+ link.name + "\n    in " + rule);
+//				error("SYNTAX ERROR: rule with free variable: "+ link.name + "\n    in " + rule);
+				error("SYNTAX ERROR: rule with free variable: "+ link.name + ", at line " + rule.lineno);
 				LinkedList process = new LinkedList();
 				process.add(new SrcLink(link.name));
 				SrcAtom sAtom = new SrcAtom(link.name, process);
@@ -1615,7 +1617,8 @@ class SyntaxExpander {
 			}
 			else if (obj instanceof SrcRule) {}
 			else if (obj instanceof SrcLink) {
-				error("SYNTAX ERROR: top-level variable occurrence: " + ((SrcLink)obj).getName());
+				SrcLink link = (SrcLink)obj;
+				error("SYNTAX ERROR: top-level variable occurrence: " + link.getName()+", at line "+link.lineno);
 				it.remove();
 			}
 			else if (obj instanceof SrcContext) {

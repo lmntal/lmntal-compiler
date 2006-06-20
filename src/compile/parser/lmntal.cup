@@ -81,7 +81,7 @@ start with WorldProcessList;
 /* -------------Precedence and Associatively of Terminals Section----------- */
 
 Link		::=   LINK_NAME:name
-					{: RESULT = new SrcLink(name); :};
+					{: RESULT = new SrcLink(name.toString(), nameleft); :};
 
 // 引数なしまたは引数ありのアトムの名前として使用できるリテラル
 FuncName	::=   ATOM_NAME:name
