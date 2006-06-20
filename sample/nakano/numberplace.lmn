@@ -30,75 +30,93 @@ determination_9@@
 // 行・列・ブロックで，すでに確定しているものを候補から削除
 check_1@@
       a(N1, L, L2, L3, [1, 1, x, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, 1, X2, X3, X4, X5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(1, _IREST), $q, @q}
-   :- _IREST > 0 | {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, 1, x, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, x, X2, X3, X4, X5, X6, X7, X8, X9]), {+L6, rest(1, _IREST - 1), $q, @q}.
+   :- _IREST > 0 
+   |  a(N1, L, L2, L3, [1, 1, x, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, x, X2, X3, X4, X5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(1, _IREST - 1), $q, @q}.
 
 check_2@@
       a(N1, L, L2, L3, [1, x, 2, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, 2, X3, X4, X5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(2, _IREST), $q, @q}
-   :- _IREST > 0 |  {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, x, 2, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, x, X3, X4, X5, X6, X7, X8, X9]), {+L6, rest(2, _IREST - 1), $q, @q}.
+   :- _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, 2, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, x, X3, X4, X5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(2, _IREST - 1), $q, @q}.
 
 check_3@@
       a(N1, L, L2, L3, [1, x, x, 3, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, 3, X4, X5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(3, _IREST), $q, @q}
-   :- _IREST > 0 |  {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, x, x, 3, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, x, X4, X5, X6, X7, X8, X9]), {+L6, rest(3, _IREST - 1), $q, @q}.
+   :- _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, 3, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, x, X4, X5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(3, _IREST - 1), $q, @q}.
 
 check_4@@
       a(N1, L, L2, L3, [1, x, x, x, 4, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, 4, X5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(4, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, 4, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, x, X5, X6, X7, X8, X9]), {+L6, rest(4, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, 4, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, x, X5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(4, _IREST - 1), $q, @q}.
 
 check_5@@
       a(N1, L, L2, L3, [1, x, x, x, x, 5, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, 5, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(5, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, 5, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, x, X6, X7, X8, X9]), {+L6, rest(5, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, 5, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, x, X6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(5, _IREST - 1), $q, @q}.
 
 check_6@@
       a(N1, L, L2, L3, [1, x, x, x, x, x, 6, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, 6, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(6, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, x, 6, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, x, X7, X8, X9]), {+L6, rest(6, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, x, 6, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, x, X7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(6, _IREST - 1), $q, @q}.
 
 check_7@@
       a(N1, L, L2, L3, [1, x, x, x, x, x, x, 7, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, 7, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(7, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, x, x, 7, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, x, X8, X9]), {+L6, rest(7, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, x, x, 7, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, x, X8, X9]), {+L, +L4, $p, @p}, {+L6, rest(7, _IREST - 1), $q, @q}.
 
 check_8@@
       a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, 8, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, 8, X9]), {+L, +L4, $p, @p}, {+L6, rest(8, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, 8, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, x, X9]), {+L6, rest(8, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, 8, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, x, X9]), {+L, +L4, $p, @p}, {+L6, rest(8, _IREST - 1), $q, @q}.
 
 check_9@@
       a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, x, 9]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, X8, 9]), {+L, +L4, $p, @p}, {+L6, rest(9, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L, +L4, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, x, 9]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, X8, x]), {+L6, rest(9, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, x, 9]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, X8, x]), {+L, +L4, $p, @p}, {+L6, rest(9, _IREST - 1), $q, @q}.
 
 check_21@@
       a(N1, L, L2, L3, [1, 1, x, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, 1, X1, X2, X3, X4, X5, X6, X7, X8]), {+L2, +L5, $p, @p}, {+L6, rest(1, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, 1, x, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, x, X1, X2, X3, X4, X5, X6, X7, X8]), {+L6, rest(1, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, 1, x, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, x, X1, X2, X3, X4, X5, X6, X7, X8]), {+L2, +L5, $p, @p}, {+L6, rest(1, _IREST - 1), $q, @q}.
 
 check_22@@
       a(N1, L, L2, L3, [1, x, 2, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, 2, X3, X4, X5, X6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(2, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, x, 2, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, x, X3, X4, X5, X6, X7, X8, X9]), {+L6, rest(2, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, 2, x, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, x, X3, X4, X5, X6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(2, _IREST - 1), $q, @q}.
 
 check_23@@
       a(N1, L, L2, L3, [1, x, x, 3, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, 3, X4, X5, X6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(3, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, x, x, 3, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, x, X4, X5, X6, X7, X8, X9]), {+L6, rest(3, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, 3, x, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, x, X4, X5, X6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(3, _IREST - 1), $q, @q}.
 
 check_24@@
       a(N1, L, L2, L3, [1, x, x, x, 4, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, 4, X5, X6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(4, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, 4, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, x, X5, X6, X7, X8, X9]), {+L6, rest(4, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, 4, x, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, x, X5, X6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(4, _IREST - 1), $q, @q}.
 
 check_25@@
       a(N1, L, L2, L3, [1, x, x, x, x, 5, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, 5, X6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(5, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, 5, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, x, X6, X7, X8, X9]), {+L6, rest(5, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, 5, x, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, x, X6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(5, _IREST - 1), $q, @q}.
 
 check_26@@
       a(N1, L, L2, L3, [1, x, x, x, x, x, 6, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, 6, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(6, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, x, 6, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, x, X7, X8, X9]), {+L6, rest(6, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, x, 6, x, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, x, X7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(6, _IREST - 1), $q, @q}.
 
 check_27@@
       a(N1, L, L2, L3, [1, x, x, x, x, x, x, 7, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, 7, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(7, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, x, x, 7, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, x, X8, X9]), {+L6, rest(7, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, x, x, 7, x, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, x, X8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(7, _IREST - 1), $q, @q}.
 
 check_28@@
       a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, 8, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, 8, X9]), {+L2, +L5, $p, @p}, {+L6, rest(8, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, 8, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, x, X9]), {+L6, rest(8, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, 8, x]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, x, X9]), {+L2, +L5, $p, @p}, {+L6, rest(8, _IREST - 1), $q, @q}.
 
 check_29@@
       a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, x, 9]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, X8, 9]), {+L2, +L5, $p, @p}, {+L6, rest(9, _IREST), $q, @q}
-   :-  _IREST > 0 |  {+L2, +L5, $p, @p}, a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, x, 9]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, X8, x]), {+L6, rest(9, _IREST - 1), $q, @q}.
+   :-  _IREST > 0 
+   |  a(N1, L, L2, L3, [1, x, x, x, x, x, x, x, x, 9]), a(N2, L4, L5, L6, [0, X1, X2, X3, X4, X5, X6, X7, X8, x]), {+L2, +L5, $p, @p}, {+L6, rest(9, _IREST - 1), $q, @q}.
 
 check_31@@
       a(N2, L4, L5, L6, [0, 1, X1, X2, X3, X4, X5, X6, X7, X8]), { rest(1,0), +L6, $p, @p}
@@ -240,7 +258,7 @@ make_node_2_9@@
  link_block@@
  a(_ID, N1, L, L2, X), {b(N2), rest(_ID2, _IREST), $p}
  :- (((N2 mod 10) - 1) / 3) = (((N1 mod 10) - 1) / 3), (((N2 / 10) - 1) / 3) = (((N1 / 10) - 1) / 3), _ID = _ID2
- | a(N1, L, L2, L3, X), {b(N2), rest(_ID2, 0), +L3, $p}, println([_ID2, N2, N1]).
+ | a(N1, L, L2, L3, X), {b(N2), rest(_ID2, 0), +L3, $p}.
  
  link_block2@@
  a(_ID, N1, L, L2, X), {b(N2), $p} 
@@ -268,15 +286,15 @@ make_node_2_9@@
  {/*行8*/ y(8).}.
  {/*行9*/ y(9).}.
 
- {/*ブロック1*/ b(11). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
- {/*ブロック2*/ b(14). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
- {/*ブロック3*/ b(17). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
- {/*ブロック4*/ b(41). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
- {/*ブロック5*/ b(44). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
- {/*ブロック6*/ b(47). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
- {/*ブロック7*/ b(71). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
- {/*ブロック8*/ b(74). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
- {/*ブロック9*/ b(77). rest(1,8), rest(2,8), rest(3,8), rest(4,8), rest(5,8), rest(6,8), rest(7,8), rest(8,8), rest(9,8)}.
+ {/*ブロック1*/ b(11). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
+ {/*ブロック2*/ b(14). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
+ {/*ブロック3*/ b(17). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
+ {/*ブロック4*/ b(41). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
+ {/*ブロック5*/ b(44). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
+ {/*ブロック6*/ b(47). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
+ {/*ブロック7*/ b(71). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
+ {/*ブロック8*/ b(74). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
+ {/*ブロック9*/ b(77). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,8)}.
 
 }.
 
