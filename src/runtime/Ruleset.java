@@ -1,5 +1,6 @@
 package runtime;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +15,8 @@ import java.io.ObjectOutputStream;
 abstract public class Ruleset {
 	/** new束縛された名前の具体値を格納する配列 */
 	protected Functor[] holes;
+	public List compiledRules = new ArrayList();
+	public boolean isRulesSetted = false;
 	abstract public String toString();
 	abstract public String encode();
 	/**

@@ -324,9 +324,13 @@ public class Dumper {
 			it = mem.rulesetIterator();
 			while (it.hasNext()) {
 				Ruleset rs = (Ruleset) it.next();
-				if (rs instanceof InterpretedRuleset) {
-					InterpretedRuleset ir = (InterpretedRuleset) rs;
-					Iterator it2 = ir.rules.iterator();
+				List rules;
+				if(rs instanceof InterpretedRuleset)
+					rules = ((InterpretedRuleset)rs).rules;
+				else
+					rules = rs.compiledRules;
+				if(rules != null){
+					Iterator it2 = rules.iterator();
 					while (it2.hasNext()) {
 						Rule r = (Rule) it2.next();
 						if (r.name != null) {
@@ -344,7 +348,7 @@ public class Dumper {
 											+ "(" + r.time + "msec)");
 							}
 						}
-					}
+					}					
 				}
 			}
 		}

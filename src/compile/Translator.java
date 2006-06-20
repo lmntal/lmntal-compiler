@@ -257,6 +257,7 @@ public class Translator {
 		writer.write("public class Main {\n");
 		genLoadModuleFunc(writer, m);
 		writer.write("	public static void main(String[] args) {\n");
+		writer.write("		runtime.FrontEnd.checkVersion();\n");
 		writer.write("		runtime.FrontEnd.processOptions(args);\n");
 		writer.write("		loadUserDefinedSystemRuleset();\n");
 		writer.write("		runtime.FrontEnd.run(translated." + getClassName(initialRuleset) + ".getInstance());\n"); //todo 引数の処理
@@ -521,6 +522,7 @@ public class Translator {
 		writer.write("import java.io.*;\n");
 		writer.write("import daemon.IDConverter;\n");
 		writer.write("import module.*;\n");
+		if(Env.profile) writer.write("import util.Util;\n");
 //		writer.write("\n");
 //		{
 //			Iterator il0 = Inline.inlineSet.values().iterator();
@@ -547,6 +549,24 @@ public class Translator {
 		writer.write("		return theInstance;\n");
 		writer.write("	}\n");
 		writer.write("	private int id = " + ruleset.getId() + ";\n");
+		int rulenum = 0;
+		if(Env.profile) {
+			writer.write("	public void setCompiledRules() {\n");
+			Iterator it = ruleset.rules.iterator();
+				while (it.hasNext()) {
+					Rule rule = (Rule) it.next();
+					writer.write("		Rule rule" + rulenum + ";\n");
+					writer.write("		rule" + rulenum + " = new Rule();\n");
+					if(rule.name == null)
+						writer.write("		rule" + rulenum + ".name = " + null + ";\n");
+					else
+						writer.write("		rule" + rulenum + ".name = \"" + rule.name + "\";\n");
+					writer.write("		compiledRules.add(" + rulenum + ", rule" + rulenum + ");\n");
+					rulenum ++;
+				}
+			writer.write("	}\n");
+		}
+
 		if (globalSystemRuleset) {
 			writer.write("	public String getGlobalRulesetID() {\n");
 			writer.write("		return \"$systemruleset\";\n");
@@ -586,15 +606,39 @@ public class Translator {
 		writer.write("	public boolean react(Membrane mem, Atom atom) {\n");
 		writer.write("		boolean result = false;\n");
 		Iterator it = ruleset.rules.iterator();
-		while (it.hasNext()) {
-			Rule rule = (Rule) it.next();
-			writer.write("		if (exec" + rule.atomMatchLabel.label + "(mem, atom, false)) {\n");
-			//writer.write("			result = true;\n");
-			writer.write("			if (Env.fTrace)\n");
-			writer.write("				Task.trace(\"-->\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
-			writer.write("			return true;\n");
-			//writer.write("			if (!mem.isCurrent()) return true;\n");
+		if(Env.profile) {
+			writer.write("		long start,stop;\n");
+			writer.write("		Rule rule;\n");
+			writer.write("		boolean success;\n");
+			writer.write("		if(!isRulesSetted) {\n");
+			writer.write("			isRulesSetted = true;\n");
+			writer.write("			setCompiledRules();\n");
 			writer.write("		}\n");
+			for (int i=0; i<rulenum; i++){
+				Rule rule = (Rule) it.next();
+				writer.write("		rule = (Rule)compiledRules.get(" + i + ");\n");
+				writer.write("		success = false;\n");			
+				writer.write("		start = Util.getTime();\n");
+				writer.write("		success = exec" + rule.atomMatchLabel.label + "(mem, atom, false);\n");
+				writer.write("		stop = Util.getTime();\n");
+				writer.write("		synchronized(rule){\n");
+				writer.write("			rule.time += (stop>start)?(stop-start):0;\n");
+				writer.write("			rule.apply++;\n");
+				writer.write("			if (success)rule.succeed ++;\n");
+				writer.write("		}\n");
+				writer.write("		if(success) return success;\n");
+			}
+		} else {
+			while (it.hasNext()) {
+				Rule rule = (Rule) it.next();
+				writer.write("		if (exec" + rule.atomMatchLabel.label + "(mem, atom, false)) {\n");
+				//writer.write("			result = true;\n");
+				writer.write("			if (Env.fTrace)\n");
+				writer.write("				Task.trace(\"-->\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
+				writer.write("			return true;\n");
+				//writer.write("			if (!mem.isCurrent()) return true;\n");
+				writer.write("		}\n");
+			}
 		}
 		writer.write("		return result;\n");
 		writer.write("	}\n");
@@ -605,15 +649,39 @@ public class Translator {
 		writer.write("	public boolean react(Membrane mem, boolean nondeterministic) {\n");
 		writer.write("		boolean result = false;\n");
 		it = ruleset.rules.iterator();
-		while (it.hasNext()) {
-			Rule rule = (Rule) it.next();
-			writer.write("		if (exec" + rule.memMatchLabel.label + "(mem, nondeterministic)) {\n");
-			//writer.write("			result = true;\n");
-			writer.write("			if (Env.fTrace)\n");
-			writer.write("				Task.trace(\"==>\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
-			writer.write("			return true;\n");
-			//writer.write("			if (!mem.isCurrent()) return true;\n");
+		if(Env.profile) {
+			writer.write("		long start,stop;\n");
+			writer.write("		Rule rule;\n");
+			writer.write("		boolean success;\n");
+			writer.write("		if(!isRulesSetted) {\n");
+			writer.write("			isRulesSetted = true;\n");
+			writer.write("			setCompiledRules();\n");
 			writer.write("		}\n");
+			for (int i=0; i<rulenum; i++){
+				Rule rule = (Rule) it.next();
+				writer.write("		rule = (Rule) compiledRules.get(" + i + ");\n");
+				writer.write("		success = false;\n");			
+				writer.write("		start = Util.getTime();\n");
+				writer.write("		success = exec" + rule.memMatchLabel.label + "(mem, nondeterministic);\n");
+				writer.write("		stop = Util.getTime();\n");
+				writer.write("		synchronized(rule){\n");
+				writer.write("			rule.time += (stop>start)?(stop-start):0;\n");
+				writer.write("			rule.apply++;\n");
+				writer.write("			if (success)rule.succeed ++;\n");
+				writer.write("		}\n");
+				writer.write("		if(success) return success;\n");
+			}
+		} else {
+			while (it.hasNext()) {
+				Rule rule = (Rule) it.next();
+				writer.write("		if (exec" + rule.memMatchLabel.label + "(mem, nondeterministic)) {\n");
+				//writer.write("			result = true;\n");
+				writer.write("			if (Env.fTrace)\n");
+				writer.write("				Task.trace(\"==>\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
+				writer.write("			return true;\n");
+				//writer.write("			if (!mem.isCurrent()) return true;\n");
+				writer.write("		}\n");
+			}
 		}
 		writer.write("		return result;\n");
 		writer.write("	}\n");

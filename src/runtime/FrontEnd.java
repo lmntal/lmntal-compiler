@@ -51,23 +51,8 @@ public class FrontEnd {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//バージョンチェック by 水野
-		try {
-			String ver = System.getProperty("java.version");
-			StringTokenizer tokenizer = new StringTokenizer(ver, ".");
-			int major = Integer.parseInt(tokenizer.nextToken());
-			int minor = Integer.parseInt(tokenizer.nextToken());
-			if (major < 1 || (major == 1 && minor < 4)) {
-				System.err.println("use jre 1.4 or higher!!");
-				System.exit(-1);
-			}
-			Env.majorVersion=major;
-			Env.minorVersion=minor;
-		// うまくいかなかった場合は無視する
-		} catch (SecurityException e) {
-		} catch (NoSuchElementException e) {
-		} catch (NumberFormatException e) {
-		}
+		
+		checkVersion();
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
@@ -104,6 +89,26 @@ public class FrontEnd {
 		if(Env.fREPL) {
 			REPL.run();
 		}
+	}
+	
+	public static void checkVersion() {
+		//バージョンチェック by 水野
+		try {
+			String ver = System.getProperty("java.version");
+			StringTokenizer tokenizer = new StringTokenizer(ver, ".");
+			int major = Integer.parseInt(tokenizer.nextToken());
+			int minor = Integer.parseInt(tokenizer.nextToken());
+			if (major < 1 || (major == 1 && minor < 4)) {
+				System.err.println("use jre 1.4 or higher!!");
+				System.exit(-1);
+			}
+			Env.majorVersion=major;
+			Env.minorVersion=minor;
+		// うまくいかなかった場合は無視する
+		} catch (SecurityException e) {
+		} catch (NoSuchElementException e) {
+		} catch (NumberFormatException e) {
+		}		
 	}
 	
 	/**
