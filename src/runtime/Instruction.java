@@ -1306,6 +1306,13 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int ADDATOMTOSET = 241;
 	static {setArgType(ADDATOMTOSET, new ArgType(false, ARG_VAR, ARG_ATOM));}
 
+	///////////////////////////////////////////////////////////////////////
+	
+	/** isflat [ srcmem ]
+	 * $srcmem
+	 */
+	public static final int ISFLAT = 300;
+	static {setArgType(ISFLAT, new ArgType(false, ARG_MEM));}
 
 	///////////////////////////////////////////////////////////////////////
 

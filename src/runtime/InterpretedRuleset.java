@@ -1043,6 +1043,9 @@ class InterpretiveReactor {
 					((Set)vars.get(inst.getIntArg1())).add(atoms[inst.getIntArg2()]);
 					break; //kudo 2004-12-08
 					//====アトムセットを操作するための命令====ここまで====
+				case Instruction.ISFLAT : //[srcmem]
+					if(!mems[inst.getIntArg1()].mems.isEmpty())return false;
+					break;
 					
 					//====整数用の組み込みボディ命令====ここから====
 				case Instruction.IADD : //[-dstintatom, intatom1, intatom2]
