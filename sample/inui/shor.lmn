@@ -6,27 +6,17 @@
  * レジスタ2を観測 --> 1つの値に収束する
  */
 {
+//x=1,2,3,...を(重ね合わせの状態で)生成する
 x(integer.set(1,10)).
-x(X) :- int(X) | x(X, fNx(integer.powermod(11, X, 15))).
 
-//modしながらpower
-//H=powermod(A,B,C) :- int(A), B > 2, int(C) | H=((A*powermod(A, B-1, C)) mod C).
-//H=powermod(A,B,C) :- int(A), B=:=2, int(C) | H=((A*A) mod C).
-//H=powermod(A,B,C) :- int(A), B < 2, int(C) | H=(A mod C).
+//(一度に)fN(x)を生成
+x(X) :- int(X) | x(X, fNx(powermod(11, X, 15))).
 
-//x(X, fNx(Y)), x(X2, fNx(Y2)) :- killed(X2, Y2), x(X, fNx(Y)).
+//法CにおけるAのB乗
+H=powermod(A,B,C) :- int(A), B > 2, int(C) | H=((A*powermod(A, B-1, C)) mod C).
+H=powermod(A,B,C) :- int(A), B=:=2, int(C) | H=((A*A) mod C).
+H=powermod(A,B,C) :- int(A), B < 2, int(C) | H=(A mod C).
 }.
 
 //観測したら１つの値に収束
-{x(X, fNx(Y)), x(X2, fNx(Y2)), $p, @p}/ :- ground(X), ground(Y), int(X2), int(Y2), Y =\= Y2 | {x(X, fNx(Y)), $p}.
-//x(X, fNx(Y)) :- {x(X), +Z}, fNx(Y, Z).
-
-//{r1, x(integer.set(1,5))}.
-//{r2.
-//H=powermod(A,B,C) :- int(A), B > 2, int(C) | H=((A*powermod(A, B-1, C)) mod C).
-//H=powermod(A,B,C) :- int(A), B=:=2, int(C) | H=((A*A) mod C).
-//H=powermod(A,B,C) :- int(A), B < 2, int(C) | H=(A mod C).
-//}.
-//
-//{r1, x(X), $p, @p}, {r2, $q, @q} :- int(X) | {r1, x(X, Y), $p}, {r2, fNx(powermod(11, X, 15), Y), $q, @q}.
-//{r2, fNx(X, Y), fNx(X2, Y2), $p, @p} :- int(X2), ground(Y2) | {r2, fNx(X,Y), $p, @p}.
+{x(X, fNx(Y)), x(X2, fNx(Y2)), $p, @p}/ :- ground(X), ground(Y), int(X2), int(Y2), Y > Y2 | {x(X, fNx(Y)), $p}.
