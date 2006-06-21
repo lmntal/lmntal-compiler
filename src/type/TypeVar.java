@@ -60,14 +60,29 @@ public class TypeVar {
 		return (self().passiveFunctors==null?("'t" + self().id+"={?}"):(stringOfPassiveFunctors()));
 	}
 	
+	boolean showDetailOfDataFunctor = false;
 	public String stringOfPassiveFunctors(){
 		String ret = "{";
 		Iterator it = self().passiveFunctors.iterator();
+		if(!showDetailOfDataFunctor){
+			Set dataTypes = new HashSet();
+			dataTypes.add(typeNameOfFunctor((Functor)it.next()));
+			while(it.hasNext()){
+				String tn = typeNameOfFunctor((Functor)it.next());
+				if(dataTypes.contains(tn))continue;
+				else dataTypes.add(tn);
+			}
+			it = dataTypes.iterator();
+		}
 		ret += it.next();
 		while(it.hasNext()){
 			ret += ", " + it.next();
 		}
 		return ret + "}";
 	}
-
+	private String typeNameOfFunctor(Functor f){
+		String tn = TypeEnv.getTypeNameOfPassiveFunctor(f);
+		if(tn != null)return tn;
+		else return f.toString();
+	}
 }

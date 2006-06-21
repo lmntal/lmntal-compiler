@@ -4,11 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import runtime.FloatingFunctor;
 import runtime.Functor;
-import runtime.IntegerFunctor;
-import runtime.ObjectFunctor;
-import runtime.StringFunctor;
 
 import compile.structure.Atom;
 import compile.structure.LinkOccurrence;
@@ -42,40 +38,8 @@ public class TypeConstraintsInferer {
 	 * @param atom
 	 * @return
 	 */
-	private static final int ACTIVE = -1;
-
-	private static final int CONNECTOR = -2;
-
 	private int outOfPassiveAtom(Atom atom) {
-		Functor f = atom.functor;
-		/* Connector */
-		if (f.equals(new Functor("=", 2)))
-			return CONNECTOR;
-		if (f.equals(Functor.INSIDE_PROXY))
-			return CONNECTOR;
-		if (f.equals(Functor.OUTSIDE_PROXY))
-			return CONNECTOR;
-		/* Passive atom */
-		/* Special atom */
-		if (f instanceof IntegerFunctor)
-			return 0;
-		if (f instanceof FloatingFunctor)
-			return 0;
-		if (f instanceof StringFunctor)
-			return 0;
-		if (f instanceof ObjectFunctor)
-			return 0;
-		/* List atom */
-		if (f.equals(new Functor(".", 3)))
-			return 2;
-		if (f.equals(new Functor("[]", 1)))
-			return 0;
-		/* Boolean atom */
-		if (f.equals(new Functor("true", 1)))
-			return 0;
-		if (f.equals(new Functor("false", 1)))
-			return 0;
-		return ACTIVE;
+		return TypeEnv.outOfPassiveAtom(atom);
 	}
 
 	public void infer() throws TypeConstraintException {
@@ -97,10 +61,10 @@ public class TypeConstraintsInferer {
 		while (it.hasNext()) {
 			Atom atom = (Atom) it.next();
 			int out = outOfPassiveAtom(atom);
-			if (out == ACTIVE) {
+			if (out == TypeEnv.ACTIVE) {
 				add(new HasActiveAtomConstraint(mem.name, atom.functor));
 				freelinks = inferAtom(atom, freelinks);
-			} else if (out == CONNECTOR)
+			} else if (out == TypeEnv.CONNECTOR)
 				continue;
 			else
 				freelinks = inferAtom(atom, freelinks);
@@ -236,7 +200,7 @@ public class TypeConstraintsInferer {
 		if (lo.buddy.atom instanceof Atom) {
 			Atom a = (Atom) lo.buddy.atom;
 			int o = outOfPassiveAtom(a);
-			if (o == CONNECTOR)
+			if (o == TypeEnv.CONNECTOR)
 				return getRealBuddy(a.args[1 - lo.buddy.pos]);
 			else
 				return lo.buddy;
@@ -292,10 +256,10 @@ public class TypeConstraintsInferer {
 	private PolarizedPath getPolarizedPath(LinkOccurrence lo) {
 		Atom atom = (Atom) lo.atom;
 		int out = outOfPassiveAtom(atom);
-		if (out == ACTIVE) {
+		if (out == TypeEnv.ACTIVE) {
 			return new PolarizedPath(1, new ActiveAtomPath(atom.mem.name,
 					atom.functor, lo.pos));
-		} else if (out == CONNECTOR) {
+		} else if (out == TypeEnv.CONNECTOR) {
 			System.out.println("fatal error in getting path.");
 			return null;
 		} else {
