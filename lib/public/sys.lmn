@@ -90,6 +90,7 @@ H=sys.exec(Cmd) :- unary(Cmd) | H=[:/*inline*/
 		e.printStackTrace();
 	}
 	:](Cmd).
+//↑1行でも書ける H=sys.exec(Cmd) :- H=sys.exec(Cmd, []). by inui
 
 /**
  * sys.perpetual(+Flag) :
@@ -129,5 +130,13 @@ R=sys.usage(_S, []) :- R=nil, io.use, r=print(_S).
 
 R=sys.usage(_S, [H|T]) :- R=[H|T].
 
+/**
+ * LMNtalの実行を終了します。
+ * 2006.6.23 by inui
+ */
+sys.exit(Status) :- int(Status) | [:/*inline*/
+	int status = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+	System.exit(status);
+	:](Status).
 }.
 
