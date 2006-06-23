@@ -1,0 +1,81 @@
+/**
+NAME
+	Scanner module
+
+SYNOPSIS
+	
+	# scanner.use.
+	  r=scanner.nextInt(n).
+
+	12
+	n(12), done(r), scanner.stdin('java.util.Sc..'), @scanner603
+
+AUTHOR
+	Atsuyuki Inui
+
+HISTORY
+	2006/06/23(Fri) nextInt, nextFloat
+*/
+
+{
+module(scanner).
+
+/**
+ * scanner.use:
+ *
+ * (initializer)
+ * Enables the use of standard input (System.in) and standard output (System.out).
+ * The result consists of two molecules representing standard input and standard output.
+ */
+scanner.use :- scanner.stdin=[:/*inline*/
+	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(System.in)));
+	mem.relink(stdin, 0, me, 0);
+	me.remove();
+	:].
+
+/**
+ * scanner.nextInt(-ReadInt, -Result)
+ * 
+ * ReadInt : One Integer
+ * Result     : "done" when succeeded. "nil" when EOF.
+ */
+H=scanner.nextInt(Result), scanner.stdin(STDIN) :- class(STDIN, "java.util.Scanner") |
+	H=scanner.nextInt(STDIN, Result), scanner.stdin(STDIN).
+
+H=scanner.nextInt(Object, ReadString) :- class(Object, "java.util.Scanner") |
+	H=[:/*inline*/
+		try {
+			java.util.Scanner br = (java.util.Scanner)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			int n = br.nextInt();
+			Atom result = mem.newAtom(new IntegerFunctor(n));
+			mem.relink(result, 0, me, 1);
+			Atom res = mem.newAtom(new Functor(n==0 ? "nil" : "done", 1));
+			mem.relink(res, 0, me, 2);
+			me.nthAtom(0).remove();
+			me.remove();
+		} catch(Exception e) {Env.e(e);}
+	:](Object, ReadString).
+
+/**
+ * scanner.nextFloat(-ReadFloat, -Result)
+ * 
+ * ReadFloat : One Float
+ * Result     : "done" when succeeded. "nil" when EOF.
+ */
+H=scanner.nextFloat(Result), scanner.stdin(STDIN) :- class(STDIN, "java.util.Scanner") |
+	H=scanner.nextFloat(STDIN, Result), scanner.stdin(STDIN).
+
+H=scanner.nextFloat(Object, ReadString) :- class(Object, "java.util.Scanner") |
+	H=[:/*inline*/
+		try {
+			java.util.Scanner br = (java.util.Scanner)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			double n = br.nextDouble();
+			Atom result = mem.newAtom(new FloatingFunctor(n));
+			mem.relink(result, 0, me, 1);
+			Atom res = mem.newAtom(new Functor(n==0 ? "nil" : "done", 1));
+			mem.relink(res, 0, me, 2);
+			me.nthAtom(0).remove();
+			me.remove();
+		} catch(Exception e) {Env.e(e);}
+	:](Object, ReadString).
+}.
