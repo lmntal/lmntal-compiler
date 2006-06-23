@@ -1,6 +1,6 @@
 /*
  * [1050] To The Max 
- * http://acm.pku.edu.cn/JudgeOnline/showproblem?problem_id=1050
+ * http://acm.pku.edu.cn/JudgeOnline/problem?id=1050
  * 
  * History
  * 2006.06.23 作成開始
@@ -13,6 +13,9 @@ scanner.use.
 r1=scanner.nextInt(n).
 r1(nil) :- sys.exit(1).
 
+n(N) :- int(N) | nn(N*N).
+
+//行列の値をn*n個読み込む
 matrix=[].
-n(N) :- N > 0 | r2=scanner.nextInt(data), n(N-1).
+nn(NN) :- NN > 0 | r2=scanner.nextInt(data), nn(NN-1).
 data(Data), matrix(Z) :- matrix=list.append(Z,[Data]).
