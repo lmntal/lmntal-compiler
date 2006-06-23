@@ -1,0 +1,18 @@
+/*
+ * [1050] To The Max 
+ * http://acm.pku.edu.cn/JudgeOnline/showproblem?problem_id=1050
+ * 
+ * History
+ * 2006.06.23 作成開始
+ */
+
+io.use.
+scanner.use.
+
+//nを読み込む
+r1=scanner.nextInt(n).
+r1(nil) :- sys.exit(1).
+
+matrix=[].
+n(N) :- N > 0 | r2=scanner.nextInt(data), n(N-1).
+data(Data), matrix(Z) :- matrix=list.append(Z,[Data]).
