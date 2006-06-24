@@ -106,7 +106,7 @@ class LMNtalFrame extends JFrame implements ActionListener {
     Atom b = mem.newAtom(new ObjectFunctor(frame));
     mem.newLink(a,0,b,0);
     mem.removeAtom(me);
-    mem.makePerpetual();
+    mem.makePerpetual(true);
   :].
   allClear.
   allClear :- update,lastOp(0.0,"="),screen(0.0),state(fresh).

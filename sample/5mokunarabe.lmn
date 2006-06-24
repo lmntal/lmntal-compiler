@@ -535,7 +535,7 @@ start :- [:/*inline*/
     Atom b= mem.newAtom(new ObjectFunctor(frame));
     mem.newLink(a,0,b,0);
     mem.removeAtom(me);
-    mem.makePerpetual();
+    mem.makePerpetual(true);
 :],wait.
 
 wait,frame(F) :- class(F,"FiveStoneFrame") |

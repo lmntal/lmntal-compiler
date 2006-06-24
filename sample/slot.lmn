@@ -316,7 +316,7 @@
              Atom b = mem.newAtom(new ObjectFunctor(drum));
              mem.newLink(a,0,b,0);
              mem.removeAtom(me);
-             mem.makePerpetual();
+             mem.makePerpetual(true);
             :]}.
  
  %3つの子膜全てでDrumクラスの生成まで完了していたらメインフレームの生成を行う
@@ -342,7 +342,7 @@
             Atom a = mem.newAtom(new Functor("frame",1));
             Atom b = mem.newAtom(new ObjectFunctor(frame));
             mem.newLink(a,0,b,0);
-            mem.makePerpetual();
+            mem.makePerpetual(true);
             mem.removeAtom(me.nthAtom(0));
             mem.removeAtom(me.nthAtom(1));
             mem.removeAtom(me.nthAtom(2));

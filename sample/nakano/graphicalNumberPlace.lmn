@@ -2,7 +2,7 @@ graphic.use.
 go :-
 {
 view.
-window, name("LMNtal Typing"), size(410,500), killer, keyCode, bgcolor(255, 255, 255).
+window, name("LMNtal Typing"), size(410,550), killer, keyCode, bgcolor(255, 255, 255).
 clickListener, sys.perpetual(on).
 
 /////////////////////////////////////////////////////////////////////////////
@@ -14,201 +14,318 @@ clicked(_IX, _IY), target(T), {target, position(_IPX3, _IPY3), $t, @t}, {{positi
  _IPX + _IPX2 < _IX, _IPY + _IPY2 < _IY, _IX < _ISX + _IPX + _IPX2, _IY < _ISY + _IPY + _IPY2, int(T), int(N)
 | target(N), {target, position(_IPX + _IPX2 + 2, _IPY + _IPY2 + 2), $t, @t},{{position(_IPX, _IPY), size(_ISX, _ISY), name(N), $p, @p}, position(_IPX2, _IPY2), $q, @q}.
 
+clicked(_IX, _IY), target(T), {position(_IPX, _IPY), size(_ISX, _ISY), calc, $p, @p} :- 
+ _IPX < _IX, _IPY < _IY, _IX < _ISX + _IPX, _IY < _ISY + _IPY, int(T)
+| {position(_IPX, _IPY), size(_ISX, _ISY), calc, $p, @p}, calc.
+
 keyCode([H | L]) , target(T), {{name(N), {getpic(string(NAME,40)),$r ,@r}, $p, @p}, $q, @q}
  :- H >= 49, H =< 57 , T = N, unary(NAME) | keyCode(L) , target(T), {{name(N), {getpic(string(H - 48,40)),$r ,@r}, $p, @p}, $q, @q}.
 
 keyCode([H | L]) :- H < 49 | keyCode(L).
 keyCode([H | L]) :- H > 57 | keyCode(L).
 
+x([X | LX]),y([Y | LY]), calc ,a(AX, AY, Z, {blank}), {{name(N), {getpic(string(NAME,40)),$r ,@r}, $p, @p}, $q, @q}
+ :- X=AX, Y=AY, unary(NAME)
+ | x([X | LX]),y(LY), calc ,a(AX, AY, Z, {n(NAME)}), {{name(N), {getpic(string(NAME,40)),$r ,@r}, $p, @p}, $q, @q}.
+
 // a(N1, L1, L2, L3, [H | L]) :- unary(H)|gomi(L1, L2, L3), res(N1, L).
 // res(N1, [H|L]),{{name(N), $p, @p},getpic(string(NAME,40)), $q, @q}:- int(H), unary(NAME), N1 = N, ground(L)| {{name(N), $p, @p},getpic(string(H,40)), $q, @q}.
 // res(N1, [x|L]):- res(N1, L).
+
+/////////////////////////////////////////////////////////////////////////////
+n(_IX, _IY, Z, _IVAL) , {{name(_INAME),{getpic(string(_GVAL, 40)),$q},$p},$r}
+ :- (_IX*10)+_IY = _INAME 
+ | gomi(Z), {{name(_INAME),{draw,getpic(string(_IVAL, 40)),$q},$p},$r}.
+
 /////////////////////////////////////////////////////////////////////////////
 
+
+
 {draw, getpic(string("Number Place",40)), position(60,40), color(0,0,0)}.
+
+{draw, calc, getpic("fillrect"),position(250,450),color(200,255,200),size(70,40)
+  {draw,getpic(string("Calc", 20)),position(15,25),color(0,0,0)}.
+}.  
 
 {draw, target, getpic("rect"), position(12,52), color(255,0,0), size(36,36)}.
 
 {position(0,0).
-{draw,name(11), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(11), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(12), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(12), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(13), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(13), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(21), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(21), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(22), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(22), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(23), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(23), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(31), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(31), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(32), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(32), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(33), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(33), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 {position(0, 130).
-{draw,name(41), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(41), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(42), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(42), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(43), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(43), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(51), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(51), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(52), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(52), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(53), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(53), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(61), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(61), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(62), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(62), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(63), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(63), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 {position(0, 260).
-{draw,name(71), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(71), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(72), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(72), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(73), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(73), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(81), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(81), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(82), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(82), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(83), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(83), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(91), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(91), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(92), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(92), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(93), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(93), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 
 {position(130, 0).
-{draw,name(14), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(14), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(15), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(15), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(16), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(16), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(24), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(24), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(25), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(25), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(26), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(26), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(34), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(34), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(35), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(35), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(36), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(36), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 {position(130, 130).
-{draw,name(44), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(44), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(45), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(45), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(46), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(46), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(54), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(54), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(55), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(55), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(56), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(56), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(64), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(64), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(65), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(65), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(66), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(66), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 {position(130, 260).
-{draw,name(74), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(74), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(75), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(75), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(76), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(76), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(84), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(84), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(85), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(85), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(86), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(86), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(94), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(94), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(95), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(95), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(96), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(96), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 
 {position(260, 0).
-{draw,name(17), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(17), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(18), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(18), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(19), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(19), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(27), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(27), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(28), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(28), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(29), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(29), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(37), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(37), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(38), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(38), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(39), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(39), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 {position(260, 130).
-{draw,name(47), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(47), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(48), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(48), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(49), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(49), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(57), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(57), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(58), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(58), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(59), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(59), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(67), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(67), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(68), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(68), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(69), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(69), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 {position(260,260).
-{draw,name(77), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
+{draw, calc, name(77), getpic("rect"), position(10,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(78), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
+{draw, calc, name(78), getpic("rect"), position(50,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(79), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
+{draw, calc, name(79), getpic("rect"), position(90,50), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(87), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
+{draw, calc, name(87), getpic("rect"), position(10,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(88), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
+{draw, calc, name(88), getpic("rect"), position(50,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(89), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
+{draw, calc, name(89), getpic("rect"), position(90,90), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(97), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
+{draw, calc, name(97), getpic("rect"), position(10,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(98), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
+{draw, calc, name(98), getpic("rect"), position(50,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
-{draw,name(99), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
+{draw, calc, name(99), getpic("rect"), position(90,130), color(0,0,255), size(40,40),
   {draw, getpic(string("",40)), position(10,35), color(0,0,0)}.}.
 }.
 }.
+/* Number Place
+   Atsushi Nakano, 2006-06-17
+
+*/
+
+{
+rule.
+
+// 行・列・ブロックで，すでに確定しているものを候補から削除
+check_X@@
+ n(_IX1, Y1, Z1, _IRES1), n(_IX2, Y2, Z2, {L=[_IRES2 | L2], $q[L, L2]}), {+Z2, rest(_IRES3, _IREST), $p}
+ :- _IX1 = _IX2, _IRES1 = _IRES2, _IRES1 = _IRES3, _IREST > 0
+ | n(_IX1, Y1, Z1, _IRES1), n(_IX2, Y2, Z2, {L=L2, $q[L, L2]}), {+Z2, rest(_IRES3, _IREST - 1), $p}.
+ 
+check_Y@@
+ n(X1, _IY1, Z1, _IRES1), n(X2, _IY2, Z2, {L=[_IRES2 | L2], $q[L, L2]}), {+Z2, rest(_IRES3, _IREST), $p}
+ :- _IY1 = _IY2, _IRES1 = _IRES2, _IRES2 = _IRES3, _IREST > 0
+ | n(X1, _IY1, Z1, _IRES1), n(X2, _IY2, Z2, {L=L2, $q[L, L2]}), {+Z2, rest(_IRES3, _IREST - 1), $p}.
+ 
+check_Z@@
+ n(X, Y, Z, {L=[_IRES1 | L2], $q[L, L2]}), {+Z, rest(_IRES2, 0), $p}
+ :- _IRES1 = _IRES2
+ |  n(X, Y, Z, {L=L2, $q[L, L2]}), {+Z, rest(_IRES2, 0), $p}.
+
+//　自マス以外のマスに自マスの持っている候補が無ければ決定
+check_Z_unique@@
+ n(X, Y, Z, {L=[_IRES1 | L2], $q[L, L2]}), {+Z, rest(_IRES2, 1), $p}
+ :- _IRES1 = _IRES2
+ |  n(X, Y, Z, _IRES1), {+Z, rest(_IRES2, 0), $p}.
+
+check_determination@@
+  n(X, Y, Z, {rest([_IRES1])}), {+Z, rest(_IRES2, _IREST), $p}
+ :- _IRES1 = _IRES2
+ |  n(X, Y, Z, _IRES1), {+Z, rest(_IRES2, 0), $p}.
+
+}.
+
+{
+ make_nodes.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*sample http://www.nikoli.co.jp/puzzles/1/*/
+
+init.
+init :- 
+ n(1,1,1, 0), n(1,2,1, 6), n(1,3,1, 0),   n(1,4,2, 1), n(1,5,2, 0), n(1,6,2, 4),   n(1,7,3, 0), n(1,8,3, 5), n(1,9,3, 0),
+ n(2,1,1, 0), n(2,2,1, 0), n(2,3,1, 8),   n(2,4,2, 3), n(2,5,2, 0), n(2,6,2, 5),   n(2,7,3, 6), n(2,8,3, 0), n(2,9,3, 0),
+ n(3,1,1, 2), n(3,2,1, 0), n(3,3,1, 0),   n(3,4,2, 0), n(3,5,2, 0), n(3,6,2, 0),   n(3,7,3, 0), n(3,8,3, 0), n(3,9,3, 1),
+ 
+ n(4,1,4, 8), n(4,2,4, 0), n(4,3,4, 0),   n(4,4,5, 4), n(4,5,5, 0), n(4,6,5, 7),   n(4,7,6, 0), n(4,8,6, 0), n(4,9,6, 6),
+ n(5,1,4, 0), n(5,2,4, 0), n(5,3,4, 6),   n(5,4,5, 0), n(5,5,5, 0), n(5,6,5, 0),   n(5,7,6, 3), n(5,8,6, 0), n(5,9,6, 0),
+ n(6,1,4, 7), n(6,2,4, 0), n(6,3,4, 0),   n(6,4,5, 9), n(6,5,5, 0), n(6,6,5, 1),   n(6,7,6, 0), n(6,8,6, 0), n(6,9,6, 4),
+ 
+ n(7,1,7, 5), n(7,2,7, 0), n(7,3,7, 0),   n(7,4,8, 0), n(7,5,8, 0), n(7,6,8, 0),   n(7,7,9, 0), n(7,8,9, 0), n(7,9,9, 2),
+ n(8,1,7, 0), n(8,2,7, 0), n(8,3,7, 7),   n(8,4,8, 2), n(8,5,8, 0), n(8,6,8, 6),   n(8,7,9, 9), n(8,8,9, 0), n(8,9,9, 0),
+ n(9,1,7, 0), n(9,2,7, 4), n(9,3,7, 0),   n(9,4,8, 5), n(9,5,8, 0), n(9,6,8, 8),   n(9,7,9, 0), n(9,8,9, 7), n(9,9,9, 0).
+/*
+init :- 
+ n(1,1,1, 0), n(1,2,1, 0), n(1,3,1, 6),   n(1,4,2, 0), n(1,5,2, 0), n(1,6,2, 0),   n(1,7,3, 0), n(1,8,3, 0), n(1,9,3, 1),
+ n(2,1,1, 0), n(2,2,1, 7), n(2,3,1, 0),   n(2,4,2, 0), n(2,5,2, 6), n(2,6,2, 0),   n(2,7,3, 0), n(2,8,3, 5), n(2,9,3, 0),
+ n(3,1,1, 8), n(3,2,1, 0), n(3,3,1, 0),   n(3,4,2, 1), n(3,5,2, 0), n(3,6,2, 3),   n(3,7,3, 2), n(3,8,3, 0), n(3,9,3, 0),
+ 
+ n(4,1,4, 0), n(4,2,4, 0), n(4,3,4, 5),   n(4,4,5, 0), n(4,5,5, 4), n(4,6,5, 0),   n(4,7,6, 8), n(4,8,6, 0), n(4,9,6, 0),
+ n(5,1,4, 0), n(5,2,4, 4), n(5,3,4, 0),   n(5,4,5, 7), n(5,5,5, 0), n(5,6,5, 2),   n(5,7,6, 0), n(5,8,6, 9), n(5,9,6, 0),
+ n(6,1,4, 0), n(6,2,4, 0), n(6,3,4, 8),   n(6,4,5, 0), n(6,5,5, 1), n(6,6,5, 0),   n(6,7,6, 7), n(6,8,6, 0), n(6,9,6, 0),
+ 
+ n(7,1,7, 0), n(7,2,7, 0), n(7,3,7, 1),   n(7,4,8, 2), n(7,5,8, 0), n(7,6,8, 5),   n(7,7,9, 0), n(7,8,9, 0), n(7,9,9, 3),
+ n(8,1,7, 0), n(8,2,7, 6), n(8,3,7, 0),   n(8,4,8, 0), n(8,5,8, 7), n(8,6,8, 0),   n(8,7,9, 0), n(8,8,9, 8), n(8,9,9, 0),
+ n(9,1,7, 2), n(9,2,7, 0), n(9,3,7, 0),   n(9,4,8, 0), n(9,5,8, 0), n(9,6,8, 0),   n(9,7,9, 4), n(9,8,9, 0), n(9,9,9, 0).
+*/
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+make_node_1@@
+ n(A, B, _IC, _IX),{b(_ID), $p} :- 0 = _IX, _IC = _ID | n(A, B, L, {rest([1,2,3,4,5,6,7,8,9])}), {b(_ID), +L, $p}.
+
+make_node_2@@
+ n(A, B, _IC, _IX),{b(_ID), rest(1,_IREST1), rest(2,_IREST2), rest(3,_IREST3), rest(4,_IREST4), rest(5,_IREST5), rest(6,_IREST6), rest(7,_IREST7), rest(8,_IREST8), rest(9,_IREST9), $p}
+  :- 0 < _IX, _IC = _ID, _IREST1 > 0, _IREST2 > 0, _IREST3 > 0, _IREST4 > 0, _IREST5 > 0, _IREST6 > 0, _IREST7 > 0, _IREST8 > 0, _IREST9 > 0
+  | n(A, B, L, _IX),{b(_ID), +L, rest(_IX, 0), rest(1,_IREST1 - 1), rest(2,_IREST2 - 1), rest(3,_IREST3 - 1), rest(4,_IREST4 - 1), rest(5,_IREST5 - 1), rest(6,_IREST6 - 1), rest(7,_IREST7 - 1), rest(8,_IREST8 - 1), rest(9,_IREST9 - 1), $p}.
+
+make_node_3@@
+ {rest(_IX1, 0), rest(_IX2, _IREST), $p} :- _IX1 = _IX2 | {rest(_IX1, 0), $p}.
+
+ {/*ブロック1*/ b(1). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+ {/*ブロック2*/ b(2). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+ {/*ブロック3*/ b(3). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+ {/*ブロック4*/ b(4). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+ {/*ブロック5*/ b(5). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+ {/*ブロック6*/ b(6). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+ {/*ブロック7*/ b(7). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+ {/*ブロック8*/ b(8). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+ {/*ブロック9*/ b(9). rest(1,9), rest(2,9), rest(3,9), rest(4,9), rest(5,9), rest(6,9), rest(7,9), rest(8,9), rest(9,9)}.
+
+}.
+
+make_nodes_done@@
+ {rule, $q, @q},{make_nodes, $p, @p}/ :- {rule, $q, @q, $p}.
+ {view, $q, @q},{rule , $p, @p}/ :- {$q, @q, $p}.
+
