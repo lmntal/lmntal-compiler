@@ -1,0 +1,214 @@
+/**
+ 分子のグラフ表現 by kudo
+
+-一部、構造が間違ってる可能性あり
+-綴りに自信が無い…。
+
+ 参考文献:Wikipedia
+
+ SINCE 2006/06/24
+ */
+
+////////////////////////////////////////////////////////////////
+// 無機
+////////////////////////////////////////////////////////////////
+
+//酸素
+oxygene:-O=o(o(O)).
+//オゾン
+ozone:-O=o(o(o(O))).
+//水素
+hydrogene:-h(h).
+//窒素
+nytrogene:-n(n(N1,N2),N1,N2).
+//水
+water:-h(o(h)).
+//過酸化水素
+hydrogene_preoxyde:-h(o(o(h))).
+
+////////////////////////////////////////////////////////////////
+// 炭素、水素、酸素からなる化合物
+////////////////////////////////////////////////////////////////
+
+//二酸化炭素(炭酸ガス、ドライアイス)
+carbon_dioxyde:-c(o(O1),O1,o(O2),O2).
+
+//メタン
+methane:-methyl(h).
+//メチル基
+R=methyl:-R=c(h,h,h).
+//エタン
+ethane:-ethyl(h).
+//エチル基
+R=ethyl:-R=c(h,methyl,h).
+//プロパン
+propane:-propyl(h).
+//プロピル基
+R=propyl:-R=c(h,ethyl,h).
+
+//エチレン
+ethylene:-cc(h,h,h,h).
+cc(H1,H2,H3,H4):-c(H1,C1,C2,H4),c(H2,C1,C2,H3).
+//アセチレン
+athetylene:-cc(C,C,h,h).
+//ポリエチレン ( $n : 炭素の数 )
+poly_ethylene($n):-$n>0|poly_ethyl($n,h,h,h,h).
+poly_ethyl($n,C1,C2,C3,C4):-$n > 0,$m=$n-1|c(P1,P2,C3,C4),poly_ethyl($m,C1,C2,P1,P2).
+poly_ethyl($n,C1,C2,C3,C4):-$n=:=0        | C1=C3, C2=C4.
+
+//ジメチルエーテル
+dimethyl_ether:-o(methyl,methyl).
+//エチルメチルエーテル
+ethyl_methyl_ether:-o(methyl,ethyl).
+//ジエチルエーテル
+diethyl_ether:-o(ethyl,ethyl).
+
+//ヒドロキシル基
+R=hydroxyl:-R=oh.
+R=oh:-R=o(h).
+//メタノール
+methanol:-methyl(oh).
+//エタノール
+ethanol:-ethyl(oh).
+//プロパノール
+propanol:-propyl(oh).
+//イソプロピルアルコール
+iso_propyl_alchohl:-c(methyl,methl,oh).
+
+//カルボキシル基
+R=carboxyl:-R=cooh.
+R=cooh:-R=c(o(O),O,oh).
+//蟻酸
+formic_acid:-h(cooh).
+//酢酸
+acetic_acid:-methyl(cooh).
+//プロピオン酸
+propionic_acid:-ethyl(cooh).
+//酪酸
+butyric_acid:-propyl(cooh).
+
+//ホルミル基
+R=formyl:-R=cho.
+R=cho:-R=c(h,o(O),O).
+//ホルムアルデヒド(メタナール, 酸化メチレン)
+formaldehyde:-h(cho).
+//アセトアルデヒド(エタナール)
+acetaldehyde:-methyl(cho).
+//プロピオンアルデヒド
+propionaldehyde:-ethyl(cho).
+
+//ケトン基
+ketone(R,R2):-c(o(O),O,R,R2).
+//アセトン
+athetone:-ketone(methyl,methyl).
+//メチルエチルケトン
+methyl_ethyl_ketone:-ketone(methyl,ethyl).
+
+////////////////////////////////////////////////////////////////
+// 芳香族 等
+////////////////////////////////////////////////////////////////
+
+//ベンゼン (C6H6)
+benzene:-phenyl(h).
+//フェニル基
+R=phenyl:-R=c6(h,h,h,h,h).
+c6(H1,H2,H3,H4,H5,H6):- cc(H1,H2,cc(H3,H4,cc(H5,H6,C)),C).
+
+//フェノール (C6H5OH)
+phenol:-phenyl(oh).
+//トルエン (C6H5CH3)
+toluene:-phenyl(methyl).
+
+//キシレン (C8H10)
+o-xylene:-c6(methyl,methyl,h,h,h).
+m-xylene:-c6(methyl,h,methyl,h,h).
+p-xylene:-c6(methyl,h,h,methyl,h).
+
+//ナフタレン
+naphthalene:-alpha_naphthyl(h).
+//  8   1
+//7       2
+//6       3
+//  5   4
+
+//モノ置換体
+//α-ナフチル基
+R=alpha_naphthyl:-c10(R,h,h,h,h,h,h,h).
+//β-ナフチル基
+R=beta_naphthyl:-c10(h,R,h,h,h,h,h,h).
+//ジ置換体
+//o-ナフチル基
+o_naphthyl(R1,R2):-c10(R1,R2,h,h,h,h,h,h).
+//m-ナフチル基
+m_naphthyl(R1,R2):-c10(R1,h,R2,h,h,h,h,h).
+//p-ナフチル基
+p_naphthyl(R1,R2):-c10(R1,h,h,R2,h,h,h,h).
+//ana-ナフチル基
+ana_naphthyl(R1,R2):-c10(R1,h,h,h,R2,h,h,h).
+//ε-ナフチル基
+epi_naphthyl(R1,R2):-c10(R1,h,h,h,h,R2,h,h).
+//kata-ナフチル基
+kata_naphthyl(R1,R2):-c10(R1,h,h,h,h,h,R2,h).
+//peri-ナフチル基
+peri_naphthyl(R1,R2):-c10(R1,h,h,h,h,h,h,R2).
+//pros-ナフチル基
+pros_naphthyl(R1,R2):-c10(h,R1,R2,h,h,h,h,h).
+//amphi-ナフチル基
+amphi_naphthyl(R1,R2):-c10(h,R1,h,h,h,R2,h,h).
+//2,7-ナフチル基
+'2_7_naphthyl'(R1,R2):-c10(h,R1,h,h,h,h,R2,h).
+
+c10(H1,H2,H3,H4,H5,H6,H7,H8):-
+  cccc(H1,H2,H3,H4,C1,C2),cccc(H5,H6,H7,H8,C3,C4),cc(C1,C2,C3,C4).
+cccc(H1,H2,H3,H4,C1,C2):-cc(H1,H2,C,C1),cc(H3,H4,C2,C).
+
+//アズレン ( ナフタレンの構造異性体)
+azulene:-cccc(h,h,h,h,C1,C2),cc(C1,C3,C4,h),cc(C2,h,C5,C3),cc(h,h,C4,C5).
+
+////////////////////////////////////////////////////////////////
+//その他
+////////////////////////////////////////////////////////////////
+
+//フェノールフタレイン
+phenol_phthalein:-
+ c('4_hydroxy_phenyl','4_hydroxy_phenyl',o(O1),c6(h,h,h,h,c(o(O2),O2,O1))).
+R='4_hydroxy_phenyl':-R=c6(h,h,oh,h,h).
+
+//酸化プロピレン (CH3OCHCH3)
+oxydated_propylene:-c(h,h,C,o(O)),c(h,methyl,O,C).
+//酢酸エチル (CH3COOC2H5)
+ethyl_acetate:-c(methyl,o(O),O,o(ethyl)).
+//ピリジン (C6H5N)
+pyridine:-cccc(h,h,h,h,C,N),c(C,h,N1,N2),n(N,N1,N2).
+//エチレングリコール
+ethylene_glycol:-c(h,h,c(h,h,oh),oh).
+//グリセリン
+glycerine:-c(h,h,c(h,h,c(h,h,oh),oh),oh).
+
+////////////////////////////////////////////////////////////////
+// 他の原子を含む
+////////////////////////////////////////////////////////////////
+
+//クロロホルム(トリクロロメタン)
+chloroform:-h=c(cl,cl,cl).
+//四塩化炭素
+tetora_chrolo_methane:-c(cl,cl,cl,cl).
+//クロルベンゼン
+chloro_benzene:-phenyl(cl).
+//二硫化炭素
+carbon_disulfide:-c(s(S1),S1,s(S2),S2).
+
+//ニトログリセリン(三硝酸グリセリン)
+nytlo_glycerine:-c(h,h,c(h,c(h,h,ono2),ono2),ono2).
+R=ono2:-R=o(n(o(O),o(O))).
+//硝酸
+nytric_acid:-h(ono2).
+//アニリン
+aniline:-phenyl(n(h,h)).
+//ニトロベンゼン
+nytro_benzene:-phenyl(no).
+R=no:-R=n(o(O),O).
+//2,4,6-トリニトロトルエン(T.N.T)
+tnt:-c6(methyl,no,h,no,h,no).
+
+
