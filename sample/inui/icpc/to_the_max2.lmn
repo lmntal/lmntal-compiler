@@ -12,13 +12,16 @@ scanner=scanner.new(sys.in).
 start.
 
 //nを読み込む
-start, scanner(S) :- class(S, "java.util.Scanner") | r1=scanner.nextInt(S, n), scanner(S).
+start, scanner(S) :- unary(S) | r1=scanner.nextInt(S, n), scanner(S).
 r1(nil) :- sys.exit(1).
 
 n(N) :- int(N) | nn(N*N).
 
 //行列の値をn*n個読み込む
 matrix=[].
-nn(NN), scanner(S) :- NN > 0, class(S, "java.util.Scanner") | r2=scanner.nextInt(S, data), nn(NN-1), scanner(S).
+nn(NN), scanner(S) :- NN > 0, unary(S) | r2=scanner.nextInt(S, data), nn(NN-1), scanner(S).
 //data(Data), matrix(Z) :- matrix=list.append(Z,[Data]).
 data(Data), matrix(Z) :- matrix=[Data|Z].
+
+r1(done) :- .
+r2(done) :- .
