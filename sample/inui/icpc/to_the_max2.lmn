@@ -6,18 +6,18 @@
  * 2006.06.23 作成開始
  */
 
-scanner.use.
+scanner=scanner.new.
 
 start.
 
 //nを読み込む
-start :- r1=scanner.nextInt(n).
+start, scanner(S) :- class(S, "java.util.Scanner") | r1=scanner.nextInt(S, n), scanner(S).
 r1(nil) :- sys.exit(1).
 
 n(N) :- int(N) | nn(N*N).
 
 //行列の値をn*n個読み込む
 matrix=[].
-nn(NN) :- NN > 0 | r2=scanner.nextInt(data), nn(NN-1).
+nn(NN), scanner(S) :- NN > 0, class(S, "java.util.Scanner") | r2=scanner.nextInt(S, data), nn(NN-1), scanner(S).
 //data(Data), matrix(Z) :- matrix=list.append(Z,[Data]).
 data(Data), matrix(Z) :- matrix=[Data|Z].
