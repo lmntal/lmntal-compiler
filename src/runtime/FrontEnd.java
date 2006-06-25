@@ -709,6 +709,7 @@ public class FrontEnd {
 				Task.initTrace();
 				Debug.init();
 				if (Env.debugFrame == null) Debug.inputCommand();//2006.4.27 by inui
+				else Env.debugFrame.setSourceText(Debug.getUnitName());
 			}
 
 			boolean ready = true;
