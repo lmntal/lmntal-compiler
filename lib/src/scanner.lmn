@@ -15,23 +15,11 @@ AUTHOR
 
 HISTORY
 	2006/06/23(Fri) nextInt, nextFloat
+	2006/06/25(Sun) コンストラクタの引数にストリームを追加
 */
 
 {
 module(scanner).
-
-/**
- * scanner.use:
- *
- * (initializer)
- * Enables the use of standard input (System.in) and standard output (System.out).
- * The result consists of two molecules representing standard input and standard output.
- */
-scanner.use :- scanner.stdin=[:/*inline*/
-	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(System.in)));
-	mem.relink(stdin, 0, me, 0);
-	me.remove();
-	:].
 
 /**
  * scanner.nextInt(-ReadInt, -Result)
@@ -52,6 +40,7 @@ H=scanner.nextInt(Object, ReadString) :- class(Object, "java.util.Scanner") |
 			Atom res = mem.newAtom(new Functor("done", 1));
 			mem.relink(res, 0, me, 2);
 		} catch(Exception e) {
+			System.err.println(e);
 			Atom result = mem.newAtom(new IntegerFunctor(0));
 			mem.relink(result, 0, me, 1);
 			Atom res = mem.newAtom(new Functor("nil", 1));
@@ -61,6 +50,40 @@ H=scanner.nextInt(Object, ReadString) :- class(Object, "java.util.Scanner") |
 			me.remove();
 		}
 	:](Object, ReadString).
+	
+//引数無しコンストラクタ
+//H=scanner.new :- H=[:/*inline*/
+//	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(System.in)));
+//	mem.relink(stdin, 0, me, 0);
+//	me.remove();
+//	:].
+
+/**
+ * 指定されたInputStreamでscannerを生成します
+ */
+//TODO classガードはサブクラスにもマッチしてほしい
+H=scanner.new(InputStream) :- class(InputStream, "java.io.BufferedInputStream") | H=[:/*inline*/
+	java.io.InputStream is = (java.io.InputStream)((ObjectFunctor)(me.nthAtom(0).getFunctor())).getValue();
+	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(is)));
+	mem.relink(stdin, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](InputStream).
+	
+/**
+ * 指定されたFileからscannerを生成します
+ */
+H=scanner.new(File) :- class(File, "java.io.File") | H=[:/*inline*/
+	java.io.File file = (java.io.File)((ObjectFunctor)(me.nthAtom(0).getFunctor())).getValue();
+	try {
+		Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(file)));
+		mem.relink(stdin, 0, me, 1);
+	} catch (java.io.IOException e) {
+		System.err.println(e);
+	}
+	me.nthAtom(0).remove();
+	me.remove();
+	:](File).
 
 /**
  * scanner.nextFloat(-ReadFloat, -Result)
@@ -90,4 +113,10 @@ H=scanner.nextFloat(Object, ReadString) :- class(Object, "java.util.Scanner") |
 			me.remove();
 		}
 	:](Object, ReadString).
+	
+//scanner.use :- scanner.stdin=[:/*inline*/
+//	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(System.in)));
+//	mem.relink(stdin, 0, me, 0);
+//	me.remove();
+//	:].
 }.
