@@ -1,0 +1,10 @@
+if.use. integer.use.
+H=gcd($m, $n) :- int($m), int($n) |
+	H=if($m>$n, T, F),
+		{T=gcd($m-$n, $n)},
+		{F=if($m<$n, T2, F2),
+			{T2=gcd($m,$n-$m)},
+			{F2=$m}
+	}.
+
+r=gcd(8,20).

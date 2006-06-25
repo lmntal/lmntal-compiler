@@ -6,7 +6,8 @@
  * 2006.06.23 作成開始
  */
 
-scanner=scanner.new.
+scanner=scanner.new(sys.in).
+//scanner=scanner.new(fis.new(file.new("to_the_max.txt"))).
 
 start.
 
