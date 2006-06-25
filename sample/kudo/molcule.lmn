@@ -45,6 +45,8 @@ R=ethyl:-R=c(h,methyl,h).
 propane:-propyl(h).
 //プロピル基
 R=propyl:-R=c(h,ethyl,h).
+//イソプロピル基
+R=iso_propyl:-R=c(methyl,h,methyl).
 
 //エチレン
 ethylene:-cc(h,h,h,h).
@@ -73,7 +75,7 @@ ethanol:-ethyl(oh).
 //プロパノール
 propanol:-propyl(oh).
 //イソプロピルアルコール
-iso_propyl_alchohl:-c(methyl,methl,oh).
+iso_propyl_alchohl:-iso_propyl(oh).
 
 //カルボキシル基
 R=carboxyl:-R=cooh.
@@ -113,6 +115,8 @@ benzene:-phenyl(h).
 //フェニル基
 R=phenyl:-R=c6(h,h,h,h,h).
 c6(H1,H2,H3,H4,H5,H6):- cc(H1,H2,cc(H3,H4,cc(H5,H6,C)),C).
+//ベンジル基
+R=benzyl:-R=c(h,phenyl,h).
 
 //フェノール (C6H5OH)
 phenol:-phenyl(oh).
@@ -162,7 +166,7 @@ c10(H1,H2,H3,H4,H5,H6,H7,H8):-
   cccc(H1,H2,H3,H4,C1,C2),cccc(H5,H6,H7,H8,C3,C4),cc(C1,C2,C3,C4).
 cccc(H1,H2,H3,H4,C1,C2):-cc(H1,H2,C,C1),cc(H3,H4,C2,C).
 
-//アズレン ( ナフタレンの構造異性体)
+//アズレン (ナフタレンの構造異性体)
 azulene:-cccc(h,h,h,h,C1,C2),cc(C1,C3,C4,h),cc(C2,h,C5,C3),cc(h,h,C4,C5).
 
 ////////////////////////////////////////////////////////////////
@@ -178,8 +182,6 @@ R='4_hydroxy_phenyl':-R=c6(h,h,oh,h,h).
 oxydated_propylene:-c(h,h,C,o(O)),c(h,methyl,O,C).
 //酢酸エチル (CH3COOC2H5)
 ethyl_acetate:-c(methyl,o(O),O,o(ethyl)).
-//ピリジン (C6H5N)
-pyridine:-cccc(h,h,h,h,C,N),c(C,h,N1,N2),n(N,N1,N2).
 //エチレングリコール
 ethylene_glycol:-c(h,h,c(h,h,oh),oh).
 //グリセリン
@@ -203,12 +205,87 @@ nytlo_glycerine:-c(h,h,c(h,c(h,h,ono2),ono2),ono2).
 R=ono2:-R=o(n(o(O),o(O))).
 //硝酸
 nytric_acid:-h(ono2).
-//アニリン
+//ピリジン (C5H5N)
+pyridine:-cccc(h,h,h,h,C,N),c(C,h,N1,N2),n(N,N1,N2).
+//アニリン (C6H5NH2)
 aniline:-phenyl(n(h,h)).
-//ニトロベンゼン
+//ニトロベンゼン (C6H5NO)
 nytro_benzene:-phenyl(no).
 R=no:-R=n(o(O),O).
 //2,4,6-トリニトロトルエン(T.N.T)
 tnt:-c6(methyl,no,h,no,h,no).
 
+///////////////////////////////////////////////////
+//アミノ酸
+//引数位置で立体異性体を考えることができるかもしれない(もっともそれ以前に角度を考えてない)
+///////////////////////////////////////////////////
+//アミノ基およびカルボキシル基の結合した炭素
+R=alpha_carbon:-R=c(h,n(h,h),cooh).
 
+//代表的な20種のα-アミノ酸
+//アラニン Ala A
+alanine:-alpha_carbon(methyl).
+//アルギニン Arg R
+arginine:-alpha_carbon(c(h,h,c(h,h,n(h,c(n(h,h),n(N,h),N))))).
+//アスパラギン Asn N
+asparagine:-alpha_carbon(c(h,h,c(o(O),O,n(h,h)))).
+//アスパラギン酸 Asp D
+aspartic_acid:-alpha_carbon(c(h,h,cooh)).
+//システイン Cys C
+cysteine:-alpha_carbon(thiol).
+ //チオール基
+ R=thiol:-R=s(h).
+//グリシン Gly G
+glycine:-alpha_carbon(h).
+//グルタミン Gln Q
+glutamine:-alpha_carbon(c(h,h,c(h,h,c(o(O),O,n(h,h))))).
+//グルタミン酸 Glu E
+glutamic_acid:-alpha_carbon(c(h,h,c(h,h,cooh))).
+//ヒスチジン His H
+histidine:-alpha_carbon(imidazol_rad).
+ //イミダゾール基
+ R=imidazol_rad:-R=n(c(h,N,n(N,c(h,C,c(N2,h,C)))),N2).
+ //イミダゾール
+ imidazol:-imidazol_rad(h).
+//イソロイシン Ile I
+isoleucine:-alpha_carbon(sec_buthyl).
+ //sec-ブチル基
+ R=sec_buthyl:-R=c(methyl,h,ethyl).
+//ロイシン Leu L
+leucine:-alpha_carbon(iso_buthyl).
+ //イソブチル基
+ R=iso_buthyl:-R=c(h,iso_propyl,h).
+//リシン Lys K
+lysine:-alpha_carbon('4_amino_buthyl').
+ //4-アミノブチル基
+ R='4_amino_buthyl':-R=c(h,c(h,c(h,c(h,n(h,h),h),h),h),h).
+//メチオニン Met M
+methionine:-alpha_carbon(c(h,c(h,s(c(h,h,h)),h),h)).
+//フェニルアラニン Phe F
+phenyl_alanine:-alpha_carbon(benzyl).
+//プロリン Pro P
+proline:-ncccc(h,h,h,h,cooh).
+ ncccc(N,C1,C2,C3,C4):-n(N,cc(C1,C2,cc(C3,C4,N2)),N2).
+ //ピロール
+ pyrrol:-ncccc(h,h,h,h,h).
+//セリン Ser S
+serine:-alpha_carbon(hydroxy_methyl).
+ //ヒドロキシメチル基
+ R=hydroxy_methyl:-R=c(oh,h,h).
+//スレオニン Thr T
+threonine:-alpha_carbon(hydroxy_ethyl).
+ //ヒドロキシエチル基
+ R=hydroxy_ethyl:-R=c(oh,methyl,h).
+//トリプトファン Trp W
+triptophan:-alpha_carbon(indole_rad).
+ //インドール基
+ R=indole_rad:-R=n(cc(h,h,cc(cc(h,h,cc(h,h,C1)),C1,N)),N).
+ //インドール
+ indole:-indole_rad(h).
+//チロシン Tyr Y
+tyrosine:-alpha_carbon(c(h,'4_hydroxy_phenyl',h)).
+//バリン Val V
+valine:-alpha_carbon(iso_propyl).
+
+//セレノシステイン Sec U
+selenocysteine:-alpha_carbon(se(h)).
