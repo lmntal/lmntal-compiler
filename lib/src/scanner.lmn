@@ -62,7 +62,7 @@ H=scanner.nextInt(Object, ReadString) :- class(Object, "java.util.Scanner") |
  * 指定されたInputStreamでscannerを生成します
  */
 //TODO classガードはサブクラスにもマッチしてほしい
-H=scanner.new(InputStream) :- class(InputStream, "java.io.BufferedInputStream") | H=[:/*inline*/
+H=scanner.new(InputStream) :- class(InputStream, "java.io.InputStream") | H=[:/*inline*/
 	java.io.InputStream is = (java.io.InputStream)((ObjectFunctor)(me.nthAtom(0).getFunctor())).getValue();
 	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(is)));
 	mem.relink(stdin, 0, me, 1);
@@ -120,3 +120,8 @@ H=scanner.nextFloat(Object, ReadString) :- class(Object, "java.util.Scanner") |
 //	me.remove();
 //	:].
 }.
+
+//テスト用コード
+//s=scanner.new(sys.in).
+//s=scanner.new(fis.new(file.new("tmp"))).
+//s(S) :- r=scanner.nextInt(S, t).
