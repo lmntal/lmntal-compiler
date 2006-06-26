@@ -58,6 +58,7 @@ non terminal Object				AtomList;
 non terminal Object				AtomListRest;
 
 non terminal SrcMembrane		Membrane;
+non terminal SrcMembrane		UnnamedMembrane;
 non terminal SrcRule			Rule;
 non terminal SrcProcessContext	ProcessContext;
 non terminal SrcRuleContext		RuleContext;
@@ -307,7 +308,11 @@ AtomListRest ::=  RPAREN
                        list.add(atom); list.add(atomlist);
                        RESULT = new SrcAtom(",", list); :};
 
-Membrane	::=	//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
+Membrane	::= UnnamedMembrane:mem {: RESULT = mem; :}
+				| AtomName:name UnnamedMembrane:mem {: mem.name = name; RESULT = mem; :};
+
+UnnamedMembrane ::=
+				//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 				//	{: SrcMembrane sMem = new SrcMembrane(name, list);
 				//	   sMem.stable = true;
 				//	   RESULT = sMem; :}
@@ -368,7 +373,7 @@ Rule		::=	  ProcessList:head RULE:lineno ProcessList:body
 					{: RESULT = new SrcRule(name, head, guard, body, lineno.intValue()); :};
 
 // 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
-// こっちはルール名には非対応。(a,b,c :- 
+// こっちはルール名には非対応。(a,b,c :- ( 対応しているようだが…。)
 // 出現した行番号を追加 by Inui
 ProcessListContinuation ::= RPAREN
 					{: RESULT = null; :}
@@ -439,17 +444,20 @@ Process		::=   Atom:p
 
 // Processをカンマで区切った列。
 // （現在、構文エラーを減らすために、膜の前のカンマは省略できるという特別扱いが採用されている）
+// -> 廃止しました。 2006/06/26 by kudo ( 膜名導入に際し衝突する為 )
 ProcessList ::= /* epsilon */
 					{: RESULT = new LinkedList(); :}
 				| NonemptyProcessList:list
 					{: RESULT = list; :}
 				| NonemptyProcessList:list COMMA
-					{: RESULT = list; :};
+					{: RESULT = list; :}
+				;
 NonemptyProcessList ::=
 				  Process:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
-				| NonemptyProcessList:list Membrane:p
-					{: list.add(p); RESULT = list; :}
+// 膜名導入に際し、衝突するようになったので廃止。
+//				| NonemptyProcessList:list Membrane:p
+//					{: list.add(p); RESULT = list; :}
 				| NonemptyProcessList:list COMMA Process:p
 					{: list.add(p); RESULT = list; :};
 
