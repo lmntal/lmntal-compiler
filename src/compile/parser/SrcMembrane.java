@@ -13,6 +13,9 @@ class SrcMembrane {
 	/** ＠指定またはnull */
 	Object pragma = null;
 	
+	/** 膜名 */
+	public String name;
+	
 	/**
 	 * 空の膜を作成します 
 	 */

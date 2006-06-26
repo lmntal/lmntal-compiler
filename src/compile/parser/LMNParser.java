@@ -208,6 +208,7 @@ public class LMNParser {
 		Membrane submem = new Membrane(mem);
 		submem.stable = sMem.stable;
 		submem.kind = sMem.kind;
+		submem.name = sMem.name;
 		if (sMem.pragma instanceof SrcProcessContext) {
 			SrcProcessContext sProc = (SrcProcessContext)sMem.pragma;
 			String name = sProc.getQualifiedName();

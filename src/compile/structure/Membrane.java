@@ -29,6 +29,7 @@ public final class Membrane {
 //	/** システムルールセットとして使うなら真 */
 //	public boolean is_system_ruleset = false;
 	
+	/** 膜名 */
 	public String name;
 
 	/** アトム(compile.structure.Atom)のリスト */
