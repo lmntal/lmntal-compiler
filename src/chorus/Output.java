@@ -12,8 +12,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.media.j3d.View;
-
 import runtime.AbstractMembrane;
 import runtime.Atom;
 
