@@ -39,6 +39,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	/** 現在実行中のルール */
 	public Rule currentRule;
 	
+	private int backtracks, lockfailure;
 	/**
 	 * RuleCompiler では、まず生成してからデータを入れ込む。
 	 * ので、特になにもしない
@@ -140,6 +141,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			boolean success;
 			if(Env.profile){
 				long start,stop;
+				backtracks = lockfailure = 0;
 		        start = Util.getTime();
 				success = matchTest(mem, null, r.memMatch);
 		        stop = Util.getTime();
@@ -147,6 +149,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			        r.time += (stop>start)?(stop-start):0;
 					r.apply++;
 					if(success)r.succeed++;
+					r.backtracks += backtracks;
+					r.lockfailure += lockfailure;
 		        }
 			} else {
 				success = matchTest(mem, null, r.memMatch);
@@ -174,6 +178,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		Instruction spec = (Instruction)matchInsts.get(0);
 		int formals = spec.getIntArg1();
 		int locals  = spec.getIntArg2();
+		boolean success;
 		if (locals == 0) {
 			System.err.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
 			locals = formals;
@@ -184,7 +189,12 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		InterpretiveReactor ir = new InterpretiveReactor(locals, this);
 		ir.mems[0] = mem;
 		if (atom != null) { ir.atoms[1] = atom; }
-		return ir.interpret(matchInsts, 0);
+		success = ir.interpret(matchInsts, 0);
+		if(Env.profile) {
+			backtracks = ir.backtracks;
+			lockfailure = ir.lockfailure;
+		}
+		return success;
 	}
 	public String toString() {
 		String ret = "@" + id;
@@ -261,11 +271,14 @@ class InterpretiveReactor {
 	/** ロックした膜のリスト　グループ化時に使用**/
 	List lockedMemList = new ArrayList();
 	
+	int backtracks, lockfailure;
+	
 	InterpretedRuleset currentInterpretedRuleset;
 	
 	InterpretiveReactor(int size, InterpretedRuleset ir) {
 		this.currentInterpretedRuleset = ir;
 		initVector(size);
+		backtracks = lockfailure = 0;
 	}
 	private void initVector(int size) {
 		this.mems  = new AbstractMembrane[size];
@@ -393,6 +406,7 @@ class InterpretiveReactor {
 						atoms[inst.getIntArg1()] = a;
 						if (interpret(insts, pc))
 							return true;
+						backtracks++;
 					}
 					return false; //n-kato
 					//====アトムに関係する出力する基本ガード命令====ここまで====
@@ -409,6 +423,7 @@ class InterpretiveReactor {
 							return true;
 						mem.unlock(true);
 					}
+					lockfailure++;
 					return false; //n-kato
 
 				case Instruction.ANYMEM :
@@ -416,8 +431,10 @@ class InterpretiveReactor {
 					it = mems[inst.getIntArg2()].mems.iterator();
 					while (it.hasNext()) {
 						AbstractMembrane submem = (AbstractMembrane) it.next();
-						if ((submem.kind != inst.getIntArg3())) 
+						if ((submem.kind != inst.getIntArg3())) { 
+							backtracks++;
 							continue;
+						}
 						if (submem.lock()) {
 							mems[inst.getIntArg1()] = submem;
 							lockedMemList.add(submem);
@@ -425,6 +442,7 @@ class InterpretiveReactor {
 								return true;
 							submem.unlock();
 						}
+						lockfailure++;
 					}
 					return false; //n-kato
 				case Instruction.LOCK :
@@ -436,6 +454,7 @@ class InterpretiveReactor {
 							return true;
 						mem.unlock();						
 					}
+					lockfailure++;
 					return false; //n-kato
 
 				case Instruction.GETMEM : //[-dstmem, srcatom]

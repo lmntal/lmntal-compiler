@@ -341,10 +341,10 @@ public class Dumper {
 							buf.append("@" + r.toString() + "@");
 							if (Env.profile) {
 								if (Env.majorVersion == 1 && Env.minorVersion > 4)
-									buf.append("_" + r.succeed + "/" + r.apply
+									buf.append("_" + r.succeed + "/" + r.apply + "/" + r.backtracks + "/" + r.lockfailure
 											+ "(" + r.time / 1000000 + "msec)");
 								else
-									buf.append("_" + r.succeed + "/" + r.apply
+									buf.append("_" + r.succeed + "/" + r.apply + "/" + r.backtracks + "/" + r.lockfailure
 											+ "(" + r.time + "msec)");
 							}
 						}

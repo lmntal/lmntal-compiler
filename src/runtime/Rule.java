@@ -45,6 +45,10 @@ public final class Rule implements Serializable {
 	public int succeed = 0;
 	/* ルール適用の合計時間 */
 	public long time = 0;
+	/* ルール適用のバックトラック回数 */
+	public long backtracks = 0;
+	/* ルール適用時の膜ロック失敗の回数 */
+	public long lockfailure = 0;
 	
 	/** 履歴 */
 	public Uniq uniq;
