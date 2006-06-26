@@ -50,6 +50,7 @@ AtomName = [a-z][A-Za-z_0-9]* | [0-9]+
 
 // AtomNameに加えて0引数でアトム名となる文字列その１（AtomNameと排他的でなければならない）
 NumberName = [0-9]*\.[0-9]+ | [0-9]*\.?[0-9]+ [Ee][+-]?[0-9]+
+NumberName16 = 0x[0-9a-fA-F]+
 
 CharCodeLiteral = "#\"" . "\""
 
@@ -127,6 +128,7 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	"\""				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(STRING); }
 	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext(), yytext(), yyline, yycolumn); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME,		yytext()); }
+	{NumberName16}		{ return symbol(sym.NUMBER_NAME16,		yytext()); }
 	{CharCodeLiteral}	{ return symbol(sym.CHAR_CODE_LITERAL,	yytext()); }
 	{SymbolName}		{ return symbol(sym.SYMBOL_NAME,		yytext()); }
 	{PathedAtomName}	{ return symbol(sym.PATHED_ATOM_NAME,	yytext()); }

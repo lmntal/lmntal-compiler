@@ -272,9 +272,17 @@ public class Functor implements Serializable {
 		if (arity == 1 && path == null) {
 			if (nametype == SrcName.PLAIN || nametype == SrcName.SYMBOL) {
 				try {
-					if (name.matches("\\+[0-9]+"))
+					int radix = 10;
+					if (name.matches("\\+[0-9]+")) {
 						name = name.substring(1);
-					return new IntegerFunctor(Integer.parseInt(name));
+					} else if (name.matches("\\+0x[0-9a-fA-F]+")) {//+16¿Ê 2006.6.26 by inui
+						name = name.substring(3);
+						radix = 16;
+					} else if (name.matches("0x[0-9a-fA-F]+")) {//16¿Ê 2006.6.26 by inui
+						name = name.substring(2);
+						radix = 16;
+					}
+					return new IntegerFunctor(Integer.parseInt(name, radix));
 				} catch (NumberFormatException e) {
 				}
 				try {
