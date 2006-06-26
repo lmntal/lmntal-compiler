@@ -126,13 +126,13 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(FINDATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
 
 	// 膜に関係する出力する基本ガード命令 (5--9)
-	// [local]lockmem    [-dstmem, freelinkatom]
-	// [local]anymem     [-dstmem, srcmem, memtype] 
+	// [local]lockmem    [-dstmem, freelinkatom, memname]
+	// [local]anymem     [-dstmem, srcmem, memtype, memname] 
 	// [local]lock       [srcmem]
-	//  ----- getmem     [-dstmem, srcatom]
+	//  ----- getmem     [-dstmem, srcatom, memtype, memname]
 	//  ----- getparent  [-dstmem, srcmem]
 
-    /** lockmem [-dstmem, freelinkatom]
+    /** lockmem [-dstmem, freelinkatom, memname]
      * <br>ロック取得するガード命令<br>
      * 自由リンク出力管理アトム$freelinkatomが所属する膜に対して、
      * ノンブロッキングでのロックを取得を試みる。
@@ -145,15 +145,15 @@ public class Instruction implements Cloneable, Serializable {
      * @see testmem
      * @see getmem */
     public static final int LOCKMEM = 5;
-	static {setArgType(LOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
+	static {setArgType(LOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_OBJ));}
     
-    /** locallockmem [-dstmem, freelinkatom]
+    /** locallockmem [-dstmem, freelinkatom, memname]
      * <br>ロック取得する最適化用ガード命令<br>
      * lockmemと同じ。ただし$freelinkatomはこの計算ノードに存在する。*/
 	public static final int LOCALLOCKMEM = LOCAL + LOCKMEM;
-	static {setArgType(LOCALLOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM));}
+	static {setArgType(LOCALLOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_OBJ));}
 
-    /** anymem [-dstmem, srcmem, memtype] 
+    /** anymem [-dstmem, srcmem, memtype, memname] 
      * <br>反復するロック取得するガード命令<br>
      * 膜$srcmemの子膜のうち、$memtypeで表せるタイプのまだロックを取得していない膜に対して次々に、
      * ノンブロッキングでのロック取得を試みる。
@@ -161,13 +161,13 @@ public class Instruction implements Cloneable, Serializable {
      * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
      * <p><b>注意</b>　ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。*/
 	public static final int ANYMEM = 6;
-	static {setArgType(ANYMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));}
+	static {setArgType(ANYMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT, ARG_OBJ));}
 	
-	/** localanymem [-dstmem, srcmem]
+	/** localanymem [-dstmem, srcmem, memtype, memname]
      * <br>反復するロック取得する最適化用ガード命令<br>
 	 * anymemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定されない。*/
 	public static final int LOCALANYMEM = LOCAL + ANYMEM;
-	static {setArgType(LOCALANYMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT));}
+	static {setArgType(LOCALANYMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT, ARG_OBJ));}
 
 	/** lock [srcmem]
 	 * <br>ロック取得するガード命令<br>
@@ -185,15 +185,16 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int LOCALLOCK = LOCAL + LOCK;
 	static {setArgType(LOCALLOCK, new ArgType(false, ARG_MEM));}
 
-	/** getmem [-dstmem, srcatom. memtype]
+	/** getmem [-dstmem, srcatom, memtype, memname]
 	 * <br>ガード命令<br>
 	 * アトム$srcatomの所属膜への参照をロックせずに$dstmemに代入する。
 	 * 所属膜が$memtypeで表せるタイプでは無い場合は失敗する。
+	 * 所属膜の名前がmemnameでない場合は失敗する。
 	 * <p>アトム主導テストで使用される。
 	 * @see lock */
 	public static final int GETMEM = 8;
 	// LOCALGETMEMは不要
-	static {setArgType(GETMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT));}
+	static {setArgType(GETMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT, ARG_OBJ));}
 	
 	/** getparent [-dstmem, srcmem]
 	 * <br>ガード命令<br>
@@ -1683,11 +1684,11 @@ public class Instruction implements Cloneable, Serializable {
 		return new Instruction(FINDATOM,dstatom,srcmem,func);
 	}	
     /** anymem 命令を生成する */
-    public static Instruction anymem(int dstmem, int srcmem) {
-		return anymem(dstmem, srcmem, 0);
+    public static Instruction anymem(int dstmem, int srcmem, String name) {
+		return anymem(dstmem, srcmem, 0, name);
     }
-    public static Instruction anymem(int dstmem, int srcmem, int kind) {
-		return new Instruction(ANYMEM,dstmem,srcmem,kind);
+    public static Instruction anymem(int dstmem, int srcmem, int kind, String name) {
+		return new Instruction(ANYMEM,dstmem,srcmem,kind,(Object)name);
     }
 
     /** newatom 命令を生成する */
@@ -1816,6 +1817,13 @@ public class Instruction implements Cloneable, Serializable {
 		add(arg3);
 	}
 	public Instruction(int kind, int arg1, int arg2, int arg3, int arg4) {
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+		add(arg4);
+	}
+	public Instruction(int kind, int arg1, int arg2, int arg3, Object arg4){
 		this.kind = kind;
 		add(arg1);
 		add(arg2);
@@ -2311,7 +2319,7 @@ public class Instruction implements Cloneable, Serializable {
 		for (int i = 0; i < data.size(); i++) {
 			if (i != 0) buffer.append(", ");
 			Object o = data.get(i);
-			String str = o.toString();
+			String str = (o==null?"null":o.toString());
 			if (o instanceof String || (Env.compileonly && o instanceof Rule)) {
 				str = Util.quoteString(str, '"');
 			}

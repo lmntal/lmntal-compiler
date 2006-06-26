@@ -146,7 +146,7 @@ public class RuleCompiler {
 					hc.match.add(new Instruction(Instruction.TESTMEM, 0, 1));
 				}
 				else {
-					hc.match.add(new Instruction(Instruction.GETMEM, hc.varcount, 1, mem.kind));
+					hc.match.add(new Instruction(Instruction.GETMEM, hc.varcount, 1, mem.kind, mem.name));
 					hc.match.add(new Instruction(Instruction.LOCK,   hc.varcount));
 					hc.mempaths.put(mem, new Integer(hc.varcount++));
 					mem = mem.parent;

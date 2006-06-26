@@ -305,7 +305,7 @@ public class HeadCompiler {
 					else {
 						buddymempath = varcount++;
 						mempaths.put(buddymem, new Integer(buddymempath));
-						match.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath ));
+						match.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath, buddyatom.mem.name ));
 						newmemlist.add(buddymem);
 					// // GETMEM時代のコード
 					//	Iterator it = buddymem.mem.mems.iterator();
@@ -410,7 +410,7 @@ public class HeadCompiler {
 		
 				// 子膜を変数に取得する
 				submempath = varcount++;
-				match.add(Instruction.anymem(submempath, thismempath, submem.kind));
+				match.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
 // NEQMEM は不要になっているが、参考のためにコードは残しておく。
 //				Iterator it2 = mem.mems.iterator();
 //				while (it2.hasNext()) {

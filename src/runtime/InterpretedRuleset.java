@@ -414,8 +414,10 @@ class InterpretiveReactor {
 					//====膜に関係する出力する基本ガード命令 ====ここから====
 				case Instruction.LOCKMEM :
 				case Instruction.LOCALLOCKMEM :
-					// lockmem [-dstmem, freelinkatom]
+					// lockmem [-dstmem, freelinkatom, memname]
 					mem = atoms[inst.getIntArg2()].mem;
+					if(!mem.equalName((String)inst.getArg3()))
+						return false;
 					if (mem.lock()) {
 						lockedMemList.add(mem);
 						mems[inst.getIntArg1()] = mem;
@@ -427,11 +429,12 @@ class InterpretiveReactor {
 					return false; //n-kato
 
 				case Instruction.ANYMEM :
-				case Instruction.LOCALANYMEM : // anymem [-dstmem, srcmem] 
+				case Instruction.LOCALANYMEM : // anymem [-dstmem, srcmem, memname] 
 					it = mems[inst.getIntArg2()].mems.iterator();
 					while (it.hasNext()) {
 						AbstractMembrane submem = (AbstractMembrane) it.next();
-						if ((submem.kind != inst.getIntArg3())) { 
+						if ((submem.kind != inst.getIntArg3()) ||
+								(!submem.equalName((String)inst.getArg4()))) { 
 							backtracks++;
 							continue;
 						}
@@ -457,8 +460,9 @@ class InterpretiveReactor {
 					lockfailure++;
 					return false; //n-kato
 
-				case Instruction.GETMEM : //[-dstmem, srcatom]
-					if(atoms[inst.getIntArg2()].mem.kind != inst.getIntArg3())
+				case Instruction.GETMEM : //[-dstmem, srcatom, memtype, memname]
+					if(atoms[inst.getIntArg2()].mem.kind != inst.getIntArg3() ||
+							(!atoms[inst.getIntArg2()].mem.equalName((String)inst.getArg4())))
 						return false;
 					mems[inst.getIntArg1()] = atoms[inst.getIntArg2()].mem;
 					break;
@@ -604,7 +608,7 @@ class InterpretiveReactor {
 					mem = mems[inst.getIntArg1()];
 					mem.parent.removeMem(mem);
 					break; //n-kato
-				case Instruction.NEWMEM: //[-dstmem, srcmem]
+				case Instruction.NEWMEM: //[-dstmem, srcmem, memtype]
 					mem = mems[inst.getIntArg2()].newMem(inst.getIntArg3());
 					mems[inst.getIntArg1()] = mem;
 					break; //n-kato

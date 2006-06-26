@@ -297,7 +297,7 @@ public class Dumper {
 				for (int k = 0; k < Env.indent; k++)
 					buf.append("  ");
 			if (m.name != null)
-				buf.append(m.name + ":");
+				buf.append(m.name /*+ ":"*/); // 膜名の構文は':'をはさまないことにした by kudo (2006/06/26)
 			buf.append("{");
 			buf.append(dump(m));
 			buf.append("}");

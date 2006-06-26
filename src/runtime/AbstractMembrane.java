@@ -87,8 +87,6 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * <p>ロック期間中のみ有効。ロック取得時に設定され、ロック解放時にnullに設定される。
 	 * ロックを必要とするランタイムのみが使用し、転送するランタイムは使用しない。*/
 	public RemoteTask remote = null; // publicは仮
-	/** この膜の名前（internされた文字列またはnull） */
-	String name = null;
 
 	private static int nextId = 0;
 	private int id;
@@ -96,6 +94,14 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	/** 子膜->(コピー元のアトムin子膜->コピー先のアトムinコピーされた子膜) */
 	HashMap memToCopyMap = null; 
 	
+	/** この膜の名前（internされた文字列またはnull） */
+	String name = null;
+	public boolean equalName(String s){
+		if(name == null && s == null)return true;
+		else if(name != null && name != null)
+			return name.equals(s);
+		else return false;
+	}
 	public String getName() { return name; }
 	void setName(String name) { this.name = name; } // 仕様が固まったらコンストラクタで渡すようにすべきかも
 
