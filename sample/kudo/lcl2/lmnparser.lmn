@@ -1,284 +1,524 @@
-//構文解析Ver.2
-
-//効率面とエラーチェックを考え、トップダウン的に修正
+// LMNtalソース用構文解析器
+// with lmnlexer, seq
+// by kudo
+//
+// SINCE 2006/06/28(Wed.)
 
 {
 module(lmnparser).
 
-P=lmnparser.parse(Tokens):-
-	P=
-	lmnparser.parse_statements( // プログラムは複数の文からなる
-	lmnparser.parse_braces(     // { } でまず切り分ける
-	lmnparser.parse_functors(   // 各種リテラル、アトム名
-	lmnparser.parse_names(      // ルール名、文脈名、mod
-	lmnparser.fix_tokens(       // 2引数のtokenを3引数に直す
-		Tokens
-	))))),
+lmnparser.parse(Tokens) :- ground(Tokens) |
 
-	dot_t(dot),
-	rbrace_t(rbrace),
-	lbrace_t(lbrace),
-	braces_t(braces),
-	rbracket_t(rbracket),
-	lbracket_t(lbracket),
-	rparen_t(rparen),
-	lparen_t(lparen),
-	atomname_t(atomname),
-	linkname_t(linkname).
+seq.run({src(Tokens)},
 
-// 文を解釈する。結果は、プロセスのリストか、ルール。
-P=lmnparser.parse_statement(Tokens):-
-	P=
-	lmnparser.parse_attach_names(    // [ ], ( ) にプロセス文脈名、アトム名をくっつける
-	lmnparser.parse_parens_brackets( // [ ], ( ) で切り分ける
-		Tokens
-	)).
-
-// 2引数のtokenを3引数に直す
-P=lmnparser.parse_fix_tokens([token(TKind,Pos)|R]):-
-	P=[token(TKind,[],Pos)|lmnparser.parse_fix_token(R)].
-P=lmnparser.parse_fix_tokens([]):-P=[].
+[
+// 諸々の名前を処理する
+// リンク名/アトム名 @@ を、ルール名とする
+// $ アトム名 を、プロセス文脈名とする
+// @ アトム名を、ルール文脈とする
+// "mod" という名前を予約語として認識する
+{
+	LinkName_At_At@@
+	L=[token(linkname,LN,LPos), token(at_at,[],_GAPos)|R] :-
+		L=[token(rulename,LN,LPos)|R].
 	
-// ルール名、文脈名、mod
-Parse_Dollar1@@
-P=lmnparser.parse_names([token(dollar,[],DPos),token(atomname,AN,_GAPos)|R]):-
-	P=[token(proccxt_name,AN,DPos)|lmnparser.parse_names(R)].
-Parse_Dollar2@@ // $の後にアトム名がなければエラー
-P=lmnparser.parse_names([token(dollar,[],DPos),token($tkind,TA,TPos)|R]),atomname_t($atomname):-
-	$tkind\=$atomname|
-	P=lmnparser.parse_error(free_dollar(DPos),[token($tkind,TA,TPos)|R]),atomname_t($atomname).
+	AtomName_At_At@@
+	L=[token(atomname,AN,APos), token(at_at,[],_GAPos)|R] :-
+		L=[token(rulename,AN,APos)|R].
+	
+	Dollar_AtomName@@
+	L=[token(dollar,[],DPos), token(atomname,AN,_GAPos)|R] :-
+		L=[token(proccxtname,AN,DPos)|R].
+	
+	At_AtomName@@
+	L=[token(at,[],AtPos), token(atomname,AN,_GAPos)|R] :-
+		L=[token(srcrulecxt,AN,AtPos)|R].
+	
+	Mod@@
+	L=[token(atomname,["mod"],APos)|R] :- L=[token(mod,[],APos)|R].
+},
 
-Parse_At1@@
-P=lmnparser.parse_names([token(at,[],ATPos),token(atomname,AN,_GAPos)|R]):-
-	P=[token(rulecxt_name,AN,ATPos)|lmnparser.parse_names(R)].
-Parse_At2@@ // @の後にアトム名がなければエラー
-P=lmnparser.parse_names([token(at,[],ATPos),token($tkind,TA,TPos)|R]),atomname_t($atomname):-
-	$tkind\=$atomname|
-	P=lmnparser.parse_error(free_at(ATPos),[token($tkind,TA,TPos)|R]),atomname_t($atomname).
+// 通常アトム
+// 数字リテラル
+// 小数リテラル
+// '..'
+// ".."
+// [: .. :]
+{
+	Parse_NormalAtomName@@
+	L=[token(atomname,[AN],APos)|R] :- L=[token(funcname,[normalfunc(AN)],APos)|R].
 
-Parse_AtAt1@@
-P=lmnparser.parse_names([token(linkname,LN,LPos),token(at_at,[],_GATPos)|R]):-
-	P=[token(rulename,LN,LPos)|lmnparser.parse_name(R)].
-Parse_AtAt2@@
-P=lmnparser.parse_names([token(atomname,AN,APos),token(at_at,[],_GATPos)|R]):-
-	P=[token(rulename,AN,APos)|lmnparser.parse_name(R)].
-Parse_AtAt3@@
-P=lmnparser.parse_names([token(at_at,ATPos)|R]):-
-	P=lmnparser.parse_error(free_at_at(ATPos),R).
+	Parse_Int@@
+	L=[token(num,[N],NPos)|R] :- L=[token(funcname,[intfunc(N)],NPos)|R].
+	
+	Parse_Float@@
+	L=[token(floatnum,[FN],FPos)|R] :- L=[token(funcname,[floatfunc(FN)],FPos)|R].
+	
+	Parse_SQString@@
+	L=[token(sq_string,[SS],SPos)|R] :- L=[token(funcname,[normalfunc(SS)],SPos)|R].
+	
+	Parse_DQString@@
+	L=[token(dq_string,[DS],DPos)|R] :- L=[token(funcname,[stringfunc(DS)],DPos)|R].
 
-Parse_Mod@@
-P=lmnparser.parse_names([token(atomname,["mod"],APos),token($tkind,TA,TPos)|R]),at_at_t($at_at):-
-	$tkind\=$at_at|
-	P=[token(mod,[],APos)|lmnparser.parse_name([token($tkind,TA,TPos)|R])].
+	Parse_BracketString@@
+	L=[token(bracket_string,[DS],DPos)|R] :- L=[token(funcname,[stringfunc(DS)],DPos)|R].
+},
 
-// その他スルー
-Parse_Names1@@
-P=lmnparser.parse_names([token(linkname,LN,LPos),token($tkind,TA,TPos)|R]),at_at_t($at_at):-
-	$tkind\=$at_at|
-	P=[token(linkname,LN,LPos)|lmnparser.parse_name([token($tkind,TA,TPos)|R])].
-Parse_Names2@@
-P=lmnparser.parse_names([token(atomname,[$an],APos),token($tkind,TA,TPos)|R]),at_at_t($at_at):-
-	$tkind\=$at_at,$an\="mod"|
-	P=[token(atomname,[$an],APos)|lmnparser.parse_name([token($tkind,TA,TPos)|R])].
-Parse_Names3@@
-P=lmnparser.parse_names([token($tkind,TA,TPos)|R]),
-	dollar_t($dollar),at_t($at),at_at($at_at),
-	atomname_t($atomname),linkname_t($linkname):-
-	$tkind\=$dollar,
-	$tkind\=$at,
-	$tkind\=$at_at,
-	$tkind\=$atomname,
-	$tkind\=$linkname|
-	P=[token($tkind,TA,TPos)|lmnparser.parse_names(R)],
-	dollar_t($dollar),at_t($at),at_at($at_at),
-	atomname_t($atomname),linkname_t($linkname).
+// error check
+{
+	RuleName_Error@@
+	L=[token(at_at,[],APos)|R]:-
+		L=R, syntax_error("SYNTAX_ERROR : '@@' can't find name", APos), stop_seq.
 
-// 各種リテラル、アトム名
-Parse_Functors1@@
-P=lmnparser.parse_functors([token(atomname,[AN],APos)|R]):-
-	P=[token(funcname,[normalfunc(AN)],APos)|lmnparser.parse_functors(R)].
-Parse_Functors2@@
-P=lmnparser.parse_functors([token(num,[N],APos)|R]):-
-	P=[token(funcname,[intfunc(N)],APos)|lmnparser.parse_functors(R)].
-Parse_Functors3@@
-P=lmnparser.parse_functors([token(floatnum,[F],APos)|R]):-
-	P=[token(funcname,[floatfunc(F)],APos)|lmnparser.parse_functors(R)].
-Parse_Functors4@@
-P=lmnparser.parse_functors([token(dq_string,[S],APos)|R]):-
-	P=[token(funcname,[stringfunc(S)],APos)|lmnparser.parse_functors(R)].
-Parse_Functors5@@
-P=lmnparser.parse_functors([token(sq_string,[S],APos)|R]):-
-	P=[token(funcname,[normalfunc(S)],APos)|lmnparser.parse_functors(R)].
-Parse_Functors6@@
-P=lmnparser.parse_functors([token(bracket_string,[S],APos)|R]):-
-	P=[token(funcname,[stringfunc(S)],APos)|lmnparser.parse_functors(R)].
+	Process_Context_Name_Error1@@
+	L=[token(dollar,[],DPos|R]:-
+		L=R, syntax_error("SYNTAX ERROR : '$' can't find name", DPos), stop_seq.
+	
+	Rule_Context_Name_Error@@
+	L=[token(at,[],APos)|R]:-
+		L=R, syntax_error("SYNTAX_ERROR : '@' can't find name", APos), stop_seq.
+},
 
-//その他をスルー
-Parse_Functors7@@
-P=lmnparser.parse_functors([token($tkind,TA,TPos)|R]),
-	atomname_t($atomname),num_t($num),floatnum_t($floatnum),dq_string_t($dq_string),
-	sq_string_t($sq_string),bracket_string($bracket_string):-
-	$tkind\=$atomname,
-	$tkind\=$num,
-	$tkind\=$floatnum,
-	$tkind\=$dq_string,
-	$tkind\=$sq_string,
-	$tkind\=$bracket_string|
-	P=[token($tkind,TA,TPos)|lmnparser.parse_functors(R)],
-	atomname_t($atomname),num_t($num),floatnum_t($floatnum),dq_string_t($dq_string),
-	sq_string_t($sq_string),bracket_string($bracket_string).
+// まず、'{', '}' で切り分ける
+{
+	// ground,unaryの比較に定数項が使えない為
+	braces_t(lbrace, rbrace).
 
-//  中括弧による切り分け
-Parse_Braces1@@
-P=lmnparser.parse_braces([token(lbrace,[],LBPos)|R]):-
-	P=lmnparser.parse_braces(lmnparser.parse_braces_in(LBPos,R)).
-Parse_Braces2@@
-P=lmnparser.parse_braces([token(rbrace,_GA,RBPos)|R]):-
-	P=lmnparser.parse_error(unopend_brace(RBPos),R).
-Parse_Braces3@@
-P=lmnparser.parse_braces([token($tkind,TA,TPos)|R]),
-	lbrace_t($lbrace),rbrace_t($rbrace):- $lbrace \= $tkind, $rbrace \= $tkind |
-	P=[token($tkind,TA,TPos)|lmnparser.parse_braces(R)],lbrace_t($lbrace),rbrace_t($rbrace).
-Parse_Braces4@@
-P=lmnparser.parse_braces([]):- P=[].
+	// '{'は膜の始まり
+	Parse_Braces1@@
+	L=[token(lbrace,[],LBPos)|R] :- L=[braces_begin(LBPos,B,B)|R].
+	
+	// '}'は膜の終わり
+	Parse_Braces2@@
+	L=[braces_begin(LBPos, MH, MT), token(rbrace,RArg,_GRBPos|R] :-
+		L=[token(braces,[[MH]|RArg],LBPos)|R], MT=[].
+	
+	// '{', '}'以外が出てきたら膜の中に入れる
+	// ※ '{'もはじくことによって、階層構造にも対応できている
+	Parse_Braces3@@
+	L=[braces_begin(LBPos,MH,MT), token($tkind, TArgs, TPos)|R], braces_t($lbrace, $rbrace) :-
+		$tkind \= $lbrace, $tkind \= $rbrace|
+		L=[braces_begin(LBPos,MH,T)|R], MT=[token($tkind,TArgs,TPos)|T],
+		braces_t($lbrace,$rbrace).
+},
 
-Parse_Braces_In@@
-P=lmnparser.parse_braces_in(Pos,Tokens):-
-	P=lmnparser.parse_braces_in(Pos,M,M,Tokens).
-Parse_Braces_In1@@
-P=lmnparser.parse_braces_in(Pos,MB,ME,[token(rbrace,A,_GRBPos)|R]):-
-	P=[token(braces,[A,MB],Pos)|R],ME=[].
-Parse_Braces_In2@@
-P=lmnparser.parse_braces_in(Pos,MB,ME,[token(lbrace,[],LBPos)|R]):-
-	P=lmnparser.parse_braces_in(Pos,MB,ME,
-		lmnparser.parse_braces_in(LBPos,R)).
-Parse_Braces_In3@@
-P=lmnparser.parse_braces_in(Pos,MB,ME,[token($tkind,TA,TPos)|R]),
-	lbrace_t($lbrace),rbrace_t($rbrace):-
-	$rbrace\=$tkind,$lbrace\=$tkind|
-	P=lmnparser.parse_braces_in(Pos,MB,ME1,R),ME=[token($tkind,TA,TPos)|ME1],
-	lbrace_t($lbrace),rbrace_t($rbrace).
-Parse_Braces_In4@@
-P=lmnparser.parse_braces_in(Pos,MB,ME,[]):-
-	P=lmnparser.parse_error(unclosed_brace(Pos),MB),ME=[].
+// エラーチェック ( { } の対応誤り )
+{
+	braces_t(lbrace, rbrace) :- ().
+	
+	// { が余る
+	LBrace_Error@@
+	L=[braces_begin(LPos,MH,MT)|R] :-
+		L=R, dead_srcmem(MH), MT=[],
+		syntax_error("SYNTAX ERROR : '{' can't find '}'. ", LPos), stop_seq.
+	
+	// } が余る
+	RBrace_Error@@
+	L=[token(rbrace,_GRArg,RPos)|R] :-
+		L=R, syntax_error("SYNTAX ERROR : '}' can't find '{'. ", RPos), stop_seq.
+},
 
-//  ピリオドによる切り分け
-//  - ピリオドで区切られたものをstatement(文)と呼ぶ。
-//  -膜の中も。
-//  -切り分けたそれぞれのstatementをparseする。
+//各文(膜内は独立した文)の終わりに'.'が無ければ挿入する
+{
+	dot_t(dot).
 
-Parse_Statements@@
-P=lmnparser.parse_statements(Tokens):-P=lmnparser.parse_statements(S,S,Tokens).
-Parse_Statements1@@
-P=lmnparser.parse_statements([SC|SB],SE,[token(dot,[],_GDPos)|R]):-
-	P=[lmnparser.parse_statement([SC|SB])|lmnparser.parse_statements(S,S,R)],SE=[].
-Parse_Statements2@@
-P=lmnparser.parse_statements(SB,SE,[token(braces,[A,M],MPos)|R]):- 
-	P=lmnparser.parse_statements(SB,SE1,R),
-	SE=[token(braces,[A,lmnparser.parse_statements(M)],MPos)|SE1].
-Parse_Statements3@@
-P=lmnparser.parse_statements(S,S,[token(dot,[],DPos)|R]):-
-	P=lmnparser.parse_error(empty_dot(DPos),R).
-Parse_Statements4@@
-P=lmnparser.parse_statements(SB,SE,[token($tkind,TA,TPos)|R]),dot_t($dot):- $tkind \= $dot|
-	P=lmnparser.parse_statements(SB,SE1,R),SE=[token($tkind,TA,TPos)|SE1],dot_t($dot).
-Parse_Statements5@@
-P=lmnparser.parse_statements(SB,SE,[]):-
-	P=[lmnparser.parse_statement(SB)],SE=[].
+	Insert_Dots@@
+	L=[token($last_token,LArgs,LPos)], dot_t($dot) :- $last_token \= $dot |
+		dot_t($dot), L=[token($last_token,LArgs,LPos), token(dot,[],nopos)].
+},
 
-// 小括弧、大括弧による切り分け
+// '.'で切り分ける
+{
+	Parse_Dots1@@
+	L=[token(dot,[],DPos)|R] :- L=[sentence([])|R].
 
-Parse_Parens_Brackets1@@
-P=lmnparser.parse_parens_brackets([token(lparen,[],LPPos)|R]):-
-	P=lmnparser.parse_parens_brackets(lmnparser.parse_parens_in(LPPos,R)).
-Parse_Parens_Brackets2@@
-P=lmnparser.parse_parens_brackets([token(lbracket,[],LBPos)|R]):-
-	P=lmnparser.parse_parens_brackets(lmnparser.parse_brackets_in(LBPos,R)).
-Parse_Parens_Brackets3@@
-P=lmnparser.parse_parens_brackets([token(rparen,[],RPPos)|R]):-
-	P=lmnparser.parse_error(unopened_parens(RPPos),R).
-Parse_Parens_Brackets4@@
-P=lmnparser.parse_parens_brackets([token(rbracket,[],RBPos)|R]):-
-	P=lmnparser.parse_error(unopened_brackets(RBPos),R).
-Parse_Parens_Brackets5@@
-P=lmnparser.parse_parens_brackets([token($tkind,TA,TPos)|R]),
-	lparen_t($lparen),rparen_t($rparen),lbracket_t($lbracket),rbracket_t($rbracket)
-	:- $tkind\=$lparen, $tkind\=$rparen, $tkind\=$lbracket, $tkind\=$rbracket |
-	P=[token($tkind,TA,TPos)|lmnparser.parse_parens_brackets(R)],
-	lparen_t($lparen),rparen_t($rparen),lbracket_t($lbracket),rbracket_t($rbracket).
-Parse_Parens_Brackets6@@
-P=lmnparser.parse_parens_brackets([]):- P=[].
+	Parse_Dots2@@
+	L=[token($tkind,TArgs,TPos), sentence(RestTokens)|R], dot_t($dot) :-
+		$tkind \= $dot|
+		L=[sentence([token($tkind,TArgs,TPos)|RestTokens])|R], dot_t($dot).
+},
 
-Parse_Parens_In@@
-P=lmnparser.parse_parens_in(Pos,Tokens):-
-	P=lmnparser.parse_parens_in(Pos,M,M,Tokens).
-Parse_Parens_In1@@
-P=lmnparser.parse_parens_in(Pos,MB,ME,[token(rparen,[],_GRPPos)|R]):-
-	P=[token(parens,[MB],Pos)|R],ME=[].
-Parse_Parens_In2@@
-P=lmnparser.parse_parens_in(Pos,MB,ME,[token(lparen,[],LPPos)|R]):-
-	P=lmnparser.parse_parens_in(Pos,MB,ME,
-		lmnparser.parse_parens_in(LPPos,R)).
-Parse_Parens_In3@@
-P=lmnparser.parse_parens_in(Pos,MB,ME,[token(lbracket,[],LBPos)|R]):-
-	P=lmnparser.parse_parens_in(Pos,MB,ME,
-		lmnparser.parse_brakets_in(LBPos,R)).
-Parse_Parens_In4@@
-P=lmnparser.parse_parens_in(_GPos,MB,ME,[token(rbracket,[],RBPos)|R]):-
-	P=lmnparser.parse_error(invalid_rbracket(RBPos),MB),ME=R.
-Parse_Parens_In5@@
-P=lmnparser.parse_parens_in(Pos,MB,ME,[token($tkind,TA,TPos)|R]),
-	lparen_t($lparen),rparen_t($rparen),lbracket_t($lbracket),rbracket_t($rbracket):-
-	$rbracket\=$tkind,$lbracket\=$tkind, $lparen\=$tkind, $rparen\=$tkind|
-	P=lmnparser.parse_parens_in(Pos,MB,ME1,R),ME=[token($tkind,TA,TPos)|ME1],
-	lparen_t($lparen),rparen_t($rparen),lbracket_t($lbracket),rbracket_t($rbracket).
-Parse_Parens_In6@@
-P=lmnparser.parse_parens_in(Pos,MB,ME,[]):-
-	P=lmnparser.parse_error(unclosed_parens(Pos),MB),ME=[].
+// '(' ')' '[' ']'で切り分ける
+{
+	dot_t(dot):-().
 
-Parse_Brackets_In@@
-P=lmnparser.parse_brackets_in(Pos,Tokens):-
-	P=lmnparser.parse_brackets_in(Pos,M,M,Tokens).
-Parse_Brackets_In1@@
-P=lmnparser.parse_brackets_in(Pos,MB,ME,[token(rbracket,[],_GRPPos)|R]):-
-	P=[token(brackets,[MB],Pos)|R],ME=[].
-Parse_Brackets_In2@@
-P=lmnparser.parse_brackets_in(Pos,MB,ME,[token(lbracket,[],LBPos)|R]):-
-	P=lmnparser.parse_brackets_in(Pos,MB,ME,
-		lmnparser.parse_brackets_in(LBPos,R)).
-Parse_Brackets_In3@@
-P=lmnparser.parse_brackets_in(Pos,MB,ME,[token(lparen,[],LPPos)|R]):-
-	P=lmnparser.parse_brackets_in(Pos,MB,ME,
-		lmnparser.parse_parens_in(LPPos,R)).
-Parse_Brackets_In4@@
-P=lmnparser.parse_brackets_in(_GPos,MB,ME,[token(rparen,[],RPPos)|R]):-
-	P=lmnparser.parse_error(invalid_rparen(RPPos),MB),ME=R.
-Parse_Brackets_In5@@
-P=lmnparser.parse_brackets_in(Pos,MB,ME,[token($tkind,TA,TPos)|R]),
-	lparen_t($lparen),rparen_t($rparen),lbracket_t($lbracket),rbracket_t($rbracket):-
-	$rbracket\=$tkind,$lbracket\=$tkind, $lparen\=$tkind, $rparen\=$tkind|
-	P=lmnparser.parse_brackets_in(Pos,MB,ME1,R),ME=[token($tkind,TA,TPos)|ME1],
-	lparen_t($lparen),rparen_t($rparen),lbracket_t($lbracket),rbracket_t($rbracket).
-Parse_Brackets_In6@@
-P=lmnparser.parse_brackets_in(Pos,MB,ME,[]):-
-	P=lmnparser.parse_error(unclosed_brackets(Pos),MB),ME=[].
+	parens_t(lparen, rparen).
+	brackets_t(lbracket, rbracket).
+	
+	Parse_Parens1@@
+	L=[token(lparen,[],LPos)|R] :- L=[parens_begin(LPos,B,B)|R].
+	
+	Parse_Parens2@@
+	L=[parens_begin(LPos,MH,MT), token(rparen,[],_GRPos)|R] :-
+		L=[token(parens,[MH],LPos)|R], MT=[].
+	
+	Parse_Parens3@@
+	L=[parens_begin(LPos, MH, MT), token($tkind,TA,TP)|R], parens_t($lparen, $rparen) :-
+		$tkind \= $lparen, $tkind \= $rparen|
+		L=[parens_begin(LPos, MH, T)|R], MT=[token($tkind, TA, TP)|T],
+		parens_t($lparen, $rparen).
 
-// [ ], ( ) にプロセス文脈名、アトム名をくっつける
+	Parse_Brackets1@@
+	L=[token(lbracket,[],LBPos)|R] :- L=[brackets_begin(LBPos, B, B)|R].
+	
+	Parse_Brackets2@@
+	L=[brackets_begin(LBPos, MH, MT), token(rbracket, [], _GRBPos)|R] :-
+		L=[token(brackets,[MH],LBPos)|R], MT=[].
+	
+	Parse_Brackets3@@
+	L=[brackets_begin(LBPos, MH, MT), token($tkind,TA,TP)|R], brackets_t($lbracket, $rbracket):-
+		$tkind \= $lbracket, $tkind \= $rbracket|
+		L=[brackets_begin(LBPos, MH, T)|R], MT=[token($tkind, TA,TP)|T],
+		brackets_t($lbracket, $rbracket).
+},
 
-Parse_Attach_Atom1@@
-P=lmnparser.parse_attach_names([token(funcname,[F],APos),token(parens,[P],_GPPos)|R]):-
-	P=[token(arityatom,[F,P],APos)|lmnparser.parse_attach_names(R)].
-Parse_Attach_Atom2@@
-P=lmnparser.parse_attach_names([token(funcname,[F],APos),token($tkind,TA,TPos)|R]),
-	parens_t($parens):-$tkind\=$parens|
-	P=[token(funcname,[F],APos),token($tkind,TA,TPos)|lmnparser.parse_attach_names(R)].
+{
+	parens_t(lparen,rparen):-().
+	brackets_t(lbracket,rbracket):-().
 
-Parse_Attach_Proccxt1@@
-P=lmnparser.parse_attach_names([token(proccxtname,[PN],PPos),token(brackets,[B],_GPPos)|R]):-
-	P=[token(proccxt_brackets,[PN,B],PPos)|lmnparser.parse_attach_names(R)].
-Parse_Attach_Proccxt2@@
-P=lmnparser.parse_attach_names([token(proccxtname,[PN],PPos),token($tkind,TA,TPos)|R]),
-	parens_t($brackets):-$tkind\=$brackets|
-	P=[token(proccxtname,[PN],PPos),token($tkind,TA,TPos)|lmnparser.parse_attach_names(R)].
+	LParen_Error@@
+	L=[parens_begin(LPos,MH,MT)|R] :-
+		L=R, dead_parens(MH), MT=[],
+		syntax_error("SYNTAX ERROR : '(' can't find ')'. ", LPos), stop_seq.
+	
+	RParen_Error@@
+	L=[token(rparen,[],RPos)|R] :-
+		L=R, syntax_error("SYNTAX ERROR : ')' can't find '('. ", RPos), stop_seq.
 
+	LBracket_Error@@
+	L=[brackets_begin(LPos,MH,MT)|R] :-
+		L=R, dead_brackets(MH), MT=[],
+		syntax_error("SYNTAX ERROR : '[' can't find ']'. ", LPos), stop_seq.
+	
+	RBracket_Error@@
+	L=[token(rbracket,[],RPos)|R] :-
+		L=R, syntax_error("SYNTAX ERROR : ']' can't find '['. ", RPos), stop_seq.
+},
+
+// a(...) $p[...]
+{
+	Parse_ArityAtom@@
+	L=[token(funcname,FA,FPos), token(parens,PA,PP)|R] :-
+		L=[token(arityatom,list.append(FA,PA),FPos)|R].
+
+	Parse_Process_Context@@
+	L=[token(proccxtname, PA, PPos), token(brackets, BA, BP)|R] :-
+		L=[token(proccxt_bracket,list.append(PA,BA),PPos)|R].
+},
+
+lmnparser.parse_process_context({$s, @s}/) :-
+// ... :- ... | ... の処理
+lmnparser.parse_rule1({$s.
+	bar_token(bar).
+	
+	Parse_Rule1@@
+	L=[colon_minus|R] :- L=[after_head({proc=[]}),before_body({proc(P,P)})|R].
+	
+	Parse_Rule2@@
+	L=[T,after_head({proc=Rest, $p[Rest]})|R] :- ground(T)|
+		L=[after_head({proc=[T|Rest],$p[Rest]})|R].
+	
+	Parse_Rule3@@
+	bar_token(Bar), L=[before_body({proc(H,T),$p[H,T]}),Token|R] :- Token \= Bar |
+		bar_token(Bar), L=[before_body({proc(H,PT), T=[Token|PT], $p[H,T]})|R].
+	
+	Parse_Rule4@@
+	L=[before_body({proc(H,T),$p[H,T]}), bar|R] :-
+		L=[guard({proc=H, $p[H,T], T=[]}),before_body({proc(P,P)})|R].
+}).
+
+lmnparser.parse_rule1({$s, bar_token(bar), @s}/) :-
+// ルールを作る
+lmnparser.parse_rule2({$s.
+	Parse_HeadBodyRule@@
+	L=[after_head({proc=H, $h[H]}), before_body({proc(BH,BT), $b[BH, BT]})] :-
+		L=[srcrule("", H, [], BH)], $h[H], $b[BH,BT],BT=[].
+
+	Parse_HeadGuardBodyRule@@
+	L=[after_head({proc=H, $h[H]}), guard({proc=G, $g[G]}),
+		before_body({proc(BH,BT), $b[BH, BT]})] :-
+		L=[srcrule("", H, G, BH)], $h[H], $g[G], $b[BH,BT],BT=[].
+	
+	Parse_NamingRule@@
+	L=[srcrule("", [rulename(RN)|H], G, B)] :- L=[srcrule(RN, H, G, B)].
+	
+	no_rule.
+	
+	no_rule, T=colon_minus :- T=colon_minus, rule_exists.
+}).
+
+lmnparser.parse_rule2({$s, rule_exists, @s}/) :- // ':-'があるかぎり上の2stepを繰り返す
+	lmnparser.parse_process_context({$s}).
+
+lmnparser.parse_rule2({$s, no_rule, @s}/) :- // ':-'がないなら次へ
+//各リストの終わりに','を挿入する
+//TODO : この前の段階で、終わりに','があるリストは構文エラーにする
+lmnparser.insert_comma({$s. syntax_ok.
+	comma_token(comma).
+
+	Insert_Comma@@
+	comma_token(Comma), L=[LastToken] :- LastToken \= Comma | comma_token(Comma), L=[LastToken,comma].
+}).
+
+lmnparser.insert_comma({$s, comma_token(comma), @s}/) :-
+// ','で切り分ける
+lmnparser.parse_comma({$s.
+	comma_token(comma).
+	cla_end_token(cla_end).
+	
+	Parse_Comma1@@
+	L=[comma|R] :- L=[cla([]), cla_end|R].
+
+	Parse_Comma2@@
+	comma_token(Comma), cla_end_token(Cla_end), L=[Token, cla(RestTokens)|R] :-
+		Token \= Comma, Token \= Cla_end|
+		comma_token(Comma), cla_end_token(Cla_end), L=[cla([Token|RestTokens])|R].
+}).
+
+lmnparser.parse_comma({$s, comma_token(comma), cla_end_token(cla_end), @s}/) :-
+// cla(S), cla_end を clause(S)にする
+lmnparser.make_clause({$s.
+	Make_Clause1@@
+	L=[cla(C),cla_end|R] :- L=[clause(C)|R].
+	
+	Make_Clause2@@
+	src=[clause(C)] :- src=C.
+}).
+
+lmnparser.make_clause({$s, @s}/) :-
+//cdrの処理
+lmnparser.parse_cdr({$s.
+	
+	Parse_Bar@@
+	L=[bar|R] :- L=[before_bar({proc([])}), after_bar({proc(P,P)})|R].
+	
+	Parse_BeferBar@@
+	L=[Token, before_bar({proc=P, $p[P]})|R] :- ground(Token)|
+		L=[before_bar({proc=[Token|P], $p[P]})|R].
+	
+	Parse_BarRest@@
+	L=[after_bar({proc(H,T),$p[H,T]}), Token|R] :- ground(Token)|
+		L=[after_bar({proc(H,BT), T=[Token|BT], $p[H,T]})|R].
+	
+	Parse_Bar2@@
+	L=[clause([before_bar({proc=B, $b[B]}), after_bar({proc(AH,AT), $a[AH,AT]})])|R] :-
+		L=[car_clauses({proc=[clause(B)],$b[B]}), cdr_clauses({proc([clause(AH)|P],P), AT=[],$a[AH,AT]})|R].
+
+	Parse_Car@@
+	L=[C, car_clauses({proc=P, $p[P]})|R] :- ground(C)|
+		L=[car_clauses({proc=[C|P], $p[P]})|R].
+	
+	Parse_Cdr@@
+	L=[cdr_clauses({proc(H,T), $p[H,T]}),Clause|R] :- ground(Clause)|
+		L=[cdr_clauses({proc(H,CT), T=[Clause|CT], $p[H,T]})|R].
+	
+	Parse_CarCdr@@
+	L=[brackets([car_clauses({proc=Car, $car[Car]}), cdr_clauses({proc(Cdr, CdrT), $cdr[Cdr,CdrT]})])|R] :-
+		L=[brackets_with_bar(Car, Cdr)|R], $car[Car], $cdr[Cdr, CdrT], CdrT=[].
+
+}).
+
+lmnparser.parse_cdr({$s, @s}/) :-
+// pc のリンクリスト
+lmnparser.parse_proccxtlinklist({$s.
+	ParseProcCxtLinkList@@
+	L=[proccxt_bracket(PN, [clause([brackets_with_bar(Car, Cdr)])])|R] :- L=[srcproccxt(PN,Car,Cdr)|R].
+	
+	ParseProcCxtLinkList2@@
+	L=[proccxt_bracket(PN, [clause([brackets(B)])])|R] :- L=[srcproccxt(PN,B,[])|R].
+}).
+
+lmnparser.parse_proccxtlinklist({$s, @s}/) :-
+// listを作る
+lmnparser.parse_list({$s.
+//	ParseList1@@
+//	L=[brackets_with_bar(clause(Car),clause(Cdr))|R] :-
+//		L=[srccons(clause(Car),clause(Cdr))|R].
+
+	ParseList2@@
+	L=[brackets_with_bar([Car1, Car2|CarRest],Cdr)|R] :-
+		L=[srccons(Car1,clause([brackets_with_bar([Car2|CarRest],Cdr)]))|R].
+	
+	ParseList3@@
+	L=[brackets_with_bar([Car],[Cdr])|R] :-
+		L=[srccons(Car,Cdr)|R].
+	
+	ParseList4@@
+	L=[brackets([C|CR])|R] :- L=[brackets_with_bar([C|CR],[srcnil])|R].
+	
+	ParseList5@@
+	L=[brackets([clause([])])|R] :- L=[clause(srcnil)|R].
+	
+	ParseList6@@
+	L=[brackets([])|R] :- L=[srcnil|R].
+	
+}).
+
+lmnparser.parse_list({$s, @s}/) :-
+// 中置記法関係演算子の処理
+lmnparser.parse_relop({$s.
+
+/* = */		Parse_Equal					@@L=[equal|R] 						:- L=[make_relop(equal)|R].
+/* == */	Parse_EqualEqual			@@L=[equal_equal|R] 				:- L=[make_relop(equal_equal)|R].
+/* \= */	Parse_BackslashEqual		@@L=[backslash_equal|R] 			:- L=[make_relop(backslash_equal)|R].
+/* =:= */	Parse_EqualColonEqual		@@L=[equal_colon_equal|R]			:- L=[make_relop(equal_colon_equal)|R].
+/* =\= */	Parse_EqualBackslashEqual	@@L=[equal_backslash_equal|R]		:- L=[make_relop(equal_backslash_equal)|R].
+/* =:=. */	Parse_EqualColonEqualDot	@@L=[equal_colon_equal_dot|R]		:- L=[make_relop(equal_colon_equal_dot)|R].
+/* =\=. */	Parse_EqualBackslashEqualDot@@L=[equal_backslash_equal_dot|R]	:- L=[make_relop(equal_backslash_equal_dot)|R].
+/* != */	Parse_ExclamationEqual		@@L=[exclamation_equal|R]			:- L=[make_relop(exclamation_equal)|R].
+/* >= */	Parse_Geq					@@L=[geq|R]							:- L=[make_relop(geq)|R].
+/* =< */	Parse_Leq					@@L=[leq|R]							:- L=[make_relop(leq)|R].
+/* >  */	Parse_Grt					@@L=[grt|R]							:- L=[make_relop(grt)|R].
+/* <  */	Parse_Les					@@L=[les|R]							:- L=[make_relop(les)|R].
+/* >=. */	Parse_GeqDot				@@L=[geq_dot|R]						:- L=[make_relop(geq_dot)|R].
+/* =<. */	Parse_LeqDot				@@L=[leq_dot|R]						:- L=[make_relop(leq_dot)|R].
+/* >.  */	Parse_GrtDot				@@L=[grt_dot|R]						:- L=[make_relop(grt_dot)|R].
+/* <.  */	Parse_LesDot				@@L=[les_dot|R]						:- L=[make_relop(les_dot)|R].
+
+	Parse_RelOp0@@
+	L=[make_relop(Op)|R] :- 
+		L=[before_relop({proc=[]}),relop(Op),after_relop({proc(P,P)})|R].
+	
+	Parse_RelOp1@@
+	L=[Token, before_relop({proc=Rest, $p[Rest]})|R] :- ground(Token)|
+		L=[before_relop({proc=[Token|Rest],$p[Rest]})|R].
+	
+	Parse_RelOp2@@
+	L=[after_relop({proc(H,T),$p[H,T]}),Token|R] :- ground(Token)|
+		L=[after_relop({proc(H,RT),T=[Token|RT],$p[H,T]})|R].
+}).
+
+lmnparser.parse_relop({$s, @s}/) :-
+// 中置記法関係演算子の構成
+lmnparser.parse_relop2({$s.
+	Parse_RelOp3@@
+	L=[before_relop({proc=B,$b[B]}), relop(Op), after_relop({proc(AH,AT),$a[AH,AT]})] :-
+	L=[srcatom(Op, [clause(B),clause(AH)])], $b[B], $a[AH,AT], AT=[].
+}).
+
+lmnparser.parse_relop2({$s, @s}/) :-
+// 中置記法乗除演算子の処理
+lmnparser.parse_asmop({$s.
+
+/* * */		Parse_Asterisk		@@L=[asterisk|R] 	:- L=[make_asmop(asterisk)|R].
+/* / */		Parse_Slash			@@L=[slash|R] 		:- L=[make_asmop(slash)|R].
+/* *. */	Parse_AsteriskDot	@@L=[asterisk_dot|R]:- L=[make_asmop(asterisk_dot)|R].
+/* /. */	Parse_SlashDot		@@L=[slash_dot|R]	:- L=[make_asmop(slash_dot)|R].
+/* mod */	Parse_Mod			@@L=[mod|R]			:- L=[make_asmop(mod)|R].
+
+	Parse_AsmOp0@@
+	L=[make_asmop(Op)|R] :- 
+		L=[before_asmop({proc=[]}),asmop(Op),after_asmop({proc(P,P)})|R].
+	
+	Parse_AsmOp1@@
+	L=[Token, before_asmop({proc=Rest, $p[Rest]})|R] :- ground(Token)|
+		L=[before_asmop({proc=[Token|Rest],$p[Rest]})|R].
+	
+	Parse_AsmOp2@@
+	L=[after_asmop({proc(H,T),$p[H,T]}),Token|R] :- ground(Token)|
+		L=[after_asmop({proc(H,RT),T=[Token|RT],$p[H,T]})|R].
+}).
+
+lmnparser.parse_asmop({$s, @s}/) :-
+// 中置記法乗除演算子の構成
+lmnparser.parse_asmop2({$s.
+	Parse_AsmOp3@@
+	L=[before_asmop({proc=B,$b[B]}), asmop(Op), after_asmop({proc(AH,AT),$a[AH,AT]})] :-
+	L=[srcatom(Op, [clause(B),clause(AH)])], $b[B], $a[AH,AT], AT=[].
+}).
+
+lmnparser.parse_asmop2({$s, @s}/) :-
+// 中置記法加減演算子の処理
+lmnparser.parse_pmop({$s.
+
+/* + */		Parse_Plus		@@L=[plus|R] 		:- L=[make_pmop(plus)|R].
+/* - */		Parse_Minus		@@L=[minus|R] 		:- L=[make_pmop(minus)|R].
+/* +. */	Parse_PlusDot	@@L=[plus_dot|R]	:- L=[make_pmop(plus_dot)|R].
+/* -. */	Parse_MinusDot	@@L=[minus_dot|R]	:- L=[make_pmop(minus_dot)|R].
+
+	Parse_PmOp0@@
+	L=[make_pmop(Op)|R] :- 
+		L=[before_pmop({proc=[]}),pmop(Op),after_pmop({proc(P,P)})|R].
+	
+	Parse_PmOp1@@
+	L=[Token, before_pmop({proc=Rest, $p[Rest]})|R] :- ground(Token)|
+		L=[before_pmop({proc=[Token|Rest],$p[Rest]})|R].
+	
+	Parse_PmOp2@@
+	L=[after_pmop({proc(H,T),$p[H,T]}),Token|R] :- ground(Token)|
+		L=[after_pmop({proc(H,RT),T=[Token|RT],$p[H,T]})|R].
+}).
+
+lmnparser.parse_pmop({$s, @s}/) :-
+// 中置記法加減演算子の構成
+lmnparser.parse_pmop2({$s.
+	Parse_PmOp3@@
+	L=[before_pmop({proc=B,$b[B]}), pmop(Op), after_pmop({proc(AH,AT),$a[AH,AT]})] :-
+	L=[srcatom(Op, [clause(B),clause(AH)])], $b[B], $a[AH,AT], AT=[].
+}).
+
+lmnparser.parse_pmop2({$s, @s}/) :-
+// 引数無しのアトム
+// 引数のあるアトム
+// リンク
+lmnparser.parse_something2({$s.
+	Parse_OneAtom@@
+	L=[funcname(AN)|R] :- L=[srcatom(AN,[])|R].
+	
+	Parse_ArityAtom@@
+	L=[arityatom(AN,P)|R] :- L=[srcatom(AN,P)|R].
+	
+	Parse_Link@@
+	L=[linkname(LN)|R] :- L=[srclink(LN)|R].
+	
+	Parse_Bundle@@
+	L=[asterisk, srclink(LN)|R] :- L=[srcbundle(LN)|R].
+
+// この処理はLMNParserにまわす。1引数とは限らないし、、、今は認めないので。
+//	Parse_Aggregate@@
+//	L=[srcatom(AN,[clause([srcbundle])])|R] :- L=[srcaggregate(AN,[clause([srcbundle])])|R].
+
+	ParseCons@@
+	L=srccons(Car, Cdr) :- L=srcatom(normalfunc("."),[Car,Cdr]).
+	
+	ParseNil@@
+	L=srcnil :- L=srcatom(normalfunc("[]"),[]).	
+
+	// この辺は演算子のパーズの時にやるべきかも
+/* = */	L=srcatom(equal, Args) 		:- L=srcatom(normalfunc("="), Args).
+/* + */	L=srcatom(plus, Args) 		:- L=srcatom(normalfunc("+"), Args).
+/* - */ L=srcatom(minus, Args)		:- L=srcatom(normalfunc("-"), Args).
+/* * */ L=srcatom(asterisk, Args)	:- L=srcatom(normalfunc("*"), Args).
+/* / */ L=srcatom(slash, Args)		:- L=srcatom(normalfunc("/"), Args).
+}).
+
+lmnparser.parse_something2({$s, @s}/) :-
+// 節(要素が一つであること)、括弧、節、文を展開する
+lmnparser.break_nest({$s.	
+
+	R=append([C|L1],L2):-R=[C|append(L1,L2)].
+	R=append([],L2):-R=L2.
+
+	Break_Clause@@
+	L=[clause([S])|R] :- L=[S|R].
+
+	Break_Sentence@@
+	L=[sentence([S|SR])|R] :- L=[S|append(SR,R)].
+	
+	Break_Parens@@
+	L=[parens([S|SR])|R] :- L=[S|append(SR,R)].
+	
+	Break_Parens2@@
+	L=[parens([])|R] :- L=R.
+}).
+lmnparser.break_nest({$s, @s}/):-
+lmnparser.parse_atom_with_arity({$s.
+}).
+
+lmnparser.parse_atom_with_arity({$s, @s}/) :-
+
+lmnparser.parsed({$s}).
+
+lmnparser.parsed({src=SrcTree, syntax_ok, $s[]}) :- ground(SrcTree)|
+	lmnparser.parsed(SrcTree).
 }.

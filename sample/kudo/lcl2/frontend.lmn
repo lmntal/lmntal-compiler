@@ -6,7 +6,7 @@
 module(char).
 C=char.charlist_of_string(S) :- S \= "" |
 C=[ string.substring(S,0,1)|char.charlist_of_string(string.substring(S,1))].
-C=char.charlist_of_string(S) :- S = "" | C=[].
+C=char.charlist_of_string(S) :- S == "" | C=[].
 
 C=char.charlist_of_stringlist([S|SR]):-
 C=list.append(
@@ -19,18 +19,35 @@ C=char.string_of_charlist([]) :- C="".
 }.
 
 % 入力文字列をlmnlexerに通す
-lexing = {
+
+io.use.
+
+I=done, result(S) :- string(S)|I = [S|io.readline(result)].
+I=nil, result(""):-I=[].
+
+INPUT=input(char.charlist_of_stringlist(io.readline(result))).
+
+//出すルール
+lexing{$lexing[LR|*V],L=[token(_Gtkind,_Gtargs,_Gtpos)|LR],@l}/:-
+	L=[token(_Gtkind,_Gtargs,_Gtpos)|LR],lexing{$lexing[LR|*V],@l}.
+lexing{$lexing,L=[],@l}/:-
+	L=[], lexing{$lexing}.
+//入れるルール
+I=input([S|R]), lexing{$lexing[I|*L],@l}/:-string(S)|
+	I1=input(R), lexing{I=[S|I1],$lexing[I|*L],@l}.
+I=input([]), lexing{$lexing[I|*L],@l}/:-
+	lexing{I=[], $lexing[I|*L],@l}.
+
+lexing{
 //	R=append([C|L1],L2):-R=[C|append(L1,L2)].
 //	R=append([],L2):-R=L2.
 //	lmnlexer.use.
-	io.use.
-	
-	I=input :- I=char.charlist_of_stringlist(io.readline(result)).
-	I=done, result(S) :- string(S)|I = [S|io.readline(result)].
-	I=nil, result(""):-I=[].
-	
-	l = lmnlexer.lex(input).
+	Lexed = lmnlexer.lex(INPUT).
 }.
+
+lexed=Lexed.
+
+lexed(_GTokens):- parsing{lmnparser.parse(_GTokens)}.
 
 % main
 

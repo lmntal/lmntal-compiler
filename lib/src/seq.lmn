@@ -15,6 +15,8 @@ DESCRIPTION
 	
 	//seq.run(Data,[F1,F2...]).
 	//DataにF1,F2...を順番に適用する
+	
+	//途中停止機能を追加 (2006/06/28 kudo)
 
 AUTHOR
 	Sakurai, Hara
@@ -29,8 +31,12 @@ module(seq).
 /**
  * seq.run : Membrane(data) -> List of Membrane(rules) -> Membrane(data)
  * 
+ * stop_seq/0が出現したら，そこで実行を停止する (2006/06/28)
  */
-H=seq.run({$p, @r}/, [ {$z, @p} | Rest ]) :- H=seq.run({$p, $z, @p}, Rest).
+H=seq.run({$p, @r}/, [ {$z, @p} | Rest ]) :- \+($p = (stop_seq, $pp))|
+	H=seq.run({$p, $z, @p}, Rest).
+
+H=seq.run({$p, stop_seq, @r}/, Rest) :- H={$p}, cancelled_seq=Rest.
 
 H=seq.run({@p. $p.}, []) :- H={@p, $p}.
 
