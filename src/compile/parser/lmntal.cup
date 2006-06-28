@@ -35,7 +35,7 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 terminal Integer	RULE;
 terminal		QUOTED_STRING;
 terminal String RELOP, STRING;
-terminal String LINK_NAME, NUMBER_NAME, NUMBER_NAME16, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
+terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
 terminal String CHAR_CODE_LITERAL;
 
 non terminal SrcLink			Link;
@@ -113,8 +113,6 @@ RuleName    ::=
 
 // 演算子が付いていない項
 UnitAtom	::=	  NUMBER_NAME:name
-					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
-				| NUMBER_NAME16:name
 					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
 				| CHAR_CODE_LITERAL:name
 					{: RESULT = new SrcAtom(new SrcName(""+(int)name.charAt(2)), nameleft, nameright); :}
