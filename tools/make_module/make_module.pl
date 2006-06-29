@@ -71,10 +71,10 @@ while (<>) {
 		print "{module($module).\n";
 	} elsif (/compareTo\(java\.lang\.Object\)/) {
 		# Comparable インタフェースのメソッドは無視
+	} elsif (/char|byte|short|float/) {
+		#とりあえず無視
 	} elsif (/public [\w.\$]+\((\S*)\)/ && $abstract eq "") {# 抽象クラスはコンストラクタなし
 		dump_constructor(split_args($1));
-	} elsif (/(byte)|(short)|(float)/) {
-		#とりあえず無視
 	} elsif (/public static (?:synchronized )?(\S+) (\S+)\((.*)\)/) {
 		# 戻り値がlongのときは除外
 		if (!($3 =~ /\[\]/) && $1 ne "long") { #TODO Javaの配列をLMNtalのリストで処理
