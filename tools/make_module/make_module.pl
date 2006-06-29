@@ -8,8 +8,11 @@
 # $ javap -public java.lang.Math | ./make_module.pl > math.lmn
 #
 # History
-# 2006/06/29(Thu) アンダーバーで始まるメソッド名に対応した
-#                 $ が含まれるクラス名に対応した
+#
+# 2006/06/29(Thu)
+# 	アンダーバーで始まるメソッド名に対応した
+# 	$ が含まれるクラス名に対応した
+# 	例外が発生した場合 Exception オブジェクトを返すようにした
 ###############################################################
 
 # java の型 => Functor
@@ -176,16 +179,20 @@ sub dump_method {
 	
 	$args = dump_args(1, @args);
 
+	printf "\tmem.relink(me.nthAtom(0), 0, me, %d);\n", $argc+1;
+	printf "\tAtom result = null;\n";
 	printf "\ttry {\n";
 	if ($type eq "void") {
 		printf "\t\to.$method($args);\n";
 	} else {
 		printf "\t\t$type r = o.$method($args);\n";
 	}
-	printf "\t\tmem.relink(me.nthAtom(0), 0, me, %d);\n", $argc+1;
 	printf "\t\t%s", dump_result_atom($type);
+	printf "\t} catch (Exception e) {\n";
+	printf "\t\tresult = mem.newAtom(new ObjectFunctor(e));\n";
+	printf "\t} finally {\n";
 	printf "\t\tmem.relink(result, 0, me, %d);\n", $argc+1;
-	printf "\t} catch (Exception e) { System.err.println(e); }\n";
+	printf "\t}\n";
 
 	dump_tail($argc+1, "${ARGS}");
 }
@@ -200,17 +207,20 @@ sub dump_static_method {
 	dump_head(${ARGS}, lmnmethod($method), @args);
 
 	$args = dump_args(0, @args);
-
+	
+	print "\tAtom result = null;\n";
 	print "\ttry {\n";
 	if ($type eq "void") {
 		print "\t\t$absolute_class.$method($args);\n";
 	} else {
 		print "\t\t$type r = $absolute_class.$method($args);\n";
 	}
-	print "\t\tmem.relink(me.nthAtom(0), 0, me, $argc);\n";
-	print "\t\t", dump_result_atom($type);
+	printf "\t\t%s", dump_result_atom($type);
+	print "\t} catch (Exception e) {\n";
+	print "\t\tresult = mem.newAtom(new ObjectFunctor(e));\n";
+	print "\t} finally {\n";
 	print "\t\tmem.relink(result, 0, me, $argc);\n";
-	print "\t} catch (Exception e) { System.err.println(e); }\n";
+	print "\t}\n";
 
 	dump_tail($argc, $ARGS);
 }
@@ -270,5 +280,5 @@ sub dump_result_atom {
 	} else {
 		$functor = "ObjectFunctor(r)";
 	}
-	return "Atom result = mem.newAtom(new $functor);\n";
+	return "result = mem.newAtom(new $functor);\n";
 }
