@@ -364,6 +364,11 @@ public class FrontEnd {
 						} else if (args[i].equals("--pp0")) {
 							// 暫定オプション
 							Env.preProcess0 = true;
+						} else if (args[i].startsWith("--public-dir=")) {
+							// 開発者用オプション
+							// --public-dir=<dir>
+							// use <dir> as public directory
+							Translator.publicDirName = args[i].substring(13);
 						} else if(args[i].equals("--profile")){
 							/// --profile
 							/// Profiling applying counts and execution times of rules.
@@ -380,6 +385,11 @@ public class FrontEnd {
 						} else if (args[i].matches("--request-port")) {//2006.4.27 by inui
 							Debug.setRequestPort(Integer.parseInt(args[i+1]));
 							i++;
+						} else if (args[i].startsWith("--stdlib-name=")) {
+							// 開発者用オプション
+							// --stdlib-name=<name>
+							// use <name> as standard library name
+							Translator.stdlibName = args[i].substring(14);
 						} else if(args[i].equals("--start-daemon")){
 							/// --start-daemon
 							/// Start LMNtalDaemon

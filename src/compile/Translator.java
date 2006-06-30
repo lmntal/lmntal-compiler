@@ -69,11 +69,11 @@ public class Translator {
 		// public/*.lmn から std_lib.jar を作成
 		fStandardLibrary = true;
 		fKeepSource = true;
-		baseDirName = "public";
+//		baseDirName = "public";
 
-		File publicDir = new File("public");
+		File publicDir = new File(publicDirName);
 		if (!publicDir.exists() || !publicDir.isDirectory()) {
-			System.err.println("public directory does not exists. (" + publicDir.getCanonicalPath() + ")");
+			System.err.println(publicDirName+" directory does not exists. (" + publicDir.getCanonicalPath() + ")");
 			System.exit(1);
 		}
 		File outDir = new File(baseDirName);
@@ -97,13 +97,13 @@ public class Translator {
 
 			Inline.inlineSet.clear();
 			SystemRulesets.clear();
-			l.set(0, "public/" + files[i]);
+			l.set(0, publicDirName+"/" + files[i]);
 			System.out.println("processing " + l.get(0));
 			count++;
 			FrontEnd.run(l);
 		}
 		baseDir = outDir;
-		genJAR("std_lib.jar");
+		genJAR(stdlibName);
 		
 		// src/*.lmn から通常のライブラリの作成
 		fStandardLibrary = false;
@@ -151,7 +151,11 @@ public class Translator {
 	/** 変換後の Java ソースを削除するかどうか */
 	public static boolean fKeepSource = false;
 	/** 一時ディレクトリとして利用するディレクトリ名 */
-	public static String baseDirName;
+	public static String baseDirName = "public";
+	/** public モジュールのソースがあるディレクトリ名 */
+	public static String publicDirName = "public";
+	/** 標準ライブラリ名 */
+	public static String stdlibName = "std_lib.jar";
 
 	/**
 	 * 指定されたルールセットに対応するクラス名を取得する。
