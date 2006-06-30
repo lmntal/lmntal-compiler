@@ -69,7 +69,7 @@ public class Translator {
 		// public/*.lmn から std_lib.jar を作成
 		fStandardLibrary = true;
 		fKeepSource = true;
-//		baseDirName = "public";
+		if (baseDirName == null) baseDirName = "public";
 
 		File publicDir = new File(publicDirName);
 		if (!publicDir.exists() || !publicDir.isDirectory()) {
@@ -151,7 +151,7 @@ public class Translator {
 	/** 変換後の Java ソースを削除するかどうか */
 	public static boolean fKeepSource = false;
 	/** 一時ディレクトリとして利用するディレクトリ名 */
-	public static String baseDirName = "public";
+	public static String baseDirName;
 	/** public モジュールのソースがあるディレクトリ名 */
 	public static String publicDirName = "public";
 	/** 標準ライブラリ名 */
