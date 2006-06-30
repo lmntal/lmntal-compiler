@@ -67,6 +67,8 @@ public class GuardCompiler extends HeadCompiler {
 		guardLibrary2.put(new Functor("*",    3), new int[]{ISINT,  ISINT,   Instruction.IMUL, ISINT});
 		guardLibrary2.put(new Functor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV, ISINT});
 		guardLibrary2.put(new Functor("mod",  3), new int[]{ISINT,  ISINT,   Instruction.IMOD, ISINT});
+//		guardLibrary2.put(new Functor("class",2), new int[]{0,      ISSTRING,Instruction.INSTANCEOF});
+		guardLibrary1.put(new Functor("class", 2), new int[]{0,              Instruction.GETCLASS,  ISSTRING});
 		guardLibrary1.put(new Functor("int",   1), new int[]{ISINT});
 		guardLibrary1.put(new Functor("string",1), new int[]{ISSTRING});
 		guardLibrary1.put(new Functor("float", 1), new int[]{ISFLOAT});
@@ -347,14 +349,15 @@ public class GuardCompiler extends HeadCompiler {
 						match.add(new Instruction(Instruction.NEQGROUND,linkid1,linkid2));
 					}
 				}
-				else if (func.equals(new Functor("class", 2))) {
-					if (!identifiedCxtdefs.contains(def1)) continue;
-					int atomid1 = loadUnaryAtom(def1);
-					int atomid2 = varcount++;
-					match.add(new Instruction(Instruction.GETCLASS, atomid2, atomid1));
-					bindToUnaryAtom(def2, atomid2);
-					typedcxtdatatypes.put(def2, new Integer(ISSTRING));
-				}
+//				// (2006.06.30 n-kato)
+//				else if (func.equals(new Functor("class", 2))) {
+//					if (!identifiedCxtdefs.contains(def1)) continue;
+//					int atomid1 = loadUnaryAtom(def1);
+//					int atomid2 = varcount++;
+//					match.add(new Instruction(Instruction.GETCLASS, atomid2, atomid1));
+//					bindToUnaryAtom(def2, atomid2);
+//					typedcxtdatatypes.put(def2, new Integer(ISSTRING));
+//				}
 				else if (func instanceof runtime.IntegerFunctor) {
 					bindToFunctor(def1, func);
 					typedcxtdatatypes.put(def1, new Integer(ISINT));
@@ -396,7 +399,7 @@ public class GuardCompiler extends HeadCompiler {
 					int[] desc = (int[])guardLibrary1.get(func);
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
-					if (!new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
+					if (desc[0] != 0 && !new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
 						match.add(new Instruction(desc[0], atomid1));
 						typedcxtdatatypes.put(def1, new Integer(desc[0]));
 					}
@@ -422,11 +425,11 @@ public class GuardCompiler extends HeadCompiler {
 					if (!identifiedCxtdefs.contains(def2)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					int atomid2 = loadUnaryAtom(def2);
-					if (!new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
+					if (desc[0] != 0 && !new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
 						match.add(new Instruction(desc[0], atomid1));
 						typedcxtdatatypes.put(def1, new Integer(desc[0]));
 					}
-					if (!new Integer(desc[1]).equals(typedcxtdatatypes.get(def2))) {
+					if (desc[1] != 0 && !new Integer(desc[1]).equals(typedcxtdatatypes.get(def2))) {
 						match.add(new Instruction(desc[1], atomid2));
 						typedcxtdatatypes.put(def1, new Integer(desc[1]));
 					}
