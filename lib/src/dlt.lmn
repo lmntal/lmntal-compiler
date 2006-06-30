@@ -183,7 +183,7 @@ class ReaderThread implements Runnable {
     }
   }
 }
-:]
+:].
 
 {
 module(dlt).
@@ -347,4 +347,4 @@ dlt.terminate :-
     ((Membrane)mem).perpetual = false;
     me.remove();
   :].
-}
+}.
