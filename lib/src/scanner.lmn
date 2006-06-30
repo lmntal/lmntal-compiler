@@ -58,6 +58,12 @@ H=scanner.nextInt(Object, ReadString) :- class(Object, "java.util.Scanner") |
 //	me.remove();
 //	:].
 
+H=scanner.new() :- H=[:/*inline*/
+	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(System.in)));
+	mem.relink(stdin, 0, me, 0);
+	me.remove();
+	:]().
+
 /**
  * 指定されたInputStreamでscannerを生成します
  */
