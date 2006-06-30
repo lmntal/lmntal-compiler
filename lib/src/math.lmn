@@ -157,4 +157,24 @@ H = math.f2i(N) :- float(N) | H=[:/*inline*/
   me.nthAtom(0).remove();
   me.remove();
   :](N).
+
+//2006.6.30 by inui
+H=math.sqrt(N) :- int(N) | H=[:/*inline*/
+  int n = 
+  ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+  Atom result = mem.newAtom(new IntegerFunctor((int)java.lang.Math.sqrt(n)));
+  mem.relink(result, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+  :](N). 
+
+//2006.6.30 by inui  
+H=math.sqrt(N) :- float(N) | H=[:/*inline*/
+  double n = 
+  ((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
+  Atom result = mem.newAtom(new FloatingFunctor(java.lang.Math.sqrt(n)));
+  mem.relink(result, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+  :](N). 
 }.
