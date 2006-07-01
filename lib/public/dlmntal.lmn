@@ -180,7 +180,7 @@ class ReaderThread implements Runnable {
     }
   }
 }
-:]
+:].
 
 {
 module(dlmntal).

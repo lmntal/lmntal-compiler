@@ -11,7 +11,7 @@ AUTHOR
 */
 [:/*inline_define*/
 	import chorus.Setting;
-:]
+:].
 {
 
 module(chorus).
