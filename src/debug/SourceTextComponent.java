@@ -72,7 +72,7 @@ class SourceTextComponent extends JTextPane {
 			g.setPaintMode();
 		}
 		
-		if (Env.profile && showProfile) {
+		if (Env.profile >= Env.PROFILE_BYRULE && showProfile) {
 			g.setColor(Color.blue);
 			//g.setFont(new Font("Monospace", Font.PLAIN, SIZE));
 			Font font = new Font(getFont().getName(), Font.PLAIN, Env.fDEMO ? 16 : 12);
@@ -81,8 +81,8 @@ class SourceTextComponent extends JTextPane {
 			if (rules != null) {
 				while (rules.hasNext()) {
 					Rule r = (Rule)rules.next();
-					double time = (Env.majorVersion == 1 && Env.minorVersion > 4) ? r.time / 1000000 : r.time;
-					String s = r.succeed + "/" + r.apply+ "(" + time + "ms)";
+					double time = (Env.majorVersion == 1 && Env.minorVersion > 4) ? (r.atomtime+r.memtime) / 1000000 : (r.atomtime+r.memtime);
+					String s = (r.atomsucceed+r.memsucceed) + "/" + (r.atomapply+r.memapply) + "(" + time + "ms)";
 					g.drawString(s, getWidth()-(Env.fDEMO ? 110 : 70), SIZE*r.lineno+(Env.fDEMO ? 2 : 4));
 				}
 			}

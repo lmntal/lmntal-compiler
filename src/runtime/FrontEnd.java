@@ -240,6 +240,22 @@ public class FrontEnd {
 						}
 						i+=2;
 						break;
+					case 'p':
+						/// -p[<0-3>]  (-p=-p0)
+						/// Profiling program.
+						/// Profile level.  Select a detail levels of profiling.
+						///   0: execution times of atom driven tests and membrane driven tests for each thread
+						///   1: test counts and applying counts and execution times for each rule 
+						///   2: 1 + backtrack counts and lockfailure counts for each rule
+						///   3: profiles each rule for each test and for each thread
+						///      output by CSV
+						if (args[i].matches("-p[0-3	]")) {
+							Env.profile = args[i].charAt(2) - '0';
+						} else {
+							Env.profile = Env.PROFILE_DEFAULT;
+						}
+						if(Env.profile != Env.PROFILE_ALL) System.err.println("profile level " + Env.profile);
+						break;
 					case '-': // 文字列オプション						
 						/*nakano* if(args[i].equals("--3d")){
 						// --3d
@@ -369,10 +385,6 @@ public class FrontEnd {
 							// --public-dir=<dir>
 							// use <dir> as public directory
 							Translator.publicDirName = args[i].substring(13);
-						} else if(args[i].equals("--profile")){
-							/// --profile
-							/// Profiling applying counts and execution times of rules.
-							Env.profile = true;
 						} else if(args[i].equals("--remain")){
 							/// --remain
 							/// Processes remain in REPL mode
@@ -429,7 +441,7 @@ public class FrontEnd {
 							Env.debugOption = true;
 							Env.fInterpret = true;
 							Env.fGUI = true;
-							Env.profile = true;
+							Env.profile = 1;
 							Env.fTrace = true;
 							Env.debugFrame = new DebugFrame();//2006.3.16 by inui
 						} else if (args[i].equals("--debug")) {
@@ -738,7 +750,10 @@ public class FrontEnd {
 			if (ready) {
 				((Task)root.getTask()).execAsMasterTask(); //rt.exec();
 
-				if (!Env.fTrace && Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
+				if (Env.profile == Env.PROFILE_ALL) {
+					Env.d( "Execution Result:" );
+					Env.p( Dumper.PROFILE_TABS + Dumper.dump(rt.getGlobalRoot()) );
+				} else if (!Env.fTrace && Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
 					Env.d( "Execution Result:" );
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );
 				}

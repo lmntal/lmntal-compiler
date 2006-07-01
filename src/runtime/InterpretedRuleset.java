@@ -93,6 +93,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	 * @return ルールを適用した場合はtrue
 	 */
 	public boolean react(Membrane mem, Atom atom) {
+    	Thread thread = Thread.currentThread();
 		boolean result = false;
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
@@ -101,15 +102,25 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 
 			
 			boolean success;
-			if(Env.profile){
+			if(Env.profile >= Env.PROFILE_BYRULE){
 				long start,stop;
 		        start = Util.getTime();
 				success = matchTest(mem, atom, r.atomMatch);
 		        stop = Util.getTime();
 		        synchronized(r){
-		        	r.time += (stop>start)?(stop-start):0;
-		        	r.apply++;
-					if (success)r.succeed ++;
+					if(Env.profile == Env.PROFILE_ALL){
+			        	r.setAtomTime((stop>start)?(stop-start):0, thread);
+			        	r.incAtomApply(thread);
+						if(success)r.incAtomSucceed(thread);
+						r.setBackTracks(backtracks, thread);
+						r.setLockFailure(lockfailure, thread);
+					} else {
+						r.atomtime += (stop>start)?(stop-start):0;
+						r.atomapply++;
+						if (success)r.atomsucceed ++;;
+						r.backtracks += backtracks;
+						r.lockfailure += lockfailure;
+					}
 		        }
 			} else {
 				success = matchTest(mem, atom, r.atomMatch);
@@ -134,23 +145,32 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	 * @return ルールを適用した場合はtrue
 	 */
 	public boolean react(Membrane mem) {
+    	Thread thread = Thread.currentThread();
 		boolean result = false;
 		Iterator it = rules.iterator();
 		while (it.hasNext()) {
 			Rule r = currentRule = (Rule) it.next();
 			boolean success;
-			if(Env.profile){
+			if(Env.profile >= Env.PROFILE_BYRULE){
 				long start,stop;
 				backtracks = lockfailure = 0;
 		        start = Util.getTime();
 				success = matchTest(mem, null, r.memMatch);
 		        stop = Util.getTime();
 		        synchronized(r){
-			        r.time += (stop>start)?(stop-start):0;
-					r.apply++;
-					if(success)r.succeed++;
-					r.backtracks += backtracks;
-					r.lockfailure += lockfailure;
+					if(Env.profile == Env.PROFILE_ALL){
+			        	r.setMemTime((stop>start)?(stop-start):0, thread);
+			        	r.incMemApply(thread);
+						if(success)r.incMemSucceed(thread);
+						r.setBackTracks(backtracks, thread);
+						r.setLockFailure(lockfailure, thread);
+					} else {
+						r.memtime += (stop>start)?(stop-start):0;
+						r.memapply++;
+						if (success)r.memsucceed ++;;
+						r.backtracks += backtracks;
+						r.lockfailure += lockfailure;
+					}
 		        }
 			} else {
 				success = matchTest(mem, null, r.memMatch);
@@ -190,7 +210,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		ir.mems[0] = mem;
 		if (atom != null) { ir.atoms[1] = atom; }
 		success = ir.interpret(matchInsts, 0);
-		if(Env.profile) {
+		if(Env.profile >= Env.PROFILE_BYRULE) {
 			backtracks = ir.backtracks;
 			lockfailure = ir.lockfailure;
 		}

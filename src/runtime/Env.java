@@ -169,10 +169,26 @@ public final class Env {
 	 */
 	public static String oneLiner;
 	
-	/**
-	 * ルールの適用回数、成功回数、実行時間が出力される
-	 */
-	public static boolean profile = false;
+	////////////////////////////////////////////////////////////////
+	
+	/** スレッドごとのアトム主導テスト、膜主導テストの実行時間測定 */
+	public static final int PROFILE_BYDRIVEN = 0;
+	/** ルールごとの実行時間、試行回数、適用回数を測定 */
+	public static final int PROFILE_BYRULE = 1;
+	/** ルールごとの実行時間、試行回数、適用回数、バックトラック回数、膜ロック失敗回数を測定 */
+	public static final int PROFILE_BYRULEDETAIL = 2;
+	/** ルールごとに、スレッド毎、テストの種類毎に測定 */
+	public static final int PROFILE_ALL = 3;
+
+	/** -profileオプション無指定時のプロファイル詳細度レベル */
+	public static final int PROFILE_INIT  = -1;
+	/** -profileオプション指定時のデフォルトのプロファイル詳細度レベル */
+	public static final int PROFILE_DEFAULT = 0;
+	/** ランダム実行レベル */
+	public static int profile = PROFILE_INIT;
+
+	////////////////////////////////////////////////////////////////
+
 	public static int majorVersion = 0;
 	public static int minorVersion = 0;
 	

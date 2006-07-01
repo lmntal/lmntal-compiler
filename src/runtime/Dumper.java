@@ -77,6 +77,11 @@ public class Dumper {
 	static Functor FUNC_CONS = new Functor(".", 3);
 
 	static Functor FUNC_NIL = new Functor("[]", 1);
+	
+	static String PROFILE_TABS  = "RuleName,\tThreadID,\tAtomDrivenTime,\tMembraneDrivenTime,\t" + 
+									"AtomDrivenSucceed,\tMembraneDrivenSucceed,\t" +
+									"AtomDrivenApply,\tMembraneDrivenApply,\t" +
+									"BackTracks,\tLockFailures\n";
 
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
 	public static String dump(AbstractMembrane mem) {
@@ -95,6 +100,8 @@ public class Dumper {
 		}
 
 		Unlexer buf = new Unlexer();
+		Unlexer pbuf = new Unlexer();
+		
 		boolean commaFlag = false;
 
 		// #1 - アトムの出力
@@ -300,6 +307,8 @@ public class Dumper {
 				buf.append(m.name /*+ ":"*/); // 膜名の構文は':'をはさまないことにした by kudo (2006/06/26)
 			buf.append("{");
 			buf.append(dump(m));
+			if(Env.profile == Env.PROFILE_ALL)
+				pbuf.append(dump(m));
 			buf.append("}");
 			if (m.kind == 1)
 				buf.append("_");
@@ -339,13 +348,25 @@ public class Dumper {
 							else
 								commaFlag = true;
 							buf.append("@" + r.toString() + "@");
-							if (Env.profile) {
-								if (Env.majorVersion == 1 && Env.minorVersion > 4)
-									buf.append("_" + r.succeed + "/" + r.apply + "/" + r.backtracks + "/" + r.lockfailure
-											+ "(" + r.time / 1000000 + "msec)");
-								else
-									buf.append("_" + r.succeed + "/" + r.apply + "/" + r.backtracks + "/" + r.lockfailure
-											+ "(" + r.time + "msec)");
+							if (Env.profile == Env.PROFILE_BYRULE) {
+								long times = (Env.majorVersion == 1 && Env.minorVersion > 4) ? (r.atomtime+r.memtime)/1000000 : r.atomtime+r.memtime;
+								buf.append("_" + (r.atomsucceed+r.memsucceed) + "/" + (r.atomapply+r.memapply) + "(" + times + "msec)");
+							} else if (Env.profile == Env.PROFILE_BYRULEDETAIL) {
+								long times = (Env.majorVersion == 1 && Env.minorVersion > 4) ? (r.atomtime+r.memtime)/1000000 : r.atomtime+r.memtime;
+								buf.append("_" + (r.atomsucceed+r.memsucceed) + "/" + (r.atomapply+r.memapply) +
+										"(" + r.backtracks + "," + r.lockfailure + ")" + "(" + times + "msec)");
+							} else if (Env.profile == Env.PROFILE_ALL) {
+								Iterator its = r.bench.values().iterator();
+								while(its.hasNext()) {
+									Benchmark b = (Benchmark)its.next();
+									long atomtimes = (Env.majorVersion == 1 && Env.minorVersion > 4) ? b.atomtime/1000000 : b.atomtime;
+									long memtimes = (Env.majorVersion == 1 && Env.minorVersion > 4) ? b.memtime/1000000 : b.memtime;
+									pbuf.append(r.toString() + ",\t" + b.threadid + ",\t" + 
+											atomtimes + ",\t" + memtimes + ",\t" + 
+											b.atomsucceed + ",\t" + b.memsucceed + ",\t" +
+											b.atomapply + ",\t" + b.memapply + ",\t" +
+											b.backtracks + ",\t" + b.lockfailure + "\n");								
+								}
 							}
 						}
 					}					
@@ -357,7 +378,10 @@ public class Dumper {
 			mem.quietUnlock();
 		}
 
-		return buf.toString();
+		if(Env.profile != Env.PROFILE_ALL)
+			return buf.toString();
+		else
+			return pbuf.toString();
 	}
 
 	/**

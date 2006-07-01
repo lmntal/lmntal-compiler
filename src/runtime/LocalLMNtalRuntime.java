@@ -57,7 +57,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime{
 				task.notifyAll();
 			}
 			try {
-				if(Env.profile)
+				if(Env.profile == Env.PROFILE_BYDRIVEN)
 					task.outTime();
 				task.thread.join();
 			} catch (InterruptedException e) {}

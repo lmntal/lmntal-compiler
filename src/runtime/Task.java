@@ -203,7 +203,7 @@ public class Task extends AbstractTask implements Runnable {
 		Iterator it = mem.rulesetIterator();
 		boolean flag = false;
 		if(!nondeterministic && Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
-			if(Env.profile){
+			if(Env.profile == Env.PROFILE_BYDRIVEN){
 		        start = Util.getTime();
 			}
 			while(it.hasNext()){ // 本膜のもつルールをaに適用
@@ -231,12 +231,12 @@ public class Task extends AbstractTask implements Runnable {
 				if(!mem.isRoot()) {mem.getParent().enqueueAtom(a);} 
 				// TODO システムコールアトムなら、本膜がルート膜でも親膜につみ、親膜を活性化
 			}
-			if(Env.profile){
+			if(Env.profile == Env.PROFILE_BYDRIVEN){
 		        stop = Util.getTime();
 		        atomtime+=(stop>start)?(stop-start):0;
 			}
 		}else{ // 実行アトムスタックが空の時
-			if(Env.profile){
+			if(Env.profile == Env.PROFILE_BYDRIVEN){
 		        start = Util.getTime();
 			}
 			// 今のところ、システムルールセットは膜主導テストでしか実行されない。
@@ -281,7 +281,7 @@ public class Task extends AbstractTask implements Runnable {
 					}
 				}
 			}
-			if(Env.profile){
+			if(Env.profile == Env.PROFILE_BYDRIVEN){
 		        stop = Util.getTime();
 		        memtime+=(stop>start)?(stop-start):0;
 			}

@@ -2,6 +2,10 @@ package runtime;
 
 import java.util.*;
 import java.io.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public final class Rule implements Serializable {
 	// Instruction のリスト
@@ -33,22 +37,14 @@ public final class Rule implements Serializable {
 	/** このルールの表示用文字列（省略なし） */
 	public String fullText ="";
 	
+	/** スレッドごとのベンチマーク結果 **/
+	public HashMap bench;
+	
 	/** ルール名 */
 	public String name;
 	
 	/** 行番号 by inui */
 	public int lineno;
-	
-	/* ルール適用回数 */
-	public int apply = 0;
-	/* ルール適用の成功回数 */
-	public int succeed = 0;
-	/* ルール適用の合計時間 */
-	public long time = 0;
-	/* ルール適用のバックトラック回数 */
-	public long backtracks = 0;
-	/* ルール適用時の膜ロック失敗の回数 */
-	public long lockfailure = 0;
 	
 	/** 履歴 */
 	public Uniq uniq;
@@ -66,6 +62,7 @@ public final class Rule implements Serializable {
 		memMatchLabel = new InstructionList();
 		atomMatch = atomMatchLabel.insts;
 		memMatch = memMatchLabel.insts;
+		bench = new HashMap();
 	}
 	/**
 	 * ルール文字列つきコンストラクタ
@@ -144,5 +141,212 @@ public final class Rule implements Serializable {
 	 */
 	public String getFullText() {
 		return fullText;
+	}
+	
+	///////////////////////////////////////////////////////////////////
+
+	/* アトム手動テストの試行回数 */
+	public long atomapply = 0;
+	/* アトム手動テストの成功回数 */
+	public long atomsucceed = 0;
+	/* アトム手動テストの合計時間 */
+	public long atomtime = 0;
+	/* 膜手動テストの試行回数 */
+	public long memapply = 0;
+	/* 膜手動テストの成功回数 */
+	public long memsucceed = 0;
+	/* 膜手動テストの合計時間 */
+	public long memtime = 0;
+	/* ルール適用のバックトラック回数 */
+	public long backtracks = 0;
+	/* ルール適用時の膜ロック失敗の回数 */
+	public long lockfailure = 0;
+	
+	public void incAtomApply(Thread thread){
+		if(bench.containsKey(thread))
+			((Benchmark)bench.get(thread)).atomapply ++;
+		else {
+			Benchmark benchmark = new Benchmark(thread);
+			benchmark.atomapply ++;
+			bench.put(thread, benchmark);
+		}
+	}
+	public void incAtomSucceed(Thread thread){
+		if(bench.containsKey(thread))
+			((Benchmark)bench.get(thread)).atomsucceed ++;
+		else {
+			Benchmark benchmark = new Benchmark(thread);
+			benchmark.atomsucceed ++;
+			bench.put(thread, benchmark);
+		}
+	}
+	public void setAtomTime(long value, Thread thread){
+		if(bench.containsKey(thread))
+			((Benchmark)bench.get(thread)).atomtime += value;
+		else {
+			Benchmark benchmark = new Benchmark(thread);
+			benchmark.atomtime += value;
+			bench.put(thread, benchmark);
+		}
+	}
+	public void incMemApply(Thread thread){
+		if(bench.containsKey(thread))
+			((Benchmark)bench.get(thread)).memapply ++;
+		else {
+			Benchmark benchmark = new Benchmark(thread);
+			benchmark.memapply ++;
+			bench.put(thread, benchmark);
+		}
+	}
+	public void incMemSucceed(Thread thread){
+		if(bench.containsKey(thread))
+			((Benchmark)bench.get(thread)).memsucceed ++;
+		else {
+			Benchmark benchmark = new Benchmark(thread);
+			benchmark.memsucceed ++;
+			bench.put(thread, benchmark);
+		}
+	}
+	public void setMemTime(long value, Thread thread){
+		if(bench.containsKey(thread))
+			((Benchmark)bench.get(thread)).memtime += value;
+		else {
+			Benchmark benchmark = new Benchmark(thread);
+			benchmark.memtime += value;
+			bench.put(thread, benchmark);
+		}
+	}
+	public void setBackTracks(long value, Thread thread){
+		if(bench.containsKey(thread))
+			((Benchmark)bench.get(thread)).backtracks += value;
+		else {
+			Benchmark benchmark = new Benchmark(thread);
+			benchmark.backtracks += value;
+			bench.put(thread, benchmark);
+		}
+	}
+	public void setLockFailure(long value, Thread thread){
+		if(bench.containsKey(thread))
+			((Benchmark)bench.get(thread)).lockfailure += value;
+		else {
+			Benchmark benchmark = new Benchmark(thread);
+			benchmark.lockfailure += value;
+			bench.put(thread, benchmark);
+		}
+	}
+	
+	public long allAtomApplys() {
+		Iterator its = bench.values().iterator();
+		long apply = 0;
+		while(its.hasNext()) {
+			Benchmark bench = (Benchmark)its.next();
+			apply += bench.atomapply;
+		}
+		return apply;
+	}
+	public long allMemApplys() {
+		Iterator its = bench.values().iterator();
+		long apply = 0;
+		while(its.hasNext()) {
+			Benchmark bench = (Benchmark)its.next();
+			apply += bench.memapply;
+		}
+		return apply;
+	}
+	
+	public long allAtomSucceeds() {
+		Iterator its = bench.values().iterator();
+		long succeed = 0;
+		while(its.hasNext()) {
+			Benchmark bench = (Benchmark)its.next();
+			succeed += bench.atomsucceed;
+		}
+		return succeed;
+	}
+	
+	public long allMemSucceeds() {
+		Iterator its = bench.values().iterator();
+		long succeed = 0;
+		while(its.hasNext()) {
+			Benchmark bench = (Benchmark)its.next();
+			succeed += bench.memsucceed;
+		}
+		return succeed;
+	}
+	
+	public long allAtomTimes() {
+		Iterator its = bench.values().iterator();
+		long time = 0;
+		while(its.hasNext()) {
+			Benchmark bench = (Benchmark)its.next();
+			time += bench.atomtime;
+		}
+		return time;
+	}
+
+	public long allMemTimes() {
+		Iterator its = bench.values().iterator();
+		long time = 0;
+		while(its.hasNext()) {
+			Benchmark bench = (Benchmark)its.next();
+			time += bench.memtime;
+		}
+		return time;
+	}
+	
+	public long allApplys() {
+		return allAtomApplys() + allMemApplys();
+	}
+	public long allSucceeds() {
+		return allAtomSucceeds() + allMemSucceeds();
+	}
+	public long allTimes() {
+		return allAtomTimes() + allMemTimes();
+	}
+	
+	public long allBackTracks() {
+		Iterator its = bench.values().iterator();
+		long backtracks = 0;
+		while(its.hasNext()) {
+			Benchmark bench = (Benchmark)its.next();
+			backtracks += bench.backtracks;
+		}
+		return backtracks;
+	}
+	public long allLockFailures() {
+		Iterator its = bench.values().iterator();
+		long lockfailure = 0;
+		while(its.hasNext()) {
+			Benchmark bench = (Benchmark)its.next();
+			lockfailure += bench.lockfailure;
+		}
+		return lockfailure;
+	}
+}
+
+class Benchmark {
+	
+	/* スレッドのID */
+	public long threadid;
+	/* アトム手動テストの試行回数 */
+	public long atomapply = 0;
+	/* アトム手動テストの成功回数 */
+	public long atomsucceed = 0;
+	/* アトム手動テストの合計時間 */
+	public long atomtime = 0;
+	/* 膜手動テストの試行回数 */
+	public long memapply = 0;
+	/* 膜手動テストの成功回数 */
+	public long memsucceed = 0;
+	/* 膜手動テストの合計時間 */
+	public long memtime = 0;
+	/* ルール適用のバックトラック回数 */
+	public long backtracks = 0;
+	/* ルール適用時の膜ロック失敗の回数 */
+	public long lockfailure = 0;
+
+	Benchmark(Thread thread) {
+		this.threadid = (Env.majorVersion == 1 && Env.minorVersion > 4) 
+						? thread.getId() : thread.hashCode();
 	}
 }
