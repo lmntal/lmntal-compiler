@@ -1489,6 +1489,16 @@ public class Instruction implements Cloneable, Serializable {
      */
     public static final int GROUP = 2000;
 	static {setArgType(GROUP, new ArgType(false, ARG_INSTS));}
+	
+	//新規命令
+    /**
+     * subclass [atom1, atom2]
+     * atom1 が atom2 のサブクラスかどうかを判定する
+     * 2006.6.30 by inui
+     */
+    public static final int SUBCLASS = 3000;
+    static {setArgType(SUBCLASS, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+
     
    
     /** 命令の種類を取得する。*/

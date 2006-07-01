@@ -857,6 +857,7 @@ public class Translator {
 		writer.write("		boolean guard_inline_ret;\n");
 		writer.write("		ArrayList guard_inline_gvar2;\n");
 		writer.write("		Iterator it_guard_inline;\n");
+		writer.write("		String s1, s2;\n");//2006.07.01 inui
 		
 		//2005-10-21 by kudo (INSERTCONNECTORS,DELETECONNECTORS,LOOKUPLINKで使う)
 		writer.write("		Set insset;\n");
@@ -1076,6 +1077,14 @@ public class Translator {
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
+				case Instruction.SUBCLASS: //[atom1, atom2]
+					writer.write(tabs + "                    s1 = ((StringFunctor)((Atom)var" + inst.getIntArg1() + ").getFunctor()).stringValue();\n");
+					writer.write(tabs + "                    s2 = ((StringFunctor)((Atom)var" + inst.getIntArg2() + ").getFunctor()).stringValue();\n");
+					writer.write(tabs + "                    try {\n");
+					writer.write(tabs + "                        if (!ObjectFunctor.isSubclass(Class.forName(s1), Class.forName(s2))) return false;\n");
+					writer.write(tabs + "                    } catch (ClassNotFoundException e1) {\n");
+					writer.write(tabs + "                    }\n");
+                    break; //inui 2006-07-01
 					//====アトムに関係する出力しない基本ガード命令====ここまで====
 					//====ファンクタに関係する命令====ここから====
 				case Instruction.DEREFFUNC : //[-dstfunc, srcatom, srcpos]

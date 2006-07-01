@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  *   代入文をif文の中に移動
  *   GETCLASSは、ローカル変数があるのでブロックで囲む
  *   DIV/MODの「else」は削除
- * IADD 	FADD
+ * IADD 	FADD	SUBCLASS
  *   ローカル変数宣言の削除
  * LOADMODULE
  * INLINE

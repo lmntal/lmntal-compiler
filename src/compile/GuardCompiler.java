@@ -11,6 +11,7 @@ public class GuardCompiler extends HeadCompiler {
 	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
 //	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
+	static final Functor classFunctor = new Functor("class", 2); //2006.07.01 inui
 
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
 	HashMap typedcxtdatatypes = new HashMap();
@@ -415,7 +416,9 @@ public class GuardCompiler extends HeadCompiler {
 							atomid2 = varcount++;
 							match.add(new Instruction(desc[1], atomid2, atomid1));
 						}
-						bindToUnaryAtom(def2, atomid2);
+						//2006.07.01 by inui
+						if (func.equals(classFunctor)) bindToUnaryAtom(def2, atomid2, Instruction.SUBCLASS);
+						else bindToUnaryAtom(def2, atomid2);
 						typedcxtdatatypes.put(def2, new Integer(desc[2]));
 					}
 				}
@@ -544,8 +547,13 @@ public class GuardCompiler extends HeadCompiler {
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 	}
-	/** 型付きプロセス文脈defを1引数アトム$atomidのファンクタで束縛する */
+	//2006.07.01 inui
 	private void bindToUnaryAtom(ContextDef def, int atomid) {
+		bindToUnaryAtom(def, atomid, Instruction.SAMEFUNC);
+	}
+	/** 型付きプロセス文脈defを1引数アトム$atomidのファンクタで束縛する */
+	//2006.07.01 束縛する命令(?) bindid 引数を追加 by inui
+	private void bindToUnaryAtom(ContextDef def, int atomid, int bindid) {
 		if (!identifiedCxtdefs.contains(def)) {
 			identifiedCxtdefs.add(def);
 			typedcxtsrcs.put(def, new Integer(atomid));
@@ -560,10 +568,10 @@ public class GuardCompiler extends HeadCompiler {
 					loadedatomid, atomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(loadedatomid));
 				typedcxtdefs.add(def);
-				match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
+				match.add(new Instruction(bindid, atomid, loadedatomid));
 				getLinks(loadedatomid, 1);
 			} else {
-				match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
+				match.add(new Instruction(bindid, atomid, loadedatomid));
 			}
 //			int funcid1 = varcount++;
 //			int funcid2 = varcount++;

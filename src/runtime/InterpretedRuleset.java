@@ -544,6 +544,16 @@ class InterpretiveReactor {
 				case Instruction.SAMEFUNC: //[atom1, atom2]
 					if (!atoms[inst.getIntArg1()].getFunctor().equals(atoms[inst.getIntArg2()].getFunctor())) return false;
 					break; //n-kato
+				case Instruction.SUBCLASS: //[atom1, atom2]
+                    String s1, s2;
+                    s1 = ((StringFunctor)atoms[inst.getIntArg1()].getFunctor()).stringValue();
+                    s2 = ((StringFunctor)atoms[inst.getIntArg2()].getFunctor()).stringValue();
+                    try {
+                        if (!ObjectFunctor.isSubclass(Class.forName(s1), Class.forName(s2))) return false;
+                    } catch (ClassNotFoundException e1) {
+                        return false;
+                    }
+                    break; //inui 2006-07-01
 					//====アトムに関係する出力しない基本ガード命令====ここまで====
 
 					//====ファンクタに関係する命令====ここから====

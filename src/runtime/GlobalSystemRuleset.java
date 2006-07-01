@@ -13,7 +13,8 @@ import module.*;
  */
 public class GlobalSystemRuleset extends Ruleset {
 	private static final GlobalSystemRuleset theInstance = new GlobalSystemRuleset();
-	private GlobalSystemRuleset() {}
+	private GlobalSystemRuleset() {
+	}
 	public static GlobalSystemRuleset getInstance() {
 		return theInstance;
 	}
@@ -221,6 +222,10 @@ public class GlobalSystemRuleset extends Ruleset {
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -263,6 +268,10 @@ L147:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -305,6 +314,10 @@ L148:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -347,6 +360,10 @@ L144:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -389,6 +406,10 @@ L145:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -431,6 +452,10 @@ L141:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -473,6 +498,10 @@ L142:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -515,6 +544,10 @@ L138:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -558,6 +591,10 @@ L139:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -600,6 +637,10 @@ L135:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -643,6 +684,10 @@ L136:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -685,6 +730,10 @@ L132:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -728,6 +777,10 @@ L133:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -776,6 +829,10 @@ L129:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -821,6 +878,10 @@ L130:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -868,6 +929,10 @@ L126:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -913,6 +978,10 @@ L127:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -960,6 +1029,10 @@ L123:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1005,6 +1078,10 @@ L124:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1052,6 +1129,10 @@ L120:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1097,6 +1178,10 @@ L121:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1147,6 +1232,10 @@ L117:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1192,6 +1281,10 @@ L118:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1242,6 +1335,10 @@ L114:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1287,6 +1384,10 @@ L115:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1334,6 +1435,10 @@ L111:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1379,6 +1484,10 @@ L112:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1426,6 +1535,10 @@ L108:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1471,6 +1584,10 @@ L109:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1518,6 +1635,10 @@ L105:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1564,6 +1685,10 @@ L106:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
@@ -1633,6 +1758,10 @@ L103:
 		double u, v;
 		int isground_ret;
 		boolean eqground_ret;
+		boolean guard_inline_ret;
+		ArrayList guard_inline_gvar2;
+		Iterator it_guard_inline;
+		String s1, s2;
 		Set insset;
 		Set delset;
 		Map srcmap;
