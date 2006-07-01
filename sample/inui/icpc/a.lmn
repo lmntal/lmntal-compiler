@@ -1,0 +1,38 @@
+scanner.use.
+io.use.
+
+next_set.
+
+//データ入力
+next_set :- ra=scanner.nextInt(a).
+ra(done) :- rb=scanner.nextInt(d).
+rb(done) :- rc=scanner.nextInt(n).
+
+//データセットの終了判定
+rc(done), a(0), d(0), n(0) :- .
+rc(done), a(A), d(D), n(N) :- int(A), int(D), int(N) | a(A), d(D), n(N).
+
+//素数の判定
+H=is_prime(1) :- H=false.
+H=is_prime(2) :- H=true.
+H=is_prime(N) :- N mod 2 =:= 0 | H=false.
+H=is_prime(N) :- N mod 2 =\= 0 | H=is_prime(N, 3).
+H=is_prime(N, M) :- 2*M  > N | H=true.
+H=is_prime(N, M) :- 2*M =< N, N mod M =:= 0 | H=false.
+H=is_prime(N, M) :- 2*M =< N, N mod M =\= 0 | H=is_prime(N, M+2).
+//H=is_prime(N) :- N mod 2 =\= 0 | H=is_prime(N, 3), nsqrt(math.sqrt(N)).
+//H=is_prime(N, M), nsqrt(Nsqrt) :- M  > Nsqrt, int(N) | H=true.
+//H=is_prime(N, M), nsqrt(Nsqrt) :- M =< Nsqrt, N mod M =:= 0 | H=false.
+//H=is_prime(N, M), nsqrt(Nsqrt) :- M =< Nsqrt, N mod M =\= 0 | H=is_prime(N, M+2), nsqrt(Nsqrt).
+
+//BigInteger による素数の判定
+//H=is_prime(N) :- int(N) |
+//	H=java_math_biginteger.isProbablePrime(java_math_biginteger.new(string.str_of_int(N)), 5).
+
+//if文
+H=if(true,  Te, Fe) :- unary(Te), unary(Fe) | H=Te.
+H=if(false, Te, Fe) :- unary(Te), unary(Fe) | H=Fe.
+
+//(初項 a, 公差 d の数列中の素数を n 個求める)
+a(A), d(D), n(N) :- int(A), int(D), N  >  0 | n(if(is_prime(A), N-1, N)), a(A+D), d(D).
+a(A), d(D), n(N) :- int(A), int(D), N =:= 0 | r=io.println(string.str_of_int(A-D)), next_set.

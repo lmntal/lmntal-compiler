@@ -5,10 +5,10 @@ NAME
 SYNOPSIS
 	
 	# scanner.use.
-	  r=scanner.nextInt(n).
+	  n=scanner.nextInt().
 
 	12
-	n(12), done(r), scanner.stdin('java.util.Sc..'), @scanner603
+	n(12), scanner.stdin('java.util.Sc..'), @scanner603
 
 AUTHOR
 	Atsuyuki Inui
@@ -22,112 +22,65 @@ HISTORY
 module(scanner).
 
 /**
- * scanner.nextInt(-ReadInt, -Result)
+ * scanner.use
  * 
- * ReadInt : One Integer
- * Result     : "done" when succeeded. "nil" when EOF.
+ * initialize scanner module.
  */
-H=scanner.nextInt(Result), scanner.stdin(STDIN) :- class(STDIN, "java.util.Scanner") |
-	H=scanner.nextInt(STDIN, Result), scanner.stdin(STDIN).
-
-H=scanner.nextInt(Object, ReadString) :- class(Object, "java.util.Scanner") |
-	H=[:/*inline*/
-		try {
-			java.util.Scanner br = (java.util.Scanner)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
-			int n = br.nextInt();
-			Atom result = mem.newAtom(new IntegerFunctor(n));
-			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor("done", 1));
-			mem.relink(res, 0, me, 2);
-		} catch(Exception e) {
-			System.err.println(e);
-			Atom result = mem.newAtom(new IntegerFunctor(0));
-			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor("nil", 1));
-			mem.relink(res, 0, me, 2);
-		} finally {
-			me.nthAtom(0).remove();
-			me.remove();
-		}
-	:](Object, ReadString).
-	
-//引数無しコンストラクタ
-//H=scanner.new :- H=[:/*inline*/
-//	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(System.in)));
-//	mem.relink(stdin, 0, me, 0);
-//	me.remove();
-//	:].
-
-H=scanner.new() :- H=[:/*inline*/
+scanner.use :- scanner.stdin=[:/*inline*/
 	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(System.in)));
 	mem.relink(stdin, 0, me, 0);
 	me.remove();
-	:]().
+	:].
 
 /**
- * 指定されたInputStreamでscannerを生成します
- */
-//TODO classガードはサブクラスにもマッチしてほしい
-H=scanner.new(InputStream) :- class(InputStream, "java.io.InputStream") | H=[:/*inline*/
-	java.io.InputStream is = (java.io.InputStream)((ObjectFunctor)(me.nthAtom(0).getFunctor())).getValue();
-	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(is)));
-	mem.relink(stdin, 0, me, 1);
-	me.nthAtom(0).remove();
-	me.remove();
-	:](InputStream).
-	
-/**
- * 指定されたFileからscannerを生成します
- */
-H=scanner.new(File) :- class(File, "java.io.File") | H=[:/*inline*/
-	java.io.File file = (java.io.File)((ObjectFunctor)(me.nthAtom(0).getFunctor())).getValue();
-	try {
-		Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(file)));
-		mem.relink(stdin, 0, me, 1);
-	} catch (java.io.IOException e) {
-		System.err.println(e);
-	}
-	me.nthAtom(0).remove();
-	me.remove();
-	:](File).
-
-/**
- * scanner.nextFloat(-ReadFloat, -Result)
+ * scanner.nextInt(-Result)
  * 
- * ReadFloat : One Float
- * Result     : "done" when succeeded. "nil" when EOF.
+ * Result: One integer when succeeded. java.lang.Exception when exception caught.
  */
-H=scanner.nextFloat(Result), scanner.stdin(STDIN) :- class(STDIN, "java.util.Scanner") |
-	H=scanner.nextFloat(STDIN, Result), scanner.stdin(STDIN).
+H=scanner.nextInt(), scanner.stdin(STDIN) :- class(STDIN, "java.util.Scanner") |
+	H=scanner.nextInt(STDIN), scanner.stdin(STDIN).
 
-H=scanner.nextFloat(Object, ReadString) :- class(Object, "java.util.Scanner") |
+H=scanner.nextInt(Object) :- class(Object, "java.util.Scanner") |
 	H=[:/*inline*/
+		Atom result = null;
 		try {
 			java.util.Scanner br = (java.util.Scanner)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
-			double n = br.nextDouble();
-			Atom result = mem.newAtom(new FloatingFunctor(n));
+			int n = br.nextInt();
+			result = mem.newAtom(new IntegerFunctor(n));
 			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor("done", 1));
-			mem.relink(res, 0, me, 2);
 		} catch(Exception e) {
-			Atom result = mem.newAtom(new FloatingFunctor(0));
-			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor("nil", 1));
-			mem.relink(res, 0, me, 2);
+		System.out.println(e);
+			result = mem.newAtom(new ObjectFunctor(e));
 		} finally {
+			mem.relink(result, 0, me, 1);
 			me.nthAtom(0).remove();
 			me.remove();
 		}
-	:](Object, ReadString).
-	
-//scanner.use :- scanner.stdin=[:/*inline*/
-//	Atom stdin = mem.newAtom(new ObjectFunctor(new java.util.Scanner(System.in)));
-//	mem.relink(stdin, 0, me, 0);
-//	me.remove();
-//	:].
-}.
+	:](Object).
 
-//テスト用コード
-//s=scanner.new(sys.in).
-//s=scanner.new(fis.new(file.new("tmp"))).
-//s(S) :- r=scanner.nextInt(S, t).
+/**
+ * scanner.nextFloat(-Result)
+ * 
+ * Result: One float when succeeded. java.lang.Exception when exception caught.
+ */
+H=scanner.nextFloat(), scanner.stdin(STDIN) :- class(STDIN, "java.util.Scanner") |
+	H=scanner.nextFloat(STDIN), scanner.stdin(STDIN).
+
+H=scanner.nextFloat(Object) :- class(Object, "java.util.Scanner") |
+	H=[:/*inline*/
+		Atom result = null;
+		try {
+			java.util.Scanner br = (java.util.Scanner)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			double n = br.nextDouble();
+			result = mem.newAtom(new FloatingFunctor(n));
+			mem.relink(result, 0, me, 1);
+		} catch(Exception e) {
+		System.out.println(e);
+			result = mem.newAtom(new ObjectFunctor(e));
+		} finally {
+			mem.relink(result, 0, me, 1);
+			me.nthAtom(0).remove();
+			me.remove();
+		}
+	:](Object).
+}.
