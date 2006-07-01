@@ -548,7 +548,11 @@ public class Translator {
 		}
 		writer.write("public class " + className + " extends Ruleset {\n");
 		writer.write("	private static final " + className + " theInstance = new " + className + "();\n");
-		writer.write("	private " + className + "() {}\n");
+		writer.write("	private " + className + "() {\n");
+		//文字列長が長かった場合コンストラクタで文字列を動的に生成する 2006.07.01 inui
+		String encodedString = ruleset.encode();
+		if (encodedString.length() > 1024) writeEncodedString(encodedString);
+		writer.write("	}\n");
 		writer.write("	public static " + className + " getInstance() {\n");
 		writer.write("		return theInstance;\n");
 		writer.write("	}\n");
@@ -597,7 +601,9 @@ public class Translator {
 			writer.write("		return \"@" + libname + "\" + id;\n");
 			writer.write("	}\n");
 			// 2006.01.02 okabe
-			writer.write("	private String encodedRuleset = \n" + Util.quoteString(ruleset.encode(), '"') + ";\n");
+			// 2006.07.01 inui encodeString が長い場合はコンストラクタで生成する（そうでないときはstatic finalでも良い?）
+			if (encodedString.length() > 1024) writer.write("	private String encodedRuleset;\n");
+			else writer.write("	private String encodedRuleset = \n" + Util.quoteString(ruleset.encode(), '"') + ";\n");
 		}
 		writer.write("	public String encode() {\n");
 		writer.write("		return encodedRuleset;\n");
@@ -770,6 +776,22 @@ public class Translator {
 		
 		writer.write("}\n");
 		writer.close();
+	}
+	
+	/**
+	 * encodedString の文字列定数が長い場合に動的に文字列を生成する Java コードを出力する
+	 * @author inui 2006.07.01
+	 * @param encodedString
+	 * @throws IOException
+	 */
+	private void writeEncodedString(String encodedString) throws IOException {
+		writer.write("		StringBuffer buffer = new StringBuffer();\n");
+		for (int i = 0; i < encodedString.length(); i += 1024) {
+			int endIndex = Math.min(i+1024, encodedString.length());
+			String s = Util.quoteString(encodedString.substring(i, endIndex), '"');
+			writer.write("		buffer.append("+s+");\n");
+		}
+		writer.write("		encodedRuleset = buffer.toString();\n");
 	}
 
 	/**
