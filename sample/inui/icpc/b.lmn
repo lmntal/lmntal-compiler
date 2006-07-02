@@ -1,9 +1,10 @@
 //http://icpc.logos.ic.i.u-tokyo.ac.jp/icpc2006/contest/all_ja.html#section_B
+//java ¤Î API ¤Ë¤¢¤ëµ¡Ç½°Ê³°¤Ï¥¤¥ó¥é¥¤¥ó¤ò»È¤ï¤Ê¤¤Êý¿Ë
 
 integer.use.
 io.use.
 
-//$B%G!<%?F~NO(B
+//¥Ç¡¼¥¿ÆþÎÏ
 r=io.readline(data_set_num).
 data_set_num(S) :- string(S) | data_set_num(string.int_of_str(S)), dataset=io.list_of_stdin, next_data_set.
 
@@ -12,7 +13,7 @@ next_data_set, data_set_num(N), dataset=[D|Z] :- N > 0 | data_set_num(N-1), data
 start, data(S) :- string(S) | split(string.length(S)-1), data(S), set={}.
 next, split(A) :- A > 0 | split(A-1).
 
-//$BJT@.2DG=$J$b$N$rA4$F(B set $B$KDI2C$9$k(B
+//ÊÔÀ®²ÄÇ½¤Ê¤â¤Î¤òÁ´¤Æ set ¤ËÄÉ²Ã¤¹¤ë
 split(A), data(S) :- A > 0, string(S) |
 	add(string.substring(S, 0, A), string.substring(S, A)),
 	add(string.reverse(string.substring(S, 0, A)), string.substring(S, A)),
@@ -23,18 +24,18 @@ split(A), data(S) :- A > 0, string(S) |
 	add(string.substring(S, A), string.reverse(string.substring(S, 0, A))),
 	add(string.reverse(string.substring(S, A)), string.reverse(string.substring(S, 0, A))), next, split(A), data(S).
 
-//$BJ,3d=*N;$7$?$iEz$($N7W;;$X(B
+//Ê¬³ä½ªÎ»¤·¤¿¤éÅú¤¨¤Î·×»»¤Ø
 split(0) :- ans(0).
 
-//set $BFb$N%"%H%`$r?t$($k(B
+//set Æâ¤Î¥¢¥È¥à¤ò¿ô¤¨¤ë
 ans(N), set={e(S),$p} :- int(N), string(S) | ans(N+1), set={$p}.
 
-//$B?t$(=*$o$C$?$iEz$($rI=<($7$F<!$N%G!<%?%;%C%H$X(B
+//¿ô¤¨½ª¤ï¤Ã¤¿¤éÅú¤¨¤òÉ½¼¨¤·¤Æ¼¡¤Î¥Ç¡¼¥¿¥»¥Ã¥È¤Ø
 ans(N), data(S), set={} :- int(N), string(S) | ans=io.println(string.str_of_int(N)), next_data_set.
 
-//set $B$KMWAG$rDI2C$9$k(B
+//set ¤ËÍ×ÁÇ¤òÄÉ²Ã¤¹¤ë
 add(S1,S2), set={$p,@p} :- string(S1), string(S2) | set={$p, e(string.concat(S1,S2))}.
 
-//$B=EJ#MWAG$r:o=|$9$k(B
+//½ÅÊ£Í×ÁÇ¤òºï½ü¤¹¤ë
 set={e(S1), e(S2), $p,@p} :- string(S1), string(S2), S1 = S2 | set={e(S1), $p}.
 
