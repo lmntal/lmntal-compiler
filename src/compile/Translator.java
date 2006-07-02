@@ -146,6 +146,8 @@ public class Translator {
 	private static String packageName;
 	/** LMNtalソースファイル名 */
 	private static String sourceName;
+	/** 分割生成する文字列の長さ */
+	private static final int splitStringLength = 10000; //2006.07.02 inui
 	/** 出力するJARファイル名*/
 	public static String outputName;
 	/** 変換後の Java ソースを削除するかどうか */
@@ -156,6 +158,14 @@ public class Translator {
 	public static String publicDirName = "public";
 	/** 標準ライブラリ名 */
 	public static String stdlibName = "std_lib.jar";
+	/**
+	 * 文字列定数の最大長（これを超えると分割生成する）
+	 * この値が大きいと文字列を定数として宣言する確率が上がり，実行速度が向上する確率が上がる
+	 * この値が小さいと文字列を動的に生成する確率が上がる
+	 * Javaの規格上 0 <= maxStringLength <= 65534 でなければならない
+	 * quote されることを考慮すると，最大値は 65000 くらいかもしれない
+	 */
+	public static int maxStringLength = 10000; //2006.07.02 inui
 
 	/**
 	 * 指定されたルールセットに対応するクラス名を取得する。
@@ -551,7 +561,7 @@ public class Translator {
 		writer.write("	private " + className + "() {\n");
 		//文字列長が長かった場合コンストラクタで文字列を動的に生成する 2006.07.01 inui
 		String encodedString = ruleset.encode();
-		if (encodedString.length() > 1024) writeEncodedString(encodedString);
+		if (encodedString.length() > maxStringLength) writeEncodedString(encodedString);
 		writer.write("	}\n");
 		writer.write("	public static " + className + " getInstance() {\n");
 		writer.write("		return theInstance;\n");
@@ -601,9 +611,9 @@ public class Translator {
 			writer.write("		return \"@" + libname + "\" + id;\n");
 			writer.write("	}\n");
 			// 2006.01.02 okabe
-			// 2006.07.01 inui encodeString が長い場合はコンストラクタで生成する（そうでないときはstatic finalでも良い?）
-			if (encodedString.length() > 1024) writer.write("	private String encodedRuleset;\n");
-			else writer.write("	private String encodedRuleset = \n" + Util.quoteString(ruleset.encode(), '"') + ";\n");
+			// 2006.07.01 inui encodeString が長い場合はコンストラクタで生成する
+			if (encodedString.length() > maxStringLength) writer.write("	private String encodedRuleset;\n");
+			else writer.write("	private static final String encodedRuleset = \n" + Util.quoteString(ruleset.encode(), '"') + ";\n");
 		}
 		writer.write("	public String encode() {\n");
 		writer.write("		return encodedRuleset;\n");
@@ -786,8 +796,8 @@ public class Translator {
 	 */
 	private void writeEncodedString(String encodedString) throws IOException {
 		writer.write("		StringBuffer buffer = new StringBuffer();\n");
-		for (int i = 0; i < encodedString.length(); i += 1024) {
-			int endIndex = Math.min(i+1024, encodedString.length());
+		for (int i = 0; i < encodedString.length(); i += splitStringLength) {
+			int endIndex = Math.min(i+splitStringLength, encodedString.length());
 			String s = Util.quoteString(encodedString.substring(i, endIndex), '"');
 			writer.write("		buffer.append("+s+");\n");
 		}

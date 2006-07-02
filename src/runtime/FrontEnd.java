@@ -309,6 +309,10 @@ public class FrontEnd {
 							/// --library
 							/// Generate library.
 							Env.fLibrary = true;
+						} else if (args[i].startsWith("--max-string-length=")) { //2006.07.02 inui
+							/// --max-string-length=<len>
+							/// Set <len> as translator's maxStringLength (0 <= len <= 65534)
+							Translator.maxStringLength = Integer.parseInt(args[i].substring(20));
 						} else if (args[i].equals("--nd")) {
 							/// --nd
 							/// Nondeterministic mode. Execute the all reduction paths.
