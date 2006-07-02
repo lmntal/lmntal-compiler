@@ -14,7 +14,9 @@ HISTORY
 		split join concat
 	.. 2006/01/12(Thu)
 		substring str_of_int int_of_str str_of_float float_of_str
-		
+	2006/07/02(Sun)
+		length, reverse (by inui)
+
 COMMENT
 	文字列アトムの表現方法は、
 	"abc"
@@ -355,5 +357,32 @@ H=string.int_to_str(I) :- int(I) | H=[:/*inline*/
 	mem.removeAtom(me);
 	:](I).
 
+/**
+ * string.length(+String, -Length):
+ * 文字列を受け取って長さを返します
+ * @example H=string.length("hello")  ==>  H=5
+ */
+//2007.07.02 inui
+H=string.length(String) :- string(String) | H=[:/*inline*/
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Atom res = mem.newAtom(new IntegerFunctor(s.length()));
+	mem.relink(res, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](String).
+	
+/**
+ * string.reverse(+String, -ReversedString):
+ * 文字列を受け取って反転させた文字列を返します
+ * @example H=string.length("hello")  ==>  H="olleh"
+ */
+//2007.07.02 inui
+H=string.reverse(String) :- string(String) | H=[:/*inline*/
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	StringBuffer sb = new StringBuffer(s);
+	Atom res = mem.newAtom(new StringFunctor(sb.reverse().toString()));
+	mem.relink(res, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](String).
 }.
-
