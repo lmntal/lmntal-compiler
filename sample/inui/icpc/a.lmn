@@ -1,4 +1,5 @@
 scanner.use.
+integer.use.
 io.use.
 
 next_set.
@@ -16,23 +17,25 @@ rc(done), a(A), d(D), n(N) :- int(A), int(D), int(N) | a(A), d(D), n(N).
 H=is_prime(1) :- H=false.
 H=is_prime(2) :- H=true.
 H=is_prime(N) :- N mod 2 =:= 0 | H=false.
-H=is_prime(N) :- N mod 2 =\= 0 | H=is_prime(N, 3).
-H=is_prime(N, M) :- 2*M  > N | H=true.
-H=is_prime(N, M) :- 2*M =< N, N mod M =:= 0 | H=false.
-H=is_prime(N, M) :- 2*M =< N, N mod M =\= 0 | H=is_prime(N, M+2).
-//H=is_prime(N) :- N mod 2 =\= 0 | H=is_prime(N, 3), nsqrt(math.sqrt(N)).
+//H=is_prime(N) :- int(N) | H=if(N mod 2 == 0, false, is_prime(N, 3, math.sqrt(N))).
+//H=is_prime(N, M) :- 2*M  > N | H=true.
+//H=is_prime(N, M) :- 2*M =< N, N mod M =:= 0 | H=false.
+//H=is_prime(N, M) :- 2*M =< N, N mod M =\= 0 | H=is_prime(N, M+2).
 //H=is_prime(N, M), nsqrt(Nsqrt) :- M  > Nsqrt, int(N) | H=true.
 //H=is_prime(N, M), nsqrt(Nsqrt) :- M =< Nsqrt, N mod M =:= 0 | H=false.
 //H=is_prime(N, M), nsqrt(Nsqrt) :- M =< Nsqrt, N mod M =\= 0 | H=is_prime(N, M+2), nsqrt(Nsqrt).
-
-//BigInteger ¤Ë¤è¤ëÁÇ¿ô¤ÎÈ½Äê
-//H=is_prime(N) :- int(N) |
-//	H=java_math_biginteger.isProbablePrime(java_math_biginteger.new(string.str_of_int(N)), 5).
+H=is_prime(N) :- N mod 2 =\= 0 | H=is_prime(N, 3, math.sqrt(N)).
+H=is_prime(N, M, Nsqrt) :- M  > Nsqrt, int(N) | H=true.
+H=is_prime(N, M, Nsqrt) :- M =< Nsqrt, N mod M =:= 0 | H=false.
+H=is_prime(N, M, Nsqrt) :- M =< Nsqrt, N mod M =\= 0 | H=is_prime(N, M+2, Nsqrt).
 
 //ifÊ¸
-H=if(true,  Te, Fe) :- unary(Te), unary(Fe) | H=Te.
-H=if(false, Te, Fe) :- unary(Te), unary(Fe) | H=Fe.
+H=if(true,  Te, Fe) :- unary(Fe) | H=Te.
+H=if(false, Te, Fe) :- unary(Te) | H=Fe.
 
 //(½é¹à a, ¸øº¹ d ¤Î¿ôÎóÃæ¤ÎÁÇ¿ô¤ò n ¸Äµá¤á¤ë)
+//a(A), d(D), n(N) :- int(A), int(D), N  >  0, N1=N-1, NewA=A+D | n(if(is_prime(A), N1, N)), a(NewA), d(D).
+//a(A), d(D), n(N) :- int(A), int(D), N =:= 0, Ans=A-D | r=io.println(string.str_of_int(Ans)), next_set.
+
 a(A), d(D), n(N) :- int(A), int(D), N  >  0 | n(if(is_prime(A), N-1, N)), a(A+D), d(D).
 a(A), d(D), n(N) :- int(A), int(D), N =:= 0 | r=io.println(string.str_of_int(A-D)), next_set.
