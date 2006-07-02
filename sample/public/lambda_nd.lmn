@@ -28,20 +28,19 @@ r_r@@           rm=rm :- .
 
 d_d@@ dp(A,B)=dp(C,D) :- A=C, B=D.
 c_d@@ cp(A,B)=dp(C,D) :- C=cp(E,F), D=cp(G,H), A=dp(E,G), B=dp(F,H).
-c_c@@ cp(A,B)=cp(C,D) :- C=cp(E,F), D=cp(G,H), A=cp(E,G), B=cp(F,H).
 
 u_c@@ U=cp(A,B) :- unary(U) | A=U, B=U.
 u_d@@ U=dp(A,B) :- unary(U) | A=U, B=U.
 u_r@@ U=rm      :- unary(U) | .
 
-}
+}.
 
 // examples
 
 { lambda.use. example1.
   // (lambda y . y y) a => a a
   r=apply(lambda(cp(Y0,Y1), apply(Y0,Y1)), a).
-}
+}.
 
 { lambda.use. example2.
   // (lambda f . (lambda x . f (f x) ) ) succ 0
@@ -49,7 +48,7 @@ u_r@@ U=rm      :- unary(U) | .
                 lambda(X, apply(F0,apply(F1,X)))),
     succ), 0).
   // H=apply(succ, I) :- int(I) | H=I+1.
-}
+}.
 
 { lambda.use. example3.
   // (lambda mul . (lambda sqr . sqr 5) (lambda x . mul x x)) 
@@ -59,7 +58,7 @@ u_r@@ U=rm      :- unary(U) | .
        apply(lambda(Sqr, apply(Sqr,5)),
          lambda(cp(X0,X1), apply(apply(Mul,X0),X1)))),
      lambda(A, lambda(B, '*'(A,B)))).
-}
+}.
 
 { lambda.use. example4.
   // exponentiation of natural numbers in Church encoding
@@ -76,5 +75,6 @@ u_r@@ U=rm      :- unary(U) | .
               apply(F0,apply(F1,apply(F2,apply(F3,X)))))).
   r=apply(apply(apply(n(4), n(3)), s), 0).  
   H=apply(s, I) :- int(I) | H=I+1.
- }
+}.
+
  
