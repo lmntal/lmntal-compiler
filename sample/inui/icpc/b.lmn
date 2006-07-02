@@ -1,30 +1,46 @@
 //http://icpc.logos.ic.i.u-tokyo.ac.jp/icpc2006/contest/all_ja.html#section_B
 //java の API にある機能以外はインラインを使わない方針
+//
+// 2006.07.02 Sample Input は 1.3 秒で解けた
 
 integer.use.
 io.use.
 
+//このプログラム専用の set モジュール
+{
+module(set).
+
+//set に要素を追加する
+set.add(S1,S2), set={$p,@p} :- string(S1), string(S2) | set={$p, e(string.concat(S1,S2))}.
+
+//重複要素を削除する
+set={e(S1), e(S2), $p,@p} :- string(S1), string(S2), S1 = S2 | set={e(S1), $p}.
+}.
+
 //データ入力
 r=io.readline(data_set_num).
-data_set_num(S) :- string(S) | data_set_num(string.int_of_str(S)), dataset=io.list_of_stdin, next_data_set.
-
-next_data_set, data_set_num(N), dataset=[D|Z] :- N > 0 | data_set_num(N-1), dataset=Z, data=D, start.
+data_set_num(S) :- string(S) |
+	data_set_num(string.int_of_str(S)), dataset=io.list_of_stdin, next_data_set.
+next_data_set, data_set_num(N), dataset=[D|Z] :- N > 0 |
+	data_set_num(N-1), dataset=Z, data=D, start.
 
 start, data(S) :- string(S) | split(string.length(S)-1), data(S), set={}.
+
+//編成可能な 8 通りを全て set に追加する
+split(A), data(S) :- A > 0, string(S) |
+	set.add(string.substring(S, 0, A), string.substring(S, A)),
+	set.add(string.reverse(string.substring(S, 0, A)), string.substring(S, A)),
+	set.add(string.substring(S, 0, A), string.reverse(string.substring(S, A))),
+	set.add(string.reverse(string.substring(S, 0, A)), string.reverse(string.substring(S, A))),
+	set.add(string.substring(S, A), string.substring(S, 0, A)),
+	set.add(string.reverse(string.substring(S, A)), string.substring(S, 0, A)),
+	set.add(string.substring(S, A), string.reverse(string.substring(S, 0, A))),
+	set.add(string.reverse(string.substring(S, A)), string.reverse(string.substring(S, 0, A))), next, split(A), data(S).
+
+//次の分割
 next, split(A) :- A > 0 | split(A-1).
 
-//編成可能なものを全て set に追加する
-split(A), data(S) :- A > 0, string(S) |
-	add(string.substring(S, 0, A), string.substring(S, A)),
-	add(string.reverse(string.substring(S, 0, A)), string.substring(S, A)),
-	add(string.substring(S, 0, A), string.reverse(string.substring(S, A))),
-	add(string.reverse(string.substring(S, 0, A)), string.reverse(string.substring(S, A))),
-	add(string.substring(S, A), string.substring(S, 0, A)),
-	add(string.reverse(string.substring(S, A)), string.substring(S, 0, A)),
-	add(string.substring(S, A), string.reverse(string.substring(S, 0, A))),
-	add(string.reverse(string.substring(S, A)), string.reverse(string.substring(S, 0, A))), next, split(A), data(S).
-
-//分割終了したら答えの計算へ
+//全部の分割に対する編成が終わったら答えの計算へ
 split(0) :- ans(0).
 
 //set 内のアトムを数える
@@ -32,10 +48,3 @@ ans(N), set={e(S),$p} :- int(N), string(S) | ans(N+1), set={$p}.
 
 //数え終わったら答えを表示して次のデータセットへ
 ans(N), data(S), set={} :- int(N), string(S) | ans=io.println(string.str_of_int(N)), next_data_set.
-
-//set に要素を追加する
-add(S1,S2), set={$p,@p} :- string(S1), string(S2) | set={$p, e(string.concat(S1,S2))}.
-
-//重複要素を削除する
-set={e(S1), e(S2), $p,@p} :- string(S1), string(S2), S1 = S2 | set={e(S1), $p}.
-
