@@ -1011,6 +1011,7 @@ public class Translator {
 					if(Env.profile >= Env.PROFILE_BYRULEDETAIL)
 						writer.write(tabs + "		backtracks++\n;");
 					writer.write(tabs + "		continue;\n");
+					writer.write(tabs + "	}\n");
 					writer.write(tabs + "	if (mem.lock()) {\n");
 					writer.write(tabs + "		var[" +  inst.getIntArg1()  + "] = mem;\n");
 					translate(it, tabs + "		", iteratorNo + 1, varnum, breakLabel, rule);
