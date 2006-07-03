@@ -290,6 +290,8 @@ public class DebugFrame extends JFrame {
 			buf.append(i+"\n");
 		buf.append("</pre>\n");
 		linenoArea.setText(buf.toString());
+		//Demo モードで restart したときに行番号が小さくならないようにする 2006.07.03 inui
+		changeFontSize(linenoArea);
 	}
 	
 	public void setLMNtalFrame(LMNtalFrame lmntalFrame) {
