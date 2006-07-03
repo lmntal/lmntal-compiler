@@ -25,7 +25,6 @@ tail -1 |
 perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"TOTAL\",\$_[1];"
 
 # compile パッケージの合計
-pushd compile > /dev/null
-wc *.java parser/*.java parser/intermediate/*.java structure/*.java | tail -1 |
+wc `find compile -name *.java` |
+tail -1 |
 perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"(compile)\",\$_[1];"
-popd > /dev/null
