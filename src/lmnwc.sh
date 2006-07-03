@@ -11,21 +11,21 @@ do
 		# 最後の行（合計情報）だけとる
 		tail -1 |
 		# 行数だけ取ってきれいに表示する
-		perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"$i\",\$_[1];" |
+		perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"${i#./}\",\$_[1];" |
 	   	# パッケージ名に置換
-		sed -e 's/\.\///' -e 's/\//\./g'
+		sed -e 's/\//\./g'
 	fi
 done
 
-echo "------------------------------------"
+echo "--------------------------------------"
 
 # 合計数を表示
 wc `find . -name *.java | grep -v test` -l |
 tail -1 |
-perl -e "split(/\s+/, <>);printf\"%-28s %7d\n\",\"TOTAL\",\$_[1];"
+perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"TOTAL\",\$_[1];"
 
 # compile パッケージの合計
 pushd compile > /dev/null
 wc *.java parser/*.java parser/intermediate/*.java structure/*.java | tail -1 |
-perl -e "split(/\s+/, <>);printf\"%-28s %7d\n\",\"(compile)\",\$_[1];"
+perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"(compile)\",\$_[1];"
 popd > /dev/null
