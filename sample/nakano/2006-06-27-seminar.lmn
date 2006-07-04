@@ -15,7 +15,7 @@ sys.perpetual(on).
 view(_IX), {$p[]} :- _IX = 1 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("LMNtalPointの実用性検証",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("***使えるLMNtalへの道***",30)), position(150,150), color(0,0,0)
+{draw, getpic(string("***使えるLMNtalへの道***",30)), position(150,150), color(0,0,0),
 {draw, getpic(string("3606U070-4　中野　敦",20)), position(170,160), color(0,0,0)
 }.
 }.
@@ -24,13 +24,13 @@ view(_IX), {$p[]} :- _IX = 1 |
 view(_IX), {$p[]} :- _IX = 2 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("LMNtalの開発",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("これまでは，",20)), position(0,60), color(0,0,0)
-{draw, getpic(string("「LMNtalで何ができるか」を模索してきた．",30)), position(0,40), color(0,0,0)
-{draw, getpic(string("　→「出来るLMNtal」",25)), position(0,60), color(0,0,0)
-{draw, getpic(string("これからは，",20)), position(0,50), color(0,0,0)
-{draw, getpic(string("「LMNtalは使えるか」も模索していく必要がある．",30)), position(0,40), color(0,0,0)
-{draw, getpic(string("　→「使えるLMNtal」",25)), position(0,60), color(0,0,0)
-{draw, getpic(string("「いろいろ出来るけど使えない」言語（処理系）",30)), position(0,50), color(0,0,0)
+{draw, getpic(string("これまでは，",20)), position(0,60), color(0,0,0),
+{draw, getpic(string("「LMNtalで何ができるか」を模索してきた．",30)), position(0,40), color(0,0,0),
+{draw, getpic(string("　→「出来るLMNtal」",25)), position(0,60), color(0,0,0),
+{draw, getpic(string("これからは，",20)), position(0,50), color(0,0,0),
+{draw, getpic(string("「LMNtalは使えるか」も模索していく必要がある．",30)), position(0,40), color(0,0,0),
+{draw, getpic(string("　→「使えるLMNtal」",25)), position(0,60), color(0,0,0),
+{draw, getpic(string("「いろいろ出来るけど使えない」言語（処理系）",30)), position(0,50), color(0,0,0),
 {draw, getpic(string("　では，意味が無い！！",30)), position(0,60), color(0,0,0)
 }.
 }.
@@ -45,13 +45,13 @@ view(_IX), {$p[]} :- _IX = 2 |
 view(_IX), {$p[]} :- _IX = 3 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("使えるLMNtalへの道",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("「使える」とは？（たとば）",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→アプリ（機能）を提供できる．",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("だれに？",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→LMNtalを使えない人に．",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("何が必要？",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→LMNtalに頼らない入出力",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("つまり？",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("「使える」とは？（たとば）",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→アプリ（機能）を提供できる．",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("だれに？",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→LMNtalを使えない人に．",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("何が必要？",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→LMNtalに頼らない入出力",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("つまり？",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("　→GUIなど．",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -66,10 +66,10 @@ view(_IX), {$p[]} :- _IX = 3 |
 view(_IX), {$p[]} :- _IX = 4 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("今日の発表",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("GraphicLMNtalを使って",30)), position(50,54), color(0,0,0)
-{draw, getpic(string("　　LMNtalPoint",60)), position(0,100), color(255,0,0)
+{draw, getpic(string("",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("GraphicLMNtalを使って",30)), position(50,54), color(0,0,0),
+{draw, getpic(string("　　LMNtalPoint",60)), position(0,100), color(255,0,0),
 {draw, getpic(string("　　　　　　　　　にチャレンジ！",30)), position(100,74), color(0,0,0)
 }.
 }.
@@ -81,13 +81,13 @@ view(_IX), {$p[]} :- _IX = 4 |
 view(_IX), {$p[]} :- _IX = 5 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("Chorus",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("LMNtalとChorus3Dの連結",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("LMNtalのアトムとリンクをChorus3Dで",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("描画したら簡単ではないか？",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→制約でプログラムの状態を描画",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("細部さんの作ったChorus3Dのサンプル",30)), position(0,45), color(0,0,0)
-{draw, getpic(string("GraphicLayoutを利用．",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→LMNtalのモデルがそのまま使える",25)), position(0,49), color(0,0,0)
+{draw, getpic(string("LMNtalとChorus3Dの連結",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("LMNtalのアトムとリンクをChorus3Dで",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("描画したら簡単ではないか？",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→制約でプログラムの状態を描画",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("細部さんの作ったChorus3Dのサンプル",30)), position(0,45), color(0,0,0),
+{draw, getpic(string("GraphicLayoutを利用．",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→LMNtalのモデルがそのまま使える",25)), position(0,49), color(0,0,0),
 {draw, getpic(string("",30)), position(0,45), color(0,0,0)
 }.
 }.
@@ -102,10 +102,10 @@ view(_IX), {$p[]} :- _IX = 5 |
 view(_IX), {$p[]} :- _IX = 6 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("Chorusとの連結方法",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("LMNtalとChorusの連結は・・・",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→見た目は強く",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("　→内部では弱く",25)), position(0,40), color(0,0,0)
-{draw, getpic(string("→それぞれのシステムの独立性を保つ",30)), position(0,45), color(0,0,0)
+{draw, getpic(string("LMNtalとChorusの連結は・・・",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→見た目は強く",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("　→内部では弱く",25)), position(0,40), color(0,0,0),
+{draw, getpic(string("→それぞれのシステムの独立性を保つ",30)), position(0,45), color(0,0,0),
 {draw, getpic(string("　→結果表示のための「外部ツール」",25)), position(0,49), color(0,0,0)
 }.
 }.
@@ -117,16 +117,16 @@ view(_IX), {$p[]} :- _IX = 6 |
 view(_IX), {$p[]} :- _IX = 7 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("Chorus起動のタイミング",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("Chorus起動のタイミングを検討",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・反応毎に表示",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→理想的だが，Chorusの処理が重すぎる．",20)), position(0,44), color(0,0,0)
-{draw, getpic(string("・任意のタイミングで表示",30)), position(0,36), color(0,0,0)
-{draw, getpic(string("　→インターフェースが重要になる",20)), position(0,44), color(0,0,0)
-{draw, getpic(string("　　→デバッガモードを利用か？",15)), position(0,21), color(0,0,0)
-{draw, getpic(string("・最終結果表示",30)), position(0,35), color(0,0,0)
-{draw, getpic(string("　→変化（反応）を意識しなくてすむ",20)), position(0,44), color(0,0,0)
-{draw, getpic(string("　→インターフェースがオプション指定ですむ",20)), position(0,26), color(0,0,0)
-{draw, getpic(string("　→最終結果を取得するだけでよい",20)), position(0,26), color(0,0,0)
+{draw, getpic(string("Chorus起動のタイミングを検討",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・反応毎に表示",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→理想的だが，Chorusの処理が重すぎる．",20)), position(0,44), color(0,0,0),
+{draw, getpic(string("・任意のタイミングで表示",30)), position(0,36), color(0,0,0),
+{draw, getpic(string("　→インターフェースが重要になる",20)), position(0,44), color(0,0,0),
+{draw, getpic(string("　　→デバッガモードを利用か？",15)), position(0,21), color(0,0,0),
+{draw, getpic(string("・最終結果表示",30)), position(0,35), color(0,0,0),
+{draw, getpic(string("　→変化（反応）を意識しなくてすむ",20)), position(0,44), color(0,0,0),
+{draw, getpic(string("　→インターフェースがオプション指定ですむ",20)), position(0,26), color(0,0,0),
+{draw, getpic(string("　→最終結果を取得するだけでよい",20)), position(0,26), color(0,0,0),
 {draw, getpic(string("　　→LMNtal処理系本体との共存が容易",15)), position(0,21), color(0,0,0)
 }.
 }.
@@ -144,13 +144,13 @@ view(_IX), {$p[]} :- _IX = 7 |
 view(_IX), {$p[]} :- _IX = 8 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("ソースの分割",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("GraphicLayoutのソースを",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・Header部",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・アトム生成部",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・リンク生成部",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・Footer部",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("に分割する．",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("LMNtal処理系でアトム，リンク生成部を動的に出力．",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("GraphicLayoutのソースを",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・Header部",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・アトム生成部",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・リンク生成部",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・Footer部",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("に分割する．",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("LMNtal処理系でアトム，リンク生成部を動的に出力．",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("→簡単だがソース量が膨大に．",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -165,12 +165,12 @@ view(_IX), {$p[]} :- _IX = 8 |
 view(_IX), {$p[]} :- _IX = 9 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("ソース量削減方法",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("アトム，リンクの情報を外部ファイル",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("として本体ソースとは別に出力．",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("メリット：",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→情報ファイルを工夫することで総量も減らせる",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→拡張性が高まる",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　　　　（ファイルに情報を増やすだけですむ）",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("アトム，リンクの情報を外部ファイル",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("として本体ソースとは別に出力．",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("メリット：",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→情報ファイルを工夫することで総量も減らせる",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→拡張性が高まる",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　　　　（ファイルに情報を増やすだけですむ）",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -184,11 +184,11 @@ view(_IX), {$p[]} :- _IX = 9 |
 view(_IX), {$p[]} :- _IX = 10 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("Makefileの出力",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("出力したソースをコンパイルするMakefileも出力",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→一旦出力したソースはLMNtalと独立して利用可能",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→Chorusを極力処理系に組み込まない",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→Chorusが入っていないPCでも問題が無いように",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("Makefile生成に必要な環境設定",30)), position(0,45), color(0,0,0)
+{draw, getpic(string("出力したソースをコンパイルするMakefileも出力",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→一旦出力したソースはLMNtalと独立して利用可能",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→Chorusを極力処理系に組み込まない",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→Chorusが入っていないPCでも問題が無いように",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("Makefile生成に必要な環境設定",30)), position(0,45), color(0,0,0),
 {draw, getpic(string("→chorus.confファイルを読み込む",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -201,10 +201,10 @@ view(_IX), {$p[]} :- _IX = 10 |
 view(_IX), {$p[]} :- _IX = 11 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("これからの課題",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("より細かい制約へ",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→「制約」はあくまで表示のためのツール",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→意識したくないところだけを任せる",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→極端な話「制約」にこだわる必要は無い",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("より細かい制約へ",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→「制約」はあくまで表示のためのツール",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→意識したくないところだけを任せる",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→極端な話「制約」にこだわる必要は無い",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("ただし，「制約」をやりたい場合は話は別だが…",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -216,10 +216,10 @@ view(_IX), {$p[]} :- _IX = 11 |
 view(_IX), {$p[]} :- _IX = 12 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("数独",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("数独とは（「はてな」より引用）",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・Howard Garns氏が考案（Number Place）",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・ニコリ創業者（鍜治真起氏）が発掘，紹介",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・2005年ごろから英国でも人気になる始める",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("数独とは（「はてな」より引用）",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・Howard Garns氏が考案（Number Place）",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・ニコリ創業者（鍜治真起氏）が発掘，紹介",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・2005年ごろから英国でも人気になる始める",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("・オイラーが考案したパズルでは無いらしい",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -231,12 +231,12 @@ view(_IX), {$p[]} :- _IX = 12 |
 view(_IX), {$p[]} :- _IX = 13 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("開発",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("使えるアプリケーションの開発",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("作り始めるに当たってぶつかった問題：",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("問題入力がわずらわしい",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→開発者くらいしか使わない（使えない）",20)), position(0,44), color(0,0,0)
-{draw, getpic(string("",30)), position(0,36), color(0,0,0)
+{draw, getpic(string("使えるアプリケーションの開発",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("作り始めるに当たってぶつかった問題：",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("問題入力がわずらわしい",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→開発者くらいしか使わない（使えない）",20)), position(0,44), color(0,0,0),
+{draw, getpic(string("",30)), position(0,36), color(0,0,0),
 {draw, getpic(string("気軽に使える入力が必要？",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -250,12 +250,12 @@ view(_IX), {$p[]} :- _IX = 13 |
 view(_IX), {$p[]} :- _IX = 14 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("基本的なアルゴリズム",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("LMNtalのメリット",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→わりと直感的なプログラムが組める",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("アルゴリズム：",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・各マスは1から9までの「候補」を保持する",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("・行・列・ブロックで決定済みのマスがあれば候補から削除",25)), position(0,40), color(0,0,0)
+{draw, getpic(string("LMNtalのメリット",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→わりと直感的なプログラムが組める",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("アルゴリズム：",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・各マスは1から9までの「候補」を保持する",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("・行・列・ブロックで決定済みのマスがあれば候補から削除",25)), position(0,40), color(0,0,0),
 {draw, getpic(string("・ブロックで，唯一残っている「候補」ならば決定",25)), position(0,40), color(0,0,0)
 }.
 }.
@@ -269,9 +269,9 @@ view(_IX), {$p[]} :- _IX = 14 |
 view(_IX), {$p[]} :- _IX = 15 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("問題点",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("LMNtalのデメリット",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→非効率的なものを組むと洒落にならないくらい重い",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→プロトタイプは２時間かかった．",25)), position(0,49), color(0,0,0)
+{draw, getpic(string("LMNtalのデメリット",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→非効率的なものを組むと洒落にならないくらい重い",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→プロトタイプは２時間かかった．",25)), position(0,49), color(0,0,0),
 {draw, getpic(string("　→アルゴリズムの工夫が必要",25)), position(0,40), color(0,0,0)
 }.
 }.
@@ -282,14 +282,14 @@ view(_IX), {$p[]} :- _IX = 15 |
 view(_IX), {$p[]} :- _IX = 16 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("高速化",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("高速化の基本的なポイント",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・膜を極力使わない",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→使っても，中身は少なく",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("→「候補」の管理を膜からリストへ",30)), position(0,45), color(0,0,0)
-{draw, getpic(string("・ガード（条件）を短く",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("→残っている候補数を別途管理",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("結果：",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("4秒くらいに短縮",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("高速化の基本的なポイント",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・膜を極力使わない",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→使っても，中身は少なく",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("→「候補」の管理を膜からリストへ",30)), position(0,45), color(0,0,0),
+{draw, getpic(string("・ガード（条件）を短く",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("→残っている候補数を別途管理",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("結果：",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("4秒くらいに短縮",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("（コンパイル時約１秒）",30)), position(0,50), color(0,0,0)
 }.
 }.
@@ -305,13 +305,13 @@ view(_IX), {$p[]} :- _IX = 16 |
 view(_IX), {$p[]} :- _IX = 17 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("LMNtalPointのソースについて",50)), position(30,90), color(0,0,0),
-{draw, getpic(string("・子膜は，親膜のpositionやsizeなどを継承する",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　　・sizeなどは再定義すると上書き．",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("　　・positionは親の値に足される",25)), position(0,40), color(0,0,0)
-{draw, getpic(string("・sys.perpetual(on)",30)), position(0,45), color(0,0,0)
-{draw, getpic(string(" →反応出来るルールが無くても終了しない",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("　→入力待ち状態で待機",25)), position(0,45), color(0,0,0)
-{draw, getpic(string("・LMNtalPoint支援スクリプトで作成",30)), position(0,45), color(0,0,0)
+{draw, getpic(string("・子膜は，親膜のpositionやsizeなどを継承する",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　　・sizeなどは再定義すると上書き．",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("　　・positionは親の値に足される",25)), position(0,40), color(0,0,0),
+{draw, getpic(string("・sys.perpetual(on)",30)), position(0,45), color(0,0,0),
+{draw, getpic(string(" →反応出来るルールが無くても終了しない",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("　→入力待ち状態で待機",25)), position(0,45), color(0,0,0),
+{draw, getpic(string("・LMNtalPoint支援スクリプトで作成",30)), position(0,45), color(0,0,0),
 {draw, getpic(string("　　　　　　　http://www.ueda.info.waseda.ac.jp/~nakano/LMNtalPoint-euc.php",15)), position(0,39), color(0,0,0)
 }.
 }.
@@ -326,9 +326,9 @@ view(_IX), {$p[]} :- _IX = 17 |
 view(_IX), {$p[]} :- _IX = 18 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("支援スクリプト",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("・本当は，LMNtalでLMNtalPoint作成アプリを作りたい",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・PHPで作成．",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・先頭に「-」をつけることで，文字サイズを変更可能",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("・本当は，LMNtalでLMNtalPoint作成アプリを作りたい",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・PHPで作成．",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・先頭に「-」をつけることで，文字サイズを変更可能",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("・出来たソースはコピペで動く",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -339,13 +339,13 @@ view(_IX), {$p[]} :- _IX = 18 |
 view(_IX), {$p[]} :- _IX = 19 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("まとめ",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("・表示には大きな問題はない",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("　→LMNtalPointの実用性あり？",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("　→フルスクリーンなど，サイズ変更は欲しい",25)), position(0,40), color(0,0,0)
-{draw, getpic(string("・入力（作成）インタフェースに問題あり",30)), position(0,45), color(0,0,0)
-{draw, getpic(string("　→容易に作成できなければアプリとして問題あり？",25)), position(0,49), color(0,0,0)
-{draw, getpic(string("　→LMNtalでの入力のGUIがあれば…",25)), position(0,40), color(0,0,0)
-{draw, getpic(string("・LMNtalPointのメリット",30)), position(0,45), color(0,0,0)
+{draw, getpic(string("・表示には大きな問題はない",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("　→LMNtalPointの実用性あり？",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("　→フルスクリーンなど，サイズ変更は欲しい",25)), position(0,40), color(0,0,0),
+{draw, getpic(string("・入力（作成）インタフェースに問題あり",30)), position(0,45), color(0,0,0),
+{draw, getpic(string("　→容易に作成できなければアプリとして問題あり？",25)), position(0,49), color(0,0,0),
+{draw, getpic(string("　→LMNtalでの入力のGUIがあれば…",25)), position(0,40), color(0,0,0),
+{draw, getpic(string("・LMNtalPointのメリット",30)), position(0,45), color(0,0,0),
 {draw, getpic(string("　→「プログラム」（？）での発表",25)), position(0,49), color(0,0,0)
 }.
 }.
@@ -360,8 +360,8 @@ view(_IX), {$p[]} :- _IX = 19 |
 view(_IX), {$p[]} :- _IX = 20 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("おまけ",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("・マウスクリック",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("・数独",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("・マウスクリック",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("・数独",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("・DNA",30)), position(0,54), color(0,0,0)
 }.
 }.
@@ -371,10 +371,10 @@ view(_IX), {$p[]} :- _IX = 20 |
 view(_IX), {$p[]} :- _IX = 21 |
 {draw, getpic("c:\\workspace\\devel\\sample\\nakano\\seminar.png"),position(0,0),size(800,600).
 {draw, getpic(string("以上",60)), position(30,90), color(0,0,0),
-{draw, getpic(string("",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("",30)), position(0,54), color(0,0,0)
-{draw, getpic(string("",30)), position(0,54), color(0,0,0)
+{draw, getpic(string("",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("",30)), position(0,54), color(0,0,0),
+{draw, getpic(string("",30)), position(0,54), color(0,0,0),
 {draw, getpic(string("　　　　　　　　発表を終わります",30)), position(0,24), color(0,0,0)
 }.
 }.
