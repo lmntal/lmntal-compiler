@@ -3,28 +3,27 @@
 # 処理系の行数を表示するスクリプト by inui
 
 # 各パッケージの行数を表示（test パッケージは除く）
-for i in `find . -type d | grep -v test`
+for i in `find . -type d -maxdepth 1 | grep -v "\(test\|CVS\|\.$\)"`
 do
-	if [ -d $i ]; then
-		# *.java ファイルがあるならそれを全部 wc に渡す
-		ls $i/*.java >& /dev/null && wc `ls $i/*.java`  -l |
-		# 最後の行（合計情報）だけとる
-		tail -1 |
-		# 行数だけ取ってきれいに表示する
-		perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"${i#./}\",\$_[1];" |
-	   	# パッケージ名に置換
-		sed -e 's/\//\./g'
-	fi
+#	# *.java ファイルがあるならそれを全部 wc に渡す
+#	ls $i/*.java >& /dev/null && wc `ls $i/*.java`  -l |
+	wc `find $i -name *.java` -l |
+	# 最後の行（合計情報）だけとる
+	tail -1 |
+	# 行数だけ取ってきれいに表示する
+	perl -e "split(/\s+/, <>);printf\"%-16s %7d\n\",\"${i#./}\",\$_[1];" |
+   	# パッケージ名に置換
+	sed -e 's/\//\./g'
 done
 
-echo "--------------------------------------"
+echo "------------------------"
 
 # 合計数を表示
 wc `find . -name *.java | grep -v test` -l |
 tail -1 |
-perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"TOTAL\",\$_[1];"
+perl -e "split(/\s+/, <>);printf\"%-16s %7d\n\",\"TOTAL\",\$_[1];"
 
 # compile パッケージの合計
-wc `find compile -name *.java` |
-tail -1 |
-perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"(compile)\",\$_[1];"
+#wc `find compile -name *.java` |
+#tail -1 |
+#perl -e "split(/\s+/, <>);printf\"%-30s %7d\n\",\"(compile)\",\$_[1];"
