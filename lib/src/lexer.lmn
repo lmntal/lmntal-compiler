@@ -1,0 +1,80 @@
+/**
+
+NAME
+
+	Lexer module
+
+SYNOPSIS
+
+	トークンを１つずつ読み出していきます
+
+AUTHOR
+
+	Atsuyuki Inui
+
+HISTORY
+
+	2006/07/04(Tue) lexer.use, lexer.next, lexer.delete
+	
+COMMENTS
+
+	2006/07/04(Tue) lexer.delete, lexer.finish, lexer.finalize, lexer.gc どれが良いかなぁ
+  
+*/
+{
+module(lexer).
+
+/**
+ * lexer.use():
+ * モジュールを使用できるようにします．
+ */
+lexer.use :- lexer.lexer=[:/*inline*/
+	Atom lexer = mem.newAtom(new ObjectFunctor(new java.io.StreamTokenizer(new java.io.InputStreamReader(System.in))));
+	mem.relink(lexer, 0, me, 0);
+	me.remove();
+	:].
+
+/**
+ * lexer.next(-Res):
+ * 次のトークンを読み込んで返します．
+ * EOF だったら eof
+ * EOL（行末）だったら eol
+ * 数字だったら IntegerFunctor
+ * 文字列だったら StringFunctor
+ * その他の文字だったら通常の Functor
+ */
+H=lexer.next(), lexer.lexer(Lexer) :- class(Lexer, "java.io.StreamTokenizer") | H=[:/*inline*/
+	try {
+		java.io.StreamTokenizer st = (java.io.StreamTokenizer) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+		int ttype = st.nextToken();
+		Atom res = null;
+		switch (ttype) {
+		case java.io.StreamTokenizer.TT_EOF:
+			res = mem.newAtom(new Functor("eof", 1));
+			break;
+		case java.io.StreamTokenizer.TT_EOL:
+			res = mem.newAtom(new Functor("eol", 1));
+			break;
+		case java.io.StreamTokenizer.TT_NUMBER:
+			res = mem.newAtom(new IntegerFunctor((int)st.nval));
+			break;
+		case java.io.StreamTokenizer.TT_WORD:
+			res = mem.newAtom(new StringFunctor(st.sval));
+			break;
+		default:
+			res = mem.newAtom(new Functor(Character.toString((char)ttype), 1));
+		}
+		mem.relink(res, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+	} catch(java.io.IOException e) {
+		System.err.println(e);
+	}
+	:](Lexer), lexer.lexer(Lexer).
+
+/**
+ * lexer.delete:
+ * モジュールを削除します．
+ */
+lexer.delete(), lexer.lexer(Lexer) :- class(Lexer, "java.io.StreamTokenizer") | .
+}.
