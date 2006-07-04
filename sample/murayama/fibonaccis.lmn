@@ -1,0 +1,25 @@
+{
+	H=fib(0) :- H=1.
+	H=fib(1) :- H=1.
+	fib1 @@
+	H=fib(N) :- N > 1 | H=fib(N-1)+fib(N-2).
+	ret=fib(20).
+}.
+
+{
+	fib2_1 @@
+	H=fib(N, X, Y)  :- N > 0, int(Y) | H=fib(N-1, Y, X+Y).
+	fib2_2 @@
+	H=fib(N, 0, Y)  :- int(N), int(Y)| H=fib(Y).
+	ret=fib(20, 0, 1).
+}.
+ 
+{
+	fib3_1 @@
+	H=fib(N, A, B, P, Q)  :- N == 0, int(B), int(P), int(Q) | H=fib(A).
+	fib3_2 @@
+	H=fib(N, A, B, P, Q)  :- N =\= 0, (N mod 2) == 0, int(P), int(Q) | H=fib(N/2, A, B, P*P+Q*Q, 2*P*Q+Q*Q).
+	fib3_3 @@
+	H=fib(N, A, B, P, Q)  :- N =\= 0, (N mod 2) == 1, int(A), int(B), int(P), int(Q) | H=fib(N-1, B*Q+A*Q+A*P, B*P+A*Q, P, Q).
+	ret=fib(20, 1, 0, 0, 1).
+}.
