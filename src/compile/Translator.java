@@ -640,7 +640,6 @@ public class Translator {
 				 writer.write("		Thread thread = Thread.currentThread();\n");
 			}
 			writer.write("		boolean success;\n");
-			writer.write("		Object[] argVar = new Object[2];\n");
 			writer.write("		if(!isRulesSetted) {\n");
 			writer.write("			isRulesSetted = true;\n");
 			writer.write("			setCompiledRules();\n");
@@ -651,6 +650,7 @@ public class Translator {
 				writer.write("		success = false;\n");			
 				writer.write("		start = Util.getTime();\n");
 				writer.write("		{\n");
+				writer.write("		Object[] argVar = new Object[2];\n");
 				writer.write("		argVar[0] = mem;\n");
 				writer.write("		argVar[1] = atom;\n");
 				writer.write("		success = exec" + rule.atomMatchLabel.label + "(argVar, false);\n");
@@ -710,7 +710,6 @@ public class Translator {
 				 writer.write("		Thread thread = Thread.currentThread();\n");
 			}
 			writer.write("		boolean success;\n");
-			writer.write("		Object[] argVar = new Object[1];\n");
 			writer.write("		if(!isRulesSetted) {\n");
 			writer.write("			isRulesSetted = true;\n");
 			writer.write("			setCompiledRules();\n");
@@ -720,8 +719,7 @@ public class Translator {
 				writer.write("		rule = (Rule) compiledRules.get(" + i + ");\n");
 				writer.write("		success = false;\n");			
 				writer.write("		start = Util.getTime();\n");
-				writer.write("		argVar[0] = mem;\n");
-				writer.write("		success = exec" + rule.memMatchLabel.label + "(argVar, nondeterministic);\n");
+				writer.write("		success = exec" + rule.memMatchLabel.label + "(mem, nondeterministic);\n");
 				writer.write("		stop = Util.getTime();\n");
 				writer.write("		synchronized(rule){\n");
 				if(Env.profile == Env.PROFILE_ALL) {
@@ -1194,8 +1192,9 @@ public class Translator {
 					ejector.commit();
 					break; //n-kato
 				case Instruction.DEQUEUEATOM : //[srcatom]
-					writer.write(tabs + "atom = ((Atom)var[" +  inst.getIntArg1()  + "]);\n");
-					writer.write(tabs + "atom.dequeue();\n");
+					ejector.write(tabs + "atom = ((Atom)var[" +  inst.getIntArg1()  + "]);\n");
+					ejector.write(tabs + "atom.dequeue();\n");
+					ejector.commit();
 					break; //n-kato
 				case Instruction.FREEATOM : //[srcatom]
 					break; //n-kato
@@ -1245,36 +1244,43 @@ public class Translator {
 					ejector.commit();
 					break; //n-kato
 				case Instruction.ALLOCMEM: //[-dstmem]
-					writer.write(tabs + "mem = ((Task)((AbstractMembrane)var0).getTask()).createFreeMembrane();\n");
-					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = mem;\n");
+					ejector.write(tabs + "mem = ((Task)((AbstractMembrane)var0).getTask()).createFreeMembrane();\n");
+					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = mem;\n");
+					ejector.commit();
 					break; //n-kato
 				case Instruction.NEWROOT : //[-dstmem, srcmem, nodeatom]
 					writer.write(tabs + "String nodedesc = ((Atom)var[" +  inst.getIntArg3()  + "]).getFunctor().getName();\n");
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).newRoot(nodedesc, " + inst.getIntArg4() + ");\n");
 					break; //n-kato 2004-09-17
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).moveCellsFrom(((AbstractMembrane)var[" +  inst.getIntArg2()  + "]));\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).moveCellsFrom(((AbstractMembrane)var[" +  inst.getIntArg2()  + "]));\n");
+					ejector.commit();
 					break; //nakajima 2004-01-04, n-kato
 				case Instruction.ENQUEUEALLATOMS : //[srcmem]
 					break;
 				case Instruction.FREEMEM : //[srcmem]
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).free();\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).free();\n");
+					ejector.commit();
 					break; //mizuno 2004-10-12, n-kato
 				case Instruction.ADDMEM :
 				case Instruction.LOCALADDMEM : //[dstmem, srcmem]
-					writer.write(tabs + "var[" +  inst.getIntArg2()  + "] = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).moveTo(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]));\n");
+					ejector.write(tabs + "var[" +  inst.getIntArg2()  + "] = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).moveTo(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]));\n");
+					ejector.commit();
 					break; //nakajima 2004-01-04, n-kato, n-kato 2004-11-10
 				case Instruction.ENQUEUEMEM:
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).activate();\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).activate();\n");
+					ejector.commit();
 					//mems[inst.getIntArg1()].enqueueAllAtoms();
 					break;
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).forceUnlock();\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).forceUnlock();\n");
+					ejector.commit();
 					break; //n-kato
 				case Instruction.LOCALSETMEMNAME: //[dstmem, name]
 				case Instruction.SETMEMNAME: //[dstmem, name]
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).setName(" + Util.quoteString((String)inst.getArg2(), '"') + ");\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).setName(" + Util.quoteString((String)inst.getArg2(), '"') + ");\n");
+					ejector.commit();
 					break; //n-kato
 					//====膜を操作する基本ボディ命令====ここまで====
 					//====リンクに関係する出力するガード命令====ここから====
@@ -1297,9 +1303,10 @@ public class Translator {
 					break; //n-kato
 				case Instruction.RELINK:		 //[atom1, pos1, atom2, pos2, mem]
 				case Instruction.LOCALRELINK:	 //[atom1, pos1, atom2, pos2 (,mem)]
-					writer.write(tabs + "((Atom)var[" +  inst.getIntArg1()  + "]).getMem().relinkAtomArgs(\n");
-					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
-					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg3()  + "]), " + inst.getIntArg4() + " );\n");
+					ejector.write(tabs + "((Atom)var[" +  inst.getIntArg1()  + "]).getMem().relinkAtomArgs(\n");
+					ejector.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
+					ejector.write(tabs + "	((Atom)var[" +  inst.getIntArg3()  + "]), " + inst.getIntArg4() + " );\n");
+					ejector.commit();
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
 					writer.write(tabs + "mem = ((AbstractMembrane)var[" +  inst.getIntArg5()  + "]);\n");
@@ -1336,16 +1343,20 @@ public class Translator {
 					//====リンクを操作するボディ命令====ここまで====
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここから====
 				case Instruction.REMOVEPROXIES : //[srcmem]
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeProxies();\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeProxies();\n");
+					ejector.commit();
 					break; //nakajima 2004-01-04, n-kato
 				case Instruction.REMOVETOPLEVELPROXIES : //[srcmem]
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeToplevelProxies();\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeToplevelProxies();\n");
+					ejector.commit();
 					break; //nakajima 2004-01-04, n-kato
 				case Instruction.INSERTPROXIES : //[parentmem,childmem]
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).insertProxies(((AbstractMembrane)var[" +  inst.getIntArg2()  + "]));\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).insertProxies(((AbstractMembrane)var[" +  inst.getIntArg2()  + "]));\n");
+					ejector.commit();
 					break;  //nakajima 2004-01-04, n-kato
 				case Instruction.REMOVETEMPORARYPROXIES : //[srcmem]
-					writer.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeTemporaryProxies();\n");
+					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeTemporaryProxies();\n");
+					ejector.commit();
 					break; //nakajima 2004-01-04, n-kato
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここまで====
 					//====ルールを操作するボディ命令====ここから====
