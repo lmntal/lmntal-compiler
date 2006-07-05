@@ -16,4 +16,10 @@
 # 環境に合わせて設定してください
 LMNTAL_HOME=~/workspace/lmntal
 
-grep "\\b$1\\." `find $LMNTAL_HOME/sample -name *.lmn` | cut -d: -f1 | uniq
+# そういうモジュールがあるかどうか調べる
+if [ -e $LMNTAL_HOME/lib/public/$1.lmn -o -e $LMNTAL_HOME/lib/src/$1.lmn ]; then
+	grep "\\b$1\\." `find $LMNTAL_HOME/sample -name *.lmn` | cut -d: -f1 | uniq
+else
+	echo $1: module not found.
+	exit
+fi
