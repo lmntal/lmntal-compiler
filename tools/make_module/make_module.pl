@@ -13,6 +13,8 @@
 # 	アンダーバーで始まるメソッド名に対応した
 # 	$ が含まれるクラス名に対応した
 # 	例外が発生した場合 Exception オブジェクトを返すようにした
+# 2006/07/05(Wed)
+#   クラス名は大文字にした
 ###############################################################
 
 # java の型 => Functor
@@ -69,7 +71,7 @@ while (<>) {
 		$abstract = $1; # 抽象クラスの場合 undef 以外の値が入る
 		$class = $3;
 		$absolute_class = "$2.$3";
-		$module = lc($absolute_class); # パッケージ名をとりたいときは $class にする
+		$module = $absolute_class; # パッケージ名をとりたいときは $class にする
 		$module =~ tr/./_/;
 		print "{module($module).\n";
 	} elsif (/compareTo\(java\.lang\.Object\)/) {
