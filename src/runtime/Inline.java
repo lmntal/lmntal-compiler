@@ -89,7 +89,7 @@ public class Inline {
 				Env.d("Compile result :  "+cp.exitValue());
 				if(cp.exitValue()==1) {
 					System.err.println("Failed in compiling.");
-					//出力が長くなるのでコメントアウトしました．2006.07.05 inui
+					//出力が冗長になるのでコメントアウトしました．2006.07.05 inui
 //					System.err.println("Failed in compiling. Commandline was :");
 //					System.err.println(compileCommand);
 				} 
