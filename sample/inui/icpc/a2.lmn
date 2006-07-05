@@ -1,0 +1,59 @@
+scanner.use.
+integer.use.
+io.use.
+
+//素数リストを作る from sample/kudo/primes.lmn, thanks to kudo
+Ps=primes(Max) :- Ps=sift(gen(2,Max)).
+Ns0=gen(N0,Max) :- N0=<Max | Ns0=[N0|gen(N0+1,Max)].
+Ns0=gen(N0,Max) :- N0> Max | Ns0=[].
+Zs0=sift([P|Xs1]) :- int(P) | Zs0=[P|sift(filter(P,Xs1))].
+Zs0=sift([])      :-        | Zs0=[].
+Ys0=filter(P,[X|Xs1]) :- X mod P =\= 0 | Ys0=[X|filter(P,Xs1)].
+Ys0=filter(P,[X|Xs1]) :- X mod P  =  0 | Ys0=   filter(P,Xs1).
+Ys0=filter(P,[])      :- int(P)        | Ys0=[].
+
+p_stream = primes(1000).
+next_set.
+
+//データ入力
+next_set :- ra=scanner.nextInt(a).
+ra(done) :- rb=scanner.nextInt(d).
+rb(done) :- rc=scanner.nextInt(n).
+
+//データセットの終了判定
+rc(done), a(0), d(0), n(0) :- io.delete.
+rc(done), a(A), d(D), n(N) :- int(A), int(D), int(N) | a(A), d(D), n(N).
+
+p_stream2=[].
+//素数の判定
+H=is_prime(1) :- H=false.
+H=is_prime(2) :- H=true.
+
+% ground copy
+//H=is_prime(N), p_stream(Primes) :- N > 2, ground(Primes) | H=is_prime(N, Primes), p_stream(Primes).
+//H=is_prime(N, [P|_GZ]) :- N <  P*P                | H=true.
+//H=is_prime(N, [P|_GZ]) :- N >= P*P, N mod P =:= 0 | H=false.
+//H=is_prime(N, [P|  Z]) :- N >= P*P, N mod P =\= 0 | H=is_prime(N, Z).
+
+% reverse
+//H=is_prime(N), p_stream=[P|Z], p_stream2(Primes2) :- N > 2, N <  P*P                |
+//	H=true,  p_stream=list.append(list.reverse(Primes2), [P|Z]), p_stream2=[].
+//H=is_prime(N), p_stream=[P|Z], p_stream2(Primes2) :- N > 2, N >= P*P, N mod P =:= 0 |
+//	H=false, p_stream=list.append(list.reverse(Primes2), [P|Z]), p_stream2=[].
+//H=is_prime(N), p_stream=[P|Z], p_stream2(Primes2) :- N > 2, N >= P*P, N mod P =\= 0 |
+//	H=is_prime(N), p_stream(Z), p_stream2=[P|Primes2].
+
+% append only
+H=is_prime(N), p_stream=[P|Z], p_stream2(Primes2) :- N > 2, N <  P*P                |
+	H=true,  p_stream=list.append(Primes2, [P|Z]), p_stream2=[].
+H=is_prime(N), p_stream=[P|Z], p_stream2(Primes2) :- N > 2, N >= P*P, N mod P =:= 0 |
+	H=false, p_stream=list.append(Primes2, [P|Z]), p_stream2=[].
+H=is_prime(N), p_stream=[P|Z], p_stream2(Primes2) :- N > 2, N >= P*P, N mod P =\= 0 |
+	H=is_prime(N), p_stream(Z), p_stream2=list.append(Primes2, [P]).
+
+//if文
+H=if(true,  Te, Fe) :- unary(Fe) | H=Te.
+H=if(false, Te, Fe) :- unary(Te) | H=Fe.
+
+a(A), d(D), n(N) :- int(A), int(D), N  >  0 | n(if(is_prime(A), N-1, N)), a(A+D), d(D).
+a(A), d(D), n(N) :- int(A), int(D), N =:= 0 | r=io.println(string.str_of_int(A-D)), next_set.
