@@ -212,10 +212,10 @@ H=io.readline(Object, ReadString, ASync) :- int(ASync), class(Object, "java.io.B
 H=io.print(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
 	H=io.print(STDOUT, String), io.stdout(STDOUT).
 
-H=io.print([String|Rest]), io.stdout(STDOUT) :- string(String), class(STDOUT, "java.io.PrintWriter") |
-	H=io.print(STDOUT, [String|Rest]), io.stdout(STDOUT).
+H=io.lprint([String|Rest]), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
+	H=io.lprint(STDOUT, [String|Rest]), io.stdout(STDOUT).
 
-H=io.print([]) :- H=done.
+//H=io.lprint([]) :- H=done.
 
 /**
  * io.print(+Atom,-Res):
@@ -224,7 +224,7 @@ H=io.print([]) :- H=done.
  * into standard output, and connects done/1 to Res.
  * To be used witn io.use. 
  */
-H=io.print(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) |
+H=io.print(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 	H=[:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -240,8 +240,8 @@ H=io.print(Object, String) :- class(Object, "java.io.PrintWriter"), string(Strin
 		} catch(Exception e) {e.printStackTrace();}
 	:](Object, String).
 
-H=io.print(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter") |
-	H=io.print(Object, Rest), [:/*inline*/
+H=io.lprint(Object, [String|Rest]) :- unary(String), class(Object, "java.io.PrintWriter") |
+	H=io.lprint(Object, Rest), [:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			if(pw!=null) {
@@ -254,15 +254,15 @@ H=io.print(Object, [String|Rest]) :- string(String), class(Object, "java.io.Prin
 		} catch(Exception e) {e.printStackTrace();}
 	:](Object, String).
 
-H=io.print(Object, []) :- class(Object, "java.io.PrintWriter") | H=done.
+H=io.lprint(Object, []) :- class(Object, "java.io.PrintWriter") | H=done.
 
 H=io.println(String), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
 	H=io.println(STDOUT, String), io.stdout(STDOUT).
 
-H=io.println([String|Rest]), io.stdout(STDOUT) :- string(String), class(STDOUT, "java.io.PrintWriter") |
-	H=io.println(STDOUT, [String|Rest]), io.stdout(STDOUT).
+H=io.lprintln([String|Rest]), io.stdout(STDOUT) :- class(STDOUT, "java.io.PrintWriter") |
+	H=io.lprintln(STDOUT, [String|Rest]), io.stdout(STDOUT).
 
-H=io.println([]) :- H=done.
+//H=io.println([]) :- H=done.
 
 /**
  * io.println(+Atom,-Res):
@@ -271,7 +271,7 @@ H=io.println([]) :- H=done.
  * into standard output, and connects done/1 to Res.
  * To be used witn io.use. 
  */
-H=io.println(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) |
+H=io.println(Object, String) :- class(Object, "java.io.PrintWriter"), unary(String) |
 	H=[:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
@@ -286,8 +286,8 @@ H=io.println(Object, String) :- class(Object, "java.io.PrintWriter"), string(Str
 		} catch(Exception e) {e.printStackTrace();}
 	:](Object, String).
 
-H=io.println(Object, [String|Rest]) :- string(String), class(Object, "java.io.PrintWriter"), string(String) |
-	H=io.println(Object, Rest), [:/*inline*/
+H=io.lprintln(Object, [String|Rest]) :- unary(String), class(Object, "java.io.PrintWriter") |
+	H=io.lprintln(Object, Rest), [:/*inline*/
 		try {
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			if(pw!=null) {
@@ -299,7 +299,7 @@ H=io.println(Object, [String|Rest]) :- string(String), class(Object, "java.io.Pr
 		} catch(Exception e) {e.printStackTrace();}
 	:](Object, String).
 
-H=io.println(Object, []) :- class(Object, "java.io.PrintWriter") | H=done.
+H=io.lprintln(Object, []) :- class(Object, "java.io.PrintWriter") | H=done.
 
 //io.close : unit -> unit
 /**
