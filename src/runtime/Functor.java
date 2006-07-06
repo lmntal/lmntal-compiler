@@ -2,6 +2,8 @@ package runtime;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import util.Util;
 
@@ -282,10 +284,12 @@ public class Functor implements Serializable {
 						name = name.substring(2);
 						radix = 16;
 					}
+					if (Env.useBigInteger) return new BigIntegerFunctor(new BigInteger(name)); //2006.07.03 inui
 					return new IntegerFunctor(Integer.parseInt(name, radix));
 				} catch (NumberFormatException e) {
 				}
 				try {
+					if (Env.useBigInteger) return new BigFloatingFunctor(new BigDecimal(name)); //2006.07.03 inui
 					return new FloatingFunctor(Double.parseDouble(name));
 				} catch (NumberFormatException e2) {
 				}

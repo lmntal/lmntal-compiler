@@ -26,6 +26,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import runtime.BigFloatingFunctor;
+import runtime.BigIntegerFunctor;
 import runtime.Env;
 import runtime.FloatingFunctor;
 import runtime.FrontEnd;
@@ -535,6 +537,8 @@ public class Translator {
 		writer.write("import runtime.*;\n");
 		writer.write("import java.util.*;\n");
 		writer.write("import java.io.*;\n");
+		writer.write("import java.math.BigInteger;\n"); //2006.07.05
+		writer.write("import java.math.BigDecimal;\n"); //2006.07.05
 		writer.write("import daemon.IDConverter;\n");
 		writer.write("import module.*;\n");
 		if(Env.profile >= Env.PROFILE_BYRULE) writer.write("import util.Util;\n");
@@ -785,6 +789,10 @@ public class Translator {
 				writer.write(" = new IntegerFunctor(" + ((IntegerFunctor)func).intValue() + ");\n");
 			} else if (func instanceof FloatingFunctor) {
 				writer.write(" = new FloatingFunctor(" + ((FloatingFunctor)func).floatValue() + ");\n");
+			} else if (func instanceof BigIntegerFunctor) { //2006.07.06 inui
+				writer.write(" = new BigIntegerFunctor(new BigInteger(\"" + ((BigIntegerFunctor)func).getValue() + "\"));\n");
+			} else if (func instanceof BigFloatingFunctor) { //2006.07.06 inui
+				writer.write(" = new BigFloatingFunctor(new BigDecimal(\"" + ((BigFloatingFunctor)func).getValue() + "\"));\n");
 			} else if (func instanceof ObjectFunctor) {
 				throw new RuntimeException("Static ObjectFunctor is not supported");
 			} else {
@@ -880,7 +888,7 @@ public class Translator {
 		//また、translateメソッドの再起呼び出しをすると、変数の値が書き換えられていることがあるので
 		//再起呼び出しの後には（再度代入せずに）利用してはいけない。
 		writer.write("		Atom atom;\n");
-		writer.write("		Functor func;\n");
+		writer.write("		Functor func = null;\n");
 		writer.write("		Link link;\n");
 		writer.write("		AbstractMembrane mem;\n");
 		writer.write("		int x, y;\n");
@@ -891,6 +899,8 @@ public class Translator {
 		writer.write("		ArrayList guard_inline_gvar2;\n");
 		writer.write("		Iterator it_guard_inline;\n");
 		writer.write("		String s1, s2;\n");//2006.07.01 inui
+		writer.write("		BigInteger bx, by;\n");//2006.07.05 inui
+		writer.write("		BigDecimal bu, bv;\n");//2006.07.05 inui
 		
 		//2005-10-21 by kudo (INSERTCONNECTORS,DELETECONNECTORS,LOOKUPLINKで使う)
 		writer.write("		Set insset;\n");
@@ -1510,6 +1520,18 @@ public class Translator {
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
+				case Instruction.ISBIGINT : //[atom]
+					ejector.close();
+					writer.write(tabs + "if (!(!(((Atom)var[" + inst.getIntArg1() + "]).getFunctor() instanceof BigIntegerFunctor))) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; //inui 2006-07-03
+				case Instruction.ISBIGFLOAT : //[atom]
+					ejector.close();
+					writer.write(tabs + "if (!(!(((Atom)var[" + inst.getIntArg1() + "]).getFunctor() instanceof BigFloatingFunctor))) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; //inui 2006-07-03
 				case Instruction.ISINTFUNC : //[func]
 					ejector.close();
 					writer.write(tabs + "if (!(!(var[" +  inst.getIntArg1()  + "] instanceof IntegerFunctor))) {\n");
@@ -1975,6 +1997,173 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //nakajima 2003-01-23
 					//====浮動小数点数用の組み込みガード命令====ここまで====
+//					====多倍長整数用の組み込みボディ命令====ここから====
+				case Instruction.BIADD : //[-dstintatom, intatom1, intatom2]
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigIntegerFunctor(bx.add(by)));\n");
+					break; //inui 2006-07-03
+				case Instruction.BISUB : //[-dstintatom, intatom1, intatom2]
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigIntegerFunctor(bx.subtract(by)));	\n");
+					break; //inui 2006-07-03
+				case Instruction.BIMUL : //[-dstintatom, intatom1, intatom2]
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigIntegerFunctor(bx.multiply(by)));	\n");
+					break; //inui 2006-07-03
+				case Instruction.BIDIV : //[-dstintatom, intatom1, intatom2]
+					ejector.close();
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "if (!(by.equals(BigInteger.ZERO))) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					writer.write(tabs + "else func = new BigIntegerFunctor(bx.divide(by));\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, func);				\n");
+					break; //inui 2006-07-03
+				case Instruction.BINEG : //[-dstintatom, intatom]
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigIntegerFunctor(bx.negate()));				\n");
+					break;
+				case Instruction.BIMOD : //[-dstintatom, intatom1, intatom2]
+					ejector.close();
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "if (!(by.equals(BigInteger.ZERO))) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					writer.write(tabs + "else func = new BigIntegerFunctor(bx.divideAndRemainder(by)[1]);\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, func);						\n");
+					break; //inui 2006-07-03
+					//====多倍長整数用の組み込みボディ命令====ここまで====
+					//====多倍長整数用の組み込みガード命令====ここから====
+				case Instruction.BILT : //[intatom1, intatom2]
+					ejector.close();
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
+					writer.write(tabs + "if (!(bx.compareTo(by) >= 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BILE : //[intatom1, intatom2]
+					ejector.close();
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
+					writer.write(tabs + "if (!(bx.compareTo(by) > 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BIGT : //[intatom1, intatom2]
+					ejector.close();
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
+					writer.write(tabs + "if (!(bx.compareTo(by) <= 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BIGE : //[intatom1, intatom2]
+					ejector.close();
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
+					writer.write(tabs + "if (!(bx.compareTo(by) < 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BIEQ : //[intatom1, intatom2]
+					ejector.close();
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
+					writer.write(tabs + "if (!(bx.compareTo(by) != 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BINE : //[intatom1, intatom2]
+					ejector.close();
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
+					writer.write(tabs + "if (!(bx.compareTo(by) == 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+					//====多倍長整数用の組み込みガード命令====ここまで====
+					//====多倍長浮動小数点数用の組み込みボディ命令====ここから====
+				case Instruction.BFADD : //[-dstfloatatom, floatatom1, floatatom2]
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigFloatingFunctor(bu.add(bv)));\n");
+					break; //inui 2006-07-03
+				case Instruction.BFSUB : //[-dstfloatatom, floatatom1, floatatom2]
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigFloatingFunctor(bu.subtract(bv)));	\n");
+					break; // inui 2006-07-03
+				case Instruction.BFMUL : //[-dstfloatatom, floatatom1, floatatom2]
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigFloatingFunctor(bu.multiply(bv)));	\n");
+					break; // inui 2006-07-03
+				case Instruction.BFDIV : //[-dstfloatatom, floatatom1, floatatom2]
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigFloatingFunctor(bu.divide(bv)));				\n");
+					break; // inui 2006-07-03
+				case Instruction.BFNEG : //[-dstfloatatom, floatatom]
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigFloatingFunctor(bu.negate()));\n");
+					break; //nakajima 2004-01-23
+					//====多倍長浮動小数点数用の組み込みボディ命令====ここまで====
+					//====多倍長浮動小数点数用の組み込みガード命令====ここから====	
+				case Instruction.BFLT : //[floatatom1, floatatom2]
+					ejector.close();
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
+					writer.write(tabs + "if (!(bu.compareTo(bv) >= 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BFLE : //[floatatom1, floatatom2]
+					ejector.close();
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
+					writer.write(tabs + "if (!(bu.compareTo(bv) > 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BFGT : //[floatatom1, floatatom2]
+					ejector.close();
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
+					writer.write(tabs + "if (!(bu.compareTo(bv) < 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BFGE : //[floatatom1, floatatom2]
+					ejector.close();
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
+					writer.write(tabs + "if (!(bu.compareTo(bv) < 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BFEQ : //[floatatom1, floatatom2]
+					ejector.close();
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
+					writer.write(tabs + "if (!(bu.compareTo(bv) != 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+				case Instruction.BFNE : //[floatatom1, floatatom2]
+					ejector.close();
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
+					writer.write(tabs + "if (!(bu.compareTo(bv) == 0)) {\n");
+					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
+					writer.write(tabs + "}\n");
+					break; // inui 2006-07-03
+					//====多倍長浮動小数点数用の組み込みガード命令====ここまで====
 				case Instruction.FLOAT2INT: //[-intatom, floatatom]
 					writer.write(tabs + "u = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = new Atom(null, new IntegerFunctor((int)u));\n");
@@ -1983,6 +2172,14 @@ public class Translator {
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = new Atom(null, new FloatingFunctor((double)x));\n");
 					break; // n-kato
+				case Instruction.BFLOAT2BINT: //[-intatom, floatatom]
+					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigIntegerFunctor(bu.toBigInteger()));\n");
+					break; //inui 2006-07-03
+				case Instruction.BINT2BFLOAT: //[-floatatom, intatom]
+					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigFloatingFunctor(new BigDecimal(bx)));\n");
+					break; //inui 2006-07-03
 //未実装
 //				case Instruction.GROUP:
 

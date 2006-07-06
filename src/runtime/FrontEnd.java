@@ -263,7 +263,11 @@ public class FrontEnd {
 						Env.fGUI = false;
 						Env.f3D = true;
 						} else */
-					    if(args[i].equals("--compileonly")){
+						if(args[i].equals("--big")) {//2006.07.03 inui
+							/// --big
+							/// Use BigInteger.
+							Env.useBigInteger = true;
+						} else if(args[i].equals("--compileonly")){
 					    	// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.fInterpret = true;

@@ -144,10 +144,11 @@ public final class Env {
 	 */
 	public static boolean fTrace = false;
 	
-	/**
-	 * デバッグ実行オプションの有無 by inui
-	 */
+	/** デバッグ実行オプションの有無 by inui */
 	public static boolean debugOption = false;
+	
+	/** 多倍長整数 2006.07.03 inui */
+	public static boolean useBigInteger = false;
 		
 	/**
 	 * REPL で、文を実行するためのアクション

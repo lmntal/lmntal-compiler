@@ -1498,8 +1498,92 @@ public class Instruction implements Cloneable, Serializable {
      */
     public static final int SUBCLASS = 3000;
     static {setArgType(SUBCLASS, new ArgType(false, ARG_ATOM, ARG_ATOM));}
-
     
+    /////////////////////////////////////////////////////////////////
+    // 多倍長に関する命令 (5000 -- 6000) 2006.07.03 inui
+    /////////////////////////////////////////////////////////////////
+    
+    /** isbigint [atom]
+	 * <br>新規ガード命令<br>
+	 * アトム$atomが整数アトムであることを確認する。*/
+    public static final int ISBIGINT = 5000;
+    public static final int ISBIGFLOAT = 5001;
+    static {setArgType(ISBIGINT, new ArgType(false, ARG_ATOM));}
+    static {setArgType(ISBIGFLOAT, new ArgType(false, ARG_ATOM));}
+
+	/** biadd [-dstintatom, intatom1, intatom2]
+	 * <br>多倍長整数用の組み込み命令<br>
+	 * 多倍長整数アトムの加算結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。
+	 * <p>bidivおよびbimodに限り失敗する。*/
+	public static final int BIADD = 5100;
+	public static final int BISUB = 5101;
+	public static final int BIMUL = 5102;
+	public static final int BIDIV = 5103;
+	public static final int BINEG = 5104;
+	public static final int BIMOD = 5105;
+	public static final int BINOT = 5110;
+	public static final int BIAND = 5111;
+	public static final int BIOR  = 5112;
+	public static final int BIXOR = 5113;
+	static {setArgType(BIADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BISUB, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIMUL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIDIV, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BINEG, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIMOD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BINOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIAND, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIXOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	
+	//多倍長整数用の組み込みガード命令
+
+	/** bilt [intatom1, intatom2]
+	 * <br>多倍長整数用の組み込みガード命令<br>
+	 * 多倍長整数アトムの値の大小比較が成り立つことを確認する。*/
+	public static final int BILT = 5120;
+	public static final int BILE = 5121;
+	public static final int BIGT = 5122;
+	public static final int BIGE = 5123;	
+	public static final int BIEQ = 5124;	
+	public static final int BINE = 5125;	
+	static {setArgType(BILT, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BILE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIGT, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIGE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BIEQ, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BINE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	
+	//多倍長浮動小数点数用の組み込みボディ命令
+	public static final int BFADD = 5600;
+	public static final int BFSUB = 5601;
+	public static final int BFMUL = 5602;
+	public static final int BFDIV = 5603;
+	public static final int BFNEG = 5604;
+	static {setArgType(BFADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFSUB, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFMUL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFDIV, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFNEG, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	
+	//多倍長浮動小数点数用の組み込みガード命令
+	public static final int BFLT = 5620;
+	public static final int BFLE = 5621;
+	public static final int BFGT = 5622;
+	public static final int BFGE = 5623;	
+	public static final int BFEQ = 5624;	
+	public static final int BFNE = 5625;	
+	static {setArgType(BFLT, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFLE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFGT, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFGE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFEQ, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BFNE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+	
+	public static final int BFLOAT2BINT = 5630;
+	public static final int BINT2BFLOAT = 5631;
+	static {setArgType(BFLOAT2BINT, new ArgType(true, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(BINT2BFLOAT, new ArgType(true, ARG_ATOM, ARG_ATOM));}
    
     /** 命令の種類を取得する。*/
 	public int getKind() {
