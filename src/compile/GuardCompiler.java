@@ -127,7 +127,7 @@ public class GuardCompiler extends HeadCompiler {
 		
 		guardLibrary1.put(new Functor("string",1), new int[]{ISSTRING});
 //		guardLibrary2.put(new Functor("class",2), new int[]{0,      ISSTRING,Instruction.INSTANCEOF});
-		guardLibrary1.put(new Functor("class", 2), new int[]{0,              Instruction.GETCLASS,  ISSTRING});
+//		guardLibrary1.put(new Functor("class", 2), new int[]{0,              Instruction.GETCLASS,  ISSTRING});
 		guardLibrary1.put(new Functor("connectRuntime",1), new int[]{ISSTRING, Instruction.CONNECTRUNTIME});
 	}
 
@@ -385,15 +385,21 @@ public class GuardCompiler extends HeadCompiler {
 						match.add(new Instruction(Instruction.NEQGROUND,linkid1,linkid2));
 					}
 				}
-//				// (2006.06.30 n-kato)
-//				else if (func.equals(new Functor("class", 2))) {
-//					if (!identifiedCxtdefs.contains(def1)) continue;
-//					int atomid1 = loadUnaryAtom(def1);
-//					int atomid2 = varcount++;
-//					match.add(new Instruction(Instruction.GETCLASS, atomid2, atomid1));
-//					bindToUnaryAtom(def2, atomid2);
-//					typedcxtdatatypes.put(def2, new Integer(ISSTRING));
-//				}
+				// (2006.07.06 n-kato)
+				else if (func.equals(new Functor("class", 2))) {
+					if (!identifiedCxtdefs.contains(def1)) continue;
+					if (!identifiedCxtdefs.contains(def2)) continue;
+					int atomid1 = loadUnaryAtom(def1);
+					int atomid2 = loadUnaryAtom(def2);
+					if (!new Integer(ISSTRING).equals(typedcxtdatatypes.get(def2))) {
+						match.add(new Instruction(ISSTRING, atomid2));
+						typedcxtdatatypes.put(def2, new Integer(ISSTRING));
+					}
+					// todo: Instruction.INSTANCEOF
+					int classnameAtomid = varcount++;
+					match.add(new Instruction(Instruction.GETCLASS, classnameAtomid, atomid1));
+					match.add(new Instruction(Instruction.SUBCLASS, classnameAtomid, atomid2));
+				}
 				else if (func instanceof runtime.IntegerFunctor) {
 					bindToFunctor(def1, func);
 					typedcxtdatatypes.put(def1, new Integer(ISINT));
@@ -459,9 +465,10 @@ public class GuardCompiler extends HeadCompiler {
 							atomid2 = varcount++;
 							match.add(new Instruction(desc[1], atomid2, atomid1));
 						}
-						//2006.07.01 by inui
-						if (func.equals(classFunctor)) bindToUnaryAtom(def2, atomid2, Instruction.SUBCLASS);
-						else bindToUnaryAtom(def2, atomid2);
+						// 2006.07.06 n-kato //2006.07.01 by inui
+						// if (func.equals(classFunctor)) bindToUnaryAtom(def2, atomid2, Instruction.SUBCLASS);
+						// else
+						bindToUnaryAtom(def2, atomid2);
 						typedcxtdatatypes.put(def2, new Integer(desc[2]));
 					}
 				}
@@ -477,7 +484,7 @@ public class GuardCompiler extends HeadCompiler {
 					}
 					if (desc[1] != 0 && !new Integer(desc[1]).equals(typedcxtdatatypes.get(def2))) {
 						match.add(new Instruction(desc[1], atomid2));
-						typedcxtdatatypes.put(def1, new Integer(desc[1]));
+						typedcxtdatatypes.put(def2, new Integer(desc[1]));
 					}
 					if (func.getArity() == 2) { // {t1,t2,inst} --> p(+X1,+X2)
 						match.add(new Instruction(desc[2], atomid1, atomid2));
