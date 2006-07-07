@@ -30,6 +30,8 @@ R=lmnlexer.rev_float(FS):-R=string.float_of_str(lmnlexer.rev_str(FS)).
 T=token(backslash,Pos):-T=error_token(free_backslash,Pos).
 T=token(colon,Pos):-T=error_token(free_colon,Pos).
 
+T=token(TK,TP):-T=token(TK,[],TP).
+
 % コメント外
 L=lmnlexer.lex(_IL,_IC,["{"|R]):- L=[token(lbrace,pos(_IL,_IC))|lmnlexer.lex(_IL,_IC+1,R)]. % lbrace/1 -> 1 (token_symbol)
 L=lmnlexer.lex(_IL,_IC,["("|R]):- L=[token(lparen,pos(_IL,_IC))|lmnlexer.lex(_IL,_IC+1,R)]. % rparen/1 -> 1 (token_symbol)

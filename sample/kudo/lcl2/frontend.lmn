@@ -47,7 +47,7 @@ lexing{
 
 lexed=Lexed.
 
-lexed(_GTokens):- parsing{lmnparser.parse(_GTokens)}.
+lexed(_GTokens):- ground(_GTokens)| parsing{lmnparser.parse(_GTokens)}.
 
 % main
 
