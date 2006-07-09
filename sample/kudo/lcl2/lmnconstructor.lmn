@@ -78,12 +78,12 @@ lmnconstructor.constructing=seq.run(
 //lmnconstructor.construct_rule({$g.
 	rulesetcount=_IRC:-().
 
-	S=srcrule(N,H,G,B,Pos) :- string(N), ground(H), ground(G), ground(B) |
-		rule={rulename(N), '+'(S),
-		mem={childs(He), '+'(L)}, He=H, lhs=L,
-		mem={childs(Gu), '+'(C)}, Gu=G, guard=C,
-		mem={childs(Bo), '+'(R)}, Bo=B, rhs=R.
-		pos(Pos).
+	S=srcrule(_SN,_GH,_GG,_GB,_GP) :-
+		rule={rulename(_SN), '+'(S),
+		mem={childs(He), '+'(L)}, He=_GH, lhs=L,
+		mem={childs(Gu), '+'(C)}, Gu=_GG, guard=C,
+		mem={childs(Bo), '+'(R)}, Bo=_GB, rhs=R.
+		pos(_GP).
 		}.
 
 },
@@ -106,19 +106,26 @@ lmnconstructor.constructing=seq.run(
 	
 		% アトムオブジェクトを作る
 		Construct_Atom@@
-		S=srcatom(Functor, Childs) :- ground(Functor) | 
-			atom={'+'(S), functorkind(Functor), childs(0, Childs)}.
+		S=srcatom(_GFunctor, Childs, _GPos) :- 
+			atom={'+'(S), functorkind(_GFunctor), childs(0, Childs), pos(_GPos)}.
 	
-		% 膜オブジェクトを作る		
+		% 膜オブジェクトを作る
 		Construct_Mem@@
-		S=srcmem(Childs, Stable_flug, Host, Kind) :- ground(Host), int(Kind) |
-			mem={childs(Childs), '+'(S), s_flg=Stable_flug, host=Host, kind=Kind}.
+		S=srcmem(Childs, Attrs, _GPos) :-
+			mem={childs(Childs), '+'(S), attrs=Attrs, kind(0), pos(_GPos)}.
+		
+		% 膜の属性をバラす
+		mem={attrs=Attrs, $mem}, Attrs=[slash|AR] :- mem={attrs=AR, stable, $mem}.
+		mem={attrs=Attrs, kind(_IK), $mem}, Attrs=[underbar|AR] :-
+			mem={attrs=AR, kind(1), $mem}.
+		// at は今のところ無視(というか先に構文解析で対応しなくてはならない)
+		mem={attrs=Attrs, $mem}, Attrs=[] :- mem={$mem}.
 		
 		% stableかどうか
-		Construct_Mem_1@@
+/*		Construct_Mem_1@@
 		mem={s_flg=F, $mem}, F=true :- mem={stable, $mem}.
 		Construct_Mem_2@@
-		mem={s_flg=F, $mem}, F=false :- mem={$mem}.
+		mem={s_flg=F, $mem}, F=false :- mem={$mem}. */
 		
 		% ルール文脈オブジェクトを作る
 		Construct_RuleCxt@@

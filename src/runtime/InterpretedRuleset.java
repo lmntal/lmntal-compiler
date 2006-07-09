@@ -1579,9 +1579,13 @@ class InterpretiveReactor {
 					}
 					break;
 					//sakurai
-					
-
-
+				
+				// 2006/07/09 by kudo
+				case Instruction.ISBUDDY: // isbuddy [ link1, link2 ]
+					Link l1 = (Link)vars.get(inst.getIntArg1());
+					Link l2 = (Link)vars.get(inst.getIntArg2());
+					if(l1.getBuddy() != l2)return false;
+					break;
 
 				default :
 					System.err.println(

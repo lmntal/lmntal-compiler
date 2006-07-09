@@ -96,7 +96,13 @@ lmnparser.parsed=seq.run({src(Tokens)},
 	// '{', '}'以外が出てきたら膜の中に入れる
 	// ※ '{'もはじくことによって、階層構造にも対応できている
 	Parse_Braces3@@
-	L=[braces_begin(LBPos,MH,MT), token($tkind, TArgs, TPos)|R], braces_t($lbrace, $rbrace) :-
+//	braces_t($lbrace, $rbrace), Tok=token($tkind, TArgs, TPos),
+//  Br_b=braces_begin(LBPos,MH,T) \
+//	MT=T, L=[Br_b, Tok|R] :-
+//		$tkind \= $lbrace, $tkind \= $rbrace|
+//		MT=[Tok|T], L=[Br_b|R].
+	braces_t($lbrace, $rbrace),
+	L=[braces_begin(LBPos,MH,MT), token($tkind, TArgs, TPos)|R] :-
 		$tkind \= $lbrace, $tkind \= $rbrace|
 		L=[braces_begin(LBPos,MH,T)|R], MT=[token($tkind,TArgs,TPos)|T],
 		braces_t($lbrace,$rbrace).

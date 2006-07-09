@@ -1584,7 +1584,18 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int BINT2BFLOAT = 5631;
 	static {setArgType(BFLOAT2BINT, new ArgType(true, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(BINT2BFLOAT, new ArgType(true, ARG_ATOM, ARG_ATOM));}
-   
+
+    /////////////////////////////////////////////////////////////
+    // LMNtal Compiler on LMNtal の為に一時的に用意する命令 by kudo
+    /////////////////////////////////////////////////////////////
+    /**
+     * isbuddy [link1, link2]
+     * $link1が$link2と接続されていることを確認する
+     * 2006/07/09 by kudo
+     */
+    public static final int ISBUDDY = 7000;
+    static {setArgType(ISBUDDY, new ArgType(false, ARG_VAR, ARG_VAR));}	
+	
     /** 命令の種類を取得する。*/
 	public int getKind() {
 		return kind;

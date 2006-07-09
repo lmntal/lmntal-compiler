@@ -47,16 +47,18 @@ lexing{
 
 lexed=Lexed.
 
-lexed(_GTokens):- ground(_GTokens)| parsing{lmnparser.parse(_GTokens)}.
+lexed(_GTokens), io.stdin(_USI), io.stdout(_USO) :-
+	parsing{io.stdin(_USI), io.stdout(_USO), lmnparser.parse(_GTokens)}.
 
 % main
 
 % 全入力tokenをlmnparserにかける(ここは、本当は全部わたす必要はなく、並列処理できる。
 % でも、そもそもここまではinlineでもいいかもしれない)
 //lexing={l=Lexed, $l[Lexed],@l}/ :- parsing={lmnparser.parse(Lexed), $l[Lexed]}.
-//parsing={lmnparser.parsed(Parsed), $p[Parsed], @p}/ :- constructing={lmnconstructor.construct(Parsed), $p[Parsed]}.
-//constructing={lmnconstructor.constructed(Constructed), $c[Constructed], @c}/ :- compiling={lmncompiler.compile({global(Constructed), $c[Constructed]}) }.
-//compiling={lmncompiler.compiled(Compiled), {$c[Compiled], @c}/, @cc}/ :- dumping={lmndumper.dump(Compiled), {$c[Compiled]}}.
-//dumping={lmndumper.dumped(Dumped), {$d[Dumped]}/, @d}/ :- end=Dumped, {$d[Dumped]}.
+parsing{lmnparser.parsed(Parsed), $p[Parsed], @p}/ :- constructing{lmnconstructor.construct(Parsed), $p[Parsed]}.
+constructing{lmnconstructor.constructed(Constructed), $c[Constructed], @c}/ :- compiling{lmncompiler.compile({global(Constructed), $c[Constructed]}) }.
+compiling{lmncompiler.compiled(Compiled), {$c[Compiled], @c}/, @cc}/ :- dumping{lmndumper.dump(Compiled), {$c[Compiled]}}.
+dumping{lmndumper.dumped(Dumped), {$d[Dumped]}/, @d}/ :- end=Dumped, {$d[Dumped]}.
 
-%end={io.stdin(SI), io.stdout(SO), $e}/ :- unary(SI), unary(SO) | end={c(io.close(SI), io.close(SO)), $e}.
+end={io.stdin(_USI), io.stdout(_USO), $e}/ :-
+	c(io.close(_USI), io.close(_USO)), end={$e}.
