@@ -286,14 +286,39 @@ lmnconstructor.constructing=seq.run(
 		
 	}.
 	
+	constructing_rule({$rule,@rule}/) :- scattering_rule({$rule.
+
+		scatter.
+		scatter, lhs={$lhs}, rhs={$rhs} :-
+			scatter({{lhs}},L), scatter({{rhs}},R),
+			lhs={$lhs, +L}, rhs={$rhs, +R}.
+	
+		{$any[C1,C2|*CZ], cpref(C1,C2,C),@any} :- {$any[C1,C2|*CZ],@any}, common.cpref(C1,C2,C).
+	
+		scatter({$s}, {$mem}) :- {$s,+S}, {$mem, scat(S),
+			(mem(M), scat(S) :- scat(S1), memscatter(S2,M), cpref(S1,S2,S)),
+			(atom(A), scat(S) :- scat(S1), atomscatter(S2,A), cpref(S1,S2,S))}.
+		scatter_atom({$s}, {$atom}) :- {$s,+S},{$atom, scat(S),
+			(arg(P,L), scat(S) :- scat(S1), argscatter(P, scatter_link(S2,L)),cpref(S1,S2,S))}.
+	
+		mem={$mem, scat(S), @mem}/ :- mem={$mem}, common.rmref(S).
+		atom={$atom, scat(S), @atom}/ :- atom={$atom}, common.rmref(S).
+	
+		{$mem, atomscatter(S,A)} :- {$mem, atom(SA)}, SA=scatter_atom(S,A).
+		{$mem, memscatter(S,M)} :- {$mem, mem(SM)}, SM=scatter(S,M).
+		{$atom, argscatter(_IP,scatter_link(S,L))} :- {$atom, arg(_IP,SL)}, SL=scatter_link(S,L).
+	
+		S=scatter({{$c[]},$s}, {$mem}) :- S={$mem, $c[], +M}, scatter({{$c[]},$s},M).
+		S=scatter_atom({{$c[]},$s}, {$atom}) :- S={$atom, $c[]}, {{$c[]},$s}.
+		S=scatter_link({{$c[]},$s}, {$link}) :- S={$link, $c[]}, {{$c[]}, $s}.
+	}).
+	
+	stop_seq.
 },
 
-//lmnconstructor.construct1({$g, @g}/) :-
-//
-//lmnconstructor.construct2({$g. 
-
 {
-	constructing_rule={$rule, linkcount(LC), @rule}/ :- int(LC) | constructing_rule={$rule.
+
+	scattering_rule={$rule, linkcount(LC), @rule}/ :- int(LC) | constructing_rule={$rule.
 
 		% 左辺の膜か，右辺の膜かという情報を配る
 		lhs={$lhs, mem(M)}, rhs={$rhs}, mem={'+'(M), $mem} :-
@@ -367,4 +392,9 @@ lmnconstructor.constructing=seq.run(
 
 lmnconstructor.constructing({global(G), $g[G]}/) :-
 	lmnconstructor.constructed(G),$g[G].
+	
+lmnconstructor.constructing(cancelled({$g}/)) :-
+	lmnconstructor.cancelled({$g}).	
+	
+	
 }.

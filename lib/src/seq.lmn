@@ -36,7 +36,7 @@ module(seq).
 H=seq.run({$p, @r}/, [ {$z, @p} | Rest ]) :- \+($p = (stop_seq, $pp))|
 	H=seq.run({$p, $z, @p}, Rest).
 
-H=seq.run({$p, stop_seq, @r}/, Rest) :- H={$p}, cancelled_seq=Rest.
+H=seq.run({$p, stop_seq, @r}/, Rest) :- H=cancelled({$p}), cancelled_seq=Rest.
 
 H=seq.run({@p. $p.}, []) :- H={$p}.
 
