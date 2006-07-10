@@ -779,14 +779,15 @@ public class Task extends AbstractTask implements Runnable {
 		Object[] args = new Object[state.length - 3 + 1];
 		int i;
 		for (i = 0; i < state.length - 3; i++) {
-			parameterTypes[i] = Object.class;
+//			parameterTypes[i] = Object.class;
 			args[i] = state[i+3];
 			if (args[i] instanceof Atom && atomMap != null && atomMap.containsKey(args[i]))
 				args[i] = atomMap.get(args[i]);
 			if (origMem == args[i])
 				args[i] = mem;
 		}
-		parameterTypes[i] = boolean.class;
+		parameterTypes[0] = Object[].class;
+		parameterTypes[1] = boolean.class;
 		args[i] = Boolean.FALSE;
 		try {
 			Method m = rs.getClass().getMethod("exec" + label, parameterTypes);
