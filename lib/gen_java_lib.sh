@@ -1,1 +1,1 @@
-./gen_all_lib.sh --public-dir="java" --stdlib-name="java_lib.jar" --temporary-dir="java"
+java -Xmx256m -cp ../classes compile.Translator --public-dir="java_lib" --stdlib-name="java_lib.jar" --temporary-dir="java_lib"
