@@ -199,7 +199,8 @@ public class Optimizer {
 		//•–•∞≤Û»Ú
 		Iterator itb = body.iterator();
 		while (itb.hasNext()) {
-			if (((Instruction)itb.next()).getKind() == Instruction.COPYCELLS)
+			int itbKind = ((Instruction)itb.next()).getKind();
+			if (itbKind == Instruction.COPYCELLS || itbKind == Instruction.DROPMEM)
 				return;
 		}
 		
