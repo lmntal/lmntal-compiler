@@ -312,8 +312,7 @@ lmnconstructor.constructing=seq.run(
 		S=scatter_atom({{$c[]},$s}, {$atom}) :- S={$atom, $c[]}, {{$c[]},$s}.
 		S=scatter_link({{$c[]},$s}, {$link}) :- S={$link, $c[]}, {{$c[]}, $s}.
 	}).
-	
-	stop_seq.
+
 },
 
 {

@@ -21,7 +21,7 @@
 			findatom($a, $m, F), usable($m1), E=eoi :- ground($a), $m1 = $m | E=[findatom($a, $m, F)|eoi], usable($m1), usable($a).
 			anymem($m, $p, K), usable($p1), E=eoi :- ground($m), $p1 = $p | E=[anymem($m, $p, K)|eoi], usable($p1), usable($m).
 			getlink($l, $a, P), usable($a1), E=eoi :- ground($l), $a1 = $a | E=[getlink($l, $a, P)|eoi], usable($a1), usable($l).
-			isbuddy($l1, $l2), usable($lu1), usable($lu2), E=eoi :- $lu1 = $l1, $lu2 = $l2 | E=[isbuddy($l1, $l2)|eoi], usable($lu1), usable($lu2).
+			isbuddy($l1, $l2,M), usable($lu1), usable($lu2), E=eoi :- $lu1 = $l1, $lu2 = $l2 | E=[isbuddy($l1, $l2,M)|eoi], usable($lu1), usable($lu2).
 			neqatom($a1, $a2), usable($au1), usable($au2), E=eoi :- $a1 = $au1, $a2 = $au2 | E=[neqatom($a1,$a2)|eoi], usable($au1), usable($au2).
 
 		}).
