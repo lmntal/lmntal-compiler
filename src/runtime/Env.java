@@ -149,6 +149,12 @@ public final class Env {
 	
 	/** 多倍長整数 2006.07.03 inui */
 	public static boolean useBigInteger = false;
+	
+	/** 標準入力から LMNtal プログラムを読み込むオプション 2006.07.11 inui */
+	public static boolean stdinLMN = false;
+	
+	/** 標準入力から 中間命令列を読み込むオプション 2006.07.11 inui */
+	public static boolean stdinTAL = false;
 		
 	/**
 	 * REPL で、文を実行するためのアクション

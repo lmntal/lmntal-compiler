@@ -79,7 +79,13 @@ public class FrontEnd {
 		} else {
 			// ソースありならソースを解釈実行、なしなら REPL。
 			if(Env.srcs.isEmpty()) {
-				REPL.run();
+				if (Env.stdinLMN) run(new InputStreamReader(System.in)); //2006.07.11 inui
+				else if (Env.stdinTAL) { //2006.07.11 inui
+					try {
+						run(RulesetParser.parse(new BufferedReader(new InputStreamReader(System.in))));
+					} catch (ParseException e) {}
+				}
+				else REPL.run();
 			} else {
 				run(Env.srcs);
 				if(Env.fREMAIN) REPL.run();
@@ -407,6 +413,14 @@ public class FrontEnd {
 						} else if (args[i].matches("--request-port")) {//2006.4.27 by inui
 							Debug.setRequestPort(Integer.parseInt(args[i+1]));
 							i++;
+						} else if (args[i].equals("--stdin-lmn")) { //2006.07.11 inui
+							/// --stdin-lmn
+							/// read LMNtal program from standard input
+							Env.stdinLMN = true;
+						} else if (args[i].equals("--stdin-tal")) { //2006.07.11 inui
+							/// --stdin-tal
+							/// read LMNtal intermediate instruction list from standard input
+							Env.stdinTAL = true;
 						} else if (args[i].startsWith("--stdlib-name=")) {
 							// 開発者用オプション
 							// --stdlib-name=<name>
