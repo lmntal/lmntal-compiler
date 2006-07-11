@@ -1,0 +1,106 @@
+//フレームを生成
+{
+frame=javax_swing_JFrame.new("LMNtal Editor"), 10.
+10, frame(F) :- class(F, "javax.swing.JFrame") | r=java_awt_Component.setSize(F, 600, 400), contentPane=javax_swing_JFrame.getContentPane(F), frame(F).
+}.
+
+{frame(F), contentPane(P) , $p[], @p}/ :- class(F, "javax.swing.JFrame"), class(P, "java.awt.Container") |
+	frame(F), contentPane(P).
+
+//メニューバーとテキストエディタを生成
+{
+jt=javax_swing_JTextArea.new(), 20.
+20, jt(JT) :- class(JT, "javax.swing.JTextArea") |
+	r10=javax_swing_JComponent.setFont(JT, java_awt_Font.new("Monospaced", java_awt_Font.plain, 12)), jt(JT).
+
+menubar=javax_swing_JMenuBar.new().
+menu=javax_swing_JMenu.new("File").
+item1=javax_swing_JMenuItem.new("Open"), 10.
+item2=javax_swing_JMenuItem.new("Save"), 30.
+10, item1(Item), jt(JT) :- class(Item, "javax.swing.JMenuItem"), class(JT, "javax.swing.JTextArea") |
+	r=javax_swing_AbstractButton.addActionListener(Item, openAction.new(JT)), item1(Item), jt(JT).
+30, item2(Item), jt(JT) :- class(Item, "javax.swing.JMenuItem"), class(JT, "javax.swing.JTextArea") |
+	r=javax_swing_AbstractButton.addActionListener(Item, saveAction.new(JT)), item2(Item), jt(JT).
+
+r(done), menu(Menu), item1(Item) :- class(Menu, "javax.swing.JMenu") |
+	r1=javax_swing_JMenu.add(Menu, Item), menu(Menu).
+r(done), menu(Menu), item2(Item) :- class(Menu, "javax.swing.JMenu") |
+	r2=javax_swing_JMenu.add(Menu, Item), menu(Menu).
+menubar(MenuBar), menu(Menu), r1(_UR1), r2(_UR2) :- class(MenuBar, "javax.swing.JMenuBar") |
+	r3=javax_swing_JMenuBar.add(MenuBar, Menu), menubar(MenuBar).
+}.
+
+{menubar(MenuBar), jt(JT), $p[], @p}/ :- class(MenuBar, "javax.swing.JMenuBar"), class(JT, "javax.swing.JTextArea") | 
+	menubar(MenuBar), jt(JT).
+
+frame(F), menubar(MenuBar) :- class(F, "javax.swing.JFrame") | menubarset=javax_swing_JFrame.setJMenuBar(F, MenuBar), frame(F).
+
+frame(F), added(_UA), menubarset(done) :- 
+	r=java_awt_Component.setVisible(F, true).
+contentPane(Pane), jt(JT) :- added=java_awt_Container.add(Pane, JT).
+
+[:/*inline_define*/
+import java.awt.event.*;
+import java.io.*;
+import javax.swing.*;
+class OpenAction implements ActionListener {
+	private JTextArea jt;
+	public OpenAction(JTextArea jt) {
+		this.jt = jt;
+	}
+	public void actionPerformed(ActionEvent e) {
+		JFileChooser fc = new JFileChooser();
+		int r = fc.showOpenDialog(null);
+		if (r == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			try {
+				BufferedReader br = new BufferedReader(new FileReader(file));
+				jt.setText("");
+				String s;
+				while ((s = br.readLine()) != null)
+					jt.append(s+"\n");
+			} catch (IOException ex) {}
+		}
+	}
+}
+class SaveAction implements ActionListener {
+	private JTextArea jt;
+	public SaveAction(JTextArea jt) {
+		this.jt = jt;
+	}
+	public void actionPerformed(ActionEvent e) {
+		JFileChooser fc = new JFileChooser();
+		int r = fc.showSaveDialog(null);
+		if (r == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			try {
+				FileWriter fw = new FileWriter(file);
+				fw.write(jt.getText());
+				fw.close();
+			} catch (IOException ex) {}
+		}
+	}
+}
+:].
+
+{
+module(openAction).
+H=openAction.new(JT) :- class(JT, "javax.swing.JTextArea") | H=[:/*inline*/
+	javax.swing.JTextArea jt = (javax.swing.JTextArea) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getValue();
+	Atom o = mem.newAtom(new ObjectFunctor(new OpenAction(jt)));
+	mem.relink(o, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](JT).
+}.
+
+{
+module(saveAction).
+H=saveAction.new(JT) :- class(JT, "javax.swing.JTextArea") | H=[:/*inline*/
+	javax.swing.JTextArea jt = (javax.swing.JTextArea) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getValue();
+	Atom o = mem.newAtom(new ObjectFunctor(new SaveAction(jt)));
+	mem.relink(o, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](JT).
+}.
