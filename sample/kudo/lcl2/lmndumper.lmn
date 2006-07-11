@@ -118,8 +118,8 @@
 		R="insertconnectors["++var_str(CMAP)++", "++varlist_str(LL)++", "++var_str(M)++"]".
 	R=str_of_inst(deleteconnectors(CM, CS, M)) :- 
 		R="deleteconnectors["++var_str(CM)++", "++var_str(CS)++", "++var_str(M)++"]".
-	R=str_of_inst(isbuddy(L1,L2)) :- 
-		R="isbuddy        ["++var_str(L1)++", "++var_str(L2)++"]".
+	R=str_of_inst(isbuddy(L1,L2,M)) :- 
+		R="isbuddy        ["++var_str(L1)++", "++var_str(L2)++", "++var_str(M)++"]".
 	R=str_of_inst(testmem(M, A)) :- 
 		R="testmem        ["++var_str(M)++", "++var_str(A)++"]".
 	R=str_of_inst(dereflink(L, A, P)) :- int(P) |
