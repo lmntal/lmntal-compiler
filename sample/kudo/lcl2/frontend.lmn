@@ -4,18 +4,18 @@
 
 {
 module(char).
-C=char.charlist_of_string(S) :- S \= "" |
-C=[ string.substring(S,0,1)|char.charlist_of_string(string.substring(S,1))].
-C=char.charlist_of_string(S) :- S == "" | C=[].
+Char1@@ C=char.charlist_of_string(S) :- S \= "" |
+	C=[ string.substring(S,0,1)|char.charlist_of_string(string.substring(S,1))].
+Char2@@ C=char.charlist_of_string(S) :- S == "" | C=[].
 
-C=char.charlist_of_stringlist([S|SR]):-
+Char3@@ C=char.charlist_of_stringlist([S|SR]):-
 C=list.append(
 	char.charlist_of_string(S),["\\n"|
 		char.charlist_of_stringlist(SR)]).
-C=char.charlist_of_stringlist([]):-C=[].
+Char4@@ C=char.charlist_of_stringlist([]):-C=[].
 
-C=char.string_of_charlist([S|L]) :- C=string.concat(S,(char.string_of_charlist(L))).
-C=char.string_of_charlist([]) :- C="".
+Char5@@ C=char.string_of_charlist([S|L]) :- C=string.concat(S,(char.string_of_charlist(L))).
+Char6@@ C=char.string_of_charlist([]) :- C="".
 }.
 
 % 入力文字列をlmnlexerに通す

@@ -299,14 +299,14 @@ lmnconstructor.constructing=seq.run(
 			(mem(M), scat(S) :- scat(S1), memscatter(S2,M), cpref(S1,S2,S)),
 			(atom(A), scat(S) :- scat(S1), atomscatter(S2,A), cpref(S1,S2,S))}.
 		scatter_atom({$s}, {$atom}) :- {$s,+S},{$atom, scat(S),
-			(arg(P,L), scat(S) :- scat(S1), argscatter(P, scatter_link(S2,L)),cpref(S1,S2,S))}.
+			(link(P,L), scat(S) :- scat(S1), linkscatter(P, scatter_link(S2,L)),cpref(S1,S2,S))}.
 	
 		mem={$mem, scat(S), @mem}/ :- mem={$mem}, common.rmref(S).
 		atom={$atom, scat(S), @atom}/ :- atom={$atom}, common.rmref(S).
 	
 		{$mem, atomscatter(S,A)} :- {$mem, atom(SA)}, SA=scatter_atom(S,A).
 		{$mem, memscatter(S,M)} :- {$mem, mem(SM)}, SM=scatter(S,M).
-		{$atom, argscatter(_IP,scatter_link(S,L))} :- {$atom, arg(_IP,SL)}, SL=scatter_link(S,L).
+		{$atom, linkscatter(_IP,scatter_link(S,L))} :- {$atom, link(_IP,SL)}, SL=scatter_link(S,L).
 	
 		S=scatter({{$c[]},$s}, {$mem}) :- S={$mem, $c[], +M}, scatter({{$c[]},$s},M).
 		S=scatter_atom({{$c[]},$s}, {$atom}) :- S={$atom, $c[]}, {{$c[]},$s}.
