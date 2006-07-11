@@ -1,13 +1,13 @@
-//フレームを生成
+//フレームを生成して・・・
 {
 frame=javax_swing_JFrame.new("LMNtal Editor"), 10.
 10, frame(F) :- class(F, "javax.swing.JFrame") | r=java_awt_Component.setSize(F, 600, 400), contentPane=javax_swing_JFrame.getContentPane(F), frame(F).
 }.
-
+//外に出す
 {frame(F), contentPane(P) , $p[], @p}/ :- class(F, "javax.swing.JFrame"), class(P, "java.awt.Container") |
 	frame(F), contentPane(P).
 
-//メニューバーとテキストエディタを生成
+//メニューバーとテキストエディタを生成して・・・
 {
 jt=javax_swing_JTextArea.new(), 20.
 20, jt(JT) :- class(JT, "javax.swing.JTextArea") |
@@ -29,7 +29,7 @@ r(done), menu(Menu), item2(Item) :- class(Menu, "javax.swing.JMenu") |
 menubar(MenuBar), menu(Menu), r1(_UR1), r2(_UR2) :- class(MenuBar, "javax.swing.JMenuBar") |
 	r3=javax_swing_JMenuBar.add(MenuBar, Menu), menubar(MenuBar).
 }.
-
+//外に出す
 {menubar(MenuBar), jt(JT), $p[], @p}/ :- class(MenuBar, "javax.swing.JMenuBar"), class(JT, "javax.swing.JTextArea") | 
 	menubar(MenuBar), jt(JT).
 
