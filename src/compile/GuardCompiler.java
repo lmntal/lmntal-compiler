@@ -597,13 +597,9 @@ public class GuardCompiler extends HeadCompiler {
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 	}
-	//2006.07.01 inui
-	private void bindToUnaryAtom(ContextDef def, int atomid) {
-		bindToUnaryAtom(def, atomid, Instruction.SAMEFUNC);
-	}
 	/** 型付きプロセス文脈defを1引数アトム$atomidのファンクタで束縛する */
 	//2006.07.01 束縛する命令(?) bindid 引数を追加 by inui
-	private void bindToUnaryAtom(ContextDef def, int atomid, int bindid) {
+	private void bindToUnaryAtom(ContextDef def, int atomid) {
 		if (!identifiedCxtdefs.contains(def)) {
 			identifiedCxtdefs.add(def);
 			typedcxtsrcs.put(def, new Integer(atomid));
@@ -618,10 +614,10 @@ public class GuardCompiler extends HeadCompiler {
 					loadedatomid, atomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(loadedatomid));
 				typedcxtdefs.add(def);
-				match.add(new Instruction(bindid, atomid, loadedatomid));
+				match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
 				getLinks(loadedatomid, 1);
 			} else {
-				match.add(new Instruction(bindid, atomid, loadedatomid));
+				match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
 			}
 //			int funcid1 = varcount++;
 //			int funcid2 = varcount++;
