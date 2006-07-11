@@ -116,11 +116,13 @@ public class FrontEnd {
 	 * @param args 引数
 	 */
 	public static void processOptions(String[] args) {
+		// --args 以降ならばfalse
 		boolean isSrcs = true;
 		for(int i = 0; i < args.length;i++){
 			// 必ずlength>0, '-'ならオプション
 			// -> 引数を "" にすると長さ 0 になるのでチェックする。
-			if(args[i].length()>0 && args[i].charAt(0) == '-'){
+			// 2006/07/11 --args　以降を全てLMNtalプログラムへのコマンドライン引数とするように変更 by kudo
+			if(isSrcs && (args[i].length()>0) && (args[i].charAt(0) == '-')){
 				if(args[i].length() < 2){ // '-'のみの時
 					System.err.println("不明なオプション:" + args[i]);
 					System.exit(-1);
@@ -462,20 +464,26 @@ public class FrontEnd {
 							// スレッドルールの変換を行わない
 							Env.fThread = false;
 						} else if (args[i].equals("--type")){
+							// --type
+							// enable type check
+							// ( 今はまだ非公開 )
 							Env.flgShowConstraints = true;
 							Env.flgShowAllConstraints = false;
 							Env.fType = true;
 						} else if (args[i].equals("--args")) {
+							/// --args
+							/// give command-line options after this to LMNtal program.
 							isSrcs = false;
 						} else {
 							System.err.println("Invalid option: " + args[i]);
+							System.err.println("Use option --help to see a long list of options.");
 							System.exit(-1);
 						}
 						break;
 					default:
 						System.err.println("Invalid option: " + args[i]);
 						System.err.println("Use option --help to see a long list of options.");
-						System.exit(-1);						
+						System.exit(-1);
 					}
 				}
 			}else{ // '-'以外で始まるものは (実行ファイル名, argv[0], arg[1], ...) とみなす
