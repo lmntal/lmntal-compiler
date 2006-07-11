@@ -1,5 +1,0 @@
-dbm.open("/tmp/sample.txt").
-dbm.put("hello", "world").
-dbm.put("LMN", "tal").
-dbm.remove("LMN").
-dbm.close().
