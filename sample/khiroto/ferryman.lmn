@@ -1,0 +1,176 @@
+/*
+NAME
+	ferryman
+	
+AUTHOR
+	Kohei HIROTO
+
+HISTORY
+	2006/07/13
+*/
+
+/*
+問題のルール
+川岸にferryman, wolf, goat, cabbageがいる。
+ferrymanが操れるボートを使って全てを向こう岸に渡したい。
+ボートはferrymanと最大一つのものを運ぶことができる。
+ferrymanがいないところは、wolfがgoatを食べてしまう。
+ferrymanがいないところは、goatがcabbageを食べてしまう。
+*/
+
+/*
+考え方
+０．初期状態
+１．ハッシュコードを計算する
+２．終了判定
+３．食べられてしまうか、同一状態を過去に通過したか、もう打つ手がないかの判定をして、合致するならアトムｘを追加
+４．ｘがあるならバックトラック
+５．新たな状態の生成→１に戻る
+*/
+
+/*
+状態数は2^4=16 4はferryman, wolf, goat, cabbageの種類の数から
+状態を示すハッシュコードを
+1 * bit(ferryman) + 2 * bit(wolf) + 4 * bit(goat) + 8 * bit(cabbage) とする。
+これで各状態に対応する固有の０から１５の整数値が決まる。bit(x)はxがaにあるとき０、bにあるとき1
+ハッシュコードを比較することで各状態の同一性の判定ができる。
+ちなみに初期状態が０、終了状態が１５である。
+*/
+
+/*
+movenumは次に運ぶべきものをあらわす。
+0:wolf
+1:goat
+2:cabbage
+3:nothing
+4:もうその状態からどうやっても手詰まりになることを示す
+*/
+
+// 終了条件、食べられる条件、これまでに一致する状態がないかの判定
+// これらよりも外側レベルの膜に、一段階状態を進めるルールを書く。
+// アトムxは、バックトラックが必要であることを示す。
+
+{	
+	{
+		currentDepth = 0. // 探索の現在の深さ
+		
+		// 初期状態
+		{
+			state = -1. // この状態固有のハッシュコード
+			depth = 0. // 探索の深さ
+			movenum = 0. // 次に何を運ぶか
+			a = { ferryman, wolf, cabbage, goat }. // 川のこちら側
+			b = { }. // 川のあちら側
+			calc_hash = { 0 }. // ハッシュコードの計算に使う。0は未計算を示す。計算が終わると消える。
+			
+			// ok 終了条件。終了する場合movenumを消して一段階進めるルールが適用できないようにする。
+			isFinished@@
+			b = { ferryman, wolf, goat, cabbage }, movenum = N :- int(N) | b = { ferryman, wolf, goat, cabbage }.
+			
+			// 食べられてしまう条件。合致するときはバックトラックが必要。
+			a = { wolf, goat, $p[] } :- \+($p = (ferryman, $pp)) | x.
+			a = { goat, cabbage, $p[] } :- \+($p = (ferryman, $pp)) | x.
+			b = { wolf, goat, $p[] } :- \+($p = (ferryman, $pp)) | x.
+			b = { goat, cabbage, $p[] } :- \+($p = (ferryman, $pp)) | x.
+			
+			/* ハッシュコードの計算 */
+			// はじめにbの中身をcalc_hashの中にコピーする
+			startCalcHash@@
+			state = N, calc_hash = { 0 }, b = { $b[] } :- int(N) | state = 0, calc_hash = { $b[] }, b = { $b[] }.
+			state = N, calc_hash = { ferryman, $c } 
+				:- int(N) | state = N + 1, calc_hash = { $c }.
+			state = N, calc_hash = { wolf, $c } 
+				:- int(N) | state = N + 2, calc_hash = { $c }.
+			state = N, calc_hash = { goat, $c } 
+				:- int(N) | state = N + 4, calc_hash = { $c }.
+			state = N, calc_hash = { cabbage, $c } 
+				:- int(N) | state = N + 8, calc_hash = { $c }.
+			// 計算が終わったら膜を消す
+			deleteClacHashMemb@@
+			calc_hash = { } :- .
+		}.
+		
+		// 今までに同じ状態を通過してこなかったか調べる。合致するときはバックトラックが必要。
+		checkEqualState@@
+		currentDepth = L, { depth = M, state = N, $p, @p }/, { state = P, $q, @q }/
+			:- L = M, N = P | currentDepth = L, { depth = M, $p, @p, x }, { state = P, $q, @q }.
+			
+		// もうこの状態から打つ手がないかの判定。合致するときはバックトラックが必要。
+		currentDepth = L, { depth = M, movenum = N, $p, @p}/
+			:- L = M, N >= 4 | currentDepth = L, { depth = M, $p, @p, x }.
+		
+		// 膜内にxがあったらバックトラックをする
+		backTrack@@
+		currentDepth = L, { depth = M, x, $p[], @p }
+			:- L = M, | currentDepth = L - 1.
+	}.
+	
+	/* 状態を一段階進める */
+	// ok aにferryamnがいて、運ぶもの＝wolfのとき
+	{currentDepth = L, { depth = M, movenum = N, a = {ferryman, wolf, $a[]}, b = { $b[] }, $p[], @p }, $t, @t}/  :-
+		L = M, (M mod 2 = 0), N = 0 | {currentDepth = L + 1, { depth = M, movenum = N + 1, a = {ferryman, wolf, $a[]}, b = { $b[] }, $p[], @p }, { depth = M + 1, movenum = 0, calc_hash = { 0 }, a = { $a[] }, b = {ferryman, wolf, $b[] }, $p[], @p }, $t, @t}.
+	// ok aにferrymanがいて、運ぶもの＝wolfのとき。しかし実際にはaに運ぶものがないとき。
+	// b内にwolfがあるという条件は、a内にwolfがないということと同じである。
+	{currentDepth = L, { depth = M, movenum = N, a = {ferryman, $a[]}, b = { wolf, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 0), N = 0 | {currentDepth = L, { depth = M, movenum = N + 1, a = {ferryman, $a[]}, b = { wolf, $b[] }, $p[], @p }, $t, @t}.
+	
+	// ok aにferryamnがいて、運ぶもの＝goatのとき
+	{currentDepth = L, { depth = M, movenum = N, a = {ferryman, goat, $a[]}, b = { $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 0), N = 1 | {currentDepth = L + 1, { depth = M, movenum = N + 1, a = {ferryman, goat, $a[]}, b = { $b[] }, $p[],@p }, { depth = M + 1, movenum = 0, calc_hash = { 0 }, a = { $a[] }, b = {ferryman, goat, $b[] }, $p[], @p }, $t, @t}.
+	// aにferrymanがいて、運ぶもの＝goatのとき。しかし実際にはaに運ぶものがないとき。
+	{currentDepth = L, { depth = M, movenum = N, a = {ferryman, $a[]}, b = { goat, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 0), N = 1 | {currentDepth = L, { depth = M, movenum = N + 1, a = {ferryman, $a[]}, b = { goat, $b[] }, $p[], @p }, $t, @t}.
+	
+	// ok aにferryamnがいて、運ぶもの＝cabbageのとき
+	{ currentDepth = L, { depth = M, movenum = N, a = {ferryman, cabbage, $a[]}, b = { $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 0), N = 2 | {currentDepth = L + 1, { depth = M, movenum = N + 1, a = {ferryman, cabbage, $a[]}, b = { $b[] }, $p[], @p }, { depth = M + 1, movenum = 0, calc_hash = { 0 }, a = { $a[] }, b = { ferryman, cabbage, $b[] }, $p[], @p }, $t, @t}.
+	// ok aにferrymanがいて、運ぶもの＝cabbageのとき。しかし実際にはaに運ぶものがないとき。
+	{currentDepth = L, { depth = M, movenum = N, a = {$a[]}, b = { cabbage, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 0), N = 2 | {currentDepth = L, { depth = M, movenum = N + 1, a = {$a[]}, b = { cabbage, $b[] }, $p[], @p }, $t, @t}.
+	
+	// aにferryamnがいて、運ぶもの＝nothingのとき
+	{currentDepth = L, { depth = M, movenum = N, a = {ferryman, $a[]}, b = { $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 0), N = 3 | {currentDepth = L + 1, { depth = M, movenum = N + 1, a = {ferryman, $a[]}, b = { $b[] }, $p[], @p }, { depth = M + 1, movenum = 0, calc_hash = { 0 }, a = { $a[] }, b = {ferryman,  $b[] }, $p[], @p }, $t, @t}.
+	
+	// ok bにferryamnがいて、運ぶもの＝wolfのとき
+	{ currentDepth = L, { depth = M, movenum = N, a = { $a[] }, b = { ferryman, wolf, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 1), N = 0 | {currentDepth = L + 1, { depth = M, movenum = N + 1, a = { $a[] }, b = { ferryman, wolf, $b[] }, $p[], @p }, { depth = M + 1, movenum = 0, calc_hash = { 0 }, a = { ferryman, wolf, $a[] }, b = { $b[] }, $p[], @p }, $t, @t}.
+	// ok bにferrymanがいて、運ぶもの＝wolfのとき。しかし実際にはbに運ぶものがないとき。
+	// a内にwolfがあるという条件は、b内にwolfがないということと同じである。
+	{currentDepth = L, { depth = M, movenum = N, a = {wolf, $a[]}, b = { ferryman, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 1), N = 0 | {currentDepth = L, { depth = M, movenum = N + 1, a = {wolf, $a[]}, b = { ferryman, $b[] }, $p[], @p }, $t, @t}.
+	
+	// ok bにferryamnがいて、運ぶもの＝goatのとき
+	{currentDepth = L, { depth = M, movenum = N, a = { $a[] }, b = { ferryman, goat, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 1), N = 1 | {currentDepth = L + 1, { depth = M, movenum = N + 1, a = { $a[] }, b = { ferryman, goat, $b[] }, $p[], @p }, { depth = M + 1, movenum = 0, calc_hash = { 0 }, a = { ferryman, goat, $a[] }, b = { $b[] }, $p[], @p }, $t, @t}.
+	// bにferrymanがいて、運ぶもの＝goatのとき。しかし実際にはbに運ぶものがないとき。
+	// a内にgoatがあるという条件は、b内にgoatがないということと同じである。
+	{currentDepth = L, { depth = M, movenum = N, a = {goat, $a[]}, b = { ferryman, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 1), N = 1 | {currentDepth = L, { depth = M, movenum = N + 1, a = {goat, $a[]}, b = { ferryman, $b[] }, $p[], @p }, $t, @t}.
+	
+	// bにferrymanがいて、運ぶもの＝cabbageのとき
+	{currentDepth = L, { depth = M, movenum = N, a = { $a[] }, b = { ferryman, cabbage, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 1), N = 2 | {currentDepth = L + 1, { depth = M, movenum = N + 1, a = { $a[] }, b = { ferryman, cabbage, $b[] }, $p[], @p }, { depth = M + 1, movenum = 0, calc_hash = { 0 }, a = { ferryman, cabbage, $a[] }, b = { $b[] }, $p[], @p }, $t, @t}.
+	// ok bにferrymanがいて、運ぶもの＝cabbageのとき。しかし実際にはbに運ぶものがないとき。
+	// a内にcabbageがあるという条件は、b内にwolfがないということと同じである。
+	{currentDepth = L, { depth = M, movenum = N, a = {cabbage, $a[]}, b = { ferryman, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 1), N = 2 | {currentDepth = L, { depth = M, movenum = N + 1, a = {cabbage, $a[]}, b = { ferryman, $b[] }, $p[], @p }, $t, @t}.
+	
+	// ok bにferryamnがいて、運ぶもの＝nothingのとき
+	{currentDepth = L, { depth = M, movenum = N, a = { $a[] }, b = { ferryman, $b[] }, $p[], @p }, $t, @t}/ :-
+		L = M, (M mod 2 = 1), N = 3 | {currentDepth = L + 1, { depth = M, movenum = N + 1, a = { $a[] }, b = { ferryman, $b[] }, $p[], @p }, { depth = M + 1, movenum = 0, calc_hash = { 0 }, a = { ferryman, $a[] }, b = { $b[] }, $p[], @p }, $t, @t}.
+}.
+
+/*
+このプログラムにっよて得られる解
+depth: a , b
+として
+0: f w g c , 
+1: w c , f g
+2: f w c , g
+3: c , f w g
+4: f g c , w
+5: g , f w c
+6: g , w c
+7: , f g w c
+*/
