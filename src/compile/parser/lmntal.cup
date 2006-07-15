@@ -28,7 +28,7 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE_UNDERBAR, RBRACE_UNDERBAR_SLASH,
 				RBRACE_UNDERBAR_AT, RBRACE_UNDERBAR_SLASH_AT,
 				RBRACE_ASTERISK,
-				COLON, PERIOD, GUARD, PROCVAR, RULEVAR, 
+				COLON, PERIOD, BACKSLASH, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
 				ASTERISK, SLASH, PLUS, MINUS, RULENAMESEP;
@@ -361,6 +361,7 @@ UnnamedMembrane ::=
 // 丸カッコなしのルール構文
 // ルール名に対応 by Hara
 // 出現した行番号を追加 by Inui
+// simpagationを追加 by Kudo
 Rule		::=	  ProcessList:head RULE:lineno ProcessList:body 
 					{: RESULT = new SrcRule(null, head, body, lineno.intValue()); :}
 				| RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:body 
@@ -368,17 +369,32 @@ Rule		::=	  ProcessList:head RULE:lineno ProcessList:body
 			    | ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body 
 					{: RESULT = new SrcRule(null, head, guard, body, lineno.intValue()); :}
 			    | RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body 
-					{: RESULT = new SrcRule(name, head, guard, body, lineno.intValue()); :};
+					{: RESULT = new SrcRule(name, head, guard, body, lineno.intValue()); :}
+				| ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body
+					{: RESULT = new SrcRule(null, head, head2, null, body, lineno.intValue()); :}
+				| RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body
+					{: RESULT = new SrcRule(name, head, head2, null, body, lineno.intValue()); :}
+				| ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
+					{: RESULT = new SrcRule(null, head, head2, guard, body, lineno.intValue()); :}
+				| RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
+					{: RESULT = new SrcRule(name, head, head2, guard, body, lineno.intValue()); :}
+;
 
 // 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
 // こっちはルール名には非対応。(a,b,c :- ( 対応しているようだが…。)
 // 出現した行番号を追加 by Inui
+// simpagationを追加 by Kudo
 ProcessListContinuation ::= RPAREN
 					{: RESULT = null; :}
 				| RULE:lineno ProcessList:body RPAREN
 					{: RESULT = new SrcRule(null, null, body, lineno.intValue()); :}
 				| RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, guard, body, lineno.intValue()); :};
+					{: RESULT = new SrcRule(null, null, guard, body, lineno.intValue()); :}
+				| BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body RPAREN
+					{: RESULT = new SrcRule(null, null, head2, null, body, lineno.intValue()); :}
+				| BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
+					{: RESULT = new SrcRule(null, null, head2, guard, body, lineno.intValue()); :}
+;
 
 ProcessContext	::= PROCVAR AtomName:name
 					 {: RESULT = new SrcProcessContext(name); :}

@@ -5,12 +5,14 @@
 package compile.parser;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 class SrcRule {
 	
 	public String name; // ルール名
 	public int lineno;	//行番号 2006.1.22 by inui
 	public LinkedList head;			// ヘッドプロセス
+	public LinkedList head2;       // ヘッドプロセス2 (simpagation ruleのみ。 \ の後 )
 	public LinkedList body;			// ボディプロセス
 	public LinkedList guard;			// ガードプロセス
 	public LinkedList guardNegatives;	// ガード否定条件構文のリスト
@@ -65,6 +67,13 @@ class SrcRule {
 		this.lineno = lineno;
 	}
 	
+	//2006/07/07 by kudo
+	public SrcRule(String name, LinkedList head, LinkedList head2, LinkedList guard, LinkedList body, int lineno){
+		this(name, head, (guard==null?new LinkedList():guard), body, lineno);
+		this.head2 = head2;
+		if(head2 != null)unSimpagationize();
+	}
+	
 	/**
 	 * リンク名が_IXなど、頭に_Iがつくと自動でガードにint(_IX)を加える.
 	 * hara. nakano.
@@ -112,6 +121,60 @@ class SrcRule {
 					addTypeConstraint(sm.process);
 			}
 		}
+	}
+	
+	/**
+	 * simpagation rule を、通常のルールの形に直します。
+	 * by kudo (2006/07/07)
+	 *
+	 */
+	private void unSimpagationize(){
+		// head を全てbodyへコピー (前に追加のほうが再利用の上でも都合がいい？)
+		body.addAll(copySrcs(head));
+		// head2をheadの後ろに連結
+		head.addAll(head2);
+		head2=null;
+	}
+	
+	/**
+	 * ソースオブジェクトのリストをコピーする。
+	 * @param l
+	 * @return
+	 */
+	private LinkedList copySrcs(List l){
+		LinkedList ret = new LinkedList(); // List 型だと各所で使っているgetFirstが無い
+		if(l == null)return null;
+		Iterator it = l.iterator();
+		while(it.hasNext()){
+			Object o = it.next();
+			if(o instanceof SrcAtom){
+				SrcAtom sa = (SrcAtom)o;
+				ret.add(new SrcAtom(sa.getName(),copySrcs(sa.getProcess())));
+			}
+			else if(o instanceof SrcMembrane){
+				SrcMembrane sm = (SrcMembrane)o;
+				SrcMembrane cpm = new SrcMembrane(copySrcs(sm.getProcess()));
+				cpm.name = sm.name;
+				cpm.kind = sm.kind;
+				cpm.stable = sm.stable;
+				cpm.pragma = sm.pragma;
+				ret.add(cpm);
+			}
+			else if(o instanceof SrcProcessContext){
+				SrcProcessContext spc = (SrcProcessContext)o;
+				SrcProcessContext cppc = new SrcProcessContext(spc.getName());
+				cppc.args = copySrcs(spc.args);
+				if(spc.bundle != null)cppc.bundle = new SrcLinkBundle(spc.bundle.getName());
+				ret.add(cppc);
+			}
+			else if(o instanceof SrcContext){ // SrcLink, SrcLinkBundle, SrcRuleContext
+				SrcLink sl = (SrcLink)o;
+				ret.add(new SrcLink(sl.getName()));
+			}
+			else if(o instanceof SrcRule){ // ※左辺にルールは出現しない筈
+			}
+		}
+		return ret;
 	}
 	
 
