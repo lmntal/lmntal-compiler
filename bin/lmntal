@@ -3,5 +3,6 @@
 source `dirname $0`/set_cp.sh
 if [ -x /usr/bin/cygpath ]; then
 	CLASSPATH=`cygpath -wp $CLASSPATH` 
+	LMNTAL_HOME=`cygpath -wp $LMNTAL_HOME`
 fi
 java -DLMNTAL_HOME=$LMNTAL_HOME runtime.FrontEnd --interpret "$@"
