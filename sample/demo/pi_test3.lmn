@@ -1,0 +1,22 @@
+  repl@@ {$x,+C1,+C2}, {bang, get(C1,Y,{$b1[Y|*V1]}), $c1},
+                       {snd(C2,Z,{$b2}),  $c2} :-
+           {$x,+C3}, $b2, nlmem.kill({$c2}),
+           {bang, get(C3,Y2,Body2),$c1},
+           nlmem.copy({$b1[U|*V1]},cp,Copies), 
+           copies(Copies,U,Body2,Z,Y2).
+
+/* 3-place buffer */
+/*                  _          _                */
+/* (new b c m1 m2) (b<m1,m2> | c<x2,m2,r>       */
+/*                   _       */
+/*    | !b(i,o).i(x).c<x,i,o>*/
+
+   {snd(B1,S2,{})}, S2=a,
+   {bang,get(B2,G1,
+          {G1=[cp(I1)], 
+             {once,get(I1,x,{/*{snd(C3,S4,{})},*/
+                             /*S4=[X]*/ 
+                             /*X=x*/})}})},/*, C3=b*/
+   {name,+B1,+B2}.//, {name,+C3}.
+//   {name,+M12}, {name,+M21}.
+

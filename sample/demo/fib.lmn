@@ -1,0 +1,7 @@
+fib(10,ret).
+
+fib($n,X), table($n1,$f1)  :- $n=$n1, int($f1) | table($n1,$f1), X=$f1.
+fib($n,X) :- $n=<1 | f2($n,X,$n).
+fib($n,X) :- $n>1  | fib($n-1,X1), fib($n-2,X2), f2($n,X,X1+X2).
+f2($n,X,$x) :- int($n), int($x) | X=$x, table($n,$x).
+

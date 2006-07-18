@@ -1,3 +1,3 @@
 io.use.
 r=io.readline(result).
-done(r), result(X) :- string(X) | r=io.print(["result=",X,"\n"]).
+done(r), result(X) :- string(X) | r=io.lprint(["result=",X,"\n"]).

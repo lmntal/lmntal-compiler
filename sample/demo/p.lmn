@@ -1,0 +1,15 @@
+{
+  {lhs,a($n),$l[]}, {rhs,$r[]} :- $n>1 |
+      {lhs,$l[]}, {rhs,a($n-1),bb,$r[]}.
+  {lhs,a(1),$l[]}, {rhs,$r[]} :-
+      {lhs,$l[]}, {rhs,bb,$r[]}, delta.
+  {lhs,f,$l[]}, {rhs,$r[]} :-
+      {lhs,$l[]}, {rhs,f,f,$r[]}.
+
+  {lhs,f,a(4)}, {rhs}.
+}.
+
+end_of_step@@
+{@r, {lhs,$l[]},{rhs,$r[]}}/ :- {@r, {lhs,$l[],$r[]},{rhs}}.
+end_of_mem@@
+{@r, delta, {lhs,$l[]},{rhs,$r[]}}/ :- $l[],$r[].
