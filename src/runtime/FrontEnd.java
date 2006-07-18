@@ -459,7 +459,7 @@ public class FrontEnd {
 							Translator.fKeepSource = true;
 						} else if (args[i].equals("--use-source-library")) {
 							/// --use-source-library
-							/// Use source library in lib/src.
+							/// Use source libraries in lib/src and lib/public.
 							Env.fUseSourceLibrary = true;
 						} else if (args[i].equals("--gdebug")) {
 							/// --gdebug
