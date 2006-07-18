@@ -263,6 +263,8 @@ public class FrontEnd {
 							Env.profile = Env.PROFILE_DEFAULT;
 						}
 						if(Env.profile != Env.PROFILE_ALL) System.err.println("profile level " + Env.profile);
+						if (Env.profile == Env.PROFILE_ALL) 
+							Env.p( Dumper.PROFILE_TABS );
 						break;
 					case '-': // 文字列オプション						
 						/*nakano* if(args[i].equals("--3d")){
@@ -782,7 +784,7 @@ public class FrontEnd {
 
 				if (Env.profile == Env.PROFILE_ALL) {
 					Env.d( "Execution Result:" );
-					Env.p( Dumper.PROFILE_TABS + Dumper.dump(rt.getGlobalRoot()) );
+					Env.p( Dumper.dump(rt.getGlobalRoot()) );
 				} else if (!Env.fTrace && Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
 					Env.d( "Execution Result:" );
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );

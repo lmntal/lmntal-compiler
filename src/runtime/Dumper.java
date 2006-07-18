@@ -9,6 +9,7 @@ final class Unlexer {
 
 	public void append(String text) {
 		if (!last.matches(".*['\"\\[\\]|,(){} ]")
+				&& Env.profile != Env.PROFILE_ALL
 				&& !text.matches("['\"\\[\\]|,(){} ].*")
 				&& last.matches(".*[0-9A-Za-z_]") == text
 						.matches("[0-9A-Za-z_].*")) {

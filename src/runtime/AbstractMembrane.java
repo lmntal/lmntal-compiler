@@ -262,6 +262,8 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	
 	/** ルールを全て消去する */
 	public void clearRules() {
+		if(Env.profile == Env.PROFILE_ALL)
+			Env.p(Dumper.dump(this));
 		rulesets.clear();
 	}
 	/** srcMemにあるルールをこの膜にコピーする。 */
