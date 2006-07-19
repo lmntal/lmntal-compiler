@@ -1,6 +1,7 @@
 scanner.use.
 integer.use.
 io.use.
+if.use.
 
 next_set.
 
@@ -28,10 +29,6 @@ H=is_prime(N) :- N mod 2 =\= 0 | H=is_prime(N, 3, math.sqrt(N)).
 H=is_prime(N, M, Nsqrt) :- M  > Nsqrt, int(N) | H=true.
 H=is_prime(N, M, Nsqrt) :- M =< Nsqrt, N mod M =:= 0 | H=false.
 H=is_prime(N, M, Nsqrt) :- M =< Nsqrt, N mod M =\= 0 | H=is_prime(N, M+2, Nsqrt).
-
-//ifÊ¸
-H=if(true,  Te, Fe) :- unary(Fe) | H=Te.
-H=if(false, Te, Fe) :- unary(Te) | H=Fe.
 
 //(½é¹à a, ¸øº¹ d ¤Î¿ôÎóÃæ¤ÎÁÇ¿ô¤ò n ¸Äµá¤á¤ë)
 //a(A), d(D), n(N) :- int(A), int(D), N  >  0, N1=N-1, NewA=A+D | n(if(is_prime(A), N1, N)), a(NewA), d(D).
