@@ -1,0 +1,26 @@
+/* exhaustive search by continuation-based program transformation
+   Interactive version for LMNtal
+   - invoke with --remain and --immediate
+   - start with 's' and find the next solution with 'f'.
+*/
+// append(X,Y,Z) :- X=[], Y=Z.
+// append(X0,Y,[A|Z]) :- append(X,Y,Z), /*L1*/ X0=[A|X].
+// bagof((X,Y), append(X,Y,Z) /*L0*/, S).
+//
+// Calling form: :- ..., ap(Z,'L0',S,[]), ...
+
+ap(Z,Cont) :- ground(Cont), ground(Z) | ap1(Z,Cont), ap2(Z,Cont).
+
+ap1(Z,Cont) :- cont(Cont,[],Z).
+
+c, ap2(Z,Cont) :- ap21(Z,Cont).
+ap21([A|Z],Cont) :- ap(Z,'L1'(A,Cont)).
+ap21([],   Cont) :- ground(Cont) | c.
+
+cont('L1'(A,Cont),X,Y) :- cont(Cont,[A|X],Y).
+cont('L0',        X,Y) :- res(X,Y).
+
+f, res(X,Y) :- ground(X), ground(Y) | c.
+
+s :- ap([1,2,3,4,5],'L0').
+

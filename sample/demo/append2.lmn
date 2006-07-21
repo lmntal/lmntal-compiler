@@ -1,0 +1,8 @@
+f, append([],Y,Z) :- Y = Z.
+f, append(X0,Y,Z0), '.'(A,X,X0) :-
+   '.'(A,Z,Z0), append(X,Y,Z).
+
+b, '.'(A,Z,Z0), append(X,Y,Z) :-
+   append(X0,Y,Z0), '.'(A,X,X0).
+
+ret=append([1,2,3,4,5], [6,7]).
