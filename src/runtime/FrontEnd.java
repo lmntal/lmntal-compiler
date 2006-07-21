@@ -13,20 +13,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import chorus.Output;
 
 import type.TypeConstraintException;
 import type.TypeConstraintsInferer;
 import util.StreamDumper;
+import chorus.Output;
 
 import compile.Module;
 import compile.Optimizer;
@@ -37,7 +32,6 @@ import compile.parser.ParseException;
 import compile.parser.intermediate.RulesetParser;
 
 import debug.Debug;
-import debug.DebugFrame;
 
 /**
  * LMNtal のメイソ
@@ -461,15 +455,6 @@ public class FrontEnd {
 							/// --use-source-library
 							/// Use source libraries in lib/src and lib/public.
 							Env.fUseSourceLibrary = true;
-						} else if (args[i].equals("--gdebug")) {
-							/// --gdebug
-							/// graphical debug mode.
-							Env.debugOption = true;
-							Env.fInterpret = true;
-							Env.fGUI = true;
-							Env.profile = 1;
-							Env.fTrace = true;
-							Env.debugFrame = new DebugFrame();//2006.3.16 by inui
 						} else if (args[i].equals("--debug")) {
 							/// --debug
 							/// run command-line debugger.
@@ -762,8 +747,7 @@ public class FrontEnd {
 			if (Env.debugOption) {
 				Task.initTrace();
 				Debug.init();
-				if (Env.debugFrame == null) Debug.inputCommand();//2006.4.27 by inui
-				else Env.debugFrame.setSourceText(Debug.getUnitName());
+				Debug.inputCommand();//2006.4.27 by inui
 			}
 
 			boolean ready = true;

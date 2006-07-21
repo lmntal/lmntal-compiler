@@ -218,12 +218,7 @@ public class Task extends AbstractTask implements Runnable {
 			
 			if(flag){
 				if (Env.debugOption) {//by inui
-					if (Debug.isBreakPoint()) {
-						if (Env.debugFrame != null) {
-							if (!guiTrace()) return false;
-						}
-						else Debug.inputCommand();
-					}
+					if (Debug.isBreakPoint()) Debug.inputCommand();
 				} else {
 					if (!guiTrace()) return false;
 				}
@@ -255,12 +250,7 @@ public class Task extends AbstractTask implements Runnable {
 			
 			if(flag){
 				if (Env.debugOption) {//by inui
-					if (Debug.isBreakPoint()) {
-						if (Env.debugFrame != null) {
-							if (!guiTrace()) return false;
-						}
-						else Debug.inputCommand();
-					}
+					if (Debug.isBreakPoint()) Debug.inputCommand();
 				} else {
 					if (!guiTrace()) return false;
 				}

@@ -46,22 +46,19 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	public boolean running = true;
 	
 	public LMNtalFrame() {
-		setDefaultCloseOperation(Env.debugOption ? JFrame.HIDE_ON_CLOSE : JFrame.DISPOSE_ON_CLOSE);
-//		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		if (!Env.debugOption) {//2006.3.16 by inui
-			addWindowListener(new WindowAdapter() {
-				public void windowClosing(WindowEvent e) {
-					running = busy = false;
-					runtime.LMNtalRuntimeManager.terminateAllThreaded();	// 追加 n-kato 2004-10-30
-				}
-			});
-		}
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				running = busy = false;
+				runtime.LMNtalRuntimeManager.terminateAllThreaded();	// 追加 n-kato 2004-10-30
+			}
+		});
 		initComponents();
 		setSize(800,600);
 		if(Env.getExtendedOption("screen").equals("max")) {
 			setExtendedState(Frame.MAXIMIZED_BOTH | getExtendedState());
 		}
-		if (!Env.debugOption) setVisible(true);
+		setVisible(true);
 		if(!Env.getExtendedOption("auto").equals("")) {
 			th = new MyThread(this);
 			th.start();
@@ -94,10 +91,8 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		getContentPane().setLayout(new BorderLayout());
 //		getContentPane().add(jt=new JTextArea(5, 80), BorderLayout.NORTH);
 		getContentPane().add(new JScrollPane(lmnPanel), BorderLayout.CENTER);
-		if (!Env.debugOption) {//2006.3.16 by inui
-			getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
-			bt.addActionListener(new ActionAdapter(this));
-		}
+		getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
+		bt.addActionListener(new ActionAdapter(this));
 //		getContentPane().addKeyListener(new MyKeyAdapter(this));
 		
 //		addKeyListener(this);
@@ -124,7 +119,6 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	public void waitBusy() {
 //		lmnPanel.getGraphLayout().calc();
 		lmnPanel.getGraphLayout().setAllowRelax(true);
-		if (Env.debugFrame != null) Env.debugFrame.updateScrollBar(Debug.getCurrentRuleLineno());
 		busy = true;
 		while(busy) {
 			try {
@@ -144,14 +138,6 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 			lmnPanel.stop();
 		}
 		return Env.gui.running;
-	}
-	
-	public void dispose() {
-		super.dispose();
-		if (Env.debugOption) {
-			running = busy = false;
-			runtime.LMNtalRuntimeManager.terminateAllThreaded();
-		}
 	}
 }
 

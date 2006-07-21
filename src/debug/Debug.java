@@ -105,13 +105,7 @@ public class Debug {
 	/**
 	 * 少なくとも最初に1回実行する
 	 */
-	public static void init() {
-		if (Env.debugFrame != null && Env.debugFrame.restart) {
-			currentLineNumber = -1;
-			Env.debugFrame.repaint();
-			return;
-		}
-		
+	public static void init() {		
 		lastLineno = 1;
 		
 		try {
