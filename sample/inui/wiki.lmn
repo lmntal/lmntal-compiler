@@ -1,0 +1,40 @@
+r1=io.lprint([
+	"<html>\n",
+	"<body>\n"
+]).
+
+{
+io.use.
+if.use.
+
+s=io.list_of_stdin.
+s(S) :- s2=list.map(section, S).
+L=[section,S] :- L=section3(S).
+//見出し
+L=[section3(S)|Z] :- string(S) |
+	L=[if(string.match(S, "^\\*\\*\\*"), string.concat(string.replace(S, "^\\*", "<h3>"), "</h3>"), section2(S))|Z].
+L=[section2(S)|Z] :- string(S) |
+	L=[if(string.match(S, "^\\*\\*"), string.concat(string.replace(S, "^\\*", "<h2>"), "</h2>"), section1(S))|Z].
+L=[section1(S)|Z] :- string(S) |
+	L=[if(string.match(S, "^\\*"), string.concat(string.replace(S, "^\\*", "<h1>"), "</h1>"), pre(S))|Z].
+//整形済みテキスト
+L=[pre(S)|Z] :- string(S) |
+	L=[if(string.match(S, "^ "), string.concat(string.replace(S, "^ ", "<pre>"), "</pre>"), p(S))|Z].
+//段落
+L=[p(S)|Z] :- string(S), S \= "" |
+	L=[string.concat(string.concat("<p>", S), "</p>")|Z].
+L=[p(S)|Z] :- string(S), S == "" |
+	L=[S|Z].
+}.
+
+{s2(S), $p[], @p}/ :- ground(S) | s2(S).
+
+s2(Z) :- s3=string.join("\n", Z).
+s3(S) :- s4=string.replace(S, "</pre>\n<pre>", "\n").
+s4(S) :- s5=string.replace(S, "</p>\n<p>", "\n").
+s5(S) :- io.use, r2=io.print(S).
+
+r2(done) :- r3=io.lprint([
+	"</body>\n",
+	"</html>\n"
+]).
