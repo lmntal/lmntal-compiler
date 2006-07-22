@@ -82,7 +82,7 @@ H=string.replace(String, Regexp, Replacement) :-
 		);
 	} catch(Exception e) {}
 	if(s==null) s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
-	Atom result = mem.newAtom(new Functor(s, 1));
+	Atom result = mem.newAtom(new StringFunctor(s));
 	mem.relink(result, 0, me, 3);
 	me.nthAtom(0).remove();
 	me.nthAtom(1).remove();
