@@ -10,6 +10,7 @@ AUTHOR
 
 HISTORY
 	2004/05/23(Sun)
+	2006/07/23(Sun) sys.getenv by inui
 
 */
 
@@ -138,5 +139,20 @@ sys.exit(Status) :- int(Status) | [:/*inline*/
 	int status = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 	System.exit(status);
 	:](Status).
+
+/**
+ * sys.getenv(+Name, -Env)
+ *
+ * 環境変数を取得します
+ * 2006.7.23 by inui
+ */
+H=sys.getenv(Name) :- string(Name) | H=[:/*inline*/
+	String name = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	String env = System.getenv(name);
+	Atom a = mem.newAtom(new StringFunctor(env == null ? "" : env));//空文字で良いかなぁ
+	me.nthAtom(0).remove();
+	mem.relink(a, 0, me, 1);
+	me.remove();
+	:](Name).
 }.
 
