@@ -22,4 +22,8 @@ if.use :- boolean.use.
 
 H=if(true,  T, F), {$t[T]}, {$f[F]} :- $t[H].
 H=if(false, T, F), {$t[T]}, {$f[F]} :- $f[H].
+
+//2006.7.23 by inui (else 節に if 文を生成するようなプロセスを書くと無限ループするので注意)
+H=if(true,  Te, Fe) :- ground(Fe) | H=Te.
+H=if(false, Te, Fe) :- ground(Te) | H=Fe.
 }.
