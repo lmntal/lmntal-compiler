@@ -6,38 +6,93 @@ SYNOPSIS
 
 AUTHOR
 	Koji Hara
+	Atsuyuki Inui
 
 HISTORY
 	2004/05/23(Sun)
+	2006/07/23(Sun) 書き直した by inui
 
 TODO
-	query_string を取得する部分だけを inline で書けば、他はライブラリを使ってかける。かく。
+	//query_string を取得する部分だけを inline で書けば、他はライブラリを使ってかける。かく。
+	
 
 */
+
+//{
+//module(cgi).
+//
+///**
+// * parse_query : unit -> Map
+// * 
+// */
+//H=cgi.parse_query :- H=map.of_queue(queue.of_list([:/*inline*/
+//	System.out.println("QS = "+Env.getExtendedOption("query_string"));
+//	String q = Env.getExtendedOption("query_string");
+//	String r[] = q.split("[&=]");
+//	StringTokenizer st = new StringTokenizer(q, "&=");
+//	List l = new ArrayList();
+//	while(st.hasMoreTokens()) {
+//		l.add(st.nextToken());
+//	}
+//	
+//	util.Util.makeList(me.getArg(0), java.util.Arrays.asList(r));
+//	util.Util.makeList(me.getArg(0), l);
+//	
+//	mem.removeAtom(me);
+//	:])).
+//
+//
+//}.
 
 {
 module(cgi).
 
 /**
- * parse_query : unit -> Map
- * 
+ * 初期化（パラメータが解析される）
  */
-H=cgi.parse_query :- H=map.of_queue(queue.of_list([:/*inline*/
-//	System.out.println("QS = "+Env.getExtendedOption("query_string"));
-	String q = Env.getExtendedOption("query_string");
-//	String r[] = q.split("[&=]");
-	StringTokenizer st = new StringTokenizer(q, "&=");
-	List l = new ArrayList();
-	while(st.hasMoreTokens()) {
-		l.add(st.nextToken());
-	}
-	
-//	util.Util.makeList(me.getArg(0), java.util.Arrays.asList(r));
-	util.Util.makeList(me.getArg(0), l);
-	
-	mem.removeAtom(me);
-	:])).
+cgi.use :-r=seq.run({query=sys.getenv("QUERY_STRING")}, [
+//cgi.use :-r=seq.run({query="name=inui&age=23"}, [
+	{query=Query :- query2=string.split("&", Query).},
+	{query2(Query) :- query3=list.map(split, Query).},
+	{H=[[split, S]|Z] :- H=[string.split("=", S)|Z].}
+	]).
+r(R), {+R, query3(Query)}/ :- ground(Query) | query3(Query).
 
+/**
+ * パラメータを取得する
+ */
+H=cgi.param(Key), query3=[[""]] :- string(Key), H="".
+H=cgi.param(Key), query3=Query :- string(Key), ground(Query) |
+	H={param(Key), query3=Query}, query3(Query).
+H={param(Key), L=[Key2, Value]}  :- string(Key), string(Key2), string(Value), ground(L), Key = Key2 | H=Value.
+H={param(Key), L=[Key2, Value]}/ :- string(Key), string(Key2), string(Value), ground(L) | H="".
 
+/**
+ * デコード
+ */
+H=cgi.decode(S) :- H=[:/*inline*/
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Atom res = null;
+//	try {
+//		res = mem.newAtom(new StringFunctor(java.net.URLDecoder.decode(s, "EUC-JP")));
+//	} catch (java.io.UnsupportedEncodingException e) {
+//		//失敗したときはそのまま返す
+//		res = mem.newAtom(new StringFunctor(s));
+//	}
+	res = mem.newAtom(new StringFunctor(java.net.URLDecoder.decode(s)));
+	me.nthAtom(0).remove();
+	mem.relink(res, 0, me, 1);
+	me.remove();
+	:](S).
+
+/**
+ * エンコード
+ */
+H=cgi.encode(S) :- H=[:/*inline*/
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	Atom res = mem.newAtom(new StringFunctor(java.net.URLEncoder.encode(s)));
+	me.nthAtom(0).remove();
+	mem.relink(res, 0, me, 1);
+	me.remove();
+	:](S).
 }.
-
