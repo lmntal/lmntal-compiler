@@ -9,10 +9,11 @@ AUTHOR
 	Atsuyuki Inui
 
 HISTORY
-	2004/07/22(Sat)
-	2006/07/23(Sun) <ul>, <ol>, リンク
+	2006/07/25(Tue) italic, 整形済みテキスト内はインライン要素を無効
 	2006/07/24(Mon) 水平線
-
+	2006/07/23(Sun) <ul>, <ol>, リンク
+	2004/07/22(Sat)
+	
 */
 
 //テスト用コード
@@ -38,60 +39,63 @@ HISTORY
 {
 module(wikiparser).
 
+/**
+ * String -> String
+ */
 //TODO ブロック要素とインライン要素の解析を分ける
-H=wikiparser.parse(S) :- string(S) | H=seq.run({s0=list.map(link, string.split("\r*\n", S))}, [
+//TODO HTML の構造を返すようにする．htmlToString も必要になる
+H=wikiparser.parse(S) :- string(S) | H=seq.run({s0=list.map(pre, string.split("\r*\n", S))}, [
 	{
 	if.use.
-	L=[link, S] :- L=s(S).
-	//TODO マッチ演算子があれば順番は必要なくなる
-	////インライン要素
+	L=[pre, S] :- L=pre(S).
+	//インライン要素の前に整形済みテキストをやる
+	L=pre(S) :- string(S) |
+		L=if(string.match(S, "^[ ]"), string.replace(S, "^[ ](.*)", "<pre>$1</pre>"), s(S)).
+	////インライン要素は全部試す
 	//取消線
-	L=[s(S)|Z] :- string(S) |
-		L=[strong(string.replace(S, "%%(.*)%%", "<s>$1</s>"))|Z].
-	//強調
-	L=[strong(S)|Z] :- string(S) |
-		L=[i(string.replace(S, "''(.*)''", "<strong>$1</strong>"))|Z].
+	L=s(S) :- string(S) |
+		L=i(string.replace(S, "%%(.*)%%", "<s>$1</s>")).
 	//斜体
-	L=[i(S)|Z] :- string(S) |
-		L=[external_link1(string.replace(S, "'''(.*)'''", "<i>$1</i>"))|Z].
+	L=i(S) :- string(S) |
+		L=strong(string.replace(S, "'''(.*)'''", "<i>$1</i>")).
+	//強調
+	L=strong(S) :- string(S) |
+		L=external_link1(string.replace(S, "''(.*)''", "<strong>$1</strong>")).
 	//外部リンク（名前あり）
-	L=[external_link1(S)|Z] :- string(S) |
-		L=[external_link2(string.replace(S, "\\[\\[(.*):(http://.*)\\]\\]", "<a href=$2>$1</a>"))|Z].
+	L=external_link1(S) :- string(S) |
+		L=external_link2(string.replace(S, "\\[\\[(.*):(http://.*)\\]\\]", "<a href=$2>$1</a>")).
 	//外部リンク（名前なし）
-	L=[external_link2(S)|Z] :- string(S) |
-		L=[internal_link(string.replace(S, "\\[\\[(http://.*)\\]\\]", "<a href=$1>$1</a>"))|Z].
+	L=external_link2(S) :- string(S) |
+		L=internal_link(string.replace(S, "\\[\\[(http://.*)\\]\\]", "<a href=$1>$1</a>")).
 	//内部リンク
-	L=[internal_link(S)|Z] :- string(S) |
-		L=[hr(string.replace(S, "\\[\\[(.*)\\]\\]", "<a href=lmnwiki.cgi?cmd=view&name=$1>$1</a>"))|Z].		
-	////ブロック要素
+	L=internal_link(S) :- string(S) |
+		L=hr(string.replace(S, "\\[\\[(.*)\\]\\]", "<a href=lmnwiki.cgi?cmd=view&name=$1>$1</a>")).		
+	////ブロック要素はどれか１つ反応したら終わり
 	//水平線
-	L=[hr(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^\\-{4,}"), string.replace(S, "^\\-+", "<hr>"), section3(S))|Z].
+	L=hr(S) :- string(S) |
+		L=if(string.match(S, "^\\-{4,}"), string.replace(S, "^\\-+", "<hr>"), section3(S)).
 	//見出し
-	L=[section3(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^\\*{3}"), string.replace(S, "^\\*{3}(.*)", "<h4>$1</h4>"), section2(S))|Z].
-	L=[section2(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^\\*{2}"), string.replace(S, "^\\*{2}(.*)", "<h3>$1</h3>"), section1(S))|Z].
-	L=[section1(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^\\*{1}"), string.replace(S, "^\\*{1}(.*)", "<h2>$1</h2>"), pre(S))|Z].
-	//整形済みテキスト
-	L=[pre(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^[ ]"), string.replace(S, "^[ ](.*)", "<pre>$1</pre>"), ul3(S))|Z].
+	L=section3(S) :- string(S) |
+		L=if(string.match(S, "^\\*{3}"), string.replace(S, "^\\*{3}(.*)", "<h4>$1</h4>"), section2(S)).
+	L=section2(S) :- string(S) |
+		L=if(string.match(S, "^\\*{2}"), string.replace(S, "^\\*{2}(.*)", "<h3>$1</h3>"), section1(S)).
+	L=section1(S) :- string(S) |
+		L=if(string.match(S, "^\\*{1}"), string.replace(S, "^\\*{1}(.*)", "<h2>$1</h2>"), ul3(S)).
 	//箇条書き
-	L=[ul3(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^[-]{3}"), string.replace(S, "^[-]{3}(.*)", "<ul><ul><ul><li>$1</li></ul></ul></ul>"), ul2(S))|Z].
-	L=[ul2(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^[-]{2}"), string.replace(S, "^[-]{2}(.*)", "<ul><ul><li>$1</li></ul></ul>"), ul1(S))|Z].
-	L=[ul1(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^[-]{1}"), string.replace(S, "^[-]{1}(.*)", "<ul><li>$1</li></ul>"), ol(S))|Z].
+	L=ul3(S) :- string(S) |
+		L=if(string.match(S, "^[-]{3}"), string.replace(S, "^[-]{3}(.*)", "<ul><ul><ul><li>$1</li></ul></ul></ul>"), ul2(S)).
+	L=ul2(S) :- string(S) |
+		L=if(string.match(S, "^[-]{2}"), string.replace(S, "^[-]{2}(.*)", "<ul><ul><li>$1</li></ul></ul>"), ul1(S)).
+	L=ul1(S) :- string(S) |
+		L=if(string.match(S, "^[-]{1}"), string.replace(S, "^[-]{1}(.*)", "<ul><li>$1</li></ul>"), ol(S)).
 	//番号つき箇条書き
-	L=[ol(S)|Z] :- string(S) |
-		L=[if(string.match(S, "^[+]"), string.replace(S, "^[+](.*)", "<ol><li>$1</li></ol>"), p(S))|Z].
+	L=ol(S) :- string(S) |
+		L=if(string.match(S, "^[+]"), string.replace(S, "^[+](.*)", "<ol><li>$1</li></ol>"), p(S)).
 	//段落
-	L=[p(S)|Z] :- string(S), S \= "" |
-		L=[string.join("", ["<p>", S, "</p>"])|Z].
-	L=[p(S)|Z] :- string(S), S == "" |
-		L=[S|Z].
+	L=p(S) :- string(S), S \= "" |
+		L=string.join("", ["<p>", S, "</p>"]).
+	L=p(S) :- string(S), S == "" |
+		L=S.
 	},
 	{
 	s0(Z) :- s3=string.join("\n", Z).
