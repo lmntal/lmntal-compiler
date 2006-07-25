@@ -17,6 +17,10 @@ AUTHOR
 HISTORY
 	2004/07/19(Sun) io.stdin(Object) ついか。これの初期化のために io.use する必要がある。またはモジュール内のデータもコピーするようにする。
 	2004/05/22(Sat)
+	2006/07/24(Mon) inui
+		io.fileReader でファイルが存在しなかったら nil を返すようにした
+		io.list_of_file で fileReader が nil なら 空リストを返すようにした
+		io.getContents
 
 */
 
@@ -116,15 +120,18 @@ io.popup(String) :- string(String) | [:/*inline*/
 /**
  * io.fileReader(+Filename, -Res):
  * 与えられたファイル名からそのファイルから読み込む為のオブジェクトを生成します。
+ * ファイルが存在しなかったときは nil を返します 2006.07.24 inui
  */
 H=io.fileReader(Filename) :- unary(Filename) | H=[:/*inline*/
+	Atom br = null;
 	try {
-		Atom br = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.FileReader(me.nth(0)))));
-//		System.out.println("FILE="+me.nth(0));
-		mem.relink(br, 0, me, 1);
-		me.nthAtom(0).remove();
-		me.remove();
-	} catch(Exception e) {}
+		br = mem.newAtom(new ObjectFunctor(new java.io.BufferedReader(new java.io.FileReader(me.nth(0)))));
+	} catch(Exception e) {
+		br = mem.newAtom(new Functor("nil", 1));
+	}
+	mem.relink(br, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
 	:](Filename).
 
 //io.fileWriter : String -> java.io.PrintWriter
@@ -339,6 +346,8 @@ H=io.list_of_file(Filename) :- H=io.list_of_dev_s0(io.fileReader(Filename), [], 
 
 H=io.list_of_dev_s0(Obj, List, done, ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=[String|io.list_of_dev_s0(Obj, List, io.readline(Obj, String, ASync), ASync)].
 H=io.list_of_dev_s0(Obj, List, nil , ASync) :- int(ASync), class(Obj, "java.io.BufferedReader") | H=List.
+//fileReaderオブジェクトがnullだった（ファイルが存在しなかった）ときは空リストを返す 2006.07.24 inui
+H=io.list_of_dev_s0(nil, [], done, 0) :- H=[].
 
 //io.toFile : String -> List of String -> unit
 /**
@@ -376,6 +385,12 @@ H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], io.readline
 //io.fclose(Handle) :- unary(Handle)|[:/*inline*/
 //	((PrintWriter)IO.handles.get(me.nth(0))).close();
 //	:](Handle).
+
+/**
+ * 標準入力から EOF まで読み込んでその文字列を返します
+ * 2006/07/25 inui
+ */
+H=io.getContents :- H=string.join("\n", io.list_of_stdin).
 
 }.
 
