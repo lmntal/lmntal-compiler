@@ -1,0 +1,58 @@
+[:/*inline_define*/
+  import java.io.*;
+  import java.util.*;
+  
+  // for 'printg' module
+  class C {
+    public static StringBuffer sb = new StringBuffer("");
+    public static HashSet set = new HashSet();
+    public static HashMap map = new HashMap();
+    public static int counter = 0; // for links
+    
+    public static void printg(Atom now, Link pointer) {
+      if(!set.contains(now)) {
+        set.add(now);
+        int arity = now.getEdgeCount();
+        if(arity == 1)
+          sb.append(now.getName());
+        else {
+          sb.append(now.getName());
+          sb.append("( ");
+          for(int i=0; i<arity; i++) {
+            Link link = now.getArg(i);
+            if(!(link.equals((Link)pointer))) {
+              if(map.containsKey(link)) {
+                sb.append(map.get(link));
+              } else {
+                if(set.contains(now.nthAtom(i))) {
+                  String name = "X" + counter++;
+                  sb.append(name);
+                  map.put(link.getBuddy(), name);
+                }
+                else
+                  printg(now.nthAtom(i),link.getBuddy());
+                if(i < arity-2)
+                  sb.append(", ");
+              }
+            }
+          }
+          sb.append(" )");
+        }
+      }
+    }
+  }
+:].
+
+H = printg(G) :- ground(G) |
+[:/*inline*/
+  Atom root = me.nthAtom(0);
+  Link pointer = me.getArg(0).getBuddy();
+  C.set.add(me);
+  C.printg(root, pointer);
+  System.out.println(C.sb);
+  mem.unifyAtomArgs(me,0,me,1);
+  me.remove();
+:](G,H).
+
+foo = printg(G1). G1 = a(b,c(d,e(f,X)),X).
+var = printg(G2). G2 = [1,2,3].
