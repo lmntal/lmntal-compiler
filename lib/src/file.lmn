@@ -9,7 +9,8 @@ AUTHOR
 	Atsuyuki Inui
 
 HISTORY
-	2006/07/24(Mon) dir.list
+	2006/07/25(Tue) create, exists, delete
+	2006/07/24(Mon) file.lastModified
 
 TODO
 	lastModified は長いな
