@@ -37,4 +37,47 @@ H=file.lastModified(Filename) :- H=[:/*inline*/
 	me.nthAtom(0).remove();
 	me.remove();
 	:](Filename).
+
+/**
+ * あるファイルが存在するかどうか調べる
+ */
+H=file.exists(Filename) :- H=[:/*inline*/
+	String filename = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	java.io.File file = new java.io.File(filename);
+	Atom res = mem.newAtom(new Functor(Boolean.toString(file.exists()), 1));
+	mem.relink(res, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Filename).
+	
+/**
+ * ファイルを生成する
+ * String -> Boolean
+ */
+H=file.create(Filename) :- H=[:/*inline*/
+	String filename = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	java.io.File file = new java.io.File(filename);
+	Atom res = null;
+	try {
+		res = mem.newAtom(new Functor(Boolean.toString(file.createNewFile()), 1));
+	} catch (java.io.IOException e) {
+		res = mem.newAtom(new Functor("false", 1));
+	}
+	mem.relink(res, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Filename).
+
+/**
+ * ファイルを削除する
+ * String -> Boolean
+ */
+H=file.delete(Filename) :- H=[:/*inline*/
+	String filename = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	java.io.File file = new java.io.File(filename);
+	Atom res = mem.newAtom(new Functor(Boolean.toString(file.delete()), 1));
+	mem.relink(res, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Filename).
 }.
