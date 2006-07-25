@@ -16,6 +16,8 @@ HISTORY
 		substring str_of_int int_of_str str_of_float float_of_str
 	2006/07/02(Sun)
 		length, reverse (by inui)
+	2006/07/25(Tue)
+		string.join に空リストが渡されたら空文字列を返すようにした by inui
 
 COMMENT
 	文字列アトムの表現方法は、
@@ -166,12 +168,14 @@ H=string.split(Regexp, S) :- string(Regexp), string(S) | H=[:/*inline*/
  * string.join(+Glue, +StringList, -Res):
  *
  * 与えられた文字列のリストを指定された結合子で結合した文字列を返す。 
+ * 空リストを渡すと空文字列が返る (2006.07.24 inui)
  * @param +Glue 結合子
  * @param +StringList 文字列のリスト
  * @param -Res 結果(文字列)
  * @example H=join("_", ["1","2","3"])  ==>  H="1_2_3"
  */
-H=string.concat(Glue0,string.join(Glue1, [])) :- string(Glue0), string(Glue1) | H=[::].
+H=string.concat(Glue0,string.join(Glue1, [])) :- string(Glue0), string(Glue1) | H="".
+H=string.join(Glue, []) :- string(Glue) | H="".	//2006.07.24 inui
 H=string.join(Glue, [CAR|CDR]) :- string(Glue) |
 	H=string.concat(CAR, string.concat(Glue, string.join(Glue, CDR))).
 
