@@ -1,0 +1,40 @@
+/*
+NAME
+	File module
+
+SYNOPSIS
+	file.lastModified
+	
+AUTHOR
+	Atsuyuki Inui
+
+HISTORY
+	2006/07/24(Mon) dir.list
+
+TODO
+	lastModified は長いな
+
+*/
+{
+module(file).
+
+/**
+ * file.lastModified(+Filename, -Date)
+ * Filename の最終変更時刻を返します
+ */
+H=file.lastModified(Filename) :- H=[:/*inline*/
+	String filename = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	java.io.File file = new java.io.File(filename);
+	Atom res = null;
+	if (file.exists()) {
+		java.util.Date date = new java.util.Date(file.lastModified());
+//		java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm::ss");
+		res = mem.newAtom(new StringFunctor(date.toString()));
+	} else {
+		res = mem.newAtom(new Functor("nil", 1));
+	}
+	mem.relink(res, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Filename).
+}.
