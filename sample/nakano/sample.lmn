@@ -28,4 +28,7 @@ go:-{
   }.
   
   clicked(_IX, _IY) :- a=sys.exec("cmd.exe /c start cmd.exe /c ping google.com").
+  nowtime(timer:getinttime),oldtime(timer:getinttime).
+  
+  nowtime(_IT), oldtime(_IO) :- _IT < _IO + 10 | .
 }.
