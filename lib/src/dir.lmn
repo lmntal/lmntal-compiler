@@ -1,0 +1,31 @@
+/*
+NAME
+	Dir module
+
+SYNOPSIS
+	dir.list
+	
+AUTHOR
+	Atsuyuki Inui
+
+HISTORY
+	2006/07/24(Mon) dir.list
+
+TODO
+
+*/
+{
+module(dir).
+
+/**
+ * dir.list(Dir, -List)
+ * ディレクトリ名 Dir にあるファイルの名前を List で返します
+ */
+H=dir.list(Dir) :- H=[:/*inline*/
+	String dir = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	java.io.File file = new java.io.File(dir);
+	util.Util.makeList(me.getArg(1), java.util.Arrays.asList(file.list()));
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Dir).
+}.
