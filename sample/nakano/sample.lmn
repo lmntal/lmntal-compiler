@@ -1,0 +1,31 @@
+graphic.use.
+go:-{
+  window.
+  size(800,600).
+  name("もんだい").
+  
+  //ウィンドウが閉じるように
+  killer.
+  
+  //clicked(X, Y)でクリックした座標を生成
+  clickListener.
+  
+  //システムが終了しないように
+  sys.perpetual(on).
+
+   //ボタン
+  {
+	  draw.
+	  getpic("rect").
+	  position(300,500).
+	  size(100,50).
+	  {
+		  draw.
+		  name(0).
+		  getpic(string("ボタン", 20)).
+		  position(20,30).
+	  }.
+  }.
+  
+  clicked(_IX, _IY) :- a=sys.exec("cmd.exe /c start cmd.exe /c ping google.com").
+}.
