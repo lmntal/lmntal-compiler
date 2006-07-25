@@ -1,18 +1,22 @@
-% つくり途中
-
 hoge=printg(G).
 G=a(b,c(d,e(f,X)),X).
+moge=printg(G2).
+G2=[1,2,3].
 
 [:/*inline_define*/
   import java.io.*;
   import java.util.*;
   
   class C {
-    // 
     public static StringBuffer sb = new StringBuffer("");
+    // Atom table
     public static HashSet set = new HashSet();
-    public static int counter = 0; // link
+    public static int counter = 0; // for link names
+    // Link -> String
+    // ex. getArg(i) -> Xi
+    public static HashMap map = new HashMap();
     
+    // @arg pointer 今通ってきたリンク
     public static void loop(Atom now, Link pointer) {
       if(!set.contains(now)) {
         set.add(now);
@@ -22,13 +26,24 @@ G=a(b,c(d,e(f,X)),X).
         else {
           sb.append(now.getName());
           sb.append("( ");
-          for(int i=0; i<arity-1; i++) {
-            if((now.getArg(i)).equals((Link)pointer))
-              sb.append("X" + counter++);
-            else
-              loop(now.nthAtom(i),now.getArg(i).getBuddy());
-            if(i < arity-2)
-              sb.append(", ");
+          for(int i=0; i<arity; i++) {
+            // このリンクが今通ってきたリンクでないとき
+            if(!((now.getArg(i)).equals((Link)pointer))) {
+              if(map.containsKey(now.getArg(i))) {
+                sb.append(map.get(now.getArg(i)));
+              } else {
+                  // チェック済アトムに対するリンクの場合
+                if(set.contains(now.nthAtom(i))) {
+                  String link = "X" + counter++;
+                  sb.append(link);
+                  map.put(now.getArg(i).getBuddy(), link);
+                }
+                else
+                  loop(now.nthAtom(i),now.getArg(i).getBuddy());
+                if(i < arity-2)
+                  sb.append(", ");
+              }
+            }
           }
           sb.append(" )");
         }
