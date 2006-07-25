@@ -18,8 +18,8 @@ TODO
 module(dir).
 
 /**
- * dir.list(Dir, -List)
- * ディレクトリ名 Dir にあるファイルの名前を List で返します
+ * ディレクトリにあるファイルのリストを返します
+ * String -> [String]
  */
 H=dir.list(Dir) :- H=[:/*inline*/
 	String dir = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
