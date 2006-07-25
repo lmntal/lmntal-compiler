@@ -16,7 +16,7 @@ go:-{
    //ƒ{ƒ^ƒ“
   {
 	  draw.
-	  getpic("rect").
+	  getpic("C:\WINDOWS\gs.png").
 	  position(300,500).
 	  size(100,50).
 	  {
