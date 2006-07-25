@@ -9,8 +9,9 @@ AUTHOR
 	Atsushi Nakano
 
 HISTORY
+	2006/07/25(Tue) sys.sleep (by inui)
+	2006/07/23(Sun) sys.getenv (by inui)
 	2004/05/23(Sun)
-	2006/07/23(Sun) sys.getenv by inui
 
 */
 
@@ -154,5 +155,24 @@ H=sys.getenv(Name) :- string(Name) | H=[:/*inline*/
 	mem.relink(a, 0, me, 1);
 	me.remove();
 	:](Name).
+
+/**
+ * Time ¥ß¥êÉÃÄä»ß¤·¤Þ¤¹
+ * 2006.07.25 inui
+ * Int -> done|InterruptedException
+ */
+H=sys.sleep(Time) :- H=[:/*inline*/
+	int time = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+	Atom a = null;
+	try {
+		Thread.sleep(time);
+		a = mem.newAtom(new Functor("done", 1));
+	} catch (InterruptedException e) {
+		a = mem.newAtom(new Functor("InterruptedException", 1));
+	}
+	me.nthAtom(0).remove();
+	mem.relink(a, 0, me, 1);
+	me.remove();
+	:](Time).
 }.
 
