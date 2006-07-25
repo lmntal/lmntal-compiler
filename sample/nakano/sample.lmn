@@ -27,7 +27,9 @@ go:-{
 	  }.
   }.
   
-  clicked(_IX, _IY) :- a=sys.exec("cmd.exe /c start cmd.exe /c ping google.com").
+ // clicked(_IX, _IY) :- a=sys.exec("cmd.exe /c start cmd.exe /c ping google.com").
+  clicked(_IX, _IY),{draw, $p} :- {$p}.
+  clicked(_IX, _IY),{$p} :- {draw, $p}.
   nowtime(timer:getinttime),oldtime(timer:getinttime).
   
   nowtime(_IT), oldtime(_IO) :- _IT < _IO + 10 | .
