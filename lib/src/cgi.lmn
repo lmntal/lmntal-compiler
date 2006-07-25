@@ -14,7 +14,7 @@ HISTORY
 
 TODO
 	//query_string を取得する部分だけを inline で書けば、他はライブラリを使ってかける。かく。
-	
+	cgi.use と cgi.use(S) の区別はライブラリ側で行う
 
 */
 
@@ -50,8 +50,13 @@ module(cgi).
 /**
  * 初期化（パラメータが解析される）
  */
-cgi.use :-r=seq.run({query=sys.getenv("QUERY_STRING")}, [
+cgi.use :- r=seq.run({query=sys.getenv("QUERY_STRING")}, [
 //cgi.use :-r=seq.run({query="name=inui&age=23"}, [
+	{query=Query :- query2=string.split("&", Query).},
+	{query2(Query) :- query3=list.map(split, Query).},
+	{H=[[split, S]|Z] :- H=[string.split("=", S)|Z].}
+	]).
+cgi.use(S) :- string(S) | r=seq.run({query=S}, [
 	{query=Query :- query2=string.split("&", Query).},
 	{query2(Query) :- query3=list.map(split, Query).},
 	{H=[[split, S]|Z] :- H=[string.split("=", S)|Z].}
@@ -84,15 +89,77 @@ H=cgi.decode(S) :- H=[:/*inline*/
 	mem.relink(res, 0, me, 1);
 	me.remove();
 	:](S).
+H=cgi.decode(S, Enc) :- H=[:/*inline*/
+	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	String enc = ((StringFunctor)me.nthAtom(1).getFunctor()).stringValue();
+	Atom res = null;
+	try {
+		res = mem.newAtom(new StringFunctor(java.net.URLDecoder.decode(s, enc)));
+	} catch (java.io.UnsupportedEncodingException e) {
+		//失敗したときはそのまま返す
+		res = mem.newAtom(new StringFunctor(s));
+	}
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	mem.relink(res, 0, me, 2);
+	me.remove();
+	:](S, Enc).
 
 /**
  * エンコード
  */
 H=cgi.encode(S) :- H=[:/*inline*/
 	String s = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
-	Atom res = mem.newAtom(new StringFunctor(java.net.URLEncoder.encode(s)));
+	Atom res = null;
+//	try {
+//		res = mem.newAtom(new StringFunctor(java.net.URLEncoder.encode(s, "EUC-JP")));
+//	} catch (java.io.UnsupportedEncodingException e) {
+//		//失敗したときはそのまま返す
+//		res = mem.newAtom(new StringFunctor(s));
+//	}
+	res = mem.newAtom(new StringFunctor(java.net.URLEncoder.encode(s)));
 	me.nthAtom(0).remove();
 	mem.relink(res, 0, me, 1);
 	me.remove();
 	:](S).
+
+///////////////////////////////////////////////////////////////////////////
+//とりあえず perl の CGI.pm を目指して作ってみる
+
+/**
+ * html のヘッダ部の文字列を生成する
+ */
+H=cgi.start_html(Title) :- H=string.replace([:
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-2022-JP">
+<link rel="stylesheet" type="text/css" href="default.css">
+<title>$Title</title>
+</head>
+<body>
+<h1>$Title</h1>
+:], "\\$Title", Title).
+
+/**
+ * html のフッタ部の文字列を生成する
+ */
+H=cgi.end_html :- H=[:
+</body>
+</html>
+:].
+
+/**
+ * h1 タグを生成する
+ */
+H=cgi.h1(S) :- H=string.join("", ["<h1>", S, "</h1>"]).
+
+/**
+ * h2 タグを生成する
+ */
+H=cgi.h2(S) :- H=string.join("", ["<h2>", S, "</h2>"]).
+
+/**
+ * h3 タグを生成する
+ */
+H=cgi.h3(S) :- H=string.join("", ["<h3>", S, "</h3>"]).
 }.
