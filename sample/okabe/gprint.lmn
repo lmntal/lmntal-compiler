@@ -23,8 +23,8 @@ G=a(b,c(d,e(f,X)),X).
           sb.append(now.getName());
           sb.append("( ");
           for(int i=0; i<arity-1; i++) {
-            if((now.getArg(i)).equals(pointer))
-              sb.append("X" + counter);
+            if((now.getArg(i)).equals((Link)pointer))
+              sb.append("X" + counter++);
             else
               loop(now.nthAtom(i),now.getArg(i).getBuddy());
             if(i < arity-2)
@@ -44,4 +44,5 @@ H = printg(G) :- ground(G) |
   C.set.add(me);
   C.loop(root, pointer);
   System.out.println(C.sb);
+  me.remove();
 :](G,H).
