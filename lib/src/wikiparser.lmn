@@ -15,7 +15,8 @@ HISTORY
 
 */
 
-/*a=wiki.parse([:
+//テスト用コード
+/*a=wikiparser.parse([:
 *見出し1
 **見出し2
 ***見出し3
@@ -100,6 +101,6 @@ H=wikiparser.parse(S) :- string(S) | H=seq.run({s0=list.map(link, string.split("
 	s6(S) :- ret=string.replace(S, "</ol>\n<ol>", "\n").
 	}
 	]).
-	X=Y, {ret(S), +Y, $p[], @p}/ :- string(S) | X=S.
-	H=seq.run(S, []) :- H=S.
+X={ret(S), $p[], @p}/ :- string(S) | X=S.
+H=seq.run(S, []) :- H=S.
 }.
