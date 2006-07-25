@@ -1,0 +1,47 @@
+% つくり途中
+
+hoge=printg(G).
+G=a(b,c(d,e(f,X)),X).
+
+[:/*inline_define*/
+  import java.io.*;
+  import java.util.*;
+  
+  class C {
+    // 
+    public static StringBuffer sb = new StringBuffer("");
+    public static HashSet set = new HashSet();
+    public static int counter = 0; // link
+    
+    public static void loop(Atom now, Link pointer) {
+      if(!set.contains(now)) {
+        set.add(now);
+        int arity = now.getEdgeCount();
+        if(arity == 1)
+          sb.append(now.getName());
+        else {
+          sb.append(now.getName());
+          sb.append("( ");
+          for(int i=0; i<arity-1; i++) {
+            if((now.getArg(i)).equals(pointer))
+              sb.append("X" + counter);
+            else
+              loop(now.nthAtom(i),now.getArg(i).getBuddy());
+            if(i < arity-2)
+              sb.append(", ");
+          }
+          sb.append(" )");
+        }
+      }
+    }
+  }
+:].
+
+H = printg(G) :- ground(G) |
+[:/*inline*/
+  Atom root = me.nthAtom(0);
+  Link pointer = me.getArg(0).getBuddy();
+  C.set.add(me);
+  C.loop(root, pointer);
+  System.out.println(C.sb);
+:](G,H).
