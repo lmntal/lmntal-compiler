@@ -9,6 +9,7 @@ AUTHOR
 	Atsuyuki Inui
 
 HISTORY
+	2006/07/26(Wed) コメントと行末改行
 	2006/07/25(Tue) italic, 整形済みテキスト内はインライン要素を無効
 	2006/07/24(Mon) 水平線
 	2006/07/23(Sun) <ul>, <ol>, リンク
@@ -25,15 +26,16 @@ HISTORY
 -箇条書き2
 -[[リンク]]
 -----
- 整形済みテキスト
- ここも整形済みテキスト
+ 整形済み''テキスト''だよ
+ ここも整形済み'''テキスト'''だよ
 
-ここは段落
-ここも段落
+ここは''段落''だよ
+ここも'''段落'''だよ
 
 ----
 +番号つき箇条書き1
 +番号つき箇条書き2
+//コメント
 :]).*/
 
 {
@@ -69,7 +71,10 @@ H=wikiparser.parse(S) :- string(S) | H=seq.run({s0=list.map(pre, string.split("\
 		L=internal_link(string.replace(S, "\\[\\[(http://.*)\\]\\]", "<a href=$1>$1</a>")).
 	//内部リンク
 	L=internal_link(S) :- string(S) |
-		L=hr(string.replace(S, "\\[\\[(.*)\\]\\]", "<a href=lmnwiki.cgi?cmd=view&name=$1>$1</a>")).		
+		L=br(string.replace(S, "\\[\\[(.*)\\]\\]", "<a href=lmnwiki.cgi?cmd=view&name=$1>$1</a>")).		
+	//行末改行
+	L=br(S) :- string(S) |
+		L=hr(string.replace(S, "~$", "<br>")).
 	////ブロック要素はどれか１つ反応したら終わり
 	//水平線
 	L=hr(S) :- string(S) |
@@ -90,8 +95,11 @@ H=wikiparser.parse(S) :- string(S) | H=seq.run({s0=list.map(pre, string.split("\
 		L=if(string.match(S, "^[-]{1}"), string.replace(S, "^[-]{1}(.*)", "<ul><li>$1</li></ul>"), ol(S)).
 	//番号つき箇条書き
 	L=ol(S) :- string(S) |
-		L=if(string.match(S, "^[+]"), string.replace(S, "^[+](.*)", "<ol><li>$1</li></ol>"), p(S)).
-	//段落
+		L=if(string.match(S, "^[+]"), string.replace(S, "^[+](.*)", "<ol><li>$1</li></ol>"), comment(S)).
+	//コメント
+	L=comment(S) :- string(S) |
+		L=if(string.match(S, "^//"), "", p(S)).
+	//段落は最後にチェック
 	L=p(S) :- string(S), S \= "" |
 		L=string.join("", ["<p>", S, "</p>"]).
 	L=p(S) :- string(S), S == "" |
