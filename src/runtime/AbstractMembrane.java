@@ -166,6 +166,17 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	public AbstractMembrane getParent() {
 		return parent;
 	}
+	
+	/** AtomSetを配列形式で取得 */
+	// 使ってる場所がないのでコメントアウト
+//	public Atom[] getAtomSet() {
+//		return (Atom[])atoms.toArray();
+//	}
+	/** 060727 */
+	/** ルールセット数を取得 */
+	public int getRulesetCount() {
+		return rulesets.size();
+	}
 	public int getMemCount() {
 		return mems.size();
 	}
@@ -233,6 +244,19 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	}
 	public Object[] getMemArray() {
 		return mems.toArray();
+	}
+	/** 06/07/27 */
+	/** ルールセットのコピーを取得 */
+	public ArrayList getRuleset() {
+		ArrayList al = new ArrayList(rulesets);
+		return al;
+	}
+	/** 子膜のコピーを取得 */
+	public HashSet getMemCopy() {
+		return new HashSet(mems);
+		//RandomSet s = new RandomSet();
+		//s.addAll(mems);
+		//return s;
 	}
 	/** この膜にあるアトムの反復子を取得する */
 	public Iterator atomIterator() {
