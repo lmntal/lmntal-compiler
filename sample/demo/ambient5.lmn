@@ -20,7 +20,7 @@ in@@
 
 /* m[n[out m.P | Q] | R] --> n[P|Q] | m[R] */
 out@@
-{amb(M0), {id,+M0,+M2,-M3,$m1} {id,+N1,-N2,$n2},
+{amb(M0), {id,+M0,+M2,-M3,$m1}, {id,+N1,-N2,$n2},
   {amb(N0), {id,+M1,-M2,$m0}, {id,+N0,-N1,$n}, out(M1,{$p}), $q,@q},
   $r,@r} :-
     {amb(N), {id,-M2,$m0}, {id,+N,-N1,$n}, $p,$q,@q},
@@ -42,7 +42,7 @@ proxy_enter@@
    {$p[M0,M1|*P],@p, {id,+M0,+M1,-M}}, {id,+M,$m}.
 
 proxy_merge@@
-{id,-M,$m0} {id,+M,$m1} :- {id,$m0,$m1}.
+{id,-M,$m0}, {id,+M,$m1} :- {id,$m0,$m1}.
 
 proxy_insert_middle@@
 {{{id,-M,$m},$p,@p},$q,@q} :- {{id,+M0,-M}, {{id,-M0,$m},$p,@p},$q,@q}.
