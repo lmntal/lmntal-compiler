@@ -765,20 +765,32 @@ public class Task extends AbstractTask implements Runnable {
 		Ruleset rs = (Ruleset)state[0];
 		String name = (String)state[1];
 		String label = (String)state[2];
-		Class[] parameterTypes = new Class[state.length - 3 + 1];
-		Object[] args = new Object[state.length - 3 + 1];
-		int i;
-		for (i = 0; i < state.length - 3; i++) {
-//			parameterTypes[i] = Object.class;
-			args[i] = state[i+3];
-			if (args[i] instanceof Atom && atomMap != null && atomMap.containsKey(args[i]))
-				args[i] = atomMap.get(args[i]);
-			if (origMem == args[i])
-				args[i] = mem;
+		Class[] parameterTypes = new Class[2];
+		Object[] argsTemp = new Object[atomMap.size() + 2];
+		Object[] args = new Object[2];
+		int i = 0;
+		int j = 0;
+		Object st;
+		for (i = 0, j = 0; i < state.length - 3; i++, j++) {
+			st = state[i+3];
+			if (st instanceof Object[] && atomMap != null){
+				for(int k = 0; k < ((Object[])st).length; k++ ){
+					argsTemp[j] = atomMap.get(((Object[])st)[k]);
+					if (origMem == ((Object[])st)[k]){
+						argsTemp[j] = mem;
+					}
+					j++;
+//					System.out.println(argsTemp[j]);
+				}
+			}
+//			if (origMem == st){
+//				argsTemp[j] = mem;
+//			}
 		}
 		parameterTypes[0] = Object[].class;
 		parameterTypes[1] = boolean.class;
-		args[i] = Boolean.FALSE;
+		args[0] = argsTemp;
+		args[1] = Boolean.FALSE;
 		try {
 			Method m = rs.getClass().getMethod("exec" + label, parameterTypes);
 			m.invoke(rs, args);
@@ -791,4 +803,35 @@ public class Task extends AbstractTask implements Runnable {
 		}
 		return name;
 	}
+//	static String react(Membrane mem, Object[] state, Membrane origMem, Map atomMap) {
+//		Ruleset rs = (Ruleset)state[0];
+//		String name = (String)state[1];
+//		String label = (String)state[2];
+//		Class[] parameterTypes = new Class[state.length - 3 + 1];
+//		Object[] args = new Object[state.length - 3 + 1];
+//		int i;
+//		for (i = 0; i < state.length - 3; i++) {
+////			parameterTypes[i] = Object.class;
+//			args[i] = state[i+3];
+//			if (args[i] instanceof Atom && atomMap != null && atomMap.containsKey(args[i]))
+//				args[i] = atomMap.get(args[i]);
+//			if (origMem == args[i])
+//				args[i] = mem;
+//		}
+//		parameterTypes[0] = Object[].class;
+//		parameterTypes[1] = boolean.class;
+//		args[i] = Boolean.FALSE;
+//		try {
+//			Method m = rs.getClass().getMethod("exec" + label, parameterTypes);
+//			System.out.println(m);
+//			m.invoke(rs, args);
+//		} catch (NoSuchMethodException e) {
+//			throw new RuntimeException(e);
+//		} catch (InvocationTargetException e) {
+//			throw new RuntimeException(e);
+//		} catch (IllegalAccessException e) {
+//			throw new RuntimeException(e);
+//		}
+//		return name;
+//	}
 }
