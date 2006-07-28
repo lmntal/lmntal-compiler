@@ -1,0 +1,84 @@
+// 途中で使ったマウスクリックのごみ置き場。
+
+graphic.use.
+go:-{
+	window.
+	size(450,600).
+	name("Who am I ??").
+	killer.
+	clickListener.
+	sys.perpetual(on).
+	
+
+	
+	{ // はこ???????
+		draw. name("box"). getpic("rect").
+		color(0,0,0). position(20,345). size(400,210).
+
+		{ // １???
+			draw. name("1_c"). getpic("circle").
+			color(0,0,0). position(30,25). size(50,50).
+			{
+				draw. name("1_s"). getpic(string("1", 25)).
+				color(0,0,0). position(15,35).
+			}.
+		}.
+		{ // enter
+			draw. name("enter_c"). getpic("rect").
+			color(0,0,0). position(140,155). size(100,40).
+			{
+				draw. name("enter_s"). getpic(string("enter", 25)).
+				color(0,0,0). position(25,30).
+			}.
+		}.
+	}.
+
+/*	{
+		draw. name("bbbb"). getpic(string("bbbb", 25)).
+		color(0,0,0). position(25,30).
+	}.
+	
+	a(3).
+*/	
+//	clicked(X,Y) :- X>100, Y>100 | {
+//	draw. name("p"). getpic(string("aaaaaa", 25)). position(200,100).}.
+
+
+	clicked(X,Y) :- X>100, Y>100 {
+	a(3).
+    a(N) :- N>0 | { 
+		draw. name("p"). getpic(string("aaaaaa", 25)). position(100,100).
+	}.
+	}.
+
+
+//	clicked(X,Y) :- X<100, Y<100 | { 
+//			draw. name("1_c"). getpic("circle").
+//			color(0,0,0). position(30,25). size(50,50).
+//			}.
+
+	
+//	clicked(_IX, _IY),{{{{draw,$p},$q},$r},$s} :- {{{{$p},$q},$r},$s}.
+//	clicked(_IX, _IY),{{{{$p},$q},$r},$s} :- {{{{draw,$p},$q},$r},$s}.
+
+
+//	clicked(_IX, _IY),{{draw, $p},$q} :- {{$p},$q}.
+//	clicked(_IX, _IY),{{$p},$q} :- {{draw, $p},$q}.
+
+	
+//	clicked(_IX, _IY) :- a=sys.exec("cmd.exe /c start cmd.exe /c lmnc sample3.lmn").
+
+
+/*
+	clicked(_IX, _IY) :- {
+			draw.
+			name(2).
+			getpic(string("aiueo", 20)).
+			position(40,30).
+		}.
+*/
+  	
+//	clicked(_IX, _IY) :- a=sys.exec("cmd.exe /c start cmd.exe /c ping google.com").
+//	clicked(_IX, _IY),{draw, $p} :- {$p}.
+//	clicked(_IX, _IY),{$p} :- {draw, $p}.
+}.
