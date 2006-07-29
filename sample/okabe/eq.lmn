@@ -1,4 +1,10 @@
-% Membrane comparator
+% Simple Membrane Comparator
+%
+% 膜比較モジュール簡易版
+% 自由リンクを持たない膜に対してのみ有効
+%
+% AUTHOR: Ryo OKABE
+%
 
 [:/*inline_define*/
   // for atom sorting
@@ -23,13 +29,14 @@
           return -1;
         // リンク数が等しいとき
         // リンク先ファンクタでソートする
+        // リンク先ファンクタについて再帰しなくても大丈夫なはず？
         else {
           for(int i=0; i<e1; i++) {
-            String fss1 = a1.nthAtom(i).getFunctor().toString();
-            String fss2 = a2.nthAtom(i).getFunctor().toString();
-            if(fss1.compareTo(fss2) > 0)
+            String ffs1 = a1.nthAtom(i).getFunctor().toString();
+            String ffs2 = a2.nthAtom(i).getFunctor().toString();
+            if(ffs1.compareTo(ffs2) > 0)
               return 1;
-            else if(fss1.compareTo(fss2) < 0)
+            else if(ffs1.compareTo(ffs2) < 0)
               return -1;
           }
           return 0;
@@ -45,81 +52,71 @@
       Ruleset r2 = (Ruleset)o2;
       String s1 = r1.encode();
       String s2 = r2.encode();
-      if(s1.compareTo(s2) > 0)
-        return 1;
-      else if(s1.compareTo(s2) < 0)
-        return -1;
-      else
-        return 0;
+      return s1.compareTo(s2);
     }
   }
   
   class C {
     public static boolean memEq(Membrane m1, Membrane m2) {
-      // 前処理
+      // 前処理	
       if(!auxMemEq(m1,m2))
         return false;
       // phase 1
-      // AtomSet の同一性判定
+      // アトムの比較
       if(!(atomEq(m1,m2))) {
         //System.out.println("atom: false");
         return false;
-        }
+      }
       // phase 2
-      // RuleSet の同一性判定
+      // ルールセットの比較
       if(!(rulesetEq(m1,m2))) {
         //System.out.println("ruleset: false");
         return false;
-        }
+      }
       // phase 3
-      // 子膜の同一性判定
+      // 子膜の比較
       if(childMemEq(m1,m2))
         return true;
-      else
-        {
+      else {
         //System.out.println("childMem: false");
         return false;
-        }
+      }
     }
     
     // 前処理
     // 膜の構成要素の個数を比較する
     public static boolean auxMemEq(Membrane m1, Membrane m2) {
       if(m1.getAtomCount() != m2.getAtomCount()) {
-        //System.out.println("atomCount");
+        //System.out.println("!atomCount");
         return false;
       }
       if(m1.getMemCount() != m2.getMemCount()) {
-        //System.out.println("memCount");
-        return false;
-      }
-      if(m1.getFreeLinkCount() != m2.getFreeLinkCount()) {
-        //System.out.println("freeLinkCount");
+        //System.out.println("!memCount");
         return false;
       }
       if(m1.getRulesetCount() != m2.getRulesetCount()) {
-        //System.out.println("rulesetCount");
+        //System.out.println("!rulesetCount");
         return false;
       }
       return true;      
     }
     
-    // 子膜の同一性判定を行う
+    // 子膜の比較
     public static boolean childMemEq(Membrane m1, Membrane m2) {
       HashSet h1 = m1.getMemCopy();
       HashSet h2 = m2.getMemCopy();
-      Iterator memIt1 = h1.iterator();
-      while(memIt1.hasNext()) {
-        Membrane mm1 = (Membrane)memIt1.next();
-        Iterator memIt2 = h2.iterator();
-        while(memIt2.hasNext()) {
+      Iterator it1 = h1.iterator();
+      while(it1.hasNext()) {
+        Membrane mm1 = (Membrane)it1.next();
+        Iterator it2 = h2.iterator();
+        while(it2.hasNext()) {
           //System.out.println("it1: " + mm1);
-          Membrane mm2 = (Membrane)memIt2.next();
+          Membrane mm2 = (Membrane)it2.next();
           //System.out.println("it2: " + mm2);
           if(memEq(mm1,mm2)) {
-            //System.out.println("remove: " + mm1 + ", " + mm2);
-            memIt1.remove();
-            memIt2.remove();
+            //System.out.println("equals: " + mm1 + ", " + mm2);
+            it1.remove();
+            it2.remove();
             if(h1.isEmpty() ^ h2.isEmpty()) {
               return false;
             }
@@ -133,7 +130,7 @@
         return false;    
     }
     
-    // アトムの同一性判定を行う
+    // アトムの比較
     public static boolean atomEq(Membrane m1, Membrane m2) {
       Atom[] a1 = (Atom[])m1.getAtomArray();
       Atom[] a2 = (Atom[])m2.getAtomArray();
@@ -143,20 +140,21 @@
       Arrays.sort(a2,ac);
       /*
       for(int i=0; i<a1.length; i++) {
-        System.out.println(a1[i] + ", " + a2[i]);
+        System.out.println(a1[i] + " ?= " + a2[i]);
       }
       */
       for(int i=0; i<a1.length; i++) {
-        // ファンクタが等しいか？
+        // ファンクタを比較
         Functor f1 = a1[i].getFunctor();
         Functor f2 = a2[i].getFunctor();
         if(!(f1.equals(f2))) {
           return false;
         }
-        // 隣接するアトムのファンクタ が等しいか？
+        // 隣接するアトムのファンクタを比較
         for(int j=0; j<a1[i].getEdgeCount(); j++) {
-          if(!((a1[i].nthAtom(j).getFunctor()).equals
-            (a2[i].nthAtom(j).getFunctor()))) {
+          Functor ff1 = a1[i].nthAtom(j).getFunctor();
+          Functor ff2 = a2[i].nthAtom(j).getFunctor();
+          if(!(ff1.equals(ff2))) {
             return false;
           }
         }
@@ -164,26 +162,21 @@
       return true;
     }
     
-    // ルールセットの同一性判定を行う
+    // ルールセットの比較
     public static boolean rulesetEq(Membrane m1, Membrane m2) {
-      if(m1.getRulesetCount() != m2.getRulesetCount())
-        return false;
       ArrayList a1 = m1.getRuleset();
       ArrayList a2 = m2.getRuleset();
-            
+      
       RulesetComparator rc = new RulesetComparator();
       Collections.sort(a1,rc);
       Collections.sort(a2,rc);
       
       Iterator it1 = a1.iterator();
-      Iterator it2 = a2.iterator();
       while(it1.hasNext()) {
-        String e1 = ((Ruleset)it1.next()).encode();
-        String e2 = ((Ruleset)it2.next()).encode();
-        if(!(e1.equals(e2))) {
-          //System.out.println("not equal: ");
-          //System.out.println(e1);
-          //System.out.println(e2);
+        Iterator it2 = a2.iterator();
+        String s1 = ((Ruleset)it1.next()).encode();
+        String s2 = ((Ruleset)it2.next()).encode();
+        if(!(s1.equals(s2))) {
           return false;
         }
       }
@@ -191,27 +184,6 @@
     }
   }
 :].
-
-res1=contains(S1,D1).
-S1={{b,c(Y),{b(x,Y)}. a:-b. hoge=integer.set(0,9).}}.
-D1={{a,c(X),{b(x,X)}. a:-b. hoge=integer.set(0,9).}}.
-
-res2=contains(S2,D2).
-S2={{{a(b),a(c),a(b,A),q(X)},
-  g(X),a(b),a(c),a(b),{a(b,A),a(c),a(b)},b(c),c(a)}}.
-D2={{{a(b),a(b,B),a(c),q(Y)},
-  g(Y),a(b),b(c),c(a),{a(b,B),a(c),a(b)},a(b),a(c)}}.
-
-res3=contains(S3,D3).
-S3={{hoge=string.times("ho",3)}}.
-D3={{hoge=string.times("ho",3)}}.
-/*
-res4=contains(S4,D4).
-S4={{string.use}}.
-D4={{string.use}}.
-*/
-move@@ {foo. {@p}} :- S5={{@p}},D5={{@p. a:-c}},res5=contains(S5,D5).
-{foo. {a :- b.}}.
 
 H = contains(Src,Dst) :- H =
 [:/*inline*/
@@ -227,7 +199,6 @@ H = contains(Src,Dst) :- H =
     Membrane mm1 = (Membrane)it1.next();
     while(it2.hasNext()) {
       Membrane mm2 = (Membrane)it2.next();
-      //System.out.println(mm1 + ", " + mm2);
       if(C.memEq(mm1,mm2)) {
         Atom a = mem.newAtom(new Functor("true",1));
         mem.relinkAtomArgs(a,0,me,2);
@@ -240,5 +211,12 @@ H = contains(Src,Dst) :- H =
       mem.relinkAtomArgs(a,0,me,2);
     }
   }
+  me.nthAtom(0).nthAtom(0).nthAtom(1).remove();
+  me.nthAtom(1).nthAtom(0).nthAtom(1).remove();
   me.remove();
 :](Src,Dst).
+
+% sample
+res = contains(S,D).
+S={{a. a:-b. b:-c.},'+'(X1)}, X1=mem1.
+D={{b. a:-b. b:-c.},'+'(X2)}, X2=mem2.
