@@ -9,7 +9,7 @@
 */
 graphic.use.
 go:-
-{window,name("window"),size(500,500),
+{window,name("window"),size(500,500),killer,
 {
 draw.
 name("rect").

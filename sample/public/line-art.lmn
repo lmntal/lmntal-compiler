@@ -10,9 +10,9 @@
 graphic.use.
 go:- 
 {
-window,position(400,0),size(400,400),name(1),bgcolor(0,0,0). timer(100).
+window,position(400,0),size(400,400),name(1),bgcolor(0,0,0). timer(1).
 	{ name(0),getpic("line"),position(1,1,1,1),color(0,0,0) }.
-	now(1),color(255,0,0).
+	now(1),color(255,0,0),killer.
 }.
 
 %xとyの対応を維持。data(x1,y1,x2,y2)  : next(現在値、速度、最大値)。

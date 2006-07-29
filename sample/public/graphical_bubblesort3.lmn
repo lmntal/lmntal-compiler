@@ -1,6 +1,6 @@
 /**
   Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
-  $Author: nakano $
+  $Author: ueda $
 
   SYNOPSIS
 	バブルソート。
@@ -8,7 +8,7 @@
 	ライブラリintegerとgraphicを使用しています。
 */
 graphic.use.
-go:-{window,position(0,0),size(500,500),name("window"),timer(10).
+go:-{window,position(0,0),size(500,500),name("window"),timer(10),killer.
 
 %要素数
 max_num(45).
