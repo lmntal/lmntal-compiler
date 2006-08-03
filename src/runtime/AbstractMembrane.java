@@ -419,7 +419,7 @@ abstract public class AbstractMembrane extends QueuedEntity {
 	 * @param nodedesc ノード名を表す文字列
 	 * @return 作成されたルート膜 */
 	public AbstractMembrane newRoot(String nodedesc, int k) {
-		if(Env.debug > 0)System.out.println("AbstraceMembrane.newRoot(" + nodedesc + ")");
+		if(Env.debug > 0)System.out.println("AbstractMembrane.newRoot(" + nodedesc + ")");
 		
 		if (nodedesc.equals("")) {
 			AbstractMembrane mem = newMem();
