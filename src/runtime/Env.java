@@ -247,6 +247,18 @@ public final class Env {
 	 */
 	public static boolean fREPL = false;
 	
+	/**
+	 * 060804
+	 * safe mode
+	 */
+	public static int maxStep = 1000;
+	
+	/**
+	 * 060804
+	 * safe mode
+	 */
+	public static int counter = 0;
+	
 	public static boolean preProcess0 = false;
 	
 	/** アトム名の表示する長さ */
