@@ -30,6 +30,10 @@ public class GlobalSystemRuleset extends Ruleset {
 		return encodedRuleset;
 	}
 	public boolean react(Membrane mem, Atom atom) {
+		// 060804 safe mode
+		if(Env.counter > Env.maxStep) return false;
+		Env.counter++;
+  
 		boolean result = false;
 		if (execL100(mem, atom, false)) {
 			if (Env.fTrace)
@@ -122,6 +126,10 @@ public class GlobalSystemRuleset extends Ruleset {
 		return react(mem, false);
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
+		// 060804 safe mode
+		if(Env.counter > Env.maxStep) return false;
+		Env.counter++;
+  
 		boolean result = false;
 		if (execL101(mem, nondeterministic)) {
 			if (Env.fTrace)
