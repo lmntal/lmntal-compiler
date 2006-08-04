@@ -477,6 +477,7 @@ public class FrontEnd {
 							isSrcs = false;
 						} else if (args[i].equals("--safe")) {
 							// 060804 safe mode
+							Env.safe = true;
 							Env.maxStep = Integer.parseInt(args[++i]);
 						} else {
 							System.err.println("Invalid option: " + args[i]);

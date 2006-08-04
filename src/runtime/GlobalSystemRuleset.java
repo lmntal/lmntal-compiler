@@ -31,7 +31,7 @@ public class GlobalSystemRuleset extends Ruleset {
 	}
 	public boolean react(Membrane mem, Atom atom) {
 		// 060804 safe mode
-		if(Env.counter > Env.maxStep) return false;
+		if(Env.safe && (Env.counter > Env.maxStep)) return false;
 		Env.counter++;
   
 		boolean result = false;
@@ -127,7 +127,7 @@ public class GlobalSystemRuleset extends Ruleset {
 	}
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		// 060804 safe mode
-		if(Env.counter > Env.maxStep) return false;
+		if(Env.safe && (Env.counter > Env.maxStep)) return false;
 		Env.counter++;
   
 		boolean result = false;

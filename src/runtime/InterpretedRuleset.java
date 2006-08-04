@@ -96,7 +96,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	 */
 	public boolean react(Membrane mem, Atom atom) {
 		// 060804 safe mode
-		if(Env.counter > Env.maxStep) return false;
+		if(Env.safe && (Env.counter > Env.maxStep)) return false;
 		Env.counter++;
     	Thread thread = Thread.currentThread();
 		boolean result = false;
@@ -150,7 +150,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	 */
 	public boolean react(Membrane mem) {
 		// 060804 safe mode
-		if(Env.counter > Env.maxStep) return false;
+		if(Env.safe && (Env.counter > Env.maxStep)) return false;
 		Env.counter++;
     	Thread thread = Thread.currentThread();
 		boolean result = false;
