@@ -475,6 +475,9 @@ public class FrontEnd {
 							/// --args
 							/// give command-line options after this to LMNtal program.
 							isSrcs = false;
+						} else if (args[i].equals("--safe")) {
+							// 060804 safe mode
+							Env.maxStep = Integer.parseInt(args[++i]);
 						} else {
 							System.err.println("Invalid option: " + args[i]);
 							System.err.println("Use option --help to see a long list of options.");
@@ -711,6 +714,8 @@ public class FrontEnd {
 	 * @param rs (:-m) というルール１つだけからなるルールセット
 	 */
 	public static void run(Ruleset rs) {
+		// 060804 safe mode
+		Env.counter = 0;
 		try {
 			// 実行
 			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
