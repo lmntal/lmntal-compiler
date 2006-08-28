@@ -8,12 +8,12 @@
 */
 graphic.use.
 go:-{
-window.
+window.  killer.
 size(800,600).
 name("hoge").
 now(0).
 timer(0).
-a(350,0,0,500,700,500, 6).
+a(350,0,0,500,700,500, 5).
 
 a(AX,AY,BX,BY,CX,CY,N):- N>0,DX=(AX+BX)/2,DY=(AY+BY)/2,EX=(AX+CX)/2,EY=(AY+CY)/2,FX=(BX+CX)/2,FY=(BY+CY)/2|
  a(AX,AY,DX,DY,EX,EY,N-1),a(DX,DY,BX,BY,FX,FY,N-1),a(EX,EY,FX,FY,CX,CY,N-1).

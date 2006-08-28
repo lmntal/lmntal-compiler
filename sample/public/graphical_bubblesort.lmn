@@ -1,13 +1,13 @@
 /**
   Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
-  $Author: nakano $
+  $Author: ueda $
 
   SYNOPSIS
 	バブルソート。
 	ライブラリgraphicを使用しています。
 */
 graphic.use.
-go:-{window,position(0,0),size(500,500),name("window"),timer(50).
+go:-{window,position(0,0),size(500,500),name("window"),timer(50). killer.
 
 %ソートルール
 {name(_IN),size(_IS,10),$p},{name(_IN2),size(_IS2,10),$q} :-

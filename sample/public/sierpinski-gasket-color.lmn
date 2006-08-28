@@ -8,7 +8,7 @@
 */
 graphic.use.
 go:-{
-window.
+window.  killer.
 size(800,600).
 name("hoge").
 now(0).
