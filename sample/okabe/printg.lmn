@@ -49,7 +49,9 @@ H = printg(G) :- ground(G) |
   Link pointer = me.getArg(0).getBuddy();
   C.set.add(me);
   C.printg(root, pointer);
+  C.set.clear();
   System.out.println(C.sb);
+  C.sb.delete(0,C.sb.length());
   mem.unifyAtomArgs(me,0,me,1);
   me.remove();
 :](G,H).
