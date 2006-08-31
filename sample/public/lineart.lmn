@@ -76,7 +76,7 @@ class TimerListener implements ActionListener {
 	private static final Functor MOVE = new Functor("move", 1);
 	private static final Functor WAIT = new Functor("wait", 1);
 	public void actionPerformed(ActionEvent e) {
-		AbstractMembrane mem = me.getMem();
+		Membrane mem = me.getMem();
 		mem.asyncLock();
 		Atom wait = me.nthAtom(0);
 		if (wait.getFunctor().equals(WAIT)) {
@@ -88,10 +88,10 @@ class TimerListener implements ActionListener {
 	}
 }
 class LineArtFrame extends Frame implements WindowListener {
-	private final AbstractMembrane mem;
+	private final Membrane mem;
 	Atom me;
 	private Canvas canvas;
-	LineArtFrame(AbstractMembrane m, int width, int height, Color backColor) {
+	LineArtFrame(Membrane m, int width, int height, Color backColor) {
 		mem = m;
 
 		addWindowListener(this);

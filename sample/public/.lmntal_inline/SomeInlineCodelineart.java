@@ -10,7 +10,7 @@ class TimerListener implements ActionListener {
 	private static final Functor MOVE = new Functor("move", 1);
 	private static final Functor WAIT = new Functor("wait", 1);
 	public void actionPerformed(ActionEvent e) {
-		AbstractMembrane mem = me.getMem();
+		Membrane mem = me.getMem();
 		mem.asyncLock();
 		Atom wait = me.nthAtom(0);
 		if (wait.getFunctor().equals(WAIT)) {
@@ -22,10 +22,10 @@ class TimerListener implements ActionListener {
 	}
 }
 class LineArtFrame extends Frame implements WindowListener {
-	private final AbstractMembrane mem;
+	private final Membrane mem;
 	Atom me;
 	private Canvas canvas;
-	LineArtFrame(AbstractMembrane m, int width, int height, Color backColor) {
+	LineArtFrame(Membrane m, int width, int height, Color backColor) {
 		mem = m;
 
 		addWindowListener(this);
@@ -44,7 +44,7 @@ class LineArtFrame extends Frame implements WindowListener {
 	}
 	public void windowClosing(WindowEvent e) {
 		mem.asyncLock();
-		//LMntalÂ¦¤«¤éFrame¤òdispose¤·¤è¤¦¤È¤¹¤?¤È¡¢¥Ç¥Ã¥É¥úÁÃ¥¯¤¹¤?¡£(¤â¤·¤«¤·¤¿¤é±³¤«¤?)
+		//LMntalÂ¦¤«¤éFrame¤òdispose¤·¤è¤¦¤È¤¹¤ë¤È¡¢¥Ç¥Ã¥É¥í¥Ã¥¯¤¹¤ë¡£(¤â¤·¤«¤·¤¿¤é±³¤«¤â)
 		this.dispose();
 		mem.newAtom(new Functor("exit", 0));
 		Atom frame = me.nthAtom(0);
@@ -59,15 +59,34 @@ class LineArtFrame extends Frame implements WindowListener {
 	public void windowActivated(WindowEvent e) {}
 	public void windowDeactivated(WindowEvent e) {}
 }
-
 public class SomeInlineCodelineart implements InlineCode {
-	public boolean runGuard(String guardID, Membrane mem, Object obj) throws Exception {
-			CustomGuard cg=(CustomGuard)Class.forName("CustomGuardImpl").newInstance();
-			if(cg==null) return false;
+	public boolean runGuard(String guardID, Membrane mem, Object obj) throws GuardNotFoundException {
+		try {
+		String name = "SomeInlineCodelineartCustomGuardImpl";
+
+			CustomGuard cg=(CustomGuard)Class.forName(name).newInstance();
+
+			if(cg==null) throw new GuardNotFoundException();
+
 			return cg.run(guardID, mem, obj);
+
+		} catch(GuardNotFoundException e) {
+			throw new GuardNotFoundException();
+
+		} catch(ClassNotFoundException e) {
+		} catch(InstantiationException e) {
+		} catch(IllegalAccessException e) {
+		} catch(Exception e) {
+
+			e.printStackTrace();
+
+		}
+
+		throw new GuardNotFoundException();
+
 	}
 	public void run(Atom me, int codeID) {
-		AbstractMembrane mem = me.getMem();
+		Membrane mem = me.getMem();
 		switch(codeID) {
 		case 1: {
 			/*inline*/
@@ -97,15 +116,6 @@ public class SomeInlineCodelineart implements InlineCode {
 		mem.removeAtom(ab);
 		Atom a = mem.newAtom(new Functor("frame", 1));
 		mem.relinkAtomArgs(a, 0, me, 0);
-		mem.removeAtom(me);
-	
-			break; }
-		case 3: {
-			/*inline*/
-		Atom a = me.nthAtom(0);
-		Timer t = (Timer)((ObjectFunctor)a.getFunctor()).getObject();
-		t.stop();
-		mem.removeAtom(a);
 		mem.removeAtom(me);
 	
 			break; }
@@ -141,6 +151,15 @@ public class SomeInlineCodelineart implements InlineCode {
 		mem.removeAtom(r);
 		mem.removeAtom(g);
 		mem.removeAtom(b);
+		mem.removeAtom(me);
+	
+			break; }
+		case 3: {
+			/*inline*/
+		Atom a = me.nthAtom(0);
+		Timer t = (Timer)((ObjectFunctor)a.getFunctor()).getObject();
+		t.stop();
+		mem.removeAtom(a);
 		mem.removeAtom(me);
 	
 			break; }
