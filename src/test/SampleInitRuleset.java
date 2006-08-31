@@ -27,7 +27,7 @@ public final class SampleInitRuleset extends Ruleset {
 	 */
 	public boolean react(Membrane mem) {
 		Atom a, b, c;
-		AbstractMembrane m1;
+		Membrane m1;
 		
 		a = mem.newAtom(new Functor("a", 1));
 		b = mem.newAtom(new Functor("b", 2));

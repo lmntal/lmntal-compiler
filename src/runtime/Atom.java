@@ -20,7 +20,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import util.QueuedEntity;
-import daemon.IDConverter;
 //import util.Stack;
 
 /**
@@ -32,7 +31,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
 	 * ただし値を変更するときはindexも同時に更新すること。(null, -1)は所属膜なしを表す。
 	 */
-	AbstractMembrane mem;
+	Membrane mem;
 	
 	/** 所属膜のAtomSet内でのインデックス */
 	public int index = -1;
@@ -71,7 +70,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	 * AbstractMembraneのnewAtomメソッド内で呼ばれる。
 	 * @param mem 所属膜
 	 */
-	public Atom(AbstractMembrane mem, Functor functor) {
+	public Atom(Membrane mem, Functor functor) {
 		this.mem = mem;
 		this.functor = functor;
 		if(functor.getArity() > 0)
@@ -132,7 +131,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	}
 
 	/** 所属膜の取得 */
-	public AbstractMembrane getMem() {
+	public Membrane getMem() {
 		return mem;
 	}
 	/** ファンクタを取得 */
@@ -304,7 +303,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 		} else if (functor.isOUTSIDE_PROXY()) {
 			//子膜へのリンクは、接続先atomID/memIDのみ送信。接続先はINSIDE_PROXYの第１引数なので、アトムのIDのみで十分。
 			Atom a = args[0].getAtom();
-			AbstractMembrane mem = a.mem;
+			Membrane mem = a.mem;
 			//ルート膜以外ではグローバルIDが管理されていないので、とりあえず自分で作っている。
 			//todo もっとよい方法を考える
 			out.writeObject(mem.getTask().getMachine().hostname);
@@ -335,7 +334,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 			String hostname = (String)in.readObject();
 			String localid = (String)in.readObject();
 			String globalid = hostname + ":" + localid;
-			AbstractMembrane mem = IDConverter.lookupGlobalMembrane(globalid);
+//			AbstractMembrane mem = IDConverter.lookupGlobalMembrane(globalid);
 			//IDConverterには、RemoteMembrane.updateCache()で登録済みのはず。
 			Atom inside = new Atom(mem, Functor.INSIDE_PROXY);
 			mem.atoms.add(inside);

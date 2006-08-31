@@ -108,7 +108,7 @@ public class TranslatorGenerator {
 				data = replace(pfarg, data, 1, "\" + getFuncVarName((Functor)", ") + \"");
 				data = replace(plvar, data, 2, "var", " = ");
 				data = replace(patom, data, 1, "((Atom)var", ")");
-				data = replace(pmem , data, 1, "((AbstractMembrane)var", ")");
+				data = replace(pmem , data, 1, "((Membrane)var", ")");
 				data = replace(pvarget, data, 1, "var", "");
 				data = replace(plink, data, 1, ".getArg(", ")");
 				data = data.replaceAll("\\.mems\\.iterator\\(\\)", ".memIterator()");

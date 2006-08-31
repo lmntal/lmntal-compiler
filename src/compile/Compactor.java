@@ -67,17 +67,16 @@ public class Compactor {
 		int size = insts.size();
 		for (int i = 0; i < size; i++) {
 			Instruction inst = (Instruction)insts.get(i);
-			int modify = (inst.getKind() >= Instruction.LOCAL ? Instruction.LOCAL : 0);
+//060831okabe			int modify = (inst.getKind() >= Instruction.LOCAL ? Instruction.LOCAL : 0);
 			switch (inst.getKind()) {
 			// inheritlink [atom1,pos1,link2,mem1]
 			// ==> alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem1]
-			case Instruction.LOCALINHERITLINK:
 			case Instruction.INHERITLINK:
 				insts.remove(i);
 				insts.add(i,     new Instruction(Instruction.ALLOCLINK,
 								varcount, inst.getIntArg1(), inst.getIntArg2() ));
-				insts.add(i + 1, new Instruction(Instruction.UNIFYLINKS + modify,
-								varcount, inst.getIntArg3() ));
+//060831okabe				insts.add(i + 1, new Instruction(Instruction.UNIFYLINKS,
+//								varcount, inst.getIntArg3() ));
 				if (inst.data.size() == 4) ((Instruction)insts.get(i + 1)).data.add(inst.getArg4());
 				varcount += 1;
 				size += 1;
@@ -86,15 +85,14 @@ public class Compactor {
 
 			// unify[atom1,pos1,atom2,pos2,mem1]
 			// ==> getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
-			case Instruction.LOCALUNIFY:
 			case Instruction.UNIFY:
 				insts.remove(i);
 				insts.add(i,     new Instruction(Instruction.GETLINK,
 								varcount, inst.getIntArg1(), inst.getIntArg2() ));
 				insts.add(i + 1, new Instruction(Instruction.GETLINK,
 								varcount + 1, inst.getIntArg3(), inst.getIntArg4() ));
-				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS + modify,
-								varcount, varcount + 1 ));
+//060831okabe				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
+//								varcount, varcount + 1 ));
 				if (inst.data.size() == 5) ((Instruction)insts.get(i + 2)).data.add(inst.getArg5());
 				varcount += 2;
 				size += 2;
@@ -103,15 +101,14 @@ public class Compactor {
 
 			// newlink[atom1,pos1,atom2,pos2,mem1]
 			// ==> alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
-			case Instruction.LOCALNEWLINK:
 			case Instruction.NEWLINK:
 				insts.remove(i);
 				insts.add(i,     new Instruction(Instruction.ALLOCLINK,
 								varcount, inst.getIntArg1(), inst.getIntArg2() ));
 				insts.add(i + 1, new Instruction(Instruction.ALLOCLINK,
 								varcount + 1, inst.getIntArg3(), inst.getIntArg4() ));
-				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS + modify,
-								varcount, varcount + 1 ));
+//060831okabe				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
+//								varcount, varcount + 1 ));
 				if (inst.data.size() == 5) ((Instruction)insts.get(i + 2)).data.add(inst.getArg5());
 				varcount += 2;
 				size += 2;
@@ -120,15 +117,14 @@ public class Compactor {
 
 			// relink[atom1,pos1,atom2,pos2,mem1]
 			// ==> alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
-			case Instruction.LOCALRELINK:
 			case Instruction.RELINK:
 				insts.remove(i);
 				insts.add(i,     new Instruction(Instruction.ALLOCLINK,
 								varcount, inst.getIntArg1(), inst.getIntArg2() ));
 				insts.add(i + 1, new Instruction(Instruction.GETLINK,
 								varcount + 1, inst.getIntArg3(), inst.getIntArg4() ));
-				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS + modify,
-								varcount, varcount + 1 ));
+//060831okabe				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
+//								varcount, varcount + 1 ));
 				if (inst.data.size() == 5) ((Instruction)insts.get(i + 2)).data.add(inst.getArg5());
 				varcount += 2;
 				size += 2;

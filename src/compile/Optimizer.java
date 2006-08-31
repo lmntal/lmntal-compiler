@@ -537,13 +537,15 @@ public class Optimizer {
 					it.remove();
 					break;
 				case Instruction.RELINK:
+/*060831okabe
 					moveInsts.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
 					it.set(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
 					nextId++;
 					break;
 				case Instruction.LOCALRELINK:
+*/
 					moveInsts.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
-					it.set(new Instruction(Instruction.LOCALINHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
+					it.set(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
 					nextId++;
 					break;
 			}
@@ -945,7 +947,6 @@ public class Optimizer {
 					}
 					break;
 				case Instruction.NEWLINK:
-				case Instruction.LOCALNEWLINK:
 					Link l1 = new Link(inst.getIntArg1(), inst.getIntArg2());
 					Link l2 = new Link(inst.getIntArg3(), inst.getIntArg4());
 					links.put(l1, l2);
@@ -956,7 +957,6 @@ public class Optimizer {
 					inherit.put(l, inst.getArg3());
 					break;
 				case Instruction.NEWATOM:
-				case Instruction.LOCALNEWATOM:
 					functor.put(inst.getArg1(), inst.getArg3());
 //					atomvars.add(inst.getArg1());
 					break;

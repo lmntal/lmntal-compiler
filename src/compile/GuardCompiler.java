@@ -454,7 +454,11 @@ public class GuardCompiler extends HeadCompiler {
 						typedcxtdatatypes.put(def1, new Integer(desc[0]));
 					}
 					if (func.getArity() == 1) { // {t1,inst} --> p(+X1)
-						if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
+						// 060831okabe
+						// 以下をコメントアウト．
+						// つまりconnectruntime はput してget されるだけ．
+						// TODO よってconnectruntime はいらないので何とかする．
+//						if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
 					}
 					else { // {t1,inst,t2} --> p(+X1,-X2)
 						int atomid2;

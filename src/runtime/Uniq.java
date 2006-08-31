@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import runtime.AbstractMembrane;
 import runtime.Membrane;
 
 public class Uniq {
@@ -18,7 +17,7 @@ public class Uniq {
 	/**
 	 * 型付きプロセス文脈に束縛された構造の実体を保存する膜。タスク==null
 	 */
-	public AbstractMembrane mem = new Membrane();
+	public Membrane mem = new Membrane();
 	
 	/**
 	 * el が history に含まれるかどうか検査する。

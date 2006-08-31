@@ -13,7 +13,7 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 
-import runtime.AbstractMembrane;
+import runtime.Membrane;
 import runtime.Env;
 
 public class GraphLayout extends AbstractGraphLayout {
@@ -29,7 +29,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	 * @param m
 	 */
 	boolean testf = false;
-	protected void relax(runtime.AbstractMembrane m) {
+	protected void relax(runtime.Membrane m) {
 		if(m==null) return;
 		Object[] mems = m.getMemArray();
 		atoms = separateAtomGroup(m);
@@ -213,7 +213,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			double maxy;
 			double margin = Env.atomSize;
 			double mx,my;
-			AbstractMembrane mem1,mem2;
+			Membrane mem1,mem2;
 			
 			length = margin * 1.5;
 
@@ -236,7 +236,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			
 			//子膜一つずつへの処理
 			for(int k = 0;k < mems.length;k++){
-				mem1 = (AbstractMembrane)mems[k];
+				mem1 = (Membrane)mems[k];
 				//子膜は他のアトムより下側に来る【仮】
 				if(getFlag(4))//6))
 				downForceMems(mem1,maxy,length);
@@ -249,7 +249,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			//子膜同士の処理
 			for(int k =0;k < mems.length - 1;k++){
 				for(int l = k+1;l < mems.length;l++){
-					mem1 = (AbstractMembrane)mems[k];mem2 = (AbstractMembrane)mems[l];
+					mem1 = (Membrane)mems[k];mem2 = (Membrane)mems[l];
 					// 膜同士で重なっているものを移動
 					if(getFlag(2))//8))
 					repulsiveForceBetweenMems(mem1,mem2);
@@ -281,7 +281,7 @@ public class GraphLayout extends AbstractGraphLayout {
 		// 子膜
 		mems = m.getMemArray();
 		for(int i=0;i<mems.length;i++) {
-			relax((AbstractMembrane)mems[i]);
+			relax((Membrane)mems[i]);
 		}
 	}
 	
@@ -290,7 +290,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	 * @param a
 	 * @return
 	 */
-	void testPrint(AbstractMembrane m,String comment){
+	void testPrint(Membrane m,String comment){
 		System.out.println(comment+"\n\n");
 		
 		if(m == rootMem)System.out.println("rootMem");
@@ -336,7 +336,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	 * @param a
 	 * @return
 	 */
-	boolean doesCutAcrossMembrane(AtomGroup atomgroup,AbstractMembrane m){
+	boolean doesCutAcrossMembrane(AtomGroup atomgroup,Membrane m){
 		boolean f = false;
 		runtime.Atom n;
 		
@@ -345,7 +345,7 @@ public class GraphLayout extends AbstractGraphLayout {
 			n = (runtime.Atom)it.next();
 			if(n.getMem() != m){
 				for(int i = 0;i<mems.length;i++){
-					if(n.getMem() == (AbstractMembrane)mems[i]){
+					if(n.getMem() == (Membrane)mems[i]){
 						f = true;
 					}
 				}
@@ -396,7 +396,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	/**
 	 * グループ同士の反発する力を計算する。
 	 */
-	 public double repulsiveForce(AbstractMembrane m1,AbstractMembrane m2){
+	 public double repulsiveForce(Membrane m1,Membrane m2){
 			DoublePoint max,min,maxa,mina;
 			boolean a1,a2,a3,a4,b1,b2,b3,b4;
 			double f,f1,f2,l;
@@ -492,7 +492,7 @@ public class GraphLayout extends AbstractGraphLayout {
 
 	 }
 	 
-	 public double repulsiveForce(Node n,AbstractMembrane m1){
+	 public double repulsiveForce(Node n,Membrane m1){
 		DoublePoint max,min;
 		boolean b1,b2;
 		double f,f1,f2,l,nx,ny;
@@ -586,7 +586,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	 * 膜やリンクで繋がったアトムのグループに含まれるノードにまとめて移動量を設定する
 	 */
 	
-	public void setMoveDelta(AbstractMembrane m ,double dx ,double dy){
+	public void setMoveDelta(Membrane m ,double dx ,double dy){
 		Iterator i = getAllNodeIterator(m);
 		while(i.hasNext()){
 			((Node)i.next()).setMoveDelta(dx,dy);
@@ -604,21 +604,21 @@ public class GraphLayout extends AbstractGraphLayout {
 	 * 膜に含まれる全てのアトムを返す Iterator を返す
 	 */
 	
-	public Iterator getAllNodeIterator(AbstractMembrane mem){
+	public Iterator getAllNodeIterator(Membrane mem){
 		Iterator it;
 		Vector vector = new Vector();
 		Object[] mems = mem.getMemArray();
 		
 		if(mems.length == 0)return mem.atomIterator();
 		for(int i = 0;i<mems.length;i++){
-			getAllNodeIterator((AbstractMembrane)mems[i],vector);
+			getAllNodeIterator((Membrane)mems[i],vector);
 		}
 		vector.addAll(Arrays.asList(mem.getAtomArray()));
 		
 		return vector.iterator();
 	}
 	
-	private void getAllNodeIterator(AbstractMembrane mem,Vector vector){
+	private void getAllNodeIterator(Membrane mem,Vector vector){
 		Object[] mems = mem.getMemArray();
 		
 		if(mems.length == 0){
@@ -627,7 +627,7 @@ public class GraphLayout extends AbstractGraphLayout {
 		}
 		
 		for(int i = 0;i < mems.length;i++){
-			getAllNodeIterator((AbstractMembrane)mems[i],vector);
+			getAllNodeIterator((Membrane)mems[i],vector);
 		}
 		return;
 	}
@@ -671,7 +671,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	 * @param g
 	 * @param m
 	 */
-	public void paintMem(Graphics g, AbstractMembrane m) {
+	public void paintMem(Graphics g, Membrane m) {
 		// 同時アクセスで java.util.ConcurrentModificationException がでるので Iterator やめた
 		// ここでの用途は readonly
 		final double MARGIN = 15.0;
@@ -695,7 +695,7 @@ public class GraphLayout extends AbstractGraphLayout {
 		// 子膜
 		Object[] mems = m.getMemArray();
 		for(int i=0;i<mems.length;i++) {
-			AbstractMembrane mm = (AbstractMembrane)mems[i];
+			Membrane mm = (Membrane)mems[i];
 			paintMem(g, mm);
 			if(m.rect.isEmpty()) m.rect.setRect(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2);
 			else                 m.rect.add(new Rectangle2D.Double(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2));
@@ -941,7 +941,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	/**
 	 * アトムグループに膜の中心に向かう力をかける。
 	 */
-	public void attractToCenter(AtomGroup atomgroup,AbstractMembrane m){
+	public void attractToCenter(AtomGroup atomgroup,Membrane m){
 		Node n;
 		double d;
 		double dx = atomgroup.getCenterPos().x;
@@ -969,7 +969,7 @@ public class GraphLayout extends AbstractGraphLayout {
 		setMoveDelta(atomgroup,-dx,-dy);
 	}
 	
-	public void attractToCenter(AbstractMembrane mem,AbstractMembrane m){
+	public void attractToCenter(Membrane mem,Membrane m){
 		double mx,my,d,dx,dy;
 		dx = 0;dy = 0;
 		mx = mem.rect.getCenterX();
@@ -994,17 +994,17 @@ public class GraphLayout extends AbstractGraphLayout {
 	/**
 	 * アトムグループに子膜より上に来るように力をかける。
 	 */
-	public void upForceAtomGroup(AtomGroup atomgroup,AbstractMembrane m,Object[] mems){
+	public void upForceAtomGroup(AtomGroup atomgroup,Membrane m,Object[] mems){
 		double length =  AtomGroup.margin * 1.5;
 		double miny = 0,dx = 0,dy = 0;
 		if(mems.length == 0){
 			return;
 		} else {
-			miny = ((AbstractMembrane)mems[0]).rect.getMinY();
+			miny = ((Membrane)mems[0]).rect.getMinY();
 		}
 		for(int i = 1;i < mems.length;i++){
-			if(miny >((AbstractMembrane)mems[i]).rect.getMinY()){
-				miny = ((AbstractMembrane)mems[i]).rect.getMinY();
+			if(miny >((Membrane)mems[i]).rect.getMinY()){
+				miny = ((Membrane)mems[i]).rect.getMinY();
 			}
 		}
 		
@@ -1022,16 +1022,16 @@ public class GraphLayout extends AbstractGraphLayout {
 	 */
 	public void repulseAtomFromMembrane(Node me,Object[] mems){
 		for(int j = 0;j < mems.length;j++){
-			if(!((AbstractMembrane)mems[j]).rect.isEmpty()&&
-				((AbstractMembrane)mems[j]).rect.contains(me.getPosition().x,me.getPosition().y)){
+			if(!((Membrane)mems[j]).rect.isEmpty()&&
+				((Membrane)mems[j]).rect.contains(me.getPosition().x,me.getPosition().y)){
 				double d,dx,dy,f;
 				
 				DoublePoint pos = me.getPosition();
 				dx = pos.x;dy = pos.y;
-				pos = new DoublePoint(((AbstractMembrane)mems[j]).rect.getCenterX(),((AbstractMembrane)mems[j]).rect.getCenterY());
+				pos = new DoublePoint(((Membrane)mems[j]).rect.getCenterX(),((Membrane)mems[j]).rect.getCenterY());
 				dx -= pos.x;dy -= pos.y;
 				d = Math.sqrt(dx*dx + dy*dy);
-				f = repulsiveForce(me,(AbstractMembrane)mems[j]);
+				f = repulsiveForce(me,(Membrane)mems[j]);
 				if(d >= 3){
 					dx = f*dx/d;
 					dy = f*dy/d;
@@ -1079,7 +1079,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	/**
 	 * 子膜同士が重なっている場合に斥力をかける。
 	 */
-	public void repulsiveForceBetweenMems(AbstractMembrane mem1,AbstractMembrane mem2){
+	public void repulsiveForceBetweenMems(Membrane mem1,Membrane mem2){
 		double f,mx,my,dx,dy,d;
 		dx = 0;dy = 0;
 		
@@ -1101,7 +1101,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	/**
 	 * 個数の多いアトムグループが上になるように力をかける。
 	 */
-	public void sortAtomGroupBySize(AtomGroup atomgroup1,AtomGroup atomgroup2,AbstractMembrane m){
+	public void sortAtomGroupBySize(AtomGroup atomgroup1,AtomGroup atomgroup2,Membrane m){
 
 		boolean fl1 = false;boolean fl2 = false;
 		double dx,dy,f1,f2,l,d,margin;
@@ -1164,7 +1164,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	/**
 	 * 子膜に指定したY座標より下側に来るように力をかける。
 	 */
-	public void downForceMems(AbstractMembrane mem,double maxy,double length){
+	public void downForceMems(Membrane mem,double maxy,double length){
 		double dy = 0;
 		if(mem.rect.getMinY()  < maxy + AtomGroup.margin + length){
 			dy += force(mem.rect.getMinY(),maxy);

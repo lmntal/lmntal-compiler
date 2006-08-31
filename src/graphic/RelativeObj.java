@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.Iterator;
 
-import runtime.AbstractMembrane;
+import runtime.Membrane;
 import runtime.Atom;
 import runtime.Functor;
 
@@ -19,14 +19,14 @@ public class RelativeObj extends GraphicObj{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public RelativeObj(AbstractMembrane mem){
+	public RelativeObj(Membrane mem){
 		super(mem);
 	}
 	///////////////////////////////////////////////////////////////////////////
 	
 	public void drawAtom(Graphics g, Point delta){}
 	
-	public void setMembrane(AbstractMembrane mem){
+	public void setMembrane(Membrane mem){
 		Iterator atomIte;
 		Atom targetAtom;
 		

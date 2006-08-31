@@ -2,14 +2,14 @@ package runtime.systemRuleset;
 import runtime.*;
 import java.util.*;
 import java.io.*;
-import daemon.IDConverter;
+
 import module.*;
 public class GlobalSystemRuleset_27 {
 	static public void exec(Object[] var, Functor[] f) {
 		Atom atom;
 		Functor func;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;

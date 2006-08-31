@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import runtime.AbstractMembrane;
+import runtime.Membrane;
 import runtime.Atom;
 
 /**
@@ -30,7 +30,7 @@ public final class Output{
 	 * @param file　出力するファイル名
 	 * @param mem　出力する膜（子膜は無視される）
 	 */
-	public static void out(String file, AbstractMembrane mem){
+	public static void out(String file, Membrane mem){
 		try {
 			String msg;
 			HashMap atomMap = new HashMap();

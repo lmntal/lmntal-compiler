@@ -46,7 +46,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,3,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  4,3,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,0,Functor.OUTSIDE_PROXY));
-		insts.add(new Instruction(Instruction.LOCALUNIFY,  1,1,5,1,0));
+//		insts.add(new Instruction(Instruction.LOCALUNIFY,  1,1,5,1,0));
 		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // 子膜を活性化する必要はない
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
@@ -118,7 +118,7 @@ public final class GlobalSystemRulesetGenerator {
 		String text = " Res=" + func + "(X) :- float(X) | [[/*inline*/";
 		text += "double x = ((FloatingFunctor)me.nthAtom(0).getFunctor()).value;";
 		text += "double y = Math." + func + "(x);";
-		text += "AbstractMembrane mem = me.getMem();";
+		text += "Membrane mem = me.getMem();";
 		text += "Atom res = mem.newAtom(new FloatingFunctor(y));";
 		text += "mem.relinkAtomArgs(res,0,me,1);";
 		text += "mem.removeAtom(me.nthAtom(0));";
@@ -184,7 +184,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  3,0));
-		insts2.add(new Instruction(Instruction.LOCALADDATOM,  0,4));
+		insts2.add(new Instruction(Instruction.ADDATOM,  0,4));
 		insts2.add(new Instruction(Instruction.RELINK,        4,0,1,2,0));
 		insts2.add(new Instruction(Instruction.FREEATOM,      1));
 		insts2.add(new Instruction(Instruction.FREEATOM,      2));
@@ -235,7 +235,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
-		insts2.add(new Instruction(Instruction.LOCALADDATOM,  0,3));
+		insts2.add(new Instruction(Instruction.ADDATOM,  0,3));
 		insts2.add(new Instruction(Instruction.RELINK,        3,0,1,1,0));
 		insts2.add(new Instruction(Instruction.FREEATOM,      1));
 		insts2.add(new Instruction(Instruction.FREEATOM,      2));
@@ -273,7 +273,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
-		insts2.add(new Instruction(Instruction.LOCALADDATOM,  0,3));
+		insts2.add(new Instruction(Instruction.ADDATOM,  0,3));
 		insts2.add(new Instruction(Instruction.RELINK,        3,0,1,1,0));
 		insts2.add(new Instruction(Instruction.FREEATOM,      1));
 		insts2.add(new Instruction(Instruction.FREEATOM,      2));

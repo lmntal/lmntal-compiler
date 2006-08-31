@@ -77,7 +77,7 @@ public class Instruction implements Cloneable, Serializable {
     // 定数
 
     /** 対象の膜がローカルの計算ノードに存在することを保証する修飾子（一部他の用途で使用） */
-    public static final int LOCAL = 100;
+// 0830    public static final int LOCAL = 100;
     /** 型付きアトムに対する命令がアトムではなく、ファンクタを対象にしていることを表す修飾子 */
     public static final int OPT = 100;
     /** ダミーの命令 */	
@@ -150,9 +150,9 @@ public class Instruction implements Cloneable, Serializable {
     /** locallockmem [-dstmem, freelinkatom, memname]
      * <br>ロック取得する最適化用ガード命令<br>
      * lockmemと同じ。ただし$freelinkatomはこの計算ノードに存在する。*/
-	public static final int LOCALLOCKMEM = LOCAL + LOCKMEM;
+/*	public static final int LOCALLOCKMEM = LOCAL + LOCKMEM;
 	static {setArgType(LOCALLOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_OBJ));}
-
+okabe*/
     /** anymem [-dstmem, srcmem, memtype, memname] 
      * <br>反復するロック取得するガード命令<br>
      * 膜$srcmemの子膜のうち、$memtypeで表せるタイプのまだロックを取得していない膜に対して次々に、
@@ -166,9 +166,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localanymem [-dstmem, srcmem, memtype, memname]
      * <br>反復するロック取得する最適化用ガード命令<br>
 	 * anymemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定されない。*/
-	public static final int LOCALANYMEM = LOCAL + ANYMEM;
+/*	public static final int LOCALANYMEM = LOCAL + ANYMEM;
 	static {setArgType(LOCALANYMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT, ARG_OBJ));}
-
+okabe*/
 	/** lock [srcmem]
 	 * <br>ロック取得するガード命令<br>
 	 * 膜$srcmemに対して、ノンブロッキングでのロックを取得を試みる。
@@ -182,9 +182,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** locallock [srcmem]
 	 * <br>ロック取得する最適化用ガード命令<br>
 	 * lockと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-	public static final int LOCALLOCK = LOCAL + LOCK;
+/*	public static final int LOCALLOCK = LOCAL + LOCK;
 	static {setArgType(LOCALLOCK, new ArgType(false, ARG_MEM));}
-
+okabe*/
 	/** getmem [-dstmem, srcatom, memtype, memname]
 	 * <br>ガード命令<br>
 	 * アトム$srcatomの所属膜への参照をロックせずに$dstmemに代入する。
@@ -400,9 +400,10 @@ public class Instruction implements Cloneable, Serializable {
 	/** localremoveatom [srcatom, srcmem, funcref]
      * <br>最適化用ボディ命令<br>
      * removeatomと同じ。ただし$srcatomはこの計算ノードに存在する。*/
+	/*
 	public static final int LOCALREMOVEATOM = LOCAL + REMOVEATOM;
 	static {setArgType(LOCALREMOVEATOM, new ArgType(false, ARG_ATOM, ARG_MEM, ARG_OBJ));}
-
+okabe*/
     /** newatom [-dstatom, srcmem, funcref]
      * <br>ボディ命令<br>
      * 膜$srcmemにファンクタfuncrefを持つ新しいアトム作成し、参照を$dstatomに代入する。
@@ -414,9 +415,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localnewatom [-dstatom, srcmem, funcref]
 	 * <br>最適化用ボディ命令<br>
 	 * newatomと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-	public static final int LOCALNEWATOM = LOCAL + NEWATOM;
+	/*public static final int LOCALNEWATOM = LOCAL + NEWATOM;
 	static {setArgType(LOCALNEWATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
-
+okabe*/
 	/** newatomindirect [-dstatom, srcmem, func]
 	 * <br>型付き拡張用ボディ命令<br>
 	 * 膜$srcmemにファンクタ$funcを持つ新しいアトム作成し、参照を$dstatomに代入する。
@@ -428,9 +429,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localnewatomindirect [-dstatom, srcmem, func]
 	 * <br>型付き拡張用最適化用ボディ命令<br>
 	 * newatomindirectと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-	public static final int LOCALNEWATOMINDIRECT = LOCAL + NEWATOMINDIRECT;
+/*	public static final int LOCALNEWATOMINDIRECT = LOCAL + NEWATOMINDIRECT;
 	static {setArgType(LOCALNEWATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_VAR));}
-
+okabe*/
 	/** enqueueatom [srcatom]
      * <br>ボディ命令<br>
      * アトム$srcatomを所属膜の実行アトムスタックに積む。
@@ -444,9 +445,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localenqueueatom [srcatom]
 	 * <br>最適化用ボディ命令<br>
 	 * enqueueatomと同じ。ただし$srcatomは<B>本膜と同じタスクが管理する膜に存在する</B>。*/
-	public static final int LOCALENQUEUEATOM = LOCAL + ENQUEUEATOM;
+/*	public static final int LOCALENQUEUEATOM = LOCAL + ENQUEUEATOM;
 	static {setArgType(LOCALENQUEUEATOM, new ArgType(false, ARG_ATOM));}
-
+okabe*/
     /** dequeueatom [srcatom]
      * <br>最適化用ボディ命令<br>
      * アトム$srcatomがこの計算ノードにある実行アトムスタックに入っていれば、スタックから取り出す。
@@ -478,9 +479,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localalterfunc [atom, funcref]
 	 * <br>最適化用ボディ命令<br>
 	 * alterfuncと同じ。ただし$atomはこの計算ノードに存在する。*/
-	public static final int LOCALALTERFUNC = LOCAL + ALTERFUNC;
+/*	public static final int LOCALALTERFUNC = LOCAL + ALTERFUNC;
 	static {setArgType(LOCALALTERFUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
-
+okabe*/
 	/** alterfuncindirect [atom, func]
 	 * <br>最適化用ボディ命令<br>
 	 * alterfuncと同じ。ただしファンクタは$funcにする。*/
@@ -490,9 +491,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localalterfuncindirect [atom, func]
 	 * <br>最適化用ボディ命令<br>
 	 * alterfuncindirectと同じ。ただし$atomはこの計算ノードに存在する。*/
-	public static final int LOCALALTERFUNCINDIRECT = LOCAL + ALTERFUNCINDIRECT;
+/*	public static final int LOCALALTERFUNCINDIRECT = LOCAL + ALTERFUNCINDIRECT;
 	static {setArgType(LOCALALTERFUNCINDIRECT, new ArgType(false, ARG_ATOM, ARG_VAR));}
-
+okabe*/
 	// アトムを操作する型付き拡張用命令 (40--49)
 	//  ----- allocatom         [-dstatom, funcref]
 	//  ----- allocatomindirect [-dstatom, func]
@@ -528,16 +529,20 @@ public class Instruction implements Cloneable, Serializable {
 	/** localcopyatom [-dstatom, mem, srcatom]
 	 * <br>最適化用ボディ命令<br>
 	 * copyatomと同じ。ただし$memはこの計算ノードに存在する。*/
-	public static final int LOCALCOPYATOM = LOCAL + COPYATOM;
+/*	public static final int LOCALCOPYATOM = LOCAL + COPYATOM;
 	static {setArgType(LOCALCOPYATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_ATOM));}
-
+okabe*/
 	/** localaddatom [dstmem, atom]
 	 * <br>最適化用ボディ命令<br>
 	 * （所属膜を持たない）アトム$atomを膜$dstmemに所属させる。
 	 * ただし$dstmemはこの計算ノードに存在する。*/
-	public static final int LOCALADDATOM = LOCAL + 43;
+/*	public static final int LOCALADDATOM = LOCAL + 43;
 	// 一般の ADDATOM は存在しない。
 	static {setArgType(LOCALADDATOM, new ArgType(false, ARG_MEM, ARG_ATOM));}
+okabe*/
+	// 0830 okabe 追加
+	public static final int ADDATOM  = 43;
+	static {setArgType(ADDATOM, new ArgType(false, ARG_MEM, ARG_ATOM));}
 	
 	// 膜を操作する基本ボディ命令 (50--60)    
 	// [local]removemem                [srcmem, parentmem]
@@ -558,15 +563,16 @@ public class Instruction implements Cloneable, Serializable {
 	 * <strike>膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。</strike>
 	 * 実行膜スタックに積まれている場合は除去する。
 	 * @see removeproxies */
+	// 実装をLOCALREMOVEMEM のものにする．
 	public static final int REMOVEMEM = 50;
 	static {setArgType(REMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** localremovemem [srcmem, parentmem]
 	 * <br>最適化用ボディ命令<br>
 	 * removememと同じ。ただし$srcmemの親膜（$parentmem）はこの計算ノードに存在する。*/
-	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
+/*	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
 	static {setArgType(LOCALREMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
-
+okabe*/
 	/** newmem [-dstmem, srcmem, memtype]
 	 * <br>ボディ命令<br>
 	 * （活性化された）膜$srcmemに新しい（ルート膜でない）$memtypeで表せるタイプの子膜を作成し、
@@ -580,8 +586,11 @@ public class Instruction implements Cloneable, Serializable {
 	/** localnewmem [-dstmem, srcmem, memtype]
 	* <br>最適化用ボディ命令<br>
 	* newmemと同じ。ただし$srcmemは<B>本膜と同じタスクによって管理される</B>。*/
+	// 0830 廃止して良い(丸ごと消して良い，NEWMEM は現状のものを使えば良いから．)
+	/*
 	public static final int LOCALNEWMEM = LOCAL + NEWMEM;
 	static {setArgType(LOCALNEWMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));}
+*/
 
 	/** allocmem [-dstmem]
 	 * <br>最適化用ボディ命令<br>
@@ -661,9 +670,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localaddmem [dstmem, srcmem]
 	 * <br>最適化用ボディ命令<br>
 	 * addmemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定しない。*/
-	public static final int LOCALADDMEM = LOCAL + ADDMEM;
+/*	public static final int LOCALADDMEM = LOCAL + ADDMEM;
 	static {setArgType(LOCALADDMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
-
+okabe*/
 	/** unlockmem [srcmem]
 	 * <br>ボディ命令<br>
 	 * （活性化した）膜$srcmemのロックを解放する。
@@ -677,9 +686,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localunlockmem [srcmem]
 	 * <br>最適化用ボディ命令<br>
 	 * unlockmemと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-	public static final int LOCALUNLOCKMEM = LOCAL + UNLOCKMEM;
+/*	public static final int LOCALUNLOCKMEM = LOCAL + UNLOCKMEM;
 	static {setArgType(LOCALUNLOCKMEM, new ArgType(false, ARG_MEM));}
-
+okabe*/
 	/** setmemname [dstmem, name]
 	 * <br>ボディ命令<br>
 	 * 膜$dstmemの名前を文字列（またはnull）nameに設定する。
@@ -690,9 +699,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localsetmemname [dstmem, name]
 	 * <br>最適化用ボディ命令<br>
 	 * setmemnameと同じ。ただし$dstmemはこの計算ノードに存在する。*/
-	public static final int LOCALSETMEMNAME = LOCAL + SETMEMNAME;
+/*	public static final int LOCALSETMEMNAME = LOCAL + SETMEMNAME;
 	static {setArgType(LOCALSETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));}
-	
+okabe*/	
 	// 予約 (61--62)
 
 	// リンクに関係する出力するガード命令 (63--64)
@@ -736,9 +745,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localnewlink [atom1, pos1, atom2, pos2 (,mem1)]
 	 * <br>最適化用ボディ命令<br>
 	 * newlinkと同じ。ただし膜$mem1はこの計算ノードに存在する。*/
-	public static final int LOCALNEWLINK = LOCAL + NEWLINK;
+/*	public static final int LOCALNEWLINK = LOCAL + NEWLINK;
 	static {setArgType(LOCALNEWLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
-
+okabe*/
 	/** relink [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
 	 * アトム$atom1（膜$memにある）の第pos1引数と、
@@ -754,9 +763,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localrelink [atom1, pos1, atom2, pos2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * relinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
-	public static final int LOCALRELINK = LOCAL + RELINK;
+/*	public static final int LOCALRELINK = LOCAL + RELINK;
 	static {setArgType(LOCALRELINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
-
+okabe*/
 	/** unify [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
 	 * アトム$atom1の第pos1引数のリンク先<strike>（膜$memにある）</strike>の引数と、
@@ -774,9 +783,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localunify [atom1, pos1, atom2, pos2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * unifyと同じ。ただし膜$memはこの計算ノードに存在する。*/
-	public static final int LOCALUNIFY = LOCAL + UNIFY;
+/*	public static final int LOCALUNIFY = LOCAL + UNIFY;
 	static {setArgType(LOCALUNIFY, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
-
+okabe*/
 	/** inheritlink [atom1, pos1, link2, mem]
 	 * <br>最適化用ボディ命令<br>
 	 * アトム$atom1（膜$memにある）の第pos1引数と、
@@ -792,9 +801,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localinheritlink [atom1, pos1, link2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * inheritlinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
-	public static final int LOCALINHERITLINK = LOCAL + INHERITLINK;
+/*	public static final int LOCALINHERITLINK = LOCAL + INHERITLINK;
 	static {setArgType(LOCALINHERITLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_VAR, ARG_MEM));}
-
+okabe*/
 	/** unifylinks [link1, link2, mem]
 	 * <br>ボディ命令<br>
 	 * リンク$link1の指すアトム引数とリンク$link2の指すアトム引数との間に双方向のリンクを張る。
@@ -809,9 +818,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localunifylinks [link1, link2 (,mem)]
 	 * <br>最適化用ボディ命令<br>
 	 * unifylinksと同じ。ただし膜$memはこの計算ノードに存在する。*/
-	public static final int LOCALUNIFYLINKS = LOCAL + UNIFYLINKS;
+/*	public static final int LOCALUNIFYLINKS = LOCAL + UNIFYLINKS;
 	static {setArgType(LOCALUNIFYLINKS, new ArgType(false, ARG_VAR, ARG_VAR, ARG_MEM));}
-
+okabe*/
     // 自由リンク管理アトム自動処理のためのボディ命令 (70--74)
 	//  -----  removeproxies          [srcmem]
 	//  -----  removetoplevelproxies  [srcmem]
@@ -866,9 +875,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localloadruleset [dstmem, ruleset]
 	 * <br>最適化用ボディ命令<br>
 	 * loadrulesetと同じ。ただし$dstmemはこの計算ノードに存在する。*/
-	public static final int LOCALLOADRULESET = LOCAL + LOADRULESET;
+/*	public static final int LOCALLOADRULESET = LOCAL + LOADRULESET;
 	static {setArgType(LOCALLOADRULESET, new ArgType(false, ARG_MEM, ARG_OBJ));}
-
+okabe*/
 	/** copyrules [dstmem, srcmem]
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemにある全てのルールを膜$dstmemにコピーする。
@@ -879,9 +888,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localcopyrules [dstmem, srcmem]
 	 * <br>最適化用ボディ命令<br>
 	 * copyrulesと同じ。ただし$dstmemはこの計算ノードに存在する。$srcmemについては何も仮定しない。*/
-	public static final int LOCALCOPYRULES = LOCAL + COPYRULES;
+/*	public static final int LOCALCOPYRULES = LOCAL + COPYRULES;
 	static {setArgType(LOCALCOPYRULES, new ArgType(false, ARG_MEM, ARG_MEM));}
-
+okabe*/
 	/** clearrules [dstmem]
 	 * <br>ボディ命令<br>
 	 * 膜$dstmemにある全てのルールを消去する。*/
@@ -891,9 +900,9 @@ public class Instruction implements Cloneable, Serializable {
 	/** localclearrules [dstmem]
 	 * <br>最適化用ボディ命令<br>
 	 * clearrulesと同じ。ただし$dstmemはこの計算ノードに存在する。*/
-	public static final int LOCALCLEARRULES = LOCAL + CLEARRULES;
+/*	public static final int LOCALCLEARRULES = LOCAL + CLEARRULES;
 	static {setArgType(LOCALCLEARRULES, new ArgType(false, ARG_MEM));}
-
+okabe*/
 	/** loadmodule [dstmem, ruleset]
 	 * <br>ボディ命令<br>
 	 * ルールセットrulesetを膜$dstmemにコピーする。
@@ -2306,8 +2315,8 @@ public class Instruction implements Cloneable, Serializable {
 				if(! f.getType().isPrimitive()) continue;
 				if (f.getName().startsWith("ARG_")) continue; //added by mizuno
 				int kind = f.getInt(inst);
-				if (kind != LOCAL
-				 && f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {
+				if (/*kind != LOCAL
+				 && okabe*/f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {
 					Integer idobj = new Integer(kind);
 					if (instructionTable.containsKey(idobj)) {
 						System.err.println("WARNING: collision detected on instruction kind = " 

@@ -720,7 +720,7 @@ public class FrontEnd {
 		try {
 			// ผยนิ
 			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
-			LMNtalRuntimeManager.init();
+//			LMNtalRuntimeManager.init();
 
 			Membrane root = rt.getGlobalRoot();
 			
@@ -795,12 +795,15 @@ public class FrontEnd {
 			if (Env.LMNgraphic != null)  Env.LMNgraphic = null;
 			
 //			LMNtalRuntimeManager.terminateAll();
-			LMNtalRuntimeManager.terminateAllThreaded();
+//			LMNtalRuntimeManager.terminateAllThreaded();
 			//if(true) System.out.println("FrontEnd: terminateAll() finished!");
-			LMNtalRuntimeManager.disconnectFromDaemon();
+//			LMNtalRuntimeManager.disconnectFromDaemon();
 			
 			if (Env.debugOption) //2006.4.26 by inui
 				Debug.terminate();
+			
+			// 060831 okabe
+			Env.theRuntime.terminate();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

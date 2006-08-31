@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.Iterator;
 
-import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
@@ -19,7 +18,7 @@ public class LineObj extends GraphicObj{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public LineObj(AbstractMembrane mem){
+	public LineObj(Membrane mem){
 		super(mem);
 	}
 	///////////////////////////////////////////////////////////////////////////
@@ -29,7 +28,7 @@ public class LineObj extends GraphicObj{
 		g.drawLine(position.x + delta.x,position.y + delta.y, position2.x + delta.x, position2.y + delta.y);		
 	}
 	
-	public void setMembrane(AbstractMembrane mem){
+	public void setMembrane(Membrane mem){
 		Iterator atomIte;
 		Atom targetAtom;
 		

@@ -194,7 +194,7 @@ public class InlineUnit {
 			//直接呼び出すので、static でよい
 			p.println("\tpublic static void run(Atom me, int codeID) {");
 		}
-		p.println("\t\tAbstractMembrane mem = me.getMem();");
+		p.println("\t\tMembrane mem = me.getMem();");
 		//p.println("\t\tEnv.p(\"-------------------------- \");");
 		//p.println("\t\tEnv.d(\"Exec Inline \"+me+codeID);");
 		p.println("\t\tswitch(codeID) {");

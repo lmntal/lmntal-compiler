@@ -2,14 +2,14 @@ package runtime.systemRuleset;
 import runtime.*;
 import java.util.*;
 import java.io.*;
-import daemon.IDConverter;
+
 import module.*;
 public class GlobalSystemRuleset_63 {
 	static public void exec(Object[] var, Functor[] f) {
 		Atom atom;
 		Functor func;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -26,7 +26,7 @@ public class GlobalSystemRuleset_63 {
 		Link a;
 		Link b;
 		Iterator it_deleteconnectors;
-							((AbstractMembrane)var[4]).activate();
-							((AbstractMembrane)var[4]).forceUnlock();
+							((Membrane)var[4]).activate();
+							((Membrane)var[4]).forceUnlock();
 	}
 }

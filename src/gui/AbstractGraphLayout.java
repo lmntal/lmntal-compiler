@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import runtime.AbstractMembrane;
+import runtime.Membrane;
 import runtime.Env;
 
 public abstract class AbstractGraphLayout implements Runnable {
@@ -73,7 +73,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * @param m
 	 * @param t
 	 */
-	public void getNearestNode(Point p, runtime.AbstractMembrane m, D_N_tuple t) {
+	public void getNearestNode(Point p, runtime.Membrane m, D_N_tuple t) {
 		for(Iterator i=m.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
 			if(!n.isVisible()) continue;
@@ -85,7 +85,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 		}
 		Object[] mems = m.getMemArray();
 		for(int i=0;i<mems.length;i++) {
-			getNearestNode(p, (AbstractMembrane)mems[i], t);
+			getNearestNode(p, (Membrane)mems[i], t);
 		}
 	}
 	
@@ -94,7 +94,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * リンクでつながった塊ごとにVecotrに分けられ、そのVectorを要素として持つVectorが返される。
 	 *
 	 */
-	protected Vector separateAtomGroup(AbstractMembrane m){
+	protected Vector separateAtomGroup(Membrane m){
 		Node a;
 		Vector tmpSeparated;
 		Iterator ite = m.atomIterator();
@@ -251,14 +251,14 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * 継承したクラスで座標処理の内容を記述する。
 	 * @param m
 	 */
-	abstract protected void relax(runtime.AbstractMembrane m);
+	abstract protected void relax(runtime.Membrane m);
 	
 	/**
 	 * テスト用膜に含まれるアトムの名前とmoveDeltaを出力する。
 	 * @param a
 	 * @return
 	 */
-	void testPrint(AbstractMembrane m,String comment){
+	void testPrint(Membrane m,String comment){
 		System.out.println(comment+"\n\n");
 		
 		if(m == rootMem)System.out.println("rootMem");
@@ -304,7 +304,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * @param a
 	 * @return
 	 */
-	boolean doesCutAcrossMembrane(AtomGroup atomgroup,AbstractMembrane m){
+	boolean doesCutAcrossMembrane(AtomGroup atomgroup,Membrane m){
 		boolean f = false;
 		runtime.Atom n;
 		
@@ -313,7 +313,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 			n = (runtime.Atom)it.next();
 			if(n.getMem() != m){
 				for(int i = 0;i<mems.length;i++){
-					if(n.getMem() == (AbstractMembrane)mems[i]){
+					if(n.getMem() == (Membrane)mems[i]){
 						f = true;
 					}
 				}
@@ -364,7 +364,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	/**
 	 * グループ同士の反発する力を計算する。
 	 */
-	 public double repulsiveForce(AbstractMembrane m1,AbstractMembrane m2){
+	 public double repulsiveForce(Membrane m1,Membrane m2){
 			DoublePoint max,min,maxa,mina;
 			boolean a1,a2,a3,a4,b1,b2,b3,b4;
 			double f,f1,f2,l;
@@ -460,7 +460,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 
 	 }
 	 
-	 public double repulsiveForce(Node n,AbstractMembrane m1){
+	 public double repulsiveForce(Node n,Membrane m1){
 		DoublePoint max,min;
 		boolean b1,b2;
 		double f,f1,f2,l,nx,ny;
@@ -554,7 +554,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * 膜やリンクで繋がったアトムのグループに含まれるノードにまとめて移動量を設定する
 	 */
 	
-	public void setMoveDelta(AbstractMembrane m ,double dx ,double dy){
+	public void setMoveDelta(Membrane m ,double dx ,double dy){
 		Iterator i = getAllNodeIterator(m);
 		while(i.hasNext()){
 			((Node)i.next()).setMoveDelta(dx,dy);
@@ -572,21 +572,21 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * 膜に含まれる全てのアトムを返す Iterator を返す
 	 */
 	
-	public Iterator getAllNodeIterator(AbstractMembrane mem){
+	public Iterator getAllNodeIterator(Membrane mem){
 		Iterator it;
 		Vector vector = new Vector();
 		Object[] mems = mem.getMemArray();
 		
 		if(mems.length == 0)return mem.atomIterator();
 		for(int i = 0;i<mems.length;i++){
-			getAllNodeIterator((AbstractMembrane)mems[i],vector);
+			getAllNodeIterator((Membrane)mems[i],vector);
 		}
 		vector.addAll(Arrays.asList(mem.getAtomArray()));
 		
 		return vector.iterator();
 	}
 	
-	private void getAllNodeIterator(AbstractMembrane mem,Vector vector){
+	private void getAllNodeIterator(Membrane mem,Vector vector){
 		Object[] mems = mem.getMemArray();
 		
 		if(mems.length == 0){
@@ -595,7 +595,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 		}
 		
 		for(int i = 0;i < mems.length;i++){
-			getAllNodeIterator((AbstractMembrane)mems[i],vector);
+			getAllNodeIterator((Membrane)mems[i],vector);
 		}
 		return;
 	}
@@ -639,7 +639,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * @param g
 	 * @param m
 	 */
-	public void paintMem(Graphics g, AbstractMembrane m) {
+	public void paintMem(Graphics g, Membrane m) {
 		// 同時アクセスで java.util.ConcurrentModificationException がでるので Iterator やめた
 		// ここでの用途は readonly
 		final double MARGIN = 15.0;
@@ -660,7 +660,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 		// 子膜
 		Object[] mems = m.getMemArray();
 		for(int i=0;i<mems.length;i++) {
-			AbstractMembrane mm = (AbstractMembrane)mems[i];
+			Membrane mm = (Membrane)mems[i];
 			paintMem(g, mm);
 			if(m.rect.isEmpty()) m.rect.setRect(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2);
 			else                 m.rect.add(new Rectangle2D.Double(mm.rect.x-MARGIN, mm.rect.y-MARGIN, mm.rect.width+MARGIN*2, mm.rect.height+MARGIN*2));

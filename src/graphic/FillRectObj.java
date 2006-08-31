@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.Iterator;
 
-import runtime.AbstractMembrane;
+import runtime.Membrane;
 import runtime.Atom;
 import runtime.Functor;
 
@@ -19,7 +19,7 @@ public class FillRectObj extends GraphicObj{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public FillRectObj(AbstractMembrane mem){
+	public FillRectObj(Membrane mem){
 		super(mem);
 	}
 	///////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ public class FillRectObj extends GraphicObj{
 		g.fillRect(position.x + delta.x, position.y + delta.y, sizeX, sizeY);	
 	}
 	
-	public void setMembrane(AbstractMembrane mem){
+	public void setMembrane(Membrane mem){
 		Iterator atomIte;
 		Atom targetAtom;
 		

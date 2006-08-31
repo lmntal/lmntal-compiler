@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import runtime.AbstractMembrane;
+import runtime.Membrane;
 import runtime.Atom;
 import runtime.Env;
 import runtime.Functor;
@@ -35,7 +35,7 @@ abstract public class Util {
 	 */
 	public static void makeList(Link link, List l) {
 		Iterator it = l.iterator();
-		AbstractMembrane mem = link.getAtom().getMem();
+		Membrane mem = link.getAtom().getMem();
 		Atom parent=null;
 		boolean first=true;
 		while(it.hasNext()) {

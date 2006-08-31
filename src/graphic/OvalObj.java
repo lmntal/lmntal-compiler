@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.Iterator;
 
-import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
@@ -20,7 +19,7 @@ public class OvalObj extends GraphicObj{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public OvalObj(AbstractMembrane mem){
+	public OvalObj(Membrane mem){
 		super(mem);
 	}
 	///////////////////////////////////////////////////////////////////////////
@@ -30,7 +29,7 @@ public class OvalObj extends GraphicObj{
 		g.drawOval(position.x + delta.x, position.y + delta.y, sizeX, sizeY);		
 	}
 	
-	public void setMembrane(AbstractMembrane mem){
+	public void setMembrane(Membrane mem){
 		Iterator atomIte;
 		Atom targetAtom;
 		

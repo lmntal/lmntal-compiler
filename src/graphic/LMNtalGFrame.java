@@ -5,7 +5,6 @@ import java.awt.Point;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
@@ -37,7 +36,7 @@ public class LMNtalGFrame{
 	 * 受け取った膜はグラフィック膜であるとは限らない．
 	 * @param mem
 	 */
-	public void setMem(AbstractMembrane mem){
+	public void setMem(Membrane mem){
 		// windowアトムがあればウィンドウ膜の登録
 		if(mem.getAtomCountOfFunctor(WINDOW_MEM)>0){
 			setWindowMem(mem);
@@ -54,7 +53,7 @@ public class LMNtalGFrame{
 	 * @param mem
 	 * @return LMNtalWindow
 	 */
-	private LMNtalWindow searchWindowMem(AbstractMembrane mem){
+	private LMNtalWindow searchWindowMem(Membrane mem){
 		while(!mem.isRoot()){
 			if(windowMap.containsKey(mem.getGlobalMemID())){
 				return (LMNtalWindow)windowMap.get(mem.getGlobalMemID());
@@ -78,7 +77,7 @@ public class LMNtalGFrame{
 	 * 登録済みの膜の場合は膜のIDを更新する．
 	 * @param mem
 	 */
-	public void setWindowMem(AbstractMembrane mem){
+	public void setWindowMem(Membrane mem){
 		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
 		if(nameAtomIte.hasNext()){
 			String windowName = ((Atom)nameAtomIte.next()).nth(0);
@@ -100,7 +99,7 @@ public class LMNtalGFrame{
 	 * 受け取った膜はグラフィック膜であるとは限らない．
 	 * @param mem
 	 */
-	public void removeGraphicMem(AbstractMembrane mem){
+	public void removeGraphicMem(Membrane mem){
 		if(null != mem.getParent()){
 			Iterator windowIte = windowMap.values().iterator();
 			while(windowIte.hasNext()){ ((LMNtalWindow)windowIte.next()).removeChildMem(mem); }
@@ -121,7 +120,7 @@ public class LMNtalGFrame{
 	 * @param mem
 	 */
 	  
-	public Point getMousePoint(AbstractMembrane mem){
+	public Point getMousePoint(Membrane mem){
 		if(mem.isRoot())return null;
 		setMem(mem);
 		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
@@ -135,7 +134,7 @@ public class LMNtalGFrame{
 		return getMousePoint(mem.getParent());
 	}
 	
-	public Dimension getWindowSize(AbstractMembrane mem){
+	public Dimension getWindowSize(Membrane mem){
 		if(mem.isRoot())return null;
 		setMem(mem);
 		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);

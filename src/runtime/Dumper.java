@@ -85,11 +85,11 @@ public class Dumper {
 									"BackTracks,\tLockFailures\n";
 
 	/** 膜の中身を出力する。出力形式の指定はまだできない。 */
-	public static String dump(AbstractMembrane mem) {
+	public static String dump(Membrane mem) {
 		return dump(mem, true);
 	}
 
-	public static String dump(AbstractMembrane mem, boolean doLock) {
+	public static String dump(Membrane mem, boolean doLock) {
 		boolean locked = false;
 		if (doLock) {
 			if (mem.getLockThread() != Thread.currentThread()) {
@@ -292,7 +292,7 @@ public class Dumper {
 		// #2 - 子膜の出力
 		it = mem.memIterator();
 		while (it.hasNext()) {
-			AbstractMembrane m = (AbstractMembrane) it.next();
+			Membrane m = (Membrane) it.next();
 			if (commaFlag) {
 				buf.append(", ");
 				if (Env.getExtendedOption("dump").equals("1"))
@@ -394,7 +394,7 @@ public class Dumper {
 	 *            mode
 	 * @return String 膜のコンパイル可能な文字列表現
 	 */
-	public static String encode(AbstractMembrane mem, boolean doLock, int mode) {
+	public static String encode(Membrane mem, boolean doLock, int mode) {
 		boolean locked = false;
 		if (doLock) {
 			if (mem.getLockThread() != Thread.currentThread()) {
@@ -570,7 +570,7 @@ public class Dumper {
 		// #2 子膜の出力
 		Iterator it = mem.memIterator();
 		while (it.hasNext()) {
-			AbstractMembrane m = (AbstractMembrane) it.next();
+			Membrane m = (Membrane) it.next();
 			if (commaFlag) {
 				buf.append(", ");
 			} else

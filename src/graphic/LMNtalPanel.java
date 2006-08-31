@@ -20,7 +20,7 @@ import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 
-import runtime.AbstractMembrane;
+import runtime.Membrane;
 import runtime.Atom;
 import runtime.Functor;
 
@@ -121,7 +121,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	 * 管理する子孫膜を記憶する．
 	 * @param mem
 	 */
-	public boolean setChildMem(AbstractMembrane mem){
+	public boolean setChildMem(Membrane mem){
 		busy = true;
 		GraphicObj gObj = null;
 		
@@ -142,7 +142,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	 * 受け取る膜はウィンドウ膜以外の膜であることが保証されていること．
 	 * @param mem
 	 */
-	private GraphicObj setGraphicMem(AbstractMembrane mem){
+	private GraphicObj setGraphicMem(Membrane mem){
 		// get getpic
 		Iterator atomIte = mem.atomIteratorOfFunctor(GETPIC_ATOM);
 		if(atomIte.hasNext()){
@@ -168,7 +168,7 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	 * 管理する子孫膜を削除する．
 	 * @param mem
 	 */
-	public boolean removeChildMem(AbstractMembrane mem){
+	public boolean removeChildMem(Membrane mem){
 		busy = true;
 		Object gObj = null;
 		synchronized (memMap) {

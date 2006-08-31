@@ -4,13 +4,23 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import daemon.LMNtalDaemon;
 
 /** このVMで実行するランタイム（旧：物理マシン、旧々：計算ノード）
  * このクラス（またはサブクラス）のインスタンスは、1つの Java VM につき高々1つしか存在しない。
  * @author n-kato, nakajima
  */
-public class LocalLMNtalRuntime extends AbstractLMNtalRuntime{
+public class LocalLMNtalRuntime{
+
+	/** ランタイムID。このVMのグローバルな識別子。ルールセットのIDの一部として使用される */
+	protected String runtimeid;
+	/** このランタイムが動作するホスト名。Fully Qualified Domain Nameである必要がある。 */
+	protected String hostname;
+
+	/** ランタイムIDを取得する */
+	public String getRuntimeID() {
+		return runtimeid;
+	}
+	
 	/** 全てのタスク */
 	List tasks = new ArrayList();
 	
@@ -18,9 +28,9 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime{
 
 	public LocalLMNtalRuntime(){
 		Env.theRuntime = this;
-		this.runtimeid = LMNtalDaemon.makeID();	// ここで生成する
+//		this.runtimeid = LMNtalDaemon.makeID();	// ここで生成する
 			// NICがあがってないとここで死ぬ（分散使いたくない時）→ 回避済 2004-11-12
-		this.hostname = LMNtalDaemon.getLocalHostName();
+//		this.hostname = LMNtalDaemon.getLocalHostName();
 	}
 
 	public static LocalLMNtalRuntime getInstance() {
@@ -30,8 +40,9 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime{
 	/**
 	/* 指定した膜を親膜とするルート膜を持つタスクをこのランタイムに作成する。
 	 * @param parent ルート膜の親膜
+	 * @return 作成したタスク
 	 */
-	AbstractTask newTask(AbstractMembrane parent) {
+	Task newTask(Membrane parent) {
 		Task t = new Task(this, parent);
 		tasks.add(t);
 		return t;
@@ -49,6 +60,7 @@ public class LocalLMNtalRuntime extends AbstractLMNtalRuntime{
 	 * 具体的には、この物理マシンのterminatedフラグをONにし、
 	 * 各タスクのルールスレッドが終わるまで待つ。*/
 	synchronized public void terminate() {
+//		System.out.println("LocalLMNtalRuntime#terminate()");
 		terminated = true;
 		Iterator it = tasks.iterator();
 		while (it.hasNext()) {

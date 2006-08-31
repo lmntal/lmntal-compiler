@@ -79,7 +79,24 @@ import util.Util;
  * タスクの停止・再開の待ち合わせ処理のために、このクラスのインスタンスに関する synchronized 節を利用する。
  */
 
-public class Task extends AbstractTask implements Runnable {
+public class Task implements Runnable {
+	/** 物理マシン */
+	protected LocalLMNtalRuntime runtime;
+	/** ルート膜 */
+	protected Membrane root;
+	/** asyncUnlockされたときにtrueになる
+	 * （trueならばシグナルで復帰時にトレースdumpする）*/
+	protected boolean asyncFlag = false;
+	
+	/** ランタイムの取得 */
+	public LocalLMNtalRuntime getMachine() {
+		return runtime;
+	}
+	/** ルート膜の取得 */
+	public Membrane getRoot() {
+		return root;
+	}
+	
 	/** このタスクのルールスレッド */
 	protected Thread thread = new Thread(this, "Task");
 	/** 実行膜スタック*/
@@ -101,8 +118,8 @@ public class Task extends AbstractTask implements Runnable {
 	
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）*/
-	Task(AbstractLMNtalRuntime runtime) {
-		super(runtime);
+	Task(LocalLMNtalRuntime runtime) {
+		this.runtime = runtime;
 		root = new Membrane(this);
 		memStack.push(root);
 	}
@@ -110,11 +127,11 @@ public class Task extends AbstractTask implements Runnable {
 	/** 指定した親膜を持つ新しいロックされたルート膜および対応するタスク（スレーブタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）
 	 * @param parent 親膜 */
-	Task(AbstractLMNtalRuntime runtime, AbstractMembrane parent) {
-		super(runtime);
+	Task(LocalLMNtalRuntime runtime, Membrane parent) {
+		this(runtime);
 		root = new Membrane(this);
 		root.lockThread = Thread.currentThread();
-		root.remote = parent.remote;
+//		root.remote = parent.remote;
 		root.activate(); 		// 仮の実行膜スタックに積む
 		parent.addMem(root);	// タスクは膜の作成時に設定した
 		thread.start();
@@ -261,7 +278,7 @@ public class Task extends AbstractTask implements Runnable {
 					it = mem.memIterator();
 					flag = false;
 					while(it.hasNext()){
-						if(!((AbstractMembrane)it.next()).isStable()) {
+						if(!((Membrane)it.next()).isStable()) {
 							flag = true;
 							break;
 						}
@@ -304,7 +321,7 @@ public class Task extends AbstractTask implements Runnable {
 				}
 				running = true;
 			}
-			mem.remote = null;
+//			mem.remote = null;
 			//非ルールスレッドが変更した内容を出力する。
 			if (root != null && Env.fTrace && asyncFlag) {
 				asyncFlag = false;
@@ -343,7 +360,7 @@ public class Task extends AbstractTask implements Runnable {
 
 			// 本膜のルール適用を終了しており、本膜がroot膜かつ親膜を持つなら、親膜を活性化。本膜ロック解放後に行う必要がある。
 			if(memStack.isEmpty() && mem.isRoot()) {
-				AbstractMembrane memToActivate = mem.getParent();
+				Membrane memToActivate = mem.getParent();
 				// 親膜がすでに無効になっていた場合、活性化要求は単純に無視すればよい。
 				if (memToActivate != null) {
 					doAsyncLock(memToActivate);
@@ -357,7 +374,7 @@ public class Task extends AbstractTask implements Runnable {
 	 * hara
 	 * @param mem
 	 */
-	static public void activatePerpetualMem(AbstractMembrane mem) {
+	static public void activatePerpetualMem(Membrane mem) {
 		if(mem.perpetual) doAsyncLock(mem);
 		Iterator it = mem.memIterator();
 		while(it.hasNext()) {
@@ -392,8 +409,8 @@ public class Task extends AbstractTask implements Runnable {
 	// 060401 okabe
 	// Membrane -> AbstractMembrane
 	// 他も順次変更していく予定
-	static public void doAsyncLock(AbstractMembrane mem) {
-		final AbstractMembrane m = mem;
+	static public void doAsyncLock(Membrane mem) {
+		final Membrane m = mem;
 		new Thread() {
 			public void run() {
 				if (m.asyncLock()) {

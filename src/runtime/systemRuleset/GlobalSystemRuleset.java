@@ -6,7 +6,7 @@ import java.util.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.math.BigDecimal;
-import daemon.IDConverter;
+
 import module.*;
 
 /**
@@ -374,7 +374,7 @@ public class GlobalSystemRuleset extends Ruleset {
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -399,7 +399,7 @@ public class GlobalSystemRuleset extends Ruleset {
 L147:
 		{
 			func = f[0];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -428,7 +428,7 @@ L147:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -454,7 +454,7 @@ L148:
 		{
 			//GlobalSystemRuleset_1
 			GlobalSystemRuleset_1.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[3]));
+			((Membrane)var[0]).addAtom(((Atom)var[3]));
 			//GlobalSystemRuleset_2
 			GlobalSystemRuleset_2.exec(var, f);
 			ret = true;
@@ -474,7 +474,7 @@ L148:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -499,7 +499,7 @@ L148:
 L144:
 		{
 			func = f[1];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -528,7 +528,7 @@ L144:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -554,7 +554,7 @@ L145:
 		{
 			//GlobalSystemRuleset_3
 			GlobalSystemRuleset_3.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[3]));
+			((Membrane)var[0]).addAtom(((Atom)var[3]));
 			//GlobalSystemRuleset_4
 			GlobalSystemRuleset_4.exec(var, f);
 			ret = true;
@@ -574,7 +574,7 @@ L145:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -599,7 +599,7 @@ L145:
 L141:
 		{
 			func = f[2];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -628,7 +628,7 @@ L141:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -654,7 +654,7 @@ L142:
 		{
 			//GlobalSystemRuleset_5
 			GlobalSystemRuleset_5.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[3]));
+			((Membrane)var[0]).addAtom(((Atom)var[3]));
 			//GlobalSystemRuleset_6
 			GlobalSystemRuleset_6.exec(var, f);
 			ret = true;
@@ -674,7 +674,7 @@ L142:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -699,7 +699,7 @@ L142:
 L138:
 		{
 			func = f[3];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -728,7 +728,7 @@ L138:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -754,7 +754,7 @@ L139:
 		{
 			//GlobalSystemRuleset_7
 			GlobalSystemRuleset_7.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[3]));
+			((Membrane)var[0]).addAtom(((Atom)var[3]));
 			//GlobalSystemRuleset_8
 			GlobalSystemRuleset_8.exec(var, f);
 			ret = true;
@@ -774,7 +774,7 @@ L139:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -799,7 +799,7 @@ L139:
 L135:
 		{
 			func = f[4];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -828,7 +828,7 @@ L135:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -854,7 +854,7 @@ L136:
 		{
 			//GlobalSystemRuleset_9
 			GlobalSystemRuleset_9.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[3]));
+			((Membrane)var[0]).addAtom(((Atom)var[3]));
 			//GlobalSystemRuleset_10
 			GlobalSystemRuleset_10.exec(var, f);
 			ret = true;
@@ -874,7 +874,7 @@ L136:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -899,7 +899,7 @@ L136:
 L132:
 		{
 			func = f[5];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -928,7 +928,7 @@ L132:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -954,7 +954,7 @@ L133:
 		{
 			//GlobalSystemRuleset_11
 			GlobalSystemRuleset_11.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[3]));
+			((Membrane)var[0]).addAtom(((Atom)var[3]));
 			//GlobalSystemRuleset_12
 			GlobalSystemRuleset_12.exec(var, f);
 			ret = true;
@@ -974,7 +974,7 @@ L133:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -999,7 +999,7 @@ L133:
 L129:
 		{
 			func = f[6];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1034,7 +1034,7 @@ L129:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1060,7 +1060,7 @@ L130:
 		{
 			//GlobalSystemRuleset_13
 			GlobalSystemRuleset_13.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_14
 			GlobalSystemRuleset_14.exec(var, f);
 			ret = true;
@@ -1080,7 +1080,7 @@ L130:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1105,7 +1105,7 @@ L130:
 L126:
 		{
 			func = f[7];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1139,7 +1139,7 @@ L126:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1165,7 +1165,7 @@ L127:
 		{
 			//GlobalSystemRuleset_15
 			GlobalSystemRuleset_15.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_16
 			GlobalSystemRuleset_16.exec(var, f);
 			ret = true;
@@ -1185,7 +1185,7 @@ L127:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1210,7 +1210,7 @@ L127:
 L123:
 		{
 			func = f[8];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1244,7 +1244,7 @@ L123:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1270,7 +1270,7 @@ L124:
 		{
 			//GlobalSystemRuleset_17
 			GlobalSystemRuleset_17.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_18
 			GlobalSystemRuleset_18.exec(var, f);
 			ret = true;
@@ -1290,7 +1290,7 @@ L124:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1315,7 +1315,7 @@ L124:
 L120:
 		{
 			func = f[9];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1349,7 +1349,7 @@ L120:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1375,7 +1375,7 @@ L121:
 		{
 			//GlobalSystemRuleset_19
 			GlobalSystemRuleset_19.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_20
 			GlobalSystemRuleset_20.exec(var, f);
 			ret = true;
@@ -1395,7 +1395,7 @@ L121:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1420,7 +1420,7 @@ L121:
 L117:
 		{
 			func = f[10];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1457,7 +1457,7 @@ L117:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1483,7 +1483,7 @@ L118:
 		{
 			//GlobalSystemRuleset_21
 			GlobalSystemRuleset_21.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_22
 			GlobalSystemRuleset_22.exec(var, f);
 			ret = true;
@@ -1503,7 +1503,7 @@ L118:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1528,7 +1528,7 @@ L118:
 L114:
 		{
 			func = f[11];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1565,7 +1565,7 @@ L114:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1591,7 +1591,7 @@ L115:
 		{
 			//GlobalSystemRuleset_23
 			GlobalSystemRuleset_23.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_24
 			GlobalSystemRuleset_24.exec(var, f);
 			ret = true;
@@ -1611,7 +1611,7 @@ L115:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1636,7 +1636,7 @@ L115:
 L111:
 		{
 			func = f[12];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1670,7 +1670,7 @@ L111:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1696,7 +1696,7 @@ L112:
 		{
 			//GlobalSystemRuleset_25
 			GlobalSystemRuleset_25.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_26
 			GlobalSystemRuleset_26.exec(var, f);
 			ret = true;
@@ -1716,7 +1716,7 @@ L112:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1741,7 +1741,7 @@ L112:
 L108:
 		{
 			func = f[13];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1775,7 +1775,7 @@ L108:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1801,7 +1801,7 @@ L109:
 		{
 			//GlobalSystemRuleset_27
 			GlobalSystemRuleset_27.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_28
 			GlobalSystemRuleset_28.exec(var, f);
 			ret = true;
@@ -1821,7 +1821,7 @@ L109:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1846,7 +1846,7 @@ L109:
 L105:
 		{
 			func = f[14];
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1880,7 +1880,7 @@ L105:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1906,7 +1906,7 @@ L106:
 		{
 			//GlobalSystemRuleset_29
 			GlobalSystemRuleset_29.exec(var, f);
-			((AbstractMembrane)var[0]).addAtom(((Atom)var[4]));
+			((Membrane)var[0]).addAtom(((Atom)var[4]));
 			//GlobalSystemRuleset_30
 			GlobalSystemRuleset_30.exec(var, f);
 			ret = true;
@@ -1926,7 +1926,7 @@ L106:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -1951,7 +1951,7 @@ L106:
 L103:
 		{
 			func = Functor.OUTSIDE_PROXY;
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -1965,10 +1965,10 @@ L103:
 						var[4] = mem;
 						link = ((Atom)var[1]).getArg(0);
 						var[5] = link.getAtom();
-						if (!(((AbstractMembrane)var[4]) != ((Atom)var[5]).getMem())) {
+						if (!(((Membrane)var[4]) != ((Atom)var[5]).getMem())) {
 			//GlobalSystemRuleset_31
 			GlobalSystemRuleset_31.exec(var, f);
-							mem = ((AbstractMembrane)var[4]);
+							mem = ((Membrane)var[4]);
 							mem.unifyAtomArgs(
 								((Atom)var[3]), 1,
 								((Atom)var[5]), 1 );
@@ -1977,7 +1977,7 @@ L103:
 							ret = true;
 							break L103;
 						}
-						((AbstractMembrane)var[4]).unlock();
+						((Membrane)var[4]).unlock();
 					}
 				}
 			}
@@ -1996,7 +1996,7 @@ L103:
 		Atom atom;
 		Functor func = null;
 		Link link;
-		AbstractMembrane mem;
+		Membrane mem;
 		int x, y;
 		double u, v;
 		int isground_ret;
@@ -2021,7 +2021,7 @@ L103:
 L101:
 		{
 			func = Functor.OUTSIDE_PROXY;
-			Iterator it1 = ((AbstractMembrane)var[0]).atomIteratorOfFunctor(func);
+			Iterator it1 = ((Membrane)var[0]).atomIteratorOfFunctor(func);
 			while (it1.hasNext()) {
 				atom = (Atom) it1.next();
 				var[1] = atom;
@@ -2037,7 +2037,7 @@ L101:
 						var[5] = link.getAtom();
 			//GlobalSystemRuleset_33
 			GlobalSystemRuleset_33.exec(var, f);
-						((AbstractMembrane)var[0]).unifyAtomArgs(
+						((Membrane)var[0]).unifyAtomArgs(
 							((Atom)var[1]), 1,
 							((Atom)var[5]), 1 );
 			//GlobalSystemRuleset_34
@@ -2045,7 +2045,7 @@ L101:
 						ret = true;
 						break L101;
 					}
-					((AbstractMembrane)var[3]).unlock();
+					((Membrane)var[3]).unlock();
 				}
 			}
 		}

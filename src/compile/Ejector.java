@@ -118,7 +118,7 @@ public class Ejector{
 			writer.write("import runtime.*;\n");
 			writer.write("import java.util.*;\n");
 			writer.write("import java.io.*;\n");
-			writer.write("import daemon.IDConverter;\n");
+//			writer.write("import daemon.IDConverter;\n");
 			writer.write("import module.*;\n");
 			if(Env.profile == Env.PROFILE_ALL){ writer.write("import util.Util;\n"); }
 			writer.write("public class " + className + "_" + serial + " {\n");
@@ -126,7 +126,7 @@ public class Ejector{
 			writer.write("		Atom atom;\n");
 			writer.write("		Functor func;\n");
 			writer.write("		Link link;\n");
-			writer.write("		AbstractMembrane mem;\n");
+			writer.write("		Membrane mem;\n");
 			writer.write("		int x, y;\n");
 			writer.write("		double u, v;\n");
 			writer.write("		int isground_ret;\n");

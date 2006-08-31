@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 
-import runtime.AbstractMembrane;
 import runtime.Atom;
 import runtime.Dumper;
 import runtime.Env;
@@ -69,7 +68,7 @@ public class LMNtalWindow extends JFrame{
 	private LinkedList waitingAtomlist = new LinkedList();
 	
 	private String memID;
-	private AbstractMembrane mymem;
+	private Membrane mymem;
 	private String windowName;
 	private int sizeX = 0;
 	private int sizeY = 0;
@@ -88,7 +87,7 @@ public class LMNtalWindow extends JFrame{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public LMNtalWindow(AbstractMembrane mem){
+	public LMNtalWindow(Membrane mem){
 		resetMembrane(mem);
 		makeWindow();
 		Iterator childMem = mem.memIterator();
@@ -105,7 +104,7 @@ public class LMNtalWindow extends JFrame{
 	 * 受け取る膜はウィンドウ膜であること保証がされていること．
 	 * @param mem
 	 */
-	public void resetMembrane(AbstractMembrane mem){
+	public void resetMembrane(Membrane mem){
 		Iterator atomIte;
 		Atom targetAtom;
 		
@@ -269,7 +268,7 @@ public class LMNtalWindow extends JFrame{
 	 * ウィンドウの情報を再セットする．
 	 * @param mem
 	 */
-	public void resetWindow(AbstractMembrane mem){
+	public void resetWindow(Membrane mem){
 		resetMembrane(mem);
 		// TODO: ウィンドウの設定に変更があった場合，更新．サイズの位置で更新を分けるべき？
 		if(sizeUpdate){
@@ -286,7 +285,7 @@ public class LMNtalWindow extends JFrame{
 	 * 管理する子孫膜を記憶する．
 	 * @param mem
 	 */
-	public void setChildMem(AbstractMembrane mem){
+	public void setChildMem(Membrane mem){
 		boolean res = lmnPanel.setChildMem(mem);
 		// パネルクラスが作業中または最短更新時間に満てないときは待つ
 		while(res && ((timer > System.currentTimeMillis() - time) || lmnPanel.isBusy())){}
@@ -300,7 +299,7 @@ public class LMNtalWindow extends JFrame{
 	 * 管理する子孫膜を削除する．
 	 * @param mem
 	 */
-	public void removeChildMem(AbstractMembrane mem){
+	public void removeChildMem(Membrane mem){
 		lmnPanel.removeChildMem(mem);
 		// パネルクラスが作業中または最短更新時間に満てないときは待つ
 		//while(timer > System.currentTimeMillis() - time || lmnPanel.isBusy()){}
@@ -331,7 +330,7 @@ public class LMNtalWindow extends JFrame{
 	 * 予約されているファンクターをアトムとして膜に追加する
 	 * @param mem
 	 */
-	private void doAddAtom(AbstractMembrane mem){
+	private void doAddAtom(Membrane mem){
 		// ウィンドウの状態変更
 //		d = getSize();
 //		if(d.width != sizeX ||
