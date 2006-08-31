@@ -13,9 +13,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -482,7 +480,8 @@ public class Translator {
 
 	private String className;
 	private File outputFile;
-	private BufferedWriter writer;
+//	private BufferedWriter writer;
+	private TranslatorWriter writer;
 	private InterpretedRuleset ruleset;
 	/**出力する InstructionList の集合。重複を防ぐために利用する。*/
 	private HashSet instLists = new HashSet();
@@ -506,7 +505,7 @@ public class Translator {
 	public Translator(InterpretedRuleset ruleset) throws IOException{
 		className = getClassName(ruleset);
 		outputFile = new File(dir, className + ".java");
-		writer = new BufferedWriter(new FileWriter(outputFile));
+		writer = new TranslatorWriter(new FileWriter(outputFile));
 		this.ruleset = ruleset;
 	}
 
@@ -520,9 +519,12 @@ public class Translator {
 		if (!system)
 			throw new RuntimeException();
 
-		packageName = "runtime";
+		packageName = "runtime.systemRuleset";
 		className = "GlobalSystemRuleset";
-		writer = new BufferedWriter(new OutputStreamWriter(System.out, Charset.forName("EUC_JP")));
+		dir = new File("../src/runtime" + File.separator + "systemRuleset" + File.separator);
+		outputFile = new File(dir, className + ".java");
+		writer = new TranslatorWriter(new FileWriter(outputFile));
+		//writer = new BufferedWriter(new OutputStreamWriter(System.out, Charset.forName("EUC_JP")));
 		writer.write("//GlobalSystemRulesetGeneratorによって自動生成されたファイル\n\n");
 		this.ruleset = ruleset;
 		globalSystemRuleset = true;
@@ -938,7 +940,8 @@ public class Translator {
 	 * @throws IOException Java ソースの出力に失敗した場合
 	 */
 	private void translate(Iterator it, String tabs, int iteratorNo, int varnum, String breakLabel, Rule rule) throws IOException {
-		Ejector ejector = new Ejector(className, dir, writer, packageName);
+		Ejector ejector = new Ejector(className, dir, packageName);
+		writer.setEjector(ejector);
 
 		while (it.hasNext()) {
 //			Functor func;
@@ -965,7 +968,6 @@ public class Translator {
 			switch (inst.getKind()) {
 				//====アトムに関係する出力する基本ガード命令====ここから====
 				case Instruction.DEREF : //[-dstatom, srcatom, srcpos, dstpos]
-					ejector.close();
 					writer.write(tabs + "link = ((Atom)var[" +  inst.getIntArg2()  + "]).getArg(" + inst.getIntArg3() + ");\n");
 					writer.write(tabs + "if (!(link.getPos() != " + inst.getIntArg4() + ")) {\n");
 					writer.write(tabs + "	var[" +  inst.getIntArg1()  + "] = link.getAtom();\n");
@@ -977,7 +979,6 @@ public class Translator {
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = link.getAtom();\n");
 					break; //n-kato
 				case Instruction.DEREFLINK : //[-dstatom, srclink, dstpos]
-					ejector.close();
 					writer.write(tabs + "link = (Link)var[" +  inst.getIntArg2()  + "];\n");
 					writer.write(tabs + "if (!(link.getPos() != " + inst.getIntArg3() + ")) {\n");
 					writer.write(tabs + "	var[" +  inst.getIntArg1()  + "] = link.getAtom();\n");
@@ -985,7 +986,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //mizuno
 				case Instruction.FINDATOM : // [-dstatom, srcmem, funcref]
-					ejector.close();
 					writer.write(tabs + "func = " + getFuncVarName((Functor)inst.getArg3()) + ";\n");
 					writer.write(tabs + "Iterator it" + iteratorNo + " = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).atomIteratorOfFunctor(func);\n");
 					writer.write(tabs + "while (it" + iteratorNo + ".hasNext()) {\n");
@@ -1001,7 +1001,6 @@ public class Translator {
 				case Instruction.LOCKMEM :
 				case Instruction.LOCALLOCKMEM :
 					// lockmem [-dstmem, freelinkatom]
-					ejector.close();
 					writer.write(tabs + "mem = ((Atom)var[" +  inst.getIntArg2()  + "]).getMem();\n");
 					writer.write(tabs + "if (mem.lock()) {\n");
 					writer.write(tabs + "	var[" +  inst.getIntArg1()  + "] = mem;\n");
@@ -1013,7 +1012,6 @@ public class Translator {
 					break;
 				case Instruction.ANYMEM :
 				case Instruction.LOCALANYMEM : // anymem [-dstmem, srcmem] 
-					ejector.close();
 					writer.write(tabs + "Iterator it" + iteratorNo + " = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).memIterator();\n");
 					writer.write(tabs + "while (it" + iteratorNo + ".hasNext()) {\n");
 					writer.write(tabs + "	mem = (AbstractMembrane) it" + iteratorNo + ".next();\n");
@@ -1033,7 +1031,6 @@ public class Translator {
 					break;
 				case Instruction.LOCK :
 				case Instruction.LOCALLOCK : //[srcmem] 
-					ejector.close();
 					writer.write(tabs + "mem = ((AbstractMembrane)var[" +  inst.getIntArg1()  + "]);\n");
 					writer.write(tabs + "if (mem.lock()) {\n");
 					translate(it, tabs + "\t", iteratorNo, varnum, breakLabel, rule);
@@ -1043,14 +1040,12 @@ public class Translator {
 						writer.write(tabs + "else lockfailure++\n;");
 					break;
 				case Instruction.GETMEM : //[-dstmem, srcatom]
-					ejector.close();
 					writer.write(tabs + "if(((Atom)var[" +  inst.getIntArg2()  + "]).getMem().getKind() == " + inst.getIntArg3() + ") {\n");
 					writer.write(tabs + "	var[" +  inst.getIntArg1()  + "] = ((Atom)var[" +  inst.getIntArg2()  + "]).getMem();\n");
 					translate(it, tabs + "\t", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.GETPARENT : //[-dstmem, srcmem]
-					ejector.close();
 					writer.write(tabs + "mem = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).getParent();\n");
 					writer.write(tabs + "if (!(mem == null)) {\n");
 					writer.write(tabs + "	var[" +  inst.getIntArg1()  + "] = mem;\n");
@@ -1060,56 +1055,47 @@ public class Translator {
 					//====膜に関係する出力する基本ガード命令====ここまで====
 					//====膜に関係する出力しない基本ガード命令====ここから====
 				case Instruction.TESTMEM : //[dstmem, srcatom]
-					ejector.close();
 					writer.write(tabs + "if (!(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]) != ((Atom)var[" +  inst.getIntArg2()  + "]).getMem())) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.NORULES : //[srcmem] 
-					ejector.close();
 					writer.write(tabs + "if (!(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).hasRules())) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.NFREELINKS : //[srcmem, count]
-					ejector.close();
 					writer.write(tabs + "mem = ((AbstractMembrane)var[" +  inst.getIntArg1()  + "]);\n");
 					writer.write(tabs + "if (!(mem.getAtomCountOfFunctor(Functor.INSIDE_PROXY) != " + inst.getIntArg2() + ")) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break;
 				case Instruction.NATOMS : //[srcmem, count]
-					ejector.close();
 					writer.write(tabs + "if (!(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).getAtomCount() != " + inst.getIntArg2() + ")) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.NATOMSINDIRECT : //[srcmem, countfunc]
-					ejector.close();
 					writer.write(tabs + "if (!(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).getAtomCount() != ((IntegerFunctor)var[" +  inst.getIntArg2()  + "]).intValue())) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-08
 				case Instruction.NMEMS : //[srcmem, count]
-					ejector.close();
 					writer.write(tabs + "if (!(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).getMemCount() != " + inst.getIntArg2() + ")) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.EQMEM : //[mem1, mem2]
-					ejector.close();
 					writer.write(tabs + "if (!(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]) != ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.NEQMEM : //[mem1, mem2]
-					ejector.close();
 					writer.write(tabs + "if (!(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]) == ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.STABLE : //[srcmem] 
-					ejector.close();
 					writer.write(tabs + "if (!(!((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).isStable())) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
@@ -1117,31 +1103,26 @@ public class Translator {
 					//====膜に関係する出力しない基本ガード命令====ここまで====
 					//====アトムに関係する出力しない基本ガード命令====ここから====
 				case Instruction.FUNC : //[srcatom, funcref]
-					ejector.close();
 					writer.write(tabs + "if (!(!(" + getFuncVarName((Functor)inst.getArg2()) + ").equals(((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.NOTFUNC : //[srcatom, funcref]
-					ejector.close();
 					writer.write(tabs + "if (!((" + getFuncVarName((Functor)inst.getArg2()) + ").equals(((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.EQATOM : //[atom1, atom2]
-					ejector.close();
 					writer.write(tabs + "if (!(((Atom)var[" +  inst.getIntArg1()  + "]) != ((Atom)var[" +  inst.getIntArg2()  + "]))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.NEQATOM : //[atom1, atom2]
-					ejector.close();
 					writer.write(tabs + "if (!(((Atom)var[" +  inst.getIntArg1()  + "]) == ((Atom)var[" +  inst.getIntArg2()  + "]))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.SAMEFUNC: //[atom1, atom2]
-					ejector.close();
 					writer.write(tabs + "if (!(!((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor().equals(((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
@@ -1166,13 +1147,11 @@ public class Translator {
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] =  " + getFuncVarName((Functor)inst.getArg2()) + ";\n");
 					break;//nakajima 2003-12-21, n-kato
 				case Instruction.EQFUNC : //[func1, func2]
-					ejector.close();
 					writer.write(tabs + "if (!(!var[" +  inst.getIntArg1()  + "].equals(var[" +  inst.getIntArg2()  + "]))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //nakajima, n-kato
 				case Instruction.NEQFUNC : //[func1, func2]
-					ejector.close();
 					writer.write(tabs + "if (!(var[" +  inst.getIntArg1()  + "].equals(var[" +  inst.getIntArg2()  + "]))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
@@ -1183,13 +1162,13 @@ public class Translator {
 				case Instruction.LOCALREMOVEATOM : //[srcatom, srcmem, funcref]
 					ejector.write(tabs + "atom = ((Atom)var[" +  inst.getIntArg1()  + "]);\n");
 					ejector.write(tabs + "atom.getMem().removeAtom(atom);\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.NEWATOM :
 				case Instruction.LOCALNEWATOM : //[-dstatom, srcmem, funcref]
 					ejector.write(tabs + "func = " + getFuncVarName((Functor)inst.getArg3()) + ";\n");
 					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).newAtom(func);\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.NEWATOMINDIRECT :
 				case Instruction.LOCALNEWATOMINDIRECT : //[-dstatom, srcmem, func]
@@ -1199,12 +1178,12 @@ public class Translator {
 				case Instruction.LOCALENQUEUEATOM : //[srcatom]
 					ejector.write(tabs + "atom = ((Atom)var[" +  inst.getIntArg1()  + "]);\n");
 					ejector.write(tabs + "atom.getMem().enqueueAtom(atom);\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.DEQUEUEATOM : //[srcatom]
 					ejector.write(tabs + "atom = ((Atom)var[" +  inst.getIntArg1()  + "]);\n");
 					ejector.write(tabs + "atom.dequeue();\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.FREEATOM : //[srcatom]
 					break; //n-kato
@@ -1217,7 +1196,7 @@ public class Translator {
 				case Instruction.LOCALALTERFUNCINDIRECT : //[atom, func]
 					ejector.write(tabs + "atom = ((Atom)var[" +  inst.getIntArg1()  + "]);\n");
 					ejector.write(tabs + "atom.getMem().alterAtomFunctor(atom,(Functor)(var[" +  inst.getIntArg2()  + "]));\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 					//====アトムを操作する基本ボディ命令====ここまで====
 					//====アトムを操作する型付き拡張用命令====ここから====
@@ -1230,7 +1209,7 @@ public class Translator {
 				case Instruction.COPYATOM :
 				case Instruction.LOCALCOPYATOM : //[-dstatom, mem, srcatom]
 					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).newAtom(((Atom)var[" +  inst.getIntArg3()  + "]).getFunctor());\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //nakajima, n-kato
 					//case Instruction.ADDATOM:
 				case Instruction.LOCALADDATOM : //[dstmem, atom]
@@ -1246,17 +1225,17 @@ public class Translator {
 				case Instruction.NEWMEM: //[-dstmem, srcmem]
 					ejector.write(tabs + "mem = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).newMem(" + inst.getIntArg3() + ");\n");
 					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = mem;\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
 					ejector.write(tabs + "mem = ((Membrane)((AbstractMembrane)var[" +  inst.getIntArg2()  + "])).newLocalMembrane(" + inst.getIntArg3() + ");\n");
 					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = mem;\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.ALLOCMEM: //[-dstmem]
-					ejector.write(tabs + "mem = ((Task)((AbstractMembrane)var0).getTask()).createFreeMembrane();\n");
+					ejector.write(tabs + "mem = ((Task)((AbstractMembrane)var[0]).getTask()).createFreeMembrane();\n");
 					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = mem;\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.NEWROOT : //[-dstmem, srcmem, nodeatom]
 					writer.write(tabs + "String nodedesc = ((Atom)var[" +  inst.getIntArg3()  + "]).getFunctor().getName();\n");
@@ -1264,33 +1243,33 @@ public class Translator {
 					break; //n-kato 2004-09-17
 				case Instruction.MOVECELLS : //[dstmem, srcmem]
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).moveCellsFrom(((AbstractMembrane)var[" +  inst.getIntArg2()  + "]));\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //nakajima 2004-01-04, n-kato
 				case Instruction.ENQUEUEALLATOMS : //[srcmem]
 					break;
 				case Instruction.FREEMEM : //[srcmem]
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).free();\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //mizuno 2004-10-12, n-kato
 				case Instruction.ADDMEM :
 				case Instruction.LOCALADDMEM : //[dstmem, srcmem]
 					ejector.write(tabs + "var[" +  inst.getIntArg2()  + "] = ((AbstractMembrane)var[" +  inst.getIntArg2()  + "]).moveTo(((AbstractMembrane)var[" +  inst.getIntArg1()  + "]));\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //nakajima 2004-01-04, n-kato, n-kato 2004-11-10
 				case Instruction.ENQUEUEMEM:
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).activate();\n");
-					ejector.commit();
+					ejector.commit(writer);
 					//mems[inst.getIntArg1()].enqueueAllAtoms();
 					break;
 				case Instruction.UNLOCKMEM :
 				case Instruction.LOCALUNLOCKMEM : //[srcmem]
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).forceUnlock();\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.LOCALSETMEMNAME: //[dstmem, name]
 				case Instruction.SETMEMNAME: //[dstmem, name]
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).setName(" + Util.quoteString((String)inst.getArg2(), '"') + ");\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 					//====膜を操作する基本ボディ命令====ここまで====
 					//====リンクに関係する出力するガード命令====ここから====
@@ -1309,14 +1288,14 @@ public class Translator {
 					ejector.write(tabs + "((Atom)var[" +  inst.getIntArg1()  + "]).getMem().newLink(\n");
 					ejector.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
 					ejector.write(tabs + "	((Atom)var[" +  inst.getIntArg3()  + "]), " + inst.getIntArg4() + " );\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.RELINK:		 //[atom1, pos1, atom2, pos2, mem]
 				case Instruction.LOCALRELINK:	 //[atom1, pos1, atom2, pos2 (,mem)]
 					ejector.write(tabs + "((Atom)var[" +  inst.getIntArg1()  + "]).getMem().relinkAtomArgs(\n");
 					ejector.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
 					ejector.write(tabs + "	((Atom)var[" +  inst.getIntArg3()  + "]), " + inst.getIntArg4() + " );\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
 					writer.write(tabs + "mem = ((AbstractMembrane)var[" +  inst.getIntArg5()  + "]);\n");
@@ -1326,7 +1305,7 @@ public class Translator {
 					break; //n-kato
 				case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
 					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
-					writer.write(tabs + "((AbstractMembrane)var0).unifyAtomArgs(\n");
+					writer.write(tabs + "((AbstractMembrane)var[0]).unifyAtomArgs(\n");
 					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
 					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg3()  + "]), " + inst.getIntArg4() + " );\n");
 					break; //mizuno
@@ -1346,7 +1325,7 @@ public class Translator {
 					break; //n-kato
 				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
 					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
-					writer.write(tabs + "((AbstractMembrane)var0).unifyLinkBuddies(\n");
+					writer.write(tabs + "((AbstractMembrane)var[0]).unifyLinkBuddies(\n");
 					writer.write(tabs + "	((Link)var[" +  inst.getIntArg1()  + "]),\n");
 					writer.write(tabs + "	((Link)var[" +  inst.getIntArg2()  + "]));\n");
 					break; //mizuno
@@ -1354,19 +1333,19 @@ public class Translator {
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここから====
 				case Instruction.REMOVEPROXIES : //[srcmem]
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeProxies();\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //nakajima 2004-01-04, n-kato
 				case Instruction.REMOVETOPLEVELPROXIES : //[srcmem]
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeToplevelProxies();\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //nakajima 2004-01-04, n-kato
 				case Instruction.INSERTPROXIES : //[parentmem,childmem]
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).insertProxies(((AbstractMembrane)var[" +  inst.getIntArg2()  + "]));\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break;  //nakajima 2004-01-04, n-kato
 				case Instruction.REMOVETEMPORARYPROXIES : //[srcmem]
 					ejector.write(tabs + "((AbstractMembrane)var[" +  inst.getIntArg1()  + "]).removeTemporaryProxies();\n");
-					ejector.commit();
+					ejector.commit(writer);
 					break; //nakajima 2004-01-04, n-kato
 					//====自由リンク管理アトム自動処理のためのボディ命令====ここまで====
 					//====ルールを操作するボディ命令====ここから====
@@ -1451,7 +1430,6 @@ public class Translator {
 //					writer.write(tabs + "return true; //n-kato\n");
 					writer.write(tabs + "ret = true;\n");
 					writer.write(tabs + "break " + breakLabel + ";\n");
-					ejector.close();
 					return;// true;
 //				case Instruction.SPEC://[formals,locals]
 //				case Instruction.BRANCH :
@@ -1461,14 +1439,12 @@ public class Translator {
 					//====制御命令====ここまで====
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
-					ejector.close();
 					writer.write(tabs + "eqground_ret = ((Link)var[" +  inst.getIntArg1()  + "]).eqGround(((Link)var[" +  inst.getIntArg2()  + "]));\n");
 					writer.write(tabs + "if (!(!eqground_ret)) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-03
 				case Instruction.NEQGROUND : //[link1,link2]
-					ejector.close();
 					writer.write(tabs + "eqground_ret = ((Link)var[" +  inst.getIntArg1()  + "]).eqGround(((Link)var[" +  inst.getIntArg2()  + "]));\n");
 					writer.write(tabs + "if (!eqground_ret) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
@@ -1485,7 +1461,6 @@ public class Translator {
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 					//====型検査のためのガード命令====ここから====
 				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
-					ejector.close();
 					writer.write(tabs + "isground_ret = ((Link)var[" +  inst.getIntArg2()  + "]).isGround(((Set)var[" +  inst.getIntArg3()  + "]));\n");
 					writer.write(tabs + "if (!(isground_ret == -1)) {\n");
 					writer.write(tabs + "	var[" +  inst.getIntArg1()  + "] = new IntegerFunctor(isground_ret);\n");
@@ -1493,7 +1468,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-03
 				case Instruction.ISUNARY: // [atom]
-					ejector.close();
 					writer.write(tabs + "func = ((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor();\n");
 					writer.write(tabs + "if (!(func.getArity() != 1)) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
@@ -1502,38 +1476,32 @@ public class Translator {
 //				case Instruction.ISUNARYFUNC: // [func]
 //					break;
 				case Instruction.ISINT : //[atom]
-					ejector.close();
 					writer.write(tabs + "if (!(!(((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor() instanceof IntegerFunctor))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.ISFLOAT : //[atom]
-					ejector.close();
 					writer.write(tabs + "if (!(!(((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor() instanceof FloatingFunctor))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.ISSTRING : //[atom] // todo StringFunctorに変える（CONNECTRUNTIMEも）
-					ejector.close();
 					writer.write(tabs + "if (((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor() instanceof ObjectFunctor &&\n");
 					writer.write(tabs + "    ((ObjectFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).getObject() instanceof String) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.ISBIGINT : //[atom]
-					ejector.close();
 					writer.write(tabs + "if (!(!(((Atom)var[" + inst.getIntArg1() + "]).getFunctor() instanceof BigIntegerFunctor))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //inui 2006-07-03
 				case Instruction.ISBIGFLOAT : //[atom]
-					ejector.close();
 					writer.write(tabs + "if (!(!(((Atom)var[" + inst.getIntArg1() + "]).getFunctor() instanceof BigFloatingFunctor))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //inui 2006-07-03
 				case Instruction.ISINTFUNC : //[func]
-					ejector.close();
 					writer.write(tabs + "if (!(!(var[" +  inst.getIntArg1()  + "] instanceof IntegerFunctor))) {\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
@@ -1543,7 +1511,6 @@ public class Translator {
 //				case Instruction.ISSTRINGFUNC : //[func]
 //					break;
 				case Instruction.GETCLASS: //[-stringatom, atom]
-					ejector.close();
 					writer.write(tabs + "if (!(!(((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor() instanceof ObjectFunctor))) {\n");
 					writer.write(tabs + "	{\n");
 					//再帰呼び出ししていないので、ブロック内で変数宣言しても大丈夫
@@ -1563,7 +1530,6 @@ public class Translator {
 					writer.write(tabs + InlineUnit.className((String)inst.getArg2()) + ".run((Atom)var[" +  inst.getArg1()  + "], " + inst.getArg3() + ");\n");
 					break;
 				case Instruction.GUARD_INLINE : //[obj]
-					ejector.close();
 
 					ArrayList gvars = (ArrayList)inst.getArg2();
 					writer.write(tabs + "{\n");
@@ -1579,7 +1545,7 @@ public class Translator {
 //					writer.write("	} catch(Exception e) {e.printStackTrace();}\n");
 					
 					writer.write(tabs + "	guard_inline_ret = false;\n");
-//					writer.write(tabs + "	guard_inline_ret = Inline.callGuardInline( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
+//					writer.write(tabs + "	guard_inline_ret = Inline.callGuardInline( \""+(String)inst.getArg1()+"\", (Membrane)var[0], guard_inline_gvar2 );\n");
 					writer.write(tabs + "	it_guard_inline = Inline.inlineSet.keySet().iterator();\n");
 					writer.write(tabs + "	while(it_guard_inline.hasNext()) {\n");
 					writer.write(tabs + "		String uName = (String)it_guard_inline.next();\n");
@@ -1601,13 +1567,13 @@ public class Translator {
 					writer.write(tabs + "		}\n");
 					writer.write(tabs + "		if(iu.customGuard!=null) {\n");
 					writer.write(tabs + "			try {\n");
-					writer.write(tabs + "				guard_inline_ret = iu.customGuard.run( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
+					writer.write(tabs + "				guard_inline_ret = iu.customGuard.run( \""+(String)inst.getArg1()+"\", (Membrane)var[0], guard_inline_gvar2 );\n");
 					writer.write(tabs + "			} catch(GuardNotFoundException e) {\n");
 					writer.write(tabs + "			} catch(Exception e) {e.printStackTrace();}\n");
 					writer.write(tabs + "		}\n");
 					writer.write(tabs + "	}\n");
 					
-//					writer.write(tabs + "	guard_inline_ret = Inline.callGuardInline( \""+(String)inst.getArg1()+"\", (Membrane)var0, guard_inline_gvar2 );\n");
+//					writer.write(tabs + "	guard_inline_ret = Inline.callGuardInline( \""+(String)inst.getArg1()+"\", (Membrane)var[0], guard_inline_gvar2 );\n");
 					writer.write(tabs + "	// ガードで値が変わったかもしれないので戻す\n");
 					for(int i=0;i<gvars.size();i++) {
 						writer.write(tabs + "	var[" + ((Integer)gvars.get(i)).intValue() + "] = guard_inline_gvar2.get(" + i + ");\n");
@@ -1650,7 +1616,6 @@ public class Translator {
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = new Atom(null, new IntegerFunctor(x * y));	\n");
 					break; //nakajima 2004-01-05
 				case Instruction.IDIV : //[-dstintatom, intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg3()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "if (!(y == 0)) {\n");
@@ -1665,7 +1630,6 @@ public class Translator {
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = new Atom(null, new IntegerFunctor(-x));				\n");
 					break;
 				case Instruction.IMOD : //[-dstintatom, intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg3()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "if (!(y == 0)) {\n");
@@ -1725,7 +1689,6 @@ public class Translator {
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] =  new IntegerFunctor(x*y);\n");
 					break; //nakajima 2003-01-05
 				case Instruction.IDIVFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)var[" +  inst.getIntArg2()  + "]).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)var[" +  inst.getIntArg3()  + "]).intValue();\n");
 					writer.write(tabs + "if (!(y == 0)) {\n");
@@ -1740,7 +1703,6 @@ public class Translator {
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] =  new IntegerFunctor(-x);\n");
 					break;
 				case Instruction.IMODFUNC : //[-dstintfunc, intfunc1, intfunc2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)var[" +  inst.getIntArg2()  + "]).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)var[" +  inst.getIntArg3()  + "]).intValue();\n");
 					writer.write(tabs + "if (!(y == 0)) {\n");
@@ -1787,7 +1749,6 @@ public class Translator {
 					//====整数用の組み込みボディ命令====ここまで====
 					//====整数用の組み込みガード命令====ここから====
 				case Instruction.ILT : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(!(x < y))) {\n");
@@ -1795,7 +1756,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.ILE : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(!(x <= y))) {\n");
@@ -1803,7 +1763,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.IGT : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(!(x > y))) {\n");
@@ -1811,7 +1770,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.IGE : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(!(x >= y))) {\n");
@@ -1819,7 +1777,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.IEQ : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(!(x == y))) {\n");
@@ -1827,7 +1784,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.INE : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(!(x != y))) {\n");
@@ -1835,7 +1791,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.ILTFUNC : //[intfunc1, intfunc2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)var[" +  inst.getIntArg1()  + "]).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)var[" +  inst.getIntArg2()  + "]).intValue();\n");
 					writer.write(tabs + "if (!(!(x < y))) {\n");
@@ -1843,7 +1798,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.ILEFUNC : //[intfunc1, intfunc2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)var[" +  inst.getIntArg1()  + "]).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)var[" +  inst.getIntArg2()  + "]).intValue();\n");
 					writer.write(tabs + "if (!(!(x <= y))) {\n");
@@ -1851,7 +1805,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.IGTFUNC : //[intfunc1, intfunc2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)var[" +  inst.getIntArg1()  + "]).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)var[" +  inst.getIntArg2()  + "]).intValue();\n");
 					writer.write(tabs + "if (!(!(x > y))) {\n");
@@ -1859,7 +1812,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.IGEFUNC : //[intfunc1, intfunc2]
-					ejector.close();
 					writer.write(tabs + "x = ((IntegerFunctor)var[" +  inst.getIntArg1()  + "]).intValue();\n");
 					writer.write(tabs + "y = ((IntegerFunctor)var[" +  inst.getIntArg2()  + "]).intValue();\n");
 					writer.write(tabs + "if (!(!(x >= y))) {\n");
@@ -1923,7 +1875,6 @@ public class Translator {
 					//====浮動小数点数用の組み込みボディ命令====ここまで====
 					//====浮動小数点数用の組み込みガード命令====ここから====	
 				case Instruction.FLT : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "u = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(!(u < v))) {\n");
@@ -1931,7 +1882,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.FLE : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "u = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(!(u <= v))) {\n");
@@ -1939,7 +1889,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.FGT : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "u = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(!(u > v))) {\n");
@@ -1947,7 +1896,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.FGE : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "u = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(!(u >= v))) {\n");
@@ -1955,7 +1903,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.FEQ : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "u = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(!(u == v))) {\n");
@@ -1963,7 +1910,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.FNE : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "u = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg1()  + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(!(u != v))) {\n");
@@ -1971,7 +1917,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // n-kato
 				case Instruction.FLTFUNC : //[floatfunc1, floatfunc2]
-					ejector.close();
 					writer.write(tabs + "u = ((FloatingFunctor)var[" +  inst.getIntArg1()  + "]).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)var[" +  inst.getIntArg2()  + "]).floatValue();\n");
 					writer.write(tabs + "if (!(!(u < v))) {\n");
@@ -1989,7 +1934,6 @@ public class Translator {
 					writer.write(tabs + "if (!(u > v)) return false;		\n");
 					break; //nakajima 2003-01-23
 				case Instruction.FGEFUNC : //[floatfunc1, floatfunc2]
-					ejector.close();
 					writer.write(tabs + "u = ((FloatingFunctor)var[" +  inst.getIntArg1()  + "]).floatValue();\n");
 					writer.write(tabs + "v = ((FloatingFunctor)var[" +  inst.getIntArg2()  + "]).floatValue();\n");
 					writer.write(tabs + "if (!(!(u >= v))) {\n");
@@ -2014,7 +1958,6 @@ public class Translator {
 					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigIntegerFunctor(bx.multiply(by)));	\n");
 					break; //inui 2006-07-03
 				case Instruction.BIDIV : //[-dstintatom, intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "if (!(by.equals(BigInteger.ZERO))) {\n");
@@ -2028,7 +1971,6 @@ public class Translator {
 					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new Atom(null, new BigIntegerFunctor(bx.negate()));				\n");
 					break;
 				case Instruction.BIMOD : //[-dstintatom, intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg3() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "if (!(by.equals(BigInteger.ZERO))) {\n");
@@ -2040,7 +1982,6 @@ public class Translator {
 					//====多倍長整数用の組み込みボディ命令====ここまで====
 					//====多倍長整数用の組み込みガード命令====ここから====
 				case Instruction.BILT : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(bx.compareTo(by) >= 0)) {\n");
@@ -2048,7 +1989,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BILE : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(bx.compareTo(by) > 0)) {\n");
@@ -2056,7 +1996,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BIGT : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(bx.compareTo(by) <= 0)) {\n");
@@ -2064,7 +2003,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BIGE : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(bx.compareTo(by) < 0)) {\n");
@@ -2072,7 +2010,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BIEQ : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(bx.compareTo(by) != 0)) {\n");
@@ -2080,7 +2017,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BINE : //[intatom1, intatom2]
-					ejector.close();
 					writer.write(tabs + "bx = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).intValue();\n");
 					writer.write(tabs + "by = ((BigIntegerFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).intValue();	\n");
 					writer.write(tabs + "if (!(bx.compareTo(by) == 0)) {\n");
@@ -2116,7 +2052,6 @@ public class Translator {
 					//====多倍長浮動小数点数用の組み込みボディ命令====ここまで====
 					//====多倍長浮動小数点数用の組み込みガード命令====ここから====	
 				case Instruction.BFLT : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(bu.compareTo(bv) >= 0)) {\n");
@@ -2124,7 +2059,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BFLE : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(bu.compareTo(bv) > 0)) {\n");
@@ -2132,7 +2066,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BFGT : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(bu.compareTo(bv) < 0)) {\n");
@@ -2140,7 +2073,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BFGE : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(bu.compareTo(bv) < 0)) {\n");
@@ -2148,7 +2080,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BFEQ : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(bu.compareTo(bv) != 0)) {\n");
@@ -2156,7 +2087,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; // inui 2006-07-03
 				case Instruction.BFNE : //[floatatom1, floatatom2]
-					ejector.close();
 					writer.write(tabs + "bu = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).floatValue();\n");
 					writer.write(tabs + "bv = ((BigFloatingFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).floatValue();	\n");
 					writer.write(tabs + "if (!(bu.compareTo(bv) == 0)) {\n");
@@ -2246,7 +2176,6 @@ public class Translator {
 					writer.write(tabs + "	ret = true;\n");
 					writer.write(tabs + "	break " + breakLabel + ";\n");
 					writer.write(tabs + "}\n");
-					ejector.close();
 					return;// false;
 				case Instruction.SPEC://[formals,locals]
 					break;//n-kato
@@ -2267,7 +2196,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //nakajima, n-kato
 				case Instruction.LOOP :
-					ejector.close();
 //					label = (InstructionList)inst.getArg1();
 					List list = (List)((List)inst.getArg1()).get(0);
 					writer.write(tabs + "while (true) {\n");
@@ -2281,7 +2209,6 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //nakajima, n-kato
 				case Instruction.NOT :
-					ejector.close();
 					label = (InstructionList)inst.getArg1();
 					writer.write(label.label + ":\n");
 					writer.write(tabs + "{\n");
@@ -2301,7 +2228,6 @@ public class Translator {
 					break;
 				case Instruction.UNIQ:
 				case Instruction.NOT_UNIQ:
-					ejector.close();
 					//Uniqオブジェクト取得
  					String uniq;
 					if (uniqVarName.containsKey(rule)) {
@@ -2330,7 +2256,6 @@ public class Translator {
 					Env.e("Unsupported Instruction : " + inst);
 			}
 		}
-		ejector.close();
 	}
 	private int nextFuncVarNum = 0;
 	private String getFuncVarName(Functor func) {
@@ -2395,6 +2320,33 @@ public class Translator {
 			if (!fFirst)
 				writer.write(",");
 			writer.write("nondeterministic");
+		}
+	}
+	
+	public class TranslatorWriter extends BufferedWriter{
+		private Ejector ejector_;
+		
+		public TranslatorWriter(Writer out){
+			super(out);
+		}
+		public TranslatorWriter(Writer out, int sz){
+			super(out, sz);
+		}
+		
+		public void setEjector(Ejector ejector){
+			ejector_ = ejector;
+		}
+
+		public void write(String str)
+			throws IOException
+		{
+			if(null != ejector_){ ejector_.close(writer); }
+			super.write(str);
+		}
+		public void superWrite(String str)
+		throws IOException
+		{
+			super.write(str);
 		}
 	}
 }

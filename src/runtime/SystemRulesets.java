@@ -3,6 +3,8 @@ package runtime;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import runtime.systemRuleset.GlobalSystemRuleset;
+
 /**
  * システムルールセットを管理する static クラス
  * @author Mizuno
