@@ -44,7 +44,7 @@ public class Optimizer {
 	 * 最適化レベルを設定する。
 	 * レベルに応じて最適化フラグをオンにする。
 	 * 低いレベルを指定しても、すでにオンにしてあるフラグをオフにすることはない。
-	 * Optimizer2 にはまだ対応していない。
+	 * 新しい最適化を実装する際には、フラグをフィールドに定義して、ここでオン・オフを行う。
 	 * @param level 最適化レベル
 	 */
 	public static void setLevel(int level) {
@@ -64,7 +64,11 @@ public class Optimizer {
 		}
 	}
 
-	/** ルールオブジェクトを最適化する */
+	/** ルールオブジェクトを最適化する
+	 * 命令列に対する最適化機能を追加する時は、ここを最適化メソッドの呼び出し元にするといい。
+	 * 
+	 *  @param rule ルールオブジェクト 
+	 */
 	public static void optimizeRule(Rule rule) {
 		// TODO 最適化器を統合する
 		Compactor.compactRule(rule);
@@ -79,10 +83,12 @@ public class Optimizer {
 		}
 		optimize(rule.memMatch, rule.body);
 		if(fGrouping) {
-			Optimizer2.grouping(rule.atomMatch, rule.memMatch);
+			Grouping g = new Grouping();
+			g.grouping(rule.atomMatch, rule.memMatch);
 		} 
 		if(fGuardMove) {
-			Optimizer2.guardMove(rule.atomMatch, rule.memMatch);
+			guardMove(rule.atomMatch);
+			guardMove(rule.memMatch);
 		} 
 		if (fInlining) {
 			// head(+guard) と body をくっつける
@@ -119,6 +125,7 @@ public class Optimizer {
 	// TODO spec命令の身分を考える
 	
 	/** 命令列の末尾のjump命令をインライン展開する。
+	 * @param insts 命令列
 	 * <pre>
 	 *     [ spec[X,Y];  C;jump[L,A1..Am] ] where L:[spec[m,m+n];D]
 	 * ==> [ spec[X,Y+n];C; D{ 1..m->A1..Am, m+1..m+n->Y+1..Y+n } ]
@@ -140,7 +147,11 @@ public class Optimizer {
 		locals = inlineExpandTailJump(insts, locals);
 		spec.updateSpec(formals, locals);
 	}
-	/** 命令列の末尾のjump命令をインライン展開する。specはまだ更新されない。*/
+	/** 命令列の末尾のjump命令をインライン展開する。specはまだ更新されない。
+	 *  @param insts 命令列
+	 *  @param varcount 展開前の実引数
+	 *  @return 展開後の実引数
+	 *  */
 	public static int inlineExpandTailJump(List insts, int varcount) {
 		if (insts.isEmpty()) return varcount;
 		int size = insts.size();
@@ -176,6 +187,65 @@ public class Optimizer {
 		return varcount;
 	}
 	
+	//sakurai
+	/** 
+	 * ガード命令を可能な限り前に移動させる.
+	 * ボディ命令は並び替えない
+	 * @param insts 命令列(headとguardをくっつけたもの)
+	 */
+	public static void guardMove(List insts){
+		for(int i=1; i<insts.size(); i++){
+			boolean moveok = true; //移動可能判定フラグ
+			Instruction inst = (Instruction)insts.get(i);
+			ArrayList list = inst.getVarArgs();
+			
+			switch(inst.getKind()){
+			//ボディ命令列は並び替えない -> ボディの先頭はcommit
+			case Instruction.COMMIT:
+				break;
+			//否定条件は放置(位置を変えない)
+			//todo どうするか考える
+			case Instruction.NOT:
+				continue;
+			//位置を変えたくない命令。他にあればここに追加する。
+			case Instruction.FINDATOM:
+			case Instruction.ANYMEM:
+			case Instruction.PROCEED:
+			case Instruction.JUMP:
+			case Instruction.UNIQ:
+			case Instruction.NOT_UNIQ:
+			case Instruction.GUARD_INLINE:
+				continue;
+		    //引数に命令列を持つ命令
+			case Instruction.GROUP:
+			case Instruction.BRANCH:
+				InstructionList subinsts = (InstructionList)inst.getArg1();
+				guardMove(subinsts.insts);
+				break;
+			//上に該当しない命令は、その引数の変数番号が定義された命令より前にならない限り、
+		    //前に動かせる。
+			default:
+				for(int i2=i-1; i2>0; i2--){
+					Instruction inst2 = (Instruction)insts.get(i2);
+					ArrayList list2 = inst2.getVarArgs();
+					for(int j=0; j<list.size(); j++){
+						if((inst2.getOutputType() != -1
+							&& list.get(j).equals(inst2.getArg1()))
+							|| list2.contains(list.get(j))){
+								moveok = false;
+								break;
+							}
+					}
+					if(moveok){
+						insts.remove(i2+1);
+						insts.add(i2, inst);
+					}
+					else break; 
+				}
+			}
+		}			
+	}
+	
 	// n-kato
 
 	///////////////////////////////////////////////////////
@@ -185,7 +255,8 @@ public class Optimizer {
 	 * 膜の再利用を行うコードを生成する。<br>
 	 * 命令列中には、1引数のremovemem命令が現れていてはいけない。
 	 * 命令列の最後はproceed命令でなければならない。
-	 * @param list ボディ命令列
+	 * @param head ヘッド命令列
+	 * @param body ボディ命令列
 	 */
 	private static void reuseMem(List head, List body) {
 		Instruction spec = (Instruction)body.get(0);
