@@ -45,7 +45,7 @@ class AcceptThread extends Thread {
 	public void run() {
 		try {
 			Socket soc = ss.accept();
-			AbstractMembrane mem = ssAtom.getMem();
+			Membrane mem = ssAtom.getMem();
 			mem.asyncLock();
 			Atom dot = ssAtom.nthAtom(1);
 			Atom acceptingAtom = dot.nthAtom(0);
@@ -102,7 +102,7 @@ L:
 					}
 					Thread.sleep(50);
 				}
-				AbstractMembrane mem = me.getMem();
+				Membrane mem = me.getMem();
 				mem.asyncLock();
 				Atom socAtom = me.nthAtom(0);
 				Atom dataAtom = mem.newAtom(new StringFunctor(data));
@@ -112,7 +112,7 @@ L:
 				mem.newLink(dot, 1, socAtom, 1);
 				mem.asyncUnlock();
 			}
-			AbstractMembrane mem = me.getMem();
+			Membrane mem = me.getMem();
 			mem.asyncLock();
 			Atom socAtom = me.nthAtom(0);
 			Atom nil = mem.newAtom(new Functor("[]", 1));

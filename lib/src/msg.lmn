@@ -57,8 +57,8 @@ import java.util.Map;
 
 class NetHolder {
 	static Net net;
-	static AbstractMembrane mem;
-	static void init(AbstractMembrane mem) {
+	static Membrane mem;
+	static void init(Membrane mem) {
 		if(NetHolder.net==null) {
 			NetHolder.net = new Net(50101, 100);
 			NetHolder.mem = mem;
@@ -67,7 +67,7 @@ class NetHolder {
 }
 class GenThread extends Thread {
 	public void run() {
-		AbstractMembrane mem = NetHolder.mem;
+		Membrane mem = NetHolder.mem;
 		try {
 			while(true) {
 				Packet p = NetHolder.net.recv();

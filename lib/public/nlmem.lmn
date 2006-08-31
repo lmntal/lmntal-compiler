@@ -99,11 +99,11 @@ R=nlmem.copy(M) :- R=nlmem.copy(M, copied).
   	}
   	else{
   		Atom isp = osp.nthAtom(0);
-  		AbstractMembrane origmem = isp.getMem();
+  		Membrane origmem = isp.getMem();
   		Functor copyTagF_unary = me.nthAtom(1).getFunctor();
   		Functor copyTagF = new Functor(copyTagF_unary.getName(),3);
   		origmem.recursiveLock();
-  		AbstractMembrane targmem = mem.newMem();
+  		Membrane targmem = mem.newMem();
   		Map origToTarg = targmem.copyCellsFrom(origmem);
   		Iterator it = origmem.atomIteratorOfFunctor(Functor.INSIDE_PROXY);
   		while(it.hasNext()){
@@ -152,7 +152,7 @@ nlmem.kill({$p,@p}), :- nlmem.kill({$p,@p}, killed).
   	}
   	else{
   		Atom isp = osp.nthAtom(0);
-  		AbstractMembrane origmem = isp.getMem();
+  		Membrane origmem = isp.getMem();
   		origmem.recursiveLock();
   		Functor killTagF = me.nthAtom(1).getFunctor();
   		Iterator it = origmem.atomIteratorOfFunctor(Functor.INSIDE_PROXY);
@@ -183,7 +183,7 @@ R=nlmem.count_freelinks(M) :-
     }
     else{
       Atom isp = osp.nthAtom(0);
-      AbstractMembrane m = isp.getMem();
+      Membrane m = isp.getMem();
       int isps = m.getFreeLinkCount();
       Atom counted = mem.newAtom(new Functor("counted",3));
       Atom ans = mem.newAtom(new IntegerFunctor(isps));
@@ -207,7 +207,7 @@ R=nlmem.collect_freelinks(M) :-
     else{
       Atom isp = osp.nthAtom(0);
 
-      AbstractMembrane m = isp.getMem();
+      Membrane m = isp.getMem();
       
       Atom nilo = mem.newAtom(new Functor("[]",1));
       Atom firstconso = mem.newAtom(new Functor(".",3));
