@@ -75,8 +75,8 @@ public class Compactor {
 				insts.remove(i);
 				insts.add(i,     new Instruction(Instruction.ALLOCLINK,
 								varcount, inst.getIntArg1(), inst.getIntArg2() ));
-//060831okabe				insts.add(i + 1, new Instruction(Instruction.UNIFYLINKS,
-//								varcount, inst.getIntArg3() ));
+				insts.add(i + 1, new Instruction(Instruction.UNIFYLINKS,
+							varcount, inst.getIntArg3() ));
 				if (inst.data.size() == 4) ((Instruction)insts.get(i + 1)).data.add(inst.getArg4());
 				varcount += 1;
 				size += 1;
@@ -91,8 +91,8 @@ public class Compactor {
 								varcount, inst.getIntArg1(), inst.getIntArg2() ));
 				insts.add(i + 1, new Instruction(Instruction.GETLINK,
 								varcount + 1, inst.getIntArg3(), inst.getIntArg4() ));
-//060831okabe				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
-//								varcount, varcount + 1 ));
+				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
+								varcount, varcount + 1 ));
 				if (inst.data.size() == 5) ((Instruction)insts.get(i + 2)).data.add(inst.getArg5());
 				varcount += 2;
 				size += 2;
@@ -107,8 +107,8 @@ public class Compactor {
 								varcount, inst.getIntArg1(), inst.getIntArg2() ));
 				insts.add(i + 1, new Instruction(Instruction.ALLOCLINK,
 								varcount + 1, inst.getIntArg3(), inst.getIntArg4() ));
-//060831okabe				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
-//								varcount, varcount + 1 ));
+				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
+								varcount, varcount + 1 ));
 				if (inst.data.size() == 5) ((Instruction)insts.get(i + 2)).data.add(inst.getArg5());
 				varcount += 2;
 				size += 2;
@@ -123,8 +123,8 @@ public class Compactor {
 								varcount, inst.getIntArg1(), inst.getIntArg2() ));
 				insts.add(i + 1, new Instruction(Instruction.GETLINK,
 								varcount + 1, inst.getIntArg3(), inst.getIntArg4() ));
-//060831okabe				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
-//								varcount, varcount + 1 ));
+				insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS,
+								varcount, varcount + 1 ));
 				if (inst.data.size() == 5) ((Instruction)insts.get(i + 2)).data.add(inst.getArg5());
 				varcount += 2;
 				size += 2;
