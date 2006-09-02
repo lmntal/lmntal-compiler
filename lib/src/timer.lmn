@@ -22,7 +22,7 @@ module(timer).
 			
 	timer:subtract(Time1,Time2,Res) :- class(Time1,"java.lang.Long"), class(Time2,"java.lang.Long") |
 		[:/*inline*/
-			AbstractMembrane mem1 = me.getMem();
+			Membrane mem1 = me.getMem();
 			mem1.removeAtom(me);
 			mem1.removeAtom(me.getArg(0).getAtom());
 			mem1.removeAtom(me.getArg(1).getAtom());
