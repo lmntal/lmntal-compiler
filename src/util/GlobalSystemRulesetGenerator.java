@@ -11,6 +11,7 @@ import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.InterpretedRuleset;
 import runtime.Rule;
+import runtime.SymbolFunctor;
 
 import compile.Translator;
 
@@ -163,7 +164,7 @@ public final class GlobalSystemRulesetGenerator {
 		List insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,5));
-		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,3)));
+		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new SymbolFunctor(name,3)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(typechecker,             2));
 		insts.add(new Instruction(Instruction.DEREFATOM, 3,1,1));
@@ -196,7 +197,7 @@ public final class GlobalSystemRulesetGenerator {
 		Rule rule = new Rule();
 		List insts = rule.memMatch;
 		insts.add(new Instruction(Instruction.SPEC,      1, 0));
-		insts.add(new Instruction(Instruction.FINDATOM,  1, 0, new Functor("+",2)));
+		insts.add(new Instruction(Instruction.FINDATOM,  1, 0, new SymbolFunctor("+",2)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 0));
 		insts.add(new Instruction(Instruction.ISINT,     2));
 		insts.add(new Instruction(Instruction.GETFUNC,   3, 2));
@@ -216,7 +217,7 @@ public final class GlobalSystemRulesetGenerator {
 		List insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,5));
-		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,2)));
+		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new SymbolFunctor(name,2)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(typechecker,             2));
 		insts.add(new Instruction(Instruction.GETFUNC,   4,2));
@@ -255,7 +256,7 @@ public final class GlobalSystemRulesetGenerator {
 		List insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,4));
-		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor(name,2)));
+		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new SymbolFunctor(name,2)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 		insts.add(new Instruction(typechecker,             2));
 		insts.add(new Instruction(op,                    3,2));
@@ -310,7 +311,7 @@ public final class GlobalSystemRulesetGenerator {
 //		insts = rule.memMatch;
 //		// match		
 //		insts.add(new Instruction(Instruction.SPEC,        1,4));
-//		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new Functor("cp",3)));
+//		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new SymbolFunctor("cp",3)));
 //		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
 //		insts.add(new Instruction(Instruction.ISUNARY,     2));
 //		// react

@@ -30,7 +30,7 @@ H=if(false, Te, Fe) :- ground(Te), ground(Fe) | H=Fe.
 H=ground_neq(G0, G1) :- H=[:/*inline*/
 	boolean r = me.getArg(0).eqGround(me.getArg(1));
 //	System.out.println("RESULT : "+r);
-	Atom result = mem.newAtom(new Functor(!r ? "true" : "false", 1));
+	Atom result = mem.newAtom(new SymbolFunctor(!r ? "true" : "false", 1));
 	mem.relink(result, 0, me, 2);
 	me.nthAtom(0).remove();
 	me.nthAtom(1).remove();

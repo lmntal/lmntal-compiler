@@ -9,14 +9,15 @@ import java.util.Iterator;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 public class StringObj extends GraphicObj{
 
 	final static
-	private Functor GETPIC_ATOM = new Functor("getpic", 1);
+	private Functor GETPIC_ATOM = new SymbolFunctor("getpic", 1);
 
 	final static
-	private Functor STRING_ATOM = new Functor("string", 3);
+	private Functor STRING_ATOM = new SymbolFunctor("string", 3);
 	
 	final static
 	private int DEFAULT_SIZE = 15;

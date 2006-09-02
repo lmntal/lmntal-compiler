@@ -101,7 +101,7 @@ R=nlmem.copy(M) :- R=nlmem.copy(M, copied).
   		Atom isp = osp.nthAtom(0);
   		Membrane origmem = isp.getMem();
   		Functor copyTagF_unary = me.nthAtom(1).getFunctor();
-  		Functor copyTagF = new Functor(copyTagF_unary.getName(),3);
+  		Functor copyTagF = new SymbolFunctor(copyTagF_unary.getName(),3);
   		origmem.recursiveLock();
   		Membrane targmem = mem.newMem();
   		Map origToTarg = targmem.copyCellsFrom(origmem);
@@ -185,7 +185,7 @@ R=nlmem.count_freelinks(M) :-
       Atom isp = osp.nthAtom(0);
       Membrane m = isp.getMem();
       int isps = m.getFreeLinkCount();
-      Atom counted = mem.newAtom(new Functor("counted",3));
+      Atom counted = mem.newAtom(new SymbolFunctor("counted",3));
       Atom ans = mem.newAtom(new IntegerFunctor(isps));
       mem.newLink(counted,0,ans,0);
       mem.relink(counted,1,me,0);
@@ -209,14 +209,14 @@ R=nlmem.collect_freelinks(M) :-
 
       Membrane m = isp.getMem();
       
-      Atom nilo = mem.newAtom(new Functor("[]",1));
-      Atom firstconso = mem.newAtom(new Functor(".",3));
+      Atom nilo = mem.newAtom(new SymbolFunctor("[]",1));
+      Atom firstconso = mem.newAtom(new SymbolFunctor(".",3));
       mem.newLink(nilo,0,firstconso,1);
-      Atom nil = mem.newAtom(new Functor("nil",1));
+      Atom nil = mem.newAtom(new SymbolFunctor("nil",1));
       mem.newLink(nil,0,firstconso,0);
 
-      Atom nili = mem.newAtom(new Functor("[]",1));
-      Atom firstconsi = mem.newAtom(new Functor(".",3));
+      Atom nili = mem.newAtom(new SymbolFunctor("[]",1));
+      Atom firstconsi = mem.newAtom(new SymbolFunctor(".",3));
       mem.newLink(nili,0,firstconsi,1);
       mem.relink(firstconsi,0,me,0);
       
@@ -226,19 +226,19 @@ R=nlmem.collect_freelinks(M) :-
         if(i==isp)continue;
         Atom o = i.nthAtom(0);
         
-        Atom newconso = mem.newAtom(new Functor(".",3));
+        Atom newconso = mem.newAtom(new SymbolFunctor(".",3));
         Link outer = o.getArg(1);
         mem.relink(newconso,0,o,1);
         mem.relink(newconso,1,firstconso,1);
         mem.newLink(newconso,2,firstconso,1);
         
-        Atom newconsi = mem.newAtom(new Functor(".",3));
+        Atom newconsi = mem.newAtom(new SymbolFunctor(".",3));
         mem.newLink(newconsi,0,o,1);
         mem.relink(newconsi,1,firstconsi,1);
         mem.newLink(newconsi,2,firstconsi,1);
       }
       
-      Atom collected = mem.newAtom(new Functor("collected",3));
+      Atom collected = mem.newAtom(new SymbolFunctor("collected",3));
       mem.newLink(firstconsi,2,collected,0);
       mem.newLink(firstconso,2,collected,1);
       mem.relink(collected,2,me,1);

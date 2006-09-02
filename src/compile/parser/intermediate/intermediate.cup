@@ -117,9 +117,9 @@ Arg				::=	  NUMBER:num
 					| LABEL:label
 						{: RESULT = new LabelRef(label); :};
 Functor			::=	  SQUOTED_STRING:name UNDERBAR NUMBER:arity
-						{: RESULT = new Functor(name, arity.intValue()); :}
+						{: RESULT = new SymbolFunctor(name, arity.intValue()); :}
 					| SQUOTED_STRING:path DOT SQUOTED_STRING:name UNDERBAR NUMBER:arity
-						{: RESULT = new Functor(name, arity.intValue(), path); :}
+						{: RESULT = new SymbolFunctor(name, arity.intValue(), path); :}
 					| NUMBER:v UNDERBAR NUMBER:arity
 						{: /*assert(arity.intValue()==1);*/ RESULT = new IntegerFunctor(v.intValue()); :}
 					| FLOAT:v UNDERBAR NUMBER:arity

@@ -463,9 +463,9 @@ public class Task implements Runnable {
 	// non deterministic LMNtal
 
 	public static HashSet states = new HashSet();
-	private static final Functor FROM = new Functor("from", 1);
-	private static final Functor TO = new Functor("to", 1);
-	private static final Functor FUNCTOR_REDUCE = new Functor("reduce", 3);
+	private static final Functor FROM = new SymbolFunctor("from", 1);
+	private static final Functor TO = new SymbolFunctor("to", 1);
+	private static final Functor FUNCTOR_REDUCE = new SymbolFunctor("reduce", 3);
 	/** 
 	 * 指定された膜に関するリダクショングラフを生成する。
 	 * 結果は、指定された膜の親膜の親膜に生成される。

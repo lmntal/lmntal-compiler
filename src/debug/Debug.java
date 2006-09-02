@@ -30,6 +30,7 @@ import runtime.Rule;
 
 /**
  * LMNtalデバッガ
+ * コマンドラインデバッガと，eclipse のデバッガの両方の機能が含まれる．
  * @author inui
  */
 public class Debug {
@@ -105,7 +106,7 @@ public class Debug {
 	/**
 	 * 少なくとも最初に1回実行する
 	 */
-	public static void init() {		
+	public static void init() {
 		lastLineno = 1;
 		
 		try {
@@ -216,6 +217,10 @@ public class Debug {
 		return breakPoints.iterator();
 	}
 	
+	/**
+	 * 現在ブレークしている行番号を取得する
+	 * @return 現在ブレークしている行番号
+	 */
 	public static int getCurrentRuleLineno() {
 		if (currentLineNumber == 0) return -1;
 		return currentLineNumber;
@@ -229,6 +234,10 @@ public class Debug {
 		Debug.unitName = unitName;
 	}
 
+	/**
+	 * 現在ブレークしているルールのテストの種類
+	 * @return 膜主導テスト (MEMBRANE_TEST) かアトム主導テスト (ATOM_TEST) 
+	 */
 	public static int getTestType() {
 		return testType;
 	}
@@ -241,12 +250,16 @@ public class Debug {
 		return rules.iterator();
 	}
 	
+	/**
+	 * 実行しているファイル名を返す
+	 * @return ファイル名
+	 */
 	public static String getUnitName() {
 		return unitName;
 	}
 	
 	/**
-	 * プログラムリストを表示します
+	 * プログラムを表示します
 	 */
 	public static void showList() {
 		int i;
@@ -257,7 +270,8 @@ public class Debug {
 	}
 
 	/**
-	 * コマンド受付
+	 * 標準入力からコマンドを受け付ける．
+	 * eclipse から起動しているときはソケット通信する．
 	 */
 	public static void inputCommand() {
 		if (isRunning) {
@@ -411,16 +425,5 @@ public class Debug {
 		System.out.println("run -- Start debugged program");					
 		//System.out.println("frame -- Select and print a stack frame");
 		System.out.println("quit -- Exit ldb");
-	}
-	
-	///////////////////////////////////////////////////
-	//DebugFramegが使用
-	
-	public static void step() {
-		isStepping = true;
-	}
-	
-	public static void doContinue() {
-		isStepping = false;
 	}
 }

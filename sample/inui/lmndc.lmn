@@ -1,11 +1,11 @@
 /*
- * LMNtal dc by inui
+ * LMNtal bc by inui
  * 
- * 逆ポーランド記法の電卓
+ * 電卓
  * 
  * History
  *
- * 2006.07.04
+ * 2006.07.06
  */
 lexer.use.
 
@@ -22,3 +22,12 @@ val('/'), stack=[A,B|Stack] :- C=A/B | stack=[C|Stack], val=lexer.next().
 
 //入力終了
 val(eof), stack=[A|Stack] :- ground(Stack) | ans(A), lexer.delete.
+
+{
+module(stack).
+
+H=stack.new :- H=[].
+H=stack.push(Stack, Object) :- H=[Object|Stack].
+H=stack.pop([Car|Cdr], Object) :- H=Cdr, Object=Car.
+H=stack.peek([Car|Cdr], Object) :- ground(Car) | H=[Car|Cdr], Object=Car.
+}.

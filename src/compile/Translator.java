@@ -39,6 +39,7 @@ import runtime.InterpretedRuleset;
 import runtime.ObjectFunctor;
 import runtime.Rule;
 import runtime.StringFunctor;
+import runtime.SymbolFunctor;
 import runtime.SystemRulesets;
 import util.Util;
 
@@ -800,7 +801,7 @@ public class Translator {
 				if (func.getPath() != null) {
 					path = Util.quoteString(func.getPath(), '"');
 				}
-				writer.write(" = new Functor(" + Util.quoteString(func.getName(), '"') + ", " + func.getArity() + ", " + path + ");\n");
+				writer.write(" = new SymbolFunctor(" + Util.quoteString(func.getName(), '"') + ", " + func.getArity() + ", " + path + ");\n");
 			}
 		}
 		writer.write("	}\n");
@@ -1389,7 +1390,7 @@ public class Translator {
 //未対応。変数は、配列に持たなければならなかったらしい。
 //対応。二番目の引数は実行時ではなくコンパイル時に参照するみたい。 って自分で作った命令なんだけど。 by kudo
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
-					writer.write(tabs + "func = "+ getFuncVarName(new Functor("=",2))+";\n");
+					writer.write(tabs + "func = "+ getFuncVarName(new SymbolFunctor("=",2))+";\n");
 					List linklist = (List)inst.getArg2();
 					writer.write(tabs + "insset = new HashSet();\n");
 					writer.write(tabs + "mem = ((Membrane)var[" +  inst.getIntArg3()  + "]);\n");

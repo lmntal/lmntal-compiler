@@ -1,17 +1,29 @@
 package compile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
 import runtime.Env;
-import runtime.Instruction;
-//import runtime.InstructionList;
 import runtime.Functor;
-import compile.structure.*;
+import runtime.Instruction;
+import runtime.SymbolFunctor;
+
+import compile.structure.Atom;
+import compile.structure.ContextDef;
+import compile.structure.LinkOccurrence;
+import compile.structure.Membrane;
+import compile.structure.ProcessContext;
 
 public class GuardCompiler extends HeadCompiler {
 	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
 //	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
-	static final Functor classFunctor = new Functor("class", 2); //2006.07.01 inui
 
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
 	HashMap typedcxtdatatypes = new HashMap();
@@ -64,71 +76,71 @@ public class GuardCompiler extends HeadCompiler {
 		
 		//2006.07.03 static 領域からここに移動して多倍長用のガードを追加
 		if (Env.useBigInteger) {
-			guardLibrary2.put(new Functor("<.",   2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFLT});
-			guardLibrary2.put(new Functor("=<.",  2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFLE});
-			guardLibrary2.put(new Functor(">.",   2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFGT});
-			guardLibrary2.put(new Functor(">=.",  2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFGE});
-			guardLibrary2.put(new Functor("<",    2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BILT});
-			guardLibrary2.put(new Functor("=<",   2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BILE});
-			guardLibrary2.put(new Functor(">",    2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIGT});
-			guardLibrary2.put(new Functor(">=",   2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIGE});
-			guardLibrary2.put(new Functor("=:=",  2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIEQ});
-			guardLibrary2.put(new Functor("=\\=", 2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BINE});
-			guardLibrary2.put(new Functor("=:=.", 2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFEQ});
-			guardLibrary2.put(new Functor("=\\=.",2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFNE});
-			guardLibrary2.put(new Functor("+.",   3), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFADD, ISBIGFLOAT});
-			guardLibrary2.put(new Functor("-.",   3), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFSUB, ISBIGFLOAT});
-			guardLibrary2.put(new Functor("*.",   3), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFMUL, ISBIGFLOAT});
-			guardLibrary2.put(new Functor("/.",   3), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFDIV, ISBIGFLOAT});
-			guardLibrary2.put(new Functor("+",    3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIADD, ISBIGINT});
-			guardLibrary2.put(new Functor("-",    3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BISUB, ISBIGINT});
-			guardLibrary2.put(new Functor("*",    3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIMUL, ISBIGINT});
-			guardLibrary2.put(new Functor("/",    3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIDIV, ISBIGINT});
-			guardLibrary2.put(new Functor("mod",  3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIMOD, ISBIGINT});
-			guardLibrary1.put(new Functor("int",   1), new int[]{ISBIGINT});
-			guardLibrary1.put(new Functor("float", 1), new int[]{ISBIGFLOAT});
-			guardLibrary1.put(new Functor("+",     2), new int[]{ISBIGINT,          -1,                    ISBIGINT});
-			guardLibrary1.put(new Functor("-",     2), new int[]{ISBIGINT,          Instruction.BINEG,      ISBIGINT});
-			guardLibrary1.put(new Functor("+.",    2), new int[]{ISBIGFLOAT,        -1,                    ISBIGFLOAT});
-			guardLibrary1.put(new Functor("-.",    2), new int[]{ISBIGFLOAT,        Instruction.BFNEG,      ISBIGFLOAT});
-			guardLibrary1.put(new Functor("float", 2), new int[]{ISBIGINT,          Instruction.BINT2BFLOAT, ISBIGFLOAT});
-			guardLibrary1.put(new Functor("int",   2), new int[]{ISBIGFLOAT,        Instruction.BFLOAT2BINT, ISBIGINT});
+			guardLibrary2.put(new SymbolFunctor("<.",   2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFLT});
+			guardLibrary2.put(new SymbolFunctor("=<.",  2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFLE});
+			guardLibrary2.put(new SymbolFunctor(">.",   2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFGT});
+			guardLibrary2.put(new SymbolFunctor(">=.",  2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFGE});
+			guardLibrary2.put(new SymbolFunctor("<",    2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BILT});
+			guardLibrary2.put(new SymbolFunctor("=<",   2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BILE});
+			guardLibrary2.put(new SymbolFunctor(">",    2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIGT});
+			guardLibrary2.put(new SymbolFunctor(">=",   2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIGE});
+			guardLibrary2.put(new SymbolFunctor("=:=",  2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIEQ});
+			guardLibrary2.put(new SymbolFunctor("=\\=", 2), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BINE});
+			guardLibrary2.put(new SymbolFunctor("=:=.", 2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFEQ});
+			guardLibrary2.put(new SymbolFunctor("=\\=.",2), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFNE});
+			guardLibrary2.put(new SymbolFunctor("+.",   3), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFADD, ISBIGFLOAT});
+			guardLibrary2.put(new SymbolFunctor("-.",   3), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFSUB, ISBIGFLOAT});
+			guardLibrary2.put(new SymbolFunctor("*.",   3), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFMUL, ISBIGFLOAT});
+			guardLibrary2.put(new SymbolFunctor("/.",   3), new int[]{ISBIGFLOAT,ISBIGFLOAT, Instruction.BFDIV, ISBIGFLOAT});
+			guardLibrary2.put(new SymbolFunctor("+",    3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIADD, ISBIGINT});
+			guardLibrary2.put(new SymbolFunctor("-",    3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BISUB, ISBIGINT});
+			guardLibrary2.put(new SymbolFunctor("*",    3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIMUL, ISBIGINT});
+			guardLibrary2.put(new SymbolFunctor("/",    3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIDIV, ISBIGINT});
+			guardLibrary2.put(new SymbolFunctor("mod",  3), new int[]{ISBIGINT,  ISBIGINT,   Instruction.BIMOD, ISBIGINT});
+			guardLibrary1.put(new SymbolFunctor("int",   1), new int[]{ISBIGINT});
+			guardLibrary1.put(new SymbolFunctor("float", 1), new int[]{ISBIGFLOAT});
+			guardLibrary1.put(new SymbolFunctor("+",     2), new int[]{ISBIGINT,          -1,                    ISBIGINT});
+			guardLibrary1.put(new SymbolFunctor("-",     2), new int[]{ISBIGINT,          Instruction.BINEG,      ISBIGINT});
+			guardLibrary1.put(new SymbolFunctor("+.",    2), new int[]{ISBIGFLOAT,        -1,                    ISBIGFLOAT});
+			guardLibrary1.put(new SymbolFunctor("-.",    2), new int[]{ISBIGFLOAT,        Instruction.BFNEG,      ISBIGFLOAT});
+			guardLibrary1.put(new SymbolFunctor("float", 2), new int[]{ISBIGINT,          Instruction.BINT2BFLOAT, ISBIGFLOAT});
+			guardLibrary1.put(new SymbolFunctor("int",   2), new int[]{ISBIGFLOAT,        Instruction.BFLOAT2BINT, ISBIGINT});
 		} else {
-			guardLibrary2.put(new Functor("<.",   2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLT});
-			guardLibrary2.put(new Functor("=<.",  2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLE});
-			guardLibrary2.put(new Functor(">.",   2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGT});
-			guardLibrary2.put(new Functor(">=.",  2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGE});
-			guardLibrary2.put(new Functor("<",    2), new int[]{ISINT,  ISINT,   Instruction.ILT});
-			guardLibrary2.put(new Functor("=<",   2), new int[]{ISINT,  ISINT,   Instruction.ILE});
-			guardLibrary2.put(new Functor(">",    2), new int[]{ISINT,  ISINT,   Instruction.IGT});
-			guardLibrary2.put(new Functor(">=",   2), new int[]{ISINT,  ISINT,   Instruction.IGE});
-			guardLibrary2.put(new Functor("=:=",  2), new int[]{ISINT,  ISINT,   Instruction.IEQ});
-			guardLibrary2.put(new Functor("=\\=", 2), new int[]{ISINT,  ISINT,   Instruction.INE});
-			guardLibrary2.put(new Functor("=:=.", 2), new int[]{ISFLOAT,ISFLOAT, Instruction.FEQ});
-			guardLibrary2.put(new Functor("=\\=.",2), new int[]{ISFLOAT,ISFLOAT, Instruction.FNE});
-			guardLibrary2.put(new Functor("+.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FADD, ISFLOAT});
-			guardLibrary2.put(new Functor("-.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FSUB, ISFLOAT});
-			guardLibrary2.put(new Functor("*.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FMUL, ISFLOAT});
-			guardLibrary2.put(new Functor("/.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FDIV, ISFLOAT});
-			guardLibrary2.put(new Functor("+",    3), new int[]{ISINT,  ISINT,   Instruction.IADD, ISINT});
-			guardLibrary2.put(new Functor("-",    3), new int[]{ISINT,  ISINT,   Instruction.ISUB, ISINT});
-			guardLibrary2.put(new Functor("*",    3), new int[]{ISINT,  ISINT,   Instruction.IMUL, ISINT});
-			guardLibrary2.put(new Functor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV, ISINT});
-			guardLibrary2.put(new Functor("mod",  3), new int[]{ISINT,  ISINT,   Instruction.IMOD, ISINT});	
-			guardLibrary1.put(new Functor("int",   1), new int[]{ISINT});
-			guardLibrary1.put(new Functor("float", 1), new int[]{ISFLOAT});
-			guardLibrary1.put(new Functor("+",     2), new int[]{ISINT,          -1,                    ISINT});
-			guardLibrary1.put(new Functor("-",     2), new int[]{ISINT,          Instruction.INEG,      ISINT});
-			guardLibrary1.put(new Functor("+.",    2), new int[]{ISFLOAT,        -1,                    ISFLOAT});
-			guardLibrary1.put(new Functor("-.",    2), new int[]{ISFLOAT,        Instruction.FNEG,      ISFLOAT});
-			guardLibrary1.put(new Functor("float", 2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
-			guardLibrary1.put(new Functor("int",   2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
+			guardLibrary2.put(new SymbolFunctor("<.",   2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLT});
+			guardLibrary2.put(new SymbolFunctor("=<.",  2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLE});
+			guardLibrary2.put(new SymbolFunctor(">.",   2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGT});
+			guardLibrary2.put(new SymbolFunctor(">=.",  2), new int[]{ISFLOAT,ISFLOAT, Instruction.FGE});
+			guardLibrary2.put(new SymbolFunctor("<",    2), new int[]{ISINT,  ISINT,   Instruction.ILT});
+			guardLibrary2.put(new SymbolFunctor("=<",   2), new int[]{ISINT,  ISINT,   Instruction.ILE});
+			guardLibrary2.put(new SymbolFunctor(">",    2), new int[]{ISINT,  ISINT,   Instruction.IGT});
+			guardLibrary2.put(new SymbolFunctor(">=",   2), new int[]{ISINT,  ISINT,   Instruction.IGE});
+			guardLibrary2.put(new SymbolFunctor("=:=",  2), new int[]{ISINT,  ISINT,   Instruction.IEQ});
+			guardLibrary2.put(new SymbolFunctor("=\\=", 2), new int[]{ISINT,  ISINT,   Instruction.INE});
+			guardLibrary2.put(new SymbolFunctor("=:=.", 2), new int[]{ISFLOAT,ISFLOAT, Instruction.FEQ});
+			guardLibrary2.put(new SymbolFunctor("=\\=.",2), new int[]{ISFLOAT,ISFLOAT, Instruction.FNE});
+			guardLibrary2.put(new SymbolFunctor("+.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FADD, ISFLOAT});
+			guardLibrary2.put(new SymbolFunctor("-.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FSUB, ISFLOAT});
+			guardLibrary2.put(new SymbolFunctor("*.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FMUL, ISFLOAT});
+			guardLibrary2.put(new SymbolFunctor("/.",   3), new int[]{ISFLOAT,ISFLOAT, Instruction.FDIV, ISFLOAT});
+			guardLibrary2.put(new SymbolFunctor("+",    3), new int[]{ISINT,  ISINT,   Instruction.IADD, ISINT});
+			guardLibrary2.put(new SymbolFunctor("-",    3), new int[]{ISINT,  ISINT,   Instruction.ISUB, ISINT});
+			guardLibrary2.put(new SymbolFunctor("*",    3), new int[]{ISINT,  ISINT,   Instruction.IMUL, ISINT});
+			guardLibrary2.put(new SymbolFunctor("/",    3), new int[]{ISINT,  ISINT,   Instruction.IDIV, ISINT});
+			guardLibrary2.put(new SymbolFunctor("mod",  3), new int[]{ISINT,  ISINT,   Instruction.IMOD, ISINT});	
+			guardLibrary1.put(new SymbolFunctor("int",   1), new int[]{ISINT});
+			guardLibrary1.put(new SymbolFunctor("float", 1), new int[]{ISFLOAT});
+			guardLibrary1.put(new SymbolFunctor("+",     2), new int[]{ISINT,          -1,                    ISINT});
+			guardLibrary1.put(new SymbolFunctor("-",     2), new int[]{ISINT,          Instruction.INEG,      ISINT});
+			guardLibrary1.put(new SymbolFunctor("+.",    2), new int[]{ISFLOAT,        -1,                    ISFLOAT});
+			guardLibrary1.put(new SymbolFunctor("-.",    2), new int[]{ISFLOAT,        Instruction.FNEG,      ISFLOAT});
+			guardLibrary1.put(new SymbolFunctor("float", 2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
+			guardLibrary1.put(new SymbolFunctor("int",   2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
 		}
 		
-		guardLibrary1.put(new Functor("string",1), new int[]{ISSTRING});
-//		guardLibrary2.put(new Functor("class",2), new int[]{0,      ISSTRING,Instruction.INSTANCEOF});
-//		guardLibrary1.put(new Functor("class", 2), new int[]{0,              Instruction.GETCLASS,  ISSTRING});
-		guardLibrary1.put(new Functor("connectRuntime",1), new int[]{ISSTRING, Instruction.CONNECTRUNTIME});
+		guardLibrary1.put(new SymbolFunctor("string",1), new int[]{ISSTRING});
+//		guardLibrary2.put(new SymbolFunctor("class",2), new int[]{0,      ISSTRING,Instruction.INSTANCEOF});
+//		guardLibrary1.put(new SymbolFunctor("class", 2), new int[]{0,              Instruction.GETCLASS,  ISSTRING});
+		guardLibrary1.put(new SymbolFunctor("connectRuntime",1), new int[]{ISSTRING, Instruction.CONNECTRUNTIME});
 	}
 
 	/** initNormalizedCompiler呼び出し後に呼ばれる。
@@ -268,12 +280,12 @@ public class GuardCompiler extends HeadCompiler {
 				if (func.getArity() > 1)  def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
 				if (func.getArity() > 2)  def3 = ((ProcessContext)cstr.args[2].buddy.atom).def;
 
-				if (func.equals(new Functor("unary", 1))) {
+				if (func.equals(new SymbolFunctor("unary", 1))) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					match.add(new Instruction(Instruction.ISUNARY, atomid1));
 				}
-				else if (func.equals(new Functor("ground", 1))){
+				else if (func.equals(new SymbolFunctor("ground", 1))){
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					checkGroundLink(def1);
 				}
@@ -351,7 +363,7 @@ public class GuardCompiler extends HeadCompiler {
 						match.add(new Instruction(Instruction.NOT_UNIQ, uniqVars));
 					}
 				}
-				else if (func.equals(new Functor("\\=",2))) {
+				else if (func.equals(new SymbolFunctor("\\=",2))) {
 					// NSAMEFUNC を作るか？
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
@@ -386,7 +398,7 @@ public class GuardCompiler extends HeadCompiler {
 					}
 				}
 				// (2006.07.06 n-kato)
-				else if (func.equals(new Functor("class", 2))) {
+				else if (func.equals(new SymbolFunctor("class", 2))) {
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
 					int atomid1 = loadUnaryAtom(def1);
@@ -440,7 +452,7 @@ public class GuardCompiler extends HeadCompiler {
 					}
 					processEquivalenceConstraint(def1,def2);
 				}
-				else if (func.equals(new Functor("==",2))) { // (+X == +Y)
+				else if (func.equals(new SymbolFunctor("==",2))) { // (+X == +Y)
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
 					processEquivalenceConstraint(def1,def2);
@@ -572,7 +584,7 @@ public class GuardCompiler extends HeadCompiler {
 		match.add(Instruction.fail());
 		for (int i = 0; i < cstr.functor.getArity(); i++) {
 			ContextDef def = ((ProcessContext)cstr.args[i].buddy.atom).def;
-			bindToFunctor(def,new Functor("*",1));
+			bindToFunctor(def,new SymbolFunctor("*",1));
 		}
 	}
 	/** 型付きプロセス文脈defを1引数ファンクタfuncで束縛する */

@@ -38,7 +38,7 @@ H= '>'(A,B) :- float(A),float(B) | H = [:/*inline*/
 		((FloatingFunctor)me.nthAtom(1).getFunctor()).floatValue();
 
 		Atom result = mem.newAtom(
-		new Functor((( a0 > a1 )?"true":"false"), 1)
+		new SymbolFunctor((( a0 > a1 )?"true":"false"), 1)
 		);
 		mem.relink(result, 0, me, 2);
 		me.nthAtom(0).remove();
@@ -63,7 +63,7 @@ H= '<'(A,B) :- float(A),float(B) | H = [:/*inline*/
 		((FloatingFunctor)me.nthAtom(1).getFunctor()).floatValue();
 
 		Atom result = mem.newAtom(
-		new Functor((( a0 < a1 )?"true":"false"), 1)
+		new SymbolFunctor((( a0 < a1 )?"true":"false"), 1)
 		);
 		mem.relink(result, 0, me, 2);
 		me.nthAtom(0).remove();
@@ -88,7 +88,7 @@ H= '=<'(A,B) :- float(A),float(B) | H = [:/*inline*/
 		((FloatingFunctor)me.nthAtom(1).getFunctor()).floatValue();
 
 		Atom result = mem.newAtom(
-		new Functor((( a0 <= a1 )?"true":"false"), 1)
+		new SymbolFunctor((( a0 <= a1 )?"true":"false"), 1)
 		);
 		mem.relink(result, 0, me, 2);
 		me.nthAtom(0).remove();
@@ -113,7 +113,7 @@ H= '>='(A,B) :- float(A),float(B) | H = [:/*inline*/
 		((FloatingFunctor)me.nthAtom(1).getFunctor()).floatValue();
 
 		Atom result = mem.newAtom(
-		new Functor((( a0 >= a1 )?"true":"false"), 1)
+		new SymbolFunctor((( a0 >= a1 )?"true":"false"), 1)
 		);
 		mem.relink(result, 0, me, 2);
 		me.nthAtom(0).remove();
@@ -138,7 +138,7 @@ H= '=='(A,B) :- float(A),float(B) | H= [:/*inline*/
 		((FloatingFunctor)me.nthAtom(1).getFunctor()).floatValue();
 
 		Atom result = mem.newAtom(
-		new Functor((( a0 == a1 )?"true":"false"), 1)
+		new SymbolFunctor((( a0 == a1 )?"true":"false"), 1)
 		);
 		mem.relink(result, 0, me, 2);
 		me.nthAtom(0).remove();
@@ -161,7 +161,7 @@ H= '!='(A,B) :- float(A),float(B) | H= [:/*inline*/
 		double a1=
 		((FloatingFunctor)me.nthAtom(1).getFunctor()).floatValue();
 		Atom result = mem.newAtom(
-		new Functor((( a0 != a1 )?"true":"false"), 1)
+		new SymbolFunctor((( a0 != a1 )?"true":"false"), 1)
 		);
 		mem.relink(result, 0, me, 2);
 		me.nthAtom(0).remove();

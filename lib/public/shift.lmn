@@ -1,0 +1,76 @@
+/*
+NAME
+	Shift module
+
+SYNOPSIS  
+	
+AUTHOR
+	Koji Hara
+	Ken Sakurai
+	Atsuyuki Inui
+
+HISTORY
+	2006/07/02(Sun) integer.lmn からシフト演算のルールを持って来た
+					'>>>' を追加
+
+*/
+
+{
+module(shift).
+
+/*
+ * << AをNビット左シフト
+ *
+ */
+//H = '<<'(A, N) :- int(A),int(N),N>0 | H='<<'(A*2,N-1).
+//H = '<<'(A, 0) :- H=A.
+//2006.07.02 inui
+H = '<<'(A, N) :- int(A),int(N) | H=[:/*inline*/
+	int a = 
+	((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+	int n =
+	((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+	Atom result = mem.newAtom(new IntegerFunctor(a << n));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](A, N).
+
+
+/*
+ * >> AをNビット右シフト
+ *
+ */
+//H = '>>'(A, N) :- int(A),int(N),N>0 | H='>>'(A/2,N-1).
+//H = '>>'(A, 0) :- H=A.
+//2006.07.02 inui
+H = '>>'(A, N) :- int(A),int(N) | H=[:/*inline*/
+	int a = 
+	((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+	int n =
+	((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+	Atom result = mem.newAtom(new IntegerFunctor(a >> n));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](A, N).
+
+/*
+ * >> AをNビット右シフト
+ *
+ */
+ //2006.07.02 inui
+H = '>>>'(A, N) :- int(A),int(N) | H=[:/*inline*/
+	int a = 
+	((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+	int n =
+	((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+	Atom result = mem.newAtom(new IntegerFunctor(a >>> n));
+	mem.relink(result, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](A, N).
+}.

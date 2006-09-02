@@ -40,7 +40,7 @@ public class Uniq {
 		for(int i=0;i<el.length;i++) {
 			el[i] = mem.copyGroundFrom(el[i]);
 			// この３行はなくても動くが、履歴が入った膜を dump しようとすると必要になる。
-			Atom dummy = mem.newAtom(new Functor("hist_"+history.size()+"_"+i, 1));
+			Atom dummy = mem.newAtom(new SymbolFunctor("hist_"+history.size()+"_"+i, 1));
 			dummy.args[0] = new Link(dummy, 0);
 			mem.unifyLinkBuddies(dummy.getArg(0), el[i]);
 		}

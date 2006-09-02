@@ -2,37 +2,67 @@ package runtime;
 
 import java.io.*;
 
+/**
+ * 特殊なファンクタ (inside_proxy, outside_proxy) を表すクラス
+ */
 public class SpecialFunctor extends Functor {
-	private String specialName;
+	static final String OUTSIDE_PROXY_NAME = "$out".intern();
+	static final String INSIDE_PROXY_NAME = "$in".intern();
+	
+	private String name;
+	private int arity;
 	private int kind;
+	
 	SpecialFunctor(String name, int arity) {
 		this(name, arity, 0);
 	}
 	public SpecialFunctor(String name, int arity, int kind) {
-		super("", arity);
-		this.specialName = name.intern();
+		this.name = name.intern();
+		this.arity = arity;
 		this.kind = kind;
 	}
-	public int hashCode() {
-		return specialName.hashCode() + arity;
-	}
 	public boolean equals(Object o) {
-		if(o instanceof SpecialFunctor){
+		if(o instanceof SpecialFunctor) {
 			SpecialFunctor f = (SpecialFunctor)o;
-			return o.getClass().equals(SpecialFunctor.class) && specialName == f.specialName && kind == f.kind;
+			return name == f.name && kind == f.kind;
 		}
 		return false;
 	}
-	private static final String OUTSIDE_PROXY_NAME = "$out".intern();
-	public boolean isOUTSIDE_PROXY(){
-		return this.specialName == OUTSIDE_PROXY_NAME;
+	
+	/**
+	 * outside_proxy かどうかを判定する
+	 * @return outside_proxy なら true
+	 */
+	public boolean isOutsideProxy(){
+		return name == OUTSIDE_PROXY_NAME;
 	}
+	
+	/**
+	 * inside_proxy かどうかを判定する
+	 * @return outside_proxy なら true
+	 */
+	public boolean isInsideProxy(){
+		return name == INSIDE_PROXY_NAME;
+	}
+	
+	/**
+	 * ファンクタ名を返す
+	 * @return ファンクタ名を返す
+	 */
 	public String getName() {
-		return specialName + (kind==0 ? "" : ""+kind); 
+		return name + (kind==0 ? "" : ""+kind); 
 	}
+	/**
+	 * 引数つきのファンクタ名を返す
+	 * @return 引数つきのファンクタ名
+	 */
 	public String toString() {
-		return specialName + (kind==0 ? "" : ""+kind) + "_" + arity;
+		return name + (kind==0 ? "" : ""+kind) + "_" + getArity();
 	}
+	/**
+	 * 膜のタイプを返す
+	 * @return 膜のタイプ
+	 */
 	public int getKind() {
 		return kind;
 	}
@@ -41,13 +71,49 @@ public class SpecialFunctor extends Functor {
 	 * 直列化復元時に呼ばれる。
 	 * author mizuno
 	 */
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	protected void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
-		specialName = specialName.intern();
+		name = name.intern();
 	}
 
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */
 	public String getQuotedFunctorName() {
 		return getAbbrName();
+	}
+	
+	/**
+	 * シンボルファンクタかどうかを調べる．
+	 * @return false
+	 */
+	public boolean isSymbol() {
+		return false;
+	}
+	
+	/**
+	 * このファンクタがアクティブかどうかを取得する。
+	 * @return false
+	 */
+	public boolean isActive() {
+		return false;
+	}
+	
+	/**
+	 * ファンクタの値を返す
+	 * @return ファンクタの名前
+	 */
+	public Object getValue() {
+		return name;
+	}
+	
+	/**
+	 * ハッシュコードを計算する
+	 * @return ハッシュコード
+	 */
+	public int hashCode() {
+		return getName().hashCode() + getArity();
+	}
+	
+	public int getArity() {
+		return arity;
 	}
 }

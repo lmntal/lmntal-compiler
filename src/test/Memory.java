@@ -11,6 +11,7 @@ import runtime.AtomSet;
 import runtime.Functor;
 import runtime.MasterLMNtalRuntime;
 import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 
 public class Memory {
@@ -50,7 +51,7 @@ public class Memory {
 		
 		
 		Atom[] a = new Atom[N];
-		Functor f = new Functor("a", 0);
+		Functor f = new SymbolFunctor("a", 0);
 		
 		//アトムを作る
 		for (int i = 0; i < N; i++) {

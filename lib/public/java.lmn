@@ -117,7 +117,7 @@ H=java.new(Class, List) :- unary(Class) | H=[:/*inline*/
 	Object obj = Java.doNew(me.nth(0), util.Util.arrayOfList(me.getArg(1)));
 //	System.out.println(obj);
 	Atom n = mem.newAtom(new ObjectFunctor(obj));
-	Atom nil = mem.newAtom(new Functor("nil", 1));
+	Atom nil = mem.newAtom(new SymbolFunctor("nil", 1));
 	mem.relink(nil, 0, me, 1);
 	mem.relink(n, 0, me, 2);
 	me.nthAtom(0).remove();
@@ -150,7 +150,7 @@ H=java.invoke(Object, Method, List) :- unary(Method), unary(Object) | H=[:/*inli
 	Object res = Java.doInvoke(obj, me.nth(1), util.Util.arrayOfList(me.getArg(2)));
 	if(res==null) res = "nil";
 	Atom n = mem.newAtom(new ObjectFunctor(res));
-	Atom nil = mem.newAtom(new Functor("nil", 1));
+	Atom nil = mem.newAtom(new SymbolFunctor("nil", 1));
 	mem.relink(nil, 0, me, 2);
 	mem.relink(n, 0, me, 3);
 	me.nthAtom(0).remove();

@@ -8,10 +8,11 @@ import java.util.Iterator;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 public class LineObj extends GraphicObj{
 	final static
-	private Functor POSITION_ATOM = new Functor("position",4); 
+	private Functor POSITION_ATOM = new SymbolFunctor("position",4); 
 	
 	private Point position2;
 	

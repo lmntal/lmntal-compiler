@@ -32,8 +32,8 @@ public class OptimizerTest {
 	public static void main2(String[] args) throws Exception {
 		/////////////////////////////////////////////////////////
 		// append 1
-		Functor append = new Functor("append", 3);
-		Functor cons = new Functor("cons", 3);
+		Functor append = new SymbolFunctor("append", 3);
+		Functor cons = new SymbolFunctor("cons", 3);
 		
 		ArrayList list = new ArrayList();
 		System.out.println("( append(X0, Y, Z), cons(A, X, X0) :- cons(A, X1, Z), append(X, Y, X1) )");
@@ -99,8 +99,8 @@ public class OptimizerTest {
 		/////////////////////////////////////////////////////////
 		// mem 1
 
-		Functor a = new Functor("a", 0);
-		Functor b = new Functor("b", 0);
+		Functor a = new SymbolFunctor("a", 0);
+		Functor b = new SymbolFunctor("b", 0);
 		list = new ArrayList();
 
 		System.out.println("( {a, $p}, {b, $q} :- {a, $q}, {a, b, $p} )");
@@ -192,7 +192,7 @@ public class OptimizerTest {
 		list = new ArrayList();
 		System.out.println("( { change, {a,$p} } :- { {b,$p} } )");
 
-		Functor change = new Functor("change", 0);
+		Functor change = new SymbolFunctor("change", 0);
 		
 		list.add(Instruction.spec(5,8));
 		list.add(Instruction.dequeueatom(3));

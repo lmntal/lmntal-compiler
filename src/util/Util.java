@@ -12,14 +12,15 @@ import runtime.Functor;
 import runtime.IntegerFunctor;
 import runtime.Link;
 import runtime.StringFunctor;
+import runtime.SymbolFunctor;
 
 /**
  * @author mizuno
  * 汎用ユーティリティメソッド・定数を集めたクラス
  */
 abstract public class Util {
-	public static Functor DOT = new Functor(".", 3);
-	public static Functor NIL = new Functor("[]", 1);
+	public static Functor DOT = new SymbolFunctor(".", 3);
+	public static Functor NIL = new SymbolFunctor("[]", 1);
 	public static final Iterator NULL_ITERATOR = Collections.EMPTY_SET.iterator();
 	public static void systemError(String msg) {
 		System.err.println(msg);
@@ -39,7 +40,7 @@ abstract public class Util {
 		Atom parent=null;
 		boolean first=true;
 		while(it.hasNext()) {
-			Atom c = mem.newAtom(new Functor(".", 3));  // .(Value Next Parent)
+			Atom c = mem.newAtom(new SymbolFunctor(".", 3));  // .(Value Next Parent)
 			Atom v = mem.newAtom(new StringFunctor(it.next().toString())); // value(Value)
 			mem.newLink(c, 0, v, 0);
 			if(first) {
@@ -50,7 +51,7 @@ abstract public class Util {
 			parent = c;
 			first=false;
 		}
-		Atom nil = mem.newAtom(new Functor("[]", 1));
+		Atom nil = mem.newAtom(new SymbolFunctor("[]", 1));
 		if(first) {
 			mem.inheritLink(nil, 0, link);
 		} else {

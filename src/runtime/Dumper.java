@@ -74,10 +74,6 @@ public class Dumper {
 	static int getBinopPrio(String name) {
 		return ((int[]) binops.get(name))[1];
 	}
-
-	static Functor FUNC_CONS = new Functor(".", 3);
-
-	static Functor FUNC_NIL = new Functor("[]", 1);
 	
 	static String PROFILE_TABS  = "RuleName,\tThreadID,\tAtomDrivenTime,\tMembraneDrivenTime,\t" + 
 									"AtomDrivenSucceed,\tMembraneDrivenSucceed,\t" +
@@ -162,13 +158,13 @@ public class Dumper {
 						continue; // 補完された自由リンクは引数に置きたい
 					if (a.getFunctor().equals(Functor.INSIDE_PROXY))
 						continue;
-					if (a.getFunctor().isOUTSIDE_PROXY())
+					if (a.getFunctor().isOutsideProxy())
 						continue;
-					if (a.getFunctor().equals(FUNC_NIL))
+					if (a.getFunctor().equals(Functor.NIL))
 						continue; // []は整数と同じ表示的な扱い
 					if (a.getArity() == 1) {
 						predAtoms[2].add(a);
-					} else if (!a.getFunctor().equals(FUNC_CONS)) {
+					} else if (!a.getFunctor().equals(Functor.CONS)) {
 						predAtoms[3].add(a);
 					} else { // consはできるだけデータとして扱う
 						predAtoms[4].add(a);
@@ -189,7 +185,7 @@ public class Dumper {
 						// 3引数演算子の強制 s=t 表示は、演算子展開表示しないときのみ行う
 						if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
 							// consは演算子と同じ表示的な扱い
-							if (a.getFunctor().equals(FUNC_CONS)
+							if (a.getFunctor().equals(Functor.CONS)
 									|| (a.getArity() == 3 && isInfixOperator(a
 											.getName()))) {
 								buf
@@ -225,16 +221,16 @@ public class Dumper {
 							continue;
 						if (a.getFunctor().equals(Functor.INSIDE_PROXY))
 							continue;
-						if (a.getFunctor().isOUTSIDE_PROXY())
+						if (a.getFunctor().isOutsideProxy())
 							continue;
-						if (a.getFunctor().equals(FUNC_NIL))
+						if (a.getFunctor().equals(Functor.NIL))
 							continue;
 					}
 					// プロキシを省略できるときは、プロキシができるだけ引数に来るようにする
 					if (Env.hideProxy/*Env.verbose < Env.VERBOSE_EXPANDPROXIES*/) {
-						if (a.getFunctor().equals(Functor.INSIDE_PROXY))
+						if (a.getFunctor().isInsideProxy())
 							continue;
-						if (a.getFunctor().isOUTSIDE_PROXY())
+						if (a.getFunctor().isOutsideProxy())
 							continue;
 					}
 					// ここまで残った1引数のアトムはデータの可能性が高いので、できるだけ引数に来るようにする
@@ -261,7 +257,7 @@ public class Dumper {
 					if (a.getArity() == 1) {
 						if (a.getLastArg().getAtom().getFunctor() == Functor.INSIDE_PROXY
 								|| a.getLastArg().getAtom().getFunctor()
-										.isOUTSIDE_PROXY()) {
+										.isOutsideProxy()) {
 							if (commaFlag)
 								buf.append(", ");
 							else
@@ -455,13 +451,13 @@ public class Dumper {
 						continue; // 補完された自由リンクは引数に置きたい
 					if (a.getFunctor().equals(Functor.INSIDE_PROXY))
 						continue;
-					if (a.getFunctor().isOUTSIDE_PROXY())
+					if (a.getFunctor().isOutsideProxy())
 						continue;
-					if (a.getFunctor().equals(FUNC_NIL))
+					if (a.getFunctor().equals(Functor.NIL))
 						continue; // []は整数と同じ表示的な扱い
 					if (a.getArity() == 1) {
 						predAtoms[2].add(a);
-					} else if (!a.getFunctor().equals(FUNC_CONS)) {
+					} else if (!a.getFunctor().equals(Functor.CONS)) {
 						predAtoms[3].add(a);
 					} else { // consはできるだけデータとして扱う
 						predAtoms[4].add(a);
@@ -481,7 +477,7 @@ public class Dumper {
 							commaFlag = true;
 						// 3引数演算子の強制 s=t 表示は、演算子展開表示しないときのみ行う
 						// consは演算子と同じ表示的な扱い
-						if (a.getFunctor().equals(FUNC_CONS)
+						if (a.getFunctor().equals(Functor.CONS)
 								|| (a.getArity() == 3 && isInfixOperator(a
 										.getName()))) {
 							buf.append(dumpLink(a.getLastArg(), atoms, 700));
@@ -512,9 +508,9 @@ public class Dumper {
 						continue;
 					if (a.getFunctor().equals(Functor.INSIDE_PROXY))
 						continue;
-					if (a.getFunctor().isOUTSIDE_PROXY())
+					if (a.getFunctor().isOutsideProxy())
 						continue;
-					if (a.getFunctor().equals(FUNC_NIL))
+					if (a.getFunctor().equals(Functor.NIL))
 						continue;
 					// ここまで残った1引数のアトムはデータの可能性が高いので、できるだけ引数に来るようにする
 					if (a.getArity() == 1)
@@ -539,7 +535,7 @@ public class Dumper {
 					if (a.getArity() == 1) {
 						if (a.getLastArg().getAtom().getFunctor() == Functor.INSIDE_PROXY
 								|| a.getLastArg().getAtom().getFunctor()
-										.isOUTSIDE_PROXY()) {
+										.isOutsideProxy()) {
 							if (commaFlag)
 								buf.append(", ");
 							else
@@ -637,7 +633,7 @@ public class Dumper {
 		}
 		if (Env.hideProxy //Env.verbose < Env.VERBOSE_EXPANDPROXIES
 				&& arity == 1
-				&& (func.equals(Functor.INSIDE_PROXY) || func.isOUTSIDE_PROXY())) {
+				&& (func.isInsideProxy() || func.isOutsideProxy())) {
 			return dumpLink(a.args[0], atoms, outerprio);
 		}
 		Unlexer buf = new Unlexer();
@@ -693,14 +689,14 @@ public class Dumper {
 			if (!(l.isFuncRef() && atoms.contains(l.getAtom())))
 				break;
 			Atom a = l.getAtom();
-			if (!a.getFunctor().equals(FUNC_CONS))
+			if (!a.getFunctor().equals(Functor.CONS))
 				break;
 			atoms.remove(a);
 			buf.append(",");
 			buf.append(dumpLink(a.args[0], atoms));
 			l = a.args[1];
 		}
-		if (l.getAtom().getFunctor().equals(FUNC_NIL)) {
+		if (l.getAtom().getFunctor().equals(Functor.NIL)) {
 			atoms.remove(l.getAtom());
 		} else {
 			buf.append("|");

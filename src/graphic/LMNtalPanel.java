@@ -17,12 +17,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
-import runtime.Membrane;
 import runtime.Atom;
 import runtime.Functor;
+import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 public class LMNtalPanel extends JPanel implements Runnable {
 	
@@ -30,13 +32,13 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	private int SLEEP_TIME = 10;
 	
 	final
-	private Functor DRAW_MEM = new Functor("draw",0); 
+	private Functor DRAW_MEM = new SymbolFunctor("draw",0); 
 	
 	final 
-	private Functor GETPIC_ATOM = new Functor("getpic",1); 
+	private Functor GETPIC_ATOM = new SymbolFunctor("getpic",1); 
 	
 	final 
-	private Functor STRING_ATOM = new Functor("string",3);
+	private Functor STRING_ATOM = new SymbolFunctor("string",3);
 	
 	final
 	private String OVAL = "oval";

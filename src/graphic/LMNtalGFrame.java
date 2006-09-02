@@ -8,6 +8,7 @@ import java.util.Iterator;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 /**
  * Graphic LMNtalのメインクラス．
@@ -17,10 +18,10 @@ import runtime.Membrane;
  */
 public class LMNtalGFrame{	
 	final static
-	private Functor WINDOW_MEM = new Functor("window",0);
+	private Functor WINDOW_MEM = new SymbolFunctor("window",0);
 	
 	final static
-	private Functor NAME_ATOM = new Functor("name",1); 
+	private Functor NAME_ATOM = new SymbolFunctor("name",1); 
 	
 	// ウィンドウ管理マップ．ウィンドウ名(String)をキーにして管理
 	final private HashMap windowMap = new HashMap();

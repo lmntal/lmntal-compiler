@@ -71,7 +71,7 @@ class AcceptThread extends Thread {
       mem.asyncLock();
       Atom objAtom = mem.newAtom(objFunc);
       rt.setObjAtom(objAtom);
-      Atom sockAtom = mem.newAtom(new Functor("socket",3,"dlmntal"));
+      Atom sockAtom = mem.newAtom(new SymbolFunctor("socket",3,"dlmntal"));
       Atom consAtom = ssAtom.nthAtom(0).nthAtom(0);
       Atom cmdAtom = consAtom.nthAtom(0);
       mem.relinkAtomArgs(sockAtom,0,cmdAtom,0);
@@ -141,9 +141,9 @@ class ReaderThread implements Runnable {
           data = reader.readLine();
           Atom sockAtom = objAtom.nthAtom(0);
           mem.asyncLock();
-          Atom consAtom = mem.newAtom(new Functor(".",3));
+          Atom consAtom = mem.newAtom(new SymbolFunctor(".",3));
           if(data.equals("CLOSE")) {
-            Atom closeAtom = mem.newAtom(new Functor("close",1));
+            Atom closeAtom = mem.newAtom(new SymbolFunctor("close",1));
             mem.newLink(closeAtom,0,consAtom,0);
             mem.relinkAtomArgs(consAtom,1,sockAtom,0);
             mem.newLink(consAtom,2,sockAtom,0);
@@ -205,7 +205,7 @@ dlmntal.bind(Port,Cmd) :- int(Port) |
       me.remove();
     } catch(IOException e) {
       e.printStackTrace();
-      Atom failedAtom = mem.newAtom(new Functor("failed",2));
+      Atom failedAtom = mem.newAtom(new SymbolFunctor("failed",2));
       mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);
       mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);
       me.nthAtom(1).remove();
@@ -289,7 +289,7 @@ dlmntal.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
       me.remove();
     } catch(IOException e) {
       e.printStackTrace();
-      Atom failedAtom = mem.newAtom(new Functor("failed",4));
+      Atom failedAtom = mem.newAtom(new SymbolFunctor("failed",4));
       mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);
       mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);
       mem.relinkAtomArgs(failedAtom,2,me.nthAtom(2),0);

@@ -1,2 +1,4 @@
 .lmntal_inline
 *.tal
+java_lib
+*.jar

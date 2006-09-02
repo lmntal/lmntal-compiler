@@ -29,19 +29,19 @@ public final class SampleInitRuleset extends Ruleset {
 		Atom a, b, c;
 		Membrane m1;
 		
-		a = mem.newAtom(new Functor("a", 1));
-		b = mem.newAtom(new Functor("b", 2));
+		a = mem.newAtom(new SymbolFunctor("a", 1));
+		b = mem.newAtom(new SymbolFunctor("b", 2));
 		m1 = mem.newMem();
-		c = m1.newAtom(new Functor("c", 1));
+		c = m1.newAtom(new SymbolFunctor("c", 1));
 		
 		mem.newLink(a, 0, b, 0);
 		mem.newLink(b, 0, a, 0);
 		mem.newLink(b, 1, c, 0);
 		mem.newLink(c, 0, b, 1);
 		
-		mem.newAtom(new Functor("x", 0));
-		mem.newAtom(new Functor("x", 0));
-		mem.newAtom(new Functor("x", 0));
+		mem.newAtom(new SymbolFunctor("x", 0));
+		mem.newAtom(new SymbolFunctor("x", 0));
+		mem.newAtom(new SymbolFunctor("x", 0));
 
 		mem.loadRuleset(new SampleRuleset());
 		
@@ -77,7 +77,7 @@ final class SampleRuleset extends Ruleset {
 	 * @return ルールを適用した場合はtrue
 	 */
 	public boolean react(Membrane mem) {
-		Iterator it = mem.atomIteratorOfFunctor(new Functor("x", 0));
+		Iterator it = mem.atomIteratorOfFunctor(new SymbolFunctor("x", 0));
 		if(it == Util.NULL_ITERATOR) return false;
 		
 		Atom a = null;
@@ -90,7 +90,7 @@ final class SampleRuleset extends Ruleset {
 		
 		// x()を消してy()を追加
 		mem.removeAtom(a);
-		mem.newAtom(new Functor("y", 0));
+		mem.newAtom(new SymbolFunctor("y", 0));
 		return true;
 	}
 	public String getGlobalRulesetID() { return ""; }	

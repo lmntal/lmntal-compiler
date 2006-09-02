@@ -51,11 +51,11 @@ class AcceptThread extends Thread {
 			Atom acceptingAtom = dot.nthAtom(0);
 			ReadThread sr = new ReadThread(soc);
 			//make client socket
-			Atom s = mem.newAtom(new Functor("socket", 4, "socket"));
+			Atom s = mem.newAtom(new SymbolFunctor("socket", 4, "socket"));
 			Atom o = mem.newAtom(new ObjectFunctor(sr));
 			sr.me = o;
-			Atom nil1 = mem.newAtom(new Functor("nil", 1));
-			Atom nil2 = mem.newAtom(new Functor("[]", 1));
+			Atom nil1 = mem.newAtom(new SymbolFunctor("nil", 1));
+			Atom nil2 = mem.newAtom(new SymbolFunctor("[]", 1));
 			mem.newLink(s, 0, o, 0);
 			mem.newLink(s, 1, nil1, 0); 
 			mem.newLink(s, 2, nil2, 0); 
@@ -106,7 +106,7 @@ L:
 				mem.asyncLock();
 				Atom socAtom = me.nthAtom(0);
 				Atom dataAtom = mem.newAtom(new StringFunctor(data));
-				Atom dot = mem.newAtom(new Functor(".", 3));
+				Atom dot = mem.newAtom(new SymbolFunctor(".", 3));
 				mem.newLink(dot, 0, dataAtom, 0);
 				mem.relink(dot, 2, socAtom, 1);
 				mem.newLink(dot, 1, socAtom, 1);
@@ -115,9 +115,9 @@ L:
 			Membrane mem = me.getMem();
 			mem.asyncLock();
 			Atom socAtom = me.nthAtom(0);
-			Atom nil = mem.newAtom(new Functor("[]", 1));
+			Atom nil = mem.newAtom(new SymbolFunctor("[]", 1));
 			mem.relink(nil, 0, socAtom, 1);
-			Atom closed = mem.newAtom(new Functor("nil", 1));
+			Atom closed = mem.newAtom(new SymbolFunctor("nil", 1));
 			mem.newLink(closed, 0, socAtom, 1);
 			mem.asyncUnlock();
 		} catch (Exception e) {

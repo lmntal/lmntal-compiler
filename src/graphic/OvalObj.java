@@ -8,11 +8,12 @@ import java.util.Iterator;
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 public class OvalObj extends GraphicObj{
 
 	final static
-	private Functor SIZE_ATOM = new Functor("size", 2);
+	private Functor SIZE_ATOM = new SymbolFunctor("size", 2);
 	
 	private int sizeX;
 	private int sizeY;

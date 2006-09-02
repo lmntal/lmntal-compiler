@@ -8,11 +8,10 @@
  * Special thanks to KUDO
  *
  */
-
 //parse('+'(1(1(x))), u, y).
 u = parse('*'('+'(1(1('+'(1(1(x))))))), y).
 
-U = parse('*'(X), Y) :- U = parse(X, A) * parse(A, Y).
+mul@@ U = parse('*'(X), Y) :- U = parse(X, A) * parse(A, Y).
 U = parse('+'(X), Y) :- U = parse(X, A) + parse(A, Y).
 
 //¸Å¤¤

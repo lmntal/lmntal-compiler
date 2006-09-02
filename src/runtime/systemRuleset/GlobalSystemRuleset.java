@@ -2056,20 +2056,20 @@ L101:
 	}
 	private static final Functor[] f = new Functor[15];
 	static{
-	f[3] = new Functor("-", 2, null);
-	f[8] = new Functor("-.", 3, null);
-	f[1] = new Functor("int", 2, null);
-	f[6] = new Functor("/.", 3, null);
-	f[11] = new Functor("/", 3, null);
-	f[13] = new Functor("-", 3, null);
-	f[4] = new Functor("+.", 2, null);
-	f[10] = new Functor("mod", 3, null);
-	f[5] = new Functor("+", 2, null);
-	f[12] = new Functor("*", 3, null);
-	f[0] = new Functor("float", 2, null);
-	f[9] = new Functor("+.", 3, null);
-	f[7] = new Functor("*.", 3, null);
-	f[14] = new Functor("+", 3, null);
-	f[2] = new Functor("-.", 2, null);
+	f[3] = new SymbolFunctor("-", 2, null);
+	f[8] = new SymbolFunctor("-.", 3, null);
+	f[1] = new SymbolFunctor("int", 2, null);
+	f[6] = new SymbolFunctor("/.", 3, null);
+	f[11] = new SymbolFunctor("/", 3, null);
+	f[13] = new SymbolFunctor("-", 3, null);
+	f[4] = new SymbolFunctor("+.", 2, null);
+	f[10] = new SymbolFunctor("mod", 3, null);
+	f[5] = new SymbolFunctor("+", 2, null);
+	f[12] = new SymbolFunctor("*", 3, null);
+	f[0] = new SymbolFunctor("float", 2, null);
+	f[9] = new SymbolFunctor("+.", 3, null);
+	f[7] = new SymbolFunctor("*.", 3, null);
+	f[14] = new SymbolFunctor("+", 3, null);
+	f[2] = new SymbolFunctor("-.", 2, null);
 	}
 }

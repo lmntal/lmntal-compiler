@@ -1,6 +1,7 @@
 package compile.structure;
 
 import runtime.Functor;
+import runtime.SymbolFunctor;
 
 /**
  * ソースコード中のアトム（またはアトム集団または型制約）の構造を表すクラス。
@@ -33,7 +34,7 @@ public class Atom extends Atomic {
 	 * @param arity リンクの数
 	 */
 	public Atom(Membrane mem, String name, int arity) {
-		this(mem,new Functor(name,arity));
+		this(mem,new SymbolFunctor(name,arity));
 	}
 
 	public String toString() {

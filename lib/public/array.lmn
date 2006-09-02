@@ -45,8 +45,8 @@ COMMENTS
 
 	H=array.new(Length) :- int(Length) | H=[:/*inline*/
 		int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
-		Atom result = mem.newAtom(new Functor("int_array", 2));
-		Atom result2 = mem.newAtom(new Functor("@", l+1));
+		Atom result = mem.newAtom(new SymbolFunctor("int_array", 2));
+		Atom result2 = mem.newAtom(new SymbolFunctor("@", l+1));
 		for(int i=0;i<l;i++) {
 			Atom el = mem.newAtom(new IntegerFunctor(0));
 			mem.newLink(el, 0, result2, i);
@@ -68,8 +68,8 @@ COMMENTS
 	H=array.new(Length, Value) :- int(Length), int(Value) | H=[:/*inline*/
 		int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 		int value = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
-		Atom result = mem.newAtom(new Functor("int_array", 2));
-		Atom result2 = mem.newAtom(new Functor("@", l+1));
+		Atom result = mem.newAtom(new SymbolFunctor("int_array", 2));
+		Atom result2 = mem.newAtom(new SymbolFunctor("@", l+1));
 		for(int i=0;i<l;i++) {
 			Atom el = mem.newAtom(new IntegerFunctor(value));
 			mem.newLink(el, 0, result2, i);

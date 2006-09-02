@@ -23,7 +23,7 @@ array.put が入れ子になると、外側のものが先に評価されてしまう。
 	
 	H=array.new(Length) :- int(Length) | H=[:/*inline*/
 		int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
-		Atom result = mem.newAtom(new Functor("array", l+1));
+		Atom result = mem.newAtom(new SymbolFunctor("array", l+1));
 		for(int i=0;i<l;i++) {
 			Atom el = mem.newAtom(new IntegerFunctor(0));
 			mem.newLink(el, 0, result, i);

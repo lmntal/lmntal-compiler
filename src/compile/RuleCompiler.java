@@ -1,15 +1,31 @@
 package compile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import runtime.Env;
-import runtime.Rule;
-//import runtime.InterpretedRuleset;
+import runtime.Functor;
+import runtime.Inline;
 import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
-import runtime.Functor;
-import runtime.Inline;
-import compile.structure.*;
+import runtime.Rule;
+import runtime.SymbolFunctor;
+
+import compile.structure.Atom;
+import compile.structure.Atomic;
+import compile.structure.Context;
+import compile.structure.ContextDef;
+import compile.structure.LinkOccurrence;
+import compile.structure.Membrane;
+import compile.structure.ProcessContext;
+import compile.structure.RuleContext;
+import compile.structure.RuleStructure;
 
 /**
  * コンパイル時ルール構造（compile.structure.RuleStructure）を
@@ -23,7 +39,7 @@ import compile.structure.*;
  */
 public class RuleCompiler {
 	/** 単一化を意味する（ものとしてRuleCompilerが考える）ファンクタ。=/2 */
-	public static final Functor FUNC_UNIFY = new Functor("=", 2);
+	public static final Functor FUNC_UNIFY = new SymbolFunctor("=", 2);
 
 	/** コンパイルされるルール構造 */
 	public RuleStructure rs;
@@ -673,10 +689,10 @@ public class RuleCompiler {
 		while (it.hasNext()) {
 			Atom cstr = (Atom)it.next();
 			Functor func = cstr.functor;
-			if (func.equals(new Functor("unary",1)))  { lists[0].add(cstr); it.remove(); }
-			if (func.equals(new Functor("=",2)))      { lists[1].add(cstr); it.remove(); }
-			if (func.equals(new Functor("==",2)))     { lists[1].add(cstr); it.remove(); }
-			if (func.equals(new Functor("ground",1))) { lists[2].add(cstr); it.remove(); }
+			if (func.equals(new SymbolFunctor("unary",1)))  { lists[0].add(cstr); it.remove(); }
+			if (func.equals(new SymbolFunctor("=",2)))      { lists[1].add(cstr); it.remove(); }
+			if (func.equals(new SymbolFunctor("==",2)))     { lists[1].add(cstr); it.remove(); }
+			if (func.equals(new SymbolFunctor("ground",1))) { lists[2].add(cstr); it.remove(); }
 		}
 		typeConstraints.addAll(lists[0]);
 		typeConstraints.addAll(lists[1]);
@@ -1019,7 +1035,7 @@ public class RuleCompiler {
 			body.add( new Instruction(Instruction.INLINE, atomID, unitName, codeID));
 		}
 	}
-	static final Functor FUNC_USE = new Functor("use",1);
+	static final Functor FUNC_USE = new SymbolFunctor("use",1);
 	/** モジュールを読み込む */
 	private void addRegAndLoadModules() {
 		Iterator it = rhsatoms.iterator();

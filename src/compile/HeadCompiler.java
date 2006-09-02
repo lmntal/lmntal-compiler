@@ -295,7 +295,7 @@ public class HeadCompiler {
 				
 				// リンク先の膜の特定
 				
-				if (atom.functor.isOUTSIDE_PROXY() && pos == 0) {
+				if (atom.functor.isOutsideProxy() && pos == 0) {
 					// 子膜へのリンクの場合、子膜の同一性を検査しなければならない
 					Membrane buddymem = buddyatom.mem;								
 					int buddymempath = memToPath(buddyatom.mem);

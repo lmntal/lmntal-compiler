@@ -1,4 +1,4 @@
-//http://icpc.logos.ic.i.u-tokyo.ac.jp/icpc2006/contest/all_ja.html#section_B
+//[[http://icpc.logos.ic.i.u-tokyo.ac.jp/icpc2006/contest/all_ja.html#section_B]]
 //java の API にある機能以外はインラインを使わない方針
 //
 // 2006.07.02 Sample Input は 1.3 秒で解けた
@@ -14,12 +14,12 @@ module(set).
 set.add(S1,S2), set={$p,@p} :- string(S1), string(S2) | set={$p, e(string.concat(S1,S2))}.
 
 //重複要素を削除する
-set={e(S1), e(S2), $p,@p} :- string(S1), string(S2), S1 = S2 | set={e(S1), $p}.
+set={e(S1), e(S2), $p, @p} :- string(S1), string(S2), S1 = S2 | set={e(S1), $p}.
 }.
 
 //データ入力
 r=io.readline(data_set_num).
-data_set_num(S) :- string(S) |
+r(done), data_set_num(S) :- string(S) |
 	data_set_num(string.int_of_str(S)), dataset=io.list_of_stdin, next_data_set.
 next_data_set, data_set_num(N), dataset=[D|Z] :- N > 0 |
 	data_set_num(N-1), dataset=Z, data=D, start.

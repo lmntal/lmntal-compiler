@@ -11,9 +11,6 @@ public class StringFunctor extends ObjectFunctor {
 	public String getQuotedAtomName() { return getStringLiteralText(getName()); }
 	public String getQuotedFunctorName() { return getQuotedAtomName(); }
 	public String stringValue() {return getName();}
-	public String toString() {
-		return Util.quoteString((String)data, '"') + "_" + getArity();
-	}
 	// 2006/06/28 by kudo
 	public boolean equals(Object o){
 		if(!(o instanceof StringFunctor))return false;

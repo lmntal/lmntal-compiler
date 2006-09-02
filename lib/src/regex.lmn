@@ -1,0 +1,64 @@
+/*
+NAME
+	Regular Expression module
+
+SYNOPSIS
+	
+AUTHOR
+	Atsuyuki Inui
+
+HISTORY
+	2006/08/01(Tue)
+
+*/
+{
+module(regex).
+
+regex.use :-
+[:/*inline_define*/
+//#/*__UNITNAME__*/CustomGuardImpl.java
+	/*__PACKAGE__*/
+	import runtime.*;
+	import java.util.*;
+	import java.util.regex.*;
+	import util.Util;
+	public class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
+		public boolean run(String guardID, Membrane mem, Object obj) {
+			ArrayList ary = (ArrayList)obj;
+//			System.err.println(ary.size());
+//			for(int i=0;i<ary.size();i++) {
+//				System.err.println(ary.get(i).getClass());
+//			}
+//			System.err.println("guardID="+guardID);
+			
+			if(guardID.equals("match")) {
+				Atom a = ((Link)ary.get(0)).getAtom();
+//				System.err.println(a);
+				Atom b = (Atom)ary.get(1);
+//				System.err.println(b);
+				
+				if (!(a.getFunctor() instanceof StringFunctor)) return false;
+				if (!(b.getFunctor() instanceof StringFunctor)) return false;
+				
+				String sa = ((StringFunctor)a.getFunctor()).stringValue();
+				String sb = ((StringFunctor)b.getFunctor()).stringValue();
+
+				Pattern p = Pattern.compile(sb);
+				Matcher m = p.matcher(sa);
+				if (m.matches()) {
+					//先方参照された値をセットする
+					for (int i = 2; i < ary.size(); i++)
+						ary.set(i, new Atom(mem, new StringFunctor(m.group(i-1))));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+//#
+:].
+}.
+
+//regex.use.
+//a(A) :- custom_iioo_match(A, "a(o*)(.*)", $a, $b) | ok($a, $b).
+//a("aoasfd").

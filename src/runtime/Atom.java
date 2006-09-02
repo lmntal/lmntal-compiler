@@ -102,11 +102,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	 * 所属膜がリモートの場合もあり、しかもAtomSetは必ず更新しなければならないので、
 	 * 膜のalterAtomFunctorメソッドを呼ぶ。*/
 	public void setFunctor(String name, int arity) {
-		mem.alterAtomFunctor(this, new Functor(name, arity));
-	}
-	/**@deprecated*/
-	public void set(String name, int arity) {
-		setFunctor(name,arity);
+		mem.alterAtomFunctor(this, new SymbolFunctor(name, arity));
 	}
 	/** アトムを所属膜から取り除く（リンク先のアトムは除去しない）*/
 	public void remove() {
@@ -201,7 +197,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 
 	public Node getNthNode(int index) {
 		Atom a = nthAtom(index);
-		while(a.getFunctor().equals(Functor.INSIDE_PROXY) || a.getFunctor().isOUTSIDE_PROXY()) {
+		while(a.getFunctor().isInsideProxy() || a.getFunctor().isOutsideProxy()) {
 //			System.out.println(a.nthAtom(0).nthAtom(0));
 //			System.out.println(a.nthAtom(0).nthAtom(1));
 			a = a.nthAtom(0).nthAtom(1);
@@ -300,7 +296,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 		if (functor.equals(Functor.INSIDE_PROXY)) {
 			//親膜へのリンクは送信しない
 			out.writeObject(args[1]);
-		} else if (functor.isOUTSIDE_PROXY()) {
+		} else if (functor.isOutsideProxy()) {
 			//子膜へのリンクは、接続先atomID/memIDのみ送信。接続先はINSIDE_PROXYの第１引数なので、アトムのIDのみで十分。
 			Atom a = args[0].getAtom();
 			Membrane mem = a.mem;
@@ -329,7 +325,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 		if (functor.equals(Functor.INSIDE_PROXY)) {
 			//とりあえず復元しておく。後でRemoteMembrane内でつなぎ直され、このアトムは使われなくなる。
 			args[1] = (Link)in.readObject();
-		} else if (functor.isOUTSIDE_PROXY()) {
+		} else if (functor.isOutsideProxy()) {
 			//子膜内のINSIDE_PROXYは送信されてこないので、ここで生成する。
 			String hostname = (String)in.readObject();
 			String localid = (String)in.readObject();

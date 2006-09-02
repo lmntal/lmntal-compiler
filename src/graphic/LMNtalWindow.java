@@ -7,59 +7,56 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 
 import runtime.Atom;
 import runtime.Dumper;
 import runtime.Env;
 import runtime.Functor;
 import runtime.IntegerFunctor;
-import runtime.StringFunctor;
 import runtime.Membrane;
-import runtime.Task;
+import runtime.StringFunctor;
+import runtime.SymbolFunctor;
 
 public class LMNtalWindow extends JFrame{
 	final static
-	private Functor NAME_ATOM = new Functor("name",1); 
+	private Functor NAME_ATOM = new SymbolFunctor("name",1); 
 	
 	final static
-	private Functor SIZE_ATOM = new Functor("size", 2);
+	private Functor SIZE_ATOM = new SymbolFunctor("size", 2);
 	
 	final static
-	private Functor BGCOLOR_ATOM = new Functor("bgcolor", 3);
+	private Functor BGCOLOR_ATOM = new SymbolFunctor("bgcolor", 3);
 	
 	final static
-	private Functor POSITION_ATOM = new Functor("position", 2);
+	private Functor POSITION_ATOM = new SymbolFunctor("position", 2);
 	
 	final static
-	private Functor TIMER_ATOM = new Functor("timer", 1);
+	private Functor TIMER_ATOM = new SymbolFunctor("timer", 1);
 	
 	final static
-	private Functor KILLER_ATOM = new Functor("killer", 0);
+	private Functor KILLER_ATOM = new SymbolFunctor("killer", 0);
 	
 	final static
-	private Functor CLICK_LISTENER_ATOM = new Functor("clickListener", 0);
+	private Functor CLICK_LISTENER_ATOM = new SymbolFunctor("clickListener", 0);
 	
 	final static
-	private Functor KEY_CHAR_ATOM = new Functor("keyChar", 0);
+	private Functor KEY_CHAR_ATOM = new SymbolFunctor("keyChar", 0);
 	
 	final static
-	private Functor KEY_CODE_ATOM = new Functor("keyCode", 0);
+	private Functor KEY_CODE_ATOM = new SymbolFunctor("keyCode", 0);
 	
 	final static
-	private Functor KEY_CHAR_ATOM_CREATED = new Functor("keyChar", 1);
+	private Functor KEY_CHAR_ATOM_CREATED = new SymbolFunctor("keyChar", 1);
 	
 	final static
-	private Functor KEY_CODE_ATOM_CREATED = new Functor("keyCode", 1);
+	private Functor KEY_CODE_ATOM_CREATED = new SymbolFunctor("keyCode", 1);
 	
 	
 	private LMNtalPanel lmnPanel = null;
@@ -189,8 +186,8 @@ public class LMNtalWindow extends JFrame{
 			atomIte= mem.atomIteratorOfFunctor(KEY_CHAR_ATOM);
 			if(atomIte.hasNext()){
 				Atom head = (Atom)atomIte.next();
-				keyAtom = mem.newAtom(new Functor(head.getName(), 1)); 
-				Atom nil = mem.newAtom(new Functor("[]", 1));
+				keyAtom = mem.newAtom(new SymbolFunctor(head.getName(), 1)); 
+				Atom nil = mem.newAtom(new SymbolFunctor("[]", 1));
 				mem.newLink(keyAtom, 0, nil, 0);
 				mem.removeAtom(head);
 				keyFunctor = KEY_CHAR_ATOM;
@@ -199,8 +196,8 @@ public class LMNtalWindow extends JFrame{
 			atomIte= mem.atomIteratorOfFunctor(KEY_CODE_ATOM);
 			if(atomIte.hasNext()){
 				Atom head = (Atom)atomIte.next();
-				keyAtom = mem.newAtom(new Functor(head.getName(), 1));
-				Atom nil = mem.newAtom(new Functor("[]", 1));
+				keyAtom = mem.newAtom(new SymbolFunctor(head.getName(), 1));
+				Atom nil = mem.newAtom(new SymbolFunctor("[]", 1));
 				mem.newLink(keyAtom, 0, nil, 0);
 				mem.removeAtom(head);
 				keyFunctor = KEY_CODE_ATOM;
@@ -353,7 +350,7 @@ public class LMNtalWindow extends JFrame{
 			while(null != (point = lmnPanel.getClickedPoint())){
 				Atom px = mem.newAtom(new IntegerFunctor(point.x));
 				Atom py = mem.newAtom(new IntegerFunctor(point.y));
-				Atom clickedAtom = mem.newAtom(new Functor("clicked", 2));
+				Atom clickedAtom = mem.newAtom(new SymbolFunctor("clicked", 2));
 				mem.newLink(px, 0, clickedAtom, 0);
 				mem.newLink(py, 0, clickedAtom, 1);
 	//			lmnPanel.clearClikedPoint();
@@ -378,7 +375,7 @@ public class LMNtalWindow extends JFrame{
 					}
 					if(nth2.getName().equals("[]")){
 						Atom data = mem.newAtom(fa);
-						Atom dot = mem.newAtom(new Functor(".", 3));
+						Atom dot = mem.newAtom(new SymbolFunctor(".", 3));
 						mem.newLink(dot, 0, data, 0);
 						mem.newLink(nth1, nth1_arg, dot, 2);
 						mem.newLink(nth2, 0, dot, 1);

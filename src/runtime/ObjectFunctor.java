@@ -6,20 +6,63 @@ package runtime;
  * @author n-kato */
 public class ObjectFunctor extends Functor {
 	Object data;
-	public ObjectFunctor(Object data) { super("",1);  this.data = data; }
+	public ObjectFunctor(Object data) {
+		this.data = data;
+	}
+	
 	public int hashCode() { return data.hashCode(); }
+	/**
+	 * このファンクタが保持しているオブジェクトを取得します
+	 * @return このファンクタが保持しているオブジェクト
+	 */
 	public Object getObject() { return data; }
+	/**
+	 * このファンクタが保持しているオブジェクトを取得します
+	 * @return このファンクタが保持しているオブジェクト
+	 */
 	public Object getValue() { return data; }
+	
 	public boolean equals(Object o) {
 		return o.getClass() == getClass() && data.equals(((ObjectFunctor)o).data);
 	}
-	public String getName() { return data.toString(); }
 	
-	//c1がc2のサブクラスかどうか判定します 2006.6.26 by inui
+	/**
+	 * 保持しているオブジェクトの名前を返す
+	 * @return 保持しているオブジェクトの名前
+	 */
+	public String getName() {
+		return data.toString();
+	}
+	
+	public int getArity() {
+		return 1;
+	}
+	
+	/**
+	 * c1がc2のサブクラスかどうか判定します
+	 * @since 2006.6.26
+	 * @author inui
+	 */
 	public static boolean isSubclass(Class c1, Class c2) {
 //		System.err.println(c1+","+c2);
 		if (c1.equals(c2)) return true;
 		if (c1.equals(Object.class)) return false;
 		return isSubclass(c1.getSuperclass(), c2);
+	}
+	
+	/**
+	 * シンボルファンクタかどうかを調べる．
+	 * @return false
+	 */
+	public boolean isSymbol() {
+		return false;
+	}
+	
+	/**
+	 * このファンクタがアクティブかどうかを取得する。
+	 * @return false
+	 */
+	public boolean isActive() {
+		return false;
 	}
 }

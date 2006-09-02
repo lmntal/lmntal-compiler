@@ -50,10 +50,10 @@ H=lexer.next(), lexer.lexer(Lexer) :- class(Lexer, "java.io.StreamTokenizer") | 
 		Atom res = null;
 		switch (ttype) {
 		case java.io.StreamTokenizer.TT_EOF:
-			res = mem.newAtom(new Functor("eof", 1));
+			res = mem.newAtom(new SymbolFunctor("eof", 1));
 			break;
 		case java.io.StreamTokenizer.TT_EOL:
-			res = mem.newAtom(new Functor("eol", 1));
+			res = mem.newAtom(new SymbolFunctor("eol", 1));
 			break;
 		case java.io.StreamTokenizer.TT_NUMBER:
 			res = mem.newAtom(new IntegerFunctor((int)st.nval));
@@ -62,7 +62,7 @@ H=lexer.next(), lexer.lexer(Lexer) :- class(Lexer, "java.io.StreamTokenizer") | 
 			res = mem.newAtom(new StringFunctor(st.sval));
 			break;
 		default:
-			res = mem.newAtom(new Functor(Character.toString((char)ttype), 1));
+			res = mem.newAtom(new SymbolFunctor(Character.toString((char)ttype), 1));
 		}
 		mem.relink(res, 0, me, 1);
 		me.nthAtom(0).remove();

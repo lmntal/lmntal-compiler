@@ -47,7 +47,7 @@ public final class AtomSet implements Serializable {
 	/** 指定されたFunctorを持つアトムの数の取得 */
 	public int getAtomCountOfFunctor(Functor f) {
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-			ArrayList l = (ArrayList)(f.isOUTSIDE_PROXY() ? getOuts().get(f) : getAtoms().get(f));
+			ArrayList l = (ArrayList)(f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
 			if (l == null) {
 				return 0;
 			} else {
@@ -85,7 +85,7 @@ public final class AtomSet implements Serializable {
 	/** 与えられた名前を持つアトムの反復子を返す */
 	public Iterator iteratorOfFunctor(Functor f) {
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-			ArrayList l = (ArrayList)(f.isOUTSIDE_PROXY() ? getOuts().get(f) : getAtoms().get(f));
+			ArrayList l = (ArrayList)(f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
 			if (l == null) {
 				return Util.NULL_ITERATOR;
 			} else {
@@ -154,7 +154,7 @@ public final class AtomSet implements Serializable {
 		Functor f = ((Atom)o).getFunctor();
 		ArrayList l;
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-			Map map = f.isOUTSIDE_PROXY() ? getOuts() : getAtoms();
+			Map map = f.isOutsideProxy() ? getOuts() : getAtoms();
 			l = (ArrayList)map.get(f);
 			if (l == null) {
 				l = new ArrayList();
@@ -177,7 +177,7 @@ public final class AtomSet implements Serializable {
 		Functor f = a.getFunctor();
 		ArrayList l;
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-			l = (ArrayList)(f.isOUTSIDE_PROXY() ? getOuts().get(f) : getAtoms().get(f));
+			l = (ArrayList)(f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
 		} else {
 			l = getDataAtoms();
 		}

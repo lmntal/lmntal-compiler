@@ -1,8 +1,9 @@
 //フィボナッチ数列
+//integer.use.
 H=fib(0) :- H=1.
 H=fib(1) :- H=1.
 H=fib(N) :- N > 1 | H=fib(N-1)+fib(N-2).
-ret=fib(15).
+ret=fib(10).
 
 //計測結果
 //			interpret	translator

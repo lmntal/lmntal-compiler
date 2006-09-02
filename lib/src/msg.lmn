@@ -72,8 +72,8 @@ class GenThread extends Thread {
 			while(true) {
 				Packet p = NetHolder.net.recv();
 				mem.asyncLock();
-				Atom a = mem.newAtom(new Functor("recv", 1));
-				Atom b = mem.newAtom(new Functor("test", 1));
+				Atom a = mem.newAtom(new SymbolFunctor("recv", 1));
+				Atom b = mem.newAtom(new SymbolFunctor("test", 1));
 				mem.newLink(a, 0, b, 0);
 				mem.asyncUnlock();
 			}

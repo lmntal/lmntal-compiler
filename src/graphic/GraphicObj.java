@@ -6,15 +6,16 @@ import java.awt.Point;
 
 import runtime.Membrane;
 import runtime.Functor;
+import runtime.SymbolFunctor;
 
 public abstract class GraphicObj{
 	final static
-	protected Functor POSITION_ATOM = new Functor("position", 2); 
+	protected Functor POSITION_ATOM = new SymbolFunctor("position", 2); 
 
 	final static
-	protected Functor COLOR_ATOM = new Functor("color", 3); 
+	protected Functor COLOR_ATOM = new SymbolFunctor("color", 3); 
 	final static
-	protected Functor ANGLE_ATOM = new Functor("angle", 1); 
+	protected Functor ANGLE_ATOM = new SymbolFunctor("angle", 1); 
 	
 	protected Color color = Color.BLACK;
 	protected Point position = new Point(0,0);

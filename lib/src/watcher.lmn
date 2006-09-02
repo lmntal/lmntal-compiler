@@ -48,7 +48,7 @@ module(watcher).
 
 M=watcher.count(Name, Arity) :- unary(Name), int(Arity) | 
 M=[:/*inline*/
-	Functor f = new Functor(me.nth(0),((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue());
+	Functor f = new SymbolFunctor(me.nth(0),((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue());
 	int c = mem.getAtomCountOfFunctor(f);
 	Atom a = mem.newAtom(new IntegerFunctor(c));
 	mem.relink(a,0,me,2);
@@ -87,8 +87,8 @@ M=watcher.update(F) :- class(F,"GraphFrame") |
 M=[:/*inline*/
 	GraphFrame frame = (GraphFrame)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 	Functor f = frame.getFunctor(0);
-	Atom monitoring = mem.newAtom(new Functor("monitoring",3,"watcher"));
-	Atom count = mem.newAtom(new Functor("count",3,"watcher"));
+	Atom monitoring = mem.newAtom(new SymbolFunctor("monitoring",3,"watcher"));
+	Atom count = mem.newAtom(new SymbolFunctor("count",3,"watcher"));
 	Atom name = mem.newAtom(new StringFunctor(f.getName()));
 	Atom arity = mem.newAtom(new IntegerFunctor(f.getArity()));
 	mem.newLink(count,0,name,0);
@@ -105,14 +105,14 @@ M=[:/*inline*/
 	GraphFrame frame = (GraphFrame)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 	frame.updateData(frame.getNowWatchingIndex(),((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue());
 	if(!frame.nextIndex()){
-		Atom draw = mem.newAtom(new Functor("draw",2,"watcher"));
+		Atom draw = mem.newAtom(new SymbolFunctor("draw",2,"watcher"));
 		mem.relink(draw,0,me,0);
 		mem.relink(draw,1,me,2);
 	}
 	else{
 		Functor f = frame.getFunctor(frame.getNowWatchingIndex());
-		Atom monitoring = mem.newAtom(new Functor("monitoring",3,"watcher"));
-		Atom count = mem.newAtom(new Functor("count",3,"watcher"));
+		Atom monitoring = mem.newAtom(new SymbolFunctor("monitoring",3,"watcher"));
+		Atom count = mem.newAtom(new SymbolFunctor("count",3,"watcher"));
 		Atom name = mem.newAtom(new StringFunctor(f.getName()));
 		Atom arity = mem.newAtom(new IntegerFunctor(f.getArity()));
 		mem.newLink(count,0,name,0);
@@ -131,7 +131,7 @@ M=[:/*inline*/
 	GraphFrame frame = (GraphFrame)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 	frame.repaint();
 	frame.waitin();
-	Atom drew = mem.newAtom(new Functor("drew",2,"watcher"));
+	Atom drew = mem.newAtom(new SymbolFunctor("drew",2,"watcher"));
 	mem.relink(drew,1,me,1);
 	mem.relink(drew,0,me,0);
 	mem.removeAtom(me);
@@ -176,7 +176,7 @@ class GraphFrame extends JFrame{
 		data.add(new ArrayList());
 		name.add(dataname);
 		color.add(c);
-		functor.add(new Functor(atomname,arity));
+		functor.add(new SymbolFunctor(atomname,arity));
 		return index;
 	}
 	public Functor getFunctor(int i){

@@ -37,13 +37,13 @@ H=scanner.nextInt(Object, ReadString) :- class(Object, "java.util.Scanner") |
 			int n = br.nextInt();
 			Atom result = mem.newAtom(new IntegerFunctor(n));
 			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor("done", 1));
+			Atom res = mem.newAtom(new SymbolFunctor("done", 1));
 			mem.relink(res, 0, me, 2);
 		} catch(Exception e) {
 			System.err.println(e);
 			Atom result = mem.newAtom(new IntegerFunctor(0));
 			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor("nil", 1));
+			Atom res = mem.newAtom(new SymbolFunctor("nil", 1));
 			mem.relink(res, 0, me, 2);
 		} finally {
 			me.nthAtom(0).remove();
@@ -67,12 +67,12 @@ H=scanner.nextFloat(Object, ReadString) :- class(Object, "java.util.Scanner") |
 			double n = br.nextDouble();
 			Atom result = mem.newAtom(new FloatingFunctor(n));
 			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor("done", 1));
+			Atom res = mem.newAtom(new SymbolFunctor("done", 1));
 			mem.relink(res, 0, me, 2);
 		} catch(Exception e) {
 			Atom result = mem.newAtom(new FloatingFunctor(0));
 			mem.relink(result, 0, me, 1);
-			Atom res = mem.newAtom(new Functor("nil", 1));
+			Atom res = mem.newAtom(new SymbolFunctor("nil", 1));
 			mem.relink(res, 0, me, 2);
 		} finally {
 			me.nthAtom(0).remove();

@@ -1,6 +1,5 @@
 package runtime;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -10,33 +9,35 @@ import util.Util;
 import compile.parser.SrcName;
 
 /**
- * Stringの名前とリンク数の組からなるアトムのFunctor。 todo SymbolFunctorというサブクラスを作ったほうがいいかもしれない。
+ * Stringの名前とリンク数の組からなるアトムのFunctorを表す抽象クラス。
+ * このクラスは名前とリンク数のフィールドは持っていないので，
+ * サブクラスはこれらの情報を取得する getName, getArity を実装する．
+ * オブジェクトの生成は各サブクラスを new する他に build メソッドを使うことが出来る．
  */
-public class Functor implements Serializable {
+public abstract class Functor implements Serializable {
 	// **注意**：特殊なFunctorを追加した場合、readObjectメソッドを変更する事。
+	
 	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
-	public static final Functor INSIDE_PROXY = new SpecialFunctor("$in", 2);
+	public static final Functor INSIDE_PROXY = new SpecialFunctor(SpecialFunctor.INSIDE_PROXY_NAME, 2);
 
 	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
-	public static final Functor OUTSIDE_PROXY = new SpecialFunctor("$out", 2);
+	public static final Functor OUTSIDE_PROXY = new SpecialFunctor(SpecialFunctor.OUTSIDE_PROXY_NAME, 2);
 
 	/**
 	 * $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム を表すファンクタ transient_inside_proxy
 	 * （通称:star）
 	 */
 	public static final Functor STAR = new SpecialFunctor("$star", 2);
+	
+	/**
+	 * cons アトムを表すファンクタ ./3
+	 */
+	public static final Functor CONS = new SymbolFunctor(".", 3);
 
 	/**
-	 * シンボル名。このクラスのオブジェクトの場合は、名前の表示名が格納される。 常に intern した値を格納する。
-	 * 空文字列のときは、サブクラスのオブジェクトであることを表す。
+	 * nil アトムを表すファンクタ []/1
 	 */
-	private String name;
-
-	/** アリティ（引数の個数） */
-	protected int arity;
-
-	/** ファンクタが所属するモジュール名（明示的に指定されていない場合はnull） */
-	private String path = null;
+	public static final Functor NIL = new SymbolFunctor("[]", 1);
 
 	// //////////////////////////////////////////////////////////////
 
@@ -44,24 +45,28 @@ public class Functor implements Serializable {
 	 * 引数をもつアトムの名前として表示名を印字するための文字列を返す。 通常の名前以外（数値や記号）の場合、クォートして返す。
 	 */
 	public String getQuotedFunctorName() {
-		return QuoteFunctorName(getAbbrName());
+		return quoteFunctorName(getAbbrName());
 	}
 
+	/**
+	 * 改行文字を取り除いたファンクタ名を返す
+	 * @return 改行文字を取り除いたファンクタ名
+	 */
 	public String getQuotedFullyFunctorName() {
 		// \rや\nがparseの際に邪魔になるため
-		return QuoteFunctorName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
+		return quoteFunctorName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
 	}
 
-	private String QuoteFunctorName(String text) {
+	protected String quoteFunctorName(String text) {
 		if (Env.verbose > Env.VERBOSE_SIMPLELINK) {
-			if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$"))
+			if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 				text = quoteName(text);
+			}
 		} else {
-			if (!text.matches("^([a-z0-9-\\+][A-Za-z0-9_]*)$"))
+			if (!text.matches("^([a-z0-9-\\+][A-Za-z0-9_]*)$")) {
 				text = quoteName(text);
+			}
 		}
-		if (path != null)
-			text = path + "." + text;
 		return text;
 	}
 	
@@ -70,23 +75,25 @@ public class Functor implements Serializable {
 	 * 通常の名前以外のもののうち、リスト構成要素や数値以外のものはクォートして返す。
 	 */
 	public String getQuotedAtomName() {
-		return QuoteAtomName(getAbbrName());
+		return quoteAtomName(getAbbrName());
 	}
 
+	/**
+	 * 改行文字を取り除いたアトム名を返す
+	 * @return 改行文字を取り除いたアトム名
+	 */
 	public String getQuotedFullyAtomName() {
 		// \rや\nがparseの際に邪魔になるため
-		return QuoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
+		return quoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
 	}
 
-	private String QuoteAtomName(String text) {
+	protected String quoteAtomName(String text) {
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\])$")) {
 			if (!text
 					.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
 				text = quoteName(text);
 			}
 		}
-		if (path != null)
-			text = path + "." + text;
 		return text;
 	}
 	
@@ -106,50 +113,6 @@ public class Functor implements Serializable {
 		return Util.quoteString(text, '\"');
 	}
 
-	public Object getValue() {
-		return name;
-	}
-
-	// //////////////////////////////////////////////////////////////
-
-	/**
-	 * モジュール名なしのファンクタを生成する。
-	 * 
-	 * @param name
-	 *            シンボル名
-	 */
-	public Functor(String name, int arity) {
-		this(name, arity, null);
-	}
-
-	/**
-	 * 指定されたモジュール名を持つファンクタを生成する。
-	 * 
-	 * @param name
-	 *            シンボル名（モジュール名を指定してはいけない）
-	 * @param arity
-	 *            引数の個数
-	 * @param path
-	 *            モジュール名（またはnull）
-	 */
-	public Functor(String name, int arity, String path) {
-		this.name = name.intern();
-		this.arity = arity;
-		if (path != null)
-			this.path = path.intern();
-	}
-
-	/**
-	 * 直列化復元時に呼ばれる。 author mizuno
-	 */
-	private void readObject(java.io.ObjectInputStream in) throws IOException,
-			ClassNotFoundException {
-		in.defaultReadObject();
-		name = name.intern();
-		if (path != null)
-			path = path.intern();
-	}
-
 	// //////////////////////////////////////////////////////////////
 
 	/** 適切に省略された表示名を取得 */
@@ -159,68 +122,28 @@ public class Functor implements Serializable {
 				Env.printLength - 2)
 				+ ".." : full;
 	}
-
-	/** 名前の表示名を取得する。サブクラスは空文字列が出力されないようにオーバーライドすること。 */
-	public String getName() {
-		return name;
-	}
-
-	/** アリティを取得する。 */
-	public int getArity() {
-		return arity;
-	}
-
-	/** このファンクタがアクティブかどうかを取得する。 */
-	public boolean isActive() {
-		// （仮）
-		if (arity == 0)
-			return true;
-		if (name.equals(""))
-			return false;
-		// char c = name.charAt(0);
-		// return c >= 'a' && c <= 'z';
-		if (name.equals(".") && arity == 3)
-			return false;
-		if (name.equals("[]") && arity == 1)
-			return false;
-		if (name.equals("thread"))
-			return false;
-		return getClass().equals(Functor.class);
-	}
-
-	/** このクラスのオブジェクトかどうかを調べる。 */
-	public boolean isSymbol() {
-		return getClass().equals(Functor.class);
+	
+	/**
+	 * ファンクタが所属するモジュール名を返す
+	 * （SymbolFunctor 以外は null を返す）
+	 * @return ファンクタが所属するモジュール名
+	 */
+	public String getPath() {
+		return null;
 	}
 
 	public String toString() {
-		if (Env.compileonly) {
-			return (path == null ? "" : Util.quoteString(path, '\'') + ".")
-					+ Util.quoteString(name, '\'') + "_" + getArity();
-		} else {
-			return getQuotedFunctorName() + "_" + getArity();
-		}
+		if (Env.compileonly)
+			return Util.quoteString(getName(), '\'') + "_" + getArity();
+		return getQuotedFunctorName() + "_" + getArity();
 	}
-
-	public int hashCode() {
-		return (path == null ? 0 : path.hashCode() * 2) + name.hashCode()
-				+ arity;
-	}
-
-	public boolean equals(Object o) {
-		// コンストラクタでinternしているので、==で比較できる。
-		// 引数oがFunctorのサブクラスの場合、falseを返す。
-		Functor f = (Functor) o;
-		return o.getClass().equals(Functor.class) && f.path == path
-				&& f.name == name && f.arity == arity;
-	}
-
-	public boolean isOUTSIDE_PROXY() {
-		return false;//equals(Functor.OUTSIDE_PROXY);
-	}
-
-	public String getPath() {
-		return path;
+	
+	/**
+	 * outside_proxy かどうかを返す．SpecialFunctor 以外は常に false
+	 * @return outside_proxy なら true
+	 */
+	public boolean isOutsideProxy() {
+		return false;
 	}
 
 	// //////////////////////////////////////////////////////////////
@@ -231,7 +154,7 @@ public class Functor implements Serializable {
 	// todo pathやStringFunctorを考慮に入れる
 
 	public String serialize() {
-		return getName() + "_" + getArity(); // todo 将来は、直列化を使う
+		return getName() + "_" + getArity(); // TODO 将来は、直列化を使う
 	}
 
 	public static Functor deserialize(String text) {
@@ -244,9 +167,9 @@ public class Functor implements Serializable {
 		} catch (Exception e) {
 		}
 		if (arity == 2) {
-			if (name.equals("$in"))
+			if (name.equals(SpecialFunctor.INSIDE_PROXY_NAME))
 				return Functor.INSIDE_PROXY;
-			if (name.equals("$out"))
+			if (name.equals(SpecialFunctor.OUTSIDE_PROXY_NAME))
 				return Functor.OUTSIDE_PROXY;
 		}
 		return build(name, arity, SrcName.PLAIN);
@@ -298,14 +221,45 @@ public class Functor implements Serializable {
 				// runtime.ObjectFunctor(name);
 			}
 		}
-		return new Functor(name, arity, path);
+		return new SymbolFunctor(name, arity, path);
 	}
+	
+	////////////////////////////////////////////////
+	// 抽象メソッド
+
+	public abstract int hashCode();
+
+	public abstract boolean equals(Object o);
+
+	/**
+	 * シンボルファンクタかどうかを判定する
+	 * @return シンボルを表すファンクタなら true 
+	 */
+	public abstract boolean isSymbol();
+
+	/**
+	 * inside_proxy かどうかを返す．SpecialFunctor 以外は常に false
+	 * @return inside_proxy なら true
+	 */
+	public boolean isInsideProxy() {
+		return false;
+	}
+	
+	/**
+	 * このファンクタがアクティブかどうかを取得する。
+	 * @return アクティブなら true
+	 */
+	public abstract boolean isActive();
+	
+	/**
+	 * ファンクタの値（名前）を返す
+	 * @return ファンクタの値（名前）
+	 */
+	public abstract Object getValue();
+	
+	/** 名前の表示名を取得する。サブクラスは空文字列が出力されないようにオーバーライドすること。 */
+	public abstract String getName();
+
+	/** アリティを取得する。 */
+	public abstract int getArity();
 }
-
-// ////////////////////////////
-
-/*
- * class VectorFunctor extends ObjectFunctor { public VectorFunctor() {
- * super(new java.util.ArrayList()); } public String toString() { return "{ ...
- * }"; } }
- */

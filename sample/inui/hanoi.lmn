@@ -2,12 +2,12 @@ io.use.
 
 //function hanoi
 R=do(hanoi(N, From, To)) :- int(N), int(From), int(To), N = 1 |
-	R=do([pr([string.of_int(N),string.of_int(From),string.of_int(To),"\n"])]).
+	R=do([pr([string.str_of_int(N),string.str_of_int(From),string.str_of_int(To),"\n"])]).
 R=do(hanoi(N, From, To)) :- int(N), int(From), int(To), N > 1 |
-	R=do([hanoi(N-1, From, 6-From-To), pr([string.of_int(N),string.of_int(From),string.of_int(To),"\n"]), hanoi(N-1, 6-From-To, To)]).
+	R=do([hanoi(N-1, From, 6-From-To), pr([string.str_of_int(N),string.str_of_int(From),string.str_of_int(To),"\n"]), hanoi(N-1, 6-From-To, To)]).
 
 //function pr
-R=do(pr(S)):-R=print(S).
+R=do(pr(S)):-R=lprint(S).
 
 //main
 r=do(hanoi(3, 1, 2)).

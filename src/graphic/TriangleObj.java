@@ -8,12 +8,12 @@ import java.util.Iterator;
 import runtime.Membrane;
 import runtime.Atom;
 import runtime.Functor;
-import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 public class TriangleObj extends GraphicObj{
 
 	final static
-	private Functor POSITION_ATOM = new Functor("position", 6);
+	private Functor POSITION_ATOM = new SymbolFunctor("position", 6);
 	
 	private int[] posX;
 	private int[] posY;

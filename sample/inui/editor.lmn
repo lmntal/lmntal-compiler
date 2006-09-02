@@ -83,6 +83,7 @@ class SaveAction implements ActionListener {
 }
 :].
 
+//OpenAction クラスのラッパーモジュール
 {
 module(openAction).
 H=openAction.new(JT) :- class(JT, "javax.swing.JTextArea") | H=[:/*inline*/
@@ -94,6 +95,7 @@ H=openAction.new(JT) :- class(JT, "javax.swing.JTextArea") | H=[:/*inline*/
 	:](JT).
 }.
 
+//SaveAction クラスのラッパーモジュール
 {
 module(saveAction).
 H=saveAction.new(JT) :- class(JT, "javax.swing.JTextArea") | H=[:/*inline*/

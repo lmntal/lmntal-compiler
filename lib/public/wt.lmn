@@ -34,7 +34,7 @@ class LMNtalFrame extends JFrame{
     addWindowListener(new WindowAdapter(){
       public void windowClosing(WindowEvent e){
         mem.asyncLock();
-        mem.newAtom(new Functor("terminate",0));
+        mem.newAtom(new SymbolFunctor("terminate",0));
         mem.asyncUnlock();
       }
     });
@@ -62,7 +62,7 @@ wt.newFrame({$p,@r}) :- {wt.createFrame,$p,@r}.
 wt.createFrame :- 
   [:/*inline*/
     LMNtalFrame frame = new LMNtalFrame((Membrane)mem);
-    Atom a = mem.newAtom(new Functor("frame",1));
+    Atom a = mem.newAtom(new SymbolFunctor("frame",1));
     Atom b = mem.newAtom(new ObjectFunctor(frame));
     mem.newLink(a,0,b,0);
     mem.removeAtom(me);
@@ -109,7 +109,7 @@ gridPanel(R,C),frame(F) :- class(F,"LMNtalFrame"),int(R),int(C) |
     Panel grid = new Panel(new GridLayout(rows,cols));
     frame.getContentPane().add(grid);
     PriorityQueue pQueue = new PriorityQueue();
-    Atom a = mem.newAtom(new Functor("grid",2));
+    Atom a = mem.newAtom(new SymbolFunctor("grid",2));
     Atom b = mem.newAtom(new ObjectFunctor(grid));
     Atom c = mem.newAtom(new ObjectFunctor(pQueue));
     mem.newLink(a,0,b,0);
@@ -128,7 +128,7 @@ borderPanel,frame(F) :- class(F,"LMNtalFrame") |
     LMNtalFrame frame = (LMNtalFrame)framefunc.getObject();
     Panel border = new Panel(new BorderLayout());
     frame.getContentPane().add(border);
-    Atom a = mem.newAtom(new Functor("border",1));
+    Atom a = mem.newAtom(new SymbolFunctor("border",1));
     Atom b = mem.newAtom(new ObjectFunctor(border));
     mem.newLink(a,0,b,0);
     mem.removeAtom(me.nthAtom(0));
@@ -156,7 +156,7 @@ addButton(T,L,E),grid(P,Q),frame(F) :-
         bt.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e) {
             memb.asyncLock();
-            memb.newAtom(new Functor(event,0));
+            memb.newAtom(new SymbolFunctor(event,0));
             memb.asyncUnlock();
           }
         });
@@ -192,7 +192,7 @@ addButton(T,L,E),border(B),frame(F) :-
         bt.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e){
             memb.asyncLock();
-            memb.newAtom(new Functor(event,0));
+            memb.newAtom(new SymbolFunctor(event,0));
             memb.asyncUnlock();
           }
         });

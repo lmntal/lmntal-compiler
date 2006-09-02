@@ -8,17 +8,19 @@ import java.math.BigInteger;
  * @since 2006.07.03
  */
 
-public class BigIntegerFunctor extends Functor {
-	BigInteger value;
-	public BigIntegerFunctor(BigInteger value) { super(value.toString(),1);  this.value = value; }
-//	public BigIntegerFunctor(String value) { super(value,1);  this.value = new BigInteger(value); }
-	public int hashCode() { return value.hashCode(); }
-	public BigInteger intValue() { return value; } //Object を返す方だと cast が面倒
-	public Object getValue() { return value; }
+public class BigIntegerFunctor extends ObjectFunctor {
+	public BigIntegerFunctor(BigInteger value) {
+		super(value);
+	}
+	
+	public BigInteger intValue() {
+		return (BigInteger)data;
+	}
+	
 	public boolean equals(Object o) {
-		return (o instanceof BigIntegerFunctor) && ((BigIntegerFunctor)o).value.equals(value);
+		return (o instanceof BigIntegerFunctor) && ((BigIntegerFunctor)o).data.equals(data);
 	}
 	protected String getAbbrName() {
-		return value.toString();
+		return data.toString();
 	}
 }

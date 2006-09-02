@@ -335,7 +335,7 @@ public final class Membrane extends QueuedEntity {
 	
 	/** [final] 1引数のnewAtomを呼び出すマクロ */
 	final Atom newAtom(String name, int arity) {
-		return newAtom(new Functor(name, arity));
+		return newAtom(new SymbolFunctor(name, arity));
 	}	
 	/** [final] この膜にアトムを追加するための内部命令 */
 	protected final void onAddAtom(Atom atom) {
@@ -954,7 +954,7 @@ public final class Membrane extends QueuedEntity {
 				}
 				else {
 					// この膜を通過して無関係な膜に入っていくリンクを除去
-					if (a1.getFunctor().isOUTSIDE_PROXY()
+					if (a1.getFunctor().isOutsideProxy()
 					 && a1.args[0].getAtom().getMem().getParent() != this) {
 						if (!removeList.contains(outside)) {
 							unifyLocalAtomArgs(outside, 0, a1, 0);
@@ -1006,7 +1006,7 @@ public final class Membrane extends QueuedEntity {
 			 && outside.args[0].getAtom().getMem().getParent() != this) {
 				// outsideの第2引数のリンク先がoutsideの場合
 				Atom a1 = outside.args[1].getAtom();
-				if (a1.getFunctor().isOUTSIDE_PROXY()) {
+				if (a1.getFunctor().isOutsideProxy()) {
 					// 2つめのoutsideの第1引数のリンク先が子膜でない場合
 					if (a1.args[0].getAtom().getMem() != null // 追加 n-kato 2004-10-30 (*)
 					 && a1.args[0].getAtom().getMem().getParent() != this) {

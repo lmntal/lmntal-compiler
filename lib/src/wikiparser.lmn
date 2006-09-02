@@ -18,101 +18,94 @@ HISTORY
 */
 
 //テスト用コード
-/*a=wikiparser.parse([:
-*見出し1
-**見出し2
-***見出し3
--箇条書き1
--箇条書き2
--[[リンク]]
------
- 整形済み''テキスト''だよ
- ここも整形済み'''テキスト'''だよ
+a=wikiparser.parse([
+"*見出し1",
+"**見出し2",
+"***見出し3",
+"-箇条書き1",
+"-箇条書き2",
+"-[[リンク]]",
+"-----",
+" 整形済み''テキスト''だよ",
+" ここも整形済み'''テキスト'''だよ",
+"",
+"ここは''段落''だよ",
+"ここも'''段落'''だよ",
+"",
+"----",
+"+番号つき箇条書き1",
+"+番号つき箇条書き2",
+"//コメント"
+]).
 
-ここは''段落''だよ
-ここも'''段落'''だよ
-
-----
-+番号つき箇条書き1
-+番号つき箇条書き2
-//コメント
-:]).*/
+io.use.
+a(S) :- r=io.print(S).
 
 {
 module(wikiparser).
 
-/**
- * String -> String
- */
-//TODO ブロック要素とインライン要素の解析を分ける
-//TODO HTML の構造を返すようにする．htmlToString も必要になる
-H=wikiparser.parse(S) :- string(S) | H=seq.run({s0=list.map(pre, string.split("\r*\n", S))}, [
-	{
-	if.use.
-	L=[pre, S] :- L=pre(S).
-	//インライン要素の前に整形済みテキストをやる
-	L=pre(S) :- string(S) |
-		L=if(string.match(S, "^[ ]"), string.replace(S, "^[ ](.*)", "<pre>$1</pre>"), s(S)).
-	////インライン要素は全部試す
-	//取消線
-	L=s(S) :- string(S) |
-		L=i(string.replace(S, "%%(.*)%%", "<s>$1</s>")).
-	//斜体
-	L=i(S) :- string(S) |
-		L=strong(string.replace(S, "'''(.*)'''", "<i>$1</i>")).
-	//強調
-	L=strong(S) :- string(S) |
-		L=external_link1(string.replace(S, "''(.*)''", "<strong>$1</strong>")).
-	//外部リンク（名前あり）
-	L=external_link1(S) :- string(S) |
-		L=external_link2(string.replace(S, "\\[\\[(.*):(http://.*)\\]\\]", "<a href=$2>$1</a>")).
-	//外部リンク（名前なし）
-	L=external_link2(S) :- string(S) |
-		L=internal_link(string.replace(S, "\\[\\[(http://.*)\\]\\]", "<a href=$1>$1</a>")).
-	//内部リンク
-	L=internal_link(S) :- string(S) |
-		L=br(string.replace(S, "\\[\\[(.*)\\]\\]", "<a href=lmnwiki.cgi?cmd=view&name=$1>$1</a>")).		
-	//行末改行
-	L=br(S) :- string(S) |
-		L=hr(string.replace(S, "~$", "<br>")).
-	////ブロック要素はどれか１つ反応したら終わり
-	//水平線
-	L=hr(S) :- string(S) |
-		L=if(string.match(S, "^\\-{4,}"), string.replace(S, "^\\-+", "<hr>"), section3(S)).
-	//見出し
-	L=section3(S) :- string(S) |
-		L=if(string.match(S, "^\\*{3}"), string.replace(S, "^\\*{3}(.*)", "<h4>$1</h4>"), section2(S)).
-	L=section2(S) :- string(S) |
-		L=if(string.match(S, "^\\*{2}"), string.replace(S, "^\\*{2}(.*)", "<h3>$1</h3>"), section1(S)).
-	L=section1(S) :- string(S) |
-		L=if(string.match(S, "^\\*{1}"), string.replace(S, "^\\*{1}(.*)", "<h2>$1</h2>"), ul3(S)).
-	//箇条書き
-	L=ul3(S) :- string(S) |
-		L=if(string.match(S, "^[-]{3}"), string.replace(S, "^[-]{3}(.*)", "<ul><ul><ul><li>$1</li></ul></ul></ul>"), ul2(S)).
-	L=ul2(S) :- string(S) |
-		L=if(string.match(S, "^[-]{2}"), string.replace(S, "^[-]{2}(.*)", "<ul><ul><li>$1</li></ul></ul>"), ul1(S)).
-	L=ul1(S) :- string(S) |
-		L=if(string.match(S, "^[-]{1}"), string.replace(S, "^[-]{1}(.*)", "<ul><li>$1</li></ul>"), ol(S)).
-	//番号つき箇条書き
-	L=ol(S) :- string(S) |
-		L=if(string.match(S, "^[+]"), string.replace(S, "^[+](.*)", "<ol><li>$1</li></ol>"), comment(S)).
-	//コメント
-	L=comment(S) :- string(S) |
-		L=if(string.match(S, "^//"), "", p(S)).
-	//段落は最後にチェック
-	L=p(S) :- string(S), S \= "" |
-		L=string.join("", ["<p>", S, "</p>"]).
-	L=p(S) :- string(S), S == "" |
-		L=S.
-	},
-	{
-	s0(Z) :- s3=string.join("\n", Z).
-	s3(S) :- s4=string.replace(S, "</pre>\n<pre>", "\n").
-	s4(S) :- s5=string.replace(S, "</p>\n<p>", "\n").
-	s5(S) :- s6=string.replace(S, "</ul>\n<ul>", "\n").
-	s6(S) :- ret=string.replace(S, "</ol>\n<ol>", "\n").
-	}
-	]).
-X={ret(S), $p[], @p}/ :- string(S) | X=S.
-H=seq.run(S, []) :- H=S.
+//[String] -> String
+H=wikiparser.parse(List) :-
+	H=uniq_ol(uniq_ul(uniq_p(uniq_pre(wikiparser.parse_sub(List))))), if.use.
+
+//[String] -> String
+H=wikiparser.parse_sub([S|Z]) :- string(S) |
+	H=string.join("\n", [pre(S), wikiparser.parse_sub(Z)]).
+	
+//[String] -> String
+H=wikiparser.parse_sub([]) :- H="".
+
+//インライン要素の前に整形済みテキストをやる
+L=pre(S) :- string(S) |
+	L=if(string.match(S, "^[ ]"), string.replace(S, "^[ ](.*)", "<pre>$1</pre>"), block(inline(S))).
+
+//インライン要素は全部試す
+H=inline(S) :- H=s(i(strong(external_link_with_name(external_link_with_noname(internal_link(br(S))))))).
+
+//インライン要素
+H=s(S) :- string(S) | H=string.replace(S, "%%(.*)%%", "<s>$1</s>").
+H=i(S) :- string(S) | H=string.replace(S, "'''(.*)'''", "<i>$1</i>").
+H=strong(S) :- string(S) | H=string.replace(S, "''(.*)''", "<strong>$1</strong>").
+H=external_link_with_name(S) :- string(S) | H=string.replace(S, "\\[\\[(.*):(http://.*)\\]\\]", "<a href=$2>$1</a>").
+H=external_link_with_noname(S) :- string(S) | H=string.replace(S, "\\[\\[(http://.*)\\]\\]", "<a href=$1>$1</a>").
+H=internal_link(S) :- string(S) | H=string.replace(S, "\\[\\[(.*)\\]\\]", "<a href=lmnwiki.cgi?cmd=view&name=$1>$1</a>").		
+H=br(S) :- string(S) | H=string.replace(S, "~$", "<br>").
+
+//ブロック要素はどれか１つ反応したら終わり
+H=block(S) :- H=hr(S).
+
+//水平線
+L=hr(S) :- string(S) |
+	L=if(string.match(S, "^\\-{4,}"), string.replace(S, "^\\-+", "<hr>"), section3(S)).
+//見出し
+L=section3(S) :- string(S) |
+	L=if(string.match(S, "^\\*{3}"), string.replace(S, "^\\*{3}(.*)", "<h4>$1</h4>"), section2(S)).
+L=section2(S) :- string(S) |
+	L=if(string.match(S, "^\\*{2}"), string.replace(S, "^\\*{2}(.*)", "<h3>$1</h3>"), section1(S)).
+L=section1(S) :- string(S) |
+	L=if(string.match(S, "^\\*{1}"), string.replace(S, "^\\*{1}(.*)", "<h2>$1</h2>"), ul3(S)).
+//箇条書き
+L=ul3(S) :- string(S) |
+	L=if(string.match(S, "^[-]{3}"), string.replace(S, "^[-]{3}(.*)", "<ul><ul><ul><li>$1</li></ul></ul></ul>"), ul2(S)).
+L=ul2(S) :- string(S) |
+	L=if(string.match(S, "^[-]{2}"), string.replace(S, "^[-]{2}(.*)", "<ul><ul><li>$1</li></ul></ul>"), ul1(S)).
+L=ul1(S) :- string(S) |
+	L=if(string.match(S, "^[-]{1}"), string.replace(S, "^[-]{1}(.*)", "<ul><li>$1</li></ul>"), ol(S)).
+//番号つき箇条書き
+L=ol(S) :- string(S) |
+	L=if(string.match(S, "^[+]"), string.replace(S, "^[+](.*)", "<ol><li>$1</li></ol>"), comment(S)).
+//コメント
+L=comment(S) :- string(S) |
+	L=if(string.match(S, "^//"), "", p(S)).
+//段落は最後にチェック
+L=p(S) :- string(S), S \= "" |
+	L=string.join("", ["<p>", S, "</p>"]).
+L=p(S) :- string(S), S == "" |
+	L=S.
+
+H=uniq_pre(S) :- H=string.replace(S, "</pre>\n<pre>", "\n").
+H=uniq_p(S) :- H=string.replace(S, "</p>\n<p>", "\n").
+H=uniq_ul(S) :- H=string.replace(S, "</ul>\n<ul>", "\n").
+H=uniq_ol(S) :- H=string.replace(S, "</ol>\n<ol>", "\n").
+
 }.

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="javadoc">
+<target name="javadoc">
+<javadoc access="private" additionalparam=" -encoding &quot;euc-jp&quot; -header &quot;&lt;META http-equiv=Content-Type content=\&quot;text/html; charset=euc-jp\&quot;&gt;&quot;" author="true" classpath="/opt/eclipse/plugins/org.junit_3.8.1/junit.jar" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="gui,compile.parser,runtime,graphic,test.graph,module,compile.parser.intermediate,runtime.systemRuleset,java_cup.runtime,debug,compile.structure,type,compile,test,chorus,util" source="1.4" sourcepath="src" splitindex="true" use="true" version="true">
+<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
+</javadoc>
+</target>
+</project>

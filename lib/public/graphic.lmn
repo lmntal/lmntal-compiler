@@ -19,7 +19,7 @@ module(graphic).
 graphic.use :- [:/*inline*/
 	Env.fGraphic = true;
 	Env.initGraphic();
-	Atom atom = mem.newAtom(new Functor("go", 0));
+	Atom atom = mem.newAtom(new SymbolFunctor("go", 0));
 	me.remove();
 :].
 
@@ -27,7 +27,7 @@ graphic.use :- [:/*inline*/
 graphic.norepaint :- [:/*inline*/
 	if(null != Env.LMNgraphic){
 		Env.LMNgraphic.setRepaint((Membrane)mem, false);
-		Atom atom = mem.newAtom(new Functor("norepaint_go", 0));
+		Atom atom = mem.newAtom(new SymbolFunctor("norepaint_go", 0));
 		me.remove();
 	}	
 :].
@@ -35,7 +35,7 @@ graphic.norepaint :- [:/*inline*/
 graphic.repaint :- [:/*inline*/
 	if(null != Env.LMNgraphic){
 		Env.LMNgraphic.setRepaint((Membrane)mem, true);
-		Atom atom = mem.newAtom(new Functor("repaint_go", 0));
+		Atom atom = mem.newAtom(new SymbolFunctor("repaint_go", 0));
 		me.remove();
 	}
 :].
@@ -46,7 +46,7 @@ graphic.perpetualUse :- [:/*inline*/
 	Env.fGraphic = true;
 	Env.initGraphic();
 	mem.makePerpetual(true);
-	Atom atom = mem.newAtom(new Functor("go", 0));
+	Atom atom = mem.newAtom(new SymbolFunctor("go", 0));
 	me.remove();
 :].
 

@@ -406,7 +406,7 @@ public class LMNParser {
 				// Xがsubmemの子膜への直通リンクであり、そこでの膜間リンク名が1^Xの場合は、2^Xとする。
 				String index = "1";
 				if (freeLink.atom instanceof Atom
-				 && ((Atom)freeLink.atom).functor.isOUTSIDE_PROXY()
+				 && ((Atom)freeLink.atom).functor.isOutsideProxy()
 				 && freeLink.atom.args[0].name.startsWith("1") ) {
 				 	index = "2";
 				}

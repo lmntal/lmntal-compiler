@@ -117,7 +117,7 @@ sys.perpetual(off) :- [:/*inline*/
  */
 H=sys.atomCount(Name, Arity) :- unary(Name), int(Arity) | H=[:/*inline*/
 	try {
-		int count = mem.getAtomCountOfFunctor(new Functor(me.nth(0), ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue()));
+		int count = mem.getAtomCountOfFunctor(new SymbolFunctor(me.nth(0), ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue()));
 		Atom p = mem.newAtom(new IntegerFunctor(count));
 		me.nthAtom(0).remove();
 		me.nthAtom(1).remove();
@@ -166,9 +166,9 @@ H=sys.sleep(Time) :- H=[:/*inline*/
 	Atom a = null;
 	try {
 		Thread.sleep(time);
-		a = mem.newAtom(new Functor("done", 1));
+		a = mem.newAtom(new SymbolFunctor("done", 1));
 	} catch (InterruptedException e) {
-		a = mem.newAtom(new Functor("InterruptedException", 1));
+		a = mem.newAtom(new SymbolFunctor("InterruptedException", 1));
 	}
 	me.nthAtom(0).remove();
 	mem.relink(a, 0, me, 1);
