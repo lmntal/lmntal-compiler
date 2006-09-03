@@ -256,6 +256,7 @@ public class RuleCompiler {
 //		}
 //	}
 
+	/** 右辺のリンクを取得または生成する */
 	private List computeRHSLinks() {
 		List rhslinks = new ArrayList();
 		rhslinkpath = new HashMap();
@@ -350,7 +351,13 @@ public class RuleCompiler {
 		}
 	}
 
-	/** 右辺膜をコンパイルする */
+	/** 右辺膜をコンパイルする 
+	 * 
+	 * LMNParserが，左辺に出現するリンクに対して必要に応じて自由リンク管理アトムを挿入している
+	 * 
+	 * 左辺の膜のロックはマッチングの時点で行う
+	 * 
+	 * */
 	private void compile_r() throws CompileException {
 		Env.c("compile_r");
 		int formals = varcount;
@@ -367,15 +374,35 @@ public class RuleCompiler {
 		//Env.d("lhsmempaths.get(rs.leftMem) -> "+lhsmempaths.get(rs.leftMem));
 		//Env.d("rhsmempaths -> "+rhsmempaths);
 
+		/*
+		 * 左辺の明示的なプロセスを除去(所属膜との関係を絶つ)する
+		 * 非線形$pの全ての子膜を再帰的にlockする
+		 * 非線形$pの自由リンクにコネクタを挿入する
+		 * 
+		 * 終わると：
+		 * 左辺のアトム(明示的な自由リンク管理アトムを含む)/unaryは変数番号にバインドされ，所属膜からは除去され，実行アトムスタックからも除去されている
+		 * 左辺の膜は変数番号にバインドされ，親膜および実行膜スタックから除去され，ロックされている
+		 * 左辺のgroundは根が変数番号にバインドされ，所属膜からは除去されている
+		 * 型なし$pはマッチしたプロセスの全ての明示的でない自由リンクはstarの第1引数に出現するようになっている
+		 * 非線形型なし$pの場合更に明示的な自由リンクに=/2が挿入され，明示的な自由リンクのリストへのマップが生成されている
+		 * 非線形$pの子膜は再帰的にロックされている
+		 */
 		dequeueLHSAtoms();
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
 		if (removeLHSMem(rs.leftMem) >= 2) {
 			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
 		}
+
 		recursiveLockLHSNonlinearProcessContextMems();
 		insertconnectors();
+
+
+		// 右辺の構造と$pの内容，を再帰的に生成する
+		// $pの明示的でないリンクをはる
+
 		buildRHSMem(rs.rightMem);
+		/* 右辺の$pが配置された直後。このタイミングでなければならない筈 */
 		if (!rs.rightMem.processContexts.isEmpty()) {
 			body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
 		}
@@ -384,17 +411,29 @@ public class RuleCompiler {
 		buildRHSTypedProcesses();
 		buildRHSAtoms(rs.rightMem);
 		// ここでvarcountの最終値が確定することになっている。変更時は適切に下に移動すること。
+
+
+		//右辺の明示的なリンクを貼る
 		//getLHSLinks();
 		updateLinks();
 		deleteconnectors();
+		
+		//右辺のアトムを実行アトムスタックに積む
 		enqueueRHSAtoms();
+
+		//次の2つは右辺の構造の生成以降ならいつでもよい
 		addInline();
 		addRegAndLoadModules();
-		freeLHSSingletonProcessContexts();
+
+		// 左辺の残ったプロセスを解放する
+		freeLHSNonlinearProcessContexts();
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
 		freeLHSTypedProcesses();
 //		freeLHSSingletonProcessContexts(); // freememに先行させるため3行上に移動した n-kato 2005.1.13
+
+		// 膜をunlockする
+		
 		recursiveUnlockLHSNonlinearProcessContextMems();
 		unlockReusedOrNewRootMem(rs.rightMem);
 		//
@@ -425,8 +464,8 @@ public class RuleCompiler {
 		}
 	}
 	
+	/** ガードの取り込み */
 	private void inc_guard() {
-		// ガードの取り込み
 		varcount = lhsatoms.size() + lhsmems.size();
 		genTypedProcessContextPaths();
 		// typedcxtdefs = gc.typedcxtdefs;
@@ -448,15 +487,15 @@ public class RuleCompiler {
 		lhsmems  = hc.mems;
 		lhsatoms = hc.atoms;
 		genLHSPaths();
-		gc = new GuardCompiler(this, hc);
+		gc = new GuardCompiler(this, hc);		/* 変数番号の正規化 */
 		if (guard == null) return;
 		int formals = gc.varcount;
-		gc.getLHSLinks();
-		gc.fixTypedProcesses();
-		gc.checkMembraneStatus();
+		gc.getLHSLinks();								/* 左辺の全てのアトムのリンクについてgetlink命令を発行する */
+		gc.fixTypedProcesses();						/* 型付きプロセス文脈を一意に決定する */
+		gc.checkMembraneStatus();					/* プロセス文脈のない膜やstableな膜の検査をする */
 		varcount = gc.varcount;
-		compileNegatives();
-		fixUniqOrder();
+		compileNegatives();							/* 否定条件のコンパイル */
+		fixUniqOrder();									/* uniq命令を最後に移動 */
 		guard.add( 0, Instruction.spec(formals,varcount) );
 		guard.add( Instruction.jump(theRule.bodyLabel, gc.getMemActuals(),
 			gc.getAtomActuals(), gc.getVarActuals()) );
@@ -484,6 +523,8 @@ public class RuleCompiler {
 		}
 		if(found) guard.add(new Instruction(Instruction.UNIQ, vars));
 	}
+
+	/** 否定条件をコンパイルする */
 	void compileNegatives() throws CompileException{
 		Iterator it = rs.guardNegatives.iterator();
 		while (it.hasNext()) {
@@ -515,15 +556,16 @@ public class RuleCompiler {
 	int groundToSrcPath(ContextDef def) {
 		return ((Integer)groundsrcs.get(def)).intValue();
 	}
-	/***/
+	/**　*/
 	int rhstypedcxtToPath(Context cxt) {
 		return ((Integer)rhstypedcxtpaths.get(cxt)).intValue();
 	}
-	/***/
+	/**　*/
 	int rhsgroundToPath(Context cxt) {
 		return ((Integer)rhsgroundpaths.get(cxt)).intValue();
 	}
 
+	/** unary型プロセス文脈について、変数番号をガードコンパイラから取得する */
 	private void genTypedProcessContextPaths() {
 		Iterator it = gc.typedcxtdefs.iterator();
 		while (it.hasNext()) {
@@ -534,7 +576,7 @@ public class RuleCompiler {
 		}
 	}
 	
-	// ground型付きプロセス文脈定義について、ソースとなるリンクを取得する
+	/** ground型付きプロセス文脈定義について、根となるリンクを取得する */
 	private void getGroundLinkPaths() {
 		Iterator it = gc.groundsrcs.keySet().iterator();
 		while(it.hasNext()) {
@@ -553,6 +595,7 @@ public class RuleCompiler {
 //			typedcxtdefs.add(def);
 //		}
 //	}
+	/** 左辺の型付きプロセス文脈を除去する */
 	private void removeLHSTypedProcesses() {
 		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
@@ -571,7 +614,8 @@ public class RuleCompiler {
 				}
 			}
 		}
-	}	
+	}
+	/** 左辺の型付きプロセス文脈を解放する */
 	private void freeLHSTypedProcesses() {
 		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
@@ -586,19 +630,19 @@ public class RuleCompiler {
 		}
 	}	
 
-	//kudo
-	private void freeLHSSingletonProcessContexts(){
+	/** 非線形プロセス文脈の左辺出現を解放する */
+	private void freeLHSNonlinearProcessContexts(){
 		Iterator it = rs.processContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
-			if (def.rhsOccs.size() != 1) { // 非線型のとき1つだけ再利用するようにしたら size == 0 に直せる
+			if (def.rhsOccs.size() != 1) { // 非線型のとき1つだけ再利用するようにしたら size == 0 に直せる -> 再利用は最適化に任せることにしたので不要
 				body.add(new Instruction( Instruction.DROPMEM,
 					lhsmemToPath(def.lhsOcc.mem) ));
 			}
 		}
 	}
 
-	//kudo
+	/** 非線形プロセス文脈の左辺出現膜を再帰的にロックする */
 	private void recursiveLockLHSNonlinearProcessContextMems(){
 		Iterator it = rs.processContexts.values().iterator();
 		while (it.hasNext()) {
@@ -610,7 +654,7 @@ public class RuleCompiler {
 		}
 	}
 
-	//kudo
+	/** 非線形プロセス文脈の左辺出現膜を再帰的にロック解放する */
 	private void recursiveUnlockLHSNonlinearProcessContextMems(){
 		Iterator it = rs.processContexts.values().iterator();
 		while (it.hasNext()) {
@@ -624,7 +668,7 @@ public class RuleCompiler {
 		}
 	}
 
-
+	/** 右辺の型付きプロセス文脈を構築する */
 	private void buildRHSTypedProcesses() {
 		Iterator it = rs.typedProcessContexts.values().iterator();
 		while (it.hasNext()) {
@@ -768,6 +812,7 @@ public class RuleCompiler {
 		}
 	}
 	
+	/** 命令列を最適化する */
 	private void optimize() {
 		Env.c("optimize");
 //		Optimizer.optimize(memMatch, body);
@@ -952,6 +997,8 @@ public class RuleCompiler {
 	 * 得たsetオブジェクトへの参照が代入された変数を覚えておき、
 	 * プロセス文脈定義->setの変数番号
 	 * というマップに登録する。
+	 * 
+	 * プロセス文脈の自由リンクが実は局所リンクである場合に必要であるらしい
 	 */
 	private void insertconnectors(){
 		Iterator it = rs.processContexts.values().iterator();

@@ -59,6 +59,9 @@ public class LMNParser {
 	/**
 	 * メインメソッド。ソースファイルを解析し、プロセス構造が入った膜構造を生成する。
 	 * 解析後は構文エラーが修正され、リンクやコンテキスト名の解決、およびプロキシの作成が行われている。
+	 * 
+	 * 詳しくはaddSrcRuleToMem を参照。
+	 * 
 	 * @return ソースファイル全体が表すプロセス構造が入った膜構造
 	 * @throws ParseException
 	 */
@@ -67,9 +70,9 @@ public class LMNParser {
 		setRuleText(srcProcess);
 		Membrane mem = new Membrane(null);
 		expander.incorporateSignSymbols(srcProcess);
-		expander.incorporateModuleNames(srcProcess);
+//		expander.incorporateModuleNames(srcProcess);
 		expander.expandAtoms(srcProcess);
-//		expander.correctPragma(new LinkedList(), srcProcess, "connectRuntime"); // TODO ガードが無いので書けない
+//		expander.correctPragma(new LinkedList(), srcProcess, "connectRuntime"); // TODO ガードが無いので書けない ( やらなくてよくなった )
 		expander.correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = addProxies(mem);
@@ -330,7 +333,8 @@ public class LMNParser {
 		rule.name = sRule.name;
 		// 略記法の展開		
 		expander.expandRuleAbbreviations(sRule);
-		// todo 左辺のルールを構文エラーとして除去する
+		//  左辺のルールを構文エラーとして除去する
+		assertLHSRules(sRule.getHead());
 		
 		// 左辺およびガード型制約に対して、構造を生成し、リンク以外の名前を解決する
 		addProcessToMem(sRule.getHead(), rule.leftMem);		
@@ -340,15 +344,42 @@ public class LMNParser {
 		addGuardNegatives(sRule.getGuardNegatives(), rule, names);
 		addProcessToMem(sRule.getBody(), rule.rightMem);
 		resolveContextNames(rule, names);
+		
+		//略記法が展開されて構造が生成され，
+		//リンク以外の名前が解決されている ( $p,@pのContext.defがセットされている，*Vは双方向リンクがはられている )
+		
 		// プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する
-		addProxies(rule.leftMem);
+		// この時点ではアトムのリンク引数には自分自身のLinkOccurreceが格納されている
+		// これらが終わると，アトムのリンク引数のLinkOccurrenceのbuddyがセットされる
+		// リンクを繋ぐ作業はaddLinkOccurrenceで行われる
+		
+		addProxies(rule.leftMem); // addProxiesAndCoupleLinksであるべき?
 		coupleLinks(rule.guardMem);
 		addProxies(rule.rightMem);
 		addProxiesToGuardNegatives(rule);
 		coupleGuardNegativeLinks(rule);		// ガード否定条件のリンクを接続する
 		coupleInheritedLinks(rule);			// 右辺と左辺の自由リンクを接続する
-		//
+		
 		mem.rules.add(rule);
+	
+	}
+	
+	/**
+	 * アトム展開されたソース膜に対してルールが無いことを確認する
+	 * 
+	 */
+	private void assertLHSRules(List procs)throws ParseException{
+		Iterator it = procs.iterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcRule) {
+				//TODO 行番号など
+				throw new ParseException("SYNTAX ERROR: rule head has some rules.");
+			}
+			else if (obj instanceof SrcMembrane) {
+				assertLHSRules(((SrcMembrane)obj).process);
+			}
+		}
 	}
 
 	/** ガード否定条件の中間形式に対応する構造を生成する
@@ -435,6 +466,9 @@ public class LMNParser {
 			}
 			submem.freeLinks = newFreeLinks;
 		}
+		
+		// memの子膜の自由リンクはプロキシを挟まれてmemまで上がってきている
+		
 		return coupleLinks(mem);
 	}
 	/** ガード否定条件に対してaddProxiesを呼ぶ */
@@ -670,7 +704,8 @@ public class LMNParser {
 	}
 	
 	/** ヘッドのプロセス文脈、型付きプロセス文脈、ルール文脈、リンク束のリストを作成する。
-	 * 型なしプロセス文脈の明示的な引数が互いに異なることを確認する。
+	 * 型なしプロセス文脈の明示的な引数が互いに異なることを確認する。 
+	 * TODO 二つ目の仕事は別メソッドにすべき
 	 * @param mem 左辺膜、またはガード否定条件内等式制約右辺の構造を保持する膜
 	 * @param names コンテキストの限定名 (String) から ContextDef への写像 [in,out]
 	 * @param isLHS 左辺かどうか（def.lhsOccに追加するかどうかの判定に使用される）*/
@@ -867,10 +902,12 @@ public class LMNParser {
 	 *  @return 左辺およびガードに出現する限定名(String) -> ContextDef / LinkOccurrence(Bundles) */
 	private HashMap resolveHeadContextNames(RuleStructure rule) throws ParseException {
 		HashMap names = new HashMap();
-		enumTypedNames(rule.guardMem, names);
-		enumHeadNames(rule.leftMem, names, true);
+		//次のメソッド後には型付きプロセス文脈の pc.def.typed が true になる
+		enumTypedNames(rule.guardMem, names); // この時点では型付きプロセス文脈のみ
+		enumHeadNames(rule.leftMem, names, true); // この時点で型なしプロセス文脈およびルール文脈およびリンク束が登録される
 		// todo リンク束が左辺で閉じていないことを確認する
 		// ---リンク束が2回出現したかどうかを調べればよいだけ。
+		// ( ここではやらなくてよいかもしれない )
 		
 		// 左辺トップレベルのプロセス文脈を削除する
 		Iterator it = rule.leftMem.processContexts.iterator();
@@ -1041,10 +1078,10 @@ class SyntaxExpander {
 		incorporateSignSymbols(sRule.getBody());
 		
 		// - モジュール名のアトムファンクタへの取り込み
-		incorporateModuleNames(sRule.getHead());
-		incorporateModuleNames(typeConstraints);
-		incorporateModuleNames(guardNegatives);
-		incorporateModuleNames(sRule.getBody());
+//		incorporateModuleNames(sRule.getHead());
+//		incorporateModuleNames(typeConstraints);
+//		incorporateModuleNames(guardNegatives);
+//		incorporateModuleNames(sRule.getBody());
 		
 		// - 型制約の冗長な = を除去する
 		shrinkUnificationConstraints(typeConstraints);
@@ -1065,7 +1102,7 @@ class SyntaxExpander {
 		correctTypeConstraints(typeConstraints);
 		
 		// - 型制約に出現するリンク名Xに対して、ルール内の全てのXを$Xに置換する
-		HashMap typedLinkNameMap = computeTypedLinkNameMap(typeConstraints);
+		HashMap typedLinkNameMap = computeTypedLinkNameMap(typeConstraints);//" X"->"X"
 		unabbreviateTypedLinks(sRule.getHead(), typedLinkNameMap);
 		unabbreviateTypedLinks(typeConstraints, typedLinkNameMap);
 		unabbreviateTypedLinks(guardNegatives,  typedLinkNameMap);
@@ -1089,6 +1126,18 @@ class SyntaxExpander {
 		expandTypedProcessContexts(typeConstraints);
 		expandTypedProcessContexts(guardNegatives);
 		expandTypedProcessContexts(sRule.getBody());
+		
+		// 終わると：
+		// - ガード否定条件は[$p,[Q]]のリストという中間表現に変換されている
+		// - 数値の正負号の取り込まれている ( -(3) -> -3 )
+		// - ガード型制約のアトム展開
+		// -- 型制約の冗長な = を除去する
+		// - アトム展開（アトム引数の再帰的な展開）
+		// - 左辺と右辺の＠指定を処理する ( pragmaAtHostがnullかSrcProcessContextになり、必要に応じて  getruntime と connectruntime が追加される )
+		// - ガードのアトム引数にプロセス文脈へのリンクのみが存在するようになっている
+		// - リンク文字を使って表されていた型付きプロセス文脈が$pに置換されている
+		// - アトムの引数は全てリンクになっている ( ? ) -> なっていない ( @p, ルール等 )
+
 	}
 
 	/** ガード否定条件の根本的な構文エラーを訂正し、各否定条件を[$p,[Q]]のリストという中間形式に変換する。
