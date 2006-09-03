@@ -17,26 +17,26 @@ HISTORY
 module(list).
 
 /**
- * list.new(-Res)
+ * list.new(-Res):
  *
- * 空のリストを返します。
- * @param -Res 結果(空のリスト)
+ * Returns an empty list.
+ * @param -Res  the result (empty list)
  */
 H=list.new :- H=[].
 
 /**
  * list.is_empty(+List, -Res, -NewList)
  * 
- * Listが空かどうか検査し、空ならばtrue/1を、空でないならfalse/1をResに返します。
- * @param +List リスト
- * @param -Res 空のとき true/1, 空でないとき false/1
- * @param -NewList (変更されていない)リスト
+ * Res is bound to true if List is empty, false otherwise.
+ * @param +List list
+ * @param -Res  true/1 or false/1
+ * @param -NewList the original list (unchanged)
  * @example r=list.is_empty([],R), ret=R ==> r=[], ret=true
  */
 H=list.is_empty([], Return) :- H=[], Return=true.
 H=list.is_empty('.'(Value, Next), Return) :- H='.'(Value, Next), Return=false.
 
-/**
+/*
  * list.unshift(+List, +Obj, -NewList)
  *
  * リストListの先頭にObjを格納します。
@@ -44,10 +44,11 @@ H=list.is_empty('.'(Value, Next), Return) :- H='.'(Value, Next), Return=false.
  * @param +Obj 先頭に格納する要素
  * @param -NewList 更新されたリスト
  */
-H=list.unshift([], Obj) :- H='.'(Obj, []).
-H=list.unshift('.'(Value, Next), Obj) :- H='.'(Obj, '.'(Value, Next)).
+// H=list.unshift([], Obj) :- H='.'(Obj, []).
+// H=list.unshift('.'(Value, Next), Obj) :- H='.'(Obj, '.'(Value, Next)).
 
-/**
+
+/*
  * list.shift(+List, -Ret, -NewList)
  *
  * リストListの先頭要素を取り出します。
@@ -55,13 +56,13 @@ H=list.unshift('.'(Value, Next), Obj) :- H='.'(Obj, '.'(Value, Next)).
  * @param -Ret 取り出された要素
  * @param -NewList 更新されたリスト
  */
-H=list.shift([], Return) :- H=[], Return=nil.
-H=list.shift('.'(Value, Next), Return) :- H=Next, Return=Value.
+// H=list.shift([], Return) :- H=[], Return=nil.
+// H=list.shift('.'(Value, Next), Return) :- H=Next, Return=Value.
 
 /**
  * list.append(+List1, +List2, -Res)
  *
- * リストList1の後ろにリストList2を結合したリストをResに返します。
+ * Appends List1 and List2 and binds the result to Res
  */
 H=list.append([], B) :- H=B.
 H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
@@ -70,7 +71,7 @@ H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
 /**
  * list.of_queue(+Queue, -List)
  * 
- * キューQueueをリストに変換し、Listに返します。
+ * Converts Queue to a list and binds the result to List.
  * @see queue
  */
 H=list.of_queue(queue.new(Head, Head)) :- H=[].
@@ -84,7 +85,7 @@ H=list.of_queue(queue.new(Head, Tail)) :-
  * リストListの要素のうちFによってtrueが返るもののみを含むリストをResに返します。
  * @example r=list.grep(f, [1,2,3,4,5]).
  *          H=[f,N] :- N<3 | H=[true, N].
- *          H=[f,N]:-N>=3 | H=[false,N].
+ *          H=[f,N] :- N>=3 | H=[false,N].
  */
 H=list.grep(F, List) :- unary(F) | H=list.grep_s0(list.map(F, List)).
 H=list.grep_s0([ [true, El] | CDR ]) :- H=[El | list.grep_s0(CDR)].
@@ -99,16 +100,16 @@ H=list.grep_s0([]) :- H=[].
  */
 H=list.map(F, List) :- H=list.fold(F, [], List).
 
-/**
+/*
  * list.fold(+F, +I, +List, -Res):
  * 
  * H=list.fold(F, I, [B1, ..., Bn]) は H=[[F, B1], [F, B2], ..., [F, Bn]|I] です。
  * @example r=list.fold("+", 0, [1,2,3]). (H=[ ["+",A]|B] :- A+B=C | H=C).
  */
-H=list.fold(F, I, []) :- unary(F), unary(I) | H=I.
-H=list.fold(F, I, [CAR|CDR]) :- unary(F), unary(I) | H=[ [F, CAR] | list.fold(F, I, CDR)].
+//H=list.fold(F, I, []) :- unary(F), unary(I) | H=I.
+//H=list.fold(F, I, [CAR|CDR]) :- unary(F), unary(I) | H=[ [F, CAR] | list.fold(F, I, CDR)].
 
-/**
+/*
  * list.unfold
  * 
  * (Seed -> Boolean)
@@ -127,15 +128,15 @@ H=list.fold(F, I, [CAR|CDR]) :- unary(F), unary(I) | H=[ [F, CAR] | list.fold(F,
  * ==> r([0,1,2,3,4,5,6,7,8,9,10,11])
  * @see Gauche http://www.shiro.dreamhost.com/scheme/gauche/man/gauche-refj_216.html#SEC239
  */
-H=list.unfold(P, F, G, Seed, Tailgen) :-
-	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
-	H=list.unfold_s0(P, F, G, Seed, Tailgen, [P,Seed]).
-H=list.unfold_s0(P, F, G, Seed, Tailgen, true) :-
-	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
-	H=[ [F,Seed] | list.unfold_s0(P, F, G, [G,Seed], Tailgen, [P,Seed]) ].
-H=list.unfold_s0(P, F, G, Seed, Tailgen, false) :-
-	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
-	H=[ [F,Seed] ].
+//H=list.unfold(P, F, G, Seed, Tailgen) :-
+//	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
+//	H=list.unfold_s0(P, F, G, Seed, Tailgen, [P,Seed]).
+//H=list.unfold_s0(P, F, G, Seed, Tailgen, true) :-
+//	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
+//	H=[ [F,Seed] | list.unfold_s0(P, F, G, [G,Seed], Tailgen, [P,Seed]) ].
+//H=list.unfold_s0(P, F, G, Seed, Tailgen, false) :-
+//	unary(P),unary(F),unary(G),unary(Seed),unary(Tailgen) |
+//	H=[ [F,Seed] ].
 
 /**
  * list.flatten(+List, -Res)
@@ -155,7 +156,7 @@ H=list.flatten([[CAR|CADR]|CDR]) :- H=list.flatten([CAR|list.append(CADR,CDR)]).
 /**
  * list.choose_k(+List, +K, -Res)
  *
- * 要素数 n 個のリストListから k 個順不同で取り出す全ての組み合わせをリストにしてResに返す。
+ * Generates a list of all ways of choosing K elements from List and binds it to Res.
  *
  * @example
  * r=choose_k([a, b, c, d, e], 3).
@@ -174,7 +175,7 @@ H=list.append(list.dist(Hd, list.choose_k(Tl, K-1)), list.choose_k(Tl, K)).
 H=list.dist(A, []) :- ground(A) | H=[].
 H=list.dist(A, [Hd|Tl]) :- ground(A) | H=[[A|Hd]|list.dist(A, Tl)].
 
-/**
+/*
  * list.uniq
  * 
  * List -> List
@@ -187,7 +188,7 @@ H=list.dist(A, [Hd|Tl]) :- ground(A) | H=[[A|Hd]|list.dist(A, Tl)].
 //H=list.uniq0([Hd|Tl]) :- uniq(Hd) | H=[Hd|list.uniq0(Tl)].
 //H={HH=list.uniq0([Hd|Tl]), $p[HH,Tl], @r}/ :- ground(Hd) | H={HH=list.uniq0(Tl), $p[HH,Tl], @r}.
 
-/**
+/*
  * list.uniq
  * 
  * List -> List
@@ -195,9 +196,10 @@ H=list.dist(A, [Hd|Tl]) :- ground(A) | H=[[A|Hd]|list.dist(A, Tl)].
  * not_uniq を追加したのでこう書ける
  * 現状、uniq() の履歴が共有されてしまう。
  */
-H=list.uniq([     ]) :-                H=[                ].
-H=list.uniq([Hd|Tl]) :-     uniq(Hd) | H=[Hd|list.uniq(Tl)].
-H=list.uniq([Hd|Tl]) :- not_uniq(Hd) | H=    list.uniq(Tl) .
+// H=list.uniq([     ]) :-                H=[                ].
+// H=list.uniq([Hd|Tl]) :-     uniq(Hd) | H=[Hd|list.uniq(Tl)].
+// H=list.uniq([Hd|Tl]) :- not_uniq(Hd) | H=    list.uniq(Tl) .
+
 
 
 list.use_guard :-
@@ -254,7 +256,7 @@ public class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
 /**
  * list.split(+List, +N, -Tail, -Head)
  *
- * リストをN番目で２つに分割して，分割後のリストをTail, Headに返します
+ * Trims List after the first N element and binds it to Head and the rest to Tail.
  * 2006.2.28 by inui
  */
 H=list.split(List,  X, Tail) :- X=0    | H=[], Tail=List.
@@ -264,22 +266,22 @@ H=list.split([Y|Z], X, Tail) :- X>0    | H=[Y|list.split(Z,X-1,Tail)].
 /**
  *  list.length(List, Len, NewList)
  *  
- *  Listの長さをLenに返します。
- *  2006/06/07 佐々木
+ *  Bind the length of List to Len
+ *  2006/06/07 Sasaki
  */
 H=list.length([Head|Tail], Len) :- H=[Head|list.length(Tail,Len1)], Len=Len1+1.
 H=list.length([],Len) :- H=[], Len=0.
 
 /**
- *  list.set(List, N, X, NewList, Old)
+ *  list.update(List, N, X, NewList, Old)
  *
  *  ListのN番目(N=0,1,2,...)の要素を新要素Xで置換し、置換対象となった要素Oldを返します。
  *  ただし、N > list.length(List) の場合は置換は行わず、Xをそのまま返します。
  *  2006/06/07 佐々木
  */
-H=list.set([], N, X, Ls) :- N>0 | H=X, Ls=[].
-H=list.set([Head|Tail], N, X, Ls) :- N=0 | H=Head, Ls=[X|Tail].
-H=list.set([Head|Tail], N, X, Ls) :- N>0 | H=list.set(Tail,N-1,X,Ls1), Ls=[Head|Ls1].
+H=list.update([], N, X, Ls) :- N>0 | H=X, Ls=[].
+H=list.update([Head|Tail], N, X, Ls) :- N=0 | H=Head, Ls=[X|Tail].
+H=list.update([Head|Tail], N, X, Ls) :- N>0 | H=list.update(Tail,N-1,X,Ls1), Ls=[Head|Ls1].
 
 /**
  *  list.get(List, N, Got, NewList)
@@ -294,7 +296,7 @@ H=list.get([Head|Tail], N, Got) :- N>0 | H=[Head|list.get(Tail,N-1,Got)].
 /**
  * list.reverse(+List, -ReversedList)
  *
- * 要素の順序を逆にしたリストを返します。
+ * Reverse List and binds it to ReversedList.
  * 2006/07/05 inui
  */
 H=list.reverse(List) :- H=list.reverse(List, []).

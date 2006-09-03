@@ -1,6 +1,5 @@
 /**
   Coyright(C) 2006 Ueda Laboratory LMNtal Group, All rights reserved.
-  $Author: inui $
   
 NAME
 	If module
@@ -8,22 +7,44 @@ NAME
 SYNOPSIS
 
 AUTHOR
+  Atsuyuki Inui
 	Kazunori Ueda
 
 HISTORY
 	2006/05/26(Fri) 21:22:23
+	2006-08-30
 */
 
 {
 module(if).
 
-// constructor
+/**
+ * if.use:
+ *
+ * Makes boolean operators available
+ */
 if.use :- boolean.use.
+
+/**
+ * H=if(Bool, Then, Else):
+ *
+ * Unwraps Then part or Else part depending upon the Bool value
+ * and connects its sole free link to H.  The other alternative
+ * is discarded.
+ */	
 
 H=if(true,  T, F), {$t[T]}, {$f[F]} :- $t[H].
 H=if(false, T, F), {$t[T]}, {$f[F]} :- $f[H].
 
+/**
+ * H='?'(Bool, Then, Else):
+ *
+ * Chooses Then or Else (both ground terms) depending on the Bool value
+ * and connects it to H.  The other alternative is discarded.
+ * Note that this is an eager conditional and the two alternatives
+ * may start evaluation before Bool has been evaluated.
+ */	
 //2006.7.23 by inui (else 節に if 文を生成するようなプロセスを書くと無限ループするので注意)
-H=if(true,  Te, Fe) :- ground(Fe) | H=Te.
-H=if(false, Te, Fe) :- ground(Te) | H=Fe.
+H='?'(true,  Te, Fe) :- ground(Fe) | H=Te.
+H='?'(false, Te, Fe) :- ground(Te) | H=Fe.
 }.

@@ -18,9 +18,12 @@ HISTORY
 module(integer).
 
 /**
- * a(set(1,100))
- * -> a(1),...,a(100)
- * by Nakano
+ * integer.set($a,$b,$g):
+ *
+ * Creates a (multi)set $g[$a], $g[$a+1], ..., $g[$b].
+ * (e.g., a=set(1,100) --> a=1, ..., a=100)
+ * $a and $b must be integers.
+ * $g must be a ground term.
  */
 H = integer.set(A, B) :- ground(H), int(A), int(B), A > B | .
 H = integer.set(A, B) :- int(A), int(B), A =< B | H=[:/*inline*/
@@ -45,7 +48,7 @@ H = integer.set(A, B) :- int(A), int(B), A =< B | H=[:/*inline*/
   }
 
   for(int i = start; i < stop; i++){
-    /*複製*/
+    /* copying */
   	Map atomMap = new HashMap();
     atomMap.put(result, mem.newAtom(result.getFunctor()));
     atomMap = mem.copyAtoms(result, atomMap);
@@ -58,102 +61,118 @@ H = integer.set(A, B) :- int(A), int(B), A =< B | H=[:/*inline*/
  :](A, B).
 
 /**
- * +
- * 
+ * H = '+'(A,B):
+ *
+ * H is bound to A+B
  */
 H='+'(A, B) :- int(A),int(B),A+B=C | H=C.
 
 /**
- * -
- * 
+ * H = '-'(A,B):
+ *
+ * H is bound to A-B
  */
 H='-'(A, B) :- int(A),int(B),A-B=C | H=C.
 
 /**
- * *
+ * H = '*'(A,B):
  *
+ * H is bound to A*B
  */
 H='*'(A, B) :- int(A),int(B),A*B=C | H=C.
 
 /**
- * /
+ * H = '/'(A,B):
  *
+ * H is bound to A/B
  */
 H='/'(A, B) :- int(A),int(B),A/B=C | H=C.
 
 /**
- * mod
+ * H = mod(A,B):
  *
+ * H is bound to A mod B
  */
-H='mod'(A, B) :- int(A),int(B),A mod B = C | H=C.
+H=mod(A, B) :- int(A),int(B),A mod B = C | H=C.
 
 /*
- * abs
+ * H = abs(N):
  *
+ * H is bound to abs(N)
  */
 H=integer.abs(N) :- int(N),N<0 | H=-1*N.
 H=integer.abs(N) :- int(N),N>=0 | H=N.
 
 /*
- * >
+ * H='>'(A,B):
  *
+ * H is bound to true when A>B, false otherwise
  */
 H='>'(A, B) :- int(A),int(B),A>B | H=true.
 H='>'(A, B) :- int(A),int(B),A=<B | H=false.
 
 /*
- * <
+ * H='<'(A,B):
  *
+ * H is bound to true when A<B, false otherwise
  */
 H='<'(A, B) :- int(A),int(B),A>=B | H=false.
 H='<'(A, B) :- int(A),int(B),A<B | H=true.
 
 /*
- * >=
+ * H='>='(A,B):
  *
+ * H is bound to true when A>=B, false otherwise
  */
 H='>='(A, B) :- int(A),int(B),A>=B | H=true.
 H='>='(A, B) :- int(A),int(B),A<B | H=false.
 
 /*
- * =<
+ * H='=<'(A,B):
  *
+ * H is bound to true when A=<B, false otherwise
  */
 H='=<'(A, B) :- int(A),int(B),A>B | H=false.
 H='=<'(A, B) :- int(A),int(B),A=<B | H=true.
 
 /*
- * ==
+ * H='=='(A,B):
  *
+ * H is bound to true when A==B, false otherwise
  */
 H='=='(A, B) :- int(A),int(B),A=B | H=true.
 H='=='(A, B) :- int(A),int(B),A-B>0 | H=false.
 H='=='(A, B) :- int(A),int(B),A-B<0 | H=false.
 
 /* 
- * !=
+ * H='!='(A,B):
  *
+ * H is bound to true when A!=B, false otherwise
  */
 H='!='(A, B) :- int(A),int(B),A=B | H=false.
 H='!='(A, B) :- int(A),int(B),A-B>0 | H=true.
 H='!='(A, B) :- int(A),int(B),A-B<0 | H=true.
 
 /*
- * << AをNビット左シフト
+ * H='<<'(A,B):
  *
+ * H is bound to A shift left by N bits
  */
 H = '<<'(A, N) :- int(A),int(N),N>0 | H='<<'(A*2,N-1).
 H = '<<'(A, 0) :- H=A.
 
 /*
- * >> AをNビット右シフト
+ * H='>>'(A,B):
  *
+ * H is bound to A shift right by N bits
  */
 H = '>>'(A, N) :- int(A),int(N),N>0 | H='>>'(A/2,N-1).
 H = '>>'(A, 0) :- H=A.
 
 /*
- * & ビット演算&
+ * H = '|'(A,B):
+ *
+ * H is bound to bitwise AND of A and B
  *
  */
 H = '&'(A,B) :- int(A),int(B) | H=[:/*inline*/
@@ -169,7 +188,9 @@ H = '&'(A,B) :- int(A),int(B) | H=[:/*inline*/
  :](A,B).
 
 /*
- * | ビット演算|
+ * H = '|'(A,B):
+ *
+ * H is bound to bitwise OR of A and B
  *
  */
 H = '|'(A,B) :- int(A),int(B) | H=[:/*inline*/
@@ -185,7 +206,9 @@ H = '|'(A,B) :- int(A),int(B) | H=[:/*inline*/
  :](A,B).
 
 /*
- * ^ ビット演算^
+ * H = '^'(A,B):
+ *
+ * H is bound to bitwise XOR of A and B
  *
  */
 H = '^'(A,B) :- int(A),int(B) | H=[:/*inline*/
@@ -202,8 +225,9 @@ H = '^'(A,B) :- int(A),int(B) | H=[:/*inline*/
 
   
 /*
- * power AのN準E
+ * H = integer.power(A,N):
  *
+ * H is bound to A to the power of N
  */
 H = integer.power(A, N) :- int(A),int(N) | H=[:/*inline*/
   int a = 
@@ -220,9 +244,9 @@ H = integer.power(A, N) :- int(A),int(N) | H=[:/*inline*/
  :](A,N).
 
 /*
- * rnd(N) 0からN-1の整数をランダムで返す。
- *
- *
+ * H = integer.rnd(N):
+ * 
+ * H is bound to a random number between 0 and N-1.
  */
 H = integer.rnd(N) :- int(N) | H=[:/*inline*/
   int n = 
@@ -236,30 +260,33 @@ H = integer.rnd(N) :- int(N) | H=[:/*inline*/
   :](N).
   
 /*
- * gcd(M, N) MとNの最大公約数を返す。 by inui
+ * H = integer.gcd(M, N):
  *
- *
+ * H is bound to the gcd of M and N (not fast)
  */
 H = integer.gcd(M, N) :- M > N | H=integer.gcd(M-N, N).
 H = integer.gcd(M, N) :- N > M | H=integer.gcd(M, N-M).
 H = integer.gcd(M, N) :- N = M | H=M.
 
 /*
- * lcm(M, N) MとNの最小公倍数を返す。 by inui
+ * H = lcm(M, N):
  *
- *
+ * H is bound to the lcm of M and N (not fast)
  */
 H = integer.lcm(M, N) :- int(M),int(N) | H = M*N/integer.gcd(M, N).
 
 /*
- * factorial(N) Nの階乗を計算する。 by inui
+ * H = integer.factorial(N):
+ *
+ * H is bound to the factorial of N
  */
 H = integer.factorial(N) :- N =< 1 | H = 1.
 H = integer.factorial(N) :- N >= 2 | H = N*integer.factorial(N-1).
 
 /*
- * integer.parse : String -> int
- * 
+ * H = integer.parse(String):
+ *
+ * parse String and binds the resulting value to H
  *
  */
 H = integer.parse(S) :- string(S) | H=[:/*inline*/
@@ -277,9 +304,10 @@ H = integer.parse(S) :- string(S) | H=[:/*inline*/
 	:](S).
 
 /*
- * Generate a list of random number.
- * _IMax : random max
- * Count : List length
+ * integer.rndList(+Max,+Count):
+ *
+ * Generate a list of random numbers between 0 and Max.
+ * Count specifies the length of the list.
  */
 H=integer.rndList(_IMax, Count) :- Count=0 | H=[].
 H=integer.rndList(_IMax, Count) :- Count>0 | H=[integer.rnd(_IMax)|integer.rndList(_IMax, Count-1)].

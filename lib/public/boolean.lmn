@@ -9,6 +9,7 @@ AUTHOR
 
 HISTORY
 	2004/06/29(Mon)
+	2006-08-30
 
 */
 
@@ -27,19 +28,22 @@ H=boolean.not(false) :- H=true.
  * &&
  *
  */
-H='&&'(true, true) :- H=true.
-H='&&'(true, false) :- H=false.
-H='&&'(false, true) :- H=false.
-H='&&'(false, false) :- H=false.
-
+// H='&&'(true, true) :- H=true.
+// H='&&'(true, false) :- H=false.
+// H='&&'(false, true) :- H=false.
+// H='&&'(false, false) :- H=false.
+H='&&'(true, Q) :- H=Q.
+H='&&'(false, $q) :- ground($q) | H=false.
 
 /*
  * ||
  *
  */
-H='||'(true, true) :- H=true.
-H='||'(true, false) :- H=true.
-H='||'(false, true) :- H=true.
-H='||'(false, false) :- H=false.
+// H='||'(true, true) :- H=true.
+// H='||'(true, false) :- H=true.
+// H='||'(false, true) :- H=true.
+// H='||'(false, false) :- H=false.
+H='||'(true, $q) :- ground($q) | H=true.
+H='||'(false, Q) :- H=Q.
 
 }.
