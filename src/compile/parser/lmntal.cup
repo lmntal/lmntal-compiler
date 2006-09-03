@@ -97,7 +97,7 @@ FuncName	::=   ATOM_NAME:name
 				| STRING:name
 					{: RESULT = new SrcName(name, SrcName.STRING); :}
 				| PATHED_ATOM_NAME:name
-					{: RESULT = new SrcName(name.replace(':','.'), SrcName.PATHED); :};
+					{: RESULT = new SrcName(name, SrcName.PATHED); :};
 
 // [a-z][A-Za-z_0-9]* | [0-9]+
 AtomName    ::= ATOM_NAME:name
