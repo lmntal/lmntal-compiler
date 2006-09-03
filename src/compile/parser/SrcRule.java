@@ -12,8 +12,6 @@ class SrcRule {
 	public String name; // ルール名
 	public int lineno;	//行番号 2006.1.22 by inui
 	public LinkedList head;			// ヘッドプロセス
-	//TODO head2は不要の筈
-	public LinkedList head2;       // ヘッドプロセス2 (simpagation ruleのみ。 \ の後 )
 	public LinkedList body;			// ボディプロセス
 	public LinkedList guard;			// ガードプロセス
 	public LinkedList guardNegatives;	// ガード否定条件構文のリスト
@@ -69,10 +67,18 @@ class SrcRule {
 	}
 	
 	//2006/07/07 by kudo
-	public SrcRule(String name, LinkedList head, LinkedList head2, LinkedList guard, LinkedList body, int lineno){
+	/**
+	 * 指定されたヘッドルールとボディルールとガードルールで初期化する。
+	 * simpagation ruleの構文に対して使われるコンストラクタ。
+	 * @param head ヘッドのリスト
+	 * @param head2 ヘッドのリスト ( \ の後ろ )
+	 * @param guard ガードのリスト
+	 * @param body ボディのリスト
+	 * @param lineno 行番号
+	 */
+	public SrcRule(String name, LinkedList head, List head2, LinkedList guard, LinkedList body, int lineno){
 		this(name, head, (guard==null?new LinkedList():guard), body, lineno);
-		this.head2 = head2;
-		if(head2 != null)unSimpagationize();
+		if(head2 != null)unSimpagationize(head2);
 	}
 	
 	/**
@@ -124,17 +130,16 @@ class SrcRule {
 		}
 	}
 	
+	// by kudo (2006/07/07)
 	/**
-	 * simpagation rule を、通常のルールの形に直します。
-	 * by kudo (2006/07/07)
-	 *
+	 * simpagation rule を、通常のルールの形に直す。コンストラクタから呼ばれる。
+	 * @param head2 ヘッドの'\'の後ろ部分のリスト
 	 */
-	private void unSimpagationize(){
+	private void unSimpagationize(List head2){
 		// head を全てbodyへコピー (前に追加のほうが再利用の上でも都合がいい？)
 		body.addAll(copySrcs(head));
 		// head2をheadの後ろに連結
 		head.addAll(head2);
-		head2=null;
 	}
 	
 	/**
