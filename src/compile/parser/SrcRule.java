@@ -12,6 +12,7 @@ class SrcRule {
 	public String name; // ルール名
 	public int lineno;	//行番号 2006.1.22 by inui
 	public LinkedList head;			// ヘッドプロセス
+	//TODO head2は不要の筈
 	public LinkedList head2;       // ヘッドプロセス2 (simpagation ruleのみ。 \ の後 )
 	public LinkedList body;			// ボディプロセス
 	public LinkedList guard;			// ガードプロセス
