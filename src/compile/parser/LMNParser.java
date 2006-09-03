@@ -1223,42 +1223,42 @@ class SyntaxExpander {
 			}
 		}
 	}
-	/** プロセス構造（子ルール外）に出現するモジュール名をファンクタに取り込む。
-	 * <pre>
-	 * ':'(m,p(t1..tn)) → 'm.p'(t1..tn)
-	 * </pre>
-	 */
-	void incorporateModuleNames(LinkedList process) {
-		ListIterator it = process.listIterator();
-		while (it.hasNext()) {
-			Object obj = it.next();
-			if (obj instanceof SrcAtom) {
-				SrcAtom atom = (SrcAtom)obj;
-				if (atom.getProcess().size() == 2
-				 && atom.getName().equals(":")
-				 && atom.getProcess().get(0) instanceof SrcAtom
-				 && atom.getProcess().get(1) instanceof SrcAtom ) {
-					SrcAtom pathatom = (SrcAtom)atom.getProcess().get(0);
-					SrcAtom bodyatom = (SrcAtom)atom.getProcess().get(1);
-					if (pathatom.getProcess().size() == 0
-					 && pathatom.getNameType() == SrcName.PLAIN) {
-						it.remove();
-						it.add(bodyatom);
-						bodyatom.srcname = new SrcName(pathatom.getName() + "." + bodyatom.getName(), SrcName.PATHED);
-						incorporateModuleNames(bodyatom.getProcess());
-						continue;
-					}
-				}
-				incorporateModuleNames(atom.getProcess());
-			}
-			else if (obj instanceof SrcMembrane) {
-				incorporateModuleNames(((SrcMembrane)obj).getProcess());
-			}
-			else if (obj instanceof LinkedList) {
-				incorporateModuleNames((LinkedList)obj);
-			}
-		}
-	}
+//	/** プロセス構造（子ルール外）に出現するモジュール名をファンクタに取り込む。
+//	 * <pre>
+//	 * ':'(m,p(t1..tn)) → 'm.p'(t1..tn)
+//	 * </pre>
+//	 */
+//	void incorporateModuleNames(LinkedList process) {
+//		ListIterator it = process.listIterator();
+//		while (it.hasNext()) {
+//			Object obj = it.next();
+//			if (obj instanceof SrcAtom) {
+//				SrcAtom atom = (SrcAtom)obj;
+//				if (atom.getProcess().size() == 2
+//				 && atom.getName().equals(":")
+//				 && atom.getProcess().get(0) instanceof SrcAtom
+//				 && atom.getProcess().get(1) instanceof SrcAtom ) {
+//					SrcAtom pathatom = (SrcAtom)atom.getProcess().get(0);
+//					SrcAtom bodyatom = (SrcAtom)atom.getProcess().get(1);
+//					if (pathatom.getProcess().size() == 0
+//					 && pathatom.getNameType() == SrcName.PLAIN) {
+//						it.remove();
+//						it.add(bodyatom);
+//						bodyatom.srcname = new SrcName(pathatom.getName() + "." + bodyatom.getName(), SrcName.PATHED);
+//						incorporateModuleNames(bodyatom.getProcess());
+//						continue;
+//					}
+//				}
+//				incorporateModuleNames(atom.getProcess());
+//			}
+//			else if (obj instanceof SrcMembrane) {
+//				incorporateModuleNames(((SrcMembrane)obj).getProcess());
+//			}
+//			else if (obj instanceof LinkedList) {
+//				incorporateModuleNames((LinkedList)obj);
+//			}
+//		}
+//	}
 	/** （ガード型制約の）プロセス構造のトップレベルに出現する冗長な = を除去する。
 	 * <pre>
 	 * $p = f(t1..tn) → f(t1..tn,$p)
