@@ -108,15 +108,6 @@ public abstract class Functor implements Serializable {
 		return Util.quoteString(text, '\'');
 	}
 
-	/**
-	 * 指定された文字列を表す文字列リテラルのテキスト表現を取得する。 例えば a"b を渡すと "a\"b" が返る。
-	 * <p>
-	 * StringFunctorクラスのクラスメソッドにするのが正しい。
-	 */
-	static final String getStringLiteralText(String text) {
-		return Util.quoteString(text, '\"');
-	}
-
 	// //////////////////////////////////////////////////////////////
 
 	/** 適切に省略された表示名を取得 */

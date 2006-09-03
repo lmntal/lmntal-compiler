@@ -8,9 +8,16 @@ import util.Util;
  * @see ObjectFunctor#getName() */
 public class StringFunctor extends ObjectFunctor {
 	public StringFunctor(String data) { super(data); }
-	public String getQuotedAtomName() { return getStringLiteralText(getName()); }
+	
+	public String getQuotedAtomName() {
+		//ダブルクオートした名前を返す
+		return Util.quoteString(getName(), '\"');
+	}
+	
 	public String getQuotedFunctorName() { return getQuotedAtomName(); }
+	
 	public String stringValue() {return getName();}
+	
 	// 2006/06/28 by kudo
 	public boolean equals(Object o){
 		if(!(o instanceof StringFunctor))return false;
