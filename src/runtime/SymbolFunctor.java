@@ -89,16 +89,6 @@ public class SymbolFunctor extends Functor {
 		return name;
 	}
 	
-	protected String quoteFunctorName(String text) {
-		if (path != null) return path + "." + super.quoteFunctorName(text);
-		return text;
-	}
-	
-	protected String quoteAtomName(String text) {
-		if (path != null) return path + "." + super.quoteAtomName(text);
-		return text;
-	}
-	
 	public String toString() {
 		if (Env.compileonly)
 			return (path == null ? "" : Util.quoteString(path, '\'') + ".") + Util.quoteString(name, '\'') + "_" + getArity();

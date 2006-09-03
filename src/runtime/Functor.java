@@ -57,7 +57,7 @@ public abstract class Functor implements Serializable {
 		return quoteFunctorName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
 	}
 
-	protected String quoteFunctorName(String text) {
+	private String quoteFunctorName(String text) {
 		if (Env.verbose > Env.VERBOSE_SIMPLELINK) {
 			if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 				text = quoteName(text);
@@ -67,6 +67,8 @@ public abstract class Functor implements Serializable {
 				text = quoteName(text);
 			}
 		}
+		if (getPath() != null)
+			text = getPath() + "." + text;
 		return text;
 	}
 	
@@ -87,13 +89,15 @@ public abstract class Functor implements Serializable {
 		return quoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
 	}
 
-	protected String quoteAtomName(String text) {
+	private String quoteAtomName(String text) {
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\])$")) {
 			if (!text
 					.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
 				text = quoteName(text);
 			}
 		}
+		if (getPath() != null)
+			text = getPath() + "." + text;
 		return text;
 	}
 	
