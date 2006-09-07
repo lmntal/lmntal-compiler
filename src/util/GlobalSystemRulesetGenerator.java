@@ -47,8 +47,8 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,3,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  4,3,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,0,Functor.OUTSIDE_PROXY));
-//		insts.add(new Instruction(Instruction.LOCALUNIFY,  1,1,5,1,0));
-		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // 子膜を活性化する必要はない
+		insts.add(new Instruction(Instruction.UNIFY,       1,1,5,1,0)); //n-kato 2006-09-07
+		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // 子膜を活性化する必要はない（quietでよい）
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 		//

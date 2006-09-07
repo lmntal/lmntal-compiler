@@ -29,7 +29,7 @@ import util.QueuedEntity;
 public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
-	 * ただし値を変更するときはindexも同時に更新すること。(null, -1)は所属膜なしを表す。
+	 * ただし値を変更するときはindexも同時に更新すること。(mem,index)==(null, -1)は所属膜なしを表す。
 	 */
 	Membrane mem;
 	
@@ -59,6 +59,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	 * リモートホストへの要求で新しくアトムが作成されると、ローカルでNEW_が代入される。
 	 * $inside_proxyアトムの場合、命令ブロックの返答を受けてリモート側のローカルIDで上書きされる。
 	 * $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
+	 * TODO 廃止する
 	 * @see Membrane.atomTable */
 	protected String remoteid;
 
@@ -99,8 +100,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 		setFunctor(name, getFunctor().getArity());
 	}
 	/** ファンクタを設定する。
-	 * 所属膜がリモートの場合もあり、しかもAtomSetは必ず更新しなければならないので、
-	 * 膜のalterAtomFunctorメソッドを呼ぶ。*/
+	 * AtomSetを更新するため、膜のalterAtomFunctorメソッドを呼ぶ。*/
 	public void setFunctor(String name, int arity) {
 		mem.alterAtomFunctor(this, new SymbolFunctor(name, arity));
 	}
@@ -300,10 +300,12 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 			//子膜へのリンクは、接続先atomID/memIDのみ送信。接続先はINSIDE_PROXYの第１引数なので、アトムのIDのみで十分。
 			Atom a = args[0].getAtom();
 			Membrane mem = a.mem;
-			//ルート膜以外ではグローバルIDが管理されていないので、とりあえず自分で作っている。
-			//todo もっとよい方法を考える
-			out.writeObject(mem.getTask().getMachine().hostname);
-			out.writeObject(mem.getLocalID());
+			out.writeObject(mem.getGlobalMemID());
+			// n-kato 削除 2006-09-07
+			// //ルート膜以外ではグローバルIDが管理されていないので、とりあえず自分で作っている。
+			// //todo もっとよい方法を考える
+			//out.writeObject(mem.getTask().getMachine().runtimeid);
+			//out.writeObject(mem.getLocalID());
 			out.writeInt(a.id);
 			out.writeObject(args[1]);
 		} else {
@@ -314,6 +316,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	/**
 	 * このアトムの内容をストリームから復元します。
 	 * キャッシュ更新や、プロセス文脈の移送の際に利用します。
+	 * TODO OUTSIDE_PROXYを正しく処理する
 	 * @param out 入力ストリーム
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
@@ -327,9 +330,11 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 			args[1] = (Link)in.readObject();
 		} else if (functor.isOutsideProxy()) {
 			//子膜内のINSIDE_PROXYは送信されてこないので、ここで生成する。
-			String hostname = (String)in.readObject();
-			String localid = (String)in.readObject();
-			String globalid = hostname + ":" + localid;
+			String globalid = (String)in.readObject();
+//			String localid = (String)in.readObject();
+//			String globalid = hostname + ":" + localid;
+			Membrane mem = null; 		// todo 擬似膜が必要
+//			mem.globalid = globalid;	// globalidは文字列フィールドにしなければならなくなるのか？
 //			AbstractMembrane mem = IDConverter.lookupGlobalMembrane(globalid);
 			//IDConverterには、RemoteMembrane.updateCache()で登録済みのはず。
 			Atom inside = new Atom(mem, Functor.INSIDE_PROXY);

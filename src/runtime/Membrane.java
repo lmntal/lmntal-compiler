@@ -59,7 +59,8 @@ public final class Membrane extends QueuedEntity {
 	private static int nextId = 0;
 	private int id;
 	
-	/** 子膜->(コピー元のアトムin子膜->コピー先のアトムinコピーされた子膜) */
+	/** 子膜->(コピー元のアトムin子膜->コピー先のアトムinコピーされた子膜)
+	 * TODO 膜のメンバ変数でいいのかどうか */
 	HashMap memToCopyMap = null; 
 	
 	/** この膜の名前（internされた文字列またはnull） */
@@ -78,15 +79,15 @@ public final class Membrane extends QueuedEntity {
 	 * 排他制御には、Stack インスタンスに関する synchronized 節を利用している。 */
 	private Stack ready = null;
 	
-	/** リモートホストとの通信でこの膜のアトムを同定するときに使用されるatomidの表。
-	 * <p>atomid (String) -> Atom
-	 * <p>この膜のキャッシュ送信後、この膜の連続するロック期間中のみ有効。
-	 * キャッシュ送信時に初期化され、引き続くリモートホストからの要求を解釈するために使用される。
-	 * リモートホストからの要求で新しくアトムが作成されると、受信したNEW_をキーとするエントリが追加される。
-	 * $inside_proxyアトムの場合、命令ブロックの返答のタイミングでローカルIDで上書きされる。
-	 * $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
-	 * @see Atom.remoteid */
-	protected HashMap atomTable = null;
+//	/** リモートホストとの通信でこの膜のアトムを同定するときに使用されるatomidの表。
+//	 * <p>atomid (String) -> Atom
+//	 * <p>この膜のキャッシュ送信後、この膜の連続するロック期間中のみ有効。
+//	 * キャッシュ送信時に初期化され、引き続くリモートホストからの要求を解釈するために使用される。
+//	 * リモートホストからの要求で新しくアトムが作成されると、受信したNEW_をキーとするエントリが追加される。
+//	 * $inside_proxyアトムの場合、命令ブロックの返答のタイミングでローカルIDで上書きされる。
+//	 * $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
+//	 * @see Atom.remoteid */
+//	protected HashMap atomTable = null;
 
 	///////////////////////////////
 	// コンストラクタ
@@ -117,9 +118,9 @@ public final class Membrane extends QueuedEntity {
 	}
 
 	/** この膜のグローバルIDを取得する */
-	public String getGlobalMemID() { return (task==null ? "":task.runtime.hostname) + ":" + getLocalID(); }
-	/** この膜が所属する計算ノードにおける、この膜の指定されたアトムのIDを取得する */
-	public String getAtomID(Atom atom) { return atom.getLocalID(); }
+	public String getGlobalMemID() { return (task==null ? "":task.runtime.runtimeid) + ":" + getLocalID(); }
+//	/** この膜が所属する計算ノードにおける、この膜の指定されたアトムのIDを取得する */
+//	public String getAtomID(Atom atom) { return atom.getLocalID(); }
 
 	///////////////////////////////
 	// 情報の取得
@@ -394,7 +395,7 @@ public final class Membrane extends QueuedEntity {
 		//(nakajima 2004-10-25) 分散。とりあえずコンストラクタで登録する時にしたのでコメントアウト。
 		//daemon.IDConverter.registerGlobalMembrane(this.getGlobalMemID(),this);
 		
-		// ↓TODO (効率改善【除去可能であることを確かめる】)connectRuntimeはガードですでに呼ばれているので冗長かもしれない
+		// ↓todo (効率改善【除去可能であることを確かめる】)connectRuntimeはガードですでに呼ばれているので冗長かもしれない
 //		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(nodedesc);
 //		AbstractMembrane mem = machine.newTask(this).getRoot();
 //		mem.changeKind(k);
@@ -896,7 +897,7 @@ public final class Membrane extends QueuedEntity {
 
 	///////////////////////////////
 	// 自由リンク管理アトムの張り替えをするための操作
-	// TODO （効率改善）starをキューで管理することにより、alterAtomFunctorの回数を減らすとよいかも知れない。
+	// todo （効率改善）starをキューで管理することにより、alterAtomFunctorの回数を減らすとよいかも知れない。
 	// キューはLinkedListオブジェクトとし、react内を生存期間とし、star関連のメソッドの引数に渡される。
 	// $pを含む全ての膜の本膜からの相対関係がルール適用で不変な場合、
 	// $pの先祖の全ての膜をうまく再利用することによって、star関連の処理を全く呼ぶ必要がなくなる。
@@ -1290,20 +1291,6 @@ public final class Membrane extends QueuedEntity {
 		return newMem(0);
 	}
 	
-	/** newMemと同じ。ただし親膜（メソッドが呼ばれたこの膜）は仮でない実行膜スタックに積まれている。
-	 * <p>最適化用。しかし実際には最適化の効果は無い気がする。*/
-	public Membrane newLocalMembrane(int k) {
-		Membrane m = new Membrane(task, this);
-		m.changeKind(k);
-		mems.add(m);
-		if (k != KIND_ND)
-			((Task)task).memStack.push(m);
-		return m;		
-	}
-	public Membrane newLocalMembrane() {
-		return newLocalMembrane(0);
-	}
-	
 //	/** 指定された子膜をこの膜から除去する。
 //	 * <strike>実行膜スタックは操作しない。</strike>
 //	 * 実行膜スタックに積まれていれば取り除く。 */
@@ -1407,9 +1394,9 @@ public final class Membrane extends QueuedEntity {
 	 * この膜のロック取得を試みる。
 	 * 失敗した場合、この膜を管理するタスクのルールスレッドに停止要求を送る。その後、
 	 * このタスクがシグナルを発行するのを待ってから、再びロック取得を試みることを繰り返す。
-	 * <p>ルールスレッド以外のスレッドが2つ目以降のロックとしてこの膜のロックを取得するときに使用する。
+	 * <p>ルールスレッド以外のスレッドがこの膜のロックを2つ目以降のロックとして取得するときに使用する。
 	 * <p>成功したら親膜のリモートを継承する。
-	 *  <p>ロック解放にはunlock()を使用する。
+	 * <p>ロック解放にはunlock()を使用すること。
 	 * 親膜のロックはすでに取得している必要がある。
 	 * @return 常にtrue */
 	public boolean blockingLock() {
@@ -1442,9 +1429,9 @@ public final class Membrane extends QueuedEntity {
 	/**
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックをブロッキングで取得し、実行膜スタックから除去する。
      * ルート膜ならばblockingLock()と同じになる
-	 * <p>ルールスレッド以外のスレッドが最初のロックとしてこの膜のロックを取得するときに使用する。
+	 * <p>ルールスレッド以外のスレッドがこの膜のロックを最初のロックとして取得するときに使用する。
 	 * <p>成功したらリモートをnullに設定する。
-	 * <p>ロック解放にはasyncUnlock()を使用する。
+	 * <p>ロック解放にはasyncUnlock()を使用すること。
 	 * @return 成功したら true。失敗するのは、この膜がすでにremoveされている場合のみ。 */
 	public boolean asyncLock() {
 		Task t = (Task)task;
@@ -1567,9 +1554,10 @@ public final class Membrane extends QueuedEntity {
 		if(changed & Env.LMNgraphic != null)
 			Env.LMNgraphic.setMem(this);
 	}
-	
+
 	/** この膜のロックを強制的に解放する。
 	 * unlock()と同じ。
+	 * TODO unlockに統廃合する
 	 */
 	public void forceUnlock() {
 		unlock();
@@ -1624,68 +1612,68 @@ public final class Membrane extends QueuedEntity {
 //		((Task)task).memStack.push(this);
 //	}
 
-	/** この膜のキャッシュを表すバイト列を取得する。
-	 * @see RemoteMembrane#updateCache(byte[]) */
-	public byte[] cache() {
-		if(null == atomTable){ atomTable = new HashMap(); }
-		
-		// atomTableを更新する // 子膜の自由リンクについては要検討
-		atomTable.clear();
-		Iterator it = atomIterator();
-		while (it.hasNext()) {
-			Atom atom = (Atom)it.next();
-			atomTable.put(atom.getLocalID(), atom);
-		}
-		if(atomTable.isEmpty()){atomTable = null; }
+//	/** この膜のキャッシュを表すバイト列を取得する。
+//	 * @see RemoteMembrane#updateCache(byte[]) */
+//	public byte[] cache() {
+//		if(null == atomTable){ atomTable = new HashMap(); }
+//		
+//		// atomTableを更新する // 子膜の自由リンクについては要検討
+//		atomTable.clear();
+//		Iterator it = atomIterator();
+//		while (it.hasNext()) {
+//			Atom atom = (Atom)it.next();
+//			atomTable.put(atom.getLocalID(), atom);
+//		}
+//		if(atomTable.isEmpty()){atomTable = null; }
+//
+//		try {
+//			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+//			ObjectOutputStream out = new ObjectOutputStream(bout);
+//
+//			//子膜
+//			out.writeInt(mems.size());
+//			it = memIterator();
+//			while (it.hasNext()) {
+//				Membrane m = (Membrane)it.next();
+//				out.writeObject(m.getTask().getMachine().hostname);
+//				out.writeObject(m.getLocalID());
+//				out.writeObject(new Boolean(m.isRoot()));
+//			}
+//			//アトム
+//			out.writeInt(atoms.size());
+//			it = atomIterator();
+//			while (it.hasNext()) {
+//				Atom a = (Atom)it.next();
+//				out.writeObject(a);
+//			}
+//			//ルールセット
+//			out.writeInt(rulesets.size());
+//			it = rulesetIterator();
+//			while (it.hasNext()) {
+//				Ruleset r = (Ruleset)it.next();
+//				out.writeObject(r.getGlobalRulesetID());
+//			}
+//			//todo nameは不要？
+//			//out.writeObject(name);
+//			out.writeObject(new Boolean(stable));
+//
+//			out.close();
+//			return bout.toByteArray();
+//		} catch (IOException e) {
+//			//ByteArrayOutputStreamなので、発生するはずがない
+//			throw new RuntimeException("Unexpected Exception", e);
+//		}
+//	}
 
-		try {
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			ObjectOutputStream out = new ObjectOutputStream(bout);
-
-			//子膜
-			out.writeInt(mems.size());
-			it = memIterator();
-			while (it.hasNext()) {
-				Membrane m = (Membrane)it.next();
-				out.writeObject(m.getTask().getMachine().hostname);
-				out.writeObject(m.getLocalID());
-				out.writeObject(new Boolean(m.isRoot()));
-			}
-			//アトム
-			out.writeInt(atoms.size());
-			it = atomIterator();
-			while (it.hasNext()) {
-				Atom a = (Atom)it.next();
-				out.writeObject(a);
-			}
-			//ルールセット
-			out.writeInt(rulesets.size());
-			it = rulesetIterator();
-			while (it.hasNext()) {
-				Ruleset r = (Ruleset)it.next();
-				out.writeObject(r.getGlobalRulesetID());
-			}
-			//todo nameは不要？
-			//out.writeObject(name);
-			out.writeObject(new Boolean(stable));
-
-			out.close();
-			return bout.toByteArray();
-		} catch (IOException e) {
-			//ByteArrayOutputStreamなので、発生するはずがない
-			throw new RuntimeException("Unexpected Exception", e);
-		}
-	}
-
-	/** アトムIDに対応するアトムを取得する */
-	public Atom lookupAtom(String atomid) {
-		return (Atom)atomTable.get(atomid);
-	}
-	/** アトムIDに対応するアトムを登録する */
-	public void registerAtom(String atomid, Atom atom) {
-		if(null == atomTable){ atomTable = new HashMap(); }
-		atomTable.put(atomid, atom);
-	}
+//	/** アトムIDに対応するアトムを取得する */
+//	public Atom lookupAtom(String atomid) {
+//		return (Atom)atomTable.get(atomid);
+//	}
+//	/** アトムIDに対応するアトムを登録する */
+//	public void registerAtom(String atomid, Atom atom) {
+//		if(null == atomTable){ atomTable = new HashMap(); }
+//		atomTable.put(atomid, atom);
+//	}
 	
 	/** この膜を削除する(子膜が無い時にのみ呼んで良い) 
 	 * デーモンを除去したため実体はない
@@ -1701,4 +1689,3 @@ public final class Membrane extends QueuedEntity {
 		removeAtom(_old);
 	}
 }
-// todo 【検証】local-remote-local 問題が解決したかどうか調べる

@@ -35,7 +35,9 @@ import util.Util;
  * </ul>
  * コンパイラは次のコードを出力する：addmemやnewrootした膜は、ルール実行終了時に（子膜側から順番に）unlockmemを実行する。
  */
- 
+
+// TODO LOCAL関係のコメントを完全に削除する (1)
+
 /**
  * 1 つの命令を保持する。通常は、InstructionのArrayListとして保持する。
  * 

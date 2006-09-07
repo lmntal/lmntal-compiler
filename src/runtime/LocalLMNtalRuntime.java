@@ -13,8 +13,9 @@ public class LocalLMNtalRuntime{
 
 	/** ランタイムID。このVMのグローバルな識別子。ルールセットのIDの一部として使用される */
 	protected String runtimeid;
-	/** このランタイムが動作するホスト名。Fully Qualified Domain Nameである必要がある。 */
-	protected String hostname;
+// 削除 n-kato 2006-09-07
+//	/** このランタイムが動作するホスト名。Fully Qualified Domain Nameである必要がある。 */
+//	protected String hostname;
 
 	/** ランタイムIDを取得する */
 	public String getRuntimeID() {
@@ -28,6 +29,7 @@ public class LocalLMNtalRuntime{
 
 	public LocalLMNtalRuntime(){
 		Env.theRuntime = this;
+		this.runtimeid = ""; // (hostname,creationtime,pid)とか
 //		this.runtimeid = LMNtalDaemon.makeID();	// ここで生成する
 			// NICがあがってないとここで死ぬ（分散使いたくない時）→ 回避済 2004-11-12
 //		this.hostname = LMNtalDaemon.getLocalHostName();

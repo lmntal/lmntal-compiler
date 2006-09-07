@@ -3,7 +3,7 @@ package runtime;
 import java.io.*;
 
 /**
- * 特殊なファンクタ (inside_proxy, outside_proxy) を表すクラス
+ * 特殊なファンクタ (inside_proxy, outside_proxy, star) を表すクラス
  */
 public class SpecialFunctor extends Functor {
 	static final String OUTSIDE_PROXY_NAME = "$out".intern();

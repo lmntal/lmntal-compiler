@@ -186,6 +186,7 @@ public class Optimizer {
 		insts.addAll(subinsts);
 		return varcount;
 	}
+	// n-kato 終
 	
 	//sakurai
 	/** 
@@ -246,8 +247,6 @@ public class Optimizer {
 		}			
 	}
 	
-	// n-kato
-
 	///////////////////////////////////////////////////////
 	// 膜最適化関連
 		

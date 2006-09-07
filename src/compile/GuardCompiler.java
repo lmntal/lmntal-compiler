@@ -469,7 +469,7 @@ public class GuardCompiler extends HeadCompiler {
 						// 060831okabe
 						// 以下をコメントアウト．
 						// つまりconnectruntime はput してget されるだけ．
-						// TODO よってconnectruntime はいらないので何とかする．
+						// TODO よってconnectruntime はいらないので何とかする．（ライブラリを使った分散を作るときまで放置でよい）
 //						if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
 					}
 					else { // {t1,inst,t2} --> p(+X1,-X2)

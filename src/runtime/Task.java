@@ -23,6 +23,8 @@ import util.Util;
  * todo ルート膜が先祖タスクまたは自タスクのルールスレッドによってロックされたかどうかを記憶する。
  * これにより、先祖タスクのルールスレッドを停止して動作する非同期実行が可能となる。
  * <p>
+ * 
+ * TODO 以下の方法6の文章をwikiに移動
  * <font size=+1><b>方法6</b></font><br>
  * 
  * <p>
@@ -80,9 +82,9 @@ import util.Util;
  */
 
 public class Task implements Runnable {
-	/** 物理マシン */
+	/** このタスクを管理するランタイム */
 	protected LocalLMNtalRuntime runtime;
-	/** ルート膜 */
+	/** このタスクのルート膜 */
 	protected Membrane root;
 	/** asyncUnlockされたときにtrueになる
 	 * （trueならばシグナルで復帰時にトレースdumpする）*/
@@ -350,7 +352,7 @@ public class Task implements Runnable {
 			// TODO perpetual じゃないもうひとつのフラグをつくってその膜を活性化させる hara
 			if(root!=null && memStack.isEmpty()) {
 				try {
-					this.thread.sleep(100);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

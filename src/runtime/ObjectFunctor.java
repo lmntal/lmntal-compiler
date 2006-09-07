@@ -1,8 +1,7 @@
 package runtime;
 
-/** オブジェクトへの参照を保持するファンクタ。
- * このクラスをSymbolFunctorの基底クラスにした方がよさそう
- * 分散環境で転送される可能性がある場合、オブジェクトはSerializableインターフェースを実装する必要がある。
+/** オブジェクトへの参照を保持する1引数ファンクタ。
+ * <strike>分散環境で転送される可能性がある場合、オブジェクトはSerializableインターフェースを実装する必要がある。</strike>
  * @author n-kato */
 public class ObjectFunctor extends Functor {
 	Object data;

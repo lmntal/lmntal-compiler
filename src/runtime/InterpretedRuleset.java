@@ -25,6 +25,8 @@ import java.util.Set;
 import util.Util;
 import debug.Debug;
 
+// TODO LOCAL関係のコメントを完全に削除する (2)
+
 /**
  * compile.RulesetCompiler によって生成される。
  * @author hara, nakajima, n-kato
@@ -1108,8 +1110,9 @@ class InterpretiveReactor {
 					
 				case Instruction.GETRUNTIME: //[-dstatom,srcmem] // todo StringFunctorに変える（ISSTRINGも）
 					String hostname = "";
-					if (mems[inst.getIntArg2()].isRoot())
-						hostname = mems[inst.getIntArg2()].getTask().getMachine().hostname;
+// n-kato 2006-09-07
+//					if (mems[inst.getIntArg2()].isRoot())
+//						hostname = mems[inst.getIntArg2()].getTask().getMachine().hostname;
 					atoms[inst.getIntArg1()] = new Atom(null, new StringFunctor(hostname));
 					break; //n-kato
 					//====分散拡張用の命令====ここまで====
