@@ -17,9 +17,7 @@ public class BigFloatingFunctor extends ObjectFunctor {
 		return (BigDecimal)data;
 	}
 	
-	public boolean equals(Object o) {
-		return (o instanceof BigFloatingFunctor) && ((BigFloatingFunctor)o).data.equals(data);
-	}
+	//多倍長なので省略しない
 	protected String getAbbrName() {
 		return data.toString();
 	}

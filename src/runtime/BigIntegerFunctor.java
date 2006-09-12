@@ -17,9 +17,7 @@ public class BigIntegerFunctor extends ObjectFunctor {
 		return (BigInteger)data;
 	}
 	
-	public boolean equals(Object o) {
-		return (o instanceof BigIntegerFunctor) && ((BigIntegerFunctor)o).data.equals(data);
-	}
+	//多倍長なので省略しない
 	protected String getAbbrName() {
 		return data.toString();
 	}
