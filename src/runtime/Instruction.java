@@ -36,7 +36,8 @@ import util.Util;
  * コンパイラは次のコードを出力する：addmemやnewrootした膜は、ルール実行終了時に（子膜側から順番に）unlockmemを実行する。
  */
 
-// TODO LOCAL関係のコメントを完全に削除する (1)
+// TODO LOCAL関係のコメントを完全に削除する (1) -> 0912 done
+// TODO 引数mem がいらない箇所がある（デーモン削除の影響）
 
 /**
  * 1 つの命令を保持する。通常は、InstructionのArrayListとして保持する。
@@ -78,8 +79,6 @@ public class Instruction implements Cloneable, Serializable {
     //////////
     // 定数
 
-    /** 対象の膜がローカルの計算ノードに存在することを保証する修飾子（一部他の用途で使用） */
-// 0830    public static final int LOCAL = 100;
     /** 型付きアトムに対する命令がアトムではなく、ファンクタを対象にしていることを表す修飾子 */
     public static final int OPT = 100;
     /** ダミーの命令 */	
@@ -90,17 +89,16 @@ public class Instruction implements Cloneable, Serializable {
 //	private static final int END_OF_INSTRUCTION = 1024;
 
     // アトムに関係する出力する基本ガード命令 (1--5)
-	//  -----  deref     [-dstatom, srcatom, srcpos, dstpos]
-	//  -----  derefatom [-dstatom, srcatom, srcpos]
-	//  -----  dereflink [-dstatom, srclink, dstpos]
-	//  -----  findatom  [-dstatom, srcmem, funcref]
+	// deref     [-dstatom, srcatom, srcpos, dstpos]
+	// derefatom [-dstatom, srcatom, srcpos]
+	// dereflink [-dstatom, srclink, dstpos]
+	// findatom  [-dstatom, srcmem, funcref]
 
     /** deref [-dstatom, srcatom, srcpos, dstpos]
      * <br><strong><font color="#ff0000">出力するガード命令</font></strong><br>
      * アトム$srcatomの第srcpos引数のリンク先が第dstpos引数に接続していることを確認したら、
      * リンク先のアトムへの参照を$dstatomに代入する。*/
 	public static final int DEREF = 1;
-	// LOCALDEREFは不要
 	static {setArgType(DEREF, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_INT, ARG_INT));}
 
 	/** derefatom [-dstatom, srcatom, srcpos]
@@ -109,7 +107,6 @@ public class Instruction implements Cloneable, Serializable {
 	 * <p>引き続き$dstatomが、単項アトム（整数なども含む）や自由リンク管理アトムと
 	 * マッチするかどうか検査する場合に使用することができる。*/
 	public static final int DEREFATOM = 2;
-	// LOCALDEREFATOMは不要
 	static {setArgType(DEREFATOM, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_INT));}
 
     /** dereflink [-dstatom, srclink, dstpos]
@@ -117,22 +114,20 @@ public class Instruction implements Cloneable, Serializable {
      * リンク$srclinkが第dstpos引数に接続していることを確認したら、
      * リンク先のアトムへの参照を$dstatomに代入する。*/
 	public static final int DEREFLINK = 3; // by mizuno
-	// LOCALDEREFLINKは不要
 	static {setArgType(DEREFLINK, new ArgType(true, ARG_ATOM, ARG_VAR, ARG_INT));}
 
 	/** findatom [-dstatom, srcmem, funcref]
 	 * <br>反復するガード命令<br>
 	 * 膜$srcmemにあってファンクタfuncrefを持つアトムへの参照を次々に$dstatomに代入する。*/
 	public static final int FINDATOM = 4;
-	// LOCALFINDATOMは不要
 	static {setArgType(FINDATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
 
 	// 膜に関係する出力する基本ガード命令 (5--9)
-	// [local]lockmem    [-dstmem, freelinkatom, memname]
-	// [local]anymem     [-dstmem, srcmem, memtype, memname] 
-	// [local]lock       [srcmem]
-	//  ----- getmem     [-dstmem, srcatom, memtype, memname]
-	//  ----- getparent  [-dstmem, srcmem]
+	// lockmem    [-dstmem, freelinkatom, memname]
+	// anymem     [-dstmem, srcmem, memtype, memname] 
+	// lock       [srcmem]
+	// getmem     [-dstmem, srcatom, memtype, memname]
+	// getparent  [-dstmem, srcmem]
 
     /** lockmem [-dstmem, freelinkatom, memname]
      * <br>ロック取得するガード命令<br>
@@ -149,12 +144,6 @@ public class Instruction implements Cloneable, Serializable {
     public static final int LOCKMEM = 5;
 	static {setArgType(LOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_OBJ));}
     
-    /** locallockmem [-dstmem, freelinkatom, memname]
-     * <br>ロック取得する最適化用ガード命令<br>
-     * lockmemと同じ。ただし$freelinkatomはこの計算ノードに存在する。*/
-/*	public static final int LOCALLOCKMEM = LOCAL + LOCKMEM;
-	static {setArgType(LOCALLOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_OBJ));}
-okabe*/
     /** anymem [-dstmem, srcmem, memtype, memname] 
      * <br>反復するロック取得するガード命令<br>
      * 膜$srcmemの子膜のうち、$memtypeで表せるタイプのまだロックを取得していない膜に対して次々に、
@@ -165,12 +154,6 @@ okabe*/
 	public static final int ANYMEM = 6;
 	static {setArgType(ANYMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT, ARG_OBJ));}
 	
-	/** localanymem [-dstmem, srcmem, memtype, memname]
-     * <br>反復するロック取得する最適化用ガード命令<br>
-	 * anymemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定されない。*/
-/*	public static final int LOCALANYMEM = LOCAL + ANYMEM;
-	static {setArgType(LOCALANYMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT, ARG_OBJ));}
-okabe*/
 	/** lock [srcmem]
 	 * <br>ロック取得するガード命令<br>
 	 * 膜$srcmemに対して、ノンブロッキングでのロックを取得を試みる。
@@ -181,12 +164,6 @@ okabe*/
 	public static final int LOCK = 7;
 	static {setArgType(LOCK, new ArgType(false, ARG_MEM));}
 	
-	/** locallock [srcmem]
-	 * <br>ロック取得する最適化用ガード命令<br>
-	 * lockと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-/*	public static final int LOCALLOCK = LOCAL + LOCK;
-	static {setArgType(LOCALLOCK, new ArgType(false, ARG_MEM));}
-okabe*/
 	/** getmem [-dstmem, srcatom, memtype, memname]
 	 * <br>ガード命令<br>
 	 * アトム$srcatomの所属膜への参照をロックせずに$dstmemに代入する。
@@ -195,7 +172,6 @@ okabe*/
 	 * <p>アトム主導テストで使用される。
 	 * @see lock */
 	public static final int GETMEM = 8;
-	// LOCALGETMEMは不要
 	static {setArgType(GETMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_INT, ARG_OBJ));}
 	
 	/** getparent [-dstmem, srcmem]
@@ -204,18 +180,17 @@ okabe*/
 	 * 親膜が無い場合は失敗する。
 	 * <p>アトム主導テストで使用される。*/
 	public static final int GETPARENT = 9;
-	// LOCALGETPARENTは不要
 	static {setArgType(GETPARENT, new ArgType(true, ARG_MEM, ARG_MEM));}
 
     // 膜に関係する出力しない基本ガード命令 (10--19)
-	//  ----- testmem    [dstmem, srcatom]
-	//  ----- norules    [srcmem] 
-	//  ----- nfreelinks [srcmem, count]
-	//  ----- natoms     [srcmem, count]
-	//  ----- nmems      [srcmem, count]
-	//  ----- eqmem      [mem1, mem2]
-	//  ----- neqmem     [mem1, mem2]
-	//  ----- stable     [srcmem]
+	// testmem    [dstmem, srcatom]
+	// norules    [srcmem] 
+	// nfreelinks [srcmem, count]
+	// natoms     [srcmem, count]
+	// nmems      [srcmem, count]
+	// eqmem      [mem1, mem2]
+	// neqmem     [mem1, mem2]
+	// stable     [srcmem]
 
     /** testmem [dstmem, srcatom]
      * <br>ガード命令<br>
@@ -223,28 +198,24 @@ okabe*/
      * <p><b>注意</b>　Ruby版ではgetmemで参照を取得した後でeqmemを行っていた。
      * @see lockmem */
 	public static final int TESTMEM = 10;
-	// LOCALTESTMEMは不要
 	static {setArgType(TESTMEM, new ArgType(false, ARG_MEM, ARG_ATOM));}
 
     /** norules [srcmem] 
      * <br>ガード命令<br>
      * 膜$srcmemにルールが存在しないことを確認する。*/
     public static final int NORULES = 11;
-    // LOCALNORULESは不要
 	static {setArgType(NORULES, new ArgType(false, ARG_MEM));}
 
     /** nfreelinks [srcmem, count]
      * <br>ガード命令<br>
      * 膜$srcmemの自由リンク数がcountであることを確認する。*/
     public static final int NFREELINKS = 12;
-	// LOCALNFREELINKSは不要
 	static {setArgType(NFREELINKS, new ArgType(false, ARG_MEM, ARG_INT));}
 
 	/** natoms [srcmem, count]
 	 * <br>ガード命令<br>
 	 * 膜$srcmemの自由リンク管理アトム以外のアトム数がcountであることを確認する。*/
 	public static final int NATOMS = 13;
-	// LOCALNATOMSは不要
 	static {setArgType(NATOMS, new ArgType(false, ARG_MEM, ARG_INT));}
 	
 	/** natomsindirect [srcmem, countfunc]
@@ -258,7 +229,6 @@ okabe*/
      * <br>ガード命令<br>
      * 膜$srcmemの子膜の数がcountであることを確認する。*/
     public static final int NMEMS = 15;
-	// LOCALNMEMSは不要
 	static {setArgType(NMEMS, new ArgType(false, ARG_MEM, ARG_INT));}
 
 	// 16は予約 see isground
@@ -268,7 +238,6 @@ okabe*/
      * $mem1と$mem2が同一の膜を参照していることを確認する。
      * <p><b>注意</b> Ruby版のeqから分離 */
     public static final int EQMEM = 17;
-	// LOCALEQMEMは不要
 	static {setArgType(EQMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 	
     /** neqmem [mem1, mem2]
@@ -277,29 +246,26 @@ okabe*/
      * <p><b>注意</b> Ruby版のneqから分離
      * <p><font color=red><b>この命令は不要かも知れない</b></font> */
     public static final int NEQMEM = 18;
-	// LOCALNEQMEMは不要
 	static {setArgType(NEQMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** stable [srcmem]
 	 * <br>ガード命令<br>
 	 * 膜$srcmemとその子孫の全ての膜の実行が停止していることを確認する。*/
 	public static final int STABLE = 19;
-	// LOCALSTABLEは不要
 	static {setArgType(STABLE, new ArgType(false, ARG_MEM));}
     
 	// アトムに関係する出力しない基本ガード命令 (20-24)
-	//  -----  func     [srcatom, funcref]
-	//  -----  notfunc  [srcatom, funcref]
-	//  -----  eqatom   [atom1, atom2]
-	//  -----  neqatom  [atom1, atom2]
-	//  -----  samefunc [atom1, atom2]
+	// func     [srcatom, funcref]
+	// notfunc  [srcatom, funcref]
+	// eqatom   [atom1, atom2]
+	// neqatom  [atom1, atom2]
+	// samefunc [atom1, atom2]
 
 	/** func [srcatom, funcref]
 	 * <br>ガード命令<br>
 	 * アトム$srcatomがファンクタfuncrefを持つことを確認する。
 	 * <p>getfunc[tmp,srcatom];loadfunc[func,funcref];eqfunc[tmp,func] と同じ。*/
 	public static final int FUNC = 20;
-	// LOCALFUNCは不要
 	static {setArgType(FUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
 
 	/** notfunc [srcatom, funcref]
@@ -308,7 +274,6 @@ okabe*/
 	 * <p>典型的には、プロセス文脈の明示的な自由リンクの出現アトムが$inside_proxyでないことを確認するために使われる。
 	 * <p>getfunc[tmp,srcatom];loadfunc[func,funcref];neqfunc[tmp,func] と同じ。*/
 	public static final int NOTFUNC = 21;
-	// LOCALNOTFUNCは不要
 	static {setArgType(NOTFUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
 
 	/** eqatom [atom1, atom2]
@@ -316,7 +281,6 @@ okabe*/
 	 * $atom1と$atom2が同一のアトムを参照していることを確認する。
 	 * <p><b>注意</b> Ruby版のeqから分離 */
 	public static final int EQATOM = 22;
-	// LOCALEQATOMは不要
 	static {setArgType(EQATOM, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
 	/** neqatom [atom1, atom2]
@@ -324,7 +288,6 @@ okabe*/
 	 * $atom1と$atom2が異なるアトムを参照していることを確認する。
 	 * <p><b>注意</b> Ruby版のneqから分離 */
 	public static final int NEQATOM = 23;
-	// LOCALNEQATOMは不要
 	static {setArgType(NEQATOM, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
 	/** samefunc [atom1, atom2]
@@ -332,15 +295,14 @@ okabe*/
 	 * $atom1と$atom2が同じファンクタを持つことを確認する。
 	 * <p>getfunc[func1,atom1];getfunc[func2,atom2];eqfunc[func1,func2]と同じ。*/
 	public static final int SAMEFUNC = 24;
-	// LOCALSAMEFUNCは不要
 	static {setArgType(SAMEFUNC, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
 	// ファンクタに関係する命令 (25--29)	
-	//  -----  dereffunc [-dstfunc, srcatom, srcpos]
-	//  -----  getfunc   [-func,    atom]
-	//  -----  loadfunc  [-func,    funcref]
-	//  -----  eqfunc              [func1, func2]
-	//  -----  neqfunc             [func1, func2]
+	// dereffunc [-dstfunc, srcatom, srcpos]
+	// getfunc   [-func,    atom]
+	// loadfunc  [-func,    funcref]
+	// eqfunc              [func1, func2]
+	// neqfunc             [func1, func2]
 
 	/** dereffunc [-dstfunc, srcatom, srcpos]
 	 * <br>出力する失敗しない拡張ガード命令
@@ -349,21 +311,18 @@ okabe*/
 	 * <p>単項アトムでない型付きプロセス文脈は、リンクオブジェクトを使って操作する。
 	 * <p>derefatom[dstatom,srcatom,srcpos];getfunc[dstfunc,dstatom]と同じなので廃止？*/
 	public static final int DEREFFUNC = 25;
-	// LOCALDEREFFUNCは不要
 	static {setArgType(DEREFFUNC, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));}
 
 	/** getfunc [-func, atom]
 	 * <br>出力する失敗しない拡張ガード命令<br>
 	 * アトム$atomのファンクタへの参照を$funcに代入する。*/
 	public static final int GETFUNC = 26;
-	// LOCALGETFUNCは不要
 	static {setArgType(GETFUNC, new ArgType(true, ARG_VAR, ARG_ATOM));}
 
 	/** loadfunc [-func, funcref]
 	 * <br>出力する失敗しない拡張ガード命令<br>
 	 * ファンクタfuncrefへの参照を$funcに代入する。*/
 	public static final int LOADFUNC = 27;
-	// LOCALLOADFUNCは不要
 	static {setArgType(LOADFUNC, new ArgType(true, ARG_VAR, ARG_OBJ));}
 	// func/funcrefはVAR? OBJ? -> (n-kato) func=VAR, funcref=OBJ
 	
@@ -371,25 +330,23 @@ okabe*/
 	 * <br>型付き拡張用ガード命令<br>
 	 * ファンクタ$func1と$func2が等しいことを確認する。*/
 	public static final int EQFUNC = 28;
-	// LOCALEQFUNCは不要
 	static {setArgType(EQFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
 
 	/** neqfunc [func1, func2]
 	 * <br>型付き拡張用ガード命令<br>
 	 * ファンクタ$func1と$func2が異なることを確認する。*/
 	public static final int NEQFUNC = 29;
-	// LOCALEQFUNCは不要
 	static {setArgType(NEQFUNC, new ArgType(false, ARG_VAR, ARG_VAR));}
 
     // アトムを操作する基本ボディ命令 (30--39)    
-	// [local]removeatom                  [srcatom, srcmem, funcref]
-	// [local]newatom           [-dstatom, srcmem, funcref]
-	// [local]newatomindirect   [-dstatom, srcmem, func]
-    // [local]enqueueatom                 [srcatom]
-	//  ----- dequeueatom                 [srcatom]
-	//  ----- freeatom                    [srcatom]
-	// [local]alterfunc                   [atom, funcref]
-	// [local]alterfuncindirect           [atom, func]
+	// removeatom                  [srcatom, srcmem, funcref]
+	// newatom           [-dstatom, srcmem, funcref]
+	// newatomindirect   [-dstatom, srcmem, func]
+    // enqueueatom                 [srcatom]
+	// dequeueatom                 [srcatom]
+	// freeatom                    [srcatom]
+	// alterfunc                   [atom, funcref]
+	// alterfuncindirect           [atom, func]
 
     /** removeatom [srcatom, srcmem, funcref]
      * <br>ボディ命令<br>
@@ -399,13 +356,6 @@ okabe*/
 	public static final int REMOVEATOM = 30;
 	static {setArgType(REMOVEATOM, new ArgType(false, ARG_ATOM, ARG_MEM, ARG_OBJ));}
 	
-	/** localremoveatom [srcatom, srcmem, funcref]
-     * <br>最適化用ボディ命令<br>
-     * removeatomと同じ。ただし$srcatomはこの計算ノードに存在する。*/
-	/*
-	public static final int LOCALREMOVEATOM = LOCAL + REMOVEATOM;
-	static {setArgType(LOCALREMOVEATOM, new ArgType(false, ARG_ATOM, ARG_MEM, ARG_OBJ));}
-okabe*/
     /** newatom [-dstatom, srcmem, funcref]
      * <br>ボディ命令<br>
      * 膜$srcmemにファンクタfuncrefを持つ新しいアトム作成し、参照を$dstatomに代入する。
@@ -414,12 +364,6 @@ okabe*/
     public static final int NEWATOM = 31;
 	static {setArgType(NEWATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
     
-	/** localnewatom [-dstatom, srcmem, funcref]
-	 * <br>最適化用ボディ命令<br>
-	 * newatomと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-	/*public static final int LOCALNEWATOM = LOCAL + NEWATOM;
-	static {setArgType(LOCALNEWATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));}
-okabe*/
 	/** newatomindirect [-dstatom, srcmem, func]
 	 * <br>型付き拡張用ボディ命令<br>
 	 * 膜$srcmemにファンクタ$funcを持つ新しいアトム作成し、参照を$dstatomに代入する。
@@ -428,12 +372,6 @@ okabe*/
 	public static final int NEWATOMINDIRECT = 32;
 	static {setArgType(NEWATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_VAR));}
 	
-	/** localnewatomindirect [-dstatom, srcmem, func]
-	 * <br>型付き拡張用最適化用ボディ命令<br>
-	 * newatomindirectと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-/*	public static final int LOCALNEWATOMINDIRECT = LOCAL + NEWATOMINDIRECT;
-	static {setArgType(LOCALNEWATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_VAR));}
-okabe*/
 	/** enqueueatom [srcatom]
      * <br>ボディ命令<br>
      * アトム$srcatomを所属膜の実行アトムスタックに積む。
@@ -444,12 +382,6 @@ okabe*/
     public static final int ENQUEUEATOM = 33;
 	static {setArgType(ENQUEUEATOM, new ArgType(false, ARG_ATOM));}
     
-	/** localenqueueatom [srcatom]
-	 * <br>最適化用ボディ命令<br>
-	 * enqueueatomと同じ。ただし$srcatomは<B>本膜と同じタスクが管理する膜に存在する</B>。*/
-/*	public static final int LOCALENQUEUEATOM = LOCAL + ENQUEUEATOM;
-	static {setArgType(LOCALENQUEUEATOM, new ArgType(false, ARG_ATOM));}
-okabe*/
     /** dequeueatom [srcatom]
      * <br>最適化用ボディ命令<br>
      * アトム$srcatomがこの計算ノードにある実行アトムスタックに入っていれば、スタックから取り出す。
@@ -458,7 +390,6 @@ okabe*/
      * <p>なお、他の計算ノードにある実行アトムスタックの内容を取得/変更する命令は存在しない。
      * <p>この命令は、Runtime.Atom.dequeueを呼び出す。*/
     public static final int DEQUEUEATOM = 34;
-	// LOCALDEQUEUEATOMは最適化の効果が無いため却下
 	static {setArgType(DEQUEUEATOM, new ArgType(false, ARG_ATOM));}
 
 	/** freeatom [srcatom]
@@ -468,7 +399,6 @@ okabe*/
 	 * アトムを他の計算ノードで積んでいる場合、輸出表の整合性は大丈夫か調べる。
 	 * → 輸出表は作らないことにしたので大丈夫。*/
 	public static final int FREEATOM = 35;
-	// LOCALFREEATOMは不要
 	static {setArgType(FREEATOM, new ArgType(false, ARG_ATOM));}
 
 	/** alterfunc [atom, funcref]
@@ -478,36 +408,23 @@ okabe*/
 	public static final int ALTERFUNC = 36;
 	static {setArgType(ALTERFUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
 
-	/** localalterfunc [atom, funcref]
-	 * <br>最適化用ボディ命令<br>
-	 * alterfuncと同じ。ただし$atomはこの計算ノードに存在する。*/
-/*	public static final int LOCALALTERFUNC = LOCAL + ALTERFUNC;
-	static {setArgType(LOCALALTERFUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));}
-okabe*/
 	/** alterfuncindirect [atom, func]
 	 * <br>最適化用ボディ命令<br>
 	 * alterfuncと同じ。ただしファンクタは$funcにする。*/
 	public static final int ALTERFUNCINDIRECT = 37;
 	static {setArgType(ALTERFUNCINDIRECT, new ArgType(false, ARG_ATOM, ARG_VAR));}
 	
-	/** localalterfuncindirect [atom, func]
-	 * <br>最適化用ボディ命令<br>
-	 * alterfuncindirectと同じ。ただし$atomはこの計算ノードに存在する。*/
-/*	public static final int LOCALALTERFUNCINDIRECT = LOCAL + ALTERFUNCINDIRECT;
-	static {setArgType(LOCALALTERFUNCINDIRECT, new ArgType(false, ARG_ATOM, ARG_VAR));}
-okabe*/
 	// アトムを操作する型付き拡張用命令 (40--49)
-	//  ----- allocatom         [-dstatom, funcref]
-	//  ----- allocatomindirect [-dstatom, func]
-	// [local]copyatom          [-dstatom, mem, srcatom]
-	//  local addatom                     [dstmem, atom]
+	// allocatom         [-dstatom, funcref]
+	// allocatomindirect [-dstatom, func]
+	// copyatom          [-dstatom, mem, srcatom]
+	// addatom           [dstmem, atom]
 
 	/** allocatom [-dstatom, funcref]
 	 * <br>型付き拡張用命令<br>
 	 * ファンクタfuncrefを持つ所属膜を持たない新しいアトム作成し、参照を$dstatomに代入する。
 	 * <p>ガード検査で使われる定数アトムを生成するために使用される。*/
 	public static final int ALLOCATOM = 40;
-	// LOCALALLOCATOMは不要
 	static {setArgType(ALLOCATOM, new ArgType(true, ARG_ATOM, ARG_OBJ));}
 
 	/** allocatomindirect [-dstatom, func]
@@ -515,7 +432,6 @@ okabe*/
 	 * ファンクタ$funcを持つ所属膜を持たない新しいアトムを作成し、参照を$dstatomに代入する。
 	 * <p>ガード検査で使われる定数アトムを生成するために使用される。*/
 	public static final int ALLOCATOMINDIRECT = 41;
-	// LOCALALLOCATOMINDIRECTは不要
 	static {setArgType(ALLOCATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_VAR));}
 
 	/** copyatom [-dstatom, mem, srcatom]
@@ -528,36 +444,24 @@ okabe*/
 	public static final int COPYATOM = 42;
 	static {setArgType(COPYATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_ATOM));}
 
-	/** localcopyatom [-dstatom, mem, srcatom]
-	 * <br>最適化用ボディ命令<br>
-	 * copyatomと同じ。ただし$memはこの計算ノードに存在する。*/
-/*	public static final int LOCALCOPYATOM = LOCAL + COPYATOM;
-	static {setArgType(LOCALCOPYATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_ATOM));}
-okabe*/
-	/** localaddatom [dstmem, atom]
-	 * <br>最適化用ボディ命令<br>
-	 * （所属膜を持たない）アトム$atomを膜$dstmemに所属させる。
-	 * ただし$dstmemはこの計算ノードに存在する。*/
-/*	public static final int LOCALADDATOM = LOCAL + 43;
-	// 一般の ADDATOM は存在しない。
-	static {setArgType(LOCALADDATOM, new ArgType(false, ARG_MEM, ARG_ATOM));}
-okabe*/
-	// 0830 okabe 追加
+	/** addatom [dstmem, atom]
+	 * <br>ボディ命令<br>
+	 * （所属膜を持たない）アトム$atomを膜$dstmemに所属させる。*/
 	public static final int ADDATOM  = 43;
 	static {setArgType(ADDATOM, new ArgType(false, ARG_MEM, ARG_ATOM));}
 	
 	// 膜を操作する基本ボディ命令 (50--60)    
-	// [local]removemem                [srcmem, parentmem]
-	// [local]newmem          [-dstmem, srcmem, memtype]
-	//  ----- allocmem        [-dstmem]
-	//  ----- newroot         [-dstmem, srcmem, node, memtype]
-	//  ----- movecells                [dstmem, srcmem]
-	//  ----- enqueueallatoms          [srcmem]
-	//  ----- freemem                  [srcmem]
-	// [local]addmem                   [dstmem, srcmem]
-	// [local]enququmem                [srcmem]
-	// [local]unlockmem                [srcmem]
-	// [local]setmemname               [dstmem, name]
+	// removemem                [srcmem, parentmem]
+	// newmem          [-dstmem, srcmem, memtype]
+	// allocmem        [-dstmem]
+	// newroot         [-dstmem, srcmem, node, memtype]
+	// movecells                [dstmem, srcmem]
+	// enqueueallatoms          [srcmem]
+	// freemem                  [srcmem]
+	// addmem                   [dstmem, srcmem]
+	// enququmem                [srcmem]
+	// unlockmem                [srcmem]
+	// setmemname               [dstmem, name]
 
 	/** removemem [srcmem, parentmem]
 	 * <br>ボディ命令<br>
@@ -565,16 +469,9 @@ okabe*/
 	 * <strike>膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。</strike>
 	 * 実行膜スタックに積まれている場合は除去する。
 	 * @see removeproxies */
-	// 実装をLOCALREMOVEMEM のものにする．
 	public static final int REMOVEMEM = 50;
 	static {setArgType(REMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
 
-	/** localremovemem [srcmem, parentmem]
-	 * <br>最適化用ボディ命令<br>
-	 * removememと同じ。ただし$srcmemの親膜（$parentmem）はこの計算ノードに存在する。*/
-/*	public static final int LOCALREMOVEMEM = LOCAL + REMOVEMEM;
-	static {setArgType(LOCALREMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
-okabe*/
 	/** newmem [-dstmem, srcmem, memtype]
 	 * <br>ボディ命令<br>
 	 * （活性化された）膜$srcmemに新しい（ルート膜でない）$memtypeで表せるタイプの子膜を作成し、
@@ -585,20 +482,10 @@ okabe*/
 	public static final int NEWMEM = 51;
 	static {setArgType(NEWMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));}
 
-	/** localnewmem [-dstmem, srcmem, memtype]
-	* <br>最適化用ボディ命令<br>
-	* newmemと同じ。ただし$srcmemは<B>本膜と同じタスクによって管理される</B>。*/
-	// 0830 廃止して良い(丸ごと消して良い，NEWMEM は現状のものを使えば良いから．)
-	/*
-	public static final int LOCALNEWMEM = LOCAL + NEWMEM;
-	static {setArgType(LOCALNEWMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));}
-*/
-
 	/** allocmem [-dstmem]
 	 * <br>最適化用ボディ命令<br>
 	 * 親膜を持たない新しい膜を作成し、参照を$dstmemに代入する。*/
 	public static final int ALLOCMEM = 52;
-	// LOCALALLOCMEMは不要
 	static {setArgType(ALLOCMEM, new ArgType(true, ARG_MEM));}
 
 	/** newroot [-dstmem, srcmem, nodeatom, memtype]
@@ -611,7 +498,6 @@ okabe*/
 	 * <p>newmemと違い、このルート膜のロックは明示的に解放しなければならない。
 	 * @see unlockmem */
 	public static final int NEWROOT = 53;
-	// LOCALNEWROOTは最適化の効果が無いため却下
 	static {setArgType(NEWROOT, new ArgType(true, ARG_MEM, ARG_MEM, ARG_ATOM, ARG_INT));}
 	
 	/** movecells [dstmem, srcmem]
@@ -625,7 +511,6 @@ okabe*/
 	 * <p>moveCellsFromメソッドを呼び出す。
 	 * @see enqueueallatoms */
 	public static final int MOVECELLS = 54;
-	// LOCALMOVECELLSは最適化の効果が無いため却下？あるいはさらに特化した仕様にする。
 	static {setArgType(MOVECELLS, new ArgType(false, ARG_MEM, ARG_MEM));}
 
 	/** enqueueallatoms [srcmem]
@@ -635,7 +520,6 @@ okabe*/
 	 * ファンクタを動的検査する方法と、2つのグループのアトムがあるとして所属膜が管理する方法がある。
 	 * @see enqueueatom */
 	public static final int ENQUEUEALLATOMS = 55;
-	// LOCALENQUEUEALLATOMSは最適化の効果が無いため却下
 	static {setArgType(ENQUEUEALLATOMS, new ArgType(false, ARG_MEM));}
 
 	/** freemem [srcmem]
@@ -644,7 +528,6 @@ okabe*/
 	 * <p>$srcmemがどの膜にも属さず、かつスタックに積まれていないことを表す。
 	 * @see freeatom */
 	public static final int FREEMEM = 56;
-	// LOCALFREEMEMは不要
 	static {setArgType(FREEMEM, new ArgType(false, ARG_MEM));}
 
 	/** addmem [dstmem, srcmem]
@@ -669,12 +552,6 @@ okabe*/
 	public static final int ENQUEUEMEM = 58;
 	static {setArgType(ENQUEUEMEM, new ArgType(false, ARG_MEM));}
 
-	/** localaddmem [dstmem, srcmem]
-	 * <br>最適化用ボディ命令<br>
-	 * addmemと同じ。ただし$srcmemはこの計算ノードに存在する。$dstmemについては何も仮定しない。*/
-/*	public static final int LOCALADDMEM = LOCAL + ADDMEM;
-	static {setArgType(LOCALADDMEM, new ArgType(false, ARG_MEM, ARG_MEM));}
-okabe*/
 	/** unlockmem [srcmem]
 	 * <br>ボディ命令<br>
 	 * （活性化した）膜$srcmemのロックを解放する。
@@ -685,25 +562,13 @@ okabe*/
 	public static final int UNLOCKMEM = 59;
 	static {setArgType(UNLOCKMEM, new ArgType(false, ARG_MEM));}
 
-	/** localunlockmem [srcmem]
-	 * <br>最適化用ボディ命令<br>
-	 * unlockmemと同じ。ただし$srcmemはこの計算ノードに存在する。*/
-/*	public static final int LOCALUNLOCKMEM = LOCAL + UNLOCKMEM;
-	static {setArgType(LOCALUNLOCKMEM, new ArgType(false, ARG_MEM));}
-okabe*/
 	/** setmemname [dstmem, name]
 	 * <br>ボディ命令<br>
 	 * 膜$dstmemの名前を文字列（またはnull）nameに設定する。
 	 * <p>現在、膜の名前の使用目的は表示用のみ。いずれ、膜名に対するマッチングができるようになるはず。*/
 	public static final int SETMEMNAME = 60;
 	static {setArgType(SETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));}
-
-	/** localsetmemname [dstmem, name]
-	 * <br>最適化用ボディ命令<br>
-	 * setmemnameと同じ。ただし$dstmemはこの計算ノードに存在する。*/
-/*	public static final int LOCALSETMEMNAME = LOCAL + SETMEMNAME;
-	static {setArgType(LOCALSETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));}
-okabe*/	
+	
 	// 予約 (61--62)
 
 	// リンクに関係する出力するガード命令 (63--64)
@@ -716,7 +581,6 @@ okabe*/
 	 * アトム$atomの第pos引数に格納されたリンクオブジェクトへの参照を$linkに代入する。
 	 * <p>典型的には、$atomはルールヘッドに存在する。*/
 	public static final int GETLINK = 63;
-	// LOCALGETLINKは不要
 	static {setArgType(GETLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));}
 
 	/** alloclink [-link, atom, pos]
@@ -724,15 +588,14 @@ okabe*/
 	 * アトム$atomの第pos引数を指すリンクオブジェクトを生成し、参照を$linkに代入する。
 	 * <p>典型的には、$atomはルールボディに存在する。*/
 	public static final int ALLOCLINK = 64;
-	// LOCALGETLINKは不要
 	static {setArgType(ALLOCLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));}
 
 	// リンクを操作するボディ命令 (65--69)
-	// [local]newlink     [atom1, pos1, atom2, pos2, mem1]
-	// [local]relink      [atom1, pos1, atom2, pos2, mem]
-	// [local]unify       [atom1, pos1, atom2, pos2, mem]
-	// [local]inheritlink [atom1, pos1, link2, mem]
-	// [local]unifylinks  [link1, link2, mem]
+	// newlink     [atom1, pos1, atom2, pos2, mem1]
+	// relink      [atom1, pos1, atom2, pos2, mem]
+	// unify       [atom1, pos1, atom2, pos2, mem]
+	// inheritlink [atom1, pos1, link2, mem]
+	// unifylinks  [link1, link2, mem]
 
 	/** newlink [atom1, pos1, atom2, pos2, mem1]
 	 * <br>ボディ命令<br>
@@ -744,30 +607,17 @@ okabe*/
 	public static final int NEWLINK = 65;
 	static {setArgType(NEWLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
-	/** localnewlink [atom1, pos1, atom2, pos2 (,mem1)]
-	 * <br>最適化用ボディ命令<br>
-	 * newlinkと同じ。ただし膜$mem1はこの計算ノードに存在する。*/
-/*	public static final int LOCALNEWLINK = LOCAL + NEWLINK;
-	static {setArgType(LOCALNEWLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
-okabe*/
 	/** relink [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
 	 * アトム$atom1（膜$memにある）の第pos1引数と、
 	 * アトム$atom2の第pos2引数のリンク先（膜$memにある）の引数を接続する。
 	 * <p>典型的には、$atom1はルールボディに、$atom2はルールヘッドに存在する。
-	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalrelinkが使用できる。
 	 * <p>実行後、$atom2[pos2]の内容は無効になる。
 	 * <p>getlink[link2,atom2,pos2];inheritlink[atom1,pos1,link2,mem]と同じ。
 	 * <p>alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
 	public static final int RELINK = 66;
 	static {setArgType(RELINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
-	/** localrelink [atom1, pos1, atom2, pos2 (,mem)]
-	 * <br>最適化用ボディ命令<br>
-	 * relinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
-/*	public static final int LOCALRELINK = LOCAL + RELINK;
-	static {setArgType(LOCALRELINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
-okabe*/
 	/** unify [atom1, pos1, atom2, pos2, mem]
 	 * <br>ボディ命令<br>
 	 * アトム$atom1の第pos1引数のリンク先<strike>（膜$memにある）</strike>の引数と、
@@ -777,35 +627,21 @@ okabe*/
 	 * $atom1 と $atom2 の両方もしくは一方が所属膜を持たない場合もある。
 	 * これは a(A),f(A,B),(a(X),f(Y,Z):-Y=Z,b(X)) の書き換えなどで起こる。
 	 * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。
-	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalunifyが使用できる。
 	 * <p>getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。*/
 	public static final int UNIFY = 67;
 	static {setArgType(UNIFY, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
 
-	/** localunify [atom1, pos1, atom2, pos2 (,mem)]
-	 * <br>最適化用ボディ命令<br>
-	 * unifyと同じ。ただし膜$memはこの計算ノードに存在する。*/
-/*	public static final int LOCALUNIFY = LOCAL + UNIFY;
-	static {setArgType(LOCALUNIFY, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));}
-okabe*/
 	/** inheritlink [atom1, pos1, link2, mem]
 	 * <br>最適化用ボディ命令<br>
 	 * アトム$atom1（膜$memにある）の第pos1引数と、
 	 * リンク$link2のリンク先（膜$memにある）を接続する。
 	 * <p>典型的には、$atom1はルールボディに存在し、$link2はルールヘッドに存在する。relinkの代用。
-	 * <p>型付きプロセス文脈が無いルールでは、つねに$memが本膜なのでlocalinheritrelinkが使用できる。
 	 * <p>$link2は再利用されるため、実行後は$link2は廃棄しなければならない。
 	 * <p>alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem]と同じ。
 	 * @see getlink */
 	public static final int INHERITLINK = 68;
 	static {setArgType(INHERITLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_VAR, ARG_MEM));}
 
-	/** localinheritlink [atom1, pos1, link2 (,mem)]
-	 * <br>最適化用ボディ命令<br>
-	 * inheritlinkと同じ。ただし膜$memはこの計算ノードに存在する。*/
-/*	public static final int LOCALINHERITLINK = LOCAL + INHERITLINK;
-	static {setArgType(LOCALINHERITLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_VAR, ARG_MEM));}
-okabe*/
 	/** unifylinks [link1, link2, mem]
 	 * <br>ボディ命令<br>
 	 * リンク$link1の指すアトム引数とリンク$link2の指すアトム引数との間に双方向のリンクを張る。
@@ -817,12 +653,6 @@ okabe*/
 	public static final int UNIFYLINKS = 69;
 	static {setArgType(UNIFYLINKS, new ArgType(false, ARG_VAR, ARG_VAR, ARG_MEM));}
 
-	/** localunifylinks [link1, link2 (,mem)]
-	 * <br>最適化用ボディ命令<br>
-	 * unifylinksと同じ。ただし膜$memはこの計算ノードに存在する。*/
-/*	public static final int LOCALUNIFYLINKS = LOCAL + UNIFYLINKS;
-	static {setArgType(LOCALUNIFYLINKS, new ArgType(false, ARG_VAR, ARG_VAR, ARG_MEM));}
-okabe*/
     // 自由リンク管理アトム自動処理のためのボディ命令 (70--74)
 	//  -----  removeproxies          [srcmem]
 	//  -----  removetoplevelproxies  [srcmem]
@@ -834,7 +664,6 @@ okabe*/
      * $srcmemを通る無関係な自由リンク管理アトムを自動削除する。
      * <p>removememの直後に同じ膜に対して呼ばれる。*/
     public static final int REMOVEPROXIES = 70;
-    // LOCALREMOVEPROXIESは最適化の効果が無いため却下
 	static {setArgType(REMOVEPROXIES, new ArgType(false, ARG_MEM));}
 
     /** removetoplevelproxies [srcmem]
@@ -842,7 +671,6 @@ okabe*/
      * 膜$srcmem（本膜）を通過している無関係な自由リンク管理アトムを除去する。
 	 * <p>removeproxiesが全て終わった後で呼ばれる。*/
     public static final int REMOVETOPLEVELPROXIES = 71;
-	// LOCALREMOVETOPLEVELPROXIESは最適化の効果が無いため却下
 	static {setArgType(REMOVETOPLEVELPROXIES, new ArgType(false, ARG_MEM));}
 
     /** insertproxies [parentmem,childmem]
@@ -850,7 +678,6 @@ okabe*/
      * 指定された膜間に自由リンク管理アトムを自動挿入する。
      * <p>addmemが全て終わった後で呼ばれる。*/
     public static final int INSERTPROXIES = 72;
-	// LOCALINSERTPROXIESは最適化の効果が無いため却下
 	static {setArgType(INSERTPROXIES, new ArgType(false, ARG_MEM, ARG_MEM));}
 	
     /** removetemporaryproxies [srcmem]
@@ -858,13 +685,12 @@ okabe*/
      * 膜$srcmem（本膜）に残された"star"アトムを除去する。
      * <p>insertproxiesが全て終わった後で呼ばれる。*/
     public static final int REMOVETEMPORARYPROXIES = 73;
-	// LOCALREMOVETEMPORARYPROXIESは最適化の効果が無いため却下
 	static {setArgType(REMOVETEMPORARYPROXIES, new ArgType(false, ARG_MEM));}
 
 	// ルールを操作するボディ命令 (75--79)
-	// [local]loadruleset [dstmem, ruleset]
-	// [local]copyrules   [dstmem, srcmem]
-	// [local]clearrules  [dstmem]
+	// loadruleset [dstmem, ruleset]
+	// copyrules   [dstmem, srcmem]
+	// clearrules  [dstmem]
 
 	/** loadruleset [dstmem, ruleset]
 	 * <br>ボディ命令<br>
@@ -874,12 +700,6 @@ okabe*/
 	public static final int LOADRULESET = 75;
 	static {setArgType(LOADRULESET, new ArgType(false, ARG_MEM, ARG_OBJ));}
 	
-	/** localloadruleset [dstmem, ruleset]
-	 * <br>最適化用ボディ命令<br>
-	 * loadrulesetと同じ。ただし$dstmemはこの計算ノードに存在する。*/
-/*	public static final int LOCALLOADRULESET = LOCAL + LOADRULESET;
-	static {setArgType(LOCALLOADRULESET, new ArgType(false, ARG_MEM, ARG_OBJ));}
-okabe*/
 	/** copyrules [dstmem, srcmem]
 	 * <br>ボディ命令<br>
 	 * 膜$srcmemにある全てのルールを膜$dstmemにコピーする。
@@ -887,24 +707,12 @@ okabe*/
 	public static final int COPYRULES = 76;
 	static {setArgType(COPYRULES, new ArgType(false, ARG_MEM, ARG_MEM));}
 
-	/** localcopyrules [dstmem, srcmem]
-	 * <br>最適化用ボディ命令<br>
-	 * copyrulesと同じ。ただし$dstmemはこの計算ノードに存在する。$srcmemについては何も仮定しない。*/
-/*	public static final int LOCALCOPYRULES = LOCAL + COPYRULES;
-	static {setArgType(LOCALCOPYRULES, new ArgType(false, ARG_MEM, ARG_MEM));}
-okabe*/
 	/** clearrules [dstmem]
 	 * <br>ボディ命令<br>
 	 * 膜$dstmemにある全てのルールを消去する。*/
 	public static final int CLEARRULES = 77;
 	static {setArgType(CLEARRULES, new ArgType(false, ARG_MEM));}
 	
-	/** localclearrules [dstmem]
-	 * <br>最適化用ボディ命令<br>
-	 * clearrulesと同じ。ただし$dstmemはこの計算ノードに存在する。*/
-/*	public static final int LOCALCLEARRULES = LOCAL + CLEARRULES;
-	static {setArgType(LOCALCLEARRULES, new ArgType(false, ARG_MEM));}
-okabe*/
 	/** loadmodule [dstmem, ruleset]
 	 * <br>ボディ命令<br>
 	 * ルールセットrulesetを膜$dstmemにコピーする。
@@ -926,7 +734,6 @@ okabe*/
      * デッドロックが起こらないことを保証できれば、この命令はブロッキングで行うべきである。
      * </b></font>*/
     public static final int RECURSIVELOCK = 80;
-	// LOCALRECURSIVELOCKは最適化の効果が無いため却下
 	static {setArgType(RECURSIVELOCK, new ArgType(false, ARG_MEM));}
 
     /** recursiveunlock [srcmem]
@@ -936,7 +743,6 @@ okabe*/
      * <p>再帰的に積む方法は、今後考える。
      * @see unlockmem */
     public static final int RECURSIVEUNLOCK = 81;
-	// LOCALRECURSIVEUNLOCKは最適化の効果が無いため却下
 	static {setArgType(RECURSIVEUNLOCK, new ArgType(false, ARG_MEM));}
 
     /** copycells [-dstmap, dstmem, srcmem]
@@ -948,7 +754,6 @@ okabe*/
      * というMapオブジェクトとして,dstmapに入れる.
      **/
     public static final int COPYCELLS = 82;
-	// LOCALCOPYMEMは最適化の効果が無いため却下
 	static {setArgType(COPYCELLS, new ArgType(true, ARG_VAR, ARG_MEM, ARG_MEM));}
 
 	/** dropmem [srcmem]
@@ -956,7 +761,6 @@ okabe*/
 	 * 再帰的にロックされた膜$srcmemを破棄する。
 	 * この膜や子孫の膜をルート膜とするタスクは強制終了する。*/
 	public static final int DROPMEM = 83;
-	// LOCALDROPMEMは最適化の効果が無いため却下
 	static {setArgType(DROPMEM, new ArgType(false, ARG_MEM));}
 
 	/** lookuplink [-dstlink, srcmap, srclink]
@@ -999,8 +803,6 @@ okabe*/
 	// 予約 (90--99)
 
 	//////////////////////////////////////////////////////////////////
-	
-	// 200番以降の命令にはLOCAL修飾版は存在しない
 	
 	// 制御命令 (200--209)
 	//  -----  react       [ruleref,         [memargs...], [atomargs...], [varargs...]]

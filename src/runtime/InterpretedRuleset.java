@@ -25,7 +25,8 @@ import java.util.Set;
 import util.Util;
 import debug.Debug;
 
-// TODO LOCAL関係のコメントを完全に削除する (2)
+// TODO LOCAL関係のコメントを完全に削除する (2) -> 0912 done
+// TODO 引数mem がいらない箇所がある（デーモン削除の影響）
 
 /**
  * compile.RulesetCompiler によって生成される。
@@ -396,8 +397,6 @@ class InterpretiveReactor {
 			if (Env.debug >= Env.DEBUG_TRACE) Env.d("Do " + inst);
 			switch (inst.getKind()) {
 
-				//メモ：LOCALHOGEはHOGEと同じコードでいい。
-				//nakajima: 2003-12-12
 				//メモ：コメントは引数
 				//nakajima: 2003-12-12
 
@@ -440,7 +439,6 @@ class InterpretiveReactor {
 
 					//====膜に関係する出力する基本ガード命令 ====ここから====
 				case Instruction.LOCKMEM :
-// 0830				case Instruction.LOCALLOCKMEM :
 					// lockmem [-dstmem, freelinkatom, memname]
 					mem = atoms[inst.getIntArg2()].mem;
 					if(!mem.equalName((String)inst.getArg3()))
@@ -456,7 +454,7 @@ class InterpretiveReactor {
 					return false; //n-kato
 
 				case Instruction.ANYMEM :
-// 0830				case Instruction.LOCALANYMEM : // anymem [-dstmem, srcmem, memname] 
+					// anymem [-dstmem, srcmem, memname] 
 					it = mems[inst.getIntArg2()].mems.iterator();
 					while (it.hasNext()) {
 						Membrane submem = (Membrane) it.next();
@@ -476,7 +474,7 @@ class InterpretiveReactor {
 					}
 					return false; //n-kato
 				case Instruction.LOCK :
-// 0830				case Instruction.LOCALLOCK : //[srcmem] 
+					//[srcmem] 
 					mem = mems[inst.getIntArg1()];
 					if (mem.lock()) {
 						lockedMemList.add(mem);
@@ -583,21 +581,21 @@ class InterpretiveReactor {
 
 					//====アトムを操作する基本ボディ命令====ここから====
 				case Instruction.REMOVEATOM :
-// 0830				case Instruction.LOCALREMOVEATOM : //[srcatom, srcmem, funcref]
+					//[srcatom, srcmem, funcref]
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.removeAtom(atom);
 					break; //n-kato
 				case Instruction.NEWATOM :
-// 0830				case Instruction.LOCALNEWATOM : //[-dstatom, srcmem, funcref]
+					//[-dstatom, srcmem, funcref]
 					func = (Functor) inst.getArg3();
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
 					break; //n-kato
 				case Instruction.NEWATOMINDIRECT :
-// 0830				case Instruction.LOCALNEWATOMINDIRECT : //[-dstatom, srcmem, func]
+					//[-dstatom, srcmem, func]
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom((Functor)(vars.get(inst.getIntArg3())));
 					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 				case Instruction.ENQUEUEATOM :
-// 0830				case Instruction.LOCALENQUEUEATOM : //[srcatom]
+					//[srcatom]
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.enqueueAtom(atom);
 					break; //n-kato
@@ -608,12 +606,12 @@ class InterpretiveReactor {
 				case Instruction.FREEATOM : //[srcatom]
 					break; //n-kato
 				case Instruction.ALTERFUNC :
-// 0830				case Instruction.LOCALALTERFUNC : //[atom, funcref]
+					//[atom, funcref]
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.alterAtomFunctor(atom,(Functor)inst.getArg2());
 					break; //n-kato
 				case Instruction.ALTERFUNCINDIRECT :
-// 0830				case Instruction.LOCALALTERFUNCINDIRECT : //[atom, func]
+					//[atom, func]
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.alterAtomFunctor(atom,(Functor)(vars.get(inst.getIntArg2())));
 					break; //nakajima 2003-12-27, 2004-01-03, n-kato
@@ -629,20 +627,19 @@ class InterpretiveReactor {
 					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 
 				case Instruction.COPYATOM :
-// 0830				case Instruction.LOCALCOPYATOM : //[-dstatom, mem, srcatom]
+					//[-dstatom, mem, srcatom]
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(atoms[inst.getIntArg3()].getFunctor());
 					break; //nakajima, n-kato
 
-					// 0830 okabe コメントアウト解除
-					case Instruction.ADDATOM:
-// 0830				case Instruction.LOCALADDATOM : //[dstmem, atom]
+				case Instruction.ADDATOM:
+					//[dstmem, atom]
 					mems[inst.getIntArg1()].addAtom(atoms[inst.getIntArg2()]);
 					break; //nakajima 2003-12-27, n-kato
 					//====アトムを操作する型付き拡張用命令====ここまで====
 
 					//====膜を操作する基本ボディ命令====ここから====
 				case Instruction.REMOVEMEM :
-// 0830				case Instruction.LOCALREMOVEMEM : //[srcmem, parentmem]
+					//[srcmem, parentmem]
 					mem = mems[inst.getIntArg1()];
 					mem.parent.removeMem(mem);
 					break; //n-kato
@@ -650,13 +647,6 @@ class InterpretiveReactor {
 					mem = mems[inst.getIntArg2()].newMem(inst.getIntArg3());
 					mems[inst.getIntArg1()] = mem;
 					break; //n-kato
-					// 0830
-					/*
-				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
-					mem = ((Membrane)mems[inst.getIntArg2()]).newLocalMembrane(inst.getIntArg3());
-					mems[inst.getIntArg1()] = mem;
-					break; //n-kato
-					*/
 				case Instruction.ALLOCMEM: //[-dstmem]
 					mem = ((Task)mems[0].getTask()).createFreeMembrane();
 					mems[inst.getIntArg1()] = mem;
@@ -675,20 +665,18 @@ class InterpretiveReactor {
 					mems[inst.getIntArg1()].free();
 					break; //mizuno 2004-10-12, n-kato
 
-					// このパターンは実装をLOCALのものにする.
 				case Instruction.ADDMEM :
-// 0830				case Instruction.LOCALADDMEM : //[dstmem, srcmem]
+					//[dstmem, srcmem]
 					mems[inst.getIntArg2()] = mems[inst.getIntArg2()].moveTo(mems[inst.getIntArg1()]);
 					break; //nakajima 2004-01-04, n-kato, n-kato 2004-11-10
 				case Instruction.ENQUEUEMEM:
 					mems[inst.getIntArg1()].activate();
 					break;
 				case Instruction.UNLOCKMEM :
-// 0830				case Instruction.LOCALUNLOCKMEM : //[srcmem]
+					//[srcmem]
 					mems[inst.getIntArg1()].forceUnlock();
 					break; //n-kato
 
-// 0830				case Instruction.LOCALSETMEMNAME: //[dstmem, name]
 				case Instruction.SETMEMNAME: //[dstmem, name]
 					mems[inst.getIntArg1()].setName((String)inst.getArg2());
 					break; //n-kato
@@ -709,31 +697,16 @@ class InterpretiveReactor {
 
 					//====リンクを操作するボディ命令====ここから====
 				case Instruction.NEWLINK:		 //[atom1, pos1, atom2, pos2, mem1]
-// 0830				case Instruction.LOCALNEWLINK:	 //[atom1, pos1, atom2, pos2 (,mem1)]
 					atoms[inst.getIntArg1()].mem.newLink(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break; //n-kato
 				case Instruction.RELINK:		 //[atom1, pos1, atom2, pos2, mem]
-// 0830				case Instruction.LOCALRELINK:	 //[atom1, pos1, atom2, pos2 (,mem)]
 					atoms[inst.getIntArg1()].mem.relinkAtomArgs(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
-					/*060830okabe
-					// mem = mems[0]; // 昔のコード
-					//2005/10/11 mizuno
-					//必ず第五引数を利用するようにコンパイラを修正し、正規のコードに変更
-					mem = mems[inst.getIntArg5()]; // 正規のコード
-					//mem = atoms[inst.getIntArg1()].args[inst.getIntArg2()]
-					//		.getAtom().getMem(); // 代用コード
-					mem.unifyAtomArgs(
-						atoms[inst.getIntArg1()], inst.getIntArg2(),
-						atoms[inst.getIntArg3()], inst.getIntArg4() );
-					break; //n-kato
-			case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
-			*/
 					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
 					mems[0].unifyAtomArgs(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
@@ -741,24 +714,12 @@ class InterpretiveReactor {
 					break; //mizuno
 
 				case Instruction.INHERITLINK:		 //[atom1, pos1, link2, mem]
-// 0830				case Instruction.LOCALINHERITLINK:	 //[atom1, pos1, link2 (,mem)]
 					atoms[inst.getIntArg1()].mem.inheritLink(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						(Link)vars.get(inst.getIntArg3()) );
 					break; //n-kato
 
 				case Instruction.UNIFYLINKS:		//[link1, link2, mem]
-					/*060830okabe
-					//2005/10/11 mizuno
-					//必ず第五引数を利用するようにコンパイラを修正し、正規のコードに変更
-					mem = mems[inst.getIntArg3()]; // 正規のコード
-					//mem = ((Link)vars.get(inst.getIntArg1())).getAtom().getMem(); // 代用コード
-					mem.unifyLinkBuddies(
-						((Link)vars.get(inst.getIntArg1())),
-						((Link)vars.get(inst.getIntArg2())));
-					break; //n-kato
-				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
-				*/
 					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
 					mems[0].unifyLinkBuddies(
 						((Link)vars.get(inst.getIntArg1())),
@@ -784,15 +745,15 @@ class InterpretiveReactor {
 
 					//====ルールを操作するボディ命令====ここから====
 				case Instruction.LOADRULESET:
-// 0830				case Instruction.LOCALLOADRULESET: //[dstmem, ruleset]
+					//[dstmem, ruleset]
 					mems[inst.getIntArg1()].loadRuleset((Ruleset)inst.getArg2() );
 					break; //n-kato
 				case Instruction.COPYRULES:
-// 0830				case Instruction.LOCALCOPYRULES:   //[dstmem, srcmem]
+					//[dstmem, srcmem]
 					mems[inst.getIntArg1()].copyRulesFrom(mems[inst.getIntArg2()]);
 					break; //n-kato
 				case Instruction.CLEARRULES:
-// 0830				case Instruction.LOCALCLEARRULES:  //[dstmem]
+					//[dstmem]
 					mems[inst.getIntArg1()].clearRules();
 					break; //n-kato
 				case Instruction.LOADMODULE: //[dstmem, module_name]
@@ -850,6 +811,7 @@ class InterpretiveReactor {
 					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
 					break; //kudo 2004-10-10
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
+					Functor FUNC_UNIFY = new SymbolFunctor("=",2);
 					List linklist=(List)inst.getArg2();
 					Set insset=new HashSet();
 					Membrane srcmem=mems[inst.getIntArg3()];
@@ -858,7 +820,7 @@ class InterpretiveReactor {
 							Link a=(Link)vars.get(((Integer)linklist.get(i)).intValue());
 							Link b=(Link)vars.get(((Integer)linklist.get(j)).intValue());
 							if(a==b.getBuddy()){
-								Atom eq=srcmem.newAtom(Functor.UNIFY);
+								Atom eq=srcmem.newAtom(FUNC_UNIFY);
 								srcmem.unifyLinkBuddies(a,new Link(eq,0));
 								srcmem.unifyLinkBuddies(b,new Link(eq,1));
 //								a.getAtom().args[a.getPos()]=new Link(eq,0);

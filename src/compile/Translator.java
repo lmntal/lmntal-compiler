@@ -1225,13 +1225,6 @@ public class Translator {
 					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = mem;\n");
 					ejector.commit(writer);
 					break; //n-kato
-				/* 060831okabe NEWMEM の実装を使うので，単純にLOCALNEWMEM を廃止すればよい．
-				case Instruction.LOCALNEWMEM : //[-dstmem, srcmem]
-					ejector.write(tabs + "mem = ((Membrane)((Membrane)var[" +  inst.getIntArg2()  + "])).newLocalMembrane(" + inst.getIntArg3() + ");\n");
-					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = mem;\n");
-					ejector.commit(writer);
-					break; //n-kato
-					*/
 				case Instruction.ALLOCMEM: //[-dstmem]
 					ejector.write(tabs + "mem = ((Task)((Membrane)var0).getTask()).createFreeMembrane();\n");
 					ejector.write(tabs + "var[" +  inst.getIntArg1()  + "] = mem;\n");
@@ -1291,43 +1284,23 @@ public class Translator {
 					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.RELINK:		 //[atom1, pos1, atom2, pos2, mem]
-//060831okabe				case Instruction.LOCALRELINK:	 //[atom1, pos1, atom2, pos2 (,mem)]
 					ejector.write(tabs + "((Atom)var[" +  inst.getIntArg1()  + "]).getMem().relinkAtomArgs(\n");
 					ejector.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
 					ejector.write(tabs + "	((Atom)var[" +  inst.getIntArg3()  + "]), " + inst.getIntArg4() + " );\n");
 					ejector.commit(writer);
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
-					/*060831okabe LOCAL の実装を使う．
-					writer.write(tabs + "mem = ((Membrane)var[" +  inst.getIntArg5()  + "]);\n");
-					writer.write(tabs + "mem.unifyAtomArgs(\n");
-					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
-					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg3()  + "]), " + inst.getIntArg4() + " );\n");
-					break; //n-kato
-				case Instruction.LOCALUNIFY:	//[atom1, pos1, atom2, pos2 (,mem)]
-				*/
 					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
 					writer.write(tabs + "((Membrane)var[0]).unifyAtomArgs(\n");
 					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
 					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg3()  + "]), " + inst.getIntArg4() + " );\n");
 					break; //mizuno
 				case Instruction.INHERITLINK:		 //[atom1, pos1, link2, mem]
-//060831okabe				case Instruction.LOCALINHERITLINK:	 //[atom1, pos1, link2 (,mem)]
 					writer.write(tabs + "((Atom)var[" +  inst.getIntArg1()  + "]).getMem().inheritLink(\n");
 					writer.write(tabs + "	((Atom)var[" +  inst.getIntArg1()  + "]), " + inst.getIntArg2() + ",\n");
 					writer.write(tabs + "	(Link)var[" +  inst.getIntArg3()  + "] );\n");
 					break; //n-kato
 				case Instruction.UNIFYLINKS:		//[link1, link2, mem]
-					//2005/10/11 mizuno
-					//必ず第五引数を利用するようにコンパイラを修正し、正規のコードに変更
-					/*060831okabe LOCAL の実装を使う．
-					writer.write(tabs + "mem = ((Membrane)var[" +  inst.getIntArg3()  + "]);\n");
-					writer.write(tabs + "mem.unifyLinkBuddies(\n");
-					writer.write(tabs + "	((Link)var[" +  inst.getIntArg1()  + "]),\n");
-					writer.write(tabs + "	((Link)var[" +  inst.getIntArg2()  + "]));\n");
-					break; //n-kato
-				case Instruction.LOCALUNIFYLINKS:	//[link1, link2 (,mem)]
-				*/
 					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
 					writer.write(tabs + "((Membrane)var[0]).unifyLinkBuddies(\n");
 					writer.write(tabs + "	((Link)var[" +  inst.getIntArg1()  + "]),\n");
@@ -1355,7 +1328,7 @@ public class Translator {
 					//====ルールを操作するボディ命令====ここから====
 //下で手動生成
 //				case Instruction.LOADRULESET:
-//				case Instruction.LOCALLOADRULESET: //[dstmem, ruleset]
+					//[dstmem, ruleset]
 				case Instruction.COPYRULES:
 				//[dstmem, srcmem]
 					writer.write(tabs + "((Membrane)var[" +  inst.getIntArg1()  + "]).copyRulesFrom(((Membrane)var[" +  inst.getIntArg2()  + "]));\n");
