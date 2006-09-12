@@ -202,14 +202,14 @@ H = contains(Src,Dst) :- H =
     while(it2.hasNext()) {
       Membrane mm2 = (Membrane)it2.next();
       if(C.memEq(mm1,mm2)) {
-        Atom a = mem.newAtom(new Functor("true",1));
+        Atom a = mem.newAtom(new SymbolFunctor("true",1));
         mem.relinkAtomArgs(a,0,me,2);
         eq = true;
         break;
       }
     }
     if(!eq) {
-      Atom a = mem.newAtom(new Functor("false",1));
+      Atom a = mem.newAtom(new SymbolFunctor("false",1));
       mem.relinkAtomArgs(a,0,me,2);
     }
   }
