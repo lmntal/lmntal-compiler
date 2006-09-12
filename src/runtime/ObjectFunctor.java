@@ -3,7 +3,7 @@ package runtime;
 /** オブジェクトへの参照を保持する1引数ファンクタ。
  * <strike>分散環境で転送される可能性がある場合、オブジェクトはSerializableインターフェースを実装する必要がある。</strike>
  * @author n-kato */
-public class ObjectFunctor extends Functor {
+public class ObjectFunctor extends DataFunctor {
 	Object data;
 	public ObjectFunctor(Object data) {
 		this.data = data;
@@ -26,15 +26,11 @@ public class ObjectFunctor extends Functor {
 	}
 	
 	/**
-	 * 保持しているオブジェクトの名前を返す
+	 * このファンクタの名前を返す
 	 * @return 保持しているオブジェクトの名前
 	 */
 	public String getName() {
 		return data.toString();
-	}
-	
-	public int getArity() {
-		return 1;
 	}
 	
 	/**
@@ -47,21 +43,5 @@ public class ObjectFunctor extends Functor {
 		if (c1.equals(c2)) return true;
 		if (c1.equals(Object.class)) return false;
 		return isSubclass(c1.getSuperclass(), c2);
-	}
-	
-	/**
-	 * シンボルファンクタかどうかを調べる．
-	 * @return false
-	 */
-	public boolean isSymbol() {
-		return false;
-	}
-	
-	/**
-	 * このファンクタがアクティブかどうかを取得する。
-	 * @return false
-	 */
-	public boolean isActive() {
-		return false;
 	}
 }

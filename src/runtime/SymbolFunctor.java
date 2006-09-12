@@ -127,4 +127,13 @@ public class SymbolFunctor extends Functor {
 	public int getArity() {
 		return arity;
 	}
+	
+	public boolean isInsideProxy() {
+		return false;
+	}
+	
+	public boolean isOutsideProxy() {
+		return false;
+	}
+
 }

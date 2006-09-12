@@ -138,14 +138,6 @@ public abstract class Functor implements Serializable {
 		return getQuotedFunctorName() + "_" + getArity();
 	}
 	
-	/**
-	 * outside_proxy かどうかを返す．SpecialFunctor 以外は常に false
-	 * @return outside_proxy なら true
-	 */
-	public boolean isOutsideProxy() {
-		return false;
-	}
-
 	// //////////////////////////////////////////////////////////////
 	//
 	// serialize/deserialize/build
@@ -241,9 +233,13 @@ public abstract class Functor implements Serializable {
 	 * inside_proxy かどうかを返す．SpecialFunctor 以外は常に false
 	 * @return inside_proxy なら true
 	 */
-	public boolean isInsideProxy() {
-		return false;
-	}
+	public abstract boolean isInsideProxy();
+	
+	/**
+	 * outside_proxy かどうかを返す．SpecialFunctor 以外は常に false
+	 * @return outside_proxy なら true
+	 */
+	public abstract boolean isOutsideProxy();
 	
 	/**
 	 * このファンクタがアクティブかどうかを取得する。
