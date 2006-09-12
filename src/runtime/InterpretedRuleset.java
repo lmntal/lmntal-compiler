@@ -850,7 +850,6 @@ class InterpretiveReactor {
 					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
 					break; //kudo 2004-10-10
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
-					Functor FUNC_UNIFY = new SymbolFunctor("=",2);
 					List linklist=(List)inst.getArg2();
 					Set insset=new HashSet();
 					Membrane srcmem=mems[inst.getIntArg3()];
@@ -859,7 +858,7 @@ class InterpretiveReactor {
 							Link a=(Link)vars.get(((Integer)linklist.get(i)).intValue());
 							Link b=(Link)vars.get(((Integer)linklist.get(j)).intValue());
 							if(a==b.getBuddy()){
-								Atom eq=srcmem.newAtom(FUNC_UNIFY);
+								Atom eq=srcmem.newAtom(Functor.UNIFY);
 								srcmem.unifyLinkBuddies(a,new Link(eq,0));
 								srcmem.unifyLinkBuddies(b,new Link(eq,1));
 //								a.getAtom().args[a.getPos()]=new Link(eq,0);

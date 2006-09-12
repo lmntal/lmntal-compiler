@@ -38,9 +38,6 @@ import compile.structure.RuleStructure;
  * @author n-kato, hara
  */
 public class RuleCompiler {
-	/** 単一化を意味する（ものとしてRuleCompilerが考える）ファンクタ。=/2 */
-	public static final Functor FUNC_UNIFY = new SymbolFunctor("=", 2);
-
 	/** コンパイルされるルール構造 */
 	public RuleStructure rs;
 	
@@ -734,7 +731,7 @@ public class RuleCompiler {
 			Atom cstr = (Atom)it.next();
 			Functor func = cstr.functor;
 			if (func.equals(new SymbolFunctor("unary",1)))  { lists[0].add(cstr); it.remove(); }
-			if (func.equals(new SymbolFunctor("=",2)))      { lists[1].add(cstr); it.remove(); }
+			if (func.equals(Functor.UNIFY))                 { lists[1].add(cstr); it.remove(); }
 			if (func.equals(new SymbolFunctor("==",2)))     { lists[1].add(cstr); it.remove(); }
 			if (func.equals(new SymbolFunctor("ground",1))) { lists[2].add(cstr); it.remove(); }
 		}
@@ -755,7 +752,7 @@ public class RuleCompiler {
 		it = mem.atoms.iterator();
 		while (it.hasNext()) {
 			Atom atom = (Atom)it.next();
-			if (atom.functor.equals(FUNC_UNIFY)) {
+			if (atom.functor.equals(Functor.UNIFY)) {
 				LinkOccurrence link1 = atom.args[0].buddy;
 				LinkOccurrence link2 = atom.args[1].buddy;
 				if (link1.atom.mem != mem && link2.atom.mem != mem) {
@@ -975,7 +972,7 @@ public class RuleCompiler {
 		it = mem.atoms.iterator();
 		while (it.hasNext()) {
 			Atom atom = (Atom)it.next();			
-			if (atom.functor.equals(FUNC_UNIFY)) {
+			if (atom.functor.equals(Functor.UNIFY)) {
 				LinkOccurrence link1 = atom.args[0].buddy;
 				LinkOccurrence link2 = atom.args[1].buddy;
 				body.add(new Instruction( Instruction.UNIFY,

@@ -22,7 +22,7 @@ public final class TypeEnv {
 	private static final Map functorToTypeName = new HashMap();
 
 	static{
-		functorToOut.put(new SymbolFunctor("=",2),new Integer(CONNECTOR));
+		functorToOut.put(Functor.UNIFY,new Integer(CONNECTOR));
 		functorToOut.put(Functor.INSIDE_PROXY,new Integer(CONNECTOR));
 		functorToOut.put(Functor.OUTSIDE_PROXY,new Integer(CONNECTOR));
 		/* Passive atom */

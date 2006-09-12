@@ -17,10 +17,10 @@ import compile.parser.SrcName;
 public abstract class Functor implements Serializable {
 	// **注意**：特殊なFunctorを追加した場合、readObjectメソッドを変更する事。
 	
-	/** 膜の内側の自由リンク管理アトムを表すファンクタ inside_proxy/2 */
+	/** 膜の内側の自由リンク管理アトムを表すファンクタ $in/2 */
 	public static final Functor INSIDE_PROXY = new SpecialFunctor(SpecialFunctor.INSIDE_PROXY_NAME, 2);
 
-	/** 膜の外側の自由リンク管理アトムを表すファンクタ outside_proxy/2 */
+	/** 膜の外側の自由リンク管理アトムを表すファンクタ $out/2 */
 	public static final Functor OUTSIDE_PROXY = new SpecialFunctor(SpecialFunctor.OUTSIDE_PROXY_NAME, 2);
 
 	/**
@@ -38,6 +38,11 @@ public abstract class Functor implements Serializable {
 	 * nil アトムを表すファンクタ []/1
 	 */
 	public static final Functor NIL = new SymbolFunctor("[]", 1);
+
+	/**
+	 * 単一化を意味するファンクタ。=/2
+	 */
+	public static final Functor UNIFY = new SymbolFunctor("=", 2);
 
 	// //////////////////////////////////////////////////////////////
 
@@ -81,8 +86,8 @@ public abstract class Functor implements Serializable {
 	}
 
 	/**
-	 * 改行文字を取り除いたアトム名を返す
-	 * @return 改行文字を取り除いたアトム名
+	 * クオートされた省略しないアトム名を返す
+	 * @return クオートされた省略しないアトム名
 	 */
 	public String getQuotedFullyAtomName() {
 		// \rや\nがparseの際に邪魔になるため
