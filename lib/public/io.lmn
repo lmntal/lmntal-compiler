@@ -16,7 +16,7 @@ AUTHOR
 	Ryo Okabe
 
 HISTORY
-    2006/09/13(Wed) printg　がリスト構造に対応した．
+    2006/09/13(Wed) printg　をprintln に変更し，リスト構造にも対応するようになった．
     2006/07/25(Tue) printg を追加．
 	2004/07/19(Sun) io.stdin(Object) ついか。これの初期化のために io.use する必要がある。またはモジュール内のデータもコピーするようにする。
 	2004/05/22(Sat)
@@ -452,20 +452,32 @@ H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], io.readline
 H=io.getContents :- H=string.join("\n", io.list_of_stdin).
 
 /**
- * io.printg(+G, -Res)
+ * io.println(+Ground, -Res)
  * prints the ground into standard output.
- * TODO インターフェースを他と揃える（io.use.を使うようにする）．
  */
-H = io.printg(G) :- ground(G) |
-[:/*inline*/
-  Atom root = me.nthAtom(0);
-  Link pointer = me.getArg(0).getBuddy();
-  C.set.add(me);
-  C.printg(root, pointer);
-  System.out.println(C.sb);
-  mem.unifyAtomArgs(me,0,me,1);
+H=io.println(Object, String) :- class(Object, "java.io.PrintWriter"), ground(String) |
+H=[:/*inline*/
+  java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+  if(pw!=null) {
+    Atom root = me.nthAtom(1);
+    Link pointer = me.getArg(1).getBuddy();
+    C.set.add(me);
+    C.printg(root, pointer);
+    pw.println(C.sb);
+    C.set.clear();
+    C.sb.delete(0,C.sb.length());
+  }
+  // ground の消し方が分からないので残すことにした．
+  mem.unifyAtomArgs(me,1,me,2);
+  me.nthAtom(0).remove();
   me.remove();
-:](G,H).
+  /*
+  mem.relink(done, 0, me, 2);
+  me.nthAtom(0).remove();
+  me.nthAtom(1).remove();
+  me.remove();
+  */
+:](Object,String).
 
 }.
 
