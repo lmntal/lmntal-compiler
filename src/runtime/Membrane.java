@@ -309,18 +309,171 @@ public final class Membrane extends QueuedEntity {
 		atoms.remove(atom);
 		atom.mem = null;
 	}
+
+	/** 
+	 * 基底項プロセスかどうかを検査する．(Stackを使うように修正 2005/07/26)
+	 * ( 2006/09/12 Membraneに移動・2引数以上のgroundを扱えるように拡張 )
+	 * (それに伴い引数に受け取っていたSetを廃止)
+	 * 基底項プロセスを構成するアトムの数を返す．
+	 * // 引数には，(左辺出現アトム等)基底項プロセスに含まれてはいけないアトムのSetを指定する．
+	 * 基底項プロセスに含まれてはいけないアトム及びその引数( つまりリンク )のSetを指定する．
+	 * ただし、自由リンク管理アトムに出会った場合は、-1を返す．
+	 * 
+	 * 基底項プロセスは連結である必要がある為，走査開始は第1引数からのみでよい．
+	 * 走査中に第1引数以外の引数に到達したらそこから先は走査せず，
+	 * 走査済みの印をつけておく．
+	 * 走査完了後，未到達の引数があれば-1を返す．
+	 * 
+	 * @param avoSet 基底項プロセスに出てきてはいけないリンクのSet
+	 * @return 基底項プロセスを構成するアトム数
+	 */
+	public int isGround(List/*<Link>*/ links, Set avoSet){
+		Set srcSet = new HashSet(); // 走査済みアトム
+		java.util.Stack s = new java.util.Stack(); //リンクを積むスタック
+		s.push(links.get(0)); // 第1引数から走査する
+		int c=0;
+		boolean[] exists = new boolean[links.size()]; // 引数について到達したかどうか
+		exists[0] = true; // 第1引数から辿る
+		while(!s.isEmpty()){
+			Link l = (Link)s.pop();
+			Atom a = l.getAtom();
+			if(srcSet.contains(a))continue; //既に辿ったアトム
+			if(avoSet.contains(l))return -1; //出現してはいけないリンク
+			int argi = links.indexOf(l.getBuddy());
+			if(argi >= 0){ // 基底項プロセスの引数に到達
+				exists[argi] = true;
+				continue; // それ以上走査しない
+			}
+			if(a.getFunctor().equals(Functor.INSIDE_PROXY)||
+				a.getFunctor().isOutsideProxy()) // 自由リンク管理アトムに到達
+				return -1; // 失敗
+			c++;
+			srcSet.add(a);
+			for(int i=0;i<a.getArity();i++){
+				if(i==l.getPos())continue;
+				s.push(a.getArg(i));
+			}
+		}
+		for(int i=0;i<links.size();i++)if(exists[i])continue;else return -1; // 未到達の根があれば失敗
+		return c;
+	}
 	
-	/** 指定された基底項プロセスをこの膜から除去する。by kudo
+	/**
+	 * 同じ構造を持った基底項プロセスかどうか検査する
+	 * ( Stackを使うように修正 2005/07/27 )
+	 * ( それに伴い引数に受け取っていたMapを廃止)
+	 * (膜に移動・ 2引数以上に対応 2006/09/13 )
+	 * どちらか片方についてgroundかどうかの検査は済んでいるものとする
+	 * 
+	 * プロセス文脈としての引数位置も一致しなければならない
+	 * 
+	 * @param srcLink 比較対象のリンク
+	 * @return
+	 */
+	public boolean eqGround(List/*<Link>*/ srclinks, List/*<Link>*/ dstlinks){
+		Map map = new HashMap(); //比較元アトムから比較先アトムへのマップ
+		java.util.Stack s1 = new java.util.Stack();  //比較元リンクを入れるスタック
+		java.util.Stack s2 = new java.util.Stack();  //比較先リンクを入れるスタック
+		s1.push(srclinks.get(0));
+		s2.push(dstlinks.get(0));
+		while(!s1.isEmpty()){
+			Link l1 = (Link)s1.pop();
+			Link l2 = (Link)s2.pop();
+			int srci = srclinks.indexOf(l1.getBuddy());
+			int dsti = dstlinks.indexOf(l2.getBuddy());
+			if(srci != dsti)return false; // プロセス文脈の引数だった場合(>=)の位置の一致，そうでない場合(-1)の確認
+			if(srci >= 0) continue; // プロセス文脈の引数だったらそれ以上走査しない
+			if(l1.getPos() != l2.getPos()) return false; //引数位置の一致を検査
+			if(!l1.getAtom().getFunctor().equals(l2.getAtom().getFunctor()))return false; //ファンクタの一致を検査
+			if(!map.containsKey(l1.getAtom()))map.put(l1.getAtom(),l2.getAtom()); //未出
+			else if(map.get(l1.getAtom()) != l2.getAtom())return false;         //既出なれど不一致
+			else continue;
+			for(int i=0;i<l1.getAtom().getArity();i++){
+				if(i==l1.getPos())continue;
+				s1.push(l1.getAtom().getArg(i));
+				s2.push(l2.getAtom().getArg(i));
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 基底項プロセスを複製する(検査は済んでいる)
+	 * ( java.util.Stackを使うように変更し，それに伴い引数のMapを廃止 2005/07/28)
+	 * ( 2引数以上に対応 2006/09/13 )
+	 * 
+	 * なお，2引数の場合には構成アトム数が0個(つまりリンク)の場合があるが，
+	 * その場合は事前にinsertconnectors命令によって=/2が挿入されているものとする．
+	 * つまり，このメソッドでは考慮する必要はない．
+	 * 
+	 * @param srcGround コピー元の基底項プロセス の根のリスト
+	 * @return コピー先の基底項プロセス の根のリスト
+	 */
+	public List/*<Link>*/ copyGroundFrom(List/*<Link>*/ srclinks){//Link srcGround){
+		java.util.Stack s = new java.util.Stack();
+		Map map = new HashMap();
+		Link first = (Link)srclinks.get(0);
+		// 最初のアトムだけまず複製してしまう ( なぜこういう手順なのか？　下のループに持っていける気がするが )
+		Atom cpAtom = newAtom(first.getAtom().getFunctor());
+		map.put(first.getAtom(),cpAtom);
+		// 最初のアトムの引数を全てスタックに積む
+		for(int i=0;i<cpAtom.getArity();i++){
+			if(first.getPos()==i)continue;
+			s.push(first.getAtom().getArg(i));
+		}
+		while(!s.isEmpty()){
+			Link l = (Link)s.pop();
+			int srci = srclinks.indexOf(l.getBuddy());
+			if(srci >= 0)continue; // プロセス文脈の引数に到達したらそれ以上辿らない
+			if(!map.containsKey(l.getAtom())){
+				cpAtom = newAtom(l.getAtom().getFunctor());
+				map.put(l.getAtom(),cpAtom);
+				Atom a = ((Atom)map.get(l.getAtom().getArg(l.getPos()).getAtom())); //リンクの根
+				a.args[l.getAtom().getArg(l.getPos()).getPos()]=new Link(cpAtom,l.getPos());
+				for(int i=0;i<cpAtom.getArity();i++){
+					s.push(l.getAtom().getArg(i));
+				}
+			}
+			else{
+				cpAtom = (Atom)map.get(l.getAtom());
+				Atom a = ((Atom)map.get(l.getAtom().getArg(l.getPos()).getAtom()));
+				a.args[l.getAtom().getArg(l.getPos()).getPos()]=new Link(cpAtom,l.getPos());
+			}
+		}
+		List dstlinks = new ArrayList(srclinks.size());
+		for(int i=0;i<srclinks.size();i++){
+			Link srclink = (Link)srclinks.get(i);
+			dstlinks.add( new Link(((Atom)map.get(srclink.getAtom())),srclink.getPos()));
+		}
+		return dstlinks;
+//		return new Link(((Atom)map.get(srcGround.getAtom())),srcGround.getPos());
+	}
+	
+	/** 1引数の基底項プロセスを複製する */
+	public Link copyGroundFrom(Link srcGround){
+		List srclinks = new ArrayList();
+		srclinks.add(srcGround);
+		List dstlinks = copyGroundFrom(srclinks);
+		return (Link)dstlinks.get(0);
+	}
+	
+	/** 指定された基底項プロセスをこの膜から除去する。 by kudo
 	 * ( java.util.Stackを使うように修正し，伴って引数を修正 2005/08/01 )
+	 * ( 2引数以上に対応 2006/09/13 )
+	 * groundであることの検査は済んでいるものとする
+	 * 
 	 * @param srcGround
 	 * @return
 	 */
-	public void removeGround(Link srcGround){//,Set srcSet){
+	public void removeGround(List/*<Link>*/ srclinks){
 		java.util.Stack s = new java.util.Stack();
-		s.push(srcGround);
+		Link first = (Link)srclinks.get(0);
+		s.push(first);
 		Set srcSet = new HashSet();
 		while(!s.isEmpty()){
 			Link l = (Link)s.pop();
+			int srci = srclinks.indexOf(l.getBuddy());
+			if( srci >= 0 ) continue; // プロセス文脈の引数に到達したらそれ以上辿らない
 			if(srcSet.contains(l.getAtom()))continue;
 			srcSet.add(l.getAtom());
 			for(int i=0;i<l.getAtom().getArity();i++){
@@ -332,7 +485,14 @@ public final class Membrane extends QueuedEntity {
 			l.getAtom().dequeue();
 		}
 	}
-
+	
+	/** 1引数の基底項プロセスをこの膜から除去する */
+	public void removeGround(Link srcGround){
+		List srclinks = new ArrayList();
+		srclinks.add(srcGround);
+		removeGround(srclinks);
+	}
+	
 	
 	/** [final] 1引数のnewAtomを呼び出すマクロ */
 	final Atom newAtom(String name, int arity) {
@@ -817,54 +977,7 @@ public final class Membrane extends QueuedEntity {
 			mem.free();
 		}
 	}
-	
-	/**
-	 * by kudo
-	 * 基底項プロセスを複製する(検査は済んでいる)
-	 * ( java.util.Stackを使うように変更し，それに伴い引数のMapを廃止 2005/07/28)
-	 * @param srcGround コピー元の基底項プロセス
-	 * @return コピー先のリンク
-	 */
-	public Link copyGroundFrom(Link srcGround){//,Map srcMap){
-		java.util.Stack s = new java.util.Stack();
-		Map map = new HashMap();
-		Atom cpAtom = newAtom(srcGround.getAtom().getFunctor());
-		map.put(srcGround.getAtom(),cpAtom);
-		for(int i=0;i<cpAtom.getArity();i++){
-			if(srcGround.getPos()==i)continue;
-			s.push(srcGround.getAtom().getArg(i));
-		}
-		while(!s.isEmpty()){
-			Link l = (Link)s.pop();
-			if(!map.containsKey(l.getAtom())){
-				cpAtom = newAtom(l.getAtom().getFunctor());
-				map.put(l.getAtom(),cpAtom);
-				Atom a = ((Atom)map.get(l.getAtom().getArg(l.getPos()).getAtom())); //リンクの根
-				a.args[l.getAtom().getArg(l.getPos()).getPos()]=new Link(cpAtom,l.getPos());
-				for(int i=0;i<cpAtom.getArity();i++){
-					s.push(l.getAtom().getArg(i));
-				}
-			}
-			else{
-				cpAtom = (Atom)map.get(l.getAtom());
-				Atom a = ((Atom)map.get(l.getAtom().getArg(l.getPos()).getAtom()));
-				a.args[l.getAtom().getArg(l.getPos()).getPos()]=new Link(cpAtom,l.getPos());
-			}
-		}
-		return new Link(((Atom)map.get(srcGround.getAtom())),srcGround.getPos());
-//		
-//		if(!srcMap.containsKey(srcGround.getAtom())){
-//			Atom cpAtom = newAtom(srcGround.getAtom().getFunctor());
-//			srcMap.put(srcGround.getAtom(),cpAtom);
-//			for(int i=0;i<cpAtom.getArity();i++){
-//				if(i==srcGround.getPos())continue;
-//				cpAtom.args[i] = copyGroundFrom(srcGround.getAtom().getArg(i),srcMap);
-//				cpAtom.getArg(i).getAtom().args[srcGround.getAtom().getArg(i).getPos()] = new Link(cpAtom,i);
-//			}
-//		}
-//		return new Link(((Atom)srcMap.get(srcGround.getAtom())),srcGround.getPos());
-	}
-	
+
 //	/**
 //	 * by kudo
 //	 * 基底項プロセスを破棄する(検査は済んでいる)

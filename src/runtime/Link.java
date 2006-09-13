@@ -112,7 +112,6 @@ public final class Link implements Cloneable, Serializable {
 	}
 
 	/**
-	 * by kudo
 	 * 同じ構造を持った基底項プロセスかどうか検査する(Stackを使うように修正 2005/07/27)
 	 * ( それに伴い引数に受け取っていたMapを廃止)
 	 * どちらか片方についてgroundかどうかの検査は済んでいるものとする
@@ -140,18 +139,6 @@ public final class Link implements Cloneable, Serializable {
 			}
 		}
 		return true;
-//		if(srcLink.getPos() != pos)return false; // これは不要か?
-//		if(!srcLink.getAtom().getFunctor().equals(atom.getFunctor()))return false;
-//		if(!srcMap.containsKey(atom))srcMap.put(atom,srcLink.getAtom());
-//		else if(srcMap.get(atom) != srcLink.getAtom())return false;
-//		else return true;
-//		boolean flgequal = true;
-//		for(int i=0;i<atom.getArity();i++){
-//			if(i==pos)continue;
-//			flgequal &= atom.getArg(i).eqGround(srcLink.getAtom().getArg(i),srcMap);
-//			if(!flgequal)return false;
-//		}
-//		return flgequal;
 	}
 	/**
 	 * ground構造に対して一意な文字列を返す。
