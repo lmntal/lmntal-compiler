@@ -32,7 +32,7 @@ button .f3.createButton -text 生成 -command {
 		}
 		# 1行ずつクラスを読み込んでモジュールを生成
 		while {[gets $fd class] >= 0} {
-			.tframe.t insert end "$i\n"
+			.tframe.t insert end "$class\n"
 			update
 			set module [exec echo $class | tr A-Z a-z | tr . _]
 			exec javap -public $class | perl ./make_module.pl > $dir/$module.lmn
