@@ -15,6 +15,9 @@
         int arity = now.getEdgeCount();
         if(arity == 1)
           sb.append(now.getName());
+        else if(util.Util.isList(pointer.getBuddy())) {
+          printl(pointer.getBuddy());
+        }
         else {
           sb.append(now.getName());
           sb.append("( ");
@@ -28,8 +31,7 @@
                   String name = "X" + counter++;
                   sb.append(name);
                   map.put(link.getBuddy(), name);
-                }
-                else
+                } else
                   printg(now.nthAtom(i),link.getBuddy());
                 if(i < arity-2)
                   sb.append(", ");
@@ -39,6 +41,15 @@
           sb.append(" )");
         }
       }
+    }
+    
+    public static void printl(Link l) {
+      sb.append("[");
+      for(Link tmp = l; tmp.getAtom().getName()=="."; tmp=tmp.getAtom().getArg(1)) {
+        sb.append(tmp.getAtom().nthAtom(0));
+        if(tmp.getAtom().nthAtom(1).getName()==".") sb.append(",");
+      }
+      sb.append("]");
     }
   }
 :].
@@ -56,5 +67,6 @@ H = printg(G) :- ground(G) |
   me.remove();
 :](G,H).
 
-foo = printg(G1). G1 = a(b,c(d,e(f,X)),X).
+foo = printg(G1). G1 = a(b,c(d,e([ f,g,h ],X)),X).
 var = printg(G2). G2 = [1,2,3].
+baz = printg(G3). G3 = a(Y,[1,2,3|Y]).                                 
