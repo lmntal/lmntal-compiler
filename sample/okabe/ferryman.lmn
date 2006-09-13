@@ -1,0 +1,49 @@
+/*
+
+NAME
+	Wolf, Goat, and Cabbage (nondeterministic LMNtal version)
+
+SYNOPSIS
+	A wolf, a goat and a cabbage are on the left side of the river.
+	A ferryman, also on the left side, can carry them to the other side
+	with his ferry. 
+	However, if the wolf and the goat are on the same side without the ferryman,
+	the goat will be eaten by the wolf.
+	Also, the goat and the cabbage are, too.
+	Now, can you move all but the ferryman to the right side of the river?
+
+AUTHOR
+	Ryo Okabe
+
+HISTORY
+	2006/09/13(Wed)
+
+*/
+
+//nd.exec({{
+
+% initial state
+fe=l, wo=l, go=l, ca=l.
+
+% move
+wo(l),fe(l) :- fe(r),wo(r).
+wo(r),fe(r) :- fe(l),wo(l).
+
+go(l),fe(l) :- fe(r),go(r).
+go(r),fe(r) :- fe(l),go(l).
+
+ca(l),fe(l) :- fe(r),ca(r).
+ca(r),fe(r) :- fe(l),ca(l).
+
+fe(l) :- fe(r).
+fe(r) :- fe(l).
+
+% terminal condition
+fe(X),wo(Y),go(Z) :- unary(X),unary(Y),unary(Z),X\=Y,Y==Z | false.
+
+fe(X),go(Y),ca(Z) :- unary(X),unary(Y),unary(Z),X\=Y,Y==Z | false.
+
+wo(r),go(r),ca(r) :- true.
+
+//}*}).
+
