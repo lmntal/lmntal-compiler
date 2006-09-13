@@ -16,6 +16,7 @@ AUTHOR
 	Ryo Okabe
 
 HISTORY
+    2006/09/13(Wed) printg　がリスト構造に対応した．
     2006/07/25(Tue) printg を追加．
 	2004/07/19(Sun) io.stdin(Object) ついか。これの初期化のために io.use する必要がある。またはモジュール内のデータもコピーするようにする。
 	2004/05/22(Sat)
@@ -43,6 +44,9 @@ HISTORY
         int arity = now.getEdgeCount();
         if(arity == 1)
           sb.append(now.getName());
+        else if(util.Util.isList(pointer.getBuddy())) {
+          printl(pointer.getBuddy());
+        }
         else {
           sb.append(now.getName());
           sb.append("( ");
@@ -56,8 +60,7 @@ HISTORY
                   String name = "X" + counter++;
                   sb.append(name);
                   map.put(link.getBuddy(), name);
-                }
-                else
+                } else
                   printg(now.nthAtom(i),link.getBuddy());
                 if(i < arity-2)
                   sb.append(", ");
@@ -67,6 +70,15 @@ HISTORY
           sb.append(" )");
         }
       }
+    }
+    
+    public static void printl(Link l) {
+      sb.append("[");
+      for(Link tmp = l; tmp.getAtom().getName()=="."; tmp=tmp.getAtom().getArg(1)) {
+        sb.append(tmp.getAtom().nthAtom(0));
+        if(tmp.getAtom().nthAtom(1).getName()==".") sb.append(",");
+      }
+      sb.append("]");
     }
   }
 :].
@@ -442,6 +454,7 @@ H=io.getContents :- H=string.join("\n", io.list_of_stdin).
 /**
  * io.printg(+G, -Res)
  * prints the ground into standard output.
+ * TODO インターフェースを他と揃える（io.use.を使うようにする）．
  */
 H = io.printg(G) :- ground(G) |
 [:/*inline*/
