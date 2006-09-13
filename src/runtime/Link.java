@@ -80,7 +80,6 @@ public final class Link implements Cloneable, Serializable {
 	}
 	
 	/** 
-	 * by kudo
 	 * 基底項プロセスかどうかを検査する．(Stackを使うように修正 2005/07/26)
 	 * (それに伴い引数に受け取っていたSetを廃止)
 	 * 基底項プロセスを構成するアトムの数を返す．
@@ -89,22 +88,6 @@ public final class Link implements Cloneable, Serializable {
 	 * @param avoSet 基底項プロセスに出てきてはいけないアトムのSet
 	 * @return 基底項プロセスを構成するアトム数
 	 */
-//	public int isGround(Set srcSet,Set avoSet){
-//		if(srcSet.contains(atom))return 0; //基底項を構成するアトムに辿りついたら
-//		if(avoSet.contains(atom))return -1; //避けるべきアトムに辿り着いたら
-//		if(atom.getFunctor().equals(Functor.INSIDE_PROXY)||
-//			atom.getFunctor().equals(Functor.OUTSIDE_PROXY))
-//			return -1; //自由リンク管理アトムに出会ったら失敗
-//		srcSet.add(atom); // 自分を追加
-//		int ac=1; //構成するアトム数:まず自分を含む
-//		for(int i=0;i<atom.getArity();i++){
-//			if(i==pos)continue; // 来し方は辿らない
-//			int gr=atom.getArg(i).isGround(srcSet,avoSet);
-//			if(gr == -1)return -1; //どっかで$in,$outに出会ったら失敗
-//			else ac+=gr; //各リンク先に新しく検出されたアトム数を合計する
-//		}
-//		return ac;
-//	}
 	public int isGround(Set avoSet){
 		Set srcSet = new HashSet();
 		Stack s = new Stack(); //リンクを積むスタック
