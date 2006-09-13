@@ -1,16 +1,16 @@
 #!/usr/bin/wish
 
 pack [frame .f1] -fill both -expand 1
-pack [label .f1.l -text 生成先のディレクトリ] -side left
-pack [entry .f1.e1 -width 40 -textvariable dir] -side left
+pack [label .f1.l -text "target directory"] -side left
+pack [entry .f1.e -width 40 -textvariable dir] -side left
 button .f1.dstButton -text ... -command {
 	set dir [tk_chooseDirectory]
 }
 pack .f1.dstButton -side left
 
 pack [frame .f2] -fill both -expand 1
-pack [label .f2.l -text 生成するクラスリスト] -side left
-pack [entry .f2.e2 -width 40 -textvariable allclassesfile] -side left
+pack [label .f2.l -text "classes list file"] -side left
+pack [entry .f2.e -width 40 -textvariable allclassesfile] -side left
 button .f2.b -text ... -command {
 	set allclassesfile [tk_getOpenFile]
 }
@@ -24,7 +24,7 @@ pack .tframe.y -side right -fill y
 
 pack [frame .f3] -fill both -expand 1
 
-button .f3.createButton -text 生成 -command {
+button .f3.createButton -text Create -command {
 	# ディレクトリとファイルが指定されているかチェックする
 	if {$dir ne "" && $allclassesfile ne ""} {
 		if [catch {open $allclassesfile r} fd] {
@@ -42,5 +42,5 @@ button .f3.createButton -text 生成 -command {
 }
 pack .f3.createButton -side left
 
-pack [button .f3.exitButton -text 終了 -command exit] -side left
+pack [button .f3.exitButton -text Exit -command exit] -side left
 
