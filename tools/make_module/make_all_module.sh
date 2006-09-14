@@ -4,7 +4,7 @@
 # $ ./make_all_module.sh allclasses.txt
 
 # 出力先のディレクトリ
-dir="~/workspace/lmntal/lib/java";
+dir=~/workspace/lmntal/lib/java_lib;
 
 # allclasses.txt を1行ずつ読み込む
 for class in `cat $1`; do
