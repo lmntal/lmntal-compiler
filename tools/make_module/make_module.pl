@@ -23,7 +23,7 @@
 	"long"				=> "IntegerFunctor",
 	"float"				=> "FloatingFunctor",
 	"double"			=> "FloatingFunctor",
-	"boolean"			=> "Functor",
+	"boolean"			=> "SymbolFunctor",
 	"java.lang.String"	=> "StringFunctor",
 );
 
@@ -53,8 +53,8 @@
 	"long"				=> "IntegerFunctor((int)r)",
 	"float"				=> "FloatingFunctor(r)",
 	"double"			=> "FloatingFunctor(r)",
-	"boolean"			=> "Functor(r?\"true\":\"false\", 1, null)",
-	"void"				=> "Functor(\"done\", 1, null)",
+	"boolean"			=> "SymbolFunctor(r?\"true\":\"false\", 1)",
+	"void"				=> "SymbolFunctor(\"done\", 1)",
 	"java.lang.String"	=> "StringFunctor(r)",
 );
 
