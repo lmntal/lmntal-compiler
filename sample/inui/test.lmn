@@ -1,4 +1,0 @@
-n(10000).
-a(5).
-n(N), a(A) :- N > 0, int(A), NewN=N-1 | n(NewN), a(A).
-n(N), b(A) :- N > 0, string(A), NewN=N-1 | n(NewN), b(A).
