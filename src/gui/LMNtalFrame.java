@@ -25,10 +25,12 @@ class MyThread extends Thread {
 		f = ff;
 	}
 	
+	/**
+	 * 指定秒sleepさせる
+	 */
 	public void run() {
 		while(true) {
 			try {
-//				System.out.println("go");
 				f.busy = false;
 				sleep(4000);
 			} catch (Exception e) {
@@ -45,6 +47,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	public boolean busy = true;
 	public boolean running = true;
 	
+	/** フレームを生成する */
 	public LMNtalFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
@@ -65,17 +68,20 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		}
 	}
 	
+	/** キーが押されたときの処理(空メソッド) */
 	public void keyPressed(KeyEvent e) {
 	}
 	
+	/** キーが離されたときの処理(空メソッド) */
 	public void keyReleased(KeyEvent e) {
 	}
 	
+	/** 何か文字をタイピングされたとき、押された文字を出力する */
 	public void keyTyped(KeyEvent e) {
 		System.out.println(e.getKeyChar());
 	}
 
-	
+	/** 生成するフレームの設定 */
 	protected void initComponents() {
 		lmnPanel = new LMNGraphPanel(this);
 		lmnPanel.getGraphLayout().initGraphDialog(this);
@@ -94,14 +100,6 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		getContentPane().add(bt=new JButton("Go ahead"), BorderLayout.SOUTH);
 		bt.addActionListener(new ActionAdapter(this));
 //		getContentPane().addKeyListener(new MyKeyAdapter(this));
-		
-//		addKeyListener(this);
-		
-//		jt.addKeyListener(new KeyAdapter() {
-//			public void keyTyped(KeyEvent e) {
-//				setSource(jt.getText());
-//			}
-//		});
 	}
 	
 //	/**
@@ -116,6 +114,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 //		}
 //	}
 	
+	/** busyがtrueのとき、待つ */
 	public void waitBusy() {
 //		lmnPanel.getGraphLayout().calc();
 		lmnPanel.getGraphLayout().setAllowRelax(true);
@@ -129,7 +128,10 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		lmnPanel.getGraphLayout().setAllowRelax(false);
 	}
 	
-	/** @return ルールスレッドの実行を継続してよいかどうか */
+	/** 
+	 * guiが有効だったらlmnPanelを起動、終了するまで見張っている。
+	 * @return ルールスレッドの実行を継続してよいかどうか 
+	 */
 	public boolean onTrace() {
 		if(Env.fGUI && Env.gui.running) {
 			lmnPanel.start();
@@ -147,7 +149,6 @@ class ActionAdapter implements ActionListener {
 		frame = f;
 	}
 	public void actionPerformed(ActionEvent e) {
-//		e.getSource();
 		frame.busy = false;
 	}
 }
@@ -159,6 +160,5 @@ class MyKeyAdapter extends KeyAdapter {
 	}
 	public void keyPressed(KeyEvent e) {
 		frame.busy = false;
-//		super.keyPressed(e);
 	}
 }

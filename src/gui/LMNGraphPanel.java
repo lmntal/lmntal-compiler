@@ -11,16 +11,25 @@ import javax.swing.border.*;
 //import compile.parser.*;
 import compile.structure.*;
 
+/**
+ * グラフィックモードを起動したときのマウスイベントの処理
+ */
 public class LMNGraphPanel extends GraphPanel {
 	LMNtalFrame frame;
 	Node movingNode;
 	
+	/** マウスイベントがグラフィック上で行われていたときの処理 */
 	public LMNGraphPanel(LMNtalFrame f) {
 		super();
 		frame = f;
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		addMouseListener(new MouseAdapter() {
+			
+			/** 
+			 * マウスが押されたときの処理
+			 * <p>押されたらclickedを出力する。座標の取得など。</p>
+			 */
 			public void mousePressed(MouseEvent e) {
 				//determine nearest node
 				if(e.getButton() == MouseEvent.BUTTON1)
@@ -34,6 +43,11 @@ public class LMNGraphPanel extends GraphPanel {
 				getGraphLayout().showGraphDialog();
 
 			}
+			
+			/**
+			 * マウスが離されたときの処理
+			 * <p>最初に押されたときより移動していたら移動した距離を取得</p>
+			 */
 			public void mouseReleased(MouseEvent e) {
 				if(movingNode==null) return;
 				movingNode.initMoveDelta();
@@ -41,6 +55,11 @@ public class LMNGraphPanel extends GraphPanel {
 			}
 		});
 		addMouseMotionListener(new MouseMotionAdapter() {
+			
+			/**
+			 * マウスがドラッグされたときの処理
+			 * <p>移動した距離を取得</p>
+			 */
 			public void mouseDragged(MouseEvent arg0) {
 				if(movingNode==null) return;
 				movingNode.setPosition(new DoublePoint(arg0.getPoint()));

@@ -17,10 +17,12 @@ public class AtomGroup {
 		atoms = a;
 	}
 	
+	/** アトムのサイズを取得して返す */
 	public int size(){
 		return atoms.size();
 	}
 	
+	/** 最大の位置を取得して返す */
 	public DoublePoint getMaxPos(){
 		double x,y;
 		DoublePoint p;
@@ -48,6 +50,7 @@ public class AtomGroup {
 		return new DoublePoint(x,y);
 	}
 	
+	/** 最小の位置を取得して返す */
 	public DoublePoint getMinPos(){
 		double x,y;
 		DoublePoint p;
@@ -75,6 +78,7 @@ public class AtomGroup {
 		return new DoublePoint(x,y);
 	}
 	
+	/** 真ん中の位置を最大値と最小値から取得して返す */
 	public DoublePoint getCenterPos(){
 		double x,y;
 		x = (getMaxPos().x + getMinPos().x)/2;
@@ -82,19 +86,23 @@ public class AtomGroup {
 		return new DoublePoint(x,y);
 	}
 	
+	/**
+	 * アトムに重なっているかの判定 
+	 * <p>重なっていたらtrueを、そうでなければfalseを返す</p>
+	 */
 	public boolean doesOverLap(Rectangle2D.Double a){
 		DoublePoint max,min,maxa,mina;
 		double mg = Env.atomSize;
 		boolean a1,a2,a3,a4,b1,b2,b3,b4;
 
-		max = getMaxPos();min = getMinPos();
+		max = getMaxPos(); min = getMinPos();
 		maxa = new DoublePoint(a.getMaxX(),a.getMaxY());mina = new DoublePoint(a.getMinX(),a.getMinY());
 		
 		//マージンの分だけmax,minの座標をずらす
-		max.x += mg;max.y += mg;
-		min.x -= mg;min.y -= mg;
-		/*maxa.x += mg;maxa.y += mg;
-		mina.x -= mg;mina.y -= mg;*/
+		max.x += mg; max.y += mg;
+		min.x -= mg; min.y -= mg;
+		//maxa.x += mg; maxa.y += mg;
+		//mina.x -= mg; mina.y -= mg;
 		
 		if(max.x >= mina.x && max.x <= maxa.x)a1 = true;else a1 =false;
 		if(min.x >= mina.x && min.x <= maxa.x)a2 = true;else a2 =false;
@@ -114,6 +122,11 @@ public class AtomGroup {
 		return false;		
 		
 	}
+	
+	/**
+	 * グループ同士が重なっているかの判定
+	 * <p>重なっていたらtrueを、そうでなければfalseを返す</p>
+	 */
 	public boolean doesOverLap(AtomGroup a){
 		DoublePoint max,min,maxa,mina;
 		boolean a1,a2,a3,a4,b1,b2,b3,b4;
@@ -121,10 +134,10 @@ public class AtomGroup {
 		max = getMaxPos();min = getMinPos();
 		maxa = a.getMaxPos();mina = a.getMinPos();
 		
-		max.x += margin;max.y += margin;
-		min.x -= margin;min.y -= margin;
-		maxa.x += margin;maxa.y += margin;
-		mina.x -= margin;mina.y -= margin;
+		max.x += margin; max.y += margin;
+		min.x -= margin; min.y -= margin;
+		maxa.x += margin; maxa.y += margin;
+		mina.x -= margin; mina.y -= margin;
 		
 		if(max.x >= mina.x && max.x <= maxa.x)a1 = true;else a1 =false;
 		if(min.x >= mina.x && min.x <= maxa.x)a2 = true;else a2 =false;
@@ -160,8 +173,8 @@ public class AtomGroup {
 			max = getMaxPos();min = getMinPos();
 			maxa = a.getMaxPos();mina = a.getMinPos();
 			
-			max.x += margin;max.y += margin;
-			min.x -= margin;min.y -= margin;
+			max.x += margin; max.y += margin;
+			min.x -= margin; min.y -= margin;
 			maxa.x += margin;maxa.y += margin;
 			mina.x -= margin;mina.y -= margin;
 			
@@ -236,6 +249,7 @@ public class AtomGroup {
 
 	 }
 	 
+	 /** 反発する力の計算 */
 	 double repulsiveForcef1(double x,double f1,double f2){
 	 	double f;
 	 	x = x / 15;
@@ -249,9 +263,9 @@ public class AtomGroup {
 	 	return f;
 	 }
 	
-	/**各ノードをグループの中心を軸にある程度回転させ、グループの高さが少なくなればその座標に設定し、
+	/**
+	 * 各ノードをグループの中心を軸にある程度回転させ、グループの高さが少なくなればその座標に設定し、
 	 * 少なくならない場合は元の値のままにする。
-	 * @return
 	 */
 	public boolean rotateAtomGroup(){
 		LinkedList a;

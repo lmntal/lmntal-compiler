@@ -5,6 +5,9 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
+/**
+ * パネルを描画する
+ */
 public class GraphPanel extends JPanel implements Runnable {
 
 	private GraphLayout gLayout = null;
@@ -12,6 +15,9 @@ public class GraphPanel extends JPanel implements Runnable {
 	private Image OSI = null;
 	private Graphics OSG = null;
 	
+	/**
+	 * イメージを取得してきて描画する
+	 */
 	public GraphPanel() {
 		super();
 		addComponentListener(new ComponentAdapter() {
@@ -28,6 +34,9 @@ public class GraphPanel extends JPanel implements Runnable {
 		return gLayout;
 	}
 	
+	/** スレッドが始まるときの処理
+	 * <p>自分をスレッドに入れてgLayoutも動かす</p>
+	 */
 	public void start() {
 		if (th == null) {
 			th = new Thread(this);
@@ -36,11 +45,15 @@ public class GraphPanel extends JPanel implements Runnable {
 		}
 	}
 	
+	/** スレッドが終わるときの処理 
+	 * <p>gLayoutも同時に終了</p>
+	 */
 	public void stop() {
 		th = null;
 		gLayout.stop();
 	}
 	
+	/** もし自分がスレッドに入っていたら走っている */
 	public void run() {
 		Thread me = Thread.currentThread();
 		while (me == th) {
@@ -52,6 +65,10 @@ public class GraphPanel extends JPanel implements Runnable {
 		}
 	}
 	
+	/** 
+	 * OSIにイメージが入っていなかったらイメージを取得してくる。
+	 * 入っていたら城背景の四角を描画のちイメージ(OSI)を貼る。 
+	 */
 	public void paint(Graphics g) {
 		if (OSI == null) {
 			OSI = createImage((int) getSize().getWidth(), (int) getSize().getHeight());

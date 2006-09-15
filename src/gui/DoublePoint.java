@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.Point;
+
+/** double型の位置(x,y)の設定 */
 public class DoublePoint {
 	public double x, y;
 	public DoublePoint(double nx, double ny) {

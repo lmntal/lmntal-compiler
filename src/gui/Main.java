@@ -1,9 +1,8 @@
 package gui;
 
 /**
- * 単体で動かす場合のメイソ
+ * 単体で動かす場合のメイン
  * @author hara
- *
  */
 public class Main {
 
