@@ -1,0 +1,119 @@
+tk.use.
+
+//テキストエリア
+t=tk.text(24, 40).
+t(T) :- r1=tk.pack(T).
+
+//開くボタン
+b1=tk.button("Open", OpenAction).
+OpenAction={file=tk.getOpenFile}.
+b1(B) :- r2=tk.pack(B).
+
+//保存ボタン
+b2=tk.button("Save", SaveAction).
+SaveAction={
+	t(T) :- text=tk.text_get(T), file=io.fileWriter("test.txt").
+	text(Text), file(File) :- r=io.print(File, Text).
+}.
+b2(B) :- r3=tk.pack(B).
+
+//配置し終わったらイベントループに入る
+r1(done), r2(done), r3(done) :- tk.loop.
+
+{
+module(tk).
+
+[:/*inline_define*/
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+:].
+
+/**
+ * ルートフレームが生成されます
+ */
+tk.use :- tk.root=[:/*inline*/
+	JFrame frame = new JFrame("LMNtal/Tk");
+	//とりあえず BoxLayout
+	BoxLayout layout = new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS);
+	frame.setLayout(layout);
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	Atom a = mem.newAtom(new ObjectFunctor(frame));
+	mem.relink(a, 0, me, 0);
+	me.remove();
+	:].
+
+tk.loop, tk.root(Frame) :- tk.root=[:/*inline*/
+	JFrame frame = (JFrame)me.nthAtom(0).getFunctor().getValue();
+	frame.pack();
+	frame.setVisible(true);
+	:](Frame).
+
+/**
+ * ボタンを生成します
+ */
+H=tk.button(Label, {$p, @p}) :- string(Label) | $p, @p, H=[:/*inline*/
+	String label = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	JButton button = new JButton(label);
+	button.addActionListener(new TkAction(mem));
+	Atom a = mem.newAtom(new ObjectFunctor(button));
+	mem.relink(a, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Label).
+
+[:/*inline_define*/
+class TkAction implements ActionListener {
+	private Membrane mem;
+	
+	public TkAction(Membrane mem) {
+		this.mem = mem;
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		System.out.println("ok");
+		mem.newAtom(new SymbolFunctor("pushed", 0));
+	}
+}
+:].
+
+/**
+ * テキストエリアを生成します
+ */
+H=tk.text(Width, Height) :- int(Width), int(Height) | H=[:/*inline*/
+	int width = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+	int height = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+	JTextArea text = new JTextArea(width, height);
+	Atom a = mem.newAtom(new ObjectFunctor(text));
+	mem.relink(a, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](Width, Height).
+
+/**
+ * テキストエリアのテキストを取得します
+ */
+H=tk.text_get(Text) :- H=[:/*inline*/
+	JTextArea ta = (JTextArea)me.nthAtom(0).getFunctor().getValue();
+	String text = ta.getText();
+	Atom a = mem.newAtom(new StringFunctor(text));
+	mem.relink(a, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Text).
+
+/**
+ * コンポーネントを配置します
+ */
+H=tk.pack(Component), tk.root(Frame) :- class(Component, "javax.swing.JComponent"), class(Frame, "javax.swing.JFrame") | H=done, tk.root=[:/*inline*/
+	JFrame frame = (JFrame)me.nthAtom(0).getFunctor().getValue();
+	JComponent component = (JComponent)me.nthAtom(1).getFunctor().getValue();
+	frame.getContentPane().add(component);
+	Atom a = mem.newAtom(new ObjectFunctor(frame));
+	mem.relink(a, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](Frame, Component).
+}.
