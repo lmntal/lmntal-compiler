@@ -460,7 +460,8 @@ H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], io.readline
  */
 H=io.gets :- H=string.join("\n", io.list_of_stdin).
 
-H=io.gets(Filename) :- string(Filename) | H=string.join("\n", io.list_of_file(File)).
+H=io.gets(Filename) :- string(Filename) |
+	H=string.join("\n", io.list_of_file(Filename)).
 
 /**
  * io.println(+Ground, -Res)
