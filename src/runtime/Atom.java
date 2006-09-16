@@ -61,7 +61,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	 * $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
 	 * TODO 廃止する
 	 * @see Membrane.atomTable */
-	protected String remoteid;
+//	protected String remoteid;
 
 	///////////////////////////////
 	// コンストラクタ
@@ -322,7 +322,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	 */
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		id = lastId++;
-		remoteid = Integer.toString(in.readInt());
+//		remoteid = Integer.toString(in.readInt());
 		functor = (Functor)in.readObject();
 		args = new Link[functor.getArity()];
 		if (functor.equals(Functor.INSIDE_PROXY)) {
@@ -340,7 +340,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 			Atom inside = new Atom(mem, Functor.INSIDE_PROXY);
 			mem.atoms.add(inside);
 			
-			inside.remoteid = Integer.toString(in.readInt());
+//			inside.remoteid = Integer.toString(in.readInt());
 			args[0] = new Link(inside, 0);
 			inside.args[0] = new Link(this, 0);
 			//insideの第2引数の接続先は、架空のアトムで終端したほうがよいかも。
