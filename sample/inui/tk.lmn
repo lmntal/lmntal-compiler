@@ -101,18 +101,20 @@ H=tk.text(Width, Height) :- int(Width), int(Height) | H=[:/*inline*/
 	int width = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 	int height = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
 	JTextArea text = new JTextArea(width, height);
-	Atom a = mem.newAtom(new ObjectFunctor(text));
+	JScrollPane scroll = new JScrollPane(text);
+	Atom a = mem.newAtom(new ObjectFunctor(scroll));
 	mem.relink(a, 0, me, 2);
 	me.nthAtom(0).remove();
 	me.nthAtom(1).remove();
 	me.remove();
 	:](Width, Height).
-
+	
 /**
  * テキストエリアのテキストを取得します
  */
-H=tk.text_get(Text) :- H=[:/*inline*/
-	JTextArea ta = (JTextArea)me.nthAtom(0).getFunctor().getValue();
+H=tk.text_get(Text) :- class(Text, "javax.swing.JScrollPane") | H=[:/*inline*/
+	JScrollPane scroll = (JScrollPane)me.nthAtom(0).getFunctor().getValue();
+	JTextArea ta = (JTextArea)scroll.getViewport().getView();
 	String text = ta.getText();
 	Atom a = mem.newAtom(new StringFunctor(text));
 	mem.relink(a, 0, me, 1);
@@ -123,8 +125,9 @@ H=tk.text_get(Text) :- H=[:/*inline*/
 /**
  * テキストエリアに文字列をセットします
  */
-H=tk.text_set(Text, Str) :- class(Text, "javax.swing.JTextArea"), string(Str) | H=[:/*inline*/
-	JTextArea ta = (JTextArea)me.nthAtom(0).getFunctor().getValue();
+H=tk.text_set(Text, Str) :- class(Text, "javax.swing.JScrollPane"), string(Str) | H=[:/*inline*/
+	JScrollPane scroll = (JScrollPane)me.nthAtom(0).getFunctor().getValue();
+	JTextArea ta = (JTextArea)scroll.getViewport().getView();
 	String str = ((StringFunctor)me.nthAtom(1).getFunctor()).stringValue();
 	ta.setText(str);
 	Atom a = mem.newAtom(new SymbolFunctor("done", 1));
@@ -218,4 +221,16 @@ H=tk.toolbar, tk.root(Frame) :- class(Frame, "javax.swing.JFrame") | H=[:/*inlin
 	Atom f = mem.newAtom(new ObjectFunctor(frame));
 	mem.newLink(root, 0, f, 0);
 	:](Frame).
+	
+/**
+ * ラベルを生成します
+ */
+H=tk.label(Text) :- string(Text) | H=[:/*inline*/
+	String text = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+	JLabel label = new JLabel(text);
+	Atom a = mem.newAtom(new ObjectFunctor(label));
+	mem.relink(a, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Text).
 }.
