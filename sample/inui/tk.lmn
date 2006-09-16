@@ -2,18 +2,22 @@ tk.use.
 
 //テキストエリア
 t=tk.text(24, 40).
-t(T) :- r1=tk.pack(T).
+t(T) :- class(T, "javax.swing.JComponent") | r1=tk.pack(T), tt(T).
 
 //開くボタン
 b1=tk.button("Open", OpenAction).
-OpenAction={file=tk.getOpenFile}.
+OpenAction={
+	eventOpen :- openfile=tk.getOpenFile.
+	openfile(File) :- string(File) | text=io.gets(File).
+	tt(T), text(Text) :- class(T, "javax.swing.JComponent"), string(Text) | r=tk.text_set(T, Text), tt(T).
+}.
 b1(B) :- r2=tk.pack(B).
 
 //保存ボタン
 b2=tk.button("Save", SaveAction).
 SaveAction={
-	t(T) :- text=tk.text_get(T), file=io.fileWriter("test.txt").
-	text(Text), file(File) :- r=io.print(File, Text).
+	eventSave, tt(T) :- class(T, "javax.swing.JComponent") | savefile=tk.getSaveFile, str=tk.text_get(T).
+	savefile(File), str(Str) :- string(File), string(Str) | r=io.puts(File, Str).
 }.
 b2(B) :- r3=tk.pack(B).
 
@@ -43,10 +47,18 @@ tk.use :- tk.root=[:/*inline*/
 	me.remove();
 	:].
 
-tk.loop, tk.root(Frame) :- tk.root=[:/*inline*/
+/**
+ * フレームを表示してイベントループに入ります
+ */
+tk.loop, tk.root(Frame) :- sys.perpetual(on), tk.root=[:/*inline*/
 	JFrame frame = (JFrame)me.nthAtom(0).getFunctor().getValue();
 	frame.pack();
 	frame.setVisible(true);
+	//この下は必要か？
+	Atom a = mem.newAtom(new ObjectFunctor(frame));
+	mem.relink(a, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
 	:](Frame).
 
 /**
@@ -55,7 +67,7 @@ tk.loop, tk.root(Frame) :- tk.root=[:/*inline*/
 H=tk.button(Label, {$p, @p}) :- string(Label) | $p, @p, H=[:/*inline*/
 	String label = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
 	JButton button = new JButton(label);
-	button.addActionListener(new TkAction(mem));
+	button.addActionListener(new TkAction(mem, label));
 	Atom a = mem.newAtom(new ObjectFunctor(button));
 	mem.relink(a, 0, me, 1);
 	me.nthAtom(0).remove();
@@ -65,14 +77,16 @@ H=tk.button(Label, {$p, @p}) :- string(Label) | $p, @p, H=[:/*inline*/
 [:/*inline_define*/
 class TkAction implements ActionListener {
 	private Membrane mem;
+	private String label;
 	
-	public TkAction(Membrane mem) {
+	public TkAction(Membrane mem, String label) {
 		this.mem = mem;
+		this.label = label;
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		System.out.println("ok");
-		mem.newAtom(new SymbolFunctor("pushed", 0));
+		System.out.println(label);
+		mem.newAtom(new SymbolFunctor("event"+label, 0));
 	}
 }
 :].
@@ -104,6 +118,20 @@ H=tk.text_get(Text) :- H=[:/*inline*/
 	:](Text).
 
 /**
+ * テキストエリアに文字列をセットします
+ */
+H=tk.text_set(Text, Str) :- class(Text, "javax.swing.JTextArea"), string(Str) | H=[:/*inline*/
+	JTextArea ta = (JTextArea)me.nthAtom(0).getFunctor().getValue();
+	String str = ((StringFunctor)me.nthAtom(1).getFunctor()).stringValue();
+	ta.setText(str);
+	Atom a = mem.newAtom(new SymbolFunctor("done", 1));
+	mem.relink(a, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](Text, Str).
+
+/**
  * コンポーネントを配置します
  */
 H=tk.pack(Component), tk.root(Frame) :- class(Component, "javax.swing.JComponent"), class(Frame, "javax.swing.JFrame") | H=done, tk.root=[:/*inline*/
@@ -116,4 +144,46 @@ H=tk.pack(Component), tk.root(Frame) :- class(Component, "javax.swing.JComponent
 	me.nthAtom(1).remove();
 	me.remove();
 	:](Frame, Component).
+
+/**
+ * 開くファイルを選択するダイアログを表示
+ * String
+ */
+H=tk.getOpenFile, tk.root(Frame) :- class(Frame, "javax.swing.JFrame") | tk.root(Frame), H=[:/*inline*/
+	JFrame frame = (JFrame)me.nthAtom(0).getFunctor().getValue();
+	JFileChooser fc = new JFileChooser();
+	int returnVal = fc.showOpenDialog(frame);
+	Functor f;
+	if(returnVal == JFileChooser.APPROVE_OPTION) {
+		String file = fc.getSelectedFile().getAbsolutePath();
+		f = new StringFunctor(file);
+	} else {
+		f = new SymbolFunctor("nil", 1);
+	}
+	Atom a = mem.newAtom(f);
+	mem.relink(a, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Frame).
+
+/**
+ * 保存するファイルを選択するダイアログを表示
+ * String
+ */
+H=tk.getSaveFile, tk.root(Frame) :- class(Frame, "javax.swing.JFrame") | tk.root(Frame), H=[:/*inline*/
+	JFrame frame = (JFrame)me.nthAtom(0).getFunctor().getValue();
+	JFileChooser fc = new JFileChooser();
+	int returnVal = fc.showSaveDialog(frame);
+	Functor f;
+	if(returnVal == JFileChooser.APPROVE_OPTION) {
+		String file = fc.getSelectedFile().getAbsolutePath();
+		f = new StringFunctor(file);
+	} else {
+		f = new SymbolFunctor("nil", 1);
+	}
+	Atom a = mem.newAtom(f);
+	mem.relink(a, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	:](Frame).
 }.
