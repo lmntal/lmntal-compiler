@@ -16,14 +16,15 @@ AUTHOR
 	Ryo Okabe
 
 HISTORY
+	2006/09/16(Sat) io.gets, io.puts を追加．inui
     2006/09/13(Wed) printg　をprintln に変更し，リスト構造にも対応するようになった．
     2006/07/25(Tue) printg を追加．
-	2004/07/19(Sun) io.stdin(Object) ついか。これの初期化のために io.use する必要がある。またはモジュール内のデータもコピーするようにする。
-	2004/05/22(Sat)
 	2006/07/24(Mon) inui
 		io.fileReader でファイルが存在しなかったら nil を返すようにした
 		io.list_of_file で fileReader が nil なら 空リストを返すようにした
 		io.getContents
+	2004/07/19(Sun) io.stdin(Object) ついか。これの初期化のために io.use する必要がある。またはモジュール内のデータもコピーするようにする。
+	2004/05/22(Sat)
 
 */
 
@@ -344,6 +345,7 @@ H=io.println(Object, String) :- class(Object, "java.io.PrintWriter"), unary(Stri
 			Atom done = mem.newAtom(new SymbolFunctor("done", 1));
 			if(pw!=null) {
 				pw.println(me.nth(1));
+				pw.flush(); //2006.09.16 inui
 			}
 			mem.relink(done, 0, me, 2);
 			me.nthAtom(0).remove();
@@ -358,6 +360,7 @@ H=io.lprintln(Object, [String|Rest]) :- unary(String), class(Object, "java.io.Pr
 			java.io.PrintWriter pw = (java.io.PrintWriter) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 			if(pw!=null) {
 				pw.println(me.nth(1));
+				pw.flush(); //2006.09.16 inui
 			}
 			me.nthAtom(0).remove();
 			me.nthAtom(1).remove();
@@ -366,6 +369,12 @@ H=io.lprintln(Object, [String|Rest]) :- unary(String), class(Object, "java.io.Pr
 	:](Object, String).
 
 H=io.lprintln(Object, []) :- class(Object, "java.io.PrintWriter") | H=done.
+
+H=io.puts(Object, String) :- class(Object, "java.io.PrintWriter"), string(String) |
+	H=io.println(Object, string.split("\n", String)).
+
+H=io.puts(Filename, String) :- string(Filename), string(String) |
+	H=io.println(io.fileWriter(Filename), String).
 
 //io.close : unit -> unit
 /**
@@ -449,7 +458,9 @@ H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], io.readline
  * 標準入力から EOF まで読み込んでその文字列を返します
  * 2006/07/25 inui
  */
-H=io.getContents :- H=string.join("\n", io.list_of_stdin).
+H=io.gets :- H=string.join("\n", io.list_of_stdin).
+
+H=io.gets(Filename) :- string(Filename) | H=string.join("\n", io.list_of_file(File)).
 
 /**
  * io.println(+Ground, -Res)
