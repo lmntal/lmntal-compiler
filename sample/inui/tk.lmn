@@ -2,21 +2,21 @@ tk.use.
 
 //テキストエリア
 t=tk.text(24, 40).
-t(T) :- class(T, "javax.swing.JComponent") | r1=tk.pack(T), tt(T).
+t(T) :- unary(T) | r1=tk.pack(T), tt(T).
 
 //開くボタン
 b1=tk.button("Open", OpenAction).
 OpenAction={
 	eventOpen :- openfile=tk.getOpenFile.
 	openfile(File) :- string(File) | text=io.gets(File).
-	tt(T), text(Text) :- class(T, "javax.swing.JComponent"), string(Text) | r=tk.text_set(T, Text), tt(T).
+	tt(T), text(Text) :- unary(T), string(Text) | r=tk.text_set(T, Text), tt(T).
 }.
 b1(B) :- r2=tk.pack(B).
 
 //保存ボタン
 b2=tk.button("Save", SaveAction).
 SaveAction={
-	eventSave, tt(T) :- class(T, "javax.swing.JComponent") | savefile=tk.getSaveFile, str=tk.text_get(T).
+	eventSave, tt(T) :- unary(T) | savefile=tk.getSaveFile, str=tk.text_get(T), tt(T).
 	savefile(File), str(Str) :- string(File), string(Str) | r=io.puts(File, Str).
 }.
 b2(B) :- r3=tk.pack(B).
@@ -85,7 +85,7 @@ class TkAction implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		System.out.println(label);
+		//System.out.println(label);
 		mem.newAtom(new SymbolFunctor("event"+label, 0));
 	}
 }
