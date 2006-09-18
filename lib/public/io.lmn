@@ -14,8 +14,10 @@ SYNOPSIS
 AUTHOR
 	Koji Hara
 	Ryo Okabe
+    Atsushi Nakano
 
 HISTORY
+	2006/09/18(Mon) io.readAllを追加． nakano
 	2006/09/16(Sat) io.gets, io.puts を追加．inui
     2006/09/13(Wed) printg　をprintln に変更し，リスト構造にも対応するようになった．
     2006/07/25(Tue) printg を追加．
@@ -244,6 +246,7 @@ H=io.readline(Result), io.stdin(STDIN) :- class(STDIN, "java.io.BufferedReader")
 	H=io.readline(STDIN, Result, 0), io.stdin(STDIN).
 
 /**
+ * 2006.9.18 nakano
  * io.readline(-Atom,-Res):
  *
  * reads one line from standard input, 
@@ -262,7 +265,50 @@ H=io.readline(Object, ReadString, ASync) :- int(ASync), class(Object, "java.io.B
 			int async = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
 			// このチェックはガードでやるべき
 			if((async!=0 && br.ready()) || async==0) {
-				String s = br.readLine();
+				String readLine;
+				String s;
+				s  = br.readLine();
+				Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
+				mem.relink(result, 0, me, 1);
+				Atom res = mem.newAtom(new SymbolFunctor(s==null ? "nil" : "done", 1));
+				mem.relink(res, 0, me, 3);
+				me.nthAtom(0).remove();
+				me.nthAtom(2).remove();
+				me.remove();
+			} else {
+				mem.alterAtomFunctor(me, new SymbolFunctor("readline", 4, "io"));
+			}
+		} catch(Exception e) {Env.e(e);}
+	:](Object, ReadString, ASync).
+	
+/**
+ * io.readall(-Atom,-Res):
+ *
+ * reads all line from standard input, 
+ * connnecting to Atom a unary atom whose name is the input string
+ * (or an empty string if the string can't be read), 
+ * and connects done/1 or nil/1 to Res, depending on whether the string could be read. 
+ * To be used with io.use.
+ */
+ReadAll @@
+H=io.readall(Object, ReadString) :- H=io.readall(Object, ReadString, 0).
+ReadAll @@
+H=io.readall(Object, ReadString, ASync) :- int(ASync), class(Object, "java.io.BufferedReader") |
+	H=[:/*inline*/
+		try {
+			java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+			int async = ((IntegerFunctor)me.nthAtom(2).getFunctor()).intValue();
+			// このチェックはガードでやるべき
+			if((async!=0 && br.ready()) || async==0) {
+				String readLine;
+				String s = null;
+				while(null != (readLine = br.readLine())) {
+					if(s == null){
+						s = readLine;
+					} else {
+						s += "\n" + readLine;
+					}
+				}
 				Atom result = mem.newAtom(new StringFunctor(s==null?"":s));
 				mem.relink(result, 0, me, 1);
 				Atom res = mem.newAtom(new SymbolFunctor(s==null ? "nil" : "done", 1));
