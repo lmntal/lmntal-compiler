@@ -291,7 +291,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		out.writeInt(id);
+		//out.writeInt(id);
 		out.writeObject(functor);
 		if (functor.equals(Functor.INSIDE_PROXY)) {
 			//親膜へのリンクは送信しない
@@ -306,7 +306,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 			// //todo もっとよい方法を考える
 			//out.writeObject(mem.getTask().getMachine().runtimeid);
 			//out.writeObject(mem.getLocalID());
-			out.writeInt(a.id);
+			//out.writeInt(a.id);//todo 膜の何番目の自由リンクかを転送しなければならない
 			out.writeObject(args[1]);
 		} else {
 			out.writeObject(args);
