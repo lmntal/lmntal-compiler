@@ -146,7 +146,7 @@ import java.util.List;
 import java.lang.InterruptedException;
 import javax.swing.JFrame;
 class GraphFrame extends JFrame{
-	AbstractMembrane mem; //所属膜
+	Membrane mem; //所属膜
 	List functor; //監視するファンクタ
 	List data; //データ(IntegerのListのList)
 	List color; //表示色(ColorのList)
@@ -155,7 +155,7 @@ class GraphFrame extends JFrame{
 	int max=0; //縦軸最大値
 	int ww = 640,wh=480; //ウィンドウサイズ
 	int nowWatchingIndex;
-	public void init(AbstractMembrane tmem){
+	public void init(Membrane tmem){
 		setBounds(100,100,ww,wh);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE); //ウィンドウを閉じたら終了
 		mem=tmem;
