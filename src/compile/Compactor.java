@@ -283,6 +283,9 @@ public class Compactor {
 				ArrayList out = (ArrayList)inst.getArg3();
 				for(int j=0;j<out.size();j++) {
 					renumberLocalsSub2(((Integer)out.get(j)).intValue(), locals, varcount, insts, i);
+					// ループの最後だけインクリメントしない(9行下でするので)
+					// 2006/09/22 kudo
+					if(j<out.size()-1)locals++;
 				}
 			} else {
 				if (inst.getOutputType() == -1) continue;
