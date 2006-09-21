@@ -1029,7 +1029,7 @@ class InterpretiveReactor {
 //					add(A,B,C) :- int(A),int(B),$builtin:iadd(A,B,C), 
 //					Inline.callInline( atoms[inst.getIntArg1()], inst.getIntArg2() );
 //					break;
-				case Instruction.GUARD_INLINE : //[obj]
+				case Instruction.GUARD_INLINE : //[string, [Links...], [OutLinks...]]
 					ArrayList gvars = (ArrayList)inst.getArg2();
 					ArrayList gOutVars = (ArrayList)inst.getArg3();
 					ArrayList gvars2 = new ArrayList();
