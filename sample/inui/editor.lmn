@@ -1,108 +1,34 @@
-//フレームを生成して・・・
+//フレームクラス?
 {
-frame=javax_swing_JFrame.new("LMNtal Editor"), 10.
-10, frame(F) :- class(F, "javax.swing.JFrame") | r=java_awt_Component.setSize(F, 600, 400), contentPane=javax_swing_JFrame.getContentPane(F), frame(F).
-}.
-//外に出す
-{frame(F), contentPane(P) , $p[], @p}/ :- class(F, "javax.swing.JFrame"), class(P, "java.awt.Container") |
-	frame(F), contentPane(P).
-
-//メニューバーとテキストエディタを生成して・・・
-{
-jt=javax_swing_JTextArea.new(), 20.
-20, jt(JT) :- class(JT, "javax.swing.JTextArea") |
-	r10=javax_swing_JComponent.setFont(JT, java_awt_Font.new("Monospaced", java_awt_Font.plain, 12)), jt(JT).
-
-menubar=javax_swing_JMenuBar.new().
-menu=javax_swing_JMenu.new("File").
-item1=javax_swing_JMenuItem.new("Open"), 10.
-item2=javax_swing_JMenuItem.new("Save"), 30.
-10, item1(Item), jt(JT) :- class(Item, "javax.swing.JMenuItem"), class(JT, "javax.swing.JTextArea") |
-	r=javax_swing_AbstractButton.addActionListener(Item, openAction.new(JT)), item1(Item), jt(JT).
-30, item2(Item), jt(JT) :- class(Item, "javax.swing.JMenuItem"), class(JT, "javax.swing.JTextArea") |
-	r=javax_swing_AbstractButton.addActionListener(Item, saveAction.new(JT)), item2(Item), jt(JT).
-
-r(done), menu(Menu), item1(Item) :- class(Menu, "javax.swing.JMenu") |
-	r1=javax_swing_JMenu.add(Menu, Item), menu(Menu).
-r(done), menu(Menu), item2(Item) :- class(Menu, "javax.swing.JMenu") |
-	r2=javax_swing_JMenu.add(Menu, Item), menu(Menu).
-menubar(MenuBar), menu(Menu), r1(_UR1), r2(_UR2) :- class(MenuBar, "javax.swing.JMenuBar") |
-	r3=javax_swing_JMenuBar.add(MenuBar, Menu), menubar(MenuBar).
-}.
-//外に出す
-{menubar(MenuBar), jt(JT), $p[], @p}/ :- class(MenuBar, "javax.swing.JMenuBar"), class(JT, "javax.swing.JTextArea") | 
-	menubar(MenuBar), jt(JT).
-
-frame(F), menubar(MenuBar) :- class(F, "javax.swing.JFrame") | menubarset=javax_swing_JFrame.setJMenuBar(F, MenuBar), frame(F).
-
-frame(F), added(_UA), menubarset(done) :- 
-	r=java_awt_Component.setVisible(F, true).
-contentPane(Pane), jt(JT) :- added=java_awt_Container.add(Pane, JT).
-
-[:/*inline_define*/
-import java.awt.event.*;
-import java.io.*;
-import javax.swing.*;
-class OpenAction implements ActionListener {
-	private JTextArea jt;
-	public OpenAction(JTextArea jt) {
-		this.jt = jt;
-	}
-	public void actionPerformed(ActionEvent e) {
-		JFileChooser fc = new JFileChooser();
-		int r = fc.showOpenDialog(null);
-		if (r == JFileChooser.APPROVE_OPTION) {
-			File file = fc.getSelectedFile();
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(file));
-				jt.setText("");
-				String s;
-				while ((s = br.readLine()) != null)
-					jt.append(s+"\n");
-			} catch (IOException ex) {}
-		}
-	}
-}
-class SaveAction implements ActionListener {
-	private JTextArea jt;
-	public SaveAction(JTextArea jt) {
-		this.jt = jt;
-	}
-	public void actionPerformed(ActionEvent e) {
-		JFileChooser fc = new JFileChooser();
-		int r = fc.showSaveDialog(null);
-		if (r == JFileChooser.APPROVE_OPTION) {
-			File file = fc.getSelectedFile();
-			try {
-				FileWriter fw = new FileWriter(file);
-				fw.write(jt.getText());
-				fw.close();
-			} catch (IOException ex) {}
-		}
-	}
-}
-:].
-
-//OpenAction クラスのラッパーモジュール
-{
-module(openAction).
-H=openAction.new(JT) :- class(JT, "javax.swing.JTextArea") | H=[:/*inline*/
-	javax.swing.JTextArea jt = (javax.swing.JTextArea) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getValue();
-	Atom o = mem.newAtom(new ObjectFunctor(new OpenAction(jt)));
-	mem.relink(o, 0, me, 1);
-	me.nthAtom(0).remove();
-	me.remove();
-	:](JT).
+module(frame).
+H=frame.new :- H={}.
+H=frame.add({$p}, C, F) :- H=done, F={$p, c(C)}.
 }.
 
-//SaveAction クラスのラッパーモジュール
+//ボタンクラス?
 {
-module(saveAction).
-H=saveAction.new(JT) :- class(JT, "javax.swing.JTextArea") | H=[:/*inline*/
-	javax.swing.JTextArea jt = (javax.swing.JTextArea) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getValue();
-	Atom o = mem.newAtom(new ObjectFunctor(new SaveAction(jt)));
-	mem.relink(o, 0, me, 1);
-	me.nthAtom(0).remove();
-	me.remove();
-	:](JT).
+module(button).
+H=button.new(Label, Action) :- string(Label) | H={name(Label), action(Action)}.
 }.
+
+//テキストエリアクラス?
+{
+module(textarea).
+H=textarea.new(Row, Column) :- int(Row), int(Column) | H={text(""), row(Row), column(Column)}.
+}.
+
+//フレーム
+f=frame.new.
+//テキストエリア
+ta=textarea.new(24, 40).
+//開くボタン
+b1=button.new("Open", OpenAction).
+OpenAction={ a:-b }.
+//保存ボタン
+b2=button.new("Save", SaveAction).
+SaveAction={ b:-c }.
+
+//フレームに追加する
+f(F), ta(TA) :- r1=frame.add(F, TA, f).
+f(F), b1(B) :- r2=frame.add(F, B, f).
+f(F), b2(B) :- r3=frame.add(F, B, f).
