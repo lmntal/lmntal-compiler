@@ -52,9 +52,9 @@ H=awt.new_textarea(Row, Column) :- int(Row), int(Column) | H={
 f=awt.new_frame().
 ta=awt.new_textarea(24, 40).
 b1=awt.new_button("Open").
-openActionListener={open :- ok}.
+openActionListener={actionPerformed(ActionEvent) :- open(ActionEvent)}.
 b2=awt.new_button("Save").
-saveActionListener={save :- ok}.
+saveActionListener={actionPerformed(ActionEvent) :- save(ActionEvent)}.
 
 //フレームにコンポーネントを追加
 f={$p, @p}, ta(TA), b1={$p1,@p1}, b2={$p2,@p2}, openActionListener={@q1}, saveActionListener={@q2} :-
