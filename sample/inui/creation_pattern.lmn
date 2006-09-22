@@ -1,0 +1,83 @@
+{
+module(new).
+H=new.mapsite :- | H={
+	}.
+	
+H=new.room(N) :- int(N) | H={
+	oop.extends(new.mapsite).
+	//field
+	roomNo(N).
+	sides=[null,null,null,null].
+	//method
+	H=getSide(Direction) :- H=Direction.
+	//本当は配列を使う
+	setSide(0, MapSite), sides=[N,S,E,W] :- sides=[MapSite,S,E,W], nlmem.kill(N).
+	setSide(1, MapSite), sides=[N,S,E,W] :- sides=[N,MapSite,E,W], nlmem.kill(S).
+	setSide(2, MapSite), sides=[N,S,E,W] :- sides=[N,S,MapSite,W], nlmem.kill(E).
+	setSide(3, MapSite), sides=[N,S,E,W] :- sides=[N,S,E,MapSite], nlmem.kill(W).
+	enter :- .
+	}.
+
+H=new.wall :- H={
+	oop.extends(new.mapsite).
+	//field
+	wall.
+	//method
+	enter :- done.
+	}.
+
+H=new.door(R1, R2) :- H={
+	oop.extends(new.mapsite).
+	//field
+	room1(R1).
+	room2(R2).
+	isopen(false).
+	//method
+	enter :- done.
+	H=other_side_from(R) :-H={room(R)}.
+	}.
+
+H=new.maze :- H={
+	//field
+	//method
+	add_room(R) :- room(R).
+	H=room_no(N) :- int(N) | H={}.
+	}.
+}.
+	
+H=new.mazegame :- H={
+	//field
+	//method
+	H=create_maze :- H={
+		maze=new.maze.
+		r1=new.room(1).
+		r2=new.room(2).
+		
+		r1={$p1, @p1}, r2={$p2, @p2}, maze={$p, @p} :-
+			r12={$p1, @p1, -R1, -R12},
+			r22={$p2, @p2, -R2, -R22},
+			door=new.door(R1, R2),
+			maze={$p, @p, add_room(R12), add_room(R22)}.
+		
+		r12={$p1, @p1}, r22={$p2, @p2}, door={$p, @p} :-
+			door={+Door1, +Door2, $p, @p},
+			r13={
+				setSide(0, new.wall).
+				setSide(1, Door1).
+				setSide(2, new.wall).
+				setSide(3, new.wall).
+				$p1, @p1.
+			},
+			r23={
+				setSide(0, new.wall).
+				setSide(1, new.wall).
+				setSide(2, new.wall).
+				setSide(3, Door2).
+				$p2, @p2.
+			}.
+		}.
+	}.
+
+a=new.mazegame.
+a={$p, @p} :- b={maze=create_maze, $p, @p}.
+H={{maze={$r, @r}, $q, @q}, $p, @p}/ :- maze={$r, @r}, H={$p, @p, $q, @q}.
