@@ -1,0 +1,30 @@
+//フレームクラス?
+H=new_frame :- H={
+	//フィールド
+	title("").
+	//メソッド
+	add(C) :- c(C).
+	set_title(NewTitle), title(Title) :- string(NewTitle), string(Title) | title(NewTitle).
+	}.
+
+//ボタンクラス?
+H=new_button(Label, Action) :- string(Label) | H={name(Label), action(Action)}.
+
+//テキストエリアクラス?
+H=new_textarea(Row, Column) :- int(Row), int(Column) |
+	H={text(""), row(Row), column(Column)}.
+
+//フレーム
+f=new_frame().
+//テキストエリア
+ta=new_textarea(24, 40).
+//開くボタン
+b1=new_button("Open", OpenAction).
+OpenAction={ a:-b }.
+//保存ボタン
+b2=new_button("Save", SaveAction).
+SaveAction={ b:-c }.
+
+//フレームにコンポーネントを追加
+f({$p, @p}), ta(T), b1(B1), b2(B2) :-
+	f({add(T), add(B1), add(B2), set_title("It's LMNtal"), $p, @p}).
