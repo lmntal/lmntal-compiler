@@ -145,9 +145,6 @@ public final class Env {
 	/** デバッグ実行オプションの有無 by inui */
 	public static boolean debugOption = false;
 	
-	/** 多倍長整数 2006.07.03 inui */
-	public static boolean useBigInteger = false;
-	
 	/** 標準入力から LMNtal プログラムを読み込むオプション 2006.07.11 inui */
 	public static boolean stdinLMN = false;
 	

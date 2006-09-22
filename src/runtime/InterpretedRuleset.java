@@ -997,12 +997,6 @@ class InterpretiveReactor {
 				case Instruction.ISINTFUNC : //[func]
 					if (!(vars.get(inst.getIntArg1()) instanceof IntegerFunctor)) return false;
 					break; //n-kato
-				case Instruction.ISBIGINT : //[atom]
-					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof BigIntegerFunctor)) return false;
-					break; //inui 2006-07-03
-				case Instruction.ISBIGFLOAT : //[atom]
-					if (!(atoms[inst.getIntArg1()].getFunctor() instanceof BigFloatingFunctor)) return false;
-					break; //inui 2006-07-03
 //				case Instruction.ISFLOATFUNC : //[func]
 //					break;
 //				case Instruction.ISSTRINGFUNC : //[func]
@@ -1397,137 +1391,6 @@ class InterpretiveReactor {
 					break; //nakajima 2003-01-23
 					//====浮動小数点数用の組み込みガード命令====ここまで====
 
-					//====多倍長整数用の組み込みボディ命令====ここから====
-				case Instruction.BIADD : //[-dstintatom, intatom1, intatom2]
-					BigInteger bx, by;
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigIntegerFunctor(bx.add(by)));
-					break; //inui 2006-07-03
-				case Instruction.BISUB : //[-dstintatom, intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigIntegerFunctor(bx.subtract(by)));	
-					break; //inui 2006-07-03
-				case Instruction.BIMUL : //[-dstintatom, intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigIntegerFunctor(bx.multiply(by)));	
-					break; //inui 2006-07-03
-				case Instruction.BIDIV : //[-dstintatom, intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
-					if (by.equals(BigInteger.ZERO)) return false;
-					else func = new BigIntegerFunctor(bx.divide(by));
-					atoms[inst.getIntArg1()] = new Atom(null, func);				
-					break; //inui 2006-07-03
-				case Instruction.BINEG : //[-dstintatom, intatom]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigIntegerFunctor(bx.negate()));				
-					break;
-				case Instruction.BIMOD : //[-dstintatom, intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg3()].getFunctor()).intValue();
-					if (by.equals(BigInteger.ZERO)) return false;
-					else func = new BigIntegerFunctor(bx.divideAndRemainder(by)[1]);
-					atoms[inst.getIntArg1()] = new Atom(null, func);						
-					break; //inui 2006-07-03
-					//====多倍長整数用の組み込みボディ命令====ここまで====
-
-					//====多倍長整数用の組み込みガード命令====ここから====
-				case Instruction.BILT : //[intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if (bx.compareTo(by) >= 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BILE : //[intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if (bx.compareTo(by) > 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BIGT : //[intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if (bx.compareTo(by) <= 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BIGE : //[intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if (bx.compareTo(by) < 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BIEQ : //[intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if (bx.compareTo(by) != 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BINE : //[intatom1, intatom2]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg1()].getFunctor()).intValue();
-					by = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();	
-					if (bx.compareTo(by) == 0) return false;
-					break; // inui 2006-07-03
-					//====多倍長整数用の組み込みガード命令====ここまで====
-
-					//====多倍長浮動小数点数用の組み込みボディ命令====ここから====
-				case Instruction.BFADD : //[-dstfloatatom, floatatom1, floatatom2]
-					BigDecimal bu, bv;
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigFloatingFunctor(bu.add(bv)));
-					break; //inui 2006-07-03
-				case Instruction.BFSUB : //[-dstfloatatom, floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigFloatingFunctor(bu.subtract(bv)));	
-					break; // inui 2006-07-03
-				case Instruction.BFMUL : //[-dstfloatatom, floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigFloatingFunctor(bu.multiply(bv)));	
-					break; // inui 2006-07-03
-				case Instruction.BFDIV : //[-dstfloatatom, floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg3()].getFunctor()).floatValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigFloatingFunctor(bu.divide(bv)));				
-					break; // inui 2006-07-03
-				case Instruction.BFNEG : //[-dstfloatatom, floatatom]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigFloatingFunctor(bu.negate()));
-					break; //nakajima 2004-01-23
-					//====多倍長浮動小数点数用の組み込みボディ命令====ここまで====
-					
-					//====多倍長浮動小数点数用の組み込みガード命令====ここから====	
-				case Instruction.BFLT : //[floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
-					if (bu.compareTo(bv) >= 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BFLE : //[floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
-					if (bu.compareTo(bv) > 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BFGT : //[floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
-					if (bu.compareTo(bv) < 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BFGE : //[floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
-					if (bu.compareTo(bv) < 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BFEQ : //[floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
-					if (bu.compareTo(bv) != 0) return false;
-					break; // inui 2006-07-03
-				case Instruction.BFNE : //[floatatom1, floatatom2]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg1()].getFunctor()).floatValue();
-					bv = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();	
-					if (bu.compareTo(bv) == 0) return false;
-					break; // inui 2006-07-03
-					//====多倍長浮動小数点数用の組み込みガード命令====ここまで====
-
 				case Instruction.FLOAT2INT: //[-intatom, floatatom]
 					u = ((FloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new IntegerFunctor((int)u));
@@ -1536,15 +1399,6 @@ class InterpretiveReactor {
 					x = ((IntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
 					atoms[inst.getIntArg1()] = new Atom(null, new FloatingFunctor((double)x));
 					break; // n-kato
-
-				case Instruction.BFLOAT2BINT: //[-intatom, floatatom]
-					bu = ((BigFloatingFunctor)atoms[inst.getIntArg2()].getFunctor()).floatValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigIntegerFunctor(bu.toBigInteger()));
-					break; //inui 2006-07-03
-				case Instruction.BINT2BFLOAT: //[-floatatom, intatom]
-					bx = ((BigIntegerFunctor)atoms[inst.getIntArg2()].getFunctor()).intValue();
-					atoms[inst.getIntArg1()] = new Atom(null, new BigFloatingFunctor(new BigDecimal(bx)));
-					break; //inui 2006-07-03
 
 				case Instruction.GROUP:
 					subinsts = ((InstructionList)inst.getArg1()).insts;
@@ -1578,4 +1432,3 @@ class InterpretiveReactor {
 		return false;
 	}
 }
-
