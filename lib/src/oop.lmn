@@ -1,0 +1,20 @@
+/**
+NAME
+	Object-Oriented Programming module
+
+SYNOPSIS
+	オブジェクト指向プログラミングモジュール
+
+AUTHOR
+	Atsuyuki Inui
+
+HISTORY
+	2006/09/22(Fri)
+ */
+{
+module(oop).
+
+oop.extends({$p, @p}) :- $p, @p.
+
+H=null :- H={}.
+}.
