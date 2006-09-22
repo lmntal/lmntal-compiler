@@ -90,6 +90,8 @@ while (<>) {
 		if (!($3 =~ /\[\]/) && $1 ne "long") { #TODO Javaの配列をLMNtalのリストで処理
 			dump_method(trim_class($1), $2, split_args($3));
 		}
+	} elsif (/public static final (\S+) (\w+)/) {
+		dump_final_variable($1, $2);
 	}
 }
 print "}.\n";
@@ -283,4 +285,17 @@ sub dump_result_atom {
 		$functor = "ObjectFunctor(r)";
 	}
 	return "result = mem.newAtom(new $functor);\n";
+}
+
+# final 定数の出力
+sub dump_final_variable {
+	my ($type, $name) = @_;
+	$lcname=lc($name);
+	
+	print "H=$module.$lcname :- H=[:/*inline*/\n";
+	print "\tAtom $lcname = mem.newAtom(new ObjectFunctor($absolute_class.$name));\n";
+	print "\tmem.relink($lcname, 0, me, 0);\n";
+	print "\tme.remove();\n";
+	print "\t:].\n";
+	print "\n";
 }
