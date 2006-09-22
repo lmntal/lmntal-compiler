@@ -261,13 +261,9 @@ public class FrontEnd {
 							Env.p( Dumper.PROFILE_TABS );
 						break;
 					case '-': // 文字列オプション						
-						/*nakano* if(args[i].equals("--3d")){
-						// --3d
-						// 3d mode.
-						Env.fGUI = false;
-						Env.f3D = true;
-						} else */
-						if(args[i].equals("--compileonly")){
+						if(args[i].equals("--gui")){
+							Env.fGUI2 = true;
+						} else if(args[i].equals("--compileonly")){
 					    	// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.fInterpret = true;
@@ -728,6 +724,7 @@ public class FrontEnd {
 			}
 			
 			Env.initGUI();
+			Env.initGUI2();
 			Env.initGraphic();
 
 			
@@ -736,6 +733,7 @@ public class FrontEnd {
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
 
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
+			if(Env.fGUI2) Env.gui2.setRootMem(root);
 //			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			boolean t = Env.fTrace;
@@ -758,13 +756,6 @@ public class FrontEnd {
 				if (!Env.gui.onTrace())  ready = false;
 			}
 			
-			/*TODO:3d calc*/
-			/*nakano*
-			if (Env.threed != null) {
-				Env.threed.lmnPanel.getGraph3DLayout().init();
-				if (!Env.threed.onTrace())  ready = false;
-			}
-			*/
 			if (ready) {
 				((Task)root.getTask()).execAsMasterTask(); //rt.exec();
 
@@ -779,10 +770,11 @@ public class FrontEnd {
 				if (Env.gui != null) {
 					while(Env.gui.running) Env.gui.onTrace();
 				}
-				/*graphic mode　用 nakano*/
-//				if (Env.LMNgraphic != null) {
-//					while(Env.LMNgraphic.running) Env.LMNgraphic.onTrace();
-//				}
+				// GUIが動いていて、かつ、ウィンドウが閉じられていなければ、許可がでるまで待機
+				// Env.gui2 が null で無い　→　GUIが起動中
+				if (Env.gui2 != null) {
+					Env.gui2.onTrace();
+				}
 			}
 			if(Env.fREMAIN) {
 				Env.remainedRuntime = rt;
