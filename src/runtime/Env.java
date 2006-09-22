@@ -214,6 +214,17 @@ public final class Env {
 		if(!Env.fGraphic) return;
 		LMNgraphic = new LMNtalGFrame();
 	}
+	
+	/**
+	 * 新 GUI モード。
+	 */
+	public static boolean fGUI2 = false;
+	public static gui2.LMNtalFrame gui2;
+	public static void initGUI2(){
+		if(!Env.fGUI2){ return; }
+		gui2 = new gui2.LMNtalFrame();
+	}
+	
 	/**
 	 * GUI 有効。仮仮仮仮
 	 */
@@ -393,8 +404,14 @@ public final class Env {
 
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public static boolean guiTrace() {
-		if(gui==null) return true;
-		return gui.onTrace();
+		if(gui == null && gui2 == null) return true;
+		if(null != gui){
+			return gui.onTrace();
+		}
+
+		Env.gui2.onTrace();
+		
+		return true;
 	}
 
 	/**
