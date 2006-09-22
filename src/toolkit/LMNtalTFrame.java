@@ -2,7 +2,9 @@ package toolkit;
 
 import java.awt.Dimension;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import runtime.Atom;
 import runtime.Functor;
@@ -18,18 +20,39 @@ public class LMNtalTFrame {
 	final static
 	private Functor NAME_ATOM = new SymbolFunctor("name",1); 
 	
+	final static
+	private Set UPDATE_COMMAND = new HashSet();
+	
 	// ウィンドウ管理マップ．ウィンドウ名(String)をキーにして管理
 	final private HashMap windowMap = new HashMap();
 
 	/** LMNtalTFrameのコンストラクタ */
 	public LMNtalTFrame(){}
 
+	/** 更新されたコンポーネントを追加する */
+	public static void addUpdateComponent(LMNComponent component){
+		UPDATE_COMMAND.add(component);
+	}
+	
+	/** 追加されたコンポーネントを読んでアトムを追加する */
+	private void addAtom(){
+		// UPDATE_COMMANDの中身をIteratorとしてaddAtomIteに入れる
+		Iterator addAtomIte = UPDATE_COMMAND.iterator();
+		while(addAtomIte.hasNext()){
+			// Setで受け取ったオブジェクトをキャストして、componentに入れる
+			LMNComponent component = (LMNComponent)addAtomIte.next();
+			component.addAtom();
+		}
+		UPDATE_COMMAND.clear();
+	}
 	
 	/**
 	 * 本体からアンロックされた膜すべて受け取る(=mem)
 	 * 受け取った膜はグラフィック膜であるとは限らない．
+	 * (アンロックされる直前に呼ばれるメソッド)
 	 */
 	public void setMem(Membrane mem){
+		addAtom();
 		//指定されたファンクタ(window.)をもつアトムの数を取得し,
 		//0以上ならそのままその膜をsetWindowMemに渡す。
 		if(mem.getAtomCountOfFunctor(WINDOW_FUNCTOR)>0){
@@ -83,11 +106,8 @@ public class LMNtalTFrame {
 			}
 			//　ウィンドウが無い
 			else{
-		
 				LMNtalWindow window = new LMNtalWindow(mem, windowName);
-				windowMap.put(windowName, window);
-
-				
+				windowMap.put(windowName, window);			
 			}
 		}
 	}

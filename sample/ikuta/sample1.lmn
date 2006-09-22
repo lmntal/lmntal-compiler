@@ -3,9 +3,16 @@
 {
 	window.
 	name("test").
-	size(200,100).
+	size(300, 300).
+	sys.perpetual(on).
 
-		a(X), b(X), c(Y), d(Y).
-		b(X) :- a(X).
-
+	{button, position(0,0), label("label1")}.
+	
+	{button, position(1,0)}.
+	
+	{textarea, position(0,1), weight(1.0, 1.0)}.
+	
+	{textarea, position(1,1), text("aaaaaaaaaaa"), weight(1.0, 1.0)}.
+	
+	
 }

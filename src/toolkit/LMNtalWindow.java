@@ -1,6 +1,6 @@
 package toolkit;
 
-import java.awt.BorderLayout;
+import java.awt.GridBagLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Iterator;
@@ -29,16 +29,21 @@ public class LMNtalWindow extends JFrame {
 	
 	final static
 	private Functor BUTTON_FUNCTOR = new SymbolFunctor("button",0);
-
+	
+	final static
+	private Functor TEXTAREA_FUNCTOR = new SymbolFunctor("textarea",0);
+	
 	/////////////////////////////////////////////////////////////////
 
 	// ウィンドウが閉じられると，プログラムを強制的に終了させるかどうかのフラグ
 	private boolean killer = false;
+
 	private String memID;
 	private Membrane mymem;
 	private String windowName;
 	private int sizeX = 0;
 	private int sizeY = 0;
+	private GridBagLayout layout;
 
 	private boolean sizeUpdate = false;
 
@@ -81,11 +86,19 @@ public class LMNtalWindow extends JFrame {
 //		doAddAtom(mem);
 	}
 	
+	/**
+	 * componentの有無の判別
+	 */
 	public void setChildMem(Membrane mem){
+	
 		if(mem.getAtomCountOfFunctor(BUTTON_FUNCTOR)>0){
 			LMNtalButton button = new LMNtalButton(this, mem);
 		}
-		
+
+		if(mem.getAtomCountOfFunctor(TEXTAREA_FUNCTOR)>0){
+			LMNtalTextArea textarea = new LMNtalTextArea(this, mem);
+		}
+
 	}
 	
 	/**
@@ -131,7 +144,8 @@ public class LMNtalWindow extends JFrame {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		System.out.println("make window");
 		setTitle(windowName);
-		getContentPane().setLayout(new BorderLayout());
+		layout = new GridBagLayout();
+		getContentPane().setLayout(layout);
 		
 		setSize(sizeX, sizeY);
 		
@@ -151,6 +165,10 @@ public class LMNtalWindow extends JFrame {
 		});
 
 		setVisible(true);
+	}
+	
+	public GridBagLayout getGridBagLayout(){
+		return layout;
 	}
 	
 	
