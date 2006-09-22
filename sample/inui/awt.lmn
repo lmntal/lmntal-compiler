@@ -1,0 +1,67 @@
+//オブジェクト指向プログラミングモジュール
+{
+module(oop).
+oop.extends({$p, @p}) :- $p, @p.
+}.
+
+//awt パッケージ
+{
+module(awt).
+H=awt.new_container :- H={
+	//field
+	layout=null.
+	components=[].
+	//method
+	add(Component), components=Components :- components=[Component|Components].
+	setLayout(LayoutManager) :- layout(LayoutManager).
+	}.
+
+//class Frame
+H=awt.new_frame :- H={
+	oop.extends(awt.new_container).
+	//field
+	title("").
+	//method
+	setTitle(NewTitle), title(Title) :- string(NewTitle), string(Title) | title(NewTitle).
+	}.
+
+//class Button
+H=awt.new_button(Label) :- string(Label) | H={
+	//field
+	label(Label).
+	actionListener({}).
+	//method
+	addActionListener({@p}), actionListener({@q}) :- actionListener({@p}).
+	}.
+
+//class TextArea
+H=awt.new_textarea(Row, Column) :- int(Row), int(Column) | H={
+	//field
+	text("").
+	row(Row).
+	column(Column).
+	//method
+	H=getText, text(Text) :- string(Text) | H=Text, text(Text).
+	}.
+
+}.
+
+//// テストコード
+
+//コンポーネントの生成
+f=awt.new_frame().
+ta=awt.new_textarea(24, 40).
+b1=awt.new_button("Open").
+openActionListener={open :- ok}.
+b2=awt.new_button("Save").
+saveActionListener={save :- ok}.
+
+//フレームにコンポーネントを追加
+f={$p, @p}, ta(TA), b1={$p1,@p1}, b2={$p2,@p2}, openActionListener={@q1}, saveActionListener={@q2} :-
+	f={
+		add(TA).
+		add({addActionListener({@q1}),$p1,@p1}).
+		add({addActionListener({@q2}),$p2,@p2}).
+		setTitle("It's LMNtal").
+		$p, @p.
+	}.
