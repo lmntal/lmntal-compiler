@@ -294,6 +294,19 @@ H=list.get([Head|Tail], N, Got) :- N=0 | Got=Head, H=Tail.
 H=list.get([Head|Tail], N, Got) :- N>0 | H=[Head|list.get(Tail,N-1,Got)].
 
 /**
+ * list.set(+List, +N, +New, -Old, -NewList)
+ *
+ * List の N 番目(N=0,1,2,...)の要素に New をセットしたリストを返します．
+ * 元々あった要素は Old に返します．
+ * List が空だったり，リストの長さを超えてセットしようとした場合は
+ * リストは変更されず，セットしようとした要素は Old に 返ります．
+ * 2006/09/23 inui
+ */
+H=list.set([], N, New, Old) :- int(N) | H=[], Old=New.
+H=list.set([Head|Tail], N, New, Old) :- N = 0 | H=[New|Tail], Old=Head.
+H=list.set([Head|Tail], N, New, Old) :- N > 0 | H=[Head|list.set(Tail,N-1,New,Old)].
+
+/**
  * list.reverse(+List, -ReversedList)
  *
  * Reverse List and binds it to ReversedList.
