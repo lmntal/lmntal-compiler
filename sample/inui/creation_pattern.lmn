@@ -10,11 +10,8 @@ H=new.room(N) :- int(N) | H={
 	sides=[null,null,null,null].
 	//method
 	H=getSide(Direction) :- H=Direction.
-	//本当は配列を使う
-	setSide(0, MapSite), sides=[N,S,E,W] :- sides=[MapSite,S,E,W], nlmem.kill(N).
-	setSide(1, MapSite), sides=[N,S,E,W] :- sides=[N,MapSite,E,W], nlmem.kill(S).
-	setSide(2, MapSite), sides=[N,S,E,W] :- sides=[N,S,MapSite,W], nlmem.kill(E).
-	setSide(3, MapSite), sides=[N,S,E,W] :- sides=[N,S,E,MapSite], nlmem.kill(W).
+	setSide(N, MapSite), sides=Sides :- sides=list.set(Sides, N, MapSite, old).
+	old(Old) :- nlmem.kill(Old).//private
 	enter :- .
 	}.
 

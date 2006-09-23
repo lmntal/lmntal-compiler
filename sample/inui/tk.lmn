@@ -1,32 +1,3 @@
-tk.use.
-
-//ツールバー
-tb=tk.toolbar.
-
-//テキストエリア
-t=tk.text(24, 40).
-t(T) :- unary(T) | r1=tk.pack(T), tt(T).
-
-//開くボタン
-b1=tk.button("Open", OpenAction).
-OpenAction={
-	eventOpen :- openfile=tk.getOpenFile.
-	openfile(File) :- string(File) | text=io.gets(File).
-	tt(T), text(Text) :- unary(T), string(Text) | r=tk.text_set(T, Text), tt(T).
-}.
-tb(ToolBar), b1(B) :- unary(ToolBar) | r2=tk.pack(ToolBar, B), tb(ToolBar).
-
-//保存ボタン
-b2=tk.button("Save", SaveAction).
-SaveAction={
-	eventSave, tt(T) :- unary(T) | savefile=tk.getSaveFile, str=tk.text_get(T), tt(T).
-	savefile(File), str(Str) :- string(File), string(Str) | r=io.puts(File, Str).
-}.
-tb(ToolBar), b2(B) :- unary(ToolBar) | r3=tk.pack(ToolBar, B), tb(ToolBar).
-
-//配置し終わったらイベントループに入る
-r1(done), r2(done), r3(done) :- tk.loop.
-
 {
 module(tk).
 
@@ -41,6 +12,7 @@ import javax.swing.*;
  */
 tk.use :- tk.root=[:/*inline*/
 	JFrame frame = new JFrame("LMNtal/Tk");
+	frame.setJMenuBar(new JMenuBar());
 	//とりあえず BoxLayout
 	BoxLayout layout = new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS);
 	frame.setLayout(layout);
@@ -101,7 +73,10 @@ H=tk.text(Width, Height) :- int(Width), int(Height) | H=[:/*inline*/
 	int width = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
 	int height = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
 	JTextArea text = new JTextArea(width, height);
-	JScrollPane scroll = new JScrollPane(text);
+	JScrollPane scroll = new JScrollPane(
+				text,
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	Atom a = mem.newAtom(new ObjectFunctor(scroll));
 	mem.relink(a, 0, me, 2);
 	me.nthAtom(0).remove();
@@ -207,6 +182,9 @@ H=tk.getSaveFile, tk.root(Frame) :- class(Frame, "javax.swing.JFrame") | tk.root
 	me.remove();
 	:](Frame).
 
+/**
+ * ツールバーを生成します
+ */
 H=tk.toolbar, tk.root(Frame) :- class(Frame, "javax.swing.JFrame") | H=[:/*inline*/
 	JFrame frame = (JFrame)me.nthAtom(0).getFunctor().getValue();
 	JToolBar toolbar = new JToolBar();
@@ -221,6 +199,42 @@ H=tk.toolbar, tk.root(Frame) :- class(Frame, "javax.swing.JFrame") | H=[:/*inlin
 	Atom f = mem.newAtom(new ObjectFunctor(frame));
 	mem.newLink(root, 0, f, 0);
 	:](Frame).
+
+/**
+ * メニューバーを生成します
+ */
+H=tk.menubar, tk.root(Frame) :- class(Frame, "javax.swing.JFrame") | H=[:/*inline*/
+	JFrame frame = (JFrame)me.nthAtom(0).getFunctor().getValue();
+	JMenuBar menubar = new JMenuBar();
+	frame.setJMenuBar(menubar);
+	Atom a = mem.newAtom(new ObjectFunctor(menubar));
+	mem.relink(a, 0, me, 1);
+	me.nthAtom(0).remove();
+	me.remove();
+	
+	Atom root = mem.newAtom(new SymbolFunctor("root", 1, "tk"));
+	Atom f = mem.newAtom(new ObjectFunctor(frame));
+	mem.newLink(root, 0, f, 0);
+	:](Frame).
+
+/**
+ * （メニューバーの）メニューを生成します
+ */
+H=tk.menu(Label), tk.root(Frame) :- class(Frame, "javax.swing.JFrame") | tk.root(Frame), H=[:/*inline*/
+	JFrame frame = (JFrame)me.nthAtom(0).getFunctor().getValue();
+	JMenuBar menubar = frame.getJMenuBar();
+	String label = ((StringFunctor)me.nthAtom(1).getFunctor()).stringValue();
+	JMenu menu = new JMenu(label);
+	menubar.add(menu);
+	Atom a = mem.newAtom(new ObjectFunctor(menu));
+	mem.relink(a, 0, me, 2);
+	me.nthAtom(0).remove();
+	me.nthAtom(1).remove();
+	me.remove();
+	:](Frame, Label).
+
+//menu("File", item("Open", OpenAction), item("Save", SaveAction)).
+//menu("File", [item("Open", OpenAction), item("Save", SaveAction)]).
 	
 /**
  * ラベルを生成します
