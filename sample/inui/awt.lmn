@@ -1,17 +1,27 @@
 //awt パッケージ
 {
 module(awt).
+
+//class Component
+H=awt.new_component :- H={
+	class(component).
+	}.
+
+//class Container
 H=awt.new_container :- H={
+	class(container).
+	oop.extends(awt.new_component).
 	//field
 	layout=null.
 	components=[].
 	//method
-	add(Component), components=Components :- components=[Component|Components].
-	setLayout(LayoutManager) :- layout(LayoutManager).
+	add({class(component), $p, @p}), components=Components :- components=[{class(component), $p, @p}|Components].
+	setLayout(NewLayout), layout(Layout) :- layout(NewLayout), nlmem.kill(Layout).
 	}.
 
 //class Frame
 H=awt.new_frame :- H={
+	class(frame).
 	oop.extends(awt.new_container).
 	//field
 	title("").
@@ -21,15 +31,19 @@ H=awt.new_frame :- H={
 
 //class Button
 H=awt.new_button(Label) :- string(Label) | H={
+	class(button).
+	oop.extends(awt.new_component).
 	//field
 	label(Label).
-	actionListener({}).
+	actionListener(null).
 	//method
-	addActionListener({@p}), actionListener({@q}) :- actionListener({@p}).
+	addActionListener({implements(actionListener), @p}), actionListener({@q}) :- actionListener({@p}).
 	}.
 
 //class TextArea
 H=awt.new_textarea(Row, Column) :- int(Row), int(Column) | H={
+	class(textarea).
+	oop.extends(awt.new_component).
 	//field
 	text("").
 	row(Row).
@@ -46,16 +60,22 @@ H=awt.new_textarea(Row, Column) :- int(Row), int(Column) | H={
 f=awt.new_frame().
 ta=awt.new_textarea(24, 40).
 b1=awt.new_button("Open").
-openAction={actionPerformed(ActionEvent) :- open(ActionEvent)}.
+openAction={
+	implements(actionListener).
+	actionPerformed(ActionEvent) :- open(ActionEvent).
+	}.
 b2=awt.new_button("Save").
-saveAction={actionPerformed(ActionEvent) :- save(ActionEvent)}.
+saveAction={
+	implements(actionListener).
+	actionPerformed(ActionEvent) :- save(ActionEvent).
+	}.
 
 //フレームにコンポーネントを追加
-f={$p, @p}, ta(TA), b1={$p1,@p1}, b2={$p2,@p2}, openAction={@q1}, saveAction={@q2} :-
+f={$p, @p}, ta({$p3,@p3}), b1={$p1,@p1}, b2={$p2,@p2}, openAction={$q1,@q1}, saveAction={$q2,@q2} :-
 	f={
-		add(TA).
-		add({addActionListener({@q1}),$p1,@p1}).
-		add({addActionListener({@q2}),$p2,@p2}).
+		add({$p3,@p3}).
+		add({addActionListener({$q1,@q1}),$p1,@p1}).
+		add({addActionListener({$q2,@q2}),$p2,@p2}).
 		setTitle("It's LMNtal").
 		$p, @p.
 	}.
