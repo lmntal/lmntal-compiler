@@ -7,6 +7,9 @@
 # 使用例
 # $ javap -public java.lang.Math | ./make_module.pl > math.lmn
 #
+# オプション
+# -m module_name
+#
 # History
 #
 # 2006/06/29(Thu)
@@ -15,7 +18,11 @@
 # 	例外が発生した場合 Exception オブジェクトを返すようにした
 # 2006/07/05(Wed)
 #   クラス名は大文字にした
+# 2006/09/23(Sat)
+#   モジュール名を指定するオプションを追加
 ###############################################################
+
+use Getopt::Std;
 
 # java の型 => Functor
 %functors = (
@@ -58,6 +65,11 @@
 	"java.lang.String"	=> "StringFunctor(r)",
 );
 
+# コマンドラインオプションの解析
+$opt = {};
+getopts('m:',$opt);
+$module = $opt->{'m'};
+
 # メイン
 $time = localtime(time);# いったん変数にとらないとうまく表示されない
 print "//----------------------------------------------------\n";
@@ -71,8 +83,10 @@ while (<>) {
 		$abstract = $1; # 抽象クラスの場合 undef 以外の値が入る
 		$class = $3;
 		$absolute_class = "$2.$3";
-		$module = $absolute_class; # パッケージ名をとりたいときは $class にする
-		$module =~ tr/./_/;
+		if ($module eq "") {
+			$module = $absolute_class; # パッケージ名をとりたいときは $class にする
+			$module =~ tr/./_/;
+		}
 		print "{module($module).\n";
 	} elsif (/compareTo\(java\.lang\.Object\)/) {
 		# Comparable インタフェースのメソッドは無視
@@ -293,8 +307,9 @@ sub dump_final_variable {
 	$lcname=lc($name);
 	
 	print "H=$module.$lcname :- H=[:/*inline*/\n";
-	print "\tAtom $lcname = mem.newAtom(new ObjectFunctor($absolute_class.$name));\n";
-	print "\tmem.relink($lcname, 0, me, 0);\n";
+	print "\t$type r = $absolute_class.$name;\n";
+	print "\tAtom ", dump_result_atom($type);
+	print "\tmem.relink(result, 0, me, 0);\n";
 	print "\tme.remove();\n";
 	print "\t:].\n";
 	print "\n";
