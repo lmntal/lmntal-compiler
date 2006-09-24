@@ -1,0 +1,52 @@
+/**
+NAME
+	Enumulation module
+
+SYNOPSIS
+
+	enum.use.
+	enum([north, south, east, west]).
+	a=enum(north).
+
+		=>
+		
+	a=0.
+	
+AUTHOR
+	Atsuyuki Inui
+	
+HISTORY
+	2006/09/25 test
+
+*/
+{
+module(enum).
+
+enum.use :- enum.count(0).
+
+enum=[A|Z] :- enum2=[enum.c(A)|Z].
+H=[enum.c(A)], enum.count(C) :- int(C) | H=[enum.e(A=C)], enum.count(C+1).
+H=[enum.c(A),B|Z], enum.count(C) :- int(C) | H=[enum.e(A=C),enum.c(B)|Z], enum.count(C+1).
+
+H=enum(A), E=[enum.e(B=N)|Z] :- int(N), A=B | H=N, E=[enum.e(B=N)|Z].
+}.
+
+//Test
+
+enum.use.
+enum([north, south, east, west]).
+enum([left, right]).
+
+a=enum(north).
+b=enum(south).
+c=enum(east).
+d=enum(west).
+a=enum(north).
+b=enum(south).
+c=enum(east).
+d=enum(west).
+
+x=enum(left).
+y=enum(right).
+x=enum(left).
+y=enum(right).
