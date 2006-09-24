@@ -1,6 +1,7 @@
 {
 module(new).
-H=new.mapsite :- | H={
+
+H=new.mapsite :- H={
 	}.
 	
 H=new.room(N) :- int(N) | H={
@@ -9,7 +10,11 @@ H=new.room(N) :- int(N) | H={
 	roomNo(N).
 	sides=[null,null,null,null].
 	//method
-	H=getSide(Direction) :- H=Direction.
+	//list.get すると要素がなくなってしまうので，参照を追加する
+	H=getSide(0), sides=[{$p,@p},S,E,W] :- H=N, sides=[{$p,@p,+N},S,E,W].
+	H=getSide(1), sides=[N,{$p,@p},E,W] :- H=S, sides=[N,{$p,@p,+S},E,W].
+	H=getSide(2), sides=[N,S,{$p,@p},W] :- H=E, sides=[N,S,{$p,@p,+E},W].
+	H=getSide(3), sides=[N,S,E,{$p,@p}] :- H=W, sides=[N,S,E,{$p,@p,+W}].
 	setSide(N, MapSite), sides=Sides :- sides=list.set(Sides, N, MapSite, old).
 	old(Old) :- nlmem.kill(Old).//private
 	enter :- .
@@ -17,8 +22,6 @@ H=new.room(N) :- int(N) | H={
 
 H=new.wall :- H={
 	oop.extends(new.mapsite).
-	//field
-	wall.
 	//method
 	enter :- done.
 	}.
@@ -37,27 +40,23 @@ H=new.door(R1, R2) :- H={
 H=new.maze :- H={
 	//field
 	//method
-	add_room(R) :- room(R).
+	addRoom(R) :- room(R).
 	H=room_no(N) :- int(N) | H={}.
 	}.
-}.
 	
 H=new.mazegame :- H={
 	//field
 	//method
 	H=create_maze :- H={
 		maze=new.maze.
-		r1=new.room(1).
-		r2=new.room(2).
+		r1=oop.ref(new.room(1), r12).
+		r2=oop.ref(new.room(2), r22).
+
+		r1(R1), r2(R2), r12(R12), r22(R22), maze={$p, @p} :-
+			door1=oop.ref(new.door(R1, R2), door12),
+			maze={$p, @p, addRoom(R12), addRoom(R22)}.
 		
-		r1={$p1, @p1}, r2={$p2, @p2}, maze={$p, @p} :-
-			r12={$p1, @p1, -R1, -R12},
-			r22={$p2, @p2, -R2, -R22},
-			door=new.door(R1, R2),
-			maze={$p, @p, add_room(R12), add_room(R22)}.
-		
-		r12={$p1, @p1}, r22={$p2, @p2}, door={$p, @p} :-
-			door={+Door1, +Door2, $p, @p},
+		r12={$p1, @p1}, r22={$p2, @p2}, door1(Door1), door12(Door12) :-
 			r13={
 				setSide(0, new.wall).
 				setSide(1, Door1).
@@ -69,12 +68,47 @@ H=new.mazegame :- H={
 				setSide(0, new.wall).
 				setSide(1, new.wall).
 				setSide(2, new.wall).
-				setSide(3, Door2).
+				setSide(3, Door12).
+				$p2, @p2.
+			}.
+		}.
+
+	//MazeFactory を受け取る		
+	H=create_maze({$p,@p}) :- H={
+		$p, @p.
+		m=makeMaze.
+		r1=oop.ref(oop.ref(makeRoom(1), r12), r13).
+		r2=oop.ref(oop.ref(makeRoom(2), r22), r23).
+		m={$p,@p}, r1(R1), r2(R2), r12(R12), r22(R22) :-
+			d1=oop.ref(makeDoor(R1, R2), d12), m={$p,@p,addRoom(R12),addRoom(R22)}.
+		r13={$p1, @p1}, r23={$p2, @p2}, d1(Door1), d12(Door12) :-
+			r13={
+				setSide(0, new.wall).
+				setSide(1, Door1).
+				setSide(2, new.wall).
+				setSide(3, new.wall).
+				$p1, @p1.
+			},
+			r23={
+				setSide(0, new.wall).
+				setSide(1, new.wall).
+				setSide(2, new.wall).
+				setSide(3, Door12).
 				$p2, @p2.
 			}.
 		}.
 	}.
+	
+H=new.mazefactory :- H={
+	//method
+	H=makeMaze :- H=new.maze.
+	H=makeWall :- H=new.wall.
+	H=makeRoom(N) :- int(N) | H=new.room(N).
+	H=makeDoor(R1, R2) :- H=new.door(R1, R2).
+	}.
+
+}.
 
 a=new.mazegame.
-a={$p, @p} :- b={maze=create_maze, $p, @p}.
-H={{maze={$r, @r}, $q, @q}, $p, @p}/ :- maze={$r, @r}, H={$p, @p, $q, @q}.
+a={$p, @p} :- b={maze=create_maze(new.mazefactory), $p, @p}.
+H={maze={$r, @r}, $p, @p}/ :- maze={$r, @r}, H={$p, @p}.
