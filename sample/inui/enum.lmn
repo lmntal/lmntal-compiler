@@ -4,13 +4,13 @@ NAME
 
 SYNOPSIS
 
-	enum.use.
-	enum([north, south, east, west]).
-	a=enum(north).
+	enum.decl([north, south, east, west]).
+	enum.decl([left=5, right]).
+	a=enum(east), b=enum(right).
 
 		=>
 		
-	a=0.
+	a=2. b=6.
 	
 AUTHOR
 	Atsuyuki Inui
@@ -22,31 +22,32 @@ HISTORY
 {
 module(enum).
 
-enum.use :- enum.count(0).
+//宣言された変数に値を割り振る
+enum.decl=[A|Z] :- enum.decl2=[A=enum.n(0)|Z].
+enum.decl=[A=N|Z] :- int(N) | enum.decl2=[A=enum.n(N)|Z].
 
-enum=[A|Z] :- enum2=[enum.c(A)|Z].
-H=[enum.c(A)], enum.count(C) :- int(C) | H=[enum.e(A=C)], enum.count(C+1).
-H=[enum.c(A),B|Z], enum.count(C) :- int(C) | H=[enum.e(A=C),enum.c(B)|Z], enum.count(C+1).
+H=[A=enum.n(N)] :- int(N) | H=[A=enum.n2(N)].
+H=[A=enum.n(N),B|Z] :- int(N) | H=[A=enum.n2(N),B=enum.n(N+1)|Z].
 
-H=enum(A), E=[enum.e(B=N)|Z] :- int(N), A=B | H=N, E=[enum.e(B=N)|Z].
+//実際の値に変換する
+H=enum(A), E=[B=enum.n2(N)|Z] :- int(N), A=B | H=N, E=[B=enum.n2(N)|Z].
+
 }.
 
 //Test
-
-enum.use.
-enum([north, south, east, west]).
-enum([left, right]).
-
-a=enum(north).
-b=enum(south).
-c=enum(east).
-d=enum(west).
-a=enum(north).
-b=enum(south).
-c=enum(east).
-d=enum(west).
-
-x=enum(left).
-y=enum(right).
-x=enum(left).
-y=enum(right).
+//enum.decl([north, south, east, west]).
+//enum.decl([left=10, right]).
+//
+//a=enum(north).
+//b=enum(south).
+//c=enum(east).
+//d=enum(west).
+//a=enum(north).
+//b=enum(south).
+//c=enum(east).
+//d=enum(west).
+//
+//x=enum(left).
+//y=enum(right).
+//x=enum(left).
+//y=enum(right).
