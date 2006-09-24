@@ -35,19 +35,19 @@ H=enum(A), E=[B=enum.n2(N)|Z] :- int(N), A=B | H=N, E=[B=enum.n2(N)|Z].
 }.
 
 //Test
-//enum.decl([north, south, east, west]).
-//enum.decl([left=10, right]).
-//
-//a=enum(north).
-//b=enum(south).
-//c=enum(east).
-//d=enum(west).
-//a=enum(north).
-//b=enum(south).
-//c=enum(east).
-//d=enum(west).
-//
-//x=enum(left).
-//y=enum(right).
-//x=enum(left).
-//y=enum(right).
+enum.decl([north, south, east, west]).
+enum.decl([left=10, right]).
+
+a=enum(north).
+b=enum(south).
+c=enum(east).
+d=enum(west).
+a=enum(north).
+b=enum(south).
+c=enum(east).
+d=enum(west).
+
+x=enum(left).
+y=enum(right).
+x=enum(left).
+y=enum(right).
