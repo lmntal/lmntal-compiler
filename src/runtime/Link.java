@@ -148,7 +148,7 @@ public final class Link implements Cloneable, Serializable {
 //		}
 //		return true;
 //	}
-	public boolean eqround(Link srcLink){
+	public boolean eqGround(Link srcLink){
 		List srclinks = new ArrayList();
 		List dstlinks = new ArrayList();
 		srclinks.add(srcLink);
