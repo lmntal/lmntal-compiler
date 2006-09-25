@@ -3,10 +3,13 @@ package runtime;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 //import java.util.ArrayList;
 //import java.util.Iterator;
@@ -88,27 +91,32 @@ public final class Link implements Cloneable, Serializable {
 	 * @param avoSet 基底項プロセスに出てきてはいけないアトムのSet
 	 * @return 基底項プロセスを構成するアトム数
 	 */
+//	public int isGround(Set avoSet){
+//		Set srcSet = new HashSet();
+//		Stack s = new Stack(); //リンクを積むスタック
+//		s.push(this);
+//		int c=0;
+//		while(!s.isEmpty()){
+//			Link l = (Link)s.pop();
+//			Atom a = l.getAtom();
+//			if(srcSet.contains(a))continue; //既に辿ったアトム
+//			if(avoSet.contains(a))return -1; //出現してはいけないアトム
+//			if(a.getFunctor().equals(Functor.INSIDE_PROXY)||
+//				a.getFunctor().isOutsideProxy()) //プロキシに至ってはいけない
+//				return -1;
+//			c++;
+//			srcSet.add(a);
+//			for(int i=0;i<a.getArity();i++){
+//				if(i==l.getPos())continue;
+//				s.push(a.getArg(i));
+//			}
+//		}
+//		return c;
+//	}
 	public int isGround(Set avoSet){
-		Set srcSet = new HashSet();
-		Stack s = new Stack(); //リンクを積むスタック
-		s.push(this);
-		int c=0;
-		while(!s.isEmpty()){
-			Link l = (Link)s.pop();
-			Atom a = l.getAtom();
-			if(srcSet.contains(a))continue; //既に辿ったアトム
-			if(avoSet.contains(a))return -1; //出現してはいけないアトム
-			if(a.getFunctor().equals(Functor.INSIDE_PROXY)||
-				a.getFunctor().isOutsideProxy()) //プロキシに至ってはいけない
-				return -1;
-			c++;
-			srcSet.add(a);
-			for(int i=0;i<a.getArity();i++){
-				if(i==l.getPos())continue;
-				s.push(a.getArg(i));
-			}
-		}
-		return c;
+		List srclinks = new ArrayList();
+		srclinks.add(this);
+		return Membrane.isGround(srclinks,avoSet);
 	}
 
 	/**
@@ -118,27 +126,34 @@ public final class Link implements Cloneable, Serializable {
 	 * @param srcLink 比較対象のリンク
 	 * @return
 	 */
-	public boolean eqGround(Link srcLink){//,Map srcMap){
-		Map map = new HashMap(); //比較元アトムから比較先アトムへのマップ
-		Stack s1 = new Stack();  //比較元リンクを入れるスタック
-		Stack s2 = new Stack();  //比較先リンクを入れるスタック
-		s1.push(this);
-		s2.push(srcLink);
-		while(!s1.isEmpty()){
-			Link l1 = (Link)s1.pop();
-			Link l2 = (Link)s2.pop();
-			if(l1.getPos() != l2.getPos())return false; //引数位置の一致を検査
-			if(!l1.getAtom().getFunctor().equals(l2.getAtom().getFunctor()))return false; //ファンクタの一致を検査
-			if(!map.containsKey(l1.getAtom()))map.put(l1.getAtom(),l2.getAtom()); //未出
-			else if(map.get(l1.getAtom()) != l2.getAtom())return false;         //既出なれど不一致
-			else continue;
-			for(int i=0;i<l1.getAtom().getArity();i++){
-				if(i==l1.getPos())continue;
-				s1.push(l1.getAtom().getArg(i));
-				s2.push(l2.getAtom().getArg(i));
-			}
-		}
-		return true;
+//	public boolean eqGround(Link srcLink){//,Map srcMap){
+//		Map map = new HashMap(); //比較元アトムから比較先アトムへのマップ
+//		Stack s1 = new Stack();  //比較元リンクを入れるスタック
+//		Stack s2 = new Stack();  //比較先リンクを入れるスタック
+//		s1.push(this);
+//		s2.push(srcLink);
+//		while(!s1.isEmpty()){
+//			Link l1 = (Link)s1.pop();
+//			Link l2 = (Link)s2.pop();
+//			if(l1.getPos() != l2.getPos())return false; //引数位置の一致を検査
+//			if(!l1.getAtom().getFunctor().equals(l2.getAtom().getFunctor()))return false; //ファンクタの一致を検査
+//			if(!map.containsKey(l1.getAtom()))map.put(l1.getAtom(),l2.getAtom()); //未出
+//			else if(map.get(l1.getAtom()) != l2.getAtom())return false;         //既出なれど不一致
+//			else continue;
+//			for(int i=0;i<l1.getAtom().getArity();i++){
+//				if(i==l1.getPos())continue;
+//				s1.push(l1.getAtom().getArg(i));
+//				s2.push(l2.getAtom().getArg(i));
+//			}
+//		}
+//		return true;
+//	}
+	public boolean eqround(Link srcLink){
+		List srclinks = new ArrayList();
+		List dstlinks = new ArrayList();
+		srclinks.add(srcLink);
+		dstlinks.add(this);
+		return Membrane.eqGround(srclinks,dstlinks);
 	}
 	/**
 	 * ground構造に対して一意な文字列を返す。
