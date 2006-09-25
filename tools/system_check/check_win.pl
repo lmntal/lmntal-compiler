@@ -18,12 +18,23 @@
 use Cwd;
 $pwd = Cwd::getcwd();
 
+if($#ARGV == -1){
+	$begin_line = 1;
+	$end_line = 50000;
+}elsif($#ARGV == 0){
+	$begin_line = $ARGV[0];
+	$end_line = 50000;
+}else{
+	$begin_line = $ARGV[0];
+	$end_line = $ARGV[1];
+}
+
 $lmntal_runtime = $pwd . "/../../bin/lmntal";
 
 open(INPUTFILE, $pwd . "/testdata.lmn");  # input file
 @file = <INPUTFILE>;
 
-for($i=0;$i<=$#file;$i++){
+for($i=$begin_line-1;$i<=$#file || $i<=$end_line-1;$i++){
 	$file[$i] =~ s/\n//;                                # delete return code
 	@data = split /%/, $file[$i];
 	$program = $data[0];                                # input data

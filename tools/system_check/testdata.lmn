@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - 基本テスト
+%% - 基本テスト
 
 append(c(1,c(2,c(3,n))),c(4,c(5,n)),result), ( append(X,Y,Z), n(X) :- Y=Z ), ( append(X,Y,Z), c(A,X1,X) :- c(A,Z1,Z), append(X1,Y,Z1) ). %result(c(1,c(2,c(3,c(4,c(5,n)))))) %ok
 append(c(1,c(2,c(3,n))),c(4,c(5,n)),result). append(X,Y,Z), n(X) :- Y=Z. append(X,Y,Z), c(A,X1,X) :- c(A,Z1,Z), append(X1,Y,Z1). %result(c(1,c(2,c(3,c(4,c(5,n)))))) %ok
@@ -7,7 +7,7 @@ append([1,2,3],[4,5],result), ( Z=append([],Y) :- Y=Z ), ( Z=append([A|X],Y) :- 
 append([1,2,3],[4,5],result). Z=append([],Y) :- Y=Z. Z=append([A|X],Y) :- Z=[A|append(X,Y)]. %result([1,2,3,4,5]) %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - アトム同一性検査のテスト
+%% - アトム同一性検査のテスト
 
 f(A),a(A,B),f(C),a(D,C) :- end(B,D). a(f,f),a(f,f). %end(f,f) %ok
 f(A),a(A,B),f(C),a(C,D) :- end(B,D). a(f,f),a(f,f). %end(f,f) %ok
@@ -16,7 +16,7 @@ p(A),f(X),p(X) :- unary(A) | .  p(f),p(f),p(f). %p(f) %ok
 {p(A),f(X),p(X),$s[A]} :- {$s[X],q(X)}.{p(f),p(f),p(f)}. %{p(f),q(f)} %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - 単一化 = のテスト
+%% - 単一化 = のテスト
 
 p(X,X). %p(X,X) %ok
 p(X,Y),Y=X. %p(X,X) %ok
@@ -30,31 +30,31 @@ p(a,b), ( Y=p(X)     :- X=Y     ). %a(b) %ok
 p(a,b), ( Y=E,E=p(X) :- X=F,F=Y ). %a(b) %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - 自由リンク管理アトムのテスト
+%% - 自由リンク管理アトムのテスト
 
-% 生成のテスト
+%% 生成のテスト
 b(X),{c(X)}. %b(X), {c(X)} %ok
-% マッチングのテスト
+%% マッチングのテスト
 b(X),{c(X)}, (b(X),{c(X)}:- ok). %ok %ok
-% 生成とマッチングのテスト
+%% 生成とマッチングのテスト
 a, (a:-b(X),{c(X)}), (b(X),{c(X)}:-d(Y),{e(Y)}) %d(X),{e(X)}. %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - プロセス文脈のテスト
+%% - プロセス文脈のテスト
 
 1,1,1,1,1,{},({$p},1:-{$p,1}).   %{1,1,1,1,1}  %ok
 {{a(X)},b(X,Y),1},{c(Y)}, ({$p,1} :- {$p}). %{{a(X)},b(X,Y)},{c(Y)} %ok
 
-% RemoveProxies のテスト
+%% RemoveProxies のテスト
 {{a(X)},b(X,Y)},{c(Y)}, ({$p},{$q} :- {$p,$q}). %{{a(X)},c(b(X))} %ok
-% RemoveToplevelProxies のテスト
+%% RemoveToplevelProxies のテスト
 {a(  X)},{b(X)},        ({$p},{$q} :-  $p,$q ). %a(b)   %ok
 {a(A,X)},{b(X)},c(A),   ({$p},{$q} :-  $p,$q ). %b(a(c))  %ok
 
-% InsertProxies のテスト
+%% InsertProxies のテスト
 {{a(A,X)},b(B,X)},c(A,B),    ({{$p},$q} :- {$p,$q}). %{b(B,a(A))},c(A,B) %ok
 
-% 全般
+%% 全般
 {{a(A,X)},b(B,X)},{d(B)},c(A),  ( {{$p},$q},{$r}   :- {{$p},$q,  $r} ). %{{a(A,X)},b(d,X)},c(A)  %ok
 {{a(A,X)},b(B,X)},{d(B)},c(A),a,( {{$p},$q},{$r},a :- {{$p},$q},{$r} ). %{{a(A,X)},b(B,X)},{d(B)},c(A) %ok
 {{a(A,X)},b(B,X)},{d(B)},c(A),  ( {{$p},$q},{$r}   :- {$p,$q,$r}     ). %{a(X,b(d))},c(X)  %ok
@@ -67,12 +67,12 @@ a, (a:-b(X),{c(X)}), (b(X),{c(X)}:-d(Y),{e(Y)}) %d(X),{e(X)}. %ok
 {a(A,X)},{b(X)},{c(A)},      ({$p},{$q} :- {$p,$q}). %{b(a(c))} %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - ルール文脈のテスト
+%% - ルール文脈のテスト
 
 {@p}:-@p. a. {a:-b}. %b  %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 明示的な自由リンク引数付きのプロセス文脈のテスト
+%% 明示的な自由リンク引数付きのプロセス文脈のテスト
 
 ( {$p[X],   a(X)} :- $p[X],   ok(X) ), {a(4)}.        %ok(4)  %ok
 ( {$p[X],   a(X)} :- $p[X],   ok(X) ), {a(X),{4(X)}}. %ok(X),{4(X)} %ok
@@ -81,7 +81,7 @@ a, (a:-b(X),{c(X)}), (b(X),{c(X)}:-d(Y),{e(Y)}) %d(X),{e(X)}. %ok
 ( {$p[Y|*A],a(Y)} :- $a=4 | $p[X|*A], $a=X ), {a(b)}. %b(4)  %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 諸々のテスト
+%% 諸々のテスト
 
   A=f(f(f(f(A)))),    c,c, ( c, X=f(Y) :- X=g(Y) ).                      %f(g(g(f(A))),A) %ok
 { A=f(f(f(f(A)))) },  c,c, ( c,{X=f(Y),$p[X,Y]} :- { X=g(Y),$p[X,Y] } ). %{ f(g(g(f(A))),A) } %ok
@@ -93,7 +93,7 @@ a, (a:-b(X),{c(X)}), (b(X),{c(X)}:-d(Y),{e(Y)}) %d(X),{e(X)}. %ok
 %( go :- { pi(X), res(X), ( pi(X) :- X=3.14 ) }@"localhost" ), ( {res($p),@r} :- result=$p ), ( result(pi) :- e,go ), go. %e,e,e,result(3.14)  %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 諸々のテスト2
+%% 諸々のテスト2
 
 {$p[X,Y],f(X,Y)}:-$p[Z,Z],$p[W,W].    {f(X,Z),g(X,Z)}. %g(A,A),g(B,B) %ok
 {$p[X,Y],f(X,Y)}:-$p[Z,Z].            {f(X,Z),g(X,Z)}. %g(A,A)  %ok
@@ -196,13 +196,46 @@ a($x),b($y) :- ground($x), $x = $y  | c($x).  a(n(m,l)), b(n(m,l)). % c(n(m,l)).
 a($x),b($y) :- ground($x), $x = $y  | c($x).  a(x(X1,Y1,y(W1,Z1))), X1=W1, Y1=Z1. b(x(X2,Y2,y(W2,Z2))), X2=W2,Y2=Z2. % c(x(X3,Y3,y(W3,Z3))), X3=W3, Y3=Z3. %ok
 a($x),b($y) :- ground($x), $x = $y  | c($x).  a(x(X1,Y1,y(W1,Z1))), X1=W1, Y1=Z1. b(x(X2,Y2,y(W2,Z2))), X2=Z2,Y2=W2. % c(x(X3,Y3,y(W3,Z3))), X3=W3, Y3=Z3. %ng
 
-% 複製
+%% 補完
+a($x) :- int($x),unary($x),ground($x) | b($x). a(3), a(g), a(t(t)). % b(3), a(g), a(t(t)). %ok
+a($x), b($y) :- unary($x), $x = $y | c($x,$y). a(g(g)), b(g(g)), a(m), b(m). % c(m,m), a(g(g)), b(g(g)). %ok
+a($x), b($y) :- unary($y), $x = $y | c($x,$y). a(g(g)), b(g(g)), a(m), b(m). % c(m,m), a(g(g)), b(g(g)). %ok
+a($x), b($y) :- unary($x), ground($y), $x = $y | c($x,$y). a(g(g)), b(g(g)), a(m), b(m). % c(m,m), a(g(g)), b(g(g)). %ok
+a($x), b($y) :- ground($x), unary($y), $x = $y | c($x,$y). a(g(g)), b(g(g)), a(m), b(m). % c(m,m), a(g(g)), b(g(g)). %ok
+a($x), b($y) :- unary($x), $x \= $y | c($x,$y). a(g(g)), b(g(g)), a(m), b(m). % c(m,g(g)), a(g(g)), b(m). %ok
+
+%% 複製
+a($x) :- ground($x) | b($x,$x,$x). a(m). a(t(t,t)). a(o(o(O),O)).  % b(m,m,m), b(t(t,t),t(t,t),t(t,t)), b(o(o(O1),O1),o(o(O2),O2),o(o(O3),O3)). %ok
+a($x) :- ground($x) | $x=$x. a(m), a(t(t,t)), a(o(o(O),O)). % m=m. t(t,t,t(t,t)). o(o(O1),O1,o(o(O2),O2)). %ok
+a($x) :- ground($x) | t(T1,T2,T3),{ T1=$x,{T2=$x,{T3=$x}}}. a(m). % t(S1,S2,S3), {m(S1),{m(S2),{m(S3)}}}. %ok
+
+%% 多引数ground
+%% 検査
+a(X,Y), $x[X,Y] :- ground($x) | b(Z,W), $x[Z,W]. a(m(M),M).             %b(m(N),N).         %ok
+a(X,Y), $x[X,Y] :- ground($x) | b(Z,W), $x[Z,W]. a(t,t).                %a(t,t).            %ok
+a(X,Y), $x[X,Y] :- ground($x) | b(Z,W), $x[Z,W]. a(A,B),{t(A,B)}.       %a(C,D),{t(C,D)}.   %ok
+a(X,Y), $x[X,Y] :- ground($x) | b(Z,W), $x[Z,W]. a(N,N).                %b(M,M).            %ok
+a(X,Y,N), $x[X,Y] :- ground($x) | b(Z,W,N), $x[Z,W]. a(g(B1,B2),B1,B2). %a(g(C1,C2),C1,C2). %ok
+a(X,Y,Z,W), $x[X,Y,Z,W] :- ground($x) | b(A,B,C,D), $x[A,B,C,D]. a(m(M1,M2,M3),M1,M2,M3). %b(m(N1,N2,N3),N1,N2,N3). %ok
+
+a(L,R), $x[L,R] :- ground($x) | $x[X,X]. a([1,2,3|A],A). % R=[1,2,3|R]. %ok
+L=[1|L1], R1=[5|R], $list[L1,R1] :- ground($list) | L=R. r=[1,2,3,4,5]. % r=[1,5]. %ok
+
+%% 比較
+a(X,Y,Z,W), $x[X,Y], $y[Z,W] :- $x = $y | b(A,B), $x[A,B]. a(t(A),A,t(B),B). % b(t(T),T).%ok
+a(X,Y,Z,W), $x[X,Y], $y[Z,W] :- $x \= $y | $x[A,B], $y[A,B]. a(M,M,N,N). % a(F,F,G,G). %ok
+
+%% アトム数計測のテスト
+{a(X,Y,Z,W),$x[X,Y],$y[Z,W]} :- ground($x), ground($y) | b. {a(A,A,B,B)}. %b. %ok
+{a(X,Y,Z,W),$x[X,Y],$y[Z,W]} :- ground($x), ground($y) | b. {a(A,A,B,B),t}. %{a(C,C,D,D),t}. %ok
+{a(X,Y,Z,W),$x[X,Y],$y[Z,W]} :- ground($x), ground($y) | b. {a(A,t(A),B,t(B))}. %b. %ok
+{a(X,Y,Z,W),$x[X,Y],$y[Z,W]} :- ground($x), ground($y) | b. {a(A,m(A),B,m(B)),t}. %{a(C,m(C),D,m(D)),t}. %ok
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% simpagation rule のテスト
 
 a \ b :- c. a,b. % a,c. %ok
 a(X) \ b(X) :- c(X). a(b). % a(c). %ok
-
 
 %EOF

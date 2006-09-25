@@ -14,12 +14,27 @@ open(PWD, "dirname $0 |");
 $pwd = <PWD>;
 $pwd =~ s/\n//;
 
+$begin_line = 1;
+$end_line = 50000;
+
+for(@ARGV){
+	if($_ =~ /b([0-9]+)/ ){
+		$begin_line = $1;
+	}elsif($_ =~ /e([0-9]+)/ ){
+		$end_line = $1;
+	}elsif($_ =~ /t/ ){
+		$flg_translate = true;
+	}
+};
+
+$lmntal_t_compiler = $pwd . "/../../bin/lmnc";
+$lmntal_t_runtime = $pwd . "/../../bin/lmnr";
 $lmntal_runtime = $pwd . "/../../bin/lmntal";
 
 open(INPUTFILE, $pwd . "/testdata.lmn");  # input file
 @file = <INPUTFILE>;
 
-for($i=0;$i<=$#file;$i++){
+for($i=$begin_line-1;$i<=$#file && $i<=$end_line-1;$i++){
 	$file[$i] =~ s/\n//;                                # delete return code
 	@data = split /%/, $file[$i];
 	$program = $data[0];                                # input data
@@ -28,8 +43,18 @@ for($i=0;$i<=$#file;$i++){
 	unless($program && $goal){next;}                    # skip comment
 	unless($flg){$flg = "ok"}
 
-	$program =~ s/\$/\\\$/g;
-	$run = $lmntal_runtime . " -e \"" . $program . "\"";
+	if($flg_translate){
+		open(TMPOUTPUTFILE, "> " . $pwd . "/tmp.lmn"); #tmp output
+		print(TMPOUTPUTFILE $program);
+		close(TMPOUTPUTFILE);
+		$cmp = $lmntal_t_compiler . " " . $pwd . "/tmp.lmn";
+		$dust = `$cmp`;
+		$run = $lmntal_t_runtime . " " . $pwd . "/tmp.jar";		
+	}else{
+		$program =~ s/\$/\\\$/g;
+		$run = $lmntal_runtime . " -e \"" . $program . "\"";
+	}
+
 	$output = `$run`;
 
 	$output =~ s/\n//;
