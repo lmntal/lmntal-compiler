@@ -771,7 +771,7 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(LOOKUPLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
 
 	/** insertconnectors[-dstset,linklist,mem]
-	 * $linklistリストの各変数番号にはリンクオブジェクトが格納されている。
+	 * linklistリストの各変数番号にはリンクオブジェクトが格納されている。
 	 * それらのリンクオブジェクトのリンク先は$mem内のアトムである。
 	 * それらのリンクオブジェクトの全ての組み合わせに対し、buddyの関係にあるかどうかを検査し、
 	 * その場合には'='アトムを挿入する。
@@ -779,15 +779,27 @@ public class Instruction implements Cloneable, Serializable {
 	 */
 	public static final int INSERTCONNECTORS = 85;
 	static {setArgType(INSERTCONNECTORS, new ArgType(true, ARG_VAR, ARG_VARS, ARG_MEM));}
-	
-	/** deleteconnectors[srcset,srcmap,srcmem]
-	 * $srcsetに含まれる'='アトムをコピーしたアトムを$srcmapから得て、
-	 * 削除し、リンクをつなぎなおす。$srcmemはコピー先の膜。
-	 * 
-	 * (単に$srcmemに含まれる'='を削除するようにすればよいか？)
+
+	// (2006/09/24 kudo)
+	// TODO 名前が長い上に意味不明なのでなんとかする
+	/** insertconnectorsinnull[-dstset,linklist]
+	 * linklistリストの各変数番号にはリンクオブジェクトが格納されている。
+	 * それらのリンクオブジェクトの全ての組み合わせに対し、buddyの関係にあるかどうかを検査し、
+	 * その場合には'='アトムを挿入する。
+	 * ただし'='は所属膜を持たない．
+	 * 挿入したアトムを$dstsetに追加する。
+	 * この命令は型付きプロセス文脈の複製に伴い発行される． 
 	 */
-	public static final int DELETECONNECTORS = 86;
-	static {setArgType(DELETECONNECTORS, new ArgType(false, ARG_VAR,ARG_VAR,ARG_MEM));}
+	public static final int INSERTCONNECTORSINNULL = 86;
+	static {setArgType(INSERTCONNECTORSINNULL, new ArgType(true, ARG_VAR, ARG_VARS));}
+
+	/** deleteconnectors[srcset, srcmap]
+	 * $srcsetに含まれる'='アトムをコピーしたアトムを$srcmapから得て、
+	 * 削除し、リンクをつなぎなおす。<strike>$memはコピー先の膜。</strike>
+	 * 膜引数は廃止(2006/09/21)
+	 */
+	public static final int DELETECONNECTORS = 87;
+	static {setArgType(DELETECONNECTORS, new ArgType(false, ARG_VAR,ARG_VAR));}
 
 //	/** * [srcatom,pos]
 //	 * <br>（予約された）ボディ命令<br>
@@ -996,32 +1008,34 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int NEQGROUND = 217;
 	static {setArgType(NEQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
 
-	/** copyground [-dstlink, srclink, dstmem]
-	 * （基底項プロセスを指す）リンク$srclinkを$dstmemに複製し、$dstlinkに格納する。
+	/** copyground [-dstlist, srclinklist, dstmem]
+	 * （基底項プロセスを指す）リンク列$srclinklistを$dstmemに複製し、
+	 * $dstlistの第1要素はコピーされたリンク列を，
+	 * 第二要素にはコピー元のアトムからコピー先のアトムへのマップがそれぞれ格納される．
 	 * @see isground */
 	public static final int COPYGROUND = 218;
-	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM));}
+	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_MEM));}
 		
-	/** removeground [srclink,srcmem]
-	 * $srcmemに属する（基底項プロセスを指す）リンク$srclinkを現在の膜から取り出す。
+	/** removeground [srclinklist,srcmem]
+	 * $srcmemに属する（基底項プロセスを指す）リンク列$srclinklistを現在の膜から取り出す。
 	 * 実行アトムスタックは操作しない。
 	 */
 	public static final int REMOVEGROUND = 219;
 	static {setArgType(REMOVEGROUND, new ArgType(false, ARG_VAR, ARG_MEM));}
 	
-	/** freeground [srclink]
-	 * 基底項プロセス$srclinkがどの膜にも属さず、かつスタックに積まれていないことを表す。
+	/** freeground [srclinklist]
+	 * 基底項プロセス$srclinklistがどの膜にも属さず、かつスタックに積まれていないことを表す。
 	 */
 	public static final int FREEGROUND = 220;
 	static {setArgType(FREEGROUND, new ArgType(false, ARG_VAR));}
 	
 	// 型検査のためのガード命令 (221--229)	
 
-	/** isground [-natomsfunc, link, srcset]
+	/** isground [-natomsfunc, linklist, avolist]
 	 * <br>（予約された）ロック取得する拡張ガード命令<br>
-	 * リンク$linkの指す先が基底項プロセスであることを確認する。
+	 * リンク列$linklistの指す先が基底項プロセスであることを確認する。
 	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこの膜に存在していることを確認する。
-	 * ただし、$srcsetに登録されたアトムに到達したら失敗する。
+	 * ただし、$avolistに登録されたリンクに到達したら失敗する。
 	 * 見つかった基底項プロセスを構成するこの膜のアトムの個数（をラップしたInteger）を$natomsに格納する。
      * 
      * <p>natomsとnmemsと統合した命令を作り、$natomsの総和を引数に渡すようにする。
@@ -1119,6 +1133,26 @@ public class Instruction implements Cloneable, Serializable {
 	 */
 	public static final int ADDATOMTOSET = 241;
 	static {setArgType(ADDATOMTOSET, new ArgType(false, ARG_VAR, ARG_ATOM));}
+
+	/**
+	 * newlinklist [-dstlist]
+	 * 新しいリンクのリストを作る
+	 */
+	public static final int NEWLIST = 242;
+	static {setArgType(NEWLIST, new ArgType(true,ARG_VAR));}
+	
+	/** addtolist [dstlist, src]
+	 * $srcをリスト$dstlistの最後に追加する
+	 * ( 2006/09/13 kudo )
+	 */
+	public static final int ADDTOLIST= 243;
+	static {setArgType(ADDTOLIST, new ArgType(false, ARG_VAR, ARG_VAR));}
+
+	/** getfromlist [-dst, list, pos]
+	 * $listからpos番目の要素を$dstに取得する
+	 */
+	public static final int GETFROMLIST = 244;
+	static {setArgType(GETFROMLIST, new ArgType(true, ARG_VAR, ARG_VAR, ARG_INT));};
 
 	///////////////////////////////////////////////////////////////////////
 	

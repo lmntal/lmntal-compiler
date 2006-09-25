@@ -811,7 +811,6 @@ class InterpretiveReactor {
 					vars.set(inst.getIntArg1(),new Link(la, srclink.getPos()));
 					break; //kudo 2004-10-10
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
-					Functor FUNC_UNIFY = new SymbolFunctor("=",2);
 					List linklist=(List)inst.getArg2();
 					Set insset=new HashSet();
 					Membrane srcmem=mems[inst.getIntArg3()];
@@ -820,30 +819,65 @@ class InterpretiveReactor {
 							Link a=(Link)vars.get(((Integer)linklist.get(i)).intValue());
 							Link b=(Link)vars.get(((Integer)linklist.get(j)).intValue());
 							if(a==b.getBuddy()){
-								Atom eq=srcmem.newAtom(FUNC_UNIFY);
+								Atom eq = srcmem.newAtom(Functor.UNIFY);
+//								Link a2 = new Link(eq,0);
+//								Link b2 = new Link(eq,1);
+//								a.getAtom().args[a.getPos()] = a2;
+//								a2.getAtom().args[a2.getPos()] = a;
+//								b.getAtom().args[b.getPos()] = b2;
+//								b2.getAtom().args[b2.getPos()] = b;
 								srcmem.unifyLinkBuddies(a,new Link(eq,0));
 								srcmem.unifyLinkBuddies(b,new Link(eq,1));
-//								a.getAtom().args[a.getPos()]=new Link(eq,0);
-//								b.getAtom().args[b.getPos()]=new Link(eq,1);
-//								eq.args[0]=a;
-//								eq.args[1]=b;
 								insset.add(eq);
 							}
 						}
 					vars.set(inst.getIntArg1(),insset);
 					break; //kudo 2004-12-29
-				case Instruction.DELETECONNECTORS : //[srcset,srcmap,srcmem]
+				case Instruction.INSERTCONNECTORSINNULL : //[-dstset, linklist]
+					linklist=(List)inst.getArg2();
+					insset=new HashSet();
+//					srcmem=mems[inst.getIntArg3()];
+					for(int i=0;i<linklist.size();i++)
+						for(int j=i+1;j<linklist.size();j++){
+							Link a=(Link)vars.get(((Integer)linklist.get(i)).intValue());
+							Link b=(Link)vars.get(((Integer)linklist.get(j)).intValue());
+							if(a==b.getBuddy()){
+								Atom eq = new Atom(null, Functor.UNIFY);
+//								Link a2 = new Link(eq,0);
+//								Link b2 = new Link(eq,1);
+								mems[0].unifyLinkBuddies(a,new Link(eq,0));
+								mems[0].unifyLinkBuddies(b,new Link(eq,1));
+//								a.getAtom().args[a.getPos()] = a2;
+//								a2.getAtom().args[a2.getPos()] = a;
+//								b.getAtom().args[b.getPos()] = b2;
+//								b2.getAtom().args[b2.getPos()] = b;
+//								srcmem.unifyLinkBuddies(a,new Link(eq,0));
+//								srcmem.unifyLinkBuddies(b,new Link(eq,1));
+								insset.add(eq);
+							}
+						}
+					vars.set(inst.getIntArg1(),insset);
+					break; //kudo 2006-09-24
+				case Instruction.DELETECONNECTORS : //[srcset, srcmap]
+					// 2006/09/24 膜引数を使わないように修正 kudo
 					Set delset = (Set)vars.get(inst.getIntArg1());
 					Map delmap = (Map)vars.get(inst.getIntArg2());
-					srcmem = mems[inst.getIntArg3()];
+//					srcmem = mems[inst.getIntArg3()];
 					it = delset.iterator();
 					while(it.hasNext()){
 						Atom orig=(Atom)it.next();
 						Atom copy=(Atom)delmap.get(orig);//new Integer(orig.id));
-						srcmem.unifyLinkBuddies(copy.args[0], copy.args[1]);
+						//ローカルなので本膜を使えば問題無いらしい
+//						copy.mem.unifyLinkBuddies(copy.args[0], copy.args[1]);
+						mems[0].unifyLinkBuddies(copy.args[0], copy.args[1]);
+//						Link link1 = copy.args[0];
+//						Link link2 = copy.args[1];
+//						link1.getAtom().args[link1.getPos()] = link2;
+//						link2.getAtom().args[link2.getPos()] = link1;
 //						copy.args[0].getAtom().args[copy.args[0].getPos()]=copy.args[1];
 //						copy.args[1].getAtom().args[copy.args[1].getPos()]=copy.args[0];
-						srcmem.removeAtom(copy);
+						if(copy.mem != null)
+							copy.mem.removeAtom(copy);
 					}
 					break; //kudo 2004-12-29
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
@@ -952,26 +986,43 @@ class InterpretiveReactor {
 					
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
-					boolean eqground_ret = ((Link)vars.get(inst.getIntArg1())).eqGround((Link)vars.get(inst.getIntArg2()));
+					boolean eqground_ret = Membrane.eqGround((List)vars.get(inst.getIntArg1()),(List)vars.get(inst.getIntArg2()));
 					if(!eqground_ret)return false;
 					break; //kudo 2004-12-03
 				case Instruction.NEQGROUND : //[link1,link2]
-					boolean neqground_ret = !((Link)vars.get(inst.getIntArg1())).eqGround((Link)vars.get(inst.getIntArg2()));
+					boolean neqground_ret = !Membrane.eqGround((List)vars.get(inst.getIntArg1()),(List)vars.get(inst.getIntArg2()));
 					if(!neqground_ret)return false;
 					break; //kudo 2006-02-18
-				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
-					vars.set(inst.getIntArg1(),mems[inst.getIntArg3()].copyGroundFrom((Link)vars.get(inst.getIntArg2())));
+				case Instruction.COPYGROUND : //[-dstlist, srclinklist, dstmem]
+					vars.set(inst.getIntArg1(),mems[inst.getIntArg3()].copyGroundFrom((List)vars.get(inst.getIntArg2())));
+//					vars.set(inst.getIntArg1(),mems[inst.getIntArg3()].copyGroundFrom((List)vars.get(inst.getIntArg2())));
+//					vars.set(inst.getIntArg1(),copy_ret.get(0));
+//					vars.set(inst.getIntArg2(),copy_ret.get(1));
 					break; //kudo 2004-12-03
-				case Instruction.REMOVEGROUND : //[srclink,srcmem]
-					mems[inst.getIntArg2()].removeGround((Link)vars.get(inst.getIntArg1()));
+				case Instruction.REMOVEGROUND : //[srclinklist,srcmem]
+//					List rlinks = new ArrayList();
+//					it = ((List)vars.get(inst.getIntArg1())).iterator();
+//					while(it.hasNext()){
+//						rlinks.add(vars.get(((Integer)it.next()).intValue()));
+//					}
+					mems[inst.getIntArg2()].removeGround((List)vars.get(inst.getIntArg1()));
 					break; //kudo 2004-12-08
-				case Instruction.FREEGROUND : //[srclink]
+				case Instruction.FREEGROUND : //[srclinklist]
 					break; //kudo 2004-12-08
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 
 					//====型検査のためのガード命令====ここから====
-				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
-					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround((Set)vars.get(inst.getIntArg3()));
+				case Instruction.ISGROUND : //[-natomsfunc,srclinklist,avolist, mem]
+//					it = ((List)vars.get(inst.getIntArg2())).iterator();
+//					List links = new ArrayList();
+//					while(it.hasNext()){
+//						links.add(vars.get(((Integer)it.next()).intValue()));
+//					}
+					List avos = (List)vars.get(inst.getIntArg3());
+					Set avoSet = new HashSet();
+					avoSet.addAll(avos);
+					int isground_ret = Membrane.isGround((List)vars.get(inst.getIntArg2()),avoSet);
+//					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround((Set)vars.get(inst.getIntArg3()));
 					if(isground_ret == -1)return false;
 					vars.set(inst.getIntArg1(),new IntegerFunctor(isground_ret));
 					break; //kudo 2004-12-03
@@ -1079,6 +1130,17 @@ class InterpretiveReactor {
 				case Instruction.ADDATOMTOSET : //[srcset,atom]
 					((Set)vars.get(inst.getIntArg1())).add(atoms[inst.getIntArg2()]);
 					break; //kudo 2004-12-08
+					
+				case Instruction.NEWLIST: //[-dstlist]
+					vars.set(inst.getIntArg1(),new ArrayList());
+					break; //kudo 2006-09-15
+				case Instruction.ADDTOLIST: // [dstlist, src]
+					((List)vars.get(inst.getIntArg1())).add(vars.get(inst.getIntArg2()));
+					break;
+				case Instruction.GETFROMLIST: // [-dst, list, pos]
+					vars.set(inst.getIntArg1(),((List)vars.get(inst.getIntArg2())).get(inst.getIntArg3()));
+					break;
+					
 					//====アトムセットを操作するための命令====ここまで====
 				case Instruction.ISFLAT : //[srcmem]
 					if(!mems[inst.getIntArg1()].mems.isEmpty())return false;

@@ -693,6 +693,7 @@ public class LMNParser {
 			String name = pc.getQualifiedName();
 			if (!names.containsKey(name)) {
 				pc.def = new ContextDef(pc.getQualifiedName());
+				//TODO ガードで出現するからと言って型付きとは限らない
 				pc.def.typed = true;
 				names.put(name, pc.def);
 			}
@@ -704,12 +705,13 @@ public class LMNParser {
 	}
 	
 	/** ヘッドのプロセス文脈、型付きプロセス文脈、ルール文脈、リンク束のリストを作成する。
-	 * 型なしプロセス文脈の明示的な引数が互いに異なることを確認する。 
+	 * <strike>型なし</strike>(2006/09/13 kudo) プロセス文脈の明示的な引数が互いに異なることを確認する。 
 	 * TODO 二つ目の仕事は別メソッドにすべき
 	 * @param mem 左辺膜、またはガード否定条件内等式制約右辺の構造を保持する膜
 	 * @param names コンテキストの限定名 (String) から ContextDef への写像 [in,out]
 	 * @param isLHS 左辺かどうか（def.lhsOccに追加するかどうかの判定に使用される）*/
 	private void enumHeadNames(Membrane mem, HashMap names, boolean isLHS) throws ParseException {
+		// 子膜
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
@@ -728,13 +730,15 @@ public class LMNParser {
 				it.remove(); // 少なくとも型なしプロセス文脈ではない（型付きまたはエラーとなる）ため取り除く
 				pc.def = (ContextDef)names.get(name);
 				if (pc.def.isTyped()) {
-					if (pc.def.lhsOcc != null) {
+					if (pc.def.lhsOcc != null) { // 既に左辺に出現している
 						// 展開を実装すれば不要になる（ガード否定条件のときはどうしても書けないが放置）
 						error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name: " + name);
 						continue;
 					}
-					if (pc.args.length != 1) {
-						error("SYNTAX ERROR: typed process context occurring in head must have exactly one explicit free link argument: " + pc);
+					// 2引数以上の左辺出現型付きプロセス文脈を許す ( 2006/09/13 by kudo )
+					if (pc.args.length == 0){//!= 1) {
+//						error("SYNTAX ERROR: typed process context occurring in head must have exactly one explicit free link argument: " + pc);
+						error("SYNTAX ERROR: typed process context occurring in head must have explicit free link arguments: " + pc);
 						continue;
 					}
 					mem.typedProcessContexts.add(pc);
@@ -849,8 +853,10 @@ public class LMNParser {
 				}
 				if (pc.def.isTyped()) {
 					it.remove();
-					if (pc.args.length != 1) {
-						error("SYNTAX ERROR: typed process context occurring in body must have exactly one explicit free link argument: " + pc);
+//					if (pc.args.length >= 1) {
+//					error("SYNTAX ERROR: typed process context occurring in body must have exactly one explicit free link argument: " + pc);
+				if(pc.args.length == 0){
+					error("SYNTAX ERROR: typed process context occurring in body must have more than zero explicit free link argument: "+ pc);
 						continue;
 					}
 					mem.typedProcessContexts.add(pc);

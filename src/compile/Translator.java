@@ -893,8 +893,10 @@ public class Translator {
 		writer.write("		String s1, s2;\n");//2006.07.01 inui
 		
 		//2005-10-21 by kudo (INSERTCONNECTORS,DELETECONNECTORS,LOOKUPLINKで使う)
+		//TODO こんなに要らない筈。共通化するべき
 		writer.write("		Set insset;\n");
 		writer.write("		Set delset;\n");
+		writer.write("		Set avoset;\n");
 		writer.write("		Map srcmap;\n");
 		writer.write("		Map delmap;\n");
 		writer.write("		Atom orig;\n");
@@ -1349,37 +1351,62 @@ public class Translator {
 					writer.write(tabs + "atom = (Atom) srcmap.get(link.getAtom());\n");
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = new Link(atom, link.getPos());\n");
 					break; //kudo 2004-10-10
-//未対応。変数は、配列に持たなければならなかったらしい。
-//対応。二番目の引数は実行時ではなくコンパイル時に参照するみたい。 って自分で作った命令なんだけど。 by kudo
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
-					writer.write(tabs + "func = "+ getFuncVarName(Functor.UNIFY)+";\n");
 					List linklist = (List)inst.getArg2();
-					writer.write(tabs + "insset = new HashSet();\n");
-					writer.write(tabs + "mem = ((Membrane)var[" +  inst.getIntArg3()  + "]);\n");
-					for(int i=0;i<linklist.size();i++) {
-						for(int j=i+1;j<linklist.size();j++) {
-							writer.write(tabs + "		a = (Link)var[" + ((Integer)linklist.get(i)).intValue() + "];\n");
-							writer.write(tabs + "		b = (Link)var[" + ((Integer)linklist.get(j)).intValue() + "];\n");
-							writer.write(tabs + "		if(a == b.getAtom().getArg(b.getPos())){\n");
-							writer.write(tabs + "			atom = mem.newAtom(func);\n");//"+getFuncVarName(new Functor("=",2))+");\n");
+					writer.write(tabs + "insset=new HashSet();\n");
+					writer.write(tabs + "mem=((Membrane)var[" + inst.getIntArg3() + "]);\n");
+					for(int i=0;i<linklist.size();i++){
+						for(int j=i+1;j<linklist.size();j++){
+							writer.write(tabs + "		a=(Link)var[" + ((Integer)linklist.get(i)).intValue() + "];\n");
+							writer.write(tabs + "		b=(Link)var[" + ((Integer)linklist.get(j)).intValue() + "];\n");
+							writer.write(tabs + "		if(a == b.getBuddy()){\n");
+							writer.write(tabs + "			atom = mem.newAtom(Functor.UNIFY);\n");
 							writer.write(tabs + "			mem.unifyLinkBuddies(a,new Link(atom,0));\n");
 							writer.write(tabs + "			mem.unifyLinkBuddies(b,new Link(atom,1));\n");
 							writer.write(tabs + "			insset.add(atom);\n");
 							writer.write(tabs + "		}\n");
 						}
 					}
-					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = insset;\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = insset;\n");
 					break; //kudo 2004-12-29
-				case Instruction.DELETECONNECTORS : //[srcset,srcmap,srcmem]
-					writer.write(tabs + "delset = (Set)var[" +  inst.getIntArg1()  + "];\n");
-					writer.write(tabs + "delmap = (Map)var[" +  inst.getIntArg2()  + "];\n");
-					writer.write(tabs + "mem = ((Membrane)var[" +  inst.getIntArg3()  + "]);\n");
+				case Instruction.INSERTCONNECTORSINNULL : //[-dstset, linklist]
+					List linklistn = (List)inst.getArg2();
+					writer.write(tabs + "insset=new HashSet();\n");
+					for(int i=0;i<linklistn.size();i++){
+						for(int j=i+1;j<linklistn.size();j++){
+							writer.write(tabs + "		a=(Link)var[" + ((Integer)linklistn.get(i)).intValue() + "];\n");
+							writer.write(tabs + "		b=(Link)var[" + ((Integer)linklistn.get(j)).intValue() + "];\n");
+							writer.write(tabs + "		if(a==b.getBuddy()){\n");
+							writer.write(tabs + "			atom = new Atom(null, Functor.UNIFY);\n");
+//							writer.write(tabs + "			a2 = new Link(atom,0);\n");
+//							writer.write(tabs + "			b2 = new Link(atom,1);\n");
+							writer.write(tabs + "			((Membrane)var[0]).unifyLinkBuddies(a, new Link(atom,0));\n");
+							writer.write(tabs + "			((Membrane)var[0]).unifyLinkBuddies(b, new Link(atom,1));\n");
+//							writer.write(tabs + "			a.getAtom().args[a.getPos()] = a2;\n");
+//							writer.write(tabs + "			a2.getAtom().args[a2.getPos()] = a;\n");
+//							writer.write(tabs + "			b.getAtom().args[b.getPos()] = b2;\n");
+//							writer.write(tabs + "			b2.getAtom().args[b2.getPos()] = b;\n");
+							writer.write(tabs + "			insset.add(atom);\n");
+							writer.write(tabs + "		}\n");
+						}
+					}
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = insset;\n");
+					break; //kudo 2006-09-24
+				case Instruction.DELETECONNECTORS : //[srcset, srcmap]
+					// 2006/09/24 膜引数を使わないように修正 kudo
+					writer.write(tabs + "delset = (Set)var[" + inst.getIntArg1() + "];\n");
+					writer.write(tabs + "delmap = (Map)var[" + inst.getIntArg2() + "];\n");
 					writer.write(tabs + "it_deleteconnectors = delset.iterator();\n");
 					writer.write(tabs + "while(it_deleteconnectors.hasNext()){\n");
-					writer.write(tabs + "	orig = (Atom)it_deleteconnectors.next();\n");
-					writer.write(tabs + "	copy = (Atom)delmap.get(orig);\n");
-					writer.write(tabs + "	mem.unifyLinkBuddies(copy.getArg(0), copy.getArg(1));\n");
-					writer.write(tabs + "	mem.removeAtom(copy);\n");
+					writer.write(tabs + "	orig=(Atom)it_deleteconnectors.next();\n");
+					writer.write(tabs + "	copy=(Atom)delmap.get(orig);//new Integer(orig.id));\n");
+					writer.write(tabs + "	((Membrane)var[0]).unifyLinkBuddies(copy.getArg(0),copy.getArg(1));\n");
+//					writer.write(tabs + "	link1 = copy.getArg(0);\n");
+//					writer.write(tabs + "	link2 = copy.getArg(1);\n");
+//					writer.write(tabs + "	link1.getAtom().getArg(link1.getPos()) = link2;\n");
+//					writer.write(tabs + "	link2.getAtom().getArg(link2.getPos()) = link1;\n");
+					writer.write(tabs + "	if(copy.getMem() != null)\n");
+					writer.write(tabs + "		copy.getMem().removeAtom(copy);\n");
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-29
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
@@ -1405,31 +1432,31 @@ public class Translator {
 					//====制御命令====ここまで====
 					//====型付きプロセス文脈を扱うための追加命令====ここから====
 				case Instruction.EQGROUND : //[link1,link2]
-					writer.write(tabs + "eqground_ret = ((Link)var[" +  inst.getIntArg1()  + "]).eqGround(((Link)var[" +  inst.getIntArg2()  + "]));\n");
-					writer.write(tabs + "if (!(!eqground_ret)) {\n");
+					writer.write(tabs + "if(Membrane.eqGround((List)var[" + inst.getIntArg1() + "],(List)var[" + inst.getIntArg2() + "])){\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-03
 				case Instruction.NEQGROUND : //[link1,link2]
-					writer.write(tabs + "eqground_ret = ((Link)var[" +  inst.getIntArg1()  + "]).eqGround(((Link)var[" +  inst.getIntArg2()  + "]));\n");
-					writer.write(tabs + "if (!eqground_ret) {\n");
+					writer.write(tabs + "if(!Membrane.eqGround((List)var[" + inst.getIntArg1() + "],(List)var[" + inst.getIntArg2() + "])){\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
+					break; //kudo 2006-02-18
+				case Instruction.COPYGROUND : //[-dstlist, srclinklist, dstmem]
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = ((Membrane)var[" + inst.getIntArg3() + "]).copyGroundFrom((List)var[" + inst.getIntArg2() + "]);\n");
 					break; //kudo 2004-12-03
-				case Instruction.COPYGROUND : //[-dstlink, srclink, dstmem]
-					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = ((Membrane)var[" +  inst.getIntArg3()  + "]).copyGroundFrom(((Link)var[" +  inst.getIntArg2()  + "]));\n");
-					break; //kudo 2004-12-03
-				case Instruction.REMOVEGROUND : //[srclink,srcmem]
-					writer.write(tabs + "((Membrane)var[" +  inst.getIntArg2()  + "]).removeGround(((Link)var[" +  inst.getIntArg1()  + "]));\n");
+				case Instruction.REMOVEGROUND : //[srclinklist,srcmem]
+					writer.write(tabs + "((Membrane)var[" + inst.getIntArg2() + "]).removeGround((List)var[" + inst.getIntArg1() + "]);\n");
 					break; //kudo 2004-12-08
 				case Instruction.FREEGROUND : //[srclink]
 					break; //kudo 2004-12-08
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 					//====型検査のためのガード命令====ここから====
-				case Instruction.ISGROUND : //[-natomsfunc,srclink,srcset]
-					writer.write(tabs + "isground_ret = ((Link)var[" +  inst.getIntArg2()  + "]).isGround(((Set)var[" +  inst.getIntArg3()  + "]));\n");
+				case Instruction.ISGROUND : //[-natomsfunc,srclinklist,avolist, mem]
+					writer.write(tabs + "avoset = new HashSet();\n");
+					writer.write(tabs + "avoset.addAll((List)var[" + inst.getIntArg3() + "]);\n");
+					writer.write(tabs + "isground_ret = Membrane.isGround((List)var[" + inst.getIntArg2() + "],avoset);\n");
 					writer.write(tabs + "if (!(isground_ret == -1)) {\n");
-					writer.write(tabs + "	var[" +  inst.getIntArg1()  + "] = new IntegerFunctor(isground_ret);\n");
+					writer.write(tabs + "	var[" + inst.getIntArg1() + "] = new IntegerFunctor(isground_ret);\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-03
@@ -1555,6 +1582,15 @@ public class Translator {
 				case Instruction.ADDATOMTOSET : //[srcset,atom]
 					writer.write(tabs + "((Set)var[" +  inst.getIntArg1()  + "]).add(((Atom)var[" +  inst.getIntArg2()  + "]));\n");
 					break; //kudo 2004-12-08
+				case Instruction.NEWLIST: //[-dstlist]
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = new ArrayList();\n");
+					break; //kudo 2006-09-15
+				case Instruction.ADDTOLIST: // [dstlist, src]
+					writer.write(tabs + "((List)var[" + inst.getIntArg1() + "]).add(var[" + inst.getIntArg2() + "]);\n");
+					break;
+				case Instruction.GETFROMLIST: // [-dst, list, pos]
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = ((List)var[" + inst.getIntArg2() + "]).get(" + inst.getIntArg3() + ");\n");
+					break;
 					//====アトムセットを操作するための命令====ここまで====
 					//====整数用の組み込みボディ命令====ここから====
 				case Instruction.IADD : //[-dstintatom, intatom1, intatom2]

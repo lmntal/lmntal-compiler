@@ -285,10 +285,15 @@ public class RuleCompiler {
 		// ground型付プロセス文脈のリンク出現
 		it = rhsgroundpaths.keySet().iterator();
 		while(it.hasNext()){
-			ProcessContext atom = (ProcessContext)it.next();
-			int linkpath = rhsgroundToPath(atom);
-			rhslinkpath.put(atom.args[0],new Integer(linkpath));
-			if(!rhslinks.contains(atom.args[0].buddy))rhslinks.add(rhslinkindex++,atom.args[0]);
+			ProcessContext ground = (ProcessContext)it.next();
+			int linklistpath = rhsgroundToPath(ground);
+			for(int i=0;i<ground.def.lhsOcc.args.length;i++){
+				int linkpath = varcount++;
+				body.add(new Instruction(Instruction.GETFROMLIST,linkpath, linklistpath, i));
+//				int linkpath = rhsgroundToPath(atom);
+				rhslinkpath.put(ground.args[i],new Integer(linkpath));
+				if(!rhslinks.contains(ground.args[i].buddy))rhslinks.add(rhslinkindex++,ground.args[i]);
+			}
 		}
 
 		// 型なし
@@ -393,6 +398,9 @@ public class RuleCompiler {
 
 		recursiveLockLHSNonlinearProcessContextMems();
 		insertconnectors();
+
+		// insertconnectorsの後でなければうまくいかないので再発行 ( 2006/09/15 kudo)
+		getGroundLinkPaths();
 
 
 		// 右辺の構造と$pの内容，を再帰的に生成する
@@ -539,11 +547,13 @@ public class RuleCompiler {
 	GuardCompiler gc;
 	/** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
 	HashMap rhstypedcxtpaths = new HashMap();
-	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkを指す)変数番号 */
+	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkのリストを指す)変数番号 */
 	HashMap rhsgroundpaths = new HashMap();
-	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時） */
+	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkを指す)変数番号のリスト */
+	HashMap rhsgroundlinkpaths = new HashMap();
+	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時） */	
 	HashMap typedcxtsrcs  = new HashMap();
-	/** ground型付きプロセス文脈定義(ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時） */
+	/** ground型付きプロセス文脈定義(ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時）のリストの変数番号 */
 	HashMap groundsrcs = new HashMap();
 	/** Body実行時なので、UNBOUNDにはならない */
 	int typedcxtToSrcPath(ContextDef def) {
@@ -573,15 +583,23 @@ public class RuleCompiler {
 		}
 	}
 	
-	/** ground型付きプロセス文脈定義について、根となるリンクを取得する */
+	/** ground型付きプロセス文脈定義について、根となるリンクのリストを取得する */
 	private void getGroundLinkPaths() {
+		groundsrcs = new HashMap();
 		Iterator it = gc.groundsrcs.keySet().iterator();
 		while(it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
 			if(gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
-				int linkpath = varcount++;
-				body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[0].buddy.atom),def.lhsOcc.args[0].buddy.pos));
-				groundsrcs.put(def,new Integer(linkpath));
+//				ProcessContext lhsOcc = def.lhsOcc
+				int linklistpath = varcount++;
+				body.add(new Instruction(Instruction.NEWLIST,linklistpath));
+				// 全ての引数に対して発行する
+				for(int i=0;i<def.lhsOcc.args.length;i++){
+					int linkpath = varcount++;
+					body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
+					body.add(new Instruction(Instruction.ADDTOLIST,linklistpath,linkpath));
+					groundsrcs.put(def,new Integer(linklistpath));
+				}
 			}
 		}
 	}
@@ -681,11 +699,18 @@ public class RuleCompiler {
 					rhstypedcxtpaths.put(pc, new Integer(atompath));
 				}
 				else if(gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
-					int groundpath = varcount++;
-					body.add(new Instruction( Instruction.COPYGROUND, groundpath,
-						groundToSrcPath(pc.def), // groundの場合はリンクを指す変数番号
+					int retlistpath = varcount++;
+//					System.out.println("cp");
+//					int mappath = varcount++;
+					body.add(new Instruction( Instruction.COPYGROUND, retlistpath,
+						groundToSrcPath(pc.def), // groundの場合はリンクの変数番号のリストを指す変数番号
 						rhsmemToPath(pc.mem) ));
+					int groundpath = varcount++;
+					body.add(new Instruction( Instruction.GETFROMLIST,groundpath,retlistpath,0));
+					int mappath = varcount++;
+					body.add(new Instruction(Instruction.GETFROMLIST,mappath,retlistpath,1));
 					rhsgroundpaths.put(pc, new Integer(groundpath));
+					rhsmappaths.put(pc,new Integer(mappath));
 				}
 			}
 		}
@@ -987,6 +1012,7 @@ public class RuleCompiler {
 		}
 	}
 	
+	/** プロセス文脈定義->setの変数番号 */
 	HashMap cxtlinksetpaths = new HashMap();
 	
 	/** コピーする$pについて、そのリンクオブジェクトへの参照を取得し、
@@ -1019,6 +1045,27 @@ public class RuleCompiler {
 				cxtlinksetpaths.put(def,new Integer(setpath));
 			}
 		}
+		it = rs.typedProcessContexts.values().iterator();
+		while(it.hasNext()){
+			ContextDef def = (ContextDef)it.next();
+			if(gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
+				List linklist = new ArrayList();
+				int setpath = varcount++;
+				for(int i=0;i<def.lhsOcc.args.length;i++){
+					if(!lhslinkpath.containsKey(def.lhsOcc.args[i])){
+						int linkpath = varcount++;
+						body.add(new Instruction(Instruction.GETLINK,linkpath,
+								lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));	
+						lhslinkpath.put(def.lhsOcc.args[i],new Integer(linkpath));
+					}
+					int srclink = lhslinkToPath(def.lhsOcc.args[i]);
+					linklist.add(new Integer(srclink));
+				}
+				body.add(new Instruction(Instruction.INSERTCONNECTORSINNULL,
+						setpath,linklist));//,lhsmemToPath(def.lhsOcc.mem)));
+				cxtlinksetpaths.put(def,new Integer(setpath));
+			}
+		}
 	}
 	
 	/** 上で作られたマップから引いてきたsetと、あとコピー時に作ったマップを
@@ -1035,8 +1082,22 @@ public class RuleCompiler {
 				ProcessContext pc = (ProcessContext)it2.next();
 				body.add(new Instruction(Instruction.DELETECONNECTORS,
 				((Integer)cxtlinksetpaths.get(def)).intValue(),
-				rhspcToMapPath(pc),
-				rhsmemToPath(pc.mem)));
+				rhspcToMapPath(pc)));
+//				rhsmemToPath(pc.mem)));
+			}
+		}
+		it = rs.typedProcessContexts.values().iterator();
+		while(it.hasNext()){
+			ContextDef def = (ContextDef)it.next();
+			if(gc.typedcxttypes.get(def) == GuardCompiler.GROUND_LINK_TYPE){
+				Iterator it2 = def.rhsOccs.iterator();
+				while(it2.hasNext()){
+					ProcessContext pc = (ProcessContext)it2.next();
+					body.add(new Instruction(Instruction.DELETECONNECTORS,
+						((Integer)cxtlinksetpaths.get(def)).intValue(),
+						rhspcToMapPath(pc)));
+//						rhsmemToPath(pc.mem)));
+				}
 			}
 		}
 	}

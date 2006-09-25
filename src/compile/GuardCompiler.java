@@ -31,7 +31,7 @@ public class GuardCompiler extends HeadCompiler {
 	HashMap typedcxttypes = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号 */
 	HashMap typedcxtsrcs  = new HashMap();
-	/** ground型付きプロセス文脈定義(ContextDef) -> リンクのソース出現（コピー元とする出現）の変数番号 */
+	/** ground型付きプロセス文脈定義(ContextDef) -> リンクのソース出現（コピー元とする出現）のリストの変数番号 */
 	HashMap groundsrcs = new HashMap();
 	/** 膜(Membrane) -> (その膜に存在するground型付きプロセス文脈定義(ContextDef) -> 構成アトム数)というマップ */
 	HashMap memToGroundSizes = new HashMap();
@@ -188,8 +188,12 @@ public class GuardCompiler extends HeadCompiler {
 				// つまり、( 2(X) :- found(X) ) や ( 2(3) :- ok ) で2や3を$pで表すことはできない。
 				// しかし実際には処理系側の都合による制限である。
 				// なお、プログラミングの観点から、右辺の型付きプロセス文脈の明示的な自由リンクの先は任意としている。
-				if (!atompaths.containsKey(def.lhsOcc.args[0].buddy.atom)) {
-					error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
+				//
+				// ( 2006/09/13 kudo ) 2引数以上の型付きプロセス文脈の導入に伴い，全ての引数をチェックするようにする
+				for(int i=0;i<def.lhsOcc.args.length;i++){
+					if (!atompaths.containsKey(def.lhsOcc.args[i].buddy.atom)) {
+						error("COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " + def.getName());
+					}
 				}
 			}
 			else if (def.lhsMem != null) {
@@ -493,7 +497,7 @@ public class GuardCompiler extends HeadCompiler {
 	}
 	boolean GROUND_ALLOWED = true;
 	/** 制約 X=Y または X==Y を処理する。ただしdef2は特定されていなければならない。*/
-	private void processEquivalenceConstraint(ContextDef def1, ContextDef def2) {
+	private void processEquivalenceConstraint(ContextDef def1, ContextDef def2) throws CompileException{
 		boolean checkNeeded = (typedcxttypes.get(def1) == null
 							 && typedcxttypes.get(def2) == null); // 型付きであることの検査が必要かどうか
 		//boolean GROUND_ALLOWED = true;
@@ -538,7 +542,7 @@ public class GuardCompiler extends HeadCompiler {
 	}
 	
 	/** 型制約を廃棄する。エラー復帰用メソッド */
-	private void discardTypeConstraint(Atom cstr) {
+	private void discardTypeConstraint(Atom cstr) throws CompileException{
 		match.add(Instruction.fail());
 		for (int i = 0; i < cstr.functor.getArity(); i++) {
 			ContextDef def = ((ProcessContext)cstr.args[i].buddy.atom).def;
@@ -546,7 +550,7 @@ public class GuardCompiler extends HeadCompiler {
 		}
 	}
 	/** 型付きプロセス文脈defを1引数ファンクタfuncで束縛する */
-	private void bindToFunctor(ContextDef def, Functor func) {
+	private void bindToFunctor(ContextDef def, Functor func) throws CompileException{
 		if (!identifiedCxtdefs.contains(def)) {
 			identifiedCxtdefs.add(def);
 			int atomid = varcount++;
@@ -555,6 +559,7 @@ public class GuardCompiler extends HeadCompiler {
 			match.add(new Instruction(Instruction.ALLOCATOM, atomid, func));			
 		}
 		else {
+			checkUnaryProcessContext(def);
 			int atomid = typedcxtToSrcPath(def);
 			if (atomid == UNBOUND) {
 				LinkOccurrence srclink = def.lhsOcc.args[0].buddy; // defのソース出現を指すアトム側の引数
@@ -605,9 +610,10 @@ public class GuardCompiler extends HeadCompiler {
 	 * （明示的な自由リンクが出現する）アトムを取得する。
 	 * また、このアトムが1引数であると仮定して、型情報を更新する。
 	 * @return 取得したアトムの変数番号 */
-	private int loadUnaryAtom(ContextDef def) {
+	private int loadUnaryAtom(ContextDef def) throws CompileException{
 		int atomid = typedcxtToSrcPath(def);
 		if (atomid == UNBOUND) {
+			checkUnaryProcessContext(def);
 			LinkOccurrence srclink = def.lhsOcc.args[0].buddy;
 			atomid = varcount++;
 			match.add(new Instruction(Instruction.DEREFATOM,
@@ -621,46 +627,97 @@ public class GuardCompiler extends HeadCompiler {
 	}	
 	
 	/** 型付プロセス文脈defの（特定されている）ソース出現のリンクを取得する。
-	 *  groundsrcsに追加する。
+	 *  それらをリスト変数に格納する．
+	 *  その変数番号をgroundsrcsに追加する。
 	 *  型情報を更新する。
 	 *  @param def プロセス文脈定義
-	 *  @return リンクの変数番号 */
+	 *  @return リンクリストの変数番号 */
 	private int loadGroundLink(ContextDef def) {
-		int linkid = groundToSrcPath(def);
-		if( linkid == UNBOUND){
-			int[] paths = (int[])linkpaths.get(new Integer(atomToPath(def.lhsOcc.args[0].buddy.atom)));
-			linkid = paths[def.lhsOcc.args[0].buddy.pos];
-			groundsrcs.put(def,new Integer(linkid));
+//		ArrayList linkids = groundToSrcPath(def);
+		int linkids = groundToSrcPath(def);
+		if( linkids == UNBOUND ){
+			linkids = varcount++;
+			match.add(new Instruction(Instruction.NEWLIST,linkids));
+			for(int i=0;i<def.lhsOcc.args.length;i++){
+				int[] paths = (int[])linkpaths.get(new Integer(atomToPath(def.lhsOcc.args[i].buddy.atom)));
+				//linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
+//				linkids.set(i,new Integer(paths[def.lhsOcc.args[i].buddy.pos]));
+//				groundsrcs.put(def,new Integer(linkids));
+				match.add(new Instruction(Instruction.ADDTOLIST,linkids, paths[def.lhsOcc.args[i].buddy.pos]));
+			}
+			groundsrcs.put(def,new Integer(linkids));
 		}
-		return linkid;
+		return linkids;
 	}
 	
 	//左辺の膜(Membrane) -> その膜のアトムが入ったsetを指す変数番号(Integer)
-	HashMap memToAtomSetPath = new HashMap();
+//	HashMap memToAtomSetPath = new HashMap();
+
+	//左辺の膜(Membrane) -> その膜のアトムの明示的な自由リンクが入ったlistを指す変数番号(Integer)
+//	HashMap memToLinkListPath = new HashMap();
 	
 	/** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
 	 *  @param def プロセス文脈定義 */
 	private void checkGroundLink(ContextDef def) {
 		if(typedcxttypes.get(def) != UNARY_ATOM_TYPE && typedcxttypes.get(def) != GROUND_LINK_TYPE){
 			typedcxttypes.put(def,GROUND_LINK_TYPE);
-			int linkid = loadGroundLink(def);
-			int srcsetpath;
-			if(!memToAtomSetPath.containsKey(def.lhsOcc.mem)){
-				srcsetpath = varcount++;
-				match.add(new Instruction(Instruction.NEWSET,srcsetpath));
+//			int linkid = loadGroundLink(def);
+//			ArrayList linkids = loadGroundLink(def);
+			int linkids = loadGroundLink(def);
+			int srclinklistpath;
+//			if(!memToLinkListPath.containsKey(def.lhsOcc.mem)){
+				srclinklistpath = varcount++;
+				// 避けるリンクのリスト
+				match.add(new Instruction(Instruction.NEWLIST,srclinklistpath));
+				
+				// 左辺出現アトムの，全ての引数(を指すリンク)のうち,
+				// 左辺の自由リンクもしくは同じ膜のプロセス文脈に接続していて
+				// このプロセス文脈の根でないものをリストに追加する
 				Iterator it = def.lhsOcc.mem.atoms.iterator();
 				while(it.hasNext()){
-					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
+					Atom atom = (Atom)it.next();
+					int[] paths = (int[])linkpaths.get(new Integer(atomToPath(atom)));
+					for(int i=0;i<atom.args.length;i++){
+//						match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
+						if(def.lhsOcc.mem.parent == null){ // 左辺出現がルール最外部
+							if( atom.args[i].buddy.atom.mem!=rc.rs.rightMem)
+								// 反対側が右辺出現の時のみ追加
+								if(!def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom))
+									continue;
+						}else{ // 左辺出現が膜内
+							if(!def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom))  // 反対側がプロセス文脈の引数の時のみ追加
+								if(!def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom))
+									continue;
+						}
+						boolean flgNotAdd = false; // その引数を避けるべきリストに「加えない」場合true
+						for(int j=0;j<def.lhsOcc.args.length;j++){
+							LinkOccurrence ro = def.lhsOcc.args[j].buddy;
+							if(ro == atom.args[i])
+								flgNotAdd = true;
+						}
+						if(!flgNotAdd)
+							match.add(new Instruction(Instruction.ADDTOLIST,srclinklistpath,paths[i]));
+					}
 				}
-				memToAtomSetPath.put(def.lhsOcc.mem,new Integer(srcsetpath));
-			}
-			else srcsetpath = ((Integer)memToAtomSetPath.get(def.lhsOcc.mem)).intValue();		
+//				memToLinkListPath.put(def.lhsOcc.mem,new Integer(srclinklistpath));
+//			}
+//			else srclinklistpath = ((Integer)memToLinkListPath.get(def.lhsOcc.mem)).intValue();
 			int natom = varcount++;
-			match.add(new Instruction(Instruction.ISGROUND, natom, linkid, srcsetpath));
+			match.add(new Instruction(Instruction.ISGROUND, natom, linkids, srclinklistpath));//,memToPath(def.lhsOcc.mem)));
 			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem,new HashMap());
 			((Map)memToGroundSizes.get(def.lhsOcc.mem)).put(def,new Integer(natom));
 		}
 		return;
+	}
+
+	/**
+	 * unary型に制約されたプロセス文脈が1引数であることを確認する．
+	 * @param def
+	 * @throws CompileException
+	 */
+	private void checkUnaryProcessContext(ContextDef def) throws CompileException{
+		if(def.lhsOcc.args.length!=1)	
+			error("COMPILE ERROR: unary type process context must has exactly one argument : " + def.lhsOcc);
 	}
 	
 	
