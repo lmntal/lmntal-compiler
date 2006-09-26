@@ -22,6 +22,7 @@ H=new.room(N) :- int(N) | H={
 
 H=new.wall :- H={
 	oop.extends(new.mapsite).
+	wall.//目印
 	//method
 	enter :- done.
 	}.
@@ -56,47 +57,41 @@ H=new.mazegame :- H={
 			door1=oop.ref(new.door(R1, R2), door12),
 			maze={$p, @p, addRoom(R12), addRoom(R22)}.
 		
-		r12={$p1, @p1}, r22={$p2, @p2}, door1(Door1), door12(Door12) :-
-			r13={
-				setSide(0, new.wall).
-				setSide(1, Door1).
-				setSide(2, new.wall).
-				setSide(3, new.wall).
-				$p1, @p1.
-			},
-			r23={
-				setSide(0, new.wall).
-				setSide(1, new.wall).
-				setSide(2, new.wall).
-				setSide(3, Door12).
-				$p2, @p2.
-			}.
+		r12(R), door1(D) :- oop.msg(R, {
+			setSide(0, new.wall).
+			setSide(1, D).
+			setSide(2, new.wall).
+			setSide(3, new.wall).
+			}).
+		r22(R), door12(D) :- oop.msg(R, {
+			setSide(0, new.wall).
+			setSide(1, new.wall).
+			setSide(2, new.wall).
+			setSide(3, D).
+			}).
 		}.
-
 	//MazeFactory を受け取る		
-	H=create_maze({$p,@p}) :- H={
+	H=create_maze({$p,@p}) :- H=return({
 		$p, @p.
 		m=makeMaze.
 		r1=oop.ref(oop.ref(makeRoom(1), r12), r13).
 		r2=oop.ref(oop.ref(makeRoom(2), r22), r23).
-		m={$p,@p}, r1(R1), r2(R2), r12(R12), r22(R22) :-
-			d1=oop.ref(makeDoor(R1, R2), d12), m={$p,@p,addRoom(R12),addRoom(R22)}.
-		r13={$p1, @p1}, r23={$p2, @p2}, d1(Door1), d12(Door12) :-
-			r13={
+		r1(R1), r2(R2) :- d1=oop.ref(makeDoor(R1, R2), d12).
+		m(M), r12(R1), r22(R2) :- oop.msg(M, {addRoom(R1),addRoom(R2)}).
+		
+		r13(R), d1(D) :- oop.msg(R, {
 				setSide(0, new.wall).
-				setSide(1, Door1).
+				setSide(1, D).
 				setSide(2, new.wall).
 				setSide(3, new.wall).
-				$p1, @p1.
-			},
-			r23={
+			}).
+		r23(R), d12(D) :- oop.msg(R, {
 				setSide(0, new.wall).
 				setSide(1, new.wall).
 				setSide(2, new.wall).
-				setSide(3, Door12).
-				$p2, @p2.
-			}.
-		}.
+				setSide(3, D).
+			}).
+		}).
 	}.
 	
 H=new.mazefactory :- H={
@@ -109,6 +104,6 @@ H=new.mazefactory :- H={
 
 }.
 
+oop.use.
 a=new.mazegame.
-a={$p, @p} :- b={maze=create_maze(new.mazefactory), $p, @p}.
-H={maze={$r, @r}, $p, @p}/ :- maze={$r, @r}, H={$p, @p}.
+a(A) :- oop.msg(A, {maze=create_maze(new.mazefactory)}).
