@@ -231,6 +231,14 @@ a(X,Y,Z,W), $x[X,Y], $y[Z,W] :- $x \= $y | $x[A,B], $y[A,B]. a(M,M,N,N). % a(F,F
 {a(X,Y,Z,W),$x[X,Y],$y[Z,W]} :- ground($x), ground($y) | b. {a(A,t(A),B,t(B))}. %b. %ok
 {a(X,Y,Z,W),$x[X,Y],$y[Z,W]} :- ground($x), ground($y) | b. {a(A,m(A),B,m(B)),t}. %{a(C,m(C),D,m(D)),t}. %ok
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% uniq
+a :- uniq | b. a. a. a. % a, a, b. %ok
+a($x) :- uniq($x) | b($x).  a(m), a(m), a(n), a(n). % a(m), b(m), a(m), b(m). %ok
+a($x) :- ground($x), uniq($x) | b($x). a(m), a(m).  % a(m), b(m).             %ok
+a($x) :- uniq($x) | b($x).  a(t(k,k)). a(t(k,k)).   % a(t(k,k)). b(t(k,k)).   %ok
+a($x) :- unary($x), uniq($x) | b($x). a(1), a(2), a(2). % b(1), b(2), a(2).   %ok
+a($x),b($y) :- uniq($x,$y) | c($x,$y). a(1), a(2), a(1). b(2), b(2), b(2). % c(1,2), c(2,2). a(1). b(2). %ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% simpagation rule のテスト
