@@ -2,7 +2,6 @@ package gui2;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Random;
 
 import runtime.Atom;
 
@@ -52,6 +51,7 @@ public class GraphAtom {
 				(int)(ATOM_DEF_SIZE * GraphPanel.getMagnification()));
 	}
 	
+	/** 実際にアトムを移動させる */
 	public void moveCalc(){
 		if(!isClipped && !isHold){
 			posX += (int)dx;
@@ -60,23 +60,32 @@ public class GraphAtom {
 		dx = dy = 0.0;
 	}
 	
+	/** アトムのX座標を取得する */
 	public int getPosX(){ return posX; }
 	
+	/** アトムのY座標を取得する */
 	public int getPosY(){ return posY; }
 	
+	/** 移動距離を設定する
+	 * <p>
+	 * このメソッドで設定された移動距離の累積がmoveCalc()での
+	 * 移動距離となる。 
+	 */
 	public void moveDelta(double x, double y){
 		dx += x;
 		dy += y;
 	}
 	
+	/** 実際にアトムを移動させる */
 	public void setPosition(int x, int y){
 		posX = x;
 		posY = y;
 	}
 	
+	/** アトムを固定する（ドラッグ用） */
 	public void setHold(boolean hold){ isHold = hold; }
 	
-	/** アトムを固定する */
+	/** アトムを固定する（ダブルクリック用） */
 	public void flipClip(){ isClipped = !isClipped; }
 	
 }

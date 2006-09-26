@@ -22,19 +22,31 @@ public class GraphMembrane {
 	
 	/////////////////////////////////////////////////////////////////
 
-
+	private boolean isRoot = false; 
 	private int posX = 0;
 	private int posY = 0;
 	private boolean viewInside = true;
+	
 	private Map atomMapTemp =
 		Collections.synchronizedMap(new HashMap());
 	
 	private Map atomMap =
 		Collections.synchronizedMap(new HashMap());
 	
+	private Map memMapTemp =
+		Collections.synchronizedMap(new HashMap());
+	
+	private Map memMap =
+		Collections.synchronizedMap(new HashMap());
+	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
 	public GraphMembrane(Membrane mem) {
+		resetMembrane(mem);
+	}
+	
+	public GraphMembrane(Membrane mem, boolean rootFlag) {
+		isRoot = rootFlag;
 		resetMembrane(mem);
 	}
 	
@@ -59,6 +71,24 @@ public class GraphMembrane {
 			atomMap.putAll(atomMapTemp);
 			
 			/////////////////////////////////////////////////////////////
+			// 膜の増減処理
+			memMapTemp.clear();
+			Iterator mems = mem.memIterator();
+			while(mems.hasNext()){
+				Membrane targetMem = (Membrane)mems.next();
+				if(memMap.containsKey(targetMem)){
+					GraphMembrane existMem = (GraphMembrane)memMap.get(targetMem);
+					memMapTemp.put(targetMem, existMem);
+					existMem.resetMembrane(targetMem);
+				}
+				else{
+					memMapTemp.put(targetMem, new GraphMembrane(targetMem));
+				}
+			}
+			memMap.clear();
+			memMap.putAll(memMapTemp);
+			
+			/////////////////////////////////////////////////////////////
 			// アトムの位置調節
 			relaxEdge();
 			relaxAngle();
@@ -66,7 +96,7 @@ public class GraphMembrane {
 		}
 		
 	}
-
+	
 	private void moveCalc(){
 		Iterator graphAtoms = atomMap.values().iterator();
 		
@@ -216,6 +246,13 @@ public class GraphMembrane {
 				GraphAtom targetAtom = (GraphAtom)graphAtoms.next();
 				targetAtom.paint(g);
 			}
+			
+			// 膜の描画
+			Iterator graphMems = memMap.values().iterator();
+			while(graphMems.hasNext()){
+				GraphMembrane targetMem = (GraphMembrane)graphMems.next();
+				targetMem.paint(g);
+			}
 
 		}
 	}
@@ -242,8 +279,29 @@ public class GraphMembrane {
 					nearestAtom = targetAtom;
 				}
 			}
+			
+			Iterator mems = memMap.values().iterator();
+			while(mems.hasNext()){
+				GraphMembrane targetMem = (GraphMembrane)mems.next();
+				GraphAtom targetAtom = targetMem.getNearestAtom(clickedPoint);
+				double dx = targetAtom.getPosX() - clickedPoint.x;
+				double dy = targetAtom.getPosY() - clickedPoint.y;
+				double distanceTmp = Math.sqrt((dx * dx) + (dy * dy));
+				
+				if(null != nearestAtom){
+					if(distance < distanceTmp){
+						continue;
+					}
+					distance = distanceTmp;
+					nearestAtom = targetAtom;
+				} else {
+					distance = distanceTmp;
+					nearestAtom = targetAtom;
+				}
+			}
 		}
 		return nearestAtom;
 	}
+	
 
 }
