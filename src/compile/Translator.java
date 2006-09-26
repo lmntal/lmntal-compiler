@@ -2073,7 +2073,7 @@ public class Translator {
 					ArrayList uniqVars = (ArrayList)inst.getArg(0);
 					for(int i=0;i<uniqVars.size();i++) {
 						if (i > 0) writer.write(",");
-						writer.write("(Link)var[" + (Integer)uniqVars.get(i) + "]");
+						writer.write("(Link)((List)var[" + (Integer)uniqVars.get(i) + "]).get(0)");
 					}
 					writer.write(tabs+"});\n");
 					if(inst.getKind()==Instruction.NOT_UNIQ) {
