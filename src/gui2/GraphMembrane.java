@@ -2,6 +2,7 @@ package gui2;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,12 +19,6 @@ public class GraphMembrane {
 	//	Äê¿ô
 	final static
 	private double EDGE_LENGTH = 150.0;
-	
-	final static
-	private int EDGE_ERROR = 10;
-	
-	final static
-	private double EDGE_MOVE_DELTA = 0.04;
 	
 	/////////////////////////////////////////////////////////////////
 
@@ -129,8 +124,8 @@ public class GraphMembrane {
 					double tx = -dy / edgeLength;
 					double ty =  dx / edgeLength;
 
-					dx = 1.5 * tx * angleR * 2;
-					dy = 1.5 * ty * angleR * 2;
+					dx = 1.5 * tx * angleR;
+					dy = 1.5 * ty * angleR;
 					
 					targetAtom.moveDelta(-dx, -dy);
 					nthAtom.moveDelta(dx, dy);
@@ -223,6 +218,32 @@ public class GraphMembrane {
 			}
 
 		}
+	}
+	
+	public GraphAtom getNearestAtom(Point clickedPoint){
+		GraphAtom nearestAtom = null;
+		double distance = 0.0;
+		synchronized (atomMap) {
+			Iterator atoms = atomMap.values().iterator();
+			while(atoms.hasNext()){
+				GraphAtom targetAtom = (GraphAtom)atoms.next();
+				double dx = targetAtom.getPosX() - clickedPoint.x;
+				double dy = targetAtom.getPosY() - clickedPoint.y;
+				double distanceTmp = Math.sqrt((dx * dx) + (dy * dy));
+				
+				if(null != nearestAtom){
+					if(distance < distanceTmp){
+						continue;
+					}
+					distance = distanceTmp;
+					nearestAtom = targetAtom;
+				} else {
+					distance = distanceTmp;
+					nearestAtom = targetAtom;
+				}
+			}
+		}
+		return nearestAtom;
 	}
 
 }

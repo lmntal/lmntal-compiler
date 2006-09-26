@@ -18,24 +18,21 @@ public class GraphAtom {
 	
 	/////////////////////////////////////////////////////////////////
 	
-	final static
-	private Random rand = new Random();
-	
-	/////////////////////////////////////////////////////////////////
-
 	private int posX;
 	private int posY;
 	private double dx;
 	private double dy;
 	private String name;
+	private boolean isHold = false;
+	private boolean isClipped = false;
 	
 	final public Atom me;
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
 	public GraphAtom(Atom atom){
-		posX = rand.nextInt(500);
-		posY = rand.nextInt(500);
+		posX = (int)(Math.random() * 500.0);
+		posY = (int)(Math.random() * 500.0);
 		me = atom;
 		name = atom.getName();
 	}
@@ -56,8 +53,10 @@ public class GraphAtom {
 	}
 	
 	public void moveCalc(){
-		posX += (int)dx;
-		posY += (int)dy;
+		if(!isClipped && !isHold){
+			posX += (int)dx;
+			posY += (int)dy;
+		}
 		dx = dy = 0.0;
 	}
 	
@@ -69,5 +68,15 @@ public class GraphAtom {
 		dx += x;
 		dy += y;
 	}
+	
+	public void setPosition(int x, int y){
+		posX = x;
+		posY = y;
+	}
+	
+	public void setHold(boolean hold){ isHold = hold; }
+	
+	/** アトムを固定する */
+	public void flipClip(){ isClipped = !isClipped; }
 	
 }

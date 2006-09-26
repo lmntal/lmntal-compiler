@@ -6,6 +6,9 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -20,6 +23,7 @@ public class GraphPanel extends JPanel implements Runnable {
 	private Graphics OSG = null;
 	private GraphMembrane rootGraphMembrane;
 	private Membrane rootMembrane;
+	private GraphAtom moveAtom;
 	
 	static
 	private double magnification = 0.5;
@@ -36,6 +40,46 @@ public class GraphPanel extends JPanel implements Runnable {
 			}
 
 		});
+		addMouseListener(new MouseAdapter() {
+			
+			/** 
+			 * マウスが押されたときの処理
+			 * <p>押されたらclickedを出力する。座標の取得など。</p>
+			 */
+			public void mousePressed(MouseEvent e) {
+				//determine nearest node
+				moveAtom = rootGraphMembrane.getNearestAtom(e.getPoint());
+				if(e.getButton() == MouseEvent.BUTTON1){
+					if(e.getClickCount() == 2){
+						moveAtom.flipClip();
+					}
+				}
+				moveAtom.setHold(true);
+			}
+			
+			/**
+			 * マウスが離されたときの処理
+			 * <p>最初に押されたときより移動していたら移動した距離を取得</p>
+			 */
+			public void mouseReleased(MouseEvent e) {
+				if(moveAtom==null){ return; }
+				moveAtom.setHold(false);
+				moveAtom = null;
+			}
+		});
+		addMouseMotionListener(new MouseMotionAdapter() {
+			
+			/**
+			 * マウスがドラッグされたときの処理
+			 * <p>移動した距離を取得</p>
+			 */
+			public void mouseDragged(MouseEvent arg0) {
+				if(moveAtom==null){ return; }
+				moveAtom.setPosition(arg0.getPoint().x, arg0.getPoint().y);
+			}
+
+		}
+		);
 		
 		start();
 	}
