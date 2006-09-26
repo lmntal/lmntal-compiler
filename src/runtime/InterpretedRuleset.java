@@ -973,7 +973,9 @@ class InterpretiveReactor {
 					for(int i=0;i<uniqVars.size();i++) {
 						int v = ((Integer)uniqVars.get(i)).intValue();
 //						Env.p("var# "+v);
-						hEntry[i] = (Link)vars.get(v);
+//						hEntry[i] = (Link)vars.get(v);
+						//TODO 2引数以上に対応する
+						hEntry[i] = (Link)((List)vars.get(v)).get(0); // とりあえず1引数のみ
 //						Env.p("LINK "+hEntry[i]);
 					}
 					if(inst.getKind()==Instruction.UNIQ) {
