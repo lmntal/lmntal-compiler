@@ -4,6 +4,7 @@
 	window.
 	name("test").
 	size(300, 300).
+	killer.
 	sys.perpetual(on).
 
 	{button, position(0,0), label("label1")}.
