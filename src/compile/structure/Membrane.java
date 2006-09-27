@@ -79,7 +79,7 @@ public final class Membrane {
 		int c=0;
 		while(it.hasNext()) {
 			Atom a = (Atom)it.next();
-			if(!(a.functor.isInsideProxy()) || a.functor.isOutsideProxy()) c++;
+			if(!a.functor.isInsideProxy() && !a.functor.isOutsideProxy()) c++;
 		}
 		return c;
 	}
