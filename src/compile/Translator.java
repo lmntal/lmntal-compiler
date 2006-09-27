@@ -390,7 +390,7 @@ public class Translator {
 	public static void deleteTemporaryFiles() {
 		if (fKeepSource) return;
 		if (baseDir != null && !delete(baseDir)) {
-			Env.warning("failed to delete temprary files");
+			Env.warning("failed to delete temporary files");
 		}
 	}
 	
