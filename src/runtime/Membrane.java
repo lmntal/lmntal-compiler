@@ -1671,6 +1671,8 @@ public final class Membrane extends QueuedEntity {
 		quietUnlock();
 		if(changed & Env.LMNgraphic != null)
 			Env.LMNgraphic.setMem(this);
+		if(changed & Env.LMNtool != null)
+			Env.LMNtool.setMem(this);
 	}
 
 	/** この膜のロックを強制的に解放する。
