@@ -448,7 +448,8 @@ public class LMNParser {
 				}
 				proxyLinkNames.add(proxyLinkName);
 				// 子膜にinside_proxyを追加
-				ProxyAtom inside = new ProxyAtom(submem, ProxyAtom.INSIDE_PROXY);
+//				ProxyAtom inside = new ProxyAtom(submem, ProxyAtom.INSIDE_PROXY);
+				Atom inside = new Atom(submem,Functor.INSIDE_PROXY);
 				inside.args[0] = new LinkOccurrence(proxyLinkName, inside, 0); // 外側
 				inside.args[1] = new LinkOccurrence(freeLink.name, inside, 1); // 内側
 				inside.args[1].buddy = freeLink;
@@ -457,7 +458,8 @@ public class LMNParser {
 				// 新しい自由リンク名を新しい自由リンク一覧に追加する
 				newFreeLinks.put(proxyLinkName, inside.args[0]);			
 				// この膜にoutside_proxyを追加
-				ProxyAtom outside = new ProxyAtom(mem, new SpecialFunctor("$out", 2, submem.kind));
+//				ProxyAtom outside = new ProxyAtom(mem, new SpecialFunctor("$out", 2, submem.kind));
+				Atom outside = new Atom(mem, new SpecialFunctor("$out", 2, submem.kind));//Functor.OUTSIDE_PROXY);
 				outside.args[0] = new LinkOccurrence(proxyLinkName, outside, 0); // 内側
 				outside.args[1] = new LinkOccurrence(freeLink.name, outside, 1); // 外側
 				outside.args[0].buddy = inside.args[0];
