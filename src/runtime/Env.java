@@ -5,6 +5,7 @@
 package runtime;
 import graphic.LMNtalGFrame;
 import gui.LMNtalFrame;
+import toolkit.LMNtalTFrame; //todo
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -145,6 +146,9 @@ public final class Env {
 	/** デバッグ実行オプションの有無 by inui */
 	public static boolean debugOption = false;
 	
+	/** 多倍長整数 2006.07.03 inui */
+	public static boolean useBigInteger = false;
+	
 	/** 標準入力から LMNtal プログラムを読み込むオプション 2006.07.11 inui */
 	public static boolean stdinLMN = false;
 	
@@ -203,6 +207,19 @@ public final class Env {
 	 * スレッド曖昧指定を使用したときの、変換後のルールをダンプ
 	 */
 	public static boolean dumpConvertedRules = false;
+	
+	
+	
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	public static boolean fTool = false;
+	public static LMNtalTFrame LMNtool;
+	
+	public static void initTool(){
+		if(!Env.fTool) return;
+		LMNtool = new LMNtalTFrame();
+	}
+	
+	
 	
 	/**
 	 * Graphic Mode 有効　nakano 

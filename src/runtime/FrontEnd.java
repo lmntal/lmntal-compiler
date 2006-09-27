@@ -34,7 +34,7 @@ import compile.parser.intermediate.RulesetParser;
 import debug.Debug;
 
 /**
- * LMNtal のメイソ
+ * LMNtal のメイン
  * 
  * 
  * 作成日: 2003/10/22
@@ -43,6 +43,7 @@ public class FrontEnd {
 	/**
 	 * 全ての始まり。
 	 * @param args
+	 * 
 	 */
 	public static void main(String[] args) {
 		
@@ -91,6 +92,10 @@ public class FrontEnd {
 		}
 	}
 	
+	/**
+	 * Javaのバージョンをチェックする
+	 * <p>java1.4以上を使っていないとエラー出力する</p>
+	 */
 	public static void checkVersion() {
 		//バージョンチェック by 水野
 		try {
@@ -282,6 +287,10 @@ public class FrontEnd {
 							/// --graphic
 							/// Graphic LMNtal mode.
 							Env.fGraphic = true;
+						} else if(args[i].equals("--wt")){
+							/// --wt
+							/// tool mode. Use tools.
+							Env.fTool = true;
 						} else if(args[i].equals("--help")){
 							/// --help
 							/// Show usage (this).
@@ -726,6 +735,7 @@ public class FrontEnd {
 			Env.initGUI();
 			Env.initGUI2();
 			Env.initGraphic();
+			Env.initTool();
 
 			
 
@@ -756,6 +766,13 @@ public class FrontEnd {
 				if (!Env.gui.onTrace())  ready = false;
 			}
 			
+			/*TODO:3d calc*/
+			/*nakano*
+			if (Env.threed != null) {
+				Env.threed.lmnPanel.getGraph3DLayout().init();
+				if (!Env.threed.onTrace())  ready = false;
+			}
+			*/
 			if (ready) {
 				((Task)root.getTask()).execAsMasterTask(); //rt.exec();
 
