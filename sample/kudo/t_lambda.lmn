@@ -1,0 +1,31 @@
+%% 修正版のlambda計算エンコーディングに型をつけてみる
+%膜名をつけてみた。外側にcp, 内側はcp2
+%cpをcpoとcpiにわけた
+%rmをrmとrmiにわけた
+
+beta@@ H=apply(lambda(A, B), C) :- H=B, A=C.
+
+l_c@@  lambda(A,B)=cpo(C,D,L), cp{+L,$q} :-
+         C=lambda(E,F), D=lambda(G,H), A=cpi(E,G,L1), B=cpo(F,H,L2),
+         cp{cp2{+L1},+L2,sub(S)}, cp{super(S),$q}.
+a_c@@  apply(A,B)=cpo(C,D,L), cp{+L,$q} :-
+         C= apply(E,F), D= apply(G,H), A=cpo(E,G,L1), B=cpo(F,H,L2),
+         cp{+L1,+L2,$q}.
+
+c_c1@@ cpi(A,B,L1)=cpo(C,D,L2), cp{cp2{+L1,$p},+L2,$q} :- A=C, B=D, cp{cp2{$p},$q}.
+c_c2@@ cpi(A,B,L1)=cpo(C,D,L2), cp{cp2{+L1,$p},$q}, cp{+L2,top,$r}
+          :- C=cpi(E,F,L3), D=cpi(G,H,L4), cp{cp2{+L3,+L4,$p},$q},
+             A=cpo(E,G,L5), B=cpo(F,H,L6), cp{+L5,+L6,top,$r}.
+u_c@@  $u=cpo(A,B,L), cp{+L,$q} :- unary($u) | A=$u, B=$u, cp{$q}.
+
+promote@@ cp{cp2{},$p,sub(S)}, cp{$q,super(S)} :- cp{$p,$q}.
+
+l_r@@  lambda(A,B)=rm :- A=rmi, B=rm.
+a_r@@  apply(A,B)=rm :- A=rm, B=rm.
+c_r1@@ cpo(A,B,L)=rmi, cp{+L,$q} :- A=rmi, B=rmi, cp{$q}.
+c_r2@@ cpi(A,B,L)=rm, cp{cp2{+L,$p},$q} :- A=rm, B=rm, cp{cp2{$p},$q}.
+r_r@@  rmi=rm :- .
+u_r@@  $u=rm :- unary($u) | .
+
+c2c@@  A=cp(B,C) :- A=cpo(B,C,L), cp{+L,top}.
+gc@@   cp{top} :- .
