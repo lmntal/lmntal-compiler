@@ -42,15 +42,15 @@ public class Merger {
 		while(it.hasNext()){
 			Rule rule = (Rule)it.next();
 			List atomMatch = (ArrayList)rule.atomMatch;
-			if(!Optimizer.fInlining){
-				List guard = (ArrayList)rule.guard;
+			List guard = (ArrayList)rule.guard;
+			if(guard != null){
 				//uniq命令がある場合は編み上げ中止。todo なんとかする
 				for(int i=0; i<guard.size(); i++) {
 					Instruction inst = (Instruction)guard.get(i);
 					if(inst.getKind() == Instruction.UNIQ
 						|| inst.getKind() == Instruction.NOT_UNIQ) return null;
 				}
-			}			
+			}
 			for(int i=0; i<atomMatch.size(); i++){
 				Instruction inst = (Instruction)atomMatch.get(i);
 				switch(inst.getKind()){
