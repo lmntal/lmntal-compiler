@@ -1788,7 +1788,11 @@ public class Instruction implements Cloneable, Serializable {
 			type = new int[] {arg1, arg2, arg3, arg4, arg5, arg6};
 		}
 	}
-
+	
+	/**
+	 * 出力引数でない引数のリストを返す
+	 * @return 引数のリスト
+	 */
 	public ArrayList getVarArgs() {
 		ArrayList ret = new ArrayList();
 		ArgType argtype = (ArgType)argTypeTable.get(new Integer(getKind()));
@@ -1806,6 +1810,25 @@ public class Instruction implements Cloneable, Serializable {
 		}
 		return ret;
 	}
+	
+	/**
+	 * 同一命令かどうかを
+	 */
+	public boolean equalsInst(Instruction inst){
+		if (kind == JUMP || inst.getKind() == JUMP) return false;
+		if (kind != inst.getKind()) return false;
+		List data2 = inst.data;
+		if (data.size() != data2.size()) return false;
+		else {
+			for(int i=0; i<data.size(); i++){
+				if (data.get(i) == null && data2.get(i) == null) return true;
+				if (data.get(i) == null || data2.get(i) == null) return false;
+				if (!data.get(i).equals(data2.get(i))) return false;
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * 与えられた対応表によって、ボディ命令列中のアトム変数を書き換える。<br>
 	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。

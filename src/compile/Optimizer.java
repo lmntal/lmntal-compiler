@@ -32,13 +32,15 @@ public class Optimizer {
 	public static boolean fGuardMove;
 	/** 命令列のグループ化を行う */
 	public static boolean fGrouping;
+	/** 命令列の編み上げを行う */
+	public static boolean fMerging;
 
 	/**
 	 * 全ての最適化フラグをオフにする
 	 */
 	public static void clearFlag() {
 		fInlining = fReuseMem = fReuseAtom = fLoop = false;
-		fGuardMove = fGrouping = false;
+		fGuardMove = fGrouping = fMerging = false;
 	}
 	/**
 	 * 最適化レベルを設定する。
@@ -82,11 +84,11 @@ public class Optimizer {
 			rule.guard = null;
 		}
 		optimize(rule.memMatch, rule.body);
-		if(fGrouping) {
+		if(fGrouping && !fMerging) {
 			Grouping g = new Grouping();
 			g.grouping(rule.atomMatch, rule.memMatch);
 		} 
-		if(fGuardMove) {
+		if(fGuardMove && !fMerging) {
 			guardMove(rule.atomMatch);
 			guardMove(rule.memMatch);
 		} 

@@ -342,7 +342,11 @@ public class FrontEnd {
 							/// --optimize-guard-move
 							/// Move up the guard instructions.
 							Optimizer.fGuardMove = true;
-						} else if(args[i].equals("--optimize-inlining")) {
+						} else if(args[i].equals("--optimize-merging")) {
+							/// --optimize-merging
+							/// Merge instructions.
+							Optimizer.fMerging = true;
+						}else if(args[i].equals("--optimize-inlining")) {
 							/// --optimize-inlining
 							/// Inlining tail jump.
 							Optimizer.fInlining = true;

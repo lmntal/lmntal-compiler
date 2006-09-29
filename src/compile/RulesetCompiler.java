@@ -15,6 +15,7 @@ import runtime.InterpretedRuleset;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRulesets;
+import runtime.MergedBranchMap;
 
 import compile.parser.*;
 import compile.structure.Atom;
@@ -128,6 +129,13 @@ public class RulesetCompiler {
 				rules.add(rc.theRule);
 			}
 		}
+		
+		// 編み上げを行う
+		Merger merger = new Merger();
+		MergedBranchMap mbm;
+		if (Optimizer.fMerging) mbm = merger.Merging(rules);
+		else mbm = null;
+		
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
 		if (!rules.isEmpty()) {
 			if (Env.shuffle >= Env.SHUFFLE_RULES) {
@@ -144,6 +152,7 @@ public class RulesetCompiler {
 				while (it.hasNext()) {
 					ruleset.rules.add(it.next());
 				}
+				ruleset.branchmap = mbm;
 				Ruleset compiledRuleset = compileRuleset(ruleset);
 				mem.rulesets.add(ruleset);
 			}

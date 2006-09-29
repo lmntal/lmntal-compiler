@@ -39,7 +39,10 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 
 	/** とりあえずルールの配列として実装 */
 	public List rules;
-
+	
+	/** 編み上げ後の命令列 */
+	public MergedBranchMap branchmap;
+	
 	/** 現在実行中のルール */
 	public Rule currentRule;
 	
@@ -103,11 +106,31 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
     	Thread thread = Thread.currentThread();
 		boolean result = false;
 		Iterator it = rules.iterator();
+		if(branchmap != null && atom != null){
+			Functor func = (Functor) atom.getFunctor();
+			if(branchmap.containsKey(func)){
+				List insts = (ArrayList)branchmap.getInsts(func);
+				Instruction spec = (Instruction)insts.get(0);
+				int formals = spec.getIntArg1();
+				int locals = spec.getIntArg2();
+				boolean success;
+				if(locals == 0){
+					System.err.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
+					locals = formals;
+				}
+				InterpretiveReactor ir = new InterpretiveReactor(locals, this);
+				ir.mems[0] = mem;
+				ir.atoms[1] = atom;
+				success = ir.interpret(insts, 0);
+				/*if(success){
+					//todo トレースモード
+				}*/
+				return success;
+			}
+		} else
 		while (it.hasNext()) {
 			Rule r = currentRule = (Rule) it.next();
 			if (r.atomMatch.size() == 1) continue; // debug表示抑制用
-
-			
 			boolean success;
 			if(Env.profile >= Env.PROFILE_BYRULE){
 				long start,stop;
