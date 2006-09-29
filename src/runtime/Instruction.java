@@ -1155,14 +1155,6 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(GETFROMLIST, new ArgType(true, ARG_VAR, ARG_VAR, ARG_INT));};
 
 	///////////////////////////////////////////////////////////////////////
-	
-	/** isflat [ srcmem ]
-	 * $srcmem
-	 */
-	public static final int ISFLAT = 300;
-	static {setArgType(ISFLAT, new ArgType(false, ARG_MEM));}
-
-	///////////////////////////////////////////////////////////////////////
 
 	// 整数用の組み込みボディ命令 (400--419+OPT)
 	/** iadd [-dstintatom, intatom1, intatom2]
