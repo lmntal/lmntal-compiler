@@ -56,7 +56,7 @@ public class Optimizer {
 		}
 		if (level >= 2) {
 //			ループ化はまだバグがいるので、個別に指定しない限り実行しない
-//			fLoop = true;
+			fLoop = true;
 //			fGrouping = true;
 		}
 		if (level >= 3) {

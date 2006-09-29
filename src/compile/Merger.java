@@ -2,6 +2,7 @@ package compile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +155,7 @@ public class Merger {
 						List instsb = label.insts;
 						List tmpinsts = mergeInBranchInsts(insts1, i, instsb);
 						if (tmpinsts != null){
-							mergedInsts.add((ArrayList)tmpinsts);
+							mergedInsts.addAll((ArrayList)tmpinsts);
 							return (ArrayList)mergedInsts;
 						}
 						else continue;
@@ -202,7 +203,8 @@ public class Merger {
 	 */
 	private ArrayList mergeInBranchInsts(List insts1, int index, List insts2){
 		List mergedInsts = new ArrayList();
-		int differenceIndex = insts1.size()+insts2.size();
+		int differenceIndex1 = insts1.size()+insts2.size();
+		int differenceIndex2 = insts1.size()+insts2.size();
 		List branchInsts1 = new ArrayList();
 		List branchInsts2 = new ArrayList();
 		Instruction spec = (Instruction)insts2.get(0);
@@ -226,25 +228,29 @@ public class Merger {
 						List instsb = label.insts;
 						List tmpinsts = mergeInBranchInsts(insts1, i, instsb);
 						if (tmpinsts != null){
-							mergedInsts.add((ArrayList)tmpinsts);
+							mergedInsts.addAll((ArrayList)tmpinsts);
 							return (ArrayList)mergedInsts;
 						}
 						else continue;
 					}
-					differenceIndex = i;
+					differenceIndex1 = i;
+					differenceIndex2 = j;
 					break;
 				}
 				else {
-					differenceIndex = i;
+					differenceIndex1 = i;
+					differenceIndex2 = j;
 					break;
 				}
 			}
 		}
 		int endsize = mergedInsts.size();
-		if (startsize == endsize) return null;
-		for(int i=differenceIndex; i<insts1.size(); i++)
+		if (startsize == endsize) {
+			return null;
+		}
+		for(int i=differenceIndex1; i<insts1.size(); i++)
 			branchInsts1.add((Instruction)insts1.get(i));
-		for(int i=differenceIndex; i<insts2.size(); i++)
+		for(int i=differenceIndex2; i<insts2.size(); i++)
 			branchInsts2.add((Instruction)insts2.get(i));
 		if (branchInsts1.size() > 0){
 			Instruction inst1 = (Instruction)branchInsts1.get(0);
@@ -256,7 +262,6 @@ public class Merger {
 		}
 		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
 		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
-		
 		
 		return (ArrayList)mergedInsts;
 	}
