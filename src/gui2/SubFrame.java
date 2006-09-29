@@ -1,18 +1,28 @@
 package gui2;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.ListCellRenderer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import runtime.Membrane;
 
 public class SubFrame extends JFrame {
 
@@ -46,7 +56,8 @@ public class SubFrame extends JFrame {
 	
 	private JButton goBt = new JButton("Go ahead");
 
-	private JButton bt1 = new JButton("OK!?");
+	static private JList memList = new JList();
+	static private DefaultListModel model = new DefaultListModel();
 	
 	private JButton bt2 = new JButton("OK!?");
 	
@@ -74,9 +85,14 @@ public class SubFrame extends JFrame {
 	
 	private void initComponents() {
 		
-		bt1.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
-		bt1.setActionCommand("window");
-		
+		MemCellRenderer renderer = new MemCellRenderer();
+		memList.setCellRenderer(renderer);
+		memList.setModel(model);
+		memList.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+        JScrollPane sp = new JScrollPane();
+        sp.getViewport().setView(memList);
+		sp.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+        
 		bt2.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
 		bt2.setActionCommand("window");
 		
@@ -98,9 +114,37 @@ public class SubFrame extends JFrame {
 		getContentPane().add(js1, BorderLayout.LINE_START);
 		getContentPane().add(buttonPanel, BorderLayout.CENTER);
 		
-		buttonPanel.add(bt1);
+		buttonPanel.add(sp);
 		buttonPanel.add(bt2);
 		//bt1.addActionListener(new ActionAdapter(this));
+	}
+	
+	static
+	public void resetList(Map memMap){
+		if(memList == null){ return; }
+		
+		// Í¾Ê¬¤ÊÍ×ÁÇ¤òºï½ü
+		Set memSet = memMap.keySet();
+		for(int i = 0; i < model.getSize(); i++){
+			if(memSet.contains(model.get(i))){
+				model.remove(i);
+			}
+		}
+		
+		// Ì¤ÅÐÏ¿¤ÎÍ×ÁÇ¤òÄÉ²Ã
+		Iterator mems = memSet.iterator();
+		while(mems.hasNext()){
+			Membrane mem = (Membrane)mems.next();
+			if(!model.contains(mem)){ 
+				model.addElement(mem);
+			}			
+		}
+
+	}
+	
+	static
+	public void initModel(){
+		model.removeAllElements();
 	}
 	
 	public class SliderChanged  implements ChangeListener {
@@ -119,4 +163,24 @@ public class SubFrame extends JFrame {
 			frame.mainFrame.stopCalc = false;
 		}
 	}
+	
+    class MemCellRenderer extends JCheckBox implements ListCellRenderer{
+    	
+        public MemCellRenderer() {
+        }
+
+        public Component getListCellRendererComponent(
+            JList list,
+            Object value,
+            int index,
+            boolean isSelected,
+            boolean cellHasFocus)
+        {
+
+        	Membrane mem = (Membrane)value;
+            setText(mem.toString());
+
+            return this;
+        }
+    }
 }

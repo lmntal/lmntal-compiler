@@ -36,6 +36,9 @@ public class GraphAtom {
 		name = atom.getName();
 	}
 	/////////////////////////////////////////////////////////////////
+	
+	static
+	public int getAtomSize(){ return (int)(ATOM_DEF_SIZE * GraphPanel.getMagnification()); }
 
 	public void paint(Graphics g){
 		// [0, 7] -> [128, 255] for eash R G B
@@ -47,8 +50,8 @@ public class GraphAtom {
 		g.drawString(name, posX, posY);
 		g.fillOval(posX,
 				posY,
-				(int)(ATOM_DEF_SIZE * GraphPanel.getMagnification()),
-				(int)(ATOM_DEF_SIZE * GraphPanel.getMagnification()));
+				getAtomSize(),
+				getAtomSize());
 	}
 	
 	/** 実際にアトムを移動させる */

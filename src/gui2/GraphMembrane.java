@@ -20,18 +20,25 @@ public class GraphMembrane {
 	final static
 	private double EDGE_LENGTH = 150.0;
 	
+	final static
+	private int ROUND = 40;
+	
 	/////////////////////////////////////////////////////////////////
 
 	private boolean isRoot = false; 
-	private int posX = 0;
-	private int posY = 0;
+	private Membrane myMem;
+	private int posX1;
+	private int posY1;
+	private int posX2;
+	private int posY2;
 	private boolean viewInside = true;
 	
-	private Map atomMapTemp =
-		Collections.synchronizedMap(new HashMap());
 	
-	private Map atomMap =
-		Collections.synchronizedMap(new HashMap());
+	private Map<Atom, GraphAtom> atomMapTemp =
+		Collections.synchronizedMap(new HashMap<Atom, GraphAtom>());
+	
+	private Map<Atom, GraphAtom> atomMap =
+		Collections.synchronizedMap(new HashMap<Atom, GraphAtom>());
 	
 	private Map memMapTemp =
 		Collections.synchronizedMap(new HashMap());
@@ -54,17 +61,31 @@ public class GraphMembrane {
 	
 	public void resetMembrane(Membrane mem){
 		synchronized (atomMap) {
+			myMem = mem;
+			if(isRoot){ SubFrame.initModel(); }
 			/////////////////////////////////////////////////////////////
 			// アトムの増減処理
 			atomMapTemp.clear();
 			Iterator atoms = mem.atomIterator();
+			posX1 = posY1 = 1000;
+			posX2 = posY2 = 0;
+			
 			while(atoms.hasNext()){
 				Atom atom = (Atom)atoms.next();
+				GraphAtom targetAtom = null;
 				if(atomMap.containsKey(atom)){
-					atomMapTemp.put(atom, atomMap.get(atom));
+					targetAtom = atomMap.get(atom);
+					atomMapTemp.put(atom, targetAtom);
 				}
 				else{
-					atomMapTemp.put(atom, new GraphAtom(atom));
+					targetAtom = new GraphAtom(atom);
+					atomMapTemp.put(atom, targetAtom);
+				}
+				if(targetAtom != null){
+					if(posX1 > targetAtom.getPosX()){ posX1 = targetAtom.getPosX(); }
+					if(posY1 > targetAtom.getPosY()){ posY1 = targetAtom.getPosY(); }
+					if(posX2 < targetAtom.getPosX()){ posX2 = targetAtom.getPosX(); }
+					if(posY2 < targetAtom.getPosY()){ posY2 = targetAtom.getPosY(); }
 				}
 			}
 			atomMap.clear();
@@ -87,6 +108,7 @@ public class GraphMembrane {
 			}
 			memMap.clear();
 			memMap.putAll(memMapTemp);
+			SubFrame.resetList(memMap);
 			
 			/////////////////////////////////////////////////////////////
 			// アトムの位置調節
@@ -253,6 +275,24 @@ public class GraphMembrane {
 				GraphMembrane targetMem = (GraphMembrane)graphMems.next();
 				targetMem.paint(g);
 			}
+			
+
+			if(isRoot){
+				g.drawRoundRect(posX1 - (GraphAtom.getAtomSize() * 2),
+						posY1 - (GraphAtom.getAtomSize() * 2),
+						posX2 - posX1 + (GraphAtom.getAtomSize() * 4),
+						posY2 - posY1 + (GraphAtom.getAtomSize() * 4),
+						ROUND,
+						ROUND);
+			}
+			else {
+				g.fillRoundRect(posX1 - (GraphAtom.getAtomSize() * 2),
+						posY1 - (GraphAtom.getAtomSize() * 2),
+						posX2 - posX1 + (GraphAtom.getAtomSize() * 4),
+						posY2 - posY1 + (GraphAtom.getAtomSize() * 4),
+						ROUND,
+						ROUND);
+			}
 
 		}
 	}
@@ -304,4 +344,7 @@ public class GraphMembrane {
 	}
 	
 
+	public String toString(){
+		return myMem.toString();
+	}
 }

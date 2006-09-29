@@ -86,7 +86,7 @@ public class GraphPanel extends JPanel implements Runnable {
 	
 	public void setRootMem(Membrane mem){
 		rootMembrane = mem;
-		rootGraphMembrane = new GraphMembrane(mem);
+		rootGraphMembrane = new GraphMembrane(mem, true);
 	}
 	
 	public void calc(){
