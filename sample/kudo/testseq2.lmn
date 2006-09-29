@@ -5,7 +5,7 @@
 R=do(I):-int(I)|R=done(I).
 % boolean value
 R=do(true):-R=done(true).
-R-do(false):-R=done(false).
+R=do(false):-R=done(false).
 
 % arithmetic operation
 integer.use.
