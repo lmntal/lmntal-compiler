@@ -2,7 +2,6 @@ package compile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +42,15 @@ public class Merger {
 		while(it.hasNext()){
 			Rule rule = (Rule)it.next();
 			List atomMatch = (ArrayList)rule.atomMatch;
+			if(!Optimizer.fInlining){
+				List guard = (ArrayList)rule.guard;
+				//uniq命令がある場合は編み上げ中止。todo なんとかする
+				for(int i=0; i<guard.size(); i++) {
+					Instruction inst = (Instruction)guard.get(i);
+					if(inst.getKind() == Instruction.UNIQ
+						|| inst.getKind() == Instruction.NOT_UNIQ) return null;
+				}
+			}			
 			for(int i=0; i<atomMatch.size(); i++){
 				Instruction inst = (Instruction)atomMatch.get(i);
 				switch(inst.getKind()){
@@ -52,6 +60,12 @@ public class Merger {
 				case Instruction.BRANCH:
 					InstructionList label = (InstructionList)inst.getArg1();
 					List branchInsts = label.insts;
+					//uniq関係の応急処置
+					for(int u=0; u<branchInsts.size(); u++) {
+						Instruction uniq = (Instruction)branchInsts.get(u);
+						if(uniq.getKind() == Instruction.UNIQ
+							|| uniq.getKind() == Instruction.NOT_UNIQ) return null;
+					}
 					Functor func = null;
 					for(int j=1; j<branchInsts.size(); j++){
 						Instruction funcInst = (Instruction)branchInsts.get(j);
