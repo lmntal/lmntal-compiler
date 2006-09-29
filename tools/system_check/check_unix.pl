@@ -6,4 +6,4 @@ $pwd =~ s/\n//;
 
 require 'check.pl';
 
-check($pwd);
+&check($pwd);

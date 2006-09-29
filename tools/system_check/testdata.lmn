@@ -84,7 +84,7 @@ a, (a:-b(X),{c(X)}), (b(X),{c(X)}:-d(Y),{e(Y)}) %d(X),{e(X)}. %ok
 %% 諸々のテスト
 
   A=f(f(f(f(A)))),    c,c, ( c, X=f(Y) :- X=g(Y) ).                      %f(g(g(f(A))),A) %ok
-{ A=f(f(f(f(A)))) },  c,c, ( c,{X=f(Y),$p[X,Y]} :- { X=g(Y),$p[X,Y] } ). %{ f(g(g(f(A))),A) } %ok
+{ A=f(f(f(f(A)))) },  c,c,c, ( c,{X=f(Y),$p[X,Y]} :- { X=g(Y),$p[X,Y] } ). %{ f(g(g(g(A))),A) } %ok
 
 {$p[X]}:-$p[X], $p[Y],f(Y), $p[Z],$p[Z].  {p(X)},g(X). %f(p), p(g), p(p) %ok
 
@@ -106,7 +106,7 @@ a, (a:-b(X),{c(X)}), (b(X),{c(X)}:-d(Y),{e(Y)}) %d(X),{e(X)}. %ok
 {$p[X,Y]} :- $p[X,Y],$p[A,A].  {f(X,Y)},g(X,Y). % f(X,Y),g(X,Y),f(A,A)  %ok
 
 {$p[X,Y,Z],f(X),f(Y),f(Z)} :- $p[V,V,W],g(W).   {f(A),f(A),f(C),f(C)}. %f(g)  %ok
-{$p[X,Y,Z],f(X,$x),f(Y,$y),f(Z,$z)} :- int($x),int($y),int($z) | $p[V,V,W],g(W). {f(A,1),f(A,2),f(C,3),f(C,4)}. %f(g,3) %ok
+{$p[X,Y,Z],f(X,$x),f(Y,$y),f(Z,$z)} :- int($x),int($y),int($z) | $p[V,V,W],g(W). {f(A,1),f(A,1),f(C,1),f(C,1)}. %f(g,1) %ok
 
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,B,C,C)}. %e(g) %ok
 {$p[A,B,C,D,E], f(A,B,C,D,E)} :- $p[L,L,M,M,N],g(N).  {e(A),f(A,B,C,C,B)}. %e(g) %ok
@@ -187,7 +187,7 @@ a($x,Y) :- ground($x) | b($x,Y). a(n(N),N).       % b(n(M),M) %ng
 a($x,Y) :- ground($x) | b($x,Y). a(z,{}).         % b(z,{})     %ok
 a($x),b(Y) :- ground($x) | c($x,Y). a(b).         % a(b).       %ok
 a($x),b($y) :- ground($x), ground($y) | c($x,$y). a(m),b(n). % c(m,n)   %ok
-a($x),b($y) :- ground($x), ground($y) | c($x,$y). a(m(M)), b(n(M)). % c(m(N), n(N)). %ok
+a($x),b($y) :- ground($x), ground($y) | c($x,$y). a(m(M)), b(n(M)). % c(m(N), n(N)). %ng
 %% 比較
 a($x),b($y) :- ground($x), $x = $y  | c($x).  a(m), b(m). % c(m). %ok
 a($x),b($y) :- ground($x), $x = $y  | c($y).  a(m), b(m). % c(m). %ok
@@ -219,7 +219,7 @@ a(X,Y,N), $x[X,Y] :- ground($x) | b(Z,W,N), $x[Z,W]. a(g(B1,B2),B1,B2). %a(g(C1,
 a(X,Y,Z,W), $x[X,Y,Z,W] :- ground($x) | b(A,B,C,D), $x[A,B,C,D]. a(m(M1,M2,M3),M1,M2,M3). %b(m(N1,N2,N3),N1,N2,N3). %ok
 
 a(L,R), $x[L,R] :- ground($x) | $x[X,X]. a([1,2,3|A],A). % R=[1,2,3|R]. %ok
-L=[1|L1], R1=[5|R], $list[L1,R1] :- ground($list) | L=R. r=[1,2,3,4,5]. % r=[1,5]. %ok
+L=[2|L1], R1=[4|R], $list[L1,R1] :- ground($list) | L=R. r=[1,2,3,4,5]. % r=[1,5]. %ok
 
 %% 比較
 a(X,Y,Z,W), $x[X,Y], $y[Z,W] :- $x = $y | b(A,B), $x[A,B]. a(t(A),A,t(B),B). % b(t(T),T).%ok
@@ -234,7 +234,7 @@ a(X,Y,Z,W), $x[X,Y], $y[Z,W] :- $x \= $y | $x[A,B], $y[A,B]. a(M,M,N,N). % a(F,F
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% uniq
 a :- uniq | b. a. a. a. % a, a, b. %ok
-a($x) :- uniq($x) | b($x).  a(m), a(m), a(n), a(n). % a(m), b(m), a(m), b(m). %ok
+a($x) :- uniq($x) | b($x).  a(m), a(m), a(n), a(n). % a(m), b(m), a(n), b(n). %ok
 a($x) :- ground($x), uniq($x) | b($x). a(m), a(m).  % a(m), b(m).             %ok
 a($x) :- uniq($x) | b($x).  a(t(k,k)). a(t(k,k)).   % a(t(k,k)). b(t(k,k)).   %ok
 a($x) :- unary($x), uniq($x) | b($x). a(1), a(2), a(2). % b(1), b(2), a(2).   %ok
@@ -251,5 +251,11 @@ a(X) \ b(X) :- c(X). a(b). % a(c). %ok
 {{a(X)}, v(X)}. {{a(X)}, v(X)} :- s. %s. %ok
 {a(X)}, v(X). {a(X)}, v(X) :- s. %s. %ok
 {{a(X)}, v(X)}. {{a(X)}, v(X),$p} :- s,$p. %s %ok
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% スクリプト自体のテスト
+a. %a. %ok
+a. %b. %ng
+a. %ng_but_ok %ok
 
 %EOF

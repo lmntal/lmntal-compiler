@@ -8,18 +8,38 @@
 
 # This is LMNtal system checker.
 
-sub check($pwd){
+sub tmpout{
+	$prog = $_[0];
+	$pwd = $_[1];
+	open(TMPOUTPUTFILE, "> " . $pwd . "/tmp.lmn"); #tmp output
+	print(TMPOUTPUTFILE $prog);
+	close(TMPOUTPUTFILE);
+};
+
+sub check{
+	
+	$pwd = $_[0];
 
 	$begin_line = 1;
 	$end_line = 50000;
 	
+	$lmntal_options = "";
+	
 	for(@ARGV){
-		if($_ =~ /b([0-9]+)/ ){
-			$begin_line = $1;
-		}elsif($_ =~ /e([0-9]+)/ ){
-			$end_line = $1;
-		}elsif($_ =~ /t/ ){
-			$flg_translate = true;
+		if($flg_lmntal_option){
+			$lmntal_options .= " " . $_;
+		}else{
+			if($_ =~ /b([0-9]+)/ ){
+				$begin_line = $1;
+			}elsif($_ =~ /e([0-9]+)/ ){
+				$end_line = $1;
+			}elsif($_ eq "t" ){
+				$flg_translate = true;
+			}elsif($_ eq "-" ){
+				$flg_lmntal_option = true;
+			}else{
+				print ("invalid option (of check.pl) : " . $_ . "\n");
+			}
 		}
 	};
 	
@@ -40,15 +60,15 @@ sub check($pwd){
 		unless($flg){$flg = "ok"}
 	
 		if($flg_translate){
-			open(TMPOUTPUTFILE, "> " . $pwd . "/tmp.lmn"); #tmp output
-			print(TMPOUTPUTFILE $program);
-			close(TMPOUTPUTFILE);
-			$cmp = $lmntal_t_compiler . " " . $pwd . "/tmp.lmn";
+			&tmpout($program, $pwd);
+			$cmp = $lmntal_t_compiler . " " . $pwd . "/tmp.lmn" . $lmntal_options;
 			$dust = `$cmp`;
-			$run = $lmntal_t_runtime . " " . $pwd . "/tmp.jar";		
+			$run = $lmntal_t_runtime . " " . $pwd . "/tmp.jar" . $lmntal_options;
 		}else{
-			$program =~ s/\$/\\\$/g;
-			$run = $lmntal_runtime . " -e \"" . $program . "\"";
+#			$program =~ s/\$/\\\$/g;
+			&tmpout($program, $pwd);
+#			$run = $lmntal_runtime . " -e \"" . $program . "\"" . $lmntal_options;
+			$run = $lmntal_runtime . " " . $pwd . "/tmp.lmn" . $lmntal_options;
 		}
 	
 		$output = `$run`;
@@ -57,13 +77,14 @@ sub check($pwd){
 		$output =~ s/@[0-9]+/()/g;
 		print (($i+1) . " : ");
 		$check_program = "{" . $output . "}, ({" . $goal . "}/:-ok)";
-		$check_run = $lmntal_runtime . " -e \"" . $check_program . "\"";
+		&tmpout($check_program, $pwd);
+		$check_run = $lmntal_runtime . " " . $pwd . "/tmp.lmn";
 		$checked = `$check_run`;
 	
 		$result = index ($checked, "ok");
-		if($flg == "ok" && $result == 0){
+		if($flg eq "ok" && $result == 0){
 			print "ok";
-		}elsif($flg == "ng" && $result != 0){
+		}elsif($flg eq "ng" && $result != 0){
 			print "ok";
 		}else{
 			print "ng : ";
