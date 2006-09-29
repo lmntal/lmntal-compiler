@@ -1,10 +1,8 @@
 package runtime;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-
-import runtime.Membrane;
+import java.util.List;
 
 public class Uniq {
 	/**
@@ -52,14 +50,31 @@ public class Uniq {
 	 * el が history に含まれるかどうか検査する。
 	 * 含まれるなら false を返す
 	 * 含まれなければ新たに追加して true を返す
+	 * 
+	 * (2006/09/29 kudo)
+	 * 2引数以上に対応。2引数以上なので、elはリンクの配列ではなく、リンクリストの配列にした。
+	 * 
 	 * @param el
 	 * @return
 	 */
-	public boolean check(Link[] el) {
+//	public boolean check(Link[] el) {
+//		// O(1) のはず
+//		StringBuffer cur=new StringBuffer();
+//		for(int j=0;j<el.length;j++) {
+//			cur.append(el[j].groundString());
+//			cur.append(":");
+//		}
+//		String curI = cur.toString();
+////		System.out.println(historyH);
+//		if(historyH.contains(curI)) return false;
+//		historyH.add(curI);
+//		return true;
+//	}
+	public boolean check(List[] el) {
 		// O(1) のはず
 		StringBuffer cur=new StringBuffer();
 		for(int j=0;j<el.length;j++) {
-			cur.append(el[j].groundString());
+			cur.append(Link.groundString(el[j]));
 			cur.append(":");
 		}
 		String curI = cur.toString();
@@ -68,4 +83,5 @@ public class Uniq {
 		historyH.add(curI);
 		return true;
 	}
+
 }

@@ -2068,12 +2068,14 @@ public class Translator {
 						uniqVarName.put(rule, uniq);
 					}
 					//コード出力
-					writer.write(tabs + "boolean goAhead = " + uniq + ".check(new Link[] {");
+//					writer.write(tabs + "boolean goAhead = " + uniq + ".check(new Link[] {");
+					writer.write(tabs + "boolean goAhead = " + uniq + ".check(new List[] {");
 					//引数リスト生成
 					ArrayList uniqVars = (ArrayList)inst.getArg(0);
 					for(int i=0;i<uniqVars.size();i++) {
 						if (i > 0) writer.write(",");
-						writer.write("(Link)((List)var[" + (Integer)uniqVars.get(i) + "]).get(0)");
+//						writer.write("(Link)((List)var[" + (Integer)uniqVars.get(i) + "]).get(0)");
+						writer.write("(List)var[" + (Integer)uniqVars.get(i) + "]");
 					}
 					writer.write(tabs+"});\n");
 					if(inst.getKind()==Instruction.NOT_UNIQ) {

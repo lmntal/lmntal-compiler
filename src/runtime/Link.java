@@ -159,15 +159,26 @@ public final class Link implements Cloneable, Serializable {
 	 * ground構造に対して一意な文字列を返す。
 	 * ground チェック済みでなければならない。
 	 * hara
+	 * 
+	 * (2006/09/29 kudo)
+	 * 2引数以上に対応。また、2引数で一本のリンクにマッチする場合"Link"を返す。
+	 * 
 	 * @return
 	 */
-	public String groundString(){
-		Set srcSet = new HashSet();
+	public static String groundString(List linklist){
+		// 2引数で、ただのリンクにマッチする場合"Link"を特別に返す
+		if(linklist.size() == 2){
+			Link l1 = (Link)linklist.get(0);
+			Link l2 = (Link)linklist.get(1);
+			if(l1 == l2.getBuddy())return "Link";
+		}
+		Set srcSet = new HashSet(); // 辿ったアトム
 		Stack s = new Stack(); //リンクを積むスタック
-		HashMap linkStr = new HashMap();
+		HashMap linkStr = new HashMap(); // リンク -> リンク名
 		StringBuffer sb = new StringBuffer();
 		int linkNo=0;
-		s.push(this);
+		s.push(linklist.get(0)); // 第1引数から辿る
+//		s.push(this);
 		while(!s.isEmpty()){
 			Link l = (Link)s.pop();
 			Atom a = l.getAtom();
@@ -178,19 +189,59 @@ public final class Link implements Cloneable, Serializable {
 			for(int i=0;i<a.getArity();i++){
 				Link l0 = a.args[i];
 				Link l1 = l0.getBuddy();
-				if(!linkStr.containsKey(l0)) {
-					String ss="L"+(linkNo++);
-					linkStr.put(l0, ss);
-					linkStr.put(l1, ss);
+				int argi = linklist.indexOf(l1);
+				if(argi >= 0){ // プロセス文脈の引数にマッチした場合、"F+<引数番号>"をリンク名として加える
+					sb.append("F"+argi);
+				}else{
+					if(!linkStr.containsKey(l0)) {
+						String ss="L"+(linkNo++);
+						linkStr.put(l0, ss);
+						linkStr.put(l1, ss);
+					}
+					sb.append(linkStr.get(l0));
+					if(i==l.getPos())continue;
+					s.push(a.getArg(i));
 				}
-				sb.append(linkStr.get(l0));
-				if(i==l.getPos())continue;
-				s.push(a.getArg(i));
 			}
 			sb.append(")");
 		}
 		return sb.toString();
 	}
+	public String groundString(){
+		List linklist = new ArrayList();
+		linklist.add(this);
+		return Link.groundString(linklist);
+	}
+//	public String groundString(){
+//		Set srcSet = new HashSet();
+//		Stack s = new Stack(); //リンクを積むスタック
+//		HashMap linkStr = new HashMap();
+//		StringBuffer sb = new StringBuffer();
+//		int linkNo=0;
+//		s.push(this);
+//		while(!s.isEmpty()){
+//			Link l = (Link)s.pop();
+//			Atom a = l.getAtom();
+//			if(srcSet.contains(a))continue; //既に辿ったアトム
+//			sb.append(a.getFunctor().getName());
+//			sb.append("(");
+//			srcSet.add(a);
+//			for(int i=0;i<a.getArity();i++){
+//				Link l0 = a.args[i];
+//				Link l1 = l0.getBuddy();
+//				if(!linkStr.containsKey(l0)) {
+//					String ss="L"+(linkNo++);
+//					linkStr.put(l0, ss);
+//					linkStr.put(l1, ss);
+//				}
+//				sb.append(linkStr.get(l0));
+//				if(i==l.getPos())continue;
+//				s.push(a.getArg(i));
+//			}
+//			sb.append(")");
+//		}
+//		return sb.toString();
+//	}
 
 	///////////////////////////////
 	// 操作

@@ -966,7 +966,8 @@ class InterpretiveReactor {
 						uniq = currentInterpretedRuleset.currentRule.uniq = new Uniq();
 					}
 					ArrayList uniqVars = (ArrayList)inst.getArg(0);
-					Link[] hEntry = new Link[uniqVars.size()];
+//					Link[] hEntry = new Link[uniqVars.size()];
+					List[] hEntry = new List[uniqVars.size()];
 //					for(int i=0;i<atoms.length;i++) System.out.println("atoms "+atoms[i]);
 //					System.out.println(vars);
 //					for(int i=0;i<mems.length;i++) System.out.println("mems "+mems[i]);
@@ -975,7 +976,8 @@ class InterpretiveReactor {
 //						Env.p("var# "+v);
 //						hEntry[i] = (Link)vars.get(v);
 						//TODO 2引数以上に対応する
-						hEntry[i] = (Link)((List)vars.get(v)).get(0); // とりあえず1引数のみ
+//						hEntry[i] = (Link)((List)vars.get(v)).get(0); // とりあえず1引数のみ
+						hEntry[i] = (List)vars.get(v);
 //						Env.p("LINK "+hEntry[i]);
 					}
 					if(inst.getKind()==Instruction.UNIQ) {
