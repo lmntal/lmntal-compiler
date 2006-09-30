@@ -45,6 +45,10 @@ public class GraphAtom {
 	static
 	public int getAtomSize(){ return (int)(ATOM_DEF_SIZE * GraphPanel.getMagnification()); }
 
+	public boolean isDummy(){
+		return (me == null) ? true : false;
+	}
+	
 	public void paint(Graphics g){
 		// [0, 7] -> [128, 255] for eash R G B
 		int ir = 0x7F - ((name.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;

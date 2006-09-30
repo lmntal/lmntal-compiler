@@ -1,6 +1,7 @@
 package gui2;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -62,8 +63,6 @@ public class SubFrame extends JFrame {
 	static private JList memList = new JList();
 	static private DefaultListModel model = new DefaultListModel();
 	
-	private JButton bt2 = new JButton("OK!?");
-	
 	private JSlider js1 = new JSlider(JSlider.VERTICAL, SLIDER_MIN, SLIDER_MAX, SLIDER_DEF);
 	
 	private LMNtalFrame mainFrame;
@@ -99,9 +98,6 @@ public class SubFrame extends JFrame {
         sp.getViewport().setView(memList);
 		sp.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
         
-		bt2.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
-		bt2.setActionCommand("window");
-		
 		goBt.addActionListener(new ActionAdapter(this));
 
 		js1.addChangeListener(new SliderChanged());
@@ -121,8 +117,6 @@ public class SubFrame extends JFrame {
 		getContentPane().add(buttonPanel, BorderLayout.CENTER);
 		
 		buttonPanel.add(sp);
-		buttonPanel.add(bt2);
-		//bt1.addActionListener(new ActionAdapter(this));
 	}
 
 	static

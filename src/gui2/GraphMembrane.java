@@ -23,6 +23,9 @@ public class GraphMembrane {
 	private double EDGE_LENGTH = 150.0;
 	
 	final static
+	private double EDGE_LENGTH_OVER_MEM = 450.0;
+	
+	final static
 	private int ROUND = 40;
 	
 	final static
@@ -30,8 +33,9 @@ public class GraphMembrane {
 	
 	/////////////////////////////////////////////////////////////////
 
-	private boolean isRoot = false; 
+	private boolean root = false; 
 	private Membrane myMem;
+	private GraphMembrane myParent;
 	private int posX1;
 	private int posY1;
 	private int posX2;
@@ -56,12 +60,14 @@ public class GraphMembrane {
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public GraphMembrane(Membrane mem) {
+	public GraphMembrane(GraphMembrane parent, Membrane mem) {
+		myParent = parent;
 		resetMembrane(mem);
 	}
 	
 	public GraphMembrane(Membrane mem, boolean rootFlag) {
-		isRoot = rootFlag;
+		root = rootFlag;
+		myParent = null;
 		resetMembrane(mem);
 	}
 	
@@ -135,7 +141,7 @@ public class GraphMembrane {
 					targetGraphMem.resetMembrane(targetMem);
 				}
 				else{
-					targetGraphMem = new GraphMembrane(targetMem);
+					targetGraphMem = new GraphMembrane(this, targetMem);
 					memMapTemp.put(targetMem, targetGraphMem);
 				}
 			}
@@ -191,6 +197,24 @@ public class GraphMembrane {
 	}
 	
 	/**
+	 * 指定された膜に対応するGraphMembraneを取得する。
+	 * @param targetMem
+	 * @return
+	 */
+	public GraphMembrane findGraphMem(Membrane targetMem){
+		if(memMap.containsKey(targetMem)){
+			return memMap.get(targetMem);
+		}
+		Iterator<GraphMembrane> graphMems = memMap.values().iterator();
+		while(graphMems.hasNext()){
+			GraphMembrane graphMem = graphMems.next().findGraphMem(targetMem);
+			if(graphMem != null){ return graphMem; }
+			
+		}
+		return null;
+	}
+	
+	/**
 	 * 角度を調節する。
 	 * ただし、実際の移動はmoveCalcが呼ばれるまで行われない。
 	 *
@@ -220,12 +244,9 @@ public class GraphMembrane {
 			for(int i = 0; i < edgeNum; i++){
 				GraphAtom nthAtom = (GraphAtom)atomMap.get(targetAtom.me.nthAtom(i));
 				
-				// ProxyAtomは無視
-				if(nthAtom.me.getFunctor().isInsideProxy() ||
-						nthAtom.me.getFunctor().isOutsideProxy())
-				{
-					continue;
-				}
+				nthAtom = getRealNthAtom(nthAtom);
+				
+				if(nthAtom == null){ continue; }
 				
 				if(null != nthAtom){
 					double dx = nthAtom.getPosX() - targetAtom.getPosX();
@@ -293,6 +314,7 @@ public class GraphMembrane {
 	 *
 	 */
 	private void relaxEdge(){
+		double length = EDGE_LENGTH;
 		GraphAtom targetAtom;
 		Iterator graphAtoms = atomMap.values().iterator();
 		
@@ -319,18 +341,15 @@ public class GraphMembrane {
 					continue;
 				}
 				
-				// ProxyAtomは無視
-				if(nthAtom.me.getFunctor().isInsideProxy() ||
-						nthAtom.me.getFunctor().isOutsideProxy())
-				{
-					continue;
-				}
+				nthAtom = getRealNthAtom(nthAtom);
+				
+				if(nthAtom == null){ continue; }
 				
 				dx = nthAtom.getPosX() - targetAtom.getPosX();
 				dy = nthAtom.getPosY() - targetAtom.getPosY();
 				
 				double edgeLen = Math.sqrt((double)((dx * dx) + (dy * dy)));
-				double f = (edgeLen - (EDGE_LENGTH * GraphPanel.getMagnification()));
+				double f = (edgeLen - (length * GraphPanel.getMagnification()));
 				double ddx = 0.05 * f * dx / edgeLen;
 				double ddy = 0.05 * f * dy / edgeLen;
 				
@@ -343,6 +362,41 @@ public class GraphMembrane {
 	
 	public GraphAtom getGraphAtom(Atom atom){
 		return atomMap.get(atom);
+	}
+	
+	public GraphAtom getDummyGraphAtom(){
+		return dummyGraphAtom;
+	}
+	
+	public GraphMembrane getParent(){
+		return myParent;
+	}
+	
+	public boolean isRoot(){
+		return root;
+	}
+	
+	public GraphAtom getRealNthAtom(GraphAtom nthAtom){
+		Atom overProxyAtom = nthAtom.me;
+		GraphMembrane overProxyMem = null;
+		// リンク先がProxyAtomだったら、その先（自膜の外または子膜中）のアトムを取得
+		while(overProxyAtom.getFunctor().isInsideProxy() ||
+				overProxyAtom.getFunctor().isOutsideProxy()) 
+		{
+			overProxyAtom = overProxyAtom.nthAtom(0).nthAtom(1);
+			overProxyMem = findGraphMem(overProxyAtom.getMem());
+			if(overProxyMem == null){ break; }
+			nthAtom = overProxyMem.getGraphAtom(overProxyAtom);
+//			if(nthAtom == null){ break; }
+		}
+
+		if((nthAtom == null) && (overProxyMem != null)){
+			while((!overProxyMem.isRoot()) && (!overProxyMem.getParent().getViewInside())){
+				overProxyMem = overProxyMem.getParent();
+			}
+			nthAtom = overProxyMem.getDummyGraphAtom();
+		}
+		return nthAtom;
 	}
 	
 	/**
@@ -363,7 +417,6 @@ public class GraphMembrane {
 				// リンクの描画
 				while(graphAtoms.hasNext()){
 					GraphAtom targetAtom = (GraphAtom)graphAtoms.next();
-					
 					// ProxyAtomは無視
 					if(targetAtom.me.getFunctor().isInsideProxy() ||
 							targetAtom.me.getFunctor().isOutsideProxy())
@@ -384,18 +437,11 @@ public class GraphMembrane {
 						
 						if(null != nthAtom){
 							
-							// リンク先がProxyAtomだったら、その先（自膜の外または子膜中）のアトムへリンクを描画
-							if(nthAtom.me.getFunctor().isInsideProxy() ||
-									nthAtom.me.getFunctor().isOutsideProxy()) 
-							{
-								Atom overProxyAtom = nthAtom.me.nthAtom(0).nthAtom(1);
-								GraphMembrane overProxyMem = memMap.get(overProxyAtom.getMem());
-								if(overProxyMem == null){ continue; }
-								nthAtom = overProxyMem.getGraphAtom(overProxyAtom);
-								if(nthAtom == null){ continue; }
-							}
+							nthAtom = getRealNthAtom(nthAtom);
 							
-							if(targetAtom.me.getid() < nthAtom.me.getid()){
+							if(nthAtom == null){ continue; }
+							
+							if((!nthAtom.isDummy()) && (targetAtom.me.getid() < nthAtom.me.getid())){
 								continue;
 							}
 							g.drawLine(targetAtom.getPosX() + deltaPos,
@@ -434,7 +480,7 @@ public class GraphMembrane {
 			g.setColor(MEM_COLOR);
 
 			// 塗りつぶしなし
-			if(viewInside && !isRoot){
+			if(viewInside && !root){
 				g.drawRoundRect(posX1 - margin1,
 						posY1 - margin1,
 						posX2 - posX1 + margin2,
@@ -443,7 +489,7 @@ public class GraphMembrane {
 						ROUND);
 			}
 			// 塗りつぶしあり
-			else if(!isRoot){
+			else if(!root){
 				g.fillRoundRect(posX1 - margin1,
 						posY1 - margin1,
 						posX2 - posX1 + margin2,
@@ -469,7 +515,7 @@ public class GraphMembrane {
 	 * @return
 	 */
 	public boolean getViewInside(){
-		return (viewInside || isRoot);
+		return (viewInside || root);
 	}
 	
 	/** 
