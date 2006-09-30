@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import runtime.Atom;
+import runtime.Dumper;
 import runtime.Membrane;
 
 public class GraphMembrane {
@@ -17,11 +18,15 @@ public class GraphMembrane {
 	
 	/////////////////////////////////////////////////////////////////
 	//	定数
+	
 	final static
 	private double EDGE_LENGTH = 150.0;
 	
 	final static
 	private int ROUND = 40;
+	
+	final static
+	private Color MEM_COLOR = new Color(102, 153, 255);
 	
 	/////////////////////////////////////////////////////////////////
 
@@ -31,18 +36,21 @@ public class GraphMembrane {
 	private int posY1;
 	private int posX2;
 	private int posY2;
-	private boolean viewInside = true;
+	private boolean viewInside = false;
+	private GraphAtom dummyGraphAtom = new GraphAtom(null);
 	
 	
 	private Map<Atom, GraphAtom> atomMapTemp =
 		Collections.synchronizedMap(new HashMap<Atom, GraphAtom>());
 	
+	/** 膜内のアトムを保持する（Atom, GraphAtom） */
 	private Map<Atom, GraphAtom> atomMap =
 		Collections.synchronizedMap(new HashMap<Atom, GraphAtom>());
 	
 	private Map<Membrane, GraphMembrane> memMapTemp =
 		Collections.synchronizedMap(new HashMap<Membrane, GraphMembrane>());
 	
+	/** 膜内の子膜を保持する（Membrane, GraphMembrane） */
 	private Map<Membrane, GraphMembrane> memMap =
 		Collections.synchronizedMap(new HashMap<Membrane, GraphMembrane>());
 	
@@ -59,6 +67,10 @@ public class GraphMembrane {
 	
 	/////////////////////////////////////////////////////////////////
 	
+	/**
+	 * 膜の中身を再設定する
+	 * @param mem 再設定対象の膜
+	 */
 	public void resetMembrane(Membrane mem){
 		synchronized (atomMap) {
 			myMem = mem;
@@ -69,7 +81,15 @@ public class GraphMembrane {
 			posX1 = posY1 = 1000;
 			posX2 = posY2 = 0;
 			
-			while(atoms.hasNext()){
+			if(!getViewInside()){
+				atomMap.clear();
+				atomMap.put(null, dummyGraphAtom);
+				if(posX1 > dummyGraphAtom.getPosX()){ posX1 = dummyGraphAtom.getPosX(); }
+				if(posY1 > dummyGraphAtom.getPosY()){ posY1 = dummyGraphAtom.getPosY(); }
+				if(posX2 < dummyGraphAtom.getPosX()){ posX2 = dummyGraphAtom.getPosX(); }
+				if(posY2 < dummyGraphAtom.getPosY()){ posY2 = dummyGraphAtom.getPosY(); }
+			}
+			while(getViewInside() && atoms.hasNext()){
 				Atom atom = (Atom)atoms.next();
 				GraphAtom targetAtom = null;
 				if(atomMap.containsKey(atom)){
@@ -96,13 +116,15 @@ public class GraphMembrane {
 			Iterator<Membrane> mems = mem.memIterator();
 			while(mems.hasNext()){
 				Membrane targetMem = mems.next();
+				GraphMembrane targetGraphMem = null;
 				if(memMap.containsKey(targetMem)){
-					GraphMembrane existMem = memMap.get(targetMem);
-					memMapTemp.put(targetMem, existMem);
-					existMem.resetMembrane(targetMem);
+					targetGraphMem = memMap.get(targetMem);
+					memMapTemp.put(targetMem, targetGraphMem);
+					targetGraphMem.resetMembrane(targetMem);
 				}
 				else{
-					memMapTemp.put(targetMem, new GraphMembrane(targetMem));
+					targetGraphMem = new GraphMembrane(targetMem);
+					memMapTemp.put(targetMem, targetGraphMem);
 				}
 			}
 			memMap.clear();
@@ -118,6 +140,34 @@ public class GraphMembrane {
 		
 	}
 	
+	/**
+	 * 膜の左上のX座標を取得する。
+	 * @return
+	 */
+	public int getPosX1(){ return posX1; }
+	
+	/**
+	 * 膜の右下のX座標を取得する。
+	 * @return
+	 */
+	public int getPosX2(){ return posX2; }
+	
+	/**
+	 * 膜の左上のY座標を取得する。
+	 * @return
+	 */
+	public int getPosY1(){ return posY1; }
+	
+	/**
+	 * 膜の右下のY座標を取得する。
+	 * @return
+	 */
+	public int getPosY2(){ return posY2; }
+	
+	/**
+	 * 膜に含まれるアトムの位置を実際に変更する。
+	 *
+	 */
 	private void moveCalc(){
 		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
 		
@@ -128,6 +178,11 @@ public class GraphMembrane {
 		
 	}
 	
+	/**
+	 * 角度を調節する。
+	 * ただし、実際の移動はmoveCalcが呼ばれるまで行われない。
+	 *
+	 */
 	private void relaxAngle(){
 		GraphAtom targetAtom;
 		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
@@ -198,6 +253,10 @@ public class GraphMembrane {
 		return a;
 	}
 	
+	/**
+	 * リンクの長さを調節する。
+	 *
+	 */
 	private void relaxEdge(){
 		GraphAtom targetAtom;
 		Iterator graphAtoms = atomMap.values().iterator();
@@ -231,64 +290,83 @@ public class GraphMembrane {
 		
 	}
 	
+	/**
+	 * 膜の内部、および膜を描画する。
+	 * ただし、膜内が非表示設定になっている場合は、
+	 * アトムおよび子膜を描画しない。
+	 * @param g
+	 */
 	public void paint(Graphics g){
 		int deltaPos = (int)((GraphAtom.ATOM_DEF_SIZE / 2) * GraphPanel.getMagnification());
+		int margin1 = GraphAtom.getAtomSize() * 2;
+		int margin2 = GraphAtom.getAtomSize() * 4;
 		synchronized (atomMap) {
-			Iterator graphAtoms = atomMap.values().iterator();
 			
-			// リンクの描画
-			while(graphAtoms.hasNext()){
-				GraphAtom targetAtom = (GraphAtom)graphAtoms.next();
-				int edgeNum = targetAtom.me.getEdgeCount(); 
-				g.setColor(Color.GRAY);
+			if(getViewInside()){
+				Iterator graphAtoms = atomMap.values().iterator();
 				
-				if(edgeNum == 0){
-					continue; 
-				}
-				
-				// つながっているアトムを走査
-				for(int i = 0; i < edgeNum; i++){
-					GraphAtom nthAtom = (GraphAtom)atomMap.get(targetAtom.me.nthAtom(i));
-					if(null != nthAtom){
-						if(targetAtom.me.getid() < nthAtom.me.getid()){
-							continue;
+				// リンクの描画
+				while(graphAtoms.hasNext()){
+					GraphAtom targetAtom = (GraphAtom)graphAtoms.next();
+					int edgeNum = targetAtom.me.getEdgeCount(); 
+					g.setColor(Color.GRAY);
+					
+					if(edgeNum == 0){
+						continue; 
+					}
+					
+					// つながっているアトムを走査
+					for(int i = 0; i < edgeNum; i++){
+						GraphAtom nthAtom = (GraphAtom)atomMap.get(targetAtom.me.nthAtom(i));
+						if(null != nthAtom){
+							if(targetAtom.me.getid() < nthAtom.me.getid()){
+								continue;
+							}
+							g.drawLine(targetAtom.getPosX() + deltaPos,
+									targetAtom.getPosY() + deltaPos,
+									nthAtom.getPosX() + deltaPos,
+									nthAtom.getPosY() + deltaPos);
 						}
-						g.drawLine(targetAtom.getPosX() + deltaPos,
-								targetAtom.getPosY() + deltaPos,
-								nthAtom.getPosX() + deltaPos,
-								nthAtom.getPosY() + deltaPos);
 					}
 				}
+				
+				// アトムの描画
+				graphAtoms = atomMap.values().iterator();
+				while(graphAtoms.hasNext()){
+					GraphAtom targetAtom = (GraphAtom)graphAtoms.next();
+					targetAtom.paint(g);
+				}
+				
+				// 膜の描画
+				Iterator graphMems = memMap.values().iterator();
+				while(graphMems.hasNext()){
+					GraphMembrane targetMem = (GraphMembrane)graphMems.next();
+					targetMem.paint(g);
+					
+					if(posX1 > targetMem.getPosX1() - margin1){ posX1 = targetMem.getPosX1() - margin1; }
+					if(posY1 > targetMem.getPosY1() - margin1){ posY1 = targetMem.getPosY1() - margin1; }
+					if(posX2 < targetMem.getPosX2() + margin1){ posX2 = targetMem.getPosX2() + margin1; }
+					if(posY2 < targetMem.getPosY2() + margin1){ posY2 = targetMem.getPosY2() + margin1; }
+				}
 			}
-			
-			// アトムの描画
-			graphAtoms = atomMap.values().iterator();
-			while(graphAtoms.hasNext()){
-				GraphAtom targetAtom = (GraphAtom)graphAtoms.next();
-				targetAtom.paint(g);
-			}
-			
-			// 膜の描画
-			Iterator graphMems = memMap.values().iterator();
-			while(graphMems.hasNext()){
-				GraphMembrane targetMem = (GraphMembrane)graphMems.next();
-				targetMem.paint(g);
-			}
-			
 
+			g.setColor(MEM_COLOR);
+
+			// 塗りつぶしなし
 			if(viewInside && !isRoot){
-				g.drawRoundRect(posX1 - (GraphAtom.getAtomSize() * 2),
-						posY1 - (GraphAtom.getAtomSize() * 2),
-						posX2 - posX1 + (GraphAtom.getAtomSize() * 4),
-						posY2 - posY1 + (GraphAtom.getAtomSize() * 4),
+				g.drawRoundRect(posX1 - margin1,
+						posY1 - margin1,
+						posX2 - posX1 + margin2,
+						posY2 - posY1 + margin2,
 						ROUND,
 						ROUND);
 			}
+			// 塗りつぶしあり
 			else if(!isRoot){
-				g.fillRoundRect(posX1 - (GraphAtom.getAtomSize() * 2),
-						posY1 - (GraphAtom.getAtomSize() * 2),
-						posX2 - posX1 + (GraphAtom.getAtomSize() * 4),
-						posY2 - posY1 + (GraphAtom.getAtomSize() * 4),
+				g.fillRoundRect(posX1 - margin1,
+						posY1 - margin1,
+						posX2 - posX1 + margin2,
+						posY2 - posY1 + margin2,
 						ROUND,
 						ROUND);
 			}
@@ -296,20 +374,54 @@ public class GraphMembrane {
 		}
 	}
 	
+	/**
+	 * 膜内を描画するかどうか
+	 * @param view
+	 */
 	public void setViewInside(boolean view){
 		viewInside = view;
 	}
 	
+	
+	/**
+	 * 膜内を描画するかどうか
+	 * @return
+	 */
 	public boolean getViewInside(){
-		return viewInside;
+		return (viewInside || isRoot);
 	}
 	
+	/** 
+	 * clickedPoint に一番近いアトムを取得する
+	 * 検索対象には子膜も含まれる。
+	 * @param clickedPoint
+	 */
 	public GraphAtom getNearestAtom(Point clickedPoint){
 		GraphAtom nearestAtom = null;
 		double distance = 0.0;
 		synchronized (atomMap) {
 			Iterator atoms = atomMap.values().iterator();
-			while(atoms.hasNext()){
+			
+			// 膜内を表示しない場合は、ダミーGraphAtomで位置の比較
+			if(!getViewInside()){
+				GraphAtom targetAtom = dummyGraphAtom;
+				double dx = targetAtom.getPosX() - clickedPoint.x;
+				double dy = targetAtom.getPosY() - clickedPoint.y;
+				double distanceTmp = Math.sqrt((dx * dx) + (dy * dy));
+				
+				if(null != nearestAtom){
+					if(distance >= distanceTmp){
+						distance = distanceTmp;
+						nearestAtom = targetAtom;
+					}
+				} else {
+					distance = distanceTmp;
+					nearestAtom = targetAtom;
+				}
+			}
+			
+			// 膜内を表示する場合は全アトムに対して位置の比較
+			while(getViewInside() && atoms.hasNext()){
 				GraphAtom targetAtom = (GraphAtom)atoms.next();
 				double dx = targetAtom.getPosX() - clickedPoint.x;
 				double dy = targetAtom.getPosY() - clickedPoint.y;
@@ -327,6 +439,7 @@ public class GraphMembrane {
 				}
 			}
 			
+			// 子膜から子膜内での一番近いアトムを取得し、現在保持しているアトムと比較する
 			Iterator mems = memMap.values().iterator();
 			while(mems.hasNext()){
 				GraphMembrane targetMem = (GraphMembrane)mems.next();
@@ -347,10 +460,14 @@ public class GraphMembrane {
 				}
 			}
 		}
+		
 		return nearestAtom;
 	}
 	
 
+	/**
+	 * 膜内を文字列として返す。
+	 */
 	public String toString(){
 		return myMem.toString();
 	}

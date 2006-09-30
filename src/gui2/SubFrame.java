@@ -166,8 +166,7 @@ public class SubFrame extends JFrame {
 	
     class MemCellRenderer extends JCheckBox implements ListCellRenderer{
     	
-        public MemCellRenderer() {
-        }
+        public MemCellRenderer() { }
 
         public Component getListCellRendererComponent(
             JList list,

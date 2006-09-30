@@ -32,8 +32,13 @@ public class GraphAtom {
 	public GraphAtom(Atom atom){
 		posX = (int)(Math.random() * 500.0);
 		posY = (int)(Math.random() * 500.0);
-		me = atom;
-		name = atom.getName();
+		if(atom != null){
+			me = atom;
+			name = atom.getName();
+		} else {
+			me = null;
+			name = ".";
+		}
 	}
 	/////////////////////////////////////////////////////////////////
 	
