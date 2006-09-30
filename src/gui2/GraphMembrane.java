@@ -40,11 +40,11 @@ public class GraphMembrane {
 	private Map<Atom, GraphAtom> atomMap =
 		Collections.synchronizedMap(new HashMap<Atom, GraphAtom>());
 	
-	private Map memMapTemp =
-		Collections.synchronizedMap(new HashMap());
+	private Map<Membrane, GraphMembrane> memMapTemp =
+		Collections.synchronizedMap(new HashMap<Membrane, GraphMembrane>());
 	
-	private Map memMap =
-		Collections.synchronizedMap(new HashMap());
+	private Map<Membrane, GraphMembrane> memMap =
+		Collections.synchronizedMap(new HashMap<Membrane, GraphMembrane>());
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -62,7 +62,6 @@ public class GraphMembrane {
 	public void resetMembrane(Membrane mem){
 		synchronized (atomMap) {
 			myMem = mem;
-			if(isRoot){ SubFrame.initModel(); }
 			/////////////////////////////////////////////////////////////
 			// アトムの増減処理
 			atomMapTemp.clear();
@@ -94,11 +93,11 @@ public class GraphMembrane {
 			/////////////////////////////////////////////////////////////
 			// 膜の増減処理
 			memMapTemp.clear();
-			Iterator mems = mem.memIterator();
+			Iterator<Membrane> mems = mem.memIterator();
 			while(mems.hasNext()){
-				Membrane targetMem = (Membrane)mems.next();
+				Membrane targetMem = mems.next();
 				if(memMap.containsKey(targetMem)){
-					GraphMembrane existMem = (GraphMembrane)memMap.get(targetMem);
+					GraphMembrane existMem = memMap.get(targetMem);
 					memMapTemp.put(targetMem, existMem);
 					existMem.resetMembrane(targetMem);
 				}
@@ -120,27 +119,27 @@ public class GraphMembrane {
 	}
 	
 	private void moveCalc(){
-		Iterator graphAtoms = atomMap.values().iterator();
+		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
 		
 		// 膜に直接含まれるアトムが対象
 		while(graphAtoms.hasNext()){
-			((GraphAtom)graphAtoms.next()).moveCalc();
+			graphAtoms.next().moveCalc();
 		}
 		
 	}
 	
 	private void relaxAngle(){
 		GraphAtom targetAtom;
-		Iterator graphAtoms = atomMap.values().iterator();
+		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
 		
 		// 膜に直接含まれるアトムが対象
 		while(graphAtoms.hasNext()){
-			targetAtom = (GraphAtom)graphAtoms.next();
+			targetAtom = graphAtoms.next();
 			int edgeNum = targetAtom.me.getEdgeCount(); 
 			
 			if(edgeNum < 2){ continue; }
 
-			Map treeMap = new TreeMap();
+			Map<Double, GraphAtom> treeMap = new TreeMap<Double, GraphAtom>();
 			
 			// つながっているアトムを走査
 			for(int i = 0; i < edgeNum; i++){
@@ -152,7 +151,7 @@ public class GraphMembrane {
 					double angle = Math.atan(dy / dx);
 					angle = regulate(angle);
 					if(dx < 0.0) angle += Math.PI;
-					treeMap.put(new Double(angle), nthAtom);
+					treeMap.put(angle, nthAtom);
 				}
 			}
 		
@@ -277,7 +276,7 @@ public class GraphMembrane {
 			}
 			
 
-			if(isRoot){
+			if(viewInside && !isRoot){
 				g.drawRoundRect(posX1 - (GraphAtom.getAtomSize() * 2),
 						posY1 - (GraphAtom.getAtomSize() * 2),
 						posX2 - posX1 + (GraphAtom.getAtomSize() * 4),
@@ -285,7 +284,7 @@ public class GraphMembrane {
 						ROUND,
 						ROUND);
 			}
-			else {
+			else if(!isRoot){
 				g.fillRoundRect(posX1 - (GraphAtom.getAtomSize() * 2),
 						posY1 - (GraphAtom.getAtomSize() * 2),
 						posX2 - posX1 + (GraphAtom.getAtomSize() * 4),
@@ -295,6 +294,14 @@ public class GraphMembrane {
 			}
 
 		}
+	}
+	
+	public void setViewInside(boolean view){
+		viewInside = view;
+	}
+	
+	public boolean getViewInside(){
+		return viewInside;
 	}
 	
 	public GraphAtom getNearestAtom(Point clickedPoint){

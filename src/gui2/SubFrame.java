@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -19,10 +21,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import runtime.Membrane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class SubFrame extends JFrame {
 
@@ -89,6 +92,9 @@ public class SubFrame extends JFrame {
 		memList.setCellRenderer(renderer);
 		memList.setModel(model);
 		memList.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+		memList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		memList.addListSelectionListener(new MemListSelectionListener());
+		
         JScrollPane sp = new JScrollPane();
         sp.getViewport().setView(memList);
 		sp.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
@@ -118,23 +124,16 @@ public class SubFrame extends JFrame {
 		buttonPanel.add(bt2);
 		//bt1.addActionListener(new ActionAdapter(this));
 	}
-	
+
 	static
 	public void resetList(Map memMap){
 		if(memList == null){ return; }
 		
-		// Í¾Ê¬¤ÊÍ×ÁÇ¤òºï½ü
-		Set memSet = memMap.keySet();
-		for(int i = 0; i < model.getSize(); i++){
-			if(memSet.contains(model.get(i))){
-				model.remove(i);
-			}
-		}
-		
 		// Ì¤ÅÐÏ¿¤ÎÍ×ÁÇ¤òÄÉ²Ã
-		Iterator mems = memSet.iterator();
+		Collection<GraphMembrane> memSet = memMap.values();
+		Iterator<GraphMembrane> mems = memSet.iterator();
 		while(mems.hasNext()){
-			Membrane mem = (Membrane)mems.next();
+			GraphMembrane mem = mems.next();
 			if(!model.contains(mem)){ 
 				model.addElement(mem);
 			}			
@@ -161,6 +160,7 @@ public class SubFrame extends JFrame {
 		}
 		public void actionPerformed(ActionEvent e) {
 			frame.mainFrame.stopCalc = false;
+			initModel();
 		}
 	}
 	
@@ -177,10 +177,33 @@ public class SubFrame extends JFrame {
             boolean cellHasFocus)
         {
 
-        	Membrane mem = (Membrane)value;
+        	GraphMembrane mem = (GraphMembrane)value;
             setText(mem.toString());
-
+            this.setSelected(mem.getViewInside());
             return this;
         }
+    }
+    
+    class MemListSelectionListener implements ListSelectionListener {
+    	private Set<GraphMembrane> selectedItem = new HashSet<GraphMembrane>();
+    	
+    	public MemListSelectionListener(){
+    		super();
+    	}
+
+		public void valueChanged(ListSelectionEvent e) {
+        	int selectedIndex = memList.getSelectedIndex(); 
+        	if((selectedIndex < 0) || (selectedIndex >= model.getSize())){ return; }
+        	GraphMembrane mem = (GraphMembrane)model.getElementAt(selectedIndex);
+            if(selectedItem.contains(mem)){
+            	mem.setViewInside(true);
+            	selectedItem.remove(mem);
+            } else {
+            	mem.setViewInside(false);
+            	selectedItem.add(mem);
+            }
+            memList.clearSelection();
+		}
+    	
     }
 }
