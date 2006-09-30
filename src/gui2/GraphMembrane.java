@@ -32,7 +32,7 @@ public class GraphMembrane {
 	private Color MEM_COLOR = new Color(102, 153, 255);
 	
 	/////////////////////////////////////////////////////////////////
-
+	
 	private boolean root = false; 
 	private Membrane myMem;
 	private GraphMembrane myParent;
@@ -100,7 +100,7 @@ public class GraphMembrane {
 				
 				// Proxyアトムは無視
 //				if(atom.getFunctor().isInsideProxy() || atom.getFunctor().isOutsideProxy()){
-//					continue;
+//				continue;
 //				}
 				
 				GraphAtom targetAtom = null;
@@ -187,6 +187,10 @@ public class GraphMembrane {
 	 *
 	 */
 	private void moveCalc(){
+		if(!viewInside){
+			dummyGraphAtom.moveCalc();
+			return;
+		}
 		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
 		
 		// 膜に直接含まれるアトムが対象
@@ -226,7 +230,7 @@ public class GraphMembrane {
 		// 膜に直接含まれるアトムが対象
 		while(graphAtoms.hasNext()){
 			targetAtom = graphAtoms.next();
-
+			
 			// ProxyAtomは無視
 			if(targetAtom.me.getFunctor().isInsideProxy() ||
 					targetAtom.me.getFunctor().isOutsideProxy())
@@ -237,7 +241,7 @@ public class GraphMembrane {
 			int edgeNum = targetAtom.me.getEdgeCount(); 
 			
 			if(edgeNum < 2){ continue; }
-
+			
 			Map<Double, GraphAtom> treeMap = new TreeMap<Double, GraphAtom>();
 			
 			// つながっているアトムを走査
@@ -258,24 +262,28 @@ public class GraphMembrane {
 					treeMap.put(angle, nthAtom);
 				}
 			}
-		
+			
 			Object[] nthAngles = treeMap.keySet().toArray();
 			for(int i = 0; i < nthAngles.length; i++ ){
 				Double nthAngle = (Double)nthAngles[i];
 				GraphAtom nthAtom = (GraphAtom)treeMap.get(nthAngle);
 				
+//				nthAtom = getRealNthAtom(nthAtom);
+				if(nthAtom == null){ continue; }
+				
+				
 				// ProxyAtomは無視
-				if(nthAtom.me.getFunctor().isInsideProxy() ||
-						nthAtom.me.getFunctor().isOutsideProxy())
+				if((nthAtom.me != null) && (nthAtom.me.getFunctor().isInsideProxy() ||
+						nthAtom.me.getFunctor().isOutsideProxy()))
 				{
 					continue;
 				}
 				
 				if(null != nthAtom){
 					double anglePre = (i != 0) ? ((Double)nthAngles[i]).doubleValue() - ((Double)nthAngles[i - 1]).doubleValue() 
-					                            : (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
+							: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
 					double angleCur = (i != nthAngles.length - 1) ? ((Double)nthAngles[i + 1]).doubleValue() - ((Double)nthAngles[i]).doubleValue() 
-					                      		: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
+							: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
 					double angleR = angleCur - anglePre;
 					double dx = nthAtom.getPosX() - targetAtom.getPosX();
 					double dy = nthAtom.getPosY() - targetAtom.getPosY();
@@ -285,13 +293,13 @@ public class GraphMembrane {
 					// これが you に働く力の単位ベクトルになる
 					double tx = -dy / edgeLength;
 					double ty =  dx / edgeLength;
-
+					
 					dx = 1.5 * tx * angleR;
 					dy = 1.5 * ty * angleR;
 					
 					targetAtom.moveDelta(-dx, -dy);
 					nthAtom.moveDelta(dx, dy);
-
+					
 				}
 			}
 			
@@ -321,7 +329,6 @@ public class GraphMembrane {
 		// 膜に直接含まれるアトムが対象
 		while(graphAtoms.hasNext()){
 			targetAtom = (GraphAtom)graphAtoms.next();
-			
 			// ProxyAtomは無視
 			if(targetAtom.me.getFunctor().isInsideProxy() ||
 					targetAtom.me.getFunctor().isOutsideProxy())
@@ -337,11 +344,10 @@ public class GraphMembrane {
 			// つながっているアトムを走査
 			for(int i = 0; i < edgeNum; i++){
 				GraphAtom nthAtom = (GraphAtom)atomMap.get(targetAtom.me.nthAtom(i));
+				nthAtom = getRealNthAtom(nthAtom);
 				if(null == nthAtom){
 					continue;
 				}
-				
-				nthAtom = getRealNthAtom(nthAtom);
 				
 				if(nthAtom == null){ continue; }
 				
@@ -378,6 +384,7 @@ public class GraphMembrane {
 	
 	public GraphAtom getRealNthAtom(GraphAtom nthAtom){
 		Atom overProxyAtom = nthAtom.me;
+		if(overProxyAtom == null){ return null; }
 		GraphMembrane overProxyMem = null;
 		// リンク先がProxyAtomだったら、その先（自膜の外または子膜中）のアトムを取得
 		while(overProxyAtom.getFunctor().isInsideProxy() ||
@@ -389,7 +396,7 @@ public class GraphMembrane {
 			nthAtom = overProxyMem.getGraphAtom(overProxyAtom);
 //			if(nthAtom == null){ break; }
 		}
-
+		
 		if((nthAtom == null) && (overProxyMem != null)){
 			while((!overProxyMem.isRoot()) && (!overProxyMem.getParent().getViewInside())){
 				overProxyMem = overProxyMem.getParent();
@@ -436,7 +443,8 @@ public class GraphMembrane {
 						GraphAtom nthAtom = (GraphAtom)atomMap.get(targetAtom.me.nthAtom(i));
 						
 						if(null != nthAtom){
-							
+							if(nthAtom.me == null)
+								System.out.println(nthAtom.me);
 							nthAtom = getRealNthAtom(nthAtom);
 							
 							if(nthAtom == null){ continue; }
@@ -476,9 +484,9 @@ public class GraphMembrane {
 					if(posY2 < targetMem.getPosY2() + margin1){ posY2 = targetMem.getPosY2() + margin1; }
 				}
 			}
-
+			
 			g.setColor(MEM_COLOR);
-
+			
 			// 塗りつぶしなし
 			if(viewInside && !root){
 				g.drawRoundRect(posX1 - margin1,
@@ -497,16 +505,29 @@ public class GraphMembrane {
 						ROUND,
 						ROUND);
 			}
-
+			
 		}
 	}
 	
 	/**
 	 * 膜内を描画するかどうか
+	 * 非表示に指定された場合は、子孫膜もすべて非表示にする。
+	 * 表示に指定された場合は、先祖膜もすべて表示にする。
 	 * @param view
 	 */
 	public void setViewInside(boolean view){
 		viewInside = view;
+		if(viewInside){ 
+			if(myParent != null){
+				myParent.setViewInside(true);
+			}
+			return;
+		}
+		
+		Iterator<GraphMembrane> graphMems = memMap.values().iterator();
+		while(graphMems.hasNext()){
+			graphMems.next().setViewInside(false);
+		}
 	}
 	
 	
@@ -591,7 +612,7 @@ public class GraphMembrane {
 		return nearestAtom;
 	}
 	
-
+	
 	/**
 	 * 膜内を文字列として返す。
 	 */

@@ -189,10 +189,10 @@ public class SubFrame extends JFrame {
         	if((selectedIndex < 0) || (selectedIndex >= model.getSize())){ return; }
         	GraphMembrane mem = (GraphMembrane)model.getElementAt(selectedIndex);
             if(selectedItem.contains(mem)){
-            	mem.setViewInside(true);
+            	mem.setViewInside(false);
             	selectedItem.remove(mem);
             } else {
-            	mem.setViewInside(false);
+            	mem.setViewInside(true);
             	selectedItem.add(mem);
             }
             memList.clearSelection();
