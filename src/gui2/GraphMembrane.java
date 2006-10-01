@@ -257,7 +257,6 @@ public class GraphMembrane {
 					double dy = nthAtom.getPosY() - targetAtom.getPosY();
 					if(dx == 0.0){ dx=0.000000001; }
 					double angle = Math.atan(dy / dx);
-					angle = regulate(angle);
 					if(dx < 0.0) angle += Math.PI;
 					treeMap.put(angle, nthAtom);
 				}
@@ -296,6 +295,9 @@ public class GraphMembrane {
 					
 					dx = 1.5 * tx * angleR;
 					dy = 1.5 * ty * angleR;
+
+					dx = dx * 2;
+					dy = dy *2;
 					
 					targetAtom.moveDelta(-dx, -dy);
 					nthAtom.moveDelta(dx, dy);
@@ -304,17 +306,6 @@ public class GraphMembrane {
 			}
 			
 		}
-	}
-	
-	/**
-	 * [0, 2PI) に正規化してかえす。mod 2PI みたいなかんじ。
-	 * @param a
-	 * @return
-	 */
-	static double regulate(double a) {
-		while(a<0.0) a+= Math.PI*2;
-		while(a>=2*Math.PI) a-= Math.PI*2;
-		return a;
 	}
 	
 	/**
