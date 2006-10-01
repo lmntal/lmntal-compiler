@@ -90,6 +90,19 @@ public class Merger {
 				}
 			}
 		}
+		if(Optimizer.fGuardMove){
+			Set set = instsMap.entrySet();
+			Iterator it2 = set.iterator();
+			HashMap copymap = new HashMap();
+			while(it2.hasNext()){
+				Map.Entry mapentry = (Map.Entry)it2.next();
+				ArrayList insts = (ArrayList)mapentry.getValue();
+				Optimizer.guardMove(insts);
+				copymap.put(mapentry.getKey(), insts);
+			}
+			if(Env.debug >= 1) viewMap(copymap);
+			return new MergedBranchMap(copymap);
+		}
 		if(Env.debug >= 1) viewMap(instsMap);
 		return new MergedBranchMap(instsMap);
 	}
