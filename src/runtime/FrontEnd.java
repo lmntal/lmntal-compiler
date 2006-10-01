@@ -770,6 +770,11 @@ public class FrontEnd {
 				if (!Env.gui.onTrace())  ready = false;
 			}
 			
+			if (Env.gui2 != null) {
+				Env.gui2.calc();
+				Env.gui2.onTrace();
+			}
+			
 			/*TODO:3d calc*/
 			/*nakano*
 			if (Env.threed != null) {
