@@ -2,7 +2,7 @@ package type;
 
 import runtime.Functor;
 
-public class HasActiveAtomConstraint implements Constraint {
+public class AtomOccurrenceConstraint implements Constraint {
 	private String memname;
 
 	private Functor functor;
@@ -15,14 +15,14 @@ public class HasActiveAtomConstraint implements Constraint {
 		return functor;
 	}
 	
-	public HasActiveAtomConstraint(String memname, Functor functor) {
+	public AtomOccurrenceConstraint(String memname, Functor functor) {
 		this.memname = (memname == null ? "??" : memname);
 		this.functor = functor;
 	}
 
 	public boolean equals(Object o) {
-		if (o instanceof HasActiveAtomConstraint) {
-			HasActiveAtomConstraint haac = (HasActiveAtomConstraint) o;
+		if (o instanceof AtomOccurrenceConstraint) {
+			AtomOccurrenceConstraint haac = (AtomOccurrenceConstraint) o;
 			return (memname.equals(haac.memname) && functor
 					.equals(haac.functor));
 		} else

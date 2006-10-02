@@ -104,16 +104,16 @@ public class ConstraintSet /* implements Set */{
 	// }
 
 	public boolean add(Object arg0) {
-		if (arg0 instanceof HasActiveAtomConstraint) {
-			HasActiveAtomConstraint haac = (HasActiveAtomConstraint) arg0;
+		if (arg0 instanceof AtomOccurrenceConstraint) {
+			AtomOccurrenceConstraint haac = (AtomOccurrenceConstraint) arg0;
 			if (!hasActiveAtomConstraintsMap.containsKey(haac.getMemname())) {
 				hasActiveAtomConstraintsMap.put(haac.getMemname(),
 						new HashSet());
 			}
 			((Set) hasActiveAtomConstraintsMap.get(haac.getMemname()))
 					.add(haac);
-		} else if (arg0 instanceof HasMembraneConstraint) {
-			HasMembraneConstraint hmc = (HasMembraneConstraint) arg0;
+		} else if (arg0 instanceof MembraneOccurrenceConstraint) {
+			MembraneOccurrenceConstraint hmc = (MembraneOccurrenceConstraint) arg0;
 			if (!hasMembraneConstraintsMap.containsKey(hmc.getParentName())) {
 				hasMembraneConstraintsMap.put(hmc.getParentName(),
 						new HashSet());

@@ -7,6 +7,7 @@ import java.util.Set;
 import runtime.Functor;
 
 import compile.structure.Atom;
+import compile.structure.ContextDef;
 import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
@@ -41,104 +42,102 @@ public class TypeConstraintsInferer {
 	private int outOfPassiveAtom(Atom atom) {
 		return TypeEnv.outOfPassiveAtom(atom);
 	}
+	private boolean isActiveAtom(Atom atom){
+		return outOfPassiveAtom(atom) == TypeEnv.ACTIVE;
+	}
 
 	public void infer() throws TypeConstraintException {
-		Set freelinks = new HashSet();
-		inferMembrane(root, freelinks);
+		// 全ての膜について、ルールの左辺最外部出現かどうかの情報を得る
+		collectLHSMems();
+		// 出現制約を推論する
+		inferOccurrence();
+		// 全ての引数についてモード変数、型変数を振る
+		inferArgument();
 		solvePathes();
 		constraints.solveUnifyConstraints();
 	}
 
+	/** 左辺膜および左辺出現膜の集合 */
+	private Set<Membrane> lhsmems = new HashSet<Membrane>();
+
 	/**
-	 * 
+	 * 左辺出現膜を$lhsmemsに登録する
 	 * @param mem
-	 * @param freelinks
-	 *            free links already checked
-	 * @return free links in the process at mem
 	 */
-	private Set inferMembrane(Membrane mem, Set freelinks) {
-		Iterator it = mem.atoms.iterator();
-		while (it.hasNext()) {
-			Atom atom = (Atom) it.next();
-			int out = outOfPassiveAtom(atom);
-			if (out == TypeEnv.ACTIVE) {
-				add(new HasActiveAtomConstraint(mem.name, atom.functor));
-				freelinks = inferAtom(atom, freelinks);
-			} else if (out == TypeEnv.CONNECTOR)
-				continue;
-			else
-				freelinks = inferAtom(atom, freelinks);
+	private void collectLHSMems(){
+		Iterator<RuleStructure> it = root.rules.iterator();
+		while(it.hasNext()){
+			collectLHSMems(it.next());
 		}
-		it = mem.mems.iterator();
-		while (it.hasNext()) {
-			Membrane child = (Membrane) it.next();
-			add(new HasMembraneConstraint(mem.name, child.name));
-			freelinks = inferMembrane(child, freelinks);
-		}
-		it = mem.rules.iterator();
-		while (it.hasNext()) {
-			RuleStructure rs = (RuleStructure) it.next();
-			inferRule(rs);
-		}
-		return freelinks;
 	}
-
-	private Set lhsmems = new HashSet();
-
 	/**
-	 * inferrence and add lhsmem into $lhsmems
-	 * 
+	 * 左辺出現膜を$lhsmemsに登録する
 	 * @param rule
 	 */
-	private void inferRule(RuleStructure rule) {
-		lhsmems.add(rule.leftMem);
-		Set freelinksLeft = inferMembrane(rule.leftMem, new HashSet());
-		Set freelinksRight = inferMembrane(rule.rightMem, new HashSet());
-		Iterator it = freelinksLeft.iterator();
-		while (it.hasNext()) {
-			LinkOccurrence lo = (LinkOccurrence) it.next();
-			LinkOccurrence b = getRealBuddy(lo);
-			if (freelinksRight.contains(b))
-				addConstraintAboutLinks(1, lo, b);
-			else if(b.atom instanceof ProcessContext){
-				ProcessContext pc = (ProcessContext)b.atom;
-//				ContextDef def = pc.def;
-				Iterator it2 = pc.def.rhsOccs.iterator();
-				while(it2.hasNext()){
-					ProcessContext rhsocc = (ProcessContext)it2.next();
-					LinkOccurrence rb = getRealBuddy(rhsocc.args[b.pos]);
-					if(rb.atom instanceof Atom){
-						addConstraintAboutLinks(1, lo, rb);
-					}
-				}
-			}
+	private void collectLHSMems(RuleStructure rule){
+		collectLHSMem(rule.leftMem);
+//		 左辺にルールは出現しない
+		Iterator<RuleStructure> it = rule.rightMem.rules.iterator();
+		while(it.hasNext()){
+			collectLHSMems(it.next());
 		}
 	}
-
-	private Set inferAtom(Atom atom, Set freelinks) {
-		for (int i = 0; i < atom.args.length; i++) {
-			updateFreeLinks(atom.args[i], freelinks);
-		}
-		return freelinks;
-	}
-
 	/**
-	 * if $lo's buddy is in $freelinks, add an inversion constraint. Else, add
-	 * $lo into $freelinks.
-	 * 
-	 * @param lo
-	 * @param freelinks
-	 *            Set of free links already checked
-	 * @return updated Set
+	 * 左辺出現膜を$lhsmemsに登録する
+	 * @param mem 左辺出現膜
 	 */
-	private Set updateFreeLinks(LinkOccurrence lo, Set freelinks) {
-		LinkOccurrence b = getRealBuddy(lo);
-		if (freelinks.contains(b)) {
-			addConstraintAboutLinks(-1, lo, b);
-			freelinks.remove(b);
-		} else
-			freelinks.add(lo);
-		return freelinks;
+	private void collectLHSMem(Membrane mem){
+		lhsmems.add(mem);
+		Iterator it = mem.mems.iterator();
+		while(it.hasNext()){
+			Membrane cmem = (Membrane)it.next();
+			collectLHSMem(cmem);
+		}
+	}
+	
+	/** 左辺のアトムかどうかを返す */
+	private boolean isLHSAtom(Atom atom) {
+		return isLHSMem(atom.mem);
+	}
+
+	/** 左辺の膜かどうかを返す */
+	private boolean isLHSMem(Membrane mem) {
+		return lhsmems.contains(mem);
+	}
+
+	/** 出現制約を推論する */
+	private void inferOccurrence(){
+		inferOccurrenceMembrane(root);
+	}
+	/** 出現制約を推論する */
+	private void inferOccurrenceMembrane(Membrane mem){
+		/** アクティブアトムについて出現制約を課す */
+		Iterator<Atom> ita = mem.atoms.iterator();
+		while(ita.hasNext()){
+			Atom atom = ita.next();
+			if(isActiveAtom(atom))
+				add(new AtomOccurrenceConstraint(mem.name,atom.functor));
+		}
+		/** 子膜について出現制約を課し、走査 */
+		Iterator<Membrane> itm = mem.mems.iterator();
+		while(itm.hasNext()){
+			Membrane child = itm.next();
+			add(new MembraneOccurrenceConstraint(mem.name,child.name));
+			inferOccurrenceMembrane(child);
+		}
+		/** ルールの左辺／右辺を走査 */
+		Iterator<RuleStructure> itr = mem.rules.iterator();
+		while(itr.hasNext()){
+			RuleStructure rule = itr.next();
+			inferOccurrenceMembrane(rule.leftMem);
+			inferOccurrenceMembrane(rule.rightMem);
+		}
+	}
+
+	/** 引数制約を推論する */
+	private void inferArgument() throws TypeConstraintException{
+		// その時点で1回しか出現していないリンクを管理するセット
+		new RuleArgumentInferrer(root).infer();//ArgumentMembrane(root, freelinks);
 	}
 
 	/**
@@ -149,35 +148,19 @@ public class TypeConstraintsInferer {
 	 * @param lo
 	 * @param b
 	 */
-	private void addConstraintAboutLinks(int sign, LinkOccurrence lo,
-			LinkOccurrence b) {
-		if (lo.atom instanceof Atom) {
-			int out = outOfPassiveAtom(((Atom) lo.atom));
-			if (out == lo.pos) {
-				LinkOccurrence bl = getRealBuddy(lo);
-				if(bl.atom instanceof ProcessContext){
-					ProcessContext pc = (ProcessContext)bl.atom;
-					bl = getRealBuddy(pc.def.lhsOcc.args[bl.pos]);
-				}
-				addReceiveConstraint(-sign, bl,
-						((Atom) lo.atom).functor);
-				return;
-			}
+	private void addConstraintAboutLinks(int sign, LinkOccurrence lo, LinkOccurrence b) throws TypeConstraintException{
+		int out = outOfPassiveAtom((Atom)lo.atom);
+		if(out == lo.pos){ // データアトムの出力引数
+			if(outOfPassiveAtom((Atom)b.atom) != TypeEnv.ACTIVE)
+				//TODO 出力引数同士が継っているのでエラー
+				throw new TypeConstraintException("MODE ERROR : output arguments connected each other.");
+			addReceiveConstraint(-sign, b, ((Atom)lo.atom).functor);
 		}
-		if (b.atom instanceof Atom) {
-			int out = outOfPassiveAtom(((Atom) b.atom));
-			if (out == b.pos) {
-				LinkOccurrence bl = getRealBuddy(b);
-				if(bl.atom instanceof ProcessContext){
-					ProcessContext pc = (ProcessContext)bl.atom;
-					bl = getRealBuddy(pc.def.lhsOcc.args[bl.pos]);
-				}
-				addReceiveConstraint(-sign, bl,
-						((Atom) b.atom).functor);
-				return;
-			}
+		else{
+			if(outOfPassiveAtom((Atom)b.atom) != TypeEnv.ACTIVE)
+				addConstraintAboutLinks(sign, b, lo);
+			else addUnifyConstraint(sign, lo, b);
 		}
-		addUnifyConstraint(sign, lo, b);
 	}
 
 	private void addUnifyConstraint(int sign, LinkOccurrence lo,
@@ -277,15 +260,157 @@ public class TypeConstraintsInferer {
 		}
 	}
 
-	private boolean isLHSAtom(Atom atom) {
-		return isLHSMem(atom.mem);
-	}
-
-	private boolean isLHSMem(Membrane mem) {
-		return lhsmems.contains(mem);
-	}
-
 	public void printAllConstraints() {
 		constraints.printAllConstraints();
 	}
+
+	/**
+	 * ルールごとに、アトム引数の型／モードを推論する。
+	 * 文脈定義がルールごとに扱うほうが都合が良い為。
+	 * @author kudo
+	 *
+	 */
+	class RuleArgumentInferrer{
+		RuleStructure rule;
+		
+		Set<ContextDef> defs;
+
+		/** */
+		RuleArgumentInferrer(RuleStructure rule){
+			this.rule = rule;
+		}
+		/**
+		 * グローバルルート膜に対してのみ呼ばれる
+		 * @param top
+		 */
+		RuleArgumentInferrer(Membrane top){
+			RuleStructure tmprule = new RuleStructure(new Membrane(null),"tmp");
+			tmprule.leftMem = new Membrane(null);
+			tmprule.rightMem = top;
+			this.rule = tmprule;
+		}
+		void infer() throws TypeConstraintException{
+			defs = new HashSet<ContextDef>();
+			inferArgumentRule(rule);
+		}
+		/**
+		 * @param mem
+		 * @param freelinks
+		 *            free links already checked
+		 * @return free links in the process at mem
+		 */
+		private Set<LinkOccurrence> inferArgumentMembrane(Membrane mem, Set<LinkOccurrence> freelinks) throws TypeConstraintException{
+
+			//ルールについて走査する
+			Iterator<RuleStructure> itr = mem.rules.iterator();
+			while (itr.hasNext()) {
+				new RuleArgumentInferrer(itr.next()).infer();
+			}
+
+			// 子膜について走査する
+			Iterator<Membrane> itm = mem.mems.iterator();
+			while (itm.hasNext()) {
+				freelinks = inferArgumentMembrane(itm.next(), freelinks);
+			}
+
+			// この時点で、子孫膜に出現する全てのアトム／プロセス文脈について、局所リンクの処理は終わっている
+			
+			Iterator<Atom> ita = mem.atoms.iterator();
+			while (ita.hasNext()) {
+				Atom atom = ita.next();
+				int out = outOfPassiveAtom(atom);
+				if (out == TypeEnv.CONNECTOR) continue; // '='/2だったら無視する
+				else
+					freelinks = inferArgumentAtom(atom, freelinks);
+			}
+
+			// この時点で、子孫膜に出現する全てのアトム／プロセス文脈、およびこの膜のアトムの引数の処理は終わっている
+			// つまり残るはこの膜に出現するプロセス文脈と、この膜の自由リンクのみ
+			
+			// プロセス文脈
+			Iterator<ProcessContext> itp = mem.processContexts.iterator();
+			while(itp.hasNext()){
+				ContextDef def = itp.next().def;
+				if(!defs.contains(def))defs.add(def);
+			}
+			//型付きプロセス文脈
+			Iterator<ProcessContext> ittp = mem.typedProcessContexts.iterator();
+			while(ittp.hasNext()){
+				ContextDef def = ittp.next().def;
+				if(!defs.contains(def))defs.add(def);
+			}
+			return freelinks;
+		}
+
+		/**
+		 * inferrence
+		 * 
+		 * @param rule
+		 */
+		private void inferArgumentRule(RuleStructure rule) throws TypeConstraintException{
+			// 左辺／右辺それぞれについて型／モードを解決し、1回出現するリンクを集める
+			Set<LinkOccurrence> freelinksLeft = inferArgumentMembrane(rule.leftMem, new HashSet<LinkOccurrence>());
+			Set<LinkOccurrence> freelinksRight = inferArgumentMembrane(rule.rightMem, new HashSet<LinkOccurrence>());
+			Iterator<LinkOccurrence> it = freelinksLeft.iterator();
+			while (it.hasNext()) {
+				LinkOccurrence leftlink = it.next();
+				LinkOccurrence rightlink = getRealBuddy(leftlink);
+				if (!freelinksRight.contains(rightlink)){ // リンクが左辺／右辺出現なら
+					throw new TypeConstraintException("link occurs once in a rule.");
+				}
+				addConstraintAboutLinks(1, leftlink, rightlink);
+			}
+			//プロセス文脈について処理する
+			Iterator<ContextDef> itd = defs.iterator();
+			while(itd.hasNext()){
+				ContextDef def = itd.next();
+				Iterator<ProcessContext> itp = def.rhsOccs.iterator();
+				while(itp.hasNext()){
+					processExplicitLinks((ProcessContext)def.lhsOcc, itp.next());
+				}
+			}
+		}
+
+		/**
+		 * アトムの引数を走査し、1回目の出現はfreelinksに登録し、
+		 * 2回目の出現であれば局所リンクとして制約を課す。
+		 * ただしプロセス文脈に接続している場合は無視する。
+		 * @param atom
+		 * @param freelinks
+		 * @return
+		 */
+		private Set<LinkOccurrence> inferArgumentAtom(Atom atom, Set<LinkOccurrence> freelinks)throws TypeConstraintException{
+			for (int i = 0; i < atom.args.length; i++) {
+				LinkOccurrence lo = atom.args[i];
+				LinkOccurrence b = getRealBuddy(lo);
+				if(b.atom instanceof ProcessContext)continue; // プロセス文脈に接続している
+				if (freelinks.contains(b)) { // 局所リンク
+					addConstraintAboutLinks(-1, lo, b);
+					freelinks.remove(b);
+				} else
+					freelinks.add(lo);
+			}
+			return freelinks;
+		}
+		
+		/** プロセス文脈の左辺／右辺出現のそれぞれの引数に対して同じであるという制約をかける */
+		private void processExplicitLinks(ProcessContext lhsOcc, ProcessContext rhsOcc){
+			for(int i=0;i<lhsOcc.args.length;i++){
+				LinkOccurrence lhsPartner = getRealBuddy(lhsOcc.args[i]);
+				LinkOccurrence rhsPartner = getRealBuddy(rhsOcc.args[i]);
+				if(rhsPartner.atom instanceof Atom){
+					if(isLHSAtom((Atom)rhsPartner.atom))
+						addUnifyConstraint(-1,lhsPartner,rhsPartner);
+					else
+						addUnifyConstraint(1,lhsPartner,rhsPartner);
+				}
+				else{ // 右辺出現がプロセス文脈と継っている
+					// そいつの左辺出現の相方をとってくる
+					LinkOccurrence partnerOfPartner = getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
+					addUnifyConstraint(-1,lhsPartner, partnerOfPartner);
+				}
+			}
+		}
+	}
 }
+

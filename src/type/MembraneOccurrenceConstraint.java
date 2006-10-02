@@ -4,7 +4,7 @@ package type;
  * @author kudo
  * 
  */
-public class HasMembraneConstraint implements Constraint {
+public class MembraneOccurrenceConstraint implements Constraint {
 
 	private String parentName;
 
@@ -22,15 +22,15 @@ public class HasMembraneConstraint implements Constraint {
 	 * @param parentName
 	 * @param childName
 	 */
-	public HasMembraneConstraint(String parentName, String childName) {
+	public MembraneOccurrenceConstraint(String parentName, String childName) {
 		this.parentName = parentName == null ? "??" : parentName;
 		this.childName = childName == null ? "??" : childName;
 	}
 
 	public boolean equals(Object o) {
-		if (!(o instanceof HasMembraneConstraint))
+		if (!(o instanceof MembraneOccurrenceConstraint))
 			return false;
-		HasMembraneConstraint hmc = (HasMembraneConstraint) o;
+		MembraneOccurrenceConstraint hmc = (MembraneOccurrenceConstraint) o;
 		return parentName.equals(hmc.parentName)
 				&& childName.equals(hmc.childName);
 	}
