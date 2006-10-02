@@ -324,10 +324,10 @@ public final class Membrane extends QueuedEntity {
 	 * 走査済みの印をつけておく．
 	 * 走査完了後，未到達の引数があれば-1を返す．
 	 * 
-	 * @param avoSet 基底項プロセスに出てきてはいけないリンクのSet
+	 * @param avoList 基底項プロセスに出てきてはいけないリンクのList
 	 * @return 基底項プロセスを構成するアトム数
 	 */
-	public int isGround(List/*<Link>*/ links, Set avoSet){
+	public static int isGround(List/*<Link>*/ links, Set avoSet){
 		Set srcSet = new HashSet(); // 走査済みアトム
 		java.util.Stack s = new java.util.Stack(); //リンクを積むスタック
 		s.push(links.get(0)); // 第1引数から走査する
@@ -338,7 +338,7 @@ public final class Membrane extends QueuedEntity {
 			Link l = (Link)s.pop();
 			Atom a = l.getAtom();
 			if(srcSet.contains(a))continue; //既に辿ったアトム
-			if(avoSet.contains(l))return -1; //出現してはいけないリンク
+			if(avoSet.contains(l.getBuddy()))return -1; //出現してはいけないリンク
 			int argi = links.indexOf(l.getBuddy());
 			if(argi >= 0){ // 基底項プロセスの引数に到達
 				exists[argi] = true;
@@ -370,7 +370,7 @@ public final class Membrane extends QueuedEntity {
 	 * @param srcLink 比較対象のリンク
 	 * @return
 	 */
-	public boolean eqGround(List/*<Link>*/ srclinks, List/*<Link>*/ dstlinks){
+	public static boolean eqGround(List/*<Link>*/ srclinks, List/*<Link>*/ dstlinks){
 		Map map = new HashMap(); //比較元アトムから比較先アトムへのマップ
 		java.util.Stack s1 = new java.util.Stack();  //比較元リンクを入れるスタック
 		java.util.Stack s2 = new java.util.Stack();  //比較先リンクを入れるスタック
@@ -407,7 +407,7 @@ public final class Membrane extends QueuedEntity {
 	 * つまり，このメソッドでは考慮する必要はない．
 	 * 
 	 * @param srcGround コピー元の基底項プロセス の根のリスト
-	 * @return コピー先の基底項プロセス の根のリスト
+	 * @return 2要素のリスト ( 第一要素 : コピー先の基底項プロセス の根のリスト, 第二要素 : コピー元のアトムからコピー先のアトムへのマップ)
 	 */
 	public List/*<Link>*/ copyGroundFrom(List/*<Link>*/ srclinks){//Link srcGround){
 		java.util.Stack s = new java.util.Stack();
@@ -445,8 +445,10 @@ public final class Membrane extends QueuedEntity {
 			Link srclink = (Link)srclinks.get(i);
 			dstlinks.add( new Link(((Atom)map.get(srclink.getAtom())),srclink.getPos()));
 		}
-		return dstlinks;
-//		return new Link(((Atom)map.get(srcGround.getAtom())),srcGround.getPos());
+		List ret_list = new ArrayList();
+		ret_list.add(dstlinks);
+		ret_list.add(map);
+		return ret_list;//		return new Link(((Atom)map.get(srcGround.getAtom())),srcGround.getPos());
 	}
 	
 	/** 1引数の基底項プロセスを複製する */
