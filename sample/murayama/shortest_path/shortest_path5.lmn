@@ -1,0 +1,181 @@
+r=seq.run({},[{
+		//	thread.create(4).
+		/* ノードをファイルから読出し */
+		rd(0)=io.fileReader([:testfile3:]).
+		rd(X,O) :- class(O,"java.io.BufferedReader"),X<94 | rd(X+1,O), readnode(O).
+		
+		readnode(Object) :- class(Object, "java.io.BufferedReader") |
+			[:/*inline*/
+				try {
+					java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+					String s = br.readLine();
+				 	String r[] = s.split(" ");
+		  			Atom e = mem.newAtom(new SymbolFunctor("p", 2));
+					Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[0])));
+					Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
+		
+					mem.newLink(e, 0, result1, 0);
+					mem.newLink(e, 1, result2, 0);
+					
+					me.nthAtom(0).remove();
+					me.remove();
+				} catch(Exception e) {Env.e(e);}
+			:](Object).
+	},
+	{
+		startpoint(1).
+		p(X,Y), startpoint(ST) :- X==ST,  int(Y) | startpoint(ST), p(X, {}, 0, Y).
+		p(X,Y), startpoint(ST) :- X=\=ST, int(Y) | startpoint(ST), p(X, {}, 100000, Y).
+	},
+	{
+		arrayset(94) = new(94).
+		arraynew@@
+		H=new(Length) :- int(Length) | H=[:/*inline*/
+			int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+			Atom result = mem.newAtom(new SymbolFunctor("array", 2));
+			Atom result2 = mem.newAtom(new SymbolFunctor("@", l+1));
+			for(int i=0;i<l;i++) {
+				Atom el = mem.newAtom(new IntegerFunctor(0));
+				mem.newLink(el, 0, result2, i);
+			}
+			mem.newLink(result, 0, result2, l);
+			mem.relink(result, 1, me, 1);
+			me.nthAtom(0).remove();
+			me.remove();
+			:](Length).
+	},
+ 	{
+		arrayset1@@	
+		arrayset(N) = A, p(X, {$p}, W, Thread) :- N>0, int(X)| 
+			p(Link, {$p}, W, Thread), 
+			arrayset(N-1) = update(A, X , old, Link).
+		H = arrayset(0) :- H = arrayget.
+		arrayupdate@@
+		H=update(array(A), I, OldValue, NewValue) :- int(I) |
+	H=array(X), [:/*inline*/
+		int i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+		int len = me.nthAtom(0).getFunctor().getArity()-1;
+		i = (i+len) % len;
+		
+		mem.swapAtomArgs(me.nthAtom(0), i, me, 3);
+		mem.unifyAtomArgs(me, 4, me, 0);
+		mem.unifyAtomArgs(me, 3, me, 2);
+		me.nthAtom(1).remove();
+		me.remove();
+		:](A, I, OldValue, NewValue, X).
+ 	},
+	{	
+		olddec@@
+		old(X) :-int(X) |.
+		olddec2@@
+		got(old) :-.
+	},
+	{	
+		/* リンクをファイルから読出し */
+		r(0)=io.fileReader([:testfile2:]).
+		r(X,O) :- class(O,"java.io.BufferedReader"),X<134 | r(X+1,O), readlink(O).
+		
+		readlink(Object) :- class(Object, "java.io.BufferedReader") |
+			[:/*inline*/
+				try {
+					java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
+					String s = br.readLine();
+				 	String r[] = s.split(" ");
+		  			Atom e = mem.newAtom(new SymbolFunctor("e", 4));
+					Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
+					Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[2])));
+					Atom result3 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[3])));
+					Atom result4 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[4])));
+		
+					mem.newLink(e, 0, result1, 0);
+					mem.newLink(e, 1, result2, 0);
+					mem.newLink(e, 2, result3, 0);
+					mem.newLink(e, 3, result4, 0);
+					
+					me.nthAtom(0).remove();
+					me.remove();
+				} catch(Exception e) {Env.e(e);}
+			:](Object).
+	},
+	{
+		addtype@@
+		e(X, Y, Z, Thread) :- int(X), int(Y) | e(n(X), nn(Y), Z, Thread).
+	},
+	{		
+		olddec@@
+		old(X) :-int(X) |.
+		olddec2@@
+		got(old) :-.
+		arrayupdate@@
+		H=update(array(A), I, OldValue, NewValue) :- int(I) |
+		  H=array(X), [:/*inline*/
+			int i = ((IntegerFunctor)me.nthAtom(1).getFunctor()).intValue();
+			int len = me.nthAtom(0).getFunctor().getArity()-1;
+			i = (i+len) % len;
+			
+			mem.swapAtomArgs(me.nthAtom(0), i, me, 3);
+			mem.unifyAtomArgs(me, 4, me, 0);
+			mem.unifyAtomArgs(me, 3, me, 2);
+			me.nthAtom(1).remove();
+			me.remove();
+			:](A, I, OldValue, NewValue, X).
+		arraygetleft@@
+		H = arrayget, e(n(X), Y, Z, Thread)
+			:- int(X) | e(m(X), Y, Z, Thread), setarray = update(H, X, res, got).
+		arraygetright@@
+		H = arrayget, e(X, nn(Y), Z, Thread)
+			:- int(Y) | e(m(X), Y, Z, Thread), setarray = update(H, Y, res, got).
+		
+		connectleft@@
+		p(res, {$p}, W, Thread1), e(m(X), Y, Z, Thread2)
+			:- int(X) |
+				p(new(X), {+(Link), $p}, W, Thread1), e(Link,Y,Z, Thread2).
+		connectright@@
+		p(res, {$p}, W, Thread1), e(m(X), Y, Z, Thread2)
+			:- int(Y) |
+				p(new(Y), {+(Link), $p}, W, Thread1), e(X,Link,Z, Thread2).
+				
+		setarray@@
+		setarray = A, p(new(X), {$p}, W, Thread) :- int(X)| 
+			p(Link, {$p}, W, Thread), 
+			arrayget = update(A, X , old, Link).
+	}
+]).
+
+/* スレッド割り当て 
+scatter({
+	scatter_node@@
+	p(X, {$p}, Weight, Thread) :- int(X), int(Weight), Thread=\=100 |
+		thread.at(Thread, {{$p, w(X, Weight)}}).
+	scatter_edge@@
+	e(X,Y,Weight,Thread) :- int(Weight), Thread=\=100 |
+		thread.at(Thread, {e(X,Y,Weight)}).
+}).*/
+
+/* Moore-Bellman-Fordのアルゴリズムによる最短経路探索 
+mbf({
+	mbf1 @@
+	go,
+	 thread.any({e(V1, V2, Weight)}),
+	 thread.any({{+(V1), w(X1, PoA), $p1}}),
+	 thread.any({{+(V2), w(X2, PoB), $p2}})
+					:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
+						go,
+						thread.any({e(V1, V2, Weight)}),
+						thread.any({{+(V1), w(X1, PoA), $p1}}),
+						thread.any({{+(V2), w(X2, PoB2), $p2}}).
+
+	mbf2 @@
+	go,
+	 thread.any({e(V2, V1, Weight)}),
+	 thread.any({{+(V1), w(X1, PoA), $p1}}),
+	 thread.any({{+(V2), w(X2, PoB), $p2}})
+					:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
+						go,
+						thread.any({e(V2, V1, Weight)}),
+						thread.any({{+(V1), w(X1, PoA), $p1}}),
+						thread.any({{+(V2), w(X2, PoB2), $p2}}).
+}).*/
+
+//init({$p, @p}/), scatter({@q}) :- scattering({$p,@p,@q}).
+//scattering({$p, @p}/), mbf({@q}) :- timer:benchmark(X,"Elapsed Time"), mbfing({+(X),$p,@p,@q}).
