@@ -136,8 +136,7 @@ public class TypeConstraintsInferer {
 
 	/** 引数制約を推論する */
 	private void inferArgument() throws TypeConstraintException{
-		// その時点で1回しか出現していないリンクを管理するセット
-		new RuleArgumentInferrer(root).infer();//ArgumentMembrane(root, freelinks);
+		new RuleArgumentInferrer(root).infer();
 	}
 
 	/**
