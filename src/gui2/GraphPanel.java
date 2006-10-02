@@ -2,6 +2,7 @@ package gui2;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ComponentAdapter;
@@ -86,7 +87,7 @@ public class GraphPanel extends JPanel implements Runnable {
 	
 	public void setRootMem(Membrane mem){
 		rootMembrane = mem;
-		rootGraphMembrane = new GraphMembrane(mem, true);
+		rootGraphMembrane = new GraphMembrane(mem, this);
 	}
 	
 	public void calc(){

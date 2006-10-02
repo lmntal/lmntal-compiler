@@ -1,7 +1,9 @@
 package gui2;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import runtime.Atom;
 
@@ -12,6 +14,15 @@ public class GraphAtom {
 	
 	final static
 	public double ATOM_DEF_SIZE = 50;
+	
+	final static
+	private BasicStroke ATOM_STROKE = new BasicStroke(1.0f);
+	
+	final static
+	private Color ATOM_BORDER_COLOR = new Color(100, 100, 100);
+	
+	final static
+	private Color ATOM_PIN_COLOR = new Color(0, 0, 0);
 
 	/////////////////////////////////////////////////////////////////
 	
@@ -23,7 +34,7 @@ public class GraphAtom {
 	private double dy;
 	private String name;
 	private boolean isHold = false;
-	private boolean isClipped = false;
+	private boolean clipped = false;
 	
 	final public Atom me;
 	
@@ -45,6 +56,10 @@ public class GraphAtom {
 	static
 	public int getAtomSize(){ return (int)(ATOM_DEF_SIZE * GraphPanel.getMagnification()); }
 
+	public boolean isClipped(){
+		return clipped;
+	}
+	
 	public boolean isDummy(){
 		return (me == null) ? true : false;
 	}
@@ -61,11 +76,26 @@ public class GraphAtom {
 				posY,
 				getAtomSize(),
 				getAtomSize());
+		
+		g.setColor(ATOM_BORDER_COLOR);
+        ((Graphics2D)g).setStroke(ATOM_STROKE);
+		g.drawOval(posX,
+				posY,
+				getAtomSize(),
+				getAtomSize());
+		
+		if(clipped){
+			g.setColor(ATOM_PIN_COLOR);
+			g.fillOval(posX + getAtomSize() / 3,
+					posY + getAtomSize() / 3,
+					getAtomSize() / 3,
+					getAtomSize() / 3);
+		}
 	}
 	
 	/** 実際にアトムを移動させる */
 	public void moveCalc(){
-		if(!isClipped && !isHold){
+		if(!clipped && !isHold){
 			posX += (int)dx;
 			posY += (int)dy;
 		}
@@ -98,6 +128,6 @@ public class GraphAtom {
 	public void setHold(boolean hold){ isHold = hold; }
 	
 	/** アトムを固定する（ダブルクリック用） */
-	public void flipClip(){ isClipped = !isClipped; }
+	public void flipClip(){ clipped = !clipped; }
 	
 }
