@@ -22,7 +22,7 @@ public class GraphMembrane {
 	
 	final static
 	private double EDGE_LENGTH = 200.0;
-
+	
 	final static
 	private double EDGE_LENGTH_TO_MEM = 450.0;
 	
@@ -186,8 +186,9 @@ public class GraphMembrane {
 			// アトムの位置調節
 			relaxEdge();
 			relaxAngle();
-			membraneRepulsive();
+			membraneAndAtomRepulsive();
 			membraneAttraction();
+			atomAndAtomRepulsive();
 			moveCalc();
 		}
 		
@@ -330,7 +331,7 @@ public class GraphMembrane {
 					
 					dx = 1.5 * tx * angleR;
 					dy = 1.5 * ty * angleR;
-
+					
 					dx = dx * 2;
 					dy = dy *2;
 					
@@ -350,7 +351,7 @@ public class GraphMembrane {
 	 */
 	private void membraneAttraction(){
 		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
-
+		
 		int memCenterX;
 		int memCenterY;
 		
@@ -387,7 +388,7 @@ public class GraphMembrane {
 	 *
 	 */
 	// FIXME: 四分割で、四方向ではなく、中心から離れるように。
-	private void membraneRepulsive(){
+	private void membraneAndAtomRepulsive(){
 		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
 		
 		// 膜に直接含まれるアトムが対象
@@ -442,7 +443,7 @@ public class GraphMembrane {
 				// 膜の下部に重なっていた場合
 				else if(targetMemPosY2 > targetAtom.getPosY() &&
 						memCenterY < atomBottomY){
-
+					
 					int dy = targetMemPosY2 - targetAtom.getPosY();
 					double ddy = MEM_REPULSIVE_FORCE * dy;
 					
@@ -465,6 +466,51 @@ public class GraphMembrane {
 						
 					}
 				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * アトム間斥力
+	 */
+	private void atomAndAtomRepulsive(){
+		GraphAtom targetAtom;
+		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
+		
+		// 膜に直接含まれるアトムが対象
+		while(graphAtoms.hasNext()){
+			double length = EDGE_LENGTH;
+			targetAtom = (GraphAtom)graphAtoms.next();
+			// ProxyAtomは無視
+			if(targetAtom.me.getFunctor().isInsideProxy() ||
+					targetAtom.me.getFunctor().isOutsideProxy())
+			{
+				continue;
+			}
+			
+			int dx = 0, dy = 0;
+			Iterator<GraphAtom> firendGraphAtoms = atomMap.values().iterator();
+			
+			// 膜に直接含まれるアトムが対象
+			while(firendGraphAtoms.hasNext()){
+				GraphAtom nthAtom = firendGraphAtoms.next();
+				if(targetAtom == nthAtom){
+					continue;
+				}
+				dx = nthAtom.getPosX() - targetAtom.getPosX();
+				dy = nthAtom.getPosY() - targetAtom.getPosY();
+				
+				double edgeLen = Math.sqrt((double)((dx * dx) + (dy * dy)));
+				if(edgeLen > GraphAtom.getAtomSize()){
+					continue;
+				}
+				double f = (edgeLen - (length * GraphPanel.getMagnification()));
+				double ddx = 0.05 * f * dx / edgeLen;
+				double ddy = 0.05 * f * dy / edgeLen;
+				
+				targetAtom.moveDelta(ddx, ddy);
+				nthAtom.moveDelta(-ddx, -ddy);
 			}
 		}
 		
@@ -644,8 +690,8 @@ public class GraphMembrane {
 				}
 			}
 			
-
-	        ((Graphics2D)g).setStroke(MEM_STROKE);
+			
+			((Graphics2D)g).setStroke(MEM_STROKE);
 			// 塗りつぶしなし
 			if(viewInside && !root){
 				g.setColor(MEM_COLOR);
@@ -691,7 +737,7 @@ public class GraphMembrane {
 			
 		}
 	}
-
+	
 	/**
 	 * すべての膜を表示に設定
 	 *
@@ -766,7 +812,7 @@ public class GraphMembrane {
 			// 膜内を表示する場合は全アトムに対して位置の比較
 			while(getViewInside() && atoms.hasNext()){
 				GraphAtom targetAtom = (GraphAtom)atoms.next();
-
+				
 				// ProxyAtomは無視
 				if(targetAtom.me.getFunctor().isInsideProxy() ||
 						targetAtom.me.getFunctor().isOutsideProxy())
