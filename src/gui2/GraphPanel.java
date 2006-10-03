@@ -89,6 +89,29 @@ public class GraphPanel extends JPanel implements Runnable {
 		rootMembrane = mem;
 		rootGraphMembrane = new GraphMembrane(mem, this);
 	}
+
+	/**
+	 * すべての膜を表示に設定
+	 *
+	 */
+	public void showAll(){
+		if(rootGraphMembrane == null){
+			return;
+		}
+		rootGraphMembrane.showAll();
+	}
+	
+	/**
+	 * すべての膜を非表示に設定
+	 *
+	 */
+	public void hideAll(){
+		if(rootGraphMembrane == null){
+			return;
+		}
+		rootGraphMembrane.setViewInside(false);
+		
+	}
 	
 	public void calc(){
 		if(null == rootGraphMembrane){ return; }

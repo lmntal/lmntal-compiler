@@ -95,6 +95,22 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		panel.setRootMem(mem);
 	}
 	
+	/**
+	 * すべての膜を表示に設定
+	 *
+	 */
+	public void showAll(){
+		panel.showAll();
+	}
+	
+	/**
+	 * すべての膜を非表示に設定
+	 *
+	 */
+	public void hideAll(){
+		panel.hideAll();
+	}
+	
 	public void calc(){
 		panel.calc();
 	}

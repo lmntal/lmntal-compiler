@@ -93,6 +93,13 @@ public class GraphMembrane {
 	/////////////////////////////////////////////////////////////////
 	
 	/**
+	 * 対応するMembraneオブジェクトを返す．
+	 */
+	public Membrane getMembrane(){
+		return myMem;
+	}
+	
+	/**
 	 * 膜の中身を再設定する
 	 * @param mem 再設定対象の膜
 	 */
@@ -164,7 +171,7 @@ public class GraphMembrane {
 					targetGraphMem = new GraphMembrane(this, targetMem);
 					memMapTemp.put(targetMem, targetGraphMem);
 				}
-				if(targetGraphMem.getViewInside()){
+				if(getViewInside()){
 					if(posX1 > targetGraphMem.getPosX1() - margin1){ posX1 = targetGraphMem.getPosX1() - margin1; }
 					if(posY1 > targetGraphMem.getPosY1() - margin1){ posY1 = targetGraphMem.getPosY1() - margin1; }
 					if(posX2 < targetGraphMem.getPosX2() + margin1){ posX2 = targetGraphMem.getPosX2() + margin1; }
@@ -682,6 +689,18 @@ public class GraphMembrane {
 				}
 			}
 			
+		}
+	}
+
+	/**
+	 * すべての膜を表示に設定
+	 *
+	 */
+	public void showAll(){
+		viewInside = true;
+		Iterator<GraphMembrane> graphMems = memMap.values().iterator();
+		while(graphMems.hasNext()){
+			graphMems.next().showAll();
 		}
 	}
 	

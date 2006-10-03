@@ -1,18 +1,20 @@
 package gui2;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -34,7 +36,7 @@ public class SubFrame extends JFrame {
 	// 定数
 	
 	final static
-	public int WINDOW_WIDTH = 200;
+	public int WINDOW_WIDTH = 250;
 	
 	final static
 	public int WINDOW_HIEGHT = 600;
@@ -59,6 +61,10 @@ public class SubFrame extends JFrame {
 	private JPanel buttonPanel;
 	
 	private JButton goBt = new JButton("Go ahead");
+	
+	private JButton hideBt = new JButton("Hide All");
+
+	private JButton showBt = new JButton("Show All");
 
 	static private JList memList = new JList();
 	static private DefaultListModel model = new DefaultListModel();
@@ -66,6 +72,8 @@ public class SubFrame extends JFrame {
 	private JSlider js1 = new JSlider(JSlider.VERTICAL, SLIDER_MIN, SLIDER_MAX, SLIDER_DEF);
 	
 	private LMNtalFrame mainFrame;
+	
+	private MemListSelectionListener memListener;
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -80,7 +88,6 @@ public class SubFrame extends JFrame {
 		initComponents();
 		
 		LMNtalFrame.setMagnification((double)js1.getValue() / (double)js1.getMaximum());
-		
 		setVisible(true);
 	}
 	/////////////////////////////////////////////////////////////////
@@ -90,15 +97,23 @@ public class SubFrame extends JFrame {
 		MemCellRenderer renderer = new MemCellRenderer();
 		memList.setCellRenderer(renderer);
 		memList.setModel(model);
-		memList.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+//		memList.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
 		memList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		memList.addListSelectionListener(new MemListSelectionListener());
+		memListener = new MemListSelectionListener();
+		memList.addListSelectionListener(memListener);
+		memList.addMouseListener(memListener);
+		memList.addMouseWheelListener(memListener);
 		
         JScrollPane sp = new JScrollPane();
         sp.getViewport().setView(memList);
-		sp.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
-        
+//		sp.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+//        
+//		showBt.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.SIZE));
+//		hideBt.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.SIZE));
+
 		goBt.addActionListener(new ActionAdapter(this));
+		showBt.addActionListener(new ShowAllAdapter(this));
+		hideBt.addActionListener(new HideAllAdapter(this));
 
 		js1.addChangeListener(new SliderChanged());
 		js1.setPaintTicks(true);      //目盛りを表示
@@ -108,15 +123,54 @@ public class SubFrame extends JFrame {
 		js1.setPaintLabels(true);    //目盛りﾗﾍﾞﾙを表示
 
 		setTitle(TITLE);
-		buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
+//		buttonPanel = new JPanel();
+//		buttonPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+//		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
+		getContentPane().setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.gridwidth = 3;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+		getContentPane().add(goBt, gbc);
+
+		gbc.gridy = 1;
+		gbc.gridwidth = 1;
+        gbc.gridheight = 2;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.weightx = 0.0;
+        gbc.weighty = 1.0;
+		getContentPane().add(js1, gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+		getContentPane().add(showBt, gbc);
+
+		gbc.gridx = 2;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+		getContentPane().add(hideBt, gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		gbc.gridwidth = 2;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+		getContentPane().add(sp, gbc);
 		
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(goBt, BorderLayout.PAGE_START);
-		getContentPane().add(js1, BorderLayout.LINE_START);
-		getContentPane().add(buttonPanel, BorderLayout.CENTER);
-		
-		buttonPanel.add(sp);
+//		buttonPanel.add(showBt);
+//		buttonPanel.add(hideBt);
+//		buttonPanel.add(sp);
 	}
 
 	static
@@ -158,6 +212,28 @@ public class SubFrame extends JFrame {
 		}
 	}
 	
+	private class ShowAllAdapter implements ActionListener {
+		SubFrame frame;
+		ShowAllAdapter(SubFrame f) {
+			frame = f;
+		}
+		public void actionPerformed(ActionEvent e) {
+			frame.mainFrame.showAll();
+			initModel();
+		}
+	}
+	
+	private class HideAllAdapter implements ActionListener {
+		SubFrame frame;
+		HideAllAdapter(SubFrame f) {
+			frame = f;
+		}
+		public void actionPerformed(ActionEvent e) {
+			frame.mainFrame.hideAll();
+			initModel();
+		}
+	}
+	
     class MemCellRenderer extends JCheckBox implements ListCellRenderer{
     	
         public MemCellRenderer() { }
@@ -173,18 +249,40 @@ public class SubFrame extends JFrame {
         	GraphMembrane mem = (GraphMembrane)value;
             setText(mem.toString());
             this.setSelected(mem.getViewInside());
+            if(mem.getViewInside() && memListener != null){
+            	memListener.addSelectedItem(mem);
+            } else if(memListener != null) {
+            	memListener.removeSelectedItem(mem);
+            }
             return this;
         }
     }
     
-    class MemListSelectionListener implements ListSelectionListener {
+    class MemListSelectionListener 
+    implements ListSelectionListener,
+    MouseListener,
+    MouseWheelListener 
+    {
     	private Set<GraphMembrane> selectedItem = new HashSet<GraphMembrane>();
+    	private boolean clicked = false;
     	
     	public MemListSelectionListener(){
     		super();
     	}
 
+    	public void addSelectedItem(GraphMembrane mem){
+    		selectedItem.add(mem);
+    	}
+    	
+    	public void removeSelectedItem(GraphMembrane mem){
+    		selectedItem.remove(mem);
+    	}
+
 		public void valueChanged(ListSelectionEvent e) {
+			if(clicked){
+	            memList.clearSelection();
+	            return;
+			}
         	int selectedIndex = memList.getSelectedIndex(); 
         	if((selectedIndex < 0) || (selectedIndex >= model.getSize())){ return; }
         	GraphMembrane mem = (GraphMembrane)model.getElementAt(selectedIndex);
@@ -196,6 +294,57 @@ public class SubFrame extends JFrame {
             	selectedItem.add(mem);
             }
             memList.clearSelection();
+            clicked = true;
+		}
+
+		public void mouseClicked(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void mousePressed(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void mouseReleased(MouseEvent e) {
+			// TODO Auto-generated method stub
+			clicked = false;
+			
+		}
+
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void mouseExited(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void mouseWheelMoved(MouseWheelEvent e) {
+			// TODO Auto-generated method stub
+			if(e.getUnitsToScroll() < 0){
+				int delta = e.getScrollAmount();
+				for(; delta > 0; delta--){
+					if(js1.getValue() >= js1.getMaximum()){
+						break;
+					}
+					js1.setValue(js1.getValue() + 1);
+					break;
+				}
+			} 
+			else if(e.getUnitsToScroll() > 0){
+				int delta = e.getScrollAmount();
+				for(; delta > 0; delta--){
+					if(js1.getValue() <= js1.getMinimum()){
+						break;
+					}
+					js1.setValue(js1.getValue() - 1);
+					break;
+				}
+			}
 		}
     	
     }

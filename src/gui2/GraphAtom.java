@@ -23,6 +23,9 @@ public class GraphAtom {
 	
 	final static
 	private Color ATOM_PIN_COLOR = new Color(0, 0, 0);
+	
+	final static
+	private Color ATOM_NAME_COLOR = new Color(0, 0, 0);
 
 	/////////////////////////////////////////////////////////////////
 	
@@ -70,8 +73,10 @@ public class GraphAtom {
 		int ig = 0x7F - ((name.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
 		int ib = 0x7F - ((name.hashCode() & 0x00F) >> 0) * 0x08 + 0x7F;
 		
-		g.setColor(new Color(ir, ig, ib));
+		g.setColor(ATOM_NAME_COLOR);
 		g.drawString(name, posX, posY);
+
+		g.setColor(new Color(ir, ig, ib));
 		g.fillOval(posX,
 				posY,
 				getAtomSize(),
