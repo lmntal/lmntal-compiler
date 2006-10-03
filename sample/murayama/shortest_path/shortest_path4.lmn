@@ -11,7 +11,7 @@ init({
 				java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 				String s = br.readLine();
 			 	String r[] = s.split(" ");
-	  			Atom e = mem.newAtom(new Functor("p", 2));
+	  			Atom e = mem.newAtom(new SymbolFunctor("p", 2));
 				Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[0])));
 				Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
 	
@@ -36,7 +36,7 @@ init({
 				java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 				String s = br.readLine();
 			 	String r[] = s.split(" ");
-	  			Atom e = mem.newAtom(new Functor("e", 4));
+	  			Atom e = mem.newAtom(new SymbolFunctor("e", 4));
 				Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[0])));
 				Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
 				Atom result3 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[2])));
