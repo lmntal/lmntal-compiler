@@ -1,8 +1,8 @@
 r=seq.run({},[{
-		//	thread.create(4).
+		thread.create(1).
 		/* ノードをファイルから読出し */
-		rd(0)=io.fileReader([:testfile3:]).
-		rd(X,O) :- class(O,"java.io.BufferedReader"),X<94 | rd(X+1,O), readnode(O).
+		rd(0)=io.fileReader([:1000nodes_1:]).
+		rd(X,O) :- class(O,"java.io.BufferedReader"),X<662 | rd(X+1,O), readnode(O).
 		
 		readnode(Object) :- class(Object, "java.io.BufferedReader") |
 			[:/*inline*/
@@ -28,7 +28,7 @@ r=seq.run({},[{
 		p(X,Y), startpoint(ST) :- X=\=ST, int(Y) | startpoint(ST), p(X, {}, 100000, Y).
 	},
 	{
-		arrayset(94) = new(94).
+		arrayset(662) = new(662).
 		arraynew@@
 		H=new(Length) :- int(Length) | H=[:/*inline*/
 			int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
@@ -72,8 +72,8 @@ r=seq.run({},[{
 	},
 	{	
 		/* リンクをファイルから読出し */
-		r(0)=io.fileReader([:testfile2:]).
-		r(X,O) :- class(O,"java.io.BufferedReader"),X<134 | r(X+1,O), readlink(O).
+		r(0)=io.fileReader([:1000edges_1:]).
+		r(X,O) :- class(O,"java.io.BufferedReader"),X<993 | r(X+1,O), readlink(O).
 		
 		readlink(Object) :- class(Object, "java.io.BufferedReader") |
 			[:/*inline*/
@@ -82,10 +82,10 @@ r=seq.run({},[{
 					String s = br.readLine();
 				 	String r[] = s.split(" ");
 		  			Atom e = mem.newAtom(new SymbolFunctor("e", 4));
-					Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
-					Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[2])));
-					Atom result3 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[3])));
-					Atom result4 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[4])));
+					Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[0])));
+					Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
+					Atom result3 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[2])));
+					Atom result4 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[3])));
 		
 					mem.newLink(e, 0, result1, 0);
 					mem.newLink(e, 1, result2, 0);
@@ -139,43 +139,46 @@ r=seq.run({},[{
 		setarray = A, p(new(X), {$p}, W, Thread) :- int(X)| 
 			p(Link, {$p}, W, Thread), 
 			arrayget = update(A, X , old, Link).
-	}
+	},
+	/* スレッド割り当て */
+	{
+		p(X, {$p}, Weight, 100) :- int(Weight) | {$p, w(Weight)}, null(X).
+		e(X,Y,Weight, 100) :- int(Weight) |	e(X,Y,Weight).
+
+		scatter_node@@
+		p(X, {$p}, Weight, Thread) :- int(Weight), Thread=\=100 |
+			thread.at(Thread, {{$p, w(Weight)}}), null(X).
+		scatter_edge@@
+		e(X,Y,Weight,Thread) :- int(Weight), Thread=\=100 |
+			thread.at(Thread, {e(X,Y,Weight)}).
+	},
+	/* Moore-Bellman-Fordのアルゴリズムによる最短経路探索 */
+	{
+		go.
+
+		mbf1 @@
+		go,
+		 thread.any({e(V1, V2, Weight)}),
+		 thread.any({{+(V1), w(PoA), $p1}}),
+		 thread.any({{+(V2), w(PoB), $p2}})
+						:- PoA + Weight < PoB, PoB2 = PoA + Weight |
+							go,
+							thread.any({e(V1, V2, Weight)}),
+							thread.any({{+(V1), w(PoA), $p1}}),
+							thread.any({{+(V2), w(PoB2), $p2}}).
+	
+		mbf2 @@
+		go,
+		 thread.any({e(V2, V1, Weight)}),
+		 thread.any({{+(V1), w(PoA), $p1}}),
+		 thread.any({{+(V2), w(PoB), $p2}})
+						:- PoA + Weight < PoB, PoB2 = PoA + Weight |
+							go,
+							thread.any({e(V2, V1, Weight)}),
+							thread.any({{+(V1), w(PoA), $p1}}),
+							thread.any({{+(V2), w(PoB2), $p2}}).
+	}	
 ]).
 
-/* スレッド割り当て 
-scatter({
-	scatter_node@@
-	p(X, {$p}, Weight, Thread) :- int(X), int(Weight), Thread=\=100 |
-		thread.at(Thread, {{$p, w(X, Weight)}}).
-	scatter_edge@@
-	e(X,Y,Weight,Thread) :- int(Weight), Thread=\=100 |
-		thread.at(Thread, {e(X,Y,Weight)}).
-}).*/
 
-/* Moore-Bellman-Fordのアルゴリズムによる最短経路探索 
-mbf({
-	mbf1 @@
-	go,
-	 thread.any({e(V1, V2, Weight)}),
-	 thread.any({{+(V1), w(X1, PoA), $p1}}),
-	 thread.any({{+(V2), w(X2, PoB), $p2}})
-					:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
-						go,
-						thread.any({e(V1, V2, Weight)}),
-						thread.any({{+(V1), w(X1, PoA), $p1}}),
-						thread.any({{+(V2), w(X2, PoB2), $p2}}).
 
-	mbf2 @@
-	go,
-	 thread.any({e(V2, V1, Weight)}),
-	 thread.any({{+(V1), w(X1, PoA), $p1}}),
-	 thread.any({{+(V2), w(X2, PoB), $p2}})
-					:- PoA + Weight < PoB, int(X1), int(X2), PoB2 = PoA + Weight |
-						go,
-						thread.any({e(V2, V1, Weight)}),
-						thread.any({{+(V1), w(X1, PoA), $p1}}),
-						thread.any({{+(V2), w(X2, PoB2), $p2}}).
-}).*/
-
-//init({$p, @p}/), scatter({@q}) :- scattering({$p,@p,@q}).
-//scattering({$p, @p}/), mbf({@q}) :- timer:benchmark(X,"Elapsed Time"), mbfing({+(X),$p,@p,@q}).
