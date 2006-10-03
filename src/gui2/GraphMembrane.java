@@ -416,55 +416,23 @@ public class GraphMembrane {
 				int memCenterX = (targetMem.getPosX1() + targetMem.getPosX2()) / 2;
 				int memCenterY = (targetMem.getPosY1() + targetMem.getPosY2()) / 2;
 				// 膜の上部に重なっていた場合
-				if(targetMemPosY1 < atomBottomY &&
-						memCenterY >= targetAtom.getPosY()){
+				if(targetMemPosX1 < atomBottomX &&
+						targetMemPosX2 > targetAtom.getPosX() &&
+						targetMemPosY1 < atomBottomY &&
+						targetMemPosY2 > targetAtom.getPosY()){
 					
-					int dy = targetMemPosY1 - atomBottomY;
-					double ddy = MEM_REPULSIVE_FORCE * dy;
+					double dx = memCenterX - targetAtom.getPosX();
+					double dy = memCenterY - targetAtom.getPosY();
+					double sizeX = memCenterX - targetMemPosX1;
+					double sizeY = memCenterY - targetMemPosY1;
 					
-					// 膜の左部に重なっていた場合
-					if(targetMemPosX1 < atomBottomX &&
-							memCenterX >= targetAtom.getPosX()){
-						int dx = targetMemPosX1 - atomBottomX;
-						
-						double ddx = MEM_REPULSIVE_FORCE * dx;
-						targetAtom.moveDelta(ddx, ddy);
-					}
-					// 膜の右部に重なっていた場合
-					else if(targetMemPosX2 > targetAtom.getPosX() &&
-							memCenterX < atomBottomX){
-						int dx = targetMemPosX2 - targetAtom.getPosX();
-						
-						double ddx = MEM_REPULSIVE_FORCE * dx;
-						targetAtom.moveDelta(ddx, ddy);
-					}
+					double edgeLen = Math.sqrt((double)((dx * dx) + (dy * dy)));
+					double length = Math.sqrt((double)((sizeX * sizeX) + (sizeY * sizeY)));
+					double f = (edgeLen - (length * GraphPanel.getMagnification()));
+					double ddx = 0.05 * f * dx / edgeLen;
+					double ddy = 0.05 * f * dy / edgeLen;
 					
-				}
-				// 膜の下部に重なっていた場合
-				else if(targetMemPosY2 > targetAtom.getPosY() &&
-						memCenterY < atomBottomY){
-					
-					int dy = targetMemPosY2 - targetAtom.getPosY();
-					double ddy = MEM_REPULSIVE_FORCE * dy;
-					
-					// 膜の左部に重なっていた場合
-					if(targetMemPosX1 < atomBottomX &&
-							memCenterX >= targetAtom.getPosX()){
-						int dx = targetMemPosX1 - atomBottomX;
-						
-						double ddx = MEM_REPULSIVE_FORCE * dx;
-						targetAtom.moveDelta(ddx, ddy);
-						
-					}
-					// 膜の右部に重なっていた場合
-					else if(targetMemPosX2 > targetAtom.getPosX() &&
-							memCenterX < atomBottomX){
-						int dx = targetMemPosX2 - targetAtom.getPosX();
-						
-						double ddx = MEM_REPULSIVE_FORCE * dx;
-						targetAtom.moveDelta(ddx, ddy);
-						
-					}
+					targetAtom.moveDelta(-ddx, -ddy);
 				}
 			}
 		}
