@@ -9,12 +9,18 @@ AUTHOR
 	Atsuyuki Inui
 
 HISTORY
-	2006/09/22(Fri)
-	2006/09/23(Sat) oop.ref を追加
+	2006/10/03(Tue) oop.use
 	2006/09/26(Tue) oop.msg
+	2006/09/23(Sat) oop.ref を追加
+	2006/09/22(Fri)
  */
 {
 module(oop).
+
+/**
+ * インポート
+ */
+oop.use :- .
 
 /**
  * 継承
