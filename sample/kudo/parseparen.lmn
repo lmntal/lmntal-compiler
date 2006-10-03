@@ -1,0 +1,15 @@
+r=['(',1,2,'(',3,')','(',')','(','(',4,')',')',')'].
+
+L=['('|R1], L1=[')'|R], $list[R1,L1] :-
+	ground($list) |
+	L=[parens(R2,L2)|R], $list[R2,L2].
+
+L=[parens(L1,R2)|R], $list1[L1,R1], R1=['('|L2], $list2[L2,R2] :-
+	ground($list1), ground($list2) |
+	L=['('|L1], $list1[L1,R1], R1=[parens(L2,R2)|R], $list2[L2,R2].
+
+L=[parens(L1,R2)|R], $list1[L1,R1], R1=[')'|L2], $list2[L2,R2] :-
+	ground($list1), ground($list2) |
+	L=[parens(L1,R1)|L2], $list1[L1,R1], $list2[L2,R2], R2=[')'|R].
+
+D=parens(L,R) :- D=parens(L), R=[].
