@@ -56,6 +56,8 @@ public class GraphMembrane {
 	private int posY1;
 	private int posX2;
 	private int posY2;
+	private double dx;
+	private double dy;
 	private boolean viewInside = false;
 	private GraphAtom dummyGraphAtom = new GraphAtom(null);
 	static private GraphPanel panel;
@@ -97,6 +99,16 @@ public class GraphMembrane {
 	 */
 	public Membrane getMembrane(){
 		return myMem;
+	}
+	
+	/**
+	 * 移動距離を設定する
+	 * @param x
+	 * @param y
+	 */
+	public void moveDelta(int x, int y){
+		dx += x;
+		dy += y;
 	}
 	
 	/**
@@ -183,12 +195,13 @@ public class GraphMembrane {
 			SubFrame.resetList(memMap);
 			
 			/////////////////////////////////////////////////////////////
-			// アトムの位置調節
+			// アトムや膜の位置調節
 			relaxEdge();
 			relaxAngle();
 			membraneAndAtomRepulsive();
 			membraneAttraction();
 			atomAndAtomRepulsive();
+			memAndMemRepulsive();
 			moveCalc();
 		}
 		
@@ -224,6 +237,8 @@ public class GraphMembrane {
 	 */
 	private void moveCalc(){
 		if(!viewInside){
+			dummyGraphAtom.moveDelta(dx, dy);
+			dx = dy =0;
 			dummyGraphAtom.moveCalc();
 			return;
 		}
@@ -231,8 +246,11 @@ public class GraphMembrane {
 		
 		// 膜に直接含まれるアトムが対象
 		while(graphAtoms.hasNext()){
-			graphAtoms.next().moveCalc();
+			GraphAtom targetAtom = graphAtoms.next();
+			targetAtom.moveDelta(dx, dy);
+			targetAtom.moveCalc();
 		}
+		dx = dy =0;
 		
 	}
 	
@@ -383,8 +401,63 @@ public class GraphMembrane {
 		
 	}
 	
+
 	/**
-	 * 膜斥力
+	 * 膜間斥力
+	 *
+	 */
+	private void memAndMemRepulsive(){
+		Iterator<GraphMembrane> graphMems = memMap.values().iterator();
+
+		while(graphMems.hasNext()){
+			GraphMembrane targetMem = graphMems.next();
+			int targetCenterX = targetMem.getCenterX();
+			int targetCenterY = targetMem.getCenterY();
+			int targetSizeX = targetMem.getSizeX();
+			int targetSizeY = targetMem.getSizeY();
+			// すべての子膜との重なりを検出
+			Iterator<GraphMembrane> graphNthMems = memMap.values().iterator();
+			while(graphNthMems.hasNext()){
+				GraphMembrane nthMem = graphNthMems.next();
+				if(targetMem.equals(nthMem)){ continue; }
+				int nthCenterX = nthMem.getCenterX();
+				int nthCenterY = nthMem.getCenterY();
+				int nthSizeX = nthMem.getSizeX();
+				int nthSizeY = nthMem.getSizeY();
+				
+				if((Math.abs(targetCenterX - nthCenterX) < targetSizeX + nthSizeX) &&
+						(Math.abs(targetCenterY - nthCenterY) < targetSizeY + nthSizeY))
+			    {
+					double dx = targetCenterX - nthCenterX;
+					double dy = targetCenterY - nthCenterY;
+					int ddx = (int)(0.05 * dx);
+					int ddy = (int)(0.05 * dy);
+					
+					targetMem.moveDelta(ddx, ddy);
+					nthMem.moveDelta(-ddx, -ddy);
+				}
+			}
+		}
+	}
+	
+	public int getSizeX(){
+		return getPosX2() - getPosX1() + (GraphAtom.getAtomSize() * 2);
+	}
+	
+	public int getSizeY(){
+		return getPosY2() - getPosY1() + (GraphAtom.getAtomSize() * 2);
+	}
+	
+	public int getCenterX(){
+		return (getPosX1() + getPosX2()) / 2;
+	}
+	
+	public int getCenterY(){
+		return (getPosY1() + getPosY2()) / 2;
+	}
+
+	/**
+	 * 膜アトム間斥力
 	 *
 	 */
 	// FIXME: 四分割で、四方向ではなく、中心から離れるように。
