@@ -45,9 +45,10 @@ H=door.new(R1, R2) :- H={
 module(maze).
 H=maze.new :- H={
 	//field
+	rooms=ooplist.new(0).
 	//method
-	addRoom(R) :- room(R).
-	H=roomNo(N) :- int(N) | H={}.
+	addRoom(R), rooms=Rooms :- rooms=[R|Rooms].
+	H=roomNo(N), rooms=Rooms :- int(N) | rooms=ooplist.get(Rooms, N, H).
 	}.
 }.
 
