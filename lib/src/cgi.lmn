@@ -55,12 +55,14 @@ module(cgi).
 cgi.use :- {
 	io.use.
 	method=sys.getenv("REQUEST_METHOD").
-	method("GET") :- query=sys.getenv("QUERY_STRING").
-	method("POST") :- query=io.getContents.
-		
-	query=Query :- query2=string.split("&", Query).
-	query2(Query) :- query3=list.map(split, Query).
-	H=[[split, S]|Z] :- H=[string.split("=", S)|Z].
+	method("GET")  :- query1=sys.getenv("QUERY_STRING").
+	method("POST") :- query1=io.gets.
+	
+	query1=Query :- query2=string.split("&", Query).
+	query2=Query :- query3=list_split(Query).
+	
+	H=list_split([Head|Tail]) :- H=[string.split("=", Head)|list_split(Tail)].
+	H=list_split([]) :- H=[].
 }.
 {query3(Query), $p[], @p}/ :- ground(Query) | query(Query).
 
