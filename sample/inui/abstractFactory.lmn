@@ -37,7 +37,7 @@ H=door.new(R1, R2) :- H={
 	isopen(false).
 	//method
 	//TODO
-	H=other_side_from(R) :-H={room(R)}.
+	H=otherSideFrom(R) :-H={room(R)}.
 	}.
 }.
 
@@ -53,53 +53,52 @@ H=maze.new :- H={
 
 {
 module(mazeGame).
-H=mazeGame.new :- H={
-	//field
-	//method
-	H=createMaze :- H={
+H=mazeGame.createMaze :- H={
 		maze=maze.new.
-		r1=oop.ref(room.new(1), r12).
-		r2=oop.ref(room.new(2), r22).
+	r1=oop.ref(room.new(1), r12).
+	r2=oop.ref(room.new(2), r22).
 
-		r1(R1), r2(R2), r12(R12), r22(R22), maze(M) :-
-			door1=oop.ref(door.new(R1, R2), door12),
-			oop.msg(M, {addRoom(R12), addRoom(R22)}).
+	r1(R1), r2(R2), r12(R12), r22(R22), maze(M) :-
+		door1=oop.ref(door.new(R1, R2), door12),
+		oop.msg(M, {addRoom(R12), addRoom(R22)}).
 		
-		r12(R), door1(D) :- oop.msg(R, {
+	r12(R), door1(D) :- oop.msg(R, {
+		setSide(0, wall.new).
+		setSide(1, D).
+		setSide(2, wall.new).
+		setSide(3, wall.new).
+		}).
+	r22(R), door12(D) :- oop.msg(R, {
+		setSide(0, wall.new).
+		setSide(1, wall.new).
+		setSide(2, wall.new).
+		setSide(3, D).
+		}).
+	}.
+
+H=mazeGame.createMaze(MazeFactory) :- H=oop.msg(MazeFactory, {
+	m=makeMaze.
+	r1=oop.ref(oop.ref(makeRoom(1), r12), r13).
+	r2=oop.ref(oop.ref(makeRoom(2), r22), r23).
+	r1(R1), r2(R2) :- d11=oop.ref(makeDoor(R1, R2), d12).
+	m(M), r12(R1), r22(R2) :- oop.msg(M, {addRoom(R1),addRoom(R2)}).
+		
+	r13(R), d11(D) :- oop.msg(R, {
 			setSide(0, wall.new).
 			setSide(1, D).
 			setSide(2, wall.new).
 			setSide(3, wall.new).
-			}).
-		r22(R), door12(D) :- oop.msg(R, {
+		}).
+	r23(R), d12(D) :- oop.msg(R, {
 			setSide(0, wall.new).
 			setSide(1, wall.new).
 			setSide(2, wall.new).
 			setSide(3, D).
-			}).
-		}.
-
-	H=createMaze(MazeFactory) :- H=return(oop.msg(MazeFactory, {
-		m=makeMaze.
-		r1=oop.ref(oop.ref(makeRoom(1), r12), r13).
-		r2=oop.ref(oop.ref(makeRoom(2), r22), r23).
-		r1(R1), r2(R2) :- d11=oop.ref(makeDoor(R1, R2), d12).
-		m(M), r12(R1), r22(R2) :- oop.msg(M, {addRoom(R1),addRoom(R2)}).
+		}).
+	}).
 		
-		r13(R), d11(D) :- oop.msg(R, {
-				setSide(0, wall.new).
-				setSide(1, D).
-				setSide(2, wall.new).
-				setSide(3, wall.new).
-			}).
-		r23(R), d12(D) :- oop.msg(R, {
-				setSide(0, wall.new).
-				setSide(1, wall.new).
-				setSide(2, wall.new).
-				setSide(3, D).
-			}).
-		})).
-	}.
+H=mazeGame.createMaze(MazeBuilder) :- H=oop.msg(MazeBuilder, {buildMaze}).
+
 }.
 
 {
@@ -131,5 +130,4 @@ H=bombedMazeFactory.new :- H={
 }.
 
 oop.use.
-a=mazeGame.new.
-a(A) :- oop.msg(A, {maze=createMaze(mazeFactory.new)}).
+maze=mazeGame.createMaze(mazeFactory.new).
