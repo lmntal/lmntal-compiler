@@ -1,0 +1,67 @@
+/**
+NAME
+	Object-Oriented Programming module
+
+SYNOPSIS
+	オブジェクト指向プログラミングモジュール
+
+AUTHOR
+	Atsuyuki Inui
+
+HISTORY
+	2006/10/03(Tue) oop.use
+	2006/09/26(Tue) oop.msg
+	2006/09/23(Sat) oop.ref を追加
+	2006/09/22(Fri)
+ */
+{
+module(oop).
+
+/**
+ * インポート
+ */
+oop.use :- ({module(M), @p} :- unary(M) | ()).
+
+/**
+ * 継承
+ */
+oop.extends({$p, @p}) :- $p, @p.
+
+/**
+ * オブジェクトの参照を取得する
+ */
+H=oop.ref({$p, @p}, R) :- H={$p, @p, +RR}, R=RR.
+
+/**
+ * メッセージ送信
+ */
+oop.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg}.
+{$p,@p,H=return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
+{$p,@p,H=return({$r,@r})} :- unary(H) | H={$r,@r}, {$p,@p}.
+
+//送信後にオブジェクトが返る
+H=oop.msg({$p,@p}, {$msg,@msg}) :- H={$p,@p,$msg,@msg}.
+H={$p,@p,S=return(R)} :- unary(H), ground(R) | S=R, H={$p,@p}.
+H={$p,@p,S=return({$r,@r})} :- unary(H) | S={$r,@r}, H={$p,@p}.
+
+H={$p,@p,return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
+H={$p,@p,return({$r,@r})} :- H={$r,@r}, {$p,@p}.
+
+/**
+ * null
+ */
+H=null :- H={}.
+}.
+
+////TEST
+//{
+//module(test).
+//H=test.new :- H={
+//	test.
+//	H=get :- H=return("ok").
+//	H=clone :- H=return(test.new).
+//	}.
+//}.
+//
+//t=test.new.
+//t(T) :- oop.msg(T, {r1=get, r2=clone}).
