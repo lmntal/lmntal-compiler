@@ -106,7 +106,7 @@ public class GraphMembrane {
 	 * @param x
 	 * @param y
 	 */
-	public void moveDelta(int x, int y){
+	public void moveDelta(double x, double y){
 		dx += x;
 		dy += y;
 	}
@@ -242,13 +242,21 @@ public class GraphMembrane {
 			dummyGraphAtom.moveCalc();
 			return;
 		}
-		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
 		
+		Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
 		// 膜に直接含まれるアトムが対象
 		while(graphAtoms.hasNext()){
 			GraphAtom targetAtom = graphAtoms.next();
 			targetAtom.moveDelta(dx, dy);
 			targetAtom.moveCalc();
+		}
+		
+
+		// 膜に直接含まれる膜が対象
+		Iterator<GraphMembrane> graphMems = memMap.values().iterator();
+		while(graphMems.hasNext()){
+			GraphMembrane targetMem = graphMems.next();
+			targetMem.moveDelta(dx, dy);
 		}
 		dx = dy =0;
 		
@@ -377,8 +385,8 @@ public class GraphMembrane {
 			memCenterX =  panel.getWidth() / 2;
 			memCenterY =  panel.getHeight() / 2;
 		} else {
-			memCenterX = (getPosX1() + getPosX2()) / 2;
-			memCenterY = (getPosY1() + getPosY2()) / 2;
+			memCenterX = getCenterX();
+			memCenterY = getCenterY();
 		}
 		// 膜に直接含まれるアトムが対象
 		while(graphAtoms.hasNext()){
@@ -397,6 +405,18 @@ public class GraphMembrane {
 			double ddy = 0.01 * dy;
 			
 			targetAtom.moveDelta(ddx, ddy);
+		}
+		// 膜に直接含まれる膜が対象
+		Iterator<GraphMembrane> graphMems = memMap.values().iterator();
+		while(graphMems.hasNext()){
+			GraphMembrane targetMem = graphMems.next();
+			double dx = memCenterX - targetMem.getCenterX();
+			double dy = memCenterY - targetMem.getCenterY();
+			
+			double ddx = 0.01 * dx;
+			double ddy = 0.01 * dy;
+			
+			targetMem.moveDelta(ddx, ddy);
 		}
 		
 	}
@@ -430,8 +450,9 @@ public class GraphMembrane {
 			    {
 					double dx = targetCenterX - nthCenterX;
 					double dy = targetCenterY - nthCenterY;
-					int ddx = (int)(0.05 * dx);
-					int ddy = (int)(0.05 * dy);
+					
+					double ddx = 0.05 * dx;
+					double ddy = 0.05 * dy;
 					
 					targetMem.moveDelta(ddx, ddy);
 					nthMem.moveDelta(-ddx, -ddy);
