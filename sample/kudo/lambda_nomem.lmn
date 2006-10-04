@@ -1,0 +1,68 @@
+%% 修正版のlambda計算エンコーディングに型をつけてみる
+%cpをcpoとcpiにわけた
+%rmをrmとrmiにわけた
+
+%膜を使わないようにしてみる. cpをcpmと表現。cp2は'-'で
+%cpm(MINUSS,PLUSS,SUPERS,SUB,TOP)
+
+%  N=n(0) :- N=lambda(rm, lambda(X, X)).
+n1@@  N=n(1) :- N=lambda(F,lambda(X,apply(F,X))).
+%  N=n(2) :- N=lambda(cp(F0,F1), lambda(X,apply(F0,apply(F1,X)))).
+%  N=n(3) :- N=lambda(cp(F0,cp(F1,F2)), lambda(X,
+%              apply(F0,apply(F1,apply(F2,X))))).
+%  N=n(4) :- N=lambda(cp(F0,cp(F1,cp(F2,F3))), lambda(X,
+%              apply(F0,apply(F1,apply(F2,apply(F3,X)))))).
+
+s@@  H=apply(s, I) :- int(I), J=I+1 | H=J.
+
+%
+%  r=apply(apply(apply(n(4), n(3)), s), 0).
+  r=apply(apply(n(1),s),0).
+%  r=apply(s,0).
+%  r=apply(lambda(cp(X1,X2),apply(X1,X2)),s).
+
+
+
+
+
+
+beta@@ H=apply(lambda(A, B), C) :- H=B, A=C.
+
+l_c@@  lambda(A,B)=cpo(C,D,L), cpm(M,c([L|R1],R2),c(SUP1,SUP2),SUB,TOP) :- %cp{+L,$q} :-
+         C=lambda(E,F), D=lambda(G,H), A=cpi(E,G,L1), B=cpo(F,H,L2),
+         cpm(c([L1|MR],MR),c([L2|PR],PR),c(SUP,SUP),S,[]), cpm(M,c(R1,R2),c([S|SUP1],SUP2),SUB,TOP).
+%         cp{cp2{+L1},+L2,sub(S)}, cp{super(S),$q}.
+a_c@@  apply(A,B)=cpo(C,D,L), cpm(M,c([L|R1],R2),SUP,SUB,TOP) :-%cp{+L,$q} :-
+         C= apply(E,F), D= apply(G,H), A=cpo(E,G,L1), B=cpo(F,H,L2),
+         cpm(M,c([L1,L2|R1],R2),SUP,SUB,TOP).
+%         cp{+L1,+L2,$q}.
+
+c_c1@@ cpi(A,B,L1)=cpo(C,D,L2), cpm(c([L1|MR1],MR2),c([L2|PR1],PR2),SUP,SUB,TOP):- %cp{cp2{+L1,$p},+L2,$q} :-
+	A=C, B=D, cpm(c(MR1,MR2),c(PR1,PR2),SUP,SUB,TOP).%cp{cp2{$p},$q}.
+
+c_c2@@ cpi(A,B,L1)=cpo(C,D,L2), 
+	cpm(c([L1|MR1],MR2),P1,SUP,SUB,TOP1), 
+	cpm(M2,c([L2|PR1],PR2),SUP2,SUB2,top) :-%cp{cp2{+L1,$p},$q}, cp{+L2,top,$r}
+          C=cpi(E,F,L3), D=cpi(G,H,L4), cpm(c([L3,L4|MR1],MR2),P1,SUP,SUB,TOP1), %cp{cp2{+L3,+L4,$p},$q},
+            A=cpo(E,G,L5), B=cpo(F,H,L6), cpm(M2,c([L5,L6|PR1],PR2),SUP2,SUB2,top).%cp{+L5,+L6,top,$r}.
+u_c@@  $u=cpo(A,B,L), cpm(M,c([L|PR1],PR2),SUP,SUB,TOP) :- %cp{+L,$q} :-
+	unary($u) | A=$u, B=$u, cpm(M,c(PR1,PR2),SUP,SUB,TOP).%cp{$q}.
+
+%promote@@ cp{cp2{},$p,sub(S)}, cp{$q,super(S)} :- cp{$p,$q}.
+promote@@ cpm(c(M,M),c(P1,P2),c(SUP1,SUP2),S,[]), cpm(M2,c(P3,P4),c([S|SUP3],SUP4),SUB2,TOP2) :-
+	P2=P3,SUP2=SUP3,cpm(M2,c(P1,P4),c(SUP1,SUP4),SUB2,TOP2).
+
+l_r@@  lambda(A,B)=rm :- A=rmi, B=rm.
+a_r@@  apply(A,B)=rm :- A=rm, B=rm.
+c_r1@@ cpo(A,B,L)=rmi, cpm(M,c([L|PR1],PR2),SUP,SUB,TOP) :-%cp{+L,$q} :-
+	A=rmi, B=rmi, cpm(M,c(PR1,PR2),SUP,SUB,TOP).%cp{$q}.
+c_r2@@ cpi(A,B,L)=rm, cpm(c([L|MR1],MR2),PLUS,SUP,SUB,TOP) :-%cp{cp2{+L,$p},$q} :-
+	A=rm, B=rm, cpm(c(MR1,MR2),PLUS,SUP,SUB,TOP).%cp{cp2{$p},$q}.
+r_r@@  rmi=rm :- .
+u_r@@  $u=rm :- unary($u) | .
+
+c2c@@  A=cp(B,C) :- A=cpo(B,C,L), cpm(c(M,M),c([L|P],P),c(SUP,SUP),[],top).%cp{+L,top}.
+gc@@   cpm(c(M,M),c(P,P),c(SUP,SUP),[],top):-().%cp{top} :- .
+
+%環状リストを回すルール
+cycl@@C=c([K|R],L) :- C=c(R,L1),L=[K|L1].

@@ -1,7 +1,9 @@
 package type;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import runtime.Functor;
@@ -49,6 +51,12 @@ public class TypeConstraintsInferer {
 	public void infer() throws TypeConstraintException {
 		// 全ての膜について、ルールの左辺最外部出現かどうかの情報を得る
 		collectLHSMems();
+		
+		// TODO Active Head Condition をチェックする
+		
+		// 個数制約を推論する
+		new QuantityInferrer().inferQuantity();
+		
 		// 出現制約を推論する
 		inferOccurrence();
 		// 全ての引数についてモード変数、型変数を振る
@@ -136,7 +144,7 @@ public class TypeConstraintsInferer {
 
 	/** 引数制約を推論する */
 	private void inferArgument() throws TypeConstraintException{
-		new RuleArgumentInferrer(root).infer();
+		new ArgumentInferrer(root).infer();
 	}
 
 	/**
@@ -150,13 +158,12 @@ public class TypeConstraintsInferer {
 	private void addConstraintAboutLinks(int sign, LinkOccurrence lo, LinkOccurrence b) throws TypeConstraintException{
 		int out = outOfPassiveAtom((Atom)lo.atom);
 		if(out == lo.pos){ // データアトムの出力引数
-			if(outOfPassiveAtom((Atom)b.atom) != TypeEnv.ACTIVE)
-				//TODO 出力引数同士が継っているのでエラー
+			if(outOfPassiveAtom((Atom)b.atom) == b.pos)//!= TypeEnv.ACTIVE)
 				throw new TypeConstraintException("MODE ERROR : output arguments connected each other.");
-			addReceiveConstraint(-sign, b, ((Atom)lo.atom).functor);
+			else addReceiveConstraint(-sign, b, ((Atom)lo.atom).functor);
 		}
 		else{
-			if(outOfPassiveAtom((Atom)b.atom) != TypeEnv.ACTIVE)
+			if(outOfPassiveAtom((Atom)b.atom) == b.pos) //!= TypeEnv.ACTIVE)
 				addConstraintAboutLinks(sign, b, lo);
 			else addUnifyConstraint(sign, lo, b);
 		}
@@ -269,20 +276,20 @@ public class TypeConstraintsInferer {
 	 * @author kudo
 	 *
 	 */
-	class RuleArgumentInferrer{
+	class ArgumentInferrer{
 		RuleStructure rule;
 		
 		Set<ContextDef> defs;
 
 		/** */
-		RuleArgumentInferrer(RuleStructure rule){
+		ArgumentInferrer(RuleStructure rule){
 			this.rule = rule;
 		}
 		/**
 		 * グローバルルート膜に対してのみ呼ばれる
 		 * @param top
 		 */
-		RuleArgumentInferrer(Membrane top){
+		ArgumentInferrer(Membrane top){
 			RuleStructure tmprule = new RuleStructure(new Membrane(null),"tmp");
 			tmprule.leftMem = new Membrane(null);
 			tmprule.rightMem = top;
@@ -303,7 +310,7 @@ public class TypeConstraintsInferer {
 			//ルールについて走査する
 			Iterator<RuleStructure> itr = mem.rules.iterator();
 			while (itr.hasNext()) {
-				new RuleArgumentInferrer(itr.next()).infer();
+				new ArgumentInferrer(itr.next()).infer();
 			}
 
 			// 子膜について走査する
@@ -407,6 +414,49 @@ public class TypeConstraintsInferer {
 					// そいつの左辺出現の相方をとってくる
 					LinkOccurrence partnerOfPartner = getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
 					addUnifyConstraint(-1,lhsPartner, partnerOfPartner);
+				}
+			}
+		}
+	}
+
+	/**
+	 * 量的解析(?)
+	 * @author kudo
+	 *
+	 */
+	class QuantityInferrer{
+		QuantityInferrer(){
+			
+		}
+		void inferQuantity(){
+			
+		}
+		
+		/** アトムについての「量」を管理するクラス */
+		class AtomQuantity{
+//			Functor f;
+			int min = 0;
+			int max = 0;
+			AtomQuantity(){}
+			AtomQuantity merge(AtomQuantity aq1, AtomQuantity aq2){
+				AtomQuantity ret = new AtomQuantity();
+				ret.min = (aq1.min<aq2.min)?aq1.min:aq2.min;
+				ret.max = (aq1.max>aq2.max)?aq1.max:aq2.max;
+				return ret;
+			}
+		}
+		class Quantitys{
+			Map<Functor,AtomQuantity> functorToQuantity;
+			Quantitys(){
+				functorToQuantity = new HashMap();
+			}
+			void putAtomQuantity(Functor f, AtomQuantity aq){
+				if(!functorToQuantity.containsKey(f)){
+					functorToQuantity.put(f,aq);
+				}
+				else{
+					AtomQuantity aqold = functorToQuantity.get(f);
+					functorToQuantity.put(f,aq.merge(aqold, aq));
 				}
 			}
 		}
