@@ -36,16 +36,13 @@ H=oop.ref({$p, @p}, R) :- H={$p, @p, +RR}, R=RR.
  * メッセージ送信
  */
 oop.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg}.
-{$p,@p,H=return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
-{$p,@p,H=return({$r,@r})} :- unary(H) | H={$r,@r}, {$p,@p}.
-
-//送信後にオブジェクトが返る
-H=oop.msg({$p,@p}, {$msg,@msg}) :- H={$p,@p,$msg,@msg}.
-H={$p,@p,S=return(R)} :- unary(H), ground(R) | S=R, H={$p,@p}.
-H={$p,@p,S=return({$r,@r})} :- unary(H) | S={$r,@r}, H={$p,@p}.
-
-H={$p,@p,return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
-H={$p,@p,return({$r,@r})} :- H={$r,@r}, {$p,@p}.
+//送信後に送信対象のオブジェクトが返る
+R=oop.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg,return(R)}.
+//送信後に戻り値が返る
+//H={$p,@p,return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
+//H={$p,@p,return({$r,@r})} :- H={$r,@r}, {$p,@p}.
+{$p,@p,return({$r,@r}),return(R)} :- R={$r,@r}, {$p,@p}.
+{$p,@p,return(R1),return(R2)} :- ground(R1), ground(R2) | R1=R2, {$p,@p}.
 
 /**
  * null
