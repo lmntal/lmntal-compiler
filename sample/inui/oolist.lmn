@@ -1,0 +1,23 @@
+/**
+NAME
+	Object-Oriented List
+
+SYNOPSIS
+	オブジェクトを格納するリスト
+
+AUTHOR
+	Atsuyuki Inui
+
+HISTORY
+	2006/10/03(Tue) 
+ */
+{
+module(oolist).
+
+H=oolist.new(N) :- N = 0 | H=[].
+H=oolist.new(N) :- N > 0 | H=[{}|oolist.new(N-1)].
+
+H=oolist.get([{$p,@p}|Tail], N, Ref) :- N=0 | H=[{$p,@p,+Ref}|Tail].
+H=oolist.get([Head|Tail], N, Ref) :- N>0 | H=[Head|oolist.get(Tail,N-1,Ref)].
+
+}.
