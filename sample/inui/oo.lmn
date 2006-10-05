@@ -1,43 +1,44 @@
 /**
 NAME
-	Object-Oriented Programming module
+	Object-Oriented module
 
 SYNOPSIS
-	オブジェクト指向プログラミングモジュール
+	オブジェクト指向モジュール
 
 AUTHOR
 	Atsuyuki Inui
 
 HISTORY
+	2006/10/05(Thu) oop --> oo
 	2006/10/03(Tue) oop.use
 	2006/09/26(Tue) oop.msg
 	2006/09/23(Sat) oop.ref を追加
 	2006/09/22(Fri)
  */
 {
-module(oop).
+module(oo).
 
 /**
  * インポート
  */
-oop.use :- ({module(M), @p} :- unary(M) | ()).
+oo.use :- ({module(M), @p} :- unary(M) | ()).
 
 /**
  * 継承
  */
-oop.extends({$p, @p}) :- $p, @p.
+oo.extends({$p, @p}) :- $p, @p.
 
 /**
  * オブジェクトの参照を取得する
  */
-H=oop.ref({$p, @p}, R) :- H={$p, @p, +RR}, R=RR.
+H=oo.ref({$p, @p}, R) :- H={$p, @p, +RR}, R=RR.
 
 /**
  * メッセージ送信
  */
-oop.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg}.
+oo.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg}.
 //送信後に送信対象のオブジェクトが返る
-R=oop.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg,return(R)}.
+R=oo.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg,return(R)}.
 //送信後に戻り値が返る
 //H={$p,@p,return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
 //H={$p,@p,return({$r,@r})} :- H={$r,@r}, {$p,@p}.
@@ -61,4 +62,4 @@ H=null :- H={}.
 //}.
 //
 //t=test.new.
-//t(T) :- oop.msg(T, {r1=get, r2=clone}).
+//t(T) :- oo.msg(T, {r1=get, r2=clone}).
