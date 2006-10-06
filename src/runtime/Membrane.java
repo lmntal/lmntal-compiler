@@ -917,6 +917,30 @@ public final class Membrane extends QueuedEntity {
 		return oldAtomToNewAtom;
 	}
 	
+	public Map copyCellsFrom2(Membrane srcmem){
+		memToCopyMap = new HashMap();
+		Iterator it = srcmem.memIterator();
+		while(it.hasNext()){
+			Membrane omem = (Membrane)it.next();
+			Membrane nmem = newMem();
+			memToCopyMap.put(omem,nmem.copyCellsFrom(omem));
+			nmem.copyRulesFrom(omem);
+		}
+		it = srcmem.atomIterator();
+		Map oldAtomToNewAtom = new HashMap();
+		while(it.hasNext()){
+			Atom oatom = (Atom)it.next();
+			if(oldAtomToNewAtom.containsKey(oatom))continue;
+			if(oatom.getFunctor().getName()!="+" && !oatom.getFunctor().isInsideProxy()){
+			    oldAtomToNewAtom.put(oatom,newAtom(oatom.getFunctor()));
+				//0引数アトムならば引数走査なし　(2006/05/26 kudo)
+				if(oatom.getArity()>0)
+					oldAtomToNewAtom = copyAtoms(oatom,oldAtomToNewAtom);
+			}
+		}
+		return oldAtomToNewAtom;
+	}
+	
 	/**
 	 * 指定されたアトムより,辿れるアトムを全てこの膜にコピーする.
 	 * リンク構造も再現する.
