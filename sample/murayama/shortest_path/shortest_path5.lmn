@@ -1,9 +1,10 @@
 r=seq.run({},[{
-		thread.create(1).
 		/* ノードをファイルから読出し */
-		rd(0)=io.fileReader([:1000nodes_1:]).
-		rd(X,O) :- class(O,"java.io.BufferedReader"),X<662 | rd(X+1,O), readnode(O).
+		rd(0)=io.fileReader([:500nodes_4:]).
+		readnode1@@
+		rd(X,O) :- class(O,"java.io.BufferedReader"),X<336 | rd(X+1,O), readnode(O).
 		
+		readnode2@@
 		readnode(Object) :- class(Object, "java.io.BufferedReader") |
 			[:/*inline*/
 				try {
@@ -21,14 +22,20 @@ r=seq.run({},[{
 					me.remove();
 				} catch(Exception e) {Env.e(e);}
 			:](Object).
-	},
-	{
+
 		startpoint(1).
-		p(X,Y), startpoint(ST) :- X==ST,  int(Y) | startpoint(ST), p(X, {}, 0, Y).
-		p(X,Y), startpoint(ST) :- X=\=ST, int(Y) | startpoint(ST), p(X, {}, 100000, Y).
 	},
 	{
-		arrayset(662) = new(662).
+		setweight2@@
+		p(X,Y), startpoint(ST) :- X=\=ST, int(Y) | startpoint(ST), p(X, {}, 100000, Y).	
+	},
+	{
+		setweight1@@
+		p(X,Y), startpoint(ST) :- X==ST,  int(Y) | startpoint(ST), p(X, {}, 0, Y).
+
+		arrayset(336) = new(336).
+	},
+	{
 		arraynew@@
 		H=new(Length) :- int(Length) | H=[:/*inline*/
 			int l = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
@@ -49,6 +56,7 @@ r=seq.run({},[{
 		arrayset(N) = A, p(X, {$p}, W, Thread) :- N>0, int(X)| 
 			p(Link, {$p}, W, Thread), 
 			arrayset(N-1) = update(A, X , old, Link).
+		arrayset0@@
 		H = arrayset(0) :- H = arrayget.
 		arrayupdate@@
 		H=update(array(A), I, OldValue, NewValue) :- int(I) |
@@ -69,12 +77,15 @@ r=seq.run({},[{
 		old(X) :-int(X) |.
 		olddec2@@
 		got(old) :-.
+
+		r(0)=io.fileReader([:500edges_4:]).
 	},
 	{	
 		/* リンクをファイルから読出し */
-		r(0)=io.fileReader([:1000edges_1:]).
-		r(X,O) :- class(O,"java.io.BufferedReader"),X<993 | r(X+1,O), readlink(O).
+		readlink1@@
+		r(X,O) :- class(O,"java.io.BufferedReader"),X<504 | r(X+1,O), readlink(O).
 		
+		readlink2@@
 		readlink(Object) :- class(Object, "java.io.BufferedReader") |
 			[:/*inline*/
 				try {
@@ -140,22 +151,29 @@ r=seq.run({},[{
 			p(Link, {$p}, W, Thread), 
 			arrayget = update(A, X , old, Link).
 	},
+	{
+		thread.create(4).
+	},
+	{
+		dontscatter_node@@
+		p(X, {$p}, Weight, 100) :- int(Weight) | {$p, w(Weight)}, null(X).
+		dontscatter_edge@@
+		e(X,Y,Weight, 100) :- int(Weight) |	e(X,Y,Weight).
+	},
 	/* スレッド割り当て */
 	{
-		p(X, {$p}, Weight, 100) :- int(Weight) | {$p, w(Weight)}, null(X).
-		e(X,Y,Weight, 100) :- int(Weight) |	e(X,Y,Weight).
 
 		scatter_node@@
 		p(X, {$p}, Weight, Thread) :- int(Weight), Thread=\=100 |
 			thread.at(Thread, {{$p, w(Weight)}}), null(X).
+
 		scatter_edge@@
 		e(X,Y,Weight,Thread) :- int(Weight), Thread=\=100 |
 			thread.at(Thread, {e(X,Y,Weight)}).
+		go.
 	},
 	/* Moore-Bellman-Fordのアルゴリズムによる最短経路探索 */
 	{
-		go.
-
 		mbf1 @@
 		go,
 		 thread.any({e(V1, V2, Weight)}),
@@ -177,7 +195,8 @@ r=seq.run({},[{
 							thread.any({e(V2, V1, Weight)}),
 							thread.any({{+(V1), w(PoA), $p1}}),
 							thread.any({{+(V2), w(PoB2), $p2}}).
-	}	
+	},{}
+
 ]).
 
 
