@@ -7,13 +7,16 @@
 	killer.
 	sys.perpetual(on).
 
-	{button, position(0,0), label("label1")}.
+	{button, id("1"), position(0,0), label("label1")}.
 	
-	{button, position(1,0)}.
+	{button, id("2"), position(1,0), label(1)}.
 	
-	{textarea, position(0,1), weight(1.0, 1.0)}.
+	{textarea, id("3"), position(0,1), weight(3.0, 2.0)}.
 	
-	{textarea, position(1,1), text("aaaaaaaaaaa"), weight(1.0, 1.0)}.
+	{textarea, id("4"), position(1,1), text("aaaaaaaaaaa"), weight(1.0, 1.0)}.
 	
+	{clicked, label(_IX), $p} :- {label(_IX + 1), $p}.
+
+
 	
 }

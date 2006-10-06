@@ -3,14 +3,16 @@ package toolkit;
 import java.awt.GridBagLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
-import runtime.Membrane;
 import runtime.Atom;
 import runtime.Dumper;
 import runtime.Functor;
+import runtime.Membrane;
 import runtime.SymbolFunctor;
 
 public class LMNtalWindow extends JFrame {
@@ -26,19 +28,22 @@ public class LMNtalWindow extends JFrame {
 	
 	final static
 	private Functor KILLER_ATOM = new SymbolFunctor("killer", 0);
-	
+		
 	final static
 	private Functor BUTTON_FUNCTOR = new SymbolFunctor("button",0);
 	
 	final static
 	private Functor TEXTAREA_FUNCTOR = new SymbolFunctor("textarea",0);
-	
+
+	final static
+	private Functor ID_FUNCTOR = new SymbolFunctor("id", 1);
+
 	/////////////////////////////////////////////////////////////////
 
 	// ウィンドウが閉じられると，プログラムを強制的に終了させるかどうかのフラグ
 	private boolean killer = false;
 
-	private String memID;
+//	private String memID;
 	private Membrane mymem;
 	private String windowName;
 	private int sizeX = 0;
@@ -46,6 +51,8 @@ public class LMNtalWindow extends JFrame {
 	private GridBagLayout layout;
 
 	private boolean sizeUpdate = false;
+	
+	private Map componentMap = new HashMap();
 
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -68,8 +75,8 @@ public class LMNtalWindow extends JFrame {
 		Atom targetAtom;
 		
 		mymem = mem;
-		// membrane ID
-		memID = mem.getGlobalMemID();
+//		// membrane ID
+//		memID = mem.getGlobalMemID();
 				
 		// name atom
 		atomIte= mem.atomIteratorOfFunctor(NAME_ATOM);
@@ -91,14 +98,37 @@ public class LMNtalWindow extends JFrame {
 	 */
 	public void setChildMem(Membrane mem){
 	
+		String key = getID(mem); // IDを取得
+		if(key == null) return;
+		System.out.println(key);
+		//componentMapのkeyにID(key)があったら更新
+		if(componentMap.containsKey(key)) {
+			LMNComponent component = 
+				(LMNComponent)componentMap.get(key); //=button? textarea?
+			component.resetMembrane(mem);
+			return;
+		}
+		
 		if(mem.getAtomCountOfFunctor(BUTTON_FUNCTOR)>0){
 			LMNtalButton button = new LMNtalButton(this, mem);
+			componentMap.put(key, button);
 		}
 
 		if(mem.getAtomCountOfFunctor(TEXTAREA_FUNCTOR)>0){
 			LMNtalTextArea textarea = new LMNtalTextArea(this, mem);
+			componentMap.put(key, textarea);
 		}
-
+	}
+	
+	private String getID(Membrane mem){
+		/** position(X,Y)のアトムがあったとき、gridxとgridyを取得する(単位はGridBag)。 */
+		String id = null;
+		Iterator idAtomIte = mem.atomIteratorOfFunctor(ID_FUNCTOR);
+		if(idAtomIte.hasNext()){
+			Atom atom = (Atom)idAtomIte.next();
+			id = atom.nth(0);
+		}
+		return id;
 	}
 	
 	/**

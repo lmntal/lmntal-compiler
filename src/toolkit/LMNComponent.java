@@ -25,10 +25,6 @@ public class LMNComponent {
 	final static
 	private Functor LABEL_ATOM = new SymbolFunctor("label",1);
 	
-	final static
-	private Functor TEXT_ATOM = new SymbolFunctor("text",1);
-	
-	
 	private GridBagConstraints gbc = new GridBagConstraints(); //位置
 
 	private boolean isLabelUpdate = false;
@@ -53,7 +49,7 @@ public class LMNComponent {
 	}
 	
 	abstract public Component initComponent();
-	
+		
 	/** position(X,Y)のアトムがあったとき、gridxとgridyを取得する(単位はGridBag)。 */
 	public void setPosition (Membrane mem) {
 		int positionX = 0;
@@ -97,21 +93,10 @@ public class LMNComponent {
 		}
 		return label;
 	}
-	
-	/** text("")のアトムがあったとき、textの内容を取得する */
-	public String getText(Membrane mem){
-		String text = "text";
-		Iterator textAtomIte = mem.atomIteratorOfFunctor(TEXT_ATOM);
-		if(textAtomIte.hasNext()){
-			Atom atom = (Atom)textAtomIte.next();
-			text = atom.nth(0);
-		}
-		return text;
-	}
-	
-	public void resetMembrane (Membrane mem){
-		setMembrane(mem);
 		
+	public void resetMembrane (Membrane mem){
+		mymem = mem;
+		setMembrane(mem);
 	}
 
 	public boolean getLabelUpdate(){
