@@ -644,13 +644,14 @@ public class Translator {
 			writer.write("			isRulesSetted = true;\n");
 			writer.write("			setCompiledRules();\n");
 			writer.write("		}\n");
+			writer.write("		Object[] argVar;");
 			for (int i=0; i<rulenum; i++){
 				Rule rule = (Rule) it.next();
 				writer.write("		rule = (Rule)compiledRules.get(" + i + ");\n");
 				writer.write("		success = false;\n");			
 				writer.write("		start = Util.getTime();\n");
 				writer.write("		{\n");
-				writer.write("		Object[] argVar = new Object[2];\n");
+				writer.write("		argVar = new Object[2];\n");
 				writer.write("		argVar[0] = mem;\n");
 				writer.write("		argVar[1] = atom;\n");
 				writer.write("		success = exec" + rule.atomMatchLabel.label + "(argVar, false);\n");
@@ -714,12 +715,15 @@ public class Translator {
 			writer.write("			isRulesSetted = true;\n");
 			writer.write("			setCompiledRules();\n");
 			writer.write("		}\n");
+			writer.write("		Object[] argVar;");
 			for (int i=0; i<rulenum; i++){
 				Rule rule = (Rule) it.next();
 				writer.write("		rule = (Rule) compiledRules.get(" + i + ");\n");
 				writer.write("		success = false;\n");			
+				writer.write("		argVar = new Object[1];\n");
+				writer.write("		argVar[0] = mem;\n");
 				writer.write("		start = Util.getTime();\n");
-				writer.write("		success = exec" + rule.memMatchLabel.label + "(mem, nondeterministic);\n");
+				writer.write("		success = exec" + rule.memMatchLabel.label + "(argVar, nondeterministic);\n");
 				writer.write("		stop = Util.getTime();\n");
 				writer.write("		synchronized(rule){\n");
 				if(Env.profile == Env.PROFILE_ALL) {
