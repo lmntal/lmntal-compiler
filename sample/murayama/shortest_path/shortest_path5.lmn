@@ -1,8 +1,17 @@
-r=seq.run({},[{
+r=seq.run({},[
+	{
+	arg0=sys.argv.
+	arg0=[H|R] :- tnum=integer.parse(H), arg1=R.
+	arg1=[H|R] :- nnum=integer.parse(H), arg2=R.
+	arg2=[H|R] :- enum=integer.parse(H), arg3=R.
+	arg3=[H|R] :- nfile=H, arg4=R.
+	arg4=[H|R] :- efile=H, arg5=R.
+	},
+	{
 		/* ノードをファイルから読出し */
-		rd(0)=io.fileReader([:500nodes_4:]).
+		nfile(F) :- rd(0)=io.fileReader(F).
 		readnode1@@
-		rd(X,O) :- class(O,"java.io.BufferedReader"),X<336 | rd(X+1,O), readnode(O).
+		rd(X,O), nnum(N) :- class(O,"java.io.BufferedReader"), int(N), X<N | rd(X+1,O), nnum(N), readnode(O).
 		
 		readnode2@@
 		readnode(Object) :- class(Object, "java.io.BufferedReader") |
@@ -33,7 +42,7 @@ r=seq.run({},[{
 		setweight1@@
 		p(X,Y), startpoint(ST) :- X==ST,  int(Y) | startpoint(ST), p(X, {}, 0, Y).
 
-		arrayset(336) = new(336).
+		nnum(N) :- int(N) | arrayset(N) = new(N).
 	},
 	{
 		arraynew@@
@@ -78,12 +87,12 @@ r=seq.run({},[{
 		olddec2@@
 		got(old) :-.
 
-		r(0)=io.fileReader([:500edges_4:]).
+		efile(F) :- r(0)=io.fileReader(F).
 	},
 	{	
 		/* リンクをファイルから読出し */
 		readlink1@@
-		r(X,O) :- class(O,"java.io.BufferedReader"),X<504 | r(X+1,O), readlink(O).
+		r(X,O), enum(N) :- class(O,"java.io.BufferedReader"), int(N), X<N | r(X+1,O), enum(N), readlink(O).
 		
 		readlink2@@
 		readlink(Object) :- class(Object, "java.io.BufferedReader") |
@@ -152,7 +161,7 @@ r=seq.run({},[{
 			arrayget = update(A, X , old, Link).
 	},
 	{
-		thread.create(4).
+		tnum(N) :- int(N) | thread.create(N).
 	},
 	{
 		dontscatter_node@@
