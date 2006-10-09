@@ -56,10 +56,11 @@ public class GraphMembrane {
 	private int posY1;
 	private int posX2;
 	private int posY2;
+	private int pinPosY;
 	private double dx;
 	private double dy;
 	private boolean viewInside = false;
-	private GraphAtom dummyGraphAtom = new GraphAtom(null);
+	private GraphAtom dummyGraphAtom = new GraphAtom(null, this);
 	static private GraphPanel panel;
 	
 	
@@ -147,7 +148,7 @@ public class GraphMembrane {
 					atomMapTemp.put(atom, targetAtom);
 				}
 				else{
-					targetAtom = new GraphAtom(atom);
+					targetAtom = new GraphAtom(atom, this);
 					atomMapTemp.put(atom, targetAtom);
 				}
 				if(targetAtom != null){
@@ -451,8 +452,8 @@ public class GraphMembrane {
 					double dx = targetCenterX - nthCenterX;
 					double dy = targetCenterY - nthCenterY;
 					
-					double ddx = 0.05 * dx;
-					double ddy = 0.05 * dy;
+					double ddx = 0.02 * dx;
+					double ddy = 0.02 * dy;
 					
 					targetMem.moveDelta(ddx, ddy);
 					nthMem.moveDelta(-ddx, -ddy);
@@ -688,6 +689,20 @@ public class GraphMembrane {
 		int deltaPos = (int)((GraphAtom.ATOM_DEF_SIZE / 2) * GraphPanel.getMagnification());
 		int margin1 = GraphAtom.getAtomSize() * 2;
 		int margin2 = GraphAtom.getAtomSize() * 4;
+
+		
+		((Graphics2D)g).setStroke(MEM_STROKE);
+		
+		// 塗りつぶしなし時の膜描画
+		if(viewInside && !root){
+			g.setColor(MEM_COLOR);
+			g.drawRoundRect(posX1 - margin1,
+					posY1 - margin1,
+					posX2 - posX1 + margin2,
+					posY2 - posY1 + margin2,
+					ROUND,
+					ROUND);
+		}
 		synchronized (atomMap) {
 			
 			if(getViewInside()){
@@ -741,7 +756,7 @@ public class GraphMembrane {
 					{
 						continue;
 					}
-					targetAtom.paint(g);
+					targetAtom.paint(g, panel);
 				}
 				
 				// 膜の描画
@@ -752,20 +767,8 @@ public class GraphMembrane {
 				}
 			}
 			
-			
-			((Graphics2D)g).setStroke(MEM_STROKE);
-			// 塗りつぶしなし
-			if(viewInside && !root){
-				g.setColor(MEM_COLOR);
-				g.drawRoundRect(posX1 - margin1,
-						posY1 - margin1,
-						posX2 - posX1 + margin2,
-						posY2 - posY1 + margin2,
-						ROUND,
-						ROUND);
-			}
-			// 塗りつぶしあり
-			else if(!root){
+			// 塗りつぶしあり時の膜描画
+			if(!viewInside && !root){
 				int posX = posX1 - margin1;
 				int posY = posY1 - margin1;
 				int sizeX = posX2 - posX1 + margin2;
@@ -787,13 +790,9 @@ public class GraphMembrane {
 						ROUND,
 						ROUND);
 				
+				// ピンの描画
 				if(dummyGraphAtom.isClipped()){
-					int pinSize = (sizeX < sizeY) ? sizeX / 5 : sizeY / 5;
-					g.setColor(MEM_PIN_COLOR);
-					g.fillOval(posX + (sizeX / 2) - (pinSize / 2),
-							posY + (sizeY / 2) - (pinSize / 2),
-							pinSize,
-							pinSize);
+					dummyGraphAtom.paintPin(g, panel, -GraphAtom.getAtomSize() / 2, -GraphAtom.getAtomSize() / 2);
 				}
 			}
 			

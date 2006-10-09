@@ -26,26 +26,30 @@ public class GraphAtom {
 	
 	final static
 	private Color ATOM_NAME_COLOR = new Color(0, 0, 0);
-
+	
 	/////////////////////////////////////////////////////////////////
 	
 	/////////////////////////////////////////////////////////////////
 	
 	private int posX;
 	private int posY;
+	private int pinPosY;
 	private double dx;
 	private double dy;
 	private String name;
 	private boolean isHold = false;
 	private boolean clipped = false;
+	public int pinAnime = 0;
 	
 	final public Atom me;
+	public GraphMembrane myMem;
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	public GraphAtom(Atom atom){
+	public GraphAtom(Atom atom, GraphMembrane graphMem){
 		posX = (int)(Math.random() * 500.0);
 		posY = (int)(Math.random() * 500.0);
+		myMem = graphMem;
 		if(atom != null){
 			me = atom;
 			name = atom.getName();
@@ -67,7 +71,7 @@ public class GraphAtom {
 		return (me == null) ? true : false;
 	}
 	
-	public void paint(Graphics g){
+	public void paint(Graphics g, GraphPanel panel){
 		// [0, 7] -> [128, 255] for eash R G B
 		int ir = 0x7F - ((name.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;
 		int ig = 0x7F - ((name.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
@@ -90,12 +94,20 @@ public class GraphAtom {
 				getAtomSize());
 		
 		if(clipped){
-			g.setColor(ATOM_PIN_COLOR);
-			g.fillOval(posX + getAtomSize() / 3,
-					posY + getAtomSize() / 3,
-					getAtomSize() / 3,
-					getAtomSize() / 3);
+			paintPin(g, panel, 0, 0);
 		}
+	}
+	
+	public void paintPin(Graphics g, GraphPanel panel, int deltaX, int deltaY){
+		g.drawImage(panel.getPin(),
+				posX + deltaX + (getAtomSize() / 2) ,
+				pinPosY + deltaY + (getAtomSize() / 2) - panel.getPin().getHeight(panel),
+				panel
+				);
+		if((pinAnime != 0) &&(pinPosY < posY)){ pinPosY += posY / pinAnime; }
+		if(pinPosY > posY){ pinAnime = 0; }
+		if(pinAnime == 0){ pinPosY = posY; }
+		
 	}
 	
 	/** 実際にアトムを移動させる */
@@ -132,7 +144,21 @@ public class GraphAtom {
 	/** アトムを固定する（ドラッグ用） */
 	public void setHold(boolean hold){ isHold = hold; }
 	
-	/** アトムを固定する（ダブルクリック用） */
-	public void flipClip(){ clipped = !clipped; }
+	/** アトムを固定する（ダブルクリック + !Ctrl用） */
+	public void flipClip(Graphics g, GraphPanel panel){ 
+		clipped = !clipped;
+		if(clipped){
+			pinAnime = 5;
+			pinPosY = 0;
+		}
+	}
+	
+	/** 膜を表示する（ダブルクリック + Ctrl用） */
+	public void flipViewMem(Graphics g, GraphPanel panel){
+		clipped = false;
+		myMem.setViewInside(true);
+		
+	}
+
 	
 }

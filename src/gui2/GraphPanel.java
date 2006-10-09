@@ -2,9 +2,10 @@ package gui2;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -25,12 +26,28 @@ public class GraphPanel extends JPanel implements Runnable {
 	private GraphMembrane rootGraphMembrane;
 	private Membrane rootMembrane;
 	private GraphAtom moveAtom;
+	private GraphPanel panel;
 	
 	static
 	private double magnification = 0.5;
 	
+	static
+	private Image PIN;
+	
 	public GraphPanel() {
 		super();
+		panel = this;
+		PIN = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gabyou.gif"));
+		// PINのロード待ち　ここから
+		MediaTracker mt = new MediaTracker(this);
+		mt.addImage(PIN, 0);
+		try {
+			mt.waitForAll();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		//　PINのロード待ち　ここまで
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		
@@ -45,14 +62,22 @@ public class GraphPanel extends JPanel implements Runnable {
 			
 			/** 
 			 * マウスが押されたときの処理
-			 * <p>押されたらclickedを出力する。座標の取得など。</p>
+			 * <p>ctrlが押されえていれば，膜を表示する
+			 * <p>ctrlが押されていなければアトムをつかむ
+			 * <p>ctｒlが押されていなく，かつダブルクリックならばアトムの固定
 			 */
 			public void mousePressed(MouseEvent e) {
 				//determine nearest node
 				moveAtom = rootGraphMembrane.getNearestAtom(e.getPoint());
 				if(e.getButton() == MouseEvent.BUTTON1){
+					if(e.isControlDown()){
+						moveAtom.flipViewMem(OSI.getGraphics(), panel);
+						return;
+					}
 					if(e.getClickCount() == 2){
-						moveAtom.flipClip();
+						if(!e.isControlDown()){
+							moveAtom.flipClip(OSI.getGraphics(), panel);
+						}
 					}
 				}
 				moveAtom.setHold(true);
@@ -89,7 +114,10 @@ public class GraphPanel extends JPanel implements Runnable {
 		rootMembrane = mem;
 		rootGraphMembrane = new GraphMembrane(mem, this);
 	}
-
+	
+	public Image getPin(){
+		return PIN;
+	}
 	/**
 	 * すべての膜を表示に設定
 	 *
@@ -144,7 +172,7 @@ public class GraphPanel extends JPanel implements Runnable {
 		while (me == th) {
 			try {
 				calc();
-				Thread.sleep(100);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 			}
 			repaint();
