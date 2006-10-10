@@ -1,0 +1,40 @@
+% Logic Model Checking, 2nd Term 2006, CS 118
+% First Assignment 2.
+
+/*
+
+NAME
+	Model Checking (nondeterministic LMNtal version)
+
+SYNOPSIS
+    An integer variable x is declared globally and initialized to zero.
+    Three parallel threads (asynchronous processes) execute the following statements,
+    respectively (given in pseudo-code here):
+    -Thread1: await (x != 0); x = x ? 2
+    -Thread2: await (x != 0); x = x ? 3
+    -Thread3: await (x == 0); x = x + 5
+    Write a Spin model that captures the behavior of this system and prove that
+    the final value of x is always zero.
+
+AUTHOR
+	Ryo Okabe
+
+HISTORY
+	2006/10/10(Tue)
+
+*/
+
+% answer
+% Execute this program with options --nd and --interactive, 
+% and you'll get an answer as below.
+% 
+% x(0), @601 ? n
+% no
+
+% initial comditions
+x(0). t1. t2. t3.
+
+% Thread1, Thread2, Thread3
+t1,x(X) :- int(X),X=\=0 | x(X-2).
+t2,x(X) :- int(X),X=\=0 | x(X-3).
+t3,x(X) :- int(X),X=:=0 | x(X+5).

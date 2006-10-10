@@ -1,0 +1,48 @@
+% Logic Model Checking, 2nd Term 2006, CS 118
+% First Assignment 2.
+
+/*
+
+NAME
+	Model Checking (nondeterministic LMNtal version)
+
+SYNOPSIS
+	Two integer variable are declared: x and y.
+	The variable x is initialized to ten, and the variable y is initialized to zero.
+	Two parallel threads execute the following statements, respectively:
+	-Thread1: while(x!=y) { x=x-1; y=y+1; }
+	-Thread2: await(x==y); atomically{ x=8; y=2;}
+	(a) Use Spin to check if both threads always terminate, 
+    and to show what the final values of x and y can be upom termination.
+	(b) Explain what happens if the assignments to x and y in Thread2 are not
+    done atomically and confirm your explanation with Spin.
+
+AUTHOR
+	Ryo Okabe
+
+HISTORY
+	2006/09/13(Wed)
+
+*/
+
+% answer
+% (a) x=8,y=2 or x=5,y=5
+% (b) If the condition x!=y in thread1 is evaluated right after
+%     the assignment x=8 in thread2 is done, then x will be 8 and y will be 5.
+%     After that, two ways are possible:
+%     the loop statement is executed or the assignment y=2 is done.
+%     So in this case, the model has an infinite state.
+
+% initial conditions
+a,b,x(10),y(0).
+
+% Thread1
+thread1_1@@ a,x(X),y(Y) :- int(X),int(Y),X=\=Y | x(X-1),y(Y+1),a.
+thread1_2@@ a,x(X),y(Y) :- int(X),int(Y),X=:=Y | x(X),y(Y).
+
+% Thread2
+% atomically
+b,x(X),y(Y) :- int(X),int(Y),X=:=Y | x(8),y(2).
+% not atomically
+//thread2_1@@ b,x(X),y(Y) :- int(X),int(Y),X=:=Y | x(8),y(Y),t2.
+//thread2_2@@ y(Y),t2 :- int(Y) | y(2).
