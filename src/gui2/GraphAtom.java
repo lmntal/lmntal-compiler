@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
+
 import runtime.Atom;
 
 public class GraphAtom {
@@ -42,13 +44,17 @@ public class GraphAtom {
 	public int pinAnime = 0;
 	
 	final public Atom me;
-	public GraphMembrane myMem;
+	private GraphMembrane myMem;
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
 	public GraphAtom(Atom atom, GraphMembrane graphMem){
-		posX = (int)(Math.random() * 500.0);
-		posY = (int)(Math.random() * 500.0);
+		if(graphMem.getViewInside()){
+			posX = (int)(Math.random() * 500.0);
+			posY = (int)(Math.random() * 500.0);
+		} else {
+			posX = posY = 0;
+		}
 		myMem = graphMem;
 		if(atom != null){
 			me = atom;
@@ -59,6 +65,10 @@ public class GraphAtom {
 		}
 	}
 	/////////////////////////////////////////////////////////////////
+	
+	public GraphMembrane getMem(){
+		return myMem;
+	}
 	
 	static
 	public int getAtomSize(){ return (int)(ATOM_DEF_SIZE * GraphPanel.getMagnification()); }
@@ -72,6 +82,7 @@ public class GraphAtom {
 	}
 	
 	public void paint(Graphics g, GraphPanel panel){
+		if(!myMem.getViewInside() && me != null){ return; }
 		// [0, 7] -> [128, 255] for eash R G B
 		int ir = 0x7F - ((name.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;
 		int ig = 0x7F - ((name.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
@@ -118,12 +129,18 @@ public class GraphAtom {
 		}
 		dx = dy = 0.0;
 	}
-	
+
 	/** アトムのX座標を取得する */
 	public int getPosX(){ return posX; }
 	
 	/** アトムのY座標を取得する */
 	public int getPosY(){ return posY; }
+	
+	/** アトムの中心点のX座標を取得する */
+	public int getCenterPosX(){ return posX + (getAtomSize() / 2); }
+	
+	/** アトムの中心点のY座標を取得する */
+	public int getCenterPosY(){ return posY + (getAtomSize() / 2); }
 	
 	/** 移動距離を設定する
 	 * <p>
@@ -133,12 +150,21 @@ public class GraphAtom {
 	public void moveDelta(double x, double y){
 		dx += x;
 		dy += y;
+		if(!myMem.getViewInside() && !isDummy()){
+			dx = dy = 0.0;
+		}
 	}
 	
 	/** 実際にアトムを移動させる */
 	public void setPosition(int x, int y){
 		posX = x;
 		posY = y;
+	}
+	
+	/** アトムの中心点をセットする */
+	public void setCenterPosition(int x, int y){
+		posX = x + (getAtomSize() / 2);
+		posY = y + (getAtomSize() / 2);
 	}
 	
 	/** アトムを固定する（ドラッグ用） */
@@ -156,7 +182,11 @@ public class GraphAtom {
 	/** 膜を表示する（ダブルクリック + Ctrl用） */
 	public void flipViewMem(Graphics g, GraphPanel panel){
 		clipped = false;
-		myMem.setViewInside(true);
+		if(myMem.getViewInside()){
+			myMem.setViewInside(false);
+		} else {
+			myMem.setViewInside(true);
+		}
 		
 	}
 

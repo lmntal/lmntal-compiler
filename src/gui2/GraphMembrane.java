@@ -56,6 +56,8 @@ public class GraphMembrane {
 	private int posY1;
 	private int posX2;
 	private int posY2;
+	private int oldCenterPosX;
+	private int oldCenterPosY;
 	private int pinPosY;
 	private double dx;
 	private double dy;
@@ -127,20 +129,14 @@ public class GraphMembrane {
 			posX2 = posY2 = 0;
 			
 			if(!getViewInside()){
-				atomMap.clear();
 				atomMap.put(null, dummyGraphAtom);
 				if(posX1 > dummyGraphAtom.getPosX()){ posX1 = dummyGraphAtom.getPosX(); }
 				if(posY1 > dummyGraphAtom.getPosY()){ posY1 = dummyGraphAtom.getPosY(); }
 				if(posX2 < dummyGraphAtom.getPosX()){ posX2 = dummyGraphAtom.getPosX(); }
 				if(posY2 < dummyGraphAtom.getPosY()){ posY2 = dummyGraphAtom.getPosY(); }
 			}
-			while(getViewInside() && atoms.hasNext()){
+			while(atoms.hasNext()){
 				Atom atom = (Atom)atoms.next();
-				
-				// Proxyアトムは無視
-//				if(atom.getFunctor().isInsideProxy() || atom.getFunctor().isOutsideProxy()){
-//				continue;
-//				}
 				
 				GraphAtom targetAtom = null;
 				if(atomMap.containsKey(atom)){
@@ -151,7 +147,7 @@ public class GraphMembrane {
 					targetAtom = new GraphAtom(atom, this);
 					atomMapTemp.put(atom, targetAtom);
 				}
-				if(targetAtom != null){
+				if(getViewInside() && targetAtom != null){
 					// ProxyAtomからはリンクを描画しない
 					if(targetAtom.me.getFunctor().isInsideProxy() ||
 							targetAtom.me.getFunctor().isOutsideProxy())
@@ -446,8 +442,8 @@ public class GraphMembrane {
 				int nthSizeX = nthMem.getSizeX();
 				int nthSizeY = nthMem.getSizeY();
 				
-				if((Math.abs(targetCenterX - nthCenterX) < targetSizeX + nthSizeX) &&
-						(Math.abs(targetCenterY - nthCenterY) < targetSizeY + nthSizeY))
+				if((Math.abs(targetCenterX - nthCenterX) < (targetSizeX / 2) + (nthSizeX / 2)) &&
+						(Math.abs(targetCenterY - nthCenterY) < (targetSizeY / 2) + (nthSizeY / 2)))
 			    {
 					double dx = targetCenterX - nthCenterX;
 					double dy = targetCenterY - nthCenterY;
@@ -463,11 +459,11 @@ public class GraphMembrane {
 	}
 	
 	public int getSizeX(){
-		return getPosX2() - getPosX1() + (GraphAtom.getAtomSize() * 2);
+		return getPosX2() - getPosX1() + (GraphAtom.getAtomSize() * 4);
 	}
 	
 	public int getSizeY(){
-		return getPosY2() - getPosY1() + (GraphAtom.getAtomSize() * 2);
+		return getPosY2() - getPosY1() + (GraphAtom.getAtomSize() * 4);
 	}
 	
 	public int getCenterX(){
@@ -565,6 +561,7 @@ public class GraphMembrane {
 				dy = nthAtom.getPosY() - targetAtom.getPosY();
 				
 				double edgeLen = Math.sqrt((double)((dx * dx) + (dy * dy)));
+				if(edgeLen == 0.0){ edgeLen = 0.00001; }
 				if(edgeLen > GraphAtom.getAtomSize()){
 					continue;
 				}
@@ -667,10 +664,9 @@ public class GraphMembrane {
 			toProxyMem = findGraphMem(toProxyAtom.getMem());
 			if(toProxyMem == null){ break; }
 			nthAtom = toProxyMem.getGraphAtom(toProxyAtom);
-//			if(nthAtom == null){ break; }
 		}
 		
-		if((nthAtom == null) && (toProxyMem != null)){
+		if((!nthAtom.getMem().getViewInside()) && (toProxyMem != null)){
 			while((!toProxyMem.isRoot()) && (!toProxyMem.getParent().getViewInside())){
 				toProxyMem = toProxyMem.getParent();
 			}
@@ -730,8 +726,6 @@ public class GraphMembrane {
 						GraphAtom nthAtom = (GraphAtom)atomMap.get(targetAtom.me.nthAtom(i));
 						
 						if(null != nthAtom){
-							if(nthAtom.me == null)
-								System.out.println(nthAtom.me);
 							nthAtom = getRealNthAtom(nthAtom);
 							
 							if(nthAtom == null){ continue; }
@@ -792,7 +786,8 @@ public class GraphMembrane {
 				
 				// ピンの描画
 				if(dummyGraphAtom.isClipped()){
-					dummyGraphAtom.paintPin(g, panel, -GraphAtom.getAtomSize() / 2, -GraphAtom.getAtomSize() / 2);
+					dummyGraphAtom.paintPin(g, panel, -GraphAtom.getAtomSize() / 2,
+							-GraphAtom.getAtomSize() / 2);
 				}
 			}
 			
@@ -818,12 +813,30 @@ public class GraphMembrane {
 	 * @param view
 	 */
 	public void setViewInside(boolean view){
+		if(root){ return; }
 		viewInside = view;
 		if(viewInside){ 
 			if(myParent != null){
 				myParent.setViewInside(true);
+				int deltaX = dummyGraphAtom.getCenterPosX() - oldCenterPosX;
+				int deltaY = dummyGraphAtom.getCenterPosY() - oldCenterPosY;
+
+				// アトムの描画
+				synchronized (atomMap) {
+					Iterator<GraphAtom> graphAtoms = atomMap.values().iterator();
+					while(graphAtoms.hasNext()){
+						GraphAtom graphAtom = graphAtoms.next();
+						graphAtom.setPosition(graphAtom.getPosX() + deltaX,
+								graphAtom.getPosY() + deltaY);
+					}
+				}
 			}
 			return;
+		} else {
+			dummyGraphAtom.setCenterPosition(getCenterX(),
+					getCenterY());
+			oldCenterPosX = getCenterX();
+			oldCenterPosY = getCenterY();
 		}
 		
 		Iterator<GraphMembrane> graphMems = memMap.values().iterator();
