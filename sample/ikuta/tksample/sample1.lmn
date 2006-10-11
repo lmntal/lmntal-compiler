@@ -14,9 +14,10 @@
 	{textarea, id("3"), position(0,1), weight(3.0, 2.0)}.
 	
 	{textarea, id("4"), position(1,1), text("aaaaaaaaaaa"), weight(1.0, 1.0)}.
-	
+
+	{button, id("5"), position(0,2), label(1), size(2,1)}.
+
+	//クリックされるとラベルが数字だった場合カウントアップされるルール	
 	{clicked, label(_IX), $p} :- {label(_IX + 1), $p}.
-
-
 	
 }

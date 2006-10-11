@@ -18,7 +18,7 @@ public class LMNtalTFrame {
 	private Functor WINDOW_FUNCTOR = new SymbolFunctor("window",0);
 
 	final static
-	private Functor NAME_ATOM = new SymbolFunctor("name",1); 
+	private Functor NAME_FUNCTOR = new SymbolFunctor("name",1); 
 	
 	final static
 	private Set UPDATE_COMMAND = new HashSet();
@@ -78,7 +78,7 @@ public class LMNtalTFrame {
 			else if(mem.getAtomCountOfFunctor(WINDOW_FUNCTOR)>0){
 				//window.というアトムをその膜に持っていたら
 				setWindowMem(mem);
-				Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
+				Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 				if(!nameAtomIte.hasNext()){ continue; }
 				String windowName = ((Atom)nameAtomIte.next()).nth(0);
 				return (LMNtalWindow)windowMap.get(windowName);
@@ -96,7 +96,7 @@ public class LMNtalTFrame {
 	 * @param mem
 	 */
 	public void setWindowMem(Membrane mem){
-		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
+		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 		if(nameAtomIte.hasNext()){
 			String windowName = ((Atom)nameAtomIte.next()).nth(0);
 			// すでにウィンドウがある
@@ -127,7 +127,7 @@ public class LMNtalTFrame {
 	
 	public void setRepaint(Membrane mem, boolean flag){
 		setMem(mem);
-		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
+		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 		if(nameAtomIte.hasNext()){
 			String windowName = ((Atom)nameAtomIte.next()).nth(0);
 			LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);
@@ -143,7 +143,7 @@ public class LMNtalTFrame {
 //	public Point getMousePoint(Membrane mem){
 //		if(mem.isRoot())return null;
 //		setMem(mem);
-//		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
+//		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 //		if(nameAtomIte.hasNext()){
 //			String windowName = ((Atom)nameAtomIte.next()).nth(0);
 //			LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);
@@ -158,7 +158,7 @@ public class LMNtalTFrame {
 	public Dimension getWindowSize(Membrane mem){
 		if(mem.isRoot())return null;
 		setMem(mem);
-		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_ATOM);
+		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 		if(nameAtomIte.hasNext()){
 			String windowName = ((Atom)nameAtomIte.next()).nth(0);
 			LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);

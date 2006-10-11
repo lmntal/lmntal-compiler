@@ -17,13 +17,16 @@ public class LMNComponent {
 	private Membrane mymem; //もらってきた膜を保存する。
 	
 	final static
-	private Functor POSITION_ATOM = new SymbolFunctor("position",2);
+	private Functor POSITION_FUNCTOR = new SymbolFunctor("position", 2);
 	
 	final static
-	private Functor WEIGHT_ATOM = new SymbolFunctor("weight",2);
+	private Functor WEIGHT_FUNCTOR = new SymbolFunctor("weight", 2);
 	
 	final static
-	private Functor LABEL_ATOM = new SymbolFunctor("label",1);
+	private Functor LABEL_FUNCTOR = new SymbolFunctor("label", 1);
+	
+	final static //windowSizeではなくてセルの幅の方
+	private Functor SIZE_FUNCTOR = new SymbolFunctor("size", 2);
 	
 	private GridBagConstraints gbc = new GridBagConstraints(); //位置
 
@@ -33,9 +36,10 @@ public class LMNComponent {
 	public LMNComponent(LMNtalWindow lmnWindow, Membrane mem){
 		mymem = mem;
 		setPosition(mem);
+		setSize(mem);
 		setWeight(mem);
 		setMembrane(mem);
-		gbc.fill = GridBagConstraints.BOTH;
+		gbc.fill = GridBagConstraints.BOTH; //デフォルトでひきのばし
 		component = initComponent();
 		GridBagLayout layout = lmnWindow.getGridBagLayout();
 		layout.setConstraints(component, gbc);
@@ -54,7 +58,7 @@ public class LMNComponent {
 	public void setPosition (Membrane mem) {
 		int positionX = 0;
 		int positionY = 0;
-		Iterator positionAtomIte = mem.atomIteratorOfFunctor(POSITION_ATOM);
+		Iterator positionAtomIte = mem.atomIteratorOfFunctor(POSITION_FUNCTOR);
 		if(positionAtomIte.hasNext()){
 			Atom atom = (Atom)positionAtomIte.next();
 			positionX = Integer.parseInt(atom.nth(0));
@@ -64,11 +68,25 @@ public class LMNComponent {
 		gbc.gridy = positionY;			
 	}
 
+	/** size(X,Y)のアトムがあったとき、gridwidthとgridheightを取得する(単位はGridBag)。 */
+	public void setSize (Membrane mem) {
+		int sizeX = 1; //デフォルトでは１の幅
+		int sizeY = 1; //デフォルトでは１の高さ
+		Iterator sizeAtomIte = mem.atomIteratorOfFunctor(SIZE_FUNCTOR);
+		if(sizeAtomIte.hasNext()){
+			Atom atom = (Atom)sizeAtomIte.next();
+			sizeX = Integer.parseInt(atom.nth(0));
+			sizeY = Integer.parseInt(atom.nth(1));
+		}
+		gbc.gridwidth = sizeX;
+		gbc.gridheight = sizeY;			
+	}
+		
 	/** weight(X,Y)のアトムがあったとき、weightxとweightyを取得する(単位はGridBag)。*/
 	public void setWeight (Membrane mem) {
 		double weightX = 0;
 		double weightY = 0;
-		Iterator weightAtomIte = mem.atomIteratorOfFunctor(WEIGHT_ATOM);
+		Iterator weightAtomIte = mem.atomIteratorOfFunctor(WEIGHT_FUNCTOR);
 		if(weightAtomIte.hasNext()){
 			Atom atom = (Atom)weightAtomIte.next();
 			weightX = Double.parseDouble(atom.nth(0));
@@ -82,7 +100,7 @@ public class LMNComponent {
 	/** label("")のアトムがあったとき、labelに貼る内容を取得する */
 	public String getLabel(Membrane mem){
 		String label = "object";
-		Iterator labelAtomIte = mem.atomIteratorOfFunctor(LABEL_ATOM);
+		Iterator labelAtomIte = mem.atomIteratorOfFunctor(LABEL_FUNCTOR);
 		if(labelAtomIte.hasNext()){
 			Atom atom = (Atom)labelAtomIte.next();
 			if(label != atom.nth(0))

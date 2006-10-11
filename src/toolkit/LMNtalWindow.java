@@ -21,13 +21,13 @@ public class LMNtalWindow extends JFrame {
 	// ¸¡º÷ÍÑFunctor
 	
 	final static
-	private Functor NAME_ATOM = new SymbolFunctor("name",1); 
+	private Functor NAME_FUNCTOR = new SymbolFunctor("name",1); 
 
 	final static
-	private Functor SIZE_ATOM = new SymbolFunctor("size", 2);
+	private Functor SIZE_FUNCTOR = new SymbolFunctor("size", 2);
 	
 	final static
-	private Functor KILLER_ATOM = new SymbolFunctor("killer", 0);
+	private Functor KILLER_FUNCTOR = new SymbolFunctor("killer", 0);
 		
 	final static
 	private Functor BUTTON_FUNCTOR = new SymbolFunctor("button",0);
@@ -79,7 +79,7 @@ public class LMNtalWindow extends JFrame {
 //		memID = mem.getGlobalMemID();
 				
 		// name atom
-		atomIte= mem.atomIteratorOfFunctor(NAME_ATOM);
+		atomIte= mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 		if(atomIte.hasNext()){
 			targetAtom = (Atom)atomIte.next();
 			windowName = ((null != targetAtom) ? targetAtom.nth(0) : "");
@@ -138,7 +138,7 @@ public class LMNtalWindow extends JFrame {
 	 */
 	private void setSizeAtom(Membrane mem){
 		Atom targetAtom;
-		Iterator atomIte= mem.atomIteratorOfFunctor(SIZE_ATOM);
+		Iterator atomIte= mem.atomIteratorOfFunctor(SIZE_FUNCTOR);
 		if(atomIte.hasNext()){
 			targetAtom = (Atom)atomIte.next();
 			try{
@@ -162,7 +162,7 @@ public class LMNtalWindow extends JFrame {
 	 */
 	private void setKiller(Membrane mem) {
 		// killer
-		Iterator atomIte= mem.atomIteratorOfFunctor(KILLER_ATOM);
+		Iterator atomIte= mem.atomIteratorOfFunctor(KILLER_FUNCTOR);
 		if(atomIte.hasNext()){
 			killer = true;
 		}

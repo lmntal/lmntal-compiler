@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Iterator;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import runtime.Atom;
@@ -20,6 +21,7 @@ import runtime.SymbolFunctor;
 public class LMNtalTextArea extends LMNComponent implements KeyListener {
 
 	private JTextArea textarea;
+	private JScrollPane scroll;
 	private String text;
 	private Atom textatom;
 
@@ -46,7 +48,9 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 	public Component initComponent(){
 		textarea = new JTextArea(text);
 		textarea.addKeyListener(this); // textareaのKeyListener呼び出し
-		return textarea;
+		textarea.setLineWrap(true);
+		scroll = new JScrollPane(textarea);
+		return scroll;
 	}
 	
 	public void setMembrane(Membrane mem){
@@ -54,7 +58,6 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 		if(textarea != null){
 			textarea.setText(text);
 		}
-		
 	}
 		
 	public void addAtom(){
@@ -68,7 +71,6 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 		reatom.remove(); // リンクの切れたreatomを削除する。
 	}
 
-	
 	public void keyTyped(KeyEvent arg0) {
 		LMNtalTFrame.addUpdateComponent(this);
 	}
@@ -83,7 +85,6 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 		}
 		return text;
 	}
-
 	
 	public void keyPressed(KeyEvent arg0) {}
 	public void keyReleased(KeyEvent arg0) {}

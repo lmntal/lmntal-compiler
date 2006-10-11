@@ -1,13 +1,16 @@
-//--wtモードで実行してみてください。
+// --wtモードで実行してみてください。メモ帳です。
+// デフォルトでC:\text.txtに保存されます。右上の部分変えれば保存先変わる。
+
+
 {
 	sys.perpetual(on).
 	window.
 	name("test").
 	size(800,600).
 	killer.
-	{ id(open), button, label("open"), position(0,0), weight(1.0, 0) }.
-	{ id(save), button, label("save"), position(1,0), weight(1.0, 0) }.
-	{ id(file), textarea, text("C:\\\\test.txt"), position(2,0), size(1,1), weight(9.0, 0) }.
+	{ id(open), button, label("open"), position(0,0), weight(1.0, 0)}.
+	{ id(save), button, label("save"), position(1,0), weight(1.0, 0)}.
+	{ id(file), textarea, text("C:\\test.txt"), position(2,0), size(1,1), weight(9.0, 0)}.
 	{ id(txt),  textarea, text(""), position(0,1), size(3,1), weight(1.0, 1.0) }.
 	
 	//****以下ルール****//
