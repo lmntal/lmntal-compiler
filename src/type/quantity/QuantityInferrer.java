@@ -1,8 +1,14 @@
 package type.quantity;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import type.ConstraintSet;
 
+import compile.structure.Atom;
 import compile.structure.Membrane;
+import compile.structure.ProcessContext;
 import compile.structure.RuleStructure;
 
 /**
@@ -14,37 +20,126 @@ public class QuantityInferrer {
 	
 	private ConstraintSet constraints;
 	
-	private final Quantities quantities;
+	private final CountsOfMemSet countsset;
 	
 	public QuantityInferrer(ConstraintSet constraints){
 		this.constraints = constraints;
-		this.quantities = new Quantities();
-	}
-
-	public void infer(Membrane root){
-		inferGeneratedMembrane(root);
+		countsset = new CountsOfMemSet();
 	}
 	
 	/**
-	 * 
+	 * 量的解析を行う
+	 * @param root
+	 */
+	public void infer(Membrane root){
+		// 1回適用されたルールの右辺として検査する
+		inferRHSMembrane(root, new NumCount(1));
+	}
+	
+	/**
+	 * ルールについて量的解析を行う
 	 * @param rule
 	 */
 	private void inferRule(RuleStructure rule){
-		inferInheritedMembranes(rule.leftMem, rule.rightMem);
+		Count count = new VarCount();
+		// 左辺膜と右辺膜を、同じ膜として扱う
+		countsset.add(inferInheritedMembrane(rule.leftMem, rule.rightMem, count));
+		Iterator<Membrane> itm = rule.rightMem.mems.iterator();
+		// 右辺子膜の走査
+		while(itm.hasNext()){
+			inferRHSMembrane(itm.next(),count);
+		}
+		// 右辺出現ルールの検査
+		Iterator<RuleStructure> itr = rule.rightMem.rules.iterator();
+		while(itr.hasNext()){
+			inferRule(itr.next());
+		}
 	}
+
+	/**
+	 * 右辺の膜を再帰的に走査し、
+	 * 1. プロセス文脈が出現しない膜
+	 * 2. プロセス文脈が1個出現する膜
+	 * 3. プロセス文脈が2個以上出現する膜
+	 * にわける
+	 * @param rhs
+	 */
+	private void inferRHSMembrane(Membrane rhs, Count count){
+		int pcsize = rhs.processContexts.size();
+		switch(pcsize){
+		case 0 : // プロセス文脈が出現しない膜
+			countsset.add(inferGeneratedMembrane(rhs, count));
+			break;
+		case 1 : // プロセス文脈が1個出現する膜
+			countsset.add(inferInheritedMembrane(((ProcessContext)rhs.processContexts.get(0)).def.lhsOcc.mem,rhs, count));
+			break;
+		default: // プロセス文脈が2個以上出現する膜
+			Set<Membrane> lhss = new HashSet<Membrane>();
+			Iterator<ProcessContext> itp = rhs.processContexts.iterator();
+			while(itp.hasNext()){
+				ProcessContext lhsOcc = (ProcessContext)itp.next().def.lhsOcc;
+				if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
+			}
+			countsset.addMultiple(inferMultiInheritedMembrane(lhss,rhs, count), rhs.name);
+		}
+		// 子膜の検査
+		Iterator<Membrane> itm = rhs.mems.iterator();
+		while(itm.hasNext()){
+			inferRHSMembrane(itm.next(), count);
+		}
+		// 右辺出現ルールの検査
+		Iterator<RuleStructure> itr = rhs.rules.iterator();
+		while(itr.hasNext()){
+			inferRule(itr.next());
+		}
+	}
+
 	/**
 	 * 左辺から右辺に受け継がれた「同じ膜」である、として解析する。
 	 * @param lhs
 	 * @param rhs
 	 */
-	private void inferInheritedMembranes(Membrane lhs, Membrane rhs){
-		
+	private CountsOfMem inferInheritedMembrane(Membrane lhs, Membrane rhs, Count count){
+		CountsOfMem lhsCounts = getCountsOfMem(-1,lhs,count);
+		CountsOfMem rhsCounts = getCountsOfMem(1,rhs,count);
+		//両辺の解析結果を加算
+		rhsCounts.addAllCounts(lhsCounts);
+		return rhsCounts;
 	}
+
+	/**
+	 * 左辺複数の膜から右辺に受け継がれた「マージされた膜」として解析する。
+	 * @param lhss
+	 * @param rhs
+	 */
+	private Count inferMultiInheritedMembrane(Set<Membrane> lhss, Membrane rhs, Count count){
+		return new MulCount(new NumCount(lhss.size()), count);
+	}
+	
 	/**
 	 * 単独で生成された膜として解析する。
 	 * @param mem
 	 */
-	private void inferGeneratedMembrane(Membrane mem){
-		
+	private CountsOfMem inferGeneratedMembrane(Membrane mem, Count count){
+		return getCountsOfMem(1,mem,count);
 	}
+
+	
+	private CountsOfMem getCountsOfMem(int sign, Membrane mem, Count count){
+		CountsOfMem quantities = new CountsOfMem(mem);
+		//アトムの解析結果
+		Iterator<Atom> itla = mem.atoms.iterator();
+		while(itla.hasNext()){
+			// <-R, p/n>
+			quantities.addAtomCount(itla.next(),(sign==1?count:new MinCount(count)));
+		}
+		//子膜の解析結果
+		Iterator<Membrane> itlm = mem.mems.iterator();
+		while(itla.hasNext()){
+			// <-R, m>
+			quantities.addMemCount(itlm.next(),(sign==1?count:new MinCount(count)));
+		}
+		return quantities;
+	}
+	
 }
