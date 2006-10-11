@@ -29,6 +29,11 @@ module(thread).
 		thread.at(N, {atoms or rules}).
 		Create atoms or rules at a thread numbered N.
 	*/
+/*	thread_at@@
+	thread.at(N,{$p,@p}) :- int(N) | thread.at2(N,{{$p,@p}}).
+	thread_at2@@
+	thread.at2(N,{{$p,@p}}), thread(M,{$q,@q}) :- int(N),int(M), M=:=(N+1) |
+		thread(M,{$p,$q,@p,@q}).*/
 	thread_at@@
 	thread.at(N,M),thread.created :- int(N) | thread.created,M=[:/*inline*/
 			int num = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
@@ -38,14 +43,17 @@ module(thread).
 			me.nthAtom(1).nthAtom(0).remove();
 			me.nthAtom(1).remove();
 			Iterator it = me.getMem().atomIteratorOfFunctor(new SymbolFunctor("thread",2));
+			Membrane toMem = null;
 			while(it.hasNext()){
 				Atom th = (Atom)(it.next());
 				if(((IntegerFunctor)(th.nthAtom(0).getFunctor())).intValue()==num+1){
-					Membrane toMem = th.nthAtom(1).nthAtom(0).nthAtom(1).getMem();
+					toMem = th.nthAtom(1).nthAtom(0).nthAtom(1).getMem();
+					toMem.blockingLock();
 					toMem.moveCellsFrom(fromMem);
 					toMem.copyRulesFrom(fromMem);
-					toMem.activate();
+					toMem.unlock();
 					fromMem.getParent().removeMem(fromMem);
+					break;
 				}
 			}
 
@@ -58,6 +66,11 @@ module(thread).
 		thread.any({atoms or rules}).
 		Create atoms or rules at a thread randomly selected.
 	*/
+/*	thread_any@@
+	thread.any({$p,@p}) :- thread.any({{$p,@p}}).
+	thread_any2@@
+	thread.any({{$p,@p}}), thread(M,{$q,@q}) :- int(M) |
+		thread(M, {$p,$q,@p,@q}).*/
 	thread_any@@
 	thread.any(M),thread.created :- thread.created,M=[:/*inline*/
 			Membrane fromMem = me.nthAtom(0).nthAtom(0).nthAtom(1).getMem();
@@ -66,14 +79,17 @@ module(thread).
 			me.nthAtom(0).nthAtom(0).remove();
 			me.nthAtom(0).remove();
 			Iterator it = me.getMem().atomIteratorOfFunctor(new SymbolFunctor("thread",2));
+			Membrane toMem = null;
 			if(it.hasNext()){
 				Atom th = (Atom)(it.next());
-				Membrane toMem = th.nthAtom(1).nthAtom(0).nthAtom(1).getMem();
+				toMem = th.nthAtom(1).nthAtom(0).nthAtom(1).getMem();
+				toMem.blockingLock();
 				toMem.moveCellsFrom(fromMem);
 				toMem.copyRulesFrom(fromMem);
-				toMem.activate();
+				toMem.unlock();
 				fromMem.getParent().removeMem(fromMem);
 			}
+			
 			re.remove();
 			me.remove();
 			:].
@@ -82,6 +98,17 @@ module(thread).
 		thread.all({atoms or rules}).
 		Create atoms or rules at all threads.
 	*/
+/*	thread_all@@
+	thread.all({$p,@p}), thread.num(N) :- int(N) |
+			thread.allc(N, {$p,@p}), thread.num(N).
+	thread_allc@@
+	thread.allc(N, {$p[],@p}) :- N>0, N2=N-1 |
+			thread.allcre(N, {{$p[],@p}}), thread.allc(N2, {$p[], @p}).
+	thread.allc(0, {$p[],@p}) :-.
+	thread_allcre@@
+	thread.allcre(N,{{$p[],@p}}), thread(M,{$q,@q}) :- int(N),int(M),N=:=M |
+			thread(M, {$p[],$q,@p,@q}).
+	thread.allcre(0,{{$p[],@p}}) :-.*/
 	thread_all@@
 	thread.all(M),thread.created  :- thread.created,M=[:/*inline*/
 			Membrane fromMem = me.nthAtom(0).nthAtom(0).nthAtom(1).getMem();
@@ -90,11 +117,14 @@ module(thread).
 			me.nthAtom(0).nthAtom(0).remove();
 			me.nthAtom(0).remove();
 			Iterator it = me.getMem().atomIteratorOfFunctor(new SymbolFunctor("thread",2));
+			Membrane toMem = null;
 			while(it.hasNext()){
 				Atom th = (Atom)(it.next());
-				Membrane toMem = th.nthAtom(1).nthAtom(0).nthAtom(1).getMem();
+				toMem = th.nthAtom(1).nthAtom(0).nthAtom(1).getMem();
+				toMem.blockingLock();
 				toMem.copyCellsFrom2(fromMem);
 				toMem.copyRulesFrom(fromMem);
+				toMem.unlock();
 				toMem.activate();
 			}
 			fromMem.getParent().removeMem(fromMem);
