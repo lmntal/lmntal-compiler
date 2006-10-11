@@ -1,7 +1,11 @@
 package type;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import runtime.FloatingFunctor;
 import runtime.Functor;
@@ -11,6 +15,9 @@ import runtime.StringFunctor;
 import runtime.SymbolFunctor;
 
 import compile.structure.Atom;
+import compile.structure.LinkOccurrence;
+import compile.structure.Membrane;
+import compile.structure.RuleStructure;
 
 public final class TypeEnv {
 
@@ -69,4 +76,71 @@ public final class TypeEnv {
 			return (String)functorToTypeName.get(f);
 		else return null;
 	}
+
+	/** 左辺膜および左辺出現膜の集合 */
+	private static final Set<Membrane> lhsmems = new HashSet<Membrane>();
+
+	/**
+	 * 左辺出現膜を$lhsmemsに登録する
+	 * @param mem
+	 */
+	public static void collectLHSMems(List<RuleStructure> rules){
+		Iterator<RuleStructure> it = rules.iterator();
+		while(it.hasNext()){
+			collectLHSMems(it.next());
+		}
+	}
+	/**
+	 * 左辺出現膜を$lhsmemsに登録する
+	 * @param rule
+	 */
+	private static void collectLHSMems(RuleStructure rule){
+		collectLHSMem(rule.leftMem);
+//		 左辺にルールは出現しない
+		Iterator<RuleStructure> it = rule.rightMem.rules.iterator();
+		while(it.hasNext()){
+			collectLHSMems(it.next());
+		}
+	}
+	/**
+	 * 左辺出現膜を$lhsmemsに登録する
+	 * @param mem 左辺出現膜
+	 */
+	private static void collectLHSMem(Membrane mem){
+		lhsmems.add(mem);
+		Iterator it = mem.mems.iterator();
+		while(it.hasNext()){
+			Membrane cmem = (Membrane)it.next();
+			collectLHSMem(cmem);
+		}
+	}
+	
+	/** 左辺のアトムかどうかを返す */
+	public static boolean isLHSAtom(Atom atom) {
+		return isLHSMem(atom.mem);
+	}
+
+	/** 左辺の膜かどうかを返す */
+	public static boolean isLHSMem(Membrane mem) {
+		return lhsmems.contains(mem);
+	}
+
+	/**
+	 * get real buddy through =/2, $out, $in
+	 * 
+	 * @param lo
+	 * @return
+	 */
+	public static LinkOccurrence getRealBuddy(LinkOccurrence lo) {
+		if (lo.buddy.atom instanceof Atom) {
+			Atom a = (Atom) lo.buddy.atom;
+			int o = TypeEnv.outOfPassiveAtom(a);
+			if (o == TypeEnv.CONNECTOR)
+				return getRealBuddy(a.args[1 - lo.buddy.pos]);
+			else
+				return lo.buddy;
+		} else
+			return lo.buddy;
+	}
+
 }
