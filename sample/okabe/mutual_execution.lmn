@@ -1,0 +1,45 @@
+% http://spinroot.com/spin/Doc/course/index.html
+% Lecture Notes 4:18
+% pp.10 mutual execution
+% Peterson¡Çs algorithm
+
+/*
+
+NAME
+	Model Checking (nondeterministic LMNtal version)
+
+SYNOPSIS
+    mutual execution
+
+AUTHOR
+	Ryo Okabe
+
+HISTORY
+	2006/10/11(Wed)
+
+*/
+
+x(0), y(0).		/* signal entering/leaving the section */
+mutex(0).		/* # of procs in the critical section */
+turn(a_turn).	/* who's turn is it? */
+
+start, start.	/* active proctype */
+
+% Thread A
+start, x(B), turn(T) :- unary(B), unary(T) | x(1), turn(b_turn), a_is_entering.
+
+a_is_entering, y(0), mutex(I) :- y(1), mutex(I+1), a_is_critical. 
+a_is_entering, turn(a_turn), mutex(I) :- turn(a_turn), mutex(I+1), a_is_critical.
+
+a_is_critical, mutex(I), x(true) :- mutex(I-1), x(false).
+
+% Thread B
+start, y(B), turn(T) :- unary(B), unary(T) | y(1), turn(a_turn), b_is_entering.
+
+b_is_entering, x(0), mutex(I) :- x(1), mutex(I+1), b_is_critical. 
+b_is_entering, turn(b_turn), mutex(I) :- turn(b_turn), mutex(I+1), b_is_critical.
+
+b_is_critical, mutex(I), y(true) :- mutex(I-1), y(false).
+
+% Assertion
+mutex(I) :- int(I), I>1 | false.
