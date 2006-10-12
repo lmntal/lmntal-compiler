@@ -26,13 +26,13 @@ public class OccurrenceInferrer {
 		while(ita.hasNext()){
 			Atom atom = ita.next();
 			if(TypeEnv.outOfPassiveAtom(atom) == TypeEnv.ACTIVE)
-				constraints.add(new AtomOccurrenceConstraint(mem.name,atom.functor));
+				constraints.add(new AtomOccurrenceConstraint(TypeEnv.getMemName(mem),atom.functor));
 		}
 		/** »ÒËì¤Ë¤Ä¤¤¤Æ½Ð¸½À©Ìó¤ò²Ý¤·¡¢Áöºº */
 		Iterator<Membrane> itm = mem.mems.iterator();
 		while(itm.hasNext()){
 			Membrane child = itm.next();
-			constraints.add(new MembraneOccurrenceConstraint(mem.name,child.name));
+			constraints.add(new MembraneOccurrenceConstraint(TypeEnv.getMemName(mem),TypeEnv.getMemName(child)));
 			inferOccurrenceMembrane(child);
 		}
 		/** ¥ë¡¼¥ë¤Îº¸ÊÕ¡¿±¦ÊÕ¤òÁöºº */

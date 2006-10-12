@@ -25,8 +25,8 @@ public final class TypeEnv {
 
 	public static final int CONNECTOR = -2;
 	
-	private static final Map functorToOut = new HashMap();
-	private static final Map functorToTypeName = new HashMap();
+	private static final Map<Functor, Integer> functorToOut = new HashMap<Functor, Integer>();
+	private static final Map<Functor, String> functorToTypeName = new HashMap<Functor, String>();
 
 	static{
 		functorToOut.put(Functor.UNIFY,new Integer(CONNECTOR));
@@ -141,6 +141,16 @@ public final class TypeEnv {
 				return lo.buddy;
 		} else
 			return lo.buddy;
+	}
+	
+	
+	public static final String ANNONYMOUS = "??";
+	/**
+	 * 
+	 */
+	public static String getMemName(Membrane mem){
+		if(mem.name == null)return ANNONYMOUS;
+		else return mem.name;
 	}
 
 }

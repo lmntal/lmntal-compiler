@@ -7,15 +7,20 @@ import java.util.Comparator;
  * @author kudo
  *
  */
-public class TypeVarConstraintComparator implements Comparator {
+public class TypeVarConstraintComparator implements Comparator<TypeVarConstraint> {
 	
-	public int compare(Object arg0, Object arg1) {
-		if(!(arg0 instanceof TypeVarConstraint && arg1 instanceof TypeVarConstraint))
-			return 0;
-		TypeVarConstraint tvc1 = (TypeVarConstraint)arg0;
-		TypeVarConstraint tvc2 = (TypeVarConstraint)arg1;
+	public int compare(TypeVarConstraint tvc1, TypeVarConstraint tvc2) {
+//		if(!(arg0 instanceof TypeVarConstraint && arg1 instanceof TypeVarConstraint))
+//			return 0;
+//		TypeVarConstraint tvc1 = (TypeVarConstraint)arg0;
+//		TypeVarConstraint tvc2 = (TypeVarConstraint)arg1;
 		Path p1 = tvc1.getPath();
 		Path p2 = tvc2.getPath();
+		
+		return comparePath(p1,p2,tvc1,tvc2);
+	}
+	private int comparePath(Path p1, Path p2, TypeVarConstraint tvc1, TypeVarConstraint tvc2){
+		
 		if(p1 instanceof ActiveAtomPath){
 			if(p2 instanceof ActiveAtomPath){
 				ActiveAtomPath ap1 = (ActiveAtomPath)p1;
@@ -41,7 +46,7 @@ public class TypeVarConstraintComparator implements Comparator {
 			else if(p2 instanceof TracingPath){
 				TracingPath tp1 = (TracingPath)p1;
 				TracingPath tp2 = (TracingPath)p2;
-				int cp = compare(tp1.getPath(),tp2.getPath());
+				int cp = comparePath(tp1.getPath(),tp2.getPath(),tvc1,tvc2);
 				if(cp==0){
 					int cf = tp1.getFunctor().getName().compareTo(tp2.getFunctor().getName());
 					if(cf==0){

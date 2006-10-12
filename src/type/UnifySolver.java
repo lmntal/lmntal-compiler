@@ -15,12 +15,12 @@ import runtime.Env;
  * 
  */
 public class UnifySolver {
-	private Map pathToTV;
+	private Map<Path,TypeVar> pathToTV;
 
 	private ModesSet modesSet;
 
 	public UnifySolver() {
-		this.pathToTV = new HashMap();
+		this.pathToTV = new HashMap<Path,TypeVar>();
 		this.modesSet = new ModesSet();
 	}
 
@@ -44,12 +44,12 @@ public class UnifySolver {
 		return (TypeVar)pathToTV.get(p);
 	}
 	
-	public void solveTypeAndMode(Collection receiveConstraintsSet)throws TypeConstraintException{
-		Iterator it = receiveConstraintsSet.iterator();
-		while(it.hasNext()){
-			Iterator it2 = ((Set)it.next()).iterator();
-			while(it2.hasNext()){
-				ReceiveConstraint rc = (ReceiveConstraint)it2.next();
+	public void solveTypeAndMode(Collection<Set<ReceiveConstraint>> receiveConstraintsSet)throws TypeConstraintException{
+		Iterator<Set<ReceiveConstraint>> itrcs = receiveConstraintsSet.iterator();
+		while(itrcs.hasNext()){
+			Iterator<ReceiveConstraint> itrc = itrcs.next().iterator();
+			while(itrc.hasNext()){
+				ReceiveConstraint rc = itrc.next();
 				PolarizedPath pp = rc.getPPath();
 				int sign = pp.getSign();
 				Path p = pp.getPath();
@@ -65,8 +65,8 @@ public class UnifySolver {
 		}
 	}
 
-	public Set getTypeVarConstraints() throws TypeConstraintException{
-		Set typeVarConstraints = new HashSet();
+	public Set<TypeVarConstraint> getTypeVarConstraints() throws TypeConstraintException{
+		Set<TypeVarConstraint> typeVarConstraints = new HashSet<TypeVarConstraint>();
 		Iterator it = pathToTV.keySet().iterator();
 		while(it.hasNext()){
 			Path p = (Path)it.next();

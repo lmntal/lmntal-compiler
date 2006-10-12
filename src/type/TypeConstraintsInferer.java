@@ -35,13 +35,13 @@ public class TypeConstraintsInferer {
 		// 全ての膜について、ルールの左辺最外部出現かどうかの情報を得る
 		TypeEnv.collectLHSMems(root.rules);
 		
-		// TODO Active Head Condition をチェックする
-		
 		// 個数制約を推論する
 		new QuantityInferrer(constraints).infer(root);
 		
 		// 出現制約を推論する
 		new OccurrenceInferrer(constraints).inferOccurrenceMembrane(root);
+
+		// TODO Active Head Condition をチェックする
 		// 全ての引数についてモード変数、型変数を振る
 		new ArgumentInferrer(root, constraints).infer();
 
@@ -94,7 +94,7 @@ public class TypeConstraintsInferer {
 		Atom atom = (Atom) lo.atom;
 		int out = TypeEnv.outOfPassiveAtom(atom);
 		if (out == TypeEnv.ACTIVE) {
-			return new PolarizedPath(1, new ActiveAtomPath(atom.mem.name,
+			return new PolarizedPath(1, new ActiveAtomPath(TypeEnv.getMemName(atom.mem),
 					atom.functor, lo.pos));
 		} else if (out == TypeEnv.CONNECTOR) {
 			System.out.println("fatal error in getting path.");

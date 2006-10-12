@@ -7,7 +7,7 @@ import java.util.Set;
 public class ModeSet {
 	public ModeSet buddy;
 
-	private Set pathes;
+	private Set<Path> pathes;
 
 	public String name;
 
@@ -16,7 +16,7 @@ public class ModeSet {
 	public int value = 0;
 
 	public ModeSet() {
-		pathes = new HashSet();
+		pathes = new HashSet<Path>();
 	}
 
 	public void bindSign(int s) throws TypeConstraintException {

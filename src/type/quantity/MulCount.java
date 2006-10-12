@@ -11,7 +11,7 @@ public class MulCount extends Count {
 		this.counts = counts;
 	}
 	public MulCount(Count first, Count second){
-		this.counts = new LinkedList();
+		this.counts = new LinkedList<Count>();
 		counts.add(first);
 		counts.add(second);
 	}

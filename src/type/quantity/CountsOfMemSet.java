@@ -1,29 +1,86 @@
 package type.quantity;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
-import compile.structure.Membrane;
+import runtime.Env;
+import type.TypeEnv;
 
+/**
+ * 膜名ごとに量的解析結果を保持する
+ * @author kudo
+ *
+ */
 public class CountsOfMemSet {
-	Map<Membrane,CountsOfMem> memToCounts;
+	/** 膜名 -> 生成プロセス */
+	Map<String,CountsOfMem> memnameToGenCounts;
+	/** 膜名 -> 変化プロセス */
+	Map<String,CountsOfMem> memnameToInhCounts;
 	public CountsOfMemSet(){
-		memToCounts = new HashMap<Membrane,CountsOfMem>();
+		memnameToGenCounts = new HashMap<String,CountsOfMem>();
+		memnameToInhCounts = new HashMap<String,CountsOfMem>();
 	}
+	/**
+	 * 膜についての解析結果をマージしていく
+	 * @param counts
+	 */
 	public void add(CountsOfMem counts){
-		Membrane mem = counts.mem;
-		if(!memToCounts.containsKey(mem))
-			memToCounts.put(mem,counts);
+		// 生成
+		if(counts.multiple == 0)
+			addGenCounts(counts);
+		// 移動
+		else if(counts.multiple == 1)
+			addInhCounts(counts);
+		// マージ
+		else
+			addMerCounts(counts);
+	}
+	/**
+	 * 
+	 * @param counts
+	 */
+	public void addGenCounts(CountsOfMem counts){
+		String memname = TypeEnv.getMemName(counts.mem);
+		if(!memnameToGenCounts.containsKey(memname))
+			memnameToGenCounts.put(memname,counts);
 		else{
-			CountsOfMem oldcounts = memToCounts.get(mem);
+			CountsOfMem oldcounts = memnameToGenCounts.get(memname);
 			oldcounts.merge(counts);
 		}
 	}
 	/**
-	 * 膜内の構造がn倍されることを意味する
-	 *
+	 * 
+	 * @param counts
 	 */
-	public void addMultiple(Count count, String name){
-		//TODO 実装
+	public void addInhCounts(CountsOfMem counts){
+		String memname = TypeEnv.getMemName(counts.mem);
+		if(!memnameToInhCounts.containsKey(memname))
+			memnameToInhCounts.put(memname,counts);
+		else{
+			CountsOfMem oldcounts = memnameToInhCounts.get(memname);
+			oldcounts.addAllCounts(counts);
+		}
 	}
+	/**
+	 * 
+	 * @param counts
+	 */
+	public void addMerCounts(CountsOfMem counts){
+		
+	}
+	
+	public void printAll(){
+		Env.p("--gen counts:");
+		Iterator<CountsOfMem> itmgs = memnameToGenCounts.values().iterator();
+		while(itmgs.hasNext()){
+			itmgs.next().print();
+		}
+		Env.p("--inh counts:");
+		Iterator<CountsOfMem> itmis = memnameToInhCounts.values().iterator();
+		while(itmis.hasNext()){
+			itmis.next().print();
+		}
+	}
+	
 }

@@ -6,10 +6,10 @@ import java.util.Set;
 
 public class ModesSet {
 	
-	private Set modes;
+	private Set<ModeSet> modes;
 	
 	public ModesSet(){
-		modes = new HashSet();
+		modes = new HashSet<ModeSet>();
 	}
 	
 	private ModeSet getContainingModeSet(Path path){

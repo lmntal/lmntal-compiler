@@ -13,10 +13,10 @@ public class TypeVar {
 
 	private static int varIndex = 0;
 
-	private Set passiveFunctors;
+	private Set<Functor> passiveFunctors;
 	
 	public void addPassiveFunctor(Functor f){
-		if(self().passiveFunctors == null)self().passiveFunctors = new HashSet();
+		if(self().passiveFunctors == null)self().passiveFunctors = new HashSet<Functor>();
 		self().passiveFunctors.add(f);
 		passiveFunctors = self().passiveFunctors;
 	}
@@ -63,20 +63,26 @@ public class TypeVar {
 	boolean showDetailOfDataFunctor = false;
 	public String stringOfPassiveFunctors(){
 		String ret = "{";
-		Iterator it = self().passiveFunctors.iterator();
+		Iterator<Functor> itf = self().passiveFunctors.iterator();
 		if(!showDetailOfDataFunctor){
-			Set dataTypes = new HashSet();
-			dataTypes.add(typeNameOfFunctor((Functor)it.next()));
-			while(it.hasNext()){
-				String tn = typeNameOfFunctor((Functor)it.next());
+			Set<String> dataTypes = new HashSet<String>();
+			dataTypes.add(typeNameOfFunctor(itf.next()));
+			while(itf.hasNext()){
+				String tn = typeNameOfFunctor(itf.next());
 				if(dataTypes.contains(tn))continue;
 				else dataTypes.add(tn);
 			}
-			it = dataTypes.iterator();
+			Iterator itd = dataTypes.iterator();
+			ret += itd.next();
+			while(itd.hasNext()){
+				ret += ", "+ itd.next();
+			}
 		}
-		ret += it.next();
-		while(it.hasNext()){
-			ret += ", " + it.next();
+		else{
+			ret += itf.next();
+			while(itf.hasNext()){
+				ret += ", " + itf.next();
+			}
 		}
 		return ret + "}";
 	}

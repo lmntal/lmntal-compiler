@@ -12,16 +12,16 @@ import runtime.Env;
 
 public class ConstraintSet /* implements Set */{
 
-	private Map hasActiveAtomConstraintsMap = new HashMap();
+	private Map<String, Set<AtomOccurrenceConstraint>> atomOccurrenceConstraintsMap = new HashMap<String, Set<AtomOccurrenceConstraint>>();
 
-	private Map hasMembraneConstraintsMap = new HashMap();
+	private Map<String, Set<MembraneOccurrenceConstraint>> membraneOccurrenceConstraintsMap = new HashMap<String, Set<MembraneOccurrenceConstraint>>();
 
 	// private Set receivePassiveConstraints = new HashSet();
-	private Map receivePassiveConstraintsMap = new HashMap();
+	private Map<PolarizedPath,Set<ReceiveConstraint>> receivePassiveConstraintsMap = new HashMap<PolarizedPath,Set<ReceiveConstraint>>();
 
-	private Set unifyConstraints = new HashSet();
+	private Set<UnifyConstraint> unifyConstraints = new HashSet<UnifyConstraint>();
 
-	private Set typeVarConstraints = new HashSet();
+	private Set<TypeVarConstraint> typeVarConstraints = new HashSet<TypeVarConstraint>();
 
 	// public int size() {
 	// return all().size();
@@ -35,23 +35,23 @@ public class ConstraintSet /* implements Set */{
 	// return all().contains(arg0);
 	// }
 
-	private Set all() {
-		Set all = new HashSet();
-		Iterator it = hasActiveAtomConstraintsMap.keySet().iterator();
-		while (it.hasNext()) {
-			String memname = (String) it.next();
-			Set haacs = (Set) hasActiveAtomConstraintsMap.get(memname);
+	private Set<Constraint> all() {
+		Set<Constraint> all = new HashSet<Constraint>();
+		Iterator<String> itmn = atomOccurrenceConstraintsMap.keySet().iterator();
+		while (itmn.hasNext()) {
+			String memname = itmn.next();
+			Set<AtomOccurrenceConstraint> haacs = atomOccurrenceConstraintsMap.get(memname);
 			all.addAll(haacs);
 		}
-		it = hasMembraneConstraintsMap.keySet().iterator();
-		while (it.hasNext()) {
-			String memname = (String) it.next();
-			Set hmcs = (Set) hasMembraneConstraintsMap.get(memname);
+		itmn = membraneOccurrenceConstraintsMap.keySet().iterator();
+		while (itmn.hasNext()) {
+			String memname = itmn.next();
+			Set<MembraneOccurrenceConstraint> hmcs = membraneOccurrenceConstraintsMap.get(memname);
 			all.addAll(hmcs);
 		}
-		it = receivePassiveConstraintsMap.values().iterator();
-		while (it.hasNext()) {
-			Set rpcs = (Set) it.next();
+		Iterator<Set<ReceiveConstraint>> itrc = receivePassiveConstraintsMap.values().iterator();
+		while (itrc.hasNext()) {
+			Set<ReceiveConstraint> rpcs = itrc.next();
 			all.addAll(rpcs);
 		}
 		// all.addAll(receivePassiveConstraints);
@@ -63,11 +63,11 @@ public class ConstraintSet /* implements Set */{
 		return unifyConstraints;
 	}
 
-	public Set getReceivePassiveConstraints() {
-		Set rpcall = new HashSet();
-		Iterator it = receivePassiveConstraintsMap.values().iterator();
+	public Set<ReceiveConstraint> getReceivePassiveConstraints() {
+		Set<ReceiveConstraint> rpcall = new HashSet<ReceiveConstraint>();
+		Iterator<Set<ReceiveConstraint>> it = receivePassiveConstraintsMap.values().iterator();
 		while (it.hasNext()) {
-			Set rpcs = (Set) it.next();
+			Set<ReceiveConstraint> rpcs = it.next();
 			rpcall.addAll(rpcs);
 		}
 		// return receivePassiveConstraints;
@@ -75,15 +75,15 @@ public class ConstraintSet /* implements Set */{
 	}
 
 	public void refreshReceivePassiveConstraints(Set rpcs) {
-		receivePassiveConstraintsMap = new HashMap();
+		receivePassiveConstraintsMap = new HashMap<PolarizedPath,Set<ReceiveConstraint>>();
 		addAll(rpcs);
 	}
 
 	public void solveUnifyConstraints() throws TypeConstraintException {
-		Iterator it = unifyConstraints.iterator();
+		Iterator<UnifyConstraint> it = unifyConstraints.iterator();
 		UnifySolver us = new UnifySolver();
 		while (it.hasNext()) {
-			UnifyConstraint uc = (UnifyConstraint) it.next();
+			UnifyConstraint uc = it.next();
 			uc.regularize();
 			us.add(uc);
 		}
@@ -106,27 +106,27 @@ public class ConstraintSet /* implements Set */{
 	public boolean add(Object arg0) {
 		if (arg0 instanceof AtomOccurrenceConstraint) {
 			AtomOccurrenceConstraint haac = (AtomOccurrenceConstraint) arg0;
-			if (!hasActiveAtomConstraintsMap.containsKey(haac.getMemname())) {
-				hasActiveAtomConstraintsMap.put(haac.getMemname(),
-						new HashSet());
+			if (!atomOccurrenceConstraintsMap.containsKey(haac.getMemname())) {
+				atomOccurrenceConstraintsMap.put(haac.getMemname(),
+						new HashSet<AtomOccurrenceConstraint>());
 			}
-			((Set) hasActiveAtomConstraintsMap.get(haac.getMemname()))
+			atomOccurrenceConstraintsMap.get(haac.getMemname())
 					.add(haac);
 		} else if (arg0 instanceof MembraneOccurrenceConstraint) {
 			MembraneOccurrenceConstraint hmc = (MembraneOccurrenceConstraint) arg0;
-			if (!hasMembraneConstraintsMap.containsKey(hmc.getParentName())) {
-				hasMembraneConstraintsMap.put(hmc.getParentName(),
-						new HashSet());
+			if (!membraneOccurrenceConstraintsMap.containsKey(hmc.getParentName())) {
+				membraneOccurrenceConstraintsMap.put(hmc.getParentName(),
+						new HashSet<MembraneOccurrenceConstraint>());
 			}
-			((Set) hasMembraneConstraintsMap.get(hmc.getParentName())).add(hmc);
+			membraneOccurrenceConstraintsMap.get(hmc.getParentName()).add(hmc);
 		} else if (arg0 instanceof ReceiveConstraint) {
 			// ReceivePassiveConstraint rpc = (ReceivePassiveConstraint) arg0;
 			// receivePassiveConstraints.add(rpc);
 			ReceiveConstraint rpc = (ReceiveConstraint) arg0;
 			if (!receivePassiveConstraintsMap.containsKey(rpc.getPPath())) {
-				receivePassiveConstraintsMap.put(rpc.getPPath(), new HashSet());
+				receivePassiveConstraintsMap.put(rpc.getPPath(), new HashSet<ReceiveConstraint>());
 			}
-			((Set) receivePassiveConstraintsMap.get(rpc.getPPath())).add(rpc);
+			receivePassiveConstraintsMap.get(rpc.getPPath()).add(rpc);
 		} else if (arg0 instanceof UnifyConstraint) {
 			UnifyConstraint uc = (UnifyConstraint) arg0;
 			unifyConstraints.add(uc);
@@ -154,38 +154,36 @@ public class ConstraintSet /* implements Set */{
 
 	//
 	// public boolean retainAll(Collection arg0) {
-	// // TODO Auto-generated method stub
 	// return false;
 	// }
 	//
 	// public boolean removeAll(Collection arg0) {
-	// // TODO Auto-generated method stub
 	// return false;
 	// }
 	//
 	// public void clear() {
-	// // TODO Auto-generated method stub
 	//
 	// }
 
+	/** 制約を出力する */
 	public void printAllConstraints() {
 		if (!Env.flgShowConstraints)
 			return;
 		Env.p("---Inferred Constraints : ");
-		Env.p("-----HasActiveAtomConstraints :");
-		Iterator it = hasActiveAtomConstraintsMap.values().iterator();
-		while (it.hasNext()) {
-			Iterator it2 = ((Set) it.next()).iterator();
-			while (it2.hasNext()) {
-				Env.p(it2.next());
+		Env.p("-----AtomOccurrenceConstraints :");
+		Iterator<Set<AtomOccurrenceConstraint>> itas = atomOccurrenceConstraintsMap.values().iterator();
+		while (itas.hasNext()) {
+			Iterator<AtomOccurrenceConstraint> itac = itas.next().iterator();
+			while (itac.hasNext()) {
+				Env.p(itac.next());
 			}
 		}
-		Env.p("-----HasMembraneConstarints : ");
-		it = hasMembraneConstraintsMap.values().iterator();
-		while (it.hasNext()) {
-			Iterator it2 = ((Set) it.next()).iterator();
-			while (it2.hasNext()) {
-				Env.p(it2.next());
+		Env.p("-----MembraneOccurrenceConstarints : ");
+		Iterator<Set<MembraneOccurrenceConstraint>> itms = membraneOccurrenceConstraintsMap.values().iterator();
+		while (itms.hasNext()) {
+			Iterator<MembraneOccurrenceConstraint> itmc = itms.next().iterator();
+			while (itmc.hasNext()) {
+				Env.p(itmc.next());
 			}
 		}
 		if (Env.flgShowAllConstraints)
@@ -193,11 +191,11 @@ public class ConstraintSet /* implements Set */{
 		if (Env.flgShowAllConstraints)
 			printUnifyConstraints();
 		Env.p("-----TypeVarConstraints : ");
-		TreeSet tvcs = new TreeSet(new TypeVarConstraintComparator());
+		TreeSet<TypeVarConstraint> tvcs = new TreeSet<TypeVarConstraint>(new TypeVarConstraintComparator());
 		tvcs.addAll(typeVarConstraints);
-		it = tvcs.iterator();
-		while (it.hasNext()) {
-			Env.p(it.next());
+		Iterator<TypeVarConstraint> ittvc = tvcs.iterator();
+		while (ittvc.hasNext()) {
+			Env.p(ittvc.next());
 		}
 		Env.p("---");
 	}
