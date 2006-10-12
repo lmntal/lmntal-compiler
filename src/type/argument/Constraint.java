@@ -1,4 +1,4 @@
-package type;
+package type.argument;
 
 public interface Constraint {
 

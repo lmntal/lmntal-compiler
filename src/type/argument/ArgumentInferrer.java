@@ -5,13 +5,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import runtime.Functor;
-import type.ConstraintSet;
-import type.PolarizedPath;
-import type.ReceiveConstraint;
-import type.RootPath;
 import type.TypeConstraintException;
 import type.TypeEnv;
-import type.UnifyConstraint;
 
 import compile.structure.Atom;
 import compile.structure.ContextDef;
@@ -38,21 +33,37 @@ public class ArgumentInferrer {
 		this.rule = rule;
 		this.constraints = constraints;
 	}
+
 	/**
 	 * グローバルルート膜に対してのみ呼ばれる
 	 * @param top
 	 */
-	public ArgumentInferrer(Membrane top, ConstraintSet constraints){
+	public ArgumentInferrer(Membrane top){//, ConstraintSet constraints){
 		RuleStructure tmprule = new RuleStructure(new Membrane(null),"tmp");
 		tmprule.leftMem = new Membrane(null);
 		tmprule.rightMem = top;
 		this.rule = tmprule;
-		this.constraints = constraints;
+		this.constraints = new ConstraintSet();//constraints;
+	}
+	
+	public void printAll(){
+		constraints.printAllConstraints();
 	}
 
+	/**
+	 * 
+	 * @throws TypeConstraintException
+	 */
 	public void infer() throws TypeConstraintException{
 		defs = new HashSet<ContextDef>();
+
+		// TODO Active Head Condition をチェックする
+		// 全ての引数についてモード変数、型変数を振る
 		inferArgumentRule(rule);
+
+		solvePathes();
+		constraints.solveUnifyConstraints();
+		
 	}
 	/**
 	 * @param mem
@@ -205,5 +216,69 @@ public class ArgumentInferrer {
 		constraints.add(new ReceiveConstraint(new PolarizedPath(sign, new RootPath(b)), f));
 	}
 
+	/**
+	 * change RootPath into ActiveAtomPath or TracingPath.
+	 * 
+	 */
+	private void solvePathes() {
+		Set unSolvedRPCs = constraints.getReceivePassiveConstraints();
+		Iterator it = unSolvedRPCs.iterator();
+		while (it.hasNext()) {
+			ReceiveConstraint rpc = (ReceiveConstraint) it.next();
+			rpc.setPPath(solvePolarizedPath(rpc.getPPath()));
+		}
+		constraints.refreshReceivePassiveConstraints(unSolvedRPCs);
+		Set unSolvedUCs = constraints.getUnifyConstraints();
+		it = unSolvedUCs.iterator();
+		while (it.hasNext()) {
+			UnifyConstraint uc = (UnifyConstraint) it.next();
+			uc.setPPathes(solvePolarizedPath(uc.getPPath1()),
+					solvePolarizedPath(uc.getPPath2()));
+		}
+	}
+
+	private PolarizedPath solvePolarizedPath(PolarizedPath pp) {
+		Path p = pp.getPath();
+		if (!(p instanceof RootPath)) {
+			System.out.println("fatal error in solving path.");
+			return pp;
+		}
+		LinkOccurrence lo = ((RootPath) p).getTarget();
+		if (!(lo.atom instanceof Atom))
+			return pp;
+		PolarizedPath tp = getPolarizedPath(lo);
+		return new PolarizedPath(pp.getSign() * tp.getSign(), tp.getPath());
+	}
+
+	/**
+	 * get the path to the active head atom.
+	 * 
+	 * @param lo :
+	 *            argument of Atom (not Atomic)
+	 * @return
+	 */
+	private PolarizedPath getPolarizedPath(LinkOccurrence lo) {
+		Atom atom = (Atom) lo.atom;
+		int out = TypeEnv.outOfPassiveAtom(atom);
+		if (out == TypeEnv.ACTIVE) {
+			return new PolarizedPath(1, new ActiveAtomPath(TypeEnv.getMemName(atom.mem),
+					atom.functor, lo.pos));
+		} else if (out == TypeEnv.CONNECTOR) {
+			System.out.println("fatal error in getting path.");
+			return null;
+		} else {
+			LinkOccurrence tl = TypeEnv.getRealBuddy(atom.args[out]);
+			if (!(tl.atom instanceof Atom))
+				return new PolarizedPath(1, new RootPath(tl));
+			Atom ta = (Atom) tl.atom;
+			PolarizedPath pp = getPolarizedPath(tl);
+			if (TypeEnv.isLHSAtom(atom) == TypeEnv.isLHSAtom(ta))
+				return new PolarizedPath(pp.getSign(), new TracingPath(pp
+						.getPath(), atom.functor, lo.pos));
+			else
+				return new PolarizedPath(-pp.getSign(), new TracingPath(pp
+						.getPath(), atom.functor, lo.pos));
+		}
+	}
 
 }

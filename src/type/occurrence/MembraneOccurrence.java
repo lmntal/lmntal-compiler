@@ -1,10 +1,10 @@
-package type;
+package type.occurrence;
 
 /**
  * @author kudo
  * 
  */
-public class MembraneOccurrenceConstraint implements Constraint {
+public class MembraneOccurrence {
 
 	private String parentName;
 
@@ -22,15 +22,15 @@ public class MembraneOccurrenceConstraint implements Constraint {
 	 * @param parentName
 	 * @param childName
 	 */
-	public MembraneOccurrenceConstraint(String parentName, String childName) {
+	public MembraneOccurrence(String parentName, String childName) {
 		this.parentName = parentName == null ? "??" : parentName;
 		this.childName = childName == null ? "??" : childName;
 	}
 
 	public boolean equals(Object o) {
-		if (!(o instanceof MembraneOccurrenceConstraint))
+		if (!(o instanceof MembraneOccurrence))
 			return false;
-		MembraneOccurrenceConstraint hmc = (MembraneOccurrenceConstraint) o;
+		MembraneOccurrence hmc = (MembraneOccurrence) o;
 		return parentName.equals(hmc.parentName)
 				&& childName.equals(hmc.childName);
 	}

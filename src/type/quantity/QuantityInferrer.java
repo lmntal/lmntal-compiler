@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import type.ConstraintSet;
-
 import compile.structure.Atom;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
@@ -18,23 +16,36 @@ import compile.structure.RuleStructure;
  */
 public class QuantityInferrer {
 	
-	private ConstraintSet constraints;
-	
 	private final CountsOfMemSet countsset;
 	
-	public QuantityInferrer(ConstraintSet constraints){
-		this.constraints = constraints;
-		countsset = new CountsOfMemSet();
+	private Membrane root;
+	
+	public QuantityInferrer(Membrane root){
+		this.countsset = new CountsOfMemSet();
+		this.root = root;
 	}
 	
 	/**
 	 * 量的解析を行う
 	 * @param root
 	 */
-	public void infer(Membrane root){
-		// 1回適用されたルールの右辺として検査する
+	public void infer(){
+		// ルート膜を1回適用されたルールの右辺として検査する
+		// TODO ルール適用回数の変数を集約しておくこと
 		inferRHSMembrane(root, new NumCount(1));
 		
+		// 膜名ごとにマージする
+		countsset.mergeForName();
+		
+		// 各量値を整理整頓する(+RV1-RV1 -> 0とか)
+		// TODO マージ前のほうがよい？
+		countsset.reflesh();
+		
+		// ルール適用回数に無限を代入して各値を計算する
+		solveRVAsInfinity();
+	}
+	
+	public void printAll(){
 		countsset.printAll();
 	}
 	
@@ -45,7 +56,7 @@ public class QuantityInferrer {
 	private void inferRule(RuleStructure rule){
 		Count count = new VarCount();
 		// 左辺膜と右辺膜を、同じ膜として扱う
-		countsset.add(inferInheritedMembrane(rule.leftMem, rule.rightMem, count));
+		countsset.add(inferRuleRootMembrane(rule, count));
 		Iterator<Membrane> itm = rule.rightMem.mems.iterator();
 		// 右辺子膜の走査
 		while(itm.hasNext()){
@@ -107,6 +118,20 @@ public class QuantityInferrer {
 		rhsCounts.addAllCounts(getCountsOfMem(-1,lhs,count,1));
 		return rhsCounts;
 	}
+	
+	/**
+	 * ルール右辺と左辺の本膜について受け継がれたものとして解析する。
+	 * @param rule
+	 * @param count
+	 * @return
+	 */
+	private CountsOfMem inferRuleRootMembrane(RuleStructure rule, Count count){
+		//右辺から左辺を減算(解析結果を加算)
+		CountsOfMem rootCounts = new CountsOfMem(rule.parent,1);
+		rootCounts.addAllCounts(getCountsOfMem(1,rule.rightMem,count,1));
+		rootCounts.addAllCounts(getCountsOfMem(-1,rule.leftMem,count,1));
+		return rootCounts;
+	}
 
 	/**
 	 * 左辺複数の膜から右辺に受け継がれた「マージされた膜」として解析する。
@@ -150,4 +175,11 @@ public class QuantityInferrer {
 		return quantities;
 	}
 	
+	/**
+	 * ルール適用回数を全て無限として解析結果を解く
+	 * 
+	 */
+	private void solveRVAsInfinity(){
+		
+	}
 }

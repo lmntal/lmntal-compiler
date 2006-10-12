@@ -1,8 +1,8 @@
-package type;
+package type.occurrence;
 
 import runtime.Functor;
 
-public class AtomOccurrenceConstraint implements Constraint {
+public class AtomOccurrence {
 	private String memname;
 
 	private Functor functor;
@@ -15,14 +15,14 @@ public class AtomOccurrenceConstraint implements Constraint {
 		return functor;
 	}
 	
-	public AtomOccurrenceConstraint(String memname, Functor functor) {
+	public AtomOccurrence(String memname, Functor functor) {
 		this.memname = (memname == null ? "??" : memname);
 		this.functor = functor;
 	}
 
 	public boolean equals(Object o) {
-		if (o instanceof AtomOccurrenceConstraint) {
-			AtomOccurrenceConstraint haac = (AtomOccurrenceConstraint) o;
+		if (o instanceof AtomOccurrence) {
+			AtomOccurrence haac = (AtomOccurrence) o;
 			return (memname.equals(haac.memname) && functor
 					.equals(haac.functor));
 		} else

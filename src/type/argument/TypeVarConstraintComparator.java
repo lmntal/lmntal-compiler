@@ -1,6 +1,7 @@
-package type;
+package type.argument;
 
 import java.util.Comparator;
+
 
 /**
  * comparator for fixed type-var constraints

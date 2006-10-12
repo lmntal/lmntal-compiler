@@ -1,7 +1,9 @@
 /**
  * 
  */
-package type;
+package type.argument;
+
+import type.TypeVar;
 
 /**
  * @author kudo

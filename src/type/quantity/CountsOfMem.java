@@ -128,13 +128,13 @@ public class CountsOfMem{
 	}
 	
 	public void print(){
-		Env.p("---atoms of " + TypeEnv.getMemName(mem) + "(" + multiple + ") :");
+		Env.p("----atoms of " + TypeEnv.getMemName(mem) + "(" + multiple + ") :");
 		Iterator<Functor> itf = functorToCount.keySet().iterator();
 		while(itf.hasNext()){
 			Functor f = itf.next();
 			Env.p(f + ":" + functorToCount.get(f));
 		}
-		Env.p("---mems of " + TypeEnv.getMemName(mem) + "(" + multiple + ") :");
+		Env.p("----mems of " + TypeEnv.getMemName(mem) + "(" + multiple + ") :");
 		Iterator<String> itm = memnameToCount.keySet().iterator();
 		while(itm.hasNext()){
 			String m = itm.next();

@@ -1,4 +1,4 @@
-package type;
+package type.argument;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
+import type.TypeConstraintException;
+import type.TypeVar;
 
 /**
  * 

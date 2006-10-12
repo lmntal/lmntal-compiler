@@ -1,7 +1,8 @@
 /**
  * 
  */
-package type;
+package type.argument;
+
 
 /**
  * @author kudo

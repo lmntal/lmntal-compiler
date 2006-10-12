@@ -1,4 +1,4 @@
-package type;
+package type.argument;
 
 import compile.structure.LinkOccurrence;
 
