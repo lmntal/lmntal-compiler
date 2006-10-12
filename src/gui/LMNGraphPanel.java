@@ -2,18 +2,19 @@ package gui;
 
 //import java.io.StringReader;
 //import java.util.*;
-import java.awt.Cursor;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.*;
+import java.awt.event.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.border.BevelBorder;
+import javax.swing.*;
+import javax.swing.border.*;
+
+//import compile.parser.*;
+import compile.structure.*;
 
 /**
  * グラフィックモードを起動したときのマウスイベントの処理
  */
-public class LMNGraphPanel extends GraphPanel implements MouseMotionListener {
+public class LMNGraphPanel extends GraphPanel {
 	LMNtalFrame frame;
 	Node movingNode;
 	
@@ -53,15 +54,19 @@ public class LMNGraphPanel extends GraphPanel implements MouseMotionListener {
 				movingNode = null;
 			}
 		});
-		addMouseMotionListener(this);
-	}
-	
-	public void mouseDragged(MouseEvent e) {
-		if(movingNode==null) return;
-		movingNode.setPosition(new DoublePoint(e.getPoint()));
-	}
-	
-	public void mouseMoved(MouseEvent e) {
+		addMouseMotionListener(new MouseMotionAdapter() {
+			
+			/**
+			 * マウスがドラッグされたときの処理
+			 * <p>移動した距離を取得</p>
+			 */
+			public void mouseDragged(MouseEvent arg0) {
+				if(movingNode==null) return;
+				movingNode.setPosition(new DoublePoint(arg0.getPoint()));
+			}
+
+		}
+		);
 	}
 	
 //	public void setSource(String src) throws ParseException {
@@ -113,13 +118,17 @@ public class LMNGraphPanel extends GraphPanel implements MouseMotionListener {
 //		}
 //		return n;
 //	}
-
-	public Node getMovingNode() {
-		return movingNode;
+	
+	runtime.Atom buddy(runtime.Atom a, int i) {
+		return a.nthAtom(i);
 	}
-
-	public void setMovingNode(Node movingNode) {
-		this.movingNode = movingNode;
+	
+	Atomic buddy(Atomic a, int i) {
+		LinkOccurrence link = a.args[i];
+		if(link.buddy != null) {
+			return link.buddy.atom;
+		}
+		return null;
 	}
 	
 //	/**
