@@ -16,7 +16,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import runtime.Env;
-import debug.Debug;
 //import compile.parser.ParseException;
 
 class MyThread extends Thread {
@@ -53,7 +52,6 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				running = busy = false;
-				Env.theRuntime.terminate();	// 060831okabe
 			}
 		});
 		initComponents();
@@ -133,7 +131,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	 * @return ルールスレッドの実行を継続してよいかどうか 
 	 */
 	public boolean onTrace() {
-		if(Env.fGUI && Env.gui.running) {
+		if(Env.gui.running) {
 			lmnPanel.start();
 //			Env.gui.lmnPanel.setMembrane((runtime.Membrane)Env.theRuntime.getGlobalRoot());
 			Env.gui.waitBusy();

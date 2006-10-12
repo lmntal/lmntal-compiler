@@ -5,8 +5,6 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,8 +13,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import runtime.Membrane;
 import runtime.Env;
+import visual.Membrane;
+import visual.State;
 
 public abstract class AbstractGraphLayout implements Runnable {
 	
@@ -26,7 +25,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	protected Component parent = null;
 	protected Rectangle area;// = new Rectangle(25,25,400,400);
 	protected Vector fixedNode = new Vector();
-	runtime.Membrane rootMem;
+	Membrane rootMem;
 	
 	public AbstractGraphLayout(Component parent) {
 		this.parent = parent;
@@ -34,7 +33,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 //		System.out.println("area = "+area);
 	}
 	
-	public void setRootMem(runtime.Membrane rootMem) {
+	public void setRootMem(Membrane rootMem) {
 		this.rootMem = rootMem;
 //		System.out.println("setRootMem"+rootMem);
 	}
@@ -46,6 +45,10 @@ public abstract class AbstractGraphLayout implements Runnable {
 //	public void addNode(GraphNode node) {
 //		nodes.add(node);
 //	}
+	
+	public Membrane getRootMem() {
+		return rootMem;
+	}
 	
 	public void removeAllNodes() {
 		nodes.removeAllElements();
@@ -73,7 +76,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * @param m
 	 * @param t
 	 */
-	public void getNearestNode(Point p, runtime.Membrane m, D_N_tuple t) {
+	public void getNearestNode(Point p, Membrane m, D_N_tuple t) {
 		for(Iterator i=m.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
 			if(!n.isVisible()) continue;
@@ -200,6 +203,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 //		if(rootMem.getAtomCount()==0) {
 //		} else {
 //		}
+		if (rootMem == null) return r;
 		for (Iterator i=rootMem.atomIterator();i.hasNext();) {
 			Node n = (Node)i.next();
 			Point p = n.getPosition().toPoint();
@@ -251,7 +255,7 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 * 継承したクラスで座標処理の内容を記述する。
 	 * @param m
 	 */
-	abstract protected void relax(runtime.Membrane m);
+	abstract protected void relax(Membrane m);
 	
 	/**
 	 * テスト用膜に含まれるアトムの名前とmoveDeltaを出力する。
@@ -306,11 +310,11 @@ public abstract class AbstractGraphLayout implements Runnable {
 	 */
 	boolean doesCutAcrossMembrane(AtomGroup atomgroup,Membrane m){
 		boolean f = false;
-		runtime.Atom n;
+		State n;
 		
 		Object[] mems = m.getMemArray();
 		for(Iterator it = atomgroup.atoms.iterator();it.hasNext();){
-			n = (runtime.Atom)it.next();
+			n = (State)it.next();
 			if(n.getMem() != m){
 				for(int i = 0;i<mems.length;i++){
 					if(n.getMem() == (Membrane)mems[i]){

@@ -3,8 +3,6 @@ package gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
@@ -13,8 +11,9 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 
-import runtime.Membrane;
 import runtime.Env;
+import visual.Membrane;
+import visual.State;
 
 public class GraphLayout extends AbstractGraphLayout {
 	private GraphDialog dialog;
@@ -29,7 +28,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	 * @param m
 	 */
 	boolean testf = false;
-	protected void relax(runtime.Membrane m) {
+	protected void relax(Membrane m) {
 		if(m==null) return;
 		Object[] mems = m.getMemArray();
 		atoms = separateAtomGroup(m);
@@ -338,11 +337,11 @@ public class GraphLayout extends AbstractGraphLayout {
 	 */
 	boolean doesCutAcrossMembrane(AtomGroup atomgroup,Membrane m){
 		boolean f = false;
-		runtime.Atom n;
+		State n;
 		
 		Object[] mems = m.getMemArray();
 		for(Iterator it = atomgroup.atoms.iterator();it.hasNext();){
-			n = (runtime.Atom)it.next();
+			n = (State)it.next();
 			if(n.getMem() != m){
 				for(int i = 0;i<mems.length;i++){
 					if(n.getMem() == (Membrane)mems[i]){
@@ -676,21 +675,24 @@ public class GraphLayout extends AbstractGraphLayout {
 		// ここでの用途は readonly
 		final double MARGIN = 15.0;
 		
-		Node[] nodes = (Node[])m.getAtomArray();
+		Iterator iter = m.atomIterator();
 		m.rect.setRect(m.rect.x, m.rect.y, 0.0, 0.0);
-		for(int i=0;i<nodes.length;i++) {
-			if(!nodes[i].isVisible()) continue;
-			double mg = MARGIN+runtime.Env.atomSize;
-			if(m.rect.isEmpty()) m.rect.setRect(nodes[i].getPosition().x-mg, nodes[i].getPosition().y-mg, mg*2, mg*2);
-			else                 m.rect.add(new Rectangle2D.Double(nodes[i].getPosition().x-mg, nodes[i].getPosition().y-mg, mg*2, mg*2));
-			nodes[i].paintEdge(g);
-		}
-		for(int i=0;i<nodes.length;i++) {
-			if(!nodes[i].isVisible()) continue;
-			if(isFixed(nodes[i])){
-				paintSelectedNode(g,nodes[i]);
+		while (iter.hasNext()) {
+			Node n = (Node)iter.next();
+			if(!n.isVisible()) continue;
+			if(isFixed(n)){
+				paintSelectedNode(g,n);
 			}
-			nodes[i].paintNode(g);
+			n.paintNode(g);
+		}
+		iter = m.atomIterator();
+		while (iter.hasNext()) {
+			Node n = (Node)iter.next();
+			if(!n.isVisible()) continue;
+			double mg = MARGIN+runtime.Env.atomSize;
+			if(m.rect.isEmpty()) m.rect.setRect(n.getPosition().x-mg, n.getPosition().y-mg, mg*2, mg*2);
+			else                 m.rect.add(new Rectangle2D.Double(n.getPosition().x-mg, n.getPosition().y-mg, mg*2, mg*2));
+			n.paintEdge(g);
 		}
 		// 子膜
 		Object[] mems = m.getMemArray();
@@ -757,7 +759,7 @@ public class GraphLayout extends AbstractGraphLayout {
 				double l = edge.getLen();
 				double f = (l - edge.getStdLen());// / (edge.getStdLen() * 1);
 				//膜を超える辺の場合力を弱くする。
-				if(((runtime.Atom)edge.from).getMem() != ((runtime.Atom)edge.to).getMem()){
+				if(((State)edge.from).getMem() != ((State)edge.to).getMem()){
 					l = l * 1.5;
 					f = f/10;
 				}
@@ -838,7 +840,7 @@ public class GraphLayout extends AbstractGraphLayout {
 				double l = edge.getLen();
 				double f = (l - edge.getStdLen());// / (edge.getStdLen() * 1);
 				//膜を超える辺の場合力を弱くする。
-				if(((runtime.Atom)edge.from).getMem() != ((runtime.Atom)edge.to).getMem()){
+				if(((State)edge.from).getMem() != ((State)edge.to).getMem()){
 					l = l * 1.5;
 					f = f/10;
 				}
