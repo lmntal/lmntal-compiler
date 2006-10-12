@@ -445,11 +445,16 @@ public final class Env {
 	/** */
 	public static boolean fType = false;
 	
+	/** 各推論の有効／無効 */
+	public static boolean flgOccurrenceInference = false;//true;
+	public static boolean flgQuantityInference = true;
+	public static boolean flgArgumentInference = false;//true;
+	
 	/** 推論された全ての情報を表示 */
 	public static boolean flgShowAllConstraints = false;
 	
 	/** 推論結果を表示 */
-	public static boolean flgShowConstraints = false;
+	public static boolean flgShowConstraints = true;
 	
 	////////////////////////////////////////////////////////////////
 	
