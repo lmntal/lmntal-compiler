@@ -473,8 +473,6 @@ public class FrontEnd {
 							// --type
 							// enable type check
 							// ( 今はまだ非公開 )
-							Env.flgShowConstraints = true;
-							Env.flgShowAllConstraints = false;
 							Env.fType = true;
 						} else if (args[i].equals("--args")) {
 							/// --args
@@ -640,11 +638,11 @@ public class FrontEnd {
 				TypeConstraintsInferer tci = new TypeConstraintsInferer(m);
 				try{
 					tci.infer();
-					tci.printAllConstraints();
+//					tci.printAllConstraints();
 				}catch (TypeConstraintException e){
 					Env.p("Type Inference Failed");
 					Env.e(e.getMessage());
-					tci.printAllConstraints();
+//					tci.printAllConstraints();
 					return;
 				}
 			}
