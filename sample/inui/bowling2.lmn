@@ -1,0 +1,22 @@
+//ボウリングの点数計算の状態遷移モデル（出力事象つき）
+start, score(0).
+
+start :- open.
+
+open, all, score(_IS) :- strike, score(_IS+10).
+open, rest(_IR), score(_IS) :- before_2, score(_IS+_IR).
+
+before_2, rest(_IR), score(_IS) :- open, score(_IS+_IR).
+before_2, all(_IR), score(_IS) :- spair, score(_IS+_IR).
+
+spair, rest(_IR), score(_IS) :- before_2, score(_IS+2*_IR).
+spair, all(_IR), score(_IS) :- strike, score(_IS+2*_IR).
+
+strike, rest(_IR), score(_IS) :- after_s_before_2, score(_IS+2*_IR).
+strike, all, score(_IS) :- double, score(_IS+2*10).
+
+double, rest(_IR), score(_IS) :- after_s_before_2, score(_IS+3*_IR).
+double, all, score(_IS) :- double, score(_IS+3*10).
+
+after_s_before_2, all(_IR), score(_IS) :- spair, score(_IS+2*_IR).
+after_s_before_2, rest(_IR), score(_IS) :- open, score(_IS+2*_IR).
