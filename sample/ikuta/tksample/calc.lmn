@@ -9,7 +9,6 @@
 	killer.
 	sys.perpetual(on).
 
-
 	// オブジェクトの配置
 	{textarea, id("answer"), position(0,0), text("0"), weight(1.0, 1.0), size(5,1)}.
 
@@ -33,27 +32,28 @@
 	{button, id("equal"), position(4,3), label("="), weight(1.0, 1.0), size(1,2)}.
 
 
-
+	//****以下ルール****// 
+	
 	numa(0).
 	numb(0).
 	ope("").
 
-	// 数字を押されたらaに数字を代入する。
+	pushint1@@ // 数字を押されたらaに数字を代入する。
 	{clicked, num(_IX), $p}, numa(_IA)
 	:-
 	{num(_IX), $p}, numa(_IA * 10 + _IX), viewa.
 	
-	// aの値をtextareaに表示する。
+	pushint2@@ // aの値をtextareaに表示する。
 	numa(_IA), {textarea, text(_GT), $p}, viewa
 	:-
 	numa(_IA), {textarea, text(_IA), $p}.
 	
-	// 演算子が押されたら、演算子を保存して演算子を表示する。
+	pushope@@ // 演算子が押されたら、演算子を保存して演算子を表示する。
 	{clicked, label(_SL), operator, $p}, {textarea, text(_GT), $q}, numa(_IA), numb(_IB), ope(_SO)
 	:-
 	{label(_SL), operator, $p}, {textarea, text(_SL), $q}, numa(0), numb(_IA), ope(_SL).
 	
-	// イコールが押されたら、結果を表示する(不正な場合は0になる)
+	pushequal@@ // イコールが押されたら、結果を表示する(不正な場合は0になる)
 	{clicked, label("="), $p}, numa(_IA), numb(_IB), ope("+"), {textarea, text(_GT), $q}
 	:-
 	{label("="), $p}, numa(0), numb(0), ope("+"), {textarea, text(_IB + _IA), $q}.
@@ -70,7 +70,7 @@
 	:-
 	{label("="), $p}, numa(0), numb(0), ope("/"), {textarea, text(_IB / _IA), $q}.
 	
-	// クリアが押されたら、全部初期化する。
+	pushclear@@ // クリアが押されたら、全部初期化する。
 	{clicked, label("c"), $p}, numa(_IA), numb(_IB), ope(_SO), {textarea, text(_GT), $q}
 	:-
 	{label("c"), $p}, numa(0), numb(0), ope(""), {textarea, text(0), $q}.
