@@ -18,7 +18,7 @@ import runtime.SymbolFunctor;
 public class LMNtalButton extends LMNComponent implements ActionListener {
 
 	private JButton button;
-	private String label;
+	private String text;
 	
 	private int clickedCounter = 0;
 	
@@ -40,16 +40,17 @@ public class LMNtalButton extends LMNComponent implements ActionListener {
 	 */
 	
 	public Component initComponent(){
-		button = new JButton(label);
+		button = new JButton(text);
 		button.addActionListener(this); //buttonのActionListener呼び出し
 		return button;
 	}
 	
 	public void setMembrane(Membrane mem){
-		label = getLabel(mem);
-		if(button != null && getLabelUpdate()){
-			setLabelUpdate(false);
-			button.setText(label);
+//		text = getLabel(mem);
+		text = getText(mem);
+		if(button != null && getTextUpdate()){
+			setTextUpdate(false);
+			button.setText(text);
 		}
 	}
 	

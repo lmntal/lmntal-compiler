@@ -36,6 +36,9 @@ public class LMNtalWindow extends JFrame {
 	private Functor TEXTAREA_FUNCTOR = new SymbolFunctor("textarea",0);
 
 	final static
+	private Functor LABEL_FUNCTOR = new SymbolFunctor("label",0);
+	
+	final static
 	private Functor ID_FUNCTOR = new SymbolFunctor("id", 1);
 
 	/////////////////////////////////////////////////////////////////
@@ -90,7 +93,7 @@ public class LMNtalWindow extends JFrame {
 		
 		// killerアトムを処理
 		setKiller(mem);
-//		doAddAtom(mem);
+
 	}
 	
 	/**
@@ -104,7 +107,7 @@ public class LMNtalWindow extends JFrame {
 		//componentMapのkeyにID(key)があったら更新
 		if(componentMap.containsKey(key)) {
 			LMNComponent component = 
-				(LMNComponent)componentMap.get(key); //=button? textarea?
+				(LMNComponent)componentMap.get(key); //=button? textarea? label?
 			component.resetMembrane(mem);
 			return;
 		}
@@ -118,10 +121,16 @@ public class LMNtalWindow extends JFrame {
 			LMNtalTextArea textarea = new LMNtalTextArea(this, mem);
 			componentMap.put(key, textarea);
 		}
+		
+		if(mem.getAtomCountOfFunctor(LABEL_FUNCTOR)>0){
+			LMNtalLabel label = new LMNtalLabel(this, mem);
+			componentMap.put(key, label);
+		}
+		
 	}
 	
 	private String getID(Membrane mem){
-		/** position(X,Y)のアトムがあったとき、gridxとgridyを取得する(単位はGridBag)。 */
+		/** ID("id")があったとき、IDを取得する */
 		String id = null;
 		Iterator idAtomIte = mem.atomIteratorOfFunctor(ID_FUNCTOR);
 		if(idAtomIte.hasNext()){

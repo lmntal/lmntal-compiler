@@ -22,16 +22,18 @@ public class LMNComponent {
 	final static
 	private Functor WEIGHT_FUNCTOR = new SymbolFunctor("weight", 2);
 	
-	final static
-	private Functor LABEL_FUNCTOR = new SymbolFunctor("label", 1);
-	
 	final static //windowSizeではなくてセルの幅の方
 	private Functor SIZE_FUNCTOR = new SymbolFunctor("size", 2);
 	
+	final static
+	private Functor TEXT_FUNCTOR = new SymbolFunctor("text",1);
+
+	
 	private GridBagConstraints gbc = new GridBagConstraints(); //位置
 
-	private boolean isLabelUpdate = false;
+	private boolean isTextUpdate = false;
 	
+	public Atom textatom; // textatomはTextAreaでも使うので…
 	
 	public LMNComponent(LMNtalWindow lmnWindow, Membrane mem){
 		mymem = mem;
@@ -97,7 +99,7 @@ public class LMNComponent {
 		gbc.weighty = weightY;			
 	}
 	
-	/** label("")のアトムがあったとき、labelに貼る内容を取得する */
+/*	** label("")のアトムがあったとき、labelに貼る内容を取得する *
 	public String getLabel(Membrane mem){
 		String label = "object";
 		Iterator labelAtomIte = mem.atomIteratorOfFunctor(LABEL_FUNCTOR);
@@ -111,18 +113,38 @@ public class LMNComponent {
 		}
 		return label;
 	}
+*/
 		
+	
+	/** text("")のアトムがあったとき、textの内容を取得する */
+	public String getText(Membrane mem){
+		String text = "";
+		Iterator textAtomIte = mem.atomIteratorOfFunctor(TEXT_FUNCTOR);
+		if(textAtomIte.hasNext()){
+			textatom = (Atom)textAtomIte.next();
+			if(text != textatom.nth(0))
+			{
+				text = textatom.nth(0);
+				isTextUpdate = true;
+			}
+		}
+		return text;
+	}
+
+	
+	
+	
 	public void resetMembrane (Membrane mem){
 		mymem = mem;
 		setMembrane(mem);
 	}
 
-	public boolean getLabelUpdate(){
-		return isLabelUpdate;
+	public boolean getTextUpdate(){
+		return isTextUpdate;
 	}
 	
-	public void setLabelUpdate(boolean update){
-		isLabelUpdate = update;
+	public void setTextUpdate(boolean update){
+		isTextUpdate = update;
 	}
 	
 	public void addAtom(){}

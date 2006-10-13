@@ -1,4 +1,6 @@
-//--wtモードで実行してみてください。
+// --wtモードで実行してみてください。
+// 右上クリックでボタン増設
+// 数字書いてあるボタンクリックで数字増やす
 
 {
 	window.
@@ -7,17 +9,24 @@
 	killer.
 	sys.perpetual(on).
 
-	{button, id("1"), position(0,0), label("label1")}.
-	
-	{button, id("2"), position(1,0), label(1)}.
-	
-	{textarea, id("3"), position(0,1), weight(3.0, 2.0)}.
-	
+	// *** 配置 *** //
+	{button, id("1"), position(0,0), text("button1")}.
+	{button, id("2"), position(1,0), text(6)}.
+	{textarea, id("3"), position(0,1), weight(1.0, 1.0)}.
 	{textarea, id("4"), position(1,1), text("aaaaaaaaaaa"), weight(1.0, 1.0)}.
+	{button, id("5"), position(0,2), text(1), size(2,1)}.
 
-	{button, id("5"), position(0,2), label(1), size(2,1)}.
-
-	//クリックされるとラベルが数字だった場合カウントアップされるルール	
-	{clicked, label(_IX), $p} :- {label(_IX + 1), $p}.
+	{label, id("6"), position(2,2), text("label"), weight(3.0, 1.0)}.
 	
+	// *** ルール *** //
+	
+	// 右上のボタン(id=2)クリックで下にボタン増設
+	{clicked, text(_IX), id("2"), $p} :- {text(_IX+1), id("2"), $p}, {button, id(_IX), position(0,_IX), text(_IX)}.
+	
+	// クリックされるとラベルが数字だった場合カウントアップされるルール	
+	{clicked, text(_IX), $p} :- {text(_IX + 1), $p}.
+	
+	
+	
+
 }

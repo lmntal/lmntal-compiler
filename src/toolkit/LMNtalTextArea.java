@@ -3,30 +3,27 @@ package toolkit;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Iterator;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import runtime.Atom;
-import runtime.Functor;
 import runtime.Membrane;
 import runtime.StringFunctor;
-import runtime.SymbolFunctor;
 
 /**
- * LMNtalWindowに設置するボタン
- * オブジェクト生成時に，膜を検索し，ボタン生成を行う．
+ * LMNtalWindowに設置するテキストエリア
+ * オブジェクト生成時に，膜を検索し，テキストエリア生成を行う．
  */
 public class LMNtalTextArea extends LMNComponent implements KeyListener {
 
 	private JTextArea textarea;
 	private JScrollPane scroll;
 	private String text;
-	private Atom textatom;
+//	private Atom textatom;
 
-	final static
-	private Functor TEXT_ATOM = new SymbolFunctor("text",1);
+//	final static
+//	private Functor TEXT_ATOM = new SymbolFunctor("text",1);
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -48,7 +45,7 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 	public Component initComponent(){
 		textarea = new JTextArea(text);
 		textarea.addKeyListener(this); // textareaのKeyListener呼び出し
-		textarea.setLineWrap(true);
+		textarea.setLineWrap(true);    // 折り返しの設定ON
 		scroll = new JScrollPane(textarea);
 		return scroll;
 	}
@@ -75,7 +72,7 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 		LMNtalTFrame.addUpdateComponent(this);
 	}
 	
-	/** text("")のアトムがあったとき、textの内容を取得する */
+/*	** text("")のアトムがあったとき、textの内容を取得する *
 	public String getText(Membrane mem){
 		String text = "";
 		Iterator textAtomIte = mem.atomIteratorOfFunctor(TEXT_ATOM);
@@ -85,6 +82,7 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 		}
 		return text;
 	}
+*/
 	
 	public void keyPressed(KeyEvent arg0) {}
 	public void keyReleased(KeyEvent arg0) {}
