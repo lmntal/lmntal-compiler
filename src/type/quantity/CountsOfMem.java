@@ -20,7 +20,7 @@ import compile.structure.Membrane;
  */
 public class CountsOfMem{
 	
-	Membrane mem;
+	public final Membrane mem;
 	
 	/**
 	 * この膜の所属プロセスが何倍されるかを表す。
@@ -28,12 +28,12 @@ public class CountsOfMem{
 	 * 1 : 移動時(あるいはルールの本膜等)
 	 * >1 : 複製、マージ
 	 */
-	int multiple;
+	public final int multiple;
 	
 	/** ファンクタ -> 量 */
-	Map<Functor,Count> functorToCount;
+	public final Map<Functor,Count> functorToCount;
 	/** 膜名 -> 量 */
-	Map<String,Count> memnameToCount;
+	public final Map<String,Count> memnameToCount;
 
 	public CountsOfMem(Membrane mem, int multiple){
 		this.mem = mem;
@@ -77,6 +77,7 @@ public class CountsOfMem{
 	}
 	/**
 	 * 別の量セットから全て加算
+	 * TODO 倍数により分ける
 	 * @param com2
 	 */
 	public void addAllCounts(CountsOfMem com2){
@@ -94,37 +95,30 @@ public class CountsOfMem{
 	/**
 	 * 別の量セットをor結合
 	 */
-	public void merge(CountsOfMem com2){
-		Set<Functor> mergedFunctors = new HashSet<Functor>();
-		mergedFunctors.addAll(functorToCount.keySet());
-		mergedFunctors.addAll(com2.functorToCount.keySet());
-		Iterator<Functor> itf = mergedFunctors.iterator();
+//	public void merge(CountsOfMem com2){
+//	}
+	
+	/**
+	 * ルール変数について整理する
+	 *
+	 */
+	public void reflesh(){
+		Iterator<Functor> itf = functorToCount.keySet().iterator();
 		while(itf.hasNext()){
 			Functor f = itf.next();
-			Count c1 = functorToCount.get(f);
-			Count c2 = com2.functorToCount.get(f);
-			if(c1==null && c2!=null)
-				functorToCount.put(f,new OrCount(c2));
-			else if(c1!=null && c2==null)
-				functorToCount.put(f,new OrCount(c1));
-			else if(c1!=null && c2!=null)
-				functorToCount.put(f, c1.merge(c2));
+			Count c = functorToCount.get(f);
+			functorToCount.put(f,c.reflesh());
 		}
-		Set<String> mergedNames = new HashSet<String>();
-		mergedNames.addAll(memnameToCount.keySet());
-		mergedNames.addAll(com2.memnameToCount.keySet());
-		Iterator<String> itn = mergedNames.iterator();
+		Iterator<String> itn = memnameToCount.keySet().iterator();
 		while(itn.hasNext()){
 			String name = itn.next();
-			Count c1 = memnameToCount.get(name);
-			Count c2 = com2.memnameToCount.get(name);
-			if(c1==null && c2!=null)
-				memnameToCount.put(name,new OrCount(c2));
-			else if(c1!=null && c2==null)
-				memnameToCount.put(name, new OrCount(c1));
-			else if(c1!=null && c2!=null)
-				memnameToCount.put(name, c1.merge(c2));
+			Count c = memnameToCount.get(name);
+			memnameToCount.put(name,c.reflesh());
 		}
+	}
+	
+	public FixedCounts solve(){
+		return new FixedCounts(this);
 	}
 	
 	public void print(){

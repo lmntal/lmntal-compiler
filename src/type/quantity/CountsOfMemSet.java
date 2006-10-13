@@ -16,6 +16,8 @@ import compile.structure.Membrane;
 public class CountsOfMemSet {
 	/** ソース上の膜 -> 量解析結果 */
 	Map<Membrane,CountsOfMem> memToCounts;
+	/** ソース上の膜 -> 量解析結果(評価済み */
+	Map<Membrane,FixedCounts> memToFixedCounts;
 //	/** 膜名 -> 変化プロセス */
 //	Map<Membrane,CountsOfMem> memToInhCounts;
 	public CountsOfMemSet(){
@@ -64,28 +66,49 @@ public class CountsOfMemSet {
 	
 	/**
 	 * 膜名ごとにマージする
-	 * TODO 実装
 	 */
 	public void mergeForName(){
-		
+		Map<String, FixedCounts> memnameToCounts = new HashMap<String, FixedCounts>();
+		Iterator<Membrane> itm = memToFixedCounts.keySet().iterator();
+		while(itm.hasNext()){
+			Membrane m = itm.next();
+			String memname = m.name;
+			FixedCounts fc = memToFixedCounts.get(m);
+			if(!memnameToCounts.containsKey(memname))
+				memnameToCounts.put(memname,fc);
+			else{
+				FixedCounts oldfc = memnameToCounts.get(memname);
+				oldfc.merge(fc);
+			}
+		}
 	}
 	
 	/**
 	 * 各解析結果を整理する
 	 * (-RV1+RV1 -> 0 など)
-	 * TODO 実装
-	 *
 	 */
 	public void reflesh(){
-		
+		Iterator<CountsOfMem> itms = memToCounts.values().iterator();
+		while(itms.hasNext()){
+			itms.next().reflesh();
+		}
+	}
+	
+	public void solve(){
+		memToFixedCounts = new HashMap<Membrane, FixedCounts>();
+		Iterator<Membrane> itm = memToCounts.keySet().iterator();
+		while(itm.hasNext()){
+			Membrane m = itm.next();
+			memToFixedCounts.put(m,memToCounts.get(m).solve());
+		}
 	}
 	
 	public void printAll(){
 		Env.p("--QUANTITY ANALYSIS");
 		Env.p("---mem on source counts:");
-		Iterator<CountsOfMem> itmgs = memToCounts.values().iterator();
-		while(itmgs.hasNext()){
-			itmgs.next().print();
+		Iterator<FixedCounts> itfc = memToFixedCounts.values().iterator();
+		while(itfc.hasNext()){
+			itfc.next().print();
 		}
 //		Env.p("---inh counts:");
 //		Iterator<CountsOfMem> itmis = memToInhCounts.values().iterator();

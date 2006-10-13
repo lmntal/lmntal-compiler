@@ -1,7 +1,9 @@
 package type.quantity;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import compile.structure.Atom;
@@ -19,9 +21,13 @@ public class QuantityInferrer {
 	private final CountsOfMemSet countsset;
 	
 	private Membrane root;
+
+	/** ルール -> ルール適用回数変数 */
+	private Map<RuleStructure, VarCount> ruleToVar;
 	
 	public QuantityInferrer(Membrane root){
 		this.countsset = new CountsOfMemSet();
+		this.ruleToVar = new HashMap<RuleStructure, VarCount>();
 		this.root = root;
 	}
 	
@@ -31,18 +37,17 @@ public class QuantityInferrer {
 	 */
 	public void infer(){
 		// ルート膜を1回適用されたルールの右辺として検査する
-		// TODO ルール適用回数の変数を集約しておくこと
 		inferRHSMembrane(root, new NumCount(1));
 		
-		// 膜名ごとにマージする
-		countsset.mergeForName();
-		
 		// 各量値を整理整頓する(+RV1-RV1 -> 0とか)
-		// TODO マージ前のほうがよい？
 		countsset.reflesh();
 		
 		// ルール適用回数に無限を代入して各値を計算する
 		solveRVAsInfinity();
+
+		// 膜名ごとにマージする
+		countsset.mergeForName();
+		
 	}
 	
 	public void printAll(){
@@ -54,13 +59,14 @@ public class QuantityInferrer {
 	 * @param rule
 	 */
 	private void inferRule(RuleStructure rule){
-		Count count = new VarCount();
+		VarCount vcount = new VarCount();
+		ruleToVar.put(rule,vcount);
 		// 左辺膜と右辺膜を、同じ膜として扱う
-		countsset.add(inferRuleRootMembrane(rule, count));
+		countsset.add(inferRuleRootMembrane(rule, vcount));
 		Iterator<Membrane> itm = rule.rightMem.mems.iterator();
 		// 右辺子膜の走査
 		while(itm.hasNext()){
-			inferRHSMembrane(itm.next(),count);
+			inferRHSMembrane(itm.next(),vcount);
 		}
 		// 右辺出現ルールの検査
 		Iterator<RuleStructure> itr = rule.rightMem.rules.iterator();
@@ -156,7 +162,6 @@ public class QuantityInferrer {
 	private CountsOfMem inferGeneratedMembrane(Membrane mem, Count count){
 		return getCountsOfMem(1,mem,count, 0);
 	}
-
 	
 	private CountsOfMem getCountsOfMem(int sign, Membrane mem, Count count, int multiple){
 		CountsOfMem quantities = new CountsOfMem(mem, multiple);
@@ -180,6 +185,9 @@ public class QuantityInferrer {
 	 * 
 	 */
 	private void solveRVAsInfinity(){
-		
+		Iterator<VarCount> itv = ruleToVar.values().iterator();
+		while(itv.hasNext())
+			itv.next().bind(Count.INFINITY.or0());
+		countsset.solve();
 	}
 }
