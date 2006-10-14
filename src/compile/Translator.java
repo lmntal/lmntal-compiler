@@ -519,7 +519,7 @@ public class Translator {
 
 		packageName = "runtime.systemRuleset";
 		className = "GlobalSystemRuleset";
-		dir = new File("../src/runtime" + File.separator + "systemRuleset" + File.separator);
+		dir = new File("src/runtime" + File.separator + "systemRuleset" + File.separator);
 		outputFile = new File(dir, className + ".java");
 		writer = new TranslatorWriter(new FileWriter(outputFile));
 		//writer = new BufferedWriter(new OutputStreamWriter(System.out, Charset.forName("EUC_JP")));
