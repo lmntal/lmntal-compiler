@@ -22,14 +22,21 @@ public class Compactor {
 	/** ルールオブジェクトを最適化する（予定） */
 	public static void compactRule(Rule rule) {		
 		// todo compactInstructionList(rule.atomMatchLabel);
-		compactInstructionList(rule.memMatchLabel);
-		compactInstructionList(rule.guardLabel);
-		compactInstructionList(rule.bodyLabel);
+		List atomMatch = rule.atomMatch;
+		for(int i=1; i<atomMatch.size(); i++){
+			Instruction inst = (Instruction)atomMatch.get(i);
+			if(inst.getKind() == Instruction.BRANCH)
+				compactInstructionList(((InstructionList)inst.getArg1()).insts);
+			else continue;
+		}
+		compactInstructionList(rule.memMatch);
+		compactInstructionList(rule.guard);
+		compactInstructionList(rule.body);
 	}
 	/** 命令列を最適化する（予定）*/
-	public static void compactInstructionList(InstructionList label) {
+	public static void compactInstructionList(List insts) {
 		//if (true) return;
-		List insts = label.insts;
+		//List insts = label.insts;
 		Instruction spec = (Instruction)insts.get(0);
 		int formals = spec.getIntArg1();
 		int varcount = spec.getIntArg2();
