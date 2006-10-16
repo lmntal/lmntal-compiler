@@ -5,28 +5,17 @@ package type.quantity;
  * @author kudo
  *
  */
-public abstract class FixedCount extends Count {
+public abstract class FixedCount{
 
 	public abstract String toString();
 
-	public final Count reflesh() {
-		return this;
-	}
-	
 	public final FixedCount evaluate() {
 		return this;
 	}
 
 	public abstract FixedCount add(FixedCount v);
-	public final Count add(Count c){
-		if(c instanceof FixedCount)
-			return add((FixedCount)c);
-		else return new SumCount(c, this);
-	}
-	
-	public abstract FixedCount mul(int m);
 
-	public abstract FixedCount inverse();
+	public abstract FixedCount mul(int m);
 
 	public final FixedCount or0(){
 		return or(new NumCount(0));

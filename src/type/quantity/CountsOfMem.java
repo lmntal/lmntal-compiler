@@ -56,7 +56,7 @@ public class CountsOfMem{
 			functorToCount.put(functor,count);
 		else{
 			Count atomcount = functorToCount.get(functor);
-			functorToCount.put(functor, atomcount.add(count));
+			functorToCount.put(functor, Count.sum(atomcount,count));
 		}
 	}
 	/**
@@ -72,7 +72,7 @@ public class CountsOfMem{
 			memnameToCount.put(memname,count);
 		else{
 			Count memcount = memnameToCount.get(memname);
-			memnameToCount.put(memname, memcount.add(count));
+			memnameToCount.put(memname, Count.sum(memcount, count));
 		}
 	}
 	/**
@@ -90,30 +90,6 @@ public class CountsOfMem{
 		while(itf.hasNext()){
 			String name = itn.next();
 			addMemCount(name,com2.memnameToCount.get(name));
-		}
-	}
-	/**
-	 * 別の量セットをor結合
-	 */
-//	public void merge(CountsOfMem com2){
-//	}
-	
-	/**
-	 * ルール変数について整理する
-	 *
-	 */
-	public void reflesh(){
-		Iterator<Functor> itf = functorToCount.keySet().iterator();
-		while(itf.hasNext()){
-			Functor f = itf.next();
-			Count c = functorToCount.get(f);
-			functorToCount.put(f,c.reflesh());
-		}
-		Iterator<String> itn = memnameToCount.keySet().iterator();
-		while(itn.hasNext()){
-			String name = itn.next();
-			Count c = memnameToCount.get(name);
-			memnameToCount.put(name,c.reflesh());
 		}
 	}
 	

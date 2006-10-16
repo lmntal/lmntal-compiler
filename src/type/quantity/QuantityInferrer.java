@@ -31,27 +31,31 @@ public class QuantityInferrer {
 		this.root = root;
 	}
 	
+	/** 変数は変数のまま */
+	public boolean fixed;
 	/**
 	 * 量的解析を行う
 	 * @param root
 	 */
 	public void infer(){
 		// ルート膜を1回適用されたルールの右辺として検査する
-		inferRHSMembrane(root, new NumCount(1));
-		
-		// 各量値を整理整頓する(+RV1-RV1 -> 0とか)
-		countsset.reflesh();
+		VarCount vc = new VarCount();
+		vc.bind(new NumCount(1));
+		inferRHSMembrane(root, new Count(vc));
 		
 		// ルール適用回数に無限を代入して各値を計算する
 		solveRVAsInfinity();
+		fixed = true;
 
 		// 膜名ごとにマージする
-		countsset.mergeForName();
-		
+//		countsset.mergeForName();
 	}
 	
 	public void printAll(){
-		countsset.printAll();
+		if(fixed)
+			countsset.printAll();
+		else
+			countsset.printAllUnfixed();
 	}
 	
 	/**
@@ -61,12 +65,13 @@ public class QuantityInferrer {
 	private void inferRule(RuleStructure rule){
 		VarCount vcount = new VarCount();
 		ruleToVar.put(rule,vcount);
+		Count sc = new Count(vcount);
 		// 左辺膜と右辺膜を、同じ膜として扱う
-		countsset.add(inferRuleRootMembrane(rule, vcount));
+		countsset.add(inferRuleRootMembrane(rule, sc));
 		Iterator<Membrane> itm = rule.rightMem.mems.iterator();
 		// 右辺子膜の走査
 		while(itm.hasNext()){
-			inferRHSMembrane(itm.next(),vcount);
+			inferRHSMembrane(itm.next(),sc);
 		}
 		// 右辺出現ルールの検査
 		Iterator<RuleStructure> itr = rule.rightMem.rules.iterator();
@@ -169,13 +174,13 @@ public class QuantityInferrer {
 		Iterator<Atom> ita = mem.atoms.iterator();
 		while(ita.hasNext()){
 			// <-R, p/n>
-			quantities.addAtomCount(ita.next(),(sign==1?count:new MinCount(count)));
+			quantities.addAtomCount(ita.next(),(Count.mul(sign, count)));
 		}
 		//子膜の解析結果
 		Iterator<Membrane> itm = mem.mems.iterator();
 		while(itm.hasNext()){
 			// <-R, m>
-			quantities.addMemCount(itm.next(),(sign==1?count:new MinCount(count)));
+			quantities.addMemCount(itm.next(),(Count.mul(sign,count)));
 		}
 		return quantities;
 	}

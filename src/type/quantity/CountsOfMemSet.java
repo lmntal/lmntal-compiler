@@ -48,7 +48,6 @@ public class CountsOfMemSet {
 	 * @param counts
 	 */
 	public void addCountsOfMem(CountsOfMem counts){
-//		String memname = TypeEnv.getMemName(counts.mem);
 		if(!memToCounts.containsKey(counts.mem))
 			memToCounts.put(counts.mem,counts);
 		else{
@@ -83,17 +82,6 @@ public class CountsOfMemSet {
 		}
 	}
 	
-	/**
-	 * 各解析結果を整理する
-	 * (-RV1+RV1 -> 0 など)
-	 */
-	public void reflesh(){
-		Iterator<CountsOfMem> itms = memToCounts.values().iterator();
-		while(itms.hasNext()){
-			itms.next().reflesh();
-		}
-	}
-	
 	public void solve(){
 		memToFixedCounts = new HashMap<Membrane, FixedCounts>();
 		Iterator<Membrane> itm = memToCounts.keySet().iterator();
@@ -110,12 +98,17 @@ public class CountsOfMemSet {
 		while(itfc.hasNext()){
 			itfc.next().print();
 		}
-//		Env.p("---inh counts:");
-//		Iterator<CountsOfMem> itmis = memToInhCounts.values().iterator();
-//		while(itmis.hasNext()){
-//			itmis.next().print();
-//		}
 		Env.p("");
 	}
-	
+
+	public void printAllUnfixed(){
+		Env.p("--QUANTITY ANALYSIS");
+		Env.p("---mem on source counts:");
+		Iterator<CountsOfMem> itc = memToCounts.values().iterator();
+		while(itc.hasNext()){
+			itc.next().print();
+		}
+		Env.p("");
+	}
+
 }

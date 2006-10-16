@@ -19,9 +19,9 @@ public class IntervalCount extends FixedCount {
 		this.max = max;
 	}
 	
-	public FixedCount inverse() {
-		return new IntervalCount(max.inverse(),min.inverse());
-	}
+//	public FixedCount inverse() {
+//		return new IntervalCount(max.inverse(),min.inverse());
+//	}
 
 	public FixedCount mul(int m) {
 		if(m>=0)

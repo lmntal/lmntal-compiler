@@ -14,15 +14,12 @@ public class InfinityCount extends ValueCount {
 	public String toString(){
 		return (minus?"-":"") + "#inf";
 	}
-	public ValueCount inverse(){
-		if(minus)return Count.INFINITY;
-		else return Count.M_INFINITY;
-	}
+
 	public ValueCount mul(int m){
 		if(m >=0)
 			return this;
-		else
-			return inverse();
+		else if(minus)return Count.INFINITY;
+		else return Count.M_INFINITY;
 	}
 	/**
 	 * 無限に何を足しても無限(-無限の時はありうるか?)

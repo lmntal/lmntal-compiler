@@ -6,7 +6,6 @@ package type.quantity;
  *
  */
 public abstract class ValueCount extends FixedCount {
-	public abstract ValueCount inverse();
 	public abstract ValueCount add(ValueCount v);
 	public final FixedCount add(FixedCount f){
 		if(f instanceof ValueCount)
