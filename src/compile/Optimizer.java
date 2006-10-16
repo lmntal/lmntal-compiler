@@ -14,6 +14,7 @@ import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.Rule;
+import runtime.SymbolFunctor;
 
 /**
  * 最適化を行うクラスメソッドを持つクラス。
@@ -34,13 +35,15 @@ public class Optimizer {
 	public static boolean fGrouping;
 	/** 命令列の編み上げを行う */
 	public static boolean fMerging;
+	/** システムルールセットのインライン展開 */
+	public static boolean fSystemRulesetsInlining;
 
 	/**
 	 * 全ての最適化フラグをオフにする
 	 */
 	public static void clearFlag() {
 		fInlining = fReuseMem = fReuseAtom = fLoop = false;
-		fGuardMove = fGrouping = fMerging = false;
+		fGuardMove = fGrouping = fMerging = fSystemRulesetsInlining = false;
 	}
 	/**
 	 * 最適化レベルを設定する。
@@ -91,7 +94,8 @@ public class Optimizer {
 		if(fGuardMove && !fMerging) {
 			guardMove(rule.atomMatch);
 			guardMove(rule.memMatch);
-		} 
+		}
+		if(fSystemRulesetsInlining) inlineExpandSystemRuleSets(rule.body);
 		if (fInlining) {
 			// head(+guard) と body をくっつける
 			inlineExpandTailJump(rule.memMatch);
@@ -205,7 +209,7 @@ public class Optimizer {
 			switch(inst.getKind()){
 			//ボディ命令列は並び替えない -> ボディの先頭はcommit
 			case Instruction.COMMIT:
-				break;
+				return;
 			//否定条件は放置(位置を変えない)
 			//todo どうするか考える
 			case Instruction.NOT:
@@ -247,6 +251,259 @@ public class Optimizer {
 				}
 			}
 		}			
+	}
+	
+	/**
+	 * システムルールセットをボディ命令列中に展開する
+	 * @param body ボディ命令列
+	 */
+	private static void inlineExpandSystemRuleSets(List body){
+		Instruction spec = (Instruction)body.get(0);
+		if(spec.getKind() != Instruction.SPEC) return;
+		int locals = spec.getIntArg2();
+		HashMap getlinkmap = new HashMap();
+		HashSet removelinks = new HashSet();
+		InstructionList inline1;
+		InstructionList inline2;
+		HashSet newlink = new HashSet();
+		HashSet newlinks2;
+		HashSet enqueueatoms;
+		HashMap old2new = new HashMap();
+		for(int i=1; i<body.size(); i++){
+			inline1 = new InstructionList();
+			inline2 = new InstructionList();
+			newlinks2 = new HashSet();
+			enqueueatoms = new HashSet();
+			Instruction inst = (Instruction)body.get(i);
+			if(inst.getKind() == Instruction.GETLINK){
+				if(!getlinkmap.containsKey(inst.getArg1())) getlinkmap.put(inst.getArg1(), inst);
+			}
+			if(inst.getKind() == Instruction.NEWATOM ){
+				int newlinkmem = 0;
+				Functor func = (Functor)inst.getArg3();
+				String funcname = func.getName();
+				int funcarity = func.getArity();
+				int newatomvar = inst.getIntArg1();
+				int arg1, arg2, result, resultlink;
+				int op, typecheck;
+				op = 0; typecheck = 0;
+				arg1 = arg2 = result = resultlink = -1;
+				if(funcarity == 3 &&
+						funcname.equals("+") || funcname.equals("-") || funcname.equals("*") || funcname.equals("/")
+						|| funcname.equals("mod") || funcname.equals("+.") || funcname.equals("-.")
+						|| funcname.equals("*.") || funcname.equals("/.")){
+					if(funcname.equals("+")) {
+						op = Instruction.IADD;
+						typecheck = Instruction.ISINT;
+					}
+					else if(funcname.equals("-")) {
+						op = Instruction.ISUB;
+						typecheck = Instruction.ISINT;
+					}
+					else if(funcname.equals("*")) {
+						op = Instruction.IMUL;
+						typecheck = Instruction.ISINT;
+					}
+					else if(funcname.equals("/")) {
+						op = Instruction.IDIV;
+						typecheck = Instruction.ISINT;
+					}
+					else if(funcname.equals("mod")) {
+						op = Instruction.IMOD;
+						typecheck = Instruction.ISINT;
+					}
+					if(funcname.equals("+.")) {
+						op = Instruction.FADD;
+						typecheck = Instruction.ISFLOAT;
+					}
+					else if(funcname.equals("-.")) {
+						op = Instruction.FSUB;
+						typecheck = Instruction.ISFLOAT;
+					}
+					else if(funcname.equals("*.")) {
+						op = Instruction.FMUL;
+						typecheck = Instruction.ISFLOAT;
+					}
+					else if(funcname.equals("/.")) {
+						op = Instruction.FDIV;
+						typecheck = Instruction.ISFLOAT;
+					}
+					for(int j=i+1; j<body.size(); j++){
+						Instruction inst2 = (Instruction)body.get(j);
+						if(inst2.getKind() == Instruction.NEWLINK ){
+							if(inst2.getIntArg1() == newatomvar){
+								if(!newlink.contains(inst2)) {
+									newlink.add(inst2);
+									newlinks2.add(inst2);
+								}
+								if(!removelinks.contains(inst2)) removelinks.add(inst2);
+								if(inst2.getIntArg2() == 2) {
+									result = inst2.getIntArg3(); 
+									resultlink = inst2.getIntArg4();
+									newlinkmem = inst2.getIntArg5();
+								}
+								else {
+									if(arg1 == -1) arg1 = inst2.getIntArg3();
+									else arg2 = inst2.getIntArg3(); 
+								}
+							}
+							else if(inst2.getIntArg3() == newatomvar){
+								if(!newlink.contains(inst2)) {
+									newlink.add(inst2);
+									newlinks2.add(inst2);
+								}
+								if(!removelinks.contains(inst2)) removelinks.add(inst2);
+								if(inst2.getIntArg4() == 2) {
+									result = inst2.getIntArg1(); 
+									resultlink = inst2.getIntArg2();
+									newlinkmem = inst2.getIntArg5();
+								}
+								else {
+									if(arg1 == -1) arg1 = inst2.getIntArg1();
+									else arg2 = inst2.getIntArg1();
+								}
+							}
+						}
+						else if(inst2.getKind() == Instruction.RELINK){
+							if(inst2.getIntArg1() == newatomvar){
+								if(!newlink.contains(inst2)) {
+									newlink.add(inst2);
+									newlinks2.add(inst2);
+								}
+								if(!removelinks.contains(inst2)) removelinks.add(inst2);
+								if(inst2.getIntArg2() == 2) {
+									result = inst2.getIntArg3(); 
+									resultlink = inst2.getIntArg4();
+									newlinkmem = inst2.getIntArg5();
+								}
+								else {
+									inline1.add(new Instruction(Instruction.DEREFATOM, locals, inst2.getIntArg3(), inst2.getIntArg4()));
+									if(arg1 == -1) arg1 = locals;
+									else arg2 = locals; 
+								}
+								locals++;
+							}
+							else if(inst2.getIntArg3() == newatomvar){
+								if(!newlink.contains(inst2)) {
+									newlink.add(inst2);
+									newlinks2.add(inst2);
+								}
+								if(!removelinks.contains(inst2)) removelinks.add(inst2);
+								if(inst2.getIntArg4() == 2) {
+									result = inst2.getIntArg1(); 
+									resultlink = inst2.getIntArg2();
+									newlinkmem = inst2.getIntArg5();
+								}
+								else {
+									inline1.add(new Instruction(Instruction.DEREFATOM, locals, inst2.getIntArg3(), inst2.getIntArg4()));
+									if(arg1 == -1) arg1 = locals;
+									else arg2 = locals; 
+								}
+								locals++;
+							}
+						}
+						else if(inst2.getKind() == Instruction.INHERITLINK){
+							if(inst2.getIntArg1() == newatomvar){
+								//newlinks2.add(inst2);
+								if(!newlink.contains(inst2)) {
+									newlink.add(inst2);
+									newlinks2.add(inst2);
+								}
+								if(!removelinks.contains(inst2)) removelinks.add(inst2);
+								newlinkmem = inst2.getIntArg4();
+								if(getlinkmap.containsKey(inst2.getArg3())){
+									Instruction getlink = (Instruction)getlinkmap.get(inst2.getArg3());
+									Instruction derefatom = new Instruction(Instruction.DEREFATOM, locals, getlink.getIntArg2(), getlink.getIntArg3());
+									inline1.add(derefatom);
+								}
+								if (arg1 == -1) arg1 = locals;
+								else arg2 = locals;
+								locals++;
+							}
+							else if(inst2.getIntArg3() == newatomvar){
+								if(!newlink.contains(inst2)) {
+									newlink.add(inst2);
+									newlinks2.add(inst2);
+								}
+								if(!removelinks.contains(inst2)) removelinks.add(inst2);
+								newlinkmem = inst2.getIntArg4();
+								if(getlinkmap.containsKey(inst2.getArg1())){
+									Instruction getlink = (Instruction)getlinkmap.get(inst2.getArg1());
+									Instruction derefatom = new Instruction(Instruction.DEREFATOM, locals, getlink.getIntArg2(), getlink.getIntArg3());
+									inline1.add(derefatom);
+								}
+								if (arg1 == -1) arg1 = locals;
+								else arg2 = locals;
+								locals++;
+							}
+						}
+					
+						if(arg1 !=-1 && arg2 != -1 && result != -1 && resultlink != -1) {
+						//システムルールセット成功時の命令列 inline1
+							if(old2new.containsKey(new Integer(arg1))) arg1 = ((Integer)old2new.get(new Integer(arg1))).intValue();
+							if(old2new.containsKey(new Integer(arg1))) arg2 = ((Integer)old2new.get(new Integer(arg2))).intValue();
+
+							inline1.add(new Instruction(typecheck, arg1));
+							inline1.add(new Instruction(typecheck, arg2));
+							inline1.add(new Instruction(op, locals, arg1, arg2));
+							inline1.add(new Instruction(Instruction.ADDATOM, newlinkmem, locals));
+							inline1.add(new Instruction(Instruction.NEWLINK, locals, 0, result, resultlink, newlinkmem));
+
+							inline1.add(new Instruction(Instruction.REMOVEATOM, arg1, newlinkmem));
+							inline1.add(new Instruction(Instruction.REMOVEATOM, arg2, newlinkmem));
+							inline1.add(new Instruction(Instruction.REMOVEATOM, newatomvar, newlinkmem));
+							inline1.add(new Instruction(Instruction.FREEATOM, arg1, newlinkmem));
+							inline1.add(new Instruction(Instruction.FREEATOM, arg2, newlinkmem));
+							inline1.add(new Instruction(Instruction.PROCEED));
+							if(!old2new.containsKey(new Integer(newatomvar))) old2new.put(new Integer(newatomvar), new Integer(locals));
+							locals++;
+
+							Instruction newenqueueatom = new Instruction(Instruction.ENQUEUEATOM, newatomvar);
+							if(enqueueatoms.contains(newenqueueatom)) enqueueatoms.remove(newenqueueatom);
+							else enqueueatoms.add(newenqueueatom);
+							for(int k=i+1; k<body.size(); k++){
+								Instruction inst3 = (Instruction)body.get(k);
+								if(inst3.getKind() == Instruction.ENQUEUEATOM
+										&& (inst3.getIntArg1() == newatomvar))
+									body.remove(k--);
+							}
+						//システムルールセット失敗時の命令列 inline2
+							Iterator it = newlinks2.iterator();
+							while(it.hasNext())
+								inline2.add((Instruction)it.next());
+							it = enqueueatoms.iterator();
+							while(it.hasNext())
+								inline2.add((Instruction)it.next());
+							inline2.add(new Instruction(Instruction.PROCEED));
+							//システムルールセット命令の追加
+							for(int i2=body.size()-1; i2>0; i2--){
+								inst2 = (Instruction)body.get(i2);
+								if(!(inst2.getKind() == Instruction.PROCEED)
+										&& !(inst2.getKind() == Instruction.FREEATOM)
+										&& !(inst2.getKind() == Instruction.FREEMEM)
+										&& !(inst2.getKind() == Instruction.FREEGROUND)
+										&& !(inst2.getKind() == Instruction.ENQUEUEALLATOMS)
+										&& !(inst2.getKind() == Instruction.ENQUEUEATOM)
+										&& !(inst2.getKind() == Instruction.ENQUEUEMEM)
+										&& !(inst2.getKind() == Instruction.SYSTEMRULESETS)){
+									body.add(i2, new Instruction(Instruction.SYSTEMRULESETS, inline1, inline2));
+									break;
+								}
+							}
+							break;
+						} else continue;
+					} 
+				}
+			}
+		}
+
+		body.remove(0);
+		body.add(0, new Instruction(Instruction.SPEC, spec.getIntArg1(), locals));
+//		不要なnewlinkの除去
+		for(int i2=0; i2<body.size(); i2++){
+			Instruction inst2 = (Instruction)body.get(i2);
+			if(removelinks.contains(inst2)) body.remove(i2--);
+		}
 	}
 	
 	///////////////////////////////////////////////////////
