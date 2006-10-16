@@ -346,7 +346,9 @@ public class FrontEnd {
 							/// --optimize-merging
 							/// Merge instructions.
 							Optimizer.fMerging = true;
-						}else if(args[i].equals("--optimize-inlining")) {
+						} else if(args[i].equals("--optimize-systemrulesetsinlining")) {
+							Optimizer.fSystemRulesetsInlining = true;
+						} else if(args[i].equals("--optimize-inlining")) {
 							/// --optimize-inlining
 							/// Inlining tail jump.
 							Optimizer.fInlining = true;
