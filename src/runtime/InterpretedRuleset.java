@@ -106,7 +106,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
     	Thread thread = Thread.currentThread();
 		boolean result = false;
 		Iterator it = rules.iterator();
-		if(branchmap != null && atom != null){
+		if(branchmap != null){
 			Functor func = (Functor) atom.getFunctor();
 			if(branchmap.containsKey(func)){
 				List insts = (ArrayList)branchmap.getInsts(func);
@@ -126,7 +126,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 					//todo トレースモード
 				}*/
 				return success;
-			}
+			} else return false;
 		} else
 		while (it.hasNext()) {
 			Rule r = currentRule = (Rule) it.next();
@@ -415,6 +415,7 @@ class InterpretiveReactor {
 		Membrane mem;
 		Link link;
 		Functor func;
+		boolean srsflag = true;
 		while (pc < insts.size()) {
 			Instruction inst = (Instruction) insts.get(pc++);
 			if (Env.debug >= Env.DEBUG_TRACE) Env.d("Do " + inst);
@@ -1499,6 +1500,22 @@ class InterpretiveReactor {
 						}
 						return false;
 					}
+					break;
+				case Instruction.SYSTEMRULESETS:
+					subinsts = ((InstructionList)inst.getArg1()).insts;
+					List subinsts2 = ((InstructionList)inst.getArg2()).insts;
+					if(srsflag){
+						if(!interpret(subinsts, 0)){
+							Iterator it2 = lockedMemList.iterator();
+							while(it2.hasNext()){
+								//System.out.println("test");
+								((Membrane)it2.next()).unlock();
+							}
+							srsflag = false;
+							interpret(subinsts2, 0);
+						}
+					}
+					else interpret(subinsts2, 0);
 					break;
 					//sakurai
 				
