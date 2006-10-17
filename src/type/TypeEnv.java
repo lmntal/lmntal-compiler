@@ -2,7 +2,6 @@ package type;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +27,10 @@ public final class TypeEnv {
 	private static final Map<Functor, Integer> functorToOut = new HashMap<Functor, Integer>();
 	private static final Map<Functor, String> functorToTypeName = new HashMap<Functor, String>();
 
+	public static final int COUNT_DEFALUT = 0;
+	public static final int COUNT_APPLY = 1;
+	public static final int countLevel = COUNT_APPLY;
+	
 	static{
 		functorToOut.put(Functor.UNIFY,new Integer(CONNECTOR));
 		functorToOut.put(Functor.INSIDE_PROXY,new Integer(CONNECTOR));
@@ -80,27 +83,35 @@ public final class TypeEnv {
 	/** 左辺膜および左辺出現膜の集合 */
 	private static final Set<Membrane> lhsmems = new HashSet<Membrane>();
 
+	private static final Map<Membrane, String> memToName = new HashMap<Membrane, String>();
+	
+	public static void initialize(Membrane root){
+		// 全ての膜について、ルールの左辺最外部出現かどうかの情報を得る
+		TypeEnv.collectLHSMemsAndNames(root.rules);
+		
+		// 全ての右辺膜について、
+	}
+	
 	/**
 	 * 左辺出現膜を$lhsmemsに登録する
+	 * 本膜の膜名を所属膜の膜名とする
 	 * @param mem
 	 */
-	public static void collectLHSMems(List<RuleStructure> rules){
-		Iterator<RuleStructure> it = rules.iterator();
-		while(it.hasNext()){
-			collectLHSMems(it.next());
-		}
+	private static void collectLHSMemsAndNames(List<RuleStructure> rules){
+		for(RuleStructure rule : rules)
+			collectLHSMemsAndNames(rule);
 	}
 	/**
 	 * 左辺出現膜を$lhsmemsに登録する
 	 * @param rule
 	 */
-	private static void collectLHSMems(RuleStructure rule){
+	private static void collectLHSMemsAndNames(RuleStructure rule){
 		collectLHSMem(rule.leftMem);
+		memToName.put(rule.leftMem, rule.parent.name);
+		memToName.put(rule.rightMem, rule.parent.name);
 //		 左辺にルールは出現しない
-		Iterator<RuleStructure> it = rule.rightMem.rules.iterator();
-		while(it.hasNext()){
-			collectLHSMems(it.next());
-		}
+		for(RuleStructure rhsrule : ((List<RuleStructure>)rule.rightMem.rules))
+			collectLHSMemsAndNames(rhsrule);
 	}
 	/**
 	 * 左辺出現膜を$lhsmemsに登録する
@@ -108,11 +119,8 @@ public final class TypeEnv {
 	 */
 	private static void collectLHSMem(Membrane mem){
 		lhsmems.add(mem);
-		Iterator it = mem.mems.iterator();
-		while(it.hasNext()){
-			Membrane cmem = (Membrane)it.next();
+		for(Membrane cmem : ((List<Membrane>)mem.mems))
 			collectLHSMem(cmem);
-		}
 	}
 	
 	/** 左辺のアトムかどうかを返す */
@@ -146,11 +154,15 @@ public final class TypeEnv {
 	
 	public static final String ANNONYMOUS = "??";
 	/**
-	 * 
+	 * ルールの本膜については所属膜の名前を返す
 	 */
 	public static String getMemName(Membrane mem){
-		if(mem.name == null)return ANNONYMOUS;
-		else return mem.name;
+		String registered = memToName.get(mem);
+		if(registered == null){
+			if(mem.name == null)return ANNONYMOUS;
+			else return mem.name;
+		}
+		else return registered;
 	}
 
 }

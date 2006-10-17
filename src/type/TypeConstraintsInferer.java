@@ -28,8 +28,7 @@ public class TypeConstraintsInferer {
 	}
 
 	public void infer() throws TypeConstraintException {
-		// 全ての膜について、ルールの左辺最外部出現かどうかの情報を得る
-		TypeEnv.collectLHSMems(root.rules);
+		TypeEnv.initialize(root);
 		
 		// 出現制約を推論する
 		// TODO 個数が推論できるなら不要(?)
