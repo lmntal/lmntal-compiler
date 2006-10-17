@@ -807,7 +807,7 @@ public class Task implements Runnable {
 		String name = (String)state[1];
 		String label = (String)state[2];
 		Class[] parameterTypes = new Class[2];
-		Object[] argsTemp = new Object[atomMap.size() + 2];
+		Object[] argsTemp = new Object[((Object[])state[3]).length]; = " + argsTemp.length);
 		Object[] args = new Object[2];
 		int i = 0;
 		int j = 0;
