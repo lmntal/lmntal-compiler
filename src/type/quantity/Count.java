@@ -44,15 +44,11 @@ public class Count {
 			varToMultiple.put(vc,varToMultiple.get(vc)+multiple);
 	}
 	public static Count sum(Count sc1, Count sc2){
-		System.out.println("sum");
 		Set<VarCount> vs = new HashSet<VarCount>();
 		vs.addAll(sc1.varToMultiple.keySet());
 		vs.addAll(sc2.varToMultiple.keySet());
 		Map<VarCount, Integer> newmap = new HashMap<VarCount, Integer>();
-		Iterator<VarCount> itv = vs.iterator();
-		while(itv.hasNext()){
-			VarCount v = itv.next();
-			System.out.println("v:"+v);
+		for(VarCount v : vs){
 			Integer i1 = sc1.varToMultiple.get(v);
 			Integer i2 = sc2.varToMultiple.get(v);
 			if(i1 == null)newmap.put(v,i2);
@@ -64,9 +60,7 @@ public class Count {
 	
 	public static Count mul(int m, Count sc){
 		Map<VarCount, Integer> newmap = new HashMap<VarCount, Integer>();
-		Iterator<VarCount> itv = sc.varToMultiple.keySet().iterator();
-		while(itv.hasNext()){
-			VarCount vc = itv.next();
+		for(VarCount vc : sc.varToMultiple.keySet()){
 			newmap.put(vc,sc.varToMultiple.get(vc)*m);
 		}
 		return new Count(newmap);
@@ -74,9 +68,7 @@ public class Count {
 	
 	public FixedCount evaluate(){
 		FixedCount fc = new NumCount(0);
-		Iterator<VarCount> itv = varToMultiple.keySet().iterator();
-		while(itv.hasNext()){
-			VarCount vc = itv.next();
+		for(VarCount vc : varToMultiple.keySet()){
 			int m = varToMultiple.get(vc);
 			if(m==0)continue;
 			FixedCount f = vc.evaluate();
@@ -84,5 +76,15 @@ public class Count {
 			fc = fc.add(f);
 		}
 		return fc;
+	}
+	
+	private Set<VarCount> fixedVars = new HashSet<VarCount>();
+	
+	// 合計値が0以上だということを利用して求める
+	public boolean constraintOverZero(){
+		for(VarCount vc : varToMultiple.keySet()){
+			// TODO 実装
+		}
+		return false;
 	}
 }

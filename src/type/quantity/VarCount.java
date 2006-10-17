@@ -18,8 +18,13 @@ public class VarCount{
 		bound = vc;
 	}
 	
+	public boolean isBound(){
+		return bound == null;
+	}
+	
 	public FixedCount evaluate(){
-		if(bound == null)System.err.println("fatal error. this var isn't bind : RV" + id);
+		if(bound == null)
+			System.err.println("fatal error. this var isn't bind : RV" + id);
 		return bound;
 	}
 }

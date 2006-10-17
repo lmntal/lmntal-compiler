@@ -1,10 +1,8 @@
 package type.quantity;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import runtime.Env;
 import runtime.Functor;
@@ -14,11 +12,12 @@ import compile.structure.Atom;
 import compile.structure.Membrane;
 
 /**
- * それぞれの膜について作られる
+ * それぞれの膜について作られる。
+ * 静的な量情報を表すクラス
  * @author kudo
  *
  */
-public class CountsOfMem{
+public class StaticCountsOfMem{
 	
 	public final Membrane mem;
 	
@@ -28,16 +27,15 @@ public class CountsOfMem{
 	 * 1 : 移動時(あるいはルールの本膜等)
 	 * >1 : 複製、マージ
 	 */
-	public final int multiple;
+//	public final int multiple;
 	
 	/** ファンクタ -> 量 */
 	public final Map<Functor,Count> functorToCount;
 	/** 膜名 -> 量 */
 	public final Map<String,Count> memnameToCount;
 
-	public CountsOfMem(Membrane mem, int multiple){
+	public StaticCountsOfMem(Membrane mem){
 		this.mem = mem;
-		this.multiple = multiple;
 
 		functorToCount = new HashMap<Functor, Count>();
 		memnameToCount = new HashMap<String, Count>();
@@ -80,31 +78,64 @@ public class CountsOfMem{
 	 * TODO 倍数により分ける
 	 * @param com2
 	 */
-	public void addAllCounts(CountsOfMem com2){
-		Iterator<Functor> itf = com2.functorToCount.keySet().iterator();
-		while(itf.hasNext()){
-			Functor f = itf.next();
+	public void addAllCounts(StaticCountsOfMem com2){
+		for(Functor f : com2.functorToCount.keySet())
 			addAtomCount(f,com2.functorToCount.get(f));
-		}
-		Iterator<String> itn = com2.memnameToCount.keySet().iterator();
-		while(itf.hasNext()){
-			String name = itn.next();
+		for(String name : com2.memnameToCount.keySet())
 			addMemCount(name,com2.memnameToCount.get(name));
+	}
+	
+	/**
+	 * 効果をこの具体膜に適用する
+	 * @param dom
+	 */
+	public void apply(DynamicCountsOfMem dom){
+		if(dom.multiple > 1)removeUpperBounds();
+		addAllCounts(dom.removeCounts);
+		addAllCounts(dom.generateCounts);
+	}
+	
+	/**
+	 * 上限を取っぱらう
+	 */
+	public void removeUpperBounds(){
+		VarCount infVar = new VarCount();
+		infVar.bind(Count.INFINITY.or0());
+		for(Functor f : functorToCount.keySet())
+			functorToCount.get(f).add(1,infVar);
+		for(String name : memnameToCount.keySet())
+			memnameToCount.get(name).add(1,infVar);
+	}
+	
+	public void solveByCounts(){
+		boolean changed = true;
+		while(changed){
+			changed = false;
+			for(Count c : functorToCount.values()){
+				changed |= c.constraintOverZero();
+			}
+			for(Count c : memnameToCount.values()){
+				changed |= c.constraintOverZero();
+			}
 		}
 	}
 	
+	/**
+	 * 具体値にする
+	 * @return
+	 */
 	public FixedCounts solve(){
 		return new FixedCounts(this);
 	}
 	
 	public void print(){
-		Env.p("----atoms of " + TypeEnv.getMemName(mem) + "(" + multiple + ") :");
+		Env.p("----atoms of " + TypeEnv.getMemName(mem) + ":");
 		Iterator<Functor> itf = functorToCount.keySet().iterator();
 		while(itf.hasNext()){
 			Functor f = itf.next();
 			Env.p(f + ":" + functorToCount.get(f));
 		}
-		Env.p("----mems of " + TypeEnv.getMemName(mem) + "(" + multiple + ") :");
+		Env.p("----mems of " + TypeEnv.getMemName(mem) + ":");
 		Iterator<String> itm = memnameToCount.keySet().iterator();
 		while(itm.hasNext()){
 			String m = itm.next();

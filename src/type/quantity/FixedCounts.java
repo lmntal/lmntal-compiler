@@ -30,7 +30,7 @@ public class FixedCounts {
 	 * 受け取った解析結果を解く(この段階でルール適用回数変数が束縛されていること)
 	 *
 	 */
-	public FixedCounts(CountsOfMem com){
+	public FixedCounts(StaticCountsOfMem com){
 		this.mem = com.mem;
 		functorToCount = new HashMap<Functor, FixedCount>();
 		memnameToCount = new HashMap<String, FixedCount>();

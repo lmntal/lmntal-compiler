@@ -6,6 +6,7 @@ package type.quantity;
  *
  */
 public class InfinityCount extends ValueCount {
+	
 	public final boolean minus;
 	
 	public InfinityCount(boolean minus){
