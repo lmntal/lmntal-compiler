@@ -820,6 +820,15 @@ public class Task implements Runnable {
 					if (origMem == ((Object[])st)[k]){
 						argsTemp[j] = mem;
 					}
+					// 0916
+					if(argsTemp[j]==null) {
+						if(((Object[])st)[k] instanceof Atom) {
+							argsTemp[j] = new Atom(((Atom)((Object[])st)[k]).getMem(),((Atom)((Object[])st)[k]).getFunctor());
+						} else {
+							System.out.println("Error: ((Object[])st)["+k+"] is not an instance of Atom.");
+							System.exit(1);
+						}
+					}
 					j++;
 //					System.out.println(argsTemp[j]);
 				}
