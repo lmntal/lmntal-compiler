@@ -142,6 +142,7 @@ public class RulesetCompiler {
 				it = rules.iterator();
 				while (it.hasNext()) {
 					InterpretedRuleset ruleset = new InterpretedRuleset();
+					ruleset.branchmap = mbm;
 					ruleset.rules.add(it.next());
 					Ruleset compiledRuleset = compileRuleset(ruleset);
 					mem.rulesets.add(ruleset);

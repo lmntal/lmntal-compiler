@@ -343,7 +343,7 @@ public class Optimizer {
 									newlinkmem = inst2.getIntArg5();
 								}
 								else {
-									if(arg1 == -1) arg1 = inst2.getIntArg3();
+									if(inst2.getIntArg2() == 0) arg1 = inst2.getIntArg3();
 									else arg2 = inst2.getIntArg3(); 
 								}
 							}
@@ -359,7 +359,7 @@ public class Optimizer {
 									newlinkmem = inst2.getIntArg5();
 								}
 								else {
-									if(arg1 == -1) arg1 = inst2.getIntArg1();
+									if(inst2.getIntArg4() == 0) arg1 = inst2.getIntArg1();
 									else arg2 = inst2.getIntArg1();
 								}
 							}
@@ -378,7 +378,7 @@ public class Optimizer {
 								}
 								else {
 									inline1.add(new Instruction(Instruction.DEREFATOM, locals, inst2.getIntArg3(), inst2.getIntArg4()));
-									if(arg1 == -1) arg1 = locals;
+									if(inst2.getIntArg2() == 0) arg1 = locals;
 									else arg2 = locals; 
 								}
 								locals++;
@@ -396,7 +396,7 @@ public class Optimizer {
 								}
 								else {
 									inline1.add(new Instruction(Instruction.DEREFATOM, locals, inst2.getIntArg3(), inst2.getIntArg4()));
-									if(arg1 == -1) arg1 = locals;
+									if(inst2.getIntArg4() ==0) arg1 = locals;
 									else arg2 = locals; 
 								}
 								locals++;
@@ -404,7 +404,6 @@ public class Optimizer {
 						}
 						else if(inst2.getKind() == Instruction.INHERITLINK){
 							if(inst2.getIntArg1() == newatomvar){
-								//newlinks2.add(inst2);
 								if(!newlink.contains(inst2)) {
 									newlink.add(inst2);
 									newlinks2.add(inst2);
@@ -413,8 +412,7 @@ public class Optimizer {
 								newlinkmem = inst2.getIntArg4();
 								if(getlinkmap.containsKey(inst2.getArg3())){
 									Instruction getlink = (Instruction)getlinkmap.get(inst2.getArg3());
-									Instruction derefatom = new Instruction(Instruction.DEREFATOM, locals, getlink.getIntArg2(), getlink.getIntArg3());
-									inline1.add(derefatom);
+									inline1.add(new Instruction(Instruction.DEREFATOM, locals, getlink.getIntArg2(), getlink.getIntArg3()));
 								}
 								if (arg1 == -1) arg1 = locals;
 								else arg2 = locals;
@@ -429,10 +427,9 @@ public class Optimizer {
 								newlinkmem = inst2.getIntArg4();
 								if(getlinkmap.containsKey(inst2.getArg1())){
 									Instruction getlink = (Instruction)getlinkmap.get(inst2.getArg1());
-									Instruction derefatom = new Instruction(Instruction.DEREFATOM, locals, getlink.getIntArg2(), getlink.getIntArg3());
-									inline1.add(derefatom);
+									inline1.add(new Instruction(Instruction.DEREFATOM, locals, getlink.getIntArg2(), getlink.getIntArg3()));
 								}
-								if (arg1 == -1) arg1 = locals;
+								if (inst2.getIntArg2() == 1) arg1 = locals;
 								else arg2 = locals;
 								locals++;
 							}
@@ -485,6 +482,7 @@ public class Optimizer {
 										&& !(inst2.getKind() == Instruction.ENQUEUEALLATOMS)
 										&& !(inst2.getKind() == Instruction.ENQUEUEATOM)
 										&& !(inst2.getKind() == Instruction.ENQUEUEMEM)
+										&& !(inst2.getKind() == Instruction.UNLOCKMEM)
 										&& !(inst2.getKind() == Instruction.SYSTEMRULESETS)){
 									body.add(i2, new Instruction(Instruction.SYSTEMRULESETS, inline1, inline2));
 									break;

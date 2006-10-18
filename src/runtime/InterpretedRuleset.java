@@ -54,6 +54,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	public InterpretedRuleset() {
 		rules = new ArrayList();
 		id = ++lastId;
+		branchmap = null;
 	}
 	
 	/** 中間命令列をパーズして生成するときに利用するコンストラクタ */

@@ -2,6 +2,7 @@ package compile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,13 +23,16 @@ public class Merger {
 	//アトム主導テスト部の命令列を編み上げる
 	//todo?　膜主導テスト部の編み上げ
 	/** 編み上げ後のルールの実引数 */
-	int maxLocals;
 	/** ファンクタ⇒命令列のマップ */
 	HashMap instsMap;
+	/** 変数番号⇒ファンクタのマップ*/
+	HashMap var2funcMap;
+	int maxLocals;
 	
 	public Merger(){
 		maxLocals = 0;
 		instsMap = new HashMap();
+		var2funcMap = new HashMap();
 	}
 	
 	/**
@@ -60,6 +64,7 @@ public class Merger {
 				case Instruction.BRANCH:
 					InstructionList label = (InstructionList)inst.getArg1();
 					List branchInsts = label.insts;
+					maxLocals = 0;
 					//uniq関係の応急処置
 					for(int u=0; u<branchInsts.size(); u++) {
 						Instruction uniq = (Instruction)branchInsts.get(u);
@@ -90,21 +95,18 @@ public class Merger {
 				}
 			}
 		}
-		if(Optimizer.fGuardMove){
-			Set set = instsMap.entrySet();
-			Iterator it2 = set.iterator();
-			HashMap copymap = new HashMap();
-			while(it2.hasNext()){
-				Map.Entry mapentry = (Map.Entry)it2.next();
-				ArrayList insts = (ArrayList)mapentry.getValue();
-				Optimizer.guardMove(insts);
-				copymap.put(mapentry.getKey(), insts);
-			}
-			if(Env.debug >= 1) viewMap(copymap);
-			return new MergedBranchMap(copymap);
+		Set set = instsMap.entrySet();
+		Iterator it2 = set.iterator();
+		HashMap optimizedmap= new HashMap();
+		while(it2.hasNext()){
+			Map.Entry mapentry = (Map.Entry)it2.next();
+			ArrayList insts = (ArrayList)mapentry.getValue();
+			if(Optimizer.fGuardMove) Optimizer.guardMove(insts);
+			//stackOrderChange(insts);
+			optimizedmap.put(mapentry.getKey(), insts);
 		}
-		if(Env.debug >= 1) viewMap(instsMap);
-		return new MergedBranchMap(instsMap);
+		if(Env.debug >= 1) 	viewMap(optimizedmap);
+		return new MergedBranchMap(optimizedmap);
 	}
 	
 	/**
@@ -156,10 +158,17 @@ public class Merger {
 		int differenceIndex = insts1.size()+insts2.size();
 		List branchInsts1 = new ArrayList();
 		List branchInsts2 = new ArrayList();
+		List branchInsts3 = new ArrayList();
+		int formal = 0;
+		int local = 0;
 		for(int i=0, j=0; i<insts1.size() &&  j<insts2.size(); i++, j++){
 			Instruction inst1 = (Instruction)insts1.get(i);
 			Instruction inst2 = (Instruction)insts2.get(j);
 			if(i==0 || j==0){
+				if(inst1.getIntArg1() > inst2.getIntArg1())formal = inst1.getIntArg1();
+				else formal = inst2.getIntArg1();
+				if(inst1.getIntArg2() > inst2.getIntArg2())local = inst1.getIntArg2();
+				else local = inst2.getIntArg2();
 				if(inst1.getKind() == Instruction.SPEC && inst1.getIntArg2() > maxLocals){
 					maxLocals = inst1.getIntArg2();
 					continue;
@@ -182,10 +191,12 @@ public class Merger {
 						List instsb = label.insts;
 						List tmpinsts = mergeInBranchInsts(insts1, i, instsb);
 						if (tmpinsts != null){
-							mergedInsts.addAll((ArrayList)tmpinsts);
+							mergedInsts.addAll(branchInsts3);
+							mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)tmpinsts)));
+							//mergedInsts.addAll((ArrayList)tmpinsts);
 							return (ArrayList)mergedInsts;
 						}
-						else continue;
+						else {branchInsts3.add(instb); continue;}
 					}
 					for(int k=j; k<insts2.size(); k++)
 						mergedInsts.add(insts2.get(k));
@@ -193,7 +204,7 @@ public class Merger {
 						branchInsts1.add((Instruction)insts1.get(k));
 					if (branchInsts1.size() > 0){
 						Instruction spec = (Instruction)branchInsts1.get(0);
-						if (spec.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC,0,0));
+						if (spec.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC, formal, local));
 					}
 					mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
 					return (ArrayList)mergedInsts;
@@ -211,11 +222,11 @@ public class Merger {
 			branchInsts2.add((Instruction)insts2.get(i));
 		if (branchInsts1.size() > 0){
 			Instruction inst1 = (Instruction)branchInsts1.get(0);
-			if (inst1.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC,0,0));
+			if (inst1.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC,formal, local));
 		}
 		if (branchInsts2.size() > 0){
 			Instruction inst2 = (Instruction)branchInsts2.get(0);
-			if (inst2.getKind() != Instruction.SPEC) branchInsts2.add(0, new Instruction(Instruction.SPEC,0,0));
+			if (inst2.getKind() != Instruction.SPEC) branchInsts2.add(0, new Instruction(Instruction.SPEC,formal,local));
 		}
 		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
 		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
@@ -234,9 +245,16 @@ public class Merger {
 		int differenceIndex2 = insts1.size()+insts2.size();
 		List branchInsts1 = new ArrayList();
 		List branchInsts2 = new ArrayList();
+		List branchInsts3 = new ArrayList();
 		Instruction spec = (Instruction)insts2.get(0);
+		int formal = 0;
+		int local = 0;
 		if(spec.getKind() != Instruction.SPEC) return null;
-		else if (spec.getIntArg2() > maxLocals) maxLocals = spec.getIntArg2();
+		else {
+			formal = spec.getIntArg1();
+			local = spec.getIntArg2();
+			if (spec.getIntArg2() > maxLocals) 	maxLocals = spec.getIntArg2();
+		}
 		
 		int startsize = mergedInsts.size();	
 		for(int i=index, j=1; i<insts1.size() && j<insts2.size(); i++, j++){
@@ -255,10 +273,12 @@ public class Merger {
 						List instsb = label.insts;
 						List tmpinsts = mergeInBranchInsts(insts1, i, instsb);
 						if (tmpinsts != null){
-							mergedInsts.addAll((ArrayList)tmpinsts);
+							mergedInsts.addAll(branchInsts3);
+							mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)tmpinsts)));
+							//mergedInsts.addAll((ArrayList)tmpinsts);
 							return (ArrayList)mergedInsts;
 						}
-						else continue;
+						else {branchInsts3.add(instb); continue;}
 					}
 					differenceIndex1 = i;
 					differenceIndex2 = j;
@@ -281,15 +301,66 @@ public class Merger {
 			branchInsts2.add((Instruction)insts2.get(i));
 		if (branchInsts1.size() > 0){
 			Instruction inst1 = (Instruction)branchInsts1.get(0);
-			if (inst1.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC,0,0));
+			if (inst1.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC, formal, local));
 		}
 		if (branchInsts2.size() > 0){
 			Instruction inst2 = (Instruction)branchInsts2.get(0);
-			if (inst2.getKind() != Instruction.SPEC) branchInsts2.add(0, new Instruction(Instruction.SPEC,0,0));
+			if (inst2.getKind() != Instruction.SPEC) branchInsts2.add(0, new Instruction(Instruction.SPEC, formal, local));
 		}
 		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
 		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
 		
 		return (ArrayList)mergedInsts;
 	}
+	
+	private void stackOrderChange(List insts){
+		var2funcMap.clear();
+		for(int i=0; i<insts.size(); i++){
+			Instruction inst = (Instruction)insts.get(i);
+			switch(inst.getKind()){
+			case Instruction.BRANCH:
+			case Instruction.JUMP:
+				InstructionList label = (InstructionList)inst.getArg1();
+				List subinsts = label.insts;
+				stackOrderChange(subinsts);
+				break;
+			case Instruction.NEWATOM:
+				Functor func = (Functor)inst.getArg3();
+				if(!var2funcMap.containsKey(func)) var2funcMap.put(new Integer(inst.getIntArg1()), func);
+				break;
+			case Instruction.ENQUEUEATOM:
+				Integer var = (Integer)inst.getArg1();
+				if(var2funcMap.containsKey(var)){ //再利用しないアトム
+					Functor func2 = (Functor)var2funcMap.get(var);
+					if(!instsMap.containsKey(func2)){
+						//ルール適用に利用されないアトムはスタックの下の方に積むようにする
+						for(int j=i-1; j>0; j--){
+							Instruction inst2 = (Instruction)insts.get(j);
+							if(inst2.getKind() == Instruction.ENQUEUEATOM) continue;
+							else {
+								insts.remove(i);
+								insts.add(j+1, inst);
+								break;
+							} 
+						}
+					} else continue;
+				} else {
+					//再利用するアトムはスタックの上の方に積む
+					for(int j=i+1; j<insts.size(); j++){
+						Instruction inst2 = (Instruction)insts.get(j);
+						if(inst2.getKind() == Instruction.ENQUEUEATOM) continue;
+						else {
+							insts.add(j-1, inst);
+							insts.remove(i);
+							break;
+						} 
+					}
+				}
+				break;
+			default: 
+				break;
+			}
+		}
+	}
+	
 }
