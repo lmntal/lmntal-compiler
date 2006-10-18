@@ -1,0 +1,20 @@
+/**
+ Collatz's tree
+*/
+
+merge_newnode @@ new({$ref1}, $n1), n({$ref2}, $n2) :- $n1 =:= $n2 | n({$ref1,$ref2}, $n1).
+
+newedge_odd @@ new({$ref}, $n):-           $n mod 2 =:= 0, $m = $n/2   | n({$ref, f(F)}, $n), new({t(F)}, $m).
+newedge_even@@ new({$ref}, $n):- $n  >  1, $n mod 2 =:= 1, $m = $n*3+1 | n({$ref, f(F)}, $n), new({t(F)}, $m).
+newedge_one @@ new({$ref}, $n):- $n =:= 1                              | n({$ref      }, $n).
+
+start @@ start($n) :- int($n) | new({},$n).
+
+merge_node @@ n({$ref1}, $n1), n({$ref2,f(F)}, $n2) :- $n1 =:= $n2 | n({$ref1,$ref2}, $n1), killedge(F).
+merge_edge @@ killedge(T),{$ref1, t(T)} :- {$ref1}.
+
+gen_n @@ gen_start($n) :- $n > 0, $m=$n-1 | start($n),gen_start($m).
+gen_0 @@gen_start($n) :- $n =:=0         | ().
+
+gen_start(5).
+ 
