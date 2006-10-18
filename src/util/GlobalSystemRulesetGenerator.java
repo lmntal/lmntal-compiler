@@ -69,8 +69,8 @@ public final class GlobalSystemRulesetGenerator {
 		// react
 		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0,Functor.OUTSIDE_PROXY));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  3,4,Functor.OUTSIDE_PROXY));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  5,4,Functor.OUTSIDE_PROXY));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  3,4,Functor.INSIDE_PROXY));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  5,4,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.UNIFY,       3,1,5,1,4)); // memo: 本質的にリモートのUNIFY
 		insts.add(new Instruction(Instruction.ENQUEUEMEM,  4)); // ここでは子膜の活性化が必要
 		insts.add(new Instruction(Instruction.UNLOCKMEM,   4));

@@ -2,7 +2,6 @@ package runtime.systemRuleset;
 import runtime.*;
 import java.util.*;
 import java.io.*;
-
 import module.*;
 public class GlobalSystemRuleset_3 {
 	static public void exec(Object[] var, Functor[] f) {

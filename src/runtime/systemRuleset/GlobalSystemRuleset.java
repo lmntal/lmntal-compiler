@@ -1,17 +1,14 @@
-//GlobalSystemRulesetGenerator§À§Ë§√§∆º´∆∞¿∏¿Æ§µ§Ï§ø•’•°•§•Î
+//GlobalSystemRulesetGeneratorÇ…ÇÊÇ¡Çƒé©ìÆê∂ê¨Ç≥ÇÍÇΩÉtÉ@ÉCÉã
 
 package runtime.systemRuleset;
 import runtime.*;
 import java.util.*;
 import java.io.*;
-import java.math.BigInteger;
-import java.math.BigDecimal;
-
 import module.*;
 
 /**
- * •≥•Û•—•§•Î∫—§ﬂ•∑•π•∆•‡•Î°º•Î•ª•√•»°£GlobalSystemRulesetGenerator §À§Ë§√§∆¿∏¿Æ§µ§Ï§Î°£
- * §≥§Œ•’•°•§•Î§œƒæ¿‹Ω§¿µ§∑§ §§§«§Ø§¿§µ§§°£
+ * ÉRÉìÉpÉCÉãçœÇ›ÉVÉXÉeÉÄÉãÅ[ÉãÉZÉbÉgÅBGlobalSystemRulesetGenerator Ç…ÇÊÇ¡Çƒê∂ê¨Ç≥ÇÍÇÈÅB
+ * Ç±ÇÃÉtÉ@ÉCÉãÇÕíºê⁄èCê≥ÇµÇ»Ç¢Ç≈Ç≠ÇæÇ≥Ç¢ÅB
  */
 public class GlobalSystemRuleset extends Ruleset {
 	private static final GlobalSystemRuleset theInstance = new GlobalSystemRuleset();
@@ -383,10 +380,9 @@ public class GlobalSystemRuleset extends Ruleset {
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -437,10 +433,9 @@ L147:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -483,10 +478,9 @@ L148:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -537,10 +531,9 @@ L144:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -583,10 +576,9 @@ L145:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -637,10 +629,9 @@ L141:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -683,10 +674,9 @@ L142:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -737,10 +727,9 @@ L138:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -783,10 +772,9 @@ L139:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -837,10 +825,9 @@ L135:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -883,10 +870,9 @@ L136:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -937,10 +923,9 @@ L132:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -983,10 +968,9 @@ L133:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1043,10 +1027,9 @@ L129:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1089,10 +1072,9 @@ L130:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1148,10 +1130,9 @@ L126:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1194,10 +1175,9 @@ L127:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1253,10 +1233,9 @@ L123:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1299,10 +1278,9 @@ L124:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1358,10 +1336,9 @@ L120:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1404,10 +1381,9 @@ L121:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1466,10 +1442,9 @@ L117:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1512,10 +1487,9 @@ L118:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1574,10 +1548,9 @@ L114:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1620,10 +1593,9 @@ L115:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1679,10 +1651,9 @@ L111:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1725,10 +1696,9 @@ L112:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1784,10 +1754,9 @@ L108:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1830,10 +1799,9 @@ L109:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1889,10 +1857,9 @@ L105:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1935,10 +1902,9 @@ L106:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
@@ -1968,8 +1934,7 @@ L103:
 						if (!(((Membrane)var[4]) != ((Atom)var[5]).getMem())) {
 			//GlobalSystemRuleset_31
 			GlobalSystemRuleset_31.exec(var, f);
-							mem = ((Membrane)var[4]);
-							mem.unifyAtomArgs(
+							((Membrane)var[0]).unifyAtomArgs(
 								((Atom)var[3]), 1,
 								((Atom)var[5]), 1 );
 			//GlobalSystemRuleset_32
@@ -2005,10 +1970,9 @@ L103:
 		ArrayList guard_inline_gvar2;
 		Iterator it_guard_inline;
 		String s1, s2;
-		BigInteger bx, by;
-		BigDecimal bu, bv;
 		Set insset;
 		Set delset;
+		Set avoset;
 		Map srcmap;
 		Map delmap;
 		Atom orig;
