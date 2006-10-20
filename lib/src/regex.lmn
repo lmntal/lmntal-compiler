@@ -32,7 +32,8 @@ regex.use :-
 //			System.err.println("guardID="+guardID);
 			
 			if(guardID.equals("match")) {
-				Atom a = ((Link)ary.get(0)).getAtom();
+				List l = (List)ary.get(0);
+				Atom a = ((Link)l.get(0)).getAtom();
 //				System.err.println(a);
 				Atom b = (Atom)ary.get(1);
 //				System.err.println(b);
