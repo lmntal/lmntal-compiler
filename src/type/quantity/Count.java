@@ -89,13 +89,48 @@ public class Count {
 		return cloned;
 	}
 	
-	private Set<VarCount> fixedVars = new HashSet<VarCount>();
-	
 	// 合計値が0以上だということを利用して求める
 	public boolean constraintOverZero(){
+		int min = 0; // 最小値
+		Set<VarCount> vars = new HashSet<VarCount>();
 		for(VarCount vc : varToMultiple.keySet()){
-			// TODO 実装
+			int m = varToMultiple.get(vc);
+			if(m == 0) continue;
+			if(vc.bound instanceof NumCount){
+				min += ((NumCount)vc.bound).value * m;
+			}
+			else if(vc.bound instanceof InfinityCount){
+				// 無限値に固定されてしまうので解けない
+				return false;
+			}
+			else if(vc.bound instanceof IntervalCount){
+				IntervalCount ic = (IntervalCount)vc.bound;
+				if(m > 0){
+					// 符号が+で上界がなければ解けない
+					if(ic.max instanceof InfinityCount)return false;
+					if(ic.max instanceof NumCount){
+						min += ((NumCount)ic.max).value;
+					}
+				}
+				else if(m < 0){
+					// 符号が-で下界がなければ解けない ( もっともこれはありえないが )
+					if(ic.min instanceof InfinityCount)return false;
+					if(ic.min instanceof NumCount){
+						min += ((NumCount)ic.min).value;
+					}
+					vars.add(vc);
+				}
+			}
 		}
-		return false;
+		boolean changed = false;
+		for(VarCount vc : vars){
+			IntervalCount ic = (IntervalCount)vc.bound;
+			int newmax = min / (-varToMultiple.get(vc));
+			if(ic.max.compare(new NumCount(newmax))>0){
+				vc.bind(new IntervalCount(ic.min, new NumCount( newmax )));
+				changed = true;
+			}
+		}
+		return changed;
 	}
 }

@@ -19,7 +19,7 @@ import compile.structure.Membrane;
  */
 public class StaticCounts{
 	
-	public final Membrane mem;
+	public Membrane mem;
 	
 	/**
 	 * この膜の所属プロセスが何倍されるかを表す。

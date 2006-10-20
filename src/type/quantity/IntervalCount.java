@@ -7,8 +7,8 @@ package type.quantity;
  */
 public class IntervalCount extends FixedCount {
 
-	private final ValueCount min;
-	private final ValueCount max;
+	public final ValueCount min;
+	public final ValueCount max;
 
 	public IntervalCount(int min, int max){
 		this(new NumCount(min), new NumCount(max));

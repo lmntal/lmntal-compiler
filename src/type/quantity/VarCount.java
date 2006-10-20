@@ -4,7 +4,7 @@ public class VarCount{
 
 	private static int current_id = 0;
 	
-	private FixedCount bound;
+	public FixedCount bound;
 	
 	private final int id;
 	public VarCount(){
@@ -19,7 +19,7 @@ public class VarCount{
 	}
 	
 	public boolean isBound(){
-		return bound == null;
+		return bound != null;
 	}
 	
 	public FixedCount evaluate(){

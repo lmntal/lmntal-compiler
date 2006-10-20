@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
+import runtime.Functor;
 import type.TypeEnv;
 
 import compile.structure.Membrane;
@@ -17,31 +18,29 @@ import compile.structure.Membrane;
  */
 public class CountsSet {
 	/** ソース上の膜 -> 量解析結果(生成膜) */
-	Map<Membrane,StaticCounts> memToGenCounts;
+	Map<Membrane,StaticCounts> memToGenCounts = new HashMap<Membrane,StaticCounts>();
 	/** ソース上の膜 -> 量解析結果(継続膜) */
-	Map<Membrane,Set<DynamicCounts>> memToInhCountss;
+	Map<Membrane,Set<DynamicCounts>> memToInhCountss = new HashMap<Membrane,Set<DynamicCounts>>();
 	/** 膜名 -> 量解析結果(継続膜) */
-	Map<String,Set<DynamicCounts>> memnameToAllInhCountss;
+	Map<String,Set<DynamicCounts>> memnameToAllInhCountss = new HashMap<String,Set<DynamicCounts>>();
+	/** 膜名 -> 量解析結果(全膜への継続膜) */
+	Map<String,Set<DynamicCounts>> memnameToCommonInhCountss = new HashMap<String, Set<DynamicCounts>>();
 	/** ソース上の膜 -> 量解析結果(生成膜/評価済み) */
-	Map<Membrane,FixedCounts> memToFixedCounts;
+	Map<Membrane,FixedCounts> memToFixedCounts = new HashMap<Membrane, FixedCounts>();
 //	/** ソース上の膜 -> 量解析結果(継続膜/評価済み) */
 //	Map<Membrane,FixedCounts> memToInhFixedCounts;
-	Map<String, FixedCounts> memnameToMergedFixedCounts;
+	Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<String, FixedCounts>();
 	/** 膜名 -> 量解析結果(継続膜) */
-	Map<String,Set<FixedDynamicCounts>> memnameToFixedCountss;
+	Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
+
 	public CountsSet(){
-		memToGenCounts = new HashMap<Membrane,StaticCounts>();
-		memToInhCountss = new HashMap<Membrane,Set<DynamicCounts>>();
-		memnameToAllInhCountss = new HashMap<String,Set<DynamicCounts>>();
-		memnameToMergedFixedCounts = new HashMap<String, FixedCounts>();
-		memnameToFixedCountss = new HashMap<String, Set<FixedDynamicCounts>>();
 	}
+	
 	/**
 	 * 膜の解析結果を加えていく。
 	 * この段階では、膜は同名でもソース上の別の膜なら区別される。
 	 * ただし、ルールの本膜は、ルールの所属する膜と同じとされる。
 	 * したがい、解析結果は同一膜については加算される。
-	 * TODO addCountsOfMemはこちらに統合できる(たぶん)
 	 * @param counts
 	 */
 	public void add(StaticCounts counts){
@@ -52,17 +51,31 @@ public class CountsSet {
 				oldcounts.addAllCounts(counts);
 			}
 	}
-	public void add(DynamicCounts counts){
-		if(!memToInhCountss.containsKey(counts.mem)){
-			Set<DynamicCounts> doms = new HashSet<DynamicCounts>();
+	/**
+	 * 
+	 * @param counts
+	 */
+	public void add(DynamicCounts counts, boolean common){
+		String memname = counts.mem.name;
+		if(common){
+			Set<DynamicCounts> doms = memnameToCommonInhCountss.get(memname);
+			if(doms == null){
+				doms = new HashSet<DynamicCounts>();
+				memnameToCommonInhCountss.put(memname, doms);
+			}
 			doms.add(counts);
-			memToInhCountss.put(counts.mem,doms);
 		}
 		else{
-			Set<DynamicCounts> oldcountss = memToInhCountss.get(counts.mem);
-			oldcountss.add(counts);
+			if(!memToInhCountss.containsKey(counts.mem)){
+				Set<DynamicCounts> doms = new HashSet<DynamicCounts>();
+				doms.add(counts);
+				memToInhCountss.put(counts.mem,doms);
+			}
+			else{
+				Set<DynamicCounts> oldcountss = memToInhCountss.get(counts.mem);
+				oldcountss.add(counts);
+			}
 		}
-		String memname = counts.mem.name;
 		if(!memnameToAllInhCountss.containsKey(memname)){
 			Set<DynamicCounts> doms = new HashSet<DynamicCounts>();
 			doms.add(counts);
@@ -110,6 +123,8 @@ public class CountsSet {
 
 	Map<String, Boolean> memnameToAlreadyApplyed = new HashMap<String, Boolean>();
 	
+	Set<DynamicCounts> clonedDynamicCounts = new HashSet<DynamicCounts>();
+	
 	/** 個々の具体膜ごとに効果を適用する
 	 * ただし、プロセスの独立性が崩れている膜については何もしない
 	 *  */
@@ -117,7 +132,8 @@ public class CountsSet {
 		for(Membrane mem : memToGenCounts.keySet()){
 			String memname = TypeEnv.getMemName(mem);
 			/** プロセスの独立性が崩れている場合、何もしない */
-			if(memnameToCPIFlg.get(memname)){
+			Boolean cpiflg = memnameToCPIFlg.get(memname);
+			if(cpiflg != null && cpiflg){
 //				if(!memnameToMergedCounts.containsKey(memname))
 //					memnameToMergedCounts.put(memname,memToGenCounts.get(mem));
 //				else{
@@ -125,22 +141,41 @@ public class CountsSet {
 //					oldsom.merge(memToGenCounts.get(mem));
 //				}
 			}
-			/** ルールの独立性が崩れている場合, 他の膜の効果を適用 */
-			else if(memToCRIFlg.get(mem) || memnameToCRIFlg.get(memname)){
-				for(DynamicCounts dom : memnameToAllInhCountss.get(memname)){
-					// DynamicCountsをコピーして適用する。
-					memToGenCounts.get(mem).apply(dom.clone());
-				}
-				// 膜名について、適用済みとする
-				memnameToAlreadyApplyed.put(memname, true);
-			}
 			else{
-				/** その具体膜への効果を適用 */
-				for(DynamicCounts dom : memToInhCountss.get(mem)){
-					memToGenCounts.get(mem).apply(dom);
+				/** ルールの独立性が崩れている場合, 他の膜の効果を適用 */
+				Boolean criflg = memToCRIFlg.get(mem);
+				if(criflg == null || !criflg)criflg = memnameToCRIFlg.get(memname);
+				if(criflg != null && criflg){
+					for(DynamicCounts dom : memnameToAllInhCountss.get(memname)){
+						// DynamicCountsをコピーして適用する。
+						DynamicCounts domclone = dom.clone();
+						clonedDynamicCounts.add(domclone);
+						memToGenCounts.get(mem).apply(domclone);
+					}
+					// 膜名について、適用済みとする
+					memnameToAlreadyApplyed.put(memname, true);
 				}
-				// 膜名について、適用済みとする
-				memnameToAlreadyApplyed.put(memname, true);
+				else{
+					Set<DynamicCounts> doms = memToInhCountss.get(mem);
+					/** その具体膜への効果を適用 */
+					if(doms != null){
+						for(DynamicCounts dom : doms){
+							memToGenCounts.get(mem).apply(dom);
+						}
+					}
+					/** その膜名への共通効果を適用 */
+					doms = memnameToCommonInhCountss.get(memname);
+					if(doms != null){
+						for(DynamicCounts dom : doms){
+							DynamicCounts domclone = dom.clone();
+							clonedDynamicCounts.add(domclone);
+							memToGenCounts.get(mem).apply(domclone);
+						}
+					}
+					
+					// 膜名について、適用済みとする
+					memnameToAlreadyApplyed.put(memname, true);
+				}
 			}
 		}
 	}
@@ -156,7 +191,7 @@ public class CountsSet {
 			for(DynamicCounts dom : memnameToAllInhCountss.get(memname)){
 				fdoms.add(dom.solve());
 			}
-			memnameToFixedCountss.put(memname, fdoms);
+			memnameToFixedDynamicCountss.put(memname, fdoms);
 		}
 	}
 	
@@ -165,8 +200,11 @@ public class CountsSet {
 		for(String memname : memnameToMergedFixedCounts.keySet()){
 			Boolean already = memnameToAlreadyApplyed.get(memname);
 			if(already != null && already)continue;
-			for(FixedDynamicCounts dom : memnameToFixedCountss.get(memname)){
-				memnameToMergedFixedCounts.get(memname).apply(dom);
+			Set<FixedDynamicCounts> doms = memnameToFixedDynamicCountss.get(memname);
+			if(doms != null){
+				for(FixedDynamicCounts dom : doms){
+					memnameToMergedFixedCounts.get(memname).apply(dom);
+				}
 			}
 		}
 	}
@@ -209,7 +247,7 @@ public class CountsSet {
 //		fixed = true;
 //	}
 
-	private boolean fixed = false;
+//	private boolean fixed = false;
 	/**
 	 * 効果におけるルール変数を無限と束縛し、解く
 	 *
@@ -218,6 +256,34 @@ public class CountsSet {
 		for(Set<DynamicCounts> doms : memToInhCountss.values())
 			for(DynamicCounts dom : doms)
 				if(!dom.applyCount.isBound())dom.applyCount.bind(Count.INFINITY.or0());
+		for(DynamicCounts dom : clonedDynamicCounts)
+			if(!dom.applyCount.isBound())dom.applyCount.bind(Count.INFINITY.or0());
+		for(Set<DynamicCounts> doms : memnameToCommonInhCountss.values())
+			for(DynamicCounts dom : doms)
+				if(!dom.applyCount.isBound())dom.applyCount.bind(Count.INFINITY.or0());
+	}
+	
+	public void assignZeroToMinimum(){
+		for(FixedCounts fc : memnameToMergedFixedCounts.values()){
+			for(Functor f : fc.functorToCount.keySet()){
+				FixedCount c = fc.functorToCount.get(f);
+				if(c instanceof NumCount){
+					if(((NumCount)c).value < 0) fc.functorToCount.put(f,new NumCount(0));
+				}
+				else if(c instanceof InfinityCount){
+					if(((InfinityCount)c).minus)fc.functorToCount.put(f, new NumCount(0));
+				}
+				else if(c instanceof IntervalCount){
+					IntervalCount ic = (IntervalCount)c;
+					if(ic.min.compare(new NumCount(0))<= 0){
+						if(ic.max.compare(new NumCount(0)) <= 0){
+							fc.functorToCount.put(f, new NumCount(0));
+						}
+						else fc.functorToCount.put(f, new IntervalCount(new NumCount(0), ic.max));
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -226,31 +292,37 @@ public class CountsSet {
 	public void solveByCounts(){
 		for(Membrane mem : memToGenCounts.keySet()){
 			// プロセスの独立性が保たれていなければ無視
-			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))
+			Boolean cpiflg = memnameToCPIFlg.get(TypeEnv.getMemName(mem));
+			if(cpiflg != null && cpiflg)
+//			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))
 				continue;
 			memToGenCounts.get(mem).solveByCounts();
 		}
 	}
 	
 	public void printAll(){
-		if(fixed){
+//		if(fixed){
 			Env.p("--QUANTITY ANALYSIS");
+//			Env.p("---mem on source counts:");
+//			for(FixedCounts fc : memToFixedCounts.values())
+//				fc.print();
+//			Env.p("");
 			Env.p("---mem on source counts:");
-			for(FixedCounts fc : memToFixedCounts.values())
+			for(FixedCounts fc : memnameToMergedFixedCounts.values())
 				fc.print();
 			Env.p("");
-		}
-		else{
-			Env.p("--QUANTITY ANALYSIS");
-			Env.p("---mem on source counts:");
-			for(StaticCounts com : memToGenCounts.values())
-				com.print();
-			Env.p("---mem effect on source counts:");
-			for(Set<DynamicCounts> doms : memToInhCountss.values())
-				for(DynamicCounts dom : doms)
-					dom.print();
-			Env.p("");
-		}
+//		}
+//		else{
+//			Env.p("--QUANTITY ANALYSIS");
+//			Env.p("---mem on source counts:");
+//			for(StaticCounts com : memToGenCounts.values())
+//				com.print();
+//			Env.p("---mem effect on source counts:");
+//			for(Set<DynamicCounts> doms : memToInhCountss.values())
+//				for(DynamicCounts dom : doms)
+//					dom.print();
+//			Env.p("");
+//		}
 	}
 
 }
