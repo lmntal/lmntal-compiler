@@ -78,6 +78,17 @@ public class Count {
 		return fc;
 	}
 	
+	public Count clone(VarCount oldvar, VarCount newvar){
+		Count cloned = new Count(new HashMap<VarCount, Integer>());
+		for(VarCount vc : varToMultiple.keySet()){
+			if(vc == oldvar){
+				cloned.add(varToMultiple.get(vc), newvar);
+			}
+			else cloned.add(varToMultiple.get(vc), vc);
+		}
+		return cloned;
+	}
+	
 	private Set<VarCount> fixedVars = new HashSet<VarCount>();
 	
 	// 合計値が0以上だということを利用して求める

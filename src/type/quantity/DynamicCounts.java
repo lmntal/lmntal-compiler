@@ -10,7 +10,7 @@ import compile.structure.Membrane;
  * @author kudo
  *
  */
-public class DynamicCountsOfMem {
+public class DynamicCounts {
 	public final Membrane mem;
 	
 	/** 適用回数を表す変数 */
@@ -24,11 +24,11 @@ public class DynamicCountsOfMem {
 	public final int multiple;
 	
 	/** 削除するプロセス */
-	public final StaticCountsOfMem removeCounts;
+	public final StaticCounts removeCounts;
 	/** 生成するプロセス */
-	public final StaticCountsOfMem generateCounts;
+	public final StaticCounts generateCounts;
 
-	public DynamicCountsOfMem(StaticCountsOfMem removeCounts, int multiple, StaticCountsOfMem generateCounts, VarCount applyCount){
+	public DynamicCounts(StaticCounts removeCounts, int multiple, StaticCounts generateCounts, VarCount applyCount){
 		this.mem = generateCounts.mem;
 		this.multiple = multiple;
 		this.applyCount = applyCount;
@@ -36,18 +36,28 @@ public class DynamicCountsOfMem {
 		this.generateCounts = generateCounts;
 	}
 
-//	public void addAllCounts(DynamicCountsOfMem dom){
+//	public void addAllCounts(DynamicCounts dom){
 //		removeCounts.addAllCounts(dom.removeCounts);
 //		generateCounts.addAllCounts(dom.generateCounts);
 //	}
 	
-//	/**
-//	 * 具体値にする
-//	 * @return
-//	 */
-//	public FixedCounts solve(){
-////		return new FixedCounts(this);
-//	}
+	/**
+	 * 具体値にする
+	 * @return
+	 */
+	public FixedDynamicCounts solve(){
+		return new FixedDynamicCounts(this);
+	}
+	
+	/**
+	 * 変数名をつけかえた自身のクローンを返す
+	 */
+	public DynamicCounts clone(){
+		VarCount newvar = new VarCount();
+		StaticCounts newR = removeCounts.clone(applyCount, newvar);
+		StaticCounts newG = generateCounts.clone(applyCount, newvar);
+		return new DynamicCounts(newR, multiple, newG, newvar);
+	}
 	
 	public void print(){
 		Env.p("---dynamic count in " + mem.name + " :");

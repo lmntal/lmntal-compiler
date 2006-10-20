@@ -17,7 +17,7 @@ import compile.structure.Membrane;
  * @author kudo
  *
  */
-public class StaticCountsOfMem{
+public class StaticCounts{
 	
 	public final Membrane mem;
 	
@@ -34,7 +34,7 @@ public class StaticCountsOfMem{
 	/** 膜名 -> 量 */
 	public final Map<String,Count> memnameToCount;
 
-	public StaticCountsOfMem(Membrane mem){
+	public StaticCounts(Membrane mem){
 		this.mem = mem;
 
 		functorToCount = new HashMap<Functor, Count>();
@@ -78,18 +78,32 @@ public class StaticCountsOfMem{
 	 * TODO 倍数により分ける
 	 * @param com2
 	 */
-	public void addAllCounts(StaticCountsOfMem com2){
+	public void addAllCounts(StaticCounts com2){
 		for(Functor f : com2.functorToCount.keySet())
 			addAtomCount(f,com2.functorToCount.get(f));
 		for(String name : com2.memnameToCount.keySet())
 			addMemCount(name,com2.memnameToCount.get(name));
 	}
 	
+//	public void merge(StaticCounts som){
+//		for(Functor f : som.functorToCount.keySet()){
+//			if(functorToCount.containsKey(f)){
+//				functorToCount.get(f).or(som.functorToCount.get(f));
+//			}
+//			else{
+//				
+//			}
+//		}
+//		for(String name : som.memnameToCount.keySet()){
+//			
+//		}
+//	}
+	
 	/**
 	 * 効果をこの具体膜に適用する
 	 * @param dom
 	 */
-	public void apply(DynamicCountsOfMem dom){
+	public void apply(DynamicCounts dom){
 		if(dom.multiple > 1)removeUpperBounds();
 		addAllCounts(dom.removeCounts);
 		addAllCounts(dom.generateCounts);
@@ -118,6 +132,18 @@ public class StaticCountsOfMem{
 				changed |= c.constraintOverZero();
 			}
 		}
+	}
+	
+	/**
+	 * 変数名を付け変えた複製を返す
+	 */
+	public StaticCounts clone(VarCount oldvar, VarCount newvar){
+		StaticCounts cloned = new StaticCounts(mem);
+		for(Functor f : functorToCount.keySet())
+			cloned.addAtomCount(f, functorToCount.get(f).clone(oldvar, newvar));
+		for(String name : memnameToCount.keySet())
+			cloned.addMemCount(name, memnameToCount.get(name).clone(oldvar, newvar));
+		return cloned;
 	}
 	
 	/**

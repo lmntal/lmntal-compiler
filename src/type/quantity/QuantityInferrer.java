@@ -19,12 +19,12 @@ import compile.structure.RuleStructure;
  */
 public class QuantityInferrer {
 	
-	private final CountsOfMemSet countsset;
+	private final CountsSet countsset;
 	
 	private Membrane root;
 	
 	public QuantityInferrer(Membrane root){
-		this.countsset = new CountsOfMemSet();
+		this.countsset = new CountsSet();
 		this.root = root;
 	}
 	
@@ -36,18 +36,22 @@ public class QuantityInferrer {
 		inferRHSMembrane(root);
 		
 		if(TypeEnv.countLevel >= TypeEnv.COUNT_APPLY){
+			// 個々の具体膜についてそれぞれに効果を適用する
 			countsset.applyIndividual();
+		}
+		// 適用回数変数に[0,無限]を割り当てる
+		countsset.assignInfinityToVar();
+		if(TypeEnv.countLevel >= TypeEnv.COUNT_APPLY){
+			// アトム個数の下限を0として適用回数を解く
 			countsset.solveByCounts();
-//			countsset.mergeIndividuals(); TODO 実装
 		}
-		else{
-			countsset.applyAllInOne();
-			// ルール適用回数に無限を代入して各値を計算する
-			countsset.solveRVAsInfinity();
-		}
-		
-		// 膜名ごとにマージする
-//		countsset.mergeForName();
+		// 具体値を計算させる
+		countsset.solveIndividuals();
+		countsset.solveDynamics();
+		// 具体膜をマージする
+		countsset.mergeFixeds();
+		//プロセスの独立性の崩れた膜に効果を適用する
+		countsset.applyCollapseds();
 	}
 	
 	public void printAll(){
@@ -174,13 +178,13 @@ public class QuantityInferrer {
 //	 * @param lhs
 //	 * @param rhs
 //	 */
-//	private DynamicCountsOfMem inferInheritedMembrane(Membrane lhs, Membrane rhs){
+//	private DynamicCounts inferInheritedMembrane(Membrane lhs, Membrane rhs){
 //		VarCount vc = new VarCount();
 //		Count count = new Count(vc);
 //		//右辺から左辺を減算(解析結果を加算)
-//		StaticCountsOfMem rhsCounts = getCountsOfMem(1,rhs,count);
-//		StaticCountsOfMem lhsCounts = getCountsOfMem(-1,lhs,count);
-//		return new DynamicCountsOfMem(lhsCounts, 1, rhsCounts,vc);
+//		StaticCounts rhsCounts = getCountsOfMem(1,rhs,count);
+//		StaticCounts lhsCounts = getCountsOfMem(-1,lhs,count);
+//		return new DynamicCounts(lhsCounts, 1, rhsCounts,vc);
 //	}
 	
 	/**
@@ -189,14 +193,14 @@ public class QuantityInferrer {
 	 * @param count
 	 * @return
 	 */
-	private DynamicCountsOfMem inferRuleRootMembrane(RuleStructure rule){
+	private DynamicCounts inferRuleRootMembrane(RuleStructure rule){
 		//右辺から左辺を減算(解析結果を加算)
 		VarCount vc = new VarCount();
 		Count count = new Count(vc);
-		StaticCountsOfMem rhsCounts = getCountsOfMem(1,rule.rightMem,count);
-		StaticCountsOfMem lhsCounts = getCountsOfMem(-1,rule.leftMem,count);
+		StaticCounts rhsCounts = getCountsOfMem(1,rule.rightMem,count);
+		StaticCounts lhsCounts = getCountsOfMem(-1,rule.leftMem,count);
 		
-		return new DynamicCountsOfMem(lhsCounts, 1, rhsCounts, vc);
+		return new DynamicCounts(lhsCounts, 1, rhsCounts, vc);
 	}
 
 	/**
@@ -204,29 +208,29 @@ public class QuantityInferrer {
 	 * @param lhss
 	 * @param rhs
 	 */
-	private DynamicCountsOfMem inferMultiInheritedMembrane(Set<Membrane> lhss, Membrane rhs){
+	private DynamicCounts inferMultiInheritedMembrane(Set<Membrane> lhss, Membrane rhs){
 		VarCount vc = new VarCount();
 		Count count = new Count(vc);
-		StaticCountsOfMem rhsCounts = getCountsOfMem(1,rhs,count);
-		StaticCountsOfMem lhsCounts = new StaticCountsOfMem(rhs);
+		StaticCounts rhsCounts = getCountsOfMem(1,rhs,count);
+		StaticCounts lhsCounts = new StaticCounts(rhs);
 		for(Membrane lhs : lhss)
 			lhsCounts.addAllCounts(getCountsOfMem(-1,lhs,count));
-		return new DynamicCountsOfMem(lhsCounts, lhss.size(), rhsCounts, vc);
+		return new DynamicCounts(lhsCounts, lhss.size(), rhsCounts, vc);
 	}
 	
 	/**
 	 * 単独で生成された膜として解析する。
 	 * @param mem
 	 */
-	private StaticCountsOfMem inferGeneratedMembrane(Membrane mem){
+	private StaticCounts inferGeneratedMembrane(Membrane mem){
 		VarCount vc = new VarCount();
 		vc.bind(new NumCount(1));
 		Count count = new Count(vc);
 		return getCountsOfMem(1,mem,count);
 	}
 	
-	private StaticCountsOfMem getCountsOfMem(int sign, Membrane mem, Count count){
-		StaticCountsOfMem quantities = new StaticCountsOfMem(mem);
+	private StaticCounts getCountsOfMem(int sign, Membrane mem, Count count){
+		StaticCounts quantities = new StaticCounts(mem);
 		//アトムの解析結果
 		for(Atom atom : ((List<Atom>)mem.atoms))
 			quantities.addAtomCount(atom,(Count.mul(sign, count)));
