@@ -25,7 +25,7 @@ public class InstructionList implements Cloneable, Serializable {
 	/** 局所変数の個数（仮引数の個数を含む） */
 	private int locals;
 	/** 命令列 (InstructionのList) */
-	public List insts = new ArrayList();
+	public List<Instruction> insts = new ArrayList<Instruction>();
 //	/** 親命令列またはnull */
 //	public InstructionList parent;
 	/** 未使用メソッド。*/

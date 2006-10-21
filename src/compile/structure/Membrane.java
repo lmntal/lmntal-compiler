@@ -4,6 +4,7 @@ import java.util.*;
 
 import runtime.Functor;
 import runtime.InterpretedRuleset;
+import runtime.Ruleset;
 
 import runtime.Env;
 
@@ -62,7 +63,7 @@ public final class Membrane {
 	
 	/** ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。*/
 //	public runtime.Ruleset ruleset = new InterpretedRuleset();
-	public List rulesets = new LinkedList();
+	public List<Ruleset> rulesets = new LinkedList<Ruleset>();
 	
 	////////////////////////////////////////////////////////////////
 

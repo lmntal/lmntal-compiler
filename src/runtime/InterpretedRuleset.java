@@ -38,7 +38,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	private static int lastId = 600;
 
 	/** とりあえずルールの配列として実装 */
-	public List rules;
+	public List<Rule> rules;
 	
 	/** 編み上げ後の命令列 */
 	public MergedBranchMap branchmap;
@@ -52,13 +52,13 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	 * ので、特になにもしない
 	 */
 	public InterpretedRuleset() {
-		rules = new ArrayList();
+		rules = new ArrayList<Rule>();
 		id = ++lastId;
 		branchmap = null;
 	}
 	
 	/** 中間命令列をパーズして生成するときに利用するコンストラクタ */
-	public InterpretedRuleset(int id, List rules) {
+	public InterpretedRuleset(int id, List<Rule> rules) {
 		this.id = id;
 		this.rules = rules;
 		if (lastId < id)
@@ -106,7 +106,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		Env.counter++;
     	Thread thread = Thread.currentThread();
 		boolean result = false;
-		Iterator it = rules.iterator();
+		Iterator<Rule> it = rules.iterator();
 		if(branchmap != null){
 			Functor func = (Functor) atom.getFunctor();
 			if(branchmap.containsKey(func)){
@@ -130,7 +130,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			} else return false;
 		} else
 		while (it.hasNext()) {
-			Rule r = currentRule = (Rule) it.next();
+			Rule r = currentRule = it.next();
 			if (r.atomMatch.size() == 1) continue; // debug表示抑制用
 			boolean success;
 			if(Env.profile >= Env.PROFILE_BYRULE){

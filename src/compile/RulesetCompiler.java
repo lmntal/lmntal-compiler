@@ -90,7 +90,7 @@ public class RulesetCompiler {
 			processMembrane(submem, unitName);
 		}
 		// この膜にあるルール構造をルールオブジェクトにコンパイルする
-		ArrayList rules = new ArrayList();
+		ArrayList<Rule> rules = new ArrayList<Rule>();
 		it = mem.rules.listIterator();
 		while (it.hasNext()) {
 			RuleStructure rs = (RuleStructure)it.next();
@@ -139,20 +139,17 @@ public class RulesetCompiler {
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
 		if (!rules.isEmpty()) {
 			if (Env.shuffle >= Env.SHUFFLE_RULES) {
-				it = rules.iterator();
-				while (it.hasNext()) {
+				for (Rule r : rules) {
 					InterpretedRuleset ruleset = new InterpretedRuleset();
 					ruleset.branchmap = mbm;
-					ruleset.rules.add(it.next());
+					ruleset.rules.add(r);
 					Ruleset compiledRuleset = compileRuleset(ruleset);
 					mem.rulesets.add(ruleset);
 				}
 			} else {
 				InterpretedRuleset ruleset = new InterpretedRuleset();
-				it = rules.iterator();
-				while (it.hasNext()) {
-					ruleset.rules.add(it.next());
-				}
+				for (Rule r : rules)
+					ruleset.rules.add(r);
 				ruleset.branchmap = mbm;
 				Ruleset compiledRuleset = compileRuleset(ruleset);
 				mem.rulesets.add(ruleset);

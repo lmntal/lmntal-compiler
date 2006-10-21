@@ -19,7 +19,7 @@ public final class Rule implements Serializable {
 	
 	/** ガード命令列（guardLabel.insts）またはnull。
 	 * 先頭の命令はspec[*,*]でなければならない。*/
-	public List guard;
+	public List<Instruction> guard;
 	/** ボディ命令列（bodyLabel.insts）またはnull。
 	 * 先頭の命令はspec[*,*]でなければならない。*/
 	public List body;
