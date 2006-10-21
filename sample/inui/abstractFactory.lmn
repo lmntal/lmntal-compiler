@@ -7,10 +7,10 @@ H=mapSite.new :- H={
 {
 module(room).
 H=room.new(N) :- int(N) | H={
-	oop.extends(mapSite.new).
+	oo.extends(mapSite.new).
 	//field
 	roomNo(N).
-	sides=ooplist.new(4).
+	sides=oolist.new(4).
 	//method
 	getSide(N), sides=Sides :- sides=list.ref(Sides, N, return).
 	setSide(N, MapSite), sides=Sides :- sides=list.set(Sides, N, MapSite, old).
@@ -21,7 +21,7 @@ H=room.new(N) :- int(N) | H={
 {
 module(wall).
 H=wall.new :- H={
-	oop.extends(mapSite.new).
+	oo.extends(mapSite.new).
 	wall.//Ã‹∞ı
 	//method
 	}.
@@ -30,7 +30,7 @@ H=wall.new :- H={
 {
 module(door).
 H=door.new(R1, R2) :- H={
-	oop.extends(mapSite.new).
+	oo.extends(mapSite.new).
 	//field
 	room1(R1).
 	room2(R2).
@@ -45,31 +45,31 @@ H=door.new(R1, R2) :- H={
 module(maze).
 H=maze.new :- H={
 	//field
-	rooms=ooplist.new(0).
+	rooms=oolist.new(0).
 	//method
 	addRoom(R), rooms=Rooms :- rooms=[R|Rooms].
-	roomNo(N), rooms=Rooms :- int(N) | rooms=ooplist.get(Rooms, N, return).
+	roomNo(N), rooms=Rooms :- int(N) | rooms=oolist.get(Rooms, N, return).
 	}.
 }.
 
 {
 module(mazeGame).
 H=mazeGame.createMaze :- H=mazeGame.createMaze2(maze.new).
-H=mazeGame.createMaze2(Maze) :- H=oop.msg(Maze, {
-	r1=oop.ref(oop.ref(room.new(1), r12), r13).
-	r2=oop.ref(oop.ref(room.new(2), r22), r23).
+H=mazeGame.createMaze2(Maze) :- H=oo.msg(Maze, {
+	r1=oo.ref(oo.ref(room.new(1), r12), r13).
+	r2=oo.ref(oo.ref(room.new(2), r22), r23).
 
 	r1(R1), r2(R2), r12(R12), r22(R22) :-
-		door1=oop.ref(door.new(R1, R2), door12),
+		door1=oo.ref(door.new(R1, R2), door12),
 		addRoom(R12), addRoom(R22).
 		
-	r13(R), door1(D) :- oop.msg(R, {
+	r13(R), door1(D) :- oo.msg(R, {
 		setSide(0, wall.new).
 		setSide(1, D).
 		setSide(2, wall.new).
 		setSide(3, wall.new).
 		}).
-	r23(R), door12(D) :- oop.msg(R, {
+	r23(R), door12(D) :- oo.msg(R, {
 		setSide(0, wall.new).
 		setSide(1, wall.new).
 		setSide(2, wall.new).
@@ -78,21 +78,21 @@ H=mazeGame.createMaze2(Maze) :- H=oop.msg(Maze, {
 	}).
 
 H=mazeGame.createMaze({$p,@p}) :- H={
-	mf1=oop.ref(oop.ref(oop.ref({$p,@p}, mf2), mf3), mf4).
-	mf1(MF) :- maze=oop.msg(MF, {makeMaze}).
-	mf2(MF) :- r11=oop.ref(oop.ref(oop.msg(MF, {makeRoom(1)}), r12), r13).
-	mf3(MF) :- r21=oop.ref(oop.ref(oop.msg(MF, {makeRoom(2)}), r22), r23).
-	mf4(MF), r11(R1), r21(R2) :- d11=oop.ref(oop.msg(MF, {makeDoor(R1, R2)}), d12).
+	mf1=oo.ref(oo.ref(oo.ref({$p,@p}, mf2), mf3), mf4).
+	mf1(MF) :- maze=oo.msg(MF, {makeMaze}).
+	mf2(MF) :- r11=oo.ref(oo.ref(oo.msg(MF, {makeRoom(1)}), r12), r13).
+	mf3(MF) :- r21=oo.ref(oo.ref(oo.msg(MF, {makeRoom(2)}), r22), r23).
+	mf4(MF), r11(R1), r21(R2) :- d11=oo.ref(oo.msg(MF, {makeDoor(R1, R2)}), d12).
 
-	maze(Maze), r12(R1), r22(R2) :- oop.msg(Maze, {addRoom(R1),addRoom(R2)}).
+	maze(Maze), r12(R1), r22(R2) :- oo.msg(Maze, {addRoom(R1),addRoom(R2)}).
 		
-	r13(R), d11(D) :- oop.msg(R, {
+	r13(R), d11(D) :- oo.msg(R, {
 			setSide(0, wall.new).
 			setSide(1, D).
 			setSide(2, wall.new).
 			setSide(3, wall.new).
 		}).
-	r23(R), d12(D) :- oop.msg(R, {
+	r23(R), d12(D) :- oo.msg(R, {
 			setSide(0, wall.new).
 			setSide(1, wall.new).
 			setSide(2, wall.new).
@@ -100,7 +100,7 @@ H=mazeGame.createMaze({$p,@p}) :- H={
 		}).
 	}.
 		
-//H=mazeGame.createMaze(MazeBuilder) :- H=oop.msg(MazeBuilder, {buildMaze}).
+//H=mazeGame.createMaze(MazeBuilder) :- H=oo.msg(MazeBuilder, {buildMaze}).
 
 }.
 
@@ -118,7 +118,7 @@ H=mazeFactory.new :- H={
 {
 module(enchantedMazeFactory).
 H=enchantedMazeFactory.new :- H={
-	oop.extends(mazeFactory.new).
+	oo.extends(mazeFactory.new).
 	makeRoom(N) :- return(enchantedRoom.new(N, castSpell.new)).
 	makeDoor(R1, R2) :- return(doorNeedingSpell(R1, R2)).
 	}.
@@ -132,6 +132,6 @@ H=bombedMazeFactory.new :- H={
 	}.
 }.
 
-oop.use.
+oo.use.
 //maze=mazeGame.createMaze().
 maze=mazeGame.createMaze(mazeFactory.new).
