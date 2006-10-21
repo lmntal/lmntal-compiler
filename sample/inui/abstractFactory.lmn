@@ -48,7 +48,7 @@ H=maze.new :- H={
 	rooms=oolist.new(0).
 	//method
 	addRoom(R), rooms=Rooms :- rooms=[R|Rooms].
-	roomNo(N), rooms=Rooms :- int(N) | rooms=oolist.get(Rooms, N, return).
+	roomNo(N), rooms=Rooms :- int(N) | rooms=oolist.ref(Rooms, N, return).
 	}.
 }.
 
@@ -56,11 +56,11 @@ H=maze.new :- H={
 module(mazeGame).
 H=mazeGame.createMaze :- H=mazeGame.createMaze2(maze.new).
 H=mazeGame.createMaze2(Maze) :- H=oo.msg(Maze, {
-	r1=oo.ref(oo.ref(room.new(1), r12), r13).
-	r2=oo.ref(oo.ref(room.new(2), r22), r23).
+	r1=oo.copy(oo.copy(room.new(1), r12), r13).
+	r2=oo.copy(oo.copy(room.new(2), r22), r23).
 
 	r1(R1), r2(R2), r12(R12), r22(R22) :-
-		door1=oo.ref(door.new(R1, R2), door12),
+		door1=oo.copy(door.new(R1, R2), door12),
 		addRoom(R12), addRoom(R22).
 		
 	r13(R), door1(D) :- oo.msg(R, {
@@ -77,12 +77,12 @@ H=mazeGame.createMaze2(Maze) :- H=oo.msg(Maze, {
 		}).
 	}).
 
-H=mazeGame.createMaze({$p,@p}) :- H={
-	mf1=oo.ref(oo.ref(oo.ref({$p,@p}, mf2), mf3), mf4).
+H=mazeGame.createMaze(X) :- H={
+	mf1=oo.copy(oo.copy(oo.copy(X, mf2), mf3), mf4).
 	mf1(MF) :- maze=oo.msg(MF, {makeMaze}).
-	mf2(MF) :- r11=oo.ref(oo.ref(oo.msg(MF, {makeRoom(1)}), r12), r13).
-	mf3(MF) :- r21=oo.ref(oo.ref(oo.msg(MF, {makeRoom(2)}), r22), r23).
-	mf4(MF), r11(R1), r21(R2) :- d11=oo.ref(oo.msg(MF, {makeDoor(R1, R2)}), d12).
+	mf2(MF) :- r11=oo.copy(oo.copy(oo.msg(MF, {makeRoom(1)}), r12), r13).
+	mf3(MF) :- r21=oo.copy(oo.copy(oo.msg(MF, {makeRoom(2)}), r22), r23).
+	mf4(MF), r11(R1), r21(R2) :- d11=oo.copy(oo.msg(MF, {makeDoor(R1, R2)}), d12).
 
 	maze(Maze), r12(R1), r22(R2) :- oo.msg(Maze, {addRoom(R1),addRoom(R2)}).
 		

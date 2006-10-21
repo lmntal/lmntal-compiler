@@ -9,6 +9,7 @@ AUTHOR
 	Atsuyuki Inui
 
 HISTORY
+	2006/10/21(Sat) oo.ref から oo.copy に名称変更
 	2006/10/05(Thu) oop --> oo
 	2006/10/03(Tue) oop.use
 	2006/09/26(Tue) oop.msg
@@ -29,16 +30,19 @@ oo.use :- ({module(M), @p} :- unary(M) | ()).
 oo.extends({$p, @p}) :- $p, @p.
 
 /**
- * オブジェクトの参照を取得する
+ * オブジェクトの参照をコピーする
  */
-H=oo.ref({$p, @p}, R) :- H={$p, @p, +RR}, R=RR.
+H=oo.copy({$p, @p}, R) :- H={$p, @p, +RR}, R=RR.
+{oo.copy(O, R, H), $p[R,H|*Z], @p} :- oo.copy(O, R, H), {$p[R,H|*Z], @p}.
 
 /**
  * メッセージ送信
  */
 oo.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg}.
+{oo.msg(O, {$msg, @msg}), $p, @p} :- oo.msg(O, {$msg, @msg}), {$p, @p}.
 //送信後に送信対象のオブジェクトが返る
 R=oo.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg,return(R)}.
+{R=oo.msg(O, {$msg, @msg}), $p[R|*Z], @p} :- R=oo.msg(O, {$msg, @msg}), {$p[R|*Z], @p}.
 //送信後に戻り値が返る
 //H={$p,@p,return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
 //H={$p,@p,return({$r,@r})} :- H={$r,@r}, {$p,@p}.
