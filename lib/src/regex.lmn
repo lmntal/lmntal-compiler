@@ -52,6 +52,22 @@ regex.use :-
 						ary.set(i, new Atom(mem, new StringFunctor(m.group(i-1))));
 					return true;
 				}
+			} else if(guardID.equals("not_match")) {
+				List l = (List)ary.get(0);
+				Atom a = ((Link)l.get(0)).getAtom();
+//				System.err.println(a);
+				Atom b = (Atom)ary.get(1);
+//				System.err.println(b);
+				
+				if (!(a.getFunctor() instanceof StringFunctor)) return false;
+				if (!(b.getFunctor() instanceof StringFunctor)) return false;
+				
+				String sa = ((StringFunctor)a.getFunctor()).stringValue();
+				String sb = ((StringFunctor)b.getFunctor()).stringValue();
+
+				Pattern p = Pattern.compile(sb);
+				Matcher m = p.matcher(sa);
+				return !m.matches();
 			}
 			return false;
 		}
