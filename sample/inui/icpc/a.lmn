@@ -34,5 +34,5 @@ H=is_prime(N, M, Nsqrt) :- M =< Nsqrt, N mod M =\= 0 | H=is_prime(N, M+2, Nsqrt)
 //a(A), d(D), n(N) :- int(A), int(D), N  >  0, N1=N-1, NewA=A+D | n(if(is_prime(A), N1, N)), a(NewA), d(D).
 //a(A), d(D), n(N) :- int(A), int(D), N =:= 0, Ans=A-D | r=io.println(string.str_of_int(Ans)), next_set.
 
-a(A), d(D), n(N) :- int(A), int(D), N  >  0 | n(if(is_prime(A), N-1, N)), a(A+D), d(D).
+a(A), d(D), n(N) :- int(A), int(D), N  >  0 | n('?'(is_prime(A), N-1, N)), a(A+D), d(D).
 a(A), d(D), n(N) :- int(A), int(D), N =:= 0 | r=io.println(string.str_of_int(A-D)), next_set.

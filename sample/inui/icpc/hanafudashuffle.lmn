@@ -13,28 +13,12 @@
  * 2006.03.11 sample inputは全部解けた
  *            io.list_of_stdinを使っているので入力が大きいと解けない
  */
-
-//publicのリストモジュールが使えないとき
-{
-module(list).
-H=list.split(List,  X, Tail) :- X=0    | H=[], Tail=List.
-H=list.split([   ], X, Tail) :- int(X) | H=[], Tail=[].
-H=list.split([Y|Z], X, Tail) :- X>0    | H=[Y|list.split(Z,X-1,Tail)].
-
-H=list.append([], B) :- H=B.
-H=list.append([Value|Next], B) :- H=[Value|list.append(Next, B)].
-}.
-
 io.use.
 
-//膜を使ってみた
-//cards=[5,4,3,2,1]を作りたいときn(5)をこの膜につっこむ
-{
-make_cards.
-n(N), cards(X) :- N>0 | cards=list.append(X,[N]), n(N-1).
-}.
-//上で出来たcardsを外に出すルール
-{make_cards, cards(X), n(0), @p} :- ground(X) | {make_cards, @p}, cards(X).
+//cards=make_cards(5) --> cards=[5,4,3,2,1]
+H=make_cards(N) :- H=make_cards(N, []).
+H=make_cards(N, L) :- N > 0 | H=list.append([N], make_cards(N-1, L)).
+H=make_cards(N, L) :- N = 0 | H=list.append([N], L).
 
 //ここから始まる
 s=io.list_of_stdin(), next_set.
@@ -42,7 +26,7 @@ s=io.list_of_stdin(), next_set.
 //1行読み込んでP, Cを取り出す
 next_set, s=[X|Z] :- ss=string.split(" ", X), s(Z), input_nr.
 input_nr, ss=[N,R] :- n=string.int_of_str(N), r=string.int_of_str(R).
-{make_cards, @p}, n(N) :- int(N) | {make_cards, n(N), cards=[], @p}, do_shuffle.
+n(N) :- cards=make_cards(N), do_shuffle.
 
 //手順に従ってシャッフル
 do_shuffle, r(R), s=[X|Z] :- R > 0 | ss2=string.split(" ", X), s(Z), r(R-1).

@@ -32,8 +32,8 @@ oo.extends({$p, @p}) :- $p, @p.
 /**
  * オブジェクトの参照をコピーする
  */
-H=oo.copy({$p, @p}, R) :- H={$p, @p, +RR}, R=RR.
-{oo.copy(O, R, H), $p[R,H|*Z], @p} :- oo.copy(O, R, H), {$p[R,H|*Z], @p}.
+oo.copy({$p, @p}, A, B) :- {$p, @p, +A, +B}.
+{oo.copy(O, A, B), $p[A,B|*Z], @p} :- oo.copy(O, A, B), {$p[A,B|*Z], @p}.
 
 /**
  * メッセージ送信
@@ -46,8 +46,9 @@ R=oo.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg,return(R)}.
 //送信後に戻り値が返る
 //H={$p,@p,return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
 //H={$p,@p,return({$r,@r})} :- H={$r,@r}, {$p,@p}.
-{$p,@p,return({$r,@r}),return(R)} :- R={$r,@r}, {$p,@p}.
-{$p,@p,return(R1),return(R2)} :- ground(R1), ground(R2) | R1=R2, {$p,@p}.
+{$p,@p,return(R)}/ :- R={$p,@p}.
+{$p,@p,return({$r,@r}),return(R)}/ :- R={$r,@r}, {$p,@p}.
+{$p,@p,return(R1),return(R2)}/ :- ground(R1), ground(R2) | R1=R2, {$p,@p}.
 
 /**
  * null

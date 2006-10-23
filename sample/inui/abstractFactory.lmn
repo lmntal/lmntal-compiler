@@ -1,11 +1,11 @@
-{
-module(mapSite).
+//// 迷路の部品クラス
+
+{module(mapSite).
 H=mapSite.new :- H={
 	}.
 }.
 
-{
-module(room).
+{module(room).
 H=room.new(N) :- int(N) | H={
 	oo.extends(mapSite.new).
 	//field
@@ -14,21 +14,18 @@ H=room.new(N) :- int(N) | H={
 	//method
 	getSide(N), sides=Sides :- sides=list.ref(Sides, N, return).
 	setSide(N, MapSite), sides=Sides :- sides=list.set(Sides, N, MapSite, old).
-	old({}) :- nlmem.kill({}).//他に参照がなかったら消す
+		old({}) :- nlmem.kill({}).
 	}.
 }.
 
-{
-module(wall).
+{module(wall).
 H=wall.new :- H={
 	oo.extends(mapSite.new).
-	wall.//目印
-	//method
+	wall.
 	}.
 }.
 
-{
-module(door).
+{module(door).
 H=door.new(R1, R2) :- H={
 	oo.extends(mapSite.new).
 	//field
@@ -36,13 +33,25 @@ H=door.new(R1, R2) :- H={
 	room2(R2).
 	isopen(false).
 	//method
-	//TODO
 	otherSideFrom(R) :-return({room(R)}).
 	}.
 }.
 
-{
-module(maze).
+{module(enchantedRoom).
+H=enchantedRoom.new(N) :- int(N) | H={
+	oo.extends(room.new(N)).
+	enchantedRoom.
+	}.
+}.
+
+{module(doorNeedingSpell).
+H=doorNeedingSpell.new(R1, R2) :- H={
+	oo.extends(door.new(R1, R2)).
+	doorNeedingSpell.
+	}.
+}.
+
+{module(maze).
 H=maze.new :- H={
 	//field
 	rooms=oolist.new(0).
@@ -52,62 +61,63 @@ H=maze.new :- H={
 	}.
 }.
 
-{
-module(mazeGame).
-H=mazeGame.createMaze :- H=mazeGame.createMaze2(maze.new).
-H=mazeGame.createMaze2(Maze) :- H=oo.msg(Maze, {
-	r1=oo.copy(oo.copy(room.new(1), r12), r13).
-	r2=oo.copy(oo.copy(room.new(2), r22), r23).
+//// 迷路を作成するクラス
 
-	r1(R1), r2(R2), r12(R12), r22(R22) :-
-		door1=oo.copy(door.new(R1, R2), door12),
-		addRoom(R12), addRoom(R22).
+{module(mazeGame).
+H=mazeGame.new :- H={
+	oo.use.
+	
+	createMaze :- createMaze2(maze.new).
+	createMaze2(Maze) :- return=oo.msg(Maze, {
+		r1=oo.copy(oo.copy(room.new(1), r12), r13).
+		r2=oo.copy(oo.copy(room.new(2), r22), r23).
+
+		r1(R1), r2(R2), r12(R12), r22(R22) :-
+			door1=oo.copy(door.new(R1, R2), door12),
+			addRoom(R12), addRoom(R22).
 		
-	r13(R), door1(D) :- oo.msg(R, {
-		setSide(0, wall.new).
-		setSide(1, D).
-		setSide(2, wall.new).
-		setSide(3, wall.new).
-		}).
-	r23(R), door12(D) :- oo.msg(R, {
-		setSide(0, wall.new).
-		setSide(1, wall.new).
-		setSide(2, wall.new).
-		setSide(3, D).
-		}).
-	}).
-
-H=mazeGame.createMaze(X) :- H={
-	mf1=oo.copy(oo.copy(oo.copy(X, mf2), mf3), mf4).
-	mf1(MF) :- maze=oo.msg(MF, {makeMaze}).
-	mf2(MF) :- r11=oo.copy(oo.copy(oo.msg(MF, {makeRoom(1)}), r12), r13).
-	mf3(MF) :- r21=oo.copy(oo.copy(oo.msg(MF, {makeRoom(2)}), r22), r23).
-	mf4(MF), r11(R1), r21(R2) :- d11=oo.copy(oo.msg(MF, {makeDoor(R1, R2)}), d12).
-
-	maze(Maze), r12(R1), r22(R2) :- oo.msg(Maze, {addRoom(R1),addRoom(R2)}).
-		
-	r13(R), d11(D) :- oo.msg(R, {
+		r13(R), door1(D) :- oo.msg(R, {
 			setSide(0, wall.new).
 			setSide(1, D).
 			setSide(2, wall.new).
 			setSide(3, wall.new).
-		}).
-	r23(R), d12(D) :- oo.msg(R, {
+			}).
+		r23(R), door12(D) :- oo.msg(R, {
 			setSide(0, wall.new).
 			setSide(1, wall.new).
 			setSide(2, wall.new).
 			setSide(3, D).
+			}).
 		}).
-	}.
-		
-//H=mazeGame.createMaze(MazeBuilder) :- H=oo.msg(MazeBuilder, {buildMaze}).
+	
+	createMaze(MazeFactory) :- mf1=oo.copy(oo.copy(oo.copy(MazeFactory, mf2), mf3), mf4).
+		mf1(MF) :- maze=oo.msg(MF, {makeMaze}).
+		mf2(MF) :- r11=oo.copy(oo.copy(oo.msg(MF, {makeRoom(1)}), r12), r13).
+		mf3(MF) :- r21=oo.copy(oo.copy(oo.msg(MF, {makeRoom(2)}), r22), r23).
+		mf4(MF), r11(R1), r21(R2) :- d11=oo.copy(oo.msg(MF, {makeDoor(R1, R2)}), d12).
 
+		maze(Maze) :- oo.copy(Maze, m1, return).
+		m1(Maze), r12(R1), r22(R2) :- oo.msg(Maze, {addRoom(R1),addRoom(R2)}).
+		
+		r13(R), d11(D) :- oo.msg(R, {
+			setSide(0, wall.new).
+			setSide(1, D).
+			setSide(2, wall.new).
+			setSide(3, wall.new).
+			}).
+		r23(R), d12(D) :- oo.msg(R, {
+			setSide(0, wall.new).
+			setSide(1, wall.new).
+			setSide(2, wall.new).
+			setSide(3, D).
+			}).
+	}.
 }.
 
-{
-module(mazeFactory).
+//// Factory クラス
+
+{module(mazeFactory).
 H=mazeFactory.new :- H={
-	//method
 	makeMaze :- return(maze.new).
 	makeWall :- return(wall.new).
 	makeRoom(N) :- int(N) | return(room.new(N)).
@@ -115,23 +125,20 @@ H=mazeFactory.new :- H={
 	}.
 }.
 
-{
-module(enchantedMazeFactory).
+{module(enchantedMazeFactory).
 H=enchantedMazeFactory.new :- H={
-	oo.extends(mazeFactory.new).
-	makeRoom(N) :- return(enchantedRoom.new(N, castSpell.new)).
-	makeDoor(R1, R2) :- return(doorNeedingSpell(R1, R2)).
+	makeMaze :- return(maze.new).//スーパークラスと同じ
+	makeWall :- return(wall.new).//スーパークラスと同じ
+	makeRoom(N) :- return(enchantedRoom.new(N)).
+	makeDoor(R1, R2) :- return(doorNeedingSpell.new(R1, R2)).
 	}.
 }.
 
-{
-module(bombedMazeFactory).
-H=bombedMazeFactory.new :- H={
-	makeWall :- return(bombedWall.new).
-	makeRoom(N) :- return(roomWithABomb(N)).
-	}.
-}.
+//// メイン
 
 oo.use.
-//maze=mazeGame.createMaze().
-maze=mazeGame.createMaze(mazeFactory.new).
+mg=mazeGame.new.
+
+//mg(MG) :- maze=oo.msg(MG, {createMaze}).
+//mg(MG) :- m=oo.msg(MG, {createMaze(mazeFactory.new)}).
+mg(MG) :- m=oo.msg(MG, {createMaze(enchantedMazeFactory.new)}).
