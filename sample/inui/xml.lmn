@@ -70,10 +70,10 @@ import runtime.*;
  * @since 2006.1.23
  */
 class LMNtalXML {
-	protected static final Functor nameFunctor = new Functor("name", 1);
-	protected static final Functor valueFunctor = new Functor("value", 1);
+	protected static final Functor nameFunctor = new SymbolFunctor("name", 1);
+	protected static final Functor valueFunctor = new SymbolFunctor("value", 1);
 	
-	protected AbstractMembrane mem;
+	protected Membrane mem;
 	protected Document doc;
 	
 	private static LMNtalXML xml;
@@ -83,7 +83,7 @@ class LMNtalXML {
 	 * @param filename 読み込むXMLファイル
 	 * @param mem データ構造を追加したい膜
 	 */
-	private LMNtalXML(String filename, AbstractMembrane mem) {
+	private LMNtalXML(String filename, Membrane mem) {
 		this.mem = mem;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -96,7 +96,7 @@ class LMNtalXML {
 		}
 	}
 	
-	public static Atom open(String filename, AbstractMembrane mem) {
+	public static Atom open(String filename, Membrane mem) {
 		xml = new LMNtalXML(filename, mem);
 		return xml.walkThrough();
 	}
@@ -118,8 +118,8 @@ class LMNtalXML {
 	 * @param node ノード
 	 * @return このノードに対応するアトム
 	 */
-	private AbstractMembrane newNodeMembrane(Node node, AbstractMembrane mem) {
-		AbstractMembrane m = mem.newMem();
+	private Membrane newNodeMembrane(Node node, Membrane mem) {
+		Membrane m = mem.newMem();
 		Atom nameAtom1 = m.newAtom(nameFunctor);
 		Atom nameAtom2 = m.newAtom(new StringFunctor(node.getNodeName()+""));
 		m.newLink(nameAtom1, 0, nameAtom2, 0);
@@ -137,7 +137,7 @@ class LMNtalXML {
 	private Atom walkThrough() {
 		Node root = doc.getDocumentElement();
 		traverse(root, mem);
-		return mem.newAtom(new Functor("root", 1));
+		return mem.newAtom(new SymbolFunctor("root", 1));
 	}
 	
 	/**
@@ -167,11 +167,11 @@ class LMNtalXML {
 	 * @param node ノード
 	 * @param atom アトム
 	 */
-	private void traverse(Node node, AbstractMembrane mem) {
+	private void traverse(Node node, Membrane mem) {
 		for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
 			if (!isValidNode(child)) continue;
 			
-			AbstractMembrane m = newNodeMembrane(child, mem);
+			Membrane m = newNodeMembrane(child, mem);
 			
 			traverse(child, m);
 		}
