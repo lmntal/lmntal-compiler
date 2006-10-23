@@ -22,7 +22,7 @@ SYNOPSIS
 	
 	|--sw1-----sw2--|
 	|               |
- battery            |
+ battery          light
 	|   |--sw3--|   |
 	|---|       |---|
 	    |--sw4--|
