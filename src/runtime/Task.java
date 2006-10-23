@@ -796,9 +796,9 @@ public class Task implements Runnable {
 
 	/**
 	 * exec(origMem, true) によって得られた情報を元に、実際に 1 段階のルール適用を行う。
-	 * @param mem 実行する対象の膜
+	 * @param mem 実行する（書き換える）対象の膜
 	 * @param state exec(origMem, true) の実行時に states に生成した適用情報 
-	 * @param origMem exec に渡した膜。state 内の origMem は、mem に書き換えられる。
+	 * @param origMem exec に渡した（マッチング検査の対象となった）膜。state 内の origMem は、mem に書き換えられる。
 	 * @param atomMap origMem 内のアトムから mem 内のアトムへのマップ。state 内のアトムはこのマップにしたがって書き換えられる。
 	 * @return 適用したルールの名前
 	 */
@@ -806,41 +806,39 @@ public class Task implements Runnable {
 		Ruleset rs = (Ruleset)state[0];
 		String name = (String)state[1];
 		String label = (String)state[2];
-		Class[] parameterTypes = new Class[2];
-		Object[] argsTemp = new Object[((Object[])state[3]).length];
-		Object[] args = new Object[2];
-		int i = 0;
-		int j = 0;
-		Object st;
-		for (i = 0, j = 0; i < state.length - 3; i++, j++) {
-			st = state[i+3];
-			if (st instanceof Object[] && atomMap != null){
-				for(int k = 0; k < ((Object[])st).length; k++ ){
-					argsTemp[j] = atomMap.get(((Object[])st)[k]);
-					if (origMem == ((Object[])st)[k]){
-						argsTemp[j] = mem;
+		Object[] st = (Object[])state[3];
+		
+		Object[] argsTemp = new Object[st.length];
+		if (atomMap != null){
+			for(int i = 0; i < st.length; i++){
+				// atomMap に含まれている場合
+				argsTemp[i] = atomMap.get(st[i]);
+				if (origMem == st[i]){
+					argsTemp[i] = mem;
+				}
+				// atomMap に含まれていない場合（ガードで追加されたプロセス）
+				if(argsTemp[i]==null) {
+					if(st[i] instanceof Atom) {
+						argsTemp[i] = new Atom(((Atom)st[i]).getMem(),((Atom)st[i]).getFunctor());
+					} else {
+						// 多分ありえないケースだと思う．
+						System.out.println("Error: st["+i+"] is not an instance of Atom.");
+						System.exit(1);
 					}
-					// 0916
-					if(argsTemp[j]==null) {
-						if(((Object[])st)[k] instanceof Atom) {
-							argsTemp[j] = new Atom(((Atom)((Object[])st)[k]).getMem(),((Atom)((Object[])st)[k]).getFunctor());
-						} else {
-							System.out.println("Error: ((Object[])st)["+k+"] is not an instance of Atom.");
-							System.exit(1);
-						}
-					}
-					j++;
-//					System.out.println(argsTemp[j]);
 				}
 			}
-//			if (origMem == st){
-//				argsTemp[j] = mem;
-//			}
 		}
+//		if (origMem == st){
+//			argsTemp[i] = mem;
+//		}
+		
+		Class[] parameterTypes = new Class[2];
 		parameterTypes[0] = Object[].class;
 		parameterTypes[1] = boolean.class;
+		Object[] args = new Object[2];
 		args[0] = argsTemp;
 		args[1] = Boolean.FALSE;
+		
 		try {
 			Method m = rs.getClass().getMethod("exec" + label, parameterTypes);
 			m.invoke(rs, args);
