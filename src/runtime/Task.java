@@ -271,7 +271,6 @@ public class Task implements Runnable {
 			// 今のところ、システムルールセットは膜主導テストでしか実行されない。
 			// 理想では、組み込みの + はインライン展開されるべきである。
 			flag = SystemRulesets.react(mem, nondeterministic);
-
 			if (!flag) {				
 				while(it.hasNext()){ // 膜主導テストを行う
 					if(((Ruleset)it.next()).react(mem, nondeterministic)) {

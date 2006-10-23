@@ -1336,7 +1336,7 @@ public class Instruction implements Cloneable, Serializable {
      * sakurai
      */
 	public static final int SYSTEMRULESETS = 2001;
-	static {setArgType(SYSTEMRULESETS, new ArgType(false, ARG_INSTS));}
+	static {setArgType(SYSTEMRULESETS, new ArgType(false, ARG_INSTS, ARG_INSTS));}
 	
 	//¿·µ¬Ì¿Îá
     /**
@@ -1917,7 +1917,9 @@ public class Instruction implements Cloneable, Serializable {
 						applyVarRewriteMap( ((InstructionList)inst.data.get(i)).insts, map);
 						break;
 					case ARG_INSTS:
-						applyVarRewriteMap( (List)inst.data.get(i), map);
+						if(inst.getKind() == Instruction.SYSTEMRULESETS)
+							applyVarRewriteMap( ((InstructionList)inst.data.get(i)).insts, map);
+						else applyVarRewriteMap( (List)inst.data.get(i), map);
 						break;
 					case ARG_VARS:
 						ListIterator li = ((List)inst.data.get(i)).listIterator();

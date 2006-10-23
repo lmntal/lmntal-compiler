@@ -19,10 +19,15 @@ public class Grouping {
 	private HashMap var2DefInst;
 	/** 命令⇒グループ識別番号のマップ */
 	private HashMap Inst2GroupId;
+	/** グループ命令内の計算コスト*/
+	private HashMap group2Cost;
 	
+	Instruction spec;
 	Grouping(){
 		var2DefInst = new HashMap();
 		Inst2GroupId = new HashMap();
+		group2Cost = new HashMap();
+		spec = null;
 	}
 	
 	/*
@@ -51,6 +56,7 @@ public class Grouping {
 	 * */
 	public void groupingInsts(List insts, boolean isAtomMatch){
 		if(((Instruction)insts.get(0)).getKind() != Instruction.SPEC) return;
+		spec = (Instruction)insts.get(0);
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = (Instruction)insts.get(i);
 			//否定条件がある場合はグループ化は無効 暫定的処置
@@ -108,29 +114,36 @@ public class Grouping {
 				changegroup = Inst2GroupId.get(inst);
 				changeMap(changegroup, group);
 			}
+		}
+		for(int i=1; i<insts.size(); i++){
+			Instruction inst = (Instruction)insts.get(i);
+			if(inst.getKind() == Instruction.COMMIT
+				|| inst.getKind() == Instruction.JUMP) break;
+			Object group = null;
+			Object changegroup = null;
 			if(inst.getKind() == Instruction.ANYMEM
-			  || inst.getKind() == Instruction.LOCKMEM){
-				//膜を取得する命令は全て同じグループに属すことにする
-				//これも暫定的措置
-				//{a}, {b, $p}, {c} ･･･これらは実際は違うグループ
-				//{a(X)}, {a(Y)} ･･･これらは同じグループ
-				//todo どう区別するか考える
-				for(int i2 = 1; i2 < insts.size(); i2++){
-					Instruction inst2 = (Instruction)insts.get(i2);
-					switch(inst2.getKind()){
-					case Instruction.COMMIT:
-					case Instruction.JUMP:
-						break;
-					case Instruction.ANYMEM:
-					case Instruction.LOCKMEM:
-						group = Inst2GroupId.get(inst);
-						changegroup = Inst2GroupId.get(inst);
-						changeMap(changegroup, group);
-						break;
-					default : break;
+					  || inst.getKind() == Instruction.LOCKMEM){
+						//膜を取得する命令は全て同じグループに属すことにする
+						//これも暫定的措置
+						//{a}, {b, $p}, {c} ･･･これらは実際は違うグループ
+						//{a(X)}, {a(Y)} ･･･これらは同じグループ
+						//todo どう区別するか考える
+						for(int i2 = 1; i2 < insts.size(); i2++){
+							Instruction inst2 = (Instruction)insts.get(i2);
+							switch(inst2.getKind()){
+							case Instruction.COMMIT:
+							case Instruction.JUMP:
+								break;
+							case Instruction.ANYMEM:
+							case Instruction.LOCKMEM:
+								group = Inst2GroupId.get(inst);
+								changegroup = Inst2GroupId.get(inst2);
+								changeMap(changegroup, group);
+								break;
+							default : break;
+							}
+						}
 					}
-				}
-			}
 		}
 		
 		//マップ書き換え終了
@@ -141,7 +154,8 @@ public class Grouping {
 				|| inst.getKind() == Instruction.JUMP) break;
 			Object group = Inst2GroupId.get(inst);
 			InstructionList subinsts = new InstructionList();
-			subinsts.add(new Instruction(Instruction.SPEC, 0, 0));
+			//subinsts.add(new Instruction(Instruction.SPEC, 0, 0));
+			subinsts.add(spec);
 			for(int i2=i; i2<insts.size(); i2++){
 				Instruction inst2 = (Instruction)insts.get(i2);
 				if(inst2.getKind() == Instruction.COMMIT
@@ -153,7 +167,52 @@ public class Grouping {
 				}
 			}
 			subinsts.add(new Instruction(Instruction.PROCEED));
-			insts.add(i, new Instruction(Instruction.GROUP, subinsts));
+			Instruction groupinst = new Instruction(Instruction.GROUP, subinsts);
+			insts.add(i, groupinst);
+			Cost cost = new Cost();
+			cost.evaluateCost(subinsts.insts);
+//			System.out.println(groupinst + " cost = ");
+//			for(int s = 0; s<cost.costvalueN.size(); s++){
+//				if(s>0){
+//					if(((Integer)cost.costvalueN.get(s)).intValue() > 1)
+//						System.out.print(((Integer)cost.costvalueN.get(s)).intValue());
+//				} else System.out.print(((Integer)cost.costvalueN.get(s)).intValue());
+//				if(s<cost.costvalueM.size()){
+//					if(((Integer)cost.costvalueM.get(s)).intValue() == 1)
+//						System.out.print("m");
+//					else if(((Integer)cost.costvalueM.get(s)).intValue() > 1)
+//						System.out.print("m^"+((Integer)cost.costvalueM.get(s)).intValue());
+//				}
+//				if(s==1)System.out.print("n");
+//				else if(s>1)System.out.print("n^"+s);
+//				
+//				if(s != cost.costvalueN.size()-1) System.out.print(" + ");
+//			}
+//			System.out.println("");
+			group2Cost.put(groupinst, cost);
+		}
+//		Group命令の並び替え
+		for(int i=0; i<insts.size(); i++){
+			Instruction inst = (Instruction)insts.get(i);
+			Cost cost1 = null;
+			if(inst.getKind() == Instruction.GROUP){
+				if(group2Cost.containsKey(inst)) cost1 = (Cost)group2Cost.get(inst);
+				else break;
+				for(int j=i-1; j>0; j--){
+					Instruction inst2 = (Instruction)insts.get(j);
+					Cost cost2 = null;
+					if (inst2.getKind() == Instruction.GROUP){
+						if(group2Cost.containsKey(inst2)) cost2 = (Cost)group2Cost.get(inst2);
+						else break;
+						if(!cost1.igtCost(cost2)){
+							insts.add(j--, inst);
+							insts.remove(i+1);
+							continue;
+						} else  System.out.println(cost1.costvalueN+" > "+cost2.costvalueN);
+					}
+					else break;
+				}
+			}
 		}
 		//viewMap();
 	}
@@ -193,5 +252,101 @@ public class Grouping {
 			Map.Entry mapentry = (Map.Entry)it2.next();
 			System.out.println(mapentry.getKey() + "/" + mapentry.getValue());
 		}	
+	}
+}
+
+class Cost {
+	List costvalueN;
+	List costvalueM;
+	HashMap memend;
+	int n;
+	
+	Cost(){
+		costvalueN = new ArrayList();
+		costvalueM = new ArrayList();
+		memend = new HashMap();
+		n = 0;
+	}
+	
+	public void evaluateCost(List insts){
+		int vn = 0;
+		int vm = 0;
+		for(int i=0; i<insts.size(); i++){
+			Instruction inst = (Instruction)insts.get(i);
+			switch(inst.getKind()){
+			case Instruction.FINDATOM:
+				costvalueN.add(n++, new Integer(vn++));
+				costvalueM.add(new Integer(vm));
+				vn = 1;
+				break;
+			case Instruction.ANYMEM:
+				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
+				else costvalueN.set(n, new Integer(++vn));
+				for(int j=insts.size()-1; j>i; j--) {
+					Instruction inst2 = (Instruction)insts.get(j);
+					switch(inst2.getKind()){
+					case Instruction.PROCEED:
+						memend.put(inst.getArg1(), inst2);
+						break;
+					case Instruction.NATOMS:
+					case Instruction.NMEMS:
+					case Instruction.NORULES:
+						if(inst2.getIntArg1() == inst.getIntArg1()){
+							if(memend.containsKey(inst2.getArg1())){
+								memend.put(inst2.getArg1(), inst2);
+								j = -1;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				if(costvalueM.size() <= n) costvalueM.add(new Integer(++vm));
+				else costvalueM.set(n, new Integer(++vm));
+				break;
+			case Instruction.NATOMS:
+			case Instruction.NMEMS:
+			case Instruction.NORULES:
+				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
+				else costvalueN.set(n, new Integer(++vn));
+				if(memend.containsValue(inst)){
+//					while(costvalueM.size() <=n) costvalueM.add(new Integer(vm));
+//						costvalueM.set(n, new Integer(vm--));
+					vm--;
+				}
+				break;
+			case Instruction.PROCEED:
+				if(memend.containsValue(inst)){
+//					while(costvalueM.size() <=n) costvalueM.add(new Integer(vm));
+//						costvalueM.set(n, new Integer(vm--));
+					vm--;
+				}
+				break;
+			default:
+				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
+				else costvalueN.set(n, new Integer(++vn));
+				
+				break;
+			}
+		}
+	}
+	
+	public boolean igtCost(Cost c){
+		List costsn = (ArrayList)c.costvalueN;
+		List costsm = (ArrayList)c.costvalueM;
+		if(costvalueN.size() > costsn.size()) return true;
+		else if(costvalueN.size() < costsn.size()) return false;
+		else {
+			for(int i=costvalueN.size()-1, j=costvalueM.size()-1; i>=0 && j>=0; i--, j--){
+				if(costvalueM.size() > j && costsm.size() > j){
+					if(((Integer)costvalueM.get(j)).intValue() > ((Integer)costsm.get(j)).intValue()) return true;
+					else if(((Integer)costvalueM.get(j)).intValue() < ((Integer)costsm.get(j)).intValue())return false;
+				}
+				if(((Integer)costvalueN.get(i)).intValue() > ((Integer)costsn.get(i)).intValue()) return true;
+				else if(((Integer)costvalueN.get(i)).intValue() == ((Integer)costsn.get(i)).intValue()) continue;
+				else return false;
+			}
+		}
+		return false;
 	}
 }

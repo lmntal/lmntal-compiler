@@ -87,14 +87,14 @@ public class Optimizer {
 			rule.guard = null;
 		}
 		optimize(rule.memMatch, rule.body);
-		if(fGrouping && !fMerging) {
-			Grouping g = new Grouping();
-			g.grouping(rule.atomMatch, rule.memMatch);
-		} 
 		if(fGuardMove && !fMerging) {
 			guardMove(rule.atomMatch);
 			guardMove(rule.memMatch);
 		}
+		if(fGrouping && !fMerging) {
+			Grouping g = new Grouping();
+			g.grouping(rule.atomMatch, rule.memMatch);
+		} 
 		if(fSystemRulesetsInlining) inlineExpandSystemRuleSets(rule.body);
 		if (fInlining) {
 			// head(+guard) と body をくっつける
@@ -413,6 +413,8 @@ public class Optimizer {
 								if(getlinkmap.containsKey(inst2.getArg3())){
 									Instruction getlink = (Instruction)getlinkmap.get(inst2.getArg3());
 									inline1.add(new Instruction(Instruction.DEREFATOM, locals, getlink.getIntArg2(), getlink.getIntArg3()));
+									inline2.add(getlink);
+									if(!removelinks.contains(getlink))removelinks.add(getlink);
 								}
 								if (arg1 == -1) arg1 = locals;
 								else arg2 = locals;
@@ -428,6 +430,8 @@ public class Optimizer {
 								if(getlinkmap.containsKey(inst2.getArg1())){
 									Instruction getlink = (Instruction)getlinkmap.get(inst2.getArg1());
 									inline1.add(new Instruction(Instruction.DEREFATOM, locals, getlink.getIntArg2(), getlink.getIntArg3()));
+									inline2.add(getlink);
+									if(!removelinks.contains(getlink))removelinks.add(getlink);
 								}
 								if (inst2.getIntArg2() == 1) arg1 = locals;
 								else arg2 = locals;
@@ -449,8 +453,8 @@ public class Optimizer {
 							inline1.add(new Instruction(Instruction.REMOVEATOM, arg1, newlinkmem));
 							inline1.add(new Instruction(Instruction.REMOVEATOM, arg2, newlinkmem));
 							inline1.add(new Instruction(Instruction.REMOVEATOM, newatomvar, newlinkmem));
-							inline1.add(new Instruction(Instruction.FREEATOM, arg1, newlinkmem));
-							inline1.add(new Instruction(Instruction.FREEATOM, arg2, newlinkmem));
+							inline1.add(new Instruction(Instruction.FREEATOM, arg1));
+							inline1.add(new Instruction(Instruction.FREEATOM, arg2));
 							inline1.add(new Instruction(Instruction.PROCEED));
 							if(!old2new.containsKey(new Integer(newatomvar))) old2new.put(new Integer(newatomvar), new Integer(locals));
 							locals++;
@@ -470,8 +474,9 @@ public class Optimizer {
 								inline2.add((Instruction)it.next());
 							it = enqueueatoms.iterator();
 							while(it.hasNext())
-								inline2.add((Instruction)it.next());
+								inline2.add((Instruction)it.next());							
 							inline2.add(new Instruction(Instruction.PROCEED));
+							//System.out.println(inline2.insts);
 							//システムルールセット命令の追加
 							for(int i2=body.size()-1; i2>0; i2--){
 								inst2 = (Instruction)body.get(i2);
