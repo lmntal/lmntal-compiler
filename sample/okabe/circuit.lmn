@@ -1,0 +1,62 @@
+/*
+
+NAME
+	Circuit Verification
+
+SYNOPSIS
+	静的な状態
+	1.本回路には電池１個，豆電球１個，スイッチ４個がある（下図参照）．
+	2.電池は常時通電しているとする．
+	3.スイッチは「入」の状態と「切」の状態がある．
+	4.スイッチにはそれぞれタイマガ付いている（スイッチ"N"にはタイマ"N"が付いている）．
+	動的な振舞い
+	1.それぞれのタイマは各時点で１だけカウントアップし，最大値になったら次の時点で１に戻る．
+	    タイマの最大値は以下の表のとおり．
+	    タイマ１＝５，タイマ２＝４，タイマ３＝６，タイマ４＝３
+	2.それぞれのタイマの初期値は以下の表のとおり．
+	    タイマ１＝２，タイマ２＝３，タイマ３＝１，タイマ４＝２
+	3.それぞれのスイッチは，対応するタイマが最大値になると，次の時点「入」となる．それ以外のとき「切」になる．
+	検査
+	    豆電球が点灯することがあるかどうか⇔
+	  F(sw1∧sw2∧(sw3∨sw4))
+	
+	|--sw1-----sw2--|
+	|               |
+ battery            |
+	|   |--sw3--|   |
+	|---|       |---|
+	    |--sw4--|
+	    
+AUTHOR
+	Ryo Okabe
+
+HISTORY
+	2006/10/23(Mon)
+
+*/
+
+nd.exec({{
+
+sw(1,off),sw(2,off),sw(3,off),sw(4,off).
+tmr(1,2),tmr(2,3),tmr(3,1),tmr(4,2).
+
+// atomic がないのでtoken passing 風にした．
+now(1).
+
+// atomic とif-then-else を使いたいなあ．
+tmr(1,5),sw(1,S),now(1) :- unary(S) | tmr(1,1),sw(1,on),now(2).
+tmr(1,N),sw(1,S),now(1) :- N=\=5,unary(S) | tmr(1,N+1),sw(1,off),now(2).
+tmr(2,4),sw(2,S),now(2) :- unary(S) | tmr(2,1),sw(2,on),now(3).
+tmr(2,N),sw(2,S),now(2) :- N=\=4,unary(S) | tmr(2,N+1),sw(2,off),now(3).
+tmr(3,6),sw(3,S),now(3) :- unary(S) | tmr(3,1),sw(3,on),now(4).
+tmr(3,N),sw(3,S),now(3) :- N=\=6,unary(S) | tmr(3,N+1),sw(3,off),now(4).
+tmr(4,3),sw(4,S),now(4) :- unary(S) | tmr(4,1),sw(4,on),now(1).
+tmr(4,N),sw(4,S),now(4) :- N=\=3,unary(S) | tmr(4,N+1),sw(4,off),now(1).
+
+}*}).
+
+% verification
+{{sw(1,on),sw(2,on),sw(3,on),sw(4,_U),$p,@p}*,$q,@q} :- uniq(_U) |
+  {{sw(1,on),sw(2,on),sw(3,on),sw(4,_U),$p,@p}*,ok,$q,@q}.
+{{sw(1,on),sw(2,on),sw(3,_U),sw(4,on),$p,@p}*,$q,@q} :- uniq(_U) |
+  {{sw(1,on),sw(2,on),sw(3,on),sw(4,_U),$p,@p}*,ok,$q,@q}.
