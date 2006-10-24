@@ -109,14 +109,14 @@ public class Count {
 					// 符号が+で上界がなければ解けない
 					if(ic.max instanceof InfinityCount)return false;
 					if(ic.max instanceof NumCount){
-						min += ((NumCount)ic.max).value;
+						min += ((NumCount)ic.max).value * m;
 					}
 				}
 				else if(m < 0){
 					// 符号が-で下界がなければ解けない ( もっともこれはありえないが )
 					if(ic.min instanceof InfinityCount)return false;
 					if(ic.min instanceof NumCount){
-						min += ((NumCount)ic.min).value;
+						min += ((NumCount)ic.min).value * m;
 					}
 					vars.add(vc);
 				}

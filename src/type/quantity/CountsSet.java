@@ -221,32 +221,6 @@ public class CountsSet {
 		}
 	}
 	
-//	/**
-//	 * 膜名ごとにマージして効果を適用する
-//	 *
-//	 */
-//	public void applyAllInOne(){
-//		for(Membrane mem : memToGenCounts.keySet()){
-//			String memname = TypeEnv.getMemName(mem);
-//			if(!memnameToMergedCounts.containsKey(memname))
-//				memnameToMergedCounts.put(memname,memToGenCounts.get(mem));
-//			else{
-//				StaticCounts oldsom = memnameToMergedCounts.get(memname);
-//				oldsom.addAllCounts(memToGenCounts.get(mem));
-//			}
-//		}
-//	}
-	
-//	/**
-//	 * ルール変数が束縛されたものとし、生成膜の各個数について実際の値を求める
-//	 */
-//	public void solve(){
-//		memToFixedCounts = new HashMap<Membrane, FixedCounts>();
-//		for(Membrane m : memToGenCounts.keySet())
-//			memToFixedCounts.put(m,memToGenCounts.get(m).solve());
-//		fixed = true;
-//	}
-
 //	private boolean fixed = false;
 	/**
 	 * 効果におけるルール変数を無限と束縛し、解く
