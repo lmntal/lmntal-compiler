@@ -191,7 +191,8 @@ public class Grouping {
 //			System.out.println("");
 			group2Cost.put(groupinst, cost);
 		}
-//		Group命令の並び替え
+//		Group命令の並び替え 膜主導テストのみ
+		if(!isAtomMatch)
 		for(int i=0; i<insts.size(); i++){
 			Instruction inst = (Instruction)insts.get(i);
 			Cost cost1 = null;
@@ -208,7 +209,7 @@ public class Grouping {
 							insts.add(j--, inst);
 							insts.remove(i+1);
 							continue;
-						} else  System.out.println(cost1.costvalueN+" > "+cost2.costvalueN);
+						} //else  System.out.println(cost1.costvalueN+" > "+cost2.costvalueN);
 					}
 					else break;
 				}
@@ -329,6 +330,7 @@ class Cost {
 				break;
 			}
 		}
+		if(costvalueN.size() == 0) costvalueN.add(vn);
 	}
 	
 	public boolean igtCost(Cost c){
