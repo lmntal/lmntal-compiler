@@ -37,6 +37,9 @@ public class LMNtalWindow extends JFrame {
 
 	final static
 	private Functor LABEL_FUNCTOR = new SymbolFunctor("label",0);
+
+	final static
+	private Functor GRAPHIC_FUNCTOR = new SymbolFunctor("graphic",0);
 	
 	final static
 	private Functor ID_FUNCTOR = new SymbolFunctor("id", 1);
@@ -55,7 +58,7 @@ public class LMNtalWindow extends JFrame {
 
 	private boolean sizeUpdate = false;
 	
-	private Map componentMap = new HashMap();
+	private Map<String, LMNComponent> componentMap = new HashMap();
 
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -127,9 +130,18 @@ public class LMNtalWindow extends JFrame {
 			componentMap.put(key, label);
 		}
 		
+		/* LMNtalPanelだけ，特別で，ここではputしない．
+		 * searchGraphicMemで管理する．
+		 * また，LMNtalPanelの子膜あるかもチェックする．
+		 */
+		LMNtalGraphic graphicPanel = searchGraphicMem(mem);
+		if(graphicPanel != null){
+			graphicPanel.setChildMem(mem);
+		}
+		
 	}
 	
-	private String getID(Membrane mem){
+	public static String getID(Membrane mem){
 		/** ID("id")があったとき、IDを取得する */
 		String id = null;
 		Iterator idAtomIte = mem.atomIteratorOfFunctor(ID_FUNCTOR);
@@ -208,6 +220,39 @@ public class LMNtalWindow extends JFrame {
 	
 	public GridBagLayout getGridBagLayout(){
 		return layout;
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
+
+	
+	/**
+	 * 祖先膜からグラフィック膜を探索する．
+	 * LMNtalGraphicの子膜->LMNtalGraphicを返す．
+	 * LMNtalGraphicの子膜でない->nullを返す
+	 * @param mem
+	 * @return LMNtalGraphic
+	 */
+	private LMNtalGraphic searchGraphicMem(Membrane mem){
+		while(!mem.isRoot()){
+
+			String key = getID(mem); // IDを取得
+			if(key != null){
+				
+				if(mem.getAtomCountOfFunctor(GRAPHIC_FUNCTOR)>0){
+
+					if(componentMap.containsKey(key)){
+						return (LMNtalGraphic)componentMap.get(key);
+					}
+					//graphic.というアトムをその膜に持っていたら
+					
+					LMNtalGraphic graphicPanel = new LMNtalGraphic(this, mem);
+					componentMap.put(key, graphicPanel);
+					return graphicPanel;
+				}
+			}
+			mem = mem.getParent();
+		}
+		return null;
 	}
 	
 	
