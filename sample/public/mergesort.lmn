@@ -32,7 +32,7 @@ R=merge([D1|L1],[D2|L2]) :- D1 >= D2 | R=[D2|merge([D1|L1],L2)].
 R=merge(L,[]) :- R=L.
 R=merge([],L) :- R=L.
 
-R=f([D]) :- R=D
+R=f([D]) :- R=D.
 
 /**
  * R=gen_lists(L)
