@@ -184,7 +184,7 @@ public class FrontEnd {
 						/// This option is available only when --use-source-library option is specified.
 						/// Otherwise, LMNtal library must be in your CLASSPATH environment variable. 
 						/// The default path is ./lib and ../lib
-						compile.Module.libPath.add(new File(args[++i]));
+						compile.Module.libPath.add(args[++i]);
 						break;
 					case 'L':
 						/// -L <path>
@@ -700,9 +700,7 @@ public class FrontEnd {
 			m.showAllRules();
 			if (Env.compileonly) {
 				//ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
-				Iterator it = Module.loaded.keySet().iterator();
-				while (it.hasNext()) {
-					String libName = (String)it.next();
+				for (String libName : Module.loaded) {
 					compile.structure.Membrane mem = (compile.structure.Membrane)Module.memNameTable.get(libName);
 					Iterator it2 = mem.rulesets.iterator();
 					while (it2.hasNext()) {

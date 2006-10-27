@@ -10,9 +10,11 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import runtime.Env;
 
@@ -38,23 +40,22 @@ import compile.structure.RuleStructure;
  *
  */
 public class Module {
-	public static List libPath = new ArrayList();
-	public static Map memNameTable = new HashMap();
-	public static Map loaded = new HashMap();
-	public static Object EXIST = new Object();
+	public static List<String> libPath = new ArrayList<String>();
+	public static Map<String, Membrane> memNameTable = new HashMap<String, Membrane>();
+	public static Set<String> loaded = new HashSet<String>();
 	
 	static {
 		String home = System.getProperty("LMNTAL_HOME");
 		if (home == null) {
 			Env.e("Warning : LMNTAL_HOME is not set. Using relativa path.");
-			libPath.add(new File("./lib/src"));
-			libPath.add(new File("../lib/src"));
-			libPath.add(new File("./lib/public"));
-			libPath.add(new File("../lib/public"));
-			libPath.add(new File("."));
+			libPath.add("./lib/src");
+			libPath.add("../lib/src");
+			libPath.add("./lib/public");
+			libPath.add("../lib/public");
+			libPath.add(".");
 		} else {
-			libPath.add(new File(home + "/lib/src"));
-			libPath.add(new File(home + "/lib/public"));
+			libPath.add(home + "/lib/src");
+			libPath.add(home + "/lib/public");
 		}
 	}
 	
@@ -72,11 +73,9 @@ public class Module {
 	 * @param mod_name  モジュール名
 	 */
 	public static void loadModule(Membrane m, String mod_name) {
-		if(loaded.get(mod_name)!=null) return;
+		if(loaded.contains(mod_name)) return;
 		
-		Iterator it = libPath.iterator();
-		while(it.hasNext()) {
-			String thePath = ((File)it.next()).toString();
+		for (String thePath : libPath) {
 			File file = new File(thePath+"/"+mod_name+".lmn");
 			StringBuffer sb = new StringBuffer("Loading Module "+mod_name+" from "+file+" ...");
 			try {
@@ -87,7 +86,7 @@ public class Module {
 				m.rulesets.add(rs);
 				sb.append(" [ OK ] ");
 				Env.d(sb.toString());
-				loaded.put(mod_name, EXIST);
+				loaded.add(mod_name);
 				return;
 			} catch (Exception e) {
 				sb.append(" [ FAILED ] ");
@@ -106,7 +105,7 @@ public class Module {
 	 * @param m
 	 */
 	public static void resolveModules(Membrane m) {
-		List need = new ArrayList();
+		List<String> need = new ArrayList<String>();
 		getNeedModules(m, need);
 		Iterator i = need.iterator();
 		while(i.hasNext()) {
@@ -119,7 +118,7 @@ public class Module {
 	 * @param m
 	 * @param need 出力引数。モジュール一覧が入る。
 	 */
-	static void getNeedModules(Membrane m, List need) {
+	static void getNeedModules(Membrane m, List<String> need) {
 		Iterator i;
 		i = m.atoms.listIterator();
 		while(i.hasNext()) {
