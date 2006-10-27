@@ -3,7 +3,7 @@
 # 処理系の行数を表示するスクリプト by inui
 
 # 各パッケージの行数を表示（test パッケージは除く）
-for i in `find . -type d -maxdepth 1 | grep -v "\(test\|CVS\|\.$\)"`
+for i in `find . -maxdepth 1 -type d| grep -v "\(test\|CVS\|\.$\)"`
 do
 #	# *.java ファイルがあるならそれを全部 wc に渡す
 #	ls $i/*.java >& /dev/null && wc `ls $i/*.java`  -l |
