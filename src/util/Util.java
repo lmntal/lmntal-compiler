@@ -163,7 +163,7 @@ abstract public class Util {
 	}
 	
 	/**
-	 * link0 が link1 のリスト中に含まれるかどうかを返す 
+	 * アトムbase が link1 のリスト中に含まれるかどうかを返す 
 	 * @param link
 	 * @param result
 	 * @return
