@@ -20,12 +20,14 @@ r=seq.run({},[
 					java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 					String s = br.readLine();
 				 	String r[] = s.split(" ");
-		  			Atom e = mem.newAtom(new SymbolFunctor("p", 2));
+		  			Atom e = mem.newAtom(new SymbolFunctor("p0", 2));
 					Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[0])));
 					Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
 		
 					mem.newLink(e, 0, result1, 0);
 					mem.newLink(e, 1, result2, 0);
+					
+					mem.enqueueAtom(e);
 					
 					me.nthAtom(0).remove();
 					me.remove();
@@ -36,11 +38,11 @@ r=seq.run({},[
 	},
 	{
 		setweight2@@
-		p(X,Y), startpoint(ST) :- X=\=ST, int(Y) | startpoint(ST), p(X, {}, 100000, Y).	
+		p0(X,Y), startpoint(ST) :- X=\=ST, int(Y) | startpoint(ST), p1(X, {}, 100000, Y).	
 	},
 	{
 		setweight1@@
-		p(X,Y), startpoint(ST) :- X==ST,  int(Y) | startpoint(ST), p(X, {}, 0, Y).
+		p0(X,Y), startpoint(ST) :- X==ST,  int(Y) | startpoint(ST), p1(X, {}, 0, Y).
 
 		nnum(N) :- int(N) | arrayset(N) = new(N).
 	},
@@ -62,7 +64,7 @@ r=seq.run({},[
 	},
  	{
 		arrayset1@@	
-		arrayset(N) = A, p(X, {$p}, W, Thread) :- N>0, int(X)| 
+		arrayset(N) = A, p1(X, {$p}, W, Thread) :- N>0, int(X)| 
 			p(Link, {$p}, W, Thread), 
 			arrayset(N-1) = update(A, X , old, Link).
 		arrayset0@@
@@ -101,7 +103,7 @@ r=seq.run({},[
 					java.io.BufferedReader br = (java.io.BufferedReader) ((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject();
 					String s = br.readLine();
 				 	String r[] = s.split(" ");
-		  			Atom e = mem.newAtom(new SymbolFunctor("e", 4));
+		  			Atom e = mem.newAtom(new SymbolFunctor("e0", 4));
 					Atom result1 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[0])));
 					Atom result2 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[1])));
 					Atom result3 = mem.newAtom(new IntegerFunctor(Integer.parseInt(r[2])));
@@ -112,6 +114,8 @@ r=seq.run({},[
 					mem.newLink(e, 2, result3, 0);
 					mem.newLink(e, 3, result4, 0);
 					
+					mem.enqueueAtom(e);
+					
 					me.nthAtom(0).remove();
 					me.remove();
 				} catch(Exception e) {Env.e(e);}
@@ -119,7 +123,7 @@ r=seq.run({},[
 	},
 	{
 		addtype@@
-		e(X, Y, Z, Thread) :- int(X), int(Y) | e(n(X), nn(Y), Z, Thread).
+		e0(X, Y, Z, Thread) :- int(X), int(Y) | e(n(X), nn(Y), Z, Thread).
 	},
 	{		
 		olddec@@
@@ -207,6 +211,3 @@ r=seq.run({},[
 	},{}
 
 ]).
-
-
-
