@@ -1,0 +1,87 @@
+/*
+------------------------------------------------------------------
+Lambda calculus (nondeterministic)
+                                       Kazunori Ueda
+                                       2006-09-12 01:20
+------------------------------------------------------------------
+*/
+
+{ module(lambda).
+
+beta@@ H=apply(lambda(A, B), C) :- H=B, A=C.
+
+l_c@@  lambda(A,B)=cp(C,D,L), {+L,$q} :-
+         C=lambda(E,F), D=lambda(G,H), A=cp(E,G,L1), B=cp(F,H,L2),
+         {{+L1},+L2,sub(S)}, {super(S),$q}.
+a_c@@  apply(A,B)=cp(C,D,L), {+L,$q} :-
+         C= apply(E,F), D= apply(G,H), A=cp(E,G,L1), B=cp(F,H,L2),
+         {+L1,+L2,$q}.
+
+c_c1@@ cp(A,B,L1)=cp(C,D,L2), {{+L1,$p},+L2,$q} :- A=C, B=D, {{$p},$q}.
+c_c2@@ cp(A,B,L1)=cp(C,D,L2), {{+L1,$p},$q}, {+L2,top,$r}
+          :- C=cp(E,F,L3), D=cp(G,H,L4), {{+L3,+L4,$p},$q},
+             A=cp(E,G,L5), B=cp(F,H,L6), {+L5,+L6,top,$r}.
+u_c@@  $u=cp(A,B,L), {+L,$q} :- unary($u) | A=$u, B=$u, {$q}.
+
+promote@@ {{},$p,sub(S)}, {$q,super(S)} :- {$p,$q}.
+
+l_r@@  lambda(A,B)=rm :- A=rm, B=rm.
+a_r@@  apply(A,B)=rm :- A=rm, B=rm.
+c_r1@@ cp(A,B,L)=rm, {+L,$q} :- A=rm, B=rm, {$q}.
+c_r2@@ cp(A,B,L)=rm, {{+L,$p},$q} :- A=rm, B=rm, {{$p},$q}.
+r_r@@  rm=rm :- .
+u_r@@  $u=rm :- unary($u) | .
+
+c2c@@  A=cp(B,C) :- A=cp(B,C,L), {+L,top}.
+gc@@   {top} :- .
+}.
+
+// examples
+
+{ lambda.use. example1.
+  // (lambda y . y y) a => a a
+  r=apply(lambda(cp(Y0,Y1), apply(Y0,Y1)), a).
+}.
+
+{ lambda.use. example2.
+  // (lambda f . (lambda x . f (f x) ) ) succ 0
+  r=apply(apply(lambda(cp(F0,F1),
+                lambda(X, apply(F0,apply(F1,X)))),
+    succ), 0).
+  // H=apply(succ, I) :- int(I) | H=I+1.
+}.
+
+{ lambda.use. example3.
+  // (lambda mul . (lambda sqr . sqr 5) (lambda x . mul x x)) 
+  //     (lambda x . (lambda y . * x y) ) 
+  r=apply(
+     lambda(Mul,
+       apply(lambda(Sqr, apply(Sqr,5)),
+         lambda(cp(X0,X1), apply(apply(Mul,X0),X1)))),
+     lambda(A, lambda(B, '*'(A,B)))).
+}.
+
+{ lambda.use. example4.
+  // exponentiation of natural numbers in Church encoding
+  // n is encoded as f^n x
+  // then n^m is encoded as lambda n m -> m n
+
+  N=n(0) :- N=lambda(rm, lambda(X, X)).
+  N=n(1) :- N=lambda(F, lambda(X, apply(F,X))).
+  N=n(2) :- N=lambda(cp(F0,F1), lambda(X,
+              apply(F0,apply(F1,X)))).
+  N=n(3) :- N=lambda(cp(F0,cp(F1,F2)), lambda(X,
+              apply(F0,apply(F1,apply(F2,X))))).
+  N=n(4) :- N=lambda(cp(F0,cp(F1,cp(F2,F3))), lambda(X,
+              apply(F0,apply(F1,apply(F2,apply(F3,X)))))).
+//   r=apply(apply(apply(n(2), n(2)),succ),0).
+  r=apply(apply(apply(apply(n(3), n(2)),n(2)),succ),0).
+//  r=apply(n(3),apply(n(2), n(2))).
+//  r=apply(n(2), n(2)).
+//  r=apply(apply(apply(apply(n(3), n(2)),n(2)),s),0).
+//  r=apply(apply(apply(n(2),apply(n(2), n(3))),s),0).
+  H=apply(succ, I) :- int(I) | H=I+1.
+}.
+
+{$p[A,B,C|*D], A=cp(B,C,L), {+L,top,$q},@p}/ :-
+    {$p[A,B,C|*D], A=c(B,C), {top,$q},@p}.

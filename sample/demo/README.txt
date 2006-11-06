@@ -15,7 +15,7 @@ bubblesort.lmn
 c60.lmn         can be called with -x chorus x
 c70.lmn         can be called with -x chorus x
 
-lambda.lmn      lambda calculus with examples
+lambda_nd.lmn   lambda calculus with examples
 lambda_cbn.lmn  call-by-name lambda calculus with examples
 
 list.lmn        list processing (mainly for testing nondeterminism)
