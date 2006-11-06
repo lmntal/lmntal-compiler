@@ -1,0 +1,14 @@
+choose(X, [Y|L0],L1) :- L1=[Y|L], choose(X,L0,L).
+choose(X0,[X|L], L0) :- X0=X, L0=L.
+
+ins(X,L0,L ) :- L=[X|L0].
+ins(X,[Y|L0],L1) :- L1=[Y|L], ins(X,L0,L).
+
+perm([],L) :- L=[].
+perm([X|L0],L) :- perm(L0,L1), ins(X,L1,L).
+
+% choose(X,[a,b,c],Y), result(X,Y).
+
+perm([a,b,c],L), result(L).
+
+% ins(a,[b,c,d],res).
