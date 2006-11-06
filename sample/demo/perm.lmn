@@ -1,25 +1,37 @@
 // perm([],[]).
 // perm([H|T],X) :- del([H|T],A,L), /*L1*/ perm(L,P), /*L2*/ X=[A|P].
 // del([H|T],H,T).
-// del([H|T],L,[H|T2]) :- del(T,L,T2), /*L3*/ X=L, Y=[H|T2].
+// del([H|T],X,Y) :- del(T,L,T2), /*L3*/ X=L, Y=[H|T2].
 
-p([],    Cont, S0, S1) :- contp(Cont, [],  S0, S1).
-p([H|T], Cont, S0, S1) :- d([H|T], l1(Cont), S0, S1).
+p1f@@ p([],    Cont,C2) :- contp(Cont,C2, []).
+p1b@@ contpb(Cont,C2, []) :- pb([],    Cont,C2).
+p2f@@ p([H|T], Cont,C2) :- d([H|T], l1(Cont),C2).
+p2b@@ db([H|T], l1(Cont),C2) :- pb([H|T], Cont,C2).
+p2b@@ db([], l1(Cont),C2) :- pb([], Cont,C2).
 
-d(L, Cont, S0, S2) :- ground(L), ground(Cont) |
-    d1(L, Cont, S0, S1), d2(L, Cont, S1, S2).
+d@@ d(L, Cont,C2) :- d1(L, Cont,C2).
 
-d1([H|T], Cont, S0, S1) :- contd(Cont, H,T, S0, S1).
-d1([],    Cont, S0, S1) :- ground(Cont) | S0=S1.
+d1f@@ d1([H|T], Cont,C2) :- contd(Cont,[d1f|C2], H,T).
+d1b@@ contdb(Cont,[d1f|C2], H,T) :- d1b([H|T], Cont,C2).
+d1fn@@ d1([],    Cont,C2) :- d1b([],Cont,C2).
 
-d2([H|T], Cont, S0, S1) :- d(T, l3(H,Cont), S0, S1).
-d2([],    Cont, S0, S1) :- ground(Cont) | S0=S1.
+d1to2@@ d1b(L,Cont,C2) :- d2(L,Cont,C2).
 
-contp(l2(A,Cont), P, S0, S1) :- contp(Cont, [A|P], S0, S1).
-contp(l0,         P, S0, S1) :- S0=[P|S1].
+d2f@@ d2([H|T], Cont,C2) :- d(T, l3(H,Cont),C2).
+d2b@@ db(T, l3(H,Cont),C2) :- d2b([H|T], Cont,C2).
+d2fn@@ d2([],    Cont,C2) :- d2b([],Cont,C2).
 
-contd(l3(H,Cont), L,T2, S0, S1) :- contd(Cont, L, [H|T2], S0, S1).
-contd(l1(Cont),   A,L,  S0, S1) :- p(L,l2(A,Cont),S0,S1).
+d2toe@@ d2b(L, Cont,C2) :- db(L, Cont,C2).
 
-p([1,2,3],l0,res,[]).
+cp1f@@ contp(l2(A,Cont),C2, P) :- contp(Cont,C2, [A|P]).
+cp1b@@ contpb(Cont,C2, [A|P]) :- contpb(l2(A,Cont),C2, P).
+cp2f@@ contp(l0,C2,         P) :- res(P,C2).
+cp2b@@ res(P,C2), f :- | contpb(l0,C2,P).
 
+cd1f@@ contd(l3(H,Cont),C2, L,T2) :- contd(Cont,[cd1f|C2], L, [H|T2]).
+cd1b@@ contdb(Cont,[cd1f|C2], L, [H|T2]) :- contdb(l3(H,Cont),C2, L,T2).
+cd2f@@ contd(l1(Cont),C2,   A,L) :- p(L,l2(A,Cont),C2).
+cd2b@@ pb(L,l2(A,Cont),C2) :- contdb(l1(Cont),C2,   A,L). 
+// cdc@@  contd(cp(Cont,C2),L,T2) :- contd(Cont,C2,L,T2).
+
+s :- p([1,2,3],l0,[]).
