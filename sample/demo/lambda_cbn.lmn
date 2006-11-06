@@ -1,9 +1,9 @@
 /*
-------------------------------------------------------------------
-Call-by-name lambda calculus
-                                       Koji Hara and Kazunori Ueda
-                                       2005-11-16 08:45
-------------------------------------------------------------------
+--------------------------------------------------------------
+Call-by-name lambda calculus (weak head normal form)
+                                   Koji Hara and Kazunori Ueda
+                                   2005-11-16 08:45
+--------------------------------------------------------------
 */
 
 { module(lambda_cbn).
@@ -29,13 +29,8 @@ dn_un@@ dn(A)= +F :- A=upf(F).
 // at-upo -> upo-apply 
 at_uo@@ C=at(D,B), D=upo(A) :- C=upo(E), E=apply(A,B).
 
-// at_upf -> external function call
+// at-upf -> external function call
 at_uf@@ C=at(D,B), D=upf(F) :- C=call(F,B).
-
-// at-upo -> ap-dn 
-// at_uo@@ C=at(D,B), D=upo(A) :- C=apply(A,F), B=dn(F).
-// ap_up@@ C=apply(A,D), D=up(B) :- C=upo(E), E=apply(A,B).
-// ap_uo@@ C=apply(A,D), D=upo(B) :- C=upo(E), E=apply(A,B).
 
 // cp-lambda -> lambda-dp
 // cp-? -> ?-cp
@@ -56,11 +51,11 @@ rm_ap@@  apply(A,B)=rm :- A=rm, B=rm.
 rm_at@@     at(A,B)=rm :- A=rm, B=rm.
 rm_cp@@     cp(A,B)=rm :- A=rm, B=rm.
 rm_dp@@     dp(A,B)=rm :- A=rm, B=rm.
-rm_rm@@         rm=rm :- .
+rm_rm@@          rm=rm :- .
 
 dp_dp@@ dp(A,B)=dp(C,D) :- A=C, B=D.
-cp_dp@@ cp(A,B)=dp(C,D) :- C=cp(E,F), D=cp(G,H), A=dp(E,G), B=dp(F,H).
-cp_cp@@ cp(A,B)=cp(C,D) :- C=cp(E,F), D=cp(G,H), A=cp(E,G), B=cp(F,H).
+cp_dp@@ cp(A,B)=dp(C,D) :-
+        C=cp(E,F), D=cp(G,H), A=dp(E,G), B=dp(F,H).
 
 cp_un@@ U=cp(A,B) :- unary(U) | A=U, B=U.
 dp_un@@ U=dp(A,B) :- unary(U) | A=U, B=U.
@@ -106,7 +101,12 @@ rm_un@@ +F=rm      :- unary(F) | .
   N=n(4) :- N=lambda(cp(F0,cp(F1,cp(F2,F3))), lambda(X,
               apply(F0,apply(F1,apply(F2,apply(F3,X)))))).
 
-  dn(r)=apply(apply(apply(n(2), n(3)), +s), 0).
+//  dn(r)=apply(apply(apply(n(4), n(4)), +s), 0).
+  dn(r)=apply(apply(apply(n(3),apply(n(2),n(2))), +s), 0).
+//  dn(r)=apply(n(2),apply(n(2),n(2))).
+//  dn(r)=apply(apply(n(2),n(2)),n(2)).
+//  dn(r)=apply(n(2),n(2)).
+//  dn(r)=apply(apply(apply(n(2),n(2)),s),0).
   
   H=call(s,N) :- | NN=normalize(N), H=upo(NN+1).
   
@@ -116,7 +116,7 @@ rm_un@@ +F=rm      :- unary(F) | .
 r=up(A) :- r=A.
 r=upo(A) :- r=A.
 }.
-
+/*
 { lambda_cbn.use.  example5.
   // y = (lambda f . (lambda x . f(x x)) (lambda x . f(x x)))
   // fact = (lambda f . (lambda n . (eqn0 1 n * f(n-1)))) 
@@ -142,6 +142,7 @@ r=upo(A) :- r=A.
     ), 9).
   r=upo(A) :- r=A.
 }.
+
 
 { lambda_cbn.use.  example6.
 	// theta = (lambda x y . y ((x x) y)) (lambda x y . y ((x x) y))
@@ -170,3 +171,4 @@ r=upo(A) :- r=A.
 	  ), 9).
 	r=upo(A) :- r=A.
 }.
+*/
