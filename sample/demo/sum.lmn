@@ -1,7 +1,0 @@
-1, add(X,Y,Z) :- eq1(X,0), eq2(Y,Z).
-2, add(X0,Y,s(Z)) :- X0=s(X), add(X,Y,Z).
-
-3, eq1(X,0), eq2(Y,Z) :- add(X,Y,Z).
-4, X0=s(X), add(X,Y,Z) :- add(X0,Y,s(Z)).
-
-add(X,Y,s(s(s(0)))), ans(X,Y).

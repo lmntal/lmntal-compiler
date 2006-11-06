@@ -1,0 +1,22 @@
+/* exhaustive search by continuation-based program transformation
+   original GHC version [Ueda, 1986]
+*/
+// append(X,Y,Z) :- X=[], Y=Z.
+// append(X0,Y,[A|Z]) :- append(X,Y,Z), /*L1*/ X0=[A|X].
+// bagof((X,Y), append(X,Y,[1,2,3,4,5]) /*L0*/, S).
+//
+// Calling form: :- ..., ap(Z,'L0',S,[]), ...
+
+ap(Z,Cont,S0,S2) :- ground(Cont), ground(Z) |
+    ap1(Z,Cont,S0,S1), ap2(Z,Cont,S1,S2).
+
+ap1(Z,Cont,S0,S1) :- cont(Cont,[],Z,S0,S1).
+
+ap2([A|Z],Cont,S0,S1) :- ap(Z,'L1'(A,Cont),S0,S1).
+ap2([],   Cont,S0,S1) :- ground(Cont) | S0=S1.
+
+cont('L1'(A,Cont),X,Y,S0,S1) :- cont(Cont,[A|X],Y,S0,S1).
+cont('L0',        X,Y,S0,S1) :- S0=[(X,Y)|S1].
+
+ap([1,2,3,4,5],'L0',res,[]).
+
