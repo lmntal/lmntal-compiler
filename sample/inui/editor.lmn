@@ -1,34 +1,46 @@
-//フレームクラス?
-{
-module(frame).
-H=frame.new :- H={}.
-H=frame.add({$p}, C, F) :- H=done, F={$p, c(C)}.
-}.
+sys.perpetual(on).
 
-//ボタンクラス?
-{
-module(button).
-H=button.new(Label, Action) :- string(Label) | H={name(Label), action(Action)}.
-}.
+java_awt_Component.use.
+java_awt_Container.use.
+java_awt_TextComponent.use.
+java_lang_String.use.
+java_awt_event_ActionEvent.use.
 
-//テキストエリアクラス?
-{
-module(textarea).
-H=textarea.new(Row, Column) :- int(Row), int(Column) | H={text(""), row(Row), column(Column)}.
-}.
+//フレームを生成
+frame=add(setSize(java_awt_Frame.new("LMNtal Editor"), 600, 400, r1), "Center",
+	setFont(java_awt_TextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 12), r2),
+	ta).
+//メニューバーを生成
+exititem=addActionListener(java_awt_MenuItem.new("Exit"), java_awt_event_ActionListener.new, r).
+openitem=addActionListener(java_awt_MenuItem.new("Open"), java_awt_event_ActionListener.new, r).
+saveitem=addActionListener(java_awt_MenuItem.new("Save"), java_awt_event_ActionListener.new, r).
+searchitem=addActionListener(java_awt_MenuItem.new("Search"), java_awt_event_ActionListener.new, r).
 
-//フレーム
-f=frame.new.
-//テキストエリア
-ta=textarea.new(24, 40).
-//開くボタン
-b1=button.new("Open", OpenAction).
-OpenAction={ a:-b }.
-//保存ボタン
-b2=button.new("Save", SaveAction).
-SaveAction={ b:-c }.
+exititem(Exit), openitem(Open), saveitem(Save) :-
+	filemenu=add(add(add(java_awt_Menu.new("File"), Open, r), Save, r), Exit, r).
+searchitem(Search) :-
+	helpmenu=add(java_awt_Menu.new("Search"), Search, r).
 
-//フレームに追加する
-f(F), ta(TA) :- r1=frame.add(F, TA, f).
-f(F), b1(B) :- r2=frame.add(F, B, f).
-f(F), b2(B) :- r3=frame.add(F, B, f).
+filemenu(FileMenu), helpmenu(HelpMenu) :- menubar=add(add(java_awt_MenuBar.new, FileMenu, kill), HelpMenu, kill).
+
+frame(Frame), menubar(MenuBar) :- frame=setVisible(setMenuBar(Frame, MenuBar, r5), true, r7).
+frame(Frame), r7(done) :- fd=java_awt_FileDialog.new(Frame).
+
+//アクション
+actionPerformed(ActionEvent) :- kill=getActionCommand(ActionEvent, cmd).
+
+cmd("Open"), fd(FD) :- fd=getFile(setVisible(FD, true, open1), openfile).
+open1(done), openfile(File), ta(TA) :- ta=setText(TA, io.gets(File), r).
+
+cmd("Save"), fd(FD) :- fd=getFile(setVisible(FD, true, open2), savefile).
+open2(done), ta(TA) :- ta=getText(TA, contents).
+savefile(File), contents(C) :- string(C) | r=io.puts(File, C).
+
+cmd("Search"), fd(FD) :- fd=getFile(setVisible(FD, true, open3), search).
+open3(done), ta(TA) :- ta=getText(TA, s).
+s(S), search(Search) :- s=indexOf(S, length(Search, len), index).
+index(Index), len(Len), ta(TA) :- int(Index), int(Len) | ta=requestFocus(select(TA, Index, Index+Len, r), r).
+
+cmd("Exit") :- r=java_lang_system.exit(0).
+
+kill(X) :- unary(X) | .

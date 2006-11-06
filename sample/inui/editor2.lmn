@@ -1,30 +1,69 @@
-//フレームクラス?
-H=new_frame :- H={
-	//フィールド
-	title("").
-	//メソッド
-	add(C) :- c(C).
-	set_title(NewTitle), title(Title) :- string(NewTitle), string(Title) | title(NewTitle).
-	}.
+/*
+ * swing 版テキストエディタ
+ */
+sys.perpetual(on).
 
-//ボタンクラス?
-H=new_button(Label, Action) :- string(Label) | H={name(Label), action(Action)}.
+java_lang_String.use.
+java_awt_event_ActionEvent.use.
+java_io_File.use.
+javax_swing_JViewport.use.
 
-//テキストエリアクラス?
-H=new_textarea(Row, Column) :- int(Row), int(Column) |
-	H={text(""), row(Row), column(Column)}.
+/////////////////////////////////////////////
+// GUI の生成
 
-//フレーム
-f=new_frame().
-//テキストエリア
-ta=new_textarea(24, 40).
-//開くボタン
-b1=new_button("Open", OpenAction).
-OpenAction={ a:-b }.
-//保存ボタン
-b2=new_button("Save", SaveAction).
-SaveAction={ b:-c }.
+//メニューバーを生成
+SearchMenu=add(javax_swing_JMenu.new("Search"), item("Search"), gc).
+FileMenu=add(add(add(javax_swing_JMenu.new("File"), item("Open"), gc), item("Save"), gc), item("Exit"), gc).
+MenuBar=add(add(javax_swing_JMenuBar.new, FileMenu, gc), SearchMenu, gc).
+//ActionListener つきの MenuItem を生成するルール
+H=item(Label) :-
+	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new, r).
 
-//フレームにコンポーネントを追加
-f({$p, @p}), ta(T), b1(B1), b2(B2) :-
-	f({add(T), add(B1), add(B2), set_title("It's LMNtal"), $p, @p}).
+//テキストエリアを生成
+TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 12), r).
+
+Scroll=javax_swing_JScrollPane.new(TextArea).
+
+//フレームを生成
+frame=setDefaultCloseOperation(setJMenuBar(getContentPane(setSize(javax_swing_JFrame.new("LMNtal Editor"),
+	600, 400, r), ContentPane), MenuBar, r), javax_swing_JFrame.exit_on_close, r).
+contentPane=add(ContentPane, "Center", Scroll, Scroll2).
+gc=getViewport(Scroll2, Viewport), gc=getView(Viewport, ta).
+frame(Frame), contentPane(CP) :- class(CP, "java.awt.Container") | frame=setVisible(Frame, true, r), gc(CP).
+
+//ファイル選択ダイアログを生成
+fc=javax_swing_JFileChooser.new.
+
+/////////////////////////////////////////////
+// アクションの定義
+
+actionPerformed(ActionEvent) :- gc=getActionCommand(ActionEvent, cmd).
+
+cmd("Open"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
+	fc=showOpenDialog(FC, Frame, res_open), frame(Frame).
+res_open(0), fc(FC), ta(TA) :-
+	fc=getSelectedFile(FC, X),
+	gc=getAbsolutePath(X, File),
+	ta=setText(TA, io.gets(File), r).
+
+cmd("Save"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
+	fc=showSaveDialog(FC, Frame, res_save), frame(Frame).
+res_save(0), fc(FC), ta(TA) :-
+	fc=getSelectedFile(FC, X),
+	gc=getAbsolutePath(X, File),
+	ta=getText(TA, Contents),
+	r=io.puts(File, Contents).
+
+cmd("Search") :- word=javax_swing_JOptionPane.showInputDialog("Input word.").
+word(Word), ta(TA) :-
+	ta=getCaretPosition(getText(TA, Text), Caret),
+	gc=indexOf(Text, length(Word, len), Caret, index).
+index(Index), len(Len), ta(TA) :- Start=Index, End=Index+Len | ta=requestFocus(select(TA, Start, End, r), r).
+
+cmd("Exit") :- r=java_lang_System.exit(0).
+
+/////////////////////////////////////////////
+// GC
+
+gc(Object) :- class(Object, "java.lang.Object") | .
+r(done) :- .
