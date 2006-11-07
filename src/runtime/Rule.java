@@ -1,28 +1,26 @@
 package runtime;
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public final class Rule implements Serializable {
 	// Instruction のリスト
 	
 	/** アトム主導ルール適用の命令列（atomMatchLabel.insts）
 	 * 先頭の命令はspec[2,*]でなければならない。*/
-	public List atomMatch;
+	public List<Instruction> atomMatch;
 	/** 膜主導ルール適用の命令列（memMatchLabel.insts）
 	 * 先頭の命令はspec[1,*]でなければならない。*/
-	public List memMatch;
+	public List<Instruction> memMatch;
 	
 	/** ガード命令列（guardLabel.insts）またはnull。
 	 * 先頭の命令はspec[*,*]でなければならない。*/
 	public List<Instruction> guard;
 	/** ボディ命令列（bodyLabel.insts）またはnull。
 	 * 先頭の命令はspec[*,*]でなければならない。*/
-	public List body;
+	public List<Instruction> body;
 	
 	/** ラベル付きアトム主導ルール適用命令列 */
 	public InstructionList atomMatchLabel;

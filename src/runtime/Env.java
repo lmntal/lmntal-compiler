@@ -116,7 +116,7 @@ public final class Env {
 	/**
 	 * プログラムに与える引数
 	 */
-	public static List argv = new ArrayList();
+	public static List<String> argv = new ArrayList<String>();
 	
 	/**
 	 * ソースファイル

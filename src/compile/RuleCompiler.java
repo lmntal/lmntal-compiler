@@ -44,10 +44,10 @@ public class RuleCompiler {
 	/** コンパイルされるルールに対応するルールオブジェクト */
 	public Rule theRule;
 	
-	public List atomMatch;
-	public List memMatch;
-	public List guard;
-	public List body;
+	public List<Instruction> atomMatch;
+	public List<Instruction> memMatch;
+	public List<Instruction> guard;
+	public List<Instruction> body;
 	int varcount;			// 次の変数番号
 	
 	List rhsatoms;

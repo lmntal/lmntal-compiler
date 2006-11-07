@@ -85,7 +85,7 @@ public class FrontEnd {
 				if (Env.stdinLMN) run(new InputStreamReader(System.in)); //2006.07.11 inui
 				else if (Env.stdinTAL) { //2006.07.11 inui
 					try {
-						run(RulesetParser.parse(new BufferedReader(new InputStreamReader(System.in))));
+						run(RulesetParser.parse(new InputStreamReader(System.in)));
 					} catch (ParseException e) {}
 				}
 				else REPL.run();
@@ -588,11 +588,10 @@ public class FrontEnd {
 	 * 
 	 * @param files ソースファイル
 	 */
-	public static void run(List files) {
+	public static void run(List<String> files) {
 		InputStream is = null;
 		try{
-			for(Iterator i=files.iterator();i.hasNext();) {
-				String filename = (String)i.next();
+			for(String filename : files) {
 				FileInputStream fis = new FileInputStream(filename);
 				if(is==null) is = fis;
 				else         is = new SequenceInputStream(is, fis);

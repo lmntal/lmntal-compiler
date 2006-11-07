@@ -45,7 +45,7 @@ public final class Membrane extends QueuedEntity {
 //	/** このセルの自由リンクの数 */
 //	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
-	protected List rulesets = new ArrayList();
+	protected List<Ruleset> rulesets = new ArrayList<Ruleset>();
 	/** 膜のタイプ */
 	protected int kind = 0;
 	public static final int KIND_ND = 2;
