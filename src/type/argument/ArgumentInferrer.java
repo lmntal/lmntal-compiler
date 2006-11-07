@@ -2,6 +2,7 @@ package type.argument;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import runtime.Functor;
@@ -17,7 +18,6 @@ import compile.structure.RuleStructure;
 
 /**
  * ルールごとに、アトム引数の型／モードを推論する。
- * 文脈定義がルールごとに扱うほうが都合が良い為。
  * @author kudo
  *
  */
@@ -61,10 +61,23 @@ public class ArgumentInferrer {
 		// 全ての引数についてモード変数、型変数を振る
 		inferArgumentRule(rule);
 
+		//プロセス文脈について処理する
+		processLinksOfProcessContexts();
+		
 		solvePathes();
 		constraints.solveUnifyConstraints();
 		
 	}
+	
+	/**
+	 * プロセス文脈の引数について処理する
+	 */
+	private void processLinksOfProcessContexts(){
+		for(ContextDef def : defs)
+			for(ProcessContext rhsOcc : (List<ProcessContext>)def.rhsOccs)
+				processExplicitLinks((ProcessContext)def.lhsOcc, rhsOcc);
+	}
+
 	/**
 	 * @param mem
 	 * @param freelinks
@@ -74,41 +87,36 @@ public class ArgumentInferrer {
 	private Set<LinkOccurrence> inferArgumentMembrane(Membrane mem, Set<LinkOccurrence> freelinks) throws TypeConstraintException{
 
 		//ルールについて走査する
-		Iterator<RuleStructure> itr = mem.rules.iterator();
-		while (itr.hasNext()) {
-			new ArgumentInferrer(itr.next(),constraints).infer();
+		for(RuleStructure rs : (List<RuleStructure>)mem.rules){
+//			new ArgumentInferrer(rs,constraints).infer();
+			inferArgumentRule(rs);
 		}
 
 		// 子膜について走査する
-		Iterator<Membrane> itm = mem.mems.iterator();
-		while (itm.hasNext()) {
-			freelinks = inferArgumentMembrane(itm.next(), freelinks);
+		for(Membrane child : (List<Membrane>)mem.mems){
+			freelinks = inferArgumentMembrane(child, freelinks);
 		}
 
 		// この時点で、子孫膜に出現する全てのアトム／プロセス文脈について、局所リンクの処理は終わっている
 		
-		Iterator<Atom> ita = mem.atoms.iterator();
-		while (ita.hasNext()) {
-			Atom atom = ita.next();
-			int out = TypeEnv.outOfPassiveAtom(atom);
-			if (out == TypeEnv.CONNECTOR) continue; // '='/2だったら無視する
-			else
+		for(Atom atom : (List<Atom>)mem.atoms){
+			if (TypeEnv.outOfPassiveAtom(atom) != TypeEnv.CONNECTOR) // '='/2だったら無視する
 				freelinks = inferArgumentAtom(atom, freelinks);
 		}
 
 		// この時点で、子孫膜に出現する全てのアトム／プロセス文脈、およびこの膜のアトムの引数の処理は終わっている
 		// つまり残るはこの膜に出現するプロセス文脈と、この膜の自由リンクのみ
 		
+		//文脈定義を集める
+		
 		// プロセス文脈
-		Iterator<ProcessContext> itp = mem.processContexts.iterator();
-		while(itp.hasNext()){
-			ContextDef def = itp.next().def;
+		for(ProcessContext pc : (List<ProcessContext>)mem.processContexts){
+			ContextDef def = pc.def;
 			if(!defs.contains(def))defs.add(def);
 		}
 		//型付きプロセス文脈
-		Iterator<ProcessContext> ittp = mem.typedProcessContexts.iterator();
-		while(ittp.hasNext()){
-			ContextDef def = ittp.next().def;
+		for(ProcessContext tpc : (List<ProcessContext>)mem.typedProcessContexts){
+			ContextDef def = tpc.def;
 			if(!defs.contains(def))defs.add(def);
 		}
 		return freelinks;
@@ -123,23 +131,11 @@ public class ArgumentInferrer {
 		// 左辺／右辺それぞれについて型／モードを解決し、1回出現するリンクを集める
 		Set<LinkOccurrence> freelinksLeft = inferArgumentMembrane(rule.leftMem, new HashSet<LinkOccurrence>());
 		Set<LinkOccurrence> freelinksRight = inferArgumentMembrane(rule.rightMem, new HashSet<LinkOccurrence>());
-		Iterator<LinkOccurrence> it = freelinksLeft.iterator();
-		while (it.hasNext()) {
-			LinkOccurrence leftlink = it.next();
+		for(LinkOccurrence leftlink : freelinksLeft){
 			LinkOccurrence rightlink = TypeEnv.getRealBuddy(leftlink);
-			if (!freelinksRight.contains(rightlink)){ // リンクが左辺／右辺出現なら
+			if (!freelinksRight.contains(rightlink)) // リンクが左辺／右辺出現でないなら
 				throw new TypeConstraintException("link occurs once in a rule.");
-			}
 			addConstraintAboutLinks(1, leftlink, rightlink);
-		}
-		//プロセス文脈について処理する
-		Iterator<ContextDef> itd = defs.iterator();
-		while(itd.hasNext()){
-			ContextDef def = itd.next();
-			Iterator<ProcessContext> itp = def.rhsOccs.iterator();
-			while(itp.hasNext()){
-				processExplicitLinks((ProcessContext)def.lhsOcc, itp.next());
-			}
 		}
 	}
 
@@ -206,8 +202,7 @@ public class ArgumentInferrer {
 		}
 	}
 
-	private void addUnifyConstraint(int sign, LinkOccurrence lo,
-			LinkOccurrence b) {
+	private void addUnifyConstraint(int sign, LinkOccurrence lo, LinkOccurrence b) {
 		constraints.add(new UnifyConstraint(new PolarizedPath(1, new RootPath(lo)),
 				new PolarizedPath(sign, new RootPath(b))));
 	}
@@ -221,17 +216,12 @@ public class ArgumentInferrer {
 	 * 
 	 */
 	private void solvePathes() {
-		Set unSolvedRPCs = constraints.getReceivePassiveConstraints();
-		Iterator it = unSolvedRPCs.iterator();
-		while (it.hasNext()) {
-			ReceiveConstraint rpc = (ReceiveConstraint) it.next();
+		Set<ReceiveConstraint> unSolvedRPCs = constraints.getReceivePassiveConstraints();
+		for(ReceiveConstraint rpc : unSolvedRPCs){
 			rpc.setPPath(solvePolarizedPath(rpc.getPPath()));
 		}
 		constraints.refreshReceivePassiveConstraints(unSolvedRPCs);
-		Set unSolvedUCs = constraints.getUnifyConstraints();
-		it = unSolvedUCs.iterator();
-		while (it.hasNext()) {
-			UnifyConstraint uc = (UnifyConstraint) it.next();
+		for(UnifyConstraint uc : constraints.getUnifyConstraints()){
 			uc.setPPathes(solvePolarizedPath(uc.getPPath1()),
 					solvePolarizedPath(uc.getPPath2()));
 		}
@@ -241,6 +231,10 @@ public class ArgumentInferrer {
 		Path p = pp.getPath();
 		if (!(p instanceof RootPath)) {
 			System.out.println("fatal error in solving path.");
+			if(p instanceof ActiveAtomPath)
+				System.out.println("\tactive atom path");
+			else if(p instanceof TracingPath)
+				System.out.println("\ttracing path");
 			return pp;
 		}
 		LinkOccurrence lo = ((RootPath) p).getTarget();

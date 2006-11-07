@@ -55,7 +55,7 @@ public class ConstraintSet /* implements Set */{
 //		return all;
 //	}
 
-	public Set getUnifyConstraints() {
+	public Set<UnifyConstraint> getUnifyConstraints() {
 		return unifyConstraints;
 	}
 
@@ -70,9 +70,9 @@ public class ConstraintSet /* implements Set */{
 		return rpcall;
 	}
 
-	public void refreshReceivePassiveConstraints(Set<Constraint> rpcs) {
+	public void refreshReceivePassiveConstraints(Set<ReceiveConstraint> rpcs) {
 		receivePassiveConstraintsMap = new HashMap<PolarizedPath,Set<ReceiveConstraint>>();
-		addAll(rpcs);
+		addAllR(rpcs);
 	}
 
 	public void solveUnifyConstraints() throws TypeConstraintException {
@@ -98,24 +98,37 @@ public class ConstraintSet /* implements Set */{
 	// public Object[] toArray(Object[] arg0) {
 	// return all().toArray(arg0);
 	// }
-
-	public boolean add(Constraint c) {
-		if (c instanceof ReceiveConstraint) {
-			// ReceivePassiveConstraint rpc = (ReceivePassiveConstraint) arg0;
-			// receivePassiveConstraints.add(rpc);
-			ReceiveConstraint rpc = (ReceiveConstraint) c;
-			if (!receivePassiveConstraintsMap.containsKey(rpc.getPPath())) {
-				receivePassiveConstraintsMap.put(rpc.getPPath(), new HashSet<ReceiveConstraint>());
-			}
-			receivePassiveConstraintsMap.get(rpc.getPPath()).add(rpc);
-		} else if (c instanceof UnifyConstraint) {
-			UnifyConstraint uc = (UnifyConstraint) c;
-			unifyConstraints.add(uc);
-		} else
-			System.err
-					.println("fatal error. ConstraintSet is required to add Object is'nt constraint.");
-		return false;
+	
+//	public boolean 
+	
+	public void add(ReceiveConstraint rpc){
+		if (!receivePassiveConstraintsMap.containsKey(rpc.getPPath())) {
+			receivePassiveConstraintsMap.put(rpc.getPPath(), new HashSet<ReceiveConstraint>());
+		}
 	}
+	
+	public void add(UnifyConstraint uc){
+//		UnifyConstraint uc = (UnifyConstraint) c;
+		unifyConstraints.add(uc);
+	}
+
+//	public void add(Constraint c) {
+//		if (c instanceof ReceiveConstraint) {
+//			// ReceivePassiveConstraint rpc = (ReceivePassiveConstraint) arg0;
+//			// receivePassiveConstraints.add(rpc);
+//			ReceiveConstraint rpc = (ReceiveConstraint) c;
+//			if (!receivePassiveConstraintsMap.containsKey(rpc.getPPath())) {
+//				receivePassiveConstraintsMap.put(rpc.getPPath(), new HashSet<ReceiveConstraint>());
+//			}
+//			receivePassiveConstraintsMap.get(rpc.getPPath()).add(rpc);
+//		} else if (c instanceof UnifyConstraint) {
+//			UnifyConstraint uc = (UnifyConstraint) c;
+//			unifyConstraints.add(uc);
+//		} else
+//			System.err
+//					.println("fatal error. ConstraintSet is required to add Object is'nt constraint.");
+////		return false;
+//	}
 
 	// public boolean remove(Object arg0) {
 	// return false;
@@ -125,13 +138,25 @@ public class ConstraintSet /* implements Set */{
 	// return all().containsAll(arg0);
 	// }
 	//
-	public boolean addAll(Collection<Constraint> arg0) {
-		Iterator<Constraint> it = arg0.iterator();
-		while (it.hasNext()) {
-			add(it.next());
+//	public boolean addAll(Collection<Constraint> arg0) {
+//		Iterator<Constraint> it = arg0.iterator();
+//		while (it.hasNext()) {
+//			add(it.next());
+//		}
+//		return false;
+//	}
+	
+	public void addAllR(Collection<ReceiveConstraint> rcs){
+		for(ReceiveConstraint rc : rcs){
+			add(rc);
 		}
-		return false;
 	}
+	
+//	public void addAllU(Collection<UnifyConstraint> ucs){
+//		for(UnifyConstraint uc: ucs){
+//			add(uc);
+//		}
+//	}
 
 	//
 	// public boolean retainAll(Collection arg0) {
@@ -157,9 +182,8 @@ public class ConstraintSet /* implements Set */{
 		Env.p("----TypeVarConstraints : ");
 		TreeSet<TypeVarConstraint> tvcs = new TreeSet<TypeVarConstraint>(new TypeVarConstraintComparator());
 		tvcs.addAll(typeVarConstraints);
-		Iterator<TypeVarConstraint> ittvc = tvcs.iterator();
-		while (ittvc.hasNext()) {
-			Env.p(ittvc.next());
+		for(TypeVarConstraint tvc : tvcs){
+			Env.p(tvc);
 		}
 		Env.p("---");
 	}

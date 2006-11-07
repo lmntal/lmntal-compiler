@@ -1,11 +1,17 @@
-package type;
+package type.argument;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import runtime.Functor;
+import type.TypeEnv;
 
+/**
+ * 型変数を表す
+ * @author kudo
+ *
+ */
 public class TypeVar {
 	private int id;
 
@@ -44,12 +50,8 @@ public class TypeVar {
 			s.realTypeVar=tvs;
 	}
 
-	public boolean equals(Object o){
-		if(o instanceof TypeVar){
-			TypeVar tv = (TypeVar)o;
+	public boolean equals(TypeVar tv){
 			return self() == tv.self();
-		}
-		else return false;
 	}
 	
 	public int hashCode(){

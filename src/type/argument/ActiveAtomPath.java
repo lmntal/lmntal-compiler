@@ -41,9 +41,9 @@ public class ActiveAtomPath implements Path {
 		return mem.hashCode() + functor.hashCode() + pos;
 	}
 	
-	public boolean equals(Object o){
-		if(o instanceof ActiveAtomPath){
-			ActiveAtomPath aap = (ActiveAtomPath)o;
+	public boolean equals(Path p){
+		if(p instanceof ActiveAtomPath){
+			ActiveAtomPath aap = (ActiveAtomPath)p;
 			return mem.equals(aap.mem) && functor.equals(aap.functor) && pos == aap.pos;
 		}
 		else return false;

@@ -3,13 +3,13 @@
  */
 package type.argument;
 
-import type.TypeVar;
 
 /**
+ * 各パスについての型変数、モード変数を持つ
  * @author kudo
  *
  */
-public class TypeVarConstraint implements Constraint {
+public class TypeVarConstraint {
 
 	private Path p;
 	
@@ -19,22 +19,16 @@ public class TypeVarConstraint implements Constraint {
 	
 	private TypeVar tp;
 	
-	private ModeSet ms;
+	private ModeVar ms;
 
-	public TypeVarConstraint(Path p, TypeVar tp, ModeSet ms){
+	public TypeVarConstraint(Path p, TypeVar tp, ModeVar ms){
 		this.p = p;
 		this.tp = tp;
 		this.ms = ms;
 	}
 	
-	public boolean equals(Object o){
-		if(o instanceof TypeVarConstraint){
-			TypeVarConstraint tvc = (TypeVarConstraint)o;
-			return p.equals(tvc.p) && tp.equals(tvc.tp)
-			&& ms.equals(tvc.ms)
-			;
-		}
-		else return false;
+	public boolean equals(TypeVarConstraint tvc){
+		return p.equals(tvc.p) && tp.equals(tvc.tp) && ms.equals(tvc.ms);
 	}
 	
 	public int hashCode(){
