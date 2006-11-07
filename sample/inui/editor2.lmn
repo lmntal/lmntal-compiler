@@ -1,5 +1,6 @@
 /*
  * swing 版テキストエディタ
+ * 要 java_lib
  */
 sys.perpetual(on).
 
@@ -13,14 +14,15 @@ javax_swing_JViewport.use.
 
 //メニューバーを生成
 SearchMenu=add(javax_swing_JMenu.new("Search"), item("Search"), gc).
-FileMenu=add(add(add(javax_swing_JMenu.new("File"), item("Open"), gc), item("Save"), gc), item("Exit"), gc).
-MenuBar=add(add(javax_swing_JMenuBar.new, FileMenu, gc), SearchMenu, gc).
+FileMenu=add(add(add(add(javax_swing_JMenu.new("File"), item("New"), gc), item("Open"), gc), item("Save"), gc), item("Exit"), gc).
+EditMenu=add(add(add(add(javax_swing_JMenu.new("Edit"), item("Copy"), gc), item("Cut"), gc), item("Paste"), gc), item("Select All"), gc).
+MenuBar=add(add(add(javax_swing_JMenuBar.new, FileMenu, gc), EditMenu, gc), SearchMenu, gc).
 //ActionListener つきの MenuItem を生成するルール
 H=item(Label) :-
 	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new, r).
 
 //テキストエリアを生成
-TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 12), r).
+TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14), r).
 
 Scroll=javax_swing_JScrollPane.new(TextArea).
 
@@ -38,6 +40,8 @@ fc=javax_swing_JFileChooser.new.
 // アクションの定義
 
 actionPerformed(ActionEvent) :- gc=getActionCommand(ActionEvent, cmd).
+
+cmd("New"), ta(TA) :- ta=setText(TA, "", r).
 
 cmd("Open"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
 	fc=showOpenDialog(FC, Frame, res_open), frame(Frame).
@@ -59,6 +63,11 @@ word(Word), ta(TA) :-
 	ta=getCaretPosition(getText(TA, Text), Caret),
 	gc=indexOf(Text, length(Word, len), Caret, index).
 index(Index), len(Len), ta(TA) :- Start=Index, End=Index+Len | ta=requestFocus(select(TA, Start, End, r), r).
+
+cmd("Copy"), ta(TA) :- ta=copy(TA, r).
+cmd("Cut"), ta(TA) :- ta=cut(TA, r).
+cmd("Paste"), ta(TA) :- ta=paste(TA, r).
+cmd("Select All"), ta(TA) :- ta=selectAll(TA, r).
 
 cmd("Exit") :- r=java_lang_System.exit(0).
 
