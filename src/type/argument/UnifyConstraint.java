@@ -22,6 +22,10 @@ public class UnifyConstraint /* implements Constraint */ {
 		return pp2;
 	}
 	
+	/**
+	 * 両辺とも符号が-なら、双方ひっくり返す
+	 *
+	 */
 	public void regularize(){
 		if(pp1.getSign() == -1 ){
 			pp1.inverse();

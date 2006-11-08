@@ -7,7 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
-import type.TypeConstraintException;
+import runtime.SymbolFunctor;
+import type.TypeEnv;
+import type.TypeException;
+
+import compile.structure.Membrane;
 
 /**
  * 
@@ -15,16 +19,22 @@ import type.TypeConstraintException;
  * 
  */
 public class UnifySolver {
-	private Map<Path,TypeVar> pathToTV;
+	/**
+	 * パスから型変数へのマップ
+	 */
+	private final Map<Path,TypeVar> pathToTV;
 
-	private ModeVarSet modeVarSet;
+	/**
+	 * モード変数の管理
+	 */
+	private final ModeVarSet modeVarSet;
 
 	public UnifySolver() {
 		this.pathToTV = new HashMap<Path,TypeVar>();
 		this.modeVarSet = new ModeVarSet();
 	}
 
-	public void add(UnifyConstraint uc) throws TypeConstraintException{
+	public void add(UnifyConstraint uc) throws TypeException{
 		PolarizedPath pp1 = uc.getPPath1();
 		PolarizedPath pp2 = uc.getPPath2();
 		Path p1 = pp1.getPath();
@@ -43,31 +53,36 @@ public class UnifySolver {
 	 * @return
 	 */
 	private TypeVar getTypeVar(Path p){
-		if(!pathToTV.containsKey(p)){
+		if(!pathToTV.containsKey(p))
 			pathToTV.put(p, new TypeVar());
-		}
 		return (TypeVar)pathToTV.get(p);
 	}
 	
-	public void solveTypeAndMode(Collection<Set<ReceiveConstraint>> receiveConstraintsSet)throws TypeConstraintException{
+	/**
+	 * ReceiveConstraint の情報から、型変数、モード変数の値を決めていく。
+	 * TODO 型変数の束縛については、データ型を意識したものにする
+	 * @param receiveConstraintsSet
+	 * @throws TypeException モード変数の束縛の際に不整合が起きる
+	 */
+	public void solveTypeAndMode(Collection<Set<ReceiveConstraint>> receiveConstraintsSet)throws TypeException{
 		for(Set<ReceiveConstraint> rcs : receiveConstraintsSet){
 			for(ReceiveConstraint rc : rcs){
 				PolarizedPath pp = rc.getPPath();
 				int sign = pp.getSign();
 				Path p = pp.getPath();
-				TypeVar tp = getTypeVar(p);
-				tp.addPassiveFunctor(rc.getFunctor());
+				TypeVar tv = getTypeVar(p);
+				tv.addPassiveFunctor(rc.getFunctor());
 				ModeVar mv = modeVarSet.getModeVar(p);
 				try{
 					mv.bindSign(sign);
-				}catch(TypeConstraintException e){
+				}catch(TypeException e){
 					Env.e(rc + " ==> " + e.getMessage());
 				}
 			}
 		}
 	}
 
-	public Set<TypeVarConstraint> getTypeVarConstraints() throws TypeConstraintException{
+	public Set<TypeVarConstraint> getTypeVarConstraints() throws TypeException{
 		Set<TypeVarConstraint> typeVarConstraints = new HashSet<TypeVarConstraint>();
 		for(Path p : pathToTV.keySet()){
 			typeVarConstraints.add(new TypeVarConstraint(p, getTypeVar(p), modeVarSet.getModeVar(p)));

@@ -1,5 +1,6 @@
 package type.quantity;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,20 +19,20 @@ import compile.structure.Membrane;
  */
 public class CountsSet {
 	/** ¥½¡¼¥¹¾å¤ÎËì -> ÎÌ²òÀÏ·ë²Ì(À¸À®Ëì) */
-	Map<Membrane,StaticCounts> memToGenCounts = new HashMap<Membrane,StaticCounts>();
+	private final Map<Membrane,StaticCounts> memToGenCounts = new HashMap<Membrane,StaticCounts>();
 	/** ¥½¡¼¥¹¾å¤ÎËì -> ÎÌ²òÀÏ·ë²Ì(·ÑÂ³Ëì) */
-	Map<Membrane,Set<DynamicCounts>> memToInhCountss = new HashMap<Membrane,Set<DynamicCounts>>();
+	private final Map<Membrane,Set<DynamicCounts>> memToInhCountss = new HashMap<Membrane,Set<DynamicCounts>>();
 	/** ËìÌ¾ -> ÎÌ²òÀÏ·ë²Ì(·ÑÂ³Ëì) */
-	Map<String,Set<DynamicCounts>> memnameToAllInhCountss = new HashMap<String,Set<DynamicCounts>>();
+	private final Map<String,Set<DynamicCounts>> memnameToAllInhCountss = new HashMap<String,Set<DynamicCounts>>();
 	/** ËìÌ¾ -> ÎÌ²òÀÏ·ë²Ì(Á´Ëì¤Ø¤Î·ÑÂ³Ëì) */
-	Map<String,Set<DynamicCounts>> memnameToCommonInhCountss = new HashMap<String, Set<DynamicCounts>>();
+	private final Map<String,Set<DynamicCounts>> memnameToCommonInhCountss = new HashMap<String, Set<DynamicCounts>>();
 	/** ¥½¡¼¥¹¾å¤ÎËì -> ÎÌ²òÀÏ·ë²Ì(À¸À®Ëì/É¾²ÁºÑ¤ß) */
-	Map<Membrane,FixedCounts> memToFixedCounts = new HashMap<Membrane, FixedCounts>();
+	private final Map<Membrane,FixedCounts> memToFixedCounts = new HashMap<Membrane, FixedCounts>();
 //	/** ¥½¡¼¥¹¾å¤ÎËì -> ÎÌ²òÀÏ·ë²Ì(·ÑÂ³Ëì/É¾²ÁºÑ¤ß) */
 //	Map<Membrane,FixedCounts> memToInhFixedCounts;
-	Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<String, FixedCounts>();
+	private final Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<String, FixedCounts>();
 	/** ËìÌ¾ -> ÎÌ²òÀÏ·ë²Ì(·ÑÂ³Ëì) */
-	Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
+	private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
 
 	public CountsSet(){
 	}
@@ -272,6 +273,10 @@ public class CountsSet {
 				continue;
 			memToGenCounts.get(mem).solveByCounts();
 		}
+	}
+	
+	public Map<String, FixedCounts> getMemNameToFixedCountsSet(){
+		return memnameToMergedFixedCounts;
 	}
 	
 	public void printAll(){

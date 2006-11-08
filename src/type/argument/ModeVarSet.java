@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import type.TypeConstraintException;
+import type.TypeException;
 
 /**
  * モード変数を管理する
@@ -47,12 +47,12 @@ public class ModeVarSet {
 	 * @param sign
 	 * @param p1
 	 * @param p2
-	 * @throws TypeConstraintException
+	 * @throws TypeException
 	 */
-	public void add(int sign, Path p1, Path p2)throws TypeConstraintException{
+	public void add(int sign, Path p1, Path p2)throws TypeException{
 		// 同一パスに対しモードが逆に設定されている
 		if((sign == -1) && p1.equals(p2))
-			throw new TypeConstraintException("mode error (same path with in/out) : " + p1 + " <=> " + p2);
+			throw new TypeException("mode error (same path with in/out) : " + p1 + " <=> " + p2);
 		ModeVar ms1 = getModeVarOfPath(p1);
 		ModeVar ms2 = getModeVarOfPath(p2);
 		// 両方に既にモード変数が振られている
@@ -63,7 +63,7 @@ public class ModeVarSet {
 				if(ms1==ms2)return;
 				// 振られたモード変数が相方なら衝突
 				else if(ms1==ms2.buddy)
-					throw new TypeConstraintException("mode error :" + p1 + " <=> " + p2);
+					throw new TypeException("mode error :" + p1 + " <=> " + p2);
 				else merge(ms1, ms2);
 			}
 			// 符号が逆なら
@@ -72,7 +72,7 @@ public class ModeVarSet {
 				if(ms1==ms2.buddy)return;
 				// 振られたモード変数が同じなら衝突
 				else if(ms1==ms2)
-					throw new TypeConstraintException("mode error :" + p1 + " <=> " + p2);
+					throw new TypeException("mode error :" + p1 + " <=> " + p2);
 				else merge(ms1, ms2.buddy);
 			}
 		}
@@ -94,7 +94,7 @@ public class ModeVarSet {
 		}
 	}
 	
-	public ModeVar getModeVar(Path path)throws TypeConstraintException{
+	public ModeVar getModeVar(Path path)throws TypeException{
 		ModeVar ms = getModeVarOfPath(path);
 		if(ms==null){
 			ms = newModeVar();
@@ -105,7 +105,7 @@ public class ModeVarSet {
 	
 	private static int index = 0;
 	private String newModeVarName(){
-		return "'m" + (index++);
+		return /*"'" +*/ "m" + (index++);
 	}
 	
 	/**

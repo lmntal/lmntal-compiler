@@ -19,9 +19,9 @@ import compile.structure.Membrane;
 public class FixedCounts {
 	
 	/** ファンクタ -> 量 */
-	final Map<Functor,FixedCount> functorToCount;
+	public final Map<Functor,FixedCount> functorToCount;
 	/** 膜名 -> 量 */
-	final Map<String,FixedCount> memnameToCount;
+	public final Map<String,FixedCount> memnameToCount;
 	
 	final Membrane mem;
 

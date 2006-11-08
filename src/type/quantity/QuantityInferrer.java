@@ -2,6 +2,7 @@ package type.quantity;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import type.TypeEnv;
@@ -20,6 +21,10 @@ import compile.structure.RuleStructure;
 public class QuantityInferrer {
 	
 	private final CountsSet countsset;
+	
+	public Map<String, FixedCounts> getMemNameToFixedCountsSet(){
+		return countsset.getMemNameToFixedCountsSet();
+	}
 	
 	private Membrane root;
 	

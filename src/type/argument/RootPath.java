@@ -17,9 +17,10 @@ public class RootPath implements Path {
 		return target.hashCode();
 	}
 	
-	public boolean equals(Path p) {
-		if (p instanceof RootPath) {
-			return target.equals(p);
+	public boolean equals(Object o) {
+		if (o instanceof RootPath) {
+			RootPath rp = (RootPath)o;
+			return target == rp.target;
 		} else
 			return false;
 	}

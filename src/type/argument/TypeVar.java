@@ -50,8 +50,11 @@ public class TypeVar {
 			s.realTypeVar=tvs;
 	}
 
-	public boolean equals(TypeVar tv){
+	public boolean equals(Object o){
+		if(o instanceof TypeVar){
+			TypeVar tv = (TypeVar)o;
 			return self() == tv.self();
+		}else return false;
 	}
 	
 	public int hashCode(){
@@ -59,12 +62,12 @@ public class TypeVar {
 	}
 	
 	public String toString() {
-		return (self().passiveFunctors==null?("'t" + self().id+"={?}"):(stringOfPassiveFunctors()));
+		return "'t" + self().id+"=" + (self().passiveFunctors==null?("{?}"):("{"+stringOfPassiveFunctors()+"}"));
 	}
 	
-	boolean showDetailOfDataFunctor = false;
+	private boolean showDetailOfDataFunctor = false;
 	public String stringOfPassiveFunctors(){
-		String ret = "{";
+		String ret = "";
 		Iterator<Functor> itf = self().passiveFunctors.iterator();
 		if(!showDetailOfDataFunctor){
 			Set<String> dataTypes = new HashSet<String>();
@@ -86,8 +89,13 @@ public class TypeVar {
 				ret += ", " + itf.next();
 			}
 		}
-		return ret + "}";
+		return ret;
 	}
+	
+	public String shortString(){
+		return "(" + (self().passiveFunctors==null?("'t" + self().id):stringOfPassiveFunctors()) + ")";
+	}
+	
 	private String typeNameOfFunctor(Functor f){
 		String tn = TypeEnv.getTypeNameOfPassiveFunctor(f);
 		if(tn != null)return tn;

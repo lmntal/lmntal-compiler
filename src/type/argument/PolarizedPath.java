@@ -36,7 +36,7 @@ public class PolarizedPath {
 		return pol + path.hashCode();
 	}
 	
-	public boolean equals(Object o) {
+	public boolean equals(Object o){
 		if (o instanceof PolarizedPath) {
 			PolarizedPath pp = (PolarizedPath) o;
 			return (pol == pp.pol && path.equals(pp.path));

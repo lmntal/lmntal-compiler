@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import runtime.Functor;
-import type.TypeConstraintException;
+import type.TypeException;
 import type.TypeEnv;
 
 import compile.structure.Atom;
@@ -27,6 +27,10 @@ public class ArgumentInferrer {
 	private Set<ContextDef> defs;
 	
 	private ConstraintSet constraints;
+	
+	public ConstraintSet getConstraints(){
+		return constraints;
+	}
 
 	/** */
 	public ArgumentInferrer(RuleStructure rule, ConstraintSet constraints){
@@ -52,9 +56,9 @@ public class ArgumentInferrer {
 
 	/**
 	 * 
-	 * @throws TypeConstraintException
+	 * @throws TypeException
 	 */
-	public void infer() throws TypeConstraintException{
+	public void infer() throws TypeException{
 		defs = new HashSet<ContextDef>();
 
 		// TODO Active Head Condition をチェックする
@@ -84,7 +88,7 @@ public class ArgumentInferrer {
 	 *            free links already checked
 	 * @return free links in the process at mem
 	 */
-	private Set<LinkOccurrence> inferArgumentMembrane(Membrane mem, Set<LinkOccurrence> freelinks) throws TypeConstraintException{
+	private Set<LinkOccurrence> inferArgumentMembrane(Membrane mem, Set<LinkOccurrence> freelinks) throws TypeException{
 
 		//ルールについて走査する
 		for(RuleStructure rs : (List<RuleStructure>)mem.rules){
@@ -127,14 +131,14 @@ public class ArgumentInferrer {
 	 * 
 	 * @param rule
 	 */
-	private void inferArgumentRule(RuleStructure rule) throws TypeConstraintException{
+	private void inferArgumentRule(RuleStructure rule) throws TypeException{
 		// 左辺／右辺それぞれについて型／モードを解決し、1回出現するリンクを集める
 		Set<LinkOccurrence> freelinksLeft = inferArgumentMembrane(rule.leftMem, new HashSet<LinkOccurrence>());
 		Set<LinkOccurrence> freelinksRight = inferArgumentMembrane(rule.rightMem, new HashSet<LinkOccurrence>());
 		for(LinkOccurrence leftlink : freelinksLeft){
 			LinkOccurrence rightlink = TypeEnv.getRealBuddy(leftlink);
 			if (!freelinksRight.contains(rightlink)) // リンクが左辺／右辺出現でないなら
-				throw new TypeConstraintException("link occurs once in a rule.");
+				throw new TypeException("link occurs once in a rule.");
 			addConstraintAboutLinks(1, leftlink, rightlink);
 		}
 	}
@@ -147,7 +151,7 @@ public class ArgumentInferrer {
 	 * @param freelinks
 	 * @return
 	 */
-	private Set<LinkOccurrence> inferArgumentAtom(Atom atom, Set<LinkOccurrence> freelinks)throws TypeConstraintException{
+	private Set<LinkOccurrence> inferArgumentAtom(Atom atom, Set<LinkOccurrence> freelinks)throws TypeException{
 		for (int i = 0; i < atom.args.length; i++) {
 			LinkOccurrence lo = atom.args[i];
 			LinkOccurrence b = TypeEnv.getRealBuddy(lo);
@@ -188,11 +192,11 @@ public class ArgumentInferrer {
 	 * @param lo
 	 * @param b
 	 */
-	private void addConstraintAboutLinks(int sign, LinkOccurrence lo, LinkOccurrence b) throws TypeConstraintException{
+	private void addConstraintAboutLinks(int sign, LinkOccurrence lo, LinkOccurrence b) throws TypeException{
 		int out = TypeEnv.outOfPassiveAtom((Atom)lo.atom);
 		if(out == lo.pos){ // データアトムの出力引数
 			if(TypeEnv.outOfPassiveAtom((Atom)b.atom) == b.pos)//!= TypeEnv.ACTIVE)
-				throw new TypeConstraintException("MODE ERROR : output arguments connected each other.");
+				throw new TypeException("MODE ERROR : output arguments connected each other.");
 			else addReceiveConstraint(-sign, b, ((Atom)lo.atom).functor);
 		}
 		else{

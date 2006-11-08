@@ -43,8 +43,8 @@ public final class TypeEnv {
 		functorToOut.put(new SymbolFunctor("true",1),new Integer(0));
 		functorToOut.put(new SymbolFunctor("false",1),new Integer(0));
 	}
-	public static int outOfPassiveAtom(Atom atom) {
-		Functor f = atom.functor;
+	
+	public static int outOfPassiveFunctor(Functor f){
 		/* Special atom */
 		if (f instanceof IntegerFunctor)
 			return 0;
@@ -59,6 +59,11 @@ public final class TypeEnv {
 		return ACTIVE;
 	}
 
+	public static int outOfPassiveAtom(Atom atom) {
+		Functor f = atom.functor;
+		return outOfPassiveFunctor(f);
+	}
+	
 	static{
 		functorToTypeName.put(new SymbolFunctor(".",3),"list");
 		functorToTypeName.put(new SymbolFunctor("[]",1),"list");

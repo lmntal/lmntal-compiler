@@ -13,7 +13,7 @@ import compile.structure.Membrane;
  * @author kudo
  * @since 2006/06/03 (Sat.)
  */
-public class TypeConstraintsInferer {
+public class TypeInferer {
 
 	/** membrane contains all processes */
 	private Membrane root;
@@ -23,37 +23,47 @@ public class TypeConstraintsInferer {
 	/**
 	 * @param root
 	 */
-	public TypeConstraintsInferer(Membrane root) {
+	public TypeInferer(Membrane root) {
 		this.root = root;
 	}
 
-	public void infer() throws TypeConstraintException {
+	public void infer() throws TypeException {
 		TypeEnv.initialize(root);
 		
 		// 出現制約を推論する
 		// TODO 個数が推論できるなら不要(?)
-		if(Env.flgOccurrenceInference){
-			OccurrenceInferrer oi = new OccurrenceInferrer(root);
-			oi.infer();
-			if(Env.flgShowConstraints)
-				oi.printAll();
-		}
+//		if(Env.flgOccurrenceInference){
+//			OccurrenceInferrer oi = new OccurrenceInferrer(root);
+//			oi.infer();
+//			if(Env.flgShowConstraints)
+//				oi.printAll();
+//		}
 
+		QuantityInferrer qi = new QuantityInferrer(root);
 		// 個数制約を推論する
 		if(Env.flgQuantityInference){
-			QuantityInferrer qi = new QuantityInferrer(root);
 			qi.infer();
-			if(Env.flgShowConstraints)
-				qi.printAll();
+//			if(Env.flgShowConstraints)
+//				qi.printAll();
 		}
 		
+		ArgumentInferrer ai = new ArgumentInferrer(root);
 		// 引数制約を推論する
 		if(Env.flgArgumentInference){
-			ArgumentInferrer ai = new ArgumentInferrer(root);
 			ai.infer();
-			if(Env.flgShowConstraints)
-				ai.printAll();
+//			if(Env.flgShowConstraints)
+//				ai.printAll();
 		}
+		
+		//推論結果を出力する
+		if(Env.flgShowConstraints){
+			TypePrinter tp;
+			if(Env.flgArgumentInference && Env.flgQuantityInference){
+				tp = new TypePrinter(ai,qi);
+				tp.printAll();
+			}
+		}
+		
 	}
 
 }

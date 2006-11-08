@@ -8,14 +8,14 @@ package type;
  * @since 2006/06/03(Sat.)
  *
  */
-public class TypeConstraintException extends Exception {
+public class TypeException extends Exception {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public TypeConstraintException(String msg){
+	public TypeException(String msg){
 		super(msg);
 	}
 

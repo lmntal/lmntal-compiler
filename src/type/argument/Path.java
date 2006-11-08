@@ -7,7 +7,7 @@ package type.argument;
  */
 public interface Path {
 	public int hashCode();
-	public boolean equals(Path p);
+	public boolean equals(Object o);
 	
 	public String toStringWithOutAnonMem();
 	

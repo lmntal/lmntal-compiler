@@ -28,9 +28,9 @@ public class TracingPath implements Path {
 		return tracedPath.hashCode() + functor.hashCode() + pos;
 	}
 	
-	public boolean equals(Path p) {
-		if (p instanceof TracingPath) {
-			TracingPath tp = (TracingPath) p;
+	public boolean equals(Object o) {
+		if (o instanceof TracingPath) {
+			TracingPath tp = (TracingPath) o;
 			return tracedPath.equals(tp.tracedPath)
 					&& functor.equals(tp.functor)
 					&& pos == tp.pos;

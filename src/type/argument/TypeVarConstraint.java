@@ -11,33 +11,53 @@ package type.argument;
  */
 public class TypeVarConstraint {
 
-	private Path p;
-	
+	/**
+	 * 型づけられるパス。具体化される前はRootPathが、具体化された後はActiveAtomPath or TracingPathが入る
+	 */
+	private Path p;	
 	public Path getPath(){
 		return p;
 	}
 	
-	private TypeVar tp;
-	
-	private ModeVar ms;
+	/**
+	 * 型変数
+	 */
+	private TypeVar tv;
+	public TypeVar getTypeVar(){
+		return tv;
+	}
+	/**
+	 * モード変数
+	 */
+	private ModeVar mv;
+	public ModeVar getModeVar(){
+		return mv;
+	}
 
-	public TypeVarConstraint(Path p, TypeVar tp, ModeVar ms){
+	public TypeVarConstraint(Path p, TypeVar tv, ModeVar mv){
 		this.p = p;
-		this.tp = tp;
-		this.ms = ms;
+		this.tv = tv;
+		this.mv = mv;
 	}
 	
-	public boolean equals(TypeVarConstraint tvc){
-		return p.equals(tvc.p) && tp.equals(tvc.tp) && ms.equals(tvc.ms);
+	public boolean equals(Object o){
+		if(o instanceof TypeVarConstraint){
+			TypeVarConstraint tvc = (TypeVarConstraint)o;
+			return p.equals(tvc.p) && tv.equals(tvc.tv) && mv.equals(tvc.mv);
+		}else return false;
 	}
 	
 	public int hashCode(){
-		return p.hashCode() + tp.self().hashCode() + tp.self().hashCode();
+		return p.hashCode() + tv.self().hashCode() + tv.self().hashCode();
 	}
 	
 	public String toString(){
 		return fixLength(p.toStringWithOutAnonMem(),15) + " : mode=" + 
-		(fixLength(ms.toString(),12)) + ", type=" + tp;
+		(fixLength(mv.toString(),12)) + ", type=" + tv;
+	}
+	
+	public String shortString(){
+		return mv.shortString() + tv.shortString();
 	}
 	
 	private String fixLength(String orig, int length){

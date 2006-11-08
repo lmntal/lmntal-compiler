@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import type.TypeConstraintException;
+import type.TypeException;
 
 public class ModeVar {
 
@@ -38,9 +38,9 @@ public class ModeVar {
 	/**
 	 * モード変数の値を束縛する。既に束縛されていた場合、異なる符号に束縛しようとすると例外を投げる。
 	 * @param s
-	 * @throws TypeConstraintException
+	 * @throws TypeException
 	 */
-	public void bindSign(int s) throws TypeConstraintException {
+	public void bindSign(int s) throws TypeException {
 		// 不明なら束縛する
 		if (value == 0) {
 			value = s;
@@ -48,7 +48,7 @@ public class ModeVar {
 		} else if (value == s)
 			return;
 		else
-			throw new TypeConstraintException("mode error " + value
+			throw new TypeException("mode error " + value
 					+ " <=> " + s);
 	}
 
@@ -75,13 +75,17 @@ public class ModeVar {
 				+ (value == 0 ? ("?" + (sign == 1 ? "+" : "-") + "(" + name + ")")
 						: value == 1 ? "+" : "-") + "]");
 	}
+	
+	public String shortString(){
+		return (value == 0? "<" + (sign == 1 ? "" : "-") + name + ">" : (value == 1 ? "+" : "-"));
+	}
 
-	public boolean equals(ModeVar mv) {
-//		if (o instanceof ModeVar) {
-//			ModeVar mv = (ModeVar) o;
+	public boolean equals(Object o) {
+		if (o instanceof ModeVar) {
+			ModeVar mv = (ModeVar) o;
 			return name.equals(mv.name) && sign == mv.sign;
-//		} else
-//			return false;
+		} else
+			return false;
 	}
 
 	public int hashCode() {

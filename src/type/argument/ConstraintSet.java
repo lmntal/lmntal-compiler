@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import runtime.Env;
-import type.TypeConstraintException;
+import type.TypeException;
 
 public class ConstraintSet /* implements Set */{
 
@@ -75,11 +75,9 @@ public class ConstraintSet /* implements Set */{
 		addAllR(rpcs);
 	}
 
-	public void solveUnifyConstraints() throws TypeConstraintException {
-		Iterator<UnifyConstraint> it = unifyConstraints.iterator();
+	public void solveUnifyConstraints() throws TypeException {
 		UnifySolver us = new UnifySolver();
-		while (it.hasNext()) {
-			UnifyConstraint uc = it.next();
+		for(UnifyConstraint uc : unifyConstraints){
 			uc.regularize();
 			us.add(uc);
 		}
@@ -105,6 +103,7 @@ public class ConstraintSet /* implements Set */{
 		if (!receivePassiveConstraintsMap.containsKey(rpc.getPPath())) {
 			receivePassiveConstraintsMap.put(rpc.getPPath(), new HashSet<ReceiveConstraint>());
 		}
+		receivePassiveConstraintsMap.get(rpc.getPPath()).add(rpc);
 	}
 	
 	public void add(UnifyConstraint uc){
@@ -171,6 +170,10 @@ public class ConstraintSet /* implements Set */{
 	//
 	// }
 
+	public Set<TypeVarConstraint> getTypeVarConstraints(){
+		return typeVarConstraints;
+	}
+	
 	/** 制約を出力する */
 	public void printAllConstraints() {
 		if (!Env.flgShowConstraints)
