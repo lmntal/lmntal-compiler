@@ -1,7 +1,8 @@
-base.use. integer.use.
+if.use.
+integer.use.
 
 //止まらない
-//H=gcd(M, N) :- int(M), int(N) | H=if(M>N, gcd(M-N, N), if(M<N, gcd(M,N-M), M)).
+//H=gcd(M, N) :- int(M), int(N) | H='?'(M>N, gcd(M-N, N), '?'(M<N, gcd(M,N-M), M)).
 
-H=gcd(M, N) :- M>0, N>0 | H=if(M>N, gcd(M-N, N), if(M<N, gcd(M,N-M), M)).
+H=gcd(M, N) :- M>0, N>0 | H='?'(M>N, gcd(M-N, N), '?'(M<N, gcd(M,N-M), M)).
 ret=gcd(4, 18).
