@@ -2,7 +2,7 @@ package type.argument;
 
 import runtime.Functor;
 
-public class ReceiveConstraint /* implements Constraint */ {
+public class ReceiveConstraint{
 	private PolarizedPath ppath;
 
 	private Functor functor;

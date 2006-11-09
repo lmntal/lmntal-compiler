@@ -21,8 +21,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import type.TypeConstraintException;
-import type.TypeConstraintsInferer;
+import type.TypeException;
+import type.TypeInferer;
 import util.StreamDumper;
 import chorus.Output;
 
@@ -647,11 +647,11 @@ public class FrontEnd {
 
 			/* 2006/06/09 by kudo */
 			if(Env.fType){
-				TypeConstraintsInferer tci = new TypeConstraintsInferer(m);
+				TypeInferer tci = new TypeInferer(m);
 				try{
 					tci.infer();
 //					tci.printAllConstraints();
-				}catch (TypeConstraintException e){
+				}catch (TypeException e){
 					Env.p("Type Inference Failed");
 					Env.e(e.getMessage());
 //					tci.printAllConstraints();

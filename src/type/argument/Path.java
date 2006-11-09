@@ -1,6 +1,5 @@
 package type.argument;
 
-
 /**
  * @author kudo
  *

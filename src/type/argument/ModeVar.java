@@ -12,17 +12,17 @@ public class ModeVar {
 	public ModeVar buddy;
 
 	/** このモード変数を持つパス */
-	private Set<Path> pathes;
+	private final Set<Path> pathes;
 	
 	public Set<Path> getPathes(){
 		return pathes;
 	}
 
 	/** モード変数名 */
-	public String name;
+	public final String name;
 
 	/** 符号 */
-	public int sign;
+	public final int sign;
 
 	/** 実際のモード値
 	 * 1: 入力
@@ -31,8 +31,10 @@ public class ModeVar {
 	 */
 	public int value = 0;
 
-	public ModeVar() {
+	public ModeVar(String name, int sign) {
 		pathes = new HashSet<Path>();
+		this.name = name;
+		this.sign = sign;
 	}	
 	
 	/**

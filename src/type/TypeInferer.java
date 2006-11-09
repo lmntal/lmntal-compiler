@@ -8,7 +8,7 @@ import type.quantity.QuantityInferrer;
 import compile.structure.Membrane;
 
 /**
- * This class infers type constrains from COMPILE STRUCTURE
+ * This class infers type constraints from COMPILE STRUCTURE
  * 
  * @author kudo
  * @since 2006/06/03 (Sat.)
@@ -17,8 +17,6 @@ public class TypeInferer {
 
 	/** membrane contains all processes */
 	private Membrane root;
-
-//	private ConstraintSet constraints = new ConstraintSet();
 
 	/**
 	 * @param root

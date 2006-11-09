@@ -103,9 +103,9 @@ public class ModeVarSet {
 		return ms;
 	}
 	
-	private static int index = 0;
+	private static int modeid = 0;
 	private String newModeVarName(){
-		return /*"'" +*/ "m" + (index++);
+		return /*"'" +*/ "m" + (modeid++);
 	}
 	
 	/**
@@ -113,13 +113,9 @@ public class ModeVarSet {
 	 * @return
 	 */
 	public ModeVar newModeVar(){
-		ModeVar ms1 = new ModeVar();
-		ModeVar ms2 = new ModeVar();
 		String nm = newModeVarName();
-		ms1.name = nm;
-		ms2.name = nm;
-		ms1.sign = 1;
-		ms2.sign = -1;
+		ModeVar ms1 = new ModeVar(nm,1);
+		ModeVar ms2 = new ModeVar(nm,-1);
 		ms1.buddy = ms2;
 		ms2.buddy = ms1;
 		modes.add(ms1);

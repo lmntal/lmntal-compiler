@@ -13,13 +13,6 @@ import java.util.Set;
 
 import util.QueuedEntity;
 import util.RandomIterator;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import util.Stack;
 
 /**
@@ -72,7 +65,7 @@ public final class Membrane extends QueuedEntity {
 		else return false;
 	}
 	public String getName() { return name; }
-	void setName(String name) { this.name = name; } // 仕様が固まったらコンストラクタで渡すようにすべきかも
+	public void setName(String name) { this.name = name; } // 仕様が固まったらコンストラクタで渡すようにすべきかも
 	
 	/** 実行アトムスタック。
 	 * 操作する際にこの膜のロックを取得している必要はない。
@@ -226,8 +219,8 @@ public final class Membrane extends QueuedEntity {
 	}
 	/** 06/07/27 */
 	/** ルールセットのコピーを取得 */
-	public ArrayList getRuleset() {
-		ArrayList al = new ArrayList(rulesets);
+	public ArrayList<Ruleset> getRuleset() {
+		ArrayList<Ruleset> al = new ArrayList<Ruleset>(rulesets);
 		return al;
 	}
 	/** 子膜のコピーを取得 */
