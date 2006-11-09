@@ -1,7 +1,6 @@
 package type.argument;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import type.TypeException;

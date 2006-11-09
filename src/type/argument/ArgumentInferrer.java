@@ -1,13 +1,12 @@
 package type.argument;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import runtime.Functor;
-import type.TypeException;
 import type.TypeEnv;
+import type.TypeException;
 
 import compile.structure.Atom;
 import compile.structure.ContextDef;
@@ -24,6 +23,7 @@ import compile.structure.RuleStructure;
 public class ArgumentInferrer {
 	private RuleStructure rule;
 	
+	/** プロセス文脈定義の集合 */
 	private Set<ContextDef> defs;
 	
 	private ConstraintSet constraints;

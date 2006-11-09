@@ -7,11 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
-import runtime.SymbolFunctor;
-import type.TypeEnv;
 import type.TypeException;
-
-import compile.structure.Membrane;
 
 /**
  * 
