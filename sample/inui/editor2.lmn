@@ -14,12 +14,20 @@ javax_swing_JViewport.use.
 
 //メニューバーを生成
 SearchMenu=add(javax_swing_JMenu.new("Search"), item("Search"), gc).
-FileMenu=add(add(add(add(javax_swing_JMenu.new("File"), item("New"), gc), item("Open"), gc), item("Save"), gc), item("Exit"), gc).
-EditMenu=add(add(add(add(javax_swing_JMenu.new("Edit"), item("Copy"), gc), item("Cut"), gc), item("Paste"), gc), item("Select All"), gc).
-MenuBar=add(add(add(javax_swing_JMenuBar.new, FileMenu, gc), EditMenu, gc), SearchMenu, gc).
+FileMenu=add(add(add(add(add(
+	javax_swing_JMenu.new("File"),
+	item("New"), gc), item("Open"), gc), item("Save"), SaveItem), item("Save as"), gc), item("Exit"), gc).
+EditMenu=add(add(add(add(
+	javax_swing_JMenu.new("Edit"),
+	item("Copy"), gc), item("Cut"), gc), item("Paste"), gc), item("Select All"), gc).
+MenuBar=add(add(add(
+	javax_swing_JMenuBar.new,
+	FileMenu, gc), EditMenu, gc), SearchMenu, gc).
 //ActionListener つきの MenuItem を生成するルール
 H=item(Label) :-
 	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new, r).
+
+saveItem=setEnabled(SaveItem, false, r).
 
 //テキストエリアを生成
 TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14), r).
@@ -27,7 +35,7 @@ TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java
 Scroll=javax_swing_JScrollPane.new(TextArea).
 
 //フレームを生成
-frame=setDefaultCloseOperation(setJMenuBar(getContentPane(setSize(javax_swing_JFrame.new("LMNtal Editor"),
+frame=setDefaultCloseOperation(setJMenuBar(getContentPane(setSize(javax_swing_JFrame.new(""),
 	600, 400, r), ContentPane), MenuBar, r), javax_swing_JFrame.exit_on_close, r).
 contentPane=add(ContentPane, "Center", Scroll, Scroll2).
 gc=getViewport(Scroll2, Viewport), gc=getView(Viewport, ta).
@@ -45,18 +53,23 @@ cmd("New"), ta(TA) :- ta=setText(TA, "", r).
 
 cmd("Open"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
 	fc=showOpenDialog(FC, Frame, res_open), frame(Frame).
-res_open(0), fc(FC), ta(TA) :-
+res_open(0), fc(FC), ta(TA), saveItem(SaveItem), frame(Frame) :-
+	saveItem=setEnabled(SaveItem, true, r),
 	fc=getSelectedFile(FC, X),
-	gc=getAbsolutePath(X, File),
-	ta=setText(TA, io.gets(File), r).
+	gc=getAbsolutePath(getAbsolutePath(getAbsolutePath(X, File), currentFile), Title),
+	ta=setText(TA, io.gets(File), r),
+	frame=setTitle(Frame, Title, r).
 
-cmd("Save"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
+cmd("Save"), ta(TA), frame(Frame) :- frame=getTitle(Frame, File), ta=getText(TA, Contents), r=io.puts(File, Contents).
+
+cmd("Save as"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
 	fc=showSaveDialog(FC, Frame, res_save), frame(Frame).
-res_save(0), fc(FC), ta(TA) :-
+res_save(0), fc(FC), ta(TA), frame(Frame) |
 	fc=getSelectedFile(FC, X),
-	gc=getAbsolutePath(X, File),
+	gc=getAbsolutePath(getAbsolutePath(X, File), Title),
 	ta=getText(TA, Contents),
 	r=io.puts(File, Contents).
+	frame=setTitle(Frame, Title),
 
 cmd("Search") :- word=javax_swing_JOptionPane.showInputDialog("Input word.").
 word(Word), ta(TA) :-
