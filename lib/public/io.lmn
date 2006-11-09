@@ -503,11 +503,28 @@ H=io.eager(In, List, done) :- unary(In) | H=io.eager(In, [Res|List], io.readline
 /**
  * 標準入力から EOF まで読み込んでその文字列を返します
  * 2006/07/25 inui
+ * 2006/11/06 高速化のためインラインで書き直した
  */
-H=io.gets :- H=string.join("\n", io.list_of_stdin).
-
-H=io.gets(Filename) :- string(Filename) |
-	H=string.join("\n", io.list_of_file(Filename)).
+H=io.gets, io.stdin(STDIN) :- class(STDIN, "java.io.Reader") | H=io.gets(STDIN), io.stdin(STDIN).
+H=io.gets(Filename) :- string(Filename) | H=io.gets(io.fileReader(Filename)).
+H=io.gets(Reader) :- class(Reader, "java.io.Reader") | H=[:/*inline*/
+	Atom result = null;
+	try {
+		BufferedReader br = new BufferedReader((Reader)((ObjectFunctor)me.nthAtom(0).getFunctor()).getObject());
+		StringBuffer buffer = new StringBuffer();
+		String s;
+		while ((s = br.readLine()) != null) {
+			buffer.append(s+"\n");
+		}
+		result = mem.newAtom(new StringFunctor(buffer.toString()));
+	} catch(java.io.IOException e) {
+		result = mem.newAtom(new ObjectFunctor(e));
+	} finally {
+		mem.relink(result, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+	}
+	:](Reader).
 
 /**
  * io.println(+Ground, -Res)
