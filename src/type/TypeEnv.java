@@ -32,16 +32,21 @@ public final class TypeEnv {
 	public static final int countLevel = COUNT_APPLY;
 	
 	static{
-		functorToOut.put(Functor.UNIFY,new Integer(CONNECTOR));
-		functorToOut.put(Functor.INSIDE_PROXY,new Integer(CONNECTOR));
-		functorToOut.put(Functor.OUTSIDE_PROXY,new Integer(CONNECTOR));
+		functorToOut.put(Functor.UNIFY, CONNECTOR);
+		functorToOut.put(Functor.INSIDE_PROXY, CONNECTOR);
+		functorToOut.put(Functor.OUTSIDE_PROXY, CONNECTOR);
 		/* Passive atom */
 		/* List atom */
-		functorToOut.put(new SymbolFunctor(".",3),new Integer(2));
-		functorToOut.put(new SymbolFunctor("[]",1),new Integer(0));
+		functorToOut.put(new SymbolFunctor(".",3), 2);
+		functorToOut.put(new SymbolFunctor("[]",1), 0);
 		/* Boolean atom */
-		functorToOut.put(new SymbolFunctor("true",1),new Integer(0));
-		functorToOut.put(new SymbolFunctor("false",1),new Integer(0));
+		functorToOut.put(new SymbolFunctor("true",1), 0);
+		functorToOut.put(new SymbolFunctor("false",1), 0);
+	}
+	
+	public static void registerDataFunctor(Functor f, String dataname, int out){
+		functorToOut.put(f, out);
+		functorToTypeName.put(f, dataname);
 	}
 	
 	public static int outOfPassiveFunctor(Functor f){

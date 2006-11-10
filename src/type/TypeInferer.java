@@ -28,6 +28,17 @@ public class TypeInferer {
 	public void infer() throws TypeException {
 		TypeEnv.initialize(root);
 		
+		// ユーザ定義情報を取得する
+		
+		Membrane typedefmem = null;
+		for(Membrane topmem : root.mems){
+			if(topmem.name.equals("typedef"))
+				typedefmem = topmem;
+		}
+		
+		if(typedefmem != null)
+			TypeDefParser.parseFromMembrane(typedefmem);
+		
 		// 出現制約を推論する
 		// TODO 個数が推論できるなら不要(?)
 //		if(Env.flgOccurrenceInference){
