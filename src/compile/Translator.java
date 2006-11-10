@@ -403,7 +403,7 @@ public class Translator {
 	 */
 	private static boolean compile(File file, boolean outputErrorMessage) throws IOException {
 		String classpath = System.getProperty("java.class.path");
-		String[] command = {"javac", "-classpath", classpath, "-sourcepath", baseDir.getPath(), file.getPath(), "-source", "1.4", "-target", "1.4"}; //1.5 の機能を使う場合は最後の 4 つをコメントアウトしてください。
+		String[] command = {"javac", "-classpath", classpath, "-sourcepath", baseDir.getPath(), file.getPath()/*, "-source", "1.4", "-target", "1.4"*/}; //1.5 の機能を使う場合は最後の 4 つをコメントアウトしてください。
 		//System.out.println("javac"+ " " + "-classpath"+ " " + classpath+ " " + "-sourcepath"+ " " + baseDir.getPath()+ " " + file.getPath()+ " " + "-source"+ " " + "1.4"+ " " + "-target"+ " " + "1.4"); //1.5 の機能を使う場合は最後の 4 つをコメントアウトしてください。
 		Process javac = Runtime.getRuntime().exec(command);
 		javac.getInputStream().close();
