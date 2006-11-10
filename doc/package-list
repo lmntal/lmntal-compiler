@@ -6,11 +6,16 @@ compile.structure
 debug
 graphic
 gui
+gui2
 java_cup.runtime
 module
 runtime
 runtime.systemRuleset
 test
 test.graph
+toolkit
 type
+type.argument
+type.occurrence
+type.quantity
 util
