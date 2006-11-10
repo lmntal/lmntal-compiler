@@ -9,13 +9,13 @@ import java.util.TreeSet;
 import runtime.Env;
 import runtime.Functor;
 import type.argument.ActiveAtomPath;
-import type.argument.ArgumentInferrer;
+import type.argument.ArgumentInferer;
 import type.argument.ConstraintSet;
 import type.argument.Path;
 import type.argument.TypeVarConstraint;
 import type.quantity.FixedCount;
 import type.quantity.FixedCounts;
-import type.quantity.QuantityInferrer;
+import type.quantity.QuantityInferer;
 
 /**
  * 型解析・推論結果を出力する
@@ -32,7 +32,7 @@ public class TypePrinter {
 	/** 膜名 -> アトム／子膜の子数のセット */
 	private final Map<String, FixedCounts> memnameToCounts;
 	
-	public TypePrinter(ArgumentInferrer ai, QuantityInferrer qi){
+	public TypePrinter(ArgumentInferer ai, QuantityInferer qi){
 		
 		//まず引数の型情報を集約する
 		ConstraintSet cs = ai.getConstraints();

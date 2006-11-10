@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import runtime.Env;
 import runtime.Functor;
 import type.TypeEnv;
+import type.TypeException;
 
 /**
  * 型変数を表す
@@ -90,6 +92,22 @@ public class TypeVar {
 			}
 		}
 		return ret;
+	}
+	
+	private String typename = null;
+	public String getTypeName()throws TypeException{
+		if(typename == null){
+			for(Functor f : self().passiveFunctors){
+				String tn = typeNameOfFunctor(f);
+				if(typename==null)typename = tn;
+				else if(typename.equals(tn))continue;
+				else throw new TypeException("two data types in one type variable : " + this);
+			}
+		}
+		return typename;
+	}
+	public void setTypeName(String typename){
+		this.typename = typename;
 	}
 	
 	public String shortString(){

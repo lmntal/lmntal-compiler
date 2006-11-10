@@ -17,6 +17,9 @@ public class TracingPath implements Path {
 	}
 	
 	private int pos;
+	public int getPos(){
+		return pos;
+	}
 
 	public TracingPath(Path tracedPath, Functor functor, int pos){
 		this.tracedPath = tracedPath;

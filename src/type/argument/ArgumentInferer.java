@@ -20,7 +20,7 @@ import compile.structure.RuleStructure;
  * @author kudo
  *
  */
-public class ArgumentInferrer {
+public class ArgumentInferer {
 	private RuleStructure rule;
 	
 	/** プロセス文脈定義の集合 */
@@ -33,7 +33,7 @@ public class ArgumentInferrer {
 	}
 
 	/** */
-	public ArgumentInferrer(RuleStructure rule, ConstraintSet constraints){
+	public ArgumentInferer(RuleStructure rule, ConstraintSet constraints){
 		this.rule = rule;
 		this.constraints = constraints;
 	}
@@ -42,7 +42,7 @@ public class ArgumentInferrer {
 	 * グローバルルート膜に対してのみ呼ばれる
 	 * @param top
 	 */
-	public ArgumentInferrer(Membrane top){//, ConstraintSet constraints){
+	public ArgumentInferer(Membrane top){//, ConstraintSet constraints){
 		RuleStructure tmprule = new RuleStructure(new Membrane(null),"tmp");
 		tmprule.leftMem = new Membrane(null);
 		tmprule.rightMem = top;
@@ -92,7 +92,7 @@ public class ArgumentInferrer {
 
 		//ルールについて走査する
 		for(RuleStructure rs : (List<RuleStructure>)mem.rules){
-//			new ArgumentInferrer(rs,constraints).infer();
+//			new ArgumentInferer(rs,constraints).infer();
 			inferArgumentRule(rs);
 		}
 

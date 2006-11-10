@@ -1,9 +1,8 @@
 package type;
 
 import runtime.Env;
-import type.argument.ArgumentInferrer;
-import type.occurrence.OccurrenceInferrer;
-import type.quantity.QuantityInferrer;
+import type.argument.ArgumentInferer;
+import type.quantity.QuantityInferer;
 
 import compile.structure.Membrane;
 
@@ -29,15 +28,19 @@ public class TypeInferer {
 		TypeEnv.initialize(root);
 		
 		// ユーザ定義情報を取得する
-		
+		boolean typeDefined = false;
 		Membrane typedefmem = null;
-		for(Membrane topmem : root.mems){
-			if(topmem.name.equals("typedef"))
+		for(Membrane topmem : root.mems)
+			if(topmem.name.equals("typedef")){
 				typedefmem = topmem;
-		}
+				break; // TODO 型定義膜が2つあったらどうする
+			}
 		
-		if(typedefmem != null)
-			TypeDefParser.parseFromMembrane(typedefmem);
+		TypeChecker tc = new TypeChecker();
+		if(typedefmem != null){
+			typeDefined = tc.parseTypeDefinition(typedefmem);
+			root.mems.remove(typedefmem); // 型定義膜は検査、コンパイルから外す
+		}
 		
 		// 出現制約を推論する
 		// TODO 個数が推論できるなら不要(?)
@@ -48,7 +51,7 @@ public class TypeInferer {
 //				oi.printAll();
 //		}
 
-		QuantityInferrer qi = new QuantityInferrer(root);
+		QuantityInferer qi = new QuantityInferer(root);
 		// 個数制約を推論する
 		if(Env.flgQuantityInference){
 			qi.infer();
@@ -56,7 +59,7 @@ public class TypeInferer {
 //				qi.printAll();
 		}
 		
-		ArgumentInferrer ai = new ArgumentInferrer(root);
+		ArgumentInferer ai = new ArgumentInferer(root);
 		// 引数制約を推論する
 		if(Env.flgArgumentInference){
 			ai.infer();
@@ -64,6 +67,11 @@ public class TypeInferer {
 //				ai.printAll();
 		}
 		
+		// 型定義が与えられていたら整合性をチェックする
+		if(typeDefined){
+			tc.check(ai, qi);
+		}
+
 		//推論結果を出力する
 		if(Env.flgShowConstraints){
 			TypePrinter tp;
@@ -72,6 +80,7 @@ public class TypeInferer {
 				tp.printAll();
 			}
 		}
+		
 		
 	}
 

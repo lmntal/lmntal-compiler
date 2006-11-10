@@ -18,7 +18,7 @@ import compile.structure.RuleStructure;
  * @author kudo
  *
  */
-public class QuantityInferrer {
+public class QuantityInferer {
 	
 	private final CountsSet countsset;
 	
@@ -28,7 +28,7 @@ public class QuantityInferrer {
 	
 	private Membrane root;
 	
-	public QuantityInferrer(Membrane root){
+	public QuantityInferer(Membrane root){
 		this.countsset = new CountsSet();
 		this.root = root;
 	}

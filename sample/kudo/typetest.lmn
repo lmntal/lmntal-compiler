@@ -1,0 +1,15 @@
+typedef{
+	{
+		abc = datatype( a('-'), b('-'), c('-') ).
+		
+		hoge(+abc) = [0,5].
+		
+		moge(-abc) = [0,1].
+	}.	
+}.
+
+ hoge(moge).
+
+ hoge(a).
+ hoge(b).
+ hoge(c).
