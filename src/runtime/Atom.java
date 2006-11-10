@@ -205,6 +205,23 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 //		System.out.println(this+" 's "+index+"th atom is "+a);
 		return a;
 	}
+
+	/**
+	 * プロキシを飛ばした実際の隣のアトムを取得する
+	 * @param index
+	 * @return
+	 */
+	public Atom getNthAtom(int index) {
+		if(null == args[index]){
+			return null;
+		}
+		Atom a = nthAtom(index);
+		while(a.getFunctor().isInsideProxy() || a.getFunctor().isOutsideProxy()) {
+			a = a.nthAtom(0).nthAtom(1);
+		}
+		return a;
+	}
+	
 	public int getEdgeCount() {
 		return functor.getArity();
 	}
