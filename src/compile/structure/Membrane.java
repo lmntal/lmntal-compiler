@@ -34,13 +34,13 @@ public final class Membrane {
 	public String name;
 
 	/** アトム(compile.structure.Atom)のリスト */
-	public List atoms = new LinkedList();
+	public List<Atom> atoms = new LinkedList<Atom>();
 
 	/** 子膜(compile.structure.Membrane)のリスト */
-	public List mems = new LinkedList();
+	public List<Membrane> mems = new LinkedList<Membrane>();
 	
 	/** ルール(compile.structure.RuleStructure)のリスト */
-	public List rules = new LinkedList();
+	public List<RuleStructure> rules = new LinkedList<RuleStructure>();
 
 	////////////////////////////////////////////////////////////////
 
