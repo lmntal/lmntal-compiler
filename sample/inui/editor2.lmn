@@ -14,12 +14,18 @@ javax_swing_JViewport.use.
 
 //メニューバーを生成
 SearchMenu=add(javax_swing_JMenu.new("Search"), item("Search"), gc).
-FileMenu=add(add(add(add(add(
+FileMenu=add(add(add(add(add(add(add(add(add(
 	javax_swing_JMenu.new("File"),
-	item("New"), gc), item("Open"), gc), item("Save"), SaveItem), item("Save as"), gc), item("Exit"), gc).
-EditMenu=add(add(add(add(
+	item("New"), gc), item("Open"), gc), item("Close"), gc), item("Close All"), gc),
+	javax_swing_JSeparator.new, gc),
+	item("Save"), SaveItem), item("Save as"), gc),
+	javax_swing_JSeparator.new, gc),
+	item("Exit"), gc).
+EditMenu=add(add(add(add(add(add(add(
 	javax_swing_JMenu.new("Edit"),
-	item("Copy"), gc), item("Cut"), gc), item("Paste"), gc), item("Select All"), gc).
+	item("Copy"), gc), item("Cut"), gc), item("Paste"), gc), item("Select All"), gc),
+	javax_swing_JSeparator.new, gc),
+	item("to Upper Case"), gc), item("to Lower Case"), gc).
 MenuBar=add(add(add(
 	javax_swing_JMenuBar.new,
 	FileMenu, gc), EditMenu, gc), SearchMenu, gc).
@@ -29,17 +35,14 @@ H=item(Label) :-
 
 saveItem=setEnabled(SaveItem, false, r).
 
-//テキストエリアを生成
-TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14), r).
-
-Scroll=javax_swing_JScrollPane.new(TextArea).
+//タブを生成
+Tab=javax_swing_JTabbedPane.new.
 
 //フレームを生成
-frame=setDefaultCloseOperation(setJMenuBar(getContentPane(setSize(javax_swing_JFrame.new(""),
-	600, 400, r), ContentPane), MenuBar, r), javax_swing_JFrame.exit_on_close, r).
-contentPane=add(ContentPane, "Center", Scroll, Scroll2).
-gc=getViewport(Scroll2, Viewport), gc=getView(Viewport, ta).
-frame(Frame), contentPane(CP) :- class(CP, "java.awt.Container") | frame=setVisible(Frame, true, r), gc(CP).
+frame=setVisible(setDefaultCloseOperation(setJMenuBar(getContentPane(setSize(
+	javax_swing_JFrame.new("LMNtal Tab Editor"),
+	600, 400, r), ContentPane), MenuBar, r), javax_swing_JFrame.exit_on_close, r), true, r).
+gc=add(ContentPane, "Center", Tab, tab).
 
 //ファイル選択ダイアログを生成
 fc=javax_swing_JFileChooser.new.
@@ -47,42 +50,89 @@ fc=javax_swing_JFileChooser.new.
 /////////////////////////////////////////////
 // アクションの定義
 
+//アクションイベントからコマンド名を取得する
 actionPerformed(ActionEvent) :- gc=getActionCommand(ActionEvent, cmd).
 
-cmd("New"), ta(TA) :- ta=setText(TA, "", r).
+cmd("New"), tab(Tab) :-
+	Scroll=javax_swing_JScrollPane.new(TextArea),
+	tab=addTab(Tab, "", Scroll, r),
+	TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14), r).
 
 cmd("Open"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
 	fc=showOpenDialog(FC, Frame, res_open), frame(Frame).
-res_open(0), fc(FC), ta(TA), saveItem(SaveItem), frame(Frame) :-
+res_open(0), tab(Tab), fc(FC), saveItem(SaveItem) :-
+	Scroll=javax_swing_JScrollPane.new(TextArea),
+	tab=addTab(Tab, Title, Scroll, r),
 	saveItem=setEnabled(SaveItem, true, r),
 	fc=getSelectedFile(FC, X),
 	gc=getAbsolutePath(getAbsolutePath(getAbsolutePath(X, File), currentFile), Title),
-	ta=setText(TA, io.gets(File), r),
-	frame=setTitle(Frame, Title, r).
+	TextArea=setText(setFont(
+		javax_swing_JTextArea.new,
+		java_awt_Font.new("Monospaced", java_awt_Font.plain, 14), r), io.gets(File), r).
 
-cmd("Save"), ta(TA), frame(Frame) :- frame=getTitle(Frame, File), ta=getText(TA, Contents), r=io.puts(File, Contents).
+cmd("Save"), tab(Tab) :-
+	tab=getSelectedComponent(getTitleAt(getSelectedIndex(Tab, Index), Index, File), Scroll),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
+	gc=getText(TA, Contents),
+	r=io.puts(File, Contents).
 
 cmd("Save as"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
 	fc=showSaveDialog(FC, Frame, res_save), frame(Frame).
-res_save(0), fc(FC), ta(TA), frame(Frame) |
+res_save(0), fc(FC), tab(Tab) :-
 	fc=getSelectedFile(FC, X),
 	gc=getAbsolutePath(getAbsolutePath(X, File), Title),
-	ta=getText(TA, Contents),
+	tab=setTitleAt(getSelectedIndex(getSelectedComponent(Tab, Scroll), Index), Index, Title, r),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
+	gc=getText(TA, Contents),
 	r=io.puts(File, Contents).
-	frame=setTitle(Frame, Title),
+	
+cmd("Close"), tab(Tab) :-
+	tab=remove(getSelectedComponent(Tab, Scroll), Scroll, r).
+	
+cmd("Close All"), tab(Tab) :-
+	tab=removeAll(Tab, r).
 
 cmd("Search") :- word=javax_swing_JOptionPane.showInputDialog("Input word.").
-word(Word), ta(TA) :-
+word(Word), tab(Tab) :-
+	tab=getSelectedComponent(Tab, Scroll),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
 	ta=getCaretPosition(getText(TA, Text), Caret),
 	gc=indexOf(Text, length(Word, len), Caret, index).
-index(Index), len(Len), ta(TA) :- Start=Index, End=Index+Len | ta=requestFocus(select(TA, Start, End, r), r).
+index(Index), len(Len), ta(TA) :- Start=Index, End=Index+Len | gc=requestFocus(select(TA, Start, End, r), r).
 
-cmd("Copy"), ta(TA) :- ta=copy(TA, r).
-cmd("Cut"), ta(TA) :- ta=cut(TA, r).
-cmd("Paste"), ta(TA) :- ta=paste(TA, r).
-cmd("Select All"), ta(TA) :- ta=selectAll(TA, r).
-
-cmd("Exit") :- r=java_lang_System.exit(0).
+cmd("Copy"), tab(Tab) :-
+	tab=getSelectedComponent(Tab, Scroll),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
+	gc=copy(TA, r).
+	
+cmd("Cut"), tab(Tab) :-
+	tab=getSelectedComponent(Tab, Scroll),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
+	gc=cut(TA, r).
+	
+cmd("Paste"), tab(Tab) :-
+	tab=getSelectedComponent(Tab, Scroll),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
+	gc=paste(TA, r).
+	
+cmd("Select All"), tab(Tab) :-
+	tab=getSelectedComponent(Tab, Scroll),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
+	gc=selectAll(TA, r).
+	
+cmd("to Upper Case"), tab(Tab) :-
+	tab=getSelectedComponent(Tab, Scroll),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
+	gc=replaceSelection(getSelectedText(TA, Text), UpperCaseText, r),
+	gc=toUpperCase(Text, UpperCaseText).
+	
+cmd("to Lower Case"), tab(Tab) :-
+	tab=getSelectedComponent(Tab, Scroll),
+	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
+	gc=replaceSelection(getSelectedText(TA, Text), LowerCaseText, r),
+	gc=toLowerCase(Text, LowerCaseText).
+	
+cmd("Exit"), frame(Frame), tab(Tab) :- gc(Frame), gc(Tab), r=java_lang_System.exit(0).
 
 /////////////////////////////////////////////
 // GC
