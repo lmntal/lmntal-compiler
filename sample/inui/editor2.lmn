@@ -31,9 +31,9 @@ MenuBar=add(add(add(
 	FileMenu, gc), EditMenu, gc), SearchMenu, gc).
 //ActionListener つきの MenuItem を生成するルール
 H=item(Label) :-
-	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new, r).
+	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new).
 
-saveItem=setEnabled(SaveItem, false, r).
+saveItem=setEnabled(SaveItem, false).
 
 //タブを生成
 Tab=javax_swing_JTabbedPane.new.
@@ -41,7 +41,7 @@ Tab=javax_swing_JTabbedPane.new.
 //フレームを生成
 frame=setVisible(setDefaultCloseOperation(setJMenuBar(getContentPane(setSize(
 	javax_swing_JFrame.new("LMNtal Tab Editor"),
-	600, 400, r), ContentPane), MenuBar, r), javax_swing_JFrame.exit_on_close, r), true, r).
+	600, 400), ContentPane), MenuBar), javax_swing_JFrame.exit_on_close), true).
 gc=add(ContentPane, "Center", Tab, tab).
 
 //ファイル選択ダイアログを生成
@@ -55,20 +55,20 @@ actionPerformed(ActionEvent) :- gc=getActionCommand(ActionEvent, cmd).
 
 cmd("New"), tab(Tab) :-
 	Scroll=javax_swing_JScrollPane.new(TextArea),
-	tab=addTab(Tab, "", Scroll, r),
-	TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14), r).
+	tab=addTab(Tab, "", Scroll),
+	TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)).
 
 cmd("Open"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
 	fc=showOpenDialog(FC, Frame, res_open), frame(Frame).
 res_open(0), tab(Tab), fc(FC), saveItem(SaveItem) :-
 	Scroll=javax_swing_JScrollPane.new(TextArea),
-	tab=addTab(Tab, Title, Scroll, r),
-	saveItem=setEnabled(SaveItem, true, r),
+	tab=addTab(Tab, Title, Scroll),
+	saveItem=setEnabled(SaveItem, true),
 	fc=getSelectedFile(FC, X),
 	gc=getAbsolutePath(getAbsolutePath(getAbsolutePath(X, File), currentFile), Title),
 	TextArea=setText(setFont(
 		javax_swing_JTextArea.new,
-		java_awt_Font.new("Monospaced", java_awt_Font.plain, 14), r), io.gets(File), r).
+		java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)), io.gets(File)).
 
 cmd("Save"), tab(Tab) :-
 	tab=getSelectedComponent(getTitleAt(getSelectedIndex(Tab, Index), Index, File), Scroll),
@@ -81,16 +81,16 @@ cmd("Save as"), fc(FC), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
 res_save(0), fc(FC), tab(Tab) :-
 	fc=getSelectedFile(FC, X),
 	gc=getAbsolutePath(getAbsolutePath(X, File), Title),
-	tab=setTitleAt(getSelectedIndex(getSelectedComponent(Tab, Scroll), Index), Index, Title, r),
+	tab=setTitleAt(getSelectedIndex(getSelectedComponent(Tab, Scroll), Index), Index, Title),
 	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
 	gc=getText(TA, Contents),
 	r=io.puts(File, Contents).
 	
 cmd("Close"), tab(Tab) :-
-	tab=remove(getSelectedComponent(Tab, Scroll), Scroll, r).
+	tab=remove(getSelectedComponent(Tab, Scroll), Scroll).
 	
 cmd("Close All"), tab(Tab) :-
-	tab=removeAll(Tab, r).
+	tab=removeAll(Tab).
 
 cmd("Search") :- word=javax_swing_JOptionPane.showInputDialog("Input word.").
 word(Word), tab(Tab) :-
@@ -98,41 +98,41 @@ word(Word), tab(Tab) :-
 	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
 	ta=getCaretPosition(getText(TA, Text), Caret),
 	gc=indexOf(Text, length(Word, len), Caret, index).
-index(Index), len(Len), ta(TA) :- Start=Index, End=Index+Len | gc=requestFocus(select(TA, Start, End, r), r).
+index(Index), len(Len), ta(TA) :- Start=Index, End=Index+Len | gc=requestFocus(select(TA, Start, End)).
 
 cmd("Copy"), tab(Tab) :-
 	tab=getSelectedComponent(Tab, Scroll),
 	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
-	gc=copy(TA, r).
+	gc=copy(TA).
 	
 cmd("Cut"), tab(Tab) :-
 	tab=getSelectedComponent(Tab, Scroll),
 	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
-	gc=cut(TA, r).
+	gc=cut(TA).
 	
 cmd("Paste"), tab(Tab) :-
 	tab=getSelectedComponent(Tab, Scroll),
 	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
-	gc=paste(TA, r).
+	gc=paste(TA).
 	
 cmd("Select All"), tab(Tab) :-
 	tab=getSelectedComponent(Tab, Scroll),
 	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
-	gc=selectAll(TA, r).
+	gc=selectAll(TA).
 	
 cmd("to Upper Case"), tab(Tab) :-
 	tab=getSelectedComponent(Tab, Scroll),
 	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
-	gc=replaceSelection(getSelectedText(TA, Text), UpperCaseText, r),
+	gc=replaceSelection(getSelectedText(TA, Text), UpperCaseText),
 	gc=toUpperCase(Text, UpperCaseText).
 	
 cmd("to Lower Case"), tab(Tab) :-
 	tab=getSelectedComponent(Tab, Scroll),
 	gc=getViewport(Scroll, Viewport), gc=getView(Viewport, TA),
-	gc=replaceSelection(getSelectedText(TA, Text), LowerCaseText, r),
+	gc=replaceSelection(getSelectedText(TA, Text), LowerCaseText),
 	gc=toLowerCase(Text, LowerCaseText).
 	
-cmd("Exit"), frame(Frame), tab(Tab) :- gc(Frame), gc(Tab), r=java_lang_System.exit(0).
+cmd("Exit"), frame(Frame), tab(Tab) :- gc(Frame), gc(Tab), java_lang_System.exit(0).
 
 /////////////////////////////////////////////
 // GC
