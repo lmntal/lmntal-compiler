@@ -9,7 +9,6 @@ import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
-import runtime.Env;
 import runtime.Membrane;
 
 public class LMNtalFrame extends JFrame implements KeyListener {
@@ -70,9 +69,8 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		getContentPane().add(new JScrollPane(panel), BorderLayout.CENTER);
 	}
 	
-	static
 	public void setMagnification(double magni){
-		GraphPanel.setMagnification(magni);	
+		panel.setMagnification(magni);	
 	}
 	
 	public void onTrace(){

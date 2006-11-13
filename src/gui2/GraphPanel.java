@@ -3,14 +3,17 @@ package gui2;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -20,27 +23,34 @@ import runtime.Membrane;
 
 public class GraphPanel extends JPanel implements Runnable {
 
-	private Thread th = null;
-	private Image OSI = null;
-	private Graphics OSG = null;
-	private GraphMembrane rootGraphMembrane;
-	private Membrane rootMembrane;
-	private GraphAtom moveAtom;
-	private GraphPanel panel;
+	///////////////////////////////////////////////////////////////////////////
+	// static
 	
 	static
-	private double magnification = 0.5;
+	private double magnification_ = 0.5;
 	
 	static
-	private Image PIN;
+	private Image pin_;
+	
+	///////////////////////////////////////////////////////////////////////////
+	
+	private Thread th_ = null;
+	private Image OSI_ = null;
+	private Graphics OSG_ = null;
+	private Node moveTargetNode_ = null;
+	private Node rootNode_;
+	private Membrane rootMembrane_;
+	private AffineTransform af_ = new AffineTransform();
+	private Point lastPoint;
+	///////////////////////////////////////////////////////////////////////////
 	
 	public GraphPanel() {
 		super();
-		panel = this;
-		PIN = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gabyou.gif"));
+		Node.setPanel(this);
+		pin_ = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gabyou.gif"));
 		// PINのロード待ち　ここから
 		MediaTracker mt = new MediaTracker(this);
-		mt.addImage(PIN, 0);
+		mt.addImage(pin_, 0);
 		try {
 			mt.waitForAll();
 		} catch (InterruptedException e1) {
@@ -53,8 +63,8 @@ public class GraphPanel extends JPanel implements Runnable {
 		
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
-				OSI = createImage((int) getSize().getWidth(), (int) getSize().getHeight());
-				OSG = OSI.getGraphics();	
+				OSI_ = createImage((int) getSize().getWidth(), (int) getSize().getHeight());
+				OSG_ = OSI_.getGraphics();	
 			}
 
 		});
@@ -62,25 +72,24 @@ public class GraphPanel extends JPanel implements Runnable {
 			
 			/** 
 			 * マウスが押されたときの処理
-			 * <p>ctrlが押されえていれば，膜を表示する
-			 * <p>ctrlが押されていなければアトムをつかむ
-			 * <p>ctｒlが押されていなく，かつダブルクリックならばアトムの固定
 			 */
 			public void mousePressed(MouseEvent e) {
-				//determine nearest node
-				moveAtom = rootGraphMembrane.getNearestAtom(e.getPoint());
-				if(e.getButton() == MouseEvent.BUTTON1){
-					if(e.isControlDown()){
-						moveAtom.flipViewMem(OSI.getGraphics(), panel);
-						return;
-					}
-					if(e.getClickCount() == 2){
-						if(!e.isControlDown()){
-							moveAtom.flipClip(OSI.getGraphics(), panel);
-						}
-					}
+				int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
+				int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
+				
+				// 可視不可視を反転
+				if(e.isControlDown()){
+					moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
+					if(null == moveTargetNode_){ return; }
+					moveTargetNode_.swapVisible();
+					moveTargetNode_ = null;
+					lastPoint = null;
+					return;
 				}
-				moveAtom.setHold(true);
+				
+				setCursor(new Cursor(Cursor.MOVE_CURSOR));
+				moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, false);
+				lastPoint = e.getPoint();
 			}
 			
 			/**
@@ -88,9 +97,8 @@ public class GraphPanel extends JPanel implements Runnable {
 			 * <p>最初に押されたときより移動していたら移動した距離を取得</p>
 			 */
 			public void mouseReleased(MouseEvent e) {
-				if(moveAtom==null){ return; }
-				moveAtom.setHold(false);
-				moveAtom = null;
+				moveTargetNode_ = null;
+				setCursor(new Cursor(Cursor.HAND_CURSOR));
 			}
 		});
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -99,9 +107,17 @@ public class GraphPanel extends JPanel implements Runnable {
 			 * マウスがドラッグされたときの処理
 			 * <p>移動した距離を取得</p>
 			 */
-			public void mouseDragged(MouseEvent arg0) {
-				if(moveAtom==null){ return; }
-				moveAtom.setPosition(arg0.getPoint().x, arg0.getPoint().y);
+			public void mouseDragged(MouseEvent e) {
+				if(moveTargetNode_ != null){
+					int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
+					int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
+					moveTargetNode_.setPos(pointX, pointY);
+				} else {
+					if(null == lastPoint){ return; }
+					rootNode_.setPosDelta(e.getPoint().getX() - lastPoint.getX(),
+							e.getPoint().getY() - lastPoint.getY());
+					lastPoint = e.getPoint();
+				}
 			}
 
 		}
@@ -111,65 +127,61 @@ public class GraphPanel extends JPanel implements Runnable {
 	}
 	
 	public void setRootMem(Membrane mem){
-		rootMembrane = mem;
-		rootGraphMembrane = new GraphMembrane(mem, this);
+		rootMembrane_ = mem;
+		rootNode_ = new Node(null, mem);
 	}
 	
 	public Image getPin(){
-		return PIN;
+		return pin_;
 	}
 	/**
 	 * すべての膜を表示に設定
 	 *
 	 */
+	//TODO
 	public void showAll(){
-		if(rootGraphMembrane == null){
-			return;
-		}
-		rootGraphMembrane.showAll();
+		rootNode_.setVisible(true, true);
+		rootNode_.setInvisibleRootNode(null);
 	}
 	
 	/**
 	 * すべての膜を非表示に設定
 	 *
 	 */
+	//TODO
 	public void hideAll(){
-		if(rootGraphMembrane == null){
-			return;
-		}
-		rootGraphMembrane.setViewInside(false);
-		
-	}
-	
-	public void calc(){
-		if(null == rootGraphMembrane){ return; }
-		rootGraphMembrane.resetMembrane(rootMembrane);
+		rootNode_.setVisible(false, true);
+		rootNode_.setInvisibleRootNode(null);
 	}
 
-	static
+	//TODO
+	public void calc(){
+		if(null == rootNode_){ return; }
+		rootNode_.reset(rootMembrane_);
+	}
+
 	public void setMagnification(double magni){
-		magnification = magni;
+		magnification_ = magni * 2;
 	}
 	
-	static
 	public double getMagnification(){
-		return magnification;
+		return magnification_;
 	}
 	
 	public void start() {
-		if (th == null) {
-			th = new Thread(this);
-			th.start();
+		if (th_ == null) {
+			th_ = new Thread(this);
+			th_.start();
 		}
 	}
 	
 	public void stop() {
-		th = null;
+		th_ = null;
 	}
 	
 	public void run() {
 		Thread me = Thread.currentThread();
-		while (me == th) {
+		while (me == th_) {
 			try {
 				calc();
 				Thread.sleep(50);
@@ -180,18 +192,23 @@ public class GraphPanel extends JPanel implements Runnable {
 	}
 	
 	public void paint(Graphics g) {
-		if (OSI == null) {
-			OSI = createImage((int) getSize().getWidth(), (int) getSize().getHeight());
-			OSG = OSI.getGraphics();			
+		if (OSI_ == null) {
+			OSI_ = createImage((int) getSize().getWidth(), (int) getSize().getHeight());
+			OSG_ = OSI_.getGraphics();			
 		}
-		if (OSI != null){
-			OSG.setColor(Color.WHITE);
-			OSG.fillRect(0,0,(int) getSize().getWidth(), (int) getSize().getHeight());
-			g.drawImage(OSI,0,0,this);
+		if (OSI_ != null){
+			OSG_.setColor(Color.WHITE);
+			OSG_.fillRect(0, 0,(int)getWidth(), (int)getHeight());
 			
-			if(null != rootGraphMembrane){
-				rootGraphMembrane.paint(g);
-			}
+			g.setColor(Color.WHITE);
+			g.drawImage(OSI_,0,0,this);
+			af_.setTransform(getMagnification(), 0, 0, getMagnification(), getWidth() / 2, getHeight() / 2);
+	        ((Graphics2D)g).setTransform(af_);
+
+	        g.setColor(Color.BLACK);
+	        if(null != rootNode_){
+	        	rootNode_.paint(g);
+	        }
 		}
 	}
 }
