@@ -1208,7 +1208,7 @@ public class GraphLayout extends AbstractGraphLayout {
 	 	int length = 7;
 	 	boolean flags[] = new boolean[length];
 	 	flags[0] = true;flags[1] = false;flags[2] = true;flags[3] = false;
-	 	flags[4] = false;flags[5] = true;flags[6] = false;
+	 	flags[4] = false;flags[5] = false;flags[6] = false;
 //	 	flags[0] = true;flags[1] = false;flags[2] = false;flags[3] = true;
 //	 	flags[4] = true;flags[5] = false;flags[6] = false;flags[7] = false;
 //	 	flags[8] = true;flags[9] = true;flags[10] = false;
@@ -1218,13 +1218,13 @@ public class GraphLayout extends AbstractGraphLayout {
 	 		names[i] = Integer.toString(i);
 	 	}
 	 	
-	 	names[0] = "辺の長さと角度を一定にする";
-	 	names[1] = "中心へ力をかける";
-	 	names[2] = "アトムや膜が重ならないようにする";
-	 	names[3] = "アトム数の多いグラフが上に来る";
-	 	names[4] = "膜を他のアトムより下に配置する";
-	 	names[5] = "摩擦力をかける";
-	 	names[6] = "水平になるように回転する";
+	 	names[0] = "uniform length of links"; // "辺の長さと角度を一定にする";
+	 	names[1] = "attract toward center"; // "中心へ力をかける";
+	 	names[2] = "minimize overlapping"; // "アトムや膜が重ならないようにする";
+	 	names[3] = "place graphs with many atoms above others"; // "アトム数の多いグラフが上に来る";
+	 	names[4] = "place membranes lower than atoms"; // "膜を他のアトムより下に配置する";
+	 	names[5] = "turn frictions on"; // "摩擦力をかける";
+	 	names[6] = "keep links horizontal"; // "水平になるように回転する";
 
 //	 	names[0] = "辺の長さと角度を一定にする";
 //	 	names[1] = "アトムに膜の中心へ力をかける";
