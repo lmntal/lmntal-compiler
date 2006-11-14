@@ -50,14 +50,14 @@ public class RuleCompiler {
 	public List<Instruction> body;
 	int varcount;			// 次の変数番号
 	
-	List rhsatoms;
+	List<Atom> rhsatoms;
 	Map  rhsatompath;		// 右辺のアトム (Atomic) -> 変数番号 (Integer)
 	Map  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)	
-	Map  rhslinkpath;		// 右辺のリンク出現(LinkOccurence) -> 変数番号(Integer)
+	Map<LinkOccurrence, Integer>  rhslinkpath;		// 右辺のリンク出現(LinkOccurence) -> 変数番号(Integer)
 	//List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り血にした
-	List lhsatoms;
+	List<Atomic> lhsatoms;
 	List lhsmems;
-	Map  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
+	Map<Atomic, Integer>  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
 	Map  lhsmempath;		// 左辺の膜 (Membrane) -> 変数番号 (Integer)
 	Map  lhslinkpath = new HashMap();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
 		// ＜左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])　＞から変更
@@ -255,13 +255,11 @@ public class RuleCompiler {
 
 	/** 右辺のリンクを取得または生成する */
 	private List computeRHSLinks() {
-		List rhslinks = new ArrayList();
-		rhslinkpath = new HashMap();
+		List<LinkOccurrence> rhslinks = new ArrayList<LinkOccurrence>();
+		rhslinkpath = new HashMap<LinkOccurrence, Integer>();
 		int rhslinkindex = 0;
 		// アトムの引数のリンク出現
-		Iterator it = rhsatoms.iterator();
-		while(it.hasNext()){
-			Atom atom = (Atom)it.next();
+		for (Atom atom : rhsatoms){
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhsatomToPath(atom),pos));
 				rhslinkpath.put(atom.args[pos],new Integer(varcount));
@@ -273,7 +271,7 @@ public class RuleCompiler {
 		}
 
 		// unary型付プロセス文脈のリンク出現
-		it = rhstypedcxtpaths.keySet().iterator();
+		Iterator it = rhstypedcxtpaths.keySet().iterator();
 		while(it.hasNext()){
 			ProcessContext atom = (ProcessContext)it.next();
 			body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhstypedcxtToPath(atom),0));
@@ -458,15 +456,14 @@ public class RuleCompiler {
 
 	/** ヘッドの膜とアトムに対して、仮引数番号を登録する */
 	private void genLHSPaths() {
-		lhsatompath = new HashMap();
+		lhsatompath = new HashMap<Atomic, Integer>();
 		lhsmempath  = new HashMap();
 		varcount = 0;
 		for (int i = 0; i < lhsmems.size(); i++) {
 			lhsmempath.put(lhsmems.get(i), new Integer(varcount++));
 		}
-		for (int i = 0; i < lhsatoms.size(); i++) {
-			lhsatompath.put(lhsatoms.get(i), new Integer(varcount++));
-		}
+		for (Atomic atomic : lhsatoms)
+			lhsatompath.put(atomic, new Integer(varcount++));
 	}
 	
 	/** ガードの取り込み */

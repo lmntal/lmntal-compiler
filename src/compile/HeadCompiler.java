@@ -32,10 +32,10 @@ public class HeadCompiler {
 	/** マッチング命令列（のラベル）*/
 	public InstructionList matchLabel;
 	/** matchLabel.insts */
-	public List match;
+	public List<Instruction> match;
 
-	public List mems			= new ArrayList();	// 出現する膜のリスト。[0]がm
-	public List atoms			= new ArrayList();	// 出現するアトムのリスト	
+	public List<Membrane> mems			= new ArrayList<Membrane>();	// 出現する膜のリスト。[0]がm
+	public List<Atomic> atoms			= new ArrayList<Atomic>();	// 出現するアトムのリスト	
 	public Map  mempaths		= new HashMap();	// Membrane -> 変数番号
 	public Map  atompaths		= new HashMap();	// Atomic -> 変数番号
 	public Map  linkpaths		= new HashMap();	// Atomの変数番号 -> リンクの変数番号の配列
@@ -106,17 +106,14 @@ public class HeadCompiler {
 	 * リスト内の追加された位置がそのアトムおよび膜の仮引数IDになる。*/
 	public void enumFormals(Membrane mem) {
 		Env.c("enumFormals");
-		Iterator it = mem.atoms.iterator();
-		while (it.hasNext()) {
+		for (Atom atom : mem.atoms) {
 			// 左辺に出現したアトムを登録する
-			Atom atom = (Atom)it.next();
 			atomids.put(atom, new Integer(atoms.size()));
 			atoms.add(atom);
 		}
 		mems.add(mem);	// 本膜はmems[0]
-		it = mem.mems.iterator();
-		while (it.hasNext()) {
-			enumFormals((Membrane)it.next());
+		for (Membrane m : mem.mems) {
+			enumFormals(m);
 		}
 	}
 	

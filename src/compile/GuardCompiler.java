@@ -26,11 +26,11 @@ public class GuardCompiler extends HeadCompiler {
 //	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
 
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
-	HashMap typedcxtdatatypes = new HashMap();
+	HashMap<ContextDef, Integer> typedcxtdatatypes = new HashMap<ContextDef, Integer>();
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型のパターンを表す定数オブジェクト */
-	HashMap typedcxttypes = new HashMap();
+	HashMap<ContextDef, Object> typedcxttypes = new HashMap<ContextDef, Object>();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号 */
-	HashMap typedcxtsrcs  = new HashMap();
+	HashMap<ContextDef, Integer> typedcxtsrcs  = new HashMap<ContextDef, Integer>();
 	/** ground型付きプロセス文脈定義(ContextDef) -> リンクのソース出現（コピー元とする出現）のリストの変数番号 */
 	HashMap groundsrcs = new HashMap();
 	/** 膜(Membrane) -> (その膜に存在するground型付きプロセス文脈定義(ContextDef) -> 構成アトム数)というマップ */
@@ -40,11 +40,11 @@ public class GuardCompiler extends HeadCompiler {
 	HashSet identifiedCxtdefs = new HashSet(); 
 	/** 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
 	 * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。*/
-	List typedcxtdefs = new ArrayList();
+	List<ContextDef> typedcxtdefs = new ArrayList<ContextDef>();
 	
 	int typedcxtToSrcPath(ContextDef def) {
 		if (!typedcxtsrcs.containsKey(def)) return UNBOUND;
-		return ((Integer)typedcxtsrcs.get(def)).intValue();
+		return typedcxtsrcs.get(def);
 	}
 	
 	int groundToSrcPath(ContextDef def) {
@@ -56,8 +56,8 @@ public class GuardCompiler extends HeadCompiler {
 	static final int ISFLOAT  = Instruction.ISFLOAT;	// 〃 浮動小数点数型
 	static final int ISSTRING = Instruction.ISSTRING;	// 〃 文字列型
 	static final int ISMEM    = Instruction.ANYMEM;	// 〃 膜（getRuntime専用）
-	static HashMap guardLibrary1 = new HashMap(); // 1入力ガード型制約名
-	static HashMap guardLibrary2 = new HashMap(); // 2入力ガード型制約名
+	static HashMap<Functor, int[]> guardLibrary1 = new HashMap<Functor, int[]>(); // 1入力ガード型制約名
+	static HashMap<Functor, int[]> guardLibrary2 = new HashMap<Functor, int[]>(); // 2入力ガード型制約名
 	static {
 		guardLibrary2.put(new SymbolFunctor("<.",   2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLT});
 		guardLibrary2.put(new SymbolFunctor("=<.",  2), new int[]{ISFLOAT,ISFLOAT, Instruction.FLE});
@@ -92,7 +92,7 @@ public class GuardCompiler extends HeadCompiler {
 	
 	//
 	RuleCompiler rc;			// rc.rs用
-	List typeConstraints;		// 型制約のリスト
+	List<Atom> typeConstraints;		// 型制約のリスト
 	Map  typedProcessContexts;	// 型付きプロセス文脈名から定義へのマップ
 	
 	GuardCompiler(RuleCompiler rc, HeadCompiler hc) {
@@ -210,9 +210,7 @@ public class GuardCompiler extends HeadCompiler {
 			}
 		}
 		// STEP 2 - 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す		
-		LinkedList cstrs = new LinkedList();
-		it = typeConstraints.iterator();
-		while (it.hasNext()) cstrs.add(it.next());
+		LinkedList<Atom> cstrs = new LinkedList<Atom>(typeConstraints);
 		
 		{
 			// uniq, not_uniq を最初に（少なくともint, unary などの前に）処理する
@@ -420,7 +418,7 @@ public class GuardCompiler extends HeadCompiler {
 					processEquivalenceConstraint(def1,def2);
 				}
 				else if (guardLibrary1.containsKey(func)) { // 1入力制約
-					int[] desc = (int[])guardLibrary1.get(func);
+					int[] desc = guardLibrary1.get(func);
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					if (desc[0] != 0 && !new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
@@ -451,7 +449,7 @@ public class GuardCompiler extends HeadCompiler {
 					}
 				}
 				else if (guardLibrary2.containsKey(func)) { // 2入力制約
-					int[] desc = (int[])guardLibrary2.get(func);
+					int[] desc = guardLibrary2.get(func);
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
 					int atomid1 = loadUnaryAtom(def1);
@@ -533,9 +531,7 @@ public class GuardCompiler extends HeadCompiler {
 				typedcxttypes.put(def1, UNARY_ATOM_TYPE);
 			}
 			else bindToUnaryAtom(def1, atomid2);
-			//
-			Object newdatatype = typedcxtdatatypes.get(def2);
-			if (newdatatype == null) newdatatype = typedcxtdatatypes.get(def1);
+			int newdatatype = (typedcxtdatatypes.containsKey(def2) ? typedcxtdatatypes.get(def2) : typedcxtdatatypes.get(def1));
 			typedcxtdatatypes.put(def1,newdatatype);
 			typedcxtdatatypes.put(def2,newdatatype);
 		}
@@ -577,7 +573,6 @@ public class GuardCompiler extends HeadCompiler {
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 	}
 	/** 型付きプロセス文脈defを1引数アトム$atomidのファンクタで束縛する */
-	//2006.07.01 束縛する命令(?) bindid 引数を追加 by inui
 	private void bindToUnaryAtom(ContextDef def, int atomid) {
 		if (!identifiedCxtdefs.contains(def)) {
 			identifiedCxtdefs.add(def);
