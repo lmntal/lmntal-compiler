@@ -85,15 +85,18 @@ public class TypePrinter {
 				if(fcs.functorToCount.containsKey(f)){
 
 					StringBuffer texp = new StringBuffer("");
-					texp.append("\t" + f.getQuotedAtomName() + "(");
+					texp.append("\t" + f.getQuotedAtomName());
+					if(f.getArity() > 0){
+						texp.append("(");
 
-					// 引数の型を表示
-					TypeVarConstraint[] argtypes = functorToArgumentTypes.get(f);
-					for(int i=0;i<argtypes.length;i++){
-						if(i!=0)texp.append(", ");
-						texp.append(argtypes[i].shortString());
+						// 引数の型を表示
+						TypeVarConstraint[] argtypes = functorToArgumentTypes.get(f);
+						for(int i=0;i<argtypes.length;i++){
+							if(i!=0)texp.append(", ");
+							texp.append(argtypes[i].shortString());
+						}
+						texp.append(")");
 					}
-					texp.append(")");
 					
 					FixedCount fc = fcs.functorToCount.get(f);
 					texp.append(" : " + fc);

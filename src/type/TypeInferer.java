@@ -31,7 +31,7 @@ public class TypeInferer {
 		boolean typeDefined = false;
 		Membrane typedefmem = null;
 		for(Membrane topmem : root.mems)
-			if(topmem.name.equals("typedef")){
+			if(TypeEnv.getMemName(topmem).equals("typedef")){
 				typedefmem = topmem;
 				break; // TODO 型定義膜が2つあったらどうする
 			}
