@@ -1121,12 +1121,12 @@ public class Translator {
 					writer.write(tabs + "}\n");
 					break; //n-kato
 				case Instruction.SUBCLASS: //[atom1, atom2]
-					writer.write(tabs + "                    s1 = ((StringFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).stringValue();\n");
-					writer.write(tabs + "                    s2 = ((StringFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).stringValue();\n");
-					writer.write(tabs + "                    try {\n");
-					writer.write(tabs + "                        if (!ObjectFunctor.isSubclass(Class.forName(s1), Class.forName(s2))) return false;\n");
-					writer.write(tabs + "                    } catch (ClassNotFoundException e1) {\n");
-					writer.write(tabs + "                    }\n");
+					writer.write(tabs + "try {\n");
+					writer.write(tabs + "	Class c1 = ((ObjectFunctor)((Atom)var[" + inst.getIntArg1() + "]).getFunctor()).getObject().getClass();\n");
+					writer.write(tabs + "	Class c2 = Class.forName(((StringFunctor)((Atom)var[" + inst.getIntArg2() + "]).getFunctor()).stringValue());\n");
+					writer.write(tabs + "	if (!c2.isAssignableFrom(c1)) return false;\n");
+					writer.write(tabs + "} catch (ClassNotFoundException e1) {\n");
+					writer.write(tabs + "}\n");
                     break; //inui 2006-07-01
 					//====アトムに関係する出力しない基本ガード命令====ここまで====
 					//====ファンクタに関係する命令====ここから====
@@ -1497,17 +1497,9 @@ public class Translator {
 //					break;
 //				case Instruction.ISSTRINGFUNC : //[func]
 //					break;
-				case Instruction.GETCLASS: //[-stringatom, atom]
-					writer.write(tabs + "if (!(!(((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor() instanceof ObjectFunctor))) {\n");
-					writer.write(tabs + "	{\n");
-					//再帰呼び出ししていないので、ブロック内で変数宣言しても大丈夫
-					writer.write(tabs + "		Object obj = ((ObjectFunctor)((Atom)var[" +  inst.getIntArg2()  + "]).getFunctor()).getObject();\n");
-					writer.write(tabs + "		String className = obj.getClass().getName();\n");
-					if (packageName != null) { //GlobalSystemRuleset のコンパイル時には null
-						writer.write(tabs + "		className = className.replaceAll(\"" + packageName + ".\", \"\");\n");
-					}
-					writer.write(tabs + "		var[" +  inst.getIntArg1()  + "] = new Atom(null, new StringFunctor( className ));\n");
-					writer.write(tabs + "	}\n");
+				case Instruction.GETCLASS: //[-objectatom, atom]
+					writer.write(tabs + "if (!(!(((Atom)var[" + inst.getIntArg2() + "]).getFunctor() instanceof ObjectFunctor))) {\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = ((Atom)var[" + inst.getIntArg2() + "]);\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //n-kato

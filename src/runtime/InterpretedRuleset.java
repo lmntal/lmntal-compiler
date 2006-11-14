@@ -12,8 +12,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,9 +106,9 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		boolean result = false;
 		Iterator<Rule> it = rules.iterator();
 		if(branchmap != null){
-			Functor func = (Functor) atom.getFunctor();
+			Functor func = atom.getFunctor();
 			if(branchmap.containsKey(func)){
-				List insts = (ArrayList)branchmap.getInsts(func);
+				List insts = branchmap.getInsts(func);
 				Instruction spec = (Instruction)insts.get(0);
 				int formals = spec.getIntArg1();
 				int locals = spec.getIntArg2();
@@ -575,14 +573,13 @@ class InterpretiveReactor {
 					if (!atoms[inst.getIntArg1()].getFunctor().equals(atoms[inst.getIntArg2()].getFunctor())) return false;
 					break; //n-kato
 				case Instruction.SUBCLASS: //[atom1, atom2]
-                    String s1, s2;
-                    s1 = ((StringFunctor)atoms[inst.getIntArg1()].getFunctor()).stringValue();
-                    s2 = ((StringFunctor)atoms[inst.getIntArg2()].getFunctor()).stringValue();
-                    try {
-                        if (!ObjectFunctor.isSubclass(Class.forName(s1), Class.forName(s2))) return false;
-                    } catch (ClassNotFoundException e1) {
-                        return false;
-                    }
+					try {
+						Class c1 = ((ObjectFunctor)atoms[inst.getIntArg1()].getFunctor()).getObject().getClass();
+						Class c2 = Class.forName(((StringFunctor)atoms[inst.getIntArg2()].getFunctor()).stringValue());
+						if (!c2.isAssignableFrom(c1)) return false;
+					} catch (ClassNotFoundException e1) {
+						return false;
+					}
                     break; //inui 2006-07-01
 					//====アトムに関係する出力しない基本ガード命令====ここまで====
 
@@ -804,9 +801,8 @@ class InterpretiveReactor {
 						Env.e("Undefined module "+inst.getArg2());
 					} else {
 						//同一ソース内のモジュール or ソースライブラリの場合
-						Iterator i = m.rulesets.iterator();
-						while (i.hasNext()) {
-							mems[inst.getIntArg1()].loadRuleset((Ruleset)i.next() );
+						for (Ruleset rs : m.rulesets) {
+							mems[inst.getIntArg1()].loadRuleset(rs);
 						}
 					}
 					break;
@@ -1082,10 +1078,9 @@ class InterpretiveReactor {
 //				case Instruction.ISSTRINGFUNC : //[func]
 //					break;
 
-				case Instruction.GETCLASS: //[-stringatom, atom]
+				case Instruction.GETCLASS: //[-objectatom, atom]
 					if (!(atoms[inst.getIntArg2()].getFunctor() instanceof ObjectFunctor)) return false;
-					Object obj = ((ObjectFunctor)atoms[inst.getIntArg2()].getFunctor()).getObject();
-					atoms[inst.getIntArg1()] = new Atom(null, new StringFunctor( obj.getClass().toString().substring(6) ));
+					atoms[inst.getIntArg1()] = atoms[inst.getIntArg2()];
 					break; //n-kato
 					
 					//====型検査のためのガード命令====ここまで====
