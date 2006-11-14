@@ -30,6 +30,7 @@ for ($i = 0; $i <= $#ARGV; $i++) {
 			$class = $2;
 			$absolute_class = $module = "$1.$2";
 			$module =~ tr/./_/;
+			printf STDERR "%-72s [%3d%%]\n", "$dir/$module.lmn", 100*($i+1)/($#ARGV+1);
 			open(STDOUT, ">$dir/$module.lmn");
 			print "{module($module).\n";
 			print "[:/*inline_define*/\n";
