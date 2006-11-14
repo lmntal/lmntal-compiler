@@ -34,7 +34,7 @@ public final class Membrane extends QueuedEntity {
 	/** アトムの集合 */
 	protected AtomSet atoms = new AtomSet();
 	/** 子膜の集合 */
-	protected Set mems = null;
+	protected Set<Membrane> mems = null;
 //	/** このセルの自由リンクの数 */
 //	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
@@ -90,7 +90,7 @@ public final class Membrane extends QueuedEntity {
 		if (Env.shuffle >= Env.SHUFFLE_MEMS)
 			mems = new RandomSet();
 		else
-			mems = new HashSet();
+			mems = new HashSet<Membrane>();
 		
 		this.task = task;
 		this.parent = parent;
@@ -231,7 +231,7 @@ public final class Membrane extends QueuedEntity {
 		//return s;
 	}
 	/** この膜にあるアトムの反復子を取得する */
-	public Iterator atomIterator() {
+	public Iterator<Atom> atomIterator() {
 		return atoms.iterator();
 	}
 	/** この膜にある子膜の反復子を取得する */
