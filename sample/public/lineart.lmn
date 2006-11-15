@@ -73,8 +73,8 @@ import javax.swing.Timer;
 
 class TimerListener implements ActionListener {
 	Atom me;
-	private static final Functor MOVE = new Functor("move", 1);
-	private static final Functor WAIT = new Functor("wait", 1);
+	private static final SymbolFunctor MOVE = new SymbolFunctor("move", 1);
+	private static final SymbolFunctor WAIT = new SymbolFunctor("wait", 1);
 	public void actionPerformed(ActionEvent e) {
 		Membrane mem = me.getMem();
 		mem.asyncLock();
@@ -112,7 +112,7 @@ class LineArtFrame extends Frame implements WindowListener {
 		mem.asyncLock();
 		//LMntal側からFrameをdisposeしようとすると、デッドロックする。(もしかしたら嘘かも)
 		this.dispose();
-		mem.newAtom(new Functor("exit", 0));
+		mem.newAtom(new SymbolFunctor("exit", 0));
 		Atom frame = me.nthAtom(0);
 		mem.removeAtom(frame);
 		mem.removeAtom(me);
@@ -173,7 +173,7 @@ drawLine(F,X1,Y1,X2,Y2,c(R,G,B)) :- int(X1),int(Y1),int(X2),int(Y2),int(R),int(G
 		mem.removeAtom(ar);
 		mem.removeAtom(ag);
 		mem.removeAtom(ab);
-		Atom a = mem.newAtom(new Functor("frame", 1));
+		Atom a = mem.newAtom(new SymbolFunctor("frame", 1));
 		mem.relinkAtomArgs(a, 0, me, 0);
 		mem.removeAtom(me);
 	:](F,X1,Y1,X2,Y2,R,G,B).
