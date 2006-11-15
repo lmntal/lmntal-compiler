@@ -1,13 +1,13 @@
 package gui2;
 
 import java.awt.Graphics;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import runtime.Atom;
-import runtime.Membrane;
 
 public class LinkSet {
 	
@@ -81,6 +81,12 @@ public class LinkSet {
 		}
 	}
 	
+	static
+	public Point2D.Double getNodePoint(Object key){
+		Node node = linkMap_.get(key);
+		return (null != node) ? node.getCenterPoint() : null;
+	}
+	
 	/**
 	 * 可視Nodeを取得する
 	 * @param node
@@ -88,7 +94,10 @@ public class LinkSet {
 	 */
 	static
 	private Node getVisibleNode(Node node){
-		if(null == node || null == node.getParent() || node.getParent().isVisible()){
+		if(null == node ||
+				null == node.getParent() ||
+				null == node.getParent().getInvisibleRootNode())
+		{
 			return node;
 		}
 		else {

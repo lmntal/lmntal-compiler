@@ -134,11 +134,11 @@ public class GraphPanel extends JPanel implements Runnable {
 	public Image getPin(){
 		return pin_;
 	}
+	
 	/**
 	 * すべての膜を表示に設定
 	 *
 	 */
-	//TODO
 	public void showAll(){
 		rootNode_.setVisible(true, true);
 		rootNode_.setInvisibleRootNode(null);
@@ -148,16 +148,15 @@ public class GraphPanel extends JPanel implements Runnable {
 	 * すべての膜を非表示に設定
 	 *
 	 */
-	//TODO
 	public void hideAll(){
 		rootNode_.setVisible(false, true);
 		rootNode_.setInvisibleRootNode(null);
 	}
 
-	//TODO
 	public void calc(){
 		if(null == rootNode_){ return; }
 		rootNode_.reset(rootMembrane_);
+		rootNode_.calcAll();
 	}
 
 	public void setMagnification(double magni){

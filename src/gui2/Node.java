@@ -3,6 +3,8 @@ package gui2;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.HashMap;
@@ -18,6 +20,11 @@ public class Node {
 
 	///////////////////////////////////////////////////////////////////////////
 	// static
+
+	/* ばね定数 */
+	final static
+	private double CONSTANT_SPRING = 0.0001;
+	
 	final static
 	private double MARGIN = 10.0;
 
@@ -29,6 +36,8 @@ public class Node {
 	private GraphPanel panel_;
 	
 	///////////////////////////////////////////////////////////////////////////
+	
+	
 	/* 移動情報 */
 	private double dx_;
 	
@@ -89,8 +98,8 @@ public class Node {
 		
 		// 世界膜ならば可視それ以外は不可視
 		if(null != parent_){
-			visible = false;
-			iWillBeAnAtom();
+			setVisible(false, true);
+			setInvisibleRootNode(null);
 		}
 	}
 	///////////////////////////////////////////////////////////////////////////
@@ -106,11 +115,91 @@ public class Node {
 	///////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * 位置座標などの計算
+	 */
+	public void calc(){
+//		calcSpring();
+		moveCalc();
+	}
+	
+	/**
+	 * 位座標などの計算を自分を含めたすべての子Nodeにて行う
+	 */
+	public void calcAll(){
+		calc();
+		synchronized (nodeMap_) {
+			Iterator<Node> nodes = nodeMap_.values().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				node.calcAll();
+			}
+		}
+	}
+	
+	/**
+	 * ばねモデルの計算
+	 *
+	 */
+	private void calcSpring(){
+		if(!Atom.class.isInstance(myObject)){
+			return;
+		} else {
+			calcSpring_Atom();
+		}
+	}
+
+	/**
+	 * ばねモデルの計算(Atom用)
+	 *
+	 */
+	private void calcSpring_Atom(){
+		Atom atom = (Atom)myObject;
+		Point2D myPoint = getCenterPoint();
+		for(int i = 0; i < atom.getEdgeCount() ; i++){
+			Point2D nthPoint = LinkSet.getNodePoint(atom.getNthAtom(i));
+			if(null == nthPoint){ continue; }
+			
+			double distance =
+		    Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
+			
+			double f = -CONSTANT_SPRING * (distance - 1.0);
+			
+			moveDelta((myPoint.getX() - nthPoint.getX()) * f, (myPoint.getY() - nthPoint.getY()) * f);
+			
+		}
+	}
+
+	/**
+	 * ばねモデルの計算(Membrane用)
+	 *
+	 */
+	private void calcSpring_Membrane(){
+//		Membrane mem = (Membrane)myObject;
+//		Point2D myPoint = getCenterPoint();
+//		for(int i = 0; i < atom.getEdgeCount() ; i++){
+//			Point2D nthPoint = LinkSet.getNodePoint(atom.getNthAtom(i));
+//			if(null == nthPoint){ continue; }
+//			
+//			double distance =
+//		    Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
+//			
+//			double f = -CONSTANT_SPRING * (distance - 1.0);
+//			
+//			moveDelta((myPoint.getX() - nthPoint.getX()) * f, (myPoint.getY() - nthPoint.getY()) * f);
+//			
+//		}
+	}
+	
+	/**
 	 * 位置、座標を取得する
 	 * @return
 	 */
 	public Rectangle2D getBounds2D(){
 		return rect_.getBounds2D();
+	}
+	
+	public Point2D.Double getCenterPoint(){
+		return (new Point2D.Double(rect_.getCenterX(), rect_.getCenterY()));
 	}
 	
 	public Node getInvisibleRootNode(){
@@ -225,8 +314,12 @@ public class Node {
 	 * @param dy
 	 */
 	public void moveDelta(double dx, double dy){
-		dx_ += dx;
-		dy_ += dy;
+		if(null != invisibleRootNode || this == invisibleRootNode){
+			parent_.moveDelta(dx, dy);
+		} else {
+			dx_ += dx;
+			dy_ += dy;
+		}
 	}
 	
 	/**
@@ -242,6 +335,7 @@ public class Node {
 			if(isAtom()){
 				g.setColor(myColor_);
 				((Graphics2D)g).fill(rect_);
+				g.setColor(Color.BLACK);
 				g.drawString(name_, (int)rect_.x, (int)rect_.y);
 			}
 			// 膜の描画
@@ -276,6 +370,8 @@ public class Node {
 		} else {
 			setMembrane((Membrane)object);
 		}
+		
+		calc();
 	}
 	
 	/**
