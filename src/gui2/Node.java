@@ -20,13 +20,9 @@ public class Node {
 
 	///////////////////////////////////////////////////////////////////////////
 	// static
-
-	/* ばね定数 */
-	final static
-	private double CONSTANT_SPRING = 0.0001;
 	
 	final static
-	private double MARGIN = 10.0;
+	private double MARGIN = 15.0;
 
 	final static
 	private double ROUND = 40;
@@ -118,7 +114,7 @@ public class Node {
 	 * 位置座標などの計算
 	 */
 	public void calc(){
-//		calcSpring();
+		NodeFunction.calcSpring(this);
 		moveCalc();
 	}
 	
@@ -134,60 +130,6 @@ public class Node {
 				node.calcAll();
 			}
 		}
-	}
-	
-	/**
-	 * ばねモデルの計算
-	 *
-	 */
-	private void calcSpring(){
-		if(!Atom.class.isInstance(myObject)){
-			return;
-		} else {
-			calcSpring_Atom();
-		}
-	}
-
-	/**
-	 * ばねモデルの計算(Atom用)
-	 *
-	 */
-	private void calcSpring_Atom(){
-		Atom atom = (Atom)myObject;
-		Point2D myPoint = getCenterPoint();
-		for(int i = 0; i < atom.getEdgeCount() ; i++){
-			Point2D nthPoint = LinkSet.getNodePoint(atom.getNthAtom(i));
-			if(null == nthPoint){ continue; }
-			
-			double distance =
-		    Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
-			
-			double f = -CONSTANT_SPRING * (distance - 1.0);
-			
-			moveDelta((myPoint.getX() - nthPoint.getX()) * f, (myPoint.getY() - nthPoint.getY()) * f);
-			
-		}
-	}
-
-	/**
-	 * ばねモデルの計算(Membrane用)
-	 *
-	 */
-	private void calcSpring_Membrane(){
-//		Membrane mem = (Membrane)myObject;
-//		Point2D myPoint = getCenterPoint();
-//		for(int i = 0; i < atom.getEdgeCount() ; i++){
-//			Point2D nthPoint = LinkSet.getNodePoint(atom.getNthAtom(i));
-//			if(null == nthPoint){ continue; }
-//			
-//			double distance =
-//		    Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
-//			
-//			double f = -CONSTANT_SPRING * (distance - 1.0);
-//			
-//			moveDelta((myPoint.getX() - nthPoint.getX()) * f, (myPoint.getY() - nthPoint.getY()) * f);
-//			
-//		}
 	}
 	
 	/**
@@ -349,8 +291,12 @@ public class Node {
 					g.setColor(myColor_);
 					if(visible){
 						((Graphics2D)g).draw(rect_);
+						g.setColor(Color.BLACK);
+						g.drawString(name_, (int)rect_.x, (int)rect_.y);
 					} else {
 						((Graphics2D)g).fill(rect_);
+						g.setColor(Color.BLACK);
+						g.drawString(name_, (int)rect_.x, (int)rect_.y);
 					}
 				}
 
