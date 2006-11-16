@@ -531,7 +531,8 @@ public class GuardCompiler extends HeadCompiler {
 				typedcxttypes.put(def1, UNARY_ATOM_TYPE);
 			}
 			else bindToUnaryAtom(def1, atomid2);
-			int newdatatype = (typedcxtdatatypes.containsKey(def2) ? typedcxtdatatypes.get(def2) : typedcxtdatatypes.get(def1));
+			Integer newdatatype = typedcxtdatatypes.get(def2);
+			if (newdatatype == null) newdatatype = typedcxtdatatypes.get(def1);
 			typedcxtdatatypes.put(def1,newdatatype);
 			typedcxtdatatypes.put(def2,newdatatype);
 		}
