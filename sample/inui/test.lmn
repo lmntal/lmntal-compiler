@@ -1,46 +1,49 @@
-//start :- runnable.
-//runnable :- run.
-//run :- runnable.
-//run :- wait_for_run.
-//run :- end.
-//wait_for_run :- runnable.
+//typedef{
+//	{
+//		%nulltype = datatype ( null('-') ).
+//		stringnull = datatype ( str(+string, '-'), null('-') ).
+//		java_io_BufferedReader.new(+inputstreamreader, -bufferReader) = [0, inf].
+//		java_io_InputStreamReader.new(+inputstream, -inputstreamreader) = [0, inf].
+//		java_lang_System.in(-inputstream) = [0, inf].
+//	}.
 //
-//start.
+//}.
 
-//{displays, $p}, t(T), t1(T1) :- T = T1 | {alarms_beep, alarm1_beep, $p}, t(T), t1(T1).
-//{displays, $p}, t(T), t2(T2) :- T = T2 | {alarms_beep, alarm2_beep, $p}, t(T), t2(T2).
+lines=[].
+br=java_io_BufferedReader.new(java_io_InputStreamReader.new(java_lang_System.in)).
+//br(BR), lines=Lines :- class(BR, "java.io.BufferedReader") |
+//	br=readLine(BR, S), H=ready(S), lines=list.append(Lines, [H]).
+br(BR) :- class(BR, "java.io.BufferedReader") | br=readLine(BR, s).
+
+s(S), lines(Lines) :- string(S) | lines=list.append(Lines, [S]).
+s(null), br(BR) :- gc(BR).
+	
+//cons(cons(1:int,nil:list):list,cons(2,cons(3,nil))).
+//H=a(b,c):int 
+
+//gc=listFiles(java_io_File.new("icpc"), Filter, files).
 //
-//{alarms_beep, a, $p} :- {displays, $p}.
-//{alarms_beep, b, $p} :- {displays, $p}.
-//{alarms_beep, c, $p} :- {displays, $p}.
-//{alarms_beep, d, $p} :- {displays, $p}.
+//Filter=java_io_FileFilter.new({
+//	java_io_File.use.
+//	H=accept(File) :- gc=isDirectory(File, H).
+//	gc(Object) :- class(Object, "java.lang.Object") | .
+//}).
 //
-//{displays, time, d} :- {displays, date}.
-//{displays, date, d} :- {displays, time}.
-//{displays, time, a} :- {displays, alarm1}.
-//{displays, alarm1, a} :- {displays, alarm2}.
-//{displays, alarm2, a} :- {displays, chime}.
-//{displays, chime, a} :- {displays, stopwatch}.
-//{displays, stopwatch} :- {displays, time}.
+//gc(Object) :- class(Object, "java.lang.Object") | .
 
-start.
-
-start :- open.
-
-open, all :- strike.
-open, rest :- before_2.
-
-before_2, rest :- open.
-before_2, all :- spair.
-
-spair, rest :- before_2.
-spair, all :- strike.
-
-strike, rest :- after_s_before_2.
-strike, all :- double.
-
-double, rest :- after_s_before_2.
-double, all :- double.
-
-after_s_before_2, all :- spair.
-after_s_before_2, rest :- open.
+//typedef{
+//	{
+//		userlist = datatype( cons(+list, +list, '-'), nil('-') ).
+//		abc = datatype( a('-'), b('-'), c('-') ).
+//		
+//		hoge(+abc, +userlist) = [0, 1].
+//		moge(+abc) = [2, 3].
+//		
+//		%m{} = [1,inf].
+//	}
+//}.
+//
+//hoge(a, nil).
+//moge(b).
+//moge(c).
+//hoge(A,B) :- fuga(B), fe(A), moge(d).
