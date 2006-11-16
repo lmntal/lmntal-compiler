@@ -32,16 +32,4 @@ public class ObjectFunctor extends DataFunctor {
 	public String getName() {
 		return data.toString();
 	}
-	
-	/**
-	 * c1がc2のサブクラスかどうか判定します
-	 * @since 2006.6.26
-	 * @author inui
-	 */
-	public static boolean isSubclass(Class c1, Class c2) {
-//		System.err.println(c1+","+c2);
-		if (c1.equals(c2)) return true;
-		if (c1.equals(Object.class)) return false;
-		return isSubclass(c1.getSuperclass(), c2);
-	}
 }
