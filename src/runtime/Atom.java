@@ -89,7 +89,12 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	///////////////////////////////
 	// 操作
 	public void setFunctor(Functor newFunctor) {
-		if (newFunctor.getArity() > args.length) {
+		if (args == null) {
+			if (newFunctor.getArity() != 0) {
+//				todo SystemError用の例外クラスを投げる
+				throw new RuntimeException("SYSTEM ERROR: insufficient link vector length");
+			}
+		} else if (newFunctor.getArity() > args.length) {
 			// todo SystemError用の例外クラスを投げる
 			throw new RuntimeException("SYSTEM ERROR: insufficient link vector length");
 		}
