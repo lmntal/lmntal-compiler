@@ -30,18 +30,16 @@ abstract public class Util {
 	/**
 	 * 与えられたリストから LMNtal リストを生成して与えられたリンク先につなげる
 	 * 
-	 * @param parent
-	 * @param pos
-	 * @param l
+	 * @param link LMNtal リストを接続するリンク
+	 * @param l Java リスト
 	 */
 	public static void makeList(Link link, List l) {
-		Iterator it = l.iterator();
 		Membrane mem = link.getAtom().getMem();
 		Atom parent=null;
 		boolean first=true;
-		while(it.hasNext()) {
+		for (Object o : l) {
 			Atom c = mem.newAtom(new SymbolFunctor(".", 3));  // .(Value Next Parent)
-			Atom v = mem.newAtom(new StringFunctor(it.next().toString())); // value(Value)
+			Atom v = mem.newAtom(new StringFunctor(o.toString())); // value(Value)
 			mem.newLink(c, 0, v, 0);
 			if(first) {
 				mem.inheritLink(c, 2, link);
@@ -72,7 +70,7 @@ abstract public class Util {
 		return vs;
 	}
 	public static Object[] arrayOfList(Link link) {
-		List l = new ArrayList();
+		List<Object> l = new ArrayList<Object>();
 		while(true) {
 			Atom a = link.getAtom();
 			if(!a.getFunctor().equals(DOT)) break;
@@ -210,7 +208,6 @@ abstract public class Util {
 	public static long getTime(){
 		if(Env.majorVersion==1 &&Env.minorVersion>4)
 	        return System.nanoTime();
-		else
-	        return System.currentTimeMillis();
+		return System.currentTimeMillis();
 	}
 }
