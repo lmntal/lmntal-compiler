@@ -21,6 +21,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import test.JavaTypeChecker;
 import type.TypeException;
 import type.TypeInferer;
 import util.StreamDumper;
@@ -279,6 +280,8 @@ public class FrontEnd {
 					case '-': // 文字列オプション						
 						if(args[i].equals("--gui")){
 							Env.fGUI2 = true;
+						} else if (args[i].equals("--check-java-type")) {
+							JavaTypeChecker.enabled = true;
 						} else if(args[i].equals("--compileonly")){
 					    	// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
@@ -330,8 +333,8 @@ public class FrontEnd {
 							/// Generate library.
 							Env.fLibrary = true;
 						} else if (args[i].startsWith("--max-string-length=")) { //2006.07.02 inui
-							/// --max-string-length=<len>
-							/// Set <len> as translator's maxStringLength (0 <= len <= 65534)
+							/// --max-string-length=<integer>
+							/// Set <integer> as translator's maxStringLength (0 <= integer <= 65534)
 							Translator.maxStringLength = Integer.parseInt(args[i].substring(20));
 						} else if (args[i].equals("--nd")) {
 							/// --nd
@@ -465,8 +468,8 @@ public class FrontEnd {
 							/// set <integer> as the upper limit of threads occured in leftside rules.
 							Env.threadMax = Integer.parseInt(args[i].substring(13));
 						} else if (args[i].startsWith("--temporary-dir=")) {
-							/// --temporary-dir=<dir>
-							/// use <dir> as temporary directory
+							/// --temporary-dir=<path>
+							/// use <path> as temporary directory
 							Translator.baseDirName = args[i].substring(16);
 							Translator.fKeepSource = true;
 						} else if (args[i].equals("--use-source-library")) {
@@ -638,6 +641,8 @@ public class FrontEnd {
 			try {
 				LMNParser lp = new LMNParser(src);
 				m = lp.parse();
+				if (JavaTypeChecker.enabled && JavaTypeChecker.containsJavaTypeError(m)) //2006.11.13 inui
+					System.exit(0);
 			}	
 			catch (ParseException e) {
 				Env.p("Compilation Failed");

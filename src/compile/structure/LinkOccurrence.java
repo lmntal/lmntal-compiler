@@ -24,6 +24,12 @@ public final class LinkOccurrence {
 	/** 2回しか出現しない場合に、もう片方の出現を保持する */
 	public LinkOccurrence buddy = null;
 	
+	/**
+	 * このリンク先のJavaの型
+	 * test.JavaTypeChckerで使う．
+	 * test.JavaTypeChckerがなくなればこのフィールドも消す
+	 */
+	public Class type; //2006.11.12 inui
 	
 	/**
 	 * リンク出現を生成する。
