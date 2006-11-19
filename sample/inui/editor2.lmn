@@ -23,6 +23,7 @@ H=editor.item(Label, Listener) :-
 
 H=editor.newAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
 	javax_swing_JTabbedPane.use.
+	javax_swing_JViewport.use.
 	tab(Tab).
 	actionPerformed(ActionEvent), tab(Tab) :- 
 		gc(ActionEvent),
@@ -30,57 +31,80 @@ H=editor.newAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
 		tab=addTab(Tab, "", Scroll),
 		TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)).	
 	gc(Object) :- class(Object, "java.lang.Object") | .
-}.
+	}.
+
+H=editor.openAction(Frame, Tab) :-
+	class(Frame, "javax.swing.JFrame"), class(Tab, "javax.swing.JTabbedPane") | H={
+	javax_swing_JTabbedPane.use.
+	java_io_File.use.
+	integer.use.
+	frame(Frame), tab(Tab).
+	actionPerformed(ActionEvent), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
+		fc=showOpenDialog(javax_swing_JFileChooser.new, Frame, res), frame(Frame), gc(ActionEvent).
+	res(0), tab(Tab), fc(FC) :-
+		Scroll=javax_swing_JScrollPane.new(TextArea),
+		tab=setSelectedIndex(getTabCount(addTab(Tab, Title, Scroll), Count), Count-1),
+		gc=getSelectedFile(FC, X),
+		gc=getAbsolutePath(getAbsolutePath(X, File), Title),
+		TextArea=setText(setFont(
+			javax_swing_JTextArea.new,
+			java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)), io.gets(File)).
+	res_open(1), fc(FC) :- gc(FC).
+	gc(Object) :- class(Object, "java.lang.Object") | .
+	}.
+
+H=editor.closeAllAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
+	javax_swing_JTabbedPane.use.
+	tab(Tab).
+	actionPerformed(ActionEvent), tab(Tab) :- gc(ActionEvent), tab=removeAll(Tab).
+	gc(Object) :- class(Object, "java.lang.Object") | .
+	}.
 }.
 
 //メニューバーを生成
 SearchMenu=add(javax_swing_JMenu.new("Search"), editor.item("Search"), gc).
 FileMenu=add(add(add(add(add(add(add(add(add(
 	javax_swing_JMenu.new("File"),
-	editor.item("New", editor.newAction(Tab3)), gc), editor.item("Open"), gc), editor.item("Close"), gc), editor.item("Close All", closeAllAction(Tab2)), gc),
+	editor.item("New", editor.newAction(Tab3)), gc),
+	editor.item("Open", editor.openAction(Frame, Tab4)), gc),
+	editor.item("Close"), gc),
+	editor.item("Close All", editor.closeAllAction(Tab2)), gc),
 	javax_swing_JSeparator.new, gc),
-	editor.item("Save"), SaveItem), editor.item("Save as"), gc),
+	editor.item("Save"), SaveItem),
+	editor.item("Save as"), gc),
 	javax_swing_JSeparator.new, gc),
 	editor.item("Exit", ExitActionListener), gc).
 EditMenu=add(add(add(add(add(add(add(
 	javax_swing_JMenu.new("Edit"),
-	editor.item("Copy"), gc), editor.item("Cut"), gc), editor.item("Paste"), gc), editor.item("Select All"), gc),
+	editor.item("Copy"), gc),
+	editor.item("Cut"), gc),
+	editor.item("Paste"), gc),
+	editor.item("Select All"), gc),
 	javax_swing_JSeparator.new, gc),
-	editor.item("to Upper Case"), gc), editor.item("to Lower Case"), gc).
-MenuBar=add(add(add(
+	editor.item("to Upper Case"), gc),
+	editor.item("to Lower Case"), gc).
+menuBar=add(add(add(
 	javax_swing_JMenuBar.new,
 	FileMenu, gc), EditMenu, gc), SearchMenu, gc).
 
 saveItem=setEnabled(SaveItem, false).
 
 //タブを生成
-Tab3=cp(cp(javax_swing_JTabbedPane.new, Tab1), Tab2).
+Tab4=cp(cp(cp(javax_swing_JTabbedPane.new, Tab1), Tab2), Tab3).
 
 //フレームを生成
-frame=setVisible(setDefaultCloseOperation(setJMenuBar(getContentPane(setSize(
+Frame=cp(setDefaultCloseOperation(getContentPane(setSize(
 	javax_swing_JFrame.new("LMNtal Tab Editor"),
-	600, 400), ContentPane), MenuBar), javax_swing_JFrame.exit_on_close), true).
+	600, 400), ContentPane), javax_swing_JFrame.exit_on_close), frame).
 gc=add(ContentPane, "Center", Tab1, tab).
+
+menuBar(MenuBar), frame(Frame) :- frame=setVisible(setJMenuBar(Frame, MenuBar), true).
 
 /////////////////////////////////////////////
 // アクションの定義
 
 //アクションイベントからコマンド名を取得する
 actionPerformed(ActionEvent) :- gc=getActionCommand(ActionEvent, cmd).
-
-cmd("Open"), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
-	fc=showOpenDialog(javax_swing_JFileChooser.new, Frame, res_open), frame(Frame).
-res_open(0), tab(Tab), fc(FC), saveItem(SaveItem) :-
-	Scroll=javax_swing_JScrollPane.new(TextArea),
-	tab=setSelectedIndex(getTabCount(addTab(Tab, Title, Scroll), Count), Count-1),
-	saveItem=setEnabled(SaveItem, true),
-	gc=getSelectedFile(FC, X),
-	gc=getAbsolutePath(getAbsolutePath(X, File), Title),
-	TextArea=setText(setFont(
-		javax_swing_JTextArea.new,
-		java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)), io.gets(File)).
-
-res_open(1), fc(FC) :- gc(FC).
 
 cmd("Save"), tab(Tab) :-
 	tab=getSelectedComponent(getTitleAt(getSelectedIndex(Tab, Index), Index, File), Scroll),
@@ -100,13 +124,6 @@ res_save(0), fc(FC), tab(Tab) :-
 	
 cmd("Close"), tab(Tab) :-
 	tab=remove(getSelectedComponent(Tab, Scroll), Scroll).
-
-H=closeAllAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
-	javax_swing_JTabbedPane.use.
-	tab(Tab).
-	actionPerformed(ActionEvent), tab(Tab) :- gc(ActionEvent), tab=removeAll(Tab).
-	gc(Object) :- class(Object, "java.lang.Object") | .
-}.
 
 //cmd("Close All"), tab(Tab) :- tab=removeAll(Tab).
 
