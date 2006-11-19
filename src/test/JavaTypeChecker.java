@@ -73,7 +73,7 @@ public class JavaTypeChecker {
 			if (checkJavaType(m)) updated = true;
 		}
 		for (RuleStructure rs : mem.rules) {
-			if (checkJavaType(rs.leftMem)) updated = true;
+//			if (checkJavaType(rs.leftMem)) updated = true;
 			if (checkJavaType(rs.rightMem)) updated = true;
 		}
 		return updated;
@@ -132,10 +132,12 @@ public class JavaTypeChecker {
 	public static boolean containsJavaTypeError2(Membrane mem) {
 		boolean error = false;
 		for (Atom a : mem.atoms) {
+			String name = a.getName();
+			if (name.equals("cp") || name.equals("gc")) continue;//とりあえず除外することで解決
+			if (a.getPath() != null) continue;//staticメソッドは検査しない
 			if (a.args.length <= 1) continue;
 			Class type = a.args[0].type;
 			if (type == null) continue;
-			String name = a.getName();
 			if (name.equals("new") || name.equals("=") || !a.functor.getClass().equals(SymbolFunctor.class)) continue;
 			
 			Class[] params = makeJavaParams(a);
@@ -155,13 +157,13 @@ public class JavaTypeChecker {
 				}
 			}
 		}
-//		for (Membrane m : mem.mems) {
-//			if (containsJavaTypeError2(m)) error = true;
-//		}
-//		for (RuleStructure rs : mem.rules) {
+		for (Membrane m : mem.mems) {
+			if (containsJavaTypeError2(m)) error = true;
+		}
+		for (RuleStructure rs : mem.rules) {
 //			if (containsJavaTypeError2(rs.leftMem)) error = true;
-//			if (containsJavaTypeError2(rs.rightMem)) error = true;
-//		}
+			if (containsJavaTypeError2(rs.rightMem)) error = true;
+		}
 		return error;
 	}
 	

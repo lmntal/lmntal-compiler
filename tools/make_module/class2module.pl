@@ -446,7 +446,7 @@ sub dump_final_variable {
 	my ($type, $name) = @_;
 	
 	print "H=$module." . lc($name) . " :- H=[:/*inline*/\n";
-	print "\t$type r = $absolute_class.$name;\n";
+	print "\t" . trim_class($type) . " r = $absolute_class.$name;\n";
 	if (exists($result_functors{$type})) {
 		$functor = $result_functors{$type};
 	} else {
