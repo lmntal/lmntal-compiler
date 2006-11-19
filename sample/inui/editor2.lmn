@@ -13,28 +13,43 @@ javax_swing_JViewport.use.
 /////////////////////////////////////////////
 // GUI の生成
 
+{
+module(editor).
+//ActionListener つきの MenuItem を生成するルール
+H=editor.item(Label) :-
+	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new).
+H=editor.item(Label, Listener) :-
+	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new(Listener)).
+
+H=editor.newAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
+	javax_swing_JTabbedPane.use.
+	tab(Tab).
+	actionPerformed(ActionEvent), tab(Tab) :- 
+		gc(ActionEvent),
+		Scroll=javax_swing_JScrollPane.new(TextArea),
+		tab=addTab(Tab, "", Scroll),
+		TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)).	
+	gc(Object) :- class(Object, "java.lang.Object") | .
+}.
+}.
+
 //メニューバーを生成
-SearchMenu=add(javax_swing_JMenu.new("Search"), item("Search"), gc).
+SearchMenu=add(javax_swing_JMenu.new("Search"), editor.item("Search"), gc).
 FileMenu=add(add(add(add(add(add(add(add(add(
 	javax_swing_JMenu.new("File"),
-	item("New", newAction(Tab3)), gc), item("Open"), gc), item("Close"), gc), item("Close All", closeAllAction(Tab2)), gc),
+	editor.item("New", editor.newAction(Tab3)), gc), editor.item("Open"), gc), editor.item("Close"), gc), editor.item("Close All", closeAllAction(Tab2)), gc),
 	javax_swing_JSeparator.new, gc),
-	item("Save"), SaveItem), item("Save as"), gc),
+	editor.item("Save"), SaveItem), editor.item("Save as"), gc),
 	javax_swing_JSeparator.new, gc),
-	item("Exit", ExitActionListener), gc).
+	editor.item("Exit", ExitActionListener), gc).
 EditMenu=add(add(add(add(add(add(add(
 	javax_swing_JMenu.new("Edit"),
-	item("Copy"), gc), item("Cut"), gc), item("Paste"), gc), item("Select All"), gc),
+	editor.item("Copy"), gc), editor.item("Cut"), gc), editor.item("Paste"), gc), editor.item("Select All"), gc),
 	javax_swing_JSeparator.new, gc),
-	item("to Upper Case"), gc), item("to Lower Case"), gc).
+	editor.item("to Upper Case"), gc), editor.item("to Lower Case"), gc).
 MenuBar=add(add(add(
 	javax_swing_JMenuBar.new,
 	FileMenu, gc), EditMenu, gc), SearchMenu, gc).
-//ActionListener つきの MenuItem を生成するルール
-H=item(Label) :-
-	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new).
-H=item(Label, Listener) :-
-	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new(Listener)).
 
 saveItem=setEnabled(SaveItem, false).
 
@@ -53,17 +68,6 @@ gc=add(ContentPane, "Center", Tab1, tab).
 //アクションイベントからコマンド名を取得する
 actionPerformed(ActionEvent) :- gc=getActionCommand(ActionEvent, cmd).
 
-H=newAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
-	javax_swing_JTabbedPane.use.
-	tab(Tab).
-	actionPerformed(ActionEvent), tab(Tab) :- 
-		gc(ActionEvent),
-		Scroll=javax_swing_JScrollPane.new(TextArea),
-		tab=addTab(Tab, "", Scroll),
-		TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)).	
-	gc(Object) :- class(Object, "java.lang.Object") | .
-}.
-
 cmd("Open"), frame(Frame) :- class(Frame, "javax.swing.JFrame") |
 	fc=showOpenDialog(javax_swing_JFileChooser.new, Frame, res_open), frame(Frame).
 res_open(0), tab(Tab), fc(FC), saveItem(SaveItem) :-
@@ -71,10 +75,12 @@ res_open(0), tab(Tab), fc(FC), saveItem(SaveItem) :-
 	tab=setSelectedIndex(getTabCount(addTab(Tab, Title, Scroll), Count), Count-1),
 	saveItem=setEnabled(SaveItem, true),
 	gc=getSelectedFile(FC, X),
-	gc=getAbsolutePath(getAbsolutePath(getAbsolutePath(X, File), currentFile), Title),
+	gc=getAbsolutePath(getAbsolutePath(X, File), Title),
 	TextArea=setText(setFont(
 		javax_swing_JTextArea.new,
 		java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)), io.gets(File)).
+
+res_open(1), fc(FC) :- gc(FC).
 
 cmd("Save"), tab(Tab) :-
 	tab=getSelectedComponent(getTitleAt(getSelectedIndex(Tab, Index), Index, File), Scroll),
