@@ -73,17 +73,22 @@ public class JavaTypeChecker {
 			if (checkJavaType(m)) updated = true;
 		}
 		for (RuleStructure rs : mem.rules) {
-//			if (checkJavaType(rs.leftMem)) updated = true;
+			if (checkJavaType(rs.leftMem)) updated = true;
 			if (checkJavaType(rs.rightMem)) updated = true;
 		}
 		return updated;
 	}
 	
-	private static void traverse(Membrane mem) {
+	private static void dump(Membrane mem) {
 		for (Atom a : mem.atoms)
 			System.out.println(a);
 		for (Membrane m : mem.mems)
-			traverse(m);
+			dump(m);
+		for (RuleStructure rs : mem.rules) {
+			dump(rs.leftMem);
+			dump(rs.guardMem);
+			dump(rs.rightMem);
+		}
 	}
 	
 	/**
@@ -152,6 +157,7 @@ public class JavaTypeChecker {
 				//スーパークラスの引数を試す
 				if (!toSuperClass(params)) {
 					System.out.println(Env.srcs.get(0)+":"+a.line+","+a.column+": "+type.getName()+"#"+name+" は存在しません");
+					System.out.println("\t"+a);
 					error = true;
 					break;
 				}
@@ -161,10 +167,96 @@ public class JavaTypeChecker {
 			if (containsJavaTypeError2(m)) error = true;
 		}
 		for (RuleStructure rs : mem.rules) {
-//			if (containsJavaTypeError2(rs.leftMem)) error = true;
+			if (containsJavaTypeError2(rs.leftMem)) error = true;
 			if (containsJavaTypeError2(rs.rightMem)) error = true;
 		}
 		return error;
+	}
+
+	/**
+	 * 指定された膜から指定された名前を持つリンクを返す
+	 * @param mem
+	 * @param name
+	 * @return
+	 */
+	private static LinkOccurrence findLink(Membrane mem, String name) {
+		for (Atom a : mem.atoms) {
+			for (LinkOccurrence link : a.args) {
+				if (link.buddy.atom.getName().equals(name))
+					return link;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 指定された膜から指定された名前を持つリンクのリストを返す
+	 * @param mem
+	 * @param name
+	 * @return
+	 */
+	private static List<LinkOccurrence> findLinks(Membrane mem, String name) {
+		List<LinkOccurrence> links = new ArrayList<LinkOccurrence>();
+		for (Atom a : mem.atoms) {
+			for (LinkOccurrence link : a.args) {
+				if (link.buddy.atom.getName().equals(name))
+					links.add(link);
+			}
+		}
+		for (Membrane m : mem.mems) {
+			links.add(findLink(m, name));
+		}
+		for (RuleStructure rs : mem.rules) {
+			for (Membrane m : rs.leftMem.mems)
+				links.add(findLink(m, name));
+			for (Membrane m : rs.rightMem.mems)
+				links.add(findLink(m, name));
+		}
+		return links;
+	}
+	
+	/**
+	 * classガード制約から型をつける
+	 * @param mem
+	 */
+	private static boolean checkJavaTypeByClassGuard(Membrane mem) {
+		boolean updated = false;
+		for (RuleStructure rs : mem.rules) {
+			for (Atom a : rs.guardMem.atoms) {
+				if (a.getName().equals("class")) {
+					LinkOccurrence headLink = findLink(rs.leftMem, a.args[0].buddy.atom.getName());
+					LinkOccurrence link1 = findLink(rs.guardMem, a.args[1].buddy.atom.getName());
+					List<LinkOccurrence> bodyLinks = findLinks(rs.rightMem, a.args[0].buddy.atom.getName());
+//					System.out.println(a.args[0].buddy.atom+" <=> "+link0);
+//					System.out.println(a.args[1].buddy.atom+" <=> "+link1.atom.getName());
+//					System.out.println(a.args[0].buddy.atom+" <=> "+link2);
+					try {
+						if (updateJavaType(headLink, Class.forName(link1.atom.getName())))
+							updated = true;
+						for (LinkOccurrence link : bodyLinks) {
+							if (link != null && updateJavaType(link, Class.forName(link1.atom.getName())))
+								updated = true;
+						}
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			for (Membrane m : rs.rightMem.mems) {
+				if (checkJavaTypeByClassGuard(m))
+					updated = true;
+			}
+			for (Membrane m : rs.leftMem.mems) {
+				if (checkJavaTypeByClassGuard(m))
+					updated = true;
+			}
+		}
+		//子膜
+		for (Membrane m : mem.mems) {
+			if (checkJavaTypeByClassGuard(m))
+				updated = true;
+		}
+		return updated;
 	}
 	
 	/**
@@ -173,8 +265,10 @@ public class JavaTypeChecker {
 	 * @return
 	 */
 	public static boolean containsJavaTypeError(Membrane mem) {
+		while (checkJavaTypeByClassGuard(mem));
 		while (checkJavaType(mem));
-
+		dump(mem);
 		return containsJavaTypeError2(mem);
+//		return true;
 	}
 }
