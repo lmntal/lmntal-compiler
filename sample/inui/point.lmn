@@ -1,0 +1,38 @@
+//二次元の点クラス
+{
+module(point).
+H=point.new(X, Y) :- int(X), int(Y) | H={x(X), y(Y)}.
+H=setX({x(X), $p, @p}, NewX) :- int(X), int(NewX) | H={x(NewX), $p, @p}.
+H=setY({y(Y), $p, @p}, NewY) :- int(Y), int(NewY) | H={y(NewY), $p, @p}.
+H=getX({x(X), $p, @p}, ResX) :- int(X) | H={x(X), $p, @p}, ResX=X.
+H=getY({y(Y), $p, @p}, ResY) :- int(Y) | H={y(Y), $p, @p}, ResY=Y.
+}.
+
+//色つきの二次元座標
+{
+module(colorPoint).
+H=colorPoint.new(X, Y, Color) :- int(X), int(Y), unary(Color) |
+	H={x(X), y(Y), color(Color)}.
+H=getColor({color(Color), $p, @p}, ResColor) :- unary(Color) |
+	H={color(Color), $p, @p}, ResColor = Color.
+H=setColor({color(Color), $p, @p}, NewColor) :- unary(Color), unary(NewColor) |
+	H={color(NewColor), $p, @p}.
+}.
+
+//線分
+{
+module(line).
+integer.use.
+H=line.new(Start, End) :- H={start(Start), end(End)}.
+//H=line.new({$p,@p}, {$q,@q}) :- H={start({$p,@p}), end({$q,@q})}.
+H=length({start(Start), end(End), $p, @p}, Length) :-
+	Length=(X1-X2)*(Y1-Y2),
+	H={start=getY(getX(Start, X1), Y1), end=getY(getX(End, X2), Y2), $p, @p}.
+}.
+
+//p1=getY(getX(setY(setX(point.new(1, 2), 10), 20), x), y).
+//p2=getColor(getX(colorPoint.new(1, 2, blue), x1), color).
+P1=point.new(0,0).
+P2=point.new(3,4).
+
+l=length(line.new(P1, P2), len).
