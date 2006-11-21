@@ -12,14 +12,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import runtime.Dumper;
 import runtime.Env;
@@ -46,17 +43,17 @@ public class Debug {
 	//直前に適用されたルールのテストタイプ
 	private static int testType;
 	
-	//ブレークポイントのリスト
-	private static List breakPoints = new ArrayList();
+	//ブレークポイントの集合
+	private static Set<Integer> breakPoints = new HashSet<Integer>();
 	
 	//全ルールのセット
-	private static Set rules = new HashSet();
+	private static Set<Rule> rules = new HashSet<Rule>();
 	
 	//実行中のファイル名(とりあえずファイルが1つであると仮定)
 	private static String unitName;
 	
 	//ソースプログラム
-	private static Vector source;
+	private static Vector<String> source;
 	
 	//最後に表示した行番号
 	private static int lastLineno;
@@ -112,7 +109,7 @@ public class Debug {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(unitName));
 			String s = null;
-			source = new Vector();
+			source = new Vector<String>();
 			source.add("** system rule **");
 			while ((s = br.readLine()) != null)
 				source.add(s);
@@ -133,20 +130,8 @@ public class Debug {
 	 */
 	public static void toggleBreakPointAt(int lineno) {
 		//すでに存在するブレークポイントなら削除
-		for (int i = 0; i < breakPoints.size(); i++) {
-			if (((Integer)breakPoints.get(i)).intValue() == lineno) {
-				breakPoints.remove(i);
-				return;
-			}
-		}
-		Iterator iter = ruleIterator();
-		while (iter.hasNext()) {
-			int r = ((Rule)iter.next()).lineno;
-			if (r == lineno) {
-				breakPoints.add(new Integer(lineno));
-				break;
-			}
-		}
+		if (breakPoints.contains(lineno)) breakPoints.remove(lineno);
+		else breakPoints.add(lineno);
 	}
 	
 	/**
@@ -155,11 +140,9 @@ public class Debug {
 	 * @return 指定された行にルールがなかったらfalse
 	 */
 	public static boolean addBreakPoint(int lineno) {
-		Iterator iter = ruleIterator();
-		while (iter.hasNext()) {
-			Rule r = (Rule)iter.next();
+		for (Rule r : rules) {
 			if (r.lineno == lineno) {
-				breakPoints.add(new Integer(lineno));
+				breakPoints.add(lineno);
 				return true;
 			}
 		}
@@ -172,11 +155,9 @@ public class Debug {
 	 * @return 指定されたルール名がなかったらfalse
 	 */
 	public static boolean addBreakPoint(String name) {
-		Iterator iter = ruleIterator();
-		while (iter.hasNext()) {
-			Rule r = (Rule)iter.next();
+		for (Rule r : rules) {
 			if (r.name != null && r.name.equals(name)) {
-				breakPoints.add(new Integer(r.lineno));
+				breakPoints.add(r.lineno);
 				return true;
 			}
 		}
@@ -189,9 +170,8 @@ public class Debug {
 	 */
 	public static boolean isBreakPoint() {
 		if (isStepping) return true;
-		Iterator itr = breakPointIterator();
-		while (itr.hasNext()) {
-			if (currentLineNumber == ((Integer)itr.next()).intValue()) {
+		for (Integer lineno : breakPoints) {
+			if (currentLineNumber == lineno.intValue()) {
 				return true;
 			}
 		}
