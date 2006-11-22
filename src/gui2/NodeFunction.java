@@ -48,7 +48,6 @@ public class NodeFunction {
 			// 表示されているNodeを取得する
 			Node nthNode = LinkSet.getNode(nthAtom);
 			Point2D nthPoint = nthNode.getCenterPoint();
-			System.out.println(nthNode);
 			if(null == nthNode ||
 					null == nthPoint ||
 					sourceNode == nthNode)
