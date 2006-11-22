@@ -22,17 +22,53 @@ H=setColor({color(Color), $p, @p}, NewColor) :- unary(Color), unary(NewColor) |
 //線分
 {
 module(line).
-integer.use.
-H=line.new(Start, End) :- H={start(Start), end(End)}.
-//H=line.new({$p,@p}, {$q,@q}) :- H={start({$p,@p}), end({$q,@q})}.
-H=length({start(Start), end(End), $p, @p}, Length) :-
-	Length=(X1-X2)*(Y1-Y2),
-	H={start=getY(getX(Start, X1), Y1), end=getY(getX(End, X2), Y2), $p, @p}.
+//H=line.new(Start, End) :- H={start(Start), end(End)}.
+H=line.new({$p,@p}, {$q,@q}) :- H={start({$p,@p}), end({$q,@q}), point.use.}.
+H=length({start(Start), end(End), $p[Start,End], @p}, Length) :- H={
+	start=getY(getX(Start, X1), Y1).
+	end=getY(getX(End, X2), Y2).
+	$p[Start,End], @p.
+	Length=(X1-X2)*(Y1-Y2).
+	}.
+}.
+
+//折れ線
+{
+module(polyline).
+H=polyline.new :- H={points=[]}.
+H=addPoint({points=Points, $p[Points], @p}, {$q,@q}) :-
+	H={points=[{$q,@q}|Points], $p[Points], @p}.
+}.
+
+//円
+{
+module(circle).
+H=circle.new({$p,@p}, Radius) :- int(Radius) | H={center={$p,@p}, radius=Radius}.
+H=calcArea({radius=Radius, $p, @p}, Area) :- int(Radius) |
+	H={radius=Radius, $p, @p},
+	Area=Radius*Radius*3.
+}.
+
+//長方形
+{
+module(rectangle).
+H=rectangle.new({$p,@p}, {$q,@q}) :- H={start={$p,@p}, end={$q,@q}, point.use.}.
+H=calcArea({start(Start), end(End), $p[Start,End], @p}, Area) :-
+	H={start=getY(getX(Start, X1), Y1), end=getY(getX(End, X2), Y2), $p[Start,End], @p},
+	Area=(X2-X1)*(Y2-Y1).
 }.
 
 //p1=getY(getX(setY(setX(point.new(1, 2), 10), 20), x), y).
 //p2=getColor(getX(colorPoint.new(1, 2, blue), x1), color).
-P1=point.new(0,0).
-P2=point.new(3,4).
+P1=point.new(1,-1).
+P2=point.new(2,-2).
+//P3=point.new(3,-3).
 
-l=length(line.new(P1, P2), len).
+//line1=length(line.new(P1, P2), len).
+//len(Len), H={Len=X, $p, @p} :- int(X) | len=X, H={$p, @p}.
+
+//pl=addPoint(addPoint(addPoint(polyline.new, P1), P2), P3).
+//c1=calcArea(circle.new(point.new(0,0), 5), area).
+rect=calcArea(rectangle.new(P1, P2), area).
+
+//cp({$p,@p}, Object1, Object2) :- {$p,@p,+Object1,+Object2}.
