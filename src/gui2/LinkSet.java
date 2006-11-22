@@ -9,6 +9,13 @@ import java.util.Map;
 
 import runtime.Atom;
 
+/**
+ * UNYO-UNYOのリンクを管理するクラス
+ * <P>
+ * すべてのメソッドはstaticで宣言される
+ * @author nakano
+ *
+ */
 public class LinkSet {
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -83,8 +90,13 @@ public class LinkSet {
 	
 	static
 	public Point2D.Double getNodePoint(Object key){
-		Node node = linkMap_.get(key);
+		Node node = getVisibleNode(linkMap_.get(key));
 		return (null != node) ? node.getCenterPoint() : null;
+	}
+	
+	static
+	public Node getNode(Object key){
+		return getVisibleNode((Node)linkMap_.get(key));
 	}
 	
 	/**

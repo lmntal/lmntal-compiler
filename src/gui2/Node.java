@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,33 +35,34 @@ public class Node {
 	///////////////////////////////////////////////////////////////////////////
 	
 	
-	/* 移動情報 */
+	/** 移動情報 */
 	private double dx_;
-	
+
+	/** 移動情報 */
 	private double dy_;
 	
-	/* アトムまたはアトム的（閉じた膜）であるか */
+	/** アトムまたはアトム的（閉じた膜）であるか */
 	private boolean imAtom_;
 	
-	/* 自Nodeの色 */
+	/** 自Nodeの色 */
 	private Color myColor_ = Color.BLUE;
 	
-	/* 自Nodeのオブジェクト（Atom または Membrane）*/
+	/** 自Nodeのオブジェクト（Atom または Membrane）*/
 	private Object myObject;
 
-	/* Node名 */
+	/** Node名 */
 	private String name_ = "";
 	
-	/* 子Node */
+	/** 子Node */
 	private Map<Object, Node> nodeMap_ = new HashMap<Object, Node>();
 	
-	/* 親膜 */
+	/** 親膜 */
 	private Node parent_;
 	
-	/* 取得可否 */
+	/** 取得可否 */
 	private boolean pickable_ = true;
 	
-	/* 描画用の形 */
+	/** 描画用の形 */
 	private RoundRectangle2D.Double rect_ = new RoundRectangle2D.Double((Math.random() * 800) - 400,
 			(Math.random() * 600) - 300,
 			40.0,
@@ -68,14 +70,14 @@ public class Node {
 			ROUND,
 			ROUND);
 	
-	/* リンクのリスト */
-	private List<Object> linkList_ = new LinkedList<Object>(); 
+	/** 非計算フラグ */
+	private boolean uncalc_ = false;
 	
-	/* 可視フラグ */
-	private boolean visible;
+	/** 可視フラグ */
+	private boolean visible_;
 	
-	/* 一番ルートに近い不可視のNode */
-	private Node invisibleRootNode = null;
+	/** 一番ルートに近い不可視のNode */
+	private Node invisibleRootNode_ = null;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -83,7 +85,7 @@ public class Node {
 		parent_ = node;
 		myObject = object;
 		
-		visible = true;
+		visible_ = true;
 		
 		// 膜、アトムの初期化
 		if(Atom.class.isInstance(object)){
@@ -115,13 +117,14 @@ public class Node {
 	 */
 	public void calc(){
 		NodeFunction.calcSpring(this);
-		moveCalc();
+//		moveCalc();
 	}
 	
 	/**
 	 * 位座標などの計算を自分を含めたすべての子Nodeにて行う
 	 */
 	public void calcAll(){
+		if(uncalc_){ return; }
 		calc();
 		synchronized (nodeMap_) {
 			Iterator<Node> nodes = nodeMap_.values().iterator();
@@ -145,7 +148,7 @@ public class Node {
 	}
 	
 	public Node getInvisibleRootNode(){
-		return invisibleRootNode;
+		return invisibleRootNode_;
 	}
 	
 	/**
@@ -191,7 +194,7 @@ public class Node {
 	 * @return
 	 */
 	public boolean isAtom(){
-		return (imAtom_ || !visible);
+		return (imAtom_ || !visible_);
 	}
 	
 	/**
@@ -203,13 +206,21 @@ public class Node {
 	}
 	
 	/**
+	 * 計算対象であるかの取得
+	 * @return
+	 */
+	public boolean isUncalc() {
+		return uncalc_;
+	}
+	
+	/**
 	 * 可視状態であるか
 	 */
 	public boolean isVisible(){
 		if(Atom.class.isInstance(myObject)){
 			return parent_.isVisible();
 		}
-		return visible;
+		return visible_;
 	}
 	
 	/**
@@ -220,7 +231,7 @@ public class Node {
 		if(!Membrane.class.isInstance(myObject)){
 			return;
 		}
-		visible = true;
+		visible_ = true;
 		if(null == parent_){ return; }
 		parent_.iWillBeAMembrane();
 	}
@@ -236,6 +247,21 @@ public class Node {
 		rect_.setFrameFromCenter(rect_.getCenterX(), rect_.getCenterY(), rect_.getCenterX() - 40, rect_.getCenterY() - 40);
 		LinkSet.addLink(myObject, this);
 		
+	}
+	
+	/**
+	 * 移動を自分を含めたすべての子Nodeにて行う
+	 */
+	public void moveAll(){
+		if(uncalc_){ return; }
+		moveCalc();
+		synchronized (nodeMap_) {
+			Iterator<Node> nodes = nodeMap_.values().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				node.moveAll();
+			}
+		}
 	}
 	
 	/**
@@ -256,11 +282,17 @@ public class Node {
 	 * @param dy
 	 */
 	public void moveDelta(double dx, double dy){
-		if(null != invisibleRootNode || this == invisibleRootNode){
-			parent_.moveDelta(dx, dy);
-		} else {
-			dx_ += dx;
-			dy_ += dy;
+		if(uncalc_){ return; }
+		dx_ += dx;
+		dy_ += dy;
+		if(null != invisibleRootNode_){
+			synchronized (nodeMap_) {
+				Iterator<Node> nodes = nodeMap_.values().iterator();
+				while(nodes.hasNext()){
+					Node node = nodes.next();
+					node.moveDelta(dx, dy);
+				}
+			}
 		}
 	}
 	
@@ -289,7 +321,7 @@ public class Node {
 				}
 				if(null != parent_){
 					g.setColor(myColor_);
-					if(visible){
+					if(visible_){
 						((Graphics2D)g).draw(rect_);
 						g.setColor(Color.BLACK);
 						g.drawString(name_, (int)rect_.x, (int)rect_.y);
@@ -345,12 +377,12 @@ public class Node {
 	 * @param invisbleNode
 	 */
 	public void setInvisibleRootNode(Node invisibleNode){
-		invisibleRootNode = ((null == invisibleNode) && (!visible)) ? this : invisibleNode;
+		invisibleRootNode_ = ((null == invisibleNode) && (!visible_)) ? this : invisibleNode;
 		synchronized (nodeMap_) {
 			Iterator<Node> nodes = nodeMap_.values().iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
-				node.setInvisibleRootNode(invisibleRootNode);
+				node.setInvisibleRootNode(invisibleRootNode_);
 			}
 		}
 	}
@@ -439,7 +471,7 @@ public class Node {
 			nodeMap_.putAll(atomNodeMap);
 			
 			// サイズ変更
-			if(visible){
+			if(visible_){
 				rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);
 			}
 		}
@@ -474,7 +506,7 @@ public class Node {
 			Iterator<Node> nodes = nodeMap_.values().iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
-				node.setPosDelta(x - rect_.x, y - rect_.y);
+				node.setPosDelta(x, y);
 			}
 			rect_.x = x;
 			rect_.y = y;
@@ -488,14 +520,37 @@ public class Node {
 	 * @param p
 	 */
 	public void setPosDelta(double dx, double dy){
+		if(null == parent_){
+			dx = dx + rect_.x;
+			dy = dy + rect_.y;
+		} else {
+			Rectangle2D parentRect = parent_.getBounds2D();
+			dx = dx + (rect_.x - parentRect.getX());
+			dy = dy + (rect_.y - parentRect.getY());
+		}
 		synchronized (nodeMap_) {
 			Iterator<Node> nodes = nodeMap_.values().iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
 				node.setPosDelta(dx, dy);
 			}
-			rect_.x += dx;
-			rect_.y += dy;
+			rect_.x = dx;
+			rect_.y = dy;
+		}
+	}
+	
+	/**
+	 * 非計算ノードのフラグをセットする
+	 * @param uncalc
+	 */
+	public void setUncalc(boolean uncalc) {
+		uncalc_ = uncalc;
+		synchronized (nodeMap_) {
+			Iterator<Node> nodes = nodeMap_.values().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				node.setUncalc(uncalc);
+			}
 		}
 	}
 	
@@ -505,7 +560,7 @@ public class Node {
 	 * @param foruce 強制的に子膜も可視状態をflagにセットする
 	 */
 	public void setVisible(boolean flag, boolean foruce){
-		visible = (parent_ != null) ? flag : true;
+		visible_ = (parent_ != null) ? flag : true;
 
 		
 		if(foruce){
@@ -519,15 +574,15 @@ public class Node {
 		}
 		
 		// 可視になった
-		if(visible && Membrane.class.isInstance(myObject)){
+		if(visible_ && Membrane.class.isInstance(myObject)){
 			iWillBeAMembrane();
 			setMembrane((Membrane)myObject);
-			if(this == invisibleRootNode){
+			if(this == invisibleRootNode_){
 				setInvisibleRootNode(null);
 			}
 		}
 		// 不可視になった
-		else if(!visible && Membrane.class.isInstance(myObject)){
+		else if(!visible_ && Membrane.class.isInstance(myObject)){
 			iWillBeAnAtom();
 			setInvisibleRootNode(this);
 		}
@@ -543,6 +598,6 @@ public class Node {
 			parent_.swapVisible();
 			return;
 		}
-		setVisible(!visible, false);
+		setVisible(!visible_, false);
 	}
 }

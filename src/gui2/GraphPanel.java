@@ -82,13 +82,17 @@ public class GraphPanel extends JPanel implements Runnable {
 					moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
 					if(null == moveTargetNode_){ return; }
 					moveTargetNode_.swapVisible();
+					moveTargetNode_.setUncalc(false);
 					moveTargetNode_ = null;
 					lastPoint = null;
 					return;
 				}
 				
 				setCursor(new Cursor(Cursor.MOVE_CURSOR));
-				moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, false);
+				moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
+				if(null != moveTargetNode_){
+					moveTargetNode_.setUncalc(true);
+				}
 				lastPoint = e.getPoint();
 			}
 			
@@ -97,7 +101,10 @@ public class GraphPanel extends JPanel implements Runnable {
 			 * <p>最初に押されたときより移動していたら移動した距離を取得</p>
 			 */
 			public void mouseReleased(MouseEvent e) {
-				moveTargetNode_ = null;
+				if(null != moveTargetNode_){
+					moveTargetNode_.setUncalc(false);
+					moveTargetNode_ = null;
+				}
 				setCursor(new Cursor(Cursor.HAND_CURSOR));
 			}
 		});
@@ -157,12 +164,17 @@ public class GraphPanel extends JPanel implements Runnable {
 		if(null == rootNode_){ return; }
 		rootNode_.reset(rootMembrane_);
 		rootNode_.calcAll();
+		rootNode_.moveAll();
 	}
 
 	public void setMagnification(double magni){
 		magnification_ = magni * 2;
 	}
 	
+	/**
+	 * 拡大縮小の倍率を取得する
+	 * @return
+	 */
 	public double getMagnification(){
 		return magnification_;
 	}
@@ -190,6 +202,9 @@ public class GraphPanel extends JPanel implements Runnable {
 		}
 	}
 	
+	/**
+	 * グラフを描画する
+	 */
 	public void paint(Graphics g) {
 		if (OSI_ == null) {
 			OSI_ = createImage((int) getSize().getWidth(), (int) getSize().getHeight());
