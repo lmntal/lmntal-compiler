@@ -11,13 +11,18 @@ java.io.BufferedReader
 java.io.File
 java.io.FileFilter
 java.io.FileReader
+java.io.InputStream
 java.io.InputStreamReader
+java.io.OutputStream
 java.io.PrintWriter
 java.io.Reader
 java.io.Writer
 java.lang.Math
 java.lang.String
 java.lang.System
+java.net.ConnectException
+java.net.ServerSocket
+java.net.Socket
 java.util.EventObject
 java.util.Random
 java.util.Scanner
@@ -35,5 +40,6 @@ javax.swing.JScrollPane
 javax.swing.JSeparator
 javax.swing.JTabbedPane
 javax.swing.JTextArea
+javax.swing.JTextField
 javax.swing.JViewport
 javax.swing.text.JTextComponent

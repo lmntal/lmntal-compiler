@@ -252,6 +252,16 @@ sub to_lmntal_method {
 	return lcfirst($method); # 先頭を小文字にして返す
 }
 
+# 戻り値がオブジェクトだった場合のインポートを出力する
+sub dump_return_type_use {
+	$_=$_[0];
+	if (/^[\w]+\.[\w.]+$/) { #クラスだったら
+		tr/./_/;
+		return ",$_.use,($_.use:-())";
+	}
+	return "";
+}
+
 # メソッドを出力する
 sub dump_method {
 	my ($type, $method, @args) = @_;
@@ -278,7 +288,7 @@ sub dump_method {
 		print "\tme.nthAtom($i).remove();\n";
 	}
 	print "\tme.remove();\n";
-	print "\t:]($ARGS).\n";
+	print "\t:]($ARGS)" . dump_return_type_use($type). ".\n";
 	print "\n";
 }
 
@@ -306,7 +316,7 @@ sub dump_static_method {
 		print "\tme.nthAtom($i).remove();\n";
 	}
 	print "\tme.remove();\n";
-	print "\t:]($ARGS)" . $uses . ".\n";
+	print "\t:](${ARGS})${uses}.\n";
 	print "\n";
 }
 
