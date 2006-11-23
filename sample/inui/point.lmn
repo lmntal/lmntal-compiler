@@ -6,6 +6,7 @@ H=setX({x(X), $p, @p}, NewX) :- int(X), int(NewX) | H={x(NewX), $p, @p}.
 H=setY({y(Y), $p, @p}, NewY) :- int(Y), int(NewY) | H={y(NewY), $p, @p}.
 H=getX({x(X), $p, @p}, ResX) :- int(X) | H={x(X), $p, @p}, ResX=X.
 H=getY({y(Y), $p, @p}, ResY) :- int(Y) | H={y(Y), $p, @p}, ResY=Y.
+H=move(Point, DX, DY) :- H=setY(getY(setX(getX(Point, X), X+DX), Y), Y+DY).
 }.
 
 //色つきの二次元座標
@@ -60,8 +61,8 @@ H=calcArea({start(Start), end(End), $p[Start,End], @p}, Area) :-
 
 //p1=getY(getX(setY(setX(point.new(1, 2), 10), 20), x), y).
 //p2=getColor(getX(colorPoint.new(1, 2, blue), x1), color).
-P1=point.new(1,-1).
-P2=point.new(2,-2).
+p=move(point.new(1,2), 3, 4).
+//P2=point.new(2,-2).
 //P3=point.new(3,-3).
 
 //line1=length(line.new(P1, P2), len).
@@ -69,6 +70,5 @@ P2=point.new(2,-2).
 
 //pl=addPoint(addPoint(addPoint(polyline.new, P1), P2), P3).
 //c1=calcArea(circle.new(point.new(0,0), 5), area).
-rect=calcArea(rectangle.new(P1, P2), area).
+//rect=calcArea(rectangle.new(P1, P2), area).
 
-//cp({$p,@p}, Object1, Object2) :- {$p,@p,+Object1,+Object2}.
