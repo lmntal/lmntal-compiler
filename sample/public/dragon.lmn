@@ -11,6 +11,7 @@ go:-{
 	window.
 	size(640,530).
 	name("hoge").
+        killer.
 
 	now(1).
 	a(179,140,400,350, 7).

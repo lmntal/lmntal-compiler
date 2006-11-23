@@ -12,7 +12,7 @@ go:-{
 	size(640,530).
 	name("hoge").
 	bgcolor(0,0,0).
-
+        killer.
 	now(1).
 	a(179,140,400,350, 7).
 	color(255,0,0).
