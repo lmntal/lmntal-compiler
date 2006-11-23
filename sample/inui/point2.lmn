@@ -1,0 +1,39 @@
+/*
+ * オブジェクトのコピー・破棄をしないバージョン
+ */
+oo.use.
+
+//二次元の点クラス
+{
+module(point).
+H=point.new(X, Y) :- H={x(X), y(Y)}.
+H=setX({$p,@p}, NewX) :- H={x(NewX), $p,@p}.
+H=setY({$p,@p}, NewY) :- H={y(NewY), $p,@p}.
+H=getX({x(X), $p,@p}, ResX) :- H={$p,@p}, ResX=X.
+H=getY({y(Y), $p,@p}, ResY) :- H={$p,@p}, ResY=Y.
+H=move(Point, DX, DY) :- H=setY(getY(setX(getX(Point, X), X+DX), Y), Y+DY).
+}.
+
+//色つきの二次元座標
+{
+module(colorPoint).
+H=colorPoint.new(X, Y, Color) :- H={x(X), y(Y), color(Color)}.
+H=getColor({color(Color), $p}, ResColor) :- H={$p}, ResColor=Color.
+H=setColor({$p}, NewColor) :- H={color(NewColor), $p}.
+}.
+
+//線分
+{
+module(line).
+H=line.new(Start, End) :- H={start(Start), end(End)}.
+H=length({start(Start), end(End)}, Length) :- H={
+	point.use.
+	start=getY(getX(Start, X1), Y1).
+	end=getY(getX(End, X2), Y2).
+	},
+	Length=(X1-X2)*(Y1-Y2).
+}.
+
+P1=point.new(1, 2).
+P2=point.new(3, 4).
+line=length(line.new(P1, P2), len).
