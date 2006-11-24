@@ -122,7 +122,7 @@ p(A,B,C,D,E) :- A=B,C=D,g(E).  e(A),p(A,B,B,C,C). %e(g)  %ok
 %% int
 %% ¸¡ºº
 i($i) :- int($i) | j($i). i(3), i(4), i(5). % j(3), j(4), j(5). %ok
-i($i) :- int($i) | yes. i('3').           % yes.           %ng
+i($i) :- int($i) | yes. i('3').           % yes.           %ok
 i($i) :- int($i) | yes. i("3").           % yes.           %ng
 i($i) :- int($i) | yes. i(a).             % yes.           %ng
 %% ±é»»
@@ -146,7 +146,7 @@ neq($i, $j) :- $i =\= $j | yes. eq(10, 10). % yes. %ng
 %% float
 %% ¸¡ºº
 f($f) :- float($f) | yes. f(0.0), f(-0.0), f(1.0), f(2.2). f(-3.5). % yes,yes,yes,yes,yes. %ok
-f($f) :- float($f) | yes. f(0). f(a). f("hello"). f('5.0').         % f(0). f(a). f("hello"). f('5.0'). %ok
+f($f) :- float($f) | yes. f(0). f(a). f("5.0"). f('5.0').         % f(0). f(a). f("5.0"). yes. %ok
 %% ±é»»
 sum($i,$j,$k)  :- $z=$i +. $j +. $k  | ans($z). sum(21.0,24.2,5.3). % ans(50.5) %ok
 msum($i,$j,$k) :- $z=-.$i-.$j-.$k | ans($z). msum(4.0,8.3,12.5). % ans(-24.8) %ok
@@ -208,6 +208,9 @@ a($x), b($y) :- unary($x), $x \= $y | c($x,$y). a(g(g)), b(g(g)), a(m), b(m). % 
 a($x) :- ground($x) | b($x,$x,$x). a(m). a(t(t,t)). a(o(o(O),O)).  % b(m,m,m), b(t(t,t),t(t,t),t(t,t)), b(o(o(O1),O1),o(o(O2),O2),o(o(O3),O3)). %ok
 a($x) :- ground($x) | $x=$x. a(m), a(t(t,t)), a(o(o(O),O)). % m=m. t(t,t,t(t,t)). o(o(O1),O1,o(o(O2),O2)). %ok
 a($x) :- ground($x) | t(T1,T2,T3),{ T1=$x,{T2=$x,{T3=$x}}}. a(m). % t(S1,S2,S3), {m(S1),{m(S2),{m(S3)}}}. %ok
+
+%% 2006/11/24¥Ð¥°Êó¹ð(from nakano)
+{w(a)}. {w(D)} :- ground(D) |{x(D)}. % {x(a)}. %ok
 
 %% Â¿°ú¿ôground
 %% ¸¡ºº
