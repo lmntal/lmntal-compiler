@@ -63,55 +63,20 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	}
 	/////////////////////////////////////////////////////////////////
 	
-	private void initComponents() {
-		panel = new GraphPanel();
-
-		setTitle(TITLE);
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new JScrollPane(panel), BorderLayout.CENTER);
-	}
-	
-	public void setMagnification(double magni){
-		panel.setMagnification(magni);	
-	}
-	
-	public void onTrace(){
-		if(null != rootMembrane){
-			logFrame.setLog(rootMembrane.toString());
-		}
-		while(running) {
-			if(!stopCalc){
-				break;
-			}
-			try {
-				Thread.sleep(SLEEP_TIME);
-			} catch (InterruptedException e) {
-				// TODO 自動生成された catch ブロック
-				e.printStackTrace();
-			}
-		}
-		stopCalc = true;
-	}
-	
-	public void setRootMem(Membrane mem){
-		rootMembrane = mem;
-		panel.setRootMem(mem);
-	}
-	
-	/**
-	 * すべての膜を表示に設定
-	 *
-	 */
-	public void showAll(){
-		panel.showAll();
-	}
-	
 	/**
 	 * すべての膜を非表示に設定
 	 *
 	 */
 	public void hideAll(){
 		panel.hideAll();
+	}
+	
+	private void initComponents() {
+		panel = new GraphPanel();
+
+		setTitle(TITLE);
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(new JScrollPane(panel), BorderLayout.CENTER);
 	}
 	
 	public void keyPressed(KeyEvent e) {
@@ -123,20 +88,50 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	public void keyTyped(KeyEvent e) {
 		System.out.println(e.getKeyChar());
 	}
-}
-
-class MyThread extends Thread {
-	LMNtalFrame f;
-	MyThread(LMNtalFrame ff) {
-		f = ff;
-	}
 	
-	public void run() {
-		while(true) {
+	/**
+	 * 処理系本体が計算を続行してよいかの問い合わせ受付。
+	 *
+	 */
+	public void onTrace(){
+		if(null != rootMembrane){
+			logFrame.setLog(rootMembrane.toString());
+		}
+		while(running) {
+			if(!stopCalc){
+				break;
+			}
 			try {
-				sleep(4000);
-			} catch (Exception e) {
+				Thread.sleep(SLEEP_TIME);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
+		stopCalc = true;
+	}
+	
+	/**
+	 * 倍率をセットする
+	 * @param magni
+	 */
+	public void setMagnification(double magni){
+		panel.setMagnification(magni);	
+	}
+	
+	/**
+	 * root膜をセットする
+	 * @param mem
+	 */
+	public void setRootMem(Membrane mem){
+		rootMembrane = mem;
+		panel.setRootMem(mem);
+	}
+	
+	/**
+	 * すべての膜を表示に設定
+	 *
+	 */
+	public void showAll(){
+		panel.showAll();
 	}
 }

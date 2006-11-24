@@ -21,7 +21,7 @@ import javax.swing.border.BevelBorder;
 
 import runtime.Membrane;
 
-public class GraphPanel extends JPanel implements Runnable {
+public class GraphPanel extends JPanel {
 
 	///////////////////////////////////////////////////////////////////////////
 	// static
@@ -34,7 +34,8 @@ public class GraphPanel extends JPanel implements Runnable {
 	
 	///////////////////////////////////////////////////////////////////////////
 	
-	private Thread th_ = null;
+	private Thread calcTh_ = null;
+	private Thread repaintTh_ = null;
 	private Image OSI_ = null;
 	private Graphics OSG_ = null;
 	private Node moveTargetNode_ = null;
@@ -129,8 +130,11 @@ public class GraphPanel extends JPanel implements Runnable {
 
 		}
 		);
-		
-		start();
+
+		calcTh_ = new CalcThread();
+		calcTh_.start();
+		repaintTh_ = new RepaintThread();
+		repaintTh_.start();
 	}
 	
 	public void setRootMem(Membrane mem){
@@ -179,29 +183,6 @@ public class GraphPanel extends JPanel implements Runnable {
 		return magnification_;
 	}
 	
-	public void start() {
-		if (th_ == null) {
-			th_ = new Thread(this);
-			th_.start();
-		}
-	}
-	
-	public void stop() {
-		th_ = null;
-	}
-	
-	public void run() {
-		Thread me = Thread.currentThread();
-		while (me == th_) {
-			try {
-				calc();
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-			}
-			repaint();
-		}
-	}
-	
 	/**
 	 * グラフを描画する
 	 */
@@ -223,6 +204,56 @@ public class GraphPanel extends JPanel implements Runnable {
 	        if(null != rootNode_){
 	        	rootNode_.paint(g);
 	        }
+		}
+	}
+
+	/**
+	 * 演算用スレッド
+	 * @author nakano
+	 *
+	 */
+	class CalcThread extends Thread {
+		private boolean runnable_ = true;
+		
+		public CalcThread() {}
+		
+		public void run() {
+			while(runnable_) {
+				try {
+					sleep(40);
+					calc();
+				} catch (Exception e) {
+				}
+			}
+		}
+		
+		public void setRunnable(boolean runnable){
+			runnable_ = runnable;
+		}
+	}
+
+	/**
+	 * 描画用スレッド
+	 * @author nakano
+	 *
+	 */
+	class RepaintThread extends Thread {
+		private boolean runnable_ = true;
+		
+		public RepaintThread() {}
+		
+		public void run() {
+			while(runnable_) {
+				try {
+					sleep(50);
+					repaint();
+				} catch (Exception e) {
+				}
+			}
+		}
+		
+		public void setRunnable(boolean runnable){
+			runnable_ = runnable;
 		}
 	}
 }

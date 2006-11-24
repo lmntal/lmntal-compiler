@@ -3,6 +3,11 @@ package gui2;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 
+/**
+ * 実行中のLMNtalプログラムを表示するためのLOGウィンドウ
+ * @author nakano
+ *
+ */
 public class LogFrame extends JFrame {
 
 	/////////////////////////////////////////////////////////////////
