@@ -425,8 +425,9 @@ public final class Env {
 		if(null != gui){
 			return gui.onTrace();
 		}
-
-		Env.gui2.onTrace();
+		if(null != gui2){
+			gui2.onTrace();
+		}
 		
 		return true;
 	}

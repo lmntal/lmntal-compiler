@@ -35,6 +35,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	private GraphPanel panel = null;
 	private SubFrame subFrame;
+	private LogFrame logFrame;
 	private Thread th;
 	private Membrane rootMembrane;
 	
@@ -57,6 +58,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		
 		// 管理ウィンドウの生成
 		subFrame = new SubFrame(this);
+		logFrame = new LogFrame(this);
 		
 	}
 	/////////////////////////////////////////////////////////////////
@@ -74,7 +76,10 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	}
 	
 	public void onTrace(){
-		calc();
+		System.out.println(rootMembrane);
+		if(null != rootMembrane){
+			logFrame.setLog(rootMembrane.toString());
+		}
 		while(running) {
 			if(!stopCalc){
 				break;
@@ -90,6 +95,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	}
 	
 	public void setRootMem(Membrane mem){
+		rootMembrane = mem;
 		panel.setRootMem(mem);
 	}
 	
@@ -109,10 +115,6 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		panel.hideAll();
 	}
 	
-	public void calc(){
-		panel.calc();
-	}
-
 	public void keyPressed(KeyEvent e) {
 	}
 	

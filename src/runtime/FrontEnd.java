@@ -758,7 +758,6 @@ public class FrontEnd {
 
 			
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
-
 			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
 			if(Env.fGUI2) Env.gui2.setRootMem(root);
 //			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
@@ -784,7 +783,6 @@ public class FrontEnd {
 			}
 			
 			if (Env.gui2 != null) {
-				Env.gui2.calc();
 				Env.gui2.onTrace();
 			}
 			
