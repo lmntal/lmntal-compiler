@@ -3,15 +3,11 @@ package gui2;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import runtime.Atom;
@@ -20,20 +16,25 @@ import runtime.Membrane;
 public class Node {
 
 	///////////////////////////////////////////////////////////////////////////
-	// static
+	// final static
 	
+	final static
+	private double ATOM_SIZE = 40.0;
+
 	final static
 	private double MARGIN = 15.0;
 
 	final static
 	private double ROUND = 40;
-	
 
+	//////////////////////////////////////////////////////////////////////////
+	// static
+	
 	static
 	private GraphPanel panel_;
 	
 	///////////////////////////////////////////////////////////////////////////
-	
+	// private
 	
 	/** 移動情報 */
 	private double dx_;
@@ -48,7 +49,7 @@ public class Node {
 	private Color myColor_ = Color.BLUE;
 	
 	/** 自Nodeのオブジェクト（Atom または Membrane）*/
-	private Object myObject;
+	private Object myObject_;
 
 	/** Node名 */
 	private String name_ = "";
@@ -65,8 +66,8 @@ public class Node {
 	/** 描画用の形 */
 	private RoundRectangle2D.Double rect_ = new RoundRectangle2D.Double((Math.random() * 800) - 400,
 			(Math.random() * 600) - 300,
-			40.0,
-			40.0,
+			ATOM_SIZE,
+			ATOM_SIZE,
 			ROUND,
 			ROUND);
 	
@@ -83,15 +84,15 @@ public class Node {
 	// コンストラクタ
 	public Node(Node node, Object object){
 		parent_ = node;
-		myObject = object;
-		
+		myObject_ = object;
+
 		visible_ = true;
 		
 		// 膜、アトムの初期化
 		if(Atom.class.isInstance(object)){
 			setAtom((Atom)object);
 		} else {
-			setMembrane((Membrane)object);
+			setMembrane((Membrane)object, true);
 		}
 		
 		// 世界膜ならば可視それ以外は不可視
@@ -117,7 +118,10 @@ public class Node {
 	 */
 	public void calc(){
 		NodeFunction.calcSpring(this);
-//		moveCalc();
+		synchronized (nodeMap_) {
+			NodeFunction.calcAttraction(this, nodeMap_);
+			NodeFunction.calcRepulsive(this, nodeMap_);
+		}
 	}
 	
 	/**
@@ -143,10 +147,20 @@ public class Node {
 		return rect_.getBounds2D();
 	}
 	
+	/**
+	 * Nodeの中心点を取得する
+	 * @return Nodeの中心点
+	 */
 	public Point2D.Double getCenterPoint(){
 		return (new Point2D.Double(rect_.getCenterX(), rect_.getCenterY()));
 	}
 	
+	/**
+	 * 非表示Nodeを取得する
+	 * <p>
+	 * 非表示Nodeは祖先Nodeのもっとも根に近い非表示のNode．
+	 * @return 非表示のNode
+	 */
 	public Node getInvisibleRootNode(){
 		return invisibleRootNode_;
 	}
@@ -156,7 +170,11 @@ public class Node {
 	 * @return
 	 */
 	public Object getObject(){
-		return myObject;
+		return myObject_;
+	}
+	
+	public int getObjectID(){
+		return ((Atom)myObject_).getid();
 	}
 	
 	/**
@@ -189,6 +207,16 @@ public class Node {
 		return null;
 	}
 	
+	public double getSize(){
+		if(myObject_ instanceof Atom){
+			return (ATOM_SIZE / 2);
+		}
+		else {
+			
+		}
+		return 0;
+	}
+	
 	/**
 	 * アトム（または閉じた膜）である場合Trueを返す．
 	 * @return
@@ -217,7 +245,7 @@ public class Node {
 	 * 可視状態であるか
 	 */
 	public boolean isVisible(){
-		if(Atom.class.isInstance(myObject)){
+		if(Atom.class.isInstance(myObject_)){
 			return parent_.isVisible();
 		}
 		return visible_;
@@ -228,7 +256,7 @@ public class Node {
 	 *
 	 */
 	private void iWillBeAMembrane(){
-		if(!Membrane.class.isInstance(myObject)){
+		if(!Membrane.class.isInstance(myObject_)){
 			return;
 		}
 		visible_ = true;
@@ -241,11 +269,11 @@ public class Node {
 	 *
 	 */
 	private void iWillBeAnAtom(){
-		if(!Membrane.class.isInstance(myObject)){
+		if(!Membrane.class.isInstance(myObject_)){
 			return;
 		}
 		rect_.setFrameFromCenter(rect_.getCenterX(), rect_.getCenterY(), rect_.getCenterX() - 40, rect_.getCenterY() - 40);
-		LinkSet.addLink(myObject, this);
+		LinkSet.addLink(myObject_, this);
 		
 	}
 	
@@ -254,13 +282,16 @@ public class Node {
 	 */
 	public void moveAll(){
 		if(uncalc_){ return; }
-		moveCalc();
 		synchronized (nodeMap_) {
 			Iterator<Node> nodes = nodeMap_.values().iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
 				node.moveAll();
 			}
+		}
+		moveCalc();
+		if(myObject_ instanceof Membrane){
+			setMembrane((Membrane)myObject_, false);
 		}
 	}
 	
@@ -285,13 +316,11 @@ public class Node {
 		if(uncalc_){ return; }
 		dx_ += dx;
 		dy_ += dy;
-		if(null != invisibleRootNode_){
-			synchronized (nodeMap_) {
-				Iterator<Node> nodes = nodeMap_.values().iterator();
-				while(nodes.hasNext()){
-					Node node = nodes.next();
-					node.moveDelta(dx, dy);
-				}
+		synchronized (nodeMap_) {
+			Iterator<Node> nodes = nodeMap_.values().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				node.moveDelta(dx, dy);
 			}
 		}
 	}
@@ -341,12 +370,12 @@ public class Node {
 	 * @param object
 	 */
 	public void reset(Object object){
-		myObject = object;
+		myObject_ = object;
 
 		if(Atom.class.isInstance(object)){
 			setAtom((Atom)object);
 		} else {
-			setMembrane((Membrane)object);
+			setMembrane((Membrane)object, true);
 		}
 		
 		calc();
@@ -389,9 +418,10 @@ public class Node {
 	
 	/**
 	 * 膜用の初期化処理
-	 * @param mem
+	 * @param mem セットする膜
+	 * @param setChildren 子Nodeを更新するか（サイズの更新だけならばfalse）
 	 */
-	private void setMembrane(Membrane mem){
+	private void setMembrane(Membrane mem, boolean setChildren){
 		synchronized (nodeMap_) {
 			LinkSet.addLink(mem, this);
 			double maxX = Integer.MIN_VALUE;
@@ -412,7 +442,10 @@ public class Node {
 				Node node;
 				if(nodeMap_.containsKey(childMem)){
 					node = nodeMap_.get(childMem);
-					node.reset(childMem);
+					// 子Nodeを更新するか
+					if(setChildren){
+						node.reset(childMem);
+					}
 				} else {
 					node = new Node(this, childMem);
 					nodeMap_.put(childMem, node);
@@ -441,7 +474,10 @@ public class Node {
 				Node node;
 				if(nodeMap_.containsKey(childAtom)){
 					node = nodeMap_.get(childAtom);
-					node.reset(childAtom);
+					// 子Nodeを更新するか
+					if(setChildren){
+						node.reset(childAtom);
+					}
 				} else {
 					node = new Node(this, childAtom);
 					nodeMap_.put(childAtom, new Node(this, childAtom));
@@ -574,15 +610,15 @@ public class Node {
 		}
 		
 		// 可視になった
-		if(visible_ && Membrane.class.isInstance(myObject)){
+		if(visible_ && Membrane.class.isInstance(myObject_)){
 			iWillBeAMembrane();
-			setMembrane((Membrane)myObject);
+			setMembrane((Membrane)myObject_, true);
 			if(this == invisibleRootNode_){
 				setInvisibleRootNode(null);
 			}
 		}
 		// 不可視になった
-		else if(!visible_ && Membrane.class.isInstance(myObject)){
+		else if(!visible_ && Membrane.class.isInstance(myObject_)){
 			iWillBeAnAtom();
 			setInvisibleRootNode(this);
 		}
@@ -594,7 +630,7 @@ public class Node {
 	 */
 	public void swapVisible(){
 		// アトムが選択された場合は親膜を反転
-		if(Atom.class.isInstance(myObject)){
+		if(Atom.class.isInstance(myObject_)){
 			parent_.swapVisible();
 			return;
 		}
