@@ -29,6 +29,9 @@ public class Node {
 
 	//////////////////////////////////////////////////////////////////////////
 	// static
+
+	static
+	private int nextID_ = 0;
 	
 	static
 	private GraphPanel panel_;
@@ -47,6 +50,9 @@ public class Node {
 	
 	/** 自Nodeの色 */
 	private Color myColor_ = Color.BLUE;
+	
+	/** 自NodeのID */
+	private int myID_;
 	
 	/** 自Nodeのオブジェクト（Atom または Membrane）*/
 	private Object myObject_;
@@ -85,6 +91,8 @@ public class Node {
 	public Node(Node node, Object object){
 		parent_ = node;
 		myObject_ = object;
+		myID_ = nextID_;
+		nextID_++;
 
 		visible_ = true;
 		
@@ -102,6 +110,7 @@ public class Node {
 		}
 	}
 	///////////////////////////////////////////////////////////////////////////
+	
 	/**
 	 * GraphPanleをセットする
 	 * @return
@@ -156,6 +165,14 @@ public class Node {
 	}
 	
 	/**
+	 * 子NodeのIteratorを取得する
+	 * @return
+	 */
+	public Map getChildMap(){
+		return nodeMap_;
+	}
+	
+	/**
 	 * 非表示Nodeを取得する
 	 * <p>
 	 * 非表示Nodeは祖先Nodeのもっとも根に近い非表示のNode．
@@ -173,8 +190,8 @@ public class Node {
 		return myObject_;
 	}
 	
-	public int getObjectID(){
-		return ((Atom)myObject_).getid();
+	public int getID(){
+		return myID_;
 	}
 	
 	/**
@@ -366,6 +383,21 @@ public class Node {
 	}
 	
 	/**
+	 * nodeおよび、その子NodeをLinkSetから削除する
+	 * @param node
+	 */
+	public void removeAll(Node node){
+		synchronized (node.getChildMap()) {
+			Iterator<Node> nodes = node.getChildMap().values().iterator();
+			while(nodes.hasNext()){
+				Node targetNode = nodes.next();
+				targetNode.removeAll(targetNode);
+			}
+		}
+		LinkSet.removeLink(node.getObject());
+	}
+	
+	/**
 	 * Nodeをリセットする
 	 * @param object
 	 */
@@ -493,11 +525,11 @@ public class Node {
 			}
 
 			// 不要になったリンクを削除
-			Iterator<Object> removeAtoms = nodeMap_.keySet().iterator();
-			while(removeAtoms.hasNext()){
-				Object key = removeAtoms.next();
+			Iterator<Object> removeNodes = nodeMap_.keySet().iterator();
+			while(removeNodes.hasNext()){
+				Object key = removeNodes.next();
 				if(!memNodeMap.containsKey(key) && !atomNodeMap.containsKey(key)){
-					LinkSet.removeLink(key);
+					removeAll(nodeMap_.get(key));
 				}
 			}
 			
