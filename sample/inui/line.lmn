@@ -1,0 +1,19 @@
+/* オブジェクトをコピーして内部に持つ */
+
+//膜で表されたLMNtalオブジェクトを受け取れない
+{
+module(line).
+H=line.new({$start}, {$end}) :- H={start({$start}), end({$end})}.
+H=length({start(Start), end(End), $p[Start,End|*Z], @p}, Length) :- H={
+	point.use.
+	start=getY(getX(Start, X1), Y1).
+	end=getY(getX(End, X2), Y2).
+	$p[Start,End|*Z], @p
+	},
+	Length=math.sqrt((X1-X2)*(Y1-Y2)).
+H=line.new(StartX, StartY, EndX, EndY) :-
+	H={start=point.new(StartX, StartY), end=point.new(EndX, EndY)}.
+}.
+
+//line1=length(line.new(point.new(1, 2), point.new(3, 4)), len).
+line1=length(line.new(1, 2, 3, 4), len).

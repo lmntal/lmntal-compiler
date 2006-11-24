@@ -7,8 +7,6 @@ integer.use.
 
 java_lang_String.use.
 java_awt_event_ActionEvent.use.
-java_io_File.use.
-javax_swing_JViewport.use.
 
 /////////////////////////////////////////////
 // GUI §Œ¿∏¿Æ
@@ -36,7 +34,6 @@ H=editor.newAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
 H=editor.openAction(Frame, Tab) :-
 	class(Frame, "javax.swing.JFrame"), class(Tab, "javax.swing.JTabbedPane") | H={
 	javax_swing_JTabbedPane.use.
-	java_io_File.use.
 	integer.use.
 	frame(Frame), tab(Tab).
 	actionPerformed(ActionEvent), frame(Frame) :- class(Frame, "javax.swing.JFrame") |

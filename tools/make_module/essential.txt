@@ -3,10 +3,12 @@ java.awt.Component
 java.awt.Container
 java.awt.Font
 java.awt.Frame
+java.awt.Point
 java.awt.Window
 java.awt.event.ActionEvent
 java.awt.event.ActionListener
 java.awt.event.ActionListener
+java_awt.geom.Point2D
 java.io.BufferedReader
 java.io.File
 java.io.FileFilter

@@ -1,74 +1,12 @@
-//二次元の点クラス
+/* オブジェクトをコピー・破棄するバージョン*/
 {
 module(point).
 H=point.new(X, Y) :- int(X), int(Y) | H={x(X), y(Y)}.
-H=setX({x(X), $p, @p}, NewX) :- int(X), int(NewX) | H={x(NewX), $p, @p}.
-H=setY({y(Y), $p, @p}, NewY) :- int(Y), int(NewY) | H={y(NewY), $p, @p}.
-H=getX({x(X), $p, @p}, ResX) :- int(X) | H={x(X), $p, @p}, ResX=X.
-H=getY({y(Y), $p, @p}, ResY) :- int(Y) | H={y(Y), $p, @p}, ResY=Y.
-H=move(Point, DX, DY) :- H=setY(getY(setX(getX(Point, X), X+DX), Y), Y+DY).
+H=setX({x(X), $p}, NewX) :- int(X), int(NewX) | H={x(NewX), $p}.
+H=setY({y(Y), $p}, NewY) :- int(Y), int(NewY) | H={y(NewY), $p}.
+H=getX({x(X), $p}, ResX) :- int(X) | H={x(X), $p}, ResX=X.
+H=getY({y(Y), $p}, ResY) :- int(Y) | H={y(Y), $p}, ResY=Y.
+H=translate(Point, DX, DY) :- H=setY(getY(setX(getX(Point, X), X+DX), Y), Y+DY).
 }.
 
-//色つきの二次元座標
-{
-module(colorPoint).
-H=colorPoint.new(X, Y, Color) :- int(X), int(Y), unary(Color) |
-	H={x(X), y(Y), color(Color)}.
-H=getColor({color(Color), $p, @p}, ResColor) :- unary(Color) |
-	H={color(Color), $p, @p}, ResColor = Color.
-H=setColor({color(Color), $p, @p}, NewColor) :- unary(Color), unary(NewColor) |
-	H={color(NewColor), $p, @p}.
-}.
-
-//線分
-{
-module(line).
-//H=line.new(Start, End) :- H={start(Start), end(End)}.
-H=line.new({$p,@p}, {$q,@q}) :- H={start({$p,@p}), end({$q,@q}), point.use.}.
-H=length({start(Start), end(End), $p[Start,End], @p}, Length) :- H={
-	start=getY(getX(Start, X1), Y1).
-	end=getY(getX(End, X2), Y2).
-	$p[Start,End], @p.
-	Length=(X1-X2)*(Y1-Y2).
-	}.
-}.
-
-//折れ線
-{
-module(polyline).
-H=polyline.new :- H={points=[]}.
-H=addPoint({points=Points, $p[Points], @p}, {$q,@q}) :-
-	H={points=[{$q,@q}|Points], $p[Points], @p}.
-}.
-
-//円
-{
-module(circle).
-H=circle.new({$p,@p}, Radius) :- int(Radius) | H={center={$p,@p}, radius=Radius}.
-H=calcArea({radius=Radius, $p, @p}, Area) :- int(Radius) |
-	H={radius=Radius, $p, @p},
-	Area=Radius*Radius*3.
-}.
-
-//長方形
-{
-module(rectangle).
-H=rectangle.new({$p,@p}, {$q,@q}) :- H={start={$p,@p}, end={$q,@q}, point.use.}.
-H=calcArea({start(Start), end(End), $p[Start,End], @p}, Area) :-
-	H={start=getY(getX(Start, X1), Y1), end=getY(getX(End, X2), Y2), $p[Start,End], @p},
-	Area=(X2-X1)*(Y2-Y1).
-}.
-
-//p1=getY(getX(setY(setX(point.new(1, 2), 10), 20), x), y).
-//p2=getColor(getX(colorPoint.new(1, 2, blue), x1), color).
-p=move(point.new(1,2), 3, 4).
-//P2=point.new(2,-2).
-//P3=point.new(3,-3).
-
-//line1=length(line.new(P1, P2), len).
-//len(Len), H={Len=X, $p, @p} :- int(X) | len=X, H={$p, @p}.
-
-//pl=addPoint(addPoint(addPoint(polyline.new, P1), P2), P3).
-//c1=calcArea(circle.new(point.new(0,0), 5), area).
-//rect=calcArea(rectangle.new(P1, P2), area).
-
+//p1=setX(translate(point.new(1, 2), 3, 4), 8).

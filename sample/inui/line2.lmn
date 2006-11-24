@@ -1,0 +1,15 @@
+/* オブジェクトをコピーしないで受け取る */
+
+//LMNtalのオブジェクトとJavaのオブジェクトの両方を受け取れる
+{
+module(line).
+H=line.new(Start, End) :- H={start(Start), end(End)}.
+H=length({start(Start), end(End)}, Length) :- H={
+	point.use.
+	start=getY(getX(Start, X1), Y1).
+	end=getY(getX(End, X2), Y2).
+	},
+	Length=math.sqrt((X1-X2)*(Y1-Y2)).
+}.
+
+line1=length(line.new(point.new(1, 2), point.new(3, 4)), len).

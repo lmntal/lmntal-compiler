@@ -1,9 +1,4 @@
-/*
- * オブジェクトをgroundで表すバージョン
- */
-oo.use.
-
-//二次元の点クラス
+/* オブジェクトをgroundで表すバージョン */
 {
 module(point).
 H=point.new(X, Y) :- H=point(x(X), y(Y)).
@@ -15,16 +10,6 @@ H=move(Point, DX, DY) :-
 	H=setY(getY(setX(getX(Point, X), X+DX), Y), Y+DY).
 }.
 
-//線分
-{
-module(line).
-H=line.new(Start, End) :- H=line(start(Start), end(End)).
-H=length(line(start(Start), end(End)), Length) :-
-	H=line(start(getY(getX(Start, X1), Y1)), end(getY(getX(End, X2), Y2))),
-	Length=(X1-X2)*(Y1-Y2).
-}.
-
-P1=move(point.new(1, 2), 3, 4).
-P2=point.new(3, 4).
-line1=length(line.new(P1, P2), len).
-//TODO getYで止まる
+//P1=move(point.new(1, 2), 3, 4).
+//P2=point.new(3, 4).
+//line1=length(line.new(P1, P2), len).
