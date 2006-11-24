@@ -76,7 +76,6 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	}
 	
 	public void onTrace(){
-		System.out.println(rootMembrane);
 		if(null != rootMembrane){
 			logFrame.setLog(rootMembrane.toString());
 		}

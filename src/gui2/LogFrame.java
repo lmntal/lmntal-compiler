@@ -12,7 +12,7 @@ public class LogFrame extends JFrame {
 	public int WINDOW_WIDTH = LMNtalFrame.WINDOW_WIDTH;
 	
 	final static
-	public int WINDOW_HIEGHT = 200;
+	public int WINDOW_HIEGHT = 100;
 	
 	final static
 	public String TITLE = "Log Panel";

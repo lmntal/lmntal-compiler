@@ -66,6 +66,7 @@ public class LinkSet {
 
 					for(int n = 0; n < atom.getEdgeCount(); n++){
 						Atom nthAtom = atom.getNthAtom(n);
+						if(null == nthAtom){ continue; }
 						if(atom.getid() < nthAtom.getid()){
 							Node nodeTarget = getVisibleNode(linkMap_.get(nthAtom));
 //							System.out.println((null != nodeSource.getInvisibleRootNode()));
