@@ -1014,7 +1014,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * 第二要素にはコピー元のアトムからコピー先のアトムへのマップがそれぞれ格納される．
 	 * @see isground */
 	public static final int COPYGROUND = 218;
-	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_MEM));}
+	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM));}
 		
 	/** removeground [srclinklist,srcmem]
 	 * $srcmemに属する（基底項プロセスを指す）リンク列$srclinklistを現在の膜から取り出す。
