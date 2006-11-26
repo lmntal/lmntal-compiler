@@ -59,8 +59,11 @@ class NetHolder {
 	static Net net;
 	static Membrane mem;
 	static void init(Membrane mem) {
+		init(mem, 50101);
+	}
+	static void init(Membrane mem, int port) {
 		if(NetHolder.net==null) {
-			NetHolder.net = new Net(50101, 100);
+			NetHolder.net = new Net(port, 100);
 			NetHolder.mem = mem;
 		}
 	}
