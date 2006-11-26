@@ -24,6 +24,10 @@ public class Node {
 	final static
 	private double MARGIN = 15.0;
 
+	/** この値以下の場合は移動しない */
+	final static
+	private double MIN_MOVE_DELTA = 0.1;
+	
 	final static
 	private double ROUND = 40;
 
@@ -131,6 +135,7 @@ public class Node {
 			NodeFunction.calcAttraction(this, nodeMap_);
 			NodeFunction.calcRepulsive(this, nodeMap_);
 		}
+		moveCalc();
 	}
 	
 	/**
@@ -306,7 +311,7 @@ public class Node {
 				node.moveAll();
 			}
 		}
-		moveCalc();
+//		moveCalc();
 		if(myObject_ instanceof Membrane){
 			setMembrane((Membrane)myObject_, false);
 		}
@@ -317,8 +322,12 @@ public class Node {
 	 * 移動後は移動予定距離を初期化する．
 	 */
 	public void moveCalc(){
-		rect_.x += dx_;
-		rect_.y += dy_;
+		if(MIN_MOVE_DELTA < Math.abs(dx_)){
+			rect_.x += dx_;
+		}
+		if(MIN_MOVE_DELTA < Math.abs(dy_)){
+			rect_.y += dy_;
+		}
 		dx_ = 0;
 		dy_ = 0;
 	}

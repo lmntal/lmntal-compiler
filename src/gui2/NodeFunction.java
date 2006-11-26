@@ -28,7 +28,7 @@ public class NodeFunction {
 	
 	/** юмнодЙ©Т */
 	final static
-	private double CONSTANT_REPULSIVE = 0.00002;
+	private double CONSTANT_REPULSIVE = 0.00001;
 	
 	///////////////////////////////////////////////////////////////////////////
 

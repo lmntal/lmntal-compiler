@@ -4,10 +4,8 @@ import java.awt.Graphics;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import runtime.Atom;
 
@@ -120,4 +118,39 @@ public class LinkSet {
 		}
 	}
 	
+	///////////////////////////////////////////////////////////////////////////
+	private class NodeSet{
+		private Node nodeA_;
+		private Node nodeB_;
+		
+		public NodeSet(Node nodeA, Node nodeB){
+			nodeA_ = nodeA;
+			nodeB_ = nodeB;
+		}
+		
+		public boolean equals(Object object){
+			if(!(object instanceof NodeSet)){
+				return false;
+			}
+			if(nodeA_.equals(((NodeSet)object).getA())){
+				if(nodeB_.equals(((NodeSet)object).getB())){
+					return true;
+				}
+			}
+			if(nodeA_.equals(((NodeSet)object).getB())){
+				if(nodeB_.equals(((NodeSet)object).getA())){
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		public Node getA(){
+			return nodeA_;
+		}
+		public Node getB(){
+			return nodeB_;
+		}
+		
+	}
 }
