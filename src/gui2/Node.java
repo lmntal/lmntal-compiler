@@ -1,6 +1,7 @@
 package gui2;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
@@ -21,6 +22,9 @@ public class Node {
 	final static
 	private double ATOM_SIZE = 40.0;
 
+	final static
+	private Font FONT = new Font("SansSerif", Font.PLAIN, 20);
+	
 	final static
 	private double MARGIN = 15.0;
 
@@ -365,6 +369,7 @@ public class Node {
 				g.setColor(myColor_);
 				((Graphics2D)g).fill(rect_);
 				g.setColor(Color.BLACK);
+				g.setFont(FONT);
 				g.drawString(name_, (int)rect_.x, (int)rect_.y);
 			}
 			// ÀÏ§Œ…¡≤Ë
@@ -379,10 +384,12 @@ public class Node {
 					if(visible_){
 						((Graphics2D)g).draw(rect_);
 						g.setColor(Color.BLACK);
+						g.setFont(FONT);
 						g.drawString(name_, (int)rect_.x, (int)rect_.y);
 					} else {
 						((Graphics2D)g).fill(rect_);
 						g.setColor(Color.BLACK);
+						g.setFont(FONT);
 						g.drawString(name_, (int)rect_.x, (int)rect_.y);
 					}
 				}

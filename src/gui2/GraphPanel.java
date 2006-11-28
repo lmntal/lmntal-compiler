@@ -75,6 +75,7 @@ public class GraphPanel extends JPanel {
 			 * マウスが押されたときの処理
 			 */
 			public void mousePressed(MouseEvent e) {
+				if(null == rootNode_){ return; }
 				int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
 				int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
 				
