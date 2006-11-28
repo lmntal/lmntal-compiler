@@ -1,0 +1,31 @@
+{
+module(polyline).
+/** コンストラクタ */
+H=polyline.new :- H={
+	point.use.
+	points=[].
+	//private method?
+	L=translate([Point|Points], X, Y) :- int(X), int(Y) |
+		L=[translate(Point, X, Y)|translate(Points, X, Y)].
+	L=translate([], X, Y) :- int(X), int(Y) | L=[].
+	L=length([P1,P2|Points], Len) :-
+		L=[length(P1,P2, Len)|length(Points, Len)].
+	}.
+
+/** 点を追加します */
+H=addPoint({points=Points, $p[Points], @p}, {$q}) :-
+	H={points=[{$q}|Points], $p[Points], @p}.
+
+/** この折れ線を移動します */
+H=translate({points=Points, $p[Points], @p}, DX, DY) :- int(DX), int(DY) |
+	H={points=translate(Points, DX, DY), $p[Points], @p}.
+
+/** 長さを計算します */
+H=length({points=Points, $p[Points], @p}, Length) :-
+	H={points=length(Points, Length), $p[Points], @p}.
+}.
+
+P1=point.new(1, 2).
+P2=point.new(3, 4).
+//pl=translate(addPoint(addPoint(polyline.new, P1), P2), 1, 2).
+pl=length(addPoint(addPoint(polyline.new, P1), P2), len).
