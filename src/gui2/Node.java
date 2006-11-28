@@ -369,6 +369,7 @@ public class Node {
 				g.setColor(myColor_);
 				((Graphics2D)g).fill(rect_);
 				g.setColor(Color.BLACK);
+				((Graphics2D)g).draw(rect_);
 				g.setFont(FONT);
 				g.drawString(name_, (int)rect_.x, (int)rect_.y);
 			}
