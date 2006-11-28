@@ -124,6 +124,7 @@ public class RuleCompiler {
 		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;
 		theRule.body      = body;
+		theRule.body.add(1, Instruction.commit(theRule.name, theRule.lineno));
 		optimize();
 		return theRule;
 	}
