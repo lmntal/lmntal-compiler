@@ -1,14 +1,14 @@
 m(800), n(800).
 a=[], b=[].
 
-//m$BMWAG$H(Bn$BMWAG$N%j%9%H$r@8@.(B
+//mÍ×ÁÇ¤ÈnÍ×ÁÇ¤Î¥ê¥¹¥È¤òÀ¸À®
 m($m), a($z) :-$m > 0, ground($z) | a=[$m|$z], m($m-1).
 n($n), b($z) :-$n > 0, ground($z) | b=[$n|$z], n($n-1).
 
-//append$B$9$k(B
+//append¤¹¤ë
 m(0), n(0), a($a), b($b) :- ground($a), ground($b) | r=list.append($a, $b).
 
-//$B7WB,7k2L(B
+//·×Â¬·ë²Ì
 //          interpret   translator
 //100,100	542			273
 //200,200	941			642

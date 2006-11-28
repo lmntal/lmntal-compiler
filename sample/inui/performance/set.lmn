@@ -2,7 +2,7 @@ H=set($a, $b) :- $a=<$b, ground(H) | H=set($a+1,$b), H=$a.
 H=set($a, $b) :- $a> $b, ground(H) | .
 a=set(1,10000).
 
-//$B7WB,7k2L(B
+//·×Â¬·ë²Ì
 //          interpret   translator
 //100		122			66
 //200		190			95
