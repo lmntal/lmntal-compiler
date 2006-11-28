@@ -180,7 +180,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        5,5));
-		insts2.add(new Instruction(Instruction.COMMIT));
+		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
 		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
@@ -232,7 +232,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));
-		insts2.add(new Instruction(Instruction.COMMIT));
+		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
 		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
@@ -270,7 +270,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));
-		insts2.add(new Instruction(Instruction.COMMIT));
+		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
 		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));

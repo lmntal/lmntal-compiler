@@ -190,13 +190,13 @@ public class Task implements Runnable {
 	synchronized public static void trace(String arrow, String rulesetName, String ruleName) {
 		boolean dumpEnable = Env.getExtendedOption("hide").equals("") || !ruleName.matches(Env.getExtendedOption("hide"));
 		if(dumpEnable && Env.theRuntime instanceof MasterLMNtalRuntime) {
+			Membrane memToDump = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot();
+			Env.p( Dumper.dump( memToDump ) );
 			if(Env.getExtendedOption("dump").equals("1")) {
 				System.out.println(" ----- " + rulesetName + "/" + ruleName + " ---------------------------------------");
 			} else {
 				System.out.println(" " + arrow + "  #" + (count++) + ": " + rulesetName + "/" + ruleName);
 			}
-			Membrane memToDump = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot();
-			Env.p( Dumper.dump( memToDump ) );
 		}
 	}
 	
@@ -321,7 +321,7 @@ public class Task implements Runnable {
 		}
 		
 		if (root != null && Env.fTrace) {
-			Env.p( Dumper.dump(root) );
+			//Env.p( Dumper.dump(root) );
 		}
 		
 		LocalLMNtalRuntime r = (LocalLMNtalRuntime)runtime;

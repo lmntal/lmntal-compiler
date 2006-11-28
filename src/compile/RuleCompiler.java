@@ -361,7 +361,7 @@ public class RuleCompiler {
 	private void compile_r() throws CompileException {
 		Env.c("compile_r");
 		int formals = varcount;
-		body.add( Instruction.commit(theRule) );
+		//body.add( Instruction.commit(theRule) );
 		inc_guard();
 			
 		rhsatoms    = new ArrayList();

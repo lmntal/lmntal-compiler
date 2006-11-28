@@ -36,6 +36,7 @@ import runtime.IntegerFunctor;
 import runtime.InterpretedRuleset;
 import runtime.ObjectFunctor;
 import runtime.Rule;
+import runtime.Ruleset;
 import runtime.StringFunctor;
 import runtime.SystemRulesets;
 import util.Util;
@@ -494,6 +495,7 @@ public class Translator {
 	private int nextUniqVarNum = 0;
 
 	private boolean globalSystemRuleset = false;
+	String rulesetName;
 	
 	/**
 	 * 指定された InterpretedRuleset を Java に変換するためのインスタンスを生成する。
@@ -620,7 +622,7 @@ public class Translator {
 		writer.write("		return encodedRuleset;\n");
 		writer.write("	}\n");
 
-		String rulesetName;
+//		String rulesetName;
 		if (globalSystemRuleset) {
 			rulesetName = "@system";
 		} else {
@@ -685,8 +687,8 @@ public class Translator {
 				writer.write("		argVar[1] = atom;\n");
 				writer.write("		if (exec" + rule.atomMatchLabel.label + "(argVar, false)) {\n");
 				//writer.write("			result = true;\n");
-				writer.write("			if (Env.fTrace)\n");
-				writer.write("				Task.trace(\"-->\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
+//				writer.write("			if (Env.fTrace)\n");
+//				writer.write("				Task.trace(\"-->\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
 				writer.write("			return true;\n");
 				//writer.write("			if (!mem.isCurrent()) return true;\n");
 				writer.write("		}\n");
@@ -752,8 +754,8 @@ public class Translator {
 				writer.write("		argVar[0] = mem;\n");
 				writer.write("		if (exec" + rule.memMatchLabel.label + "(argVar, nondeterministic)) {\n");
 				//writer.write("			result = true;\n");
-				writer.write("			if (Env.fTrace)\n");
-				writer.write("				Task.trace(\"==>\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
+//				writer.write("			if (Env.fTrace)\n");
+//				writer.write("				Task.trace(\"==>\", \"" + rulesetName + "\", " + Util.quoteString(rule.toString(), '"') + ");\n");
 				writer.write("			return true;\n");
 				//writer.write("			if (!mem.isCurrent()) return true;\n");
 				writer.write("		}\n");
@@ -1416,6 +1418,8 @@ public class Translator {
 					//====型付きでないプロセス文脈をコピーまたは廃棄するための命令====ここまで====
 					//====制御命令====ここから====
 				case Instruction.COMMIT :
+					writer.write(tabs+"if (Env.fTrace)\n");
+					writer.write("				Task.trace(\"-->\", \"" + rulesetName + "\", \"" + (String)inst.getArg1() + "\");\n");
 					// TODO トレーサをよぶ
 					break;//
 //一部は未実装、一部は下の方で手動生成

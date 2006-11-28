@@ -364,6 +364,7 @@ public class FrontEnd {
 							/// --optimize-merging
 							/// Merge instructions.
 							Optimizer.fMerging = true;
+							Env.fMerging = true;
 						} else if(args[i].equals("--optimize-systemrulesetsinlining")) {
 							Optimizer.fSystemRulesetsInlining = true;
 						} else if(args[i].equals("--optimize-inlining")) {

@@ -156,11 +156,11 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			}
 			if (success) {
 				result = true;
-				if (Env.fTrace) Task.trace("-->", "@" + id, r.toString());
-				if (Env.debugOption) {//2006.1.26 by inui
-					Debug.breakPoint(r.lineno, Debug.ATOM);
-					//if (Debug.isBreakPoint()) Task.trace("-->", "@" + id, r.toString());
-				}
+//				if (Env.fTrace) Task.trace("-->", "@" + id, r.toString());
+//				if (Env.debugOption) {//2006.1.26 by inui
+//					Debug.breakPoint(r.lineno, Debug.ATOM);
+//					//if (Debug.isBreakPoint()) Task.trace("-->", "@" + id, r.toString());
+//				}
 				//if (!mem.isCurrent()) return true;
 				return true;
 			}
@@ -207,12 +207,12 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 				success = matchTest(mem, null, r.memMatch);
 			}
 			if (success) {
-				result = true;
-				if(Env.fTrace) Task.trace("==>", "@" + id, r.toString());
-				if (Env.debugOption) {//2006.1.26 by inui
-					Debug.breakPoint(r.lineno, Debug.MEMBRANE);
-					//if (Debug.isBreakPoint()) Task.trace("==>", "@" + id, r.toString());
-				}
+//				result = true;
+//				if(Env.fTrace) Task.trace("==>", "@" + id, r.toString());
+//				if (Env.debugOption) {//2006.1.26 by inui
+//					Debug.breakPoint(r.lineno, Debug.MEMBRANE);
+//					//if (Debug.isBreakPoint()) Task.trace("==>", "@" + id, r.toString());
+//				}
 				return true;
 				//if (!mem.isCurrent()) return true;
 			}
@@ -905,6 +905,11 @@ class InterpretiveReactor {
 
 					//====制御命令====ここから====
 				case Instruction.COMMIT :
+					if (Env.fTrace) Task.trace("-->", "@" + currentInterpretedRuleset.getId(), (String)inst.getArg1());
+					if (Env.debugOption) {//2006.1.26 by inui
+						Debug.breakPoint(inst.getIntArg2(), Debug.ATOM);
+						//if (Debug.isBreakPoint()) Task.trace("-->", "@" + id, r.toString());
+					}
 					// トレーサをよぶ
 					break;//
 				case Instruction.REACT : {

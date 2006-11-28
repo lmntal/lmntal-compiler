@@ -217,6 +217,7 @@ public class Optimizer {
 			//位置を変えたくない命令。他にあればここに追加する。
 			case Instruction.FINDATOM:
 			case Instruction.ANYMEM:
+			case Instruction.NEWLIST:
 			case Instruction.PROCEED:
 			case Instruction.JUMP:
 			case Instruction.UNIQ:
@@ -236,12 +237,16 @@ public class Optimizer {
 					Instruction inst2 = (Instruction)insts.get(i2);
 					ArrayList list2 = inst2.getVarArgs();
 					for(int j=0; j<list.size(); j++){
-						if((inst2.getOutputType() != -1
-							&& list.get(j).equals(inst2.getArg1()))
-							|| list2.contains(list.get(j))){
+						if(inst2.getOutputType() != -1){
+							if(list.get(j).equals(inst2.getArg1())) {
 								moveok = false;
 								break;
 							}
+						}
+						else if(list2.contains(list.get(j))){
+							moveok = false;
+							break;
+						}
 					}
 					if(moveok){
 						insts.remove(i2+1);
@@ -250,7 +255,7 @@ public class Optimizer {
 					else break; 
 				}
 			}
-		}			
+		}
 	}
 	
 	/**

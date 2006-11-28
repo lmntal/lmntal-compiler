@@ -476,4 +476,7 @@ public final class Env {
 		System.err.println(text);
 		nWarnings++;
 	}
+	
+	//�Ԥ߾夲
+	public static boolean fMerging = false;
 }

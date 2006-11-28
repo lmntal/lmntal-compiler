@@ -860,7 +860,15 @@ public class Instruction implements Cloneable, Serializable {
 	 * 現在の実引数ベクタでルールrulerefに対するマッチングが成功したことを表す。
 	 * 処理系は、この命令に到達するまでに行った全ての分岐履歴を忘却してよい。*/
 	public static final int COMMIT = 201;
-	static {setArgType(COMMIT, new ArgType(false, ARG_OBJ));}
+	//static {setArgType(COMMIT, new ArgType(false, ARG_OBJ));}
+	/**
+	 * 変更版 commit [rulename, lineno]
+	 * トレースとデバッガに必要な情報を保持する.
+	 * トレース用にルール名を文字列で保持.
+	 * デバッガ用にソース上の行番号linenoを整数で保持.
+	 * sakurai
+	 */
+	static {setArgType(COMMIT, new ArgType(false, ARG_OBJ, ARG_INT));}
 
 	/** resetvars [[memargs...], [atomargs...], [varargs...]]
 	 * <br>失敗しないガード命令および最適化用ボディ命令<br>
@@ -1526,6 +1534,10 @@ public class Instruction implements Cloneable, Serializable {
 		Instruction i = new Instruction(COMMIT);
 		i.add(r);
 		return i;
+	}
+	public static Instruction commit(String rulename, int lineno) {
+		Instruction inst = new Instruction(COMMIT, rulename, lineno);
+		return inst;
 	}
     /** resetvars 命令を生成する */
     public static Instruction resetvars(List memargs, List atomargs, List varargs) {

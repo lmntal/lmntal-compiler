@@ -15,6 +15,7 @@ import runtime.InterpretedRuleset;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRulesets;
+import runtime.Instruction;
 import runtime.MergedBranchMap;
 
 import compile.parser.*;
@@ -142,14 +143,17 @@ public class RulesetCompiler {
 				for (Rule r : rules) {
 					InterpretedRuleset ruleset = new InterpretedRuleset();
 					ruleset.branchmap = mbm;
+					r.body.add(1, Instruction.commit(r.name, r.lineno));
 					ruleset.rules.add(r);
 					Ruleset compiledRuleset = compileRuleset(ruleset);
 					mem.rulesets.add(ruleset);
 				}
 			} else {
 				InterpretedRuleset ruleset = new InterpretedRuleset();
-				for (Rule r : rules)
+				for (Rule r : rules){
 					ruleset.rules.add(r);
+					r.body.add(1, Instruction.commit(r.name, r.lineno));
+				}
 				ruleset.branchmap = mbm;
 				Ruleset compiledRuleset = compileRuleset(ruleset);
 				mem.rulesets.add(ruleset);

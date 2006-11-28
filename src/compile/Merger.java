@@ -20,7 +20,7 @@ import runtime.Rule;
  * @author sakurai
  */
 public class Merger {
-	//アトム主導テスト部の命令列を編み上げる
+	//アトム主導テスト部の命令列を編み上げるf
 	//todo?　膜主導テスト部の編み上げ
 	/** 編み上げ後のルールの実引数 */
 	/** ファンクタ⇒命令列のマップ */
@@ -47,6 +47,7 @@ public class Merger {
 			Rule rule = (Rule)it.next();
 			List atomMatch = (ArrayList)rule.atomMatch;
 			List guard = (ArrayList)rule.guard;
+			//if(Env.fTrace || Env.debugOption)(rule.body).add(1, new Instruction(Instruction.GETCURRENTRULE, rule));
 			if(guard != null){
 				//uniq命令がある場合は編み上げ中止。todo なんとかする
 				for(int i=0; i<guard.size(); i++) {
