@@ -1,6 +1,7 @@
 package gui2;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /**
@@ -49,7 +50,7 @@ public class LogFrame extends JFrame {
 		setTitle(TITLE);
 		logArea.setEditable(false);
 		logArea.setLineWrap(true);
-		add(logArea);
+		add(new JScrollPane(logArea));
 	}
 	
 	public void setLog(String log){

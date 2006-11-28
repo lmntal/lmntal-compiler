@@ -90,6 +90,15 @@ public class GraphPanel extends JPanel {
 					return;
 				}
 				
+				if(e.getClickCount() == 2){
+					moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
+					if(null != moveTargetNode_){
+						moveTargetNode_.swapClipped();
+					}
+					moveTargetNode_ = null;
+					return;
+				}
+				
 				setCursor(new Cursor(Cursor.MOVE_CURSOR));
 				moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
 				if(null != moveTargetNode_){

@@ -46,6 +46,9 @@ public class Node {
 	
 	///////////////////////////////////////////////////////////////////////////
 	// private
+
+	/** 継続非計算フラグ */
+	private boolean clipped_ = false;
 	
 	/** 移動情報 */
 	private double dx_;
@@ -76,6 +79,12 @@ public class Node {
 	
 	/** 取得可否 */
 	private boolean pickable_ = true;
+	
+	/** ピンのアニメーション用変数 */
+	public int pinAnime_ = 0;
+	
+	/** ピンのアニメーション用座標変数 */
+	private double pinPosY_;
 	
 	/** 描画用の形 */
 	private RoundRectangle2D.Double rect_ = new RoundRectangle2D.Double((Math.random() * 800) - 400,
@@ -146,7 +155,7 @@ public class Node {
 	 * 位座標などの計算を自分を含めたすべての子Nodeにて行う
 	 */
 	public void calcAll(){
-		if(uncalc_){ return; }
+		if(uncalc_ || clipped_){ return; }
 		calc();
 		synchronized (nodeMap_) {
 			Iterator<Node> nodes = nodeMap_.values().iterator();
@@ -260,14 +269,6 @@ public class Node {
 	}
 	
 	/**
-	 * 計算対象であるかの取得
-	 * @return
-	 */
-	public boolean isUncalc() {
-		return uncalc_;
-	}
-	
-	/**
 	 * 可視状態であるか
 	 */
 	public boolean isVisible(){
@@ -343,7 +344,7 @@ public class Node {
 	 * @param dy
 	 */
 	public void moveDelta(double dx, double dy){
-		if(uncalc_){ return; }
+		if(uncalc_ || clipped_){ return; }
 		dx_ += dx;
 		dy_ += dy;
 		synchronized (nodeMap_) {
@@ -396,7 +397,34 @@ public class Node {
 				}
 
 			}
+			if(clipped_){
+				paintPin(g, 0, 0);
+			}
 		}
+	}
+	
+	/**
+	 * ピンの描画およびアニメーション用の計算を行う
+	 * @param g
+	 * @param deltaX
+	 * @param deltaY
+	 */
+	public void paintPin(Graphics g, int deltaX, int deltaY){
+		if((pinAnime_ != 0) && (pinPosY_ < rect_.getCenterY())){
+			pinPosY_ += Math.abs(panel_.getHeight() / pinAnime_); 
+		}
+		if(pinPosY_ > rect_.getCenterY()){ pinAnime_ = 0; }
+		if(pinAnime_ == 0){ pinPosY_ = rect_.getY() - (panel_.getPin().getHeight(panel_) / 2); }
+
+		if((myObject_ instanceof Membrane) && visible_){
+			return;
+		}
+		g.drawImage(panel_.getPin(),
+				(int)(rect_.getCenterX() + deltaX),
+				(int)(pinPosY_ + deltaY),
+				panel_
+				);
+		
 	}
 	
 	/**
@@ -445,6 +473,25 @@ public class Node {
 		myColor_ = new Color(ir, ig, ib);
 		if(0 < atom.getEdgeCount()){
 			LinkSet.addLink(atom, this);
+		}
+	}
+	
+	/**
+	 * 継続非計算フラグを立てる
+	 * @param clipped
+	 */
+	public void setClipped(boolean clipped){
+		clipped_ = clipped;
+		synchronized (nodeMap_) {
+			Iterator<Node> nodes = nodeMap_.values().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				node.setClipped(clipped_);
+			}
+		}
+		if(clipped_){
+			pinAnime_ = 5;
+			pinPosY_ = -(panel_.getHeight() + (panel_.getPin().getHeight(panel_) * Math.random() * 15)) / panel_.getMagnification();
 		}
 	}
 	
@@ -671,6 +718,14 @@ public class Node {
 			iWillBeAnAtom();
 			setInvisibleRootNode(this);
 		}
+	}
+	
+	/**
+	 * 継続非計算フラグを反転する
+	 *
+	 */
+	public void swapClipped(){
+		setClipped(!clipped_);
 	}
 	
 	/**
