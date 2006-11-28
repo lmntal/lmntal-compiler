@@ -874,13 +874,6 @@ public class Optimizer {
 					it.remove();
 					break;
 				case Instruction.RELINK:
-/*060831okabe
-					moveInsts.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
-					it.set(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
-					nextId++;
-					break;
-				case Instruction.LOCALRELINK:
-*/
 					moveInsts.add(new Instruction(Instruction.GETLINK,  nextId, inst.getIntArg3(), inst.getIntArg4()));
 					it.set(new Instruction(Instruction.INHERITLINK,  inst.getIntArg1(), inst.getIntArg2(), nextId, inst.getIntArg5()));
 					nextId++;
@@ -889,7 +882,10 @@ public class Optimizer {
 		}
 //		list.set(0, Instruction.spec(spec.getIntArg1(), nextId));
 		spec.updateSpec(spec.getIntArg1(), nextId);
-		list.addAll(1, moveInsts);
+		if (list.size() >= 2 && ((Instruction)list.get(1)).getKind() == Instruction.COMMIT)
+			list.addAll(2, moveInsts); // (061128okabe) commitがある場合は２番目でなければならない．
+		else
+			list.addAll(1, moveInsts);
 //		spec.data.set(1, new Integer(nextId)); //ローカル変数の数を変更
 		return true;
 	}
@@ -1073,7 +1069,7 @@ public class Optimizer {
 				links.put(l2, l1);
 			}
 		}
-										
+		
 		//不要になったremoveatom/freeatom/newatom命令を除去
 		ListIterator lit = body.listIterator(/*getlinkInsts.size() + */1);
 		while (lit.hasNext()) {
