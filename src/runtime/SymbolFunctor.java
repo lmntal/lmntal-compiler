@@ -124,6 +124,11 @@ public class SymbolFunctor extends Functor {
 		return name;
 	}
 	
+	@Override
+	public String getQuotedAtomName() {
+		return quoteAtomName(getAbbrName());
+	}
+	
 	public int getArity() {
 		return arity;
 	}

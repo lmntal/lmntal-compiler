@@ -59,10 +59,8 @@ public final class Link implements Cloneable, Serializable {
 		} else {
 			i = atom.args[pos].id;
 		}
-		if (Env.verbose > Env.VERBOSE_SIMPLELINK)
-			return "_" + i;
-		else
-			return "L" + i;
+		if (Env.verbose > Env.VERBOSE_SIMPLELINK) return Env.colorMode ? "\033[0;33m_"+i+"\033[0m" : "_" + i;
+		return (Env.colorMode ? "\033[0;33mL"+i+"\033[0m" : "L" + i);
 	}
 				
 	/** リンク先のアトムを取得する */

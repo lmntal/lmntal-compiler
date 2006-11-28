@@ -11,7 +11,8 @@ public class StringFunctor extends ObjectFunctor {
 	
 	public String getQuotedAtomName() {
 		//ダブルクオートした名前を返す
-		return Util.quoteString(getName(), '\"');
+		String quotedAtomName = Util.quoteString(getName(), '\"');
+		return (Env.colorMode ? "\033[0;31m"+quotedAtomName+"\033[0m" : quotedAtomName);
 	}
 	
 	public String getQuotedFunctorName() { return getQuotedAtomName(); }

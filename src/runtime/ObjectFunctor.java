@@ -25,6 +25,12 @@ public class ObjectFunctor extends DataFunctor {
 		return o.getClass() == getClass() && data.equals(((ObjectFunctor)o).data);
 	}
 	
+	@Override
+	public String getQuotedAtomName() {
+		if (Env.colorMode) return "\033[0;35m'"+data.getClass().getSimpleName()+"'\033[0m";
+		return "'"+data.getClass().getSimpleName()+"'";
+	}
+
 	/**
 	 * このファンクタの名前を返す
 	 * @return 保持しているオブジェクトの名前

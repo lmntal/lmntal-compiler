@@ -79,9 +79,7 @@ public abstract class Functor implements Serializable {
 	 * 引数をもたないアトムの名前として表示名を印字するための文字列を返す。
 	 * 通常の名前以外のもののうち、リスト構成要素や数値以外のものはクォートして返す。
 	 */
-	public String getQuotedAtomName() {
-		return quoteAtomName(getAbbrName());
-	}
+	public abstract String getQuotedAtomName();
 
 	/**
 	 * クオートされた省略しないアトム名を返す
@@ -92,7 +90,7 @@ public abstract class Functor implements Serializable {
 		return quoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
 	}
 
-	private String quoteAtomName(String text) {
+	protected String quoteAtomName(String text) {
 		if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\])$")) {
 			if (!text
 					.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
@@ -123,7 +121,7 @@ public abstract class Functor implements Serializable {
 	
 	/**
 	 * ファンクタが所属するモジュール名を返す
-	 * （SymbolFunctor 以外は null を返す）
+	 * （SymbolFunctor 以外は 常に null を返す）
 	 * @return ファンクタが所属するモジュール名
 	 */
 	public String getPath() {
@@ -238,14 +236,14 @@ public abstract class Functor implements Serializable {
 	public abstract boolean isOutsideProxy();
 	
 	/**
-	 * このファンクタがアクティブかどうかを取得する。
+	 * このファンクタがアクティブかどうかを判定する。
 	 * @return アクティブなら true
 	 */
 	public abstract boolean isActive();
 	
 	/**
-	 * ファンクタの値（名前）を返す
-	 * @return ファンクタの値（名前）
+	 * このファンクタの値を返す
+	 * @return ファンクタの値
 	 */
 	public abstract Object getValue();
 	

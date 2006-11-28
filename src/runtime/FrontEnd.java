@@ -282,6 +282,10 @@ public class FrontEnd {
 							Env.fGUI2 = true;
 						} else if (args[i].equals("--check-java-type")) {
 							JavaTypeChecker.enabled = true;
+						} else if (args[i].equals("--color")) {//2006.11.13 inui
+							/// --color
+							/// color dump
+							Env.colorMode = true;
 						} else if(args[i].equals("--compileonly")){
 					    	// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;

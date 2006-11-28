@@ -175,6 +175,9 @@ public final class Env {
 	 */
 	public static String oneLiner;
 	
+	/** dumpをカラーにするモード */
+	public static boolean colorMode = false;//2006.11.13 inui
+	
 	////////////////////////////////////////////////////////////////
 	
 	/** スレッドごとのアトム主導テスト、膜主導テストの実行時間測定 */

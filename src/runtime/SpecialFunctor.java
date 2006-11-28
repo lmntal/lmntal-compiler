@@ -80,6 +80,11 @@ public class SpecialFunctor extends Functor {
 	public String getQuotedFunctorName() {
 		return getAbbrName();
 	}
+
+	@Override
+	public String getQuotedAtomName() {
+		return getAbbrName();
+	}
 	
 	/**
 	 * シンボルファンクタかどうかを調べる．
