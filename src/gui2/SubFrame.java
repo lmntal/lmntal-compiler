@@ -1,34 +1,21 @@
 package gui2;
 
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-import javax.swing.DefaultListModel;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 public class SubFrame extends JFrame {
 
@@ -56,23 +43,34 @@ public class SubFrame extends JFrame {
 	/////////////////////////////////////////////////////////////////
 	
 	// 倍率
-	static public int magnification;
+	static
+	public int magnification_;
 	
-	private JButton goBt = new JButton("Go ahead");
+	private JButton goBt_ = new JButton("Go ahead");
 	
-	private JButton hideBt = new JButton("Hide All");
+	private JButton hideBt_ = new JButton("Hide All");
 
-	private JButton showBt = new JButton("Show All");
-
-	private JSlider js1 = new JSlider(JSlider.VERTICAL, SLIDER_MIN, SLIDER_MAX, SLIDER_DEF);
+	private JButton showBt_ = new JButton("Show All");
 	
-	private LMNtalFrame mainFrame;
+	private JScrollPane menuScroll_;
+	
+	private JPanel menuPanel_ = new JPanel();
+	
+	private JCheckBox springCheck_ = new JCheckBox("Calc Spring");
+
+	private JCheckBox attractionCheck_ = new JCheckBox("Calc Attraction");
+	
+	private JCheckBox repulsiveCheck_ = new JCheckBox("Calc Replusive");
+
+	private JSlider js1_ = new JSlider(JSlider.VERTICAL, SLIDER_MIN, SLIDER_MAX, SLIDER_DEF);
+	
+	private LMNtalFrame mainFrame_;
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
 	public SubFrame(LMNtalFrame f) {
 		
-		mainFrame = f;
+		mainFrame_ = f;
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
@@ -80,23 +78,42 @@ public class SubFrame extends JFrame {
 		
 		initComponents();
 		
-		mainFrame.setMagnification((double)js1.getValue() / (double)js1.getMaximum());
+		mainFrame_.setMagnification((double)js1_.getValue() / (double)js1_.getMaximum());
 		setVisible(true);
 	}
 	/////////////////////////////////////////////////////////////////
 	
 	private void initComponents() {
 		
-		goBt.addActionListener(new ActionAdapter(this));
-		showBt.addActionListener(new ShowAllAdapter(this));
-		hideBt.addActionListener(new HideAllAdapter(this));
-
-		js1.addChangeListener(new SliderChanged());
-		js1.setPaintTicks(true);      //目盛りを表示
-		js1.setMinorTickSpacing(2);   //小目盛りの間隔を設定
-		js1.setMajorTickSpacing(10);  //大目盛りの間隔を設定
-		js1.setLabelTable(js1.createStandardLabels(10)); //目盛りﾗﾍﾞﾙを10間隔で表示
-		js1.setPaintLabels(true);    //目盛りﾗﾍﾞﾙを表示
+		goBt_.addActionListener(new GoActionAdapter(this));
+		showBt_.addActionListener(new ShowAllAdapter(this));
+		hideBt_.addActionListener(new HideAllAdapter(this));
+		
+		
+		///////////////////////////////////////////////////////////////////////
+		// メニューを追加する処理
+		
+		springCheck_.addItemListener(new SpringAdapter());
+		springCheck_.setSelected(true);
+		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
+		repulsiveCheck_.setSelected(true);
+		attractionCheck_.addItemListener(new AttractionAdapter());
+		attractionCheck_.setSelected(true);
+		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
+		menuPanel_.add(springCheck_);
+		menuPanel_.add(repulsiveCheck_);
+		menuPanel_.add(attractionCheck_);
+		
+		
+		menuScroll_ = new JScrollPane(menuPanel_);
+		///////////////////////////////////////////////////////////////////////
+		
+		js1_.addChangeListener(new SliderChanged());
+		js1_.setPaintTicks(true);      //目盛りを表示
+		js1_.setMinorTickSpacing(2);   //小目盛りの間隔を設定
+		js1_.setMajorTickSpacing(10);  //大目盛りの間隔を設定
+		js1_.setLabelTable(js1_.createStandardLabels(10)); //目盛りﾗﾍﾞﾙを10間隔で表示
+		js1_.setPaintLabels(true);    //目盛りﾗﾍﾞﾙを表示
 
 		setTitle(TITLE);
 		getContentPane().setLayout(new GridBagLayout());
@@ -109,7 +126,7 @@ public class SubFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
-		getContentPane().add(goBt, gbc);
+		getContentPane().add(goBt_, gbc);
 
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
@@ -117,7 +134,7 @@ public class SubFrame extends JFrame {
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.weightx = 0.0;
         gbc.weighty = 1.0;
-		getContentPane().add(js1, gbc);
+		getContentPane().add(js1_, gbc);
 
 		gbc.gridx = 1;
 		gbc.gridy = 1;
@@ -125,49 +142,117 @@ public class SubFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
-		getContentPane().add(showBt, gbc);
+		getContentPane().add(showBt_, gbc);
 
 		gbc.gridx = 2;
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
-		getContentPane().add(hideBt, gbc);
+		getContentPane().add(hideBt_, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		gbc.gridwidth = 2;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+		getContentPane().add(menuScroll_, gbc);
 
 	}
 	
+	/**
+	 * 倍率変更のスライダー
+	 * @author nakano
+	 *
+	 */
 	public class SliderChanged  implements ChangeListener {
 		public void stateChanged(ChangeEvent e) {
 			JSlider source = (JSlider)e.getSource();
-			mainFrame.setMagnification((double)source.getValue() / (double)source.getMaximum());
+			mainFrame_.setMagnification((double)source.getValue() / (double)source.getMaximum());
 		}
 	}
 
-	private class ActionAdapter implements ActionListener {
-		SubFrame frame;
-		ActionAdapter(SubFrame f) {
+	/**
+	 * 計算続行ボタン
+	 * @author nakano
+	 *
+	 */
+	private class GoActionAdapter implements ActionListener {
+		private SubFrame frame;
+		public GoActionAdapter(SubFrame f) {
 			frame = f;
 		}
 		public void actionPerformed(ActionEvent e) {
-			frame.mainFrame.stopCalc = false;
+			frame.mainFrame_.stopCalc = false;
 		}
 	}
 	
+	/**
+	 * すべての膜を表示化
+	 * @author nakano
+	 *
+	 */
 	private class ShowAllAdapter implements ActionListener {
-		SubFrame frame;
-		ShowAllAdapter(SubFrame f) {
+		private SubFrame frame;
+		public ShowAllAdapter(SubFrame f) {
 			frame = f;
 		}
 		public void actionPerformed(ActionEvent e) {
-			frame.mainFrame.showAll();
+			frame.mainFrame_.showAll();
 		}
 	}
 	
+	/**
+	 * すべての膜を非表示化
+	 * @author nakano
+	 *
+	 */
 	private class HideAllAdapter implements ActionListener {
-		SubFrame frame;
-		HideAllAdapter(SubFrame f) {
+		private SubFrame frame;
+		public HideAllAdapter(SubFrame f) {
 			frame = f;
 		}
 		public void actionPerformed(ActionEvent e) {
-			frame.mainFrame.hideAll();
+			frame.mainFrame_.hideAll();
+		}
+	}
+	
+	/**
+	 * ばねモデルの有効・無効化
+	 * @author nakano
+	 *
+	 */
+	private class SpringAdapter implements ItemListener {
+		public SpringAdapter() { } 
+		
+		public void itemStateChanged(ItemEvent e) {
+			NodeFunction.setSpringFlag(springCheck_.isSelected());
+		}
+	}
+	
+	/**
+	 * 引力計算の有効・無効化
+	 * @author nakano
+	 *
+	 */
+	private class AttractionAdapter implements ItemListener {
+		public AttractionAdapter() { }
+
+		public void itemStateChanged(ItemEvent e) {
+			NodeFunction.setAttractionFlag(attractionCheck_.isSelected());
+		}
+	}
+	
+	/**
+	 * 斥力計算の有効・無効化
+	 * @author nakano
+	 *
+	 */
+	private class RepulsiveAdapter implements ItemListener {
+		public RepulsiveAdapter() { }
+		
+		public void itemStateChanged(ItemEvent e) {
+			NodeFunction.setRepulsiveFlag(repulsiveCheck_.isSelected());
 		}
 	}
 	

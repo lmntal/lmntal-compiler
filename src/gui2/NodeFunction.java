@@ -18,6 +18,8 @@ import runtime.Membrane;
 public class NodeFunction {
 
 	///////////////////////////////////////////////////////////////////////////
+	// final static
+	
 	/** ばね定数 */
 	final static
 	private double CONSTANT_SPRING = 0.01;
@@ -29,6 +31,18 @@ public class NodeFunction {
 	/** 斥力定数 */
 	final static
 	private double CONSTANT_REPULSIVE = 0.00002;
+	
+	///////////////////////////////////////////////////////////////////////////
+	// static
+	
+	static
+	private boolean attractionFlag_ = true;
+	
+	static
+	private boolean repulsiveFlag_ = true;
+	
+	static
+	private boolean springFlag_ = true;
 	
 	///////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +58,8 @@ public class NodeFunction {
 	 */
 	static
 	public void calcAttraction(Node node, Map nodeMap){
-		if(!(node.getObject() instanceof Membrane) ||
+		if(!attractionFlag_ ||
+				!(node.getObject() instanceof Membrane) ||
 				null != node.getInvisibleRootNode())
 		{
 			return;
@@ -81,7 +96,7 @@ public class NodeFunction {
 	 */
 	static
 	public void calcRepulsive(Node node, Map nodeMap){
-		if(!Membrane.class.isInstance(node.getObject())){
+		if(!repulsiveFlag_ || !Membrane.class.isInstance(node.getObject())){
 			return;
 		}
 
@@ -128,7 +143,7 @@ public class NodeFunction {
 	 */
 	static
 	public void calcSpring(Node node){
-		if(!Atom.class.isInstance(node.getObject())){
+		if(!springFlag_ || !Atom.class.isInstance(node.getObject())){
 			return;
 		}
 		
@@ -164,5 +179,20 @@ public class NodeFunction {
 			nthNode.moveDelta(-ddx, -ddy);
 
 		}
+	}
+	
+	static 
+	public void setAttractionFlag(boolean attractionFlag) {
+		attractionFlag_ = attractionFlag;
+	}
+	
+	static 
+	public void setRepulsiveFlag(boolean repulsiveFlag) {
+		repulsiveFlag_ = repulsiveFlag;
+	}
+	
+	static 
+	public void setSpringFlag(boolean springFlag) {
+		springFlag_ = springFlag;
 	}
 }
