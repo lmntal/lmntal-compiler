@@ -22,7 +22,7 @@ public class NodeFunction {
 	
 	/** ばね定数 */
 	final static
-	private double CONSTANT_SPRING = 0.01;
+	private double CONSTANT_SPRING = 0.02;
 
 	/** 引力定数 */
 	final static
@@ -30,7 +30,15 @@ public class NodeFunction {
 	
 	/** 斥力定数 */
 	final static
-	private double CONSTANT_REPULSIVE = 0.00002;
+	private double CONSTANT_REPULSIVE = 0.1;
+	
+	/** 発散定数 */
+	final static
+	private double CONSTANT_DIVERGENCE = 0.01;
+	
+	/** 発散時間 */
+	final static
+	private int DIVERGENCE_TIMER = 200;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// static
@@ -43,6 +51,9 @@ public class NodeFunction {
 	
 	static
 	private boolean springFlag_ = true;
+	
+	static
+	private int divergenceTimer_ = 0;
 	
 	///////////////////////////////////////////////////////////////////////////
 
@@ -87,6 +98,48 @@ public class NodeFunction {
 		}
 	}
 	
+	
+	/**
+	 * 発散の計算
+	 * <P>
+	 * 巻くの中心とNodeが強めのバネでつながれていると考える
+	 * <BR>
+	 * <font color="red">このメソッドを呼び出すときはsynchronized (nodeMap_) を行うこと。</font>
+	 * @param node
+	 * @param nodeMap
+	 */
+	static
+	public void calcDivergence(Node node, Map nodeMap){
+		if(divergenceTimer_ == 0 ||
+				!(node.getObject() instanceof Membrane) ||
+				null != node.getInvisibleRootNode())
+		{
+			return;
+		}
+		divergenceTimer_--;
+		
+		Point2D myPoint = node.getCenterPoint();
+
+		Iterator<Node> nodes = nodeMap.values().iterator();
+		while(nodes.hasNext()){
+			// 表示されているNodeを取得する
+			Node targetNode = nodes.next();
+			Point2D nthPoint = targetNode.getCenterPoint();
+
+//			double distance =
+//				Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
+
+			double f = -CONSTANT_DIVERGENCE;
+
+			double dx = myPoint.getX() - nthPoint.getX();
+			double dy = myPoint.getY() - nthPoint.getY();
+
+			double ddx = f * dx;
+			double ddy = f * dy;
+			targetNode.moveDelta(ddx, ddy);
+		}
+	}
+	
 	/**
 	 * 膜内部のNode間の斥力の計算
 	 * <P>
@@ -111,18 +164,27 @@ public class NodeFunction {
 				// 表示されているNodeを取得する
 				Node targetNode = targetNodes.next();
 				// 引力は働かせない
-				if(sourceNode == targetNode ||
-						!sourceRect.intersects(targetNode.getBounds2D()))
+//				if(sourceNode == targetNode ||
+//						!sourceRect.intersects(targetNode.getBounds2D()))
+				if(sourceNode.getID() == targetNode.getID())
 				{
 					continue; 
 				}
 
 				Point2D targetPoint = targetNode.getCenterPoint();
+				// TODO: Node　の大きさ
 				double distance =
-					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY());
-
-				double f = CONSTANT_REPULSIVE * distance;
+					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
 				
+				if(distance > 1){
+					continue; 
+				}
+
+				double f = CONSTANT_REPULSIVE * (
+						(1.25 * distance * distance * distance) -
+						(2.375 * distance * distance) +
+						1.125);
+//				double f = CONSTANT_REPULSIVE * distance;
 				
 				double dx = sourcePoint.getX() - targetPoint.getX();
 				double dy = sourcePoint.getY() - targetPoint.getY();
@@ -179,6 +241,11 @@ public class NodeFunction {
 			nthNode.moveDelta(-ddx, -ddy);
 
 		}
+	}
+	
+	static
+	public void setDivergence(){
+		divergenceTimer_ = DIVERGENCE_TIMER;
 	}
 	
 	static 

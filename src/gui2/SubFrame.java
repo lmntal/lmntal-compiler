@@ -51,6 +51,8 @@ public class SubFrame extends JFrame {
 	private JButton hideBt_ = new JButton("Hide All");
 
 	private JButton showBt_ = new JButton("Show All");
+
+	private JButton divergenceBt_ = new JButton("Divergence");
 	
 	private JScrollPane menuScroll_;
 	
@@ -88,6 +90,7 @@ public class SubFrame extends JFrame {
 		goBt_.addActionListener(new GoActionAdapter(this));
 		showBt_.addActionListener(new ShowAllAdapter(this));
 		hideBt_.addActionListener(new HideAllAdapter(this));
+		divergenceBt_.addActionListener(new DivergenceAdapter());
 		
 		
 		///////////////////////////////////////////////////////////////////////
@@ -130,7 +133,7 @@ public class SubFrame extends JFrame {
 
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
-        gbc.gridheight = 2;
+        gbc.gridheight = 3;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.weightx = 0.0;
         gbc.weighty = 1.0;
@@ -148,14 +151,22 @@ public class SubFrame extends JFrame {
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
 		getContentPane().add(hideBt_, gbc);
-		
+
 		gbc.gridx = 1;
 		gbc.gridy = 2;
 		gbc.gridwidth = 2;
         gbc.gridheight = 1;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+		getContentPane().add(divergenceBt_, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 3;
+		gbc.gridwidth = 2;
+        gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;
-        gbc.weighty = 1.0;
+        gbc.weighty = 100.0;
 		getContentPane().add(menuScroll_, gbc);
 
 	}
@@ -214,6 +225,18 @@ public class SubFrame extends JFrame {
 		}
 		public void actionPerformed(ActionEvent e) {
 			frame.mainFrame_.hideAll();
+		}
+	}
+
+	/**
+	 * すべての膜を非表示化
+	 * @author nakano
+	 *
+	 */
+	private class DivergenceAdapter implements ActionListener {
+		public DivergenceAdapter() { }
+		public void actionPerformed(ActionEvent e) {
+			NodeFunction.setDivergence();
 		}
 	}
 	

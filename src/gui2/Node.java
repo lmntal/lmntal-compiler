@@ -147,6 +147,7 @@ public class Node {
 		synchronized (nodeMap_) {
 			NodeFunction.calcAttraction(this, nodeMap_);
 			NodeFunction.calcRepulsive(this, nodeMap_);
+			NodeFunction.calcDivergence(this, nodeMap_);
 		}
 		moveCalc();
 	}
