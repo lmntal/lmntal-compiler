@@ -272,7 +272,7 @@ public class NodeFunction {
 				dy = dy * 2;
 				
 				sourceNode.moveDelta(-dx, -dy);
-//				nthNode.moveDelta(dx, dy);
+				nthNode.moveDelta(dx, dy);
 				
 			}
 		}
