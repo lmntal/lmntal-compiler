@@ -134,6 +134,18 @@ public class JavaTypeChecker {
 		return false;
 	}
 	
+	/**
+	 * アトムをメソッドとして出力する
+	 * @param a
+	 * @return
+	 */
+	private static String dumpAtomAsMethod(Atom a) {
+		StringBuffer buffer = new StringBuffer(a.getName()+"(");
+		for (int i = 1; i < a.args.length-1; i++)
+			buffer.append((a.args[i].type == null ? "'?'" : a.args[i].type.getName())+",");
+		return buffer.substring(0, buffer.length()-1)+")";
+	}
+	
 	public static boolean containsJavaTypeError2(Membrane mem) {
 		boolean error = false;
 		for (Atom a : mem.atoms) {
@@ -156,8 +168,7 @@ public class JavaTypeChecker {
 				
 				//スーパークラスの引数を試す
 				if (!toSuperClass(params)) {
-					System.out.println(Env.srcs.get(0)+":"+a.line+","+a.column+": "+type.getName()+"#"+name+" は存在しません");
-					System.out.println("\t"+a);
+					System.out.println(Env.srcs.get(0)+":"+a.line+","+a.column+": "+type.getName()+"#"+dumpAtomAsMethod(a)+" は存在しません");
 					error = true;
 					break;
 				}
@@ -267,7 +278,7 @@ public class JavaTypeChecker {
 	public static boolean containsJavaTypeError(Membrane mem) {
 		while (checkJavaTypeByClassGuard(mem));
 		while (checkJavaType(mem));
-		dump(mem);
+//		dump(mem);
 		return containsJavaTypeError2(mem);
 //		return true;
 	}
