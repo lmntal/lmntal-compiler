@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public final class Env {
 
-	public static final String LMNTAL_VERSION = "0.82.20061027";
+	public static final String LMNTAL_VERSION = "0.83.20061129";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
