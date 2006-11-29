@@ -671,14 +671,16 @@ public class Dumper {
 			buf.append(func.getQuotedFunctorName());
 		else
 			buf.append(func.getQuotedFullyFunctorName());
-		if (Env.verbose > Env.VERBOSE_SIMPLELINK || !func.getName().matches("[-\\+]"))
+		if (Env.verbose > Env.VERBOSE_SIMPLELINK || !func.getName().matches("[-\\+]")
+				|| !(arity==1) || !(a.args[0].getAtom().getFunctor() instanceof SpecialFunctor) )
 			buf.append("(");
 		buf.append(dumpLink(a.args[0], atoms));
 		for (int i = 1; i < arity; i++) {
 			buf.append(",");
 			buf.append(dumpLink(a.args[i], atoms));
 		}
-		if (Env.verbose > Env.VERBOSE_SIMPLELINK || !func.getName().matches("[-\\+]"))
+		if (Env.verbose > Env.VERBOSE_SIMPLELINK || !func.getName().matches("[-\\+]") 
+				|| !(arity==1) || !(a.args[0].getAtom().getFunctor() instanceof SpecialFunctor) )
 			buf.append(")");
 		return buf.toString();
 	}
