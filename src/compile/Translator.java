@@ -606,7 +606,7 @@ public class Translator {
 			writer.write("	public String getGlobalRulesetID() {\n");
 			writer.write("		if (globalRulesetID == null) {\n");
 			String libname = (Env.fLibrary ? sourceName : "");
-			writer.write("			globalRulesetID = Env.theRuntime.getRuntimeID() + \":" + libname + "\" + id;\n");
+			writer.write("			globalRulesetID = \"" + libname + "\" + id;\n");
 			writer.write("		}\n");
 			writer.write("		return globalRulesetID;\n");
 			writer.write("	}\n");

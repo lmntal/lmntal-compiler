@@ -111,7 +111,7 @@ public final class Membrane extends QueuedEntity {
 	}
 
 	/** この膜のグローバルIDを取得する */
-	public String getGlobalMemID() { return (task==null ? "":task.runtime.runtimeid) + ":" + getLocalID(); }
+	public String getMemID() { return Integer.toString(id); }
 //	/** この膜が所属する計算ノードにおける、この膜の指定されたアトムのIDを取得する */
 //	public String getAtomID(Atom atom) { return atom.getLocalID(); }
 
@@ -125,10 +125,11 @@ public final class Membrane extends QueuedEntity {
 	public int hashCode() {
 		return id;
 	}
-	/** この膜のローカルIDを取得する */
-	public String getLocalID() {  //publicなのはLMNtalDaemonから呼んでいるから→呼ばなくなったのでprotectedでよい
-		return Integer.toString(id);
-	}
+	// 061028 okabe ランタイムは唯一つなのでGlobal/Local の区別は必要ない
+//	/** この膜のローカルIDを取得する */
+//	public String getLocalID() {  //publicなのはLMNtalDaemonから呼んでいるから→呼ばなくなったのでprotectedでよい
+//		return Integer.toString(id);
+//	}
 	
 	/** この膜を管理するタスクの取得 */
 	public Task getTask() {
@@ -554,7 +555,7 @@ public final class Membrane extends QueuedEntity {
 //		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(nodedesc);
 //		AbstractMembrane mem = machine.newTask(this).getRoot();
 //		mem.changeKind(k);
-		LocalLMNtalRuntime machine = Env.theRuntime;
+		LMNtalRuntime machine = Env.theRuntime;
 		Membrane mem = machine.newTask(this).getRoot();
 		mem.changeKind(k);
 		return mem;
@@ -663,7 +664,7 @@ public final class Membrane extends QueuedEntity {
 		}
 		
 		// 子膜の移動
-		if (srcMem.task.getMachine() instanceof LocalLMNtalRuntime) {
+		if (srcMem.task.getMachine() instanceof LMNtalRuntime) {
 			// ローカル膜からの移動
 			mems.addAll(srcMem.mems);
 		}

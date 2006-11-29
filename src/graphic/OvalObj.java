@@ -35,7 +35,7 @@ public class OvalObj extends GraphicObj{
 		Atom targetAtom;
 		
 		// membrane ID
-		memID = mem.getGlobalMemID();
+		memID = mem.getMemID();
 
 		// position atom
 		atomIte= mem.atomIteratorOfFunctor(POSITION_ATOM);

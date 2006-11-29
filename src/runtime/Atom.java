@@ -322,7 +322,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 			//子膜へのリンクは、接続先atomID/memIDのみ送信。接続先はINSIDE_PROXYの第１引数なので、アトムのIDのみで十分。
 			Atom a = args[0].getAtom();
 			Membrane mem = a.mem;
-			out.writeObject(mem.getGlobalMemID());
+			out.writeObject(mem.getMemID());
 			// n-kato 削除 2006-09-07
 			// //ルート膜以外ではグローバルIDが管理されていないので、とりあえず自分で作っている。
 			// //todo もっとよい方法を考える

@@ -107,7 +107,7 @@ public class LMNtalWindow extends JFrame{
 		
 		mymem = mem;
 		// membrane ID
-		memID = mem.getGlobalMemID();
+		memID = mem.getMemID();
 				
 		// name atom
 		atomIte= mem.atomIteratorOfFunctor(NAME_ATOM);

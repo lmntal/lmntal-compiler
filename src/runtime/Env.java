@@ -268,7 +268,7 @@ public final class Env {
 	 * REMAIN モード
 	 */
 	public static boolean fREMAIN = false;
-	public static MasterLMNtalRuntime remainedRuntime;
+	public static LMNtalRuntime remainedRuntime;
 	
 	/**
 	 * REPL モード
@@ -419,8 +419,8 @@ public final class Env {
 		return indent;
 	}
 	
-	/** LocalLMNtalRuntimeのインスタンス */
-	public static LocalLMNtalRuntime theRuntime;
+	/** LMNtalRuntimeのインスタンス */
+	public static LMNtalRuntime theRuntime;
 
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public static boolean guiTrace() {

@@ -742,7 +742,7 @@ public class FrontEnd {
 		Env.counter = 0;
 		try {
 			// ผยนิ
-			MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
+			LMNtalRuntime rt = new LMNtalRuntime();
 //			LMNtalRuntimeManager.init();
 
 			Membrane root = rt.getGlobalRoot();

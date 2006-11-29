@@ -73,14 +73,15 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		return id;
 	}
 	/**（仮）*/
-	public String getGlobalRulesetID() {
-		// todo ランタイムIDの有効期間を見直す
-		if (globalRulesetID == null) {
-			globalRulesetID = Env.theRuntime.getRuntimeID() + ":" + id;
-//			IDConverter.registerRuleset(globalRulesetID, this);
-		}
-		return globalRulesetID;
-	}
+	// 061129 okabe runtimeid 廃止による
+//	public String getGlobalRulesetID() {
+//		// todo ランタイムIDの有効期間を見直す
+//		if (globalRulesetID == null) {
+//			globalRulesetID = Env.theRuntime.getRuntimeID() + ":" + id;
+////			IDConverter.registerRuleset(globalRulesetID, this);
+//		}
+//		return globalRulesetID;
+//	}
 	
 	////////////////////////////////////////////////////////////////
 

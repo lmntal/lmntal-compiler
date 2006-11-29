@@ -9,7 +9,7 @@ import java.util.Set;
 import runtime.Atom;
 import runtime.AtomSet;
 import runtime.Functor;
-import runtime.MasterLMNtalRuntime;
+import runtime.LMNtalRuntime;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
 
@@ -71,7 +71,7 @@ public class Memory {
 		show(N);
 
 		//ÀÏ§À∫Ó¿Æ
-		MasterLMNtalRuntime rt = new MasterLMNtalRuntime();
+		LMNtalRuntime rt = new LMNtalRuntime();
 		Membrane root = rt.getGlobalRoot();
 		for (int i = 0; i < N; i++) {
 			if (i % 100 == 0)

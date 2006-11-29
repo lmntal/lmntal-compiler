@@ -44,10 +44,11 @@ abstract public class Ruleset {
 	//abstract
 	public Ruleset fillHoles(Functor[] holes) { return null; }
 	
-	/**
-	 * グローバルルールセットIDを取得する
-	 * @author nakajima */
-	abstract public String getGlobalRulesetID();
+	// 061129 okabe runtimeid 廃止による
+//	/**
+//	 * グローバルルールセットIDを取得する
+//	 * @author nakajima */
+//	abstract public String getGlobalRulesetID();
 	
 	////////////////////////////////////////////////////////////////
 	

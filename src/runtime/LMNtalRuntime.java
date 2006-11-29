@@ -4,22 +4,25 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-
 /** このVMで実行するランタイム（旧：物理マシン、旧々：計算ノード）
  * このクラス（またはサブクラス）のインスタンスは、1つの Java VM につき高々1つしか存在しない。
  * @author n-kato, nakajima
  */
-public class LocalLMNtalRuntime{
+public class LMNtalRuntime{
 
-	/** ランタイムID。このVMのグローバルな識別子。ルールセットのIDの一部として使用される */
-	protected String runtimeid;
-// 削除 n-kato 2006-09-07
-//	/** このランタイムが動作するホスト名。Fully Qualified Domain Nameである必要がある。 */
-//	protected String hostname;
-
-	/** ランタイムIDを取得する */
-	public String getRuntimeID() {
-		return runtimeid;
+	// 061129 okabe 廃止
+//	/** ランタイムID。このVMのグローバルな識別子。ルールセットのIDの一部として使用される */
+//	protected String runtimeid;
+//	/** ランタイムIDを取得する */
+//	public String getRuntimeID() {
+//		return runtimeid;
+//	}
+	
+	/** 世界的ルート膜 */
+	private Membrane globalRoot;
+	/** 世界的ルート膜を取得する */
+	public final Membrane getGlobalRoot(){
+		return globalRoot;
 	}
 	
 	/** 全てのタスク */
@@ -27,16 +30,21 @@ public class LocalLMNtalRuntime{
 	
 	////////////////////////////////////////////////////////////////	
 
-	public LocalLMNtalRuntime(){
+	public LMNtalRuntime(){
 		Env.theRuntime = this;
-		this.runtimeid = ""; // (hostname,creationtime,pid)とか
-//		this.runtimeid = LMNtalDaemon.makeID();	// ここで生成する
-			// NICがあがってないとここで死ぬ（分散使いたくない時）→ 回避済 2004-11-12
-//		this.hostname = LMNtalDaemon.getLocalHostName();
+		Task masterTask = new Task(this);
+		tasks.add(masterTask);
+		globalRoot = (Membrane)masterTask.getRoot();
+		// Inline
+		Inline.initInline(); // TODO 適切な場所に移動する
 	}
 
-	public static LocalLMNtalRuntime getInstance() {
-		return Env.theRuntime;
+//	public static LMNtalRuntime getInstance() {
+//		return Env.theRuntime;
+//	}
+
+	public final Task getMasterTask(){
+		return (Task)globalRoot.getTask();
 	}
 	
 	/**
@@ -52,7 +60,7 @@ public class LocalLMNtalRuntime{
 	
 	////////////////////////////////////////////////////////////////
 	
-	/** （マスタランタイムなどによって）このランタイムの終了が要求されたかどうか */
+	/** このランタイムの終了が要求されたかどうか */
 	protected boolean terminated = false;
 	/** このランタイムの終了が要求されたかどうか */
 	public boolean isTerminated() {
@@ -62,7 +70,6 @@ public class LocalLMNtalRuntime{
 	 * 具体的には、この物理マシンのterminatedフラグをONにし、
 	 * 各タスクのルールスレッドが終わるまで待つ。*/
 	synchronized public void terminate() {
-//		System.out.println("LocalLMNtalRuntime#terminate()");
 		terminated = true;
 		Iterator it = tasks.iterator();
 		while (it.hasNext()) {
@@ -111,4 +118,14 @@ public class LocalLMNtalRuntime{
 //			}
 //		} while(!allIdle);
 //	}
+
+//	/**
+//	 * １回だけ適用するルールをglobalRoot膜に適用する。
+//	 * 初期化ルール、およびREPLが１行入力毎に生成するルールを適用するために使用する。
+//	 * @deprecated
+//	 */
+//	public void applyRulesetOnce(Ruleset r){
+//		r.react(globalRoot);
+//	}
+	
 }

@@ -56,8 +56,8 @@ public class LMNtalGFrame{
 	 */
 	private LMNtalWindow searchWindowMem(Membrane mem){
 		while(!mem.isRoot()){
-			if(windowMap.containsKey(mem.getGlobalMemID())){
-				return (LMNtalWindow)windowMap.get(mem.getGlobalMemID());
+			if(windowMap.containsKey(mem.getMemID())){
+				return (LMNtalWindow)windowMap.get(mem.getMemID());
 			}
 			else if(mem.getAtomCountOfFunctor(WINDOW_MEM)>0){
 				setWindowMem(mem);

@@ -16,7 +16,7 @@ public class DumperTest {
 	public static void main(String[] args) {
 		System.out.println("before init:");
 		Ruleset rule = new SampleInitRuleset();
-		MasterLMNtalRuntime mm = new MasterLMNtalRuntime();
+		LMNtalRuntime mm = new LMNtalRuntime();
 		Membrane m = mm.getGlobalRoot();
 		rule.react(m);
 		System.out.println("before exec:");

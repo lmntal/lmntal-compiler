@@ -72,8 +72,8 @@ public class LMNtalTFrame {
 	 */
 	private LMNtalWindow searchWindowMem(Membrane mem){
 		while(!mem.isRoot()){
-			if(windowMap.containsKey(mem.getGlobalMemID())){
-				return (LMNtalWindow)windowMap.get(mem.getGlobalMemID());
+			if(windowMap.containsKey(mem.getMemID())){
+				return (LMNtalWindow)windowMap.get(mem.getMemID());
 			}
 			else if(mem.getAtomCountOfFunctor(WINDOW_FUNCTOR)>0){
 				//window.というアトムをその膜に持っていたら

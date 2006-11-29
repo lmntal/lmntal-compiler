@@ -132,8 +132,8 @@ public class LMNtalPanel extends JPanel implements Runnable {
 				gObj = setGraphicMem(mem);
 			}
 			else{ gObj = new RelativeObj(mem); }
-			memMap.put(mem.getGlobalMemID(), mem.getParent().getGlobalMemID());
-			objMap.put(mem.getGlobalMemID(), gObj);
+			memMap.put(mem.getMemID(), mem.getParent().getMemID());
+			objMap.put(mem.getMemID(), gObj);
 		}
 		busy = false;
 		return ((null != gObj) ? true : false);
@@ -174,8 +174,8 @@ public class LMNtalPanel extends JPanel implements Runnable {
 		busy = true;
 		Object gObj = null;
 		synchronized (memMap) {
-			memMap.remove(mem.getGlobalMemID());
-			gObj = objMap.remove(mem.getGlobalMemID());
+			memMap.remove(mem.getMemID());
+			gObj = objMap.remove(mem.getMemID());
 		}
 		busy = false;
 		return ((null != gObj) ? true : false);

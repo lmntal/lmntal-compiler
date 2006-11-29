@@ -21,7 +21,7 @@ import java.util.Vector;
 import runtime.Dumper;
 import runtime.Env;
 import runtime.InterpretedRuleset;
-import runtime.MasterLMNtalRuntime;
+import runtime.LMNtalRuntime;
 import runtime.Membrane;
 import runtime.Rule;
 
@@ -120,7 +120,7 @@ public class Debug {
 		}
 		
 		//全てのルールを収集する
-		Membrane rootMem = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot();
+		Membrane rootMem = Env.theRuntime.getGlobalRoot();
 		collectAllRules(rootMem);
 	}
 	
@@ -301,7 +301,7 @@ public class Debug {
 					else isStepping = true;
 					break;
 				} else if (s.startsWith("p")) {//内部状態を表示
-					Membrane memToDump = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot();
+					Membrane memToDump = Env.theRuntime.getGlobalRoot();
 					requestOut.println(Dumper.dump(memToDump));
 				} else if (s.startsWith("r")) {//実行開始
 					if (isRunning) {

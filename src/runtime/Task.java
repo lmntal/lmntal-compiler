@@ -98,7 +98,7 @@ import util.Util;
 
 public class Task implements Runnable {
 	/** このタスクを管理するランタイム */
-	protected LocalLMNtalRuntime runtime;
+	protected LMNtalRuntime runtime;
 	/** このタスクのルート膜 */
 	protected Membrane root;
 	/** asyncUnlockされたときにtrueになる
@@ -106,7 +106,7 @@ public class Task implements Runnable {
 	protected boolean asyncFlag = false;
 	
 	/** ランタイムの取得 */
-	public LocalLMNtalRuntime getMachine() {
+	public LMNtalRuntime getMachine() {
 		return runtime;
 	}
 	/** ルート膜の取得 */
@@ -135,7 +135,7 @@ public class Task implements Runnable {
 	
 	/** 親膜を持たない新しいルート膜および対応するタスク（マスタタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）*/
-	Task(LocalLMNtalRuntime runtime) {
+	Task(LMNtalRuntime runtime) {
 		this.runtime = runtime;
 		root = new Membrane(this);
 		memStack.push(root);
@@ -144,7 +144,7 @@ public class Task implements Runnable {
 	/** 指定した親膜を持つ新しいロックされたルート膜および対応するタスク（スレーブタスク）を作成する
 	 * @param runtime 作成したタスクを実行するランタイム（つねにEnv.getRuntime()を渡す）
 	 * @param parent 親膜 */
-	Task(LocalLMNtalRuntime runtime, Membrane parent) {
+	Task(LMNtalRuntime runtime, Membrane parent) {
 		this(runtime);
 		root = new Membrane(this);
 		root.lockThread = Thread.currentThread();
@@ -189,8 +189,8 @@ public class Task implements Runnable {
 	// 出力と count の排他制御のため、static synchronized
 	synchronized public static void trace(String arrow, String rulesetName, String ruleName) {
 		boolean dumpEnable = Env.getExtendedOption("hide").equals("") || !ruleName.matches(Env.getExtendedOption("hide"));
-		if(dumpEnable && Env.theRuntime instanceof MasterLMNtalRuntime) {
-			Membrane memToDump = ((MasterLMNtalRuntime)Env.theRuntime).getGlobalRoot();
+		if(dumpEnable) {
+			Membrane memToDump = Env.theRuntime.getGlobalRoot();
 			Env.p( Dumper.dump( memToDump ) );
 			if(Env.getExtendedOption("dump").equals("1")) {
 				System.out.println(" ----- " + rulesetName + "/" + ruleName + " ---------------------------------------");
@@ -315,8 +315,8 @@ public class Task implements Runnable {
 	/** このタスク固有のルールスレッドが実行する処理 */
 	public void run() {
 		Membrane root = null; // ルートタスクのときのみルート膜が入る。それ以外はnull
-		if (runtime instanceof MasterLMNtalRuntime) {
-			root = ((MasterLMNtalRuntime)runtime).getGlobalRoot();
+		if (runtime instanceof LMNtalRuntime) {
+			root = runtime.getGlobalRoot();
 			if (root.getTask() != this) root = null;
 		}
 		
@@ -324,7 +324,7 @@ public class Task implements Runnable {
 			//Env.p( Dumper.dump(root) );
 		}
 		
-		LocalLMNtalRuntime r = (LocalLMNtalRuntime)runtime;
+		LMNtalRuntime r = runtime;
 		while (!r.isTerminated()) {
 			Membrane mem;
 			//本膜をロック
