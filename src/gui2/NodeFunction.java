@@ -1,9 +1,12 @@
 package gui2;
 
+import gui_backup.GraphAtom;
+
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import runtime.Atom;
 import runtime.Membrane;
@@ -53,6 +56,9 @@ public class NodeFunction {
 	private boolean springFlag_ = true;
 	
 	static
+	private boolean angleFlag_ = true;
+	
+	static
 	private int divergenceTimer_ = 0;
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -69,7 +75,8 @@ public class NodeFunction {
 	 */
 	static
 	public void calcAttraction(Node node, Map nodeMap){
-		if(!attractionFlag_ ||
+		if(divergenceTimer_ != 0 ||
+				!attractionFlag_ ||
 				!(node.getObject() instanceof Membrane) ||
 				null != node.getInvisibleRootNode())
 		{
@@ -197,6 +204,82 @@ public class NodeFunction {
 		}
 	}
 	
+	static
+	public void calcRelaxAngle(Node node){
+		if(!angleFlag_ || !Atom.class.isInstance(node.getObject())){
+			return;
+		}
+		Atom targetAtom = (Atom)node.getObject();
+		int edgeNum = targetAtom.getEdgeCount(); 
+		
+		if(edgeNum < 2){ return; }
+
+		Node sourceNode = LinkSet.getNode(targetAtom);
+		if(null == sourceNode){ return; }
+		Point2D myPoint = sourceNode.getCenterPoint();
+		Map<Double, Node> treeMap = new TreeMap<Double, Node>();
+		
+		// つながっているアトムを走査
+		for(int i = 0; i < edgeNum; i++){
+			Atom nthAtom = targetAtom.getNthAtom(i);
+			Node nthNode = LinkSet.getNode(nthAtom);
+			if(null == nthNode){ continue; }
+			Point2D nthPoint = nthNode.getCenterPoint();
+
+			if(null == nthNode ||
+					null == nthPoint ||
+					sourceNode == nthNode)
+			{ 
+				continue; 
+			}
+			
+			if(null != nthAtom){
+				double dx = nthPoint.getX() - myPoint.getX();
+				double dy = nthPoint.getY() - myPoint.getY();
+				
+				if(dx == 0.0){ dx=0.000000001; }
+				double angle = Math.atan(dy / dx);
+				if(dx < 0.0) angle += Math.PI;
+				treeMap.put(angle, nthNode);
+			}
+		}
+		
+		Object[] nthAngles = treeMap.keySet().toArray();
+		for(int i = 0; i < nthAngles.length; i++ ){
+			Double nthAngle = (Double)nthAngles[i];
+			Node nthNode = treeMap.get(nthAngle);
+			Point2D nthPoint = nthNode.getCenterPoint();
+
+			
+			if(nthNode == null){ continue; }
+			
+			if(null != nthNode){
+				double anglePre = (i != 0) ? ((Double)nthAngles[i]).doubleValue() - ((Double)nthAngles[i - 1]).doubleValue() 
+						: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
+				double angleCur = (i != nthAngles.length - 1) ? ((Double)nthAngles[i + 1]).doubleValue() - ((Double)nthAngles[i]).doubleValue() 
+						: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
+				double angleR = angleCur - anglePre;
+				double dx = nthPoint.getX() - myPoint.getX();
+				double dy = nthPoint.getY() - myPoint.getY();
+				double edgeLength = Math.sqrt(dx * dx + dy * dy);
+				if(edgeLength == 0.0){ edgeLength = 0.00001; }
+				//線分に垂直で長さ１のベクトル
+				double tx = -dy / edgeLength;
+				double ty =  dx / edgeLength;
+				
+				dx = 1.5 * tx * angleR;
+				dy = 1.5 * ty * angleR;
+				
+				dx = dx * 2;
+				dy = dy * 2;
+				
+				sourceNode.moveDelta(-dx, -dy);
+				nthNode.moveDelta(dx, dy);
+				
+			}
+		}
+	}
+	
 	/**
 	 * ばねモデルの計算
 	 * @param node
@@ -245,7 +328,7 @@ public class NodeFunction {
 	
 	static
 	public void setDivergence(){
-		divergenceTimer_ = DIVERGENCE_TIMER;
+		divergenceTimer_ += DIVERGENCE_TIMER;
 	}
 	
 	static 
@@ -261,5 +344,10 @@ public class NodeFunction {
 	static 
 	public void setSpringFlag(boolean springFlag) {
 		springFlag_ = springFlag;
+	}
+	
+	static 
+	public void setAngleFlag(boolean angleFlag) {
+		angleFlag_ = angleFlag;
 	}
 }

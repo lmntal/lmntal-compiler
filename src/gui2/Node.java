@@ -144,6 +144,7 @@ public class Node {
 	 */
 	public void calc(){
 		NodeFunction.calcSpring(this);
+		NodeFunction.calcRelaxAngle(this);
 		synchronized (nodeMap_) {
 			NodeFunction.calcAttraction(this, nodeMap_);
 			NodeFunction.calcRepulsive(this, nodeMap_);

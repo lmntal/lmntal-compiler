@@ -59,6 +59,8 @@ public class SubFrame extends JFrame {
 	private JPanel menuPanel_ = new JPanel();
 	
 	private JCheckBox springCheck_ = new JCheckBox("Calc Spring");
+	
+	private JCheckBox angleCheck_ = new JCheckBox("Calc Angle");
 
 	private JCheckBox attractionCheck_ = new JCheckBox("Calc Attraction");
 	
@@ -96,6 +98,8 @@ public class SubFrame extends JFrame {
 		///////////////////////////////////////////////////////////////////////
 		// メニューを追加する処理
 		
+		angleCheck_.addItemListener(new AngleAdapter());
+		angleCheck_.setSelected(true);
 		springCheck_.addItemListener(new SpringAdapter());
 		springCheck_.setSelected(true);
 		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
@@ -103,6 +107,7 @@ public class SubFrame extends JFrame {
 		attractionCheck_.addItemListener(new AttractionAdapter());
 		attractionCheck_.setSelected(true);
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
+		menuPanel_.add(angleCheck_);
 		menuPanel_.add(springCheck_);
 		menuPanel_.add(repulsiveCheck_);
 		menuPanel_.add(attractionCheck_);
@@ -250,6 +255,19 @@ public class SubFrame extends JFrame {
 		
 		public void itemStateChanged(ItemEvent e) {
 			NodeFunction.setSpringFlag(springCheck_.isSelected());
+		}
+	}
+	
+	/**
+	 * ばねモデルの有効・無効化
+	 * @author nakano
+	 *
+	 */
+	private class AngleAdapter implements ItemListener {
+		public AngleAdapter() { } 
+		
+		public void itemStateChanged(ItemEvent e) {
+			NodeFunction.setAngleFlag(angleCheck_.isSelected());
 		}
 	}
 	
