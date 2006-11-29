@@ -28,6 +28,9 @@ public class Node {
 	final static
 	private double MARGIN = 15.0;
 
+	final static
+	private double MAX_MOVE_DELTA = 300.0;
+	
 	/** この値以下の場合は移動しない */
 	final static
 	private double MIN_MOVE_DELTA = 0.1;
@@ -150,7 +153,7 @@ public class Node {
 			NodeFunction.calcRepulsive(this, nodeMap_);
 			NodeFunction.calcDivergence(this, nodeMap_);
 		}
-		moveCalc();
+//		moveCalc();
 	}
 	
 	/**
@@ -318,7 +321,7 @@ public class Node {
 				node.moveAll();
 			}
 		}
-//		moveCalc();
+		moveCalc();
 		if(myObject_ instanceof Membrane){
 			setMembrane((Membrane)myObject_, false);
 		}
@@ -329,6 +332,18 @@ public class Node {
 	 * 移動後は移動予定距離を初期化する．
 	 */
 	public void moveCalc(){
+		// 最大移動距離を制限
+		if(MAX_MOVE_DELTA < dx_){ dx_ = MAX_MOVE_DELTA; }
+		else if(dx_ < -MAX_MOVE_DELTA){ dx_ = -MAX_MOVE_DELTA; }
+		if(MAX_MOVE_DELTA < dy_){ dy_ = MAX_MOVE_DELTA; }
+		else if(dy_ < -MAX_MOVE_DELTA){ dy_ = -MAX_MOVE_DELTA; }
+
+		// 移動後に限界を越えない
+		if(Integer.MAX_VALUE - dx_ < rect_.x){ return; }
+		if(rect_.x < Integer.MIN_VALUE - dx_){ return; }
+		if(Integer.MAX_VALUE - dy_ < rect_.y){ return; }
+		if(rect_.y < Integer.MIN_VALUE - dy_){ return; }
+		
 		if(MIN_MOVE_DELTA < Math.abs(dx_)){
 			rect_.x += dx_;
 		}
@@ -457,7 +472,7 @@ public class Node {
 			setMembrane((Membrane)object, true);
 		}
 		
-		calc();
+//		calc();
 	}
 	
 	/**

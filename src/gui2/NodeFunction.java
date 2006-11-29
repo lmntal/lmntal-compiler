@@ -39,7 +39,10 @@ public class NodeFunction {
 	
 	/** È¯»¶»þ´Ö */
 	final static
-	private int DIVERGENCE_TIMER = 200;
+	private int DIVERGENCE_TIMER = 100;
+	
+	final static
+	private double MAX_FORCE = 5.0;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// static
@@ -312,7 +315,6 @@ public class NodeFunction {
 				Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
 
 			double f = -CONSTANT_SPRING * ((distance / ( 80 * 2)) - 1.0);
-
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
@@ -352,5 +354,10 @@ public class NodeFunction {
 	static 
 	public void setAngleFlag(boolean angleFlag) {
 		angleFlag_ = angleFlag;
+	}
+	
+	static
+	public void stopDivergence(){
+		divergenceTimer_ = 0;
 	}
 }

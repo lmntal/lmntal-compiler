@@ -53,6 +53,8 @@ public class SubFrame extends JFrame {
 	private JButton showBt_ = new JButton("Show All");
 
 	private JButton divergenceBt_ = new JButton("Divergence");
+
+	private JButton stopDivergenceBt_ = new JButton("Stop Divergence");
 	
 	private JScrollPane menuScroll_;
 	
@@ -93,6 +95,7 @@ public class SubFrame extends JFrame {
 		showBt_.addActionListener(new ShowAllAdapter(this));
 		hideBt_.addActionListener(new HideAllAdapter(this));
 		divergenceBt_.addActionListener(new DivergenceAdapter());
+		stopDivergenceBt_.addActionListener(new StopDivergenceAdapter());
 		
 		
 		///////////////////////////////////////////////////////////////////////
@@ -138,7 +141,7 @@ public class SubFrame extends JFrame {
 
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
-        gbc.gridheight = 3;
+        gbc.gridheight = 4;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.weightx = 0.0;
         gbc.weighty = 1.0;
@@ -153,20 +156,22 @@ public class SubFrame extends JFrame {
 		getContentPane().add(showBt_, gbc);
 
 		gbc.gridx = 2;
-        gbc.weightx = 1.0;
-        gbc.weighty = 0.0;
 		getContentPane().add(hideBt_, gbc);
 
 		gbc.gridx = 1;
 		gbc.gridy = 2;
 		gbc.gridwidth = 2;
         gbc.gridheight = 1;
-        gbc.weightx = 1.0;
-        gbc.weighty = 0.0;
 		getContentPane().add(divergenceBt_, gbc);
-		
+
 		gbc.gridx = 1;
 		gbc.gridy = 3;
+		gbc.gridwidth = 2;
+        gbc.gridheight = 1;
+		getContentPane().add(stopDivergenceBt_, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 4;
 		gbc.gridwidth = 2;
         gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.BOTH;
@@ -234,7 +239,7 @@ public class SubFrame extends JFrame {
 	}
 
 	/**
-	 * すべての膜を非表示化
+	 * 拡散処理開始
 	 * @author nakano
 	 *
 	 */
@@ -242,6 +247,18 @@ public class SubFrame extends JFrame {
 		public DivergenceAdapter() { }
 		public void actionPerformed(ActionEvent e) {
 			NodeFunction.setDivergence();
+		}
+	}
+
+	/**
+	 * 拡散処理終了
+	 * @author nakano
+	 *
+	 */
+	private class StopDivergenceAdapter implements ActionListener {
+		public StopDivergenceAdapter() { }
+		public void actionPerformed(ActionEvent e) {
+			NodeFunction.stopDivergence();
 		}
 	}
 	
