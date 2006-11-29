@@ -1,7 +1,5 @@
 package gui2;
 
-import gui_backup.GraphAtom;
-
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
@@ -274,7 +272,7 @@ public class NodeFunction {
 				dy = dy * 2;
 				
 				sourceNode.moveDelta(-dx, -dy);
-				nthNode.moveDelta(dx, dy);
+//				nthNode.moveDelta(dx, dy);
 				
 			}
 		}
@@ -324,6 +322,11 @@ public class NodeFunction {
 			nthNode.moveDelta(-ddx, -ddy);
 
 		}
+	}
+	
+	static
+	public int getDivergence(){
+		return divergenceTimer_;
 	}
 	
 	static

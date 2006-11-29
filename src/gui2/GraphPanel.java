@@ -204,8 +204,18 @@ public class GraphPanel extends JPanel {
 		if (OSI_ != null){
 			OSG_.setColor(Color.WHITE);
 			OSG_.fillRect(0, 0,(int)getWidth(), (int)getHeight());
-			
-			g.setColor(Color.WHITE);
+//			g.setColor(Color.WHITE);
+//			g.fillRect(0, 0,(int)getWidth(), (int)getHeight());
+//			
+//			OSG_.drawImage(OSI_,0,0,this);
+//			af_.setTransform(getMagnification(), 0, 0, getMagnification(), getWidth() / 2, getHeight() / 2);
+//	        ((Graphics2D)OSG_).setTransform(af_);
+//
+//	        OSG_.setColor(Color.BLACK);
+//	        if(null != rootNode_){
+//	        	rootNode_.paint(OSG_);
+//	        }
+	        g.setColor(Color.WHITE);
 			g.drawImage(OSI_,0,0,this);
 			af_.setTransform(getMagnification(), 0, 0, getMagnification(), getWidth() / 2, getHeight() / 2);
 	        ((Graphics2D)g).setTransform(af_);
@@ -214,23 +224,12 @@ public class GraphPanel extends JPanel {
 	        if(null != rootNode_){
 	        	rootNode_.paint(g);
 	        }
-//	        g.setColor(Color.WHITE);
-//			g.drawImage(OSI_,0,0,this);
-//			af_.setTransform(getMagnification(), 0, 0, getMagnification(), getWidth() / 2, getHeight() / 2);
-//	        ((Graphics2D)g).setTransform(af_);
-//
-//	        g.setColor(Color.BLACK);
-//	        if(null != rootNode_){
-//	        	rootNode_.paint(g);
-//	        }
 
-			af_.setTransform(0, 0, 0, 0, 0, 0);
-	        ((Graphics2D)g).setTransform(af_);
-	        int divergenceTimer = NodeFunction.getDivergence();
-	        if(0 < divergenceTimer){
-	        	g.setColor(Color.RED);
-	        	g.drawString("Divergence Timer:" + divergenceTimer, 100, 100);
-	        }
+//	        int divergenceTimer = NodeFunction.getDivergence();
+//	        if(0 < divergenceTimer){
+//	        	g.setColor(Color.RED);
+//	        	g.drawString("Divergence Timer:" + divergenceTimer, 100, 100);
+//	        }
 		}
 	}
 
