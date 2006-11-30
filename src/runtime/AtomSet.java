@@ -23,7 +23,7 @@ import util.RandomIterator;
  * Functor毎にアトムを管理している。
  * @author Mizuno
  */
-public final class AtomSet implements Serializable {
+public final class AtomSet implements Serializable, Iterable<Atom> {
 	/** atoms内のアトムの数。整合性要注意 */
 	private int size = 0;
 	/** 実際にアトムの集合を管理している変数 */
