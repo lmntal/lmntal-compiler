@@ -321,9 +321,9 @@ public final class Membrane extends QueuedEntity {
 	 * @param avoList 基底項プロセスに出てきてはいけないリンクのList
 	 * @return 基底項プロセスを構成するアトム数
 	 */
-	public static int isGround(List/*<Link>*/ links, Set avoSet){
-		Set srcSet = new HashSet(); // 走査済みアトム
-		java.util.Stack s = new java.util.Stack(); //リンクを積むスタック
+	public static int isGround(List<Link> links, Set<Atom> avoSet){
+		Set<Atom> srcSet = new HashSet<Atom>(); // 走査済みアトム
+		java.util.Stack<Link> s = new java.util.Stack<Link>(); //リンクを積むスタック
 		s.push(links.get(0)); // 第1引数から走査する
 		int c=0;
 		boolean[] exists = new boolean[links.size()]; // 引数について到達したかどうか
@@ -348,7 +348,9 @@ public final class Membrane extends QueuedEntity {
 				s.push(a.getArg(i));
 			}
 		}
-		for(int i=0;i<links.size();i++)if(exists[i])continue;else return -1; // 未到達の根があれば失敗
+		for(int i=0;i<links.size();i++)
+			if(exists[i])continue;
+			else return -1; // 未到達の根があれば失敗
 		return c;
 	}
 	
@@ -364,15 +366,15 @@ public final class Membrane extends QueuedEntity {
 	 * @param srcLink 比較対象のリンク
 	 * @return
 	 */
-	public static boolean eqGround(List/*<Link>*/ srclinks, List/*<Link>*/ dstlinks){
-		Map map = new HashMap(); //比較元アトムから比較先アトムへのマップ
-		java.util.Stack s1 = new java.util.Stack();  //比較元リンクを入れるスタック
-		java.util.Stack s2 = new java.util.Stack();  //比較先リンクを入れるスタック
+	public static boolean eqGround(List<Link> srclinks, List<Link> dstlinks){
+		Map<Atom,Atom> map = new HashMap<Atom,Atom>(); //比較元アトムから比較先アトムへのマップ
+		java.util.Stack<Link> s1 = new java.util.Stack<Link>();  //比較元リンクを入れるスタック
+		java.util.Stack<Link> s2 = new java.util.Stack<Link>();  //比較先リンクを入れるスタック
 		s1.push(srclinks.get(0));
 		s2.push(dstlinks.get(0));
 		while(!s1.isEmpty()){
-			Link l1 = (Link)s1.pop();
-			Link l2 = (Link)s2.pop();
+			Link l1 = s1.pop();
+			Link l2 = s2.pop();
 			int srci = srclinks.indexOf(l1.getBuddy());
 			int dsti = dstlinks.indexOf(l2.getBuddy());
 			if(srci != dsti)return false; // プロセス文脈の引数だった場合(>=)の位置の一致，そうでない場合(-1)の確認
@@ -403,11 +405,11 @@ public final class Membrane extends QueuedEntity {
 	 * @param srcGround コピー元の基底項プロセス の根のリスト
 	 * @return 2要素のリスト ( 第一要素 : コピー先の基底項プロセス の根のリスト, 第二要素 : コピー元のアトムからコピー先のアトムへのマップ)
 	 */
-	public List/*<Link>*/ copyGroundFrom(List/*<Link>*/ srclinks){//Link srcGround){
-		java.util.Stack s = new java.util.Stack();
-		Map map = new HashMap();
+	public List<Link> copyGroundFrom(List<Link> srclinks){
+		java.util.Stack<Link> s = new java.util.Stack<Link>();
+		Map<Atom,Atom> map = new HashMap<Atom,Atom>();
 		Link first = (Link)srclinks.get(0);
-		// 最初のアトムだけまず複製してしまう ( なぜこういう手順なのか？　下のループに持っていける気がするが )
+		// 最初のアトムだけまず複製してしまう ( なぜこういう手順なのか？　下のループに持っていける気がする)
 		Atom cpAtom = newAtom(first.getAtom().getFunctor());
 		map.put(first.getAtom(),cpAtom);
 		// 最初のアトムの引数を全てスタックに積む
@@ -416,7 +418,7 @@ public final class Membrane extends QueuedEntity {
 			s.push(first.getAtom().getArg(i));
 		}
 		while(!s.isEmpty()){
-			Link l = (Link)s.pop();
+			Link l = s.pop();
 			int srci = srclinks.indexOf(l.getBuddy());
 			if(srci >= 0)continue; // プロセス文脈の引数に到達したらそれ以上辿らない
 			if(!map.containsKey(l.getAtom())){
@@ -429,15 +431,15 @@ public final class Membrane extends QueuedEntity {
 				}
 			}
 			else{
-				cpAtom = (Atom)map.get(l.getAtom());
-				Atom a = ((Atom)map.get(l.getAtom().getArg(l.getPos()).getAtom()));
+				cpAtom = map.get(l.getAtom());
+				Atom a = map.get(l.getAtom().getArg(l.getPos()).getAtom());
 				a.args[l.getAtom().getArg(l.getPos()).getPos()]=new Link(cpAtom,l.getPos());
 			}
 		}
-		List dstlinks = new ArrayList(srclinks.size());
+		List<Link> dstlinks = new ArrayList<Link>(srclinks.size());
 		for(int i=0;i<srclinks.size();i++){
-			Link srclink = (Link)srclinks.get(i);
-			dstlinks.add( new Link(((Atom)map.get(srclink.getAtom())),srclink.getPos()));
+			Link srclink = srclinks.get(i);
+			dstlinks.add( new Link(map.get(srclink.getAtom()),srclink.getPos()));
 		}
 		List ret_list = new ArrayList();
 		ret_list.add(dstlinks);
@@ -447,7 +449,7 @@ public final class Membrane extends QueuedEntity {
 	
 	/** 1引数の基底項プロセスを複製する */
 	public Link copyGroundFrom(Link srcGround){
-		List srclinks = new ArrayList();
+		List<Link> srclinks = new ArrayList<Link>();
 		srclinks.add(srcGround);
 		List dstlinks = copyGroundFrom(srclinks);
 		return (Link)dstlinks.get(0);
@@ -461,13 +463,13 @@ public final class Membrane extends QueuedEntity {
 	 * @param srcGround
 	 * @return
 	 */
-	public void removeGround(List/*<Link>*/ srclinks){
-		java.util.Stack s = new java.util.Stack();
-		Link first = (Link)srclinks.get(0);
+	public void removeGround(List<Link> srclinks){
+		java.util.Stack<Link> s = new java.util.Stack<Link>();
+		Link first = srclinks.get(0);
 		s.push(first);
-		Set srcSet = new HashSet();
+		Set<Atom> srcSet = new HashSet<Atom>();
 		while(!s.isEmpty()){
-			Link l = (Link)s.pop();
+			Link l = s.pop();
 			int srci = srclinks.indexOf(l.getBuddy());
 			if( srci >= 0 ) continue; // プロセス文脈の引数に到達したらそれ以上辿らない
 			if(srcSet.contains(l.getAtom()))continue;
@@ -484,7 +486,7 @@ public final class Membrane extends QueuedEntity {
 	
 	/** 1引数の基底項プロセスをこの膜から除去する */
 	public void removeGround(Link srcGround){
-		List srclinks = new ArrayList();
+		List<Link> srclinks = new ArrayList<Link>();
 		srclinks.add(srcGround);
 		removeGround(srclinks);
 	}
