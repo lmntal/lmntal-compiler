@@ -8,7 +8,7 @@ java.awt.Window
 java.awt.event.ActionEvent
 java.awt.event.ActionListener
 java.awt.event.ActionListener
-java_awt.geom.Point2D
+java.awt.geom.Point2D
 java.io.BufferedReader
 java.io.File
 java.io.FileFilter
@@ -16,6 +16,7 @@ java.io.FileReader
 java.io.InputStream
 java.io.InputStreamReader
 java.io.OutputStream
+java.io.PrintStream
 java.io.PrintWriter
 java.io.Reader
 java.io.Writer

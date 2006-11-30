@@ -1,15 +1,10 @@
 if.use.
-java_io_PrintStream.use.
 
 next_set.
-
 s=java_util_Scanner.new(java_lang_System.in).
 
 //データ入力
 next_set, s(S) :- s=nextInt(nextInt(nextInt(S, a), d), n).
-
-//データセットの終了判定
-a(0), d(0), n(0) :- .
 
 //素数の判定
 H=is_prime(1) :- H=false.
@@ -30,8 +25,7 @@ H=is_prime(N, M, Nsqrt) :- M =< Nsqrt, N mod M =\= 0 | H=is_prime(N, M+2, Nsqrt)
 //(初項 a, 公差 d の数列中の素数を n 個求める)
 //a(A), d(D), n(N) :- int(A), int(D), N  >  0, N1=N-1, NewA=A+D | n(if(is_prime(A), N1, N)), a(NewA), d(D).
 //a(A), d(D), n(N) :- int(A), int(D), N =:= 0, Ans=A-D | r=io.println(string.str_of_int(Ans)), next_set.
-
-a(A), d(D), n(N) :- int(A), int(D), N  >  0 | n('?'(is_prime(A), N-1, N)), a(A+D), d(D).
-a(A), d(D), n(N) :- int(A), int(D), N =:= 0 | gc=print(java_lang_System.out, A-D), next_set.
+a(A), d(D), n(N) :- A > 0, D > 0, N  >  0 | n('?'(is_prime(A), N-1, N)), a(A+D), d(D).
+a(A), d(D), n(N) :- A > 0, D > 0, N =:= 0 | gc=println(java_lang_System.out, A-D), next_set.
 
 gc(Object) :- class(Object, "java.lang.Object") | .
