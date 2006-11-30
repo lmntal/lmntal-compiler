@@ -26,7 +26,7 @@ final class Unlexer {
 }
 
 public class Dumper {
-	static HashMap binops = new HashMap();
+	static HashMap<String,int[]> binops = new HashMap<String, int[]>();
 
 	private static final int xfy = 0;
 
