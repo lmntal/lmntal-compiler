@@ -116,9 +116,9 @@ public class SubFrame extends JFrame {
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
 		menuPanel_.add(linkNumCheck_);
 		menuPanel_.add(angleCheck_);
-		menuPanel_.add(springCheck_);
-		menuPanel_.add(repulsiveCheck_);
 		menuPanel_.add(attractionCheck_);
+		menuPanel_.add(repulsiveCheck_);
+		menuPanel_.add(springCheck_);
 		
 		
 		menuScroll_ = new JScrollPane(menuPanel_);
