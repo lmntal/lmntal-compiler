@@ -20,8 +20,16 @@ public class LinkSet {
 	
 	///////////////////////////////////////////////////////////////////////////
 
+	final static
+	private double LINK_NUM_DELTA = 30.0;
+	
+	///////////////////////////////////////////////////////////////////////////
+
 	static
 	private Map<Object, Node> linkMap_ = new HashMap<Object, Node>();
+	
+	static
+	private boolean showLinkNum_ = false;
 	
 	///////////////////////////////////////////////////////////////////////////
 	
@@ -45,6 +53,11 @@ public class LinkSet {
 		}
 	}
 	
+	static
+	public void setShowLinkNum(boolean flag){
+		showLinkNum_ = flag;
+	}
+	
 	/**
 	 * リンクを描画する
 	 * @param g
@@ -65,7 +78,7 @@ public class LinkSet {
 					for(int n = 0; n < atom.getEdgeCount(); n++){
 						Atom nthAtom = atom.getNthAtom(n);
 						if(null == nthAtom){ continue; }
-						if(atom.getid() < nthAtom.getid()){
+						if(showLinkNum_ || atom.getid() < nthAtom.getid()){
 							Node nodeTarget = getVisibleNode(linkMap_.get(nthAtom));
 //							System.out.println((null != nodeSource.getInvisibleRootNode()));
 							if((null == nodeTarget) ||
@@ -78,10 +91,24 @@ public class LinkSet {
 								continue;
 							}
 							Rectangle2D rectTarget = nodeTarget.getBounds2D();
-							g.drawLine((int)rectSource.getCenterX(),
-									(int)rectSource.getCenterY(),
-									(int)rectTarget.getCenterX(),
-									(int)rectTarget.getCenterY());
+							
+							if(showLinkNum_){
+								double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
+								double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
+								if(x0 == 0.0){ x0=0.000000001; }
+								double angle = Math.atan(y0 / x0);
+								if(x0 < 0.0){ angle += Math.PI; }
+								angle += Math.PI / 2;
+								double y = Math.cos(angle) * LINK_NUM_DELTA;
+								double x = Math.sin(angle) * LINK_NUM_DELTA;
+								g.drawString(Integer.toString(n), (int)(rectSource.getCenterX() - x), (int)(rectSource.getCenterY() + y));
+							}
+							if(atom.getid() < nthAtom.getid()){
+								g.drawLine((int)rectSource.getCenterX(),
+										(int)rectSource.getCenterY(),
+										(int)rectTarget.getCenterX(),
+										(int)rectTarget.getCenterY());
+							}
 						}
 					}
 				}

@@ -60,6 +60,8 @@ public class SubFrame extends JFrame {
 	
 	private JPanel menuPanel_ = new JPanel();
 	
+	private JCheckBox linkNumCheck_ = new JCheckBox("Show Link Number");
+	
 	private JCheckBox springCheck_ = new JCheckBox("Calc Spring");
 	
 	private JCheckBox angleCheck_ = new JCheckBox("Calc Angle");
@@ -103,6 +105,8 @@ public class SubFrame extends JFrame {
 		
 		angleCheck_.addItemListener(new AngleAdapter());
 		angleCheck_.setSelected(true);
+		linkNumCheck_.addItemListener(new LinkNumAdapter());
+		linkNumCheck_.setSelected(false);
 		springCheck_.addItemListener(new SpringAdapter());
 		springCheck_.setSelected(true);
 		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
@@ -110,6 +114,7 @@ public class SubFrame extends JFrame {
 		attractionCheck_.addItemListener(new AttractionAdapter());
 		attractionCheck_.setSelected(true);
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
+		menuPanel_.add(linkNumCheck_);
 		menuPanel_.add(angleCheck_);
 		menuPanel_.add(springCheck_);
 		menuPanel_.add(repulsiveCheck_);
@@ -259,6 +264,19 @@ public class SubFrame extends JFrame {
 		public StopDivergenceAdapter() { }
 		public void actionPerformed(ActionEvent e) {
 			NodeFunction.stopDivergence();
+		}
+	}
+	
+	/**
+	 * リンク番号の表示
+	 * @author nakano
+	 *
+	 */
+	private class LinkNumAdapter implements ItemListener {
+		public LinkNumAdapter() { } 
+		
+		public void itemStateChanged(ItemEvent e) {
+			LinkSet.setShowLinkNum(linkNumCheck_.isSelected());
 		}
 	}
 	
