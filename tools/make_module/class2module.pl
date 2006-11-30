@@ -465,7 +465,7 @@ sub dump_final_variable {
 	print "\tAtom res = mem.newAtom(new $functor);\n";
 	print "\tmem.relink(res, 0, me, 0);\n";
 	print "\tme.remove();\n";
-	print "\t:].\n";
+	print "\t:]" . dump_return_type_use($type). ".\n";
 	print "\n";
 }
 
