@@ -41,9 +41,6 @@ public class NodeFunction {
 	final static
 	private int DIVERGENCE_TIMER = 100;
 	
-	final static
-	private double MAX_FORCE = 5.0;
-	
 	///////////////////////////////////////////////////////////////////////////
 	// static
 	
@@ -124,7 +121,9 @@ public class NodeFunction {
 		{
 			return;
 		}
-		divergenceTimer_--;
+		if(null == node.getParent()){
+			divergenceTimer_--;
+		}
 		
 		Point2D myPoint = node.getCenterPoint();
 
@@ -133,9 +132,6 @@ public class NodeFunction {
 			// 表示されているNodeを取得する
 			Node targetNode = nodes.next();
 			Point2D nthPoint = targetNode.getCenterPoint();
-
-//			double distance =
-//				Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
 
 			double f = -CONSTANT_DIVERGENCE;
 
@@ -165,7 +161,8 @@ public class NodeFunction {
 		while(nodes.hasNext()){
 			Node sourceNode = nodes.next();
 			Point2D sourcePoint = sourceNode.getCenterPoint();
-			Rectangle2D sourceRect = sourceNode.getBounds2D();
+			Rectangle2D sourceRecat = sourceNode.getBounds2D();
+			double sourceSize = Math.max(sourceRecat.getHeight(), sourceRecat.getWidth());
 			
 			Iterator<Node> targetNodes = nodeMap.values().iterator();
 			while(targetNodes.hasNext()){
@@ -180,6 +177,8 @@ public class NodeFunction {
 				}
 
 				Point2D targetPoint = targetNode.getCenterPoint();
+				Rectangle2D targetRecat = targetNode.getBounds2D();
+				double targetSize = Math.max(targetRecat.getHeight(), targetRecat.getWidth());
 				// TODO: Node　の大きさ
 				double distance =
 					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
@@ -188,6 +187,7 @@ public class NodeFunction {
 				if(distance > 1 * divergenceFource){
 					continue; 
 				}
+				
 				double distance2 = distance * distance;
 				double f = CONSTANT_REPULSIVE * divergenceFource *(
 						(1.25 * distance2 * distance) -

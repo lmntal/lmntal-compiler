@@ -126,10 +126,9 @@ public class LinkSet {
 								if(x0 == 0.0){ x0=0.000000001; }
 								double angle = Math.atan(y0 / x0);
 								if(x0 < 0.0){ angle += Math.PI; }
-								angle += Math.PI / 2;
-								double y = Math.cos(angle) * LINK_NUM_DELTA;
-								double x = Math.sin(angle) * LINK_NUM_DELTA;
-								g.drawString(Integer.toString(n), (int)(rectSource.getCenterX() - x), (int)(rectSource.getCenterY() + y));
+								double x = Math.cos(angle) * LINK_NUM_DELTA;
+								double y = Math.sin(angle) * LINK_NUM_DELTA;
+								g.drawString(Integer.toString(n), (int)(rectSource.getCenterX() - x), (int)(rectSource.getCenterY() - y));
 							}
 							if(atom.getid() < nthAtom.getid()){
 								g.drawLine((int)rectSource.getCenterX(),

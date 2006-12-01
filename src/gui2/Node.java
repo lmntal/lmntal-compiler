@@ -14,7 +14,7 @@ import java.util.Map;
 import runtime.Atom;
 import runtime.Membrane;
 
-public class Node {
+public class Node implements Cloneable{
 
 	///////////////////////////////////////////////////////////////////////////
 	// final static
@@ -146,6 +146,7 @@ public class Node {
 	 * 位置座標などの計算
 	 */
 	public void calc(){
+		if(clipped_){ return; }
 		NodeFunction.calcSpring(this);
 		NodeFunction.calcRelaxAngle(this);
 		synchronized (nodeMap_) {
@@ -160,7 +161,7 @@ public class Node {
 	 * 位座標などの計算を自分を含めたすべての子Nodeにて行う
 	 */
 	public void calcAll(){
-		if(uncalc_ || clipped_){ return; }
+		if(uncalc_){ return; }
 		calc();
 		synchronized (nodeMap_) {
 			Iterator<Node> nodes = nodeMap_.values().iterator();
@@ -168,6 +169,15 @@ public class Node {
 				Node node = nodes.next();
 				node.calcAll();
 			}
+		}
+	}
+	
+	public Object clone(){
+		try {
+			return (super.clone());
+		} catch (CloneNotSupportedException e) {
+			// TODO 自動生成された catch ブロック
+			throw (new InternalError(e.getMessage()));
 		}
 	}
 	

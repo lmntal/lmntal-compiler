@@ -5,6 +5,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -30,7 +32,8 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	/////////////////////////////////////////////////////////////////
 	
-	public boolean stopCalc = true;
+	private int step_ = 1;
+	private boolean stopCalc_ = true;
 	public boolean running = true;
 	
 	private GraphPanel panel = null;
@@ -38,6 +41,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	private LogFrame logFrame;
 	private Thread th;
 	private Membrane rootMembrane;
+	private List<Node> rootMemList = new ArrayList<Node>();
 	
 
 	/////////////////////////////////////////////////////////////////
@@ -47,10 +51,12 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				stopCalc = false;
+				stopCalc_ = false;
 				running = false;
 			}
 		});
+		
+//		addKeyListener(this);
 		
 		initComponents();
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
@@ -80,13 +86,21 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	}
 	
 	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_A){
+			if(rootMemList.size() == 0){ return; }
+			panel.setRootNode(rootMemList.remove(rootMemList.size() - 1));
+			setRootMem(rootMembrane);
+			System.out.println(rootMembrane);
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_S){
+			rootMemList.add(panel.getRootNode());
+		}
 	}
 	
 	public void keyReleased(KeyEvent e) {
 	}
 	
 	public void keyTyped(KeyEvent e) {
-		System.out.println(e.getKeyChar());
 	}
 	
 	/**
@@ -98,7 +112,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 			logFrame.setLog(rootMembrane.toString());
 		}
 		while(running) {
-			if(!stopCalc){
+			if(!stopCalc_){
 				break;
 			}
 			try {
@@ -107,7 +121,8 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 				e.printStackTrace();
 			}
 		}
-		stopCalc = true;
+		stopCalc_ = (step_ == 0) ? true : false;
+		step_--;
 	}
 	
 	/**
@@ -125,6 +140,14 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	public void setRootMem(Membrane mem){
 		rootMembrane = mem;
 		panel.setRootMem(mem);
+	}
+	
+	public void setStep(int step){
+		step_ = step;
+	}
+	
+	public void setStopCalc(boolean flag){
+		stopCalc_ = flag;
 	}
 	
 	/**

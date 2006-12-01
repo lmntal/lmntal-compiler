@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -60,6 +61,8 @@ public class SubFrame extends JFrame {
 	
 	private JPanel menuPanel_ = new JPanel();
 	
+	private JTextField  stepBox_ = new JTextField("1");
+	
 	private JCheckBox linkNumCheck_ = new JCheckBox("Show Link Number");
 	
 	private JCheckBox springCheck_ = new JCheckBox("Calc Spring");
@@ -91,6 +94,11 @@ public class SubFrame extends JFrame {
 	}
 	/////////////////////////////////////////////////////////////////
 	
+	
+	public int getSliderValue(){
+		return js1_.getValue();
+	}
+	
 	private void initComponents() {
 		
 		goBt_.addActionListener(new GoActionAdapter(this));
@@ -119,6 +127,7 @@ public class SubFrame extends JFrame {
 		menuPanel_.add(attractionCheck_);
 		menuPanel_.add(repulsiveCheck_);
 		menuPanel_.add(springCheck_);
+		menuPanel_.addMouseWheelListener(new SliderMouseListener(this));
 		
 		
 		menuScroll_ = new JScrollPane(menuPanel_);
@@ -130,20 +139,31 @@ public class SubFrame extends JFrame {
 		js1_.setMajorTickSpacing(10);  //大目盛りの間隔を設定
 		js1_.setLabelTable(js1_.createStandardLabels(10)); //目盛りﾗﾍﾞﾙを10間隔で表示
 		js1_.setPaintLabels(true);    //目盛りﾗﾍﾞﾙを表示
+		getContentPane().addMouseWheelListener(new SliderMouseListener(this));
 
 		setTitle(TITLE);
 		getContentPane().setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
-
+		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		gbc.gridwidth = 3;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 1.0;
+		gbc.weighty = 0.0;
+		getContentPane().add(stepBox_, gbc);
+
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.gridwidth = 2;
         gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
 		getContentPane().add(goBt_, gbc);
 
+		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
         gbc.gridheight = 4;
@@ -185,113 +205,13 @@ public class SubFrame extends JFrame {
 		getContentPane().add(menuScroll_, gbc);
 
 	}
-	
-	/**
-	 * 倍率変更のスライダー
-	 * @author nakano
-	 *
-	 */
-	public class SliderChanged  implements ChangeListener {
-		public void stateChanged(ChangeEvent e) {
-			JSlider source = (JSlider)e.getSource();
-			mainFrame_.setMagnification((double)source.getValue() / (double)source.getMaximum());
-		}
-	}
 
-	/**
-	 * 計算続行ボタン
-	 * @author nakano
-	 *
-	 */
-	private class GoActionAdapter implements ActionListener {
-		private SubFrame frame;
-		public GoActionAdapter(SubFrame f) {
-			frame = f;
-		}
-		public void actionPerformed(ActionEvent e) {
-			frame.mainFrame_.stopCalc = false;
-		}
+	public void setSliderValue(int value){
+		js1_.setValue(value);
 	}
 	
-	/**
-	 * すべての膜を表示化
-	 * @author nakano
-	 *
-	 */
-	private class ShowAllAdapter implements ActionListener {
-		private SubFrame frame;
-		public ShowAllAdapter(SubFrame f) {
-			frame = f;
-		}
-		public void actionPerformed(ActionEvent e) {
-			frame.mainFrame_.showAll();
-		}
-	}
-	
-	/**
-	 * すべての膜を非表示化
-	 * @author nakano
-	 *
-	 */
-	private class HideAllAdapter implements ActionListener {
-		private SubFrame frame;
-		public HideAllAdapter(SubFrame f) {
-			frame = f;
-		}
-		public void actionPerformed(ActionEvent e) {
-			frame.mainFrame_.hideAll();
-		}
-	}
+	///////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * 拡散処理開始
-	 * @author nakano
-	 *
-	 */
-	private class DivergenceAdapter implements ActionListener {
-		public DivergenceAdapter() { }
-		public void actionPerformed(ActionEvent e) {
-			NodeFunction.setDivergence();
-		}
-	}
-
-	/**
-	 * 拡散処理終了
-	 * @author nakano
-	 *
-	 */
-	private class StopDivergenceAdapter implements ActionListener {
-		public StopDivergenceAdapter() { }
-		public void actionPerformed(ActionEvent e) {
-			NodeFunction.stopDivergence();
-		}
-	}
-	
-	/**
-	 * リンク番号の表示
-	 * @author nakano
-	 *
-	 */
-	private class LinkNumAdapter implements ItemListener {
-		public LinkNumAdapter() { } 
-		
-		public void itemStateChanged(ItemEvent e) {
-			LinkSet.setShowLinkNum(linkNumCheck_.isSelected());
-		}
-	}
-	
-	/**
-	 * ばねモデルの有効・無効化
-	 * @author nakano
-	 *
-	 */
-	private class SpringAdapter implements ItemListener {
-		public SpringAdapter() { } 
-		
-		public void itemStateChanged(ItemEvent e) {
-			NodeFunction.setSpringFlag(springCheck_.isSelected());
-		}
-	}
 	
 	/**
 	 * ばねモデルの有効・無効化
@@ -318,6 +238,66 @@ public class SubFrame extends JFrame {
 			NodeFunction.setAttractionFlag(attractionCheck_.isSelected());
 		}
 	}
+
+	/**
+	 * 拡散処理開始
+	 * @author nakano
+	 *
+	 */
+	private class DivergenceAdapter implements ActionListener {
+		public DivergenceAdapter() { }
+		public void actionPerformed(ActionEvent e) {
+			NodeFunction.setDivergence();
+		}
+	}
+
+	/**
+	 * 計算続行ボタン
+	 * @author nakano
+	 *
+	 */
+	private class GoActionAdapter implements ActionListener {
+		private SubFrame frame;
+		public GoActionAdapter(SubFrame f) {
+			frame = f;
+		}
+		public void actionPerformed(ActionEvent e) {
+			try {
+				frame.mainFrame_.setStep(Integer.parseInt(stepBox_.getText()));
+			} catch (NumberFormatException e1) {
+				frame.mainFrame_.setStep(1);
+			}
+			frame.mainFrame_.setStopCalc(false);
+		}
+	}
+	
+	/**
+	 * すべての膜を非表示化
+	 * @author nakano
+	 *
+	 */
+	private class HideAllAdapter implements ActionListener {
+		private SubFrame frame;
+		public HideAllAdapter(SubFrame f) {
+			frame = f;
+		}
+		public void actionPerformed(ActionEvent e) {
+			frame.mainFrame_.hideAll();
+		}
+	}
+	
+	/**
+	 * リンク番号の表示
+	 * @author nakano
+	 *
+	 */
+	private class LinkNumAdapter implements ItemListener {
+		public LinkNumAdapter() { } 
+		
+		public void itemStateChanged(ItemEvent e) {
+			LinkSet.setShowLinkNum(linkNumCheck_.isSelected());
+		}
+	}
 	
 	/**
 	 * 斥力計算の有効・無効化
@@ -329,6 +309,57 @@ public class SubFrame extends JFrame {
 		
 		public void itemStateChanged(ItemEvent e) {
 			NodeFunction.setRepulsiveFlag(repulsiveCheck_.isSelected());
+		}
+	}
+	/**
+	 * すべての膜を表示化
+	 * @author nakano
+	 *
+	 */
+	private class ShowAllAdapter implements ActionListener {
+		private SubFrame frame;
+		public ShowAllAdapter(SubFrame f) {
+			frame = f;
+		}
+		public void actionPerformed(ActionEvent e) {
+			frame.mainFrame_.showAll();
+		}
+	}
+	
+	/**
+	 * 倍率変更のスライダー
+	 * @author nakano
+	 *
+	 */
+	private class SliderChanged  implements ChangeListener {
+		public void stateChanged(ChangeEvent e) {
+			JSlider source = (JSlider)e.getSource();
+			mainFrame_.setMagnification((double)source.getValue() / (double)source.getMaximum());
+		}
+	}
+	/**
+	
+	 * ばねモデルの有効・無効化
+	 * @author nakano
+	 *
+	 */
+	private class SpringAdapter implements ItemListener {
+		public SpringAdapter() { } 
+		
+		public void itemStateChanged(ItemEvent e) {
+			NodeFunction.setSpringFlag(springCheck_.isSelected());
+		}
+	}
+
+	/**
+	 * 拡散処理終了
+	 * @author nakano
+	 *
+	 */
+	private class StopDivergenceAdapter implements ActionListener {
+		public StopDivergenceAdapter() { }
+		public void actionPerformed(ActionEvent e) {
+			NodeFunction.stopDivergence();
 		}
 	}
 	

@@ -8,10 +8,14 @@ import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -39,6 +43,8 @@ public class GraphPanel extends JPanel {
 	private Membrane rootMembrane_;
 	private AffineTransform af_ = new AffineTransform();
 	private Point lastPoint;
+	private List<Membrane> rootMemList_ = new ArrayList<Membrane>();
+	
 	///////////////////////////////////////////////////////////////////////////
 	
 	public GraphPanel() {
@@ -56,7 +62,32 @@ public class GraphPanel extends JPanel {
 		//　PINのロード待ち　ここまで
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-		
+		addKeyListener(new KeyListener(){
+
+			public void keyPressed(KeyEvent e) {
+				System.out.println("key");
+				if(e.getKeyCode() == KeyEvent.VK_A){
+					rootMembrane_ = rootMemList_.remove(rootMemList_.size() - 1);
+					setRootMem(rootMembrane_);
+					System.out.println(rootMembrane_);
+				}
+				else if(e.getKeyCode() == KeyEvent.VK_S){
+//					rootMemList_.add(((O)rootMembrane));
+				}
+				
+			}
+
+			public void keyReleased(KeyEvent e) {
+				System.out.println("keyR");
+				
+			}
+
+			public void keyTyped(KeyEvent e) {
+				System.out.println("keyT");
+				
+			}
+			
+		});
 		addMouseListener(new MouseAdapter() {
 			
 			/** 
@@ -128,6 +159,8 @@ public class GraphPanel extends JPanel {
 
 		}
 		);
+		
+		addMouseWheelListener(new SliderMouseListener(null));
 
 		calcTh_ = new CalcThread();
 		calcTh_.start();
@@ -217,6 +250,14 @@ public class GraphPanel extends JPanel {
 	public void showAll(){
 		rootNode_.setVisible(true, true);
 		rootNode_.setInvisibleRootNode(null);
+	}
+	
+	public Node getRootNode(){
+		return (Node)rootNode_.clone();
+	}
+	
+	public void setRootNode(Node node){
+		rootNode_ = node;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
