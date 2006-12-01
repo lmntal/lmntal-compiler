@@ -36,7 +36,7 @@ import util.Util;
  * コンパイラは次のコードを出力する：addmemやnewrootした膜は、ルール実行終了時に（子膜側から順番に）unlockmemを実行する。
  */
 
-// TODO LOCAL関係のコメントを完全に削除する (1) -> 0912 done
+// doneTODO LOCAL関係のコメントを完全に削除する (1) -> 0912 done
 // TODO 引数mem がいらない箇所がある（デーモン削除の影響）
 
 /**
