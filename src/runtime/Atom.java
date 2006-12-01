@@ -339,7 +339,7 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	 * このアトムの内容をストリームから復元します。
 	 * キャッシュ更新や、プロセス文脈の移送の際に利用します。
 	 * TODO OUTSIDE_PROXYを正しく処理する
-	 * @param out 入力ストリーム
+	 * @param in 入力ストリーム
 	 * @throws IOException 入出力エラーが発生した場合。
 	 */
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
