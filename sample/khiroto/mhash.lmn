@@ -4,13 +4,6 @@
 % 
 % 06/11/01
 
-%まずは
-%{aa. bb. cc} {{aa. bb.} {cc}} {{aa.}. {bb.}. cc}
-%などが異なる構造とされるハッシュコード算出方法を考える。
-
-%XOR演算の性質
-%x^y = y^x, (x^y)^z = x^(y^z), x^x = 0
-
 {
 module(mhash).
 
@@ -24,8 +17,6 @@ module(mhash).
 			long f = 3412;
 			
 			// 子膜以外のアトムを処理する
-			// このやり方では、アトムが子膜に繋がっているときは
-			// それが「どのような」膜であるかは区別できない。
 			for (Iterator i = m.atomIterator(); i.hasNext(); ) {
 				Atom a = (Atom) i.next();
 				String name = a.getName();
