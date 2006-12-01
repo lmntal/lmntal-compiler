@@ -8,8 +8,6 @@ import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -36,8 +34,6 @@ public class GraphPanel extends JPanel {
 	
 	private Thread calcTh_ = null;
 	private Thread repaintTh_ = null;
-	private Image OSI_ = null;
-	private Graphics OSG_ = null;
 	private Node moveTargetNode_ = null;
 	private Node rootNode_;
 	private Membrane rootMembrane_;
@@ -55,20 +51,12 @@ public class GraphPanel extends JPanel {
 		try {
 			mt.waitForAll();
 		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		//　PINのロード待ち　ここまで
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		
-		addComponentListener(new ComponentAdapter() {
-			public void componentResized(ComponentEvent e) {
-				OSI_ = createImage((int) getSize().getWidth(), (int) getSize().getHeight());
-				OSG_ = OSI_.getGraphics();	
-			}
-
-		});
 		addMouseListener(new MouseAdapter() {
 			
 			/** 
@@ -147,22 +135,32 @@ public class GraphPanel extends JPanel {
 		repaintTh_.start();
 	}
 	
-	public void setRootMem(Membrane mem){
-		rootMembrane_ = mem;
-		rootNode_ = new Node(null, mem);
-	}
-	
-	public Image getPin(){
-		return pin_;
-	}
-	
 	/**
-	 * すべての膜を表示に設定
+	 * 力学モデルの計算・移動の計算を行う
 	 *
 	 */
-	public void showAll(){
-		rootNode_.setVisible(true, true);
-		rootNode_.setInvisibleRootNode(null);
+	public void calc(){
+		if(null == rootNode_){ return; }
+		rootNode_.reset(rootMembrane_);
+		rootNode_.calcAll();
+		rootNode_.moveAll();
+	}
+
+	/**
+	 * 拡大縮小の倍率を取得する
+	 * @return
+	 */
+	static
+	public double getMagnification(){
+		return magnification_;
+	}
+
+	/**
+	 * Pinのイメージを取得する
+	 * @return
+	 */
+	public Image getPin(){
+		return pin_;
 	}
 	
 	/**
@@ -174,41 +172,22 @@ public class GraphPanel extends JPanel {
 		rootNode_.setInvisibleRootNode(null);
 	}
 
-	public void calc(){
-		if(null == rootNode_){ return; }
-		rootNode_.reset(rootMembrane_);
-		rootNode_.calcAll();
-		rootNode_.moveAll();
-	}
-
-	public void setMagnification(double magni){
-		magnification_ = magni * 2;
-	}
-	
-	/**
-	 * 拡大縮小の倍率を取得する
-	 * @return
-	 */
-	public double getMagnification(){
-		return magnification_;
-	}
-	
 	/**
 	 * グラフを描画する
 	 */
 	public void paint(Graphics g) {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0,(int)getWidth(), (int)getHeight());
-
+	
 		g.setColor(Color.WHITE);
 		af_.setTransform(getMagnification(), 0, 0, getMagnification(), getWidth() / 2, getHeight() / 2);
 		((Graphics2D)g).setTransform(af_);
-
+	
 		g.setColor(Color.BLACK);
 		if(null != rootNode_){
 			rootNode_.paint(g);
 		}
-
+	
 		// 初期位置に戻す
 		int divergenceTimer = NodeFunction.getDivergence();
 		if(0 < divergenceTimer){
@@ -218,6 +197,29 @@ public class GraphPanel extends JPanel {
 		}
 	}
 
+	public void setMagnification(double magni){
+		magnification_ = magni * 2;
+	}
+
+	/**
+	 * ルート膜をセットする
+	 * @param mem
+	 */
+	public void setRootMem(Membrane mem){
+		rootMembrane_ = mem;
+		rootNode_ = new Node(null, mem);
+	}
+
+	/**
+	 * すべての膜を表示に設定
+	 *
+	 */
+	public void showAll(){
+		rootNode_.setVisible(true, true);
+		rootNode_.setInvisibleRootNode(null);
+	}
+
+	///////////////////////////////////////////////////////////////////////////
 	/**
 	 * 演算用スレッド
 	 * @author nakano
@@ -243,6 +245,7 @@ public class GraphPanel extends JPanel {
 		}
 	}
 
+	///////////////////////////////////////////////////////////////////////////
 	/**
 	 * 描画用スレッド
 	 * @author nakano

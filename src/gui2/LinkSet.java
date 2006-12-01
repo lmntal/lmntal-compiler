@@ -1,6 +1,8 @@
 package gui2;
 
+import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -44,18 +46,45 @@ public class LinkSet {
 	}
 	
 	/**
-	 * アトムを除去する
+	 * AtomまたはMembraneから可視Nodeを取得する
+	 * <P>
+	 * 可視Nodeは，描画時に見えるNodeのこと
+	 * @param key
+	 * @return
 	 */
 	static
-	public void removeLink(Object key){
-		synchronized (linkMap_) {
-			linkMap_.remove(key);
-		}
+	public Node getNode(Object key){
+		return getVisibleNode((Node)linkMap_.get(key));
 	}
 	
+	/**
+	 * AtomまたはMembraneから可視Nodeの座標を取得する
+	 * @param key
+	 * @return
+	 */
 	static
-	public void setShowLinkNum(boolean flag){
-		showLinkNum_ = flag;
+	public Point2D.Double getNodePoint(Object key){
+		Node node = getVisibleNode(linkMap_.get(key));
+		return (null != node) ? node.getCenterPoint() : null;
+	}
+
+	
+	/**
+	 * 可視Nodeを取得する
+	 * @param node
+	 * @return
+	 */
+	static
+	private Node getVisibleNode(Node node){
+		if(null == node ||
+				null == node.getParent() ||
+				null == node.getParent().getInvisibleRootNode())
+		{
+			return node;
+		}
+		else {
+			return getVisibleNode(node.getParent());
+		}
 	}
 	
 	/**
@@ -80,7 +109,6 @@ public class LinkSet {
 						if(null == nthAtom){ continue; }
 						if(showLinkNum_ || atom.getid() < nthAtom.getid()){
 							Node nodeTarget = getVisibleNode(linkMap_.get(nthAtom));
-//							System.out.println((null != nodeSource.getInvisibleRootNode()));
 							if((null == nodeTarget) ||
 									(
 											(null != nodeSource.getInvisibleRootNode()) &&
@@ -91,7 +119,7 @@ public class LinkSet {
 								continue;
 							}
 							Rectangle2D rectTarget = nodeTarget.getBounds2D();
-							
+
 							if(showLinkNum_){
 								double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
 								double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
@@ -116,33 +144,19 @@ public class LinkSet {
 		}
 	}
 	
-	static
-	public Point2D.Double getNodePoint(Object key){
-		Node node = getVisibleNode(linkMap_.get(key));
-		return (null != node) ? node.getCenterPoint() : null;
-	}
-	
-	static
-	public Node getNode(Object key){
-		return getVisibleNode((Node)linkMap_.get(key));
-	}
-	
 	/**
-	 * 可視Nodeを取得する
-	 * @param node
-	 * @return
+	 * アトムを除去する
 	 */
 	static
-	private Node getVisibleNode(Node node){
-		if(null == node ||
-				null == node.getParent() ||
-				null == node.getParent().getInvisibleRootNode())
-		{
-			return node;
+	public void removeLink(Object key){
+		synchronized (linkMap_) {
+			linkMap_.remove(key);
 		}
-		else {
-			return getVisibleNode(node.getParent());
-		}
+	}
+	
+	static
+	public void setShowLinkNum(boolean flag){
+		showLinkNum_ = flag;
 	}
 	
 	///////////////////////////////////////////////////////////////////////////

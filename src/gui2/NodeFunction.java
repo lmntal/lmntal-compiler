@@ -183,16 +183,16 @@ public class NodeFunction {
 				// TODO: Node　の大きさ
 				double distance =
 					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
-				
-				if(distance > 1){
+
+				double divergenceFource = (divergenceTimer_ == 0) ? 1 : 2;
+				if(distance > 1 * divergenceFource){
 					continue; 
 				}
-
-				double f = CONSTANT_REPULSIVE * (
-						(1.25 * distance * distance * distance) -
-						(2.375 * distance * distance) +
+				double distance2 = distance * distance;
+				double f = CONSTANT_REPULSIVE * divergenceFource *(
+						(1.25 * distance2 * distance) -
+						(2.375 * distance2) +
 						1.125);
-//				double f = CONSTANT_REPULSIVE * distance;
 				
 				double dx = sourcePoint.getX() - targetPoint.getX();
 				double dy = sourcePoint.getY() - targetPoint.getY();
@@ -314,7 +314,9 @@ public class NodeFunction {
 			double distance =
 				Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
 
-			double f = -CONSTANT_SPRING * ((distance / ( 80 * 2)) - 1.0);
+			double divergenceFource = (divergenceTimer_ == 0) ? 1 : Math.random() * 10;
+			
+			double f = -CONSTANT_SPRING * divergenceFource * ((distance / ( 80 * 2)) - 1.0);
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
