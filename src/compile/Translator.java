@@ -891,24 +891,16 @@ public class Translator {
 		writer.write("		Membrane mem;\n");
 		writer.write("		int x, y;\n");
 		writer.write("		double u, v;\n");
-		writer.write("		int isground_ret;\n");
-		writer.write("		boolean eqground_ret;\n");
 		writer.write("		boolean guard_inline_ret;\n");
 		writer.write("		ArrayList guard_inline_gvar2;\n");
 		writer.write("		Iterator it_guard_inline;\n");
 		writer.write("		String s1, s2;\n");//2006.07.01 inui
 		
 		//2005-10-21 by kudo (INSERTCONNECTORS,DELETECONNECTORS,LOOKUPLINKで使う)
-		//TODO こんなに要らない筈。共通化するべき
-		writer.write("		Set insset;\n");
-		writer.write("		Set delset;\n");
-		writer.write("		Set avoset;\n");
-		writer.write("		Map srcmap;\n");
-		writer.write("		Map delmap;\n");
-		writer.write("		Atom orig;\n");
-		writer.write("		Atom copy;\n");
-		writer.write("		Link a;\n");
-		writer.write("		Link b;\n");
+		writer.write("		Set set1;\n");
+		writer.write("		Map map1;\n");
+		writer.write("		Atom copy;\n"); // DELETECONNECTORSで使用
+		writer.write("		Link link2;\n"); // INSERTCONNECTORS, INSERTCONNECTORSINNULLで使用
 		writer.write("		Iterator it_deleteconnectors;\n");
 
 		writer.write("		Object ejector;\n");
@@ -1352,60 +1344,60 @@ public class Translator {
 					writer.write(tabs + "((Membrane)var[" +  inst.getIntArg1()  + "]).drop();\n");
 					break; //kudo 2004-09-29
 				case Instruction.LOOKUPLINK : //[-dstlink, srcmap, srclink]
-					writer.write(tabs + "srcmap = (HashMap)var[" +  inst.getIntArg2()  + "];\n");
+					writer.write(tabs + "map1 = (HashMap)var[" +  inst.getIntArg2()  + "];\n");
 					writer.write(tabs + "link = (Link)var[" +  inst.getIntArg3()  + "];\n");
-					writer.write(tabs + "atom = (Atom) srcmap.get(link.getAtom());\n");
+					writer.write(tabs + "atom = (Atom) map1.get(link.getAtom());\n");
 					writer.write(tabs + "var[" +  inst.getIntArg1()  + "] = new Link(atom, link.getPos());\n");
 					break; //kudo 2004-10-10
 				case Instruction.INSERTCONNECTORS : //[-dstset,linklist,mem]
 					List linklist = (List)inst.getArg2();
-					writer.write(tabs + "insset=new HashSet();\n");
+					writer.write(tabs + "set1=new HashSet();\n");
 					writer.write(tabs + "mem=((Membrane)var[" + inst.getIntArg3() + "]);\n");
 					for(int i=0;i<linklist.size();i++){
 						for(int j=i+1;j<linklist.size();j++){
-							writer.write(tabs + "		a=(Link)var[" + ((Integer)linklist.get(i)).intValue() + "];\n");
-							writer.write(tabs + "		b=(Link)var[" + ((Integer)linklist.get(j)).intValue() + "];\n");
-							writer.write(tabs + "		if(a == b.getBuddy()){\n");
+							writer.write(tabs + "		link=(Link)var[" + ((Integer)linklist.get(i)).intValue() + "];\n");
+							writer.write(tabs + "		link2=(Link)var[" + ((Integer)linklist.get(j)).intValue() + "];\n");
+							writer.write(tabs + "		if(link == link2.getBuddy()){\n");
 							writer.write(tabs + "			atom = mem.newAtom(Functor.UNIFY);\n");
-							writer.write(tabs + "			mem.unifyLinkBuddies(a,new Link(atom,0));\n");
-							writer.write(tabs + "			mem.unifyLinkBuddies(b,new Link(atom,1));\n");
-							writer.write(tabs + "			insset.add(atom);\n");
+							writer.write(tabs + "			mem.unifyLinkBuddies(link,new Link(atom,0));\n");
+							writer.write(tabs + "			mem.unifyLinkBuddies(link2,new Link(atom,1));\n");
+							writer.write(tabs + "			set1.add(atom);\n");
 							writer.write(tabs + "		}\n");
 						}
 					}
-					writer.write(tabs + "var[" + inst.getIntArg1() + "] = insset;\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = set1;\n");
 					break; //kudo 2004-12-29
 				case Instruction.INSERTCONNECTORSINNULL : //[-dstset, linklist]
 					List linklistn = (List)inst.getArg2();
-					writer.write(tabs + "insset=new HashSet();\n");
+					writer.write(tabs + "set1=new HashSet();\n");
 					for(int i=0;i<linklistn.size();i++){
 						for(int j=i+1;j<linklistn.size();j++){
-							writer.write(tabs + "		a=(Link)var[" + ((Integer)linklistn.get(i)).intValue() + "];\n");
-							writer.write(tabs + "		b=(Link)var[" + ((Integer)linklistn.get(j)).intValue() + "];\n");
-							writer.write(tabs + "		if(a==b.getBuddy()){\n");
+							writer.write(tabs + "		link=(Link)var[" + ((Integer)linklistn.get(i)).intValue() + "];\n");
+							writer.write(tabs + "		link2=(Link)var[" + ((Integer)linklistn.get(j)).intValue() + "];\n");
+							writer.write(tabs + "		if(link==link2.getBuddy()){\n");
 							writer.write(tabs + "			atom = new Atom(null, Functor.UNIFY);\n");
 //							writer.write(tabs + "			a2 = new Link(atom,0);\n");
 //							writer.write(tabs + "			b2 = new Link(atom,1);\n");
-							writer.write(tabs + "			((Membrane)var[0]).unifyLinkBuddies(a, new Link(atom,0));\n");
-							writer.write(tabs + "			((Membrane)var[0]).unifyLinkBuddies(b, new Link(atom,1));\n");
+							writer.write(tabs + "			((Membrane)var[0]).unifyLinkBuddies(link, new Link(atom,0));\n");
+							writer.write(tabs + "			((Membrane)var[0]).unifyLinkBuddies(link2, new Link(atom,1));\n");
 //							writer.write(tabs + "			a.getAtom().args[a.getPos()] = a2;\n");
 //							writer.write(tabs + "			a2.getAtom().args[a2.getPos()] = a;\n");
 //							writer.write(tabs + "			b.getAtom().args[b.getPos()] = b2;\n");
 //							writer.write(tabs + "			b2.getAtom().args[b2.getPos()] = b;\n");
-							writer.write(tabs + "			insset.add(atom);\n");
+							writer.write(tabs + "			set1.add(atom);\n");
 							writer.write(tabs + "		}\n");
 						}
 					}
-					writer.write(tabs + "var[" + inst.getIntArg1() + "] = insset;\n");
+					writer.write(tabs + "var[" + inst.getIntArg1() + "] = set1;\n");
 					break; //kudo 2006-09-24
 				case Instruction.DELETECONNECTORS : //[srcset, srcmap]
 					// 2006/09/24 膜引数を使わないように修正 kudo
-					writer.write(tabs + "delset = (Set)var[" + inst.getIntArg1() + "];\n");
-					writer.write(tabs + "delmap = (Map)var[" + inst.getIntArg2() + "];\n");
-					writer.write(tabs + "it_deleteconnectors = delset.iterator();\n");
+					writer.write(tabs + "set1 = (Set)var[" + inst.getIntArg1() + "];\n");
+					writer.write(tabs + "map1 = (Map)var[" + inst.getIntArg2() + "];\n");
+					writer.write(tabs + "it_deleteconnectors = set1.iterator();\n");
 					writer.write(tabs + "while(it_deleteconnectors.hasNext()){\n");
-					writer.write(tabs + "	orig=(Atom)it_deleteconnectors.next();\n");
-					writer.write(tabs + "	copy=(Atom)delmap.get(orig);//new Integer(orig.id));\n");
+					writer.write(tabs + "	atom=(Atom)it_deleteconnectors.next();\n");
+					writer.write(tabs + "	copy=(Atom)map1.get(atom);//new Integer(atom.id));\n");
 					writer.write(tabs + "	((Membrane)var[0]).unifyLinkBuddies(copy.getArg(0),copy.getArg(1));\n");
 //					writer.write(tabs + "	link1 = copy.getArg(0);\n");
 //					writer.write(tabs + "	link2 = copy.getArg(1);\n");
@@ -1459,12 +1451,12 @@ public class Translator {
 					break; //kudo 2004-12-08
 					//====型付きプロセス文脈を扱うための追加命令====ここまで====
 					//====型検査のためのガード命令====ここから====
-				case Instruction.ISGROUND : //[-natomsfunc,srclinklist,avolist, mem]
-					writer.write(tabs + "avoset = new HashSet();\n");
-					writer.write(tabs + "avoset.addAll((List)var[" + inst.getIntArg3() + "]);\n");
-					writer.write(tabs + "isground_ret = Membrane.isGround((List)var[" + inst.getIntArg2() + "],avoset);\n");
-					writer.write(tabs + "if (!(isground_ret == -1)) {\n");
-					writer.write(tabs + "	var[" + inst.getIntArg1() + "] = new IntegerFunctor(isground_ret);\n");
+				case Instruction.ISGROUND : //[-natomsfunc,srclinklist,avolist]
+					writer.write(tabs + "set1 = new HashSet();\n");
+					writer.write(tabs + "set1.addAll((List)var[" + inst.getIntArg3() + "]);\n");
+					writer.write(tabs + "x = Membrane.isGround((List)var[" + inst.getIntArg2() + "],set1);\n");
+					writer.write(tabs + "if (!(x == -1)) {\n");
+					writer.write(tabs + "	var[" + inst.getIntArg1() + "] = new IntegerFunctor(x);\n");
 					translate(it, tabs + "	", iteratorNo, varnum, breakLabel, rule);
 					writer.write(tabs + "}\n");
 					break; //kudo 2004-12-03
