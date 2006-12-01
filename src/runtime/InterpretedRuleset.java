@@ -23,7 +23,7 @@ import java.util.Set;
 import util.Util;
 import debug.Debug;
 
-// TODO LOCAL関係のコメントを完全に削除する (2) -> 0912 done
+// doneTODO LOCAL関係のコメントを完全に削除する (2) -> 0912 done
 // TODO 引数mem がいらない箇所がある（デーモン削除の影響）
 
 /**
@@ -993,19 +993,11 @@ class InterpretiveReactor {
 						uniq = currentInterpretedRuleset.currentRule.uniq = new Uniq();
 					}
 					ArrayList uniqVars = (ArrayList)inst.getArg(0);
-//					Link[] hEntry = new Link[uniqVars.size()];
 					List[] hEntry = new List[uniqVars.size()];
-//					for(int i=0;i<atoms.length;i++) System.out.println("atoms "+atoms[i]);
-//					System.out.println(vars);
-//					for(int i=0;i<mems.length;i++) System.out.println("mems "+mems[i]);
 					for(int i=0;i<uniqVars.size();i++) {
 						int v = ((Integer)uniqVars.get(i)).intValue();
-//						Env.p("var# "+v);
-//						hEntry[i] = (Link)vars.get(v);
-						//TODO 2引数以上に対応する
 //						hEntry[i] = (Link)((List)vars.get(v)).get(0); // とりあえず1引数のみ
-						hEntry[i] = (List)vars.get(v);
-//						Env.p("LINK "+hEntry[i]);
+						hEntry[i] = (List)vars.get(v); // groundの2引数以上化に伴いlistに
 					}
 					if(inst.getKind()==Instruction.UNIQ) {
 						if(!uniq.check(hEntry)) return false;
