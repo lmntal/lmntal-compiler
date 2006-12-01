@@ -804,7 +804,8 @@ public class FrontEnd {
 				if (Env.profile == Env.PROFILE_ALL) {
 					Env.d( "Execution Result:" );
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );
-				} else if (!Env.fTrace && Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
+				} //else if (!Env.fTrace && Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
+					else if (Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
 					Env.d( "Execution Result:" );
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );
 				}
