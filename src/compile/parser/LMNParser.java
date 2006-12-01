@@ -373,8 +373,8 @@ public class LMNParser {
 		while (it.hasNext()) {
 			Object obj = it.next();
 			if (obj instanceof SrcRule) {
-				//TODO 行番号など
-				throw new ParseException("SYNTAX ERROR: rule head has some rules.");
+				SrcRule sr = (SrcRule)obj;
+				throw new ParseException("SYNTAX ERROR: rule head has some rules at line " + sr.lineno);
 			}
 			else if (obj instanceof SrcMembrane) {
 				assertLHSRules(((SrcMembrane)obj).process);
@@ -395,12 +395,12 @@ public class LMNParser {
 				LinkedList sPair = (LinkedList)it2.next();
 				String cxtname = ((SrcProcessContext)sPair.getFirst()).getQualifiedName();
 				if (!names.containsKey(cxtname)) {
-					error("SYNTAX ERROR: fresh process context constrained in a negative condition: " + cxtname);
+					error("SYNTAX ERROR: fresh process context constrained in a negative condition: " + cxtname + " in a rule at line " + rule.lineno);
 				}
 				else {
 					ContextDef def = (ContextDef)names.get(cxtname);
 					if (def.typed) {
-						error("SYNTAX ERROR: typed process context constrained in a negative condition: " + cxtname);
+						error("SYNTAX ERROR: typed process context constrained in a negative condition: " + cxtname + " in a rule at line " + rule.lineno);
 					}
 					else if (def.lhsOcc != null) {
 						Membrane mem = new Membrane(null);
@@ -526,7 +526,7 @@ public class LMNParser {
 	private void addLinkOccurrence(HashMap links, LinkOccurrence lnk) {
 		// 3回以上の出現
 		if (links.get(lnk.name) == CLOSED_LINK) {
-			error("SYNTAX ERROR: link " + lnk.name + " appears more than twice.");
+			error("SYNTAX ERROR: link " + lnk.name + " appears more than twice at line " + lnk.atom.line);
 			String linkname = lnk.name + generateNewLinkName();
 			if (lnk.name.startsWith(SrcLinkBundle.PREFIX_TAG))
 				linkname = SrcLinkBundle.PREFIX_TAG + linkname;
@@ -551,7 +551,7 @@ public class LMNParser {
 		Iterator it = mem.freeLinks.keySet().iterator();
 		while (it.hasNext()) {
 			LinkOccurrence link = (LinkOccurrence)mem.freeLinks.get(it.next());
-			warning("WARNING: global singleton link: " + link.name);
+			warning("WARNING: global singleton link: " + link.name + " at line " + link.atom.line);
 			LinkedList process = new LinkedList();
 			process.add(new SrcLink(link.name));
 			SrcAtom sAtom = new SrcAtom(link.name, process);
@@ -734,20 +734,22 @@ public class LMNParser {
 				if (pc.def.isTyped()) {
 					if (pc.def.lhsOcc != null) { // 既に左辺に出現している
 						// 展開を実装すれば不要になる（ガード否定条件のときはどうしても書けないが放置）
-						error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name: " + name);
+						// TODO 構文エラーでは？ (2006/12/01 kudo)
+						error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name: " + name + " at line " + pc.line);
 						continue;
 					}
 					// 2引数以上の左辺出現型付きプロセス文脈を許す ( 2006/09/13 by kudo )
 					if (pc.args.length == 0){//!= 1) {
 //						error("SYNTAX ERROR: typed process context occurring in head must have exactly one explicit free link argument: " + pc);
-						error("SYNTAX ERROR: typed process context occurring in head must have explicit free link arguments: " + pc);
+						error("SYNTAX ERROR: typed process context occurring in head must have some explicit free link arguments: " + pc + " at line " + pc.line);
 						continue;
 					}
 					mem.typedProcessContexts.add(pc);
 				}
 				else {
 					// 構造比較への変換を実装すれば不要になる（ガード否定条件のときはどうしても書けないが放置）
-					error("FEATURE NOT IMPLEMENTED: untyped process context name appeared more than once in a head: " + name);
+					// TODO 構文エラーでは？ (2006/12/01 kudo)
+					error("FEATURE NOT IMPLEMENTED: untyped process context name appeared more than once in a head: " + name + " at line " + pc.line);
 					continue;
 				}
 			}
@@ -759,7 +761,7 @@ public class LMNParser {
 				for (int i = 0; i < pc.args.length; i++) {
 					LinkOccurrence lnk = pc.args[i];
 					if (explicitfreelinks.contains(lnk.name)) {
-						error("SYNTAX ERROR: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
+						error("SYNTAX ERROR: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def + " at line " + pc.line);
 						lnk.name = lnk.name + generateNewLinkName();
 					}
 					else {
@@ -778,7 +780,7 @@ public class LMNParser {
 				names.put(name, rc.def);
 			}
 			else {
-				error("SYNTAX ERROR: head contains more than one occurrence of a rule context: " + name);
+				error("SYNTAX ERROR: head contains more than one occurrence of a rule context: " + name + " at line " + rc.line);
 				it.remove();
 			}
 		}
@@ -791,20 +793,20 @@ public class LMNParser {
 		}
 		//
 		if (mem.processContexts.size() > 1) {
-			error("SYNTAX ERROR: head membrane cannot contain more than one untyped process context");
 			it = mem.processContexts.iterator();
 			while (it.hasNext()) {
 				ProcessContext pc = (ProcessContext)it.next();
 				if (pc.def.lhsOcc == pc)  pc.def.lhsOcc = null; // 左辺での出現の登録を取り消す
 				it.remove(); // namesには残る
+				error("SYNTAX ERROR: head membrane cannot contain more than one untyped process context: " + pc.def.getName() + " at line " + pc.line);
 			}
 		}
 		if (mem.ruleContexts.size() > 1) {
-			error("SYNTAX ERROR: head membrane cannot contain more than one rule context");
 			while (it.hasNext()) {
 				RuleContext rc = (RuleContext)it.next();
 				if (rc.def.lhsOcc == rc)  rc.def.lhsOcc = null; // 左辺での出現の登録を取り消す
 				it.remove(); // namesには残る
+				error("SYNTAX ERROR: head membrane cannot contain more than one rule context: " + rc.def.getName() + " at line " + rc.line);
 			}
 		}
 		//
@@ -813,7 +815,7 @@ public class LMNParser {
 			String name = pc.getQualifiedName();
 			pc.def = (ContextDef)names.get(name);
 			if (pc.def == null) {
-				error("SYSTEM ERROR: contextdef not set for pragma " + name);
+				error("SYSTEM ERROR: contextdef not set for pragma " + name + " at line " + pc.line);
 			}			
 			// todo 【コード整理】直接ContextDefを代入できるようにする(2)
 			if (pc.def.lhsMem == null) {
@@ -839,7 +841,7 @@ public class LMNParser {
 			ProcessContext pc = (ProcessContext)it.next();
 			String name = pc.getQualifiedName();
 			if (!names.containsKey(name)) {
-				error("SYNTAX ERROR: untyped process context not appeared in head: " + pc.getQualifiedName());
+				error("SYNTAX ERROR: untyped process context not appeared in head: " + pc.getQualifiedName() + " at line " + pc.line);
 				it.remove();
 				continue;
 			}
@@ -848,7 +850,7 @@ public class LMNParser {
 				if (pc.def.lhsOcc != null) {
 					if (pc.args.length != pc.def.lhsOcc.args.length
 					 || ((pc.bundle == null) != (((ProcessContext)pc.def.lhsOcc).bundle == null)) ) {
-						error("SYNTAX ERROR: unmatched length of free link list of process context: " + pc);
+						error("SYNTAX ERROR: unmatched length of free link list of process context: " + pc + " at line " + pc.line);
 						it.remove();
 						continue;
 					}
@@ -856,9 +858,9 @@ public class LMNParser {
 				if (pc.def.isTyped()) {
 					it.remove();
 //					if (pc.args.length >= 1) {
-//					error("SYNTAX ERROR: typed process context occurring in body must have exactly one explicit free link argument: " + pc);
+//					error("SYNTAX ERROR: typed process context occurring in body must have exactly one explicit free link argument: " + pc + " at line " + pc.line);
 				if(pc.args.length == 0){
-					error("SYNTAX ERROR: typed process context occurring in body must have more than zero explicit free link argument: "+ pc);
+					error("SYNTAX ERROR: typed process context occurring in body must have some explicit free link argument: " + pc + " at line " + pc.line);
 						continue;
 					}
 					mem.typedProcessContexts.add(pc);
@@ -882,7 +884,7 @@ public class LMNParser {
 				rc.def.rhsOccs.add(rc);
 			}
 			else {
-				error("SYNTAX ERROR: rule context not appeared in head: " + rc);
+				error("SYNTAX ERROR: rule context not appeared in head: " + rc + " at line " + rc.line);
 				it.remove();
 			}
 		}
@@ -899,7 +901,7 @@ public class LMNParser {
 			String name = pc.getQualifiedName();
 			pc.def = (ContextDef)names.get(name);
 			if (pc.def == null) {
-				error("SYSTEM ERROR: contextdef not set for pragma " + name);
+				error("SYSTEM ERROR: contextdef not set for pragma " + name + " at line " + pc.line);
 			}	
 			// todo 【コード整理】直接ContextDefを代入できるようにする(2)
 		}
@@ -921,7 +923,7 @@ public class LMNParser {
 		Iterator it = rule.leftMem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
-			error("SYNTAX ERROR: untyped head process context requires an enclosing membrane: " + pc);
+			error("SYNTAX ERROR: untyped head process context requires an enclosing membrane: " + pc + " at line " + pc.line);
 			names.remove(pc.def.getName());
 			pc.def.lhsOcc = null;	// 左辺での出現の登録を取り消す
 			it.remove();
@@ -1626,7 +1628,7 @@ class SyntaxExpander {
 					else {
 						String proccxtname = generateNewProcessContextName();
 						sAtom.getProcess().set(i, new SrcProcessContext(proccxtname, true));
-						error("SYNTAX ERROR: illegal object in guard atom argument: " + subobj);
+						error("SYNTAX ERROR: illegal object in guard atom argument: " + subobj + " at line " + sAtom.line);
 					}
 				}
 			}
