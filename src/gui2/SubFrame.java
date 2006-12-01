@@ -73,7 +73,7 @@ public class SubFrame extends JFrame {
 	
 	private JCheckBox repulsiveCheck_ = new JCheckBox("Calc Replusive");
 
-	private JSlider js1_ = new JSlider(JSlider.VERTICAL, SLIDER_MIN, SLIDER_MAX, SLIDER_DEF);
+	private JSlider zoomSlider_ = new JSlider(JSlider.VERTICAL, SLIDER_MIN, SLIDER_MAX, SLIDER_DEF);
 	
 	private LMNtalFrame mainFrame_;
 	
@@ -89,14 +89,14 @@ public class SubFrame extends JFrame {
 		
 		initComponents();
 		
-		mainFrame_.setMagnification((double)js1_.getValue() / (double)js1_.getMaximum());
+		mainFrame_.setMagnification((double)zoomSlider_.getValue() / (double)zoomSlider_.getMaximum());
 		setVisible(true);
 	}
 	/////////////////////////////////////////////////////////////////
 	
 	
 	public int getSliderValue(){
-		return js1_.getValue();
+		return zoomSlider_.getValue();
 	}
 	
 	private void initComponents() {
@@ -106,6 +106,7 @@ public class SubFrame extends JFrame {
 		hideBt_.addActionListener(new HideAllAdapter(this));
 		divergenceBt_.addActionListener(new DivergenceAdapter());
 		stopDivergenceBt_.addActionListener(new StopDivergenceAdapter());
+		stepBox_.setHorizontalAlignment(JTextField.RIGHT);
 		
 		
 		///////////////////////////////////////////////////////////////////////
@@ -133,12 +134,12 @@ public class SubFrame extends JFrame {
 		menuScroll_ = new JScrollPane(menuPanel_);
 		///////////////////////////////////////////////////////////////////////
 		
-		js1_.addChangeListener(new SliderChanged());
-		js1_.setPaintTicks(true);      //目盛りを表示
-		js1_.setMinorTickSpacing(2);   //小目盛りの間隔を設定
-		js1_.setMajorTickSpacing(10);  //大目盛りの間隔を設定
-		js1_.setLabelTable(js1_.createStandardLabels(10)); //目盛りﾗﾍﾞﾙを10間隔で表示
-		js1_.setPaintLabels(true);    //目盛りﾗﾍﾞﾙを表示
+		zoomSlider_.addChangeListener(new SliderChanged());
+		zoomSlider_.setPaintTicks(true);      //目盛りを表示
+		zoomSlider_.setMinorTickSpacing(2);   //小目盛りの間隔を設定
+		zoomSlider_.setMajorTickSpacing(10);  //大目盛りの間隔を設定
+		zoomSlider_.setLabelTable(zoomSlider_.createStandardLabels(10)); //目盛りﾗﾍﾞﾙを10間隔で表示
+		zoomSlider_.setPaintLabels(true);    //目盛りﾗﾍﾞﾙを表示
 		getContentPane().addMouseWheelListener(new SliderMouseListener(this));
 
 		setTitle(TITLE);
@@ -170,7 +171,7 @@ public class SubFrame extends JFrame {
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.weightx = 0.0;
         gbc.weighty = 1.0;
-		getContentPane().add(js1_, gbc);
+		getContentPane().add(zoomSlider_, gbc);
 
 		gbc.gridx = 1;
 		gbc.gridy = 1;
@@ -207,7 +208,7 @@ public class SubFrame extends JFrame {
 	}
 
 	public void setSliderValue(int value){
-		js1_.setValue(value);
+		zoomSlider_.setValue(value);
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
