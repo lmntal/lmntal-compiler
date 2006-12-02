@@ -485,7 +485,7 @@ public class Task implements Runnable {
 	////////////////////////////////////
 	// non deterministic LMNtal
 
-	public static HashSet states = new HashSet();
+	public static HashSet<Object[]> states = new HashSet<Object[]>();
 	private static final Functor FROM = new SymbolFunctor("from", 1);
 	private static final Functor TO = new SymbolFunctor("to", 1);
 	private static final Functor FUNCTOR_REDUCE = new SymbolFunctor("reduce", 3);
@@ -497,12 +497,12 @@ public class Task implements Runnable {
 	public void nondeterministicExec(Membrane memExec2) {
 		AtomSet atoms = memExec2.getAtoms();
 		atoms.freeze();
-		ArrayList l = new ArrayList();
+		ArrayList<Membrane> l = new ArrayList<Membrane>();
 		l.add(memExec2);
-		HashMap memMap = new HashMap();
+		HashMap<AtomSet,Membrane> memMap = new HashMap<AtomSet,Membrane>();
 		memMap.put(atoms, memExec2.getParent());
 		while (l.size() > 0) {
-			Membrane mem2 = (Membrane)l.remove(l.size() - 1);
+			Membrane mem2 = l.remove(l.size() - 1);
 			nondeterministicExec(mem2, memMap, l);
 		}
 	}
@@ -513,26 +513,26 @@ public class Task implements Runnable {
 	 * @param newMems 新しく生成した膜を追加するリスト。実行した結果が memMap 内になかった場合に、ここに追加される。
 	 *         nullが指定された場合は何もしない。
 	 */
-	public void nondeterministicExec(Membrane memExec2, HashMap memMap, ArrayList newMems) {
-		Membrane memExec = (Membrane)memExec2.getParent();
-		Membrane memGraph = (Membrane)memExec.getParent();
+	public void nondeterministicExec(Membrane memExec2, HashMap<AtomSet,Membrane> memMap, ArrayList<Membrane> newMems) {
+		Membrane memExec = memExec2.getParent();
+		Membrane memGraph = memExec.getParent();
 		states.clear();
 		exec(memExec2, true);
 		//それぞれ適用した結果を作成
-		Iterator it = states.iterator();
+		Iterator<Object[]> it = states.iterator();
 		while (it.hasNext()) {
 			//複製
-			Membrane memResult = (Membrane)memGraph.newMem();
-			Membrane memResult2 = (Membrane)memResult.newMem(Membrane.KIND_ND);
+			Membrane memResult = memGraph.newMem();
+			Membrane memResult2 = memResult.newMem(Membrane.KIND_ND);
 			Map atomMap = memResult2.copyCellsFrom(memExec2);
 			memResult2.copyRulesFrom(memExec2);
 			//適用
-			String name = react(memResult2, (Object[])it.next(), memExec2, atomMap);
+			String name = react(memResult2, it.next(), memExec2, atomMap);
 			AtomSet atoms = memResult2.getAtoms();
 			atoms.freeze();
 			
 			//同一の膜を調べる
-			Membrane memOut = (Membrane)memMap.get(atoms);
+			Membrane memOut = memMap.get(atoms);
 			boolean flg = memOut == null;
 			if (flg) {
 				memMap.put(atoms, memResult);
