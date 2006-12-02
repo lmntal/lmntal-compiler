@@ -121,8 +121,8 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 				e.printStackTrace();
 			}
 		}
+		step_ = (step_ == 0) ? 0 : step_ - 1;
 		stopCalc_ = (step_ == 0) ? true : false;
-		step_--;
 	}
 	
 	/**
