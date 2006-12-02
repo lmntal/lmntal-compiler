@@ -45,7 +45,7 @@ public class NodeFunction {
 	// static
 	
 	static
-	private boolean attractionFlag_ = true;
+	private boolean attractionFlag_ = false;
 	
 	static
 	private boolean repulsiveFlag_ = true;

@@ -121,7 +121,7 @@ public class SubFrame extends JFrame {
 		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
 		repulsiveCheck_.setSelected(true);
 		attractionCheck_.addItemListener(new AttractionAdapter());
-		attractionCheck_.setSelected(true);
+		attractionCheck_.setSelected(false);
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
 		menuPanel_.add(linkNumCheck_);
 		menuPanel_.add(angleCheck_);
