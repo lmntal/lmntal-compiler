@@ -1,8 +1,6 @@
 package gui2;
 
-import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -107,12 +105,15 @@ public class LinkSet {
 					for(int n = 0; n < atom.getEdgeCount(); n++){
 						Atom nthAtom = atom.getNthAtom(n);
 						if(null == nthAtom){ continue; }
-						if(showLinkNum_ || atom.getid() < nthAtom.getid()){
+						if(showLinkNum_ || atom.getid() <= nthAtom.getid()){
 							Node nodeTarget = getVisibleNode(linkMap_.get(nthAtom));
 							if((null == nodeTarget) ||
 									(
 											(null != nodeSource.getInvisibleRootNode()) &&
-											(nodeSource.getInvisibleRootNode().equals(nodeTarget.getInvisibleRootNode()))
+											(
+													nodeSource != nodeTarget &&
+													nodeSource.getInvisibleRootNode().equals(nodeTarget.getInvisibleRootNode())
+											)
 									)
 							)
 							{
@@ -120,6 +121,20 @@ public class LinkSet {
 							}
 							Rectangle2D rectTarget = nodeTarget.getBounds2D();
 
+							if(atom.getid() < nthAtom.getid()){
+								g.drawLine((int)rectSource.getCenterX(),
+										(int)rectSource.getCenterY(),
+										(int)rectTarget.getCenterX(),
+										(int)rectTarget.getCenterY());
+							}
+							else if(atom.getid() == nthAtom.getid() && nodeSource == linkMap_.get(atom)){
+								g.drawOval((int)rectSource.getCenterX(),
+										(int)rectSource.getY(),
+										50,
+										50);
+								continue;
+							}
+							
 							if(showLinkNum_){
 								double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
 								double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
@@ -129,12 +144,6 @@ public class LinkSet {
 								double x = Math.cos(angle) * LINK_NUM_DELTA;
 								double y = Math.sin(angle) * LINK_NUM_DELTA;
 								g.drawString(Integer.toString(n), (int)(rectSource.getCenterX() - x), (int)(rectSource.getCenterY() - y));
-							}
-							if(atom.getid() < nthAtom.getid()){
-								g.drawLine((int)rectSource.getCenterX(),
-										(int)rectSource.getCenterY(),
-										(int)rectTarget.getCenterX(),
-										(int)rectTarget.getCenterY());
 							}
 						}
 					}
