@@ -850,7 +850,7 @@ public class Node implements Cloneable{
 		// 可視になった
 		if(visible_ && Membrane.class.isInstance(myObject_)){
 			iWillBeAMembrane();
-			setMembrane((Membrane)myObject_, true);
+			calcMembraneSize();
 			if(this == invisibleRootNode_){
 				setInvisibleRootNode(null);
 			}
