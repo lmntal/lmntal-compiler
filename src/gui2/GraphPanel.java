@@ -152,6 +152,7 @@ public class GraphPanel extends JPanel {
 	 */
 	public void calc(){
 		if(null == rootNode_){ return; }
+		rootNode_.setMembrane(rootMembrane_);
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
@@ -210,7 +211,7 @@ public class GraphPanel extends JPanel {
 			return;
 		}
 		if(value == rootNodeList_.size() - 1){
-			LinkSet.resetNodes(orgRootNode_);
+//			LinkSet.resetNodes(orgRootNode_);
 			rootNode_ = orgRootNode_;
 			LinkSet.resetNodes(orgRootNode_);
 		} else {
@@ -249,10 +250,10 @@ public class GraphPanel extends JPanel {
 	
 	public void saveState(){
 		if(rootNode_ != orgRootNode_){
-			LinkSet.resetNodes(orgRootNode_);
 			rootNode_ = orgRootNode_;
+			LinkSet.resetNodes(orgRootNode_);
 		}
-		rootNode_.setMembrane(rootMembrane_, true);
+		rootNode_.setMembrane(rootMembrane_);
 		nowHistoryPos_ = 0;
 		Map<Node, Node> cloneMap = new HashMap<Node, Node>();
 		Node newNode = rootNode_.cloneNode(cloneMap);
@@ -271,6 +272,7 @@ public class GraphPanel extends JPanel {
 	public void setRootMem(Membrane mem){
 		rootMembrane_ = mem;
 		orgRootMembrane_ = mem;
+//		System.out.println(mem);
 		rootNode_ = new Node(null, mem);
 		orgRootNode_ = rootNode_;
 	}

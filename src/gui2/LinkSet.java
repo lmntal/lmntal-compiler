@@ -3,8 +3,10 @@ package gui2;
 import java.awt.Graphics;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import runtime.Atom;
@@ -29,6 +31,9 @@ public class LinkSet {
 	private Set<Node> linkSet_ = new HashSet<Node>();
 	
 	static
+	private Map<Object, Node> linkMap_ = new HashMap<Object, Node>();
+	
+	static
 	private boolean showLinkNum_ = false;
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -49,6 +54,14 @@ public class LinkSet {
 	public void addLink(Node node){
 		synchronized (linkSet_) {
 			linkSet_.add(node);
+			linkMap_.put(node.getObject(), node);
+		}
+	}
+	
+	static
+	public Node getNodeByAtom(Atom atom){
+		synchronized (linkMap_) {
+			return linkMap_.get(atom);
 		}
 	}
 	
@@ -98,17 +111,17 @@ public class LinkSet {
 					Node nodeSource = getVisibleNode(key);
 					if(null == nodeSource){ return; }
 					Rectangle2D rectSource = nodeSource.getBounds2D();
-					for(int n = 0; n < nodeSource.getEdgeCount(); n++){
-						Node nthNode = nodeSource.getNthNode(n);
+					for(int n = 0; n < key.getEdgeCount(); n++){
+						Node nthNode = key.getNthNode(n);
 						if(null == nthNode){ return; }
-						if(showLinkNum_ || nodeSource.getID() <= nthNode.getID()){
+						if(showLinkNum_ || key.getID() <= nthNode.getID()){
 							Node nodeTarget = getVisibleNode(nthNode);
 							if((null == nodeTarget) ||
 									(
-											(null != nodeSource.getInvisibleRootNode()) &&
+											(null != key.getInvisibleRootNode()) &&
 											(
-													nodeSource != nodeTarget &&
-													nodeSource.getInvisibleRootNode().equals(nodeTarget.getInvisibleRootNode())
+													key != nthNode &&
+													key.getInvisibleRootNode().equals(nthNode.getInvisibleRootNode())
 											)
 									)
 							)
@@ -116,8 +129,7 @@ public class LinkSet {
 								continue;
 							}
 							Rectangle2D rectTarget = nodeTarget.getBounds2D();
-
-							if(nodeSource.getID() < nthNode.getID()){
+							if(key.getID() < nthNode.getID()){
 								g.drawLine((int)rectSource.getCenterX(),
 										(int)rectSource.getCenterY(),
 										(int)rectTarget.getCenterX(),
@@ -155,6 +167,7 @@ public class LinkSet {
 	public void removeLink(Node node){
 		synchronized (linkSet_) {
 			linkSet_.remove(node);
+			linkMap_.remove(node.getObject());
 		}
 	}
 	
