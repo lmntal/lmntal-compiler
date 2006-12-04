@@ -64,7 +64,7 @@ public class Node implements Cloneable{
 	/** アトムまたはアトム的（閉じた膜）であるか */
 	private boolean imAtom_;
 	
-	public List<Node> linkList_ = new ArrayList<Node>();
+	public ArrayList<Node> linkList_ = new ArrayList<Node>();
 	
 	/** 自Nodeの色 */
 	private Color myColor_ = Color.BLUE;
@@ -239,7 +239,7 @@ public class Node implements Cloneable{
 		visible_ = orginNode.visible_;
 
 		Map<Object, Node> cloneNodeMap = new HashMap<Object, Node>();
-		List<Node> cloneLinkList = linkList_;
+		ArrayList<Node> cloneLinkList = linkList_;
 
 		Iterator keys = orginNode.nodeMap_.keySet().iterator();
 		while(keys.hasNext()){
@@ -257,12 +257,7 @@ public class Node implements Cloneable{
 			Node oldNode  = linkNodes.next();
 			Node newNode = cloneMap.get(oldNode);
 			cloneMap.put(oldNode, newNode);
-
-			for(int i = 0; i < orginNode.linkList_.size(); i++){
-				if(orginNode.linkList_.get(i) == oldNode){
-					cloneLinkList.add(i, newNode);
-				}
-			}
+			cloneLinkList.add(newNode);
 		}
 
 		nodeMap_ = cloneNodeMap;
