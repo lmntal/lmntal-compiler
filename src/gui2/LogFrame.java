@@ -1,15 +1,20 @@
 package gui2;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTextArea;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * 実行中のLMNtalプログラムを表示するためのLOGウィンドウ
  * @author nakano
  *
  */
-public class LogFrame extends JFrame {
+public class LogFrame extends JFrame implements ChangeListener {
 
 	/////////////////////////////////////////////////////////////////
 	// 定数
@@ -28,6 +33,12 @@ public class LogFrame extends JFrame {
 	private JTextArea logArea = new JTextArea("log");
 
 	private LMNtalFrame mainFrame;
+	
+	private JSlider timeSlider_ = new JSlider(JSlider.HORIZONTAL, 0, 0, 0);
+	
+	private CommonListener commonListener_ = new CommonListener(this);
+	
+	private boolean timeSliderResizing_ = false;
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -50,10 +61,27 @@ public class LogFrame extends JFrame {
 		setTitle(TITLE);
 		logArea.setEditable(false);
 		logArea.setLineWrap(true);
-		add(new JScrollPane(logArea));
+		timeSlider_.setSnapToTicks(true);
+		timeSlider_.addChangeListener(this);
+		setLayout(new BorderLayout());
+		add(timeSlider_, BorderLayout.NORTH);
+		add(new JScrollPane(logArea), BorderLayout.CENTER);
 	}
 	
 	public void setLog(String log){
 		logArea.setText(log);
+	}
+	
+	public void addTime(){
+		timeSliderResizing_ = true;
+		timeSlider_.setMaximum(timeSlider_.getMaximum() + 1);
+		timeSlider_.setValue(timeSlider_.getMaximum());
+		timeSliderResizing_ = false;
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	public void stateChanged(ChangeEvent arg0) {
+		if(timeSliderResizing_){ return; }
+		commonListener_.setState(timeSlider_.getValue());
 	}
 }

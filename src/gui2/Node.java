@@ -7,8 +7,10 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import runtime.Atom;
@@ -62,6 +64,8 @@ public class Node implements Cloneable{
 	/** アトムまたはアトム的（閉じた膜）であるか */
 	private boolean imAtom_;
 	
+	public List<Node> linkList_ = new ArrayList<Node>();
+	
 	/** 自Nodeの色 */
 	private Color myColor_ = Color.BLUE;
 	
@@ -75,7 +79,7 @@ public class Node implements Cloneable{
 	private String name_ = "";
 	
 	/** 子Node */
-	private Map<Object, Node> nodeMap_ = new HashMap<Object, Node>();
+	public Map<Object, Node> nodeMap_ = new HashMap<Object, Node>();
 	
 	/** 親膜 */
 	private Node parent_;
@@ -108,6 +112,9 @@ public class Node implements Cloneable{
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
+	
+	public Node(){}
+	
 	public Node(Node node, Object object){
 		parent_ = node;
 		myObject_ = object;
@@ -172,15 +179,97 @@ public class Node implements Cloneable{
 		}
 	}
 	
-	public Object clone(){
-		try {
-			return (super.clone());
-		} catch (CloneNotSupportedException e) {
-			// TODO 自動生成された catch ブロック
-			throw (new InternalError(e.getMessage()));
+	public void calcMembraneSize(){
+		synchronized (nodeMap_) {
+			double maxX = Integer.MIN_VALUE;
+			double maxY = Integer.MIN_VALUE;
+			double minX = Integer.MAX_VALUE;
+			double minY = Integer.MAX_VALUE;
+			
+			// 子膜をリセット
+			Iterator<Node> nodes = nodeMap_.values().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				
+				Rectangle2D rectangle = node.getBounds2D();
+				minX = (minX < rectangle.getMinX()) ? minX : rectangle.getMinX(); 
+				maxX = (maxX > rectangle.getMaxX()) ? maxX : rectangle.getMaxX(); 
+				minY = (minY < rectangle.getMinY()) ? minY : rectangle.getMinY(); 
+				maxY = (maxY > rectangle.getMaxY()) ? maxY : rectangle.getMaxY(); 
+			}
+
+			// サイズ変更
+			if(visible_){
+				rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);
+			}
 		}
+		
 	}
 	
+	public Node cloneNode(Map<Node, Node> cloneMap){
+		Node cloneNode = new Node();
+		cloneMap.put(this, cloneNode);
+
+		Iterator keys = nodeMap_.keySet().iterator();
+		while(keys.hasNext()){
+			Object key = keys.next();
+			Node oldNode = nodeMap_.get(key);
+			oldNode.cloneNode(cloneMap);
+
+		}
+		return cloneNode;
+	}
+	
+	public Node cloneNodeParm(Map<Node, Node> cloneMap, Node orginNode){
+		parent_ = cloneMap.get(orginNode.parent_);
+		invisibleRootNode_ = cloneMap.get(orginNode.invisibleRootNode_);
+		myObject_ = orginNode.myObject_;
+		clipped_ = orginNode.clipped_;
+		dx_ = orginNode.dx_;
+		dy_ = orginNode.dy_;
+		imAtom_ = orginNode.imAtom_;
+		myColor_ = orginNode.myColor_;
+		myID_ = orginNode.myID_;
+		name_ = orginNode.name_;
+		pickable_ = orginNode.pickable_;
+		pinAnime_ = orginNode.pinAnime_;
+		pinPosY_ = orginNode.pinPosY_;
+		rect_ = orginNode.rect_;
+		uncalc_ = orginNode.uncalc_;
+		visible_ = orginNode.visible_;
+
+		Map<Object, Node> cloneNodeMap = new HashMap<Object, Node>();
+		List<Node> cloneLinkList = linkList_;
+
+		Iterator keys = orginNode.nodeMap_.keySet().iterator();
+		while(keys.hasNext()){
+			Object key = keys.next();
+			Node oldNode = orginNode.nodeMap_.get(key);
+			Node newNode = cloneMap.get(oldNode);
+			if(newNode == null){ continue; }
+			newNode.cloneNodeParm(cloneMap, oldNode);
+			cloneNodeMap.put(key, newNode);
+
+		}
+
+		Iterator<Node> linkNodes = orginNode.linkList_.iterator();
+		while(linkNodes.hasNext()){
+			Node oldNode  = linkNodes.next();
+			Node newNode = cloneMap.get(oldNode);
+			cloneMap.put(oldNode, newNode);
+
+			for(int i = 0; i < orginNode.linkList_.size(); i++){
+				if(orginNode.linkList_.get(i) == oldNode){
+					cloneLinkList.add(i, newNode);
+				}
+			}
+		}
+
+		nodeMap_ = cloneNodeMap;
+		linkList_ = cloneLinkList;
+		return this;
+	}
+
 	/**
 	 * 位置、座標を取得する
 	 * @return
@@ -201,8 +290,12 @@ public class Node implements Cloneable{
 	 * 子NodeのIteratorを取得する
 	 * @return
 	 */
-	public Map getChildMap(){
+	public Map<Object, Node> getChildMap(){
 		return nodeMap_;
+	}
+
+	public int getEdgeCount(){
+		return linkList_.size();
 	}
 	
 	/**
@@ -213,6 +306,10 @@ public class Node implements Cloneable{
 	 */
 	public Node getInvisibleRootNode(){
 		return invisibleRootNode_;
+	}
+	
+	public Node getNthNode(int i){
+		return linkList_.get(i);
 	}
 	
 	/**
@@ -315,7 +412,7 @@ public class Node implements Cloneable{
 			return;
 		}
 		rect_.setFrameFromCenter(rect_.getCenterX(), rect_.getCenterY(), rect_.getCenterX() - 40, rect_.getCenterY() - 40);
-		LinkSet.addLink(myObject_, this);
+		LinkSet.addLink(this);
 		
 	}
 	
@@ -333,7 +430,7 @@ public class Node implements Cloneable{
 		}
 		moveCalc();
 		if(myObject_ instanceof Membrane){
-			setMembrane((Membrane)myObject_, false);
+			calcMembraneSize();
 		}
 	}
 	
@@ -466,7 +563,7 @@ public class Node implements Cloneable{
 				targetNode.removeAll(targetNode);
 			}
 		}
-		LinkSet.removeLink(node.getObject());
+		LinkSet.removeLink(node);
 	}
 	
 	/**
@@ -481,8 +578,19 @@ public class Node implements Cloneable{
 		} else {
 			setMembrane((Membrane)object, true);
 		}
-		
-//		calc();
+	}
+	
+	/**
+	 * リンク先を再取得
+	 * @param nodeMap
+	 */
+	public void resetLink(Map<Atom, Node> nodeMap){
+		if(!(myObject_ instanceof Atom)){ return; }
+		int nthNum = ((Atom)myObject_).getEdgeCount();
+		linkList_.clear();
+		for(int i = 0; i < nthNum; i++){
+			linkList_.add(nodeMap.get(((Atom)myObject_).getNthAtom(i)));
+		}
 	}
 	
 	/**
@@ -492,14 +600,14 @@ public class Node implements Cloneable{
 	private void setAtom(Atom atom){
 		imAtom_ = true;
 		name_ = (null != atom.getName()) ? atom.getName() : "";
-
+		
 		// [0, 7] -> [128, 255] for eash R G B
 		int ir = 0x7F - ((name_.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;
 		int ig = 0x7F - ((name_.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
 		int ib = 0x7F - ((name_.hashCode() & 0x00F) >> 0) * 0x08 + 0x7F;
 		myColor_ = new Color(ir, ig, ib);
 		if(0 < atom.getEdgeCount()){
-			LinkSet.addLink(atom, this);
+			LinkSet.addLink(this);
 		}
 	}
 	
@@ -544,9 +652,9 @@ public class Node implements Cloneable{
 	 * @param mem セットする膜
 	 * @param setChildren 子Nodeを更新するか（サイズの更新だけならばfalse）
 	 */
-	private void setMembrane(Membrane mem, boolean setChildren){
+	public void setMembrane(Membrane mem, boolean setChildren){
 		synchronized (nodeMap_) {
-			LinkSet.addLink(mem, this);
+			LinkSet.addLink(this);
 			double maxX = Integer.MIN_VALUE;
 			double maxY = Integer.MIN_VALUE;
 			double minX = Integer.MAX_VALUE;
@@ -555,8 +663,8 @@ public class Node implements Cloneable{
 			imAtom_ = false;
 			name_ = (null != mem.getName()) ? mem.getName() : "";
 
-			Map<Object, Node> memNodeMap = new HashMap<Object, Node>();
-			Map<Object, Node> atomNodeMap = new HashMap<Object, Node>();
+			Map<Membrane, Node> memNodeMap = new HashMap<Membrane, Node>();
+			Map<Atom, Node> atomNodeMap = new HashMap<Atom, Node>();
 
 			// 子膜をリセット
 			Iterator mems = mem.memIterator();
@@ -615,11 +723,19 @@ public class Node implements Cloneable{
 				atomNodeMap.put(childAtom, node);
 			}
 
+			// Nodeのリンク情報を再設定
+			Iterator<Node> newAtoms = atomNodeMap.values().iterator();
+			while(newAtoms.hasNext()){
+				Node newAtom = newAtoms.next();
+				newAtom.resetLink(atomNodeMap);
+			}
+
 			// 不要になったリンクを削除
 			Iterator<Object> removeNodes = nodeMap_.keySet().iterator();
 			while(removeNodes.hasNext()){
 				Object key = removeNodes.next();
 				if(!memNodeMap.containsKey(key) && !atomNodeMap.containsKey(key)){
+//					LinkSet.removeLink(key)
 					removeAll(nodeMap_.get(key));
 				}
 			}
@@ -628,7 +744,6 @@ public class Node implements Cloneable{
 			nodeMap_.clear();
 			nodeMap_.putAll(memNodeMap);
 			nodeMap_.putAll(atomNodeMap);
-			
 			// サイズ変更
 			if(visible_){
 				rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);

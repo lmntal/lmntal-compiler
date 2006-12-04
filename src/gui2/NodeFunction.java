@@ -126,7 +126,6 @@ public class NodeFunction {
 		}
 		
 		Point2D myPoint = node.getCenterPoint();
-
 		Iterator<Node> nodes = nodeMap.values().iterator();
 		while(nodes.hasNext()){
 			// 表示されているNodeを取得する
@@ -210,20 +209,18 @@ public class NodeFunction {
 		if(!angleFlag_ || !Atom.class.isInstance(node.getObject())){
 			return;
 		}
-		Atom targetAtom = (Atom)node.getObject();
-		int edgeNum = targetAtom.getEdgeCount(); 
+		int edgeNum = node.getEdgeCount(); 
 		
 		if(edgeNum < 2){ return; }
 
-		Node sourceNode = LinkSet.getNode(targetAtom);
+		Node sourceNode = LinkSet.getVisibleNode(node);
 		if(null == sourceNode){ return; }
 		Point2D myPoint = sourceNode.getCenterPoint();
 		Map<Double, Node> treeMap = new TreeMap<Double, Node>();
 		
 		// つながっているアトムを走査
 		for(int i = 0; i < edgeNum; i++){
-			Atom nthAtom = targetAtom.getNthAtom(i);
-			Node nthNode = LinkSet.getNode(nthAtom);
+			Node nthNode = LinkSet.getVisibleNode(node.getNthNode(i));
 			if(null == nthNode){ continue; }
 			Point2D nthPoint = nthNode.getCenterPoint();
 
@@ -234,15 +231,13 @@ public class NodeFunction {
 				continue; 
 			}
 			
-			if(null != nthAtom){
-				double dx = nthPoint.getX() - myPoint.getX();
-				double dy = nthPoint.getY() - myPoint.getY();
-				
-				if(dx == 0.0){ dx=0.000000001; }
-				double angle = Math.atan(dy / dx);
-				if(dx < 0.0) angle += Math.PI;
-				treeMap.put(angle, nthNode);
-			}
+			double dx = nthPoint.getX() - myPoint.getX();
+			double dy = nthPoint.getY() - myPoint.getY();
+
+			if(dx == 0.0){ dx=0.000000001; }
+			double angle = Math.atan(dy / dx);
+			if(dx < 0.0) angle += Math.PI;
+			treeMap.put(angle, nthNode);
 		}
 		
 		Object[] nthAngles = treeMap.keySet().toArray();
@@ -292,16 +287,15 @@ public class NodeFunction {
 		if(!springFlag_ || !Atom.class.isInstance(node.getObject())){
 			return;
 		}
-		
-		Atom atom = (Atom)node.getObject();
+
 		// 表示されているNodeを取得する
-		Node sourceNode = LinkSet.getNode(atom);
+		Node sourceNode = LinkSet.getVisibleNode(node);
 		if(null == sourceNode){ return; }
 		Point2D myPoint = sourceNode.getCenterPoint();
-		for(int i = 0; i < atom.getEdgeCount() ; i++){
-			Atom nthAtom = atom.getNthAtom(i);
+		for(int i = 0; i < node.getEdgeCount() ; i++){
+			Node realNthNode = node.getNthNode(i);
 			// 表示されているNodeを取得する
-			Node nthNode = LinkSet.getNode(nthAtom);
+			Node nthNode = LinkSet.getVisibleNode(realNthNode);
 			if(null == nthNode){ continue; }
 			Point2D nthPoint = nthNode.getCenterPoint();
 			if(null == nthNode ||

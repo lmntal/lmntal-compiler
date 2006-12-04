@@ -8,14 +8,14 @@ import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -41,9 +41,13 @@ public class GraphPanel extends JPanel {
 	private Node moveTargetNode_ = null;
 	private Node rootNode_;
 	private Membrane rootMembrane_;
+	private Membrane orgRootMembrane_;
+	private Node orgRootNode_;
 	private AffineTransform af_ = new AffineTransform();
 	private Point lastPoint;
-	private List<Membrane> rootMemList_ = new ArrayList<Membrane>();
+	private int nowHistoryPos_ = 0;
+	private CommonListener commonListener_ = new CommonListener(this);
+	private List<Node> rootNodeList_ = new ArrayList<Node>();
 	
 	///////////////////////////////////////////////////////////////////////////
 	
@@ -62,32 +66,6 @@ public class GraphPanel extends JPanel {
 		//　PINのロード待ち　ここまで
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-		addKeyListener(new KeyListener(){
-
-			public void keyPressed(KeyEvent e) {
-				System.out.println("key");
-				if(e.getKeyCode() == KeyEvent.VK_A){
-					rootMembrane_ = rootMemList_.remove(rootMemList_.size() - 1);
-					setRootMem(rootMembrane_);
-					System.out.println(rootMembrane_);
-				}
-				else if(e.getKeyCode() == KeyEvent.VK_S){
-//					rootMemList_.add(((O)rootMembrane));
-				}
-				
-			}
-
-			public void keyReleased(KeyEvent e) {
-				System.out.println("keyR");
-				
-			}
-
-			public void keyTyped(KeyEvent e) {
-				System.out.println("keyT");
-				
-			}
-			
-		});
 		addMouseListener(new MouseAdapter() {
 			
 			/** 
@@ -160,7 +138,7 @@ public class GraphPanel extends JPanel {
 		}
 		);
 		
-		addMouseWheelListener(new SliderMouseListener(null));
+		addMouseWheelListener(commonListener_);
 
 		calcTh_ = new CalcThread();
 		calcTh_.start();
@@ -174,7 +152,6 @@ public class GraphPanel extends JPanel {
 	 */
 	public void calc(){
 		if(null == rootNode_){ return; }
-		rootNode_.reset(rootMembrane_);
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
@@ -204,6 +181,46 @@ public class GraphPanel extends JPanel {
 		rootNode_.setVisible(false, true);
 		rootNode_.setInvisibleRootNode(null);
 	}
+	
+	public void loadPrevState(){
+		if(rootNodeList_.size() == 0 || nowHistoryPos_ == rootNodeList_.size()){
+			return;
+		}
+		nowHistoryPos_++;
+		rootNode_ = rootNodeList_.get(rootNodeList_.size() - nowHistoryPos_);
+		commonListener_.setLog(rootMembrane_.toString());
+	}
+	
+	public void loadNextState(){
+		if(rootNodeList_.size() == 0 || nowHistoryPos_ == 0){
+			return;
+		}
+		nowHistoryPos_--;
+		if(nowHistoryPos_ == 0){
+			rootMembrane_ = orgRootMembrane_;
+			rootNode_ = orgRootNode_;
+			return;
+		}
+		rootNode_ = rootNodeList_.get(rootNodeList_.size() - nowHistoryPos_);
+		commonListener_.setLog(rootMembrane_.toString());
+	}
+
+	public void loadState(int value){
+		if(rootNodeList_.size() == 0 || value >= rootNodeList_.size() || value < 0){
+			return;
+		}
+		if(value == rootNodeList_.size() - 1){
+			LinkSet.resetNodes(orgRootNode_);
+			rootNode_ = orgRootNode_;
+			LinkSet.resetNodes(orgRootNode_);
+		} else {
+			Map<Node, Node> cloneMap = new HashMap<Node, Node>();
+			Node newNode = rootNodeList_.get(value).cloneNode(cloneMap);
+			newNode.cloneNodeParm(cloneMap, rootNodeList_.get(value)); 
+			rootNode_ = newNode;
+			LinkSet.resetNodes(newNode);
+		}
+	}
 
 	/**
 	 * グラフを描画する
@@ -229,6 +246,19 @@ public class GraphPanel extends JPanel {
 			g.drawString("Divergence Timer:" + divergenceTimer, 10, 30);
 		}
 	}
+	
+	public void saveState(){
+		if(rootNode_ != orgRootNode_){
+			LinkSet.resetNodes(orgRootNode_);
+			rootNode_ = orgRootNode_;
+		}
+		rootNode_.setMembrane(rootMembrane_, true);
+		nowHistoryPos_ = 0;
+		Map<Node, Node> cloneMap = new HashMap<Node, Node>();
+		Node newNode = rootNode_.cloneNode(cloneMap);
+		newNode.cloneNodeParm(cloneMap, rootNode_);
+		rootNodeList_.add(newNode);
+	}
 
 	public void setMagnification(double magni){
 		magnification_ = magni * 2;
@@ -240,9 +270,11 @@ public class GraphPanel extends JPanel {
 	 */
 	public void setRootMem(Membrane mem){
 		rootMembrane_ = mem;
+		orgRootMembrane_ = mem;
 		rootNode_ = new Node(null, mem);
+		orgRootNode_ = rootNode_;
 	}
-
+	
 	/**
 	 * すべての膜を表示に設定
 	 *
@@ -252,14 +284,6 @@ public class GraphPanel extends JPanel {
 		rootNode_.setInvisibleRootNode(null);
 	}
 	
-	public Node getRootNode(){
-		return (Node)rootNode_.clone();
-	}
-	
-	public void setRootNode(Node node){
-		rootNode_ = node;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	/**
 	 * 演算用スレッド

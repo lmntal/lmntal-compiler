@@ -13,7 +13,7 @@ import javax.swing.JScrollPane;
 
 import runtime.Membrane;
 
-public class LMNtalFrame extends JFrame implements KeyListener {
+public class LMNtalFrame extends JFrame {
 
 	/////////////////////////////////////////////////////////////////
 	// 定数
@@ -34,14 +34,13 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	
 	private int step_ = 1;
 	private boolean stopCalc_ = true;
-	public boolean running = true;
+	public boolean running_ = true;
 	
-	private GraphPanel panel = null;
-	private SubFrame subFrame;
-	private LogFrame logFrame;
-	private Thread th;
-	private Membrane rootMembrane;
-	private List<Node> rootMemList = new ArrayList<Node>();
+	private GraphPanel panel_ = null;
+	private SubFrame subFrame_;
+	private LogFrame logFrame_;
+	private Membrane rootMembrane_;
+	private List<Node> rootMemList_ = new ArrayList<Node>();
 	
 
 	/////////////////////////////////////////////////////////////////
@@ -52,19 +51,19 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				stopCalc_ = false;
-				running = false;
+				running_ = false;
 			}
 		});
 		
-//		addKeyListener(this);
+		addKeyListener(new CommonListener(panel_));
 		
 		initComponents();
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
 		setVisible(true);
 		
 		// 管理ウィンドウの生成
-		subFrame = new SubFrame(this);
-		logFrame = new LogFrame(this);
+		subFrame_ = new SubFrame(this);
+		logFrame_ = new LogFrame(this);
 		
 	}
 	/////////////////////////////////////////////////////////////////
@@ -74,33 +73,15 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	 *
 	 */
 	public void hideAll(){
-		panel.hideAll();
+		panel_.hideAll();
 	}
 	
 	private void initComponents() {
-		panel = new GraphPanel();
+		panel_ = new GraphPanel();
 
 		setTitle(TITLE);
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new JScrollPane(panel), BorderLayout.CENTER);
-	}
-	
-	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_A){
-			if(rootMemList.size() == 0){ return; }
-			panel.setRootNode(rootMemList.remove(rootMemList.size() - 1));
-			setRootMem(rootMembrane);
-			System.out.println(rootMembrane);
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_S){
-			rootMemList.add(panel.getRootNode());
-		}
-	}
-	
-	public void keyReleased(KeyEvent e) {
-	}
-	
-	public void keyTyped(KeyEvent e) {
+		getContentPane().add(new JScrollPane(panel_), BorderLayout.CENTER);
 	}
 	
 	/**
@@ -108,10 +89,11 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	 *
 	 */
 	public void onTrace(){
-		if(null != rootMembrane){
-			logFrame.setLog(rootMembrane.toString());
+		if(null != rootMembrane_){
+			logFrame_.setLog(rootMembrane_.toString());
 		}
-		while(running) {
+		panel_.saveState();
+		while(running_) {
 			if(!stopCalc_){
 				break;
 			}
@@ -121,6 +103,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 				e.printStackTrace();
 			}
 		}
+		logFrame_.addTime();
 		step_ = (step_ == 0) ? 0 : step_ - 1;
 		stopCalc_ = (step_ == 0) ? true : false;
 	}
@@ -130,7 +113,7 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	 * @param magni
 	 */
 	public void setMagnification(double magni){
-		panel.setMagnification(magni);	
+		panel_.setMagnification(magni);	
 	}
 	
 	/**
@@ -138,8 +121,8 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	 * @param mem
 	 */
 	public void setRootMem(Membrane mem){
-		rootMembrane = mem;
-		panel.setRootMem(mem);
+		rootMembrane_ = mem;
+		panel_.setRootMem(mem);
 	}
 	
 	public void setStep(int step){
@@ -155,6 +138,6 @@ public class LMNtalFrame extends JFrame implements KeyListener {
 	 *
 	 */
 	public void showAll(){
-		panel.showAll();
+		panel_.showAll();
 	}
 }

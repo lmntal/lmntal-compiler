@@ -77,6 +77,8 @@ public class SubFrame extends JFrame {
 	
 	private LMNtalFrame mainFrame_;
 	
+	private CommonListener commonListener_ = new CommonListener(this);
+	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
 	public SubFrame(LMNtalFrame f) {
@@ -128,8 +130,7 @@ public class SubFrame extends JFrame {
 		menuPanel_.add(attractionCheck_);
 		menuPanel_.add(repulsiveCheck_);
 		menuPanel_.add(springCheck_);
-		menuPanel_.addMouseWheelListener(new SliderMouseListener(this));
-		
+		menuPanel_.addMouseWheelListener(commonListener_);
 		
 		menuScroll_ = new JScrollPane(menuPanel_);
 		///////////////////////////////////////////////////////////////////////
@@ -140,7 +141,7 @@ public class SubFrame extends JFrame {
 		zoomSlider_.setMajorTickSpacing(10);  //大目盛りの間隔を設定
 		zoomSlider_.setLabelTable(zoomSlider_.createStandardLabels(10)); //目盛りﾗﾍﾞﾙを10間隔で表示
 		zoomSlider_.setPaintLabels(true);    //目盛りﾗﾍﾞﾙを表示
-		getContentPane().addMouseWheelListener(new SliderMouseListener(this));
+		getContentPane().addMouseWheelListener(commonListener_);
 
 		setTitle(TITLE);
 		getContentPane().setLayout(new GridBagLayout());

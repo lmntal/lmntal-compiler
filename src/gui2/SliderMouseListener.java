@@ -20,7 +20,7 @@ public class SliderMouseListener implements MouseWheelListener {
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if(subFrame == null){ return; }
 		
-		subFrame.setSliderValue(subFrame.getSliderValue() - e.getWheelRotation());
+		subFrame.setSliderValue(subFrame.getSliderValue() + e.getWheelRotation());
 	}
 
 }
