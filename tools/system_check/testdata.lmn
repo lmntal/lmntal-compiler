@@ -164,6 +164,17 @@ eq($i,$j) :- $i =:=. $j | yes. eq(9.1, 9.1). % yes. %ok
 neq($i, $j) :- $i \= $j | yes. eq(10.4, 10.4). % yes. %ng
 neq($i, $j) :- $i =\=. $j | yes. eq(10.6, 10.6). % yes. %ng
 
+%% string
+s($s) :- string($s) | yes. s("hoge"), s(""). %yes, yes %ok
+s($s) :- string($s) | yes. s(hoge), s('hoge'). %s(hoge), s(hoge) %ok
+
+%% Åù¹æÈæ³Ó
+eq($s,$t) :- $s == $t | yes. eq("hello", "hello"). %yes. %ok
+eq($s,$t) :- $s == $t | yes. eq("hello", 'hello'). %yes. %ng
+neq($s, $t) :- string($s), unary($t), $s \= $t | yes. neq("hello", 'hello'). %yes. %ok
+neq($s, $t) :- string($s), string($t), $s \= $t | yes. neq("hello", 'hello'). %yes. %ng
+
+
 %% unary
 %% ¸¡ºº
 u($u) :- unary($u) | yes. u(a). u(longlonglonglonglongname). u(1). u("year"). u(2.2). %yes,yes,yes,yes,yes.%ok
