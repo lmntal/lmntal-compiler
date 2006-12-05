@@ -153,9 +153,9 @@ public class Node implements Cloneable{
 	 * 位置座標などの計算
 	 */
 	public void calc(){
-		if(clipped_){ return; }
-		NodeFunction.calcSpring(this);
 		NodeFunction.calcRelaxAngle(this);
+		if(clipped_ || uncalc_){ return; }
+		NodeFunction.calcSpring(this);
 		synchronized (nodeMap_) {
 			NodeFunction.calcAttraction(this, nodeMap_);
 			NodeFunction.calcRepulsive(this, nodeMap_);
@@ -168,8 +168,8 @@ public class Node implements Cloneable{
 	 * 位座標などの計算を自分を含めたすべての子Nodeにて行う
 	 */
 	public void calcAll(){
-		if(uncalc_){ return; }
 		calc();
+		if(uncalc_){ return; }
 		synchronized (nodeMap_) {
 			Iterator<Node> nodes = nodeMap_.values().iterator();
 			while(nodes.hasNext()){

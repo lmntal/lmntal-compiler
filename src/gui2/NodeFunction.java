@@ -206,7 +206,7 @@ public class NodeFunction {
 	
 	static
 	public void calcRelaxAngle(Node node){
-		if(!angleFlag_ || !Atom.class.isInstance(node.getObject())){
+		if(!(node.getObject() instanceof Atom)){
 			return;
 		}
 		int edgeNum = node.getEdgeCount(); 
@@ -268,8 +268,9 @@ public class NodeFunction {
 				
 				dx = dx * 2;
 				dy = dy * 2;
-				
-				sourceNode.moveDelta(-dx, -dy);
+				if(angleFlag_){
+					sourceNode.moveDelta(-dx, -dy);
+				}
 				nthNode.moveDelta(dx, dy);
 				
 			}
