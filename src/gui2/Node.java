@@ -10,7 +10,6 @@ import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import runtime.Atom;
@@ -202,6 +201,12 @@ public class Node implements Cloneable{
 			// サイズ変更
 			if(visible_){
 				rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);
+			}
+			else if(rect_.width != ATOM_SIZE || rect_.height != ATOM_SIZE){
+				rect_.setFrameFromCenter(rect_.getCenterX(),
+						rect_.getCenterY(),
+						rect_.getCenterX() - ATOM_SIZE,
+						rect_.getCenterY() - ATOM_SIZE);
 			}
 		}
 		
@@ -641,7 +646,11 @@ public class Node implements Cloneable{
 		}
 		if(clipped_){
 			pinAnime_ = 5;
-			pinPosY_ = -(panel_.getHeight() + (panel_.getPin().getHeight(panel_) * Math.random() * 15)) / panel_.getMagnification();
+			pinPosY_ =
+				-(
+						panel_.getHeight() +
+						(panel_.getPin().getHeight(panel_) * Math.random() * 15)
+				) / GraphPanel.getMagnification();
 		}
 	}
 	
