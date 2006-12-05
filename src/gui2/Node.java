@@ -121,10 +121,10 @@ public class Node implements Cloneable{
 		nextID_++;
 
 		visible_ = true;
-		
 		// 膜、アトムの初期化
-		if(Atom.class.isInstance(object)){
+		if(object instanceof Atom){
 			setAtom((Atom)object);
+			initPosition();
 		} else {
 			setMembrane((Membrane)object);
 		}
@@ -313,6 +313,11 @@ public class Node implements Cloneable{
 		return invisibleRootNode_;
 	}
 	
+	/**
+	 * 隣のNodeを取得する
+	 * @param i
+	 * @return
+	 */
 	public Node getNthNode(int i){
 		return linkList_.get(i);
 	}
@@ -325,6 +330,10 @@ public class Node implements Cloneable{
 		return myObject_;
 	}
 	
+	/**
+	 * Node固有のIDを取得する
+	 * @return
+	 */
 	public int getID(){
 		return myID_;
 	}
@@ -367,6 +376,44 @@ public class Node implements Cloneable{
 			
 		}
 		return 0;
+	}
+	
+	/**
+	 * 初期位置をリンクされているアトムに極力近くする
+	 *
+	 */
+	public void initPosition(){
+		if(!(myObject_ instanceof Atom)){ return; }
+		int nthNum = ((Atom)myObject_).getEdgeCount();
+		if(0 == nthNum){ return; }
+		if(1 == nthNum){
+			Node nthNode = LinkSet.getNodeByAtom(((Atom)myObject_).getNthAtom(0));
+			if(null == nthNode){ return; }
+			Point2D nthPoint = nthNode.getCenterPoint();
+			rect_.x = nthPoint.getX() + 10;
+			rect_.y = nthPoint.getY() + 10;
+		} else {
+			double x = 0;
+			double y = 0;
+			double findNthNum = 0;
+			for(int i = 0; i < nthNum; i++){
+				Node nthNode = LinkSet.getNodeByAtom(((Atom)myObject_).getNthAtom(i));
+				if(null == nthNode){ continue; }
+				Point2D nthPoint = nthNode.getCenterPoint();
+				x += nthPoint.getX();
+				y += nthPoint.getY();
+				findNthNum++;
+			}
+			if(1 == findNthNum){
+				rect_.x = x;
+				rect_.y = x;
+			}
+			else if(1 < findNthNum){
+				rect_.x = x / findNthNum;
+				rect_.y = x / findNthNum;
+			}
+			
+		}
 	}
 	
 	/**
