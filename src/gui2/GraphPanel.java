@@ -45,6 +45,8 @@ public class GraphPanel extends JPanel {
 	private Node orgRootNode_;
 	private AffineTransform af_ = new AffineTransform();
 	private Point lastPoint;
+	private double deltaX;
+	private double deltaY;
 	private int nowHistoryPos_ = 0;
 	private CommonListener commonListener_ = new CommonListener(this);
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
@@ -100,7 +102,11 @@ public class GraphPanel extends JPanel {
 				moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
 				if(null != moveTargetNode_){
 					moveTargetNode_.setUncalc(true);
+				} else {
+					moveTargetNode_ = rootNode_;
 				}
+				deltaX = e.getX() - (getWidth() / 2) - (moveTargetNode_.getCenterPoint().x * getMagnification());
+				deltaY = e.getY() - (getHeight() / 2) - (moveTargetNode_.getCenterPoint().y * getMagnification());
 				lastPoint = e.getPoint();
 			}
 			
@@ -124,8 +130,8 @@ public class GraphPanel extends JPanel {
 			 */
 			public void mouseDragged(MouseEvent e) {
 				if(moveTargetNode_ != null){
-					int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
-					int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
+					int pointX = (int)((e.getX() - deltaX - (getWidth() / 2)) / getMagnification());
+					int pointY = (int)((e.getY() - deltaY - (getHeight() / 2)) / getMagnification());
 					moveTargetNode_.setPos(pointX, pointY);
 				} else {
 					if(null == lastPoint){ return; }
