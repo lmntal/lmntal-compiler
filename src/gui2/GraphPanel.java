@@ -105,8 +105,8 @@ public class GraphPanel extends JPanel {
 				} else {
 					moveTargetNode_ = rootNode_;
 				}
-				deltaX = e.getX() - (getWidth() / 2) - (moveTargetNode_.getCenterPoint().x * getMagnification());
-				deltaY = e.getY() - (getHeight() / 2) - (moveTargetNode_.getCenterPoint().y * getMagnification());
+				deltaX = e.getX() - (moveTargetNode_.getCenterPoint().x * getMagnification());
+				deltaY = e.getY() - (moveTargetNode_.getCenterPoint().y * getMagnification());
 				lastPoint = e.getPoint();
 			}
 			
@@ -129,16 +129,10 @@ public class GraphPanel extends JPanel {
 			 * <p>移動した距離を取得</p>
 			 */
 			public void mouseDragged(MouseEvent e) {
-				if(moveTargetNode_ != null){
-					int pointX = (int)((e.getX() - deltaX - (getWidth() / 2)) / getMagnification());
-					int pointY = (int)((e.getY() - deltaY - (getHeight() / 2)) / getMagnification());
-					moveTargetNode_.setPos(pointX, pointY);
-				} else {
-					if(null == lastPoint){ return; }
-					rootNode_.setPosDelta(e.getPoint().getX() - lastPoint.getX(),
-							e.getPoint().getY() - lastPoint.getY());
-					lastPoint = e.getPoint();
-				}
+				if(moveTargetNode_ == null){ return; }
+				int pointX = (int)((e.getX() - deltaX) / getMagnification());
+				int pointY = (int)((e.getY() - deltaY) / getMagnification());
+				moveTargetNode_.setPos(pointX, pointY);
 			}
 
 		}
