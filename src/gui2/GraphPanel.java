@@ -186,26 +186,26 @@ public class GraphPanel extends JPanel {
 	}
 	
 	public void loadPrevState(){
-		if(rootNodeList_.size() == 0 || nowHistoryPos_ == rootNodeList_.size()){
-			return;
-		}
-		nowHistoryPos_++;
-		rootNode_ = rootNodeList_.get(rootNodeList_.size() - nowHistoryPos_);
-		commonListener_.setLog(rootMembrane_.toString());
+//		if(rootNodeList_.size() == 0 || nowHistoryPos_ == rootNodeList_.size()){
+//			return;
+//		}
+//		nowHistoryPos_++;
+//		rootNode_ = rootNodeList_.get(rootNodeList_.size() - nowHistoryPos_);
+//		commonListener_.setLog(rootMembrane_.toString());
 	}
 	
 	public void loadNextState(){
-		if(rootNodeList_.size() == 0 || nowHistoryPos_ == 0){
-			return;
-		}
-		nowHistoryPos_--;
-		if(nowHistoryPos_ == 0){
-			rootMembrane_ = orgRootMembrane_;
-			rootNode_ = orgRootNode_;
-			return;
-		}
-		rootNode_ = rootNodeList_.get(rootNodeList_.size() - nowHistoryPos_);
-		commonListener_.setLog(rootMembrane_.toString());
+//		if(rootNodeList_.size() == 0 || nowHistoryPos_ == 0){
+//			return;
+//		}
+//		nowHistoryPos_--;
+//		if(nowHistoryPos_ == 0){
+//			rootMembrane_ = orgRootMembrane_;
+//			rootNode_ = orgRootNode_;
+//			return;
+//		}
+//		rootNode_ = rootNodeList_.get(rootNodeList_.size() - nowHistoryPos_);
+//		commonListener_.setLog(rootMembrane_.toString());
 	}
 
 	public void loadState(int value){
@@ -217,7 +217,7 @@ public class GraphPanel extends JPanel {
 			rootNode_ = orgRootNode_;
 			LinkSet.resetNodes(orgRootNode_);
 		} else {
-			Map<Node, Node> cloneMap = new HashMap<Node, Node>();
+//			Map<Node, Node> cloneMap = new HashMap<Node, Node>();
 //			Node newNode = rootNodeList_.get(value).cloneNode(cloneMap);
 			Node newNode = rootNodeList_.get(value);
 //			newNode.cloneNodeParm(cloneMap, rootNodeList_.get(value)); 
