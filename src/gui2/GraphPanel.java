@@ -152,7 +152,9 @@ public class GraphPanel extends JPanel {
 	 */
 	public void calc(){
 		if(null == rootNode_){ return; }
-		rootNode_.setMembrane(rootMembrane_);
+		if(rootNode_ == orgRootNode_){
+			rootNode_.setMembrane(rootMembrane_);
+		}
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
@@ -253,7 +255,10 @@ public class GraphPanel extends JPanel {
 			rootNode_ = orgRootNode_;
 			LinkSet.resetNodes(orgRootNode_);
 		}
-		rootNode_.setMembrane(rootMembrane_);
+		boolean success = false;
+		while(!success){
+			success = rootNode_.setMembrane(rootMembrane_);
+		}
 		nowHistoryPos_ = 0;
 		Map<Node, Node> cloneMap = new HashMap<Node, Node>();
 		Node newNode = rootNode_.cloneNode(cloneMap);
