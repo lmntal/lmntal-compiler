@@ -1,0 +1,184 @@
+% 膜のハッシュコードを計算する
+%
+% AUTHOR: Kohei HIROTO
+% 
+% 06/11/01
+
+{
+module(mhash).
+
+[:/*inline_define*/	
+	import java.util.*;
+	class MembraneHashCodeCalculator {
+		static int calculate(Membrane m) {
+			System.out.println(m);
+			final long MAX_VALUE = Integer.MAX_VALUE;
+			long h = 3412;        // 3412は適当な初期値
+			//long g = 3412;
+			long f = 3412;
+			
+			Atom a = null;
+			
+			// atoms:この膜内のアトム全体の集合, toCalculate:現在計算中の分子内の未処理アトムの集合, calculated:現在形山中の分子内の処理済アトムの集合
+			Set<Atom> atoms = new HashSet<Atom>(), toCalculate = new HashSet<Atom>(), calculated = new HashSet<Atom>();
+			
+			for (Iterator i = m.atomIterator(); i.hasNext(); ) {
+				a = (Atom) i.next();
+				String name = a.getName();
+				if (name.equals("+") || name.equals("$in") || name.equals("$out")) {
+					continue;
+				}
+				atoms.add(a);
+			}
+			
+			// 子膜以外のアトムを処理する
+			while (!atoms.isEmpty()) {
+				a = atoms.iterator().next();
+				atoms.remove(a);
+				
+				// 分子ごとのハッシュコード
+				long mol = -1, mol_add = 0, mol_xor = 0, mol_mult = 1, temp = 0;
+				// 単原始分子の場合は、そのアトムのファンクタのハッシュコードを分子のハッシュコードとする。
+				if (a.getFunctor().getArity() == 0) {
+					mol = a.getFunctor().hashCode();
+				} else {
+					toCalculate.clear();
+					calculated.clear();
+					toCalculate.add(a);
+					
+					// 「２つ一組が２つ」と「４つで環状」を区別するために
+					// 分子毎にグループ化して計算する
+					while (!toCalculate.isEmpty()) {
+						a = toCalculate.iterator().next();
+						temp = a.getFunctor().hashCode();
+						//System.out.println(a +":"+ mol_hc);
+				
+						// このアトムのリンクを処理する
+						int arity = a.getFunctor().getArity();
+						for (int k = 0; k < arity; k++) {
+							temp *= 31;
+							Link link = a.getArg(k);
+							if (link.getAtom().getName().equals("$out")) { // リンク先が子膜の場合
+								//System.out.println("process komaku");
+								temp += calculate(link.getAtom().nthAtom(0).getMem());
+							} else { // リンク先が子膜ではなくアトムの場合
+								Atom linked = link.getAtom();
+								if (!calculated.contains(linked)) {
+									toCalculate.add(linked);
+								}
+								int pos = link.getPos();
+								//System.out.println(pos);
+								// 接続先の引数番号をハッシュに関与させる
+								temp += (linked.getFunctor().hashCode() * (pos + 1));							
+							}
+						}
+						mol_add += temp;
+						mol_add %= MAX_VALUE;
+						//mol_xor ^= temp;
+						mol_mult *= temp;
+						mol_mult %= MAX_VALUE;
+						
+						calculated.add(a);
+						toCalculate.remove(a);
+					}
+					mol = mol_add /*+ mol_xor */ + mol_mult;
+					atoms.remove(calculated);
+				}
+				
+				h += mol;
+				h %= MAX_VALUE;
+				//g ^= mol;
+				f *= mol;
+				f %= MAX_VALUE;
+			}
+			
+			// 子膜を処理する
+			for (Iterator i = m.memIterator(); i.hasNext(); ) {
+				Membrane me = (Membrane) i.next();
+				long t = calculate(me);
+				//System.out.println("komaku " + me +":"+ t);
+				h += t;
+				h %= MAX_VALUE;
+				//g ^= t;
+				f *= t;
+				f %= MAX_VALUE;
+			}
+			return (int) ((f /*+ g*/ + h) % MAX_VALUE);
+		}
+	}
+:].
+
+H = mhash.hashCode(Memb) :- H = 
+[:/*inline*/
+	Atom a = me.nthAtom(0).nthAtom(0); // アトム$in
+	Membrane m = (Membrane) (a.getMem());
+	int hashCode = MembraneHashCodeCalculator.calculate(m);
+	
+	Atom result = mem.newAtom(new IntegerFunctor(hashCode));
+	mem.relinkAtomArgs(result, 0, me, 1);
+	a.nthAtom(1).remove();
+	me.remove();
+:](Memb).
+}.
+
+/*
+// 膜によるグループ分けの例
+hc0 = mhash.hashCode(Memb0).
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+hc3 = mhash.hashCode(Memb3).
+hc4 = mhash.hashCode(Memb4).
+hc5 = mhash.hashCode(Memb5).
+hc6 = mhash.hashCode(Memb6).
+hc7 = mhash.hashCode(Memb7).
+hc8 = mhash.hashCode(Memb8).
+hc9 = mhash.hashCode(Memb9).
+hc10 = mhash.hashCode(Memb10).
+hc11 = mhash.hashCode(Memb11).
+hc12 = mhash.hashCode(Memb12).
+hc13 = mhash.hashCode(Memb13).
+
+Memb0 = {aaa. bbb. ccc.}.
+Memb1 = {{aaa. bbb. ccc}. {}.}.
+Memb2 = {{}. {ccc. aaa. bbb}.}.   // アトムの順番が変ったとき
+Memb3 = {{aaa. bbb. ccc}. }.      // {}の有無
+Memb4 = {{aaa. bbb.}. {ccc.}.}.
+Memb5 = {{ccc.}. {aaa. bbb.}.}.
+Memb6 = {{aaa. ccc.}. {bbb.}.}.
+Memb7 = {{bbb. ccc.}. {aaa.}.}.
+Memb8 = {{aaa.}. {bbb.}. {ccc.}.}.
+Memb9 = {aaa.}.
+Memb10 = {{aaa.}.}.
+Memb11 = {{{aaa.}.}.}.
+Memb12 = {a = {w, c}. b = {g}}.
+Memb13 = {a = {w, g}. b = {c}}.
+*/
+
+
+// 「２つ一組が２つ」と「４つで環状」
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+Memb1 = { a(X, Y). a(X, Y). a(S, T). a(S, T). }.
+Memb2 = { a(X, Y). a(X, T). a(S, Y). a(S, T). }.
+
+
+/*
+hc1 = mhash.hashCode(Memb1).
+Memb1 = { }.
+*/
+
+/*
+// シス･トランス異性体
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+Memb1 = { a(X, Y, L). a(X, T). a(S, Y). a(S, T, M). a(L). a(M). }.
+Memb2 = { a(X, Y, L). a(X, T). a(S, Y, M). a(S, T). a(L). a(M). }.
+*/
+
+/*
+//ferrymanの例題で使った状態を表す膜
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+Memb1 = {a = {f, c, g}. b = {}.}.
+Memb2 = {a = {c, g}. b = {f}.}.
+*/
