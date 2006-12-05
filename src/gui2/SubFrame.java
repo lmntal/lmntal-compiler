@@ -53,9 +53,9 @@ public class SubFrame extends JFrame {
 
 	private JButton showBt_ = new JButton("Show All");
 
-	private JButton divergenceBt_ = new JButton("Divergence");
+	private JButton heatupBt_ = new JButton("Heatup");
 
-	private JButton stopDivergenceBt_ = new JButton("Stop Divergence");
+	private JButton stopHeatingBt_ = new JButton("Stop Heating");
 	
 	private JScrollPane menuScroll_;
 	
@@ -64,6 +64,8 @@ public class SubFrame extends JFrame {
 	private JTextField  stepBox_ = new JTextField("1");
 	
 	private JCheckBox linkNumCheck_ = new JCheckBox("Show Link Number");
+	
+	private JCheckBox historyCheck_ = new JCheckBox("Take History");
 	
 	private JCheckBox springCheck_ = new JCheckBox("Calc Spring");
 	
@@ -106,8 +108,8 @@ public class SubFrame extends JFrame {
 		goBt_.addActionListener(new GoActionAdapter(this));
 		showBt_.addActionListener(new ShowAllAdapter(this));
 		hideBt_.addActionListener(new HideAllAdapter(this));
-		divergenceBt_.addActionListener(new DivergenceAdapter());
-		stopDivergenceBt_.addActionListener(new StopDivergenceAdapter());
+		heatupBt_.addActionListener(new HeatupAdapter());
+		stopHeatingBt_.addActionListener(new StopHeatingAdapter());
 		stepBox_.setHorizontalAlignment(JTextField.RIGHT);
 		
 		
@@ -118,6 +120,8 @@ public class SubFrame extends JFrame {
 		angleCheck_.setSelected(true);
 		linkNumCheck_.addItemListener(new LinkNumAdapter());
 		linkNumCheck_.setSelected(false);
+		historyCheck_.addItemListener(new HistoryAdapter());
+		historyCheck_.setSelected(false);
 		springCheck_.addItemListener(new SpringAdapter());
 		springCheck_.setSelected(true);
 		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
@@ -125,6 +129,7 @@ public class SubFrame extends JFrame {
 		attractionCheck_.addItemListener(new AttractionAdapter());
 		attractionCheck_.setSelected(false);
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
+		menuPanel_.add(historyCheck_);
 		menuPanel_.add(linkNumCheck_);
 		menuPanel_.add(angleCheck_);
 		menuPanel_.add(attractionCheck_);
@@ -189,13 +194,13 @@ public class SubFrame extends JFrame {
 		gbc.gridy = 2;
 		gbc.gridwidth = 2;
         gbc.gridheight = 1;
-		getContentPane().add(divergenceBt_, gbc);
+		getContentPane().add(heatupBt_, gbc);
 
 		gbc.gridx = 1;
 		gbc.gridy = 3;
 		gbc.gridwidth = 2;
         gbc.gridheight = 1;
-		getContentPane().add(stopDivergenceBt_, gbc);
+		getContentPane().add(stopHeatingBt_, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 4;
@@ -242,14 +247,14 @@ public class SubFrame extends JFrame {
 	}
 
 	/**
-	 * ³È»¶½èÍý³«»Ï
+	 * ²ÃÇ®½èÍý³«»Ï
 	 * @author nakano
 	 *
 	 */
-	private class DivergenceAdapter implements ActionListener {
-		public DivergenceAdapter() { }
+	private class HeatupAdapter implements ActionListener {
+		public HeatupAdapter() { }
 		public void actionPerformed(ActionEvent e) {
-			NodeFunction.setDivergence();
+			NodeFunction.setHeatup();
 		}
 	}
 
@@ -285,6 +290,14 @@ public class SubFrame extends JFrame {
 		}
 		public void actionPerformed(ActionEvent e) {
 			frame.mainFrame_.hideAll();
+		}
+	}
+	
+	private class HistoryAdapter implements ItemListener {
+		public HistoryAdapter() { } 
+		
+		public void itemStateChanged(ItemEvent e) {
+			commonListener_.setHistory(historyCheck_.isSelected());
 		}
 	}
 	
@@ -354,14 +367,14 @@ public class SubFrame extends JFrame {
 	}
 
 	/**
-	 * ³È»¶½èÍý½ªÎ»
+	 * ²ÃÇ®½èÍý½ªÎ»
 	 * @author nakano
 	 *
 	 */
-	private class StopDivergenceAdapter implements ActionListener {
-		public StopDivergenceAdapter() { }
+	private class StopHeatingAdapter implements ActionListener {
+		public StopHeatingAdapter() { }
 		public void actionPerformed(ActionEvent e) {
-			NodeFunction.stopDivergence();
+			NodeFunction.stopHeating();
 		}
 	}
 	

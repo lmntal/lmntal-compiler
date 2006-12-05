@@ -748,6 +748,11 @@ public class Node implements Cloneable{
 				} else {
 					node = new Node(this, childMem);
 					nodeMap_.put(childMem, node);
+					if(success){
+						success = node.reset(childMem);
+					} else {
+						node.reset(childMem);
+					}
 				}
 				
 				memNodeMap.put(childMem, node);
@@ -775,6 +780,7 @@ public class Node implements Cloneable{
 				} else {
 					node = new Node(this, childAtom);
 					nodeMap_.put(childAtom, node);
+					node.reset(childAtom);
 				}
 				atomNodeMap.put(childAtom, node);
 			}

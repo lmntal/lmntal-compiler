@@ -36,18 +36,19 @@ public class GraphPanel extends JPanel {
 	
 	///////////////////////////////////////////////////////////////////////////
 	
-	private Thread calcTh_ = null;
-	private Thread repaintTh_ = null;
-	private Node moveTargetNode_ = null;
-	private Node rootNode_;
-	private Membrane rootMembrane_;
-	private Node orgRootNode_;
 	private AffineTransform af_ = new AffineTransform();
+	private Thread calcTh_ = null;
+	private CommonListener commonListener_ = new CommonListener(this);
 	private double deltaX;
 	private double deltaY;
-	private CommonListener commonListener_ = new CommonListener(this);
-	private List<Node> rootNodeList_ = new ArrayList<Node>();
+	private boolean history_ = false;
 	private List<String> logList_ = new ArrayList<String>();
+	private Node moveTargetNode_ = null;
+	private Node orgRootNode_;
+	private Thread repaintTh_ = null;
+	private Membrane rootMembrane_;
+	private Node rootNode_;
+	private List<Node> rootNodeList_ = new ArrayList<Node>();
 	
 	///////////////////////////////////////////////////////////////////////////
 	
@@ -249,7 +250,13 @@ public class GraphPanel extends JPanel {
 		}
 	}
 	
-	public void saveState(){
+	public void revokeState(){
+		commonListener_.revokeTime();
+		rootNodeList_.clear();
+		logList_.clear();
+	}
+	
+	public void resetLink(){
 		if(rootNode_ != orgRootNode_){
 			rootNode_ = orgRootNode_;
 			LinkSet.resetNodes(orgRootNode_);
@@ -258,11 +265,37 @@ public class GraphPanel extends JPanel {
 		while(!success){
 			success = rootNode_.setMembrane(rootMembrane_);
 		}
+	}
+	
+	public void saveState(){
+		if(!history_){ return; }
+		// 同じ状態であれば記録しない
+		if(logList_.size() != 0 &&
+				rootMembrane_.toString().equals(logList_.get(logList_.size() - 1)))
+		{
+			return;
+		}
+		if(0 < rootNodeList_.size()){
+			commonListener_.addTime();
+		}
 		Map<Node, Node> cloneMap = new HashMap<Node, Node>();
 		Node newNode = rootNode_.cloneNode(cloneMap);
 		newNode.cloneNodeParm(cloneMap, rootNode_);
 		rootNodeList_.add(newNode);
-		logList_.add(rootMembrane_.toString());
+		if(0 == logList_.size()){
+			logList_.add(commonListener_.getLog());
+		} else {
+			logList_.add(rootMembrane_.toString());
+		}
+	}
+	
+	public void setHistory(boolean flag){
+		history_ = flag;
+		if(history_){
+			saveState();
+		} else {
+			revokeState();
+		}
 	}
 
 	public void setMagnification(double magni){

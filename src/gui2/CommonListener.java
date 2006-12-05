@@ -65,6 +65,16 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 	
 	///////////////////////////////////////////////////////////////////////////
 	
+	public void addTime(){
+		if(null == logFrame_){ return; }
+		logFrame_.addTime();
+	}
+	
+	public String getLog(){
+		if(null == logFrame_){ return ""; }
+		return logFrame_.getLog();
+	}
+	
 	public void loadNextState(){
 		if(null == panel_){ return; }
 		panel_.loadNextState();
@@ -74,7 +84,17 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 		if(null == panel_){ return; }
 		panel_.loadPrevState();
 	}
+
+	public void revokeTime(){
+		if(null == logFrame_){ return; }
+		logFrame_.revokeTime();
+	}
 	
+	public void setHistory(boolean flag){
+		if(null == panel_){ return; }
+		panel_.setHistory(flag);
+	}
+
 	public void setState(int value){
 		if(null == panel_){ return; }
 		panel_.loadState(value);
@@ -83,6 +103,5 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 	public void setLog(String log){
 		if(null == logFrame_){ return; }
 		logFrame_.setLog(log);
-		
 	}
 }

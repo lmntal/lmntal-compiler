@@ -56,6 +56,19 @@ public class LogFrame extends JFrame implements ChangeListener {
 	}
 	/////////////////////////////////////////////////////////////////
 	
+	public void addTime(){
+		timeSliderResizing_ = true;
+		timeSlider_.setMaximum(timeSlider_.getMaximum() + 1);
+		timeSlider_.setValue(timeSlider_.getMaximum());
+		timeSlider_.setMajorTickSpacing(1);
+		timeSlider_.setPaintTicks(true);
+		timeSliderResizing_ = false;
+	}
+	
+	public String getLog(){
+		return logArea.getText();
+	}
+	
 	private void initComponents() {
 		
 		setTitle(TITLE);
@@ -68,15 +81,15 @@ public class LogFrame extends JFrame implements ChangeListener {
 		add(new JScrollPane(logArea), BorderLayout.CENTER);
 	}
 	
-	public void setLog(String log){
-		logArea.setText(log);
+	public void revokeTime(){
+		timeSliderResizing_ = true;
+		timeSlider_.setValue(0);
+		timeSlider_.setMaximum(0);
+		timeSliderResizing_ = false;
 	}
 	
-	public void addTime(){
-		timeSliderResizing_ = true;
-		timeSlider_.setMaximum(timeSlider_.getMaximum() + 1);
-		timeSlider_.setValue(timeSlider_.getMaximum());
-		timeSliderResizing_ = false;
+	public void setLog(String log){
+		logArea.setText(log);
 	}
 
 	///////////////////////////////////////////////////////////////////////////

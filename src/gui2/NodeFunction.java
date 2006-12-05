@@ -327,7 +327,7 @@ public class NodeFunction {
 	}
 	
 	static
-	public void setDivergence(){
+	public void setHeatup(){
 		divergenceTimer_ += DIVERGENCE_TIMER;
 	}
 	
@@ -352,7 +352,7 @@ public class NodeFunction {
 	}
 	
 	static
-	public void stopDivergence(){
+	public void stopHeating(){
 		divergenceTimer_ = 0;
 	}
 }

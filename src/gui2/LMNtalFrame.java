@@ -103,7 +103,6 @@ public class LMNtalFrame extends JFrame {
 				e.printStackTrace();
 			}
 		}
-		logFrame_.addTime();
 		step_ = (step_ == 0) ? 0 : step_ - 1;
 		stopCalc_ = (step_ == 0) ? true : false;
 	}
