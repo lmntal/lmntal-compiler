@@ -218,8 +218,9 @@ public class GraphPanel extends JPanel {
 			LinkSet.resetNodes(orgRootNode_);
 		} else {
 			Map<Node, Node> cloneMap = new HashMap<Node, Node>();
-			Node newNode = rootNodeList_.get(value).cloneNode(cloneMap);
-			newNode.cloneNodeParm(cloneMap, rootNodeList_.get(value)); 
+//			Node newNode = rootNodeList_.get(value).cloneNode(cloneMap);
+			Node newNode = rootNodeList_.get(value);
+//			newNode.cloneNodeParm(cloneMap, rootNodeList_.get(value)); 
 			rootNode_ = newNode;
 			LinkSet.resetNodes(newNode);
 		}

@@ -208,62 +208,66 @@ public class Node implements Cloneable{
 	}
 	
 	public Node cloneNode(Map<Node, Node> cloneMap){
-		Node cloneNode = new Node();
-		cloneMap.put(this, cloneNode);
+		synchronized (nodeMap_) {
+			Node cloneNode = new Node();
+			cloneMap.put(this, cloneNode);
 
-		Iterator keys = nodeMap_.keySet().iterator();
-		while(keys.hasNext()){
-			Object key = keys.next();
-			Node oldNode = nodeMap_.get(key);
-			oldNode.cloneNode(cloneMap);
+			Iterator keys = nodeMap_.keySet().iterator();
+			while(keys.hasNext()){
+				Object key = keys.next();
+				Node oldNode = nodeMap_.get(key);
+				oldNode.cloneNode(cloneMap);
 
+			}
+			return cloneNode;
 		}
-		return cloneNode;
 	}
 	
 	public Node cloneNodeParm(Map<Node, Node> cloneMap, Node orginNode){
-		parent_ = cloneMap.get(orginNode.parent_);
-		invisibleRootNode_ = cloneMap.get(orginNode.invisibleRootNode_);
-		myObject_ = orginNode.myObject_;
-		clipped_ = orginNode.clipped_;
-		dx_ = orginNode.dx_;
-		dy_ = orginNode.dy_;
-		imAtom_ = orginNode.imAtom_;
-		myColor_ = orginNode.myColor_;
-		myID_ = orginNode.myID_;
-		name_ = orginNode.name_;
-		pickable_ = orginNode.pickable_;
-		pinAnime_ = orginNode.pinAnime_;
-		pinPosY_ = orginNode.pinPosY_;
-		rect_ = orginNode.rect_;
-		uncalc_ = orginNode.uncalc_;
-		visible_ = orginNode.visible_;
+		synchronized (orginNode.nodeMap_) {
+			parent_ = cloneMap.get(orginNode.parent_);
+			invisibleRootNode_ = cloneMap.get(orginNode.invisibleRootNode_);
+			myObject_ = orginNode.myObject_;
+			clipped_ = orginNode.clipped_;
+			dx_ = orginNode.dx_;
+			dy_ = orginNode.dy_;
+			imAtom_ = orginNode.imAtom_;
+			myColor_ = orginNode.myColor_;
+			myID_ = orginNode.myID_;
+			name_ = orginNode.name_;
+			pickable_ = orginNode.pickable_;
+			pinAnime_ = orginNode.pinAnime_;
+			pinPosY_ = orginNode.pinPosY_;
+			rect_ = orginNode.rect_;
+			uncalc_ = orginNode.uncalc_;
+			visible_ = orginNode.visible_;
 
-		Map<Object, Node> cloneNodeMap = new HashMap<Object, Node>();
-		ArrayList<Node> cloneLinkList = new ArrayList<Node>();
+			Map<Object, Node> cloneNodeMap = new HashMap<Object, Node>();
+			ArrayList<Node> cloneLinkList = new ArrayList<Node>();
 
-		Iterator keys = orginNode.nodeMap_.keySet().iterator();
-		while(keys.hasNext()){
-			Object key = keys.next();
-			Node oldNode = orginNode.nodeMap_.get(key);
-			Node newNode = cloneMap.get(oldNode);
-			if(newNode == null){ continue; }
-			newNode.cloneNodeParm(cloneMap, oldNode);
-			cloneNodeMap.put(key, newNode);
+			Iterator keys = orginNode.nodeMap_.keySet().iterator();
+			while(keys.hasNext()){
+				Object key = keys.next();
+				Node oldNode = orginNode.nodeMap_.get(key);
+				Node newNode = cloneMap.get(oldNode);
+				if(newNode == null){ continue; }
+				newNode.cloneNodeParm(cloneMap, oldNode);
+				cloneNodeMap.put(key, newNode);
 
+			}
+			nodeMap_ = cloneNodeMap;
+
+			Iterator<Node> linkNodes = orginNode.linkList_.iterator();
+			while(linkNodes.hasNext()){
+				Node oldNode  = linkNodes.next();
+				Node newNode = cloneMap.get(oldNode);
+//				cloneMap.put(oldNode, newNode);
+				cloneLinkList.add(newNode);
+			}
+
+			linkList_ = cloneLinkList;
+			return this;
 		}
-		nodeMap_ = cloneNodeMap;
-
-		Iterator<Node> linkNodes = orginNode.linkList_.iterator();
-		while(linkNodes.hasNext()){
-			Node oldNode  = linkNodes.next();
-			Node newNode = cloneMap.get(oldNode);
-//			cloneMap.put(oldNode, newNode);
-			cloneLinkList.add(newNode);
-		}
-
-		linkList_ = cloneLinkList;
-		return this;
 	}
 
 	/**
@@ -566,14 +570,16 @@ public class Node implements Cloneable{
 	 * Nodeをリセットする
 	 * @param object
 	 */
-	public void reset(Object object){
+	public boolean reset(Object object){
+		boolean success = true;
 		myObject_ = object;
 
 		if(Atom.class.isInstance(object)){
 			setAtom((Atom)object);
 		} else {
-			setMembrane((Membrane)object);
+			success = setMembrane((Membrane)object);
 		}
+		return success;
 	}
 	
 	public void resetAllLink(){
@@ -590,13 +596,16 @@ public class Node implements Cloneable{
 	/**
 	 * リンク先を再取得
 	 */
-	public void resetLink(){
-		if(!(myObject_ instanceof Atom)){ return; }
+	public boolean resetLink(){
+		if(!(myObject_ instanceof Atom)){ return true; }
 		int nthNum = ((Atom)myObject_).getEdgeCount();
 		linkList_.clear();
 		for(int i = 0; i < nthNum; i++){
-			linkList_.add(LinkSet.getNodeByAtom(((Atom)myObject_).getNthAtom(i)));
+			Node node = LinkSet.getNodeByAtom(((Atom)myObject_).getNthAtom(i));
+			if(null == node) return false;
+			linkList_.add(node);
 		}
+		return true;
 	}
 	
 	/**
@@ -658,7 +667,8 @@ public class Node implements Cloneable{
 	 * @param mem セットする膜
 	 * @param setChildren 子Nodeを更新するか（サイズの更新だけならばfalse）
 	 */
-	public void setMembrane(Membrane mem){
+	public boolean setMembrane(Membrane mem){
+		boolean success = true;
 		synchronized (nodeMap_) {
 			LinkSet.addLink(this);
 			imAtom_ = false;
@@ -674,7 +684,11 @@ public class Node implements Cloneable{
 				Node node;
 				if(nodeMap_.containsKey(childMem)){
 					node = nodeMap_.get(childMem);
-					node.reset(childMem);
+					if(success){
+						success = node.reset(childMem);
+					} else {
+						node.reset(childMem);
+					}
 				} else {
 					node = new Node(this, childMem);
 					nodeMap_.put(childMem, node);
@@ -697,7 +711,11 @@ public class Node implements Cloneable{
 				Node node;
 				if(nodeMap_.containsKey(childAtom)){
 					node = nodeMap_.get(childAtom);
-					node.reset(childAtom);
+					if(success){
+						success = node.reset(childAtom);
+					} else {
+						node.reset(childAtom);
+					}
 				} else {
 					node = new Node(this, childAtom);
 					nodeMap_.put(childAtom, node);
@@ -719,7 +737,11 @@ public class Node implements Cloneable{
 			Iterator<Node> newAtoms = atomNodeMap.values().iterator();
 			while(newAtoms.hasNext()){
 				Node newAtom = newAtoms.next();
-				newAtom.resetLink();
+				if(success){
+					success = newAtom.resetLink();
+				} else {
+					newAtom.resetLink();
+				}
 			}
 			
 			// 不要になったNode削除
@@ -727,6 +749,7 @@ public class Node implements Cloneable{
 			nodeMap_.putAll(memNodeMap);
 			nodeMap_.putAll(atomNodeMap);
 		}
+		return success;
 	}
 	
 	/**
