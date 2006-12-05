@@ -41,15 +41,13 @@ public class GraphPanel extends JPanel {
 	private Node moveTargetNode_ = null;
 	private Node rootNode_;
 	private Membrane rootMembrane_;
-	private Membrane orgRootMembrane_;
 	private Node orgRootNode_;
 	private AffineTransform af_ = new AffineTransform();
-	private Point lastPoint;
 	private double deltaX;
 	private double deltaY;
-	private int nowHistoryPos_ = 0;
 	private CommonListener commonListener_ = new CommonListener(this);
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
+	private List<String> logList_ = new ArrayList<String>();
 	
 	///////////////////////////////////////////////////////////////////////////
 	
@@ -85,7 +83,6 @@ public class GraphPanel extends JPanel {
 					moveTargetNode_.swapVisible();
 					moveTargetNode_.setUncalc(false);
 					moveTargetNode_ = null;
-					lastPoint = null;
 					return;
 				}
 				
@@ -107,7 +104,6 @@ public class GraphPanel extends JPanel {
 				}
 				deltaX = e.getX() - (moveTargetNode_.getCenterPoint().x * getMagnification());
 				deltaY = e.getY() - (moveTargetNode_.getCenterPoint().y * getMagnification());
-				lastPoint = e.getPoint();
 			}
 			
 			/**
@@ -216,10 +212,12 @@ public class GraphPanel extends JPanel {
 //			LinkSet.resetNodes(orgRootNode_);
 			rootNode_ = orgRootNode_;
 			LinkSet.resetNodes(orgRootNode_);
+			commonListener_.setLog(logList_.get(value));
 		} else {
 //			Map<Node, Node> cloneMap = new HashMap<Node, Node>();
 //			Node newNode = rootNodeList_.get(value).cloneNode(cloneMap);
 			Node newNode = rootNodeList_.get(value);
+			commonListener_.setLog(logList_.get(value));
 //			newNode.cloneNodeParm(cloneMap, rootNodeList_.get(value)); 
 			rootNode_ = newNode;
 			LinkSet.resetNodes(newNode);
@@ -260,11 +258,11 @@ public class GraphPanel extends JPanel {
 		while(!success){
 			success = rootNode_.setMembrane(rootMembrane_);
 		}
-		nowHistoryPos_ = 0;
 		Map<Node, Node> cloneMap = new HashMap<Node, Node>();
 		Node newNode = rootNode_.cloneNode(cloneMap);
 		newNode.cloneNodeParm(cloneMap, rootNode_);
 		rootNodeList_.add(newNode);
+		logList_.add(rootMembrane_.toString());
 	}
 
 	public void setMagnification(double magni){
@@ -277,7 +275,6 @@ public class GraphPanel extends JPanel {
 	 */
 	public void setRootMem(Membrane mem){
 		rootMembrane_ = mem;
-		orgRootMembrane_ = mem;
 //		System.out.println(mem);
 		rootNode_ = new Node(null, mem);
 		orgRootNode_ = rootNode_;
