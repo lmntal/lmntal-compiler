@@ -199,7 +199,7 @@ public class Node implements Cloneable{
 			}
 
 			// サイズ変更
-			if(visible_){
+			if(visible_ && 0 < nodeMap_.size()){
 				rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);
 			}
 			else if(rect_.width != ATOM_SIZE || rect_.height != ATOM_SIZE){
