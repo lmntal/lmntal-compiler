@@ -215,11 +215,8 @@ public class GraphPanel extends JPanel {
 			LinkSet.resetNodes(orgRootNode_);
 			commonListener_.setLog(logList_.get(value));
 		} else {
-//			Map<Node, Node> cloneMap = new HashMap<Node, Node>();
-//			Node newNode = rootNodeList_.get(value).cloneNode(cloneMap);
-			Node newNode = rootNodeList_.get(value);
 			commonListener_.setLog(logList_.get(value));
-//			newNode.cloneNodeParm(cloneMap, rootNodeList_.get(value)); 
+			Node newNode = rootNodeList_.get(value);
 			rootNode_ = newNode;
 			LinkSet.resetNodes(newNode);
 		}
@@ -271,13 +268,14 @@ public class GraphPanel extends JPanel {
 		if(!history_){ return; }
 		// 同じ状態であれば記録しない
 		if(logList_.size() != 0 &&
-				rootMembrane_.toString().equals(logList_.get(logList_.size() - 1)))
+				commonListener_.getLog().equals(logList_.get(logList_.size() - 1)))
 		{
 			return;
 		}
 		if(0 < rootNodeList_.size()){
 			commonListener_.addTime();
 		}
+		resetLink();
 		Map<Node, Node> cloneMap = new HashMap<Node, Node>();
 		Node newNode = rootNode_.cloneNode(cloneMap);
 		newNode.cloneNodeParm(cloneMap, rootNode_);
@@ -293,9 +291,10 @@ public class GraphPanel extends JPanel {
 		history_ = flag;
 		if(history_){
 			saveState();
-		} else {
-			revokeState();
 		}
+//		else {
+//			revokeState();
+//		}
 	}
 
 	public void setMagnification(double magni){
