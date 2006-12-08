@@ -67,6 +67,8 @@ public class SubFrame extends JFrame {
 	
 	private JCheckBox historyCheck_ = new JCheckBox("Take History");
 	
+	private JCheckBox showFullNameCheck_ = new JCheckBox("Show Full Name");
+	
 	private JCheckBox springCheck_ = new JCheckBox("Calc Spring");
 	
 	private JCheckBox angleCheck_ = new JCheckBox("Calc Angle");
@@ -122,6 +124,8 @@ public class SubFrame extends JFrame {
 		linkNumCheck_.setSelected(false);
 		historyCheck_.addItemListener(new HistoryAdapter());
 		historyCheck_.setSelected(false);
+		showFullNameCheck_.addItemListener(new ShowFullNameAdapter());
+		showFullNameCheck_.setSelected(true);
 		springCheck_.addItemListener(new SpringAdapter());
 		springCheck_.setSelected(true);
 		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
@@ -131,6 +135,7 @@ public class SubFrame extends JFrame {
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
 		menuPanel_.add(historyCheck_);
 		menuPanel_.add(linkNumCheck_);
+		menuPanel_.add(showFullNameCheck_);
 		menuPanel_.add(angleCheck_);
 		menuPanel_.add(attractionCheck_);
 		menuPanel_.add(repulsiveCheck_);
@@ -326,6 +331,7 @@ public class SubFrame extends JFrame {
 			NodeFunction.setRepulsiveFlag(repulsiveCheck_.isSelected());
 		}
 	}
+	
 	/**
 	 * すべての膜を表示化
 	 * @author nakano
@@ -338,6 +344,18 @@ public class SubFrame extends JFrame {
 		}
 		public void actionPerformed(ActionEvent e) {
 			frame.mainFrame_.showAll();
+		}
+	}
+	
+	/**
+	 * アトム名をすべて表示化
+	 * @author nakano
+	 *
+	 */
+	private class ShowFullNameAdapter implements ItemListener {
+		public ShowFullNameAdapter() { }
+		public void itemStateChanged(ItemEvent e) {
+			Node.setShowFullName(showFullNameCheck_.isSelected());
 		}
 	}
 	

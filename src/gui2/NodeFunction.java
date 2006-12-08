@@ -72,7 +72,7 @@ public class NodeFunction {
 	 * @param nodeMap
 	 */
 	static
-	public void calcAttraction(Node node, Map nodeMap){
+	public void calcAttraction(Node node, Map<Object, Node> nodeMap){
 		if(divergenceTimer_ != 0 ||
 				!attractionFlag_ ||
 				!(node.getObject() instanceof Membrane) ||
@@ -114,7 +114,7 @@ public class NodeFunction {
 	 * @param nodeMap
 	 */
 	static
-	public void calcDivergence(Node node, Map nodeMap){
+	public void calcDivergence(Node node, Map<Object, Node> nodeMap){
 		if(divergenceTimer_ == 0 ||
 				!(node.getObject() instanceof Membrane) ||
 				null != node.getInvisibleRootNode())
@@ -151,7 +151,7 @@ public class NodeFunction {
 	 * @param nodeMap
 	 */
 	static
-	public void calcRepulsive(Node node, Map nodeMap){
+	public void calcRepulsive(Node node, Map<Object, Node> nodeMap){
 		if(!repulsiveFlag_ || !Membrane.class.isInstance(node.getObject())){
 			return;
 		}
@@ -160,9 +160,7 @@ public class NodeFunction {
 		while(nodes.hasNext()){
 			Node sourceNode = nodes.next();
 			Point2D sourcePoint = sourceNode.getCenterPoint();
-			Rectangle2D sourceRecat = sourceNode.getBounds2D();
-			double sourceSize = Math.max(sourceRecat.getHeight(), sourceRecat.getWidth());
-			
+
 			Iterator<Node> targetNodes = nodeMap.values().iterator();
 			while(targetNodes.hasNext()){
 				// 表示されているNodeを取得する
@@ -176,8 +174,7 @@ public class NodeFunction {
 				}
 
 				Point2D targetPoint = targetNode.getCenterPoint();
-				Rectangle2D targetRecat = targetNode.getBounds2D();
-				double targetSize = Math.max(targetRecat.getHeight(), targetRecat.getWidth());
+
 				// TODO: Node　の大きさ
 				double distance =
 					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
@@ -246,8 +243,6 @@ public class NodeFunction {
 			Node nthNode = treeMap.get(nthAngle);
 			Point2D nthPoint = nthNode.getCenterPoint();
 
-			
-			if(nthNode == null){ continue; }
 			
 			if(null != nthNode){
 				double anglePre = (i != 0) ? ((Double)nthAngles[i]).doubleValue() - ((Double)nthAngles[i - 1]).doubleValue() 

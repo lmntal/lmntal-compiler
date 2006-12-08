@@ -24,7 +24,7 @@ public class Node implements Cloneable{
 	private double ATOM_SIZE = 40.0;
 
 	final static
-	private Font FONT = new Font("SansSerif", Font.PLAIN, 20);
+	private Font FONT = new Font("SansSerif", Font.PLAIN, 25);
 	
 	final static
 	private double MARGIN = 15.0;
@@ -47,6 +47,9 @@ public class Node implements Cloneable{
 	
 	static
 	private GraphPanel panel_;
+	
+	static
+	private boolean showFullName_ = true;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// private
@@ -547,8 +550,18 @@ public class Node implements Cloneable{
 				((Graphics2D)g).fill(rect_);
 				g.setColor(Color.BLACK);
 				((Graphics2D)g).draw(rect_);
+				
+				///////////////////////////////////////////////////////////////
+				// アトム名描画
 				g.setFont(FONT);
-				g.drawString(name_, (int)rect_.x, (int)rect_.y);
+				if(showFullName_){
+					g.drawString(name_, (int)rect_.x, (int)rect_.y);
+				} else {
+					g.drawString(name_.substring(0, 1),
+							(int)(rect_.x + (rect_.width / 2) - ((g.getFontMetrics(g.getFont()).getWidths()[0]) / 2)),
+							(int)(rect_.y + (rect_.height / 2) + ((g.getFontMetrics(g.getFont()).getHeight()) / 4)));
+				}
+				///////////////////////////////////////////////////////////////
 			}
 			// 膜の描画
 			else {
@@ -874,6 +887,15 @@ public class Node implements Cloneable{
 			rect_.x = dx;
 			rect_.y = dy;
 		}
+	}
+	
+	/**
+	 * アトムの名称を全部表示するか、頭文字を表示するかの設定
+	 * @param showFullName
+	 */
+	static
+	public void setShowFullName(boolean showFullName){
+		showFullName_ = showFullName;
 	}
 	
 	/**
