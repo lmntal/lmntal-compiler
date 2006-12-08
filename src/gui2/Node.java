@@ -13,7 +13,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import runtime.Atom;
+import runtime.InterpretedRuleset;
 import runtime.Membrane;
+import runtime.Ruleset;
 
 public class Node implements Cloneable{
 
@@ -556,7 +558,7 @@ public class Node implements Cloneable{
 				g.setFont(FONT);
 				if(showFullName_){
 					g.drawString(name_, (int)rect_.x, (int)rect_.y);
-				} else {
+				} else if(0 < name_.length()){
 					g.drawString(name_.substring(0, 1),
 							(int)(rect_.x + (rect_.width / 2) - ((g.getFontMetrics(g.getFont()).getWidths()[0]) / 2)),
 							(int)(rect_.y + (rect_.height / 2) + ((g.getFontMetrics(g.getFont()).getHeight()) / 4)));
@@ -737,6 +739,13 @@ public class Node implements Cloneable{
 	 * @param setChildren 子Nodeを更新するか（サイズの更新だけならばfalse）
 	 */
 	public boolean setMembrane(Membrane mem){
+//		Iterator rules = mem.rulesetIterator();
+//		while(rules.hasNext()){
+//			Ruleset ruleset = (Ruleset)rules.next();
+//			if(ruleset instanceof InterpretedRuleset){
+//				System.out.println(((InterpretedRuleset)ruleset).encodeIndividually()[0]);
+//			}
+//		}
 		boolean success = true;
 		synchronized (nodeMap_) {
 			LinkSet.addLink(this);
