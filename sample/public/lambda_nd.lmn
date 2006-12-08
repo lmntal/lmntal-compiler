@@ -73,10 +73,10 @@ gc@@   {top} :- .
               apply(F0,apply(F1,apply(F2,X))))).
   N=n(4) :- N=lambda(cp(F0,cp(F1,cp(F2,F3))), lambda(X,
               apply(F0,apply(F1,apply(F2,apply(F3,X)))))).
-//   r=apply(apply(apply(n(2), n(2)),succ),0).
-  r=apply(apply(apply(apply(n(3), n(2)),n(2)),succ),0).
+//  r=apply(apply(apply(n(2), n(2)),succ),0).
+//  r=apply(apply(apply(apply(n(2), n(2)),n(2)),succ),0).
 //  r=apply(n(3),apply(n(2), n(2))).
-//  r=apply(n(2), n(2)).
+  r=apply(n(2), n(2)).
 //  r=apply(apply(apply(apply(n(3), n(2)),n(2)),s),0).
 //  r=apply(apply(apply(n(2),apply(n(2), n(3))),s),0).
   H=apply(succ, I) :- int(I) | H=I+1.

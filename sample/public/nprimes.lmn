@@ -1,0 +1,12 @@
+/* multiset rewriting -- prime number generator
+   Kazunori Ueda, 2004-12-16
+*/
+
+/*
+gen(50).
+gen($n) :- $n>=2 | n($n), gen($n-1).
+gen($n) :- $n<2  | .
+*/
+n = integer.set(2,50).
+
+n($i), n($j) :- $i mod $j =:= 0 | n($j).
