@@ -276,6 +276,21 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		return s.toString();
 	}
 	
+	public String[] encodeRulesIndividually(){
+		String[] result = new String[rules.size()];
+		Iterator it = rules.iterator();
+		int i = 0;
+		while(it.hasNext()) {
+			result[i] = ((Rule)it.next()).getFullText().
+					replaceAll("\\n","").replaceAll("\\r","");
+			if(2 < result[i].length()){
+				result[i] = result[i].substring(1, result[i].length() - 1);
+			}
+			i++;
+		}
+		return result;
+	}
+	
 	public void showDetail() {
 		if (Env.verbose >= Env.VERBOSE_SHOWRULES || Env.compileonly)
 			Env.p("Compiled Ruleset @" + id + dumpRules());

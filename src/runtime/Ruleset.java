@@ -1,5 +1,6 @@
 package runtime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +20,7 @@ abstract public class Ruleset {
 	public boolean isRulesSetted = false;
 	abstract public String toString();
 	abstract public String encode();
+	public String[] encodeRulesIndividually(){ return null; }
 	/**
 	 * アトム主導テストを行い、マッチすれば適用する
 	 * @param mem 本膜
