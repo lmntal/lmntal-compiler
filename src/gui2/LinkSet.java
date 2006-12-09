@@ -1,7 +1,10 @@
 package gui2;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.CubicCurve2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +27,9 @@ public class LinkSet {
 
 	final static
 	private double LINK_NUM_DELTA = 30.0;
+	
+	final static
+	private double DIPLO_LINK_DELTA = 50;
 	
 	///////////////////////////////////////////////////////////////////////////
 
@@ -106,58 +112,117 @@ public class LinkSet {
 			while(keys.hasNext()){
 				Node key = keys.next();
 				
-				// keyがAtomの場合
-				if(key.getObject() instanceof Atom){
-					Node nodeSource = getVisibleNode(key);
-					if(null == nodeSource){ return; }
-					Rectangle2D rectSource = nodeSource.getBounds2D();
-					for(int n = 0; n < key.getEdgeCount(); n++){
-						Node nthNode = key.getNthNode(n);
-						if(null == nthNode){ return; }
-						if(showLinkNum_ || key.getID() <= nthNode.getID()){
-							Node nodeTarget = getVisibleNode(nthNode);
-							if((null == nodeTarget) ||
-									(
-											(null != key.getInvisibleRootNode()) &&
-											(
-													key != nthNode &&
-													key.getInvisibleRootNode().equals(nthNode.getInvisibleRootNode())
-											)
-									)
-							)
-							{
-								continue;
-							}
-							Rectangle2D rectTarget = nodeTarget.getBounds2D();
-							if(key.getID() < nthNode.getID()){
-								g.drawLine((int)rectSource.getCenterX(),
-										(int)rectSource.getCenterY(),
-										(int)rectTarget.getCenterX(),
-										(int)rectTarget.getCenterY());
-							}
-							else if(nodeSource.getID() == nthNode.getID() && nodeSource == key){
-								g.drawOval((int)rectSource.getCenterX(),
-										(int)rectSource.getY(),
-										50,
-										50);
-								continue;
-							}
-							
-							if(showLinkNum_){
-								double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
-								double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
-								if(x0 == 0.0){ x0=0.000000001; }
-								double angle = Math.atan(y0 / x0);
-								if(x0 < 0.0){ angle += Math.PI; }
-								double x = Math.cos(angle) * LINK_NUM_DELTA;
-								double y = Math.sin(angle) * LINK_NUM_DELTA;
-								g.drawString(Integer.toString(n), (int)(rectSource.getCenterX() - x), (int)(rectSource.getCenterY() - y));
-							}
+				// keyがAtomでない場合
+				if(!(key.getObject() instanceof Atom)){ continue; }
+				Node nodeSource = getVisibleNode(key);
+				if(null == nodeSource){ return; }
+				Rectangle2D rectSource = nodeSource.getBounds2D();
+				
+				Map<Integer, Integer> diplolinkMap = new HashMap<Integer, Integer>();
+				int selfLinkNum = 0;
+				for(int n = 0; n < key.getEdgeCount(); n++){
+					Node nthNode = key.getNthNode(n);
+					if(null == nthNode){ return; }
+					if((null != key.getInvisibleRootNode()) &&
+							(key != nthNode &&
+									key.getInvisibleRootNode().equals(nthNode.getInvisibleRootNode())))
+					{ continue; }
+					
+					if(showLinkNum_ || key.getID() <= nthNode.getID()){
+						Node nodeTarget = getVisibleNode(nthNode);
+						if(null == nodeTarget) { continue; }
+						Rectangle2D rectTarget = nodeTarget.getBounds2D();
+						if(key.getID() < nthNode.getID()){
+							paintLink(g, diplolinkMap, nthNode.getID(), rectSource, rectTarget);
+						}
+						else if(nodeSource.getID() == nthNode.getID() && nodeSource == key){
+							g.drawOval((int)rectSource.getCenterX(),
+									(int)rectSource.getY() -  (5 * selfLinkNum),
+									50 + (20 * selfLinkNum),
+									50 + (10 * selfLinkNum));
+							selfLinkNum++;
+							continue;
+						}
+
+						if(showLinkNum_){
+							paintLinkNum(g, n, rectSource, rectTarget);
 						}
 					}
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 多重リンクを描画する
+	 * @param g
+	 * @param diplolinkMap リンク先のNodeIDをキーにした、リンク先へのリンク描画回数
+	 * @param nthNodeID
+	 * @param rectSource
+	 * @param rectTarget
+	 */
+	static
+	private void paintLink(Graphics g,
+			Map<Integer, Integer> diplolinkMap,
+			int nthNodeID,
+			Rectangle2D rectSource,
+			Rectangle2D rectTarget)
+	{
+		if(!diplolinkMap.containsKey(nthNodeID)){
+			g.drawLine((int)rectSource.getCenterX(),
+					(int)rectSource.getCenterY(),
+					(int)rectTarget.getCenterX(),
+					(int)rectTarget.getCenterY());
+			diplolinkMap.put(nthNodeID, 1);
+			return;
+		}
+		int linkNum = diplolinkMap.get(nthNodeID);
+		diplolinkMap.put(nthNodeID, linkNum + 1);
+
+		double linkDelta = DIPLO_LINK_DELTA * ((linkNum + 1) / 2);
+
+		double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
+		double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
+		if(x0 == 0.0){ x0=0.000000001; }
+		double angle = Math.atan(y0 / x0);
+		if(x0 < 0.0){ angle += Math.PI; }
+		angle = (linkNum % 2 == 0) ? angle + (Math.PI / 2) : angle - (Math.PI / 2);
+
+		double x = Math.cos(angle) * linkDelta;
+		double y = Math.sin(angle) * linkDelta;
+
+		((Graphics2D)g).draw(
+				new QuadCurve2D.Double(
+						rectSource.getCenterX(),
+						rectSource.getCenterY(),
+						((rectSource.getCenterX() + rectTarget.getCenterX()) / 2) + x,
+						((rectSource.getCenterY() + rectTarget.getCenterY()) / 2) + y,
+						rectTarget.getCenterX(),
+						rectTarget.getCenterY()));
+		
+	}
+	
+	/**
+	 * リンク番号を描画する
+	 * @param g
+	 * @param linkNum
+	 * @param rectSource
+	 * @param rectTarget
+	 */
+	static
+	private void paintLinkNum(Graphics g,
+			int linkNum,
+			Rectangle2D rectSource,
+			Rectangle2D rectTarget)
+	{
+		double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
+		double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
+		if(x0 == 0.0){ x0=0.000000001; }
+		double angle = Math.atan(y0 / x0);
+		if(x0 < 0.0){ angle += Math.PI; }
+		double x = Math.cos(angle) * LINK_NUM_DELTA;
+		double y = Math.sin(angle) * LINK_NUM_DELTA;
+		g.drawString(Integer.toString(linkNum), (int)(rectSource.getCenterX() - x), (int)(rectSource.getCenterY() - y));
 	}
 	
 	/**
@@ -185,39 +250,4 @@ public class LinkSet {
 		showLinkNum_ = flag;
 	}
 	
-	///////////////////////////////////////////////////////////////////////////
-	private class NodeSet{
-		private Node nodeA_;
-		private Node nodeB_;
-		
-		public NodeSet(Node nodeA, Node nodeB){
-			nodeA_ = nodeA;
-			nodeB_ = nodeB;
-		}
-		
-		public boolean equals(Object object){
-			if(!(object instanceof NodeSet)){
-				return false;
-			}
-			if(nodeA_.equals(((NodeSet)object).getA())){
-				if(nodeB_.equals(((NodeSet)object).getB())){
-					return true;
-				}
-			}
-			if(nodeA_.equals(((NodeSet)object).getB())){
-				if(nodeB_.equals(((NodeSet)object).getA())){
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		public Node getA(){
-			return nodeA_;
-		}
-		public Node getB(){
-			return nodeB_;
-		}
-		
-	}
 }

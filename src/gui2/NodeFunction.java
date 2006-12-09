@@ -1,7 +1,6 @@
 package gui2;
 
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
