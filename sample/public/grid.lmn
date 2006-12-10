@@ -8,8 +8,8 @@ c(n,   Y02, X10,Y010) :-
         c(X01,Y01,X00,Y00), c(X02,Y11,X01,Y10),
         c(X11,Y02,X10,Y01), c(n,  n,  X11,Y11).
 
-c(A,E,n,n),c(B,n,A,n),c(C,n,B,n),c(D,n,C,n),c(n,n,D,n),
-c(n,G,n,E),
-c(n,H,n,G),
-c(n,I,n,H),
-c(n,n,n,I).
+c(A,E,nw,nn),c(B,n,A,nn),c(C,n,B,nn),c(D,n,C,nn),c(n,n,D,nn),
+c(n,G,nw,E),
+c(n,H,nw,G),
+c(n,I,nw,H),
+c(n,n,nw,I).
