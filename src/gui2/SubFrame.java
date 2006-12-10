@@ -372,7 +372,7 @@ public class SubFrame extends JFrame {
 	private class ShowRulesAdapter implements ItemListener {
 		public ShowRulesAdapter() { }
 		public void itemStateChanged(ItemEvent e) {
-			Node.setShowRules(showRulesCheck_.isSelected());
+			commonListener_.setShowRules(showRulesCheck_.isSelected());
 		}
 	}
 	

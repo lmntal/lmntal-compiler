@@ -91,6 +91,9 @@ public class Node implements Cloneable{
 	/** 子Node */
 	public Map<Object, Node> nodeMap_ = new HashMap<Object, Node>();
 	
+	/** ルールNode */
+	public Map<String, Node> ruleNodeMap_ = new HashMap<String, Node>();
+	
 	/** 親膜 */
 	private Node parent_;
 	
@@ -196,11 +199,15 @@ public class Node implements Cloneable{
 			double maxY = Integer.MIN_VALUE;
 			double minX = Integer.MAX_VALUE;
 			double minY = Integer.MAX_VALUE;
-			
+			boolean sizeChange = false;
 			// 子膜をリセット
 			Iterator<Node> nodes = nodeMap_.values().iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
+				if(!showRules_ && node.getObject() instanceof String){
+					continue;
+				}
+				sizeChange = true;
 				
 				Rectangle2D rectangle = node.getBounds2D();
 				minX = (minX < rectangle.getMinX()) ? minX : rectangle.getMinX(); 
@@ -210,7 +217,7 @@ public class Node implements Cloneable{
 			}
 
 			// サイズ変更
-			if(visible_ && 0 < nodeMap_.size()){
+			if(visible_ && sizeChange){
 				rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);
 			}
 			else if(rect_.width != ATOM_SIZE || rect_.height != ATOM_SIZE){
@@ -593,7 +600,7 @@ public class Node implements Cloneable{
 					}
 				}
 
-			} else if(showRules_ && myObject_ instanceof String){
+			} else if(myObject_ instanceof String){
 				rect_.width = g.getFontMetrics(FONT).stringWidth(name_);
 				g.setColor(myColor_);
 				g.fillRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
@@ -828,8 +835,8 @@ public class Node implements Cloneable{
 
 				for(int i = 0; i < ruleValues.length; i++){
 					Node node;
-					if(nodeMap_.containsKey(ruleValues[i])){
-						node = nodeMap_.get(ruleValues[i]);
+					if(ruleNodeMap_.containsKey(ruleValues[i])){
+						node = ruleNodeMap_.get(ruleValues[i]);
 						if(success){
 							success = node.reset(ruleValues[i]);
 						} else {
@@ -837,7 +844,7 @@ public class Node implements Cloneable{
 						}
 					} else {
 						node = new Node(this, ruleValues[i]);
-						nodeMap_.put(ruleValues[i], node);
+						ruleNodeMap_.put(ruleValues[i], node);
 						node.reset(ruleValues[i]);
 					}
 					ruleNodeMap.put(ruleValues[i], node);
@@ -849,8 +856,7 @@ public class Node implements Cloneable{
 			while(removeNodes.hasNext()){
 				Object key = removeNodes.next();
 				if(!memNodeMap.containsKey(key) &&
-						!atomNodeMap.containsKey(key) &&
-						!ruleNodeMap.containsKey(key))
+						!atomNodeMap.containsKey(key))
 				{
 					removeAll(nodeMap_.get(key));
 				}
@@ -871,7 +877,13 @@ public class Node implements Cloneable{
 			nodeMap_.clear();
 			nodeMap_.putAll(memNodeMap);
 			nodeMap_.putAll(atomNodeMap);
-			nodeMap_.putAll(ruleNodeMap);
+			
+			ruleNodeMap_.clear();
+			ruleNodeMap_.putAll(ruleNodeMap);
+			
+			if(showRules_){
+				nodeMap_.putAll(ruleNodeMap_);
+			}
 		}
 		return success;
 	}
@@ -938,15 +950,32 @@ public class Node implements Cloneable{
 		}
 	}
 	
+	/**
+	 * ルールNodeの名前や色を設定する
+	 * @param rule
+	 */
 	private void setRule(String rule){
 		name_ = rule;
 		
 		myColor_ = RULE_COLOR;
 	}
 	
-	static
+	/**
+	 * ルールの表示非表示設定
+	 * @param showRules
+	 */
 	public void setShowRules(boolean showRules){
 		showRules_ = showRules;
+		synchronized (nodeMap_) {
+			if(showRules){
+				nodeMap_.putAll(ruleNodeMap_);
+			} else {
+				Iterator keys = ruleNodeMap_.keySet().iterator();
+				while(keys.hasNext()){
+					nodeMap_.remove(keys.next());
+				}
+			}
+		}
 	}
 	
 	/**

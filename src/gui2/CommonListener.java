@@ -94,6 +94,10 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 		if(null == panel_){ return; }
 		panel_.setHistory(flag);
 	}
+	public void setShowRules(boolean flag){
+		if(null == panel_){ return; }
+		panel_.setShowRules(flag);
+	}
 
 	public void setState(int value){
 		if(null == panel_){ return; }

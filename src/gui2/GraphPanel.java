@@ -263,6 +263,7 @@ public class GraphPanel extends JPanel {
 		}
 	}
 	
+	
 	public void saveState(){
 		if(!history_){ return; }
 		// 同じ状態であれば記録しない
@@ -286,14 +287,15 @@ public class GraphPanel extends JPanel {
 		}
 	}
 	
+	public void setShowRules(boolean flag){
+		rootNode_.setShowRules(flag);
+	}
+	
 	public void setHistory(boolean flag){
 		history_ = flag;
 		if(history_){
 			saveState();
 		}
-//		else {
-//			revokeState();
-//		}
 	}
 
 	public void setMagnification(double magni){
