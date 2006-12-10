@@ -13,7 +13,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import runtime.Atom;
+import runtime.InterpretedRuleset;
 import runtime.Membrane;
+import runtime.Ruleset;
 
 public class Node implements Cloneable{
 
@@ -38,6 +40,9 @@ public class Node implements Cloneable{
 	
 	final static
 	private double ROUND = 40;
+	
+	final static
+	private Color RULE_COLOR = new Color(207,207,207);
 
 	//////////////////////////////////////////////////////////////////////////
 	// static
@@ -50,6 +55,9 @@ public class Node implements Cloneable{
 	
 	static
 	private boolean showFullName_ = true;
+	
+	static
+	private boolean showRules_ = false;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// private
@@ -128,7 +136,7 @@ public class Node implements Cloneable{
 		if(object instanceof Atom){
 			setAtom((Atom)object);
 			initPosition();
-		} else {
+		} else if(object instanceof Membrane) {
 			setMembrane((Membrane)object);
 		}
 		
@@ -424,7 +432,7 @@ public class Node implements Cloneable{
 	 * @return
 	 */
 	public boolean isAtom(){
-		return (imAtom_ || !visible_);
+		return (myObject_ instanceof Atom || (myObject_ instanceof Membrane && !visible_));
 	}
 	
 	/**
@@ -564,7 +572,7 @@ public class Node implements Cloneable{
 				///////////////////////////////////////////////////////////////
 			}
 			// 膜の描画
-			else {
+			else if(myObject_ instanceof Membrane){
 				Iterator<Node> nodes = nodeMap_.values().iterator();
 				while(nodes.hasNext()){
 					Node node = nodes.next();
@@ -585,6 +593,14 @@ public class Node implements Cloneable{
 					}
 				}
 
+			} else if(showRules_ && myObject_ instanceof String){
+				rect_.width = g.getFontMetrics(FONT).stringWidth(name_);
+				g.setColor(myColor_);
+				g.fillRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
+				g.setColor(Color.BLACK);
+				g.drawRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
+				g.setFont(FONT);
+				g.drawString(name_, (int)rect_.x + 5, (int)rect_.y + g.getFontMetrics(FONT).getHeight());
 			}
 			if(clipped_){
 				paintPin(g, 0, 0);
@@ -639,10 +655,12 @@ public class Node implements Cloneable{
 		boolean success = true;
 		myObject_ = object;
 
-		if(Atom.class.isInstance(object)){
+		if(object instanceof Atom){
 			setAtom((Atom)object);
-		} else {
+		} else if(object instanceof Membrane){
 			success = setMembrane((Membrane)object);
+		} else if(object instanceof String){
+			setRule((String)object);
 		}
 		return success;
 	}
@@ -737,13 +755,6 @@ public class Node implements Cloneable{
 	 * @param setChildren 子Nodeを更新するか（サイズの更新だけならばfalse）
 	 */
 	public boolean setMembrane(Membrane mem){
-//		Iterator rules = mem.rulesetIterator();
-//		while(rules.hasNext()){
-//			Ruleset ruleset = (Ruleset)rules.next();
-//			if(ruleset instanceof InterpretedRuleset){
-//				System.out.println(((InterpretedRuleset)ruleset).encodeIndividually()[0]);
-//			}
-//		}
 		boolean success = true;
 		synchronized (nodeMap_) {
 			LinkSet.addLink(this);
@@ -752,6 +763,7 @@ public class Node implements Cloneable{
 
 			Map<Membrane, Node> memNodeMap = new HashMap<Membrane, Node>();
 			Map<Atom, Node> atomNodeMap = new HashMap<Atom, Node>();
+			Map<String, Node> ruleNodeMap = new HashMap<String, Node>();
 
 			// 子膜をリセット
 			Iterator mems = mem.memIterator();
@@ -804,13 +816,42 @@ public class Node implements Cloneable{
 				}
 				atomNodeMap.put(childAtom, node);
 			}
+			
+			Iterator rules = mem.rulesetIterator();
+			while(rules.hasNext()){
+				Ruleset ruleset = (Ruleset)rules.next();
+				if(!(ruleset instanceof InterpretedRuleset)){
+					continue;
+				}
+				String[] ruleValues =
+					((InterpretedRuleset)ruleset).encodeRulesIndividually();
+
+				for(int i = 0; i < ruleValues.length; i++){
+					Node node;
+					if(nodeMap_.containsKey(ruleValues[i])){
+						node = nodeMap_.get(ruleValues[i]);
+						if(success){
+							success = node.reset(ruleValues[i]);
+						} else {
+							node.reset(ruleValues[i]);
+						}
+					} else {
+						node = new Node(this, ruleValues[i]);
+						nodeMap_.put(ruleValues[i], node);
+						node.reset(ruleValues[i]);
+					}
+					ruleNodeMap.put(ruleValues[i], node);
+				}
+			}
 
 			// 不要になったリンクを削除
 			Iterator<Object> removeNodes = nodeMap_.keySet().iterator();
 			while(removeNodes.hasNext()){
 				Object key = removeNodes.next();
-				if(!memNodeMap.containsKey(key) && !atomNodeMap.containsKey(key)){
-//					LinkSet.removeLink(key)
+				if(!memNodeMap.containsKey(key) &&
+						!atomNodeMap.containsKey(key) &&
+						!ruleNodeMap.containsKey(key))
+				{
 					removeAll(nodeMap_.get(key));
 				}
 			}
@@ -830,6 +871,7 @@ public class Node implements Cloneable{
 			nodeMap_.clear();
 			nodeMap_.putAll(memNodeMap);
 			nodeMap_.putAll(atomNodeMap);
+			nodeMap_.putAll(ruleNodeMap);
 		}
 		return success;
 	}
@@ -894,6 +936,17 @@ public class Node implements Cloneable{
 			rect_.x = dx;
 			rect_.y = dy;
 		}
+	}
+	
+	private void setRule(String rule){
+		name_ = rule;
+		
+		myColor_ = RULE_COLOR;
+	}
+	
+	static
+	public void setShowRules(boolean showRules){
+		showRules_ = showRules;
 	}
 	
 	/**

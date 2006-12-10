@@ -136,10 +136,12 @@ public class LinkSet {
 							paintLink(g, diplolinkMap, nthNode.getID(), rectSource, rectTarget);
 						}
 						else if(nodeSource.getID() == nthNode.getID() && nodeSource == key){
-							g.drawOval((int)rectSource.getCenterX(),
-									(int)rectSource.getY() -  (5 * selfLinkNum),
-									50 + (20 * selfLinkNum),
-									50 + (10 * selfLinkNum));
+							if(0 == selfLinkNum % 2){
+								g.drawOval((int)rectSource.getCenterX(),
+										(int)rectSource.getY() -  (5 * selfLinkNum / 2),
+										50 + (10 * selfLinkNum),
+										50 + (5 * selfLinkNum));
+							}
 							selfLinkNum++;
 							continue;
 						}

@@ -69,6 +69,8 @@ public class SubFrame extends JFrame {
 	
 	private JCheckBox showFullNameCheck_ = new JCheckBox("Show Full Name");
 	
+	private JCheckBox showRulesCheck_ = new JCheckBox("Show Rules");
+	
 	private JCheckBox springCheck_ = new JCheckBox("Calc Spring");
 	
 	private JCheckBox angleCheck_ = new JCheckBox("Calc Angle");
@@ -126,6 +128,8 @@ public class SubFrame extends JFrame {
 		historyCheck_.setSelected(false);
 		showFullNameCheck_.addItemListener(new ShowFullNameAdapter());
 		showFullNameCheck_.setSelected(true);
+		showRulesCheck_.addItemListener(new ShowRulesAdapter());
+		showRulesCheck_.setSelected(false);
 		springCheck_.addItemListener(new SpringAdapter());
 		springCheck_.setSelected(true);
 		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
@@ -136,6 +140,7 @@ public class SubFrame extends JFrame {
 		menuPanel_.add(historyCheck_);
 		menuPanel_.add(linkNumCheck_);
 		menuPanel_.add(showFullNameCheck_);
+		menuPanel_.add(showRulesCheck_);
 		menuPanel_.add(angleCheck_);
 		menuPanel_.add(attractionCheck_);
 		menuPanel_.add(repulsiveCheck_);
@@ -356,6 +361,18 @@ public class SubFrame extends JFrame {
 		public ShowFullNameAdapter() { }
 		public void itemStateChanged(ItemEvent e) {
 			Node.setShowFullName(showFullNameCheck_.isSelected());
+		}
+	}
+	
+	/**
+	 * アトム名をすべて表示化
+	 * @author nakano
+	 *
+	 */
+	private class ShowRulesAdapter implements ItemListener {
+		public ShowRulesAdapter() { }
+		public void itemStateChanged(ItemEvent e) {
+			Node.setShowRules(showRulesCheck_.isSelected());
 		}
 	}
 	
