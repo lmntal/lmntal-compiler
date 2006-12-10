@@ -497,6 +497,11 @@ public class Node implements Cloneable{
 				Node node = nodes.next();
 				node.moveAll();
 			}
+			Iterator<Node> ruleNodes = ruleNodeMap_.values().iterator();
+			while(ruleNodes.hasNext()){
+				Node node = ruleNodes.next();
+				node.moveCalc();
+			}
 		}
 		moveCalc();
 		if(myObject_ instanceof Membrane){
@@ -919,6 +924,15 @@ public class Node implements Cloneable{
 				Node node = nodes.next();
 				node.setPosDelta(x, y);
 			}
+			Iterator<String> ruleKeys = ruleNodeMap_.keySet().iterator();
+			while(ruleKeys.hasNext()){
+				String key = ruleKeys.next(); 
+				if(nodeMap_.containsKey(key)){
+					continue;
+				}
+				Node node = ruleNodeMap_.get(key);
+				node.setPosDelta(x, y);
+			}
 			rect_.x = x;
 			rect_.y = y;
 		}
@@ -948,6 +962,7 @@ public class Node implements Cloneable{
 			rect_.x = dx;
 			rect_.y = dy;
 		}
+		
 	}
 	
 	/**
