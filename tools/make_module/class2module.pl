@@ -109,18 +109,61 @@ sub dump_class_module {
 		} elsif (/char|byte|short|float/) {
 			#とりあえず無視
 		} elsif (/public [\w.\$]+\(([\w., ]*)\)/ && $abstract eq "") { # 抽象クラスはコンストラクタなし
-			dump_static_method($absolute_class, "new $absolute_class", "$module.new", $uses, split_args($1));
-		} elsif (/public static (?:final )?(?:synchronized )?(\S+) (\S+)\((.*)\)/) {
+			my @args = split_args($1);
+			if ($1 =~ /boolean/) {
+				for (my $i = 0; $i <= $#args; $i++) {
+					if ($args[$i] eq "boolean") {
+						my @args2 = @args;
+						$args2[$i] = "true";
+						dump_static_method($absolute_class, "new $absolute_class", "$module.new", $uses, @args2);
+						$args2[$i] = "false";
+						dump_static_method($absolute_class, "new $absolute_class", "$module.new", $uses, @args2);
+					}
+				}
+			} else {
+				dump_static_method($absolute_class, "new $absolute_class", "$module.new", $uses, @args);
+			}
+		} elsif (/public static (?:final )?(?:synchronized )?(\S+) (\S+)\((.*)\)/) { #staticメソッド
 			# 戻り値がlongのときは除外
 			if (!($3 =~ /\[\]/) && $1 ne "long") { #TODO Javaの配列をLMNtalのリストで処理
-				dump_static_method(trim_class($1), "$absolute_class.$2", "$module.".to_lmntal_method($2), "", split_args($3));
+				my @args = split_args($3);
+				$type = trim_class($1);
+				$m = $2;
+				if ($3 =~ /boolean/) {
+					for (my $i = 0; $i <= $#args; $i++) {
+						if ($args[$i] eq "boolean") {
+							my @args2 = @args;
+							$args2[$i] = "true";
+							dump_static_method($type, "$absolute_class.$m", "$module.".to_lmntal_method($m), "", @args2);
+							$args2[$i] = "false";
+							dump_static_method($type, "$absolute_class.$m", "$module.".to_lmntal_method($m), "", @args2);
+						}
+					}
+				} else {
+					dump_static_method(trim_class($1), "$absolute_class.$2", "$module.".to_lmntal_method($2), "", @args);
+				}
 			}
-		} elsif (/public (?:abstract )?(?:final )?(?:synchronized )?(\S+) (\S+)\((.*)\)/) {
+		} elsif (/public (?:abstract )?(?:final )?(?:synchronized )?(\S+) (\S+)\((.*)\)/) { #通常のメソッド
 			# 戻り値がlongのときは除外
 			if (!($3 =~ /\[\]/) && $1 ne "long") { #TODO Javaの配列をLMNtalのリストで処理
-				dump_method(trim_class($1), $2, split_args($3));
+				my @args = split_args($3);
+				$type = trim_class($1);
+				$method = $2;
+				if ($3 =~ /boolean/) {
+					for (my $i = 0; $i <= $#args; $i++) {
+						if ($args[$i] eq "boolean") {
+							my @args2 = @args;
+							$args2[$i] = "true";
+							dump_method($type, $method, @args2);
+							$args2[$i] = "false";
+							dump_method($type, $method, @args2);
+						}
+					}
+				} else {
+					dump_method($type, $method, @args);
+				}
 			}
-		} elsif (/public static final (\S+) (\w+)/) {
+		} elsif (/public static final (\S+) (\w+)/) { #定数
 			dump_final_variable($1, $2);
 		}
 	}
@@ -198,17 +241,6 @@ sub split_args {
 	return @args;
 }
 
-sub to_lmntal_args {
-	my ($args) = @_;
-	my @args = split(/\s*,\s*/, $args);
-	my $lmntal_args;
-	for (my $i = 0; $i <= $#args+2; $i++) {
-		$lmntal_args .= "_$i,";
-	}
-	chop($lmntal_args);
-	return $lmntal_args;
-}
-
 # クラス名を正しく整形する
 sub trim_class {
 	my ($class) = @_;
@@ -222,7 +254,7 @@ sub dump_guards {
 	my $guards = "";
 	for (my $i = 0; $i <= $#args; $i++) {
 		$arg = $args[$i];
-		if ($arg eq "boolean") {
+		if ($arg eq "true" || $arg eq "false") {
 			next;
 		}
 		if (exists($guards{$arg})) {
@@ -265,14 +297,9 @@ sub dump_return_type_use {
 # メソッドを出力する
 sub dump_method {
 	my ($type, $method, @args) = @_;
-	$argc = $#args+1;
+	my $argc = $#args+1;
 
-	my $ARGS;
-	if ($type eq "void") {
-		$ARGS = make_lmntal_args($argc+1);
-	} else {
-		$ARGS = make_lmntal_args($argc+2);
-	}
+	my $ARGS = make_lmntal_args($type, @args);
 
 	print "H=";
 	dump_head($ARGS, to_lmntal_method($method), ($absolute_class,@args));
@@ -280,7 +307,7 @@ sub dump_method {
 
 	print "\t$absolute_class v0 = ($absolute_class)me.nthAtom(0).getFunctor().getValue();\n";
 	
-	$args = dump_args(1, @args);
+	dump_args(1, @args);
 	
 	dump_call_method($type, $method, $argc+1);
 
@@ -297,7 +324,7 @@ sub dump_static_method {
 	($type, $method, $lmnmethod, $uses, @args) = @_;
 	$argc = $#args+1;
 
-	$ARGS = make_lmntal_args($argc);
+	$ARGS = make_static_lmntal_args(@args);
 
 	if ($type ne "void") {
 		print "H=";
@@ -308,7 +335,7 @@ sub dump_static_method {
 	}
 	print "[:/*inline*/\n";
 
-	$args = dump_args(0, @args);
+	dump_args(0, @args);
 	
 	dump_call_static_method($type, $method, $argc);
 
@@ -322,10 +349,35 @@ sub dump_static_method {
 
 # LMNtal の引数の文字列を生成する
 sub make_lmntal_args {
-	my ($argc) = @_;
+	my ($type, @args) = @_;
+	my $args = "_0,";
+	my $i;
+	for ($i = 0; $i <= $#args; $i++) {
+		my $arg = $args[$i];
+		if ($arg eq "true" || $arg eq "false") {#booleanだったらアトム
+			$args .= "$arg,";
+		} else {#boolean以外はリンク
+			$args .= "_" . ($i+1) . ",";
+		}
+	}
+	if ($type ne "void") {
+		$args .= "_" . ($i+1) . ",";
+	}
+	chop($args); #最後のカンマを除去
+	return $args;
+}
+
+# LMNtal の引数の文字列を生成する
+sub make_static_lmntal_args {
+	my (@args) = @_;
 	my $args = "";
-	for (my $i = 0; $i < $argc; $i++) {
-		$args .= "_$i,";
+	for (my $i = 0; $i <= $#args; $i++) {
+		$arg = $args[$i];
+		if ($arg eq "true" || $arg eq "false") {#booleanだったらアトム
+			$args .= "$arg,";
+		} else {#boolean以外はリンク
+			$args .= "_$i,";
+		}
 	}
 	chop($args); #最後のカンマを除去
 	return $args;
@@ -334,13 +386,12 @@ sub make_lmntal_args {
 # 引数を取得する処理の出力
 sub dump_args {
 	my ($start, @args) = @_;
-	my $argc = $#args;
-	my $args = "";
-	for (my $i = $start; $i <= $argc+$start; $i++) {
+	for (my $i = $start; $i <= $#args+$start; $i++) {
 		my $type = $args[$i-$start];
-		$type =~ s/\s//;
-		$args .= "v$i,";
-		if (exists($functors{$type})) {
+#		$type =~ s/\s//;
+		if ($type eq "true" || $type eq "false") {
+			print "\tboolean v$i = $type;\n";
+		} elsif (exists($functors{$type})) {
 			$functor = $functors{$type};
 			$getmethod = $getmethods{$type};
 			printf "\t$type v$i = (($functor)me.nthAtom(%d).getFunctor()).$getmethod;\n", $i;
@@ -348,8 +399,6 @@ sub dump_args {
 			printf "\t$type v$i = ($type)me.nthAtom(%d).getFunctor().getValue();\n", $i;
 		}
 	}
-	chop($args); #最後のカンマを除去
-	return $args;
 }
 
 sub dump_catch {
@@ -366,6 +415,11 @@ sub dump_catch {
 # メソッドを呼び出す部分の出力
 sub dump_call_method {
 	my ($type, $method, $argc) = @_;
+	my $args = "";
+	for (my $i = 0; $i < $argc-1; $i++) {
+		$args .= "v" . ($i+1) . ",";
+	}
+	chop($args);
 	
 	if ($type eq "void") {
 		print "\ttry {\n";
@@ -419,6 +473,11 @@ sub dump_static_catch {
 # static メソッドを呼び出す部分の出力
 sub dump_call_static_method {
 	my ($type, $method, $argc) = @_;
+	my $args = "";
+	for (my $i = 0; $i < $argc; $i++) {
+		$args .= "v$i,";
+	}
+	chop($args);
 	
 	print "\ttry {\n";
 	
