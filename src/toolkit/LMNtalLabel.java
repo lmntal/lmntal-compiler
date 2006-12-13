@@ -2,6 +2,8 @@ package toolkit;
 
 import java.awt.Component;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import runtime.Membrane;
 
@@ -13,7 +15,6 @@ public class LMNtalLabel extends LMNComponent {
 
 	private JLabel label;
 	private String text;
-	
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ

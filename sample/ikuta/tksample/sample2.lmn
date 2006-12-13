@@ -1,6 +1,8 @@
 // --wtモードで実行してみてください。
-// 右上クリックでボタン増設
-// 数字書いてあるボタンクリックで数字増やす
+// 絵を表示してみる
+
+
+// 作成中！！
 
 {
 	window.
@@ -10,13 +12,14 @@
 	sys.perpetual(on).
 
 	// *** 配置 *** //
-	{button, id("1"), position(0,0), text("button1")}.
-	{button, id("2"), position(1,0), text(6)}.
-	{textarea, id("3"), position(0,1), weight(1.0, 1.0)}.
-	{textarea, id("4"), position(1,1), text("aaaaaaaaaaa"), weight(1.0, 1.0)}.
-	{button, id("5"), position(0,2), text(1), size(2,1)}.
-
-	{label, id("6"), position(2,2), text("label"), weight(1.0, 1.0)}.
+	{graphic, id("1"), position(0,0), weight(1.0,1.0),
+	  {
+	  	id(5).
+	    draw. name("testrect"). getpic("rect").
+		color(0,0,0). position(10,10). size(100,100).
+	  }
+	}.
+	{button, id("2"), position(0,1), text(6)}.
 	
 	// *** ルール *** //
 	
@@ -25,6 +28,8 @@
 	
 	// クリックされるとラベルが数字だった場合カウントアップされるルール	
 	{clicked, text(_IX), $p} :- {text(_IX + 1), $p}.
-
+	
+	
+	
 
 }
