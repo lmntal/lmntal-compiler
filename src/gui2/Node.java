@@ -1060,6 +1060,11 @@ public class Node implements Cloneable{
 				Node node = nodes.next();
 				node.setPosDelta(dx, dy);
 			}
+			Iterator<Node> bezNodes = bezierMap_.values().iterator();
+			while(bezNodes.hasNext()){
+				Node node = bezNodes.next();
+				node.setPosDelta(dx, dy);
+			}
 			rect_.x = dx;
 			rect_.y = dy;
 		}
