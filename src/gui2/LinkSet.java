@@ -133,7 +133,7 @@ public class LinkSet {
 						if(null == nodeTarget) { continue; }
 						Rectangle2D rectTarget = nodeTarget.getBounds2D();
 						if(key.getID() < nthNode.getID()){
-							paintLink(g, diplolinkMap, nthNode.getID(), rectSource, rectTarget);
+							paintLink(g, nodeSource, nthNode, diplolinkMap, nthNode.getID(), rectSource, rectTarget);
 						}
 						else if(nodeSource.getID() == nthNode.getID() && nodeSource == key){
 							if(0 == selfLinkNum % 2){
@@ -165,11 +165,53 @@ public class LinkSet {
 	 */
 	static
 	private void paintLink(Graphics g,
+			Node nodeSource,
+			Node nthNode,
 			Map<Integer, Integer> diplolinkMap,
 			int nthNodeID,
 			Rectangle2D rectSource,
 			Rectangle2D rectTarget)
 	{
+		Node sourceBezNode = nodeSource.getBezierNode(nthNode);
+		Node nthBezNode = nthNode.getBezierNode(nodeSource);
+		boolean sourceBez = (null == sourceBezNode) ? false : true;
+		boolean nthBez = (null == nthBezNode) ? false : true;
+		
+		if(sourceBez || nthBez){
+			if(sourceBez && !nthBez){
+				((Graphics2D)g).draw(
+						new QuadCurve2D.Double(
+								rectSource.getCenterX(),
+								rectSource.getCenterY(),
+								sourceBezNode.getCenterPoint().x,
+								sourceBezNode.getCenterPoint().y,
+								rectTarget.getCenterX(),
+								rectTarget.getCenterY()));
+			}
+			else if(!sourceBez && nthBez){
+				((Graphics2D)g).draw(
+						new QuadCurve2D.Double(
+								rectSource.getCenterX(),
+								rectSource.getCenterY(),
+								nthBezNode.getCenterPoint().x,
+								nthBezNode.getCenterPoint().y,
+								rectTarget.getCenterX(),
+								rectTarget.getCenterY()));
+			} else {
+				((Graphics2D)g).draw(
+						new CubicCurve2D.Double(
+								rectSource.getCenterX(),
+								rectSource.getCenterY(),
+								sourceBezNode.getCenterPoint().x,
+								sourceBezNode.getCenterPoint().y,
+								nthBezNode.getCenterPoint().x,
+								nthBezNode.getCenterPoint().y,
+								rectTarget.getCenterX(),
+								rectTarget.getCenterY()));
+			}
+			return;
+		}
+		
 		if(!diplolinkMap.containsKey(nthNodeID)){
 			g.drawLine((int)rectSource.getCenterX(),
 					(int)rectSource.getCenterY(),

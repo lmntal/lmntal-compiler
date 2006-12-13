@@ -1,9 +1,15 @@
 package gui2;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 import runtime.Atom;
 import runtime.Membrane;
@@ -346,7 +352,37 @@ public class NodeFunction {
 	}
 	
 	static
+	public void showNodeMenu(Node node, GraphPanel panel){
+		if(node.getEdgeCount() == 0){ return; }
+		Rectangle2D nodeRectangle = node.getBounds2D(); 
+		JPopupMenu popup = new JPopupMenu();
+		for(int i = 0; i < node.getEdgeCount(); i++){
+			JMenuItem item = new JMenuItem("Link(" + i + "):Bezier on/off");
+			item.addActionListener(new BezierLinkListener(node, node.getNthNode(i)));
+			popup.add(item);
+		}
+		popup.show(panel, 
+				(int)((nodeRectangle.getMaxX() * panel.getMagnification()) + (panel.getWidth() / 2)),
+				(int)((nodeRectangle.getMaxY() * panel.getMagnification()) + (panel.getHeight() / 2)));
+	}
+	
+	static
 	public void stopHeating(){
 		divergenceTimer_ = 0;
+	}
+
+	static
+	private class BezierLinkListener implements ActionListener {
+		private Node sourceNode_;
+		private Node targetNode_;
+		
+		public BezierLinkListener(Node sourceNode, Node targetNode){
+			sourceNode_ = sourceNode;
+			targetNode_ = targetNode;
+		}
+
+		public void actionPerformed(ActionEvent e){
+			sourceNode_.addBezier(targetNode_);
+		}
 	}
 }

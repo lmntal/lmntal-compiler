@@ -23,7 +23,7 @@ public class LogFrame extends JFrame implements ChangeListener {
 	public int WINDOW_WIDTH = LMNtalFrame.WINDOW_WIDTH;
 	
 	final static
-	public int WINDOW_HIEGHT = 100;
+	public int WINDOW_HIEGHT = 200;
 	
 	final static
 	public String TITLE = "Log Panel";

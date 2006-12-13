@@ -53,7 +53,7 @@ public class SubFrame extends JFrame {
 
 	private JButton showBt_ = new JButton("Show All");
 
-	private JButton heatupBt_ = new JButton("Heatup");
+	private JButton heatBt_ = new JButton("Heat");
 
 	private JButton stopHeatingBt_ = new JButton("Stop Heating");
 	
@@ -112,7 +112,7 @@ public class SubFrame extends JFrame {
 		goBt_.addActionListener(new GoActionAdapter(this));
 		showBt_.addActionListener(new ShowAllAdapter(this));
 		hideBt_.addActionListener(new HideAllAdapter(this));
-		heatupBt_.addActionListener(new HeatupAdapter());
+		heatBt_.addActionListener(new HeatupAdapter());
 		stopHeatingBt_.addActionListener(new StopHeatingAdapter());
 		stepBox_.setHorizontalAlignment(JTextField.RIGHT);
 		
@@ -204,7 +204,7 @@ public class SubFrame extends JFrame {
 		gbc.gridy = 2;
 		gbc.gridwidth = 2;
         gbc.gridheight = 1;
-		getContentPane().add(heatupBt_, gbc);
+		getContentPane().add(heatBt_, gbc);
 
 		gbc.gridx = 1;
 		gbc.gridy = 3;

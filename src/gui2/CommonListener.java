@@ -11,8 +11,9 @@ import java.awt.event.MouseWheelListener;
  *
  */
 public class CommonListener implements MouseWheelListener , KeyListener{
+
 	static
-	private SubFrame subFrame_;
+	private AdvanceFrame advance_;
 	
 	static
 	private LogFrame logFrame_;
@@ -20,8 +21,15 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 	static
 	private GraphPanel panel_;
 	
+	static
+	private SubFrame subFrame_;
 	///////////////////////////////////////////////////////////////////////////
 	public CommonListener() { }
+	
+	public CommonListener(AdvanceFrame advance) {
+		if(advance == null){ return; }
+		advance_ = advance;
+	}
 	
 	public CommonListener(GraphPanel panel) {
 		if(panel == null){ return; }
@@ -107,5 +115,10 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 	public void setLog(String log){
 		if(null == logFrame_){ return; }
 		logFrame_.setLog(log);
+	}
+	
+	public void setSelectedNode(Node node){
+		if(null == advance_){ return; }
+		advance_.setSelectedNode(node);
 	}
 }

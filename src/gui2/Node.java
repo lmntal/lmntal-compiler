@@ -1,16 +1,20 @@
 package gui2;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import runtime.Atom;
 import runtime.InterpretedRuleset;
@@ -24,7 +28,7 @@ public class Node implements Cloneable{
 	
 	final static
 	private double ATOM_SIZE = 40.0;
-
+	
 	final static
 	private Font FONT = new Font("SansSerif", Font.PLAIN, 25);
 	
@@ -43,6 +47,9 @@ public class Node implements Cloneable{
 	
 	final static
 	private Color RULE_COLOR = new Color(207,207,207);
+	
+	final static
+	private Stroke SELECTED_STROKE = new BasicStroke(4.0f);
 
 	//////////////////////////////////////////////////////////////////////////
 	// static
@@ -59,9 +66,15 @@ public class Node implements Cloneable{
 	static
 	private boolean showRules_ = false;
 	
+	static
+	private Set<Node> bezierSet_ = new HashSet<Node>(); 
+	
 	///////////////////////////////////////////////////////////////////////////
 	// private
 
+	/** ベジエ曲線かするリンク */
+	private Map<Node, Node> bezierMap_ = new HashMap<Node, Node>();
+	
 	/** 継続非計算フラグ */
 	private boolean clipped_ = false;
 	
@@ -122,6 +135,8 @@ public class Node implements Cloneable{
 	
 	/** 一番ルートに近い不可視のNode */
 	private Node invisibleRootNode_ = null;
+
+	private boolean selected_ = false;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -141,6 +156,9 @@ public class Node implements Cloneable{
 			initPosition();
 		} else if(object instanceof Membrane) {
 			setMembrane((Membrane)object);
+		} else if(null == object){
+			setBez();
+			initPosition();
 		}
 		
 		// 世界膜ならば可視それ以外は不可視
@@ -162,6 +180,17 @@ public class Node implements Cloneable{
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
+	
+	public void addBezier(Node node){
+		if(bezierMap_.containsKey(node)){
+			bezierMap_.remove(node);
+			bezierSet_.remove(node);
+			return;
+		}
+		Node bezNode = new Node(this, null);
+		bezierMap_.put(node, bezNode);
+		bezierSet_.add(bezNode);
+	}
 
 	/**
 	 * 位置座標などの計算
@@ -292,6 +321,10 @@ public class Node implements Cloneable{
 			return this;
 		}
 	}
+	
+	public Node getBezierNode(Node node){
+		return bezierMap_.get(node);
+	}
 
 	/**
 	 * 位置、座標を取得する
@@ -329,6 +362,10 @@ public class Node implements Cloneable{
 	 */
 	public Node getInvisibleRootNode(){
 		return invisibleRootNode_;
+	}
+	
+	public String getName(){
+		return name_;
 	}
 	
 	/**
@@ -369,6 +406,17 @@ public class Node implements Cloneable{
 	 */
 	public Node getPointNode(int x, int y, boolean force){
 		synchronized (nodeMap_) {
+			// ベジエ曲線のチェック
+			if(null == parent_){
+				Iterator<Node> nodes = bezierSet_.iterator();
+				while(nodes.hasNext()){
+					Node node = nodes.next();
+					if(!node.getParent().isSelected()){ continue; }
+					node = node.getPointNode(x, y, false);
+					if(null != node){ return node; }
+				}
+			}
+			
 			if(rect_.contains(x, y)){
 				if(isPickable()){
 					return this;
@@ -384,6 +432,10 @@ public class Node implements Cloneable{
 			}
 		}
 		return null;
+	}
+	
+	public RoundRectangle2D getShape(){
+		return rect_;
 	}
 	
 	public double getSize(){
@@ -439,7 +491,9 @@ public class Node implements Cloneable{
 	 * @return
 	 */
 	public boolean isAtom(){
-		return (myObject_ instanceof Atom || (myObject_ instanceof Membrane && !visible_));
+		return (null == myObject_ ||
+				myObject_ instanceof Atom ||
+				(myObject_ instanceof Membrane && !visible_));
 	}
 	
 	/**
@@ -448,6 +502,10 @@ public class Node implements Cloneable{
 	 */
 	public boolean isPickable(){
 		return (pickable_ && isAtom() && null != parent_);
+	}
+
+	public boolean isSelected(){
+		return selected_;
 	}
 	
 	/**
@@ -502,6 +560,11 @@ public class Node implements Cloneable{
 				Node node = ruleNodes.next();
 				node.moveCalc();
 			}
+			Iterator<Node> bezNodes = bezierMap_.values().iterator();
+			while(bezNodes.hasNext()){
+				Node node = bezNodes.next();
+				node.moveAll();
+			}
 		}
 		moveCalc();
 		if(myObject_ instanceof Membrane){
@@ -531,6 +594,11 @@ public class Node implements Cloneable{
 		}
 		if(MIN_MOVE_DELTA < Math.abs(dy_)){
 			rect_.y += dy_;
+		}
+		Iterator<Node> bezNodes = bezierMap_.values().iterator();
+		while(bezNodes.hasNext()){
+			Node node = bezNodes.next();
+			node.moveDelta(dx_, dy_);
 		}
 		dx_ = 0;
 		dy_ = 0;
@@ -568,9 +636,26 @@ public class Node implements Cloneable{
 			if(isAtom()){
 				g.setColor(myColor_);
 				((Graphics2D)g).fill(rect_);
-				g.setColor(Color.BLACK);
-				((Graphics2D)g).draw(rect_);
 				
+				// ベジエ曲線の制御点なら終了
+				if(null == myObject_){ return; }
+				
+				if(selected_){
+					Iterator<Node> nodes = bezierMap_.values().iterator();
+					while(nodes.hasNext()){
+						Node node = nodes.next();
+						node.paint(g);
+					}
+					
+					g.setColor(Color.RED);
+					Stroke oldStroke = ((Graphics2D)g).getStroke();
+					((Graphics2D)g).setStroke(SELECTED_STROKE);
+					((Graphics2D)g).draw(rect_);
+					((Graphics2D)g).setStroke(oldStroke);
+				} else {
+					g.setColor(Color.BLACK);
+					((Graphics2D)g).draw(rect_);
+				}
 				///////////////////////////////////////////////////////////////
 				// アトム名描画
 				g.setFont(FONT);
@@ -592,17 +677,18 @@ public class Node implements Cloneable{
 				}
 				if(null != parent_){
 					g.setColor(myColor_);
-					if(visible_){
+					if(selected_){
+						g.setColor(Color.RED);
+						Stroke oldStroke = ((Graphics2D)g).getStroke();
+						((Graphics2D)g).setStroke(SELECTED_STROKE);
 						((Graphics2D)g).draw(rect_);
-						g.setColor(Color.BLACK);
-						g.setFont(FONT);
-						g.drawString(name_, (int)rect_.x, (int)rect_.y);
+						((Graphics2D)g).setStroke(oldStroke);
 					} else {
-						((Graphics2D)g).fill(rect_);
-						g.setColor(Color.BLACK);
-						g.setFont(FONT);
-						g.drawString(name_, (int)rect_.x, (int)rect_.y);
+						((Graphics2D)g).draw(rect_);
 					}
+					g.setColor(Color.BLACK);
+					g.setFont(FONT);
+					g.drawString(name_, (int)rect_.x, (int)rect_.y);
 				}
 
 			} else if(myObject_ instanceof String){
@@ -719,6 +805,16 @@ public class Node implements Cloneable{
 		if(0 < atom.getEdgeCount()){
 			LinkSet.addLink(this);
 		}
+	}
+	
+	private void setBez(){
+		myColor_ = Color.BLACK;
+		rect_ = new RoundRectangle2D.Double((Math.random() * 800) - 400,
+				(Math.random() * 600) - 300,
+				ATOM_SIZE / 2,
+				ATOM_SIZE / 2,
+				ROUND / 2,
+				ROUND / 2);
 	}
 	
 	/**
@@ -933,6 +1029,11 @@ public class Node implements Cloneable{
 				Node node = ruleNodeMap_.get(key);
 				node.setPosDelta(x, y);
 			}
+			Iterator<Node> bezNodes = bezierMap_.values().iterator();
+			while(bezNodes.hasNext()){
+				Node node = bezNodes.next();
+				node.setPosDelta(x, y);
+			}
 			rect_.x = x;
 			rect_.y = y;
 		}
@@ -973,6 +1074,10 @@ public class Node implements Cloneable{
 		name_ = rule;
 		
 		myColor_ = RULE_COLOR;
+	}
+	
+	public void setSelected(boolean selected){
+		selected_ = selected;
 	}
 	
 	/**

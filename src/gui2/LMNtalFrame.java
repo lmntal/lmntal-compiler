@@ -25,7 +25,7 @@ public class LMNtalFrame extends JFrame {
 	public int WINDOW_HIEGHT = 600;
 	
 	final static
-	public String TITLE = "It's LMNtal";
+	public String TITLE = "UNYO UNYO";
 	
 	final static
 	private long SLEEP_TIME = 500;
@@ -37,6 +37,7 @@ public class LMNtalFrame extends JFrame {
 	public boolean running_ = true;
 	
 	private GraphPanel panel_ = null;
+	private AdvanceFrame advanceFrame_;
 	private SubFrame subFrame_;
 	private LogFrame logFrame_;
 	private Membrane rootMembrane_;
@@ -64,6 +65,7 @@ public class LMNtalFrame extends JFrame {
 		// 管理ウィンドウの生成
 		subFrame_ = new SubFrame(this);
 		logFrame_ = new LogFrame(this);
+		advanceFrame_ = new AdvanceFrame(this);
 		
 	}
 	/////////////////////////////////////////////////////////////////

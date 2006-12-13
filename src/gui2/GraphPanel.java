@@ -43,11 +43,13 @@ public class GraphPanel extends JPanel {
 	private boolean history_ = false;
 	private List<String> logList_ = new ArrayList<String>();
 	private Node moveTargetNode_ = null;
+	private Node selectedNode_ = null;
 	private Node orgRootNode_;
 	private Thread repaintTh_ = null;
 	private Membrane rootMembrane_;
 	private Node rootNode_;
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
+	private GraphPanel myPanel_ = this;
 	
 	///////////////////////////////////////////////////////////////////////////
 	
@@ -97,9 +99,39 @@ public class GraphPanel extends JPanel {
 				
 				setCursor(new Cursor(Cursor.MOVE_CURSOR));
 				moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
+				
+				/*
+				 * 右クリック処理
+				 * Nodeのリンクをベジエ曲線化
+				 */
+				if(e.getButton() == MouseEvent.BUTTON3){
+					if(null == moveTargetNode_){ return; }
+					
+					NodeFunction.showNodeMenu(moveTargetNode_, myPanel_);
+					
+					moveTargetNode_ = null;
+					return;
+				}
+				
 				if(null != moveTargetNode_){
 					moveTargetNode_.setUncalc(true);
-				} else {
+					if(selectedNode_ != moveTargetNode_ && 
+							null != moveTargetNode_.getParent() &&
+							!moveTargetNode_.getParent().isSelected()){
+						moveTargetNode_.setSelected(true);
+						if(null != selectedNode_){
+							selectedNode_.setSelected(false);
+						}
+						commonListener_.setSelectedNode(moveTargetNode_);
+						selectedNode_ = moveTargetNode_;
+					} else if(selectedNode_ == moveTargetNode_){
+						moveTargetNode_.setSelected(false);
+						selectedNode_ = null;
+						commonListener_.setSelectedNode(null);
+					}
+				} else if(null == moveTargetNode_ ||
+						!(null != moveTargetNode_.getParent() &&
+						!moveTargetNode_.getParent().isSelected())){
 					moveTargetNode_ = rootNode_;
 				}
 				deltaX = e.getX() - (moveTargetNode_.getCenterPoint().x * getMagnification());
@@ -308,7 +340,6 @@ public class GraphPanel extends JPanel {
 	 */
 	public void setRootMem(Membrane mem){
 		rootMembrane_ = mem;
-//		System.out.println(mem);
 		rootNode_ = new Node(null, mem);
 		orgRootNode_ = rootNode_;
 	}
