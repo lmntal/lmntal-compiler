@@ -70,11 +70,6 @@ public class FrontEnd {
 		processOptions(args);
 		if (Env.debugOption) Debug.openSocket(); //2006.4.27 by inui
 		
-		if (Env.dumpMethods) { //2006.10.22 inui
-			dumpMethods();
-			return;
-		}
-		
 		// 実行
 
 		if(Env.oneLiner!=null) {
@@ -170,9 +165,6 @@ public class FrontEnd {
 						/// GUI mode. Atoms, membranes and links are drawn graphically.
 						/// Click button to proceed reaction. Close the window to quit.
 						Env.fGUI = true;
-						break;
-					case 'i': //2006.10.22 inui
-						Env.dumpMethods = true;
 						break;
 					case 'o':
 						/// -o <file>
@@ -889,31 +881,6 @@ public class FrontEnd {
 			e.printStackTrace();
 		}
 		return null;
-	}
-	
-	/**
-	 * メソッド名の一覧を出力する
-	 * 2006.10.22 inui
-	 */
-	static void dumpMethods() {
-		for (String f : Env.srcs) {
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(f));
-				String s;
-				String className = "";
-				Pattern p1 = Pattern.compile("\\t(\\w+).*:-.*");//メソッド名
-				Pattern p2 = Pattern.compile(".*module\\((\\w+)\\).*");//クラス名
-				while ((s = br.readLine()) != null) {
-					Matcher m1 = p1.matcher(s);
-					Matcher m2 = p2.matcher(s);
-					if (m1.matches()) System.out.println(m1.group(1)+" - "+className);
-					if (m2.matches()) className = m2.group(1);
-				}
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 }
 // TODO 初期配置で子タスクを作る

@@ -146,9 +146,6 @@ public final class Env {
 	/** デバッグ実行オプションの有無 by inui */
 	public static boolean debugOption = false;
 	
-	/** メソッド名一覧を出力するオプションの有無 2006.10.22 inui */
-	public static boolean dumpMethods = false;
-	
 	/** 標準入力から LMNtal プログラムを読み込むオプション 2006.07.11 inui */
 	public static boolean stdinLMN = false;
 	
