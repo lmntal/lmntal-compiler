@@ -34,7 +34,6 @@
 	"long"				=> "int",
 	"float"				=> "float",
 	"double"			=> "float",
-#	"boolean"			=> "boolean",
 	"java.lang.String"	=> "string",
 );
 
@@ -51,7 +50,9 @@
 #モジュールを生成するディレクトリ
 $dir=".";
 
-#オプション解析
+#####################################################################
+# オプション解析
+#####################################################################
 use Getopt::Std;
 my $opt = {}; 
 getopts('d:h',$opt);
@@ -70,7 +71,9 @@ if ($opt->{'h'} || $#ARGV == -1) {
 	exit(0);
 }
 
+#####################################################################
 # メイン
+#####################################################################
 for ($i = 0; $i <= $#ARGV; $i++) {
 	$class = $ARGV[$i];
 	open(FILE, "javap -public $class |");
@@ -388,7 +391,6 @@ sub dump_args {
 	my ($start, @args) = @_;
 	for (my $i = $start; $i <= $#args+$start; $i++) {
 		my $type = $args[$i-$start];
-#		$type =~ s/\s//;
 		if ($type eq "true" || $type eq "false") {
 			print "\tboolean v$i = $type;\n";
 		} elsif (exists($functors{$type})) {
