@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.org.apache.xerces.internal.dom.ParentNode;
+
 import runtime.Atom;
 import runtime.InterpretedRuleset;
 import runtime.Membrane;
@@ -453,6 +455,11 @@ public class Node implements Cloneable{
 	 *
 	 */
 	public void initPosition(){
+		if(null == myObject_){
+			rect_.x = parent_.getBounds2D().getCenterX() + 100;
+			rect_.y = parent_.getBounds2D().getCenterY();
+			return;
+		}
 		if(!(myObject_ instanceof Atom)){ return; }
 		int nthNum = ((Atom)myObject_).getEdgeCount();
 		if(0 == nthNum){ return; }
@@ -476,11 +483,11 @@ public class Node implements Cloneable{
 			}
 			if(1 == findNthNum){
 				rect_.x = x;
-				rect_.y = x;
+				rect_.y = y;
 			}
 			else if(1 < findNthNum){
 				rect_.x = x / findNthNum;
-				rect_.y = x / findNthNum;
+				rect_.y = y / findNthNum;
 			}
 			
 		}
