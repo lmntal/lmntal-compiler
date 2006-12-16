@@ -496,6 +496,10 @@ public class Node implements Cloneable{
 				(myObject_ instanceof Membrane && !visible_));
 	}
 	
+	public boolean isBezNode(){
+		return (null == myObject_);
+	}
+	
 	/**
 	 * マウスで拾い上げることが出来るか
 	 * @return

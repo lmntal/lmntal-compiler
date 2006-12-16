@@ -147,7 +147,51 @@ public class LinkSet {
 						}
 
 						if(showLinkNum_){
-							paintLinkNum(g, n, rectSource, rectTarget);
+							Node sourceBezNode = nodeSource.getBezierNode(nthNode);
+							Node nthBezNode = nthNode.getBezierNode(nodeSource);
+							if(null != sourceBezNode){
+								Rectangle2D rect = sourceBezNode.getBounds2D();
+								paintLinkNum(g, n,
+										rectSource.getCenterX(),
+										rectSource.getCenterY(),
+										rect.getCenterX(),
+										rect.getCenterY());
+							}
+							else if(null == sourceBezNode && null != nthBezNode){
+								Rectangle2D rect = nthBezNode.getBounds2D();
+								paintLinkNum(g, n,
+										rectSource.getCenterX(),
+										rectSource.getCenterY(),
+										rect.getCenterX(),
+										rect.getCenterY());
+							}
+//							else if(diplolinkMap.containsKey(nthNode.getID())){
+//								int linkNum = diplolinkMap.get(nthNode.getID());
+//
+//								double linkDelta = DIPLO_LINK_DELTA * ((linkNum + 1) / 2);
+//
+//								double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
+//								double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
+//								if(x0 == 0.0){ x0=0.000000001; }
+//								double angle = Math.atan(y0 / x0);
+//								if(x0 < 0.0){ angle += Math.PI; }
+//								angle = (linkNum % 2 == 0) ? angle + (Math.PI / 2) : angle - (Math.PI / 2);
+//
+//								double x = Math.cos(angle) * linkDelta;
+//								double y = Math.sin(angle) * linkDelta;
+//									paintLinkNum(g, n,
+//											rectSource.getCenterX(),
+//											rectSource.getCenterY(),
+//											((rectSource.getCenterX() + rectTarget.getCenterX()) / 2) + x,
+//											((rectSource.getCenterY() + rectTarget.getCenterY()) / 2) + y);
+//							}
+							else{
+								paintLinkNum(g, n,
+										rectSource.getCenterX(),
+										rectSource.getCenterY(),
+										rectTarget.getCenterX(),
+										rectTarget.getCenterY());
+							}
 						}
 					}
 				}
@@ -256,17 +300,19 @@ public class LinkSet {
 	static
 	private void paintLinkNum(Graphics g,
 			int linkNum,
-			Rectangle2D rectSource,
-			Rectangle2D rectTarget)
+			double sourceX,
+			double sourceY,
+			double targetX,
+			double targetY)
 	{
-		double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
-		double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
+		double x0 = sourceX - targetX;
+		double y0 = sourceY - targetY;
 		if(x0 == 0.0){ x0=0.000000001; }
 		double angle = Math.atan(y0 / x0);
 		if(x0 < 0.0){ angle += Math.PI; }
 		double x = Math.cos(angle) * LINK_NUM_DELTA;
 		double y = Math.sin(angle) * LINK_NUM_DELTA;
-		g.drawString(Integer.toString(linkNum), (int)(rectSource.getCenterX() - x), (int)(rectSource.getCenterY() - y));
+		g.drawString(Integer.toString(linkNum), (int)(sourceX - x), (int)(sourceY - y));
 	}
 	
 	/**

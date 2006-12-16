@@ -116,8 +116,7 @@ public class GraphPanel extends JPanel {
 				if(null != moveTargetNode_){
 					moveTargetNode_.setUncalc(true);
 					if(selectedNode_ != moveTargetNode_ && 
-							null != moveTargetNode_.getParent() &&
-							!moveTargetNode_.getParent().isSelected()){
+							!moveTargetNode_.isBezNode()){
 						moveTargetNode_.setSelected(true);
 						if(null != selectedNode_){
 							selectedNode_.setSelected(false);
@@ -129,9 +128,7 @@ public class GraphPanel extends JPanel {
 						selectedNode_ = null;
 						commonListener_.setSelectedNode(null);
 					}
-				} else if(null == moveTargetNode_ ||
-						!(null != moveTargetNode_.getParent() &&
-						!moveTargetNode_.getParent().isSelected())){
+				} else if(null == moveTargetNode_){
 					moveTargetNode_ = rootNode_;
 				}
 				deltaX = e.getX() - (moveTargetNode_.getCenterPoint().x * getMagnification());
