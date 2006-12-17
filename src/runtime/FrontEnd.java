@@ -164,7 +164,7 @@ public class FrontEnd {
 						/// -g
 						/// GUI mode. Atoms, membranes and links are drawn graphically.
 						/// Click button to proceed reaction. Close the window to quit.
-						Env.fGUI = true;
+						Env.fGUI2 = true;
 						break;
 					case 'o':
 						/// -o <file>
@@ -271,7 +271,7 @@ public class FrontEnd {
 						break;
 					case '-': // 文字列オプション						
 						if(args[i].equals("--gui")){
-							Env.fGUI = true;
+							Env.fGUI2 = true;
 						} else if (args[i].equals("--check-java-type")) {
 							JavaTypeChecker.enabled = true;
 						} else if (args[i].equals("--color")) {//2006.11.13 inui
@@ -742,7 +742,7 @@ public class FrontEnd {
 				}
 			}
 			
-			Env.initGUI();
+			Env.initGUI2();
 			Env.initGraphic();
 			Env.initTool();
 
@@ -750,7 +750,7 @@ public class FrontEnd {
 
 			
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
-			if(Env.fGUI) Env.gui.setRootMem(root);
+			if(Env.fGUI2) Env.gui2.setRootMem(root);
 //			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			boolean t = Env.fTrace;
@@ -769,8 +769,8 @@ public class FrontEnd {
 
 			boolean ready = true;
 			
-			if (Env.gui != null) {
-				Env.gui.onTrace();
+			if (Env.gui2 != null) {
+				Env.gui2.onTrace();
 			}
 			
 			/*TODO:3d calc*/
@@ -792,8 +792,9 @@ public class FrontEnd {
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );
 				}
 				if(Env.getExtendedOption("chorus") != ""){ Output.out(Env.getExtendedOption("chorus"), rt.getGlobalRoot()); }
-				if (Env.gui != null) {
-					Env.gui.onTrace();
+				// Env.gui2 が null で無い　→　GUIが起動中
+				if (Env.gui2 != null) {
+					Env.gui2.onTrace();
 				}
 			}
 			if(Env.fREMAIN) {

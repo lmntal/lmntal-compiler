@@ -146,11 +146,11 @@ public class REPL {
 						continue;
 					} else if(nline.equals("gui")) {//2006.2.8 inui
 						Env.p("gui mode on");
-						Env.fGUI = true;
+						Env.fGUI2 = true;
 						continue;
 					} else if(nline.equals("nogui")) {//2006.2.8 inui
 						Env.p("gui mode off");
-						Env.fGUI = false;
+						Env.fGUI2 = false;
 						continue;
 					} else if(nline.startsWith("l")) {//2006.5.25 by inui
 						String ss[] = nline.split(" ");
