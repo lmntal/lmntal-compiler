@@ -263,7 +263,7 @@ H=lmnsrcparser.parse($srctext) :- string($srctext) | H=[:/*inline*/
 	}
 	catch(ParseException e){
 		Atom er = mem.newAtom(new SymbolFunctor("parse_error",1));
-		mem.relinkAtomArgs(me, 1, er, 0);
+		mem.relinkAtomArgs(er,0,me,1);
 	}
 	me.nthAtom(0).remove();
 	me.remove();
