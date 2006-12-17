@@ -24,13 +24,12 @@ module(mhash).
 			//long xor = 3412;
 			long mult = 3412;
 			
+			/* 一時的に使う物のための変数 */
 			Atom a = null;
 			Membrane mm = null;
 			QueuedEntity q = null;
 			
-			//Map<Membrane, Integer> m2hc = new HashMap<Membrane, Integer>();
-			
-			// atoms:この膜内のアトム全体の集合, toCalculate:現在計算中の分子内の未処理アトムの集合, calculated:現在形山中の分子内の処理済アトムの集合
+			// contents:この膜内のアトムと子膜全体の集合, toCalculate:現在計算中の分子内の未処理アトムまたは子膜の集合, calculated:現在計算中の分子内の処理済アトムまたは子膜の集合
 			Set<QueuedEntity> contents = new HashSet<QueuedEntity>(), toCalculate = new HashSet<QueuedEntity>(), calculated = new HashSet<QueuedEntity>();
 			
 			for (Iterator i = m.atomIterator(); i.hasNext(); ) {
@@ -41,14 +40,12 @@ module(mhash).
 				contents.add(a);
 			}
 			
-			// 子膜を処理する
 			for (Iterator i = m.memIterator(); i.hasNext(); ) {
 				mm = (Membrane) i.next();
 				contents.add(mm);
 				m2hc.put(mm, calculate(mm, m2hc));
 			}
 			
-			// 子膜以外のアトムを処理する
 			while (!contents.isEmpty()) {
 				System.out.println("uncalculated:" + contents);
 				q = contents.iterator().next();
@@ -61,7 +58,6 @@ module(mhash).
 				calculated.clear();
 				toCalculate.add(q);
 					
-				// 「２つ一組が２つ」と「４つで環状」を区別するために
 				// 分子毎にグループ化して計算する
 				while (!toCalculate.isEmpty()) {
 					q = toCalculate.iterator().next();
@@ -109,7 +105,7 @@ module(mhash).
 								}
 								int pos = link.getPos() + 1;
 								//System.out.println(pos);
-								// 接続先の引数番号をハッシュに関与させる
+								// 接続先の引数番号をハッシュコードに関与させる
 								temp += (linked.getFunctor().hashCode() * pos);
 							}
 						}
@@ -197,6 +193,7 @@ H = mhash.hashCode(Memb) :- H =
 	me.remove();
 :](Memb).
 }.
+
 /*
 hc1 = mhash.hashCode(Memb1).
 Memb1 = { a(X). a(X) }.
