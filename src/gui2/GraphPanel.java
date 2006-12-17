@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,9 @@ public class GraphPanel extends JPanel {
 
 	///////////////////////////////////////////////////////////////////////////
 	// static
+	
+	final static
+	private double POINT_DELTA_AREA = 10.0;
 	
 	static
 	private double magnification_ = 0.5;
@@ -77,10 +81,14 @@ public class GraphPanel extends JPanel {
 				if(null == rootNode_){ return; }
 				int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
 				int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
+				Rectangle2D rect = new Rectangle2D.Double(pointX - ((POINT_DELTA_AREA / 2) / getMagnification()),
+						pointY - ((POINT_DELTA_AREA / 2) / getMagnification()),
+						POINT_DELTA_AREA / getMagnification(),
+						POINT_DELTA_AREA / getMagnification());
 				
 				// 可視不可視を反転
 				if(e.isControlDown()){
-					moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
+					moveTargetNode_ = rootNode_.getPointNode(rect, true);
 					if(null == moveTargetNode_){ return; }
 					moveTargetNode_.swapVisible();
 					moveTargetNode_.setUncalc(false);
@@ -89,7 +97,7 @@ public class GraphPanel extends JPanel {
 				}
 				
 				if(e.getClickCount() == 2){
-					moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
+					moveTargetNode_ = rootNode_.getPointNode(rect, true);
 					if(null != moveTargetNode_){
 						moveTargetNode_.swapClipped();
 					}
@@ -98,7 +106,7 @@ public class GraphPanel extends JPanel {
 				}
 				
 				setCursor(new Cursor(Cursor.MOVE_CURSOR));
-				moveTargetNode_ = rootNode_.getPointNode(pointX, pointY, true);
+				moveTargetNode_ = rootNode_.getPointNode(rect, true);
 				
 				/*
 				 * 右クリック処理
@@ -329,6 +337,9 @@ public class GraphPanel extends JPanel {
 
 	public void setMagnification(double magni){
 		magnification_ = magni * 2;
+		if(0.01 > magnification_){
+			magnification_ = 0.01;
+		}
 	}
 
 	/**

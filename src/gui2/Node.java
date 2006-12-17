@@ -404,9 +404,9 @@ public class Node implements Cloneable{
 	}
 	
 	/**
-	 * 指定された座標にあるNodeを取得する
+	 * 指定された範囲にあるNodeを取得する
 	 */
-	public Node getPointNode(int x, int y, boolean force){
+	public Node getPointNode(Rectangle2D rect, boolean force){
 		synchronized (nodeMap_) {
 			// ベジエ曲線のチェック
 			if(null == parent_){
@@ -414,19 +414,19 @@ public class Node implements Cloneable{
 				while(nodes.hasNext()){
 					Node node = nodes.next();
 					if(!node.getParent().isSelected()){ continue; }
-					node = node.getPointNode(x, y, false);
+					node = node.getPointNode(rect, false);
 					if(null != node){ return node; }
 				}
 			}
 			
-			if(rect_.contains(x, y)){
+			if(rect_.intersects(rect)){
 				if(isPickable()){
 					return this;
 				} else{
 					Iterator<Node> nodes = nodeMap_.values().iterator();
 					while(nodes.hasNext()){
 						Node node = nodes.next();
-						node = node.getPointNode(x, y, force);
+						node = node.getPointNode(rect, force);
 						if(null != node){ return node; }
 					}
 				}
