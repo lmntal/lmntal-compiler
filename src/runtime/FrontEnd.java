@@ -271,7 +271,7 @@ public class FrontEnd {
 						break;
 					case '-': // 文字列オプション						
 						if(args[i].equals("--gui")){
-							Env.fGUI2 = true;
+							Env.fGUI = true;
 						} else if (args[i].equals("--check-java-type")) {
 							JavaTypeChecker.enabled = true;
 						} else if (args[i].equals("--color")) {//2006.11.13 inui
@@ -286,10 +286,6 @@ public class FrontEnd {
 							// --debug-daemon
 							// dump debug message of LMNtalDaemon
 							Env.debugDaemon = Env.DEBUG_DEFAULT;
-					    } else if(args[i].equals("--demo")){
-							/// --demo
-							/// Demo mode.  Draw atoms and text larger.
-							Env.fDEMO = true;
 					    } else if (args[i].matches("--event-port")) {//2006.4.27 by inui
 					    	Debug.setEventPort(Integer.parseInt(args[i+1]));	
 							i++;
@@ -747,7 +743,6 @@ public class FrontEnd {
 			}
 			
 			Env.initGUI();
-			Env.initGUI2();
 			Env.initGraphic();
 			Env.initTool();
 
@@ -755,8 +750,7 @@ public class FrontEnd {
 
 			
 			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
-			if(Env.fGUI) Env.gui.lmnPanel.getGraphLayout().setRootMem(root);
-			if(Env.fGUI2) Env.gui2.setRootMem(root);
+			if(Env.fGUI) Env.gui.setRootMem(root);
 //			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			boolean t = Env.fTrace;
@@ -774,13 +768,9 @@ public class FrontEnd {
 			}
 
 			boolean ready = true;
-			if (Env.gui != null) {
-				Env.gui.lmnPanel.getGraphLayout().calc();
-				if (!Env.gui.onTrace())  ready = false;
-			}
 			
-			if (Env.gui2 != null) {
-				Env.gui2.onTrace();
+			if (Env.gui != null) {
+				Env.gui.onTrace();
 			}
 			
 			/*TODO:3d calc*/
@@ -803,18 +793,12 @@ public class FrontEnd {
 				}
 				if(Env.getExtendedOption("chorus") != ""){ Output.out(Env.getExtendedOption("chorus"), rt.getGlobalRoot()); }
 				if (Env.gui != null) {
-					while(Env.gui.running) Env.gui.onTrace();
-				}
-				// GUIが動いていて、かつ、ウィンドウが閉じられていなければ、許可がでるまで待機
-				// Env.gui2 が null で無い　→　GUIが起動中
-				if (Env.gui2 != null) {
-					Env.gui2.onTrace();
+					Env.gui.onTrace();
 				}
 			}
 			if(Env.fREMAIN) {
 				Env.remainedRuntime = rt;
 			}
-			if (Env.gui != null)  Env.gui = null;
 			if (Env.LMNgraphic != null)  Env.LMNgraphic = null;
 			
 //			LMNtalRuntimeManager.terminateAll();

@@ -95,12 +95,6 @@ public final class Membrane extends QueuedEntity {
 		this.task = task;
 		this.parent = parent;
 		id = nextId++;
-		
-		if(Env.gui!=null) {
-			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
-			rect = new Rectangle2D.Double(Math.random()*r.width + r.x, Math.random()*r.height + r.y, 10.0, 10.0);
-//			System.out.println(rect);
-		}
 	}
 	/** 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。*/
 	protected Membrane(Task task) {
@@ -296,10 +290,6 @@ public final class Membrane extends QueuedEntity {
 	/** 指定されたアトムをこの膜から除去する。
 	 * <strike>実行アトムスタックに入っている場合、スタックから取り除く。</strike>*/
 	public void removeAtom(Atom atom) {
-		if(Env.fGUI) {
-			Env.gui.lmnPanel.getGraphLayout().removedAtomPos.add(atom.getPosition());
-		}
-		
 		atoms.remove(atom);
 		atom.mem = null;
 	}

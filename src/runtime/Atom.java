@@ -1,13 +1,5 @@
 package runtime;
 
-//import java.util.ArrayList;
-//import java.util.Iterator;
-//import java.util.List;
-
-import gui.DoublePoint;
-import gui.Node;
-import gui.NodeParameter;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -26,7 +18,7 @@ import util.QueuedEntity;
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
  * @author Mizuno
  */
-public final class Atom extends QueuedEntity implements gui.Node, Serializable {
+public final class Atom extends QueuedEntity implements Serializable {
 	
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
 	 * ただし値を変更するときはindexも同時に更新すること。(mem,index)==(null, -1)は所属膜なしを表す。
@@ -36,8 +28,6 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	/** 所属膜のAtomSet内でのインデックス */
 	public int index = -1;
 
-	private NodeParameter  nodeParam = null;
-	
 	public int getid(){
 		return id;
 	}
@@ -79,11 +69,6 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 		else
 			args = null;
 		id = lastId++;
-		if(Env.fGUI) {
-			nodeParam = new NodeParameter();
-			Rectangle r = Env.gui.lmnPanel.getGraphLayout().getAtomsBound();
-			nodeParam.pos = new DoublePoint(Math.random()*r.width + r.x, Math.random()*r.height + r.y);
-		}
 	}
 
 	///////////////////////////////
@@ -186,29 +171,8 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 //	LMNTransformGroup objTrans;
 //	double vx, vy, vz;
 	
-	public void initNode() {
-		nodeParam.pos = new DoublePoint();
-	}
 	public boolean isVisible() {
 		return !(functor instanceof SpecialFunctor);
-	}
-	public DoublePoint getPosition() {
-		return nodeParam.pos;
-	}
-
-	public void setPosition(DoublePoint p) {
-		nodeParam.pos = p;
-	}
-
-	public Node getNthNode(int index) {
-		Atom a = nthAtom(index);
-		while(a.getFunctor().isInsideProxy() || a.getFunctor().isOutsideProxy()) {
-//			System.out.println(a.nthAtom(0).nthAtom(0));
-//			System.out.println(a.nthAtom(0).nthAtom(1));
-			a = a.nthAtom(0).nthAtom(1);
-		}
-//		System.out.println(this+" 's "+index+"th atom is "+a);
-		return a;
 	}
 
 	/**
@@ -230,81 +194,6 @@ public final class Atom extends QueuedEntity implements gui.Node, Serializable {
 	public int getEdgeCount() {
 		return functor.getArity();
 	}
-	public void setMoveDelta(double dx, double dy) {
-		nodeParam.vx += dx;
-		nodeParam.vy += dy;
-	}
-	public void setMoveDelta3d(double dx, double dy, double dz) {
-		nodeParam.vx += dx;
-		nodeParam.vy += dy;
-		nodeParam.vz += dz;
-	}
-	public void initMoveDelta() {
-		nodeParam.vx = nodeParam.vy = 0;
-	}
-	public void initMoveDelta3d() {
-		nodeParam.vx = nodeParam.vy = nodeParam.vz = 0;
-	}
-	public DoublePoint getMoveDelta(){
-		return new DoublePoint(nodeParam.vx, nodeParam.vy);
-	}
-	public void move(Rectangle area) {
-		//if (n.isFixed()) return;
-		final int M = 100;
-		nodeParam.pos.x += Math.max(-M, Math.min(M, nodeParam.vx));
-		nodeParam.pos.y += Math.max(-M, Math.min(M, nodeParam.vy));
-		
-		if (nodeParam.pos.x < area.getMinX())		nodeParam.pos.x = (int)area.getMinX();
-		else if (nodeParam.pos.x > area.getMaxX())	nodeParam.pos.x = (int)area.getMaxX();
-		
-		if (nodeParam.pos.y < area.getMinY())		nodeParam.pos.y = (int)area.getMinY();
-		else if (nodeParam.pos.y > area.getMaxY())	nodeParam.pos.y = (int)area.getMaxY();
-		
-//		vx=vy=0;
-		nodeParam.vx /= 2;
-		nodeParam.vy /= 2;
-	}
-	public void paintEdge(Graphics g) {
-		g.setColor(Color.BLACK);
-		for(int i=0;i<getEdgeCount();i++) {
-			Node n2 = getNthNode(i);
-			if(this.hashCode() < n2.hashCode()) continue;
-			g.drawLine((int)getPosition().x, (int)getPosition().y, (int)n2.getPosition().x, (int)n2.getPosition().y);
-		}
-	}
-	
-	public void paintNode(Graphics g) {
-		String label = getName();
-		FontMetrics fm = g.getFontMetrics();
-		if(Env.fDEMO) {
-			g.setFont(new Font(null, Font.PLAIN, 30));
-		} else {//2006.3.8 by inui
-			g.setFont(new Font(null, Font.PLAIN, 12));
-		}
-		int w = fm.stringWidth(label);
-		int h = fm.getHeight();
-		
-		int wh = Env.fDEMO ? 40 : 16;
-		Dimension size = new Dimension(wh, wh);
-//		g.setColor(new Color(64,128,255));
-		// 適当に色分けする！
-		
-		// [0, 7] -> [128, 255] for eash R G B
-		int ir = 0x7F - ((label.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;
-		int ig = 0x7F - ((label.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
-		int ib = 0x7F - ((label.hashCode() & 0x00F) >> 0) * 0x08 + 0x7F;
-		
-//		System.out.println(label + "  " + ir + "  " + ig + "  " + ib);
-		g.setColor(new Color(ir, ig, ib));
-		
-		g.fillOval((int)(nodeParam.pos.x - size.width/2), (int)(nodeParam.pos.y - size.height/ 2), size.width, size.height);
-		
-		g.setColor(Color.BLACK);
-		g.drawOval((int)(nodeParam.pos.x - size.width/2), (int)(nodeParam.pos.y - size.height/ 2), size.width, size.height);
-		g.drawString(label, (int)(nodeParam.pos.x - (w-10)/2), (int)(nodeParam.pos.y - (h-4)/2) + fm.getAscent()+size.height);
-	}
-	
-	/* *** *** *** *** *** END GUI *** *** *** *** *** */
 	
 	/**
 	 * このアトムを直列化してストリームに書き出します。

@@ -4,7 +4,6 @@
  */
 package runtime;
 import graphic.LMNtalGFrame;
-import gui.LMNtalFrame;
 import toolkit.LMNtalTFrame; //todo
 
 import java.util.ArrayList;
@@ -235,25 +234,11 @@ public final class Env {
 	/**
 	 * 新 GUI モード。
 	 */
-	public static boolean fGUI2 = false;
-	public static gui2.LMNtalFrame gui2;
-	public static void initGUI2(){
-		if(!Env.fGUI2){ return; }
-		gui2 = new gui2.LMNtalFrame();
-	}
-	
-	/**
-	 * GUI 有効。仮仮仮仮
-	 */
 	public static boolean fGUI = false;
-	public static LMNtalFrame gui;
-	public static boolean fDEMO;
-	public static int atomSize;
-	
-	public static void initGUI() {
-		if(!Env.fGUI) return;
-		atomSize = Env.fDEMO ? 40 : 16;
-		Env.gui = new LMNtalFrame();
+	public static gui2.LMNtalFrame gui;
+	public static void initGUI(){
+		if(!Env.fGUI){ return; }
+		gui = new gui2.LMNtalFrame();
 	}
 	
 	/**
@@ -421,12 +406,9 @@ public final class Env {
 
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public static boolean guiTrace() {
-		if(gui == null && gui2 == null) return true;
+		if(gui == null) return true;
 		if(null != gui){
-			return gui.onTrace();
-		}
-		if(null != gui2){
-			gui2.onTrace();
+			gui.onTrace();
 		}
 		
 		return true;
