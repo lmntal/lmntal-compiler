@@ -25,7 +25,7 @@ module(mhash).
 			long mult = 3412;
 			
 			Atom a = null;
-			Membrane me = null;
+			Membrane mm = null;
 			QueuedEntity q = null;
 			
 			//Map<Membrane, Integer> m2hc = new HashMap<Membrane, Integer>();
@@ -43,9 +43,9 @@ module(mhash).
 			
 			// 子膜を処理する
 			for (Iterator i = m.memIterator(); i.hasNext(); ) {
-				me = (Membrane) i.next();
-				contents.add(me);
-				m2hc.put(me, calculate(me, m2hc));
+				mm = (Membrane) i.next();
+				contents.add(mm);
+				m2hc.put(mm, calculate(mm, m2hc));
 			}
 			
 			// 子膜以外のアトムを処理する
@@ -88,14 +88,14 @@ module(mhash).
 									そのアトムの引数番号の組を
 									このアトムから子膜へのリンクを表現する項とする。*/
 								int t = 0;
-								me = link.getAtom().nthAtom(0).getMem();
-							if (!calculated.contains(me)) {
-									toCalculate.add(me);
+								mm = link.getAtom().nthAtom(0).getMem();
+							if (!calculated.contains(mm)) {
+									toCalculate.add(mm);
 								}
 								while (link.getAtom().getFunctor().isOutsideProxy()) {
 									link = link.getAtom().nthAtom(0).getArg(1);
-									me = link.getAtom().getMem();
-									t += m2hc.get(me);
+									mm = link.getAtom().getMem();
+									t += m2hc.get(mm);
 									t *= 13;
 								}
 								
@@ -114,32 +114,23 @@ module(mhash).
 							}
 						}
 					} else {
-						me = (Membrane) q;
+						Membrane mt = (Membrane) q;
 						
-						// この膜のInsideProxyを全て得る。より効率的な方法があるかもしれない。
-						List<Atom> ip = new ArrayList<Atom>();
-						for (Iterator i = me.atomIterator(); i.hasNext(); ) {
-							a = (Atom) i.next();
-							if (a.getFunctor().isInsideProxy()) {
-								ip.add(a);
-							}
-						}
-						
-						final int thisMembsHC = m2hc.get(me);
+						final int thisMembsHC = m2hc.get(mt);
 						temp = thisMembsHC;
 						
 						// この膜から膜の外部へのリンクを処理する
 						Link link = null;
-						for (Atom inside : ip) {
-							
+						for (Iterator i = mt.atomIteratorOfFunctor(Functor.INSIDE_PROXY); i.hasNext(); ) {
+							Atom inside = (Atom) i.next();
 							// この膜外部の（プロキシでない）リンク先アトムまでトレース
 							int s = 0;
 							link = inside.nthAtom(0).getArg(1);
 							
 							if (link.getAtom().getFunctor().isOutsideProxy()) { // この膜のリンク先が膜のとき
-								me = link.getAtom().nthAtom(0).getMem();
-								if (!calculated.contains(me)) {
-									toCalculate.add(me);
+								mm = link.getAtom().nthAtom(0).getMem();
+								if (!calculated.contains(mm)) {
+									toCalculate.add(mm);
 								}
 							} else { // この膜のリンク先がアトムの場合
 								a = link.getAtom();
