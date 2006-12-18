@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public final class Env {
 
-	public static final String LMNTAL_VERSION = "0.85.20061208";
+	public static final String LMNTAL_VERSION = "0.86.20061218";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
@@ -234,11 +234,11 @@ public final class Env {
 	/**
 	 * 新 GUI モード。
 	 */
-	public static boolean fGUI2 = false;
-	public static gui2.LMNtalFrame gui2;
-	public static void initGUI2(){
-		if(!Env.fGUI2){ return; }
-		gui2 = new gui2.LMNtalFrame();
+	public static boolean fGUI = false;
+	public static gui2.LMNtalFrame gui;
+	public static void initGUI(){
+		if(!Env.fGUI){ return; }
+		gui = new gui2.LMNtalFrame();
 	}
 	
 	/**
@@ -406,9 +406,9 @@ public final class Env {
 
 	/** @return ルールスレッドの実行を継続してよいかどうか */
 	public static boolean guiTrace() {
-		if(gui2 == null) return true;
-		if(null != gui2){
-			gui2.onTrace();
+		if(gui == null) return true;
+		if(null != gui){
+			gui.onTrace();
 		}
 		
 		return true;
