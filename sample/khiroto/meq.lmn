@@ -1,0 +1,201 @@
+% 膜同士の同型判定
+%
+% AUTHOR: Kohei HIROTO
+% 
+% 06/12/18
+
+/* 膜同士の同型判定。フラットな構造のみに対応した版
+   詳細な構造比較に入る前の予備検査は省略している。 */
+{
+module(meq).
+
+[:/*inline_define*/	
+	import java.util.*;
+	import util.*;
+	
+	class MembraneEqualityJudge {
+		static boolean judge(Membrane m1, Membrane m2) {
+			if (m1.getAtomCount() != m2.getAtomCount()
+				|| m1.getMemCount() != m2.getMemCount()) {
+				return false;
+			}
+			
+			Set<Atom> atoms1 = new HashSet<Atom>(), atoms2 = new HashSet<Atom>();
+			Set<Membrane> mems1 = new HashSet<Membrane>(), mems2 = new HashSet<Membrane>();
+			for (Iterator i = m1.atomIterator(); i.hasNext(); ) {
+				atoms1.add((Atom) i.next());
+			}
+			for (Iterator i = m2.atomIterator(); i.hasNext(); ) {
+				atoms2.add((Atom) i.next());
+			}
+			for (Iterator i = m1.memIterator(); i.hasNext(); ) {
+				mems1.add((Membrane) i.next());
+			}
+			for (Iterator i = m2.memIterator(); i.hasNext(); ) {
+				mems2.add((Membrane) i.next());
+			}
+			
+			Set<Atom> atomsInMol1 = new HashSet<Atom>(), atomsInMol2 = new HashSet<Atom>();
+			while (!atoms1.isEmpty()) {
+				Atom a1 = atoms1.iterator().next();
+				//System.out.println("a1=" + a1);
+				trace: {
+					for (Atom a2 : atoms2) {
+						//System.out.println("a2=" + a2);
+						atomsInMol1.clear();
+						atomsInMol2.clear();
+						if (traceLinks(a1, a2, atomsInMol1, atomsInMol2)) {
+							atoms1.removeAll(atomsInMol1);
+							atoms2.removeAll(atomsInMol2);
+							break trace;
+						}
+					}
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		static boolean traceLinks(Atom a1, Atom a2, Set<Atom> atomsInMol1, Set<Atom> atomsInMol2) {
+			//System.out.println("a1=" + a1 + ", a2=" + a2);
+			return traceLinks(a1, -1, a2, -1, atomsInMol1, atomsInMol2, new ArrayList<Atom>(), new ArrayList<Atom>());
+		}
+		
+		private static boolean traceLinks(Atom a1, int argNum1, Atom a2, int argNum2, Set<Atom> atomsInMol1, Set<Atom> atomsInMol2, List<Atom> log1, List<Atom> log2) {
+			//System.out.println("traceLinks: a1=" + a1 + ", a2=" + a2);
+			log1.add(a1);
+			log2.add(a2);
+			atomsInMol1.add(a1);
+			atomsInMol2.add(a2);
+			
+			if (!a1.getName().equals(a2.getName())
+						|| a1.getFunctor().getArity() != a2.getFunctor().getArity()
+						|| argNum1 != argNum2) {
+				//System.out.println("a1: name=" + a1.getName() + ", arity=" + a1.getFunctor().getArity() + ", a2: name=" + a2.getName() + ", arity=" + a2.getFunctor().getArity());
+				return false;
+			}
+			
+			int arity = a1.getFunctor().getArity();
+			for (int i = (a1.getFunctor().isInsideProxy()) ? 1 : 0; i < arity; i++) {
+				Link link1 = a1.getArg(i);
+				Link link2 = a2.getArg(i);
+				Atom aa1 = link1.getAtom();
+				Atom aa2 = link2.getAtom();
+				int an1 = link1.getPos();
+				int an2 = link2.getPos();
+				
+				int index1 = log1.indexOf(aa1);
+				if (index1 >= 0) {
+					if (index1 != log2.indexOf(aa2) || an1 != an2) {
+						return false;
+					} else {
+						continue;
+					}
+				}
+				
+				boolean flag = traceLinks(aa1, an1, aa2, an2, atomsInMol1, atomsInMol2, log1, log2);
+				log1.remove(log1.size() - 1);
+				log2.remove(log2.size() - 1);
+				if (!flag) {
+					return false;
+				}
+			}
+			System.out.println(atomsInMol1 + ", " + atomsInMol2);
+			return true;
+		}
+	}
+:].
+
+H = meq.judgeEquality(Memb1, Memb2) :- H = 
+[:/*inline*/
+	Atom a1 = me.nthAtom(0).nthAtom(0); // アトム$in
+	Atom a2 = me.nthAtom(1).nthAtom(0);
+	Membrane m1 = (Membrane) (a1.getMem());
+	Membrane m2 = (Membrane) (a2.getMem());
+	boolean equality = MembraneEqualityJudge.judge(m1, m2);
+	
+	Atom result = mem.newAtom(new SymbolFunctor((equality) ? "true" : "false", 1));
+	mem.relinkAtomArgs(result, 0, me, 2);
+	a1.nthAtom(1).remove();
+	a2.nthAtom(1).remove();
+	me.remove();
+:](Memb1, Memb2).
+}.
+
+
+e1 = meq.judgeEquality(Memb1, Memb2).
+Memb1 = { a(X, Y). a(X, Y). b.}.
+Memb2 = { a(X, Y). a(X, Y). b.}.
+
+
+/*
+// 膜によるグループ分けの例
+hc0 = mhash.hashCode(Memb0).
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+hc3 = mhash.hashCode(Memb3).
+hc4 = mhash.hashCode(Memb4).
+hc5 = mhash.hashCode(Memb5).
+hc6 = mhash.hashCode(Memb6).
+hc7 = mhash.hashCode(Memb7).
+hc8 = mhash.hashCode(Memb8).
+hc9 = mhash.hashCode(Memb9).
+hc10 = mhash.hashCode(Memb10).
+hc11 = mhash.hashCode(Memb11).
+hc12 = mhash.hashCode(Memb12).
+hc13 = mhash.hashCode(Memb13).
+Memb0 = {aaa. bbb. ccc.}.
+Memb1 = {{aaa. bbb. ccc}. {}.}.
+Memb2 = {{}. {ccc. aaa. bbb}.}.   // アトムの順番が変ったとき
+Memb3 = {{aaa. bbb. ccc}. }.      // {}の有無
+Memb4 = {{aaa. bbb.}. {ccc.}.}.
+Memb5 = {{ccc.}. {aaa. bbb.}.}.
+Memb6 = {{aaa. ccc.}. {bbb.}.}.
+Memb7 = {{bbb. ccc.}. {aaa.}.}.
+Memb8 = {{aaa.}. {bbb.}. {ccc.}.}.
+Memb9 = {aaa.}.
+Memb10 = {{aaa.}.}.
+Memb11 = {{{aaa.}.}.}.
+Memb12 = {a = {w, c}. b = {g}}.
+Memb13 = {a = {w, g}. b = {c}}.
+*/
+
+/*
+// 「２つ一組が２つ」と「４つで環状」
+e1 = meq.judgeEquality(Memb22, Memb2).
+//e2 = meq.judgeEquality(Memb3, Memb4).
+Memb1 = { a(X, Y). a(X, Y). a(S, T). a(S, T). }.
+Memb2 = { a(X, Y). a(X, T). a(S, Y). a(S, T). }.
+Memb22 = { a(X, Y). a(X, T). a(S, Y). a(S, T). }.
+Memb3 = { a(X, Y). a(Y, Z). a(Z, X). a(S, T). a(T, S). }.
+Memb4 = { a(X, Y). a(Y, Z). a(Z, S). a(S, T). a(T, X). }.
+*/
+
+/*
+// 膜内のリンク先アトムひとつのみを考える場合には区別できない例
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+Memb1 = { x(X). y(Y). { a(X, L1). a(Y, L2). b(L3, L1). c(L2, L3). } }.
+Memb2 = { x(X). y(Y). { a(X, L1). a(Y, L2). c(L1, L3). b(L3, L2). } }.
+*/
+
+/*
+// 膜内のリンク先アトムひとつのみを考える場合には区別できない例
+e1 = meq.judgeEquality(Memb1, Memb2).
+Memb1 = { x(X). y(Y). a(X, L0). a(L0, L1). a(Y, L500). a(L500, L2). b(L3, L1). c(L2, L3). }.
+Memb2 = { x(X). y(Y). a(X, L0). a(L0, L1). a(Y, L500). a(L500, L2). c(L1, L3). b(L3, L2). }.
+*/
+/*
+// シス･トランス異性体
+e1 = meq.judgeEquality(Memb1, Memb2).
+Memb1 = { a(X, Y, L). a(X, T). a(S, Y). a(S, T, M). a(L). a(M). }.
+Memb2 = { a(X, Y, L). a(X, T). a(S, Y, M). a(S, T). a(L). a(M). }.
+*/
+
+/*
+//ferrymanの例題で使った状態を表す膜
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+Memb1 = {a = {f, c, g}. b = {}.}.
+Memb2 = {a = {c, g}. b = {f}.}.
+*/
