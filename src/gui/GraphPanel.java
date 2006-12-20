@@ -20,6 +20,8 @@ import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.LookAndFeel;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 
 import runtime.Membrane;

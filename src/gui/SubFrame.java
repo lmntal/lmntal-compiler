@@ -24,7 +24,7 @@ public class SubFrame extends JFrame {
 	// Äê¿ô
 	
 	final static
-	public int WINDOW_WIDTH = 250;
+	public int WINDOW_WIDTH = 260;
 	
 	final static
 	public int WINDOW_HIEGHT = 600;

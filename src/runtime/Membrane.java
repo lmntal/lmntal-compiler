@@ -1299,13 +1299,6 @@ public final class Membrane extends QueuedEntity {
 		return "{" + Dumper.encode(this, true, 2) + "}";
 	}
 		
-	/* *** *** *** *** *** BEGIN GUI *** *** *** *** *** */
-	public java.awt.geom.Rectangle2D.Double rect;
-	
-	
-	
-	/* *** *** *** *** *** END GUI *** *** *** *** *** */
-	
 	////////////////////////////////////////
 	// non deterministic LMNtal
 	AtomSet getAtoms() {

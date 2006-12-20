@@ -13,6 +13,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 /**
  * 環境。デバッグ用。
  * @author hara
@@ -238,6 +242,18 @@ public final class Env {
 	public static gui.LMNtalFrame gui;
 	public static void initGUI(){
 		if(!Env.fGUI){ return; }
+		try {
+			UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+
 		gui = new gui.LMNtalFrame();
 	}
 	

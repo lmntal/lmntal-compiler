@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,8 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import test.JavaTypeChecker;
 import type.TypeException;
@@ -164,7 +161,7 @@ public class FrontEnd {
 						/// -g
 						/// GUI mode. Atoms, membranes and links are drawn graphically.
 						/// Click button to proceed reaction. Close the window to quit.
-						Env.fGUI2 = true;
+						Env.fGUI = true;
 						break;
 					case 'o':
 						/// -o <file>
@@ -271,7 +268,7 @@ public class FrontEnd {
 						break;
 					case '-': // 文字列オプション						
 						if(args[i].equals("--gui")){
-							Env.fGUI2 = true;
+							Env.fGUI = true;
 						} else if (args[i].equals("--check-java-type")) {
 							JavaTypeChecker.enabled = true;
 						} else if (args[i].equals("--color")) {//2006.11.13 inui
@@ -742,15 +739,14 @@ public class FrontEnd {
 				}
 			}
 			
-			Env.initGUI2();
+			Env.initGUI();
 			Env.initGraphic();
 			Env.initTool();
 
 			
 
 			
-			root.rect = new java.awt.geom.Rectangle2D.Double(0.0, 0.0, 0.0, 0.0);
-			if(Env.fGUI2) Env.gui2.setRootMem(root);
+			if(Env.fGUI) Env.gui.setRootMem(root);
 //			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			boolean t = Env.fTrace;
@@ -769,8 +765,8 @@ public class FrontEnd {
 
 			boolean ready = true;
 			
-			if (Env.gui2 != null) {
-				Env.gui2.onTrace();
+			if (Env.gui != null) {
+				Env.gui.onTrace();
 			}
 			
 			/*TODO:3d calc*/
@@ -792,9 +788,8 @@ public class FrontEnd {
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );
 				}
 				if(Env.getExtendedOption("chorus") != ""){ Output.out(Env.getExtendedOption("chorus"), rt.getGlobalRoot()); }
-				// Env.gui2 が null で無い　→　GUIが起動中
-				if (Env.gui2 != null) {
-					Env.gui2.onTrace();
+				if (Env.gui != null) {
+					Env.gui.onTrace();
 				}
 			}
 			if(Env.fREMAIN) {
