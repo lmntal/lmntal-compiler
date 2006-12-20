@@ -1,10 +1,11 @@
-package gui2;
+package gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -15,8 +16,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import com.sun.org.apache.xerces.internal.dom.ParentNode;
 
 import runtime.Atom;
 import runtime.InterpretedRuleset;
@@ -324,6 +323,25 @@ public class Node implements Cloneable{
 		}
 	}
 	
+	/**
+	 * 自Nodeおよび子Nodeを含む、最小の矩形を取得する
+	 * @return
+	 */
+	public Rectangle getArea(){
+		Rectangle rect = new Rectangle(rect_.getBounds());
+		if(null != invisibleRootNode_){
+			return rect;
+		}
+		Iterator<Node> nodes = nodeMap_.values().iterator();
+		while(nodes.hasNext()){
+			Node node = nodes.next();
+			if(node == null){ continue; }
+			rect.add(node.getArea());
+		}
+		
+		return rect;
+	}
+	
 	public Node getBezierNode(Node node){
 		return bezierMap_.get(node);
 	}
@@ -441,13 +459,11 @@ public class Node implements Cloneable{
 	}
 	
 	public double getSize(){
-		if(myObject_ instanceof Atom){
-			return (ATOM_SIZE / 2);
+		if(null == myObject_ || myObject_ instanceof Atom){
+			return rect_.getHeight();
 		}
-		else {
-			
-		}
-		return 0;
+	
+		return ((rect_.getHeight() + rect_.getWidth()) / 2 );
 	}
 	
 	/**
@@ -643,6 +659,12 @@ public class Node implements Cloneable{
 			LinkSet.paint(g);
 		}
 		synchronized (nodeMap_) {
+			
+			// 描画範囲に入っていないものは描画しない
+			if(!g.getClipBounds().intersects(rect_.getBounds())){
+				return;
+			}
+			
 			// アトムまたは閉じた膜の描画
 			if(isAtom()){
 				g.setColor(myColor_);

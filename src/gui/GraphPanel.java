@@ -1,4 +1,4 @@
-package gui2;
+package gui;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -23,10 +24,17 @@ import javax.swing.border.BevelBorder;
 
 import runtime.Membrane;
 
+final
 public class GraphPanel extends JPanel {
 
 	///////////////////////////////////////////////////////////////////////////
 	// static
+
+	final static
+	private int AUTO_FOCUS_POS_DELTA = 5;
+	
+	final static
+	private int AUTO_FOCUS_SIZE_DELTA = 10;
 	
 	final static
 	private double POINT_DELTA_AREA = 10.0;
@@ -40,7 +48,8 @@ public class GraphPanel extends JPanel {
 	///////////////////////////////////////////////////////////////////////////
 	
 	private AffineTransform af_ = new AffineTransform();
-	private Thread calcTh_ = null;
+	private AutoFocusThread autoFocusTh_ = null;
+	private CalcThread calcTh_ = null;
 	private CommonListener commonListener_ = new CommonListener(this);
 	private double deltaX;
 	private double deltaY;
@@ -49,7 +58,7 @@ public class GraphPanel extends JPanel {
 	private Node moveTargetNode_ = null;
 	private Node selectedNode_ = null;
 	private Node orgRootNode_;
-	private Thread repaintTh_ = null;
+	private RepaintThread repaintTh_ = null;
 	private Membrane rootMembrane_;
 	private Node rootNode_;
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
@@ -79,6 +88,7 @@ public class GraphPanel extends JPanel {
 			 */
 			public void mousePressed(MouseEvent e) {
 				if(null == rootNode_){ return; }
+				//　Nodeの当たり判定を行うために、クリックしたPointを範囲（Rectangle）に変換
 				int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
 				int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
 				Rectangle2D rect = new Rectangle2D.Double(pointX - ((POINT_DELTA_AREA / 2) / getMagnification()),
@@ -178,6 +188,12 @@ public class GraphPanel extends JPanel {
 		repaintTh_ = new RepaintThread();
 		repaintTh_.start();
 	}
+	///////////////////////////////////////////////////////////////////////////
+	
+	public void autoFocus(){
+		autoFocusTh_ = new AutoFocusThread();
+		autoFocusTh_.start();
+	}
 	
 	/**
 	 * 力学モデルの計算・移動の計算を行う
@@ -217,36 +233,12 @@ public class GraphPanel extends JPanel {
 		rootNode_.setVisible(false, true);
 		rootNode_.setInvisibleRootNode(null);
 	}
-	
-	public void loadPrevState(){
-//		if(rootNodeList_.size() == 0 || nowHistoryPos_ == rootNodeList_.size()){
-//			return;
-//		}
-//		nowHistoryPos_++;
-//		rootNode_ = rootNodeList_.get(rootNodeList_.size() - nowHistoryPos_);
-//		commonListener_.setLog(rootMembrane_.toString());
-	}
-	
-	public void loadNextState(){
-//		if(rootNodeList_.size() == 0 || nowHistoryPos_ == 0){
-//			return;
-//		}
-//		nowHistoryPos_--;
-//		if(nowHistoryPos_ == 0){
-//			rootMembrane_ = orgRootMembrane_;
-//			rootNode_ = orgRootNode_;
-//			return;
-//		}
-//		rootNode_ = rootNodeList_.get(rootNodeList_.size() - nowHistoryPos_);
-//		commonListener_.setLog(rootMembrane_.toString());
-	}
 
 	public void loadState(int value){
 		if(rootNodeList_.size() == 0 || value >= rootNodeList_.size() || value < 0){
 			return;
 		}
 		if(value == rootNodeList_.size() - 1){
-//			LinkSet.resetNodes(orgRootNode_);
 			rootNode_ = orgRootNode_;
 			LinkSet.resetNodes(orgRootNode_);
 			commonListener_.setLog(logList_.get(value));
@@ -373,10 +365,12 @@ public class GraphPanel extends JPanel {
 		public CalcThread() {}
 		
 		public void run() {
-			while(runnable_) {
+			while(true) {
 				try {
 					sleep(40);
-					calc();
+					if(runnable_){
+						calc();
+					}
 				} catch (Exception e) {
 				}
 			}
@@ -399,10 +393,12 @@ public class GraphPanel extends JPanel {
 		public RepaintThread() {}
 		
 		public void run() {
-			while(runnable_) {
+			while(true) {
 				try {
 					sleep(50);
-					repaint();
+					if(runnable_){
+						repaint();
+					}
 				} catch (Exception e) {
 				}
 			}
@@ -411,5 +407,75 @@ public class GraphPanel extends JPanel {
 		public void setRunnable(boolean runnable){
 			runnable_ = runnable;
 		}
+		
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+	/**
+	 * AutoFocus用スレッド
+	 * @author nakano
+	 *
+	 */
+	class AutoFocusThread extends Thread {
+		boolean change_ = true;
+		boolean reduction_ = false;
+		
+		public AutoFocusThread() {}
+		
+		public void run() {
+			while(change_ && autoFocusTh_ == Thread.currentThread()) {
+				try {
+					sleep(20);
+					autoFocus();
+					repaint();
+				} catch (Exception e) {
+				}
+			}
+		}
+		
+		
+		/**
+		 * rect　が最適に表示できるように倍率および位置を調節する。
+		 * @param rect
+		 */
+		public void autoFocus() {
+			Rectangle rect = rootNode_.getArea();
+			change_ = false;
+			// 縮小処理
+			if(0 < magnification_ &&
+					(getHeight() < (rect.height * magnification_) + AUTO_FOCUS_SIZE_DELTA ||
+					getWidth() < (rect.width * magnification_) + AUTO_FOCUS_SIZE_DELTA))
+			{
+				change_ = true;
+				reduction_ = true;
+				magnification_ -= 0.01;
+				double value = (magnification_ / 2) * SubFrame.SLIDER_MAX;
+				commonListener_.setMagnificationSliderValue((int)value);
+			}
+			// 拡大処理
+			else if(magnification_ < 2 && 
+					!reduction_ &&
+					(getHeight() > (rect.height * magnification_) + AUTO_FOCUS_SIZE_DELTA ||
+							getWidth() > (rect.width * magnification_) + AUTO_FOCUS_SIZE_DELTA))
+			{
+				change_ = true;
+				reduction_ = false;
+				magnification_ += 0.01;
+				double value = (magnification_ / 2) * SubFrame.SLIDER_MAX;
+				commonListener_.setMagnificationSliderValue((int)value);
+			}
+			// 移動処理
+			if(AUTO_FOCUS_POS_DELTA < Math.abs(rect.getCenterX())){
+				change_ = true;
+				rootNode_.setPosDelta(-(rect.getCenterX() / 10),
+						0);
+			}
+			if(AUTO_FOCUS_POS_DELTA < Math.abs(rect.getCenterY())){
+				change_ = true;
+				rootNode_.setPosDelta(0,
+						-(rect.getCenterY() / 10));
+			}
+		}
+		
 	}
 }

@@ -1,11 +1,10 @@
-package gui2;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.JFrame;
@@ -35,7 +34,7 @@ public class AdvanceFrame extends JFrame {
 	
 	/////////////////////////////////////////////////////////////////
 	
-	private LMNtalFrame mainFrame;
+	private LMNtalFrame mainFrame_;
 	
 	private CommonListener commonListener_ = new CommonListener(this);
 	
@@ -43,13 +42,13 @@ public class AdvanceFrame extends JFrame {
 	
 	private AdvancePanel panel_ = new AdvancePanel();
 	
-	private Thread panelThread;
+	private Thread panelThread_;
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
 	public AdvanceFrame(LMNtalFrame f) {
 		
-		mainFrame = f;
+		mainFrame_ = f;
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);

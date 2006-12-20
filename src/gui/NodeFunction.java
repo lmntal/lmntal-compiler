@@ -1,9 +1,11 @@
-package gui2;
+package gui;
 
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -41,6 +43,10 @@ public class NodeFunction {
 	/** 発散定数 */
 	final static
 	private double CONSTANT_DIVERGENCE = 0.01;
+	
+	/** 角度調整力定数 */
+	final static
+	private double CONSTANT_ANGLE = 1.5;
 	
 	/** 発散時間 */
 	final static
@@ -157,7 +163,10 @@ public class NodeFunction {
 	 */
 	static
 	public void calcRepulsive(Node node, Map<Object, Node> nodeMap){
-		if(!repulsiveFlag_ || !Membrane.class.isInstance(node.getObject())){
+		if(!repulsiveFlag_ ||
+				!(node.getObject() instanceof Membrane) ||
+				null != node.getInvisibleRootNode())
+		{
 			return;
 		}
 
@@ -171,8 +180,6 @@ public class NodeFunction {
 				// 表示されているNodeを取得する
 				Node targetNode = targetNodes.next();
 				// 引力は働かせない
-//				if(sourceNode == targetNode ||
-//						!sourceRect.intersects(targetNode.getBounds2D()))
 				if(sourceNode.getID() == targetNode.getID())
 				{
 					continue; 
@@ -180,9 +187,12 @@ public class NodeFunction {
 
 				Point2D targetPoint = targetNode.getCenterPoint();
 
+				double size = (sourceNode.getSize() + targetNode.getSize()) / 2;
 				// TODO: Node　の大きさ
-				double distance =
-					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
+				double distance = 
+					Point.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
+
+//					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / size;
 
 				double divergenceFource = (divergenceTimer_ == 0) ? 1 : 2;
 				if(distance > 1 * divergenceFource){
@@ -263,8 +273,8 @@ public class NodeFunction {
 				double tx = -dy / edgeLength;
 				double ty =  dx / edgeLength;
 				
-				dx = 1.5 * tx * angleR;
-				dy = 1.5 * ty * angleR;
+				dx = CONSTANT_ANGLE * tx * angleR;
+				dy = CONSTANT_ANGLE * ty * angleR;
 				
 				dx = dx * 2;
 				dy = dy * 2;
@@ -304,12 +314,13 @@ public class NodeFunction {
 				continue; 
 			}
 
+			int memNum = countMembraneNum(sourceNode, nthNode);
 			double distance =
 				Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
 
-			double divergenceFource = (divergenceTimer_ == 0) ? 1 : Math.random() * 10;
+			double divergenceFource = (divergenceTimer_ == 0) ? 1 : (Math.random() * 10) - (Math.random() * 5);
 			
-			double f = -CONSTANT_SPRING * divergenceFource * ((distance / ( 80 * 2)) - 1.0);
+			double f = -CONSTANT_SPRING * divergenceFource * ((distance / (20 + (60 * (memNum + 1)))) - 1.0);
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
@@ -319,6 +330,37 @@ public class NodeFunction {
 			nthNode.moveDelta(-ddx, -ddy);
 
 		}
+	}
+	
+	/**
+	 * node1とnode2の間に階層の数を数える
+	 * @param node1
+	 * @param node2
+	 * @return
+	 */
+	static
+	private int countMembraneNum(Node node1, Node node2){
+		if(node1.getParent() == node2.getParent()){
+			return 1;
+		}
+		Node node = node1;
+		Map<Integer, Integer> memMap = new HashMap<Integer, Integer>();
+		int counter = 1;
+		while(null != node.getParent()){
+			node = node.getParent();
+			memMap.put(node.getID(), counter);
+			counter++;
+		}
+		node = node2;
+		int counter2 = 0;
+		while(null != node.getParent()){
+			node = node.getParent();
+			if(memMap.containsKey(node.getID())){
+				return (memMap.get(node.getID()) + counter2);
+			}
+			counter2++;
+		}
+		return (counter + counter2);
 	}
 	
 	static
@@ -362,8 +404,8 @@ public class NodeFunction {
 			popup.add(item);
 		}
 		popup.show(panel, 
-				(int)((nodeRectangle.getMaxX() * panel.getMagnification()) + (panel.getWidth() / 2)),
-				(int)((nodeRectangle.getMaxY() * panel.getMagnification()) + (panel.getHeight() / 2)));
+				(int)((nodeRectangle.getMaxX() * GraphPanel.getMagnification()) + (panel.getWidth() / 2)),
+				(int)((nodeRectangle.getMaxY() * GraphPanel.getMagnification()) + (panel.getHeight() / 2)));
 	}
 	
 	static

@@ -1,7 +1,5 @@
-package gui2;
+package gui;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
@@ -10,7 +8,7 @@ import java.awt.event.MouseWheelListener;
  * @author nakano
  *
  */
-public class CommonListener implements MouseWheelListener , KeyListener{
+public class CommonListener implements MouseWheelListener {
 
 	static
 	private AdvanceFrame advance_;
@@ -54,23 +52,6 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 		subFrame_.setSliderValue(subFrame_.getSliderValue() - e.getWheelRotation());
 	}
 	
-	public void keyPressed(KeyEvent e) {
-		if(null == panel_){ return; }
-		
-		if(e.getKeyCode() == KeyEvent.VK_LEFT){
-			panel_.loadPrevState();
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_RIGHT){
-			panel_.loadNextState();
-		}
-	}
-	
-	public void keyReleased(KeyEvent e) {
-	}
-	
-	public void keyTyped(KeyEvent e) {
-	}
-	
 	///////////////////////////////////////////////////////////////////////////
 	
 	public void addTime(){
@@ -78,19 +59,14 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 		logFrame_.addTime();
 	}
 	
+	public void autoFocus(){
+		if(null == panel_){ return; }
+		panel_.autoFocus();
+	}
+	
 	public String getLog(){
 		if(null == logFrame_){ return ""; }
 		return logFrame_.getLog();
-	}
-	
-	public void loadNextState(){
-		if(null == panel_){ return; }
-		panel_.loadNextState();
-	}
-	
-	public void loadPrevState(){
-		if(null == panel_){ return; }
-		panel_.loadPrevState();
 	}
 
 	public void revokeTime(){
@@ -120,5 +96,10 @@ public class CommonListener implements MouseWheelListener , KeyListener{
 	public void setSelectedNode(Node node){
 		if(null == advance_){ return; }
 		advance_.setSelectedNode(node);
+	}
+	
+	public void setMagnificationSliderValue(int value){
+		if(null == subFrame_){ return; }
+		subFrame_.setSliderValue(value);
 	}
 }

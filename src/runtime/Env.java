@@ -235,10 +235,10 @@ public final class Env {
 	 * 新 GUI モード。
 	 */
 	public static boolean fGUI = false;
-	public static gui2.LMNtalFrame gui;
+	public static gui.LMNtalFrame gui;
 	public static void initGUI(){
 		if(!Env.fGUI){ return; }
-		gui = new gui2.LMNtalFrame();
+		gui = new gui.LMNtalFrame();
 	}
 	
 	/**

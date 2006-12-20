@@ -1,4 +1,4 @@
-package gui2;
+package gui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -33,10 +33,10 @@ public class SubFrame extends JFrame {
 	public String TITLE = "Control Panel";
 	
 	final static
-	private int SLIDER_MIN = 0;
+	public int SLIDER_MIN = 0;
 	
 	final static
-	private int SLIDER_MAX = 100;
+	public int SLIDER_MAX = 100;
 	
 	final static
 	private int SLIDER_DEF = 30;
@@ -56,6 +56,8 @@ public class SubFrame extends JFrame {
 	private JButton heatBt_ = new JButton("Heat");
 
 	private JButton stopHeatingBt_ = new JButton("Stop Heating");
+
+	private JButton autoFocusBt_ = new JButton("Auto Focues");
 	
 	private JScrollPane menuScroll_;
 	
@@ -114,6 +116,7 @@ public class SubFrame extends JFrame {
 		hideBt_.addActionListener(new HideAllAdapter(this));
 		heatBt_.addActionListener(new HeatupAdapter());
 		stopHeatingBt_.addActionListener(new StopHeatingAdapter());
+		autoFocusBt_.addActionListener(new AutoFocusgAdapter());
 		stepBox_.setHorizontalAlignment(JTextField.RIGHT);
 		
 		
@@ -183,7 +186,7 @@ public class SubFrame extends JFrame {
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
-        gbc.gridheight = 4;
+        gbc.gridheight = 5;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.weightx = 0.0;
         gbc.weighty = 1.0;
@@ -201,21 +204,20 @@ public class SubFrame extends JFrame {
 		getContentPane().add(hideBt_, gbc);
 
 		gbc.gridx = 1;
-		gbc.gridy = 2;
-		gbc.gridwidth = 2;
-        gbc.gridheight = 1;
+		gbc.gridy += 1;
+		gbc.gridwidth = 1;
 		getContentPane().add(heatBt_, gbc);
 
-		gbc.gridx = 1;
-		gbc.gridy = 3;
-		gbc.gridwidth = 2;
-        gbc.gridheight = 1;
+		gbc.gridx = 2;
+		gbc.gridwidth = 1;
 		getContentPane().add(stopHeatingBt_, gbc);
-		
+
 		gbc.gridx = 1;
-		gbc.gridy = 4;
 		gbc.gridwidth = 2;
-        gbc.gridheight = 1;
+		gbc.gridy += 1;
+		getContentPane().add(autoFocusBt_, gbc);
+		
+		gbc.gridy += 1;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;
         gbc.weighty = 100.0;
@@ -253,6 +255,18 @@ public class SubFrame extends JFrame {
 
 		public void itemStateChanged(ItemEvent e) {
 			NodeFunction.setAttractionFlag(attractionCheck_.isSelected());
+		}
+	}
+
+	/**
+	 * AutoFocus処理開始
+	 * @author nakano
+	 *
+	 */
+	private class AutoFocusgAdapter implements ActionListener {
+		public AutoFocusgAdapter() { }
+		public void actionPerformed(ActionEvent e) {
+			commonListener_.autoFocus();
 		}
 	}
 

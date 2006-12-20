@@ -1,4 +1,4 @@
-package gui2;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
@@ -55,8 +55,6 @@ public class LMNtalFrame extends JFrame {
 				running_ = false;
 			}
 		});
-		
-		addKeyListener(new CommonListener(panel_));
 		
 		initComponents();
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
