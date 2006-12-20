@@ -57,7 +57,7 @@ public class SubFrame extends JFrame {
 
 	private JButton stopHeatingBt_ = new JButton("Stop Heating");
 
-	private JButton autoFocusBt_ = new JButton("Auto Focues");
+	private JButton autoFocusBt_ = new JButton("Auto Focus");
 	
 	private JScrollPane menuScroll_;
 	
