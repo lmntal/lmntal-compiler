@@ -1,26 +1,35 @@
-% 格子状に（違うか）ピラミッドのような図形を作る。
-% ほとんどソースは暗号だが、やってることは大して複雑ではない。格子形成の六角形バージョン。
-% つまり、上三角形形成と、下三角形形成の二パターンがあるというだけ。
+/* 三角形版格子形成 (2006/12/21 改訂) */
 
-top = p(7).
+Start1@@ triangles($n) :- int($n) |  top=create($n).
+Start2@@ R=create($n) :- $n > 0 | R=v(nil,nil,create($n-1),nil,nil).
+Start3@@ R=create($n) :- $n = 0 | R=end.
 
-P=p(N) :- N>0| P = s(n,n,p(N-1)).
-P=p(N) :- N=0| P = e.
+Basic1@@
+v(V00,nil,N,V03,V04,V05),v(nil,V11,V12,V13,V14,N) :-
+  v(V00,L0,N,V03,V04,V05),v(L1,V11,V12,V13,V14,N),v(nil,nil,nil,L1,L0,nil).
 
-%top(s(n,S)) :- top(s(n(N),S),N).
+Basic2@@
+v(V00,V01,nil,N1,V04,V05),v(N1,N2,V12,V13,V14,V15),v(V20,V21,V22,V23,N2,nil) :-
+  v(V00,V01,L,N1,V04,V05),v(N1,N2,V12,V13,V14,V15),v(V20,V21,V22,V23,N2,L).
 
-s(N11,n,S,T),s(n,N22,SN,S) :- s(N11,L1,S,T),s(L2,N22,SN,S),n(n,n,n,L2,L1,n).
+Final1@@
+v(nil,V01,V02,nil,nil,top),v(V10,V11,V12,V13,V01,V15),v(V20,V21,V22,V23,V24,V02):-
+t(f(V01),f(V02)),          v(V10,V11,V12,V13,V01,V15),v(V20,V21,V22,V23,V24,V02).
+Final2@@
+v(V00,V01,V02,nil,nil,F),f(F,F1),v(V10,V11,V12,V13,V01,V15):-
+e(V00,V01,f(V02),F1),            v(V10,V11,V12,V13,V01,V15).
+Final3@@
+v(V00,nil,end,nil,nil,F),f(F,F1),v(V10,V11,V12,V00,V14,V15) :-
+t(f(V00),F1),                    v(V10,V11,V12,V00,V14,V15).
+Final4@@
+v(nil,V01,V02,V03,F,nil),f(F,F1),v(V10,V11,V12,V13,V01,V15):-
+e(f(V01),V02,V03,F1),            v(V10,V11,V12,V13,V01,V15).
+Final5@@
+v(V00,nil,nil,F,V04,V05),f(F,F1),v(V10,V11,V12,V00,V14,V15):-
+e(f(V00),F1,V04,V05),            v(V10,V11,V12,V00,V14,V15).
+Final6@@
+v(nil,nil,nil,F1,F2,nil),f(F1,F11),f(F2,F21):-
+t(F11,F21).
 
-s(N1,N2,S,T),n(L1,L2,n,N1,L3,L4),n(L5,L6,L7,L8,N2,n) :- s(NN1,NN2,S,T),n(L1,L2,X,NN1,L3,L4),n(L5,L6,L7,L8,NN2,X).
 
-n(L1,n,N,L2,L3,L4),n(n,L5,L6,L7,L8,N) :- n(L1,X,NN,L2,L3,L4),n(Y,L5,L6,L7,L8,NN),n(n,n,n,Y,X,n).
-
-n(N1,N2,L1,L2,L3,L4),n(L5,L6,n,N1,L7,L8),n(L9,L10,L11,L12,N2,n) :- n(NN1,NN2,L1,L2,L3,L4),n(L5,L6,X,NN1,L7,L8),n(L9,L10,L11,L12,NN2,X).
-
-s(N,n,e,T) :- s(N,z(Z),e(Z),T).
-
-z(E,ZZ),s(N,ZZ,L1,L2),n(L3,L4,n,N,L5,L6) :- s(NN,ZZZ,L1,L2),n(L3,L4,Z,NN,L5,L6),z(E,ZZZ,Z).
-
-z(L1,L2,N),n(L3,n,N,L4,L5,L6) :- z(L1,L2,NN,Z),z(Z,ZN),n(L3,ZN,NN,L4,L5,L6).
-
-z(L1,Z),n(N,Z,L2,L3,L4,L5),n(L6,L7,n,N,L8,L9) :- z(L1,ZZ,X),n(NN,ZZ,L2,L3,L4,L5),n(L6,L7,X,NN,L8,L9).
+triangles(5).
