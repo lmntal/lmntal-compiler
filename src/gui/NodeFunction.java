@@ -187,12 +187,12 @@ public class NodeFunction {
 
 				Point2D targetPoint = targetNode.getCenterPoint();
 
-				double size = (sourceNode.getSize() + targetNode.getSize()) / 2;
+				double size = Math.max(sourceNode.getSize() , targetNode.getSize());
 				// TODO: Node　の大きさ
 				double distance = 
-					Point.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
+//					Point.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
 
-//					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / size;
+					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / size;
 
 				double divergenceFource = (divergenceTimer_ == 0) ? 1 : 2;
 				if(distance > 1 * divergenceFource){

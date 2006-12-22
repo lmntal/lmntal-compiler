@@ -130,10 +130,11 @@ public class LinkSet {
 					
 					if(showLinkNum_ || key.getID() <= nthNode.getID()){
 						Node nodeTarget = getVisibleNode(nthNode);
-						
 						// リンク元もリンク先も描画範囲に入っていない場合は描画しない
-						if(!g.getClipBounds().intersects(nodeSource.getBounds2D()) &&
-								!g.getClipBounds().intersects(nthNode.getBounds2D()))
+						if(null == g ||
+								null == g.getClipBounds() ||
+								(!g.getClipBounds().intersects(nodeSource.getBounds2D()) &&
+								!g.getClipBounds().intersects(nthNode.getBounds2D())))
 						{
 							continue;
 						}

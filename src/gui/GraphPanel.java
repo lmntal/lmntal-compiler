@@ -20,8 +20,6 @@ import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import javax.swing.LookAndFeel;
-import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 
 import runtime.Membrane;
@@ -444,7 +442,7 @@ public class GraphPanel extends JPanel {
 			Rectangle rect = rootNode_.getArea();
 			change_ = false;
 			// ½Ì¾®½èÍý
-			if(0 < magnification_ &&
+			if(0.01 < magnification_ &&
 					(getHeight() < (rect.height * magnification_) + AUTO_FOCUS_SIZE_DELTA ||
 					getWidth() < (rect.width * magnification_) + AUTO_FOCUS_SIZE_DELTA))
 			{
