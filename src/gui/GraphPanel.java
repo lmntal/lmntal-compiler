@@ -8,6 +8,8 @@ import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -102,6 +104,9 @@ public class GraphPanel extends JPanel {
 					if(null == moveTargetNode_){ return; }
 					moveTargetNode_.swapVisible();
 					moveTargetNode_.setUncalc(false);
+					if(null != moveTargetNode_.getParent()){
+						moveTargetNode_.getParent().setUncalcOutSideForce(false);
+					}
 					moveTargetNode_ = null;
 					return;
 				}
@@ -133,6 +138,9 @@ public class GraphPanel extends JPanel {
 				
 				if(null != moveTargetNode_){
 					moveTargetNode_.setUncalc(true);
+					if(null != moveTargetNode_.getParent()){
+						moveTargetNode_.getParent().setUncalcOutSideForce(true);
+					}
 					if(selectedNode_ != moveTargetNode_ && 
 							!moveTargetNode_.isBezNode()){
 						moveTargetNode_.setSelected(true);
@@ -160,6 +168,9 @@ public class GraphPanel extends JPanel {
 			public void mouseReleased(MouseEvent e) {
 				if(null != moveTargetNode_){
 					moveTargetNode_.setUncalc(false);
+					if(null != moveTargetNode_.getParent()){
+						moveTargetNode_.getParent().setUncalcOutSideForce(false);
+					}
 					moveTargetNode_ = null;
 				}
 				setCursor(new Cursor(Cursor.HAND_CURSOR));

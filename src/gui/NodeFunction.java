@@ -1,6 +1,5 @@
 package gui;
 
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
@@ -190,8 +189,6 @@ public class NodeFunction {
 				double size = Math.max(sourceNode.getSize() , targetNode.getSize());
 				// TODO: Node　の大きさ
 				double distance = 
-//					Point.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
-
 					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / size;
 
 				double divergenceFource = (divergenceTimer_ == 0) ? 1 : 2;

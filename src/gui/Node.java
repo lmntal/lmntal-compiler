@@ -130,6 +130,8 @@ public class Node implements Cloneable{
 	
 	/** 非計算フラグ */
 	private boolean uncalc_ = false;
+
+	private boolean uncalcOutsideFource_ = false;
 	
 	/** 可視フラグ */
 	private boolean visible_;
@@ -638,7 +640,7 @@ public class Node implements Cloneable{
 	 * @param dy
 	 */
 	public void moveDelta(double dx, double dy){
-		if(uncalc_ || clipped_){ return; }
+		if(uncalc_ || clipped_ || uncalcOutsideFource_){ return; }
 		dx_ += dx;
 		dy_ += dy;
 		synchronized (nodeMap_) {
@@ -1143,6 +1145,10 @@ public class Node implements Cloneable{
 	static
 	public void setShowFullName(boolean showFullName){
 		showFullName_ = showFullName;
+	}
+	
+	public void setUncalcOutSideForce(boolean uncalc){
+		uncalcOutsideFource_ = uncalc;
 	}
 	
 	/**
