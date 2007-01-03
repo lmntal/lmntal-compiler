@@ -1,0 +1,389 @@
+% 膜同士の同型判定
+%
+% AUTHOR: Kohei HIROTO
+% 
+% 06/12/19
+
+/* 膜同士の同型判定。
+   詳細な構造比較に入る前の予備検査は省略している。 */
+{
+module(meq).
+
+[:/*inline_define*/	
+	import java.util.*;
+	import util.*;
+	
+	class MembraneEqualityJudge {
+		/* mの直下のアトムの集合を返す */
+		private static Set<Atom> getAtomSet(Membrane m) {
+			Set<Atom> atoms = new HashSet<Atom> (m.getAtomCount());
+			for (Iterator i = m.atomIterator(); i.hasNext(); ) {
+				atoms.add((Atom) i.next());
+			}
+			return atoms;
+		}
+		
+		/* mの直下の子膜の集合を返す */
+		private static Set<Membrane> getMemSet(Membrane m) {
+			Set<Membrane> mems = new HashSet<Membrane> (m.getMemCount());
+			for (Iterator i = m.memIterator(); i.hasNext(); ) {
+				mems.add((Membrane) i.next());
+			}
+			return mems;
+		}
+		
+		/* m1とm2が同型ならば真同型でなければ偽を返す */
+		static boolean judge(Membrane m1, Membrane m2) {
+			return judge(m1, getAtomSet(m1), getMemSet(m1), m2, getAtomSet(m2), getMemSet(m2), 0, new HashSet<Atom>(), new HashSet<Membrane>(), new HashSet<Atom>(), new HashSet<Membrane>());
+		}
+		
+		/* 
+		 * m1とm2が同型ならば真同型でなければ偽を返す 
+		 * @param uncheckedAtoms1 m1直下のアトムのうちm2との同型性が未チェックのものの集合
+		 * @param uncheckedMems1 m1直下の子膜のうちm2との同型性が未チェックのものの集合
+		 * @param depth m1およびm2が同型性を判定したい膜の何階層下の子膜であるかを示すゼロ以上の整数値。
+		 * 				m1およびm2が同型性を判定したい膜そのものであるとき0
+		 * @param checkedAtoms1 同型性判定が終了したアトムの集合。m1直下にないアトムも含み得る。
+		 * 				このメソッドが真を返すとき少なくともuncheckedAtoms1に含まれていたアトムは追加される。
+		 * 				偽を返すときは呼び出し時の状態から変化しない。
+		 * @param checkedMems1 同型性判定が終了した膜の集合。m1直下にない膜も含み得る。
+		 * 				このメソッドが真を返すとき少なくともuncheckedMems1に含まれていた子膜は追加される。
+		 * 				偽を返すときは呼び出し時の状態から変化しない。
+		 */
+		private static boolean judge(Membrane m1, Set<Atom> uncheckedAtoms1, Set<Membrane> uncheckedMems1, Membrane m2, Set<Atom> uncheckedAtoms2, Set<Membrane> uncheckedMems2, int depth, Set<Atom> checkedAtoms1, Set<Membrane> checkedMems1, Set<Atom> checkedAtoms2, Set<Membrane> checkedMems2) {
+			System.out.println("judge:\nm1=" + m1 + "\n\tuncheckedAtoms1=" + uncheckedAtoms1 + "\n\tuncheckedMems1=" + uncheckedMems1 + "\nm2=" + m2 + "\n\tuncheckedAtoms2=" + uncheckedAtoms2 + "\n\tuncheckedMems2=" + uncheckedMems2
+								+ "\ncheckedAtoms1=" + checkedAtoms1 + "\ncheckedMems1=" + checkedMems1 + "\ncheckedAtoms2=" + checkedAtoms2 + "\ncheckedMems2=" + checkedMems2);
+			
+			// 直下のアトム数と子膜数を調べる
+			if (m1.getAtomCount() != m2.getAtomCount()
+				|| m1.getMemCount() != m2.getMemCount()) {
+				return false;
+			}
+			
+			/*
+			 * tca1: このメソッドが真を返すときcheckedAtoms1に追加されるアトムの集合
+			 * tcm1: このメソッドが真を返すときcheckedMems1に追加される膜の集合
+			 */
+			Set<Atom> tca1 = new HashSet<Atom>(checkedAtoms1), tca2 = new HashSet<Atom>(checkedAtoms2);
+			Set<Membrane> tcm1 = new HashSet<Membrane>(checkedMems1), tcm2 = new HashSet<Membrane>(checkedMems2);
+			
+			/*
+			 * traceメソッドの呼び出しに必要となる変数群
+			 */
+			Set<Atom> atomsInMol1 = new HashSet<Atom>(), atomsInMol2 = new HashSet<Atom>();
+			List<Membrane> mLog1 = new ArrayList<Membrane>(), mLog2 = new ArrayList<Membrane>();
+			List<Integer> mdLog = new ArrayList<Integer>();
+			
+			// m1とm2直下のアトムをそれぞれ起点とする分子を調べる
+			while (!uncheckedAtoms1.isEmpty()) {
+				Atom a1 = uncheckedAtoms1.iterator().next();
+				/* matched: m1直下のアトムa1を起点とする分子とマッチする分子がm2内で最終的に見つかったかどうかを示すフラグ */
+				boolean matched = false;
+				Set<Atom> ca1 = null, ca2 = null;
+				Set<Membrane> cm1 = null, cm2 = null;
+				for (Iterator i = uncheckedAtoms2.iterator(); i.hasNext() && !matched; ) {
+					Atom a2 = (Atom) i.next();
+					atomsInMol1.clear();
+					atomsInMol2.clear();
+					mLog1.clear();
+					mLog2.clear();
+					mdLog.clear();
+					
+					trace: {
+						if (traceLinks(a1, a2, depth, atomsInMol1, atomsInMol2, mLog1, mLog2, mdLog)) {
+							// traceLinksで通過してきた膜をその順番どおり検査する
+							// 膜が全てマッチすれば、a1とa2をそれぞれ起点とする分子全体がマッチしたことになる
+							ca1 = new HashSet<Atom>(tca1);
+							ca2 = new HashSet<Atom>(tca2);
+							ca1.addAll(atomsInMol1);
+							ca2.addAll(atomsInMol2);
+							cm1 = new HashSet<Membrane>(tcm1);
+							cm2 = new HashSet<Membrane>(tcm2);
+							for (int k = 0; k < mLog1.size(); k++) {
+								Membrane mm1 = mLog1.get(k), mm2 = mLog2.get(k);
+								int d = mdLog.get(k);
+								Set<Atom> ua1 = getAtomSet(mm1), ua2 = getAtomSet(mm2); 
+								ua1.removeAll(ca1);
+								ua2.removeAll(ca2);
+								Set<Membrane> um1 = getMemSet(mm1), um2 = getMemSet(mm2);
+								um1.removeAll(cm1);
+								um2.removeAll(cm2);
+								if (!judge(mm1, ua1, um1, mm2, ua2, um2, d, ca1, cm1, ca2, cm2)) {
+									// 膜がひとつでもマッチしなかったら、このa2を起点とする分子はa1を起点とする分子にマッチしなかったということになる
+									break trace;
+								}
+							}
+							// traceLinksで通過してきた膜が全てマッチしたときここに到達する
+							matched = true;
+						}
+					}
+				}
+					
+				if (matched) {
+					// a1とa2をそれぞれ起点とする分子同士のマッチングに成功したときここに到達する
+					tca1.addAll(ca1);
+					tcm1.addAll(cm1);
+					tca2.addAll(ca2);
+					tcm2.addAll(cm2);
+					uncheckedAtoms1.removeAll(tca1);
+					uncheckedMems1.removeAll(tcm1);
+					uncheckedAtoms2.removeAll(tca2);
+					uncheckedMems2.removeAll(tcm2);
+				} else {
+					return false;
+				}
+			}
+			
+			// m1とm2直下のアトムをそれぞれ起点とする分子のマッチングが全て成功したときここに到達する
+			// m1とm2直下の子膜をそれぞれ起点とする分子を調べる
+			while (!uncheckedMems1.isEmpty()) {
+				Membrane mm1 = uncheckedMems1.iterator().next();
+				Membrane mm2 = null;
+				/* matched: m1直下の子膜mm1を起点とする分子とマッチする分子がm2内で最終的に見つかったかどうかを示すフラグ */
+				boolean matched = false;
+				Set<Atom> ca1 = null, ca2 = null, ua1 = null, ua2 = null;
+				Set<Membrane> cm1 = null, cm2 = null, um1 = null, um2 = null;
+				for (Iterator i = uncheckedMems2.iterator(); i.hasNext() && !matched; ) {
+					mm2 = (Membrane) i.next();
+					ua1 = getAtomSet(mm1);
+					ua1.removeAll(tca1);
+					ua2 = getAtomSet(mm2);
+					ua2.removeAll(tca2);
+					um1 = getMemSet(mm1);
+					um1.removeAll(tcm1);
+					um2 = getMemSet(mm2);
+					um2.removeAll(tcm2);
+					
+					ca1 = new HashSet<Atom>(tca1);
+					ca2 = new HashSet<Atom>(tca2);
+					cm1 = new HashSet<Membrane>(tcm1);
+					cm2 = new HashSet<Membrane>(tcm2);
+					
+					mLog1.clear();
+					mLog2.clear();
+					mdLog.clear();
+					
+					if (judge(mm1, ua1, um1, mm2, ua2, um2, depth + 1, ca1, cm1, ca2, cm2)) {
+						matched = true;
+					}
+				}
+					
+				if (matched) {
+					// mm1とmm2をそれぞれ起点とする分子同士のマッチングに成功したときここに到達する
+					tca1.addAll(ca1);
+					tcm1.addAll(cm1);
+					tcm1.add(mm1);
+					tca2.addAll(ca2);
+					tcm2.addAll(cm2);
+					tcm2.add(mm2);
+					uncheckedAtoms1.removeAll(tca1);
+					uncheckedMems1.removeAll(tcm1);
+					uncheckedAtoms2.removeAll(tca2);
+					uncheckedMems2.removeAll(tcm2);
+				} else {
+					return false;
+				}
+			}
+			
+			// m1とm2が同型と判定されたときここに到達する
+			checkedAtoms1.addAll(tca1);
+			checkedMems1.addAll(tcm1);
+			checkedAtoms2.addAll(tca2);
+			checkedMems2.addAll(tcm2);
+			return true;
+		}
+		
+		/*
+		 * a1とa2をそれぞれ起点とする分子を比較する。このメソッドはメソッドjudgeから呼び出される。
+		 */
+		private static boolean traceLinks(Atom a1, Atom a2, int depth, Set<Atom> atomsInMol1, Set<Atom> atomsInMol2, List<Membrane> mLog1, List<Membrane> mLog2, List<Integer> mdLog) {
+			//System.out.println("a1=" + a1 + ", a2=" + a2);
+			return traceLinks(a1, -1, a2, -1, depth, atomsInMol1, atomsInMol2, new ArrayList<Atom>(), new ArrayList<Atom>(), mLog1, mLog2, mdLog);
+		}
+		
+		/*
+		 * a1とa2をそれぞれ起点とする分子を比較する
+		 * @param a1 起点となるアトム
+		 * @param argNum1 あるアトムからa1へのリンクを辿ってきたときの、a1側の引数番号。
+		 * @param atomInMol1 メソッド実行後に分子１に含まれるアトムが追加されている
+		 * @param depth メソッドjudgeの引数depthが受け渡される
+		 * @param mLog1 トレースで通過してきた膜が通過順に格納される
+		 * @param mdLog トレースで通過してきた膜の通過順に、その膜に対応するdepthが格納される。depthの意味はメソッドjudgeの引数depthと同様である。
+		 */
+		private static boolean traceLinks(Atom a1, int argNum1, Atom a2, int argNum2, int depth, Set<Atom> atomsInMol1, Set<Atom> atomsInMol2, List<Atom> aLog1, List<Atom> aLog2, List<Membrane> mLog1, List<Membrane> mLog2, List<Integer> mdLog) {
+			//System.out.println("traceLinks: a1=" + a1 + ", a2=" + a2);
+			aLog1.add(a1);
+			aLog2.add(a2);
+			
+			// a1とa2が等しくなかったら偽を返す
+			if (!a1.getName().equals(a2.getName())
+						|| a1.getFunctor().getArity() != a2.getFunctor().getArity()
+						|| argNum1 != argNum2) {
+				//System.out.println("a1: name=" + a1.getName() + ", arity=" + a1.getFunctor().getArity() + ", a2: name=" + a2.getName() + ", arity=" + a2.getFunctor().getArity());
+				return false;
+			}
+			
+			atomsInMol1.add(a1);
+			atomsInMol2.add(a2);
+			if (depth > 0 && a1.getFunctor().isInsideProxy()) {
+				Membrane m = a1.getMem();
+				if (!mLog1.contains(m)) {
+					mLog1.add(m);
+					mLog2.add(a2.getMem());
+					mdLog.add(depth);
+				}
+			}
+			
+			int arity = a1.getFunctor().getArity();
+			// for文内のiの初期化で、比較したい膜の外側にまでトレースが進まないようにしている
+			for (int i = (a1.getFunctor().isInsideProxy() && depth == 0) ? 1 : 0; i < arity; i++) {
+				Link link1 = a1.getArg(i);
+				Link link2 = a2.getArg(i);
+				Atom aa1 = link1.getAtom();
+				Atom aa2 = link2.getAtom();
+				int an1 = link1.getPos();
+				int an2 = link2.getPos();
+				
+				int index1 = aLog1.indexOf(aa1);
+				if (index1 >= 0) { // これまでのトレースで通過してきたアトムに帰ってきたとき。（分子が環状であるとき起こる)
+					if (index1 != aLog2.indexOf(aa2) || an1 != an2) {
+						return false;
+					} else {
+						continue;
+					}
+				}
+				
+				int nextDepth = depth;
+				if (a1.getFunctor().isOutsideProxy() && i == 0) {
+					nextDepth++;
+				} else if (a1.getFunctor().isInsideProxy() && i == 0) {
+					nextDepth--;
+				}
+				boolean flag = traceLinks(aa1, an1, aa2, an2, nextDepth, atomsInMol1, atomsInMol2, aLog1, aLog2, mLog1, mLog2, mdLog);
+				aLog1.remove(aLog1.size() - 1);
+				aLog2.remove(aLog2.size() - 1);
+				if (!flag) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+:].
+
+H = meq.judgeEquality(Memb1, Memb2) :- H = 
+[:/*inline*/
+	Atom a1 = me.nthAtom(0).nthAtom(0);
+	Atom a2 = me.nthAtom(1).nthAtom(0);
+	Membrane m1 = (Membrane) (a1.getMem());
+	Membrane m2 = (Membrane) (a2.getMem());
+	boolean equality = MembraneEqualityJudge.judge(m1, m2);
+	
+	Atom result = mem.newAtom(new SymbolFunctor((equality) ? "true" : "false", 1));
+	mem.relinkAtomArgs(result, 0, me, 2);
+	a1.nthAtom(1).remove();
+	a2.nthAtom(1).remove();
+	me.remove();
+:](Memb1, Memb2).
+}.
+
+// 岡部さんのWiki「グラフ同型判定（まとめ）」の例題
+e1 = meq.judgeEquality(Memb1, Memb2).
+Memb1 = { { a(W). b(X). }. { a(Y). b(W). }. { a(Y). b(Z). }. { a(Z). b(X). }}.
+Memb2 = { { a(W). b(X). }. { a(Y). b(W). }. { a(Y). b(Z). }. { a(Z). b(X). }}.
+
+/*
+e1 = meq.judgeEquality(Memb1, Memb2).
+Memb1 = { b(L1, L2). a(L2, L3). a(L3, L4). b(L4, L5). a(L5, L1). }.
+Memb2 = { a(L1, L2). a(L2, L3). b(L3, L4). a(L4, L5). b(L5, L1). }.
+*/
+
+/*
+e1 = meq.judgeEquality(Memb1, Memb2).
+Memb1 = { a(X, Y). a(X, Y). b(b). }.
+Memb2 = { a(X, Y). a(Y, X). b(b). }.
+*/
+
+/*
+// 膜内のリンク先アトムひとつのみを考える場合には区別できない例
+e1 = meq.judgeEquality(Memb1, Memb2).
+Memb1 = { x(X). y(Y). { a(X, L0). a(L0, L1). a(Y, L500). a(L500, L2). b(L3, L1). c(L2, L3)}. }.
+Memb2 = { x(X). y(Y). { a(X, L0). a(L0, L1). a(Y, L500). a(L500, L2). b(L3, L1). c(L2, L3)}. }.
+*/
+
+/*
+// 「２つ一組が２つ」と「４つで環状」
+e1 = meq.judgeEquality(Memb3, Memb4).
+//Memb1 = { a(X, Y). a(X, Y). a(S, T). a(S, T). }.
+//Memb2 = { a(X, Y). a(X, T). a(S, Y). a(S, T). }.
+//Memb22 = { a(X, Y). a(X, T). a(S, Y). a(S, T). }.
+Memb3 = { a(X, Y). a(Y, Z). a(Z, X). a(S, T). a(T, S). }.
+Memb4 = { a(X, Y). a(Y, Z). a(Z, S). a(S, T). a(T, X). }.
+*/
+
+/*
+// シス･トランス異性体
+e1 = meq.judgeEquality(Memb1, Memb2).
+Memb1 = { a(X, Y, L). a(X, T). a(S, Y). a(S, T, M). a(L). a(M). }.
+Memb2 = { a(X, Y, L). a(X, T). a(S, Y, M). a(S, T). a(L). a(M). }.
+*/
+
+/*
+// 膜内のリンク先アトムひとつのみを考える場合には区別できない例
+//e1 = meq.judgeEquality(Memb1, Memb2).
+e2 = meq.judgeEquality(Memb3, Memb4).
+//Memb1 = { x(X). y(Y). { a(X, L1). a(Y, L2). b(L3, L1). c(L2, L3). } }.
+//Memb2 = { x(X). y(Y). { a(X, L1). a(Y, L2). c(L1, L3). b(L3, L2). } }.
+Memb3 = { x(X). y(Y). { a(X, L1). a(Y, L2). b(L3, L1). c(L2, L3). aaa(S). ccc(T). }. zzz(S, T). }.
+Memb4 = { x(X). y(Y). { a(X, L1). a(Y, L2). b(L3, L1). c(L2, L3). aaa(S). ccc(T). }. zzz(S, T). }.
+*/
+
+/*
+// 膜内のリンク先アトムひとつのみを考える場合には区別できない例
+//e1 = meq.judgeEquality(Memb1, Memb2).
+e2 = meq.judgeEquality(Memb3, Memb4).
+//Memb1 = { x(X). y(Y). { a(X, L1). a(Y, L2). b(L3, L1). c(L2, L3). } }.
+//Memb2 = { x(X). y(Y). { a(X, L1). a(Y, L2). c(L1, L3). b(L3, L2). } }.
+Memb3 = { x(X). y(Y). { a(X, L1). a(Y, L2). b(L3, L1). c(L2, L3). aaa(X). { g. g. }. }. zzz(X). }.
+Memb4 = { x(X). y(Y). { aaa(X). a(X, L1). a(Y, L2). b(L3, L1). c(L2, L3).  { g. }. }. zzz(X). }.
+*/
+
+/*
+// 膜によるグループ分けの例
+hc0 = mhash.hashCode(Memb0).
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+hc3 = mhash.hashCode(Memb3).
+hc4 = mhash.hashCode(Memb4).
+hc5 = mhash.hashCode(Memb5).
+hc6 = mhash.hashCode(Memb6).
+hc7 = mhash.hashCode(Memb7).
+hc8 = mhash.hashCode(Memb8).
+hc9 = mhash.hashCode(Memb9).
+hc10 = mhash.hashCode(Memb10).
+hc11 = mhash.hashCode(Memb11).
+hc12 = mhash.hashCode(Memb12).
+hc13 = mhash.hashCode(Memb13).
+Memb0 = {aaa. bbb. ccc.}.
+Memb1 = {{aaa. bbb. ccc}. {}.}.
+Memb2 = {{}. {ccc. aaa. bbb}.}.   // アトムの順番が変ったとき
+Memb3 = {{aaa. bbb. ccc}. }.      // {}の有無
+Memb4 = {{aaa. bbb.}. {ccc.}.}.
+Memb5 = {{ccc.}. {aaa. bbb.}.}.
+Memb6 = {{aaa. ccc.}. {bbb.}.}.
+Memb7 = {{bbb. ccc.}. {aaa.}.}.
+Memb8 = {{aaa.}. {bbb.}. {ccc.}.}.
+Memb9 = {aaa.}.
+Memb10 = {{aaa.}.}.
+Memb11 = {{{aaa.}.}.}.
+Memb12 = {a = {w, c}. b = {g}}.
+Memb13 = {a = {w, g}. b = {c}}.
+*/
+
+/*
+//ferrymanの例題で使った状態を表す膜
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+Memb1 = {a = {f, c, g}. b = {}.}.
+Memb2 = {a = {c, g}. b = {f}.}.
+*/
