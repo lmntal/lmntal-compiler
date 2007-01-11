@@ -234,25 +234,25 @@ public class LMNtalWindow extends JFrame {
 	 */
 	private LMNtalGraphic searchGraphicMem(Membrane mem){
 		while(!mem.isRoot()){
-
 			String key = getID(mem); // IDを取得
 			if(key != null){
 				
+				// graphic.というアトムをその膜に持っていたら
 				if(mem.getAtomCountOfFunctor(GRAPHIC_FUNCTOR)>0){
-
+					
+					// すでに登録されてたらこっちから返す
 					if(componentMap.containsKey(key)){
 						return (LMNtalGraphic)componentMap.get(key);
 					}
-					//graphic.というアトムをその膜に持っていたら
 					
 					LMNtalGraphic graphicPanel = new LMNtalGraphic(this, mem);
 					componentMap.put(key, graphicPanel);
-					return graphicPanel;
+					return graphicPanel; // graphicが存在したよ(初回のみ)
 				}
 			}
 			mem = mem.getParent();
 		}
-		return null;
+		return null; // graphic.が存在しませんでした…
 	}
 	
 	

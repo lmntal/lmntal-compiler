@@ -55,7 +55,7 @@ public class LMNtalButton extends LMNComponent implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-//		System.out.println("clicked.");
+		System.out.println("clicked : " + this); ////////////// デバッグ用
 		LMNtalTFrame.addUpdateComponent(this);
 		clickedCounter++;
 	}

@@ -50,7 +50,7 @@ public class LMNComponent {
 	}
 	
 	public void setMembrane(Membrane mem){
-		//LMNtalButton -- Labelの追加
+		//LMNtalButton -- Textの追加
 		//LMNtalTextArea -- Textの追加
 	}
 	

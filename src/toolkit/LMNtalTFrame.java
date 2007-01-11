@@ -28,7 +28,7 @@ public class LMNtalTFrame {
 
 	/** LMNtalTFrameのコンストラクタ */
 	public LMNtalTFrame(){}
-
+	
 	/** 更新されたコンポーネントを追加する */
 	public static void addUpdateComponent(LMNComponent component){
 		UPDATE_COMMAND.add(component);
