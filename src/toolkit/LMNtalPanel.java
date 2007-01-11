@@ -83,12 +83,11 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	private LinkedList clickedPoint = new LinkedList();
 	
 	///////////////////////////////////////////////////////////////////////////
-	// コンストラク
+	// コンストラクタ
 	public LMNtalPanel(Membrane mem){
 		super(true);
 		windowID = LMNtalWindow.getID(mem);
 		bgcolor = Color.WHITE;
-		
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		addMouseListener(new MouseAdapter(){
@@ -119,7 +118,6 @@ public class LMNtalPanel extends JPanel implements Runnable {
 	public boolean setChildMem(Membrane mem){
 		busy = true;
 		GraphicObj gObj = null;
-		
 		synchronized (memMap) {
 			if(mem.getAtomCountOfFunctor(DRAW_MEM)>0){
 				gObj = setGraphicMem(mem);
@@ -277,8 +275,11 @@ public class LMNtalPanel extends JPanel implements Runnable {
 		while (me == th) {
 			try {
 				Thread.sleep(SLEEP_TIME);
+				repaint();
 			} catch (InterruptedException e) {
 			}
 		}
 	}
+	
+	
 }
