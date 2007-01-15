@@ -37,16 +37,6 @@
 	"java.lang.String"	=> "string",
 );
 
-# java の戻り値型 => 結果を返すアトム用の Functor
-%result_functors = (
-	"int"				=> "IntegerFunctor(r)",
-	"long"				=> "IntegerFunctor((int)r)",
-	"float"				=> "FloatingFunctor(r)",
-	"double"			=> "FloatingFunctor(r)",
-	"boolean"			=> "SymbolFunctor(r?\"true\":\"false\", 1)",
-	"java.lang.String"	=> "StringFunctor(r)",
-);
-
 #モジュールを生成するディレクトリ
 $dir=".";
 
@@ -449,18 +439,34 @@ sub dump_call_method {
 	print "\ttry {\n";
 	print "\t\t$type r = v0.$method($args);\n";
 
-	my $functor;
-	if (exists($result_functors{$type})) {
-		$functor = $result_functors{$type};
-	} else {
-		$functor = "ObjectFunctor(r)";
-	}
+	my $functor = get_result_functor($type);
 
 	print "\t\tAtom res = mem.newAtom(new $functor);\n";
 	print "\t\tmem.relink(res, 0, me, $argc);\n";
 	# 第1引数のオブジェクトを最終引数につなぐ
 	print "\t\tmem.relink(me.nthAtom(0), 0, me, " . ($argc+1) . ");\n";
 	dump_catch($argc);
+}
+
+# javaの戻り値型から，対応するファンクタを取得する
+sub get_result_functor {
+	my ($type) = @_;
+	
+	# java の戻り値型 => 結果を返すアトム用の Functor
+	my %result_functors = (
+		"int"				=> "IntegerFunctor(r)",
+		"long"				=> "IntegerFunctor((int)r)",
+		"float"				=> "FloatingFunctor(r)",
+		"double"			=> "FloatingFunctor(r)",
+		"boolean"			=> "SymbolFunctor(r?\"true\":\"false\", 1)",
+		"java.lang.String"	=> "StringFunctor(r)",
+	);
+
+	if (exists($result_functors{$type})) {
+		return $result_functors{$type};
+	} else {
+		return "ObjectFunctor(r)";
+	}
 }
 
 sub dump_static_catch {
@@ -486,7 +492,6 @@ sub dump_call_static_method {
 	if ($type eq "void") {
 		print "\t\t$method($args);\n";
 		print "\t} catch (Exception e) {\n";
-		print "\t\t//ここにはこないと思う\n";
 		print "\t\tSystem.err.println(e);\n";
 		print "\t}\n";
 		return;
@@ -501,11 +506,7 @@ sub dump_call_static_method {
 		return;
 	}
 
-	if (exists($result_functors{$type})) {
-		$functor = $result_functors{$type};
-	} else {
-		$functor = "ObjectFunctor(r)";
-	}
+	my $functor = get_result_functor($type);
 
 	print "\t\tAtom res = mem.newAtom(new $functor);\n";
 	print "\t\tmem.relink(res, 0, me, $argc);\n";
@@ -518,11 +519,7 @@ sub dump_final_variable {
 	
 	print "H=$module." . lc($name) . " :- H=[:/*inline*/\n";
 	print "\t" . trim_class($type) . " r = $absolute_class.$name;\n";
-	if (exists($result_functors{$type})) {
-		$functor = $result_functors{$type};
-	} else {
-		$functor = "ObjectFunctor(r)";
-	}
+	my $functor = get_result_functor($type);
 	print "\tAtom res = mem.newAtom(new $functor);\n";
 	print "\tmem.relink(res, 0, me, 0);\n";
 	print "\tme.remove();\n";
@@ -563,6 +560,7 @@ sub dump_argatom {
 	print "\t\tmem.newLink(a, $i, a$i, 0);\n";	
 }
 
+# javaの引数を出力する
 sub dump_java_args {
 	my (@args) = @_;
 	my $args;
@@ -573,18 +571,18 @@ sub dump_java_args {
 	return $args;
 }
 
+# インタフェースが持つメソッドを出力する
 sub dump_interface_method {
 	my ($type, $method, $args) = @_;
 	my @args = split(/\s*,\s*/, $args);
 	my $argc = $#args+1;
-	my $i;
 	
 	print "\tpublic $type $method(" . dump_java_args(@args) . ") {\n";
 	
 	$arity = ($type eq "void" ? $argc : $argc+1);
 	print "\t\tAtom a = mem.newAtom(new SymbolFunctor(\"$method\", $arity));\n";
 
-	for ($i = 0; $i < $argc; $i++) {
+	for (my $i = 0; $i < $argc; $i++) {
 		dump_argatom($args[$i], $i);
 	}
 	
