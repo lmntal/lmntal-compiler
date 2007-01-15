@@ -45,7 +45,7 @@ $dir=".";
 #####################################################################
 use Getopt::Std;
 my $opt = {}; 
-getopts('d:h',$opt);
+getopts('d:m:h',$opt);
 if ($opt->{'d'}) {
 	$dir=$opt->{'d'};
 }
@@ -60,6 +60,10 @@ if ($opt->{'h'} || $#ARGV == -1) {
 	print STDERR "\t-d <dir>\tSet output directory\n";
 	exit(0);
 }
+#モジュール名が指定された
+if ($opt->{'m'}) {
+	$module = $opt->{'m'};
+}
 
 #####################################################################
 # メイン
@@ -72,8 +76,11 @@ for ($i = 0; $i <= $#ARGV; $i++) {
 	if (<FILE> =~ /(abstract )?(class|interface) ([\w.]+)\.(\w+)/) { #完全クラス名を取得するために必要？
 		$abstract = $1; # 抽象クラスの場合 undef 以外の値が入る
 		$class = $4;
-		$absolute_class = $module = "$3.$4";
-		$module =~ tr/./_/;
+		$absolute_class = "$3.$4";
+		if (!$module) {#指定されていなければパッケージ名+クラス名をモジュール名とする
+			$module = "$3.$4";
+			$module =~ tr/./_/;
+		}
 		printf STDERR "%-73s[%3d%%]\n", "$dir/$module.lmn", 100*($i+1)/($#ARGV+1);
 		open(STDOUT, ">$dir/$module.lmn"); #標準出力を切り替える
 		print "//-----------------------------------------------------\n";

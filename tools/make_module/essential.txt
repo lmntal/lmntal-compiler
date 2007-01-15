@@ -21,8 +21,11 @@ java.io.PrintWriter
 java.io.Reader
 java.io.Writer
 java.lang.Math
+java.lang.Number
 java.lang.String
 java.lang.System
+java.math.BigInteger
+java.math.BigDecimal
 java.net.ConnectException
 java.net.ServerSocket
 java.net.Socket
