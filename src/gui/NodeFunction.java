@@ -37,7 +37,7 @@ public class NodeFunction {
 	
 	/** 斥力定数 */
 	final static
-	private double CONSTANT_REPULSIVE = 0.1;
+	private double CONSTANT_REPULSIVE = 0.0005;
 	
 	/** 発散定数 */
 	final static
@@ -183,33 +183,63 @@ public class NodeFunction {
 				{
 					continue; 
 				}
+				
+				Rectangle2D intersectionRect = 
+					sourceNode.getBounds2D().createIntersection(targetNode.getBounds2D());
+				if(intersectionRect.isEmpty() ||
+						1 > intersectionRect.getWidth() ||
+						1 >  intersectionRect.getHeight())
+				{
+					continue;
+				}
 
 				Point2D targetPoint = targetNode.getCenterPoint();
-
-//				double size = Math.max(sourceNode.getSize() , targetNode.getSize());
-				// TODO: Node　の大きさ
-				double distance = 
-					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
-//					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / size;
-
-				double divergenceFource = (divergenceTimer_ == 0) ? 1 : 2;
-				if(distance > 1 * divergenceFource){
-					continue; 
-				}
 				
-				double distance2 = distance * distance;
-				double f = CONSTANT_REPULSIVE * divergenceFource *(
-						(1.25 * distance2 * distance) -
-						(2.375 * distance2) +
-						1.125);
-				
+				double fx = CONSTANT_REPULSIVE * intersectionRect.getWidth();
+				double fy = CONSTANT_REPULSIVE * intersectionRect.getHeight();
 				double dx = sourcePoint.getX() - targetPoint.getX();
 				double dy = sourcePoint.getY() - targetPoint.getY();
-				
-				double ddx = f * dx;
-				double ddy = f * dy;
-				sourceNode.moveDelta(ddx, ddy);
-				targetNode.moveDelta(-ddx, -ddy);
+
+				double ddx = fx * dx;
+				double ddy = fy * dy;
+
+				if(!sourceNode.isAtom() && !targetNode.isAtom()){
+					sourceNode.moveDelta(ddx, ddy);
+					targetNode.moveDelta(-ddx, -ddy);
+				} else {
+					if(sourceNode.isAtom()){
+						sourceNode.moveDelta(ddx, ddy);
+					}
+					if(targetNode.isAtom()){
+						targetNode.moveDelta(-ddx, -ddy);
+					}
+				}
+//				Point2D targetPoint = targetNode.getCenterPoint();
+//
+////				double size = Math.max(sourceNode.getSize() , targetNode.getSize());
+//				// TODO: Node　の大きさ
+//				double distance = 
+//					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
+////					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / size;
+//
+//				double divergenceFource = (divergenceTimer_ == 0) ? 1 : 2;
+//				if(distance > 1 * divergenceFource){
+//					continue; 
+//				}
+//				
+//				double distance2 = distance * distance;
+//				double f = CONSTANT_REPULSIVE * divergenceFource *(
+//						(1.25 * distance2 * distance) -
+//						(2.375 * distance2) +
+//						1.125);
+//				
+//				double dx = sourcePoint.getX() - targetPoint.getX();
+//				double dy = sourcePoint.getY() - targetPoint.getY();
+//				
+//				double ddx = f * dx;
+//				double ddy = f * dy;
+//				sourceNode.moveDelta(ddx, ddy);
+//				targetNode.moveDelta(-ddx, -ddy);
 			}
 		}
 	}
@@ -322,10 +352,27 @@ public class NodeFunction {
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
+			Node comNode = getCommonParent(node, nthNode);
+			
 			double ddx = f * dx;
 			double ddy = f * dy;
-			node.moveDelta(ddx, ddy);
-			nthNode.moveDelta(-ddx, -ddy);
+
+//			node.moveDelta(ddx, ddy);
+//			nthNode.moveDelta(-ddx, -ddy);
+//			ddx = ddx * 0.9;
+//			ddy = ddy * 0.9;
+			
+			Node targetNode = node;
+			while(targetNode.getParent() != comNode){
+				targetNode = targetNode.getParent();
+			}
+			targetNode.moveDelta(ddx, ddy);
+			
+			targetNode = nthNode;
+			while(targetNode.getParent() != comNode){
+				targetNode = targetNode.getParent();
+			}
+			targetNode.moveDelta(-ddx, -ddy);
 
 		}
 	}
@@ -364,6 +411,34 @@ public class NodeFunction {
 	static
 	public int getDivergence(){
 		return divergenceTimer_;
+	}
+	
+	/**
+	 * 二つのNodeの共通Nodeを取得する
+	 * @param node1
+	 * @param node2
+	 * @return
+	 */
+	static
+	public Node getCommonParent(Node node1, Node node2){
+		if(node1.getParent() == node2.getParent()){
+			return node1.getParent();
+		}
+		Node node = node1;
+		Map<Integer, Node> memMap = new HashMap<Integer, Node>();
+		while(null != node.getParent()){
+			node = node.getParent();
+			memMap.put(node.getID(), node);
+		}
+		node = node2;
+		while(null != node.getParent()){
+			node = node.getParent();
+			if(memMap.containsKey(node.getID())){
+				return memMap.get(node.getID());
+			}
+		}
+		
+		return null;
 	}
 	
 	static
