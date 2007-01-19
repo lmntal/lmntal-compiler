@@ -1,49 +1,7 @@
-//typedef{
-//	{
-//		%nulltype = datatype ( null('-') ).
-//		stringnull = datatype ( str(+string, '-'), null('-') ).
-//		java_io_BufferedReader.new(+inputstreamreader, -bufferReader) = [0, inf].
-//		java_io_InputStreamReader.new(+inputstream, -inputstreamreader) = [0, inf].
-//		java_lang_System.in(-inputstream) = [0, inf].
-//	}.
-//
-//}.
+//l=line.new(point.new(1, 2), point.new(3, 4)).
+//p=translate(getX(point.new(1, 2), x), 3, 4).
+//l1=length(line.new(point.new(1, 2), point.new(3, 4)), len1).
+//l2=length(line.new(1, 2, 3, 4), len2).
 
-lines=[].
-br=java_io_BufferedReader.new(java_io_InputStreamReader.new(java_lang_System.in)).
-//br(BR), lines=Lines :- class(BR, "java.io.BufferedReader") |
-//	br=readLine(BR, S), H=ready(S), lines=list.append(Lines, [H]).
-br(BR) :- class(BR, "java.io.BufferedReader") | br=readLine(BR, s).
-
-s(S), lines(Lines) :- string(S) | lines=list.append(Lines, [S]).
-s(null), br(BR) :- gc(BR).
-	
-//cons(cons(1:int,nil:list):list,cons(2,cons(3,nil))).
-//H=a(b,c):int 
-
-//gc=listFiles(java_io_File.new("icpc"), Filter, files).
-//
-//Filter=java_io_FileFilter.new({
-//	java_io_File.use.
-//	H=accept(File) :- gc=isDirectory(File, H).
-//	gc(Object) :- class(Object, "java.lang.Object") | .
-//}).
-//
-//gc(Object) :- class(Object, "java.lang.Object") | .
-
-//typedef{
-//	{
-//		userlist = datatype( cons(+list, +list, '-'), nil('-') ).
-//		abc = datatype( a('-'), b('-'), c('-') ).
-//		
-//		hoge(+abc, +userlist) = [0, 1].
-//		moge(+abc) = [2, 3].
-//		
-//		%m{} = [1,inf].
-//	}
-//}.
-//
-//hoge(a, nil).
-//moge(b).
-//moge(c).
-//hoge(A,B) :- fuga(B), fe(A), moge(d).
+point.use.
+p=getColor(translate(colorPoint.new(1, 2, 0), 3, 4), color).

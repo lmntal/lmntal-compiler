@@ -1,14 +1,26 @@
-/* オブジェクトのコピー・破棄をしないバージョン */
+/* 
+ * オブジェクトを膜で表現
+ * オブジェクトをコピー・破棄する
+ */
 {
 module(point).
-H=point.new(X, Y) :- H={x(X), y(Y)}.
-H=setX({$p,@p}, NewX) :- H={x(NewX), $p,@p}.//フィールドxが追加される
-H=setX({$p,@p}, NewX) :- H={x(NewX), $p,@p}.//フィールドxが追加される
-H=setY({$p,@p}, NewY) :- H={y(NewY), $p,@p}.//フィールドyが追加される
-H=getX({x(X), $p,@p}, ResX) :- H={$p,@p}, ResX=X.//フィールドxはなくなる
-H=getY({y(Y), $p,@p}, ResY) :- H={$p,@p}, ResY=Y.//フィールドyはなくなる
-H=move(Point, X, Y) :- H=setY(setX(Point, X), Y).
-H=translate(Point, DX, DY) :- H=setY(getY(setX(getX(Point, X), X+DX), Y), Y+DY).
+H=point.new(X, Y) :- int(X), int(Y) | H={x(X), y(Y)}.
+H=setX({x(X), $p, @p}, NewX) :- int(X), int(NewX) | H={x(NewX), $p, @p}.
+H=setY({y(Y), $p, @p}, NewY) :- int(Y), int(NewY) | H={y(NewY), $p, @p}.
+H=getX({x(X), $p, @p}, ResX) :- int(X) | H={x(X), $p, @p}, ResX=X.
+H=getY({y(Y), $p, @p}, ResY) :- int(Y) | H={y(Y), $p, @p}, ResY=Y.
+H=translate(Point, DX, DY) :- int(DX), int(DY) |
+	H=setY(getY(setX(getX(Point, X), X+DX), Y), Y+DY).
 }.
 
-//p1=translate(point.new(1, 2), 3, 4).
+//色つきの二次元座標
+{
+module(colorPoint).
+H=colorPoint.new(X, Y, Color) :- int(X), int(Y), int(Color) |
+	H={oo.extends(point.new(X, Y)), color(Color)}.
+
+H=setColor({color(Color), $p, @p}, NewColor) :- int(Color), int(NewColor) |
+	H={color(NewColor), $p, @p}.	
+H=getColor({color(Color), $p, @p}, ResColor) :- int(Color) |
+	H={color(Color), $p, @p}, ResColor=Color.
+}.
