@@ -1,0 +1,51 @@
+{
+module(readerWriter).
+H=readerWriter.new :- H={idle}.
+shared@@
+H=shared({idle, $p}) :- H={s(1), $p}.
+shared@@
+H=shared({s(N), $p}) :- int(N) | H={s(N+1), $p}.
+releaseShared@@
+H=releaseShared({s(1), $p}) :- H={idle, $p}.
+releaseShared@@
+H=releaseShared({s(N), $p}) :- int(N) | H={s(N-1), $p}.
+exclusive@@
+H=exclusive({idle, $p}) :- H={$p}.
+releaseExclusive@@
+H=releaseExclusive({$p}) :- H={idle, $p}.
+}.
+
+{
+module(client).
+new@@
+H=client.new(ID, RW) :- int(ID) | H=run({
+	id(ID).
+	rw(RW).
+	}).
+//delay@@
+//H=delay(Client) :- H=Client.
+read@@
+H=read({id(ID), rw(RW)}), RW={$p} :- int(ID) | H={
+	id(ID).
+	rw=_RW.
+	},
+	_RW=releaseShared(shared(RW)), RW={$p}.
+write@@
+H=write({id(ID), rw(RW)}), RW={$p} :- int(ID) | H={
+	id(ID).
+	rw=_RW.
+	},
+	_RW=releaseExclusive(exclusive(RW)), RW={$p}.
+run@@
+H=run({id(ID), rw(RW)}) :- int(ID) |
+	H=write(read({id(ID), rw(RW)})).
+}.
+
+oo.use.
+rw=readerWriter.new.
+
+i(0).
+new@@
+i(I), rw(RW) :- I < 1 |
+	c=client.new(I, RW2), rw=oo.ref(RW, RW2), i(I+1).
+//i(I), rw(RW) :- I < 1 | c=client.new(I, RW), i(I+1).

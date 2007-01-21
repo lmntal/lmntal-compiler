@@ -9,8 +9,6 @@ AUTHOR
 	Atsuyuki Inui
 
 HISTORY
-	2006/10/21(Sat) oo.ref から oo.copy に名称変更
-	2006/10/05(Thu) oop --> oo
 	2006/10/03(Tue) oop.use
 	2006/09/26(Tue) oop.msg
 	2006/09/23(Sat) oop.ref を追加
@@ -22,49 +20,26 @@ module(oo).
 /**
  * インポート
  */
+use@@
 oo.use :- ({module(M), @p} :- unary(M) | ()).
 
 /**
  * 継承
  */
+extends@@
 oo.extends({$p, @p}) :- $p, @p.
-
-/**
- * オブジェクトの参照をコピーする
- */
-oo.copy({$p, @p}, A, B) :- {$p, @p, +A, +B}.
-{oo.copy(O, A, B), $p[A,B|*Z], @p} :- oo.copy(O, A, B), {$p[A,B|*Z], @p}.
 
 /**
  * メッセージ送信
  */
-oo.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg}.
-{oo.msg(O, {$msg, @msg}), $p, @p} :- oo.msg(O, {$msg, @msg}), {$p, @p}.
-//送信後に送信対象のオブジェクトが返る
-R=oo.msg({$p,@p}, {$msg,@msg}) :- {$p,@p,$msg,@msg,return(R)}.
-{R=oo.msg(O, {$msg, @msg}), $p[R|*Z], @p} :- R=oo.msg(O, {$msg, @msg}), {$p[R|*Z], @p}.
-//送信後に戻り値が返る
-//H={$p,@p,return(R)} :- unary(H), ground(R) | H=R, {$p,@p}.
-//H={$p,@p,return({$r,@r})} :- H={$r,@r}, {$p,@p}.
-{$p,@p,return(R)}/ :- R={$p,@p}.
-{$p,@p,return({$r,@r}),return(R)}/ :- R={$r,@r}, {$p,@p}.
-{$p,@p,return(R1),return(R2)}/ :- ground(R1), ground(R2) | R1=R2, {$p,@p}.
+msg@@
+H=oo.msg({$p,@p}, {$msg,@msg}) :- H={$p,@p,$msg,@msg}.
 
 /**
- * null
+ * 参照のコピー
  */
-H=null :- H={}.
-}.
+ref@@
+H=oo.ref({$p, @p}, Ref) :- H={$p, @p, +Ref}.
 
-////TEST
-//{
-//module(test).
-//H=test.new :- H={
-//	test.
-//	H=get :- H=return("ok").
-//	H=clone :- H=return(test.new).
-//	}.
-//}.
-//
-//t=test.new.
-//t(T) :- oo.msg(T, {r1=get, r2=clone}).
+//H=oo.ref(Object, Ref) :- ground(Object) | {o(Object), +H, +Ref}.
+}.

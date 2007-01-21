@@ -1,0 +1,19 @@
+{
+module(oneCell).
+H=oneCell.new :- H={
+	empty.
+	put(Object), empty :- contains(Object).
+	H=get, contains(Object) :- H=Object, empty.
+	}.
+H=get({contains(Object), $p, @p}, Res) :- int(Object) |
+	H={empty, $p, @p}, Res=Object.
+//H=get({empty, $p, @p}, Res) :- H=get({empty, $p, @p}, Res).
+}.
+
+//o=oo.msg(oneCell.new, {put(1), put(2), a=get, b=get}).
+
+a=[].
+o=oneCell.new, n(0), m(0).
+o(O), n(N) :- N < 2 | o=oo.msg(O, {put(N)}), n(N+1).
+//o(O), m(M) :- M < 5 | o=oo.msg(O, {a=get}), m(M+1).
+o(O), m(M), a=A :- M < 2 | o=get(O, X), m(M+1), a=[X|A].

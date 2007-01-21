@@ -1,0 +1,50 @@
+/**
+ * メソッドを膜内に記述する方式
+ */
+{
+module(readerWriter).
+H=readerWriter.new :- H={
+	idle.
+	shared, idle :- s(1).
+	shared, s(N) :- int(N) | s(N+1).
+	releaseShared, s(1) :- idle.
+	releaseShared, s(N) :- N > 1 | s(N-1).
+	exclusive, idle :- .
+	releaseExclusive :- idle.
+	}.
+}.
+
+{
+module(client).
+H=client.new(ID, RW) :- int(ID) | H=run({
+	id(ID).
+	rw(RW).
+	}).
+H=run(Client) :- H=delay(write(delay(read(Client)))).
+H=delay(Client) :- H=Client.
+H=read({id(ID), rw(RW)}) :- int(ID) | H={
+	id(ID).
+	rw=releaseShared(shared(RW)).
+	}.
+H=write({id(ID), rw(RW)}) :- int(ID) | H={
+	id(ID).
+	rw=releaseExclusive(exclusive(RW)).
+	}.
+}.
+
+oo.use.
+rw=readerWriter.new.
+
+i(0).
+i(I), rw(RW) :- I < 1 | c=client.new(I, RW2), rw=oo.ref(RW, RW2), i(I+1).
+
+/*a=oo.msg(readerWriter.new, {
+	shared.
+	releaseExclusive.
+	exclusive.
+	releaseShared.
+	releaseShared.
+	shared.
+	shared.
+	}).
+*/
