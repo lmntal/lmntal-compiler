@@ -1,0 +1,24 @@
+{module(bufferN).
+new@@
+H=bufferN.new(N) :- N = 0 | H={}.
+new@@
+H=bufferN.new(N) :- N > 0 | H=token(bufferN.new(N-1)).
+put@@
+H=put({token, $p}, O) :- H={value(O), $p}.
+get@@
+H=get({value(O), $p}, Res) :- H={token, $p}, Res=O.
+token@@
+H=token({$p}) :- H={token, $p}.
+}.
+
+b=bufferN.new(2).
+
+//無限ストリーム?
+i(0).
+provide@@
+b({token, $p}), i(I) :- int(I) | b={value(I), $p}, i(I+1).
+
+a=[].
+consume@@
+b({value(O), $p}), a(A) :- int(O) |
+	b={token, $p}, a=[O|A].
