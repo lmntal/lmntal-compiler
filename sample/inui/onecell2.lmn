@@ -1,3 +1,6 @@
+/**
+ * 膜にルールを入れたバージョン
+ */
 {
 module(oneCell).
 H=oneCell.new :- H={
