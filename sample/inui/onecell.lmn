@@ -1,3 +1,6 @@
+/**
+ * �ְ㤤
+ */
 {
 module(oneCell).
 new@@
@@ -11,10 +14,7 @@ H=get({contains(Object)}, Res) :- H={empty}, Res=Object.
 b=oneCell.new.
 
 n(0).
-//n(N), b(B) :- N < 2 | b=put(B, N), n(N+1).
-n(N), b({empty}) :- N < 10 | b={contains(N)}, n(N+1).
+n(N), b(B) :- N < 10 | b=put(B, N), n(N+1).
 
 m(0), a=[].
-//m(M), a(A), b(B) :- M < 2 | b=get(B, X), m(M+1), a=[X|A].
-m(M), a(A), b({contains(S)}) :- M < 10, int(S) |
-	b={empty}, m(M+1), a=[S|A].
+m(M), a(A), b(B) :- M < 10 | b=get(B, X), m(M+1), a=[X|A].

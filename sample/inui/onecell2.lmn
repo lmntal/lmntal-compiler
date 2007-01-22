@@ -1,22 +1,35 @@
 /**
- * 膜にルールを入れたバージョン
+ * 正しい
  */
 {
 module(oneCell).
-H=oneCell.new :- H={
-	empty.
-	put(Object), empty :- contains(Object).
-	H=get, contains(Object) :- H=Object, empty.
-	}.
-H=get({contains(Object), $p, @p}, Res) :- int(Object) |
-	H={empty, $p, @p}, Res=Object.
-//H=get({empty, $p, @p}, Res) :- H=get({empty, $p, @p}, Res).
+new@@
+H=oneCell.new :- H={empty, puts=Puts, pn(0), gets=Gets, gn(0)}, Puts=queue.new, Gets=queue.new.
+
+put@@
+H=put({empty, pn(0), $p}, Object) :- H={contains(Object), pn(0), $p}.
+H=put({contains(S), puts(Puts), pn(N), $p}, Object) :- int(N) |
+	H={contains(S), puts=_Puts, pn(N+1), $p},
+	_Puts=push(Puts, Object).
+H={empty, puts=Puts, pn(N), $p} :- N > 0 |
+	H={contains(Object), puts=_Puts, pn(N-1), $p},
+	_Puts=shift(Puts, Object).
+	
+get@@
+H=get({contains(Object), gn(0), $p}, Res) :-
+	H={empty, gn(0), $p}, Res=Object.
+H=get({empty, gets(Gets), gn(N), $p}, Res) :- int(N) |
+	H={empty, gets=_Gets, gn(N+1), $p},
+	_Gets=push(Gets, Res).
+H={contains(S), gets=Gets, gn(N), $p} :- N > 0 |
+	H={empty, gets=_Gets, gn(N-1), $p}, Res=S,
+	_Gets=shift(Gets, Res).
 }.
 
-//o=oo.msg(oneCell.new, {put(1), put(2), a=get, b=get}).
+b=oneCell.new.
 
-a=[].
-o=oneCell.new, n(0), m(0).
-o(O), n(N) :- N < 2 | o=oo.msg(O, {put(N)}), n(N+1).
-//o(O), m(M) :- M < 5 | o=oo.msg(O, {a=get}), m(M+1).
-o(O), m(M), a=A :- M < 2 | o=get(O, X), m(M+1), a=[X|A].
+n(0).
+n(N), b(B) :- N < 10 | b=put(B, N), n(N+1).
+
+m(0), a=[].
+m(M), a(A), b(B) :- M < 10 | b=get(B, X), m(M+1), a=[X|A].

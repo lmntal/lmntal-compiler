@@ -11,12 +11,25 @@ token@@
 H=token({$p}) :- H={token, $p}.
 }.
 
-b=bufferN.new(7).
+b=bufferN.new(5).
 
+//--------------------------
+//Å¸³«Á°
 i(0).
 provide@@
-b(B), i(I) :- I < 5 | b=put(B, I), i(I+1).
+b(B), i(I) :- int(I) | b=put(B, I), i(I+1).
 
 j(0), a=[].
 consume@@
 b(B), j(J), a(A) :- J < 5 | b=get(B, X), j(J+1), a=[X|A].
+
+//--------------------------
+//Å¸³«¸å
+//i(0).
+//provide@@
+//b({token, $p}), i(I) :- int(I) | b={value(I), $p}, i(I+1).
+//
+//a=[].
+//consume@@
+//b({value(O), $p}), a(A) :- int(O) |
+//	b={token, $p}, a=[O|A].
