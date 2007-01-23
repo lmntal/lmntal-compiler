@@ -18,10 +18,10 @@ HISTORY
 module(oo).
 
 /**
- * インポート
+ * オブジェクトの定義モジュールを消去します
  */
 use@@
-oo.use :- ({module(M), @p} :- unary(M) | ()).
+oo.clean :- ({module(M), @p} :- unary(M) | ()).
 
 /**
  * 継承
@@ -29,17 +29,36 @@ oo.use :- ({module(M), @p} :- unary(M) | ()).
 extends@@
 oo.extends({$p, @p}) :- $p, @p.
 
-/**
- * メッセージ送信
- */
-msg@@
-H=oo.msg({$p,@p}, {$msg,@msg}) :- H={$p,@p,$msg,@msg}.
+///**
+// * メッセージ送信
+// */
+//msg@@
+//H=oo.msg({$p,@p}, Message) :- H={$p,@p,msg(Message)}.
+//H=oo.msg({$p,@p}, {$msg}) :- H={$p,@p,$msg}.
+//H=oo.msg({$p,@p}, [Message|Z]) :- H=oo.msg({$p,@p,msg(Message)}, Z).
+//H=oo.msg({$p,@p}, [Message]) :- H={$p,@p,msg(Message)}.
+//H=oo.msg({$p,@p}, []) :- H={$p,@p}.
+
+//H={Res=oo.return(Object), $p, @p}/ :- ground(Object) |
+//	H={$p, @p}, Res=Object.
 
 /**
  * 参照のコピー
  */
 ref@@
 H=oo.ref({$p, @p}, Ref) :- H={$p, @p, +Ref}.
+ref@@
+H=oo.ref(Object, Ref) :- class(Object, "java.lang.Object") | H=Object, Ref=Object.
 
-//H=oo.ref(Object, Ref) :- ground(Object) | {o(Object), +H, +Ref}.
+/**
+ * GC
+ */
+gc@@
+gc(Object) :- class(Object, "java.lang.Object") | ().
+
+/**
+ * null
+ */
+null@@
+H=oo.null :- H={}.
 }.

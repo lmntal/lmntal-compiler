@@ -13,11 +13,3 @@ H=get({value(O), $p}, Res) :- H={token, $p}, Res=O.
 token@@
 H=token({$p}) :- H={token, $p}.
 }.
-
-oo.ref(bufferN.new(5), provider, consumer).
-
-i(0), j(0), a=[].
-provide@@
-provider(B), i(I)       :- I < 5 | provider=put(B, I), i(I+1).
-consume@@
-consumer(B), j(J), a(A) :- J < 5 | consumer=get(B, X), j(J+1), a=[X|A].

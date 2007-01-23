@@ -3,6 +3,7 @@
  * 要 java_lib
  */
 
+oo.clean.
 integer.use.
 
 java_lang_String.use.
@@ -11,8 +12,7 @@ java_awt_event_ActionEvent.use.
 /////////////////////////////////////////////
 // GUI の生成
 
-{
-module(editor).
+{module(editor).
 //ActionListener つきの MenuItem を生成するルール
 H=editor.item(Label) :-
 	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new).
@@ -20,6 +20,7 @@ H=editor.item(Label, Listener) :-
 	H=addActionListener(javax_swing_JMenuItem.new(Label), java_awt_event_ActionListener.new(Listener)).
 
 H=editor.newAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
+	oo.use.
 	javax_swing_JTabbedPane.use.
 	javax_swing_JViewport.use.
 	tab(Tab).
@@ -28,11 +29,11 @@ H=editor.newAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
 		Scroll=javax_swing_JScrollPane.new(TextArea),
 		tab=addTab(Tab, "", Scroll),
 		TextArea=setFont(javax_swing_JTextArea.new, java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)).	
-	gc(Object) :- class(Object, "java.lang.Object") | .
 	}.
 
 H=editor.openAction(Frame, Tab) :-
 	class(Frame, "javax.swing.JFrame"), class(Tab, "javax.swing.JTabbedPane") | H={
+	oo.use.
 	javax_swing_JTabbedPane.use.
 	integer.use.
 	frame(Frame), tab(Tab).
@@ -47,14 +48,13 @@ H=editor.openAction(Frame, Tab) :-
 			javax_swing_JTextArea.new,
 			java_awt_Font.new("Monospaced", java_awt_Font.plain, 14)), io.gets(File)).
 	res_open(1), fc(FC) :- gc(FC).
-	gc(Object) :- class(Object, "java.lang.Object") | .
 	}.
 
 H=editor.closeAllAction(Tab) :- class(Tab, "javax.swing.JTabbedPane") | H={
+	oo.use.
 	javax_swing_JTabbedPane.use.
 	tab(Tab).
 	actionPerformed(ActionEvent), tab(Tab) :- gc(ActionEvent), tab=removeAll(Tab).
-	gc(Object) :- class(Object, "java.lang.Object") | .
 	}.
 }.
 
@@ -87,10 +87,10 @@ menuBar=add(add(add(
 saveItem=setEnabled(SaveItem, false).
 
 //タブを生成
-Tab4=cp(cp(cp(javax_swing_JTabbedPane.new, Tab1), Tab2), Tab3).
+Tab4=oo.ref(oo.ref(oo.ref(javax_swing_JTabbedPane.new, Tab1), Tab2), Tab3).
 
 //フレームを生成
-Frame=cp(setDefaultCloseOperation(getContentPane(setSize(
+Frame=oo.ref(setDefaultCloseOperation(getContentPane(setSize(
 	javax_swing_JFrame.new("LMNtal Tab Editor"),
 	600, 400), ContentPane), javax_swing_JFrame.exit_on_close), frame).
 gc=add(ContentPane, "Center", Tab1, tab).
@@ -166,11 +166,4 @@ cmd("to Lower Case"), tab(Tab) :-
 
 ExitActionListener={
 	actionPerformed(ActionEvent) :- gc=(ActionEvent), java_lang_System.exit(0).
-	gc(Object) :- class(Object, "java.lang.Object") | .
 }.
-
-/////////////////////////////////////////////
-// GC
-
-gc(Object) :- class(Object, "java.lang.Object") | .
-cp(Object, Object1, Object2) :- class(Object, "java.lang.Object") | Object1=Object, Object2=Object.

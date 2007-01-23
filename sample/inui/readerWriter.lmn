@@ -25,17 +25,17 @@ H=client.new(ID, RW) :- int(ID) | H=run({
 //delay@@
 //H=delay(Client) :- H=Client.
 read@@
-H=read({id(ID), rw(RW)}), RW={$p} :- int(ID) | H={
+H=read({id(ID), rw(RW)}) :- int(ID) | H={
 	id(ID).
 	rw=_RW.
 	},
-	_RW=releaseShared(shared(RW)), RW={$p}.
+	_RW=releaseShared(shared(RW)).
 write@@
-H=write({id(ID), rw(RW)}), RW={$p} :- int(ID) | H={
+H=write({id(ID), rw(RW)}) :- int(ID) | H={
 	id(ID).
 	rw=_RW.
 	},
-	_RW=releaseExclusive(exclusive(RW)), RW={$p}.
+	_RW=releaseExclusive(exclusive(RW)).
 run@@
 H=run({id(ID), rw(RW)}) :- int(ID) |
 	H=write(read({id(ID), rw(RW)})).
@@ -46,6 +46,6 @@ rw=readerWriter.new.
 
 i(0).
 new@@
-i(I), rw(RW) :- I < 1 |
+i(I), rw(RW) :- I < 2 |
 	c=client.new(I, RW2), rw=oo.ref(RW, RW2), i(I+1).
 //i(I), rw(RW) :- I < 1 | c=client.new(I, RW), i(I+1).

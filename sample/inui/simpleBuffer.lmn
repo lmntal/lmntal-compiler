@@ -3,12 +3,10 @@
  */
 {
 module(simpleBuffer).
+new@@
 H=simpleBuffer.new :- H={}.
+put@@
 H=put({$p}, S) :- H={put(S), $p}.
+get@@
 H=get({put(S), $p}, Res) :- H={$p}, Res=S.
 }.
-
-B1=oo.ref(simpleBuffer.new, B2).
-
-b=put(put(put(B1, 1), 2), 3).
-b=get(get(get(B2, x), y), z).
