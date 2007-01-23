@@ -38,6 +38,9 @@ public class QuantityInferer {
 	 * @param root
 	 */
 	public void infer(){
+		
+		// 個々の具体膜に対して実体量を、
+		// 継続膜に対して効果を求める
 		inferRHSMembrane(root);
 		
 		if(TypeEnv.countLevel >= TypeEnv.COUNT_APPLY){
@@ -109,7 +112,7 @@ public class QuantityInferer {
 		case 0 : // プロセス文脈が出現しない膜
 			inferGeneratedMembrane(rhs);
 			break;
-		default:
+		default: // 1個も2個も関係なく解析
 			inferMultiInheritedMembrane(lhss,rhs);
 //		case 1 : // プロセス文脈が1個出現する膜
 //			countsset.add(inferInheritedMembrane(((ProcessContext)rhs.processContexts.get(0)).def.lhsOcc.mem,rhs));
@@ -200,6 +203,7 @@ public class QuantityInferer {
 	
 	/**
 	 * ルール右辺と左辺の本膜について受け継がれたものとして解析する。
+	 * この効果はルール本膜に対してのみ有効(TODO ルール本膜の効果範囲にたいして有効)
 	 * @param rule
 	 * @param count
 	 * @return
@@ -219,6 +223,7 @@ public class QuantityInferer {
 
 	/**
 	 * 左辺複数の膜から右辺に受け継がれた「マージされた膜」として解析する。
+	 * この効果は、同名の膜全てに共通。
 	 * @param lhss
 	 * @param rhs
 	 */

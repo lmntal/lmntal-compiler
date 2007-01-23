@@ -21,10 +21,13 @@ public class TypeInferer {
 	 * @param root
 	 */
 	public TypeInferer(Membrane root) {
+		// 世界的ルート膜にはrootという名前をつける
+		root.name = "root";
 		this.root = root;
 	}
 
 	public void infer() throws TypeException {
+		// 初期化処理(左辺出現を収集したり)
 		TypeEnv.initialize(root);
 		
 		// ユーザ定義情報を取得する
@@ -33,7 +36,7 @@ public class TypeInferer {
 		for(Membrane topmem : root.mems)
 			if(TypeEnv.getMemName(topmem).equals("typedef")){
 				typedefmem = topmem;
-				break; // TODO 型定義膜が2つあったらどうする
+				break; // TODO 型定義膜が2つあったらどうする => マージ
 			}
 		
 		TypeChecker tc = new TypeChecker();
@@ -43,7 +46,6 @@ public class TypeInferer {
 		}
 		
 		// 出現制約を推論する
-		// TODO 個数が推論できるなら不要(?)
 //		if(Env.flgOccurrenceInference){
 //			OccurrenceInferrer oi = new OccurrenceInferrer(root);
 //			oi.infer();

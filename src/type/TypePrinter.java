@@ -73,6 +73,7 @@ public class TypePrinter {
 		Env.p("Type Information : ");
 		for(String memname : sortedMemNames){
 			FixedCounts fcs = memnameToCounts.get(memname);
+			if(fcs==null)continue;
 			Env.p(memname + "{");
 			// アクティブアトムの情報を出力
 			for(Functor f : sortedFunctors){
