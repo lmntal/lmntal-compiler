@@ -1,3 +1,6 @@
+/**
+ * N個まで順不同でputできるbuffer
+ */
 {module(bufferN).
 new@@
 H=bufferN.new(N) :- N = 0 | H={}.
@@ -11,25 +14,10 @@ token@@
 H=token({$p}) :- H={token, $p}.
 }.
 
-b=bufferN.new(5).
+oo.ref(bufferN.new(5), provider, consumer).
 
-//--------------------------
-//展開前
-i(0).
+i(0), j(0), a=[].
 provide@@
-b(B), i(I) :- int(I) | b=put(B, I), i(I+1).
-
-j(0), a=[].
+provider(B), i(I)       :- I < 5 | provider=put(B, I), i(I+1).
 consume@@
-b(B), j(J), a(A) :- J < 5 | b=get(B, X), j(J+1), a=[X|A].
-
-//--------------------------
-//展開後
-//i(0).
-//provide@@
-//b({token, $p}), i(I) :- int(I) | b={value(I), $p}, i(I+1).
-//
-//a=[].
-//consume@@
-//b({value(O), $p}), a(A) :- int(O) |
-//	b={token, $p}, a=[O|A].
+consumer(B), j(J), a(A) :- J < 5 | consumer=get(B, X), j(J+1), a=[X|A].

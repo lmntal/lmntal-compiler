@@ -1,0 +1,22 @@
+/**
+ * 値をただ1つ保持するbuffer
+ */
+{
+module(onePlaceBuffer).
+new@@
+H=onePlaceBuffer.new :- H={empty}.
+put@@
+H=put({empty, $p}, Object) :- H={contains(Object), $p}.
+get@@
+H=get({contains(Object), $p}, Res) :- H={empty, $p}, Res=Object.
+}.
+
+c([])=oo.ref(oo.ref(onePlaceBuffer.new, p1), p2).
+
+i(0), j(0), k(0).
+provide1@@
+i(I), p1(P) :- I < 10 | p1=put(P,  I), i(I+1).
+provide2@@
+j(J), p2(P) :- J < 10 | p2=put(P, -J), j(J+1).
+consume@@
+k(K), c(Objects, C) :- K < 20 | c([O|Objects], get(C, O)), k(K+1).
