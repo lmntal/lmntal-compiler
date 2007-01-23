@@ -242,7 +242,7 @@ public class Translator {
 			writer.write("		loadSystemRulesetFromModule(\"" + modules.get(i) + "\");\n");
 			writer.write("		runtime.Inline.inlineSet.put(\"module_"+modules.get(i)+".lmn\", new runtime.InlineUnit(\""+modules.get(i)+".lmn\"));\n");
 		}
-		writer.write("		runtime.Inline.inlineSet.put(\""+unitName+"\", new runtime.InlineUnit(\""+unitName+"\"));\n");
+		writer.write("		runtime.Inline.inlineSet.put(\""+unitName.replaceAll("\\\\", "\\\\\\\\")+"\", new runtime.InlineUnit(\""+unitName.replaceAll("\\\\", "\\\\\\\\")+"\"));\n");
 		writer.write("	}\n");
 
 		//TODO このメソッドは動的にな要素がないので、SystemRulesets クラスに作るべきだった。
