@@ -7,6 +7,8 @@
 {
 module(meq).
 
+meq.use :- .
+
 [:/*inline_define*/	
 	import java.util.*;
 	import util.*;
