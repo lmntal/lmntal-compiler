@@ -32,7 +32,8 @@ module(meq).
 		
 		/* m1とm2が同型ならば真同型でなければ偽を返す */
 		static boolean judge(Membrane m1, Membrane m2) {
-			return judge(m1, getAtomSet(m1), getMemSet(m1), m2, getAtomSet(m2), getMemSet(m2), 0, new HashSet<Atom>(), new HashSet<Membrane>(), new HashSet<Atom>(), new HashSet<Membrane>());
+			return judge(m1, getAtomSet(m1), getMemSet(m1), m2, getAtomSet(m2), getMemSet(m2), 
+							0, new HashSet<Atom>(), new HashSet<Membrane>(), new HashSet<Atom>(), new HashSet<Membrane>());
 		}
 		
 		/* 
@@ -48,9 +49,13 @@ module(meq).
 		 * 				このメソッドが真を返すとき少なくともuncheckedMems1に含まれていた子膜は追加される。
 		 * 				偽を返すときは呼び出し時の状態から変化しない。
 		 */
-		private static boolean judge(Membrane m1, Set<Atom> uncheckedAtoms1, Set<Membrane> uncheckedMems1, Membrane m2, Set<Atom> uncheckedAtoms2, Set<Membrane> uncheckedMems2, int depth, Set<Atom> checkedAtoms1, Set<Membrane> checkedMems1, Set<Atom> checkedAtoms2, Set<Membrane> checkedMems2) {
-			//System.out.println("judge:\nm1=" + m1 + "\n\tuncheckedAtoms1=" + uncheckedAtoms1 + "\n\tuncheckedMems1=" + uncheckedMems1 + "\nm2=" + m2 + "\n\tuncheckedAtoms2=" + uncheckedAtoms2 + "\n\tuncheckedMems2=" + uncheckedMems2
-								+ "\ncheckedAtoms1=" + checkedAtoms1 + "\ncheckedMems1=" + checkedMems1 + "\ncheckedAtoms2=" + checkedAtoms2 + "\ncheckedMems2=" + checkedMems2);
+		private static boolean judge(Membrane m1, Set<Atom> uncheckedAtoms1, Set<Membrane> uncheckedMems1, 
+										Membrane m2, Set<Atom> uncheckedAtoms2, Set<Membrane> uncheckedMems2, 
+										int depth, Set<Atom> checkedAtoms1, Set<Membrane> checkedMems1, Set<Atom> checkedAtoms2, Set<Membrane> checkedMems2) {
+			/*System.out.println("judge:\nm1=" + m1 + "\n\tuncheckedAtoms1=" + uncheckedAtoms1 + "\n\tuncheckedMems1=" + uncheckedMems1 
+								+ "\nm2=" + m2 + "\n\tuncheckedAtoms2=" + uncheckedAtoms2 + "\n\tuncheckedMems2=" + uncheckedMems2
+								+ "\ncheckedAtoms1=" + checkedAtoms1 + "\ncheckedMems1=" + checkedMems1 
+								+ "\ncheckedAtoms2=" + checkedAtoms2 + "\ncheckedMems2=" + checkedMems2);*/
 			
 			// 直下のアトム数と子膜数を調べる
 			if (m1.getAtomCount() != m2.getAtomCount()
@@ -194,7 +199,9 @@ module(meq).
 		/*
 		 * a1とa2をそれぞれ起点とする分子を比較する。このメソッドはメソッドjudgeから呼び出される。
 		 */
-		private static boolean traceLinks(Atom a1, Atom a2, int depth, Set<Atom> atomsInMol1, Set<Atom> atomsInMol2, List<Membrane> mLog1, List<Membrane> mLog2, List<Integer> mdLog) {
+		private static boolean traceLinks(Atom a1, Atom a2, int depth, 
+											Set<Atom> atomsInMol1, Set<Atom> atomsInMol2, 
+											List<Membrane> mLog1, List<Membrane> mLog2, List<Integer> mdLog) {
 			//System.out.println("a1=" + a1 + ", a2=" + a2);
 			return traceLinks(a1, -1, a2, -1, depth, atomsInMol1, atomsInMol2, new ArrayList<Atom>(), new ArrayList<Atom>(), mLog1, mLog2, mdLog);
 		}
@@ -208,7 +215,9 @@ module(meq).
 		 * @param mLog1 トレースで通過してきた膜が通過順に格納される
 		 * @param mdLog トレースで通過してきた膜の通過順に、その膜に対応するdepthが格納される。depthの意味はメソッドjudgeの引数depthと同様である。
 		 */
-		private static boolean traceLinks(Atom a1, int argNum1, Atom a2, int argNum2, int depth, Set<Atom> atomsInMol1, Set<Atom> atomsInMol2, List<Atom> aLog1, List<Atom> aLog2, List<Membrane> mLog1, List<Membrane> mLog2, List<Integer> mdLog) {
+		private static boolean traceLinks(Atom a1, int argNum1, Atom a2, int argNum2, int depth, 
+											Set<Atom> atomsInMol1, Set<Atom> atomsInMol2, 
+											List<Atom> aLog1, List<Atom> aLog2, List<Membrane> mLog1, List<Membrane> mLog2, List<Integer> mdLog) {
 			aLog1.add(a1);
 			aLog2.add(a2);
 			
@@ -216,7 +225,6 @@ module(meq).
 			if (!a1.getName().equals(a2.getName())
 						|| a1.getFunctor().getArity() != a2.getFunctor().getArity()
 						|| argNum1 != argNum2) {
-				//System.out.println("a1: name=" + a1.getName() + ", arity=" + a1.getFunctor().getArity() + ", a2: name=" + a2.getName() + ", arity=" + a2.getFunctor().getArity());
 				return false;
 			}
 			
