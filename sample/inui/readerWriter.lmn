@@ -4,48 +4,76 @@ H=readerWriter.new :- H={idle}.
 shared@@
 H=shared({idle, $p}) :- H={s(1), $p}.
 shared@@
-H=shared({s(N), $p}) :- int(N) | H={s(N+1), $p}.
+H=shared({s(N), $p}) :- N > 1 | H={s(N+1), $p}.
 releaseShared@@
 H=releaseShared({s(1), $p}) :- H={idle, $p}.
 releaseShared@@
-H=releaseShared({s(N), $p}) :- int(N) | H={s(N-1), $p}.
+H=releaseShared({s(N), $p}) :- N > 1 | H={s(N-1), $p}.
 exclusive@@
-H=exclusive({idle, $p}) :- H={$p}.
+H=exclusive({idle, $p}) :- H={ex, $p}.
 releaseExclusive@@
-H=releaseExclusive({$p}) :- H={idle, $p}.
+H=releaseExclusive({ex, $p}) :- H={idle, $p}.
 }.
 
 {
 module(client).
 new@@
-H=client.new(ID, RW) :- int(ID) | H=run({
-	id(ID).
-	rw(RW).
-	}).
-//delay@@
-//H=delay(Client) :- H=Client.
-read@@
-H=read({id(ID), rw(RW)}) :- int(ID) | H={
-	id(ID).
-	rw=_RW.
-	},
-	_RW=releaseShared(shared(RW)).
-write@@
-H=write({id(ID), rw(RW)}) :- int(ID) | H={
-	id(ID).
-	rw=_RW.
-	},
-	_RW=releaseExclusive(exclusive(RW)).
+H=client.new(ID, RW) :- int(ID) |
+	H=run({id(ID), rw(RW), r=R}), R=done.
+delay@@
+//H=delay({$p}) :-
+//	H={$p, r=R},
+//	R=sys.sleep(1000).
+H=delay(Client) :- H=Client.
+
 run@@
-H=run({id(ID), rw(RW)}) :- int(ID) |
-	H=write(read({id(ID), rw(RW)})).
+H=run({r(R), $p}), R=done :- H=read({$p}).
+
+read@@
+H=read({id(ID), $p}) :- int(ID) |
+	H=read2({id(ID), r=R, $p}),
+	R=io.lprint_sync([ID, " waiting to read\n"]).
+H=read2({rw(RW), r(R), $p}), R=done, RW={$rw} :-
+	H=read3({rw=_RW, $p}),
+	_RW=shared({$rw}).
+H=read3({id(ID), rw(RW), $p}), RW={$rw} :- int(ID) |
+	H=read4({id(ID), rw(RW), r1=R1, r2=R2, $p}),
+	RW={$rw},
+	R1=io.lprint_sync([ID, " reading\n"]),
+	R2=sys.sleep(500).
+H=read4({rw(RW), r1(R1), r2(R2), $p}), R1=done, R2=done, RW={$rw} :-
+	H=read5({rw(_RW), $p}),
+	_RW=releaseShared({$rw}).
+H=read5({id(ID), $p}) :- int(ID) |
+	H=write({id(ID), r(R), $p}),
+	R=io.lprint_sync([ID, " finished reading\n"]).
+
+write@@
+H=write({id(ID), r(R), $p}), R=done :- int(ID) |
+	H=write2({id(ID), r(R), $p}),
+	R=io.lprint_sync([ID, " waiting to write\n"]).
+H=write2({rw(RW), r(R), $p}), R=done, RW={$rw} :-
+	H=write3({rw=_RW, $p}),
+	_RW=exclusive({$rw}).
+H=write3({id(ID), rw(RW), $p}), RW={$rw} :- int(ID) |
+	H=write4({id(ID), rw(RW), r1=R1, r2=R2, $p}),
+	RW={$rw},
+	R1=io.lprint_sync([ID, " writing\n"]),
+	R2=sys.sleep(500).
+H=write4({rw(RW), r1(R1), r2(R2), $p}), R1=done, R2=done, RW={$rw} :-
+	H=write5({rw(_RW), $p}),
+	_RW=releaseExclusive({$rw}).
+H=write5({id(ID), $p}) :- int(ID) |
+	H=run({id(ID), r(R), $p}),
+	R=io.lprint_sync([ID, " finished writing\n"]).
 }.
 
-oo.use.
+io.use.
+oo.clean.
+
 rw=readerWriter.new.
 
 i(0).
 new@@
-i(I), rw(RW) :- I < 2 |
+i(I), rw(RW) :- I < 3 |
 	c=client.new(I, RW2), rw=oo.ref(RW, RW2), i(I+1).
-//i(I), rw(RW) :- I < 1 | c=client.new(I, RW), i(I+1).
