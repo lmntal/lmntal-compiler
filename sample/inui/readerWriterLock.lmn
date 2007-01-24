@@ -1,7 +1,8 @@
 /*
- * idle idle状態
- * s(N) N人が読み取り権限でアクセス中
- * ex 1人が排他制御
+ * 読み取る前にshared
+ * 読み取り後はreleaseShared
+ * 書き込む前にexclusive
+ * 書き込んだらreleaseExclusive
  */
 {
 module(readerWriterLock).
@@ -27,6 +28,7 @@ i(0), data=1.
 new@@
 i(I), rw(RW) :- I < 2 | rw=oo.ref(RW, reader(I)), i(I+1).
 
+//読み込み
 wait_reading@@
 reader(ID, {$rw}) :-
 	wait_reading(ID, shared({$rw})).
@@ -36,6 +38,7 @@ wait_reading(ID, {$rw}), data(Data) :- int(Data) |
 finish_reading@@
 reading(ID, {$rw}, Data) :- finish_reading(ID, releaseShared({$rw}), Data).
 
+//書き込み
 wait_writing@@
 finish_reading(ID, {$rw}, Data) :- 
 	wait_writing(ID, exclusive({$rw}), Data).
