@@ -1,0 +1,46 @@
+/*
+ * idle idle状態
+ * s(N) N人が読み取り権限でアクセス中
+ * ex 1人が排他制御
+ */
+{
+module(readerWriterLock).
+H=readerWriterLock.new :- H={idle}.
+shared@@
+H=shared({idle, $p}) :- H={s(1), $p}.
+shared@@
+H=shared({s(N), $p}) :- N > 0 | H={s(N+1), $p}.
+releaseShared@@
+H=releaseShared({s(1), $p}) :- H={idle, $p}.
+releaseShared@@
+H=releaseShared({s(N), $p}) :- N > 1 | H={s(N-1), $p}.
+exclusive@@
+H=exclusive({idle, $p}) :- H={ex, $p}.
+releaseExclusive@@
+H=releaseExclusive({ex, $p}) :- H={idle, $p}.
+}.
+
+oo.clean.
+rw=readerWriterLock.new.
+i(0), data=1.
+
+new@@
+i(I), rw(RW) :- I < 2 | rw=oo.ref(RW, reader(I)), i(I+1).
+
+wait_reading@@
+reader(ID, {$rw}) :-
+	wait_reading(ID, shared({$rw})).
+reading@@
+wait_reading(ID, {$rw}), data(Data) :- int(Data) |
+	reading(ID, {$rw}, Data), data(Data).
+finish_reading@@
+reading(ID, {$rw}, Data) :- finish_reading(ID, releaseShared({$rw}), Data).
+
+wait_writing@@
+finish_reading(ID, {$rw}, Data) :- 
+	wait_writing(ID, exclusive({$rw}), Data).
+writing@@
+wait_writing(ID, {$rw}, _Data), data(Data) :- int(Data) |
+	writing(ID, {$rw}), data(2*_Data).
+finish_writing@@
+writing(ID, {$rw}) :- finish_writing(ID, releaseExclusive({$rw})).
