@@ -32,4 +32,4 @@ v(nil,nil,nil,F1,F2,nil),f(F1,F11),f(F2,F21):-
 t(F11,F21).
 
 
-triangles(5).
+triangles(15).

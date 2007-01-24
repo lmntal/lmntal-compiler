@@ -1,0 +1,18 @@
+// シェルピンスキーのギャスゲットをグラフとして生成する
+
+Gasket@@
+gasket(Limit) :- c(L1,L2),c(L3,L4),c(L5,L6),g(Limit,L1,L2,L3,L4,L5,L6).
+
+Gasket_sub1@@
+g($limit,L1,L2,L3,L4,L5,L6) :- $limit = 0 | L2=L3,L4=L5,L6=L1.
+
+Gasket_sub2@@
+g($limit,L1,L2,L3,L4,L5,L6) :- $limit > 0, $limit1 = $limit - 1 |
+n(L11,L12,L13,L14),
+n(L21,L22,L23,L24),
+n(L31,L32,L33,L34),
+g($limit1,L1,L2,L11,L12,L23,L24),
+g($limit1,L3,L4,L31,L32,L13,L14),
+g($limit1,L5,L6,L21,L22,L33,L34).
+
+gasket(5).

@@ -43,103 +43,121 @@ public class TypeChecker {
 	private final Map<Functor, List<ModedType>> dataAtomTypes = new HashMap<Functor, List<ModedType>>();
 	
 	/**
+	 * データ型宣言をパーズする
+	 * @param atom datatypeアトム
+	 * @throws TypeParseException
+	 */
+	private void parseDatatypeAtom(Atom atom)throws TypeParseException{
+		Functor f = atom.functor;
+		Atomic typeatomic = TypeEnv.getRealBuddy(atom.args[f.getArity()-1]).atom;
+		if(!(typeatomic instanceof Atom))
+			throw new TypeParseException("context appearing in type definition.");
+
+		String typename = typeatomic.getName();
+		for(int i=0;i<f.getArity()-1;i++){
+			
+			Atomic dataatomic = TypeEnv.getRealBuddy(atom.args[i]).atom;
+			if(!(dataatomic instanceof Atom))
+				throw new TypeParseException("context appearing in type definition.");
+			Atom dataatom = (Atom)dataatomic;
+
+			List<ModedType> types = new ArrayList<ModedType>(dataatom.getArity()-1);
+			boolean flgRegistered = false;
+			for(int j=0;j<dataatom.getArity()-1;j++){
+				Atomic signatomic = TypeEnv.getRealBuddy(dataatom.args[j]).atom;
+				if(!(signatomic instanceof Atom))
+					throw new TypeParseException("context appearing in type definition.");
+				Atom signatom = (Atom)signatomic;
+				if(signatom.functor.equals(new SymbolFunctor("+",2))){
+					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[0]).atom;
+					if(!(signedatomic instanceof Atom))
+						throw new TypeParseException("context appearing in type definition.");
+					String dataname = signedatomic.getName();
+					types.add(j, new ModedType(dataname, 1));
+				}
+				else if(signatom.functor.equals(new SymbolFunctor("-",1))){
+					if(flgRegistered)
+						throw new TypeParseException("data atom must have only one output argument.");
+					TypeEnv.registerDataFunctor(new SymbolFunctor(dataatom.functor.getName(),dataatom.functor.getArity()-1),typename,j);
+					flgRegistered = true;
+					types.add(j, null);
+				}
+				else throw new TypeParseException("data atom must have sign atom : " + dataatom.functor +" -> " + signatom.functor);
+			}
+			if(!flgRegistered)
+				throw new TypeParseException("datatype atom must have output sign.");
+			addDataAtomType(dataatom.functor, types);
+		}
+	}
+	
+	/**
 	 * 型定義膜を読み込んで型情報を得る
 	 * @param typedefmem
 	 */
-	public boolean parseTypeDefinition(Membrane typedefmem){
-		try{
-			for(Membrane mem : typedefmem.mems){
-				String memname = TypeEnv.getMemName(mem);
-				for(Atom atom : mem.atoms){
-					Functor f = atom.functor;
-					if(f.getName().equals("datatype")){
-						Atomic typeatomic = TypeEnv.getRealBuddy(atom.args[f.getArity()-1]).atom;
-						if(!(typeatomic instanceof Atom))
-							throw new TypeParseException("context appearing in type definition.");
-	
-						String typename = typeatomic.getName();
-						for(int i=0;i<f.getArity()-1;i++){
-							
-							Atomic dataatomic = TypeEnv.getRealBuddy(atom.args[i]).atom;
-							if(!(dataatomic instanceof Atom))
-								throw new TypeParseException("context appearing in type definition.");
-							Atom dataatom = (Atom)dataatomic;
-	
-							List<ModedType> types = new ArrayList<ModedType>(dataatom.getArity()-1);
-							boolean flgRegistered = false;
-							for(int j=0;j<dataatom.getArity()-1;j++){
-								Atomic signatomic = TypeEnv.getRealBuddy(dataatom.args[j]).atom;
-								if(!(signatomic instanceof Atom))
-									throw new TypeParseException("context appearing in type definition.");
-								Atom signatom = (Atom)signatomic;
-								if(signatom.functor.equals(new SymbolFunctor("+",2))){
-									Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[0]).atom;
-									if(!(signedatomic instanceof Atom))
-										throw new TypeParseException("context appearing in type definition.");
-									String dataname = signedatomic.getName();
-									types.add(j, new ModedType(dataname, 1));
-								}
-								else if(signatom.functor.equals(new SymbolFunctor("-",1))){
-									if(flgRegistered)
-										throw new TypeParseException("data atom must have only one output argument.");
-									TypeEnv.registerDataFunctor(new SymbolFunctor(dataatom.functor.getName(),dataatom.functor.getArity()-1),typename,j);
-									flgRegistered = true;
-									types.add(j, null);
-								}
-								else throw new TypeParseException("data atom must have sign atom : " + dataatom.functor +" -> " + signatom.functor);
+	public boolean parseTypeDefinition(List<Membrane> typedefmems){
+		
+		for(Membrane typedefmem : typedefmems){
+			try{
+				for(Atom topatom : typedefmem.atoms){
+					if(topatom.getName().equals("datatype")){
+						parseDatatypeAtom(topatom);
+					}
+				}
+				for(Membrane mem : typedefmem.mems){
+					String memname = TypeEnv.getMemName(mem);
+					for(Atom atom : mem.atoms){
+						Functor f = atom.functor;
+						if(f.getName().equals("datatype")){
+							parseDatatypeAtom(atom);
+						}
+						else if(f.equals(new SymbolFunctor(".",3))){
+							Atomic lastatomic = TypeEnv.getRealBuddy(atom.args[2]).atom;
+							if(!(lastatomic instanceof Atom))
+								throw new TypeParseException("context appearing in type definition");
+							Atom lastatom = (Atom)lastatomic;
+							Functor lastf = lastatom.functor;
+							if(lastf.equals(new SymbolFunctor(".", 3)))
+								continue;
+							else if(lastf.equals(new SymbolFunctor("+", 1)) && lastatom.mem.parent == mem){ // 子膜なら
+								String childname = TypeEnv.getMemName(lastatom.mem); // 0引数目の先($in)の1引数目の先のアトムの所属膜
+								FixedCount fc = getCountFromList(atom);
+								addChildCount(memname, childname, fc);
 							}
-							if(!flgRegistered)
-								throw new TypeParseException("datatype atom must have output sign.");
-							addDataAtomType(dataatom.functor, types);
+							else{ // アクティブアトム
+								constrainActiveAtomArgument(memname, lastatom);
+								FixedCount fc = getCountFromList(atom);
+								addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
+							}
 						}
-					}
-					else if(f.equals(new SymbolFunctor(".",3))){
-						Atomic lastatomic = TypeEnv.getRealBuddy(atom.args[2]).atom;
-						if(!(lastatomic instanceof Atom))
-							throw new TypeParseException("context appearing in type definition");
-						Atom lastatom = (Atom)lastatomic;
-						Functor lastf = lastatom.functor;
-						if(lastf.equals(new SymbolFunctor(".", 3)))
-							continue;
-						else if(lastf.equals(new SymbolFunctor("+", 1)) && lastatom.mem.parent == mem){ // 子膜なら
-							String childname = TypeEnv.getMemName(lastatom.mem); // 0引数目の先($in)の1引数目の先のアトムの所属膜
-							FixedCount fc = getCountFromList(atom);
-							addChildCount(memname, childname, fc);
-						}
-						else{ // アクティブアトム
-							constrainActiveAtomArgument(memname, lastatom);
-							FixedCount fc = getCountFromList(atom);
-							addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
-						}
-					}
-					else if(f instanceof IntegerFunctor){
-						Atomic actatomic = TypeEnv.getRealBuddy(atom.args[0]).atom;
-						if(!(actatomic instanceof Atom))
-							throw new TypeParseException("context appearing in type definition");
-						Atom lastatom = (Atom)actatomic;
-						Functor lastf = lastatom.functor;
-						int count = ((IntegerFunctor)f).intValue();
-						if(lastf.equals(new SymbolFunctor(".",3)))
-							continue;
-						else if(lastf.equals(new SymbolFunctor("+",1)) && lastatom.mem.parent == mem){ // 子膜なら
-							String childname = TypeEnv.getMemName(lastatom.mem); // 0引数目の先($in)の1引数目の先のアトムの所属膜
-							FixedCount fc = new NumCount(count);
-							addChildCount(memname, childname, fc);
-						}
-						else{ //アクティブアトム
-							constrainActiveAtomArgument(memname, lastatom);
-							FixedCount fc = new NumCount(count);
-							addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
+						else if(f instanceof IntegerFunctor){
+							Atomic actatomic = TypeEnv.getRealBuddy(atom.args[0]).atom;
+							if(!(actatomic instanceof Atom))
+								throw new TypeParseException("context appearing in type definition");
+							Atom lastatom = (Atom)actatomic;
+							Functor lastf = lastatom.functor;
+							int count = ((IntegerFunctor)f).intValue();
+							if(lastf.equals(new SymbolFunctor(".",3)))
+								continue;
+							else if(lastf.equals(new SymbolFunctor("+",1)) && lastatom.mem.parent == mem){ // 子膜なら
+								String childname = TypeEnv.getMemName(lastatom.mem); // 0引数目の先($in)の1引数目の先のアトムの所属膜
+								FixedCount fc = new NumCount(count);
+								addChildCount(memname, childname, fc);
+							}
+							else{ //アクティブアトム
+								constrainActiveAtomArgument(memname, lastatom);
+								FixedCount fc = new NumCount(count);
+								addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
+							}
 						}
 					}
 				}
+	//			printTypeDefinitions();
+			}catch(TypeParseException e){
+				e.printError();
+				return false;
 			}
-//			printTypeDefinitions();
-			return true;
-		}catch(TypeParseException e){
-			e.printError();
-			return false;
 		}
+		return true;
 	}
 	
 	private void printTypeDefinitions(){

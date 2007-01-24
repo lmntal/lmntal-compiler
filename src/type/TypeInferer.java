@@ -1,5 +1,8 @@
 package type;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import runtime.Env;
 import type.argument.ArgumentInferer;
 import type.quantity.QuantityInferer;
@@ -32,17 +35,17 @@ public class TypeInferer {
 		
 		// ユーザ定義情報を取得する
 		boolean typeDefined = false;
-		Membrane typedefmem = null;
+		List<Membrane> typedefmems = new ArrayList<Membrane>();
 		for(Membrane topmem : root.mems)
 			if(TypeEnv.getMemName(topmem).equals("typedef")){
-				typedefmem = topmem;
+				typedefmems.add(topmem);
 				break; // TODO 型定義膜が2つあったらどうする => マージ
 			}
 		
 		TypeChecker tc = new TypeChecker();
-		if(typedefmem != null){
-			typeDefined = tc.parseTypeDefinition(typedefmem);
-			root.mems.remove(typedefmem); // 型定義膜は検査、コンパイルから外す
+		if(typedefmems.size() > 0){
+			typeDefined = tc.parseTypeDefinition(typedefmems);
+			root.mems.removeAll(typedefmems); // 型定義膜は検査、コンパイルから外す
 		}
 		
 		// 出現制約を推論する
