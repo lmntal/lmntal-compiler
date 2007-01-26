@@ -8,6 +8,8 @@ H=mapSite.new :- H={mapSite}.
 {module(room).
 room@@
 H=room.new(N) :- int(N) | H={room, roomNo(N), sides=Sides}, Sides=oolist.new(4).
+roomNo@@
+H=roomNo({roomNo(N), $p}, Res) :- int(N) | H={roomNo(N), $p}, Res=N.
 getSide@@
 H=getSide({sides=Sides, $p}, N, Res) :- int(N) |
 	H={sides=_Sides, $p},
@@ -18,9 +20,8 @@ H=setSide({sides=Sides, $p}, N, MapSite) :- int(N) |
 	_Sides=list.set(Sides, N, MapSite, gc).
 room_enter@@
 H=enter({room, $p}, From, To) :-
-	H={room, $p},
+	H=oo.ref({room, $p}, To),
 	gc(From),
-	gc(To),
 	gc=io.println("部屋に入りました").
 }.
 
@@ -30,24 +31,39 @@ wall@@
 H=wall.new :- H={wall}.
 H=enter({wall, $p}, From, To) :-
 	H={wall, $p},
-	gc(From),
-	gc(To),
+	To=From,
 	gc=io.println("そこは壁です").
 }.
 
 //ドア
 {module(door).
 door@@
-H=door.new(R1, R2) :- H={door, room1(R1), room2(R2), isopen(false)}.
-otherSideFrom@@//TODO
-H=otherSideFrom({door, room1=R1, room2=R2, $p}, From, To) :-
-	H={door, room1=R1, room=_R2, $p}, gc(From), To=oo.ref(R2, _R2).
+H=door.new(R1, R2) :-
+	H={door, room1(R1), room2(R2), isopen(false)}.
+otherSideFrom@@//TODO リンク先が同一オブジェクトかどうかの判定
+H=otherSideFrom({door, room1(R1), room2(R2), $p}, From, To) :-
+	H=otherSideFrom2({door, room1(_R1), room2(_R2), $p}, To, N, N1, N2),
+	gc=roomNo(From, N),
+	_R1=roomNo(R1, N1),
+	_R2=roomNo(R2, N2).
+//H=otherSideFrom2({door, room2=R2, roomNo1(N1), roomNo(N), to(To), $p}) :- N == N1 |
+//	H={door, room=_R2, roomNo1(N1), $p},
+//	_R2=oo.ref(R2, To).
+//H=otherSideFrom2({door, room1=R1, roomNo2(N2), roomNo(N), to(To), $p}) :- N == N2 |
+//	H={door, room=_R1, roomNo2(N2), $p},
+//	_R1=oo.ref(R1, To).
+H=otherSideFrom2({door, room2=R2, $p}, To, N, N1, N2) :- N == N1, int(N2) |
+	H={door, room2=_R2, $p},
+	_R2=oo.ref(R2, To).
+H=otherSideFrom2({door, room1=R1, $p}, To, N, N1, N2) :- N == N2, int(N1) |
+	H={door, room1=_R1, $p},
+	_R1=oo.ref(R1, To).
 door_enter@@
 H=enter({door, $p}, FromRoom, To) :-
 	H=enter2(otherSideFrom({door, r(R), to(To), otherSide(Room), $p}, FromRoom, Room)),
 	R=io.println("ドアを開けます").
 H=enter2({door, r(R), to(To), otherSide(Room), $p}), R=done :-
-	H={door, $p}, To=enter(Room, {}, {}).
+	H={door, $p}, To=enter(Room, oo.null, oo.null).
 }.
 
 {module(enchantedRoom).
@@ -130,10 +146,15 @@ oo.clean.
 
 start.
 
-start :-
+start :- oneset={
+	io.use.
 	scanner=java_util_Scanner.new(java_lang_System.in).
 	gc=createMaze(mazeGame.new, maze).
-	maze(Maze) :- gc=roomNo(Maze, 0, Room), gc=enter(Room, {}, player), next.
-next, scanner(Scanner) :- scanner=nextInt(Scanner, n).
+	
+	maze(Maze) :- gc=roomNo(Maze, 0, Room), gc=enter(Room, {}, player).
+	next, scanner(Scanner) :- scanner=nextInt(Scanner, n).
+	player(Room), n(N) :- N >= 0, N < 4 |
+		gc=getSide(oo.ref(Room, FromRoom), N, MapSite), gc=enter(MapSite, FromRoom, player).
+}.
 
-player(Room), n(N) :- gc=getSide(oo.ref(Room, FromRoom), N, MapSite), gc=enter(MapSite, FromRoom, player), next.
+oneset={$p,@p}/ :- oneset={$p,@p,next}.
