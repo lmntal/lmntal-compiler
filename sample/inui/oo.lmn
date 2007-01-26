@@ -46,9 +46,15 @@ oo.extends({$p, @p}) :- $p, @p.
  * 参照のコピー
  */
 ref@@
-H=oo.ref({$p, @p}, Ref) :- H={$p, @p, +Ref}.
-ref@@
 H=oo.ref(Object, Ref) :- class(Object, "java.lang.Object") | H=Object, Ref=Object.
+ref@@
+H=oo.ref ({$p}, Ref)                    :- H={$p, +Ref}.
+ref2@@
+H=oo.ref2({$p}, Ref1, Ref2)             :- H={$p, +Ref1, +Ref2}.
+ref3@@
+H=oo.ref3({$p}, Ref1, Ref2, Ref3)       :- H={$p, +Ref1, +Ref2, +Ref3}.
+ref4@@
+H=oo.ref4({$p}, Ref1, Ref2, Ref3, Ref4) :- H={$p, +Ref1, +Ref2, +Ref3, +Ref4}.
 
 /**
  * GC
