@@ -34,7 +34,7 @@ public class Node implements Cloneable{
 	private Font FONT = new Font("SansSerif", Font.PLAIN, 25);
 	
 	final static
-	private double MARGIN = 15.0;
+	public double MARGIN = 15.0;
 
 	final static
 	private double MAX_MOVE_DELTA = 300.0;
@@ -531,6 +531,10 @@ public class Node implements Cloneable{
 	 */
 	public boolean isPickable(){
 		return (pickable_ && isAtom() && null != parent_);
+	}
+	
+	public boolean isUncalc(){
+		return uncalc_;
 	}
 
 	public boolean isSelected(){

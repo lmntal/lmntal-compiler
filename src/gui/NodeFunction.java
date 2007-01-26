@@ -361,7 +361,7 @@ public class NodeFunction {
 //			nthNode.moveDelta(-ddx, -ddy);
 //			ddx = ddx * 0.9;
 //			ddy = ddy * 0.9;
-			
+			/*
 			Node targetNode = node;
 			while(targetNode.getParent() != comNode){
 				targetNode = targetNode.getParent();
@@ -373,7 +373,35 @@ public class NodeFunction {
 				targetNode = targetNode.getParent();
 			}
 			targetNode.moveDelta(-ddx, -ddy);
-
+			*/
+			double dxMargin = (ddx < 0) ? -Node.MARGIN : Node.MARGIN;
+			double dyMargin = (ddy < 0) ? -Node.MARGIN : Node.MARGIN;
+			{
+				Node targetNode = node;
+				while(targetNode.getParent() != comNode){
+					targetNode = targetNode.getParent();
+				}
+				Rectangle2D rect = node.getBounds2D();
+				rect.setRect(rect.getX() + ddx + dxMargin, rect.getY() + ddy + dyMargin, rect.getWidth(), rect.getHeight());
+				if(!node.isUncalc() && !nthNode.isUncalc() && targetNode.getBounds2D().contains(rect)){
+					node.moveDelta(ddx, ddy);
+				} else {
+					targetNode.moveDelta(ddx, ddy);
+				}
+			}
+			{
+				Node targetNode = nthNode;
+				while(targetNode.getParent() != comNode){
+					targetNode = targetNode.getParent();
+				}
+				Rectangle2D rect = nthNode.getBounds2D();
+				rect.setRect(rect.getX() - ddx - dxMargin, rect.getY() - ddy + dyMargin, rect.getWidth(), rect.getHeight());
+				if(!node.isUncalc() && !nthNode.isUncalc() && targetNode.getBounds2D().contains(rect)){
+					nthNode.moveDelta(-ddx, -ddy);
+				} else {
+					targetNode.moveDelta(-ddx, -ddy);
+				}
+			}
 		}
 	}
 	
