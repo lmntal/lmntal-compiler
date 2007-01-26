@@ -461,9 +461,6 @@ public final class Env {
 	/** 個数の解析のレベル */
 	public static int quantityInferenceLevel = COUNT_DEFAULT;
 	
-	/** 推論された全ての情報を表示 */
-	public static boolean flgShowAllConstraints = false;
-	
 	/** 推論結果を表示 */
 	public static boolean flgShowConstraints = false;
 	

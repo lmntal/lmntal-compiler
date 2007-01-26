@@ -81,7 +81,7 @@ public class TypePrinter {
 		Env.p("Type Information : ");
 		for(String memname : sortedMemNames){
 			FixedCounts fcs = memnameToCounts.get(memname);
-			if(fcs==null)continue;
+//			if(fcs==null)continue;
 			Env.p(memname + "{");
 			// アクティブアトムの情報を出力
 			for(Functor f : sortedFunctors){
@@ -89,7 +89,8 @@ public class TypePrinter {
 				// データアトム、コネクタは無視する
 				if(TypeEnv.outOfPassiveFunctor(f) != TypeEnv.ACTIVE)continue;
 				
-				Map<Functor, TypeVarConstraint[]> functorToArgumentTypes = memnameToFunctorTypes.get(memname);
+				Map<Functor, TypeVarConstraint[]> functorToArgumentTypes =
+					memnameToFunctorTypes.get(memname);
 				
 //				if(fcs.functorToCount.containsKey(f)){
 
@@ -114,10 +115,13 @@ public class TypePrinter {
 							}
 						}
 					}
-					texp.append(")");
+					texp.append(") : ");
 					
-					IntervalCount fc = fcs.functorToCount.get(f);
-					texp.append(" : " + fc);
+					if(fcs != null){
+						IntervalCount fc = fcs.functorToCount.get(f);
+						texp.append(fc);
+					}
+					else texp.append("??");
 					
 					Env.p(texp);
 //				}
@@ -129,11 +133,13 @@ public class TypePrinter {
 			}
 			
 			// 子膜の情報を出力
-			for(String childname : sortedMemNames){
-				
-				if(fcs.memnameToCount.containsKey(childname)){
-					IntervalCount fc = fcs.memnameToCount.get(childname);
-					Env.p("\t" + childname + "{} : " + fc);
+			if(fcs!=null){
+				for(String childname : sortedMemNames){
+					
+					if(fcs.memnameToCount.containsKey(childname)){
+						IntervalCount fc = fcs.memnameToCount.get(childname);
+						Env.p("\t" + childname + "{} : " + fc);
+					}
 				}
 			}
 			

@@ -2,6 +2,7 @@ package type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +41,8 @@ public class TypeChecker {
 	// データアトムの型情報 (?)
 	private final Map<Functor, List<ModedType>> dataAtomTypes = new HashMap<Functor, List<ModedType>>();
 	
+	private final Set<String> nomores = new HashSet<String>();
+	
 	/**
 	 * データ型宣言をパーズする
 	 * @param atom datatypeアトム
@@ -66,13 +69,40 @@ public class TypeChecker {
 				if(!(signatomic instanceof Atom))
 					throw new TypeParseException("context appearing in type definition.");
 				Atom signatom = (Atom)signatomic;
-				if(signatom.functor.equals(new SymbolFunctor("+",2))){
-					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[0]).atom;
-					if(!(signedatomic instanceof Atom))
-						throw new TypeParseException("context appearing in type definition.");
-					String dataname = signedatomic.getName();
-					types.add(j, new ModedType(dataname, 1));
+				if(signatom.getName().equals("+")){
+					Set<String> datanames = new HashSet<String>();
+					for(int k=0;k<signatom.getArity()-1;k++){
+						Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[k]).atom;
+						String dataname = signedatomic.getName();
+						if(!datanames.contains(dataname))datanames.add(dataname);
+					}
+					types.add(j, new ModedType(datanames, 1));
 				}
+//				else if(signatom.getName().equals("-")){
+//					Set<String> datanames = new HashSet<String>();
+//					for(int k=0;k<signatom.getArity()-1;k++){
+//						Atomic signedatomic = signatom.args[0].atom;
+//						String dataname = signedatomic.getName();
+//						if(!datanames.contains(dataname))datanames.add(dataname);
+//					}
+//					types.add(i, new ModedType(datanames, -1));
+//				}
+				else if(signatom.getName().equals("*")){
+					Set<String> datanames = new HashSet<String>();
+					for(int k=0;k<signatom.getArity()-1;k++){
+						Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[k]).atom;
+						String dataname = signedatomic.getName();
+						if(!datanames.contains(dataname))datanames.add(dataname);
+					}
+					types.add(j, new ModedType(datanames, 0));
+				}
+//				if(signatom.functor.equals(new SymbolFunctor("+",2))){
+//					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[0]).atom;
+//					if(!(signedatomic instanceof Atom))
+//						throw new TypeParseException("context appearing in type definition.");
+//					String dataname = signedatomic.getName();
+//					types.add(j, new ModedType(dataname, 1));
+//				}
 				else if(signatom.functor.equals(new SymbolFunctor("-",1))){
 					if(flgRegistered)
 						throw new TypeParseException("data atom must have only one output argument.");
@@ -84,7 +114,7 @@ public class TypeChecker {
 			}
 			if(!flgRegistered)
 				throw new TypeParseException("datatype atom must have output sign.");
-			addDataAtomType(dataatom.functor, types);
+			addDataAtomType(new SymbolFunctor(dataatom.getName(),dataatom.getArity()-1), types);
 		}
 	}
 	
@@ -147,6 +177,10 @@ public class TypeChecker {
 								addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
 							}
 						}
+						// "nomore" 未定義アトムの出現禁止フラグ
+						else if(f.equals(new SymbolFunctor("nomore",0))){
+							nomores.add(TypeEnv.getMemName(mem));
+						}
 					}
 				}
 	//			printTypeDefinitions();
@@ -184,19 +218,32 @@ public class TypeChecker {
 			if(!(signatomic instanceof Atom))
 				throw new TypeParseException("context appearing in type definition.");
 			Atom signatom = (Atom)signatomic;
-			if(signatom.functor.equals(new SymbolFunctor("+",2))){
-				Atomic signedatomic = signatom.args[0].atom;
-				if(!(signedatomic instanceof Atom))
-					throw new TypeParseException("context appearing in type definition.");
-				String dataname = signedatomic.getName();
-				types.add(i, new ModedType(dataname, 1));
+			if(signatom.getName().equals("+")){
+				Set<String> datanames = new HashSet<String>();
+				for(int j=0;j<signatom.getArity()-1;j++){
+					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[j]).atom;
+					String dataname = signedatomic.getName();
+					if(!datanames.contains(dataname))datanames.add(dataname);
+				}
+				types.add(i, new ModedType(datanames, 1));
 			}
-			else if(signatom.functor.equals(new SymbolFunctor("-",2))){
-				Atomic signedatomic = signatom.args[0].atom;
-				if(!(signedatomic instanceof Atom))
-					throw new TypeParseException("context appearing in type definition.");
-				String dataname = signedatomic.getName();
-				types.add(i, new ModedType(dataname, -1));
+			else if(signatom.getName().equals("-")){
+				Set<String> datanames = new HashSet<String>();
+				for(int j=0;j<signatom.getArity()-1;j++){
+					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[j]).atom;
+					String dataname = signedatomic.getName();
+					if(!datanames.contains(dataname))datanames.add(dataname);
+				}
+				types.add(i, new ModedType(datanames, -1));
+			}
+			else if(signatom.getName().equals("*")){
+				Set<String> datanames = new HashSet<String>();
+				for(int j=0;j<signatom.getArity()-1;j++){
+					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[j]).atom;
+					String dataname = signedatomic.getName();
+					if(!datanames.contains(dataname))datanames.add(dataname);
+				}
+				types.add(i, new ModedType(datanames, 0));
 			}
 			else throw new TypeParseException("active atom must have signed data atom : " + atom.functor + " -> " + signatom.functor);
 		}
@@ -318,12 +365,12 @@ public class TypeChecker {
 				else if(mv.value != mt.sign)
 					throw new TypeException("mode error : " + mt.sign + "(user def) <=> " + mv.value + "(infered)");
 				TypeVar tv = tvc.getTypeVar();
-				String typeName = tv.getTypeName(); // データ型名を取得する
-				if(typeName == null){ // データ型が未定
-					tv.setTypeName(mt.typename);
+				Set<String> typeNames = tv.getTypeName(); // データ型名を取得する
+				if(typeNames == null){ // データ型が未定
+					tv.setTypeName(mt.typenames);
 				}
-				else if(typeName.equals(mt.typename))
-					throw new TypeException("type error : " + mt.typename + "(user def) <=> " + typeName + "(infered)");
+				else if(!checkDataTypes(mt.typenames,typeNames))//typeName.equals(mt.typename))
+					throw new TypeException("type error : " + f + "/" + pos + ":" + mt.typenames + "(user def) <=> " + typeNames + "(infered)");
 			}
 			else if(p instanceof TracingPath){
 				TracingPath tp = (TracingPath)p;
@@ -333,16 +380,31 @@ public class TypeChecker {
 				List<ModedType> types = dataAtomTypes.get(f);
 				ModedType mt = types.get(pos);
 				ModeVar mv = tvc.getModeVar();
-				if(mv.value == 0)mv.bindSign(mt.sign); // もしモード変数が未決定なら決定する
-				else if(mv.value != mt.sign)
-					throw new TypeException("mode error : " + mt.sign + "(user def) <=> " + mv.value + "(infered)");
-				TypeVar tv = tvc.getTypeVar();
-				String typeName = tv.getTypeName(); // データ型名を取得する
-				if(typeName == null){ // データ型が未定
-					tv.setTypeName(mt.typename);
+				ActiveAtomPath ap = getTracedRoot(tp);
+				Functor af = ap.getFunctor();
+				Map<Functor,List<ModedType>> f2ts = activeAtomTypes.get(ap.getMemName());
+				List<ModedType> amts = f2ts.get(af);
+				ModedType amt = amts.get(ap.getPos());
+				//　到達もとのActiveAtomPathのモードにより逆になる
+				if(amt.sign == -1){
+					if(mv.value == 0)mv.bindSign(-mt.sign); // もしモード変数が未決定なら決定する
+					else if(mv.value != -mt.sign)
+						throw new TypeException("mode error : " + f + "/" + pos + " : " + mt.sign + "(user def) <=> " + mv.value + "(infered)");
 				}
-				else if(typeName.equals(mt.typename))
-					throw new TypeException("type error : " + mt.typename + "(user def) <=> " + typeName + "(infered)");
+				else if(amt.sign == 1){
+					if(mv.value == 0)mv.bindSign(mt.sign); // もしモード変数が未決定なら決定する
+					else if(mv.value != mt.sign)
+						throw new TypeException("mode error : " + f + "/" + pos + " : " + mt.sign + "(user def) <=> " + mv.value + "(infered)");
+				}else{ // ルートが不明の場合、特にチェックしない
+					continue;
+				}
+				TypeVar tv = tvc.getTypeVar();
+				Set<String> typeNames = tv.getTypeName(); // データ型名を取得する
+				if(typeNames == null){ // データ型が未定
+					tv.setTypeName(mt.typenames);
+				}
+				else if(!checkDataTypes(mt.typenames,typeNames))
+					throw new TypeException("type error : " + f + "/" + pos + " : " + mt.typenames + "(user def) <=> " + typeNames + "(infered)");
 			}
 			else Env.p("fatal error : RootPath");
 		}
@@ -351,9 +413,15 @@ public class TypeChecker {
 		for(String memname : memnameToCounts.keySet()){
 			FixedCounts fcs = memnameToCounts.get(memname);
 			for(Functor f : fcs.functorToCount.keySet()){
+				if(TypeEnv.outOfPassiveFunctor(f)!=TypeEnv.ACTIVE)continue;
 				if(!functorCounts.containsKey(memname))break;
 				Map<Functor, IntervalCount> fToC = functorCounts.get(memname);
-				if(!fToC.containsKey(f))continue;
+				if(!fToC.containsKey(f)){
+					if(nomores.contains(memname)){
+						throw new TypeException("undefined atom occurs. : " + f);
+					}
+					else continue;
+				}
 				IntervalCount fc = fToC.get(f);
 				checkCount(f.toString(), fc,fcs.functorToCount.get(f));
 			}
@@ -365,6 +433,29 @@ public class TypeChecker {
 				checkCount(childname, fc, fcs.memnameToCount.get(childname));
 			}
 		}
+	}
+	
+	private ActiveAtomPath getTracedRoot(TracingPath tp){
+		Path p = tp.getPath();
+		if(p instanceof ActiveAtomPath){
+			return (ActiveAtomPath)p;
+		}
+		else return getTracedRoot((TracingPath)p);
+	}
+	
+	/**
+	 * $con内に$infが収まっていることを確認する
+	 * @param con
+	 * @param inf
+	 * @return
+	 */
+	private boolean checkDataTypes(Set<String> con, Set<String> inf){
+		for(String dname : inf){
+			if(!con.contains(dname)){
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private void checkCount(String s, IntervalCount constraint, IntervalCount infered)throws TypeException{
@@ -415,16 +506,16 @@ public class TypeChecker {
 	}
 	
 	private void errorCount(String s, IntervalCount constraint, IntervalCount infered)throws TypeException{
-		throw new TypeException("quantity error : " + s + " : " + constraint + "(user def) <=> " + infered + "(infered)");
+		throw new TypeException("count error : " + s + " : " + constraint + "(user def) <=> " + infered + "(infered)");
 	}
 	
 }
 
 class ModedType{
-	public String typename;
+	public Set<String> typenames;
 	public int sign;
-	public ModedType(String typename, int sign) {
-		this.typename = typename;
+	public ModedType(Set<String> typenames, int sign) {
+		this.typenames = typenames;
 		this.sign = sign;
 	}
 }

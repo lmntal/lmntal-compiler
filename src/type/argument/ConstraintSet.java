@@ -178,9 +178,9 @@ public class ConstraintSet /* implements Set */{
 	public void printAllConstraints() {
 		if (!Env.flgShowConstraints)
 			return;
-		if (Env.flgShowAllConstraints)
+//		if (Env.flgShowAllConstraints)
 			printReceiveConstraints();
-		if (Env.flgShowAllConstraints)
+//		if (Env.flgShowAllConstraints)
 			printUnifyConstraints();
 		Env.p("----TypeVarConstraints : ");
 		TreeSet<TypeVarConstraint> tvcs = new TreeSet<TypeVarConstraint>(new TypeVarConstraintComparator());

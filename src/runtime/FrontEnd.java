@@ -680,7 +680,7 @@ public class FrontEnd {
 //					tci.printAllConstraints();
 				}catch (TypeException e){
 					Env.p("Type Inference Failed");
-					Env.e(e.getMessage());
+					Env.e("TYPE ERROR: " + e.getMessage());
 //					tci.printAllConstraints();
 					return;
 				}

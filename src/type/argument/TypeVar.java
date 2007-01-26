@@ -94,20 +94,25 @@ public class TypeVar {
 		return ret;
 	}
 	
-	private String typename = null;
-	public String getTypeName()throws TypeException{
-		if(typename == null){
+	private Set<String> typenames;// = new HashSet<String>();
+	public Set<String> getTypeName(){//throws TypeException{
+		if(typenames == null){
+			typenames = new HashSet<String>();
 			for(Functor f : self().passiveFunctors){
 				String tn = typeNameOfFunctor(f);
-				if(typename==null)typename = tn;
-				else if(typename.equals(tn))continue;
-				else throw new TypeException("two data types in one type variable : " + this);
+				if(!typenames.contains(tn))
+					typenames.add(tn);
+//				if(typename==null)typename = tn;
+//				else if(typename.equals(tn))continue;
+//				else throw new TypeException("two data types in one type variable : " + this);
 			}
 		}
-		return typename;
+		return typenames;
 	}
-	public void setTypeName(String typename){
-		this.typename = typename;
+	public void setTypeName(Set<String> typenames){
+//		Set<String> tns = new HashSet<String>();
+		this.typenames = typenames;
+//		this.typename = typename;
 	}
 	
 	public String shortString(){

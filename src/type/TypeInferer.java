@@ -63,13 +63,13 @@ public class TypeInferer {
 //			if(Env.flgShowConstraints)
 //				qi.printAll();
 		}
-		
+
 		ArgumentInferer ai = new ArgumentInferer(root);
 		// 引数制約を推論する
 		if(Env.flgArgumentInference){
 			ai.infer();
-//			if(Env.flgShowConstraints)
-//				ai.printAll();
+			if(false)
+				ai.printAll();
 		}
 		
 		// 型定義が与えられていたら整合性をチェックする
