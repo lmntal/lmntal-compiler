@@ -4,7 +4,7 @@ public class VarCount{
 
 	private static int current_id = 0;
 	
-	public FixedCount bound;
+	public IntervalCount bound;
 	
 	private final int id;
 	public VarCount(){
@@ -14,7 +14,7 @@ public class VarCount{
 		return "RV" + id;
 	}
 	
-	public void bind(FixedCount vc){
+	public void bind(IntervalCount vc){
 		bound = vc;
 	}
 	
@@ -22,7 +22,7 @@ public class VarCount{
 		return bound != null;
 	}
 	
-	public FixedCount evaluate(){
+	public IntervalCount evaluate(){
 		if(bound == null)
 			System.err.println("fatal error. this var isn't bind : RV" + id);
 		return bound;

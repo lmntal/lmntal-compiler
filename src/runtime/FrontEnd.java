@@ -480,6 +480,38 @@ public class FrontEnd {
 							// enable type check
 							// ( 今はまだ非公開 )
 							Env.fType = true;
+						} else if (args[i].startsWith("--type-count-level=")){
+							// --type-count-level
+							// set count-analysis level.
+							int ctlevel = 0;
+							try{
+								ctlevel = Integer.parseInt(args[i].substring(19));
+							}catch(NumberFormatException e){
+								ctlevel = Env.COUNT_DEFAULT; // 最大限
+							}
+							if(ctlevel > Env.COUNT_APPLYANDMERGEDETAIL)
+								ctlevel = Env.COUNT_APPLYANDMERGEDETAIL;
+							Env.quantityInferenceLevel = ctlevel;
+							Env.fType = true;
+						} else if (args[i].equals("--type-argument")){
+							// --type-argument
+							// enable argument type system.
+							Env.flgArgumentInference = true;
+							Env.flgQuantityInference = false;
+							Env.flgOccurrenceInference = false;
+							Env.fType = true;
+						} else if (args[i].equals("--type-count")){
+							// --type-count
+							// enable count type system
+							Env.flgArgumentInference = false;
+							Env.flgQuantityInference = true;
+							Env.flgOccurrenceInference = false;
+							Env.fType = true;
+						} else if (args[i].equals("--type-verbose")){
+							// --type-verbose
+							// print type information.
+							Env.fType = true;
+							Env.flgShowConstraints = true;
 						} else if (args[i].equals("--args")) {
 							/// --args
 							/// give command-line options after this to LMNtal program.

@@ -39,18 +39,4 @@ public class InfinityCount extends ValueCount {
 			else return 1;
 		}
 	}
-	
-	public FixedCount or(ValueCount vc){
-		if(vc instanceof InfinityCount){
-			InfinityCount ic = (InfinityCount)vc;
-			if(ic.minus == minus)return this;
-			else return new IntervalCount(Count.M_INFINITY, Count.INFINITY);
-		}
-		else{
-			NumCount nc = (NumCount)vc;
-			if(minus)return new IntervalCount(this,nc);
-			else return new IntervalCount(nc,this);
-		}
-	}
-	
 }

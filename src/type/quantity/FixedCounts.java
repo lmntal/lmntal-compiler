@@ -19,9 +19,9 @@ import compile.structure.Membrane;
 public class FixedCounts {
 	
 	/** ファンクタ -> 量 */
-	public final Map<Functor,FixedCount> functorToCount;
+	public final Map<Functor,IntervalCount> functorToCount;
 	/** 膜名 -> 量 */
-	public final Map<String,FixedCount> memnameToCount;
+	public final Map<String,IntervalCount> memnameToCount;
 	
 	final Membrane mem;
 
@@ -31,8 +31,8 @@ public class FixedCounts {
 	 */
 	public FixedCounts(StaticCounts com){
 		this.mem = com.mem;
-		functorToCount = new HashMap<Functor, FixedCount>();
-		memnameToCount = new HashMap<String, FixedCount>();
+		functorToCount = new HashMap<Functor, IntervalCount>();
+		memnameToCount = new HashMap<String, IntervalCount>();
 		for(Functor f : com.functorToCount.keySet()){
 			Count c = com.functorToCount.get(f);
 			functorToCount.put(f,c.evaluate());
@@ -44,6 +44,8 @@ public class FixedCounts {
 	}
 	
 	/**
+	 * マージする.
+	 * マージとは[0, 3] , [2, 5] => [0, 5]みたいなこと
 	 * TODO 倍数により分ける
 	 * @param com
 	 */
@@ -52,11 +54,11 @@ public class FixedCounts {
 		mergedFunctors.addAll(functorToCount.keySet());
 		mergedFunctors.addAll(fcs.functorToCount.keySet());
 		for(Functor f : mergedFunctors){
-			FixedCount fc1 = functorToCount.get(f);
-			FixedCount fc2 = fcs.functorToCount.get(f);
-			if(fc1==null && fc2!=null)
+			IntervalCount fc1 = functorToCount.get(f);
+			IntervalCount fc2 = fcs.functorToCount.get(f);
+			if(fc1==null && fc2!=null)// 片方にしかない場合
 				functorToCount.put(f,fc2.or0());
-			else if(fc1!=null && fc2==null)
+			else if(fc1!=null && fc2==null)// 片方にしかない場合
 				functorToCount.put(f,fc1.or0());
 			else if(fc1!=null && fc2!=null)
 				functorToCount.put(f, fc1.or(fc2));
@@ -65,8 +67,8 @@ public class FixedCounts {
 		mergedNames.addAll(memnameToCount.keySet());
 		mergedNames.addAll(fcs.memnameToCount.keySet());
 		for(String name : mergedNames){
-			FixedCount fc1 = memnameToCount.get(name);
-			FixedCount fc2 = fcs.memnameToCount.get(name);
+			IntervalCount fc1 = memnameToCount.get(name);
+			IntervalCount fc2 = fcs.memnameToCount.get(name);
 			if(fc1==null && fc2!=null)
 				memnameToCount.put(name, fc2.or0());
 			else if(fc1!=null && fc2==null)
@@ -86,10 +88,10 @@ public class FixedCounts {
 		addCounts(memnameToCount, fc.memnameToCount);
 	}
 
-	public <Key> void addCounts(Map<Key, FixedCount> countmap1, Map<Key, FixedCount> countmap2){
+	public <Key> void addCounts(Map<Key, IntervalCount> countmap1, Map<Key, IntervalCount> countmap2){
 		for(Key key : countmap2.keySet()){
 			if(countmap1.containsKey(key)){
-				FixedCount oldfc = countmap1.get(key);
+				IntervalCount oldfc = countmap1.get(key);
 				oldfc.add(countmap2.get(key));
 			}
 			else{

@@ -16,6 +16,10 @@ public class DynamicCounts {
 	/** 適用回数を表す変数 */
 	public final VarCount applyCount;
 	
+	public void assignToVar(IntervalCount ic){
+		applyCount.bind(ic);
+	}
+	
 	/**
 	 * この膜の所属プロセスが何倍されるかを表す。
 	 * 1 : 移動時(あるいはルールの本膜等)

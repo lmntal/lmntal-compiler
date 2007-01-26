@@ -440,20 +440,32 @@ public final class Env {
 	}
 	
 	////////////////////////////////////////////////////////////////
-	/* type inference 関係 */
-	/** */
+	/* type inference 関係 by kudo */
+	/** 型システム on/off */
 	public static boolean fType = false;
 	
 	/** 各推論の有効／無効 */
-	public static boolean flgOccurrenceInference = false;//true;
+	public static boolean flgOccurrenceInference = false;
 	public static boolean flgQuantityInference = true;
 	public static boolean flgArgumentInference = true;
+
+	/** 各生成膜を混ぜて効果を適用 */
+	public static final int COUNT_MERGEANDAPPLY = 0;
+	/** 各生成膜ごとに効果を適用してから混ぜる */
+	public static final int COUNT_APPLYANDMERGE = 1;
+	/** 各生成膜ごとに適用回数を解析 */
+	public static final int COUNT_APPLYANDMERGEDETAIL = 2;
+	/** default */
+	public static final int COUNT_DEFAULT = COUNT_APPLYANDMERGEDETAIL;
+	
+	/** 個数の解析のレベル */
+	public static int quantityInferenceLevel = COUNT_DEFAULT;
 	
 	/** 推論された全ての情報を表示 */
 	public static boolean flgShowAllConstraints = false;
 	
 	/** 推論結果を表示 */
-	public static boolean flgShowConstraints = true;
+	public static boolean flgShowConstraints = false;
 	
 	////////////////////////////////////////////////////////////////
 	

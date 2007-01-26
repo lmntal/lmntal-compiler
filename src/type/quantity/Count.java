@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+/** 多項式の形で持っている */
 public class Count {
 
 	public final static InfinityCount INFINITY = new InfinityCount(false);
@@ -66,12 +67,12 @@ public class Count {
 		return new Count(newmap);
 	}
 	
-	public FixedCount evaluate(){
-		FixedCount fc = new NumCount(0);
+	public IntervalCount evaluate(){
+		IntervalCount fc = new IntervalCount(0,0);
 		for(VarCount vc : varToMultiple.keySet()){
 			int m = varToMultiple.get(vc);
 			if(m==0)continue;
-			FixedCount f = vc.evaluate();
+			IntervalCount f = vc.evaluate();
 			f = f.mul(m);
 			fc = fc.add(f);
 		}
@@ -96,30 +97,21 @@ public class Count {
 		for(VarCount vc : varToMultiple.keySet()){
 			int m = varToMultiple.get(vc);
 			if(m == 0) continue;
-			if(vc.bound instanceof NumCount){
-				min += ((NumCount)vc.bound).value * m;
-			}
-			else if(vc.bound instanceof InfinityCount){
-				// 無限値に固定されてしまうので解けない
-				return false;
-			}
-			else if(vc.bound instanceof IntervalCount){
-				IntervalCount ic = (IntervalCount)vc.bound;
-				if(m > 0){
-					// 符号が+で上界がなければ解けない
-					if(ic.max instanceof InfinityCount)return false;
-					if(ic.max instanceof NumCount){
-						min += ((NumCount)ic.max).value * m;
-					}
+			IntervalCount ic = vc.bound;
+			if(m > 0){
+				// 符号が+で上界がなければ解けない
+				if(ic.max instanceof InfinityCount)return false;
+				if(ic.max instanceof NumCount){
+					min += ((NumCount)ic.max).value * m;
 				}
-				else if(m < 0){
-					// 符号が-で下界がなければ解けない ( もっともこれはありえないが )
-					if(ic.min instanceof InfinityCount)return false;
-					if(ic.min instanceof NumCount){
-						min += ((NumCount)ic.min).value * m;
-					}
-					vars.add(vc);
+			}
+			else if(m < 0){
+				// 符号が-で下界がなければ解けない ( もっともこれはありえないが )
+				if(ic.min instanceof InfinityCount)return false;
+				if(ic.min instanceof NumCount){
+					min += ((NumCount)ic.min).value * m;
 				}
+				vars.add(vc);
 			}
 		}
 		boolean changed = false;

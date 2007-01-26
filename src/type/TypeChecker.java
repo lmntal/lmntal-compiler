@@ -19,9 +19,7 @@ import type.argument.TracingPath;
 import type.argument.TypeVar;
 import type.argument.TypeVarConstraint;
 import type.quantity.Count;
-import type.quantity.FixedCount;
 import type.quantity.FixedCounts;
-import type.quantity.InfinityCount;
 import type.quantity.IntervalCount;
 import type.quantity.NumCount;
 import type.quantity.QuantityInferer;
@@ -34,8 +32,8 @@ import compile.structure.Membrane;
 public class TypeChecker {
 	
 	//膜名ごとに、子膜およびアクティブアトムの個数を管理する
-	private final Map<String, Map<String, FixedCount>> memCounts = new HashMap<String, Map<String, FixedCount>>();
-	private final Map<String, Map<Functor,FixedCount>> functorCounts = new HashMap<String, Map<Functor,FixedCount>>();
+	private final Map<String, Map<String, IntervalCount>> memCounts = new HashMap<String, Map<String, IntervalCount>>();
+	private final Map<String, Map<Functor,IntervalCount>> functorCounts = new HashMap<String, Map<Functor, IntervalCount>>();
 	
 	// アクティブアトムの型情報
 	private final Map<String, Map<Functor, List<ModedType>>> activeAtomTypes = new HashMap<String, Map<Functor, List<ModedType>>>();
@@ -120,12 +118,12 @@ public class TypeChecker {
 								continue;
 							else if(lastf.equals(new SymbolFunctor("+", 1)) && lastatom.mem.parent == mem){ // 子膜なら
 								String childname = TypeEnv.getMemName(lastatom.mem); // 0引数目の先($in)の1引数目の先のアトムの所属膜
-								FixedCount fc = getCountFromList(atom);
+								IntervalCount fc = getCountFromList(atom);
 								addChildCount(memname, childname, fc);
 							}
 							else{ // アクティブアトム
 								constrainActiveAtomArgument(memname, lastatom);
-								FixedCount fc = getCountFromList(atom);
+								IntervalCount fc = getCountFromList(atom);
 								addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
 							}
 						}
@@ -140,12 +138,12 @@ public class TypeChecker {
 								continue;
 							else if(lastf.equals(new SymbolFunctor("+",1)) && lastatom.mem.parent == mem){ // 子膜なら
 								String childname = TypeEnv.getMemName(lastatom.mem); // 0引数目の先($in)の1引数目の先のアトムの所属膜
-								FixedCount fc = new NumCount(count);
+								IntervalCount fc = new IntervalCount(count,count);//new NumCount(count);
 								addChildCount(memname, childname, fc);
 							}
 							else{ //アクティブアトム
 								constrainActiveAtomArgument(memname, lastatom);
-								FixedCount fc = new NumCount(count);
+								IntervalCount fc = new IntervalCount(count,count);//new NumCount(count);
 								addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
 							}
 						}
@@ -163,7 +161,7 @@ public class TypeChecker {
 	private void printTypeDefinitions(){
 		for(String memname : memCounts.keySet()){
 			Env.p(memname + "{");
-			Map<String, FixedCount> mtof = memCounts.get(memname);
+			Map<String, IntervalCount> mtof = memCounts.get(memname);
 			for(String child : mtof.keySet()){
 				Env.p("\t" + child + " = " + mtof.get(child));
 			}
@@ -171,7 +169,7 @@ public class TypeChecker {
 		}
 		for(String memname : functorCounts.keySet()){
 			Env.p(memname + "{");
-			Map<Functor, FixedCount> ftof = functorCounts.get(memname);
+			Map<Functor, IntervalCount> ftof = functorCounts.get(memname);
 			for(Functor f : ftof.keySet()){
 				Env.p("\t" + f + " = " + ftof.get(f));
 			}
@@ -211,7 +209,7 @@ public class TypeChecker {
 	 * @return
 	 * @throws TypeParseException
 	 */
-	private static FixedCount getCountFromList(Atom firstcons)throws TypeParseException{
+	private static IntervalCount getCountFromList(Atom firstcons)throws TypeParseException{
 		Atomic atomic1 = firstcons.args[0].buddy.atom;
 		if(!(atomic1 instanceof Atom))
 			throw new TypeParseException("context appearing in type definition.");
@@ -266,10 +264,10 @@ public class TypeChecker {
 	 * @param fc 個数情報
 	 * @throws TypeParseException 同じ膜名について2つ個数情報を追加しようとするとエラー
 	 */
-	private void addChildCount(String parentname, String childname, FixedCount fc)throws TypeParseException{
+	private void addChildCount(String parentname, String childname, IntervalCount fc)throws TypeParseException{
 		if(!memCounts.containsKey(parentname))
-			memCounts.put(parentname, new HashMap<String, FixedCount>());
-		Map<String, FixedCount> counts = memCounts.get(parentname);
+			memCounts.put(parentname, new HashMap<String, IntervalCount>());
+		Map<String, IntervalCount> counts = memCounts.get(parentname);
 		if(!counts.containsKey(childname))
 			counts.put(childname, fc);
 		else{
@@ -284,10 +282,10 @@ public class TypeChecker {
 	 * @param fc 個数情報
 	 * @throws TypeParseException 同じアクティブアトムについて2つ個数情報を追加しようとするとエラー
 	 */
-	private void addFunctorCount(String parentname, Functor functor, FixedCount fc)throws TypeParseException{
+	private void addFunctorCount(String parentname, Functor functor, IntervalCount fc)throws TypeParseException{
 		if(!functorCounts.containsKey(parentname))
-			functorCounts.put(parentname, new HashMap<Functor, FixedCount>());
-		Map<Functor, FixedCount> counts = functorCounts.get(parentname);
+			functorCounts.put(parentname, new HashMap<Functor, IntervalCount>());
+		Map<Functor, IntervalCount> counts = functorCounts.get(parentname);
 		if(!counts.containsKey(functor))
 			counts.put(functor, fc);
 		else{
@@ -354,69 +352,69 @@ public class TypeChecker {
 			FixedCounts fcs = memnameToCounts.get(memname);
 			for(Functor f : fcs.functorToCount.keySet()){
 				if(!functorCounts.containsKey(memname))break;
-				Map<Functor, FixedCount> fToC = functorCounts.get(memname);
+				Map<Functor, IntervalCount> fToC = functorCounts.get(memname);
 				if(!fToC.containsKey(f))continue;
-				FixedCount fc = fToC.get(f);
+				IntervalCount fc = fToC.get(f);
 				checkCount(f.toString(), fc,fcs.functorToCount.get(f));
 			}
 			for(String childname : fcs.memnameToCount.keySet()){
 				if(!memCounts.containsKey(memname))break;
-				Map<String, FixedCount> mToC = memCounts.get(memname);
+				Map<String, IntervalCount> mToC = memCounts.get(memname);
 				if(!mToC.containsKey(childname))continue;
-				FixedCount fc = mToC.get(childname);
+				IntervalCount fc = mToC.get(childname);
 				checkCount(childname, fc, fcs.memnameToCount.get(childname));
 			}
 		}
 	}
 	
-	private void checkCount(String s, FixedCount constraint, FixedCount infered)throws TypeException{
-		if(constraint instanceof InfinityCount){
-			throw new TypeException("fatal error : infinity is given as definition.");
-//			if(!(infered instanceof InfinityCount))
-//				errorCount(constraint, infered);
-//			InfinityCount ci = (InfinityCount)constraint;
-//			InfinityCount ii = (InfinityCount)infered;
-//			if(ci.minus != ii.minus)
-//				errorCount(constraint, infered);
-		}
-		else if(constraint instanceof NumCount){
-			if(!(infered instanceof NumCount))
-				errorCount(s, constraint, infered);
-			NumCount cn = (NumCount)constraint;
-			NumCount in = (NumCount)infered;
-			if(cn.value != in.value)
-				errorCount(s, constraint, infered);
-		}
-		else{
+	private void checkCount(String s, IntervalCount constraint, IntervalCount infered)throws TypeException{
+//		if(constraint instanceof InfinityCount){
+//			throw new TypeException("fatal error : infinity is given as definition.");
+////			if(!(infered instanceof InfinityCount))
+////				errorCount(constraint, infered);
+////			InfinityCount ci = (InfinityCount)constraint;
+////			InfinityCount ii = (InfinityCount)infered;
+////			if(ci.minus != ii.minus)
+////				errorCount(constraint, infered);
+//		}
+//		else if(constraint instanceof NumCount){
+//			if(!(infered instanceof NumCount))
+//				errorCount(s, constraint, infered);
+//			NumCount cn = (NumCount)constraint;
+//			NumCount in = (NumCount)infered;
+//			if(cn.value != in.value)
+//				errorCount(s, constraint, infered);
+//		}
+//		else{
 			IntervalCount ci = (IntervalCount)constraint;
-			if(infered instanceof InfinityCount){
-				InfinityCount ii = (InfinityCount)infered;
-				if(!ii.minus){
-					if(ci.max instanceof InfinityCount){
-						if(((InfinityCount)ci.max).minus)
-							errorCount(s, constraint, infered);
-					}
-					else
-						errorCount(s, constraint, infered);
-				}
-				else{
-					throw new TypeException("fatal error : -inf infered.");
-				}
-			}
-			else if(infered instanceof NumCount){
-				NumCount in = (NumCount)infered;
-				if(ci.min.compare(in) > 0 || ci.max.compare(in) < 0)
-					errorCount(s, constraint, infered);
-			}
-			else{
+//			if(infered instanceof InfinityCount){
+//				InfinityCount ii = (InfinityCount)infered;
+//				if(!ii.minus){
+//					if(ci.max instanceof InfinityCount){
+//						if(((InfinityCount)ci.max).minus)
+//							errorCount(s, constraint, infered);
+//					}
+//					else
+//						errorCount(s, constraint, infered);
+//				}
+//				else{
+//					throw new TypeException("fatal error : -inf infered.");
+//				}
+//			}
+//			else if(infered instanceof NumCount){
+//				NumCount in = (NumCount)infered;
+//				if(ci.min.compare(in) > 0 || ci.max.compare(in) < 0)
+//					errorCount(s, constraint, infered);
+//			}
+//			else{
 				IntervalCount ii = (IntervalCount)infered;
 				if(ci.min.compare(ii.min) > 0 || ci.max.compare(ii.max) < 0)
 					errorCount(s, constraint, infered);
-			}
-		}
+//			}
+//		}
 	}
 	
-	private void errorCount(String s, FixedCount constraint, FixedCount infered)throws TypeException{
+	private void errorCount(String s, IntervalCount constraint, IntervalCount infered)throws TypeException{
 		throw new TypeException("quantity error : " + s + " : " + constraint + "(user def) <=> " + infered + "(infered)");
 	}
 	

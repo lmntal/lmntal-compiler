@@ -80,10 +80,10 @@ public class TypeInferer {
 		//推論結果を出力する
 		if(Env.flgShowConstraints){
 			TypePrinter tp;
-			if(Env.flgArgumentInference && Env.flgQuantityInference){
+//			if(Env.flgArgumentInference && Env.flgQuantityInference){
 				tp = new TypePrinter(ai,qi);
 				tp.printAll();
-			}
+//			}
 		}
 		
 		

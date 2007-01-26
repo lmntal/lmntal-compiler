@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import runtime.Env;
 import type.TypeEnv;
 
 import compile.structure.Atom;
@@ -39,27 +40,40 @@ public class QuantityInferer {
 	 */
 	public void infer(){
 		
-		// 個々の具体膜に対して実体量を、
-		// 継続膜に対して効果を求める
+		// 個々の具体膜に対してStaticCountsを、
+		// 最外膜/継続膜に対してDynamicCountsを求める
+		// 全ての右辺膜に効果範囲を決める
+		// プロセスの混在膜があればプロセス独立性を失う
+		// ルール文脈の分散があればルールセット独立性を失う
 		inferRHSMembrane(root);
 		
-		if(TypeEnv.countLevel >= TypeEnv.COUNT_APPLY){
-			// 個々の具体膜についてそれぞれに効果を適用する
-			countsset.applyIndividual();
-		}
-		// 適用回数変数に[0,無限]を割り当てる
-		countsset.assignInfinityToVar();
-		if(TypeEnv.countLevel >= TypeEnv.COUNT_APPLY){
-			// アトム個数の下限を0として適用回数を解く
-			countsset.solveByCounts();
-		}
-		// 具体値を計算させる
-		countsset.solveIndividuals();
-		countsset.solveDynamics();
-		// 具体膜をマージする
-		countsset.mergeFixeds();
-		//プロセスの独立性の崩れた膜に効果を適用する
-		countsset.applyCollapseds();
+		// 個々に解けるものは解く
+		countsset.solveIndividual();
+//		// 解いたものをマージする
+//		countsset.mergeFixeds();
+		
+		// 解けないものはマージして解く
+		countsset.solveAll();
+				
+//		if(Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE){
+//			// 個々の具体膜についてそれぞれに効果を適用する
+//			countsset.applyIndividual();
+//		}
+//		// 適用回数変数に[0,無限]を割り当てる
+//		countsset.assignInfinityToVar();
+//		if(Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE){
+//			// アトム個数の下限を0として適用回数を解く
+//			countsset.solveByCounts();
+//		}
+//		// 具体値を計算させる
+//		if(Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGEDETAIL){
+//			countsset.solveIndividuals();
+//		}
+////		countsset.solveDynamics();
+//		// 具体膜をマージする
+//		countsset.mergeFixeds();
+//		//プロセスの独立性の崩れた膜に効果を適用する
+//		countsset.applyCollapseds();
 		
 		// 全下限を0に直し、[0,0]を0にする
 		countsset.assignZeroToMinimum();
@@ -104,15 +118,19 @@ public class QuantityInferer {
 			ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
 			if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
 		}
-		
+
 		// プロセス文脈が複数の膜から来ている場合、プロセスの独立性は絶たれる
-		if(lhss.size() > 1)countsset.collapseProcessIndependency(TypeEnv.getMemName(rhs));
+		if(lhss.size() > 1)
+			countsset.collapseProcessIndependency(TypeEnv.getMemName(rhs));
 
 		switch(lhss.size()){
 		case 0 : // プロセス文脈が出現しない膜
+			countsset.effectTarget.put(rhs,rhs);
 			inferGeneratedMembrane(rhs);
+			// 生成膜の効果対象は自身
 			break;
 		default: // 1個も2個も関係なく解析
+			countsset.effectTarget.put(rhs,countsset.effectTarget.get(rhs.parent));
 			inferMultiInheritedMembrane(lhss,rhs);
 //		case 1 : // プロセス文脈が1個出現する膜
 //			countsset.add(inferInheritedMembrane(((ProcessContext)rhs.processContexts.get(0)).def.lhsOcc.mem,rhs));
@@ -126,19 +144,22 @@ public class QuantityInferer {
 //			countsset.add(inferMultiInheritedMembrane(lhss,rhs));
 		}
 
-		/** プロセス文脈の分散が無いことを確認する */
+		/** プロセス文脈の分散が無いことを確認し、あればプロセス独立性を失う */
 		if(!checkIndependency((List<ProcessContext>)rhs.processContexts, rhs) ||
 			!checkIndependency((List<ProcessContext>)rhs.typedProcessContexts, rhs) )
 			countsset.collapseProcessUnderBounds(TypeEnv.getMemName(rhs));
 		
-		/** ルール文脈の移動の有無を確認する */
+		/** ルール文脈の分散の有無を確認し、あればルールセット独立性を失う */
 		for(RuleContext rc : ((List<RuleContext>)rhs.ruleContexts)){
 			if(lhss.contains(rc.mem))continue;
 			else{
-				if(lhss.size() == 0)
+				if(lhss.size() == 0) // 生成膜であればその膜のみ
 					countsset.collapseRuleIndependency(rhs);
-				else
-					countsset.collapseRulesIndependency(TypeEnv.getMemName(rhs));
+				else // 継続膜等であれば効果対象において。
+					if(countsset.effectTarget.get(rhs) == null){
+						countsset.collapseRulesIndependency(TypeEnv.getMemName(rhs));
+					}// 効果対象が全ての膜であれば膜名について。
+					else countsset.collapseRuleIndependency(countsset.effectTarget.get(rhs));
 			}
 		}
 		
@@ -243,7 +264,7 @@ public class QuantityInferer {
 	 */
 	private void inferGeneratedMembrane(Membrane mem){
 		VarCount vc = new VarCount();
-		vc.bind(new NumCount(1));
+		vc.bind(new IntervalCount(1,1));//NumCount(1));
 		Count count = new Count(vc);
 		countsset.add(getCountsOfMem(1,mem,count));
 	}

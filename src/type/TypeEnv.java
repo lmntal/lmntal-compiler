@@ -27,10 +27,6 @@ public final class TypeEnv {
 	private static final Map<Functor, Integer> functorToOut = new HashMap<Functor, Integer>();
 	private static final Map<Functor, String> functorToTypeName = new HashMap<Functor, String>();
 
-	public static final int COUNT_DEFALUT = 0;
-	public static final int COUNT_APPLY = 1;
-	public static final int countLevel = COUNT_APPLY;
-	
 	static{
 		functorToOut.put(Functor.UNIFY, CONNECTOR);
 		functorToOut.put(Functor.INSIDE_PROXY, CONNECTOR);

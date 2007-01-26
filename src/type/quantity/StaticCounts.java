@@ -21,14 +21,6 @@ public class StaticCounts{
 	
 	public Membrane mem;
 	
-	/**
-	 * この膜の所属プロセスが何倍されるかを表す。
-	 * 0 : 生成時
-	 * 1 : 移動時(あるいはルールの本膜等)
-	 * >1 : 複製、マージ
-	 */
-//	public final int multiple;
-	
 	/** ファンクタ -> 量 */
 	public final Map<Functor,Count> functorToCount;
 	/** 膜名 -> 量 */
@@ -114,7 +106,7 @@ public class StaticCounts{
 	 */
 	public void removeUpperBounds(){
 		VarCount infVar = new VarCount();
-		infVar.bind(Count.INFINITY.or0());
+		infVar.bind(new IntervalCount(new NumCount(0),Count.INFINITY));
 		for(Functor f : functorToCount.keySet())
 			functorToCount.get(f).add(1,infVar);
 		for(String name : memnameToCount.keySet())
