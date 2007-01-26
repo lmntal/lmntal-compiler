@@ -147,8 +147,9 @@ public class NodeFunction {
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
-			double ddx = f * dx;
-			double ddy = f * dy;
+			double ddx = f * dx * Math.random() * 20;
+			double ddy = f * dy * Math.random() * 20;
+			
 			targetNode.moveDelta(ddx, ddy);
 		}
 	}
@@ -186,6 +187,10 @@ public class NodeFunction {
 				
 				Rectangle2D intersectionRect = 
 					sourceNode.getBounds2D().createIntersection(targetNode.getBounds2D());
+				double divergenceFource = CONSTANT_REPULSIVE;
+//				if(divergenceTimer_ != 0){
+//					divergenceFource = divergenceFource * 300;
+//				}
 				if(intersectionRect.isEmpty() ||
 						1 > intersectionRect.getWidth() ||
 						1 >  intersectionRect.getHeight())
@@ -195,8 +200,8 @@ public class NodeFunction {
 
 				Point2D targetPoint = targetNode.getCenterPoint();
 				
-				double fx = CONSTANT_REPULSIVE * intersectionRect.getWidth();
-				double fy = CONSTANT_REPULSIVE * intersectionRect.getHeight();
+				double fx = divergenceFource * intersectionRect.getWidth();
+				double fy = divergenceFource * intersectionRect.getHeight();
 				double dx = sourcePoint.getX() - targetPoint.getX();
 				double dy = sourcePoint.getY() - targetPoint.getY();
 
