@@ -41,7 +41,7 @@ public class NodeFunction {
 	
 	/** 発散定数 */
 	final static
-	private double CONSTANT_DIVERGENCE = 0.01;
+	private double CONSTANT_HEATING = 0.01;
 	
 	/** 角度調整力定数 */
 	final static
@@ -50,6 +50,10 @@ public class NodeFunction {
 	/** 発散時間 */
 	final static
 	private int HEATING_TIMER = 100;
+	
+	/** 局所発散と全体発散の力の差 */
+	final static
+	private int LOCAL_GLOBAL_RATE = 20;
 	
 	/** 局所発散時間 */
 	final static
@@ -139,7 +143,7 @@ public class NodeFunction {
 		{	
 			return;
 		}
-		if(localHeating_.isEmpty() && null == node.getParent()){
+		if(null == node.getParent() && 0 < heatingTimer_){
 			heatingTimer_--;
 		}
 		
@@ -148,8 +152,10 @@ public class NodeFunction {
 		while(nodes.hasNext()){
 			// 表示されているNodeを取得する
 			Node targetNode = nodes.next();
+			int heatParam = heatingTimer_;
 			boolean contain = localHeating_.containsKey(targetNode); 
-			if(!localHeating_.isEmpty() &&
+			if(0 == heatingTimer_ &&
+					!localHeating_.isEmpty() &&
 					!contain)
 			{
 				continue;
@@ -162,16 +168,20 @@ public class NodeFunction {
 					localHeating_.remove(targetNode);
 					continue;
 				}
+				heatParam = count * LOCAL_GLOBAL_RATE;
 			}
 			Point2D nthPoint = targetNode.getCenterPoint();
 
-			double f = -CONSTANT_DIVERGENCE;
+			double f = -CONSTANT_HEATING;
 
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
-			double ddx = f * dx * Math.random() * 20;
-			double ddy = f * dy * Math.random() * 20;
+			double dxr = (dx > 0) ? -(Math.random() * heatParam) : Math.random() * heatParam;
+			double dyr = (dy > 0) ? -(Math.random() * heatParam) : Math.random() * heatParam;
+			
+			double ddx = (f * dx) + dxr;
+			double ddy = (f * dy) + dyr;
 			
 			targetNode.moveDelta(ddx, ddy);
 		}

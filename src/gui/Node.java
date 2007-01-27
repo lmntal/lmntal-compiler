@@ -458,6 +458,28 @@ public class Node implements Cloneable{
 		return null;
 	}
 	
+	public Set<Node> getPointNodes(Rectangle2D rect, boolean withMembrane){
+		Set<Node> nodeSet = new HashSet<Node>();
+		synchronized (nodeMap_) {
+			if(rect_.intersects(rect)){
+				if(null != parent_ &&
+						isVisible() &&
+						(myObject_ instanceof Atom ||
+						(withMembrane &&
+								myObject_ instanceof Membrane)))
+				{
+					nodeSet.add(this);
+				}
+				Iterator<Node> nodes = nodeMap_.values().iterator();
+				while(nodes.hasNext()){
+					Node node = nodes.next();
+					nodeSet.addAll(node.getPointNodes(rect, withMembrane));
+				}
+			}
+		}
+		return nodeSet;
+	}
+	
 	public RoundRectangle2D getShape(){
 		return rect_;
 	}

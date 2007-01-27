@@ -6,19 +6,22 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -32,18 +35,43 @@ public class GraphPanel extends JPanel {
 	///////////////////////////////////////////////////////////////////////////
 	// static
 
+	/**　 自動焦点の位置決めの遊び（振動防止） */
 	final static
 	private int AUTO_FOCUS_POS_DELTA = 5;
 	
+	/** 自動焦点の余白サイズ */
 	final static
 	private int AUTO_FOCUS_SIZE_DELTA = 10;
 	
+	/** 局所加熱の加熱範囲 */
+	final static
+	private double FIRE_AREA = 75.0;
+
+	/** 炎のアニメーション表示位置 */
+	final static
+	private int FIRE_HEIGHT_MARGIN = 40;
+	
+	/** 炎のアニメーション表示位置 */
+	final static
+	private int FIRE_WIDTH_MARGIN = 40;
+
+	/** 不可視カーソル */
+	final static
+	private Cursor NULL_CURSOR = createNullCursor();
+
+	/** Nodeを掴むときの当たり範囲（値が小さいほどシビア） */
 	final static
 	private double POINT_DELTA_AREA = 10.0;
 	
+	/** 炎のイメージ */
+	static
+	private Image[] fire_ = new Image[7];
+	
+	/** 表示倍率 */
 	static
 	private double magnification_ = 0.5;
 	
+	/** 固定用ピンのイメージ */
 	static
 	private Image pin_;
 	
@@ -56,10 +84,12 @@ public class GraphPanel extends JPanel {
 	private Cursor currentCursor = new Cursor(Cursor.HAND_CURSOR);
 	private double deltaX;
 	private double deltaY;
-	private boolean localHeatingMode_ = false;
+	private int fireNum_ = 0;
 	private boolean history_ = false;
+	private boolean localHeatingMode_ = false;
 	private List<String> logList_ = new ArrayList<String>();
 	private Node moveTargetNode_ = null;
+	private boolean nowHeating_ = false;
 	private Node selectedNode_ = null;
 	private Node orgRootNode_;
 	private RepaintThread repaintTh_ = null;
@@ -74,9 +104,23 @@ public class GraphPanel extends JPanel {
 		super();
 		Node.setPanel(this);
 		pin_ = Toolkit.getDefaultToolkit().getImage(getClass().getResource("gabyou.gif"));
+		fire_[0] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("fire1.png"));
+		fire_[1] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("fire2.png"));
+		fire_[2] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("fire3.png"));
+		fire_[3] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("fire4.png"));
+		fire_[4] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("fire5.png"));
+		fire_[5] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("fire6.png"));
+		fire_[6] = Toolkit.getDefaultToolkit().getImage(getClass().getResource("fire7.png"));
 		// PINのロード待ち　ここから
 		MediaTracker mt = new MediaTracker(this);
 		mt.addImage(pin_, 0);
+		mt.addImage(fire_[0], 1);
+		mt.addImage(fire_[1], 2);
+		mt.addImage(fire_[2], 3);
+		mt.addImage(fire_[3], 4);
+		mt.addImage(fire_[4], 5);
+		mt.addImage(fire_[5], 6);
+		mt.addImage(fire_[6], 7);
 		try {
 			mt.waitForAll();
 		} catch (InterruptedException e1) {
@@ -173,6 +217,7 @@ public class GraphPanel extends JPanel {
 			 * <p>最初に押されたときより移動していたら移動した距離を取得</p>
 			 */
 			public void mouseReleased(MouseEvent e) {
+				nowHeating_ = false;
 				if(null != moveTargetNode_){
 					moveTargetNode_.setUncalc(false);
 					if(null != moveTargetNode_.getParent()){
@@ -214,6 +259,10 @@ public class GraphPanel extends JPanel {
 		repaintTh_.start();
 	}
 	///////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * 自動焦点
+	 */
 	public void autoFocus(){
 		autoFocusTh_ = new AutoFocusThread();
 		autoFocusTh_.start();
@@ -231,6 +280,21 @@ public class GraphPanel extends JPanel {
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
+	
+	/**
+	 * 見えないカーソルを生成する
+	 * @return
+	 */
+	static 
+	public Cursor createNullCursor() {
+        BufferedImage image = new BufferedImage(16,16, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D g2 = image.createGraphics();
+        g2.setColor(new Color(0,0,0,0));    // 黒で透明 black & transparency
+        g2.fillRect(0,0, 16,16);
+        g2.dispose();
+        return Toolkit.getDefaultToolkit().createCustomCursor(
+                image, new Point(0,0), "null_cursor");
+    }
 
 	/**
 	 * 拡大縮小の倍率を取得する
@@ -280,16 +344,19 @@ public class GraphPanel extends JPanel {
 	 */
 	public void localHeating(MouseEvent e){
 		if(null == rootNode_){ return; }
+		nowHeating_ = true;
+		setCursor(NULL_CURSOR);
 		//　Nodeの当たり判定を行うために、クリックしたPointを範囲（Rectangle）に変換
 		int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
 		int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
-		Rectangle2D rect = new Rectangle2D.Double(pointX - ((POINT_DELTA_AREA / 2) / getMagnification()),
-				pointY - ((POINT_DELTA_AREA / 2) / getMagnification()),
-				POINT_DELTA_AREA / getMagnification(),
-				POINT_DELTA_AREA / getMagnification());
-		Node node = rootNode_.getPointNode(rect, false);
-		if(null != node){
-			NodeFunction.setLocalHeating(node);
+		Rectangle2D rect = new Rectangle2D.Double(pointX - ((FIRE_AREA / 2) / getMagnification()),
+				pointY - ((FIRE_AREA / 2) / getMagnification()),
+				FIRE_AREA / getMagnification(),
+				FIRE_AREA / getMagnification());
+		Set<Node> nodeSet = rootNode_.getPointNodes(rect, false);
+		Iterator<Node> nodes = nodeSet.iterator();
+		while(nodes.hasNext()){
+			NodeFunction.setLocalHeating(nodes.next());
 		}
 	}
 
@@ -309,10 +376,20 @@ public class GraphPanel extends JPanel {
 			rootNode_.paint(g);
 		}
 	
+		((Graphics2D)g).setTransform(new AffineTransform());
+
+		if(localHeatingMode_ && nowHeating_){
+			Point mousePoint = MouseInfo.getPointerInfo().getLocation();
+			g.drawImage(fire_[fireNum_],
+					mousePoint.x - FIRE_WIDTH_MARGIN,
+					mousePoint.y - FIRE_HEIGHT_MARGIN,
+					this);
+			fireNum_ = (fireNum_ < 6) ? fireNum_ + 1 : 0; 
+		}
+		
 		// 初期位置に戻す
 		int divergenceTimer = NodeFunction.getDivergence();
 		if(0 < divergenceTimer){
-			((Graphics2D)g).setTransform(new AffineTransform());
 			g.setColor(Color.RED);
 			g.drawString("Divergence Timer:" + divergenceTimer, 10, 30);
 		}
