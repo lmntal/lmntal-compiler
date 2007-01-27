@@ -53,8 +53,10 @@ public class GraphPanel extends JPanel {
 	private AutoFocusThread autoFocusTh_ = null;
 	private CalcThread calcTh_ = null;
 	private CommonListener commonListener_ = new CommonListener(this);
+	private Cursor currentCursor = new Cursor(Cursor.HAND_CURSOR);
 	private double deltaX;
 	private double deltaY;
+	private boolean localHeatingMode_ = false;
 	private boolean history_ = false;
 	private List<String> logList_ = new ArrayList<String>();
 	private Node moveTargetNode_ = null;
@@ -87,9 +89,14 @@ public class GraphPanel extends JPanel {
 			
 			/** 
 			 * マウスが押されたときの処理
+			 * 局所加熱モード時は何もしない
 			 */
 			public void mousePressed(MouseEvent e) {
 				if(null == rootNode_){ return; }
+				if(localHeatingMode_){
+					localHeating(e);
+					return;
+				}
 				//　Nodeの当たり判定を行うために、クリックしたPointを範囲（Rectangle）に変換
 				int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
 				int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
@@ -173,16 +180,23 @@ public class GraphPanel extends JPanel {
 					}
 					moveTargetNode_ = null;
 				}
-				setCursor(new Cursor(Cursor.HAND_CURSOR));
+				setCursor(currentCursor);
 			}
 		});
 		addMouseMotionListener(new MouseMotionAdapter() {
-			
 			/**
 			 * マウスがドラッグされたときの処理
-			 * <p>移動した距離を取得</p>
+			 * <p>移動した距離の取得や局所加熱処理</p>
 			 */
+			@Override
 			public void mouseDragged(MouseEvent e) {
+				// 局所加熱処理
+				if(localHeatingMode_){
+					localHeating(e);
+					return;
+				}
+					
+				// 移動距離の取得
 				if(moveTargetNode_ == null){ return; }
 				int pointX = (int)((e.getX() - deltaX) / getMagnification());
 				int pointY = (int)((e.getY() - deltaY) / getMagnification());
@@ -200,7 +214,6 @@ public class GraphPanel extends JPanel {
 		repaintTh_.start();
 	}
 	///////////////////////////////////////////////////////////////////////////
-	
 	public void autoFocus(){
 		autoFocusTh_ = new AutoFocusThread();
 		autoFocusTh_.start();
@@ -258,6 +271,25 @@ public class GraphPanel extends JPanel {
 			Node newNode = rootNodeList_.get(value);
 			rootNode_ = newNode;
 			LinkSet.resetNodes(newNode);
+		}
+	}
+	
+	/**
+	 * 局所加熱を行う対象を検出および加熱
+	 * @param e
+	 */
+	public void localHeating(MouseEvent e){
+		if(null == rootNode_){ return; }
+		//　Nodeの当たり判定を行うために、クリックしたPointを範囲（Rectangle）に変換
+		int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
+		int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
+		Rectangle2D rect = new Rectangle2D.Double(pointX - ((POINT_DELTA_AREA / 2) / getMagnification()),
+				pointY - ((POINT_DELTA_AREA / 2) / getMagnification()),
+				POINT_DELTA_AREA / getMagnification(),
+				POINT_DELTA_AREA / getMagnification());
+		Node node = rootNode_.getPointNode(rect, false);
+		if(null != node){
+			NodeFunction.setLocalHeating(node);
 		}
 	}
 
@@ -325,6 +357,16 @@ public class GraphPanel extends JPanel {
 		} else {
 			logList_.add(rootMembrane_.toString());
 		}
+	}
+	
+	public void setLocalHeatingMode(boolean flag){
+		localHeatingMode_ = flag;
+		if(flag){
+			currentCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+		} else {
+			currentCursor = new Cursor(Cursor.HAND_CURSOR);
+		}
+		setCursor(currentCursor);
 	}
 	
 	public void setShowRules(boolean flag){

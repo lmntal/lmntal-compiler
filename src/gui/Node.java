@@ -85,6 +85,8 @@ public class Node implements Cloneable{
 	/** 移動情報 */
 	private double dy_;
 	
+	private boolean heating_ = false;
+	
 	/** アトムまたはアトム的（閉じた膜）であるか */
 	private boolean imAtom_;
 	
@@ -205,7 +207,7 @@ public class Node implements Cloneable{
 		synchronized (nodeMap_) {
 			NodeFunction.calcAttraction(this, nodeMap_);
 			NodeFunction.calcRepulsive(this, nodeMap_);
-			NodeFunction.calcDivergence(this, nodeMap_);
+			NodeFunction.calcHeat(this, nodeMap_);
 		}
 //		moveCalc();
 	}
@@ -523,6 +525,10 @@ public class Node implements Cloneable{
 	
 	public boolean isBezNode(){
 		return (null == myObject_);
+	}
+	
+	public boolean isHeating(){
+		return heating_;
 	}
 	
 	/**

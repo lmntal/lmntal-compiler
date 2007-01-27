@@ -49,7 +49,11 @@ public class NodeFunction {
 	
 	/** 発散時間 */
 	final static
-	private int DIVERGENCE_TIMER = 100;
+	private int HEATING_TIMER = 100;
+	
+	/** 局所発散時間 */
+	final static
+	private int LOCAL_HEATING_TIMER = 4;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// static
@@ -58,6 +62,12 @@ public class NodeFunction {
 	private boolean attractionFlag_ = false;
 	
 	static
+	private int heatingTimer_ = 0;
+	
+	static
+	private Map<Node, Integer> localHeating_ = new HashMap<Node, Integer>(); 
+
+	static
 	private boolean repulsiveFlag_ = true;
 	
 	static
@@ -65,9 +75,6 @@ public class NodeFunction {
 	
 	static
 	private boolean angleFlag_ = true;
-	
-	static
-	private int divergenceTimer_ = 0;
 	
 	///////////////////////////////////////////////////////////////////////////
 
@@ -83,7 +90,7 @@ public class NodeFunction {
 	 */
 	static
 	public void calcAttraction(Node node, Map<Object, Node> nodeMap){
-		if(divergenceTimer_ != 0 ||
+		if(heatingTimer_ != 0 ||
 				!attractionFlag_ ||
 				!(node.getObject() instanceof Membrane) ||
 				null != node.getInvisibleRootNode())
@@ -124,15 +131,16 @@ public class NodeFunction {
 	 * @param nodeMap
 	 */
 	static
-	public void calcDivergence(Node node, Map<Object, Node> nodeMap){
-		if(divergenceTimer_ == 0 ||
+	public void calcHeat(Node node, Map<Object, Node> nodeMap){
+		if(localHeating_.isEmpty() &&
+				(heatingTimer_ == 0 ||
 				!(node.getObject() instanceof Membrane) ||
-				null != node.getInvisibleRootNode())
-		{
+				null != node.getInvisibleRootNode()))
+		{	
 			return;
 		}
-		if(null == node.getParent()){
-			divergenceTimer_--;
+		if(localHeating_.isEmpty() && null == node.getParent()){
+			heatingTimer_--;
 		}
 		
 		Point2D myPoint = node.getCenterPoint();
@@ -140,6 +148,21 @@ public class NodeFunction {
 		while(nodes.hasNext()){
 			// 表示されているNodeを取得する
 			Node targetNode = nodes.next();
+			boolean contain = localHeating_.containsKey(targetNode); 
+			if(!localHeating_.isEmpty() &&
+					!contain)
+			{
+				continue;
+			} else if(contain){
+				int count = localHeating_.get(targetNode);
+				count--;
+				if(0 < count){
+					localHeating_.put(targetNode, count);
+				} else {
+					localHeating_.remove(targetNode);
+					continue;
+				}
+			}
 			Point2D nthPoint = targetNode.getCenterPoint();
 
 			double f = -CONSTANT_DIVERGENCE;
@@ -351,7 +374,7 @@ public class NodeFunction {
 			double distance =
 				Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
 
-			double divergenceFource = (divergenceTimer_ == 0) ? 1 : (Math.random() * 10) - (Math.random() * 5);
+			double divergenceFource = (heatingTimer_ == 0) ? 1 : (Math.random() * 10) - (Math.random() * 5);
 			
 			double f = -CONSTANT_SPRING * divergenceFource * ((distance / (20 + (60 * (memNum + 1)))) - 1.0);
 			double dx = myPoint.getX() - nthPoint.getX();
@@ -443,7 +466,7 @@ public class NodeFunction {
 	
 	static
 	public int getDivergence(){
-		return divergenceTimer_;
+		return heatingTimer_;
 	}
 	
 	/**
@@ -474,14 +497,23 @@ public class NodeFunction {
 		return null;
 	}
 	
-	static
-	public void setHeatup(){
-		divergenceTimer_ += DIVERGENCE_TIMER;
-	}
-	
 	static 
 	public void setAttractionFlag(boolean attractionFlag) {
 		attractionFlag_ = attractionFlag;
+	}
+	
+	static
+	public void setHeatup(){
+		heatingTimer_ += HEATING_TIMER;
+	}
+	
+	static
+	public void setLocalHeating(Node node){
+		if(localHeating_.containsKey(node)){
+			localHeating_.put(node, localHeating_.get(node) + LOCAL_HEATING_TIMER);
+		} else {
+			localHeating_.put(node, LOCAL_HEATING_TIMER);
+		}
 	}
 	
 	static 
@@ -516,7 +548,7 @@ public class NodeFunction {
 	
 	static
 	public void stopHeating(){
-		divergenceTimer_ = 0;
+		heatingTimer_ = 0;
 	}
 
 	static

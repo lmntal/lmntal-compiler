@@ -78,6 +78,12 @@ public class CommonListener implements MouseWheelListener {
 		if(null == panel_){ return; }
 		panel_.setHistory(flag);
 	}
+	
+	public void setLocalHeatingMode(boolean flag){
+		if(null == panel_){ return; }
+		panel_.setLocalHeatingMode(flag);
+	}
+	
 	public void setShowRules(boolean flag){
 		if(null == panel_){ return; }
 		panel_.setShowRules(flag);

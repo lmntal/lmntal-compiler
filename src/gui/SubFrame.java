@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -59,6 +60,8 @@ public class SubFrame extends JFrame {
 
 	private JButton autoFocusBt_ = new JButton("Auto Focus");
 	
+	private JToggleButton localHeatingBt_ = new JToggleButton("Normal Mode");
+	
 	private JScrollPane menuScroll_;
 	
 	private JPanel menuPanel_ = new JPanel();
@@ -79,7 +82,7 @@ public class SubFrame extends JFrame {
 
 	private JCheckBox attractionCheck_ = new JCheckBox("Calc Attraction");
 	
-	private JCheckBox repulsiveCheck_ = new JCheckBox("Calc Replusive");
+	private JCheckBox repulsiveCheck_ = new JCheckBox("Calc Repulsive");
 
 	private JSlider zoomSlider_ = new JSlider(JSlider.VERTICAL, SLIDER_MIN, SLIDER_MAX, SLIDER_DEF);
 	
@@ -117,6 +120,7 @@ public class SubFrame extends JFrame {
 		heatBt_.addActionListener(new HeatupAdapter());
 		stopHeatingBt_.addActionListener(new StopHeatingAdapter());
 		autoFocusBt_.addActionListener(new AutoFocusgAdapter());
+		localHeatingBt_.addActionListener(new LocalHeatingAdapter());
 		stepBox_.setHorizontalAlignment(JTextField.RIGHT);
 		
 		
@@ -218,6 +222,9 @@ public class SubFrame extends JFrame {
 		getContentPane().add(autoFocusBt_, gbc);
 		
 		gbc.gridy += 1;
+		getContentPane().add(localHeatingBt_, gbc);
+		
+		gbc.gridy += 1;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;
         gbc.weighty = 100.0;
@@ -267,6 +274,23 @@ public class SubFrame extends JFrame {
 		public AutoFocusgAdapter() { }
 		public void actionPerformed(ActionEvent e) {
 			commonListener_.autoFocus();
+		}
+	}
+
+	/**
+	 * LocalHeatingMode切り替え処理開始
+	 * @author nakano
+	 *
+	 */
+	private class LocalHeatingAdapter implements ActionListener {
+		public LocalHeatingAdapter() { }
+		public void actionPerformed(ActionEvent e) {
+			commonListener_.setLocalHeatingMode(localHeatingBt_.isSelected());
+			if(localHeatingBt_.isSelected()){
+				localHeatingBt_.setText("Local Heating Mode");
+			} else {
+				localHeatingBt_.setText("Normal Mode");
+			}
 		}
 	}
 
