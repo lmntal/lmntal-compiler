@@ -98,6 +98,9 @@ public class TypeVar {
 	public Set<String> getTypeName(){//throws TypeException{
 		if(typenames == null){
 			typenames = new HashSet<String>();
+			if(self().passiveFunctors == null){
+				return new HashSet<String>();
+			}
 			for(Functor f : self().passiveFunctors){
 				String tn = typeNameOfFunctor(f);
 				if(!typenames.contains(tn))

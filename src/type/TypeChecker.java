@@ -383,6 +383,7 @@ public class TypeChecker {
 				ActiveAtomPath ap = getTracedRoot(tp);
 				Functor af = ap.getFunctor();
 				Map<Functor,List<ModedType>> f2ts = activeAtomTypes.get(ap.getMemName());
+				if(!f2ts.containsKey(af))continue;
 				List<ModedType> amts = f2ts.get(af);
 				ModedType amt = amts.get(ap.getPos());
 				//　到達もとのActiveAtomPathのモードにより逆になる
