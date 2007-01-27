@@ -549,6 +549,7 @@ public class NodeFunction {
 	static
 	public void stopHeating(){
 		heatingTimer_ = 0;
+		localHeating_.clear();
 	}
 
 	static
