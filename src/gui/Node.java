@@ -228,13 +228,13 @@ public class Node implements Cloneable{
 	}
 	
 	public void calcMembraneSize(){
+		double maxX = Integer.MIN_VALUE;
+		double maxY = Integer.MIN_VALUE;
+		double minX = Integer.MAX_VALUE;
+		double minY = Integer.MAX_VALUE;
+		boolean sizeChange = false;
+		// 子膜をリセット
 		synchronized (nodeMap_) {
-			double maxX = Integer.MIN_VALUE;
-			double maxY = Integer.MIN_VALUE;
-			double minX = Integer.MAX_VALUE;
-			double minY = Integer.MAX_VALUE;
-			boolean sizeChange = false;
-			// 子膜をリセット
 			Iterator<Node> nodes = nodeMap_.values().iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
@@ -242,46 +242,44 @@ public class Node implements Cloneable{
 					continue;
 				}
 				sizeChange = true;
-				
+
 				Rectangle2D rectangle = node.getBounds2D();
 				minX = (minX < rectangle.getMinX()) ? minX : rectangle.getMinX(); 
 				maxX = (maxX > rectangle.getMaxX()) ? maxX : rectangle.getMaxX(); 
 				minY = (minY < rectangle.getMinY()) ? minY : rectangle.getMinY(); 
 				maxY = (maxY > rectangle.getMaxY()) ? maxY : rectangle.getMaxY(); 
 			}
-
-			// サイズ変更
-			if(visible_ && sizeChange){
-				rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);
-			}
-			else if(rect_.width != ATOM_SIZE || rect_.height != ATOM_SIZE){
-				rect_.setFrameFromCenter(rect_.getCenterX(),
-						rect_.getCenterY(),
-						rect_.getCenterX() - ATOM_SIZE,
-						rect_.getCenterY() - ATOM_SIZE);
-			}
 		}
-		
+
+		// サイズ変更
+		if(visible_ && sizeChange){
+			rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);
+		}
+		else if(rect_.width != ATOM_SIZE || rect_.height != ATOM_SIZE){
+			rect_.setFrameFromCenter(rect_.getCenterX(),
+					rect_.getCenterY(),
+					rect_.getCenterX() - ATOM_SIZE,
+					rect_.getCenterY() - ATOM_SIZE);
+		}
+
 	}
 	
 	public Node cloneNode(Map<Node, Node> cloneMap){
-		synchronized (nodeMap_) {
-			Node cloneNode = new Node();
-			cloneMap.put(this, cloneNode);
+		Node cloneNode = new Node();
+		cloneMap.put(this, cloneNode);
 
+		synchronized (nodeMap_) {
 			Iterator keys = nodeMap_.keySet().iterator();
 			while(keys.hasNext()){
 				Object key = keys.next();
 				Node oldNode = nodeMap_.get(key);
 				oldNode.cloneNode(cloneMap);
-
 			}
-			return cloneNode;
 		}
+		return cloneNode;
 	}
 	
 	public Node cloneNodeParm(Map<Node, Node> cloneMap, Node orginNode){
-		synchronized (orginNode.nodeMap_) {
 			parent_ = cloneMap.get(orginNode.parent_);
 			invisibleRootNode_ = cloneMap.get(orginNode.invisibleRootNode_);
 			myObject_ = orginNode.myObject_;
@@ -302,17 +300,19 @@ public class Node implements Cloneable{
 			Map<Object, Node> cloneNodeMap = new HashMap<Object, Node>();
 			ArrayList<Node> cloneLinkList = new ArrayList<Node>();
 
-			Iterator keys = orginNode.nodeMap_.keySet().iterator();
-			while(keys.hasNext()){
-				Object key = keys.next();
-				Node oldNode = orginNode.nodeMap_.get(key);
-				Node newNode = cloneMap.get(oldNode);
-				if(newNode == null){ continue; }
-				newNode.cloneNodeParm(cloneMap, oldNode);
-				cloneNodeMap.put(key, newNode);
+			synchronized (orginNode.nodeMap_) {
+				Iterator keys = orginNode.nodeMap_.keySet().iterator();
+				while(keys.hasNext()){
+					Object key = keys.next();
+					Node oldNode = orginNode.nodeMap_.get(key);
+					Node newNode = cloneMap.get(oldNode);
+					if(newNode == null){ continue; }
+					newNode.cloneNodeParm(cloneMap, oldNode);
+					cloneNodeMap.put(key, newNode);
 
+				}
+				nodeMap_ = cloneNodeMap;
 			}
-			nodeMap_ = cloneNodeMap;
 
 			Iterator<Node> linkNodes = orginNode.linkList_.iterator();
 			while(linkNodes.hasNext()){
@@ -324,7 +324,6 @@ public class Node implements Cloneable{
 
 			linkList_ = cloneLinkList;
 			return this;
-		}
 	}
 	
 	/**
@@ -429,22 +428,22 @@ public class Node implements Cloneable{
 	 * 指定された範囲にあるNodeを取得する
 	 */
 	public Node getPointNode(Rectangle2D rect, boolean force){
-		synchronized (nodeMap_) {
-			// ベジエ曲線のチェック
-			if(null == parent_){
-				Iterator<Node> nodes = bezierSet_.iterator();
-				while(nodes.hasNext()){
-					Node node = nodes.next();
-					if(!node.getParent().isSelected()){ continue; }
-					node = node.getPointNode(rect, false);
-					if(null != node){ return node; }
-				}
+		// ベジエ曲線のチェック
+		if(null == parent_){
+			Iterator<Node> nodes = bezierSet_.iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				if(!node.getParent().isSelected()){ continue; }
+				node = node.getPointNode(rect, false);
+				if(null != node){ return node; }
 			}
-			
-			if(rect_.intersects(rect)){
-				if(isPickable()){
-					return this;
-				} else{
+		}
+
+		if(rect_.intersects(rect)){
+			if(isPickable()){
+				return this;
+			} else{
+				synchronized (nodeMap_) {
 					Iterator<Node> nodes = nodeMap_.values().iterator();
 					while(nodes.hasNext()){
 						Node node = nodes.next();
@@ -452,24 +451,24 @@ public class Node implements Cloneable{
 						if(null != node){ return node; }
 					}
 				}
-				return (force && null != parent_) ? this : null;
 			}
+			return (force && null != parent_) ? this : null;
 		}
 		return null;
 	}
 	
 	public Set<Node> getPointNodes(Rectangle2D rect, boolean withMembrane){
 		Set<Node> nodeSet = new HashSet<Node>();
-		synchronized (nodeMap_) {
-			if(rect_.intersects(rect)){
-				if(null != parent_ &&
-						isVisible() &&
-						(myObject_ instanceof Atom ||
-						(withMembrane &&
-								myObject_ instanceof Membrane)))
-				{
-					nodeSet.add(this);
-				}
+		if(rect_.intersects(rect)){
+			if(null != parent_ &&
+					isVisible() &&
+					(myObject_ instanceof Atom ||
+							(withMembrane &&
+									myObject_ instanceof Membrane)))
+			{
+				nodeSet.add(this);
+			}
+			synchronized (nodeMap_) {
 				Iterator<Node> nodes = nodeMap_.values().iterator();
 				while(nodes.hasNext()){
 					Node node = nodes.next();
@@ -692,84 +691,84 @@ public class Node implements Cloneable{
 		if(null == parent_){
 			LinkSet.paint(g);
 		}
-		synchronized (nodeMap_) {
-			
-			// 描画範囲に入っていないものは描画しない
-			if(!g.getClipBounds().intersects(rect_.getBounds())){
-				return;
+
+		// 描画範囲に入っていないものは描画しない
+		if(!g.getClipBounds().intersects(rect_.getBounds())){
+			return;
+		}
+
+		// アトムまたは閉じた膜の描画
+		if(isAtom()){
+			g.setColor(myColor_);
+			((Graphics2D)g).fill(rect_);
+
+			// ベジエ曲線の制御点なら終了
+			if(null == myObject_){ return; }
+
+			if(selected_){
+				Iterator<Node> nodes = bezierMap_.values().iterator();
+				while(nodes.hasNext()){
+					Node node = nodes.next();
+					node.paint(g);
+				}
+
+				g.setColor(Color.RED);
+				Stroke oldStroke = ((Graphics2D)g).getStroke();
+				((Graphics2D)g).setStroke(SELECTED_STROKE);
+				((Graphics2D)g).draw(rect_);
+				((Graphics2D)g).setStroke(oldStroke);
+			} else {
+				g.setColor(Color.BLACK);
+				((Graphics2D)g).draw(rect_);
 			}
-			
-			// アトムまたは閉じた膜の描画
-			if(isAtom()){
+			///////////////////////////////////////////////////////////////
+			// アトム名描画
+			g.setFont(FONT);
+			if(showFullName_){
+				g.drawString(name_, (int)rect_.x, (int)rect_.y);
+			} else if(0 < name_.length()){
+				g.drawString(name_.substring(0, 1),
+						(int)(rect_.x + (rect_.width / 2) - ((g.getFontMetrics(g.getFont()).getWidths()[0]) / 2)),
+						(int)(rect_.y + (rect_.height / 2) + ((g.getFontMetrics(g.getFont()).getHeight()) / 4)));
+			}
+			///////////////////////////////////////////////////////////////
+		}
+		// 膜の描画
+		else if(myObject_ instanceof Membrane){
+			synchronized (nodeMap_) {
+				Iterator<Node> nodes = nodeMap_.values().iterator();
+				while(nodes.hasNext()){
+					Node node = nodes.next();
+					node.paint(g);
+				}
+			}
+			if(null != parent_){
 				g.setColor(myColor_);
-				((Graphics2D)g).fill(rect_);
-				
-				// ベジエ曲線の制御点なら終了
-				if(null == myObject_){ return; }
-				
 				if(selected_){
-					Iterator<Node> nodes = bezierMap_.values().iterator();
-					while(nodes.hasNext()){
-						Node node = nodes.next();
-						node.paint(g);
-					}
-					
 					g.setColor(Color.RED);
 					Stroke oldStroke = ((Graphics2D)g).getStroke();
 					((Graphics2D)g).setStroke(SELECTED_STROKE);
 					((Graphics2D)g).draw(rect_);
 					((Graphics2D)g).setStroke(oldStroke);
 				} else {
-					g.setColor(Color.BLACK);
 					((Graphics2D)g).draw(rect_);
 				}
-				///////////////////////////////////////////////////////////////
-				// アトム名描画
-				g.setFont(FONT);
-				if(showFullName_){
-					g.drawString(name_, (int)rect_.x, (int)rect_.y);
-				} else if(0 < name_.length()){
-					g.drawString(name_.substring(0, 1),
-							(int)(rect_.x + (rect_.width / 2) - ((g.getFontMetrics(g.getFont()).getWidths()[0]) / 2)),
-							(int)(rect_.y + (rect_.height / 2) + ((g.getFontMetrics(g.getFont()).getHeight()) / 4)));
-				}
-				///////////////////////////////////////////////////////////////
-			}
-			// 膜の描画
-			else if(myObject_ instanceof Membrane){
-				Iterator<Node> nodes = nodeMap_.values().iterator();
-				while(nodes.hasNext()){
-					Node node = nodes.next();
-					node.paint(g);
-				}
-				if(null != parent_){
-					g.setColor(myColor_);
-					if(selected_){
-						g.setColor(Color.RED);
-						Stroke oldStroke = ((Graphics2D)g).getStroke();
-						((Graphics2D)g).setStroke(SELECTED_STROKE);
-						((Graphics2D)g).draw(rect_);
-						((Graphics2D)g).setStroke(oldStroke);
-					} else {
-						((Graphics2D)g).draw(rect_);
-					}
-					g.setColor(Color.BLACK);
-					g.setFont(FONT);
-					g.drawString(name_, (int)rect_.x, (int)rect_.y);
-				}
-
-			} else if(myObject_ instanceof String){
-				rect_.width = g.getFontMetrics(FONT).stringWidth(name_);
-				g.setColor(myColor_);
-				g.fillRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
 				g.setColor(Color.BLACK);
-				g.drawRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
 				g.setFont(FONT);
-				g.drawString(name_, (int)rect_.x + 5, (int)rect_.y + g.getFontMetrics(FONT).getHeight());
+				g.drawString(name_, (int)rect_.x, (int)rect_.y);
 			}
-			if(clipped_){
-				paintPin(g, 0, 0);
-			}
+
+		} else if(myObject_ instanceof String){
+			rect_.width = g.getFontMetrics(FONT).stringWidth(name_);
+			g.setColor(myColor_);
+			g.fillRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
+			g.setColor(Color.BLACK);
+			g.drawRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
+			g.setFont(FONT);
+			g.drawString(name_, (int)rect_.x + 5, (int)rect_.y + g.getFontMetrics(FONT).getHeight());
+		}
+		if(clipped_){
+			paintPin(g, 0, 0);
 		}
 	}
 	

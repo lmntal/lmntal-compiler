@@ -53,7 +53,7 @@ public class NodeFunction {
 	
 	/** 局所発散と全体発散の力の差 */
 	final static
-	private int LOCAL_GLOBAL_RATE = 20;
+	private int LOCAL_GLOBAL_RATE = 10;
 	
 	/** 局所発散時間 */
 	final static

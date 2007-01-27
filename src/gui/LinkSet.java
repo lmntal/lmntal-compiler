@@ -60,6 +60,8 @@ public class LinkSet {
 	public void addLink(Node node){
 		synchronized (linkSet_) {
 			linkSet_.add(node);
+		}
+		synchronized (linkMap_) {
 			linkMap_.put(node.getObject(), node);
 		}
 	}
@@ -118,6 +120,7 @@ public class LinkSet {
 				if(null == nodeSource){ return; }
 				Rectangle2D rectSource = nodeSource.getBounds2D();
 				
+				// TODO:グローバル変数化？
 				Map<Integer, Integer> diplolinkMap = new HashMap<Integer, Integer>();
 				int selfLinkNum = 0;
 				for(int n = 0; n < key.getEdgeCount(); n++){
