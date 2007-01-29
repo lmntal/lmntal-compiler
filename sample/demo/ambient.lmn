@@ -64,7 +64,9 @@ global_name_out@@
     {{id,+M0,-M},{$p[M0|*M],@p},$q,@q}, {id,name($n),+M}.
 
 root_merge@@
-{id,name($n0),$m0}, {id,name($n1), $m1} :- unary($n0), unary($n1), $n0=$n1 |
+{id,name($n0),$m0}, {id,name($n1), $m1} :-
+  unary($n0), unary($n1),
+  $n0=$n1 |
   {id,name($n0),$m0,$m1}.
 
 gc1@@ {id} :- .

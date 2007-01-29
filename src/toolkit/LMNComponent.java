@@ -94,7 +94,7 @@ public class LMNComponent {
 			weightX = Double.parseDouble(atom.nth(0));
 			weightY = Double.parseDouble(atom.nth(1));
 		}
-		System.out.println(weightX);
+//		System.out.println(weightX);
 		gbc.weightx = weightX;
 		gbc.weighty = weightY;			
 	}

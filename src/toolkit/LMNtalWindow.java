@@ -106,7 +106,7 @@ public class LMNtalWindow extends JFrame {
 	
 		String key = getID(mem); // IDを取得
 		if(key == null) return;
-		System.out.println(key);
+//		System.out.println(key);
 		//componentMapのkeyにID(key)があったら更新
 		if(componentMap.containsKey(key)) {
 			LMNComponent component = 
