@@ -164,7 +164,9 @@ public class NodeFunction {
 				count--;
 				if(0 < count){
 					localHeating_.put(targetNode, count);
+					targetNode.setHeating(true);
 				} else {
+					targetNode.setHeating(false);
 					localHeating_.remove(targetNode);
 					continue;
 				}
@@ -177,8 +179,8 @@ public class NodeFunction {
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
-			double dxr = (dx > 0) ? -(Math.random() * heatParam) : Math.random() * heatParam;
-			double dyr = (dy > 0) ? -(Math.random() * heatParam) : Math.random() * heatParam;
+			double dxr = (dx > 0) ? -(Math.random() * heatParam) + (heatParam / 2) : (Math.random() * heatParam) -  (heatParam / 2);
+			double dyr = (dy > 0) ? -(Math.random() * heatParam) + (heatParam / 2) : (Math.random() * heatParam) -  (heatParam / 2);
 			
 			double ddx = (f * dx) + dxr;
 			double ddy = (f * dy) + dyr;

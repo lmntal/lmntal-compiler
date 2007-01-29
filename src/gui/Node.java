@@ -5,8 +5,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.MediaTracker;
 import java.awt.Rectangle;
 import java.awt.Stroke;
+import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -29,7 +32,15 @@ public class Node implements Cloneable{
 	
 	final static
 	private double ATOM_SIZE = 40.0;
+
+	/** 炎のアニメーション表示位置 */
+	final static
+	private int FIRE_HEIGHT_MARGIN = 40;
 	
+	/** 炎のアニメーション表示位置 */
+	final static
+	private int FIRE_WIDTH_MARGIN = 0;
+
 	final static
 	private Font FONT = new Font("SansSerif", Font.PLAIN, 25);
 	
@@ -54,6 +65,10 @@ public class Node implements Cloneable{
 
 	//////////////////////////////////////////////////////////////////////////
 	// static
+	
+	/** 炎のイメージ */
+	static
+	private Image[] fire_ = new Image[7];
 
 	static
 	private int nextID_ = 0;
@@ -84,6 +99,8 @@ public class Node implements Cloneable{
 
 	/** 移動情報 */
 	private double dy_;
+	
+	private int fireID_ = 0;
 	
 	private boolean heating_ = false;
 	
@@ -130,6 +147,8 @@ public class Node implements Cloneable{
 			ROUND,
 			ROUND);
 	
+	private boolean rootMembrane_ = false;
+	
 	/** 非計算フラグ */
 	private boolean uncalc_ = false;
 
@@ -171,9 +190,36 @@ public class Node implements Cloneable{
 			setVisible(false, true);
 			setInvisibleRootNode(null);
 //			resetAllLink();
+		} else {
+			rootMembrane_ = true;
 		}
 	}
 	///////////////////////////////////////////////////////////////////////////
+	
+	static
+	public void loadFire(GraphPanel panel){
+		fire_[0] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire1_.png"));
+		fire_[1] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire2_.png"));
+		fire_[2] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire3_.png"));
+		fire_[3] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire4_.png"));
+		fire_[4] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire5_.png"));
+		fire_[5] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire6_.png"));
+		fire_[6] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire7_.png"));
+		// PINのロード待ち　ここから
+		MediaTracker mt = new MediaTracker(panel);
+		mt.addImage(fire_[0], 1);
+		mt.addImage(fire_[1], 2);
+		mt.addImage(fire_[2], 3);
+		mt.addImage(fire_[3], 4);
+		mt.addImage(fire_[4], 5);
+		mt.addImage(fire_[5], 6);
+		mt.addImage(fire_[6], 7);
+		try {
+			mt.waitForAll();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+	}
 	
 	/**
 	 * GraphPanleをセットする
@@ -267,7 +313,7 @@ public class Node implements Cloneable{
 	public Node cloneNode(Map<Node, Node> cloneMap){
 		Node cloneNode = new Node();
 		cloneMap.put(this, cloneNode);
-
+		
 		synchronized (nodeMap_) {
 			Iterator keys = nodeMap_.keySet().iterator();
 			while(keys.hasNext()){
@@ -282,6 +328,7 @@ public class Node implements Cloneable{
 	public Node cloneNodeParm(Map<Node, Node> cloneMap, Node orginNode){
 			parent_ = cloneMap.get(orginNode.parent_);
 			invisibleRootNode_ = cloneMap.get(orginNode.invisibleRootNode_);
+			rootMembrane_ = orginNode.rootMembrane_;
 			myObject_ = orginNode.myObject_;
 			clipped_ = orginNode.clipped_;
 			dx_ = orginNode.dx_;
@@ -421,7 +468,7 @@ public class Node implements Cloneable{
 	 * @return
 	 */
 	public Node getParent(){
-		return parent_;
+		return (rootMembrane_) ? null : parent_;
 	}
 	
 	/**
@@ -429,7 +476,7 @@ public class Node implements Cloneable{
 	 */
 	public Node getPointNode(Rectangle2D rect, boolean force){
 		// ベジエ曲線のチェック
-		if(null == parent_){
+		if(rootMembrane_){
 			Iterator<Node> nodes = bezierSet_.iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
@@ -452,7 +499,7 @@ public class Node implements Cloneable{
 					}
 				}
 			}
-			return (force && null != parent_) ? this : null;
+			return (force && !rootMembrane_) ? this : null;
 		}
 		return null;
 	}
@@ -460,7 +507,7 @@ public class Node implements Cloneable{
 	public Set<Node> getPointNodes(Rectangle2D rect, boolean withMembrane){
 		Set<Node> nodeSet = new HashSet<Node>();
 		if(rect_.intersects(rect)){
-			if(null != parent_ &&
+			if(!rootMembrane_ &&
 					isVisible() &&
 					(myObject_ instanceof Atom ||
 							(withMembrane &&
@@ -557,7 +604,7 @@ public class Node implements Cloneable{
 	 * @return
 	 */
 	public boolean isPickable(){
-		return (pickable_ && isAtom() && null != parent_);
+		return (pickable_ && isAtom() && !rootMembrane_);
 	}
 	
 	public boolean isUncalc(){
@@ -587,7 +634,7 @@ public class Node implements Cloneable{
 			return;
 		}
 		visible_ = true;
-		if(null == parent_){ return; }
+		if(rootMembrane_){ return; }
 		parent_.iWillBeAMembrane();
 	}
 	
@@ -688,7 +735,7 @@ public class Node implements Cloneable{
 	 * @param g
 	 */
 	public void paint(Graphics g){
-		if(null == parent_){
+		if(rootMembrane_){
 			LinkSet.paint(g);
 		}
 
@@ -731,6 +778,15 @@ public class Node implements Cloneable{
 						(int)(rect_.x + (rect_.width / 2) - ((g.getFontMetrics(g.getFont()).getWidths()[0]) / 2)),
 						(int)(rect_.y + (rect_.height / 2) + ((g.getFontMetrics(g.getFont()).getHeight()) / 4)));
 			}
+			
+			// 炎の描画
+			if(heating_){
+				g.drawImage(fire_[fireID_],
+						(int)rect_.x - FIRE_WIDTH_MARGIN,
+						(int)rect_.y - FIRE_HEIGHT_MARGIN,
+						panel_);
+				fireID_ = (fireID_ < 6) ? fireID_ + 1 : 0; 
+			}
 			///////////////////////////////////////////////////////////////
 		}
 		// 膜の描画
@@ -742,7 +798,7 @@ public class Node implements Cloneable{
 					node.paint(g);
 				}
 			}
-			if(null != parent_){
+			if(!rootMembrane_){
 				g.setColor(myColor_);
 				if(selected_){
 					g.setColor(Color.RED);
@@ -904,6 +960,10 @@ public class Node implements Cloneable{
 						(panel_.getPin().getHeight(panel_) * Math.random() * 15)
 				) / GraphPanel.getMagnification();
 		}
+	}
+	
+	public void setHeating(boolean flag){
+		heating_ = flag;
 	}
 	
 	/**
@@ -1112,7 +1172,7 @@ public class Node implements Cloneable{
 	 * @param p
 	 */
 	public void setPosDelta(double dx, double dy){
-		if(null == parent_){
+		if(rootMembrane_){
 			dx = dx + rect_.x;
 			dy = dy + rect_.y;
 		} else {
@@ -1135,6 +1195,10 @@ public class Node implements Cloneable{
 			rect_.y = dy;
 		}
 		
+	}
+	
+	public void setRoot(boolean flag){
+		rootMembrane_ = flag;
 	}
 	
 	/**
@@ -1203,7 +1267,7 @@ public class Node implements Cloneable{
 	 * @param foruce 強制的に子膜も可視状態をflagにセットする
 	 */
 	public void setVisible(boolean flag, boolean foruce){
-		visible_ = (parent_ != null) ? flag : true;
+		visible_ = (!rootMembrane_) ? flag : true;
 
 		
 		if(foruce){

@@ -84,7 +84,7 @@ public class GraphPanel extends JPanel {
 	private Cursor currentCursor = new Cursor(Cursor.HAND_CURSOR);
 	private double deltaX;
 	private double deltaY;
-	private int fireNum_ = 0;
+	private int fireID_ = 0;
 	private boolean history_ = false;
 	private boolean localHeatingMode_ = false;
 	private List<String> logList_ = new ArrayList<String>();
@@ -126,6 +126,9 @@ public class GraphPanel extends JPanel {
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
+		
+		Node.loadFire(this);
+		
 		//　PINのロード待ち　ここまで
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
@@ -148,7 +151,13 @@ public class GraphPanel extends JPanel {
 						pointY - ((POINT_DELTA_AREA / 2) / getMagnification()),
 						POINT_DELTA_AREA / getMagnification(),
 						POINT_DELTA_AREA / getMagnification());
-				
+				if(e.isAltDown()){
+					moveTargetNode_ = rootNode_.getPointNode(rect, true);
+					if(null == moveTargetNode_){ return; }
+					setTempRootNode(moveTargetNode_);
+					return;
+					
+				}
 				// 可視不可視を反転
 				if(e.isControlDown()){
 					moveTargetNode_ = rootNode_.getPointNode(rect, true);
@@ -380,11 +389,11 @@ public class GraphPanel extends JPanel {
 
 		if(localHeatingMode_ && nowHeating_){
 			Point mousePoint = MouseInfo.getPointerInfo().getLocation();
-			g.drawImage(fire_[fireNum_],
+			g.drawImage(fire_[fireID_],
 					mousePoint.x - FIRE_WIDTH_MARGIN,
 					mousePoint.y - FIRE_HEIGHT_MARGIN,
 					this);
-			fireNum_ = (fireNum_ < 6) ? fireNum_ + 1 : 0; 
+			fireID_ = (fireID_ < 6) ? fireID_ + 1 : 0; 
 		}
 		
 		// 初期位置に戻す
@@ -472,6 +481,15 @@ public class GraphPanel extends JPanel {
 		rootMembrane_ = mem;
 		rootNode_ = new Node(null, mem);
 		orgRootNode_ = rootNode_;
+	}
+	
+	public void setTempRootNode(Node node){
+		if(!(node.getObject() instanceof Membrane)){
+			rootNode_.setRoot(true);
+			return;
+		}
+		node.setRoot(true);
+		rootNode_.setRoot(false);
 	}
 	
 	/**
