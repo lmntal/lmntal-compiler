@@ -219,7 +219,7 @@ public class ArgumentInferer {
 	 * change RootPath into ActiveAtomPath or TracingPath.
 	 * 
 	 */
-	private void solvePathes() {
+	private void solvePathes()throws TypeException{
 		Set<ReceiveConstraint> unSolvedRPCs = constraints.getReceivePassiveConstraints();
 		for(ReceiveConstraint rpc : unSolvedRPCs){
 			rpc.setPPath(solvePolarizedPath(rpc.getPPath()));
@@ -231,7 +231,7 @@ public class ArgumentInferer {
 		}
 	}
 
-	private PolarizedPath solvePolarizedPath(PolarizedPath pp) {
+	private PolarizedPath solvePolarizedPath(PolarizedPath pp)throws TypeException{
 		Path p = pp.getPath();
 		if (!(p instanceof RootPath)) {
 			System.out.println("fatal error in solving path.");
@@ -255,7 +255,7 @@ public class ArgumentInferer {
 	 *            argument of Atom (not Atomic)
 	 * @return
 	 */
-	private PolarizedPath getPolarizedPath(LinkOccurrence lo) {
+	private PolarizedPath getPolarizedPath(LinkOccurrence lo)throws TypeException{
 		Atom atom = (Atom) lo.atom;
 		int out = TypeEnv.outOfPassiveAtom(atom);
 		if (out == TypeEnv.ACTIVE) {
@@ -269,7 +269,14 @@ public class ArgumentInferer {
 			if (!(tl.atom instanceof Atom))
 				return new PolarizedPath(1, new RootPath(tl));
 			Atom ta = (Atom) tl.atom;
-			PolarizedPath pp = getPolarizedPath(tl);
+			PolarizedPath pp = null;
+			
+			// TODO 暫定的なバグ回避策 : きちんとActiveHeadConditionを検査すること
+			try{
+				pp = getPolarizedPath(tl);
+			}catch(java.lang.StackOverflowError e){
+				throw new TypeException("path link loop ");
+			}
 			if (TypeEnv.isLHSAtom(atom) == TypeEnv.isLHSAtom(ta))
 				return new PolarizedPath(pp.getSign(), new TracingPath(pp
 						.getPath(), atom.functor, lo.pos));
