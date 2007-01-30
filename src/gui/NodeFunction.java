@@ -53,11 +53,11 @@ public class NodeFunction {
 	
 	/** ¶É½êÈ¯»¶¤ÈÁ´ÂÎÈ¯»¶¤ÎÎÏ¤Îº¹ */
 	final static
-	private int LOCAL_GLOBAL_RATE = 10;
+	private int LOCAL_GLOBAL_RATE = 1;
 	
 	/** ¶É½êÈ¯»¶»þ´Ö */
 	final static
-	private int LOCAL_HEATING_TIMER = 4;
+	private int LOCAL_HEATING_TIMER = 10;
 	
 	///////////////////////////////////////////////////////////////////////////
 	// static
@@ -179,8 +179,12 @@ public class NodeFunction {
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
-			double dxr = (dx > 0) ? -(Math.random() * heatParam) + (heatParam / 2) : (Math.random() * heatParam) -  (heatParam / 2);
-			double dyr = (dy > 0) ? -(Math.random() * heatParam) + (heatParam / 2) : (Math.random() * heatParam) -  (heatParam / 2);
+			double dxr =
+				(dx > 0) ? -(Math.random() * heatParam) 
+						: (Math.random() * heatParam);
+			double dyr =
+				(dy > 0) ? -(Math.random() * heatParam) 
+						: (Math.random() * heatParam);
 			
 			double ddx = (f * dx) + dxr;
 			double ddy = (f * dy) + dyr;
@@ -561,6 +565,10 @@ public class NodeFunction {
 	static
 	public void stopHeating(){
 		heatingTimer_ = 0;
+		Iterator<Node> heatingNodes = localHeating_.keySet().iterator();
+		while(heatingNodes.hasNext()){
+			heatingNodes.next().setHeating(false);
+		}
 		localHeating_.clear();
 	}
 
