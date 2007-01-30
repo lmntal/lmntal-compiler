@@ -107,12 +107,13 @@ H=createMaze({mazeGame, $p}, Maze) :-
 createMaze@@
 H=createMaze({mazeGame, $p}, MazeFactory, Maze) :-
 	H={mazeGame, $p},
-	gc=makeDoor(makeRoom(makeRoom(makeMaze(MazeFactory, _Maze), 1, R11), 2, R21), R12, R22, oo.ref(D1, D2)),
+	gc=makeWall(makeDoor(makeRoom(makeRoom(makeMaze(MazeFactory, _Maze), 1, R11), 2, R21), R12, R22, oo.ref(D1, D2)), Wall),
 	R14=oo.ref(oo.ref(R11, R12), R13),
 	R24=oo.ref(oo.ref(R21, R22), R23),
 	Maze=addRoom(addRoom(_Maze, R13), R23),
-	gc=setSide(setSide(setSide(setSide(R14, 0, wall.new), 1, D1), 2, wall.new), 3, wall.new),
-	gc=setSide(setSide(setSide(setSide(R24, 0, wall.new), 1, wall.new), 2, D2), 3, wall.new),
+	Wall1=oo.ref(oo.ref(oo.ref(oo.ref(oo.ref(Wall, Wall2), Wall3), Wall4), Wall5), Wall6),
+	gc=setSide(setSide(setSide(setSide(R14, 0, Wall1), 1, D1), 2, Wall2), 3, Wall3),
+	gc=setSide(setSide(setSide(setSide(R24, 0, Wall4), 1, Wall5), 2, D2), 3, Wall6).
 }.
 
 //// Factory епеще╣
