@@ -96,6 +96,7 @@ public class GraphPanel extends JPanel {
 	private Membrane rootMembrane_;
 	private Node rootNode_;
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
+	private Node tmpRootNode_;
 	private GraphPanel myPanel_ = this;
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -153,7 +154,6 @@ public class GraphPanel extends JPanel {
 						POINT_DELTA_AREA / getMagnification());
 				if(e.isAltDown()){
 					moveTargetNode_ = rootNode_.getPointNode(rect, true);
-					if(null == moveTargetNode_){ return; }
 					setTempRootNode(moveTargetNode_);
 					return;
 					
@@ -382,7 +382,7 @@ public class GraphPanel extends JPanel {
 	
 		g.setColor(Color.BLACK);
 		if(null != rootNode_){
-			rootNode_.paint(g);
+			rootNode_.paint(g, false);
 		}
 	
 		((Graphics2D)g).setTransform(new AffineTransform());
@@ -397,10 +397,10 @@ public class GraphPanel extends JPanel {
 		}
 		
 		// 初期位置に戻す
-		int divergenceTimer = NodeFunction.getDivergence();
-		if(0 < divergenceTimer){
+		int heatingTimer = NodeFunction.getDivergence();
+		if(0 < heatingTimer){
 			g.setColor(Color.RED);
-			g.drawString("Divergence Timer:" + divergenceTimer, 10, 30);
+			g.drawString("Heating Timer:" + heatingTimer, 10, 30);
 		}
 	}
 	
@@ -484,11 +484,24 @@ public class GraphPanel extends JPanel {
 	}
 	
 	public void setTempRootNode(Node node){
-		if(!(node.getObject() instanceof Membrane)){
+		System.out.println(node);
+		if(null == node ||
+				!(node.getObject() instanceof Membrane) ||
+				node.getParent() == null ||
+				tmpRootNode_ == node)
+		{
+			if(null != tmpRootNode_){
+				System.out.println("false");
+				tmpRootNode_.setRoot(false);
+				tmpRootNode_ = null;
+			}
+			System.out.println("true");
 			rootNode_.setRoot(true);
 			return;
 		}
+		System.out.println(node.getObject());
 		node.setRoot(true);
+		tmpRootNode_ = node;
 		rootNode_.setRoot(false);
 	}
 	
@@ -575,7 +588,6 @@ public class GraphPanel extends JPanel {
 				try {
 					sleep(20);
 					autoFocus();
-					repaint();
 				} catch (Exception e) {
 				}
 			}

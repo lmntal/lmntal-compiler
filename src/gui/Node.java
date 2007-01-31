@@ -444,7 +444,12 @@ public class Node implements Cloneable{
 	 * @return
 	 */
 	public Node getNthNode(int i){
-		return linkList_.get(i);
+		Node node = null;
+		try {
+			node = linkList_.get(i);
+		} catch (java.lang.IndexOutOfBoundsException e) {
+		}
+		return node;
 	}
 	
 	/**
@@ -635,7 +640,9 @@ public class Node implements Cloneable{
 		}
 		visible_ = true;
 		if(rootMembrane_){ return; }
-		parent_.iWillBeAMembrane();
+		if(null != parent_){
+			parent_.iWillBeAMembrane();
+		}
 	}
 	
 	/**
@@ -734,7 +741,10 @@ public class Node implements Cloneable{
 	 * 自身を描画する
 	 * @param g
 	 */
-	public void paint(Graphics g){
+	public void paint(Graphics g, boolean enable){
+		if(rootMembrane_){
+			enable = true;
+		}
 		if(rootMembrane_){
 			LinkSet.paint(g);
 		}
@@ -745,7 +755,7 @@ public class Node implements Cloneable{
 		}
 
 		// アトムまたは閉じた膜の描画
-		if(isAtom()){
+		if(isAtom() && enable){
 			g.setColor(myColor_);
 			((Graphics2D)g).fill(rect_);
 
@@ -756,7 +766,7 @@ public class Node implements Cloneable{
 				Iterator<Node> nodes = bezierMap_.values().iterator();
 				while(nodes.hasNext()){
 					Node node = nodes.next();
-					node.paint(g);
+					node.paint(g, enable);
 				}
 
 				g.setColor(Color.RED);
@@ -795,10 +805,10 @@ public class Node implements Cloneable{
 				Iterator<Node> nodes = nodeMap_.values().iterator();
 				while(nodes.hasNext()){
 					Node node = nodes.next();
-					node.paint(g);
+					node.paint(g, enable);
 				}
 			}
-			if(!rootMembrane_){
+			if(!rootMembrane_ && enable){
 				g.setColor(myColor_);
 				if(selected_){
 					g.setColor(Color.RED);
