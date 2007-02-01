@@ -1,0 +1,11 @@
+ typedef{
+   root{
+     dome(+e,+e,+e,+e,+e,+e,+e,+e,+e,+e) = [0, inf].
+     p(+e,+e,+e,+e,+e) = [0,inf].
+     c(+e,+e,+e) = [0,inf].
+     nomore.
+   }
+ }.
+dome(L1,L2,L3,L4,L5,L6,L7,L8,L9,L10):-p(L11,L12,L13,L14,L15),p(L1,L2,L16,L11,L20),p(L3,L4,L17,L12,L16),p(L5,L6,L18,L13,L17),p(L7,L8,L19,L14,L18),p(L9,L10,L20,L15,L19).
+dome(L21,L22,L23,L24,L25,L26,L27,L28,L29,L30),dome(L21,L30,L29,L28,L27,L26,L25,L24,L23,L22).
+p(L1,L2,L3,L4,L5):-c(L1,L31,L35),c(L2,L32,L31),c(L3,L33,L32),c(L4,L34,L33),c(L5,L35,L34).

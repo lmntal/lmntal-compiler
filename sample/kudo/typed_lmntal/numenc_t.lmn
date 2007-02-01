@@ -1,0 +1,24 @@
+ typedef{
+   num = datatype( zero('-'), succ(+num, '-') ).
+ }.
+R=pred(succ(N)):-R=N.
+R=succ(pred(N)) :- R=N.
+R=plus(N,zero):-R=N.
+R=plus(N,succ(M)) :- R=plus(succ(N),M).
+R=plus(N,pred(M)) :- R=plus(pred(N),M).
+R=minus(zero):-R=zero.
+R=minus(succ(N)):-R=pred(minus(N)).
+R=minus(pred(N)):-R=succ(minus(N)).
+R=sub(M,N):-R=plus(M,minus(N)).
+suprcp(succ(N0),N1,N2):-suprcp(N0,S1,S2),N1=succ(S1),N2=succ(S2).
+suprcp(pred(N0),N1,N2):-suprcp(N0,P1,P2),N1=pred(P1),N2=pred(P2).
+suprcp(zero,N1,N2):-N1=zero,N2=zero.
+suprrm(succ(N1)) :- suprrm(N1).
+suprrm(pred(N2)) :- suprrm(N2). suprrm(zero) :- ().
+R=mul(M,zero):-R=zero, suprrm(M).
+R=mul(M,succ(zero)):-R=M.
+R=mul(M,pred(zero)):-R=minus(M).
+R=mul(M0,succ(succ(N))):-R=plus(mul(M1,succ(N)),M2),suprcp(M0,M1,M2).
+R=mul(M0,pred(pred(N))):-R=sub(mul(M1,pred(N)),M2),suprcp(M0,M1,M2).
+ret = sub(mul(plus(succ(succ(succ(zero))),succ(zero)),
+succ(succ(zero))),succ(succ(succ(succ(succ(succ(zero))))))).
