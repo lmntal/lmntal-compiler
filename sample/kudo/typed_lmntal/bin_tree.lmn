@@ -21,6 +21,8 @@ Ret=append([C|L1],L2):-Ret=[C|append(L1,L2)].
 Append2@@
 Ret=append([],L2):-Ret=L2.
 
+
+//example
 insert(1, none, T1),
 insert(3,   T1, T2),
 insert(5,   T2, T3),
