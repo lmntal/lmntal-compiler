@@ -76,7 +76,7 @@ public class ArgumentInferer {
 	/**
 	 * プロセス文脈の引数について処理する
 	 */
-	private void processLinksOfProcessContexts(){
+	private void processLinksOfProcessContexts()throws TypeException{
 		for(ContextDef def : defs)
 			for(ProcessContext rhsOcc : (List<ProcessContext>)def.rhsOccs)
 				processExplicitLinks((ProcessContext)def.lhsOcc, rhsOcc);
@@ -121,7 +121,31 @@ public class ArgumentInferer {
 		//型付きプロセス文脈
 		for(ProcessContext tpc : (List<ProcessContext>)mem.typedProcessContexts){
 			ContextDef def = tpc.def;
-			if(!defs.contains(def))defs.add(def);
+			if(TypeEnv.dataTypeOfContextDef(def) == null){
+				if(!defs.contains(def))defs.add(def);
+			}
+			else{
+				LinkOccurrence lo = tpc.args[0];
+				LinkOccurrence b = TypeEnv.getRealBuddy(lo);
+				if(b.atom instanceof ProcessContext){
+					ProcessContext budpc = (ProcessContext)b.atom;
+					if(TypeEnv.dataTypeOfContextDef(budpc.def)!= null){
+						throw new TypeException("MODE ERROR : output arguments connected each other.");
+					}
+					else{
+						freelinks.add(lo);
+						continue;
+					}
+				}
+				else{
+					if(freelinks.contains(b)){
+						addConstraintAboutLinks(-1, lo, b);
+						freelinks.remove(b);
+					}
+					else
+						freelinks.add(lo);
+				}
+			}
 		}
 		return freelinks;
 	}
@@ -155,7 +179,18 @@ public class ArgumentInferer {
 		for (int i = 0; i < atom.args.length; i++) {
 			LinkOccurrence lo = atom.args[i];
 			LinkOccurrence b = TypeEnv.getRealBuddy(lo);
-			if(b.atom instanceof ProcessContext)continue; // プロセス文脈に接続している
+			if(b.atom instanceof ProcessContext){ // プロセス文脈に接続している
+				ProcessContext pc = (ProcessContext)b.atom;
+				if(TypeEnv.dataTypeOfContextDef(pc.def) != null){ // データ型
+					if(freelinks.contains(b)){
+						addConstraintAboutLinks(-1, b, lo);
+						freelinks.remove(b);
+					}
+					else
+						freelinks.add(lo);
+				}
+				else continue;
+			}
 			if (freelinks.contains(b)) { // 局所リンク
 				addConstraintAboutLinks(-1, lo, b);
 				freelinks.remove(b);
@@ -166,20 +201,33 @@ public class ArgumentInferer {
 	}
 	
 	/** プロセス文脈の左辺／右辺出現のそれぞれの引数に対して同じであるという制約をかける */
-	private void processExplicitLinks(ProcessContext lhsOcc, ProcessContext rhsOcc){
+	private void processExplicitLinks(ProcessContext lhsOcc, ProcessContext rhsOcc)throws TypeException{
 		for(int i=0;i<lhsOcc.args.length;i++){
 			LinkOccurrence lhsPartner = TypeEnv.getRealBuddy(lhsOcc.args[i]);
 			LinkOccurrence rhsPartner = TypeEnv.getRealBuddy(rhsOcc.args[i]);
 			if(rhsPartner.atom instanceof Atom){
 				if(TypeEnv.isLHSAtom((Atom)rhsPartner.atom))
-					addUnifyConstraint(-1,lhsPartner,rhsPartner);
+//					addUnifyConstraint(-1,lhsPartner,rhsPartner);
+					addConstraintAboutLinks(-1,lhsPartner,rhsPartner);
 				else
-					addUnifyConstraint(1,lhsPartner,rhsPartner);
+//					addUnifyConstraint(1,lhsPartner,rhsPartner);
+					addConstraintAboutLinks(1,lhsPartner,rhsPartner);
 			}
 			else{ // 右辺出現がプロセス文脈と継っている
-				// そいつの左辺出現の相方をとってくる
-				LinkOccurrence partnerOfPartner = TypeEnv.getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
-				addUnifyConstraint(-1,lhsPartner, partnerOfPartner);
+				ProcessContext pc = (ProcessContext)rhsPartner.atom;
+				Functor df = TypeEnv.dataTypeOfContextDef(pc.def);
+				if(df==null){// 型付きでない
+					// そいつの左辺出現の相方をとってくる
+					LinkOccurrence partnerOfPartner =
+						TypeEnv.getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
+//					addUnifyConstraint(-1,lhsPartner, partnerOfPartner);
+					addConstraintAboutLinks(-1,lhsPartner,partnerOfPartner);
+				}
+				else{
+					addConstraintAboutLinks(1,rhsPartner,lhsPartner);
+//					LinkOccurrence partnerOfPartner = TypeEnv.getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
+//					add
+				}
 			}
 		}
 	}
@@ -193,16 +241,25 @@ public class ArgumentInferer {
 	 * @param b
 	 */
 	private void addConstraintAboutLinks(int sign, LinkOccurrence lo, LinkOccurrence b) throws TypeException{
-		int out = TypeEnv.outOfPassiveAtom((Atom)lo.atom);
-		if(out == lo.pos){ // データアトムの出力引数
-			if(TypeEnv.outOfPassiveAtom((Atom)b.atom) == b.pos)//!= TypeEnv.ACTIVE)
-				throw new TypeException("MODE ERROR : output arguments connected each other.");
-			else addReceiveConstraint(-sign, b, ((Atom)lo.atom).functor);
+		// 型付きプロセス文脈で、データ型の時にはデータアトムとして扱う
+		if(lo.atom instanceof ProcessContext){
+			ProcessContext pc = (ProcessContext)lo.atom;
+			Functor df = TypeEnv.dataTypeOfContextDef(pc.def);
+			if(df != null)
+				addReceiveConstraint(-sign, b, df);
 		}
 		else{
-			if(TypeEnv.outOfPassiveAtom((Atom)b.atom) == b.pos) //!= TypeEnv.ACTIVE)
-				addConstraintAboutLinks(sign, b, lo);
-			else addUnifyConstraint(sign, lo, b);
+			int out = TypeEnv.outOfPassiveAtom((Atom)lo.atom);
+			if(out == lo.pos){ // データアトムの出力引数
+				if(TypeEnv.outOfPassiveAtom((Atom)b.atom) == b.pos)//!= TypeEnv.ACTIVE)
+					throw new TypeException("MODE ERROR : output arguments connected each other.");
+				else addReceiveConstraint(-sign, b, ((Atom)lo.atom).functor);
+			}
+			else{
+				if(TypeEnv.outOfPassiveAtom((Atom)b.atom) == b.pos) //!= TypeEnv.ACTIVE)
+					addConstraintAboutLinks(sign, b, lo);
+				else addUnifyConstraint(sign, lo, b);
+			}
 		}
 	}
 

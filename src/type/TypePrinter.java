@@ -119,7 +119,10 @@ public class TypePrinter {
 					
 					if(fcs != null){
 						IntervalCount fc = fcs.functorToCount.get(f);
-						texp.append(fc);
+						if(fc != null)
+							texp.append(fc);
+						else
+							texp.append(0);
 					}
 					else texp.append("??");
 					
@@ -138,7 +141,7 @@ public class TypePrinter {
 					
 					if(fcs.memnameToCount.containsKey(childname)){
 						IntervalCount fc = fcs.memnameToCount.get(childname);
-						Env.p("\t" + childname + "{} : " + fc);
+						Env.p("\t" + childname + "{} : " + ((fc==null)?"0":fc));
 					}
 				}
 			}

@@ -14,8 +14,10 @@ import runtime.StringFunctor;
 import runtime.SymbolFunctor;
 
 import compile.structure.Atom;
+import compile.structure.ContextDef;
 import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
+import compile.structure.ProcessContext;
 import compile.structure.RuleStructure;
 
 public final class TypeEnv {
@@ -60,9 +62,17 @@ public final class TypeEnv {
 		return ACTIVE;
 	}
 
-	public static int outOfPassiveAtom(Atom atom) {
-		Functor f = atom.functor;
-		return outOfPassiveFunctor(f);
+	public static int outOfPassiveAtom(Atom atomic) {
+//		if(atomic instanceof Atom){
+			Atom atom = (Atom)atomic;
+			Functor f = atom.functor;
+			return outOfPassiveFunctor(f);
+//		}
+//		else(atomic instanceof ProcessContext){
+//			ProcessContext pc = (ProcessContext)atomic;
+//			String dt = def2type.get(pc.def);
+//			if(dt == null)return PC;
+//		}
 	}
 	
 	static{
@@ -91,12 +101,127 @@ public final class TypeEnv {
 
 	private static final Map<Membrane, String> memToName = new HashMap<Membrane, String>();
 	
-	public static void initialize(Membrane root){
+	public static void initialize(Membrane root)throws TypeException{
 		// 全ての膜について、ルールの左辺最外部出現かどうかの情報を得る
 		TypeEnv.collectLHSMemsAndNames(root.rules);
 		
+		// 全ての型付きプロセス文脈について、プロセス型を知っておく
+		// TODO いずれガードコンパイラに役立てる
+		knowTPCMem(root);
+		
 		// 全ての右辺膜について、
 	}
+	
+	/** 型付きプロセス文脈定義 -> データ型*/
+	private static Map<ContextDef, Functor> def2type = new HashMap<ContextDef, Functor>();
+	
+	public static Functor dataTypeOfContextDef(ContextDef cd){
+		return def2type.get(cd);
+	}
+	
+	private static void knowTPCMem(Membrane mem)throws TypeException{
+		for(RuleStructure rs : mem.rules){
+			knowTPCGuard(rs.guardMem);
+		}
+	}
+	
+	private static void knowTPCGuard(Membrane guardmem)throws TypeException{
+		Functor intf = new IntegerFunctor(0);
+		Functor floatf = new FloatingFunctor(0.0);
+		Functor stringf = new StringFunctor("hello");
+		Functor classf = new ObjectFunctor(new Object());
+		for(Atom guard : guardmem.atoms){
+			if(guard.functor.equals(new SymbolFunctor("int",1))){
+				ProcessContext tpc = (ProcessContext)guard.args[0].buddy.atom;
+				constrainTPC(tpc.def, intf);
+			}
+			else if(guard.functor.equals(new SymbolFunctor("float",1))){
+				ProcessContext tpc = (ProcessContext)guard.args[0].buddy.atom;
+				constrainTPC(tpc.def, floatf);
+			}
+			else if(guard.functor.equals(new SymbolFunctor("string",1))){
+				ProcessContext tpc = (ProcessContext)guard.args[0].buddy.atom;
+				constrainTPC(tpc.def, stringf);
+			}
+			else if(guard.functor.equals(new SymbolFunctor("class",2))){
+				ProcessContext tpc = (ProcessContext)guard.args[0].buddy.atom;
+				constrainTPC(tpc.def, classf);
+			}
+			else if(
+				guard.functor.equals(new SymbolFunctor("=:=",2)) ||
+				guard.functor.equals(new SymbolFunctor("=\\=",2)) ||
+				guard.functor.equals(new SymbolFunctor(">",2)) ||
+				guard.functor.equals(new SymbolFunctor("<",2)) ||
+				guard.functor.equals(new SymbolFunctor(">=",2)) ||
+				guard.functor.equals(new SymbolFunctor("=<",2))){
+				ProcessContext tpc = (ProcessContext)guard.args[0].buddy.atom;
+				constrainTPC(tpc.def, intf);
+				tpc = (ProcessContext)guard.args[1].buddy.atom;
+				constrainTPC(tpc.def, intf);
+			}
+			else if(
+			guard.functor.equals(new SymbolFunctor("+",3)) ||
+			guard.functor.equals(new SymbolFunctor("-",3)) ||
+			guard.functor.equals(new SymbolFunctor("*",3)) ||
+			guard.functor.equals(new SymbolFunctor("/",3)) ||
+			guard.functor.equals(new SymbolFunctor("mod",3))
+			){
+				ProcessContext tpc = (ProcessContext)guard.args[0].buddy.atom;
+				constrainTPC(tpc.def, intf);
+				tpc = (ProcessContext)guard.args[1].buddy.atom;
+				constrainTPC(tpc.def, intf);
+				tpc = (ProcessContext)guard.args[2].buddy.atom;
+				constrainTPC(tpc.def, intf);
+			}
+			else if(
+			guard.functor.equals(new SymbolFunctor("=:=.",2)) ||
+			guard.functor.equals(new SymbolFunctor("=\\=.",2)) ||
+			guard.functor.equals(new SymbolFunctor(">.",2)) ||
+			guard.functor.equals(new SymbolFunctor("<.",2)) ||
+			guard.functor.equals(new SymbolFunctor(">=.",2)) ||
+			guard.functor.equals(new SymbolFunctor("=<.",2))){
+				ProcessContext tpc = (ProcessContext)guard.args[0].buddy.atom;
+				constrainTPC(tpc.def, floatf);
+				tpc = (ProcessContext)guard.args[1].buddy.atom;
+				constrainTPC(tpc.def, floatf);
+			}
+			else if(
+			guard.functor.equals(new SymbolFunctor("+.",3)) ||
+			guard.functor.equals(new SymbolFunctor("-.",3)) ||
+			guard.functor.equals(new SymbolFunctor("*.",3)) ||
+			guard.functor.equals(new SymbolFunctor("/.",3))
+			){
+				ProcessContext tpc = (ProcessContext)guard.args[0].buddy.atom;
+				constrainTPC(tpc.def, floatf);
+				tpc = (ProcessContext)guard.args[1].buddy.atom;
+				constrainTPC(tpc.def, floatf);
+				tpc = (ProcessContext)guard.args[2].buddy.atom;
+				constrainTPC(tpc.def, floatf);
+			}
+		}
+		for(Atom guard : guardmem.atoms){
+			if(
+				guard.functor.equals(new SymbolFunctor("=",2))||
+				guard.functor.equals(new SymbolFunctor("==",2))){
+				ProcessContext tpc1 = (ProcessContext)guard.args[0].buddy.atom;
+				ProcessContext tpc2 = (ProcessContext)guard.args[0].buddy.atom;
+				if(def2type.get(tpc1.def)!=null){
+					constrainTPC(tpc2.def,def2type.get(tpc1.def));
+				}
+				else if(def2type.get(tpc2.def)!=null){
+					constrainTPC(tpc1.def,def2type.get(tpc2.def));
+				}
+			}
+		}
+	}
+	
+	private static void constrainTPC(ContextDef cd, Functor datatype)throws TypeException{
+		Functor df = def2type.get(cd);
+		if(df == null)def2type.put(cd, datatype);
+		else if(df.equals(datatype))return;
+		else throw new TypeException("Typed Process Context is constrained two process type. : " + cd.getName());
+	}
+	
 	
 	/**
 	 * 左辺出現膜を$lhsmemsに登録する
