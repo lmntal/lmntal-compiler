@@ -1,3 +1,5 @@
+// bug
+
 typedef{
   inttree = datatype(
     n1(                  +inttree,                               '-'),
@@ -46,6 +48,15 @@ LiftupN4_2@@R=n4(N1,N2,N3,T1,liftup(N21,T21,T22),T3,T4) :- R=liftup(N2,n3(N1,N21
 LiftupN4_3@@R=n4(N1,N2,N3,T1,T2,liftup(N31,T31,T32),T4) :- R=liftup(N2,n2(N1,T1,T2),n3(N31,N3,T31,T32,T4)).
 LiftupN4_4@@R=n4(N1,N2,N3,T1,T2,T3,liftup(N41,T41,T42)) :- R=liftup(N2,n2(N1,T1,T2),n3(N3,N41,T3,T41,T42)).
 
+Tolist_1@@R=tolist(n1(T)):-R=tolist(T).
+Tolist_2@@R=tolist(n2(N,T1,T2)):-R=append(tolist(T1),[N|tolist(T2)]).
+Tolist_3@@R=tolist(n3(N1,N2,T1,T2,T3)):-R=append(tolist(T1),[N1|append(tolist(T2),[N2|tolist(T3)])]).
+Tolist_4@@R=tolist(n4(N1,N2,N3,T1,T2,T3,T4)):-R=append(tolist(T1),[N1|append(tolist(T2),[N2|append(tolist(T3),[N3|tolist(T4)])])]).
+Tolist_5@@R=tolist(none):-R=[].
+
+Append_1@@R=append([C|L1],L2):-R=[C|append(L1,L2)].
+Append_2@@R=append([],L2):-R=L2.
+
 // example
 insert(1,empty,T1),
 insert(3,   T1,T2),
@@ -58,3 +69,4 @@ insert(6,   T7,T8),
 insert(8,   T8,Tree).
 
 ret=Tree.
+//ret=tolist(Tree).

@@ -30,32 +30,31 @@ R=ct(C,t(I,fixed(T1),T2)):-R=fixed(ct(C,t(I,T1,T2))).
 R=ct(C,t(I,T1,fixed(T2))):-R=fixed(ct(C,t(I,T1,T2))).
 
 // parent is black
-R=ct(black,t(PI,fix(ct(red,T)),TP)):-
-  R=fixed(ct(black,t(PI,ct(red,T),TP))).
-R=ct(black,t(PI,TP,fix(ct(red,T)))):-
-  R=fixed(ct(black,t(PI,TP,ct(red,T)))).
+R=ct(black,t(PI,fix(ct(red,T)),TP)):-R=fixed(ct(black,t(PI,ct(red,T),TP))).
+R=ct(black,t(PI,TP,fix(ct(red,T)))):-R=fixed(ct(black,t(PI,TP,ct(red,T)))).
 
 // uncle is red
-R=ct(black,t(GI,ct(red,t(PI,fix(ct(red,T)),TP)),ct(red,U))):-
-  R=fix(ct(red,t(GI,ct(black,t(PI,ct(red,T),TP)),ct(black,U)))).
-R=ct(black,t(GI,ct(red,t(PI,TP,fix(ct(red,T)))),ct(red,U))):-
-  R=fix(ct(red,t(GI,ct(black,t(PI,TP,ct(red,T))),ct(black,U)))).
-R=ct(black,t(GI,ct(red,U),ct(red,t(PI,fix(ct(red,T)),TP)))):-
-  R=fix(ct(red,t(GI,ct(black,U),ct(black,t(PI,ct(red,T),TP))))).
-R=ct(black,t(GI,ct(red,U),ct(red,t(PI,TP,fix(ct(red,T)))))):-
-  R=fix(ct(red,t(GI,ct(black,U),ct(black,t(PI,TP,ct(red,T)))))).
+R=ct(black,t(GI,ct(red,t(PI,fix(ct(red,T)),TP)),ct(red,U))):-R=fix(ct(red,t(GI,ct(black,t(PI,ct(red,T),TP)),ct(black,U)))).
+R=ct(black,t(GI,ct(red,t(PI,TP,fix(ct(red,T)))),ct(red,U))):-R=fix(ct(red,t(GI,ct(black,t(PI,TP,ct(red,T))),ct(black,U)))).
+R=ct(black,t(GI,ct(red,U),ct(red,t(PI,fix(ct(red,T)),TP)))):-R=fix(ct(red,t(GI,ct(black,U),ct(black,t(PI,ct(red,T),TP))))).
+R=ct(black,t(GI,ct(red,U),ct(red,t(PI,TP,fix(ct(red,T)))))):-R=fix(ct(red,t(GI,ct(black,U),ct(black,t(PI,TP,ct(red,T)))))).
 
 // uncle is black rotation1
-R=ct(black,t(GI,ct(red,t(PI,TP,fix(ct(red,t(I,T1,T2))))),ct(black,U))):-
-  R=fixed(ct(black,t(GI,ct(red,t(I,fix(ct(red,t(PI,TP,T1))),T2)),ct(black,U)))).
-R=ct(black,t(GI,ct(black,U),ct(red,t(PI,fix(ct(red,t(I,T1,T2))),TP)))):-
-  R=fixed(ct(black,t(GI,ct(black,U),ct(red,t(I,T1,fix(ct(red,t(PI,T2,TP)))))))).
+R=ct(black,t(GI,ct(red,t(PI,TP,fix(ct(red,t(I,T1,T2))))),ct(black,U))):-R=fixed(ct(black,t(GI,ct(red,t(I,fix(ct(red,t(PI,TP,T1))),T2)),ct(black,U)))).
+R=ct(black,t(GI,ct(black,U),ct(red,t(PI,fix(ct(red,t(I,T1,T2))),TP)))):-R=fixed(ct(black,t(GI,ct(black,U),ct(red,t(I,T1,fix(ct(red,t(PI,T2,TP)))))))).
 
 // uncle is black rotation2
-R=ct(black,t(GI,ct(red,t(PI,fix(ct(red,T)),TP)),ct(black,U))):-
-  R=fixed(ct(black,t(PI,ct(red,T),ct(red,t(GI,TP,ct(black,U)))))).
-R=ct(black,t(GI,ct(black,U),ct(red,t(PI,TP,fix(ct(red,T)))))):-
-  R=fixed(ct(black,t(PI,ct(red,t(GI,ct(black,U),TP)),ct(red,T)))).
+R=ct(black,t(GI,ct(red,t(PI,fix(ct(red,T)),TP)),ct(black,U))):-R=fixed(ct(black,t(PI,ct(red,T),ct(red,t(GI,TP,ct(black,U)))))).
+R=ct(black,t(GI,ct(black,U),ct(red,t(PI,TP,fix(ct(red,T)))))):-R=fixed(ct(black,t(PI,ct(red,t(GI,ct(black,U),TP)),ct(red,T)))).
+
+// to list
+R=tolist(ct($c,t(I,T1,T2))):- unary($c)|R=append(tolist(T1),[I|tolist(T2)]).
+R=tolist(ct($c,n)):- unary($c)|R=[].
+R=tolist(r(T)):-R=tolist(T).
+
+// append
+R=append([C|L1],L2):-R=[C|append(L1,L2)].
+R=append([],L2):-R=L2.
 
 // example
 insert(1,empty,T1),
@@ -68,4 +67,4 @@ insert(4,   T6,T7),
 insert(6,   T7,T8),
 insert(8,   T8,Tree).
 
-ret=Tree.
+ret=tolist(Tree).
