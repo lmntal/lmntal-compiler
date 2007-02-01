@@ -13,7 +13,7 @@ public class InfinityCount extends ValueCount {
 		this.minus = minus;
 	}
 	public String toString(){
-		return (minus?"-":"") + "#inf";
+		return (minus?"-":"") + "inf";
 	}
 
 	public ValueCount mul(int m){

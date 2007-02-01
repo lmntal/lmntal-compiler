@@ -163,7 +163,12 @@ public class ArgumentInferer {
 			LinkOccurrence rightlink = TypeEnv.getRealBuddy(leftlink);
 			if (!freelinksRight.contains(rightlink)) // リンクが左辺／右辺出現でないなら
 				throw new TypeException("link occurs once in a rule.");
-			addConstraintAboutLinks(1, leftlink, rightlink);
+			if(leftlink.atom instanceof Atom){
+				addConstraintAboutLinks(1, rightlink, leftlink);
+			}
+			else if(rightlink.atom instanceof ProcessContext)
+				throw new TypeException("SYNTAX ERROR : Process Context's link inherited.");
+			else addConstraintAboutLinks(1, leftlink, rightlink);
 		}
 	}
 
