@@ -14,10 +14,11 @@ HISTORY
 {
 module(oolist).
 
+new@@
 H=oolist.new(N) :- N = 0 | H=[].
 H=oolist.new(N) :- N > 0 | H=[{}|oolist.new(N-1)].
 
+get@@
 H=oolist.get([{$p}|Tail], N, Ref) :- N=0 | H=[{$p,+Ref}|Tail].
 H=oolist.get([Head|Tail], N, Ref) :- N>0 | H=[Head|oolist.get(Tail,N-1,Ref)].
-
 }.

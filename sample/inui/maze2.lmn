@@ -1,0 +1,59 @@
+io.use.
+
+createMaze.
+makePlayer.
+
+makePlayer, {room, $p} :- player(Player, 1), {room, +Player, $p}.
+makeRoom(ID) :- int(ID) |
+	{room, id(ID), mapSite(0, wall), mapSite(1, wall), mapSite(2, wall), mapSite(3, wall)}.
+	
+createMaze :-
+	{room, id(ID), mapSite(0, {wall}), mapSite(1, {wall}), mapSite(2, {wall}), mapSite(3, {door, otherSide(Door1), state(closed)})},
+	{room, id(ID), mapSite(0, {wall}), mapSite(1, {door, otherSide(Door1), state(closed)}), mapSite(2, {wall}), mapSite(3, {wall})}.
+
+createMaze(MazeFactory) :-
+	{room, id(ID), mapSite(
+//{room, id(0), mapSite(0, wall), mapSite(1, {door, doorNeedingSpell, otherSide(Door1), state(closed)}), mapSite(2, wall), mapSite(3, wall)}.
+//{room, id(1), mapSite(0, wall), mapSite(1, {door, doorNeedingSpell, otherSide(Door1), state(closed)}), mapSite(2, wall), mapSite(3, wall)}.
+
+//{room, id(0), mapSite(3, wall), $p}, {room, id(1), mapSite(1, wall), $q} :-
+//	{room, id(0), mapSite(3, {door, otherSide(Door1), state(closed)}), $p},
+//	{room, id(1), mapSite(1, {door, otherSide(Door1), state(closed)}), $q}.
+
+room={mapSite(0, wall), mapSite(1, wall), mapSite(2, door(X)), mapSite(3. wall)}.
+room={mapSite(0, wall), mapSite(1, door(X)), mapSite(2, wall), mapSite(3. wall)}.
+
+r(done).
+s=java_util_Scanner.new(java_lang_System.in).
+r(done), s(S) :- s=nextInt(S, n).
+
+wall@@
+n(N1), player(Player, Spells), {room, mapSite(N2, {wall}), +Player, $p} :- N1 = N2 |
+	player(Player, Spells),
+	{room, mapSite(N2, {wall}), +Player, $p},
+	r=io.println("There is a wall.").
+openDoor@@
+n(N1), player(Player, Spells),
+	{room, mapSite(N2, {door, otherSide(D), state(closed)}), $p, +Player},
+	{room, mapSite(N3, {door, otherSide(D), state(closed)}), $q} :- N1 = N2, int(N3) |
+	player(Player, Spells), 
+	{room, mapSite(N2, {door, otherSide(D), state(opened)}), $p},
+	{room, mapSite(N3, {door, otherSide(D), state(opened)}), $q, +Player},
+	n(N1),
+	r1=io.println("Opened a door.").
+enterRoom@@
+n(N1), player(Player, Spells), 
+	{room, mapSite(N2, {door, otherSide(D), state(opened), $d1}), $p, +Player},
+	{room, mapSite(N3, {door, otherSide(D), state(opened), $d2}), $q} :- N1 = N2, int(N3) |
+	player(Player, Spells),
+	{room, mapSite(N2, {door, otherSide(D), state(opened), $d1}), $p},
+	{room, mapSite(N3, {door, otherSide(D), state(opened), $d2}), $q, +Player},
+	r=io.println("Enter a room.").
+openDoorNeedingSpell@@
+n(N1), player(Player, Spells),
+	{room, mapSite(N2, {door, doorNeedingSpell, otherSide(D), state(closed)}), $p, +Player},
+	{room, mapSite(N3, {door, doorNeedingSpell, otherSide(D), state(closed)}), $q} :- N1 = N2, Spells > 0 |
+	player(Player, Spells-1),
+	{room, mapSite(N2, {door, doorNeedingSpell, otherSide(D), state(opened)}), $p, +Player},
+	{room, mapSite(N3, {door, doorNeedingSpell, otherSide(D), state(opened)}), $q},
+	r=io.println("Opened a door needing spell.").

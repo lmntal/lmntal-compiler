@@ -105,22 +105,25 @@ H=createMaze({mazeGame, $p}, Maze) :-
 	Room2=setSide(setSide(setSide(setSide(oo.ref(room.new(2), Room22), 0, wall.new), 1, wall.new), 2, Door2), 3, wall.new),
 	Door1=oo.ref(door.new(Room1, Room2), Door2).
 createMaze@@
-H=createMaze({mazeGame, $p}, MazeFactory, Maze) :-
+H=createMaze({mazeGame, $p}, {mazeFactory, $q}, Maze) :-
 	H={mazeGame, $p},
-	gc=makeWall(makeDoor(makeRoom(makeRoom(makeMaze(MazeFactory, _Maze), 1, R11), 2, R21), R12, R22, oo.ref(D1, D2)), Wall),
+	gc=makeWall(makeDoor(makeRoom(makeRoom(makeMaze({mazeFactory, $q}, _Maze), 1, R11), 2, R21), R12, R22, oo.ref(D1, D2)), Wall),
 	R14=oo.ref(oo.ref(R11, R12), R13),
 	R24=oo.ref(oo.ref(R21, R22), R23),
 	Maze=addRoom(addRoom(_Maze, R13), R23),
 	Wall1=oo.ref(oo.ref(oo.ref(oo.ref(oo.ref(Wall, Wall2), Wall3), Wall4), Wall5), Wall6),
 	gc=setSide(setSide(setSide(setSide(R14, 0, Wall1), 1, D1), 2, Wall2), 3, Wall3),
 	gc=setSide(setSide(setSide(setSide(R24, 0, Wall4), 1, Wall5), 2, D2), 3, Wall6).
+H=createMaze({mazeGame, $p}, {mazeBuilder, $q}, Maze) :-
+	H={mazeGame, $p},
+	gc=getMaze(buildDoor(buildRoom(buildRoom(buildMaze({mazeBuilder, $q}), 1), 2), 0, 1, 2, 3), Maze).
 }.
 
 //// Factory クラス
 
 {module(mazeFactory).
 mazeFactory@@
-H=mazeFactory.new :- H={}.
+H=mazeFactory.new :- H={mazeFactory}.
 //H=makeMaze({}, Maze) :- H={}, Maze=maze.new.
 //H=makeWall({}, Wall) :- H={}, Wall=wall.new.
 //H=makeRoom({}, N, Room) :- int(N) | H={}, Room=room.new(N).
@@ -140,17 +143,38 @@ H=makeWall({}, Wall) :- H={}, Wall=bombedWall.new.
 H=makeRoom({}, N, Room) :- int(N) | H={}, Room=roomWithABomb.new(N).
 }.
 
+//// Builderクラス
+
+{module(mazeBuilder).
+H=mazeBuilder.new :- H={mazeBuilder}.
+H=buildMaze({mazeBuilder, $p}) :- H={mazeBuilder, maze(Maze), $p}, Maze=maze.new.
+H=buildRoom({mazeBuilder, maze(Maze), $p}, N) :- int(N) |
+	H={mazeBuilder, maze(_Maze), $p},
+	Room=setSide(setSide(setSide(setSide(room.new(N), 0, wall.new), 1, wall.new), 2, wall.new), 3, wall.new),
+	_Maze=addRoom(Maze, Room).
+H=buildDoor({mazeBuilder, maze(Maze), $p}, From, To, D1, D2) :- int(From), int(To), int(D1), int(D2) |
+	H={mazeBuilder, maze(_Maze), $p},
+	_Maze=roomNo(roomNo(Maze, From, R1), To, R2),
+	_R1=setSide(R1, D1, Door1),
+	_R2=setSide(R2, D2, Door2),
+	Door1=oo.ref(door.new(_R1, _R2), Door2).
+H=getMaze({mazeBuilder, maze(Maze), $p}, Res) :-
+	H={mazeBuilder, maze(_Maze), $p}, Res=oo.ref(Maze, _Maze).
+}.
+
 //// メイン
 
 io.use.
 oo.clean.
 
 start.
+//gc=createMaze(mazeGame.new, mazeBuilder.new, maze).
 
 start :- oneset={
 	io.use.
 	scanner=java_util_Scanner.new(java_lang_System.in).
-	gc=createMaze(mazeGame.new, maze).
+//	gc=createMaze(mazeGame.new, maze).
+	gc=createMaze(mazeGame.new, mazeBuilder.new, maze).
 	
 	maze(Maze) :- gc=roomNo(Maze, 0, Room), gc=enter(Room, {}, player).
 	next, scanner(Scanner) :- scanner=nextInt(Scanner, n).
