@@ -130,7 +130,7 @@ public class ArgumentInferer {
 				if(b.atom instanceof ProcessContext){
 					ProcessContext budpc = (ProcessContext)b.atom;
 					if(TypeEnv.dataTypeOfContextDef(budpc.def)!= null){
-						throw new TypeException("MODE ERROR : output arguments connected each other.");
+						throw new TypeException("output arguments connected each other. : " + lo.atom.getName() + " <=> " + b.atom.getName());
 					}
 					else{
 						freelinks.add(lo);
@@ -257,7 +257,12 @@ public class ArgumentInferer {
 			int out = TypeEnv.outOfPassiveAtom((Atom)lo.atom);
 			if(out == lo.pos){ // データアトムの出力引数
 				if(TypeEnv.outOfPassiveAtom((Atom)b.atom) == b.pos)//!= TypeEnv.ACTIVE)
-					throw new TypeException("MODE ERROR : output arguments connected each other.");
+					if(sign == -1)
+						throw new TypeException("output arguments connected each other. : " + lo.atom.getName() + " <=> " + b.atom.getName() + " in line " + lo.atom.line);
+					else{
+						// TODO データアトムの引数同士がルール左辺・右辺で受け継がれる場合はどうしたらいいんだろう
+						addUnifyConstraint(sign, lo, b);
+					}
 				else addReceiveConstraint(-sign, b, ((Atom)lo.atom).functor);
 			}
 			else{
@@ -306,7 +311,11 @@ public class ArgumentInferer {
 		LinkOccurrence lo = ((RootPath) p).getTarget();
 		if (!(lo.atom instanceof Atom))
 			return pp;
-		PolarizedPath tp = getPolarizedPath(lo);
+		Set<LinkOccurrence> traced = new HashSet<LinkOccurrence>();
+		PolarizedPath tp = getPolarizedPath(traced, lo);
+		if(tp == null){
+			return new PolarizedPath(1,p);
+		}
 		return new PolarizedPath(pp.getSign() * tp.getSign(), tp.getPath());
 	}
 
@@ -317,7 +326,11 @@ public class ArgumentInferer {
 	 *            argument of Atom (not Atomic)
 	 * @return
 	 */
-	private PolarizedPath getPolarizedPath(LinkOccurrence lo)throws TypeException{
+	private PolarizedPath getPolarizedPath(Set<LinkOccurrence> traced, LinkOccurrence lo)throws TypeException{
+		if(traced.contains(lo)){
+			// TODO この場合は1つ辿るとこまでのPathが得られるようにする
+			return null;
+		}
 		Atom atom = (Atom) lo.atom;
 		int out = TypeEnv.outOfPassiveAtom(atom);
 		if (out == TypeEnv.ACTIVE) {
@@ -333,12 +346,9 @@ public class ArgumentInferer {
 			Atom ta = (Atom) tl.atom;
 			PolarizedPath pp = null;
 			
-			// TODO 暫定的なバグ回避策 : きちんとActiveHeadConditionを検査すること
-			try{
-				pp = getPolarizedPath(tl);
-			}catch(java.lang.StackOverflowError e){
-				throw new TypeException("path link loop ");
-			}
+			traced.add(lo);
+			pp = getPolarizedPath(traced, tl);
+			if(pp == null)return null;
 			if (TypeEnv.isLHSAtom(atom) == TypeEnv.isLHSAtom(ta))
 				return new PolarizedPath(pp.getSign(), new TracingPath(pp
 						.getPath(), atom.functor, lo.pos));

@@ -408,7 +408,11 @@ public class TypeChecker {
 				else if(!checkDataTypes(mt.typenames,typeNames))
 					throw new TypeException("type error : " + f + "/" + pos + " : " + mt.typenames + "(user def) <=> " + typeNames + "(infered)");
 			}
-			else Env.p("fatal error : RootPath");
+			else{ // RootPath のままになっていることもありうる。
+				// TODO ArgumentInferer.getPolarizedPathで1つ手前までtraceする。
+				//
+//				Env.p("fatal error : RootPath");
+			}
 		}
 		//次に個数の検査をする
 		Map<String, FixedCounts> memnameToCounts = qi.getMemNameToFixedCountsSet();
