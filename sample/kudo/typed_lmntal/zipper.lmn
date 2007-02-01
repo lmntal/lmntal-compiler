@@ -1,0 +1,37 @@
+//参考: http://www.kmonos.net/wlog/55.php
+typedef{
+  zipper = datatype( z(+list, +list, '-') ).
+}.
+
+R=begin_of(L) :- R=z([],L).
+
+//このへんは使い勝手が良いかもしれない。
+R=next(z(L1,[C|L2])) :- R=z([C|L1],L2).
+R=next(z(L1,[])):- R=z(L1,[]).
+R=prev(z([C|L1],L2)) :- R=z(L1,[C|L2]).
+R=prev(z([],L2)):- R=z([],L2).
+R=insert(E,z(L1,L2)) :- R=z(L1,[E|L2]).
+R=remove(z(L1,[C|L2]),Z):-R=C,Z=z(L1,L2).
+
+//// このへんはいまいち使いにくい
+//R=is_begin(z([],L2),Z) :- R=true, Z=z([],L2).
+//R=is_begin(z([C|L1],L2),Z) :- R=false, Z=z([C|L1],L2).
+//R=is_end(z(L1,[]),Z) :- R=true, Z=z(L1,[]).
+//R=is_end(z(L1,[C|L2]),Z) :- R=true, Z=z(L1,[C|L2]).
+//R=get(z(L1,[C|L2]),Z) :- R=C1,Z=z(L1,[C2|L2]), C=cp(C1,C2).
+//R=get(z(L1,[]),Z) :- R=notfound, Z=z(L1,[]).
+//R=set(E,z(L1,[C|L2])) :- R=z(L1,[E|L2]), rm(C).
+//R=set(E,z(L1,[])) :- notfound, R=z(L1,[]), rm(E).
+
+//example
+Z1=begin_of([1,2,3,4,5]).
+
+Z2=next(Z1).
+Z3=next(Z2).
+Z4=next(Z3).
+Z5=prev(Z4).
+Z6=insert(6,Z5).
+Z7=next(Z6).
+ret=remove(Z7,Z9).
+
+zipper_end=Z9.
