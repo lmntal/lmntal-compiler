@@ -31,9 +31,12 @@ public class LMNtalWindow extends JFrame {
 		
 	final static
 	private Functor BUTTON_FUNCTOR = new SymbolFunctor("button",0);
-	
+
 	final static
 	private Functor TEXTAREA_FUNCTOR = new SymbolFunctor("textarea",0);
+	
+	final static
+	private Functor HTML_FUNCTOR = new SymbolFunctor("html",0);
 
 	final static
 	private Functor LABEL_FUNCTOR = new SymbolFunctor("label",0);
@@ -130,6 +133,11 @@ public class LMNtalWindow extends JFrame {
 		if(mem.getAtomCountOfFunctor(TEXTAREA_FUNCTOR)>0){
 			LMNtalTextArea textarea = new LMNtalTextArea(this, mem);
 			componentMap.put(key, textarea);
+		}
+		
+		if(mem.getAtomCountOfFunctor(HTML_FUNCTOR)>0){
+			LMNtalHtml html = new LMNtalHtml(this, mem);
+			componentMap.put(key, html);
 		}
 		
 		if(mem.getAtomCountOfFunctor(LABEL_FUNCTOR)>0){

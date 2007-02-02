@@ -21,6 +21,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
+import com.sun.org.apache.xalan.internal.xslt.Process;
+
 import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
