@@ -1,0 +1,38 @@
+// --wtモードで実行してみてください。
+// Timerのテストです。
+
+{
+	window.
+	name("Timer test.").
+	size(300, 300).
+	killer.
+	sys.perpetual(on).
+
+	// *** 配置 *** //
+	{graphic, id("1"), position(0,0), weight(1.0,4.0),
+	  {
+	  	id("1_1").
+	    draw. name("rect"). getpic("rect").
+		color(0,0,0). position(100,30). size(100,100).
+	  }
+	}.
+
+	{label, id("2"), position(0,1), text("Is this a circle ??"), weight(1.0,1.0), size(1,1)}.
+	
+	{button, id("3"), position(0,2), text("YES!!"), weight(1.0,1.0)}.
+
+	{timer, id("4"), time(3000)}.
+	
+	// *** ルール *** //
+	
+	//３秒後に四角い頭を丸くする。
+	{timeover, $p}, {{getpic("rect"), $r}, $q} :- {$p}, {{getpic("circle"), $r}, $q}.
+	//丸から三角へ
+	{timeover, $p}, {{getpic("circle"), position(100,30), $r}, $q}
+	 :- {$p}, {{getpic("triangle"), position(100,100,150,30,200,100), $r}, $q}.
+	//三角か四角へ
+	{timeover, $p}, {{getpic("triangle"), position(100,100,150,30,200,100), $r}, $q}
+	 :- {$p}, {{getpic("rect"), position(100,30), $r}, $q}.
+
+	
+}
