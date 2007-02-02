@@ -140,7 +140,7 @@ public class LMNtalWindow extends JFrame {
 //		if(mem.getAtomCountOfFunctor(IMAGE_FUNCTOR)>0){
 //			LMNtalImage image = new LMNtalImage(this, mem);
 //			componentMap.put(key, image);
-		}
+//		}
 
 		if(mem.getAtomCountOfFunctor(TIMER_FUNCTOR)>0){
 			LMNtalTimer timer = new LMNtalTimer(this, mem);
