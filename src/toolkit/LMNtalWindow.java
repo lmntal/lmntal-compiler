@@ -44,8 +44,8 @@ public class LMNtalWindow extends JFrame {
 	final static
 	private Functor ID_FUNCTOR = new SymbolFunctor("id", 1);
 	
-	final static
-	private Functor IMAGE_FUNCTOR = new SymbolFunctor("image", 0);
+//	final static
+//	private Functor IMAGE_FUNCTOR = new SymbolFunctor("image", 0);
 
 	final static
 	private Functor TIMER_FUNCTOR = new SymbolFunctor("timer", 0);
@@ -137,9 +137,9 @@ public class LMNtalWindow extends JFrame {
 			componentMap.put(key, label);
 		}
 
-		if(mem.getAtomCountOfFunctor(IMAGE_FUNCTOR)>0){
-			LMNtalImage image = new LMNtalImage(this, mem);
-			componentMap.put(key, image);
+//		if(mem.getAtomCountOfFunctor(IMAGE_FUNCTOR)>0){
+//			LMNtalImage image = new LMNtalImage(this, mem);
+//			componentMap.put(key, image);
 		}
 
 		if(mem.getAtomCountOfFunctor(TIMER_FUNCTOR)>0){
