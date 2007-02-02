@@ -4,7 +4,7 @@
 {
 	window.
 	name("Timer test.").
-	size(300, 300).
+	size(320, 320).
 	killer.
 	sys.perpetual(on).
 
@@ -12,8 +12,8 @@
 	{graphic, id("1"), position(0,0), weight(1.0,4.0),
 	  {
 	  	id("1_1").
-	    draw. name("rect"). getpic("rect").
-		color(0,0,0). position(100,30). size(100,100).
+	    draw. name("rect"). getpic("C:\soft\soft\eclipse-SDK-3.1.2-win32\eclipse\workspace\devel\sample\ikuta\\tksample\green.gif").
+		color(255,0,0). position(100,30). size(100,100).
 	  }
 	}.
 
