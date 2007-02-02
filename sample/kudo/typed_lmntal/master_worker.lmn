@@ -1,0 +1,35 @@
+master{
+    send(T1, W1), task{pow(2,4), tr(T1)}.
+    send(T2, W2), task{pow(3,2), tr(T2)}.
+    send(T3, W3), task{pow(5,1), tr(T3)}.
+}.
+
+worker{ task{ pow($n,$e) } :- task{}, do(p($. wr(W1). }.
+
+
+
+
+master{
+  task{}. w(W1),w(W2),w(W3).
+  task{$t[]}, w(W1),w(W2),w(W3)
+    :- send( task{$t[], div(2)}, W1),
+       send( task{$t[], div(3)}, W2),
+       send( task{$t[], div(5)}, W3). }.
+worker(W1),worker(W2),worker(W3).
+worker(W) :-
+  {recv(W).
+    recv(task{nums=[$n|R], div($d)}):-$n mod $d =:= 0|nums=R. div($d). }).
+    recv(task{nums=[$n|R], div($d)}):-$n mod $d =\= 0|p($n),nums=R. div($d). }).
+  }.
+
+// タスクの通信
+master{ send(T,W), task{$t[T]}, $m }, worker{ $w[W] } :-
+  master{ $m }, worker{ task{$t[R] }, $w[R] }.
+
+//// タスクを処理する
+//worker{ recv( task{$t} ), @w} :- worker{ do( task{$t, (:-)} ),$w}.
+
+// 結果をmasterに返す
+worker{ do( task{$t} ), @w }, master{ $m }:-
+  master{$m, task{$t} }.
+

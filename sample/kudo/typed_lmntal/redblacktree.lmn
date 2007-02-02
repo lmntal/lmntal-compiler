@@ -1,11 +1,13 @@
+/** Red-Black Tree */
+
 typedef{
   inttree = datatype(
-    r(+inttree,'-'),
-    ct(+color,+node,'-')
+    r(+inttree,'-'),        // root
+    ct(+color,+node,'-')    // colored tree node
   ),
   node = datatype(
-    t(+int,+inttree,+inttree,'-'),
-    n('-')
+    t(+int,+inttree,+inttree,'-'),  // tree node
+    n('-')                          // nil
   ).
   color = datatype(
     black('-'),
