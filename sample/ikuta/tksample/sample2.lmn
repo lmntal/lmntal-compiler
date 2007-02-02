@@ -1,35 +1,59 @@
 // --wtモードで実行してみてください。
-// 絵を表示してみる
-
-
-// 作成中！！
+// 四角い絵を表示。さらに、クリックで動いたり動かなかったり。
 
 {
 	window.
 	name("test").
-	size(300, 300).
+	size(800, 600).
 	killer.
 	sys.perpetual(on).
 
 	// *** 配置 *** //
 	{graphic, id("1"), position(0,0), weight(1.0,1.0),
 	  {
-	  	id(5).
+	  	id("1_1").
 	    draw. name("testrect"). getpic("rect").
 		color(0,0,0). position(10,10). size(100,100).
 	  }
 	}.
-	{button, id("2"), position(0,1), text(6)}.
-	
-	// *** ルール *** //
-	
-	// 右上のボタン(id=2)クリックで下にボタン増設
-	{clicked, text(_IX), id("2"), $p} :- {text(_IX+1), id("2"), $p}, {button, id(_IX), position(0,_IX), text(_IX)}.
-	
-	// クリックされるとラベルが数字だった場合カウントアップされるルール	
-	{clicked, text(_IX), $p} :- {text(_IX + 1), $p}.
+	{button, id("2"), position(0,1), text("click here!!")}.
+
+//	↓ふたつ同時にはまだできない。
+	{timer, id("3"), time(100), visible(0)}.
+//	{timer, id("4"), time(5000), visible(0)}.
+
+	activeOn.
 	
 	
+	
+	// *** 以下、ルール *** //
+
+	// 時間が経ったら(time(X)の(X/1000)秒)できるtimeoverを食って進め。
+	// ただし、activeOnが存在するときに限る(＝activeOffはダメ。)
+	{timeover, $p}, {id("1"), $q, {position(_IX, _IY), $r}}, activeOn
+	:-
+	{$p}, {id("1"), $q, {position(_IX + 3, _IY + 3), $r}}, activeOn.
+
+		
+	//クリックされた膜の中にactiveOnが入ってたら、activeOffに置き換える。
+	{$p, clicked}, activeOn :- {$p}, activeOff. 
+	//クリックされた膜の中にactiveOffが入ってたら、activeOnに置き換える。
+	{$p, clicked}, activeOff :- {$p}, activeOn. 
+
+
+
+//	// クリックされた膜の中にactiveOnが入ってなかったら、activeOnを生成。
+//	{$p, clicked} :- \+($p=(activeOn,$pp)) | {$p, activeOn}.
+
+	// クリックされたものについて、activeが入ってなかったらOn。
+//	{$p, clicked}, $q :- \+($q=(active,$pp)) | {$p}, activeOn, $q.
+	
+//	{clicked, id("2"), $p}, $q :- \+($q=(activeOn, $qq)) | {id("2"), $p), activeOn, $q.
+//	{clicked, id("2"), $p}, activeOn, $q :- {id("2"), $p), activeOff, $q.
+	
+	
+//	{clicked, id("2"), $p}, $q :- \+($q=(active,$r)) | {id("2"), $p}, $q.
+//	{clicked, id("2"), $p}, active, $q :- {id("2"), $p}, $q. 
 	
 
 }

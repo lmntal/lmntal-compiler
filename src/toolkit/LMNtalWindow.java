@@ -43,7 +43,14 @@ public class LMNtalWindow extends JFrame {
 	
 	final static
 	private Functor ID_FUNCTOR = new SymbolFunctor("id", 1);
+	
+	final static
+	private Functor IMAGE_FUNCTOR = new SymbolFunctor("image", 0);
 
+	final static
+	private Functor TIMER_FUNCTOR = new SymbolFunctor("timer", 0);
+
+	
 	/////////////////////////////////////////////////////////////////
 
 	// ウィンドウが閉じられると，プログラムを強制的に終了させるかどうかのフラグ
@@ -129,6 +136,17 @@ public class LMNtalWindow extends JFrame {
 			LMNtalLabel label = new LMNtalLabel(this, mem);
 			componentMap.put(key, label);
 		}
+
+		if(mem.getAtomCountOfFunctor(IMAGE_FUNCTOR)>0){
+			LMNtalImage image = new LMNtalImage(this, mem);
+			componentMap.put(key, image);
+		}
+
+		if(mem.getAtomCountOfFunctor(TIMER_FUNCTOR)>0){
+			LMNtalTimer timer = new LMNtalTimer(this, mem);
+//			componentMap.put(key, timer);
+		}
+
 		
 		/* LMNtalPanelだけ，特別で，ここではputしない．
 		 * searchGraphicMemで管理する．

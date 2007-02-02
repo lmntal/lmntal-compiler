@@ -29,7 +29,7 @@ import runtime.SymbolFunctor;
 public class LMNtalPanel extends JPanel implements Runnable {
 	
 	final
-	private int SLEEP_TIME = 10;
+	private int SLEEP_TIME = 10; // 10秒ごとにrepaintされる。
 	
 	final
 	private Functor DRAW_MEM = new SymbolFunctor("draw",0); 

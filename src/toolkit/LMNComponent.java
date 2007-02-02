@@ -27,13 +27,12 @@ public class LMNComponent {
 	
 	final static
 	private Functor TEXT_FUNCTOR = new SymbolFunctor("text",1);
-
 	
 	private GridBagConstraints gbc = new GridBagConstraints(); //位置
 
 	private boolean isTextUpdate = false;
 	
-	public Atom textatom; // textatomはTextAreaでも使うので…
+	public Atom textatom; // textatomはTextAreaでも使うので共有してみる
 	
 	public LMNComponent(LMNtalWindow lmnWindow, Membrane mem){
 		mymem = mem;
@@ -98,24 +97,7 @@ public class LMNComponent {
 		gbc.weightx = weightX;
 		gbc.weighty = weightY;			
 	}
-	
-/*	** label("")のアトムがあったとき、labelに貼る内容を取得する *
-	public String getLabel(Membrane mem){
-		String label = "object";
-		Iterator labelAtomIte = mem.atomIteratorOfFunctor(LABEL_FUNCTOR);
-		if(labelAtomIte.hasNext()){
-			Atom atom = (Atom)labelAtomIte.next();
-			if(label != atom.nth(0))
-			{
-				label = atom.nth(0);
-				isLabelUpdate = true;
-			}
-		}
-		return label;
-	}
-*/
-		
-	
+			
 	/** text("")のアトムがあったとき、textの内容を取得する */
 	public String getText(Membrane mem){
 		String text = "";
@@ -130,9 +112,6 @@ public class LMNComponent {
 		}
 		return text;
 	}
-
-	
-	
 	
 	public void resetMembrane (Membrane mem){
 		mymem = mem;
