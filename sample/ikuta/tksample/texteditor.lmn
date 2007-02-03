@@ -5,7 +5,7 @@
 {
 	sys.perpetual(on).
 	window.
-	name("TextEditor").
+	name("TextEditor   by LMNtal").
 	size(400,300).
 	killer.
 	{ id(open), button, text("open"), position(0,0), weight(1.0, 0)}.

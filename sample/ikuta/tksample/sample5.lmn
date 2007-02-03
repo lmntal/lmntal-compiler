@@ -1,0 +1,35 @@
+
+// 07/02/03 発表で使ったソース。
+
+
+/*
+{
+  window, name("Draw rect"),
+  size(250, 250),
+  killer, sys.perpetual(on),
+  {
+    graphic, id("1"), position(0,0), weight(1.0, 1.0),
+    {
+      id("1_1"). draw. name("rect"). getpic("rect"),
+      color(255,0,0). position(50,50). size(120,120)
+    }
+  }
+}.
+*/
+// ↑赤い四角を書く。
+
+
+// ↓配置してみる。
+{
+  window. name("test"). size(400, 300). killer. sys.perpetual(on).
+  {textarea, id("1"), text("a"), position(0,0), weight(1.0, 3.0), size(2,1)}.
+  {button, id("2"), text("b"), position(0,1), weight(1.0, 1,0), size(1,1)}.
+  {label, id("3"), text("c"), position(1,1), weight(2.0, 1.0), size(1,1)}.
+  {timer, id("4"), time(1000)}.
+  {clicked, id("2"), $p}, {id("1"), text(_SX), $q}
+   :- {id("2"), $p}, {id("1"), text("button clicked!"), $q}.
+  {timeover, $p}, {label, text(_SX), $q}
+   :- {$p}, {label, text("time is over !"), $q}.
+} 
+
+
