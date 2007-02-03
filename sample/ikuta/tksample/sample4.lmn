@@ -18,6 +18,7 @@
 
 	{label, id("2"), position(0,1), text("Is this a circle ??"), weight(1.0,1.0), size(1,1)}.
 	{button, id("3"), position(0,2), text("YES!!"), weight(1.0,1.0)}.
+
 	{timer, id("4"), time(3000)}.
 	
 	// *** ¥ë¡¼¥ë *** //

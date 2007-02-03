@@ -10,11 +10,11 @@
 	sys.perpetual(on).
 
 	// *** «€√÷ *** //
-	{button, id("1"), position(0,0), text("button1")}.
-	{button, id("2"), position(1,0), text(6)}.
+	{button, id("1"), position(0,0), text("button1"),  weight(1.0, 1.0)}.
+	{button, id("2"), position(1,0), text(6), weight(1.0, 1.0)}.
 	{textarea, id("3"), position(0,1), weight(1.0, 1.0)}.
 	{textarea, id("4"), position(1,1), text("aaaaaaaaaaa"), weight(1.0, 1.0)}.
-	{button, id("5"), position(0,2), text(1), size(2,1)}.
+	{button, id("5"), position(0,2), text(1), size(2,1),  weight(1.0, 1.0)}.
 
 	{label, id("6"), position(2,2), text("label"), weight(1.0, 1.0)}.
 	
