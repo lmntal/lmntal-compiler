@@ -25,7 +25,6 @@
 	activeOn.
 	
 	
-	
 	// *** 以下、ルール *** //
 
 	// 時間が経ったら(time(X)の(X/1000)秒)できるtimeoverを食って進め。
@@ -35,25 +34,13 @@
 	{$p}, {id("1"), $q, {position(_IX + 3, _IY + 3), $r}}, activeOn.
 
 		
-	//クリックされた膜の中にactiveOnが入ってたら、activeOffに置き換える。
+	// クリックされた膜の中にactiveOnが入ってたら、activeOffに置き換える。
 	{$p, clicked}, activeOn :- {$p}, activeOff. 
-	//クリックされた膜の中にactiveOffが入ってたら、activeOnに置き換える。
+	// クリックされた膜の中にactiveOffが入ってたら、activeOnに置き換える。
 	{$p, clicked}, activeOff :- {$p}, activeOn. 
 
-
-
-//	// クリックされた膜の中にactiveOnが入ってなかったら、activeOnを生成。
-//	{$p, clicked} :- \+($p=(activeOn,$pp)) | {$p, activeOn}.
-
-	// クリックされたものについて、activeが入ってなかったらOn。
-//	{$p, clicked}, $q :- \+($q=(active,$pp)) | {$p}, activeOn, $q.
-	
-//	{clicked, id("2"), $p}, $q :- \+($q=(activeOn, $qq)) | {id("2"), $p), activeOn, $q.
-//	{clicked, id("2"), $p}, activeOn, $q :- {id("2"), $p), activeOff, $q.
-	
-	
-//	{clicked, id("2"), $p}, $q :- \+($q=(active,$r)) | {id("2"), $p}, $q.
-//	{clicked, id("2"), $p}, active, $q :- {id("2"), $p}, $q. 
-	
+	// Stopしてるとき、timeoverをためこまないで削除する。
+	// でないと再びStartしたとき、ごそっと移動してしまう。
+	{timeover, $p}, activeOff :- {$p}, activeOff.
 
 }
