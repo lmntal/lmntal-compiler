@@ -1338,13 +1338,14 @@ public class Instruction implements Cloneable, Serializable {
 	static {setArgType(GROUP, new ArgType(false, ARG_INSTS));}
 	
 	//ボディに展開したシステムルールセットを扱う命令
-	/** systemrulesets [subinsts1, subinsts2]
+	/** systemrulesets [subinsts1, subinsts2, vars]
      * subinsts1 展開したシステムルールセット
      * subinsts2 システムルールセット内で失敗したときに実行する命令列
+     * vars      この変数番号が定義されていなければsubinsts1は実行できない
      * sakurai
      */
 	public static final int SYSTEMRULESETS = 2001;
-	static {setArgType(SYSTEMRULESETS, new ArgType(false, ARG_INSTS, ARG_INSTS));}
+	static {setArgType(SYSTEMRULESETS, new ArgType(false, ARG_INSTS, ARG_INSTS, ARG_OBJ));}
 	
 	//新規命令
     /**

@@ -2,7 +2,6 @@ package compile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.MergedBranchMap;
 import runtime.Rule;
+import runtime.SymbolFunctor;
 
 /**
  * 編み上げを行うクラス
@@ -35,13 +35,18 @@ public class Merger {
 		var2funcMap = new HashMap();
 	}
 	
+	public void clear(){
+		maxLocals = 0;
+		instsMap.clear();
+		var2funcMap.clear();
+	}
 	/**
 	 * 各ルール中のアトム主導テスト部に出現するbranch命令を編み上げ、
 	 * ファンクタ⇒命令列のマップを生成する
 	 * @param rules ルールセット内のルール群
 	 * @return ファンクタ⇒命令列のマップ
 	 */
-	public MergedBranchMap Merging(ArrayList rules){
+	public MergedBranchMap Merging(ArrayList rules, boolean system){
 		Iterator it = rules.iterator();
 		while(it.hasNext()){
 			Rule rule = (Rule)it.next();
@@ -92,6 +97,22 @@ public class Merger {
 						instsMap.put(func, branchInsts);
 					}
 					break;
+				case Instruction.FUNC:
+					//List insts2 = new ArrayList();
+					//for(int j=i+1; j<atomMatch.size(); j++) insts2.add((Instruction)atomMatch.get(j));
+					func = (Functor)inst.getArg2();
+					if(instsMap.containsKey(func)){
+						List existInsts = (ArrayList)instsMap.get(func);
+						List mergedInsts = new ArrayList();
+						mergedInsts = mergeInsts(atomMatch, existInsts);
+						Instruction spec = Instruction.spec(2, maxLocals);
+						mergedInsts.add(0, spec);
+						instsMap.put(func, mergedInsts);
+					}
+					else {
+						instsMap.put(func, atomMatch);
+					}
+					break;
 				default: break;
 				}
 			}
@@ -102,11 +123,12 @@ public class Merger {
 		while(it2.hasNext()){
 			Map.Entry mapentry = (Map.Entry)it2.next();
 			ArrayList insts = (ArrayList)mapentry.getValue();
-			if(Optimizer.fGuardMove) Optimizer.guardMove(insts);
+			//if(Optimizer.fGuardMove) Optimizer.guardMove(insts);
 			//stackOrderChange(insts);
 			optimizedmap.put(mapentry.getKey(), insts);
 		}
-		if(Env.debug >= 1) 	viewMap(optimizedmap);
+		if(Env.debug >= 1 && !system) 	viewMap(optimizedmap);
+		//viewMap(optimizedmap);
 		return new MergedBranchMap(optimizedmap);
 	}
 	
@@ -114,7 +136,7 @@ public class Merger {
 	 * 生成したマップの表示　デバッグ用
 	 * param map マップ
 	 */
-	private void viewMap(HashMap map){
+	private static void viewMap(HashMap map){
 		Set set = map.entrySet();
 		Iterator it1 = set.iterator();
 		while(it1.hasNext()){
@@ -132,7 +154,7 @@ public class Merger {
 	 * @param insts 命令列
 	 * @param tabs 表示する際のタブ
 	 */
-	private void viewInsts(ArrayList insts, int tabs){
+	private static void viewInsts(ArrayList insts, int tabs){
 		for(int i=0; i<insts.size(); i++){
 			Instruction inst = (Instruction)insts.get(i);
 			for(int j=0; j<tabs; j++) System.out.print("    ");
@@ -193,7 +215,7 @@ public class Merger {
 						List tmpinsts = mergeInBranchInsts(insts1, i, instsb);
 						if (tmpinsts != null){
 							mergedInsts.addAll(branchInsts3);
-							mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)tmpinsts)));
+							if(tmpinsts.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)tmpinsts)));
 							//mergedInsts.addAll((ArrayList)tmpinsts);
 							return (ArrayList)mergedInsts;
 						}
@@ -207,7 +229,7 @@ public class Merger {
 						Instruction spec = (Instruction)branchInsts1.get(0);
 						if (spec.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC, formal, local));
 					}
-					mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
+					if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
 					return (ArrayList)mergedInsts;
 				}
 				else {
@@ -229,8 +251,8 @@ public class Merger {
 			Instruction inst2 = (Instruction)branchInsts2.get(0);
 			if (inst2.getKind() != Instruction.SPEC) branchInsts2.add(0, new Instruction(Instruction.SPEC,formal,local));
 		}
-		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
-		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
+		if(branchInsts2.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
+		if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
 		return (ArrayList)mergedInsts;
 	}
 	
@@ -275,7 +297,7 @@ public class Merger {
 						List tmpinsts = mergeInBranchInsts(insts1, i, instsb);
 						if (tmpinsts != null){
 							mergedInsts.addAll(branchInsts3);
-							mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)tmpinsts)));
+							if(tmpinsts.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)tmpinsts)));
 							//mergedInsts.addAll((ArrayList)tmpinsts);
 							return (ArrayList)mergedInsts;
 						}
@@ -308,60 +330,199 @@ public class Merger {
 			Instruction inst2 = (Instruction)branchInsts2.get(0);
 			if (inst2.getKind() != Instruction.SPEC) branchInsts2.add(0, new Instruction(Instruction.SPEC, formal, local));
 		}
-		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
-		mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
+		if(branchInsts2.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
+		if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
 		
 		return (ArrayList)mergedInsts;
 	}
 	
-	private void stackOrderChange(List insts){
-		var2funcMap.clear();
-		for(int i=0; i<insts.size(); i++){
-			Instruction inst = (Instruction)insts.get(i);
-			switch(inst.getKind()){
-			case Instruction.BRANCH:
-			case Instruction.JUMP:
-				InstructionList label = (InstructionList)inst.getArg1();
-				List subinsts = label.insts;
-				stackOrderChange(subinsts);
-				break;
-			case Instruction.NEWATOM:
-				Functor func = (Functor)inst.getArg3();
-				if(!var2funcMap.containsKey(func)) var2funcMap.put(new Integer(inst.getIntArg1()), func);
-				break;
-			case Instruction.ENQUEUEATOM:
-				Integer var = (Integer)inst.getArg1();
-				if(var2funcMap.containsKey(var)){ //再利用しないアトム
-					Functor func2 = (Functor)var2funcMap.get(var);
-					if(!instsMap.containsKey(func2)){
-						//ルール適用に利用されないアトムはスタックの下の方に積むようにする
-						for(int j=i-1; j>0; j--){
-							Instruction inst2 = (Instruction)insts.get(j);
-							if(inst2.getKind() == Instruction.ENQUEUEATOM) continue;
-							else {
-								insts.remove(i);
-								insts.add(j+1, inst);
-								break;
-							} 
-						}
-					} else continue;
-				} else {
-					//再利用するアトムはスタックの上の方に積む
-					for(int j=i+1; j<insts.size(); j++){
-						Instruction inst2 = (Instruction)insts.get(j);
-						if(inst2.getKind() == Instruction.ENQUEUEATOM) continue;
-						else {
-							insts.add(j-1, inst);
-							insts.remove(i);
-							break;
-						} 
-					}
-				}
-				break;
-			default: 
-				break;
-			}
-		}
+	//システムルールセットのマップを生成する
+	public MergedBranchMap createSystemRulesetsMap(){
+		MergedBranchMap systemmbm;
+		ArrayList systemrules = new ArrayList();
+		
+//		自由リンク管理アトム関連はとりあえず保留		
+//		ArrayList insts = new ArrayList();
+//		Rule rule = new Rule("proxy");
+//		insts.add(new Instruction(Instruction.SPEC,        2,6));
+//		insts.add(new Instruction(Instruction.FUNC,  1,Functor.OUTSIDE_PROXY));
+//		insts.add(new Instruction(Instruction.TESTMEM, 0, 1));
+//		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
+//		insts.add(new Instruction(Instruction.LOCKMEM,   3,2));
+//		insts.add(new Instruction(Instruction.DEREFATOM, 4,2,1));
+//		insts.add(new Instruction(Instruction.FUNC,        4,Functor.INSIDE_PROXY));
+//		insts.add(new Instruction(Instruction.DEREFATOM, 5,4,0));
+//		insts.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
+//		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0,Functor.OUTSIDE_PROXY));
+//		insts.add(new Instruction(Instruction.REMOVEATOM,  2,3,Functor.INSIDE_PROXY));
+//		insts.add(new Instruction(Instruction.REMOVEATOM,  4,3,Functor.INSIDE_PROXY));
+//		insts.add(new Instruction(Instruction.REMOVEATOM,  5,0,Functor.OUTSIDE_PROXY));
+//		insts.add(new Instruction(Instruction.UNIFY,       1,1,5,1,0));
+//		insts.add(new Instruction(Instruction.UNLOCKMEM,   3));
+//		insts.add(new Instruction(Instruction.PROCEED));
+//		rule.atomMatch = insts;
+//		systemrules.add(rule);
+//		
+//		ArrayList insts2 = new ArrayList();
+//		Rule rule2 = new Rule("proxy");
+//		insts2.add(new Instruction(Instruction.SPEC,        2,6));
+//		insts2.add(new Instruction(Instruction.FUNC,  1,Functor.OUTSIDE_PROXY));
+//		insts2.add(new Instruction(Instruction.TESTMEM, 0, 1));
+//		insts2.add(new Instruction(Instruction.DEREFATOM, 2,1,1));
+//		insts2.add(new Instruction(Instruction.FUNC,        2,Functor.OUTSIDE_PROXY));
+//		insts2.add(new Instruction(Instruction.DEREFATOM, 3,2,0));
+//		insts2.add(new Instruction(Instruction.LOCKMEM,   4,3));
+//		insts2.add(new Instruction(Instruction.DEREFATOM, 5,1,0));
+//		insts2.add(new Instruction(Instruction.TESTMEM,     4,5));
+//		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
+//		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0,Functor.OUTSIDE_PROXY));
+//		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0,Functor.OUTSIDE_PROXY));
+//		insts2.add(new Instruction(Instruction.REMOVEATOM,  3,4,Functor.INSIDE_PROXY));
+//		insts2.add(new Instruction(Instruction.REMOVEATOM,  5,4,Functor.INSIDE_PROXY));
+//		insts2.add(new Instruction(Instruction.UNIFY,       3,1,5,1,4));
+//		insts2.add(new Instruction(Instruction.ENQUEUEMEM,  4));
+//		insts2.add(new Instruction(Instruction.UNLOCKMEM,   4));
+//		insts2.add(new Instruction(Instruction.PROCEED));
+//		rule2.atomMatch = insts2;
+//		systemrules.add(rule2);
+		
+		systemrules.add((Rule)buildUnaryPlusOpRule("+", Instruction.ISINT));
+		systemrules.add((Rule)buildUnaryPlusOpRule("+.", Instruction.ISFLOAT));
+		systemrules.add((Rule)buildUnaryOpRule("-", Instruction.ISINT, Instruction.INEG));
+		systemrules.add((Rule)buildUnaryOpRule("-.", Instruction.ISFLOAT, Instruction.FNEG));
+		systemrules.add((Rule)buildUnaryOpRule("int", Instruction.ISFLOAT, Instruction.FLOAT2INT));
+		systemrules.add((Rule)buildUnaryOpRule("float", Instruction.ISINT, Instruction.INT2FLOAT));
+		
+		systemrules.add((Rule)buildBinOpRule("+", Instruction.ISINT, Instruction.IADD));
+		systemrules.add((Rule)buildBinOpRule("-", Instruction.ISINT, Instruction.ISUB));
+		systemrules.add((Rule)buildBinOpRule("*", Instruction.ISINT, Instruction.IMUL));
+		systemrules.add((Rule)buildBinOpRule("/", Instruction.ISINT, Instruction.IDIV));
+		systemrules.add((Rule)buildBinOpRule("mod", Instruction.ISINT, Instruction.IMOD));
+		systemrules.add((Rule)buildBinOpRule("+.", Instruction.ISFLOAT, Instruction.FADD));
+		systemrules.add((Rule)buildBinOpRule("-.", Instruction.ISFLOAT, Instruction.FSUB));
+		systemrules.add((Rule)buildBinOpRule("*.", Instruction.ISFLOAT, Instruction.FMUL));
+		systemrules.add((Rule)buildBinOpRule("/.", Instruction.ISFLOAT, Instruction.FDIV));
+		
+//		Iterator it = (Iterator)systemrules.iterator();
+//		while(it.hasNext()) System.out.println(it.next());
+		systemmbm = Merging(systemrules, true);
+//		viewMap(systemmbm.branchMap);
+		return systemmbm;
+		//return Merging(systemrules);
 	}
 	
+	//システムルール生成用メソッド
+	private Rule buildUnaryPlusOpRule(String name, int typechecker){
+		Rule rule = new Rule(name);
+		ArrayList insts =  new ArrayList();
+		ArrayList insts2 = new ArrayList();
+
+		insts.add(new Instruction(Instruction.SPEC,        2,5));
+		insts.add(new Instruction(Instruction.FUNC,  1,new SymbolFunctor(name,2)));
+		insts.add(new Instruction(Instruction.TESTMEM, 0, 1));
+		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
+		insts.add(new Instruction(typechecker,             2));
+		insts.add(new Instruction(Instruction.GETFUNC,   4,2));
+		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
+
+		ArrayList mems = new ArrayList();
+		mems.add(new Integer(0));
+		ArrayList atoms = new ArrayList();
+		atoms.add(new Integer(1));
+		atoms.add(new Integer(2));
+		atoms.add(new Integer(3));
+
+		insts2.add(new Instruction(Instruction.SPEC,        4,4));
+		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
+		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
+		insts2.add(new Instruction(Instruction.ADDATOM,  0,3));
+		insts2.add(new Instruction(Instruction.RELINK,        3,0,1,1,0));
+		insts2.add(new Instruction(Instruction.FREEATOM,      1));
+		insts2.add(new Instruction(Instruction.FREEATOM,      2));
+		insts2.add(new Instruction(Instruction.PROCEED));
+		
+		rule.bodyLabel = new InstructionList((ArrayList)insts2); rule.body = rule.bodyLabel.insts;
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		rule.atomMatch = insts;
+		return rule;
+	}
+	
+	private Rule buildUnaryOpRule(String name, int typechecker, int op){
+		Rule rule = new Rule(name);
+		ArrayList insts = new ArrayList();
+		ArrayList insts2 = new ArrayList();
+
+		insts.add(new Instruction(Instruction.SPEC,        2,5));
+		insts.add(new Instruction(Instruction.FUNC,  1,new SymbolFunctor(name,2)));
+		insts.add(new Instruction(Instruction.TESTMEM, 0, 1));
+		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
+		insts.add(new Instruction(typechecker,             2));
+		insts.add(new Instruction(Instruction.GETFUNC,   4,2));
+		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
+
+		ArrayList mems = new ArrayList();
+		mems.add(new Integer(0));
+		ArrayList atoms = new ArrayList();
+		atoms.add(new Integer(1));
+		atoms.add(new Integer(2));
+		atoms.add(new Integer(3));
+		
+		insts2.add(new Instruction(Instruction.SPEC,        4,4));
+		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
+		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
+		insts2.add(new Instruction(Instruction.ADDATOM,  0,3));
+		insts2.add(new Instruction(Instruction.RELINK,        3,0,1,1,0));
+		insts2.add(new Instruction(Instruction.FREEATOM,      1));
+		insts2.add(new Instruction(Instruction.FREEATOM,      2));
+		insts2.add(new Instruction(Instruction.PROCEED));
+		
+		rule.bodyLabel = new InstructionList((ArrayList)insts2); rule.body = rule.bodyLabel.insts;
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		rule.atomMatch = insts;
+		return rule;
+	}
+	
+	private Rule buildBinOpRule(String name, int typechecker, int op){
+		Rule rule = new Rule(name);
+		ArrayList insts = new ArrayList();
+		ArrayList insts2 = new ArrayList();
+
+		insts.add(new Instruction(Instruction.SPEC,        2,5));
+		insts.add(new Instruction(Instruction.FUNC,  1,new SymbolFunctor(name,3)));
+		insts.add(new Instruction(Instruction.TESTMEM, 0, 1));
+		insts.add(new Instruction(Instruction.DEREFATOM, 2,1,0));
+		insts.add(new Instruction(typechecker,             2));
+		insts.add(new Instruction(Instruction.DEREFATOM, 3,1,1));
+		insts.add(new Instruction(typechecker,             3));
+		insts.add(new Instruction(op,                    4,2,3));
+		ArrayList mems = new ArrayList();
+		mems.add(new Integer(0));
+		ArrayList atoms = new ArrayList();
+		atoms.add(new Integer(1));
+		atoms.add(new Integer(2));
+		atoms.add(new Integer(3));
+		atoms.add(new Integer(4));
+		
+		insts2.add(new Instruction(Instruction.SPEC,        5,5));
+		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
+		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
+		insts2.add(new Instruction(Instruction.REMOVEATOM,  3,0));
+		insts2.add(new Instruction(Instruction.ADDATOM,  0,4));
+		insts2.add(new Instruction(Instruction.RELINK,        4,0,1,2,0));
+		insts2.add(new Instruction(Instruction.FREEATOM,      1));
+		insts2.add(new Instruction(Instruction.FREEATOM,      2));
+		insts2.add(new Instruction(Instruction.FREEATOM,      3));
+		insts2.add(new Instruction(Instruction.PROCEED));
+		
+		rule.bodyLabel = new InstructionList((ArrayList)insts2); rule.body = rule.bodyLabel.insts;
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		rule.atomMatch = insts;
+		return rule;
+	}	
 }

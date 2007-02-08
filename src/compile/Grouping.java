@@ -45,7 +45,7 @@ public class Grouping {
 	 * */
 	public void grouping(List atom, List mem){
 		//アトム主導テスト部
-		groupingInstsForAtomMatch(atom);
+		if(!Optimizer.fMerging) groupingInstsForAtomMatch(atom);
 		//膜主導テスト部
 		groupingInsts(mem, false);
 	}
@@ -134,6 +134,7 @@ public class Grouping {
 			Object group = null;
 			Object changegroup = null;
 			boolean norules = false;
+			boolean meminsttype = false; //anymem -> true  lockmem -> false
 			int natoms = -1;
 			int nmems = -1;
 			if(inst.getKind() == Instruction.ANYMEM
@@ -145,6 +146,8 @@ public class Grouping {
 						//{a(X), b(X)}, {a(Y)}, b(Y) ･･･これらは違うグループ
 						//$in, $out の数で区別可能?
 						//todo どう区別するか考える
+				if(inst.getKind() == Instruction.ANYMEM) meminsttype = true;
+				else meminsttype = false;
 						for(int i2 = i+1; i2 < insts.size(); i2++){
 							Instruction inst2 = (Instruction)insts.get(i2);
 							switch(inst2.getKind()){
@@ -173,6 +176,9 @@ public class Grouping {
 							case Instruction.LOCKMEM:
 								boolean eqgroup = true;
 								boolean norules2 = false;
+								boolean meminsttype2;
+								if(inst2.getKind() == Instruction.ANYMEM) meminsttype2 = true;
+								else meminsttype2 = false;
 								int natoms2 = -1;
 								int nmems2 = -1;
 								for(int j2 = j+1; j2 < insts.size(); j2++){
@@ -193,9 +199,12 @@ public class Grouping {
 									default : break;
 									}
 								}
-								if(norules != norules2) eqgroup = false;
+								if(meminsttype != meminsttype2) eqgroup = false;
 								if(natoms != natoms2) eqgroup = false;
 								if(nmems != nmems2) eqgroup = false;
+								if(natoms == -1 || nmems == -1 ||
+									natoms2 == -1 || nmems2 == -1) eqgroup = true;
+								if(norules != norules2) eqgroup = false;
 								if(eqgroup){
 									group = Inst2GroupId.get(inst);
 									changegroup = Inst2GroupId.get(inst2);
@@ -216,7 +225,7 @@ public class Grouping {
 				|| inst.getKind() == Instruction.JUMP) break;
 			Object group = Inst2GroupId.get(inst);
 			InstructionList subinsts = new InstructionList();
-			//subinsts.add(new Instruction(Instruction.SPEC, 0, 0));
+			//SPECは不要?
 			subinsts.add(spec);
 			for(int i2=i; i2<insts.size(); i2++){
 				Instruction inst2 = (Instruction)insts.get(i2);
@@ -233,7 +242,8 @@ public class Grouping {
 			insts.add(i, groupinst);
 			Cost cost = new Cost();
 			cost.evaluateCost(subinsts.insts);
-//			System.out.println(groupinst + " cost = ");
+//          デバッグ用コスト表示
+//			System.out.print(groupinst + "\n cost = ");
 //			for(int s = 0; s<cost.costvalueN.size(); s++){
 //				if(s>0){
 //					if(((Integer)cost.costvalueN.get(s)).intValue() > 1)
@@ -251,10 +261,11 @@ public class Grouping {
 //				if(s != cost.costvalueN.size()-1) System.out.print(" + ");
 //			}
 //			System.out.println("");
+			
 			group2Cost.put(groupinst, cost);
 		}
 //		Group命令の並び替え
-		//アトム主導テストは最初のfunc命令を含む命令の位置は先頭のままとする
+		//アトム主導テストでは最初のfunc命令を含むグループの位置は先頭のままとする
 		int groupstart = 0;
 		if(isAtomMatch){
 			for(int i=0; i<insts.size(); i++){
@@ -267,21 +278,21 @@ public class Grouping {
 		}
 		for(int i=groupstart; i<insts.size(); i++){
 			Instruction inst = (Instruction)insts.get(i);
-			Cost cost1 = null;
 			if(inst.getKind() == Instruction.GROUP){
+				Cost cost1 = null;
 				if(group2Cost.containsKey(inst)) cost1 = (Cost)group2Cost.get(inst);
 				else break;
 				for(int j=i-1; j>0; j--){
 					Instruction inst2 = (Instruction)insts.get(j);
-					Cost cost2 = null;
 					if (inst2.getKind() == Instruction.GROUP){
+						Cost cost2 = null;
 						if(group2Cost.containsKey(inst2)) cost2 = (Cost)group2Cost.get(inst2);
 						else break;
-						if(!cost1.igtCost(cost2)){
+						if(cost2.igtCost(cost1)){
 							insts.add(j--, inst);
 							insts.remove(i+1);
 							continue;
-						} //else  System.out.println(cost1.costvalueN+" > "+cost2.costvalueN);
+						}
 					}
 					else break;
 				}
@@ -348,7 +359,7 @@ class Cost {
 			Instruction inst = (Instruction)insts.get(i);
 			switch(inst.getKind()){
 			case Instruction.FINDATOM:
-				costvalueN.add(n++, new Integer(vn++));
+				costvalueN.add(n++, new Integer(vn));
 				costvalueM.add(new Integer(vm));
 				vn = 1;
 				break;
@@ -364,7 +375,7 @@ class Cost {
 					case Instruction.NATOMS:
 					case Instruction.NMEMS:
 					case Instruction.NORULES:
-						if(inst2.getIntArg1() == inst.getIntArg1()){
+						if(!Optimizer.fGuardMove && inst2.getIntArg1() == inst.getIntArg1()){
 							if(memend.containsKey(inst2.getArg1())){
 								memend.put(inst2.getArg1(), inst2);
 								j = -1;
@@ -380,6 +391,7 @@ class Cost {
 			case Instruction.NATOMS:
 			case Instruction.NMEMS:
 			case Instruction.NORULES:
+				if(Optimizer.fGuardMove) {vn++; break;}
 				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
 				else costvalueN.set(n, new Integer(++vn));
 				if(memend.containsValue(inst)){
@@ -417,10 +429,10 @@ class Cost {
 					else if(((Integer)costvalueM.get(j)).intValue() < ((Integer)costsm.get(j)).intValue())return false;
 				}
 				if(((Integer)costvalueN.get(i)).intValue() > ((Integer)costsn.get(i)).intValue()) return true;
-				else if(((Integer)costvalueN.get(i)).intValue() == ((Integer)costsn.get(i)).intValue()) continue;
-				else return false;
+				else if(((Integer)costvalueN.get(i)).intValue() < ((Integer)costsn.get(i)).intValue()) return false;
+				else continue;
 			}
+			return false;
 		}
-		return false;
 	}
 }
