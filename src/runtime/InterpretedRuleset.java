@@ -40,6 +40,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	
 	/** 編み上げ後の命令列 */
 	public MergedBranchMap branchmap;
+	public MergedBranchMap systemrulemap;
 	
 	/** 現在実行中のルール */
 	public Rule currentRule;
@@ -53,6 +54,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		rules = new ArrayList<Rule>();
 		id = ++lastId;
 		branchmap = null;
+		systemrulemap = null;
 	}
 	
 	/** 中間命令列をパーズして生成するときに利用するコンストラクタ */
@@ -108,6 +110,24 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		Iterator<Rule> it = rules.iterator();
 		if(branchmap != null){
 			Functor func = atom.getFunctor();
+			if(systemrulemap.containsKey(func)){
+				List insts = systemrulemap.getInsts(func);
+				Instruction spec = (Instruction)insts.get(0);
+				int formals = spec.getIntArg1();
+				int locals = spec.getIntArg2();
+				boolean success;
+				if(locals == 0){
+					System.err.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
+					locals = formals;
+				}
+				InterpretiveReactor ir = new InterpretiveReactor(locals, this);
+				ir.mems[0] = mem;
+				ir.atoms[1] = atom;
+				success = ir.interpret(insts, 0);
+				if(success) {
+					return true;
+				}
+			} else
 			if(branchmap.containsKey(func)){
 				List insts = branchmap.getInsts(func);
 				Instruction spec = (Instruction)insts.get(0);
@@ -430,7 +450,6 @@ class InterpretiveReactor {
 		Membrane mem;
 		Link link;
 		Functor func;
-		boolean srsflag = true;
 		while (pc < insts.size()) {
 			Instruction inst = (Instruction) insts.get(pc++);
 			if (Env.debug >= Env.DEBUG_TRACE) Env.d("Do " + inst);
@@ -1499,27 +1518,30 @@ class InterpretiveReactor {
 				case Instruction.GROUP:
 					subinsts = ((InstructionList)inst.getArg1()).insts;
 					if(!interpret(subinsts, 0)){
-						//if(lockedMemList.size() == 0)System.out.println("no!");
 						//GROUP内の命令で失敗したらルール適用失敗
 						//その前のGROUP内で取得した膜のロックを開放する
 						Iterator it2 = lockedMemList.iterator();
 						while(it2.hasNext()){
-							//System.out.println("test");
 							((Membrane)it2.next()).unlock();
 						}
 						return false;
 					}
 					break;
 				case Instruction.SYSTEMRULESETS:
+					boolean srsflag = true;
 					subinsts = ((InstructionList)inst.getArg1()).insts;
 					List subinsts2 = ((InstructionList)inst.getArg2()).insts;
+					Iterator flagit = ((ArrayList)inst.getArg3()).iterator();
+					while(flagit.hasNext()){
+						int flagvar = ((Integer)flagit.next()).intValue();
+						if(flagvar >= atoms.length
+								|| atoms[flagvar] == null){
+							srsflag = false;
+							break;
+						}
+					}
 					if(srsflag){
 						if(!interpret(subinsts, 0)){
-							Iterator it2 = lockedMemList.iterator();
-							while(it2.hasNext()){
-								//System.out.println("test");
-								((Membrane)it2.next()).unlock();
-							}
 							srsflag = false;
 							interpret(subinsts2, 0);
 						}

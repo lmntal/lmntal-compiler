@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import runtime.Env;
+import runtime.Functor;
 import runtime.InlineUnit;
 import runtime.InterpretedRuleset;
 import runtime.Rule;
@@ -133,9 +134,13 @@ public class RulesetCompiler {
 		
 		// 編み上げを行う
 		Merger merger = new Merger();
-		MergedBranchMap mbm;
-		if (Optimizer.fMerging) mbm = merger.Merging(rules);
-		else mbm = null;
+		MergedBranchMap mbm = null;
+		MergedBranchMap systemmbm = null;
+		if (Optimizer.fMerging) {
+			mbm = merger.Merging(rules, false);
+			merger.clear();
+			systemmbm = merger.createSystemRulesetsMap();
+		}
 		
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
 		if (!rules.isEmpty()) {
@@ -143,6 +148,7 @@ public class RulesetCompiler {
 				for (Rule r : rules) {
 					InterpretedRuleset ruleset = new InterpretedRuleset();
 					ruleset.branchmap = mbm;
+					ruleset.systemrulemap = systemmbm;
 					ruleset.rules.add(r);
 					Ruleset compiledRuleset = compileRuleset(ruleset);
 					mem.rulesets.add(ruleset);
@@ -153,6 +159,7 @@ public class RulesetCompiler {
 					ruleset.rules.add(r);
 				}
 				ruleset.branchmap = mbm;
+				ruleset.systemrulemap = systemmbm;
 				Ruleset compiledRuleset = compileRuleset(ruleset);
 				mem.rulesets.add(ruleset);
 			}
