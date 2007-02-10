@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -9,7 +10,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +26,10 @@ public class LMNtalFrame extends JFrame {
 	// 定数
 	
 	final static
-	public int WINDOW_WIDTH = 800;
+	public int WINDOW_WIDTH;
 	
 	final static
-	public int WINDOW_HIEGHT = 600;
+	public int WINDOW_HIEGHT;
 	
 	final static
 	public String TITLE = "UNYO UNYO";
@@ -40,6 +40,12 @@ public class LMNtalFrame extends JFrame {
 	final static
 	private String[] ext = {"*.png"};
 	
+	
+	static {
+		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		WINDOW_WIDTH = screenSize.width - SubFrame.WINDOW_WIDTH - 100;
+		WINDOW_HIEGHT = screenSize.height - LogFrame.WINDOW_HIEGHT - 50;
+	}
 	/////////////////////////////////////////////////////////////////
 	
 	private int step_ = 1;
@@ -52,7 +58,6 @@ public class LMNtalFrame extends JFrame {
 	private LogFrame logFrame_;
 	private Membrane rootMembrane_;
 	private List<Node> rootMemList_ = new ArrayList<Node>();
-	
 
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ

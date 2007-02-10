@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -14,7 +15,7 @@ import javax.swing.event.ChangeListener;
  * @author nakano
  *
  */
-public class LogFrame extends JFrame implements ChangeListener {
+public class LogFrame extends JFrame{
 
 	/////////////////////////////////////////////////////////////////
 	// Äê¿ô
@@ -30,14 +31,19 @@ public class LogFrame extends JFrame implements ChangeListener {
 	
 	/////////////////////////////////////////////////////////////////
 	
+	static
 	private JTextArea logArea = new JTextArea("log");
 
+	static
 	private LMNtalFrame mainFrame;
 	
+	static
 	private JSlider timeSlider_ = new JSlider(JSlider.HORIZONTAL, 0, 0, 0);
 	
-	private CommonListener commonListener_ = new CommonListener(this);
+	static
+	private CommonListener commonListener_;
 	
+	static
 	private boolean timeSliderResizing_ = false;
 	
 	/////////////////////////////////////////////////////////////////
@@ -49,8 +55,10 @@ public class LogFrame extends JFrame implements ChangeListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
 		setLocation(0, LMNtalFrame.WINDOW_HIEGHT);
+		commonListener_ = new CommonListener(this);
 		
-		initComponents();
+		initComponents(this);
+		setTitle(TITLE);
 		
 		setVisible(true);
 	}
@@ -69,16 +77,16 @@ public class LogFrame extends JFrame implements ChangeListener {
 		return logArea.getText();
 	}
 	
-	private void initComponents() {
+	static
+	public void initComponents(Container container) {
 		
-		setTitle(TITLE);
 		logArea.setEditable(false);
 		logArea.setLineWrap(true);
 		timeSlider_.setSnapToTicks(true);
-		timeSlider_.addChangeListener(this);
-		setLayout(new BorderLayout());
-		add(timeSlider_, BorderLayout.NORTH);
-		add(new JScrollPane(logArea), BorderLayout.CENTER);
+		timeSlider_.addChangeListener(new LogChangeListener());
+		container.setLayout(new BorderLayout());
+		container.add(timeSlider_, BorderLayout.NORTH);
+		container.add(new JScrollPane(logArea), BorderLayout.CENTER);
 	}
 	
 	public void revokeTime(){
@@ -93,8 +101,12 @@ public class LogFrame extends JFrame implements ChangeListener {
 	}
 
 	///////////////////////////////////////////////////////////////////////////
-	public void stateChanged(ChangeEvent arg0) {
-		if(timeSliderResizing_){ return; }
-		commonListener_.setState(timeSlider_.getValue());
+	
+	static
+	private class LogChangeListener implements ChangeListener {
+		public void stateChanged(ChangeEvent arg0) {
+			if(timeSliderResizing_){ return; }
+			commonListener_.setState(timeSlider_.getValue());
+		}
 	}
 }

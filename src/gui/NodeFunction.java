@@ -26,10 +26,6 @@ public class NodeFunction {
 
 	///////////////////////////////////////////////////////////////////////////
 	// final static
-	
-	/** ばね定数 */
-	final static
-	private double CONSTANT_SPRING = 0.02;
 
 	/** 引力定数 */
 	final static
@@ -42,10 +38,6 @@ public class NodeFunction {
 	/** 発散定数 */
 	final static
 	private double CONSTANT_HEATING = 0.01;
-	
-	/** 角度調整力定数 */
-	final static
-	private double CONSTANT_ANGLE = 1.5;
 	
 	/** 発散時間 */
 	final static
@@ -64,6 +56,14 @@ public class NodeFunction {
 	
 	static
 	private boolean attractionFlag_ = false;
+	
+	/** 角度調整力定数 */
+	static
+	private double constantAngle_ = 3;
+	
+	/** ばね定数 */
+	static
+	private double constantSpring_ = 0.02;
 	
 	static
 	private int heatingTimer_ = 0;
@@ -153,7 +153,8 @@ public class NodeFunction {
 			// 表示されているNodeを取得する
 			Node targetNode = nodes.next();
 			int heatParam = heatingTimer_;
-			boolean contain = localHeating_.containsKey(targetNode); 
+			double dr = 0;
+			boolean contain = localHeating_.containsKey(targetNode);
 			if(0 == heatingTimer_ &&
 					!localHeating_.isEmpty() &&
 					!contain)
@@ -171,6 +172,7 @@ public class NodeFunction {
 					continue;
 				}
 				heatParam = count * LOCAL_GLOBAL_RATE;
+				dr = (Math.random() * heatParam) / 2;
 			}
 			Point2D nthPoint = targetNode.getCenterPoint();
 
@@ -180,11 +182,11 @@ public class NodeFunction {
 			double dy = myPoint.getY() - nthPoint.getY();
 
 			double dxr =
-				(dx > 0) ? -(Math.random() * heatParam) 
-						: (Math.random() * heatParam);
+				(dx > 0) ? -(Math.random() * heatParam) + dr 
+						: (Math.random() * heatParam) - dr;
 			double dyr =
-				(dy > 0) ? -(Math.random() * heatParam) 
-						: (Math.random() * heatParam);
+				(dy > 0) ? -(Math.random() * heatParam) + dr 
+						: (Math.random() * heatParam) - dr;
 			
 			double ddx = (f * dx) + dxr;
 			double ddy = (f * dy) + dyr;
@@ -300,7 +302,10 @@ public class NodeFunction {
 		Node sourceNode = LinkSet.getVisibleNode(node);
 		if(null == sourceNode){ return; }
 		Point2D myPoint = sourceNode.getCenterPoint();
-		Map<Double, Node> treeMap = new TreeMap<Double, Node>();
+		// すべの隣のNodeを含んだソート済みマップ
+		Map<Double, Node> sortedNodeMap = new TreeMap<Double, Node>();
+		// リンクを二本以上保持している隣のNodeのソート済みマップ
+		Map<Integer, Integer> idMap = new HashMap<Integer, Integer>();
 		
 		// つながっているアトムを走査
 		for(int i = 0; i < edgeNum; i++){
@@ -321,42 +326,58 @@ public class NodeFunction {
 			if(dx == 0.0){ dx=0.000000001; }
 			double angle = Math.atan(dy / dx);
 			if(dx < 0.0) angle += Math.PI;
-			treeMap.put(angle, nthNode);
+			sortedNodeMap.put(angle, nthNode);
 		}
-		
-		Object[] nthAngles = treeMap.keySet().toArray();
-		for(int i = 0; i < nthAngles.length; i++ ){
-			Double nthAngle = (Double)nthAngles[i];
-			Node nthNode = treeMap.get(nthAngle);
-			Point2D nthPoint = nthNode.getCenterPoint();
 
-			
-			if(null != nthNode){
-				double anglePre = (i != 0) ? ((Double)nthAngles[i]).doubleValue() - ((Double)nthAngles[i - 1]).doubleValue() 
-						: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
-				double angleCur = (i != nthAngles.length - 1) ? ((Double)nthAngles[i + 1]).doubleValue() - ((Double)nthAngles[i]).doubleValue() 
-						: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
-				double angleR = angleCur - anglePre;
-				double dx = nthPoint.getX() - myPoint.getX();
-				double dy = nthPoint.getY() - myPoint.getY();
-				double edgeLength = Math.sqrt(dx * dx + dy * dy);
-				if(edgeLength == 0.0){ edgeLength = 0.00001; }
-				//線分に垂直で長さ１のベクトル
-				double tx = -dy / edgeLength;
-				double ty =  dx / edgeLength;
-				
-				dx = CONSTANT_ANGLE * tx * angleR;
-				dy = CONSTANT_ANGLE * ty * angleR;
-				
-				dx = dx * 2;
-				dy = dy * 2;
-				sourceNode.moveDelta(-dx, -dy);
-				nthNode.moveDelta(dx, dy);
-				
+		int j = 0;
+		int maxJ = 0;
+		Object[] allNthNodes = sortedNodeMap.values().toArray();
+		for(int i = 0; i < allNthNodes.length; i++ ){
+			if(1 < ((Node)allNthNodes[i]).getEdgeCount()){
+				idMap.put(j, i);
+				maxJ = j;
+				j++;
 			}
 		}
+		Object[] allNthAngles = sortedNodeMap.keySet().toArray();
+		
+		j = 0;
+		for(int i = 0; i < allNthAngles.length; i++ ){
+			Double nthAngle = (Double)allNthAngles[i];
+			Node nthNode = sortedNodeMap.get(nthAngle);
+			Point2D nthPoint = nthNode.getCenterPoint();
+
+			double anglePre;
+			double angleCur;
+			if(1 < nthNode.getEdgeCount()){
+				anglePre = (j != 0) ? ((Double)allNthAngles[idMap.get(j)]).doubleValue() - ((Double)allNthAngles[idMap.get(j - 1)]).doubleValue() 
+						: (Math.PI * 2) - ((Double)allNthAngles[idMap.get(maxJ)]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+				angleCur = (j != maxJ) ? ((Double)allNthAngles[idMap.get(j + 1)]).doubleValue() - ((Double)allNthAngles[idMap.get(j)]).doubleValue() 
+						: (Math.PI * 2) - ((Double)allNthAngles[idMap.get(maxJ)]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+				j++;
+			} else {
+				anglePre = (i != 0) ? ((Double)allNthAngles[i]).doubleValue() - ((Double)allNthAngles[i - 1]).doubleValue() 
+						: (Math.PI * 2) - ((Double)allNthAngles[allNthAngles.length - 1]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+				angleCur = (i != allNthAngles.length - 1) ? ((Double)allNthAngles[i + 1]).doubleValue() - ((Double)allNthAngles[i]).doubleValue() 
+						: (Math.PI * 2) - ((Double)allNthAngles[allNthAngles.length - 1]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+			}
+			double angleR = angleCur - anglePre;
+			double dx = nthPoint.getX() - myPoint.getX();
+			double dy = nthPoint.getY() - myPoint.getY();
+			double edgeLength = Math.sqrt(dx * dx + dy * dy);
+			if(edgeLength == 0.0){ edgeLength = 0.00001; }
+			//線分に垂直で長さ１のベクトル
+			double tx = -dy / edgeLength;
+			double ty =  dx / edgeLength;
+
+			dx = constantAngle_ * tx * angleR;
+			dy = constantAngle_ * ty * angleR;
+
+			sourceNode.moveDelta(-dx, -dy);
+			nthNode.moveDelta(dx, dy);
+		}
 	}
-	
+
 	/**
 	 * ばねモデルの計算
 	 * @param node
@@ -392,7 +413,7 @@ public class NodeFunction {
 
 			double divergenceFource = (heatingTimer_ == 0) ? 1 : (Math.random() * 10) - (Math.random() * 5);
 			
-			double f = -CONSTANT_SPRING * divergenceFource * ((distance / (20 + (60 * (memNum + 1)))) - 1.0);
+			double f = -constantSpring_ * divergenceFource * ((distance / (20 + (60 * (memNum + 1)))) - 1.0);
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
@@ -420,6 +441,8 @@ public class NodeFunction {
 			*/
 			double dxMargin = (ddx < 0) ? -Node.MARGIN : Node.MARGIN;
 			double dyMargin = (ddy < 0) ? -Node.MARGIN : Node.MARGIN;
+			boolean isUncalc = node.isUncalc() || nthNode.isUncalc();
+			
 			{
 				Node targetNode = node;
 				while(targetNode.getParent() != comNode){
@@ -427,7 +450,7 @@ public class NodeFunction {
 				}
 				Rectangle2D rect = node.getBounds2D();
 				rect.setRect(rect.getX() + ddx + dxMargin, rect.getY() + ddy + dyMargin, rect.getWidth(), rect.getHeight());
-				if(!node.isUncalc() && !nthNode.isUncalc() && targetNode.getBounds2D().contains(rect)){
+				if(isUncalc && targetNode.getBounds2D().contains(rect)){
 					node.moveDelta(ddx, ddy);
 				} else {
 					targetNode.moveDelta(ddx, ddy);
@@ -440,7 +463,7 @@ public class NodeFunction {
 				}
 				Rectangle2D rect = nthNode.getBounds2D();
 				rect.setRect(rect.getX() - ddx - dxMargin, rect.getY() - ddy + dyMargin, rect.getWidth(), rect.getHeight());
-				if(!node.isUncalc() && !nthNode.isUncalc() && targetNode.getBounds2D().contains(rect)){
+				if(isUncalc && targetNode.getBounds2D().contains(rect)){
 					nthNode.moveDelta(-ddx, -ddy);
 				} else {
 					targetNode.moveDelta(-ddx, -ddy);
@@ -516,6 +539,16 @@ public class NodeFunction {
 	static 
 	public void setAttractionFlag(boolean attractionFlag) {
 		attractionFlag_ = attractionFlag;
+	}
+	
+	static
+	public void setConstantSpring(double value){
+		constantSpring_ = value / 1000;
+	}
+	
+	static
+	public void setConstantAngle(double value){
+		constantAngle_ = value / 10;
 	}
 	
 	static

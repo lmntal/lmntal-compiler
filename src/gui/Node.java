@@ -13,12 +13,17 @@ import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import runtime.Atom;
 import runtime.InterpretedRuleset;
@@ -65,6 +70,9 @@ public class Node implements Cloneable{
 
 	//////////////////////////////////////////////////////////////////////////
 	// static
+
+	static
+	private BufferedImage ball_;
 	
 	/** 炎のイメージ */
 	static
@@ -75,6 +83,9 @@ public class Node implements Cloneable{
 	
 	static
 	private GraphPanel panel_;
+	
+	static
+	private boolean richMode_ = false;
 	
 	static
 	private boolean showFullName_ = true;
@@ -198,6 +209,11 @@ public class Node implements Cloneable{
 	
 	static
 	public void loadFire(GraphPanel panel){
+		try {
+			ball_ = ImageIO.read(new File(panel.getClass().getResource("ball.png").getFile()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		fire_[0] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire1_.png"));
 		fire_[1] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire2_.png"));
 		fire_[2] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire3_.png"));
@@ -214,6 +230,7 @@ public class Node implements Cloneable{
 		mt.addImage(fire_[4], 5);
 		mt.addImage(fire_[5], 6);
 		mt.addImage(fire_[6], 7);
+		mt.addImage(ball_, 8);
 		try {
 			mt.waitForAll();
 		} catch (InterruptedException e1) {
@@ -296,7 +313,6 @@ public class Node implements Cloneable{
 				maxY = (maxY > rectangle.getMaxY()) ? maxY : rectangle.getMaxY(); 
 			}
 		}
-
 		// サイズ変更
 		if(visible_ && sizeChange){
 			rect_.setFrameFromDiagonal(minX - MARGIN, minY - MARGIN, maxX + MARGIN, maxY + MARGIN);
@@ -473,7 +489,7 @@ public class Node implements Cloneable{
 	 * @return
 	 */
 	public Node getParent(){
-		return (rootMembrane_) ? null : parent_;
+		return parent_;
 	}
 	
 	/**
@@ -481,7 +497,7 @@ public class Node implements Cloneable{
 	 */
 	public Node getPointNode(Rectangle2D rect, boolean force){
 		// ベジエ曲線のチェック
-		if(rootMembrane_){
+		if(null == myObject_){
 			Iterator<Node> nodes = bezierSet_.iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
@@ -504,7 +520,7 @@ public class Node implements Cloneable{
 					}
 				}
 			}
-			return (force && !rootMembrane_) ? this : null;
+			return (force && !rootMembrane_ && null != myObject_) ? this : null;
 		}
 		return null;
 	}
@@ -741,10 +757,7 @@ public class Node implements Cloneable{
 	 * 自身を描画する
 	 * @param g
 	 */
-	public void paint(Graphics g, boolean enable){
-		if(rootMembrane_){
-			enable = true;
-		}
+	public void paint(Graphics g){
 		if(rootMembrane_){
 			LinkSet.paint(g);
 		}
@@ -755,9 +768,11 @@ public class Node implements Cloneable{
 		}
 
 		// アトムまたは閉じた膜の描画
-		if(isAtom() && enable){
-			g.setColor(myColor_);
-			((Graphics2D)g).fill(rect_);
+		if(isAtom()){
+			if(!richMode_ || !(myObject_ instanceof Atom)){
+				g.setColor(myColor_);
+				((Graphics2D)g).fill(rect_);
+			}
 
 			// ベジエ曲線の制御点なら終了
 			if(null == myObject_){ return; }
@@ -766,17 +781,30 @@ public class Node implements Cloneable{
 				Iterator<Node> nodes = bezierMap_.values().iterator();
 				while(nodes.hasNext()){
 					Node node = nodes.next();
-					node.paint(g, enable);
+					node.paint(g);
 				}
 
 				g.setColor(Color.RED);
 				Stroke oldStroke = ((Graphics2D)g).getStroke();
 				((Graphics2D)g).setStroke(SELECTED_STROKE);
+				if(richMode_ && myObject_ instanceof Atom){
+					g.drawImage(ball_, (int)rect_.x, (int)rect_.y, panel_);
+				}
 				((Graphics2D)g).draw(rect_);
 				((Graphics2D)g).setStroke(oldStroke);
 			} else {
-				g.setColor(Color.BLACK);
-				((Graphics2D)g).draw(rect_);
+				if(richMode_ && myObject_ instanceof Atom){
+					g.setColor(myColor_);
+					Stroke oldStroke = ((Graphics2D)g).getStroke();
+					((Graphics2D)g).setStroke(SELECTED_STROKE);
+					g.drawImage(ball_, (int)rect_.x, (int)rect_.y, panel_);
+					((Graphics2D)g).draw(rect_);
+					((Graphics2D)g).setStroke(oldStroke);
+					g.setColor(Color.BLACK);
+				}  else {
+					g.setColor(Color.BLACK);
+					((Graphics2D)g).draw(rect_);
+				}
 			}
 			///////////////////////////////////////////////////////////////
 			// アトム名描画
@@ -805,10 +833,10 @@ public class Node implements Cloneable{
 				Iterator<Node> nodes = nodeMap_.values().iterator();
 				while(nodes.hasNext()){
 					Node node = nodes.next();
-					node.paint(g, enable);
+					node.paint(g);
 				}
 			}
-			if(!rootMembrane_ && enable){
+			if(!rootMembrane_){
 				g.setColor(myColor_);
 				if(selected_){
 					g.setColor(Color.RED);
@@ -928,12 +956,12 @@ public class Node implements Cloneable{
 	private void setAtom(Atom atom){
 		imAtom_ = true;
 		name_ = (null != atom.getName()) ? atom.getName() : "";
-		
 		// [0, 7] -> [128, 255] for eash R G B
 		int ir = 0x7F - ((name_.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;
 		int ig = 0x7F - ((name_.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
 		int ib = 0x7F - ((name_.hashCode() & 0x00F) >> 0) * 0x08 + 0x7F;
 		myColor_ = new Color(ir, ig, ib);
+			
 		if(0 < atom.getEdgeCount()){
 			LinkSet.addLink(this);
 		}
@@ -1182,7 +1210,7 @@ public class Node implements Cloneable{
 	 * @param p
 	 */
 	public void setPosDelta(double dx, double dy){
-		if(rootMembrane_){
+		if(null == myObject_ || null == parent_){
 			dx = dx + rect_.x;
 			dy = dy + rect_.y;
 		} else {
@@ -1205,6 +1233,11 @@ public class Node implements Cloneable{
 			rect_.y = dy;
 		}
 		
+	}
+	
+	static
+	public void setRichMode(boolean flag){
+		richMode_ = flag;
 	}
 	
 	public void setRoot(boolean flag){

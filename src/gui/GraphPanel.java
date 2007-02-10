@@ -133,110 +133,8 @@ public class GraphPanel extends JPanel {
 		//　PINのロード待ち　ここまで
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-		addMouseListener(new MouseAdapter() {
-			
-			/** 
-			 * マウスが押されたときの処理
-			 * 局所加熱モード時は何もしない
-			 */
-			public void mousePressed(MouseEvent e) {
-				if(null == rootNode_){ return; }
-				if(localHeatingMode_){
-					localHeating(e);
-					return;
-				}
-				//　Nodeの当たり判定を行うために、クリックしたPointを範囲（Rectangle）に変換
-				int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
-				int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
-				Rectangle2D rect = new Rectangle2D.Double(pointX - ((POINT_DELTA_AREA / 2) / getMagnification()),
-						pointY - ((POINT_DELTA_AREA / 2) / getMagnification()),
-						POINT_DELTA_AREA / getMagnification(),
-						POINT_DELTA_AREA / getMagnification());
-				if(e.isAltDown()){
-					moveTargetNode_ = rootNode_.getPointNode(rect, true);
-					setTempRootNode(moveTargetNode_);
-					return;
-					
-				}
-				// 可視不可視を反転
-				if(e.isControlDown()){
-					moveTargetNode_ = rootNode_.getPointNode(rect, true);
-					if(null == moveTargetNode_){ return; }
-					moveTargetNode_.swapVisible();
-					moveTargetNode_.setUncalc(false);
-					if(null != moveTargetNode_.getParent()){
-						moveTargetNode_.getParent().setUncalcOutSideForce(false);
-					}
-					moveTargetNode_ = null;
-					return;
-				}
-				
-				if(e.getClickCount() == 2){
-					moveTargetNode_ = rootNode_.getPointNode(rect, true);
-					if(null != moveTargetNode_){
-						moveTargetNode_.swapClipped();
-					}
-					moveTargetNode_ = null;
-					return;
-				}
-				
-				setCursor(new Cursor(Cursor.MOVE_CURSOR));
-				moveTargetNode_ = rootNode_.getPointNode(rect, true);
-				
-				/*
-				 * 右クリック処理
-				 * Nodeのリンクをベジエ曲線化
-				 */
-				if(e.getButton() == MouseEvent.BUTTON3){
-					if(null == moveTargetNode_){ return; }
-					
-					NodeFunction.showNodeMenu(moveTargetNode_, myPanel_);
-					
-					moveTargetNode_ = null;
-					return;
-				}
-				
-				if(null != moveTargetNode_){
-					moveTargetNode_.setUncalc(true);
-					if(null != moveTargetNode_.getParent()){
-						moveTargetNode_.getParent().setUncalcOutSideForce(true);
-					}
-					if(selectedNode_ != moveTargetNode_ && 
-							!moveTargetNode_.isBezNode()){
-						moveTargetNode_.setSelected(true);
-						if(null != selectedNode_){
-							selectedNode_.setSelected(false);
-						}
-						commonListener_.setSelectedNode(moveTargetNode_);
-						selectedNode_ = moveTargetNode_;
-					} else if(selectedNode_ == moveTargetNode_){
-						moveTargetNode_.setSelected(false);
-						selectedNode_ = null;
-						commonListener_.setSelectedNode(null);
-					}
-				} else if(null == moveTargetNode_){
-					moveTargetNode_ = rootNode_;
-				}
-				deltaX = e.getX() - (moveTargetNode_.getCenterPoint().x * getMagnification());
-				deltaY = e.getY() - (moveTargetNode_.getCenterPoint().y * getMagnification());
-			}
-			
-			/**
-			 * マウスが離されたときの処理
-			 * <p>最初に押されたときより移動していたら移動した距離を取得</p>
-			 */
-			public void mouseReleased(MouseEvent e) {
-				nowHeating_ = false;
-				if(null != moveTargetNode_){
-					moveTargetNode_.setUncalc(false);
-					if(null != moveTargetNode_.getParent()){
-						moveTargetNode_.getParent().setUncalcOutSideForce(false);
-					}
-					moveTargetNode_ = null;
-				}
-				setCursor(currentCursor);
-			}
-		});
+		addMouseListener(new PanelMouseAdapter());
+		
 		addMouseMotionListener(new MouseMotionAdapter() {
 			/**
 			 * マウスがドラッグされたときの処理
@@ -284,7 +182,7 @@ public class GraphPanel extends JPanel {
 	public void calc(){
 		if(null == rootNode_){ return; }
 		if(rootNode_ == orgRootNode_){
-			rootNode_.setMembrane(rootMembrane_);
+//			rootNode_.setMembrane(rootMembrane_);
 		}
 		rootNode_.calcAll();
 		rootNode_.moveAll();
@@ -382,7 +280,7 @@ public class GraphPanel extends JPanel {
 	
 		g.setColor(Color.BLACK);
 		if(null != rootNode_){
-			rootNode_.paint(g, false);
+			rootNode_.paint(g);
 		}
 	
 		((Graphics2D)g).setTransform(new AffineTransform());
@@ -423,6 +321,7 @@ public class GraphPanel extends JPanel {
 	
 	
 	public void saveState(){
+		rootNode_.setMembrane(rootMembrane_);
 		if(!history_){ return; }
 		// 同じ状態であれば記録しない
 		if(logList_.size() != 0 &&
@@ -515,12 +414,118 @@ public class GraphPanel extends JPanel {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
+	
+	private class PanelMouseAdapter extends MouseAdapter {
+		/** 
+		 * マウスが押されたときの処理
+		 * 局所加熱モード時は何もしない
+		 */
+		public void mousePressed(MouseEvent e) {
+			if(null == rootNode_){ return; }
+			if(localHeatingMode_){
+				localHeating(e);
+				return;
+			}
+			//　Nodeの当たり判定を行うために、クリックしたPointを範囲（Rectangle）に変換
+			int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
+			int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
+			Rectangle2D rect = new Rectangle2D.Double(pointX - ((POINT_DELTA_AREA / 2) / getMagnification()),
+					pointY - ((POINT_DELTA_AREA / 2) / getMagnification()),
+					POINT_DELTA_AREA / getMagnification(),
+					POINT_DELTA_AREA / getMagnification());
+			if(e.isAltDown()){
+				moveTargetNode_ = rootNode_.getPointNode(rect, true);
+				setTempRootNode(moveTargetNode_);
+				return;
+				
+			}
+			// 可視不可視を反転
+			if(e.isControlDown()){
+				moveTargetNode_ = rootNode_.getPointNode(rect, true);
+				if(null == moveTargetNode_){ return; }
+				moveTargetNode_.swapVisible();
+				moveTargetNode_.setUncalc(false);
+				if(null != moveTargetNode_.getParent()){
+					moveTargetNode_.getParent().setUncalcOutSideForce(false);
+				}
+				moveTargetNode_ = null;
+				return;
+			}
+			
+			if(e.getClickCount() == 2){
+				moveTargetNode_ = rootNode_.getPointNode(rect, true);
+				if(null != moveTargetNode_){
+					moveTargetNode_.swapClipped();
+				}
+				moveTargetNode_ = null;
+				return;
+			}
+			
+			setCursor(new Cursor(Cursor.MOVE_CURSOR));
+			moveTargetNode_ = rootNode_.getPointNode(rect, true);
+			
+			/*
+			 * 右クリック処理
+			 * Nodeのリンクをベジエ曲線化
+			 */
+			if(e.getButton() == MouseEvent.BUTTON3){
+				if(null == moveTargetNode_){ return; }
+				
+				NodeFunction.showNodeMenu(moveTargetNode_, myPanel_);
+				
+				moveTargetNode_ = null;
+				return;
+			}
+			
+			if(null != moveTargetNode_){
+				moveTargetNode_.setUncalc(true);
+				if(null != moveTargetNode_.getParent()){
+					moveTargetNode_.getParent().setUncalcOutSideForce(true);
+				}
+				if(selectedNode_ != moveTargetNode_ && 
+						!moveTargetNode_.isBezNode()){
+					moveTargetNode_.setSelected(true);
+					if(null != selectedNode_){
+						selectedNode_.setSelected(false);
+					}
+					commonListener_.setSelectedNode(moveTargetNode_);
+					selectedNode_ = moveTargetNode_;
+				} else if(selectedNode_ == moveTargetNode_){
+					moveTargetNode_.setSelected(false);
+					selectedNode_ = null;
+					commonListener_.setSelectedNode(null);
+				}
+			} else if(null == moveTargetNode_){
+				moveTargetNode_ = rootNode_;
+			}
+			deltaX = e.getX() - (moveTargetNode_.getCenterPoint().x * getMagnification());
+			deltaY = e.getY() - (moveTargetNode_.getCenterPoint().y * getMagnification());
+		}
+		
+		/**
+		 * マウスが離されたときの処理
+		 * <p>最初に押されたときより移動していたら移動した距離を取得</p>
+		 */
+		public void mouseReleased(MouseEvent e) {
+			nowHeating_ = false;
+			if(null != moveTargetNode_){
+				moveTargetNode_.setUncalc(false);
+				if(null != moveTargetNode_.getParent()){
+					moveTargetNode_.getParent().setUncalcOutSideForce(false);
+				}
+				moveTargetNode_ = null;
+			}
+			setCursor(currentCursor);
+		}
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
 	/**
 	 * 演算用スレッド
 	 * @author nakano
 	 *
 	 */
-	class CalcThread extends Thread {
+	private class CalcThread extends Thread {
 		private boolean runnable_ = true;
 		
 		public CalcThread() {}
@@ -548,7 +553,7 @@ public class GraphPanel extends JPanel {
 	 * @author nakano
 	 *
 	 */
-	class RepaintThread extends Thread {
+	private class RepaintThread extends Thread {
 		private boolean runnable_ = true;
 		
 		public RepaintThread() {}
@@ -577,7 +582,7 @@ public class GraphPanel extends JPanel {
 	 * @author nakano
 	 *
 	 */
-	class AutoFocusThread extends Thread {
+	private class AutoFocusThread extends Thread {
 		boolean change_ = true;
 		boolean reduction_ = false;
 		
@@ -608,7 +613,7 @@ public class GraphPanel extends JPanel {
 			{
 				change_ = true;
 				reduction_ = true;
-				magnification_ -= 0.01;
+				magnification_ -= 0.011;
 				double value = (magnification_ / 2) * SubFrame.SLIDER_MAX;
 				commonListener_.setMagnificationSliderValue((int)value);
 			}

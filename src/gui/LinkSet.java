@@ -177,26 +177,6 @@ public class LinkSet {
 										rect.getCenterX(),
 										rect.getCenterY());
 							}
-//							else if(diplolinkMap.containsKey(nthNode.getID())){
-//								int linkNum = diplolinkMap.get(nthNode.getID());
-//
-//								double linkDelta = DIPLO_LINK_DELTA * ((linkNum + 1) / 2);
-//
-//								double x0 = rectSource.getCenterX() - rectTarget.getCenterX();
-//								double y0 = rectSource.getCenterY() - rectTarget.getCenterY();
-//								if(x0 == 0.0){ x0=0.000000001; }
-//								double angle = Math.atan(y0 / x0);
-//								if(x0 < 0.0){ angle += Math.PI; }
-//								angle = (linkNum % 2 == 0) ? angle + (Math.PI / 2) : angle - (Math.PI / 2);
-//
-//								double x = Math.cos(angle) * linkDelta;
-//								double y = Math.sin(angle) * linkDelta;
-//									paintLinkNum(g, n,
-//											rectSource.getCenterX(),
-//											rectSource.getCenterY(),
-//											((rectSource.getCenterX() + rectTarget.getCenterX()) / 2) + x,
-//											((rectSource.getCenterY() + rectTarget.getCenterY()) / 2) + y);
-//							}
 							else{
 								paintLinkNum(g, n,
 										rectSource.getCenterX(),
