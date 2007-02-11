@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -27,7 +28,10 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
+import runtime.Atom;
+import runtime.Functor;
 import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 final
 public class GraphPanel extends JPanel {
@@ -78,6 +82,9 @@ public class GraphPanel extends JPanel {
 	static
 	private boolean stopPainting_ = false;
 	
+	static
+	private Point lastMousePoint;
+	
 	///////////////////////////////////////////////////////////////////////////
 	
 	private AffineTransform af_ = new AffineTransform();
@@ -87,11 +94,14 @@ public class GraphPanel extends JPanel {
 	private Cursor currentCursor = new Cursor(Cursor.HAND_CURSOR);
 	private double deltaX;
 	private double deltaY;
+	private boolean editLinkMode_ = false;
 	private int fireID_ = 0;
 	private boolean history_ = false;
 	private boolean localHeatingMode_ = false;
 	private List<String> logList_ = new ArrayList<String>();
 	private Node moveTargetNode_ = null;
+	private Map<Object, Membrane> newNodeMap_ = new HashMap<Object, Membrane>();
+	private Map<Node, Node> newLinkMap_ = new HashMap<Node, Node>();
 	private boolean nowHeating_ = false;
 	private Node selectedNode_ = null;
 	private Node orgRootNode_;
@@ -150,6 +160,11 @@ public class GraphPanel extends JPanel {
 					localHeating(e);
 					return;
 				}
+				
+				if(editLinkMode_ && moveTargetNode_ != rootNode_){
+					lastMousePoint = e.getPoint();
+					return;
+				}
 					
 				// 移動距離の取得
 				if(moveTargetNode_ == null){ return; }
@@ -170,6 +185,91 @@ public class GraphPanel extends JPanel {
 	}
 	///////////////////////////////////////////////////////////////////////////
 	
+	public void addAtom(String name, Membrane targetMem){
+		Functor func = new SymbolFunctor(name, 0);
+		synchronized (newNodeMap_) {
+			newNodeMap_.put(func, targetMem);
+		}
+	}
+	
+	public void addMembrane(String name, Membrane targetMem){
+		Membrane mem = new Membrane();
+		mem.setName(name);
+		synchronized (newNodeMap_) {
+			newNodeMap_.put(mem, targetMem);
+		}
+	}
+	
+	/**
+	 * addAtomやaddMembraneで追加予約したNodeを実際に追加する
+	 *
+	 */
+	private void addNode(){
+		synchronized (newNodeMap_) {
+			Iterator objects = newNodeMap_.keySet().iterator();
+			while(objects.hasNext()){
+				Object obj = objects.next();
+				Membrane targetMem = newNodeMap_.get(obj);
+				if(obj instanceof Functor){
+					targetMem.addAtom(new Atom(targetMem, (Functor)obj));
+				}
+				else if(obj instanceof Membrane){
+					targetMem.addMem((Membrane)obj);
+				}
+			}
+			newNodeMap_.clear();
+		}
+		rootNode_.reset(rootMembrane_);
+		resetLink();
+		commonListener_.setLog(rootMembrane_.toString());
+	}
+	
+	/**
+	 * リンクを張りなおす。<p>
+	 * 現状は、アトムの再利用が無理。（再利用しつつリンク数を増やせないので）。
+	 */
+	private void addLink(){
+		synchronized (newLinkMap_) {
+			Iterator<Node> atoms = newLinkMap_.keySet().iterator();
+			while(atoms.hasNext()){
+				Node sourceNode = atoms.next();
+				Node targetNode = newLinkMap_.get(sourceNode);
+				Atom sourceAtom = (Atom)sourceNode.getObject();
+				Atom targetAtom = (Atom)targetNode.getObject();
+				
+				Functor newSourceFunctor =
+					new SymbolFunctor(sourceAtom.getName(), sourceAtom.getEdgeCount() + 1);
+				Functor newTargetFunctor =
+					new SymbolFunctor(targetAtom.getName(), targetAtom.getEdgeCount() + 1);
+
+				Atom newSourceAtom = new Atom(sourceAtom.getMem(), newSourceFunctor);
+				Atom newTargetAtom = new Atom(targetAtom.getMem(), newTargetFunctor);
+				sourceAtom.getMem().addAtom(newSourceAtom);
+				targetAtom.getMem().addAtom(newTargetAtom);
+				
+				for(int i = 0; i < sourceAtom.getEdgeCount(); i++){
+					sourceAtom.getMem().relink(newSourceAtom, i, sourceAtom, i);
+				}
+				sourceAtom.remove();
+				
+				for(int i = 0; i < targetAtom.getEdgeCount(); i++){
+					targetAtom.getMem().relink(newTargetAtom, i, targetAtom, i);
+				}
+				targetAtom.remove();
+				
+				newSourceAtom.getMem().newLink(newSourceAtom,
+						newSourceAtom.getEdgeCount() - 1,
+						newTargetAtom,
+						newTargetAtom.getEdgeCount() - 1);
+			}
+			newLinkMap_.clear();
+		}
+		rootNode_.reset(rootMembrane_);
+		resetLink();
+		commonListener_.setLog(rootMembrane_.toString());
+		
+	}
+	
 	/**
 	 * 自動焦点
 	 */
@@ -184,9 +284,12 @@ public class GraphPanel extends JPanel {
 	 */
 	public void calc(){
 		if(null == rootNode_){ return; }
-//		if(rootNode_ == orgRootNode_){
-//			rootNode_.setMembrane(rootMembrane_);
-//		}
+		if(!newNodeMap_.isEmpty()){
+			addNode();
+		}
+		if(!newLinkMap_.isEmpty()){
+			addLink();
+		}
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
@@ -269,7 +372,7 @@ public class GraphPanel extends JPanel {
 			NodeFunction.setLocalHeating(nodes.next());
 		}
 	}
-
+	
 	/**
 	 * グラフを描画する
 	 */
@@ -283,14 +386,35 @@ public class GraphPanel extends JPanel {
 		g.fillRect(0, 0,(int)getWidth(), (int)getHeight());
 	
 		g.setColor(Color.WHITE);
-		af_.setTransform(getMagnification(), 0, 0, getMagnification(), getWidth() / 2, getHeight() / 2);
+		af_.setTransform(getMagnification(),
+				0,
+				0,
+				getMagnification(),
+				(double)getWidth() / 2,
+				(double)getHeight() / 2);
 		((Graphics2D)g).setTransform(af_);
 	
 		g.setColor(Color.BLACK);
 		if(null != rootNode_){
 			rootNode_.paint(g);
 		}
+
+		// EditLink時に補助線を引く
+		if(editLinkMode_ &&
+				null != lastMousePoint &&
+				null != moveTargetNode_ &&
+				moveTargetNode_ != rootNode_ &&
+				moveTargetNode_.getObject() instanceof Atom)
+		{
+			g.setColor(Color.RED);
+			Point2D sourcePoint = moveTargetNode_.getCenterPoint();
+			g.drawLine((int)sourcePoint.getX(),
+					(int)sourcePoint.getY(),
+					(int)((lastMousePoint.getX() - ((double)getWidth() / 2)) / getMagnification()),
+					(int)((lastMousePoint.getY() - ((double)getHeight() / 2)) / getMagnification()));
+		}
 	
+		// 初期位置に戻す
 		((Graphics2D)g).setTransform(new AffineTransform());
 
 		if(localHeatingMode_ && nowHeating_){
@@ -302,7 +426,6 @@ public class GraphPanel extends JPanel {
 			fireID_ = (fireID_ < 6) ? fireID_ + 1 : 0; 
 		}
 		
-		// 初期位置に戻す
 		int heatingTimer = NodeFunction.getDivergence();
 		if(0 < heatingTimer){
 			g.setColor(Color.RED);
@@ -327,7 +450,6 @@ public class GraphPanel extends JPanel {
 		}
 	}
 	
-	
 	public void saveState(){
 		rootNode_.setMembrane(rootMembrane_);
 		resetLink();
@@ -351,6 +473,16 @@ public class GraphPanel extends JPanel {
 		} else {
 			logList_.add(rootMembrane_.toString());
 		}
+	}
+	
+	public void setEditLinkMode(boolean flag){
+		editLinkMode_ = flag;
+		if(flag){
+			currentCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+		} else {
+			currentCursor = new Cursor(Cursor.HAND_CURSOR);
+		}
+		setCursor(currentCursor);
 	}
 	
 	public void setLocalHeatingMode(boolean flag){
@@ -379,6 +511,7 @@ public class GraphPanel extends JPanel {
 		}
 	}
 
+	static
 	public void setMagnification(double magni){
 		magnification_ = magni * 2;
 		if(0.01 > magnification_){
@@ -447,12 +580,12 @@ public class GraphPanel extends JPanel {
 					pointY - ((POINT_DELTA_AREA / 2) / getMagnification()),
 					POINT_DELTA_AREA / getMagnification(),
 					POINT_DELTA_AREA / getMagnification());
-			if(e.isAltDown()){
-				moveTargetNode_ = rootNode_.getPointNode(rect, true);
-				setTempRootNode(moveTargetNode_);
-				return;
-				
-			}
+//			if(e.isAltDown()){
+//				moveTargetNode_ = rootNode_.getPointNode(rect, true);
+//				setTempRootNode(moveTargetNode_);
+//				return;
+//				
+//			}
 			// 可視不可視を反転
 			if(e.isControlDown()){
 				moveTargetNode_ = rootNode_.getPointNode(rect, true);
@@ -492,6 +625,10 @@ public class GraphPanel extends JPanel {
 			}
 			
 			if(null != moveTargetNode_){
+				if(editLinkMode_ && moveTargetNode_.getObject() instanceof Atom){
+					rootNode_.setUncalc(true);
+					return;
+				}
 				moveTargetNode_.setUncalc(true);
 				if(null != moveTargetNode_.getParent()){
 					moveTargetNode_.getParent().setUncalcOutSideForce(true);
@@ -521,6 +658,26 @@ public class GraphPanel extends JPanel {
 		 * <p>最初に押されたときより移動していたら移動した距離を取得</p>
 		 */
 		public void mouseReleased(MouseEvent e) {
+			if(editLinkMode_ &&
+					null != moveTargetNode_ &&
+					moveTargetNode_.getObject() instanceof Atom)
+			{
+				//　Nodeの当たり判定を行うために、クリックしたPointを範囲（Rectangle）に変換
+				int pointX = (int)((e.getX() - (getWidth() / 2)) / getMagnification());
+				int pointY = (int)((e.getY() - (getHeight() / 2)) / getMagnification());
+				Rectangle2D rect = new Rectangle2D.Double(pointX - ((POINT_DELTA_AREA / 2) / getMagnification()),
+						pointY - ((POINT_DELTA_AREA / 2) / getMagnification()),
+						POINT_DELTA_AREA / getMagnification(),
+						POINT_DELTA_AREA / getMagnification());
+				
+				Node targetNode = rootNode_.getPointNode(rect, true);
+				if(null != targetNode &&
+						targetNode.getObject() instanceof Atom)
+				{
+					newLinkMap_.put(moveTargetNode_, targetNode);
+				}
+				rootNode_.setUncalc(false);
+			}
 			nowHeating_ = false;
 			if(null != moveTargetNode_){
 				moveTargetNode_.setUncalc(false);

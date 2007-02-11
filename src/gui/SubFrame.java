@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -94,7 +93,7 @@ public class SubFrame extends JFrame {
 	private JButton autoFocusBt_ = new JButton("Auto Focus");
 	
 	static
-	private JToggleButton localHeatingBt_ = new JToggleButton("Normal Mode");
+	private JButton modeBt_ = new JButton("Normal Mode");
 	
 	static
 	private JScrollPane menuScroll_;
@@ -189,7 +188,7 @@ public class SubFrame extends JFrame {
 	static
 	public void initComponents(Container container) {
 		
-		localHeatingBt_.addActionListener(new LocalHeatingAdapter());
+		modeBt_.addActionListener(new LocalHeatingAdapter());
 		stepBox_.setHorizontalAlignment(JTextField.RIGHT);
 		
 		
@@ -309,7 +308,7 @@ public class SubFrame extends JFrame {
 		container.add(autoFocusBt_, gbc);
 		
 		gbc.gridy += 1;
-		container.add(localHeatingBt_, gbc);
+		container.add(modeBt_, gbc);
 		
 		gbc.gridy += 1;
         gbc.fill = GridBagConstraints.BOTH;
@@ -408,11 +407,16 @@ public class SubFrame extends JFrame {
 	private class LocalHeatingAdapter implements ActionListener {
 		public LocalHeatingAdapter() { }
 		public void actionPerformed(ActionEvent e) {
-			commonListener_.setLocalHeatingMode(localHeatingBt_.isSelected());
-			if(localHeatingBt_.isSelected()){
-				localHeatingBt_.setText("Local Heating Mode");
+			if(modeBt_.getText().equals("Normal Mode")){
+				commonListener_.setLocalHeatingMode(true);
+				modeBt_.setText("Local Heating Mode");
+			} else if(modeBt_.getText().equals("Local Heating Mode")){
+				commonListener_.setLocalHeatingMode(false);
+				commonListener_.setEditLinkMode(true);
+				modeBt_.setText("Edit Link Mode");
 			} else {
-				localHeatingBt_.setText("Normal Mode");
+				commonListener_.setEditLinkMode(false);
+				modeBt_.setText("Normal Mode");
 			}
 		}
 	}

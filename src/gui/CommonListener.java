@@ -3,6 +3,8 @@ package gui;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import runtime.Membrane;
+
 /**
  * ³ÈÂç½Ì¾®¤ò´ÉÍý¤¹¤ëListener
  * @author nakano
@@ -11,7 +13,7 @@ import java.awt.event.MouseWheelListener;
 public class CommonListener implements MouseWheelListener {
 
 	static
-	private AdvanceFrame advance_;
+	private EditFrame advance_;
 	
 	static
 	private LogFrame logFrame_;
@@ -24,7 +26,7 @@ public class CommonListener implements MouseWheelListener {
 	///////////////////////////////////////////////////////////////////////////
 	public CommonListener() { }
 	
-	public CommonListener(AdvanceFrame advance) {
+	public CommonListener(EditFrame advance) {
 		if(advance == null){ return; }
 		advance_ = advance;
 	}
@@ -53,6 +55,17 @@ public class CommonListener implements MouseWheelListener {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
+
+	
+	public void addAtom(String name, Membrane targetMem){
+		if(null == panel_){ return; }
+		panel_.addAtom(name, targetMem);
+	}
+	
+	public void addMembrane(String name, Membrane targetMem){
+		if(null == panel_){ return; }
+		panel_.addMembrane(name, targetMem);
+	}
 	
 	public void addTime(){
 		if(null == logFrame_){ return; }
@@ -70,8 +83,12 @@ public class CommonListener implements MouseWheelListener {
 	}
 
 	public void revokeTime(){
-		if(null == logFrame_){ return; }
-		logFrame_.revokeTime();
+		LogFrame.revokeTime();
+	}
+	
+	public void setEditLinkMode(boolean flag){
+		if(null == panel_){ return; }
+		panel_.setEditLinkMode(flag);
 	}
 	
 	public void setHistory(boolean flag){

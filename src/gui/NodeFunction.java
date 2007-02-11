@@ -441,7 +441,6 @@ public class NodeFunction {
 			*/
 			double dxMargin = (ddx < 0) ? -Node.MARGIN : Node.MARGIN;
 			double dyMargin = (ddy < 0) ? -Node.MARGIN : Node.MARGIN;
-			boolean isUncalc = node.isUncalc() || nthNode.isUncalc();
 			
 			{
 				Node targetNode = node;
@@ -450,7 +449,7 @@ public class NodeFunction {
 				}
 				Rectangle2D rect = node.getBounds2D();
 				rect.setRect(rect.getX() + ddx + dxMargin, rect.getY() + ddy + dyMargin, rect.getWidth(), rect.getHeight());
-				if(isUncalc && targetNode.getBounds2D().contains(rect)){
+				if(targetNode.getBounds2D().contains(rect)){
 					node.moveDelta(ddx, ddy);
 				} else {
 					targetNode.moveDelta(ddx, ddy);
@@ -463,7 +462,7 @@ public class NodeFunction {
 				}
 				Rectangle2D rect = nthNode.getBounds2D();
 				rect.setRect(rect.getX() - ddx - dxMargin, rect.getY() - ddy + dyMargin, rect.getWidth(), rect.getHeight());
-				if(isUncalc && targetNode.getBounds2D().contains(rect)){
+				if(targetNode.getBounds2D().contains(rect)){
 					nthNode.moveDelta(-ddx, -ddy);
 				} else {
 					targetNode.moveDelta(-ddx, -ddy);
@@ -591,8 +590,8 @@ public class NodeFunction {
 			popup.add(item);
 		}
 		popup.show(panel, 
-				(int)((nodeRectangle.getMaxX() * GraphPanel.getMagnification()) + (panel.getWidth() / 2)),
-				(int)((nodeRectangle.getMaxY() * GraphPanel.getMagnification()) + (panel.getHeight() / 2)));
+				(int)((nodeRectangle.getMaxX() * GraphPanel.getMagnification()) + ((double)panel.getWidth() / 2)),
+				(int)((nodeRectangle.getMaxY() * GraphPanel.getMagnification()) + ((double)panel.getHeight() / 2)));
 	}
 	
 	static

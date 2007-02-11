@@ -64,6 +64,7 @@ public class LogFrame extends JFrame{
 	}
 	/////////////////////////////////////////////////////////////////
 	
+	static
 	public void addTime(){
 		timeSliderResizing_ = true;
 		timeSlider_.setMaximum(timeSlider_.getMaximum() + 1);
@@ -89,6 +90,7 @@ public class LogFrame extends JFrame{
 		container.add(new JScrollPane(logArea), BorderLayout.CENTER);
 	}
 	
+	static
 	public void revokeTime(){
 		timeSliderResizing_ = true;
 		timeSlider_.setValue(0);

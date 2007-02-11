@@ -53,7 +53,7 @@ public class LMNtalFrame extends JFrame {
 	public boolean running_ = true;
 	
 	private GraphPanel panel_ = null;
-	private AdvanceFrame advanceFrame_;
+	private EditFrame editFrame_;
 	private SubFrame subFrame_;
 	private LogFrame logFrame_;
 	private Membrane rootMembrane_;
@@ -79,7 +79,7 @@ public class LMNtalFrame extends JFrame {
 		// 管理ウィンドウの生成
 		subFrame_ = new SubFrame(this);
 		logFrame_ = new LogFrame(this);
-		advanceFrame_ = new AdvanceFrame(this);
+		editFrame_ = new EditFrame(this);
 		
 	}
 	/////////////////////////////////////////////////////////////////
