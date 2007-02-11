@@ -75,6 +75,9 @@ public class GraphPanel extends JPanel {
 	static
 	private Image pin_;
 	
+	static
+	private boolean stopPainting_ = false;
+	
 	///////////////////////////////////////////////////////////////////////////
 	
 	private AffineTransform af_ = new AffineTransform();
@@ -181,9 +184,9 @@ public class GraphPanel extends JPanel {
 	 */
 	public void calc(){
 		if(null == rootNode_){ return; }
-		if(rootNode_ == orgRootNode_){
+//		if(rootNode_ == orgRootNode_){
 //			rootNode_.setMembrane(rootMembrane_);
-		}
+//		}
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
@@ -271,6 +274,11 @@ public class GraphPanel extends JPanel {
 	 * グラフを描画する
 	 */
 	public void paint(Graphics g) {
+		if(stopPainting_){
+			g.setColor(Color.GRAY);
+			g.fillRect(0, 0,(int)getWidth(), (int)getHeight());
+			return;
+		}
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0,(int)getWidth(), (int)getHeight());
 	
@@ -322,6 +330,7 @@ public class GraphPanel extends JPanel {
 	
 	public void saveState(){
 		rootNode_.setMembrane(rootMembrane_);
+		resetLink();
 		if(!history_){ return; }
 		// 同じ状態であれば記録しない
 		if(logList_.size() != 0 &&
@@ -356,6 +365,11 @@ public class GraphPanel extends JPanel {
 	
 	public void setShowRules(boolean flag){
 		rootNode_.setShowRules(flag);
+	}
+	
+	static
+	public void setStopPainting(boolean flag){
+		stopPainting_ = flag;
 	}
 	
 	public void setHistory(boolean flag){

@@ -127,6 +127,9 @@ public class SubFrame extends JFrame {
 	private JSlider springSlider_ = new JSlider(SPRING_MIN, SPRING_MAX, SPRING_DEFAULT);
 	
 	static
+	private JCheckBox stopPainting_ = new JCheckBox("Stop painting");
+	
+	static
 	private JCheckBox angleCheck_ = new JCheckBox("Calc Angle");
 	
 	static
@@ -212,6 +215,8 @@ public class SubFrame extends JFrame {
 		showRulesCheck_.setSelected(false);
 		springCheck_.addItemListener(new SpringAdapter());
 		springCheck_.setSelected(true);
+		stopPainting_.addItemListener(new StopPaintingAdapter());
+		stopPainting_.setSelected(false);
 		springSlider_.addChangeListener(new SpringSliderChanged());
 		springSlider_.setPreferredSize(preferredSize);
 		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
@@ -220,6 +225,7 @@ public class SubFrame extends JFrame {
 		attractionCheck_.setSelected(false);
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
 		menuPanel_.add(advanceModeCheck_);
+		menuPanel_.add(stopPainting_);
 		menuPanel_.add(richCheck_);
 		menuPanel_.add(historyCheck_);
 		menuPanel_.add(linkNumCheck_);
@@ -570,6 +576,19 @@ public class SubFrame extends JFrame {
 		public StopHeatingAdapter() { }
 		public void actionPerformed(ActionEvent e) {
 			NodeFunction.stopHeating();
+		}
+	}
+	
+	/**
+	 * 描画処理中断処理終了
+	 * @author nakano
+	 *
+	 */
+	static
+	private class StopPaintingAdapter implements ItemListener {
+		public StopPaintingAdapter() { }
+		public void itemStateChanged(ItemEvent e) {
+			GraphPanel.setStopPainting(stopPainting_.isSelected());
 		}
 	}
 	

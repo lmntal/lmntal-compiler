@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -34,6 +35,9 @@ public class Node implements Cloneable{
 
 	///////////////////////////////////////////////////////////////////////////
 	// final static
+	
+	final static
+	private float ATOM_COMPOSITE = 0.5f;
 	
 	final static
 	private double ATOM_SIZE = 40.0;
@@ -773,6 +777,8 @@ public class Node implements Cloneable{
 				g.setColor(myColor_);
 				((Graphics2D)g).fill(rect_);
 			}
+			g.setColor(myColor_);
+			((Graphics2D)g).fill(rect_);
 
 			// ベジエ曲線の制御点なら終了
 			if(null == myObject_){ return; }
@@ -784,12 +790,16 @@ public class Node implements Cloneable{
 					node.paint(g);
 				}
 
-				g.setColor(Color.RED);
 				Stroke oldStroke = ((Graphics2D)g).getStroke();
 				((Graphics2D)g).setStroke(SELECTED_STROKE);
 				if(richMode_ && myObject_ instanceof Atom){
+					g.setColor(myColor_);
+					((Graphics2D)g).setStroke(SELECTED_STROKE);
+					((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ATOM_COMPOSITE));
 					g.drawImage(ball_, (int)rect_.x, (int)rect_.y, panel_);
+					((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 				}
+				g.setColor(Color.RED);
 				((Graphics2D)g).draw(rect_);
 				((Graphics2D)g).setStroke(oldStroke);
 			} else {
@@ -797,8 +807,9 @@ public class Node implements Cloneable{
 					g.setColor(myColor_);
 					Stroke oldStroke = ((Graphics2D)g).getStroke();
 					((Graphics2D)g).setStroke(SELECTED_STROKE);
+					((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ATOM_COMPOSITE));
 					g.drawImage(ball_, (int)rect_.x, (int)rect_.y, panel_);
-					((Graphics2D)g).draw(rect_);
+					((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 					((Graphics2D)g).setStroke(oldStroke);
 					g.setColor(Color.BLACK);
 				}  else {
@@ -1028,16 +1039,16 @@ public class Node implements Cloneable{
 	 */
 	public boolean setMembrane(Membrane mem){
 		boolean success = true;
+		LinkSet.addLink(this);
+		imAtom_ = false;
+		name_ = (null != mem.getName()) ? mem.getName() : "";
+
+		Map<Membrane, Node> memNodeMap = new HashMap<Membrane, Node>();
+		Map<Atom, Node> atomNodeMap = new HashMap<Atom, Node>();
+		Map<String, Node> ruleNodeMap = new HashMap<String, Node>();
+
+		// 子膜をリセット
 		synchronized (nodeMap_) {
-			LinkSet.addLink(this);
-			imAtom_ = false;
-			name_ = (null != mem.getName()) ? mem.getName() : "";
-
-			Map<Membrane, Node> memNodeMap = new HashMap<Membrane, Node>();
-			Map<Atom, Node> atomNodeMap = new HashMap<Atom, Node>();
-			Map<String, Node> ruleNodeMap = new HashMap<String, Node>();
-
-			// 子膜をリセット
 			Iterator mems = mem.memIterator();
 			while(mems.hasNext()){
 				Membrane childMem = (Membrane)mems.next();
