@@ -921,17 +921,27 @@ public class Node implements Cloneable{
 	 * @param object
 	 */
 	public boolean reset(Object object){
-		boolean success = true;
+		if(null != parent_ &&
+				null != myObject_ &&
+				null != object &&
+				myObject_ != object)
+		{
+			if(parent_.getChildMap().containsKey(myObject_)){
+				Node node = parent_.getChildMap().remove(myObject_);
+				parent_.getChildMap().put(object, node);
+			}
+		}
 		myObject_ = object;
 
 		if(object instanceof Atom){
 			setAtom((Atom)object);
 		} else if(object instanceof Membrane){
-			success = setMembrane((Membrane)object);
+			return setMembrane((Membrane)object);
 		} else if(object instanceof String){
 			setRule((String)object);
 		}
-		return success;
+		
+		return true;
 	}
 	
 	public void resetAllLink(){

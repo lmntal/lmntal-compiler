@@ -43,8 +43,10 @@ public class LMNtalFrame extends JFrame {
 	
 	static {
 		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-		WINDOW_WIDTH = screenSize.width - SubFrame.WINDOW_WIDTH - 100;
-		WINDOW_HIEGHT = screenSize.height - LogFrame.WINDOW_HIEGHT - 50;
+		int width = screenSize.width - SubFrame.WINDOW_WIDTH - 100;
+		int hieght = screenSize.height - LogFrame.WINDOW_HIEGHT - 50;
+		WINDOW_WIDTH = (width < 100) ? 100 : width;
+		WINDOW_HIEGHT = (hieght < 50) ? 50 : hieght;
 	}
 	/////////////////////////////////////////////////////////////////
 	

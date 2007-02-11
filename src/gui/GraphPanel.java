@@ -161,7 +161,11 @@ public class GraphPanel extends JPanel {
 					return;
 				}
 				
-				if(editLinkMode_ && moveTargetNode_ != rootNode_){
+				if(editLinkMode_ &&
+						moveTargetNode_ != rootNode_ &&
+						null != moveTargetNode_ &&
+						moveTargetNode_.getObject() instanceof Atom)
+				{
 					lastMousePoint = e.getPoint();
 					return;
 				}
@@ -261,10 +265,12 @@ public class GraphPanel extends JPanel {
 						newSourceAtom.getEdgeCount() - 1,
 						newTargetAtom,
 						newTargetAtom.getEdgeCount() - 1);
+				sourceNode.reset(newSourceAtom);
+				targetNode.reset(newTargetAtom);
 			}
 			newLinkMap_.clear();
 		}
-		rootNode_.reset(rootMembrane_);
+//		rootNode_.reset(rootMembrane_);
 		resetLink();
 		commonListener_.setLog(rootMembrane_.toString());
 		
