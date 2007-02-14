@@ -203,7 +203,7 @@ public class CountsSet {
 			Boolean cpiflg = memnameToCPIFlg.get(memname);
 			if(cpiflg != null && cpiflg &&
 					Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE){
-				if(memnameToMergedFixedCounts.containsKey(memname)){
+				if(!(memnameToMergedFixedCounts.containsKey(memname))){
 					for(DynamicCounts dom : memnameToAllInhCountss.get(memname)){
 						DynamicCounts domclone = dom.clone();
 //						clonedDynamicCounts.add(domclone);
@@ -289,25 +289,20 @@ public class CountsSet {
 //				if(!dom.applyCount.isBound())dom.applyCount.bind(new IntervalCount(new NumCount(0),Count.INFINITY));
 //	}
 	
+	/** 下限が0以下なのを0に補正 */
 	public void assignZeroToMinimum(){
 		for(FixedCounts fc : memnameToMergedFixedCounts.values()){
 			for(Functor f : fc.functorToCount.keySet()){
-				IntervalCount c = fc.functorToCount.get(f);
-//				if(c instanceof NumCount){
-//					if(((NumCount)c).value < 0) fc.functorToCount.put(f,new NumCount(0));
-//				}
-//				else if(c instanceof InfinityCount){
-//					if(((InfinityCount)c).minus)fc.functorToCount.put(f, new NumCount(0));
-//				}
-//				else if(c instanceof IntervalCount){
-					IntervalCount ic = (IntervalCount)c;
-					if(ic.min.compare(new NumCount(0))<= 0){
-						if(ic.max.compare(new NumCount(0)) <= 0){
-							fc.functorToCount.put(f, new IntervalCount(0,0));
-						}
-						else fc.functorToCount.put(f, new IntervalCount(new NumCount(0), ic.max));
-					}
-//				}
+				IntervalCount ic = fc.functorToCount.get(f);
+				if(ic.min.compare(new NumCount(0))< 0){
+					fc.functorToCount.put(f, new IntervalCount(new NumCount(0),ic.max));
+				}
+			}
+			for(String m : fc.memnameToCount.keySet()){
+				IntervalCount ic = fc.memnameToCount.get(m);
+				if(ic.min.compare(new NumCount(0))< 0){
+					fc.memnameToCount.put(m, new IntervalCount(new NumCount(0),ic.max));
+				}
 			}
 		}
 	}

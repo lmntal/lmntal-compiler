@@ -15,6 +15,7 @@ import type.argument.Path;
 import type.argument.TypeVarConstraint;
 import type.quantity.FixedCounts;
 import type.quantity.IntervalCount;
+import type.quantity.NumCount;
 import type.quantity.QuantityInferer;
 
 /**
@@ -93,7 +94,17 @@ public class TypePrinter {
 					memnameToFunctorTypes.get(memname);
 				
 //				if(fcs.functorToCount.containsKey(f)){
-
+				boolean flgNoCount = false;
+				if(fcs == null)flgNoCount = true;
+				IntervalCount fc = null;
+				if(!flgNoCount){
+					fc = fcs.functorToCount.get(f);
+					if(fc == null)continue;
+					if(fc.min.compare(new NumCount(0))==0 && fc.max.compare(new NumCount(0))==0){
+						continue;
+					}
+				}
+				
 					StringBuffer texp = new StringBuffer("");
 					texp.append("\t" + f.getQuotedAtomName());
 					texp.append("(");
@@ -117,14 +128,8 @@ public class TypePrinter {
 					}
 					texp.append(") : ");
 					
-					if(fcs != null){
-						IntervalCount fc = fcs.functorToCount.get(f);
-						if(fc != null)
-							texp.append(fc);
-						else
-							texp.append(0);
-					}
-					else texp.append("??");
+					if(flgNoCount)texp.append("??");
+					else texp.append(fc);
 					
 					Env.p(texp);
 //				}
@@ -141,7 +146,8 @@ public class TypePrinter {
 					
 					if(fcs.memnameToCount.containsKey(childname)){
 						IntervalCount fc = fcs.memnameToCount.get(childname);
-						Env.p("\t" + childname + "{} : " + ((fc==null)?"0":fc));
+						if(fc==null)continue;
+						Env.p("\t" + childname + "{} : " + fc);
 					}
 				}
 			}

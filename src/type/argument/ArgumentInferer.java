@@ -226,6 +226,9 @@ public class ArgumentInferer {
 					LinkOccurrence partnerOfPartner =
 						TypeEnv.getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
 //					addUnifyConstraint(-1,lhsPartner, partnerOfPartner);
+					if(partnerOfPartner.atom instanceof ProcessContext){
+						throw new TypeException("SYNTAX ERROR : head PC connected each other.");
+					}
 					addConstraintAboutLinks(-1,lhsPartner,partnerOfPartner);
 				}
 				else{

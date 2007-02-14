@@ -115,6 +115,8 @@ public class QuantityInferer {
 			if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
 		}
 		for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.typedProcessContexts)){
+			// データ型は無視
+			if(TypeEnv.dataTypeOfContextDef(rhsOcc.def)!=null)continue;
 			ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
 			if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
 		}
@@ -190,6 +192,8 @@ public class QuantityInferer {
 	 * 確認できたらtrueを、確認できなければfalseを返す */
 	public boolean checkIndependency(List<ProcessContext> rhsOccs, Membrane rhs){
 		for(ProcessContext rhsOcc : rhsOccs){
+			// データ型の場合無視する
+			if(TypeEnv.dataTypeOfContextDef(rhsOcc.def)!=null)continue;
 			Membrane lhsmem = ((ProcessContext)rhsOcc.def.lhsOcc).mem;
 			if(lhsmem.processContexts.size() > 0){
 				boolean ok = checkOccurrence((List<ProcessContext>)((ProcessContext)lhsmem.processContexts.get(0)).def.rhsOccs, rhs);

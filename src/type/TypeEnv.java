@@ -122,6 +122,10 @@ public final class TypeEnv {
 	private static void knowTPCMem(Membrane mem)throws TypeException{
 		for(RuleStructure rs : mem.rules){
 			knowTPCGuard(rs.guardMem);
+			knowTPCMem(rs.rightMem);
+		}
+		for(Membrane child : mem.mems){
+			knowTPCMem(child);
 		}
 	}
 	
