@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import test.JavaTypeChecker;
 import type.TypeException;
 import type.TypeInferer;
 import util.StreamDumper;

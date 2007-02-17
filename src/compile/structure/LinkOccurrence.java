@@ -25,13 +25,6 @@ public final class LinkOccurrence {
 	public LinkOccurrence buddy = null;
 	
 	/**
-	 * このリンク先のJavaの型
-	 * test.JavaTypeChckerで使う．
-	 * test.JavaTypeChckerがなくなればこのフィールドも消す
-	 */
-	public Class type; //2006.11.12 inui
-	
-	/**
 	 * リンク出現を生成する。
 	 * @param name リンク名
 	 * @param atom 所属するアトム
