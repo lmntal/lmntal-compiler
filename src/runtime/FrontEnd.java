@@ -269,8 +269,6 @@ public class FrontEnd {
 					case '-': // 文字列オプション						
 						if(args[i].equals("--gui")){
 							Env.fGUI = true;
-						} else if (args[i].equals("--check-java-type")) {
-							JavaTypeChecker.enabled = true;
 						} else if (args[i].equals("--color")) {//2006.11.13 inui
 							/// --color
 							/// color dump
@@ -663,8 +661,6 @@ public class FrontEnd {
 			try {
 				LMNParser lp = new LMNParser(src);
 				m = lp.parse();
-				if (JavaTypeChecker.enabled && JavaTypeChecker.containsJavaTypeError(m)) //2006.11.13 inui
-					System.exit(0);
 			}	
 			catch (ParseException e) {
 				Env.p("Compilation Failed");
