@@ -19,6 +19,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -106,6 +107,7 @@ public class GraphPanel extends JPanel {
 	private Node selectedNode_ = null;
 	private Node orgRootNode_;
 	private RepaintThread repaintTh_ = null;
+	private Map<Node, Node> removeLinkMap_ = new HashMap<Node, Node>();
 	private Membrane rootMembrane_;
 	private Node rootNode_;
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
@@ -296,6 +298,9 @@ public class GraphPanel extends JPanel {
 		if(!newLinkMap_.isEmpty()){
 			addLink();
 		}
+		if(!removeLinkMap_.isEmpty()){
+			removeLink();
+		}
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
@@ -402,7 +407,9 @@ public class GraphPanel extends JPanel {
 	
 		g.setColor(Color.BLACK);
 		if(null != rootNode_){
-			rootNode_.paint(g);
+			synchronized (rootNode_.getChildMap()) {
+				rootNode_.paint(g);
+			}
 		}
 
 		// EditLink時に補助線を引く
@@ -437,6 +444,84 @@ public class GraphPanel extends JPanel {
 			g.setColor(Color.RED);
 			g.drawString("Heating Timer:" + heatingTimer, 10, 30);
 		}
+	}
+	
+	/**
+	 * リンクを張りなおす。<p>
+	 * 現状は、アトムの再利用が無理。（再利用しつつリンク数をへらせないので）。
+	 */
+	private void removeLink(){
+		synchronized (removeLinkMap_) {
+			Iterator<Node> atoms = removeLinkMap_.keySet().iterator();
+			while(atoms.hasNext()){
+				Node sourceNode = atoms.next();
+				Node targetNode = removeLinkMap_.get(sourceNode);
+				Atom sourceAtom = (Atom)sourceNode.getObject();
+				Atom targetAtom = (Atom)targetNode.getObject();
+				int sourceAtomIndex = -1;
+				int targetAtomIndex = -1;
+				for(int i = 0; i < sourceAtom.getEdgeCount(); i++){
+					if(sourceAtom.getNthAtom(i) == targetAtom){
+						sourceAtomIndex = i;
+						break;
+					}
+				}
+				for(int i = 0; i < targetAtom.getEdgeCount(); i++){
+					if(targetAtom.getNthAtom(i) == sourceAtom){
+						targetAtomIndex = i;
+						break;
+					}
+				}
+				// 対象アトム同士がつながっていない
+				if(sourceAtomIndex < 0 || targetAtomIndex < 0){
+					continue;
+				}
+				
+				Functor newSourceFunctor =
+					new SymbolFunctor(sourceAtom.getName(), sourceAtom.getEdgeCount() - 1);
+				Functor newTargetFunctor =
+					new SymbolFunctor(targetAtom.getName(), targetAtom.getEdgeCount() - 1);
+
+				Atom newSourceAtom = new Atom(sourceAtom.getMem(), newSourceFunctor);
+				Atom newTargetAtom = new Atom(targetAtom.getMem(), newTargetFunctor);
+				sourceAtom.getMem().addAtom(newSourceAtom);
+				targetAtom.getMem().addAtom(newTargetAtom);
+				
+				// sourceAtomの繋ぎ変え
+				for(int i = 0; i < sourceAtom.getEdgeCount(); i++){
+					if(i == sourceAtomIndex){ continue; }
+					sourceAtom.getMem().relink(newSourceAtom, i, sourceAtom, i);
+				}
+				
+//				// proxyAtom消し
+//				Atom proxyAtom = sourceAtom.nthAtom(sourceAtomIndex);
+//				Set<Atom> removeAtomSet = new HashSet<Atom>();
+//				while(proxyAtom.getFunctor().isInsideProxy() || proxyAtom.getFunctor().isOutsideProxy()) {
+//					removeAtomSet.add(proxyAtom);
+//					proxyAtom = proxyAtom.nthAtom(0).nthAtom(1);
+//				}
+//				Iterator<Atom> removeAtoms = removeAtomSet.iterator();
+//				while(removeAtoms.hasNext()){
+//					Atom removeAtom = removeAtoms.next();
+//					removeAtom.remove();
+//				}
+				sourceAtom.remove();
+				
+				for(int i = 0; i < targetAtom.getEdgeCount(); i++){
+					if(i == targetAtomIndex){ continue; }
+					targetAtom.getMem().relink(newTargetAtom, i, targetAtom, i);
+				}
+				targetAtom.remove();
+				
+				sourceNode.reset(newSourceAtom);
+				targetNode.reset(newTargetAtom);
+			}
+			removeLinkMap_.clear();
+		}
+//		rootNode_.reset(rootMembrane_);
+		resetLink();
+		commonListener_.setLog(rootMembrane_.toString());
+		
 	}
 	
 	public void revokeState(){
@@ -621,7 +706,7 @@ public class GraphPanel extends JPanel {
 			 * 右クリック処理
 			 * Nodeのリンクをベジエ曲線化
 			 */
-			if(e.getButton() == MouseEvent.BUTTON3){
+			if(!editLinkMode_ && e.getButton() == MouseEvent.BUTTON3){
 				if(null == moveTargetNode_){ return; }
 				
 				NodeFunction.showNodeMenu(moveTargetNode_, myPanel_);
@@ -629,31 +714,29 @@ public class GraphPanel extends JPanel {
 				moveTargetNode_ = null;
 				return;
 			}
-			
-			if(null != moveTargetNode_){
-				if(editLinkMode_ && moveTargetNode_.getObject() instanceof Atom){
-					rootNode_.setUncalc(true);
-					return;
-				}
-				moveTargetNode_.setUncalc(true);
-				if(null != moveTargetNode_.getParent()){
-					moveTargetNode_.getParent().setUncalcOutSideForce(true);
-				}
-				if(selectedNode_ != moveTargetNode_ && 
-						!moveTargetNode_.isBezNode()){
-					moveTargetNode_.setSelected(true);
-					if(null != selectedNode_){
-						selectedNode_.setSelected(false);
-					}
-					commonListener_.setSelectedNode(moveTargetNode_);
-					selectedNode_ = moveTargetNode_;
-				} else if(selectedNode_ == moveTargetNode_){
-					moveTargetNode_.setSelected(false);
-					selectedNode_ = null;
-					commonListener_.setSelectedNode(null);
-				}
-			} else if(null == moveTargetNode_){
+			if(null == moveTargetNode_){
 				moveTargetNode_ = rootNode_;
+			}
+			if(editLinkMode_ && moveTargetNode_.getObject() instanceof Atom){
+				rootNode_.setUncalc(true);
+				return;
+			}
+			moveTargetNode_.setUncalc(true);
+			if(null != moveTargetNode_.getParent()){
+				moveTargetNode_.getParent().setUncalcOutSideForce(true);
+			}
+			if(selectedNode_ != moveTargetNode_ && 
+					!moveTargetNode_.isBezNode()){
+				moveTargetNode_.setSelected(true);
+				if(null != selectedNode_){
+					selectedNode_.setSelected(false);
+				}
+				commonListener_.setSelectedNode(moveTargetNode_);
+				selectedNode_ = moveTargetNode_;
+			} else if(selectedNode_ == moveTargetNode_){
+				moveTargetNode_.setSelected(false);
+				selectedNode_ = null;
+				commonListener_.setSelectedNode(null);
 			}
 			deltaX = e.getX() - (moveTargetNode_.getCenterPoint().x * getMagnification());
 			deltaY = e.getY() - (moveTargetNode_.getCenterPoint().y * getMagnification());
@@ -680,7 +763,12 @@ public class GraphPanel extends JPanel {
 				if(null != targetNode &&
 						targetNode.getObject() instanceof Atom)
 				{
-					newLinkMap_.put(moveTargetNode_, targetNode);
+					if(e.getButton() == MouseEvent.BUTTON1){
+						newLinkMap_.put(moveTargetNode_, targetNode);
+					}
+					else if(e.getButton() == MouseEvent.BUTTON3){
+						removeLinkMap_.put(moveTargetNode_, targetNode);
+					}
 				}
 				rootNode_.setUncalc(false);
 			}

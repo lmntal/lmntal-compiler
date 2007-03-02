@@ -977,11 +977,39 @@ public class Node implements Cloneable{
 	private void setAtom(Atom atom){
 		imAtom_ = true;
 		name_ = (null != atom.getName()) ? atom.getName() : "";
-		// [0, 7] -> [128, 255] for eash R G B
-		int ir = 0x7F - ((name_.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;
-		int ig = 0x7F - ((name_.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
-		int ib = 0x7F - ((name_.hashCode() & 0x00F) >> 0) * 0x08 + 0x7F;
-		myColor_ = new Color(ir, ig, ib);
+		if(name_.equalsIgnoreCase("black")){
+			myColor_ = Color.BLACK;
+		} else if(name_.equalsIgnoreCase("blue")){
+			myColor_ = Color.BLUE;
+		} else if(name_.equalsIgnoreCase("cyan")){
+			myColor_ = Color.CYAN;
+		} else if(name_.equalsIgnoreCase("dark_gray")){
+			myColor_ = Color.DARK_GRAY;
+		} else if(name_.equalsIgnoreCase("gray")){
+			myColor_ = Color.GRAY;
+		} else if(name_.equalsIgnoreCase("green")){
+			myColor_ = Color.GREEN;
+		} else if(name_.equalsIgnoreCase("light_gray")){
+			myColor_ = Color.LIGHT_GRAY;
+		} else if(name_.equalsIgnoreCase("magenta")){
+			myColor_ = Color.MAGENTA;
+		} else if(name_.equalsIgnoreCase("orange")){
+			myColor_ = Color.ORANGE;
+		} else if(name_.equalsIgnoreCase("pink")){
+			myColor_ = Color.PINK;
+		} else if(name_.equalsIgnoreCase("red")){
+			myColor_ = Color.RED;
+		} else if(name_.equalsIgnoreCase("white")){
+			myColor_ = Color.WHITE;
+		} else if(name_.equalsIgnoreCase("yellow")){
+			myColor_ = Color.YELLOW;
+		} else {
+			// [0, 7] -> [128, 255] for eash R G B
+			int ir = 0x7F - ((name_.hashCode() & 0xF00) >> 8) * 0x08 + 0x7F;
+			int ig = 0x7F - ((name_.hashCode() & 0x0F0) >> 4) * 0x08 + 0x7F;
+			int ib = 0x7F - ((name_.hashCode() & 0x00F) >> 0) * 0x08 + 0x7F;
+			myColor_ = new Color(ir, ig, ib);
+		}
 			
 		if(0 < atom.getEdgeCount()){
 			LinkSet.addLink(this);
