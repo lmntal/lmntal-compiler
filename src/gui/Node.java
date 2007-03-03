@@ -76,7 +76,7 @@ public class Node implements Cloneable{
 	// static
 
 	static
-	private BufferedImage ball_;
+	private Image ball_;
 	
 	/** 炎のイメージ */
 	static
@@ -213,11 +213,8 @@ public class Node implements Cloneable{
 	
 	static
 	public void loadFire(GraphPanel panel){
-		try {
-			ball_ = ImageIO.read(new File(panel.getClass().getResource("ball.png").getFile()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+		ball_ = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("ball.png"));
 		fire_[0] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire1_.png"));
 		fire_[1] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire2_.png"));
 		fire_[2] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire3_.png"));
