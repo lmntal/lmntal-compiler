@@ -267,8 +267,12 @@ public class GraphPanel extends JPanel {
 						newSourceAtom.getEdgeCount() - 1,
 						newTargetAtom,
 						newTargetAtom.getEdgeCount() - 1);
-				sourceNode.reset(newSourceAtom);
-				targetNode.reset(newTargetAtom);
+				synchronized (sourceNode.getParent().getChildMap()) {
+					sourceNode.reset(newSourceAtom);
+				}
+				synchronized (targetNode.getParent().getChildMap()) {
+					targetNode.reset(newTargetAtom);
+				}
 			}
 			newLinkMap_.clear();
 		}
