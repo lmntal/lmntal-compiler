@@ -14,17 +14,12 @@ import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import javax.imageio.ImageIO;
 
 import runtime.Atom;
 import runtime.InterpretedRuleset;
@@ -498,7 +493,8 @@ public class Node implements Cloneable{
 	 */
 	public Node getPointNode(Rectangle2D rect, boolean force){
 		// ベジエ曲線のチェック
-		if(null == myObject_){
+//		if(null == myObject_){
+		if(null == parent_){
 			Iterator<Node> nodes = bezierSet_.iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
@@ -974,31 +970,31 @@ public class Node implements Cloneable{
 	private void setAtom(Atom atom){
 		imAtom_ = true;
 		name_ = (null != atom.getName()) ? atom.getName() : "";
-		if(name_.equalsIgnoreCase("black")){
+		if(name_.toLowerCase().endsWith("black")){
 			myColor_ = Color.BLACK;
-		} else if(name_.equalsIgnoreCase("blue")){
+		} else if(name_.toLowerCase().endsWith("blue")){
 			myColor_ = Color.BLUE;
-		} else if(name_.equalsIgnoreCase("cyan")){
+		} else if(name_.toLowerCase().endsWith("cyan")){
 			myColor_ = Color.CYAN;
-		} else if(name_.equalsIgnoreCase("dark_gray")){
+		} else if(name_.toLowerCase().endsWith("dark_gray")){
 			myColor_ = Color.DARK_GRAY;
-		} else if(name_.equalsIgnoreCase("gray")){
+		} else if(name_.toLowerCase().endsWith("gray")){
 			myColor_ = Color.GRAY;
-		} else if(name_.equalsIgnoreCase("green")){
+		} else if(name_.toLowerCase().endsWith("green")){
 			myColor_ = Color.GREEN;
-		} else if(name_.equalsIgnoreCase("light_gray")){
+		} else if(name_.toLowerCase().endsWith("light_gray")){
 			myColor_ = Color.LIGHT_GRAY;
-		} else if(name_.equalsIgnoreCase("magenta")){
+		} else if(name_.toLowerCase().endsWith("magenta")){
 			myColor_ = Color.MAGENTA;
-		} else if(name_.equalsIgnoreCase("orange")){
+		} else if(name_.toLowerCase().endsWith("orange")){
 			myColor_ = Color.ORANGE;
-		} else if(name_.equalsIgnoreCase("pink")){
+		} else if(name_.toLowerCase().endsWith("pink")){
 			myColor_ = Color.PINK;
-		} else if(name_.equalsIgnoreCase("red")){
+		} else if(name_.toLowerCase().endsWith("red")){
 			myColor_ = Color.RED;
-		} else if(name_.equalsIgnoreCase("white")){
+		} else if(name_.toLowerCase().endsWith("white")){
 			myColor_ = Color.WHITE;
-		} else if(name_.equalsIgnoreCase("yellow")){
+		} else if(name_.toLowerCase().endsWith("yellow")){
 			myColor_ = Color.YELLOW;
 		} else {
 			// [0, 7] -> [128, 255] for eash R G B
@@ -1256,7 +1252,7 @@ public class Node implements Cloneable{
 	 * @param p
 	 */
 	public void setPosDelta(double dx, double dy){
-		if(null == myObject_ || null == parent_){
+		if(null != myObject_ && null == parent_){
 			dx = dx + rect_.x;
 			dy = dy + rect_.y;
 		} else {

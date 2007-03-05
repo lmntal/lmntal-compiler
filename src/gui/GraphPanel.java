@@ -31,6 +31,7 @@ import javax.swing.border.BevelBorder;
 
 import runtime.Atom;
 import runtime.Functor;
+import runtime.IntegerFunctor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
 
@@ -243,9 +244,27 @@ public class GraphPanel extends JPanel {
 				Atom sourceAtom = (Atom)sourceNode.getObject();
 				Atom targetAtom = (Atom)targetNode.getObject();
 				
-				Functor newSourceFunctor =
+				Functor newSourceFunctor;
+				Functor newTargetFunctor;
+				
+//				if(sourceAtom.getEdgeCount() == 0){
+//					try {
+//						int value = Integer.parseInt(sourceAtom.getName());
+//						newSourceFunctor =
+//							new IntegerFunctor(value);
+//					} catch (NumberFormatException e) {
+//						newSourceFunctor =
+//							new SymbolFunctor(sourceAtom.getName(), 1);
+//					}
+//				} else {
+//					newSourceFunctor =
+//						new SymbolFunctor(sourceAtom.getName(), sourceAtom.getEdgeCount() + 1);
+//				}
+				
+				
+				newSourceFunctor =
 					new SymbolFunctor(sourceAtom.getName(), sourceAtom.getEdgeCount() + 1);
-				Functor newTargetFunctor =
+				newTargetFunctor =
 					new SymbolFunctor(targetAtom.getName(), targetAtom.getEdgeCount() + 1);
 
 				Atom newSourceAtom = new Atom(sourceAtom.getMem(), newSourceFunctor);
@@ -490,35 +509,39 @@ public class GraphPanel extends JPanel {
 				Atom newTargetAtom = new Atom(targetAtom.getMem(), newTargetFunctor);
 				sourceAtom.getMem().addAtom(newSourceAtom);
 				targetAtom.getMem().addAtom(newTargetAtom);
-				
-				// sourceAtomの繋ぎ変え
-				for(int i = 0; i < sourceAtom.getEdgeCount(); i++){
-					if(i == sourceAtomIndex){ continue; }
-					sourceAtom.getMem().relink(newSourceAtom, i, sourceAtom, i);
+
+				synchronized (targetNode.getParent().getChildMap()) {
+					for(int i = 0, j = 0; i < targetAtom.getEdgeCount(); i++){
+						if(i == targetAtomIndex){ continue; }
+						targetAtom.getMem().relink(newTargetAtom, j, targetAtom, i);
+						j++;
+					}
+					targetNode.reset(newTargetAtom);
 				}
-				
-//				// proxyAtom消し
-//				Atom proxyAtom = sourceAtom.nthAtom(sourceAtomIndex);
-//				Set<Atom> removeAtomSet = new HashSet<Atom>();
-//				while(proxyAtom.getFunctor().isInsideProxy() || proxyAtom.getFunctor().isOutsideProxy()) {
-//					removeAtomSet.add(proxyAtom);
-//					proxyAtom = proxyAtom.nthAtom(0).nthAtom(1);
-//				}
-//				Iterator<Atom> removeAtoms = removeAtomSet.iterator();
-//				while(removeAtoms.hasNext()){
-//					Atom removeAtom = removeAtoms.next();
-//					removeAtom.remove();
-//				}
+				synchronized (sourceNode.getParent().getChildMap()) {
+					// sourceAtomの繋ぎ変え
+					for(int i = 0, j = 0; i < sourceAtom.getEdgeCount(); i++){
+						if(i == sourceAtomIndex){ continue; }
+						sourceAtom.getMem().relink(newSourceAtom, j, sourceAtom, i);
+						j++;
+					}
+
+					// proxyAtom消し
+					Atom proxyAtom = sourceAtom.nthAtom(sourceAtomIndex);
+					Set<Atom> removeAtomSet = new HashSet<Atom>();
+					while(proxyAtom.getFunctor().isInsideProxy() || proxyAtom.getFunctor().isOutsideProxy()) {
+						removeAtomSet.add(proxyAtom);
+						proxyAtom = proxyAtom.nthAtom(0).nthAtom(1);
+					}
+					Iterator<Atom> removeAtoms = removeAtomSet.iterator();
+					while(removeAtoms.hasNext()){
+						Atom removeAtom = removeAtoms.next();
+						removeAtom.remove();
+					}
+					sourceNode.reset(newSourceAtom);
+				}
 				sourceAtom.remove();
-				
-				for(int i = 0; i < targetAtom.getEdgeCount(); i++){
-					if(i == targetAtomIndex){ continue; }
-					targetAtom.getMem().relink(newTargetAtom, i, targetAtom, i);
-				}
 				targetAtom.remove();
-				
-				sourceNode.reset(newSourceAtom);
-				targetNode.reset(newTargetAtom);
 			}
 			removeLinkMap_.clear();
 		}
