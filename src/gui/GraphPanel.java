@@ -414,54 +414,53 @@ public class GraphPanel extends JPanel {
 		if(stopPainting_){
 			g.setColor(Color.GRAY);
 			g.fillRect(0, 0,(int)getWidth(), (int)getHeight());
-			return;
-		}
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0,(int)getWidth(), (int)getHeight());
-	
-		g.setColor(Color.WHITE);
-		af_.setTransform(getMagnification(),
-				0,
-				0,
-				getMagnification(),
-				(double)getWidth() / 2,
-				(double)getHeight() / 2);
-		((Graphics2D)g).setTransform(af_);
-	
-		g.setColor(Color.BLACK);
-		if(null != rootNode_){
-			synchronized (rootNode_.getChildMap()) {
-				rootNode_.paint(g);
+		} else {
+			g.setColor(Color.WHITE);
+			g.fillRect(0, 0,(int)getWidth(), (int)getHeight());
+
+			g.setColor(Color.WHITE);
+			af_.setTransform(getMagnification(),
+					0,
+					0,
+					getMagnification(),
+					(double)getWidth() / 2,
+					(double)getHeight() / 2);
+			((Graphics2D)g).setTransform(af_);
+
+			g.setColor(Color.BLACK);
+			if(null != rootNode_){
+				synchronized (rootNode_.getChildMap()) {
+					rootNode_.paint(g);
+				}
+			}
+
+			// EditLink時に補助線を引く
+			if(editLinkMode_ &&
+					null != lastMousePoint &&
+					null != moveTargetNode_ &&
+					moveTargetNode_ != rootNode_ &&
+					moveTargetNode_.getObject() instanceof Atom)
+			{
+				g.setColor(Color.RED);
+				Point2D sourcePoint = moveTargetNode_.getCenterPoint();
+				g.drawLine((int)sourcePoint.getX(),
+						(int)sourcePoint.getY(),
+						(int)((lastMousePoint.getX() - ((double)getWidth() / 2)) / getMagnification()),
+						(int)((lastMousePoint.getY() - ((double)getHeight() / 2)) / getMagnification()));
+			}
+
+			// 初期位置に戻す
+			((Graphics2D)g).setTransform(new AffineTransform());
+
+			if(localHeatingMode_ && nowHeating_){
+				Point mousePoint = MouseInfo.getPointerInfo().getLocation();
+				g.drawImage(fire_[fireID_],
+						mousePoint.x - FIRE_WIDTH_MARGIN,
+						mousePoint.y - FIRE_HEIGHT_MARGIN,
+						this);
+				fireID_ = (fireID_ < 6) ? fireID_ + 1 : 0; 
 			}
 		}
-
-		// EditLink時に補助線を引く
-		if(editLinkMode_ &&
-				null != lastMousePoint &&
-				null != moveTargetNode_ &&
-				moveTargetNode_ != rootNode_ &&
-				moveTargetNode_.getObject() instanceof Atom)
-		{
-			g.setColor(Color.RED);
-			Point2D sourcePoint = moveTargetNode_.getCenterPoint();
-			g.drawLine((int)sourcePoint.getX(),
-					(int)sourcePoint.getY(),
-					(int)((lastMousePoint.getX() - ((double)getWidth() / 2)) / getMagnification()),
-					(int)((lastMousePoint.getY() - ((double)getHeight() / 2)) / getMagnification()));
-		}
-	
-		// 初期位置に戻す
-		((Graphics2D)g).setTransform(new AffineTransform());
-
-		if(localHeatingMode_ && nowHeating_){
-			Point mousePoint = MouseInfo.getPointerInfo().getLocation();
-			g.drawImage(fire_[fireID_],
-					mousePoint.x - FIRE_WIDTH_MARGIN,
-					mousePoint.y - FIRE_HEIGHT_MARGIN,
-					this);
-			fireID_ = (fireID_ < 6) ? fireID_ + 1 : 0; 
-		}
-		
 		int heatingTimer = NodeFunction.getDivergence();
 		if(0 < heatingTimer){
 			g.setColor(Color.RED);
