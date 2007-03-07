@@ -241,13 +241,16 @@ public class NodeFunction {
 
 				Point2D targetPoint = targetNode.getCenterPoint();
 				
+				
 				double fx = divergenceFource * intersectionRect.getWidth();
-				double fy = divergenceFource * intersectionRect.getHeight();
 				double dx = sourcePoint.getX() - targetPoint.getX();
+				double fy = divergenceFource * intersectionRect.getHeight();
 				double dy = sourcePoint.getY() - targetPoint.getY();
 
-				double ddx = fx * dx;
-				double ddy = fy * dy;
+				boolean calcX = (((sourceNode.getBounds2D().getWidth() / 2) - Math.abs(dx)) < ((sourceNode.getBounds2D().getHeight() / 2) - Math.abs(dy)));
+				
+				double ddx = (calcX) ? fx * dx : 0;
+				double ddy = (!calcX) ? fy * dy : 0;
 
 				if(!sourceNode.isAtom() && !targetNode.isAtom()){
 					sourceNode.moveDelta(ddx, ddy);
