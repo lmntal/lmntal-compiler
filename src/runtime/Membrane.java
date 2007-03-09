@@ -230,7 +230,7 @@ public final class Membrane extends QueuedEntity {
 		return atoms.iterator();
 	}
 	/** この膜にある子膜の反復子を取得する */
-	public Iterator memIterator() {
+	public Iterator<Membrane> memIterator() {
 		return mems.iterator();
 	}
 	/** 名前funcを持つアトムの反復子を取得する */
