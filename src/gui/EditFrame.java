@@ -40,6 +40,18 @@ public class EditFrame extends JFrame {
 	
 	final static
 	public String TITLE = "Edit Panel";
+
+	final static
+	private String CREATE_ATOM = "Create Atom";
+
+	final static
+	private String CREATE_MEMBRANE = "Create Membrane";
+	
+	final static
+	private String RENAME_ATOM = "Rename Atom";
+	
+	final static
+	private String RENAME_MEMBRANE = "Rename Membrane";
 	
 	final static
 	private Font FONT = new Font("SansSerif", Font.PLAIN, 25);
@@ -60,10 +72,10 @@ public class EditFrame extends JFrame {
 	/////////////////////////////////////////////////////////////////
 
 	static
-	private JButton createAtomBt_ = new JButton("Create Atom");
+	private JButton editAtomBt_ = new JButton(CREATE_ATOM);
 	
 	static
-	private JButton createMemBt_ = new JButton("Create Membrane");
+	private JButton editMemBt_ = new JButton(CREATE_MEMBRANE);
 	
 	static
 	private JLabel nodeNameLabel_ = new JLabel("New name : ");
@@ -140,14 +152,14 @@ public class EditFrame extends JFrame {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.weightx = 1.0;
 		gbc.weighty = 0.0;
-		createAtomBt_.setEnabled(false);
-		createAtomBt_.addActionListener(new CreateAtomAction());
-		add(createAtomBt_, gbc);
+		editAtomBt_.setEnabled(false);
+		editAtomBt_.addActionListener(new EditAtomAction());
+		add(editAtomBt_, gbc);
 		
 		gbc.gridx += 1;
-		createMemBt_.setEnabled(false);
-		createMemBt_.addActionListener(new CreateMembraneAction());
-		add(createMemBt_, gbc);
+		editMemBt_.setEnabled(false);
+		editMemBt_.addActionListener(new EditMembraneAction());
+		add(editMemBt_, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy += 1;
@@ -178,8 +190,8 @@ public class EditFrame extends JFrame {
 		String detail = "";
 		
 		if(null == node){
-			createAtomBt_.setEnabled(false);
-			createMemBt_.setEnabled(false);
+			editAtomBt_.setEnabled(false);
+			editMemBt_.setEnabled(false);
 
 			nodeDetail_.setText(INFO_NOTHING);
 			return;
@@ -188,17 +200,19 @@ public class EditFrame extends JFrame {
 			String nodeName = node.getName();
 			int linkNum = ((Atom)node.getObject()).getEdgeCount();
 			
-			createAtomBt_.setEnabled(false);
-			createMemBt_.setEnabled(false);
+			editAtomBt_.setText(RENAME_ATOM);
+			editAtomBt_.setEnabled(true);
+			editMemBt_.setEnabled(false);
 			detail =
 				String.format(INFO_ATOM_TEXT, nodeName, linkNum);
 		} 
 		else if(node.getObject() instanceof Membrane){
 			String nodeName = node.getName();
 			int nodeNum = ((Membrane)node.getObject()).getAtomCount();
-			
-			createAtomBt_.setEnabled(true);
-			createMemBt_.setEnabled(true);
+
+			editAtomBt_.setText(CREATE_ATOM);
+			editAtomBt_.setEnabled(true);
+			editMemBt_.setEnabled(true);
 			detail =
 				String.format(INFO_MEM_TEXT, nodeName, nodeNum);
 		}
@@ -210,21 +224,27 @@ public class EditFrame extends JFrame {
 	///////////////////////////////////////////////////////////////////////////
 	
 	static
-	private class CreateAtomAction implements ActionListener {
+	private class EditAtomAction implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			if(nodeNameArea_.getText().equals("") ||
-					!(selectedNode_.getObject() instanceof Membrane)){
+					(!(selectedNode_.getObject() instanceof Membrane) &&
+							!(selectedNode_.getObject() instanceof Atom))){
 				Toolkit.getDefaultToolkit().beep();
 				return;
 			}
-			commonListener_.addAtom(nodeNameArea_.getText(),
-					(Membrane)selectedNode_.getObject());
+			if(editAtomBt_.getText().equals(CREATE_ATOM)){
+				commonListener_.addAtom(nodeNameArea_.getText(),
+						(Membrane)selectedNode_.getObject());
+			} else {
+				commonListener_.renameAtom(nodeNameArea_.getText(),
+						selectedNode_);
+			}
 		}
 		
 	}
 	
 	static
-	private class CreateMembraneAction implements ActionListener {
+	private class EditMembraneAction implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			if(!(selectedNode_.getObject() instanceof Membrane)){
 				Toolkit.getDefaultToolkit().beep();

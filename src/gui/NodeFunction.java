@@ -464,7 +464,7 @@ public class NodeFunction {
 					targetNode = targetNode.getParent();
 				}
 				Rectangle2D rect = nthNode.getBounds2D();
-				rect.setRect(rect.getX() - ddx - dxMargin, rect.getY() - ddy + dyMargin, rect.getWidth(), rect.getHeight());
+				rect.setRect(rect.getX() - ddx - dxMargin, rect.getY() - ddy - dyMargin, rect.getWidth(), rect.getHeight());
 				if(targetNode.getBounds2D().contains(rect)){
 					nthNode.moveDelta(-ddx, -ddy);
 				} else {

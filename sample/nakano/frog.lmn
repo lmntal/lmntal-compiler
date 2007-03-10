@@ -1,0 +1,16 @@
+  black(L37,white(L19,L20),white(L24,L19),L40,white(L20,L42)), 
+ green(L457,L464,green(L454,L461,green(L410,L417,green(L310,L317,
+ green(L258,L265,green(L208,L201,green(L132,L133))))))), green(L456,L457,
+ green(L447,L454,green(L379,L410,green(L301,L310,green(L239,L265,
+ green(L201,L197,white(L136,L82,L94,L133))))))), green(L464,L471,
+ green(L461,L468,green(L417,L366,green(L317,L324,green(L251,L258,
+ green(L208,L186,white(L24,L145,L37,L132))))))), green(green,green,
+ green,green(L367,green(L324,green(L245,L187),green(L245,L251,
+ white(L42,L145,L40,L186,L187)),L340),L483)), green(green,green,
+ green,green(L378,L304,L442)), green(L456,green(L441,L442),green(L441,L447,
+ green(L378,L379,green(L301,green(L233,L198),green(L233,L239,white(L136,L90,
+ black(L94,white(L65,L66),white(L66,L82),white
+ (L90,L65)),L197,L198)),L304))),green(green,green,green)), 
+ green(L471,green(L468,L475,green(L366,L367,L340)),green(L475,L483),
+ green(green,green,green)).
+ 

@@ -3,6 +3,7 @@ package gui;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import runtime.Atom;
 import runtime.Membrane;
 
 /**
@@ -56,10 +57,20 @@ public class CommonListener implements MouseWheelListener {
 	
 	///////////////////////////////////////////////////////////////////////////
 
-	
+
 	public void addAtom(String name, Membrane targetMem){
 		if(null == panel_){ return; }
 		panel_.addAtom(name, targetMem);
+	}
+	
+	public void renameAtom(String name, Node node){
+		if(null == panel_){ return; }
+		panel_.addRenameAtom(name, node);
+	}
+	
+	public void renameMembrane(String name, Node node){
+		if(null == panel_){ return; }
+		panel_.addRenameMembrane(name, node);
 	}
 	
 	public void addMembrane(String name, Membrane targetMem){

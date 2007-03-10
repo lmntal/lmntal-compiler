@@ -31,7 +31,6 @@ import javax.swing.border.BevelBorder;
 
 import runtime.Atom;
 import runtime.Functor;
-import runtime.IntegerFunctor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
 
@@ -109,6 +108,8 @@ public class GraphPanel extends JPanel {
 	private Node orgRootNode_;
 	private RepaintThread repaintTh_ = null;
 	private Map<Node, Node> removeLinkMap_ = new HashMap<Node, Node>();
+	private Map<Node, String> renameAtomMap_ = new HashMap<Node, String>();
+	private Map<Node, String> renameMembraneMap_ = new HashMap<Node, String>();
 	private Membrane rootMembrane_;
 	private Node rootNode_;
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
@@ -204,6 +205,20 @@ public class GraphPanel extends JPanel {
 		mem.setName(name);
 		synchronized (newNodeMap_) {
 			newNodeMap_.put(mem, targetMem);
+		}
+	}
+
+	public void addRenameAtom(String name, Node node){
+		if(!(node.getObject() instanceof Atom)){ return; }
+		synchronized (renameAtomMap_) {
+			renameAtomMap_.put(node, name);
+		}
+	}
+	
+	public void addRenameMembrane(String name, Node node){
+		if(!(node.getObject() instanceof Membrane)){ return; }
+		synchronized (renameMembraneMap_) {
+			renameMembraneMap_.put(node, name);
 		}
 	}
 	
@@ -324,6 +339,9 @@ public class GraphPanel extends JPanel {
 		if(!removeLinkMap_.isEmpty()){
 			removeLink();
 		}
+		if(!renameAtomMap_.isEmpty()){
+			renameAtom();
+		}
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
@@ -342,6 +360,38 @@ public class GraphPanel extends JPanel {
         return Toolkit.getDefaultToolkit().createCustomCursor(
                 image, new Point(0,0), "null_cursor");
     }
+
+	/** Atomの名前を書き換える */
+	public void renameAtom(){
+		synchronized (renameAtomMap_) {
+			Iterator<Node> nodes = renameAtomMap_.keySet().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				Atom atom = (Atom)node.getObject();
+				atom.setName(renameAtomMap_.get(node));
+				synchronized (node.getParent().getChildMap()) {
+					node.setAtom(atom);
+				}
+			}
+			renameAtomMap_.clear();
+		}
+	}
+	
+	/** Membraneの名前を書き換える */
+	public void renameMenbrane(){
+		synchronized (renameMembraneMap_) {
+			Iterator<Node> nodes = renameMembraneMap_.keySet().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				Membrane mem = (Membrane)node.getObject();
+				mem.setName(renameMembraneMap_.get(node));
+				synchronized (node.getParent().getChildMap()) {
+					node.setMembrane(mem);
+				}
+			}
+			renameMembraneMap_.clear();
+		}
+	}
 
 	/**
 	 * 拡大縮小の倍率を取得する

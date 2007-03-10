@@ -93,6 +93,9 @@ public class Node implements Cloneable{
 	private boolean showRules_ = false;
 	
 	static
+	private boolean showAll_ = false;
+	
+	static
 	private Set<Node> bezierSet_ = new HashSet<Node>(); 
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -109,6 +112,10 @@ public class Node implements Cloneable{
 
 	/** 移動情報 */
 	private double dy_;
+	
+	private double insideDx_;
+	
+	private double insideDy_;
 	
 	private int fireID_ = 0;
 	
@@ -197,8 +204,14 @@ public class Node implements Cloneable{
 		
 		// 世界膜ならば可視それ以外は不可視
 		if(null != parent_){
-			setVisible(false, true);
 			setInvisibleRootNode(null);
+			setVisible(showAll_, true);
+			if(showAll_){
+				rect_.setFrameFromCenter(rect_.getCenterX(),
+						rect_.getCenterY(),
+						rect_.getCenterX() - ATOM_SIZE,
+						rect_.getCenterY() - ATOM_SIZE);
+			}
 //			resetAllLink();
 		} else {
 			rootMembrane_ = true;
@@ -473,6 +486,15 @@ public class Node implements Cloneable{
 	}
 	
 	/**
+	 * Nodeの左上の座標を取得する
+	 * @return Nodeの左上の座標
+	 * @return
+	 */
+	public Point2D.Double getPoint(){
+		return (new Point2D.Double(rect_.getX(), rect_.getY()));
+	}
+	
+	/**
 	 * Node固有のIDを取得する
 	 * @return
 	 */
@@ -573,6 +595,54 @@ public class Node implements Cloneable{
 			Node nthNode = LinkSet.getNodeByAtom(((Atom)myObject_).getNthAtom(0));
 			if(null == nthNode){ return; }
 			Point2D nthPoint = nthNode.getCenterPoint();
+
+			double x = nthPoint.getX();
+			double y = nthPoint.getY();
+			if(x == 0.0){ x=0.000000001; }
+			double angle = Math.atan(y / x);
+			
+			double dx = (nthPoint.getX() > 0) ? (Math.cos(angle) * 100) : -(Math.cos(angle) * 100); 
+			double dy = (nthPoint.getY() > 0) ? (Math.sin(angle) * 100) : -(Math.sin(angle) * 100); 
+			
+			rect_.x = nthPoint.getX() + dx + Math.random();
+			rect_.y = nthPoint.getY() + dy + Math.random();
+		} else {
+			double x = 0;
+			double y = 0;
+			double findNthNum = 0;
+			for(int i = 0; i < nthNum; i++){
+				Node nthNode = LinkSet.getNodeByAtom(((Atom)myObject_).getNthAtom(i));
+				if(null == nthNode){ continue; }
+				Point2D nthPoint = nthNode.getPoint();
+				x += nthPoint.getX();
+				y += nthPoint.getY();
+				findNthNum++;
+			}
+			if(1 == findNthNum){
+				rect_.x = x;
+				rect_.y = y;
+			}
+			else if(1 < findNthNum){
+				rect_.x = (x / findNthNum) + 1;
+				rect_.y = (y / findNthNum) + 1;
+			}
+			
+		}
+	}
+	/*
+	public void initPosition(){
+		if(null == myObject_){
+			rect_.x = parent_.getBounds2D().getCenterX() + 100;
+			rect_.y = parent_.getBounds2D().getCenterY();
+			return;
+		}
+		if(!(myObject_ instanceof Atom)){ return; }
+		int nthNum = ((Atom)myObject_).getEdgeCount();
+		if(0 == nthNum){ return; }
+		if(1 == nthNum){
+			Node nthNode = LinkSet.getNodeByAtom(((Atom)myObject_).getNthAtom(0));
+			if(null == nthNode){ return; }
+			Point2D nthPoint = nthNode.getCenterPoint();
 			rect_.x = nthPoint.getX() + 10;
 			rect_.y = nthPoint.getY() + 10;
 		} else {
@@ -598,6 +668,7 @@ public class Node implements Cloneable{
 			
 		}
 	}
+	*/
 	
 	/**
 	 * アトム（または閉じた膜）である場合Trueを返す．
@@ -729,6 +800,26 @@ public class Node implements Cloneable{
 		}
 		dx_ = 0;
 		dy_ = 0;
+	}
+	
+	public void moveCalcInside(double dx, double dy){
+		double dxMargin = (dx < 0) ? -Node.MARGIN : Node.MARGIN;
+		double dyMargin = (dy < 0) ? -Node.MARGIN : Node.MARGIN;
+		
+		{
+			Rectangle2D rect = getBounds2D();
+			rect.setRect(rect.getX() + dx + dxMargin,
+					rect.getY() + dy + dyMargin,
+					rect.getWidth(),
+					rect.getHeight());
+			if(getParent().getBounds2D().contains(rect)){
+				moveDelta(dx, dy);
+			} else {
+				if(null != parent_)
+					parent_.moveCalcInside(dx, dy);
+			}
+		}
+		
 	}
 	
 	/**
@@ -967,7 +1058,7 @@ public class Node implements Cloneable{
 	 * アトム用の初期化処理
 	 * @param atom
 	 */
-	private void setAtom(Atom atom){
+	public void setAtom(Atom atom){
 		imAtom_ = true;
 		name_ = (null != atom.getName()) ? atom.getName() : "";
 		if(name_.toLowerCase().endsWith("black")){
@@ -1298,6 +1389,11 @@ public class Node implements Cloneable{
 	
 	public void setSelected(boolean selected){
 		selected_ = selected;
+	}
+	
+	static
+	public void setShowAll(boolean flag){
+		showAll_ = flag;
 	}
 	
 	/**
