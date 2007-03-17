@@ -1,13 +1,22 @@
 package gui;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -19,6 +28,7 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.MouseInputListener;
 
 public class SubFrame extends JFrame {
 
@@ -150,6 +160,9 @@ public class SubFrame extends JFrame {
 	static
 	private CommonListener commonListener_;
 	
+	static
+	private WheelPanel wheelPanel_ = new WheelPanel();
+	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
 	public SubFrame(LMNtalFrame f) {
@@ -236,6 +249,7 @@ public class SubFrame extends JFrame {
 		menuPanel_.add(repulsiveCheck_);
 		menuPanel_.add(springCheck_);
 		menuPanel_.add(springSlider_);
+		menuPanel_.add(wheelPanel_);
 		angleSlider_.setVisible(false);
 		springSlider_.setVisible(false);
 		
@@ -315,6 +329,8 @@ public class SubFrame extends JFrame {
         gbc.weightx = 1.0;
         gbc.weighty = 100.0;
 		container.add(menuScroll_, gbc);
+		
+		wheelPanel_.repaint();
 
 	}
 	
@@ -327,7 +343,7 @@ public class SubFrame extends JFrame {
 			springSlider_.setValue(SPRING_DEFAULT);
 		}
 	}
-
+	
 	public void setSliderValue(int value){
 		zoomSlider_.setValue(value);
 	}
@@ -594,6 +610,63 @@ public class SubFrame extends JFrame {
 		public void itemStateChanged(ItemEvent e) {
 			GraphPanel.setStopPainting(stopPainting_.isSelected());
 		}
+	}
+	
+	static
+	private class WheelPanel extends JPanel implements MouseInputListener {
+		final static
+		private int WHEEL_SIZE = 75;
+		private Image wheel_;
+		private double theta_ = 0;
+		private double lastTheta_ = 0;
+		private int startPoint_;
+		
+		public WheelPanel(){
+			wheel_ = Toolkit.getDefaultToolkit().getImage(getClass().getResource("wheel.gif"));
+			this.setBackground(Color.GRAY);
+			this.setOpaque(false);
+			addMouseListener(this);
+			addMouseMotionListener(this);
+		}
+		
+		@Override
+		public void paint(Graphics g){
+			Graphics2D g2d = (Graphics2D)g;
+			int x = (getWidth() - WHEEL_SIZE) / 4;
+			g2d.rotate(theta_, (WHEEL_SIZE /2) + x , WHEEL_SIZE / 2);
+			g2d.drawImage(wheel_, x, 0, WHEEL_SIZE, WHEEL_SIZE, this);
+		}
+
+		public void mouseDragged(MouseEvent e) {
+			Rectangle rect = getBounds();
+			Point mousePoint = MouseInfo.getPointerInfo().getLocation();
+			double dx = rect.getCenterX() - mousePoint.getX();
+			double dy = rect.getCenterY() - mousePoint.getY();
+			if(dx == 0.0) { dx = 0.00001; }
+			theta_ = Math.atan(dy / dx);
+			System.out.println(theta_);
+			theta_ = (startPoint_ + MouseInfo.getPointerInfo().getLocation().x) % 360;
+//			if(0 < Math.abs(theta_ - lastTheta_)){
+//				commonListener_.moveRotate(((double)(theta_ - lastTheta_)) / 10);
+//				lastTheta_ = theta_;
+//			}
+			commonListener_.moveRotate(theta_ - lastTheta_);
+			lastTheta_ = theta_;
+			repaint();
+		}
+
+		public void mousePressed(MouseEvent e) {
+			startPoint_ = MouseInfo.getPointerInfo().getLocation().x;
+			lastTheta_ = theta_;
+		}
+
+		public void mouseReleased(MouseEvent e) { 
+		}
+
+		public void mouseMoved(MouseEvent e) { }
+		public void mouseClicked(MouseEvent e) { }
+		public void mouseEntered(MouseEvent e) { }
+		public void mouseExited(MouseEvent e) { }
 	}
 	
 	/**

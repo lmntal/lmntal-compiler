@@ -457,6 +457,10 @@ public class GraphPanel extends JPanel {
 		}
 	}
 	
+	public void rotate(double angle){
+		rootNode_.moveRotate(angle);
+	}
+	
 	/**
 	 * グラフを描画する
 	 */
@@ -716,6 +720,10 @@ public class GraphPanel extends JPanel {
 		node.setRoot(true);
 		tmpRootNode_ = node;
 		rootNode_.setRoot(false);
+	}
+	
+	public void setUncalc(boolean flag){
+		rootNode_.setUncalc(flag);
 	}
 	
 	/**

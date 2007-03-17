@@ -770,56 +770,66 @@ public class Node implements Cloneable{
 		}
 	}
 	
-	/**
-	 * moveDeltaで加算された移動距離分を実際に移動させる．
-	 * 移動後は移動予定距離を初期化する．
-	 */
 	public void moveCalc(){
-		// 最大移動距離を制限
-		if(MAX_MOVE_DELTA < dx_){ dx_ = MAX_MOVE_DELTA; }
-		else if(dx_ < -MAX_MOVE_DELTA){ dx_ = -MAX_MOVE_DELTA; }
-		if(MAX_MOVE_DELTA < dy_){ dy_ = MAX_MOVE_DELTA; }
-		else if(dy_ < -MAX_MOVE_DELTA){ dy_ = -MAX_MOVE_DELTA; }
-
-		// 移動後に限界を越えない
-		if(Integer.MAX_VALUE - dx_ < rect_.x){ return; }
-		if(rect_.x < Integer.MIN_VALUE - dx_){ return; }
-		if(Integer.MAX_VALUE - dy_ < rect_.y){ return; }
-		if(rect_.y < Integer.MIN_VALUE - dy_){ return; }
-		
-		if(MIN_MOVE_DELTA < Math.abs(dx_)){
-			rect_.x += dx_;
-		}
-		if(MIN_MOVE_DELTA < Math.abs(dy_)){
-			rect_.y += dy_;
-		}
-		Iterator<Node> bezNodes = bezierMap_.values().iterator();
-		while(bezNodes.hasNext()){
-			Node node = bezNodes.next();
-			node.moveDelta(dx_, dy_);
-		}
+		moveCalcInside();
+		moveCalc(dx_, dy_);
 		dx_ = 0;
 		dy_ = 0;
 	}
 	
-	public void moveCalcInside(double dx, double dy){
-		double dxMargin = (dx < 0) ? -Node.MARGIN : Node.MARGIN;
-		double dyMargin = (dy < 0) ? -Node.MARGIN : Node.MARGIN;
+	/**
+	 * moveDeltaで加算された移動距離分を実際に移動させる．
+	 * 移動後は移動予定距離を初期化する．
+	 */
+	public void moveCalc(double dx, double dy){
+		// 最大移動距離を制限
+		if(MAX_MOVE_DELTA < dx){ dx = MAX_MOVE_DELTA; }
+		else if(dx < -MAX_MOVE_DELTA){ dx = -MAX_MOVE_DELTA; }
+		if(MAX_MOVE_DELTA < dy){ dy = MAX_MOVE_DELTA; }
+		else if(dy < -MAX_MOVE_DELTA){ dy = -MAX_MOVE_DELTA; }
+
+		// 移動後に限界を越えない
+		if(Integer.MAX_VALUE - dx < rect_.x){ return; }
+		if(rect_.x < Integer.MIN_VALUE - dx){ return; }
+		if(Integer.MAX_VALUE - dy < rect_.y){ return; }
+		if(rect_.y < Integer.MIN_VALUE - dy){ return; }
 		
-		{
-			Rectangle2D rect = getBounds2D();
-			rect.setRect(rect.getX() + dx + dxMargin,
-					rect.getY() + dy + dyMargin,
-					rect.getWidth(),
-					rect.getHeight());
-			if(getParent().getBounds2D().contains(rect)){
-				moveDelta(dx, dy);
+		if(MIN_MOVE_DELTA < Math.abs(dx)){
+			rect_.x += dx;
+		}
+		if(MIN_MOVE_DELTA < Math.abs(dy)){
+			rect_.y += dy;
+		}
+		Iterator<Node> bezNodes = bezierMap_.values().iterator();
+		while(bezNodes.hasNext()){
+			Node node = bezNodes.next();
+			node.moveDelta(dx, dy);
+		}
+	}
+	
+	public void moveCalcInside(){
+		if(insideDx_ == 0 && insideDy_ == 0){
+			return;
+		}
+		double dxMargin = insideDx_ + ((insideDx_ < 0) ? -Node.MARGIN : Node.MARGIN);
+		double dyMargin = insideDy_ + ((insideDy_ < 0) ? -Node.MARGIN : Node.MARGIN);
+		
+		Rectangle2D rect = getBounds2D();
+		rect.setRect(rect.getX() + dxMargin,
+				rect.getY() + dyMargin,
+				rect.getWidth() + Node.MARGIN,
+				rect.getHeight() + Node.MARGIN);
+		if(getParent().getBounds2D().contains(rect)){
+			moveDelta(insideDx_, insideDy_);
+		} else {
+			if(null != parent_){
+				parent_.moveInside(insideDx_, insideDy_);
 			} else {
-				if(null != parent_)
-					parent_.moveCalcInside(dx, dy);
+				moveDelta(insideDx_, insideDy_);
 			}
 		}
-		
+		insideDx_ = 0;
+		insideDy_ = 0;
 	}
 	
 	/**
@@ -837,6 +847,38 @@ public class Node implements Cloneable{
 			while(nodes.hasNext()){
 				Node node = nodes.next();
 				node.moveDelta(dx, dy);
+			}
+		}
+	}
+	
+	public void moveInside(double dx, double dy){
+		if(uncalc_ || clipped_ || uncalcOutsideFource_){ return; }
+		insideDx_ += dx;
+		insideDy_ += dy;
+	}
+	
+	/**
+	 * 原点を中心に回転移動させる
+	 * @param angle
+	 */
+	public void moveRotate(double angle) {
+		if(null != parent_){
+			double dx = rect_.getX();
+			double dy = rect_.getY();
+
+			if(dx == 0.0){ dx=0.000000001; }
+			double moveAngle = Math.atan(dy / dx) + angle;
+			if(dx < 0.0) moveAngle += Math.PI;
+			double length = Math.sqrt((dx * dx) + (dy * dy));
+			if(length == 0.0){ length = 0.00001; }
+			rect_.x = Math.cos(moveAngle) * length;
+			rect_.y = Math.sin(moveAngle) * length;
+		}
+		synchronized (nodeMap_) {
+			Iterator<Node> nodes = nodeMap_.values().iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				node.moveRotate(angle);
 			}
 		}
 	}

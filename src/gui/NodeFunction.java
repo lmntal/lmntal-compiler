@@ -442,34 +442,58 @@ public class NodeFunction {
 			}
 			targetNode.moveDelta(-ddx, -ddy);
 			*/
-			double dxMargin = (ddx < 0) ? -Node.MARGIN : Node.MARGIN;
-			double dyMargin = (ddy < 0) ? -Node.MARGIN : Node.MARGIN;
+//			double dxMargin = ddx + ((ddx < 0) ? -Node.MARGIN : Node.MARGIN);
+//			double dyMargin = ddy + ((ddy < 0) ? -Node.MARGIN : Node.MARGIN);
 			
 			{
-				Node targetNode = node;
-				while(targetNode.getParent() != comNode){
-					targetNode = targetNode.getParent();
-				}
-				Rectangle2D rect = node.getBounds2D();
-				rect.setRect(rect.getX() + ddx + dxMargin, rect.getY() + ddy + dyMargin, rect.getWidth(), rect.getHeight());
-				if(targetNode.getBounds2D().contains(rect)){
+//				Node targetNode = node;
+//				while(targetNode != null && targetNode.getParent() != comNode){
+//					targetNode = targetNode.getParent();
+//				}
+//				Rectangle2D rect = node.getBounds2D();
+//				rect.setRect(rect.getX() + dxMargin,
+//						rect.getY() + dyMargin,
+//						rect.getWidth() + Node.MARGIN,
+//						rect.getHeight() + Node.MARGIN);
+				if(comNode == node.getParent()){
 					node.moveDelta(ddx, ddy);
 				} else {
-					targetNode.moveDelta(ddx, ddy);
+//					System.out.println("hoge");
+//					targetNode.moveDelta(ddx, ddy);
+					node.moveInside(ddx, ddy);
 				}
+//				if(comNode == node.getParent() || targetNode.getBounds2D().contains(rect)){
+//					node.moveDelta(ddx, ddy);
+//				} else {
+////					System.out.println("hoge");
+////					targetNode.moveDelta(ddx, ddy);
+//					targetNode.moveInside(ddx, ddy);
+//				}
 			}
 			{
-				Node targetNode = nthNode;
-				while(targetNode.getParent() != comNode){
-					targetNode = targetNode.getParent();
-				}
-				Rectangle2D rect = nthNode.getBounds2D();
-				rect.setRect(rect.getX() - ddx - dxMargin, rect.getY() - ddy - dyMargin, rect.getWidth(), rect.getHeight());
-				if(targetNode.getBounds2D().contains(rect)){
+//				Node targetNode = nthNode;
+//				while(targetNode != null && targetNode.getParent() != comNode){
+//					targetNode = targetNode.getParent();
+//				}
+//				Rectangle2D rect = nthNode.getBounds2D();
+//				rect.setRect(rect.getX() + dxMargin,
+//						rect.getY() + dyMargin,
+//						rect.getWidth() + Node.MARGIN,
+//						rect.getHeight() + Node.MARGIN);
+				if(comNode == nthNode.getParent()){
 					nthNode.moveDelta(-ddx, -ddy);
 				} else {
-					targetNode.moveDelta(-ddx, -ddy);
+//					System.out.println("moge");
+//					targetNode.moveDelta(ddx, ddy);
+					nthNode.moveInside(-ddx, -ddy);
 				}
+//				if(comNode == nthNode.getParent() || targetNode.getBounds2D().contains(rect)){
+//					nthNode.moveDelta(-ddx, -ddy);
+//				} else {
+////					System.out.println("moge");
+////					targetNode.moveDelta(ddx, ddy);
+//					targetNode.moveInside(-ddx, -ddy);
+//				}
 			}
 		}
 	}

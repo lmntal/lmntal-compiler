@@ -92,6 +92,11 @@ public class CommonListener implements MouseWheelListener {
 		if(null == logFrame_){ return ""; }
 		return logFrame_.getLog();
 	}
+	
+	public void moveRotate(double angle){
+		if(null == panel_){ return; }
+		panel_.rotate(angle);
+	}
 
 	public void revokeTime(){
 		LogFrame.revokeTime();
@@ -135,5 +140,10 @@ public class CommonListener implements MouseWheelListener {
 	public void setMagnificationSliderValue(int value){
 		if(null == subFrame_){ return; }
 		subFrame_.setSliderValue(value);
+	}
+	
+	public void setUncalc(boolean flag){
+		if(null == panel_){ return; }
+		panel_.setUncalc(flag);
 	}
 }
