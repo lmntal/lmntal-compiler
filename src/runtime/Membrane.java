@@ -2,6 +2,8 @@ package runtime;
 
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +12,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import util.QueuedEntity;
 import util.RandomIterator;
@@ -1805,4 +1817,192 @@ public final class Membrane extends QueuedEntity {
 		relink(_old, 0, _new, 0);
 		removeAtom(_old);
 	}
+	
+	// XML <-> Mem ここから
+	
+	// Membrane -> XML
+	private static int lastLinkId;
+
+	private static int lastFreeLinkId;
+
+	private static HashMap<Link, Integer> links = null;
+
+	private static ArrayList<Link> freeLinks = null;
+
+	/**
+	 * xmlSerialize() 膜のXML表現と自由リンクの配列を返す．
+	 * 
+	 * @return Object[] { String xml, ArrayList<Link> freeLinks }
+	 */
+	public Object[] xmlSerialize() {
+		lastLinkId = 0;
+		lastFreeLinkId = 0;
+		links = new HashMap<Link, Integer>();
+		freeLinks = new ArrayList<Link>();
+
+		String xml = this.xmlSerialize(new StringBuffer(""));
+		return new Object[] { xml, freeLinks };
+	}
+
+	private String xmlSerialize(StringBuffer sb) {
+		sb.append("<mem>");
+		// アトム
+		Iterator<Atom> atomIt = this.atomIterator();
+		while (atomIt.hasNext()) {
+			Atom nowAtom = atomIt.next();
+			sb.append("<atom class=\"" + nowAtom.getFunctor().getClass().getSimpleName()
+					+ "\" name=\"" + nowAtom.getName() + "\" arity=\""
+					+ nowAtom.getArity() + "\">");
+			// リンク
+			for (int i = 0; i < nowAtom.getArity(); i++) {
+				Link nowLink = nowAtom.getArg(i);
+				if (links.containsKey(nowLink)) {
+					sb.append("<link id=\"" + links.remove(nowLink).toString()
+							+ "\" pos=\"" + i + "\"/>");
+				} else {
+					if (nowAtom.getFunctor().equals(Functor.INSIDE_PROXY)
+							&& i == 0) {
+						// 自由リンクの処理
+						// 相方が存在しないようなInsideProxyに対して行う
+						sb.append("<free_link id=\"" + lastFreeLinkId++
+								+ "\"/>");
+						freeLinks.add(nowLink.getAtom().getArg(1).getBuddy());
+						links.remove(nowLink);
+					} else {
+						links.put(nowLink.getBuddy(), lastLinkId);
+						sb.append("<link id=\"" + lastLinkId++ + "\" pos=\""
+								+ i + "\"/>");
+					}
+				}
+			}
+			sb.append("</atom>");
+		}
+
+		// 子膜
+		Iterator<Membrane> memIt = this.memIterator();
+		while (memIt.hasNext()) {
+			sb.append(memIt.next().xmlSerialize(new StringBuffer("")));
+		}
+
+		sb.append("</mem>");
+		return sb.toString();
+	}
+	
+	
+	// XML -> Membrane
+	public void xmlDeserialize(String src) {
+		try {
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			SAXParser parser = factory.newSAXParser();
+			parser.parse(new InputSource(new StringReader(src)), new LMNtalSax(
+					this));
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	class LMNtalSax extends DefaultHandler {
+		Membrane rootMem = null;
+
+		Membrane tmpMem = null;
+
+		Atom tmpAtom = null;
+
+		HashMap<Integer, Object[]> linkMap = null; // <id, (atom, pos)>
+
+		ArrayList<Atom> insides = null;
+
+		LMNtalSax(Membrane mem) {
+			this.rootMem = this.tmpMem = mem;
+			this.linkMap = new HashMap<Integer, Object[]>();
+			this.insides = new ArrayList<Atom>();
+		}
+
+		public void startDocument() {
+		}
+
+		public void startElement(String uri, String localName, String qName,
+				Attributes attributes) {
+			if (qName.equals("mem")) {
+				Membrane newMem = tmpMem.newMem();
+				this.tmpMem = newMem;
+			} else if (qName.equals("atom")) {
+				String funcClass = attributes.getValue(0).intern();
+				String funcName = attributes.getValue(1).intern();
+
+				if (funcClass == "SpecialFunctor") {
+					if (funcName == "$in") {
+						this.tmpAtom = tmpMem.newAtom(Functor.INSIDE_PROXY);
+					} else if (funcName == "$out") {
+						this.tmpAtom = tmpMem.newAtom(Functor.OUTSIDE_PROXY);
+					}
+				} else if (funcClass == "IntegerFunctor") {
+					this.tmpAtom = tmpMem.newAtom(new IntegerFunctor(Integer
+							.parseInt(funcName)));
+				} else if (funcClass == "FloatingFunctor") {
+					this.tmpAtom = tmpMem.newAtom(new FloatingFunctor(Double
+							.parseDouble(funcName)));
+				} else { // SymbolFunctor
+					this.tmpAtom = tmpMem.newAtom(new SymbolFunctor(funcName,
+							Integer.parseInt(attributes.getValue(2))));
+				}
+			} else if (qName.equals("link")) {
+				int linkId = Integer.parseInt(attributes.getValue(0));
+				int linkPos = Integer.parseInt(attributes.getValue(1));
+				if (linkMap.containsKey(linkId)) {
+					Object[] dst = linkMap.remove(linkId);
+					Atom dstAtom = (Atom) dst[0];
+					int dstPos = (Integer) dst[1];
+					tmpMem.newLink(this.tmpAtom, linkPos, dstAtom, dstPos);
+				} else {
+					linkMap.put(linkId, new Object[] { this.tmpAtom, linkPos });
+				}
+			} else { // 自由リンク
+				insides.add(tmpAtom);
+			}
+		}
+
+		public void characters(char[] ch, int offset, int length) {
+		}
+
+		public void endElement(String uri, String localName, String qName) {
+			if (qName.equals("mem")) {
+				this.tmpMem = this.tmpMem.getParent();
+			}
+		}
+
+		public void endDocument() {
+			// 自由リンクのリストを作成する
+			if (!insides.isEmpty()) {
+				boolean first = true;
+				Atom parent = tmpMem.newAtom(new SymbolFunctor("fls", 1));
+				for (Atom in : insides) {
+					Atom c = tmpMem.newAtom(new SymbolFunctor(".", 3));
+					Atom out = tmpMem.newAtom(Functor.OUTSIDE_PROXY);
+					tmpMem.newLink(c, 0, out, 1);
+					in.getMem().newLink(in, 0, out, 0);
+					if (first) {
+						tmpMem.newLink(c, 2, parent, 0);
+					} else {
+						tmpMem.newLink(c, 2, parent, 1);
+					}
+					parent = c;
+					first = false;
+				}
+				Atom nil = tmpMem.newAtom(new SymbolFunctor("[]", 1));
+				if (first) {
+					tmpMem.newLink(nil, 0, parent, 0);
+				} else {
+					tmpMem.newLink(nil, 0, parent, 1);
+				}
+			}
+		}
+	}
+	
+	// XML <-> Mem ここまで
+	
 }
