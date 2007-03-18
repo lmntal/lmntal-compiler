@@ -288,7 +288,7 @@ dlmntal.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
       me.nthAtom(1).remove();
       me.remove();
     } catch(IOException e) {
-      e.printStackTrace();
+//      e.printStackTrace();
       Atom failedAtom = mem.newAtom(new SymbolFunctor("failed",4));
       mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);
       mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);
