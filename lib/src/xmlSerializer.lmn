@@ -1,0 +1,117 @@
+/*
+NAME
+
+	XML serializer (Membeane <-> XML)
+
+SYNOPSIS
+
+test=xmlSerializer.serialize({a(X)}), b(X).
+---serialize--->
+test(xmlSerializer.serialized(
+"<mem>
+<atom class=\"SymbolFunctor\" name=\"a\" arity=\"1\">
+<link id=\"0\" pos=\"0\"/>
+</atom>
+<atom class=\"SpecialFunctor\" name=\"$in\" arity=\"2\">
+<free_link id=\"0\"/>
+<link id=\"0\" pos=\"1\"/>
+</atom>
+</mem>",
+[L2])), b(L2).
+
+"<mem>
+<atom class=\"SymbolFunctor\" name=\"a\" arity=\"1\">
+<link id=\"0\" pos=\"0\"/>
+</atom>
+<atom class=\"SpecialFunctor\" name=\"$in\" arity=\"2\">
+<free_link id=\"0\"/>
+<link id=\"0\" pos=\"1\"/>
+</atom>
+</mem>"
+---deserialize--->
+xmlSerializer.deserialized(test), fls([L9]), {a(L9)}
+
+AUTHOR
+
+	Ryo Okabe
+
+HISTORY
+
+    07/03/18
+
+*/
+
+{ module(xmlSerializer).
+
+[:/*inline_define*/
+  class ListUtil {
+	static void makeList(Link link, List<Link> list) {
+		Membrane mem = link.getAtom().getMem();
+		Atom parent=null;
+		boolean first=true;
+		for (Link tmpLink : list) {
+			Atom c = mem.newAtom(new SymbolFunctor(".", 3));  // .(Value Next Parent)
+			mem.inheritLink(c,0,tmpLink);
+			if(first) {
+				mem.inheritLink(c, 2, link);
+			} else {
+				mem.newLink(c, 2, parent, 1);
+			}
+			parent = c;
+			first=false;
+		}
+		Atom nil = mem.newAtom(new SymbolFunctor("[]", 1));
+		if(first) {
+			mem.inheritLink(nil, 0, link);
+		} else {
+			mem.newLink(nil, 0, parent, 1);
+		}
+	}
+  }
+:].
+
+% serialize
+Ret=xmlSerializer.serialize({$p,@p}) :- Ret=[:/*inline*/
+  // 前処理
+  Atom out = me.nthAtom(0);
+  Atom in = out.nthAtom(0);
+  Atom plus = in.nthAtom(1);
+  Membrane memToSerialize = in.getMem();
+  memToSerialize.removeAtom(in);
+  memToSerialize.removeAtom(plus);
+  
+  // XMLに変換
+  Object[] ret = memToSerialize.xmlSerialize();
+  String xml = (String)ret[0];
+  ArrayList fls = (ArrayList)ret[1];
+  
+  Atom rootAtom = mem.newAtom(new SymbolFunctor("serialized",3,"xmlSerializer"));
+  mem.relinkAtomArgs(rootAtom, 2, me, 1);
+  
+  Atom xmlAtom = mem.newAtom(new StringFunctor(xml));
+  mem.newLink(rootAtom,0,xmlAtom,0);
+  
+  Atom tmpAtom = mem.newAtom(new SymbolFunctor("tmp",1));
+  mem.newLink(rootAtom,1,tmpAtom,0);
+  ListUtil.makeList(tmpAtom.getArg(0),fls);
+  mem.removeAtom(tmpAtom);
+  
+  // 後処理
+  mem.removeMem(memToSerialize);
+  out.remove();
+  me.remove();
+:]({$p,@p}).
+
+% deserialize
+Res=xmlSerializer.deserialize(X) :- string(X) | Res=[:/*inline*/
+  mem.xmlDeserialize(me.nth(0));
+  Atom res = mem.newAtom(new SymbolFunctor("deserialized",1,"xmlSerializer"));
+  mem.relinkAtomArgs(res, 0, me, 1);
+  me.nthAtom(0).remove();
+  me.remove();
+:](X).
+}.
+
+% test
+//test=xmlSerializer.serialize({a(X)}), b(X).
+//test=xmlSerializer.deserialize("<mem><atom class=\"SymbolFunctor\" name=\"a\" arity=\"1\"><link id=\"0\" pos=\"0\"/></atom><atom class=\"SpecialFunctor\" name=\"$in\" arity=\"2\"><free_link id=\"0\"/><link id=\"0\" pos=\"1\"/></atom></mem>").
