@@ -137,7 +137,7 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 }
 
 <QUOTED> {
-	":]"                { token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.QUOTED_STRING, string.toString(), token.toString(), startline, startcol); }
+	":]"                { token.append(yytext()); yybegin(YYINITIAL); return symbol(sym.SYMBOL_NAME, string.toString(), token.toString(), startline, startcol); }
 	<<EOF>>             { throw new Error("EOF in quoted name"); }
 	.|{LineTerminator}  { token.append(yytext()); string.append( yytext() ); }
 }
