@@ -1,6 +1,51 @@
 [:/*inline_define*/
 import java.net.*;
 import java.io.*;
+import java.util.Enumeration;
+
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.*;
+import javax.swing.text.html.parser.ParserDelegator;
+
+class GetATagHref extends HTMLEditorKit.ParserCallback {
+	private Atom targetAtom = null;
+	private Membrane targetMem = null;
+	
+	public GetATagHref (Atom atom, Membrane mem){
+		targetAtom = atom;
+		targetMem = mem;
+	}
+	
+	public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos){
+	    if(!t.toString().equalsIgnoreCase("a")){
+	    	return;
+	    }
+	    Enumeration e = a.getAttributeNames();
+        while(e.hasMoreElements()){
+            Object key = e.nextElement();
+            if(!key.toString().equalsIgnoreCase("href")){
+	    		continue;
+	   		}	
+			Functor newTargetFunctor =
+				new SymbolFunctor(targetAtom.getName(), targetAtom.getEdgeCount() + 1);
+			Functor newLinkFunctor =
+				new SymbolFunctor(a.getAttribute(key).toString(), 1);
+
+			Atom newTargetAtom = targetMem.newAtom(newTargetFunctor);
+			Atom newLinkAtom = targetMem.newAtom(newLinkFunctor);
+			for(int i = 0; i < targetAtom.getEdgeCount(); i++){
+				targetMem.relink(newTargetAtom, i, targetAtom, i);
+			}
+			targetAtom.remove();
+			targetAtom = newTargetAtom;
+			
+			targetMem.newLink(newTargetAtom,
+					newTargetAtom.getEdgeCount() - 1,
+					newLinkAtom,
+					0);
+        }
+	}
+}
 :].
 
 {
@@ -27,6 +72,27 @@ module(net).
 				.replaceAll("&#\\d{5}", "")
 				.replaceAll("&.*;"," ")
 				, 1);
+		} catch (Exception e) {
+		}
+		:](S) ).
+
+	( H=net.getSource(S) :- unary(S) | H=[:/*inline*/
+		try {
+			URL url = new URL(me.nth(0));
+			HttpURLConnection hc = (HttpURLConnection)url.openConnection();
+			hc.setRequestProperty("USER-AGENT", "DoCoMo/1.0/D505i/c10");
+			hc.connect();
+			BufferedReader br = new BufferedReader(new InputStreamReader(hc.getInputStream(), "JISAutoDetect"));
+			String s;
+			StringBuffer b=new StringBuffer();
+			while((s=br.readLine())!=null) {
+				b.append(s);
+			}
+//			System.out.println(b);
+			Atom res = mem.newAtom(new StringFunctor(b.toString()));
+			me.nthAtom(0).remove();
+			mem.relink(res, 0, me, 1);
+			me.remove();
 		} catch (Exception e) {
 		}
 		:](S) ).
@@ -73,6 +139,35 @@ H=net.encode(S) :- H=[:/*inline*/
 	me.nthAtom(0).remove();
 	mem.relink(res, 0, me, 1);
 	me.remove();
+	:](S).
+	
+	
+H=net.getATagHrefs(S) :-  unary(S) | H=[:/*inline*/
+	try{
+		URL url = new URL(me.nth(0));
+		
+	   	Atom res = mem.newAtom(new SymbolFunctor(me.nthAtom(0).getName(), 1));
+	   	me.nthAtom(0).remove();
+		mem.relink(res, 0, me, 1);
+		me.remove();
+		
+		HttpURLConnection hc = (HttpURLConnection)url.openConnection();
+		hc.setRequestProperty("USER-AGENT", "DoCoMo/1.0/D505i/c10");
+		hc.connect();
+		BufferedReader br =
+		 new BufferedReader(new InputStreamReader(hc.getInputStream(), "JISAutoDetect"));
+		String s;
+		StringBuffer b=new StringBuffer();
+		while((s=br.readLine())!=null) {
+			b.append(s);
+		}
+		Reader in = new StringReader(b.toString());
+		new ParserDelegator().parse(in, new GetATagHref(res, mem), true);
+		in.close();
+	}
+    catch(IOException e){
+        e.printStackTrace();
+    }
 	:](S).
 }.
 
