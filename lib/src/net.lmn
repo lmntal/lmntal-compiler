@@ -10,10 +10,17 @@ import javax.swing.text.html.parser.ParserDelegator;
 class GetATagHref extends HTMLEditorKit.ParserCallback {
 	private Atom targetAtom = null;
 	private Membrane targetMem = null;
+	private String url = null;
 	
 	public GetATagHref (Atom atom, Membrane mem){
 		targetAtom = atom;
 		targetMem = mem;
+		url = atom.getName();
+		if(url.endsWith("/")){
+			url = url.substring(0, url.length() - 1);
+		} else if(url.lastIndexOf("/") < url.lastIndexOf(".")){
+			url = url.substring(0, url.lastIndexOf("/") - 1);
+		}
 	}
 	
 	public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos){
@@ -25,14 +32,27 @@ class GetATagHref extends HTMLEditorKit.ParserCallback {
             Object key = e.nextElement();
             if(!key.toString().equalsIgnoreCase("href")){
 	    		continue;
-	   		}	
+	   		}
 			Functor newTargetFunctor =
 				new SymbolFunctor(targetAtom.getName(), targetAtom.getEdgeCount() + 1);
 			Functor newLinkFunctor =
-				new SymbolFunctor(a.getAttribute(key).toString(), 1);
+				new SymbolFunctor("href", 2);
+				
+			String hrefValue = a.getAttribute(key).toString();
+			if(hrefValue.startsWith("./")){
+				hrefValue = url + hrefValue.substring(1, hrefValue.length() - 1);
+				
+			} else if(!hrefValue.startsWith("http") &&
+					!hrefValue.startsWith("mailto")){
+					hrefValue = url + "/" + hrefValue;
+			}
+			
+			Functor newURLFunctor =
+				new StringFunctor(hrefValue);
 
 			Atom newTargetAtom = targetMem.newAtom(newTargetFunctor);
 			Atom newLinkAtom = targetMem.newAtom(newLinkFunctor);
+			Atom newURLAtom = targetMem.newAtom(newURLFunctor);
 			for(int i = 0; i < targetAtom.getEdgeCount(); i++){
 				targetMem.relink(newTargetAtom, i, targetAtom, i);
 			}
@@ -42,6 +62,10 @@ class GetATagHref extends HTMLEditorKit.ParserCallback {
 			targetMem.newLink(newTargetAtom,
 					newTargetAtom.getEdgeCount() - 1,
 					newLinkAtom,
+					0);
+			targetMem.newLink(newLinkAtom,
+					1,
+					newURLAtom,
 					0);
         }
 	}
@@ -144,29 +168,30 @@ H=net.encode(S) :- H=[:/*inline*/
 	
 H=net.getATagHrefs(S) :-  unary(S) | H=[:/*inline*/
 	try{
-		URL url = new URL(me.nth(0));
+		String urlValue = me.nth(0);
 		
 	   	Atom res = mem.newAtom(new SymbolFunctor(me.nthAtom(0).getName(), 1));
 	   	me.nthAtom(0).remove();
 		mem.relink(res, 0, me, 1);
 		me.remove();
-		
-		HttpURLConnection hc = (HttpURLConnection)url.openConnection();
-		hc.setRequestProperty("USER-AGENT", "DoCoMo/1.0/D505i/c10");
-		hc.connect();
-		BufferedReader br =
-		 new BufferedReader(new InputStreamReader(hc.getInputStream(), "JISAutoDetect"));
-		String s;
-		StringBuffer b=new StringBuffer();
-		while((s=br.readLine())!=null) {
-			b.append(s);
+		if(urlValue.startsWith("http")){
+			URL url = new URL(urlValue);
+			HttpURLConnection hc = (HttpURLConnection)url.openConnection();
+			hc.setRequestProperty("USER-AGENT", "DoCoMo/1.0/D505i/c10");
+			hc.connect();
+			BufferedReader br =
+			 new BufferedReader(new InputStreamReader(hc.getInputStream(), "JISAutoDetect"));
+			String s;
+			StringBuffer b=new StringBuffer();
+			while((s=br.readLine())!=null) {
+				b.append(s);
+			}
+			Reader in = new StringReader(b.toString());
+			new ParserDelegator().parse(in, new GetATagHref(res, mem), true);
+			in.close();
 		}
-		Reader in = new StringReader(b.toString());
-		new ParserDelegator().parse(in, new GetATagHref(res, mem), true);
-		in.close();
 	}
     catch(IOException e){
-        e.printStackTrace();
     }
 	:](S).
 }.
