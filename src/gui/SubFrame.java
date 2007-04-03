@@ -40,7 +40,7 @@ public class SubFrame extends JFrame {
 	private int ANGLE_DEFAULT = 30;
 	
 	final static
-	private int ANGLE_MAX = 100;
+	private int ANGLE_MAX = 500;
 	
 	final static
 	private int ANGLE_MIN = 0;

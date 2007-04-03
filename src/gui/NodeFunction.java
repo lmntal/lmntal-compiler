@@ -29,7 +29,7 @@ public class NodeFunction {
 
 	/** 引力定数 */
 	final static
-	private double CONSTANT_ATTRACTION = 0.00001;
+	private double CONSTANT_ATTRACTION = 0.000001;
 	
 	/** 斥力定数 */
 	final static
@@ -63,7 +63,7 @@ public class NodeFunction {
 	
 	/** ばね定数 */
 	static
-	private double constantSpring_ = 0.02;
+	private double constantSpring_ = -0.02;
 	
 	static
 	private int heatingTimer_ = 0;
@@ -181,12 +181,12 @@ public class NodeFunction {
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
-			double dxr =
-				(dx > 0) ? -(Math.random() * heatParam) + dr 
-						: (Math.random() * heatParam) - dr;
-			double dyr =
-				(dy > 0) ? -(Math.random() * heatParam) + dr 
-						: (Math.random() * heatParam) - dr;
+			double dxr = 0;
+//				(dx > 0) ? -(Math.random() * heatParam) + dr 
+//						: (Math.random() * heatParam) - dr;
+			double dyr = 0;
+//				(dy > 0) ? -(Math.random() * heatParam) + dr 
+//						: (Math.random() * heatParam) - dr;
 			
 			double ddx = (f * dx) + dxr;
 			double ddy = (f * dy) + dyr;
@@ -305,12 +305,8 @@ public class NodeFunction {
 		Node sourceNode = LinkSet.getVisibleNode(node);
 		if(null == sourceNode){ return; }
 		Point2D myPoint = sourceNode.getCenterPoint();
-		// すべの隣のNodeを含んだソート済みマップ
-		Map<Double, Node> sortedNodeMap = new TreeMap<Double, Node>();
-		// リンクを二本以上保持している隣のNodeのソート済みマップ
-		Map<Integer, Integer> idMap = new HashMap<Integer, Integer>();
+		Map<Double, Node> treeMap = new TreeMap<Double, Node>();
 		
-		// つながっているアトムを走査
 		for(int i = 0; i < edgeNum; i++){
 			Node nthNode = LinkSet.getVisibleNode(node.getNthNode(i));
 			if(null == nthNode){ continue; }
@@ -329,56 +325,125 @@ public class NodeFunction {
 			if(dx == 0.0){ dx=0.000000001; }
 			double angle = Math.atan(dy / dx);
 			if(dx < 0.0) angle += Math.PI;
-			sortedNodeMap.put(angle, nthNode);
+			treeMap.put(angle, nthNode);
 		}
-
-		int j = 0;
-		int maxJ = 0;
-		Object[] allNthNodes = sortedNodeMap.values().toArray();
-		for(int i = 0; i < allNthNodes.length; i++ ){
-			if(1 < ((Node)allNthNodes[i]).getEdgeCount()){
-				idMap.put(j, i);
-				maxJ = j;
-				j++;
-			}
-		}
-		Object[] allNthAngles = sortedNodeMap.keySet().toArray();
 		
-		j = 0;
-		for(int i = 0; i < allNthAngles.length; i++ ){
-			Double nthAngle = (Double)allNthAngles[i];
-			Node nthNode = sortedNodeMap.get(nthAngle);
+		Object[] nthAngles = treeMap.keySet().toArray();
+		for(int i = 0; i < nthAngles.length; i++ ){
+			Double nthAngle = (Double)nthAngles[i];
+			Node nthNode = treeMap.get(nthAngle);
 			Point2D nthPoint = nthNode.getCenterPoint();
 
-			double anglePre;
-			double angleCur;
-			if(1 < nthNode.getEdgeCount()){
-				anglePre = (j != 0) ? ((Double)allNthAngles[idMap.get(j)]).doubleValue() - ((Double)allNthAngles[idMap.get(j - 1)]).doubleValue() 
-						: (Math.PI * 2) - ((Double)allNthAngles[idMap.get(maxJ)]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
-				angleCur = (j != maxJ) ? ((Double)allNthAngles[idMap.get(j + 1)]).doubleValue() - ((Double)allNthAngles[idMap.get(j)]).doubleValue() 
-						: (Math.PI * 2) - ((Double)allNthAngles[idMap.get(maxJ)]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
-				j++;
-			} else {
-				anglePre = (i != 0) ? ((Double)allNthAngles[i]).doubleValue() - ((Double)allNthAngles[i - 1]).doubleValue() 
-						: (Math.PI * 2) - ((Double)allNthAngles[allNthAngles.length - 1]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
-				angleCur = (i != allNthAngles.length - 1) ? ((Double)allNthAngles[i + 1]).doubleValue() - ((Double)allNthAngles[i]).doubleValue() 
-						: (Math.PI * 2) - ((Double)allNthAngles[allNthAngles.length - 1]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+			
+			if(null != nthNode){
+				double anglePre = (i != 0) ? ((Double)nthAngles[i]).doubleValue() - ((Double)nthAngles[i - 1]).doubleValue() 
+						: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
+				double angleCur = (i != nthAngles.length - 1) ? ((Double)nthAngles[i + 1]).doubleValue() - ((Double)nthAngles[i]).doubleValue() 
+						: (Math.PI * 2) - ((Double)nthAngles[nthAngles.length - 1]).doubleValue() + ((Double)nthAngles[0]).doubleValue();
+				double angleR = angleCur - anglePre;
+				double dx = nthPoint.getX() - myPoint.getX();
+				double dy = nthPoint.getY() - myPoint.getY();
+				double edgeLength = Math.sqrt(dx * dx + dy * dy);
+				if(edgeLength == 0.0){ edgeLength = 0.00001; }
+
+				double tx = -dy / edgeLength;
+				double ty =  dx / edgeLength;
+				
+				dx = constantAngle_ * tx * angleR;
+				dy = constantAngle_ * ty * angleR;
+				
+				dx = dx * 2;
+				dy = dy * 2;
+//				sourceNode.moveDelta(-dx, -dy);
+				nthNode.moveDelta(dx, dy);
+				
 			}
-			double angleR = angleCur - anglePre;
-			double dx = nthPoint.getX() - myPoint.getX();
-			double dy = nthPoint.getY() - myPoint.getY();
-			double edgeLength = Math.sqrt(dx * dx + dy * dy);
-			if(edgeLength == 0.0){ edgeLength = 0.00001; }
-			//線分に垂直で長さ１のベクトル
-			double tx = -dy / edgeLength;
-			double ty =  dx / edgeLength;
-
-			dx = constantAngle_ * tx * angleR;
-			dy = constantAngle_ * ty * angleR;
-
-			sourceNode.moveDelta(-dx, -dy);
-			nthNode.moveDelta(dx, dy);
 		}
+//		if(!angleFlag_ || !(node.getObject() instanceof Atom)){
+//			return;
+//		}
+//		int edgeNum = node.getEdgeCount(); 
+//		
+//		if(edgeNum < 2){ return; }
+//
+//		Node sourceNode = LinkSet.getVisibleNode(node);
+//		if(null == sourceNode){ return; }
+//		Point2D myPoint = sourceNode.getCenterPoint();
+//		// すべの隣のNodeを含んだソート済みマップ
+//		Map<Double, Node> sortedNodeMap = new TreeMap<Double, Node>();
+//		// リンクを二本以上保持している隣のNodeのソート済みマップ
+//		Map<Integer, Integer> idMap = new HashMap<Integer, Integer>();
+//		
+//		// つながっているアトムを走査
+//		for(int i = 0; i < edgeNum; i++){
+//			Node nthNode = LinkSet.getVisibleNode(node.getNthNode(i));
+//			if(null == nthNode){ continue; }
+//			Point2D nthPoint = nthNode.getCenterPoint();
+//			if(null == nthNode ||
+//					null == nthPoint ||
+//					sourceNode == nthNode ||
+//					sortedNodeMap.containsValue(nthNode))
+//			{
+//				continue; 
+//			}
+//			
+//			double dx = nthPoint.getX() - myPoint.getX();
+//			double dy = nthPoint.getY() - myPoint.getY();
+//
+//			if(dx == 0.0){ dx=0.000000001; }
+//			double angle = Math.atan(dy / dx);
+//			if(dx < 0.0) angle += Math.PI;
+//			sortedNodeMap.put(angle, nthNode);
+//		}
+//
+//		int j = 0;
+//		int maxJ = 0;
+//		Object[] allNthNodes = sortedNodeMap.values().toArray();
+//		for(int i = 0; i < allNthNodes.length; i++ ){
+//			if(1 < ((Node)allNthNodes[i]).getEdgeCount()){
+//				idMap.put(j, i);
+//				maxJ = j;
+//				j++;
+//			}
+//		}
+//		Object[] allNthAngles = sortedNodeMap.keySet().toArray();
+//		
+//		j = 0;
+//		for(int i = 0; i < allNthAngles.length; i++ ){
+//			Double nthAngle = (Double)allNthAngles[i];
+//			Node nthNode = sortedNodeMap.get(nthAngle);
+//			Point2D nthPoint = nthNode.getCenterPoint();
+//
+//			double anglePre;
+//			double angleCur;
+//			if(1 < nthNode.getEdgeCount()){
+//				anglePre = (j != 0) ? ((Double)allNthAngles[idMap.get(j)]).doubleValue() - ((Double)allNthAngles[idMap.get(j - 1)]).doubleValue() 
+//						: (Math.PI * 2) - ((Double)allNthAngles[idMap.get(maxJ)]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+//				angleCur = (j != maxJ) ? ((Double)allNthAngles[idMap.get(j + 1)]).doubleValue() - ((Double)allNthAngles[idMap.get(j)]).doubleValue() 
+//						: (Math.PI * 2) - ((Double)allNthAngles[idMap.get(maxJ)]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+//				j++;
+//			} else {
+//				anglePre = (i != 0) ? ((Double)allNthAngles[i]).doubleValue() - ((Double)allNthAngles[i - 1]).doubleValue() 
+//						: (Math.PI * 2) - ((Double)allNthAngles[allNthAngles.length - 1]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+//				angleCur = (i != allNthAngles.length - 1) ? ((Double)allNthAngles[i + 1]).doubleValue() - ((Double)allNthAngles[i]).doubleValue() 
+//						: (Math.PI * 2) - ((Double)allNthAngles[allNthAngles.length - 1]).doubleValue() + ((Double)allNthAngles[0]).doubleValue();
+//			}
+//			double angleR = angleCur - anglePre;
+//			double dx = nthPoint.getX() - myPoint.getX();
+//			double dy = nthPoint.getY() - myPoint.getY();
+//			double edgeLength = Math.sqrt(dx * dx + dy * dy);
+//			if(edgeLength == 0.0){ edgeLength = 0.00001; }
+//			
+//			//線分に垂直で長さ１のベクトル
+//			double tx = -dy / edgeLength;
+//			double ty =  dx / edgeLength;
+//
+//			dx = constantAngle_ * tx * angleR;
+//			dy = constantAngle_ * ty * angleR;
+//
+//			sourceNode.moveDelta(-dx, -dy);
+//			nthNode.moveDelta(dx, dy);
+//		}
 	}
 
 	/**
@@ -415,85 +480,29 @@ public class NodeFunction {
 				Point2D.distance(myPoint.getX(), myPoint.getY(), nthPoint.getX(), nthPoint.getY());
 
 			double divergenceFource = (heatingTimer_ == 0) ? 1 : (Math.random() * 10) - (Math.random() * 5);
-			
-			double f = -constantSpring_ * divergenceFource * ((distance / (20 + (60 * (memNum + 1)))) - 1.0);
+			double linkLength = 20 * (1.0 + (Math.pow((double)sourceNode.getEdgeCount() + (double)nthNode.getEdgeCount(), 2) / 10));
+			double f = constantSpring_ * divergenceFource * ((distance / (linkLength + (60 * (memNum + 1)))) - 1.0);
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
 			Node comNode = getCommonParent(node, nthNode);
-			
+
 			double ddx = f * dx;
 			double ddy = f * dy;
 
-//			node.moveDelta(ddx, ddy);
-//			nthNode.moveDelta(-ddx, -ddy);
-//			ddx = ddx * 0.9;
-//			ddy = ddy * 0.9;
-			/*
-			Node targetNode = node;
-			while(targetNode.getParent() != comNode){
-				targetNode = targetNode.getParent();
-			}
-			targetNode.moveDelta(ddx, ddy);
-			
-			targetNode = nthNode;
-			while(targetNode.getParent() != comNode){
-				targetNode = targetNode.getParent();
-			}
-			targetNode.moveDelta(-ddx, -ddy);
-			*/
-//			double dxMargin = ddx + ((ddx < 0) ? -Node.MARGIN : Node.MARGIN);
-//			double dyMargin = ddy + ((ddy < 0) ? -Node.MARGIN : Node.MARGIN);
-			
 			{
-//				Node targetNode = node;
-//				while(targetNode != null && targetNode.getParent() != comNode){
-//					targetNode = targetNode.getParent();
-//				}
-//				Rectangle2D rect = node.getBounds2D();
-//				rect.setRect(rect.getX() + dxMargin,
-//						rect.getY() + dyMargin,
-//						rect.getWidth() + Node.MARGIN,
-//						rect.getHeight() + Node.MARGIN);
 				if(comNode == node.getParent()){
 					node.moveDelta(ddx, ddy);
 				} else {
-//					System.out.println("hoge");
-//					targetNode.moveDelta(ddx, ddy);
 					node.moveInside(ddx, ddy);
 				}
-//				if(comNode == node.getParent() || targetNode.getBounds2D().contains(rect)){
-//					node.moveDelta(ddx, ddy);
-//				} else {
-////					System.out.println("hoge");
-////					targetNode.moveDelta(ddx, ddy);
-//					targetNode.moveInside(ddx, ddy);
-//				}
 			}
 			{
-//				Node targetNode = nthNode;
-//				while(targetNode != null && targetNode.getParent() != comNode){
-//					targetNode = targetNode.getParent();
-//				}
-//				Rectangle2D rect = nthNode.getBounds2D();
-//				rect.setRect(rect.getX() + dxMargin,
-//						rect.getY() + dyMargin,
-//						rect.getWidth() + Node.MARGIN,
-//						rect.getHeight() + Node.MARGIN);
 				if(comNode == nthNode.getParent()){
 					nthNode.moveDelta(-ddx, -ddy);
 				} else {
-//					System.out.println("moge");
-//					targetNode.moveDelta(ddx, ddy);
 					nthNode.moveInside(-ddx, -ddy);
 				}
-//				if(comNode == nthNode.getParent() || targetNode.getBounds2D().contains(rect)){
-//					nthNode.moveDelta(-ddx, -ddy);
-//				} else {
-////					System.out.println("moge");
-////					targetNode.moveDelta(ddx, ddy);
-//					targetNode.moveInside(-ddx, -ddy);
-//				}
 			}
 		}
 	}
@@ -569,7 +578,7 @@ public class NodeFunction {
 	
 	static
 	public void setConstantSpring(double value){
-		constantSpring_ = value / 1000;
+		constantSpring_ = -(value / 1000);
 	}
 	
 	static
