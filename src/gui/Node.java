@@ -1140,12 +1140,10 @@ public class Node implements Cloneable{
 		if(0 < atom.getEdgeCount()){
 			LinkSet.addLink(this);
 			double atomSize = ATOM_SIZE + ((ATOM_SIZE / 8) * atom.getEdgeCount());
-			rect_ = new RoundRectangle2D.Double((Math.random() * 800) - 400,
-					(Math.random() * 600) - 300,
-					atomSize,
-					atomSize,
-					atomSize,
-					atomSize);
+			rect_.width = atomSize;
+			rect_.height = atomSize;
+			rect_.archeight = atomSize;
+			rect_.arcwidth = atomSize;
 		}
 	}
 	

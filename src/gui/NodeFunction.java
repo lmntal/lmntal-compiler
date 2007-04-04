@@ -153,7 +153,6 @@ public class NodeFunction {
 			// 表示されているNodeを取得する
 			Node targetNode = nodes.next();
 			int heatParam = heatingTimer_;
-			double dr = 0;
 			boolean contain = localHeating_.containsKey(targetNode);
 			if(0 == heatingTimer_ &&
 					!localHeating_.isEmpty() &&
@@ -172,7 +171,6 @@ public class NodeFunction {
 					continue;
 				}
 				heatParam = count * LOCAL_GLOBAL_RATE;
-				dr = (Math.random() * heatParam) / 2;
 			}
 			Point2D nthPoint = targetNode.getCenterPoint();
 
@@ -181,12 +179,12 @@ public class NodeFunction {
 			double dx = myPoint.getX() - nthPoint.getX();
 			double dy = myPoint.getY() - nthPoint.getY();
 
-			double dxr = 0;
-//				(dx > 0) ? -(Math.random() * heatParam) + dr 
-//						: (Math.random() * heatParam) - dr;
-			double dyr = 0;
-//				(dy > 0) ? -(Math.random() * heatParam) + dr 
-//						: (Math.random() * heatParam) - dr;
+			double dxr = 
+				(dx > 0) ? -(Math.random() * heatParam)  
+						: (Math.random() * heatParam);
+			double dyr = 
+				(dy > 0) ? -(Math.random() * heatParam) 
+						: (Math.random() * heatParam) ;
 			
 			double ddx = (f * dx) + dxr;
 			double ddy = (f * dy) + dyr;
