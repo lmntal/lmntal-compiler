@@ -1,16 +1,16 @@
-package gui;
+package gui.model;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
+import gui.GraphPanel;
+import gui.control.AngleForce;
+import gui.control.AttractionForce;
+import gui.control.NodeFunction;
+import gui.control.RepulsiveForce;
+import gui.control.SpringForce;
+import gui.view.CommonView;
+
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.MediaTracker;
 import java.awt.Rectangle;
-import java.awt.Stroke;
-import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -32,21 +32,7 @@ public class Node implements Cloneable{
 	// final static
 	
 	final static
-	private float ATOM_COMPOSITE = 0.5f;
-	
-	final static
-	private double ATOM_SIZE = 40.0;
-
-	/** 炎のアニメーション表示位置 */
-	final static
-	private int FIRE_HEIGHT_MARGIN = 40;
-	
-	/** 炎のアニメーション表示位置 */
-	final static
-	private int FIRE_WIDTH_MARGIN = 0;
-
-	final static
-	private Font FONT = new Font("SansSerif", Font.PLAIN, 25);
+	public double ATOM_SIZE = 40.0;
 	
 	final static
 	public double MARGIN = 15.0;
@@ -63,20 +49,9 @@ public class Node implements Cloneable{
 	
 	final static
 	private Color RULE_COLOR = new Color(207,207,207);
-	
-	final static
-	private Stroke SELECTED_STROKE = new BasicStroke(4.0f);
 
 	//////////////////////////////////////////////////////////////////////////
 	// static
-
-	static
-	private Image ball_;
-	
-	/** 炎のイメージ */
-	static
-	private Image[] fire_ = new Image[7];
-
 	static
 	private int nextID_ = 0;
 	
@@ -157,7 +132,8 @@ public class Node implements Cloneable{
 	private double pinPosY_;
 	
 	/** 描画用の形 */
-	private RoundRectangle2D.Double rect_ = new RoundRectangle2D.Double((Math.random() * 800) - 400,
+	private RoundRectangle2D.Double rect_ =
+		new RoundRectangle2D.Double((Math.random() * 800) - 400,
 			(Math.random() * 600) - 300,
 			ATOM_SIZE,
 			ATOM_SIZE,
@@ -219,34 +195,6 @@ public class Node implements Cloneable{
 	}
 	///////////////////////////////////////////////////////////////////////////
 	
-	static
-	public void loadFire(GraphPanel panel){
-//		try {
-		ball_ = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("ball.png"));
-		fire_[0] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire1_.png"));
-		fire_[1] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire2_.png"));
-		fire_[2] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire3_.png"));
-		fire_[3] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire4_.png"));
-		fire_[4] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire5_.png"));
-		fire_[5] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire6_.png"));
-		fire_[6] = Toolkit.getDefaultToolkit().getImage(panel.getClass().getResource("fire7_.png"));
-		// PINのロード待ち　ここから
-		MediaTracker mt = new MediaTracker(panel);
-		mt.addImage(fire_[0], 1);
-		mt.addImage(fire_[1], 2);
-		mt.addImage(fire_[2], 3);
-		mt.addImage(fire_[3], 4);
-		mt.addImage(fire_[4], 5);
-		mt.addImage(fire_[5], 6);
-		mt.addImage(fire_[6], 7);
-		mt.addImage(ball_, 8);
-		try {
-			mt.waitForAll();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-	}
-	
 	/**
 	 * GraphPanleをセットする
 	 * @return
@@ -273,12 +221,12 @@ public class Node implements Cloneable{
 	 * 位置座標などの計算
 	 */
 	public void calc(){
-		NodeFunction.calcRelaxAngle(this);
+		AngleForce.calcRelaxAngle(this);
 		if(clipped_ || uncalc_){ return; }
-		NodeFunction.calcSpring(this);
+		SpringForce.calcSpring(this);
 		synchronized (nodeMap_) {
-			NodeFunction.calcAttraction(this, nodeMap_);
-			NodeFunction.calcRepulsive(this, nodeMap_);
+			AttractionForce.calcAttraction(this, nodeMap_);
+			RepulsiveForce.calcRepulsive(this, nodeMap_);
 			NodeFunction.calcHeat(this, nodeMap_);
 		}
 //		moveCalc();
@@ -444,9 +392,21 @@ public class Node implements Cloneable{
 	public Map<Object, Node> getChildMap(){
 		return nodeMap_;
 	}
+	
+	public Iterator<Node> getChilds(){
+		return nodeMap_.values().iterator();
+	}
+	
+	public Color getColor(){
+		return myColor_;
+	}
 
 	public int getEdgeCount(){
 		return linkList_.size();
+	}
+	public int getNextFireID(){
+		fireID_ = (fireID_ < CommonView.FIRE_ID_MAX) ? fireID_ + 1 : 0;
+		return fireID_;
 	}
 	
 	/**
@@ -492,6 +452,15 @@ public class Node implements Cloneable{
 	 */
 	public Point2D.Double getPoint(){
 		return (new Point2D.Double(rect_.getX(), rect_.getY()));
+	}
+
+	public RoundRectangle2D getRoundRectangle2D(){
+		return rect_;
+	}
+	
+	static
+	public boolean getShowFullName(){
+		return showFullName_;
 	}
 	
 	/**
@@ -688,12 +657,21 @@ public class Node implements Cloneable{
 		return heating_;
 	}
 	
+	public Iterator<Node> getBeziers(){
+		return bezierMap_.values().iterator();
+	}
+	
 	/**
 	 * マウスで拾い上げることが出来るか
 	 * @return
 	 */
 	public boolean isPickable(){
 		return (pickable_ && isAtom() && !rootMembrane_);
+	}
+	
+	
+	public boolean isRoot(){
+		return rootMembrane_;
 	}
 	
 	public boolean isUncalc(){
@@ -888,116 +866,12 @@ public class Node implements Cloneable{
 	 * @param g
 	 */
 	public void paint(Graphics g){
-		if(rootMembrane_){
-			LinkSet.paint(g);
-		}
-
 		// 描画範囲に入っていないものは描画しない
 		if(!g.getClipBounds().intersects(rect_.getBounds())){
 			return;
 		}
 
 		// アトムまたは閉じた膜の描画
-		if(isAtom()){
-			if(!richMode_ || !(myObject_ instanceof Atom)){
-				g.setColor(myColor_);
-				((Graphics2D)g).fill(rect_);
-			}
-			g.setColor(myColor_);
-			((Graphics2D)g).fill(rect_);
-
-			// ベジエ曲線の制御点なら終了
-			if(null == myObject_){ return; }
-
-			if(selected_){
-				Iterator<Node> nodes = bezierMap_.values().iterator();
-				while(nodes.hasNext()){
-					Node node = nodes.next();
-					node.paint(g);
-				}
-
-				Stroke oldStroke = ((Graphics2D)g).getStroke();
-				((Graphics2D)g).setStroke(SELECTED_STROKE);
-				if(richMode_ && myObject_ instanceof Atom){
-					g.setColor(myColor_);
-					((Graphics2D)g).setStroke(SELECTED_STROKE);
-					((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ATOM_COMPOSITE));
-					g.drawImage(ball_, (int)rect_.x, (int)rect_.y, panel_);
-					((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-				}
-				g.setColor(Color.RED);
-				((Graphics2D)g).draw(rect_);
-				((Graphics2D)g).setStroke(oldStroke);
-			} else {
-				if(richMode_ && myObject_ instanceof Atom){
-					g.setColor(myColor_);
-					Stroke oldStroke = ((Graphics2D)g).getStroke();
-					((Graphics2D)g).setStroke(SELECTED_STROKE);
-					((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ATOM_COMPOSITE));
-					g.drawImage(ball_, (int)rect_.x, (int)rect_.y, panel_);
-					((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-					((Graphics2D)g).setStroke(oldStroke);
-					g.setColor(Color.BLACK);
-				}  else {
-					g.setColor(Color.BLACK);
-					((Graphics2D)g).draw(rect_);
-				}
-			}
-			///////////////////////////////////////////////////////////////
-			// アトム名描画
-			g.setFont(FONT);
-			if(showFullName_){
-				g.drawString(name_, (int)rect_.x, (int)rect_.y);
-			} else if(0 < name_.length()){
-				g.drawString(name_.substring(0, 1),
-						(int)(rect_.x + (rect_.width / 2) - ((g.getFontMetrics(g.getFont()).getWidths()[0]) / 2)),
-						(int)(rect_.y + (rect_.height / 2) + ((g.getFontMetrics(g.getFont()).getHeight()) / 4)));
-			}
-			
-			// 炎の描画
-			if(heating_){
-				g.drawImage(fire_[fireID_],
-						(int)rect_.x - FIRE_WIDTH_MARGIN,
-						(int)rect_.y - FIRE_HEIGHT_MARGIN,
-						panel_);
-				fireID_ = (fireID_ < 6) ? fireID_ + 1 : 0; 
-			}
-			///////////////////////////////////////////////////////////////
-		}
-		// 膜の描画
-		else if(myObject_ instanceof Membrane){
-			synchronized (nodeMap_) {
-				Iterator<Node> nodes = nodeMap_.values().iterator();
-				while(nodes.hasNext()){
-					Node node = nodes.next();
-					node.paint(g);
-				}
-			}
-			if(!rootMembrane_){
-				g.setColor(myColor_);
-				if(selected_){
-					g.setColor(Color.RED);
-					Stroke oldStroke = ((Graphics2D)g).getStroke();
-					((Graphics2D)g).setStroke(SELECTED_STROKE);
-					((Graphics2D)g).draw(rect_);
-					((Graphics2D)g).setStroke(oldStroke);
-				} else {
-					((Graphics2D)g).draw(rect_);
-				}
-				g.setColor(Color.BLACK);
-				g.setFont(FONT);
-				g.drawString(name_, (int)rect_.x, (int)rect_.y);
-			}
-
-		} else if(myObject_ instanceof String){
-			rect_.width = g.getFontMetrics(FONT).stringWidth(name_);
-			g.setColor(myColor_);
-			g.fillRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
-			g.setColor(Color.BLACK);
-			g.drawRect((int)rect_.x, (int)rect_.y, (int)rect_.width + 10, (int)rect_.height);
-			g.setFont(FONT);
-			g.drawString(name_, (int)rect_.x + 5, (int)rect_.y + g.getFontMetrics(FONT).getHeight());
-		}
 		if(clipped_){
 			paintPin(g, 0, 0);
 		}

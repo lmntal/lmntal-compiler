@@ -1,28 +1,21 @@
-package gui;
+package gui.view;
+
+import gui.model.LinkSet;
+import gui.model.Node;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.CubicCurve2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import runtime.Atom;
 
-/**
- * UNYO-UNYOのリンクを管理するクラス
- * <P>
- * すべてのメソッドはstaticで宣言される
- * @author nakano
- *
- */
-public class LinkSet {
-	
+public class LinkView {
+
 	///////////////////////////////////////////////////////////////////////////
 
 	final static
@@ -32,95 +25,24 @@ public class LinkSet {
 	private double DIPLO_LINK_DELTA = 50;
 	
 	///////////////////////////////////////////////////////////////////////////
-
-	static
-	private Set<Node> linkSet_ = new HashSet<Node>();
-	
-	static
-	private Map<Object, Node> linkMap_ = new HashMap<Object, Node>();
-	
-	static
-	private boolean showLinkNum_ = false;
-	
-	///////////////////////////////////////////////////////////////////////////
-
-	static
-	private void addAllNode(Node node){
-		linkSet_.add(node);
-		Iterator<Node> nodes = node.getChildMap().values().iterator();
-		while(nodes.hasNext()){
-			addAllNode(nodes.next());
-		}
-	}
-	
-	/**
-	 * リンクを持っているアトムを追加する
-	 */
-	static
-	public void addLink(Node node){
-		synchronized (linkSet_) {
-			linkSet_.add(node);
-		}
-		synchronized (linkMap_) {
-			linkMap_.put(node.getObject(), node);
-		}
-	}
-	
-	static
-	public Node getNodeByAtom(Atom atom){
-		synchronized (linkMap_) {
-			return linkMap_.get(atom);
-		}
-	}
-	
-	/**
-	 * AtomまたはMembraneから可視Nodeの座標を取得する
-	 * @param key
-	 * @return
-	 */
-	static
-	public Point2D.Double getNodePoint(Node keyNode){
-		Node node = getVisibleNode(keyNode);
-		return (null != node) ? node.getCenterPoint() : null;
-	}
-
-	
-	/**
-	 * 可視Nodeを取得する
-	 * @param node
-	 * @return
-	 */
-	static
-	public Node getVisibleNode(Node node){
-		if(null == node ||
-				null == node.getParent() ||
-				null == node.getParent().getInvisibleRootNode())
-		{
-			return node;
-		}
-		else {
-			return getVisibleNode(node.getParent());
-		}
-	}
 	
 	/**
 	 * リンクを描画する
 	 * @param g
 	 */
 	static
-	public void paint(Graphics g){
-		synchronized (linkSet_) {
-			Iterator<Node> keys = linkSet_.iterator();
+	public void draw(Graphics g, boolean showLinkNum){
+		synchronized (LinkSet.getLinkSet()) {
+			Iterator<Node> keys = LinkSet.getLinkNodes();
 			while(keys.hasNext()){
 				Node key = keys.next();
 				
 				// keyがAtomでない場合
 				if(!(key.getObject() instanceof Atom)){ continue; }
-				Node nodeSource = getVisibleNode(key);
+				Node nodeSource = LinkSet.getVisibleNode(key);
 				if(null == nodeSource){ return; }
 				Rectangle2D rectSource = nodeSource.getBounds2D();
 				
-				// TODO:グローバル変数化？
 				Map<Integer, Integer> diplolinkMap = new HashMap<Integer, Integer>();
 				int selfLinkNum = 0;
 				for(int n = 0; n < key.getEdgeCount(); n++){
@@ -131,8 +53,8 @@ public class LinkSet {
 									key.getInvisibleRootNode().equals(nthNode.getInvisibleRootNode())))
 					{ continue; }
 					
-					if(showLinkNum_ || key.getID() <= nthNode.getID()){
-						Node nodeTarget = getVisibleNode(nthNode);
+					if(showLinkNum || key.getID() <= nthNode.getID()){
+						Node nodeTarget = LinkSet.getVisibleNode(nthNode);
 						// リンク元もリンク先も描画範囲に入っていない場合は描画しない
 						if(null == g ||
 								null == g.getClipBounds() ||
@@ -158,7 +80,7 @@ public class LinkSet {
 							continue;
 						}
 
-						if(showLinkNum_){
+						if(showLinkNum){
 							Node sourceBezNode = nodeSource.getBezierNode(nthNode);
 							Node nthBezNode = nthNode.getBezierNode(nodeSource);
 							if(null != sourceBezNode){
@@ -306,30 +228,4 @@ public class LinkSet {
 		double y = Math.sin(angle) * LINK_NUM_DELTA;
 		g.drawString(Integer.toString(linkNum), (int)(sourceX - x), (int)(sourceY - y));
 	}
-	
-	/**
-	 * アトムを除去する
-	 */
-	static
-	public void removeLink(Node node){
-		synchronized (linkSet_) {
-			linkSet_.remove(node);
-			linkMap_.remove(node.getObject());
-		}
-	}
-	
-	static
-	public void resetNodes(Node node){
-		synchronized (linkSet_) {
-			linkSet_.clear();
-			addAllNode(node);
-		}
-	}
-	
-	
-	static
-	public void setShowLinkNum(boolean flag){
-		showLinkNum_ = flag;
-	}
-	
 }

@@ -1,5 +1,7 @@
 package gui;
 
+import gui.model.Node;
+
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 

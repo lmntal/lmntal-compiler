@@ -1,5 +1,13 @@
 package gui;
 
+import gui.control.AngleForce;
+import gui.control.AttractionForce;
+import gui.control.NodeFunction;
+import gui.control.RepulsiveForce;
+import gui.control.SpringForce;
+import gui.model.LinkSet;
+import gui.model.Node;
+
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -375,7 +383,7 @@ public class SubFrame extends JFrame {
 		public AngleAdapter() { } 
 		
 		public void itemStateChanged(ItemEvent e) {
-			NodeFunction.setAngleFlag(angleCheck_.isSelected());
+			AngleForce.setAngleFlag(angleCheck_.isSelected());
 		}
 	}
 	
@@ -383,7 +391,7 @@ public class SubFrame extends JFrame {
 	private class AngleSliderChanged implements ChangeListener {
 		public void stateChanged(ChangeEvent e) {
 			JSlider source = (JSlider)e.getSource();
-			NodeFunction.setConstantAngle(source.getValue());
+			AngleForce.setConstantAngle(source.getValue());
 		}
 	}
 	
@@ -397,7 +405,7 @@ public class SubFrame extends JFrame {
 		public AttractionAdapter() { }
 
 		public void itemStateChanged(ItemEvent e) {
-			NodeFunction.setAttractionFlag(attractionCheck_.isSelected());
+			AttractionForce.setAttractionFlag(attractionCheck_.isSelected());
 		}
 	}
 
@@ -521,7 +529,7 @@ public class SubFrame extends JFrame {
 		public RepulsiveAdapter() { }
 		
 		public void itemStateChanged(ItemEvent e) {
-			NodeFunction.setRepulsiveFlag(repulsiveCheck_.isSelected());
+			RepulsiveForce.setRepulsiveFlag(repulsiveCheck_.isSelected());
 		}
 	}
 	
@@ -574,7 +582,7 @@ public class SubFrame extends JFrame {
 		public SpringAdapter() { } 
 		
 		public void itemStateChanged(ItemEvent e) {
-			NodeFunction.setSpringFlag(springCheck_.isSelected());
+			SpringForce.setSpringFlag(springCheck_.isSelected());
 		}
 	}
 	
@@ -582,7 +590,7 @@ public class SubFrame extends JFrame {
 	private class SpringSliderChanged implements ChangeListener {
 		public void stateChanged(ChangeEvent e) {
 			JSlider source = (JSlider)e.getSource();
-			NodeFunction.setConstantSpring(source.getValue());
+			SpringForce.setConstantSpring(source.getValue());
 		}
 	}
 

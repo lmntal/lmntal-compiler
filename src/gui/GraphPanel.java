@@ -1,5 +1,12 @@
 package gui;
 
+import gui.control.NodeFunction;
+import gui.model.LinkSet;
+import gui.model.Node;
+import gui.view.CommonView;
+import gui.view.LinkView;
+import gui.view.MembraneView;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
@@ -145,7 +152,7 @@ public class GraphPanel extends JPanel {
 			e1.printStackTrace();
 		}
 		
-		Node.loadFire(this);
+		CommonView.initView(this.getClass());
 		
 		//　PINのロード待ち　ここまで
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -484,7 +491,8 @@ public class GraphPanel extends JPanel {
 			g.setColor(Color.BLACK);
 			if(null != rootNode_){
 				synchronized (rootNode_.getChildMap()) {
-					rootNode_.paint(g);
+					LinkView.draw(g, false);
+					MembraneView.draw(g, rootNode_, false, this);
 				}
 			}
 
@@ -515,7 +523,7 @@ public class GraphPanel extends JPanel {
 				fireID_ = (fireID_ < 6) ? fireID_ + 1 : 0; 
 			}
 		}
-		int heatingTimer = NodeFunction.getDivergence();
+		int heatingTimer = NodeFunction.getHeatingTime();
 		if(0 < heatingTimer){
 			g.setColor(Color.RED);
 			g.drawString("Heating Timer:" + heatingTimer, 10, 30);
