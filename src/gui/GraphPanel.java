@@ -98,7 +98,7 @@ public class GraphPanel extends JPanel {
 	private AffineTransform af_ = new AffineTransform();
 	private AutoFocusThread autoFocusTh_ = null;
 	private CalcThread calcTh_ = null;
-	private CommonListener commonListener_ = new CommonListener(this);
+	private Commons commonListener_ = new Commons(this);
 	private Cursor currentCursor = new Cursor(Cursor.HAND_CURSOR);
 	private double deltaX;
 	private double deltaY;
@@ -464,7 +464,7 @@ public class GraphPanel extends JPanel {
 		}
 	}
 	
-	public void rotate(double angle){
+	public void moveRotate(double angle){
 		rootNode_.moveRotate(angle);
 	}
 	

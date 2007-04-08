@@ -41,7 +41,7 @@ public class LogFrame extends JFrame{
 	private JSlider timeSlider_ = new JSlider(JSlider.HORIZONTAL, 0, 0, 0);
 	
 	static
-	private CommonListener commonListener_;
+	private Commons commonListener_;
 	
 	static
 	private boolean timeSliderResizing_ = false;
@@ -55,7 +55,7 @@ public class LogFrame extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
 		setLocation(0, LMNtalFrame.WINDOW_HIEGHT);
-		commonListener_ = new CommonListener(this);
+		commonListener_ = new Commons(this);
 		
 		initComponents(this);
 		setTitle(TITLE);
@@ -108,7 +108,7 @@ public class LogFrame extends JFrame{
 	private class LogChangeListener implements ChangeListener {
 		public void stateChanged(ChangeEvent arg0) {
 			if(timeSliderResizing_){ return; }
-			commonListener_.setState(timeSlider_.getValue());
+			commonListener_.loadState(timeSlider_.getValue());
 		}
 	}
 }

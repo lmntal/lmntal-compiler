@@ -100,7 +100,7 @@ public class EditFrame extends JFrame {
 	private LMNtalFrame mainFrame_;
 	
 	static
-	private CommonListener commonListener_;
+	private Commons commonListener_;
 	
 	static
 	private Node selectedNode_;
@@ -118,7 +118,7 @@ public class EditFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
 		setLocation(LMNtalFrame.WINDOW_WIDTH, LMNtalFrame.WINDOW_HIEGHT);
-		commonListener_ = new CommonListener(this);
+		commonListener_ = new Commons(this);
 		
 		initComponents();
 		
@@ -186,7 +186,6 @@ public class EditFrame extends JFrame {
 		
 	}
 	
-	static
 	public void setSelectedNode(Node node){
 		selectedNode_ = node;
 		
@@ -239,7 +238,7 @@ public class EditFrame extends JFrame {
 				commonListener_.addAtom(nodeNameArea_.getText(),
 						(Membrane)selectedNode_.getObject());
 			} else {
-				commonListener_.renameAtom(nodeNameArea_.getText(),
+				commonListener_.addRenameAtom(nodeNameArea_.getText(),
 						selectedNode_);
 			}
 		}

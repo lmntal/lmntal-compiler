@@ -166,7 +166,7 @@ public class SubFrame extends JFrame {
 	private LMNtalFrame mainFrame_;
 	
 	static
-	private CommonListener commonListener_;
+	private Commons commonListener_;
 	
 	static
 	private WheelPanel wheelPanel_ = new WheelPanel();
@@ -176,7 +176,7 @@ public class SubFrame extends JFrame {
 	public SubFrame(LMNtalFrame f) {
 		
 		mainFrame_ = f;
-		commonListener_ = new CommonListener(this);
+		commonListener_ = new Commons(this);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);

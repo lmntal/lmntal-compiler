@@ -5,18 +5,16 @@ import gui.model.Node;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-import runtime.Atom;
 import runtime.Membrane;
 
 /**
- * ³ÈÂç½Ì¾®¤ò´ÉÍý¤¹¤ëListener
  * @author nakano
  *
  */
-public class CommonListener implements MouseWheelListener {
+public class Commons implements MouseWheelListener {
 
 	static
-	private EditFrame advance_;
+	private EditFrame editFrame_;
 	
 	static
 	private LogFrame logFrame_;
@@ -27,24 +25,24 @@ public class CommonListener implements MouseWheelListener {
 	static
 	private SubFrame subFrame_;
 	///////////////////////////////////////////////////////////////////////////
-	public CommonListener() { }
+	public Commons() { }
 	
-	public CommonListener(EditFrame advance) {
+	public Commons(EditFrame advance) {
 		if(advance == null){ return; }
-		advance_ = advance;
+		editFrame_ = advance;
 	}
 	
-	public CommonListener(GraphPanel panel) {
+	public Commons(GraphPanel panel) {
 		if(panel == null){ return; }
 		panel_ = panel;
 	}
 	
-	public CommonListener(LogFrame f) {
+	public Commons(LogFrame f) {
 		if(f == null){ return; }
 		logFrame_ = f;
 	}
 	
-	public CommonListener(SubFrame f) {
+	public Commons(SubFrame f) {
 		if(f == null){ return; }
 		subFrame_ = f;
 	}
@@ -65,12 +63,12 @@ public class CommonListener implements MouseWheelListener {
 		panel_.addAtom(name, targetMem);
 	}
 	
-	public void renameAtom(String name, Node node){
+	public void addRenameAtom(String name, Node node){
 		if(null == panel_){ return; }
 		panel_.addRenameAtom(name, node);
 	}
 	
-	public void renameMembrane(String name, Node node){
+	public void addRenameMembrane(String name, Node node){
 		if(null == panel_){ return; }
 		panel_.addRenameMembrane(name, node);
 	}
@@ -97,7 +95,7 @@ public class CommonListener implements MouseWheelListener {
 	
 	public void moveRotate(double angle){
 		if(null == panel_){ return; }
-		panel_.rotate(angle);
+		panel_.moveRotate(angle);
 	}
 
 	public void revokeTime(){
@@ -124,7 +122,7 @@ public class CommonListener implements MouseWheelListener {
 		panel_.setShowRules(flag);
 	}
 
-	public void setState(int value){
+	public void loadState(int value){
 		if(null == panel_){ return; }
 		panel_.loadState(value);
 	}
@@ -135,8 +133,8 @@ public class CommonListener implements MouseWheelListener {
 	}
 	
 	public void setSelectedNode(Node node){
-		if(null == advance_){ return; }
-		advance_.setSelectedNode(node);
+		if(null == editFrame_){ return; }
+		editFrame_.setSelectedNode(node);
 	}
 	
 	public void setMagnificationSliderValue(int value){
