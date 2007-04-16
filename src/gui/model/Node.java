@@ -479,6 +479,14 @@ public class Node implements Cloneable{
 		return parent_;
 	}
 	
+	public int getPinAnimeCounter(){
+		return pinAnime_;
+	}
+	
+	public double getPinPosY(){
+		return pinPosY_;
+	}
+	
 	/**
 	 * 指定された範囲にあるNodeを取得する
 	 */
@@ -651,6 +659,10 @@ public class Node implements Cloneable{
 	
 	public boolean isBezNode(){
 		return (null == myObject_);
+	}
+	
+	public boolean isClipped(){
+		return clipped_;
 	}
 	
 	public boolean isHeating(){
@@ -871,34 +883,6 @@ public class Node implements Cloneable{
 			return;
 		}
 
-		// アトムまたは閉じた膜の描画
-		if(clipped_){
-			paintPin(g, 0, 0);
-		}
-	}
-	
-	/**
-	 * ピンの描画およびアニメーション用の計算を行う
-	 * @param g
-	 * @param deltaX
-	 * @param deltaY
-	 */
-	public void paintPin(Graphics g, int deltaX, int deltaY){
-		if((pinAnime_ != 0) && (pinPosY_ < rect_.getCenterY())){
-			pinPosY_ += Math.abs(panel_.getHeight() / pinAnime_); 
-		}
-		if(pinPosY_ > rect_.getCenterY()){ pinAnime_ = 0; }
-		if(pinAnime_ == 0){ pinPosY_ = rect_.getY() - (panel_.getPin().getHeight(panel_) / 2); }
-
-		if((myObject_ instanceof Membrane) && visible_){
-			return;
-		}
-		g.drawImage(panel_.getPin(),
-				(int)(rect_.getCenterX() + deltaX),
-				(int)(pinPosY_ + deltaY),
-				panel_
-				);
-		
 	}
 	
 	/**
@@ -1221,6 +1205,10 @@ public class Node implements Cloneable{
 	 */
 	public void setPickable(boolean pick){
 		pickable_ = pick;
+	}
+	
+	public void setPinAnimeCounter(int counter){
+		pinAnime_ = counter;
 	}
 	
 	/**

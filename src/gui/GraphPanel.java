@@ -413,6 +413,7 @@ public class GraphPanel extends JPanel {
 	 * Pinのイメージを取得する
 	 * @return
 	 */
+	static
 	public Image getPin(){
 		return pin_;
 	}

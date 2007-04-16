@@ -1,13 +1,14 @@
 package gui.view;
 
+import gui.GraphPanel;
+import gui.model.Node;
+
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.Stroke;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.ImageObserver;
 import java.util.Iterator;
@@ -15,7 +16,7 @@ import java.util.Iterator;
 import javax.swing.ImageIcon;
 
 import runtime.Atom;
-import gui.model.Node;
+import runtime.Membrane;
 
 /**
  * アトムを描画する<br/>
@@ -115,5 +116,45 @@ public class AtomView {
 			CommonView.drawFire(g, node.getNextFireID(), x, y, imageObserver);
 		}
 		///////////////////////////////////////////////////////////////
+		
+
+		if(node.isClipped()){
+			paintPin(g, 0, y, rect, node, imageObserver);
+		}
+	}
+	
+	/**
+	 * ピンの描画およびアニメーション用の計算を行う
+	 * @param g
+	 * @param deltaX
+	 * @param deltaY
+	 */
+	static
+	public void paintPin(Graphics g,
+			int deltaX,
+			int deltaY,
+			RoundRectangle2D rect,
+			Node node,
+			ImageObserver imageObserver){
+		int pinAnime = node.getPinAnimeCounter();
+		double pinPosY = node.getPinPosY();
+		
+		if((pinAnime != 0) && (pinPosY < rect.getCenterY())){
+			pinPosY += Math.abs(200 / pinAnime); 
+		}
+		
+		if(pinPosY > rect.getCenterY()){
+			node.setPinAnimeCounter(0); 
+		}
+		if(pinAnime == 0){
+//			node.getPinPosY()pinPosY = rect.getY() - (GraphPanel.getPin().getHeight(imageObserver) / 2); 
+		}
+
+		g.drawImage(GraphPanel.getPin(),
+				(int)(rect.getCenterX()),
+				(int)(deltaY),
+				imageObserver
+				);
+		
 	}
 }
