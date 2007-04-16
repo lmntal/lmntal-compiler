@@ -11,6 +11,14 @@ import runtime.Atom;
 
 public class AngleForce {
 
+	/** 角度調整力定数 */
+	static double constantAngle_ = 3;
+	static boolean angleFlag_ = true;
+	static 
+	public void setAngleFlag(boolean angleFlag) {
+		angleFlag_ = angleFlag;
+	}
+	
 	static
 	public void setConstantAngle(double value){
 		AngleForce.constantAngle_ = value / 10;
@@ -77,7 +85,7 @@ public class AngleForce {
 					
 					dx = dx * 2;
 					dy = dy * 2;
-	//				sourceNode.moveDelta(-dx, -dy);
+					sourceNode.moveDelta(-dx, -dy);
 					nthNode.moveDelta(dx, dy);
 					
 				}
@@ -168,13 +176,5 @@ public class AngleForce {
 	//			nthNode.moveDelta(dx, dy);
 	//		}
 		}
-
-	/** 角度調整力定数 */
-	static double constantAngle_ = 3;
-	static boolean angleFlag_ = true;
-	static 
-	public void setAngleFlag(boolean angleFlag) {
-		angleFlag_ = angleFlag;
-	}
 
 }
