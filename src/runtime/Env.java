@@ -23,7 +23,7 @@ import javax.swing.UnsupportedLookAndFeelException;
  */
 public final class Env {
 
-	public static final String LMNTAL_VERSION = "0.86.20061218";
+	public static final String LMNTAL_VERSION = "0.90.20070416";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
