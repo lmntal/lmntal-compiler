@@ -1,8 +1,8 @@
 package gui;
 
-import gui.control.NodeFunction;
 import gui.model.LinkSet;
 import gui.model.Node;
+import gui.model.forces.NodeFunction;
 import gui.view.CommonView;
 import gui.view.LinkView;
 import gui.view.MembraneView;

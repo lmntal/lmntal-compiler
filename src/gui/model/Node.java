@@ -1,11 +1,11 @@
 package gui.model;
 
 import gui.GraphPanel;
-import gui.control.AngleForce;
-import gui.control.AttractionForce;
-import gui.control.NodeFunction;
-import gui.control.RepulsiveForce;
-import gui.control.SpringForce;
+import gui.model.forces.AngleForce;
+import gui.model.forces.AttractionForce;
+import gui.model.forces.NodeFunction;
+import gui.model.forces.RepulsiveForce;
+import gui.model.forces.SpringForce;
 import gui.view.CommonView;
 
 import java.awt.Color;

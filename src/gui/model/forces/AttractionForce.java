@@ -1,4 +1,4 @@
-package gui.control;
+package gui.model.forces;
 
 import gui.model.Node;
 
