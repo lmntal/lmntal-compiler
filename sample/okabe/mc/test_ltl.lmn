@@ -3,38 +3,42 @@
   import test.Tableau;
 :].
 
+% preprocess
 pre={
+% LTL formula
 res = make(create_graph(F)).
-F=(global(not(and(cr0,cr1)))).
+//F=until(a,until(b,c)).
+F=(future(global(p))).
+//res = create_graph(implication(until(a,b),future(c))).
 
+% preprocess rules
 // F ¦× ¢Î True U ¦×
 H = future(Psi) :- H = until(true,Psi).
 // G ¦× ¢Î False R ¦×
 H = global(Psi) :- H = release(false,Psi).
 // ¢Ì(¦Ì U ¦Ç) = (¢Ì¦Ì) R (¢Ì¦Ç)
-H = not(until(Mu,Eta)) :- H = release(not(Mu,Eta)).
+H = not(until(Mu,Eta)) :- H = release(not(Mu),not(Eta)).
 // ¢Ì(¦Ì R ¦Ç) = (¢Ì¦Ì) U (¢Ì¦Ç)
 H = not(release(Mu,Eta)) :- H = until(not(Mu),not(Eta)).
 // ¢ÌX¦Ì = X¢Ì¦Ì
 H = not(next(Mu)) :- H = next(not(Mu)).
 // boolean equivalences
+H = implication(G1,G2) :- ground(G1),ground(G2) | H = or(not(G1),G2).
 H = not(not(G)) :- ground(G) | H = G.
 H = not(and(G1,G2)) :- ground(G1),ground(G2) | H = or(not(G1),not(G2)).
 H = not(or(G1,G2)) :- ground(G1),ground(G2) | H = and(not(G1),not(G2)).
 }.
-pre={$p,@p} :- $p.
+pre={$p,@p}/ :- $p.
 
 % function create_graph
 H = create_graph(Psi) :- ground(Psi) | H =
 [:/*inline*/
-  HashSet<Integer> incoming = new HashSet<Integer>();
-  incoming.add(-1);
-  HashSet<Link> old = new HashSet<Link>();
-  HashSet<Link> newer = new HashSet<Link>();
-  newer.add(me.getArg(0));
+  HashSet<Integer> incoming = new HashSet<Integer>(); incoming.add(-1);
+  HashSet<Link> older = new HashSet<Link>();
+  HashSet<Link> newer = new HashSet<Link>(); newer.add(me.getArg(0));
   HashSet<Link> next = new HashSet<Link>();
   HashSet<Node> nodes = new HashSet<Node>();
-  Node node = new Node(Tableau.counter++, incoming, old, newer, next);
+  Node node = new Node(Tableau.counter++, incoming, older, newer, next);
   HashSet<Node> result = Tableau.expand(node, nodes); // expand
 
   Atom resultAtom = mem.newAtom(new ObjectFunctor(result));
