@@ -25,7 +25,7 @@ item_done.
 %%待ち時間[ms]
 waittime(1000).
 %%時間生成
-nowtime(timer:getinttime),oldtime(timer:getinttime).
+nowtime(timer.getinttime),oldtime(timer.getinttime).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%アイテム生成
@@ -60,7 +60,7 @@ score(S),
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%キー入力受付
-item(L),keyCode([]),waittime(_IW),nowtime(_INOWT),oldtime(_IOLDT):- _INOWT - _IOLDT =< _IW |item(L),keyCode([]),waittime(_IW),nowtime(timer:getinttime),oldtime(_IOLDT).
+item(L),keyCode([]),waittime(_IW),nowtime(_INOWT),oldtime(_IOLDT):- _INOWT - _IOLDT =< _IW |item(L),keyCode([]),waittime(_IW),nowtime(timer.getinttime),oldtime(_IOLDT).
 keyCode([_IH|L]),item(L2):-keyCode(L),check(_IH,L2,[]).
 %%アイテムのインデックスをすべてチェック
 check(_IH,[_IS,X|L1],L2):-_IH=\=_IS|check(_IH,L1,[_IS,X|L2]).
