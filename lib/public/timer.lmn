@@ -12,15 +12,15 @@ module(timer).
 %	timer:subtract(+Long,+Long,-Float)
 %	timer:benchmark(Link,-Float),{'+'(Link), ... }
 
-	timer:getinttime(Time) :-
+	timer.getinttime(Time) :-
 		[:/*inline*/me.getMem().alterAtomFunctor( me,
 			new IntegerFunctor(new Long(System.currentTimeMillis()).intValue()) );:](Time).
 			
-	timer:gettime(Time) :-
+	timer.gettime(Time) :-
 		[:/*inline*/me.getMem().alterAtomFunctor( me,
 			new ObjectFunctor(new Long(System.currentTimeMillis())) );:](Time).
 			
-	timer:subtract(Time1,Time2,Res) :- class(Time1,"java.lang.Long"), class(Time2,"java.lang.Long") |
+	timer.subtract(Time1,Time2,Res) :- class(Time1,"java.lang.Long"), class(Time2,"java.lang.Long") |
 		[:/*inline*/
 			Membrane mem1 = me.getMem();
 			mem1.removeAtom(me);
@@ -32,13 +32,13 @@ module(timer).
 			Atom resatom = mem1.newAtom(new FloatingFunctor(res));
 			mem1.relinkAtomArgs(resatom,0,me,2);:](Time1,Time2,Res).
 
-	timer:benchmark(X,Res) :- timer:gettime(Start), timer:benchmark2(X,Start,Res).
-//	timer:benchmark2(X,Start,Res), {+X,$p,@p} :- class(Start,"java.lang.Long") |
-//		timer:benchmark3(Start,Res), {go,$p,@p}.
-//	timer:benchmark3(Start,Res), {$p,@r}/ :- timer:gettime(End),
-//		timer:subtract(End,Start,Res), {$p,@r}.
-	timer:benchmark2(X,Start,Res), {+X,$p,@p} :- class(Start,"java.lang.Long") |
-		timer:benchmark3(X, Start,Res), {+X, go,$p,@p}.
-	timer:benchmark3(X, Start,Res), {+X, $p,@r}/ :- timer:gettime(End),
-		timer:subtract(End,Start,Res), timer:end(X), {+X, $p,@r}.
+	timer.benchmark(X,Res) :- timer.gettime(Start), timer.benchmark2(X,Start,Res).
+//	timer.benchmark2(X,Start,Res), {+X,$p,@p} :- class(Start,"java.lang.Long") |
+//		timer.benchmark3(Start,Res), {go,$p,@p}.
+//	timer.benchmark3(Start,Res), {$p,@r}/ :- timer.gettime(End),
+//		timer.subtract(End,Start,Res), {$p,@r}.
+	timer.benchmark2(X,Start,Res), {+X,$p,@p} :- class(Start,"java.lang.Long") |
+		timer.benchmark3(X, Start,Res), {+X, go,$p,@p}.
+	timer.benchmark3(X, Start,Res), {+X, $p,@r}/ :- timer.gettime(End),
+		timer.subtract(End,Start,Res), timer.end(X), {+X, $p,@r}.
 }
