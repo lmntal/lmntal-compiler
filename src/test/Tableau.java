@@ -1,5 +1,6 @@
 package test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import runtime.*;
@@ -10,209 +11,172 @@ import runtime.Link;
 public class Tableau {
 	public static int counter = 0;
 
-	public static HashSet<Node> expand(Node node, HashSet<Node> nodes) {
-		 System.out.println("--expand--");
-		 node.printv();
+	public static HashSet<Node> expand(Node q, HashSet<Node> nodes) {
 
-		if (node.newer.isEmpty()) {
+		if (q.newer.isEmpty()) { // New(q) is empty
 			Iterator<Node> it = nodes.iterator();
 			while (it.hasNext()) {
 				Node r = it.next();
-				if (r.older.equals(node.older) && r.next.equals(node.next)) {
-					r.incoming.addAll(node.incoming);
+				if (r.older.equals(q.older) && r.next.equals(q.next)) {
+					r.incoming.addAll(q.incoming);
 					return nodes;
 				}
 			}
-			HashSet<Integer> newIncoming = new HashSet<Integer>();
-			newIncoming.add(node.id);
-			HashSet<Link> newNew = new HashSet<Link>();
-			newNew.addAll(node.next);
-			Node newNode = new Node(counter++, newIncoming,
-					new HashSet<Link>(), newNew, new HashSet<Link>());
-			nodes.add(node);
+			ArrayList<Integer> incoming = new ArrayList<Integer>();
+			incoming.add(q.id);
+			HashSet<Link> older = new HashSet<Link>();
+			HashSet<Link> newer = new HashSet<Link>(q.next);
+			HashSet<Link> next = new HashSet<Link>();
+			Node newNode = new Node(counter++, incoming, older, newer, next);
+			nodes.add(q);
 			return expand(newNode, nodes);
 		} else { // New(q) is not empty
-			Iterator<Link> it = node.newer.iterator();
+			Iterator<Link> it = q.newer.iterator();
 			Link eta = it.next();
 			it.remove();
-			// if eta already belongs to Old
-			if (node.older.contains(eta))
-				return expand(node, nodes);
-			if (eta.getAtom().getFunctor().getArity() == 1) {
-				// proposition
-				// System.out.println("eta is a proposition: " + eta.getAtom());
-				if (eta.getAtom().getFunctor().getName().equals("false")) // contradiction
-					return (nodes);
-				Iterator<Link> oldIte = node.older.iterator();
-				while (oldIte.hasNext()) {
-					if (oldIte.next().getAtom().getName().equals("not"))
-						if (oldIte.next().getAtom().nthAtom(0).getFunctor()
-								.equals(eta.getAtom().getFunctor()))
-							return (nodes); // contradiction
+			/** * eta is in Old(q) or not ** */
+			if (q.older.contains(eta))
+				return expand(q, nodes);
+			Atom etaAtom = eta.getAtom();
+			/** * case 1: eta is a proposition or the negation of a proposition ** */
+			if (etaAtom.getFunctor().getArity() == 1
+					|| etaAtom.getName().equals("not")) { // proposition
+				if (etaAtom.getFunctor().getArity() == 1) {
+					if (etaAtom.getName().equals("false"))
+						return (nodes);
+					Iterator<Link> oldIte = q.older.iterator();
+					while (oldIte.hasNext()) {
+						Atom oldAtom = oldIte.next().getAtom();
+						if (oldAtom.getName().equals("not"))
+							if (oldAtom.nthAtom(0).getFunctor().equals(
+									etaAtom.getFunctor()))
+								return (nodes);
+					}
+				} else { // negation of a proposition
+					if (etaAtom.nthAtom(0).getName().equals("true"))
+						return (nodes);
+					Iterator<Link> oldIte = q.older.iterator();
+					while (oldIte.hasNext()) {
+						Atom oldAtom = oldIte.next().getAtom();
+						if (oldAtom.getFunctor().equals(
+								etaAtom.nthAtom(0).getFunctor()))
+							return (nodes);
+					}
 				}
-				HashSet<Integer> newIncoming = new HashSet<Integer>();
-				newIncoming.addAll(node.incoming);
-				HashSet<Link> newOld = new HashSet<Link>();
-				newOld.addAll(node.older);
-				newOld.add(eta);
-				HashSet<Link> newNew = new HashSet<Link>();
-				newNew.addAll(node.newer);
-				HashSet<Link> newNext = new HashSet<Link>();
-				newNext.addAll(node.next);
-				Node newNode = new Node(counter++, newIncoming, newOld, newNew,
-						newNext);
-				nodes.remove(node);
+				ArrayList<Integer> incoming = new ArrayList<Integer>(q.incoming);
+				HashSet<Link> older = new HashSet<Link>(q.older);
+				older.add(eta);
+				HashSet<Link> newer = new HashSet<Link>(q.newer);
+				HashSet<Link> next = new HashSet<Link>(q.next);
+				Node newNode = new Node(counter++, incoming, older, newer, next);
+				nodes.remove(q);
 				return expand(newNode, nodes);
 			}
-			if (eta.getAtom().getFunctor().getName().equals("not")) {
-				// the negation of a proposition
-				if (eta.getAtom().nthAtom(0).getFunctor().getName().equals(
-						"true")) // contradiction
-					return (nodes);
-				Iterator<Link> oldIte = node.older.iterator();
-				while (oldIte.hasNext()) {
-					if (oldIte.next().getAtom().getFunctor().equals(
-							eta.getAtom().nthAtom(0).getFunctor()))
-						return (nodes); // contradiction
-				}
-				HashSet<Integer> newIncoming = new HashSet<Integer>();
-				newIncoming.addAll(node.incoming);
-				HashSet<Link> newOld = new HashSet<Link>();
-				newOld.addAll(node.older);
-				newOld.add(eta);
-				HashSet<Link> newNew = new HashSet<Link>();
-				newNew.addAll(node.newer);
-				HashSet<Link> newNext = new HashSet<Link>();
-				newNext.addAll(node.next);
-				Node newNode = new Node(counter++, newIncoming, newOld, newNew,
-						newNext);
-				nodes.remove(node);
+			/** * case2: eta is of the form until(mu,psi) ** */
+			else if (etaAtom.getName().equals("until")) {
+				// q1
+				ArrayList<Integer> incoming1 = new ArrayList<Integer>(
+						q.incoming);
+				HashSet<Link> old1 = new HashSet<Link>(q.older);
+				old1.add(eta);
+				HashSet<Link> newer1 = new HashSet<Link>(q.newer);
+				newer1.add(etaAtom.getArg(0));
+				HashSet<Link> next1 = new HashSet<Link>(q.next);
+				next1.add(eta);
+				Node newNode1 = new Node(counter++, incoming1, old1, newer1,
+						next1);
+				// q2
+				ArrayList<Integer> incoming2 = new ArrayList<Integer>(
+						q.incoming);
+				HashSet<Link> old2 = new HashSet<Link>(q.older);
+				old2.add(eta);
+				HashSet<Link> newer2 = new HashSet<Link>(q.newer);
+				newer2.add(etaAtom.getArg(1));
+				HashSet<Link> next2 = new HashSet<Link>(q.next);
+				Node newNode2 = new Node(counter++, incoming2, old2, newer2,
+						next2);
+				nodes.remove(q);
+				return expand(newNode2, expand(newNode1, nodes));
+			}
+			/** * case3: eta is of the form release(mu,psi) ** */
+			else if (etaAtom.getName().equals("release")) {
+				// q1
+				ArrayList<Integer> incoming1 = new ArrayList<Integer>(
+						q.incoming);
+				HashSet<Link> older1 = new HashSet<Link>(q.older);
+				older1.add(eta);
+				HashSet<Link> newer1 = new HashSet<Link>(q.newer);
+				newer1.add(etaAtom.getArg(0));
+				newer1.add(etaAtom.getArg(1));
+				HashSet<Link> next1 = new HashSet<Link>(q.next);
+				Node newNode1 = new Node(counter++, incoming1, older1, newer1,
+						next1);
+				// q2
+				ArrayList<Integer> incoming2 = new ArrayList<Integer>(
+						q.incoming);
+				HashSet<Link> older2 = new HashSet<Link>(q.older);
+				older2.add(eta);
+				HashSet<Link> newer2 = new HashSet<Link>(q.newer);
+				newer2.add(etaAtom.getArg(1));
+				HashSet<Link> next2 = new HashSet<Link>(q.next);
+				next2.add(eta);
+				Node newNode2 = new Node(counter++, incoming2, older2, newer2,
+						next2);
+				nodes.remove(q);
+				return expand(newNode2, expand(newNode1, nodes));
+			}
+			/** * case4: eta is of the form or(mu,psi) ** */
+			else if (etaAtom.getName().equals("or")) {
+				// q1
+				ArrayList<Integer> incoming1 = new ArrayList<Integer>(
+						q.incoming);
+				HashSet<Link> older1 = new HashSet<Link>(q.older);
+				older1.add(eta);
+				HashSet<Link> newer1 = new HashSet<Link>(q.newer);
+				newer1.add(etaAtom.getArg(0));
+				HashSet<Link> next1 = new HashSet<Link>(q.next);
+				Node newNode1 = new Node(counter++, incoming1, older1, newer1,
+						next1);
+				// q2
+				ArrayList<Integer> incoming2 = new ArrayList<Integer>(
+						q.incoming);
+				HashSet<Link> older2 = new HashSet<Link>(q.older);
+				older2.add(eta);
+				HashSet<Link> newer2 = new HashSet<Link>(q.newer);
+				newer2.add(etaAtom.getArg(1));
+				HashSet<Link> next2 = new HashSet<Link>(q.next);
+				Node newNode2 = new Node(counter++, incoming2, older2, newer2,
+						next2);
+				nodes.remove(q);
+				return expand(newNode2, expand(newNode1, nodes));
+			}
+			/** * case5: eta is of the form and(mu,psi) ** */
+			else if (etaAtom.getName().equals("and")) {
+				ArrayList<Integer> incoming = new ArrayList<Integer>(q.incoming);
+				HashSet<Link> older = new HashSet<Link>(q.older);
+				older.add(eta);
+				HashSet<Link> newer = new HashSet<Link>(q.newer);
+				newer.add(etaAtom.getArg(0));
+				newer.add(etaAtom.getArg(1));
+				HashSet<Link> next = new HashSet<Link>(q.next);
+				Node newNode = new Node(counter++, incoming, older, newer, next);
+				nodes.remove(q);
 				return expand(newNode, nodes);
 			}
-			if (eta.getAtom().getFunctor().getName().equals("until")) {
-				// System.out.println("Tableau: until");
-				HashSet<Integer> newIncoming1 = new HashSet<Integer>();
-				newIncoming1.addAll(node.incoming);
-				HashSet<Link> newOld1 = new HashSet<Link>();
-				newOld1.addAll(node.older);
-				newOld1.add(eta);
-				HashSet<Link> newNew1 = new HashSet<Link>();
-				newNew1.addAll(node.newer);
-				newNew1.add(eta.getAtom().getArg(0));
-				HashSet<Link> newNext1 = new HashSet<Link>();
-				newNext1.addAll(node.next);
-				newNext1.add(eta);
-				Node newNode1 = new Node(counter++, newIncoming1, newOld1,
-						newNew1, newNext1);
-				HashSet<Integer> newIncoming2 = new HashSet<Integer>();
-				newIncoming2.addAll(node.incoming);
-				HashSet<Link> newOld2 = new HashSet<Link>();
-				newOld2.addAll(node.older);
-				newOld2.add(eta);
-				HashSet<Link> newNew2 = new HashSet<Link>();
-				newNew2.addAll(node.newer);
-				newNew2.add(eta.getAtom().getArg(1));
-				HashSet<Link> newNext2 = new HashSet<Link>();
-				newNext2.addAll(node.next);
-				Node newNode2 = new Node(counter++, newIncoming2, newOld2,
-						newNew2, newNext2);
-				nodes.remove(node);
-				return expand(newNode2, expand(newNode1, nodes));
-			}
-			if (eta.getAtom().getFunctor().getName().equals("release")) {
-				HashSet<Integer> newIncoming1 = new HashSet<Integer>();
-				newIncoming1.addAll(node.incoming);
-				HashSet<Link> newOld1 = new HashSet<Link>();
-				newOld1.addAll(node.older);
-				newOld1.add(eta);
-				HashSet<Link> newNew1 = new HashSet<Link>();
-				newNew1.addAll(node.newer);
-				newNew1.add(eta.getAtom().getArg(0));
-				newNew1.add(eta.getAtom().getArg(1));
-				HashSet<Link> newNext1 = new HashSet<Link>();
-				newNext1.addAll(node.next);
-				Node newNode1 = new Node(counter++, newIncoming1, newOld1,
-						newNew1, newNext1);
-				HashSet<Integer> newIncoming2 = new HashSet<Integer>();
-				newIncoming2.addAll(node.incoming);
-				HashSet<Link> newOld2 = new HashSet<Link>();
-				newOld2.addAll(node.older);
-				newOld2.add(eta);
-				HashSet<Link> newNew2 = new HashSet<Link>();
-				newNew2.addAll(node.newer);
-				newNew2.add(eta.getAtom().getArg(1));
-				HashSet<Link> newNext2 = new HashSet<Link>();
-				newNext2.addAll(node.next);
-				newNext2.add(eta);
-				Node newNode2 = new Node(counter++, newIncoming2, newOld2,
-						newNew2, newNext2);
-				nodes.remove(node);
-				return expand(newNode2, expand(newNode1, nodes));
-			}
-			if (eta.getAtom().getFunctor().getName().equals("or")) {
-				HashSet<Integer> newIncoming1 = new HashSet<Integer>();
-				newIncoming1.addAll(node.incoming);
-				HashSet<Link> newOld1 = new HashSet<Link>();
-				newOld1.addAll(node.older);
-				newOld1.add(eta);
-				HashSet<Link> newNew1 = new HashSet<Link>();
-				newNew1.addAll(node.newer);
-				newNew1.add(eta.getAtom().getArg(0));
-				HashSet<Link> newNext1 = new HashSet<Link>();
-				newNext1.addAll(node.next);
-				Node newNode1 = new Node(counter++, newIncoming1, newOld1,
-						newNew1, newNext1);
-				HashSet<Integer> newIncoming2 = new HashSet<Integer>();
-				newIncoming2.addAll(node.incoming);
-				HashSet<Link> newOld2 = new HashSet<Link>();
-				newOld2.addAll(node.older);
-				newOld2.add(eta);
-				HashSet<Link> newNew2 = new HashSet<Link>();
-				newNew2.addAll(node.newer);
-				newNew2.add(eta.getAtom().getArg(1));
-				HashSet<Link> newNext2 = new HashSet<Link>();
-				newNext2.addAll(node.next);
-				Node newNode2 = new Node(counter++, newIncoming2, newOld2,
-						newNew2, newNext2);
-				nodes.remove(node);
-				return expand(newNode2, expand(newNode1, nodes));
-			}
-			if (eta.getAtom().getFunctor().getName().equals("and")) {
-				System.out.println("and");
-				HashSet<Integer> newIncoming = new HashSet<Integer>();
-				newIncoming.addAll(node.incoming);
-				HashSet<Link> newOld = new HashSet<Link>();
-				newOld.addAll(node.older);
-				newOld.add(eta);
-				HashSet<Link> newNew = new HashSet<Link>();
-				newNew.addAll(node.newer);
-				newNew.add(eta.getAtom().getArg(0));
-				newNew.add(eta.getAtom().getArg(1));
-				HashSet<Link> newNext = new HashSet<Link>();
-				newNext.addAll(node.next);
-				Node newNode = new Node(counter++, newIncoming, newOld, newNew,
-						newNext);
-				nodes.remove(node);
-				return expand(newNode, nodes);
-			}
-			if (eta.getAtom().getFunctor().getName().equals("next")) {
-				HashSet<Integer> newIncoming = new HashSet<Integer>();
-				newIncoming.addAll(node.incoming);
-				HashSet<Link> newOld = new HashSet<Link>();
-				newOld.addAll(node.older);
-				newOld.add(eta);
-				HashSet<Link> newNew = new HashSet<Link>();
-				newNew.addAll(node.newer);
-				HashSet<Link> newNext = new HashSet<Link>();
-				newNext.addAll(node.next);
-				newNext.add(eta.getAtom().getArg(0));
-				Node newNode = new Node(counter++, newIncoming, newOld, newNew,
-						newNext);
-				nodes.remove(node);
+			/** * case6: eta is of the form next(mu) ** */
+			else /* if (etaAtom.getName().equals("next")) */{
+				ArrayList<Integer> incoming = new ArrayList<Integer>(
+						q.incoming);
+				HashSet<Link> older = new HashSet<Link>(q.older);
+				older.add(eta);
+				HashSet<Link> newer = new HashSet<Link>(q.newer);
+				HashSet<Link> next = new HashSet<Link>(q.next);
+				next.add(etaAtom.getArg(0));
+				Node newNode = new Node(counter++, incoming, older, newer, next);
+				nodes.remove(q);
 				return expand(newNode, nodes);
 			}
 		}
-		return nodes;
 	}
 
 	public static void toAutomaton(Membrane mem, HashSet<Node> nodes) {
@@ -249,8 +213,9 @@ public class Tableau {
 				srcMem.newLink(in, 1, plus, 0);
 				// node.older
 				Iterator<Link> oldIte = tmpNode.older.iterator();
-				while(oldIte.hasNext()) {
-					srcMem.newAtom(new SymbolFunctor(oldIte.next().getAtom().getFunctor().getName(),0));
+				while (oldIte.hasNext()) {
+					srcMem.newAtom(new SymbolFunctor(oldIte.next().getAtom()
+							.getFunctor().getName(), 0));
 				}
 			} else {
 				// src stateが存在する場合

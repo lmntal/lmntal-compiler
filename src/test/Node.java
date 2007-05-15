@@ -35,15 +35,18 @@
 //[:/*inline_define*/
 package test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+
+import runtime.Atom;
 import runtime.Link;
 
 //struct node
 public class Node {
 	public final int id;
 
-	public HashSet<Integer> incoming;
+	public ArrayList<Integer> incoming;
 
 	HashSet<Link> older;
 
@@ -51,30 +54,22 @@ public class Node {
 
 	HashSet<Link> next;
 
-	public Node(int id, HashSet<Integer> incoming, HashSet<Link> old,
+	public Node(int id, ArrayList<Integer> incoming, HashSet<Link> older,
 			HashSet<Link> newer, HashSet<Link> next) {
 		this.id = id;
 		this.incoming = incoming;
-		this.older = old;
+		this.older = older;
 		this.newer = newer;
 		this.next = next;
 	}
 
 	public void print() {
-		System.out.println("id: " + this.id);
+		System.out.println("ID: " + this.id);
 		System.out.println("Incoming: " + this.incoming);
-		System.out.println("Old: " + this.older);
-		System.out.println("New: " + this.newer);
-		System.out.println("Next: " + this.next);
-	}
-
-	public void printv() {
-		System.out.println("Id: " + this.id);
-		System.out.println("Incoming: " + this.incoming);
-		Iterator<Link> oi = this.older.iterator();
+		Iterator<Link> oldi = this.older.iterator();
 		System.out.print("Old:");
-		while (oi.hasNext())
-			System.out.print(" " + oi.next().getAtom());
+		while (oldi.hasNext())
+			System.out.print(" " + oldi.next().getAtom());
 		System.out.print("\n");
 		Iterator<Link> newi = this.newer.iterator();
 		System.out.print("New:");
@@ -86,5 +81,41 @@ public class Node {
 		while (nexti.hasNext())
 			System.out.print(" " + nexti.next().getAtom());
 		System.out.print("\n");
+	}
+
+	public void printv() {
+		System.out.println("---\n" + "ID: " + this.id);
+		System.out.println("Incoming: " + this.incoming);
+		Iterator<Link> oldi = this.older.iterator();
+		System.out.println("Old:");
+		while (oldi.hasNext())
+			System.out.println(" " + traverse(oldi.next()));
+		Iterator<Link> newi = this.newer.iterator();
+		System.out.println("New:");
+		while (newi.hasNext())
+			System.out.println(" " + traverse(newi.next()));
+		Iterator<Link> nexti = this.next.iterator();
+		System.out.println("Next:");
+		while (nexti.hasNext())
+			System.out.println(" " + traverse(nexti.next()));
+	}
+
+	public String traverse(Link root) {
+		Atom now = root.getAtom();
+		int arity = now.getEdgeCount();
+		StringBuffer buf = new StringBuffer();
+		buf.append(now.getName());
+		if (arity == 1) // leaf
+			return buf.toString();
+		else {
+			buf.append("(");
+			for (int i = 0; i < arity - 1; i++) {
+				buf.append(traverse(now.getArg(i)));
+				if (i < arity - 2)
+					buf.append(",");
+			}
+			buf.append(")");
+			return buf.toString();
+		}
 	}
 }
