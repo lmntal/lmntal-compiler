@@ -4,12 +4,12 @@
 :].
 
 % preprocess
+pre={$p,@p}/ :- $p.
 pre={
 % LTL formula
-res = make(create_graph(F)).
+res = create_graph(F).
 //F=until(a,until(b,c)).
 F=(future(global(p))).
-//res = create_graph(implication(until(a,b),future(c))).
 
 % preprocess rules
 // F ¦× ¢Î True U ¦×
@@ -28,12 +28,12 @@ H = not(not(G)) :- ground(G) | H = G.
 H = not(and(G1,G2)) :- ground(G1),ground(G2) | H = or(not(G1),not(G2)).
 H = not(or(G1,G2)) :- ground(G1),ground(G2) | H = and(not(G1),not(G2)).
 }.
-pre={$p,@p}/ :- $p.
+
 
 % function create_graph
 H = create_graph(Psi) :- ground(Psi) | H =
 [:/*inline*/
-  HashSet<Integer> incoming = new HashSet<Integer>(); incoming.add(-1);
+  ArrayList<Integer> incoming = new ArrayList<Integer>(); incoming.add(-1);
   HashSet<Link> older = new HashSet<Link>();
   HashSet<Link> newer = new HashSet<Link>(); newer.add(me.getArg(0));
   HashSet<Link> next = new HashSet<Link>();
@@ -42,19 +42,16 @@ H = create_graph(Psi) :- ground(Psi) | H =
   HashSet<Node> result = Tableau.expand(node, nodes); // expand
 
   Atom resultAtom = mem.newAtom(new ObjectFunctor(result));
-  System.out.println(resultAtom);
   mem.relinkAtomArgs(resultAtom, 0, me, 1);
   mem.removeGround(me.getArg(0));
   me.remove();
-  
-  System.out.println("--result--");
-  Iterator<Node> it = result.iterator();
-  while(it.hasNext()) {
-  	Node resultnode = it.next();
-  	resultnode.printv();
+
+  for(Node resultNode : result) {
+  	resultNode.printv();
   }
 :](Psi).
 
+% method toAutomaton
 H = make(O) :- class(O, "java.util.HashSet") |
 H =
 [:/*inline*/
