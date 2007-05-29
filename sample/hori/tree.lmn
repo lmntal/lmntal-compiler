@@ -1,0 +1,210 @@
+/*
+
+NAME
+
+	tree module
+
+SYNOPSIS
+
+AUTHOR
+
+	Taisuke HORI
+
+HISTORY
+
+*/
+
+{
+module(tree).
+
+
+/////////////////////////////////
+// リストを使った実装          //
+// node:                       //
+//   arg0 : ラベル(unary)      //
+//   arg1 : subtreeのリスト    //
+/////////////////////////////////
+
+apply{@r. $h[|*L]}/ :- $h[|*L].
+
+/// リストに対する操作
+
+for_each @@
+for_each(X, []) :-  ground(X) | .
+for_each(X, [Hd|Tl]) :-  ground(X) | X=Hd, for_each(X, Tl).
+
+// listモジュールのmapは動かない(foldがコメントアウト)
+// こっちの方が美しい。ただし、膜を使っているので遅いのかも。
+map @@
+H=map({@r. $p[]}, []) :-  H=[].
+H=map({@r. $p[]}, [$h|Tl]) :- ground($h) |
+    H=[L | map({@r. $p[]}, Tl)],  apply{@r. $p[]. L=','($h)}.
+
+
+append_all @@
+H=append_all([]) :- H=[].
+H=append_all([Hl|Tl]) :- H=list.append(Hl, append_all(Tl)).
+
+/// 木に対する操作
+
+node_label @@
+H=node_label(node(A, L)) :- ground(L) | H=A.
+
+sub_trees @@
+H=sub_trees(node(A, L)) :- ground(A) | H=L.
+
+traverse @@
+traverse($f, node(A, L)) :- ground($f) |
+    A=$f, for_each(X, L), traverse($f, X).
+
+flatten @@
+H=flatten(node(A, L)) :-
+    H=[A| append_all(map(F, L))],
+    F={t. t, H=','(node(A,L)) :- H=flatten(node(A,L))}.
+// T1=node("0", [node("1",[node("10", [node("100", []), node("200", [])])]),
+//               node("2",[node("50", []), node("-100", []), node("10", [])]),node("3",[]),node("4",[]),node("5",[])]).
+// r=flatten(T1).
+
+map_tree @@
+H=map_tree({@r. $p[]}, node($a, L)) :- ground($a) |
+    H=node(B, map({{@r. $p[]}.
+                   H=','(A), {@r. $p[]} :- H=map_tree({@r. $p[]}, A).}, L)),
+    apply{@r. $p[]. B=','($a)}.
+
+// T1=node(0, [node(1,[node(10, [])]),node(2,[]),node(3,[]),node(4,[]),node(5,[])]).
+// io.use.
+// print_tree(map_tree({H=','(N) :- | H=string.str_of_int(100+N).}, T1)).
+
+unfold_tree @@
+H=unfold_tree({@p. $p[]}, $a) :- ground($a) |
+    H=unfold_tree_sub({@p. $p[]}, A),
+    apply{@p. $p[]. A=','($a)}.
+H=unfold_tree_sub({@p. $p[]}, ','(A, L)) :- H=node(A, map({{@p. $p[]}.
+                                                        H=','(A), {@p. $p[]} :- H=unfold_tree({@p. $p[]}, A).}
+                                                      , L)).
+// io.use.
+// print_tree(unfold_tree({ H=','(N) :- N>0 | H=','(string.str_of_int(N), [N-1, N-2]).
+//                          H=','(N) :- N=<0 | H=','(string.str_of_int(N), []).},
+//             10)).
+
+tree_to_strings @@
+H=tree_to_strings(node(A, L)) :- string(A) | H=[A | forest_to_strings(L)].
+
+shift @@
+H=shift(Rest, []) :- string(Rest) | H=[].
+H=shift(Rest, [Hd | Tl]) :- string(Rest) | H=[string.concat(Rest, Hd) | shift(Rest, Tl)].
+
+shift @@
+H=shift(First, Rest, []) :- string(First), string(Rest) | H=[].
+H=shift(First, Rest, [Hd | Tl]) :- string(First), string(Rest) |
+    H=[string.concat(First, Hd) | shift(Rest, Tl)].
+
+forset_to_strings @@
+H=forest_to_strings([]) :- H=[].
+H=forest_to_strings([Hd]) :- H=["| " | shift("`-", "  ", tree_to_strings(Hd))].
+H=forest_to_strings([Hd1, Hd2 | Tl]) :-
+    H=["| " |
+       list.append(shift("+-", "| ", tree_to_strings(Hd1)),
+                   forest_to_strings([Hd2 | Tl]))].
+
+print_list @@
+print_list(done, []) :- .
+print_list(done, [Hl | Tl]) :-  print_list(io.println(Hl), Tl).
+
+print_tree @@
+print_tree(Tree) :- print_list(done, tree_to_strings(Tree)).
+ 
+// io.use.
+// T2=node("0", [node("1",[node("10", [node("100", []), node("200", [])])]),
+//               node("2",[node("50", []), node("-100", []), node("10", [])]),node("3",[]),node("4",[]),node("5",[])]).
+// print_tree(T2).
+
+
+
+// 一般的なmapを用いて、flattenを定義する方法が分からない。
+// mapはarityが二つのアトム(flatten)を受け取り、片方を結果に、
+// 片方に、headを繋げなければならない。
+//   H=map(F, [Hd|Tl]) :- ground(F) | H='.'(F=Hd, map(F, Tl)).
+// だと、Fは一本だけしかないのでダメ
+
+// map_flatten @@
+// H=map_flatten([]) :-  H=[].
+// H=map_flatten([Hd|Tl]) :- H='.'(flatten(Hd), map_flatten(Tl)).
+
+// flatten @@
+// H=flatten(node(A, L)) :- H=[A| Y], Y=append_all(map_flatten(L)).
+
+// 実装2
+
+// 実装1
+// map_subtree @@
+// H=map_subtree(F, []) :- ground(F) |  H=[].
+// H=map_subtree(F, [Hd|Tl]) :- ground(F) | H=[map_tree(F, Hd) | map_subtree(F, Tl)].
+                                           
+// map_tree @@
+// H=map_tree(F, node(A, L)) :- ground(F) | H=node(map_tree_tag(F, A),
+//                                                 map_subtree(F, L)).
+
+
+/// Test
+
+// T1=node(0, [node(1,[node(10, [])]),node(2,[]),node(3,[]),node(4,[]),node(5,[])]).
+// T2=node("0", [node("1",[node("10", [])]),node("2",[]),node("3",[]),node("4",[]),node("5",[])]).
+
+// T1=node(0, [node(1,[])]).
+// r=map_tree(hoge, T1).
+// H=map_tree_tag(hoge, N) :- ground(N) | H=N+100.
+
+// r=flatten(T1).
+// r=unfold_tree(hoge, 2).
+// H=fold_tree_tag(hoge, N) :- N=<0 | H=[0, []].
+// H=fold_tree_tag(hoge, N) :- N>0 | H=[N, [N-1, N-2]].
+
+//r=tree_to_strings(T2).
+
+is_tree @@
+H=is_tree(X) :- H=[:/*inline*/
+	class Pair { 
+		public Atom parent, next;
+		public Pair(Atom parent, Atom next) {
+			this.parent = parent;
+			this.next = next;
+		}
+	}
+
+	Stack<Pair> s = new Stack<Pair>();
+	s.push(new Pair(me, me.nthAtom(0)));
+	HashSet h = new HashSet<Atom>();
+	boolean ok = true;
+	while (!s.empty()) {
+		Pair p = s.pop();
+		Atom a = p.next;
+		Atom parent = p.parent;
+		
+		if (h.contains(a)) {
+			ok = false;
+			break;
+		}
+		h.add(a);
+		int arity = a.getFunctor().getArity();
+		for (int i = 0; i < arity; i++) {
+			Atom b = a.getNthAtom(i);
+			if (b != parent) s.push(new Pair(a, a.getNthAtom(i)));
+		}
+	}
+	Atom a = mem.newAtom(new SymbolFunctor(ok ? "true" : "false", 1));
+	mem.newLink(me.nthAtom(1), 0, a, 0);
+	// アトム一つしか消せない
+	//	me.nthAtom(0).remove();
+	me.remove();
+:](X).
+
+// traverseはアトムのコピーができないから無理
+
+//  A=a(b(c(d))).
+//  r=is_tree(A).
+// // ==> a(b(c(d)),L8), r(true), @601
+//  B=a(X, Y), b(X, Y).
+//  s=is_tree(B).
+// ==> a(L10,b(L10),L16), a(b(c(d)),L8), s(false), r(true), @601
+}.
