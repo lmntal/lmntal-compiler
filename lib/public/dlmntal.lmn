@@ -23,9 +23,9 @@ AUTHOR
 HISTORY
 
 	06/01/07 released
-	06/01/10 1.1
-	06/01/12 2.0 add termination processing
-	06/01/19 3.0 change module name (dlt -> dlmntal)
+	06/01/12 add dlmntal.terminate
+	06/01/19 change module name (dlt -> dlmntal)
+	07/05/29 fix dlmntal.close
 
 */
 
@@ -40,7 +40,7 @@ class AcceptThread extends Thread {
   private ServerSocket servSock;
   private final Membrane mem;
   private Atom ssAtom = null;
-
+  
   /**
    *  AcceptThread#AcceptThread()
    *  @param ServerSocket servSock
@@ -89,11 +89,11 @@ class AcceptThread extends Thread {
   }
 }
 
-/** 
+/**
  *  class: ReaderThread
  */
 class ReaderThread implements Runnable {
-  volatile Thread th = null;
+  private volatile Thread th = null;
   private Socket sock;
   private BufferedReader reader;
   private final Membrane mem;
@@ -123,11 +123,11 @@ class ReaderThread implements Runnable {
    *  ReaderThread#start()
    */
   public void start() {
-    if(th == null) {
-      th = new Thread(this);
-      th.start();
-    }
+    th = new Thread(this);
+    th.start();
   }
+  
+  public boolean closing = false;
   
   /**
    *  ReaderThread#run()
@@ -137,34 +137,33 @@ class ReaderThread implements Runnable {
     String data;
     while(th == thisThread) {
       try {
-        while(reader.ready()) {
-          data = reader.readLine();
-          Atom sockAtom = objAtom.nthAtom(0);
-          mem.asyncLock();
-          Atom consAtom = mem.newAtom(new SymbolFunctor(".",3));
-          if(data.equals("CLOSE")) {
-            Atom closeAtom = mem.newAtom(new SymbolFunctor("close",1));
-            mem.newLink(closeAtom,0,consAtom,0);
-            mem.relinkAtomArgs(consAtom,1,sockAtom,0);
-            mem.newLink(consAtom,2,sockAtom,0);
-          } else {
-            Atom dataAtom = mem.newAtom(new StringFunctor(data));
-            mem.newLink(dataAtom,0,consAtom,0);
-            mem.relinkAtomArgs(consAtom,2,sockAtom,1);
-            mem.newLink(consAtom,1,sockAtom,1);
-          }
-          mem.asyncUnlock();
-        }
+        data = reader.readLine();
       } catch(IOException e) {
-        e.printStackTrace();
+        //e.printStackTrace();
+        data = null;
       }
-      try {
-        th.sleep(50);
-      } catch(InterruptedException e) {
-        e.printStackTrace();
-      }
+      if(data == null)
+        break;
+      Atom sockAtom = objAtom.nthAtom(0);
+      mem.asyncLock();
+      Atom dataAtom = mem.newAtom(new StringFunctor(data));
+      Atom consAtom = mem.newAtom(new SymbolFunctor(".",3));
+      mem.newLink(dataAtom,0,consAtom,0);
+      mem.relinkAtomArgs(consAtom,2,sockAtom,1);
+      mem.newLink(consAtom,1,sockAtom,1);
+      mem.asyncUnlock();
     }
-    th = null;
+    if(!closing) {
+      this.stop();
+      Atom sockAtom = objAtom.nthAtom(0);
+      mem.asyncLock();
+      Atom closedAtom = mem.newAtom(new SymbolFunctor("closed",2));
+      mem.relinkAtomArgs(closedAtom,0,sockAtom,0);
+      mem.relinkAtomArgs(closedAtom,1,sockAtom,1);
+      sockAtom.remove();
+      objAtom.remove();
+      mem.asyncUnlock();
+    }
   }
   
   /**
@@ -172,11 +171,15 @@ class ReaderThread implements Runnable {
    */
   public void stop() {
     th = null;
+    ObjectFunctor objFunc = (ObjectFunctor)objAtom.getFunctor();
+    Vector obj = (Vector)objFunc.getObject();
+    PrintWriter writer = (PrintWriter)obj.get(1);
     try {
+      writer.close();
       reader.close();
       sock.close();
     } catch(IOException e) {
-      e.printStackTrace();
+      //e.printStackTrace();
     }
   }
 }
@@ -204,7 +207,7 @@ dlmntal.bind(Port,Cmd) :- int(Port) |
       me.nthAtom(0).remove();
       me.remove();
     } catch(IOException e) {
-      e.printStackTrace();
+      //e.printStackTrace();
       Atom failedAtom = mem.newAtom(new SymbolFunctor("failed",2));
       mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);
       mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);
@@ -224,14 +227,13 @@ dlmntal.bound([accept(Send,Recv)|T],Obj) :-
     mem.makePerpetual(true);
     ObjectFunctor ssFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     ServerSocket servSock = (ServerSocket)ssFunc.getObject();
-    AcceptThread at = 
-      new AcceptThread(servSock,(Membrane)mem,me.nthAtom(0));
+    AcceptThread at = new AcceptThread(servSock,mem,me.nthAtom(0));
     at.setName("at");
     mem.unifyAtomArgs(me,0,me,1);
     me.remove();
     at.start();
   :](Obj).
-  
+
 /**
  *  rule: close
  *    close ServerSocket
@@ -245,12 +247,12 @@ dlmntal.bound([close|T],Obj) :- class(Obj,"java.net.ServerSocket") |
     try {
       servSock.close();
     } catch(IOException e) {
-      e.printStackTrace();
+      //e.printStackTrace();
     }
     me.nthAtom(0).remove();
     me.remove();
   :](Obj).
-  
+
 /**
  *  module: connect
  *    connect to server
@@ -268,11 +270,10 @@ dlmntal.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
       // throws IOException and SecurityException
       Socket sock = new Socket(ip,port);
       // throws IOException
-      BufferedReader reader = 
-        new BufferedReader(new InputStreamReader(sock.getInputStream()));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
       // throws IOException
       PrintWriter writer = new PrintWriter(sock.getOutputStream());
-      ReaderThread rt = new ReaderThread(sock,reader,(Membrane)mem);
+      ReaderThread rt = new ReaderThread(sock,reader,mem);
       Vector obj = new Vector(3);
       obj.add(sock);
       obj.add(writer);
@@ -288,7 +289,7 @@ dlmntal.connect(Host,Port,Send,Recv) :- string(Host),int(Port) |
       me.nthAtom(1).remove();
       me.remove();
     } catch(IOException e) {
-//      e.printStackTrace();
+      //e.printStackTrace();
       Atom failedAtom = mem.newAtom(new SymbolFunctor("failed",4));
       mem.relinkAtomArgs(failedAtom,0,me.nthAtom(0),0);
       mem.relinkAtomArgs(failedAtom,1,me.nthAtom(1),0);
@@ -328,10 +329,9 @@ dlmntal.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
   [:/*inline*/
     ObjectFunctor objFunc = (ObjectFunctor)me.nthAtom(0).getFunctor();
     Vector obj = (Vector)objFunc.getObject();
-    PrintWriter writer = (PrintWriter)obj.get(1);
-    writer.println("CLOSE");
-    writer.close();
-    ((ReaderThread)obj.get(2)).stop();
+    ReaderThread rt = (ReaderThread)obj.get(2);
+    rt.closing = true;
+    rt.stop();
     me.nthAtom(0).remove();
     me.remove();
   :](Obj).
@@ -343,7 +343,7 @@ dlmntal.socket([close|T],Recv,Obj) :- class(Obj,"java.util.Vector") |
 terminate @@
 dlmntal.terminate :-
   [:/*inline*/
-    ((Membrane)mem).perpetual = false;
+    mem.makePerpetual(false);
     me.remove();
   :].
 }
