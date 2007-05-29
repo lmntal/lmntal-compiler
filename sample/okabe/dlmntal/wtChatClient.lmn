@@ -1,0 +1,25 @@
+% 2007/05/28
+% @see wtChatServer.lmn
+
+{
+  sys.perpetual(on).
+  window.
+  name("LMNchat Client").
+  size(400,300).
+  killer.
+  { id(screen),  textarea, text(""), position(0,0), size(2,1), weight(0, 1) }.
+  { id(line), textarea, text(""), position(0,1), size(1,1), weight(1, 0) }.
+  { id(submit), button, text("submit"), position(1,1) }.
+  
+  dlmntal.connect("127.0.0.1",50000,[],msg).
+  
+  submit@@
+  {id(submit), clicked, $s,@s}, {id(line), text(_Sline), $l,@l}, dlmntal.socket(Send,Recv,Obj) :-
+  {id(submit), $s,@s},
+  {id(line), text(""), $l,@l},
+  dlmntal.socket(list.append(Send,[_Sline]),Recv,Obj).
+  
+  recv@@
+  msg=[H|T], {id(screen), text(_Stext), $t,@t} :- string(H) |
+  msg=T, {id(screen), text(string.concat(_Stext,string.concat(H,"\n"))), $t,@t}.
+}.
