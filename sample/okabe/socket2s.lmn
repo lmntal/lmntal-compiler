@@ -1,5 +1,0 @@
-socket2.init(60001).
-%socket2.send("127.0.0.1","{a. a:-aa}").
-%socket2.send("127.0.0.1","{d. d:-dd}").
-%socket2.close("127.0.0.1").
-%socket2.terminate.

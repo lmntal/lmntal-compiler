@@ -1,9 +1,0 @@
-%level1
-%dlt.bind(50000,[accept([],recv),close]).
-
-%level2
-Ret=times([H|T],N) :- int(N),string(H) |
-  Ret=[string.times(H,N)|times(T,N)].
-dlt.bind(50000,[accept(times(X,3),X),close]).
-
-
