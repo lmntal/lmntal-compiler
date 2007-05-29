@@ -1,0 +1,33 @@
+// できない
+/*
+{
+  sys.perpetual(on).
+  window.
+  name("LMNtest").
+  size(200,150).
+  killer.
+  { id(hoge), button, text("hoge"), position(0,0) }.
+
+  moge@@ {id(hoge),clicked,$p[],@p} :- moge.
+}.
+*/
+
+// できる
+{
+  sys.perpetual(on).
+  window.
+  name("LMNtest").
+  size(200,150).
+  killer.
+  { id(hoge), button, text("hoge"), position(0,0) }.
+  { id(moge), button, text("moge"), position(1,0) }.
+  { id(fuga), button, text("fuga"), position(2,0) }.
+  { id(piyo), textarea, text(""), position(0,1), size(3,1), weight(0,1) }.
+
+  foo@@
+  {id(hoge),text(_S1),clicked,$p[],@p} :- {id(hoge),text(string.concat(_S1,"hoge")),$p[],@p}.
+  bar@@
+  {id(moge),text(_S1),clicked,$p[],@p} :- {id(moge),text(string.concat(_S1,"moge")),$p[],@p}.
+  fuga@@
+  {id(fuga),clicked,$p,@p}, {id(piyo), size(3,1),$q,@q} :- {id(fuga),$p,@p}, {id(piyo), size(1,1),$q,@q}
+}.
