@@ -35,7 +35,7 @@ H=seq.run({$p, @r}/, [ {$z, @p} | Rest ]) :- \+($p = (stop_seq, $pp))|
 
 H=seq.run({$p, stop_seq, @r}/, Rest) :- H=cancelled({$p}), cancelled_seq=Rest.
 
-H=seq.run({@p. $p.}, []) :- H={$p}.
+H=seq.run({@p. $p.}/, []) :- H={$p}.
 
 // Unabbreviated form:
 // H=seq.run(Data, [Cur|Rest]), {+Cur. @p}, {+Data, $p, @r}/
