@@ -162,14 +162,11 @@ H=list.flatten([[CAR|CADR]|CDR]) :- H=list.flatten([CAR|list.append(CADR,CDR)]).
  * r=choose_k([a, b, c, d, e], 3).
  * r=choose_k([b, c], 1).
  */
-//H=list.choose_k(L, K) :- H=choose_k(L, K).
-H=list.choose_k(L, K) :- ground(L), K=0 | H=[].
-H=list.choose_k([], K) :- int(K) | H=[].
-H=list.choose_k([Hd|R], K) :- K=1 | H=[[Hd]|list.choose_k(R, K)].
-
+H=list.choose_k(L, K) :- ground(L), K=0 | H=[[]].
+H=list.choose_k([], K) :- int(K), K=\=0 | H=[].
 // Hd を選ぶ場合とそうでない場合の全組み合わせをくっつける 
-H=list.choose_k([Hd|Tl], K) :- K>1, ground(Tl) |
-H=list.append(list.dist(Hd, list.choose_k(Tl, K-1)), list.choose_k(Tl, K)).
+H=list.choose_k([Hd|Tl], K) :- int(K), ground(Tl) |
+    H=list.append(list.dist(Hd, list.choose_k(Tl, K-1)), list.choose_k(Tl, K)).
 
 // map (cons A) L
 H=list.dist(A, []) :- ground(A) | H=[].
