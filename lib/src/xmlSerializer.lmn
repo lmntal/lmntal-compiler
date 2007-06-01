@@ -19,6 +19,7 @@ test(xmlSerializer.serialized(
 </mem>",
 [L2])), b(L2).
 
+test=xmlSerializer.deserialize(
 "<mem>
 <atom class=\"SymbolFunctor\" name=\"a\" arity=\"1\">
 <link id=\"0\" pos=\"0\"/>
@@ -27,7 +28,7 @@ test(xmlSerializer.serialized(
 <free_link id=\"0\"/>
 <link id=\"0\" pos=\"1\"/>
 </atom>
-</mem>"
+</mem>")
 ---deserialize--->
 xmlSerializer.deserialized(test), fls([L9]), {a(L9)}
 
