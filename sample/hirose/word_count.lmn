@@ -1,0 +1,23 @@
+
+//ファイルから一行ずつ読み込んでlineアトムと関連づける
+lines = io.list_of_file("C:\hirose\eclipse\devel\sample\hirose\a.txt").
+lines([]) :- .
+lines('.'(Value, Next)) :- lines(Next), line(Value).
+
+/*
+c(done).
+r = io.fileReader("C:\hirose\eclipse\devel\sample\hirose\a.txt").
+c(done), r(X) :- ground(X), unary(X) | c=io.readline(X, line), r(X).
+c(nil) ,r(X):- ground(X) | .
+*/
+
+
+//単語ごとに切り出し(ピリオド、カンマ、括弧は削除)
+line(X) :- words = string.split("\s+|\.|\,|\(|\)|\"", X).
+
+words([]) :-.
+words('.'(Value, Next)) :- words(Next), word(Value, 1).
+word("", X) :- int(X) | .
+
+//出現数のカウント
+word(X1, N1), word(X2, N2) :- X1=X2 | word(X1, N1+N2).
