@@ -1,0 +1,7 @@
+ pink(A,B,C,D).
+ pink(B,C,D,E).
+ red(A).
+ red(E).
+
+
+ 
