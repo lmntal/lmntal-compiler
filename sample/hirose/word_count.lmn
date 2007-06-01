@@ -1,3 +1,6 @@
+/**
+ * ファイルに含まれる単語の出現頻度をカウントする
+ */
 
 //ファイルから一行ずつ読み込んでlineアトムと関連づける
 lines = io.list_of_file("C:\hirose\eclipse\devel\sample\hirose\a.txt").
