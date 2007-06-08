@@ -43,7 +43,7 @@ fe(X),wo(Y),go(Z) :- unary(X),unary(Y),unary(Z),X\=Y,Y==Z | false.
 
 fe(X),go(Y),ca(Z) :- unary(X),unary(Y),unary(Z),X\=Y,Y==Z | false.
 
-wo(r),go(r),ca(r) :- true.
+wo(r),go(r),ca(r),fe(X) :- unary(X) | true.
 
 //}*}).
 
