@@ -1,0 +1,24 @@
+/*
+ * 最大値発見問題（アルゴリズムNAIVE）
+ * 相異なる自然数をもつノードが単方向リングを構成する
+ * 各ノードが最大値を得る
+ */
+
+% 初期状態
+Res=[node(2,2),node(3,3),node(1,1),node(5,5),node(4,4)|Res].
+
+% 自分のIDを送信する。
+Res=[node(Id1,Max1)|T] :- uniq(Id1),int(Id1) |
+  Res=[Id1,node(Id1,Max1)|T].
+
+% 最大値を更新して送信する。
+Res=[node(Id,Max),Recv|T] :- Max<Recv,Id=\=Recv |
+  Res=[Recv,node(Id,Recv)|T].
+
+% 受信したデータをそのまま送信する。
+Res=[node(Id,Max),Recv|T] :- Max>=Recv,Id=\=Recv |
+  Res=[Recv,node(Id,Max)|T].
+
+% 自分のIDを受け取ったら離脱する。
+Res=[node(Id,Max),Recv|T] :- Id=:=Recv |
+  Res=T,node(Id,max(Max)).
