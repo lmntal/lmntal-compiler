@@ -1,0 +1,61 @@
+{
+  sys.perpetual(on).
+  window.
+  name("LMNchat Client").
+  size(400,300).
+  killer.
+  { id(screen),  textarea, text(""), position(0,0), size(3,1), weight(0, 1) }.
+  { id(line), textarea, text(""), position(0,1), size(1,1), weight(1, 0) }.
+  { id(submit), button, text("submit"), position(1,1) }.
+  { id(login), button, text("login"), position(2,1) }.
+  
+  login @@
+  {id(login), text("login"), clicked, $s,@s}, {id(line), text(_Sline), $l,@l}
+    :-
+  {id(login), text("login"), $s,@s}, {id(line), text(""), $l,@l},
+	connect_data(list.length(string.split(",",_Sline),check1)).
+
+  check1(N), connect_data(X) :- N=\=3, ground(X) | .
+
+  check1(3), connect_data([Host,StrPort,Name])
+    :- 
+  check2, loginname(Name), dlmntal.connect(Host,string.int_of_str(StrPort),[],msg).
+
+  check2, loginname(Name), msg(failed(X,Y,[]))
+    :- string(Name),string(X),int(Y) |
+  .
+
+  check2, dlmntal.socket(X,Y,Z), {id(login), text("login"), $s,@s}
+    :-
+  dlmntal.socket(X,Y,Z), {id(login), text("logout"), $s,@s}.
+
+  logout @@
+  {id(login), text("logout"), clicked, $s,@s}, dlmntal.socket(Send,Recv,Obj)
+    :- ground(Send),ground(Recv),ground(Obj) |
+  {id(login), text("logout"), $s,@s}, dlmntal.socket([close|Send],Recv,Obj).
+
+  {id(login), text("logout"), $s,@s}, closed(X,Y), loginname(Name)
+    :- ground(X), ground(Y), string(Name) |
+  {id(login), text("login"), $s,@s}.
+
+
+  Ret=test(X) :- ground(X) | Ret=codec.memProcessEncoder({codec.head(X)}).
+  Ret=tset(X) :- string(X) | Ret=tset2({codec.strDecoder(X)}).
+  Ret=tset2({{codec.head(X),@p},@q}) :- ground(X) | Ret=X.
+
+  submit@@
+  loginname(Name), {id(submit), clicked, $s,@s}, {id(line), text(_Sline), $l,@l},
+	dlmntal.socket(Send,Recv,Obj)
+    :- string(Name) |
+  loginname(Name), {id(submit), $s,@s},{id(line), text(""), $l,@l},
+	dlmntal.socket(list.append(Send,[test([Name,_Sline])]),Recv,Obj).
+  
+  recv@@
+  msg=[H|T], {id(screen), text(_Stext), $t,@t}
+    :- string(H) |
+        msg=T,
+	{id(screen), 
+	text(string.concat(_Stext,string.concat(H,"\n"))),
+        $t,@t}.
+  //msg=[H|T] :- msg=[tset(H)|T]. 
+}.
