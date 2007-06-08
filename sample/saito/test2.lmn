@@ -1,0 +1,4 @@
+ leq(X, Y), leq(Z, W) :- Y=Z, uniq(X, Y, Z, W) |
+ leq(X, Y), leq(Z, W), leq(X, W).
+ 
+ leq(a, b), leq(b, c).
