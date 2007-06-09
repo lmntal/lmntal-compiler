@@ -1,0 +1,30 @@
+/*
+ * 最大値発見問題（アルゴリズムCR）
+ * 相異なる自然数をもつノードが単方向リングを構成する
+ * 各ノードが最大値を得る
+ */
+
+% 初期状態（Nを指定してルールで作りたい…）
+Res=[node(2,2),node(3,3),node(1,1),node(5,5),node(4,4)|Res].
+
+% 自分のIDを送信する。
+Res=[node(Id1,Max1)|T] :- uniq(Id1),int(Id1) |
+  Res=[Id1,node(Id1,Max1)|T].
+
+% 最大値を更新して送信する。
+Res=[node(Id,Max),Recv|T] :- Max<Recv,Id=\=Recv |
+  Res=[Recv,node(Id,Recv)|T].
+
+% 受信したデータを破棄する。
+Res=[node(Id,Max),Recv|T] :- Max>=Recv,Id=\=Recv |
+  Res=[node(Id,Max)|T].
+
+% 自分のIDを受け取ったら終了メッセージを発行して離脱する。
+Res=[node(Id,Max),Recv|T] :- Id=:=Recv |
+  Res=[exit|T],node(Id,max(Max)).
+
+% 終了メッセージを受け取ったら終了メッセージを発行して離脱する。
+Res=[node(Id,Max),exit|T] :- Res=[exit|T],node(Id,max(Max)).
+
+% ごみ拾い
+Res=[exit|Res] :- .
