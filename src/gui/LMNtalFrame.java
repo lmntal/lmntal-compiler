@@ -31,7 +31,7 @@ public class LMNtalFrame extends JFrame {
 	public int WINDOW_WIDTH;
 	
 	final static
-	public int WINDOW_HIEGHT;
+	public int WINDOW_HEIGHT;
 	
 	final static
 	public String TITLE = "UNYO UNYO";
@@ -46,9 +46,9 @@ public class LMNtalFrame extends JFrame {
 	static {
 		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 		int width = screenSize.width - SubFrame.WINDOW_WIDTH - 100;
-		int hieght = screenSize.height - LogFrame.WINDOW_HIEGHT - 50;
+		int height = screenSize.height - LogFrame.WINDOW_HEIGHT - 50;
 		WINDOW_WIDTH = (width < 100) ? 100 : width;
-		WINDOW_HIEGHT = (hieght < 50) ? 50 : hieght;
+		WINDOW_HEIGHT = (height < 50) ? 50 : height;
 	}
 	/////////////////////////////////////////////////////////////////
 	
@@ -77,7 +77,7 @@ public class LMNtalFrame extends JFrame {
 		addKeyListener(new GraphPanelKeyListener(this));
 
 		initComponents();
-		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
+		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		setVisible(true);
 		
 		// 管理ウィンドウの生成

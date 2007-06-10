@@ -24,7 +24,7 @@ public class LogFrame extends JFrame{
 	public int WINDOW_WIDTH = LMNtalFrame.WINDOW_WIDTH;
 	
 	final static
-	public int WINDOW_HIEGHT = 200;
+	public int WINDOW_HEIGHT = 200;
 	
 	final static
 	public String TITLE = "Log Panel";
@@ -53,8 +53,8 @@ public class LogFrame extends JFrame{
 		mainFrame = f;
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
-		setLocation(0, LMNtalFrame.WINDOW_HIEGHT);
+		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+		setLocation(0, LMNtalFrame.WINDOW_HEIGHT);
 		commonListener_ = new Commons(this);
 		
 		initComponents(this);

@@ -57,7 +57,7 @@ public class SubFrame extends JFrame {
 	public int WINDOW_WIDTH = 260;
 	
 	final static
-	public int WINDOW_HIEGHT = LMNtalFrame.WINDOW_HIEGHT;
+	public int WINDOW_HIEGHT = LMNtalFrame.WINDOW_HEIGHT;
 	
 	final static
 	public String TITLE = "Control Panel";

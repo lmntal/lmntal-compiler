@@ -39,7 +39,7 @@ public class EditFrame extends JFrame {
 	public int WINDOW_WIDTH = SubFrame.WINDOW_WIDTH;
 	
 	final static
-	public int WINDOW_HIEGHT = LogFrame.WINDOW_HIEGHT;
+	public int WINDOW_HEIGHT = LogFrame.WINDOW_HEIGHT;
 	
 	final static
 	public String TITLE = "Edit Panel";
@@ -114,10 +114,9 @@ public class EditFrame extends JFrame {
 	public EditFrame(LMNtalFrame f) {
 		
 		mainFrame_ = f;
-		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
-		setLocation(LMNtalFrame.WINDOW_WIDTH, LMNtalFrame.WINDOW_HIEGHT);
+		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+		setLocation(LMNtalFrame.WINDOW_WIDTH, LMNtalFrame.WINDOW_HEIGHT);
 		commonListener_ = new Commons(this);
 		
 		initComponents();
@@ -262,7 +261,7 @@ public class EditFrame extends JFrame {
 		
 		public void paint(Graphics g){
 			g.setColor(Color.WHITE);
-			g.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HIEGHT);
+			g.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 			if(null == selectedNode_){ return; }
 			g.setColor(Color.BLACK);
@@ -270,9 +269,9 @@ public class EditFrame extends JFrame {
 			g.drawString(selectedNode_.getName(), 10, 20);
 			RoundRectangle2D selectedShape = (RoundRectangle2D)selectedNode_.getShape().clone();
 			selectedShape.setFrameFromCenter(WINDOW_WIDTH / 2,
-					(WINDOW_HIEGHT / 2) - 10,
+					(WINDOW_HEIGHT / 2) - 10,
 					((selectedShape.getMaxX() - selectedShape.getMinX()) / 2) + (WINDOW_WIDTH / 2),
-					((selectedShape.getMaxY() - selectedShape.getMinY()) / 2) + (WINDOW_HIEGHT / 2) - 10);
+					((selectedShape.getMaxY() - selectedShape.getMinY()) / 2) + (WINDOW_HEIGHT / 2) - 10);
 			((Graphics2D)g).draw(selectedShape);
 		}
 		
