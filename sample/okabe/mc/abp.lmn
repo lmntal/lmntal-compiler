@@ -1,0 +1,52 @@
+/*
+ * Alternating Bit Protocol
+ * 
+ * データは通信路上で損失・重複・破損する可能性がある
+ */
+
+nd.exec({{
+%%%---
+% 初期状態
+S2R=[sender(0)|R2S].		// sender(expected_bit, message_id)
+R2S=[receiver(0)|S2R].	// receiver(expected_bit)
+
+% 最初のメッセージ
+S2R = [sender(E1)|R2S], R2S = [receiver(E2)|S2R] :- int(E1), int(E2) |
+	S2R = [msg(E1,0), sender(E1,0)|R2S], R2S = [receiver(E2)|S2R].
+
+%%%---
+% 送信
+S2R = [sender(E,I), ack(B)|T] :- B=:=E, N=(E+1) mod 2, I2=(I+1) mod 100 |
+	S2R = [msg(N,I2), sender(N,I2)|T].
+
+% 再送（制御ビットが異なる場合）
+S2R = [sender(E,I), ack(B)|T] :- B=\=E, int(I) |
+	S2R = [msg(E,I), sender(E,I)|T].
+
+% 再送（ackが返ってこない場合）
+S2R = [sender(E1,I)|R2S], R2S = [receiver(E2)|S2R] :- int(E1), int(I) |
+	S2R = [msg(E1,I), sender(E1,I)|R2S], R2S = [receiver(E2)|S2R].
+	
+%%%---
+% 通信路（データの損失）
+R=[msg(B,I)|T] :- int(B),int(I) | R=T.
+//R=[ack(B)|T] :- int(B) | R=T.
+
+% 通信路（データの重複）
+% 状態が無限になる 
+//R=[msg(B,I)|T] :- int(B),int(I) | R=[msg(B,I),msg(B,I)|T].
+//R=[ack(B)|T] :- int(B) | R=[ack(B),ack(B)|T].
+
+% 通信路（データの破損）
+R=[msg(B,I)|T] :- B2=(B+1) mod 2 | R=[msg(B2,I)|T].
+//R=[ack(B)|T] :- B2=(B+1) mod 2 | R=[ack(B2)|T].
+
+%%%---
+% 返答
+R2S = [receiver(E), msg(B,I)|T] :- B=:=E, N=(E+1) mod 2, int(I) |
+	R2S = [ack(B), receiver(N)|T].
+
+% 返答（異常を検知した場合）
+R2S = [receiver(E), msg(B,I)|T] :- B=\=E, N=(E+1) mod 2, int(I) |
+	R2S = [ack(N), receiver(E)|T].
+}*}).
