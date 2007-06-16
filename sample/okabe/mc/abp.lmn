@@ -1,5 +1,6 @@
 /*
  * Alternating Bit Protocol
+ * 2007/06/15(Fri) by okabe
  * 
  * データは通信路上で損失・重複・破損する可能性がある
  */
