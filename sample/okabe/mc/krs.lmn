@@ -1,0 +1,84 @@
+/*
+ * 最大値発見問題（アルゴリズムKRS）
+ * 2007/06/17(Sun) by okabe
+ * 
+ * 相異なる自然数をもつノードが方向感覚のない双方向リングを構成する
+ * コードが長いのは大小関係の比較でルールが２本になってしまうせい
+ * （カスタムガードを使えばまとめられる）
+ *
+ * 参考：『分散アルゴリズム』（近代科学社）
+ */
+
+% 初期状態
+{node(1,0), start,
+	out(r,[],X14), in(r,msg,X41), out(l,[],X12), in(l,msg,X21)},
+{node(2,0), ready,
+	out(l,[],X21), in(l,msg,X12), out(r,[],X23), in(r,msg,X32)},
+{node(3,0), ready,
+	out(l,[],X32), in(l,msg,X23), out(r,[],X34), in(r,msg,X43)},
+{node(4,0), ready,
+	out(l,[],X43), in(l,msg,X34), out(r,[],X41), in(r,msg,X14)}.
+	
+% 通信処理
+channel@@
+{out(D1,[H|T],X),$p[|*Y1],@p}, {in(D2,msg,X),$q[|*Y2],@q} :-
+	unary(D1),unary(D2),unary(H),ground(T) |
+	{out(D1,T,X),$p[|*Y1],@p}, {in(D2,M,X),msg([H|M]),$q[|*Y2],@q}.
+	
+% 始動プロセス
+start@@
+{start,node(Id,Max),out(r,[],X),$p[X|*Y],@p} :- int(Id),int(Max) |
+	{run,node(Id,Id),out(r,[Id],X),$p[X|*Y],@p}.
+
+% 始動プロセス以外のプロセス
+ready_lr@@
+{ready,node(Id,Max),out(r,S,X1),in(l,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	Id>M,int(Max),ground(S) |
+	{run,node(Id,Id),out(r,list.append(S,[Id]),X1),in(l,msg,X2),$p[X1,X2|*Y],@p}.
+ready_lr@@
+{ready,node(Id,Max),out(r,S,X1),in(l,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	Id<M,int(Max),ground(S) |
+	{run,node(Id,M),out(r,list.append(S,[M]),X1),in(l,msg,X2),$p[X1,X2|*Y],@p}.
+ready_rl@@
+{ready,node(Id,Max),out(l,S,X1),in(r,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	Id>M,int(Max),ground(S) |
+	{run,node(Id,Id),out(l,list.append(S,[Id]),X1),in(r,msg,X2),$p[X1,X2|*Y],@p}.
+ready_rl@@
+{ready,node(Id,Max),out(l,S,X1),in(r,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	Id<M,int(Max),ground(S) |
+	{run,node(Id,M),out(l,list.append(S,[M]),X1),in(r,msg,X2),$p[X1,X2|*Y],@p}.
+
+% メッセージ処理
+halt@@
+{run,node(Id,Max),out(r,S,X1),in(l,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	Id=:=M,int(Max),ground(S) |
+	{node(Id,Max),out(r,list.append(S,[max(Max)]),X1),in(l,msg,X2),$p[X1,X2|*Y],@p}.
+halt@@
+{run,node(Id,Max),out(l,S,X1),in(r,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	Id=:=M,int(Max),ground(S) |
+	{node(Id,Max),out(l,list.append(S,[max(Max)]),X1),in(r,msg,X2),$p[X1,X2|*Y],@p}.
+recv_from_r_halt@@
+{run,node(Id,Max),out(r,S,X1),in(l,R,X2),msg([max(M)|R]),$p[X1,X2|*Y],@p} :-
+	int(Id),int(Max),int(M),ground(S) |
+	{node(Id,M),out(r,list.append(S,[max(M)]),X1),in(l,msg,X2),$p[X1,X2|*Y],@p}.
+recv_from_l_halt@@
+{run,node(Id,Max),out(l,S,X1),in(r,R,X2),msg([max(M)|R]),$p[X1,X2|*Y],@p} :-
+	int(Id),int(Max),int(M),ground(S) |
+	{node(Id,M),out(l,list.append(S,[max(M)]),X1),in(r,msg,X2),$p[X1,X2|*Y],@p}.
+recv_from_r@@
+{run,node(Id,Max),out(r,S,X1),in(l,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	M>Max,int(Id),ground(S) |
+	{run,node(Id,M),out(r,list.append(S,[M]),X1),in(l,msg,X2),$p[X1,X2|*Y],@p}.
+recv_from_r@@
+{run,node(Id,Max),out(r,S,X1),in(l,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	M=<Max,int(Id),ground(S) |
+	{run,node(Id,Max),out(r,S,X1),in(l,msg,X2),$p[X1,X2|*Y],@p}.
+recv_from_l@@
+{run,node(Id,Max),out(l,S,X1),in(r,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	M>Max,int(Id),ground(S) |
+	{run,node(Id,M),out(l,list.append(S,[M]),X1),in(r,msg,X2),$p[X1,X2|*Y],@p}.
+recv_from_l@@
+{run,node(Id,Max),out(l,S,X1),in(r,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
+	M=<Max,int(Id),ground(S) |
+	{run,node(Id,Max),out(l,S,X1),in(r,msg,X2),$p[X1,X2|*Y],@p}.
+	
