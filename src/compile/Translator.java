@@ -859,7 +859,7 @@ public class Translator {
 		}
 		Instruction spec = (Instruction)instList.insts.get(0);
 		if (spec.getKind() != Instruction.SPEC) {
-			throw new RuntimeException("first instructio is not SPEC but " + spec);
+			throw new RuntimeException("first instruction is not SPEC but " + spec);
 		}
 		int formals = spec.getIntArg1();
 		int locals = spec.getIntArg2();
