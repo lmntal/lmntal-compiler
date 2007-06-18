@@ -3,24 +3,33 @@
  * 2007/06/09(Sat) by okabe
  *
  * 相異なる自然数をもつノードが単方向リングを構成する
- * 各ノードが最大値を得る
+ * 
+ * 参考：『分散アルゴリズム』（近代科学社）
  */
 
 % 初期状態
-Res=[node(2,2),node(3,3),node(1,1),node(5,5),node(4,4)|Res].
+Res=[node(ready,2,0),node(start,3,0),node(ready,1,0),node(start,5,0),node(ready,4,0)|Res].
 
-% 自分のIDを送信する。
-Res=[node(Id1,Max1)|T] :- uniq(Id1),int(Id1) |
-  Res=[Id1,node(Id1,Max1)|T].
+% 始動プロセス：自分のIDを送信する
+start@@
+Res=[node(start,Id,Max)|T] :- int(Id) |
+  Res=[Id,node(run,Id,Max)|T].
 
-% 最大値を更新して送信する。
-Res=[node(Id,Max),Recv|T] :- Max<Recv,Id=\=Recv |
-  Res=[Recv,node(Id,Recv)|T].
+% 始動プロセス以外のプロセス
+ready@@
+Res=[node(ready,Id,Max),M|T] :- Id>M, int(Max), NewMax=Id |
+	Res=[Id,M,node(run,Id,NewMax)|T].
+ready@@
+Res=[node(ready,Id,Max),M|T] :- Id<M, int(Max), NewMax=M |
+	Res=[Id,M,node(run,Id,NewMax)|T].
 
-% 受信したデータをそのまま送信する。
-Res=[node(Id,Max),Recv|T] :- Max>=Recv,Id=\=Recv |
-  Res=[Recv,node(Id,Max)|T].
-
-% 自分のIDを受け取ったら離脱する。
-Res=[node(Id,Max),Recv|T] :- Id=:=Recv |
-  Res=T,node(Id,max(Max)).
+% メッセージ処理
+recv@@
+Res=[node(run,Id,Max),M|T] :- Max>M, NewMax=Max, Id=\=M |
+  Res=[M,node(run,Id,NewMax)|T].
+recv@@
+Res=[node(run,Id,Max),M|T] :- Max=<M, NewMax=M, Id=\=M |
+  Res=[M,node(run,Id,NewMax)|T].
+halt@@
+Res=[node(run,Id,Max),M|T] :- Id=:=M |
+  Res=[node(Id,Max)|T].
