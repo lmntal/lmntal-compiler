@@ -1,6 +1,6 @@
 /*
  * Alternating Bit Protocol
- * 2007/06/18(Mon) by okabe
+ * 2007/06/19(Tue) by okabe
  * 
  * データは通信路上で損失・重複・破損する可能性がある
  * ただしプロセスはデータの破損を検出することができる
