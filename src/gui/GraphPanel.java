@@ -501,7 +501,7 @@ public class GraphPanel extends JPanel {
 			g.setColor(Color.BLACK);
 			if(null != rootNode_){
 				synchronized (rootNode_.getChildMap()) {
-					LinkView.draw(g, false);
+					LinkView.draw(g);
 					MembraneView.draw(g, rootNode_, false, this);
 				}
 			}

@@ -24,6 +24,9 @@ public class LinkView {
 	final static
 	private double DIPLO_LINK_DELTA = 50;
 	
+	static
+	private boolean showLinkNum_ = false;
+	
 	///////////////////////////////////////////////////////////////////////////
 	
 	/**
@@ -31,7 +34,7 @@ public class LinkView {
 	 * @param g
 	 */
 	static
-	public void draw(Graphics g, boolean showLinkNum){
+	public void draw(Graphics g){
 		synchronized (LinkSet.getLinkSet()) {
 			Iterator<Node> keys = LinkSet.getLinkNodes();
 			while(keys.hasNext()){
@@ -53,7 +56,7 @@ public class LinkView {
 									key.getInvisibleRootNode().equals(nthNode.getInvisibleRootNode())))
 					{ continue; }
 					
-					if(showLinkNum || key.getID() <= nthNode.getID()){
+					if(showLinkNum_ || key.getID() <= nthNode.getID()){
 						Node nodeTarget = LinkSet.getVisibleNode(nthNode);
 						// リンク元もリンク先も描画範囲に入っていない場合は描画しない
 						if(null == g ||
@@ -80,7 +83,7 @@ public class LinkView {
 							continue;
 						}
 
-						if(showLinkNum){
+						if(showLinkNum_){
 							Node sourceBezNode = nodeSource.getBezierNode(nthNode);
 							Node nthBezNode = nthNode.getBezierNode(nodeSource);
 							if(null != sourceBezNode){
@@ -227,5 +230,10 @@ public class LinkView {
 		double x = Math.cos(angle) * LINK_NUM_DELTA;
 		double y = Math.sin(angle) * LINK_NUM_DELTA;
 		g.drawString(Integer.toString(linkNum), (int)(sourceX - x), (int)(sourceY - y));
+	}
+	
+	static
+	public void setShowLinkNum(boolean flag){
+		showLinkNum_ = flag;
 	}
 }

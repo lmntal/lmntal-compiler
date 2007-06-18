@@ -30,9 +30,6 @@ public class LinkSet {
 	static
 	private Map<Object, Node> linkMap_ = new HashMap<Object, Node>();
 	
-	static
-	private boolean showLinkNum_ = false;
-	
 	///////////////////////////////////////////////////////////////////////////
 
 	static
@@ -121,12 +118,6 @@ public class LinkSet {
 			linkSet_.clear();
 			addAllNode(node);
 		}
-	}
-	
-	
-	static
-	public void setShowLinkNum(boolean flag){
-		showLinkNum_ = flag;
 	}
 	
 }
