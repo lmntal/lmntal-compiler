@@ -8,14 +8,22 @@
 
 nd.exec({{
 
-// initial state
+% initial state
 poles(X,Y,Z).
 X=p([1,2,3,4,5,1000]).
 Y=p([1000]).
 Z=p([1000]).
 
-// move
+% move
 P1=p([H1|T1]), P2=p([H2|T2]) :- H1<H2 |
   P1=p(T1), P2=p([H1,H2|T2]).
+
+% verification
+finish@@
+poles(X,Y,Z),Y=p([1,2,3,4,5,1000]) :- ground(X), ground(Z) |
+	poles([],[ok],[]).
+finish@@
+poles(X,Y,Z),Z=p([1,2,3,4,5,1000]) :- ground(X), ground(Y) |
+	poles([],[],[ok]).
 
 }*}).
