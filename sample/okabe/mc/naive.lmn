@@ -13,7 +13,7 @@ Res=[node(ready,2,0),node(start,3,0),node(ready,1,0),node(start,5,0),node(ready,
 % 始動プロセス：自分のIDを送信する
 start@@
 Res=[node(start,Id,Max)|T] :- int(Id) |
-  Res=[Id,node(run,Id,Max)|T].
+ 	Res=[Id,node(run,Id,Max)|T].
 
 % 始動プロセス以外のプロセス
 ready@@
@@ -26,10 +26,10 @@ Res=[node(ready,Id,Max),M|T] :- Id<M, int(Max), NewMax=M |
 % メッセージ処理
 recv@@
 Res=[node(run,Id,Max),M|T] :- Max>M, NewMax=Max, Id=\=M |
-  Res=[M,node(run,Id,NewMax)|T].
+	Res=[M,node(run,Id,NewMax)|T].
 recv@@
 Res=[node(run,Id,Max),M|T] :- Max=<M, NewMax=M, Id=\=M |
-  Res=[M,node(run,Id,NewMax)|T].
+	Res=[M,node(run,Id,NewMax)|T].
 halt@@
 Res=[node(run,Id,Max),M|T] :- Id=:=M |
-  Res=[node(Id,Max)|T].
+	Res=[node(Id,Max)|T].
