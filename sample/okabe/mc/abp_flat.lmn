@@ -1,0 +1,68 @@
+/*
+ * Alternating Bit Protocol
+ * 2007/06/19(Tue) by okabe
+ * 
+ * データは通信路上で損失・重複・破損する可能性がある
+ * ただしプロセスはデータの破損を検出することができる
+ *
+ * 参考
+ * Alternating bit protocol - Wikipedia
+ *  http://en.wikipedia.org/wiki/Alternating_bit_protocol
+ * Promela Reference -- timeout(5)
+ *  http://spinroot.com/spin/Man/timeout.html
+ */
+
+//nd.exec({{
+
+% 初期状態
+S2R=[sender(0,-1)|R2S].		// sender(expected_bit, message_id)
+R2S=[receiver(0,[])|S2R].	// receiver(expected_bit, received_message)
+
+% 通信開始
+start@@
+S2R = [sender(0,-1)|R2S] :- S2R = [msg(0,0), sender(0,0)|R2S].
+
+% 送り手（正常に受信）
+send_ok@@
+S2R = [sender(E,I), ack(B)|T] :- B=:=E, B2=(B+1) mod 2, E2=B2, I2=(I+1) mod 100 |
+	S2R = [msg(B2,I2), sender(E2,I2)|T].
+% 送り手（制御ビットが期待通りでない場合）
+send_ng_bit@@
+S2R = [sender(E,I), ack(B)|T] :- B=\=E, int(I) |
+	S2R = [msg(E,I), sender(E,I)|T].
+% 送り手（返答が返ってこない場合）
+timeout@@
+S2R = [sender(E1,I)|R2S], R2S = [receiver(E2,Q)|S2R] :- int(E1), I=\=-1 |
+	S2R = [msg(E1,I), sender(E1,I)|R2S], R2S = [receiver(E2,Q)|S2R].
+% 送り手（データ破損）
+sender_corruption@@
+S2R = [sender(E,I), corrupted|T] :- int(E), int(I) |
+	S2R = [msg(E,I), sender(E,I)|T].
+
+% 受け手（正常に受信）
+recv_ok@@
+R2S = [receiver(E,Q), msg(B,I)|T] :- B=:=E, E2=(E+1) mod 2, int(I) |
+	R2S = [ack(B), receiver(E2,[msg(I)|Q])|T].
+% 受け手（制御ビットが期待通りでない場合）
+recv_ng_bit@@
+R2S = [receiver(E,Q), msg(B,I)|T] :- B=\=E, B2=(E+1) mod 2, int(I) |
+	R2S = [ack(B2), receiver(E,Q)|T].
+% 受け手（データ破損）
+receiver_corruption@@
+R2S = [receiver(E,Q), corrupted|T] :- B2=(E+1) mod 2 |
+	R2S = [ack(B2), receiver(E,Q)|T].
+
+% 通信路（データの損失）
+channel_loss@@
+R=[msg(B,I)|T] :- int(B),int(I) | R=T.
+R=[ack(B)|T] :- int(B) | R=T.
+% 通信路（データの重複）
+//channel_dupulication@@
+//R=[msg(B,I)|T] :- int(B),int(I) | R=[msg(B,I),msg(B,I)|T].
+//R=[ack(B)|T] :- int(B) | R=[ack(B),ack(B)|T].
+% 通信路（データの破損）
+channel_corruption@@
+R=[msg(B,I)|T] :- int(B),int(I) | R=[corrupted|T].
+R=[ack(B)|T] :- int(B) | R=[corrupted|T].
+
+//}*}).
