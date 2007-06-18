@@ -96,6 +96,9 @@ public class Node implements Cloneable{
 	
 	private boolean heating_ = false;
 	
+	static
+	private String AREA_KEY_SEPARATOR = ",";
+	
 	/** アトムまたはアトム的（閉じた膜）であるか */
 	private boolean imAtom_;
 	
@@ -116,6 +119,9 @@ public class Node implements Cloneable{
 	/** 子Node */
 	public Map<Object, Node> nodeMap_ = new HashMap<Object, Node>();
 	
+	/** 座標の区間分割による子Node */
+	public Map<String, Set<Node>> areaNodeMap_ = new HashMap<String, Set<Node>>();
+	
 	/** ルールNode */
 	public Map<String, Node> ruleNodeMap_ = new HashMap<String, Node>();
 	
@@ -133,8 +139,8 @@ public class Node implements Cloneable{
 	
 	/** 描画用の形 */
 	private RoundRectangle2D.Double rect_ =
-		new RoundRectangle2D.Double((Math.random() * 800) - 400,
-			(Math.random() * 600) - 300,
+		new RoundRectangle2D.Double(0,
+			0,
 			ATOM_SIZE,
 			ATOM_SIZE,
 			ROUND,
@@ -216,6 +222,40 @@ public class Node implements Cloneable{
 		bezierMap_.put(node, bezNode);
 		bezierSet_.add(bezNode);
 	}
+	
+	public void resetAreaMap(){
+		synchronized (nodeMap_) {
+			synchronized (areaNodeMap_) {
+				areaNodeMap_.clear();
+				Iterator<Node> nodes = nodeMap_.values().iterator();
+				while(nodes.hasNext()){
+					Node node = nodes.next();
+					Rectangle2D rect = node.getBounds2D();
+					double atomSize = ATOM_SIZE;
+					int minX = (int)(rect.getMinX() / atomSize);
+					int minY = (int)(rect.getMinY() / atomSize);
+					int maxX = (int)(rect.getMaxX() / atomSize);
+					int maxY = (int)(rect.getMaxY() / atomSize);
+					String[] key = { (minX + AREA_KEY_SEPARATOR + minY),
+							(minX + AREA_KEY_SEPARATOR + maxY),
+							(maxX + AREA_KEY_SEPARATOR + minY),
+							(maxX + AREA_KEY_SEPARATOR + maxY)};
+
+					for(int i = 0; i < 4; i++){
+						if(areaNodeMap_.containsKey(key[i])){
+							Set<Node> nodeSet = areaNodeMap_.get(key[i]);
+							nodeSet.add(node);
+						} else {
+							Set<Node> nodeSet = new HashSet<Node>();
+							nodeSet.add(node);
+							areaNodeMap_.put(key[i], nodeSet);
+						}
+					}
+					node.resetAreaMap();
+				}
+			}
+		}
+	}
 
 	/**
 	 * 位置座標などの計算
@@ -226,7 +266,7 @@ public class Node implements Cloneable{
 		SpringForce.calcSpring(this);
 		synchronized (nodeMap_) {
 			AttractionForce.calcAttraction(this, nodeMap_);
-			RepulsiveForce.calcRepulsive(this, nodeMap_);
+			RepulsiveForce.calcRepulsive(this, areaNodeMap_);
 			NodeFunction.calcHeat(this, nodeMap_);
 		}
 //		moveCalc();
@@ -433,6 +473,7 @@ public class Node implements Cloneable{
 		try {
 			node = linkList_.get(i);
 		} catch (java.lang.IndexOutOfBoundsException e) {
+			e.printStackTrace();
 		}
 		return node;
 	}
@@ -565,12 +606,18 @@ public class Node implements Cloneable{
 			rect_.y = parent_.getBounds2D().getCenterY();
 			return;
 		}
-		if(!(myObject_ instanceof Atom)){ return; }
+		if(!(myObject_ instanceof Atom)){ 
+			initSingleNodePosition();
+			return; 
+		}
 		int nthNum = ((Atom)myObject_).getEdgeCount();
 		if(0 == nthNum){ return; }
 		if(1 == nthNum){
 			Node nthNode = LinkSet.getNodeByAtom(((Atom)myObject_).getNthAtom(0));
-			if(null == nthNode){ return; }
+			if(null == nthNode){  
+				initSingleNodePosition();
+				return; 
+			}
 			Point2D nthPoint = nthNode.getCenterPoint();
 
 			double x = nthPoint.getX();
@@ -595,6 +642,10 @@ public class Node implements Cloneable{
 				y += nthPoint.getY();
 				findNthNum++;
 			}
+			if(x == 0 && y == 0){
+				initSingleNodePosition();
+				return; 
+			}
 			if(1 == findNthNum){
 				rect_.x = x;
 				rect_.y = y;
@@ -605,6 +656,16 @@ public class Node implements Cloneable{
 			}
 			
 		}
+	}
+	
+	public void initSingleNodePosition(){
+		int index = ((Atom)myObject_).index;
+		int sign = (index % 2 == 0) ? 1 : -1;
+		double x = sign * index * Math.random();
+		double y = sign * index * Math.random();
+
+		rect_.x = x;
+		rect_.y = y;
 	}
 	/*
 	public void initPosition(){

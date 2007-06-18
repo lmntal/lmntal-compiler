@@ -652,7 +652,6 @@ public class SubFrame extends JFrame {
 			double dy = rect.getCenterY() - mousePoint.getY();
 			if(dx == 0.0) { dx = 0.00001; }
 			theta_ = Math.atan(dy / dx);
-			System.out.println(theta_);
 			theta_ = (startPoint_ + MouseInfo.getPointerInfo().getLocation().x) % 360;
 //			if(0 < Math.abs(theta_ - lastTheta_)){
 //				commonListener_.moveRotate(((double)(theta_ - lastTheta_)) / 10);

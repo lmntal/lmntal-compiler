@@ -122,6 +122,7 @@ public class GraphPanel extends JPanel {
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
 	private Node tmpRootNode_;
 	private GraphPanel myPanel_ = this;
+	private int areaResetCounter_ = 0;
 	
 	///////////////////////////////////////////////////////////////////////////
 	
@@ -348,6 +349,14 @@ public class GraphPanel extends JPanel {
 		}
 		if(!renameAtomMap_.isEmpty()){
 			renameAtom();
+		}
+		if(areaResetCounter_ == 10){
+			rootNode_.resetAreaMap();
+			areaResetCounter_++;
+		} else if(areaResetCounter_ < 50){
+			areaResetCounter_++;
+		} else {
+			areaResetCounter_ = 0;
 		}
 		rootNode_.calcAll();
 		rootNode_.moveAll();
@@ -895,7 +904,8 @@ public class GraphPanel extends JPanel {
 					if(runnable_){
 						calc();
 					}
-				} catch (Exception e) {
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 		}
