@@ -4,13 +4,21 @@
  * 
  * データは通信路上で損失・重複・破損する可能性がある
  * ただしプロセスはデータの破損を検出することができる
- *
+ * fairnessは仮定していない（損失・重複・破損が無限回繰り返されうる）
+ * 
  * 参考
  * Alternating bit protocol - Wikipedia
  *  http://en.wikipedia.org/wiki/Alternating_bit_protocol
  * Promela Reference -- timeout(5)
  *  http://spinroot.com/spin/Man/timeout.html
  */
+
+//妄想
+//define
+// p@@ {sender,out([msg(I,0)|T],SR),$p[SR|*X],@p} :- int(I),ground(T) | true.
+// q@@ {sender,in(R,RS),msg=[ack(0)|R],$p[RS|*X],@p} :- true.
+//LTL
+// global(implication(p,future(q))).
 
 % sender
 {out([],SR), in(msg,RS), sender, expected(0), start}.
