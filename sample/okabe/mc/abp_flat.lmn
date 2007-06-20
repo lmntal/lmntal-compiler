@@ -57,9 +57,9 @@ channel_loss@@
 R=[msg(B,I)|T] :- int(B),int(I) | R=T.
 R=[ack(B)|T] :- int(B) | R=T.
 % 通信路（データの重複）
-//channel_dupulication@@
-//R=[msg(B,I)|T] :- int(B),int(I) | R=[msg(B,I),msg(B,I)|T].
-//R=[ack(B)|T] :- int(B) | R=[ack(B),ack(B)|T].
+channel_dupulication@@
+R=[msg(B,I)|T] :- int(B),int(I) | R=[msg(B,I),msg(B,I)|T].
+R=[ack(B)|T] :- int(B) | R=[ack(B),ack(B)|T].
 % 通信路（データの破損）
 channel_corruption@@
 R=[msg(B,I)|T] :- int(B),int(I) | R=[corrupted|T].
