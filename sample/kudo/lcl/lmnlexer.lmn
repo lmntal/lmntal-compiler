@@ -222,7 +222,7 @@ lmnlexer.use_guard :-
 	//		System.out.println("CustomGuardImpl "+ary);
 			
 			if(guardID.equals("lowerletter")) {
-				Atom a = ((Link)ary.get(0)).getAtom();
+				Atom a = ((Link)(((ArrayList)ary.get(0)).get(0))).getAtom();
 				if(a.getFunctor() instanceof StringFunctor){
 					String sv = ((StringFunctor)a.getFunctor()).stringValue();
 					if(sv.length() > 1)return false;
@@ -235,7 +235,7 @@ lmnlexer.use_guard :-
 				else return false;
 			}
 			else if(guardID.equals("upperletter")) {
-				Atom a = ((Link)ary.get(0)).getAtom();
+				Atom a = ((Link)(((ArrayList)ary.get(0)).get(0))).getAtom();
 				if(a.getFunctor() instanceof StringFunctor){
 					String sv = ((StringFunctor)a.getFunctor()).stringValue();
 					if(sv.length() > 1)return false;
@@ -248,7 +248,7 @@ lmnlexer.use_guard :-
 				else return false;
 			}
 			else if(guardID.equals("digitletter")) {
-				Atom a = ((Link)ary.get(0)).getAtom();
+				Atom a = ((Link)(((ArrayList)ary.get(0)).get(0))).getAtom();
 				if(a.getFunctor() instanceof StringFunctor){
 					String sv = ((StringFunctor)a.getFunctor()).stringValue();
 					if(sv.length() > 1)return false;
@@ -261,7 +261,7 @@ lmnlexer.use_guard :-
 				else return false;
 			}
 			else if(guardID.equals("undigitletter")) {
-				Atom a = ((Link)ary.get(0)).getAtom();
+				Atom a = ((Link)(((ArrayList)ary.get(0)).get(0))).getAtom();
 				if(a.getFunctor() instanceof StringFunctor){
 					String sv = ((StringFunctor)a.getFunctor()).stringValue();
 					if(sv.length() > 1)return true;
@@ -274,7 +274,7 @@ lmnlexer.use_guard :-
 				else return false; //?
 			}
 			else if(guardID.equals("letter")) {
-				Atom a = ((Link)ary.get(0)).getAtom();
+				Atom a = ((Link)(((ArrayList)ary.get(0)).get(0))).getAtom();
 				if(a.getFunctor() instanceof StringFunctor){
 					String sv = ((StringFunctor)a.getFunctor()).stringValue();
 					if(sv.length() > 1)return false;
@@ -287,7 +287,7 @@ lmnlexer.use_guard :-
 				else return false;
 			}
 			else if(guardID.equals("unletter")) {
-				Atom a = ((Link)ary.get(0)).getAtom();
+				Atom a = ((Link)(((ArrayList)ary.get(0)).get(0))).getAtom();
 				if(a.getFunctor() instanceof StringFunctor){
 					String sv = ((StringFunctor)a.getFunctor()).stringValue();
 					if(sv.length() > 1)return true;
