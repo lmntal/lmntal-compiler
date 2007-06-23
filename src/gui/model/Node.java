@@ -859,6 +859,9 @@ public class Node implements Cloneable{
 	}
 	
 	public void moveCalcInside(){
+		if(null == getParent()){
+			return;
+		}
 		if(insideDx_ == 0 && insideDy_ == 0){
 			return;
 		}
