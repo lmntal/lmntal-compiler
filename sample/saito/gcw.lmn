@@ -2,8 +2,8 @@
 {left}.
 {river}.
 int(0).
-{g,c,$p}:-\+($p=(f,$q))|{dead,$p}.
-{g,w,$p}:-\+($p=(f,$q))|{dead,$p}.
+{g,c,$p}:-\+($p=(f,$q))|{dead},$p.
+{g,w,$p}:-\+($p=(f,$q))|{dead},$p.
 
 {f,$q},{river},int(N):-{river,f},{$q},int(N+1).
 {f,g,$q},{river},int(N):-{river,f,g},{$q},int(N+1).
