@@ -1,12 +1,12 @@
 package gui;
 
-import gui.model.LinkSet;
 import gui.model.Node;
 import gui.model.forces.AngleForce;
 import gui.model.forces.AttractionForce;
 import gui.model.forces.NodeFunction;
 import gui.model.forces.RepulsiveForce;
 import gui.model.forces.SpringForce;
+import gui.view.LinkView;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -509,7 +509,7 @@ public class SubFrame extends JPanel {
 		public LinkNumAdapter() { } 
 		
 		public void itemStateChanged(ItemEvent e) {
-			LinkSet.setShowLinkNum(linkNumCheck_.isSelected());
+			LinkView.setShowLinkNum(linkNumCheck_.isSelected());
 		}
 	}
 	static
