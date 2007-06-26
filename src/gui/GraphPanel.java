@@ -122,7 +122,6 @@ public class GraphPanel extends JPanel {
 	private List<Node> rootNodeList_ = new ArrayList<Node>();
 	private Node tmpRootNode_;
 	private GraphPanel myPanel_ = this;
-	private int areaResetCounter_ = 0;
 	
 	///////////////////////////////////////////////////////////////////////////
 	
@@ -350,14 +349,6 @@ public class GraphPanel extends JPanel {
 		if(!renameAtomMap_.isEmpty()){
 			renameAtom();
 		}
-		if(areaResetCounter_ == 10){
-			rootNode_.resetAreaMap();
-			areaResetCounter_++;
-		} else if(areaResetCounter_ < 50){
-			areaResetCounter_++;
-		} else {
-			areaResetCounter_ = 0;
-		}
 		rootNode_.calcAll();
 		rootNode_.moveAll();
 	}
@@ -501,7 +492,7 @@ public class GraphPanel extends JPanel {
 			g.setColor(Color.BLACK);
 			if(null != rootNode_){
 				synchronized (rootNode_.getChildMap()) {
-					LinkView.draw(g);
+					LinkView.draw(g, false);
 					MembraneView.draw(g, rootNode_, false, this);
 				}
 			}
@@ -904,8 +895,7 @@ public class GraphPanel extends JPanel {
 					if(runnable_){
 						calc();
 					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
 				}
 			}
 		}

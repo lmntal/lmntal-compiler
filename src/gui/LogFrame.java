@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
@@ -15,13 +16,13 @@ import javax.swing.event.ChangeListener;
  * @author nakano
  *
  */
-public class LogFrame extends JFrame{
+public class LogFrame extends JPanel{
 
 	/////////////////////////////////////////////////////////////////
 	// Äê¿ô
 	
 	final static
-	public int WINDOW_WIDTH = LMNtalFrame.WINDOW_WIDTH;
+	public int WINDOW_WIDTH = LMNtalFrame.WINDOW_WIDTH-SubFrame.WINDOW_WIDTH;
 	
 	final static
 	public int WINDOW_HEIGHT = 200;
@@ -52,13 +53,13 @@ public class LogFrame extends JFrame{
 		
 		mainFrame = f;
 		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		setLocation(0, LMNtalFrame.WINDOW_HEIGHT);
 		commonListener_ = new Commons(this);
 		
 		initComponents(this);
-		setTitle(TITLE);
+//		setTitle(TITLE);
 		
 		setVisible(true);
 	}

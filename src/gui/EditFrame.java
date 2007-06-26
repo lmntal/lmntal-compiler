@@ -30,7 +30,7 @@ import runtime.Membrane;
  * @author nakano
  *
  */
-public class EditFrame extends JFrame {
+public class EditFrame extends JPanel {
 
 	/////////////////////////////////////////////////////////////////
 	// Äê¿ô
@@ -114,7 +114,8 @@ public class EditFrame extends JFrame {
 	public EditFrame(LMNtalFrame f) {
 		
 		mainFrame_ = f;
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+//		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		setLocation(LMNtalFrame.WINDOW_WIDTH, LMNtalFrame.WINDOW_HEIGHT);
 		commonListener_ = new Commons(this);
@@ -129,7 +130,7 @@ public class EditFrame extends JFrame {
 	
 	private void initComponents() {
 		
-		setTitle(TITLE);
+//		setTitle(TITLE);
 		setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 

@@ -7,7 +7,6 @@ import gui.model.forces.AttractionForce;
 import gui.model.forces.NodeFunction;
 import gui.model.forces.RepulsiveForce;
 import gui.model.forces.SpringForce;
-import gui.view.LinkView;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -39,7 +38,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputListener;
 
-public class SubFrame extends JFrame {
+public class SubFrame extends JPanel {
 
 	/////////////////////////////////////////////////////////////////
 	// Äê¿ô
@@ -58,7 +57,7 @@ public class SubFrame extends JFrame {
 	public int WINDOW_WIDTH = 260;
 	
 	final static
-	public int WINDOW_HIEGHT = LMNtalFrame.WINDOW_HEIGHT;
+	public int WINDOW_HEIGHT = LMNtalFrame.WINDOW_HEIGHT-LogFrame.WINDOW_HEIGHT;
 	
 	final static
 	public String TITLE = "Control Panel";
@@ -179,13 +178,14 @@ public class SubFrame extends JFrame {
 		mainFrame_ = f;
 		commonListener_ = new Commons(this);
 		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(WINDOW_WIDTH, WINDOW_HIEGHT);
+//		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		setLocation(LMNtalFrame.WINDOW_WIDTH, 0);
 
 		initListener();
-		initComponents(getContentPane());
-		
+//		initComponents(getContentPane());
+		initComponents(this);
+			
 		mainFrame_.setMagnification((double)zoomSlider_.getValue() / (double)zoomSlider_.getMaximum());
 		setVisible(true);
 	}
@@ -509,7 +509,7 @@ public class SubFrame extends JFrame {
 		public LinkNumAdapter() { } 
 		
 		public void itemStateChanged(ItemEvent e) {
-			LinkView.setShowLinkNum(linkNumCheck_.isSelected());
+			LinkSet.setShowLinkNum(linkNumCheck_.isSelected());
 		}
 	}
 	static
@@ -653,6 +653,7 @@ public class SubFrame extends JFrame {
 			double dy = rect.getCenterY() - mousePoint.getY();
 			if(dx == 0.0) { dx = 0.00001; }
 			theta_ = Math.atan(dy / dx);
+			System.out.println(theta_);
 			theta_ = (startPoint_ + MouseInfo.getPointerInfo().getLocation().x) % 360;
 //			if(0 < Math.abs(theta_ - lastTheta_)){
 //				commonListener_.moveRotate(((double)(theta_ - lastTheta_)) / 10);
