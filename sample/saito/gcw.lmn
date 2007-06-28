@@ -2,8 +2,8 @@
 {left}.
 {river}.
 int(0).
-{g,c,$p}:-\+($p=(f,$q))|{dead},$p.
-{g,w,$p}:-\+($p=(f,$q))|{dead},$p.
+{g,c,$p},{$r},{river,$s}:-\+($p=(f,$q))|$p,$r,$s,dead.
+{g,w,$p},{$r},{river,$s}:-\+($p=(f,$q))|$p,$r,$s,dead.
 
 {f,$q},{river},int(N):-{river,f},{$q},int(N+1).
 {f,g,$q},{river},int(N):-{river,f,g},{$q},int(N+1).
@@ -13,3 +13,4 @@ int(0).
 {river,$p},{right,$q},int(N):-N mod 2=0|{river},{right,$p,$q},int(N).
 {river,$p},{left,$q},int(N):-N mod 2=1|{river},{left,$p,$q},int(N).
 {right},{river}:-goal.
+//dead:-{g,c,w,f,right},{left},{river},int(0).
