@@ -1,0 +1,68 @@
+// 目標：整数の世界が扱えること
+
+/* !((gcgw -> gf) U cgwf) */
+/*
+#define gcgw ((goat == cabbage) || (goat == wolf))
+#define gf (goat == ferryman)
+#define cgwf (cabbage && wolf && goat && ferryman)
+never {
+T0_init:
+	if
+	:: ((cgwf)) -> goto accept_all
+	:: !(gcgw) || (gf) -> goto T0_init
+	fi;
+accept_all:
+	skip
+}
+
+!(gc||gw) = (!gc && !gw)
+*/
+
+/* LTL
+t0_init, ca(C), go(G), wo(W), fe(F) :- C=:=1, G=:=1, W=:=1, F=:=1 | accept_all.
+t0_init, ca(C), go(G), wo(W) :- G=\=C, G=\=W | t0_init.
+t0_init, go(G), fe(F) :- G=:=F | t0_init.
+*/
+
+/* system
+% initial state
+fe=0, wo=0, go=0, ca=0.
+
+% move
+wo(W),fe(F) :- W2=1-W, F2=1-F | fe(F2),wo(W2).
+go(G),fe(F) :- G2=1-G, F2=1-F | fe(F2),go(G2).
+ca(C),fe(F) :- C2=1-C, F2=1-F | fe(F2),ca(C2).
+fe(F) :- F2=1-F | fe(F2).
+*/
+
+nd.exec({{
+init.
+init :- t0_init, fe(0), wo(0), go(0), ca(0).
+
+accept@@ t0_init, ca(C), go(G), wo(W), fe(F) :- 
+	C=:=1, G=:=1, W=:=1, F=:=1, W2=1-W, F2=1-F | accept_all, ca(C), go(G), fe(F2), wo(W2).
+accept@@ t0_init, ca(C), go(G), wo(W), fe(F) :- 
+	C=:=1, G=:=1, W=:=1, F=:=1, G2=1-G, F2=1-F | accept_all, ca(C), wo(W), fe(F2), go(G2).
+accept@@ t0_init, ca(C), go(G), wo(W), fe(F) :- 
+	C=:=1, G=:=1, W=:=1, F=:=1, C2=1-C, F2=1-F | accept_all, ca(C), wo(W), fe(F2), ca(C2).
+accept@@ t0_init, ca(C), go(G), wo(W), fe(F) :- 
+	C=:=1, G=:=1, W=:=1, F=:=1, F2=1-F | accept_all, ca(C), go(G), wo(W), fe(F2).
+
+t0_init, ca(C), go(G), wo(W), fe(F) :- 
+	G=\=C, G=\=W, W2=1-W, F2=1-F | t0_init, ca(C), go(G), wo(W2), fe(F2).
+t0_init, ca(C), go(G), wo(W), fe(F) :- 
+	G=\=C, G=\=W, G2=1-G, F2=1-F | t0_init, ca(C), go(G2), wo(W), fe(F2).
+t0_init, ca(C), go(G), wo(W), fe(F) :- 
+	G=\=C, G=\=W, C2=1-C, F2=1-F | t0_init, ca(C2), go(G), wo(W), fe(F2).
+t0_init, ca(C), go(G), wo(W), fe(F) :- 
+	G=\=C, G=\=W, F2=1-F | t0_init, ca(C), go(G), wo(W), fe(F2).
+	
+t0_init, ca(C), wo(W), go(G), fe(F) :- 
+	G=:=F, W2=1-W, F2=1-F | t0_init, ca(C), wo(W2), go(G), fe(F2).
+t0_init, ca(C), wo(W), go(G), fe(F) :- 
+	G=:=F, G2=1-G, F2=1-F | t0_init, ca(C), wo(W), go(G2), fe(F2).
+t0_init, ca(C), wo(W), go(G), fe(F) :- 
+	G=:=F, C2=1-C, F2=1-F | t0_init, ca(C2), wo(W), go(G), fe(F2).
+t0_init, ca(C), wo(W), go(G), fe(F) :- 
+	G=:=F, F2=1-F | t0_init, ca(C), wo(W), go(G), fe(F2).
+}*}).

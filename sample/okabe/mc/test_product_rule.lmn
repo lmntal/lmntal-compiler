@@ -1,0 +1,42 @@
+% LMNtal source
+//x(N) :- N mod 2=:=0, N2=N/2 | x(N2).
+//x(N) :- N mod 2=:=1, N2=3*N+1 | x(N2).
+
+% system automaton (before expanded)
+% ルールはSPIN で言うところのatomic なので状態遷移しない
+//init :- p0. // init
+//p0, x(N) :- N mod 2=:=0, N2=N/2 | p0,x(N2).
+//p0, x(N) :- N mod 2=\=0, N2=3*N+1 | p0,x(N2).
+
+% system automaton (after expanded)
+//init :- p0, x(4). // init
+//p0, x(N) :- N=:=4 | p0, x(2).
+//p0, x(N) :- N=:=2 | p0, x(1).
+//p0, x(N) :- N=:=1 | p0, x(4).
+
+% LTL automaton (<>[]p)
+//init :- q0. // init
+//q0 :- q0.
+//q0, x(N) :- N<4 | q1.
+//q1, x(N) :- N<4 | q1.
+
+% synchronous product, 2 * 3 = 6 rules
+nd.exec({{
+init.
+init :- p0, q0, x(4). // init and expand
+p0, q0, x(N) :- N mod 2=:=0, N2=N/2 | p0, q0, x(N2).
+p0, q0, x(N) :- N mod 2=\=0, N2=3*N+1 | p0, q0, x(N2).
+p0, q0, x(N) :- N mod 2=:=0, N<4, N2=N/2 | p0, q1, x(N2).
+p0, q0, x(N) :- N mod 2=\=0, N<4, N2=3*N+1 | p0, q1, x(N2). // accepting state
+p0, q1, x(N) :- N mod 2=:=0, N<4, N2=N/2 | p0, q1, x(N2).
+p0, q1, x(N) :- N mod 2=\=0, N<4, N2=3*N+1 | p0, q1, x(N2). // accepting state
+}*}).
+
+% synchronous product (after expanded)
+//p0, q0, x(N) :- N=:=4, N mod 2=:=0, N2=N/2 | p0, q0, x(N2).
+//p0, q0, x(N) :- N=:=2, N mod 2=:=0, N2=N/2 | p0, q0, x(N2).
+//p0, q0, x(N) :- N=:=1, N mod 2=\=0, N2=3*N+1 | p0, q0, x(N2).
+//p0, q0, x(N) :- N=:=1, N mod 2=\=0, N<4, N2=3*N+1 | p0, q1, x(N2). // accepting state
+//p0, q0, x(N) :- N=:=2, N mod 2=:=0, N<4, N2=N/2 | p0, q1, x(N2).
+//p0, q1, x(N) :- N=:=1, N mod 2=\=0, N<4, N2=3*N+1 | p0, q1, x(N2). // accepting state
+
