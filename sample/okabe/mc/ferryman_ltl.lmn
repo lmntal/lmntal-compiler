@@ -1,4 +1,9 @@
-// 目標：整数の世界が扱えること
+/*
+ * ferryman (with LTL)
+ * 2007/06/30(Sun) by okabe
+ * 
+ * 目標：整数の世界が扱えること
+ */
 
 /* never claim
 > ./ltl2ba -f '(((gc || gw) -> gf) U cgwf)'
@@ -13,13 +18,13 @@ accept_all:
 }
 */
 
-/* LTL rule
+/* 
+% LTL rule
 t0_init, go(G), ca(C), wo(W) :- G=\=C, G=\=W | t0_init.
 t0_init, go(G), fe(F) :- G=:=F | t0_init.
 t0_init, ca(C), go(G), wo(W), fe(F) :- C=:=1, G=:=1, W=:=1, F=:=1 | accept_all.
-*/
 
-/* system rule
+% system rule
 ca(C), go(G), wo(W), fe(F) :- W2=1-W, F2=1-F | ca(C), go(G), wo(W2), fe(F2).
 ca(C), go(G), wo(W), fe(F) :- G2=1-G, F2=1-F | ca(C), go(G), go(G2), fe(F2).
 ca(C), go(G), wo(W), fe(F) :- C2=1-C, F2=1-F | ca(C2), go(G), wo(W), fe(F2).
