@@ -23,27 +23,22 @@ HISTORY
 //nd.exec({{
 
 % initial state
-fe=l, wo=l, go=l, ca=l.
+fe(0), wo(0), go(0), ca(0).
 
 % move
-wo(l),fe(l) :- fe(r),wo(r).
-wo(r),fe(r) :- fe(l),wo(l).
-
-go(l),fe(l) :- fe(r),go(r).
-go(r),fe(r) :- fe(l),go(l).
-
-ca(l),fe(l) :- fe(r),ca(r).
-ca(r),fe(r) :- fe(l),ca(l).
-
-fe(l) :- fe(r).
-fe(r) :- fe(l).
+wo(W), fe(F) :- W=:=F, W2=1-W | wo(W2), fe(W2).
+go(G), fe(F) :- G=:=F, G2=1-G | go(G2), fe(G2).
+ca(C), fe(F) :- C=:=F, C2=1-C | ca(C2), fe(C2).
+fe(F) :- F2=1-F | fe(F2).
 
 % terminal condition
-fe(X),wo(Y),go(Z) :- unary(X),unary(Y),unary(Z),X\=Y,Y==Z | false.
+fail@@
+fe(X),wo(Y),go(Z) :- X=\=Y,Y=:=Z | false.
 
-fe(X),go(Y),ca(Z) :- unary(X),unary(Y),unary(Z),X\=Y,Y==Z | false.
+fail@@
+fe(X),go(Y),ca(Z) :- X=\=Y,Y=:=Z | false.
 
-wo(r),go(r),ca(r),fe(X) :- unary(X) | true.
+goal@@
+wo(1),go(1),ca(1),fe(F) :- int(F) | true.
 
 //}*}).
-
