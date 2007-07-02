@@ -17,19 +17,33 @@ AUTHOR
 
 HISTORY
 	2006/09/13(Wed)
+	2007/07/02(Mon) add typedef
 
 */
 
-//nd.exec({{
+typedef{
+  bool = datatype( 0('-'), 1('-') ).
+  nd{
+    ca(+int) = [0, 1].
+    go(+int) = [0, 1].
+    wo(+int) = [0, 1].
+    fe(+int) = [0, 1].
+    true = [0, 1].
+    false = [0, 2].
+    nomore.
+  }.
+}.
+
+nd.exec({nd{
 
 % initial state
 fe(0), wo(0), go(0), ca(0).
 
 % move
-wo(W), fe(F) :- W=:=F, W2=1-W | wo(W2), fe(W2).
-go(G), fe(F) :- G=:=F, G2=1-G | go(G2), fe(G2).
-ca(C), fe(F) :- C=:=F, C2=1-C | ca(C2), fe(C2).
-fe(F) :- F2=1-F | fe(F2).
+wo(W), fe(F) :- W=:=F, int(W2), W2=1-W | wo(W2), fe(W2).
+go(G), fe(F) :- G=:=F, int(G2), G2=1-G | go(G2), fe(G2).
+ca(C), fe(F) :- C=:=F, int(C2), C2=1-C | ca(C2), fe(C2).
+fe(F) :- int(F2), F2=1-F | fe(F2).
 
 % terminal condition
 fail@@
@@ -41,4 +55,4 @@ fe(X),go(Y),ca(Z) :- X=\=Y,Y=:=Z | false.
 goal@@
 wo(1),go(1),ca(1),fe(F) :- int(F) | true.
 
-//}*}).
+}*}).
