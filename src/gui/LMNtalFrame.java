@@ -6,6 +6,9 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Graphics;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -66,6 +69,10 @@ public class LMNtalFrame extends JFrame {
 	private LogFrame logFrame_;
 	private Membrane rootMembrane_;
 	private List<Node> rootMemList_ = new ArrayList<Node>();
+	private JSplitPane subsplitpane_;
+	private JSplitPane logsplitpane_;
+	private int location_sub;
+	private int location_log;
 
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -110,30 +117,33 @@ public class LMNtalFrame extends JFrame {
 	
 		JPanel bottompanel = new JPanel();
 		
-		JSplitPane subsplitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		JSplitPane logsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		subsplitpane_ = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		logsplitpane_ = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		
 		bottompanel.setLayout(new BorderLayout());
 
-		subsplitpane.setOneTouchExpandable(true);
-		logsplitpane.setOneTouchExpandable(true);
+		subsplitpane_.setOneTouchExpandable(true);
+		logsplitpane_.setOneTouchExpandable(true);
 //		SPLITPANEのサイズ指定
-		subsplitpane.setDividerLocation(WINDOW_WIDTH-SubFrame.WINDOW_WIDTH);
-		logsplitpane.setDividerLocation(WINDOW_HEIGHT-LogFrame.WINDOW_HEIGHT);
+
+		location_sub = SubFrame.WINDOW_WIDTH;
+		location_log = LogFrame.WINDOW_HEIGHT;
 
 		bottompanel.add(new JScrollPane(logFrame_), BorderLayout.CENTER);
 		bottompanel.add(new JScrollPane(editFrame_), BorderLayout.EAST);
 
 		
-	    subsplitpane.setLeftComponent(new JScrollPane(panel_));
-	    subsplitpane.setRightComponent(new JScrollPane(subFrame_));
-	    logsplitpane.setTopComponent(subsplitpane);
-	    logsplitpane.setBottomComponent(bottompanel);
+	    subsplitpane_.setLeftComponent(new JScrollPane(panel_));
+	    subsplitpane_.setRightComponent(new JScrollPane(subFrame_));
+	    logsplitpane_.setTopComponent(subsplitpane_);
+	    logsplitpane_.setBottomComponent(bottompanel);
 	    
-	    getContentPane().add(logsplitpane, BorderLayout.CENTER);
+	    getContentPane().add(logsplitpane_, BorderLayout.CENTER);
 	    
-	    subsplitpane.setUI(new MultiSplitPaneUI());
-	    subsplitpane.updateUI();
+	    subsplitpane_.setUI(new MultiSplitPaneUI());
+	    subsplitpane_.updateUI();
+	    
+	    addComponentListener(new Resize(this));
 	    
 //	    try{
 //	    	javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
@@ -142,9 +152,7 @@ public class LMNtalFrame extends JFrame {
 //	        System.out.println("Error L&F Setting");
 //	      }
 	}
-	
 
-	
 	
 	/**
 	 * 処理系本体が計算を続行してよいかの問い合わせ受付。
@@ -295,6 +303,20 @@ public class LMNtalFrame extends JFrame {
 		public void keyReleased(KeyEvent e) {}
 
 		public void keyTyped(KeyEvent e) {}
+		
+	}
+	///////////////////////////////////////////////////////////////////////////
+	
+	public class Resize extends ComponentAdapter {
+		private JFrame frame;
+		public Resize(JFrame f){
+			frame = f;
+		}
+		public void componentResized(ComponentEvent e) {
+
+		subsplitpane_.setDividerLocation(frame.getWidth()-location_sub);
+		logsplitpane_.setDividerLocation(frame.getHeight()-location_log);
+		}
 		
 	}
 }
