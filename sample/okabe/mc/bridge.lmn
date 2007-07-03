@@ -11,21 +11,14 @@
  */
 
 % Q1
-x(1),x(2),x(5),x(10),s(4,0,[]), here.
+x(1),x(2),x(5),x(10),s(0), here.
 % Q2
-//x(5),x(10),x(20),x(25),s(4,0,[]), here.
+//x(5),x(10),x(20),x(25),s(0), here.
 % Q3
-//x(1),x(3),x(6),x(8),x(12),s(5,0,[]), here.
+//x(1),x(3),x(6),x(8),x(12),s(0), here.
 
 go@@
-x(I), x(J), s(Num,Sum,List), here :- Num>=2, N=Num-2, I>=J, S=Sum+I |
-	y(I), y(J), s(N,S,[go(I,J)|List]), there.
-x(I), x(J), s(Num,Sum,List), here :- Num>=2, N=Num-2, I<J, S=Sum+J |
-	y(I), y(J), s(N,S,[go(J,I)|List]), there.
+x(I), x(J), s(Sum), here :- I>=J, S=Sum+I | y(I), y(J), s(S), there.
 
 back@@
-y(I), s(Num,Sum,List), there :- Num>0, N=Num+1, S=Sum+I |
-	x(I), s(N,S,[back(I)|List]), here.
-
-finish@@
-s(Num,Sum,List) :- Num=:=0 | finished(Sum,List).
+y(I), s(Sum), there :- S=Sum+I | x(I), s(S), here.
