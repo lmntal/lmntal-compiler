@@ -32,12 +32,12 @@ start@@
 % 始動プロセス以外のプロセス
 ready@@
 {ready,node(Id,Max),out(D1,S,X1),in(D2,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
-	Id>M,int(Max),D1=\=D2,ground(S) |
-	{run,node(Id,Id),out(D1,list.append(S,[Id]),X1),in(D2,msg,X2),$p[X1,X2|*Y],@p}.
+	Id>M,NewMax=Id,int(Max),D1=\=D2,ground(S) |
+	{run,node(Id,NewMax),out(D1,list.append(S,[NewMax]),X1),in(D2,msg,X2),$p[X1,X2|*Y],@p}.
 ready@@
 {ready,node(Id,Max),out(D1,S,X1),in(D2,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
-	Id<M,int(Max),D1=\=D2,ground(S) |
-	{run,node(Id,M),out(D1,list.append(S,[M]),X1),in(D2,msg,X2),$p[X1,X2|*Y],@p}.
+	Id<M,NewMax=M,int(Max),D1=\=D2,ground(S) |
+	{run,node(Id,NewMax),out(D1,list.append(S,[NewMax]),X1),in(D2,msg,X2),$p[X1,X2|*Y],@p}.
 
 % メッセージ処理
 halt@@
@@ -50,10 +50,10 @@ recv_halt@@
 	{node(Id,M),out(D1,list.append(S,[max(M)]),X1),in(D2,msg,X2),$p[X1,X2|*Y],@p}.
 recv@@
 {run,node(Id,Max),out(D1,S,X1),in(D2,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
-	M>Max,int(Id),D1=\=D2,ground(S) |
+	Id=\=M,M>Max,D1=\=D2,ground(S) |
 	{run,node(Id,M),out(D1,list.append(S,[M]),X1),in(D2,msg,X2),$p[X1,X2|*Y],@p}.
 recv@@
 {run,node(Id,Max),out(D1,S,X1),in(D2,R,X2),msg([M|R]),$p[X1,X2|*Y],@p} :-
-	M=<Max,int(Id),D1=\=D2,ground(S) |
+	Id=\=M,M=<Max,D1=\=D2,ground(S) |
 	{run,node(Id,Max),out(D1,S,X1),in(D2,msg,X2),$p[X1,X2|*Y],@p}.
 	
