@@ -54,7 +54,7 @@ channel_corruption@@
 % 送り手（正常に受信）
 send_ok@@
 {sender,out(S,SR),in(R,RS),msg=[ack(B)|R],expected(E),msgid(I),$p[SR,RS|*X],@p} :-
-	B=:=E, B2=(B+1) mod 2, E2=B2, I2=I+1, ground(S) |
+	B=:=E, B2=1-B, E2=B2, I2=I+1, ground(S) |
 	{sender,out(list.append(S,[msg(I2,B2)]),SR),in(msg,RS),expected(E2),msgid(I2),$p[SR,RS|*X],@p}.
 % 送り手（制御ビットが期待通りでない場合）
 send_ng_bit@@
@@ -77,15 +77,15 @@ sender_corruption@@
 % 受け手（正常に受信）
 recv_ok@@
 {receiver,out(S,RS),in(R,SR),msg=[msg(I,B)|R],expected(E),queue(Q),$p[RS,SR|*X],@p} :-
-	B=:=E, E2=(E+1) mod 2, int(I), ground(S), ground(Q) |
+	B=:=E, E2=1-E, int(I), ground(S), ground(Q) |
 	{receiver,out(list.append(S,[ack(B)]),RS),in(msg,SR),expected(E2),queue([msg(I)|Q]),$p[RS,SR|*X],@p}.
 % 受け手（制御ビットが期待通りでない場合）
 recv_ng_bit@@
 {receiver,out(S,RS),in(R,SR),msg=[msg(I,B)|R],expected(E),$p[RS,SR|*X],@p} :-
-	B=\=E, B2=(E+1) mod 2, int(I), ground(S) |
+	B=\=E, B2=1-E, int(I), ground(S) |
 	{receiver,out(list.append(S,[ack(B2)]),RS),in(msg,SR),expected(E),$p[RS,SR|*X],@p}.
 % 受け手（データ破損）
 receiver_corruption@@
 {receiver,out(S,RS),in(R,SR),msg=[corrupted|R],expected(E),$p[RS,SR|*X],@p} :-
-	B2=(E+1) mod 2, ground(S) |
+	B2=1-E, ground(S) |
 	{receiver,out(list.append(S,[ack(B2)]),RS),in(msg,SR),expected(E),$p[RS,SR|*X],@p}.

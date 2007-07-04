@@ -24,7 +24,7 @@ S2R = [sender(0,-1)|R2S] :- S2R = [msg(0,0), sender(0,0)|R2S].
 
 % 送り手（正常に受信）
 send_ok@@
-S2R = [sender(E,I), ack(B)|T] :- B=:=E, B2=(B+1) mod 2, E2=B2, I2=(I+1) mod 100 |
+S2R = [sender(E,I), ack(B)|T] :- B=:=E, B2=1-B, E2=B2, I2=(I+1) mod 100 |
 	S2R = [msg(B2,I2), sender(E2,I2)|T].
 % 送り手（制御ビットが期待通りでない場合）
 send_ng_bit@@
@@ -41,15 +41,15 @@ S2R = [sender(E,I), corrupted|T] :- int(E), int(I) |
 
 % 受け手（正常に受信）
 recv_ok@@
-R2S = [receiver(E,Q), msg(B,I)|T] :- B=:=E, E2=(E+1) mod 2, int(I) |
+R2S = [receiver(E,Q), msg(B,I)|T] :- B=:=E, E2=1-E, int(I) |
 	R2S = [ack(B), receiver(E2,[msg(I)|Q])|T].
 % 受け手（制御ビットが期待通りでない場合）
 recv_ng_bit@@
-R2S = [receiver(E,Q), msg(B,I)|T] :- B=\=E, B2=(E+1) mod 2, int(I) |
+R2S = [receiver(E,Q), msg(B,I)|T] :- B=\=E, B2=1-E, int(I) |
 	R2S = [ack(B2), receiver(E,Q)|T].
 % 受け手（データ破損）
 receiver_corruption@@
-R2S = [receiver(E,Q), corrupted|T] :- B2=(E+1) mod 2 |
+R2S = [receiver(E,Q), corrupted|T] :- B2=1-E |
 	R2S = [ack(B2), receiver(E,Q)|T].
 
 % 通信路（データの損失）
