@@ -17,19 +17,19 @@ Res=[node(start,Id,Max)|T] :- int(Id) |
 
 % 始動プロセス以外のプロセス
 ready@@
-Res=[node(ready,Id,Max),M|T] :- Id>M, int(Max), NewMax=Id |
+Res=[node(ready,Id,Max),M|T] :- Id>M, int(Max), int(NewMax), NewMax=Id |
 	Res=[Id,M,node(run,Id,NewMax)|T].
 ready@@
-Res=[node(ready,Id,Max),M|T] :- Id<M, int(Max), NewMax=M |
+Res=[node(ready,Id,Max),M|T] :- Id<M, int(Max), int(NewMax), NewMax=M |
 	Res=[Id,M,node(run,Id,NewMax)|T].
 
 % メッセージ処理
 recv@@
-Res=[node(run,Id,Max),M|T] :- Max>M, NewMax=Max, Id=\=M |
+Res=[node(run,Id,Max),M|T] :- Max>M, int(NewMax), NewMax=Max, Id=\=M |
 	Res=[M,node(run,Id,NewMax)|T].
 recv@@
-Res=[node(run,Id,Max),M|T] :- Max=<M, NewMax=M, Id=\=M |
+Res=[node(run,Id,Max),M|T] :- Max=<M, int(NewMax), NewMax=M, Id=\=M |
 	Res=[M,node(run,Id,NewMax)|T].
 halt@@
 Res=[node(run,Id,Max),M|T] :- Id=:=M |
-	Res=[node(Id,Max)|T].
+	Res=[node(halt,Id,Max)|T].
