@@ -12,24 +12,42 @@ Res=[node(ready,2,0),node(start,3,0),node(ready,1,0),node(start,5,0),node(ready,
 
 % 始動プロセス：自分のIDを送信する
 start@@
-Res=[node(start,Id,Max)|T] :- int(Id) |
- 	Res=[Id,node(run,Id,Max)|T].
+Res=[node(start,Id,Max)|T] :- int(Id),int(Max) |
+ 	Res=[Id,node(run,Id,Id)|T].
 
 % 始動プロセス以外のプロセス
 ready@@
-Res=[node(ready,Id,Max),M|T] :- Id>M, int(Max), int(NewMax), NewMax=Id |
-	Res=[Id,M,node(run,Id,NewMax)|T].
-ready@@
-Res=[node(ready,Id,Max),M|T] :- Id<M, int(Max), int(NewMax), NewMax=M |
-	Res=[Id,M,node(run,Id,NewMax)|T].
+Res=[node(ready,Id,Max),M|T] :- int(Id),int(M),int(Max2),int(Max),custom_iio_max(Id,M,Max2) |
+	Res=[Id,M,node(run,Id,Max2)|T].
 
 % メッセージ処理
 recv@@
-Res=[node(run,Id,Max),M|T] :- Max>M, int(NewMax), NewMax=Max, Id=\=M |
-	Res=[M,node(run,Id,NewMax)|T].
-recv@@
-Res=[node(run,Id,Max),M|T] :- Max=<M, int(NewMax), NewMax=M, Id=\=M |
-	Res=[M,node(run,Id,NewMax)|T].
+Res=[node(run,Id,Max),M|T] :- Id=\=M,int(Max),int(M),int(Max2),custom_iio_max(Max,M,Max2) |
+	Res=[M,node(run,Id,Max2)|T].
 halt@@
 Res=[node(run,Id,Max),M|T] :- Id=:=M |
 	Res=[node(halt,Id,Max)|T].
+
+% カスタムガード
+[:/*inline_define*/
+//#/*__UNITNAME__*/CustomGuardImpl.java
+	/*__PACKAGE__*/
+	import runtime.*;
+	import java.util.*;
+	public class /*__UNITNAME__*/CustomGuardImpl implements CustomGuard {
+		public boolean run(String guardID, Membrane mem, Object obj) {
+			ArrayList ary = (ArrayList)obj;
+			if(guardID.equals("max")) {
+				Atom a = (Atom)ary.get(0);
+				Atom b = (Atom)ary.get(1);
+				int va = ((IntegerFunctor)a.getFunctor()).intValue();
+				int vb = ((IntegerFunctor)b.getFunctor()).intValue();
+				int v = va > vb ? va : vb;
+              ary.set(2, new Atom(null, new IntegerFunctor(v)));
+				return true;
+		     }
+    		return false;
+		}
+	}
+//#
+:].
