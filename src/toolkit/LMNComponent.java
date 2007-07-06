@@ -53,6 +53,10 @@ public class LMNComponent {
 		//LMNtalTextArea -- Textの追加
 	}
 	
+	public Component getComponent(){
+		return component;
+	}
+	
 	abstract public Component initComponent();
 		
 	/** position(X,Y)のアトムがあったとき、gridxとgridyを取得する(単位はGridBag)。 */

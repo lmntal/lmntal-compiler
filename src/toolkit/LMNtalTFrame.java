@@ -121,7 +121,7 @@ public class LMNtalTFrame {
 	public void removeGraphicMem(Membrane mem){
 		if(null != mem.getParent()){
 			Iterator windowIte = windowMap.values().iterator();
-//			while(windowIte.hasNext()){ ((LMNtalWindow)windowIte.next()).removeChildMem(mem); }
+			while(windowIte.hasNext()){ ((LMNtalWindow)windowIte.next()).removeChildMem(mem); }
 		}
 	}
 	

@@ -1,7 +1,5 @@
 package runtime;
 
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -12,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -537,6 +534,8 @@ public final class Membrane extends QueuedEntity {
 	public void removeMem(Membrane mem) {
 		if(Env.LMNgraphic != null && !mem.isRoot())
 			Env.LMNgraphic.removeGraphicMem(mem);
+		if(Env.LMNtool != null && !mem.isRoot())
+			Env.LMNtool.removeGraphicMem(mem);
 		mems.remove(mem);
 		mem.dequeue();
 		mem.parent = null;

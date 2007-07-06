@@ -166,6 +166,20 @@ public class LMNtalWindow extends JFrame {
 		}
 		
 	}
+
+	public void removeChildMem(Membrane mem){
+		String key = getID(mem); // IDを取得
+		if(key == null) return;
+		//componentMapのkeyにID(key)があったら更新
+		LMNComponent component = 
+			(LMNComponent)componentMap.get(key); //=button? textarea? label?
+		if(component == null) {
+			return;
+		}
+		remove(component.getComponent());
+		setVisible(true);
+	}
+	
 	
 	public static String getID(Membrane mem){
 		/** ID("id")があったとき、IDを取得する */
