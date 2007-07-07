@@ -11,14 +11,11 @@
  */
 
 % Q1
-x(1),x(2),x(5),x(10),s(0), here.
-% Q2
-//x(5),x(10),x(20),x(25),s(0), here.
-% Q3
-//x(1),x(3),x(6),x(8),x(12),s(0), here.
+x(0,1),x(0,2),x(0,5),x(0,10),s(0),light(0).
 
 go@@
-x(I), x(J), s(Sum), here :- I>=J, S=Sum+I | y(I), y(J), s(S), there.
+x(P1,T1),x(P2,T2),s(Sum),light(L) :- P1=:=0,P2=:=0,L=:=0,T1>=T2,S=Sum+T1 |
+	x(1,T1),x(1,T2),s(S),light(1).
 
 back@@
-y(I), s(Sum), there :- S=Sum+I | x(I), s(S), here.
+x(P,T),s(Sum),light(L) :- P=:=1,L=:=1,S=Sum+T | x(0,T),s(S),light(0).
