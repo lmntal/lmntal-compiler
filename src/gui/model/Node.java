@@ -118,6 +118,9 @@ public class Node implements Cloneable{
 	
 	/** 子Node */
 	public Map<Object, Node> nodeMap_ = new HashMap<Object, Node>();
+
+	public Map<Set<Node>, Rectangle2D.Double> nodeGroupMap_ =
+		 new HashMap<Set<Node>, Rectangle2D.Double>();
 	
 	/** 座標の区間分割による子Node */
 	public Map<String, Set<Node>> areaNodeMap_ = new HashMap<String, Set<Node>>();
@@ -236,19 +239,18 @@ public class Node implements Cloneable{
 					int minY = (int)(rect.getMinY() / atomSize);
 					int maxX = (int)(rect.getMaxX() / atomSize);
 					int maxY = (int)(rect.getMaxY() / atomSize);
-					String[] key = { (minX + AREA_KEY_SEPARATOR + minY),
-							(minX + AREA_KEY_SEPARATOR + maxY),
-							(maxX + AREA_KEY_SEPARATOR + minY),
-							(maxX + AREA_KEY_SEPARATOR + maxY)};
 
-					for(int i = 0; i < 4; i++){
-						if(areaNodeMap_.containsKey(key[i])){
-							Set<Node> nodeSet = areaNodeMap_.get(key[i]);
-							nodeSet.add(node);
-						} else {
-							Set<Node> nodeSet = new HashSet<Node>();
-							nodeSet.add(node);
-							areaNodeMap_.put(key[i], nodeSet);
+					for(int x = minX; x <= maxX; x++){
+						for(int y = minY; y <= maxY; y++){
+							String key = x + AREA_KEY_SEPARATOR + y;
+							if(areaNodeMap_.containsKey(key)){
+								Set<Node> nodeSet = areaNodeMap_.get(key);
+								nodeSet.add(node);
+							} else {
+								Set<Node> nodeSet = new HashSet<Node>();
+								nodeSet.add(node);
+								areaNodeMap_.put(key, nodeSet);
+							}
 						}
 					}
 					node.resetAreaMap();
@@ -824,6 +826,8 @@ public class Node implements Cloneable{
 	public void moveCalc(){
 		moveCalcInside();
 		moveCalc(dx_, dy_);
+//		if(dx_ != 0 || dy_ != 0)
+//			System.out.println(dx_+ "," + dy_);
 		dx_ = 0;
 		dy_ = 0;
 	}
@@ -859,10 +863,7 @@ public class Node implements Cloneable{
 	}
 	
 	public void moveCalcInside(){
-		if(null == getParent()){
-			return;
-		}
-		if(insideDx_ == 0 && insideDy_ == 0){
+		if((insideDx_ == 0 && insideDy_ == 0) || null == getParent()){
 			return;
 		}
 		double dxMargin = insideDx_ + ((insideDx_ < 0) ? -Node.MARGIN : Node.MARGIN);
@@ -1339,6 +1340,24 @@ public class Node implements Cloneable{
 			rect_.y = dy;
 		}
 		
+	}
+
+	public void setPosToGrid(){
+		int nodeNum = nodeMap_.size();
+		int len = (int)Math.ceil(Math.sqrt(nodeNum));
+		synchronized (nodeMap_) {
+			Iterator<Node> nodes = nodeMap_.values().iterator();
+			for(int i = -(len / 2); i < (len / 2); i++){
+				for(int j = -(len / 2); j < (len / 2); j++){
+					if(!nodes.hasNext()){
+						continue;
+					}
+					Node node = nodes.next();
+					node.setPos(i * ATOM_SIZE * 2, j * ATOM_SIZE * 2);
+					node.setPosToGrid();
+				}
+			}
+		}
 	}
 	
 	static
