@@ -2,6 +2,7 @@ package gui;
 
 import gui.model.LinkSet;
 import gui.model.Node;
+import gui.model.forces.AttractionForce;
 import gui.model.forces.NodeFunction;
 import gui.view.CommonView;
 import gui.view.LinkView;
@@ -707,6 +708,7 @@ public class GraphPanel extends JPanel {
 		rootMembrane_ = mem;
 		rootNode_ = new Node(null, mem);
 		orgRootNode_ = rootNode_;
+//		AttractionForce.groupNode();
 	}
 	
 	public void setTempRootNode(Node node){

@@ -122,6 +122,7 @@ public class Node implements Cloneable{
 	public Map<Set<Node>, Rectangle2D.Double> nodeGroupMap_ =
 		 new HashMap<Set<Node>, Rectangle2D.Double>();
 	
+	
 	/** 座標の区間分割による子Node */
 	public Map<String, Set<Node>> areaNodeMap_ = new HashMap<String, Set<Node>>();
 	
@@ -267,7 +268,7 @@ public class Node implements Cloneable{
 		if(clipped_ || uncalc_){ return; }
 		SpringForce.calcSpring(this);
 		synchronized (nodeMap_) {
-			AttractionForce.calcAttraction(this, nodeMap_);
+			AttractionForce.calcAttraction(this, nodeMap_, nodeGroupMap_);
 			RepulsiveForce.calcRepulsive(this, areaNodeMap_);
 			NodeFunction.calcHeat(this, nodeMap_);
 		}
@@ -818,6 +819,7 @@ public class Node implements Cloneable{
 			}
 		}
 		moveCalc();
+		AttractionForce.createRect(AttractionForce.nodeSet_);
 		if(myObject_ instanceof Membrane){
 			calcMembraneSize();
 		}
