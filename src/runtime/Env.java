@@ -213,7 +213,9 @@ public final class Env {
 	
 	
 	
-	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	/**
+	 * tool kit ON
+	 */
 	public static boolean fTool = false;
 	public static LMNtalTFrame LMNtool;
 	
