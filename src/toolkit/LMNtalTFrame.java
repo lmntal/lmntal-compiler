@@ -112,16 +112,6 @@ public class LMNtalTFrame {
 		}
 	}
 	
-	public void setRepaint(Membrane mem, boolean flag){
-		setMem(mem);
-		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_FUNCTOR);
-		if(nameAtomIte.hasNext()){
-			String windowName = ((Atom)nameAtomIte.next()).nth(0);
-			LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);
-//			window.setRepaint(flag);
-			System.out.println("Repaint Repaint Repaint"); // デバッグ用
-		}
-	}
 
 	/**
 	 * 本体から除去された膜をすべて受け取る．
@@ -129,14 +119,39 @@ public class LMNtalTFrame {
 	 * @param mem
 	 */
 	public void removeGraphicMem(Membrane mem){
-		System.out.println("Remove Remove Remove"); // デバック用
+
 		if(null != mem.getParent()){
 			Iterator windowIte = windowMap.values().iterator();
-			while(windowIte.hasNext()){ ((LMNtalWindow)windowIte.next()).removeChildMem(mem); }
+			String id = LMNtalWindow.getID(mem); // IDを取得
+			if(id == null){
+				return;
+			}
+			
+			Object[] memArray = mem.getParent().getMemArray();
+			for(int i = 0; i < memArray.length; i++){
+				Membrane targetMem = (Membrane)memArray[i];
+				if(targetMem == mem){
+					continue;
+				}
+				String targetID = LMNtalWindow.getID(targetMem);
+				if(id.equals(targetID)){
+					return;
+				}
+			}
+			while(windowIte.hasNext()){ ((LMNtalWindow)windowIte.next()).removeChildMem(mem, id); }
 		}
 	}
-
 	
+	public void setRepaint(Membrane mem, boolean flag){
+		setMem(mem);
+		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_FUNCTOR);
+		if(nameAtomIte.hasNext()){
+			String windowName = ((Atom)nameAtomIte.next()).nth(0);
+			LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);
+//			window.setRepaint(flag);
+		}
+	}
+		
 //	/**
 //	 * マウスの位置を検出する。ライブラリmouseで使用
 //	 * @param mem

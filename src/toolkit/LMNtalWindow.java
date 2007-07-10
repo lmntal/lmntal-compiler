@@ -47,8 +47,8 @@ public class LMNtalWindow extends JFrame {
 	final static
 	private Functor ID_FUNCTOR = new SymbolFunctor("id", 1);
 	
-	final static
-	private Functor IMAGE_FUNCTOR = new SymbolFunctor("image", 0);
+//	final static
+//	private Functor IMAGE_FUNCTOR = new SymbolFunctor("image", 0);
 
 	final static
 	private Functor TIMER_FUNCTOR = new SymbolFunctor("timer", 0);
@@ -114,41 +114,42 @@ public class LMNtalWindow extends JFrame {
 	 */
 	public void setChildMem(Membrane mem){
 	
-		String key = getID(mem); // IDを取得
-		if(key == null) return;
+		String id = getID(mem); // IDを取得
+		if(id == null) return;
+		System.out.println(id);
 //		System.out.println(key);
 		//componentMapのkeyにID(key)があったら更新
-		if(componentMap.containsKey(key)) {
+		if(componentMap.containsKey(id)) {
 			LMNComponent component = 
-				(LMNComponent)componentMap.get(key); //=button? textarea? label? ...?
+				(LMNComponent)componentMap.get(id); //=button? textarea? label?
 			component.resetMembrane(mem);
 			return;
 		}
 		
 		if(mem.getAtomCountOfFunctor(BUTTON_FUNCTOR)>0){
 			LMNtalButton button = new LMNtalButton(this, mem);
-			componentMap.put(key, button);
+			componentMap.put(id, button);
 		}
 
 		if(mem.getAtomCountOfFunctor(TEXTAREA_FUNCTOR)>0){
 			LMNtalTextArea textarea = new LMNtalTextArea(this, mem);
-			componentMap.put(key, textarea);
+			componentMap.put(id, textarea);
 		}
 		
 		if(mem.getAtomCountOfFunctor(HTML_FUNCTOR)>0){
 			LMNtalHtml html = new LMNtalHtml(this, mem);
-			componentMap.put(key, html);
+			componentMap.put(id, html);
 		}
 		
 		if(mem.getAtomCountOfFunctor(LABEL_FUNCTOR)>0){
 			LMNtalLabel label = new LMNtalLabel(this, mem);
-			componentMap.put(key, label);
+			componentMap.put(id, label);
 		}
 
-		if(mem.getAtomCountOfFunctor(IMAGE_FUNCTOR)>0){
-			LMNtalImage image = new LMNtalImage(this, mem);
-			componentMap.put(key, image);
-		}
+//		if(mem.getAtomCountOfFunctor(IMAGE_FUNCTOR)>0){
+//			LMNtalImage image = new LMNtalImage(this, mem);
+//			componentMap.put(key, image);
+//		}
 
 		if(mem.getAtomCountOfFunctor(TIMER_FUNCTOR)>0){
 			LMNtalTimer timer = new LMNtalTimer(this, mem);
@@ -167,16 +168,15 @@ public class LMNtalWindow extends JFrame {
 		
 	}
 
-	public void removeChildMem(Membrane mem){
-		String key = getID(mem); // IDを取得
-		if(key == null) return;
+	public void removeChildMem(Membrane mem, String id){
 		//componentMapのkeyにID(key)があったら更新
 		LMNComponent component = 
-			(LMNComponent)componentMap.get(key); //=button? textarea? label?
+			(LMNComponent)componentMap.get(id); //=button? textarea? label?
 		if(component == null) {
 			return;
 		}
 		remove(component.getComponent());
+		componentMap.remove(id);
 		setVisible(true);
 	}
 	
