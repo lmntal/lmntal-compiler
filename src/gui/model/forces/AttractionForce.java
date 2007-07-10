@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Point2D.Double;
 import runtime.Membrane;
 
 public class AttractionForce {
@@ -22,7 +21,7 @@ public class AttractionForce {
 	 * @param node
 	 * @param nodeMap
 	 */
-	public static Set<Node> nodeSet_;
+
 	
 	static
 	public void groupNode(Node node,Map<Object, Node> nodeMap,
@@ -33,10 +32,10 @@ public class AttractionForce {
 		nodesWhile:
 		while(nodes.hasNext()){
 			Node targetNode = nodes.next();
-			Iterator<Node> nodeSets = ((Set<Node>) nodeGroupMap).iterator();
+			Iterator<Set<Node>> nodeSets = nodeGroupMap.keySet().iterator();
 			while(nodeSets.hasNext()){
-				nodeSet_ = (Set<Node>) nodeSets.next();
-				if(nodeSet_.contains(targetNode)){
+				Set<Node> nodeSet = nodeSets.next();
+				if(nodeSet.contains(targetNode)){
 					continue nodesWhile;
 				}
 			}
@@ -52,16 +51,12 @@ public class AttractionForce {
 	
 	static
 	public Rectangle2D.Double createRect(Set<Node> nodeSet){
-//		double maxX = Double.MIN_VALUE;
-//		double minX = Double.MAX_VALUE;
-//		double maxY = Double.MIN_VALUE;
-//		double minY = Double.MAX_VALUE;
-		double maxX = 0;
-		double minX = 0;
-		double maxY = 0;
-		double minY = 0;
-		
-		if(NodeFunction.heatingTime_ != 0 || !attractionFlag_ )
+		double maxX = Double.MIN_VALUE;
+		double minX = Double.MAX_VALUE;
+		double maxY = Double.MIN_VALUE;
+		double minY = Double.MAX_VALUE;
+
+		if(NodeFunction.heatingTime_ != 0)
 		{
 			return(null);
 		}
@@ -75,11 +70,39 @@ public class AttractionForce {
 			double y = p.getY();
 			if(maxX < x) maxX = x;
 			if(x < minX) minX = x;
-			if(maxX < y) maxY = y;
+			if(maxY < y) maxY = y;
 			if(y < minY) minY = y;
 		}
 		
 		return (new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY));
+		
+	}
+	
+	static
+	public void updateRect(Map<Set<Node>, Rectangle2D.Double> nodeGroupMap){
+		Iterator<Set<Node>> nodeSets = nodeGroupMap.keySet().iterator();
+		while(nodeSets.hasNext()){
+			Set<Node> nodeSet = nodeSets.next();
+			Rectangle2D.Double rect = nodeGroupMap.get(nodeSet);
+			double maxX = Double.MIN_VALUE;
+			double minX = Double.MAX_VALUE;
+			double maxY = Double.MIN_VALUE;
+			double minY = Double.MAX_VALUE;
+
+			Iterator<Node> nodes = nodeSet.iterator();
+			while(nodes.hasNext()){
+				Node node = nodes.next();
+				Point2D p = node.getPoint();
+				double x = p.getX();
+				double y = p.getY();
+				if(maxX < x) maxX = x;
+				if(x < minX) minX = x;
+				if(maxY < y) maxY = y;
+				if(y < minY) minY = y;
+			}
+			rect.setRect(minX, minY, maxX - minX, maxY - minY);
+		}
+		
 		
 	}
 
@@ -103,15 +126,21 @@ public class AttractionForce {
 		{
 			return;
 		}
-		groupNode(node,nodeMap,nodeGroupMap);
+
 		Iterator<Set<Node>> nodeSets = nodeGroupMap.keySet().iterator();
-		
+		nodeSets:
 		while(nodeSets.hasNext()){
 			Set<Node> nodeSet = nodeSets.next();
 			Rectangle2D.Double rect = nodeGroupMap.get(nodeSet);
+			if(rect == null){
+				continue;
+			}
 			double centerX = rect.getCenterX();
 			double centerY = rect.getCenterY();
 			Point2D myPoint = node.getCenterPoint();
+			if(node.isRoot()){
+				myPoint = new Point2D.Double(0,0);
+			}
 			
 			double distance =
 				Point2D.distance(myPoint.getX(), myPoint.getY(), centerX, centerY);
@@ -123,7 +152,20 @@ public class AttractionForce {
 	
 			double ddx = f * dx;
 			double ddy = f * dy;
-			((Node) nodeSet).moveDelta(-ddx, -ddy);
+			Iterator<Node> nodes = nodeSet.iterator();
+			while(nodes.hasNext()){
+				Node targetNode = nodes.next();
+				if(targetNode.isUncalc() || targetNode.isClipped()){
+					continue nodeSets;
+				}
+
+			}
+			
+			nodes = nodeSet.iterator();
+			while(nodes.hasNext()){
+				Node targetNode = nodes.next();
+				targetNode.moveDelta(-ddx, -ddy);
+			}
 			// TODO: nodeSetの親膜（node）の中心点を取得
 			// TODO: nodeSetの中心が、親膜（node）の中心に近付くような力を算出
 			// TODO: nodeSetのすべてのNodeに力を適用
@@ -140,7 +182,7 @@ public class AttractionForce {
 	}
 
 	/** 引力定数 */
-	final static double CONSTANT_ATTRACTION = 0.000001;
+	final static double CONSTANT_ATTRACTION = 0.0001;
 	static boolean attractionFlag_ = false;
 
 }

@@ -819,7 +819,7 @@ public class Node implements Cloneable{
 			}
 		}
 		moveCalc();
-		AttractionForce.createRect(AttractionForce.nodeSet_);
+//		AttractionForce.createRect(AttractionForce.nodeSet_);
 		if(myObject_ instanceof Membrane){
 			calcMembraneSize();
 		}
@@ -828,6 +828,7 @@ public class Node implements Cloneable{
 	public void moveCalc(){
 		moveCalcInside();
 		moveCalc(dx_, dy_);
+		AttractionForce.updateRect(nodeGroupMap_);
 //		if(dx_ != 0 || dy_ != 0)
 //			System.out.println(dx_+ "," + dy_);
 		dx_ = 0;
@@ -1255,6 +1256,7 @@ public class Node implements Cloneable{
 				nodeMap_.putAll(ruleNodeMap_);
 			}
 		}
+		AttractionForce.groupNode(this, nodeMap_, nodeGroupMap_);
 		return success;
 	}
 	
