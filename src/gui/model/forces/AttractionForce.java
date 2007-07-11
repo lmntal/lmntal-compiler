@@ -68,10 +68,10 @@ public class AttractionForce {
 			Point2D p = node.getPoint();
 			double x = p.getX();
 			double y = p.getY();
-			if(maxX < x) maxX = x;
-			if(x < minX) minX = x;
-			if(maxY < y) maxY = y;
-			if(y < minY) minY = y;
+			if(maxX < x) maxX = x + node.getSize();
+			if(x < minX) minX = x - node.getSize();
+			if(maxY < y) maxY = y + node.getSize();
+			if(y < minY) minY = y - node.getSize();
 		}
 		
 		return (new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY));
