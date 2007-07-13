@@ -65,13 +65,11 @@ public class AttractionForce {
 		while(nodes.hasNext()){
 			Node node = nodes.next();
 			// TODO: nodeの大きさを考慮するように。
-			Point2D p = node.getPoint();
-			double x = p.getX();
-			double y = p.getY();
-			if(maxX < x) maxX = x + node.getSize();
-			if(x < minX) minX = x - node.getSize();
-			if(maxY < y) maxY = y + node.getSize();
-			if(y < minY) minY = y - node.getSize();
+			Rectangle2D targetRect = node.getBounds2D();
+			if(maxX < targetRect.getMaxX()) maxX = targetRect.getMaxX();
+			if(targetRect.getMinX() < minX) minX = targetRect.getMinX();
+			if(maxY < targetRect.getMaxY()) maxY = targetRect.getMaxY();
+			if(targetRect.getMinY() < minY) minY = targetRect.getMinY();
 		}
 		
 		return (new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY));
@@ -92,13 +90,11 @@ public class AttractionForce {
 			Iterator<Node> nodes = nodeSet.iterator();
 			while(nodes.hasNext()){
 				Node node = nodes.next();
-				Point2D p = node.getPoint();
-				double x = p.getX();
-				double y = p.getY();
-				if(maxX < x) maxX = x;
-				if(x < minX) minX = x;
-				if(maxY < y) maxY = y;
-				if(y < minY) minY = y;
+				Rectangle2D targetRect = node.getBounds2D();
+				if(maxX < targetRect.getMaxX()) maxX = targetRect.getMaxX();
+				if(targetRect.getMinX() < minX) minX = targetRect.getMinX();
+				if(maxY < targetRect.getMaxY()) maxY = targetRect.getMaxY();
+				if(targetRect.getMinY() < minY) minY = targetRect.getMinY();
 			}
 			rect.setRect(minX, minY, maxX - minX, maxY - minY);
 		}
