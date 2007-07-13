@@ -182,14 +182,7 @@ public class LMNtalWindow extends JFrame {
 	
 	
 	public static String getID(Membrane mem){
-		/** ID("id")があったとき、IDを取得する */
-		String id = mem.getName();
-//		Iterator idAtomIte = mem.atomIteratorOfFunctor(ID_FUNCTOR);
-//		if(idAtomIte.hasNext()){
-//			Atom atom = (Atom)idAtomIte.next();
-//			id = atom.nth(0);
-//		}
-		return id;
+		return mem.getName();
 	}
 	
 	/**
