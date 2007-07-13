@@ -156,7 +156,8 @@ public class LMNtalPanel extends JPanel implements Runnable {
 			else if(TRIANGLE.compareToIgnoreCase(getpic) == 0){ return (new TriangleObj(mem)); }
 			else if(FILL_TRIANGLE.compareToIgnoreCase(getpic) == 0){ return (new FillTriangleObj(mem)); }
 			else if(atomGetpic.nthAtom(0).getFunctor().equals(STRING_ATOM)){ return (new StringObj(mem)); }
-			else if((new File(getpic)).exists()){ return (new FileObj(mem, getpic));}
+			else if((new File(getpic)).exists()){return (new FileObj(mem, getpic));}
+			
 		}
 		return (new RelativeObj(mem));
 	}

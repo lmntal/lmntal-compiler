@@ -26,6 +26,9 @@ public class LMNtalTFrame {
 	// ウィンドウ管理マップ．ウィンドウ名(String)をキーにして管理
 	final private HashMap windowMap = new HashMap();
 
+	// 消される膜の中身を管理
+	final private HashSet<String> removedIDSet = new HashSet<String>();
+
 	/** LMNtalTFrameのコンストラクタ */
 	public LMNtalTFrame(){}
 	
@@ -61,6 +64,8 @@ public class LMNtalTFrame {
 		// ウィンドウ膜でなく，かつ親がルート膜でなければ膜管理マップに追加
 		else if(null != mem.getParent() && !mem.getParent().isRoot()){
 			LMNtalWindow window = searchWindowMem(mem.getParent());
+			String id = LMNtalWindow.getID(mem); // ルールで変更後のIDを取得			
+			removedIDSet.remove(id); // 変更のあった膜のみをremovedIDSetの中に残す
 			if(null != window){ window.setChildMem(mem); }
 		}
 	}
@@ -118,28 +123,26 @@ public class LMNtalTFrame {
 	 * 受け取った膜はグラフィック膜であるとは限らない．
 	 * @param mem
 	 */
-	public void removeGraphicMem(Membrane mem){
-
-		if(null != mem.getParent()){
-			Iterator windowIte = windowMap.values().iterator();
-			String id = LMNtalWindow.getID(mem); // IDを取得
+	public void addRemovedMem(Membrane mem){
+		String id = LMNtalWindow.getID(mem); // ID(コンポーネントの所属している膜名)を取得
+		removedIDSet.add(id); // removeされた膜をremovedIDSetの中に残す
+	}
+	
+	public void removeMem(){
+		Iterator<String> ids = removedIDSet.iterator();
+//		String id = LMNtalWindow.getID(mem); // ID(コンポーネントの所属している膜名)を取得
+		while(ids.hasNext()){
+			String id = ids.next();
 			if(id == null){
 				return;
 			}
-			
-			Object[] memArray = mem.getParent().getMemArray();
-			for(int i = 0; i < memArray.length; i++){
-				Membrane targetMem = (Membrane)memArray[i];
-				if(targetMem == mem){
-					continue;
-				}
-				String targetID = LMNtalWindow.getID(targetMem);
-				if(id.equals(targetID)){
-					return;
-				}
+			// ここで更新
+			Iterator<LMNtalWindow> windows = windowMap.values().iterator();
+			while(windows.hasNext()){
+				windows.next().removeChildMem(id);
 			}
-			while(windowIte.hasNext()){ ((LMNtalWindow)windowIte.next()).removeChildMem(mem, id); }
 		}
+		System.out.println("remove");
 	}
 	
 	public void setRepaint(Membrane mem, boolean flag){

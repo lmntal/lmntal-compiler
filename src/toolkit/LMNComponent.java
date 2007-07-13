@@ -102,7 +102,9 @@ public class LMNComponent {
 		gbc.weighty = weightY;			
 	}
 			
-	/** text("")のアトムがあったとき、textの内容を取得する */
+	/** text("")のアトムがあったとき、textの内容を取得する。
+	 *  textは割と共通なのでここで取得して使いまわす)
+	 */
 	public String getText(Membrane mem){
 		String text = "";
 		Iterator textAtomIte = mem.atomIteratorOfFunctor(TEXT_FUNCTOR);

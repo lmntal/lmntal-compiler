@@ -183,6 +183,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 //					//if (Debug.isBreakPoint()) Task.trace("-->", "@" + id, r.toString());
 //				}
 				//if (!mem.isCurrent()) return true;
+				if(Env.LMNtool != null && !mem.isRoot())
+					Env.LMNtool.removeMem();
 				return true;
 			}
 		}
@@ -234,6 +236,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 //					Debug.breakPoint(r.lineno, Debug.MEMBRANE);
 //					//if (Debug.isBreakPoint()) Task.trace("==>", "@" + id, r.toString());
 //				}
+				if(Env.LMNtool != null && !mem.isRoot())
+					Env.LMNtool.removeMem();
 				return true;
 				//if (!mem.isCurrent()) return true;
 			}
