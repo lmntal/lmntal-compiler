@@ -47,7 +47,7 @@ public class Module {
 	static {
 		String home = System.getProperty("LMNTAL_HOME");
 		if (home == null) {
-			Env.e("Warning : LMNTAL_HOME is not set. Using relativa path.");
+			Env.e("Warning : LMNTAL_HOME is not set. Using relative path.");
 			libPath.add("./lib/src");
 			libPath.add("../lib/src");
 			libPath.add("./lib/public");
