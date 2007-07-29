@@ -124,7 +124,7 @@ public class LMNtalTFrame {
 	 * @param mem
 	 */
 	public void addRemovedMem(Membrane mem){
-		String id = LMNtalWindow.getID(mem); // ID(コンポーネントの所属している膜名)を取得
+		String id = LMNtalWindow.getID(mem); // コンポーネントのIDを取得
 		removedIDSet.add(id); // removeされた膜をremovedIDSetの中に残す
 	}
 	
@@ -141,6 +141,10 @@ public class LMNtalTFrame {
 			while(windows.hasNext()){
 				windows.next().removeChildMem(id);
 			}
+		}
+		Iterator<LMNtalWindow> windows = windowMap.values().iterator();
+		while(windows.hasNext()){
+			windows.next().setVisible(true);
 		}
 		System.out.println("remove");
 	}

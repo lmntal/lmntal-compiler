@@ -115,8 +115,7 @@ public class LMNtalWindow extends JFrame {
 	public void setChildMem(Membrane mem){
 	
 		String id = getID(mem); // IDを取得
-		if(id == null) return;
-		System.out.println(id);
+		if(id == null) return; // IDがなかったら戻る
 
 		//componentMapのkeyにIDがあったら更新
 		if(componentMap.containsKey(id)) {
@@ -168,8 +167,9 @@ public class LMNtalWindow extends JFrame {
 		
 	}
 
+	
 	public void removeChildMem(String id){
-		//componentMapのkeyにID(key)があったら更新
+		//componentMapのkeyにIDがあったら更新
 		LMNComponent component = 
 			(LMNComponent)componentMap.get(id); //=button? textarea? label?
 		if(component == null) {
@@ -177,12 +177,20 @@ public class LMNtalWindow extends JFrame {
 		}
 		remove(component.getComponent()); // ここで削除
 		componentMap.remove(id);
-		setVisible(true); // ここで再描画
+//		setVisible(true); // ここで再描画
 	}
 	
 	
+	
+	// IDの取得
 	public static String getID(Membrane mem){
-		return mem.getName();
+		String Id = null;
+		Iterator IdAtomIte= mem.atomIteratorOfFunctor(ID_FUNCTOR);
+		if(IdAtomIte.hasNext()){
+			Atom targetAtom = (Atom)IdAtomIte.next();
+			Id = ((null != targetAtom) ? targetAtom.nth(0) : "");
+		}
+		return Id;
 	}
 	
 	/**
