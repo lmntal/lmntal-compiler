@@ -1,18 +1,22 @@
 /* prime number generator a la concurrent logic programming
-   Kazunori Ueda, 2004-03-12
-*/
+   Kazunori Ueda, 2004-03-12 */
 
 gen($n,$max,Ns) :- $n > $max | Ns=[].
-gen($n,$max,Ns) :- $n =<$max | Ns=[$n|Ns1], N1=$n+1, gen(N1,$max,Ns1).
+gen($n,$max,Ns) :- $n =<$max |
+    Ns=[$n|Ns1], N1=$n+1, gen(N1,$max,Ns1).
 
 sift($max,[],Zs) :- int($max) | Zs=[].
-sift($max,[$p|Xs],Zs) :- $p*$p<$max  | Zs=[$p|Zs1], filter($p,Xs,Ys), sift($max,Ys,Zs1).
-sift($max,[$p|Xs],Zs) :- $p*$p>=$max | Zs=[$p|Zs1], sift($max,Xs,Zs1).
+sift($max,[$p|Xs],Zs) :- $p*$p<$max  |
+    Zs=[$p|Zs1], filter($p,Xs,Ys), sift($max,Ys,Zs1).
+sift($max,[$p|Xs],Zs) :- $p*$p>=$max |
+    Zs=[$p|Zs1], sift($max,Xs,Zs1).
 
 filter($p,[],Ys) :- int($p) | Ys=[].
 filter($p,[$x|Xs],Ys) :- $x mod $p=:=0 | filter($p,Xs,Ys).
-filter($p,[$x|Xs],Ys) :- $x mod $p=\=0 | Ys=[$x|Ys1], filter($p,Xs,Ys1).
+filter($p,[$x|Xs],Ys) :- $x mod $p=\=0 |
+    Ys=[$x|Ys1], filter($p,Xs,Ys1).
 
-primes($max,Ps) :- int($max) | gen(2,$max,Ns), sift($max,Ns,Ps).
+primes($max,Ps) :- int($max) |
+    gen(2,$max,Ns), sift($max,Ns,Ps).
 
 primes(2000,answer).
