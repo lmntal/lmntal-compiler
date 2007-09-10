@@ -825,7 +825,7 @@ public class Instruction implements Cloneable, Serializable {
 	//  -----  spec        [formals,locals]
 	//  -----  proceed
 	//  -----  stop 
-	//  -----  branch      [instructionlist]
+	//  -----  branch      [[instructions...]]
 	//  -----  loop        [[instructions...]]
 	//  -----  run         [[instructions...]]
 	//  -----  not         [instructionslist]
@@ -915,7 +915,7 @@ public class Instruction implements Cloneable, Serializable {
 //	public static final int STOP = 205;
 //	static {setArgType(STOP, new ArgType(false));}
 
-    /** branch [instructionlist]
+    /** branch [[instructions...]]
      * <br>構造化命令<br>
      * 引数の命令列を実行することを表す。
      * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、branchの次の命令に進む。
