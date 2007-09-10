@@ -276,6 +276,11 @@ public class FrontEnd {
 					    	// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.fInterpret = true;
+						} else if(args[i].equals("--slimcode")){
+					    	// コンパイル後の中間命令列を出力するモード
+							Env.compileonly = true;
+							Env.slimcode = true;
+							Env.fInterpret = true;
 						} else if(args[i].equals("--debug-daemon")){
 							// --debug-daemon
 							// dump debug message of LMNtalDaemon

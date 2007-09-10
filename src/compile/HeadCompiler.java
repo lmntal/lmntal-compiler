@@ -304,15 +304,17 @@ public class HeadCompiler {
 						mempaths.put(buddymem, new Integer(buddymempath));
 						match.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath, buddyatom.mem.name ));
 						newmemlist.add(buddymem);
-					// // GETMEM時代のコード
-					//	Iterator it = buddymem.mem.mems.iterator();
-					//	while (it.hasNext()) {
-					//		Membrane othermem = it.getNext();
-					//		if (othermem != buddymem && memToPath(othermem) != UNBOUND) {
-					//			match.add(new Instruction( Instruction.NEQMEM,
-					//				buddymempath, memIDPath(othermem) ));
-					//		}
-					//	}
+						if(Env.slimcode){
+							// GETMEM時代のコード
+							Iterator it = buddymem.mems.iterator();
+							while (it.hasNext()) {
+								Membrane othermem = (Membrane)it.next();
+								if (othermem != buddymem && memToPath(othermem) != UNBOUND) {
+									match.add(new Instruction( Instruction.NEQMEM,
+										buddymempath, memToPath(othermem) ));
+								}
+							}
+						}
 					}
 				}
 				//リンクの一括取得(RISC化) by mizuno
@@ -408,15 +410,17 @@ public class HeadCompiler {
 				// 子膜を変数に取得する
 				submempath = varcount++;
 				match.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
-// NEQMEM は不要になっているが、参考のためにコードは残しておく。
-//				Iterator it2 = mem.mems.iterator();
-//				while (it2.hasNext()) {
-//					Membrane othermem = (Membrane)it2.next();
-//					int other = memToPath(othermem);
-//					if (other == UNBOUND) continue;
-//					//if (othermem == submem) continue;
-//					match.add(new Instruction(Instruction.NEQMEM, submempath, other));
-//				}
+				if(Env.slimcode){
+					// NEQMEM は不要になっているが、参考のためにコードは残しておく。
+					Iterator it2 = mem.mems.iterator();
+					while (it2.hasNext()) {
+						Membrane othermem = (Membrane)it2.next();
+						int other = memToPath(othermem);
+						if (other == UNBOUND) continue;
+						//if (othermem == submem) continue;
+						match.add(new Instruction(Instruction.NEQMEM, submempath, other));
+					}
+				}
 				mempaths.put(submem, new Integer(submempath));
 			}
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno

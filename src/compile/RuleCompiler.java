@@ -140,7 +140,7 @@ public class RuleCompiler {
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化			
 			if (firstid < hc.atoms.size()) {			
-				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS) continue;
+				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS || Env.slimcode) continue;
 				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
 				
 				Atom atom = (Atom)hc.atoms.get(firstid);
