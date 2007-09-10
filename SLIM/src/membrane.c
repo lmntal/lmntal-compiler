@@ -17,7 +17,7 @@ struct RuleSetList {
 };
 typedef struct RuleSetList RuleSetNode;
 
-RuleSetNode *make_ruleset_node(LmnRuleSet *ruleset)
+static RuleSetNode *make_ruleset_node(LmnRuleSet *ruleset)
 {
   RuleSetNode *node = LMN_MALLOC(RuleSetNode);
   node->ruleset = ruleset;
@@ -25,7 +25,7 @@ RuleSetNode *make_ruleset_node(LmnRuleSet *ruleset)
   return node;
 }
 
-void add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
+void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 {
   RuleSetNode *new_node = make_ruleset_node(ruleset);
   if (mem->rulesets) new_node->next = mem->rulesets;
@@ -39,7 +39,7 @@ void add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 /* TODO stub implementation */
 
 struct AtomSet {
-  LmnAtom atoms[1<<LMN_FUNCTOR_BITS];
+  LmnAtomPtr atoms[1<<LMN_FUNCTOR_BITS];
 };
 
 static AtomSet *make_atom_set(int init_size)
@@ -49,7 +49,7 @@ static AtomSet *make_atom_set(int init_size)
   return a;
 }
 
-static LmnAtom get_atom_list(struct AtomSet *atom_set, LmnFunctor functor)
+static LmnAtomPtr get_atom_list(struct AtomSet *atom_set, LmnFunctor functor)
 {
   return atom_set->atoms[functor];
 }

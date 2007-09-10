@@ -15,6 +15,6 @@ void lmn_fatal(const char *msg, ...)
   va_end(args);
   fputc('\n', stderr);
   fflush(stderr);
-  _exit(1);
+  exit(1);
   /* no treatment */
 }

@@ -12,7 +12,6 @@ struct LmnRule {
   lmn_interned_str name;
 };
 
-typedef unsigned short lmn_ruleset_size_t;
 
 struct LmnRuleSet {
   lmn_ruleset_size_t num, cap;

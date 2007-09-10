@@ -57,14 +57,15 @@ typedef unsigned char BYTE;
 #define LMN_WORD_BITS   (SIZEOF_LONG*8)
 #define LMN_WORD(X)     ((LmnWord)(X))
 
-typedef uint16_t LmnFunctor; /* int16_t may be larger than 16 bit */
-#define LMN_FUNCTOR_BYTES 2
+/* uit16_t is not defined if there is no 2Byte data type */
+typedef uint16_t LmnFunctor; 
+#define LMN_FUNCTOR_BYTES (sizeof(LmnFunctor))
 #define LMN_FUNCTOR_BITS (LMN_FUNCTOR_BYTES*8)
-#define LMN_FUNCTOR(X) ((LmnFunctor)((X)&0xffff))
+#define LMN_FUNCTOR(X) ((LmnFunctor)((X)))
 
 typedef int lmn_interned_str;
 
-/* ã¦ãã¨ãƒ¼ */
+/* ¤Æ¤­¤È¡¼ */
 typedef BYTE* lmn_rule_instr;
 
 typedef struct LmnRule    LmnRule;
@@ -81,7 +82,8 @@ typedef struct LmnMembrane LmnMembrane;
  * Atom Structure
  *
  *  * Atom
- *      first Word                        : pointer to next atom
+ *      first Word                        : pointer to previous atom
+ *      second Word                       : pointer to next atom
  *      next 2 Bytes                      : Functor
  *      next N Bytes                      : Link Attribute
  *      N Word from next aligned position : Link
@@ -109,30 +111,47 @@ typedef struct LmnMembrane LmnMembrane;
  *
  */
 
-typedef LmnWord *LmnAtom;
+typedef LmnWord *LmnAtomPtr;
 
-typedef uint8_t LmnAtomArgAttr;
-#define ARG_ATTR_BYTES 1
-
-#define LMN_ATOM(X)               ((LmnAtom)(X))
-#define LMN_ATOM_WORD(ATOM, N)    (LMN_ATOM(ATOM)[N])
-#define LMN_ATOM_NEXT(ATOM)       ((LmnAtom)LMN_ATOM_WORD(ATOM, 0))
-#define LMN_ATOM_FUNCTOR(ATOM)    LMN_FUNCTOR(LMN_ATOM_WORD(ATOM, 1))
-#define LMN_ATOM_ARG_ATTR(ATOM,N) \
-  (((BYTE*)(((LmnWord*)(ATOM)) + 1)) + LMN_FUNCTOR_BYTES + (N)*ARG_ATTR_BYTES)
+typedef uint8_t LmnAtomLinkAttr;
+#define LMN_ATOM_LINK_ATTR(X) ((LmnAtomLinkAttr)(X))
+#define LMN_LINK_ATTR_BYTES (sizeof(LmnAtomLinkAttr))
 
 #if LMN_WORD_BYTES == 4
-#define WORD_SHIFT 2
+#define LMN_WORD_SHIFT 2
 #elif LMN_WORD_BYTES == 8
-#define WORD_SHIFT 3
+#define LMN_WORD_SHIFT 3
 #else
 #error Word size is not 2^N
 #endif
 
-#define LMN_ATOM_ARG(ATOM, N) \
-  ((LmnWord*)(ATOM) + 1 + ((N - (LMN_WORD_BYTES - LMN_FUNCTOR_BYTES)) >> WORD_SHIFT) + N)
+#define LMN_ATTR_WORDS(ARITY)  \
+  (((ARITY)+(LMN_FUNCTOR_BYTES - 1))>>LMN_WORD_SHIFT)
 
-#undef WORD_SHIFT
+#define LMN_ATOM(X)                 ((LmnAtomPtr)(X))
+
+#define LMN_ATOM_PPREV(ATOM)        ((LmnWord*)(ATOM))
+#define LMN_ATOM_PNEXT(ATOM)        ((LmnWord*)(ATOM)+1)
+#define LMN_ATOM_PLINK_ATTR(ATOM,N) \
+  ((LmnAtomLinkAttr*)(((BYTE*)(((LmnWord*)(ATOM))+2))+ \
+              LMN_FUNCTOR_BYTES+(N)*LMN_LINK_ATTR_BYTES))
+#define LMN_ATOM_PLINK(ATOM,N) \
+  ((LmnWord*)(ATOM)+3+LMN_ATTR_WORDS(LMN_ATOM_ARITY(ATOM))+(N))
+
+#define LMN_ATOM_GET_PREV(ATOM)           (*(LmnAtomPtr)LMN_ATOM_PPREV(ATOM))
+#define LMN_ATOM_SET_PREV(ATOM,X)         (*(LmnAtomPtr)LMN_ATOM_PPREV(ATOM)=(X))
+#define LMN_ATOM_GET_NEXT(ATOM)           (*(LmnAtomPtr)LMN_ATOM_PNEXT(ATOM))
+#define LMN_ATOM_SET_NEXT(ATOM,X)         (*(LmnAtomPtr)LMN_ATOM_PNEXT(ATOM)=(X))
+#define LMN_ATOM_GET_FUNCTOR(ATOM)        LMN_FUNCTOR(*((LmnWord*)(ATOM)+2))
+#define LMN_ATOM_GET_LINK_ATTR(ATOM,N)    (*LMN_ATOM_PLINK_ATTR(ATOM,N))
+#define LMN_ATOM_SET_LINK_ATTR(ATOM,N,X)  ((*LMN_ATOM_PLINK_ATTR(ATOM,N))=(X))
+
+#define LMN_ATOM_GET_LINK(ATOM, N) \
+  (*LMN_ATOM_PLINK(ATOM,N))
+#define LMN_ATOM_SET_LINK(ATOM,N,X) \
+  (*LMN_ATOM_PLINK(ATOM,N)=(X))
+
+#define LMN_ATOM_WORDS(ARITY)  (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
 
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
@@ -140,28 +159,54 @@ typedef uint8_t LmnAtomArgAttr;
 
 /* low 7 bits of link attribute */
 
-#define ATOM_IN_PROXY_ATTR   0
-#define ATOM_OUT_PROXY_ATTR  1
+#define LMN_ATOM_IN_PROXY_ATTR   0
+#define LMN_ATOM_OUT_PROXY_ATTR  1
 
-#define ATOM_INT_ATTR        2
-#define ATOM_DBL_ATTR        3
+#define LMN_ATOM_INT_ATTR        2
+#define LMN_ATOM_DBL_ATTR        3
 
 
-/*---------------------------------------------------
+/*----------------------------------------------------------------------
+ * Membrane
+ */
+LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
+
+/*----------------------------------------------------------------------
+ * Rule
+ */
+
+typedef unsigned short lmn_ruleset_size_t;
+
+LMN_EXTERN LmnRule *lmn_rule_make(lmn_rule_instr instr, lmn_interned_str name);
+LMN_EXTERN void lmn_rule_free(LmnRule *rule);
+LMN_EXTERN LmnRuleSet *lmn_ruleset_make(lmn_ruleset_size_t init_size);
+LMN_EXTERN void lmn_ruleset_free(LmnRuleSet *ruleset);
+LMN_EXTERN void lmn_ruleset_put(LmnRuleSet* ruleset, LmnRule *rule);
+
+/*----------------------------------------------------------------------
+ * Atom
+ */
+
+LMN_EXTERN LmnAtomPtr lmn_new_atom(unsigned int arity);
+
+/*----------------------------------------------------------------------
  * Utility
  */
 
 /*  Memory */
 
-void *lmn_calloc(size_t num, size_t size);
-void *lmn_malloc (size_t num);
-void *lmn_realloc (void *p, size_t num);
-void lmn_free (void *p);
+LMN_EXTERN void *lmn_calloc(size_t num, size_t size);
+LMN_EXTERN void *lmn_malloc(size_t num);
+LMN_EXTERN void *lmn_realloc(void *p, size_t num);
+LMN_EXTERN void lmn_free (void *p);
 
 #define LMN_CALLOC(TYPE, NUM)	       ((TYPE *)lmn_calloc ((NUM), sizeof(TYPE)))
 #define LMN_MALLOC(TYPE)	           ((TYPE *)lmn_malloc(sizeof(TYPE)))
 #define LMN_REALLOC(TYPE, P, NUM)	   ((TYPE *)lmn_realloc((P), (NUM) * sizeof(TYPE)))
 #define LMN_FREE(P)				       (lmn_free((void*)(P)))
+
+/* Error */
+LMN_EXTERN void lmn_fatal(const char *msg, ...);
 
 /* Assertion */
 

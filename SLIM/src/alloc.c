@@ -1,5 +1,24 @@
+/*
+ * alloc.c -- memory management
+ */
+
 #include "lmntal.h"
 #include <malloc.h>
+
+/*----------------------------------------------------------------------
+ * memory allocation for atom
+ */
+
+/* TODO stub implementation */
+
+LmnAtomPtr lmn_new_atom(unsigned int arity)
+{
+  return lmn_malloc(LMN_ATOM_WORDS(arity));
+}
+
+/*----------------------------------------------------------------------
+ * low level allocation
+ */
 
 void *lmn_calloc(size_t num, size_t size)
 {
@@ -13,7 +32,7 @@ void *lmn_calloc(size_t num, size_t size)
   return new;
 }
 
-void *lmn_malloc (size_t num)
+void *lmn_malloc(size_t num)
 {
   void *new = malloc(num);
   if (!new) lmn_fatal("Memory exhausted");
@@ -21,7 +40,7 @@ void *lmn_malloc (size_t num)
   return new;
 }
 
-void *lmn_realloc (void *p, size_t num)
+void *lmn_realloc(void *p, size_t num)
 {
   void *new;
 
@@ -32,7 +51,8 @@ void *lmn_realloc (void *p, size_t num)
   return new;
 }
 
-void lmn_free (void *p)
+void lmn_free(void *p)
 {
   if (p) free(p);
 }
+

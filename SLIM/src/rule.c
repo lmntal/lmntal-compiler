@@ -31,6 +31,7 @@ LmnRuleSet *lmn_ruleset_make(lmn_ruleset_size_t init_size)
   ruleset->rules = LMN_CALLOC(LmnRule*, init_size);
   ruleset->num = 0;
   ruleset->cap = init_size;
+  return ruleset;
 }
 
 void lmn_ruleset_free(LmnRuleSet *ruleset)

@@ -4,7 +4,7 @@ dnl Process this file with autoconf to produce a configure script
 
 AC_PREREQ(2.61)
 AC_INIT([SLIM], [0.0.1], [lang@ueda.info.waseda.ac.jp], [slim])
-# AC_REVISION($Revision: 1.1 $)
+# AC_REVISION($Revision: 1.2 $)
 # AC_COPYRIGHT (copyright-notice)
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -20,7 +20,7 @@ AC_C_CONST
 AC_C_VOLATILE
 AC_C_RESTRICT
 AC_C_CHAR_UNSIGNED
-#AC_C_VARARRAYS          # ÂèØÂ§âÈï∑ÈÖçÂàó
+#AC_C_VARARRAYS          # ≤ƒ —ƒπ«€ŒÛ
 #AC_C_TYPEOF
 # AC_C_STRINGIZE
 # AM_WITH_DMALLOC
