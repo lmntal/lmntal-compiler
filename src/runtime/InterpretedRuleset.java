@@ -324,6 +324,8 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 			Rule r = ((Rule) l.next());
 			r.showDetail();
 		}
+		if(Env.slimcode)
+			Env.p("");
 	}
 	
 	public void serialize(ObjectOutputStream out) throws IOException {
