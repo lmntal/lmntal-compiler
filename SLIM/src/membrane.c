@@ -3,6 +3,7 @@
  */
 
 
+#include "lmntal.h"
 #include "membrane.h"
 
 /*----------------------------------------------------------------------
@@ -38,8 +39,12 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 
 /* TODO stub implementation */
 
+struct AtomSetEntry {
+  LmnAtomPtr head, tail;
+};
+
 struct AtomSet {
-  LmnAtomPtr atoms[1<<LMN_FUNCTOR_BITS];
+  AtomSetEntry atoms[1<<LMN_FUNCTOR_BITS];
 };
 
 static AtomSet *make_atom_set(int init_size)
@@ -49,7 +54,38 @@ static AtomSet *make_atom_set(int init_size)
   return a;
 }
 
-static LmnAtomPtr get_atom_list(struct AtomSet *atom_set, LmnFunctor functor)
+static inline AtomSetEntry *get_atom_list(struct AtomSet *atomset, LmnFunctor functor)
 {
-  return atom_set->atoms[functor];
+  return &atomset->atoms[functor];
+}
+
+static inline BOOL atom_list_is_empty(AtomSetEntry *entry)
+{
+  return !entry->head;
+}
+
+void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
+{
+  AtomSetEntry *as = get_atom_list(mem->atomset, LMN_ATOM_FUNCTOR(ap));
+  
+  LMN_ATOM_SET_NEXT(ap, 0);
+  if (atom_list_is_empty(&as)) {
+    as->head = as->tail = ap;
+    LMN_ATOM_SET_PREV(ap, 0);
+  } else {
+    LMN_ATOM_SET_PREV(ap, as->tail);
+    LMN_ATOM_SET_NEXT(as->tail, ap);
+    as->tail = ap;
+  }
+}    
+
+LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f)
+{
+  AtomSetEntry *as = get_atom_list(mem->atomset, LMN_ATOM_FUNCTOR(ap));
+  LmnAtomPtr ap;
+  
+  LMN_ASSERT(!atom_list_is_empty(as));
+  ap = as->head;
+  as->head = as->next;
+  return ap;
 }

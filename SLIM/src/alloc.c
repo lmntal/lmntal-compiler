@@ -47,7 +47,7 @@ void *lmn_realloc(void *p, size_t num)
 
   if (!p) return lmn_malloc (num);
   new = realloc (p, num);
-  if (!new) lmn_fatal("Memory Exhausted");
+  if (!new) lmn_fatal("Memory exhausted");
 
   return new;
 }

@@ -28,7 +28,7 @@ static void usage(void)
 
 static void version(void)
 {
-  printf("The Slim LMNtla Implementation, version %s\n", SLIM_VERSION);
+  printf("The Slim LMNtal Implementation, version %s\n", SLIM_VERSION);
 }
 
 static int parse_options(int argc, char *argv[])
