@@ -53,6 +53,5 @@ void *lmn_realloc(void *p, size_t num)
 
 void lmn_free(void *p)
 {
-  if (p) free(p);
+  free(p);
 }
-

@@ -18,6 +18,10 @@
 #define LMN_EXTERN extern
 
 /* Some useful macros */
+#ifndef BOOL
+#define BOOL unsigned char
+#endif
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -46,8 +50,8 @@ LMN_DECL_BEGIN
  * data types
  */
 
-#if SIZEOF_LONG != SIZEOF_VOIDP
-#error sizeof(long) != sizeof(void*)
+#if SIZEOF_LONG < SIZEOF_VOIDP
+#error sizeof(long) < sizeof(void*)
 #endif
 
 typedef unsigned long LmnWord;
@@ -63,6 +67,9 @@ typedef uint16_t LmnFunctor;
 #define LMN_FUNCTOR_BITS (LMN_FUNCTOR_BYTES*8)
 #define LMN_FUNCTOR(X) ((LmnFunctor)((X)))
 
+/* this type must be enough to represent arity */
+typedef uint8_t LmnArity;
+
 typedef int lmn_interned_str;
 
 /* てきとー */
@@ -72,11 +79,9 @@ typedef struct LmnRule    LmnRule;
 typedef struct LmnRuleSet LmnRuleSet;
 typedef struct LmnMembrane LmnMembrane;
 
-
 /*----------------------------------------------------------------------
  * Atom
  */
-
 
 /*
  * Atom Structure
@@ -165,7 +170,6 @@ typedef uint8_t LmnAtomLinkAttr;
 #define LMN_ATOM_INT_ATTR        2
 #define LMN_ATOM_DBL_ATTR        3
 
-
 /*----------------------------------------------------------------------
  * Membrane
  */
@@ -200,7 +204,7 @@ LMN_EXTERN void *lmn_malloc(size_t num);
 LMN_EXTERN void *lmn_realloc(void *p, size_t num);
 LMN_EXTERN void lmn_free (void *p);
 
-#define LMN_CALLOC(TYPE, NUM)	       ((TYPE *)lmn_calloc ((NUM), sizeof(TYPE)))
+#define LMN_CALLOC(TYPE, NUM)	       ((TYPE *)lmn_calloc((NUM), sizeof(TYPE)))
 #define LMN_MALLOC(TYPE)	           ((TYPE *)lmn_malloc(sizeof(TYPE)))
 #define LMN_REALLOC(TYPE, P, NUM)	   ((TYPE *)lmn_realloc((P), (NUM) * sizeof(TYPE)))
 #define LMN_FREE(P)				       (lmn_free((void*)(P)))
@@ -217,6 +221,45 @@ LMN_EXTERN void lmn_fatal(const char *msg, ...);
 #define LMN_ASSERT(expr)   ((void)0)/* nothing */
 #endif
 
+/*----------------------------------------------------------------------
+ * Global data
+ */
+
+/* Functor Information */
+
+typedef struct LmnFunctorEntry {
+  lmn_interned_str  name;
+  LmnArity          arity;
+} LmnFunctorEntry;
+
+typedef struct LmnFunctorTable {
+  int size;
+  struct LmnFunctorEntry *entry;
+} LmnFunctorInfo;
+
+extern struct LmnFunctorTable lmn_functor_table;
+
+#define LMN_FUNCTOR_ARITY(F)    (lmn_functor_table.entry[(F)].arity)
+#define LMN_FUNCTOR_NAME(F)     (lmn_functor_table.entry[(F)].name)
+
+/* Symbol Information */
+
+typedef struct LmnSymbolTable {
+  int size;
+  char **entry;
+} LmnSymbolTable;
+
+extern struct LmnSymbolTable lmn_symbol_table;
+
+#define LMN_SYMBOL_STR(ID)       (lmn_symbol_table.entry[(ID)])
+
+/* Runtime Environment */
+
+struct LmnEnv {
+  char    *symbol_file;
+};
+
+extern struct LmnEnv  lmn_env;
 
 LMN_DECL_END
 

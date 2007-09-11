@@ -31,12 +31,12 @@ LmnMembrane* memstack_pop(){
 	struct Entity *ent = memstack.head->next;
 	memstack.head->next = ent->next;
 	LmnMembrane *mem = ent->mem;
-	free(ent);
+	LMN_FREE(ent);
 	return mem;
 }
 
 LmnMembrane* memstack_peek(){
-	return memstack.head->mem;
+	return memstack.head->next->mem;
 }
 
 void memstack_printall(){
@@ -50,6 +50,33 @@ void memstack_printall(){
 int react(LmnMembrane *mem, LmnRuleSet *ruleset){
 	return FALSE;
 }
+
+/* void interpret() */
+/* { */
+
+/*   BYTE *instr; */
+/*   int i; */
+
+/*   switch (*instr++) { */
+
+/*   case FINDATOM: */
+/*     int first_arg = ARG_INT(instr); */
+/*     instr += ARG_INT_SIZE; */
+/*     break; */
+/*   case JUMP: */
+/*     int atom_num = ARG_INT(instr); */
+/*     for (i=0;i<atom_num;i++) { */
+/*       int n = ARG_INT(instr); */
+      
+/*       instr += ARG_INT_SIZE; */
+/*     } */
+/*     break; */
+/*   } */
+  
+  
+/* } */
+
+
 struct RuleSetList {
   LmnRuleSet *ruleset;
   RuleSetList *next;
