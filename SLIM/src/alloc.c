@@ -11,9 +11,10 @@
 
 /* TODO stub implementation */
 
-LmnAtomPtr lmn_new_atom(unsigned int arity)
+inline LmnAtomPtr lmn_new_atom(LmnFunctor f)
 {
-  return lmn_malloc(LMN_ATOM_WORDS(arity));
+  LmnAtomPtr ap = lmn_malloc(LMN_ATOM_WORDS(LMN_ATOM_ARITY(arity)));
+  LMN_ATOM_SET_FUNCTOR(ap, f);
 }
 
 /*----------------------------------------------------------------------

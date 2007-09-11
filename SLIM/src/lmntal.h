@@ -74,6 +74,8 @@ typedef int lmn_interned_str;
 
 /* てきとー */
 typedef BYTE* lmn_rule_instr;
+typedef uint16_t LmnInstrOp;
+typedef uint16_t LmnInstrVar;
 
 typedef struct LmnRule    LmnRule;
 typedef struct LmnRuleSet LmnRuleSet;
@@ -136,24 +138,32 @@ typedef uint8_t LmnAtomLinkAttr;
 #define LMN_ATOM(X)                 ((LmnAtomPtr)(X))
 
 #define LMN_ATOM_PPREV(ATOM)        ((LmnWord*)(ATOM))
-#define LMN_ATOM_PNEXT(ATOM)        ((LmnWord*)(ATOM)+1)
-#define LMN_ATOM_PLINK_ATTR(ATOM,N) \
-  ((LmnAtomLinkAttr*)(((BYTE*)(((LmnWord*)(ATOM))+2))+ \
+#define LMN_ATOM_PNEXT(ATOM)        (((LmnWord*)(ATOM))+1)
+#define LMN_ATOM_PLINK_ATTR(ATOM,N)                       \
+  ((LmnAtomLinkAttr*)(((BYTE*)(((LmnWord*)(ATOM))+2))+    \
               LMN_FUNCTOR_BYTES+(N)*LMN_LINK_ATTR_BYTES))
-#define LMN_ATOM_PLINK(ATOM,N) \
+#define LMN_ATOM_PLINK(ATOM,N)                            \
   ((LmnWord*)(ATOM)+3+LMN_ATTR_WORDS(LMN_ATOM_ARITY(ATOM))+(N))
 
-#define LMN_ATOM_GET_PREV(ATOM)           (*(LmnAtomPtr)LMN_ATOM_PPREV(ATOM))
-#define LMN_ATOM_SET_PREV(ATOM,X)         (*(LmnAtomPtr)LMN_ATOM_PPREV(ATOM)=(X))
-#define LMN_ATOM_GET_NEXT(ATOM)           (*(LmnAtomPtr)LMN_ATOM_PNEXT(ATOM))
-#define LMN_ATOM_SET_NEXT(ATOM,X)         (*(LmnAtomPtr)LMN_ATOM_PNEXT(ATOM)=(X))
-#define LMN_ATOM_GET_FUNCTOR(ATOM)        LMN_FUNCTOR(*((LmnWord*)(ATOM)+2))
-#define LMN_ATOM_GET_LINK_ATTR(ATOM,N)    (*LMN_ATOM_PLINK_ATTR(ATOM,N))
-#define LMN_ATOM_SET_LINK_ATTR(ATOM,N,X)  ((*LMN_ATOM_PLINK_ATTR(ATOM,N))=(X))
-
-#define LMN_ATOM_GET_LINK(ATOM, N) \
+#define LMN_ATOM_GET_PREV(ATOM)           \
+  (*(LmnAtomPtr)LMN_ATOM_PPREV(ATOM))
+#define LMN_ATOM_SET_PREV(ATOM,X)         \
+  (*(LmnAtomPtr)LMN_ATOM_PPREV(ATOM)=(X))
+#define LMN_ATOM_GET_NEXT(ATOM)           \
+  (*(LmnAtomPtr)LMN_ATOM_PNEXT(ATOM))
+#define LMN_ATOM_SET_NEXT(ATOM,X)         \
+  (*(LmnAtomPtr)LMN_ATOM_PNEXT(ATOM)=(X))
+#define LMN_ATOM_GET_FUNCTOR(ATOM)        \
+  LMN_FUNCTOR(*(((LmnWord*)(ATOM))+2))
+#define LMN_ATOM_SET_FUNCTOR(ATOM,X)      \
+  (*((LmnFunctor*)(((LmnWord*)(ATOM))+2))=(X))
+#define LMN_ATOM_GET_LINK_ATTR(ATOM,N)    \
+  (*LMN_ATOM_PLINK_ATTR(ATOM,N))
+#define LMN_ATOM_SET_LINK_ATTR(ATOM,N,X)  \
+  ((*LMN_ATOM_PLINK_ATTR(ATOM,N))=(X))
+#define LMN_ATOM_GET_LINK(ATOM, N)        \
   (*LMN_ATOM_PLINK(ATOM,N))
-#define LMN_ATOM_SET_LINK(ATOM,N,X) \
+#define LMN_ATOM_SET_LINK(ATOM,N,X)       \
   (*LMN_ATOM_PLINK(ATOM,N)=(X))
 
 #define LMN_ATOM_WORDS(ARITY)  (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
@@ -173,6 +183,8 @@ typedef uint8_t LmnAtomLinkAttr;
 /*----------------------------------------------------------------------
  * Membrane
  */
+
+#include "membrane.h"
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
 
 /*----------------------------------------------------------------------
