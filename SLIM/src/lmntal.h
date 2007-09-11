@@ -203,7 +203,7 @@ LMN_EXTERN void lmn_ruleset_put(LmnRuleSet* ruleset, LmnRule *rule);
  * Atom
  */
 
-LMN_EXTERN LmnAtomPtr lmn_new_atom(unsigned int arity);
+LMN_EXTERN LmnAtomPtr lmn_new_atom(LmnFunctor arity);
 
 /*----------------------------------------------------------------------
  * Utility
@@ -270,7 +270,7 @@ extern struct LmnSymbolTable lmn_symbol_table;
 
 typedef struct LmnRuleSetTable {
   unsigned int size;
-  LmnRuleSet *entry;
+  LmnRuleSet **entry;
 } LmnRuleSetTable;			 
 
 extern struct LmnRuleSetTable lmn_ruleset_table;

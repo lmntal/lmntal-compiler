@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <lmntal.h>
+#include <rule.h>
 
 LmnRuleSetTable lmn_ruleset_table;
 
@@ -42,7 +43,7 @@ static unsigned int load_uint32(FILE *in)
 static LmnRule *load_rule(FILE *in)
 {
   int instr_size = load_uint32(in);
-  lmn_rule_instr instr = LMN_CALLOC(char, instr_size);
+  lmn_rule_instr instr = LMN_CALLOC(BYTE, instr_size);
   int rule_name = load_uint32(in);
 
   fread(instr, 1, instr_size, in);
@@ -51,23 +52,23 @@ static LmnRule *load_rule(FILE *in)
 }
 
 /*
-  load ruleset to out(malloced)
+  load ruleset and return(malloced)
 
   data format is::
   count of rules(uint32)
   rule * X
 */
-static void load_ruleset(FILE *in, LmnRuleSet **out)
+static LmnRuleSet *load_ruleset(FILE *in)
 {
   int rule_size = load_uint32(in);
-  LmnRuleSet *out_tmp =lmn_ruleset_make(rule_size);
+  LmnRuleSet *res =lmn_ruleset_make(rule_size);
   int i;
 
   for(i=0; i<rule_size; ++i){
-    lmn_ruleset_put(out_tmp, load_rule(in));
+    lmn_ruleset_put(res, load_rule(in));
   }
   
-  *out = out_tmp;
+  return res;
 }
 
 /*
@@ -80,13 +81,13 @@ static void load_ruleset(FILE *in, LmnRuleSet **out)
 void load_instr(char *file_name)
 {
   FILE *in = fopen(file_name, "rb");
-  int i;
+  unsigned int i;
 
   lmn_ruleset_table.size = load_uint32(in);
   lmn_ruleset_table.entry = LMN_CALLOC(LmnRuleSet*, lmn_ruleset_table.size);
 
   for(i=0; i<lmn_ruleset_table.size; ++i){
-    load_ruleset(in, &lmn_ruleset_table.entry[i]);
+    lmn_ruleset_table.entry[i] = load_ruleset(in);
   }
 
   fclose(in);
