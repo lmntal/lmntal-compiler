@@ -1,0 +1,8 @@
+
+configure.ac, Makefile.am src/Makefile.am 変更したら
+  autoreconf,
+  ./configure
+でMakefileができる。
+
+.cファイルを追加した場合
+   src/Makefile.am にファイルを追加

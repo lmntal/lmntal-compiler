@@ -72,7 +72,7 @@ typedef uint8_t LmnArity;
 
 typedef int lmn_interned_str;
 
-/* てきとー */
+/* ?????? */
 typedef BYTE* lmn_rule_instr;
 typedef uint16_t LmnInstrOp;
 typedef uint16_t LmnInstrVar;
@@ -120,9 +120,10 @@ typedef struct LmnMembrane LmnMembrane;
 
 typedef LmnWord *LmnAtomPtr;
 
-typedef uint8_t LmnAtomLinkAttr;
-#define LMN_ATOM_LINK_ATTR(X) ((LmnAtomLinkAttr)(X))
-#define LMN_LINK_ATTR_BYTES (sizeof(LmnAtomLinkAttr))
+typedef uint8_t LmnLinkAttr;
+#define LMN_ATOM_LINK_ATTR(X)   ((LmnLinkAttr)(X))
+#define LMN_LINK_ATTR_BYTES     (sizeof(LmnLinkAttr))
+#define LMN_LINK_ATTR_MASK      (0x7f)
 
 #if LMN_WORD_BYTES == 4
 #define LMN_WORD_SHIFT 2
@@ -140,7 +141,7 @@ typedef uint8_t LmnAtomLinkAttr;
 #define LMN_ATOM_PPREV(ATOM)        ((LmnWord*)(ATOM))
 #define LMN_ATOM_PNEXT(ATOM)        (((LmnWord*)(ATOM))+1)
 #define LMN_ATOM_PLINK_ATTR(ATOM,N)                       \
-  ((LmnAtomLinkAttr*)(((BYTE*)(((LmnWord*)(ATOM))+2))+    \
+  ((LmnLinkAttr*)(((BYTE*)(((LmnWord*)(ATOM))+2))+    \
               LMN_FUNCTOR_BYTES+(N)*LMN_LINK_ATTR_BYTES))
 #define LMN_ATOM_PLINK(ATOM,N)                            \
   ((LmnWord*)(ATOM)+3+LMN_ATTR_WORDS(LMN_ATOM_ARITY(ATOM))+(N))
@@ -167,6 +168,13 @@ typedef uint8_t LmnAtomLinkAttr;
   (*LMN_ATOM_PLINK(ATOM,N)=(X))
 
 #define LMN_ATOM_WORDS(ARITY)  (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
+
+#define LMN_ATTR_IS_DATA(X)              ((X)&~LMN_LINK_ATTR_MASK)
+#define LMN_ATTR_MAKE_DATA(X)    (0x80|(X))
+#define LMN_ATTR_MAKE_LINK(X)    (X)
+#define LMN_ATTR_GET_VALUE(X)            ((X)&LMN_LINK_ATTR_MASK) 
+#define LMN_ATTR_SET_VALUE(PATTR,X) \
+  (*(PATTR)=((((X)&~LMN_LINK_ATTR_MASK))|X))
 
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
@@ -217,10 +225,10 @@ LMN_EXTERN void *lmn_realloc(void *p, size_t num);
 LMN_EXTERN void lmn_free (void *p);
 
 #define LMN_NALLOC(TYPE, NUM)          ((TYPE *)lmn_malloc(sizeof(TYPE)*(NUM)))
-#define LMN_CALLOC(TYPE, NUM)	       ((TYPE *)lmn_calloc((NUM), sizeof(TYPE)))
-#define LMN_MALLOC(TYPE)	           ((TYPE *)lmn_malloc(sizeof(TYPE)))
-#define LMN_REALLOC(TYPE, P, NUM)	   ((TYPE *)lmn_realloc((P), (NUM) * sizeof(TYPE)))
-#define LMN_FREE(P)				       (lmn_free((void*)(P)))
+#define LMN_CALLOC(TYPE, NUM)          ((TYPE *)lmn_calloc((NUM), sizeof(TYPE)))
+#define LMN_MALLOC(TYPE)               ((TYPE *)lmn_malloc(sizeof(TYPE)))
+#define LMN_REALLOC(TYPE, P, NUM)      ((TYPE *)lmn_realloc((P), (NUM) * sizeof(TYPE)))
+#define LMN_FREE(P)                    (lmn_free((void*)(P)))
 
 /* Error */
 LMN_EXTERN void lmn_fatal(const char *msg, ...);
