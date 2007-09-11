@@ -216,6 +216,7 @@ LMN_EXTERN void *lmn_malloc(size_t num);
 LMN_EXTERN void *lmn_realloc(void *p, size_t num);
 LMN_EXTERN void lmn_free (void *p);
 
+#define LMN_NALLOC(TYPE, NUM)          ((TYPE *)lmn_malloc(sizeof(TYPE)*(NUM)))
 #define LMN_CALLOC(TYPE, NUM)	       ((TYPE *)lmn_calloc((NUM), sizeof(TYPE)))
 #define LMN_MALLOC(TYPE)	           ((TYPE *)lmn_malloc(sizeof(TYPE)))
 #define LMN_REALLOC(TYPE, P, NUM)	   ((TYPE *)lmn_realloc((P), (NUM) * sizeof(TYPE)))
@@ -245,7 +246,7 @@ typedef struct LmnFunctorEntry {
 } LmnFunctorEntry;
 
 typedef struct LmnFunctorTable {
-  int size;
+  unsigned int size;
   struct LmnFunctorEntry *entry;
 } LmnFunctorInfo;
 
@@ -257,13 +258,22 @@ extern struct LmnFunctorTable lmn_functor_table;
 /* Symbol Information */
 
 typedef struct LmnSymbolTable {
-  int size;
+  unsigned int size;
   char **entry;
 } LmnSymbolTable;
 
 extern struct LmnSymbolTable lmn_symbol_table;
 
 #define LMN_SYMBOL_STR(ID)       (lmn_symbol_table.entry[(ID)])
+
+/* RuleSet Information */
+
+typedef struct LmnRuleSetTable {
+  unsigned int size;
+  LmnRuleSet *entry;
+} LmnRuleSetTable;			 
+
+extern struct LmnRuleSetTable lmn_ruleset_table;
 
 /* Runtime Environment */
 
