@@ -13,7 +13,7 @@
 
 inline LmnAtomPtr lmn_new_atom(LmnFunctor f)
 {
-  LmnAtomPtr ap = lmn_malloc(LMN_ATOM_WORDS(LMN_ATOM_ARITY(arity)));
+  LmnAtomPtr ap = lmn_malloc(LMN_ATOM_WORDS(LMN_ATOM_ARITY(f)));
   LMN_ATOM_SET_FUNCTOR(ap, f);
 }
 
