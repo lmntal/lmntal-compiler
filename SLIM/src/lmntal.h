@@ -76,6 +76,8 @@ typedef unsigned int lmn_interned_str;
 typedef BYTE* lmn_rule_instr;
 typedef uint16_t LmnInstrOp;
 typedef uint16_t LmnInstrVar;
+typedef uint16_t LmnJumpOffset;
+typedef uint32_t LmnLineNum;
 
 typedef struct LmnRule    LmnRule;
 typedef struct LmnRuleSet LmnRuleSet;
