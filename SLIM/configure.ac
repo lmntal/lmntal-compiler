@@ -4,7 +4,7 @@ dnl Process this file with autoconf to produce a configure script
 
 AC_PREREQ(2.61)
 AC_INIT([SLIM], [0.0.1], [lang@ueda.info.waseda.ac.jp], [slim])
-# AC_REVISION($Revision: 1.3 $)
+# AC_REVISION($Revision: 1.4 $)
 # AC_COPYRIGHT (copyright-notice)
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -103,7 +103,6 @@ dnl AC_CHECK_HEADERS(pty.h util.h libutil.h sys/loadavg.h)
 AC_CHECK_FUNC([strchr])
 
 # output
-AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 
 AC_OUTPUT
