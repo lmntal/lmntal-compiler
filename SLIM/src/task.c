@@ -22,6 +22,7 @@ LmnWord *wv, *tv;
 LmnByte *wkv, *tkv;
 
 #define SWAP(T,X,Y)       do { T t=(X); (X)=(Y); (Y)=t;} while(0)
+#define REF_CAST(T,X)     (*(T*)&(X))
 
 struct Entity {
   LmnMembrane	*mem;
@@ -35,13 +36,13 @@ struct MemStack {
 
 static BOOL interpret(lmn_rule_instr instr);
 
-void memstack_init()
+static void memstack_init()
 {
   memstack.head = LMN_MALLOC(struct Entity);
   memstack.tail = memstack.head;
 }
 
-void memstack_push(LmnMembrane *mem)
+static void memstack_push(LmnMembrane *mem)
 {
   struct Entity *ent = LMN_MALLOC(struct Entity);
   ent->mem = mem;
@@ -49,12 +50,12 @@ void memstack_push(LmnMembrane *mem)
   memstack.head->next = ent;
 }
 
-int memstack_isempty()
+static int memstack_isempty()
 {
   return memstack.head->next==NULL;
 }
 
-LmnMembrane* memstack_pop()
+static LmnMembrane* memstack_pop()
 {
   struct Entity *ent = memstack.head->next;
   LmnMembrane *mem = ent->mem;
@@ -63,12 +64,12 @@ LmnMembrane* memstack_pop()
   return mem;
 }
 
-LmnMembrane* memstack_peek()
+static LmnMembrane* memstack_peek()
 {
   return memstack.head->next->mem;
 }
 
-void memstack_printall()
+static void memstack_printall()
 {
   struct Entity *ent;
   for(ent = memstack.head; ent!=NULL; ent = ent->next){
@@ -81,7 +82,7 @@ static BOOL react_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 {
   int i;
 
-  wv[0] = mem;
+  REF_CAST(LmnMembrane*, wv[0]) = mem;
   for (i = 0; i < ruleset->num; i++) {
     if (interpret(ruleset->rules[i]->instr)) return TRUE;
   }
@@ -95,7 +96,7 @@ struct RuleSetList {
 };
 typedef struct RuleSetList RuleSetNode;
 
-int exec(LmnMembrane *mem)
+static int exec(LmnMembrane *mem)
 {
   RuleSetNode *rs = mem->rulesets;
   int flag = FALSE;
@@ -134,7 +135,7 @@ static BOOL interpret(lmn_rule_instr instr)
   LmnInstrOp op;
   
   while (TRUE) {
-    LMN_IMS_READ_OP(instr, op);
+    LMN_IMS_READ(LmnInstrOp, instr, op);
     switch (op) {
     case INSTR_SPEC:
       /* ignore spec, because wv is initially large enough. */
@@ -172,7 +173,7 @@ static BOOL interpret(lmn_rule_instr instr)
       SWAP(LmnWord*, wv, tv);
       SWAP(LmnByte*, wkv, tkv);
 
-      LMN_IMS_READ_UINT16(instr, offset);
+      LMN_IMS_READ(uint16_t, instr, offset);
       instr += offset;
       break;
     }
@@ -190,7 +191,7 @@ static BOOL interpret(lmn_rule_instr instr)
       LMN_IMS_READ(LmnFunctor, instr, f);
       ap = lmn_new_atom(f);
       lmn_mem_push_atom((LmnMembrane*)wv[memi], ap);
-      wv[atomi] = ap;
+      REF_CAST(LmnAtomPtr, wv[atomi]) = ap;
       break;
     }
     case INSTR_ALLOCLINK:
@@ -205,7 +206,7 @@ static BOOL interpret(lmn_rule_instr instr)
         wv[link] = wv[atom];
         wkv[link] = wkv[atom];
       } else { /* link to atom */
-        wv[link] = LMN_ATOM(wv[atom]);
+        REF_CAST(LmnAtomPtr, wv[link]) = LMN_ATOM(wv[atom]);
         wkv[link] = LMN_ATTR_MAKE_LINK(n);
       }
       break;
@@ -220,7 +221,7 @@ static BOOL interpret(lmn_rule_instr instr)
 
       if (LMN_ATTR_IS_DATA(wkv[link1]) && LMN_ATTR_IS_DATA(wkv[link2])) {
         #ifdef DEBUG
-        fprintf(stderr, "Tow data atoms are connected each other.\n");
+        fprintf(stderr, "Two data atoms are connected each other.\n");
         #endif
       }
       else if (LMN_ATTR_IS_DATA(wkv[link1])) {
@@ -276,13 +277,14 @@ static BOOL interpret(lmn_rule_instr instr)
 	LMN_IMS_READ(LmnInstrVar, instr, memf);
 	mp = lmn_mem_make(); /*lmn_new_mem(memf);*/
 	lmn_mem_push_mem((LmnMembrane*)wv[parentmemi], mp);
-	wv[newmemi] = mp;
+	REF_CAST(LmnMembrane*, wv[newmemi]) = mp;
 	break;
       }
     case INSTR_REMOVEATOM:
       {
-	LmnInstrVar atomi, memi;
-	LmnFunctor f;
+	/*LmnInstrVar atomi, memi;*/
+	/*LmnFunctor f;*/
+	LmnInstrVar atomi;
 	LmnAtomPtr atom, prev, next;
 
 	LMN_IMS_READ(LmnInstrVar, instr, atomi);
@@ -291,10 +293,10 @@ static BOOL interpret(lmn_rule_instr instr)
 
 	atom = (LmnAtomPtr)wv[atomi];
 	if(! LMN_ATTR_IS_DATA(wkv[atomi])){
-	  prev = *LMN_ATOM_PPREV(atom);
-	  next = *LMN_ATOM_PNEXT(atom);
-	  *LMN_ATOM_PPREV(next) = prev;
-	  *LMN_ATOM_PNEXT(prev) = next;
+	  prev = (LmnAtomPtr)*LMN_ATOM_PPREV(atom);
+	  next = (LmnAtomPtr)*LMN_ATOM_PNEXT(atom);
+	  REF_CAST(LmnAtomPtr, *LMN_ATOM_PPREV(next)) = prev;
+	  REF_CAST(LmnAtomPtr, *LMN_ATOM_PNEXT(prev)) = next;
 	}
 	break;
       }
@@ -311,7 +313,8 @@ static BOOL interpret(lmn_rule_instr instr)
       }
     case INSTR_REMOVEMEM:
       {
-	LmnInstrVar memi, parentmem;
+	/*LmnInstrVar memi, parentmem;*/
+	LmnInstrVar memi;
 	LmnMembrane *mp;
 
 	LMN_IMS_READ(LmnInstrVar, instr, memi);
@@ -339,7 +342,8 @@ static BOOL interpret(lmn_rule_instr instr)
       exit(1);
     }
   }
- END:;
+ END:
+  return TRUE;
 }
 
 
