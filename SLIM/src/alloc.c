@@ -2,6 +2,7 @@
  * alloc.c -- memory management
  */
 
+#include "memory_pool.h"
 #include "lmntal.h"
 #include <malloc.h>
 
@@ -11,17 +12,24 @@
 
 /* TODO stub implementation */
 
+static memory_pool *atom_memory_pools[128];
+
 LmnAtomPtr lmn_new_atom(LmnFunctor f)
 {
   LmnAtomPtr ap;
-  ap = LMN_NALLOC(LmnWord, LMN_ATOM_WORDS(LMN_FUNCTOR_ARITY(f)));
+  int arity = LMN_FUNCTOR_ARITY(f);
+  
+  if(atom_memory_pools[arity] == 0){
+    atom_memory_pools[arity] = memory_pool_new(sizeof(LmnWord)*LMN_ATOM_WORDS(arity));
+  }
+  ap = (LmnAtomPtr)memory_pool_malloc(atom_memory_pools[arity]);
   LMN_ATOM_SET_FUNCTOR(ap, f);
   return ap;
 }
 
 void lmn_delete_atom(LmnAtomPtr ap)
 {
-  lmn_free(ap);
+  memory_pool_free(atom_memory_pools[LMN_FUNCTOR_ARITY(LMN_ATOM_GET_FUNCTOR(ap))], ap);
 }
 
 /*----------------------------------------------------------------------
