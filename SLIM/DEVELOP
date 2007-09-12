@@ -1,8 +1,21 @@
+-*- mode: org; -*-
+#+STARTUP: showall
 
-configure.ac, Makefile.am src/Makefile.am å¤‰æ›´ã—ãŸã‚‰
-  autoreconf,
-  ./configure
-ã§MakefileãŒã§ãã‚‹ã€‚
 
-.cãƒ•ã‚¡ã‚¤ãƒ«ã‚’è¿½åŠ ã—ãŸå ´åˆ
-   src/Makefile.am ã«ãƒ•ã‚¡ã‚¤ãƒ«ã‚’è¿½åŠ 
+* ¥³¥ó¥Ñ¥¤¥ë
+¸½ºßAutoconf, Automake¤È¤¤¤¦¥Ä¡¼¥ë¤ò»È¤Ã¤Æ¤¤¤Ş¤¹¡£¤³¤ì¤é¤Ï,¥³¥ó¥Ñ¥¤¥ë
+»ş¤Î´Ä¶­¤ò¸¡ºº¤·¤Æ,Å¬ÀÚ¤ÊMakefile¤Èconfig.h¤ÎºîÀ®¤ò¤·¤Ş¤¹¡£
+autoconf¤Ïversion 2.61 ¤Ç¤Ê¤¤¤È¥³¥ó¥Ñ¥¤¥ë¤Ç¤­¤Ş¤»¤ó¡£
+
+** config.h, Makefile¤òºî¤ë
+configure.ac, Makefile.am src/Makefile.am ÊÑ¹¹¤·¤¿¤éconfig.h, Makefile
+¤òºî¤êÄ¾¤·¤Ş¤¹¡£
+  $ autoreconf
+  $./configure
+(autoreconf¤Ç·Ù¹ğ¤¬½Ğ¤ë¤Î¤Ç¤¹¤¬¤É¤¦¤ä¤Ã¤¿¤é¾Ã¤¨¤ë¤Î¤«..)
+** .c¥Õ¥¡¥¤¥ë¤òÄÉ²Ã¤·¤¿¾ì¹ç
+   src/Makefile.am ¤ËÄÉ²Ã¤·¤¿¥Õ¥¡¥¤¥ë¤ò½ñ¤­²Ã¤¨¤ë
+
+** configure¤Î¥ª¥×¥·¥ç¥ó
+./configure »ş¤Ë¥ª¥×¥·¥ç¥ó¤¬ÉÕ¤±¤é¤ì¤ë
+- --enable-debug  : DEBUG ¤ò define ¤¹¤ë
