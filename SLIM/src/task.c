@@ -180,7 +180,7 @@ static BOOL interpret(lmn_rule_instr instr)
       LmnInstrVar atomi, memi;
       LmnFunctor f;
       LmnAtomPtr ap;
-      
+
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnFunctor, instr, f);

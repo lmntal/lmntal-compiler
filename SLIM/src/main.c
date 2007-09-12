@@ -49,7 +49,7 @@ static int parse_options(int argc, char *argv[])
       break;
     case 's':
       lmn_env.symbol_file = optarg;
-      
+      load_symbol(lmn_env.symbol_file);
       break;
     case 1000: version(); break;
     case 1001: /* help */ /*FALLTHROUGH*/
@@ -72,7 +72,7 @@ static void finalize(void)
 {
   if (lmn_functor_table.size > 0) LMN_FREE(lmn_functor_table.entry);
   if (lmn_symbol_table.size > 0) {
-    int i;
+    unsigned int i;
     for (i = 0; i < lmn_symbol_table.size; i++) {
       LMN_FREE(lmn_symbol_table.entry[i]);
     }
@@ -80,26 +80,28 @@ static void finalize(void)
   }
 }
 
+#ifdef DEBUG
+static void test(void)
+{
+  test_mem();
+}
+
+#endif
+
 int main(int argc, char *argv[])
 {
-  #ifdef DEBUG
+#ifdef DEBUG
   mtrace();
-  #endif
+#endif
   
   init_internal();
   parse_options(argc, argv);
 
-  if (lmn_env.symbol_file) load_symbol(lmn_env.symbol_file);
+#ifdef DEBUG
+  test();
+#endif
+  
 
-  {
-    int i;
-    for (i = 0; i < lmn_symbol_table.size; i++) {
-      printf("id: %u, str = %s\n", i, lmn_symbol_table.entry[i]);
-    }
-    for (i = 0; i< lmn_functor_table.size; i++) {
-      printf("id: %u, str = %s, arity = %u\n", i, lmn_symbol_table.entry[lmn_functor_table.entry[i].name], lmn_functor_table.entry[i].arity);
-    }
-  }
   finalize();
 
 #ifdef DEBUG

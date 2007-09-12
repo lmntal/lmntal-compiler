@@ -70,9 +70,8 @@ typedef uint16_t LmnFunctor;
 /* this type must be enough to represent arity */
 typedef uint8_t LmnArity;
 
-typedef int lmn_interned_str;
+typedef unsigned int lmn_interned_str;
 
-/* ?????? */
 typedef BYTE* lmn_rule_instr;
 typedef uint16_t LmnInstrOp;
 typedef uint16_t LmnInstrVar;
@@ -144,20 +143,21 @@ typedef uint8_t LmnLinkAttr;
   ((LmnLinkAttr*)(((BYTE*)(((LmnWord*)(ATOM))+2))+    \
               LMN_FUNCTOR_BYTES+(N)*LMN_LINK_ATTR_BYTES))
 #define LMN_ATOM_PLINK(ATOM,N)                            \
-  ((LmnWord*)(ATOM)+3+LMN_ATTR_WORDS(LMN_ATOM_ARITY(ATOM))+(N))
+  (((LmnWord*)(ATOM))+3+LMN_ATTR_WORDS(LMN_ATOM_GET_ARITY(ATOM))+(N))
 
 #define LMN_ATOM_GET_PREV(ATOM)           \
-  (*(LmnAtomPtr)LMN_ATOM_PPREV(ATOM))
+  ((LmnAtomPtr)*LMN_ATOM_PPREV(ATOM))
 #define LMN_ATOM_SET_PREV(ATOM,X)         \
-  (*(LmnAtomPtr)LMN_ATOM_PPREV(ATOM)=(X))
+  (*LMN_ATOM_PPREV(ATOM)=(LmnWord)(X))
 #define LMN_ATOM_GET_NEXT(ATOM)           \
-  (*(LmnAtomPtr)LMN_ATOM_PNEXT(ATOM))
+  ((LmnAtomPtr)*LMN_ATOM_PNEXT(ATOM))
 #define LMN_ATOM_SET_NEXT(ATOM,X)         \
-  (*(LmnAtomPtr)LMN_ATOM_PNEXT(ATOM)=(X))
+  (*LMN_ATOM_PNEXT(ATOM)=(LmnWord)(X))
 #define LMN_ATOM_GET_FUNCTOR(ATOM)        \
   LMN_FUNCTOR(*(((LmnWord*)(ATOM))+2))
 #define LMN_ATOM_SET_FUNCTOR(ATOM,X)      \
   (*((LmnFunctor*)(((LmnWord*)(ATOM))+2))=(X))
+#define LMN_ATOM_GET_ARITY(ATOM)          (LMN_FUNCTOR_ARITY(LMN_ATOM_GET_FUNCTOR(ATOM)))
 #define LMN_ATOM_GET_LINK_ATTR(ATOM,N)    \
   (*LMN_ATOM_PLINK_ATTR(ATOM,N))
 #define LMN_ATOM_SET_LINK_ATTR(ATOM,N,X)  \
@@ -167,13 +167,13 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATOM_SET_LINK(ATOM,N,X)       \
   (*LMN_ATOM_PLINK(ATOM,N)=(X))
 
-#define LMN_ATOM_WORDS(ARITY)  (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
+#define LMN_ATOM_WORDS(ARITY)         (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
 
-#define LMN_ATTR_IS_DATA(X)              ((X)&~LMN_LINK_ATTR_MASK)
-#define LMN_ATTR_MAKE_DATA(X)    (0x80|(X))
-#define LMN_ATTR_MAKE_LINK(X)    (X)
-#define LMN_ATTR_GET_VALUE(X)            ((X)&LMN_LINK_ATTR_MASK) 
-#define LMN_ATTR_SET_VALUE(PATTR,X) \
+#define LMN_ATTR_IS_DATA(X)           ((X)&~LMN_LINK_ATTR_MASK)
+#define LMN_ATTR_MAKE_DATA(X)         (0x80|(X))
+#define LMN_ATTR_MAKE_LINK(X)         (X)
+#define LMN_ATTR_GET_VALUE(X)         ((X)&LMN_LINK_ATTR_MASK) 
+#define LMN_ATTR_SET_VALUE(PATTR,X)   \
   (*(PATTR)=((((X)&~LMN_LINK_ATTR_MASK))|X))
 
 /*----------------------------------------------------------------------
@@ -193,7 +193,13 @@ typedef uint8_t LmnLinkAttr;
  */
 
 #include "membrane.h"
+
+LMN_EXTERN LmnMembrane *lmn_mem_make(void);
+LMN_EXTERN void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap);
+LMN_EXTERN LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f);
+
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
+LMN_EXTERN void lmn_mem_dump(LmnMembrane *mem);
 
 /*----------------------------------------------------------------------
  * Rule
@@ -290,6 +296,15 @@ struct LmnEnv {
 };
 
 extern struct LmnEnv  lmn_env;
+
+/*----------------------------------------------------------------------
+ * test
+ */
+
+#ifdef DEBUG
+void test_mem(void);
+
+#endif
 
 LMN_DECL_END
 
