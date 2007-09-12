@@ -19,6 +19,18 @@ LmnAtomPtr lmn_new_atom(LmnFunctor f)
   return ap;
 }
 
+void lmn_delete_atom(LmnAtomPtr ap)
+{
+  lmn_free(ap);
+}
+
+/*----------------------------------------------------------------------
+ * memory allocation for membrane
+ */
+
+/* in membrane.c */
+/* lmn_mem_make / lmn_mem_delete */
+
 /*----------------------------------------------------------------------
  * low level allocation
  */

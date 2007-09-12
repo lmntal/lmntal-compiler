@@ -56,6 +56,7 @@ LMN_DECL_BEGIN
 
 typedef unsigned long LmnWord;
 typedef unsigned char BYTE;
+typedef BYTE LmnByte;
 
 #define LMN_WORD_BYTES  SIZEOF_LONG
 #define LMN_WORD_BITS   (SIZEOF_LONG*8)
@@ -156,7 +157,7 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATOM_GET_FUNCTOR(ATOM)        \
   LMN_FUNCTOR(*(((LmnWord*)(ATOM))+2))
 #define LMN_ATOM_SET_FUNCTOR(ATOM,X)      \
-  (*((LmnFunctor*)(((LmnWord*)(ATOM))+2))=(X))
+  (*((LmnFunctor*)((LmnWord*)(ATOM)+2))=(X))
 #define LMN_ATOM_GET_ARITY(ATOM)          (LMN_FUNCTOR_ARITY(LMN_ATOM_GET_FUNCTOR(ATOM)))
 #define LMN_ATOM_GET_LINK_ATTR(ATOM,N)    \
   (*LMN_ATOM_PLINK_ATTR(ATOM,N))

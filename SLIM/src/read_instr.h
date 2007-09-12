@@ -15,6 +15,6 @@
 #define LMN_IMS_READ(T,X,I)      ((X)=*(T*)(I), I+=sizeof(T))
 
 #define LMN_IMS_READ_SYMBOL(X,I) LMN_IMS_READ_UINT16(X,I)
-#define LMN_IMS_RAED_OP(X,I)     ((X)=*(LmnInstrOp*)(I), I+=sizeof(LmnInstrOp))
+#define LMN_IMS_READ_OP(X,I)     ((X)=*(LmnInstrOp*)(I), I+=sizeof(LmnInstrOp))
 
 #endif /* READ_INSTR_H */

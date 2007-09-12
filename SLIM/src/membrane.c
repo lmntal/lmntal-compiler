@@ -103,6 +103,22 @@ LmnMembrane *lmn_mem_make(void)
   return mem;
 }
 
+void lmn_mem_delete(LmnMembrane *mem)
+{
+  /* TODO: free member */
+  lmn_free(mem);
+}
+
+void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
+{
+  /* TODO: membrane activation */
+  newmem->parent = parentmem;
+  newmem->next = parentmem->child_head;
+  if(parentmem->child_head) parentmem->child_head->prev = newmem;
+  parentmem->child_head = newmem;
+} 
+
+
 /*----------------------------------------------------------------------
  * Dump
  */

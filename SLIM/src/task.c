@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include "lmntal.h"
 #include "instruction.h"
+#include "rule.h"
+#include "read_instr.h"
 
 /* this size should be the maximum size of 'spec' arguments */
 /* Or allocated when required */
@@ -31,6 +33,8 @@ struct MemStack {
     *tail;
 } memstack;
 
+static BOOL interpret(lmn_rule_instr instr);
+
 void memstack_init()
 {
   memstack.head = LMN_MALLOC(struct Entity);
@@ -53,8 +57,8 @@ int memstack_isempty()
 LmnMembrane* memstack_pop()
 {
   struct Entity *ent = memstack.head->next;
-  memstack.head->next = ent->next;
   LmnMembrane *mem = ent->mem;
+  memstack.head->next = ent->next;
   LMN_FREE(ent);
   return mem;
 }
@@ -98,7 +102,7 @@ int exec(LmnMembrane *mem)
 /*   	flag = react(mem, systemrulesets); */
   if (!flag) {
     while (rs->ruleset != NULL) {
-      if (react(mem, rs->ruleset)) {
+      if (react_ruleset(mem, rs->ruleset)) {
         flag = TRUE;
         break;
       }
@@ -114,8 +118,8 @@ void run()
   /* Initialize for running */
   wv = v1;
   tv = v2;
-  wkv = kv1;
-  tkv = kv2;
+  wkv = k1;
+  tkv = k2;
   
   while(!memstack_isempty()){
     LmnMembrane *mem = memstack_peek();
@@ -130,7 +134,7 @@ static BOOL interpret(lmn_rule_instr instr)
   LmnInstrOp op;
   
   while (TRUE) {
-    LMN_INS_READ_OP(instr, op);
+    LMN_IMS_READ_OP(instr, op);
     switch (op) {
     case INSTR_SPEC:
       /* ignore spec, because wv is initially large enough. */
@@ -147,14 +151,14 @@ static BOOL interpret(lmn_rule_instr instr)
       for (; num--; i++) {
         LMN_IMS_READ(LmnInstrVar, instr, n);
         tv[i] = wv[n];
-        kv[i].temp = kv[n].tag;
+        tkv[i] = wkv[n];
       }
       /* mem */
       LMN_IMS_READ(LmnInstrVar, instr, num);
       for (; num--; i++) {
         LMN_IMS_READ(LmnInstrVar, instr, n);
         tv[i] = wv[n];
-        kv[i].temp = kv[n].tag;
+        tkv[i] = wkv[n];
       }
       while (i--) wv[i] = tv[i];
       /* vars */
@@ -162,7 +166,7 @@ static BOOL interpret(lmn_rule_instr instr)
       for (; num--; i++) {
         LMN_IMS_READ(LmnInstrVar, instr, n);
         tv[i] = wv[n];
-        kv[i].temp = kv[n].tag;
+        tkv[i] = wkv[n];
       }
 
       SWAP(LmnWord*, wv, tv);
@@ -222,13 +226,13 @@ static BOOL interpret(lmn_rule_instr instr)
       else if (LMN_ATTR_IS_DATA(wkv[link1])) {
         /* TODO wkvをコピーする必要はないかな? */
            
-        LMN_ATOM_SET_LINK(LMN_ATOM(wv[link2]), LMN_ATTR_GET_VALUE(wkv[link2]), kv[link1]);
+        LMN_ATOM_SET_LINK(LMN_ATOM(wv[link2]), LMN_ATTR_GET_VALUE(wkv[link2]), wkv[link1]);
         LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[link2]),
                                LMN_ATTR_GET_VALUE(wkv[link2]),
                                wkv[link1]);
       }
       else if (LMN_ATTR_IS_DATA(wkv[link2])) {
-        LMN_ATOM_SET_LINK(LMN_ATOM(wv[link1]), LMN_ATTR_GET_VALUE(wkv[link1]), kv[link2]);
+        LMN_ATOM_SET_LINK(LMN_ATOM(wv[link1]), LMN_ATTR_GET_VALUE(wkv[link1]), wkv[link2]);
         LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[link1]),
                                LMN_ATTR_GET_VALUE(wkv[link1]),
                                wkv[link2]);
@@ -246,8 +250,90 @@ static BOOL interpret(lmn_rule_instr instr)
     }
     case INSTR_PROCEED:
       /* TODO スタックの操作とか・・・*/
-      goot END;
+      goto END;
       break;
+    case INSTR_ENQUEUEATOM:
+      {
+	LmnInstrVar atom;
+	
+	LMN_IMS_READ(LmnInstrVar, instr, atom);
+	break;
+      }
+    case INSTR_DEQUEUEATOM:
+      {
+	LmnInstrVar atom;
+	
+	LMN_IMS_READ(LmnInstrVar, instr, atom);
+	break;
+      }
+    case INSTR_NEWMEM:
+      {
+	LmnInstrVar newmemi, parentmemi, memf;
+	LmnMembrane *mp;
+
+	LMN_IMS_READ(LmnInstrVar, instr, newmemi);
+	LMN_IMS_READ(LmnInstrVar, instr, parentmemi);
+	LMN_IMS_READ(LmnInstrVar, instr, memf);
+	mp = lmn_mem_make(); /*lmn_new_mem(memf);*/
+	lmn_mem_push_mem((LmnMembrane*)wv[parentmemi], mp);
+	wv[newmemi] = mp;
+	break;
+      }
+    case INSTR_REMOVEATOM:
+      {
+	LmnInstrVar atomi, memi;
+	LmnFunctor f;
+	LmnAtomPtr atom, prev, next;
+
+	LMN_IMS_READ(LmnInstrVar, instr, atomi);
+	/*LMN_IMS_READ(LmnInstrVar, instr, memi);*/
+	/*LMN_IMS_READ(LmnFunctor, instr, f);*/
+
+	atom = (LmnAtomPtr)wv[atomi];
+	if(! LMN_ATTR_IS_DATA(wkv[atomi])){
+	  prev = *LMN_ATOM_PPREV(atom);
+	  next = *LMN_ATOM_PNEXT(atom);
+	  *LMN_ATOM_PPREV(next) = prev;
+	  *LMN_ATOM_PNEXT(prev) = next;
+	}
+	break;
+      }
+    case INSTR_FREEATOM:
+      {
+	LmnInstrVar atomi;
+
+	LMN_IMS_READ(LmnInstrVar, instr, atomi);
+	
+	if(! LMN_ATTR_IS_DATA(wkv[atomi])){
+	  lmn_delete_atom((LmnAtomPtr)wv[atomi]);
+	}
+	break;
+      }
+    case INSTR_REMOVEMEM:
+      {
+	LmnInstrVar memi, parentmem;
+	LmnMembrane *mp;
+
+	LMN_IMS_READ(LmnInstrVar, instr, memi);
+	/*LMN_IMS_READ(LmnInstrVar, instr, parentmemi);*/
+
+	mp = (LmnMembrane*)wv[memi];
+	if(mp->parent->child_head == mp) mp->parent->child_head = mp->next;
+	if(mp->prev) mp->prev->next = mp->next;
+	if(mp->next) mp->next->prev = mp->prev;
+	break;
+      }
+    case INSTR_FREEMEM:
+      {
+	LmnInstrVar memi;
+	LmnMembrane *mp;
+
+	LMN_IMS_READ(LmnInstrVar, instr, memi);
+
+	mp = (LmnMembrane*)wv[memi];
+	lmn_mem_delete(mp);
+	break;
+      }
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
