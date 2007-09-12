@@ -61,7 +61,7 @@ typedef unsigned char BYTE;
 #define LMN_WORD_BITS   (SIZEOF_LONG*8)
 #define LMN_WORD(X)     ((LmnWord)(X))
 
-/* uit16_t is not defined if there is no 2Byte data type */
+/* uint16_t is not defined if there is no 2Byte data type */
 typedef uint16_t LmnFunctor; 
 #define LMN_FUNCTOR_BYTES (sizeof(LmnFunctor))
 #define LMN_FUNCTOR_BITS (LMN_FUNCTOR_BYTES*8)
