@@ -188,15 +188,7 @@ static lmn_interned_str get_symbol_id(char *str)
     strcpy(s.str, str);
     s.id = symbol_id++;
     PUSH(symbols, s);
-  {int i;
-  for (i = 0; i < symbols_num; i++) {
-    int n;
-
-    fwrite(&symbols[i].id, sizeof(lmn_interned_str), 1, stdout);
-    n = strlen(symbols[i].str);
-    fwrite(&n, sizeof(uint16_t), 1, stdout);
-    fwrite(symbols[i].str, n, 1, stdout);
-  }}
+  
     return s.id;
   }
 }
@@ -808,10 +800,11 @@ int main(int argc, char* argv[])
   /* header */
 
   /* symbol table */
+  debug(stderr, "num = %d\n", symbols_num);
   fwrite(&symbols_num, sizeof(lmn_interned_str), 1, stdout);
   for (i = 0; i < symbols_num; i++) {
     int n;
-
+/*     debug(stderr, "%s&symbols[i].id, sizeof(lmn_interned_str), 1, stdout); */
     fwrite(&symbols[i].id, sizeof(lmn_interned_str), 1, stdout);
     n = strlen(symbols[i].str);
     fwrite(&n, sizeof(uint16_t), 1, stdout);
