@@ -4,7 +4,7 @@ dnl Process this file with autoconf to produce a configure script
 
 AC_PREREQ(2.61)
 AC_INIT([SLIM], [0.0.1], [lang@ueda.info.waseda.ac.jp], [slim])
-# AC_REVISION($Revision: 1.4 $)
+# AC_REVISION($Revision: 1.5 $)
 # AC_COPYRIGHT (copyright-notice)
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -67,16 +67,6 @@ if test "$enable_debug" = "yes"; then
   AC_DEFINE([DEBUG],,[elable debug])
 else
   AC_MSG_RESULT(enable debug: no)
-fi
-
-AC_ARG_ENABLE(debug,
-[  --enable-trace            trun on trace [default no]])
-
-if test "$enable_trace" = "yes"; then
-  AC_MSG_RESULT(enable trace: yes)
-  AC_DEFINE([TRACE],,[elable trace])
-else
-  AC_MSG_RESULT(enable trace: no)
 fi
 
 # ----------------------------------------------------------------------
