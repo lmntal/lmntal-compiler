@@ -258,6 +258,9 @@ LMN_EXTERN void lmn_fatal(const char *msg, ...);
  * Global data
  */
 
+/* load input program file */
+void read_il(const char *file_name);
+
 /* Functor Information */
 
 typedef struct LmnFunctorEntry {
@@ -268,7 +271,7 @@ typedef struct LmnFunctorEntry {
 typedef struct LmnFunctorTable {
   unsigned int size;
   struct LmnFunctorEntry *entry;
-} LmnFunctorInfo;
+} LmnFunctorTable;
 
 extern struct LmnFunctorTable lmn_functor_table;
 

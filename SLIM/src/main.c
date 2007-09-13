@@ -7,7 +7,6 @@
 #include <getopt.h>
 #include "lmntal.h"
 #include "read_instr.h"
-#include "read_symtbl.h"
 
 #ifdef DEBUG
 #include <mcheck.h>
