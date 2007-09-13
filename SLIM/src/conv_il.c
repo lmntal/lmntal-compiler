@@ -118,6 +118,10 @@ unsigned int pos;
   } while (0) 
 
   
+typedef int16_t RuleNumType;
+typedef int16_t RulesetId;
+
+
 /*----------------------------------------------------------------------
  * Label
  */
@@ -153,13 +157,23 @@ struct Rule {
 };
 
 struct Ruleset {
-  unsigned int id;
+  unsigned int id, src_id;
   unsigned int pos;
   unsigned int rule_num;
 };
 
 struct Ruleset *ruleset;
 unsigned int ruleset_num, ruleset_cap;
+
+struct RulesetLink {
+  unsigned int pos;
+  unsigned int src_id;
+};
+
+struct RulesetLink *rlink;
+unsigned int rlink_num, rlink_cap;
+
+unsigned int rule_id = 0;
 
 /*----------------------------------------------------------------------
  * Symbol
@@ -505,6 +519,15 @@ static char *parse_arg(char *line, enum ArgType type)
 
     return line;
   }
+  case ArgRuleset:
+  {
+    struct RulesetLink l;
+    assert(*line == '@');
+    line = read_int(line, &l.src_id);
+    l.pos = pos;
+    pos += sizeof(RulesetId);
+    return line;
+  }
   case Label:
     assert(FALSE);
     break;
@@ -660,8 +683,6 @@ static struct Ruleset *parse_ruleset(void)
   char *line;
   struct Ruleset *rs;
   unsigned int rule_num_pos;
-  typedef int16_t RuleNumType;
-  typedef int16_t RulesetId;
   
   line = src_lines[cur_line];
   
@@ -672,7 +693,8 @@ static struct Ruleset *parse_ruleset(void)
 
   rs = malloc(sizeof(struct Ruleset));
 
-  rs->id = id;
+  rs->src_id = id;
+  rs->id = rule_id++;
   rs->pos = pos;
   rs->rule_num = 0;
 
@@ -750,8 +772,8 @@ static unsigned int find_label_pos(unsigned int label)
       return labels[i].pos;
     }
   }
-
   assert(FALSE);
+  return 0;
 }
 
 static void resolve_label(void)
@@ -764,9 +786,27 @@ static void resolve_label(void)
   }
 }
 
+static unsigned int find_ruleset_pos(unsigned int id)
+{
+  unsigned int i;
+
+  for (i = 0; i < ruleset_num; i++) {
+    if (ruleset[i].src_id == id) {
+      return ruleset[i].pos;
+    }
+  }
+  assert(FALSE);
+  return 0;
+}
+
 static void resolve_ruleset(void)
 {
-  /* TODO */
+  unsigned int i;
+
+  for (i = 0; i < rlink_num; i++) {
+    unsigned int label_pos = find_ruleset_pos(rlink[i].src_id);
+    WRITE(RulesetId, label_pos, rlink[i].pos);
+  }
   
 }
 
@@ -790,6 +830,7 @@ int main(int argc, char* argv[])
   MAKE_VEC(src_lines);
   MAKE_VEC(llink);
   MAKE_VEC(funcs);
+  MAKE_VEC(rlink);
 
   read_all_lines();
   parse();
@@ -800,11 +841,9 @@ int main(int argc, char* argv[])
   /* header */
 
   /* symbol table */
-  debug(stderr, "num = %d\n", symbols_num);
   fwrite(&symbols_num, sizeof(lmn_interned_str), 1, stdout);
   for (i = 0; i < symbols_num; i++) {
     int n;
-/*     debug(stderr, "%s&symbols[i].id, sizeof(lmn_interned_str), 1, stdout); */
     fwrite(&symbols[i].id, sizeof(lmn_interned_str), 1, stdout);
     n = strlen(symbols[i].str);
     fwrite(&n, sizeof(uint16_t), 1, stdout);
