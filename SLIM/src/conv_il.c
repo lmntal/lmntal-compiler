@@ -6,6 +6,35 @@
 #include "lmntal.h"
 #include "instruction.h"
 
+/*
+ *  * symbol table
+ *      lmn_interned_str : シンボルの数
+ *      数 * 文字列
+ *  ** 文字列
+ *      lmn_interned_str : シンボルの長さ
+ *      char             : 長さ分の文字列
+ *
+ *  * functor table
+ *      LmnFunctor       : 数
+ *      entry * 数
+ *  ** entry
+ *      LmnFunctor       : ID
+ *      lmn_interned_str : 名前
+ *      LmnArity         : アリティ
+ *  * ruleset
+ *      uint16_t         : ID
+ *      uint16_t         : ルールの数
+ *      rule * 数
+ *  ** rule
+ *    uint16_t            : サイズ
+ *    instruction
+ *  ** functor
+ *     BYTE : tag
+ *     tagに応じたデータ
+ *        
+ */
+
+
 #define debug fprintf
 
 enum ArgType {
@@ -628,9 +657,6 @@ static struct Rule *parse_rule(void)
     if (!parse_rule_el(rule)) break;
   }
   WRITE(RuleSize, pos - rule_start_pos, rule_start_pos);
-
-
-
 
   return rule;
 }
