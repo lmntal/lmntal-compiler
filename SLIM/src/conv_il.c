@@ -159,7 +159,15 @@ static lmn_interned_str get_symbol_id(char *str)
     strcpy(s.str, str);
     s.id = symbol_id++;
     PUSH(symbols, s);
+  {int i;
+  for (i = 0; i < symbols_num; i++) {
+    int n;
 
+    fwrite(&symbols[i].id, sizeof(lmn_interned_str), 1, stdout);
+    n = strlen(symbols[i].str);
+    fwrite(&n, sizeof(uint16_t), 1, stdout);
+    fwrite(symbols[i].str, n, 1, stdout);
+  }}
     return s.id;
   }
 }
@@ -449,10 +457,11 @@ static char *parse_arg(char *line, enum ArgType type)
     case SYMBOL:
     {
       LmnFunctor f_id = get_functor_id(f);
-      WRITE(LmnLinkAttr, LMN_MAKE_LINK(0), pos);
+      WRITE(LmnLinkAttr, LMN_ATTR_MAKE_LINK(0), pos);
       pos += sizeof(LmnLinkAttr);
       WRITE(LmnFunctor, f_id, pos);
       pos += sizeof(LmnFunctor);
+            
       break;
     }
     case INT:
@@ -473,8 +482,7 @@ static char *parse_arg(char *line, enum ArgType type)
       break;
     }
 
-    assert(FALSE);
-    break;
+    return line;
   }
   case Label:
     assert(FALSE);
@@ -606,15 +614,24 @@ static BOOL parse_rule_el(struct Rule *rule)
 static struct Rule *parse_rule(void)
 {
   struct Rule *rule;
+  int rule_start_pos;
+  typedef int16_t RuleSize;
 
   rule = malloc(sizeof(struct Rule));
   if (!SEQ(src_lines[cur_line], RULE)) return NULL;
 
+  rule_start_pos = pos;
+  pos += sizeof(RuleSize);
   cur_line++;
-  
+
   while (1) {
     if (!parse_rule_el(rule)) break;
   }
+  WRITE(RuleSize, pos - rule_start_pos, rule_start_pos);
+
+
+
+
   return rule;
 }
 
@@ -624,8 +641,10 @@ static struct Ruleset *parse_ruleset(void)
   char *end;
   char *line;
   struct Ruleset *rs;
-  unsigned int size_pos;
-
+  unsigned int rule_num_pos;
+  typedef int16_t RuleNumType;
+  typedef int16_t RulesetId;
+  
   line = src_lines[cur_line];
   
   if (!SEQ(line, RULESET)) return NULL;
@@ -639,8 +658,10 @@ static struct Ruleset *parse_ruleset(void)
   rs->pos = pos;
   rs->rule_num = 0;
 
-  WRITE(LmnWord, rs->id, pos);
-  pos += sizeof(LmnWord);
+  WRITE(RulesetId, rs->id, pos);
+  pos += sizeof(RulesetId);
+  rule_num_pos = pos;
+  pos += sizeof(RuleNumType);
   
   cur_line++;
 
@@ -659,8 +680,8 @@ static struct Ruleset *parse_ruleset(void)
     fprintf(stderr, "parse_ruleset: line[%d], ruleset is empty\n", cur_line);
   }
 
-  WRITE(int32_t, rs->rule_num, 
-  
+  WRITE(RuleNumType, rs->rule_num, rule_num_pos);
+
   return rs;
 }
 
@@ -731,6 +752,13 @@ static void resolve_ruleset(void)
   
 }
 
+#define MAKE_VEC(NAME)                                      \
+  do {                                                      \
+    NAME##_cap = 1<<16;                                     \
+    NAME##_num = 0;                                         \
+    NAME = malloc(sizeof(struct LabelInfo) * NAME##_cap);   \
+  } while (0)
+
 int main(int argc, char* argv[])
 {
   int i;
@@ -739,21 +767,11 @@ int main(int argc, char* argv[])
   out_cap = 1<<16;
   out = malloc(out_cap);
 
-  labels_cap = 1<<16;
-  labels_num = 0;
-  labels = malloc(sizeof(struct LabelInfo) * labels_cap);
-
-  ruleset_cap = 1<<16;
-  ruleset_num = 0;
-  ruleset = malloc(sizeof(struct Ruleset) * ruleset_cap);
-
-  src_lines_cap = 1<<16;
-  src_lines_num = 0;
-  src_lines = malloc(sizeof(char*) * src_lines_cap);
-
-  llink_cap = 1<<16;
-  llink_num = 0;
-  llink = malloc(sizeof(char*) * llink_cap);
+  MAKE_VEC(labels);
+  MAKE_VEC(ruleset);
+  MAKE_VEC(src_lines);
+  MAKE_VEC(llink);
+  MAKE_VEC(funcs);
 
   read_all_lines();
   parse();
@@ -768,7 +786,6 @@ int main(int argc, char* argv[])
   for (i = 0; i < symbols_num; i++) {
     int n;
 
-    debug(stderr, "[%s] %d\n", symbols[i].str, symbols[i].id);
     fwrite(&symbols[i].id, sizeof(lmn_interned_str), 1, stdout);
     n = strlen(symbols[i].str);
     fwrite(&n, sizeof(uint16_t), 1, stdout);
@@ -783,19 +800,6 @@ int main(int argc, char* argv[])
     fwrite(&funcs[i].arity, sizeof(LmnArity), 1, stdout);
   }
 
-  /* ruleset */
-  fwrite(&ruleset_num, sizeof(LmnWord), 1, stdout);
-  for (i = 0; i < ruleset_num; i++) {
-    LmnWord n;
-    fwrite(&ruleset[i].id, sizeof(LmnWord), 1, stdout);
-    fwrite(&ruleset[i].rule_num, sizeof(LmnWord), 1, stdout);
-    if (i + 1 < ruleset_num) 
-      n = ruleset[i+1].pos - ruleset[i].pos;
-    else
-      n = 0;
-    WRITE(LmnWord, n, ruleset[i].pos);
-  }
-  
   /* print */
   fwrite(out, pos, 1, stdout);
 
