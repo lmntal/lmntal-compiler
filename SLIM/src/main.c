@@ -41,15 +41,11 @@ static int parse_options(int argc, char *argv[])
     {0, 0, 0, 0}
   };
 
-  while ((c = getopt_long(argc, argv, "+s:", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "+", long_options, &option_index)) != -1) {
     switch (c) {
     case 0:
       printf("log_options entries must have positive 4th member.\n");
       exit(1);
-      break;
-    case 's':
-      lmn_env.symbol_file = optarg;
-      load_symbol(lmn_env.symbol_file);
       break;
     case 1000: version(); break;
     case 1001: /* help */ /*FALLTHROUGH*/
@@ -90,12 +86,21 @@ static void test(void)
 
 int main(int argc, char *argv[])
 {
+  int optid;
+  
 #ifdef DEBUG
   mtrace();
 #endif
   
-  init_internal();
-  parse_options(argc, argv);
+/*   init_internal(); */
+  
+  optid = parse_options(argc, argv);
+  {
+    int i;
+    for (i = optid; i < argc; i++) {
+      printf("%s\n", argv[i]);
+    }
+  }
 
 #ifdef DEBUG
   test();
