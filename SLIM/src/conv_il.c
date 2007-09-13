@@ -867,6 +867,7 @@ int main(int argc, char* argv[])
     fwrite(&funcs[i].arity, sizeof(LmnArity), 1, stdout);
   }
 
+  fwrite(&ruleset_num, sizeof(uint32_t), 1, stdout);
   /* print */
   fwrite(out, pos, 1, stdout);
 
