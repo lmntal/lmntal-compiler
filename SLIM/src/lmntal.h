@@ -73,11 +73,12 @@ typedef uint8_t LmnArity;
 
 typedef unsigned int lmn_interned_str;
 
-typedef BYTE* lmn_rule_instr;
+typedef BYTE* LmnRuleInstr;
 typedef uint16_t LmnInstrOp;
 typedef uint16_t LmnInstrVar;
 typedef uint16_t LmnJumpOffset;
 typedef uint32_t LmnLineNum;
+typedef int16_t LmnRulesetId;
 
 typedef struct LmnRule    LmnRule;
 typedef struct LmnRuleSet LmnRuleSet;
@@ -209,18 +210,14 @@ LMN_EXTERN LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f);
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
 LMN_EXTERN void lmn_mem_dump(LmnMembrane *mem);
 LMN_EXTERN unsigned int lmn_mem_natoms(LmnMembrane *mem);
-
+LMN_EXTERN AtomSetEntry *lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f);
+LMN_EXTERN void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom);
+  
 /*----------------------------------------------------------------------
  * Rule
  */
 
-typedef unsigned short lmn_ruleset_size_t;
-
-LMN_EXTERN LmnRule *lmn_rule_make(lmn_rule_instr instr, lmn_interned_str name);
-LMN_EXTERN void lmn_rule_free(LmnRule *rule);
-LMN_EXTERN LmnRuleSet *lmn_ruleset_make(lmn_ruleset_size_t init_size);
-LMN_EXTERN void lmn_ruleset_free(LmnRuleSet *ruleset);
-LMN_EXTERN void lmn_ruleset_put(LmnRuleSet* ruleset, LmnRule *rule);
+#include "rule.h"
 
 /*----------------------------------------------------------------------
  * Atom
@@ -233,7 +230,7 @@ LMN_EXTERN void lmn_delete_atom(LmnAtomPtr ap);
  * Execution
  */
 
-LMN_EXTERN void run();
+LMN_EXTERN void run(void);
 
 /*----------------------------------------------------------------------
  * Utility
@@ -286,7 +283,7 @@ typedef struct LmnFunctorTable {
 extern struct LmnFunctorTable lmn_functor_table;
 
 #define LMN_FUNCTOR_ARITY(F)    (lmn_functor_table.entry[(F)].arity)
-#define LMN_FUNCTOR_NAME(F)     (lmn_functor_table.entry[(F)].name)
+#define LMN_FUNCTOR_NAME_ID(F)     (lmn_functor_table.entry[(F)].name)
 
 /* Symbol Information */
 
@@ -307,6 +304,8 @@ typedef struct LmnRuleSetTable {
 } LmnRuleSetTable;			 
 
 extern struct LmnRuleSetTable lmn_ruleset_table;
+
+#define LMN_RULESET_ID(ID)      lmn_ruleset_table.entry[(ID)]
 
 /* Runtime Environment */
 

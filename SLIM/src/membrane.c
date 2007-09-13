@@ -49,15 +49,6 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 
 /* TODO stub implementation */
 
-typedef struct AtomSetEntry {
-  LmnAtomPtr head, tail;
-} AtomSetEntry;
-
-struct AtomSet {
-  unsigned int size;
-  AtomSetEntry atoms[1<<LMN_FUNCTOR_BITS];
-};
-
 static void atom_set_entry_free(AtomSetEntry entry)
 {
   LmnAtomPtr p, q;
@@ -124,6 +115,21 @@ LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f)
   return ap;
 }
 
+void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
+{
+  LmnAtomPtr prev, next;
+
+  prev = LMN_ATOM_GET_PREV(atom);
+  next = LMN_ATOM_GET_NEXT(atom);
+  if (next) LMN_ATOM_SET_PREV(next, prev);
+  if (prev) LMN_ATOM_SET_NEXT(prev, next);
+
+  if (next == NULL && prev == NULL) {
+    AtomSetEntry *p = lmn_mem_get_atomlist(mem, LMN_ATOM_GET_FUNCTOR(atom));
+    p->head = p->tail = NULL;
+  }
+}
+
 /*----------------------------------------------------------------------
  * Membrane
  */
@@ -150,7 +156,13 @@ void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
   newmem->parent = parentmem;
   if(parentmem->child_head) parentmem->child_head->prev = newmem;
   parentmem->child_head = newmem;
-} 
+}
+
+AtomSetEntry *lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
+{
+  return get_atom_list(mem->atomset, f);
+}
+
 
 unsigned int lmn_mem_natoms(LmnMembrane *mem)
 {
@@ -179,7 +191,7 @@ static void dump_atom(LmnAtomPtr atom)
   
   f = LMN_ATOM_GET_FUNCTOR(atom);
   arity = LMN_FUNCTOR_ARITY(f);
-  fprintf(stdout, "F[%u], A[%u], ", LMN_FUNCTOR_NAME(f), arity);
+  fprintf(stdout, "Func[%u], Name[%s], A[%u], Addr[%p]", f, LMN_SYMBOL_STR(LMN_FUNCTOR_NAME_ID(f)), arity, (void*)atom);
 
   for (i = 0; i < arity; i++) {
     LmnLinkAttr attr;
@@ -212,6 +224,17 @@ static void dump_atom(LmnAtomPtr atom)
   fprintf(stdout, "\n");
 }
 
+static void dump_ruleset(RuleSetList *p)
+{
+  fprintf(stdout, "ruleset[");
+  while (p) {
+    fprintf(stdout, "%d ", p->ruleset->id);
+    p = p->next;
+  }
+  fprintf(stdout, "]\n");
+}
+                  
+
 void lmn_mem_dump(LmnMembrane *mem)
 {
   unsigned int i;
@@ -229,7 +252,7 @@ void lmn_mem_dump(LmnMembrane *mem)
       }
     }
   }
-
+  dump_ruleset(mem->rulesets);
   lmn_mem_dump(mem->child_head);
   lmn_mem_dump(mem->next);
   

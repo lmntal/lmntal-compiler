@@ -20,4 +20,13 @@ struct LmnMembrane {
   lmn_interned_str  name;
 };
 
+typedef struct AtomSetEntry {
+  LmnAtomPtr head, tail;
+} AtomSetEntry;
+
+struct AtomSet {
+  unsigned int size;
+  AtomSetEntry atoms[1<<LMN_FUNCTOR_BITS];
+};
+
 #endif /* LMN_MEMBRANE_H */

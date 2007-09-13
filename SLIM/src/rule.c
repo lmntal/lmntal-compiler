@@ -2,10 +2,10 @@
  * rule.c
  */
 
-#include "rule.h"
+#include "lmntal.h"
 
 /* move ownship of instr */
-LmnRule *lmn_rule_make(lmn_rule_instr instr, lmn_interned_str name)
+LmnRule *lmn_rule_make(LmnRuleInstr instr, lmn_interned_str name)
 {
   LmnRule *rule = LMN_MALLOC(LmnRule);
   rule->instr = instr;
@@ -25,9 +25,10 @@ void lmn_rule_free(LmnRule *rule)
 
 #define GROWN_RATE 2.0
 
-LmnRuleSet *lmn_ruleset_make(lmn_ruleset_size_t init_size)
+LmnRuleSet *lmn_ruleset_make(LmnRulesetId id, lmn_ruleset_size_t init_size)
 {
   LmnRuleSet *ruleset = LMN_MALLOC(LmnRuleSet);
+  ruleset->id = id;
   ruleset->rules = LMN_CALLOC(LmnRule*, init_size);
   ruleset->num = 0;
   ruleset->cap = init_size;

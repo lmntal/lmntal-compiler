@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "lmntal.h"
-#include "rule.h"
 
 LmnRuleSetTable lmn_ruleset_table;
 LmnSymbolTable lmn_symbol_table;
@@ -43,7 +42,7 @@ static unsigned int load_uint(FILE *in, int size)
 static LmnRule *load_rule(FILE *in)
 {
   int instr_size = load_uint16(in);
-  lmn_rule_instr instr = LMN_CALLOC(BYTE, instr_size);
+  LmnRuleInstr instr = LMN_CALLOC(BYTE, instr_size);
 
   fread(instr, 1, instr_size, in);
   { int i;
@@ -62,7 +61,7 @@ static LmnRuleSet *load_ruleset(FILE *in)
   /* skip ruleset id because ... */
   int ruleset_id = load_uint16(in);
   int rule_size = load_uint16(in);
-  LmnRuleSet *res =lmn_ruleset_make(rule_size);
+  LmnRuleSet *res =lmn_ruleset_make(ruleset_id, rule_size);
   int i;
 
   printf("loading ruleset >>> size:%d name:%d\n", rule_size, ruleset_id);

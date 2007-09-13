@@ -71,18 +71,22 @@ struct InstrSpec {
     /* special */
     {"jump", INSTR_JUMP,        {Label, InstrVarList, InstrVarList, InstrVarList}},
     {"commit", INSTR_COMMIT,      {String, LineNum}},
+    {"findatom", INSTR_FINDATOM,  {InstrVar, InstrVar, Functor}},
     {"newatom", INSTR_NEWATOM,    {InstrVar, InstrVar, Functor}},
+    {"freeatom", INSTR_FREEATOM, {InstrVar}},
     {"removeatom", INSTR_REMOVEATOM, {InstrVar, InstrVar, Functor}},
+    {"enqueueatom", INSTR_ENQUEUEATOM, {InstrVar}},
+    {"dequeueatom", INSTR_DEQUEUEATOM, {InstrVar}},
     {"alloclink", INSTR_ALLOCLINK, {InstrVar, InstrVar, InstrVar}},
     {"unifylinks", INSTR_UNIFYLINKS, {InstrVar, InstrVar, InstrVar}},
-    {"enqueueatom", INSTR_ENQUEUEATOM, {InstrVar}},
+    {"newmem", INSTR_NEWMEM,    {InstrVar, InstrVar, InstrVar}},
     {"proceed", INSTR_PROCEED, {0}},
     {"loadruleset", INSTR_LOADRULESET, {InstrVar, ArgRuleset}},
     {"deref", INSTR_DEREF, {InstrVar, InstrVar, InstrVar, InstrVar}},
     {"func", INSTR_FUNC, {InstrVar, Functor}},
   };
 
-enum FunctorType {SYMBOL, INT, DOUBLE};
+enum FunctorType {SYMBOL, INT, DOUBLE, IN_PROXY, OUT_PROXY};
 
 struct Functor {
   enum FunctorType type;
@@ -127,9 +131,20 @@ unsigned int pos;
   } while (0) 
 
   
+/*----------------------------------------------------------------------
+ * typedef
+ */
 typedef int16_t RuleNumType;
-typedef int16_t RulesetId;
 
+/*----------------------------------------------------------------------
+ * Utility Macro
+ */
+
+#define SEQ(A,S) (!strncmp((A),(S),strlen(S)))
+#define WRITE(T,V,POS)                              \
+  do { expand_out_buf();                            \
+    (*(T*)(out+POS) = (V));                         \
+      } while (0)
 
 /*----------------------------------------------------------------------
  * Label
@@ -176,7 +191,7 @@ unsigned int ruleset_num, ruleset_cap;
 
 struct RulesetLink {
   unsigned int pos;
-  unsigned int src_id;
+  int src_id;
 };
 
 struct RulesetLink *rlink;
@@ -256,7 +271,7 @@ static LmnFunctor get_functor_id(struct Functor f)
  */
 
 #define RULESET    "Compiled Ruleset"
-#define RULE       "Compiled Rule"
+#define RULE       "Compiled Rule "
 #define INLINE     "Inline"
 #define ATOMMATCH  "--atommatch:"
 #define MEMMATCH   "--memmatch:"
@@ -360,8 +375,21 @@ static char *read_int(char *line, int *n)
 
 static char *read_functor(char *line, struct Functor *functor)
 {
-  
-  if (*line == '\'') { /* symbol functor */
+
+  if (*line == '$') {
+    line++;
+    if (SEQ(line, "in")) {
+      functor->type = IN_PROXY;
+      line += strlen("in");
+    } else if (SEQ(line, "out")) {
+      functor->type = OUT_PROXY;
+      line += strlen("out");
+    } else {
+      assert(FALSE);
+    }
+    return line;
+  }
+  else if (*line == '\'') { /* symbol functor */
     char s[1<<16];
     
     functor->type = SYMBOL;
@@ -401,12 +429,6 @@ static char *read_functor(char *line, struct Functor *functor)
     return line + 1;
   }
 }
-
-#define SEQ(A,S) (!strncmp((A),(S),strlen(S)))
-#define WRITE(T,V,POS)                              \
-  do { expand_out_buf();                            \
-    (*(T*)(out+POS) = (V));                         \
-      } while (0)
 
 /* 引数がこれ以上なければ NULLが帰る */
 static char *next_arg(char* s)
@@ -456,7 +478,7 @@ static char *parse_var_list(char *line)
   pos += sizeof(LmnInstrVar);
   
   while (TRUE) {
-    unsigned int n;
+    int n;
     line = next_arg(line);
     if (*line == ']') break;
     line = read_int(line, &n);
@@ -475,7 +497,7 @@ static char *parse_arg(char *line, enum ArgType type)
   switch (type) {
   case InstrVar:
   {
-    unsigned int n;
+    int n;
     line = read_int(line, &n);
     WRITE(LmnInstrVar, n, pos);
     pos += sizeof(LmnInstrVar);
@@ -486,7 +508,7 @@ static char *parse_arg(char *line, enum ArgType type)
     return line;
   case LineNum:
   {
-    unsigned int n;
+    int n;
     line = read_int(line, &n);
     WRITE(LmnLineNum, n, pos);
     pos += sizeof(LmnLineNum);
@@ -520,6 +542,14 @@ static char *parse_arg(char *line, enum ArgType type)
       WRITE(double, f.v.double_value, pos);
       pos += sizeof(double);
       break;
+    case IN_PROXY:
+      WRITE(LmnLinkAttr, LMN_ATTR_MAKE_DATA(LMN_ATOM_IN_PROXY_ATTR), pos);
+      pos += sizeof(LmnLinkAttr);
+      break;
+    case OUT_PROXY:
+      WRITE(LmnLinkAttr, LMN_ATTR_MAKE_DATA(LMN_ATOM_OUT_PROXY_ATTR), pos);
+      pos += sizeof(LmnLinkAttr);
+      break;
     default:
       fprintf(stderr, "not implemented data type %d\n", f.type);
       exit(1);
@@ -532,9 +562,10 @@ static char *parse_arg(char *line, enum ArgType type)
   {
     struct RulesetLink l;
     assert(*line == '@');
-    line = read_int(line, &l.src_id);
+    line = read_int(line+1, &l.src_id);
     l.pos = pos;
-    pos += sizeof(RulesetId);
+    pos += sizeof(LmnRulesetId);
+    PUSH(rlink, l);
     return line;
   }
   case Label:
@@ -556,7 +587,7 @@ static BOOL parse_special_instr(char *line, struct InstrSpec spec)
   switch (spec.op) {
   case INSTR_JUMP:
   {
-    unsigned int label;
+    int label;
     struct LabelLink link;
 
     WRITE(LmnInstrOp, spec.op, pos);
@@ -630,7 +661,7 @@ static BOOL parse_rule_el(struct Rule *rule)
     struct LabelInfo l;
 
     line += strlen(GUARD) + 1/*L*/;
-    line = read_int(line, &l.label);
+    line = read_int(line, (int*)&l.label);
     l.pos = pos;
     PUSH(labels, l);
     cur_line++;
@@ -640,7 +671,7 @@ static BOOL parse_rule_el(struct Rule *rule)
     struct LabelInfo l;
 
     line += strlen(BODY) + 1/*L*/;
-    line = read_int(line, &l.label);
+    line = read_int(line, (int*)&l.label);
     l.pos = pos;
     PUSH(labels, l);
 
@@ -660,7 +691,7 @@ static BOOL parse_rule_el(struct Rule *rule)
     }
   }
 
-  fprintf(stderr, "Unrecognized line: %s\n", line);
+  fprintf(stderr, "Unrecognized line: %s %d\n", line, cur_line);
   exit(1);
 }
 
@@ -679,8 +710,10 @@ static struct Rule *parse_rule(void)
 
   while (1) {
     if (!parse_rule_el(rule)) break;
+
   }
-  WRITE(RuleSize, pos - rule_start_pos, rule_start_pos);
+
+  WRITE(RuleSize, pos - rule_start_pos - sizeof(RuleSize), rule_start_pos);
 
   return rule;
 }
@@ -688,7 +721,6 @@ static struct Rule *parse_rule(void)
 static struct Ruleset *parse_ruleset(void)
 {
   unsigned int id;
-  char *end;
   char *line;
   struct Ruleset *rs;
   unsigned int rule_num_pos;
@@ -698,7 +730,7 @@ static struct Ruleset *parse_ruleset(void)
   if (!SEQ(line, RULESET)) return NULL;
 
   line += strlen(RULESET) + 2/*space + atmark*/;
-  line = read_int(line, &id);
+  line = read_int(line, (int*)&id);
 
   rs = malloc(sizeof(struct Ruleset));
 
@@ -707,8 +739,8 @@ static struct Ruleset *parse_ruleset(void)
   rs->pos = pos;
   rs->rule_num = 0;
 
-  WRITE(RulesetId, rs->id, pos);
-  pos += sizeof(RulesetId);
+  WRITE(LmnRulesetId, rs->id, pos);
+  pos += sizeof(LmnRulesetId);
   rule_num_pos = pos;
   pos += sizeof(RuleNumType);
   
@@ -718,6 +750,7 @@ static struct Ruleset *parse_ruleset(void)
     struct Rule *r;
 
     r = parse_rule();
+
     if (r) {
       rs->rule_num++;
     } else {
@@ -801,7 +834,7 @@ static unsigned int find_ruleset_pos(unsigned int id)
 
   for (i = 0; i < ruleset_num; i++) {
     if (ruleset[i].src_id == id) {
-      return ruleset[i].pos;
+      return ruleset[i].id;
     }
   }
   assert(FALSE);
@@ -812,9 +845,11 @@ static void resolve_ruleset(void)
 {
   unsigned int i;
 
+  debug(stderr, "rlink: %d\n", rlink_num);
   for (i = 0; i < rlink_num; i++) {
-    unsigned int label_pos = find_ruleset_pos(rlink[i].src_id);
-    WRITE(RulesetId, label_pos, rlink[i].pos);
+    unsigned int id = find_ruleset_pos(rlink[i].src_id);
+    debug(stderr, "ruleset_pos: %d\n", id);
+    WRITE(LmnRulesetId, id, rlink[i].pos);
   }
   
 }
@@ -828,7 +863,7 @@ static void resolve_ruleset(void)
 
 int main(int argc, char* argv[])
 {
-  int i;
+  unsigned int i;
   
   /* initialize */
   out_cap = 1<<16;
