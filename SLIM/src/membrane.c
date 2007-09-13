@@ -112,13 +112,27 @@ void lmn_mem_delete(LmnMembrane *mem)
 void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
 {
   /* TODO: membrane activation */
-  newmem->parent = parentmem;
   newmem->next = parentmem->child_head;
+  newmem->parent = parentmem;
   if(parentmem->child_head) parentmem->child_head->prev = newmem;
   parentmem->child_head = newmem;
 } 
 
-
+unsigned int lmn_mem_natoms(LmnMembrane *mem)
+{
+	unsigned int i, j = 0;
+	for (i = 0; i < mem->atomset->size; i++) {
+    AtomSetEntry *ent = get_atom_list(mem->atomset, (LmnFunctor)i);
+    if (!atom_list_is_empty(ent)) {
+      LmnAtomPtr atom = ent->head;
+      while (atom) {
+         atom = LMN_ATOM_GET_NEXT(atom);
+					j++;
+      }
+    }
+  }
+	
+}
 /*----------------------------------------------------------------------
  * Dump
  */

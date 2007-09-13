@@ -34,6 +34,49 @@ struct MemStack {
     *tail;
 } memstack;
 
+/* 失敗したときに戻るところ */
+struct Stack {
+	lmn_rule_instr *v;
+	unsigned int num;
+	unsigned int cap;
+};
+
+static struct Stack make_stack(unsigned int size) 
+{
+	struct Stack st;
+	st.v = LMN_NALLOC(lmn_rule_instr, size);
+	st.num = 0;
+	st.cap = size;
+	return st;
+}
+
+#define STACK_PUSH stack_push
+#define STACK_POP stack_pop
+
+static void stack_push(struct Stack st, lmn_rule_instr x)
+{
+	if (st.num == st.cap) {
+		st.cap *= 2;
+		st.v = LMN_REALLOC(lmn_rule_instr, st.v, st.cap);
+	}
+	st.v[st.num++] = x;
+}
+
+static lmn_rule_instr stack_pop(struct Stack st)
+{
+	if (st.num == 0) {
+		fprintf(stderr, "stack is empty\n");
+	}
+	return st.v[--st.num];
+}
+
+static BOOL stack_is_empty(struct Stack st)
+{
+	return st.num != 0;
+}
+
+struct Stack st;
+
 static BOOL interpret(lmn_rule_instr instr);
 
 static void memstack_init()
@@ -122,6 +165,8 @@ void run()
   wkv = k1;
   tkv = k2;
   
+  st = make_stack(16);
+  
   while(!memstack_isempty()){
     LmnMembrane *mem = memstack_peek();
     if(!exec(mem))
@@ -193,6 +238,24 @@ static BOOL interpret(lmn_rule_instr instr)
       lmn_mem_push_atom((LmnMembrane*)wv[memi], ap);
       REF_CAST(LmnAtomPtr, wv[atomi]) = ap;
       break;
+    }
+    case INSTR_NATOMS:
+    {
+			LmnInstrVar memi, natoms;
+			LMN_IMS_READ(LmnInstrVar, instr, memi);
+			LMN_IMS_READ(LmnInstrVar, instr, natoms);
+			if(natoms == (LmnInstrVar)lmn_mem_natoms((LmnMembrane*)wv[memi])) {
+				break;
+			} else {
+				/*失敗したとき*/
+				if(stack_is_empty(st)) {
+					/* ルールが失敗する */
+					return FALSE;
+				} else {
+					instr = stack_pop(st);	
+				}
+				break;
+			}
     }
     case INSTR_ALLOCLINK:
     {

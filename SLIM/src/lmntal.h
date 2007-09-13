@@ -179,6 +179,9 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATTR_SET_VALUE(PATTR,X)   \
   (*(PATTR)=((((X)&~LMN_LINK_ATTR_MASK))|X))
 
+#define LMN_ATTR_IS_PROXY(X)						(LMN_ATTR_IS_DATA(X) &&	\
+																						(LMN_ATTR_GET_VALUE(X) == LMN_ATOM_IN_PROXY_ATTR ||	\
+																						LMN_ATTR_GET_VALUE(X) == LMN_ATOM_OUT_PROXY_ATTR))
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
  */
@@ -205,6 +208,7 @@ LMN_EXTERN LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f);
 
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
 LMN_EXTERN void lmn_mem_dump(LmnMembrane *mem);
+LMN_EXTERN unsigned int lmn_mem_natoms(LmnMembrane *mem);
 
 /*----------------------------------------------------------------------
  * Rule
