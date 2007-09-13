@@ -36,6 +36,8 @@ static unsigned int load_uint(FILE *in, int size)
   case 2: return load_uint16(in);
   case 4: return load_uint32(in);
   }
+  assert(FALSE);
+  return 0;
 }
 
 static LmnRule *load_rule(FILE *in)
@@ -44,6 +46,12 @@ static LmnRule *load_rule(FILE *in)
   lmn_rule_instr instr = LMN_CALLOC(BYTE, instr_size);
 
   fread(instr, 1, instr_size, in);
+  { int i;
+    for (i = 0; i < instr_size/2; i++) {
+      printf("instr: %d\n", *(uint16_t*)(instr+i*2));
+    }
+  }
+
   printf("loaded rule size:%d\n", instr_size);
   
   return lmn_rule_make(instr, 0); /* there is no name for rule */
@@ -94,14 +102,14 @@ static void load_symbols(FILE *in)
     unsigned int symbol_id = load_uint(in, sizeof(lmn_interned_str));
     unsigned int symbol_size = load_uint16(in);
     
-    lmn_symbol_table.entry[i] = LMN_NALLOC(char, symbol_size+1);
+    lmn_symbol_table.entry[symbol_id] = LMN_NALLOC(char, symbol_size+1);
 
     for(j=0; j<symbol_size; ++j){
-      lmn_symbol_table.entry[i][j] = load_uint8(in);
+      lmn_symbol_table.entry[symbol_id][j] = load_uint8(in);
     }
-    lmn_symbol_table.entry[i][symbol_size] = '\0';
+    lmn_symbol_table.entry[symbol_id][symbol_size] = '\0';
 
-    printf("loaded a symbol name:%s\n", lmn_symbol_table.entry[i]);
+    printf("loaded a symbol name:%s\n", lmn_symbol_table.entry[symbol_id]);
   }
   printf("loading symbol <<< size:%d\n", lmn_symbol_table.size);
 }

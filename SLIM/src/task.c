@@ -159,13 +159,30 @@ static int exec(LmnMembrane *mem)
 
 void run()
 {
+  LmnMembrane *mem;
+
   /* Initialize for running */
   wv = v1;
   tv = v2;
   wkv = k1;
   tkv = k2;
-  
+
   st = make_stack(16);
+  memstack_init();
+  
+  /* make toplevel membrane */
+  
+  mem = lmn_mem_make();
+
+  lmn_mem_dump(mem);
+
+  /*     lmn_mem_add_ruleset(mem, lmn_ruleset_table.entry[0]); */
+
+  memstack_push(mem);
+  /* call init atom creation rule */
+  react_ruleset(mem, lmn_ruleset_table.entry[0]);
+
+  lmn_mem_dump(mem);
   
   while(!memstack_isempty()){
     LmnMembrane *mem = memstack_peek();
@@ -173,6 +190,8 @@ void run()
       memstack_pop();
     memstack_printall();
   }
+
+  lmn_mem_dump(mem);
 }
 
 static BOOL interpret(lmn_rule_instr instr)
@@ -315,91 +334,90 @@ static BOOL interpret(lmn_rule_instr instr)
     case INSTR_PROCEED:
       /* TODO スタックの操作とか・・・*/
       goto END;
-      break;
     case INSTR_ENQUEUEATOM:
-      {
-	LmnInstrVar atom;
+    {
+      LmnInstrVar atom;
 	
-	LMN_IMS_READ(LmnInstrVar, instr, atom);
-	break;
-      }
+      LMN_IMS_READ(LmnInstrVar, instr, atom);
+      break;
+    }
     case INSTR_DEQUEUEATOM:
-      {
-	LmnInstrVar atom;
+    {
+      LmnInstrVar atom;
 	
-	LMN_IMS_READ(LmnInstrVar, instr, atom);
-	break;
-      }
+      LMN_IMS_READ(LmnInstrVar, instr, atom);
+      break;
+    }
     case INSTR_NEWMEM:
-      {
-	LmnInstrVar newmemi, parentmemi, memf;
-	LmnMembrane *mp;
+    {
+      LmnInstrVar newmemi, parentmemi, memf;
+      LmnMembrane *mp;
 
-	LMN_IMS_READ(LmnInstrVar, instr, newmemi);
-	LMN_IMS_READ(LmnInstrVar, instr, parentmemi);
-	LMN_IMS_READ(LmnInstrVar, instr, memf);
-	mp = lmn_mem_make(); /*lmn_new_mem(memf);*/
-	lmn_mem_push_mem((LmnMembrane*)wv[parentmemi], mp);
-	REF_CAST(LmnMembrane*, wv[newmemi]) = mp;
-	break;
-      }
+      LMN_IMS_READ(LmnInstrVar, instr, newmemi);
+      LMN_IMS_READ(LmnInstrVar, instr, parentmemi);
+      LMN_IMS_READ(LmnInstrVar, instr, memf);
+      mp = lmn_mem_make(); /*lmn_new_mem(memf);*/
+      lmn_mem_push_mem((LmnMembrane*)wv[parentmemi], mp);
+      REF_CAST(LmnMembrane*, wv[newmemi]) = mp;
+      break;
+    }
     case INSTR_REMOVEATOM:
-      {
-	/*LmnInstrVar atomi, memi;*/
-	/*LmnFunctor f;*/
-	LmnInstrVar atomi;
-	LmnAtomPtr atom, prev, next;
+    {
+      /*LmnInstrVar atomi, memi;*/
+      /*LmnFunctor f;*/
+      LmnInstrVar atomi;
+      LmnAtomPtr atom, prev, next;
 
-	LMN_IMS_READ(LmnInstrVar, instr, atomi);
-	/*LMN_IMS_READ(LmnInstrVar, instr, memi);*/
-	/*LMN_IMS_READ(LmnFunctor, instr, f);*/
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      instr += sizeof(LmnInstrVar) + sizeof(LmnFunctor);
+      /*LMN_IMS_READ(LmnInstrVar, instr, memi);*/
+      /*LMN_IMS_READ(LmnFunctor, instr, f);*/
 
-	atom = (LmnAtomPtr)wv[atomi];
-	if(! LMN_ATTR_IS_DATA(wkv[atomi])){
-	  prev = (LmnAtomPtr)*LMN_ATOM_PPREV(atom);
-	  next = (LmnAtomPtr)*LMN_ATOM_PNEXT(atom);
-	  REF_CAST(LmnAtomPtr, *LMN_ATOM_PPREV(next)) = prev;
-	  REF_CAST(LmnAtomPtr, *LMN_ATOM_PNEXT(prev)) = next;
-	}
-	break;
+      atom = (LmnAtomPtr)wv[atomi];
+      if(! LMN_ATTR_IS_DATA(wkv[atomi])){
+        prev = LMN_ATOM_GET_PREV(atom);
+        next = LMN_ATOM_GET_NEXT(atom);
+        LMN_ATOM_SET_PREV(next, prev);
+        LMN_ATOM_SET_NEXT(prev, next);
       }
+      break;
+    }
     case INSTR_FREEATOM:
-      {
-	LmnInstrVar atomi;
+    {
+      LmnInstrVar atomi;
 
-	LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
 	
-	if(! LMN_ATTR_IS_DATA(wkv[atomi])){
-	  lmn_delete_atom((LmnAtomPtr)wv[atomi]);
-	}
-	break;
+      if(! LMN_ATTR_IS_DATA(wkv[atomi])){
+        lmn_delete_atom((LmnAtomPtr)wv[atomi]);
       }
+      break;
+    }
     case INSTR_REMOVEMEM:
-      {
-	/*LmnInstrVar memi, parentmem;*/
-	LmnInstrVar memi;
-	LmnMembrane *mp;
+    {
+      LmnInstrVar memi;
+      LmnMembrane *mp;
 
-	LMN_IMS_READ(LmnInstrVar, instr, memi);
-	/*LMN_IMS_READ(LmnInstrVar, instr, parentmemi);*/
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      instr += sizeof(LmnInstrVar); /* ingnore parent */
 
-	mp = (LmnMembrane*)wv[memi];
-	if(mp->parent->child_head == mp) mp->parent->child_head = mp->next;
-	if(mp->prev) mp->prev->next = mp->next;
-	if(mp->next) mp->next->prev = mp->prev;
-	break;
-      }
+      mp = (LmnMembrane*)wv[memi];
+      if(mp->parent->child_head == mp) mp->parent->child_head = mp->next;
+      if(mp->prev) mp->prev->next = mp->next;
+      if(mp->next) mp->next->prev = mp->prev;
+      break;
+    }
     case INSTR_FREEMEM:
-      {
-	LmnInstrVar memi;
-	LmnMembrane *mp;
+    {
+      LmnInstrVar memi;
+      LmnMembrane *mp;
 
-	LMN_IMS_READ(LmnInstrVar, instr, memi);
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
 
-	mp = (LmnMembrane*)wv[memi];
-	lmn_mem_delete(mp);
-	break;
-      }
+      mp = (LmnMembrane*)wv[memi];
+      lmn_mem_free(mp);
+      break;
+    }
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);

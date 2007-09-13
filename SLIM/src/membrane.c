@@ -17,7 +17,7 @@ struct RuleSetList {
 };
 typedef struct RuleSetList RuleSetNode;
 
-static RuleSetNode *make_ruleset_node(LmnRuleSet *ruleset)
+static RuleSetNode *ruleset_node_make(LmnRuleSet *ruleset)
 {
   RuleSetNode *node = LMN_MALLOC(RuleSetNode);
   node->ruleset = ruleset;
@@ -25,9 +25,20 @@ static RuleSetNode *make_ruleset_node(LmnRuleSet *ruleset)
   return node;
 }
 
+static void ruleset_free(RuleSetList *r)
+{
+  RuleSetList *p;
+  
+  while (r) {
+    p = r->next;
+    LMN_FREE(r);
+    r = p;
+  }
+}
+
 void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 {
-  RuleSetNode *new_node = make_ruleset_node(ruleset);
+  RuleSetNode *new_node = ruleset_node_make(ruleset);
   if (mem->rulesets) new_node->next = mem->rulesets;
   mem->rulesets = new_node;
 }
@@ -47,12 +58,34 @@ struct AtomSet {
   AtomSetEntry atoms[1<<LMN_FUNCTOR_BITS];
 };
 
-static AtomSet *make_atom_set(int init_size)
+static void atom_set_entry_free(AtomSetEntry entry)
+{
+  LmnAtomPtr p, q;
+
+  p = entry.head;
+  while (p) {
+    q = LMN_ATOM_GET_NEXT(p);
+    LMN_FREE(p);
+    p = q;
+  }
+}
+
+static AtomSet *atom_set_make(int init_size)
 {
   struct AtomSet *a = LMN_MALLOC(struct AtomSet);
   memset(a->atoms, 0, sizeof(a->atoms));
   a->size = sizeof(a->atoms)/sizeof(a->atoms[0]);
   return a;
+}
+
+static void atom_set_free(AtomSet *atomset)
+{
+  unsigned int i;
+
+  for (i = 0; i < atomset->size; i++) {
+    atom_set_entry_free(atomset->atoms[i]);
+  }
+  LMN_FREE(atomset);
 }
 
 static AtomSetEntry *get_atom_list(struct AtomSet *atomset, LmnFunctor functor)
@@ -99,14 +132,15 @@ LmnMembrane *lmn_mem_make(void)
 {
   LmnMembrane *mem = LMN_MALLOC(LmnMembrane);
   memset(mem, 0, sizeof(LmnMembrane));
-  mem->atomset = make_atom_set(100);
+  mem->atomset = atom_set_make(100);
   return mem;
 }
 
-void lmn_mem_delete(LmnMembrane *mem)
+void lmn_mem_free(LmnMembrane *mem)
 {
-  /* TODO: free member */
-  lmn_free(mem);
+  atom_set_free(mem->atomset);
+  ruleset_free(mem->rulesets);
+  LMN_FREE(mem);
 }
 
 void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
@@ -120,18 +154,18 @@ void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
 
 unsigned int lmn_mem_natoms(LmnMembrane *mem)
 {
-	unsigned int i, j = 0;
-	for (i = 0; i < mem->atomset->size; i++) {
+  unsigned int i, j = 0;
+  for (i = 0; i < mem->atomset->size; i++) {
     AtomSetEntry *ent = get_atom_list(mem->atomset, (LmnFunctor)i);
     if (!atom_list_is_empty(ent)) {
       LmnAtomPtr atom = ent->head;
       while (atom) {
-         atom = LMN_ATOM_GET_NEXT(atom);
-					j++;
+        atom = LMN_ATOM_GET_NEXT(atom);
+        j++;
       }
     }
   }
-	
+  return j;
 }
 /*----------------------------------------------------------------------
  * Dump

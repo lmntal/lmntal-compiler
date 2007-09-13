@@ -91,15 +91,11 @@ int main(int argc, char *argv[])
   mtrace();
 #endif
   
-/*   init_internal(); */
-  
+  init_internal();
   optid = parse_options(argc, argv);
-  {
-    int i;
-    for (i = optid; i < argc; i++) {
-      printf("%s\n", argv[i]);
-    }
-  }
+  read_il(argv[optid]);
+
+  run();
 
 #ifdef DEBUG
   test();

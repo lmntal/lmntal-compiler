@@ -201,7 +201,7 @@ typedef uint8_t LmnLinkAttr;
 #include "membrane.h"
 
 LMN_EXTERN LmnMembrane *lmn_mem_make(void);
-LMN_EXTERN void lmn_mem_delete(LmnMembrane *mem);
+LMN_EXTERN void lmn_mem_free(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem);
 LMN_EXTERN void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap);
 LMN_EXTERN LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f);
@@ -228,6 +228,12 @@ LMN_EXTERN void lmn_ruleset_put(LmnRuleSet* ruleset, LmnRule *rule);
 
 LMN_EXTERN LmnAtomPtr lmn_new_atom(LmnFunctor arity);
 LMN_EXTERN void lmn_delete_atom(LmnAtomPtr ap);
+
+/*----------------------------------------------------------------------
+ * Execution
+ */
+
+LMN_EXTERN void run();
 
 /*----------------------------------------------------------------------
  * Utility
