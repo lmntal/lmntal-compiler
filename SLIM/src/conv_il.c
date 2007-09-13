@@ -24,7 +24,7 @@
  *      LmnArity         : アリティ
  *
  *  * instruction table
- *      uint16_t         : ルールセットの数   PLEASE ADD THIS!!
+ *      uint32_t         : ルールセットの数
  *      ruleset * 数
  *  ** ruleset
  *      uint16_t         : ID
@@ -848,7 +848,7 @@ int main(int argc, char* argv[])
   resolve_ruleset();
 
   /* header */
-  f
+  
   /* symbol table */
   fwrite(&symbols_num, sizeof(lmn_interned_str), 1, stdout);
   for (i = 0; i < symbols_num; i++) {
@@ -861,7 +861,7 @@ int main(int argc, char* argv[])
 
   /* functor table */
   fwrite(&funcs_num, sizeof(LmnFunctor), 1, stdout);
-  for (i = 0; i < symbols_num; i++) {
+  for (i = 0; i < funcs_num; i++) {
     fwrite(&funcs[i].id, sizeof(LmnFunctor), 1, stdout);
     fwrite(&funcs[i].name, sizeof(lmn_interned_str), 1, stdout);
     fwrite(&funcs[i].arity, sizeof(LmnArity), 1, stdout);

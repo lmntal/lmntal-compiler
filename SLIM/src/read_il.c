@@ -70,7 +70,7 @@ static void load_instr(FILE *in)
 {
   unsigned int i;
 
-  lmn_ruleset_table.size = load_uint16(in);
+  lmn_ruleset_table.size = load_uint32(in);
   lmn_ruleset_table.entry = LMN_NALLOC(LmnRuleSet*, lmn_ruleset_table.size);
 
   printf("loading instr >>> size:%d\n", lmn_ruleset_table.size);
@@ -149,4 +149,3 @@ int main()
   return 0;
 }
 */
-
