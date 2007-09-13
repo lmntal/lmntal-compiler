@@ -9,9 +9,10 @@
 /*
  *  * symbol table
  *      lmn_interned_str : シンボルの数
- *      数 * 文字列
- *  ** 文字列
- *      lmn_interned_str : シンボルの長さ
+ *      数 * シンボル
+ *  ** シンボル
+ *      lmn_interned_str : シンボルID
+ *      uint16_t         : シンボルの長さ
  *      char             : 長さ分の文字列
  *
  *  * functor table
@@ -21,13 +22,21 @@
  *      LmnFunctor       : ID
  *      lmn_interned_str : 名前
  *      LmnArity         : アリティ
- *  * ruleset
+ *
+ *  * instruction table
+ *      uint16_t         : ルールセットの数   PLEASE ADD THIS!!
+ *      ruleset * 数
+ *  ** ruleset
  *      uint16_t         : ID
  *      uint16_t         : ルールの数
  *      rule * 数
- *  ** rule
- *    uint16_t            : サイズ
- *    instruction
+ *  *** rule
+ *      uint16_t            : サイズ
+ *      instruction (byte * サイズ) 
+ */
+
+
+/*  ???
  *  ** functor
  *     BYTE : tag
  *     tagに応じたデータ
@@ -839,7 +848,7 @@ int main(int argc, char* argv[])
   resolve_ruleset();
 
   /* header */
-
+  f
   /* symbol table */
   fwrite(&symbols_num, sizeof(lmn_interned_str), 1, stdout);
   for (i = 0; i < symbols_num; i++) {
