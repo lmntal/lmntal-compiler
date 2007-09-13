@@ -161,7 +161,6 @@ static BOOL interpret(lmn_rule_instr instr)
         tv[i] = wv[n];
         tkv[i] = wkv[n];
       }
-      while (i--) wv[i] = tv[i];
       /* vars */
       LMN_IMS_READ(LmnInstrVar, instr, num);
       for (; num--; i++) {
@@ -175,6 +174,7 @@ static BOOL interpret(lmn_rule_instr instr)
 
       LMN_IMS_READ(uint16_t, instr, offset);
       instr += offset;
+      
       break;
     }
     case INSTR_COMMIT:
@@ -225,7 +225,7 @@ static BOOL interpret(lmn_rule_instr instr)
         #endif
       }
       else if (LMN_ATTR_IS_DATA(wkv[link1])) {
-        /* TODO wkv„Çí„Ç≥„Éî„Éº„Åô„ÇãÂøÖË¶Å„ÅØ„Å™„ÅÑ„Åã„Å™? */
+        /* TODO wkv§Ú•≥•‘°º§π§Î…¨Õ◊§œ§ §§§´§ ? */
            
         LMN_ATOM_SET_LINK(LMN_ATOM(wv[link2]), LMN_ATTR_GET_VALUE(wkv[link2]), wkv[link1]);
         LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[link2]),
@@ -250,7 +250,7 @@ static BOOL interpret(lmn_rule_instr instr)
         break;
     }
     case INSTR_PROCEED:
-      /* TODO „Çπ„Çø„ÉÉ„ÇØ„ÅÆÊìç‰Ωú„Å®„Åã„Éª„Éª„Éª*/
+      /* TODO •π•ø•√•Ø§Œ¡‡∫Ó§»§´°¶°¶°¶*/
       goto END;
       break;
     case INSTR_ENQUEUEATOM:

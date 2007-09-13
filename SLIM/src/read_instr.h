@@ -5,7 +5,7 @@
 #ifndef READ_INSTR_H
 #define READ_INSTR_H
 
-/* I „ÅØ BYTE„Å∏„ÅÆ„Éù„Ç§„É≥„Çø */
+/* I §œ BYTE§ÿ§Œ•›•§•Û•ø */
 
 #define LMN_IMS_READ_UINT8(X,I)  ((X)=*(uint8_t*)(I), I+=sizeof(uint8_t))
 #define LMN_IMS_READ_UINT16(X,I) ((X)=*(uint16_t*)(I), I+=sizeof(uint16_t))

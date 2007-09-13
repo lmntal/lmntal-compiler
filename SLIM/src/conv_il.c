@@ -14,7 +14,8 @@ enum ArgType {
   InstrVarList,
   String,
   LineNum,
-  Functor
+  Functor,
+  ArgRuleset
 };
 
 struct InstrSpec {
@@ -23,20 +24,24 @@ struct InstrSpec {
   enum ArgType args[128];
 }
 
-/* åˆæœŸå€¤ã®ãªã„é…åˆ—ã®è¦ç´ ãŒ0ã«åˆæœŸåŒ–ã•ã‚Œã‚‹ã“ã¨ã‚’å‰æã«ã—ã¦ã„ã‚‹
- * ã“ã‚Œã£ã¦ã€ä»•æ§˜ãªã‚“ã§ã—ãŸã£ã‘?
- * ã‚€ã—ã‚ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ã®åˆæœŸåŒ–?
+/* ½é´üÃÍ¤Î¤Ê¤¤ÇÛÎó¤ÎÍ×ÁÇ¤¬0¤Ë½é´ü²½¤µ¤ì¤ë¤³¤È¤òÁ°Äó¤Ë¤·¤Æ¤¤¤ë
+ * ¤³¤ì¤Ã¤Æ¡¢»ÅÍÍ¤Ê¤ó¤Ç¤·¤¿¤Ã¤±?
+ * ¤à¤·¤í¥°¥í¡¼¥Ğ¥ëÊÑ¿ô¤Î½é´ü²½?
  */
   spec[] = {
     {"spec", INSTR_SPEC,          {InstrVar, InstrVar,}},
-  /* special */
-  {"jump", INSTR_JUMP,        {Label, InstrVarList, InstrVarList, InstrVarList}},
-  {"commit", INSTR_COMMIT,      {String, LineNum}},
-  {"newatom", INSTR_NEWATOM,    {InstrVar, InstrVar, Functor}},
-  {"alloclink", INSTR_ALLOCLINK, {InstrVar, InstrVar, InstrVar}},
-  {"unifylinks", INSTR_UNIFYLINKS, {InstrVar, InstrVar, InstrVar}},
-  {"enqueueatom", INSTR_ENQUEUEATOM, {InstrVar}},
-  {"proceed", INSTR_PROCEED, {0}}
+    /* special */
+    {"jump", INSTR_JUMP,        {Label, InstrVarList, InstrVarList, InstrVarList}},
+    {"commit", INSTR_COMMIT,      {String, LineNum}},
+    {"newatom", INSTR_NEWATOM,    {InstrVar, InstrVar, Functor}},
+    {"removeatom", INSTR_REMOVEATOM, {InstrVar, InstrVar, Functor}},
+    {"alloclink", INSTR_ALLOCLINK, {InstrVar, InstrVar, InstrVar}},
+    {"unifylinks", INSTR_UNIFYLINKS, {InstrVar, InstrVar, InstrVar}},
+    {"enqueueatom", INSTR_ENQUEUEATOM, {InstrVar}},
+    {"proceed", INSTR_PROCEED, {0}},
+    {"loadruleset", INSTR_LOADRULESET, {InstrVar, ArgRuleset}},
+    {"deref", INSTR_DEREF, {InstrVar, InstrVar, InstrVar, InstrVar}},
+    {"func", INSTR_FUNC, {InstrVar, Functor}},
   };
 
 enum FunctorType {SYMBOL, INT, DOUBLE};
@@ -65,15 +70,25 @@ char *out;
 unsigned int out_cap;
 unsigned int pos;
 
-#define PUSH(V,X)                   \
-  do {                             \
-    if (V##_num == V##_cap) {      \
-      V##_cap *= 2;                                       \
-      V = realloc(V, sizeof(V[0]) * V##_cap); \
-    }                                                     \
-    V[V##_num++] = (X);                                   \
+#define PUSH(V,X)                               \
+  do {                                          \
+    if (V##_num == V##_cap) {                   \
+      V##_cap *= 2;                             \
+      V = realloc(V, sizeof(V[0]) * V##_cap);   \
+    }                                           \
+    V[V##_num++] = (X);                         \
   } while(0)
 
+#define POP(V,X)                                    \
+  do {                                              \
+    if (V##_num == 0) {                             \
+      fprintf(stderr, "pop from empty vector\n");   \
+    }                                               \
+    V##_num--;                                      \
+    *X = V[V##_num];                                \
+  } while (0) 
+
+  
 /*----------------------------------------------------------------------
  * Label
  */
@@ -92,7 +107,7 @@ unsigned int labels_cap;
 struct LabelLink {
   unsigned int label;
   unsigned int write_pos;
-  unsigned int start_pos; /* label_pos - pos - offset ãŒJumpå…ˆ */
+  unsigned int start_pos; /* label_pos - pos - offset ¤¬JumpÀè */
 };
 
 struct LabelLink *llink;
@@ -105,6 +120,7 @@ unsigned int llink_cap;
 
 struct Rule {
   unsigned int name;
+  BYTE *instr;
 };
 
 struct Ruleset {
@@ -129,20 +145,11 @@ struct SymbolEntry *symbols;
 unsigned int symbols_cap, symbols_num;
 unsigned int symbol_id = 0;
 
-struct FunctorEntry {
-  unsigned int name;
-  unsigned int arity;
-  unsigned int id;
-};
-struct FunctorEntry *funcs;
-unsigned int funcs_cap, funcs_num;
-unsigned int func_id = 0;
-
 static lmn_interned_str get_symbol_id(char *str)
 {
   unsigned int i;
 
-  /* TODO åŠ¹ç‡çš„ãªå®Ÿè£…ãŒå¿…è¦ */
+  /* TODO ¸úÎ¨Åª¤Ê¼ÂÁõ¤¬É¬Í× */
   for (i = 0; i < symbols_num; i++) {
     if (!strcmp(symbols[i].str, str)) return symbols[i].id;
   }
@@ -157,11 +164,24 @@ static lmn_interned_str get_symbol_id(char *str)
   }
 }
 
+/*----------------------------------------------------------------------
+ * Functor
+ */
+
+struct FunctorEntry {
+  unsigned int name;
+  unsigned int arity;
+  unsigned int id;
+};
+struct FunctorEntry *funcs;
+unsigned int funcs_cap, funcs_num;
+unsigned int func_id = 0;
+
 static LmnFunctor get_functor_id(struct Functor f)
 {
   unsigned int i;
 
-  /* TODO åŠ¹ç‡çš„ãªå®Ÿè£…ãŒå¿…è¦ */
+  /* TODO ¸úÎ¨Åª¤Ê¼ÂÁõ¤¬É¬Í× */
   for (i = 0; i < funcs_num; i++) {
     if (funcs[i].arity == f.v.sym_atom.arity &&
         funcs[i].name == f.v.sym_atom.symbol_id) {
@@ -197,10 +217,11 @@ static char* skipws(char* s)
   return s;
 }
 
-static char* skipdigit(char* s)
+static BOOL is_empty_line(char *line)
 {
-  while (isdigit(*s)) s++;
-  return s;
+  for (; *line==' ' || *line=='\t';  line++) ;
+  if (*line == '\r' || *line == '\n') return TRUE;
+  else return FALSE;
 }
 
 static void expand_out_buf()
@@ -211,15 +232,6 @@ static void expand_out_buf()
   }
 
 }
-/* void skipws(FILE* file) */
-/* { */
-/*   char c; */
-/*   do { */
-/*     c = fgetc(file); */
-/*   } while (c == ' ' || c == '\t'); */
-
-/*   ungetc(c, file); */
-/* } */
 
 static BOOL str_to_int(char *buf, int *x)
 {
@@ -246,51 +258,6 @@ static BOOL str_to_double(char *buf, double *v)
   if (errno == ERANGE) return FALSE;
   return TRUE;
 }
-
-/* struct Functor read_functor(FILE* file) */
-/* { */
-/*   char c; */
-/*   struct Functor functor; */
-  
-/*   do { */
-/*     c = fgetc(file); */
-/*   } while (c == ' ' || c == '\t'); */
-
-/*   if (c == '\'') { */
-/*     unsigned int str_len; */
-
-/*     functor.type = SYMBOL; */
-/*     ungetc(c, file); */
-/*     read_quoted_str(file, buf, &buf_size, &str_len); */
-/*     functor.v.sym_atom.symbol_id = get_symbol_id(buf); */
-/*     /\* skip '_' *\/ */
-/*     fgetc(file); */
-/*     fscanf(file, "%d", &functor.v.sym_atom.arity); */
-/*   } */
-/*   else { */
-/*     int i, dummy; */
-/*     /\* read before '_'  *\/ */
-/*     i = 0; */
-/*     while ((c = fgetc(file)) != '_') { */
-/*       buf[i++] = c; */
-/*     } */
-/*     buf[i] = '\0'; */
-
-/*     if (str_to_int(buf, &functor.v.int_value)) { */
-/*         functor.type = INT; */
-/*     } */
-/*     else if (str_to_double(buf, &functor.v.double_value)) { */
-/*       functor.type = DOUBLE; */
-/*     } else { */
-/*       fprintf(stderr, "read_functor: invalid format %s\n", buf); */
-/*       exit(1); */
-/*     } */
-
-/*     fscanf(file, "%d", &dummy); */
-/*     assert(dummy == 1); */
-/*   } */
-/*   return functor; */
-/* } */
 
 /* output is str */
 static char *read_quoted_str(char *line, char *str)
@@ -321,9 +288,26 @@ static char *read_quoted_str(char *line, char *str)
   return NULL;
 }
 
+static char *read_int(char *line, int *n)
+{
+  int sign  = 1;
+  
+  assert(isdigit(*line) || *line == '-');
+  if (*line == '-') sign = -1;
+  
+  *n = 0;
+  while (isdigit(*line)) {
+    *n *= 10;
+    *n += (*line) - '0';
+    line++;
+  }
+  *n *= sign;
+  
+  return line;
+}
+
 static char *read_functor(char *line, struct Functor *functor)
 {
-  debug(stderr, "line = %s\n", line);
   
   if (*line == '\'') { /* symbol functor */
     char s[1<<16];
@@ -335,16 +319,15 @@ static char *read_functor(char *line, struct Functor *functor)
     /* skip '_' */
     assert(*line == '_');
     line++;
-    functor->v.sym_atom.arity = atoi(line);
-    line = skipdigit(line);
+    line = read_int(line, (int*)&functor->v.sym_atom.arity);
 
     return line;
   }
   else { /* data atom */
     int i;
     char s[1<<16], *t;
-    /* copy before '_' */
 
+    /* copy before '_' */
     for (i = 0, t = line; *t != '_'; i++, t++) {
       s[i] = *t;
     }
@@ -356,7 +339,8 @@ static char *read_functor(char *line, struct Functor *functor)
     }
     else if (str_to_double(s, &functor->v.double_value)) {
       functor->type = DOUBLE;
-    } else {
+    }
+    else {
       fprintf(stderr, "read_functor: invalid format %s\n", s);
       exit(1);
     }
@@ -372,7 +356,7 @@ static char *read_functor(char *line, struct Functor *functor)
     (*(T*)(out+POS) = (V));                         \
       } while (0)
 
-/* å¼•æ•°ãŒã“ã‚Œä»¥ä¸Šãªã‘ã‚Œã° NULLãŒå¸°ã‚‹ */
+/* °ú¿ô¤¬¤³¤ì°Ê¾å¤Ê¤±¤ì¤Ğ NULL¤¬µ¢¤ë */
 static char *next_arg(char* s)
 {
   while (*s != ']' && (*s == '[' || *s == ',' ||*s == ' ' || *s == '\t')) {
@@ -390,6 +374,7 @@ static char *parse_string(char *line)
 
   if (SEQ(line, "null")) {
     num = strlen("null");
+    start = line;
     end = line + num;
   } else {
     char *t;
@@ -402,7 +387,8 @@ static char *parse_string(char *line)
   {
     unsigned int id;
     char *s = malloc(sizeof(char) * num + 1);
-
+    strncpy(s, start, num);
+    s[num] = '\0';
     id = get_symbol_id(s);
     WRITE(lmn_interned_str, id, pos);
     pos += sizeof(lmn_interned_str);
@@ -420,10 +406,8 @@ static char *parse_var_list(char *line)
   while (TRUE) {
     unsigned int n;
     line = next_arg(line);
-    debug(stderr, "d0 : %c %s\n", *line, line);
     if (*line == ']') break;
-    n = atoi(line);
-    line = skipdigit(line);
+    line = read_int(line, &n);
     WRITE(LmnInstrVar, n, pos);
     pos += sizeof(LmnInstrVar);
     num++;
@@ -440,12 +424,9 @@ static char *parse_arg(char *line, enum ArgType type)
   case InstrVar:
   {
     unsigned int n;
-        debug(stderr, "instrvar n=%d pos=%d : %s", n, pos, line);
-    n = atoi(line);
-    line = skipdigit(line);
+    line = read_int(line, &n);
     WRITE(LmnInstrVar, n, pos);
     pos += sizeof(LmnInstrVar);
-        debug(stderr, "instrvar n=%d pos=%d : %s", n, pos, line);
     return line;
   }
   case String:
@@ -454,15 +435,47 @@ static char *parse_arg(char *line, enum ArgType type)
   case LineNum:
   {
     unsigned int n;
-    n = atoi(line);
-    line = skipdigit(line);
+    line = read_int(line, &n);
     WRITE(LmnLineNum, n, pos);
     pos += sizeof(LmnLineNum);
     return line;
   }
   case Functor:
+  {
+    struct Functor f;
+
+    line = read_functor(line, &f);
+    switch (f.type) {
+    case SYMBOL:
+    {
+      LmnFunctor f_id = get_functor_id(f);
+      WRITE(LmnLinkAttr, LMN_MAKE_LINK(0), pos);
+      pos += sizeof(LmnLinkAttr);
+      WRITE(LmnFunctor, f_id, pos);
+      pos += sizeof(LmnFunctor);
+      break;
+    }
+    case INT:
+      WRITE(LmnLinkAttr, LMN_ATTR_MAKE_DATA(LMN_ATOM_INT_ATTR), pos);
+      pos += sizeof(LmnLinkAttr);
+      WRITE(int, f.v.int_value, pos);
+      pos += sizeof(int);
+      break;
+    case DOUBLE:
+      WRITE(LmnLinkAttr, LMN_ATTR_MAKE_DATA(LMN_ATOM_DBL_ATTR), pos);
+      pos += sizeof(LmnLinkAttr);
+      WRITE(double, f.v.double_value, pos);
+      pos += sizeof(double);
+      break;
+    default:
+      fprintf(stderr, "not implemented data type %d\n", f.type);
+      exit(1);
+      break;
+    }
+
     assert(FALSE);
     break;
+  }
   case Label:
     assert(FALSE);
     break;
@@ -485,13 +498,11 @@ static BOOL parse_special_instr(char *line, struct InstrSpec spec)
     unsigned int label;
     struct LabelLink link;
 
-    debug(stderr, "write jump %s\n", spec.op_str);
     WRITE(LmnInstrOp, spec.op, pos);
     pos += sizeof(LmnInstrOp);
 
     line = next_arg(line) + 1/* L */;
-    label = atoi(line);
-    line = skipdigit(line);
+    line = read_int(line, &label);
 
     line = next_arg(parse_var_list(line)); 
     line = next_arg(parse_var_list(line)); 
@@ -504,45 +515,6 @@ static BOOL parse_special_instr(char *line, struct InstrSpec spec)
     PUSH(llink, link);
     pos += sizeof(LmnJumpOffset);
 
-    debug(stderr, "write jump end%s\n", spec.op_str);
-
-    return TRUE;
-  }
-  case INSTR_NEWATOM:
-  {
-    struct Functor f;
-    unsigned int op_pos;
-
-    op_pos = pos;
-    pos += sizeof(LmnInstrOp);
-
-    line = next_arg(line);
-    line = next_arg(parse_arg(line, InstrVar));
-    line = next_arg(parse_arg(line, InstrVar));
-    line = read_functor(line, &f);
-    
-    switch (f.type) {
-    case SYMBOL:
-    {
-      LmnFunctor f_id = get_functor_id(f);
-      WRITE(LmnFunctor, f_id, pos);
-      WRITE(LmnInstrOp, INSTR_NEWATOM, op_pos);
-      break;
-    }
-    case INT:
-      WRITE(int, f.v.int_value, pos);
-      pos += sizeof(int);
-      WRITE(LmnInstrOp, INSTR_NEWATOM_INT, op_pos);
-      break;
-    case DOUBLE:
-      WRITE(double, f.v.double_value, pos);
-      pos += sizeof(double);
-      WRITE(LmnInstrOp, INSTR_NEWATOM_DOUBLE, op_pos);
-      break;
-    default:
-      assert(FALSE);
-      break;
-    }
     return TRUE;
   }
   default:
@@ -563,7 +535,6 @@ static BOOL parse_instr(struct Rule *rule, struct InstrSpec spec)
   line = skipws(line);
   if (parse_special_instr(line, spec)) return TRUE;
 
-  debug(stderr, "write op : %s\n", spec.op_str);
 
   WRITE(LmnInstrOp, spec.op, pos);
   pos += sizeof(LmnInstrOp);
@@ -584,7 +555,7 @@ static BOOL parse_rule_el(struct Rule *rule)
   line = skipws(src_lines[cur_line]);
 
   if (SEQ(line, ATOMMATCH)) {
-    /* ç¶šãå‘½ä»¤ã‚’èª­ã¿æ¨ã¦ã‚‹ */
+    /* Â³¤¯Ì¿Îá¤òÆÉ¤ß¼Î¤Æ¤ë */
     while (!SEQ(line, MEMMATCH)) {
       line = skipws(src_lines[++cur_line]);
     }
@@ -595,25 +566,20 @@ static BOOL parse_rule_el(struct Rule *rule)
     return TRUE;
   }
   if (SEQ(line, GUARD)) {
-    int label;
     struct LabelInfo l;
 
     line += strlen(GUARD) + 1/*L*/;
-    label = atoi(line);
-    l.label = label;
+    line = read_int(line, &l.label);
     l.pos = pos;
     PUSH(labels, l);
-
     cur_line++;
     return TRUE;
   }
   if (SEQ(line, BODY)) {
-    int label;
     struct LabelInfo l;
 
     line += strlen(BODY) + 1/*L*/;
-    label = atoi(line);
-    l.label = label;
+    line = read_int(line, &l.label);
     l.pos = pos;
     PUSH(labels, l);
 
@@ -621,7 +587,7 @@ static BOOL parse_rule_el(struct Rule *rule)
     return TRUE;
   }
 
-  if (*line == '\n' || *line == '\r') {
+  if (is_empty_line(line)) {
     cur_line++;
     return FALSE;
   }
@@ -658,20 +624,24 @@ static struct Ruleset *parse_ruleset(void)
   char *end;
   char *line;
   struct Ruleset *rs;
-  
+  unsigned int size_pos;
+
   line = src_lines[cur_line];
   
   if (!SEQ(line, RULESET)) return NULL;
 
   line += strlen(RULESET) + 2/*space + atmark*/;
-  id = strtoul(line, &end, 10);
+  line = read_int(line, &id);
 
   rs = malloc(sizeof(struct Ruleset));
-  
+
   rs->id = id;
   rs->pos = pos;
   rs->rule_num = 0;
 
+  WRITE(LmnWord, rs->id, pos);
+  pos += sizeof(LmnWord);
+  
   cur_line++;
 
   while (1) {
@@ -688,6 +658,8 @@ static struct Ruleset *parse_ruleset(void)
   if (rs->rule_num == 0) {
     fprintf(stderr, "parse_ruleset: line[%d], ruleset is empty\n", cur_line);
   }
+
+  WRITE(int32_t, rs->rule_num, 
   
   return rs;
 }
@@ -749,7 +721,6 @@ static void resolve_label(void)
 
   for (i = 0; i < llink_num; i++) {
     unsigned int label_pos = find_label_pos(llink[i].label);
-    debug(stderr, "jump offset = %d %d %d\n", label_pos, llink[i].start_pos, llink[i].write_pos);
     WRITE(LmnJumpOffset, label_pos - llink[i].start_pos, llink[i].write_pos);
   }
 }
@@ -762,6 +733,8 @@ static void resolve_ruleset(void)
 
 int main(int argc, char* argv[])
 {
+  int i;
+  
   /* initialize */
   out_cap = 1<<16;
   out = malloc(out_cap);
@@ -788,6 +761,41 @@ int main(int argc, char* argv[])
   resolve_label();
   resolve_ruleset();
 
+  /* header */
+
+  /* symbol table */
+  fwrite(&symbols_num, sizeof(lmn_interned_str), 1, stdout);
+  for (i = 0; i < symbols_num; i++) {
+    int n;
+
+    debug(stderr, "[%s] %d\n", symbols[i].str, symbols[i].id);
+    fwrite(&symbols[i].id, sizeof(lmn_interned_str), 1, stdout);
+    n = strlen(symbols[i].str);
+    fwrite(&n, sizeof(uint16_t), 1, stdout);
+    fwrite(symbols[i].str, n, 1, stdout);
+  }
+
+  /* functor table */
+  fwrite(&funcs_num, sizeof(LmnFunctor), 1, stdout);
+  for (i = 0; i < symbols_num; i++) {
+    fwrite(&funcs[i].id, sizeof(LmnFunctor), 1, stdout);
+    fwrite(&funcs[i].name, sizeof(lmn_interned_str), 1, stdout);
+    fwrite(&funcs[i].arity, sizeof(LmnArity), 1, stdout);
+  }
+
+  /* ruleset */
+  fwrite(&ruleset_num, sizeof(LmnWord), 1, stdout);
+  for (i = 0; i < ruleset_num; i++) {
+    LmnWord n;
+    fwrite(&ruleset[i].id, sizeof(LmnWord), 1, stdout);
+    fwrite(&ruleset[i].rule_num, sizeof(LmnWord), 1, stdout);
+    if (i + 1 < ruleset_num) 
+      n = ruleset[i+1].pos - ruleset[i].pos;
+    else
+      n = 0;
+    WRITE(LmnWord, n, ruleset[i].pos);
+  }
+  
   /* print */
   fwrite(out, pos, 1, stdout);
 
