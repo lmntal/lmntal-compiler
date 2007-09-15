@@ -19,3 +19,35 @@ configure.ac, Makefile.am src/Makefile.am 変更したらconfig.h, Makefile
 ** configureのオプション
 ./configure 時にオプションが付けられる
 - --enable-debug  : DEBUG を define する
+
+* デバッグ
+** dmalloc (http://dmalloc.com/)
+メモリリークおよび不正なアドレスへの書き込みを検出する
+
+*** 使いかた
+http://dmalloc.com/docs/latest/online/dmalloc_4.html#SEC4
+にチュートリアルがある。
+
+automakeでdmallocようの機能があったのでそれを使ったときの手順。
+$ が付いている行はシェルコマンド
+
+1. $ function dmalloc { eval `command dmalloc -b $*`; }
+  
+2. ./configure時に --enable-dmalloc をつけるか、
+   make HAVE_DMALLOC=1
+　としてmakeする。
+
+3. $ dmalloc -l dmalloc_log -i 100 low 
+      * -l dmaloc_log : ログファイルの名前
+      * -i 100 : チェックする頻度。数字が小さい方がプログラムは遅くなる
+      * low    : チェックする機能の数。 runtime < low < medium < high
+                 の順にチェックが多くなる。
+4. プログラムを実行
+5. ログが dmalloc_log に書かれる
+
+* プロファイラ
+** gprof
+
+** oprofile
+
+
