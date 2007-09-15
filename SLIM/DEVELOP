@@ -33,9 +33,7 @@ $ が付いている行はシェルコマンド
 
 1. $ function dmalloc { eval `command dmalloc -b $*`; }
   
-2. ./configure時に --enable-dmalloc をつけるか、
-   make HAVE_DMALLOC=1
-　としてmakeする。
+2. ./configureに --with-dmalloc を付けて実行
 
 3. $ dmalloc -l dmalloc_log -i 100 low 
       * -l dmaloc_log : ログファイルの名前
