@@ -64,7 +64,6 @@ public class AttractionForce {
 		Iterator<Node> nodes = nodeSet.iterator();
 		while(nodes.hasNext()){
 			Node node = nodes.next();
-			// TODO: nodeの大きさを考慮するように。
 			Rectangle2D targetRect = node.getBounds2D();
 			if(maxX < targetRect.getMaxX()) maxX = targetRect.getMaxX();
 			if(targetRect.getMinX() < minX) minX = targetRect.getMinX();
@@ -162,9 +161,6 @@ public class AttractionForce {
 				Node targetNode = nodes.next();
 				targetNode.moveDelta(-ddx, -ddy);
 			}
-			// TODO: nodeSetの親膜（node）の中心点を取得
-			// TODO: nodeSetの中心が、親膜（node）の中心に近付くような力を算出
-			// TODO: nodeSetのすべてのNodeに力を適用
 			
 			
 		}

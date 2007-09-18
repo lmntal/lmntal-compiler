@@ -145,12 +145,6 @@ public class LMNtalFrame extends JFrame {
 	    
 	    addComponentListener(new Resize(this));
 	    
-//	    try{
-//	    	javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
-//	        SwingUtilities.updateComponentTreeUI(this);
-//	      }catch(Exception ex){
-//	        System.out.println("Error L&F Setting");
-//	      }
 	}
 
 	
