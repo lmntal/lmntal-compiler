@@ -306,7 +306,7 @@ public class HeadCompiler {
 						newmemlist.add(buddymem);
 						if(Env.slimcode){
 							// GETMEM時代のコード
-							Iterator it = buddymem.mems.iterator();
+							Iterator it = buddymem.parent.mems.iterator();
 							while (it.hasNext()) {
 								Membrane othermem = (Membrane)it.next();
 								if (othermem != buddymem && memToPath(othermem) != UNBOUND) {
