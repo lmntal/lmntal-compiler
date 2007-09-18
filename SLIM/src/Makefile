@@ -34,7 +34,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = slim$(EXEEXT)
+bin_PROGRAMS = slim$(EXEEXT) conv_il$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/config.h.in
@@ -48,8 +48,12 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
+am_conv_il_OBJECTS = conv_il.$(OBJEXT)
+conv_il_OBJECTS = $(am_conv_il_OBJECTS)
+conv_il_LDADD = $(LDADD)
 am_slim_OBJECTS = main.$(OBJEXT) membrane.$(OBJEXT) rule.$(OBJEXT) \
-	alloc.$(OBJEXT) error.$(OBJEXT)
+	alloc.$(OBJEXT) error.$(OBJEXT) read_il.$(OBJEXT) \
+	task.$(OBJEXT) memory_pool.$(OBJEXT)
 slim_OBJECTS = $(am_slim_OBJECTS)
 slim_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
@@ -59,8 +63,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(slim_SOURCES)
-DIST_SOURCES = $(slim_SOURCES)
+SOURCES = $(conv_il_SOURCES) $(slim_SOURCES)
+DIST_SOURCES = $(conv_il_SOURCES) $(slim_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -72,7 +76,7 @@ AUTOCONF = ${SHELL} /home/taisuke/data/workspace/devel/SLIM/missing --run autoco
 AUTOHEADER = ${SHELL} /home/taisuke/data/workspace/devel/SLIM/missing --run autoheader
 AUTOMAKE = ${SHELL} /home/taisuke/data/workspace/devel/SLIM/missing --run automake-1.9
 AWK = mawk
-CC = gcc
+CC = gcc -std=gnu99
 CCDEPMODE = depmode=gcc3
 CFLAGS = -std=c89 -pedantic -Wall -Wchar-subscripts -Wmissing-declarations -Wredundant-decls -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wcast-align -Wsign-compare -Wswitch-enum -g -O2
 CPP = gcc -E
@@ -90,9 +94,9 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
-LDFLAGS = 
+LDFLAGS =  -g
 LIBOBJS = 
-LIBS = 
+LIBS =  -ldmalloc
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/taisuke/data/workspace/devel/SLIM/missing --run makeinfo
 OBJEXT = o
@@ -143,7 +147,8 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
-slim_SOURCES = main.c membrane.c rule.c alloc.c error.c
+slim_SOURCES = main.c membrane.c rule.c alloc.c error.c  read_il.c task.c memory_pool.c 
+conv_il_SOURCES = conv_il.c 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -218,6 +223,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+conv_il$(EXEEXT): $(conv_il_OBJECTS) $(conv_il_DEPENDENCIES) 
+	@rm -f conv_il$(EXEEXT)
+	$(LINK) $(conv_il_LDFLAGS) $(conv_il_OBJECTS) $(conv_il_LDADD) $(LIBS)
 slim$(EXEEXT): $(slim_OBJECTS) $(slim_DEPENDENCIES) 
 	@rm -f slim$(EXEEXT)
 	$(LINK) $(slim_LDFLAGS) $(slim_OBJECTS) $(slim_LDADD) $(LIBS)
@@ -229,10 +237,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/alloc.Po
+include ./$(DEPDIR)/conv_il.Po
 include ./$(DEPDIR)/error.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/membrane.Po
+include ./$(DEPDIR)/memory_pool.Po
+include ./$(DEPDIR)/read_il.Po
 include ./$(DEPDIR)/rule.Po
+include ./$(DEPDIR)/task.Po
 
 .c.o:
 	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -416,11 +428,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	tags uninstall uninstall-am uninstall-binPROGRAMS \
 	uninstall-info-am
 
-
-# TESTS = test
-
-# check_PROGRAMS = test
-# test_SOURCES = ${slim_SOURCES} c_test/libtest.c c_test/test_main.c c_test/test_char.c
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
