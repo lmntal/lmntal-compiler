@@ -45,13 +45,8 @@ static LmnRule *load_rule(FILE *in)
   LmnRuleInstr instr = LMN_CALLOC(BYTE, instr_size);
 
   fread(instr, 1, instr_size, in);
-  { int i;
-    for (i = 0; i < instr_size/2; i++) {
-      printf("instr: %d\n", *(uint16_t*)(instr+i*2));
-    }
-  }
 
-  printf("loaded rule size:%d\n", instr_size);
+  fprintf(stderr, "loaded rule size:%d\n", instr_size);
   
   return lmn_rule_make(instr, 0); /* there is no name for rule */
 }
@@ -64,11 +59,11 @@ static LmnRuleSet *load_ruleset(FILE *in)
   LmnRuleSet *res =lmn_ruleset_make(ruleset_id, rule_size);
   int i;
 
-  printf("loading ruleset >>> size:%d name:%d\n", rule_size, ruleset_id);
+  fprintf(stderr, "loading ruleset >>> size:%d name:%d\n", rule_size, ruleset_id);
   for(i=0; i<rule_size; ++i){
     lmn_ruleset_put(res, load_rule(in));
   }
-  printf("loading ruleset <<< size:%d name:%d\n", rule_size, ruleset_id);
+  fprintf(stderr, "loading ruleset <<< size:%d name:%d\n", rule_size, ruleset_id);
   
   return res;
 }
@@ -80,22 +75,24 @@ static void load_instr(FILE *in)
   lmn_ruleset_table.size = load_uint32(in);
   lmn_ruleset_table.entry = LMN_NALLOC(LmnRuleSet*, lmn_ruleset_table.size);
 
-  printf("loading instr >>> size:%d\n", lmn_ruleset_table.size);
+  fprintf(stderr, "loading instr >>> size:%d\n", lmn_ruleset_table.size);
   for(i=0; i<lmn_ruleset_table.size; ++i){
     lmn_ruleset_table.entry[i] = load_ruleset(in);
   }
-  printf("loading instr <<< size:%d\n", lmn_ruleset_table.size);
+  fprintf(stderr, "loading instr <<< size:%d\n", lmn_ruleset_table.size);
 }
 
 static void load_symbols(FILE *in)
 {
   unsigned int i;
+  unsigned int symbol_num;
 
-  lmn_symbol_table.size = load_uint(in, sizeof(lmn_interned_str));
+  symbol_num = load_uint(in, sizeof(lmn_interned_str));
+  lmn_symbol_table.size = symbol_num + 1;
   lmn_symbol_table.entry = LMN_NALLOC(char*, lmn_symbol_table.size);
 
-  printf("loading symbol >>> size:%d\n", lmn_symbol_table.size);
-  for(i=0; i<lmn_symbol_table.size; ++i){
+  fprintf(stderr, "loading symbol >>> size:%d\n", lmn_symbol_table.size);
+  for(i=0; i<symbol_num; ++i){
     unsigned int j;
     /* skip symbol id, because it must be sorted in order*/
     unsigned int symbol_id = load_uint(in, sizeof(lmn_interned_str));
@@ -108,9 +105,9 @@ static void load_symbols(FILE *in)
     }
     lmn_symbol_table.entry[symbol_id][symbol_size] = '\0';
 
-    printf("loaded a symbol name:%s\n", lmn_symbol_table.entry[symbol_id]);
+    fprintf(stderr, "loaded a symbol name:%s\n", lmn_symbol_table.entry[symbol_id]);
   }
-  printf("loading symbol <<< size:%d\n", lmn_symbol_table.size);
+  fprintf(stderr, "loading symbol <<< size:%d\n", lmn_symbol_table.size);
 }
 
 static void load_functors(FILE *in)
@@ -119,20 +116,23 @@ static void load_functors(FILE *in)
 
   lmn_functor_table.size = load_uint(in, sizeof(LmnFunctor));
   lmn_functor_table.entry = LMN_NALLOC(LmnFunctorEntry, lmn_functor_table.size);
-  printf("loading functors >>> size:%d\n", lmn_functor_table.size);
+  fprintf(stderr, "loading functors >>> size:%d\n", lmn_functor_table.size);
   for(i=0; i<lmn_functor_table.size; ++i){
      /* skip functor id, because it must be sorted in order */
     int functor_id = load_uint(in, sizeof(LmnFunctor));
+    lmn_functor_table.entry[i].module = load_uint(in, sizeof(lmn_interned_str));
     lmn_functor_table.entry[i].name = load_uint(in, sizeof(lmn_interned_str));
     lmn_functor_table.entry[i].arity = load_uint(in, sizeof(LmnArity));
 
-    printf("loaded functor id:%d string:%d->%s arity:%d\n",
+    fprintf(stderr, "loaded functor id:%d module:%d->%s string:%d->%s arity:%d\n",
 	   functor_id,
+	   lmn_functor_table.entry[i].module,
+	   lmn_symbol_table.entry[lmn_functor_table.entry[i].module],
 	   lmn_functor_table.entry[i].name,
 	   lmn_symbol_table.entry[lmn_functor_table.entry[i].name],
 	   lmn_functor_table.entry[i].arity);
   }
-  printf("loading functors <<< size:%d\n", lmn_functor_table.size);
+  fprintf(stderr, "loading functors <<< size:%d\n", lmn_functor_table.size);
 }
 
 void read_il(const char *file_name)
