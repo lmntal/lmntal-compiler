@@ -36,7 +36,7 @@ struct MemStack {
  * Stack for backtrack
  */
 
-enum StackEntryType { PT_FINDATOM, PT_GROUP };
+enum StackEntryType { PT_FINDATOM, PT_GROUP, PT_SWAP_VEC };
 
 typedef struct StackEntry {
   enum StackEntryType type;
@@ -234,7 +234,7 @@ static BOOL interpret(LmnRuleInstr instr)
   while (TRUE) {
   LOOP_HEAD:;
     LMN_IMS_READ(LmnInstrOp, instr, op);
-    printf("op: %d %d\n", op, instr - start - 2);
+    fprintf(stderr, "op: %d %d\n", op, instr - start - 2);
     switch (op) {
     case INSTR_SPEC:
       /* ignore spec, because wv is initially large enough. */
@@ -243,7 +243,7 @@ static BOOL interpret(LmnRuleInstr instr)
     case INSTR_JUMP:
     {
       LmnInstrVar num, i, n;
-      uint16_t offset;
+      LmnJumpOffset offset;
 
       i = 0;
       /* atom */
@@ -268,10 +268,7 @@ static BOOL interpret(LmnRuleInstr instr)
         tkv[i] = wkv[n];
       }
 
-      SWAP(LmnWord*, wv, tv);
-      SWAP(LmnByte*, wkv, tkv);
-
-      LMN_IMS_READ(uint16_t, instr, offset);
+      LMN_IMS_READ(LmnJumpOffset, instr, offset);
       instr += offset;
       
       break;
@@ -285,7 +282,7 @@ static BOOL interpret(LmnRuleInstr instr)
       LmnLinkAttr attr;
       LmnRuleInstr ret_pt;
 
-      ret_pt = instr;
+      ret_pt = instr - sizeof(LmnInstrOp);
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnLinkAttr, instr, attr);
@@ -365,6 +362,7 @@ static BOOL interpret(LmnRuleInstr instr)
         ap = lmn_new_atom(f);
         lmn_mem_push_atom((LmnMembrane*)wv[memi], ap);
         REF_CAST(LmnAtomPtr, wv[atomi]) = ap;
+        wkv[atomi] = LMN_ATTR_MAKE_LINK(0);
       }
       break;
     }
@@ -546,6 +544,33 @@ static BOOL interpret(LmnRuleInstr instr)
       lmn_mem_add_ruleset((LmnMembrane*)wv[memi], LMN_RULESET_ID(id));
       break;
     }
+    /* slim optimization instruction ---------------------------------------- */
+    case INSTR_SWAP_WORK_VEC:
+    {
+      SWAP(LmnWord*, wv, tv);
+      SWAP(LmnByte*, wkv, tkv);
+
+      if (is_backtrack) {
+        fprintf(stderr, "swap back\n");
+        BACKTRACK;
+      } else {
+        StackEntry e = {PT_SWAP_VEC};
+        fprintf(stderr, "swap \n");
+        e.ret_pt = instr - sizeof(LmnInstrOp);
+        stack_push(st, e);
+      }
+      break;
+    }
+    case INSTR_REWINDSTACK:
+    {
+      LmnInstrVar n;
+
+      LMN_IMS_READ(LmnInstrVar, instr, n);
+      st.num -= n;
+      break;
+    }
+    case INSTR_SUCCESS:
+      goto SUCCESS;
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
