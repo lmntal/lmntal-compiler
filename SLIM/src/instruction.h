@@ -1,4 +1,7 @@
-enum {
+#ifndef LMN_INSTRUCTION_H
+#define LMN_INSTRUCTION_H
+
+enum LmnInstruction {
   INSTR_OPT,
   INSTR_DUMMY,
   INSTR_UNDEF,
@@ -180,5 +183,12 @@ enum {
   INSTR_GROUP,
   INSTR_SYSTEMRULESETS,
   INSTR_SUBCLASS,
-  INSTR_ISBUDDY };
+  INSTR_ISBUDDY,
 
+  /* add for optimization */
+  INSTR_SWAP_WORK_VEC,
+  INSTR_REWINDSTACK,
+  INSTR_SUCCESS
+};
+
+#endif /*LMN_INSTRUCTION_H*/
