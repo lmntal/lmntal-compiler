@@ -71,8 +71,13 @@ typedef int16_t RuleSize;
  *
  *  * Argument
  *   ** functor
- *     BYTE : data tag (see atom description in lmntal.h)
- *     data
+ *       BYTE : data tag (see atom description in lmntal.h)
+ *       data according to tag
+ *   ** InstrVar
+ *       LmnInstrVar      : integer value
+ *   ** InstrVarList
+ *     int16_t           : # of elements (N)
+ *     LmnInstrVar * N
  * 
  */
 
