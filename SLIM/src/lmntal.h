@@ -11,6 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef WITH_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #if defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
@@ -271,6 +275,7 @@ void read_il(const char *file_name);
 /* Functor Information */
 
 typedef struct LmnFunctorEntry {
+  lmn_interned_str  module;
   lmn_interned_str  name;
   LmnArity          arity;
 } LmnFunctorEntry;

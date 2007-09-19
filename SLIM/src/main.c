@@ -87,13 +87,15 @@ int main(int argc, char *argv[])
 {
   int optid;
   
-#ifdef DEBUG
-  mtrace();
-#endif
-  
   init_internal();
+  
   optid = parse_options(argc, argv);
-  read_il(argv[optid]);
+  if (optid < argc) {
+    read_il(argv[optid]);
+  } else {
+    fprintf(stderr, "no input file\n");
+    exit(1);
+  }
 
   run();
 
@@ -104,9 +106,6 @@ int main(int argc, char *argv[])
 
   finalize();
 
-#ifdef DEBUG
-  muntrace();
-#endif
 
 
 /*   unsigned int instr_a[] = {0x12345678, 0x11223344}; */
