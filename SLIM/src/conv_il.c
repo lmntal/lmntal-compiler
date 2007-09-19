@@ -31,6 +31,9 @@ typedef int16_t RuleSize;
 #define ARY_SIZE(X) (sizeof(X)/sizeof(X[0]))
 #define SEQ(A,S) (!strncmp((A),(S),strlen(S)))
 
+BOOL dump = FALSE;
+BOOL stack_opt = FALSE;
+
 /*
  *  Binary Format
  *    - symbol table
@@ -656,7 +659,7 @@ static char *read_quoted_str(char *line, char *str)
 static char *read_int(char *line, int *n)
 {
   int sign  = 1;
-  
+
   ASSERT(isdigit(*line) || *line == '-');
   if (*line == '-') sign = -1;
   
@@ -924,7 +927,8 @@ static BOOL parse_instr(struct Instruction *instr, char **next)
   instr_init(instr);
   
   for (i = 0; i < sizeof(spec)/sizeof(spec[0]); i++) {
-    if (SEQ(line, spec[i].op_str)) {
+    if (SEQ(line, spec[i].op_str) &&
+        !isalpha(*(line + strlen(spec[i].op_str)))) {
       line = skipws(line+strlen(spec[i].op_str));
       instr->id = spec[i].op;
       if ((line = parse_instr_arg(line, spec[i].args, instr)) != NULL) {
@@ -1294,21 +1298,23 @@ static void optimize_instrs(VEC_T(INSTR_V) *v)
       SWAP(struct InstrArg, instr->args[1], instr->args[2]);
       SWAP(struct InstrArg, instr->args[2], instr->args[3]);
     }
-    if (instr->id == INSTR_GROUP) {
-      optimize_group(instr); 
-      { /* 保持している命令列を再帰的に処理 */
-        VEC_T(INSTR_V) *instrs = (VEC_T(INSTR_V)*)instr->args[0].v;
-        optimize_instrs(instrs);
+    if (stack_opt) {
+      if (instr->id == INSTR_GROUP) {
+        optimize_group(instr); 
+        { /* 保持している命令列を再帰的に処理 */
+          VEC_T(INSTR_V) *instrs = (VEC_T(INSTR_V)*)instr->args[0].v;
+          optimize_instrs(instrs);
+        }
       }
-    }
-    if (is_unused(instr)) {
-      VEC_REMOVE(v, (unsigned int)i);
-    }
-    if (is_not_allowed(instr)) {
-      fprintf(stderr, "Instruction: ");
-      instr_dump(*instr);
-      fprintf(stderr, "not allowed\n");
-      exit(1);
+      if (is_unused(instr)) {
+        VEC_REMOVE(v, (unsigned int)i);
+      }
+      if (is_not_allowed(instr)) {
+        fprintf(stderr, "Instruction: ");
+        instr_dump(*instr);
+        fprintf(stderr, "not allowed\n");
+        exit(1);
+      }
     }
   }
 }
@@ -1336,22 +1342,21 @@ static void optimize_guard(struct RuleEl *r)
 
 static void optimize_body(struct RuleEl *r)
 {
-  if (r->instrs.num > 0) {
-    struct Instruction instr;
+  struct Instruction instr;
 
-    instr.id = INSTR_SUCCESS;
-    instr.arg_num = 0;
-    PUSH(&r->instrs, instr);
-  }
+  instr.id = INSTR_SUCCESS;
+  instr.arg_num = 0;
+  PUSH(&r->instrs, instr);
 }
 
 static void optimize_rule(struct Rule *r)
 {
-  optimize_amatch(&r->amatch);
-  optimize_mmatch(&r->mmatch);
-  optimize_guard(&r->guard);
-  optimize_body(&r->body);
-
+  if (stack_opt) {
+    optimize_amatch(&r->amatch);
+    optimize_mmatch(&r->mmatch);
+    optimize_guard(&r->guard);
+    optimize_body(&r->body);
+  }
   optimize_instrs(&r->amatch.instrs);
   optimize_instrs(&r->mmatch.instrs);
   optimize_instrs(&r->guard.instrs);
@@ -1724,8 +1729,6 @@ static void usage(void)
   exit(1);
 }
  
-BOOL dump = FALSE;
-
 static int parse_options(int argc, char *argv[])
 {
   int c, option_index;
@@ -1736,11 +1739,14 @@ static int parse_options(int argc, char *argv[])
     {0, 0, 0, 0}
   };
 
-  while ((c = getopt_long(argc, argv, "+", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "+s", long_options, &option_index)) != -1) {
     switch (c) {
     case 0:
       printf("log_options entries must have positive 4th member.\n");
       exit(1);
+      break;
+    case 's':
+      stack_opt = TRUE;
       break;
     case 1000:
       dump = TRUE;
