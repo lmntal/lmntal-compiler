@@ -19,7 +19,7 @@ memory_pool *memory_pool_new(int s)
   res->sizeof_element = ((s+sizeof_p-1)/sizeof_p)*sizeof_p;
   res->free_head = 0;
 
-  printf("this memory_pool allocate %d, aligned as %d\n", s, res->sizeof_element);
+  fprintf(stderr, "this memory_pool allocate %d, aligned as %d\n", s, res->sizeof_element);
 
   return res;
 }
@@ -33,7 +33,7 @@ void *memory_pool_malloc(memory_pool *p)
     char *rawblock;
     int i;
     
-    printf("no more free space, so allocate new block\n");
+    fprintf(stderr, "no more free space, so allocate new block\n");
 
     p->free_head = malloc(p->sizeof_element * blocksize);
     rawblock = (char*)p->free_head;
@@ -41,7 +41,7 @@ void *memory_pool_malloc(memory_pool *p)
     for(i=0; i<blocksize-1; ++i){
       LHS_CAST(void*, rawblock[p->sizeof_element*i]) = &rawblock[p->sizeof_element*(i+1)];
     }
-    LHS_CAST(void*, rawblock[p->sizeof_element*blocksize-1]) = 0;
+    LHS_CAST(void*, rawblock[p->sizeof_element * (blocksize-1)]) = 0;
   }
 
   res = p->free_head;
@@ -58,7 +58,7 @@ void memory_pool_free(memory_pool *p, void *e)
 
 void memory_pool_delete(memory_pool *p)
 {
-  printf("i dont know how to free what i memory_pooled\n");
+  fprintf(stderr, "i dont know how to free what i memory_pooled\n");
 }
 
 /*
