@@ -982,7 +982,6 @@ static BOOL parse_rule(struct Rule *r)
   b = parse_rule_el(&r->guard, GUARD) || b;
   b = parse_rule_el(&r->body, BODY) || b;
 
-  fprintf(stderr, "b = %d\n", b);
   return b;
 }
 
