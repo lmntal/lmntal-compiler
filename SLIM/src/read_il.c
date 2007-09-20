@@ -113,24 +113,24 @@ static void load_symbols(FILE *in)
 static void load_functors(FILE *in)
 {
   unsigned int i;
-
-  lmn_functor_table.size = load_uint(in, sizeof(LmnFunctor));
+  unsigned int data_num = load_uint(in, sizeof(LmnFunctor));
+  lmn_functor_table.size = data_num + 1; /* ファンクタIDの開始は1 */
   lmn_functor_table.entry = LMN_NALLOC(LmnFunctorEntry, lmn_functor_table.size);
   fprintf(stderr, "loading functors >>> size:%d\n", lmn_functor_table.size);
-  for(i=0; i<lmn_functor_table.size; ++i){
+  for(i=0; i<data_num; ++i){
      /* skip functor id, because it must be sorted in order */
     int functor_id = load_uint(in, sizeof(LmnFunctor));
-    lmn_functor_table.entry[i].module = load_uint(in, sizeof(lmn_interned_str));
-    lmn_functor_table.entry[i].name = load_uint(in, sizeof(lmn_interned_str));
-    lmn_functor_table.entry[i].arity = load_uint(in, sizeof(LmnArity));
+    lmn_functor_table.entry[functor_id].module = load_uint(in, sizeof(lmn_interned_str));
+    lmn_functor_table.entry[functor_id].name = load_uint(in, sizeof(lmn_interned_str));
+    lmn_functor_table.entry[functor_id].arity = load_uint(in, sizeof(LmnArity));
 
     fprintf(stderr, "loaded functor id:%d module:%d->%s string:%d->%s arity:%d\n",
 	   functor_id,
-	   lmn_functor_table.entry[i].module,
-	   lmn_symbol_table.entry[lmn_functor_table.entry[i].module],
-	   lmn_functor_table.entry[i].name,
-	   lmn_symbol_table.entry[lmn_functor_table.entry[i].name],
-	   lmn_functor_table.entry[i].arity);
+	   lmn_functor_table.entry[functor_id].module,
+	   lmn_symbol_table.entry[lmn_functor_table.entry[functor_id].module],
+	   lmn_functor_table.entry[functor_id].name,
+	   lmn_symbol_table.entry[lmn_functor_table.entry[functor_id].name],
+	   lmn_functor_table.entry[functor_id].arity);
   }
   fprintf(stderr, "loading functors <<< size:%d\n", lmn_functor_table.size);
 }

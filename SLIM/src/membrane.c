@@ -197,6 +197,8 @@ static void dump_atom(LmnAtomPtr atom, struct SimpleHashtbl *ht, BOOL internal, 
   int i;
   int limit;
 
+  if (!atom) return;
+  
   if (hashtbl_contains(ht, (HashKeyType)atom) &&
       hashtbl_find(ht, (HashKeyType)atom)) {
     LMN_ASSERT(!internal);
@@ -226,7 +228,7 @@ static void dump_atom(LmnAtomPtr atom, struct SimpleHashtbl *ht, BOOL internal, 
           fprintf(stdout, "out-proxy");
           break;
         case  LMN_ATOM_INT_ATTR:
-          fprintf(stdout, "%d", (int)LMN_ATOM_GET_LINK(atom,i));
+          fprintf(stdout, "%d", (int)LMN_ATOM_GET_LINK_ATTR(atom,i), LMN_ATOM_GET_LINK(atom,i));
           break;
         case  LMN_ATOM_DBL_ATTR:
           fprintf(stdout, "%f", *(double*)LMN_ATOM_GET_LINK(atom,i));
@@ -236,13 +238,13 @@ static void dump_atom(LmnAtomPtr atom, struct SimpleHashtbl *ht, BOOL internal, 
           break;
         }
       } else { /* symbol atom */
-        dump_atom(LMN_ATOM(*(LmnAtomPtr*)LMN_ATOM_GET_LINK(atom, i)), ht, TRUE, link_num, indent);
+        dump_atom(LMN_ATOM(LMN_ATOM_GET_LINK(atom, i)), ht, TRUE, link_num, indent);
       }
     }
     fprintf(stdout, ")");
   }
 
-  fprintf(stdout, ". ");
+  if (!internal) fprintf(stdout, ". ");
 }
 
 static void dump_ruleset(RuleSetList *p, int indent)
