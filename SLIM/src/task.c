@@ -244,7 +244,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnLinkAttr, instr, attr);
       if (LMN_ATTR_IS_DATA(attr)) {
-        switch (attr) {
+        switch (LMN_ATTR_GET_VALUE(attr)) {
           /* TODO */
 /*         case LMN_ATOM_IN_PROXY_ATTR: */
 /*           /\* TODO: proxy implementation *\/ */
