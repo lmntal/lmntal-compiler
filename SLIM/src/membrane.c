@@ -191,7 +191,7 @@ static void dump_atom(LmnAtomPtr atom)
   
   f = LMN_ATOM_GET_FUNCTOR(atom);
   arity = LMN_FUNCTOR_ARITY(f);
-  fprintf(stdout, "Func[%u], Name[%s], A[%u], Addr[%p]", f, LMN_SYMBOL_STR(LMN_FUNCTOR_NAME_ID(f)), arity, (void*)atom);
+  fprintf(stdout, "Func[%u], Name[%s], A[%u], Addr[%p], ", f, LMN_SYMBOL_STR(LMN_FUNCTOR_NAME_ID(f)), arity, (void*)atom);
 
   for (i = 0; i < arity; i++) {
     LmnLinkAttr attr;
