@@ -12,8 +12,8 @@
 /* Or allocated when required */
 LmnWord v1[1024];
 LmnWord v2[1024];
-/* for value tag */
 
+/* for value tag */
 LmnByte k1[1024];
 LmnByte k2[1024];
 
@@ -32,65 +32,7 @@ struct MemStack {
   struct Entity	*head, *tail;
 } memstack;
 
-/*----------------------------------------------------------------------
- * Stack for backtrack
- */
-
-enum StackEntryType { PT_FINDATOM, PT_GROUP, PT_SWAP_VEC };
-
-typedef struct StackEntry {
-  enum StackEntryType type;
-  LmnRuleInstr ret_pt;
-  union {
-    LmnAtomPtr find_atom_iter;
-  } v;
-} StackEntry;
-
-/* 失敗したときに戻るところ */
-struct Stack {
-	StackEntry *entry;
-	unsigned int num;
-	unsigned int cap;
-};
-
-static struct Stack make_stack(unsigned int size) 
-{
-	struct Stack st;
-	st.entry = LMN_NALLOC(StackEntry, size);
-	st.num = 0;
-	st.cap = size;
-	return st;
-}
-
-#define STACK_PUSH stack_push
-#define STACK_POP stack_pop
-
-static void stack_push(struct Stack st, StackEntry x)
-{
-	if (st.num == st.cap) {
-		st.cap *= 2;
-		st.entry = LMN_REALLOC(StackEntry, st.entry, st.cap);
-	}
-	st.entry[st.num++] = x;
-}
-
-static StackEntry stack_pop(struct Stack st)
-{
-	if (st.num == 0) {
-		fprintf(stderr, "stack is empty\n");
-        assert(FALSE);
-	}
-	return st.entry[--st.num];
-}
-
-static BOOL stack_is_empty(struct Stack st)
-{
-	return st.num == 0;
-}
-
-struct Stack st;
-
-static BOOL interpret(LmnRuleInstr instr);
+static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next);
 
 static void memstack_init()
 {
@@ -139,10 +81,11 @@ static void memstack_printall()
 static BOOL react_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 {
   int i;
+  LmnRuleInstr dummy;
 
   REF_CAST(LmnMembrane*, wv[0]) = mem;
   for (i = 0; i < ruleset->num; i++) {
-    if (interpret(ruleset->rules[i]->instr)) return TRUE;
+    if (interpret(ruleset->rules[i]->instr, &dummy)) return TRUE;
   }
   
   return FALSE;
@@ -182,7 +125,6 @@ void run(void)
   wkv = k1;
   tkv = k2;
 
-  st = make_stack(16);
   memstack_init();
   
   /* make toplevel membrane */
@@ -209,30 +151,14 @@ void run(void)
   lmn_mem_dump(mem);
 }
 
-static BOOL interpret(LmnRuleInstr instr)
+static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 {
   LmnInstrOp op;
   LmnRuleInstr start = instr;
-  BOOL is_backtrack;
-  StackEntry st_top;
 
-#define BACKTRACK                               \
-  do {                                          \
-    if (stack_is_empty(st)) goto FAIL;          \
-    else {                                      \
-      is_backtrack = TRUE;                      \
-      st_top = stack_pop(st);                   \
-      instr = st_top.ret_pt;                    \
-      goto LOOP_HEAD;                           \
-    }                                           \
-  } while (0)
-
-  st.num = 0;
-
-  is_backtrack = FALSE;
+#define BACKTRACK return FALSE
   
   while (TRUE) {
-  LOOP_HEAD:;
     LMN_IMS_READ(LmnInstrOp, instr, op);
     fprintf(stderr, "op: %d %d\n", op, instr - start - 2);
     switch (op) {
@@ -299,20 +225,14 @@ static BOOL interpret(LmnRuleInstr instr)
         LmnAtomPtr atom;
 
         LMN_IMS_READ(LmnFunctor, instr, f);
-        if (is_backtrack) {
-          atom = LMN_ATOM_GET_NEXT((LmnAtomPtr)st_top.v.find_atom_iter);
-        } else { /* first processing */
-          atom = lmn_mem_get_atomlist((LmnMembrane*)wv[memi], f)->head;
-        }
-        if (atom) {
-          StackEntry e = {PT_FINDATOM};
-          e.ret_pt = ret_pt;
-          e.v.find_atom_iter = atom;
-          stack_push(st, e);
+        atom = lmn_mem_get_atomlist((LmnMembrane*)wv[memi], f)->head;
+        
+        while (atom) {
           REF_CAST(LmnAtomPtr, wv[atomi]) = atom;
-        } else {
-          BACKTRACK;
+          if (interpret(instr, &instr)) goto SUCCESS;
+          atom = LMN_ATOM_GET_NEXT(atom);
         }
+        BACKTRACK;
       }
       break;
     }
@@ -327,6 +247,7 @@ static BOOL interpret(LmnRuleInstr instr)
       LMN_IMS_READ(LmnLinkAttr, instr, attr);
       if (LMN_ATTR_IS_DATA(attr)) {
         switch (attr) {
+          /* TODO */
 /*         case LMN_ATOM_IN_PROXY_ATTR: */
 /*           /\* TODO: proxy implementation *\/ */
 /*           ap = lmn_new_atom(0); */
@@ -432,8 +353,6 @@ static BOOL interpret(LmnRuleInstr instr)
         break;
     }
     case INSTR_PROCEED:
-      /* TODO スタックの操作とか・・・*/
-      lmn_mem_dump((LmnMembrane*)wv[0]);
       goto SUCCESS;
     case INSTR_ENQUEUEATOM:
     {
@@ -544,40 +463,12 @@ static BOOL interpret(LmnRuleInstr instr)
       lmn_mem_add_ruleset((LmnMembrane*)wv[memi], LMN_RULESET_ID(id));
       break;
     }
-    /* slim optimization instruction ---------------------------------------- */
-    case INSTR_SWAP_WORK_VEC:
-    {
-      SWAP(LmnWord*, wv, tv);
-      SWAP(LmnByte*, wkv, tkv);
-
-      if (is_backtrack) {
-        fprintf(stderr, "swap back\n");
-        BACKTRACK;
-      } else {
-        StackEntry e = {PT_SWAP_VEC};
-        fprintf(stderr, "swap \n");
-        e.ret_pt = instr - sizeof(LmnInstrOp);
-        stack_push(st, e);
-      }
-      break;
-    }
-    case INSTR_REWINDSTACK:
-    {
-      LmnInstrVar n;
-
-      LMN_IMS_READ(LmnInstrVar, instr, n);
-      st.num -= n;
-      break;
-    }
-    case INSTR_SUCCESS:
-      goto SUCCESS;
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
     }
   }
  SUCCESS:
+  *next = instr;
   return TRUE;
- FAIL:
-  return FALSE;
 }
