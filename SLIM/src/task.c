@@ -308,7 +308,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         wv[link] = wv[atom];
         wkv[link] = wkv[atom];
       } else { /* link to atom */
-        REF_CAST(LmnAtomPtr, wv[link]) = LMN_ATOM(wv[atom]);
+        REF_CAST(LmnAtomPtr, wv[link]) = wv[atom];
         wkv[link] = LMN_ATTR_MAKE_LINK(n);
       }
       break;
@@ -329,13 +329,13 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       else if (LMN_ATTR_IS_DATA(wkv[link1])) {
         /* TODO wkvをコピーする必要はないかな? */
            
-        LMN_ATOM_SET_LINK(LMN_ATOM(wv[link2]), LMN_ATTR_GET_VALUE(wkv[link2]), wkv[link1]);
+        LMN_ATOM_SET_LINK(LMN_ATOM(wv[link2]), LMN_ATTR_GET_VALUE(wkv[link2]), wv[link1]);
         LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[link2]),
                                LMN_ATTR_GET_VALUE(wkv[link2]),
                                wkv[link1]);
       }
       else if (LMN_ATTR_IS_DATA(wkv[link2])) {
-        LMN_ATOM_SET_LINK(LMN_ATOM(wv[link1]), LMN_ATTR_GET_VALUE(wkv[link1]), wkv[link2]);
+        LMN_ATOM_SET_LINK(LMN_ATOM(wv[link1]), LMN_ATTR_GET_VALUE(wkv[link1]), wv[link2]);
         LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[link1]),
                                LMN_ATTR_GET_VALUE(wkv[link1]),
                                wkv[link2]);

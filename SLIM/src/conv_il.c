@@ -424,7 +424,7 @@ static lmn_interned_str get_symbol_id(char *str)
 
 VEC_DEF(struct SymbolFunctor, FUNCTOR_ENTRY_V);
 VEC_T(FUNCTOR_ENTRY_V) functors;
-unsigned int func_id = 0;
+unsigned int func_id = 1;
 
 
 static LmnFunctor get_functor_id(struct Functor f)

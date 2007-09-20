@@ -56,6 +56,7 @@ BOOL hashtbl_contains(struct SimpleHashtbl *ht, HashKeyType key)
 void hashtbl_put(struct SimpleHashtbl *ht, HashKeyType key, LmnWord data)
 {
   struct HashEntry e;
+  LMN_ASSERT(key); /* key must be non 0 */
   e.key = key;
   e.data = data;
   *hashtbl_find_p(ht, key) = e;
@@ -73,8 +74,6 @@ static struct HashEntry *hashtbl_find_p(struct SimpleHashtbl *ht, HashKeyType ke
   HashKeyType probe;
   HashKeyType increment = (key | 1) & (ht->cap-1);
   
-
-  LMN_ASSERT(key); /* key must be non 0 */
   for (probe = hash_val & (ht->cap-1);
        !IS_EMPTY(ht->tbl[probe]) && ht->tbl[probe].key != key;
        hash_val = (probe + increment)) {
