@@ -1297,6 +1297,13 @@ static void optimize_instrs(VEC_T(INSTR_V) *v)
       SWAP(struct InstrArg, instr->args[1], instr->args[2]);
       SWAP(struct InstrArg, instr->args[2], instr->args[3]);
     }
+    if (instr->id == INSTR_REMOVEATOM) {
+      /* 第３引数は無視する */
+      if (instr->arg_num == 3) {
+        instr->arg_num--;
+        arg_free(instr->args[2]);
+      }
+    }
     if (stack_opt) {
       if (instr->id == INSTR_GROUP) {
         optimize_group(instr); 
