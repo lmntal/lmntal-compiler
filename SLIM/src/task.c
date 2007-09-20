@@ -225,6 +225,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         LMN_IMS_READ(LmnFunctor, instr, f);
         atom = lmn_mem_get_atomlist((LmnMembrane*)wv[memi], f)->head;
         
+        wkv[atomi] = LMN_ATTR_MAKE_LINK(0);
         while (atom) {
           REF_CAST(LmnAtomPtr, wv[atomi]) = atom;
           if (interpret(instr, &instr)) return TRUE;
@@ -274,7 +275,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           assert(FALSE);
           break;
         }
-        wkv[atomi] = LMN_ATTR_MAKE_DATA(LMN_ATOM_INT_ATTR);
+        wkv[atomi] = LMN_ATTR_MAKE_DATA(attr);
       } else { /* symbol atom */
         LmnFunctor f;
         LMN_IMS_READ(LmnFunctor, instr, f);
@@ -406,19 +407,24 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 				LMN_ATOM_SET_LINK_ATTR(ap, LMN_ATTR_GET_VALUE(attr), wkv[atom1]);
 			}
 			else if (LMN_ATTR_IS_DATA(attr)) {
+			printf("hogehogehoge\n");
+			printf("attr: %d\n", attr);
+			printf("wkv[atom1]: %d\n", wkv[atom1]);
+			printf("atom1: %d\n", atom1);
 				LMN_ATOM_SET_LINK(LMN_ATOM(wv[atom1]), pos1, (LmnWord)ap);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[atom1]), LMN_ATTR_GET_VALUE(pos1), wkv[atom2]);
+				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[atom1]), pos1, attr);
 			}
 			else {
 				LMN_ATOM_SET_LINK(ap, attr, wv[atom1]);
 				LMN_ATOM_SET_LINK_ATTR(ap, LMN_ATTR_GET_VALUE(attr), wkv[atom1]);
 				LMN_ATOM_SET_LINK(LMN_ATOM(wv[atom1]), pos1, (LmnWord)ap);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[atom1]), LMN_ATTR_GET_VALUE(pos1), wkv[atom2]);
+				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wv[atom1]), pos1, attr);
 			}
 			break;
 		}
     case INSTR_PROCEED:
       *next = instr;
+			lmn_mem_dump((LmnMembrane *)wv[0]);
       return TRUE;
     case INSTR_ENQUEUEATOM:
     {
@@ -489,6 +495,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
 	
+			printf("mogemogemoge: %d %d\n", wkv[atomi], atomi);
       if(! LMN_ATTR_IS_DATA(wkv[atomi])){
         lmn_delete_atom((LmnAtomPtr)wv[atomi]);
       }
@@ -529,6 +536,14 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       lmn_mem_add_ruleset((LmnMembrane*)wv[memi], LMN_RULESET_ID(id));
       break;
     }
+		case INSTR_ISINT:
+		{
+			LmnInstrVar atomi;
+			LMN_IMS_READ(LmnInstrVar, instr, atomi);
+
+
+			break;
+		}
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
