@@ -252,7 +252,7 @@ LMN_EXTERN void run(void);
 
 /*  Memory */
 
-LMN_EXTEpRN void *lmn_calloc(size_t num, size_t size);
+LMN_EXTERN void *lmn_calloc(size_t num, size_t size);
 LMN_EXTERN void *lmn_malloc(size_t num);
 LMN_EXTERN void *lmn_realloc(void *p, size_t num);
 LMN_EXTERN void lmn_free (void *p);
