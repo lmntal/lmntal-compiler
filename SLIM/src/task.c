@@ -156,8 +156,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
   LmnInstrOp op;
   LmnRuleInstr start = instr;
 
-#define BACKTRACK return FALSE
-  
   while (TRUE) {
     LMN_IMS_READ(LmnInstrOp, instr, op);
     fprintf(stderr, "op: %d %d\n", op, instr - start - 2);
@@ -229,10 +227,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         
         while (atom) {
           REF_CAST(LmnAtomPtr, wv[atomi]) = atom;
-          if (interpret(instr, &instr)) goto SUCCESS;
+          if (interpret(instr, &instr)) return TRUE;
           atom = LMN_ATOM_GET_NEXT(atom);
         }
-        BACKTRACK;
+       return FALSE;
       }
       break;
     }
@@ -293,7 +291,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnInstrVar, instr, natoms);
       if(natoms != (LmnInstrVar)lmn_mem_natoms((LmnMembrane*)wv[memi])) {
-        BACKTRACK;
+        return FALSE;
       }
       break;
     }
@@ -384,7 +382,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			break;
 		}
     case INSTR_PROCEED:
-      goto SUCCESS;
+      *next = instr;
+      return TRUE;
     case INSTR_ENQUEUEATOM:
     {
       LmnInstrVar atom;
@@ -499,7 +498,4 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       exit(1);
     }
   }
- SUCCESS:
-  *next = instr;
-  return TRUE;
 }
