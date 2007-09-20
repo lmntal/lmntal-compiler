@@ -325,7 +325,7 @@ extern struct LmnRuleSetTable lmn_ruleset_table;
 /* Runtime Environment */
 
 struct LmnEnv {
-  char    *symbol_file;
+  BOOL dev_dump;
 };
 
 extern struct LmnEnv  lmn_env;
