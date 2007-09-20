@@ -153,40 +153,50 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATOM_PLINK(ATOM,N)                            \
   (((LmnWord*)(ATOM))+3+LMN_ATTR_WORDS(LMN_ATOM_GET_ARITY(ATOM))+(N))
 
+/* get/set prev atom of ATOM */
 #define LMN_ATOM_GET_PREV(ATOM)           \
   ((LmnAtomPtr)*LMN_ATOM_PPREV(ATOM))
 #define LMN_ATOM_SET_PREV(ATOM,X)         \
   (*LMN_ATOM_PPREV(ATOM)=(LmnWord)(X))
+/* get/set next atom of ATOM */
 #define LMN_ATOM_GET_NEXT(ATOM)           \
   ((LmnAtomPtr)*LMN_ATOM_PNEXT(ATOM))
 #define LMN_ATOM_SET_NEXT(ATOM,X)         \
   (*LMN_ATOM_PNEXT(ATOM)=(LmnWord)(X))
+/* get/set ATOM functor */
 #define LMN_ATOM_GET_FUNCTOR(ATOM)        \
   LMN_FUNCTOR(*(((LmnWord*)(ATOM))+2))
 #define LMN_ATOM_SET_FUNCTOR(ATOM,X)      \
   (*((LmnFunctor*)((LmnWord*)(ATOM)+2))=(X))
 #define LMN_ATOM_GET_ARITY(ATOM)          (LMN_FUNCTOR_ARITY(LMN_ATOM_GET_FUNCTOR(ATOM)))
+/* get/set N th link attribute of  ATOM */
 #define LMN_ATOM_GET_LINK_ATTR(ATOM,N)    \
   (*LMN_ATOM_PLINK_ATTR(ATOM,N))
 #define LMN_ATOM_SET_LINK_ATTR(ATOM,N,X)  \
   ((*LMN_ATOM_PLINK_ATTR(ATOM,N))=(X))
+/* get/set N th link of ATOM */ 
 #define LMN_ATOM_GET_LINK(ATOM, N)        \
   (*LMN_ATOM_PLINK(ATOM,N))
 #define LMN_ATOM_SET_LINK(ATOM,N,X)       \
   (*LMN_ATOM_PLINK(ATOM,N)=(X))
 
+/* word size of atom */
 #define LMN_ATOM_WORDS(ARITY)         (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
 
+/* operations for link attribute */
 #define LMN_ATTR_IS_DATA(X)           ((X)&~LMN_LINK_ATTR_MASK)
+#define LMN_ATTR_IS_PROXY(X)                            \
+  (LMN_ATTR_IS_DATA(X) &&                               \
+   (LMN_ATTR_GET_VALUE(X) == LMN_ATOM_IN_PROXY_ATTR ||	\
+    LMN_ATTR_GET_VALUE(X) == LMN_ATOM_OUT_PROXY_ATTR))
+/* set data/link tag to link attribute value */
 #define LMN_ATTR_MAKE_DATA(X)         (0x80|(X))
 #define LMN_ATTR_MAKE_LINK(X)         (X)
-#define LMN_ATTR_GET_VALUE(X)         ((X)&LMN_LINK_ATTR_MASK) 
+/* get link attribute value (remove tag) */
+#define LMN_ATTR_GET_VALUE(X)         ((X)&LMN_LINK_ATTR_MASK)
+/* set link attribute value. Tag is not changed. */
 #define LMN_ATTR_SET_VALUE(PATTR,X)   \
   (*(PATTR)=((((X)&~LMN_LINK_ATTR_MASK))|X))
-
-#define LMN_ATTR_IS_PROXY(X)						(LMN_ATTR_IS_DATA(X) &&	\
-																						(LMN_ATTR_GET_VALUE(X) == LMN_ATOM_IN_PROXY_ATTR ||	\
-																						LMN_ATTR_GET_VALUE(X) == LMN_ATOM_OUT_PROXY_ATTR))
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
  */
@@ -242,7 +252,7 @@ LMN_EXTERN void run(void);
 
 /*  Memory */
 
-LMN_EXTERN void *lmn_calloc(size_t num, size_t size);
+LMN_EXTEpRN void *lmn_calloc(size_t num, size_t size);
 LMN_EXTERN void *lmn_malloc(size_t num);
 LMN_EXTERN void *lmn_realloc(void *p, size_t num);
 LMN_EXTERN void lmn_free (void *p);
