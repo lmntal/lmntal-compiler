@@ -180,6 +180,15 @@ unsigned int lmn_mem_natoms(LmnMembrane *mem)
   }
   return j;
 }
+
+unsigned int lmn_mem_nmems(LmnMembrane *mem)
+{
+	unsigned int i = 0;
+	LmnMembrane* mp = mem->child_head;
+	for(; mp; mp=mp->next, i++);
+  return i;
+}
+
 /*----------------------------------------------------------------------
  * Dump
  */
