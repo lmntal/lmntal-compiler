@@ -40,11 +40,14 @@ static int parse_options(int argc, char *argv[])
     {0, 0, 0, 0}
   };
 
-  while ((c = getopt_long(argc, argv, "+", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "+d", long_options, &option_index)) != -1) {
     switch (c) {
     case 0:
       printf("log_options entries must have positive 4th member.\n");
       exit(1);
+      break;
+    case 'd': /* 開発用. dumpの表示を開発用にする */
+      lmn_env.dev_dump = TRUE;
       break;
     case 1000: version(); break;
     case 1001: /* help */ /*FALLTHROUGH*/
@@ -59,8 +62,14 @@ static int parse_options(int argc, char *argv[])
   return optind;
 }
 
+static void init_env(void)
+{
+  lmn_env.dev_dump = FALSE;
+}
+    
 static void init_internal(void)
 {
+  init_env();
 }
 
 static void finalize(void)
@@ -78,7 +87,6 @@ static void finalize(void)
 #ifdef DEBUG
 static void test(void)
 {
-  test_mem();
 }
 
 #endif
