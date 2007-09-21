@@ -453,10 +453,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 				LMN_ATOM_SET_LINK_ATTR(ap, LMN_ATTR_GET_VALUE(attr), at[atom1]);
 			}
 			else if (LMN_ATTR_IS_DATA(attr)) {
-			printf("hogehogehoge\n");
-			printf("attr: %d\n", attr);
-			printf("at[atom1]: %d\n", at[atom1]);
-			printf("atom1: %d\n", atom1);
 				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, (LmnWord)ap);
 				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
 			}
@@ -467,6 +463,44 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
 			}
 			break;
+		}
+		case INSTR_UNIFY:
+		{
+			LmnInstrVar atom1, pos1, atom2, pos2, memi;
+			LmnAtomPtr ap1, ap2;
+			LmnByte attr1, attr2;
+		
+			LMN_IMS_READ(LmnInstrVar, instr, atom1);
+			LMN_IMS_READ(LmnInstrVar, instr, pos1);
+			LMN_IMS_READ(LmnInstrVar, instr, atom2);
+			LMN_IMS_READ(LmnInstrVar, instr, pos2);
+			LMN_IMS_READ(LmnInstrVar, instr, memi);
+
+			ap1 = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom1], pos1));
+			attr1 = LMN_ATOM_GET_LINK_ATTR(wt[atom1], pos1);
+			ap2 = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], pos2));
+			attr2 = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos2);
+
+			if(LMN_ATTR_IS_DATA(attr1) && LMN_ATTR_IS_DATA(attr2)) {
+				#ifdef DEBUG
+				fprintf(stderr, "Two data atoms are connected each other.\n");
+				#endif
+			}
+			else if (LMN_ATTR_IS_DATA(attr1)) {
+				LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
+				LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
+			}
+			else if (LMN_ATTR_IS_DATA(attr2)) {
+				LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
+				LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
+			}
+			else {
+				LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
+				LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
+				LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
+				LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
+			}
+		break;
 		}
     case INSTR_PROCEED:
       *next = instr;
@@ -523,10 +557,13 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           assert(FALSE);
         }
       } else { /* symbol atom */
+				lmn_mem_dump((LmnMembrane*)wt[0]);
         atom = (LmnAtomPtr)wt[atomi];
         if (! LMN_ATTR_IS_DATA(at[atomi])){
           lmn_mem_remove_atom((LmnMembrane*)wt[memi], (LmnAtomPtr)wt[atomi]);
         }
+				printf("instr_removeatom: %d(%p)\n", atomi, wt[atomi]);
+				lmn_mem_dump((LmnMembrane*)wt[0]);
       }
       break;
     }
@@ -585,6 +622,68 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			
 			REF_CAST(LmnAtomPtr, wt[atom1]) = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], posi));
 			at[atom1] = LMN_ATOM_GET_LINK_ATTR(wt[atom2], posi);
+			break;
+		}
+		case INSTR_DEREF:
+		{
+			LmnInstrVar atom1, atom2, pos1, pos2;
+			LmnAtomPtr ap;
+			LmnByte attr;
+			LMN_IMS_READ(LmnInstrVar, instr, atom1);
+			LMN_IMS_READ(LmnInstrVar, instr, atom2);
+			LMN_IMS_READ(LmnInstrVar, instr, pos1);
+			LMN_IMS_READ(LmnInstrVar, instr, pos2);
+
+			ap = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], pos1));
+			attr = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos1);
+
+			if (LMN_ATTR_IS_DATA(at[atom2])) {
+				#ifdef DEBUG
+				fprintf(stderr, "Can't deref from data atom.\n");
+				#endif
+			}
+			else if (LMN_ATTR_IS_DATA(attr)) {
+				switch (LMN_ATTR_GET_VALUE(attr)) {
+				printf("data!!!\n");
+					/*
+					case LMN_ATOM_IN_PROXY_ATTR:
+						break;
+					case LMN_ATOM_OUT_PROXY_ATTR:
+						break;
+					*/
+					/* TODO 以下の２つの右辺が怪しい… */
+					case LMN_ATOM_INT_ATTR:
+					{
+						REF_CAST(int, wt[atom1]) = *ap;
+						break;
+					}
+					case LMN_ATOM_DBL_ATTR:
+					{
+						REF_CAST(double*, wt[atom1]) = (double *)ap;
+						break;
+					}
+				}
+				at[atom1] = attr;
+			}
+			else {
+				if (attr != pos2)
+					return FALSE;
+				REF_CAST(LmnAtomPtr, wt[atom1]) = ap;
+				at[atom1] = attr;
+			}
+			break;
+		}
+		case INSTR_FUNC:
+		{
+			LmnInstrVar atomi;
+			LmnFunctor f;
+			LmnLinkAttr attr;
+			LMN_IMS_READ(LmnInstrVar, instr, atomi);
+			LMN_IMS_READ(LmnLinkAttr, instr, attr);
+			LMN_IMS_READ(LmnFunctor, instr, f);
+
+			if (f != LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atomi])))
+				return FALSE;
 			break;
 		}
 		case INSTR_ISINT:
