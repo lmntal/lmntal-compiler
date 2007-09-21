@@ -224,10 +224,10 @@ LMN_EXTERN LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f);
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
 LMN_EXTERN void lmn_mem_dump(LmnMembrane *mem);
 LMN_EXTERN unsigned int lmn_mem_natoms(LmnMembrane *mem);
-LMN_EXTERN AtomSetEntry *lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f);
+LMN_EXTERN struct AtomSetEntry *lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f);
 LMN_EXTERN void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom);
 LMN_EXTERN unsigned int lmn_mem_nmems(LmnMembrane *mem);
-  
+
 /*----------------------------------------------------------------------
  * Rule
  */

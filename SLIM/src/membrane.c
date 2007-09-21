@@ -2,9 +2,7 @@
  * membrane.c
  */
 
-#include "lmntal.h"
 #include "membrane.h"
-#include "internal_hash.h"
 
 /*----------------------------------------------------------------------
  * Rule Set List
@@ -48,43 +46,6 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
  * Atom Set
  */
 
-/* TODO stub implementation */
-
-static void atom_set_entry_free(AtomSetEntry entry)
-{
-  LmnAtomPtr p, q;
-
-  p = entry.head;
-  while (p) {
-    q = LMN_ATOM_GET_NEXT(p);
-    LMN_FREE(p);
-    p = q;
-  }
-}
-
-static AtomSet *atom_set_make(int init_size)
-{
-  struct AtomSet *a = LMN_MALLOC(struct AtomSet);
-  memset(a->atoms, 0, sizeof(a->atoms));
-  a->size = sizeof(a->atoms)/sizeof(a->atoms[0]);
-  return a;
-}
-
-static void atom_set_free(AtomSet *atomset)
-{
-  unsigned int i;
-
-  for (i = 0; i < atomset->size; i++) {
-    atom_set_entry_free(atomset->atoms[i]);
-  }
-  LMN_FREE(atomset);
-}
-
-static AtomSetEntry *get_atom_list(struct AtomSet *atomset, LmnFunctor functor)
-{
-  return &atomset->atoms[functor];
-}
-
 static BOOL atom_list_is_empty(AtomSetEntry *entry)
 {
   return !entry->head;
@@ -92,8 +53,15 @@ static BOOL atom_list_is_empty(AtomSetEntry *entry)
 
 void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
 {
-  AtomSetEntry *as = get_atom_list(mem->atomset, LMN_ATOM_GET_FUNCTOR(ap));
-  
+  AtomSetEntry *as;
+
+  as = (AtomSetEntry *)hashtbl_get_default(&mem->atomset, LMN_ATOM_GET_FUNCTOR(ap), 0);
+  if (!as) {
+    as = LMN_MALLOC(struct AtomSetEntry);
+    as->head = as->tail = 0;
+    hashtbl_put(&mem->atomset, LMN_ATOM_GET_FUNCTOR(ap), (HashKeyType)as);
+  }
+
   LMN_ATOM_SET_NEXT(ap, 0);
   if (atom_list_is_empty(as)) {
     as->head = as->tail = ap;
@@ -108,8 +76,10 @@ void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
 LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f)
 {
   LmnAtomPtr ap;
-  AtomSetEntry *ent = get_atom_list(mem->atomset, f);
-  
+  AtomSetEntry *ent;
+
+  LMN_ASSERT(hashtbl_contains(&mem->atomset, f));
+  ent = (AtomSetEntry *)hashtbl_get(&mem->atomset, f);
   LMN_ASSERT(!atom_list_is_empty(ent));
   ap = ent->head;
   ent->head = LMN_ATOM_GET_NEXT(ap);
@@ -125,8 +95,9 @@ void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
   if (next) LMN_ATOM_SET_PREV(next, prev);
   if (prev) LMN_ATOM_SET_NEXT(prev, next);
 
+  /* リストがダミーheadを持たないのでこの処理が必要になる */
   if (next == NULL && prev == NULL) {
-    AtomSetEntry *p = lmn_mem_get_atomlist(mem, LMN_ATOM_GET_FUNCTOR(atom));
+    AtomSetEntry *p = (AtomSetEntry *)hashtbl_get(&mem->atomset, LMN_ATOM_GET_FUNCTOR(atom));
     p->head = p->tail = NULL;
   }
 }
@@ -139,13 +110,23 @@ LmnMembrane *lmn_mem_make(void)
 {
   LmnMembrane *mem = LMN_MALLOC(LmnMembrane);
   memset(mem, 0, sizeof(LmnMembrane));
-  mem->atomset = atom_set_make(100);
+  hashtbl_init(&mem->atomset, 4); /* 初期サイズはいくつが適当？ */
   return mem;
 }
 
 void lmn_mem_free(LmnMembrane *mem)
 {
-  atom_set_free(mem->atomset);
+  
+  HashIterator iter;
+
+  /* free hashtable and it's element */
+  for (iter = hashtbl_iterator(&mem->atomset);
+       !hashiter_isend(&iter);
+       hashiter_next(&iter)) {
+    LMN_FREE(hashiter_entry(&iter).data);
+  }
+  hashtbl_destroy(&mem->atomset);
+
   ruleset_free(mem->rulesets);
   LMN_FREE(mem);
 }
@@ -161,24 +142,27 @@ void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
 
 AtomSetEntry *lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
 {
-  return get_atom_list(mem->atomset, f);
+  return (AtomSetEntry *)hashtbl_get(&mem->atomset, f);
 }
-
 
 unsigned int lmn_mem_natoms(LmnMembrane *mem)
 {
-  unsigned int i, j = 0;
-  for (i = 0; i < mem->atomset->size; i++) {
-    AtomSetEntry *ent = get_atom_list(mem->atomset, (LmnFunctor)i);
+  unsigned int n = 0;
+  HashIterator iter;
+
+  for (iter = hashtbl_iterator(&mem->atomset);
+       !hashiter_isend(&iter);
+       hashiter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
     if (!atom_list_is_empty(ent)) {
       LmnAtomPtr atom = ent->head;
       while (atom) {
         atom = LMN_ATOM_GET_NEXT(atom);
-        j++;
+        n++;
       }
     }
   }
-  return j;
+  return n;
 }
 
 unsigned int lmn_mem_nmems(LmnMembrane *mem)
@@ -234,7 +218,7 @@ static void dump_atom(LmnAtomPtr atom,
   LMN_ASSERT(atom);
   
   if (hashtbl_contains(ht, (HashKeyType)atom)) {
-    t = (struct AtomRec *)hashtbl_find(ht, (HashKeyType)atom);
+    t = (struct AtomRec *)hashtbl_get(ht, (HashKeyType)atom);
   } else {
     t = atomrec_make();
     hashtbl_put(ht, (HashKeyType)atom, (HashValueType)t);
@@ -282,7 +266,7 @@ static void dump_atom(LmnAtomPtr atom,
         }
       } else { /* symbol atom */
         if (hashtbl_contains(&t->args, i)) {
-          int link = hashtbl_find(&t->args, i);
+          int link = hashtbl_get(&t->args, i);
           fprintf(stdout, LINK_FORMAT, link);
         }
         else {
@@ -322,6 +306,7 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
   unsigned int i, j;
   enum {P0, P1, P2, P3, PRI_NUM};
   SimpleHashtbl pred_atoms[PRI_NUM];
+  HashIterator iter;
 
   if (!mem) return;
 
@@ -334,8 +319,12 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
 
   /* 優先順位に応じて起点となるアトムを振り分ける */
   /* P0 : 0引数アトム */
-  for (i = 0; i < mem->atomset->size; i++) {
-    AtomSetEntry *ent = get_atom_list(mem->atomset, (LmnFunctor)i);
+
+  for (iter = hashtbl_iterator(&mem->atomset);
+       !hashiter_isend(&iter);
+       hashiter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
+
     if (!atom_list_is_empty(ent)) {
       LmnAtomPtr atom;
       for (atom = ent->head; atom; atom = LMN_ATOM_GET_NEXT(atom)) {
@@ -366,17 +355,17 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
   fprintf(stdout, "{");
   for (i = 0; i < PRI_NUM; i++) {
     for (j = 0; j < hashtbl_num(&pred_atoms[i]); j++) {
-      dump_atom(LMN_ATOM(hashtbl_find(&pred_atoms[i], j)),
+      dump_atom(LMN_ATOM(hashtbl_get(&pred_atoms[i], j)),
                 ht,
                 -1,
                 s,
                 indent + INDENT_INCR);
     }
-
-    dump_ruleset(mem->rulesets, indent);
-    lmn_mem_dump_internal(mem->child_head, ht, s, indent + INDENT_INCR);
-    lmn_mem_dump_internal(mem->next, ht, s, indent);
   }
+  dump_ruleset(mem->rulesets, indent);
+  lmn_mem_dump_internal(mem->child_head, ht, s, indent + INDENT_INCR);
+  lmn_mem_dump_internal(mem->next, ht, s, indent);
+
 
   fprintf(stdout, "}");
   
@@ -479,13 +468,16 @@ static void dump_ruleset_dev(RuleSetList *p)
 
 static void lmn_mem_dump_dev(LmnMembrane *mem)
 {
-  unsigned int i;
+  HashIterator iter;
+
 
   if (!mem) return;
   
   fprintf(stdout, "{\n");
-  for (i = 0; i < mem->atomset->size; i++) {
-    AtomSetEntry *ent = get_atom_list(mem->atomset, (LmnFunctor)i);
+  for (iter = hashtbl_iterator(&mem->atomset);
+       !hashiter_isend(&iter);
+       hashiter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
     if (!atom_list_is_empty(ent)) {
       LmnAtomPtr atom = ent->head;
       while (atom) {
@@ -494,6 +486,7 @@ static void lmn_mem_dump_dev(LmnMembrane *mem)
       }
     }
   }
+
   dump_ruleset_dev(mem->rulesets);
   lmn_mem_dump_dev(mem->child_head);
   lmn_mem_dump_dev(mem->next);

@@ -3,6 +3,11 @@
  */
 
 #include "internal_hash.h"
+#include "config.h"
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <stdio.h>
 
 /* Hashtable
  *  
@@ -22,46 +27,57 @@
    Kが定数なのでインデックスの計算の時に、hash_valを32bitに
    畳み込む必要がある */
 
-#if LMN_WORD_BYTES == 4
+#if SIZEOF_LONG == 4
 # define EMPTY_KEY 0xffffffffU
-#elif LMN_WORD_BYTES == 8
+#elif SIZEOF_LONG == 8
 # define EMPTY_KEY 0xffffffffffffffffU
 #endif
 
 #define INT_HASH(val)  ((val)*K)
 
 static void hashtbl_extend(SimpleHashtbl *ht);
-static struct HashEntry *hashtbl_find_p(SimpleHashtbl *ht, HashKeyType key);
-static LmnWord round2up(unsigned int n);
+static struct HashEntry *hashtbl_get_p(SimpleHashtbl *ht, HashKeyType key);
+static HashKeyType round2up(unsigned int n);
 
 void hashtbl_init(SimpleHashtbl *ht, unsigned int init_size)
 {
   ht->num = 0;
   ht->cap = round2up(init_size);
-  ht->tbl = LMN_NALLOC(struct HashEntry, ht->cap);
+  ht->tbl = malloc(sizeof(struct HashEntry) * ht->cap);
   memset(ht->tbl, 0xff, sizeof(struct HashEntry) * ht->cap);
 }
 
 void hashtbl_destroy(SimpleHashtbl *ht)
 {
-  LMN_FREE(ht->tbl);
+  free(ht->tbl);
 }
 
-LmnWord hashtbl_find(SimpleHashtbl *ht, HashKeyType key)
+HashValueType hashtbl_get(SimpleHashtbl *ht, HashKeyType key)
 {
-  return hashtbl_find_p(ht, key)->data;
+  return hashtbl_get_p(ht, key)->data;
 }
 
-BOOL hashtbl_contains(SimpleHashtbl *ht, HashKeyType key)
+HashValueType hashtbl_get_default(SimpleHashtbl *ht,
+                                  HashKeyType key,
+                                  HashValueType default_value)
 {
-  return hashtbl_find_p(ht, key)->key != EMPTY_KEY;
+  HashEntry *e =  hashtbl_get_p(ht, key);
+  if (e->key == EMPTY_KEY) return default_value;
+  else return e->data;
+}
+
+int hashtbl_contains(SimpleHashtbl *ht, HashKeyType key)
+{
+  return hashtbl_get_p(ht, key)->key != EMPTY_KEY;
 }
  
-void hashtbl_put(SimpleHashtbl *ht, HashKeyType key, LmnWord data)
+void hashtbl_put(SimpleHashtbl *ht, HashKeyType key, HashValueType data)
 {
   struct HashEntry *e;
-  LMN_ASSERT(key != EMPTY_KEY); 
-  e = hashtbl_find_p(ht, key);
+#ifdef DEBUG
+  assert(key != EMPTY_KEY);
+#endif
+  e = hashtbl_get_p(ht, key);
   if (e->key == EMPTY_KEY) {
     ht->num++;
     e->key = key;
@@ -73,7 +89,7 @@ void hashtbl_put(SimpleHashtbl *ht, HashKeyType key, LmnWord data)
   }
 }
 
-static struct HashEntry *hashtbl_find_p(SimpleHashtbl *ht, HashKeyType key)
+static struct HashEntry *hashtbl_get_p(SimpleHashtbl *ht, HashKeyType key)
 {
   HashKeyType hash_val = INT_HASH(key);
   HashKeyType probe;
@@ -94,12 +110,14 @@ static void hashtbl_extend(SimpleHashtbl *ht)
   unsigned int i, cap;
 
   if (ht->cap == MAX_CAP) {
-    lmn_fatal("hashtable capacity overflow\n");
+    fprintf(stderr, "hashtable capacity overflow\n");
+    exit(1);
   }
+  
   cap = ht->cap;
   tbl = ht->tbl;
   ht->cap <<= 1;
-  ht->tbl = LMN_NALLOC(struct HashEntry, ht->cap);
+  ht->tbl = malloc(sizeof(struct HashEntry) *  ht->cap);
   memset(ht->tbl, 0xff, sizeof(struct HashEntry) * ht->cap);
 
   for (i = 0; i < cap; i++) {
@@ -107,16 +125,19 @@ static void hashtbl_extend(SimpleHashtbl *ht)
       hashtbl_put(ht, tbl[i].key, tbl[i].data);
     }
   }
-  LMN_FREE(tbl);
+  free(tbl);
 }
 
-static LmnWord round2up(unsigned int n)
+static HashKeyType round2up(unsigned int n)
 {
   unsigned int v = 1;
   while (v && v < n) {
     v <<= 1;
   }
-  if (v == 0) lmn_fatal("hashtbl init size too large\n");
+  if (v == 0) {
+    fprintf(stderr, "hashtbl init size too large\n");
+    exit(1);
+  }
   return v;
 }
 

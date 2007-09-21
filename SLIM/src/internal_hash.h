@@ -6,15 +6,13 @@
 #ifndef INTERNAL_HASH_H
 #define INTERNAL_HASH_H
 
-#include "lmntal.h"
+typedef unsigned int HashKeyType;
+typedef unsigned int HashValueType;
 
-typedef LmnWord HashKeyType;
-typedef LmnWord HashValueType;
-
-struct HashEntry {
+typedef struct HashEntry {
   HashKeyType key;
-  LmnWord data;
-};
+  HashValueType data;
+} HashEntry;
 
 typedef struct SimpleHashtbl {
   struct HashEntry *tbl;
@@ -28,9 +26,12 @@ typedef struct HashIterator {
 
 
 void hashtbl_init(SimpleHashtbl *ht, unsigned int init_size);
-LmnWord hashtbl_find(SimpleHashtbl *ht, HashKeyType key);
-BOOL hashtbl_contains(SimpleHashtbl *ht, HashKeyType key);
-void hashtbl_put(SimpleHashtbl *ht, HashKeyType key, LmnWord val);
+HashValueType hashtbl_get(SimpleHashtbl *ht, HashKeyType key);
+HashValueType hashtbl_get_default(SimpleHashtbl *ht,
+                                  HashKeyType key,
+                                  HashValueType default_value);
+int hashtbl_contains(SimpleHashtbl *ht, HashKeyType key);
+void hashtbl_put(SimpleHashtbl *ht, HashKeyType key, HashValueType val);
 void hashtbl_destroy(SimpleHashtbl *ht);
 #define hashtbl_num(HT) (HT)->num
 
