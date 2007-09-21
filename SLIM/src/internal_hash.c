@@ -22,68 +22,73 @@
    Kが定数なのでインデックスの計算の時に、hash_valを32bitに
    畳み込む必要がある */
 
+#if LMN_WORD_BYTES == 4
+# define EMPTY_KEY 0xffffffffU
+#elif LMN_WORD_BYTES == 8
+# define EMPTY_KEY 0xffffffffffffffffU
+#endif
+
 #define INT_HASH(val)  ((val)*K)
 
-#define IS_EMPTY(Entry) (!(Entry).key)
-
-static void hashtbl_extend(struct SimpleHashtbl *ht);
-static struct HashEntry *hashtbl_find_p(struct SimpleHashtbl *ht, HashKeyType key);
+static void hashtbl_extend(SimpleHashtbl *ht);
+static struct HashEntry *hashtbl_find_p(SimpleHashtbl *ht, HashKeyType key);
 static LmnWord round2up(unsigned int n);
 
-void hashtbl_init(struct SimpleHashtbl *ht, unsigned int init_size)
+void hashtbl_init(SimpleHashtbl *ht, unsigned int init_size)
 {
   ht->num = 0;
   ht->cap = round2up(init_size);
   ht->tbl = LMN_NALLOC(struct HashEntry, ht->cap);
-  memset(ht->tbl, 0, sizeof(struct HashEntry) * ht->cap);
+  memset(ht->tbl, 0xff, sizeof(struct HashEntry) * ht->cap);
 }
 
-void hashtbl_free(struct SimpleHashtbl *ht)
+void hashtbl_destroy(SimpleHashtbl *ht)
 {
   LMN_FREE(ht->tbl);
 }
 
-LmnWord hashtbl_find(struct SimpleHashtbl *ht, HashKeyType key)
+LmnWord hashtbl_find(SimpleHashtbl *ht, HashKeyType key)
 {
   return hashtbl_find_p(ht, key)->data;
 }
 
-BOOL hashtbl_contains(struct SimpleHashtbl *ht, HashKeyType key)
+BOOL hashtbl_contains(SimpleHashtbl *ht, HashKeyType key)
 {
-  return !IS_EMPTY(*hashtbl_find_p(ht, key));
+  return hashtbl_find_p(ht, key)->key != EMPTY_KEY;
 }
  
-void hashtbl_put(struct SimpleHashtbl *ht, HashKeyType key, LmnWord data)
+void hashtbl_put(SimpleHashtbl *ht, HashKeyType key, LmnWord data)
 {
-  struct HashEntry e;
-  LMN_ASSERT(key); /* key must be non 0 */
-  e.key = key;
-  e.data = data;
-  *hashtbl_find_p(ht, key) = e;
-  ht->num++;
+  struct HashEntry *e;
+  LMN_ASSERT(key != EMPTY_KEY); 
+  e = hashtbl_find_p(ht, key);
+  if (e->key == EMPTY_KEY) {
+    ht->num++;
+    e->key = key;
+  }
+  e->data = data;
+
   if (ht->num > ht->cap * LOAD_FACTOR) {
     hashtbl_extend(ht);
   }
 }
 
-/* findと存在検査を同時に行う必要がある場合には,
-   <BOOL,data> の組を返すようにする。*/
-static struct HashEntry *hashtbl_find_p(struct SimpleHashtbl *ht, HashKeyType key)
+static struct HashEntry *hashtbl_find_p(SimpleHashtbl *ht, HashKeyType key)
 {
   HashKeyType hash_val = INT_HASH(key);
   HashKeyType probe;
   HashKeyType increment = (key | 1) & (ht->cap-1);
   
   for (probe = hash_val & (ht->cap-1);
-       !IS_EMPTY(ht->tbl[probe]) && ht->tbl[probe].key != key;
-       hash_val = (probe + increment)) {
+       ht->tbl[probe].key != EMPTY_KEY && ht->tbl[probe].key != key;
+       probe = (probe + increment) & (ht->cap-1)) {
   }
 
 /*   printf("ret = %d\n", probe); */
   return &ht->tbl[probe];
 }
 
-static void hashtbl_extend(struct SimpleHashtbl *ht)
+static void hashtbl_extend(SimpleHashtbl *ht)
 {
   struct HashEntry *tbl;
   unsigned int i, cap;
@@ -95,10 +100,10 @@ static void hashtbl_extend(struct SimpleHashtbl *ht)
   tbl = ht->tbl;
   ht->cap <<= 1;
   ht->tbl = LMN_NALLOC(struct HashEntry, ht->cap);
-  memset(ht->tbl, 0, sizeof(struct HashEntry) * ht->cap);
+  memset(ht->tbl, 0xff, sizeof(struct HashEntry) * ht->cap);
 
   for (i = 0; i < cap; i++) {
-    if (!IS_EMPTY(tbl[i])) {
+    if (tbl[i].key != EMPTY_KEY) {
       hashtbl_put(ht, tbl[i].key, tbl[i].data);
     }
   }
@@ -113,4 +118,21 @@ static LmnWord round2up(unsigned int n)
   }
   if (v == 0) lmn_fatal("hashtbl init size too large\n");
   return v;
+}
+
+HashIterator hashtbl_iterator(SimpleHashtbl *ht)
+{
+  HashIterator iter;
+  iter.i = 0;
+  iter.ht = ht;
+  if (ht->cap > 0 && ht->tbl[iter.i].key == EMPTY_KEY) {
+    hashiter_next(&iter);
+  }
+  return iter;
+}
+
+void hashiter_next(HashIterator *iter)
+{
+  while (++iter->i < iter->ht->cap &&
+         iter->ht->tbl[iter->i].key == EMPTY_KEY) ;
 }

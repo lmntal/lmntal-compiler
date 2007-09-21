@@ -90,6 +90,7 @@ static void load_symbols(FILE *in)
   symbol_num = load_uint(in, sizeof(lmn_interned_str));
   lmn_symbol_table.size = symbol_num + 1;
   lmn_symbol_table.entry = LMN_NALLOC(char*, lmn_symbol_table.size);
+  memset(lmn_symbol_table.entry, 0, sizeof(char *) * lmn_symbol_table.size);
 
   fprintf(stderr, "loading symbol >>> size:%d\n", lmn_symbol_table.size);
   for(i=0; i<symbol_num; ++i){
@@ -114,7 +115,7 @@ static void load_functors(FILE *in)
 {
   unsigned int i;
   unsigned int data_num = load_uint(in, sizeof(LmnFunctor));
-  lmn_functor_table.size = data_num + 1; /* ファンクタIDの開始は1 */
+  lmn_functor_table.size = data_num;
   lmn_functor_table.entry = LMN_NALLOC(LmnFunctorEntry, lmn_functor_table.size);
   fprintf(stderr, "loading functors >>> size:%d\n", lmn_functor_table.size);
   for(i=0; i<data_num; ++i){
