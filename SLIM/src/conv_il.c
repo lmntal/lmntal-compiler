@@ -168,7 +168,7 @@ struct InstrSpec {
 
     {"newlink", INSTR_NEWLINK, {InstrVar, InstrVar, InstrVar, InstrVar, InstrVar, 0}},
     {"relink", INSTR_RELINK, {InstrVar, InstrVar, InstrVar, InstrVar, InstrVar, 0}},
-    {"unify", INSTR_UNIFY, {InstrVar, InstrVar, InstrVar, InstrVar, 0}},
+    {"unify", INSTR_UNIFY, {InstrVar, InstrVar, InstrVar, InstrVar, InstrVar, 0}},
     {"inheritlink", INSTR_INHERITLINK, {InstrVar, InstrVar, InstrVar, InstrVar, 0}},
     {"unifylinks", INSTR_UNIFYLINKS, {InstrVar, InstrVar, InstrVar, 0}},
 
