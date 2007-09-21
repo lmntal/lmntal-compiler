@@ -644,7 +644,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			}
 			else if (LMN_ATTR_IS_DATA(attr)) {
 				switch (LMN_ATTR_GET_VALUE(attr)) {
-				printf("data!!!\n");
 					/*
 					case LMN_ATOM_IN_PROXY_ATTR:
 						break;
@@ -663,13 +662,13 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 						break;
 					}
 				}
-				at[atom1] = attr;
+				at[atom1] = LMN_ATTR_MAKE_DATA(attr);
 			}
 			else {
 				if (attr != pos2)
 					return FALSE;
 				REF_CAST(LmnAtomPtr, wt[atom1]) = ap;
-				at[atom1] = attr;
+              at[atomi] = LMN_ATTR_MAKE_LINK(0);
 			}
 			break;
 		}
