@@ -23,9 +23,9 @@
 #define K 2654435761U
 /* maximum capacity */
 #define MAX_CAP 0x80000000
-/* 別に最大容量を制限する必要はないが、制限をしない場合は,
-   Kが定数なのでインデックスの計算の時に、hash_valを32bitに
-   畳み込む必要がある */
+/* �̤˺������̤����¤���ɬ�פϤʤ��������¤򤷤ʤ�����,
+   K������ʤΤǥ���ǥå����η׻��λ��ˡ�hash_val��32bit��
+   ���߹���ɬ�פ����� */
 
 #if SIZEOF_LONG == 4
 # define EMPTY_KEY 0xffffffffU
