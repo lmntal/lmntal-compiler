@@ -668,7 +668,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 				if (attr != pos2)
 					return FALSE;
 				REF_CAST(LmnAtomPtr, wt[atom1]) = ap;
-              at[atomi] = LMN_ATTR_MAKE_LINK(0);
+              at[atom1] = LMN_ATTR_MAKE_LINK(0);
 			}
 			break;
 		}
