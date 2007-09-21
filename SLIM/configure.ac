@@ -4,7 +4,7 @@ dnl Process this file with autoconf to produce a configure script
 
 AC_PREREQ(2.61)
 AC_INIT([SLIM], [0.0.1], [lang@ueda.info.waseda.ac.jp], [slim])
-# AC_REVISION($Revision: 1.5 $)
+# AC_REVISION($Revision: 1.6 $)
 # AC_COPYRIGHT (copyright-notice)
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -23,7 +23,6 @@ AC_C_CHAR_UNSIGNED
 #AC_C_VARARRAYS
 #AC_C_TYPEOF
 # AC_C_STRINGIZE
-# AM_WITH_DMALLOC
 
 AC_TYPE_INT8_T
 AC_TYPE_INT16_T
@@ -55,8 +54,10 @@ AC_CHECK_SIZEOF(void*)
 AC_PROG_CC_STDC
 AC_PROG_CC_C89
 
+AC_SUBST(CFLAGS)
+
 if test "$GCC" = "yes"; then
-  CFLAGS="-std=c89 -pedantic -Wall -Wchar-subscripts -Wmissing-declarations -Wredundant-decls -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wcast-align -Wsign-compare -Wswitch-enum $CFLAGS"
+  CFLAGS="-ggdb -std=c89 -pedantic -Wall -Wchar-subscripts -Wmissing-declarations -Wredundant-decls -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wcast-align -Wsign-compare -Wswitch-enum"
 fi
 
 AC_ARG_ENABLE(debug,
@@ -68,6 +69,9 @@ if test "$enable_debug" = "yes"; then
 else
   AC_MSG_RESULT(enable debug: no)
 fi
+
+AM_WITH_DMALLOC
+
 
 # ----------------------------------------------------------------------
 # for SLIM
