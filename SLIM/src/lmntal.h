@@ -114,12 +114,16 @@ typedef struct LmnMembrane LmnMembrane;
  *     [out-proxy]
  *       10000001
  *     [otherwise]
- *       We are going to support some premitive data types.
+ *       [int]
+ *       	 10000002
+ *       [double]
+ *         10000003
+ *       We are going to support some primitive data types.
  *
- *       (signed/unsigned) int, short int, long int, byte, long long int
- *       float, double, long double
- *       bool, string, character
- *       ground array, ground with membrane array, premitive arrays
+ *       (signed/unsigned) int, short int, long int, byte, long long int,
+ *       float, double, long double,
+ *       bool, string, character,
+ *       ground array, ground with membrane array, primitive arrays
  *
  *       But, incompletely-specified.
  *
@@ -145,7 +149,7 @@ typedef uint8_t LmnLinkAttr;
 
 #define LMN_ATOM(X)                 ((LmnAtomPtr)(X))
 
-#define LMN_ATOM_PPREV(ATOM)        ((LmnWord*)(ATOM))
+#define LMN_ATOM_PPREV(ATOM)        (((LmnWord*)(ATOM))-1)
 #define LMN_ATOM_PNEXT(ATOM)        (((LmnWord*)(ATOM))+1)
 #define LMN_ATOM_PLINK_ATTR(ATOM,N)                       \
   ((LmnLinkAttr*)(((BYTE*)(((LmnWord*)(ATOM))+2))+    \
