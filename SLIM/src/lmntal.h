@@ -149,7 +149,7 @@ typedef uint8_t LmnLinkAttr;
 
 #define LMN_ATOM(X)                 ((LmnAtomPtr)(X))
 
-#define LMN_ATOM_PPREV(ATOM)        (((LmnWord*)(ATOM))-1)
+#define LMN_ATOM_PPREV(ATOM)        (((LmnWord*)(ATOM)))
 #define LMN_ATOM_PNEXT(ATOM)        (((LmnWord*)(ATOM))+1)
 #define LMN_ATOM_PLINK_ATTR(ATOM,N)                       \
   ((LmnLinkAttr*)(((BYTE*)(((LmnWord*)(ATOM))+2))+    \
