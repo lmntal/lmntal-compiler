@@ -100,6 +100,7 @@ void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
     AtomSetEntry *p = (AtomSetEntry *)hashtbl_get(&mem->atomset, LMN_ATOM_GET_FUNCTOR(atom));
     p->head = p->tail = NULL;
   }
+	LMN_ATOM_SET_NEXT(atom, NULL); LMN_ATOM_SET_PREV(atom, NULL);
 }
 
 /*----------------------------------------------------------------------
