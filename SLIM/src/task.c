@@ -204,9 +204,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     {
       LmnInstrVar atomi, memi;
       LmnLinkAttr attr;
-      LmnRuleInstr ret_pt;
+      /*LmnRuleInstr ret_pt;*/
 
-      ret_pt = instr - sizeof(LmnInstrOp);
+      /*ret_pt = instr - sizeof(LmnInstrOp);*/
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnLinkAttr, instr, attr);
@@ -738,6 +738,15 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
 			REF_CAST(LmnAtomPtr, wt[atom1]) = REF_CAST(LmnAtomPtr, wt[atom2]);
 			at[atom1] = at[atom2];
+			break;
+		}
+		case INSTR_NEQATOM:
+		{
+			LmnInstrVar atom1, atom2;
+			LMN_IMS_READ(LmnInstrVar, instr, atom1);
+			LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+			if(atom1 == atom2) return FALSE;
 			break;
 		}
     default:
