@@ -12,7 +12,7 @@
 
 /* TODO stub implementation */
 
-static memory_pool *atom_memory_pools[128];
+static memory_pool *atom_memory_pools[128+2]; /* +2 is in/out proxy */
 
 LmnAtomPtr lmn_new_atom(LmnFunctor f)
 {
