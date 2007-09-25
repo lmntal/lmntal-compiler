@@ -48,43 +48,25 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 
 static BOOL atom_list_is_empty(AtomSetEntry *entry)
 {
-  return !entry->head;
+  return entry->head == (LmnAtomPtr)entry;
 }
 
 void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
 {
   AtomSetEntry *as;
-
   as = (AtomSetEntry *)hashtbl_get_default(&mem->atomset, LMN_ATOM_GET_FUNCTOR(ap), 0);
   if (!as) {
     as = LMN_MALLOC(struct AtomSetEntry);
-    as->head = as->tail = 0;
+    LMN_ATOM_SET_PREV(as, as);
+    LMN_ATOM_SET_NEXT(as, as);
     hashtbl_put(&mem->atomset, LMN_ATOM_GET_FUNCTOR(ap), (HashKeyType)as);
   }
 
-  LMN_ATOM_SET_NEXT(ap, 0);
-  if (atom_list_is_empty(as)) {
-    as->head = as->tail = ap;
-    LMN_ATOM_SET_PREV(ap, 0);
-  } else {
-    LMN_ATOM_SET_PREV(ap, as->tail);
-    LMN_ATOM_SET_NEXT(as->tail, ap);
-    as->tail = ap;
-  }
+  LMN_ATOM_SET_NEXT(ap, as);
+  LMN_ATOM_SET_PREV(ap, as->tail);
+  LMN_ATOM_SET_NEXT(as->tail, ap);
+  as->tail = ap;
 } 
-
-LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f)
-{
-  LmnAtomPtr ap;
-  AtomSetEntry *ent;
-
-  LMN_ASSERT(hashtbl_contains(&mem->atomset, f));
-  ent = (AtomSetEntry *)hashtbl_get(&mem->atomset, f);
-  LMN_ASSERT(!atom_list_is_empty(ent));
-  ap = ent->head;
-  ent->head = LMN_ATOM_GET_NEXT(ap);
-  return ap;
-}
 
 void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
 {
@@ -92,15 +74,9 @@ void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
 
   prev = LMN_ATOM_GET_PREV(atom);
   next = LMN_ATOM_GET_NEXT(atom);
-  if (next) LMN_ATOM_SET_PREV(next, prev);
-  if (prev) LMN_ATOM_SET_NEXT(prev, next);
-
-  /* リストがダミーheadを持たないのでこの処理が必要になる */
-  if (next == NULL && prev == NULL) {
-    AtomSetEntry *p = (AtomSetEntry *)hashtbl_get(&mem->atomset, LMN_ATOM_GET_FUNCTOR(atom));
-    p->head = p->tail = NULL;
-  }
-	LMN_ATOM_SET_NEXT(atom, NULL); LMN_ATOM_SET_PREV(atom, NULL);
+  LMN_ASSERT(prev && next);
+  LMN_ATOM_SET_PREV(next, prev);
+  LMN_ATOM_SET_NEXT(prev, next);
 }
 
 /*----------------------------------------------------------------------
@@ -141,9 +117,9 @@ void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
   parentmem->child_head = newmem;
 }
 
-AtomSetEntry *lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
+AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
 {
-  return (AtomSetEntry *)hashtbl_get(&mem->atomset, f);
+  return (AtomSetEntry*)hashtbl_get(&mem->atomset, f);
 }
 
 unsigned int lmn_mem_natoms(LmnMembrane *mem)
@@ -155,13 +131,13 @@ unsigned int lmn_mem_natoms(LmnMembrane *mem)
        !hashiter_isend(&iter);
        hashiter_next(&iter)) {
     AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
-    if (!atom_list_is_empty(ent)) {
-      LmnAtomPtr atom = ent->head;
-      while (atom) {
-        atom = LMN_ATOM_GET_NEXT(atom);
-        n++;
-      }
-    }
+    LmnAtomPtr atom;
+    for (atom = ent->head;
+         atom != lmn_atomset_end(ent);
+         atom = LMN_ATOM_GET_NEXT(atom)) {
+      atom = LMN_ATOM_GET_NEXT(atom);
+      n++;
+    }      
   }
   return n;
 }
@@ -325,29 +301,29 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
        !hashiter_isend(&iter);
        hashiter_next(&iter)) {
     AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
+    LmnAtomPtr atom;
 
-    if (!atom_list_is_empty(ent)) {
-      LmnAtomPtr atom;
-      for (atom = ent->head; atom; atom = LMN_ATOM_GET_NEXT(atom)) {
-        int arity = LMN_ATOM_GET_ARITY(atom);
-        if (arity == 0) {
-          hashtbl_put(&pred_atoms[P0], hashtbl_num(&pred_atoms[P0]), (HashValueType)atom);
-        }
-        else if (arity == 1 &&
-                 (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ||
-                  LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ==
-                  LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, 0)) - 1)) {
-          hashtbl_put(&pred_atoms[P1], hashtbl_num(&pred_atoms[P1]), (HashValueType)atom);
-        }
-        else if (arity > 1 &&
-                 (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ||
-                  LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ==
-                  LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, arity-1)) - 1)) {
-          hashtbl_put(&pred_atoms[P2], hashtbl_num(&pred_atoms[P2]), (HashValueType)atom);
-        }
-        else {
-          hashtbl_put(&pred_atoms[P3], hashtbl_num(&pred_atoms[P3]), (HashValueType)atom);
-        }
+    for (atom = ent->head;
+         atom != lmn_atomset_end(ent);
+         atom = LMN_ATOM_GET_NEXT(atom)) {
+      int arity = LMN_ATOM_GET_ARITY(atom);
+      if (arity == 0) {
+        hashtbl_put(&pred_atoms[P0], hashtbl_num(&pred_atoms[P0]), (HashValueType)atom);
+      }
+      else if (arity == 1 &&
+               (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ||
+                LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ==
+                LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, 0)) - 1)) {
+        hashtbl_put(&pred_atoms[P1], hashtbl_num(&pred_atoms[P1]), (HashValueType)atom);
+      }
+      else if (arity > 1 &&
+               (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ||
+                LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ==
+                LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, arity-1)) - 1)) {
+        hashtbl_put(&pred_atoms[P2], hashtbl_num(&pred_atoms[P2]), (HashValueType)atom);
+      }
+      else {
+        hashtbl_put(&pred_atoms[P3], hashtbl_num(&pred_atoms[P3]), (HashValueType)atom);
       }
     }
   }
@@ -471,7 +447,6 @@ static void lmn_mem_dump_dev(LmnMembrane *mem)
 {
   HashIterator iter;
 
-
   if (!mem) return;
   
   fprintf(stdout, "{\n");
@@ -479,12 +454,12 @@ static void lmn_mem_dump_dev(LmnMembrane *mem)
        !hashiter_isend(&iter);
        hashiter_next(&iter)) {
     AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
-    if (!atom_list_is_empty(ent)) {
-      LmnAtomPtr atom = ent->head;
-      while (atom) {
-        dump_atom_dev(atom);
-        atom = LMN_ATOM_GET_NEXT(atom);
-      }
+    LmnAtomPtr atom;
+
+    for (atom = ent->head;
+         atom != lmn_atomset_end(ent);
+         atom = LMN_ATOM_GET_NEXT(atom)) {
+      dump_atom_dev(atom);
     }
   }
 
