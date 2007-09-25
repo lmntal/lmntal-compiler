@@ -212,8 +212,9 @@ struct InstrSpec {
     {"isint", INSTR_ISINT, {InstrVar, 0}},
     {"isintfunc", INSTR_ISINTFUNC, {InstrVar, 0}},
     
-    {"ine", INSTR_INE, {InstrVar, InstrVar, 0}},
+    {"isub", INSTR_ISUB, {InstrVar, InstrVar, InstrVar, 0}},
     {"igt", INSTR_IGT, {InstrVar, InstrVar, 0}},
+    {"ine", INSTR_INE, {InstrVar, InstrVar, 0}},
     
     /* for dump */
     {"rewindstack", INSTR_REWINDSTACK, {InstrVar, 0}},
