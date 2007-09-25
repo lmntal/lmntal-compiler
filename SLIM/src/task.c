@@ -97,6 +97,19 @@ struct RuleSetList {
 };
 typedef struct RuleSetList RuleSetNode;
 
+/* 中間命令で使われるリンクのリスト */
+struct LmnLinkListNode {
+  LmnInstrVar index;
+  struct LmnLinkListNode *next;
+};
+typedef struct LmnLinkListNode LmnLinkListNode;
+
+static struct LmnLinkListNode* lmn_list_init() {
+  LmnLinkListNode* ret = LMN_MALLOC(LmnLinkListNode);
+  ret->next = ret;
+  return ret;
+}
+
 static int exec(LmnMembrane *mem)
 {
   RuleSetNode *rs = mem->rulesets;
@@ -131,7 +144,7 @@ void run(void)
   
   mem = lmn_mem_make();
 
-  /*  lmn_mem_dump(mem);  */
+  lmn_mem_dump(mem);
 
   /*     lmn_mem_add_ruleset(mem, lmn_ruleset_table.entry[0]); */
 
@@ -165,6 +178,14 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       /* ignore spec, because wt is initially large enough. */
       instr += sizeof(LmnInstrVar)*2;
       break;
+    case INSTR_INSERTCONNECTORSINNULL:
+    {
+      /* TODO めんどくさい */
+      LmnInstrVar seti, listi;
+      LMN_IMS_READ(LmnInstrVar, instr, seti);
+      LMN_IMS_READ(LmnInstrVar, instr, listi);
+      break;
+    }
     case INSTR_JUMP:
     {
       LmnInstrVar num, i, n;
@@ -725,6 +746,37 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			if(LMN_ATOM(wt[atom1]) == LMN_ATOM(wt[atom2])) return FALSE;
 			break;
 		}
+    case INSTR_NEWLIST:
+    {
+      LmnInstrVar listi;
+      /* TODO: proceedごとに開放する */
+      LMN_IMS_READ(LmnInstrVar, instr, listi);
+      REF_CAST(LmnLinkListNode*, wt[listi]) = lmn_list_init();
+      /* TODO: at[listi]には何が入る？ */
+      break;
+    }
+    case INSTR_ADDTOLIST:
+    {
+      LmnInstrVar listi, linki;
+      LmnLinkListNode* node;
+      LMN_IMS_READ(LmnInstrVar, instr, listi);
+      LMN_IMS_READ(LmnInstrVar, instr, linki);
+      
+      node = (LmnLinkListNode*)wt[listi];
+      if(node->next == node) {
+        node->next=NULL;
+        node->index=linki;
+      }
+      else {
+        LmnLinkListNode* new = LMN_MALLOC(LmnLinkListNode);
+        /* TODO: 大きさ有限でいいなら配列を使いたい… */
+        for(; node!=NULL; node=node->next);
+        node->next=new;
+        new->next=NULL;
+        new->index=linki;
+      }
+      break;
+    }
     case INSTR_ISUB:
     {
       LmnInstrVar dstatom, atom1, atom2;
@@ -736,6 +788,24 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       at[dstatom] = LMN_ATOM_INT_ATTR;
       break;
     }
+    case INSTR_ILT:
+    {
+      LmnInstrVar atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      if(!((int)wt[atom1] < (int)wt[atom2])) return FALSE;
+      break;
+    }
+    case INSTR_ILE:
+    {
+      LmnInstrVar atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      if(!((int)wt[atom1] <= (int)wt[atom2])) return FALSE;
+      break;
+    }
     case INSTR_IGT:
     {
       LmnInstrVar atom1, atom2;
@@ -743,6 +813,33 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] > (int)wt[atom2])) return FALSE;
+      break;
+    }
+    case INSTR_IGE:
+    {
+      LmnInstrVar atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      if(!(int)wt[atom1] >= (int)wt[atom2]) return FALSE;
+      break;
+    }
+    case INSTR_IEQ:
+    {
+      LmnInstrVar atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      if(!(int)wt[atom1] == (int)wt[atom2]) return FALSE;
+      break;
+    }
+    case INSTR_INE:
+    {
+      LmnInstrVar atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      if(!(int)wt[atom1] != (int)wt[atom2]) return FALSE;
       break;
     }
     case INSTR_ALLOCATOM:
