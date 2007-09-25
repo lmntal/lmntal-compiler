@@ -144,6 +144,8 @@ typedef uint8_t LmnLinkAttr;
 #error Word size is not 2^N
 #endif
 
+/* リンク番号のタグのワード数。ファンクタと同じワードにある分は
+   数えない */
 #define LMN_ATTR_WORDS(ARITY)  \
   (((ARITY)+(LMN_FUNCTOR_BYTES - 1))>>LMN_WORD_SHIFT)
 
@@ -185,10 +187,17 @@ typedef uint8_t LmnLinkAttr;
   (*LMN_ATOM_PLINK(ATOM,N)=(X))
 
 /* word size of atom */
-#define LMN_ATOM_WORDS(ARITY)         (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
-
+/* プロキシに時は膜への参照の分 +1 */
+/* 3の加算は prev,next,functorのワード */
+#define LMN_ATOM_WORDS(FUNCTOR, ARITY)          \
+  ((((FUNCTOR) == LMN_IN_PROXY_FUNCTOR ||       \
+     (FUNCTOR) == LMN_OUT_PROXY_FUNCTOR) ?      \
+    1 : 0) + (3+LMN_ATTR_WORDS(ARITY)+(ARITY)))
 /* operations for link attribute */
-#define LMN_ATTR_IS_DATA(X)           ((X)&~LMN_LINK_ATTR_MASK)
+#define LMN_ATTR_IS_DATA(X)                         \
+  ((X)&~LMN_LINK_ATTR_MASK &&                       \
+   LMN_ATTR_GET_VALUE(X) > LMN_ATOM_OUT_PROXY_ATTR)
+
 #define LMN_ATTR_IS_PROXY(X)                            \
   (LMN_ATTR_IS_DATA(X) &&                               \
    (LMN_ATTR_GET_VALUE(X) == LMN_ATOM_IN_PROXY_ATTR ||	\
@@ -201,6 +210,19 @@ typedef uint8_t LmnLinkAttr;
 /* set link attribute value. Tag is not changed. */
 #define LMN_ATTR_SET_VALUE(PATTR,X)   \
   (*(PATTR)=((((X)&~LMN_LINK_ATTR_MASK))|X))
+
+
+/* Proxy
+ *  Proxy is implememted as a special atom. It has more 1 word as a
+ *  reference to the membrane it's owend.
+ */
+
+#define LMN_IN_PROXY_FUNCTOR 0
+#define LMN_OUT_PROXY_FUNCTOR 1
+
+#define LMN_PROXY_GET_MEM(PROXY_ATOM)  *(LMN_ATOM_PLINK(PROXY_ATOM) + 1)
+#define LMN_PROXY_SET_MEM(PROXY_ATOM,X)  (*(LMN_ATOM_PLINK(PROXY_ATOM) + 1) = (X))
+
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
  */
@@ -218,19 +240,6 @@ typedef uint8_t LmnLinkAttr;
  */
 
 #include "membrane.h"
-
-LMN_EXTERN LmnMembrane *lmn_mem_make(void);
-LMN_EXTERN void lmn_mem_free(LmnMembrane *mem);
-LMN_EXTERN void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem);
-LMN_EXTERN void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap);
-LMN_EXTERN LmnAtomPtr lmn_mem_pop_atom(LmnMembrane *mem, LmnFunctor f);
-
-LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
-LMN_EXTERN void lmn_mem_dump(LmnMembrane *mem);
-LMN_EXTERN unsigned int lmn_mem_natoms(LmnMembrane *mem);
-LMN_EXTERN struct AtomSetEntry *lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f);
-LMN_EXTERN void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom);
-LMN_EXTERN unsigned int lmn_mem_nmems(LmnMembrane *mem);
 
 /*----------------------------------------------------------------------
  * Rule
