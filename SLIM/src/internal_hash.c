@@ -43,7 +43,7 @@ void hashtbl_init(SimpleHashtbl *ht, unsigned int init_size)
 {
   ht->num = 0;
   ht->cap = round2up(init_size);
-  ht->tbl = malloc(sizeof(struct HashEntry) * ht->cap);
+  ht->tbl = (HashEntry *)malloc(sizeof(struct HashEntry) * ht->cap);
   memset(ht->tbl, 0xff, sizeof(struct HashEntry) * ht->cap);
 }
 
@@ -99,13 +99,12 @@ static struct HashEntry *hashtbl_get_p(SimpleHashtbl *ht, HashKeyType key)
        probe = (probe + increment) & (ht->cap-1)) {
   }
 
-/*   printf("ret = %d\n", probe); */
   return &ht->tbl[probe];
 }
 
 static void hashtbl_extend(SimpleHashtbl *ht)
 {
-  struct HashEntry *tbl;
+  struct HashEntry *tbl, *e;
   unsigned int i, cap;
 
   if (ht->cap == MAX_CAP) {
@@ -116,12 +115,14 @@ static void hashtbl_extend(SimpleHashtbl *ht)
   cap = ht->cap;
   tbl = ht->tbl;
   ht->cap <<= 1;
-  ht->tbl = malloc(sizeof(struct HashEntry) *  ht->cap);
+  ht->tbl = (HashEntry *)malloc(sizeof(struct HashEntry) *  ht->cap);
   memset(ht->tbl, 0xff, sizeof(struct HashEntry) * ht->cap);
 
   for (i = 0; i < cap; i++) {
     if (tbl[i].key != EMPTY_KEY) {
-      hashtbl_put(ht, tbl[i].key, tbl[i].data);
+      e = hashtbl_get_p(ht, tbl[i].key);
+      e->key = tbl[i].key;
+      e->data = tbl[i].data;
     }
   }
   free(tbl);
