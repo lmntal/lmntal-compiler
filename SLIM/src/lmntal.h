@@ -115,7 +115,7 @@ typedef struct LmnMembrane LmnMembrane;
  *       10000001
  *     [otherwise]
  *       [int]
- *       	 10000002
+ *         10000002
  *       [double]
  *         10000003
  *       We are going to support some primitive data types.
