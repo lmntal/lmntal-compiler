@@ -33,7 +33,7 @@ void *memory_pool_malloc(memory_pool *p)
     char *rawblock;
     int i;
     
-    fprintf(stderr, "no more free space, so allocate new block\n");
+/*    fprintf(stderr, "no more free space, so allocate new block\n");*/
 
     p->free_head = malloc(p->sizeof_element * blocksize);
     rawblock = (char*)p->free_head;
