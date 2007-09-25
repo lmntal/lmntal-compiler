@@ -117,6 +117,7 @@ void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
   parentmem->child_head = newmem;
 }
 
+/* return NULL when atomlist don't exists. */
 AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
 {
   return (AtomSetEntry*)hashtbl_get_default(&mem->atomset, f, 0);
