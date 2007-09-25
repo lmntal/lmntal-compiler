@@ -609,8 +609,20 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LmnInstrVar atomi;
 
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
-	
-      if(! LMN_ATTR_IS_DATA(at[atomi])){
+
+      if (LMN_ATTR_IS_DATA(at[atomi])) {
+        switch (at[atomi]) {
+        case LMN_ATOM_INT_ATTR:
+          break;
+        case LMN_ATOM_DBL_ATTR:
+          LMN_FREE((double*)wt[atomi]);
+          break;
+        default:
+          LMN_ASSERT(FALSE);
+          break;
+        }
+      }
+      else { /* symbol atom */
         lmn_delete_atom((LmnAtomPtr)wt[atomi]);
       }
       break;
