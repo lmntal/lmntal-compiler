@@ -135,6 +135,7 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATOM_LINK_ATTR(X)   ((LmnLinkAttr)(X))
 #define LMN_LINK_ATTR_BYTES     (sizeof(LmnLinkAttr))
 #define LMN_LINK_ATTR_MASK      (0x7f)
+#define LMN_LINK_ATTR_FLAG      (0x80)
 
 #if LMN_WORD_BYTES == 4
 #define LMN_WORD_SHIFT 2
@@ -195,13 +196,11 @@ typedef uint8_t LmnLinkAttr;
     1 : 0) + (3+LMN_ATTR_WORDS(ARITY)+(ARITY)))
 /* operations for link attribute */
 #define LMN_ATTR_IS_DATA(X)                         \
-  ((X)&~LMN_LINK_ATTR_MASK &&                       \
-   LMN_ATTR_GET_VALUE(X) > LMN_ATOM_OUT_PROXY_ATTR)
+  ((X)&~LMN_LINK_ATTR_MASK && !LMN_ATTR_IS_PROXY(X))
 
 #define LMN_ATTR_IS_PROXY(X)                            \
-  (LMN_ATTR_IS_DATA(X) &&                               \
-   (LMN_ATTR_GET_VALUE(X) == LMN_ATOM_IN_PROXY_ATTR ||	\
-    LMN_ATTR_GET_VALUE(X) == LMN_ATOM_OUT_PROXY_ATTR))
+  ((X) == LMN_ATOM_IN_PROXY_ATTR ||                     \
+   (X) == LMN_ATOM_OUT_PROXY_ATTR)
 /* set data/link tag to link attribute value */
 #define LMN_ATTR_MAKE_DATA(X)         (0x80|(X))
 #define LMN_ATTR_MAKE_LINK(X)         (X)
@@ -229,11 +228,11 @@ typedef uint8_t LmnLinkAttr;
 
 /* low 7 bits of link attribute */
 
-#define LMN_ATOM_IN_PROXY_ATTR   0
-#define LMN_ATOM_OUT_PROXY_ATTR  1
+#define LMN_ATOM_IN_PROXY_ATTR   (LMN_LINK_ATTR_FLAG | 0)
+#define LMN_ATOM_OUT_PROXY_ATTR  (LMN_LINK_ATTR_FLAG | 1)
 
-#define LMN_ATOM_INT_ATTR        2
-#define LMN_ATOM_DBL_ATTR        3
+#define LMN_ATOM_INT_ATTR        (LMN_LINK_ATTR_FLAG | 2)
+#define LMN_ATOM_DBL_ATTR        (LMN_LINK_ATTR_FLAG | 3)
 
 /*----------------------------------------------------------------------
  * Membrane
