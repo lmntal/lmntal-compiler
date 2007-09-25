@@ -733,7 +733,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			LMN_IMS_READ(LmnInstrVar, instr, atom1);
 			LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-/*			REF_CAST(int, wt[dstatom]) = (int)wt[atom1] - (int)wt[atom2];*/
+			REF_CAST(int, wt[dstatom]) = (int)wt[atom1] - (int)wt[atom2];
 			break;
 		}
     case INSTR_IGT:
@@ -742,6 +742,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
+      if(!((int)wt[atom1] > (int)wt[atom2])) return FALSE;
       break;
     }
     default:
