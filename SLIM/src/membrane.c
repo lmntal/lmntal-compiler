@@ -253,7 +253,6 @@ static void dump_atom(LmnAtomPtr atom,
         }
       }
       else { /* symbol atom */
-        printf("hoge %d\n", attr);
         if (hashtbl_contains(&t->args, i)) {
           int link = hashtbl_get(&t->args, i);
           fprintf(stdout, LINK_FORMAT, link);
