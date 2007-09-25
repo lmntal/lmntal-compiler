@@ -91,11 +91,10 @@ void hashtbl_put(SimpleHashtbl *ht, HashKeyType key, HashValueType data)
 
 static struct HashEntry *hashtbl_get_p(SimpleHashtbl *ht, HashKeyType key)
 {
-  HashKeyType hash_val = INT_HASH(key);
   HashKeyType probe;
   HashKeyType increment = (key | 1) & (ht->cap-1);
   
-  for (probe = hash_val & (ht->cap-1);
+  for (probe = INT_HASH(key) & (ht->cap-1);
        ht->tbl[probe].key != EMPTY_KEY && ht->tbl[probe].key != key;
        probe = (probe + increment) & (ht->cap-1)) {
   }
