@@ -423,7 +423,7 @@ static lmn_interned_str get_symbol_id(char *str)
 
 VEC_DEF(struct SymbolFunctor, FUNCTOR_ENTRY_V);
 VEC_T(FUNCTOR_ENTRY_V) functors;
-unsigned int func_id = 0;
+unsigned int func_id; /* init¤ÇÀßÄê */
 
 
 static LmnFunctor get_functor_id(struct Functor f)
@@ -1565,24 +1565,26 @@ static void output_arg(struct InstrArg a, VEC_T(LABEL_V) *labels, unsigned int *
     }
     case INT:
     {
-      WRITE_GO(LmnLinkAttr, LMN_ATTR_MAKE_DATA(LMN_ATOM_INT_ATTR), *pos);
+      WRITE_GO(LmnLinkAttr, LMN_ATOM_INT_ATTR, *pos);
       WRITE_GO(int, f.v.int_value, *pos);
       break;
     }
     case DOUBLE:
     {
-      WRITE_GO(LmnLinkAttr, LMN_ATTR_MAKE_DATA(LMN_ATOM_DBL_ATTR), *pos);
+      WRITE_GO(LmnLinkAttr, LMN_ATOM_DBL_ATTR, *pos);
       WRITE_GO(double, f.v.double_value, *pos);
       break;
     }
     case IN_PROXY:
     {
-      WRITE_GO(LmnLinkAttr, LMN_ATTR_MAKE_DATA(LMN_ATOM_IN_PROXY_ATTR), *pos);
+      WRITE_GO(LmnLinkAttr, LMN_ATOM_IN_PROXY_ATTR, *pos);
+      WRITE_GO(LmnFunctor, LMN_IN_PROXY_FUNCTOR, *pos);
       break;
     }
     case OUT_PROXY:
     {
-      WRITE_GO(LmnLinkAttr, LMN_ATTR_MAKE_DATA(LMN_ATOM_OUT_PROXY_ATTR), *pos);
+      WRITE_GO(LmnLinkAttr, LMN_ATOM_OUT_PROXY_ATTR, *pos);
+      WRITE_GO(LmnFunctor, LMN_OUT_PROXY_FUNCTOR, *pos);
       break;
     }
     default:
@@ -1714,6 +1716,21 @@ static void init(void)
   VEC_INIT(&functors);
   out_buf_cap = 1024;
   out_buf = malloc(sizeof(char) * out_buf_cap);
+
+  /* add proxy */
+  {
+    struct SymbolFunctor f;
+    f.module_id = 0;
+    f.symbol_id = get_symbol_id("$in");
+    f.arity = 2;
+    f.functor_id = 0;
+    PUSH(&functors, f);
+    f.symbol_id = get_symbol_id("$out");
+    f.functor_id = 1;
+    PUSH(&functors, f);
+
+    func_id = 2;
+  }
 }
 
 static void finalize(void)
