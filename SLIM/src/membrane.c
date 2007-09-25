@@ -119,7 +119,7 @@ void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
 
 AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
 {
-  return (AtomSetEntry*)hashtbl_get(&mem->atomset, f);
+  return (AtomSetEntry*)hashtbl_get_default(&mem->atomset, f, 0);
 }
 
 unsigned int lmn_mem_natoms(LmnMembrane *mem)
@@ -222,8 +222,9 @@ static void dump_atom(LmnAtomPtr atom,
 
       if (i > 0) fprintf(stdout, ", ");
       attr = LMN_ATOM_GET_LINK_ATTR(atom,i);
+/*       printf("attr %d\n", attr); */
       if (LMN_ATTR_IS_DATA(attr)) {
-        switch (LMN_ATTR_GET_VALUE(attr)) {
+        switch (attr) {
         case  LMN_ATOM_IN_PROXY_ATTR:
           /* TODO プロキシをたどってリンク先のアトムのに出力するリンク番号を知らせる*/
           fprintf(stdout, "$in");
@@ -238,10 +239,20 @@ static void dump_atom(LmnAtomPtr atom,
           fprintf(stdout, "%f", *(double*)LMN_ATOM_GET_LINK(atom,i));
           break;
         default:
-          fprintf(stdout, "unknown data type[%d], ", LMN_ATTR_GET_VALUE(attr));
+          fprintf(stdout, "unknown data type[%d], ", attr);
           break;
         }
-      } else { /* symbol atom */
+      }
+      else if (LMN_ATTR_IS_PROXY(attr)) {
+        if (attr == LMN_ATOM_IN_PROXY_ATTR) {
+          fprintf(stdout, "$in");
+        }
+        if (attr == LMN_ATOM_OUT_PROXY_ATTR) {
+          fprintf(stdout, "$out");
+        }
+      }
+      else { /* symbol atom */
+        printf("hoge %d\n", attr);
         if (hashtbl_contains(&t->args, i)) {
           int link = hashtbl_get(&t->args, i);
           fprintf(stdout, LINK_FORMAT, link);
@@ -301,8 +312,13 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
        !hashiter_isend(&iter);
        hashiter_next(&iter)) {
     AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
+    LmnFunctor f = hashiter_entry(&iter).key;
     LmnAtomPtr atom;
 
+    if (f == LMN_IN_PROXY_FUNCTOR ||
+        f == LMN_OUT_PROXY_FUNCTOR) {
+      continue;
+    }
     for (atom = ent->head;
          atom != lmn_atomset_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
@@ -407,7 +423,7 @@ static void dump_atom_dev(LmnAtomPtr atom)
     fprintf(stdout, "%u: ", i);
     attr = LMN_ATOM_GET_LINK_ATTR(atom,i);
     if (LMN_ATTR_IS_DATA(attr)) {
-      switch (LMN_ATTR_GET_VALUE(attr)) {
+      switch (attr) {
       case  LMN_ATOM_IN_PROXY_ATTR:
         fprintf(stdout, "in-proxy[%lu], ", LMN_ATOM_GET_LINK(atom,i));
         break;
@@ -421,7 +437,7 @@ static void dump_atom_dev(LmnAtomPtr atom)
         fprintf(stdout, "double[%f], ", *(double*)LMN_ATOM_GET_LINK(atom,i));
         break;
       default:
-        fprintf(stdout, "unknown data type[%d], ", LMN_ATTR_GET_VALUE(attr));
+        fprintf(stdout, "unknown data type[%d], ", attr);
         break;
       }
     } else { /* symbol atom */
