@@ -723,6 +723,24 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			if(LMN_ATOM(wt[atom1]) == LMN_ATOM(wt[atom2])) return FALSE;
 			break;
 		}
+		case INSTR_ISUB:
+		{
+			LmnInstrVar dstatom, atom1, atom2;
+			LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+			LMN_IMS_READ(LmnInstrVar, instr, atom1);
+			LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+/*			REF_CAST(int, wt[dstatom]) = (int)wt[atom1] - (int)wt[atom2];*/
+			break;
+		}
+    case INSTR_IGT:
+    {
+      LmnInstrVar atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      break;
+    }
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
