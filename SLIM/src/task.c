@@ -131,7 +131,7 @@ void run(void)
   
   mem = lmn_mem_make();
 
-  lmn_mem_dump(mem);
+  /*  lmn_mem_dump(mem);  */
 
   /*     lmn_mem_add_ruleset(mem, lmn_ruleset_table.entry[0]); */
 
@@ -662,7 +662,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         switch (attr) {
         case LMN_ATOM_INT_ATTR:
           {
-            printf("deref: int hogehoge\n");
             REF_CAST(int, wt[atom1]) = (int)ap;
             break;
           }
@@ -726,16 +725,17 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			if(LMN_ATOM(wt[atom1]) == LMN_ATOM(wt[atom2])) return FALSE;
 			break;
 		}
-		case INSTR_ISUB:
-		{
-			LmnInstrVar dstatom, atom1, atom2;
-			LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-			LMN_IMS_READ(LmnInstrVar, instr, atom1);
-			LMN_IMS_READ(LmnInstrVar, instr, atom2);
+    case INSTR_ISUB:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-			REF_CAST(int, wt[dstatom]) = (int)wt[atom1] - (int)wt[atom2];
-			break;
-		}
+      REF_CAST(int, wt[dstatom]) = (int)wt[atom1] - (int)wt[atom2];
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
     case INSTR_IGT:
     {
       LmnInstrVar atom1, atom2;
@@ -743,6 +743,111 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] > (int)wt[atom2])) return FALSE;
+      break;
+    }
+    case INSTR_ALLOCATOM:
+    {
+      LmnInstrVar atomi;
+      LmnAtomPtr ap;
+      LmnLinkAttr attr;
+
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      LMN_IMS_READ(LmnLinkAttr, instr, attr);
+      if (LMN_ATTR_IS_DATA(attr)) {
+        switch (attr) {
+        case LMN_ATOM_INT_ATTR:
+          {
+            int x;
+            LMN_IMS_READ(int, instr, x);
+            REF_CAST(int, wt[atomi]) = x;
+            
+            break;
+          }
+        case LMN_ATOM_DBL_ATTR:
+          {
+            double *x;
+
+            x = LMN_MALLOC(double);
+            LMN_IMS_READ(double, instr, *x);
+            REF_CAST(double*, wt[atomi]) = x;
+            break;
+          }
+        default:
+          assert(FALSE);
+          break;
+        }
+        at[atomi] = attr;
+      } else { /* symbol atom */
+        LmnFunctor f;
+        fprintf(stderr, "symbol atom can't be created in GUARD\n");
+        LMN_IMS_READ(LmnFunctor, instr, f);
+        REF_CAST(LmnAtomPtr, wt[atomi]) = ap;
+        at[atomi] = attr;
+      }
+      break;
+    }
+    case INSTR_ALLOCATOMINDIRECT:
+    {
+      LmnInstrVar atomi;
+      LmnFunctor funci;
+
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      LMN_IMS_READ(LmnInstrVar, instr, funci);
+
+      if (LMN_ATTR_IS_DATA(at[funci])) {
+        switch (at[funci]) {
+        case LMN_ATOM_INT_ATTR:
+          {
+            wt[atomi] = wt[funci];
+            break;
+          }
+        case LMN_ATOM_DBL_ATTR:
+          {
+            REF_CAST(double*, wt[atomi]) = LMN_MALLOC(double);
+            *(double*) wt[atomi] = *(double *) wt[funci];
+            break;
+          }
+        default:
+          assert(FALSE);
+          break;
+        }
+        at[atomi] = at[funci];
+      } else { /* symbol atom */
+        fprintf(stderr, "symbol atom can't be created in GUARD\n");
+      }
+      break;
+    }
+    case INSTR_SAMEFUNC:
+    {
+      LmnInstrVar atom1, atom2;
+
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      if(LMN_ATTR_IS_DATA(at[atom1]) == LMN_ATTR_IS_DATA(at[atom1])) {
+        if (LMN_ATTR_IS_DATA(at[atom1])) {
+          if(at[atom1] != at[atom2])
+            return FALSE;
+        }
+        else if(LMN_ATOM_GET_FUNCTOR((LmnAtomPtr)wt[atom1]) != LMN_ATOM_GET_FUNCTOR((LmnAtomPtr)wt[atom2])) 
+        return FALSE; 
+      }
+      break;
+    }
+    case INSTR_GETFUNC:
+    {
+      LmnInstrVar funci, atomi;
+
+      LMN_IMS_READ(LmnFunctor, instr, funci);
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      if(LMN_ATTR_IS_DATA(at[atomi])) {
+        wt[funci]=wt[atomi];
+      }
+      else {
+        REF_CAST(LmnFunctor, wt[funci]) = LMN_ATOM_GET_FUNCTOR(wt[atomi]);
+      }
+      at[funci] = at[atomi];
+
       break;
     }
     default:
