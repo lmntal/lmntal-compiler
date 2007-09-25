@@ -219,8 +219,8 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_IN_PROXY_FUNCTOR 0
 #define LMN_OUT_PROXY_FUNCTOR 1
 
-#define LMN_PROXY_GET_MEM(PROXY_ATOM)  *(LMN_ATOM_PLINK(PROXY_ATOM) + 1)
-#define LMN_PROXY_SET_MEM(PROXY_ATOM,X)  (*(LMN_ATOM_PLINK(PROXY_ATOM) + 1) = (X))
+#define LMN_PROXY_GET_MEM(PROXY_ATOM)  (*(((LmnWord*)PROXY_ATOM)+3))
+#define LMN_PROXY_SET_MEM(PROXY_ATOM,X)  (*(((LmnWord*)PROXY_ATOM)+3)=(X))
 
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
