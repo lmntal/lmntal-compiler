@@ -740,49 +740,51 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       }
       break;
     }
-		case INSTR_FUNC:
-		{
-			LmnInstrVar atomi;
-			LmnFunctor f;
-			LmnLinkAttr attr;
-			LMN_IMS_READ(LmnInstrVar, instr, atomi);
-			LMN_IMS_READ(LmnLinkAttr, instr, attr);
+    case INSTR_FUNC:
+    {
+      LmnInstrVar atomi;
+      LmnFunctor f;
+      LmnLinkAttr attr;
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      LMN_IMS_READ(LmnLinkAttr, instr, attr);
 
       if (LMN_ATTR_IS_DATA(at[atomi]) == LMN_ATTR_IS_DATA(attr)) {
         if(LMN_ATTR_IS_DATA(at[atomi])) {
           if(at[atomi] != attr) return FALSE; /* comp attr */
           switch(attr) { /* comp value */
-            case LMN_ATOM_INT_ATTR:
+          case LMN_ATOM_INT_ATTR:
             {
               int x;
               LMN_IMS_READ(int, instr, x);
-              if(REF_CAST(int, wt[atomi]) != x) return FALSE;
+              if((int)wt[atomi] != x) return FALSE;
               break;
             }
-            case LMN_ATOM_DBL_ATTR:
+          case LMN_ATOM_DBL_ATTR:
             {
-              double *x;
-              x = LMN_MALLOC(double);
-              LMN_IMS_READ(double, instr, *x);
-              if(*(REF_CAST(double*, wt[atomi])) != *x) return FALSE;
+              double x;
+              LMN_IMS_READ(double, instr, x);
+              if(*(double*)wt[atomi] != x) return FALSE;
               break;
             }
+          default:
+            LMN_ASSERT(FALSE);
+            break;
           }
         }
-			  else /* symbol atom */
-        {
-          LMN_IMS_READ(LmnFunctor, instr, f);
-			    if (LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atomi])) != f) {
-				    return FALSE;
+        else /* symbol atom */
+          {
+            LMN_IMS_READ(LmnFunctor, instr, f);
+            if (LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atomi])) != f) {
+              return FALSE;
+            }
           }
-        }
       }
       else { /* LMN_ATTR_IS_DATA(at[atomi]) != LMN_ATTR_IS_DATA(attr) */
         return FALSE;
       }
       fprintf(stderr, "instr_func successed\n");
-			break;
-		}
+      break;
+    }
     case INSTR_ISUNARY:
     {
       LmnInstrVar atomi;
@@ -791,15 +793,15 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       if(LMN_ATOM_GET_ARITY((LmnAtomPtr)wt[atomi]) != 1) return FALSE;
       break;
     }
-		case INSTR_ISINT:
-		{
-			LmnInstrVar atomi;
-			LMN_IMS_READ(LmnInstrVar, instr, atomi);
+    case INSTR_ISINT:
+    {
+      LmnInstrVar atomi;
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
 
-			if (at[atomi] != LMN_ATOM_INT_ATTR)
-				return FALSE;
-			break;
-		}
+      if (at[atomi] != LMN_ATOM_INT_ATTR)
+        return FALSE;
+      break;
+    }
     case INSTR_ISFLOAT:
     {
       LmnInstrVar atomi;
