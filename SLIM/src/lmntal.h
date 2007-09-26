@@ -129,6 +129,11 @@ typedef struct LmnMembrane LmnMembrane;
  *
  */
 
+/* Proxy
+ *  Proxy is implememted as a special atom. The 3rd link is a pointer
+ *  to the current membrane.
+ */
+
 typedef LmnWord *LmnAtomPtr;
 
 typedef uint8_t LmnLinkAttr;
@@ -188,12 +193,10 @@ typedef uint8_t LmnLinkAttr;
   (*LMN_ATOM_PLINK(ATOM,N)=(X))
 
 /* word size of atom */
-/* プロキシに時は膜への参照の分 +1 */
 /* 3の加算は prev,next,functorのワード */
 #define LMN_ATOM_WORDS(FUNCTOR, ARITY)          \
-  ((((FUNCTOR) == LMN_IN_PROXY_FUNCTOR ||       \
-     (FUNCTOR) == LMN_OUT_PROXY_FUNCTOR) ?      \
-    1 : 0) + (3+LMN_ATTR_WORDS(ARITY)+(ARITY)))
+  (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
+
 /* operations for link attribute */
 #define LMN_ATTR_IS_DATA(X)                         \
   ((X)&~LMN_LINK_ATTR_MASK && !LMN_ATTR_IS_PROXY(X))
@@ -210,17 +213,16 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATTR_SET_VALUE(PATTR,X)   \
   (*(PATTR)=((((X)&~LMN_LINK_ATTR_MASK))|X))
 
+#define LMN_PROXY_GET_MEM(PROXY_ATOM)  LMN_ATOM_GET_LINK((PROXY_ATOM), 3)
+#define LMN_PROXY_SET_MEM(PROXY_ATOM,X)  LMN_ATOM_SET_LINK((PROXY_ATOM), 3, (X))
 
-/* Proxy
- *  Proxy is implememted as a special atom. It has more 1 word as a
- *  reference to the membrane it's owend.
- */
 
-#define LMN_IN_PROXY_FUNCTOR 0
-#define LMN_OUT_PROXY_FUNCTOR 1
+/* special functors */
 
-#define LMN_PROXY_GET_MEM(PROXY_ATOM)  (*(((LmnWord*)PROXY_ATOM)+3))
-#define LMN_PROXY_SET_MEM(PROXY_ATOM,X)  (*(((LmnWord*)PROXY_ATOM)+3)=(X))
+#define LMN_IN_PROXY_FUNCTOR   0
+#define LMN_OUT_PROXY_FUNCTOR  1
+#define LMN_LIST_FUNCTOR       2
+#define LMN_NIL_FUNCTOR        3
 
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
