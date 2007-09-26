@@ -729,6 +729,14 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 				return FALSE;
 			break;
 		}
+    case INSTR_ISUNARY:
+    {
+      LmnInstrVar atomi;
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+
+      if(LMN_ATOM_GET_ARITY((LmnAtomPtr)wt[atomi]) != 1) return FALSE;
+      break;
+    }
 		case INSTR_ISINT:
 		{
 			LmnInstrVar atomi;
@@ -738,7 +746,34 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 				return FALSE;
 			break;
 		}
-		case INSTR_COPYATOM:
+    case INSTR_ISFLOAT:
+    {
+      LmnInstrVar atomi;
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+
+      if(at[atomi] != LMN_ATOM_DBL_ATTR)
+        return FALSE;
+      break;
+    }
+    case INSTR_ISINTFUNC:
+    {
+      LmnInstrVar funci;
+      LMN_IMS_READ(LmnInstrVar, instr, funci);
+
+      if(at[funci] != LMN_ATOM_INT_ATTR)
+        return FALSE;
+      break;
+    }
+    case INSTR_ISFLOATFUNC:
+	  {
+      LmnInstrVar funci;
+      LMN_IMS_READ(LmnInstrVar, instr, funci);
+
+      if(at[funci] != LMN_ATOM_DBL_ATTR)
+        return FALSE;
+      break;
+    }
+    case INSTR_COPYATOM:
 		{
 			LmnInstrVar atom1, memi, atom2;
 			LMN_IMS_READ(LmnInstrVar, instr, atom1);
@@ -789,6 +824,17 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       }
       break;
     }
+    case INSTR_IADD:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      REF_CAST(int, wt[dstatom]) = (int)wt[atom1] + (int)wt[atom2];
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
     case INSTR_ISUB:
     {
       LmnInstrVar dstatom, atom1, atom2;
@@ -797,6 +843,28 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
       REF_CAST(int, wt[dstatom]) = (int)wt[atom1] - (int)wt[atom2];
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IMUL:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      REF_CAST(int, wt[dstatom]) = (int)wt[atom1] * (int)wt[atom2];
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IDIV:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      REF_CAST(int, wt[dstatom]) = (int)wt[atom1] / (int)wt[atom2];
       at[dstatom] = LMN_ATOM_INT_ATTR;
       break;
     }
