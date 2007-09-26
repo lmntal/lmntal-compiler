@@ -723,10 +723,40 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			LmnLinkAttr attr;
 			LMN_IMS_READ(LmnInstrVar, instr, atomi);
 			LMN_IMS_READ(LmnLinkAttr, instr, attr);
-			LMN_IMS_READ(LmnFunctor, instr, f);
 
-			if (f != LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atomi])))
-				return FALSE;
+      if (LMN_ATTR_IS_DATA(at[atomi]) == LMN_ATTR_IS_DATA(attr)) {
+        if(LMN_ATTR_IS_DATA(at[atomi])) {
+          if(at[atomi] != attr) return FALSE; /* comp attr */
+          switch(attr) { /* comp value */
+            case LMN_ATOM_INT_ATTR:
+            {
+              int x;
+              LMN_IMS_READ(int, instr, x);
+              if(REF_CAST(int, wt[atomi]) != x) return FALSE;
+              break;
+            }
+            case LMN_ATOM_DBL_ATTR:
+            {
+              double *x;
+              x = LMN_MALLOC(double);
+              LMN_IMS_READ(double, instr, *x);
+              if(*(REF_CAST(double*, wt[atomi])) != *x) return FALSE;
+              break;
+            }
+          }
+        }
+			  else /* symbol atom */
+        {
+          LMN_IMS_READ(LmnFunctor, instr, f);
+			    if (LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atomi])) != f) {
+				    return FALSE;
+          }
+        }
+      }
+      else { /* LMN_ATTR_IS_DATA(at[atomi]) != LMN_ATTR_IS_DATA(attr) */
+        return FALSE;
+      }
+      fprintf(stderr, "instr_func successed\n");
 			break;
 		}
     case INSTR_ISUNARY:
@@ -780,6 +810,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 			LMN_IMS_READ(LmnInstrVar, instr, memi);
 			LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
+      /* TODO: 参照のコピーじゃなくてデータのコピーが必要かも… */
 			REF_CAST(LmnAtomPtr, wt[atom1]) = REF_CAST(LmnAtomPtr, wt[atom2]);
 			at[atom1] = at[atom2];
 			break;
@@ -817,6 +848,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       else {
         LmnLinkListNode* new = LMN_MALLOC(LmnLinkListNode);
         /* TODO: 大きさ有限でいいなら配列を使いたい… */
+        /* -> malloc/reallocでいいじゃん */
         for(; node!=NULL; node=node->next);
         node->next=new;
         new->next=NULL;
