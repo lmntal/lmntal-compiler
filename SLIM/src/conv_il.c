@@ -212,8 +212,17 @@ struct InstrSpec {
     {"isint", INSTR_ISINT, {InstrVar, 0}},
     {"isintfunc", INSTR_ISINTFUNC, {InstrVar, 0}},
     
+    {"iadd", INSTR_IADD, {InstrVar, InstrVar, InstrVar, 0}},
     {"isub", INSTR_ISUB, {InstrVar, InstrVar, InstrVar, 0}},
+    {"imul", INSTR_IMUL, {InstrVar, InstrVar, InstrVar, 0}},
+    {"idiv", INSTR_IDIV, {InstrVar, InstrVar, InstrVar, 0}},
+    {"ineg", INSTR_INEG, {InstrVar, InstrVar, 0}},
+    {"imod", INSTR_IMOD, {InstrVar, InstrVar, InstrVar, 0}},
+    {"ilt", INSTR_ILT, {InstrVar, InstrVar, 0}},
+    {"ile", INSTR_ILE, {InstrVar, InstrVar, 0}},
     {"igt", INSTR_IGT, {InstrVar, InstrVar, 0}},
+    {"ige", INSTR_IGE, {InstrVar, InstrVar, 0}},
+    {"ieq", INSTR_IEQ, {InstrVar, InstrVar, 0}},
     {"ine", INSTR_INE, {InstrVar, InstrVar, 0}},
     
     /* for dump */
