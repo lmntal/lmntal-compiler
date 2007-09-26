@@ -240,8 +240,15 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       LMN_IMS_READ(LmnJumpOffset, instr, offset);
       instr += offset;
-      
-      break;
+
+      SWAP(LmnWord*, wt, tv);
+      SWAP(LmnLinkAttr*, at, tkv);
+      if (interpret(instr, &instr)) return TRUE;
+      else {
+        SWAP(LmnWord*, wt, tv);
+        SWAP(LmnLinkAttr*, at, tkv);
+        return FALSE;
+      }
     }
     case INSTR_COMMIT:
       instr += sizeof(lmn_interned_str) + sizeof(LmnLineNum);
@@ -601,6 +608,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       mp = lmn_mem_make(); /*lmn_new_mem(memf);*/
       lmn_mem_push_mem((LmnMembrane*)wt[parentmemi], mp);
       REF_CAST(LmnMembrane*, wt[newmemi]) = mp;
+      memstack_push(mp);
       break;
     }
     case INSTR_REMOVEATOM:
