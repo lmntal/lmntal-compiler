@@ -901,7 +901,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      if(!(int)wt[atom1] >= (int)wt[atom2]) return FALSE;
+      if(!((int)wt[atom1] >= (int)wt[atom2])) return FALSE;
       break;
     }
     case INSTR_IEQ:
@@ -910,7 +910,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      if(!(int)wt[atom1] == (int)wt[atom2]) return FALSE;
+      if(!((int)wt[atom1] == (int)wt[atom2])) return FALSE;
       break;
     }
     case INSTR_INE:
@@ -919,7 +919,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      if(!(int)wt[atom1] != (int)wt[atom2]) return FALSE;
+      if(!((int)wt[atom1] != (int)wt[atom2])) return FALSE;
       break;
     }
     case INSTR_ALLOCATOM:
@@ -1001,13 +1001,22 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      if(LMN_ATTR_IS_DATA(at[atom1]) == LMN_ATTR_IS_DATA(at[atom1])) {
+      if(LMN_ATTR_IS_DATA(at[atom1]) == LMN_ATTR_IS_DATA(at[atom2])) {
         if (LMN_ATTR_IS_DATA(at[atom1])) {
-          if(at[atom1] != at[atom2])
+          if(at[atom1] != at[atom2]) { /* comp attr */
             return FALSE;
+          }
+          /* TODO: double*などポインタの場合は値がコピーされている場合がある？ */
+          else if(wt[atom1] != wt[atom2]) { /* comp value */
+            return FALSE;
+          }
         }
-        else if(LMN_ATOM_GET_FUNCTOR((LmnAtomPtr)wt[atom1]) != LMN_ATOM_GET_FUNCTOR((LmnAtomPtr)wt[atom2])) 
-        return FALSE; 
+        else if(LMN_ATOM_GET_FUNCTOR((LmnAtomPtr)wt[atom1]) != LMN_ATOM_GET_FUNCTOR((LmnAtomPtr)wt[atom2])) {
+          return FALSE;
+        }
+      }
+      else { /* LMN_ATTR_IS_DATA(at[atom1] != LMN_ATTR_IS_DATA(at[atom2]) */
+        return FALSE;
       }
       break;
     }
