@@ -1718,6 +1718,29 @@ static void output_il(struct IL il)
 
 /*----------------------------------------------------------------------*/
 
+static void add_functors(int functor_id,
+                         int module_id,
+                         char *symbol,
+                         int arity)
+{
+  struct SymbolFunctor f;
+
+  f.functor_id = functor_id;
+  f.module_id = module_id;
+  f.symbol_id = get_symbol_id(symbol);
+  f.arity = arity;
+  PUSH(&functors, f);
+}
+
+static void init_functors(void)
+{
+  add_functors(LMN_IN_PROXY_FUNCTOR, 0, "$in", 3);
+  add_functors(LMN_OUT_PROXY_FUNCTOR, 0, "$out", 3);
+  add_functors(LMN_LIST_FUNCTOR, 0, ".", 3);
+  add_functors(LMN_NIL_FUNCTOR, 0, "[]", 1);
+  func_id = 4;
+}
+
 static void init(void)
 {
   VEC_INIT(&src_lines);
@@ -1726,20 +1749,7 @@ static void init(void)
   out_buf_cap = 1024;
   out_buf = malloc(sizeof(char) * out_buf_cap);
 
-  /* add proxy */
-  {
-    struct SymbolFunctor f;
-    f.module_id = 0;
-    f.symbol_id = get_symbol_id("$in");
-    f.arity = 2;
-    f.functor_id = 0;
-    PUSH(&functors, f);
-    f.symbol_id = get_symbol_id("$out");
-    f.functor_id = 1;
-    PUSH(&functors, f);
-
-    func_id = 2;
-  }
+  init_functors();
 }
 
 static void finalize(void)
