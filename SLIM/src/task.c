@@ -412,8 +412,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atom);
       LMN_IMS_READ(LmnInstrVar, instr, n);
 
-      if (LMN_ATTR_IS_DATA(at[atom]) ||
-          LMN_ATTR_IS_PROXY(at[atom])) {
+      if (LMN_ATTR_IS_DATA(at[atom])) {
         wt[link] = wt[atom];
         at[link] = at[atom];
       } else { /* link to atom */
@@ -448,7 +447,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[link1]),
                                LMN_ATTR_GET_VALUE(at[link1]),
                                at[link2]);
-      } else {
+      }
+      else {
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[link1]), LMN_ATTR_GET_VALUE(at[link1]), wt[link2]);
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[link2]), LMN_ATTR_GET_VALUE(at[link2]), wt[link1]);
         LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[link1]),

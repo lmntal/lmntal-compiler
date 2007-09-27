@@ -1591,13 +1591,13 @@ static void output_arg(struct InstrArg a, VEC_T(LABEL_V) *labels, unsigned int *
     }
     case IN_PROXY:
     {
-      WRITE_GO(LmnLinkAttr, LMN_ATOM_IN_PROXY_ATTR, *pos);
+      WRITE_GO(LmnLinkAttr, LMN_ATTR_MAKE_LINK(0), *pos);
       WRITE_GO(LmnFunctor, LMN_IN_PROXY_FUNCTOR, *pos);
       break;
     }
     case OUT_PROXY:
     {
-      WRITE_GO(LmnLinkAttr, LMN_ATOM_OUT_PROXY_ATTR, *pos);
+      WRITE_GO(LmnLinkAttr, LMN_ATTR_MAKE_LINK(0), *pos);
       WRITE_GO(LmnFunctor, LMN_OUT_PROXY_FUNCTOR, *pos);
       break;
     }
