@@ -40,7 +40,7 @@ static struct HashEntry *hashtbl_get_p(SimpleHashtbl *ht, HashKeyType key);
 static HashKeyType round2up(unsigned int n);
 static HashKeyType* hashset_get_p(HashSet* set, HashKeyType key);
 
-/* HashMap <HashKeyType, HashValueTypr>
+/* HashMap <HashKeyType, HashValueTypr> */
 void hashtbl_init(SimpleHashtbl *ht, unsigned int init_size)
 {
   ht->num = 0;
