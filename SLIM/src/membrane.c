@@ -42,10 +42,10 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
  * Atom Set
  */
 
-static BOOL atom_list_is_empty(AtomSetEntry *entry)
-{
-  return entry->head == (LmnAtomPtr)entry;
-}
+/* static BOOL atom_list_is_empty(AtomSetEntry *entry) */
+/* { */
+/*   return entry->head == (LmnAtomPtr)entry; */
+/* } */
 
 void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
 {
