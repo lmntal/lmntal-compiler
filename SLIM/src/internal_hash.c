@@ -38,7 +38,9 @@
 static void hashtbl_extend(SimpleHashtbl *ht);
 static struct HashEntry *hashtbl_get_p(SimpleHashtbl *ht, HashKeyType key);
 static HashKeyType round2up(unsigned int n);
+static HashKeyType* hashset_get_p(HashSet* set, HashKeyType key);
 
+/* HashMap <HashKeyType, HashValueTypr>
 void hashtbl_init(SimpleHashtbl *ht, unsigned int init_size)
 {
   ht->num = 0;
@@ -156,4 +158,89 @@ void hashiter_next(HashIterator *iter)
 {
   while (++iter->i < iter->ht->cap &&
          iter->ht->tbl[iter->i].key == EMPTY_KEY) ;
+}
+
+/* HashSet <HashKeyType> */
+void hashset_init(HashSet *set, unsigned int init_size)
+{
+  set->num = 0;
+  set->cap = round2up(init_size);
+  set->tbl = (HashKeyType *)malloc(sizeof(HashKeyType) * set->cap);
+  memset(set->tbl, 0xff, sizeof(HashKeyType) * set->cap);
+}
+
+void hashset_destroy(HashSet *set)
+{
+  free(set->tbl);
+}
+
+int hashset_contains(HashSet *set, HashKeyType key)
+{
+  return *hashset_get_p(set, key) != EMPTY_KEY;
+}
+
+static void hashset_extend(HashSet *set)
+{
+  HashKeyType *tbl, *entry;
+  unsigned int i, cap;
+
+  if (set->cap == MAX_CAP) {
+    fprintf(stderr, "hashtable capacity overflow\n");
+    exit(1);
+  }
+  
+  cap = set->cap;
+  tbl = set->tbl;
+  set->cap <<= 1;
+  set->tbl = (HashKeyType *)malloc(sizeof(HashKeyType) *  set->cap);
+  memset(set->tbl, 0xff, sizeof(HashKeyType) * set->cap);
+
+  for(i = 0; i < cap; i++) {
+    if(tbl[i] != EMPTY_KEY) {
+      entry = hashset_get_p(set, tbl[i]); /* ¿·¤·¤¤index */
+      *entry = tbl[i];
+    }
+  }
+  free(tbl);
+}
+
+void hashset_add(HashSet* set, HashKeyType key) {
+  HashKeyType* entry;
+#ifdef DEBUG
+  assert(key != EMPTY_KEY);
+#endif  
+  entry = hashset_get_p(set, key);
+  if(key == EMPTY_KEY) {
+    set->num++;
+    *entry = key;
+  }
+  if(set->num > set->cap * LOAD_FACTOR) {
+    hashset_extend(set);
+  }
+}
+
+HashSetIterator hashset_iterator(HashSet *set) {
+  HashSetIterator it;
+  it.i = 0;
+  it.set = set;
+  if(set->cap > 0 && set->tbl[it.i] == EMPTY_KEY) {
+    hashset_it_next(&it);
+  }
+  return it;
+}
+
+void hashset_it_next(HashSetIterator *it) {
+  while (++it->i < it->set->cap && it->set->tbl[it->i] == EMPTY_KEY);
+}
+
+HashKeyType* hashset_get_p(HashSet* set, HashKeyType key)
+{
+  HashKeyType probe;
+  HashKeyType increment = (key | 1) & (set->cap-1);
+  
+  for (probe = INT_HASH(key) & (set->cap-1);
+       set->tbl[probe] != EMPTY_KEY && set->tbl[probe] != key;
+       probe = (probe + increment) & (set->cap-1)) {
+  }
+  return &set->tbl[probe];
 }
