@@ -7,6 +7,7 @@
 #include "lmntal.h"
 #include "instruction.h"
 #include "read_instr.h"
+#include "vector.h"
 
 /* this size should be the maximum size of 'spec' arguments */
 /* Or allocated when required */
@@ -97,42 +98,71 @@ struct RuleSetList {
 };
 typedef struct RuleSetList RuleSetNode;
 
-/* 中間命令で使われるArrayList<LmnWord> */
-/* たぶんaddのみ必要でremoveはいらない */
-typedef struct VecEntry VecEntry;
-struct VecEntry {
-  LmnWord key;
-  /*VecEntry* next;*/
+/* リンクオブジェクトの代替 */
+typedef struct LinkObj {
+  LmnAtomPtr ap;
+  LmnLinkAttr pos;
+} LinkObj;
+
+/*
+ * ground検査で再帰除去のため必要になったstack
+ * とりあえずここに作ったけどどうしよう。
+ * 基本的なデータ構造はまとめてヘッダ行き？
+ */
+typedef struct StackEntity StackEntity;
+struct StackEntity {
+  LmnWord *key;
+  StackEntity *next;
 };
-typedef struct Vector {
-  struct VecEntry* head;
-  unsigned int num, cap;
-} Vector;
-/* init */
-Vector* vec_init(unsigned int init_size) {
-  Vector* ret;
-  ret->head = LMN_NALLOC(VecEntry, init_size);
-  ret->num = 0;
-  ret->cap = init_size;
-  return ret;
+
+typedef struct Stack {
+  StackEntity *head, *tail;
+} Stack;
+
+static void stack_init(Stack *stack)
+{
+  stack->head = LMN_MALLOC(StackEntity);
+  stack->head->next = NULL;
+  stack->head->key = NULL;
+  stack->tail = stack->head;
 }
-Vector* vec_init_default() {
-  return vec_init(16);
+
+static void stack_push(Stack* stack, LmnWord *key)
+{
+  StackEntity *ent = LMN_MALLOC(StackEntity);
+  ent->key = key;
+  ent->next = stack->head->next;
+  stack->head->next = ent;
 }
-/* extend */
-void vec_extend(Vector* vec) {
-  vec->cap *= 2;
-  vec->head = LMN_REALLOC(VecEntry, vec->head, vec->cap);
+
+static int stack_isempty(Stack* stack)
+{
+  return stack->head->next==NULL;
 }
-/* add */
-void vec_add(Vector* vec, LmnInstrVar key) {
-  (vec->head)[vec->num].key = key;
-  vec->num++;
-  if(vec->num == vec->cap) {
-    vec_extend(vec);
+
+static LmnWord* stack_pop(Stack *stack)
+{
+  StackEntity *ent = stack->head->next;
+  LmnWord *key = ent->key;
+  stack->head->next = ent->next;
+  LMN_FREE(ent);
+  return key;
+}
+
+static LmnWord* stack_peek(Stack stack)
+{
+  return stack.head->next->key;
+}
+
+static void stack_printall(Stack stack)
+{
+  StackEntity *ent;
+  for(ent = stack.head; ent!=NULL; ent = ent->next){
+    if(ent->key!=NULL) printf("%d ", (unsigned int)*(ent->key));
   }
+  printf("\n");
 }
-/* Vectorここまで */
+/* Stackここまで */
 
 static int exec(LmnMembrane *mem)
 {
@@ -793,6 +823,41 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       fprintf(stderr, "instr_func successed\n");
       break;
     }
+    case INSTR_ISGROUND:
+    {
+      LmnInstrVar funci, srclisti, avolisti;
+      unsigned int i;
+      Vector *srcvec, *avovec; /* 要素はリンク */
+      HashSet* avoset;
+      HashSet *atoms; /* 走査済みアトム */
+      Stack *links;   /* 再帰用スタック */
+
+      LMN_IMS_READ(LmnInstrVar, instr, funci);
+      LMN_IMS_READ(LmnInstrVar, instr, srclisti);
+      LMN_IMS_READ(LmnInstrVar, instr, avolisti);
+
+      /* TODO: マクロ化できる部分があるか？ */
+      srcvec = (Vector*) wt[srclisti];
+      avovec = (Vector*) wt[avolisti];
+      
+      hashset_init(avoset, 16);
+      hashset_init(atoms, 256);
+      for(i = 0; i < avovec->num; i++) {
+        hashset_add(avoset, avovec->tbl[i]);
+      }
+      stack_init(links);
+
+      /* method: isGround */
+      while(!stack_isempty(links)) {
+        LmnAtomPtr ap = stack_pop(links);
+        if(hashset_contains(atoms, (HashKeyType)ap))
+          continue;
+        if(hashset_contains(avoset, (HashKeyType)ap))
+          return FALSE;
+          
+
+      }
+    }
     case INSTR_ISUNARY:
     {
       LmnInstrVar atomi;
@@ -862,15 +927,19 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     {
       LmnInstrVar listi;
       LMN_IMS_READ(LmnInstrVar, instr, listi);
-      REF_CAST(Vector*, wt[listi]) = vec_init_default();
+      REF_CAST(Vector*, wt[listi]) = vec_make_default();
       break;
     }
     case INSTR_ADDTOLIST:
     {
       LmnInstrVar listi, srci;
+      LinkObj linko;
       LMN_IMS_READ(LmnInstrVar, instr, listi);
       LMN_IMS_READ(LmnInstrVar, instr, srci);
-      vec_add((Vector*)wt[listi], wt[srci]);
+      /* おそらくADDTOLISTで追加される要素の種類はリンクのみ */
+      linko.ap = (LmnAtomPtr)wt[srci];
+      linko.pos = (at[srci]);
+      vec_add((Vector*)wt[listi], (LmnWord)&linko);
       break;
     }
     case INSTR_IADD:
@@ -1055,7 +1124,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           if(at[atom1] != at[atom2]) { /* comp attr */
             return FALSE;
           }
-          /* TODO: double*などポインタの場合は値がコピーされている場合がある？ */
+          /* TODO: double*などポインタの場合は値がコピーされている場合がある */
           else if(wt[atom1] != wt[atom2]) { /* comp value */
             return FALSE;
           }
