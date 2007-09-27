@@ -160,6 +160,7 @@ unsigned int lmn_mem_nmems(LmnMembrane *mem)
 struct AtomRec {
   BOOL done;
   SimpleHashtbl args;
+  int link_num; /* proxy only */
 };
 
 struct DumpState {
@@ -178,6 +179,7 @@ static struct AtomRec *atomrec_make()
   struct AtomRec *a = LMN_MALLOC(struct AtomRec);
   a->done = FALSE;
   hashtbl_init(&a->args, 16);
+  a->link_num = -1;
   return a;
 }
 
@@ -191,7 +193,10 @@ static BOOL is_direct_printable(char *s)
 {
   LMN_ASSERT(*s);
 
-  /* head character */
+  /* proxy */
+  if (!strcmp(s, "$in") || !strcmp(s, "$out")) return TRUE;
+  
+  /* symbol */
   if (!(isalpha(*s) && islower(*s))) return FALSE;
   while (*(++s)) {
     if (!(isalpha(*s) || isdigit(*s))) return FALSE;
@@ -221,6 +226,28 @@ static void dump_atomname(char *s)
   }
 }
 
+static void dump_data_atom(LmnWord data,
+                           SimpleHashtbl *ht,
+                           LmnLinkAttr attr,
+                           struct DumpState *s,
+                           int indent,
+                           int call_depth)
+{
+  /* print only data (no link) */
+  switch (attr) {
+  case  LMN_ATOM_INT_ATTR:
+    fprintf(stdout, "%d", (int)data);
+    break;
+  case  LMN_ATOM_DBL_ATTR:
+    fprintf(stdout, "%f", *(double*)data);
+    break;
+  default:
+    fprintf(stdout, "unknown data type[%d], ", attr);
+    LMN_ASSERT(FALSE);
+    break;
+  }
+}
+
 static void dump_list(LmnAtomPtr atom,
                       SimpleHashtbl *ht,
                       struct DumpState *s,
@@ -228,12 +255,10 @@ static void dump_list(LmnAtomPtr atom,
                       int call_depth) {
   BOOL first = TRUE;
   LmnLinkAttr attr;
-  struct AtomRec *t;
 
-  t = get_atomrec(ht, atom);
-  if (t->done) return;
+  if (get_atomrec(ht, atom)->done) return;
 
-  attr = LMN_ATTR_MAKE_LINK(2);
+  attr = LMN_ATTR_MAKE_LINK(2); /* 2 is output link position */
 
   fprintf(stdout, "[");
   while (TRUE) {
@@ -245,18 +270,20 @@ static void dump_list(LmnAtomPtr atom,
 
       rec = get_atomrec(ht, atom);
       
-      if (rec->done) { /* 閉路 */
+      if (rec->done) { /* cyclic */
         int link = s->link_num++;
-        fprintf(stdout, " | ");
+        fprintf(stdout, "|");
         hashtbl_put(&rec->args, LMN_ATTR_GET_VALUE(attr), link);
         fprintf(stdout, LINK_FORMAT, link);
         break;
       }
       rec->done = TRUE;
 
-      if (!first) fprintf(stdout, ", ");
+      if (!first) fprintf(stdout, ",");
       first = FALSE;
+
       if (hashtbl_contains(&rec->args, 0)) {
+        /* link 0 was already printed */
         int link = hashtbl_get(&rec->args, 0);
         fprintf(stdout, LINK_FORMAT, link);
       }
@@ -279,8 +306,8 @@ static void dump_list(LmnAtomPtr atom,
       hashtbl_put(ht, (HashKeyType)atom, (HashValueType)rec);
       break;
     }
-    else {
-      fprintf(stdout, " | ");
+    else { /* list ends with non nil data */
+      fprintf(stdout, "|");
       dump_atom(atom, ht, LMN_ATTR_GET_VALUE(attr), s, indent, call_depth + 1);
       break;
     }
@@ -288,6 +315,43 @@ static void dump_list(LmnAtomPtr atom,
   fprintf(stdout, "]");
 }
 
+/* propagate a link number to connected proxies */
+static void propagate_proxy_link(LmnAtomPtr atom,
+                                 LmnLinkAttr attr,
+                                 SimpleHashtbl *ht,
+                                 int link_num)
+{
+  struct AtomRec *t;
+  int i;
+  
+  if (LMN_ATTR_IS_DATA(attr)) return;
+  if (LMN_ATOM_GET_FUNCTOR(atom) != LMN_IN_PROXY_FUNCTOR &&
+      LMN_ATOM_GET_FUNCTOR(atom) != LMN_OUT_PROXY_FUNCTOR) return;
+  t = get_atomrec(ht, atom);
+  if (t->link_num >= 0) return;
+  
+  t->link_num = link_num;
+
+  for (i = 0; i < 2; i++) {
+    propagate_proxy_link(LMN_ATOM(LMN_ATOM_GET_LINK(atom, 0)),
+                         LMN_ATOM_GET_LINK_ATTR(atom, 0),
+                         ht,
+                         link_num);
+  }
+}
+
+/* assign a link number to all connected proxies */
+static void assign_link_to_proxy(LmnAtomPtr atom, SimpleHashtbl *ht, struct DumpState *s)
+{
+  struct AtomRec *t;
+
+  t = get_atomrec(ht, atom);
+  if (t->link_num < 0) {
+    int link_num = s->link_num++;
+    propagate_proxy_link(atom, LMN_ATTR_MAKE_LINK(0), ht, link_num);
+  }
+}
+   
 static void dump_proxy(LmnAtomPtr atom,
                        SimpleHashtbl *ht,
                        int link_pos,
@@ -296,40 +360,21 @@ static void dump_proxy(LmnAtomPtr atom,
                        int call_depth)
 {
   struct AtomRec *t;
-  t = atomrec_make();
+  t = get_atomrec(ht, atom);
   t->done = TRUE;
-  hashtbl_put(ht, (HashKeyType)atom, (HashValueType)t);
 
-  if (LMN_ATOM_GET_FUNCTOR(atom) == LMN_IN_PROXY_FUNCTOR) {
-    fprintf(stdout, "$in");
+  if (call_depth == 0) {
+    LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(atom, 1);
+    if (LMN_ATTR_IS_DATA(attr)) {
+      dump_data_atom((LmnWord)LMN_ATOM_GET_LINK(atom, 1), ht, attr, s, indent, call_depth);
+      fprintf(stdout, "(" LINK_FORMAT "). ", t->link_num);
+    }
   }
-  if (LMN_ATOM_GET_FUNCTOR(atom) == LMN_OUT_PROXY_FUNCTOR) {
-    fprintf(stdout, "$out");
-  }
-}
-
-static void dump_data_atom(LmnWord data,
-                           SimpleHashtbl *ht,
-                           LmnLinkAttr attr,
-                           struct DumpState *s,
-                           int indent,
-                           int call_depth)
-{
-  switch (attr) {
-  case  LMN_ATOM_INT_ATTR:
-    fprintf(stdout, "%d", (int)data);
-    break;
-  case  LMN_ATOM_DBL_ATTR:
-    fprintf(stdout, "%f", *(double*)data);
-    break;
-  default:
-    fprintf(stdout, "unknown data type[%d], ", attr);
-    LMN_ASSERT(FALSE);
-    break;
+  else {
+    fprintf(stdout, LINK_FORMAT, t->link_num);
   }
 }
 
-/* TODO: ちゃんとした実装はプロキシを実装してから */
 static void dump_symbol_atom(LmnAtomPtr atom,
                              SimpleHashtbl *ht,
                              int link_pos,
@@ -345,11 +390,13 @@ static void dump_symbol_atom(LmnAtomPtr atom,
   
   f = LMN_ATOM_GET_FUNCTOR(atom);
   arity = LMN_FUNCTOR_ARITY(f);
+  if (LMN_IS_PROXY_FUNCTOR(f)) arity--;
+  
   t = get_atomrec(ht, atom);
 
-  if ((call_depth > 0 && link_pos != arity - 1) ||
-      (call_depth > 0 && t->done)               ||
-      call_depth > MAX_DEPTH) {
+  if ((call_depth > 0 && link_pos != arity - 1) || /* not last link */
+      (call_depth > 0 && t->done)               || /* already printed */
+      call_depth > MAX_DEPTH) {                    /* limit overflow */
     int link;
     if (hashtbl_contains(&t->args, link_pos)) {
       link = hashtbl_get(&t->args, link_pos);
@@ -365,13 +412,16 @@ static void dump_symbol_atom(LmnAtomPtr atom,
   t->done = TRUE;
 
   dump_atomname(LMN_SYMBOL_STR(LMN_FUNCTOR_NAME_ID(f)));
-  limit = call_depth == 0 ? arity : arity - 1;
+  limit = arity;
+  if (call_depth > 0) limit--;
+
   if (limit > 0) {
     fprintf(stdout, "(");
     for (i = 0; i < limit; i++) {
       if (i > 0) fprintf(stdout, ", ");
 
       if (hashtbl_contains(&t->args, i)) {
+        /* argument has link number */
         int link = hashtbl_get(&t->args, i);
         fprintf(stdout, LINK_FORMAT, link);
       }
@@ -403,8 +453,9 @@ static void dump_atom(LmnAtomPtr atom,
   else {
     LmnFunctor f = LMN_ATOM_GET_FUNCTOR(atom);
     LmnLinkAttr link_pos = LMN_ATTR_GET_VALUE(attr);
-    if (f == LMN_IN_PROXY_FUNCTOR ||
-        f == LMN_OUT_PROXY_FUNCTOR) {
+    if (!lmn_env.show_proxy &&
+        (f == LMN_IN_PROXY_FUNCTOR ||
+         f == LMN_OUT_PROXY_FUNCTOR)) {
       dump_proxy(atom, ht, attr, s, indent, call_depth);
     }
     else if (f == LMN_LIST_FUNCTOR &&
@@ -423,8 +474,14 @@ static void dump_toplevel_atom(LmnAtomPtr atom,
                                struct DumpState *s,
                                int indent)
 {
-  LmnFunctor f = LMN_ATOM_GET_FUNCTOR(atom);
-  dump_symbol_atom(atom, ht, LMN_ATTR_MAKE_LINK(0), s, indent, 0);
+  if (!lmn_env.show_proxy &&
+      (LMN_ATOM_GET_FUNCTOR(atom) == LMN_IN_PROXY_FUNCTOR ||
+       LMN_ATOM_GET_FUNCTOR(atom) == LMN_OUT_PROXY_FUNCTOR)) {
+    dump_proxy(atom, ht, LMN_ATTR_MAKE_LINK(0), s, indent, 0);
+  }
+  else {
+    dump_symbol_atom(atom, ht, LMN_ATTR_MAKE_LINK(0), s, indent, 0);
+  }
 }
 
 
@@ -447,7 +504,7 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
                                   int indent)
 {
   unsigned int i, j;
-  enum {P0, P1, P2, P3, PRI_NUM};
+  enum {P0, P1, P2, P3, PROXY, PRI_NUM};
   SimpleHashtbl pred_atoms[PRI_NUM];
   HashIterator iter;
 
@@ -461,7 +518,6 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
   }
 
   /* 優先順位に応じて起点となるアトムを振り分ける */
-  /* P0 : 0引数アトム */
 
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashiter_isend(&iter);
@@ -470,23 +526,26 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
     LmnFunctor f = hashiter_entry(&iter).key;
     LmnAtomPtr atom;
 
-    if (f == LMN_IN_PROXY_FUNCTOR ||
-        f == LMN_OUT_PROXY_FUNCTOR) {
-      continue;
-    }
     for (atom = ent->head;
          atom != lmn_atomset_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
       int arity = LMN_ATOM_GET_ARITY(atom);
-      if (arity == 0) {
+      if (f == LMN_IN_PROXY_FUNCTOR ||
+          f == LMN_OUT_PROXY_FUNCTOR) {
+        hashtbl_put(&pred_atoms[PROXY], hashtbl_num(&pred_atoms[PROXY]), (HashValueType)atom);
+      }
+      /* 0 argument atom */
+      else if (arity == 0) { 
         hashtbl_put(&pred_atoms[P0], hashtbl_num(&pred_atoms[P0]), (HashValueType)atom);
       }
+      /* 1 argument, link to the last argument */
       else if (arity == 1 &&
                (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ||
                 LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ==
                 LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, 0)) - 1)) {
         hashtbl_put(&pred_atoms[P1], hashtbl_num(&pred_atoms[P1]), (HashValueType)atom);
       }
+      /* link to the last argument */
       else if (arity > 1 &&
                (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ||
                 LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ==
@@ -499,6 +558,12 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
     }
   }
 
+  if (!lmn_env.show_proxy) {
+    /* assign link to proxies */
+    for (i = 0; i < hashtbl_num(&pred_atoms[PROXY]); i++) {
+      assign_link_to_proxy(LMN_ATOM(hashtbl_get(&pred_atoms[PROXY], i)), ht, s);
+    }
+  }
 
   fprintf(stdout, "{");
   for (i = 0; i < PRI_NUM; i++) {
@@ -514,14 +579,11 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
   lmn_mem_dump_internal(mem->child_head, ht, s, indent + INDENT_INCR);
   lmn_mem_dump_internal(mem->next, ht, s, indent);
 
-
   fprintf(stdout, "}");
   
   for (i = 0; i < PRI_NUM; i++) {
     hashtbl_destroy(&pred_atoms[i]);
   }
-
-
 }
 
 static void lmn_mem_dump_dev(LmnMembrane *mem);
@@ -579,12 +641,6 @@ static void dump_atom_dev(LmnAtomPtr atom)
     attr = LMN_ATOM_GET_LINK_ATTR(atom,i);
     if (LMN_ATTR_IS_DATA(attr)) {
       switch (attr) {
-      case  LMN_ATOM_IN_PROXY_ATTR:
-        fprintf(stdout, "in-proxy[%lu], ", LMN_ATOM_GET_LINK(atom,i));
-        break;
-      case  LMN_ATOM_OUT_PROXY_ATTR:
-        fprintf(stdout, "out-proxy[%lu], ", LMN_ATOM_GET_LINK(atom,i));
-        break;
       case  LMN_ATOM_INT_ATTR:
         fprintf(stdout, "int[%lu], ", LMN_ATOM_GET_LINK(atom,i));
         break;
