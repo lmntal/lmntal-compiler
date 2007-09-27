@@ -4,18 +4,13 @@
 
 #include <ctype.h>
 #include "membrane.h"
+#include "rule.h"
 
 /*----------------------------------------------------------------------
  * Rule Set List
  */
 
 /* TODO stub implementation */
-
-struct RuleSetList {
-  LmnRuleSet *ruleset;
-  RuleSetList *next;
-};
-typedef struct RuleSetList RuleSetNode;
 
 static RuleSetNode *ruleset_node_make(LmnRuleSet *ruleset)
 {

@@ -26,6 +26,11 @@ typedef struct AtomSetEntry {
   LmnAtomPtr tail, head;
 } AtomSetEntry;
 
+struct RuleSetList {
+  LmnRuleSet *ruleset;
+  RuleSetList *next;
+};
+typedef struct RuleSetList RuleSetNode;
 
 LMN_EXTERN LmnMembrane *lmn_mem_make(void);
 LMN_EXTERN void lmn_mem_free(LmnMembrane *mem);

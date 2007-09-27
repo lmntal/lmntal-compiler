@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 #include "lmntal.h"
+#include "rule.h"
+#include "membrane.h"
 #include "instruction.h"
 #include "read_instr.h"
 #include "vector.h"
@@ -91,12 +93,6 @@ static BOOL react_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
   
   return FALSE;
 }
-
-struct RuleSetList {
-  LmnRuleSet *ruleset;
-  RuleSetList *next;
-};
-typedef struct RuleSetList RuleSetNode;
 
 /* リンクオブジェクトの代替 */
 typedef struct LinkObj {

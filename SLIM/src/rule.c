@@ -3,6 +3,7 @@
  */
 
 #include "lmntal.h"
+#include "rule.h"
 
 /* move ownship of instr */
 LmnRule *lmn_rule_make(LmnRuleInstr instr, lmn_interned_str name)
