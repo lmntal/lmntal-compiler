@@ -6,6 +6,7 @@
 #ifndef INTERNAL_HASH_H
 #define INTERNAL_HASH_H
 
+/* HashMap */
 typedef unsigned int HashKeyType;
 typedef unsigned int HashValueType;
 
@@ -39,5 +40,23 @@ HashIterator hashtbl_iterator(SimpleHashtbl *ht);
 void hashiter_next(HashIterator *iter);
 #define hashiter_entry(I) ((I)->ht->tbl[(I)->i])
 #define hashiter_isend(I) ((I)->i >= (I)->ht->cap)
+
+/* HashSet */
+typedef struct HashSet {
+  HashKeyType* tbl;
+  unsigned int cap, num;
+} HashSet;
+
+typedef struct HashSetItrator {
+  HashSet *set;
+  unsigned int i;
+} HashSetIterator;
+
+void hashset_init(HashSet *set, unsigned int init_size);
+int hashset_contains(HashSet *set, HashKeyType key);
+void hashset_add(HashSet *set, HashKeyType key);
+void hashset_destroy(HashSet *set);
+HashSetIterator hashset_iterator(HashSet *set);
+void hashset_it_next(HashSetIterator *it);
 
 #endif /*INTERNAL_HASH_H*/
