@@ -103,11 +103,10 @@ typedef struct LinkObj {
 /*
  * ground検査で再帰除去のため必要になったstack
  * とりあえずここに作ったけどどうしよう。
- * 基本的なデータ構造はまとめてヘッダ行き？
  */
 typedef struct StackEntity StackEntity;
 struct StackEntity {
-  LmnWord *key;
+  LmnWord keyp;
   StackEntity *next;
 };
 
@@ -119,14 +118,14 @@ static void stack_init(Stack *stack)
 {
   stack->head = LMN_MALLOC(StackEntity);
   stack->head->next = NULL;
-  stack->head->key = NULL;
+  stack->head->keyp = 0; /* TODO: これでいいのか…？ */
   stack->tail = stack->head;
 }
 
-static void stack_push(Stack* stack, LmnWord *key)
+static void stack_push(Stack* stack, LmnWord keyp)
 {
   StackEntity *ent = LMN_MALLOC(StackEntity);
-  ent->key = key;
+  ent->keyp = keyp;
   ent->next = stack->head->next;
   stack->head->next = ent;
 }
@@ -136,25 +135,25 @@ static int stack_isempty(Stack* stack)
   return stack->head->next==NULL;
 }
 
-static LmnWord* stack_pop(Stack *stack)
+static LmnWord stack_pop(Stack *stack)
 {
   StackEntity *ent = stack->head->next;
-  LmnWord *key = ent->key;
+  LmnWord keyp = ent->keyp;
   stack->head->next = ent->next;
   LMN_FREE(ent);
-  return key;
+  return keyp;
 }
 
-static LmnWord* stack_peek(Stack stack)
+static LmnWord stack_peek(Stack *stack)
 {
-  return stack.head->next->key;
+  return stack->head->next->keyp;
 }
 
-static void stack_printall(Stack stack)
+static void stack_printall(Stack *stack)
 {
   StackEntity *ent;
-  for(ent = stack.head; ent!=NULL; ent = ent->next){
-    if(ent->key!=NULL) printf("%d ", (unsigned int)*(ent->key));
+  for(ent = stack->head; ent!=NULL; ent = ent->next){
+    printf("%lu ", ent->keyp);
   }
   printf("\n");
 }
@@ -822,9 +821,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     case INSTR_ISGROUND:
     {
       LmnInstrVar funci, srclisti, avolisti;
-      unsigned int i;
+      unsigned int i, c;
       Vector *srcvec, *avovec; /* 要素はリンク */
-      HashSet* avoset;
+      HashSet *avoset;
       HashSet *atoms; /* 走査済みアトム */
       Stack *links;   /* 再帰用スタック */
 
@@ -832,7 +831,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, srclisti);
       LMN_IMS_READ(LmnInstrVar, instr, avolisti);
 
-      /* TODO: マクロ化できる部分があるか？ */
       srcvec = (Vector*) wt[srclisti];
       avovec = (Vector*) wt[avolisti];
       
@@ -842,17 +840,36 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         hashset_add(avoset, avovec->tbl[i]);
       }
       stack_init(links);
+      stack_push(links, vec_get(srcvec, 0));
 
       /* method: isGround */
       while(!stack_isempty(links)) {
-        LmnAtomPtr ap = stack_pop(links);
-        if(hashset_contains(atoms, (HashKeyType)ap))
+        LinkObj *linko = (LinkObj *)stack_pop(links);
+        LinkObj *nextlinko;
+        LmnAtomPtr ap = linko->ap;
+        if(hashset_contains(atoms, (HashKeyType)ap)) /* 走査済みアトム */
           continue;
-        if(hashset_contains(avoset, (HashKeyType)ap))
+        if(hashset_contains(avoset, LMN_ATOM_GET_LINK(ap, linko->pos)))
           return FALSE;
-          
-
+        /* TODO: 基底項プロセスの引数に到達しているか検査
+         * 実装をどうするか考え中
+         */
+        if(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(ap))) /* 膜を横断する */
+          return FALSE;
+        c++;
+        hashset_add(atoms, (LmnWord)&ap);
+        for(i = 0; i < LMN_ATOM_GET_ARITY(ap); i++) {
+          if(i == linko->pos) /* 親へのリンク */
+            continue;
+          nextlinko->ap = (LmnAtomPtr)LMN_ATOM_GET_LINK(ap, i);
+          nextlinko->pos = LMN_ATOM_GET_LINK_ATTR(ap, i);
+          stack_push(links, (LmnWord)&nextlinko); 
+        }
       }
+      /* TODO: 未到達の根の検査
+       * 同様に考え中
+       */
+      printf("instr_isground: success\n");
     }
     case INSTR_ISUNARY:
     {
