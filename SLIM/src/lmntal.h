@@ -109,15 +109,11 @@ typedef struct LmnMembrane LmnMembrane;
  *
  *     [Link Number]
  *       0-------
- *     [in-proxy]
+ *     [int]
  *       10000000
- *     [out-proxy]
+ *     [double]
  *       10000001
- *     [otherwise]
- *       [int]
- *         10000002
- *       [double]
- *         10000003
+ *
  *       We are going to support some primitive data types.
  *
  *       (signed/unsigned) int, short int, long int, byte, long long int,
@@ -198,12 +194,8 @@ typedef uint8_t LmnLinkAttr;
   (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
 
 /* operations for link attribute */
-#define LMN_ATTR_IS_DATA(X)                         \
-  ((X)&~LMN_LINK_ATTR_MASK && !LMN_ATTR_IS_PROXY(X))
+#define LMN_ATTR_IS_DATA(X)           ((X)&~LMN_LINK_ATTR_MASK)
 
-#define LMN_ATTR_IS_PROXY(X)                            \
-  ((X) == LMN_ATOM_IN_PROXY_ATTR ||                     \
-   (X) == LMN_ATOM_OUT_PROXY_ATTR)
 /* set data/link tag to link attribute value */
 #define LMN_ATTR_MAKE_DATA(X)         (0x80|(X))
 #define LMN_ATTR_MAKE_LINK(X)         (X)
@@ -219,6 +211,10 @@ typedef uint8_t LmnLinkAttr;
 
 /* special functors */
 
+#define LMN_IS_PROXY_FUNCTOR(FUNC)              \
+  ((FUNC) == LMN_IN_PROXY_FUNCTOR ||            \
+   (FUNC) == LMN_OUT_PROXY_FUNCTOR)
+
 #define LMN_IN_PROXY_FUNCTOR   0
 #define LMN_OUT_PROXY_FUNCTOR  1
 #define LMN_LIST_FUNCTOR       2
@@ -230,11 +226,8 @@ typedef uint8_t LmnLinkAttr;
 
 /* low 7 bits of link attribute */
 
-#define LMN_ATOM_IN_PROXY_ATTR   (LMN_LINK_ATTR_FLAG | 0)
-#define LMN_ATOM_OUT_PROXY_ATTR  (LMN_LINK_ATTR_FLAG | 1)
-
-#define LMN_ATOM_INT_ATTR        (LMN_LINK_ATTR_FLAG | 2)
-#define LMN_ATOM_DBL_ATTR        (LMN_LINK_ATTR_FLAG | 3)
+#define LMN_ATOM_INT_ATTR        (LMN_LINK_ATTR_FLAG | 0)
+#define LMN_ATOM_DBL_ATTR        (LMN_LINK_ATTR_FLAG | 1)
 
 /*----------------------------------------------------------------------
  * Atom
@@ -329,6 +322,7 @@ extern struct LmnRuleSetTable lmn_ruleset_table;
 
 struct LmnEnv {
   BOOL dev_dump;
+  BOOL show_proxy;
 };
 
 extern struct LmnEnv  lmn_env;
