@@ -28,6 +28,12 @@ void vec_add(Vector* vec, LmnWord keyp) {
   }
 }
 
+/* get */
+LmnWord vec_get(Vector *vec, unsigned int index) {
+  /* TODO: index checking */
+  return(vec->tbl[index]);
+}
+
 /* free */
 void vec_free(Vector *vec) {
   free(vec->tbl);

@@ -16,6 +16,7 @@ typedef struct Vector {
 LMN_EXTERN Vector* vec_make(unsigned int init_size);
 LMN_EXTERN Vector* vec_make_default(void);
 LMN_EXTERN void vec_add(Vector* vec, LmnWord keyp);
+LMN_EXTERN LmnWord vec_get(Vector *vec, unsigned int index);
 LMN_EXTERN void vec_free(Vector *vec);
 
 #endif /* LMN_VECTOR_H */
