@@ -208,10 +208,15 @@ struct InstrSpec {
     {"group", INSTR_GROUP, {InstrList, 0}},
 
     /* guard */
+    {"isground", INSTR_ISGROUND, {InstrVar, InstrVar, InstrVar, 0}},
     {"isunary", INSTR_ISUNARY, {InstrVar, 0}},
     {"isint", INSTR_ISINT, {InstrVar, 0}},
     {"isintfunc", INSTR_ISINTFUNC, {InstrVar, 0}},
     
+    {"newlist", INSTR_NEWLIST, {InstrVar, 0}},
+    {"addtolist", INSTR_ADDTOLIST, {InstrVar, InstrVar, 0}},
+
+    /* guard: int */
     {"iadd", INSTR_IADD, {InstrVar, InstrVar, InstrVar, 0}},
     {"isub", INSTR_ISUB, {InstrVar, InstrVar, InstrVar, 0}},
     {"imul", INSTR_IMUL, {InstrVar, InstrVar, InstrVar, 0}},
