@@ -19,6 +19,7 @@ static void usage(void)
   fprintf(stderr,
           "Usage: slim [file]\n"
           "options:\n"
+          "  --showproxy     Show proxy atoms\n"
           "  --version       Prints version and exits.\n"
           "  --help          This Help.\n"
           );
@@ -37,6 +38,7 @@ static int parse_options(int argc, char *argv[])
   struct option long_options[] = {
     {"version", 0, 0, 1000},
     {"help",    0, 0, 1001},
+    {"showproxy",  0, 0, 1002},
     {0, 0, 0, 0}
   };
 
@@ -46,12 +48,15 @@ static int parse_options(int argc, char *argv[])
       printf("log_options entries must have positive 4th member.\n");
       exit(1);
       break;
-    case 'd': /* ÈñãÁô∫Áî®. dump„ÅÆË°®Á§∫„ÇíÈñãÁô∫Áî®„Å´„Åô„Çã */
+    case 'd': /* ≥´»ØÕ—. dump§Œ…Ωº®§Ú≥´»ØÕ—§À§π§Î */
       lmn_env.dev_dump = TRUE;
       break;
     case 1000: version(); break;
     case 1001: /* help */ /*FALLTHROUGH*/
     case '?': usage(); break;
+    case 1002:
+      lmn_env.show_proxy = TRUE;
+      break;
     default:
       printf("?? getopt returned character code 0x%x ??\n", c);
       exit(1);
@@ -65,6 +70,7 @@ static int parse_options(int argc, char *argv[])
 static void init_env(void)
 {
   lmn_env.dev_dump = FALSE;
+  lmn_env.show_proxy = FALSE;
 }
     
 static void init_internal(void)
