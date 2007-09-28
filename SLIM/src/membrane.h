@@ -18,6 +18,7 @@ struct LmnMembrane {
   LmnMembrane 	   *prev,
                    *next;
   struct SimpleHashtbl atomset;
+  unsigned int     atom_num; /* # of atom except proxy */
   RuleSetList 	   *rulesets;
   lmn_interned_str name;
 };
@@ -39,10 +40,12 @@ LMN_EXTERN void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap);
 
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
 LMN_EXTERN void lmn_mem_dump(LmnMembrane *mem);
-LMN_EXTERN unsigned int lmn_mem_natoms(LmnMembrane *mem);
+LMN_EXTERN BOOL lmn_mem_natoms(LmnMembrane *mem, unsigned int count);
 LMN_EXTERN AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f);
 LMN_EXTERN void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom);
-LMN_EXTERN unsigned int lmn_mem_nmems(LmnMembrane *mem);
+LMN_EXTERN BOOL lmn_mem_nmems(LmnMembrane *mem, unsigned int count);
+LMN_EXTERN BOOL lmn_mem_nfreelinks(LmnMembrane *mem, unsigned int count);
+LMN_EXTERN void lmn_mem_movecells(LmnMembrane *destmem, LmnMembrane *srcmem);
 /* LmnAtomPtr* lmn_atomset_end(AtomSetEntry * ent); */
 #define lmn_atomset_end(p_atomset_entry) ((LmnAtomPtr)p_atomset_entry)
 

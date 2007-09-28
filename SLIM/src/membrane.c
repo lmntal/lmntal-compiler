@@ -140,49 +140,22 @@ BOOL lmn_mem_nmems(LmnMembrane *mem, unsigned int count)
   return i == count;
 }
 
-<<<<<<< variant A
 /* return TRUE if # of freelinks in mem is equal to count */
 /* リストをたどって数を数えているのでO(n)。
    countがそれほど大きくならなければ問題はないが */
 BOOL lmn_mem_nfreelinks(LmnMembrane *mem, unsigned int count)
 {
-  AtomSetEntry *ent = (AtomSetEntry *)hashtbl_get_defaulta(&mem->atomset,
-                                                           LMN_IN_PROXY_FUNCTOR,
-                                                           0);
-  int n;
+  AtomSetEntry *ent = (AtomSetEntry *)hashtbl_get_default(&mem->atomset,
+                                                          LMN_IN_PROXY_FUNCTOR,
+                                                          0);
+  unsigned int n;
+  LmnAtomPtr atom;
+  
   if (!ent) return count == 0;
   for (atom = ent->head, n = 0;
        atom != lmn_atomset_end(ent) && count<n;
        atom = LMN_ATOM_GET_NEXT(atom), n++) {}
   return count == n;
->>>>>>> variant B
-  for (iter = hashtbl_iterator(&mem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
-    LmnAtomPtr atom;
-    for (atom = ent->head;
-         atom != lmn_atomset_end(ent);
-         atom = LMN_ATOM_GET_NEXT(atom)) {
-      n++;
-    }      
-  }
-  return n;
-####### Ancestor
-  for (iter = hashtbl_iterator(&mem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
-    LmnAtomPtr atom;
-    for (atom = ent->head;
-         atom != lmn_atomset_end(ent);
-         atom = LMN_ATOM_GET_NEXT(atom)) {
-      atom = LMN_ATOM_GET_NEXT(atom);
-      n++;
-    }      
-  }
-  return n;
-======= end
 }
 
 void lmn_mem_movecells(LmnMembrane *destmem, LmnMembrane *srcmem)
