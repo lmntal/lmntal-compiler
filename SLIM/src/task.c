@@ -327,7 +327,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         if (/*mp->name == memn &&*/interpret(instr, &instr)) return TRUE;
         mp = mp->next;
       }
-      printf("failure");
       return FALSE;
       break;
     }
