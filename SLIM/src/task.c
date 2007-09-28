@@ -822,7 +822,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     {
       LmnInstrVar funci, srclisti, avolisti;
       unsigned int i, c;
+      int argi;
       Vector *srcvec, *avovec; /* 要素はリンク */
+      Vector *roots;
       HashSet *avoset;
       HashSet *atoms; /* 走査済みアトム */
       Stack *links;   /* 再帰用スタック */
@@ -833,6 +835,11 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       srcvec = (Vector*) wt[srclisti];
       avovec = (Vector*) wt[avolisti];
+      roots = vec_make(avovec->num);
+      for(i = 0; i < roots->cap; i++) {
+        roots->tbl[i] = 0;
+      }
+      roots->tbl[0] = TRUE;
       
       hashset_init(avoset, 16);
       hashset_init(atoms, 256);
@@ -851,9 +858,11 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           continue;
         if(hashset_contains(avoset, LMN_ATOM_GET_LINK(ap, linko->pos)))
           return FALSE;
-        /* TODO: 基底項プロセスの引数に到達しているか検査
-         * 実装をどうするか考え中
-         */
+        argi = vec_indexof(srcvec, LMN_ATOM_GET_LINK(ap, linko->pos));
+        if(argi >= 0) { /* 根に到達した場合 */
+          roots->tbl[argi] = TRUE;
+          continue;
+        }
         if(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(ap))) /* 膜を横断する */
           return FALSE;
         c++;
@@ -866,9 +875,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           stack_push(links, (LmnWord)&nextlinko); 
         }
       }
-      /* TODO: 未到達の根の検査
-       * 同様に考え中
-       */
+      for(i = 0; i < srcvec->num; i++) {
+        if(roots->tbl[i] == TRUE) continue;
+        else return -1;
+      }
       printf("instr_isground: success\n");
     }
     case INSTR_ISUNARY:
