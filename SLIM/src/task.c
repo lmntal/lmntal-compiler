@@ -20,19 +20,19 @@ LmnWord v2[1024];
 LmnByte k1[1024];
 LmnByte k2[1024];
 
-LmnWord *wt, *tv;		/* working table */
-LmnByte *at, *tkv;	/* attribute table */
+LmnWord *wt, *tv;    /* working table */
+LmnByte *at, *tkv;  /* attribute table */
 
 #define SWAP(T,X,Y)       do { T t=(X); (X)=(Y); (Y)=t;} while(0)
 #define REF_CAST(T,X)     (*(T*)&(X))
 
 struct Entity {
-  LmnMembrane	*mem;
-  struct Entity	*next;
+  LmnMembrane  *mem;
+  struct Entity  *next;
 };
 
 struct MemStack {
-  struct Entity	*head, *tail;
+  struct Entity  *head, *tail;
 } memstack;
 
 static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next);
@@ -163,7 +163,7 @@ static int exec(LmnMembrane *mem)
 {
   RuleSetNode *rs = mem->rulesets;
   int flag = FALSE;
-/*   	flag = react(mem, systemrulesets); */
+/*     flag = react(mem, systemrulesets); */
   if (!flag) {
     while (rs != NULL) {
       if (react_ruleset(mem, rs->ruleset)) {
@@ -173,7 +173,7 @@ static int exec(LmnMembrane *mem)
       rs = rs->next;
     }
   }
-	
+  
   return flag;
 }
 
@@ -220,8 +220,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
   while (TRUE) {
     LMN_IMS_READ(LmnInstrOp, instr, op);
-/*    fprintf(stderr, "op: %d %d\n", op, instr - start - 2);*/
-/*     lmn_mem_dump((LmnMembrane*)wt[0]); */
+    fprintf(stdout, "op: %d %d\n", op, instr - start - 2);
+    lmn_mem_dump((LmnMembrane*)wt[0]); 
     switch (op) {
     case INSTR_SPEC:
       /* ignore spec, because wt is initially large enough. */
@@ -310,6 +310,16 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       }
       break;
     }
+    case INSTR_LOCKMEM:
+    {
+      LmnInstrVar mem, atom, memn;
+      LMN_IMS_READ(LmnInstrVar, instr, mem);
+      LMN_IMS_READ(LmnInstrVar, instr, atom);
+      LMN_IMS_READ(lmn_interned_str, instr, memn);
+
+      wt[mem] = (LmnWord)LMN_PROXY_GET_MEM(wt[atom]);
+      break;
+    }
     case INSTR_ANYMEM:
     {
       LmnInstrVar mem1, mem2, memt, memn; /* dst, parent, type, name */
@@ -323,7 +333,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       mp = ((LmnMembrane*)wt[mem2])->child_head;
       while (mp) {
         REF_CAST(LmnMembrane *, wt[mem1]) = mp;
-        if (mp->name == memn && interpret(instr, &instr)) return TRUE;
+        if (/*mp->name == memn &&*/ interpret(instr, &instr)) return TRUE;
         mp = mp->next;
       }
       return FALSE;
@@ -462,165 +472,165 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       }
         break;
     }
-		case INSTR_NEWLINK:
-		{
-			LmnInstrVar atom1, atom2, pos1, pos2, memi;
+    case INSTR_NEWLINK:
+    {
+      LmnInstrVar atom1, atom2, pos1, pos2, memi;
 
-			LMN_IMS_READ(LmnInstrVar, instr, atom1);
-			LMN_IMS_READ(LmnInstrVar, instr, pos1);
-			LMN_IMS_READ(LmnInstrVar, instr, atom2);
-			LMN_IMS_READ(LmnInstrVar, instr, pos2);
-			LMN_IMS_READ(LmnInstrVar, instr, memi);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, pos1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      LMN_IMS_READ(LmnInstrVar, instr, pos2);
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
 
-			if (LMN_ATTR_IS_DATA(at[atom1]) && LMN_ATTR_IS_DATA(at[atom2])) {
-				#ifdef DEBUG
-				fprintf(stderr, "Two data atoms are connected each other.\n");
-				#endif
-			}
-			else if (LMN_ATTR_IS_DATA(at[atom1])) {
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom2]), pos2, wt[atom1]);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom2]), pos2, at[atom1]);
-			}
-			else if (LMN_ATTR_IS_DATA(at[atom2])) {
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, wt[atom2]);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, at[atom2]);
-			}
-			else {
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, wt[atom2]);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, pos2);
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom2]), pos2, wt[atom1]); 
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom2]), pos2, pos1);
-			}
-			break;
-		}
-		case INSTR_RELINK:
-		{
-			LmnInstrVar atom1, atom2, pos1, pos2, memi;
-			LmnAtomPtr ap;
-			LmnByte attr;
+      if (LMN_ATTR_IS_DATA(at[atom1]) && LMN_ATTR_IS_DATA(at[atom2])) {
+        #ifdef DEBUG
+        fprintf(stderr, "Two data atoms are connected each other.\n");
+        #endif
+      }
+      else if (LMN_ATTR_IS_DATA(at[atom1])) {
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom2]), pos2, wt[atom1]);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom2]), pos2, at[atom1]);
+      }
+      else if (LMN_ATTR_IS_DATA(at[atom2])) {
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, wt[atom2]);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, at[atom2]);
+      }
+      else {
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, wt[atom2]);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, pos2);
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom2]), pos2, wt[atom1]); 
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom2]), pos2, pos1);
+      }
+      break;
+    }
+    case INSTR_RELINK:
+    {
+      LmnInstrVar atom1, atom2, pos1, pos2, memi;
+      LmnAtomPtr ap;
+      LmnByte attr;
 
-			LMN_IMS_READ(LmnInstrVar, instr, atom1);
-			LMN_IMS_READ(LmnInstrVar, instr, pos1);
-			LMN_IMS_READ(LmnInstrVar, instr, atom2);
-			LMN_IMS_READ(LmnInstrVar, instr, pos2);
-			LMN_IMS_READ(LmnInstrVar, instr, memi);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, pos1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      LMN_IMS_READ(LmnInstrVar, instr, pos2);
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
 
-			ap = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], pos2));
-			attr = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos2);
+      ap = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], pos2));
+      attr = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos2);
 
-			if(LMN_ATTR_IS_DATA(at[atom1]) && LMN_ATTR_IS_DATA(attr)) {
-			  #ifdef DEBUG
-				fprintf(stderr, "Two data atoms are connected each other.\n");
-				#endif 
-			}
-			else if (LMN_ATTR_IS_DATA(at[atom1])) {
-				LMN_ATOM_SET_LINK(ap, attr, wt[atom1]);
-				LMN_ATOM_SET_LINK_ATTR(ap, attr, at[atom1]);
-			}
-			else if (LMN_ATTR_IS_DATA(attr)) {
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, (LmnWord)ap);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
-			}
-			else {
-				LMN_ATOM_SET_LINK(ap, attr, wt[atom1]);
-				LMN_ATOM_SET_LINK_ATTR(ap, attr, pos1);
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, (LmnWord)ap);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
-			}
-			break;
-		}
-		case INSTR_INHERITLINK:
-		{
-			LmnInstrVar atomi, posi, linki, memi;
-			LMN_IMS_READ(LmnInstrVar, instr, atomi);
-			LMN_IMS_READ(LmnInstrVar, instr, posi);
-			LMN_IMS_READ(LmnInstrVar, instr, linki);
-			LMN_IMS_READ(LmnInstrVar, instr, memi);
+      if(LMN_ATTR_IS_DATA(at[atom1]) && LMN_ATTR_IS_DATA(attr)) {
+        #ifdef DEBUG
+        fprintf(stderr, "Two data atoms are connected each other.\n");
+        #endif 
+      }
+      else if (LMN_ATTR_IS_DATA(at[atom1])) {
+        LMN_ATOM_SET_LINK(ap, attr, wt[atom1]);
+        LMN_ATOM_SET_LINK_ATTR(ap, attr, at[atom1]);
+      }
+      else if (LMN_ATTR_IS_DATA(attr)) {
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, (LmnWord)ap);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
+      }
+      else {
+        LMN_ATOM_SET_LINK(ap, attr, wt[atom1]);
+        LMN_ATOM_SET_LINK_ATTR(ap, attr, pos1);
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, (LmnWord)ap);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
+      }
+      break;
+    }
+    case INSTR_INHERITLINK:
+    {
+      LmnInstrVar atomi, posi, linki, memi;
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      LMN_IMS_READ(LmnInstrVar, instr, posi);
+      LMN_IMS_READ(LmnInstrVar, instr, linki);
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
 
-			if(LMN_ATTR_IS_DATA(at[atomi]) && LMN_ATTR_IS_DATA(at[linki])) {
-				#ifdef DEBUG
-				fprintf(stderr, "Two data atoms are connected each other.\n");
-				#endif
-			}
-			else if(LMN_ATTR_IS_DATA(at[atomi])) {
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[linki]), at[linki], wt[atomi]);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[linki]), at[linki], at[atomi]);
-			}
-			else if(LMN_ATTR_IS_DATA(at[linki])) {
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atomi]), posi, wt[linki]);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atomi]), posi, at[linki]);
-			}
-			else {
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[atomi]), posi, wt[linki]);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atomi]), posi, at[linki]);
-				LMN_ATOM_SET_LINK(LMN_ATOM(wt[linki]), at[linki], wt[atomi]);
-				LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[linki]), at[linki], posi);
-			}
-			break;
-		}
-		case INSTR_GETLINK:
-		{
-			LmnInstrVar linki, atomi, posi;
-			LMN_IMS_READ(LmnInstrVar, instr, linki);
-			LMN_IMS_READ(LmnInstrVar, instr, atomi);
-			LMN_IMS_READ(LmnInstrVar, instr, posi);
+      if(LMN_ATTR_IS_DATA(at[atomi]) && LMN_ATTR_IS_DATA(at[linki])) {
+        #ifdef DEBUG
+        fprintf(stderr, "Two data atoms are connected each other.\n");
+        #endif
+      }
+      else if(LMN_ATTR_IS_DATA(at[atomi])) {
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[linki]), at[linki], wt[atomi]);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[linki]), at[linki], at[atomi]);
+      }
+      else if(LMN_ATTR_IS_DATA(at[linki])) {
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[atomi]), posi, wt[linki]);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atomi]), posi, at[linki]);
+      }
+      else {
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[atomi]), posi, wt[linki]);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atomi]), posi, at[linki]);
+        LMN_ATOM_SET_LINK(LMN_ATOM(wt[linki]), at[linki], wt[atomi]);
+        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[linki]), at[linki], posi);
+      }
+      break;
+    }
+    case INSTR_GETLINK:
+    {
+      LmnInstrVar linki, atomi, posi;
+      LMN_IMS_READ(LmnInstrVar, instr, linki);
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      LMN_IMS_READ(LmnInstrVar, instr, posi);
 
-			wt[linki] = LMN_ATOM_GET_LINK(wt[atomi], posi);
-			at[linki] = LMN_ATOM_GET_LINK_ATTR(wt[atomi], posi);
-			break;
-		}
-		case INSTR_UNIFY:
-		{
-			LmnInstrVar atom1, pos1, atom2, pos2, memi;
-			LmnAtomPtr ap1, ap2;
-			LmnByte attr1, attr2;
-		
-			LMN_IMS_READ(LmnInstrVar, instr, atom1);
-			LMN_IMS_READ(LmnInstrVar, instr, pos1);
-			LMN_IMS_READ(LmnInstrVar, instr, atom2);
-			LMN_IMS_READ(LmnInstrVar, instr, pos2);
-			LMN_IMS_READ(LmnInstrVar, instr, memi);
+      wt[linki] = LMN_ATOM_GET_LINK(wt[atomi], posi);
+      at[linki] = LMN_ATOM_GET_LINK_ATTR(wt[atomi], posi);
+      break;
+    }
+    case INSTR_UNIFY:
+    {
+      LmnInstrVar atom1, pos1, atom2, pos2, memi;
+      LmnAtomPtr ap1, ap2;
+      LmnByte attr1, attr2;
+    
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, pos1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      LMN_IMS_READ(LmnInstrVar, instr, pos2);
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
 
-			ap1 = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom1], pos1));
-			attr1 = LMN_ATOM_GET_LINK_ATTR(wt[atom1], pos1);
-			ap2 = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], pos2));
-			attr2 = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos2);
+      ap1 = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom1], pos1));
+      attr1 = LMN_ATOM_GET_LINK_ATTR(wt[atom1], pos1);
+      ap2 = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], pos2));
+      attr2 = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos2);
 
-			if(LMN_ATTR_IS_DATA(attr1) && LMN_ATTR_IS_DATA(attr2)) {
-				#ifdef DEBUG
-				fprintf(stderr, "Two data atoms are connected each other.\n");
-				#endif
-			}
-			else if (LMN_ATTR_IS_DATA(attr1)) {
-				LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
-				LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
-			}
-			else if (LMN_ATTR_IS_DATA(attr2)) {
-				LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
-				LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
-			}
-			else {
-				LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
-				LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
-				LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
-				LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
-			}
-			break;
-		}
+      if(LMN_ATTR_IS_DATA(attr1) && LMN_ATTR_IS_DATA(attr2)) {
+        #ifdef DEBUG
+        fprintf(stderr, "Two data atoms are connected each other.\n");
+        #endif
+      }
+      else if (LMN_ATTR_IS_DATA(attr1)) {
+        LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
+        LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
+      }
+      else if (LMN_ATTR_IS_DATA(attr2)) {
+        LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
+        LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
+      }
+      else {
+        LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
+        LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
+        LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
+        LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
+      }
+      break;
+    }
     case INSTR_PROCEED:
       *next = instr;
       return TRUE;
     case INSTR_ENQUEUEATOM:
     {
       LmnInstrVar atom;
-	
+  
       LMN_IMS_READ(LmnInstrVar, instr, atom);
       break;
     }
     case INSTR_DEQUEUEATOM:
     {
       LmnInstrVar atom;
-	
+  
       LMN_IMS_READ(LmnInstrVar, instr, atom);
       break;
     }
@@ -941,7 +951,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       break;
     }
     case INSTR_ISFLOATFUNC:
-	  {
+    {
       LmnInstrVar funci;
       LMN_IMS_READ(LmnInstrVar, instr, funci);
 
@@ -950,26 +960,35 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       break;
     }
     case INSTR_COPYATOM:
-		{
-			LmnInstrVar atom1, memi, atom2;
-			LMN_IMS_READ(LmnInstrVar, instr, atom1);
-			LMN_IMS_READ(LmnInstrVar, instr, memi);
-			LMN_IMS_READ(LmnInstrVar, instr, atom2);
+    {
+      LmnInstrVar atom1, memi, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
       /* TODO: 参照のコピーじゃなくてデータのコピーが必要かも… */
-			REF_CAST(LmnAtomPtr, wt[atom1]) = REF_CAST(LmnAtomPtr, wt[atom2]);
-			at[atom1] = at[atom2];
-			break;
-		}
-		case INSTR_NEQATOM:
-		{
-			LmnInstrVar atom1, atom2;
-			LMN_IMS_READ(LmnInstrVar, instr, atom1);
-			LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      REF_CAST(LmnAtomPtr, wt[atom1]) = REF_CAST(LmnAtomPtr, wt[atom2]);
+      at[atom1] = at[atom2];
+      break;
+    }
+    case INSTR_NEQATOM:
+    {
+      LmnInstrVar atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-			if(LMN_ATOM(wt[atom1]) == LMN_ATOM(wt[atom2])) return FALSE;
-			break;
-		}
+      if(LMN_ATOM(wt[atom1]) == LMN_ATOM(wt[atom2])) return FALSE;
+      break;
+    }
+    case INSTR_NEQMEM:
+    {
+      LmnInstrVar mem1, mem2;
+      LMN_IMS_READ(LmnInstrVar, instr, mem1);
+      LMN_IMS_READ(LmnInstrVar, instr, mem2);
+
+      if(wt[mem1] == wt[mem2]) return FALSE;
+      break;
+    }
     case INSTR_NEWLIST:
     {
       LmnInstrVar listi;
