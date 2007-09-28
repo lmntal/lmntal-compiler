@@ -833,6 +833,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     }
     case INSTR_ISGROUND:
     {
+      /* TODO: groundをたどる際にdataアトムを考慮する */
       LmnInstrVar funci, srclisti, avolisti;
       unsigned int i, c;
       int argi;
@@ -902,21 +903,45 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     }
     case INSTR_REMOVEGROUND:
     {
+      /* TODO: groundをたどる際にdataアトムを考慮する */
       LmnInstrVar listi, memi;
       Vector *srclinks;
       Stack *links;
       HashSet *atoms;
+      LinkObj *linko, *nextlinko;
+      int srci;
+      unsigned int i;
       LMN_IMS_READ(LmnInstrVar, instr, listi);
       LMN_IMS_READ(LmnInstrVar, instr, memi);
 
       srclinks = (Vector *)wt[listi];
+
       stack_init(links);
       stack_push(links, vec_get(srclinks, 0));
       hashset_init(atoms, 256);
       
-      while(1) {
+      /* method: removeGround */
+      while(!stack_isempty(links)) {
+        LmnAtomPtr ap;
+        linko = (LinkObj *)stack_pop(links);
+        srci = vec_indexof(srclinks, LMN_ATOM_GET_LINK(ap, i));
+        if(srci >= 0) /* 根に到達 */
+          continue;
+        if(hashset_contains(atoms, (HashKeyType)linko->ap)) /* 走査済み */
+          continue;
+        hashset_add(atoms, (LmnWord)ap);
+        for(i = 0; i < LMN_ATOM_GET_ARITY(ap); i++) {
+          if(i == linko->pos) /* 親へのリンク */
+            continue;
+          nextlinko->ap = (LmnAtomPtr)LMN_ATOM_GET_LINK(ap, i);
+          nextlinko->pos = LMN_ATOM_GET_LINK_ATTR(ap, i);
+          stack_push(links, (LmnWord)nextlinko); 
+        }
+        lmn_mem_remove_atom((LmnMembrane*)wt[memi], ap);
+        lmn_delete_atom(ap);
+        /* アトムは親膜への参照を持たない＆アトムスタックがない */
       }
-
+      /* method: removeGround */
       break;
     }
     case INSTR_ISUNARY:
