@@ -208,6 +208,7 @@ struct InstrSpec {
     {"group", INSTR_GROUP, {InstrList, 0}},
 
     /* guard */
+    {"removeground", INSTR_REMOVEGROUND, {InstrVar, InstrVar, 0}},
     {"isground", INSTR_ISGROUND, {InstrVar, InstrVar, InstrVar, 0}},
     {"isunary", INSTR_ISUNARY, {InstrVar, 0}},
     {"isint", INSTR_ISINT, {InstrVar, 0}},
@@ -407,7 +408,7 @@ struct SymbolEntry {
 
 VEC_DEF(struct SymbolEntry, SYMBOL_ENTRY_V);
 VEC_T(SYMBOL_ENTRY_V) symbols;
-static unsigned int symbol_id = 1;
+static unsigned int symbol_id = 0;
 
 static void symbol_entry_free(struct SymbolEntry e)
 {
@@ -1696,6 +1697,7 @@ static void init(void)
   out_buf_cap = 1024;
   out_buf = malloc(sizeof(char) * out_buf_cap);
 
+  get_symbol_id("null");
   init_functors();
 }
 
