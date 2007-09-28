@@ -110,6 +110,7 @@ struct InstrSpec {
     {"findatom", INSTR_FINDATOM, {InstrVar, InstrVar, Functor, 0}},
 
     /* lockmem unused */
+    {"lockmem", INSTR_LOCKMEM, {InstrVar, InstrVar, String, 0}},
     {"anymem", INSTR_ANYMEM, {InstrVar, InstrVar, InstrVar, String, 0}},
     /* lock unused */
     {"getmem", INSTR_GETMEM, {InstrVar, InstrVar, InstrVar, String, 0}},
