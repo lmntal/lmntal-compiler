@@ -32,7 +32,6 @@ typedef int16_t RuleSize;
 #define SEQ(A,S) (!strncmp((A),(S),strlen(S)))
 
 BOOL dump = FALSE;
-BOOL stack_opt = FALSE;
 
 /*
  *  Binary Format
@@ -1251,50 +1250,9 @@ static BOOL is_unused(struct Instruction *instr)
     struct Functor *a = ((struct Functor *)instr->args[2].v);
     if (a->type != SYMBOL) return TRUE;
   }
-  if (instr->id == INSTR_PROCEED) return TRUE;
+
+  if (instr->id == INSTR_LOCKMEM) return TRUE;
   return FALSE;
-}
-
-static BOOL is_backtrack_point(struct Instruction *instr)
-{
-  unsigned int i;
-  for (i = 0; i < ARY_SIZE(backtrack_points); i++) {
-    if (instr->id == backtrack_points[i]) return TRUE;
-  }
-  return FALSE;
-}
-
-/*
- *  内部の命令でつまれるスタックの数だけスタックを巻戻す命令を最後に追加する
- */
-static void optimize_group(struct Instruction *g)
-{
-  unsigned int stack_num = 0;
-  unsigned int i;
-  VEC_T(INSTR_V) *instrs = (VEC_T(INSTR_V)*)g->args[0].v;
-
-  assert(g->id == INSTR_GROUP);
-  for (i = 0; i < instrs->num; i++) {
-    if (is_backtrack_point(VEC_REF(*instrs, i))) {
-      stack_num++;
-    }
-  }
-
-  /* add rewind stack */
-  {
-    struct Instruction a;
-    struct InstrArg arg0; /* 巻戻す数 */
-    instr_init(&a); 
-    a.id = INSTR_REWINDSTACK;
-
-    arg0.type = InstrVar; /* 適切な型ではない気がするが */
-    arg0.v = malloc(sizeof(INT_T));
-    *(int*)arg0.v = stack_num;
-
-    a.args[0] = arg0;
-    a.arg_num = 1;
-    PUSH(instrs, a);
-  }
 }
 
 static void optimize_instrs(VEC_T(INSTR_V) *v)
@@ -1317,23 +1275,21 @@ static void optimize_instrs(VEC_T(INSTR_V) *v)
         arg_free(instr->args[2]);
       }
     }
-    if (stack_opt) {
-      if (instr->id == INSTR_GROUP) {
-        optimize_group(instr); 
-        { /* 保持している命令列を再帰的に処理 */
-          VEC_T(INSTR_V) *instrs = (VEC_T(INSTR_V)*)instr->args[0].v;
-          optimize_instrs(instrs);
-        }
+    if (instr->id == INSTR_GROUP) {
+      { /* 保持している命令列を再帰的に処理 */
+        VEC_T(INSTR_V) *instrs = (VEC_T(INSTR_V)*)instr->args[0].v;
+        optimize_instrs(instrs);
       }
-      if (is_unused(instr)) {
-        VEC_REMOVE(v, (unsigned int)i);
-      }
-      if (is_not_allowed(instr)) {
-        fprintf(stderr, "Instruction: ");
-        instr_dump(*instr);
-        fprintf(stderr, "not allowed\n");
-        exit(1);
-      }
+    }
+
+    if (is_unused(instr)) {
+      VEC_REMOVE(v, (unsigned int)i);
+    }
+    if (is_not_allowed(instr)) {
+      fprintf(stderr, "Instruction: ");
+      instr_dump(*instr);
+      fprintf(stderr, "not allowed\n");
+      exit(1);
     }
   }
 }
@@ -1359,23 +1315,8 @@ static void optimize_guard(struct RuleEl *r)
   }
 }
 
-static void optimize_body(struct RuleEl *r)
-{
-  struct Instruction instr;
-
-  instr.id = INSTR_SUCCESS;
-  instr.arg_num = 0;
-  PUSH(&r->instrs, instr);
-}
-
 static void optimize_rule(struct Rule *r)
 {
-  if (stack_opt) {
-    optimize_amatch(&r->amatch);
-    optimize_mmatch(&r->mmatch);
-    optimize_guard(&r->guard);
-    optimize_body(&r->body);
-  }
   optimize_instrs(&r->amatch.instrs);
   optimize_instrs(&r->mmatch.instrs);
   optimize_instrs(&r->guard.instrs);
@@ -1790,9 +1731,6 @@ static int parse_options(int argc, char *argv[])
     case 0:
       printf("log_options entries must have positive 4th member.\n");
       exit(1);
-      break;
-    case 's':
-      stack_opt = TRUE;
       break;
     case 1000:
       dump = TRUE;
