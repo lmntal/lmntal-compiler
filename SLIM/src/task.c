@@ -323,9 +323,11 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       mp = ((LmnMembrane*)wt[mem2])->child_head;
       while (mp) {
         REF_CAST(LmnMembrane *, wt[mem1]) = mp;
-        if (mp->name == memn && interpret(instr, &instr)) return TRUE;
+        /* TODO: ËìÌ¾¤ÎÈæ³Ó¤¬ÊÑ*/
+        if (/*mp->name == memn &&*/interpret(instr, &instr)) return TRUE;
         mp = mp->next;
       }
+      printf("failure");
       return FALSE;
       break;
     }

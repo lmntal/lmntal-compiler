@@ -135,7 +135,6 @@ unsigned int lmn_mem_natoms(LmnMembrane *mem)
     for (atom = ent->head;
          atom != lmn_atomset_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
-      atom = LMN_ATOM_GET_NEXT(atom);
       n++;
     }      
   }
