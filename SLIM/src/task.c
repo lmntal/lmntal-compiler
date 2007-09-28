@@ -842,26 +842,26 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       HashSet *atoms; /* 走査済みアトム */
       Stack *links;   /* 再帰用スタック */
 
-      /* TODO: 後処理が必要 */
       LMN_IMS_READ(LmnInstrVar, instr, funci);
       LMN_IMS_READ(LmnInstrVar, instr, srclisti);
       LMN_IMS_READ(LmnInstrVar, instr, avolisti);
 
       srcvec = (Vector*) wt[srclisti];
       avovec = (Vector*) wt[avolisti];
-      roots = vec_make(avovec->num);
-      for(i = 0; i < roots->cap; i++) {
-        roots->tbl[i] = 0;
-      }
-      roots->tbl[0] = TRUE;
-      
       hashset_init(avoset, 16);
-      hashset_init(atoms, 256);
       for(i = 0; i < avovec->num; i++) {
         hashset_add(avoset, avovec->tbl[i]);
       }
+
+      hashset_init(atoms, 256);
       stack_init(links);
       stack_push(links, vec_get(srcvec, 0));
+      c = 0;
+      roots = vec_make(srcvec->num);
+      for(i = 0; i < roots->cap; i++) {
+        vec_set(roots, i, FALSE);
+      }
+      roots->tbl[0] = TRUE;
 
       /* method: isGround */
       while(!stack_isempty(links)) {
@@ -870,29 +870,33 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         LmnAtomPtr ap = linko->ap;
         if(hashset_contains(atoms, (HashKeyType)ap)) /* 走査済みアトム */
           continue;
-        if(hashset_contains(avoset, LMN_ATOM_GET_LINK(ap, linko->pos)))
+        if(hashset_contains(avoset, LMN_ATOM_GET_LINK(ap, linko->pos))) /* 出現禁止リンク */
           return FALSE;
         argi = vec_indexof(srcvec, LMN_ATOM_GET_LINK(ap, linko->pos));
-        if(argi >= 0) { /* 根に到達した場合 */
+        if(argi >= 0) { /* 根に到達 */
           roots->tbl[argi] = TRUE;
           continue;
         }
-        if(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(ap))) /* 膜を横断する */
+        if(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(ap))) /* 膜を横断 */
           return FALSE;
         c++;
-        hashset_add(atoms, (LmnWord)&ap);
+        hashset_add(atoms, (LmnWord)ap);
         for(i = 0; i < LMN_ATOM_GET_ARITY(ap); i++) {
           if(i == linko->pos) /* 親へのリンク */
             continue;
           nextlinko->ap = (LmnAtomPtr)LMN_ATOM_GET_LINK(ap, i);
           nextlinko->pos = LMN_ATOM_GET_LINK_ATTR(ap, i);
-          stack_push(links, (LmnWord)&nextlinko); 
+          stack_push(links, (LmnWord)nextlinko); 
         }
       }
       for(i = 0; i < srcvec->num; i++) {
         if(roots->tbl[i] == TRUE) continue;
-        else return -1;
+        else return FALSE;
       }
+      /* method: isGround */
+
+      wt[funci] = (LmnWord)c;
+      at[funci] = LMN_ATOM_INT_ATTR;
       printf("instr_isground: success\n");
       break;
     }
