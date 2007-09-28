@@ -1253,7 +1253,6 @@ static BOOL is_unused(struct Instruction *instr)
     if (a->type != SYMBOL) return TRUE;
   }
 
-  if (instr->id == INSTR_LOCKMEM) return TRUE;
   return FALSE;
 }
 
