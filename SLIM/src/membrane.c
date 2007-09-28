@@ -347,8 +347,8 @@ static void propagate_proxy_link(LmnAtomPtr atom,
   t->link_num = link_num;
 
   for (i = 0; i < 2; i++) {
-    propagate_proxy_link(LMN_ATOM(LMN_ATOM_GET_LINK(atom, 0)),
-                         LMN_ATOM_GET_LINK_ATTR(atom, 0),
+    propagate_proxy_link(LMN_ATOM(LMN_ATOM_GET_LINK(atom, i)),
+                         LMN_ATOM_GET_LINK_ATTR(atom, i),
                          ht,
                          link_num);
   }
@@ -361,6 +361,7 @@ static void assign_link_to_proxy(LmnAtomPtr atom, SimpleHashtbl *ht, struct Dump
 
   t = get_atomrec(ht, atom);
   if (t->link_num < 0) {
+    printf("assign %p\n", (void*) atom);
     int link_num = s->link_num++;
     propagate_proxy_link(atom, LMN_ATTR_MAKE_LINK(0), ht, link_num);
   }
