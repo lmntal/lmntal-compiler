@@ -7,14 +7,13 @@
 struct memory_pool_
 {
   int sizeof_element;
-
   void *free_head;
 };
 
 memory_pool *memory_pool_new(int s)
 {
   memory_pool *res = malloc(sizeof(memory_pool));
-  const int sizeof_p = sizeof(void*);
+  const int sizeof_p = sizeof(long);
   
   res->sizeof_element = ((s+sizeof_p-1)/sizeof_p)*sizeof_p;
   res->free_head = 0;

@@ -589,9 +589,8 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
                 indent + INDENT_INCR);
     }
   }
-  dump_ruleset(mem->rulesets, indent);
   lmn_mem_dump_internal(mem->child_head, ht, s, indent + INDENT_INCR);
-
+  dump_ruleset(mem->rulesets, indent);
   fprintf(stdout, "}. ");
   lmn_mem_dump_internal(mem->next, ht, s, indent);
   

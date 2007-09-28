@@ -20,7 +20,7 @@ LmnAtomPtr lmn_new_atom(LmnFunctor f)
   int arity = LMN_FUNCTOR_ARITY(f);
   
   if(atom_memory_pools[arity] == 0){
-    atom_memory_pools[arity] = memory_pool_new(sizeof(LmnWord)*LMN_ATOM_WORDS(f, arity));
+    atom_memory_pools[arity] = memory_pool_new(sizeof(LmnWord)*LMN_ATOM_WORDS(arity));
   }
   ap = (LmnAtomPtr)memory_pool_malloc(atom_memory_pools[arity]);
   LMN_ATOM_SET_FUNCTOR(ap, f);

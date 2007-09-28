@@ -190,7 +190,7 @@ typedef uint8_t LmnLinkAttr;
 
 /* word size of atom */
 /* 3の加算は prev,next,functorのワード */
-#define LMN_ATOM_WORDS(FUNCTOR, ARITY)          \
+#define LMN_ATOM_WORDS(ARITY)          \
   (3+LMN_ATTR_WORDS(ARITY)+(ARITY))
 
 /* operations for link attribute */
