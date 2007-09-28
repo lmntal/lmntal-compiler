@@ -26,11 +26,9 @@ typedef int INT_T;
 typedef unsigned int ID_T;
 typedef int16_t RuleNumType;
 typedef int16_t RuleSize;
-#define REF_CAST(T,X)     (*(T*)&(X))
 #define SWAP(T,X,Y)       do { T t=(X); (X)=(Y); (Y)=t;} while(0)
 #define ARY_SIZE(X) (sizeof(X)/sizeof(X[0]))
 #define SEQ(A,S) (!strncmp((A),(S),strlen(S)))
-
 BOOL dump = FALSE;
 
 /*
@@ -92,6 +90,7 @@ enum ArgType {
   Label,
   InstrVarList,
   String,
+  NameString,
   LineNum,
   Functor,
   ArgRuleset,
@@ -110,10 +109,10 @@ struct InstrSpec {
     {"findatom", INSTR_FINDATOM, {InstrVar, InstrVar, Functor, 0}},
 
     /* lockmem unused */
-    {"lockmem", INSTR_LOCKMEM, {InstrVar, InstrVar, String, 0}},
-    {"anymem", INSTR_ANYMEM, {InstrVar, InstrVar, InstrVar, String, 0}},
+    {"lockmem", INSTR_LOCKMEM, {InstrVar, InstrVar, NameString, 0}},
+    {"anymem", INSTR_ANYMEM, {InstrVar, InstrVar, InstrVar, NameString, 0}},
     /* lock unused */
-    {"getmem", INSTR_GETMEM, {InstrVar, InstrVar, InstrVar, String, 0}},
+    {"getmem", INSTR_GETMEM, {InstrVar, InstrVar, InstrVar, NameString, 0}},
     {"getparent", INSTR_GETPARENT, {InstrVar, InstrVar, 0}},
 
     {"testmem", INSTR_TESTMEM, {InstrVar, InstrVar, 0}},
@@ -161,7 +160,7 @@ struct InstrSpec {
     {"addmem", INSTR_ADDMEM, {InstrVar, InstrVar, 0}},
     {"enqueuemem", INSTR_ENQUEUEMEM, {InstrVar, 0}},
     {"unlockmem", INSTR_UNLOCKMEM, {InstrVar, 0}},
-    {"setmemname", INSTR_SETMEMNAME, {InstrVar, String, 0}},
+    {"setmemname", INSTR_SETMEMNAME, {InstrVar, NameString, 0}},
 
     {"getlink", INSTR_GETLINK, {InstrVar, InstrVar, InstrVar, 0}},
     {"alloclink", INSTR_ALLOCLINK, {InstrVar, InstrVar, InstrVar, 0}},
@@ -193,7 +192,7 @@ struct InstrSpec {
      
     {"react", INSTR_REACT, {InstrVar, InstrVarList, InstrVarList, InstrVarList, 0}},
     {"jump", INSTR_JUMP, {Label, InstrVarList, InstrVarList, InstrVarList, 0}},
-    {"commit", INSTR_COMMIT, {String, LineNum, 0}},
+    {"commit", INSTR_COMMIT, {NameString, LineNum, 0}},
     {"resetvars", INSTR_RESETVARS, {InstrVarList, InstrVarList, InstrVarList,}},
     {"changevars", INSTR_CHANGEVARS, {InstrVarList, InstrVarList, InstrVarList,}},
     {"spec", INSTR_SPEC, {InstrVar, InstrVar,0}},
@@ -230,11 +229,6 @@ struct InstrSpec {
     {"ige", INSTR_IGE, {InstrVar, InstrVar, 0}},
     {"ieq", INSTR_IEQ, {InstrVar, InstrVar, 0}},
     {"ine", INSTR_INE, {InstrVar, InstrVar, 0}},
-    
-    /* for dump */
-    {"rewindstack", INSTR_REWINDSTACK, {InstrVar, 0}},
-    {"swapvec", INSTR_SWAP_WORK_VEC, {0}},
-    {"success", INSTR_SUCCESS, {0}},
   };
 
 enum LmnInstruction backtrack_points[] =
@@ -408,7 +402,8 @@ struct SymbolEntry {
 
 VEC_DEF(struct SymbolEntry, SYMBOL_ENTRY_V);
 VEC_T(SYMBOL_ENTRY_V) symbols;
-static unsigned int symbol_id = 0;
+#define NULL_STRING_ID 0
+static unsigned int symbol_id = 1;
 
 static void symbol_entry_free(struct SymbolEntry e)
 {
@@ -515,6 +510,7 @@ static void arg_free(struct InstrArg P)
   case InstrVar:
   case Label:
   case String:
+  case NameString:
   case LineNum:
   case Functor:
   case ArgRuleset:
@@ -700,18 +696,11 @@ static char *read_string(char *line, ID_T *ret)
   int num;
 
 
-  if (SEQ(line, "null")) {
-    num = strlen("null");
-    start = line;
-    end = line + num;
-  } else {
-    char *t;
-    ASSERT((*line) == '"');
-    start = line + 1;
-    for (t = start, num = 0; *t != '"'; t++, num++) ;
-    end = t + 1;
-  }
-
+  char *t;
+  ASSERT((*line) == '"');
+  start = line + 1;
+  for (t = start, num = 0; *t != '"'; t++, num++) ;
+  end = t + 1;
   {
     unsigned int id;
     char *s = malloc(sizeof(char) * num + 1);
@@ -818,6 +807,19 @@ static char *parse_typed_arg(enum ArgType type, char *line, void **ret)
     *ret = malloc(sizeof(INT_T));
     line = read_string(line, &n);
     *(ID_T*)*ret = n;
+    return line;
+  }
+  case NameString:
+  {
+    ID_T n;
+    *ret = malloc(sizeof(INT_T));
+    if (!strncmp(line, "null", 4)) {
+      *(ID_T*)*ret = NULL_STRING_ID;
+      line += 4;
+    } else {
+      line = read_string(line, &n);
+      *(ID_T*)*ret = n;
+    }
     return line;
   }
   case Functor:
@@ -1135,6 +1137,7 @@ static void arg_dump(struct InstrArg a)
   case InstrVar:
   case Label:
   case String:
+  case NameString:
   case LineNum:
   case ArgRuleset:
     printf("%d", *(int*)a.v);
@@ -1292,27 +1295,6 @@ static void optimize_instrs(VEC_T(INSTR_V) *v)
       fprintf(stderr, "not allowed\n");
       exit(1);
     }
-  }
-}
-
-static void optimize_amatch(struct RuleEl *r)
-{
-
-}
-
-static void optimize_mmatch(struct RuleEl *r)
-{
-
-}
-
-static void optimize_guard(struct RuleEl *r)
-{
-  if (r->instrs.num > 0) {
-    struct Instruction instr;
-
-    instr.id = INSTR_SWAP_WORK_VEC;
-    instr.arg_num = 0;
-    VEC_INSERT(&r->instrs, 0, instr);
   }
 }
 
@@ -1504,6 +1486,7 @@ static void output_arg(struct InstrArg a, VEC_T(LABEL_V) *labels, unsigned int *
     break;
   }
   case String:
+  case NameString:
     WRITE_GO(lmn_interned_str, *(lmn_interned_str*)a.v, *pos);
     break;
   case LineNum:
@@ -1696,7 +1679,6 @@ static void init(void)
   out_buf_cap = 1024;
   out_buf = malloc(sizeof(char) * out_buf_cap);
 
-  get_symbol_id("null");
   init_functors();
 }
 
