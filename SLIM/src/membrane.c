@@ -50,7 +50,9 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
 {
   AtomSetEntry *as;
-  as = (AtomSetEntry *)hashtbl_get_default(&mem->atomset, LMN_ATOM_GET_FUNCTOR(ap), 0);
+  LmnFunctor f = LMN_ATOM_GET_FUNCTOR(ap); 
+  
+  as = (AtomSetEntry *)hashtbl_get_default(&mem->atomset, f, 0);
   if (!as) {
     as = LMN_MALLOC(struct AtomSetEntry);
     LMN_ATOM_SET_PREV(as, as);
@@ -62,6 +64,8 @@ void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
   LMN_ATOM_SET_PREV(ap, as->tail);
   LMN_ATOM_SET_NEXT(as->tail, ap);
   as->tail = ap;
+
+  if (!LMN_IS_PROXY_FUNCTOR(f)) mem->atom_num++;
 } 
 
 void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
@@ -70,9 +74,10 @@ void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
 
   prev = LMN_ATOM_GET_PREV(atom);
   next = LMN_ATOM_GET_NEXT(atom);
-  LMN_ASSERT(prev && next);
   LMN_ATOM_SET_PREV(next, prev);
   LMN_ATOM_SET_NEXT(prev, next);
+  if (!LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(atom)))
+    mem->atom_num--;
 }
 
 /*----------------------------------------------------------------------
@@ -82,7 +87,7 @@ void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
 LmnMembrane *lmn_mem_make(void)
 {
   LmnMembrane *mem = LMN_MALLOC(LmnMembrane);
-  memset(mem, 0, sizeof(LmnMembrane));
+  memset(mem, 0, sizeof(LmnMembrane)); /* set all data to 0 */
   hashtbl_init(&mem->atomset, 4); /* 初期サイズはいくつが適当？ */
   return mem;
 }
@@ -122,11 +127,35 @@ AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
 /* TODO: 全てのシンボルアトムをなめているので O(n) になっている */
 /* TODO: データアトムの個数を数えていない. 正確に行うには
    引数の先を確かめる必要がある */
-unsigned int lmn_mem_natoms(LmnMembrane *mem)
+BOOL lmn_mem_natoms(LmnMembrane *mem, unsigned int count)
 {
-  unsigned int n = 0;
-  HashIterator iter;
+  return mem->atom_num == count;
+}
 
+BOOL lmn_mem_nmems(LmnMembrane *mem, unsigned int count)
+{
+	unsigned int i;
+	LmnMembrane* mp = mem->child_head;
+	for(i = 0; mp && i < count; mp=mp->next, i++);
+  return i == count;
+}
+
+<<<<<<< variant A
+/* return TRUE if # of freelinks in mem is equal to count */
+/* リストをたどって数を数えているのでO(n)。
+   countがそれほど大きくならなければ問題はないが */
+BOOL lmn_mem_nfreelinks(LmnMembrane *mem, unsigned int count)
+{
+  AtomSetEntry *ent = (AtomSetEntry *)hashtbl_get_defaulta(&mem->atomset,
+                                                           LMN_IN_PROXY_FUNCTOR,
+                                                           0);
+  int n;
+  if (!ent) return count == 0;
+  for (atom = ent->head, n = 0;
+       atom != lmn_atomset_end(ent) && count<n;
+       atom = LMN_ATOM_GET_NEXT(atom), n++) {}
+  return count == n;
+>>>>>>> variant B
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashiter_isend(&iter);
        hashiter_next(&iter)) {
@@ -139,14 +168,27 @@ unsigned int lmn_mem_natoms(LmnMembrane *mem)
     }      
   }
   return n;
+####### Ancestor
+  for (iter = hashtbl_iterator(&mem->atomset);
+       !hashiter_isend(&iter);
+       hashiter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
+    LmnAtomPtr atom;
+    for (atom = ent->head;
+         atom != lmn_atomset_end(ent);
+         atom = LMN_ATOM_GET_NEXT(atom)) {
+      atom = LMN_ATOM_GET_NEXT(atom);
+      n++;
+    }      
+  }
+  return n;
+======= end
 }
 
-unsigned int lmn_mem_nmems(LmnMembrane *mem)
+void lmn_mem_movecells(LmnMembrane *destmem, LmnMembrane *srcmem)
 {
-	unsigned int i = 0;
-	LmnMembrane* mp = mem->child_head;
-	for(; mp; mp=mp->next, i++);
-  return i;
+  /* concatenate atomlist */
+  
 }
 
 /*----------------------------------------------------------------------
@@ -576,9 +618,9 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
   }
   dump_ruleset(mem->rulesets, indent);
   lmn_mem_dump_internal(mem->child_head, ht, s, indent + INDENT_INCR);
-  lmn_mem_dump_internal(mem->next, ht, s, indent);
 
-  fprintf(stdout, "}");
+  fprintf(stdout, "}. ");
+  lmn_mem_dump_internal(mem->next, ht, s, indent);
   
   for (i = 0; i < PRI_NUM; i++) {
     hashtbl_destroy(&pred_atoms[i]);
