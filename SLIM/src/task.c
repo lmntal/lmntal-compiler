@@ -385,11 +385,14 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         at[atomi] = attr;
       } else { /* symbol atom */
         LmnFunctor f;
-        LMN_IMS_READ(LmnFunctor, instr, f);
-        ap = lmn_new_atom(f);
-        lmn_mem_push_atom((LmnMembrane*)wt[memi], ap);
-        REF_CAST(LmnAtomPtr, wt[atomi]) = ap;
-        at[atomi] = attr;
+	LMN_IMS_READ(LmnFunctor, instr, f);
+	ap = lmn_new_atom(f);
+	lmn_mem_push_atom((LmnMembrane*)wt[memi], ap);
+	REF_CAST(LmnAtomPtr, wt[atomi]) = ap;
+	at[atomi] = attr;
+	if (LMN_IS_PROXY_FUNCTOR(f)) {
+	  LMN_ATOM_SET_LINK(ap, 2, wt[memi]);
+	}
       }
       break;
     }
