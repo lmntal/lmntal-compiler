@@ -184,11 +184,6 @@ enum LmnInstruction {
   INSTR_SYSTEMRULESETS,
   INSTR_SUBCLASS,
   INSTR_ISBUDDY,
-
-  /* add for optimization */
-  INSTR_SWAP_WORK_VEC,
-  INSTR_REWINDSTACK,
-  INSTR_SUCCESS
 };
 
 #endif /*LMN_INSTRUCTION_H*/
