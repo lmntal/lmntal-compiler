@@ -1126,6 +1126,9 @@ static void functor_dump(FILE* fid, struct Functor a)
   case OUT_PROXY:
     fprintf(fid, "$out");
     break;
+  case UNIFY:
+    fprintf(fid, "=");
+    break;
   default:
     ASSERT(FALSE);
   }
@@ -1528,6 +1531,12 @@ static void output_arg(struct InstrArg a, VEC_T(LABEL_V) *labels, unsigned int *
     {
       WRITE_GO(LmnLinkAttr, LMN_ATTR_MAKE_LINK(0), *pos);
       WRITE_GO(LmnFunctor, LMN_OUT_PROXY_FUNCTOR, *pos);
+      break;
+    }
+    case UNIFY:
+    {
+      WRITE_GO(LmnLinkAttr, LMN_ATTR_MAKE_LINK(0), *pos);
+      WRITE_GO(LmnFunctor, LMN_UNIFY_FUNCTOR, *pos);
       break;
     }
     default:
