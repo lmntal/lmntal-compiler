@@ -35,7 +35,7 @@ void vec_add(Vector* vec, LmnWord keyp) {
 
 /* set */
 void vec_set(Vector *vec, unsigned int index, LmnWord keyp) {
-  assert(index < vec->num);
+  assert(index <= vec->num);
   (vec->tbl)[index] = keyp;
 }
 
