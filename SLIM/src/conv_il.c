@@ -187,7 +187,7 @@ struct InstrSpec {
     {"dropmem", INSTR_DROPMEM, {InstrVar, 0}},
     {"lookuplink", INSTR_LOOKUPLINK, {InstrVar, InstrVar, InstrVar, 0}},
     {"insertconnectors", INSTR_INSERTCONNECTORS, {InstrVar, InstrVarList, InstrVar, 0}},
-    {"insertconnectorsinnull", INSTR_INSERTCONNECTORSINNULL, {InstrVar, InstrVar, 0}},
+    {"insertconnectorsinnull", INSTR_INSERTCONNECTORSINNULL, {InstrVar, InstrVarList, 0}},
     {"deleteconnectors", INSTR_DELETECONNECTORS, {InstrVar, InstrVar, 0}},
      
     {"react", INSTR_REACT, {InstrVar, InstrVarList, InstrVarList, InstrVarList, 0}},
@@ -208,6 +208,7 @@ struct InstrSpec {
 
     /* guard */
     {"removeground", INSTR_REMOVEGROUND, {InstrVar, InstrVar, 0}},
+    {"freeground", INSTR_FREEGROUND, {InstrVar, 0}},
     {"isground", INSTR_ISGROUND, {InstrVar, InstrVar, InstrVar, 0}},
     {"isunary", INSTR_ISUNARY, {InstrVar, 0}},
     {"isint", INSTR_ISINT, {InstrVar, 0}},
