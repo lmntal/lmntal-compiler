@@ -322,7 +322,7 @@ VEC_DEF(int, INT_V);
  * data types
  */
 
-enum FunctorType {SYMBOL, INT, DOUBLE, IN_PROXY, OUT_PROXY};
+enum FunctorType {SYMBOL, INT, DOUBLE, IN_PROXY, OUT_PROXY, UNIFY};
 
 struct SymbolFunctor {
   lmn_interned_str module_id;
