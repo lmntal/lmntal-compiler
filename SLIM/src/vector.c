@@ -1,12 +1,17 @@
 #include "vector.h"
 
 /* init */
+Vector *vec_init(Vector *vec, unsigned int init_size) {
+  vec->tbl = LMN_NALLOC(LmnWord, init_size);
+  vec->num = 0;
+  vec->cap = init_size;
+  return vec;
+}
+
+/* make */
 Vector* vec_make(unsigned int init_size) {
-  Vector* ret;
-  ret->tbl = LMN_NALLOC(LmnWord, init_size);
-  ret->num = 0;
-  ret->cap = init_size;
-  return ret;
+  Vector* vec = LMN_MALLOC(Vector);
+  return vec_init(vec, init_size);
 }
 
 Vector* vec_make_default() {
@@ -28,6 +33,7 @@ void vec_add(Vector* vec, LmnWord keyp) {
   }
 }
 
+/* set */
 void vec_set(Vector *vec, unsigned int index, LmnWord keyp) {
   assert(index < vec->num);
   (vec->tbl)[index] = keyp;

@@ -13,6 +13,7 @@ typedef struct Vector {
   unsigned int num, cap;
 } Vector;
 
+LMN_EXTERN Vector *vec_init(Vector *vec, unsigned int init_size);
 LMN_EXTERN Vector* vec_make(unsigned int init_size);
 LMN_EXTERN Vector* vec_make_default(void);
 LMN_EXTERN void vec_add(Vector* vec, LmnWord keyp);
