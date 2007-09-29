@@ -169,6 +169,7 @@ public class Debug {
 	 * @return
 	 */
 	public static boolean isBreakPoint() {
+
 		if (isStepping) return true;
 		for (Integer lineno : breakPoints) {
 			if (currentLineNumber == lineno.intValue()) {
@@ -185,6 +186,7 @@ public class Debug {
 	 * ATOM, MEMBRANE
 	 */
 	public static void breakPoint(int r, int testType) {
+		System.out.println(r);
 		currentLineNumber = r;
 		Debug.testType = testType;
 	}

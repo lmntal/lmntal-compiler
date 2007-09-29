@@ -27,6 +27,10 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.multi.MultiSplitPaneUI;
 
+import debug.BreakPoint;
+import debug.BreakPointFrame;
+import debug.Debug;
+
 import runtime.Membrane;
 
 public class LMNtalFrame extends JFrame {
@@ -48,6 +52,9 @@ public class LMNtalFrame extends JFrame {
 	
 	final static
 	private String[] ext = {"*.png"};
+	
+	static
+	private boolean nextStep_ = false;
 	
 	
 	static {
@@ -126,6 +133,11 @@ public class LMNtalFrame extends JFrame {
 		logsplitpane_.setOneTouchExpandable(true);
 //		SPLITPANEのサイズ指定
 
+		subsplitpane_.setPreferredSize(new Dimension
+				(WINDOW_WIDTH-SubFrame.WINDOW_WIDTH,SubFrame.WINDOW_WIDTH));
+		logsplitpane_.setPreferredSize(new Dimension
+				(WINDOW_HEIGHT-LogFrame.WINDOW_HEIGHT,LogFrame.WINDOW_HEIGHT));
+		
 		location_sub = SubFrame.WINDOW_WIDTH;
 		location_log = LogFrame.WINDOW_HEIGHT;
 
@@ -145,6 +157,7 @@ public class LMNtalFrame extends JFrame {
 	    
 	    addComponentListener(new Resize(this));
 	    
+	    
 	}
 
 	
@@ -158,9 +171,12 @@ public class LMNtalFrame extends JFrame {
 		}
 		panel_.saveState();
 		while(running_) {
-			if(!stopCalc_){
+			if(nextStep_ || (!stopCalc_ && !BreakPoint.isBreakPoint())){
+				nextStep_ = false;
 				break;
 			}
+			
+
 			try {
 				Thread.sleep(SLEEP_TIME);
 			} catch (InterruptedException e) {
@@ -189,6 +205,7 @@ public class LMNtalFrame extends JFrame {
 	}
 	
 	public void setStep(int step){
+		nextStep_ = true;
 		step_ = step;
 	}
 	
@@ -303,8 +320,12 @@ public class LMNtalFrame extends JFrame {
 	
 	public class Resize extends ComponentAdapter {
 		private JFrame frame;
+		private int subWidth;
+		private int logHeight;
 		public Resize(JFrame f){
 			frame = f;
+			subWidth = subsplitpane_.getX();
+			logHeight = logsplitpane_.getY();
 		}
 		public void componentResized(ComponentEvent e) {
 

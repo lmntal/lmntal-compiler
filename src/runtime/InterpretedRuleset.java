@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import util.Util;
+import debug.BreakPoint;
 import debug.Debug;
 
 // doneTODO LOCAL関係のコメントを完全に削除する (2) -> 0912 done
@@ -950,6 +951,9 @@ class InterpretiveReactor {
 					if (Env.debugOption) {//2006.1.26 by inui
 						Debug.breakPoint(inst.getIntArg2(), Debug.ATOM);
 						//if (Debug.isBreakPoint()) Task.trace("-->", "@" + id, r.toString());
+					}
+					if(BreakPoint.breakPointFlag_){
+						BreakPoint.setCurrentRuleName((String)inst.getArg1());
 					}
 					// トレーサをよぶ
 					break;//

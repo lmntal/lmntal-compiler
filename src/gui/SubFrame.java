@@ -38,6 +38,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputListener;
 
+import debug.BreakPoint;
+import debug.BreakPointFrame;
+import debug.Debug;
+
 public class SubFrame extends JPanel {
 
 	/////////////////////////////////////////////////////////////////
@@ -158,6 +162,10 @@ public class SubFrame extends JPanel {
 	
 	static
 	private JCheckBox repulsiveCheck_ = new JCheckBox("Calc Repulsive");
+	
+	// break point
+	static
+	private JCheckBox breakPointCheck_ = new JCheckBox("Break Point"); 
 
 	static
 	private JSlider zoomSlider_ = new JSlider(JSlider.VERTICAL, SLIDER_MIN, SLIDER_MAX, SLIDER_DEF);
@@ -244,6 +252,8 @@ public class SubFrame extends JPanel {
 		repulsiveCheck_.setSelected(true);
 		attractionCheck_.addItemListener(new AttractionAdapter());
 		attractionCheck_.setSelected(false);
+		breakPointCheck_.addItemListener(new BreakPointAdapter());
+		breakPointCheck_.setSelected(false);
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
 		menuPanel_.add(advanceModeCheck_);
 		menuPanel_.add(stopPainting_);
@@ -257,6 +267,7 @@ public class SubFrame extends JPanel {
 		menuPanel_.add(attractionCheck_);
 		menuPanel_.add(repulsiveCheck_);
 		menuPanel_.add(springCheck_);
+		menuPanel_.add(breakPointCheck_);
 		menuPanel_.add(springSlider_);
 		menuPanel_.add(wheelPanel_);
 		angleSlider_.setVisible(false);
@@ -411,6 +422,25 @@ public class SubFrame extends JPanel {
 	}
 
 	/**
+	 * ブレークポイント
+	 * @author saito
+	 *
+	 */
+	static
+	private class BreakPointAdapter implements ItemListener {
+		public BreakPointAdapter() { }
+
+		public void itemStateChanged(ItemEvent e) {
+			BreakPoint.setBreakPointFlag(breakPointCheck_.isSelected());
+		}
+	}
+	
+	static 
+	public void setBreakPointCheck(boolean f){
+		breakPointCheck_.setSelected(f);
+	}
+	
+	/**
 	 * AutoFocus処理開始
 	 * @author nakano
 	 *
@@ -468,7 +498,8 @@ public class SubFrame extends JPanel {
 	private class GoActionAdapter implements ActionListener {
 		public GoActionAdapter() { }
 		public void actionPerformed(ActionEvent e) {
-			try {
+			
+			try{
 				mainFrame_.setStep(Integer.parseInt(stepBox_.getText()));
 			} catch (NumberFormatException e1) {
 				mainFrame_.setStep(1);
