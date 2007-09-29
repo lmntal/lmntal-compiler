@@ -219,6 +219,7 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_OUT_PROXY_FUNCTOR  1
 #define LMN_LIST_FUNCTOR       2
 #define LMN_NIL_FUNCTOR        3
+#define LMN_UNIFY_FUNCTOR      4
 
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
