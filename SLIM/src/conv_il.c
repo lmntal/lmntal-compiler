@@ -1743,6 +1743,7 @@ static void usage(void)
           "Usage: conv_il [file]\n"
           "options:\n"
           "  --dump       dump parsed structure.\n"
+          "  --v1         print instructions.\n"
           );
   exit(1);
 }
