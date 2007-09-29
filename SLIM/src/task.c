@@ -193,7 +193,7 @@ void run(void)
   
   mem = lmn_mem_make();
 
-  lmn_mem_dump(mem);
+/*   lmn_mem_dump(mem); */
 
   /*     lmn_mem_add_ruleset(mem, lmn_ruleset_table.entry[0]); */
 
@@ -201,7 +201,7 @@ void run(void)
   /* call init atom creation rule */
   react_ruleset(mem, lmn_ruleset_table.entry[0]);
 
-  lmn_mem_dump(mem);
+/*   lmn_mem_dump(mem); */
   
   while(!memstack_isempty()){
     LmnMembrane *mem = memstack_peek();
@@ -213,15 +213,18 @@ void run(void)
   lmn_mem_dump(mem);
 }
 
+static void print_wt(void);
+
 static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 {
   LmnInstrOp op;
   LmnRuleInstr start = instr;
 
   while (TRUE) {
+  LOOP:;
     LMN_IMS_READ(LmnInstrOp, instr, op);
-    fprintf(stdout, "op: %d %d\n", op, instr - start - 2);
-    lmn_mem_dump((LmnMembrane*)wt[0]); 
+/*     fprintf(stderr, "op: %d %d\n", op, instr - start - 2); */
+/*     lmn_mem_dump((LmnMembrane*)wt[0]);  */
     switch (op) {
     case INSTR_SPEC:
       /* ignore spec, because wt is initially large enough. */
@@ -1250,9 +1253,46 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       break;
     }
+    case INSTR_PRINTINSTR:
+    {
+      char c;
+      int i;
+      
+      fprintf(stderr, "instr:");
+      while (TRUE) {
+        LMN_IMS_READ(char, instr, c);
+        if (!c) break;
+        fprintf(stderr, "%c", c);
+      }
+      goto LOOP;
+    }
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
     }
+    #ifdef DEBUG
+    print_wt();
+    #endif
   }
+}
+
+static void print_wt(void)
+{
+  unsigned int i;
+  unsigned int end = 16;
+  
+  fprintf(stderr, " wt: [");
+  for (i = 0; i < end; i++) {
+    if (i>0) fprintf(stderr, ", ");
+    fprintf(stderr, "%ld", wt[i]);
+  }
+  fprintf(stderr, "]");
+  fprintf(stderr, "\n");
+  fprintf(stderr, " at: [");
+  for (i = 0; i < end; i++) {
+    if (i>0) fprintf(stderr, ", ");
+    fprintf(stderr, "%d", at[i]);
+  }
+  fprintf(stderr, "]");
+  fprintf(stderr, "\n");
 }
