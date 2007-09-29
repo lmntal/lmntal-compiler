@@ -8,7 +8,6 @@ import java.awt.FileDialog;
 import java.awt.Graphics;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -24,12 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
 import javax.swing.plaf.multi.MultiSplitPaneUI;
-
-import debug.BreakPoint;
-import debug.BreakPointFrame;
-import debug.Debug;
 
 import runtime.Membrane;
 

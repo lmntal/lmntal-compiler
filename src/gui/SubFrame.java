@@ -38,10 +38,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputListener;
 
-import debug.BreakPoint;
-import debug.BreakPointFrame;
-import debug.Debug;
-
 public class SubFrame extends JPanel {
 
 	/////////////////////////////////////////////////////////////////

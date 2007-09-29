@@ -6,6 +6,8 @@
 
 package runtime;
 
+import gui.BreakPoint;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -21,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import util.Util;
-import debug.BreakPoint;
 import debug.Debug;
 
 // doneTODO LOCAL関係のコメントを完全に削除する (2) -> 0912 done
