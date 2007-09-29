@@ -4,12 +4,13 @@
  *   branch
  */
 
+#include <unistd.h>
 #include <limits.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <unistd.h>
+#include <sys/wait.h>
 #include <getopt.h>
 #include "lmntal.h"
 #include "instruction.h"
@@ -30,6 +31,7 @@ typedef int16_t RuleSize;
 #define ARY_SIZE(X) (sizeof(X)/sizeof(X[0]))
 #define SEQ(A,S) (!strncmp((A),(S),strlen(S)))
 BOOL dump = FALSE;
+int verb = 0;
 
 /*
  *  Binary Format
@@ -232,9 +234,6 @@ struct InstrSpec {
     {"ine", INSTR_INE, {InstrVar, InstrVar, 0}},
   };
 
-enum LmnInstruction backtrack_points[] =
-  {INSTR_FINDATOM, INSTR_ANYMEM};
-
 /*----------------------------------------------------------------------
  * extensible vector
  */
@@ -353,6 +352,7 @@ struct InstrArg {
 struct Instruction {
   enum LmnInstruction id;
   unsigned int arg_num;
+  char *str;
   struct InstrArg args[10];
 };
 
@@ -946,8 +946,9 @@ static BOOL parse_instr(struct Instruction *instr, char **next)
   for (i = 0; i < sizeof(spec)/sizeof(spec[0]); i++) {
     if (SEQ(line, spec[i].op_str) &&
         !isalpha(*(line + strlen(spec[i].op_str)))) {
-      line = skipws(line+strlen(spec[i].op_str));
       instr->id = spec[i].op;
+      instr->str = line;
+      line = skipws(line+strlen(spec[i].op_str));
       if ((line = parse_instr_arg(line, spec[i].args, instr)) != NULL) {
         *next = line;
         return TRUE;
@@ -1084,55 +1085,55 @@ static char* get_op_str(enum LmnInstruction op)
   return "null";
 }
 
-static void symbols_dump(void)
+static void symbols_dump(FILE* fid)
 {
   unsigned int i;
 
-  printf("--- symbols ---\n");
+  fprintf(fid, "--- symbols ---\n");
   for (i = 0; i < symbols.num; i++) {
     struct SymbolEntry *e = VEC_REF(symbols, i);
-    printf("%d: %s\n", e->id, e->str);
+    fprintf(fid, "%d: %s\n", e->id, e->str);
   }   
 }
 
-static void functors_dump(void)
+static void functors_dump(FILE *fid)
 {
   unsigned int i;
   
-  printf("--- functors ---\n");
+  fprintf(fid, "--- functors ---\n");
   for (i = 0; i < functors.num; i++) {
     struct SymbolFunctor *e = VEC_REF(functors, i);
-    printf("%d: %d.%d_%d\n", e->functor_id, e->module_id, e->symbol_id, e->arity);
+    fprintf(fid, "%d: %d.%d_%d\n", e->functor_id, e->module_id, e->symbol_id, e->arity);
   }
 }
 
-static void functor_dump(struct Functor a)
+static void functor_dump(FILE* fid, struct Functor a)
 {
   switch (a.type) {
   case SYMBOL:
-    printf("%d.%d_%d[%d]", a.v.sym_atom.module_id,
+    fprintf(fid, "%d.%d_%d[%d]", a.v.sym_atom.module_id,
            a.v.sym_atom.symbol_id, a.v.sym_atom.arity, a.v.sym_atom.functor_id);
     break;
   case INT:
-    printf("%d", a.v.int_value);
+    fprintf(fid, "%d", a.v.int_value);
     break;
   case DOUBLE:
-    printf("%f", a.v.double_value);
+    fprintf(fid, "%f", a.v.double_value);
     break;
   case IN_PROXY:
-    printf("in-proxy");
+    fprintf(fid, "$in");
     break;
   case OUT_PROXY:
-    printf("out-proxy");
+    fprintf(fid, "$out");
     break;
   default:
     ASSERT(FALSE);
   }
 }
 
-static void instr_dump(struct Instruction a);
+static void instr_dump(FILE* fid, struct Instruction a);
 
-static void arg_dump(struct InstrArg a)
+static void arg_dump(FILE* fid, struct InstrArg a)
 {
   switch (a.type) {
   case InstrVar:
@@ -1141,33 +1142,33 @@ static void arg_dump(struct InstrArg a)
   case NameString:
   case LineNum:
   case ArgRuleset:
-    printf("%d", *(int*)a.v);
+    fprintf(fid, "%d", *(int*)a.v);
     break;
   case Functor:
-    functor_dump(*(struct Functor*)a.v);
+    functor_dump(fid, *(struct Functor*)a.v);
     break;
   case InstrVarList:
   {
     unsigned int i;
     VEC_T(INT_V) v = *(VEC_T(INT_V)*)a.v;
-    printf("[");
+    fprintf(fid, "[");
     for (i = 0; i < v.num; i++) {
-      if (i>0) printf(", ");
-      printf("%d", v.v[i]);
+      if (i>0) fprintf(fid, ", ");
+      fprintf(fid, "%d", v.v[i]);
     }
-    printf("]");
+    fprintf(fid, "]");
     break;
   }
   case InstrList:
   {
     unsigned int i;
     VEC_T(INSTR_V) v = *(VEC_T(INSTR_V)*)a.v;
-    printf("[\n");
+    fprintf(fid, "[\n");
     for (i = 0; i < v.num; i++) {
-      printf("   ");
-      instr_dump(v.v[i]);
+      fprintf(fid, "   ");
+      instr_dump(fid, v.v[i]);
     }
-    printf("     ]");
+    fprintf(fid, "     ]");
     break;
   }
   default:
@@ -1176,59 +1177,59 @@ static void arg_dump(struct InstrArg a)
   }
 }
 
-static void instr_dump(struct Instruction a)
+static void instr_dump(FILE* fid, struct Instruction a)
 {
   unsigned int i;
-  printf("     %s arg= [", get_op_str(a.id));
+  fprintf(fid, "     %s arg= [", get_op_str(a.id));
   for (i = 0; i < a.arg_num; i++) {
-    if (i>0) printf(", ");
-    arg_dump(a.args[i]);
+    if (i>0) fprintf(fid, ", ");
+    arg_dump(fid, a.args[i]);
   }
-  printf("]\n");
+  fprintf(fid, "]\n");
 }
 
-static void rule_el_dump(struct RuleEl a)
+static void rule_el_dump(FILE* fid, struct RuleEl a)
 {
   unsigned int i;
 
-  printf("    Label=%d \n", a.label);
+  fprintf(fid, "    Label=%d \n", a.label);
   for (i = 0; i < a.instrs.num; i++) {
-    instr_dump(a.instrs.v[i]);
+    instr_dump(fid, a.instrs.v[i]);
   }
 }
 
-static void rule_dump(struct Rule a)
+static void rule_dump(FILE* fid, struct Rule a)
 {
-  printf("Rule NAME=%d \n", a.name);
-  printf("  amatch \n");
-  rule_el_dump(a.amatch);
-  printf("  mmatch \n");
-  rule_el_dump(a.mmatch);
-  printf("  guard \n");
-  rule_el_dump(a.guard);
-  printf("  body \n");
-  rule_el_dump(a.body);
+  fprintf(fid, "Rule NAME=%d \n", a.name);
+  fprintf(fid, "  amatch \n");
+  rule_el_dump(fid, a.amatch);
+  fprintf(fid, "  mmatch \n");
+  rule_el_dump(fid, a.mmatch);
+  fprintf(fid, "  guard \n");
+  rule_el_dump(fid, a.guard);
+  fprintf(fid, "  body \n");
+  rule_el_dump(fid, a.body);
 }
 
-static void ruleset_dump(struct Ruleset a)
+static void ruleset_dump(FILE* fid, struct Ruleset a)
 {
   unsigned int i;
 
-  printf("Ruleset ID=%d \n", a.id);
+  fprintf(fid, "Ruleset ID=%d \n", a.id);
   for (i = 0; i < a.rules.num; i++) {
-    rule_dump(a.rules.v[i]);
+    rule_dump(fid, a.rules.v[i]);
   }
 }
 
-static void il_dump(struct IL il)
+static void il_dump(FILE* fid, struct IL il)
 {
   unsigned int i;
 
-  symbols_dump();
-  functors_dump();
+  symbols_dump(fid);
+  functors_dump(fid);
   
   for (i = 0; i < il.rulesets.num; i++) {
-    ruleset_dump(il.rulesets.v[i]);
+    ruleset_dump(fid, il.rulesets.v[i]);
   }
 }
 
@@ -1245,7 +1246,9 @@ static BOOL is_not_allowed(struct Instruction *instr)
 {
   if (instr->id == INSTR_FINDATOM) {
     struct Functor *a = ((struct Functor *)instr->args[2].v);
-    if (a->type != SYMBOL) return TRUE;
+    if (a->type != SYMBOL &&
+        a->type != IN_PROXY &&
+        a->type != OUT_PROXY) return TRUE;
   }
   return FALSE;
 }
@@ -1292,7 +1295,7 @@ static void optimize_instrs(VEC_T(INSTR_V) *v)
     }
     if (is_not_allowed(instr)) {
       fprintf(stderr, "Instruction: ");
-      instr_dump(*instr);
+      instr_dump(stderr, *instr);
       fprintf(stderr, "not allowed\n");
       exit(1);
     }
@@ -1562,6 +1565,39 @@ static void output_instr(struct Instruction *instr,
 {
   unsigned int i;
   
+  if (verb >= 1) {
+    /* 命令の前に名例の文字列を出力する命令をはさむ */
+    /* 子プロセスでinstrをdumpした結果を親プロセスで読み込み、出力 */
+    int pfd[2];
+    int cpid;
+    if (pipe(pfd) == -1) {perror("pipe"); exit(EXIT_FAILURE);}
+    cpid = fork();
+    if (cpid == -1) { perror("fork"); exit(EXIT_FAILURE); }
+    if (cpid == 0) { /* read from child process */
+      FILE *fout;
+      close(pfd[0]);
+      fout = fdopen(pfd[1], "w");
+      instr_dump(fout, *instr);
+      fclose(fout);
+      close(pfd[0]);
+      exit(0);
+    } else {
+      int c;
+      FILE *fin; int i = 0;
+      close(pfd[1]);
+      fin = fdopen(pfd[0], "r");
+      WRITE_GO(LmnInstrOp, INSTR_PRINTINSTR, *pos);
+      while ((c = fgetc(fin)) != EOF) {
+        i++;
+        WRITE_GO(BYTE, (BYTE)c, *pos);
+      }
+      WRITE_GO(BYTE, '\0', *pos);
+      fclose(fin);
+      close(pfd[1]);
+      wait(NULL);
+    }
+  }
+
   if (!(instr->id == INSTR_GROUP ||
         instr->id == INSTR_BRANCH)) {
     WRITE_GO(LmnInstrOp, instr->id, *pos);
@@ -1570,6 +1606,7 @@ static void output_instr(struct Instruction *instr,
     struct InstrArg a = instr->args[i];
     output_arg(a, labels, pos, b);
   }
+
 }
 
 static void output_rule_el(struct RuleEl r, VEC_T(LABEL_V) *labels, unsigned int *pos, BOOL b)
@@ -1707,6 +1744,7 @@ static int parse_options(int argc, char *argv[])
 
   struct option long_options[] = {
     {"dump", 0, 0, 1000},
+    {"v1", 0, 0, 1002},    /* instruction を出力する命令をはさむ */
     {"help",    0, 0, 1001},
     {0, 0, 0, 0}
   };
@@ -1719,6 +1757,9 @@ static int parse_options(int argc, char *argv[])
       break;
     case 1000:
       dump = TRUE;
+      break;
+    case 1002:
+      verb = 1;
       break;
     case 1001: /* help */ /*FALLTHROUGH*/
     case '?': usage(); break;
@@ -1747,7 +1788,7 @@ int main(int argc, char* argv[])
   optimize(il);
   
   if (dump) {
-    il_dump(il);
+    il_dump(stdout, il);
   } else {
     output_il(il);
   }
