@@ -135,8 +135,8 @@ typedef LmnWord *LmnAtomPtr;
 typedef uint8_t LmnLinkAttr;
 #define LMN_ATOM_LINK_ATTR(X)   ((LmnLinkAttr)(X))
 #define LMN_LINK_ATTR_BYTES     (sizeof(LmnLinkAttr))
-#define LMN_LINK_ATTR_MASK      (0x7f)
-#define LMN_LINK_ATTR_FLAG      (0x80)
+#define LMN_LINK_ATTR_MASK      (0x7fU)
+#define LMN_LINK_ATTR_FLAG      (0x80U)
 
 #if LMN_WORD_BYTES == 4
 #define LMN_WORD_SHIFT 2
@@ -197,7 +197,7 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATTR_IS_DATA(X)           ((X)&~LMN_LINK_ATTR_MASK)
 
 /* set data/link tag to link attribute value */
-#define LMN_ATTR_MAKE_DATA(X)         (0x80|(X))
+#define LMN_ATTR_MAKE_DATA(X)         (0x80U|(X))
 #define LMN_ATTR_MAKE_LINK(X)         (X)
 /* get link attribute value (remove tag) */
 #define LMN_ATTR_GET_VALUE(X)         ((X)&LMN_LINK_ATTR_MASK)

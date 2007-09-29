@@ -20,15 +20,15 @@
  */
 
 #define LOAD_FACTOR 0.75
-#define K 2654435761U
+#define K 2654435761UL
 /* maximum capacity */
-#define MAX_CAP 0x80000000
+#define MAX_CAP 0x80000000UL
 /* 別に最大容量を制限する必要はないが、制限をしない場合は,
    Kが定数なのでインデックスの計算の時に、hash_valを32bitに
    畳み込む必要がある */
 
 #if SIZEOF_LONG == 4
-# define EMPTY_KEY 0xffffffffU
+# define EMPTY_KEY 0xffffffffUL
 #elif SIZEOF_LONG == 8
 # define EMPTY_KEY 0xffffffffffffffffU
 #endif
@@ -46,7 +46,7 @@ void hashtbl_init(SimpleHashtbl *ht, unsigned int init_size)
   ht->num = 0;
   ht->cap = round2up(init_size);
   ht->tbl = (HashEntry *)malloc(sizeof(struct HashEntry) * ht->cap);
-  memset(ht->tbl, 0xff, sizeof(struct HashEntry) * ht->cap);
+  memset(ht->tbl, 0xffU, sizeof(struct HashEntry) * ht->cap);
 }
 
 void hashtbl_destroy(SimpleHashtbl *ht)
@@ -118,7 +118,7 @@ static void hashtbl_extend(SimpleHashtbl *ht)
   tbl = ht->tbl;
   ht->cap <<= 1;
   ht->tbl = (HashEntry *)malloc(sizeof(struct HashEntry) *  ht->cap);
-  memset(ht->tbl, 0xff, sizeof(struct HashEntry) * ht->cap);
+  memset(ht->tbl, 0xffU, sizeof(struct HashEntry) * ht->cap);
 
   for (i = 0; i < cap; i++) {
     if (tbl[i].key != EMPTY_KEY) {
@@ -166,7 +166,7 @@ void hashset_init(HashSet *set, unsigned int init_size)
   set->num = 0;
   set->cap = round2up(init_size);
   set->tbl = (HashKeyType *)malloc(sizeof(HashKeyType) * set->cap);
-  memset(set->tbl, 0xff, sizeof(HashKeyType) * set->cap);
+  memset(set->tbl, 0xffU, sizeof(HashKeyType) * set->cap);
 }
 
 void hashset_destroy(HashSet *set)
@@ -193,7 +193,7 @@ static void hashset_extend(HashSet *set)
   tbl = set->tbl;
   set->cap <<= 1;
   set->tbl = (HashKeyType *)malloc(sizeof(HashKeyType) *  set->cap);
-  memset(set->tbl, 0xff, sizeof(HashKeyType) * set->cap);
+  memset(set->tbl, 0xffU, sizeof(HashKeyType) * set->cap);
 
   for(i = 0; i < cap; i++) {
     if(tbl[i] != EMPTY_KEY) {
