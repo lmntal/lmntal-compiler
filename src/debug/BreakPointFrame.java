@@ -149,12 +149,12 @@ public class BreakPointFrame extends JFrame{
 
 			if(((JButton)e.getSource()).getText().equals(ADD_RULE_NAME)){
 				BreakPoint.addBreakPoint(ruleArea_.getText());
-				breakDetail_.setText(breakDetail_.getText() + "\nADD: rule name \""+ruleArea_.getText()+"\"");
+				breakDetail_.setText(breakDetail_.getText() + "ADD: rule name \""+ruleArea_.getText()+"\""+System.getProperty("line.separator"));
 			}
 			
 			if(((JButton)e.getSource()).getText().equals(REMOVE_RULE_NAME)){
 				BreakPoint.removeBreakPoint(ruleArea_.getText());
-				breakDetail_.setText(breakDetail_.getText() + "\nREMOVE: rule name \""+ruleArea_.getText()+"\"");
+				breakDetail_.setText(breakDetail_.getText() + "REMOVE: rule name \""+ruleArea_.getText()+"\""+System.getProperty("line.separator"));
 			}
 
 		}
