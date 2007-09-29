@@ -232,10 +232,37 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       break;
     case INSTR_INSERTCONNECTORSINNULL:
     {
-      /* TODO めんどくさい */
-      LmnInstrVar seti, listi;
-      LMN_IMS_READ(LmnInstrVar, instr, seti);
-      LMN_IMS_READ(LmnInstrVar, instr, listi);
+        LmnInstrVar seti, num, enti;
+        LmnAtomPtr link1, link2, buddy1, buddy2, ap;
+        Vector *links; /* src list */
+        HashSet *retset = LMN_MALLOC(HashSet); /* dst set */
+        unsigned int i, j;
+        LMN_IMS_READ(LmnInstrVar, instr, seti);
+        LMN_IMS_READ(LmnInstrVar, instr, num);
+
+        links = vec_make(num);
+        for(i = 0; i < num; i++) {
+          LMN_IMS_READ(LmnInstrVar, instr, enti);
+          vec_add(links, (LmnWord)enti);
+        }
+        hashset_init(retset, num);
+        
+        /* main loop */
+        for(i = 0; i < links->num; i++) {
+          for(j = 0; j < links->num; j++) {
+            link1 = (LmnAtomPtr)wt[vec_get(links, i)]; 
+            link2 = (LmnAtomPtr)wt[vec_get(links, j)];
+            buddy1 = LMN_ATOM(LMN_ATOM_GET_LINK(link1, at[vec_get(links, i)]));
+            buddy2 = LMN_ATOM(LMN_ATOM_GET_LINK(link2, at[vec_get(links, i)]));
+            if(link1 == link2 &&  buddy1 == link2) {
+              ap = lmn_new_atom(LMN_UNIFY_FUNCTOR);
+              buddy1 = link2;
+              buddy2 = link1;
+              hashset_add(retset, (LmnWord)ap);
+            }
+          }
+        }
+        wt[seti] = (LmnWord)retset;
       break;
     }
     case INSTR_JUMP:
@@ -842,9 +869,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       int argi;
       Vector *srcvec, *avovec; /* 要素はリンク */
       Vector *roots;
-      HashSet *avoset;
-      HashSet *atoms; /* 走査済みアトム */
-      Stack *links;   /* 再帰用スタック */
+      HashSet *avoset = LMN_MALLOC(HashSet);
+      HashSet *atoms = LMN_MALLOC(HashSet); /* 走査済みアトム */
+      Stack *links = LMN_MALLOC(Stack);   /* 再帰用スタック */
 
       LMN_IMS_READ(LmnInstrVar, instr, funci);
       LMN_IMS_READ(LmnInstrVar, instr, srclisti);
@@ -909,8 +936,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       /* TODO: groundをたどる際にdataアトムを考慮する */
       LmnInstrVar listi, memi;
       Vector *srclinks;
-      Stack *links;
-      HashSet *atoms;
+      Stack *links = LMN_MALLOC(Stack);
+      HashSet *atoms = LMN_MALLOC(HashSet);
       LinkObj *linko, *nextlinko;
       int srci;
       unsigned int i;
@@ -927,7 +954,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       while(!stack_isempty(links)) {
         LmnAtomPtr ap;
         linko = (LinkObj *)stack_pop(links);
-        srci = vec_indexof(srclinks, LMN_ATOM_GET_LINK(ap, i));
+        srci = vec_indexof(srclinks, LMN_ATOM_GET_LINK(linko->ap, linko->pos));
         if(srci >= 0) /* 根に到達 */
           continue;
         if(hashset_contains(atoms, (HashKeyType)linko->ap)) /* 走査済み */
@@ -945,6 +972,17 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         /* アトムは親膜への参照を持たない＆アトムスタックがない */
       }
       /* method: removeGround */
+      lmn_mem_dump(wt[0]);
+      break;
+    }
+    case INSTR_FREEGROUND:
+    {
+      LmnInstrVar listi;
+      LMN_IMS_READ(LmnInstrVar, instr, listi);
+      /* 
+       * Java版では何もしていない
+       * TODO: GC相当の処理はREMOVEGROUNDで行う？
+       */
       break;
     }
     case INSTR_ISUNARY:
@@ -1025,7 +1063,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     {
       LmnInstrVar listi;
       LMN_IMS_READ(LmnInstrVar, instr, listi);
-      REF_CAST(Vector*, wt[listi]) = vec_make_default();
+      wt[listi] = (LmnWord)vec_make_default();
       /* TODO: interpretで再帰して開放する */
       break;
     }
@@ -1284,14 +1322,14 @@ static void print_wt(void)
   fprintf(stderr, " wt: [");
   for (i = 0; i < end; i++) {
     if (i>0) fprintf(stderr, ", ");
-    fprintf(stderr, "%ld", wt[i]);
+    fprintf(stderr, "%lu", wt[i]);
   }
   fprintf(stderr, "]");
   fprintf(stderr, "\n");
   fprintf(stderr, " at: [");
   for (i = 0; i < end; i++) {
     if (i>0) fprintf(stderr, ", ");
-    fprintf(stderr, "%d", at[i]);
+    fprintf(stderr, "%u", at[i]);
   }
   fprintf(stderr, "]");
   fprintf(stderr, "\n");
