@@ -915,6 +915,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         for(i = 0; i < LMN_ATOM_GET_ARITY(ap); i++) {
           if(i == linko->pos) /* 親へのリンク */
             continue;
+          nextlinko = LMN_MALLOC(LinkObj);
           nextlinko->ap = (LmnAtomPtr)LMN_ATOM_GET_LINK(ap, i);
           nextlinko->pos = LMN_ATOM_GET_LINK_ATTR(ap, i);
           stack_push(links, (LmnWord)nextlinko); 
@@ -959,20 +960,21 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           continue;
         if(hashset_contains(atoms, (HashKeyType)linko->ap)) /* 走査済み */
           continue;
-        hashset_add(atoms, (LmnWord)ap);
-        for(i = 0; i < LMN_ATOM_GET_ARITY(ap); i++) {
+        hashset_add(atoms, (LmnWord)linko->ap);
+        for(i = 0; i < LMN_ATOM_GET_ARITY(linko->ap); i++) {
           if(i == linko->pos) /* 親へのリンク */
             continue;
-          nextlinko->ap = (LmnAtomPtr)LMN_ATOM_GET_LINK(ap, i);
-          nextlinko->pos = LMN_ATOM_GET_LINK_ATTR(ap, i);
+          nextlinko = LMN_MALLOC(LinkObj);
+          nextlinko->ap = (LmnAtomPtr)LMN_ATOM_GET_LINK(linko->ap, i);
+          nextlinko->pos = LMN_ATOM_GET_LINK_ATTR(linko->ap, i);
           stack_push(links, (LmnWord)nextlinko); 
         }
-        lmn_mem_remove_atom((LmnMembrane*)wt[memi], ap);
-        lmn_delete_atom(ap);
+        lmn_mem_remove_atom((LmnMembrane*)wt[memi], linko->ap);
+        lmn_delete_atom(linko->ap);
         /* アトムは親膜への参照を持たない＆アトムスタックがない */
       }
       /* method: removeGround */
-      lmn_mem_dump(wt[0]);
+      lmn_mem_dump((LmnMembrane*)wt[0]);
       break;
     }
     case INSTR_FREEGROUND:
