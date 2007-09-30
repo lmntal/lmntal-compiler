@@ -208,6 +208,8 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_PROXY_GET_MEM(PROXY_ATOM)  LMN_ATOM_GET_LINK((PROXY_ATOM), 2)
 #define LMN_PROXY_SET_MEM(PROXY_ATOM,X)  LMN_ATOM_SET_LINK((PROXY_ATOM), 2, (X))
 
+/* print atom name (for debug) */
+#define LMN_ATOM_STR(ATOM) LMN_SYMBOL_STR(LMN_FUNCTOR_NAME_ID(LMN_ATOM_GET_FUNCTOR(ATOM)))
 
 /* special functors */
 
