@@ -35,7 +35,7 @@ void vec_add(Vector* vec, LmnWord keyp) {
 
 /* set */
 void vec_set(Vector *vec, unsigned int index, LmnWord keyp) {
-  assert(index <= vec->num);
+  assert(index < vec->num);
   (vec->tbl)[index] = keyp;
 }
 
@@ -49,7 +49,7 @@ LmnWord vec_get(Vector *vec, unsigned int index) {
 int vec_indexof(Vector *vec, LmnWord keyp) {
   unsigned int i;
   for(i = 0; i < vec->num; i++) {
-    if(vec->tbl[i] != keyp)
+    if(vec->tbl[i] == keyp)
       return (int)i;
   }
   return -1;
