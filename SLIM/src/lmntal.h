@@ -129,6 +129,8 @@ typedef struct LmnMembrane LmnMembrane;
  *  Proxy is implememted as a special atom. The 3rd link is a pointer
  *  to the current membrane.
  */
+/* プロキシの3番目の引数番号の領域を remove_proxy, insert_proxy
+   で利用中 */
 
 typedef LmnWord *LmnAtomPtr;
 
@@ -205,7 +207,8 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATTR_SET_VALUE(PATTR,X)   \
   (*(PATTR)=((((X)&~LMN_LINK_ATTR_MASK))|X))
 
-#define LMN_PROXY_GET_MEM(PROXY_ATOM)  LMN_ATOM_GET_LINK((PROXY_ATOM), 2)
+#define LMN_PROXY_GET_MEM(PROXY_ATOM)  \
+  ((LmnMembrane *)LMN_ATOM_GET_LINK((PROXY_ATOM), 2))
 #define LMN_PROXY_SET_MEM(PROXY_ATOM,X)  LMN_ATOM_SET_LINK((PROXY_ATOM), 2, (X))
 
 /* print atom name (for debug) */
@@ -308,6 +311,7 @@ typedef struct LmnSymbolTable {
 
 extern struct LmnSymbolTable lmn_symbol_table;
 
+#define NULL_STRING_ID 0
 #define LMN_SYMBOL_STR(ID)       (lmn_symbol_table.entry[(ID)])
 
 /* RuleSet Information */
@@ -326,6 +330,7 @@ extern struct LmnRuleSetTable lmn_ruleset_table;
 struct LmnEnv {
   BOOL dev_dump;
   BOOL show_proxy;
+  BOOL show_ruleset;
 };
 
 extern struct LmnEnv  lmn_env;
