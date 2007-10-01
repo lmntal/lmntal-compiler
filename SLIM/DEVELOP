@@ -7,12 +7,19 @@
 時の環境を検査して,適切なMakefileとconfig.hの作成をします。
 autoconfはversion 2.61 でないとコンパイルできません。
 
+** 一番最初にすること
+CVSからチェックアウトした段階ではautomakeに必要なファイルがないので
+configure.acのあるディレクトリで
+  automake --add-missing
+とする。
+
 ** config.h, Makefileを作る
 configure.ac, Makefile.am src/Makefile.am 変更したらconfig.h, Makefile
 を作り直します。
   $ autoreconf
   $./configure
 (autoreconfで警告が出るのですがどうやったら消えるのか..)
+
 ** .cファイルを追加した場合
    src/Makefile.am に追加したファイルを書き加える
 
