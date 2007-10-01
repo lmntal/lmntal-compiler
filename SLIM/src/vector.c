@@ -26,11 +26,11 @@ static void vec_extend(Vector* vec) {
 
 /* add */
 void vec_add(Vector* vec, LmnWord keyp) {
-  (vec->tbl)[vec->num] = keyp;
-  vec->num++;
   if(vec->num == vec->cap) {
     vec_extend(vec);
   }
+  (vec->tbl)[vec->num] = keyp;
+  vec->num++;
 }
 
 /* set */
@@ -55,8 +55,14 @@ int vec_indexof(Vector *vec, LmnWord keyp) {
   return -1;
 }
 
+/* destroy */
+void vec_destroy(Vector *vec) {
+  free(vec->tbl);
+}
+
 /* free */
 void vec_free(Vector *vec) {
   free(vec->tbl);
+  free(vec);
 }
 
