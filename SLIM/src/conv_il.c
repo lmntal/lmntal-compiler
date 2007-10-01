@@ -403,7 +403,6 @@ struct SymbolEntry {
 
 VEC_DEF(struct SymbolEntry, SYMBOL_ENTRY_V);
 VEC_T(SYMBOL_ENTRY_V) symbols;
-#define NULL_STRING_ID 0
 static unsigned int symbol_id = 1;
 
 static void symbol_entry_free(struct SymbolEntry e)
@@ -435,14 +434,17 @@ static lmn_interned_str get_symbol_id(char *str)
 VEC_DEF(struct SymbolFunctor, FUNCTOR_ENTRY_V);
 VEC_T(FUNCTOR_ENTRY_V) functors;
 unsigned int func_id; /* initで設定 */
-
+unsigned int min_func_id; /* 通常のアトムのファンクタIDの最小値 */
 
 static LmnFunctor get_functor_id(struct Functor f)
 {
   unsigned int i;
 
+  if (f.type == IN_PROXY)return LMN_IN_PROXY_FUNCTOR;
+  if (f.type == OUT_PROXY) return LMN_OUT_PROXY_FUNCTOR;
+
   /* TODO 効率的な実装が必要 */
-  for (i = 0; i < functors.num; i++) {
+  for (i = min_func_id; i < functors.num; i++) {
     struct SymbolFunctor e = *VEC_REF(functors, i);
     if (e.module_id == f.v.sym_atom.module_id &&
         e.symbol_id == f.v.sym_atom.symbol_id &&
@@ -817,7 +819,8 @@ static char *parse_typed_arg(enum ArgType type, char *line, void **ret)
     if (!strncmp(line, "null", 4)) {
       *(ID_T*)*ret = NULL_STRING_ID;
       line += 4;
-    } else {
+    }
+    else {
       line = read_string(line, &n);
       *(ID_T*)*ret = n;
     }
@@ -1259,7 +1262,7 @@ static BOOL is_not_allowed(struct Instruction *instr)
 static BOOL is_unused(struct Instruction *instr)
 {
   if (instr->id == INSTR_REMOVEATOM) {
-    struct Functor *a = ((struct Functor *)instr->args[2].v);
+    struct Functor *a = ((struct Functor *)(instr->args[2]).v);
     if (a->type != SYMBOL) return TRUE;
   }
 
@@ -1269,6 +1272,20 @@ static BOOL is_unused(struct Instruction *instr)
 static void optimize_instrs(VEC_T(INSTR_V) *v)
 {
   int i;
+
+
+  for (i = v->num-1; i >= 0; i--) {
+    struct Instruction *instr = VEC_REF(*v, i);
+    if (is_unused(instr)) {
+      VEC_REMOVE(v, (unsigned int)i);
+    }
+    if (is_not_allowed(instr)) {
+      fprintf(stderr, "Instruction: ");
+      instr_dump(stderr, *instr);
+      fprintf(stderr, "not allowed\n");
+      exit(1);
+    }
+  }
 
   for (i = v->num-1; i >= 0; i--) {
     struct Instruction *instr = VEC_REF(*v, i);
@@ -1291,16 +1308,6 @@ static void optimize_instrs(VEC_T(INSTR_V) *v)
         VEC_T(INSTR_V) *instrs = (VEC_T(INSTR_V)*)instr->args[0].v;
         optimize_instrs(instrs);
       }
-    }
-
-    if (is_unused(instr)) {
-      VEC_REMOVE(v, (unsigned int)i);
-    }
-    if (is_not_allowed(instr)) {
-      fprintf(stderr, "Instruction: ");
-      instr_dump(stderr, *instr);
-      fprintf(stderr, "not allowed\n");
-      exit(1);
     }
   }
 }
@@ -1567,6 +1574,9 @@ static void output_arg(struct InstrArg a, VEC_T(LABEL_V) *labels, unsigned int *
   }
 }
 
+/* これがないと警告が出る */
+FILE *fdopen(int, const char *);
+
 static void output_instr(struct Instruction *instr,
                          VEC_T(LABEL_V) *labels,
                          unsigned int *pos,
@@ -1711,11 +1721,14 @@ static void add_functors(int functor_id,
 
 static void init_functors(void)
 {
+  /* ファンクタIDと整合させるために事前に登録しておく */
   add_functors(LMN_IN_PROXY_FUNCTOR, 0, "$in", 3);
   add_functors(LMN_OUT_PROXY_FUNCTOR, 0, "$out", 3);
+  min_func_id = 2; /* ファンクタ以外は通常のアトム */
   add_functors(LMN_LIST_FUNCTOR, 0, ".", 3);
   add_functors(LMN_NIL_FUNCTOR, 0, "[]", 1);
-  func_id = 4;
+  add_functors(LMN_UNIFY_FUNCTOR, 0, "=", 2);
+  func_id = 5;
 }
 
 static void init(void)
