@@ -210,7 +210,7 @@ void hashset_add(HashSet* set, HashKeyType key) {
   assert(key != EMPTY_KEY);
 #endif  
   entry = hashset_get_p(set, key);
-  if(key == EMPTY_KEY) {
+  if(*entry == EMPTY_KEY) {
     set->num++;
     *entry = key;
   }
