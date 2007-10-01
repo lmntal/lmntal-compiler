@@ -20,6 +20,7 @@ LMN_EXTERN void vec_add(Vector* vec, LmnWord keyp);
 LMN_EXTERN void vec_set(Vector* vec, unsigned int index, LmnWord keyp);
 LMN_EXTERN LmnWord vec_get(Vector *vec, unsigned int index);
 LMN_EXTERN int vec_indexof(Vector *vec, LmnWord keyp);
+LMN_EXTERN void vec_destroy(Vector *vec);
 LMN_EXTERN void vec_free(Vector *vec);
 
 #endif /* LMN_VECTOR_H */
