@@ -35,7 +35,7 @@ typedef struct AtomSetEntry {
 
 LMN_EXTERN LmnMembrane *lmn_mem_make(void);
 LMN_EXTERN void lmn_mem_free(LmnMembrane *mem);
-LMN_EXTERN void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem);
+LMN_EXTERN void lmn_mem_add_child_mem(LmnMembrane *parentmem, LmnMembrane *newmem);
 LMN_EXTERN void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap);
 
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
@@ -69,6 +69,7 @@ LMN_EXTERN void lmn_mem_relink_atom_args(LmnMembrane *mem,
                                          LmnWord atom1,
                                          LmnLinkAttr attr1,
                                          int pos1);
+LMN_EXTERN void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem);
 LMN_EXTERN void lmn_mem_remove_proxies(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem);
 /* LmnAtomPtr* lmn_atomset_end(AtomSetEntry * ent); */

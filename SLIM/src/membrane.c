@@ -20,6 +20,14 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 /*   return entry->head == (LmnAtomPtr)entry; */
 /* } */
 
+static AtomSetEntry *make_atomlist()
+{
+  AtomSetEntry *as = LMN_MALLOC(struct AtomSetEntry);
+  LMN_ATOM_SET_PREV(as, as);
+  LMN_ATOM_SET_NEXT(as, as);
+  return as;
+}
+
 void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
 {
   AtomSetEntry *as;
@@ -27,9 +35,7 @@ void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
   
   as = (AtomSetEntry *)hashtbl_get_default(&mem->atomset, f, 0);
   if (!as) {
-    as = LMN_MALLOC(struct AtomSetEntry);
-    LMN_ATOM_SET_PREV(as, as);
-    LMN_ATOM_SET_NEXT(as, as);
+    as = make_atomlist();
     hashtbl_put(&mem->atomset, LMN_ATOM_GET_FUNCTOR(ap), (HashKeyType)as);
   }
 
@@ -46,7 +52,7 @@ static inline void append_atomlist(AtomSetEntry *e1, AtomSetEntry *e2)
 {
   LMN_ATOM_SET_NEXT(e1->tail, e2->head);
   e1->tail = e2->tail;
-} 
+}
 
 void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
 {
@@ -89,13 +95,23 @@ void lmn_mem_free(LmnMembrane *mem)
   LMN_FREE(mem);
 }
 
-void lmn_mem_push_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
+/* add newmem to parent chid membranes */
+void lmn_mem_add_child_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
 {
   /* TODO: membrane activation */
   newmem->next = parentmem->child_head;
   newmem->parent = parentmem;
   if(parentmem->child_head) parentmem->child_head->prev = newmem;
   parentmem->child_head = newmem;
+}
+
+/* newmemから始まる膜のリスト(newmem, newmem->next, ...)の膜全てを
+   parentmemの子膜に追加*/
+static void lmn_mem_add_chid_mem_all(LmnMembrane *parentmem, LmnMembrane *newmem)
+{
+  for (; newmem; newmem = newmem->next) {
+    lmn_mem_add_child_mem(parentmem, newmem);
+  }
 }
 
 /* return NULL when atomlist don't exists. */
@@ -253,11 +269,26 @@ void lmn_mem_relink_atom_args(LmnMembrane *mem,
   }
 }
                               
-
-void lmn_mem_movecells(LmnMembrane *destmem, LmnMembrane *srcmem)
+void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
 {
-  /* concatenate atomlist */
-  
+  /* move atoms */
+  {
+    HashIterator iter;
+
+    for (iter = hashtbl_iterator(&srcmem->atomset);
+         !hashiter_isend(&iter);
+         hashiter_next(&iter)) {
+      LmnFunctor f = (LmnFunctor)hashiter_entry(&iter).key;
+      AtomSetEntry *srcent = (AtomSetEntry *)hashiter_entry(&iter).data;
+      AtomSetEntry *destent = lmn_mem_get_atomlist(destmem, f);
+      hashiter_entry(&iter).data = 0;
+      if (destent) append_atomlist(destent, srcent);
+      else hashtbl_put(&destmem->atomset, (HashKeyType)f, (HashValueType)srcent);
+    }
+  }
+
+  /* move membranes */
+  lmn_mem_add_chid_mem_all(destmem, srcmem->child_head);
 }
 
 #define REMOVE 1U
@@ -339,6 +370,8 @@ void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem)
   ent = (AtomSetEntry *)hashtbl_get_default(&child_mem->atomset,
                                             LMN_OUT_PROXY_FUNCTOR,
                                             0);
+  if (!ent) return;
+  
   vec_init(&remove_list, 16);
 
   for (star = atomlist_head(ent);

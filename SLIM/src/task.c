@@ -678,7 +678,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, memf);
 
       mp = lmn_mem_make(); /*lmn_new_mem(memf);*/
-      lmn_mem_push_mem((LmnMembrane*)wt[parentmemi], mp);
+      lmn_mem_add_child_mem((LmnMembrane*)wt[parentmemi], mp);
       REF_CAST(LmnMembrane*, wt[newmemi]) = mp;
       memstack_push(mp);
       break;
@@ -1371,8 +1371,19 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     }
     case INSTR_REMOVEPROXIES:
     {
-      /* TODO: Ì¤¼ÂÁõ */
-      LMN_ASSERT(FALSE);
+      LmnInstrVar memi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      lmn_mem_remove_proxies((LmnMembrane *)wt[memi]);
+      break;
+    }
+    case INSTR_INSERTPROXIES:
+    {
+      LmnInstrVar parentmemi, childmemi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, parentmemi);
+      LMN_IMS_READ(LmnInstrVar, instr, childmemi);
+      lmn_mem_insert_proxies((LmnMembrane *)wt[parentmemi], (LmnMembrane *)wt[childmemi]);
       break;
     }
     case INSTR_DEREFFUNC:
@@ -1420,6 +1431,15 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
       lmn_mem_push_atom((LmnMembrane *)wt[memi], LMN_ATOM(wt[atomi]));
+      break;
+    }
+    case INSTR_MOVECELLS:
+    {
+      LmnInstrVar destmemi, srcmemi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, destmemi);
+      LMN_IMS_READ(LmnInstrVar, instr, srcmemi);
+      lmn_mem_move_cells((LmnMembrane *)wt[destmemi], (LmnMembrane *)wt[srcmemi]);
       break;
     }
     default:
