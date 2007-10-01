@@ -30,7 +30,7 @@
 #if SIZEOF_LONG == 4
 # define EMPTY_KEY 0xffffffffUL
 #elif SIZEOF_LONG == 8
-# define EMPTY_KEY 0xffffffffffffffffU
+# define EMPTY_KEY 0xffffffffffffffffUL
 #endif
 
 #define INT_HASH(val)  ((val)*K)
@@ -185,7 +185,7 @@ static void hashset_extend(HashSet *set)
   unsigned int i, cap;
 
   if (set->cap == MAX_CAP) {
-    fprintf(stderr, "hashtable capacity overflow\n");
+    fprintf(stderr, "hashset capacity overflow\n");
     exit(1);
   }
   
