@@ -365,6 +365,9 @@ static void lmn_mem_dump_internal(LmnMembrane *mem,
                                   struct DumpState *s,
                                   int indent)
 {
+  if (mem->name != NULL_STRING_ID) {
+    fprintf(stdout, "%s", LMN_SYMBOL_STR(mem->name));
+  }
   fprintf(stdout, "{");
   lmn_dump_cell_internal(mem, ht, s, indent);
   fprintf(stdout, "}");
