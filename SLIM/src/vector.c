@@ -35,7 +35,10 @@ void vec_push(Vector* vec, LmnWord keyp) {
 
 /* pop */
 LmnWord vec_pop(Vector *vec) {
-  /* TODO: 要素が少なくなったらreallocする */
+  if(vec->num <= vec->cap/2) {
+    vec->cap /= 2;
+    vec->tbl = LMN_REALLOC(LmnWord, vec_tbl, vec->cap);
+  }
   return vec_get(vec, --(vec->num));
 }
 
