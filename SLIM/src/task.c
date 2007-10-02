@@ -344,7 +344,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         atomlist_ent = lmn_mem_get_atomlist((LmnMembrane*)wt[memi], f);
         if (atomlist_ent) {
           at[atomi] = LMN_ATTR_MAKE_LINK(0);
-          for (atom = atomlist_ent->head;
+          for (atom = atomlist_head(atomlist_ent);
                atom != lmn_atomset_end(atomlist_ent);
                atom = LMN_ATOM_GET_NEXT(atom)) {
             REF_CAST(LmnAtomPtr, wt[atomi]) = atom;
@@ -674,11 +674,12 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       instr += sizeof(LmnInstrVar); /* ingnore parent */
-
+      
       mp = (LmnMembrane*)wt[memi];
       if(mp->parent->child_head == mp) mp->parent->child_head = mp->next;
       if(mp->prev) mp->prev->next = mp->next;
       if(mp->next) mp->next->prev = mp->prev;
+      mp->parent = NULL;
       break;
     }
     case INSTR_FREEMEM:
@@ -1358,6 +1359,14 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       lmn_mem_insert_proxies((LmnMembrane *)wt[parentmemi], (LmnMembrane *)wt[childmemi]);
       break;
     }
+    case INSTR_REMOVETOPLEVELPROXIES:
+    {
+      LmnInstrVar memi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      lmn_mem_remove_toplevel_proxies((LmnMembrane *)wt[memi]);
+      break;
+    }
     case INSTR_DEREFFUNC:
     {
       LmnInstrVar funci, atomi, pos;
@@ -1412,6 +1421,24 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, destmemi);
       LMN_IMS_READ(LmnInstrVar, instr, srcmemi);
       lmn_mem_move_cells((LmnMembrane *)wt[destmemi], (LmnMembrane *)wt[srcmemi]);
+      break;
+    }
+    case INSTR_REMOVETEMPORARYPROXIES:
+    {
+      LmnInstrVar memi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      lmn_mem_remove_temporary_proxies((LmnMembrane *)wt[memi]);
+      break;
+    }
+    case INSTR_NFREELINKS:
+    {
+      LmnInstrVar memi, count;
+
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      LMN_IMS_READ(LmnInstrVar, instr, count);
+
+      if (!lmn_mem_nfreelinks((LmnMembrane *)wt[memi], count)) return FALSE;
       break;
     }
     default:
