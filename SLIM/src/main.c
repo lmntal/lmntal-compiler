@@ -86,14 +86,15 @@ static void init_internal(void)
 
 static void finalize(void)
 {
-  if (lmn_functor_table.size > 0) LMN_FREE(lmn_functor_table.entry);
-  if (lmn_symbol_table.size > 0) {
-    unsigned int i;
-    for (i = 0; i < lmn_symbol_table.size; i++) {
-      LMN_FREE(lmn_symbol_table.entry[i]);
-    }
-    LMN_FREE(lmn_symbol_table.entry);
-  }
+  unread_il();
+/*   if (lmn_functor_table.size > 0) LMN_FREE(lmn_functor_table.entry); */
+/*   if (lmn_symbol_table.size > 0) { */
+/*     unsigned int i; */
+/*     for (i = 0; i < lmn_symbol_table.size; i++) { */
+/*       LMN_FREE(lmn_symbol_table.entry[i]); */
+/*     } */
+/*     LMN_FREE(lmn_symbol_table.entry); */
+/*   } */
 }
 
 #ifdef DEBUG

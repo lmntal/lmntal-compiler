@@ -283,6 +283,7 @@ LMN_EXTERN void lmn_fatal(const char *msg, ...);
 
 /* load input program file */
 void read_il(const char *file_name);
+void unread_il(void);
 
 /* Functor Information */
 
