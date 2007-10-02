@@ -8,7 +8,7 @@
 
 void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 {
-  vec_add(&mem->rulesets, (LmnWord)ruleset);
+  vec_push(&mem->rulesets, (LmnWord)ruleset);
 }
 
 /*----------------------------------------------------------------------
@@ -332,7 +332,7 @@ void lmn_mem_remove_proxies(LmnMembrane *mem)
                                 (LmnWord)a1,
                                 LMN_ATTR_MAKE_LINK(0));
         SET_STATE(opxy, REMOVE);
-        vec_add(&remove_list, (LmnWord)opxy);
+        vec_push(&remove_list, (LmnWord)opxy);
         lmn_mem_remove_atom(mem, a1);
         lmn_delete_atom(a1);
       }
@@ -343,8 +343,8 @@ void lmn_mem_remove_proxies(LmnMembrane *mem)
           lmn_mem_unify_atom_args(mem, (LmnWord)opxy, 0, (LmnWord)a1, 0);
           LMN_ATOM_SET_LINK_ATTR(opxy, 2, REMOVE);
           LMN_ATOM_SET_LINK_ATTR(a1, 2, REMOVE);
-          vec_add(&remove_list, (LmnWord)opxy);
-          vec_add(&remove_list, (LmnWord)a1);
+          vec_push(&remove_list, (LmnWord)opxy);
+          vec_push(&remove_list, (LmnWord)a1);
         } else {
           SET_STATE(opxy, STAR);
         }

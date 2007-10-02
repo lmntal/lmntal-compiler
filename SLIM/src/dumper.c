@@ -405,28 +405,28 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
       int arity = LMN_ATOM_GET_ARITY(atom);
       if (f == LMN_IN_PROXY_FUNCTOR ||
           f == LMN_OUT_PROXY_FUNCTOR) {
-        vec_add(&pred_atoms[PROXY], (LmnWord)atom);
+        vec_push(&pred_atoms[PROXY], (LmnWord)atom);
       }
       /* 0 argument atom */
       else if (arity == 0) { 
-        vec_add(&pred_atoms[P0], (LmnWord)atom);
+        vec_push(&pred_atoms[P0], (LmnWord)atom);
       }
       /* 1 argument, link to the last argument */
       else if (arity == 1 &&
                (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ||
                 (int)LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ==
                 LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, 0)) - 1)) {
-        vec_add(&pred_atoms[P1], (LmnWord)atom);
+        vec_push(&pred_atoms[P1], (LmnWord)atom);
       }
       /* link to the last argument */
       else if (arity > 1 &&
                (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ||
                 (int)LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ==
                 LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, arity-1)) - 1)) {
-        vec_add(&pred_atoms[P2], (LmnWord)atom);
+        vec_push(&pred_atoms[P2], (LmnWord)atom);
       }
       else {
-        vec_add(&pred_atoms[P3], (LmnWord)atom);
+        vec_push(&pred_atoms[P3], (LmnWord)atom);
       }
     }
   }

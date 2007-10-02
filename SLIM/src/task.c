@@ -307,7 +307,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         links = vec_make(num);
         for(i = 0; i < num; i++) {
           LMN_IMS_READ(LmnInstrVar, instr, enti);
-          vec_add(links, (LmnWord)enti);
+          vec_push(links, (LmnWord)enti);
         }
         hashset_init(retset, num);
         
@@ -899,10 +899,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 	o->ap = LMN_ATOM_GET_LINK(src->ap, src->pos);
 	o->pos = LMN_ATOM_GET_LINK_ATTR(src->ap, src->pos);
 	printf("%p %d\n", o->ap, o->pos);
-	vec_add(&rootvec, (HashKeyType)o);
+	vec_push(&rootvec, (HashKeyType)o);
       }
       for(i = 0; i < srcvec->num; i++) {
-        vec_add(&visited_root, FALSE);
+        vec_push(&visited_root, FALSE);
       }
 
       /*  vec_set(&visited_root, 0, TRUE); */
@@ -1148,7 +1148,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       /* おそらくADDTOLISTで追加される要素の種類はリンクのみ */
       linko->ap = wt[srci];
       linko->pos = (at[srci]);
-      vec_add((Vector*)wt[listi], (LmnWord)linko);
+      vec_push((Vector*)wt[listi], (LmnWord)linko);
       break;
     }
     case INSTR_IADD:
