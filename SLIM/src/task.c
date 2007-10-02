@@ -105,65 +105,6 @@ static LmnAtomPtr get_buddy(LinkObj *linko) {
   return (LmnAtomPtr)LMN_ATOM_GET_LINK(linko->ap, linko->pos);
 }
 
-/*
- * ground検査で再帰除去のため必要になったstack
- * とりあえずここに作ったけどどうしよう。
- */
-typedef struct StackEntity StackEntity;
-struct StackEntity {
-  LmnWord keyp;
-  StackEntity *next;
-};
-
-typedef struct Stack {
-  StackEntity *head, *tail;
-} Stack;
-
-static void stack_init(Stack *stack)
-{
-  stack->head = LMN_MALLOC(StackEntity);
-  stack->head->next = NULL;
-  stack->head->keyp = 0; /* TODO: これでいいのか…？ */
-  stack->tail = stack->head;
-}
-
-static void stack_push(Stack* stack, LmnWord keyp)
-{
-  StackEntity *ent = LMN_MALLOC(StackEntity);
-  ent->keyp = keyp;
-  ent->next = stack->head->next;
-  stack->head->next = ent;
-}
-
-static int stack_isempty(Stack* stack)
-{
-  return stack->head->next==NULL;
-}
-
-static LmnWord stack_pop(Stack *stack)
-{
-  StackEntity *ent = stack->head->next;
-  LmnWord keyp = ent->keyp;
-  stack->head->next = ent->next;
-  LMN_FREE(ent);
-  return keyp;
-}
-
-static LmnWord stack_peek(Stack *stack)
-{
-  return stack->head->next->keyp;
-}
-
-static void stack_printall(Stack *stack)
-{
-  StackEntity *ent;
-  for(ent = stack->head; ent!=NULL; ent = ent->next){
-    printf("%lu ", ent->keyp);
-  }
-  printf("\n");
-}
-/* Stackここまで */
-
 static int exec(LmnMembrane *mem)
 {
   unsigned int i;
@@ -872,83 +813,74 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       unsigned int i, atom_num;
       Vector *srcvec, *avovec, rootvec; /* 要素はリンク */
       Vector visited_root;
-      HashSet *avoset = LMN_MALLOC(HashSet);
-      HashSet visited_atoms; /* 走査済みアトム */
-      Stack *links = LMN_MALLOC(Stack);   /* 再帰用スタック */
+      Vector links;           /* 再帰用スタック */
+      HashSet avoset;
+      HashSet visited_atoms;  /* 走査済みアトム */
 
       LMN_IMS_READ(LmnInstrVar, instr, funci);
       LMN_IMS_READ(LmnInstrVar, instr, srclisti);
       LMN_IMS_READ(LmnInstrVar, instr, avolisti);
 
       srcvec = (Vector*) wt[srclisti];
+      
       avovec = (Vector*) wt[avolisti];
-      hashset_init(avoset, 16);
+      hashset_init(&avoset, 16);
       for(i = 0; i < avovec->num; i++) {
-        hashset_add(avoset, vec_get(avovec, i));
+        hashset_add(&avoset, vec_get(avovec, i));
       }
 
       hashset_init(&visited_atoms, 256);
-      stack_init(links);
-      stack_push(links, (LmnWord)vec_get(srcvec, 0));
-      atom_num = 0;
+      vec_init(&links, 16);
+      vec_push(&links, (LmnWord)vec_get(srcvec, 0));
       vec_init(&rootvec, 16);
       vec_init(&visited_root, 16);
+      atom_num = 0;
+
       for (i = 0; i < srcvec->num; i++) {
-	LinkObj *o = LMN_MALLOC(LinkObj);
-	LinkObj *src = (LinkObj *)vec_get(srcvec, i);
-	o->ap = LMN_ATOM_GET_LINK(src->ap, src->pos);
-	o->pos = LMN_ATOM_GET_LINK_ATTR(src->ap, src->pos);
-	printf("%p %d\n", o->ap, o->pos);
-	vec_push(&rootvec, (HashKeyType)o);
+        LinkObj *o = LMN_MALLOC(LinkObj);
+        LinkObj *src = (LinkObj *)vec_get(srcvec, i);
+        o->ap = LMN_ATOM_GET_LINK(src->ap, src->pos);
+        o->pos = LMN_ATOM_GET_LINK_ATTR(src->ap, src->pos);
+        vec_push(&rootvec, (HashKeyType)o);
       }
+
       for(i = 0; i < srcvec->num; i++) {
         vec_push(&visited_root, FALSE);
       }
 
-      /*  vec_set(&visited_root, 0, TRUE); */
-
       /* method: isGround */
-      while(!stack_isempty(links)) {
-	int argi;
-        LinkObj *linko = (LinkObj *)stack_pop(links);
+      while(links.num!=0) {
+        LinkObj *linko = (LinkObj *)vec_pop(&links);
 
-	printf("pop0 %p %d\n", linko->ap, linko->pos);
-	for(i = 0; i < rootvec.num; i++) {
-	  LinkObj *o = vec_get(&rootvec, i);
-	  printf("cmp %p %d\n", o->ap, o->pos);
-	  if (linko->ap == o->ap &&
-	      linko->pos == o->pos) {
-	    vec_set(&visited_root, i, TRUE);
-	    continue;
-	  }
-	}
+	      for(i = 0; i < rootvec.num; i++) {
+          LinkObj *o = vec_get(&rootvec, i);
+          if (linko->ap == o->ap && linko->pos == o->pos) {
+            vec_set(&visited_root, i, TRUE);
+            /*continue;*/
+            goto NEXT;
+	        }
+	      }
 
-	printf("pop %p %d\n", linko->ap, linko->pos);
-        if(hashset_contains(&visited_atoms, (HashKeyType)linko->ap)) { /* 走査済みアトム */ 
-	  printf("contain %p\n", linko->ap);
+        if(hashset_contains(&visited_atoms, (HashKeyType)linko->ap)) /* 走査済みアトム */ 
           continue;
-	}
-        if(hashset_contains(avoset, (LmnWord)get_buddy(linko))) /* 出現禁止リンク */
+        if(hashset_contains(&avoset, (LmnWord)get_buddy(linko))) /* 出現禁止リンク */
           return FALSE;
-
         if(LMN_ATOM_GET_FUNCTOR(linko->ap) == LMN_IN_PROXY_FUNCTOR) /* 膜を横断 */
           return FALSE;
+
         atom_num++;
         hashset_add(&visited_atoms, (LmnWord)linko->ap);
-	printf("add %p\n", linko->ap);
         for(i = 0; i < LMN_ATOM_GET_ARITY(linko->ap); i++) {
-	  LinkObj *nextlinko;
-
+          LinkObj *nextlinko;
           nextlinko = LMN_MALLOC(LinkObj);
           nextlinko->ap = (LmnAtomPtr)LMN_ATOM_GET_LINK(linko->ap, i);
           nextlinko->pos = LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(linko->ap, i));
-          stack_push(links, (LmnWord)nextlinko); 
+          vec_push(&links, (LmnWord)nextlinko); 
         }
       NEXT:;
       } /* while stack */
 
       for(i = 0; i < visited_root.num; i++) {
-	printf("%d %p %d\n", i, ((LinkObj *)vec_get(&rootvec, i))->ap, vec_get(&visited_root, i));
         if(!vec_get(&visited_root, i)) return FALSE;
       }
       /* method: isGround */
@@ -958,12 +890,44 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       printf("instr_isground: success\n");
       break;
     }
+    case INSTR_COPYGROUND: {
+      int i;
+      LmnInstrVar dstlist, srclist, memi;
+      Vector *srcvec;
+      Vector stack;
+      SimpleHashtbl atoms;
+      
+      LMN_IMS_READ(LmnInstrVar, instr, dstlist);
+      LMN_IMS_READ(LmnInstrVar, instr, srclist);
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+
+      srcvec = (Vector *)wt[srclist];
+
+      vec_init(&stack, 16);
+      hashtbl_init(&atoms, 256);
+      while(stack.num!=0) {
+        LinkObj *lo = vec_pop(&stack);
+        
+        /* indexof */
+        for(i = 0; i < srcvec->num; i++){
+          LinkObj *tmp = (LinkObj *)vec_get(srcvec, i);
+          if(lo->ap == tmp->ap && lo->pos == tmp->pos) goto CONT;
+        }
+
+        if(hashtbl_contains(&atoms, (HashKeyType)lo->ap)) {
+        } else {
+          
+        }
+        CONT:;
+      }
+      break;
+    }
     case INSTR_REMOVEGROUND:
     {
       /* TODO: groundをたどる際にdataアトムを考慮する */
       LmnInstrVar listi, memi;
       Vector *srclinks;
-      Stack *links = LMN_MALLOC(Stack);
+      Vector links;
       HashSet *atoms = LMN_MALLOC(HashSet);
       LinkObj *linko, *nextlinko;
       int srci;
@@ -973,14 +937,14 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       srclinks = (Vector *)wt[listi];
 
-      stack_init(links);
-      stack_push(links, vec_get(srclinks, 0));
+      vec_init(&links, 16);
+      vec_push(&links, vec_get(srclinks, 0));
       hashset_init(atoms, 256);
       
       /* method: removeGround */
-      while(!stack_isempty(links)) {
+      while(links.num!=0) {
         LmnAtomPtr ap;
-        linko = (LinkObj *)stack_pop(links);
+        linko = (LinkObj *)vec_pop(&links);
         srci = vec_indexof(srclinks, LMN_ATOM_GET_LINK(linko->ap, linko->pos));
         if(srci >= 0) /* 根に到達 */
           continue;
@@ -993,7 +957,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           nextlinko = LMN_MALLOC(LinkObj);
           nextlinko->ap = (LmnAtomPtr)LMN_ATOM_GET_LINK(linko->ap, i);
           nextlinko->pos = LMN_ATOM_GET_LINK_ATTR(linko->ap, i);
-          stack_push(links, (LmnWord)nextlinko); 
+          vec_push(&links, (LmnWord)nextlinko); 
         }
         lmn_mem_remove_atom((LmnMembrane*)wt[memi], linko->ap);
         lmn_delete_atom(linko->ap);
