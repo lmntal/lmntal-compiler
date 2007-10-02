@@ -35,11 +35,14 @@ void vec_push(Vector* vec, LmnWord keyp) {
 
 /* pop */
 LmnWord vec_pop(Vector *vec) {
+  LmnWord ret;
   if(vec->num <= vec->cap/2) {
     vec->cap /= 2;
     vec->tbl = LMN_REALLOC(LmnWord, vec->tbl, vec->cap);
   }
-  return vec_get(vec, --(vec->num));
+  ret = vec_get(vec, (vec->num-1));
+  vec->num--;
+  return ret;
 }
 
 /* set */
