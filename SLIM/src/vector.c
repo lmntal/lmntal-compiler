@@ -37,7 +37,7 @@ void vec_push(Vector* vec, LmnWord keyp) {
 LmnWord vec_pop(Vector *vec) {
   if(vec->num <= vec->cap/2) {
     vec->cap /= 2;
-    vec->tbl = LMN_REALLOC(LmnWord, vec_tbl, vec->cap);
+    vec->tbl = LMN_REALLOC(LmnWord, vec->tbl, vec->cap);
   }
   return vec_get(vec, --(vec->num));
 }
