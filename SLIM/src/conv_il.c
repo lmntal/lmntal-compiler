@@ -110,10 +110,9 @@ struct InstrSpec {
     {"dereflink", INSTR_DEREFLINK, {InstrVar, InstrVar, InstrVar, 0}},
     {"findatom", INSTR_FINDATOM, {InstrVar, InstrVar, Functor, 0}},
 
-    /* lockmem unused */
     {"lockmem", INSTR_LOCKMEM, {InstrVar, InstrVar, NameString, 0}},
     {"anymem", INSTR_ANYMEM, {InstrVar, InstrVar, InstrVar, NameString, 0}},
-    /* lock unused */
+
     {"getmem", INSTR_GETMEM, {InstrVar, InstrVar, InstrVar, NameString, 0}},
     {"getparent", INSTR_GETPARENT, {InstrVar, InstrVar, 0}},
 
@@ -1267,6 +1266,8 @@ static BOOL is_unused(struct Instruction *instr)
     if (a->type != SYMBOL) return TRUE;
   }
 
+  if (instr->id == INSTR_RECURSIVELOCK) return TRUE;
+  if (instr->id == INSTR_RECURSIVEUNLOCK) return TRUE;
   return FALSE;
 }
 
@@ -1725,7 +1726,7 @@ static void init_functors(void)
   /* ファンクタIDと整合させるために事前に登録しておく */
   add_functors(LMN_IN_PROXY_FUNCTOR, 0, "$in", 3);
   add_functors(LMN_OUT_PROXY_FUNCTOR, 0, "$out", 3);
-  min_func_id = 2; /* ファンクタ以外は通常のアトム */
+  min_func_id = 2; /* プロキシ以外は通常のアトム */
   add_functors(LMN_LIST_FUNCTOR, 0, ".", 3);
   add_functors(LMN_NIL_FUNCTOR, 0, "[]", 1);
   add_functors(LMN_UNIFY_FUNCTOR, 0, "=", 2);
