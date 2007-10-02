@@ -209,6 +209,7 @@ struct InstrSpec {
     {"group", INSTR_GROUP, {InstrList, 0}},
 
     /* guard */
+    {"copyground", INSTR_COPYGROUND, {InstrVar, InstrVar, InstrVar, 0}},
     {"removeground", INSTR_REMOVEGROUND, {InstrVar, InstrVar, 0}},
     {"freeground", INSTR_FREEGROUND, {InstrVar, 0}},
     {"isground", INSTR_ISGROUND, {InstrVar, InstrVar, InstrVar, 0}},
