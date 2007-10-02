@@ -24,13 +24,19 @@ static void vec_extend(Vector* vec) {
   vec->tbl = LMN_REALLOC(LmnWord, vec->tbl, vec->cap);
 }
 
-/* add */
-void vec_add(Vector* vec, LmnWord keyp) {
+/* push */
+void vec_push(Vector* vec, LmnWord keyp) {
   if(vec->num == vec->cap) {
     vec_extend(vec);
   }
   (vec->tbl)[vec->num] = keyp;
   vec->num++;
+}
+
+/* pop */
+LmnWord vec_pop(Vector *vec) {
+  /* TODO: 要素が少なくなったらreallocする */
+  return vec_get(vec, --(vec->num));
 }
 
 /* set */
