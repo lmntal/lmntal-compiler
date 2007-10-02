@@ -24,9 +24,9 @@ struct LmnMembrane {
   lmn_interned_str name;
 };
 
-/* TODO: åå‰ã‚’AtomListã«å¤‰æ›´ */
-/* ã“ã®æ§‹é€ ä½“ã‚’Atomã¨ã—ã¦æ‰±ã†ã“ã¨ã§,ã“ã®æ§‹é€ ä½“è‡ªèº«ãŒ
-   Headã¨Tailã®ä¸¡æ–¹ã®å½¹ç›®ã‚’æœãŸã—ã¦ã„ã‚‹ */
+/* TODO: Ì¾Á°¤òAtomList¤ËÊÑ¹¹ */
+/* ¤³¤Î¹½Â¤ÂÎ¤òAtom¤È¤·¤Æ°·¤¦¤³¤È¤Ç,¤³¤Î¹½Â¤ÂÎ¼«¿È¤¬
+   Head¤ÈTail¤ÎÎ¾Êı¤ÎÌòÌÜ¤ò²Ì¤¿¤·¤Æ¤¤¤ë */
 typedef struct AtomSetEntry {
   LmnWord tail, head;
 } AtomSetEntry;
@@ -36,8 +36,8 @@ typedef struct AtomSetEntry {
 LMN_EXTERN LmnMembrane *lmn_mem_make(void);
 LMN_EXTERN void lmn_mem_free(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_add_child_mem(LmnMembrane *parentmem, LmnMembrane *newmem);
+LMN_EXTERN LmnAtomPtr lmn_mem_newatom(LmnMembrane *mem, LmnFunctor f);
 LMN_EXTERN void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap);
-
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
 LMN_EXTERN BOOL lmn_mem_natoms(LmnMembrane *mem, unsigned int count);
 LMN_EXTERN AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f);
@@ -72,6 +72,8 @@ LMN_EXTERN void lmn_mem_relink_atom_args(LmnMembrane *mem,
 LMN_EXTERN void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem);
 LMN_EXTERN void lmn_mem_remove_proxies(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem);
+LMN_EXTERN void lmn_mem_remove_temporary_proxies(LmnMembrane *mem);
+LMN_EXTERN void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem);
 /* LmnAtomPtr* lmn_atomset_end(AtomSetEntry * ent); */
 #define lmn_atomset_end(p_atomset_entry) ((LmnAtomPtr)p_atomset_entry)
 
