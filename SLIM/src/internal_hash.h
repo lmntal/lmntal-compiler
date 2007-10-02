@@ -38,7 +38,7 @@ void hashtbl_destroy(SimpleHashtbl *ht);
 
 HashIterator hashtbl_iterator(SimpleHashtbl *ht);
 void hashiter_next(HashIterator *iter);
-#define hashiter_entry(I) ((I)->ht->tbl[(I)->i])
+#define hashiter_entry(I) (&((I)->ht->tbl[(I)->i]))
 #define hashiter_isend(I) ((I)->i >= (I)->ht->cap)
 
 /* HashSet */
