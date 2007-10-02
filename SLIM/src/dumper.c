@@ -59,7 +59,7 @@ static BOOL is_direct_printable(char *s)
   return TRUE;
 }
 
-/* htã‹ã‚‰atomã«å¯¾å¿œã™ã‚‹AtomRecã‚’å–å¾—ã€‚ãªã‘ã‚Œã°è¿½åŠ ã—ã¦ã‹ã‚‰è¿”ã™ */
+/* ht¤«¤éatom¤ËÂÐ±þ¤¹¤ëAtomRec¤ò¼èÆÀ¡£¤Ê¤±¤ì¤ÐÄÉ²Ã¤·¤Æ¤«¤éÊÖ¤¹ */
 static struct AtomRec *get_atomrec(SimpleHashtbl *ht, LmnAtomPtr atom)
 {
   if (hashtbl_contains(ht, (HashKeyType)atom)) {
@@ -99,7 +99,7 @@ static BOOL dump_data_atom(LmnWord data,
     fprintf(stdout, "%f", *(double*)data);
     break;
   default:
-    fprintf(stdout, "unknown data type[%d], ", attr);
+    fprintf(stdout, "* ", attr);
     LMN_ASSERT(FALSE);
     break;
   }
@@ -110,7 +110,8 @@ static BOOL dump_list(LmnAtomPtr atom,
                       SimpleHashtbl *ht,
                       struct DumpState *s,
                       int indent,
-                      int call_depth) {
+                      int call_depth)
+{
   BOOL first = TRUE;
   LmnLinkAttr attr;
 
@@ -190,7 +191,6 @@ static void propagate_proxy_link(LmnAtomPtr atom,
   if (t->link_num >= 0) return;
   
   t->link_num = link_num;
-
   for (i = 0; i < 2; i++) {
     propagate_proxy_link(LMN_ATOM(LMN_ATOM_GET_LINK(atom, i)),
                          LMN_ATOM_GET_LINK_ATTR(atom, i),
@@ -382,6 +382,7 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
   enum {P0, P1, P2, P3, PROXY, PRI_NUM};
   Vector pred_atoms[PRI_NUM];
   HashIterator iter;
+  BOOL printed;
 
   if (!mem) return;
 
@@ -391,14 +392,15 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
     vec_init(&pred_atoms[i], 16);
   }
 
-  /* å„ªå…ˆé †ä½ã«å¿œã˜ã¦èµ·ç‚¹ã¨ãªã‚‹ã‚¢ãƒˆãƒ ã‚’æŒ¯ã‚Šåˆ†ã‘ã‚‹ */
+  /* Í¥Àè½ç°Ì¤Ë±þ¤¸¤Æµ¯ÅÀ¤È¤Ê¤ë¥¢¥È¥à¤ò¿¶¤êÊ¬¤±¤ë */
 
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashiter_isend(&iter);
        hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
-    LmnFunctor f = hashiter_entry(&iter).key;
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
+    LmnFunctor f = hashiter_entry(&iter)->key;
     LmnAtomPtr atom;
+
     for (atom = atomlist_head(ent);
          atom != lmn_atomset_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
@@ -438,14 +440,16 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
     }
   }
 
+  printed = FALSE;
   { /* dump atoms */
     for (i = 0; i < PRI_NUM; i++) {
       for (j = 0; j < pred_atoms[i].num; j++) {
         LmnAtomPtr atom = LMN_ATOM(vec_get(&pred_atoms[i], j));
         if (dump_toplevel_atom(atom, ht, s, indent + INDENT_INCR)) {
-          /* TODO ã‚¢ãƒˆãƒ ã®å‡ºåŠ›ã®å¾Œã«ã¯å¸¸ã« ". "ãŒå…¥ã£ã¦ã—ã¾ã†.
-             ã‚¢ãƒˆãƒ ã®é–“ã« ", "ã‚’æŒŸã‚“ã æ–¹ãŒè¦‹æ „ãˆãŒè‰¯ã„ */
+          /* TODO ¥¢¥È¥à¤Î½ÐÎÏ¤Î¸å¤Ë¤Ï¾ï¤Ë ". "¤¬Æþ¤Ã¤Æ¤·¤Þ¤¦.
+             ¥¢¥È¥à¤Î´Ö¤Ë ", "¤ò¶´¤ó¤ÀÊý¤¬¸«±É¤¨¤¬ÎÉ¤¤ */
           fprintf(stdout, ". ");
+          printed = TRUE;
         }
       }
     }
@@ -461,8 +465,15 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
       if (m->next)
         fprintf(stdout, ", ");
     }
+    if (mem->child_head) {
+      /* ºÇ¸å¤ÎËì¤Î¸å¤Ë ". "¤ò½ÐÎÏ */
+      fprintf(stdout, ". ");
+    }
   }
-  if (lmn_env.show_ruleset) dump_ruleset(&mem->rulesets, indent);
+
+  if (lmn_env.show_ruleset) {
+    dump_ruleset(&mem->rulesets, indent);
+  }
 }
 
 static void lmn_dump_cell_nonewline(LmnMembrane *mem)
@@ -477,11 +488,11 @@ static void lmn_dump_cell_nonewline(LmnMembrane *mem)
   {
     HashIterator iter;
 
-    /* é–‹æ”¾å‡¦ç†. ä»Šã®ã¨ã“ã‚dataã«0ä»¥å¤–ãŒå…¥ã£ã¦ã„ãŸå ´åˆ
-       struct AtomRecã®ãƒã‚¤ãƒ³ã‚¿ãŒæ ¼ç´ã•ã‚Œã¦ã„ã‚‹ */
+    /* ³«Êü½èÍý. º£¤Î¤È¤³¤ídata¤Ë0°Ê³°¤¬Æþ¤Ã¤Æ¤¤¤¿¾ì¹ç
+       struct AtomRec¤Î¥Ý¥¤¥ó¥¿¤¬³ÊÇ¼¤µ¤ì¤Æ¤¤¤ë */
     for (iter = hashtbl_iterator(&ht); !hashiter_isend(&iter); hashiter_next(&iter)) {
-      if (hashiter_entry(&iter).data) {
-        atomrec_free((struct AtomRec *)hashiter_entry(&iter).data);
+      if (hashiter_entry(&iter)->data) {
+        atomrec_free((struct AtomRec *)hashiter_entry(&iter)->data);
       }
     }
     hashtbl_destroy(&ht);
@@ -499,6 +510,11 @@ static void lmn_mem_dump_dev(LmnMembrane *mem);
 /* print membrane structure */
 void lmn_mem_dump(LmnMembrane *mem)
 {
+  if (lmn_env.dev_dump) {
+    lmn_mem_dump_dev(mem);
+    return;
+  }
+  /* TODO: ËëÌ¾¤òÉ½¼¨¡£¡¡´Ø¿ô¤Î¹½À®¤ò¸«Ä¾¤¹ */
   fprintf(stdout, "{");
   lmn_dump_cell_nonewline(mem);
   fprintf(stdout, "}\n");
@@ -560,7 +576,7 @@ static void lmn_mem_dump_dev(LmnMembrane *mem)
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashiter_isend(&iter);
        hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter).data;
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
     LmnAtomPtr atom;
 
     for (atom = atomlist_head(ent);
