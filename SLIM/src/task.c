@@ -298,7 +298,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     case INSTR_INSERTCONNECTORSINNULL:
     {
         LmnInstrVar seti, num, enti;
-        LmnAtomPtr link1, link2, buddy1, buddy2, ap;
         Vector *links; /* src list */
         HashSet *retset = LMN_MALLOC(HashSet); /* dst set */
         unsigned int i, j;
@@ -314,17 +313,26 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         
         /* main loop */
         for(i = 0; i < links->num; i++) {
-          for(j = 0; j < links->num; j++) {
-            link1 = (LmnAtomPtr)wt[vec_get(links, i)]; 
-            link2 = (LmnAtomPtr)wt[vec_get(links, j)];
-            buddy1 = LMN_ATOM(LMN_ATOM_GET_LINK(link1, at[vec_get(links, i)]));
-            buddy2 = LMN_ATOM(LMN_ATOM_GET_LINK(link2, at[vec_get(links, j)]));
-            if(link1 == link2 &&  buddy1 == link2) {
-              ap = lmn_new_atom(LMN_UNIFY_FUNCTOR);
-              /* TODO: すぐ直す */
-              buddy1 = link2;
-              buddy2 = link1;
-              hashset_add(retset, (LmnWord)ap);
+          for(j = i+1; j < links->num; j++) {
+            LmnWord linkid1, linkid2;
+            linkid1 = vec_get(links, i);
+            linkid2 = vec_get(links, j);
+            if(wt[linkid2] == LMN_ATOM_GET_LINK(wt[linkid1], at[linkid1]) && 
+                at[linkid2] == LMN_ATOM_GET_LINK_ATTR(wt[linkid1], at[linkid1])) {
+              LmnAtomPtr eq = lmn_new_atom(LMN_UNIFY_FUNCTOR);
+              /* '='アトムをはさむ */
+              LMN_ATOM_SET_LINK(eq, 0, wt[linkid1]);
+              LMN_ATOM_SET_LINK(eq, 1, wt[linkid2]);
+              LMN_ATOM_SET_LINK_ATTR(eq, 0, at[linkid1]);
+              LMN_ATOM_SET_LINK_ATTR(eq, 1, at[linkid2]);
+              LMN_ATOM_SET_LINK(wt[linkid2], at[linkid2], (LmnWord)eq);
+              LMN_ATOM_SET_LINK(wt[linkid1], at[linkid1], (LmnWord)eq);
+              LMN_ATOM_SET_LINK_ATTR(wt[linkid2], at[linkid2], 0);
+              LMN_ATOM_SET_LINK_ATTR(wt[linkid1], at[linkid1], 1);
+              /* invalid link objects */
+              wt[linkid1] = wt[linkid2] = at[linkid1] = at[linkid2] = 0;
+
+              hashset_add(retset, (LmnWord)eq);
             }
           }
         }
