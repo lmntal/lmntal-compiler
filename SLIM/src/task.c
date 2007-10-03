@@ -1031,6 +1031,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
+      at[atom1] = at[atom2];
       if (LMN_ATTR_IS_DATA(at[atom2])) {
         switch (at[atom2]) {
         case LMN_ATOM_INT_ATTR:
@@ -1048,7 +1049,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         LmnFunctor f = LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atom2]));
         wt[atom1] = (LmnWord)lmn_new_atom(f);
         memcpy((void *)wt[atom1], (void *)wt[atom2], LMN_WORD_BYTES*LMN_ATOM_WORDS(f));
-        at[atom1] = at[atom2];
       }
       break;
     }
@@ -1439,6 +1439,17 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, count);
 
       if (!lmn_mem_nfreelinks((LmnMembrane *)wt[memi], count)) return FALSE;
+      break;
+    }
+    case INSTR_COPYCELLS:
+    {
+      LmnInstrVar mapi, destmemi, srcmemi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, mapi);
+      LMN_IMS_READ(LmnInstrVar, instr, destmemi);
+      LMN_IMS_READ(LmnInstrVar, instr, srcmemi);
+      wt[mapi] = (LmnWord)lmn_mem_copy_cells((LmnMembrane *)wt[destmemi],
+                                             (LmnMembrane *)wt[srcmemi]);
       break;
     }
     default:
