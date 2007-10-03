@@ -201,16 +201,30 @@ void lmn_mem_unify_atom_args(LmnMembrane *mem,
 }
 
 /* シンボルアトムに限定したnewlink */
-static void lmn_mem_newlink_symbols(LmnMembrane *mem,
-                                    LmnWord atom0,
+static void lmn_mem_newlink_symbols(LmnAtomPtr atom0,
                                     int pos0,
-                                    LmnWord atom1,
+                                    LmnAtomPtr atom1,
                                     int pos1)
 {
-  LMN_ATOM_SET_LINK(LMN_ATOM(atom0), pos0, atom1);
-  LMN_ATOM_SET_LINK(LMN_ATOM(atom1), pos1, atom0); 
-  LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(atom0), pos0, pos1);
-  LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(atom1), pos1, pos0);
+  LMN_ATOM_SET_LINK(atom0, pos0, (LmnWord)atom1);
+  LMN_ATOM_SET_LINK(atom1, pos1, (LmnWord)atom0); 
+  LMN_ATOM_SET_LINK_ATTR(atom0, pos0, pos1);
+  LMN_ATOM_SET_LINK_ATTR(atom1, pos1, pos0);
+}
+
+/* シンボルアトムatom0と, シンボルorデータアトム atom1 の間にリンクを張る
+   このコードが重複して現れたので,関数に分割した */
+static inline void newlink_symbol_and_something(LmnAtomPtr atom0,
+                                                int pos,
+                                                LmnWord atom1,
+                                                LmnLinkAttr attr)
+{
+  LMN_ATOM_SET_LINK(atom0, pos, atom1);
+  LMN_ATOM_SET_LINK_ATTR(atom0, pos, attr);
+  if (!LMN_ATTR_IS_DATA(attr)) {
+    LMN_ATOM_SET_LINK(LMN_ATOM(atom1), LMN_ATTR_GET_VALUE(attr), (LmnWord)atom0);
+    LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(atom1), LMN_ATTR_GET_VALUE(attr), LMN_ATTR_MAKE_LINK(pos));
+  }
 }
 
 void lmn_mem_newlink(LmnMembrane *mem,
@@ -236,7 +250,7 @@ void lmn_mem_newlink(LmnMembrane *mem,
     LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(atom0), pos0, attr1);
   }
   else { /* both symbol */
-    lmn_mem_newlink_symbols(mem, atom0, pos0, atom1, pos1);
+    lmn_mem_newlink_symbols(LMN_ATOM(atom0), pos0, LMN_ATOM(atom1), pos1);
   }
 }
 
@@ -249,25 +263,15 @@ void lmn_mem_relink_atom_args(LmnMembrane *mem,
                               LmnLinkAttr attr1,
                               int pos1)
 {
-  LmnWord a;
-  LmnLinkAttr attr;
-
   /* TODO: relinkではatom0,atom1がデータになることは,セマンティクスで禁止されるはず
            このことを確認する */
   LMN_ASSERT(!LMN_ATTR_IS_DATA(attr0) &&
              !LMN_ATTR_IS_DATA(attr1));
-  
-  a = LMN_ATOM_GET_LINK(LMN_ATOM(atom1), pos1);
-  attr = LMN_ATOM_GET_LINK_ATTR(LMN_ATOM(atom1), pos1);
 
-  /* この処理はaがsymbol, dataのどちらでも共通 */
-  LMN_ATOM_SET_LINK(LMN_ATOM(atom0), pos0, a);
-  LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(atom0), pos0, attr);
-
-  if (!LMN_ATTR_IS_DATA(attr)) {
-    LMN_ATOM_SET_LINK(LMN_ATOM(a), LMN_ATTR_GET_VALUE(attr), atom0);
-    LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(a), LMN_ATTR_GET_VALUE(attr), LMN_ATTR_MAKE_LINK(pos0));
-  }
+  newlink_symbol_and_something(LMN_ATOM(atom0),
+                               pos0,
+                               LMN_ATOM_GET_LINK(LMN_ATOM(atom1), pos1),
+                               LMN_ATOM_GET_LINK_ATTR(LMN_ATOM(atom1), pos1));
 }
                               
 void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
@@ -298,8 +302,8 @@ void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
   }
 }
 
-#define REMOVE 1U
-#define STAR   2U
+#define REMOVE            1
+#define STAR              2
 #define STATE(ATOM)        (LMN_ATOM_GET_LINK_ATTR((ATOM), 2))
 #define SET_STATE(ATOM,S)  (LMN_ATOM_SET_LINK_ATTR((ATOM), 2, (S)))
 
@@ -393,12 +397,12 @@ void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem)
       LMN_ATOM_SET_FUNCTOR(star, LMN_IN_PROXY_FUNCTOR);
       if (LMN_PROXY_GET_MEM(oldstar) == mem) {
         LMN_ATOM_SET_FUNCTOR(oldstar, LMN_OUT_PROXY_FUNCTOR);
-        lmn_mem_newlink_symbols(mem, (LmnWord)star, 0, (LmnWord)oldstar, 0);
+        lmn_mem_newlink_symbols(star, 0, oldstar, 0);
       } else {
         LmnAtomPtr outside = lmn_mem_newatom(mem, LMN_OUT_PROXY_FUNCTOR);
         LmnAtomPtr newstar = lmn_mem_newatom(mem, LMN_OUT_PROXY_FUNCTOR);
         SET_STATE(newstar, STAR);
-        lmn_mem_newlink_symbols(mem, (LmnWord)outside, 1, (LmnWord)newstar, 1);
+        lmn_mem_newlink_symbols(outside, 1, newstar, 1);
         lmn_mem_relink_atom_args(mem,
                                  (LmnWord)newstar,
                                  LMN_ATTR_MAKE_LINK(0),
@@ -406,7 +410,7 @@ void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem)
                                  (LmnWord)star,
                                  LMN_ATTR_MAKE_LINK(0),
                                  0);
-        lmn_mem_newlink_symbols(mem, (LmnWord)star, 0, (LmnWord)outside, 0);
+        lmn_mem_newlink_symbols(star, 0, outside, 0);
       }
     }
   }
@@ -496,3 +500,105 @@ void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem)
   }
 }
 
+static LmnWord lmn_copy_atom(LmnWord atom, LmnLinkAttr attr)
+{
+  if (LMN_ATTR_IS_DATA(attr)) {
+    switch (attr) {
+    case LMN_ATOM_INT_ATTR:
+      return atom;
+    case LMN_ATOM_DBL_ATTR:
+    {
+       double *d = LMN_MALLOC(double);
+       *d = *(double*)atom;
+       return (LmnWord)d;
+    }
+    default:
+      LMN_ASSERT(FALSE);
+      return 0;
+    }
+  } else { /* symbol atom */
+    LmnFunctor f = LMN_ATOM_GET_FUNCTOR(LMN_ATOM(atom));
+    LmnAtomPtr newatom = lmn_new_atom(f);
+    memcpy((void *)newatom, (void *)atom, LMN_WORD_BYTES*LMN_ATOM_WORDS(f));
+    return (LmnWord)newatom;
+  }
+}
+
+/* TODO Instruction.javaの戻り値のmapの説明が逆な気がするけれども。 */
+/* mem -> atoms のhashtblはold atom -> newatomのhashtbl一つに統合できる.
+   子膜を必ず先にコピーする。しかし,これだと、一つのhashtblが大きくなってしまう
+   問題がある
+*/
+SimpleHashtbl *lmn_mem_copy_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
+{
+  SimpleHashtbl *atoms, mem_to_atoms;
+  LmnMembrane *m;
+  HashIterator iter;
+  unsigned int i;
+  
+  atoms = hashtbl_make(srcmem->atom_num * 2);
+  hashtbl_init(&mem_to_atoms, 16);
+  hashtbl_put(&mem_to_atoms, (HashKeyType)destmem, (HashValueType)atoms);
+
+  /* copy child mems */
+  for (m = srcmem->child_head; m; m = m->next) {
+    LmnMembrane *new_mem = lmn_mem_make();
+    lmn_mem_add_child_mem(destmem, new_mem);
+    hashtbl_put(&mem_to_atoms,
+                (HashKeyType)new_mem,
+                (HashValueType)lmn_mem_copy_cells(new_mem, m));
+  }
+
+  /* copy atoms */
+  for (iter = hashtbl_iterator(&srcmem->atomset);
+       !hashiter_isend(&iter);
+       hashiter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
+    LmnAtomPtr srcatom;
+    
+    LMN_ASSERT(ent);
+    
+    for (srcatom = atomlist_head(ent);
+         lmn_atomset_end(ent);
+         srcatom = LMN_ATOM_GET_NEXT(srcatom)) {
+      LmnFunctor f;
+      LmnAtomPtr newatom;
+      unsigned int start, end;
+      
+      if (hashtbl_contains(atoms, (HashKeyType)srcatom)) continue;
+      f = LMN_ATOM_GET_FUNCTOR(srcatom);
+      newatom = lmn_mem_newatom(destmem, f);
+      hashtbl_put(atoms, (HashKeyType)srcatom, (HashValueType)newatom);
+
+      start = 0;
+      end = LMN_ATOM_GET_ARITY(srcatom);
+
+      if (LMN_IS_PROXY_FUNCTOR(f)) {
+        start = 1, end = 2;
+        LMN_PROXY_SET_MEM(newatom, (LmnWord)destmem);
+        if (f == LMN_OUT_PROXY_FUNCTOR) {
+          LmnAtomPtr srcinside = LMN_ATOM(LMN_ATOM_GET_LINK(srcatom, 0));
+          SimpleHashtbl *childmem_atoms =
+            (SimpleHashtbl *)hashtbl_get(&mem_to_atoms,
+                                         (HashKeyType)LMN_PROXY_GET_MEM(srcinside));
+          LmnAtomPtr newinside = LMN_ATOM(hashtbl_get(childmem_atoms, (HashKeyType)srcinside));
+          /* 必ず子膜につながっているはず */
+          LMN_ASSERT(LMN_ATOM_GET_FUNCTOR(srcinside) == LMN_IN_PROXY_FUNCTOR &&
+                     LMN_PROXY_GET_MEM(srcinside) == mem);
+          lmn_mem_newlink_symbols(newatom, 0, newinside, 0);
+        }
+      }
+
+      /* リンク先と接続 */
+      for (i = start; i < end; i++) {
+        LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(srcatom, i);
+        LmnWord newargatom = lmn_copy_atom(LMN_ATOM_GET_LINK(srcatom, i), attr);
+        newlink_symbol_and_something(newatom, i, newargatom, attr);
+      }
+    }
+  }
+
+  hashtbl_destroy(&mem_to_atoms);
+
+  return atoms;
+}
