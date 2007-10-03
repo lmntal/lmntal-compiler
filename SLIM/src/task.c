@@ -11,6 +11,7 @@
 #include "read_instr.h"
 #include "vector.h"
 #include "dumper.h"
+#include "task.h"
 
 /* this size should be the maximum size of 'spec' arguments */
 /* Or allocated when required */
@@ -23,6 +24,8 @@ LmnByte k2[1024];
 
 LmnWord *wt, *tv;    /* working table */
 LmnByte *at, *tkv;  /* attribute table */
+
+LmnCompiledRuleset system_ruleset;
 
 #define SWAP(T,X,Y)       do { T t=(X); (X)=(Y); (Y)=t;} while(0)
 #define REF_CAST(T,X)     (*(T*)&(X))
@@ -46,7 +49,7 @@ static void memstack_init()
   memstack.tail = memstack.head;
 }
 
-static void memstack_push(LmnMembrane *mem)
+void memstack_push(LmnMembrane *mem)
 {
   struct Entity *ent = LMN_MALLOC(struct Entity);
   ent->mem = mem;
@@ -133,6 +136,7 @@ void run(void)
   at = k1;
   tkv = k2;
 
+  init_system_ruleset(&system_ruleset);
   memstack_init();
   
   /* make toplevel membrane */
@@ -151,8 +155,12 @@ void run(void)
   
   while(!memstack_isempty()){
     LmnMembrane *mem = memstack_peek();
-    if(!exec(mem))
-      memstack_pop();
+    if(!exec(mem)) {
+      printf("system_ruleset react \n");
+      if (!compiled_ruleset_react(&system_ruleset, mem)) {
+        memstack_pop();
+      }
+    }
 /*     memstack_printall(); */
   }
 
@@ -597,7 +605,11 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, pos2);
       LMN_IMS_READ(LmnInstrVar, instr, memi);
 
-      lmn_mem_unify_atom_args((LmnMembrane *)wt[memi], wt[atom1], pos1, wt[atom2], pos2);
+      lmn_mem_unify_atom_args((LmnMembrane *)wt[memi],
+                              LMN_ATOM(wt[atom1]),
+                              pos1,
+                              LMN_ATOM(wt[atom2]),
+                              pos2);
       break;
     }
     case INSTR_PROCEED:

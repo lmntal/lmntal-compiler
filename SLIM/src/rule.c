@@ -4,6 +4,7 @@
 
 #include "lmntal.h"
 #include "rule.h"
+#include "system_ruleset.h"
 
 /* move ownship of instr */
 LmnRule *lmn_rule_make(LmnRuleInstr instr, lmn_interned_str name)
@@ -53,6 +54,29 @@ void lmn_ruleset_put(LmnRuleSet* ruleset, LmnRule *rule)
     ruleset->rules = LMN_REALLOC(LmnRule*, ruleset->rules, ruleset->cap);
   }
   ruleset->rules[ruleset->num++] = rule;
+}
+
+/*----------------------------------------------------------------------
+ * System Ruleset
+ */
+
+void init_system_ruleset(LmnCompiledRuleset *rs)
+{
+  vec_push(&rs->rules, (LmnWord)delete_redundant_outproxies);
+  vec_push(&rs->rules, (LmnWord)delete_redundant_inproxies);
+}
+
+BOOL compiled_ruleset_react(LmnCompiledRuleset *rs, LmnMembrane *mem)
+{
+  unsigned int i;
+  BOOL b, is_succ = FALSE;
+  
+  for (i = 0; i < rs->rules.num; i++) {
+    compiled_rule r =(compiled_rule)vec_get(&rs->rules, i);
+    for (; r(mem); b=TRUE);
+    is_succ = is_succ || b;
+  }
+  return is_succ;
 }
 
 #undef GROWN_RATE
