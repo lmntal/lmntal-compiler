@@ -179,6 +179,7 @@ public class RulesetCompiler {
 			while(ri.hasNext()) {
 				InterpretedRuleset ir = (InterpretedRuleset)ri.next();
 				SystemRulesets.addUserDefinedSystemRuleset(ir);
+				ir.isSystemRuleset = true;
 			}
 		}
 	}

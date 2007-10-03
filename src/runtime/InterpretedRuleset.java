@@ -319,7 +319,10 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	
 	public void showDetail() {
 		if (Env.verbose >= Env.VERBOSE_SHOWRULES || Env.compileonly)
-			Env.p("Compiled Ruleset @" + id + dumpRules());
+			if(isSystemRuleset)
+				Env.p("Compiled SystemRuleset @" + id + dumpRules());
+			else
+				Env.p("Compiled Ruleset @" + id + dumpRules());
 		Iterator l;
 		l = rules.listIterator();
 		while (l.hasNext()) {

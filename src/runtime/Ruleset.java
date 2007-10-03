@@ -18,6 +18,7 @@ abstract public class Ruleset {
 	protected Functor[] holes;
 	public List compiledRules = new ArrayList();
 	public boolean isRulesSetted = false;
+	public boolean isSystemRuleset = false;
 	abstract public String toString();
 	abstract public String encode();
 	public String[] encodeRulesIndividually(){ return null; }

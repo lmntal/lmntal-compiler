@@ -49,6 +49,7 @@ WhiteSpace		= {LineTerminator} | [ \t]
 
 <YYINITIAL> {
 	{WhiteSpace}		{}
+	"Compiled SystemRuleset"	{yybegin(BEGIN_RULESET);	return symbol(sym.KW_COMPILED_RULESET); }
 	"Compiled Ruleset"	{yybegin(BEGIN_RULESET);	return symbol(sym.KW_COMPILED_RULESET); }
 	"Compiled Rule"		{yybegin(SKIP_LINE);		return symbol(sym.KW_COMPILED_RULE); }
 	"--atommatch:"		{return symbol(sym.KW_ATOM_MATCH); }
