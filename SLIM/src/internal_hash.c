@@ -14,7 +14,7 @@
  *  This hashtable uses 'open addressing with double hasing'.
  *  Once key&value is inserted to hashtable, it can not be deleted.
  *  The size of hashtable is always power of 2. If # of elements / table size >
- *  LOAD_FACTOR then rehash function will be called, and table size extended.
+ *  LOAD_FACTOR then execute rehash.
  *  
  *  Keys must be positive integer, because hashtable use 0 as the Empty flag.
  */
@@ -49,9 +49,22 @@ void hashtbl_init(SimpleHashtbl *ht, unsigned int init_size)
   memset(ht->tbl, 0xffU, sizeof(struct HashEntry) * ht->cap);
 }
 
+SimpleHashtbl *hashtbl_make(unsigned int init_size)
+{
+  SimpleHashtbl *ht = (SimpleHashtbl *)malloc(sizeof(SimpleHashtbl));
+  hashtbl_init(ht, init_size);
+  return ht;
+}
+
 void hashtbl_destroy(SimpleHashtbl *ht)
 {
   free(ht->tbl);
+}
+
+void hashtbl_free(SimpleHashtbl *ht)
+{
+  free(ht->tbl);
+  free(ht);
 }
 
 HashValueType hashtbl_get(SimpleHashtbl *ht, HashKeyType key)
