@@ -170,10 +170,11 @@ void lmn_mem_link_data_atoms(LmnMembrane *mem,
   lmn_mem_push_atom(mem, ap);
 }
 
+/* atom1, atom2はシンボルアトムのはず */
 void lmn_mem_unify_atom_args(LmnMembrane *mem,
-                   LmnWord atom1,
+                   LmnAtomPtr atom1,
                    int pos1,
-                   LmnWord  atom2,
+                   LmnAtomPtr atom2,
                    int pos2)
 {
   LmnWord ap1 = LMN_ATOM_GET_LINK(atom1, pos1);
@@ -337,7 +338,7 @@ void lmn_mem_remove_proxies(LmnMembrane *mem)
       LmnAtomPtr a1 = LMN_ATOM(LMN_ATOM_GET_LINK(opxy, 1));
       LmnFunctor f1 = LMN_ATOM_GET_FUNCTOR(a1);
       if (f1 == LMN_IN_PROXY_FUNCTOR) {
-        lmn_mem_unify_atom_args(mem, (LmnWord)opxy, 0, (LmnWord)a1, 0);
+        lmn_mem_unify_atom_args(mem, opxy, 0, a1, 0);
         SET_STATE(opxy, REMOVE);
         vec_push(&remove_list, (LmnWord)opxy);
         lmn_mem_remove_atom(mem, a1);
@@ -347,7 +348,7 @@ void lmn_mem_remove_proxies(LmnMembrane *mem)
         if (f1 == LMN_OUT_PROXY_FUNCTOR &&
             LMN_PROXY_GET_MEM(LMN_ATOM_GET_LINK(a1, 0))->parent != mem &&
             STATE(opxy) != REMOVE) {
-          lmn_mem_unify_atom_args(mem, (LmnWord)opxy, 0, (LmnWord)a1, 0);
+          lmn_mem_unify_atom_args(mem, opxy, 0, a1, 0);
           SET_STATE(opxy, REMOVE);
           SET_STATE(a1, REMOVE);
           vec_push(&remove_list, (LmnWord)opxy);
@@ -388,7 +389,7 @@ void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem)
     oldstar = LMN_ATOM(LMN_ATOM_GET_LINK(star, 0));
     if (LMN_PROXY_GET_MEM(oldstar) == child_mem) {
       if (STATE(star) != REMOVE) {
-        lmn_mem_unify_atom_args(child_mem, (LmnWord)star, 1, (LmnWord)oldstar, 1);
+        lmn_mem_unify_atom_args(child_mem, star, 1, oldstar, 1);
         SET_STATE(star, REMOVE);
         SET_STATE(oldstar, REMOVE);
       }
@@ -443,7 +444,7 @@ void lmn_mem_remove_temporary_proxies(LmnMembrane *mem)
        star = LMN_ATOM_GET_NEXT(star)) {
     if (STATE(star) != STAR) continue;
     outside = LMN_ATOM(LMN_ATOM_GET_LINK(star, 0));
-    lmn_mem_unify_atom_args(mem, (LmnWord)star, 1, (LmnWord)outside, 1);
+    lmn_mem_unify_atom_args(mem, star, 1, outside, 1);
     SET_STATE(star, REMOVE);
     SET_STATE(outside, REMOVE);
     vec_push(&remove_list, (LmnWord)star);
@@ -484,7 +485,7 @@ void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem)
         LmnAtomPtr a10 = LMN_ATOM(LMN_ATOM_GET_LINK(a1, 0));
         if (LMN_PROXY_GET_MEM(a10) != 0 &&
             LMN_PROXY_GET_MEM(a10) != mem) {
-          lmn_mem_unify_atom_args(mem, (LmnWord)outside, 0, (LmnWord)a1, 0);
+          lmn_mem_unify_atom_args(mem, outside, 0, a1, 0);
           SET_STATE(outside, REMOVE);
           SET_STATE(a1, REMOVE);
           vec_push(&remove_list, (LmnWord)outside);

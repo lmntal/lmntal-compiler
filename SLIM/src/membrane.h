@@ -57,11 +57,11 @@ LMN_EXTERN void lmn_mem_link_data_atoms(LmnMembrane *mem,
                                         LmnLinkAttr attr1,
                                         LmnWord d2,
                                         LmnLinkAttr attr2);
-LMN_EXTERN void lmn_mem_unify_atom_args(LmnMembrane *mem,
-                                        LmnWord atom1,
-                                        int pos1,
-                                        LmnWord  atom2,
-                                        int pos2);
+void lmn_mem_unify_atom_args(LmnMembrane *mem,
+                             LmnAtomPtr atom1,
+                             int pos1,
+                             LmnAtomPtr atom2,
+                             int pos2);
 LMN_EXTERN void lmn_mem_relink_atom_args(LmnMembrane *mem,
                                          LmnWord atom0,
                                          LmnLinkAttr attr0,
