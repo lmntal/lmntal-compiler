@@ -70,11 +70,13 @@ LMN_EXTERN void lmn_mem_relink_atom_args(LmnMembrane *mem,
                                          LmnLinkAttr attr1,
                                          int pos1);
 LMN_EXTERN void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem);
+LMN_EXTERN SimpleHashtbl *lmn_mem_copy_cells(LmnMembrane *dest, LmnMembrane *srcmem);
 LMN_EXTERN void lmn_mem_remove_proxies(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem);
 LMN_EXTERN void lmn_mem_remove_temporary_proxies(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem);
 /* LmnAtomPtr* lmn_atomset_end(AtomSetEntry * ent); */
+/* TODO: rename to atomlist_end */
 #define lmn_atomset_end(p_atomset_entry) ((LmnAtomPtr)p_atomset_entry)
 
 #endif /* LMN_MEMBRANE_H */
