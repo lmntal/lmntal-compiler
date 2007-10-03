@@ -69,11 +69,11 @@ void init_system_ruleset(LmnCompiledRuleset *rs)
 BOOL compiled_ruleset_react(LmnCompiledRuleset *rs, LmnMembrane *mem)
 {
   unsigned int i;
-  BOOL b, is_succ = FALSE;
+  BOOL b = FALSE, is_succ = FALSE;
   
   for (i = 0; i < rs->rules.num; i++) {
     compiled_rule r =(compiled_rule)vec_get(&rs->rules, i);
-    for (; r(mem); b=TRUE);
+    for (; r(mem); b=TRUE) ;
     is_succ = is_succ || b;
   }
   return is_succ;
