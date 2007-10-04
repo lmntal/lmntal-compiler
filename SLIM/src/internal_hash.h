@@ -60,5 +60,7 @@ void hashset_add(HashSet *set, HashKeyType key);
 void hashset_destroy(HashSet *set);
 HashSetIterator hashset_iterator(HashSet *set);
 void hashset_it_next(HashSetIterator *it);
+#define hashsetiter_entry(I) (&((I)->set->tbl[(I)->i]))
+#define hashsetiter_isend(I) ((I)->i >= (I)->set->cap)
 
 #endif /*INTERNAL_HASH_H*/
