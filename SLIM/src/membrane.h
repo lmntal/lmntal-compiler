@@ -35,6 +35,7 @@ typedef struct AtomSetEntry {
 
 LMN_EXTERN LmnMembrane *lmn_mem_make(void);
 LMN_EXTERN void lmn_mem_free(LmnMembrane *mem);
+LMN_EXTERN void lmn_mem_drop(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_add_child_mem(LmnMembrane *parentmem, LmnMembrane *newmem);
 LMN_EXTERN LmnAtomPtr lmn_mem_newatom(LmnMembrane *mem, LmnFunctor f);
 LMN_EXTERN void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap);
@@ -57,11 +58,15 @@ LMN_EXTERN void lmn_mem_link_data_atoms(LmnMembrane *mem,
                                         LmnLinkAttr attr1,
                                         LmnWord d2,
                                         LmnLinkAttr attr2);
-void lmn_mem_unify_atom_args(LmnMembrane *mem,
+LMN_EXTERN void lmn_mem_unify_atom_args(LmnMembrane *mem,
                              LmnAtomPtr atom1,
                              int pos1,
                              LmnAtomPtr atom2,
                              int pos2);
+LMN_EXTERN void lmn_mem_unify_symbol_atom_args(LmnAtomPtr atom1,
+                                               int pos1,
+                                               LmnAtomPtr atom2,
+                                               int pos2);
 LMN_EXTERN void lmn_mem_relink_atom_args(LmnMembrane *mem,
                                          LmnWord atom0,
                                          LmnLinkAttr attr0,
@@ -78,5 +83,14 @@ LMN_EXTERN void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem);
 /* LmnAtomPtr* lmn_atomset_end(AtomSetEntry * ent); */
 /* TODO: rename to atomlist_end */
 #define lmn_atomset_end(p_atomset_entry) ((LmnAtomPtr)p_atomset_entry)
+
+
+/* Utility */
+/* TODO: このファイルにあるのはふさわしくないので移動する */
+LMN_EXTERN void lmn_newlink_in_symbols(LmnAtomPtr atom0,
+                                       int pos0,
+                                       LmnAtomPtr atom1,
+                                       int pos1);
+LMN_EXTERN void lmn_free_atom(LmnWord atom, LmnLinkAttr attr);
 
 #endif /* LMN_MEMBRANE_H */
