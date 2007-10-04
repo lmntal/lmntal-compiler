@@ -453,6 +453,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       at[atomi] = attr;
       if (LMN_ATTR_IS_DATA(attr)) {
         READ_DATA_ATOM(wt[atomi], attr);
+        ((LmnMembrane *)wt[memi])->atom_num++;
       } else { /* symbol atom */
         LmnFunctor f;
       	LMN_IMS_READ(LmnFunctor, instr, f);
@@ -809,7 +810,6 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       else { /* LMN_ATTR_IS_DATA(at[atomi]) != LMN_ATTR_IS_DATA(attr) */
         return FALSE;
       }
-      fprintf(stderr, "instr_func successed\n");
       break;
     }
     case INSTR_NOTFUNC:

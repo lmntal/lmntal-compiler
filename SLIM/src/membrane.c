@@ -44,7 +44,10 @@ void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
   LMN_ATOM_SET_NEXT(as->tail, ap);
   as->tail = (LmnWord)ap;
 
-  if (!LMN_IS_PROXY_FUNCTOR(f)) mem->atom_num++;
+  if (!LMN_IS_PROXY_FUNCTOR(f) &&
+      f != LMN_UNIFY_FUNCTOR) {
+    mem->atom_num++;
+  }
 } 
 
 /* append e2 to e1 */
