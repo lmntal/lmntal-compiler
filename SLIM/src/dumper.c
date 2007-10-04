@@ -99,7 +99,7 @@ static BOOL dump_data_atom(LmnWord data,
     fprintf(stdout, "%f", *(double*)data);
     break;
   default:
-    fprintf(stdout, "* ", attr);
+    fprintf(stdout, "*[%d]", attr);
     LMN_ASSERT(FALSE);
     break;
   }
