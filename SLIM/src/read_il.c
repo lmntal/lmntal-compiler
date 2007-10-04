@@ -48,7 +48,7 @@ static LmnRule *load_rule(FILE *in)
 
   fread(instr, 1, instr_size, in);
 
-  fprintf(stderr, "loaded rule size:%d\n", instr_size);
+/*   fprintf(stderr, "loaded rule size:%d\n", instr_size); */
   
   return lmn_rule_make(instr, 0); /* there is no name for rule */
 }
@@ -61,11 +61,11 @@ static LmnRuleSet *load_ruleset(FILE *in)
   LmnRuleSet *res =lmn_ruleset_make(ruleset_id, rule_size);
   int i;
 
-  fprintf(stderr, "loading ruleset >>> size:%d name:%d\n", rule_size, ruleset_id);
+/*   fprintf(stderr, "loading ruleset >>> size:%d name:%d\n", rule_size, ruleset_id); */
   for(i=0; i<rule_size; ++i){
     lmn_ruleset_put(res, load_rule(in));
   }
-  fprintf(stderr, "loading ruleset <<< size:%d name:%d\n", rule_size, ruleset_id);
+/*   fprintf(stderr, "loading ruleset <<< size:%d name:%d\n", rule_size, ruleset_id); */
   
   return res;
 }
@@ -77,11 +77,11 @@ static void load_instr(FILE *in)
   lmn_ruleset_table.size = load_uint32(in);
   lmn_ruleset_table.entry = LMN_NALLOC(LmnRuleSet*, lmn_ruleset_table.size);
 
-  fprintf(stderr, "loading instr >>> size:%d\n", lmn_ruleset_table.size);
+/*   fprintf(stderr, "loading instr >>> size:%d\n", lmn_ruleset_table.size); */
   for(i=0; i<lmn_ruleset_table.size; ++i){
     lmn_ruleset_table.entry[i] = load_ruleset(in);
   }
-  fprintf(stderr, "loading instr <<< size:%d\n", lmn_ruleset_table.size);
+/*   fprintf(stderr, "loading instr <<< size:%d\n", lmn_ruleset_table.size); */
 }
 
 static void load_symbols(FILE *in)
@@ -94,7 +94,7 @@ static void load_symbols(FILE *in)
   lmn_symbol_table.entry = LMN_NALLOC(char*, lmn_symbol_table.size);
   memset(lmn_symbol_table.entry, 0, sizeof(char *) * lmn_symbol_table.size);
 
-  fprintf(stderr, "loading symbol >>> size:%d\n", lmn_symbol_table.size);
+/*   fprintf(stderr, "loading symbol >>> size:%d\n", lmn_symbol_table.size); */
   for(i=0; i<symbol_num; ++i){
     unsigned int j;
     /* skip symbol id, because it must be sorted in order*/
@@ -108,9 +108,9 @@ static void load_symbols(FILE *in)
     }
     lmn_symbol_table.entry[symbol_id][symbol_size] = '\0';
 
-    fprintf(stderr, "loaded a symbol name:%s\n", lmn_symbol_table.entry[symbol_id]);
+/*     fprintf(stderr, "loaded a symbol name:%s\n", lmn_symbol_table.entry[symbol_id]); */
   }
-  fprintf(stderr, "loading symbol <<< size:%d\n", lmn_symbol_table.size);
+/*   fprintf(stderr, "loading symbol <<< size:%d\n", lmn_symbol_table.size); */
 }
 
 static void load_functors(FILE *in)
@@ -120,7 +120,7 @@ static void load_functors(FILE *in)
   lmn_functor_table.size = data_num;
   lmn_functor_table.entry = LMN_NALLOC(LmnFunctorEntry, lmn_functor_table.size);
   
-  fprintf(stderr, "loading functors >>> size:%d\n", lmn_functor_table.size);
+/*   fprintf(stderr, "loading functors >>> size:%d\n", lmn_functor_table.size); */
   
   for(i=0; i<data_num; ++i){
      /* skip functor id, because it must be sorted in order */
@@ -129,15 +129,15 @@ static void load_functors(FILE *in)
     lmn_functor_table.entry[functor_id].name = load_uint(in, sizeof(lmn_interned_str));
     lmn_functor_table.entry[functor_id].arity = load_uint(in, sizeof(LmnArity));
 
-    fprintf(stderr, "loaded functor id:%d module:%d->%s string:%d->%s arity:%d\n",
-	   functor_id,
-	   lmn_functor_table.entry[functor_id].module,
-	   lmn_symbol_table.entry[lmn_functor_table.entry[functor_id].module],
-	   lmn_functor_table.entry[functor_id].name,
-	   lmn_symbol_table.entry[lmn_functor_table.entry[functor_id].name],
-	   lmn_functor_table.entry[functor_id].arity);
+/*     fprintf(stderr, "loaded functor id:%d module:%d->%s string:%d->%s arity:%d\n", */
+/* 	   functor_id, */
+/* 	   lmn_functor_table.entry[functor_id].module, */
+/* 	   lmn_symbol_table.entry[lmn_functor_table.entry[functor_id].module], */
+/* 	   lmn_functor_table.entry[functor_id].name, */
+/* 	   lmn_symbol_table.entry[lmn_functor_table.entry[functor_id].name], */
+/* 	   lmn_functor_table.entry[functor_id].arity); */
   }
-  fprintf(stderr, "loading functors <<< size:%d\n", lmn_functor_table.size);
+/*   fprintf(stderr, "loading functors <<< size:%d\n", lmn_functor_table.size); */
 }
 
 
@@ -145,31 +145,31 @@ static void unload_instr()
 {
   unsigned int i;
   
-  fprintf(stderr, "unloading instr >>> size:%d\n", lmn_ruleset_table.size);
+/*   fprintf(stderr, "unloading instr >>> size:%d\n", lmn_ruleset_table.size); */
   for(i=0; i<lmn_ruleset_table.size; ++i){
     lmn_ruleset_free(lmn_ruleset_table.entry[i]);
   }
   LMN_FREE(lmn_ruleset_table.entry);
-  fprintf(stderr, "unloading instr <<< size:%d\n", lmn_ruleset_table.size);
+/*   fprintf(stderr, "unloading instr <<< size:%d\n", lmn_ruleset_table.size); */
 }
 
 static void unload_functors()
 {
-  fprintf(stderr, "unloading functors >>> size:%d\n", lmn_functor_table.size);
+/*   fprintf(stderr, "unloading functors >>> size:%d\n", lmn_functor_table.size); */
   LMN_FREE(lmn_functor_table.entry);
-  fprintf(stderr, "unloading functors <<< size:%d\n", lmn_functor_table.size);
+/*   fprintf(stderr, "unloading functors <<< size:%d\n", lmn_functor_table.size); */
 }
 
 static void unload_symbols()
 {
   unsigned int i;
   
-  fprintf(stderr, "unloading symbol >>> size:%d\n", lmn_symbol_table.size);
+/*   fprintf(stderr, "unloading symbol >>> size:%d\n", lmn_symbol_table.size); */
   for(i=0; i<lmn_symbol_table.size; ++i){
     LMN_FREE(lmn_symbol_table.entry[i]);
   }
   LMN_FREE(lmn_symbol_table.entry);
-  fprintf(stderr, "unloading symbol <<< size:%d\n", lmn_symbol_table.size);
+/*   fprintf(stderr, "unloading symbol <<< size:%d\n", lmn_symbol_table.size); */
 }
 
 
