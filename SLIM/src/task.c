@@ -116,7 +116,7 @@ typedef struct LinkObj {
   LmnLinkAttr pos;
 } LinkObj;
 
-LinkObj *LinkObj_make(LmnAtomPtr ap, LmnLinkAttr pos) {
+static LinkObj *LinkObj_make(LmnAtomPtr ap, LmnLinkAttr pos) {
   LinkObj* ret = LMN_MALLOC(LinkObj);
   ret->ap = ap;
   ret->pos = pos;
@@ -955,10 +955,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         }
 
         if(!hashtbl_contains(atommap, (HashKeyType)lo->ap)) {
-          cpatom = lmn_mem_newatom((LmnMembrane *)wt[memi], LMN_ATOM_GET_FUNCTOR(lo->ap));
-          hashtbl_put(atommap, (HashKeyType)lo->ap, (HashValueType)cpatom);
           /* 親アトム */
           LmnAtomPtr cpbuddy = (LmnAtomPtr)hashtbl_get(atommap, (HashKeyType)(LmnAtomPtr)LMN_ATOM_GET_LINK(lo->ap, lo->pos));
+          cpatom = lmn_mem_newatom((LmnMembrane *)wt[memi], LMN_ATOM_GET_FUNCTOR(lo->ap));
+          hashtbl_put(atommap, (HashKeyType)lo->ap, (HashValueType)cpatom);
           LMN_ATOM_SET_LINK(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), (LmnWord)cpatom);
           LMN_ATOM_SET_LINK_ATTR(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), lo->pos);
           for(i = 0; i < LMN_ATOM_GET_ARITY(cpatom); i++) {
@@ -967,9 +967,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           }
         }
         else {
-          cpatom = (LmnAtomPtr)hashtbl_get(atommap, (HashKeyType)lo->ap);
           /* 親アトム */
           LmnAtomPtr cpbuddy = (LmnAtomPtr)hashtbl_get(atommap, (HashKeyType)(LmnAtomPtr)LMN_ATOM_GET_LINK(lo->ap, lo->pos));
+          cpatom = (LmnAtomPtr)hashtbl_get(atommap, (HashKeyType)lo->ap);
           LMN_ATOM_SET_LINK(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), (LmnWord)cpatom);
           LMN_ATOM_SET_LINK_ATTR(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), lo->pos);
         }
