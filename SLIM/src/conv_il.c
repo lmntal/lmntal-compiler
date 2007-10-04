@@ -1727,10 +1727,10 @@ static void init_functors(void)
   /* ファンクタIDと整合させるために事前に登録しておく */
   add_functors(LMN_IN_PROXY_FUNCTOR, 0, "$in", 3);
   add_functors(LMN_OUT_PROXY_FUNCTOR, 0, "$out", 3);
-  min_func_id = 2; /* プロキシ以外は通常のアトム */
+  add_functors(LMN_UNIFY_FUNCTOR, 0, "=", 2);
+  min_func_id = 3; /* プロキシ以外は通常のアトム */
   add_functors(LMN_LIST_FUNCTOR, 0, ".", 3);
   add_functors(LMN_NIL_FUNCTOR, 0, "[]", 1);
-  add_functors(LMN_UNIFY_FUNCTOR, 0, "=", 2);
   func_id = 5;
 }
 
