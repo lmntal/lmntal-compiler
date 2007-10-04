@@ -218,6 +218,7 @@ struct InstrSpec {
     
     {"newlist", INSTR_NEWLIST, {InstrVar, 0}},
     {"addtolist", INSTR_ADDTOLIST, {InstrVar, InstrVar, 0}},
+    {"getfromlist", INSTR_GETFROMLIST, {InstrVar, InstrVar, InstrVar, 0}},
 
     /* guard: int */
     {"iadd", INSTR_IADD, {InstrVar, InstrVar, InstrVar, 0}},
