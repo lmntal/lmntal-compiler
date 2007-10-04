@@ -12,6 +12,7 @@
 #include "vector.h"
 #include "dumper.h"
 #include "task.h"
+#include "vector.h"
 
 /* TO BE MOVED TO task.h */
 #define LINK_LIST     1
@@ -52,6 +53,12 @@ static void memstack_init()
   memstack.head->next = NULL;
   memstack.head->mem = NULL;
   memstack.tail = memstack.head;
+}
+
+static void memstack_destroy()
+{
+  LMN_ASSERT(memstack_isempty());
+  LMN_FREE(memstack.head);
 }
 
 void memstack_push(LmnMembrane *mem)
@@ -164,7 +171,6 @@ void run(void)
   while(!memstack_isempty()){
     LmnMembrane *mem = memstack_peek();
     if(!exec(mem)) {
-      printf("system_ruleset react \n");
       if (!compiled_ruleset_react(&system_ruleset, mem)) {
         memstack_pop();
       }
@@ -172,7 +178,11 @@ void run(void)
 /*     memstack_printall(); */
   }
 
+  memstack_destroy();
+  
   lmn_mem_dump(mem);
+  lmn_mem_drop(mem);
+  lmn_mem_free(mem);
 }
 
 /* Utility for reading data */
@@ -254,46 +264,57 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       break;
     case INSTR_INSERTCONNECTORSINNULL:
     {
-        LmnInstrVar seti, num, enti;
-        Vector *links; /* src list */
-        HashSet *retset = LMN_MALLOC(HashSet); /* dst set */
-        unsigned int i, j;
-        LMN_IMS_READ(LmnInstrVar, instr, seti);
-        LMN_IMS_READ(LmnInstrVar, instr, num);
+      /* 何もしない !! */
+      LmnInstrVar seti, list_num;
+      HashSet *retset = hashset_make(0);
 
-        links = vec_make(num);
-        for(i = 0; i < num; i++) {
-          LMN_IMS_READ(LmnInstrVar, instr, enti);
-          vec_push(links, (LmnWord)enti);
-        }
-        hashset_init(retset, num);
-        
-        /* main loop */
-        for(i = 0; i < links->num; i++) {
-          for(j = i+1; j < links->num; j++) {
-            LmnWord linkid1, linkid2;
-            linkid1 = vec_get(links, i);
-            linkid2 = vec_get(links, j);
-            if(wt[linkid2] == LMN_ATOM_GET_LINK(wt[linkid1], at[linkid1]) && 
-                at[linkid2] == LMN_ATOM_GET_LINK_ATTR(wt[linkid1], at[linkid1])) {
-              LmnAtomPtr eq = lmn_new_atom(LMN_UNIFY_FUNCTOR);
-              /* '='アトムをはさむ */
-              LMN_ATOM_SET_LINK(eq, 0, wt[linkid1]);
-              LMN_ATOM_SET_LINK(eq, 1, wt[linkid2]);
-              LMN_ATOM_SET_LINK_ATTR(eq, 0, at[linkid1]);
-              LMN_ATOM_SET_LINK_ATTR(eq, 1, at[linkid2]);
-              LMN_ATOM_SET_LINK(wt[linkid2], at[linkid2], (LmnWord)eq);
-              LMN_ATOM_SET_LINK(wt[linkid1], at[linkid1], (LmnWord)eq);
-              LMN_ATOM_SET_LINK_ATTR(wt[linkid2], at[linkid2], 0);
-              LMN_ATOM_SET_LINK_ATTR(wt[linkid1], at[linkid1], 1);
-              /* invalid link objects */
-              wt[linkid1] = wt[linkid2] = at[linkid1] = at[linkid2] = 0;
+      LMN_IMS_READ(LmnInstrVar, instr, seti);
+      LMN_IMS_READ(LmnInstrVar, instr, list_num);
 
-              hashset_add(retset, (LmnWord)eq);
-            }
+      wt[seti] = (LmnWord)retset;
+      while (list_num--) {
+        LmnInstrVar t;
+        LMN_IMS_READ(LmnInstrVar, instr, t);
+      }
+      break;
+    }
+    case INSTR_INSERTCONNECTORS:
+    {
+      /* TODO: retsetがHash Setである意味は?　ベクタでいいのでは？ */
+      LmnInstrVar seti, num, memi, enti;
+      Vector *links; /* src list */
+      HashSet *retset;
+      unsigned int i, j;
+      LMN_IMS_READ(LmnInstrVar, instr, seti);
+      LMN_IMS_READ(LmnInstrVar, instr, num);
+
+      links = vec_make(num);
+      for(i = 0; i < num; i++) {
+        LMN_IMS_READ(LmnInstrVar, instr, enti);
+        vec_push(links, (LmnWord)enti);
+      }
+      retset = hashset_make(num*2);
+      wt[seti] = (LmnWord)retset;
+
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      /* TODO: データへのリンクオブジェクトはatにデータのタイプが入っている */
+      for(i = 0; i < links->num; i++) {
+        LmnWord linkid1 = vec_get(links, i);
+        if (LMN_ATTR_IS_DATA(at[linkid1])) continue;
+        for(j = i+1; j < links->num; j++) {
+          LmnWord linkid2 = vec_get(links, j);
+          if (LMN_ATTR_IS_DATA(at[linkid2])) continue;
+          /* is buddy? */
+          if (wt[linkid2] == LMN_ATOM_GET_LINK(wt[linkid1], at[linkid1]) && 
+              at[linkid2] == LMN_ATOM_GET_LINK_ATTR(wt[linkid1], at[linkid1])) {
+            /* '='アトムをはさむ */
+            LmnAtomPtr eq = lmn_mem_newatom((LmnMembrane *)wt[memi], LMN_UNIFY_FUNCTOR);
+            lmn_newlink_in_symbols(LMN_ATOM(wt[linkid1]), at[linkid1], eq, 0);
+            lmn_newlink_in_symbols(LMN_ATOM(wt[linkid2]), at[linkid2], eq, 1);
+            hashset_add(retset, (HashKeyType)eq);
           }
         }
-        wt[seti] = (LmnWord)retset;
+      }
       break;
     }
     case INSTR_JUMP:
@@ -628,6 +649,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LmnInstrVar atom;
   
       LMN_IMS_READ(LmnInstrVar, instr, atom);
+      /* do nothing */
       break;
     }
     case INSTR_DEQUEUEATOM:
@@ -670,21 +692,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
 
-      if (LMN_ATTR_IS_DATA(at[atomi])) {
-        switch (at[atomi]) {
-        case LMN_ATOM_INT_ATTR:
-          break;
-        case LMN_ATOM_DBL_ATTR:
-          LMN_FREE((double*)wt[atomi]);
-          break;
-        default:
-          LMN_ASSERT(FALSE);
-          break;
-        }
-      }
-      else { /* symbol atom */
-        lmn_delete_atom((LmnAtomPtr)wt[atomi]);
-      }
+      lmn_free_atom(wt[atomi], at[atomi]);
       break;
     }
     case INSTR_REMOVEMEM:
@@ -699,7 +707,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       if(mp->parent->child_head == mp) mp->parent->child_head = mp->next;
       if(mp->prev) mp->prev->next = mp->next;
       if(mp->next) mp->next->prev = mp->prev;
-      mp->parent = NULL;
+      mp->parent = NULL; /* removeproxies のために必要 */
       break;
     }
     case INSTR_FREEMEM:
@@ -1459,10 +1467,13 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       for(it = hashset_iterator(delset); !hashsetiter_isend(&it); hashset_it_next(&it)) {
         LmnAtomPtr orig = (LmnAtomPtr)hashsetiter_entry(&it);
         LmnAtomPtr copy = (LmnAtomPtr)hashtbl_get(delmap, (HashKeyType)orig);
-        LMN_ATOM_SET_LINK(LMN_ATOM_GET_LINK(copy, 1), LMN_ATOM_GET_LINK_ATTR(copy, 1), LMN_ATOM_GET_LINK(copy, 0));
-        LMN_ATOM_SET_LINK(LMN_ATOM_GET_LINK(copy, 0), LMN_ATOM_GET_LINK_ATTR(copy, 0), LMN_ATOM_GET_LINK(copy, 1));
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM_GET_LINK(copy, 1), LMN_ATOM_GET_LINK_ATTR(copy, 1), LMN_ATOM_GET_LINK_ATTR(copy, 0));
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM_GET_LINK(copy, 1), LMN_ATOM_GET_LINK_ATTR(copy, 1), LMN_ATOM_GET_LINK_ATTR(copy, 0));
+        lmn_mem_unify_symbol_atom_args(copy, 0, copy, 1);
+        /* mem がないので仕方なく直接アトムリストをつなぎ変える
+           UNIFYアトムはnatomに含まれないので大丈夫 */
+        LMN_ATOM_SET_PREV(LMN_ATOM_GET_NEXT(copy), LMN_ATOM_GET_PREV(copy));
+        LMN_ATOM_SET_NEXT(LMN_ATOM_GET_PREV(copy), LMN_ATOM_GET_NEXT(copy));
+
+        lmn_delete_atom(orig);
       }
       break;
     }
@@ -1559,12 +1570,46 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
                                              (LmnMembrane *)wt[srcmemi]);
       break;
     }
+    case INSTR_LOOKUPLINK:
+    {
+      LmnInstrVar destlinki, tbli, srclinki;
+      
+      LMN_IMS_READ(LmnInstrVar, instr, destlinki);
+      LMN_IMS_READ(LmnInstrVar, instr, tbli);
+      LMN_IMS_READ(LmnInstrVar, instr, srclinki);
+
+      at[destlinki] = at[srclinki];
+      if (LMN_ATTR_IS_DATA(at[srclinki])) {
+        wt[destlinki] = wt[srclinki];
+      }
+      else { /* symbol atom */
+        SimpleHashtbl *ht = (SimpleHashtbl *)wt[tbli];
+        wt[destlinki] = hashtbl_get(ht, wt[srclinki]);
+      }
+      break;
+    }
+    case INSTR_CLEARRULES:
+    {
+      LmnInstrVar memi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      vec_clear(&((LmnMembrane *)wt[memi])->rulesets);
+      break;
+    }
+    case INSTR_DROPMEM:
+    {
+      LmnInstrVar memi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      lmn_mem_drop((LmnMembrane *)wt[memi]);
+      break;
+    }
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
     }
     #ifdef DEBUG
-    print_wt();
+/*     print_wt(); */
     #endif
   }
 }
