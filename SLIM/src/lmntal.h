@@ -132,6 +132,8 @@ typedef struct LmnMembrane LmnMembrane;
 /* プロキシの3番目の引数番号の領域を remove_proxy, insert_proxy
    で利用中 */
 
+/* TODO:  rename *LINK_ATTR* to *ATTR* */
+
 typedef LmnWord *LmnAtomPtr;
 
 typedef uint8_t LmnLinkAttr;
@@ -222,9 +224,9 @@ typedef uint8_t LmnLinkAttr;
 
 #define LMN_IN_PROXY_FUNCTOR   0
 #define LMN_OUT_PROXY_FUNCTOR  1
-#define LMN_LIST_FUNCTOR       2
-#define LMN_NIL_FUNCTOR        3
-#define LMN_UNIFY_FUNCTOR      4
+#define LMN_UNIFY_FUNCTOR      2
+#define LMN_LIST_FUNCTOR       3
+#define LMN_NIL_FUNCTOR        4
 
 /*----------------------------------------------------------------------
  * link attribute of premitive data type
