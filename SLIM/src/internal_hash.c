@@ -182,9 +182,22 @@ void hashset_init(HashSet *set, unsigned int init_size)
   memset(set->tbl, 0xffU, sizeof(HashKeyType) * set->cap);
 }
 
+HashSet *hashset_make(unsigned int init_size)
+{
+  HashSet *hs = (HashSet *)malloc(sizeof(HashSet));
+  hashset_init(hs, init_size);
+  return hs;
+}
+
 void hashset_destroy(HashSet *set)
 {
   free(set->tbl);
+}
+
+void hashset_free(HashSet *set)
+{
+  free(set->tbl);
+  free(set);
 }
 
 int hashset_contains(HashSet *set, HashKeyType key)

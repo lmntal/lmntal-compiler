@@ -39,6 +39,7 @@ void hashtbl_free(SimpleHashtbl *ht);
 #define hashtbl_num(HT) (HT)->num
 
 HashIterator hashtbl_iterator(SimpleHashtbl *ht);
+/* TODO: rename to hashtbliter */
 void hashiter_next(HashIterator *iter);
 #define hashiter_entry(I) (&((I)->ht->tbl[(I)->i]))
 #define hashiter_isend(I) ((I)->i >= (I)->ht->cap)
@@ -54,13 +55,15 @@ typedef struct HashSetItrator {
   unsigned int i;
 } HashSetIterator;
 
+HashSet *hashset_make(unsigned int init_size);
 void hashset_init(HashSet *set, unsigned int init_size);
 int hashset_contains(HashSet *set, HashKeyType key);
 void hashset_add(HashSet *set, HashKeyType key);
+void hashset_free(HashSet *set);
 void hashset_destroy(HashSet *set);
 HashSetIterator hashset_iterator(HashSet *set);
 void hashset_it_next(HashSetIterator *it);
-#define hashsetiter_entry(I) (&((I)->set->tbl[(I)->i]))
+#define hashsetiter_entry(I) ((I)->set->tbl[(I)->i])
 #define hashsetiter_isend(I) ((I)->i >= (I)->set->cap)
 
 #endif /*INTERNAL_HASH_H*/
