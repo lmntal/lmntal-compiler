@@ -67,6 +67,11 @@ int vec_indexof(Vector *vec, LmnWord keyp) {
   return -1;
 }
 
+/* pop all elements from vec */
+void vec_clear(Vector *vec) {
+  vec->num = 0;
+}
+
 /* destroy */
 void vec_destroy(Vector *vec) {
   free(vec->tbl);
