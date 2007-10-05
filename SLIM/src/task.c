@@ -1106,24 +1106,7 @@ ISGROUND_CONT:;
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
       at[atom1] = at[atom2];
-      if (LMN_ATTR_IS_DATA(at[atom2])) {
-        switch (at[atom2]) {
-        case LMN_ATOM_INT_ATTR:
-          wt[atom1] = wt[atom2];
-          break;
-        case LMN_ATOM_DBL_ATTR:
-          wt[atom1] = (LmnWord)LMN_MALLOC(double);
-          *(double *)wt[atom1] = *(double*)wt[atom2];
-          break;
-        default:
-          LMN_ASSERT(FALSE);
-          break;
-        }
-      } else { /* symbol atom */
-        LmnFunctor f = LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atom2]));
-        wt[atom1] = (LmnWord)lmn_new_atom(f);
-        memcpy((void *)wt[atom1], (void *)wt[atom2], LMN_WORD_BYTES*LMN_ATOM_WORDS(f));
-      }
+      wt[atom1] = lmn_copy_atom(wt[atom2], at[atom2]);
       break;
     }
     case INSTR_EQATOM:
@@ -1608,10 +1591,24 @@ ISGROUND_CONT:;
       lmn_mem_drop((LmnMembrane *)wt[memi]);
       break;
     }
+    case INSTR_TESTMEM:
+    {
+      LmnInstrVar memi, atomi;
+
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      LMN_ASSERT(!LMN_ATTR_IS_DATA(at[atomi]));
+      LMN_ASSERT(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(wt[atomi])));
+
+      if (LMN_PROXY_GET_MEM(wt[atomi]) != wt[memi]) return FALSE;
+      break;
+    }
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
     }
+/*     lmn_mem_dump((LmnMembrane *)wt[0]); */
+/*     print_wt(); */
     #ifdef DEBUG
 /*     print_wt(); */
     #endif
