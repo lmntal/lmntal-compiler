@@ -837,8 +837,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     }
     case INSTR_ISGROUND:
     {
+      /* TODO: データアトムの判定
+       * TODO: srcvec, avovecの解放
+       */
       unsigned int i, atom_num;
-      /*int rooti;*/
       LmnInstrVar funci, srclisti, avolisti;
       Vector *srcvec, *avovec; 
       HashSet avoset, visited_atoms;
@@ -873,20 +875,23 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         LinkObj* lo = (LinkObj *)vec_pop(&stack);
         
         if(hashset_contains(&visited_atoms, (HashKeyType)lo->ap))
+          LMN_FREE(lo);
           continue;
-        if(hashset_contains(&avoset, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos))))
+        if(hashset_contains(&avoset, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos))) ||
+            LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(lo->ap))) {
+          LMN_FREE(start);
+          LMN_FREE(lo);
           return FALSE;
-        if(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(lo->ap)))
-          return FALSE;
+        }
 
-	      for(i = 0; i < visited_root.num; i++) {
+        for(i = 0; i < visited_root.num; i++) {
           unsigned int index = vec_get(srcvec, i);
           if (lo->ap == (LmnAtomPtr)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
-          && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
             vec_set(&visited_root, i, TRUE);
             goto ISGROUND_CONT;
-	        }
-	      }
+          }
+        }
 
         atom_num++;
         hashset_add(&visited_atoms, (LmnWord)lo->ap);
@@ -899,16 +904,18 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           next->pos = LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
           vec_push(&stack, (LmnWord)next);
         }
-      ISGROUND_CONT:;
+ISGROUND_CONT:;
       }
-      
+
       for(i = 0; i < visited_root.num; i++) {
         if(!vec_get(&visited_root, i)) {
+          LMN_FREE(start);
           return FALSE;
         }
       }
       wt[funci] = (LmnWord)atom_num;
       at[funci] = LMN_ATOM_INT_ATTR;
+      LMN_FREE(start);
       break;
     }
     case INSTR_COPYGROUND: {
