@@ -28,25 +28,38 @@ static AtomSetEntry *make_atomlist()
   return as;
 }
 
-void lmn_mem_push_atom(LmnMembrane *mem, LmnAtomPtr ap)
+static inline void mem_push_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom)
 {
   AtomSetEntry *as;
-  LmnFunctor f = LMN_ATOM_GET_FUNCTOR(ap); 
+  LmnFunctor f = LMN_ATOM_GET_FUNCTOR(atom); 
 
   as = (AtomSetEntry *)hashtbl_get_default(&mem->atomset, f, 0);
   if (!as) {
     as = make_atomlist();
-    hashtbl_put(&mem->atomset, LMN_ATOM_GET_FUNCTOR(ap), (HashKeyType)as);
+    hashtbl_put(&mem->atomset, (LmnWord)f, (HashKeyType)as);
   }
 
-  LMN_ATOM_SET_NEXT(ap, as);
-  LMN_ATOM_SET_PREV(ap, as->tail);
-  LMN_ATOM_SET_NEXT(as->tail, ap);
-  as->tail = (LmnWord)ap;
+  LMN_ATOM_SET_NEXT(atom, as);
+  LMN_ATOM_SET_PREV(atom, as->tail);
+  LMN_ATOM_SET_NEXT(as->tail, atom);
+  as->tail = (LmnWord)atom;
 
-  if (!LMN_IS_PROXY_FUNCTOR(f) &&
-      f != LMN_UNIFY_FUNCTOR) {
+  if (LMN_IS_PROXY_FUNCTOR(f)) {
+    LMN_PROXY_SET_MEM(atom, (LmnWord)mem);
+  }
+  else if (f != LMN_UNIFY_FUNCTOR) {
+    /* symbol atom except proxy and unify */
     mem->atom_num++;
+  }
+}
+
+void lmn_mem_push_atom(LmnMembrane *mem, LmnWord atom, LmnLinkAttr attr)
+{
+  if (LMN_ATTR_IS_DATA(attr)) {
+    mem->atom_num++;
+  }
+  else { /* symbol atom */
+    mem_push_symbol_atom(mem, LMN_ATOM(atom));
   }
 } 
 
@@ -59,12 +72,23 @@ static inline void append_atomlist(AtomSetEntry *e1, AtomSetEntry *e2)
   e1->tail = e2->tail;
 }
 
-void lmn_mem_remove_atom(LmnMembrane *mem, LmnAtomPtr atom)
+static inline void mem_remove_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom)
 {
+  LmnFunctor f = LMN_ATOM_GET_FUNCTOR(atom);
+  
   LMN_ATOM_SET_PREV(LMN_ATOM_GET_NEXT(atom), LMN_ATOM_GET_PREV(atom));
   LMN_ATOM_SET_NEXT(LMN_ATOM_GET_PREV(atom), LMN_ATOM_GET_NEXT(atom));
-  if (!LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(atom)))
+  if (!LMN_IS_PROXY_FUNCTOR(f) && f != LMN_UNIFY_FUNCTOR) {
     mem->atom_num--;
+  }
+}
+
+void lmn_mem_remove_atom(LmnMembrane *mem, LmnWord atom, LmnLinkAttr attr)
+{
+  if (LMN_ATTR_IS_DATA(attr)) {
+    mem->atom_num--;
+  }
+  mem_remove_symbol_atom(mem, LMN_ATOM(atom));
 }
 
 /*----------------------------------------------------------------------
@@ -146,7 +170,7 @@ AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
 LmnAtomPtr lmn_mem_newatom(LmnMembrane *mem, LmnFunctor f)
 {
   LmnAtomPtr atom = lmn_new_atom(f);
-  lmn_mem_push_atom(mem, atom);
+  mem_push_symbol_atom(mem, atom);
   return atom;
 }
 
@@ -196,7 +220,7 @@ void lmn_mem_link_data_atoms(LmnMembrane *mem,
   LMN_ATOM_SET_LINK(ap, 1, d1);
   LMN_ATOM_SET_LINK_ATTR(ap, 0, attr0);
   LMN_ATOM_SET_LINK_ATTR(ap, 1, attr1);
-  lmn_mem_push_atom(mem, ap);
+  mem_push_symbol_atom(mem, ap);
 }
 
 /* atom1, atom2をシンボルアトムに限定した unify link */
@@ -388,7 +412,7 @@ void lmn_mem_remove_proxies(LmnMembrane *mem)
         lmn_mem_unify_atom_args(mem, opxy, 0, a1, 0);
         SET_STATE(opxy, REMOVE);
         vec_push(&remove_list, (LmnWord)opxy);
-        lmn_mem_remove_atom(mem, a1);
+        mem_remove_symbol_atom(mem, a1);
         lmn_delete_atom(a1);
       }
       else {
@@ -408,7 +432,7 @@ void lmn_mem_remove_proxies(LmnMembrane *mem)
   }
 
   for (i = 0; i < remove_list.num; i++) {
-    lmn_mem_remove_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
+    mem_remove_symbol_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
     lmn_delete_atom(LMN_ATOM(vec_get(&remove_list, i)));
   }
   vec_destroy(&remove_list);
@@ -464,7 +488,7 @@ void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem)
   }
 
   for (i = 0; i < remove_list.num; i++) {
-    lmn_mem_remove_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
+    mem_remove_symbol_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
     lmn_delete_atom(LMN_ATOM(vec_get(&remove_list, i)));
   }
 
@@ -498,7 +522,7 @@ void lmn_mem_remove_temporary_proxies(LmnMembrane *mem)
     vec_push(&remove_list, (LmnWord)outside);
   }
   for (i = 0; i < remove_list.num; i++) {
-    lmn_mem_remove_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
+    mem_remove_symbol_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
     lmn_delete_atom(LMN_ATOM(vec_get(&remove_list, i)));
   }
 
@@ -543,7 +567,7 @@ void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem)
   }
 
   for (i = 0; i < remove_list.num; i++) {
-    lmn_mem_remove_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
+    mem_remove_symbol_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
     lmn_delete_atom(LMN_ATOM(vec_get(&remove_list, i)));
   }
 }
