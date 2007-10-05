@@ -55,6 +55,11 @@ static void memstack_init()
   memstack.tail = memstack.head;
 }
 
+static int memstack_isempty()
+{
+  return memstack.head->next==NULL;
+}
+
 static void memstack_destroy()
 {
   LMN_ASSERT(memstack_isempty());
@@ -67,11 +72,6 @@ void memstack_push(LmnMembrane *mem)
   ent->mem = mem;
   ent->next = memstack.head->next;
   memstack.head->next = ent;
-}
-
-static int memstack_isempty()
-{
-  return memstack.head->next==NULL;
 }
 
 static LmnMembrane* memstack_pop()
