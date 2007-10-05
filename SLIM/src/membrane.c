@@ -20,11 +20,17 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 /*   return entry->head == (LmnAtomPtr)entry; */
 /* } */
 
+/* アトムリストを空にする. */
+#define EMPTY_ATOMLIST(X)                       \
+  do {                                          \
+    LMN_ATOM_SET_PREV((X), (X));                \
+    LMN_ATOM_SET_NEXT((X), (X));                \
+  } while (0)
+
 static AtomSetEntry *make_atomlist()
 {
   AtomSetEntry *as = LMN_MALLOC(struct AtomSetEntry);
-  LMN_ATOM_SET_PREV(as, as);
-  LMN_ATOM_SET_NEXT(as, as);
+  EMPTY_ATOMLIST(as);
   return as;
 }
 
@@ -70,6 +76,8 @@ static inline void append_atomlist(AtomSetEntry *e1, AtomSetEntry *e2)
   LMN_ATOM_SET_PREV(e2->head, e1->tail);
   LMN_ATOM_SET_NEXT(e2->tail, e1);
   e1->tail = e2->tail;
+
+  EMPTY_ATOMLIST(e2);
 }
 
 static inline void mem_remove_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom)
@@ -111,6 +119,8 @@ void lmn_mem_drop(LmnMembrane *mem)
 {
   HashIterator iter;
   LmnMembrane *m, *n;
+
+  /* drop and free child mems */
   m = mem->child_head;
   while (m) {
     n = m;
@@ -118,6 +128,7 @@ void lmn_mem_drop(LmnMembrane *mem)
     lmn_mem_drop(n);
     lmn_mem_free(n);
   }
+  mem->child_head = NULL;
 
   /* free all atoms */
   for (iter = hashtbl_iterator(&mem->atomset);
@@ -130,6 +141,7 @@ void lmn_mem_drop(LmnMembrane *mem)
       a = LMN_ATOM_GET_NEXT(a);
       lmn_delete_atom(b);
     }
+    EMPTY_ATOMLIST(ent);
   }
   mem->atom_num = 0;
 }
@@ -158,6 +170,7 @@ void lmn_mem_add_child_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
   /* TODO: membrane activation */
   newmem->next = parentmem->child_head;
   newmem->parent = parentmem;
+  LMN_ASSERT(parentmem);
   if(parentmem->child_head) parentmem->child_head->prev = newmem;
   parentmem->child_head = newmem;
 }
@@ -348,7 +361,7 @@ void lmn_mem_relink_atom_args(LmnMembrane *mem,
                                LMN_ATOM_GET_LINK(LMN_ATOM(atom1), pos1),
                                LMN_ATOM_GET_LINK_ATTR(LMN_ATOM(atom1), pos1));
 }
-                              
+
 void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
 {
   /* move atoms */
@@ -361,10 +374,14 @@ void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
       LmnFunctor f = (LmnFunctor)hashiter_entry(&iter)->key;
       AtomSetEntry *srcent = (AtomSetEntry *)hashiter_entry(&iter)->data;
       AtomSetEntry *destent = lmn_mem_get_atomlist(destmem, f);
-      hashtbl_put(&srcmem->atomset, f, 0);
       if (destent) append_atomlist(destent, srcent);
-      else hashtbl_put(&destmem->atomset, (HashKeyType)f, (HashValueType)srcent);
+      else {
+        /* リストをdestに移す */
+        hashiter_entry(&iter)->data = 0;
+        hashtbl_put(&destmem->atomset, (HashKeyType)f, (HashValueType)srcent);
+      }
     }
+    srcmem->atom_num = 0;
   }
 
   /* move membranes */
@@ -700,9 +717,10 @@ void lmn_free_atom(LmnWord atom, LmnLinkAttr attr)
   }
   else { /* symbol atom */
     unsigned int i;
-    unsigned int arity = LMN_ATOM_GET_ARITY(atom);
+    unsigned int end = LMN_ATOM_GET_ARITY(atom) -
+      (LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(atom)) ? 1: 0);
     /* free linked data atoms */
-    for (i = 0; i < arity; i++) {
+    for (i = 0; i < end; i++) {
       if (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, i))) {
         free_data_atom(LMN_ATOM_GET_LINK(atom, i), LMN_ATOM_GET_LINK_ATTR(atom, i));
       }
