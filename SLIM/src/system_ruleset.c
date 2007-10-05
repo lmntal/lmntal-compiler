@@ -28,13 +28,13 @@ BOOL delete_redundant_outproxies(LmnMembrane *mem)
       LmnMembrane *m0 = LMN_PROXY_GET_MEM(i0);
       LmnMembrane *m1 = LMN_PROXY_GET_MEM(i1);
       if (m0 == m1) {
-        lmn_mem_remove_atom(mem, o0);
-        lmn_mem_remove_atom(mem, o1);
+        REMOVE_FROM_ATOMLIST(o0); /* for efficiency */
+        REMOVE_FROM_ATOMLIST(o1);
         lmn_delete_atom(o0);
         lmn_delete_atom(o1);
         lmn_mem_unify_atom_args(m0, i0, 1, i1, 1);
-        lmn_mem_remove_atom(m0, i0);
-        lmn_mem_remove_atom(m1, i1);
+        REMOVE_FROM_ATOMLIST(i0);
+        REMOVE_FROM_ATOMLIST(i1);
         memstack_push(m0);
         return TRUE;
       }
@@ -61,14 +61,13 @@ BOOL delete_redundant_inproxies(LmnMembrane *mem)
     i1 =LMN_ATOM( LMN_ATOM_GET_LINK(i0, 1));
     if (LMN_ATOM_GET_FUNCTOR(i1) == LMN_IN_PROXY_FUNCTOR) {
       LmnAtomPtr o1 = LMN_ATOM(LMN_ATOM_GET_LINK(i1, 0));
-      LmnMembrane *min = LMN_PROXY_GET_MEM(i0);
-      lmn_mem_remove_atom(mem, o0);
-      lmn_mem_remove_atom(mem, o1);
+      REMOVE_FROM_ATOMLIST(o0);
+      REMOVE_FROM_ATOMLIST(o1);
       lmn_delete_atom(o0);
       lmn_delete_atom(o1);
       lmn_mem_unify_atom_args(mem, o0, 1, o1, 1);
-      lmn_mem_remove_atom(min, i0);
-      lmn_mem_remove_atom(min, i1);
+      REMOVE_FROM_ATOMLIST(i0);
+      REMOVE_FROM_ATOMLIST(i1);
       return TRUE;
     }
   }

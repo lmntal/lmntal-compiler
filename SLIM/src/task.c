@@ -444,26 +444,23 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     case INSTR_NEWATOM:
     {
       LmnInstrVar atomi, memi;
-      LmnAtomPtr ap;
+      LmnWord ap;
       LmnLinkAttr attr;
 
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnLinkAttr, instr, attr);
-      at[atomi] = attr;
       if (LMN_ATTR_IS_DATA(attr)) {
-        READ_DATA_ATOM(wt[atomi], attr);
-        ((LmnMembrane *)wt[memi])->atom_num++;
+        READ_DATA_ATOM(ap, attr);
       } else { /* symbol atom */
         LmnFunctor f;
+
       	LMN_IMS_READ(LmnFunctor, instr, f);
-      	ap = lmn_new_atom(f);
-      	lmn_mem_push_atom((LmnMembrane*)wt[memi], ap);
-      	REF_CAST(LmnAtomPtr, wt[atomi]) = ap;
-	      if (LMN_IS_PROXY_FUNCTOR(f)) {
-      	  LMN_ATOM_SET_LINK(ap, 2, wt[memi]);
-      	}
+      	ap = (LmnWord)lmn_new_atom(f);
       }
+      lmn_mem_push_atom((LmnMembrane *)wt[memi], ap, attr);
+      wt[atomi] = ap;
+      at[atomi] = attr;
       break;
     }
     case INSTR_NATOMS:
@@ -682,9 +679,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
       LMN_IMS_READ(LmnInstrVar, instr, memi);
 
-      if (!LMN_ATTR_IS_DATA(at[atomi])) {
-        lmn_mem_remove_atom((LmnMembrane*)wt[memi], (LmnAtomPtr)wt[atomi]);
-      }
+      lmn_mem_remove_atom((LmnMembrane*)wt[memi], wt[atomi], at[atomi]);
       break;
     }
     case INSTR_FREEATOM:
@@ -1047,7 +1042,7 @@ ISGROUND_CONT:;
         }
         switch (op) {
           case INSTR_REMOVEGROUND:
-          lmn_mem_remove_atom((LmnMembrane*)wt[memi], lo->ap);
+            lmn_mem_remove_atom((LmnMembrane*)wt[memi], (LmnWord)lo->ap, lo->pos);
           break;
           case INSTR_FREEGROUND:
           lmn_delete_atom(lo->ap);
@@ -1538,7 +1533,7 @@ ISGROUND_CONT:;
 
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      lmn_mem_push_atom((LmnMembrane *)wt[memi], LMN_ATOM(wt[atomi]));
+      lmn_mem_push_atom((LmnMembrane *)wt[memi], wt[atomi], at[atomi]);
       break;
     }
     case INSTR_MOVECELLS:
