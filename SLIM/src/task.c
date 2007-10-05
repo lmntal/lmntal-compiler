@@ -1107,6 +1107,7 @@ ISGROUND_CONT:;
 
       at[atom1] = at[atom2];
       wt[atom1] = lmn_copy_atom(wt[atom2], at[atom2]);
+      lmn_mem_push_atom((LmnMembrane *)wt[memi], wt[atom1], at[atom1]);
       break;
     }
     case INSTR_EQATOM:
@@ -1600,15 +1601,13 @@ ISGROUND_CONT:;
       LMN_ASSERT(!LMN_ATTR_IS_DATA(at[atomi]));
       LMN_ASSERT(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(wt[atomi])));
 
-      if (LMN_PROXY_GET_MEM(wt[atomi]) != wt[memi]) return FALSE;
+      if (LMN_PROXY_GET_MEM(wt[atomi]) != (LmnMembrane *)wt[memi]) return FALSE;
       break;
     }
     default:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
     }
-/*     lmn_mem_dump((LmnMembrane *)wt[0]); */
-/*     print_wt(); */
     #ifdef DEBUG
 /*     print_wt(); */
     #endif
