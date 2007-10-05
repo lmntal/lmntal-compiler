@@ -180,7 +180,7 @@ void run(void)
 
   memstack_destroy();
   
-  lmn_mem_dump(mem);
+  lmn_dump_cell(mem);
   lmn_mem_drop(mem);
   lmn_mem_free(mem);
 }
