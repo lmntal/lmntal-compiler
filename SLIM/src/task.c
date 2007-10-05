@@ -874,9 +874,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       while(stack.num!=0) {
         LinkObj* lo = (LinkObj *)vec_pop(&stack);
         
-        if(hashset_contains(&visited_atoms, (HashKeyType)lo->ap))
+        if(hashset_contains(&visited_atoms, (HashKeyType)lo->ap)) {
           LMN_FREE(lo);
           continue;
+        }
         if(hashset_contains(&avoset, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos))) ||
             LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(lo->ap))) {
           LMN_FREE(start);
@@ -994,6 +995,7 @@ ISGROUND_CONT:;
       vec_push(retvec, (LmnWord)atommap);
       wt[dstlist] = (LmnWord)retvec;
       at[dstlist] = (LmnByte)LIST_AND_MAP;
+      /*LMN_FREE(start);*/
       break;
     }
     case INSTR_REMOVEGROUND:
