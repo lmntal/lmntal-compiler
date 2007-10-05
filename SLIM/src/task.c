@@ -151,6 +151,7 @@ void run(void)
   at = k1;
   tkv = k2;
 
+  compiled_ruleset_init(&system_ruleset);
   init_system_ruleset(&system_ruleset);
   memstack_init();
   
@@ -183,6 +184,7 @@ void run(void)
   lmn_dump_cell(mem);
   lmn_mem_drop(mem);
   lmn_mem_free(mem);
+  compiled_ruleset_destroy(&system_ruleset);
 }
 
 /* Utility for reading data */
@@ -398,8 +400,11 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       LMN_IMS_READ(LmnInstrVar, instr, mem);
       LMN_IMS_READ(LmnInstrVar, instr, atom);
       LMN_IMS_READ(lmn_interned_str, instr, memn);
-
+      
+      LMN_ASSERT(!LMN_ATTR_IS_DATA(at[atom]));
+      LMN_ASSERT(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atom]))));
       wt[mem] = (LmnWord)LMN_PROXY_GET_MEM(wt[atom]);
+      LMN_ASSERT(((LmnMembrane *)wt[mem])->parent);
       break;
     }
     case INSTR_ANYMEM:
@@ -770,6 +775,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
           }
         default:
           LMN_ASSERT(FALSE);
+          break;
         }
       }
       else {
@@ -1638,6 +1644,9 @@ REMOVE_FREE_GROUND_CONT:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
     }
+/*     lmn_mem_dump((LmnMembrane *)wt[0]); */
+/*     print_wt(); */
+
     #ifdef DEBUG
 /*     print_wt(); */
     #endif
