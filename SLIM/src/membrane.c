@@ -191,6 +191,7 @@ BOOL lmn_mem_nmems(LmnMembrane *mem, unsigned int count)
 }
 
 /* return TRUE if # of freelinks in mem is equal to count */
+/* TODO: O(N) になっている */
 /* リストをたどって数を数えているのでO(n)。
    countがそれほど大きくならなければ問題はないが */
 BOOL lmn_mem_nfreelinks(LmnMembrane *mem, unsigned int count)
@@ -203,7 +204,7 @@ BOOL lmn_mem_nfreelinks(LmnMembrane *mem, unsigned int count)
   
   if (!ent) return count == 0;
   for (atom = atomlist_head(ent), n = 0;
-       atom != lmn_atomset_end(ent) && count<n;
+       atom != lmn_atomset_end(ent) && n<=count;
        atom = LMN_ATOM_GET_NEXT(atom), n++) {}
   return count == n;
 }
@@ -572,7 +573,8 @@ void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem)
   }
 }
 
-static LmnWord lmn_copy_atom(LmnWord atom, LmnLinkAttr attr)
+/* TODO このファイルにあるのはふさわしくない */
+LmnWord lmn_copy_atom(LmnWord atom, LmnLinkAttr attr)
 {
   if (LMN_ATTR_IS_DATA(attr)) {
     switch (attr) {
