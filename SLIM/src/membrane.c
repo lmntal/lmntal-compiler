@@ -88,7 +88,9 @@ void lmn_mem_remove_atom(LmnMembrane *mem, LmnWord atom, LmnLinkAttr attr)
   if (LMN_ATTR_IS_DATA(attr)) {
     mem->atom_num--;
   }
-  mem_remove_symbol_atom(mem, LMN_ATOM(atom));
+  else {
+    mem_remove_symbol_atom(mem, LMN_ATOM(atom));
+  }
 }
 
 /*----------------------------------------------------------------------
