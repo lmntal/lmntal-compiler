@@ -1,0 +1,19 @@
+r = bubblesort([3,5,1,8,9,10,2,0,1,4,6]).
+
+R = bubblesort(X) :-
+	R = bs_init(HEAD,LAST,X),
+	{
+          inside(HEAD,LAST),
+	  (BL=b(HL,BM),BM=b(HR,BR) :- HL>HR | BL=b(HR,BM),BM=b(HL,BR))
+        }.
+
+R = bs_init(HEAD,LAST,[H|T]),{$p[HEAD,LAST],@p} :-
+	int(H) |
+    R = bs_init(HEAD,NLAST,T),{$p[HEAD,LAST],LAST=b(H,NLAST),@p}.
+
+R = bs_init(HEAD,LAST,[]),{$p[HEAD,LAST],@p} :- R = bs_wait(HEAD),{$p[HEAD,LAST],LAST=[],@p}.
+
+R = bs_wait(HEAD),{inside(HEAD,RES),$p[RES],@p}/ :- R = bs_finish(RES), $p[RES].
+
+R = bs_finish(b(H,T)) :- R = [H|bs_finish(T)].
+R = bs_finish([]) :- R = [].

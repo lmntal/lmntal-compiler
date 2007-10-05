@@ -1,0 +1,13 @@
+q([3,5,1,8,9,10,2,0,1,4,6],r).
+
+q(L,R) :- q(NL,last(L,NL),R,[]).
+
+last([],NL,R) :- R=NL.
+last([H|T],NL,R) :- NL=[H|NXT],last(T,NXT,R).
+
+q(LAST,LAST,R,Z) :- R=Z.
+q([H|T],LAST,R,Z) :- p(H,T,LAST,LHS,LHS,RHS,RHS,R,Z).
+
+p(P,L1,L1,H2,L2,H3,L3,R,Z) :- q(H2,L2,R,N), N=[P|M], q(H3,L3,M,Z).
+p(P,[H|T],L1,H2,L2,H3,L3,R,Z) :- H=<P | p(P,T,L1,[H|H2],L2,H3,L3,R,Z).
+p(P,[H|T],L1,H2,L2,H3,L3,R,Z) :- H>=P | p(P,T,L1,H2,L2,[H|H3],L3,R,Z).

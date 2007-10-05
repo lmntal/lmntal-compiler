@@ -1,0 +1,44 @@
+fibsqcu(100,r).
+
+fibsqcu(Target,Answer) :-
+        fibonacci_lazy(0,1,Stream),
+        dispatch(Stream,Target,Fibo),
+	copy(Fibo,Fibo1,Fibo2),
+        square(Fibo1,Squares), cube(Fibo2,Cubes),
+        merge(Squares,Cubes,Both),
+        sum(Both,Answer).
+
+fibonacci_lazy(N1,N2,[]) :- int(N1),int(N2) | .
+fibonacci_lazy(N1,N2,[make(X)|Stream]) :-
+	int(N1),int(N2) |
+    X = N2,fibonacci_lazy(N2,N1+N2,Stream).
+
+dispatch(Stream,Target,Fibo) :- 
+        Stream = [make(X)|StreamN],
+        dispatch(StreamN,Target,Fibo,X).
+
+dispatch(Stream,Target,Fibo,X) :-
+	X >= Target|
+    Stream = [], Fibo = [].
+dispatch(Stream,Target,Fibo,X) :-
+	X < Target|
+    Fibo = [X|FiboN], dispatch(Stream,Target,FiboN).
+
+sum(X,R) :- sum(X,0,R).
+sum([],S,R) :- S=R.
+sum([T|X],S,R) :- sum(X,S+T,R).
+
+merge([],S2,R) :- S2=R.
+merge(S1,[],R) :- S1=R.
+merge([T|X],S2,R) :- R=[T|N], merge(X,S2,N).
+merge(S1,[T|X],R) :- R=[T|N], merge(S1,X,N).
+
+square([],R) :- R=[].
+square([T|X],R) :- ground(T) | R=[T*T|N], square(X,N).
+
+cube([],R) :- R=[].
+cube([T|X],R) :- ground(T) | R=[T*T*T|N], cube(X,N).
+
+copy([],R,S) :- R=[], S=[].
+copy([T|X],R,S) :- ground(T) | R=[T|P], S=[T|Q], copy(X,P,Q).
+

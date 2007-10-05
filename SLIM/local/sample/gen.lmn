@@ -1,0 +1,4 @@
+r = gen(10).
+
+R = gen(N) :- N>0,M=N-1 | R = [N|gen(M)].
+R = gen(0) :- R = [].
