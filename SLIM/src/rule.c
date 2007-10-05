@@ -56,13 +56,22 @@ void lmn_ruleset_put(LmnRuleSet* ruleset, LmnRule *rule)
   ruleset->rules[ruleset->num++] = rule;
 }
 
+void compiled_ruleset_init(LmnCompiledRuleset *rs)
+{
+  vec_init(&rs->rules, 16);
+}
+
+void compiled_ruleset_destroy(LmnCompiledRuleset *rs)
+{
+  vec_destroy(&rs->rules);
+}
+
 /*----------------------------------------------------------------------
  * System Ruleset
  */
 
 void init_system_ruleset(LmnCompiledRuleset *rs)
 {
-  vec_init(&rs->rules, 16);
   vec_push(&rs->rules, (LmnWord)delete_redundant_outproxies);
   vec_push(&rs->rules, (LmnWord)delete_redundant_inproxies);
 }

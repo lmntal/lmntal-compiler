@@ -35,9 +35,13 @@ LMN_EXTERN void lmn_ruleset_free(LmnRuleSet *ruleset);
 LMN_EXTERN void lmn_ruleset_put(LmnRuleSet* ruleset, LmnRule *rule);
 
 
+void compiled_ruleset_init(LmnCompiledRuleset *rs);
+void compiled_ruleset_destroy(LmnCompiledRuleset *rs);
+
 /*----------------------------------------------------------------------
  * System RUleset
  */
+  
 void init_system_ruleset(LmnCompiledRuleset *rs);
 BOOL compiled_ruleset_react(LmnCompiledRuleset *rs, LmnMembrane *mem);
 
