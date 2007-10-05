@@ -278,6 +278,12 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
         LmnInstrVar t;
         LMN_IMS_READ(LmnInstrVar, instr, t);
       }
+      /* 解放のための再帰 */
+      if(interpret(instr, &instr)) {
+        hashset_free(retset);
+        return TRUE;
+      }
+      else assert(0);
       break;
     }
     case INSTR_INSERTCONNECTORS:
@@ -860,7 +866,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       vec_init(&stack, 16);
       start = LinkObj_make((LmnWord)wt[vec_get(srcvec, 0)], at[vec_get(srcvec, 0)]);
-      vec_push(&stack, (LmnWord)start);
+      if(!LMN_ATTR_IS_DATA(start->pos)) { /* data atom は積まない */
+        vec_push(&stack, (LmnWord)start);
+      }
 
       vec_init(&visited_root, 16);
       for(i = 0; i < srcvec->num; i++) {
@@ -873,42 +881,38 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       while(stack.num!=0) {
         LinkObj* lo = (LinkObj *)vec_pop(&stack);
         
-        /* data atom */
-        if (LMN_ATTR_IS_DATA(lo->pos)) {
-          atom_num++;
-          continue;
-        }
-
        if(hashset_contains(&visited_atoms, (HashKeyType)lo->ap)) {
           LMN_FREE(lo);
           continue;
         }
-        if(hashset_contains(&avoset, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos))) ||
-            LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(lo->ap))) {
-          LMN_FREE(start);
-          LMN_FREE(lo);
-          return FALSE;
-        }
+       if(hashset_contains(&avoset, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos))) ||
+           LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(lo->ap))) {
+         LMN_FREE(start);
+         LMN_FREE(lo);
+         return FALSE;
+       }
 
-        for(i = 0; i < visited_root.num; i++) {
-          unsigned int index = vec_get(srcvec, i);
-          if (lo->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
-              && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
-            vec_set(&visited_root, i, TRUE);
-            goto ISGROUND_CONT;
-          }
-        }
+       for(i = 0; i < visited_root.num; i++) {
+         unsigned int index = vec_get(srcvec, i);
+         if (lo->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
+             && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+           vec_set(&visited_root, i, TRUE);
+           goto ISGROUND_CONT;
+         }
+       }
 
-        atom_num++;
-        hashset_add(&visited_atoms, (LmnWord)lo->ap);
+       atom_num++;
+       hashset_add(&visited_atoms, (LmnWord)lo->ap);
 
-        for(i = 0; i < LMN_ATOM_GET_ARITY(lo->ap); i++) {
-          LinkObj *next;
-          if (i == lo->pos)
-            continue;
-          next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(lo->ap, i)));
-          vec_push(&stack, (LmnWord)next);
-        }
+       for(i = 0; i < LMN_ATOM_GET_ARITY(lo->ap); i++) {
+         LinkObj *next;
+         if (i == lo->pos)
+           continue;
+         if(!LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(lo->ap, i))) { /* data atom は積まない */
+           next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(lo->ap, i)));
+           vec_push(&stack, (LmnWord)next);
+         }
+       }
 ISGROUND_CONT:;
       }
 
@@ -959,7 +963,7 @@ ISGROUND_CONT:;
               LmnAtomPtr cpdata = (LmnAtomPtr)lmn_copy_atom(LMN_ATOM_GET_LINK(start->ap, i), LMN_ATOM_GET_LINK_ATTR(start->ap, i));
               hashtbl_put(atommap, (HashKeyType)LMN_ATOM_GET_LINK(start->ap, i), (HashValueType)cpatom);
               LMN_ATOM_SET_LINK(cpatom, i, (LmnWord)cpdata);
-              LMN_ATOM_SET_LINK_ATTR(cpatom, i, start->pos);
+              LMN_ATOM_SET_LINK_ATTR(cpatom, i, LMN_ATOM_GET_LINK_ATTR(start->ap, i));
             }
           }
         }
@@ -992,7 +996,7 @@ ISGROUND_CONT:;
               LmnAtomPtr cpdata = (LmnAtomPtr)lmn_copy_atom(LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
               hashtbl_put(atommap, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, i), (HashValueType)cpatom);
               LMN_ATOM_SET_LINK(cpatom, i, (LmnWord)cpdata);
-              LMN_ATOM_SET_LINK_ATTR(cpatom, i, lo->pos);
+              LMN_ATOM_SET_LINK_ATTR(cpatom, i, LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
             }
           }
         }
@@ -1020,6 +1024,18 @@ COPYGROUND_CONT:
       wt[dstlist] = (LmnWord)retvec;
       at[dstlist] = (LmnByte)LIST_AND_MAP;
       LMN_FREE(start);
+      
+      /* 解放のための再帰 */
+      /*
+      if(interpret(instr, &instr)) {
+        vec_free(retvec);
+        return TRUE;
+      }
+      else {
+        vec_free(retvec);
+        return FALSE;
+      }
+      */
       break;
     }
     case INSTR_REMOVEGROUND:
@@ -1031,7 +1047,7 @@ COPYGROUND_CONT:
       Vector *srcvec;
       HashSet visited_atoms;
       Vector stack;
-      LinkObj *start = LMN_MALLOC(LinkObj); 
+      LinkObj *start;
       LMN_IMS_READ(LmnInstrVar, instr, listi);
       if (INSTR_REMOVEGROUND == op) {
         LMN_IMS_READ(LmnInstrVar, instr, memi);
@@ -1039,22 +1055,26 @@ COPYGROUND_CONT:
       srcvec = (Vector *)wt[listi];
       
       vec_init(&stack, 16);
-      start->ap = (LmnWord)wt[vec_get(srcvec, 0)];
-      start->pos = at[vec_get(srcvec, 0)];
-      vec_push(&stack, (LmnWord)start);
-      
+      start = LinkObj_make((LmnWord)wt[vec_get(srcvec, 0)], at[vec_get(srcvec, 0)]);
+      if(!LMN_ATTR_IS_DATA(start->pos)) {
+        vec_push(&stack, (LmnWord)start);
+      }
+      else { /* data atom は積まない */
+        switch (op) {
+          case INSTR_REMOVEGROUND:
+            lmn_mem_remove_atom((LmnMembrane*)wt[memi], start->ap, start->pos);
+            break;
+          case INSTR_FREEGROUND:
+            /* data atomは接続されたsymbol atomがfreeされると一緒にfreeされるので放置 */
+            /*lmn_free_atom(start->ap, start->pos);*/
+            break;
+        }
+      }
+
       hashset_init(&visited_atoms, 256);
 
       while(stack.num != 0) {
         LinkObj *lo = (LinkObj *)vec_pop(&stack);
-
-        /* data atom */
-        if (LMN_ATTR_IS_DATA(lo->pos)) {
-          if (INSTR_FREEGROUND == op) {
-            lmn_free_atom(lo->ap, lo->pos);
-          }
-          continue;
-        }
 
         if(hashset_contains(&visited_atoms, (HashKeyType)lo->ap))
           continue;
@@ -1068,24 +1088,43 @@ COPYGROUND_CONT:
         }
 
         for(i = 0; i < LMN_ATOM_GET_ARITY(lo->ap); i++) {
-          LinkObj *next = LMN_MALLOC(LinkObj);
+          LinkObj *next;
           if(i == lo->pos)
             continue;
-          next->ap = (LmnWord)LMN_ATOM_GET_LINK(lo->ap, i);
-          next->pos = LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
-          vec_push(&stack, (LmnWord)next); 
+          if(!LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(lo->ap, i))) {
+            next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(lo->ap, i)));
+            vec_push(&stack, (LmnWord)next); 
+          }
+          else { /* data atom は積まない */
+            switch (op) {
+              case INSTR_REMOVEGROUND:
+                lmn_mem_remove_atom((LmnMembrane*)wt[memi], (LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
+                break;
+              case INSTR_FREEGROUND:
+                /* data atomは接続されたsymbol atomがfreeされると一緒にfreeされるので放置 */
+                /*lmn_free_atom((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_LINK_ATTR(lo->ap, i));*/
+                break;
+            }
+          }
         }
         switch (op) {
           case INSTR_REMOVEGROUND:
             lmn_mem_remove_atom((LmnMembrane*)wt[memi], lo->ap, lo->pos);
             break;
           case INSTR_FREEGROUND:
-            lmn_delete_atom((LmnAtomPtr)lo->ap);
+            lmn_free_atom(lo->ap, lo->pos);
+/*            lmn_delete_atom((LmnAtomPtr)lo->ap);*/
             break;
         }
 REMOVE_FREE_GROUND_CONT:
         LMN_FREE(lo);
       }
+      /* freegroundでsrcvecを解放する */
+      /*
+      if (op == INSTR_FREEGROUND) {
+        vec_free(srcvec);
+      }
+      */
       break;
     }
     case INSTR_ISUNARY:
@@ -1195,7 +1234,19 @@ REMOVE_FREE_GROUND_CONT:
       LmnInstrVar listi;
       LMN_IMS_READ(LmnInstrVar, instr, listi);
       wt[listi] = (LmnWord)vec_make_default();
-      /* TODO: interpretで再帰して開放する */
+      /* 解放時期を知るためにinterpretで再帰する
+       * TODO: TRUE時の処理
+       */
+      /*
+      if(interpret(instr, &instr)) {
+        vec_free((Vectro *)wt[listi]);
+        return TRUE;
+      }
+      else {
+        vec_free((Vector *)wt[listi]);
+        return FALSE;
+      }
+      */
       break;
     }
     case INSTR_ADDTOLIST:
@@ -1499,6 +1550,8 @@ REMOVE_FREE_GROUND_CONT:
 
         lmn_delete_atom(orig);
       }
+      /* たぶんここで解放して大丈夫 */
+      /*hashtbl_free(delmap);*/
       break;
     }
     case INSTR_REMOVETOPLEVELPROXIES:
