@@ -101,5 +101,5 @@ LMN_EXTERN void lmn_newlink_in_symbols(LmnAtomPtr atom0,
                                        LmnAtomPtr atom1,
                                        int pos1);
 LMN_EXTERN void lmn_free_atom(LmnWord atom, LmnLinkAttr attr);
-
+LMN_EXTERN LmnWord lmn_copy_atom(LmnWord atom, LmnLinkAttr attr);
 #endif /* LMN_MEMBRANE_H */
