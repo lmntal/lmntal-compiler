@@ -979,21 +979,26 @@ ISGROUND_CONT:
       /* atommapの初期設定：ループ内で親アトムを参照する必要があるため */
       start = LinkObj_make((LmnWord)wt[vec_get(srcvec, 0)], (LmnLinkAttr)at[vec_get(srcvec, 0)]);
       cpatom = (LmnAtomPtr)lmn_copy_atom(start->ap, start->pos);
+      /* EFFIENCY: lmn_mem_push_symbol_atom とかで置き換える*/
+      lmn_mem_push_atom((LmnMembrane *)wt[memi], (LmnWord)cpatom, start->pos);
       hashtbl_put(atommap, (HashKeyType)start->ap, (HashValueType)cpatom);
       if (!LMN_ATTR_IS_DATA(start->pos)) { /* data atom でない場合 */
         for(i = 0; i < LMN_ATOM_GET_ARITY(cpatom); i++) {
           if(start->pos == i)
             continue;
           else {
-            if (!LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(start->ap, i))) {
+            LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(start->ap, i);
+            if (!LMN_ATTR_IS_DATA(attr)) {
               LinkObj *next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(start->ap, i), LMN_ATOM_GET_LINK_ATTR(start->ap, i));
               vec_push(&stack, (LmnWord)next);
             }
             else { /* data atom はスタックに積まない */
-              LmnAtomPtr cpdata = (LmnAtomPtr)lmn_copy_atom(LMN_ATOM_GET_LINK(start->ap, i), LMN_ATOM_GET_LINK_ATTR(start->ap, i));
+              LmnWord cpdata = lmn_copy_atom(LMN_ATOM_GET_LINK(start->ap, i), attr);
+              /* EFFIENCY: lmn_mem_push_symbol_atom とかで置き換える*/
+              lmn_mem_push_atom((LmnMembrane *)wt[memi], cpdata, attr);
               hashtbl_put(atommap, (HashKeyType)LMN_ATOM_GET_LINK(start->ap, i), (HashValueType)cpatom);
               LMN_ATOM_SET_LINK(cpatom, i, (LmnWord)cpdata);
-              LMN_ATOM_SET_LINK_ATTR(cpatom, i, LMN_ATOM_GET_LINK_ATTR(start->ap, i));
+              LMN_ATOM_SET_LINK_ATTR(cpatom, i, attr);
             }
           }
         }
@@ -1014,6 +1019,9 @@ ISGROUND_CONT:
           /* 親アトム */
           LmnAtomPtr cpbuddy = (LmnAtomPtr)hashtbl_get(atommap, (HashKeyType)(LmnAtomPtr)LMN_ATOM_GET_LINK(lo->ap, lo->pos));
           cpatom = (LmnAtomPtr)lmn_copy_atom(lo->ap, lo->pos);
+          /* EFFIENCY: lmn_mem_push_symbol_atom とかで置き換える*/
+          lmn_mem_push_atom((LmnMembrane *)wt[memi], (LmnWord)cpatom, lo->pos);
+
           hashtbl_put(atommap, (HashKeyType)lo->ap, (HashValueType)cpatom);
           LMN_ATOM_SET_LINK(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), (LmnWord)cpatom);
           LMN_ATOM_SET_LINK_ATTR(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), lo->pos);
@@ -1636,8 +1644,6 @@ REMOVE_FREE_GROUND_CONT:
 
         lmn_delete_atom(orig);
       }
-      /* たぶんここで解放して大丈夫 */
-      hashtbl_free(delmap);
       break;
     }
     case INSTR_REMOVETOPLEVELPROXIES:
