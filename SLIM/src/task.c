@@ -1324,6 +1324,68 @@ REMOVE_FREE_GROUND_CONT:
       at[dstatom] = LMN_ATOM_INT_ATTR;
       break;
     }
+    case INSTR_INEG:
+    {
+      LmnInstrVar dstatom, atomi;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      wt[dstatom] = (LmnWord)-(int)atomi;
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IMOD:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      wt[dstatom] = (LmnWord)((int)wt[atom1] % (int)wt[atom2]);
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_INOT:
+    {
+      LmnInstrVar dstatom, atomi;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      wt[dstatom] = (LmnWord)~(int)atomi;
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IAND:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      wt[dstatom] = (LmnWord)((int)wt[atom1] & (int)wt[atom2]);
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IOR:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      wt[dstatom] = (LmnWord)((int)wt[atom1] | (int)wt[atom2]);
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IXOR:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      wt[dstatom] = (LmnWord)((int)wt[atom1] ^ (int)wt[atom2]);
+      at[dstatom] = LMN_ATOM_INT_ATTR;
+      break;
+    }
     case INSTR_ILT:
     {
       LmnInstrVar atom1, atom2;
