@@ -233,6 +233,8 @@ struct InstrSpec {
     {"ige", INSTR_IGE, {InstrVar, InstrVar, 0}},
     {"ieq", INSTR_IEQ, {InstrVar, InstrVar, 0}},
     {"ine", INSTR_INE, {InstrVar, InstrVar, 0}},
+
+    {"iaddfunc", INSTR_IADDFUNC, {InstrVar, InstrVar, InstrVar, 0}},
   };
 
 /*----------------------------------------------------------------------
@@ -324,6 +326,8 @@ VEC_DEF(int, INT_V);
  */
 
 enum FunctorType {SYMBOL, INT, DOUBLE, IN_PROXY, OUT_PROXY, UNIFY};
+#define FUNCTOR_IS_DATA(X) \
+  ((X)==INT || (X)==DOUBLE)
 
 struct SymbolFunctor {
   lmn_interned_str module_id;
@@ -1262,9 +1266,10 @@ static BOOL is_not_allowed(struct Instruction *instr)
 
 static BOOL is_unused(struct Instruction *instr)
 {
-  if (instr->id == INSTR_REMOVEATOM) {
+  if (instr->id == INSTR_REMOVEATOM &&
+      instr->arg_num > 2) {
     struct Functor *a = ((struct Functor *)(instr->args[2]).v);
-    if (a->type != SYMBOL) return TRUE;
+    if (FUNCTOR_IS_DATA(a->type)) return TRUE;
   }
 
   if (instr->id == INSTR_RECURSIVELOCK) return TRUE;
