@@ -250,6 +250,39 @@ void run(void)
 
 static void print_wt(void);
 
+/* TODO: 以下にあるutility関数の置き場所を整理する */
+
+/* mem != NULL ならば memにUNIFYを追加、そうでなければ
+   UNIFYは膜に所属しない */
+static HashSet *insertconnectors(LmnMembrane *mem, Vector *links)
+{
+  unsigned int i, j;
+  HashSet *retset = hashset_make(8);
+  for(i = 0; i < links->num; i++) {
+    LmnWord linkid1 = vec_get(links, i);
+    if (LMN_ATTR_IS_DATA(at[linkid1])) continue;
+    for(j = i+1; j < links->num; j++) {
+      LmnWord linkid2 = vec_get(links, j);
+      if (LMN_ATTR_IS_DATA(at[linkid2])) continue;
+      /* is buddy? */
+      if (wt[linkid2] == LMN_ATOM_GET_LINK(wt[linkid1], at[linkid1]) && 
+          at[linkid2] == LMN_ATOM_GET_LINK_ATTR(wt[linkid1], at[linkid1])) {
+        /* '='アトムをはさむ */
+        LmnAtomPtr eq;
+        if (mem) eq = lmn_mem_newatom(mem, LMN_UNIFY_FUNCTOR);
+        else {
+          eq = lmn_new_atom(LMN_UNIFY_FUNCTOR);
+        }
+                   
+        lmn_newlink_in_symbols(LMN_ATOM(wt[linkid1]), at[linkid1], eq, 0);
+        lmn_newlink_in_symbols(LMN_ATOM(wt[linkid2]), at[linkid2], eq, 1);
+        hashset_add(retset, (HashKeyType)eq);
+      }
+    }
+  }
+  return retset;
+}
+
 static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 {
   LmnInstrOp op;
@@ -266,21 +299,26 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       break;
     case INSTR_INSERTCONNECTORSINNULL:
     {
-      /* 何もしない !! */
       LmnInstrVar seti, list_num;
-      HashSet *retset = hashset_make(0);
+      Vector links;
+      unsigned int i;
 
       LMN_IMS_READ(LmnInstrVar, instr, seti);
       LMN_IMS_READ(LmnInstrVar, instr, list_num);
 
-      wt[seti] = (LmnWord)retset;
-      while (list_num--) {
+      vec_init(&links, list_num);
+      for (i = 0; i < list_num; i++) {
         LmnInstrVar t;
         LMN_IMS_READ(LmnInstrVar, instr, t);
+        vec_push(&links, (LmnWord)t); /* TODO: vector_initの仕様変更に伴い変更する */
       }
-      /* 解放のための再帰 */
+
+      wt[seti] = (LmnWord)insertconnectors(NULL, &links);
+      vec_destroy(&links);
+      
+      /* EFFICIENCY: 解放のための再帰 */
       if(interpret(instr, &instr)) {
-        hashset_free(retset);
+        hashset_free((HashSet *)wt[seti]);
         return TRUE;
       }
       else assert(0);
@@ -289,40 +327,29 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     case INSTR_INSERTCONNECTORS:
     {
       /* TODO: retsetがHash Setである意味は?　ベクタでいいのでは？ */
-      LmnInstrVar seti, num, memi, enti;
-      Vector *links; /* src list */
-      HashSet *retset;
-      unsigned int i, j;
+      LmnInstrVar seti, list_num, memi, enti;
+      Vector links; /* src list */
+      unsigned int i;
       LMN_IMS_READ(LmnInstrVar, instr, seti);
-      LMN_IMS_READ(LmnInstrVar, instr, num);
+      LMN_IMS_READ(LmnInstrVar, instr, list_num);
 
-      links = vec_make(num);
-      for(i = 0; i < num; i++) {
+      vec_init(&links, list_num);
+      /* TODO: このリストを読み込む部分は *NULLと共通化するべき */
+      for (i = 0; i < list_num; i++) {
         LMN_IMS_READ(LmnInstrVar, instr, enti);
-        vec_push(links, (LmnWord)enti);
+        vec_push(&links, (LmnWord)enti); /* TODO: vector_initの仕様変更に伴い変更する */
       }
-      retset = hashset_make(num*2);
-      wt[seti] = (LmnWord)retset;
 
       LMN_IMS_READ(LmnInstrVar, instr, memi);
-      /* TODO: データへのリンクオブジェクトはatにデータのタイプが入っている */
-      for(i = 0; i < links->num; i++) {
-        LmnWord linkid1 = vec_get(links, i);
-        if (LMN_ATTR_IS_DATA(at[linkid1])) continue;
-        for(j = i+1; j < links->num; j++) {
-          LmnWord linkid2 = vec_get(links, j);
-          if (LMN_ATTR_IS_DATA(at[linkid2])) continue;
-          /* is buddy? */
-          if (wt[linkid2] == LMN_ATOM_GET_LINK(wt[linkid1], at[linkid1]) && 
-              at[linkid2] == LMN_ATOM_GET_LINK_ATTR(wt[linkid1], at[linkid1])) {
-            /* '='アトムをはさむ */
-            LmnAtomPtr eq = lmn_mem_newatom((LmnMembrane *)wt[memi], LMN_UNIFY_FUNCTOR);
-            lmn_newlink_in_symbols(LMN_ATOM(wt[linkid1]), at[linkid1], eq, 0);
-            lmn_newlink_in_symbols(LMN_ATOM(wt[linkid2]), at[linkid2], eq, 1);
-            hashset_add(retset, (HashKeyType)eq);
-          }
-        }
+      insertconnectors((LmnMembrane *)wt[memi], &links);
+      vec_destroy(&links);
+      
+      /* EFFICIENCY: 解放のための再帰 */
+      if(interpret(instr, &instr)) {
+        hashset_free((HashSet *)wt[seti]);
+        return TRUE;
       }
+      vec_destroy(&links);
       break;
     }
     case INSTR_JUMP:
@@ -711,6 +738,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       instr += sizeof(LmnInstrVar); /* ingnore parent */
       
       mp = (LmnMembrane*)wt[memi];
+      LMN_ASSERT(mp->parent);
       if(mp->parent->child_head == mp) mp->parent->child_head = mp->next;
       if(mp->prev) mp->prev->next = mp->next;
       if(mp->next) mp->next->prev = mp->prev;
@@ -1609,7 +1637,7 @@ REMOVE_FREE_GROUND_CONT:
         lmn_delete_atom(orig);
       }
       /* たぶんここで解放して大丈夫 */
-      /*hashtbl_free(delmap);*/
+      hashtbl_free(delmap);
       break;
     }
     case INSTR_REMOVETOPLEVELPROXIES:
@@ -1673,6 +1701,7 @@ REMOVE_FREE_GROUND_CONT:
 
       LMN_IMS_READ(LmnInstrVar, instr, destmemi);
       LMN_IMS_READ(LmnInstrVar, instr, srcmemi);
+      LMN_ASSERT(wt[destmemi] != wt[srcmemi]);
       lmn_mem_move_cells((LmnMembrane *)wt[destmemi], (LmnMembrane *)wt[srcmemi]);
       break;
     }
@@ -1749,6 +1778,19 @@ REMOVE_FREE_GROUND_CONT:
       LMN_ASSERT(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(wt[atomi])));
 
       if (LMN_PROXY_GET_MEM(wt[atomi]) != (LmnMembrane *)wt[memi]) return FALSE;
+      break;
+    }
+    case INSTR_IADDFUNC:
+    {
+      LmnInstrVar desti, i0, i1;
+
+      LMN_IMS_READ(LmnInstrVar, instr, desti);
+      LMN_IMS_READ(LmnInstrVar, instr, i0);
+      LMN_IMS_READ(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      wt[desti] = wt[i0] + wt[i1];
+      at[desti] = LMN_ATOM_INT_ATTR;
       break;
     }
     default:
