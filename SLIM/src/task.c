@@ -1226,7 +1226,8 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      /* atom1 or atom2 is a symbol atom */
+      /* データアトムは１引数なので,この命令が出る状況では
+         では常にFALSEのはず */
       if (LMN_ATTR_IS_DATA(at[atom1]) ||
           LMN_ATTR_IS_DATA(at[atom2]) ||
           LMN_ATOM(wt[atom1]) != LMN_ATOM(wt[atom2]))
@@ -1239,7 +1240,6 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
  
-     /* atom1 or atom2 is a symbol atom */
       if (!(LMN_ATTR_IS_DATA(at[atom1]) ||
             LMN_ATTR_IS_DATA(at[atom2]) ||
             LMN_ATOM(wt[atom1]) != LMN_ATOM(wt[atom2])))
@@ -1504,25 +1504,11 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, funci);
 
       if (LMN_ATTR_IS_DATA(at[funci])) {
-        switch (at[funci]) {
-        case LMN_ATOM_INT_ATTR:
-          {
-            wt[atomi] = wt[funci];
-            break;
-          }
-        case LMN_ATOM_DBL_ATTR:
-          {
-            REF_CAST(double*, wt[atomi]) = LMN_MALLOC(double);
-            *(double*) wt[atomi] = *(double *) wt[funci];
-            break;
-          }
-        default:
-          assert(FALSE);
-          break;
-        }
+        READ_DATA_ATOM(wt[atomi], at[funci]);
         at[atomi] = at[funci];
       } else { /* symbol atom */
         fprintf(stderr, "symbol atom can't be created in GUARD\n");
+        exit(1);
       }
       break;
     }
@@ -1533,23 +1519,8 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      if(LMN_ATTR_IS_DATA(at[atom1]) == LMN_ATTR_IS_DATA(at[atom2])) {
-        if (LMN_ATTR_IS_DATA(at[atom1])) {
-          if(at[atom1] != at[atom2]) { /* comp attr */
-            return FALSE;
-          }
-          /* TODO: double*などポインタの場合は値がコピーされている場合がある */
-          else if(wt[atom1] != wt[atom2]) { /* comp value */
-            return FALSE;
-          }
-        }
-        else if(LMN_ATOM_GET_FUNCTOR((LmnAtomPtr)wt[atom1]) != LMN_ATOM_GET_FUNCTOR((LmnAtomPtr)wt[atom2])) {
-          return FALSE;
-        }
-      }
-      else { /* LMN_ATTR_IS_DATA(at[atom1] != LMN_ATTR_IS_DATA(at[atom2]) */
+      if (!lmn_eq_func(wt[atom1], at[atom1], wt[atom2], at[atom2]))
         return FALSE;
-      }
       break;
     }
     case INSTR_GETFUNC:
