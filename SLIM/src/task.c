@@ -1029,6 +1029,11 @@ COPYGROUND_CONT:
       vec_destroy(&stack);
       /* 解放のための再帰 */
       if(interpret(instr, &instr)) {
+        /* この作業も必要なのか… */
+        while(--(dstlovec->num)) {
+          LMN_FREE(vec_get(dstlovec, dstlovec->num));
+          printf("freed\n");
+        }
         vec_free(dstlovec);
         hashtbl_free(atommap);
         vec_free(retvec);
