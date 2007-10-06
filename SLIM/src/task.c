@@ -958,6 +958,77 @@ ISGROUND_CONT:
       at[funci] = LMN_ATOM_INT_ATTR;
       break;
     }
+    case INSTR_EQGROUND:
+    {
+      /* TODO: »ñ¸»¤Î²òÊü */
+      unsigned int i, j;
+      LmnInstrVar srci, dsti;
+      Vector *srcv, *dstv; /* Èæ³Ó¸µ¡¢Èæ³ÓÀè */
+      Vector stack1, stack2;
+      SimpleHashtbl map; /* Èæ³Ó¸µ¢ªÈæ³ÓÀè */
+      LinkObj *start1, *start2;
+      LMN_IMS_READ(LmnInstrVar, instr, srci);
+      LMN_IMS_READ(LmnInstrVar, instr, dsti);
+
+      vec_init(&stack1, 16);
+      vec_init(&stack2, 16);
+      start1 = LinkObj_make((LmnWord)wt[vec_get(srcv, 0)], at[vec_get(srcv, 0)]);
+      start2 = LinkObj_make((LmnWord)wt[vec_get(dstv, 0)], at[vec_get(dstv, 0)]);
+      if (!LMN_ATTR_IS_DATA(start1->pos) && !LMN_ATTR_IS_DATA(start2->pos)) {
+        vec_push(&stack1, (LmnWord)start1);
+        vec_push(&stack2, (LmnWord)start2);
+      }
+      else { /* data atom ¤ÏÀÑ¤Þ¤Ê¤¤ */
+        if(!lmn_eq_func(start1->ap, start1->pos, start2->ap, start2->pos)) return FALSE;
+      }
+      while(stack1.num != 0) {
+        LinkObj *l1 = (LinkObj *)vec_pop(&stack1);
+        LinkObj *l2 = (LinkObj *)vec_pop(&stack2);
+        BOOL contains1 = FALSE;
+        BOOL contains2 = FALSE;
+
+        for(i = 0; i < srcv->num; i++) {
+          unsigned int index = vec_get(srcv, i);
+          if (l1->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
+              && l1->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              contains1 = TRUE;
+            break;
+          }
+        }
+        for(j = 0; j < dstv->num; j++) {
+          unsigned int index = vec_get(dstv, j);
+          if (l2->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
+              && l2->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              contains2 = TRUE;
+            break;
+          }
+        }
+        if(i != j) return FALSE; /* º¬¤Î°ÌÃÖ¤¬°ã¤¦ */
+        if(contains1) continue; /* º¬¤ËÅþÃ£¤·¤¿¾ì¹ç */
+        if(l1->pos != l2->pos) return FALSE; /* °ú¿ô */
+        if(LMN_ATOM_GET_FUNCTOR(l1->ap) != LMN_ATOM_GET_FUNCTOR(l2->ap)) return FALSE; /* ¥Õ¥¡¥ó¥¯¥¿ */
+        if(!hashtbl_contains(&map, l1->ap)) hashtbl_put(&map, l1->ap, l2->ap); /* Ì¤½Ð */
+        else if(hashtbl_get(&map, l1->ap) != l2->ap) return FALSE; /* ´û½Ð¤ÇÉÔ°ìÃ× */
+        else continue; /* ´û½Ð¤Ç°ìÃ× */
+        for(i = 0; i < LMN_ATOM_GET_ARITY(l1->ap); i++) {
+          LinkObj *n1, *n2;
+          if(i == l1->pos) continue;
+          if (!LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(l1->ap, i)) && !LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(l1->ap, i))) {
+            n1 = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(l1->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(l1->ap, i)));
+            n2 = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(l2->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(l2->ap, i)));
+            vec_push(&stack1, (LmnWord)n1);
+            vec_push(&stack2, (LmnWord)n2);
+          }
+          else { /* data atom ¤ÏÀÑ¤Þ¤Ê¤¤ */
+            if(!lmn_eq_func(LMN_ATOM_GET_LINK(l1->ap, i), LMN_ATOM_GET_LINK_ATTR(l1->ap, i),
+                  LMN_ATOM_GET_LINK(l2->ap, i), LMN_ATOM_GET_LINK_ATTR(l2->ap, i))) {
+              return FALSE;
+            }
+          }
+        }
+      }
+      break;
+    }
     case INSTR_COPYGROUND:
     {
       unsigned int i;
@@ -1474,6 +1545,65 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] != (int)wt[atom2])) return FALSE;
+      break;
+    }
+    case  INSTR_FADD:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      wt[dstatom] = (LmnWord)LMN_MALLOC(double);
+      *(double *)wt[dstatom] = *(double *)wt[atom1] + *(double *)wt[atom2];
+      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      break;
+    }
+    case  INSTR_FSUB:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      wt[dstatom] = (LmnWord)LMN_MALLOC(double);
+      *(double *)wt[dstatom] = *(double *)wt[atom1] - *(double *)wt[atom2];
+      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      break;
+    }
+    case  INSTR_FMUL:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      wt[dstatom] = (LmnWord)LMN_MALLOC(double);
+      *(double *)wt[dstatom] = *(double *)wt[atom1] * *(double *)wt[atom2];
+      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      break;
+    }
+    case  INSTR_FDIV:
+    {
+      LmnInstrVar dstatom, atom1, atom2;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atom1);
+      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+
+      wt[dstatom] = (LmnWord)LMN_MALLOC(double);
+      *(double *)wt[dstatom] = *(double *)wt[atom1] / *(double *)wt[atom2];
+      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      break;
+    }
+    case  INSTR_FNEG:
+    {
+      LmnInstrVar dstatom, atomi;
+      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
+      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+
+      wt[dstatom] = (LmnWord)LMN_MALLOC(double);
+      *(double *)wt[dstatom] = -*(double *)wt[atomi];
+      at[dstatom] = LMN_ATOM_DBL_ATTR;
       break;
     }
     case INSTR_ALLOCATOM:
