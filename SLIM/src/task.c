@@ -960,8 +960,9 @@ ISGROUND_CONT:
     }
     case INSTR_EQGROUND:
     {
-      /* TODO: 資源の解放 */
+      /* TODO: NEQGROUNDもあるので関数化する */
       unsigned int i, j;
+      BOOL ret_flag = TRUE; /* 資源解放を一箇所に集めるため */
       LmnInstrVar srci, dsti;
       Vector *srcv, *dstv; /* 比較元、比較先 */
       Vector stack1, stack2;
@@ -969,6 +970,10 @@ ISGROUND_CONT:
       LinkObj *start1, *start2;
       LMN_IMS_READ(LmnInstrVar, instr, srci);
       LMN_IMS_READ(LmnInstrVar, instr, dsti);
+
+      srcv = (Vector *)wt[srci];
+      dstv = (Vector *)wt[dsti];
+      hashtbl_init(&map, 256);
 
       vec_init(&stack1, 16);
       vec_init(&stack2, 16);
@@ -979,7 +984,7 @@ ISGROUND_CONT:
         vec_push(&stack2, (LmnWord)start2);
       }
       else { /* data atom は積まない */
-        if(!lmn_eq_func(start1->ap, start1->pos, start2->ap, start2->pos)) return FALSE;
+        if(!lmn_eq_func(start1->ap, start1->pos, start2->ap, start2->pos)) ret_flag = FALSE;
       }
       while(stack1.num != 0) {
         LinkObj *l1 = (LinkObj *)vec_pop(&stack1);
@@ -1003,12 +1008,31 @@ ISGROUND_CONT:
             break;
           }
         }
-        if(i != j) return FALSE; /* 根の位置が違う */
-        if(contains1) continue; /* 根に到達した場合 */
-        if(l1->pos != l2->pos) return FALSE; /* 引数 */
-        if(LMN_ATOM_GET_FUNCTOR(l1->ap) != LMN_ATOM_GET_FUNCTOR(l2->ap)) return FALSE; /* ファンクタ */
+        if(i != j){ /* 根の位置が違う */
+          LMN_FREE(l1); LMN_FREE(l2);
+          ret_flag = FALSE;
+          break;
+        }
+        if(contains1) { /* 根に到達した場合 */
+          LMN_FREE(l1); LMN_FREE(l2);
+          continue;
+        }
+        if(l1->pos != l2->pos){ /* 引数 */
+          LMN_FREE(l1); LMN_FREE(l2);
+          ret_flag = FALSE;
+          break;
+        }
+        if(LMN_ATOM_GET_FUNCTOR(l1->ap) != LMN_ATOM_GET_FUNCTOR(l2->ap)){ /* ファンクタ */
+          LMN_FREE(l1); LMN_FREE(l2);
+          ret_flag = FALSE;
+          break;
+        }
         if(!hashtbl_contains(&map, l1->ap)) hashtbl_put(&map, l1->ap, l2->ap); /* 未出 */
-        else if(hashtbl_get(&map, l1->ap) != l2->ap) return FALSE; /* 既出で不一致 */
+        else if(hashtbl_get(&map, l1->ap) != l2->ap) { /* 既出で不一致 */
+          LMN_FREE(l1); LMN_FREE(l2);
+          ret_flag = FALSE;
+          break;
+        }
         else continue; /* 既出で一致 */
         for(i = 0; i < LMN_ATOM_GET_ARITY(l1->ap); i++) {
           LinkObj *n1, *n2;
@@ -1022,10 +1046,20 @@ ISGROUND_CONT:
           else { /* data atom は積まない */
             if(!lmn_eq_func(LMN_ATOM_GET_LINK(l1->ap, i), LMN_ATOM_GET_LINK_ATTR(l1->ap, i),
                   LMN_ATOM_GET_LINK(l2->ap, i), LMN_ATOM_GET_LINK_ATTR(l2->ap, i))) {
-              return FALSE;
+              LMN_FREE(l1); LMN_FREE(l2);
+              ret_flag = FALSE;
+              goto EQGROUND_BREAK;
             }
           }
         }
+        LMN_FREE(l1); LMN_FREE(l2);
+      }
+EQGROUND_BREAK:
+      vec_destroy(&stack1);
+      vec_destroy(&stack2);
+      hashtbl_destroy(&map);
+      if(!ret_flag) {
+        return FALSE;
       }
       break;
     }
