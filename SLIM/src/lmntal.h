@@ -181,6 +181,11 @@ typedef uint8_t LmnLinkAttr;
 #define LMN_ATOM_SET_FUNCTOR(ATOM,X)      \
   (*((LmnFunctor*)((LmnWord*)(ATOM)+2))=(X))
 #define LMN_ATOM_GET_ARITY(ATOM)          (LMN_FUNCTOR_ARITY(LMN_ATOM_GET_FUNCTOR(ATOM)))
+/* TODO GET_FUNCTORを２回呼んでしまっている */
+#define LMN_ATOM_GET_LINK_NUM(ATOM)   \
+  ((LMN_FUNCTOR_ARITY(LMN_ATOM_GET_FUNCTOR(ATOM))) -  \
+   (LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(ATOM)) ? 1 : 0))
+
 /* get/set N th link attribute of  ATOM */
 #define LMN_ATOM_GET_LINK_ATTR(ATOM,N)    \
   (*LMN_ATOM_PLINK_ATTR(ATOM,N))
@@ -234,6 +239,7 @@ typedef uint8_t LmnLinkAttr;
 
 /* low 7 bits of link attribute */
 
+/* REFACT: rename */
 #define LMN_ATOM_INT_ATTR        (LMN_LINK_ATTR_FLAG | 0)
 #define LMN_ATOM_DBL_ATTR        (LMN_LINK_ATTR_FLAG | 1)
 
