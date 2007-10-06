@@ -35,7 +35,7 @@ static AtomSetEntry *make_atomlist()
   return as;
 }
 
-static inline void mem_push_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom)
+static void mem_push_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom)
 {
   AtomSetEntry *as;
   LmnFunctor f = LMN_ATOM_GET_FUNCTOR(atom); 
@@ -742,5 +742,20 @@ void lmn_free_atom(LmnWord atom, LmnLinkAttr attr)
       }
     }
     lmn_delete_atom((LmnAtomPtr)atom);
+  }
+}
+
+BOOL lmn_eq_func(LmnWord atom0, LmnLinkAttr attr0, LmnWord atom1, LmnLinkAttr attr1)
+{
+  /* TODO: シンボルアトムのattrがすべて等しい値であることを確認する */
+  if (attr0 != attr1) return FALSE;
+  switch (attr0) {
+  case LMN_ATOM_INT_ATTR:
+    return atom0 == atom1;
+  case LMN_ATOM_DBL_ATTR:
+    /* TODO: 浮動小数点の比較は要確認 */
+    return *(double *)atom0 == *(double *)atom1;
+  default: /* symbol atom */
+    return LMN_ATOM_GET_FUNCTOR(atom0) == LMN_ATOM_GET_FUNCTOR(atom1);
   }
 }
