@@ -208,6 +208,8 @@ struct InstrSpec {
     {"group", INSTR_GROUP, {InstrList, 0}},
 
     /* guard */
+    {"eqground", INSTR_EQGROUND, {InstrVar, InstrVar, 0}},
+    {"neqground", INSTR_NEQGROUND, {InstrVar, InstrVar, 0}},
     {"copyground", INSTR_COPYGROUND, {InstrVar, InstrVar, InstrVar, 0}},
     {"removeground", INSTR_REMOVEGROUND, {InstrVar, InstrVar, 0}},
     {"freeground", INSTR_FREEGROUND, {InstrVar, 0}},
