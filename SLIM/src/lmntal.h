@@ -249,7 +249,9 @@ typedef uint8_t LmnLinkAttr;
 
 LMN_EXTERN LmnAtomPtr lmn_new_atom(LmnFunctor arity);
 LMN_EXTERN void lmn_delete_atom(LmnAtomPtr ap);
-
+/* TODO: move to alloc.h */
+LMN_EXTERN void free_atom_memory_pools(void);
+  
 /*----------------------------------------------------------------------
  * Execution
  */
