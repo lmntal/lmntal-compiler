@@ -6,13 +6,15 @@
 #include "lmntal.h"
 #include <malloc.h>
 
+#define ARYSIZE(ary)	(sizeof(ary)/sizeof((ary)[0]))
+
 /*----------------------------------------------------------------------
  * memory allocation for atom
  */
 
 /* TODO stub implementation */
 
-static memory_pool *atom_memory_pools[128+2]; /* +2 is in/out proxy */
+static memory_pool *atom_memory_pools[128];
 
 LmnAtomPtr lmn_new_atom(LmnFunctor f)
 {
@@ -30,6 +32,17 @@ LmnAtomPtr lmn_new_atom(LmnFunctor f)
 void lmn_delete_atom(LmnAtomPtr ap)
 {
   memory_pool_free(atom_memory_pools[LMN_FUNCTOR_ARITY(LMN_ATOM_GET_FUNCTOR(ap))], ap);
+}
+
+void free_atom_memory_pools(void)
+{
+  unsigned int i;
+  
+  for (i = 0; i < ARYSIZE(atom_memory_pools); i++) {
+    if (atom_memory_pools[i]) {
+      memory_pool_delete(atom_memory_pools[i]);
+    }
+  }
 }
 
 /*----------------------------------------------------------------------
