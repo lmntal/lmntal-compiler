@@ -32,6 +32,7 @@ typedef int16_t RuleSize;
 #define SEQ(A,S) (!strncmp((A),(S),strlen(S)))
 BOOL dump = FALSE;
 int verb = 0;
+BOOL lmntal = FALSE;
 
 /*
  *  Binary Format
@@ -217,7 +218,11 @@ struct InstrSpec {
     {"isunary", INSTR_ISUNARY, {InstrVar, 0}},
     {"isint", INSTR_ISINT, {InstrVar, 0}},
     {"isintfunc", INSTR_ISINTFUNC, {InstrVar, 0}},
-    
+
+    {"isfloat", INSTR_ISFLOAT, {InstrVar, 0}},
+
+    {"fadd", INSTR_FADD, {InstrVar, InstrVar, InstrVar, 0}},
+     
     {"newlist", INSTR_NEWLIST, {InstrVar, 0}},
     {"addtolist", INSTR_ADDTOLIST, {InstrVar, InstrVar, 0}},
     {"getfromlist", INSTR_GETFROMLIST, {InstrVar, InstrVar, InstrVar, 0}},
@@ -1247,6 +1252,201 @@ static void il_dump(FILE* fid, struct IL il)
 }
 
 /*----------------------------------------------------------------------
+ * Dump Lmntal
+ */
+
+static void print_space(FILE *fid, int n)
+{
+  while (n--) fprintf(fid, " ");
+}
+
+static void symbols_dump_lmn(FILE* fid)
+{
+  unsigned int i;
+
+  fprintf(fid, "sym_tbl {\n");
+  for (i = 0; i < symbols.num; i++) {
+    struct SymbolEntry *e = VEC_REF(symbols, i);
+    fprintf(fid, "sym_ent(\"%s\", %d).\n", e->str, e->id);
+  }
+  fprintf(fid, "}. \n");
+}
+
+static void functors_dump_lmn(FILE *fid)
+{
+  unsigned int i;
+  
+  fprintf(fid, "func_tbl {\n");
+  for (i = 0; i < functors.num; i++) {
+    struct SymbolFunctor *e = VEC_REF(functors, i);
+    fprintf(fid, "func_ent(func(%d, %d, %d), %d).\n",
+            e->functor_id, e->module_id, e->symbol_id, e->arity);
+  }
+  fprintf(fid, "}. \n");
+}
+
+static void functor_dump_lmn(FILE* fid, struct Functor a)
+{
+  switch (a.type) {
+  case SYMBOL:
+    fprintf(fid, "func(%d, %d, %d)", a.v.sym_atom.module_id,
+            a.v.sym_atom.symbol_id, a.v.sym_atom.arity);
+    break;
+  case INT:
+    fprintf(fid, "int(%d)", a.v.int_value);
+    break;
+  case DOUBLE:
+    fprintf(fid, "dbl(%f)", a.v.double_value);
+    break;
+  case IN_PROXY:
+    fprintf(fid, "inproxy");
+    break;
+  case OUT_PROXY:
+    fprintf(fid, "outproxy");
+    break;
+  case UNIFY:
+    fprintf(fid, "unify");
+    break;
+  default:
+    ASSERT(FALSE);
+  }
+}
+
+static void instr_dump_lmn(FILE* fid, struct Instruction a);
+
+static void arg_dump_lmn(FILE* fid, struct InstrArg a)
+{
+  switch (a.type) {
+  case Label:
+    fprintf(fid, "label(%d)", *(int*)a.v);
+    break;
+  case InstrVar:
+    fprintf(fid, "var(%d)", *(int*)a.v);
+    break;
+  case String:
+  case NameString:
+    fprintf(fid, "string(%d)", *(int*)a.v);
+    break;
+  case LineNum:
+    fprintf(fid, "line_num(%d)", *(int*)a.v);
+    break;
+  case ArgRuleset:
+    fprintf(fid, "ruleset(%d)", *(int*)a.v);
+    break;
+  case Functor:
+    functor_dump_lmn(fid, *(struct Functor*)a.v);
+    break;
+  case InstrVarList:
+  {
+    unsigned int i;
+    VEC_T(INT_V) v = *(VEC_T(INT_V)*)a.v;
+    fprintf(fid, "[");
+    for (i = 0; i < v.num; i++) {
+      if (i>0) fprintf(fid, ", ");
+      fprintf(fid, "var(%d)", v.v[i]);
+    }
+    fprintf(fid, "]");
+    break;
+  }
+  case InstrList:
+  {
+    unsigned int i;
+    VEC_T(INSTR_V) v = *(VEC_T(INSTR_V)*)a.v;
+    fprintf(fid, "[\n");
+    for (i = 0; i < v.num; i++) {
+      fprintf(fid, "   ");
+      instr_dump_lmn(fid, v.v[i]);
+    }
+    fprintf(fid, "     ]");
+    break;
+  }
+  default:
+    ASSERT(FALSE);
+    break;
+  }
+}
+
+static void instr_dump_lmn(FILE* fid, struct Instruction a)
+{
+  unsigned int i;
+  fprintf(fid, "%s(", get_op_str(a.id));
+  for (i = 0; i < a.arg_num; i++) {
+    if (i>0) fprintf(fid, ", ");
+    arg_dump_lmn(fid, a.args[i]);
+  }
+  fprintf(fid, ")");
+}
+
+static void rule_el_dump_lmn(FILE* fid, struct RuleEl a, int indent)
+{
+  unsigned int i;
+  fprintf(fid, "[");
+  for (i = 0; i < a.instrs.num; i++) {
+    if (i>0) {
+      fprintf(fid, ",\n");
+      print_space(fid, indent+1);
+    }
+    instr_dump_lmn(fid, a.instrs.v[i]);
+  }
+  fprintf(fid, "]");
+}
+
+static void rule_dump_lmn(FILE* fid, struct Rule a, int indent)
+{
+  int n = 5;
+  fprintf(fid, "rule(name(%d), \n", a.name);
+
+  print_space(fid, indent+n);
+  rule_el_dump_lmn(fid, a.amatch, indent+n);
+  fprintf(fid, "\n");
+
+  print_space(fid, indent+n);
+  rule_el_dump_lmn(fid, a.mmatch, indent+n);
+  fprintf(fid, "\n");
+
+  print_space(fid, indent+n);
+  rule_el_dump_lmn(fid, a.guard, indent+n);
+  fprintf(fid, "\n");
+
+  print_space(fid, indent+n);
+  rule_el_dump_lmn(fid, a.body, indent+n);
+  fprintf(fid, "\n");
+
+  fprintf(fid, ")");
+}
+
+static void ruleset_dump_lmn(FILE* fid, struct Ruleset a)
+{
+  unsigned int i;
+  char buf[1024];
+  int n;
+  sprintf(buf, "ruleset(id(%d), [", a.id);
+  n = strlen(buf);
+  
+  fprintf(fid, "ruleset(id(%d), [", a.id);
+  for (i = 0; i < a.rules.num; i++) {
+    if (i>0) fprintf(fid, ",\n");
+    rule_dump_lmn(fid, a.rules.v[i], n);
+  }
+  fprintf(fid, "]).\n");
+}
+
+static void il_dump_lmn(FILE* fid, struct IL il)
+{
+  unsigned int i;
+
+  symbols_dump_lmn(fid);
+  functors_dump_lmn(fid);
+  
+  for (i = 0; i < il.rulesets.num; i++) {
+    ruleset_dump_lmn(fid, il.rulesets.v[i]);
+  }
+  fprintf(fid, "generation_ruleset(id(%d)).\n", il.rulesets.v[0].id);
+}
+
+
+
+/*----------------------------------------------------------------------
  * Optimization
  */
 
@@ -1766,6 +1966,7 @@ static void usage(void)
           "Usage: conv_il [file]\n"
           "options:\n"
           "  --dump       dump parsed structure.\n"
+          "  --lmntal     dump parsed structure for lmntal translator.\n"
           "  --v1         print instructions.\n"
           );
   exit(1);
@@ -1778,6 +1979,7 @@ static int parse_options(int argc, char *argv[])
   struct option long_options[] = {
     {"dump", 0, 0, 1000},
     {"v1", 0, 0, 1002},    /* instruction を出力する命令をはさむ */
+    {"lmntal", 0, 0, 1003},
     {"help",    0, 0, 1001},
     {0, 0, 0, 0}
   };
@@ -1793,6 +1995,9 @@ static int parse_options(int argc, char *argv[])
       break;
     case 1002:
       verb = 1;
+      break;
+    case 1003:
+      lmntal = 1;
       break;
     case 1001: /* help */ /*FALLTHROUGH*/
     case '?': usage(); break;
@@ -1822,6 +2027,8 @@ int main(int argc, char* argv[])
   
   if (dump) {
     il_dump(stdout, il);
+  } else if (lmntal) {
+    il_dump_lmn(stdout, il);
   } else {
     output_il(il);
   }
