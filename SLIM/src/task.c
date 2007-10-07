@@ -185,6 +185,7 @@ void run(void)
   lmn_mem_drop(mem);
   lmn_mem_free(mem);
   compiled_ruleset_destroy(&system_ruleset);
+  free_atom_memory_pools();
 }
 
 /* Utility for reading data */
@@ -280,6 +281,7 @@ static HashSet *insertconnectors(LmnMembrane *mem, Vector *links)
       }
     }
   }
+
   return retset;
 }
 
@@ -315,7 +317,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       wt[seti] = (LmnWord)insertconnectors(NULL, &links);
       vec_destroy(&links);
-      
+
       /* EFFICIENCY: 解放のための再帰 */
       if(interpret(instr, &instr)) {
         hashset_free((HashSet *)wt[seti]);
@@ -341,7 +343,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       }
 
       LMN_IMS_READ(LmnInstrVar, instr, memi);
-      insertconnectors((LmnMembrane *)wt[memi], &links);
+      wt[seti] = (LmnWord)insertconnectors((LmnMembrane *)wt[memi], &links);
       vec_destroy(&links);
       
       /* EFFICIENCY: 解放のための再帰 */
@@ -780,43 +782,23 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
     case INSTR_DEREF:
     {
       LmnInstrVar atom1, atom2, pos1, pos2;
-      LmnAtomPtr ap;
       LmnByte attr;
+
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
       LMN_IMS_READ(LmnInstrVar, instr, pos1);
       LMN_IMS_READ(LmnInstrVar, instr, pos2);
 
-      ap = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], pos1));
       attr = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos1);
-      at[atom1] = attr;
-      if (LMN_ATTR_IS_DATA(at[atom2])) {
-#ifdef DEBUG
-        fprintf(stderr, "Can't deref from data atom.\n");
-#endif
-      }
-      else if (LMN_ATTR_IS_DATA(attr)) {
-        switch (attr) {
-        case LMN_ATOM_INT_ATTR:
-          {
-            REF_CAST(int, wt[atom1]) = (int)ap;
-            break;
-          }
-        case LMN_ATOM_DBL_ATTR:
-          {
-            REF_CAST(double*, wt[atom1]) = (double *)ap;
-            break;
-          }
-        default:
-          LMN_ASSERT(FALSE);
-          break;
-        }
+      LMN_ASSERT(!LMN_ATTR_IS_DATA(at[atom2]));
+      if (LMN_ATTR_IS_DATA(attr)) {
+        if (pos2 != 0) return FALSE;
       }
       else {
-        if (attr != pos2)
-          return FALSE;
-        REF_CAST(LmnAtomPtr, wt[atom1]) = ap;
+        if (attr != pos2) return FALSE;
       }
+      wt[atom1] = LMN_ATOM_GET_LINK(wt[atom2], pos1);
+      at[atom1] = attr;
       break;
     }
     case INSTR_FUNC:
@@ -894,6 +876,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       start = LinkObj_make((LmnWord)wt[vec_get(srcvec, 0)], at[vec_get(srcvec, 0)]);
       if(!LMN_ATTR_IS_DATA(start->pos)) { /* data atom は積まない */
         vec_push(&stack, (LmnWord)start);
+      } else {
+        LMN_FREE(start);
       }
 
       vec_init(&visited_root, 16);
@@ -985,6 +969,8 @@ ISGROUND_CONT:
       }
       else { /* data atom は積まない */
         if(!lmn_eq_func(start1->ap, start1->pos, start2->ap, start2->pos)) ret_flag = FALSE;
+        LMN_FREE(start1);
+        LMN_FREE(start2);
       }
       while(stack1.num != 0) {
         LinkObj *l1 = (LinkObj *)vec_pop(&stack1);
@@ -1176,7 +1162,8 @@ COPYGROUND_CONT:
           dstlovec->num--;
         }
         vec_free(dstlovec);
-        hashtbl_free(atommap);
+        /* TODO: 要確認. freeはdeleteconnectorsで行うので大丈夫? */
+        /* hashtbl_free(atommap); */
         vec_free(retvec);
         return TRUE;
       }
@@ -1654,6 +1641,7 @@ REMOVE_FREE_GROUND_CONT:
       } else { /* symbol atom */
         LmnFunctor f;
         fprintf(stderr, "symbol atom can't be created in GUARD\n");
+        exit(EXIT_FAILURE);
         LMN_IMS_READ(LmnFunctor, instr, f);
         REF_CAST(LmnAtomPtr, wt[atomi]) = ap;
       }
@@ -1668,11 +1656,11 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, funci);
 
       if (LMN_ATTR_IS_DATA(at[funci])) {
-        READ_DATA_ATOM(wt[atomi], at[funci]);
+        wt[atomi] = lmn_copy_data_atom(wt[funci], at[funci]);
         at[atomi] = at[funci];
       } else { /* symbol atom */
         fprintf(stderr, "symbol atom can't be created in GUARD\n");
-        exit(1);
+        exit(EXIT_FAILURE);
       }
       break;
     }
@@ -1693,7 +1681,10 @@ REMOVE_FREE_GROUND_CONT:
 
       LMN_IMS_READ(LmnFunctor, instr, funci);
       LMN_IMS_READ(LmnInstrVar, instr, atomi);
+
       if(LMN_ATTR_IS_DATA(at[atomi])) {
+        /* TODO: 要確認. ここで得るファンクタはガード命令中で一時的に使われるだけなので
+           double はポインタのコピーで十分なはず */
         wt[funci]=wt[atomi];
       }
       else {
@@ -1779,6 +1770,9 @@ REMOVE_FREE_GROUND_CONT:
 
         lmn_delete_atom(orig);
       }
+
+      /* TODO: 要確認. freeはdeleteconnectorsで行うので大丈夫? */
+      hashtbl_free(delmap);
       break;
     }
     case INSTR_REMOVETOPLEVELPROXIES:
