@@ -7,6 +7,10 @@
 #include "rule.h"
 #include "dumper.h" /* for debug */
 
+/* REFACTOR: このファイルにあるのはふさわしくないので移動する */
+static inline void free_symbol_atom_with_buddy_data(LmnAtomPtr atom);
+
+
 void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 {
   vec_push(&mem->rulesets, (LmnWord)ruleset);
@@ -142,7 +146,7 @@ void lmn_mem_drop(LmnMembrane *mem)
     while (a != lmn_atomset_end(ent)) {
       b = a;
       a = LMN_ATOM_GET_NEXT(a);
-      lmn_delete_atom(b);
+      free_symbol_atom_with_buddy_data(b);
     }
     EMPTY_ATOMLIST(ent);
   }
@@ -608,23 +612,29 @@ void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem)
   }
 }
 
-/* TODO このファイルにあるのはふさわしくない */
+/* REFACTOR: このファイルにあるのはふさわしくない */
+LmnWord lmn_copy_data_atom(LmnWord atom, LmnLinkAttr attr)
+{
+  switch (attr) {
+  case LMN_ATOM_INT_ATTR:
+    return atom;
+  case LMN_ATOM_DBL_ATTR:
+    {
+      double *d = LMN_MALLOC(double);
+      *d = *(double*)atom;
+      return (LmnWord)d;
+    }
+  default:
+    LMN_ASSERT(FALSE);
+    return -1;
+  }
+}
+
+/* REFACTOR: このファイルにあるのはふさわしくない */
 LmnWord lmn_copy_atom(LmnWord atom, LmnLinkAttr attr)
 {
   if (LMN_ATTR_IS_DATA(attr)) {
-    switch (attr) {
-    case LMN_ATOM_INT_ATTR:
-      return atom;
-    case LMN_ATOM_DBL_ATTR:
-    {
-       double *d = LMN_MALLOC(double);
-       *d = *(double*)atom;
-       return (LmnWord)d;
-    }
-    default:
-      LMN_ASSERT(FALSE);
-      return 0;
-    }
+    return lmn_copy_data_atom(atom, attr);
   } else { /* symbol atom */
     LmnFunctor f = LMN_ATOM_GET_FUNCTOR(LMN_ATOM(atom));
     LmnAtomPtr newatom = lmn_new_atom(f);
@@ -725,7 +735,24 @@ static inline void free_data_atom(LmnWord atom, LmnLinkAttr attr)
   }
   return;
 }
-/* TODO: このファイルにあるのはふさわしくないので移動する */
+
+
+/* REFACTOR: このファイルにあるのはふさわしくないので移動する */
+/* シンボルアトムとリンクで接続しているデータアトムを解放する */
+static inline void free_symbol_atom_with_buddy_data(LmnAtomPtr atom)
+{
+  unsigned int i;
+  unsigned int end = LMN_ATOM_GET_LINK_NUM(atom);
+  /* free linked data atoms */
+  for (i = 0; i < end; i++) {
+    if (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, i))) {
+      free_data_atom(LMN_ATOM_GET_LINK(atom, i), LMN_ATOM_GET_LINK_ATTR(atom, i));
+    }
+  }
+  lmn_delete_atom((LmnAtomPtr)atom);
+}
+
+/* REFACTOR: このファイルにあるのはふさわしくないので移動する */
 /* O(ARITY) */
 void lmn_free_atom(LmnWord atom, LmnLinkAttr attr)
 {
@@ -733,14 +760,6 @@ void lmn_free_atom(LmnWord atom, LmnLinkAttr attr)
     free_data_atom(atom, attr);
   }
   else { /* symbol atom */
-    unsigned int i;
-    unsigned int end = LMN_ATOM_GET_LINK_NUM(atom);
-    /* free linked data atoms */
-    for (i = 0; i < end; i++) {
-      if (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, i))) {
-        free_data_atom(LMN_ATOM_GET_LINK(atom, i), LMN_ATOM_GET_LINK_ATTR(atom, i));
-      }
-    }
     lmn_delete_atom((LmnAtomPtr)atom);
   }
 }
