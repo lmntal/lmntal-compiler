@@ -285,14 +285,13 @@ static HashSet *insertconnectors(LmnMembrane *mem, Vector *links)
   return retset;
 }
 
-static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
+static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
 {
   LmnInstrOp op;
-
   while (TRUE) {
   LOOP:;
     LMN_IMS_READ(LmnInstrOp, instr, op);
-/*     fprintf(stderr, "op: %d %d\n", op, instr - start - 2); */
+/*     fprintf(stderr, "op: %d %p\n", op, next_instr); */
 /*     lmn_mem_dump((LmnMembrane*)wt[0]); */
     switch (op) {
     case INSTR_SPEC:
@@ -319,7 +318,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       vec_destroy(&links);
 
       /* EFFICIENCY: 解放のための再帰 */
-      if(interpret(instr, &instr)) {
+      if(interpret(instr, next_instr)) {
         hashset_free((HashSet *)wt[seti]);
         return TRUE;
       }
@@ -347,7 +346,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       vec_destroy(&links);
       
       /* EFFICIENCY: 解放のための再帰 */
-      if(interpret(instr, &instr)) {
+      if(interpret(instr, next_instr)) {
         hashset_free((HashSet *)wt[seti]);
         return TRUE;
       }
@@ -387,7 +386,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
 
       SWAP(LmnWord*, wt, tv);
       SWAP(LmnLinkAttr*, at, tkv);
-      if (interpret(instr, &instr)) return TRUE;
+      if (interpret(instr, next_instr)) return TRUE;
       else {
         SWAP(LmnWord*, wt, tv);
         SWAP(LmnLinkAttr*, at, tkv);
@@ -422,7 +421,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
                atom != lmn_atomset_end(atomlist_ent);
                atom = LMN_ATOM_GET_NEXT(atom)) {
             REF_CAST(LmnAtomPtr, wt[atomi]) = atom;
-            if (interpret(instr, &instr)) return TRUE;
+            if (interpret(instr, &instr)) {
+              *next_instr = instr;
+              return TRUE;
+            }
           }
         }
        return FALSE;
@@ -455,7 +457,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       mp = ((LmnMembrane*)wt[mem2])->child_head;
       while (mp) {
         REF_CAST(LmnMembrane *, wt[mem1]) = mp;
-        if (mp->name == memn && interpret(instr, &instr)) return TRUE;
+        if (mp->name == memn && interpret(instr, &instr)) {
+          *next_instr = instr;
+          return TRUE;
+        }
         mp = mp->next;
       }
       return FALSE;
@@ -680,7 +685,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next)
       break;
     }
     case INSTR_PROCEED:
-      *next = instr;
+      *next_instr = instr;
       return TRUE;
     case INSTR_ENQUEUEATOM:
     {
@@ -1155,7 +1160,7 @@ COPYGROUND_CONT:
       LMN_FREE(start);
       vec_destroy(&stack);
       /* 解放のための再帰 */
-      if(interpret(instr, &instr)) {
+      if(interpret(instr, next_instr)) {
         /* この作業も必要なのか… */
         while(dstlovec->num) {
           LMN_FREE(vec_get(dstlovec, dstlovec->num-1));
@@ -1363,7 +1368,7 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, listi);
       wt[listi] = (LmnWord)listvec;
       /* 解放のための再帰 */
-      if(interpret(instr, &instr)) {
+      if(interpret(instr, next_instr)) {
         vec_free(listvec);
         return TRUE;
       }
@@ -1926,6 +1931,11 @@ REMOVE_FREE_GROUND_CONT:
       LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
       wt[desti] = wt[i0] + wt[i1];
       at[desti] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_GROUP:
+    {
+      if (!interpret(instr, &instr)) return FALSE;
       break;
     }
     default:
