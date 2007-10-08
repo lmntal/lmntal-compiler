@@ -1827,10 +1827,7 @@ static void output_instr(struct Instruction *instr,
     }
   }
 
-  if (!(instr->id == INSTR_GROUP ||
-        instr->id == INSTR_BRANCH)) {
-    WRITE_GO(LmnInstrOp, instr->id, *pos);
-  }
+  WRITE_GO(LmnInstrOp, instr->id, *pos);
   for (i = 0; i < instr->arg_num; i++) {
     struct InstrArg a = instr->args[i];
     output_arg(a, labels, pos, b);
