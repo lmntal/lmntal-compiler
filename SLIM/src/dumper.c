@@ -15,7 +15,7 @@
 struct AtomRec {
   BOOL done;
   SimpleHashtbl args;
-  int link_num; /* proxy only */
+  int link_num; /* 一連のプロキシに割り当てられた番号, proxy only */
 };
 
 struct DumpState {
@@ -46,6 +46,11 @@ static void atomrec_free(struct AtomRec *a)
 {
   hashtbl_destroy(&a->args);
   LMN_FREE(a);
+}
+
+static void dump_state_init(struct DumpState *s)
+{
+  s->link_num = 0;
 }
 
 static BOOL is_direct_printable(char *s)
@@ -84,11 +89,8 @@ static void dump_atomname(LmnFunctor f)
 }
 
 static BOOL dump_data_atom(LmnWord data,
-                           SimpleHashtbl *ht,
                            LmnLinkAttr attr,
-                           struct DumpState *s,
-                           int indent,
-                           int call_depth)
+                           int indent)
 {
   /* print only data (no link) */
   switch (attr) {
@@ -225,7 +227,7 @@ static BOOL dump_proxy(LmnAtomPtr atom,
   if (call_depth == 0) {
     LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(atom, 1);
     if (LMN_ATTR_IS_DATA(attr)) {
-      dump_data_atom((LmnWord)LMN_ATOM_GET_LINK(atom, 1), ht, attr, s, indent, call_depth);
+      dump_data_atom((LmnWord)LMN_ATOM_GET_LINK(atom, 1), attr, indent);
       fprintf(stdout, "(" LINK_FORMAT "). ", t->link_num);
     } else {
       /* symbol atom has dumped */
@@ -311,7 +313,7 @@ static BOOL dump_atom(LmnAtomPtr atom,
                       int call_depth)
 {
   if (LMN_ATTR_IS_DATA(attr)) {
-    return dump_data_atom((LmnWord)atom, ht, attr, s, indent, call_depth);
+    return dump_data_atom((LmnWord)atom, attr, indent);
   }
   else {
     LmnFunctor f = LMN_ATOM_GET_FUNCTOR(atom);
@@ -400,7 +402,7 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
     AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
     LmnFunctor f = hashiter_entry(&iter)->key;
     LmnAtomPtr atom;
-
+    LMN_ASSERT(ent);
     for (atom = atomlist_head(ent);
          atom != lmn_atomset_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
@@ -480,12 +482,13 @@ static void lmn_dump_cell_nonewline(LmnMembrane *mem)
 {
   SimpleHashtbl ht;
   struct DumpState s;
-  s.link_num = 0;
+
+  dump_state_init(&s);
 
   hashtbl_init(&ht, 128);
   lmn_dump_cell_internal(mem, &ht, &s, 0);
 
-  {
+  { /* hashtblの解放 */
     HashIterator iter;
 
     /* 開放処理. 今のところdataに0以外が入っていた場合
@@ -501,8 +504,18 @@ static void lmn_dump_cell_nonewline(LmnMembrane *mem)
 
 void lmn_dump_cell(LmnMembrane *mem)
 {
-  lmn_dump_cell_nonewline(mem);
-  fprintf(stdout, "\n");
+  switch (lmn_env.output_format) {
+  case DEFAULT:
+    lmn_dump_cell_nonewline(mem);
+    fprintf(stdout, "\n");
+    break;
+  case DOT:
+    lmn_dump_dot(mem);
+    break;
+  default:
+    assert(FALSE);
+    exit(EXIT_FAILURE);
+  }
 }
 
 static void lmn_mem_dump_dev(LmnMembrane *mem);
@@ -591,4 +604,130 @@ static void lmn_mem_dump_dev(LmnMembrane *mem)
   lmn_mem_dump_dev(mem->next);
   
   fprintf(stdout, "}\n");
+}
+
+
+/*----------------------------------------------------------------------
+ * dump dot
+ */
+
+static void dump_dot_cell(LmnMembrane *mem,
+                          SimpleHashtbl *ht,
+                          int *data_id,
+                          int *cluster_id)
+{
+  unsigned int i;
+  HashIterator iter;
+
+  if (!mem) return;
+
+  /* dump node labels */
+  for (iter = hashtbl_iterator(&mem->atomset);
+       !hashiter_isend(&iter);
+       hashiter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
+    LmnFunctor f = hashiter_entry(&iter)->key;
+    LmnAtomPtr atom;
+    LMN_ASSERT(ent);
+    for (atom = atomlist_head(ent);
+         atom != lmn_atomset_end(ent);
+         atom = LMN_ATOM_GET_NEXT(atom)) {
+      fprintf(stdout, "%lu [label = \"%s\", shape = circle];\n", (LmnWord)atom,
+              LMN_SYMBOL_STR(LMN_FUNCTOR_NAME_ID(f)));
+      for (i = 0; i < LMN_ATOM_GET_LINK_NUM(atom); i++) {
+        LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(atom, i);
+        if (LMN_ATTR_IS_DATA(attr)) {
+          fprintf(stdout, "%lu [label = \"", (LmnWord)LMN_ATOM_PLINK(atom, i));
+          dump_data_atom(LMN_ATOM_GET_LINK(atom, i), attr, 0);
+          fprintf(stdout, "\", shape = box];\n");
+        }
+      }
+    }
+  }
+
+  /* dump connections */
+  for (iter = hashtbl_iterator(&mem->atomset);
+       !hashiter_isend(&iter);
+       hashiter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
+/*     LmnFunctor f = hashiter_entry(&iter)->key; */
+    LmnAtomPtr atom;
+    LMN_ASSERT(ent);
+    for (atom = atomlist_head(ent);
+         atom != lmn_atomset_end(ent);
+         atom = LMN_ATOM_GET_NEXT(atom)) {
+      struct AtomRec *ar = (struct AtomRec *)hashtbl_get_default(ht, (HashKeyType)atom, 0);
+      unsigned int arity = LMN_ATOM_GET_LINK_NUM(atom);
+
+      
+      for (i = 0; i < arity; i++) {
+        LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(LMN_ATOM(atom), i);
+        
+        if (ar && hashtbl_contains(&ar->args, i)) continue;
+        fprintf(stdout, "%lu -- ", (LmnWord)atom);
+        if (LMN_ATTR_IS_DATA(attr)) {
+          fprintf(stdout, " %lu", (LmnWord)LMN_ATOM_PLINK(atom, i));
+          (*data_id)++;
+        }
+        else { /* symbol atom */
+          struct AtomRec *ar;
+          LmnWord atom2 = LMN_ATOM_GET_LINK(atom, i);
+          if (hashtbl_contains(ht, atom2)) {
+             ar = (struct AtomRec *)hashtbl_get(ht, atom2);
+          } else {
+            ar = atomrec_make();
+            hashtbl_put(ht, (HashKeyType)atom2, (HashValueType)ar);
+          }
+          hashtbl_put(&ar->args, LMN_ATTR_GET_VALUE(attr), 1);
+          fprintf(stdout, "%lu", atom2);
+        }
+        fprintf(stdout, "\n");
+      }
+    }
+  }
+
+
+  { /* dump chidren */
+    LmnMembrane *m;
+    for (m = mem->child_head; m; m = m->next) {
+      fprintf(stdout, "subgraph cluster%d {\n", *cluster_id);
+      (*cluster_id)++;
+      dump_dot_cell(m, ht, data_id, cluster_id);
+      fprintf(stdout, "}\n");
+    }
+  }
+}
+
+void lmn_dump_dot(LmnMembrane *mem)
+{
+  int cluster_id = 0, data_id = 0;
+  struct DumpState s;
+  SimpleHashtbl ht;
+
+  dump_state_init(&s);
+  hashtbl_init(&ht, 128);
+
+  fprintf(stdout, "// This is auto generated file by SLIM\n\n"
+                  "graph {\n"
+                  "node [bgcolor=\"trasnparent\",truecolor=true,color=\"#000000\",style=filled,fillcolor=\"#ffd49b50\"];"
+                  "edge [color=\"#000080\"];"
+          
+          );
+
+  dump_dot_cell(mem, &ht, &data_id, &cluster_id);
+  
+  fprintf(stdout, "}\n");
+
+  {
+    HashIterator iter;
+
+    /* 開放処理. 今のところdataに0以外が入っていた場合
+       struct AtomRecのポインタが格納されている */
+    for (iter = hashtbl_iterator(&ht); !hashiter_isend(&iter); hashiter_next(&iter)) {
+      if (hashiter_entry(&iter)->data) {
+        atomrec_free((struct AtomRec *)hashiter_entry(&iter)->data);
+      }
+    }
+    hashtbl_destroy(&ht);
+  }
 }
