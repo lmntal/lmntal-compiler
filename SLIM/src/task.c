@@ -1950,6 +1950,58 @@ REMOVE_FREE_GROUND_CONT:
       at[desti] = LMN_ATOM_INT_ATTR;
       break;
     }
+    case INSTR_ISUBFUNC:
+    {
+      LmnInstrVar desti, i0, i1;
+
+      LMN_IMS_READ(LmnInstrVar, instr, desti);
+      LMN_IMS_READ(LmnInstrVar, instr, i0);
+      LMN_IMS_READ(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      wt[desti] = wt[i0] - wt[i1];
+      at[desti] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IMULFUNC:
+    {
+      LmnInstrVar desti, i0, i1;
+
+      LMN_IMS_READ(LmnInstrVar, instr, desti);
+      LMN_IMS_READ(LmnInstrVar, instr, i0);
+      LMN_IMS_READ(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      wt[desti] = wt[i0] * wt[i1];
+      at[desti] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IDIVFUNC:
+    {
+      LmnInstrVar desti, i0, i1;
+
+      LMN_IMS_READ(LmnInstrVar, instr, desti);
+      LMN_IMS_READ(LmnInstrVar, instr, i0);
+      LMN_IMS_READ(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      wt[desti] = wt[i0] / wt[i1];
+      at[desti] = LMN_ATOM_INT_ATTR;
+      break;
+    }
+    case INSTR_IMODFUNC:
+    {
+      LmnInstrVar desti, i0, i1;
+
+      LMN_IMS_READ(LmnInstrVar, instr, desti);
+      LMN_IMS_READ(LmnInstrVar, instr, i0);
+      LMN_IMS_READ(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      wt[desti] = wt[i0] % wt[i1];
+      at[desti] = LMN_ATOM_INT_ATTR;
+      break;
+    }
     case INSTR_GROUP:
     {
       if (!interpret(instr, &instr)) return FALSE;
