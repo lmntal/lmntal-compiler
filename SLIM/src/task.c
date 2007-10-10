@@ -863,7 +863,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       BOOL ret_flag; /* freeをたくさん書くのを避けるため */
       LmnInstrVar funci, srclisti, avolisti;
       Vector *srcvec, *avovec; 
-      HashSet avoset, visited_atoms;
+      HashSet /*avoset, */visited_atoms;
       Vector stack, visited_root;
       LinkObj *start;
       LMN_IMS_READ(LmnInstrVar, instr, funci);
@@ -872,10 +872,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
 
       srcvec = (Vector*) wt[srclisti];
       avovec = (Vector*) wt[avolisti];
-      hashset_init(&avoset, 16);
+      /*hashset_init(&avoset, 16);
       for(i = 0; i < avovec->num; i++) {
         hashset_add(&avoset, vec_get(avovec, i));
-      }
+      }*/
 
       vec_init(&stack, 16);
       start = LinkObj_make((LmnWord)wt[vec_get(srcvec, 0)], at[vec_get(srcvec, 0)]);
@@ -896,13 +896,30 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       ret_flag=TRUE;
       while(stack.num!=0) {
         LinkObj* lo = (LinkObj *)vec_pop(&stack);
-        
+
         if(hashset_contains(&visited_atoms, (HashKeyType)lo->ap)) {
           LMN_FREE(lo);
           continue;
         }
-        if(hashset_contains(&avoset, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos))) ||
+
+        /*if(hashset_contains(&avoset, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos))) ||
             LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(lo->ap))) {
+          LMN_FREE(lo);
+          ret_flag=FALSE;
+          break;
+        }*/
+        for(i = 0; i < avovec->num; i++) {
+          LmnAtomPtr avolink = (LmnAtomPtr)wt[vec_get(avovec, i)];
+          LmnLinkAttr avoattr = at[vec_get(avovec, i)];
+          if((LmnAtomPtr)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos)) == avolink &&
+              LMN_ATOM_GET_LINK_ATTR(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos)) == avoattr) {
+            ret_flag=FALSE;
+            break;
+          }
+        }
+        if(!ret_flag) break;
+
+        if(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(lo->ap))) {
           LMN_FREE(lo);
           ret_flag=FALSE;
           break;
@@ -938,7 +955,7 @@ ISGROUND_CONT:
           break;
         }
       }
-      hashset_destroy(&avoset);
+      /*hashset_destroy(&avoset);*/
       hashset_destroy(&visited_atoms);
       vec_destroy(&stack);
       vec_destroy(&visited_root);
@@ -948,8 +965,8 @@ ISGROUND_CONT:
       break;
     }
     case INSTR_EQGROUND:
+    case INSTR_NEQGROUND:
     {
-      /* TODO: NEQGROUNDもあるので関数化する */
       unsigned int i, j;
       BOOL ret_flag = TRUE; /* 資源解放を一箇所に集めるため */
       LmnInstrVar srci, dsti;
@@ -1039,17 +1056,17 @@ ISGROUND_CONT:
                   LMN_ATOM_GET_LINK(l2->ap, i), LMN_ATOM_GET_LINK_ATTR(l2->ap, i))) {
               LMN_FREE(l1); LMN_FREE(l2);
               ret_flag = FALSE;
-              goto EQGROUND_BREAK;
+              goto EQGROUND_NEQGROUND_BREAK;
             }
           }
         }
         LMN_FREE(l1); LMN_FREE(l2);
       }
-EQGROUND_BREAK:
+EQGROUND_NEQGROUND_BREAK:
       vec_destroy(&stack1);
       vec_destroy(&stack2);
       hashtbl_destroy(&map);
-      if(!ret_flag) {
+      if((!ret_flag && INSTR_EQGROUND == op) || (ret_flag && INSTR_NEQGROUND == op)) {
         return FALSE;
       }
       break;
