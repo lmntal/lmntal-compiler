@@ -772,14 +772,15 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar memi;
       LMN_IMS_READ(LmnInstrVar, instr, memi);
-      /* TODO: 何する */
+      memstack_push((LmnMembrane *)wt[memi]);
+      /* TODO: 何する -> pushする */
       break;
     }
     case INSTR_UNLOCKMEM:
     {
       LmnInstrVar memi;
       LMN_IMS_READ(LmnInstrVar, instr, memi);
-      /* TODO: 何する */
+      /* TODO: 何する -> 何もしない */
       break;
     }
     case INSTR_LOADRULESET:
