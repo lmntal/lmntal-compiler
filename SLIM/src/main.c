@@ -21,6 +21,7 @@ static void usage(void)
           "options:\n"
           "  --showproxy     Show proxy atoms\n"
           "  --hideruleset   Hide ruleset from result\n"
+          "  --dot           Output result dot format graph\n"
           "  --version       Prints version and exits.\n"
           "  --help          This Help.\n"
           );
@@ -41,6 +42,7 @@ static int parse_options(int argc, char *argv[])
     {"help",    0, 0, 1001},
     {"showproxy",  0, 0, 1002},
     {"hideruleset",  0, 0, 1003},
+    {"dot", 0, 0, 1004},
     {0, 0, 0, 0}
   };
 
@@ -62,6 +64,9 @@ static int parse_options(int argc, char *argv[])
     case 1003:
       lmn_env.show_ruleset = FALSE;
       break;
+    case 1004:
+      lmn_env.output_format = DOT;
+      break;
     default:
       printf("?? getopt returned character code 0x%x ??\n", c);
       exit(1);
@@ -77,6 +82,7 @@ static void init_env(void)
   lmn_env.dev_dump = FALSE;
   lmn_env.show_proxy = FALSE;
   lmn_env.show_ruleset = TRUE;
+  lmn_env.output_format = DEFAULT;
 }
     
 static void init_internal(void)
