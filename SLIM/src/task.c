@@ -763,6 +763,20 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       lmn_mem_free(mp);
       break;
     }
+    case INSTR_ENQUEUEMEM:
+    {
+      LmnInstrVar memi;
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      /* TODO: 何する */
+      break;
+    }
+    case INSTR_UNLOCKMEM:
+    {
+      LmnInstrVar memi;
+      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      /* TODO: 何する */
+      break;
+    }
     case INSTR_LOADRULESET:
     {
       LmnInstrVar memi;
