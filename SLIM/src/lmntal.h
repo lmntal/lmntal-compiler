@@ -184,7 +184,7 @@ typedef uint8_t LmnLinkAttr;
 /* TODO GET_FUNCTORを２回呼んでしまっている */
 #define LMN_ATOM_GET_LINK_NUM(ATOM)   \
   ((LMN_FUNCTOR_ARITY(LMN_ATOM_GET_FUNCTOR(ATOM))) -  \
-   (LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(ATOM)) ? 1 : 0))
+   (LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(ATOM)) ? 1U : 0U))
 
 /* get/set N th link attribute of  ATOM */
 #define LMN_ATOM_GET_LINK_ATTR(ATOM,N)    \
@@ -338,10 +338,13 @@ extern struct LmnRuleSetTable lmn_ruleset_table;
 
 /* Runtime Environment */
 
+enum OutputFormat { DEFAULT, DOT };
+
 struct LmnEnv {
   BOOL dev_dump;
   BOOL show_proxy;
   BOOL show_ruleset;
+  enum OutputFormat output_format;
 };
 
 extern struct LmnEnv  lmn_env;
