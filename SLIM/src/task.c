@@ -177,8 +177,9 @@ void run(void)
     if(!exec(mem)) {
       if (!compiled_ruleset_react(&system_ruleset, mem)) {
         m = memstack_pop();
-        /* TODO: 確認. 膜スタックから削除される時に親膜を活性化する */
-        if (m->parent && !m->parent->is_activated) memstack_push(m->parent);
+        /* TODO: 確認. 膜スタックから削除される時に親膜を活性化する
+           ENQUEUEMEMで積まれるので必要ないっぽい */
+        /* if (m->parent && !m->parent->is_activated) memstack_push(m->parent); */
       }
     }
 /*     memstack_printall(); */
