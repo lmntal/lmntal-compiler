@@ -242,6 +242,10 @@ struct InstrSpec {
     {"ine", INSTR_INE, {InstrVar, InstrVar, 0}},
 
     {"iaddfunc", INSTR_IADDFUNC, {InstrVar, InstrVar, InstrVar, 0}},
+    {"isubfunc", INSTR_ISUBFUNC, {InstrVar, InstrVar, InstrVar, 0}},
+    {"imulfunc", INSTR_IMULFUNC, {InstrVar, InstrVar, InstrVar, 0}},
+    {"idivfunc", INSTR_IDIVFUNC, {InstrVar, InstrVar, InstrVar, 0}},
+    {"imodfunc", INSTR_IMODFUNC, {InstrVar, InstrVar, InstrVar, 0}},
   };
 
 /*----------------------------------------------------------------------
