@@ -72,6 +72,7 @@ void memstack_push(LmnMembrane *mem)
   ent->mem = mem;
   ent->next = memstack.head->next;
   memstack.head->next = ent;
+  mem->is_activated = TRUE;
 }
 
 static LmnMembrane* memstack_pop()
@@ -79,6 +80,7 @@ static LmnMembrane* memstack_pop()
   struct Entity *ent = memstack.head->next;
   LmnMembrane *mem = ent->mem;
   memstack.head->next = ent->next;
+  mem->is_activated = FALSE;
   LMN_FREE(ent);
   return mem;
 }
@@ -171,9 +173,12 @@ void run(void)
   
   while(!memstack_isempty()){
     LmnMembrane *mem = memstack_peek();
+    LmnMembrane *m;
     if(!exec(mem)) {
       if (!compiled_ruleset_react(&system_ruleset, mem)) {
-        memstack_pop();
+        m = memstack_pop();
+        /* TODO: 確認. 膜スタックから削除される時に親膜を活性化する */
+        if (m->parent && !m->parent->is_activated) memstack_push(m->parent);
       }
     }
 /*     memstack_printall(); */

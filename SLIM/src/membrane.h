@@ -22,6 +22,7 @@ struct LmnMembrane {
   unsigned int     atom_num; /* # of atom except proxy */
   struct Vector	   rulesets;
   lmn_interned_str name;
+  BOOL             is_activated;
 };
 
 /* TODO: 名前をAtomListに変更 */

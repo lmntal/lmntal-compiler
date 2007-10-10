@@ -117,7 +117,7 @@ LmnMembrane *lmn_mem_make(void)
   
   memset(mem, 0, sizeof(LmnMembrane)); /* set all data to 0 */
   vec_init(&mem->rulesets, 1);
-  hashtbl_init(&mem->atomset, 4); /* 初期サイズはいくつが適当？ */
+  hashtbl_init(&mem->atomset, 4); /* TODO: 初期サイズはいくつが適当？ */
   return mem;
 }
 
