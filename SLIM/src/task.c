@@ -1402,7 +1402,7 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_NEWLIST:
     {
       LmnInstrVar listi;
-      Vector *listvec = vec_make_default();
+      Vector *listvec = vec_make(16);
       LMN_IMS_READ(LmnInstrVar, instr, listi);
       wt[listi] = (LmnWord)listvec;
       /* 解放のための再帰 */
