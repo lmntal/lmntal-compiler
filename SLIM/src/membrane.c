@@ -39,7 +39,7 @@ static AtomSetEntry *make_atomlist()
   return as;
 }
 
-static void mem_push_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom)
+void mem_push_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom)
 {
   AtomSetEntry *as;
   LmnFunctor f = LMN_ATOM_GET_FUNCTOR(atom); 
@@ -207,8 +207,8 @@ BOOL lmn_mem_natoms(LmnMembrane *mem, unsigned int count)
 BOOL lmn_mem_nmems(LmnMembrane *mem, unsigned int count)
 {
 	unsigned int i;
-	LmnMembrane* mp = mem->child_head;
-	for(i = 0; mp && i < count; mp=mp->next, i++);
+	LmnMembrane *mp = mem->child_head;
+	for(i = 0; mp && i < count; mp = mp->next, i++);
   return i == count;
 }
 
