@@ -16,8 +16,8 @@ R = pre2tree(ST,[op(TY,AR,Q,Z)|CDR]) :- R = pre2tree([op(TY,AR,Q,Z)|ST],CDR).
 
 /* push operand into operator */
 R = pre2tree([op(TY,AR,Q,Z)|ST],[opf(TY1,ARG)|CDR]) :-
-	int(AR), AR=\=0 |
-    R = pre2tree([op(TY,AR-1,Q,N)|ST],CDR), Z=[opf(TY1,ARG)|N].
+	int(AR), AR=\=0, AR1=AR-1 |
+    R = pre2tree([op(TY,AR1,Q,N)|ST],CDR), Z=[opf(TY1,ARG)|N].
 
 /* pop operator(filled) (it will be used as operand) */
 R = pre2tree([op(TY,AR,Q,Z)|ST],CDR) :-
@@ -51,8 +51,8 @@ R = post2tree(ST,[op(TY,0,ARG)|CDR]) :- R = post2tree([opf(TY,ARG)|ST],CDR).
 
 /* set operand into operator */
 R = post2tree([OPR|ST],[op(TY,AR,ARG)|CDR]) :-
-	int(AR), AR=\=0 |
-    R = post2tree(ST,[op(TY,AR-1,[OPR|ARG])|CDR]).
+	int(AR), AR=\=0, AR1=AR-1 |
+    R = post2tree(ST,[op(TY,AR1,[OPR|ARG])|CDR]).
 
 /* finalize */
 R = post2tree([opf(TY,ARG)],[]) :- R = opf(TY,ARG).
@@ -63,15 +63,15 @@ R = post2tree([opf(TY,ARG)],[]) :- R = opf(TY,ARG).
 /* ***************************************** */
 
 /* length of list(list will be back from L2) */
-R = length([],L2) :- R = 0, L2 = [].
-R = length([CAR|CDR],L2) :- R = 1+length(CDR,N2), L2 = [CAR|N2].
+R = length(L,L2) :- R = length(L,0,L2).
+R = length([],N,L2) :- R = N, L2 = [].
+R = length([CAR|CDR],N,L2) :- M=N+1 | R = length(CDR,M,N2), L2 = [CAR|N2].
 
 /* initialize */
 R = tree2pre(X) :- R = tree2pre(X,[]).
 
 /* exchange of node */
 R = tree2pre(opf(num,[X]),TAIL) :- int(X) | R = [X|TAIL].
-/* type が num でないならば, と書きたい. このままではルール適用が上に書いたものから、という実装に依存してしまう */
 R = tree2pre(opf(TY,ARG),TAIL) :- R = [op(TY,length(ARG,ARG2))|tree2prearg(ARG2,TAIL)].
 
 /* recursion for argument */
@@ -88,12 +88,11 @@ R = tree2in(X) :- R = tree2in(X,[]).
 
 /* exchange of node */
 R = tree2in(opf(num,[X]),TAIL) :- int(X) | R = [X|TAIL].
-/* type が num でないならば, と書きたい. このままではルール適用が上に書いたものから、という実装に依存してしまう */
 /* one term operater */
 R = tree2in(opf(TY,[X]),TAIL) :- R = ['(',op(TY,1)|tree2in(X,[')'|TAIL])].
 /* two or more term operator */
 R = tree2in(opf(TY,[X|Y]),TAIL) :-
-	R = ['('|tree2in(X,[op(TY,1+length(Y,Y2))|N])], N = tree2inarg(Y2,[')'|TAIL]).
+	R = ['('|tree2in(X,[op(TY,length(Y,1,Y2))|N])], N = tree2inarg(Y2,[')'|TAIL]).
 
 /* recursion for argument */
 R = tree2inarg([CAR|CDR],TAIL) :- R = tree2in(CAR,N), N = tree2inarg(CDR,TAIL).
@@ -109,7 +108,6 @@ R = tree2post(X) :- R = tree2post(X,[]).
 
 /* exchange of node */
 R = tree2post(opf(num,[X]),TAIL) :- int(X) | R = [X|TAIL].
-/* type が num でないならば, と書きたい. このままではルール適用が上に書いたものから、という実装に依存してしまう */
 R = tree2post(opf(TY,ARG),TAIL) :- R = tree2postarg(ARG2,[op(TY,length(ARG,ARG2))|TAIL]).
 
 /* recursion for argument */
@@ -128,9 +126,9 @@ R = evalarg([]) :- R = [].
 
 /* evaluate operator */
 R = evaled(opf(num,[X])) :- int(X) | R = X.
-R = evaled(opf('+',[X,Y])) :- int(X),int(Y) | R = X+Y.
-R = evaled(opf('*',[X,Y])) :- int(X),int(Y) | R = X*Y.
-R = evaled(opf('-',[X,Y])) :- int(X),int(Y) | R = X-Y.
+R = evaled(opf('+',[X,Y])) :- Z=X+Y | R = Z.
+R = evaled(opf('*',[X,Y])) :- Z=X*Y | R = Z.
+R = evaled(opf('-',[X,Y])) :- Z=X-Y | R = Z.
 
 
 /* ***************************************** */

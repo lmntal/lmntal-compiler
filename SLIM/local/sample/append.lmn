@@ -1,4 +1,4 @@
-r = append([1,2,3], [4,5,6]).
+r = append([a,b,c], [1,2,3]).
 
 R = append([H|T],B) :- R = [H|append(T,B)].
 R = append([],B) :- R = B.

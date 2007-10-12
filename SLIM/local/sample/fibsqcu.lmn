@@ -1,41 +1,26 @@
 fibsqcu(100, r).
 
-global@@
 fibsqcu(N, R) :-
 	sum(T,0,R), merge(SQ,CU,T),
 	square(F1,SQ), cube(F2,CU),
 	copy(F,F1,F2), fibonacci(1,0,N,F).
 
-sum_close@@
 sum([],S,R) :- S=R.
-sum_prog@@
-sum([T|X],S,R) :- sum(X,S+T,R).
+sum([T|X],S,R) :- U=S+T | sum(X,U,R).
 
-merge_close_l@@
 merge([],S2,R) :- S2=R.
-merge_close_r@@
 merge(S1,[],R) :- S1=R.
-merge_prog_l@@
 merge([T|X],S2,R) :- R=[T|N], merge(X,S2,N).
-merge_prog_r@@
 merge(S1,[T|X],R) :- R=[T|N], merge(S1,X,N).
 
-square_close@@
 square([],R) :- R=[].
-square_prog@@
-square([T|X],R) :- ground(T) | R=[T*T|N], square(X,N).
+square([T|X],R) :- U=T*T | R=[U|N], square(X,N).
 
-cube_close@@
 cube([],R) :- R=[].
-cube_prog@@
-cube([T|X],R) :- ground(T) | R=[T*T*T|N], cube(X,N).
+cube([T|X],R) :- U=T*T*T | R=[U|N], cube(X,N).
 
-copy_close@@
 copy([],R,S) :- R=[], S=[].
-copy_prog@@
-copy([T|X],R,S) :- ground(T) | R=[T|P], S=[T|Q], copy(X,P,Q).
+copy([T|X],R,S) :- int(T) | R=[T|P], S=[T|Q], copy(X,P,Q).
 
-fib_close@@
 fibonacci(A,B,Z,R) :- A+B>=Z | R=[].
-fib_prog@@
-fibonacci(A,B,Z,R) :- A+B=<Z | R=[A+B|N], fibonacci(B,A+B,Z,N).
+fibonacci(A,B,Z,R) :- A+B=<Z,C=A+B | R=[C|N], fibonacci(B,C,Z,N).
