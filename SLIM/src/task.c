@@ -774,14 +774,12 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar memi;
       LMN_IMS_READ(LmnInstrVar, instr, memi);
       memstack_push((LmnMembrane *)wt[memi]);
-      /* TODO: 何する -> pushする */
       break;
     }
     case INSTR_UNLOCKMEM:
-    {
+    { /* 何もしない */
       LmnInstrVar memi;
       LMN_IMS_READ(LmnInstrVar, instr, memi);
-      /* TODO: 何する -> 何もしない */
       break;
     }
     case INSTR_LOADRULESET:
@@ -1834,7 +1832,6 @@ REMOVE_FREE_GROUND_CONT:
         lmn_delete_atom(orig);
       }
 
-      /* TODO: 要確認. freeはdeleteconnectorsで行うので大丈夫? */
       hashtbl_free(delmap);
       break;
     }
