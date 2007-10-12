@@ -162,12 +162,12 @@ HashIterator hashtbl_iterator(SimpleHashtbl *ht)
   iter.i = 0;
   iter.ht = ht;
   if (ht->cap > 0 && ht->tbl[iter.i].key == EMPTY_KEY) {
-    hashiter_next(&iter);
+    hashtbliter_next(&iter);
   }
   return iter;
 }
 
-void hashiter_next(HashIterator *iter)
+void hashtbliter_next(HashIterator *iter)
 {
   while (++iter->i < iter->ht->cap &&
          iter->ht->tbl[iter->i].key == EMPTY_KEY) ;

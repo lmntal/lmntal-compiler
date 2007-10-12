@@ -139,9 +139,9 @@ void lmn_mem_drop(LmnMembrane *mem)
 
   /* free all atoms */
   for (iter = hashtbl_iterator(&mem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
+       !hashtbliter_isend(&iter);
+       hashtbliter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
     LmnAtomPtr a = LMN_ATOM(ent->head), b;
     while (a != lmn_atomset_end(ent)) {
       b = a;
@@ -161,9 +161,9 @@ void lmn_mem_free(LmnMembrane *mem)
   LMN_ASSERT(mem->atom_num == 0);
   /* free all atomlists  */
   for (iter = hashtbl_iterator(&mem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    LMN_FREE(hashiter_entry(&iter)->data);
+       !hashtbliter_isend(&iter);
+       hashtbliter_next(&iter)) {
+    LMN_FREE(hashtbliter_entry(&iter)->data);
   }
   hashtbl_destroy(&mem->atomset);
   vec_destroy(&mem->rulesets);
@@ -376,10 +376,10 @@ void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
     HashIterator iter;
 
     for (iter = hashtbl_iterator(&srcmem->atomset);
-         !hashiter_isend(&iter);
-         hashiter_next(&iter)) {
-      LmnFunctor f = (LmnFunctor)hashiter_entry(&iter)->key;
-      AtomSetEntry *srcent = (AtomSetEntry *)hashiter_entry(&iter)->data;
+         !hashtbliter_isend(&iter);
+         hashtbliter_next(&iter)) {
+      LmnFunctor f = (LmnFunctor)hashtbliter_entry(&iter)->key;
+      AtomSetEntry *srcent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
       AtomSetEntry *destent = lmn_mem_get_atomlist(destmem, f);
 
       if (LMN_IS_PROXY_FUNCTOR(f)) {
@@ -396,7 +396,7 @@ void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
       }
       else {
         /* リストをdestに移す */
-        hashiter_entry(&iter)->data = 0; /* freeされないように NULL にする */
+        hashtbliter_entry(&iter)->data = 0; /* freeされないように NULL にする */
         hashtbl_put(&destmem->atomset, (HashKeyType)f, (HashValueType)srcent);
       }
     }
@@ -669,9 +669,9 @@ SimpleHashtbl *lmn_mem_copy_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
 
   /* copy atoms */
   for (iter = hashtbl_iterator(&srcmem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
+       !hashtbliter_isend(&iter);
+       hashtbliter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
     LmnAtomPtr srcatom;
     
     LMN_ASSERT(ent);

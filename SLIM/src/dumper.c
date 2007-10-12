@@ -397,10 +397,10 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
   /* 優先順位に応じて起点となるアトムを振り分ける */
 
   for (iter = hashtbl_iterator(&mem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
-    LmnFunctor f = hashiter_entry(&iter)->key;
+       !hashtbliter_isend(&iter);
+       hashtbliter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+    LmnFunctor f = hashtbliter_entry(&iter)->key;
     LmnAtomPtr atom;
     LMN_ASSERT(ent);
     for (atom = atomlist_head(ent);
@@ -493,9 +493,9 @@ static void lmn_dump_cell_nonewline(LmnMembrane *mem)
 
     /* 開放処理. 今のところdataに0以外が入っていた場合
        struct AtomRecのポインタが格納されている */
-    for (iter = hashtbl_iterator(&ht); !hashiter_isend(&iter); hashiter_next(&iter)) {
-      if (hashiter_entry(&iter)->data) {
-        atomrec_free((struct AtomRec *)hashiter_entry(&iter)->data);
+    for (iter = hashtbl_iterator(&ht); !hashtbliter_isend(&iter); hashtbliter_next(&iter)) {
+      if (hashtbliter_entry(&iter)->data) {
+        atomrec_free((struct AtomRec *)hashtbliter_entry(&iter)->data);
       }
     }
     hashtbl_destroy(&ht);
@@ -587,9 +587,9 @@ static void lmn_mem_dump_dev(LmnMembrane *mem)
   
   fprintf(stdout, "{\n");
   for (iter = hashtbl_iterator(&mem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
+       !hashtbliter_isend(&iter);
+       hashtbliter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
     LmnAtomPtr atom;
 
     for (atom = atomlist_head(ent);
@@ -623,10 +623,10 @@ static void dump_dot_cell(LmnMembrane *mem,
 
   /* dump node labels */
   for (iter = hashtbl_iterator(&mem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
-    LmnFunctor f = hashiter_entry(&iter)->key;
+       !hashtbliter_isend(&iter);
+       hashtbliter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+    LmnFunctor f = hashtbliter_entry(&iter)->key;
     LmnAtomPtr atom;
     LMN_ASSERT(ent);
     for (atom = atomlist_head(ent);
@@ -647,10 +647,10 @@ static void dump_dot_cell(LmnMembrane *mem,
 
   /* dump connections */
   for (iter = hashtbl_iterator(&mem->atomset);
-       !hashiter_isend(&iter);
-       hashiter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashiter_entry(&iter)->data;
-/*     LmnFunctor f = hashiter_entry(&iter)->key; */
+       !hashtbliter_isend(&iter);
+       hashtbliter_next(&iter)) {
+    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+/*     LmnFunctor f = hashtbliter_entry(&iter)->key; */
     LmnAtomPtr atom;
     LMN_ASSERT(ent);
     for (atom = atomlist_head(ent);
@@ -723,9 +723,9 @@ void lmn_dump_dot(LmnMembrane *mem)
 
     /* 開放処理. 今のところdataに0以外が入っていた場合
        struct AtomRecのポインタが格納されている */
-    for (iter = hashtbl_iterator(&ht); !hashiter_isend(&iter); hashiter_next(&iter)) {
-      if (hashiter_entry(&iter)->data) {
-        atomrec_free((struct AtomRec *)hashiter_entry(&iter)->data);
+    for (iter = hashtbl_iterator(&ht); !hashtbliter_isend(&iter); hashtbliter_next(&iter)) {
+      if (hashtbliter_entry(&iter)->data) {
+        atomrec_free((struct AtomRec *)hashtbliter_entry(&iter)->data);
       }
     }
     hashtbl_destroy(&ht);

@@ -39,10 +39,9 @@ void hashtbl_free(SimpleHashtbl *ht);
 #define hashtbl_num(HT) (HT)->num
 
 HashIterator hashtbl_iterator(SimpleHashtbl *ht);
-/* TODO: rename to hashtbliter */
-void hashiter_next(HashIterator *iter);
-#define hashiter_entry(I) (&((I)->ht->tbl[(I)->i]))
-#define hashiter_isend(I) ((I)->i >= (I)->ht->cap)
+void hashtbliter_next(HashIterator *iter);
+#define hashtbliter_entry(I) (&((I)->ht->tbl[(I)->i]))
+#define hashtbliter_isend(I) ((I)->i >= (I)->ht->cap)
 
 /* HashSet */
 typedef struct HashSet {
