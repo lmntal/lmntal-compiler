@@ -14,11 +14,6 @@
 #include "task.h"
 #include "vector.h"
 
-/* TO BE MOVED TO task.h */
-#define LINK_LIST     1
-#define LIST_AND_MAP  2
-#define MAP           3
-
 /* this size should be the maximum size of 'spec' arguments */
 /* Or allocated when required */
 LmnWord v1[1024];
@@ -34,7 +29,6 @@ LmnByte *at, *tkv;  /* attribute table */
 LmnCompiledRuleset system_ruleset;
 
 #define SWAP(T,X,Y)       do { T t=(X); (X)=(Y); (Y)=t;} while(0)
-#define REF_CAST(T,X)     (*(T*)&(X))
 
 struct Entity {
   LmnMembrane  *mem;
@@ -104,7 +98,7 @@ static BOOL react_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
   int i;
   LmnRuleInstr dummy;
 
-  REF_CAST(LmnMembrane*, wt[0]) = mem;
+  wt[0] = (LmnWord)mem;
   for (i = 0; i < ruleset->num; i++) {
     if (interpret(ruleset->rules[i]->instr, &dummy)) return TRUE;
   }
@@ -426,7 +420,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
           for (atom = atomlist_head(atomlist_ent);
                atom != lmn_atomset_end(atomlist_ent);
                atom = LMN_ATOM_GET_NEXT(atom)) {
-            REF_CAST(LmnAtomPtr, wt[atomi]) = atom;
+            wt[atomi] = (LmnWord)atom;
             if (interpret(instr, &instr)) {
               *next_instr = instr;
               return TRUE;
@@ -462,7 +456,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
 
       mp = ((LmnMembrane*)wt[mem2])->child_head;
       while (mp) {
-        REF_CAST(LmnMembrane *, wt[mem1]) = mp;
+        wt[mem1] = (LmnWord)mp;
         if (mp->name == memn && interpret(instr, &instr)) {
           *next_instr = instr;
           return TRUE;
@@ -536,7 +530,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
         wt[link] = wt[atom];
         at[link] = at[atom];
       } else { /* link to atom */
-        REF_CAST(LmnAtomPtr, wt[link]) = LMN_ATOM(wt[atom]);
+        wt[link] = (LmnWord)LMN_ATOM(wt[atom]);
         at[link] = LMN_ATTR_MAKE_LINK(n);
       }
       break;
@@ -719,7 +713,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
 
       mp = lmn_mem_make(); /*lmn_new_mem(memf);*/
       lmn_mem_add_child_mem((LmnMembrane*)wt[parentmemi], mp);
-      REF_CAST(LmnMembrane*, wt[newmemi]) = mp;
+      wt[newmemi] = (LmnWord)mp;
       memstack_push(mp);
       break;
     }
@@ -799,7 +793,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
       LMN_IMS_READ(LmnInstrVar, instr, posi);
             
-      REF_CAST(LmnAtomPtr, wt[atom1]) = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], posi));
+      wt[atom1] = (LmnWord)LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], posi));
       at[atom1] = LMN_ATOM_GET_LINK_ATTR(wt[atom2], posi);
       break;
     }
@@ -1476,7 +1470,7 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      REF_CAST(int, wt[dstatom]) = (int)wt[atom1] + (int)wt[atom2];
+      wt[dstatom] = (LmnWord)((int)wt[atom1] + (int)wt[atom2]);
       at[dstatom] = LMN_ATOM_INT_ATTR;
       break;
     }
@@ -1487,7 +1481,7 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      REF_CAST(int, wt[dstatom]) = (int)wt[atom1] - (int)wt[atom2];
+      wt[dstatom] = (LmnWord)((int)wt[atom1] - (int)wt[atom2]);
       at[dstatom] = LMN_ATOM_INT_ATTR;
       break;
     }
@@ -1498,7 +1492,7 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      REF_CAST(int, wt[dstatom]) = (int)wt[atom1] * (int)wt[atom2];
+      wt[dstatom] = (LmnWord)((int)wt[atom1] * (int)wt[atom2]);
       at[dstatom] = LMN_ATOM_INT_ATTR;
       break;
     }
@@ -1509,7 +1503,7 @@ REMOVE_FREE_GROUND_CONT:
       LMN_IMS_READ(LmnInstrVar, instr, atom1);
       LMN_IMS_READ(LmnInstrVar, instr, atom2);
 
-      REF_CAST(int, wt[dstatom]) = (int)wt[atom1] / (int)wt[atom2];
+      wt[dstatom] = (LmnWord)((int)wt[atom1] / (int)wt[atom2]);
       at[dstatom] = LMN_ATOM_INT_ATTR;
       break;
     }
@@ -1704,7 +1698,7 @@ REMOVE_FREE_GROUND_CONT:
         fprintf(stderr, "symbol atom can't be created in GUARD\n");
         exit(EXIT_FAILURE);
         LMN_IMS_READ(LmnFunctor, instr, f);
-        REF_CAST(LmnAtomPtr, wt[atomi]) = ap;
+        wt[atomi] = (LmnWord)ap;
       }
       break;
     }
@@ -1749,7 +1743,7 @@ REMOVE_FREE_GROUND_CONT:
         wt[funci]=wt[atomi];
       }
       else {
-        REF_CAST(LmnFunctor, wt[funci]) = LMN_ATOM_GET_FUNCTOR(wt[atomi]);
+        wt[funci] = (LmnWord)LMN_ATOM_GET_FUNCTOR(wt[atomi]);
       }
       at[funci] = at[atomi];
 
@@ -1820,7 +1814,7 @@ REMOVE_FREE_GROUND_CONT:
       delset = (HashSet *)wt[srcset];
       delmap = (SimpleHashtbl *)wt[srcmap];
 
-      for(it = hashset_iterator(delset); !hashsetiter_isend(&it); hashset_it_next(&it)) {
+      for(it = hashset_iterator(delset); !hashsetiter_isend(&it); hashsetiter_next(&it)) {
         LmnAtomPtr orig = (LmnAtomPtr)hashsetiter_entry(&it);
         LmnAtomPtr copy = (LmnAtomPtr)hashtbl_get(delmap, (HashKeyType)orig);
         lmn_mem_unify_symbol_atom_args(copy, 0, copy, 1);
