@@ -1029,7 +1029,7 @@ ISGROUND_CONT:
           unsigned int index = vec_get(srcv, i);
           if (l1->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
               && l1->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
-              contains1 = TRUE;
+            contains1 = TRUE;
             break;
           }
         }
@@ -1037,7 +1037,7 @@ ISGROUND_CONT:
           unsigned int index = vec_get(dstv, j);
           if (l2->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
               && l2->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
-              contains2 = TRUE;
+            contains2 = TRUE;
             break;
           }
         }
@@ -1116,7 +1116,7 @@ EQGROUND_NEQGROUND_BREAK:
       LMN_IMS_READ(LmnInstrVar, instr, memi);
 
       srcvec = (Vector *)wt[srclist];
-      
+
       vec_init(&stack, 16); /* 再帰除去用スタック */
 
       hashtbl_init(atommap, 256);
@@ -1157,9 +1157,9 @@ EQGROUND_NEQGROUND_BREAK:
         for(i = 0; i < srcvec->num; i++){
           unsigned int index = vec_get(srcvec, i);
           if (lo->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
-          && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
             goto COPYGROUND_CONT;
-	        }
+          }
         }
 
         if(!hashtbl_contains(atommap, (HashKeyType)lo->ap)) {
@@ -1231,20 +1231,21 @@ COPYGROUND_CONT:
     case INSTR_REMOVEGROUND:
     case INSTR_FREEGROUND:
     {
-      /* メモリ解放 */
       unsigned int i;
       LmnInstrVar listi, memi;
-      Vector *srcvec;
+      Vector *srcvec; /* 変数番号のリスト */
       HashSet visited_atoms;
       Vector stack;
       LinkObj *start;
+
       LMN_IMS_READ(LmnInstrVar, instr, listi);
       if (INSTR_REMOVEGROUND == op) {
         LMN_IMS_READ(LmnInstrVar, instr, memi);
       }
+
       srcvec = (Vector *)wt[listi];
-      
-      vec_init(&stack, 16);
+
+      vec_init(&stack, 16); /* 再帰除去用スタック */
       start = LinkObj_make((LmnWord)wt[vec_get(srcvec, 0)], at[vec_get(srcvec, 0)]);
       if(!LMN_ATTR_IS_DATA(start->pos)) {
         vec_push(&stack, (LmnWord)start);
@@ -1253,23 +1254,25 @@ COPYGROUND_CONT:
         switch (op) {
           case INSTR_REMOVEGROUND:
             lmn_mem_remove_atom((LmnMembrane*)wt[memi], start->ap, start->pos);
+            LMN_FREE(start);
             break;
           case INSTR_FREEGROUND:
-            /* data atomは接続されたsymbol atomがfreeされると一緒にfreeされるので放置 */
-            /*lmn_free_atom(start->ap, start->pos);*/
+            /* data atomは接続されたsymbol atomがfreeされると一緒にfreeされる */
+            LMN_FREE(start);
             break;
         }
       }
 
       hashset_init(&visited_atoms, 256);
 
-      while(stack.num != 0) {
+      while(stack.num != 0) { /* main loop: start */
         LinkObj *lo = (LinkObj *)vec_pop(&stack);
 
         if(hashset_contains(&visited_atoms, (HashKeyType)lo->ap))
           continue;
+
         hashset_add(&visited_atoms, (LmnWord)lo->ap);
-        for(i = 0; i < srcvec->num; i++) {
+        for(i = 0; i < srcvec->num; i++) { /* 根に到達したか */
           unsigned int index = vec_get(srcvec, i);
           if (lo->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
               && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
@@ -1291,12 +1294,12 @@ COPYGROUND_CONT:
                 lmn_mem_remove_atom((LmnMembrane*)wt[memi], (LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
                 break;
               case INSTR_FREEGROUND:
-                /* data atomは接続されたsymbol atomがfreeされると一緒にfreeされるので放置 */
-                /*lmn_free_atom((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_LINK_ATTR(lo->ap, i));*/
+                /* data atomは接続されたsymbol atomがfreeされると一緒にfreeされる */
                 break;
             }
           }
         }
+
         switch (op) {
           case INSTR_REMOVEGROUND:
             lmn_mem_remove_atom((LmnMembrane*)wt[memi], lo->ap, lo->pos);
@@ -1305,9 +1308,11 @@ COPYGROUND_CONT:
             lmn_free_atom(lo->ap, lo->pos);
             break;
         }
+
 REMOVE_FREE_GROUND_CONT:
         LMN_FREE(lo);
-      }
+      } /* main loop: end */
+
       vec_destroy(&stack);
       hashset_destroy(&visited_atoms);
       break;
