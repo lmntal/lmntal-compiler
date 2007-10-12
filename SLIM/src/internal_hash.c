@@ -250,12 +250,12 @@ HashSetIterator hashset_iterator(HashSet *set) {
   it.i = 0;
   it.set = set;
   if(set->cap > 0 && set->tbl[it.i] == EMPTY_KEY) {
-    hashset_it_next(&it);
+    hashsetiter_next(&it);
   }
   return it;
 }
 
-void hashset_it_next(HashSetIterator *it) {
+void hashsetiter_next(HashSetIterator *it) {
   while (++it->i < it->set->cap && it->set->tbl[it->i] == EMPTY_KEY);
 }
 
