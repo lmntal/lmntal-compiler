@@ -4,6 +4,7 @@
 
 #include "memory_pool.h"
 #include "lmntal.h"
+#include "atom.h"
 #include <malloc.h>
 
 #define ARYSIZE(ary)	(sizeof(ary)/sizeof((ary)[0]))
@@ -11,8 +12,6 @@
 /*----------------------------------------------------------------------
  * memory allocation for atom
  */
-
-/* TODO stub implementation */
 
 static memory_pool *atom_memory_pools[128];
 
