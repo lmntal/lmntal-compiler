@@ -2,14 +2,11 @@
  * membrane.c
  */
 
-#include <ctype.h>
 #include "membrane.h"
+#include "atom.h"
 #include "rule.h"
 #include "dumper.h" /* for debug */
-
-/* REFACTOR: このファイルにあるのはふさわしくないので移動する */
-static inline void free_symbol_atom_with_buddy_data(LmnAtomPtr atom);
-
+#include <ctype.h>
 
 void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 {
@@ -32,19 +29,19 @@ void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
     LMN_ATOM_SET_NEXT((X), (X));                \
   } while (0)
 
-static AtomSetEntry *make_atomlist()
+static AtomListEntry *make_atomlist()
 {
-  AtomSetEntry *as = LMN_MALLOC(struct AtomSetEntry);
+  AtomListEntry *as = LMN_MALLOC(struct AtomListEntry);
   EMPTY_ATOMLIST(as);
   return as;
 }
 
 void mem_push_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom)
 {
-  AtomSetEntry *as;
+  AtomListEntry *as;
   LmnFunctor f = LMN_ATOM_GET_FUNCTOR(atom); 
 
-  as = (AtomSetEntry *)hashtbl_get_default(&mem->atomset, f, 0);
+  as = (AtomListEntry *)hashtbl_get_default(&mem->atomset, f, 0);
   if (!as) {
     as = make_atomlist();
     hashtbl_put(&mem->atomset, (LmnWord)f, (HashKeyType)as);
@@ -75,9 +72,9 @@ void lmn_mem_push_atom(LmnMembrane *mem, LmnWord atom, LmnLinkAttr attr)
 } 
 
 /* append e2 to e1 */
-static inline void append_atomlist(AtomSetEntry *e1, AtomSetEntry *e2)
+static inline void append_atomlist(AtomListEntry *e1, AtomListEntry *e2)
 {
-  if (atomlist_head(e2) != lmn_atomset_end(e2)) {/* true if e2 is not empty */
+  if (atomlist_head(e2) != lmn_atomlist_end(e2)) {/* true if e2 is not empty */
     LMN_ATOM_SET_NEXT(e1->tail, e2->head);
     LMN_ATOM_SET_PREV(e2->head, e1->tail);
     LMN_ATOM_SET_NEXT(e2->tail, e1);
@@ -117,7 +114,7 @@ LmnMembrane *lmn_mem_make(void)
   
   memset(mem, 0, sizeof(LmnMembrane)); /* set all data to 0 */
   vec_init(&mem->rulesets, 1);
-  hashtbl_init(&mem->atomset, 4); /* TODO: 初期サイズはいくつが適当？ */
+  hashtbl_init(&mem->atomset, 16); /* EFFICIENCY: 初期サイズはいくつが適当？ */
   return mem;
 }
 
@@ -141,9 +138,9 @@ void lmn_mem_drop(LmnMembrane *mem)
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashtbliter_isend(&iter);
        hashtbliter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+    AtomListEntry *ent = (AtomListEntry *)hashtbliter_entry(&iter)->data;
     LmnAtomPtr a = LMN_ATOM(ent->head), b;
-    while (a != lmn_atomset_end(ent)) {
+    while (a != lmn_atomlist_end(ent)) {
       b = a;
       a = LMN_ATOM_GET_NEXT(a);
       free_symbol_atom_with_buddy_data(b);
@@ -174,7 +171,6 @@ void lmn_mem_free(LmnMembrane *mem)
 /* add newmem to parent chid membranes */
 void lmn_mem_add_child_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
 {
-  /* TODO: membrane activation */
   newmem->next = parentmem->child_head;
   newmem->parent = parentmem;
   LMN_ASSERT(parentmem);
@@ -183,9 +179,9 @@ void lmn_mem_add_child_mem(LmnMembrane *parentmem, LmnMembrane *newmem)
 }
 
 /* return NULL when atomlist don't exists. */
-AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
+AtomListEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f)
 {
-  return (AtomSetEntry*)hashtbl_get_default(&mem->atomset, f, 0);
+  return (AtomListEntry*)hashtbl_get_default(&mem->atomset, f, 0);
 }
 
 /* make atom which functor is f, and push atom into mem */
@@ -196,9 +192,6 @@ LmnAtomPtr lmn_mem_newatom(LmnMembrane *mem, LmnFunctor f)
   return atom;
 }
 
-/* TODO: 全てのシンボルアトムをなめているので O(n) になっている */
-/* TODO: データアトムの個数を数えていない. 正確に行うには
-   引数の先を確かめる必要がある */
 BOOL lmn_mem_natoms(LmnMembrane *mem, unsigned int count)
 {
   return mem->atom_num == count;
@@ -213,12 +206,11 @@ BOOL lmn_mem_nmems(LmnMembrane *mem, unsigned int count)
 }
 
 /* return TRUE if # of freelinks in mem is equal to count */
-/* TODO: O(N) になっている */
-/* リストをたどって数を数えているのでO(n)。
+/* EFFICIENCY: リストをたどって数を数えているのでO(n)。
    countがそれほど大きくならなければ問題はないが */
 BOOL lmn_mem_nfreelinks(LmnMembrane *mem, unsigned int count)
 {
-  AtomSetEntry *ent = (AtomSetEntry *)hashtbl_get_default(&mem->atomset,
+  AtomListEntry *ent = (AtomListEntry *)hashtbl_get_default(&mem->atomset,
                                                           LMN_IN_PROXY_FUNCTOR,
                                                           0);
   unsigned int n;
@@ -226,7 +218,7 @@ BOOL lmn_mem_nfreelinks(LmnMembrane *mem, unsigned int count)
   
   if (!ent) return count == 0;
   for (atom = atomlist_head(ent), n = 0;
-       atom != lmn_atomset_end(ent) && n<=count;
+       atom != lmn_atomlist_end(ent) && n<=count;
        atom = LMN_ATOM_GET_NEXT(atom), n++) {}
   return count == n;
 }
@@ -241,8 +233,8 @@ void lmn_mem_link_data_atoms(LmnMembrane *mem,
 
   LMN_ATOM_SET_LINK(ap, 0, d0);
   LMN_ATOM_SET_LINK(ap, 1, d1);
-  LMN_ATOM_SET_LINK_ATTR(ap, 0, attr0);
-  LMN_ATOM_SET_LINK_ATTR(ap, 1, attr1);
+  LMN_ATOM_SET_ATTR(ap, 0, attr0);
+  LMN_ATOM_SET_ATTR(ap, 1, attr1);
   mem_push_symbol_atom(mem, ap);
 }
 
@@ -253,14 +245,14 @@ void lmn_mem_unify_symbol_atom_args(LmnAtomPtr atom1,
                                     int pos2)
 {
   LmnWord ap1 = LMN_ATOM_GET_LINK(atom1, pos1);
-  LmnLinkAttr attr1 = LMN_ATOM_GET_LINK_ATTR(atom1, pos1);
+  LmnLinkAttr attr1 = LMN_ATOM_GET_ATTR(atom1, pos1);
   LmnWord ap2 = LMN_ATOM_GET_LINK(atom2, pos2);
-  LmnLinkAttr attr2 = LMN_ATOM_GET_LINK_ATTR(atom2, pos2);
+  LmnLinkAttr attr2 = LMN_ATOM_GET_ATTR(atom2, pos2);
 
   LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
-  LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
+  LMN_ATOM_SET_ATTR(ap2, attr2, attr1);
   LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
-  LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
+  LMN_ATOM_SET_ATTR(ap1, attr1, attr2);
 }
 
 /* atom1, atom2はシンボルアトムのはず */
@@ -271,31 +263,30 @@ void lmn_mem_unify_atom_args(LmnMembrane *mem,
                    int pos2)
 {
   LmnWord ap1 = LMN_ATOM_GET_LINK(atom1, pos1);
-  LmnLinkAttr attr1 = LMN_ATOM_GET_LINK_ATTR(atom1, pos1);
+  LmnLinkAttr attr1 = LMN_ATOM_GET_ATTR(atom1, pos1);
   LmnWord ap2 = LMN_ATOM_GET_LINK(atom2, pos2);
-  LmnLinkAttr attr2 = LMN_ATOM_GET_LINK_ATTR(atom2, pos2);
+  LmnLinkAttr attr2 = LMN_ATOM_GET_ATTR(atom2, pos2);
 
   if(LMN_ATTR_IS_DATA(attr1) && LMN_ATTR_IS_DATA(attr2)) {
     lmn_mem_link_data_atoms(mem, ap1, attr1, ap2, attr2);
   }
   else if (LMN_ATTR_IS_DATA(attr1)) {
     LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
-    LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
+    LMN_ATOM_SET_ATTR(ap2, attr2, attr1);
   }
   else if (LMN_ATTR_IS_DATA(attr2)) {
     LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
-    LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
+    LMN_ATOM_SET_ATTR(ap1, attr1, attr2);
   }
   else {
     LMN_ATOM_SET_LINK(ap2, attr2, (LmnWord)ap1);
-    LMN_ATOM_SET_LINK_ATTR(ap2, attr2, attr1);
+    LMN_ATOM_SET_ATTR(ap2, attr2, attr1);
     LMN_ATOM_SET_LINK(ap1, attr1, (LmnWord)ap2);
-    LMN_ATOM_SET_LINK_ATTR(ap1, attr1, attr2);
+    LMN_ATOM_SET_ATTR(ap1, attr1, attr2);
   }
 }
 
 /* シンボルアトムに限定したnewlink */
-/* TODO: memの関数でないので名前からmemを取り除く */
 void lmn_newlink_in_symbols(LmnAtomPtr atom0,
                             int pos0,
                             LmnAtomPtr atom1,
@@ -303,8 +294,8 @@ void lmn_newlink_in_symbols(LmnAtomPtr atom0,
 {
   LMN_ATOM_SET_LINK(atom0, pos0, (LmnWord)atom1);
   LMN_ATOM_SET_LINK(atom1, pos1, (LmnWord)atom0); 
-  LMN_ATOM_SET_LINK_ATTR(atom0, pos0, pos1);
-  LMN_ATOM_SET_LINK_ATTR(atom1, pos1, pos0);
+  LMN_ATOM_SET_ATTR(atom0, pos0, pos1);
+  LMN_ATOM_SET_ATTR(atom1, pos1, pos0);
 }
 
 /* シンボルアトムatom0と, シンボルorデータアトム atom1 の間にリンクを張る
@@ -315,10 +306,10 @@ static inline void newlink_symbol_and_something(LmnAtomPtr atom0,
                                                 LmnLinkAttr attr)
 {
   LMN_ATOM_SET_LINK(atom0, pos, atom1);
-  LMN_ATOM_SET_LINK_ATTR(atom0, pos, attr);
+  LMN_ATOM_SET_ATTR(atom0, pos, attr);
   if (!LMN_ATTR_IS_DATA(attr)) {
     LMN_ATOM_SET_LINK(LMN_ATOM(atom1), LMN_ATTR_GET_VALUE(attr), (LmnWord)atom0);
-    LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(atom1), LMN_ATTR_GET_VALUE(attr), LMN_ATTR_MAKE_LINK(pos));
+    LMN_ATOM_SET_ATTR(LMN_ATOM(atom1), LMN_ATTR_GET_VALUE(attr), LMN_ATTR_MAKE_LINK(pos));
   }
 }
 
@@ -337,19 +328,18 @@ void lmn_mem_newlink(LmnMembrane *mem,
     }
     else { /* atom0 data, atom1 symbol */
       LMN_ATOM_SET_LINK(LMN_ATOM(atom1), pos1, atom0);
-      LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(atom1), pos1, attr0);
+      LMN_ATOM_SET_ATTR(LMN_ATOM(atom1), pos1, attr0);
     }
   }
   else if (LMN_ATTR_IS_DATA(attr1)) { /* atom0 symbol, atom1 data */
     LMN_ATOM_SET_LINK(LMN_ATOM(atom0), pos0, atom1);
-    LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(atom0), pos0, attr1);
+    LMN_ATOM_SET_ATTR(LMN_ATOM(atom0), pos0, attr1);
   }
   else { /* both symbol */
     lmn_newlink_in_symbols(LMN_ATOM(atom0), pos0, LMN_ATOM(atom1), pos1);
   }
 }
 
-/* TODO: atom0, atom1がデータでないことが保証されれば,attrは不要 */
 void lmn_mem_relink_atom_args(LmnMembrane *mem,
                               LmnWord atom0,
                               LmnLinkAttr attr0,
@@ -358,7 +348,7 @@ void lmn_mem_relink_atom_args(LmnMembrane *mem,
                               LmnLinkAttr attr1,
                               int pos1)
 {
-  /* TODO: relinkではatom0,atom1がデータになることは,セマンティクスで禁止されるはず
+  /* TODO: relinkではatom0,atom1がデータになることはないはず
            このことを確認する */
   LMN_ASSERT(!LMN_ATTR_IS_DATA(attr0) &&
              !LMN_ATTR_IS_DATA(attr1));
@@ -366,7 +356,7 @@ void lmn_mem_relink_atom_args(LmnMembrane *mem,
   newlink_symbol_and_something(LMN_ATOM(atom0),
                                pos0,
                                LMN_ATOM_GET_LINK(LMN_ATOM(atom1), pos1),
-                               LMN_ATOM_GET_LINK_ATTR(LMN_ATOM(atom1), pos1));
+                               LMN_ATOM_GET_ATTR(LMN_ATOM(atom1), pos1));
 }
 
 void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
@@ -379,13 +369,13 @@ void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
          !hashtbliter_isend(&iter);
          hashtbliter_next(&iter)) {
       LmnFunctor f = (LmnFunctor)hashtbliter_entry(&iter)->key;
-      AtomSetEntry *srcent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
-      AtomSetEntry *destent = lmn_mem_get_atomlist(destmem, f);
+      AtomListEntry *srcent = (AtomListEntry *)hashtbliter_entry(&iter)->data;
+      AtomListEntry *destent = lmn_mem_get_atomlist(destmem, f);
 
       if (LMN_IS_PROXY_FUNCTOR(f)) {
         LmnAtomPtr a;
         for (a = atomlist_head(srcent);
-             a != lmn_atomset_end(srcent);
+             a != lmn_atomlist_end(srcent);
              a = LMN_ATOM_GET_NEXT(a)) {
           LMN_PROXY_SET_MEM(a, (LmnWord)destmem);
         }
@@ -416,17 +406,17 @@ void lmn_mem_move_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
 
 #define REMOVE            1
 #define STAR              2
-#define STATE(ATOM)        (LMN_ATOM_GET_LINK_ATTR((ATOM), 2))
-#define SET_STATE(ATOM,S)  (LMN_ATOM_SET_LINK_ATTR((ATOM), 2, (S)))
+#define STATE(ATOM)        (LMN_ATOM_GET_ATTR((ATOM), 2))
+#define SET_STATE(ATOM,S)  (LMN_ATOM_SET_ATTR((ATOM), 2, (S)))
 
 void lmn_mem_remove_proxies(LmnMembrane *mem)
 {
-  AtomSetEntry *ent;
+  AtomListEntry *ent;
   LmnAtomPtr opxy;
   Vector remove_list;
   unsigned int i;
 
-  ent = (AtomSetEntry *)hashtbl_get_default(&mem->atomset,
+  ent = (AtomListEntry *)hashtbl_get_default(&mem->atomset,
                                            LMN_OUT_PROXY_FUNCTOR,
                                            0);
   if (!ent) return;
@@ -435,17 +425,17 @@ void lmn_mem_remove_proxies(LmnMembrane *mem)
 
   /* clear mem attribute */
   for (opxy = atomlist_head(ent);
-       opxy != lmn_atomset_end(ent);
+       opxy != lmn_atomlist_end(ent);
        opxy = LMN_ATOM_GET_NEXT(opxy)) {
-    LMN_ATOM_SET_LINK_ATTR(opxy, 2, 0);
+    LMN_ATOM_SET_ATTR(opxy, 2, 0);
   }
 
   for (opxy = atomlist_head(ent);
-       opxy != lmn_atomset_end(ent);
+       opxy != lmn_atomlist_end(ent);
        opxy = LMN_ATOM_GET_NEXT(opxy)) {
     LmnAtomPtr a0 = LMN_ATOM(LMN_ATOM_GET_LINK(opxy, 0));
     if (LMN_PROXY_GET_MEM(a0)->parent != mem &&
-        !LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(opxy, 1))) {
+        !LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(opxy, 1))) {
       LmnAtomPtr a1 = LMN_ATOM(LMN_ATOM_GET_LINK(opxy, 1));
       LmnFunctor f1 = LMN_ATOM_GET_FUNCTOR(a1);
       if (f1 == LMN_IN_PROXY_FUNCTOR) {
@@ -482,11 +472,11 @@ void lmn_mem_remove_proxies(LmnMembrane *mem)
 void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem)
 {
   Vector remove_list;
-  AtomSetEntry *ent;
+  AtomListEntry *ent;
   LmnAtomPtr star, oldstar;
   unsigned int i;
   
-  ent = (AtomSetEntry *)hashtbl_get_default(&child_mem->atomset,
+  ent = (AtomListEntry *)hashtbl_get_default(&child_mem->atomset,
                                             LMN_OUT_PROXY_FUNCTOR,
                                             0);
   if (!ent) return;
@@ -494,7 +484,7 @@ void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem)
   vec_init(&remove_list, 16);
 
   for (star = atomlist_head(ent);
-       star != lmn_atomset_end(ent);
+       star != lmn_atomlist_end(ent);
        star = LMN_ATOM_GET_NEXT(star)) {
     if (STATE(star) != STAR) continue;
     oldstar = LMN_ATOM(LMN_ATOM_GET_LINK(star, 0));
@@ -538,11 +528,11 @@ void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem)
 void lmn_mem_remove_temporary_proxies(LmnMembrane *mem)
 {
   LmnAtomPtr star, outside;
-  AtomSetEntry *ent;
+  AtomListEntry *ent;
   Vector remove_list;
   unsigned int i;
 
-  ent = (AtomSetEntry *)hashtbl_get_default(&mem->atomset,
+  ent = (AtomListEntry *)hashtbl_get_default(&mem->atomset,
                                             LMN_OUT_PROXY_FUNCTOR,
                                             0);
   
@@ -551,7 +541,7 @@ void lmn_mem_remove_temporary_proxies(LmnMembrane *mem)
   vec_init(&remove_list, 16);
   
   for (star = atomlist_head(ent);
-       star != lmn_atomset_end(ent);
+       star != lmn_atomlist_end(ent);
        star = LMN_ATOM_GET_NEXT(star)) {
     if (STATE(star) != STAR) continue;
     outside = LMN_ATOM(LMN_ATOM_GET_LINK(star, 0));
@@ -572,11 +562,11 @@ void lmn_mem_remove_temporary_proxies(LmnMembrane *mem)
 void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem)
 {
   Vector remove_list;
-  AtomSetEntry *ent;
+  AtomListEntry *ent;
   LmnAtomPtr outside;
   unsigned int i;
   
-  ent = (AtomSetEntry *)hashtbl_get_default(&mem->atomset,
+  ent = (AtomListEntry *)hashtbl_get_default(&mem->atomset,
                                             LMN_OUT_PROXY_FUNCTOR,
                                             0);
   if (!ent) return;
@@ -584,7 +574,7 @@ void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem)
   vec_init(&remove_list, 16);
 
   for (outside = atomlist_head(ent);
-       outside != lmn_atomset_end(ent);
+       outside != lmn_atomlist_end(ent);
        outside = LMN_ATOM_GET_NEXT(outside)) {
     LmnAtomPtr a0;
     if (STATE(outside) == REMOVE) continue;
@@ -609,37 +599,6 @@ void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem)
   for (i = 0; i < remove_list.num; i++) {
     mem_remove_symbol_atom(mem, LMN_ATOM(vec_get(&remove_list, i)));
     lmn_delete_atom(LMN_ATOM(vec_get(&remove_list, i)));
-  }
-}
-
-/* REFACTOR: このファイルにあるのはふさわしくない */
-LmnWord lmn_copy_data_atom(LmnWord atom, LmnLinkAttr attr)
-{
-  switch (attr) {
-  case LMN_ATOM_INT_ATTR:
-    return atom;
-  case LMN_ATOM_DBL_ATTR:
-    {
-      double *d = LMN_MALLOC(double);
-      *d = *(double*)atom;
-      return (LmnWord)d;
-    }
-  default:
-    LMN_ASSERT(FALSE);
-    return -1;
-  }
-}
-
-/* REFACTOR: このファイルにあるのはふさわしくない */
-LmnWord lmn_copy_atom(LmnWord atom, LmnLinkAttr attr)
-{
-  if (LMN_ATTR_IS_DATA(attr)) {
-    return lmn_copy_data_atom(atom, attr);
-  } else { /* symbol atom */
-    LmnFunctor f = LMN_ATOM_GET_FUNCTOR(LMN_ATOM(atom));
-    LmnAtomPtr newatom = lmn_new_atom(f);
-    memcpy((void *)newatom, (void *)atom, LMN_WORD_BYTES*LMN_ATOM_WORDS(LMN_FUNCTOR_ARITY(f)));
-    return (LmnWord)newatom;
   }
 }
 
@@ -671,13 +630,13 @@ SimpleHashtbl *lmn_mem_copy_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
   for (iter = hashtbl_iterator(&srcmem->atomset);
        !hashtbliter_isend(&iter);
        hashtbliter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+    AtomListEntry *ent = (AtomListEntry *)hashtbliter_entry(&iter)->data;
     LmnAtomPtr srcatom;
     
     LMN_ASSERT(ent);
     
     for (srcatom = atomlist_head(ent);
-         srcatom != lmn_atomset_end(ent);
+         srcatom != lmn_atomlist_end(ent);
          srcatom = LMN_ATOM_GET_NEXT(srcatom)) {
       LmnFunctor f;
       LmnAtomPtr newatom;
@@ -708,73 +667,14 @@ SimpleHashtbl *lmn_mem_copy_cells(LmnMembrane *destmem, LmnMembrane *srcmem)
 
       /* リンク先と接続 */
       for (i = start; i < end; i++) {
-        LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(srcatom, i);
+        LmnLinkAttr attr = LMN_ATOM_GET_ATTR(srcatom, i);
         LmnWord newargatom = lmn_copy_atom(LMN_ATOM_GET_LINK(srcatom, i), attr);
         newlink_symbol_and_something(newatom, i, newargatom, attr);
       }
     }
   }
   destmem->atom_num += srcmem->atom_num;
-  
   hashtbl_destroy(&mem_to_atoms);
 
   return atoms;
-}
-
-static inline void free_data_atom(LmnWord atom, LmnLinkAttr attr)
-{
-  switch (attr) {
-  case LMN_ATOM_INT_ATTR:
-    break;
-  case LMN_ATOM_DBL_ATTR:
-    LMN_FREE((double*)atom);
-    break;
-  default:
-    LMN_ASSERT(FALSE);
-    break;
-  }
-  return;
-}
-
-
-/* REFACTOR: このファイルにあるのはふさわしくないので移動する */
-/* シンボルアトムとリンクで接続しているデータアトムを解放する */
-static inline void free_symbol_atom_with_buddy_data(LmnAtomPtr atom)
-{
-  unsigned int i;
-  unsigned int end = LMN_ATOM_GET_LINK_NUM(atom);
-  /* free linked data atoms */
-  for (i = 0; i < end; i++) {
-    if (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, i))) {
-      free_data_atom(LMN_ATOM_GET_LINK(atom, i), LMN_ATOM_GET_LINK_ATTR(atom, i));
-    }
-  }
-  lmn_delete_atom((LmnAtomPtr)atom);
-}
-
-/* REFACTOR: このファイルにあるのはふさわしくないので移動する */
-/* O(ARITY) */
-void lmn_free_atom(LmnWord atom, LmnLinkAttr attr)
-{
-  if (LMN_ATTR_IS_DATA(attr)) {
-    free_data_atom(atom, attr);
-  }
-  else { /* symbol atom */
-    lmn_delete_atom((LmnAtomPtr)atom);
-  }
-}
-
-BOOL lmn_eq_func(LmnWord atom0, LmnLinkAttr attr0, LmnWord atom1, LmnLinkAttr attr1)
-{
-  /* TODO: シンボルアトムのattrがすべて等しい値であることを確認する */
-  if (attr0 != attr1) return FALSE;
-  switch (attr0) {
-  case LMN_ATOM_INT_ATTR:
-    return atom0 == atom1;
-  case LMN_ATOM_DBL_ATTR:
-    /* TODO: 浮動小数点の比較は要確認 */
-    return *(double *)atom0 == *(double *)atom1;
-  default: /* symbol atom */
-    return LMN_ATOM_GET_FUNCTOR(atom0) == LMN_ATOM_GET_FUNCTOR(atom1);
-  }
 }

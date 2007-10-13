@@ -8,6 +8,7 @@
 #include "vector.h"
 #include "rule.h"
 #include "membrane.h"
+#include "atom.h"
 
 #define MAX_DEPTH 1000
 #define LINK_FORMAT "L%d"
@@ -94,10 +95,10 @@ static BOOL dump_data_atom(LmnWord data,
 {
   /* print only data (no link) */
   switch (attr) {
-  case  LMN_ATOM_INT_ATTR:
+  case  LMN_INT_ATTR:
     fprintf(stdout, "%d", (int)data);
     break;
-  case  LMN_ATOM_DBL_ATTR:
+  case  LMN_DBL_ATTR:
     fprintf(stdout, "%f", *(double*)data);
     break;
   default:
@@ -151,12 +152,12 @@ static BOOL dump_list(LmnAtomPtr atom,
       else {
         dump_atom(LMN_ATOM(LMN_ATOM_GET_LINK(atom, 0)),
                   ht,
-                  LMN_ATOM_GET_LINK_ATTR(atom, 0),
+                  LMN_ATOM_GET_ATTR(atom, 0),
                   s,
                   indent,
                   call_depth + 1);
       }
-      attr = LMN_ATOM_GET_LINK_ATTR(atom, 1);
+      attr = LMN_ATOM_GET_ATTR(atom, 1);
       atom = LMN_ATOM(LMN_ATOM_GET_LINK(atom, 1));
     }
     else if (!LMN_ATTR_IS_DATA(attr) &&
@@ -195,7 +196,7 @@ static void propagate_proxy_link(LmnAtomPtr atom,
   t->link_num = link_num;
   for (i = 0; i < 2; i++) {
     propagate_proxy_link(LMN_ATOM(LMN_ATOM_GET_LINK(atom, i)),
-                         LMN_ATOM_GET_LINK_ATTR(atom, i),
+                         LMN_ATOM_GET_ATTR(atom, i),
                          ht,
                          link_num);
   }
@@ -225,7 +226,7 @@ static BOOL dump_proxy(LmnAtomPtr atom,
   t->done = TRUE;
 
   if (call_depth == 0) {
-    LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(atom, 1);
+    LmnLinkAttr attr = LMN_ATOM_GET_ATTR(atom, 1);
     if (LMN_ATTR_IS_DATA(attr)) {
       dump_data_atom((LmnWord)LMN_ATOM_GET_LINK(atom, 1), attr, indent);
       fprintf(stdout, "(" LINK_FORMAT "). ", t->link_num);
@@ -293,7 +294,7 @@ static BOOL dump_symbol_atom(LmnAtomPtr atom,
       else {
         dump_atom((LmnAtomPtr)LMN_ATOM_GET_LINK(atom, i),
                   ht,
-                  LMN_ATOM_GET_LINK_ATTR(atom, i),
+                  LMN_ATOM_GET_ATTR(atom, i),
                   s,
                   indent,
                   call_depth + 1);
@@ -362,7 +363,7 @@ static void dump_ruleset(struct Vector *v, int indent)
                   
 #define INDENT_INCR 2
 
-static void lmn_mem_dump_internal(LmnMembrane *mem,
+static void lmn_dump_mem_internal(LmnMembrane *mem,
                                   SimpleHashtbl *ht,
                                   struct DumpState *s,
                                   int indent)
@@ -399,12 +400,12 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashtbliter_isend(&iter);
        hashtbliter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+    AtomListEntry *ent = (AtomListEntry *)hashtbliter_entry(&iter)->data;
     LmnFunctor f = hashtbliter_entry(&iter)->key;
     LmnAtomPtr atom;
     LMN_ASSERT(ent);
     for (atom = atomlist_head(ent);
-         atom != lmn_atomset_end(ent);
+         atom != lmn_atomlist_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
       int arity = LMN_ATOM_GET_ARITY(atom);
       if (f == LMN_IN_PROXY_FUNCTOR ||
@@ -417,15 +418,15 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
       }
       /* 1 argument, link to the last argument */
       else if (arity == 1 &&
-               (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ||
-                (int)LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, 0)) ==
+               (LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(atom, 0)) ||
+                (int)LMN_ATTR_GET_VALUE(LMN_ATOM_GET_ATTR(atom, 0)) ==
                 LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, 0)) - 1)) {
         vec_push(&pred_atoms[P1], (LmnWord)atom);
       }
       /* link to the last argument */
       else if (arity > 1 &&
-               (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ||
-                (int)LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(atom, arity-1)) ==
+               (LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(atom, arity-1)) ||
+                (int)LMN_ATTR_GET_VALUE(LMN_ATOM_GET_ATTR(atom, arity-1)) ==
                 LMN_ATOM_GET_ARITY(LMN_ATOM_GET_LINK(atom, arity-1)) - 1)) {
         vec_push(&pred_atoms[P2], (LmnWord)atom);
       }
@@ -463,7 +464,7 @@ static void lmn_dump_cell_internal(LmnMembrane *mem,
   { /* dump chidren */
     LmnMembrane *m;
     for (m = mem->child_head; m; m = m->next) {
-      lmn_mem_dump_internal(m, ht, s, indent);
+      lmn_dump_mem_internal(m, ht, s, indent);
       if (m->next)
         fprintf(stdout, ", ");
     }
@@ -518,16 +519,16 @@ void lmn_dump_cell(LmnMembrane *mem)
   }
 }
 
-static void lmn_mem_dump_dev(LmnMembrane *mem);
+static void lmn_dump_mem_dev(LmnMembrane *mem);
 
 /* print membrane structure */
-void lmn_mem_dump(LmnMembrane *mem)
+void lmn_dump_mem(LmnMembrane *mem)
 {
   if (lmn_env.dev_dump) {
-    lmn_mem_dump_dev(mem);
+    lmn_dump_mem_dev(mem);
     return;
   }
-  /* TODO: 幕名を表示。　関数の構成を見直す */
+
   fprintf(stdout, "{");
   lmn_dump_cell_nonewline(mem);
   fprintf(stdout, "}\n");
@@ -547,13 +548,13 @@ static void dump_atom_dev(LmnAtomPtr atom)
     LmnLinkAttr attr;
 
     fprintf(stdout, "%u: ", i);
-    attr = LMN_ATOM_GET_LINK_ATTR(atom,i);
+    attr = LMN_ATOM_GET_ATTR(atom,i);
     if (LMN_ATTR_IS_DATA(attr)) {
       switch (attr) {
-      case  LMN_ATOM_INT_ATTR:
+      case  LMN_INT_ATTR:
         fprintf(stdout, "int[%lu], ", LMN_ATOM_GET_LINK(atom,i));
         break;
-      case  LMN_ATOM_DBL_ATTR:
+      case  LMN_DBL_ATTR:
         fprintf(stdout, "double[%f], ", *(double*)LMN_ATOM_GET_LINK(atom,i));
         break;
       default:
@@ -579,7 +580,7 @@ static void dump_ruleset_dev(struct Vector *v)
 }
                   
 
-static void lmn_mem_dump_dev(LmnMembrane *mem)
+static void lmn_dump_mem_dev(LmnMembrane *mem)
 {
   HashIterator iter;
 
@@ -589,19 +590,19 @@ static void lmn_mem_dump_dev(LmnMembrane *mem)
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashtbliter_isend(&iter);
        hashtbliter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+    AtomListEntry *ent = (AtomListEntry *)hashtbliter_entry(&iter)->data;
     LmnAtomPtr atom;
 
     for (atom = atomlist_head(ent);
-         atom != lmn_atomset_end(ent);
+         atom != lmn_atomlist_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
       dump_atom_dev(atom);
     }
   }
 
   dump_ruleset_dev(&mem->rulesets);
-  lmn_mem_dump_dev(mem->child_head);
-  lmn_mem_dump_dev(mem->next);
+  lmn_dump_mem_dev(mem->child_head);
+  lmn_dump_mem_dev(mem->next);
   
   fprintf(stdout, "}\n");
 }
@@ -625,17 +626,17 @@ static void dump_dot_cell(LmnMembrane *mem,
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashtbliter_isend(&iter);
        hashtbliter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+    AtomListEntry *ent = (AtomListEntry *)hashtbliter_entry(&iter)->data;
     LmnFunctor f = hashtbliter_entry(&iter)->key;
     LmnAtomPtr atom;
     LMN_ASSERT(ent);
     for (atom = atomlist_head(ent);
-         atom != lmn_atomset_end(ent);
+         atom != lmn_atomlist_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
       fprintf(stdout, "%lu [label = \"%s\", shape = circle];\n", (LmnWord)atom,
               LMN_SYMBOL_STR(LMN_FUNCTOR_NAME_ID(f)));
-      for (i = 0; i < LMN_ATOM_GET_LINK_NUM(atom); i++) {
-        LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(atom, i);
+      for (i = 0; i < LMN_FUNCTOR_GET_LINK_NUM(LMN_ATOM_GET_FUNCTOR(atom)); i++) {
+        LmnLinkAttr attr = LMN_ATOM_GET_ATTR(atom, i);
         if (LMN_ATTR_IS_DATA(attr)) {
           fprintf(stdout, "%lu [label = \"", (LmnWord)LMN_ATOM_PLINK(atom, i));
           dump_data_atom(LMN_ATOM_GET_LINK(atom, i), attr, 0);
@@ -649,19 +650,19 @@ static void dump_dot_cell(LmnMembrane *mem,
   for (iter = hashtbl_iterator(&mem->atomset);
        !hashtbliter_isend(&iter);
        hashtbliter_next(&iter)) {
-    AtomSetEntry *ent = (AtomSetEntry *)hashtbliter_entry(&iter)->data;
+    AtomListEntry *ent = (AtomListEntry *)hashtbliter_entry(&iter)->data;
 /*     LmnFunctor f = hashtbliter_entry(&iter)->key; */
     LmnAtomPtr atom;
     LMN_ASSERT(ent);
     for (atom = atomlist_head(ent);
-         atom != lmn_atomset_end(ent);
+         atom != lmn_atomlist_end(ent);
          atom = LMN_ATOM_GET_NEXT(atom)) {
       struct AtomRec *ar = (struct AtomRec *)hashtbl_get_default(ht, (HashKeyType)atom, 0);
-      unsigned int arity = LMN_ATOM_GET_LINK_NUM(atom);
+      unsigned int arity = LMN_FUNCTOR_GET_LINK_NUM(LMN_ATOM_GET_FUNCTOR(atom));
 
       
       for (i = 0; i < arity; i++) {
-        LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(LMN_ATOM(atom), i);
+        LmnLinkAttr attr = LMN_ATOM_GET_ATTR(LMN_ATOM(atom), i);
         
         if (ar && hashtbl_contains(&ar->args, i)) continue;
         fprintf(stdout, "%lu -- ", (LmnWord)atom);

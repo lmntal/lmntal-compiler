@@ -9,7 +9,7 @@
 
 BOOL delete_redundant_outproxies(LmnMembrane *mem)
 {
-  AtomSetEntry *ent = (AtomSetEntry *)hashtbl_get_default(&mem->atomset,
+  AtomListEntry *ent = (AtomListEntry *)hashtbl_get_default(&mem->atomset,
                                                           LMN_OUT_PROXY_FUNCTOR,
                                                           0);
   LmnAtomPtr o0;
@@ -17,10 +17,10 @@ BOOL delete_redundant_outproxies(LmnMembrane *mem)
   if (!ent) return FALSE;
   
   for (o0 = atomlist_head(ent);
-       o0 != lmn_atomset_end(ent);
+       o0 != lmn_atomlist_end(ent);
        o0 = LMN_ATOM_GET_NEXT(o0)) {
     LmnAtomPtr o1;
-    if (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(o0, 1))) return FALSE;
+    if (LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(o0, 1))) return FALSE;
      o1 = LMN_ATOM(LMN_ATOM_GET_LINK(o0, 1));
     if (LMN_ATOM_GET_FUNCTOR(o1) == LMN_OUT_PROXY_FUNCTOR) {
       LmnAtomPtr i0 = LMN_ATOM(LMN_ATOM_GET_LINK(o0, 0));
@@ -45,7 +45,7 @@ BOOL delete_redundant_outproxies(LmnMembrane *mem)
 
 BOOL delete_redundant_inproxies(LmnMembrane *mem)
 {
-  AtomSetEntry *ent = (AtomSetEntry *)hashtbl_get_default(&mem->atomset,
+  AtomListEntry *ent = (AtomListEntry *)hashtbl_get_default(&mem->atomset,
                                                           LMN_OUT_PROXY_FUNCTOR,
                                                           0);
   LmnAtomPtr o0;
@@ -53,11 +53,11 @@ BOOL delete_redundant_inproxies(LmnMembrane *mem)
   if (!ent) return FALSE;
   
   for (o0 = atomlist_head(ent);
-       o0 != lmn_atomset_end(ent);
+       o0 != lmn_atomlist_end(ent);
        o0 = LMN_ATOM_GET_NEXT(o0)) {
     LmnAtomPtr i0 = LMN_ATOM(LMN_ATOM_GET_LINK(o0, 0));
     LmnAtomPtr i1;
-    if (LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(i0, 1))) return FALSE;
+    if (LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(i0, 1))) return FALSE;
     i1 =LMN_ATOM( LMN_ATOM_GET_LINK(i0, 1));
     if (LMN_ATOM_GET_FUNCTOR(i1) == LMN_IN_PROXY_FUNCTOR) {
       LmnAtomPtr o1 = LMN_ATOM(LMN_ATOM_GET_LINK(i1, 0));

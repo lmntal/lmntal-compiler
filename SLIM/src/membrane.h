@@ -6,12 +6,9 @@
 #define LMN_MEMBRANE_H
 
 #include "lmntal.h"
+#include "atom.h"
 #include "internal_hash.h"
 #include "vector.h"
-
-struct SimpleHashtbl atomset;
-
-typedef struct RuleSetList RuleSetList;
 
 struct LmnMembrane {
   LmnMembrane 	   *parent;
@@ -25,12 +22,11 @@ struct LmnMembrane {
   BOOL             is_activated;
 };
 
-/* TODO: 名前をAtomListに変更 */
 /* この構造体をAtomとして扱うことで,この構造体自身が
    HeadとTailの両方の役目を果たしている */
-typedef struct AtomSetEntry {
+typedef struct AtomListEntry {
   LmnWord tail, head;
-} AtomSetEntry;
+} AtomListEntry;
 
 #define atomlist_head(LIST)    (LMN_ATOM((LIST)->head))
 
@@ -43,7 +39,7 @@ LMN_EXTERN void lmn_mem_push_atom(LmnMembrane *mem, LmnWord atom, LmnLinkAttr at
 LMN_EXTERN void mem_push_symbol_atom(LmnMembrane *mem, LmnAtomPtr atom);
 LMN_EXTERN void lmn_mem_add_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset);
 LMN_EXTERN BOOL lmn_mem_natoms(LmnMembrane *mem, unsigned int count);
-LMN_EXTERN AtomSetEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f);
+LMN_EXTERN AtomListEntry* lmn_mem_get_atomlist(LmnMembrane *mem, LmnFunctor f);
 LMN_EXTERN void lmn_mem_remove_atom(LmnMembrane *mem, LmnWord atom, LmnLinkAttr attr);
 
 /* アトムをアトムリストから削除する.
@@ -64,6 +60,10 @@ LMN_EXTERN void lmn_mem_newlink(LmnMembrane *mem,
                                 LmnWord atom1,
                                 LmnLinkAttr attr1,
                                 int pos1);
+LMN_EXTERN void lmn_newlink_in_symbols(LmnAtomPtr atom0,
+                                       int pos0,
+                                       LmnAtomPtr atom1,
+                                       int pos1);
 LMN_EXTERN void lmn_mem_link_data_atoms(LmnMembrane *mem,
                                         LmnWord d1,
                                         LmnLinkAttr attr1,
@@ -91,19 +91,7 @@ LMN_EXTERN void lmn_mem_remove_proxies(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_insert_proxies(LmnMembrane *mem, LmnMembrane *child_mem);
 LMN_EXTERN void lmn_mem_remove_temporary_proxies(LmnMembrane *mem);
 LMN_EXTERN void lmn_mem_remove_toplevel_proxies(LmnMembrane *mem);
-/* LmnAtomPtr* lmn_atomset_end(AtomSetEntry * ent); */
-/* TODO: rename to atomlist_end */
-#define lmn_atomset_end(p_atomset_entry) ((LmnAtomPtr)p_atomset_entry)
+/* LmnAtomPtr* lmn_atomlist_end(AtomSetEntry * ent); */
+#define lmn_atomlist_end(p_atomset_entry) ((LmnAtomPtr)p_atomset_entry)
 
-
-/* Utility */
-/* REFACTOR: このファイルにあるのはふさわしくないので移動する */
-LMN_EXTERN void lmn_newlink_in_symbols(LmnAtomPtr atom0,
-                                       int pos0,
-                                       LmnAtomPtr atom1,
-                                       int pos1);
-LMN_EXTERN void lmn_free_atom(LmnWord atom, LmnLinkAttr attr);
-LMN_EXTERN LmnWord lmn_copy_atom(LmnWord atom, LmnLinkAttr attr);
-LMN_EXTERN LmnWord lmn_copy_data_atom(LmnWord atom, LmnLinkAttr);
-LMN_EXTERN BOOL lmn_eq_func(LmnWord atom0, LmnLinkAttr attr0, LmnWord atom1, LmnLinkAttr attr1);
 #endif /* LMN_MEMBRANE_H */

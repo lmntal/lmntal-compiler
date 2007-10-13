@@ -8,27 +8,20 @@
 #include "rule.h"
 #include "membrane.h"
 #include "instruction.h"
-#include "read_instr.h"
 #include "vector.h"
 #include "dumper.h"
 #include "task.h"
+#include "atom.h"
 #include "vector.h"
 
-/* this size should be the maximum size of 'spec' arguments */
-/* Or allocated when required */
-LmnWord v1[1024];
-LmnWord v2[1024];
-
-/* for value tag */
-LmnByte k1[1024];
-LmnByte k2[1024];
-
-LmnWord *wt, *tv;    /* working table */
-LmnByte *at, *tkv;  /* attribute table */
+LmnWord *wt; /* variable vector used in interpret */
+LmnByte *at; /* attribute vector */
+unsigned int wt_size;
 
 LmnCompiledRuleset system_ruleset;
 
 #define SWAP(T,X,Y)       do { T t=(X); (X)=(Y); (Y)=t;} while(0)
+#define READ_VAL(T,I,X)      ((X)=*(T*)(I), I+=sizeof(T))
 
 struct Entity {
   LmnMembrane  *mem;
@@ -84,14 +77,15 @@ static LmnMembrane* memstack_peek()
   return memstack.head->next->mem;
 }
 
-static void memstack_printall()
-{
-  struct Entity *ent;
-  for(ent = memstack.head; ent!=NULL; ent = ent->next){
-    if(ent->mem!=NULL)printf("%d ", ent->mem->name);
-  }
-  printf("\n");
-}
+/* DEBUG: */
+/* static void memstack_printall() */
+/* { */
+/*   struct Entity *ent; */
+/*   for(ent = memstack.head; ent!=NULL; ent = ent->next){ */
+/*     if(ent->mem!=NULL)printf("%d ", ent->mem->name); */
+/*   } */
+/*   printf("\n"); */
+/* } */
 
 static BOOL react_ruleset(LmnMembrane *mem, LmnRuleSet *ruleset)
 {
@@ -142,49 +136,38 @@ void run(void)
   LmnMembrane *mem;
 
   /* Initialize for running */
-  wt = v1;
-  tv = v2;
-  at = k1;
-  tkv = k2;
-
   compiled_ruleset_init(&system_ruleset);
   init_system_ruleset(&system_ruleset);
   memstack_init();
-  
+  wt_size = 1024;
+  wt = LMN_NALLOC(LmnWord, wt_size);
+  at = LMN_NALLOC(LmnByte, wt_size);
+
   /* make toplevel membrane */
-  
   mem = lmn_mem_make();
-
-/*   lmn_mem_dump(mem); */
-
-  /*     lmn_mem_add_ruleset(mem, lmn_ruleset_table.entry[0]); */
-
   memstack_push(mem);
   /* call init atom creation rule */
   react_ruleset(mem, lmn_ruleset_table.entry[0]);
 
-/*   lmn_mem_dump(mem); */
-  
   while(!memstack_isempty()){
     LmnMembrane *mem = memstack_peek();
     LmnMembrane *m;
     if(!exec(mem)) {
       if (!compiled_ruleset_react(&system_ruleset, mem)) {
         m = memstack_pop();
-        /* TODO: 確認. 膜スタックから削除される時に親膜を活性化する
-           ENQUEUEMEMで積まれるので必要ないっぽい */
-        /* if (m->parent && !m->parent->is_activated) memstack_push(m->parent); */
       }
     }
-/*     memstack_printall(); */
   }
 
   memstack_destroy();
-  
+
+  /* 後始末 */
   lmn_dump_cell(mem);
   lmn_mem_drop(mem);
   lmn_mem_free(mem);
   compiled_ruleset_destroy(&system_ruleset);
+  LMN_FREE(wt);
+  LMN_FREE(at);
   free_atom_memory_pools();
 }
 
@@ -193,14 +176,14 @@ void run(void)
 #define READ_DATA_ATOM(dest, attr)              \
   do {                                          \
     switch (attr) {                             \
-    case LMN_ATOM_INT_ATTR:                     \
-       LMN_IMS_READ(int, instr, (dest));        \
+    case LMN_INT_ATTR:                     \
+       READ_VAL(int, instr, (dest));        \
        break;                                   \
-     case LMN_ATOM_DBL_ATTR:                    \
+     case LMN_DBL_ATTR:                    \
      {                                          \
         double *x;                              \
         x = LMN_MALLOC(double);                 \
-        LMN_IMS_READ(double, instr, *x);        \
+        READ_VAL(double, instr, *x);        \
         (dest) = (LmnWord)x;                    \
         break;                                  \
      }                                          \
@@ -213,10 +196,10 @@ void run(void)
 #define READ_CONST_DATA_ATOM(dest, attr)        \
   do {                                          \
     switch (attr) {                             \
-    case LMN_ATOM_INT_ATTR:                     \
-       LMN_IMS_READ(int, instr, (dest));        \
+    case LMN_INT_ATTR:                     \
+       READ_VAL(int, instr, (dest));        \
        break;                                   \
-     case LMN_ATOM_DBL_ATTR:                    \
+     case LMN_DBL_ATTR:                    \
        (dest) = (LmnWord)instr;                 \
        instr += sizeof(double);                 \
        break;                                   \
@@ -229,17 +212,17 @@ void run(void)
 #define READ_CMP_DATA_ATOM(attr, x, result)            \
        do {                                            \
           switch(attr) {                               \
-          case LMN_ATOM_INT_ATTR:                      \
+          case LMN_INT_ATTR:                      \
             {                                          \
               int t;                                   \
-              LMN_IMS_READ(int, instr, t);             \
+              READ_VAL(int, instr, t);             \
               (result) = ((int)(x) == t);              \
               break;                                   \
             }                                          \
-          case LMN_ATOM_DBL_ATTR:                      \
+          case LMN_DBL_ATTR:                      \
             {                                          \
               double t;                                \
-              LMN_IMS_READ(double, instr, t);          \
+              READ_VAL(double, instr, t);          \
               (result) = (*(double*)(x) == t);         \
               break;                                   \
             }                                          \
@@ -249,9 +232,8 @@ void run(void)
           }                                            \
           } while (0)
 
-static void print_wt(void);
-
-/* TODO: 以下にあるutility関数の置き場所を整理する */
+/* DEBUG: */
+/* static void print_wt(void); */
 
 /* mem != NULL ならば memにUNIFYを追加、そうでなければ
    UNIFYは膜に所属しない */
@@ -259,6 +241,9 @@ static HashSet *insertconnectors(LmnMembrane *mem, Vector *links)
 {
   unsigned int i, j;
   HashSet *retset = hashset_make(8);
+  /* EFFICIENCY: retsetがHash Setである意味は?　ベクタでいいのでは？
+     中間命令でセットを使うように書かれている */
+  
   for(i = 0; i < links->num; i++) {
     LmnWord linkid1 = vec_get(links, i);
     if (LMN_ATTR_IS_DATA(at[linkid1])) continue;
@@ -267,7 +252,7 @@ static HashSet *insertconnectors(LmnMembrane *mem, Vector *links)
       if (LMN_ATTR_IS_DATA(at[linkid2])) continue;
       /* is buddy? */
       if (wt[linkid2] == LMN_ATOM_GET_LINK(wt[linkid1], at[linkid1]) && 
-          at[linkid2] == LMN_ATOM_GET_LINK_ATTR(wt[linkid1], at[linkid1])) {
+          at[linkid2] == LMN_ATOM_GET_ATTR(wt[linkid1], at[linkid1])) {
         /* '='アトムをはさむ */
         LmnAtomPtr eq;
         if (mem) eq = lmn_mem_newatom(mem, LMN_UNIFY_FUNCTOR);
@@ -290,28 +275,39 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
   LmnInstrOp op;
   while (TRUE) {
   LOOP:;
-    LMN_IMS_READ(LmnInstrOp, instr, op);
+    READ_VAL(LmnInstrOp, instr, op);
 /*     fprintf(stderr, "op: %d %p\n", op, next_instr); */
-/*     lmn_mem_dump((LmnMembrane*)wt[0]); */
+/*     lmn_dump_mem((LmnMembrane*)wt[0]); */
     switch (op) {
     case INSTR_SPEC:
-      /* ignore spec, because wt is initially large enough. */
-      instr += sizeof(LmnInstrVar)*2;
+    {
+      LmnInstrVar s0, s1;
+
+      READ_VAL(LmnInstrVar, instr, s0);
+      READ_VAL(LmnInstrVar, instr, s1);
+
+        /* extend vector if need */
+      if (s1 > wt_size) {
+        wt_size *= 2;
+        wt = LMN_REALLOC(LmnWord, wt, wt_size);
+        at = LMN_REALLOC(LmnByte, at, wt_size);
+      }
       break;
+    }
     case INSTR_INSERTCONNECTORSINNULL:
     {
       LmnInstrVar seti, list_num;
       Vector links;
       unsigned int i;
 
-      LMN_IMS_READ(LmnInstrVar, instr, seti);
-      LMN_IMS_READ(LmnInstrVar, instr, list_num);
+      READ_VAL(LmnInstrVar, instr, seti);
+      READ_VAL(LmnInstrVar, instr, list_num);
 
-      vec_init(&links, list_num);
+      vec_init(&links, list_num); /* TODO: vector_initの仕様変更に伴い変更する */
       for (i = 0; i < list_num; i++) {
         LmnInstrVar t;
-        LMN_IMS_READ(LmnInstrVar, instr, t);
-        vec_push(&links, (LmnWord)t); /* TODO: vector_initの仕様変更に伴い変更する */
+        READ_VAL(LmnInstrVar, instr, t);
+        vec_push(&links, (LmnWord)t); /* TODO: vector_initの仕様変更に伴い変更する(インデックスアクセスに) */
       }
 
       wt[seti] = (LmnWord)insertconnectors(NULL, &links);
@@ -327,21 +323,21 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     }
     case INSTR_INSERTCONNECTORS:
     {
-      /* TODO: retsetがHash Setである意味は?　ベクタでいいのでは？ */
       LmnInstrVar seti, list_num, memi, enti;
       Vector links; /* src list */
       unsigned int i;
-      LMN_IMS_READ(LmnInstrVar, instr, seti);
-      LMN_IMS_READ(LmnInstrVar, instr, list_num);
+
+      READ_VAL(LmnInstrVar, instr, seti);
+      READ_VAL(LmnInstrVar, instr, list_num);
 
       vec_init(&links, list_num);
-      /* TODO: このリストを読み込む部分は *NULLと共通化するべき */
+
       for (i = 0; i < list_num; i++) {
-        LMN_IMS_READ(LmnInstrVar, instr, enti);
+        READ_VAL(LmnInstrVar, instr, enti);
         vec_push(&links, (LmnWord)enti); /* TODO: vector_initの仕様変更に伴い変更する */
       }
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       wt[seti] = (LmnWord)insertconnectors((LmnMembrane *)wt[memi], &links);
       vec_destroy(&links);
       
@@ -355,43 +351,47 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     }
     case INSTR_JUMP:
     {
+      /* EFFICIENCY: 新たに作業配列をmallocしているので非常に遅い
+                     -O3 で生成される中間命令にJUMPが含まれないため
+                     これでもよい */
       LmnInstrVar num, i, n;
       LmnJumpOffset offset;
+      BOOL ret;
+      LmnWord *wt2 = LMN_NALLOC(LmnWord, wt_size);
+      LmnByte *at2 = LMN_NALLOC(LmnByte, wt_size);
+      unsigned int wt_size_org = wt_size;
 
       i = 0;
       /* atom */
-      LMN_IMS_READ(LmnInstrVar, instr, num);
+      READ_VAL(LmnInstrVar, instr, num);
       for (; num--; i++) {
-        LMN_IMS_READ(LmnInstrVar, instr, n);
-        tv[i] = wt[n];
-        tkv[i] = at[n];
+        READ_VAL(LmnInstrVar, instr, n);
+        wt2[i] = wt[n];
+        at2[i] = at[n];
       }
       /* mem */
-      LMN_IMS_READ(LmnInstrVar, instr, num);
+      READ_VAL(LmnInstrVar, instr, num);
       for (; num--; i++) {
-        LMN_IMS_READ(LmnInstrVar, instr, n);
-        tv[i] = wt[n];
-        tkv[i] = at[n];
+        READ_VAL(LmnInstrVar, instr, n);
+        wt2[i] = wt[n];
+        at2[i] = at[n];
       }
       /* vars */
-      LMN_IMS_READ(LmnInstrVar, instr, num);
+      READ_VAL(LmnInstrVar, instr, num);
       for (; num--; i++) {
-        LMN_IMS_READ(LmnInstrVar, instr, n);
-        tv[i] = wt[n];
-        tkv[i] = at[n];
+        READ_VAL(LmnInstrVar, instr, n);
+        wt2[i] = wt[n];
+        at2[i] = at[n];
       }
 
-      LMN_IMS_READ(LmnJumpOffset, instr, offset);
+      READ_VAL(LmnJumpOffset, instr, offset);
       instr += offset;
 
-      SWAP(LmnWord*, wt, tv);
-      SWAP(LmnLinkAttr*, at, tkv);
-      if (interpret(instr, next_instr)) return TRUE;
-      else {
-        SWAP(LmnWord*, wt, tv);
-        SWAP(LmnLinkAttr*, at, tkv);
-        return FALSE;
-      }
+      ret = interpret(instr, next_instr);
+      LMN_FREE(wt2);
+      LMN_FREE(at2);
+      wt_size = wt_size_org;
+      return ret;
     }
     case INSTR_COMMIT:
       instr += sizeof(lmn_interned_str) + sizeof(LmnLineNum);
@@ -401,24 +401,24 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar atomi, memi;
       LmnLinkAttr attr;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnLinkAttr, instr, attr);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnLinkAttr, instr, attr);
       
       if (LMN_ATTR_IS_DATA(attr)) {
         fprintf(stderr, "I can not find data atoms.\n");
         assert(FALSE);
       } else { /* symbol atom */
         LmnFunctor f;
-        AtomSetEntry *atomlist_ent;
+        AtomListEntry *atomlist_ent;
         LmnAtomPtr atom;
         
-        LMN_IMS_READ(LmnFunctor, instr, f);
+        READ_VAL(LmnFunctor, instr, f);
         atomlist_ent = lmn_mem_get_atomlist((LmnMembrane*)wt[memi], f);
         if (atomlist_ent) {
           at[atomi] = LMN_ATTR_MAKE_LINK(0);
           for (atom = atomlist_head(atomlist_ent);
-               atom != lmn_atomset_end(atomlist_ent);
+               atom != lmn_atomlist_end(atomlist_ent);
                atom = LMN_ATOM_GET_NEXT(atom)) {
             wt[atomi] = (LmnWord)atom;
             if (interpret(instr, &instr)) {
@@ -434,9 +434,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     case INSTR_LOCKMEM:
     {
       LmnInstrVar mem, atom, memn;
-      LMN_IMS_READ(LmnInstrVar, instr, mem);
-      LMN_IMS_READ(LmnInstrVar, instr, atom);
-      LMN_IMS_READ(lmn_interned_str, instr, memn);
+      READ_VAL(LmnInstrVar, instr, mem);
+      READ_VAL(LmnInstrVar, instr, atom);
+      READ_VAL(lmn_interned_str, instr, memn);
       
       LMN_ASSERT(!LMN_ATTR_IS_DATA(at[atom]));
       LMN_ASSERT(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atom]))));
@@ -449,10 +449,10 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar mem1, mem2, memt, memn; /* dst, parent, type, name */
       LmnMembrane* mp;
 
-      LMN_IMS_READ(LmnInstrVar, instr, mem1);
-      LMN_IMS_READ(LmnInstrVar, instr, mem2);
-      LMN_IMS_READ(LmnInstrVar, instr, memt);
-      LMN_IMS_READ(lmn_interned_str, instr, memn);
+      READ_VAL(LmnInstrVar, instr, mem1);
+      READ_VAL(LmnInstrVar, instr, mem2);
+      READ_VAL(LmnInstrVar, instr, memt);
+      READ_VAL(lmn_interned_str, instr, memn);
 
       mp = ((LmnMembrane*)wt[mem2])->child_head;
       while (mp) {
@@ -470,8 +470,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar memi, nmems;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnInstrVar, instr, nmems);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, nmems);
 
       if(!lmn_mem_nmems((LmnMembrane*)wt[memi], nmems)) {
         return FALSE;
@@ -482,7 +482,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar memi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       if(((LmnMembrane *)wt[memi])->rulesets.num) return FALSE;
       break;
     }
@@ -492,15 +492,15 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnWord ap;
       LmnLinkAttr attr;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnLinkAttr, instr, attr);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnLinkAttr, instr, attr);
       if (LMN_ATTR_IS_DATA(attr)) {
         READ_DATA_ATOM(ap, attr);
       } else { /* symbol atom */
         LmnFunctor f;
 
-      	LMN_IMS_READ(LmnFunctor, instr, f);
+      	READ_VAL(LmnFunctor, instr, f);
       	ap = (LmnWord)lmn_new_atom(f);
       }
       lmn_mem_push_atom((LmnMembrane *)wt[memi], ap, attr);
@@ -511,8 +511,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     case INSTR_NATOMS:
     {
       LmnInstrVar memi, natoms;
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnInstrVar, instr, natoms);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, natoms);
       if(!lmn_mem_natoms((LmnMembrane*)wt[memi], natoms)) {
         return FALSE;
       }
@@ -522,9 +522,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar link, atom, n;
       
-      LMN_IMS_READ(LmnInstrVar, instr, link);
-      LMN_IMS_READ(LmnInstrVar, instr, atom);
-      LMN_IMS_READ(LmnInstrVar, instr, n);
+      READ_VAL(LmnInstrVar, instr, link);
+      READ_VAL(LmnInstrVar, instr, atom);
+      READ_VAL(LmnInstrVar, instr, n);
 
       if (LMN_ATTR_IS_DATA(at[atom])) {
         wt[link] = wt[atom];
@@ -539,9 +539,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar link1, link2, mem;
       
-      LMN_IMS_READ(LmnInstrVar, instr, link1);
-      LMN_IMS_READ(LmnInstrVar, instr, link2);
-      LMN_IMS_READ(LmnInstrVar, instr, mem);
+      READ_VAL(LmnInstrVar, instr, link1);
+      READ_VAL(LmnInstrVar, instr, link2);
+      READ_VAL(LmnInstrVar, instr, mem);
 
       if (LMN_ATTR_IS_DATA(at[link1])) {
         if (LMN_ATTR_IS_DATA(at[link2])) { /* 1, 2 are data */
@@ -549,24 +549,24 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
         }
         else { /* 1 is data */
           LMN_ATOM_SET_LINK(LMN_ATOM(wt[link2]), LMN_ATTR_GET_VALUE(at[link2]), wt[link1]);
-          LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[link2]),
+          LMN_ATOM_SET_ATTR(LMN_ATOM(wt[link2]),
                                  LMN_ATTR_GET_VALUE(at[link2]),
                                  at[link1]);
         }
       }
       else if (LMN_ATTR_IS_DATA(at[link2])) { /* 2 is data */
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[link1]), LMN_ATTR_GET_VALUE(at[link1]), wt[link2]);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[link1]),
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[link1]),
                                LMN_ATTR_GET_VALUE(at[link1]),
                                at[link2]);
       }
       else { /* 1, 2 are symbol atom */
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[link1]), LMN_ATTR_GET_VALUE(at[link1]), wt[link2]);
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[link2]), LMN_ATTR_GET_VALUE(at[link2]), wt[link1]);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[link1]),
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[link1]),
                                LMN_ATTR_GET_VALUE(at[link1]),
                                at[link2]);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[link2]),
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[link2]),
                                LMN_ATTR_GET_VALUE(at[link2]),
                                at[link1]);
       }
@@ -576,11 +576,11 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar atom1, atom2, pos1, pos2, memi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, pos1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
-      LMN_IMS_READ(LmnInstrVar, instr, pos2);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, pos1);
+      READ_VAL(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, pos2);
+      READ_VAL(LmnInstrVar, instr, memi);
 
       lmn_mem_newlink((LmnMembrane *)wt[memi],
                       wt[atom1],
@@ -597,14 +597,14 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnAtomPtr ap;
       LmnByte attr;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, pos1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
-      LMN_IMS_READ(LmnInstrVar, instr, pos2);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, pos1);
+      READ_VAL(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, pos2);
+      READ_VAL(LmnInstrVar, instr, memi);
 
       ap = LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], pos2));
-      attr = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos2);
+      attr = LMN_ATOM_GET_ATTR(wt[atom2], pos2);
 
       if(LMN_ATTR_IS_DATA(at[atom1]) && LMN_ATTR_IS_DATA(attr)) {
         #ifdef DEBUG
@@ -613,27 +613,27 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       }
       else if (LMN_ATTR_IS_DATA(at[atom1])) {
         LMN_ATOM_SET_LINK(ap, attr, wt[atom1]);
-        LMN_ATOM_SET_LINK_ATTR(ap, attr, at[atom1]);
+        LMN_ATOM_SET_ATTR(ap, attr, at[atom1]);
       }
       else if (LMN_ATTR_IS_DATA(attr)) {
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, (LmnWord)ap);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
       }
       else {
         LMN_ATOM_SET_LINK(ap, attr, wt[atom1]);
-        LMN_ATOM_SET_LINK_ATTR(ap, attr, pos1);
+        LMN_ATOM_SET_ATTR(ap, attr, pos1);
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[atom1]), pos1, (LmnWord)ap);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[atom1]), pos1, attr);
       }
       break;
     }
     case INSTR_INHERITLINK:
     {
       LmnInstrVar atomi, posi, linki, memi;
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnInstrVar, instr, posi);
-      LMN_IMS_READ(LmnInstrVar, instr, linki);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, posi);
+      READ_VAL(LmnInstrVar, instr, linki);
+      READ_VAL(LmnInstrVar, instr, memi);
 
       if(LMN_ATTR_IS_DATA(at[atomi]) && LMN_ATTR_IS_DATA(at[linki])) {
         #ifdef DEBUG
@@ -642,40 +642,40 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       }
       else if(LMN_ATTR_IS_DATA(at[atomi])) {
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[linki]), at[linki], wt[atomi]);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[linki]), at[linki], at[atomi]);
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[linki]), at[linki], at[atomi]);
       }
       else if(LMN_ATTR_IS_DATA(at[linki])) {
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[atomi]), posi, wt[linki]);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atomi]), posi, at[linki]);
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[atomi]), posi, at[linki]);
       }
       else {
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[atomi]), posi, wt[linki]);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[atomi]), posi, at[linki]);
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[atomi]), posi, at[linki]);
         LMN_ATOM_SET_LINK(LMN_ATOM(wt[linki]), at[linki], wt[atomi]);
-        LMN_ATOM_SET_LINK_ATTR(LMN_ATOM(wt[linki]), at[linki], posi);
+        LMN_ATOM_SET_ATTR(LMN_ATOM(wt[linki]), at[linki], posi);
       }
       break;
     }
     case INSTR_GETLINK:
     {
       LmnInstrVar linki, atomi, posi;
-      LMN_IMS_READ(LmnInstrVar, instr, linki);
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnInstrVar, instr, posi);
+      READ_VAL(LmnInstrVar, instr, linki);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, posi);
 
       wt[linki] = LMN_ATOM_GET_LINK(wt[atomi], posi);
-      at[linki] = LMN_ATOM_GET_LINK_ATTR(wt[atomi], posi);
+      at[linki] = LMN_ATOM_GET_ATTR(wt[atomi], posi);
       break;
     }
     case INSTR_UNIFY:
     {
       LmnInstrVar atom1, pos1, atom2, pos2, memi;
     
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, pos1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
-      LMN_IMS_READ(LmnInstrVar, instr, pos2);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, pos1);
+      READ_VAL(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, pos2);
+      READ_VAL(LmnInstrVar, instr, memi);
 
       lmn_mem_unify_atom_args((LmnMembrane *)wt[memi],
                               LMN_ATOM(wt[atom1]),
@@ -691,7 +691,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar atom;
   
-      LMN_IMS_READ(LmnInstrVar, instr, atom);
+      READ_VAL(LmnInstrVar, instr, atom);
       /* do nothing */
       break;
     }
@@ -699,7 +699,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar atom;
   
-      LMN_IMS_READ(LmnInstrVar, instr, atom);
+      READ_VAL(LmnInstrVar, instr, atom);
       break;
     }
     case INSTR_NEWMEM:
@@ -707,9 +707,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar newmemi, parentmemi, memf;
       LmnMembrane *mp;
 
-      LMN_IMS_READ(LmnInstrVar, instr, newmemi);
-      LMN_IMS_READ(LmnInstrVar, instr, parentmemi);
-      LMN_IMS_READ(LmnInstrVar, instr, memf);
+      READ_VAL(LmnInstrVar, instr, newmemi);
+      READ_VAL(LmnInstrVar, instr, parentmemi);
+      READ_VAL(LmnInstrVar, instr, memf);
 
       mp = lmn_mem_make(); /*lmn_new_mem(memf);*/
       lmn_mem_add_child_mem((LmnMembrane*)wt[parentmemi], mp);
@@ -721,8 +721,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar atomi, memi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, memi);
 
       lmn_mem_remove_atom((LmnMembrane*)wt[memi], wt[atomi], at[atomi]);
       break;
@@ -731,7 +731,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     {
       LmnInstrVar atomi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, atomi);
 
       lmn_free_atom(wt[atomi], at[atomi]);
       break;
@@ -741,7 +741,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar memi;
       LmnMembrane *mp;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       instr += sizeof(LmnInstrVar); /* ingnore parent */
       
       mp = (LmnMembrane*)wt[memi];
@@ -757,7 +757,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar memi;
       LmnMembrane *mp;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
 
       mp = (LmnMembrane*)wt[memi];
       lmn_mem_free(mp);
@@ -766,22 +766,22 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     case INSTR_ENQUEUEMEM:
     {
       LmnInstrVar memi;
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       memstack_push((LmnMembrane *)wt[memi]);
       break;
     }
     case INSTR_UNLOCKMEM:
     { /* 何もしない */
       LmnInstrVar memi;
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       break;
     }
     case INSTR_LOADRULESET:
     {
       LmnInstrVar memi;
       LmnRulesetId id;
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnRulesetId, instr, id);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnRulesetId, instr, id);
       
       lmn_mem_add_ruleset((LmnMembrane*)wt[memi], LMN_RULESET_ID(id));
       break;
@@ -789,12 +789,12 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
     case INSTR_DEREFATOM:
     {
       LmnInstrVar atom1, atom2, posi;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
-      LMN_IMS_READ(LmnInstrVar, instr, posi);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, posi);
             
       wt[atom1] = (LmnWord)LMN_ATOM(LMN_ATOM_GET_LINK(wt[atom2], posi));
-      at[atom1] = LMN_ATOM_GET_LINK_ATTR(wt[atom2], posi);
+      at[atom1] = LMN_ATOM_GET_ATTR(wt[atom2], posi);
       break;
     }
     case INSTR_DEREF:
@@ -802,12 +802,12 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar atom1, atom2, pos1, pos2;
       LmnByte attr;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
-      LMN_IMS_READ(LmnInstrVar, instr, pos1);
-      LMN_IMS_READ(LmnInstrVar, instr, pos2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, pos1);
+      READ_VAL(LmnInstrVar, instr, pos2);
 
-      attr = LMN_ATOM_GET_LINK_ATTR(wt[atom2], pos1);
+      attr = LMN_ATOM_GET_ATTR(wt[atom2], pos1);
       LMN_ASSERT(!LMN_ATTR_IS_DATA(at[atom2]));
       if (LMN_ATTR_IS_DATA(attr)) {
         if (pos2 != 0) return FALSE;
@@ -824,8 +824,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar atomi;
       LmnFunctor f;
       LmnLinkAttr attr;
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnLinkAttr, instr, attr);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnLinkAttr, instr, attr);
 
       if (LMN_ATTR_IS_DATA(at[atomi]) == LMN_ATTR_IS_DATA(attr)) {
         if(LMN_ATTR_IS_DATA(at[atomi])) {
@@ -836,7 +836,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
         }
         else /* symbol atom */
           {
-            LMN_IMS_READ(LmnFunctor, instr, f);
+            READ_VAL(LmnFunctor, instr, f);
             if (LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atomi])) != f) {
               return FALSE;
             }
@@ -852,8 +852,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       LmnInstrVar atomi;
       LmnFunctor f;
       LmnLinkAttr attr;
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnLinkAttr, instr, attr);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnLinkAttr, instr, attr);
 
       if (LMN_ATTR_IS_DATA(at[atomi]) == LMN_ATTR_IS_DATA(attr)) {
         if(LMN_ATTR_IS_DATA(at[atomi])) {
@@ -864,7 +864,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
           }
         }
         else { /* symbol atom */
-          LMN_IMS_READ(LmnFunctor, instr, f);
+          READ_VAL(LmnFunctor, instr, f);
           if (LMN_ATOM_GET_FUNCTOR(LMN_ATOM(wt[atomi])) == f) return FALSE;
         }
       }
@@ -880,9 +880,9 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
       Vector stack, visited_root;
       LinkObj *start;
 
-      LMN_IMS_READ(LmnInstrVar, instr, funci);
-      LMN_IMS_READ(LmnInstrVar, instr, srclisti);
-      LMN_IMS_READ(LmnInstrVar, instr, avolisti);
+      READ_VAL(LmnInstrVar, instr, funci);
+      READ_VAL(LmnInstrVar, instr, srclisti);
+      READ_VAL(LmnInstrVar, instr, avolisti);
 
       srcvec = (Vector*) wt[srclisti];
       avovec = (Vector*) wt[avolisti];
@@ -917,8 +917,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
         for(i = 0; i < avovec->num; i++) {
           LmnAtomPtr avolink = (LmnAtomPtr)wt[vec_get(avovec, i)];
           LmnLinkAttr avoattr = at[vec_get(avovec, i)];
-          if((LmnAtomPtr)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos)) == avolink &&
-              LMN_ATOM_GET_LINK_ATTR(lo->ap, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos)) == avoattr) {
+          if((LmnAtomPtr)LMN_ATOM_GET_LINK(lo->ap, LMN_ATOM_GET_ATTR(lo->ap, lo->pos)) == avolink &&
+              LMN_ATOM_GET_ATTR(lo->ap, LMN_ATOM_GET_ATTR(lo->ap, lo->pos)) == avoattr) {
             ret_flag = FALSE;
             break;
           }
@@ -939,7 +939,7 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
         for(i = 0; i < visited_root.num; i++) {
           unsigned int index = vec_get(srcvec, i);
           if (lo->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
-              && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              && lo->pos == LMN_ATOM_GET_ATTR((LmnAtomPtr)wt[index], at[index])) {
             vec_set(&visited_root, i, TRUE);
             goto ISGROUND_CONT;
           }
@@ -953,8 +953,8 @@ static BOOL interpret(LmnRuleInstr instr, LmnRuleInstr *next_instr)
           LinkObj *next;
           if (i == lo->pos)
             continue;
-          if(!LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(lo->ap, i))) { /* data atom は積まない */
-            next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(lo->ap, i)));
+          if(!LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(lo->ap, i))) { /* data atom は積まない */
+            next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_ATTR(lo->ap, i)));
             vec_push(&stack, (LmnWord)next);
           }
         }
@@ -975,7 +975,7 @@ ISGROUND_CONT:
       vec_destroy(&visited_root);
       if(!ret_flag) return FALSE;
       wt[funci] = (LmnWord)atom_num;
-      at[funci] = LMN_ATOM_INT_ATTR;
+      at[funci] = LMN_INT_ATTR;
       break;
     }
     case INSTR_EQGROUND:
@@ -989,8 +989,8 @@ ISGROUND_CONT:
       SimpleHashtbl map; /* 比較元→比較先 */
       LinkObj *start1, *start2;
 
-      LMN_IMS_READ(LmnInstrVar, instr, srci);
-      LMN_IMS_READ(LmnInstrVar, instr, dsti);
+      READ_VAL(LmnInstrVar, instr, srci);
+      READ_VAL(LmnInstrVar, instr, dsti);
 
       srcv = (Vector *)wt[srci];
       dstv = (Vector *)wt[dsti];
@@ -1020,7 +1020,7 @@ ISGROUND_CONT:
         for(i = 0; i < srcv->num; i++) {
           unsigned int index = vec_get(srcv, i);
           if (l1->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
-              && l1->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              && l1->pos == LMN_ATOM_GET_ATTR((LmnAtomPtr)wt[index], at[index])) {
             contains1 = TRUE;
             break;
           }
@@ -1028,7 +1028,7 @@ ISGROUND_CONT:
         for(j = 0; j < dstv->num; j++) {
           unsigned int index = vec_get(dstv, j);
           if (l2->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
-              && l2->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              && l2->pos == LMN_ATOM_GET_ATTR((LmnAtomPtr)wt[index], at[index])) {
             contains2 = TRUE;
             break;
           }
@@ -1066,15 +1066,15 @@ ISGROUND_CONT:
         for(i = 0; i < LMN_ATOM_GET_ARITY(l1->ap); i++) {
           LinkObj *n1, *n2;
           if(i == l1->pos) continue;
-          if (!LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(l1->ap, i)) && !LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(l1->ap, i))) {
-            n1 = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(l1->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(l1->ap, i)));
-            n2 = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(l2->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(l2->ap, i)));
+          if (!LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(l1->ap, i)) && !LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(l1->ap, i))) {
+            n1 = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(l1->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_ATTR(l1->ap, i)));
+            n2 = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(l2->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_ATTR(l2->ap, i)));
             vec_push(&stack1, (LmnWord)n1);
             vec_push(&stack2, (LmnWord)n2);
           }
           else { /* data atom は積まない */
-            if(!lmn_eq_func(LMN_ATOM_GET_LINK(l1->ap, i), LMN_ATOM_GET_LINK_ATTR(l1->ap, i),
-                  LMN_ATOM_GET_LINK(l2->ap, i), LMN_ATOM_GET_LINK_ATTR(l2->ap, i))) {
+            if(!lmn_eq_func(LMN_ATOM_GET_LINK(l1->ap, i), LMN_ATOM_GET_ATTR(l1->ap, i),
+                  LMN_ATOM_GET_LINK(l2->ap, i), LMN_ATOM_GET_ATTR(l2->ap, i))) {
               LMN_FREE(l1); LMN_FREE(l2);
               ret_flag = FALSE;
               goto EQGROUND_NEQGROUND_BREAK;
@@ -1103,9 +1103,9 @@ EQGROUND_NEQGROUND_BREAK:
       LinkObj *start;
       LmnAtomPtr cpatom;
 
-      LMN_IMS_READ(LmnInstrVar, instr, dstlist);
-      LMN_IMS_READ(LmnInstrVar, instr, srclist);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, dstlist);
+      READ_VAL(LmnInstrVar, instr, srclist);
+      READ_VAL(LmnInstrVar, instr, memi);
 
       srcvec = (Vector *)wt[srclist];
 
@@ -1122,9 +1122,9 @@ EQGROUND_NEQGROUND_BREAK:
           if(start->pos == i)
             continue;
           else {
-            LmnLinkAttr attr = LMN_ATOM_GET_LINK_ATTR(start->ap, i);
+            LmnLinkAttr attr = LMN_ATOM_GET_ATTR(start->ap, i);
             if (!LMN_ATTR_IS_DATA(attr)) {
-              LinkObj *next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(start->ap, i), LMN_ATOM_GET_LINK_ATTR(start->ap, i));
+              LinkObj *next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(start->ap, i), LMN_ATOM_GET_ATTR(start->ap, i));
               vec_push(&stack, (LmnWord)next);
             }
             else { /* data atom はスタックに積まないで即コピーする */
@@ -1132,7 +1132,7 @@ EQGROUND_NEQGROUND_BREAK:
               lmn_mem_push_atom((LmnMembrane *)wt[memi], cpdata, attr);
               hashtbl_put(atommap, (HashKeyType)LMN_ATOM_GET_LINK(start->ap, i), (HashValueType)cpatom);
               LMN_ATOM_SET_LINK(cpatom, i, (LmnWord)cpdata);
-              LMN_ATOM_SET_LINK_ATTR(cpatom, i, attr);
+              LMN_ATOM_SET_ATTR(cpatom, i, attr);
             }
           }
         }
@@ -1149,7 +1149,7 @@ EQGROUND_NEQGROUND_BREAK:
         for(i = 0; i < srcvec->num; i++){
           unsigned int index = vec_get(srcvec, i);
           if (lo->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
-              && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              && lo->pos == LMN_ATOM_GET_ATTR((LmnAtomPtr)wt[index], at[index])) {
             goto COPYGROUND_CONT;
           }
         }
@@ -1161,19 +1161,19 @@ EQGROUND_NEQGROUND_BREAK:
           mem_push_symbol_atom((LmnMembrane *)wt[memi], (LmnAtomPtr)cpatom);
 
           hashtbl_put(atommap, (HashKeyType)lo->ap, (HashValueType)cpatom);
-          LMN_ATOM_SET_LINK(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), (LmnWord)cpatom);
-          LMN_ATOM_SET_LINK_ATTR(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), lo->pos);
+          LMN_ATOM_SET_LINK(cpbuddy, LMN_ATOM_GET_ATTR(lo->ap, lo->pos), (LmnWord)cpatom);
+          LMN_ATOM_SET_ATTR(cpbuddy, LMN_ATOM_GET_ATTR(lo->ap, lo->pos), lo->pos);
           for(i = 0; i < LMN_ATOM_GET_ARITY(cpatom); i++) {
-            if (!LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(lo->ap, i))) {
-              LinkObj *next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
+            if (!LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(lo->ap, i))) {
+              LinkObj *next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_ATTR(lo->ap, i));
               vec_push(&stack, (LmnWord)next);
             }
             else { /* data atom はスタックに積まないで即コピーする */
-              LmnAtomPtr cpdata = (LmnAtomPtr)lmn_copy_atom(LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
+              LmnAtomPtr cpdata = (LmnAtomPtr)lmn_copy_atom(LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_ATTR(lo->ap, i));
               hashtbl_put(atommap, (HashKeyType)LMN_ATOM_GET_LINK(lo->ap, i), (HashValueType)cpatom);
-              lmn_mem_push_atom((LmnMembrane *)wt[memi], (LmnWord)cpdata, LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
+              lmn_mem_push_atom((LmnMembrane *)wt[memi], (LmnWord)cpdata, LMN_ATOM_GET_ATTR(lo->ap, i));
               LMN_ATOM_SET_LINK(cpatom, i, (LmnWord)cpdata);
-              LMN_ATOM_SET_LINK_ATTR(cpatom, i, LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
+              LMN_ATOM_SET_ATTR(cpatom, i, LMN_ATOM_GET_ATTR(lo->ap, i));
             }
           }
         }
@@ -1181,8 +1181,8 @@ EQGROUND_NEQGROUND_BREAK:
           /* アトムのコピーを表から取得して親アトムのコピーと接続する */
           LmnAtomPtr cpbuddy = (LmnAtomPtr)hashtbl_get(atommap, (HashKeyType)(LmnAtomPtr)LMN_ATOM_GET_LINK(lo->ap, lo->pos));
           cpatom = (LmnAtomPtr)hashtbl_get(atommap, (HashKeyType)lo->ap);
-          LMN_ATOM_SET_LINK(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), (LmnWord)cpatom);
-          LMN_ATOM_SET_LINK_ATTR(cpbuddy, LMN_ATOM_GET_LINK_ATTR(lo->ap, lo->pos), lo->pos);
+          LMN_ATOM_SET_LINK(cpbuddy, LMN_ATOM_GET_ATTR(lo->ap, lo->pos), (LmnWord)cpatom);
+          LMN_ATOM_SET_ATTR(cpbuddy, LMN_ATOM_GET_ATTR(lo->ap, lo->pos), lo->pos);
         }
 
 COPYGROUND_CONT:
@@ -1230,9 +1230,9 @@ COPYGROUND_CONT:
       Vector stack;
       LinkObj *start;
 
-      LMN_IMS_READ(LmnInstrVar, instr, listi);
+      READ_VAL(LmnInstrVar, instr, listi);
       if (INSTR_REMOVEGROUND == op) {
-        LMN_IMS_READ(LmnInstrVar, instr, memi);
+        READ_VAL(LmnInstrVar, instr, memi);
       }
 
       srcvec = (Vector *)wt[listi];
@@ -1267,7 +1267,7 @@ COPYGROUND_CONT:
         for(i = 0; i < srcvec->num; i++) { /* 根に到達したか */
           unsigned int index = vec_get(srcvec, i);
           if (lo->ap == (LmnWord)LMN_ATOM_GET_LINK((LmnAtomPtr)wt[index], at[index])
-              && lo->pos == LMN_ATOM_GET_LINK_ATTR((LmnAtomPtr)wt[index], at[index])) {
+              && lo->pos == LMN_ATOM_GET_ATTR((LmnAtomPtr)wt[index], at[index])) {
             goto REMOVE_FREE_GROUND_CONT;
           }
         }
@@ -1276,14 +1276,14 @@ COPYGROUND_CONT:
           LinkObj *next;
           if(i == lo->pos)
             continue;
-          if(!LMN_ATTR_IS_DATA(LMN_ATOM_GET_LINK_ATTR(lo->ap, i))) {
-            next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_LINK_ATTR(lo->ap, i)));
+          if(!LMN_ATTR_IS_DATA(LMN_ATOM_GET_ATTR(lo->ap, i))) {
+            next = LinkObj_make((LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATTR_GET_VALUE(LMN_ATOM_GET_ATTR(lo->ap, i)));
             vec_push(&stack, (LmnWord)next); 
           }
           else { /* data atom は積まない */
             switch (op) {
               case INSTR_REMOVEGROUND:
-                lmn_mem_remove_atom((LmnMembrane*)wt[memi], (LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_LINK_ATTR(lo->ap, i));
+                lmn_mem_remove_atom((LmnMembrane*)wt[memi], (LmnWord)LMN_ATOM_GET_LINK(lo->ap, i), LMN_ATOM_GET_ATTR(lo->ap, i));
                 break;
               case INSTR_FREEGROUND:
                 /* data atomは接続されたsymbol atomがfreeされると一緒にfreeされる */
@@ -1312,7 +1312,7 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_ISUNARY:
     {
       LmnInstrVar atomi;
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, atomi);
 
       if(!LMN_ATTR_IS_DATA(at[atomi]) &&
          LMN_ATOM_GET_ARITY((LmnAtomPtr)wt[atomi]) != 1) return FALSE;
@@ -1321,36 +1321,36 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_ISINT:
     {
       LmnInstrVar atomi;
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, atomi);
 
-      if (at[atomi] != LMN_ATOM_INT_ATTR)
+      if (at[atomi] != LMN_INT_ATTR)
         return FALSE;
       break;
     }
     case INSTR_ISFLOAT:
     {
       LmnInstrVar atomi;
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, atomi);
 
-      if(at[atomi] != LMN_ATOM_DBL_ATTR)
+      if(at[atomi] != LMN_DBL_ATTR)
         return FALSE;
       break;
     }
     case INSTR_ISINTFUNC:
     {
       LmnInstrVar funci;
-      LMN_IMS_READ(LmnInstrVar, instr, funci);
+      READ_VAL(LmnInstrVar, instr, funci);
 
-      if(at[funci] != LMN_ATOM_INT_ATTR)
+      if(at[funci] != LMN_INT_ATTR)
         return FALSE;
       break;
     }
     case INSTR_ISFLOATFUNC:
     {
       LmnInstrVar funci;
-      LMN_IMS_READ(LmnInstrVar, instr, funci);
+      READ_VAL(LmnInstrVar, instr, funci);
 
-      if(at[funci] != LMN_ATOM_DBL_ATTR)
+      if(at[funci] != LMN_DBL_ATTR)
         return FALSE;
       break;
     }
@@ -1358,9 +1358,9 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar atom1, memi, atom2;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       at[atom1] = at[atom2];
       wt[atom1] = lmn_copy_atom(wt[atom2], at[atom2]);
@@ -1370,8 +1370,8 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_EQATOM:
     {
       LmnInstrVar atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       /* データアトムは１引数なので,この命令が出る状況では
          では常にFALSEのはず */
@@ -1384,8 +1384,8 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_NEQATOM:
     {
       LmnInstrVar atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
  
       if (!(LMN_ATTR_IS_DATA(at[atom1]) ||
             LMN_ATTR_IS_DATA(at[atom2]) ||
@@ -1397,16 +1397,16 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar mem1, mem2;
 
-      LMN_IMS_READ(LmnInstrVar, instr, mem1);
-      LMN_IMS_READ(LmnInstrVar, instr, mem2);
+      READ_VAL(LmnInstrVar, instr, mem1);
+      READ_VAL(LmnInstrVar, instr, mem2);
       if (wt[mem1] != wt[mem2]) return FALSE;
       break;
     }
     case INSTR_NEQMEM:
     {
       LmnInstrVar mem1, mem2;
-      LMN_IMS_READ(LmnInstrVar, instr, mem1);
-      LMN_IMS_READ(LmnInstrVar, instr, mem2);
+      READ_VAL(LmnInstrVar, instr, mem1);
+      READ_VAL(LmnInstrVar, instr, mem2);
 
       if(wt[mem1] == wt[mem2]) return FALSE;
       break;
@@ -1415,7 +1415,7 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar listi;
       Vector *listvec = vec_make(16);
-      LMN_IMS_READ(LmnInstrVar, instr, listi);
+      READ_VAL(LmnInstrVar, instr, listi);
       wt[listi] = (LmnWord)listvec;
       /* 解放のための再帰 */
       if(interpret(instr, next_instr)) {
@@ -1431,17 +1431,17 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_ADDTOLIST:
     {
       LmnInstrVar listi, srci;
-      LMN_IMS_READ(LmnInstrVar, instr, listi);
-      LMN_IMS_READ(LmnInstrVar, instr, srci);
+      READ_VAL(LmnInstrVar, instr, listi);
+      READ_VAL(LmnInstrVar, instr, srci);
       vec_push((Vector *)wt[listi], srci);
       break;
     }
     case INSTR_GETFROMLIST:
     {
       LmnInstrVar dsti, listi, posi;
-      LMN_IMS_READ(LmnInstrVar, instr, dsti);
-      LMN_IMS_READ(LmnInstrVar, instr, listi);
-      LMN_IMS_READ(LmnInstrVar, instr, posi);
+      READ_VAL(LmnInstrVar, instr, dsti);
+      READ_VAL(LmnInstrVar, instr, listi);
+      READ_VAL(LmnInstrVar, instr, posi);
 
       switch (at[listi]) {
         case LIST_AND_MAP:
@@ -1466,114 +1466,114 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_IADD:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)((int)wt[atom1] + (int)wt[atom2]);
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_ISUB:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)((int)wt[atom1] - (int)wt[atom2]);
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IMUL:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)((int)wt[atom1] * (int)wt[atom2]);
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IDIV:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)((int)wt[atom1] / (int)wt[atom2]);
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_INEG:
     {
       LmnInstrVar dstatom, atomi;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atomi);
       wt[dstatom] = (LmnWord)-(int)atomi;
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IMOD:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)((int)wt[atom1] % (int)wt[atom2]);
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_INOT:
     {
       LmnInstrVar dstatom, atomi;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atomi);
       wt[dstatom] = (LmnWord)~(int)atomi;
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IAND:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)((int)wt[atom1] & (int)wt[atom2]);
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IOR:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)((int)wt[atom1] | (int)wt[atom2]);
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IXOR:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)((int)wt[atom1] ^ (int)wt[atom2]);
-      at[dstatom] = LMN_ATOM_INT_ATTR;
+      at[dstatom] = LMN_INT_ATTR;
       break;
     }
     case INSTR_ILT:
     {
       LmnInstrVar atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] < (int)wt[atom2])) return FALSE;
       break;
@@ -1581,8 +1581,8 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_ILE:
     {
       LmnInstrVar atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] <= (int)wt[atom2])) return FALSE;
       break;
@@ -1590,8 +1590,8 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_IGT:
     {
       LmnInstrVar atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] > (int)wt[atom2])) return FALSE;
       break;
@@ -1599,8 +1599,8 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_IGE:
     {
       LmnInstrVar atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] >= (int)wt[atom2])) return FALSE;
       break;
@@ -1608,8 +1608,8 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_IEQ:
     {
       LmnInstrVar atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] == (int)wt[atom2])) return FALSE;
       break;
@@ -1617,8 +1617,8 @@ REMOVE_FREE_GROUND_CONT:
     case INSTR_INE:
     {
       LmnInstrVar atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       if(!((int)wt[atom1] != (int)wt[atom2])) return FALSE;
       break;
@@ -1626,60 +1626,60 @@ REMOVE_FREE_GROUND_CONT:
     case  INSTR_FADD:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)LMN_MALLOC(double);
       *(double *)wt[dstatom] = *(double *)wt[atom1] + *(double *)wt[atom2];
-      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      at[dstatom] = LMN_DBL_ATTR;
       break;
     }
     case  INSTR_FSUB:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)LMN_MALLOC(double);
       *(double *)wt[dstatom] = *(double *)wt[atom1] - *(double *)wt[atom2];
-      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      at[dstatom] = LMN_DBL_ATTR;
       break;
     }
     case  INSTR_FMUL:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)LMN_MALLOC(double);
       *(double *)wt[dstatom] = *(double *)wt[atom1] * *(double *)wt[atom2];
-      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      at[dstatom] = LMN_DBL_ATTR;
       break;
     }
     case  INSTR_FDIV:
     {
       LmnInstrVar dstatom, atom1, atom2;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       wt[dstatom] = (LmnWord)LMN_MALLOC(double);
       *(double *)wt[dstatom] = *(double *)wt[atom1] / *(double *)wt[atom2];
-      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      at[dstatom] = LMN_DBL_ATTR;
       break;
     }
     case  INSTR_FNEG:
     {
       LmnInstrVar dstatom, atomi;
-      LMN_IMS_READ(LmnInstrVar, instr, dstatom);
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, dstatom);
+      READ_VAL(LmnInstrVar, instr, atomi);
 
       wt[dstatom] = (LmnWord)LMN_MALLOC(double);
       *(double *)wt[dstatom] = -*(double *)wt[atomi];
-      at[dstatom] = LMN_ATOM_DBL_ATTR;
+      at[dstatom] = LMN_DBL_ATTR;
       break;
     }
     case INSTR_ALLOCATOM:
@@ -1688,8 +1688,8 @@ REMOVE_FREE_GROUND_CONT:
       LmnAtomPtr ap;
       LmnLinkAttr attr;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnLinkAttr, instr, attr);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnLinkAttr, instr, attr);
       at[atomi] = attr;
       if (LMN_ATTR_IS_DATA(attr)) {
         READ_DATA_ATOM(wt[atomi], attr);
@@ -1697,7 +1697,7 @@ REMOVE_FREE_GROUND_CONT:
         LmnFunctor f;
         fprintf(stderr, "symbol atom can't be created in GUARD\n");
         exit(EXIT_FAILURE);
-        LMN_IMS_READ(LmnFunctor, instr, f);
+        READ_VAL(LmnFunctor, instr, f);
         wt[atomi] = (LmnWord)ap;
       }
       break;
@@ -1707,8 +1707,8 @@ REMOVE_FREE_GROUND_CONT:
       LmnInstrVar atomi;
       LmnFunctor funci;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnInstrVar, instr, funci);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, funci);
 
       if (LMN_ATTR_IS_DATA(at[funci])) {
         wt[atomi] = lmn_copy_data_atom(wt[funci], at[funci]);
@@ -1723,8 +1723,8 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar atom1, atom2;
 
-      LMN_IMS_READ(LmnInstrVar, instr, atom1);
-      LMN_IMS_READ(LmnInstrVar, instr, atom2);
+      READ_VAL(LmnInstrVar, instr, atom1);
+      READ_VAL(LmnInstrVar, instr, atom2);
 
       if (!lmn_eq_func(wt[atom1], at[atom1], wt[atom2], at[atom2]))
         return FALSE;
@@ -1734,11 +1734,11 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar funci, atomi;
 
-      LMN_IMS_READ(LmnFunctor, instr, funci);
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnFunctor, instr, funci);
+      READ_VAL(LmnInstrVar, instr, atomi);
 
       if(LMN_ATTR_IS_DATA(at[atomi])) {
-        /* TODO: 要確認. ここで得るファンクタはガード命令中で一時的に使われるだけなので
+        /* ここで得るファンクタはガード命令中で一時的に使われるだけなので
            double はポインタのコピーで十分なはず */
         wt[funci]=wt[atomi];
       }
@@ -1755,7 +1755,7 @@ REMOVE_FREE_GROUND_CONT:
       
       fprintf(stderr, "instr:");
       while (TRUE) {
-        LMN_IMS_READ(char, instr, c);
+        READ_VAL(char, instr, c);
         if (!c) break;
         fprintf(stderr, "%c", c);
       }
@@ -1766,8 +1766,8 @@ REMOVE_FREE_GROUND_CONT:
       LmnInstrVar memi;
       lmn_interned_str name;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(lmn_interned_str, instr, name);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(lmn_interned_str, instr, name);
       ((LmnMembrane *)wt[memi])->name = name;
       break;
     }
@@ -1777,8 +1777,8 @@ REMOVE_FREE_GROUND_CONT:
       unsigned int i;
       struct Vector *v;
       
-      LMN_IMS_READ(LmnInstrVar, instr, destmemi);
-      LMN_IMS_READ(LmnInstrVar, instr, srcmemi);
+      READ_VAL(LmnInstrVar, instr, destmemi);
+      READ_VAL(LmnInstrVar, instr, srcmemi);
       v = &((LmnMembrane *)wt[srcmemi])->rulesets;
       for (i = 0; i< v->num; i++) {
         lmn_mem_add_ruleset((LmnMembrane *)wt[destmemi], (LmnRuleSet *)vec_get(v, i));
@@ -1789,7 +1789,7 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar memi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       lmn_mem_remove_proxies((LmnMembrane *)wt[memi]);
       break;
     }
@@ -1797,8 +1797,8 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar parentmemi, childmemi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, parentmemi);
-      LMN_IMS_READ(LmnInstrVar, instr, childmemi);
+      READ_VAL(LmnInstrVar, instr, parentmemi);
+      READ_VAL(LmnInstrVar, instr, childmemi);
       lmn_mem_insert_proxies((LmnMembrane *)wt[parentmemi], (LmnMembrane *)wt[childmemi]);
       break;
     }
@@ -1808,8 +1808,8 @@ REMOVE_FREE_GROUND_CONT:
       HashSet *delset;
       SimpleHashtbl *delmap;
       HashSetIterator it;
-      LMN_IMS_READ(LmnInstrVar, instr, srcset);
-      LMN_IMS_READ(LmnInstrVar, instr, srcmap);
+      READ_VAL(LmnInstrVar, instr, srcset);
+      READ_VAL(LmnInstrVar, instr, srcmap);
 
       delset = (HashSet *)wt[srcset];
       delmap = (SimpleHashtbl *)wt[srcmap];
@@ -1833,7 +1833,7 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar memi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       lmn_mem_remove_toplevel_proxies((LmnMembrane *)wt[memi]);
       break;
     }
@@ -1842,11 +1842,11 @@ REMOVE_FREE_GROUND_CONT:
       LmnInstrVar funci, atomi, pos;
       LmnLinkAttr attr;
       
-      LMN_IMS_READ(LmnInstrVar, instr, funci);
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
-      LMN_IMS_READ(LmnLinkAttr, instr, pos);
+      READ_VAL(LmnInstrVar, instr, funci);
+      READ_VAL(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnLinkAttr, instr, pos);
 
-      attr = LMN_ATOM_GET_LINK_ATTR(LMN_ATOM(wt[atomi]), pos);
+      attr = LMN_ATOM_GET_ATTR(LMN_ATOM(wt[atomi]), pos);
       if (LMN_ATTR_IS_DATA(attr)) {
         wt[funci] = LMN_ATOM_GET_LINK(LMN_ATOM(wt[atomi]), pos);
       }
@@ -1861,8 +1861,8 @@ REMOVE_FREE_GROUND_CONT:
       LmnInstrVar funci;
       LmnLinkAttr attr;
 
-      LMN_IMS_READ(LmnFunctor, instr, funci);
-      LMN_IMS_READ(LmnInstrVar, instr, attr);
+      READ_VAL(LmnFunctor, instr, funci);
+      READ_VAL(LmnInstrVar, instr, attr);
       at[funci] = attr;
       if(LMN_ATTR_IS_DATA(attr)) {
         READ_CONST_DATA_ATOM(wt[funci], attr);
@@ -1870,7 +1870,7 @@ REMOVE_FREE_GROUND_CONT:
       else {
         LmnFunctor f;
         
-        LMN_IMS_READ(LmnFunctor, instr, f);
+        READ_VAL(LmnFunctor, instr, f);
         wt[funci] = (LmnWord)f;
       }
       break;
@@ -1879,8 +1879,8 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar memi, atomi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, atomi);
       lmn_mem_push_atom((LmnMembrane *)wt[memi], wt[atomi], at[atomi]);
       break;
     }
@@ -1888,8 +1888,8 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar destmemi, srcmemi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, destmemi);
-      LMN_IMS_READ(LmnInstrVar, instr, srcmemi);
+      READ_VAL(LmnInstrVar, instr, destmemi);
+      READ_VAL(LmnInstrVar, instr, srcmemi);
       LMN_ASSERT(wt[destmemi] != wt[srcmemi]);
       lmn_mem_move_cells((LmnMembrane *)wt[destmemi], (LmnMembrane *)wt[srcmemi]);
       break;
@@ -1898,7 +1898,7 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar memi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       lmn_mem_remove_temporary_proxies((LmnMembrane *)wt[memi]);
       break;
     }
@@ -1906,8 +1906,8 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar memi, count;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnInstrVar, instr, count);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, count);
 
       if (!lmn_mem_nfreelinks((LmnMembrane *)wt[memi], count)) return FALSE;
       break;
@@ -1916,9 +1916,9 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar mapi, destmemi, srcmemi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, mapi);
-      LMN_IMS_READ(LmnInstrVar, instr, destmemi);
-      LMN_IMS_READ(LmnInstrVar, instr, srcmemi);
+      READ_VAL(LmnInstrVar, instr, mapi);
+      READ_VAL(LmnInstrVar, instr, destmemi);
+      READ_VAL(LmnInstrVar, instr, srcmemi);
       wt[mapi] = (LmnWord)lmn_mem_copy_cells((LmnMembrane *)wt[destmemi],
                                              (LmnMembrane *)wt[srcmemi]);
       break;
@@ -1927,9 +1927,9 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar destlinki, tbli, srclinki;
       
-      LMN_IMS_READ(LmnInstrVar, instr, destlinki);
-      LMN_IMS_READ(LmnInstrVar, instr, tbli);
-      LMN_IMS_READ(LmnInstrVar, instr, srclinki);
+      READ_VAL(LmnInstrVar, instr, destlinki);
+      READ_VAL(LmnInstrVar, instr, tbli);
+      READ_VAL(LmnInstrVar, instr, srclinki);
 
       at[destlinki] = at[srclinki];
       if (LMN_ATTR_IS_DATA(at[srclinki])) {
@@ -1945,7 +1945,7 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar memi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       vec_clear(&((LmnMembrane *)wt[memi])->rulesets);
       break;
     }
@@ -1953,7 +1953,7 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar memi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, memi);
       lmn_mem_drop((LmnMembrane *)wt[memi]);
       break;
     }
@@ -1961,8 +1961,8 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar memi, atomi;
 
-      LMN_IMS_READ(LmnInstrVar, instr, memi);
-      LMN_IMS_READ(LmnInstrVar, instr, atomi);
+      READ_VAL(LmnInstrVar, instr, memi);
+      READ_VAL(LmnInstrVar, instr, atomi);
       LMN_ASSERT(!LMN_ATTR_IS_DATA(at[atomi]));
       LMN_ASSERT(LMN_IS_PROXY_FUNCTOR(LMN_ATOM_GET_FUNCTOR(wt[atomi])));
 
@@ -1973,65 +1973,65 @@ REMOVE_FREE_GROUND_CONT:
     {
       LmnInstrVar desti, i0, i1;
 
-      LMN_IMS_READ(LmnInstrVar, instr, desti);
-      LMN_IMS_READ(LmnInstrVar, instr, i0);
-      LMN_IMS_READ(LmnInstrVar, instr, i1);
-      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
-      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      READ_VAL(LmnInstrVar, instr, desti);
+      READ_VAL(LmnInstrVar, instr, i0);
+      READ_VAL(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_INT_ATTR);
       wt[desti] = wt[i0] + wt[i1];
-      at[desti] = LMN_ATOM_INT_ATTR;
+      at[desti] = LMN_INT_ATTR;
       break;
     }
     case INSTR_ISUBFUNC:
     {
       LmnInstrVar desti, i0, i1;
 
-      LMN_IMS_READ(LmnInstrVar, instr, desti);
-      LMN_IMS_READ(LmnInstrVar, instr, i0);
-      LMN_IMS_READ(LmnInstrVar, instr, i1);
-      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
-      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      READ_VAL(LmnInstrVar, instr, desti);
+      READ_VAL(LmnInstrVar, instr, i0);
+      READ_VAL(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_INT_ATTR);
       wt[desti] = wt[i0] - wt[i1];
-      at[desti] = LMN_ATOM_INT_ATTR;
+      at[desti] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IMULFUNC:
     {
       LmnInstrVar desti, i0, i1;
 
-      LMN_IMS_READ(LmnInstrVar, instr, desti);
-      LMN_IMS_READ(LmnInstrVar, instr, i0);
-      LMN_IMS_READ(LmnInstrVar, instr, i1);
-      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
-      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      READ_VAL(LmnInstrVar, instr, desti);
+      READ_VAL(LmnInstrVar, instr, i0);
+      READ_VAL(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_INT_ATTR);
       wt[desti] = wt[i0] * wt[i1];
-      at[desti] = LMN_ATOM_INT_ATTR;
+      at[desti] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IDIVFUNC:
     {
       LmnInstrVar desti, i0, i1;
 
-      LMN_IMS_READ(LmnInstrVar, instr, desti);
-      LMN_IMS_READ(LmnInstrVar, instr, i0);
-      LMN_IMS_READ(LmnInstrVar, instr, i1);
-      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
-      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      READ_VAL(LmnInstrVar, instr, desti);
+      READ_VAL(LmnInstrVar, instr, i0);
+      READ_VAL(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_INT_ATTR);
       wt[desti] = wt[i0] / wt[i1];
-      at[desti] = LMN_ATOM_INT_ATTR;
+      at[desti] = LMN_INT_ATTR;
       break;
     }
     case INSTR_IMODFUNC:
     {
       LmnInstrVar desti, i0, i1;
 
-      LMN_IMS_READ(LmnInstrVar, instr, desti);
-      LMN_IMS_READ(LmnInstrVar, instr, i0);
-      LMN_IMS_READ(LmnInstrVar, instr, i1);
-      LMN_ASSERT(at[i0] == LMN_ATOM_INT_ATTR);
-      LMN_ASSERT(at[i1] == LMN_ATOM_INT_ATTR);
+      READ_VAL(LmnInstrVar, instr, desti);
+      READ_VAL(LmnInstrVar, instr, i0);
+      READ_VAL(LmnInstrVar, instr, i1);
+      LMN_ASSERT(at[i0] == LMN_INT_ATTR);
+      LMN_ASSERT(at[i1] == LMN_INT_ATTR);
       wt[desti] = wt[i0] % wt[i1];
-      at[desti] = LMN_ATOM_INT_ATTR;
+      at[desti] = LMN_INT_ATTR;
       break;
     }
     case INSTR_GROUP:
@@ -2043,7 +2043,7 @@ REMOVE_FREE_GROUND_CONT:
       fprintf(stderr, "interpret: Unknown operation %d\n", op);
       exit(1);
     }
-/*     lmn_mem_dump((LmnMembrane *)wt[0]); */
+/*     lmn_dump_mem((LmnMembrane *)wt[0]); */
 /*     print_wt(); */
 
     #ifdef DEBUG
@@ -2052,23 +2052,24 @@ REMOVE_FREE_GROUND_CONT:
   }
 }
 
-static void print_wt(void)
-{
-  unsigned int i;
-  unsigned int end = 16;
+/* DEBUG: */
+/* static void print_wt(void) */
+/* { */
+/*   unsigned int i; */
+/*   unsigned int end = 16; */
   
-  fprintf(stderr, " wt: [");
-  for (i = 0; i < end; i++) {
-    if (i>0) fprintf(stderr, ", ");
-    fprintf(stderr, "%lu", wt[i]);
-  }
-  fprintf(stderr, "]");
-  fprintf(stderr, "\n");
-  fprintf(stderr, " at: [");
-  for (i = 0; i < end; i++) {
-    if (i>0) fprintf(stderr, ", ");
-    fprintf(stderr, "%u", at[i]);
-  }
-  fprintf(stderr, "]");
-  fprintf(stderr, "\n");
-}
+/*   fprintf(stderr, " wt: ["); */
+/*   for (i = 0; i < end; i++) { */
+/*     if (i>0) fprintf(stderr, ", "); */
+/*     fprintf(stderr, "%lu", wt[i]); */
+/*   } */
+/*   fprintf(stderr, "]"); */
+/*   fprintf(stderr, "\n"); */
+/*   fprintf(stderr, " at: ["); */
+/*   for (i = 0; i < end; i++) { */
+/*     if (i>0) fprintf(stderr, ", "); */
+/*     fprintf(stderr, "%u", at[i]); */
+/*   } */
+/*   fprintf(stderr, "]"); */
+/*   fprintf(stderr, "\n"); */
+/* } */
