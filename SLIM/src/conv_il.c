@@ -14,6 +14,7 @@
 #include <getopt.h>
 #include "lmntal.h"
 #include "instruction.h"
+#include "atom.h"
 
 #define RULESET    "Compiled Ruleset @"
 #define RULE       "Compiled Rule "
@@ -456,7 +457,7 @@ static LmnFunctor get_functor_id(struct Functor f)
 {
   unsigned int i;
 
-  if (f.type == IN_PROXY)return LMN_IN_PROXY_FUNCTOR;
+  if (f.type == IN_PROXY) return LMN_IN_PROXY_FUNCTOR;
   if (f.type == OUT_PROXY) return LMN_OUT_PROXY_FUNCTOR;
 
   /* TODO 効率的な実装が必要 */
@@ -1732,13 +1733,13 @@ static void output_arg(struct InstrArg a, VEC_T(LABEL_V) *labels, unsigned int *
     }
     case INT:
     {
-      WRITE_GO(LmnLinkAttr, LMN_ATOM_INT_ATTR, *pos);
+      WRITE_GO(LmnLinkAttr, LMN_INT_ATTR, *pos);
       WRITE_GO(int, f.v.int_value, *pos);
       break;
     }
     case DOUBLE:
     {
-      WRITE_GO(LmnLinkAttr, LMN_ATOM_DBL_ATTR, *pos);
+      WRITE_GO(LmnLinkAttr, LMN_DBL_ATTR, *pos);
       WRITE_GO(double, f.v.double_value, *pos);
       break;
     }
@@ -1901,6 +1902,11 @@ static void output_il(struct IL il)
   unsigned int i;
   unsigned int pos = 0;
 
+  WRITE_GO(char, 'S', pos);
+  WRITE_GO(char, 'L', pos);
+  WRITE_GO(char, 'I', pos);
+  WRITE_GO(char, 'M', pos);
+  
   output_symbols(&pos);
   output_functors(&pos);
 

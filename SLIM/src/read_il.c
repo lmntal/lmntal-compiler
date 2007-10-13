@@ -40,7 +40,23 @@ static unsigned int load_uint(FILE *in, int size)
   return 0;
 }
 
+/* 有効なヘッダかをチェックする */
+static void load_header(FILE *in)
+{
+  char s = load_uint8(in);
+  char l = load_uint8(in);
+  char i = load_uint8(in);
+  char m = load_uint8(in);
 
+  if (s != 'S' ||
+      l != 'L' ||
+      i != 'I' ||
+      m != 'M') {
+    fprintf(stderr, "invalid input file\n");
+    exit(EXIT_FAILURE);
+  }
+}
+      
 static LmnRule *load_rule(FILE *in)
 {
   int instr_size = load_uint16(in);
@@ -172,11 +188,11 @@ static void unload_symbols()
 /*   fprintf(stderr, "unloading symbol <<< size:%d\n", lmn_symbol_table.size); */
 }
 
-
 void read_il(const char *file_name)
 {
   FILE *in = fopen(file_name, "rb");
 
+  load_header(in);
   load_symbols(in);
   load_functors(in);
   load_instr(in);
