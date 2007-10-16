@@ -263,8 +263,8 @@ public class SubFrame extends JPanel {
 		menuPanel_.add(attractionCheck_);
 		menuPanel_.add(repulsiveCheck_);
 		menuPanel_.add(springCheck_);
-		menuPanel_.add(breakPointCheck_);
 		menuPanel_.add(springSlider_);
+		menuPanel_.add(breakPointCheck_);
 		menuPanel_.add(wheelPanel_);
 		angleSlider_.setVisible(false);
 		springSlider_.setVisible(false);
