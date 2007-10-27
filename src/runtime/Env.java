@@ -6,6 +6,7 @@ package runtime;
 import graphic.LMNtalGFrame;
 import toolkit.LMNtalTFrame; //todo
 
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -239,6 +240,11 @@ public final class Env {
 		if(!Env.fGraphic) return;
 		LMNgraphic = new LMNtalGFrame();
 	}
+	
+	/**
+	 * UNYOモード
+	 */
+	public static boolean fUNYO = false;
 	
 	/**
 	 * 新 GUI モード。
