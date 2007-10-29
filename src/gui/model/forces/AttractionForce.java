@@ -21,6 +21,8 @@ public class AttractionForce {
 	 * @param node
 	 * @param nodeMap
 	 */
+	
+	static double constantAttraction_ = 0.00001;
 
 	
 	static
@@ -140,7 +142,7 @@ public class AttractionForce {
 			double distance =
 				Point2D.distance(myPoint.getX(), myPoint.getY(), centerX, centerY);
 	
-			double f = -CONSTANT_ATTRACTION * distance;
+			double f = -constantAttraction_ * distance;
 	
 			double dx = myPoint.getX() - centerX;
 			double dy = myPoint.getY() - centerY;
@@ -172,9 +174,12 @@ public class AttractionForce {
 	public void setAttractionFlag(boolean attractionFlag) {
 		attractionFlag_ = attractionFlag;
 	}
+	
+	static
+	public void setConstantAttraction(double value){
+		constantAttraction_ = value / 100000000;
+	}
 
-	/** 引力定数 */
-	final static double CONSTANT_ATTRACTION = 0.0001;
 	static boolean attractionFlag_ = false;
 
 }

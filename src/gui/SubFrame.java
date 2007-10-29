@@ -72,6 +72,15 @@ public class SubFrame extends JPanel {
 	private int SLIDER_DEF = 30;
 	
 	final static
+	public int ATTRACTION_MIN = 0;
+	
+	final static
+	public int ATTRACTION_MAX = 10000;
+	
+	final static
+	private int ATTRACTION_DEFAULT = 100;
+	
+	final static
 	private int SPRING_DEFAULT = 20;
 	
 	final static
@@ -142,7 +151,10 @@ public class SubFrame extends JPanel {
 	
 	static
 	private JSlider springSlider_ = new JSlider(SPRING_MIN, SPRING_MAX, SPRING_DEFAULT);
-	
+
+	static
+	private JSlider attractionSlider_ = new JSlider(ATTRACTION_MIN, ATTRACTION_MAX, ATTRACTION_DEFAULT);
+
 	static
 	private JCheckBox stopPainting_ = new JCheckBox("Stop painting");
 	
@@ -248,12 +260,14 @@ public class SubFrame extends JPanel {
 		repulsiveCheck_.setSelected(true);
 		attractionCheck_.addItemListener(new AttractionAdapter());
 		attractionCheck_.setSelected(false);
+		attractionSlider_.addChangeListener(new AttractionSliderChanged());
+		attractionSlider_.setPreferredSize(preferredSize);
 		breakPointCheck_.addItemListener(new BreakPointAdapter());
 		breakPointCheck_.setSelected(false);
 		menuPanel_.setLayout(new BoxLayout(menuPanel_, BoxLayout.PAGE_AXIS));
 		menuPanel_.add(advanceModeCheck_);
 		menuPanel_.add(stopPainting_);
-		menuPanel_.add(richCheck_);
+//		menuPanel_.add(richCheck_);
 		menuPanel_.add(historyCheck_);
 		menuPanel_.add(linkNumCheck_);
 		menuPanel_.add(showFullNameCheck_);
@@ -261,6 +275,7 @@ public class SubFrame extends JPanel {
 		menuPanel_.add(angleCheck_);
 		menuPanel_.add(angleSlider_);
 		menuPanel_.add(attractionCheck_);
+		menuPanel_.add(attractionSlider_);
 		menuPanel_.add(repulsiveCheck_);
 		menuPanel_.add(springCheck_);
 		menuPanel_.add(springSlider_);
@@ -268,6 +283,7 @@ public class SubFrame extends JPanel {
 		menuPanel_.add(wheelPanel_);
 		angleSlider_.setVisible(false);
 		springSlider_.setVisible(false);
+		attractionSlider_.setVisible(false);
 		
 		menuScroll_ = new JScrollPane(menuPanel_);
 		///////////////////////////////////////////////////////////////////////
@@ -354,9 +370,11 @@ public class SubFrame extends JPanel {
 	public void setAdvanceMode(boolean flag){
 		angleSlider_.setVisible(flag);
 		springSlider_.setVisible(flag);
+		attractionSlider_.setVisible(flag);
 		if(!flag){
 			angleSlider_.setValue(ANGLE_DEFAULT);
 			springSlider_.setValue(SPRING_DEFAULT);
+			attractionSlider_.setValue(ATTRACTION_DEFAULT);
 		}
 	}
 	
@@ -619,6 +637,15 @@ public class SubFrame extends JPanel {
 		public void stateChanged(ChangeEvent e) {
 			JSlider source = (JSlider)e.getSource();
 			SpringForce.setConstantSpring(source.getValue());
+		}
+	}
+	
+	
+	static
+	private class AttractionSliderChanged implements ChangeListener {
+		public void stateChanged(ChangeEvent e) {
+			JSlider source = (JSlider)e.getSource();
+			AttractionForce.setConstantAttraction(source.getValue());
 		}
 	}
 
