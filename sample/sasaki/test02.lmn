@@ -168,10 +168,11 @@ meq.use :- .
 					mm2 = (Membrane) i.next();
 					ua1 = getAtomSet(mm1);
 					System.out.println("\nua1=" + ua1);
-					ua1.removeAll(tca1);
+					ua1.removeAll(tca1); // コメントアウトしないと正しい結果が得られないことも...
 					System.out.println("\nua1'=" + ua1);
 					ua2 = getAtomSet(mm2);
-					ua2.removeAll(tca2);
+					System.out.println("\nmm2=" + mm2);
+					ua2.removeAll(tca2); // コメントアウトしないと正しい結果が得られないことも...
 					um1 = getMemSet(mm1);
 					System.out.println("\num1=" + um1);
 					um1.removeAll(tcm1);
@@ -280,7 +281,7 @@ meq.use :- .
 				
 				System.out.println("\n\taa1's functor=" + aa1.getFunctor() + "\n\taa2's functor=" + aa2.getFunctor());
 				System.out.println("\nan1=" + an1 + ", an2=" + an2);
-				/* [修正] an1==an2 であることが期待されるため、これが満たされない場合はただちに偽を返す */
+				/* [修正] an1==an2 であることが期待されるため、これが満たされない場合はただちに偽を返す(あまり効果無し ∵どうせ直後のtraceLinksの呼出で直ちに引っかかる) */
 				//if (an1 != an2) return false; // 結果が偽である場合、本メソッドのループ回数を減少させる効果あり(デバッグ時はこの行をコメントアウト)
 				
 				int index1 = aLog1.indexOf(aa1); /* aLog1内にaa1が存在しない i.e. aa1への到達によって閉路が形成されない場合は-1が返る */
@@ -339,12 +340,16 @@ H = meq.judgeEquality(Memb1, Memb2) :- H =
 }.
 
 e1 = meq.judgeEquality(Memb1, Memb2).
+/*
 Memb1 = {a(b). a(X,Y,W). b(X,Y,Z). {{c(Z,W,V)}}. d(V).}.
 Memb2 = {a(b). a(X,Y,W). b(X,Y,Z). {{c(Z,W,V)}}. d(V).}.
+*/
 /* [要チェックの事案] (子膜を起点とする分子のマッチングは必要か否かに関連)
 Memb1 = {a(b). a(X,Y,W). b(X,Y,Z). {{c(Z,W,V)}, {}}. d(V).}.
-Memb2 = {a(b). a(X,Y,W). b(X,Y,Z). {{c(Z,W,V)}, {}}. d(V).}.
+Memb2 = {a(b). a(X,Y,W). b(X,Y,Z). {{c(Z,W,V)}, {{}}}. d(V).}.
 */
+Memb1 = {a(b). a(X,Y,W). b(X,Y,Z). {{c(Z,W,V)}, {h}}. d(V).}.
+Memb2 = {a(b). a(X,Y,W). b(X,Y,Z). {{c(Z,W,V)}, {h}}. d(V).}.
 
 /*
 Memb1 = {a(b). a(X,Y,W). b(X,Y,Z). {c(Z,W,V)}. d(V).}.
