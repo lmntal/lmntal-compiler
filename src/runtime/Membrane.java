@@ -291,6 +291,7 @@ public final class Membrane extends QueuedEntity {
 	}
 	/** 指定されたアトムの名前を変える */
 	public void alterAtomFunctor(Atom atom, Functor func) {
+		
 		atoms.remove(atom);
 		atom.setFunctor(func);
 		atoms.add(atom);
@@ -477,6 +478,7 @@ public final class Membrane extends QueuedEntity {
 				if(i==l.getPos())continue;
 				s.push(l.getAtom().getArg(i));
 			}
+
 			atoms.remove(l.getAtom());
 			l.getAtom().mem = null;
 			l.getAtom().dequeue();
@@ -527,6 +529,10 @@ public final class Membrane extends QueuedEntity {
 	public final void addMem(Membrane mem) {
 		mems.add(mem);
 		mem.parent = this;
+		
+		if(Env.fUNYO){
+			unyo.Mediator.addAddedMembrane(mem);
+		}
 	}
 	/** 指定された子膜をこの膜から除去する。
 	 * <strike>実行膜スタックは操作しない。</strike>
@@ -536,9 +542,11 @@ public final class Membrane extends QueuedEntity {
 			Env.LMNgraphic.removeGraphicMem(mem);
 		if(Env.LMNtool != null && !mem.isRoot())
 			Env.LMNtool.addRemovedMem(mem);
+		
 		mems.remove(mem);
 		mem.dequeue();
 		mem.parent = null;
+		
 	}
 	/** 指定されたノードで実行されるロックされたkind==kのルート膜を作成し、この膜の子膜にし、活性化する。
 	 * @param nodedesc ノード名を表す文字列
@@ -581,6 +589,7 @@ public final class Membrane extends QueuedEntity {
 	 * の2通りに限られる。
 	 */
 	public void newLink(Atom atom1, int pos1, Atom atom2, int pos2) {
+
 		atom1.args[pos1] = new Link(atom2, pos2);
 		atom2.args[pos2] = new Link(atom1, pos1);
 	}
@@ -612,6 +621,7 @@ public final class Membrane extends QueuedEntity {
 	
 	/** deprecated */
 	public void relink(Atom atom1, int pos1, Atom atom2, int pos2) {
+
 		relinkAtomArgs(atom1, pos1, atom2, pos2);
 	}
 	/** link1の指すアトム引数とlink2の指すアトム引数の間に、双方向のリンクを張る。
@@ -1413,6 +1423,10 @@ public final class Membrane extends QueuedEntity {
 		// 親膜と同じ実行膜スタックに積む
 		if (k != KIND_ND)
 			stack.push(m);
+
+		if(Env.fUNYO){
+			unyo.Mediator.addAddedMembrane(m);
+		}
 		return m;
 	}
 	/** 新しいデフォルトタイプの子膜を作成し、活性化する */

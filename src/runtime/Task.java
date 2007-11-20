@@ -253,7 +253,7 @@ public class Task implements Runnable {
 			if(flag){
 				if (Env.debugOption) {//by inui
 					if (Debug.isBreakPoint()) Debug.inputCommand();
-				} else if(Env.fUNYO){
+				} else  if(Env.fUNYO){
 					unyo.Mediator.sync(root);
 				} else {
 					if (!guiTrace()) return false;
@@ -286,7 +286,7 @@ public class Task implements Runnable {
 			if(flag){
 				if (Env.debugOption) {//by inui
 					if (Debug.isBreakPoint()) Debug.inputCommand();
-				} else if(Env.fUNYO){
+				} else  if(Env.fUNYO){
 					unyo.Mediator.sync(root);
 				} else {
 					if (!guiTrace()) return false;
@@ -329,6 +329,9 @@ public class Task implements Runnable {
 		}
 		
 		LMNtalRuntime r = runtime;
+		if(Env.fUNYO){
+			unyo.Mediator.sync(root);
+		}
 		while (!r.isTerminated()) {
 			Membrane mem;
 			//本膜をロック

@@ -48,7 +48,6 @@ public class FrontEnd {
 	public static void main(String[] args) {
 		
 		checkVersion();
-		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				Inline.terminate();
@@ -800,6 +799,10 @@ public class FrontEnd {
 			if (Env.gui != null) {
 				Env.gui.onTrace();
 			}
+
+//			if(Env.fUNYO){
+//				unyo.Mediator.sync(root);
+//			}
 			
 			/*TODO:3d calc*/
 			/*nakano*

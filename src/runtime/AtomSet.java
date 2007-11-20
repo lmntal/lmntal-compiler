@@ -176,6 +176,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		Atom a = (Atom)o;
 		Functor f = a.getFunctor();
 		ArrayList l;
+		
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
 			l = (ArrayList)(f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
 		} else {
@@ -191,6 +192,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		}
 		a.index = -1;
 		size--;
+
 		return true;
 	}
 	/**

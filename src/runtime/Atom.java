@@ -1,18 +1,11 @@
 package runtime;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import util.QueuedEntity;
-//import util.Stack;
 
 /**
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
@@ -129,7 +122,7 @@ public final class Atom extends QueuedEntity implements Serializable {
 		return functor.getName();
 	}
 	/** リンク数を取得 */
-	int getArity() {
+	public int getArity() {
 		return functor.getArity();
 	}
 	/** 最終引数を取得 */
@@ -146,6 +139,7 @@ public final class Atom extends QueuedEntity implements Serializable {
 	}
 	/** 第 n 引数につながってるアトムを取得する */
 	public Atom nthAtom(int n) {
+		
 		return args[n].getAtom();
 	}
 //	/** 所属膜を設定する。AbstractMembraneとそのサブクラスのみ呼び出してよい。*/

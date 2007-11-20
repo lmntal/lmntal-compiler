@@ -650,6 +650,9 @@ class InterpretiveReactor {
 					//====アトムを操作する基本ボディ命令====ここから====
 				case Instruction.REMOVEATOM :
 					//[srcatom, srcmem, funcref]
+					if(Env.fUNYO){
+						unyo.Mediator.addRemovedAtom(atoms[inst.getIntArg1()], atoms[inst.getIntArg1()].mem.getMemID());
+					}
 					atom = atoms[inst.getIntArg1()];
 					atom.mem.removeAtom(atom);
 					break; //n-kato
@@ -657,10 +660,17 @@ class InterpretiveReactor {
 					//[-dstatom, srcmem, funcref]
 					func = (Functor) inst.getArg3();
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(func);
+					if(Env.fUNYO){
+						unyo.Mediator.addAddedAtom(atoms[inst.getIntArg1()]);
+					}
 					break; //n-kato
 				case Instruction.NEWATOMINDIRECT :
 					//[-dstatom, srcmem, func]
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom((Functor)(vars.get(inst.getIntArg3())));
+
+					if(Env.fUNYO){
+						unyo.Mediator.addAddedAtom(atoms[inst.getIntArg1()]);
+					}
 					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 				case Instruction.ENQUEUEATOM :
 					//[srcatom]
@@ -688,32 +698,53 @@ class InterpretiveReactor {
 					//====アトムを操作する型付き拡張用命令====ここから====
 				case Instruction.ALLOCATOM : //[-dstatom, funcref]
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)inst.getArg2());
+
+					if(Env.fUNYO){
+						unyo.Mediator.addAddedAtom(atoms[inst.getIntArg1()]);
+					}
 					break; //nakajima 2003-12-27, n-kato
 
 				case Instruction.ALLOCATOMINDIRECT : //[-dstatom, func]
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)(vars.get(inst.getIntArg2())));
+
+					if(Env.fUNYO){
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg1()]);
+					}
 					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 
 				case Instruction.COPYATOM :
 					//[-dstatom, mem, srcatom]
 					atoms[inst.getIntArg1()] = mems[inst.getIntArg2()].newAtom(atoms[inst.getIntArg3()].getFunctor());
+
+					if(Env.fUNYO){
+						unyo.Mediator.addAddedAtom(atoms[inst.getIntArg1()]);
+					}
 					break; //nakajima, n-kato
 
 				case Instruction.ADDATOM:
 					//[dstmem, atom]
 					mems[inst.getIntArg1()].addAtom(atoms[inst.getIntArg2()]);
+					if(Env.fUNYO){
+						unyo.Mediator.addAddedAtom(atoms[inst.getIntArg2()]);
+					}
 					break; //nakajima 2003-12-27, n-kato
 					//====アトムを操作する型付き拡張用命令====ここまで====
 
 					//====膜を操作する基本ボディ命令====ここから====
 				case Instruction.REMOVEMEM :
 					//[srcmem, parentmem]
+					if(Env.fUNYO){
+						unyo.Mediator.addRemovedMembrane(mems[inst.getIntArg1()].getMemID(), mems[inst.getIntArg1()].getParent().getMemID());
+					}
 					mem = mems[inst.getIntArg1()];
 					mem.parent.removeMem(mem);
 					break; //n-kato
 				case Instruction.NEWMEM: //[-dstmem, srcmem, memtype]
 					mem = mems[inst.getIntArg2()].newMem(inst.getIntArg3());
 					mems[inst.getIntArg1()] = mem;
+					if(Env.fUNYO){
+						unyo.Mediator.addAddedMembrane(mem);
+					}
 					break; //n-kato
 				case Instruction.ALLOCMEM: //[-dstmem]
 					mem = ((Task)mems[0].getTask()).createFreeMembrane();
@@ -736,6 +767,9 @@ class InterpretiveReactor {
 				case Instruction.ADDMEM :
 					//[dstmem, srcmem]
 					mems[inst.getIntArg2()] = mems[inst.getIntArg2()].moveTo(mems[inst.getIntArg1()]);
+					if(Env.fUNYO){
+						unyo.Mediator.addAddedMembrane(mems[inst.getIntArg2()]);
+					}
 					break; //nakajima 2004-01-04, n-kato, n-kato 2004-11-10
 				case Instruction.ENQUEUEMEM:
 					mems[inst.getIntArg1()].activate();
@@ -747,6 +781,9 @@ class InterpretiveReactor {
 
 				case Instruction.SETMEMNAME: //[dstmem, name]
 					mems[inst.getIntArg1()].setName((String)inst.getArg2());
+					if(Env.fUNYO){
+						unyo.Mediator.addModifiedMembrane(mems[inst.getIntArg1()]);
+					}
 					break; //n-kato
 
 
@@ -768,30 +805,58 @@ class InterpretiveReactor {
 					atoms[inst.getIntArg1()].mem.newLink(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
+					if(Env.fUNYO){
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg1()]);
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg3()]);
+					}
 					break; //n-kato
 				case Instruction.RELINK:		 //[atom1, pos1, atom2, pos2, mem]
+					
 					atoms[inst.getIntArg1()].mem.relinkAtomArgs(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
+
+					if(Env.fUNYO){
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg1()]);
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg3()]);
+					}
 					break; //n-kato
 				case Instruction.UNIFY:		//[atom1, pos1, atom2, pos2, mem]
+					
 					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
 					mems[0].unifyAtomArgs(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						atoms[inst.getIntArg3()], inst.getIntArg4() );
+					if(Env.fUNYO){
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg1()]);
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg3()]);
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg1()].args[inst.getIntArg2()].getAtom());
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg3()].args[inst.getIntArg4()].getAtom());
+					}
 					break; //mizuno
 
 				case Instruction.INHERITLINK:		 //[atom1, pos1, link2, mem]
 					atoms[inst.getIntArg1()].mem.inheritLink(
 						atoms[inst.getIntArg1()], inst.getIntArg2(),
 						(Link)vars.get(inst.getIntArg3()) );
+					
+					if(Env.fUNYO){
+						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg1()]);
+						unyo.Mediator.addModifiedAtom(((Link)vars.get(inst.getIntArg3())).getAtom());
+					}
+					
 					break; //n-kato
 
 				case Instruction.UNIFYLINKS:		//[link1, link2, mem]
+					
 					//2005/10/11 mizuno ローカルなので、本膜を使えば問題ないはず
 					mems[0].unifyLinkBuddies(
 						((Link)vars.get(inst.getIntArg1())),
 						((Link)vars.get(inst.getIntArg2())));
+					if(Env.fUNYO){
+						unyo.Mediator.addModifiedAtom(((Link)vars.get(inst.getIntArg1())).getAtom());
+						unyo.Mediator.addModifiedAtom(((Link)vars.get(inst.getIntArg2())).getAtom());
+					}
 					break; //mizuno
 
 					//====リンクを操作するボディ命令====ここまで====

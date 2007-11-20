@@ -2,7 +2,9 @@ package unyo;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import runtime.Atom;
 import runtime.Env;
@@ -10,8 +12,9 @@ import runtime.Membrane;
 
 public class Mediator {
 
+	// <削除された膜のID, 親膜のID>
 	static
-	private HashSet<Membrane> deletedMembrane_;
+	private HashMap<String, String> removedMembrane_;
 	
 	static
 	private HashSet<Membrane> addedMembrane_;
@@ -19,8 +22,9 @@ public class Mediator {
 	static
 	private HashSet<Membrane> modifiedMembrane_;
 	
+	// <削除されたアトムのID, 親膜のID>
 	static
-	private HashSet<Atom> deletedAtom_;
+	private HashMap<String, String> removedAtom_;
 	
 	static
 	private HashSet<Atom> addedAtom_;
@@ -43,10 +47,10 @@ public class Mediator {
 	static
 	public void init(){
 
-		deletedMembrane_ = new HashSet<Membrane>();
+		removedMembrane_ = new HashMap<String, String>();
 		addedMembrane_ = new HashSet<Membrane>();
 		modifiedMembrane_ = new HashSet<Membrane>();
-		deletedAtom_ = new HashSet<Atom>();
+		removedAtom_ = new HashMap<String, String>();
 		addedAtom_ = new HashSet<Atom>();
 		modifiedAtom_ = new HashSet<Atom>();
 		
@@ -61,10 +65,10 @@ public class Mediator {
 			setState_ 
 			= unyoClass_.getMethod("setState",
 					Object.class,
+					HashMap.class,
 					HashSet.class,
 					HashSet.class,
-					HashSet.class,
-					HashSet.class,
+					HashMap.class,
 					HashSet.class,
 					HashSet.class);
 			
@@ -88,12 +92,19 @@ public class Mediator {
 		try {
 			setState_.invoke(unyoObj_,
 					root,
-					deletedMembrane_,
+					removedMembrane_,
 					addedMembrane_,
 					modifiedMembrane_,
-					deletedAtom_,
+					removedAtom_,
 					addedAtom_,
 					modifiedAtom_);
+
+			removedMembrane_.clear();
+			addedMembrane_.clear();
+			modifiedMembrane_.clear();
+			removedAtom_.clear();
+			addedAtom_.clear();
+			modifiedAtom_.clear();
 			
 			while((Boolean)sync_.invoke(unyoObj_)){
 				try {
@@ -114,8 +125,8 @@ public class Mediator {
 	}
 
 	static
-	public void addDeletedMembrane(Membrane mem){
-		deletedMembrane_.add(mem);
+	public void addRemovedMembrane(String removeMemID, String parentMemID){
+		removedMembrane_.put(removeMemID, parentMemID);
 	}
 	
 	static
@@ -129,8 +140,9 @@ public class Mediator {
 	}
 	
 	static
-	public void addDeletedAtom(Atom atom){
-		deletedAtom_.add(atom);
+	public void addRemovedAtom(Atom removeAtom, String parentMemID){
+		String id = ((Integer)removeAtom.getid()).toString();
+		removedAtom_.put(id, parentMemID);
 	}
 	
 	static
