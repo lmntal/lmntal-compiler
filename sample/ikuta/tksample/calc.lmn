@@ -1,3 +1,6 @@
+
+{} :- {}.
+
 // --wtモードで実行してください。
 // 入力が９桁までの計算機です。
 // 不正な入力(式の途中で＝を押すなど)には対応してません。
@@ -13,12 +16,11 @@
 	{textarea, id("answer"), position(0,0), text("0"), weight(1.0, 1.0), size(5,1)}.
 
 	{button, id("0"), position(0,4), text("0"), weight(1.0, 1.0), size(2,1), num(0)}.
-	
+
 	// ボタン生成（１~９）
 	id(1).
 	id(_ID) :- _ID < 10, _IX = (_ID - 1) mod 3, _IY = (12 - _ID) / 3 | id(_ID + 1), 
 	{button, id(_ID), position(_IX ,_IY), text(_ID), weight(1.0, 1.0), num(_ID)}.
-
 
 	{button, id("pul"), position(3,1), text("+"), weight(1.0, 1.0), operator}.
 	{button, id("min"), position(3,2), text("-"), weight(1.0, 1.0), operator}.
@@ -34,6 +36,7 @@
 	numa(0).
 	numb(0).
 	ope("").
+
 
 	pushint1@@ // 数字を押されたらaに数字を代入する。
 	{clicked, num(_IX), $p}, numa(_IA)

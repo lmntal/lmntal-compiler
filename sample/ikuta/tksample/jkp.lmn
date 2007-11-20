@@ -9,7 +9,7 @@
 	sys.perpetual(on).
 
 	// *** 配置 *** //
-	{graphic, id("1"), position(0,0), weight(1.0,10.0), size(3,1), 
+	{graphic, id(1), position(0,0), weight(1.0,10.0), size(3,1), 
 	  {
 	  	id("1_1").
 	    draw. name("pic"). getpic("C:\\goo.gif").
@@ -17,14 +17,14 @@
 	  }
 	}.
 
-	{label, id("2"), position(0,1), text("  One, two, three, go !!"), weight(1.0,1.0), size(3,1)}.
+	{label, id(2), position(0,1), text("  One, two, three, go !!"), weight(1.0,1.0), size(3,1)}.
 	
-	{button, id("3"), position(0,2), text("rock"), weight(1.0,2.0)}.
-	{button, id("4"), position(1,2), text("scissors"), weight(1.0,2.0)}.
-	{button, id("5"), position(2,2), text("paper"), weight(1.0,2.0)}.
-	{button, id("6"), position(0,3), text("agein!!"), size(3,1), weight(1.0,1.0)}.
+	{button, id(3), position(0,2), text("rock"), weight(1.0,2.0)}.
+	{button, id(4), position(1,2), text("scissors"), weight(1.0,2.0)}.
+	{button, id(5), position(2,2), text("paper"), weight(1.0,2.0)}.
+	{button, id(6), position(0,3), text("again!!"), size(3,1), weight(1.0,1.0)}.
 
-	{timer, id("7"), time(10)}.
+	{timer, id(7), time(100)}.
 	
 	// *** ルール *** //
 	
@@ -37,26 +37,26 @@
 	:- {$p}, {{getpic("C:\\goo.gif"), $q}, $r}.
 	
 	//判定
-	{clicked, id("3"), $p}, {{getpic("C:\\goo.gif"), $q}, $r}
-	:- {id("3"), $p}, {{getpic("C:\\aiko.gif"), $q}, $r}, aiko.
-	{clicked, id("3"), $p}, {{getpic("C:\\cho.gif"), $q}, $r}
-	:- {id("3"), $p}, {{getpic("C:\\kachi.gif"), $q}, $r}.
-	{clicked, id("3"), $p}, {{getpic("C:\\paa.gif"), $q}, $r}
-	:- {id("3"), $p}, {{getpic("C:\\make.gif"), $q}, $r}.
+	{clicked, $p}, {{getpic("C:\\goo.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\aiko.gif"), $q}, $r}, aiko.
+	{clicked, $p}, {{getpic("C:\\cho.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\kachi.gif"), $q}, $r}.
+	{clicked, $p}, {{getpic("C:\\paa.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\make.gif"), $q}, $r}.
 
-	{clicked, id("4"), $p}, {{getpic("C:\\goo.gif"), $q}, $r}
-	:- {id("4"), $p}, {{getpic("C:\\make.gif"), $q}, $r}.
-	{clicked, id("4"), $p}, {{getpic("C:\\cho.gif"), $q}, $r}
-	:- {id("4"), $p}, {{getpic("C:\\aiko.gif"), $q}, $r}, aiko.
-	{clicked, id("4"), $p}, {{getpic("C:\\paa.gif"), $q}, $r}
-	:- {id("4"), $p}, {{getpic("C:\\kachi.gif"), $q}, $r}.
+	{clicked, $p}, {{getpic("C:\\goo.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\make.gif"), $q}, $r}.
+	{clicked, $p}, {{getpic("C:\\cho.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\aiko.gif"), $q}, $r}, aiko.
+	{clicked, $p}, {{getpic("C:\\paa.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\kachi.gif"), $q}, $r}.
 
-	{clicked, id("5"), $p}, {{getpic("C:\\goo.gif"), $q}, $r}
-	:- {id("5"), $p}, {{getpic("C:\\kachi.gif"), $q}, $r}.
-	{clicked, id("5"), $p}, {{getpic("C:\\cho.gif"), $q}, $r}
-	:- {id("5"), $p}, {{getpic("C:\\make.gif"), $q}, $r}.
-	{clicked, id("5"), $p}, {{getpic("C:\\paa.gif"), $q}, $r}
-	:- {id("5"), $p}, {{getpic("C:\\aiko.gif"), $q}, $r}, aiko.
+	{clicked, $p}, {{getpic("C:\\goo.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\kachi.gif"), $q}, $r}.
+	{clicked, $p}, {{getpic("C:\\cho.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\make.gif"), $q}, $r}.
+	{clicked, $p}, {{getpic("C:\\paa.gif"), $q}, $r}
+	:- {$p}, {{getpic("C:\\aiko.gif"), $q}, $r}, aiko.
 	
 	//あいこ
 	aiko, {timeover, timeover, timeover, timeover, timeover, 
@@ -65,7 +65,7 @@
 	 :- {$p}, {{getpic("C:\\goo.gif"), $q}, $r}.
 	
 	//もっかい
-	{clicked, id("6"), $p}, {{getpic(_SX), $q}, $r}
-	:- {id("6"), $p}, {{getpic("C:\\goo.gif"), $q}, $r}.
+	{clicked, $p}, {{getpic(_SX), $q}, $r}
+	:- {$p}, {{getpic("C:\\goo.gif"), $q}, $r}.
 
 }

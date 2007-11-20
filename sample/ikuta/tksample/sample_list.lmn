@@ -1,0 +1,81 @@
+
+// コメントアウトしてある部分をはずして使ってください。
+
+/*
+// window生成
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on) }.
+*/
+
+/*
+// button生成
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { button, id(1), text("Button_Text"), position(0,0) }.
+}
+*/
+
+/*
+// label生成
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { label, id(2), text("Label_Text"), position(0,0) }.
+}
+*/
+
+/*
+// textarea生成
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { textarea, id(3), text("TextArea_Text"), position(0,0) }.
+}
+*/
+
+/*
+// html生成
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { html, id(4), position(0,0),
+    text("<BR><CENTER><FONT size=6 color=red>Html_Text</FONT></CENTER>") }.
+}
+*/
+
+/*
+// timer生成(３秒後にlabelの内容が変わる)
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { label, id(2), text("Label_Text"), position(0,0) }.
+  { timer, id(5), time(3000) }.
+  {timeover, $p}, {text(_SX), $q} :- {$p}, {text("TimeOver"), $q}.
+}
+*/
+
+/*
+// 配置テスト(size)
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { button, id(1), text("Button"), position(0,0), size(1,1), weight(1.0,1.0), ipad(0,0) }.
+  { label, id(2), text("Label1"), position(1,0), size(1,1), weight(1.0,1.0), ipad(0,0) }.
+  { label, id(3), text("Label2"), position(2,0), size(1,1), weight(1.0,1.0), ipad(0,0) }.
+  { textarea, id(4), text("TextArea"), position(0,1), size(2,2), weight(1.0,1.0), ipad(0,0) }.
+  { html, id(5), text("<B>HTML</B>"), position(2,1), size(1,1), weight(1.0,1.0), ipad(0,0) }.
+  { html, id(6), text("<B>HTML</B>"), position(2,2), size(1,1), weight(1.0,1.0), ipad(0,0) }.
+}
+*/
+
+/*
+// 配置テスト(weight)
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { button, id(1), text("Button"), position(0,0), size(1,1), weight(0,0), ipad(0,0) }.
+  { label, id(2), text("Label1"), position(1,0), size(1,1), weight(0,0), ipad(0,0) }.
+  { label, id(3), text("Label2"), position(2,0), size(1,1), weight(0,0), ipad(0,0) }.
+  { textarea, id(4), text("TextArea"), position(0,1), size(2,2), weight(0,0), ipad(0,0) }.
+  { html, id(5), text("<B>HTML</B>"), position(2,1), size(1,1), weight(0,0), ipad(0,0) }.
+  { html, id(6), text("<B>HTML</B>"), position(2,2), size(1,1), weight(0,0), ipad(0,0) }.
+}
+*/
+
+/*
+// 配置テスト(ipad)
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { button, id(1), text("Button"), position(0,0), size(1,1), weight(0,0), ipad(50,30) }.
+  { button, id(2), text("Button"), position(1,0), size(1,1), weight(0,0), ipad(20,30) }.
+  { button, id(3), text("Button"), position(2,0), size(1,1), weight(0,0), ipad(0,30) }.
+  { textarea, id(4), text("TextArea"), position(0,1), size(2,2), weight(0,0), ipad(0,0) }.
+  { html, id(5), text("<B>HTML</B>"), position(2,1), size(1,1), weight(0,0), ipad(0,0) }.
+  { html, id(6), text("<B>HTML</B>"), position(2,2), size(1,1), weight(0,0), ipad(0,0) }.
+}
+*/
