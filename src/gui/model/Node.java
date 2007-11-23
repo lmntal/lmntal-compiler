@@ -271,6 +271,7 @@ public class Node implements Cloneable{
 			AttractionForce.calcAttraction(this, nodeMap_, nodeGroupMap_);
 			RepulsiveForce.calcRepulsive(this, areaNodeMap_);
 			NodeFunction.calcHeat(this, nodeMap_);
+			resetAreaMap();
 		}
 //		moveCalc();
 	}
