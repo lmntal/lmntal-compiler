@@ -569,7 +569,7 @@ public class Node implements Cloneable{
 		Set<Node> nodeSet = new HashSet<Node>();
 		if(rect_.intersects(rect)){
 			if(!rootMembrane_ &&
-					isVisible() &&
+					parent_.isVisible() &&
 					(myObject_ instanceof Atom ||
 							(withMembrane &&
 									myObject_ instanceof Membrane)))

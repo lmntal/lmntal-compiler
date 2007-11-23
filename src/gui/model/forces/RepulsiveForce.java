@@ -4,6 +4,7 @@ import gui.model.Node;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,7 @@ public class RepulsiveForce {
 				return;
 			}
 	
+			Set<PairNode> calcedNodeSet = new HashSet<PairNode>();
 			Iterator<Set<Node>> nodeSets = areaNodeMap.values().iterator();
 			while(nodeSets.hasNext()){
 				Set<Node> nodeSet = nodeSets.next();
@@ -42,15 +44,24 @@ public class RepulsiveForce {
 					Point2D sourcePoint = sourceNode.getCenterPoint();
 
 					Iterator<Node> targetNodes = nodeSet.iterator();
+					targetNodes:
 					while(targetNodes.hasNext()){
 						// 表示されているNodeを取得する
 						Node targetNode = targetNodes.next();
-						// 引力は働かせない
-						if(sourceNode == targetNode)
-						{
-							continue; 
+						if(sourceNode.getID() == targetNode.getID()){
+							continue;
 						}
-
+						PairNode pn = new PairNode(sourceNode, targetNode);
+						Iterator<PairNode> pairNodes = calcedNodeSet.iterator();
+						while (pairNodes.hasNext()) {
+							PairNode pairNode = (PairNode) pairNodes.next();
+							if(pairNode.equals(pn)){
+								continue targetNodes;
+							}
+							
+						}
+						calcedNodeSet.add(pn);
+						
 						Rectangle2D intersectionRect = 
 							sourceNode.getBounds2D().createIntersection(targetNode.getBounds2D());
 						double divergenceFource = CONSTANT_REPULSIVE;
@@ -66,16 +77,21 @@ public class RepulsiveForce {
 
 						Point2D targetPoint = targetNode.getCenterPoint();
 
+						double fx = intersectionRect.getWidth();
+						double dx = (sourcePoint.getX() - targetPoint.getX() < 0) ? -1 : 1;
+						double fy = intersectionRect.getHeight();
+						double dy = (sourcePoint.getY() - targetPoint.getY() < 0) ? -1 : 1;
 
-						double fx = divergenceFource * intersectionRect.getWidth();
-						double dx = sourcePoint.getX() - targetPoint.getX();
-						double fy = divergenceFource * intersectionRect.getHeight();
-						double dy = sourcePoint.getY() - targetPoint.getY();
+//						boolean calcX = (((intersectionRect.getBounds2D().getWidth() / 2) - Math.abs(dx)) < ((intersectionRect.getBounds2D().getHeight() / 2) - Math.abs(dy)));
+						boolean calcX = (intersectionRect.getBounds2D().getWidth() < intersectionRect.getBounds2D().getHeight());
 
-						boolean calcX = (((sourceNode.getBounds2D().getWidth() / 2) - Math.abs(dx)) < ((sourceNode.getBounds2D().getHeight() / 2) - Math.abs(dy)));
-
-						double ddx = (calcX) ? fx * dx : 0;
-						double ddy = (!calcX) ? fy * dy : 0;
+						double ddx = (calcX) ? fx * dx: 0;
+						double ddy = (!calcX) ? fy * dy: 0;
+						
+//						System.out.println(sourceNode.getID());
+//						System.out.println(targetNode.getID());
+//						System.out.println("------------");
+//						System.out.println("rep" +ddx + "," + ddy);
 
 						if(!sourceNode.isAtom() && !targetNode.isAtom()){
 							sourceNode.moveDelta(ddx, ddy);
@@ -88,32 +104,6 @@ public class RepulsiveForce {
 								targetNode.moveDelta(-ddx, -ddy);
 							}
 						}
-						//				Point2D targetPoint = targetNode.getCenterPoint();
-						//
-						////				double size = Math.max(sourceNode.getSize() , targetNode.getSize());
-						//				// TODO: Node　の大きさ
-						//				double distance = 
-						//					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / 80;
-						////					Point2D.distance(sourcePoint.getX(), sourcePoint.getY(), targetPoint.getX(), targetPoint.getY()) / size;
-						//
-						//				double divergenceFource = (divergenceTimer_ == 0) ? 1 : 2;
-						//				if(distance > 1 * divergenceFource){
-						//					continue; 
-						//				}
-						//				
-						//				double distance2 = distance * distance;
-						//				double f = CONSTANT_REPULSIVE * divergenceFource *(
-						//						(1.25 * distance2 * distance) -
-						//						(2.375 * distance2) +
-						//						1.125);
-						//				
-						//				double dx = sourcePoint.getX() - targetPoint.getX();
-						//				double dy = sourcePoint.getY() - targetPoint.getY();
-						//				
-						//				double ddx = f * dx;
-						//				double ddy = f * dy;
-						//				sourceNode.moveDelta(ddx, ddy);
-						//				targetNode.moveDelta(-ddx, -ddy);
 					}
 				}
 			}
@@ -122,5 +112,32 @@ public class RepulsiveForce {
 	static boolean repulsiveFlag_ = true;
 	/** 斥力定数 */
 	final static double CONSTANT_REPULSIVE = 0.0005;
+	
+	final static double ALFA_DIST = 5;
+	
+	static
+	private class PairNode{
+		private Node nodeA;
+		private Node nodeB;
+		
+		public PairNode(Node a, Node b){
+			nodeA = a;
+			nodeB = b;
+		}
+		
+		@Override
+		public boolean equals(Object obj){
+			if(!(obj instanceof PairNode)){
+				return false;
+			}
+			PairNode pn = (PairNode) obj;
+			if((nodeA.getID() == pn.nodeA.getID() && nodeB.getID() == pn.nodeB.getID()) ||
+					(nodeA.getID() == pn.nodeB.getID() && nodeB.getID() == pn.nodeA.getID()))
+			{
+				return true;
+			}
+			return false;
+		}
+	}
 
 }

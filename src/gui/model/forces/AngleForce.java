@@ -43,10 +43,7 @@ public class AngleForce {
 				if(null == nthNode){ continue; }
 				Point2D nthPoint = nthNode.getCenterPoint();
 	
-				if(null == nthNode ||
-						null == nthPoint ||
-						sourceNode == nthNode)
-				{ 
+				if(sourceNode == nthNode){ 
 					continue; 
 				}
 				
@@ -74,17 +71,19 @@ public class AngleForce {
 					double angleR = angleCur - anglePre;
 					double dx = nthPoint.getX() - myPoint.getX();
 					double dy = nthPoint.getY() - myPoint.getY();
-					double edgeLength = Math.sqrt(dx * dx + dy * dy);
+					double edgeLength = Math.sqrt((dx * dx) + (dy * dy));
 					if(edgeLength == 0.0){ edgeLength = 0.00001; }
 	
 					double tx = -dy / edgeLength;
 					double ty =  dx / edgeLength;
 					
-					dx = AngleForce.constantAngle_ * tx * angleR;
-					dy = AngleForce.constantAngle_ * ty * angleR;
+//					dx = AngleForce.constantAngle_ * tx * angleR;
+//					dy = AngleForce.constantAngle_ * ty * angleR;
+					dx = tx * angleR;
+					dy = ty * angleR;
 					
-					dx = dx * 2;
-					dy = dy * 2;
+//					dx = dx * 2;
+//					dy = dy * 2;
 					sourceNode.moveDelta(-dx, -dy);
 					nthNode.moveDelta(dx, dy);
 					
