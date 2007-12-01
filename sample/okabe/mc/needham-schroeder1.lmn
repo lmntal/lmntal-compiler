@@ -1,0 +1,62 @@
+/*
+ * Needham-Schroeder Public Key Protocol
+ * 2007/12/01(Sat) by okabe
+ * 
+ * ２つの主体が公開鍵を用いて互いのノンスを交換する
+ * 名前管理を膜への参照で行う
+ *
+ * A->B: {Na,A}Kb
+ * B->A: {Na,Nb}Ka
+ * A->B: {Nb}Kb
+ *
+ * 参考
+ * Needham-Schroeder protocol - Wikipedia
+ *  http://en.wikipedia.org/wiki/Needham-Schroeder
+ */
+
+
+princ{ id(A), send{}, recv{}, knonce{}. conn_to(X) }.
+princ{ id(B), send{}, recv{}, knonce{}. }.
+
+id{+A}.
+id{+B, +X}.
+nonce{}.
+
+initiator1@@
+princ{ id(I0), conn_to(X0), send{$s}, knonce{$k}, $p },
+  id{+I0, $i}, id{+X0, $x}, nonce{$n} :-
+princ{ id(I0), send{enc{pubk(X1), nonce(N0), id(I1)}, $s}, state_send(X2,N1), knonce{nonce(N2), $k} ,$p },
+  id{+I0, +I1, $i}, id{+X1, +X2, $x}, nonce{+N0, +N1, +N2, $n}.
+
+initiator2@@
+princ{ id(I0), state_send(X0, N0), recv{enc{pubk(I1), nonce(NX0), nonce(N1)}, $r}, send{$s}, knonce{$k}, $p},
+  id{+I0, +I1, $i}, id{+X0, $x}, nonce{+N0, +N1, $n}, nonce{+NX0, $nx} :-
+princ{ id(I0), recv{$r}, send{enc{pubk(X1), nonce(NX0)}, $s}, knonce{nonce(NX1), $k}, est_to(X2) ,$p},
+id{+I0, $i}, id{+X1, +X2, $x}, nonce{$n}, nonce{+NX0, +NX1, $nx}.
+
+responder1@@
+princ{ id(I0), recv{enc{pubk(I1), nonce(NX0), id(X0)}, $r}, send{$s}, knonce{$k}, $p},
+  id{+I0, +I1, $i}, id{+X0, $x}, nonce{+NX0, $nx} :-
+princ{ id(I0), recv{$r}, send{enc{pubk(X1), nonce(N0), nonce(NX0)}, $s}, state_recv(X2, N1), knonce{nonce(N2), nonce(NX1), $k}, $p},
+  id{+I0, $i}, id{+X1, +X2, $x}, nonce{+N0, +N1, +N2}, nonce{+NX0, +NX1, $nx}.
+
+resopnder2@@
+princ{ id(I0), state_recv(X0, N0), recv{enc{pubk(I1), nonce(N1)}, $r}, $p},
+  id{+I0, +I1, $i}, id{+X0, $x}, nonce{+N0, +N1, $n} :-
+princ{ id(I0), recv{$r}, est_from(X0), $p },
+  id{+I0, $i}, id{+X0, $x}, nonce{$n}.
+
+/*
+ * TODO:
+ * 非線形プロセス文脈のコピーができないためブロードキャストができない
+ * →あきらめた
+ */
+% bnetwork
+send@@
+princ{send{$s}, $p} :- \+($s=()) |
+  princ{send{}, $p}, net{$s}.
+
+recv@@
+princ{recv{$r}, $p}, net{$c} :- \+($c=()) |
+  princ{recv{$r, $c}, $p}. 
+
