@@ -909,6 +909,7 @@ public final class Membrane extends QueuedEntity {
 		while(it.hasNext()){
 			Membrane omem = (Membrane)it.next();
 			Membrane nmem = newMem();
+			nmem.setName(omem.getName());
 			memToCopyMap.put(omem,nmem.copyCellsFrom(omem));
 			nmem.copyRulesFrom(omem);
 		}
@@ -930,6 +931,7 @@ public final class Membrane extends QueuedEntity {
 		while(it.hasNext()){
 			Membrane omem = (Membrane)it.next();
 			Membrane nmem = newMem();
+			nmem.setName(omem.getName());
 			memToCopyMap.put(omem,nmem.copyCellsFrom(omem));
 			nmem.copyRulesFrom(omem);
 		}
