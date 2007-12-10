@@ -43,6 +43,9 @@ public final class Env {
 	/** SLIM用の中間命令列を出力するモード。 */
 	public static boolean slimcode = false;
 	
+	/** 膜主導テストオンリーのモード。 */
+	public static boolean memtestonly = false;
+
 	/** メモリ使用量を最小化する */
 	public static boolean fMemory = true;
 

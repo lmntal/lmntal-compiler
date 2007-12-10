@@ -1356,7 +1356,29 @@ public class Instruction implements Cloneable, Serializable {
     public static final int SUBCLASS = 3000;
     static {setArgType(SUBCLASS, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
-    /////////////////////////////////////////////////////////////
+	//履歴つきfindatom
+    /**
+   	 * findatom2 [-dstatom, srcmem, findatomid, funcref]
+ 	 * <br>反復するガード命令<br>
+ 	 * 膜$srcmemにあってファンクタfuncrefを持つアトムへの参照を次々に$dstatomに代入する。
+ 	 * findatomごとに参照の履歴をとっておき、一度失敗したアトムへは再検査しない。
+     * 2007.10.29 by murayama
+    */
+    public static final int FINDATOM2 = 1004;
+     static {setArgType(FINDATOM2, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_INT, ARG_OBJ));}
+
+ 	//履歴つきanymem
+     /** anymem2 [-dstmem, srcmem, memtype, anymemid, memname] 
+      * <br>反復するガード命令<br>
+      * 膜$srcmemの子膜のうち、$memtypeで表せるタイプの膜に対して次々に、
+      * $memtypeで表せるタイプの各子膜への参照を$dstmemに代入する。
+ 	  * anymemごとに参照の履歴をとっておき、一度失敗した膜へは再検査しない。
+      * 2007.10.29 by murayama
+      * */
+ 	public static final int ANYMEM2 = 1006;
+ 	static {setArgType(ANYMEM2, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT, ARG_INT, ARG_OBJ));}
+ 	
+	/////////////////////////////////////////////////////////////
     // LMNtal Compiler on LMNtal の為に一時的に用意する命令 by kudo
     /////////////////////////////////////////////////////////////
     /**
@@ -1567,8 +1589,21 @@ public class Instruction implements Cloneable, Serializable {
     public static Instruction anymem(int dstmem, int srcmem, String name) {
 		return anymem(dstmem, srcmem, 0, name);
     }
+	/** findatom2 命令を生成する */
+	public static Instruction findatom2(int dstatom, int srcmem, int findatomid, Functor func) {
+		return new Instruction(FINDATOM2,dstatom,srcmem, findatomid, func);
+	}	
+    /** anymem2 命令を生成する */
+    public static Instruction anymem2(int dstmem, int srcmem, int anymemid, String name) {
+		return anymem(dstmem, srcmem, 0, name);
+    }
+
     public static Instruction anymem(int dstmem, int srcmem, int kind, String name) {
 		return new Instruction(ANYMEM,dstmem,srcmem,kind,(Object)name);
+    }
+
+    public static Instruction anymem2(int dstmem, int srcmem, int kind, int anymemid, String name) {
+		return new Instruction(ANYMEM2,dstmem,srcmem,kind, anymemid,(Object)name);
     }
 
     /** newatom 命令を生成する */
@@ -1709,6 +1744,14 @@ public class Instruction implements Cloneable, Serializable {
 		add(arg2);
 		add(arg3);
 		add(arg4);
+	}
+	public Instruction(int kind, int arg1, int arg2, int arg3, int arg4, Object arg5){
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+		add(arg4);
+		add(arg5);
 	}
 	public Instruction(int kind, Object arg1, Object arg2, Object arg3, Object arg4) {
 		this.kind = kind;

@@ -566,7 +566,7 @@ public class GuardCompiler extends HeadCompiler {
 				typedcxtsrcs.put(def, new Integer(atomid));
 				typedcxtdefs.add(def);
 				match.add(new Instruction(Instruction.FUNC, atomid, func));
-				getLinks(atomid, 1);
+				getLinks(atomid, 1, match);
 			} else {
 				match.add(new Instruction(Instruction.FUNC, atomid, func));
 			}
@@ -590,7 +590,7 @@ public class GuardCompiler extends HeadCompiler {
 				typedcxtsrcs.put(def, new Integer(loadedatomid));
 				typedcxtdefs.add(def);
 				match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
-				getLinks(loadedatomid, 1);
+				getLinks(loadedatomid, 1, match);
 			} else {
 				match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
 			}
@@ -616,7 +616,7 @@ public class GuardCompiler extends HeadCompiler {
 				atomid, atomToPath(srclink.atom), srclink.pos));
 			typedcxtsrcs.put(def, new Integer(atomid));
 			typedcxtdefs.add(def);
-			getLinks(atomid, 1);
+			getLinks(atomid, 1, match);
 		}
 		typedcxttypes.put(def, UNARY_ATOM_TYPE);
 		return atomid;

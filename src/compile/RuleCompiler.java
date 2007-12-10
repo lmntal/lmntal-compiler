@@ -125,7 +125,7 @@ public class RuleCompiler {
 		theRule.guard     = guard;
 		theRule.body      = body;
 		theRule.body.add(1, Instruction.commit(theRule.name, theRule.lineno));
-		optimize();
+		//optimize();
 		return theRule;
 	}
 	
@@ -173,17 +173,17 @@ public class RuleCompiler {
 					hc.match.add(new Instruction(Instruction.GETPARENT,hc.varcount,hc.varcount-1));
 					hc.match.add(new Instruction(Instruction.EQMEM, 0, hc.varcount++));
 				}
-				hc.getLinks(1, atom.functor.getArity()); //リンクの一括取得(RISC化) by mizuno
+				hc.getLinks(1, atom.functor.getArity(), hc.match); //リンクの一括取得(RISC化) by mizuno
 				Atom firstatom = (Atom)hc.atoms.get(firstid);
-				hc.compileLinkedGroup(firstatom);
-				hc.compileMembrane(firstatom.mem);
+				hc.compileLinkedGroup(firstatom, hc.match);
+				hc.compileMembrane(firstatom.mem, hc.match);
 			} else {
 				// 膜主導
 				theRule.memMatchLabel = hc.matchLabel;
 				memMatch = hc.match;
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
-			hc.compileMembrane(rs.leftMem);
+			hc.compileMembrane(rs.leftMem, hc.match);
 			// 自由出現したデータアトムがないか検査する
 			if (!hc.fFindDataAtoms) {
 				if (Env.debug >= 1) {
@@ -196,9 +196,10 @@ public class RuleCompiler {
 					}
 				}
 				hc.switchToUntypedCompilation();
-				hc.compileMembrane(rs.leftMem);
+				hc.setContLabel(contLabel);
+				hc.compileMembrane(rs.leftMem, hc.match);
 			}
-			hc.checkFreeLinkCount(rs.leftMem); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
+			hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
 			if (hc.match == memMatch) {
 				hc.match.add(0, Instruction.spec(1, hc.varcount));
 			}
@@ -534,7 +535,7 @@ public class RuleCompiler {
 			LinkedList eqs = (LinkedList)it.next();
 			HeadCompiler negcmp = hc.getNormalizedHeadCompiler();
 			negcmp.varcount = varcount;
-			negcmp.compileNegativeCondition(eqs);
+			negcmp.compileNegativeCondition(eqs, hc.match);
 			guard.add(new Instruction(Instruction.NOT, negcmp.matchLabel));
 			if (varcount < negcmp.varcount)  varcount = negcmp.varcount;
 		}
