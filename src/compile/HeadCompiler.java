@@ -221,7 +221,11 @@ public class HeadCompiler {
 
 				}
 				
-
+				if (atomToPath(buddyatom) != UNBOUND) {
+					// リンク先のアトムをすでに取得している場合
+					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs なのでリンク先のアトムの同一性を確認
+					continue;
+				}
 							
 				// リンク先のアトムを変数に取得する
 				

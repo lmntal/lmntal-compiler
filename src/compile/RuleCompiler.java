@@ -125,7 +125,7 @@ public class RuleCompiler {
 		theRule.guard     = guard;
 		theRule.body      = body;
 		theRule.body.add(1, Instruction.commit(theRule.name, theRule.lineno));
-		//optimize();
+		if(!Env.slimcode)optimize();
 		return theRule;
 	}
 	
