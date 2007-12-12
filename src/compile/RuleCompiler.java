@@ -140,7 +140,7 @@ public class RuleCompiler {
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化			
 			if (firstid < hc.atoms.size()) {			
-				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS || Env.slimcode) continue;
+				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS || Env.slimcode || Env.memtestonly) continue;
 				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
 				
 				Atom atom = (Atom)hc.atoms.get(firstid);
@@ -201,10 +201,10 @@ public class RuleCompiler {
 			}
 			hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
 			if (hc.match == memMatch) {
-				hc.match.add(0, Instruction.spec(1, hc.varcount));
+				hc.match.add(0, Instruction.spec(1, hc.maxvarcount));
 			}
 			else {
-				hc.match.add(0, Instruction.spec(2, hc.varcount));
+				hc.match.add(0, Instruction.spec(2, hc.maxvarcount));
 			}
 			// jump命令群の生成
 			List memActuals  = hc.getMemActuals();
@@ -222,7 +222,7 @@ public class RuleCompiler {
 //			hc.match.add( new Instruction(Instruction.BRANCH, brancharg) );
 			
 			// jump命令群の生成終わり
-			if (maxvarcount < hc.varcount) maxvarcount = hc.varcount;
+			if (maxvarcount < hc.varcount) maxvarcount = hc.maxvarcount;
 		}
 		atomMatch.add(0, Instruction.spec(2,maxvarcount));
 	}

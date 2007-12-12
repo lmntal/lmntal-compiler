@@ -2193,7 +2193,9 @@ public class Instruction implements Cloneable, Serializable {
      * メモ：出力の時、モードが−の変数をインデントする。
      *
      */
+	public static int depth;
     public String toString() {
+		depth++;
 		//nakajima版2004-01-21
 		StringBuffer buffer = new StringBuffer("               ");
 		String tmp = getInstructionString(kind);
@@ -2244,13 +2246,17 @@ public class Instruction implements Cloneable, Serializable {
 //						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
 //						buffer.append("\n");
 //					}
-					buffer.append("                  ");
+					buffer.append("                ");
+					for(int j = 0;j < depth ; j++)
+						buffer.append("  ");
 					buffer.append(insts.get(i));
 					//TODO 出力引数だったらインデントを下げる.
 					if(Env.compileonly) buffer.append("\n");
 					else buffer.append(", \n");
 				}
-				buffer.append("                  ");
+				buffer.append("                ");
+				for(int j = 0;j < depth ; j++)
+					buffer.append("  ");
 				buffer.append(insts.get(i));
 				for(int j = 1; j < data.size(); j++){
 					buffer.append("                  ");
@@ -2258,6 +2264,7 @@ public class Instruction implements Cloneable, Serializable {
 					buffer.append(", " + data.get(j));
 				}
 				buffer.append(" ]]");
+				depth--;
 				return buffer.toString();
 			}
 		}
@@ -2274,6 +2281,7 @@ public class Instruction implements Cloneable, Serializable {
 			buffer.append(str);
 		}
 		buffer.append("]");
+		depth--;
 
 		return buffer.toString();
     }
