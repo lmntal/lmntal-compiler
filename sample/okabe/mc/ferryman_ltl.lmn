@@ -1,70 +1,61 @@
 /*
- * ferryman (with LTL)
- * 2007/06/30(Sun) by okabe
- * 
- * 目標：整数の世界が扱えること
- */
 
-/* never claim
-> ./ltl2ba -f '(((gc || gw) -> gf) U cgwf)'
+NAME
+  ferryman (LTL version)
+
+SYNOPSIS
+  run under SLIM LTL mode
+  性質：「食物連鎖を起こさずに全員が向こう岸に渡ることはできない」
+  
+AUTHOR
+  Ryo Okabe
+
+HISTORY
+  2007/12/14(Fri)
+
+*/
+
+% system rule
+t0_init{
+  fe(0), wo(0), go(0), ca(0).
+  w@@ wo(W), fe(F) :- W=:=F, W2=1-W | wo(W2), fe(W2).
+  g@@ go(G), fe(F) :- G=:=F, G2=1-G | go(G2), fe(G2).
+  c@@ ca(C), fe(F) :- C=:=F, C2=1-C | ca(C2), fe(C2).
+  f@@ fe(F) :- F2=1-F | fe(F2).
+}.
+
+% property rule
+t0_init{go(G), ca(C), wo(W), $p, @p} :- int(G), int(C), int(W), G=\=C, G=\=W |
+  t0_init{go(G), ca(C), wo(W), $p, @p}.
+t0_init{go(G), fe(F), $p, @p} :- int(G), int(F), G=:=F |
+  t0_init{go(G), fe(F), $p, @p}.
+t0_init{ca(C), go(G), wo(W), fe(F), $p, @p} :- C=:=1, G=:=1, W=:=1, F=:=1 |
+  accept_all_end{ca(C), go(G), wo(W), fe(F), $p, @p}.
+
+/* ltl2ba output (never claim)
+> ./ltl2ba -f '(((gc || gw) -> gf ) U gcwf)'
 never {
 T0_init:
         if
         :: (!gc && !gw) || (gf) -> goto T0_init
-        :: (cgwf) -> goto accept_all
+        :: (gcwf) -> goto accept_all
         fi;
 accept_all:
         skip
 }
 */
 
-/* 
-% LTL rule
-t0_init, go(G), ca(C), wo(W) :- G=\=C, G=\=W | t0_init.
-t0_init, go(G), fe(F) :- G=:=F | t0_init.
-t0_init, ca(C), go(G), wo(W), fe(F) :- C=:=1, G=:=1, W=:=1, F=:=1 | accept_all.
-
-% system rule
-ca(C), go(G), wo(W), fe(F) :- W=:=F, W2=1-W | ca(C), go(G), wo(W2), fe(W2).
-ca(C), go(G), wo(W), fe(F) :- G=:=F, G2=1-G | ca(C), go(G2), wo(W), fe(G2).
-ca(C), go(G), wo(W), fe(F) :- C=:=F, C2=1-C | ca(C2), go(G), wo(W), fe(C2).
-ca(C), go(G), wo(W), fe(F) :- F2=1-F | ca(C), go(G), wo(W), fe(F2).
+/* literal definition
+!gc@@
+{go(G), ca(C), $p, @p} :- int(G), int(C), G=\=C |
+  {go(G), ca(C), $p, @p}.
+!gw@@
+{go(G), wo(W), $p, @p} :- int(G), int(W), G=\=W |
+  {go(G), wo(W), $p, @p}.
+gf@@
+{go(G), fe(F), $p, @p} :- int(G), int(F), G=:=F |
+  {go(G), fe(F), $p, @p}.
+gcwf@@
+{ca(C), go(G), wo(W), fe(F), $p, @p} :- C=:=1, G=:=1, W=:=1, F=:=1 |
+  {ca(C), go(G), wo(W), fe(F), $p, @p}.
 */
-
-//nd.exec({{
-init.
-init :- t0_init, fe(0), wo(0), go(0), ca(0).
-
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	C=:=1, G=:=1, W=:=1, F=:=1, W=:=F, W2=1-W | 
-	accept_all, ca(C), go(G), fe(W2), wo(W2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	C=:=1, G=:=1, W=:=1, F=:=1, G=:=F, G2=1-G | 
-	accept_all, ca(C), wo(W), fe(G2), go(G2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	C=:=1, G=:=1, W=:=1, F=:=1, C=:=F, C2=1-C | 
-	accept_all, ca(C), wo(W), fe(C2), ca(C2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	C=:=1, G=:=1, W=:=1, F=:=1, F2=1-F | 
-	accept_all, ca(C), go(G), wo(W), fe(F2).
-
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	G=\=C, G=\=W, W=:=F, W2=1-W | t0_init, ca(C), go(G), wo(W2), fe(W2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	G=\=C, G=\=W, G=:=F, G2=1-G | t0_init, ca(C), go(G2), wo(W), fe(G2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	G=\=C, G=\=W, C=:=F, C2=1-C | t0_init, ca(C2), go(G), wo(W), fe(C2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	G=\=C, G=\=W, F2=1-F | t0_init, ca(C), go(G), wo(W), fe(F2).
-	
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	G=:=F, W=:=F, W2=1-W | t0_init, ca(C), go(G), wo(W2), fe(W2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	G=:=F, G=:=F, G2=1-G | t0_init, ca(C), go(G2), wo(W), fe(G2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	G=:=F, C=:=F, C2=1-C | t0_init, ca(C2), go(G), wo(W), fe(C2).
-t0_init, ca(C), go(G), wo(W), fe(F) :- 
-	G=:=F, F2=1-F | t0_init, ca(C), go(G), wo(W), fe(F2).
-
-accept_all :- accept_all. // stutter extension
-//}*}).

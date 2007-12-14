@@ -1,0 +1,63 @@
+/*
+
+NAME
+  hold hands (LTL version)
+
+SYNOPSIS
+  run under SLIM LTL mode
+  性質：「最終的に一人ぼっちができることはない」
+  
+AUTHOR
+  Ryo Okabe
+
+HISTORY
+  2007/12/14(Fri)
+
+*/
+
+% system rule
+t0_init{
+
+/*kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand),*/
+kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand).
+
+hand@@
+kid(A,B),hand(B),hand(C),kid(C,D) :- kid(A,X),kid(X,D).
+
+}.
+
+% property rule
+ltl_1@@
+t0_init{$p,@p} :- t0_init{$p,@p}.
+ltl_2@@
+t0_init{kid(hand,hand),$p,@p} :-  accept_s2{kid(hand,hand),$p,@p}.
+ltl_3@@
+accept_s2{kid(hand,hand),$p,@p} :- accept_s2{kid(hand,hand),$p,@p}.
+
+/* ltl2ba output (never claim)
+> ~/workspace/mc/ltl2ba-1.0/ltl2ba -f '!([]<>!(p))'
+never {
+T0_init:
+        if
+        :: (1) -> goto T0_init
+        :: (p) -> goto accept_S2
+        fi;
+accept_S2:
+        if
+        :: (p) -> goto accept_S2
+        fi;
+}
+*/
+
+/* literal definition
+p@@
+{ kid(hand,hand), $p, @p } :- {kid(hand,hand), $p, @p}.
+not_p@@
+{ $p, @p } :- \+($p=(kid(hand,hand), $pp)) | { $p, @p }.
+*/
