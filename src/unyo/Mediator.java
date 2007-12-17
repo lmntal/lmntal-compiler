@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 import runtime.Atom;
 import runtime.Env;
@@ -45,6 +44,22 @@ public class Mediator {
 	private Method sync_;
 	
 	static
+	public void release(){
+//		if(Env.theRuntime != null){
+//			Env.theRuntime.terminate();
+//		}
+//		Env.fUNYO = false;
+		Env.srcs.clear();
+//		doNext_ = false;
+//		removedMembrane_.clear();
+//		addedMembrane_.clear();
+//		modifiedMembrane_.clear();
+//		removedAtom_.clear();
+//		addedAtom_.clear();
+//		modifiedAtom_.clear();
+	}
+	
+	static
 	public void init(){
 
 		removedMembrane_ = new HashMap<String, String>();
@@ -53,7 +68,6 @@ public class Mediator {
 		removedAtom_ = new HashMap<String, String>();
 		addedAtom_ = new HashSet<Atom>();
 		modifiedAtom_ = new HashSet<Atom>();
-		
 		try {
 			unyoClass_ = Class.forName("jp.ac.waseda.info.ueda.unyo.mediator.StepSync");
 			unyoObj_ = unyoClass_.newInstance();
