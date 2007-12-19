@@ -157,6 +157,7 @@ public class Mediator {
 	public void addRemovedAtom(Atom removeAtom, String parentMemID){
 		String id = ((Integer)removeAtom.getid()).toString();
 		removedAtom_.put(id, parentMemID);
+		addedAtom_.remove(removeAtom);
 	}
 	
 	static

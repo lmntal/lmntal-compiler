@@ -282,6 +282,9 @@ public final class Membrane extends QueuedEntity {
 	public Atom newAtom(Functor functor) {
 		Atom atom = new Atom(this, functor);
 		onAddAtom(atom);
+		if(Env.fUNYO){
+			unyo.Mediator.addAddedAtom(atom);
+		}
 		return atom;
 	}
 	/** （所属膜を持たない）アトムをこの膜に追加する。*/
@@ -300,6 +303,9 @@ public final class Membrane extends QueuedEntity {
 	/** 指定されたアトムをこの膜から除去する。
 	 * <strike>実行アトムスタックに入っている場合、スタックから取り除く。</strike>*/
 	public void removeAtom(Atom atom) {
+		if(Env.fUNYO){
+			unyo.Mediator.addRemovedAtom(atom, getMemID());
+		}
 		atoms.remove(atom);
 		atom.mem = null;
 	}
@@ -592,6 +598,11 @@ public final class Membrane extends QueuedEntity {
 
 		atom1.args[pos1] = new Link(atom2, pos2);
 		atom2.args[pos2] = new Link(atom1, pos1);
+
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(atom1);
+			unyo.Mediator.addModifiedAtom(atom2);
+		}
 	}
 	/** atom1の第pos1引数と、atom2の第pos2引数のリンク先を接続する。
 	 * 実行後、atom2の第pos2引数は廃棄しなければならない。
@@ -602,6 +613,11 @@ public final class Membrane extends QueuedEntity {
 	public void relinkAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
 		atom2.args[pos2].getBuddy().set(atom1, pos1);
+
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(atom1);
+			unyo.Mediator.addModifiedAtom(atom2);
+		}
 	}
 	/** atom1の第pos1引数のリンク先と、atom2の第pos2引数のリンク先を接続する。*/
 	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {

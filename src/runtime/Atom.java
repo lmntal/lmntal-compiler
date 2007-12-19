@@ -89,6 +89,9 @@ public final class Atom extends QueuedEntity implements Serializable {
 	}
 	/** アトムを所属膜から取り除く（リンク先のアトムは除去しない）*/
 	public void remove() {
+		if(Env.fUNYO){
+			unyo.Mediator.addRemovedAtom(this, mem.getMemID());
+		}
 		mem.removeAtom(this);
 	}
 	///////////////////////////////

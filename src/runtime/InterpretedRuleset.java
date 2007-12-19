@@ -699,17 +699,10 @@ class InterpretiveReactor {
 				case Instruction.ALLOCATOM : //[-dstatom, funcref]
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)inst.getArg2());
 
-					if(Env.fUNYO){
-						unyo.Mediator.addAddedAtom(atoms[inst.getIntArg1()]);
-					}
 					break; //nakajima 2003-12-27, n-kato
 
 				case Instruction.ALLOCATOMINDIRECT : //[-dstatom, func]
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)(vars.get(inst.getIntArg2())));
-
-					if(Env.fUNYO){
-						unyo.Mediator.addModifiedAtom(atoms[inst.getIntArg1()]);
-					}
 					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 
 				case Instruction.COPYATOM :
