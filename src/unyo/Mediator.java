@@ -101,6 +101,18 @@ public class Mediator {
 		}
 	}
 	
+	static
+	public void updateAtom(Object atom, String name){
+		Atom targetAtom = (Atom)atom;
+		targetAtom.setName(name);
+	}
+	
+	static
+	public void updateMembrane(Object mem, String name){
+		Membrane targetMem = (Membrane)mem;
+		targetMem.setName(name);
+	}
+	
 	static 
 	public void sync(Membrane root) {
 		try {
