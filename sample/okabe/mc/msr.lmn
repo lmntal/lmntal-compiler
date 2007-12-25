@@ -1,0 +1,70 @@
+/*
+ * MSR encoding on LMNtal
+ * 2007/12/25(Tue) by okabe
+ *
+ * 変数（ノンス）を膜への参照で表す
+ * i.e. fresh data declaration (existential quantification) = membrane generation
+ *
+ * @see Iliano Cervesato. Typed MSR: Syntax and Examples, 2001
+ * @see Iliano Cervesato. Typed Multiset Rewriting Specifications of Security Protocols, 2001
+ */
+
+/* 
+ * atomic messages
+ *   p(P) - principal
+ *   k(K) - key
+ *   n(N) - nonce
+ */
+
+/*
+ * messages(terms)
+ *   msg(M1,...,Mn) - concatenation
+ *   asym(K,T)      - asymmetric-key encryption
+ */
+
+/*
+ * message predicetes 
+ *   n(N1,...,Nn) - network predicate
+ *   l(L1,...,Ln) - role state predicate
+ */
+
+% example: simplified Needham-Schoeder authentication protocol
+initiator(a,b), responder(b).
+
+% initiator role
+i1@@
+initiator(A,B) :- unary(A), unary(B) |
+  n(asym(k(B), msg(n(NA1),p(A)))),
+  l(p(A),p(B),k(B),n(NA2)),
+  nonce{'+'(NA1), '+'(NA2)}.
+
+i2@@
+n(asym(k(A1), msg(n(NA1),n(NB1)))), l(p(A2),p(B1),k(B2),n(NA2)),
+  nonce{'+'(NA1),'+'(NA2),$na}, nonce{'+'(NB1),$nb} :-
+  A1==A2, B1==B2 |
+  n(asym(k(B1), msg(n(NB2)))),
+  n(asym(k(A1), msg(n(NA1),n(NB1)))), // replication
+  nonce{'+'(NA1),$na},
+  nonce{'+'(NB1),'+'(NB2),$nb}.
+
+% responder role
+r1@@
+responder(B1), n(asym(k(B2), msg(n(NA1),p(A)))), nonce{'+'(NA1),$p} :-
+  unary(A), B1==B2 |
+  n(asym(k(A), msg(n(NA2),n(NB1)))),
+  l(B1,k(B1),k(B1),p(A),n(NA3),k(A),n(NB2)),
+  n(asym(k(B2), msg(n(NA1),p(A)))), // replication
+  nonce{'+'(NA1),'+'(NA2),'+'(NA3),$p},
+  nonce{'+'(NB1),'+'(NB2)}.
+
+r2@@
+n(asym(k(B1), msg(n(NB1)))), l(B2,k(B3),k(B4),p(A1),n(NA1),k(A2),n(NB2)),
+  nonce{'+'(NB1),'+'(NB2),$nb}, nonce{'+'(NA1),$na} :-
+  A1==A2, B1==B2, B2==B3, B3==B4 |
+  n(asym(k(B1), msg(n(NB1)))),
+  nonce{'+'(NB1),$nb}, nonce{$na}.
+
+% gc
+gc@@
+nonce{} :- .
+
