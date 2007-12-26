@@ -26,8 +26,8 @@ public class InstructionList implements Cloneable, Serializable {
 	private int locals;
 	/** 命令列 (InstructionのList) */
 	public List<Instruction> insts = new ArrayList<Instruction>();
-//	/** 親命令列またはnull */
-//	public InstructionList parent;
+	/** 親命令列またはnull */
+	public InstructionList parent;
 	/** 未使用メソッド。*/
 	public void setFormals(int formals) {
 	}
@@ -36,14 +36,19 @@ public class InstructionList implements Cloneable, Serializable {
 		if (this.locals < locals) this.locals = locals;
 //		if (parent != null) parent.updateLocals(locals);
 	}
-//	/** 親命令列が無いかどうか返す */
-//	public boolean isRoot() {
-//		return parent == null;
-//	}
+	/** 親命令列が無いかどうか返す */
+	public boolean isRoot() {
+		return parent == null;
+	}
 	/** 通常のコンストラクタ */
 	public InstructionList() {
 		label = "L" + nextId++;
-//		this.parent = parent;
+		this.parent = null;
+	}
+
+	public InstructionList(InstructionList parent) {
+		label = "L" + nextId++;
+		this.parent = parent;
 	}
 
 	/** パーザーで利用するコンストラクタ */

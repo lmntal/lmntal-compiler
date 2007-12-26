@@ -428,6 +428,31 @@ class InterpretiveReactor {
 		}
 	}
 
+	private void reloadVarsByClones(InterpretiveReactor irSrc,
+			int size, List memargs, List atomargs, List varargs) {
+		Membrane[] srcmems  = irSrc.mems;
+		Atom[]             srcatoms = irSrc.atoms;
+		List               srcvars  = irSrc.vars;
+		this.mems  = srcmems.clone();
+		this.atoms = srcatoms.clone();
+		this.vars  = srcvars.subList(0, srcvars.size());
+				
+		int memcount  = memargs.size();
+		int atomcount = atomargs.size();
+		for (int i = 0; i < memcount; i++) {
+			mems[i] =
+			   srcmems[((Integer) memargs.get(i)).intValue()];
+		}
+		for (int i = 0; i < atomcount; i++) {
+			atoms[i + memcount] =
+			   srcatoms[((Integer) atomargs.get(i)).intValue()];
+		}
+		for (int i = 0; i < varargs.size(); i++) {
+			vars.set(i + memcount + atomcount,
+				srcvars.get(((Integer) varargs.get(i)).intValue()));
+		}
+	}
+
 	private void changeVars(InterpretiveReactor irSrc,
 			List memargs, List atomargs, List varargs) {
 		Membrane[] srcmems  = irSrc.mems;
@@ -464,6 +489,7 @@ class InterpretiveReactor {
 		while (pc < insts.size()) {
 			Instruction inst = (Instruction) insts.get(pc++);
 			if (Env.debug >= Env.DEBUG_TRACE) Env.d("Do " + inst);
+			try {
 			switch (inst.getKind()) {
 
 				//メモ：コメントは引数
@@ -1049,7 +1075,7 @@ class InterpretiveReactor {
 					return false; //n-kato
 					}
 				case Instruction.RESETVARS :
-					reloadVars(this, vars.size(), (List)inst.getArg1(),
+					reloadVarsByClones(this, vars.size(), (List)inst.getArg1(),
 							(List)inst.getArg2(), (List)inst.getArg3());
 					break;
 
@@ -1633,6 +1659,11 @@ class InterpretiveReactor {
 					System.err.println(
 						"SYSTEM ERROR: Invalid instruction: " + inst);
 					break;
+			}
+			} catch (Exception e) {
+				System.err.println(e + " was occured at \"" + inst + "\" in");
+				System.err.println(insts);
+				System.exit(1);
 			}
 		}
 		return false;

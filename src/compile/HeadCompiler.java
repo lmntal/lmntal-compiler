@@ -32,9 +32,9 @@ public class HeadCompiler {
 //	/** 左辺膜 */
 //	public Membrane lhsmem;//m;
 	/** マッチング命令列（のラベル）*/
-	public InstructionList matchLabel;
+	public InstructionList matchLabel, tempLabel;
 	/** matchLabel.insts */
-	public List<Instruction> match;
+	public List<Instruction> match, tempmatch;
 
 	public List<Membrane> mems			= new ArrayList<Membrane>();	// 出現する膜のリスト。[0]がm
 	public List<Atomic> atoms			= new ArrayList<Atomic>();	// 出現するアトムのリスト	
@@ -75,7 +75,26 @@ public class HeadCompiler {
 	
 	static final int UNBOUND = -1;
 	
-	HeadCompiler() {}
+	HeadCompiler() {
+		UnionFind uf = new UnionFind();
+		uf.add(1);
+		uf.add(2);
+		uf.add(3);
+		uf.add(4);
+		uf.add(5);
+		uf.add(6);
+		uf.add(7);
+		uf.add(8);
+		uf.add(9);
+		uf.union(1,2);
+		uf.union(2,3);
+		uf.union(4,5);
+		uf.union(6,7);
+		uf.union(4,6);
+		System.out.println(uf.allKnownElements());
+//		for(int i=1;i<10;i++)
+//			System.out.println(i + " = " + uf.size(i));
+	}
 	
 	/** ガード否定条件およびボディのコンパイルで使うために、
 	 * thisを指定されたhcに対する正規化されたHeadCompilerとする。
@@ -130,7 +149,9 @@ public class HeadCompiler {
 		visited.clear();
 		memVisited.clear();
 		matchLabel = new InstructionList();
+		tempLabel = new InstructionList();
 		match = matchLabel.insts;
+		tempmatch = tempLabel.insts;
 		varcount = 1;	// [0]は本膜
 //		mempaths.put(mems.get(0), new Integer(0));	// 本膜の変数番号は 0
 		fFindDataAtoms = UNTYPED_COMPILE;
@@ -300,8 +321,9 @@ public class HeadCompiler {
 	/** リンクでつながったアトムおよびその所属膜に対してマッチングを行う。
 	 * また、途中で見つかった「新しい膜」のそれぞれに対して、compileMembraneを呼ぶ。
 	 */
-	public void compileLinkedGroup(Atom firstatom, List<Instruction> insts) {
+	public void compileLinkedGroup(Atom firstatom, InstructionList list) {
 		Env.c("compileLinkedGroup");
+		List<Instruction> insts = list.insts;
 		LinkedList newmemlist = new LinkedList();
 		LinkedList atomqueue = new LinkedList();
 		if(debug)System.out.println("start "+firstatom);
@@ -357,7 +379,7 @@ public class HeadCompiler {
 					// ( 0: 1:{$p[|*X],2:{$q[|*Y]}} :- \+($p=(atom(L),$pp),$q=(buddy(L),$qq)) | ... )
 					// このルールのガードの意味:
 					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) にはマッチしない
-					int firstindex = match.size() - 1; // atomからのDEREF命令を指す
+					int firstindex = insts.size() - 1; // atomからのDEREF命令を指す
 					//
 					LinkedList atomSupermems  = new LinkedList(); // atomの広義先祖膜列（親膜側が先頭）
 					LinkedList buddySupermems = new LinkedList(); // buddyの広義先祖膜列（親膜側が先頭）
@@ -398,18 +420,18 @@ public class HeadCompiler {
 						buddyatompath += 2;
 					}
 					varcount = buddyatompath + 1;
-					int lastindex = match.size() - 1; // buddyatomを取得するためのDEREF命令を指す
+					int lastindex = insts.size() - 1; // buddyatomを取得するためのDEREF命令を指す
 					
 					// deref命令の第4引数を修正する					
 					// - deref [-tmp1atom,atom,atompos,buddypos] ==> deref [-tmp1atom,atom,atompos,1]
 //					((Instruction)insts.get(firstindex)).setArg4(new Integer(1));
-					Instruction oldfirst = (Instruction)match.remove(firstindex);
+					Instruction oldfirst = (Instruction)insts.remove(firstindex);
 					Instruction newfirst = new Instruction(Instruction.DEREF,
 						oldfirst.getIntArg1(), oldfirst.getIntArg2(), oldfirst.getIntArg3(), 1);
 					insts.add(firstindex,newfirst);
 					// - deref [-buddyatom,tmpatom,tmppos,1] ==> deref [-buddyatom,buddypos,atompos,buddypos]
 //					((Instruction)insts.get(lastindex)).setArg4(new Integer(buddylink.pos));
-					Instruction oldlast = (Instruction)match.remove(lastindex);
+					Instruction oldlast = (Instruction)insts.remove(lastindex);
 					Instruction newlast = new Instruction(Instruction.DEREF,
 						oldlast.getIntArg1(), oldlast.getIntArg2(), oldlast.getIntArg3(), buddylink.pos);
 					insts.add(lastindex,newlast);
@@ -495,7 +517,12 @@ public class HeadCompiler {
 			while (it2.hasNext()) {
 				Atom atom = (Atom)it2.next();
 				if (!isAtomLoaded(atom) && atom.functor.isActive()) {
-					compileMembrane(mem, insts);
+					if(Env.slimcode){
+						compileMembraneForSlimcode(mem, list);
+						compileMembrane(mem, list);
+					} else {
+						compileMembrane(mem, list);
+					}
 					it.remove();
 					continue nextmem;
 				}					
@@ -503,7 +530,13 @@ public class HeadCompiler {
 		}
 		it = newmemlist.iterator();
 		while (it.hasNext()) {
-			compileMembrane((Membrane)it.next(), insts);
+			Membrane mem =(Membrane)it.next();
+			if(Env.slimcode){
+				compileMembraneForSlimcode(mem, list);
+				compileMembrane(mem, list);
+			} else {
+				compileMembrane(mem, list);
+			}
 		}
 	}
 	/** 引き続きこのヘッドを型なしでコンパイルするための準備をする。*/
@@ -513,17 +546,11 @@ public class HeadCompiler {
 	}
 
 	/** 膜および子孫の膜に対してマッチングを行う */
-	public void compileMembrane(Membrane mem, List<Instruction> insts) {
-		if(Env.slimcode){
-			compileMembraneForSlimcode(mem, insts);
-			if(varcount > maxvarcount)
-				maxvarcount = varcount;
-			return ;
-		}
+	public void compileMembrane(Membrane mem, InstructionList list) {
 		Env.c("compileMembrane");
+		List<Instruction> insts = list.insts;
 		if (memVisited.contains(mem)) return;
 		memVisited.add(mem);
-
 		int thismempath = memToPath(mem);
 		
 		Iterator it = mem.atoms.iterator();
@@ -533,7 +560,7 @@ public class HeadCompiler {
 			if (atomToPath(atom) == UNBOUND) {
 				// 見つかったアトムを変数に取得する
 				int atompath = varcount++;
-				match.add(Instruction.findatom(atompath, thismempath, atom.functor));
+				insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 				// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
 				Membrane[] testmems = { mem };
 				if (proccxteqMap.containsKey(mem)) {
@@ -549,13 +576,13 @@ public class HeadCompiler {
 						if (other == UNBOUND) continue;
 						if (!otheratom.functor.equals(atom.functor)) continue;
 						//if (otheratom == atom) continue;
-						match.add(new Instruction(Instruction.NEQATOM, atompath, other));
+						insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
 					}
 				}
 				atompaths.put(atom, new Integer(atompath));
 				//リンクの一括取得(RISC化) by mizuno
 				getLinks(atompath, atom.functor.getArity(), insts);
-				compileLinkedGroup(atom, insts);
+				compileLinkedGroup(atom, list);
 			}
 //			compileLinkedGroup(atom);	// 2行上に移動してみた n-kato (2004.7.16)
 		}
@@ -580,7 +607,7 @@ public class HeadCompiler {
 		
 				// 子膜を変数に取得する
 				submempath = varcount++;
-				match.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
+				insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
 				if(Env.slimcode){
 					// NEQMEM は不要になっているが、参考のためにコードは残しておく。
 					Iterator it2 = mem.mems.iterator();
@@ -589,13 +616,13 @@ public class HeadCompiler {
 						int other = memToPath(othermem);
 						if (other == UNBOUND) continue;
 						//if (othermem == submem) continue;
-						match.add(new Instruction(Instruction.NEQMEM, submempath, other));
+						insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
 					}
 				}
 				mempaths.put(submem, new Integer(submempath));
 			}
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
-			compileMembrane(submem, insts);
+			compileMembrane(submem, list);
 		}
 		if(varcount > maxvarcount)
 			maxvarcount = varcount;
@@ -607,8 +634,9 @@ public class HeadCompiler {
 	public void setContLabel(InstructionList contLabel){
 		this.contLabel = contLabel;
 	}
-	public void compileMembraneForSlimcode(Membrane mem, List<Instruction> insts) {
+	public void compileMembraneForSlimcode(Membrane mem, InstructionList list) {
 		Env.c("compileMembrane");
+		List<Instruction> insts = list.insts;
 		if (memVisited.contains(mem)) return;
 		memVisited.add(mem);
 
@@ -618,7 +646,7 @@ public class HeadCompiler {
 		while (it.hasNext()) {
 			thismempath = memToPath(mem);
 			InstructionList groupinst, nextgroupinst;
-			nextgroupinst = new InstructionList();
+			nextgroupinst = new InstructionList(list);
 			Atom atom = (Atom)it.next();
 			if (!atom.functor.isActive() && !fFindDataAtoms) continue;
 //			System.out.println(atom.getName());
@@ -638,7 +666,7 @@ public class HeadCompiler {
 				Iterator it3 = qatoms.iterator();
 				if(debug)System.out.println("qatoms = " + qatoms);
 				groupinst = nextgroupinst;
-				nextgroupinst = new InstructionList();
+				nextgroupinst = new InstructionList(list);
 				while(it3.hasNext()){
 					atom = (Atom)it3.next();
 //					if(satoms.contains(atom))
@@ -662,7 +690,7 @@ public class HeadCompiler {
 					visited.clear();
 //					ratoms.clear();
 					
-					InstructionList subinst = new InstructionList();
+					InstructionList subinst = new InstructionList(groupinst);
 					groupinst.add(new Instruction(Instruction.BRANCH, subinst));
 
 					//				tmplabel.insts = ;
@@ -698,7 +726,7 @@ public class HeadCompiler {
 
 					//リンクの一括取得(RISC化) by mizuno
 					getLinks(atompath, atom.functor.getArity(), subinst.insts);
-					compileLinkedGroup(atom, subinst.insts);
+					compileLinkedGroup(atom, subinst);
 //					if(ratoms!=null)ratoms.add(atom);
 					List memActuals  = getMemActuals();
 					List atomActuals = getAtomActuals();
@@ -767,9 +795,11 @@ public class HeadCompiler {
 				mempaths.put(submem, new Integer(submempath));
 			}
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
-			compileMembrane(submem, insts);
+			compileMembraneForSlimcode(submem, list);
 		}
-		if(debug)System.out.println(match);
+		if(varcount > maxvarcount)
+			maxvarcount = varcount;
+		if(debug)System.out.println(insts);
 	}
 	/** 膜および子孫の膜に対して自由リンクの個数を調べる。
 	 * <p>かつて$p等式右辺膜以外の場合は、自由リンクに関する検査を行う必要があった。
@@ -854,7 +884,8 @@ public class HeadCompiler {
 	////////////////////////////////////////////////////////////////
 	
 	/** ガード否定条件をコンパイルする */
-	void compileNegativeCondition(LinkedList eqs, List<Instruction> insts) throws CompileException{
+	void compileNegativeCondition(LinkedList eqs, InstructionList list) throws CompileException{
+		List<Instruction> insts = list.insts;
 		//int formals = varcount;
 		//matchLabel.setFormals(formals);
 		Iterator it = eqs.iterator();
@@ -867,7 +898,12 @@ public class HeadCompiler {
 		it = eqs.iterator();
 		while (it.hasNext()) {
 			ProcessContextEquation eq = (ProcessContextEquation)it.next();
-			compileMembrane(eq.mem, insts);
+			if(Env.slimcode){
+				compileMembraneForSlimcode(eq.mem, list);
+				compileMembrane(eq.mem, list);
+			} else {
+				compileMembrane(eq.mem, list);
+			}
 			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
 			if (eq.mem.processContexts.isEmpty()) {
 				// TODO （機能拡張）単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(2)
@@ -893,3 +929,91 @@ public class HeadCompiler {
 	}
 }
 // TODO （機能拡張）ガード否定条件の中の型付きプロセス文脈をコンパイルする
+
+
+class RependenceGraph {
+	public List<Membrane> mems;
+	public List<Atomic> atoms;
+	public List atomandmems;
+	UnionFind uf;
+
+	RependenceGraph(List<Atomic> atoms, List<Membrane> mems){
+		this.atoms = atoms;
+		this.mems = mems;
+		uf = new UnionFind();
+		uf.addAll(atoms);
+		uf.addAll(mems);
+	}
+}
+
+class UnionFind {
+	private HashMap<Object, Object> lnk = new HashMap();
+	private HashMap<Object, Integer> lnkSiz = new HashMap();
+	private HashMap<Object, LinkedList> lists = new HashMap();
+
+	public	void union( Object x, Object y )
+		{
+			Object tx = find(x);
+			Object ty = find(y);
+			Object temp = link_repr(tx, ty);
+			LinkedList listx = lists.get(tx);
+			LinkedList listy = lists.get(ty);
+			if(temp == tx){
+				listx.addAll(listy);
+				lists.remove(ty);
+			} else if(temp == ty) {
+				listy.addAll(listx);
+				lists.remove(tx);
+			}
+		}
+	
+	public String toString(){
+		return lists.toString();
+	}
+
+	public	void add(Object x)
+		{
+			lnkSiz.put(x, 1);
+			LinkedList<Object> list = new LinkedList();
+			list.add(x);
+			lists.put(x, list);
+		}
+	public void addAll(Collection c){
+		Iterator it = c.iterator();
+		while(it.hasNext())
+			add(it.next());
+	}
+	
+	public boolean areUnified(Object x, Object y){
+		return find(x) == find(y);
+	}
+	
+	public Collection<LinkedList> allKnownElements(){
+		return lists.values();
+	}
+
+	private	Object find( Object x )
+		{
+			// ここでPath圧縮すると計算量が nlog(n) から n ack^-1(n) に
+			while(lnk.containsKey(x))
+				x = lnk.get(x);
+			return x;
+		}
+	
+	private	Object link_repr( Object x, Object y )
+		{
+			if( x == y )
+				return -1;
+	
+			// グループ化
+			if( lnkSiz.get(x) < lnkSiz.get(y) ) {
+				lnk.put(x, y);
+				lnkSiz.put(y, lnkSiz.get(y)+lnkSiz.get(x));
+				return y;
+			} else {
+				lnk.put(y,x);
+				lnkSiz.put(x, lnkSiz.get(x)+lnkSiz.get(y));
+				return x;
+			}
+		}
+}

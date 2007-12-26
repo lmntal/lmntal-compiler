@@ -14,6 +14,8 @@ public final class Rule implements Serializable {
 	/** 膜主導ルール適用の命令列（memMatchLabel.insts）
 	 * 先頭の命令はspec[1,*]でなければならない。*/
 	public List<Instruction> memMatch;
+	/** コンパイル時専用膜主導ルール適用の命令列 */
+	public List<Instruction> tempMatch;
 	
 	/** ガード命令列（guardLabel.insts）またはnull。
 	 * 先頭の命令はspec[*,*]でなければならない。*/

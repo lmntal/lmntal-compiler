@@ -7,7 +7,7 @@ import java.util.*;
 import runtime.Instruction;
 import runtime.InstructionList;
 //import runtime.Functor;
-//import runtime.Env;
+import runtime.Env;
 
 import runtime.Rule;
 
@@ -29,9 +29,24 @@ public class Compactor {
 				compactInstructionList(((InstructionList)inst.getArg1()).insts);
 			else continue;
 		}
-		compactInstructionList(rule.memMatch);
+		if(Env.slimcode)
+			compactInsts(rule.memMatch);
+		else
+			compactInstructionList(rule.memMatch);
 		compactInstructionList(rule.guard);
 		compactInstructionList(rule.body);
+	}
+	private static void compactInsts(List insts) {		
+		// todo compactInstructionList(rule.atomMatchLabel);
+		compactInstructionListForSlimCode(insts);
+		for(int i=0; i<insts.size(); i++){
+			Instruction inst = (Instruction)insts.get(i);
+			if(inst.getKind() == Instruction.BRANCH)
+				compactInsts(((InstructionList)inst.getArg1()).insts);
+			else if(inst.getKind() == Instruction.GROUP)
+				compactInsts(((InstructionList)inst.getArg1()).insts);
+			else continue;
+		}
 	}
 	/** 命令列を最適化する（予定）*/
 	public static void compactInstructionList(List insts) {
@@ -54,6 +69,27 @@ public class Compactor {
 		spec.updateSpec(formals,varcount);
 	}
 	
+	public static void compactInstructionListForSlimCode(List insts) {
+		//if (true) return;
+		//List insts = label.insts;
+//		Instruction spec = (Instruction)insts.get(0);
+//		int formals = spec.getIntArg1();
+//		int varcount = spec.getIntArg2();
+		int varcount = 0;
+		varcount = expandBody(insts, varcount);	// 展開（RISC化）
+		boolean changed = true;
+		while (changed) {
+			changed = false;
+//			if (liftUpTestInstructions(insts))  changed = true;
+			if (eliminateCommonSubexpressions(insts))  changed = true;
+			if (eliminateRedundantInstructions(insts))  changed = true;
+		}
+		packUnifyLinks(insts);
+		varcount = compactBody(insts, varcount);	// 圧縮 (CISC化）
+//		varcount = renumberLocals(insts, varcount);	// 局所変数を振りなおす
+//		spec.updateSpec(formals,varcount);
+	}
+
 	//（テスト命令列生成用） for f(X,Y):-X=Y
 	static void genTest(Rule rule) {		
 		 if (rule.body.size() > 6) {

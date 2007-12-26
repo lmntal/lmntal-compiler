@@ -117,7 +117,7 @@ public class Grouping {
 				|| inst.getKind() == Instruction.JUMP) break;
 			Object group = null;
 			Object changegroup = null;
-			ArrayList list = inst.getVarArgs();
+			ArrayList list = inst.getVarArgs(new HashMap());
 			if(list.isEmpty()) continue;
 			for (int j = 0; j < list.size(); j++) {
 				if (list.get(j).equals(new Integer(0))) continue;

@@ -46,6 +46,7 @@ public class RuleCompiler {
 	
 	public List<Instruction> atomMatch;
 	public List<Instruction> memMatch;
+	public List<Instruction> tempMatch;// Slimcode時にのみ使用される(中身はmemMatch)
 	public List<Instruction> guard;
 	public List<Instruction> body;
 	int varcount;			// 次の変数番号
@@ -62,7 +63,7 @@ public class RuleCompiler {
 	Map  lhslinkpath = new HashMap();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
 		// ＜左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])　＞から変更
 	
-	HeadCompiler hc;
+	HeadCompiler hc, hc2;
 	
 	final int lhsmemToPath(Membrane mem) { return ((Integer)lhsmempath.get(mem)).intValue(); }
 	final int rhsmemToPath(Membrane mem) { return ((Integer)rhsmempath.get(mem)).intValue(); }
@@ -104,7 +105,8 @@ public class RuleCompiler {
 		
 		hc = new HeadCompiler();//rs.leftMem;
 		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
-		
+		hc2 = new HeadCompiler();
+		hc2.enumFormals(rs.leftMem);
 		//とりあえず常にガードコンパイラを呼ぶ事にしてしまう by mizuno
 //		if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty()) {
 		if (true) {
@@ -121,11 +123,12 @@ public class RuleCompiler {
 		compile_r();
 		
 		theRule.memMatch  = memMatch;
+		theRule.tempMatch = tempMatch;
 		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;
 		theRule.body      = body;
 		theRule.body.add(1, Instruction.commit(theRule.name, theRule.lineno));
-		if(!Env.slimcode)optimize();
+		optimize();
 		return theRule;
 	}
 	
@@ -139,6 +142,7 @@ public class RuleCompiler {
 		int maxvarcount = 2;	// アトム主導用（仮）
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
 			hc.prepare(); // 変数番号を初期化			
+			hc2.prepare();
 			if (firstid < hc.atoms.size()) {			
 				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS || Env.slimcode || Env.memtestonly) continue;
 				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
@@ -175,15 +179,26 @@ public class RuleCompiler {
 				}
 				hc.getLinks(1, atom.functor.getArity(), hc.match); //リンクの一括取得(RISC化) by mizuno
 				Atom firstatom = (Atom)hc.atoms.get(firstid);
-				hc.compileLinkedGroup(firstatom, hc.match);
-				hc.compileMembrane(firstatom.mem, hc.match);
+				hc.compileLinkedGroup(firstatom, hc.matchLabel);
+				hc.compileMembrane(firstatom.mem, hc.matchLabel);
 			} else {
 				// 膜主導
 				theRule.memMatchLabel = hc.matchLabel;
-				memMatch = hc.match;
+				if(Env.slimcode){
+					tempMatch = hc.tempmatch;
+					memMatch = hc.match;
+				} else {
+					memMatch = hc.match;
+				}
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
+				hc2.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
-			hc.compileMembrane(rs.leftMem, hc.match);
+			if(Env.slimcode){
+				hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel);
+				hc2.compileMembrane(rs.leftMem, hc.tempLabel);
+			} else {
+				hc.compileMembrane(rs.leftMem, hc.matchLabel);
+			}
 			// 自由出現したデータアトムがないか検査する
 			if (!hc.fFindDataAtoms) {
 				if (Env.debug >= 1) {
@@ -197,14 +212,21 @@ public class RuleCompiler {
 				}
 				hc.switchToUntypedCompilation();
 				hc.setContLabel(contLabel);
-				hc.compileMembrane(rs.leftMem, hc.match);
+				if(Env.slimcode){
+					hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel);
+					hc2.compileMembrane(rs.leftMem, hc.tempLabel);
+				} else {
+					hc.compileMembrane(rs.leftMem, hc.matchLabel);
+				}
 			}
 			hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
 			if (hc.match == memMatch) {
 				hc.match.add(0, Instruction.spec(1, hc.maxvarcount));
+				hc.tempmatch.add(0, Instruction.spec(1, hc.maxvarcount));
 			}
 			else {
 				hc.match.add(0, Instruction.spec(2, hc.maxvarcount));
+				hc.tempmatch.add(0, Instruction.spec(1, hc.maxvarcount));
 			}
 			// jump命令群の生成
 			List memActuals  = hc.getMemActuals();
@@ -212,6 +234,7 @@ public class RuleCompiler {
 			List varActuals  = hc.getVarActuals();
 			// - コード#1
 			hc.match.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
+			hc.tempmatch.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
 			// - コード#2
 //			hc.match.add( Instruction.inlinereact(theRule, memActuals, atomActuals, varActuals) );
 //			int formals = memActuals.size() + atomActuals.size() + varActuals.size();
@@ -535,7 +558,7 @@ public class RuleCompiler {
 			LinkedList eqs = (LinkedList)it.next();
 			HeadCompiler negcmp = hc.getNormalizedHeadCompiler();
 			negcmp.varcount = varcount;
-			negcmp.compileNegativeCondition(eqs, hc.match);
+			negcmp.compileNegativeCondition(eqs, hc.matchLabel);
 			guard.add(new Instruction(Instruction.NOT, negcmp.matchLabel));
 			if (varcount < negcmp.varcount)  varcount = negcmp.varcount;
 		}
@@ -1212,4 +1235,3 @@ public class RuleCompiler {
 		throw new CompileException("SYSTEM ERROR");
 	}
 }
-

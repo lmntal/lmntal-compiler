@@ -1850,10 +1850,12 @@ public class Instruction implements Cloneable, Serializable {
 	 * 出力引数でない引数のリストを返す
 	 * @return 引数のリスト
 	 */
-	public ArrayList getVarArgs() {
+	public ArrayList getVarArgs(HashMap listn) {
 		ArrayList ret = new ArrayList();
+		listn.clear();
 		ArgType argtype = (ArgType)argTypeTable.get(new Integer(getKind()));
 		int i = 0;
+		int j = 0;
 		if (getOutputType() != -1) {
 			i = 1;
 		}
@@ -1863,6 +1865,8 @@ public class Instruction implements Cloneable, Serializable {
 				case ARG_MEM:
 				case ARG_VAR:
 					ret.add(getArg(i));
+					listn.put(j, new Integer(i));
+					j++;
 			}
 		}
 		return ret;
@@ -2030,12 +2034,13 @@ public class Instruction implements Cloneable, Serializable {
 						break;
 					case ARG_LABEL:
 						if (inst.getKind() == JUMP) break; // JUMP命令のLABEL引数はただのラベルなので除外
-						count += getVarUseCount( ((InstructionList)inst.data.get(i)).insts, varnum);
+						count += getVarUseCount( ((InstructionList)inst.getArg1()).insts, varnum);
 						break;
 					case ARG_INSTS:
-						count += getVarUseCount( (List)inst.data.get(i), varnum);
+						count += getVarUseCount( ((InstructionList)inst.getArg1()).insts, varnum);
 						break;
 					case ARG_VARS:
+						if (inst.getKind() == RESETVARS) break; // RESETVARS命令のVARS引数はただのラベルなので除外
 						Iterator it2 = ((List)inst.data.get(i)).iterator();
 						while (it2.hasNext()) {
 							if (it2.next().equals(varnum)) count++;
@@ -2125,6 +2130,32 @@ public class Instruction implements Cloneable, Serializable {
 				return true;
 		}
 		return true;
+	}
+	
+	/*比較系の命令であればtrueを返す。*/
+	public boolean isCompareInst() {
+		switch (getKind()) {
+		case Instruction.SAMEFUNC:
+		case Instruction.EQATOM:
+		case Instruction.EQFUNC:
+		case Instruction.EQMEM:
+		case Instruction.EQGROUND:
+		case Instruction.NEQATOM:
+		case Instruction.NEQFUNC:
+		case Instruction.NEQMEM:
+		case Instruction.NEQGROUND:
+		case Instruction.ISGROUND:
+		case Instruction.IEQ: case Instruction.ILT: case Instruction.ILE:
+		case Instruction.IGT: case Instruction.IGE: case Instruction.INE:
+		case Instruction.FEQ: case Instruction.FLT: case Instruction.FLE:
+		case Instruction.FGT: case Instruction.FGE: case Instruction.FNE:
+		case Instruction.ILTFUNC: case Instruction.ILEFUNC:
+		case Instruction.IGTFUNC: case Instruction.IGEFUNC:
+		case Instruction.FLTFUNC: case Instruction.FLEFUNC:
+		case Instruction.FGTFUNC: case Instruction.FGEFUNC:
+			return true;
+		}
+		return false;
 	}
 	
 	//////////////////////////////////

@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import runtime.Env;
 import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
@@ -79,18 +80,22 @@ public class Optimizer {
 		Compactor.compactRule(rule);
 		// TODO 本質的にインライン展開が必要ないものは、展開しなくてもできるようにする
 		if (fInlining || fGuardMove || fGrouping || fReuseMem || fReuseAtom || fLoop) {
-			//head と gaurd をくっつける
+			//head と guard をくっつける
 			inlineExpandTailJump(rule.memMatch);
 			//現状ではアトム主導テストのインライン展開には対応していない -> 一応対応(sakurai)
 			inlineExpandTailJump(rule.atomMatch);
 			rule.guardLabel = null;
 			rule.guard = null;
 		}
-		optimize(rule.memMatch, rule.body);
+		if(Env.slimcode)
+			optimize(rule.tempMatch, rule.body);
+		else
+			optimize(rule.memMatch, rule.body);
 		if(fGuardMove && !fMerging) {
 			guardMove(rule.atomMatch);
 			guardMove(rule.memMatch);
 		}
+		if(Env.slimcode)return ;
 		if(fGrouping && !fMerging) {
 			Grouping g = new Grouping();
 			g.grouping(rule.atomMatch, rule.memMatch);
@@ -202,9 +207,7 @@ public class Optimizer {
 	 */
 	public static void guardMove(List insts){
 		for(int i=1; i<insts.size(); i++){
-			boolean moveok = true; //移動可能判定フラグ
 			Instruction inst = (Instruction)insts.get(i);
-			ArrayList list = inst.getVarArgs();
 			
 			switch(inst.getKind()){
 			//ボディ命令列は並び替えない -> ボディの先頭はcommit
@@ -220,6 +223,7 @@ public class Optimizer {
 			case Instruction.NEWLIST:
 			case Instruction.PROCEED:
 			case Instruction.JUMP:
+			case Instruction.RESETVARS:
 			case Instruction.UNIQ:
 			case Instruction.NOT_UNIQ:
 			case Instruction.GUARD_INLINE:
@@ -233,29 +237,112 @@ public class Optimizer {
 			//上に該当しない命令は、その引数の変数番号が定義された命令より前にならない限り、
 		    //前に動かせる。
 			default:
-				for(int i2=i-1; i2>0; i2--){
-					Instruction inst2 = (Instruction)insts.get(i2);
-					ArrayList list2 = inst2.getVarArgs();
-					for(int j=0; j<list.size(); j++){
-						if(inst2.getOutputType() != -1){
-							if(list.get(j).equals(inst2.getArg1())) {
-								moveok = false;
-								break;
-							}
-						}
-						else if(list2.contains(list.get(j))){
-							moveok = false;
-							break;
-						}
-					}
-					if(moveok){
-						insts.remove(i2+1);
-						insts.add(i2, inst);
-					}
-					else break; 
-				}
+				int judge = guardMove(insts, inst, i-1);
+				if(judge == 2){
+//					System.out.println("remove2\t"+insts.get(i));
+					insts.remove(i);
+					i--;
+				} else if (judge == 1){
+//					System.out.println("remove1\t"+insts.get(i+1));
+					insts.remove(i+1);
+				} 
 			}
 		}
+	}
+	private static int max(int m, int n){
+		if(m>n)
+			return m;
+		else
+			return n;
+	}
+	private static int guardMove(List insts, Instruction inst, int locate){
+		int moveok = 0; //移動可能判定フラグ
+		ArrayList list;
+		HashMap listn = new HashMap();
+		int i=locate;
+		ff:
+		for(; i>=0; i--){
+			list = inst.getVarArgs(listn);
+			Instruction inst2 = (Instruction)insts.get(i);
+			if(inst2.getKind() == Instruction.GROUP) {
+//				System.out.println("GROUP");
+				InstructionList subinsts = (InstructionList)inst2.getArg1();
+				moveok = max(moveok, guardMove(subinsts.insts, inst, subinsts.insts.size()-1));
+				if(moveok > 0){
+					moveok = 2;
+					i=0;
+					continue;
+				}
+//				System.out.println(moveok);
+				continue;
+			} else if(inst2.getKind() == Instruction.BRANCH) {
+//				System.out.println("BRANCH");
+				InstructionList subinsts = (InstructionList)inst2.getArg1();
+				Instruction instrep  = (Instruction)inst.clone();
+				moveok = max(moveok, guardMove(subinsts.insts, inst, subinsts.insts.size()-1));
+				if(moveok > 0){
+					moveok = 2;
+				}
+				inst = instrep;
+//				System.out.println(moveok);
+				continue;
+			} else if(inst2.getKind() == Instruction.RESETVARS){
+//				System.out.println("RESETVARS");
+				int memnum = ((List)inst2.getArg1()).size();
+				ArrayList mems = (ArrayList)inst2.getArg1();
+				ArrayList atoms = (ArrayList)inst2.getArg2();
+				
+//				System.out.print(inst + "\t to ");
+				for(int j=0; j<list.size(); j++){
+					int num =((Integer)list.get(j)).intValue();
+//					System.out.println("j=" + j +", atoms = "+atoms + ", num = "+num+ " ,memnum = " + memnum);
+					//getVarArgsのうち、j番目に設定すべき
+					if(num<memnum){
+						inst.data.set(((Integer)listn.get(j)).intValue(),  new Integer(((Integer)mems.get(num)).intValue()));
+					} else if((num-memnum)>=atoms.size() || num-memnum<0) {
+//						System.out.println("atom = "+atoms + ", num = "+num+ " ,memnum = " + memnum);
+						continue;
+					} else {
+						inst.data.set(((Integer)listn.get(j)).intValue(),  new Integer(((Integer)atoms.get(num - memnum)).intValue()));
+					}
+//					System.out.println("set " + new Integer(((Integer)atoms.get(num - memnum)).intValue()) );
+//					System.out.println(inst.getArg(j+1));
+//					inst.setArg(j+1, new Integer(((Integer)atoms.get(num - memnum)).intValue()));
+				}
+//				System.out.println(inst);
+//				System.out.println(inst2 + "\t" + memnum);
+				continue;
+			}
+			ArrayList list2 = inst2.getVarArgs(listn);
+//			System.out.println("check " + inst + "\t to" + inst2);
+			for(int j=0; j<list.size(); j++){
+				if(inst2.getOutputType() != -1){
+					if(list.get(j).equals(inst2.getArg1())) {
+//						System.out.println("match1 " + inst);
+						moveok = max(moveok, 1);
+						break ff;
+					}
+//					System.out.println("unmatch1 " + list.get(j) + "neq" + inst2.getArg1() + inst);
+				}
+				else if(list2.contains(list.get(j))){
+//					System.out.println("match2 " + inst);
+					moveok = max(moveok, 1);
+					break ff;
+				}
+//				System.out.println("unmatch2 " + inst);
+			}
+//			if(!moveok) break; 
+		}
+//		System.out.println(moveok);
+		if(moveok > 0){
+			if(i!=-1){
+//				System.out.println("add\t" + inst + "to "+(i+1));
+				insts.add(i+1, inst);
+			}
+			return moveok;
+		}
+//		System.out.println("no\t" + inst);
+		return 0;
 	}
 	
 	/**

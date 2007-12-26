@@ -452,8 +452,10 @@ public class GuardCompiler extends HeadCompiler {
 					int[] desc = guardLibrary2.get(func);
 					if (!identifiedCxtdefs.contains(def1)) continue;
 					if (!identifiedCxtdefs.contains(def2)) continue;
+					System.out.println("st");
 					int atomid1 = loadUnaryAtom(def1);
 					int atomid2 = loadUnaryAtom(def2);
+					System.out.println("end");
 					if (desc[0] != 0 && !new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
 						match.add(new Instruction(desc[0], atomid1));
 						typedcxtdatatypes.put(def1, new Integer(desc[0]));
@@ -561,6 +563,7 @@ public class GuardCompiler extends HeadCompiler {
 			if (atomid == UNBOUND) {
 				LinkOccurrence srclink = def.lhsOcc.args[0].buddy; // defのソース出現を指すアトム側の引数
 				atomid = varcount++;
+				System.out.println("bindToFunctor " + srclink.atom);
 				match.add(new Instruction(Instruction.DEREFATOM,
 					atomid, atomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(atomid));
@@ -585,6 +588,7 @@ public class GuardCompiler extends HeadCompiler {
 			if (loadedatomid == UNBOUND) {
 				LinkOccurrence srclink = def.lhsOcc.args[0].buddy;
 				loadedatomid = varcount++;
+				System.out.println("bindToUnaryAtom " + srclink.atom);
 				match.add(new Instruction(Instruction.DEREFATOM,
 					loadedatomid, atomToPath(srclink.atom), srclink.pos));
 				typedcxtsrcs.put(def, new Integer(loadedatomid));
@@ -612,6 +616,7 @@ public class GuardCompiler extends HeadCompiler {
 			checkUnaryProcessContext(def);
 			LinkOccurrence srclink = def.lhsOcc.args[0].buddy;
 			atomid = varcount++;
+			System.out.println("loadUnaryAtom "+srclink.atom);
 			match.add(new Instruction(Instruction.DEREFATOM,
 				atomid, atomToPath(srclink.atom), srclink.pos));
 			typedcxtsrcs.put(def, new Integer(atomid));
@@ -635,6 +640,7 @@ public class GuardCompiler extends HeadCompiler {
 			linkids = varcount++;
 			match.add(new Instruction(Instruction.NEWLIST,linkids));
 			for(int i=0;i<def.lhsOcc.args.length;i++){
+				System.out.println("loadGroundLink "+def.lhsOcc.args[i].buddy.atom);
 				int[] paths = (int[])linkpaths.get(new Integer(atomToPath(def.lhsOcc.args[i].buddy.atom)));
 				//linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
 //				linkids.set(i,new Integer(paths[def.lhsOcc.args[i].buddy.pos]));
@@ -672,6 +678,7 @@ public class GuardCompiler extends HeadCompiler {
 				Iterator it = def.lhsOcc.mem.atoms.iterator();
 				while(it.hasNext()){
 					Atom atom = (Atom)it.next();
+					System.out.println("checkGroundLink"+atom);
 					int[] paths = (int[])linkpaths.get(new Integer(atomToPath(atom)));
 					for(int i=0;i<atom.args.length;i++){
 //						match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
