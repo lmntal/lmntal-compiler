@@ -383,7 +383,7 @@ public class Debug {
 	
 	//デバッガを終了する
 	public static void terminate() {
-		System.out.println();
+		Util.println("");
 		eventOut.println("Program exited normally.");
 		try {
 			requestIn.close();
@@ -392,7 +392,7 @@ public class Debug {
 			if (requestSocket != null) requestSocket.close();
 			if (eventSocket != null) eventSocket.close();
 		} catch (IOException e) {
-			System.err.println(e);
+			Util.errPrintln(e);
 		}
 	}
 	

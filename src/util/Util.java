@@ -28,6 +28,14 @@ abstract public class Util {
 		System.exit(-1);
 	}
 	
+	public static void errPrint(String msg){
+		if(Env.fUNYO){
+			Mediator.errPrint(msg);
+			return;
+		}
+		System.err.print(msg);
+	}
+	
 	public static void errPrintln(String msg){
 		if(Env.fUNYO){
 			Mediator.errPrintln(msg);

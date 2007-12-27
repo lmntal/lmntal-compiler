@@ -6,8 +6,19 @@
 
 package compile.parser.intermediate;
 
-import java.util.*;
-import runtime.*;
+import java.util.ArrayList;
+
+import runtime.FloatingFunctor;
+import runtime.Functor;
+import runtime.Instruction;
+import runtime.InstructionList;
+import runtime.IntegerFunctor;
+import runtime.InterpretedRuleset;
+import runtime.Rule;
+import runtime.StringFunctor;
+import runtime.SymbolFunctor;
+import util.Util;
+
 import compile.parser.MySymbol;
 
 /** CUP v0.10k generated parser.
@@ -206,9 +217,9 @@ public class parser extends java_cup.runtime.lr_parser {
 		System.err.print(message);
 		if (info instanceof MySymbol) {
 			MySymbol symbol = (MySymbol)info;
-			System.err.print(" : Unexpected Token <" + symbol.token + "> at line " + symbol.left);
+			Util.errPrint(" : Unexpected Token <" + symbol.token + "> at line " + symbol.left);
 		}
-		System.err.println();
+		Util.errPrintln("");
     }
     public void unrecovered_syntax_error(java_cup.runtime.Symbol cur_token) throws Exception {
     	report_fatal_error("Couldn't repair and continue parse", null);

@@ -625,10 +625,10 @@ public class Task implements Runnable {
 							idMap.put(atoms, id);
 						}
 						if (!Env.fInteractive)
-							System.out.print(" " + id + "(" + ruleName + ")");
+							Util.print(" " + id + "(" + ruleName + ")");
 					}
 				} else if (Env.fInteractive) {
-					System.out.print(Dumper.dump(mem) + " ? ");
+					Util.print(Dumper.dump(mem) + " ? ");
 					String str = reader.readLine();
 					if (str == null || str.equals("") || str.equals("y")) {
 						Env.p("yes");
@@ -690,7 +690,7 @@ public class Task implements Runnable {
 		//適用した結果を作成
 		ArrayList children = new ArrayList();
 		if (Env.fInteractive && states.size() == 0) {
-			System.out.print(Dumper.dump(mem) + " ? ");
+			Util.print(Dumper.dump(mem) + " ? ");
 			String str = reader.readLine();
 			if (str == null || str.equals("") || str.equals("y")) {
 				idMap.remove(mem.getAtoms());
@@ -722,10 +722,10 @@ public class Task implements Runnable {
 				idMap.put(atoms2, id);
 			}
 			if (!Env.fInteractive)
-				System.out.print(" " + id + "(" + ruleName + ")");
+				Util.print(" " + id + "(" + ruleName + ")");
 		}
 		if (!Env.fInteractive)
-			System.out.println();
+			Util.println("");
 		
 		for (int i = 0; i < children.size(); i++) {
 			if (nondeterministicExec2(idMap, (Membrane)children.get(i), reader))
@@ -771,10 +771,10 @@ public class Task implements Runnable {
 						
 						queue.addLast(mem2);
 						if (!Env.fInteractive)
-							System.out.print(" " + nextId++ + "(" + ruleName + ")");
+							Util.print(" " + nextId++ + "(" + ruleName + ")");
 					}
 				} else 	if (Env.fInteractive) {
-					System.out.print(Dumper.dump(mem) + " ? ");
+					Util.print(Dumper.dump(mem) + " ? ");
 					String str = reader.readLine();
 					if (str == null || str.equals("") || str.equals("y")) {
 						Env.p("yes");

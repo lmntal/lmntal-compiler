@@ -145,7 +145,7 @@ public class Mediator {
 	}
 	
 	public static void errPrintln(String msg){
-		errPrintln(msg + System.getProperty("line.separator"));
+		errPrint(msg + System.getProperty("line.separator"));
 	}
 	
 	public static void errPrint(String msg){

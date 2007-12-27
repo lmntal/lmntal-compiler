@@ -22,7 +22,7 @@ class Readline {
 	static void load(int dummy) {}
 	static void initReadline(String dummy) {}
 	static String readline(String prompt) throws IOException {
-		System.out.print(prompt);
+		Util.print(prompt);
 		try {
 			String line = in.readLine();
 			if (line.length() == 0) return null;

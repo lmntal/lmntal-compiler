@@ -85,12 +85,12 @@ public class Test {
 			Class[] cls = new Class[2];
 			cls[0] = cls[1] = Integer.TYPE;
 			Method tm = cl.getMethod("setSize", cls);
-			System.out.println(tm);
+			Util.println(tm);
 			for(int i=0;i<m.length;i++) {
-				System.out.println(m[i]);
+				Util.println(m[i]);
 				Class[] pt = m[i].getParameterTypes();
 				for(int j=0;j<pt.length;j++) {
-					System.out.print(" "+pt[j]);
+					Util.print(" "+pt[j]);
 				}
 			}
 		}
@@ -104,7 +104,7 @@ public class Test {
 		}
 	}
 	public static void f() {
-		System.out.println((int)1.3);
+		Util.println((int)1.3);
 	}
 	public static void e() {
 		Util.println(get("http://yahoo.co.jp"));

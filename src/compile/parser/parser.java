@@ -7,7 +7,8 @@
 package compile.parser;
 
 import java.util.LinkedList;
-import compile.parser.MySymbol;
+
+import util.Util;
 
 /** CUP v0.10k TUM Edition 20050516 generated parser.
   * @version Sun Sep 03 22:42:12 JST 2006
@@ -913,12 +914,12 @@ public class parser extends java_cup.runtime.lr_parser {
 
  
 	public void report_error(String message, Object info) {
-		System.err.print(message);
+		Util.errPrint(message);
 		if (info instanceof MySymbol) {
 			MySymbol symbol = (MySymbol)info;
-			System.err.print(" : Unexpected Token <" + symbol.token + "> at line " + symbol.left);
+			Util.errPrint(" : Unexpected Token <" + symbol.token + "> at line " + symbol.left);
 		}
-		System.err.println();
+		Util.errPrintln("");
     }
 
     public void unrecovered_syntax_error(java_cup.runtime.Symbol cur_token) throws Exception {

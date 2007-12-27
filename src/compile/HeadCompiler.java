@@ -4,14 +4,28 @@
  */
 package compile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import runtime.Env;
 import runtime.Functor;
-import runtime.SpecialFunctor;
 import runtime.Instruction;
 import runtime.InstructionList;
-import compile.structure.*;
+import runtime.SpecialFunctor;
+import util.Util;
+
+import compile.structure.Atom;
+import compile.structure.Atomic;
+import compile.structure.LinkOccurrence;
+import compile.structure.Membrane;
+import compile.structure.ProcessContext;
+import compile.structure.ProcessContextEquation;
 
 /**
  * 膜に対するマッチング命令列を出力する
@@ -91,9 +105,9 @@ public class HeadCompiler {
 		uf.union(4,5);
 		uf.union(6,7);
 		uf.union(4,6);
-		System.out.println(uf.allKnownElements());
+		Util.println(uf.allKnownElements());
 //		for(int i=1;i<10;i++)
-//			System.out.println(i + " = " + uf.size(i));
+//			Util.println(i + " = " + uf.size(i));
 	}
 	
 	/** ガード否定条件およびボディのコンパイルで使うために、
@@ -326,13 +340,13 @@ public class HeadCompiler {
 		List<Instruction> insts = list.insts;
 		LinkedList newmemlist = new LinkedList();
 		LinkedList atomqueue = new LinkedList();
-		if(debug)System.out.println("start "+firstatom);
+		if(debug)Util.println("start "+firstatom);
 		atomqueue.add(firstatom);
 		while( ! atomqueue.isEmpty() ) {
 			Atom atom = (Atom)atomqueue.removeFirst();			
-			if(debug)System.out.println("before " + atom);
+			if(debug)Util.println("before " + atom);
 			if (visited.contains(atom)) continue;
-			if(debug)System.out.println("after " + atom);
+			if(debug)Util.println("after " + atom);
 			visited.add(atom);
 			
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
@@ -341,8 +355,8 @@ public class HeadCompiler {
 				if (!atomids.containsKey(buddylink.atom)) continue; // 右辺や$p（およびlhs->neg）へのリンクは無視
 				Atom buddyatom = (Atom)buddylink.atom;
 				
-				if(debug)System.out.println("proc1 " + atom);
-				if(debug)System.out.println("proc1 " + buddyatom);
+				if(debug)Util.println("proc1 " + atom);
+				if(debug)Util.println("proc1 " + buddyatom);
 				if (atomToPath(buddyatom) != UNBOUND) {
 					// リンク先のアトムをすでに取得している場合。
 					// - リンク先のアトムbuddyatomと以前に取得したアトムの同一性を検査する。
@@ -352,10 +366,10 @@ public class HeadCompiler {
 					 && !proccxteqMap.containsKey(buddyatom.mem)
 					 && buddyatom.mem.parent != null) {
 						// just skip
-						if(debug)System.out.println("proc2 " + atom);
+						if(debug)Util.println("proc2 " + atom);
 					}
 					else {
-						if(debug)System.out.println("proc3 " + atom);
+						if(debug)Util.println("proc3 " + atom);
 						// lhs(>)->lhs(<) または neg(>)->neg(<) ならば、
 						// すでに同一性を確認するコードを出力しているため、何もしない
 						int b = atomToPath(buddyatom);
@@ -363,9 +377,9 @@ public class HeadCompiler {
 						if (b < t) continue;
 						if (b == t && buddylink.pos < pos) continue;
 					}
-					if(debug)System.out.println("proc4 " + atom);
+					if(debug)Util.println("proc4 " + atom);
 				}
-				if(debug)System.out.println("proc5 " + atom);
+				if(debug)Util.println("proc5 " + atom);
 				// リンク先のアトムを新しい変数に取得する (*A)
 				int buddyatompath = varcount++;
 				insts.add( new Instruction(Instruction.DEREF,
@@ -649,8 +663,8 @@ public class HeadCompiler {
 			nextgroupinst = new InstructionList(list);
 			Atom atom = (Atom)it.next();
 			if (!atom.functor.isActive() && !fFindDataAtoms) continue;
-//			System.out.println(atom.getName());
-			if(debug)System.out.println("start from " + atom);
+//			Util.println(atom.getName());
+			if(debug)Util.println("start from " + atom);
 			if (atomToPath(atom) == UNBOUND) {
 //				HashSet ratoms = new HashSet();
 				HashSet qatoms = new HashSet();
@@ -664,7 +678,7 @@ public class HeadCompiler {
 				searchLinkedGroup(atom, qatoms, atom.mem);
 				varcount = restvarcount;
 				Iterator it3 = qatoms.iterator();
-				if(debug)System.out.println("qatoms = " + qatoms);
+				if(debug)Util.println("qatoms = " + qatoms);
 				groupinst = nextgroupinst;
 				nextgroupinst = new InstructionList(list);
 				while(it3.hasNext()){
@@ -673,7 +687,7 @@ public class HeadCompiler {
 //						continue;
 //					satoms.add(atom);
 //					Iterator it4 = ratoms.iterator();
-//					if(debug)System.out.println("ratom = " + ratoms);
+//					if(debug)Util.println("ratom = " + ratoms);
 //					while(it4.hasNext()){
 //						Atom at = (Atom)it4.next();
 //						atompaths.remove(at);
@@ -722,7 +736,7 @@ public class HeadCompiler {
 						}
 					}
 					atompaths.put(atom, new Integer(atompath));
-					if(debug)System.out.println("put " + atom);
+					if(debug)Util.println("put " + atom);
 
 					//リンクの一括取得(RISC化) by mizuno
 					getLinks(atompath, atom.functor.getArity(), subinst.insts);
@@ -799,7 +813,7 @@ public class HeadCompiler {
 		}
 		if(varcount > maxvarcount)
 			maxvarcount = varcount;
-		if(debug)System.out.println(insts);
+		if(debug)Util.println(insts);
 	}
 	/** 膜および子孫の膜に対して自由リンクの個数を調べる。
 	 * <p>かつて$p等式右辺膜以外の場合は、自由リンクに関する検査を行う必要があった。
