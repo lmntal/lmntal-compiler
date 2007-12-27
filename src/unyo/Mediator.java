@@ -145,8 +145,12 @@ public class Mediator {
 	}
 	
 	public static void errPrintln(String msg){
+		errPrintln(msg + System.getProperty("line.separator"));
+	}
+	
+	public static void errPrint(String msg){
 		try {
-			errPrint_.invoke(unyoObj_, msg + System.getProperty("line.separator"));
+			errPrint_.invoke(unyoObj_, msg);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
