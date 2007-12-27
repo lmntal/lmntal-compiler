@@ -45,8 +45,8 @@ public final class SampleInitRuleset extends Ruleset {
 
 		mem.loadRuleset(new SampleRuleset());
 		
-		System.out.println("Sample init ruleset generated:");
-		System.out.println("a(X), b(X,Y), {c(Y)}, x, x, x, (x :- y)\n");		
+		Util.println("Sample init ruleset generated:");
+		Util.println("a(X), b(X,Y), {c(Y)}, x, x, x, (x :- y)\n");		
 
 		return true;
 	}

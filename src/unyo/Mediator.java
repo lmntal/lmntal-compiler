@@ -8,6 +8,7 @@ import java.util.HashSet;
 import runtime.Atom;
 import runtime.Env;
 import runtime.Membrane;
+import runtime.SymbolFunctor;
 
 public class Mediator {
 
@@ -41,6 +42,12 @@ public class Mediator {
 	private Method setState_;
 	
 	static
+	private Method print_;
+	
+	static
+	private Method errPrint_;
+	
+	static
 	private Method sync_;
 	
 	static
@@ -69,12 +76,18 @@ public class Mediator {
 		addedAtom_ = new HashSet<Atom>();
 		modifiedAtom_ = new HashSet<Atom>();
 		try {
-			unyoClass_ = Class.forName("jp.ac.waseda.info.ueda.unyo.mediator.StepSync");
+			unyoClass_ = Class.forName("jp.ac.waseda.info.ueda.unyo.mediator.Synchronizer");
 			unyoObj_ = unyoClass_.newInstance();
 			Env.fUNYO = true;
 			
 			sync_ 
 			= unyoClass_.getMethod("sync");
+			
+			print_ 
+			= unyoClass_.getMethod("print", String.class);
+			
+			errPrint_ 
+			= unyoClass_.getMethod("errPrint", String.class);
 			
 			setState_ 
 			= unyoClass_.getMethod("setState",
@@ -111,6 +124,60 @@ public class Mediator {
 	public void updateMembrane(Object mem, String name){
 		Membrane targetMem = (Membrane)mem;
 		targetMem.setName(name);
+	}
+	
+	static
+	public Atom addAtom(Object mem, String name){
+		Membrane targetMem = (Membrane)mem;
+		SymbolFunctor func = new SymbolFunctor(name, 0);
+		Atom atom = new Atom(targetMem, func);
+		targetMem.addAtom(atom);
+		return atom;
+	}
+	
+	static
+	public Membrane addMembrane(Object mem, String name){
+		Membrane targetMem = (Membrane)mem;
+		Membrane newMem = new Membrane();
+		newMem.setName(name);
+		targetMem.addMem(newMem);
+		return newMem;
+	}
+	
+	public static void errPrintln(String msg){
+		try {
+			errPrint_.invoke(unyoObj_, msg + System.getProperty("line.separator"));
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void println(String msg){
+		print(msg  + System.getProperty("line.separator"));
+	}
+	
+	public static void println(Object msg){
+		println(msg.toString());
+	}
+	
+	public static void print(String msg){
+		try {
+			print_.invoke(unyoObj_, msg);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void print(Object msg){
+		print(msg.toString());
 	}
 	
 	static 

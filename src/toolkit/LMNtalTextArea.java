@@ -10,6 +10,7 @@ import javax.swing.JTextArea;
 import runtime.Atom;
 import runtime.Membrane;
 import runtime.StringFunctor;
+import util.Util;
 
 /**
  * LMNtalWindowに設置するテキストエリア
@@ -33,7 +34,7 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 	 */
 	public LMNtalTextArea(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		System.out.println("textarea");
+		Util.println("textarea");
 	}
 	/////////////////////////////////////////////////////////////////
 

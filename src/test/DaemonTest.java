@@ -1,7 +1,13 @@
 package test;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+import util.Util;
 
 class DaemonTest{
 	
@@ -12,7 +18,7 @@ class DaemonTest{
 
 			socket = servSocket.accept();
 			//接続があるとこの行以下に処理が進む
-			System.out.println("ACK");
+			Util.println("ACK");
 			
 			
 			//入力stream			
@@ -30,7 +36,7 @@ class DaemonTest{
 			
 			
 			inString.append(inStream.readLine());
-			System.out.println("input: " + inString.toString());
+			Util.println("input: " + inString.toString());
 			
 			outString.append(inString.toString());
 			outStream.write(outString.toString());
@@ -38,7 +44,7 @@ class DaemonTest{
 			outStream.flush();
 			
 		} catch (Exception e){
-			System.out.println("ERROR!!!");
+			Util.println("ERROR!!!");
 		}
 	}
 

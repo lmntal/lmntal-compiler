@@ -119,7 +119,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 				int locals = spec.getIntArg2();
 				boolean success;
 				if(locals == 0){
-					System.err.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
+					Util.errPrintln("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
 					locals = formals;
 				}
 				InterpretiveReactor ir = new InterpretiveReactor(locals, this);
@@ -137,7 +137,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 				int locals = spec.getIntArg2();
 				boolean success;
 				if(locals == 0){
-					System.err.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
+					Util.errPrintln("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
 					locals = formals;
 				}
 				InterpretiveReactor ir = new InterpretiveReactor(locals, this);
@@ -257,7 +257,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		int locals  = spec.getIntArg2();
 		boolean success;
 		if (locals == 0) {
-			System.err.println("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
+			Util.errPrintln("SYSTEM DEBUG REPORT: an old version of spec instruction was detected");
 			locals = formals;
 		}
 // ArrayIndexOutOfBoundsException がでたので一時的に変更
@@ -497,7 +497,7 @@ class InterpretiveReactor {
 
 				//====その他====ここから====
 				case Instruction.DUMMY :
-					System.err.println(
+					Util.errPrintln(
 						"SYSTEM ERROR: dummy instruction remains: " + inst);
 					break;
 					//case Instruction.UNDEF:
@@ -1656,13 +1656,13 @@ class InterpretiveReactor {
 					break;
 
 				default :
-					System.err.println(
+					Util.errPrintln(
 						"SYSTEM ERROR: Invalid instruction: " + inst);
 					break;
 			}
 			} catch (Exception e) {
-				System.err.println(e + " was occured at \"" + inst + "\" in");
-				System.err.println(insts);
+				Util.errPrintln(e + " was occured at \"" + inst + "\" in");
+				Util.errPrintln(insts);
 				System.exit(1);
 			}
 		}

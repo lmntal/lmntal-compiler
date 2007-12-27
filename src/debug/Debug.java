@@ -24,6 +24,7 @@ import runtime.InterpretedRuleset;
 import runtime.LMNtalRuntime;
 import runtime.Membrane;
 import runtime.Rule;
+import util.Util;
 
 /**
  * LMNtalデバッガ
@@ -246,7 +247,7 @@ public class Debug {
 	public static void showList() {
 		int i;
 		for (i = lastLineno; i < Math.min(lastLineno+listsize, source.size()); i++) {
-			System.out.println(i+"\t"+source.get(i));
+			Util.println(i+"\t"+source.get(i));
 		}
 		lastLineno = i;
 	}
@@ -265,7 +266,7 @@ public class Debug {
 		isStepping = false;
 		try {
 			while (true) {
-				System.out.print("(ldb) ");
+				Util.print("(ldb) ");
 //				System.err.println("クライアントからの接続をポート"+requestPort+"で待ちます");
 				String s = requestIn.readLine().trim();
 //				System.err.println("'"+s+"'を受信しました");
@@ -275,14 +276,14 @@ public class Debug {
 					if (ss.length < 2) continue;
 					try {
 						int lineNumber = Integer.parseInt(ss[1]);
-						if (addBreakPoint(lineNumber)) System.out.println("Breakpoint "+breakPoints.size()+", line"+lineNumber);
-						else System.out.println("No rlue at line "+lineNumber);
+						if (addBreakPoint(lineNumber)) Util.println("Breakpoint "+breakPoints.size()+", line"+lineNumber);
+						else Util.println("No rlue at line "+lineNumber);
 					} catch (NumberFormatException e) {
-						if (addBreakPoint(ss[1])) System.out.println("Breakpoint "+breakPoints.size()+", "+ss[1]);
-						else System.out.println("No rlue "+ss[1]);
+						if (addBreakPoint(ss[1])) Util.println("Breakpoint "+breakPoints.size()+", "+ss[1]);
+						else Util.println("No rlue "+ss[1]);
 					}
 				} else if (s.startsWith("c")) {//実行を再開
-					System.out.println("Continuing.");
+					Util.println("Continuing.");
 					break;
 				} else if (s.startsWith("h")) {
 					showHelp();
@@ -293,13 +294,13 @@ public class Debug {
 							int lineNumber = Integer.parseInt(ss[1]);
 							lastLineno = Math.max(1, lineNumber-listsize/2);
 						} catch (NumberFormatException e) {
-							System.out.println("Rule \""+ss[1]+"\" not defined.");
+							Util.println("Rule \""+ss[1]+"\" not defined.");
 							continue;
 						}
 					}
 					showList();
 				} else if (s.startsWith("n")) {//ステップ実行
-					if (!isRunning)	System.out.println("The program is not being run.");
+					if (!isRunning)	Util.println("The program is not being run.");
 					else isStepping = true;
 					break;
 				} else if (s.startsWith("p")) {//内部状態を表示
@@ -307,14 +308,14 @@ public class Debug {
 					requestOut.println(Dumper.dump(memToDump));
 				} else if (s.startsWith("r")) {//実行開始
 					if (isRunning) {
-						System.out.println("The program being debugged has been started already.");
+						Util.println("The program being debugged has been started already.");
 					} else {
 						isRunning = true;
-						System.out.println("Starting program: "+getUnitName()+"\n");
+						Util.println("Starting program: "+getUnitName()+"\n");
 						break;
 					}
 				} else if (s.startsWith("f")) {//フレーム情報を表示（今は現在の行番号を表示）
-					System.out.println(currentLineNumber);
+					Util.println(currentLineNumber);
 				} else if (s.startsWith("q")) {//デバッグ終了
 					System.exit(0);//TODO exitしちゃって良いかな？
 				} else if (s.startsWith("set l")) {
@@ -323,10 +324,10 @@ public class Debug {
 					try {
 						listsize = Integer.parseInt(ss[2]);
 					} catch (NumberFormatException e) {
-						System.out.println("No symbol \""+ss[2]+"\" in current context.");
+						Util.println("No symbol \""+ss[2]+"\" in current context.");
 					}
 				} else {
-					System.out.println("Undefined command: \""+s+"\".  Try \"help\".");
+					Util.println("Undefined command: \""+s+"\".  Try \"help\".");
 				}
 			}
 		} catch(IOException e){
@@ -363,18 +364,18 @@ public class Debug {
 			} else {
 				//サーバーソケットの生成
 				requestSocket = new ServerSocket(requestPort);
-				System.err.println("クライアントからの接続をポート"+requestPort+"で待ちます");
+				Util.errPrintln("クライアントからの接続をポート"+requestPort+"で待ちます");
 				
 				eventSocket = new ServerSocket(eventPort);
-				System.err.println("クライアントからの接続をポート"+eventPort+"で待ちます");
+				Util.errPrintln("クライアントからの接続をポート"+eventPort+"で待ちます");
 				
 				Socket socket1 = requestSocket.accept();
-				System.err.println(socket1.getInetAddress() + "から接続を受付ました");
+				Util.errPrintln(socket1.getInetAddress() + "から接続を受付ました");
 				requestIn = new BufferedReader(new InputStreamReader(socket1.getInputStream()));
 				requestOut = new PrintWriter(socket1.getOutputStream(), true);
 				
 				Socket socket2 = eventSocket.accept();
-				System.err.println(socket2.getInetAddress() + "から接続を受付ました");
+				Util.errPrintln(socket2.getInetAddress() + "から接続を受付ました");
 				eventOut = new PrintWriter(socket2.getOutputStream(), true);
 			}
 		} catch (IOException e) {}
@@ -396,16 +397,16 @@ public class Debug {
 	}
 	
 	public static void showHelp() {
-		System.out.println("List of commands:");
-		System.out.println("");
-		System.out.println("break -- Set breakpoint at specified line or function");
-		System.out.println("continue -- Continue program being debugged");
-		System.out.println("help -- Print list of commands");
-		System.out.println("list -- List specified line");
-		System.out.println("next -- Step program");
-		System.out.println("print -- dump membrane");
-		System.out.println("run -- Start debugged program");					
+		Util.println("List of commands:");
+		Util.println("");
+		Util.println("break -- Set breakpoint at specified line or function");
+		Util.println("continue -- Continue program being debugged");
+		Util.println("help -- Print list of commands");
+		Util.println("list -- List specified line");
+		Util.println("next -- Step program");
+		Util.println("print -- dump membrane");
+		Util.println("run -- Start debugged program");					
 		//System.out.println("frame -- Select and print a stack frame");
-		System.out.println("quit -- Exit ldb");
+		Util.println("quit -- Exit ldb");
 	}
 }

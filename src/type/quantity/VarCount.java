@@ -1,5 +1,7 @@
 package type.quantity;
 
+import util.Util;
+
 public class VarCount{
 
 	private static int current_id = 0;
@@ -24,7 +26,7 @@ public class VarCount{
 	
 	public IntervalCount evaluate(){
 		if(bound == null)
-			System.err.println("fatal error. this var isn't bind : RV" + id);
+			Util.errPrintln("fatal error. this var isn't bind : RV" + id);
 		return bound;
 	}
 }

@@ -103,18 +103,18 @@ public class HybridOutputStream {
 		writer.close();
 		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
 		HybridInputStream reader = new HybridInputStream(new BufferedInputStream(bin));
-		System.out.println(reader.readLine());
-		System.out.println(reader.readObject());
-		System.out.println(reader.readLine());
-		System.out.println(reader.readLine());
-		System.out.println(reader.readObject());
-		System.out.println(reader.readObject());
+		Util.println(reader.readLine());
+		Util.println(reader.readObject());
+		Util.println(reader.readLine());
+		Util.println(reader.readLine());
+		Util.println(reader.readObject());
+		Util.println(reader.readObject());
 		for (int i = 0; i < 32; i++) {
-			System.out.println(reader.readLine());
+			Util.println(reader.readLine());
 		}
-		System.out.println(reader.readObject());
+		Util.println(reader.readObject());
 
-		System.out.println(reader.readLine());
-		System.out.println(reader.readLine());
+		Util.println(reader.readLine());
+		Util.println(reader.readLine());
 	}
 }

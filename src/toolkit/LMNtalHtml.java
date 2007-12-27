@@ -3,15 +3,14 @@ package toolkit;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
 
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 import runtime.Atom;
 import runtime.Membrane;
 import runtime.StringFunctor;
+import util.Util;
 
 /**
  * LMNtalWindowに設置するテキストエリア
@@ -35,7 +34,7 @@ public class LMNtalHtml extends LMNComponent implements KeyListener {
 	 */
 	public LMNtalHtml(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		System.out.println("html");
+		Util.println("html");
 	}
 	/////////////////////////////////////////////////////////////////
 

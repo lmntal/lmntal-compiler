@@ -124,7 +124,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 			ret[index++] = it.next();
 		}
 		if (index != size) {
-			System.err.println("SYSTEM ERROR!: AtomSet.size is incorrect");
+			Util.errPrintln("SYSTEM ERROR!: AtomSet.size is incorrect");
 		}
 		return ret;
 	}
@@ -244,12 +244,12 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	}
 	/**デバッグ用出力*/
 	public void print() {
-		System.out.println("AtomSet: ");
+		Util.println("AtomSet: ");
 		Iterator it = iterator();
 		while (it.hasNext()) {
-			System.out.println(it.next());
+			Util.println(it.next());
 		}
-		System.out.println("result of verify() is " + verify());
+		Util.println("result of verify() is " + verify());
 	}
 	
 	/** dataAtoms 中の特定のファンクタだけを返す反復子 */

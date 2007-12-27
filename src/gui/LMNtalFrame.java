@@ -26,6 +26,7 @@ import javax.swing.JSplitPane;
 import javax.swing.plaf.multi.MultiSplitPaneUI;
 
 import runtime.Membrane;
+import util.Util;
 
 public class LMNtalFrame extends JFrame {
 
@@ -291,7 +292,7 @@ public class LMNtalFrame extends JFrame {
 			    File saveFile = new File(saveDialog.getDirectory() + saveDialog.getFile() + fileType);
 
 			    if(!saveFile.getParentFile().exists()){
-			    	System.out.println("not found");
+			    	Util.println("not found");
 			    	return;
 			    }
 

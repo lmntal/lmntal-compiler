@@ -3,6 +3,7 @@ package toolkit;
 import java.awt.Component;
 
 import runtime.Membrane;
+import util.Util;
 
 /**
  * LMNtalWindowに設置するラベル
@@ -21,7 +22,7 @@ public class LMNtalGraphic extends LMNComponent {
 	 */
 	public LMNtalGraphic(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		System.out.println("panel");
+		Util.println("panel");
 	}
 	/////////////////////////////////////////////////////////////////
 

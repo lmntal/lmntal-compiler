@@ -2184,7 +2184,7 @@ public class Instruction implements Cloneable, Serializable {
 				 && okabe*/f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {
 					Integer idobj = new Integer(kind);
 					if (instructionTable.containsKey(idobj)) {
-						System.err.println("WARNING: collision detected on instruction kind = " 
+						Util.errPrintln("WARNING: collision detected on instruction kind = " 
 							+ idobj.intValue());
 					}
 					instructionTable.put(idobj, f.getName().toLowerCase());

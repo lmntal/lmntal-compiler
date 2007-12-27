@@ -3,6 +3,8 @@ package java_cup.runtime;
 
 import java.util.Stack;
 
+import util.Util;
+
 /** This class implements a skeleton table driven LR parser.  In general,
  *  LR parsers are a form of bottom up shift-reduce parsers.  Shift-reduce
  *  parsers act by shifting input onto a parse stack until the Symbols 
@@ -374,13 +376,13 @@ public abstract class lr_parser {
    */
   public void report_error(String message, Object info)
     {
-      System.err.print(message);
+	  Util.errPrintln(message);
       if (info instanceof Symbol)
 	if (((Symbol)info).left != -1)
-	System.err.println(" at character " + ((Symbol)info).left + 
+		Util.errPrintln(" at character " + ((Symbol)info).left + 
 			   " of input");
-	else System.err.println("");
-      else System.err.println("");
+	else Util.errPrintln("");
+      else Util.errPrintln("");
     }
 
   /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
@@ -619,7 +621,7 @@ public abstract class lr_parser {
    */
   public void debug_message(String mess)
     {
-      System.err.println(mess);
+	  Util.errPrintln(mess);
     }
 
   /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/

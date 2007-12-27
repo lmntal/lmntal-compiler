@@ -4,8 +4,9 @@
  */
 package test;
 
-import runtime.*;
 import junit.framework.TestCase;
+import runtime.Instruction;
+import util.Util;
 
 /**
  * @author hara
@@ -27,7 +28,7 @@ public class InstructionTest extends TestCase {
 	}
 
 	public void testHoge() {
-		System.out.println("test "+inst.data.toString());
+		Util.println("test "+inst.data.toString());
 		assertTrue(inst.data.toString().equals("[react, [1, 2, 5]]"));
 	}
 }

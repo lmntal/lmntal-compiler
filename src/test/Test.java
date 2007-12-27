@@ -23,6 +23,7 @@ import java.util.Iterator;
 import javax.swing.JFrame;
 
 import runtime.Env;
+import util.Util;
 
 /**
  * わかったこと→ path.separator = (linux => : windows => ;)
@@ -50,16 +51,16 @@ public class Test {
 	public static void l() throws Exception {
 		BufferedReader br0 = new BufferedReader(new InputStreamReader(System.in));
 		BufferedReader br1 = new BufferedReader(new FileReader("demo.sh"));
-		System.out.println(br0.getClass());
-		System.out.println(br1.getClass());
+		Util.println(br0.getClass());
+		Util.println(br1.getClass());
 	}
 	public static void k()  {
 		byte b;
 		b = (byte)255;
-		System.out.println(b&0xff);
+		Util.println(b&0xff);
 	}
 	public static void j() {
-		System.out.println("aHIJc___123".replaceAll("a(.*?)c", ":$1:$1:$1:"));
+		Util.println("aHIJc___123".replaceAll("a(.*?)c", ":$1:$1:$1:"));
 	}
 	public static void i() {
 		JFrame fr = new JFrame("test");
@@ -98,7 +99,7 @@ public class Test {
 			Object arg[] = new Object[1];
 			arg[0] = "Hello";
 			Object o = Java.doNew("java.awt.Frame", arg);
-			System.out.println("GENERATED : "+o);
+			Util.println("GENERATED : "+o);
 			Java.doInvoke(o, "show", null);
 		}
 	}
@@ -106,24 +107,24 @@ public class Test {
 		System.out.println((int)1.3);
 	}
 	public static void e() {
-		System.out.println(get("http://yahoo.co.jp"));
+		Util.println(get("http://yahoo.co.jp"));
 	}
 	public static void d() {
 		try {
 			File f = new File("abc/build.xml/");
-			System.out.println(f.getPath());
+			Util.println(f.getPath());
 		} catch (Exception e) {
 		}
 	}
 	public static void c() {
 		String s = "abc/def/g.txt";
 		s = s.replaceAll(".*?[\\/]([^\\/]+)$", "$1");
-		System.out.println(s);
+		Util.println(s);
 	}
 	public static void b() {
 		String s = "1 2 .. 3.. 4. 5 6 7";
 		String r[] = s.split("[\\s.]+");
-		System.out.println(Arrays.asList(r));
+		Util.println(Arrays.asList(r));
 		
 	}
 	public static void a() {

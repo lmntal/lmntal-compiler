@@ -12,6 +12,7 @@ import runtime.Functor;
 import runtime.LMNtalRuntime;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
+import util.Util;
 
 
 public class Memory {
@@ -90,6 +91,6 @@ public class Memory {
 	private static void show(int n) {
 		Runtime r = Runtime.getRuntime();
 		r.gc();
-		System.out.println(n + "\t" + (r.totalMemory() - r.freeMemory())); 
+		Util.println(n + "\t" + (r.totalMemory() - r.freeMemory())); 
 	}
 }

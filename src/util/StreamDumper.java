@@ -22,7 +22,7 @@ public class StreamDumper implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("StreamDumper: now starting dumping the console log of: " + processName);
+		Util.println("StreamDumper: now starting dumping the console log of: " + processName);
 	
 		BufferedReader buff = new BufferedReader(new InputStreamReader(childIn));
 		
@@ -33,10 +33,10 @@ public class StreamDumper implements Runnable {
 				input = buff.readLine();
 
 				if (input == null){
-					System.out.println("StreamDumper of: " + processName + " finished");
+					Util.println("StreamDumper of: " + processName + " finished");
 					break;
 				} else {
-					System.out.println(processName + ": " +  input);
+					Util.println(processName + ": " +  input);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

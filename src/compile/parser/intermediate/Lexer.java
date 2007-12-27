@@ -2,6 +2,7 @@
 
 /* --------------------------Usercode Section------------------------ */
 package compile.parser.intermediate;
+import util.Util;
 import compile.parser.MySymbol;
 import java_cup.runtime.Symbol;
 
@@ -314,7 +315,7 @@ class Lexer implements java_cup.runtime.Scanner {
 		while (true) {
 			Symbol symbol = lexer.next_token();
 			if (symbol.sym == sym.EOF) break;
-	    	System.out.println("(" + symbol.left + "," + symbol.right + ") " + symbol.sym + ":" + symbol.value);
+			Util.println("(" + symbol.left + "," + symbol.right + ") " + symbol.sym + ":" + symbol.value);
 	    }
 	}
 	

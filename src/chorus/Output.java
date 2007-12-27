@@ -12,8 +12,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import runtime.Membrane;
 import runtime.Atom;
+import runtime.Membrane;
+import util.Util;
 
 /**
  * Chorus3Dのソースを出力する
@@ -109,7 +110,7 @@ public final class Output{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("output:"+file+".java");
+		Util.println("output:"+file+".java");
 	}
 	
 	/**
@@ -156,7 +157,7 @@ public final class Output{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("output:" + file + "_Atom.dat");
+		Util.println("output:" + file + "_Atom.dat");
 	}
 	
 	private static void outPutEdgeFile(Map idMap, Map atomMap, String file){
@@ -197,16 +198,13 @@ public final class Output{
 			osw.close();
 			fos.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("output:" + file + "_Edge.dat");
+		Util.println("output:" + file + "_Edge.dat");
 	}
 	
 	/**
@@ -253,7 +251,7 @@ public final class Output{
 			"	$(RM) *.class\n";
 		
 		try {
-			System.out.println("output:" + file + "_Makefile");
+			Util.println("output:" + file + "_Makefile");
 			FileOutputStream fos = new FileOutputStream(parentPath + file + "_Makefile");
 			OutputStreamWriter osw = new OutputStreamWriter(fos , ENCODE);
 			BufferedWriter bw = new BufferedWriter(osw);

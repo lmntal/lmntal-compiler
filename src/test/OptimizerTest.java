@@ -1,12 +1,23 @@
 package test;
 
-import java.util.*;
-import java.io.*;
-//import java.lang.reflect.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import compile.*;
-import compile.parser.*;
-import runtime.*;
+import runtime.Functor;
+import runtime.Instruction;
+import runtime.InterpretedRuleset;
+import runtime.Rule;
+import runtime.SymbolFunctor;
+import util.Util;
+
+import compile.Optimizer;
+import compile.RulesetCompiler;
+import compile.parser.LMNParser;
 
 /**
  * @author Mizuno
@@ -36,7 +47,7 @@ public class OptimizerTest {
 		Functor cons = new SymbolFunctor("cons", 3);
 		
 		ArrayList list = new ArrayList();
-		System.out.println("( append(X0, Y, Z), cons(A, X, X0) :- cons(A, X1, Z), append(X, Y, X1) )");
+		Util.println("( append(X0, Y, Z), cons(A, X, X0) :- cons(A, X1, Z), append(X, Y, X1) )");
 		
 //		//head
 //		list.add(Instruction.findatom(1, 0, append));
@@ -74,8 +85,8 @@ public class OptimizerTest {
 		// append 2
 		
 		list = new ArrayList();
-		System.out.println("( append(X0, Y, Z), cons(A, X, X0) :- cons(A, X1, Z), append(X, Y, X1) )");
-		System.out.println("use relink instruction");
+		Util.println("( append(X0, Y, Z), cons(A, X, X0) :- cons(A, X1, Z), append(X, Y, X1) )");
+		Util.println("use relink instruction");
 
 		list.add(new Instruction(Instruction.SPEC, 3, 5));
 		list.add(Instruction.removeatom(1, 0, append)); //append
@@ -103,7 +114,7 @@ public class OptimizerTest {
 		Functor b = new SymbolFunctor("b", 0);
 		list = new ArrayList();
 
-		System.out.println("( {a, $p}, {b, $q} :- {a, $q}, {a, b, $p} )");
+		Util.println("( {a, $p}, {b, $q} :- {a, $q}, {a, b, $p} )");
 
 		list.add(Instruction.spec(5, 10));
 		list.add(Instruction.removeatom(3, 1, a));
@@ -140,7 +151,7 @@ public class OptimizerTest {
 
 		list = new ArrayList();
 
-		System.out.println("( {$p}, {$q} :- {$q, $p} )");
+		Util.println("( {$p}, {$q} :- {$q, $p} )");
 
 		list.add(Instruction.spec(3, 4));
 		list.add(new Instruction(Instruction.REMOVEMEM, 1, 0));
@@ -165,7 +176,7 @@ public class OptimizerTest {
 
 		list = new ArrayList();
 
-		System.out.println("( {$p, {$q}} :- {$q, {$p}} )");
+		Util.println("( {$p, {$q}} :- {$q, {$p}} )");
 		
 		list.add(Instruction.spec(3, 5));
 		list.add(new Instruction(Instruction.REMOVEMEM, 2, 1));
@@ -190,7 +201,7 @@ public class OptimizerTest {
 		// mem4
 		
 		list = new ArrayList();
-		System.out.println("( { change, {a,$p} } :- { {b,$p} } )");
+		Util.println("( { change, {a,$p} } :- { {b,$p} } )");
 
 		Functor change = new SymbolFunctor("change", 0);
 		
@@ -205,21 +216,21 @@ public class OptimizerTest {
 	
 	private static void doTest(ArrayList list) { 
 		
-		System.out.println("Before Optimization:");
+		Util.println("Before Optimization:");
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
-			System.out.println(it.next());
+			Util.println(it.next());
 		}
 		
 		//optimize
 		Optimizer.optimize(null, list);
 		
-		System.out.println("After Optimization:");
+		Util.println("After Optimization:");
 		it = list.iterator();
 		while (it.hasNext()) {
-			System.out.println(it.next());
+			Util.println(it.next());
 		}
-		System.out.println();
+		Util.println("");
 	}
 
 }

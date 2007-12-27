@@ -4,9 +4,7 @@
  */
 package runtime;
 import graphic.LMNtalGFrame;
-import toolkit.LMNtalTFrame; //todo
 
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,9 +12,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import toolkit.LMNtalTFrame;
+import util.Util;
 
 /**
  * 環境。デバッグ用。
@@ -341,7 +341,7 @@ public final class Env {
 	 * @param depth インデントの深さ
 	 */
 	public static void e(Object o, int depth) {
-		System.err.println(getIndent(depth) + o);
+		Util.errPrintln(getIndent(depth) + o);
 	}
 	public static void e(Exception e) {
 		e.printStackTrace(System.err);
@@ -369,7 +369,7 @@ public final class Env {
 	 * @param depth インデントの深さ
 	 */
 	public static void d(Object o, int depth) {
-		if(debug > 0) System.out.println(getIndent(depth) + o);
+		if(debug > 0) Util.println(getIndent(depth) + o);
 	}
 	
 	/**
@@ -386,7 +386,7 @@ public final class Env {
 	 * @param depth インデントの深さ
 	 */
 	public static void p(Object o, int depth) {
-		System.out.println(getIndent(depth) + o);
+		Util.println(getIndent(depth) + o);
 	}
 	
 	/**
@@ -487,11 +487,11 @@ public final class Env {
 		nWarnings = 0;
 	}
 	public static void error(String text) {
-		System.err.println(text);
+		Util.errPrintln(text);
 		nErrors++;
 	}
 	public static void warning(String text) {
-		System.err.println(text);
+		Util.errPrintln(text);
 		nWarnings++;
 	}
 	

@@ -14,6 +14,7 @@ import runtime.Dumper;
 import runtime.Functor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
+import util.Util;
 
 public class LMNtalWindow extends JFrame {
 	
@@ -234,7 +235,7 @@ public class LMNtalWindow extends JFrame {
 	/** ウィンドウを生成する */
 	public void makeWindow(){
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		System.out.println("make window");
+		Util.println("make window");
 		setTitle(windowName);
 		layout = new GridBagLayout();
 		getContentPane().setLayout(layout);
@@ -250,7 +251,7 @@ public class LMNtalWindow extends JFrame {
 					dump = dump.replaceAll("\\}", "\\}\n");
 					dump = dump.replaceAll("\\{", "\n\\{");
 					dump = dump.substring(1);
-					System.out.println(dump);
+					Util.println(dump);
 					System.exit(0);
 				}
 			}

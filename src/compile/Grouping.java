@@ -9,6 +9,7 @@ import java.util.Set;
 
 import runtime.Instruction;
 import runtime.InstructionList;
+import util.Util;
 
 /**
  * 命令列のグループ化をを行うクラス。
@@ -326,15 +327,15 @@ public class Grouping {
 		Iterator it1 = set1.iterator();
 		Iterator it2 = set2.iterator();
 	
-		System.out.println("var2DefInst :- ");
+		Util.println("var2DefInst :- ");
 		while(it1.hasNext()){
 			Map.Entry mapentry = (Map.Entry)it1.next();
-			System.out.println(mapentry.getKey() + "/" + mapentry.getValue());
+			Util.println(mapentry.getKey() + "/" + mapentry.getValue());
 		}
-			System.out.println("Inst2GroupId :- ");
+			Util.println("Inst2GroupId :- ");
 		while(it2.hasNext()){
 			Map.Entry mapentry = (Map.Entry)it2.next();
-			System.out.println(mapentry.getKey() + "/" + mapentry.getValue());
+			Util.println(mapentry.getKey() + "/" + mapentry.getValue());
 		}	
 	}
 }

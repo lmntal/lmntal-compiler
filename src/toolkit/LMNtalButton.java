@@ -10,6 +10,7 @@ import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
+import util.Util;
 
 /**
  * LMNtalWindowに設置するボタン
@@ -30,7 +31,7 @@ public class LMNtalButton extends LMNComponent implements ActionListener {
 	 */
 	public LMNtalButton(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		System.out.println("button");		
+		Util.println("button");		
 	}
 	/////////////////////////////////////////////////////////////////
 
@@ -55,7 +56,7 @@ public class LMNtalButton extends LMNComponent implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		System.out.println("clicked : " + this); ////////////// デバッグ用
+		Util.println("clicked : " + this); ////////////// デバッグ用
 		LMNtalTFrame.addUpdateComponent(this);
 		clickedCounter++;
 	}

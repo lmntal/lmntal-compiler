@@ -7,6 +7,7 @@ import java.util.Set;
 import runtime.Functor;
 import type.TypeEnv;
 import type.TypeException;
+import util.Util;
 
 import compile.structure.Atom;
 import compile.structure.ContextDef;
@@ -304,11 +305,11 @@ public class ArgumentInferer {
 	private PolarizedPath solvePolarizedPath(PolarizedPath pp)throws TypeException{
 		Path p = pp.getPath();
 		if (!(p instanceof RootPath)) {
-			System.out.println("fatal error in solving path.");
+			Util.println("fatal error in solving path.");
 			if(p instanceof ActiveAtomPath)
-				System.out.println("\tactive atom path");
+				Util.println("\tactive atom path");
 			else if(p instanceof TracingPath)
-				System.out.println("\ttracing path");
+				Util.println("\ttracing path");
 			return pp;
 		}
 		LinkOccurrence lo = ((RootPath) p).getTarget();
@@ -340,7 +341,7 @@ public class ArgumentInferer {
 			return new PolarizedPath(1, new ActiveAtomPath(TypeEnv.getMemName(atom.mem),
 					atom.functor, lo.pos));
 		} else if (out == TypeEnv.CONNECTOR) {
-			System.out.println("fatal error in getting path.");
+			Util.println("fatal error in getting path.");
 			return null;
 		} else {
 			LinkOccurrence tl = TypeEnv.getRealBuddy(atom.args[out]);

@@ -41,6 +41,7 @@ import java.util.Iterator;
 
 import runtime.Atom;
 import runtime.Link;
+import util.Util;
 
 //struct node
 public class Node {
@@ -64,40 +65,40 @@ public class Node {
 	}
 
 	public void print() {
-		System.out.println("ID: " + this.id);
-		System.out.println("Incoming: " + this.incoming);
+		Util.println("ID: " + this.id);
+		Util.println("Incoming: " + this.incoming);
 		Iterator<Link> oldi = this.older.iterator();
-		System.out.print("Old:");
+		Util.print("Old:");
 		while (oldi.hasNext())
-			System.out.print(" " + oldi.next().getAtom());
-		System.out.print("\n");
+			Util.print(" " + oldi.next().getAtom());
+		Util.print("\n");
 		Iterator<Link> newi = this.newer.iterator();
-		System.out.print("New:");
+		Util.print("New:");
 		while (newi.hasNext())
-			System.out.print(" " + newi.next().getAtom());
-		System.out.print("\n");
+			Util.print(" " + newi.next().getAtom());
+		Util.print("\n");
 		Iterator<Link> nexti = this.next.iterator();
-		System.out.print("Next:");
+		Util.print("Next:");
 		while (nexti.hasNext())
-			System.out.print(" " + nexti.next().getAtom());
-		System.out.print("\n");
+			Util.print(" " + nexti.next().getAtom());
+		Util.print("\n");
 	}
 
 	public void printv() {
-		System.out.println("---\n" + "ID: " + this.id);
-		System.out.println("Incoming: " + this.incoming);
+		Util.println("---\n" + "ID: " + this.id);
+		Util.println("Incoming: " + this.incoming);
 		Iterator<Link> oldi = this.older.iterator();
-		System.out.println("Old:");
+		Util.println("Old:");
 		while (oldi.hasNext())
-			System.out.println(" " + traverse(oldi.next()));
+			Util.println(" " + traverse(oldi.next()));
 		Iterator<Link> newi = this.newer.iterator();
-		System.out.println("New:");
+		Util.println("New:");
 		while (newi.hasNext())
-			System.out.println(" " + traverse(newi.next()));
+			Util.println(" " + traverse(newi.next()));
 		Iterator<Link> nexti = this.next.iterator();
-		System.out.println("Next:");
+		Util.println("Next:");
 		while (nexti.hasNext())
-			System.out.println(" " + traverse(nexti.next()));
+			Util.println(" " + traverse(nexti.next()));
 	}
 
 	public String traverse(Link root) {

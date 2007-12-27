@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.Iterator;
 
+import util.Util;
+
 import compile.Optimizer;
 class Readline {
 	static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -54,17 +56,17 @@ public class REPL {
 			//Readline.load(ReadlineLibrary.GnuReadline);
 			Readline.load(ReadlineLibrary.PureJava);
 		} catch (UnsatisfiedLinkError ignore_me) {
-			System.err.println("couldn't load readline lib. Using simple stdin.");
+			Util.errPrintln("couldn't load readline lib. Using simple stdin.");
 		}
 		
 		Readline.initReadline("LMNtal");
 		
-		System.out.println("        LMNtal version " + Env.LMNTAL_VERSION);
-		System.out.println("");
-		System.out.println("Type "+Env.replCommandPrefix+"h to see help.");
-		System.out.println("Type "+Env.replCommandPrefix+"q to quit.");
-		if(Env.replTerm.equals("null_line")) System.out.println("Enter an empty line to run the input.");
-		System.out.println("");
+		Util.println("        LMNtal version " + Env.LMNTAL_VERSION);
+		Util.println("");
+		Util.println("Type "+Env.replCommandPrefix+"h to see help.");
+		Util.println("Type "+Env.replCommandPrefix+"q to quit.");
+		if(Env.replTerm.equals("null_line")) Util.println("Enter an empty line to run the input.");
+		Util.println("");
 		StringBuffer lb = new StringBuffer();
 		while (true) {
 			try {
@@ -146,11 +148,11 @@ public class REPL {
 						continue;
 					} else if(nline.equals("gui")) {//2006.2.8 inui
 						Env.p("gui mode on");
-						Env.fGUI2 = true;
+						Env.fGUI = true;
 						continue;
 					} else if(nline.equals("nogui")) {//2006.2.8 inui
 						Env.p("gui mode off");
-						Env.fGUI2 = false;
+						Env.fGUI = false;
 						continue;
 					} else if(nline.startsWith("l")) {//2006.5.25 by inui
 						String ss[] = nline.split(" ");
@@ -178,7 +180,7 @@ public class REPL {
 						BufferedReader br = new BufferedReader(new InputStreamReader(is));
 						String s = null;
 						while ((s = br.readLine()) != null) {
-							System.out.println(s);
+							Util.println(s);
 						}
 					} else if (nline.equals("clear")) {//2006.6.6 by inui
 						Env.remainedRuntime = null;//全プロセスを消去
@@ -214,7 +216,7 @@ public class REPL {
 			} catch (EOFException e) {
 				break;
 			} catch (FileNotFoundException e) {//2006.6.1 by inui
-				System.err.println("No such file or directory");
+				Util.errPrintln("No such file or directory");
 			} catch (IOException e) {
 				System.err.println(e);
 //			} catch (Exception e) {
@@ -260,20 +262,20 @@ public class REPL {
 	 *
 	 */
 	public static void showHelp() {
-		System.out.println("Commands:");
-		System.out.println("  "+"[no]debug    [0-9] - set debug level");
-		System.out.println("  "+"[no]optimize [0-9] - set optimization level");
-		System.out.println("  "+"[no]verbose  [0-9] - set verbose level");
-		System.out.println("  "+"[no]shuffle  [0-4] - set shuffle level");
-		System.out.println("  "+"[no]trace          - set trace mode");					
-		System.out.println("  "+"[no]remain         - set remain mode");
-		System.out.println("  "+"[no]gui            - set gui mode");//2006.2.9 inui
-		System.out.println("  "+"r | rules          - show current rules");					
-		System.out.println("  "+"(rm | remove) [ruleset number...]");					
-		System.out.println("  "+"                   - remove specified rulesets  (ex: rm 601)");
-		System.out.println("  "+"l | load [file...] - load specified files (and remain mode on)");
-		System.out.println("  "+"clear              - clear all processes");
-		System.out.println("  "+"h                  - help");
-		System.out.println("  "+"q                  - quit");
+		Util.println("Commands:");
+		Util.println("  "+"[no]debug    [0-9] - set debug level");
+		Util.println("  "+"[no]optimize [0-9] - set optimization level");
+		Util.println("  "+"[no]verbose  [0-9] - set verbose level");
+		Util.println("  "+"[no]shuffle  [0-4] - set shuffle level");
+		Util.println("  "+"[no]trace          - set trace mode");					
+		Util.println("  "+"[no]remain         - set remain mode");
+		Util.println("  "+"[no]gui            - set gui mode");//2006.2.9 inui
+		Util.println("  "+"r | rules          - show current rules");					
+		Util.println("  "+"(rm | remove) [ruleset number...]");					
+		Util.println("  "+"                   - remove specified rulesets  (ex: rm 601)");
+		Util.println("  "+"l | load [file...] - load specified files (and remain mode on)");
+		Util.println("  "+"clear              - clear all processes");
+		Util.println("  "+"h                  - help");
+		Util.println("  "+"q                  - quit");
 	}
 }

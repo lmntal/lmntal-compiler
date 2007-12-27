@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
+import util.Util;
+
 /**
  * 設定ファイルから各種設定を読み込む
  * @author nakano
@@ -36,7 +38,7 @@ public class Setting {
 	 */
 	public static String getValue(String key){
 		if(!settingMap.containsKey(key)){
-			System.err.println("項目\"" + key + "\"が存在しません．");
+			Util.errPrintln("項目\"" + key + "\"が存在しません．");
 			System.exit(0);
 		}
 		return (String)settingMap.get(key);
@@ -57,11 +59,11 @@ public class Setting {
 	 */
 	public static String getFilePass(String key){
 		if(!settingMap.containsKey(key)){
-			System.err.println("項目\"" + key + "\"が存在しません．");
+			Util.errPrintln("項目\"" + key + "\"が存在しません．");
 			System.exit(0);
 		}
 		if(!(new File(((String)settingMap.get(key)).replaceAll("\\\\",""))).exists()){
-			System.err.println(((String)settingMap.get(key)).replaceAll("\\\\","")+"　が存在しません．");
+			Util.errPrintln(((String)settingMap.get(key)).replaceAll("\\\\","")+"　が存在しません．");
 			System.exit(0);
 		}
 		return (String)settingMap.get(key);
@@ -80,11 +82,11 @@ public class Setting {
 		File f1 = new File(file1);
 		File f2 = new File(file2 + ".java");
 		if(!f1.exists()){
-			System.err.println(file1+"　が存在しません．");
+			Util.errPrintln(file1+"　が存在しません．");
 			System.exit(0);
 		}
 		if(!f2.exists()){
-			System.err.println(file2+"　が存在しません．");
+			Util.errPrintln(file2+"　が存在しません．");
 			System.exit(0);
 		}
 		StringBuffer s1 = new StringBuffer(f1.getAbsolutePath());
@@ -133,7 +135,7 @@ public class Setting {
 				
 				// key読み込み
 				if((char)i == '='){
-					if(!isKey){ System.err.println("設定ファイルが不正です"); }
+					if(!isKey){ Util.errPrintln("設定ファイルが不正です"); }
 					key = s.toString();
 					s = new StringBuffer();
 					// key読み込みフラグ終了

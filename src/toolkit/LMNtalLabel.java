@@ -2,10 +2,10 @@ package toolkit;
 
 import java.awt.Component;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+
 import runtime.Membrane;
+import util.Util;
 
 /**
  * LMNtalWindowに設置するラベル
@@ -24,7 +24,7 @@ public class LMNtalLabel extends LMNComponent {
 	 */
 	public LMNtalLabel(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		System.out.println("label");		
+		Util.println("label");		
 	}
 	/////////////////////////////////////////////////////////////////
 

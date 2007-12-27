@@ -14,6 +14,7 @@ import runtime.InstructionList;
 import runtime.MergedBranchMap;
 import runtime.Rule;
 import runtime.SymbolFunctor;
+import util.Util;
 
 /**
  * 編み上げを行うクラス
@@ -143,9 +144,9 @@ public class Merger {
 			Map.Entry mapentry = (Map.Entry)it1.next();
 			ArrayList branchinststest = (ArrayList)mapentry.getValue();
 
-			System.out.println(mapentry.getKey() + " ⇒ ");
+			Util.println(mapentry.getKey() + " ⇒ ");
 			viewInsts(branchinststest, 1);
-			System.out.println("");
+			Util.println("");
 		}
 	}
 	
@@ -160,13 +161,13 @@ public class Merger {
 			for(int j=0; j<tabs; j++) System.out.print("    ");
 			//引数に命令列を持つ命令
 			if(inst.getKind() == Instruction.BRANCH){
-				System.out.println("branch\t[");
+				Util.println("branch\t[");
 				InstructionList label = (InstructionList) inst.getArg1();
 				viewInsts((ArrayList)label.insts, tabs+1);
 				for(int j=0; j<tabs; j++) System.out.print("    ");
-				System.out.println("]");
+				Util.println("]");
 			}
-			else System.out.println(inst);
+			else Util.println(inst);
 		}
 	}
 	

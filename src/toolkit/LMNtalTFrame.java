@@ -10,6 +10,7 @@ import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
+import util.Util;
 
 /** --wtモードで実行したときの処理 */
 public class LMNtalTFrame {
@@ -146,7 +147,7 @@ public class LMNtalTFrame {
 		while(windows.hasNext()){
 			windows.next().setVisible(true);
 		}
-		System.out.println("remove");
+		Util.println("remove");
 	}
 	
 	public void setRepaint(Membrane mem, boolean flag){

@@ -23,6 +23,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import util.QueuedEntity;
 import util.RandomIterator;
 import util.Stack;
+import util.Util;
 
 /**
  * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。
@@ -558,7 +559,7 @@ public final class Membrane extends QueuedEntity {
 	 * @param nodedesc ノード名を表す文字列
 	 * @return 作成されたルート膜 */
 	public Membrane newRoot(String nodedesc, int k) {
-		if(Env.debug > 0)System.out.println("AbstractMembrane.newRoot(" + nodedesc + ")");
+		if(Env.debug > 0)Util.println("AbstractMembrane.newRoot(" + nodedesc + ")");
 		if (nodedesc.equals("")) {
 			Membrane mem = newMem();
 			mem.changeKind(k);
@@ -733,7 +734,7 @@ public final class Membrane extends QueuedEntity {
 	 */
 	public Membrane moveTo(Membrane dstMem) {
 		if (parent != null) {
-			System.err.println("Warning: membrane with parent was moved");
+			Util.errPrintln("Warning: membrane with parent was moved");
 			parent.removeMem(this);
 		} 
 		if (dstMem instanceof Membrane) {

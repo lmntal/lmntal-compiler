@@ -193,9 +193,9 @@ public class Task implements Runnable {
 			Membrane memToDump = Env.theRuntime.getGlobalRoot();
 			Env.p( Dumper.dump( memToDump ) );
 			if(Env.getExtendedOption("dump").equals("1")) {
-				System.out.println(" ----- " + rulesetName + "/" + ruleName + " ---------------------------------------");
+				Util.println(" ----- " + rulesetName + "/" + ruleName + " ---------------------------------------");
 			} else {
-				System.out.println(" " + arrow + "  #" + (count++) + ": " + rulesetName + "/" + ruleName);
+				Util.println(" " + arrow + "  #" + (count++) + ": " + rulesetName + "/" + ruleName);
 			}
 		}
 	}
@@ -450,9 +450,9 @@ public class Task implements Runnable {
 
 	public void outTime(){
 		if(Env.majorVersion==1 && Env.minorVersion>4)
-			System.out.println("threadID="+thread.getId()+" atomtime=" + atomtime/1000000 + "msec memtime=" + memtime/1000000 +"msec totaltime="+(atomtime+memtime)/1000000+"msec");
+			Util.println("threadID="+thread.getId()+" atomtime=" + atomtime/1000000 + "msec memtime=" + memtime/1000000 +"msec totaltime="+(atomtime+memtime)/1000000+"msec");
 		else
-			System.out.println("threadID="+thread.hashCode()+" atomtime=" + atomtime + "msec memtime=" + memtime +"msec totaltime=" + (atomtime+memtime) + "msec");
+			Util.println("threadID="+thread.hashCode()+" atomtime=" + atomtime + "msec memtime=" + memtime +"msec totaltime=" + (atomtime+memtime) + "msec");
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -596,7 +596,7 @@ public class Task implements Runnable {
 				memStack.pop();
 				//適用した結果を作成
 				if (!Env.fInteractive)
-					System.out.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
+					Util.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
 				if (states.size() > 0) {
 					Iterator it = states.iterator();
 		//			int w = 0;
@@ -686,7 +686,7 @@ public class Task implements Runnable {
 		exec(mem, true);
 		memStack.pop();
 		if (!Env.fInteractive)
-			System.out.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
+			Util.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
 		//適用した結果を作成
 		ArrayList children = new ArrayList();
 		if (Env.fInteractive && states.size() == 0) {
@@ -756,7 +756,7 @@ public class Task implements Runnable {
 				exec(mem, true);
 				memStack.pop();
 				if (!Env.fInteractive)
-					System.out.println(nowId++ + " : " + Dumper.dump(mem));
+					Util.println(nowId++ + " : " + Dumper.dump(mem));
 				//適用した結果を作成
 				if (states.size() > 0) {
 					Iterator it = states.iterator();
@@ -826,7 +826,7 @@ public class Task implements Runnable {
 						argsTemp[i] = new Atom(((Atom)st[i]).getMem(),((Atom)st[i]).getFunctor());
 					} else {
 						// 多分ありえないケースだと思う．
-						System.out.println("Error: st["+i+"] is not an instance of Atom.");
+						Util.println("Error: st["+i+"] is not an instance of Atom.");
 						System.exit(1);
 					}
 				}

@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import util.RandomIterator;
+import util.Util;
 
 /**
  * @author Mizuno
@@ -215,7 +216,7 @@ public class RandomSet implements Set {
 		h.add(data[0]);
 		assertTrue(!r.equals(h));
 		assertTrue(r.verify());
-		System.out.println("ok");
+		Util.println("ok");
 	}
 	private static void assertTrue(boolean b) {
 		if (!b) {

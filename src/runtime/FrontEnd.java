@@ -21,6 +21,7 @@ import java.util.StringTokenizer;
 import type.TypeException;
 import type.TypeInferer;
 import util.StreamDumper;
+import util.Util;
 import chorus.Output;
 
 import compile.Module;
@@ -103,7 +104,7 @@ public class FrontEnd {
 			int major = Integer.parseInt(tokenizer.nextToken());
 			int minor = Integer.parseInt(tokenizer.nextToken());
 			if (major < 1 || (major == 1 && minor < 4)) {
-				System.err.println("use jre 1.4 or higher!!");
+				Util.errPrintln("use jre 1.4 or higher!!");
 				System.exit(-1);
 			}
 			Env.majorVersion=major;
@@ -128,7 +129,7 @@ public class FrontEnd {
 			// 2006/07/11 --args　以降を全てLMNtalプログラムへのコマンドライン引数とするように変更 by kudo
 			if(isSrcs && (args[i].length()>0) && (args[i].charAt(0) == '-')){
 				if(args[i].length() < 2){ // '-'のみの時
-					System.err.println("不明なオプション:" + args[i]);
+					Util.errPrintln("不明なオプション:" + args[i]);
 					System.exit(-1);
 				} else { // オプション解釈部
 					switch(args[i].charAt(1)){
@@ -197,7 +198,7 @@ public class FrontEnd {
 							Optimizer.setLevel(level);
 							break;
 						} else {
-							System.err.println("Invalid option: " + args[i]);
+							Util.errPrintln("Invalid option: " + args[i]);
 							System.exit(-1);
 						}
 						break;
@@ -213,7 +214,7 @@ public class FrontEnd {
 						} else {
 							Env.shuffle = Env.SHUFFLE_DEFAULT;
 						}
-						System.err.println("shuffle level " + Env.shuffle);
+						Util.errPrintln("shuffle level " + Env.shuffle);
 						break;
 					case 't':
 						/// -t
@@ -260,7 +261,7 @@ public class FrontEnd {
 						} else {
 							Env.profile = Env.PROFILE_DEFAULT;
 						}
-						if(Env.profile != Env.PROFILE_ALL) System.err.println("profile level " + Env.profile);
+						if(Env.profile != Env.PROFILE_ALL) Util.errPrintln("profile level " + Env.profile);
 						if (Env.profile == Env.PROFILE_ALL) 
 							Env.p( Dumper.PROFILE_TABS );
 						break;
@@ -302,7 +303,7 @@ public class FrontEnd {
 						} else if(args[i].equals("--help")){
 							/// --help
 							/// Show usage (this).
-							System.out.println("usage: java -jar lmntal.jar [options...] [filenames...]");
+							Util.println("usage: java -jar lmntal.jar [options...] [filenames...]");
 							// usage: FrontEnd [options...] [filenames...]
 							
 							// commandline: perl src/help_gen.pl < src/runtime/FrontEnd.java > src/runtime/Help.java
@@ -388,19 +389,19 @@ public class FrontEnd {
 									 */
 									int portnum = Integer.parseInt(args[i+1]);
 									if(portnum < 49152 || portnum > 65535){
-										System.err.println("Invalid option: " + args[i] + " " + args[i+1]);
-										System.err.println("only port 49152 through 65535 is available");
+										Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
+										Util.errPrintln("only port 49152 through 65535 is available");
 										System.exit(-1);
 									}
 									Env.daemonListenPort = portnum;
 								} catch (NumberFormatException e){
 									//e.printStackTrace();
-									System.err.println("Invalid option: " + args[i] + " " + args[i+1]);
-									System.err.println("Cannot parse as integer: " + args[i+1]);
+									Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
+									Util.errPrintln("Cannot parse as integer: " + args[i+1]);
 									System.exit(-1);
 								}
 							} else {
-								System.err.println("Invalid option: " + args[i] + " " + args[i+1]);
+								Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
 								System.exit(-1);
 							}
 							
@@ -526,14 +527,14 @@ public class FrontEnd {
 							Env.safe = true;
 							Env.maxStep = Integer.parseInt(args[++i]);
 						} else {
-							System.err.println("Invalid option: " + args[i]);
-							System.err.println("Use option --help to see a long list of options.");
+							Util.errPrintln("Invalid option: " + args[i]);
+							Util.errPrintln("Use option --help to see a long list of options.");
 							System.exit(-1);
 						}
 						break;
 					default:
-						System.err.println("Invalid option: " + args[i]);
-						System.err.println("Use option --help to see a long list of options.");
+						Util.errPrintln("Invalid option: " + args[i]);
+					Util.errPrintln("Use option --help to see a long list of options.");
 						System.exit(-1);
 					}
 				}
@@ -548,7 +549,7 @@ public class FrontEnd {
 		//オプションの正規化
 		if (Env.ndMode != Env.ND_MODE_D) {
 			if (Env.fInterpret) {
-				System.err.println("Non Deterministic execution is not supported in interpreted mode");
+				Util.errPrintln("Non Deterministic execution is not supported in interpreted mode");
 				System.exit(-1);
 			}
 			if (Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS)
@@ -562,7 +563,7 @@ public class FrontEnd {
 		
 		if(Env.fCGI) {
 			System.setErr(System.out);
-			System.out.println("Content-type: text/html\n");
+			Util.println("Content-type: text/html\n");
 		}
 		
 		//start LMNtalDaemon
@@ -628,7 +629,7 @@ public class FrontEnd {
 			}
 		} catch(FileNotFoundException e) {
 			// e.printStackTrace();
-			System.out.println(e.getMessage());
+			Util.println(e.getMessage());
 			System.exit(-1);
 		} catch(SecurityException e) {
 			e.printStackTrace();
@@ -894,7 +895,7 @@ public class FrontEnd {
 //					System.out.println(a);
 				}
 			}
-			System.out.println(a);
+			Util.println(a);
 			return new StringReader(a);
 		} catch (Exception e) {
 			e.printStackTrace();

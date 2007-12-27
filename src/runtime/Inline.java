@@ -67,10 +67,10 @@ public class Inline {
 	 * InlineUnit の名前とクラスファイルの組を出力する。
 	 */
 	public static void showInlineList() {
-		System.out.println("Inline");
+		Util.println("Inline");
 		Iterator it = inlineSet.keySet().iterator();
 		while (it.hasNext()) {
-			System.out.println(Util.quoteString((String)it.next(), '"'));
+			Util.println(Util.quoteString((String)it.next(), '"'));
 		}
 	}
 	
@@ -88,7 +88,7 @@ public class Inline {
 				cp.waitFor();
 				Env.d("Compile result :  "+cp.exitValue());
 				if(cp.exitValue()==1) {
-					System.err.println("Failed in compiling.");
+					Util.errPrintln("Failed in compiling.");
 					//出力が冗長になるのでコメントアウトしました．2006.07.05 inui
 //					System.err.println("Failed in compiling. Commandline was :");
 //					System.err.println(compileCommand);
@@ -193,7 +193,7 @@ public class Inline {
 				cp = Runtime.getRuntime().exec(cmd);
 			}
 		} catch (java.io.IOException e) {
-			System.err.println("\n*** Compile failed. javac not found on PATH. javac is necessary for compiling inline code. ***\n");
+			Util.errPrintln("\n*** Compile failed. javac not found on PATH. javac is necessary for compiling inline code. ***\n");
 			Env.d(e);
 		}
 	}

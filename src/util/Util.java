@@ -13,6 +13,7 @@ import runtime.IntegerFunctor;
 import runtime.Link;
 import runtime.StringFunctor;
 import runtime.SymbolFunctor;
+import unyo.Mediator;
 
 /**
  * @author mizuno
@@ -25,6 +26,42 @@ abstract public class Util {
 	public static void systemError(String msg) {
 		System.err.println(msg);
 		System.exit(-1);
+	}
+	
+	public static void errPrintln(String msg){
+		if(Env.fUNYO){
+			Mediator.errPrintln(msg);
+			return;
+		}
+		System.err.println(msg);
+	}
+	
+	public static void errPrintln(Object msg){
+		errPrintln(msg.toString());
+	}
+	
+	public static void println(String msg){
+		if(Env.fUNYO){
+			Mediator.println(msg);
+			return;
+		}
+		System.out.println(msg);
+	}
+	
+	public static void println(Object msg){
+		println(msg.toString());
+	}
+	
+	public static void print(String msg){
+		if(Env.fUNYO){
+			Mediator.print(msg);
+			return;
+		}
+		System.out.print(msg);
+	}
+	
+	public static void print(Object msg){
+		print(msg.toString());
 	}
 	
 	/**

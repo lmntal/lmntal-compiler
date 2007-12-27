@@ -72,7 +72,7 @@ public class Translator {
 
 		File publicDir = new File(publicDirName);
 		if (!publicDir.exists() || !publicDir.isDirectory()) {
-			System.err.println(publicDirName+" directory does not exists. (" + publicDir.getCanonicalPath() + ")");
+			Util.errPrintln(publicDirName+" directory does not exists. (" + publicDir.getCanonicalPath() + ")");
 			System.exit(1);
 		}
 		File outDir = new File(baseDirName);
@@ -97,7 +97,7 @@ public class Translator {
 			Inline.inlineSet.clear();
 			SystemRulesets.clear();
 			l.set(0, publicDirName+"/" + files[i]);
-			System.out.println("processing " + l.get(0));
+			Util.println("processing " + l.get(0));
 			count++;
 			FrontEnd.run(l);
 		}
@@ -125,11 +125,11 @@ public class Translator {
 			Inline.inlineSet.clear();
 			SystemRulesets.clear();
 			l.set(0, "src/" + files[i]);
-			System.out.println("processing " + l.get(0));
+			Util.println("processing " + l.get(0));
 			count++;
 			FrontEnd.run(l);
 		}
-		System.out.println("success : " + success + ", failure : " + (count - success));
+		Util.println("success : " + success + ", failure : " + (count - success));
 	}
 	
 	//////////////////////////////////////////////////////////////////

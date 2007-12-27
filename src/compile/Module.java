@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
+import util.Util;
 
 import compile.parser.LMNParser;
 import compile.structure.Atom;
@@ -146,7 +147,7 @@ public class Module {
 	public static void showModuleList() {
 		if (memNameTable.size() == 0) return;
 		
-		System.out.println("Module");
+		Util.println("Module");
 		Iterator it = memNameTable.keySet().iterator();
 		while (it.hasNext()) {
 			String name = (String)it.next();
@@ -155,16 +156,16 @@ public class Module {
 			name = name.replaceAll("'", "\\\\'");
 			name = name.replaceAll("\r", "\\\\r");
 			name = name.replaceAll("\n", "\\\\n");
-			System.out.print("'" + name + "'");
-			System.out.print(" {");
+			Util.print("'" + name + "'");
+			Util.print(" {");
 			if (mem.rulesets.size() > 0) {
 				Iterator it2 = mem.rulesets.iterator();
-				System.out.print(it2.next());
+				Util.print(it2.next());
 				while (it2.hasNext()) {
 					System.out.print(", " + it2.next());
 				}
 			}
-			System.out.println("}");
+			Util.println("}");
 		}
 	}
 }

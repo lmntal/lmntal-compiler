@@ -23,6 +23,7 @@ import runtime.IntegerFunctor;
 import runtime.Membrane;
 import runtime.StringFunctor;
 import runtime.SymbolFunctor;
+import util.Util;
 
 public class LMNtalWindow extends JFrame{
 	final static
@@ -239,7 +240,7 @@ public class LMNtalWindow extends JFrame{
 					dump = dump.replaceAll("\\}", "\\}\n");
 					dump = dump.replaceAll("\\{", "\n\\{");
 					dump = dump.substring(1);
-					System.out.println(dump);
+					Util.println(dump);
 					System.exit(0);
 				}
 			}

@@ -2,7 +2,6 @@ package gui;
 
 import gui.model.LinkSet;
 import gui.model.Node;
-import gui.model.forces.AttractionForce;
 import gui.model.forces.NodeFunction;
 import gui.view.CommonView;
 import gui.view.LinkView;
@@ -41,6 +40,7 @@ import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
+import util.Util;
 
 final
 public class GraphPanel extends JPanel {
@@ -719,15 +719,15 @@ public class GraphPanel extends JPanel {
 				tmpRootNode_ == node)
 		{
 			if(null != tmpRootNode_){
-				System.out.println("false");
+				Util.println("false");
 				tmpRootNode_.setRoot(false);
 				tmpRootNode_ = null;
 			}
-			System.out.println("true");
+			Util.println("true");
 			rootNode_.setRoot(true);
 			return;
 		}
-		System.out.println(node.getObject());
+		Util.println(node.getObject());
 		node.setRoot(true);
 		tmpRootNode_ = node;
 		rootNode_.setRoot(false);

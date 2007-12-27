@@ -81,21 +81,21 @@ public class TranslatorGenerator {
 				break;
 			String trimed = line.trim();
 			if (trimed.startsWith("//")) {
-				System.out.println(line);
+				Util.println(line);
 			} else if (trimed.startsWith("case")) {
-				System.out.println(line);
+				Util.println(line);
 			} else if (trimed.startsWith("break;")) {
-				System.out.println(line);
+				Util.println(line);
 			} else if (trimed.startsWith("default:")) {
 				break;
 			} else if (trimed.equals("if (interpret(insts, pc))")) {
 				String line2 = reader.readLine();
 				if (line2.trim().equals("return true;")) {
-					System.out.println("\t\t\t\t\ttranslate(it, tabs, iteratorNo, varnum);"); //後で手動で修正
+					Util.println("\t\t\t\t\ttranslate(it, tabs, iteratorNo, varnum);"); //後で手動で修正
 				} else {
 					//後で手動で修正
-					System.out.println("**" + line);
-					System.out.println("**" + line2);
+					Util.println("**" + line);
+					Util.println("**" + line2);
 				}
 			} else if (trimed.startsWith("return false;")) {
 			} else if (!trimed.equals("")) {
@@ -128,7 +128,7 @@ public class TranslatorGenerator {
 					trimed = data.trim();
 					int pos = trimed.indexOf(',');
 					int pos2 = trimed.lastIndexOf(')');
-					System.out.println("\t\t\t\t\twriter.write(tabs + \"var" + trimed.substring(9, pos)
+					Util.println("\t\t\t\t\twriter.write(tabs + \"var" + trimed.substring(9, pos)
 							+ " = " + trimed.substring(pos+1, pos2) + ";\\n\");");
 					continue;
 				}
@@ -138,25 +138,25 @@ public class TranslatorGenerator {
 						String line2 = reader.readLine();
 						if (line2.trim().equals("return false;")) {
 							data = "if (!(" + data.substring(pos, data.lastIndexOf(')')) + ")) {";
-							System.out.println("\t\t\t\t\twriter.write(tabs + \"" + data + "\\n\");");
-							System.out.println("\t\t\t\t\ttranslate(it, tabs + \"\t\", iteratorNo, varnum);");
-							System.out.println("\t\t\t\t\twriter.write(tabs + \"}\\n\");");
+							Util.println("\t\t\t\t\twriter.write(tabs + \"" + data + "\\n\");");
+							Util.println("\t\t\t\t\ttranslate(it, tabs + \"\t\", iteratorNo, varnum);");
+							Util.println("\t\t\t\t\twriter.write(tabs + \"}\\n\");");
 						} else {
 							//後で手動で修正
-							System.out.println("**" + line);
-							System.out.println("**" + line2);
+							Util.println("**" + line);
+							Util.println("**" + line2);
 						}
 						continue;
 					} else if (data.endsWith("return false;")) {
 						int pos2 = data.lastIndexOf(')');
 						data = "if (!(" + data.substring(pos, pos2) + ")) {";
-						System.out.println("\t\t\t\t\twriter.write(tabs + \"" + data + "\\n\");");
-						System.out.println("\t\t\t\t\ttranslate(it, tabs + \"\t\", iteratorNo, varnum);");
-						System.out.println("\t\t\t\t\twriter.write(tabs + \"}\\n\");");
+						Util.println("\t\t\t\t\twriter.write(tabs + \"" + data + "\\n\");");
+						Util.println("\t\t\t\t\ttranslate(it, tabs + \"\t\", iteratorNo, varnum);");
+						Util.println("\t\t\t\t\twriter.write(tabs + \"}\\n\");");
 						continue;
 					}
 				}
-				System.out.println("\t\t\t\t\twriter.write(tabs + \"" + data + "\\n\");");
+				Util.println("\t\t\t\t\twriter.write(tabs + \"" + data + "\\n\");");
 			}
 		}
 	}

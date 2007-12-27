@@ -5,6 +5,7 @@ package compile;
 import java.util.ArrayList;
 import java.util.Iterator;
 import runtime.Env;
+import util.Util;
 
 class RuleConverter {
 	private String[] name, head, guard, body, submems;
@@ -124,7 +125,7 @@ class RuleConverter {
 			 			if(body[mnum].indexOf("thread(THD",i+1) == -1)
 			 				reductANY2(i, j, mnum);
 			 		}else{
-				 			System.out.println("error");
+				 			Util.println("error");
 			 		}
 		 		}
 		 	}
@@ -149,7 +150,7 @@ class RuleConverter {
 	 				name[k] += "_" + k;
 	 			lst.add("("+toRule(name[k], head[k],guard[k],body[k])+")");
 	 			if(Env.dumpConvertedRules)
-	 				System.out.println(toRule(name[k], head[k],guard[k],body[k]));
+	 				Util.println(toRule(name[k], head[k],guard[k],body[k]));
 //	 		}
 	 	}
 	 	return lst.iterator();
