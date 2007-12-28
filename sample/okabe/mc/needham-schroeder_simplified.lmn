@@ -1,0 +1,84 @@
+/*
+ * simplified Needham-Schroeder
+ * 2007/12/27(Thu) by okabe
+ *
+ * A->B : Na
+ * B->A : Na,Nb
+ * A->B : Nb
+ *
+ * @see
+ *   I. Cervesato, N.A. Durgin, P.D. Lincoln, J.C. Mitchell, A. Scedrov.
+ *   A Meta-notation for Protocol Analysis, 1999
+ */
+
+% system rule
+t0_init{
+
+initiator(alice,bob), responder(bob).
+snd(5), gen(1).
+
+% initiator role
+i1@@
+initiator(A,B) :- unary(A), unary(B) |
+  n([n(NA1)]), l1(A,n(NA2)),
+  nonce{'+'(NA1), '+'(NA2)}.
+i2@@
+n([n(NA1),n(NB1)]), l1(A,n(NA2)), nonce{'+'(NA1),'+'(NA2),$na}, nonce{'+'(NB1),$nb} :- unary(A) |
+  n([n(NB2)]), l2(A,n(NA3),n(NB3)),
+  nonce{'+'(NA3),$na}, nonce{'+'(NB2),'+'(NB3),$nb}.
+
+% responder role
+r1@@
+responder(B), n([n(NA1)]), nonce{'+'(NA1),$na} :- unary(B) |
+  n([n(NA2), n(NB1)]), l1(B,n(NA3),n(NB2)),
+  nonce{'+'(NA2),'+'(NA3),$na}, nonce{'+'(NB1),'+'(NB2)}.
+r2@@
+n([n(NB1)]), l1(B,n(NA1),n(NB2)), nonce{'+'(NA1),$na}, nonce{'+'(NB1),'+'(NB2),$nb} :- unary(B) |
+  l2(B,n(NA2),n(NB3)),
+  nonce{'+'(NA2),$na}, nonce{'+'(NB3),$nb}.
+
+% intruder role
+rec@@
+n([X]) :- m([X]).
+rec@@
+n([X,Y]) :- m([X]), m([Y]).
+
+snd@@
+snd(N1), m([n(X)]), nonce{'+'(X),$n} :- N1>0, N2=N1-1 |
+  snd(N2), n([n(X1)]), m([n(X2)]), nonce{'+'(X1),'+'(X2),$n}.
+  /*
+snd@@
+snd(N1), m([n(X)]), m([n(Y)]), nonce{'+'(X),$nx}, nonce{'+'(Y),$ny} :- N1>0, N2=N1-1 |
+  snd(N2), n([n(X1),n(Y1)]), m([n(X2)]), m([n(Y2)]), nonce{'+'(X1),'+'(X2),$nx}, nonce{'+'(Y1),'+'(Y2),$ny}.
+  */
+
+gen@@
+gen(N1) :- N1>0, N2=N1-1 | gen(N2), m([n(N)]), nonce{'+'(N)}.
+
+}.
+
+% property rule
+ltl_1@@
+t0_init{$p,@p} :- t0_init{$p,@p}.
+ltl_2@@
+t0_init{m(NI1),l2(B,NI2,NB1),nonce{'+'(NI1),'+'(NI2),$n},$p,@p} :-
+  accept_all_end{mm(NI1),l2(B,NI2,NB1),nonce{'+'(NI1),'+'(NI2),$n},$p,@p}.
+
+/* ltl2ba output (never claim)
+> ~/workspace/mc/ltl2ba-1.0/ltl2ba -f '!([]!(p))'
+never {
+T0_init:
+        if
+        :: (1) -> goto T0_init
+        :: (p) -> goto accept_all
+        fi;
+accept_all:
+        skip
+}
+*/
+
+/* literal definition
+p@@
+{ m(NI1),l2(B,NI2,NB1),nonce{'+'(NI1),'+'(NI2),$n}, $p, @p } :-
+  { m(NI1),l2(B,NI2,NB1),nonce{'+'(NI1),'+'(NI2),$n}, $p, @p }.
+*/
