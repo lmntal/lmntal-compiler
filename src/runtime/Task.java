@@ -520,7 +520,7 @@ public class Task implements Runnable {
 	 */
 	public void nondeterministicExec(Membrane memExec2, HashMap<AtomSet,Membrane> memMap, ArrayList<Membrane> newMems) {
 		Membrane memExec = memExec2.getParent();
-		Membrane memGraph = memExec.getParent();
+		Membrane memGraph = memExec.getParent(); // リダクショングラフが生成される膜
 		states.clear();
 		exec(memExec2, true);
 		//それぞれ適用した結果を作成
@@ -529,9 +529,11 @@ public class Task implements Runnable {
 			//複製
 			Membrane memResult = memGraph.newMem();
 			Membrane memResult2 = memResult.newMem(Membrane.KIND_ND);
-			Map atomMap = memResult2.copyCellsFrom(memExec2);
+			Map atomMap = memResult2.copyCellsFrom(memExec2); // 帰り値はコピー元のアトム->コピー先のアトムというMap
 			memResult2.copyRulesFrom(memExec2);
 			//適用
+			// memResult2: 複製で作成された膜
+			// memExec2:   複製元
 			String name = react(memResult2, it.next(), memExec2, atomMap);
 			AtomSet atoms = memResult2.getAtoms();
 			atoms.freeze();
@@ -575,9 +577,9 @@ public class Task implements Runnable {
 	 */
 	void nondeterministicExec() {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		HashMap idMap = new HashMap();
+		HashMap<AtomSet, Integer> idMap = new HashMap<AtomSet, Integer>();
 		int nextId = 0;
-		ArrayList st = new ArrayList();
+		ArrayList<Membrane> st = new ArrayList<Membrane>();
 		st.add(getRoot());
 		AtomSet atoms = getRoot().getAtoms();
 		atoms.freeze();
@@ -586,7 +588,7 @@ public class Task implements Runnable {
 
 		try {
 			while (st.size() > 0) {
-				Membrane mem = (Membrane)st.remove(st.size() - 1);
+				Membrane mem = st.remove(st.size() - 1);
 				//ルール適用の全可能性を検査
 				if (mem != getRoot())
 					memStack.push(mem);
