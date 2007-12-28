@@ -5,64 +5,71 @@
  * 変数（ノンス）を膜への参照で表す
  * i.e. fresh data declaration (existential quantification) = membrane generation
  *
- * @see Iliano Cervesato. Typed MSR: Syntax and Examples, 2001
- * @see Iliano Cervesato. Typed Multiset Rewriting Specifications of Security Protocols, 2001
+ * Needham-Schroeder Authentication Protocol
+ *   @see Iliano Cervesato. Typed MSR: Syntax and Examples, 2001
+ * Dolev-Yao Intruder
+ *   @see Iliano Cervesato. Typed Multiset Rewriting Specifications of Security Protocols, 2001
  */
 
 /* 
- * atomic messages
- *   p(P) - principal
- *   k(K) - key
- *   n(N) - nonce
+ * atomic messages: a ::=
+ *   A=p(P)     - principal
+ *   A=k(T, K)  - key
+ *   A=n(N)     - nonce
+ *   A=t(T)     - timestamp
+ *   A=m(M)     - raw datum
  */
 
 /*
- * messages(terms)
- *   msg(M1,...,Mn) - concatenation
- *   asym(K,T)      - asymmetric-key encryption
+ * messages: t ::=
+ *   T=[a]          - atomic messages
+ *   T=X            - variables
+ *   T=[T1,T2]      - concatenation
+ *   T=[symm(K,T)]  - symmetric-key encryption
+ *   T=[asym(K,T)]  - asymmetric-key encryption
+ *   T=[sign(K,T)]  - digital signature
  */
 
 /*
- * message predicetes 
- *   n(N1,...,Nn) - network predicate
+ * メッセージ＝リストとすることでconcatenation=appendを実現する
+ * message predicetes:
+ *   n(N)         - network predicate
  *   l(L1,...,Ln) - role state predicate
+ *   m(M1,...,Mn) - memory predicate
  */
 
-% example: simplified Needham-Schoeder authentication protocol
+% example: simplified Needham-Schoeder Authentication Protocol
 initiator(a,b), responder(b).
 
 % initiator role
 i1@@
 initiator(A,B) :- unary(A), unary(B) |
-  n(asym(k(B), msg(n(NA1),p(A)))),
-  l(p(A),p(B),k(B),n(NA2)),
+  n([asym(k(pubK,B), [n(NA1),p(A)])]),
+  l(p(A),p(B),k(pubK,B),n(NA2)),
   nonce{'+'(NA1), '+'(NA2)}.
 
 i2@@
-n(asym(k(A1), msg(n(NA1),n(NB1)))), l(p(A2),p(B1),k(B2),n(NA2)),
+n([asym(k(pubK,A1), [n(NA1),n(NB1)])]), l(p(A2),p(B1),k(pubK,B2),n(NA2)),
   nonce{'+'(NA1),'+'(NA2),$na}, nonce{'+'(NB1),$nb} :-
   A1==A2, B1==B2 |
-  n(asym(k(B1), msg(n(NB2)))),
-  n(asym(k(A1), msg(n(NA1),n(NB1)))), // replication
-  nonce{'+'(NA1),$na},
-  nonce{'+'(NB1),'+'(NB2),$nb}.
+  n([asym(k(pubK,B1), [n(NB2)])]),
+  nonce{$na},
+  nonce{'+'(NB2),$nb}.
 
 % responder role
 r1@@
-responder(B1), n(asym(k(B2), msg(n(NA1),p(A)))), nonce{'+'(NA1),$p} :-
+responder(B1), n([asym(k(pubK,B2), [n(NA1),p(A)])]), nonce{'+'(NA1),$p} :-
   unary(A), B1==B2 |
-  n(asym(k(A), msg(n(NA2),n(NB1)))),
-  l(B1,k(B1),k(B1),p(A),n(NA3),k(A),n(NB2)),
-  n(asym(k(B2), msg(n(NA1),p(A)))), // replication
-  nonce{'+'(NA1),'+'(NA2),'+'(NA3),$p},
+  n([asym(k(pubK,A), [n(NA2),n(NB1)])]),
+  l(B1,k(pubK,B1),k(privK,B1),p(A),n(NA3),k(pubK,A),n(NB2)),
+  nonce{'+'(NA2),'+'(NA3),$p},
   nonce{'+'(NB1),'+'(NB2)}.
 
 r2@@
-n(asym(k(B1), msg(n(NB1)))), l(B2,k(B3),k(B4),p(A1),n(NA1),k(A2),n(NB2)),
+n([asym(k(pubK,B1), [n(NB1)])]), l(B2,k(pubK,B3),k(privK,B4),p(A1),n(NA1),k(pubK,A2),n(NB2)),
   nonce{'+'(NB1),'+'(NB2),$nb}, nonce{'+'(NA1),$na} :-
   A1==A2, B1==B2, B2==B3, B3==B4 |
-  n(asym(k(B1), msg(n(NB1)))),
-  nonce{'+'(NB1),$nb}, nonce{$na}.
+  nonce{$nb}, nonce{$na}.
 
 % gc
 gc@@
