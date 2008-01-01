@@ -958,6 +958,17 @@ class RependenceGraph {
 		uf.addAll(atoms);
 		uf.addAll(mems);
 	}
+	public void connect(Object x, Object y){
+		uf.union(x,y);
+	}
+	
+	public void reachable(Object x, Object y){
+		uf.areUnified(x, y);
+	}
+	
+	public String toString(){
+		return uf.toString();
+	}
 }
 
 class UnionFind {
