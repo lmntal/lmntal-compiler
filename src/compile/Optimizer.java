@@ -87,7 +87,7 @@ public class Optimizer {
 			rule.guardLabel = null;
 			rule.guard = null;
 		}
-		if(Env.slimcode)
+		if(Env.findatom2)
 			optimize(rule.tempMatch, rule.body);
 		else
 			optimize(rule.memMatch, rule.body);
@@ -95,7 +95,7 @@ public class Optimizer {
 			guardMove(rule.atomMatch);
 			guardMove(rule.memMatch);
 		}
-		if(Env.slimcode)return ;
+		if(Env.findatom2)return ;
 		if(fGrouping && !fMerging) {
 			Grouping g = new Grouping();
 			g.grouping(rule.atomMatch, rule.memMatch);

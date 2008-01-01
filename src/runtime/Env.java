@@ -43,6 +43,9 @@ public final class Env {
 	/** SLIM用の中間命令列を出力するモード。 */
 	public static boolean slimcode = false;
 	
+	/** 履歴つきfindatomを含む中間命令列を出力するモード。 */
+	public static boolean findatom2 = false;
+
 	/** 膜主導テストオンリーのモード。 */
 	public static boolean memtestonly = false;
 

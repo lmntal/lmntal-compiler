@@ -105,7 +105,7 @@ public class HeadCompiler {
 		uf.union(4,5);
 		uf.union(6,7);
 		uf.union(4,6);
-		Util.println(uf.allKnownElements());
+//		Util.println(uf.allKnownElements());
 //		for(int i=1;i<10;i++)
 //			Util.println(i + " = " + uf.size(i));
 	}
@@ -531,7 +531,7 @@ public class HeadCompiler {
 			while (it2.hasNext()) {
 				Atom atom = (Atom)it2.next();
 				if (!isAtomLoaded(atom) && atom.functor.isActive()) {
-					if(Env.slimcode){
+					if(Env.findatom2){
 						compileMembraneForSlimcode(mem, list);
 						compileMembrane(mem, list);
 					} else {
@@ -545,7 +545,7 @@ public class HeadCompiler {
 		it = newmemlist.iterator();
 		while (it.hasNext()) {
 			Membrane mem =(Membrane)it.next();
-			if(Env.slimcode){
+			if(Env.findatom2){
 				compileMembraneForSlimcode(mem, list);
 				compileMembrane(mem, list);
 			} else {
@@ -710,7 +710,7 @@ public class HeadCompiler {
 					//				tmplabel.insts = ;
 					// 見つかったアトムを変数に取得する
 					int atompath = varcount++;
-					if(!Env.slimcode){
+					if(!Env.findatom2){
 	//					insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 						subinst.insts.add(Instruction.findatom2(atompath, thismempath, findatomcount, atom.functor));
 						findatomcount++;
@@ -789,7 +789,7 @@ public class HeadCompiler {
 		
 				// 子膜を変数に取得する
 				submempath = varcount++;
-				if(Env.slimcode){
+				if(Env.findatom2){
 //					insts.add(Instruction.anymem2(submempath, thismempath, submem.kind, anymemcount, submem.name));
 					insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
 					anymemcount++;
@@ -912,7 +912,7 @@ public class HeadCompiler {
 		it = eqs.iterator();
 		while (it.hasNext()) {
 			ProcessContextEquation eq = (ProcessContextEquation)it.next();
-			if(Env.slimcode){
+			if(Env.findatom2){
 				compileMembraneForSlimcode(eq.mem, list);
 				compileMembrane(eq.mem, list);
 			} else {

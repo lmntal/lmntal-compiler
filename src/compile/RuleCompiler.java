@@ -184,7 +184,7 @@ public class RuleCompiler {
 			} else {
 				// 膜主導
 				theRule.memMatchLabel = hc.matchLabel;
-				if(Env.slimcode){
+				if(Env.findatom2){
 					tempMatch = hc.tempmatch;
 					memMatch = hc.match;
 				} else {
@@ -193,7 +193,7 @@ public class RuleCompiler {
 				hc.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 				hc2.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
-			if(Env.slimcode){
+			if(Env.findatom2){
 				hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel);
 				hc2.compileMembrane(rs.leftMem, hc.tempLabel);
 			} else {
@@ -212,7 +212,7 @@ public class RuleCompiler {
 				}
 				hc.switchToUntypedCompilation();
 				hc.setContLabel(contLabel);
-				if(Env.slimcode){
+				if(Env.findatom2){
 					hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel);
 					hc2.compileMembrane(rs.leftMem, hc.tempLabel);
 				} else {

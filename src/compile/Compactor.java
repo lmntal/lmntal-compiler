@@ -29,7 +29,7 @@ public class Compactor {
 				compactInstructionList(((InstructionList)inst.getArg1()).insts);
 			else continue;
 		}
-		if(Env.slimcode)
+		if(Env.findatom2)
 			compactInsts(rule.memMatch);
 		else
 			compactInstructionList(rule.memMatch);
