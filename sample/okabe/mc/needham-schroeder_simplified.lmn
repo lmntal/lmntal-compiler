@@ -43,10 +43,10 @@ n([X]) :- m([X]).
 rec2@@
 n([X,Y]) :- m([X]), m([Y]).
 
-snd1@
+snd1@@
 snd(N1), m([n(X)]), nonce{'+'(X),$n} :- N1>0, N2=N1-1 |
   snd(N2), n([n(X1)]), m([n(X2)]), nonce{'+'(X1),'+'(X2),$n}.
-snd2@
+snd2@@
 snd(N1), m([n(X)]), m([n(Y)]), nonce{'+'(X),$nx}, nonce{'+'(Y),$ny} :- N1>0, N2=N1-1 |
   snd(N2), n([n(X1),n(Y1)]), m([n(X2)]), m([n(Y2)]), nonce{'+'(X1),'+'(X2),$nx}, nonce{'+'(Y1),'+'(Y2),$ny}.
 
