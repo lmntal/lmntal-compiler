@@ -15,7 +15,7 @@
 t0_init{
 
 initiator(alice,bob), responder(bob).
-snd(5), gen(1).
+snd(2), gen(1).
 
 % initiator role
 i1@@
@@ -38,19 +38,17 @@ n([n(NB1)]), l1(B,n(NA1),n(NB2)), nonce{'+'(NA1),$na}, nonce{'+'(NB1),'+'(NB2),$
   nonce{'+'(NA2),$na}, nonce{'+'(NB3),$nb}.
 
 % intruder role
-rec@@
+rec1@@
 n([X]) :- m([X]).
-rec@@
+rec2@@
 n([X,Y]) :- m([X]), m([Y]).
 
-snd@@
+snd1@
 snd(N1), m([n(X)]), nonce{'+'(X),$n} :- N1>0, N2=N1-1 |
   snd(N2), n([n(X1)]), m([n(X2)]), nonce{'+'(X1),'+'(X2),$n}.
-  /*
-snd@@
+snd2@
 snd(N1), m([n(X)]), m([n(Y)]), nonce{'+'(X),$nx}, nonce{'+'(Y),$ny} :- N1>0, N2=N1-1 |
   snd(N2), n([n(X1),n(Y1)]), m([n(X2)]), m([n(Y2)]), nonce{'+'(X1),'+'(X2),$nx}, nonce{'+'(Y1),'+'(Y2),$ny}.
-  */
 
 gen@@
 gen(N1) :- N1>0, N2=N1-1 | gen(N2), m([n(N)]), nonce{'+'(N)}.
@@ -61,8 +59,8 @@ gen(N1) :- N1>0, N2=N1-1 | gen(N2), m([n(N)]), nonce{'+'(N)}.
 ltl_1@@
 t0_init{$p,@p} :- t0_init{$p,@p}.
 ltl_2@@
-t0_init{m(NI1),l2(B,NI2,NB1),nonce{'+'(NI1),'+'(NI2),$n},$p,@p} :-
-  accept_all_end{mm(NI1),l2(B,NI2,NB1),nonce{'+'(NI1),'+'(NI2),$n},$p,@p}.
+t0_init{ m([n(NI1)]),m([n(NB1)]),l2(B,NI2,NB2),nonce{'+'(NI1),'+'(NI2),$n1},nonce{'+'(NB1),'+'(NB2),$n2}, $p, @p } :-
+  accept_all_end{ m([n(NI1)]),m([n(NB1)]),l2(B,NI2,NB2),nonce{'+'(NI1),'+'(NI2),$n1},nonce{'+'(NB1),'+'(NB2),$n2}, $p, @p }.
 
 /* ltl2ba output (never claim)
 > ~/workspace/mc/ltl2ba-1.0/ltl2ba -f '!([]!(p))'
@@ -79,6 +77,6 @@ accept_all:
 
 /* literal definition
 p@@
-{ m(NI1),l2(B,NI2,NB1),nonce{'+'(NI1),'+'(NI2),$n}, $p, @p } :-
-  { m(NI1),l2(B,NI2,NB1),nonce{'+'(NI1),'+'(NI2),$n}, $p, @p }.
+{ m([n(NI1)]),m([n(NB1)]),l2(B,NI2,NB2),nonce{'+'(NI1),'+'(NI2),$n1},nonce{'+'(NB1),'+'(NB2),$n2}, $p, @p } :-
+  { m([n(NI1)]),m([n(NB1)]),l2(B,NI2,NB2),nonce{'+'(NI1),'+'(NI2),$n1},nonce{'+'(NB1),'+'(NB2),$n2}, $p, @p }.
 */
