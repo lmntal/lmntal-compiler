@@ -846,7 +846,14 @@ public class HeadCompiler {
 					HashMap newmempaths = (HashMap)((HashMap)mempaths).clone();
 					HashSet newvisited = (HashSet)visited.clone();
 					HashSet newmemVisited = (HashSet)memVisited.clone();
-					searchLinkedGroup(atom, qatoms, atom.mem);
+					for(int listi2 = listi; listi2<atommems.size();listi2++){
+						if(atommems.get(listi2) instanceof Membrane)
+							continue;
+						if(visited.contains((Atom)atommems.get(listi2)))
+							continue;
+						searchLinkedGroup((Atom)atommems.get(listi2), qatoms, atom.mem);
+					}
+//					searchLinkedGroup(atom, qatoms, atom.mem);
 					varcount = restvarcount;
 					Iterator it3 = qatoms.iterator();
 					groupinst = nextgroupinst;
@@ -869,6 +876,7 @@ public class HeadCompiler {
 						// 見つかったアトムを変数に取得する
 						int atompath = varcount++;
 						if(Env.findatom2 && rireki){
+//							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 							subinst.insts.add(Instruction.findatom2(atompath, thismempath, findatomcount, atom.functor));
 							findatomcount++;
 						} else
@@ -895,7 +903,7 @@ public class HeadCompiler {
 						//リンクの一括取得(RISC化) by mizuno
 						getLinks(atompath, atom.functor.getArity(), subinst.insts);
 						compileLinkedGroup(atom, subinst);
-						compileMembraneSecondTime(mem, subinst, atommems.subList(listi+1, atommems.size()), false);
+						compileMembraneSecondTime(mem, subinst, atommems, false);
 						List memActuals  = getMemActuals();
 						List atomActuals = getAtomActuals();
 						List varActuals  = getVarActuals();
@@ -960,7 +968,7 @@ public class HeadCompiler {
 				}
 				//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 				compileMembraneForSlimcode(submem, list, false);
-				compileMembraneSecondTime(mem, list, atommems.subList(listi+1, atommems.size()), false);
+				compileMembraneSecondTime(mem, list, atommems, false);
 				return ;
 			} else {
 				System.err.println("Undef Class occured");
