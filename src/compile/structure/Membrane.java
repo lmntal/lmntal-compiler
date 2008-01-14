@@ -67,6 +67,10 @@ public final class Membrane {
 	
 	////////////////////////////////////////////////////////////////
 
+	/** コンパイラ用データ構造。atomやmemをGROUP化されるべきものについて近くに配置する。 **/
+	public RependenceGraph rg = new RependenceGraph();
+	////////////////////////////////////////////////////////////////
+
 	/**
 	 * コンストラクタ
 	 * @param mem 親膜
@@ -222,4 +226,137 @@ public final class Membrane {
 		rulesets.addAll(m.rulesets);
 	}
 	
+	public void connect(Object x, Object y){
+//		System.out.println("connect "+x + "   " + y);
+		rg.connect(x, y);
+	}
+	
+	public void printfRG(){
+		System.out.println(rg.toString());
+	}
+	public void createRG() {
+		rg.addAll(atoms);
+		rg.addAll(mems);
+	}
+	
+	public Collection<LinkedList> allKnownElements() {
+		return rg.allKnownElements();
+	}
+}
+
+class RependenceGraph {
+	public List<Membrane> mems;
+	public List<Atomic> atoms;
+	public List atomandmems;
+	UnionFind uf;
+
+	RependenceGraph(){
+		atoms = new LinkedList();
+		mems = new LinkedList();
+		uf = new UnionFind();
+	}
+	RependenceGraph(List<Atomic> atoms, List<Membrane> mems){
+		this.atoms = atoms;
+		this.mems = mems;
+		uf = new UnionFind();
+		uf.addAll(atoms);
+		uf.addAll(mems);
+	}
+	public void addAll(List x){
+		uf.addAll(x);
+	}
+	public void connect(Object x, Object y){
+		uf.union(x,y);
+	}
+	
+	public void reachable(Object x, Object y){
+		uf.areUnified(x, y);
+	}
+	
+	public String toString(){
+		return uf.allKnownElements().toString();
+	}
+
+	public Collection<LinkedList> allKnownElements() {
+		return uf.allKnownElements();
+	}
+}
+
+class UnionFind {
+	private HashMap<Object, Object> lnk = new HashMap();
+	private HashMap<Object, Integer> lnkSiz = new HashMap();
+	private HashMap<Object, LinkedList> lists = new HashMap();
+
+	public	void union( Object x, Object y )
+		{
+			if(!lnkSiz.containsKey(x))
+				add(x);
+			if(!lnkSiz.containsKey(y))
+				add(y);
+			Object tx = find(x);
+			Object ty = find(y);
+			Object temp = link_repr(tx, ty);
+			LinkedList listx = lists.get(tx);
+			LinkedList listy = lists.get(ty);
+			if(temp == tx){
+				listx.addAll(listy);
+				lists.remove(ty);
+			} else if(temp == ty) {
+				listy.addAll(listx);
+				lists.remove(tx);
+			}
+		}
+	
+	public String toString(){
+		return lists.toString();
+	}
+
+	public	void add(Object x)
+		{
+			if(!lnkSiz.containsKey(x))
+			{
+				lnkSiz.put(x, 1);
+				LinkedList<Object> list = new LinkedList();
+				list.add(x);
+				lists.put(x, list);
+			}
+		}
+	public void addAll(Collection c){
+		Iterator it = c.iterator();
+		while(it.hasNext())
+			add(it.next());
+	}
+	
+	public boolean areUnified(Object x, Object y){
+		return find(x) == find(y);
+	}
+	
+	public Collection<LinkedList> allKnownElements(){
+		return lists.values();
+	}
+
+	private	Object find( Object x )
+		{
+			// ここでPath圧縮すると計算量が nlog(n) から n ack^-1(n) に
+			while(lnk.containsKey(x))
+				x = lnk.get(x);
+			return x;
+		}
+	
+	private	Object link_repr( Object x, Object y )
+		{
+			if( x == y )
+				return -1;
+	
+			// グループ化
+			if( lnkSiz.get(x) < lnkSiz.get(y) ) {
+				lnk.put(x, y);
+				lnkSiz.put(y, lnkSiz.get(y)+lnkSiz.get(x));
+				return y;
+			} else {
+				lnk.put(y,x);
+				lnkSiz.put(x, lnkSiz.get(x)+lnkSiz.get(y));
+				return x;
+			}
+		}
 }

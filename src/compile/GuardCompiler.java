@@ -16,6 +16,7 @@ import runtime.SymbolFunctor;
 import util.Util;
 
 import compile.structure.Atom;
+import compile.structure.Atomic;
 import compile.structure.ContextDef;
 import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
@@ -348,6 +349,8 @@ public class GuardCompiler extends HeadCompiler {
 							typedcxttypes.get(def2) == UNARY_ATOM_TYPE){
 						int atomid1 = loadUnaryAtom(def1);
 						int atomid2 = loadUnaryAtom(def2);
+						if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
+							connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 						match.add(new Instruction(Instruction.ISUNARY, atomid1));
 						match.add(new Instruction(Instruction.ISUNARY, atomid2));
 						int funcid1 = varcount++;
@@ -359,6 +362,8 @@ public class GuardCompiler extends HeadCompiler {
 					else{
 						checkGroundLink(def1);
 						checkGroundLink(def2);
+						if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
+							connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 						int linkid1 = loadGroundLink(def1);
 						int linkid2 = loadGroundLink(def2);
 //						match.add(new Instruction(Instruction.ISGROUND,linkid1));
@@ -372,6 +377,8 @@ public class GuardCompiler extends HeadCompiler {
 					if (!identifiedCxtdefs.contains(def2)) continue;
 					int atomid1 = loadUnaryAtom(def1);
 					int atomid2 = loadUnaryAtom(def2);
+					if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
+						connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 					if (!new Integer(ISSTRING).equals(typedcxtdatatypes.get(def2))) {
 						match.add(new Instruction(ISSTRING, atomid2));
 						typedcxtdatatypes.put(def2, new Integer(ISSTRING));
@@ -456,6 +463,8 @@ public class GuardCompiler extends HeadCompiler {
 //					Util.println("st");
 					int atomid1 = loadUnaryAtom(def1);
 					int atomid2 = loadUnaryAtom(def2);
+					if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
+						connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 //					Util.println("end");
 					if (desc[0] != 0 && !new Integer(desc[0]).equals(typedcxtdatatypes.get(def1))) {
 						match.add(new Instruction(desc[0], atomid1));
@@ -539,6 +548,8 @@ public class GuardCompiler extends HeadCompiler {
 			typedcxtdatatypes.put(def1,newdatatype);
 			typedcxtdatatypes.put(def2,newdatatype);
 		}
+		if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
+			connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 	}
 	
 	/** 型制約を廃棄する。エラー復帰用メソッド */
@@ -617,7 +628,6 @@ public class GuardCompiler extends HeadCompiler {
 			checkUnaryProcessContext(def);
 			LinkOccurrence srclink = def.lhsOcc.args[0].buddy;
 			atomid = varcount++;
-//			Util.println("loadUnaryAtom "+srclink.atom);
 			match.add(new Instruction(Instruction.DEREFATOM,
 				atomid, atomToPath(srclink.atom), srclink.pos));
 			typedcxtsrcs.put(def, new Integer(atomid));
@@ -699,8 +709,11 @@ public class GuardCompiler extends HeadCompiler {
 							if(ro == atom.args[i])
 								flgNotAdd = true;
 						}
-						if(!flgNotAdd)
+						if(!flgNotAdd){
 							match.add(new Instruction(Instruction.ADDTOLIST,srclinklistpath,paths[i]));
+							if(Env.findatom2 && def.lhsOcc!=null)
+								connectAtoms(def.lhsOcc.args[0].buddy.atom, atom.args[i].atom);
+						}
 					}
 				}
 //				memToLinkListPath.put(def.lhsOcc.mem,new Integer(srclinklistpath));
@@ -708,6 +721,7 @@ public class GuardCompiler extends HeadCompiler {
 //			else srclinklistpath = ((Integer)memToLinkListPath.get(def.lhsOcc.mem)).intValue();
 			int natom = varcount++;
 			match.add(new Instruction(Instruction.ISGROUND, natom, linkids, srclinklistpath));//,memToPath(def.lhsOcc.mem)));
+			rc.hasISGROUND = false;
 			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem,new HashMap());
 			((Map)memToGroundSizes.get(def.lhsOcc.mem)).put(def,new Integer(natom));
 		}
@@ -780,6 +794,55 @@ public class GuardCompiler extends HeadCompiler {
 	void error(String text) throws CompileException {
 		Env.error(text);
 		throw new CompileException("COMPILE ERROR");
+	}
+	
+	private void connectAtoms(Atomic a1, Atomic a2){
+		Membrane m1, m2;
+		m1 = a1.mem;
+		m2 = a2.mem;
+		if(m1==m2)
+			m1.connect(a1, a2);
+		else {
+			Membrane p1, p2, c1, c2;
+			p2 = m2.parent;
+			c2 = m2;
+			while(p2 !=null){
+				if(m1==p2){
+					m1.connect(a1, c2);
+					return ;
+				}
+				c2 = p2;
+				p2 = c2.parent;
+			}
+
+			p1 = m1.parent;
+			c1 = m1;
+			while(p1 !=null){
+				if(p1==m2){
+					m2.connect(c1, a2);
+					return ;
+				}
+				c1 = p1;
+				p1 = c1.parent;
+			}
+
+			p1 = m1.parent;
+			c1 = m1;
+			while(p1 !=null){
+				p2 = m2.parent;
+				c2 = m2;
+				while(p2 !=null){
+					if(p1==p2){
+						p1.connect(c1, c2);
+						return ;
+					}
+					c2 = p2;
+					p2 = c2.parent;
+				}
+				c1 = p1;
+				p1 = c1.parent;
+			}
+		}
 	}
 
 }

@@ -51,6 +51,8 @@ public class RuleCompiler {
 	public List<Instruction> body;
 	int varcount;			// 次の変数番号
 	
+	public boolean hasISGROUND = true;
+	
 	List<Atom> rhsatoms;
 	Map  rhsatompath;		// 右辺のアトム (Atomic) -> 変数番号 (Integer)
 	Map  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)	
@@ -118,6 +120,14 @@ public class RuleCompiler {
 		body = theRule.bodyLabel.insts;
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);		
 		
+		compile_l();
+		compile_g();
+		hc = new HeadCompiler();//rs.leftMem;
+		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
+		hc.firsttime = false;
+		theRule.guardLabel = new InstructionList();
+		guard = theRule.guardLabel.insts;
+		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);		
 		compile_l();
 		compile_g();
 		compile_r();
@@ -194,7 +204,7 @@ public class RuleCompiler {
 				hc2.mempaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
 			if(Env.findatom2){
-				hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel);
+				hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
 				hc2.compileMembrane(rs.leftMem, hc.tempLabel);
 			} else {
 				hc.compileMembrane(rs.leftMem, hc.matchLabel);
@@ -213,7 +223,7 @@ public class RuleCompiler {
 				hc.switchToUntypedCompilation();
 				hc.setContLabel(contLabel);
 				if(Env.findatom2){
-					hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel);
+					hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
 					hc2.compileMembrane(rs.leftMem, hc.tempLabel);
 				} else {
 					hc.compileMembrane(rs.leftMem, hc.matchLabel);
