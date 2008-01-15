@@ -858,6 +858,8 @@ public class HeadCompiler {
 							continue;
 						if(visited.contains((Atom)atommems.get(listi2)))
 							continue;
+						if(!((Atom)atommems.get(listi2)).functor.isActive())
+							continue;
 						searchLinkedGroup((Atom)atommems.get(listi2), qatoms, atom.mem);
 					}
 //					searchLinkedGroup(atom, qatoms, atom.mem);
@@ -867,6 +869,8 @@ public class HeadCompiler {
 					nextgroupinst = new InstructionList(list);
 					while(it3.hasNext()){
 						atom = (Atom)it3.next();
+//						if(!atom.functor.isActive())
+//							continue;
 						visited = newvisited;
 						memVisited = newmemVisited;
 						atompaths = newatompaths;
@@ -975,7 +979,7 @@ public class HeadCompiler {
 				}
 				//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 				compileMembraneForSlimcode(submem, list, false);
-				compileMembraneSecondTime(mem, list, atommems, false);
+				compileMembraneSecondTime(mem, list, atommems.subList(listi+1, atommems.size()), false);
 				return ;
 			} else {
 				System.err.println("Undef Class occured");
