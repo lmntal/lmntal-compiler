@@ -735,9 +735,9 @@ public class GuardCompiler extends HeadCompiler {
 	 */
 	private void checkUnaryProcessContext(ContextDef def) throws CompileException{
 		if(def.lhsOcc == null)
-			error("COMPILE ERROR: unary type process context must be occured in LHS");
+			error("COMPILE ERROR: unary type process context must occur in LHS");
 		else if(def.lhsOcc.args.length!=1)	
-			error("COMPILE ERROR: unary type process context must has exactly one argument : " + def.lhsOcc);
+			error("COMPILE ERROR: unary type process context must have exactly one argument : " + def.lhsOcc);
 	}
 	
 	

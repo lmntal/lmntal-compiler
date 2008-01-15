@@ -577,23 +577,7 @@ public class HeadCompiler {
 				insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 //				insts.add(Instruction.findatom2(atompath, thismempath, findatomcount, atom.functor));
 				// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
-				Membrane[] testmems = { mem };
-				if (proccxteqMap.containsKey(mem)) {
-					// $p等式トップレベルのアトムのときは、$pがヘッド出現する膜とも比較する
-					testmems = new Membrane[]{ mem,
-						((ProcessContextEquation)proccxteqMap.get(mem)).def.lhsOcc.mem };
-				}
-				for (int i = 0; i < testmems.length; i++) {
-					Iterator it2 = testmems[i].atoms.iterator();
-					while (it2.hasNext()) {
-						Atom otheratom = (Atom)it2.next();					
-						int other = atomToPath(otheratom);
-						if (other == UNBOUND) continue;
-						if (!otheratom.functor.equals(atom.functor)) continue;
-						//if (otheratom == atom) continue;
-						insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
-					}
-				}
+				emitNeqAtoms(mem, atom, atompath, insts);
 				atompaths.put(atom, new Integer(atompath));
 				//リンクの一括取得(RISC化) by mizuno
 				getLinks(atompath, atom.functor.getArity(), insts);
@@ -641,6 +625,29 @@ public class HeadCompiler {
 		}
 		if(varcount > maxvarcount)
 			maxvarcount = varcount;
+	}
+	/** すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する 
+	 * (n-kato 2008.01.15) TODO 誰かがこのメソッドを拡張または参考にしてガードunary等のコンパイルバグを修正する
+	 * テスト用プログラム-->   5($seven),7($five) :- $seven=$five+2 |. 5=7.
+	 */
+	public void emitNeqAtoms(Membrane mem, Atom atom, int atompath, List<Instruction> insts) {
+		Membrane[] testmems = { mem };
+		if (proccxteqMap.containsKey(mem)) {
+			// $p等式トップレベルのアトムのときは、$pがヘッド出現する膜とも比較する
+			testmems = new Membrane[]{ mem,
+				((ProcessContextEquation)proccxteqMap.get(mem)).def.lhsOcc.mem };
+		}
+		for (int i = 0; i < testmems.length; i++) {
+			Iterator it2 = testmems[i].atoms.iterator();
+			while (it2.hasNext()) {
+				Atom otheratom = (Atom)it2.next();					
+				int other = atomToPath(otheratom);
+				if (other == UNBOUND) continue;
+				if (!otheratom.functor.equals(atom.functor)) continue;
+				//if (otheratom == atom) continue;
+				insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
+			}
+		}
 	}
 	
 	HashSet satoms = new HashSet();

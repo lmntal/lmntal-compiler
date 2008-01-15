@@ -2022,6 +2022,13 @@ public class Instruction implements Cloneable, Serializable {
 		Iterator it = list.iterator();
 		while (it.hasNext()) {
 			Instruction inst = (Instruction)it.next();
+			if (inst.getKind() == RESETVARS || inst.getKind() == CHANGEVARS) {
+				// (n-kato 2008.01.15) TODO 誰かがこれを実装する↓
+				/* if (inst contains varnum) varnum = lookupNewVarnum(inst,varnum);
+				 * else return count;
+				 * continue;
+				 */
+			}
 			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
 			int i = 0;
 			if (argtype.output) i++;
@@ -2034,13 +2041,13 @@ public class Instruction implements Cloneable, Serializable {
 						break;
 					case ARG_LABEL:
 						if (inst.getKind() == JUMP) break; // JUMP命令のLABEL引数はただのラベルなので除外
-						count += getVarUseCount( ((InstructionList)inst.getArg1()).insts, varnum);
+						count += getVarUseCount( ((InstructionList)inst.getArg(i)).insts, varnum);
 						break;
 					case ARG_INSTS:
-						count += getVarUseCount( ((InstructionList)inst.getArg1()).insts, varnum);
+						count += getVarUseCount( ((InstructionList)inst.getArg(i)).insts, varnum);
 						break;
 					case ARG_VARS:
-						if (inst.getKind() == RESETVARS) break; // RESETVARS命令のVARS引数はただのラベルなので除外
+						if (inst.getKind() == RESETVARS) break; // <strike>RESETVARS命令のVARS引数はただのラベルなので除外</strike>
 						Iterator it2 = ((List)inst.data.get(i)).iterator();
 						while (it2.hasNext()) {
 							if (it2.next().equals(varnum)) count++;
@@ -2179,12 +2186,13 @@ public class Instruction implements Cloneable, Serializable {
 				// 追加。hara
 				if(! f.getType().isPrimitive()) continue;
 				if (f.getName().startsWith("ARG_")) continue; //added by mizuno
+				if (f.getName().equals("depth")) continue; //added by n-kato, todo make local
 				int kind = f.getInt(inst);
 				if (/*kind != LOCAL
 				 && okabe*/f.getType().getName().equals("int") && Modifier.isStatic(f.getModifiers())) {
 					Integer idobj = new Integer(kind);
 					if (instructionTable.containsKey(idobj)) {
-						Util.errPrintln("WARNING: collision detected on instruction kind = " 
+						Util.errPrintln("WARNING: collision detected at instruction kind number: " 
 							+ idobj.intValue());
 					}
 					instructionTable.put(idobj, f.getName().toLowerCase());
