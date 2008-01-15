@@ -729,12 +729,14 @@ public class GuardCompiler extends HeadCompiler {
 	}
 
 	/**
-	 * unary型に制約されたプロセス文脈が1引数であることを確認する．
+	 * unary型に制約されたプロセス文脈が左辺に出現し、1引数であることを確認する．
 	 * @param def
 	 * @throws CompileException
 	 */
 	private void checkUnaryProcessContext(ContextDef def) throws CompileException{
-		if(def.lhsOcc.args.length!=1)	
+		if(def.lhsOcc == null)
+			error("COMPILE ERROR: unary type process context must be occured in LHS");
+		else if(def.lhsOcc.args.length!=1)	
 			error("COMPILE ERROR: unary type process context must has exactly one argument : " + def.lhsOcc);
 	}
 	
