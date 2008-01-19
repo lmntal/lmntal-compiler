@@ -12,9 +12,9 @@ rule@@ b,b,b,b,b,b,b,{$p} :- {a,a,a,a,a,a,a,$p}.
 {g,w,$p[]},{$r[]},{river,$s[]}:-\+($p[]=(f,$q))|false.
 
 rule1@@ {f,$q},{river},int(N):-{river,f},{$q},int(N+1).
-rule2@@ {f,g,$q},{river},int(N):-{river,f,g},{$q},int(N+1).
-rule3@@ {f,c,$q},{river},int(N):-{river,f,c},{$q},int(N+1).
-rule4@@ {f,w,$q},{river},int(N):-{river,f,w},{$q},int(N+1).
+rule1@@ {f,g,$q},{river},int(N):-{river,f,g},{$q},int(N+1).
+rule2@@ {f,c,$q},{river},int(N):-{river,f,c},{$q},int(N+1).
+rule3@@ {f,w,$q},{river},int(N):-{river,f,w},{$q},int(N+1).
 
 {river,$p},{right,$q},int(N):-N mod 2=0|{river},{right,$p,$q},int(N).
 {river,$p},{left,$q},int(N):-N mod 2=1|{river},{left,$p,$q},int(N).
