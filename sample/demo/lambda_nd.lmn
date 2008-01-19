@@ -1,9 +1,9 @@
 /*
----------------------------------------------------------------
+-----------------------------------------------------------
 Lambda calculus (nondeterministic)
                                        Kazunori Ueda
                                        2006-09-12 01:20
----------------------------------------------------------------
+-----------------------------------------------------------
 */
 
 { module(lambda).
@@ -26,7 +26,7 @@ c_c2@@
   cp(A,B,L1)=cp(C,D,L2), {{+L1,$p},$q}, {+L2,top,$r} :-
     C=cp(E,F,L3), D=cp(G,H,L4), {{+L3,+L4,$p},$q},
     A=cp(E,G,L5), B=cp(F,H,L6), {+L5,+L6,top,$r}.
-u_c@@
+f_c@@
   fv($u)=cp(A,B,L), {+L,$q} :- unary($u) | A=fv($u), B=fv($u), {$q}.
 
 l_r@@  lambda(A,B)=rm :- A=rm, B=rm.
@@ -36,7 +36,7 @@ c_r2@@ cp(A,B,L)=rm, {{+L,$p},$q} :- A=rm, B=rm, {{$p},$q}.
 c_r3@@ A=cp(B,rm,L), {+L,$p} :- A=B, {$p}.
 c_r4@@ A=cp(rm,B,L), {+L,$p} :- A=B, {$p}.
 r_r@@  rm=rm :- .
-u_r@@  fv($u)=rm :- unary($u) | .
+f_r@@  fv($u)=rm :- unary($u) | .
 
 promote@@ {{},$p,sub(S)}, {$q,super(S)} :- {$p,$q}.
 c2c@@  A=cp(B,C) :- A=cp(B,C,L), {+L,top}.
@@ -83,9 +83,10 @@ gc@@   {top} :- .
 // r=apply(apply(apply(two, three),fv(succ)),fv(0)).
 // r=apply(apply(apply(apply(two, two),three),succ),0).
 // r=apply(apply(two, two),three).
-// r=apply(two,apply(two, two)).
+r=apply(two, two).
 // r=apply(two, three).
-r=apply(apply(apply(two,apply(two, three)),fv(succ)),fv(0)).
+// r=apply(apply(apply(two,apply(two,three)),fv(succ)),fv(0)).
+// r=apply(two,apply(two,three)).
 H=apply(fv(succ), fv(I)) :- int(I) | H=fv(I+1).
 }.
 
