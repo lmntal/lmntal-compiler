@@ -1,7 +1,7 @@
 
 // 07/02/03 発表で使ったソース。
 
-
+/*
 {
   window, name("Draw rect"),
   size(250, 250),
@@ -14,10 +14,13 @@
     }
   }
 }.
-// ↑赤い四角を書く。
+ // ↑赤い四角を書く。
+*/
 
-/*
+
 // ↓配置してみる。
+// 右下ラベルは５秒後に"time is over !"表示。
+// ボタンクリックで"button clicked !"表示。
 {
   window. name("test"). size(400, 300). killer. sys.perpetual(on).
   {textarea, id("1"), text("a"), position(0,0), weight(1.0, 3.0), size(2,1)}.
@@ -25,9 +28,31 @@
   {label, id("3"), text("c"), position(1,1), weight(2.0, 1.0), size(1,1)}.
   {timer, id("4"), time(5000)}.
   {clicked, id("2"), $p}, {id("1"), text(_SX), $q}
-   :- {id("2"), $p}, {id("1"), text("button clicked!"), $q}.
+   :- {id("2"), $p}, {id("1"), text("button clicked !"), $q}.
   {timeover, $p}, {label, text(_SX), $q}
    :- {$p}, {label, text("time is over !"), $q}.
-} 
+   
+}.
 
+
+/*
+// 簡単な例
+{
+  window. name("sample"). size(400, 300). killer. sys.perpetual(on).
+    mem1 { textarea, position(0,0), text("textarea"), weight(1.0, 2.0), size(2,1) }.
+    mem2 { button, position(0,1), text("button1"),  weight(1.0, 1.0), size(1,1) }.
+    mem3 { label, position(1,1), text("label"), weight(2.0, 1.0), size(1,1) }.
+}
 */
+
+/*    
+  {textarea, id("1"), text("a"), position(0,0), weight(1.0, 3.0), size(2,1)}.
+  {button, id("2"), text("b"), position(0,1), weight(1.0, 1,0), size(1,1)}.
+  {label, id("3"), text("c"), position(1,1), weight(2.0, 1.0), size(1,1)}.
+  {timer, id("4"), time(5000)}.
+  {clicked, id("2"), $p}, {id("1"), text(_SX), $q}
+   :- {id("2"), $p}, {id("1"), text("button clicked !"), $q}.
+  {timeover, $p}, {label, text(_SX), $q}
+   :- {$p}, {label, text("time is over !"), $q}.
+
+}*/ 

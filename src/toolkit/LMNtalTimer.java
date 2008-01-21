@@ -53,7 +53,6 @@ public class LMNtalTimer implements ActionListener {
 		time = getTime(mymem);
 //		System.out.println("time is :" + time);
 		timer = new Timer(time, this);
-//		timer.addActionListener(this); //buttonのActionListener呼び出し
 //		timer.setRepeats(false); //イベントが起こるのは１度だけ
 		timer.start();
 	}
@@ -79,7 +78,6 @@ public class LMNtalTimer implements ActionListener {
 	}	
 	
 	public void actionPerformed(ActionEvent e) {
-//		System.out.println("timedtimed!! "+ timeCount + this); ////////////// デバッグ用
 //		LMNtalTFrame.addUpdateComponent(this);
 		timeCount++;
 		addAtom();
@@ -91,7 +89,6 @@ public class LMNtalTimer implements ActionListener {
 			Functor func = new SymbolFunctor("timeover", 0); //timeover.を作る
 			mem.addAtom(new Atom(mem, func)); //funcを元にして作ったアトムをmemに追加する
 			//↑のaddAtomはMembraneのaddAtom。toolkit内のaddAtomとは別物。
-//			System.out.println("maked.time!!");
 		}
 		timeCount = 0;
 	}

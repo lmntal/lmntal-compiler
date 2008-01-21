@@ -548,8 +548,7 @@ public final class Membrane extends QueuedEntity {
 		if(Env.LMNgraphic != null && !mem.isRoot())
 			Env.LMNgraphic.removeGraphicMem(mem);
 		if(Env.LMNtool != null && !mem.isRoot())
-			Env.LMNtool.addRemovedMem(mem);
-		
+			Env.LMNtool.addRemovedMem(mem);		
 		mems.remove(mem);
 		mem.dequeue();
 		mem.parent = null;

@@ -1,0 +1,67 @@
+/*
+// スライドもどき
+{
+  window. name("sample"). size(400, 400). killer. sys.perpetual(on).
+    mem1 { html, position(0,0), weight(1.0,10.0),
+           text("<BR><BR><CENTER><FONT size=5 color=blue>first page</FONT></CENTER>")}.
+    mem2 { button, position(0,1), text("next")}.
+    
+    more.
+    
+    // ２枚目(コンポーネントの書き換え／従来通り)
+    mem2 {clicked, $p}, more, 
+     mem1{$q, text("<BR><BR><CENTER><FONT size=5 color=blue>first page</FONT></CENTER>")}
+    :-
+    mem2{$p}, mem1{$q, text("<BR><BR><CENTER><FONT size=5 color=red>second page</FONT></CENTER>")}, more2.
+    
+    // ３枚目(コンポーネント増える)
+    mem2 {clicked, $p}, more2, 
+     mem1{$q, text("<BR><BR><CENTER><FONT size=5 color=red>second page</FONT></CENTER>")}
+    :-
+    mem2{$p}, mem1{$q, text("<BR><BR><CENTER><FONT size=5 color=red>third page</FONT></CENTER>")},
+    mem3{textarea, position(1,0), text("textarea")}, more3.
+    
+    // ラスト(コンポーネント削除してラベルへ書き換え)
+    mem2 {clicked, $p[]}, mem1 {$q[]}, mem3{$r[]}, more3 :- 
+     mem1 {label, position(0,0), weight(1.0, 1.0), text("last page")}.
+
+}
+*/
+
+
+// おみくじ的な
+{
+  window. name("sample"). size(200, 200). killer. sys.perpetual(on).
+    mem1 { button, position(0,0), weight(1.0,1.0)}.
+    mem2 { button, position(0,1), weight(1.0,1.0)}.
+    mem3 { button, position(0,2), weight(1.0,1.0)}.
+    
+  mem1 {clicked, button, $p} :- mem1{label, text("OK!"), $p}.
+  mem1 {clicked, button, $p} :- mem1{label, text("NO!"), $p}.
+
+//  mem2 {clicked, $p[]} :- . // 消えるよー
+  
+  mem2 {clicked, button, $p} :- mem2{label, text("OK!"), $p}.
+  mem2 {clicked, button, $p} :- mem2{label, text("NO!"), $p}.
+  
+  mem3 {clicked, button, $p} :- mem3{label, text("OK!"), $p}.
+  mem3 {clicked, button, $p} :- mem3{label, text("NO!"), $p}.
+  
+}
+
+
+/*
+// 削除問題
+// 最後に残る(ラベル貼れ…？)、ルールが多い、ルールでコンポーネント作成できない
+{
+  window. name("sample"). size(200, 200). killer. sys.perpetual(on).
+    mem1 { button, position(0,0), weight(1.0,1.0), text("button1")}.
+    mem2 { button, position(0,1), weight(1.0,1.0), text("button2")}.
+    mem3 { button, position(0,2), weight(1.0,1.0), text("button3")}.
+    
+  mem1 {clicked, $p[]} :- .
+  mem2 {clicked, $p[]} :- .
+  mem3 {clicked, $p[]} :- .
+  
+}
+*/

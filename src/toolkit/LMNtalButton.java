@@ -47,7 +47,6 @@ public class LMNtalButton extends LMNComponent implements ActionListener {
 	}
 	
 	public void setMembrane(Membrane mem){
-//		text = getLabel(mem);
 		text = getText(mem);
 		if(button != null && getTextUpdate()){
 			setTextUpdate(false);

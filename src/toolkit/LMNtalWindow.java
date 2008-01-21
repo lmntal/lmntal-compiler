@@ -47,14 +47,13 @@ public class LMNtalWindow extends JFrame {
 	
 	final static
 	private Functor ID_FUNCTOR = new SymbolFunctor("id", 1);
-	
-//	final static
-//	private Functor IMAGE_FUNCTOR = new SymbolFunctor("image", 0);
+
+	final static
+	private Functor IMAGE_FUNCTOR = new SymbolFunctor("image", 0);
 
 	final static
 	private Functor TIMER_FUNCTOR = new SymbolFunctor("timer", 0);
 
-	
 	/////////////////////////////////////////////////////////////////
 
 	// ウィンドウが閉じられると，プログラムを強制的に終了させるかどうかのフラグ
@@ -69,7 +68,11 @@ public class LMNtalWindow extends JFrame {
 
 	private boolean sizeUpdate = false;
 	
+	// IDとコンポーネントのマップ
 	private Map<String, LMNComponent> componentMap = new HashMap();
+
+	// コンポーネントのIDと膜のIDのマップ
+	public static Map<String, String> memIDMap = new HashMap();
 
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -94,7 +97,7 @@ public class LMNtalWindow extends JFrame {
 		mymem = mem;
 //		// membrane ID
 //		memID = mem.getGlobalMemID();
-				
+		
 		// name atom
 		atomIte= mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 		if(atomIte.hasNext()){
@@ -116,8 +119,16 @@ public class LMNtalWindow extends JFrame {
 	public void setChildMem(Membrane mem){
 	
 		String id = getID(mem); // IDを取得
-		if(id == null) return; // IDがなかったら戻る
 
+		if(id == null) {
+			setVisible(true); // IDないものは消えてるので再描画			
+			return; // IDがなかったら戻る
+		}
+		
+		// IDが存在するとき所属している膜のIDを取得
+		String memID = mem.getMemID();
+		memIDMap.put(memID, id); // idと膜名を登録
+		
 		//componentMapのkeyにIDがあったら更新
 		if(componentMap.containsKey(id)) {
 			LMNComponent component = 
@@ -125,7 +136,7 @@ public class LMNtalWindow extends JFrame {
 			component.resetMembrane(mem);
 			return;
 		}
-		
+
 		if(mem.getAtomCountOfFunctor(BUTTON_FUNCTOR)>0){
 			LMNtalButton button = new LMNtalButton(this, mem);
 			componentMap.put(id, button);
@@ -146,10 +157,10 @@ public class LMNtalWindow extends JFrame {
 			componentMap.put(id, label);
 		}
 
-//		if(mem.getAtomCountOfFunctor(IMAGE_FUNCTOR)>0){
-//			LMNtalImage image = new LMNtalImage(this, mem);
-//			componentMap.put(key, image);
-//		}
+		if(mem.getAtomCountOfFunctor(IMAGE_FUNCTOR)>0){
+			LMNtalImage image = new LMNtalImage(this, mem);
+			componentMap.put(id, image);
+		}
 
 		if(mem.getAtomCountOfFunctor(TIMER_FUNCTOR)>0){
 			LMNtalTimer timer = new LMNtalTimer(this, mem);
@@ -172,13 +183,12 @@ public class LMNtalWindow extends JFrame {
 	public void removeChildMem(String id){
 		//componentMapのkeyにIDがあったら更新
 		LMNComponent component = 
-			(LMNComponent)componentMap.get(id); //=button? textarea? label?
+			(LMNComponent)componentMap.get(id); //=button? textarea? label? ...?
 		if(component == null) {
 			return;
 		}
-		remove(component.getComponent()); // ここで削除
+		remove(component.getComponent()); // 左辺にあったIDに対応するコンポーネントを削除
 		componentMap.remove(id);
-//		setVisible(true); // ここで再描画
 	}
 	
 	
@@ -189,7 +199,7 @@ public class LMNtalWindow extends JFrame {
 		Iterator IdAtomIte= mem.atomIteratorOfFunctor(ID_FUNCTOR);
 		if(IdAtomIte.hasNext()){
 			Atom targetAtom = (Atom)IdAtomIte.next();
-			Id = ((null != targetAtom) ? targetAtom.nth(0) : "");
+			Id = ((null != targetAtom) ? targetAtom.nth(0) : "");			
 		}
 		return Id;
 	}
@@ -289,13 +299,27 @@ public class LMNtalWindow extends JFrame {
 					
 					LMNtalGraphic graphicPanel = new LMNtalGraphic(this, mem);
 					componentMap.put(key, graphicPanel);
-					return graphicPanel; // graphicが存在したよ(初回のみ)
+					return graphicPanel; // graphicが存在した(初回のみ)
 				}
 			}
 			mem = mem.getParent();
 		}
-		return null; // graphic.が存在しませんでした…
+		return null;
 	}
 	
+	/**
+	 * 膜のIDから、コンポーネントのIDを返す
+	 */
+	public static String getmemIDMapKey(String memID){
+		String id = memIDMap.get(memID);
+		return id;
+	}
+	
+	/**
+	 * ルール左辺に対応するものはmemIDMapから削除
+	 */
+	public static void removememIDMap(String memID){
+		memIDMap.remove(memID);
+	}
 	
 }

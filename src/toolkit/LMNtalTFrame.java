@@ -10,7 +10,6 @@ import runtime.Atom;
 import runtime.Functor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
-import util.Util;
 
 /** --wtモードで実行したときの処理 */
 public class LMNtalTFrame {
@@ -27,9 +26,9 @@ public class LMNtalTFrame {
 	// ウィンドウ管理マップ．ウィンドウ名(String)をキーにして管理
 	final private HashMap windowMap = new HashMap();
 
-	// 消される膜の中身を管理
+	/** 消される膜の中身を管理 */
 	final private HashSet<String> removedIDSet = new HashSet<String>();
-
+		
 	/** LMNtalTFrameのコンストラクタ */
 	public LMNtalTFrame(){}
 	
@@ -53,7 +52,7 @@ public class LMNtalTFrame {
 	/**
 	 * 本体からアンロックされた膜すべて受け取る(=mem)
 	 * 受け取った膜はグラフィック膜であるとは限らない．
-	 * (アンロックされる直前に呼ばれるメソッド)
+	 * (アンロックされる直前に呼ばれるメソッド) runtime.Membraneのunlock(boolean)
 	 */
 	public void setMem(Membrane mem){
 		addAtom();
@@ -65,12 +64,10 @@ public class LMNtalTFrame {
 		// ウィンドウ膜でなく，かつ親がルート膜でなければ膜管理マップに追加
 		else if(null != mem.getParent() && !mem.getParent().isRoot()){
 			LMNtalWindow window = searchWindowMem(mem.getParent());
-			String id = LMNtalWindow.getID(mem); // ルールで変更後のIDを取得			
-			removedIDSet.remove(id); // 変更のあった膜のみをremovedIDSetの中に残す
-			if(null != window){ window.setChildMem(mem); }
+			if(null != window){ window.setChildMem(mem); }			
 		}
 	}
-	
+		
 	/**
 	 * 祖先膜からウィンドウ膜を探索する．
 	 * @param mem
@@ -102,13 +99,16 @@ public class LMNtalTFrame {
 	 * @param mem
 	 */
 	public void setWindowMem(Membrane mem){
+		if(mem.getAtomCountOfFunctor(NAME_FUNCTOR)==0){ // 正しくなかったらエラー出して終了
+			System.out.println("Name Error. Plaese make Name_Atom with one argument");
+			System.exit(0);
+		}
 		Iterator nameAtomIte = mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 		if(nameAtomIte.hasNext()){
 			String windowName = ((Atom)nameAtomIte.next()).nth(0);
 			// すでにウィンドウがある
 			if(windowMap.containsKey(windowName)){
 				LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);
-//				window.resetWindow(mem);
 			}
 			//　ウィンドウが無い
 			else{
@@ -118,36 +118,37 @@ public class LMNtalTFrame {
 		}
 	}
 	
-
 	/**
 	 * 本体から除去された膜をすべて受け取る．
 	 * 受け取った膜はグラフィック膜であるとは限らない．
 	 * @param mem
 	 */
-	public void addRemovedMem(Membrane mem){
-		String id = LMNtalWindow.getID(mem); // コンポーネントのIDを取得
-		removedIDSet.add(id); // removeされた膜をremovedIDSetの中に残す
+	public void addRemovedMem(Membrane mem){ // 消える直前の処理(runtime.Membraneより)
+		String id = mem.getMemID(); // 左辺の膜のIDを取得
+		String componentID = LMNtalWindow.getmemIDMapKey(id); //消える膜に対応するコンポーネントのIDを取得
+		if(componentID != null)
+			removedIDSet.add(componentID); // removeされた膜のIDをremovedIDSetの中に残す
+		LMNtalWindow.removememIDMap(id);
 	}
 	
-	public void removeMem(){
+	public void removeMem(){ // ルール適用後の処理(runtime.InterpretedRulesetより)
 		Iterator<String> ids = removedIDSet.iterator();
-//		String id = LMNtalWindow.getID(mem); // ID(コンポーネントの所属している膜名)を取得
 		while(ids.hasNext()){
 			String id = ids.next();
 			if(id == null){
 				return;
 			}
-			// ここで更新
 			Iterator<LMNtalWindow> windows = windowMap.values().iterator();
 			while(windows.hasNext()){
-				windows.next().removeChildMem(id);
+				windows.next().removeChildMem(id); // 左辺にあるコンポーネント消す
 			}
 		}
+		removedIDSet.clear();
 		Iterator<LMNtalWindow> windows = windowMap.values().iterator();
 		while(windows.hasNext()){
-			windows.next().setVisible(true);
-		}
-		Util.println("remove");
+			windows.next().setVisible(true); // ここで再描画
+		}		
+		System.out.println("remove");
 	}
 	
 	public void setRepaint(Membrane mem, boolean flag){
@@ -157,6 +158,7 @@ public class LMNtalTFrame {
 			String windowName = ((Atom)nameAtomIte.next()).nth(0);
 			LMNtalWindow window = (LMNtalWindow)windowMap.get(windowName);
 //			window.setRepaint(flag);
+
 		}
 	}
 		
@@ -193,9 +195,6 @@ public class LMNtalTFrame {
 		}
 		return getWindowSize(mem.getParent());
 	}
-	
-
-	
 	
 	
 }
