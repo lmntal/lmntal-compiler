@@ -281,15 +281,12 @@ public class FrontEnd {
 							Env.compileonly = true;
 							Env.slimcode = true;
 						} else if(args[i].equals("--use-findatom2")){
-					    	// コンパイル後の中間命令列を出力するモード
 //							Env.compileonly = true;
 							Env.slimcode = true;
 							Env.findatom2 = true;
 							Env.fInterpret = true;
 						} else if(args[i].equals("--memtest-only")){
-					    	// コンパイル後の中間命令列を出力するモード
-							Env.fInterpret = true;
-//							Env.memtestonly = true;
+							Env.memtestonly = true;
 						} else if(args[i].equals("--debug-daemon")){
 							// --debug-daemon
 							// dump debug message of LMNtalDaemon
