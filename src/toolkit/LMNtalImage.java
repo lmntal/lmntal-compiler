@@ -75,7 +75,7 @@ public class LMNtalImage extends LMNComponent {
 		setScale(mem);
 	}
 	
-	// file("")の中身を取得
+	// file("FileName")の中身を取得
 	public static String getFileName(Membrane mem){
 		String fn = null;
 		Iterator fileAtomIte= mem.atomIteratorOfFunctor(FILE_FUNCTOR);
@@ -104,7 +104,6 @@ public class LMNtalImage extends LMNComponent {
 		public void mouseClicked(MouseEvent me){
 			clickedCounter++;
 			clickedImage();
-			System.out.println("clicked counter : " + clickedCounter);
 		}			
 	}
 	
@@ -117,7 +116,6 @@ public class LMNtalImage extends LMNComponent {
 			Membrane mem = getMymem();
 			Functor func = new SymbolFunctor("clicked", 0);
 			mem.addAtom(new Atom(mem, func));
-			System.out.println("mem is " + mem);
 			}
 		clickedCounter = 0;
 	}
