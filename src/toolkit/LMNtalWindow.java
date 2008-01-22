@@ -92,11 +92,8 @@ public class LMNtalWindow extends JFrame {
 	 */
 	public void resetMembrane(Membrane mem){
 		Iterator atomIte;
-		Atom targetAtom;
-		
+		Atom targetAtom;		
 		mymem = mem;
-//		// membrane ID
-//		memID = mem.getGlobalMemID();
 		
 		// name atom
 		atomIte= mem.atomIteratorOfFunctor(NAME_FUNCTOR);
@@ -164,7 +161,7 @@ public class LMNtalWindow extends JFrame {
 
 		if(mem.getAtomCountOfFunctor(TIMER_FUNCTOR)>0){
 			LMNtalTimer timer = new LMNtalTimer(this, mem);
-//			componentMap.put(key, timer);
+//			componentMap.put(id, timer);
 		}
 
 		
@@ -189,9 +186,7 @@ public class LMNtalWindow extends JFrame {
 		}
 		remove(component.getComponent()); // 左辺にあったIDに対応するコンポーネントを削除
 		componentMap.remove(id);
-	}
-	
-	
+	}	
 	
 	// IDの取得
 	public static String getID(Membrane mem){
