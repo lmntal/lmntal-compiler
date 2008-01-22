@@ -7,9 +7,10 @@
 */
 
 /*
-// button生成
+// button生成(クリックで文章が変わる)
 { window, name("title"), size(300, 200), killer, sys.perpetual(on).
   { button, id(1), text("Button_Text"), position(0,0) }.
+  {clicked, text(_SX), $p} :- {text("BUTTON_TEXT"), $p}.
 }
 */
 
@@ -41,6 +42,14 @@
   { label, id(2), text("Label_Text"), position(0,0) }.
   { timer, id(5), time(3000) }.
   {timeover, $p}, {text(_SX), $q} :- {$p}, {text("TimeOver"), $q}.
+}
+*/
+
+/*
+// image生成(クリックで内容が変わる)
+{ window, name("title"), size(300, 200), killer, sys.perpetual(on).
+  { image, id(6), file("goo.gif"), position(0,0), scale(1.0, 1.5)}.
+  {clicked, file(_SX), $p} :- {file("C:\\cho.gif"), $p}.
 }
 */
 
