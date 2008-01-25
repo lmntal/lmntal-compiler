@@ -18,12 +18,12 @@ HISTORY
 % system rule
 t0_init{
 
-/*kid(hand,hand), kid(hand,hand),
 kid(hand,hand), kid(hand,hand),
 kid(hand,hand), kid(hand,hand),
 kid(hand,hand), kid(hand,hand),
 kid(hand,hand), kid(hand,hand),
-kid(hand,hand), kid(hand,hand),*/
+kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand),
 kid(hand,hand), kid(hand,hand),
 kid(hand,hand), kid(hand,hand).
 
