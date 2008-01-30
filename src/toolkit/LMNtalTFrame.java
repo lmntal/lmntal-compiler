@@ -51,7 +51,6 @@ public class LMNtalTFrame {
 	
 	/**
 	 * 本体からアンロックされた膜すべて受け取る(=mem)
-	 * 受け取った膜はグラフィック膜であるとは限らない．
 	 * (アンロックされる直前に呼ばれるメソッド) runtime.Membraneのunlock(boolean)
 	 */
 	public void setMem(Membrane mem){

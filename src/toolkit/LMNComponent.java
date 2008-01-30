@@ -29,9 +29,12 @@ public class LMNComponent {
 
 	final static // 描画物の内側の周囲の大きさ(デフォルト０)
 	private Functor IPAD_FUNCTOR = new SymbolFunctor("ipad", 2);
+
+	final static // 描画物の格子内の配置位置
+	private Functor ANCHOR_FUNCTOR = new SymbolFunctor("anchor", 1);
 	
 	final static
-	private Functor TEXT_FUNCTOR = new SymbolFunctor("text",1);
+	private Functor TEXT_FUNCTOR = new SymbolFunctor("text", 1);
 	
 	final static // 描画するかどうか
 	private Functor VISIBLE_FUNCTOR = new SymbolFunctor("visible",1);
@@ -50,7 +53,7 @@ public class LMNComponent {
 		setWeight(mem);
 		setIpad(mem);
 		setMembrane(mem);
-		gbc.fill = GridBagConstraints.BOTH; //デフォルトでひきのばし
+		setAnchor(mem);
 		checkVisible(mem);
 		if (visible==false) component = noComponent();
 		  else component = initComponent();
@@ -134,6 +137,34 @@ public class LMNComponent {
 		gbc.ipady = ipadY;			
 	}
 
+	public void setAnchor(Membrane mem){
+		String anc;
+		Iterator anchorAtomIte = mem.atomIteratorOfFunctor(ANCHOR_FUNCTOR);
+		gbc.fill = GridBagConstraints.NONE;
+		if(anchorAtomIte.hasNext()){
+			Atom atom = (Atom)anchorAtomIte.next();	
+			anc = atom.nth(0);
+			anc = anc.toUpperCase(); // 全て大文字に変換
+			gbc.anchor = GridBagConstraints.CENTER; // デフォルトCENTER
+			if (anc.equals("NORTHWEST"))
+				gbc.anchor = GridBagConstraints.NORTHWEST;
+			if (anc.equals("NORTH"))
+				gbc.anchor = GridBagConstraints.NORTH;
+			if (anc.equals("NORTHEAST"))
+				gbc.anchor = GridBagConstraints.NORTHEAST;
+			if (anc.equals("WEST"))
+				gbc.anchor = GridBagConstraints.WEST;
+			if (anc.equals("EAST"))
+				gbc.anchor = GridBagConstraints.EAST;
+			if (anc.equals("SOUTHWEST"))
+				gbc.anchor = GridBagConstraints.SOUTHWEST;
+			if (anc.equals("SOUTH"))
+				gbc.anchor = GridBagConstraints.SOUTH;	
+			if (anc.equals("SOUTHEAST"))
+				gbc.anchor = GridBagConstraints.SOUTHEAST;
+		} else 
+			gbc.fill = GridBagConstraints.BOTH;
+	}
 	
 	/** text("")のアトムがあったとき、textの内容を取得する。
 	 *  textは割と共通なのでここで取得して使いまわす)

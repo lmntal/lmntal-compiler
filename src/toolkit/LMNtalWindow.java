@@ -91,17 +91,20 @@ public class LMNtalWindow extends JFrame {
 	 * @param mem
 	 */
 	public void resetMembrane(Membrane mem){
+		mymem = mem;
+
+		/*
 		Iterator atomIte;
 		Atom targetAtom;		
-		mymem = mem;
-		
+
 		// name atom
 		atomIte= mem.atomIteratorOfFunctor(NAME_FUNCTOR);
 		if(atomIte.hasNext()){
 			targetAtom = (Atom)atomIte.next();
 			windowName = ((null != targetAtom) ? targetAtom.nth(0) : "");
 		}
-			
+		*/
+		
 		// sizeアトム　を処理
 		setSizeAtom(mem);
 		
