@@ -21,10 +21,6 @@ public class LMNtalHtml extends LMNComponent implements KeyListener {
 	private JEditorPane html;
 	private JScrollPane scroll;
 	private String text;
-//	private Atom textatom;
-
-//	final static
-//	private Functor TEXT_ATOM = new SymbolFunctor("text",1);
 	
 	/////////////////////////////////////////////////////////////////
 	// コンストラクタ
@@ -47,7 +43,6 @@ public class LMNtalHtml extends LMNComponent implements KeyListener {
 		html = new JEditorPane("text/html",text);
 		html.setEditable(false);
 //		html.setContentType("text/html");
-//		html.setText(text);
 		html.addKeyListener(this); // textareaのKeyListener呼び出し
 		scroll = new JScrollPane(html);
 		return scroll;
@@ -74,19 +69,7 @@ public class LMNtalHtml extends LMNComponent implements KeyListener {
 	public void keyTyped(KeyEvent arg0) {
 		LMNtalTFrame.addUpdateComponent(this);
 	}
-	
-/*	** text("")のアトムがあったとき、textの内容を取得する *
-	public String getText(Membrane mem){
-		String text = "";
-		Iterator textAtomIte = mem.atomIteratorOfFunctor(TEXT_ATOM);
-		if(textAtomIte.hasNext()){
-			textatom = (Atom)textAtomIte.next();
-			text = textatom.nth(0);
-		}
-		return text;
-	}
-*/
-	
+		
 	public void keyPressed(KeyEvent arg0) {}
 	public void keyReleased(KeyEvent arg0) {}
 	

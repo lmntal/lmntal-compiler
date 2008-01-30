@@ -1,8 +1,10 @@
 package toolkit;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -66,7 +68,10 @@ public class LMNtalImage extends LMNComponent {
 			Graphics2D g2=(Graphics2D)g;
 			AffineTransform a = AffineTransform.getScaleInstance(scalex,scaley);
 			g2.setTransform(a);
-			g2.drawImage(image,0,0,this);
+			Point p = this.getLocation();
+			int x = (int)(p.x / scalex);
+			int y = (int)(p.y / scaley);
+			g2.drawImage(image,x,y,this);
 		}	
 	}
 

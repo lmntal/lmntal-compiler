@@ -72,19 +72,7 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 	public void keyTyped(KeyEvent arg0) {
 		LMNtalTFrame.addUpdateComponent(this);
 	}
-	
-/*	** text("")のアトムがあったとき、textの内容を取得する *
-	public String getText(Membrane mem){
-		String text = "";
-		Iterator textAtomIte = mem.atomIteratorOfFunctor(TEXT_ATOM);
-		if(textAtomIte.hasNext()){
-			textatom = (Atom)textAtomIte.next();
-			text = textatom.nth(0);
-		}
-		return text;
-	}
-*/
-	
+		
 	public void keyPressed(KeyEvent arg0) {}
 	public void keyReleased(KeyEvent arg0) {}
 	
