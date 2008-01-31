@@ -10,12 +10,10 @@
  * １７分で全員が渡りきることはできるか？
  */
 
-% Q1
-x(0,1),x(0,2),x(0,5),x(0,10),s(0),light(0).
+x(0,1),x(0,2),x(0,5),x(0,10),light(0),total(0).
 
 go@@
-x(P1,T1),x(P2,T2),s(Sum),light(L) :- P1=:=0,P2=:=0,L=:=0,T1>=T2,S=Sum+T1 |
-	x(1,T1),x(1,T2),s(S),light(1).
-
+x(0,T1),x(0,T2),total(S),light(0) :- T1>=T2,S2=S+T1 |
+  x(1,T1),x(1,T2),total(S2),light(1).
 back@@
-x(P,T),s(Sum),light(L) :- P=:=1,L=:=1,S=Sum+T | x(0,T),s(S),light(0).
+x(1,T),total(S),light(1) :- S2=S+T | x(0,T),total(S2),light(0).
