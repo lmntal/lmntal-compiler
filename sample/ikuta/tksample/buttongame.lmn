@@ -1,0 +1,50 @@
+// ボタンを押すとボタンが生成され、押されたボタンは消えるかそのままかどちらか。
+// lmntal -s --wt sample3.lmn　シャッフルモードで実行必須。
+// 二回目の初期化以降の初期化でたまにバグる。
+
+{ window, name("MoveButton"), size(300, 300), location(center), killer, sys.perpetual(on).
+
+	// ３×３のラベルを生成
+	id(1).
+	id(_ID) :- _ID=<9, _IX = (_ID-1) mod 3, _IY = (_ID-1) / 3 | id(_ID+1), 
+	{label, id(_ID), position(_IX ,_IY), text(""), here}.
+
+	{timer, time(1000)}.
+	{label, id(10), position(0,3), text("time"), anchor(center), weight(0,0)}.
+	{label, id(11), position(0,4), text(0), anchor(center), weight(0,0)}.
+	{button, id(12), position(1,3), size(1,2), text("start"), anchor(center), weight(0,0), wait}.
+	{label, id(13), position(2,3), text("click"), anchor(center), weight(0,0)}.
+	{label, id(14), position(2,4), text(0), anchor(center), weight(0,0)}.
+
+	{timeover, $p}, {id(11), text(_IX), $q} :- {$p}, {id(11), text(_IX+1), $q}.
+
+	// startクリック(最初)
+	{clicked, id(12), wait, $p}, {label, id(5), $q}, {timer, $r},
+	 {id(11), text(_IX), $s}, {id(14), text(_IY), $t}
+	 :- {$p}, {button, id(5), $q}, {timer, id("time"), $r},
+	  {id(11), text(0), $s}, {id(14), text(0), $t}.
+
+	// ボタンを押すとどれかのラベルをボタンにする。自分はボタンのまま。
+	{clicked, button, id(_IX), here, $p}, {label, id(_ID), here, $q}, {id(14), text(_IT), $r}
+	 :- {button, id(_IX), here, $p}, {button, id(_ID),here, $q}, {id(14), text(_IT+1), $r}.
+
+	// ボタンを押すとどれかのラベルをボタンにする。自分はラベルになる。
+	{clicked, button, id(_IX), here, $p}, {label, id(_ID), here, $q}, {id(14), text(_IT), $r}
+	 :- {label, id(_IX), here, $p}, {button, id(_ID), here, $q}, {id(14), text(_IT+1), $r}.
+
+	// 埋めたらタイマー止める。
+	{button, id(1), $p1}, {button, id(2), $p2}, {button, id(3), $p3},
+	{button, id(4), $p4}, {button, id(5), text(_ST), $p5}, {button, id(6), $p6},
+	{button, id(7), $p7}, {button, id(8), $p8}, {button, id(9), $p9},
+	{id("time"), $q}
+	 :- 
+	{button, id(1), $p1}, {button, id(2), $p2}, {button, id(3), $p3},
+	{button, id(4), $p4}, {button, id(5), text("END"), $p5}, {button, id(6), $p6},
+	{button, id(7), $p7}, {button, id(8), $p8}, {button, id(9), $p9},
+	{$q}.
+	
+	{clicked, text("END"), $p}, id(_IX) :- {text(""), $p}, id(21).
+	// 終了したら最初から。全てのボタンをラベルにする。
+	id(_ID), {button, $p} :- _ID>20, _ID=<30 | id(_ID+1), {label, $p}.
+	id(31), {label, position(1,3), $p} :- id(40), {button, position(1,3), wait, id(12), $p}.
+}
