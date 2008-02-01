@@ -1,9 +1,25 @@
-
+// 簡単な機能紹介サンプル集。
 // コメントアウトしてある部分をはずして使ってください。
 
 /*
 // window生成
 { window, name("title"), size(300, 200), killer, sys.perpetual(on)}.
+*/
+
+/*
+// window中央配置
+{ window, name("title"), size(300, 200), killer, location(center), sys.perpetual(on)}.
+*/
+
+/*
+// window座標指定配置
+{ window, name("title"), size(300, 200), killer, location(100,100), sys.perpetual(on)}.
+*/
+
+/*
+// window複数配置
+{ window, name("window1"), size(300, 200), killer, location(100,100), sys.perpetual(on)}.
+{ window, name("window2"), size(300, 200), killer, location(300,300), sys.perpetual(on)}.
 */
 
 /*
@@ -166,7 +182,7 @@
 }
 */
 
-
+/*
 // 複合してみた
 { window, name("GUI_Component"), size(400, 250), killer, sys.perpetual(on).
   { button, id(1), text("Button"), position(0,0)}.
@@ -179,6 +195,32 @@
 	  { draw, id("6_1"), getpic("rect").
 		color(0,255,0), position(20,10), size(50,60).}
   }.
-//  { timer, id(6), time(3000). }.
 }
+*/
 
+/*
+// ランダムサンプル
+{ window, name("RandomTest"), size(200, 200), killer, sys.perpetual(on).
+	id(1).
+	id(_ID) :- _ID =< 12, _IX = (_ID - 1) mod 4, _IY = (_ID - 1) / 4 | id(_ID + 1), 
+	{id(_ID), position(_IX ,_IY), text(_ID), make}.
+	{make, $p} :- {button, $p}.
+	{make, $p} :- {label, $p}.
+	{make, $p} :- {textarea, $p}.
+	{make, $p} :- {html, $p}.
+}
+*/
+
+/*
+// 逃げるボタン
+{ window, name("MoveButton"), size(300, 300), killer, sys.perpetual(on).
+	id(1).
+	id(_ID) :- _ID =< 9, _IX = (_ID - 1) mod 3, _IY = (_ID - 1) / 3 | id(_ID + 1), 
+	{label, id(_ID), position(_IX ,_IY), text(""), wait}.
+	// 中央にボタン配置
+	{id(5), wait, label, $p} :- {id(5), button, $p}.
+	// ボタンがあればラベルをボタンにして自身をラベルにする
+	{clicked, button, position(_IX,_IY), $p}, {label, $q}
+	 :- {label, position(_IX,_IY), $p}, {button, $q}.
+}
+*/
