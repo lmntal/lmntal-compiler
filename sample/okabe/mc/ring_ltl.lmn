@@ -36,7 +36,7 @@ kid(A,B),hand(B),hand(C),kid(C,D) :- kid(A,X),kid(X,D).
 ltl_1@@
 t0_init{$p,@p} :- t0_init{$p,@p}.
 ltl_2@@
-t0_init{kid(hand,hand),$p,@p} :-  accept_s2{kid(hand,hand),$p,@p}.
+t0_init{kid(hand,hand),$p,@p} :- accept_s2{kid(hand,hand),$p,@p}.
 ltl_3@@
 accept_s2{kid(hand,hand),$p,@p} :- accept_s2{kid(hand,hand),$p,@p}.
 
