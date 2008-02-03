@@ -1,4 +1,6 @@
-a(X),
-{a(X,Y,Z),{a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a}},
-a(Y),
-a(Z).
+%a(X),
+%{a(X,Y,Z),{a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a}},
+%a(Y),
+%a(Z).
+{a(X), b(X).
+a(X) :- a(X,Y),c(Y)}.
