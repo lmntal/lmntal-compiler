@@ -22,7 +22,6 @@ public class LMNtalGraphic extends LMNComponent {
 	 */
 	public LMNtalGraphic(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		Util.println("panel");
 	}
 	/////////////////////////////////////////////////////////////////
 

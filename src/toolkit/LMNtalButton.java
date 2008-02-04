@@ -31,7 +31,6 @@ public class LMNtalButton extends LMNComponent implements ActionListener {
 	 */
 	public LMNtalButton(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		Util.println("button");		
 	}
 	/////////////////////////////////////////////////////////////////
 

@@ -40,7 +40,6 @@ public class LMNtalImage extends LMNComponent {
 	// コンストラクタ
 	public LMNtalImage(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		System.out.println("Image");
 	}
 	/////////////////////////////////////////////////////////////////
 

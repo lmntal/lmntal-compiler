@@ -147,7 +147,6 @@ public class LMNtalTFrame {
 		while(windows.hasNext()){
 			windows.next().setVisible(true); // ここで再描画
 		}		
-		System.out.println("remove");
 	}
 	
 	public void setRepaint(Membrane mem, boolean flag){

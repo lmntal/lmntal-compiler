@@ -207,7 +207,6 @@ public class LMNComponent {
 		Iterator visibleAtomIte = mem.atomIteratorOfFunctor(VISIBLE_FUNCTOR);
 		if(visibleAtomIte.hasNext()){
 			Atom atom = (Atom)visibleAtomIte.next();
-			System.out.println("visible atom");
 			if(atom.nth(0) == "false" ) visible = false;
 			else visible = true;
 		}

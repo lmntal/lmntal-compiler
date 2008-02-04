@@ -34,7 +34,6 @@ public class LMNtalTextArea extends LMNComponent implements KeyListener {
 	 */
 	public LMNtalTextArea(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		Util.println("textarea");
 	}
 	/////////////////////////////////////////////////////////////////
 

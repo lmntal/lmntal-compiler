@@ -30,7 +30,6 @@ public class LMNtalHtml extends LMNComponent implements KeyListener {
 	 */
 	public LMNtalHtml(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		Util.println("html");
 	}
 	/////////////////////////////////////////////////////////////////
 

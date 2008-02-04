@@ -24,7 +24,6 @@ public class LMNtalLabel extends LMNComponent {
 	 */
 	public LMNtalLabel(LMNtalWindow lmnWindow, Membrane mem){
 		super(lmnWindow, mem);
-		Util.println("label");		
 	}
 	/////////////////////////////////////////////////////////////////
 

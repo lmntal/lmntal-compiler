@@ -21,11 +21,17 @@ public class LMNtalWindow extends JFrame {
 	/////////////////////////////////////////////////////////////////
 	// 検索用Functor
 	
-	final static
-	private Functor NAME_FUNCTOR = new SymbolFunctor("name",1); 
+//	final static
+//	private Functor NAME_FUNCTOR = new SymbolFunctor("name",1); 
 
 	final static
 	private Functor SIZE_FUNCTOR = new SymbolFunctor("size", 2);
+
+	final static
+	private Functor LOCATION_FUNCTOR = new SymbolFunctor("location", 2);
+
+	final static
+	private Functor LOCATION2_FUNCTOR = new SymbolFunctor("location", 1);
 	
 	final static
 	private Functor KILLER_FUNCTOR = new SymbolFunctor("killer", 0);
@@ -58,12 +64,16 @@ public class LMNtalWindow extends JFrame {
 
 	// ウィンドウが閉じられると，プログラムを強制的に終了させるかどうかのフラグ
 	private boolean killer = false;
+	private boolean locationCenter = false;
 
 //	private String memID;
 	private Membrane mymem;
 	private String windowName;
 	private int sizeX = 0;
 	private int sizeY = 0;
+	private int locationX = 0;
+	private int locationY = 0;
+	
 	private GridBagLayout layout;
 
 	private boolean sizeUpdate = false;
@@ -107,6 +117,9 @@ public class LMNtalWindow extends JFrame {
 		
 		// sizeアトム　を処理
 		setSizeAtom(mem);
+		
+		// locationアトム　を処理
+		setLocationAtom(mem);
 		
 		// killerアトムを処理
 		setKiller(mem);
@@ -227,6 +240,37 @@ public class LMNtalWindow extends JFrame {
 	}
 
 	/**
+	 * 膜内のアトムを検索し，"size"アトムを取得する．
+	 * アトムの第一リンク先を幅，第二リンクを高さとする．
+	 * @param mem 検索対象の膜
+	 */
+	private void setLocationAtom(Membrane mem){
+		Atom targetAtom;	
+		Iterator atomIte = mem.atomIteratorOfFunctor(LOCATION2_FUNCTOR);
+		if(atomIte.hasNext()){
+			targetAtom = (Atom)atomIte.next();
+			if(targetAtom.nth(0) == "center" ){
+				locationCenter = true;
+				return;	
+			}
+			else locationCenter = false;
+		}	
+		atomIte= mem.atomIteratorOfFunctor(LOCATION_FUNCTOR);
+		if(atomIte.hasNext()){
+			targetAtom = (Atom)atomIte.next();
+			try{
+				if( (null != targetAtom) &&
+					( (locationX != Integer.parseInt(targetAtom.nth(0))) ||
+					  (locationY != Integer.parseInt(targetAtom.nth(1))) )){
+				}
+				locationX = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(0)) : 0);
+				locationY = ((null != targetAtom) ? Integer.parseInt(targetAtom.nth(1)) : 0);
+			}
+			catch(NumberFormatException e){}
+		}
+	}
+	
+	/**
 	 * 膜内のアトムを検索し，"killer"アトムを取得する．
 	 * "killer"アトムが存在した場合は，killerフラグを立てる
 	 * @param mem 検索対象の膜
@@ -243,12 +287,13 @@ public class LMNtalWindow extends JFrame {
 	/** ウィンドウを生成する */
 	public void makeWindow(){
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		Util.println("make window");
 		setTitle(windowName);
 		layout = new GridBagLayout();
 		getContentPane().setLayout(layout);
-		
+
 		setSize(sizeX, sizeY);
+		if(locationCenter) setLocationRelativeTo(null);
+		else setLocation(locationX, locationY);
 		
 		// killerがtrueのとき，ウィンドウを閉じると，プログラムを強制終了させる
 		addWindowListener(new WindowAdapter() {
