@@ -1,5 +1,6 @@
 ;; lmntal.el --- LMNtal mode for Emacs.   -*- coding: euc-jp -*-
-
+;; $Id: lmntal.el,v 1.3 2008/02/21 07:43:05 taisuke Exp $
+;; $Revision: 1.3 $
 
 ;;  Author: Taisuke HORI (taisuke@ueda.info.waseda.ac.jp)
 ;;  Version 0.2.3.4
