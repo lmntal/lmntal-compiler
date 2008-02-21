@@ -250,7 +250,8 @@ public class REPL {
 				Iterator it2 = rs.rules.iterator();
 				while(it2.hasNext()) {
 					Rule r = (Rule)it2.next();
-					Env.p("  "+r.text);
+					if(r.name!=null) Env.p("  "+r.name+"@@");
+					else Env.p("  "+r.text);
 					r.showDetail();
 				}
 			}
