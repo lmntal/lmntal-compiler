@@ -88,7 +88,7 @@ public class Optimizer {
 			rule.guard = null;
 		}
 		if(Env.findatom2)
-			;//			optimize(rule.tempMatch, rule.body);
+			optimize(rule.tempMatch, rule.body);
 		else
 			optimize(rule.memMatch, rule.body);
 		if(fGuardMove && !fMerging) {
