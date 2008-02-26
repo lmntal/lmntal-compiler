@@ -167,10 +167,10 @@ public class HeadCompiler {
 		}
 		linkpaths.put(new Integer(atompath), paths);
 	}
-	public void searchLinkedGroup(Atom firstatom, HashSet qatoms, Membrane firstmem) {
+	public void searchLinkedGroup(Atom startatom, HashSet qatoms, Atom firstatom, Membrane firstmem) {
 		LinkedList newmemlist = new LinkedList();
 		LinkedList atomqueue = new LinkedList();
-		atomqueue.add(firstatom);
+		atomqueue.add(startatom);
 		while( ! atomqueue.isEmpty() ) {
 			Atom atom = (Atom)atomqueue.removeFirst();			
 			if(atom.functor.getArity()==0 && atom.mem==firstmem){
@@ -288,12 +288,12 @@ public class HeadCompiler {
 			Iterator it2 = mem.atoms.iterator();
 			while (it2.hasNext()) {
 				Atom atom = (Atom)it2.next();
-				searchMembrane(mem, qatoms, firstmem);
+				searchMembrane(mem, qatoms, firstatom, firstmem);
 			}
 		}
 	}
 		
-	public void searchMembrane(Membrane mem, HashSet qatoms, Membrane firstmem) {
+	public void searchMembrane(Membrane mem, HashSet qatoms, Atom firstatom, Membrane firstmem) {
 		if (memVisited.contains(mem)) return;
 		memVisited.add(mem);
 
@@ -314,7 +314,7 @@ public class HeadCompiler {
 						((ProcessContextEquation)proccxteqMap.get(mem)).def.lhsOcc.mem };
 				}
 				atompaths.put(atom, new Integer(atompath));
-				searchLinkedGroup(atom, qatoms, firstmem);
+				searchLinkedGroup(atom, qatoms, firstatom, firstmem);
 			}
 //			compileLinkedGroup(atom);	// 2行上に移動してみた n-kato (2004.7.16)
 		}
@@ -328,20 +328,20 @@ public class HeadCompiler {
 				mempaths.put(submem, new Integer(submempath));
 			}
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
-			searchMembrane(submem, qatoms, firstmem);
+			searchMembrane(submem, qatoms, firstatom, firstmem);
 		}
 	}
 	
 	/** リンクでつながったアトムおよびその所属膜に対してマッチングを行う。
 	 * また、途中で見つかった「新しい膜」のそれぞれに対して、compileMembraneを呼ぶ。
 	 */
-	public void compileLinkedGroup(Atom firstatom, InstructionList list) {
+	public void compileLinkedGroup(Atom startatom, InstructionList list) {
 		Env.c("compileLinkedGroup");
 		List<Instruction> insts = list.insts;
 		LinkedList newmemlist = new LinkedList();
 		LinkedList atomqueue = new LinkedList();
-		if(debug)Util.println("start "+firstatom);
-		atomqueue.add(firstatom);
+		if(debug)Util.println("start "+startatom);
+		atomqueue.add(startatom);
 		while( ! atomqueue.isEmpty() ) {
 			Atom atom = (Atom)atomqueue.removeFirst();			
 			if(debug)Util.println("before " + atom);
@@ -473,7 +473,7 @@ public class HeadCompiler {
 				for (int i = 0; i < testmems.length; i++) {
 					Iterator it = testmems[i].atoms.iterator();
 					while (it.hasNext()) {
-						Atom otheratom = (Atom)it.next();					
+						Atom otheratom = (Atom)it.next();
 						int other = atomToPath(otheratom);
 						if (other == UNBOUND) continue;
 						if (!otheratom.functor.equals(buddyatom.functor)) continue;
@@ -646,11 +646,10 @@ public class HeadCompiler {
 				if (!otheratom.functor.equals(atom.functor)) continue;
 				//if (otheratom == atom) continue;
 				insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
+				testmems[i].connect(otheratom, atom);
 			}
 		}
 	}
-	
-	HashSet satoms = new HashSet();
 	
 	static InstructionList contLabel;
 	public void setContLabel(InstructionList contLabel){
@@ -684,7 +683,7 @@ public class HeadCompiler {
 					HashMap newmempaths = (HashMap)((HashMap)mempaths).clone();
 					HashSet newvisited = (HashSet)visited.clone();
 					HashSet newmemVisited = (HashSet)memVisited.clone();
-					searchLinkedGroup(atom, qatoms, atom.mem);
+					searchLinkedGroup(atom, qatoms, atom, atom.mem);
 					varcount = restvarcount;
 					Iterator it3 = qatoms.iterator();
 					if(debug)Util.println("qatoms = " + qatoms);
@@ -692,16 +691,6 @@ public class HeadCompiler {
 					nextgroupinst = new InstructionList(list);
 					while(it3.hasNext()){
 						atom = (Atom)it3.next();
-	//					if(satoms.contains(atom))
-	//						continue;
-	//					satoms.add(atom);
-	//					Iterator it4 = ratoms.iterator();
-	//					if(debug)Util.println("ratom = " + ratoms);
-	//					while(it4.hasNext()){
-	//						Atom at = (Atom)it4.next();
-	//						atompaths.remove(at);
-	//						visited.remove(at);
-	//					}
 						visited = newvisited;
 						memVisited = newmemVisited;
 						atompaths = newatompaths;
@@ -726,25 +715,7 @@ public class HeadCompiler {
 						} else
 	//						insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
-						// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
-						Membrane[] testmems = { mem };
-						if (proccxteqMap.containsKey(mem)) {
-							// $p等式トップレベルのアトムのときは、$pがヘッド出現する膜とも比較する
-							testmems = new Membrane[]{ mem,
-								((ProcessContextEquation)proccxteqMap.get(mem)).def.lhsOcc.mem };
-						}
-						for (int i = 0; i < testmems.length; i++) {
-							Iterator it2 = testmems[i].atoms.iterator();
-							while (it2.hasNext()) {
-								Atom otheratom = (Atom)it2.next();					
-								int other = atomToPath(otheratom);
-								if (other == UNBOUND) continue;
-								if (!otheratom.functor.equals(atom.functor)) continue;
-								//if (otheratom == atom) continue;
-								subinst.insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
-								testmems[i].connect(otheratom, atom);
-							}
-						}
+						emitNeqAtoms(mem, atom, atompath, insts);
 						atompaths.put(atom, new Integer(atompath));
 						if(debug)Util.println("put " + atom);
 	
@@ -848,6 +819,23 @@ public class HeadCompiler {
 					HashSet qatoms = new HashSet();
 					int restvarcount = varcount;
 					int diffvarcount = 0;
+					if(!rireki){
+						int atompath = varcount++;
+						if(Env.findatom2 && rireki){
+//							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
+							insts.add(Instruction.findatom2(atompath, thismempath, findatomcount, atom.functor));
+							findatomcount++;
+						} else
+							insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
+						emitNeqAtoms(mem, atom, atompath, insts);
+						atompaths.put(atom, new Integer(atompath));
+	
+						//リンクの一括取得(RISC化) by mizuno
+						getLinks(atompath, atom.functor.getArity(), insts);
+						compileLinkedGroup(atom, list);
+						compileMembraneSecondTime(mem, list, atommems, false);
+						return;
+					}
 					qatoms.clear();
 					HashMap newatompaths = (HashMap)((HashMap)atompaths).clone();
 					HashMap newmempaths = (HashMap)((HashMap)mempaths).clone();
@@ -860,17 +848,16 @@ public class HeadCompiler {
 							continue;
 						if(!((Atom)atommems.get(listi2)).functor.isActive())
 							continue;
-						searchLinkedGroup((Atom)atommems.get(listi2), qatoms, atom.mem);
+						searchLinkedGroup((Atom)atommems.get(listi2), qatoms, (Atom)atommems.get(listi2), atom.mem);
 					}
-//					searchLinkedGroup(atom, qatoms, atom.mem);
 					varcount = restvarcount;
 					Iterator it3 = qatoms.iterator();
 					groupinst = nextgroupinst;
 					nextgroupinst = new InstructionList(list);
 					while(it3.hasNext()){
 						atom = (Atom)it3.next();
-//						if(!atom.functor.isActive())
-//							continue;
+						if(!atom.functor.isActive())
+							continue;
 						visited = newvisited;
 						memVisited = newmemVisited;
 						atompaths = newatompaths;
@@ -879,7 +866,7 @@ public class HeadCompiler {
 						newmemVisited = (HashSet)memVisited.clone();
 						newatompaths = (HashMap)((HashMap)atompaths).clone();
 						newmempaths = (HashMap)((HashMap)mempaths).clone();
-						visited.clear();
+//						visited.clear();
 						
 						InstructionList subinst = new InstructionList(groupinst);
 						groupinst.add(new Instruction(Instruction.BRANCH, subinst));
@@ -892,23 +879,7 @@ public class HeadCompiler {
 							findatomcount++;
 						} else
 							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
-						// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
-						Membrane[] testmems = { mem };
-						if (proccxteqMap.containsKey(mem)) {
-							// $p等式トップレベルのアトムのときは、$pがヘッド出現する膜とも比較する
-							testmems = new Membrane[]{ mem,
-								((ProcessContextEquation)proccxteqMap.get(mem)).def.lhsOcc.mem };
-						}
-						for (int i = 0; i < testmems.length; i++) {
-							Iterator it2 = testmems[i].atoms.iterator();
-							while (it2.hasNext()) {
-								Atom otheratom = (Atom)it2.next();					
-								int other = atomToPath(otheratom);
-								if (other == UNBOUND) continue;
-								if (!otheratom.functor.equals(atom.functor)) continue;
-								subinst.insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
-							}
-						}
+						emitNeqAtoms(mem, atom, atompath, subinst.insts);
 						atompaths.put(atom, new Integer(atompath));
 	
 						//リンクの一括取得(RISC化) by mizuno
@@ -929,6 +900,7 @@ public class HeadCompiler {
 					}
 					varcount += diffvarcount;
 					if(!groupinst.insts.isEmpty()){
+						groupinst.add(new Instruction(Instruction.STOP));
 						insts.add(new Instruction(Instruction.GROUP, groupinst));
 						if(varcount > maxvarcount)
 							maxvarcount = varcount;

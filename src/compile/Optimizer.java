@@ -88,12 +88,14 @@ public class Optimizer {
 			rule.guard = null;
 		}
 		if(Env.findatom2)
-			optimize(rule.tempMatch, rule.body);
+			;//			optimize(rule.tempMatch, rule.body);
 		else
 			optimize(rule.memMatch, rule.body);
 		if(fGuardMove && !fMerging) {
 			guardMove(rule.atomMatch);
 			guardMove(rule.memMatch);
+			allocMove(rule.atomMatch);
+			allocMove(rule.memMatch);
 		}
 		if(Env.findatom2)return ;
 		if(fGrouping && !fMerging) {
@@ -313,25 +315,39 @@ public class Optimizer {
 //				System.out.println(inst2 + "\t" + memnum);
 				continue;
 			}
+
+			//　instをinst2の下に配置するべきか判定
 			ArrayList list2 = inst2.getVarArgs(listn);
-//			System.out.println("check " + inst + "\t to" + inst2);
-			for(int j=0; j<list.size(); j++){
-				if(inst2.getOutputType() != -1){
-					if(list.get(j).equals(inst2.getArg1())) {
-//						System.out.println("match1 " + inst);
+			if(inst.getKind() == Instruction.ALLOCATOM || inst.getKind() == Instruction.NEWLIST){
+//				System.out.println("check " + inst + "\t to" + inst2);
+				if(list2.contains(inst.getArg1())){
+//						System.out.println("match2 " + inst);
+					moveok = max(moveok, 1);
+					i--;
+					break ff;
+				}
+			}
+			else {
+				for(int j=0; j<list.size(); j++){
+					if(inst2.getKind() == Instruction.ALLOCATOM || inst2.getKind() == Instruction.NEWLIST)
+						continue;
+					if(inst2.getOutputType() != -1){
+						if(list.get(j).equals(inst2.getArg1())) {
+//							System.out.println("match1 " + inst);
+							moveok = max(moveok, 1);
+							break ff;
+						}
+//							System.out.println("unmatch1 " + list.get(j) + "neq" + inst2.getArg1() + inst);
+					}
+					else if(list2.contains(list.get(j))){
+//						System.out.println("match2 " + inst);
 						moveok = max(moveok, 1);
 						break ff;
 					}
-//					System.out.println("unmatch1 " + list.get(j) + "neq" + inst2.getArg1() + inst);
+//					System.out.println("unmatch2 " + inst);
 				}
-				else if(list2.contains(list.get(j))){
-//					System.out.println("match2 " + inst);
-					moveok = max(moveok, 1);
-					break ff;
-				}
-//				System.out.println("unmatch2 " + inst);
-			}
 //			if(!moveok) break; 
+			}
 		}
 //		System.out.println(moveok);
 		if(moveok > 0){
@@ -343,6 +359,33 @@ public class Optimizer {
 		}
 //		System.out.println("no\t" + inst);
 		return 0;
+	}
+
+	/** 
+	 * ガード命令を可能な限り前に移動させる.
+	 * ボディ命令は並び替えない
+	 * @param insts 命令列(headとguardをくっつけたもの)
+	 */
+	public static void allocMove(List insts){
+		for(int i=1; i<insts.size(); i++){
+			Instruction inst = (Instruction)insts.get(i);
+			
+			switch(inst.getKind()){
+			case Instruction.ALLOCATOM:
+			case Instruction.NEWLIST:
+				int judge = guardMove(insts, inst, i-1);
+				if(judge == 2){
+//					System.out.println("remove2\t"+insts.get(i));
+					insts.remove(i);
+					i--;
+				} else if (judge == 1){
+//					System.out.println("remove1\t"+insts.get(i+1));
+					insts.remove(i+1);
+				} 
+			default:
+				continue;
+			}
+		}
 	}
 	
 	/**

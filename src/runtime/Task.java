@@ -236,7 +236,7 @@ public class Task implements Runnable {
 		Atom a = mem.popReadyAtom();
 		Iterator it = mem.rulesetIterator();
 		boolean flag = false;
-		if(!nondeterministic && Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null){ // 実行アトムスタックが空でないとき
+		if(!nondeterministic && Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null && !Env.memtestonly){ // 実行アトムスタックが空でないとき
 			if(Env.profile == Env.PROFILE_BYDRIVEN){
 		        start = Util.getTime();
 			}

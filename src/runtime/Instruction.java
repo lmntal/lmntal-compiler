@@ -907,13 +907,13 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int PROCEED = 204;
 	static {setArgType(PROCEED, new ArgType(false));}
 
-//	/** stop 
-//	 * <br>（予約された）失敗しないガード命令<br>
-//	 * proceedと同じ。マッチングとボディの命令が統合されたことに伴って廃止される予定。
-//	 * <p>典型的には、否定条件にマッチしたことを表すために使用される。
-//	 */
-//	public static final int STOP = 205;
-//	static {setArgType(STOP, new ArgType(false));}
+	/** stop 
+	 * <br>（予約された）失敗しないガード命令<br>
+	 * proceedと同じ。マッチングとボディの命令が統合されたことに伴って廃止される予定。
+	 * <p>典型的には、否定条件にマッチしたことを表すために使用される。
+	 */
+	public static final int STOP = 205;
+	static {setArgType(STOP, new ArgType(false));}
 
     /** branch [[instructions...]]
      * <br>構造化命令<br>
