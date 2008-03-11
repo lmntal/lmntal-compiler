@@ -568,7 +568,7 @@ public class RuleCompiler {
 			LinkedList eqs = (LinkedList)it.next();
 			HeadCompiler negcmp = hc.getNormalizedHeadCompiler();
 			negcmp.varcount = varcount;
-			negcmp.compileNegativeCondition(eqs, hc.matchLabel);
+			negcmp.compileNegativeCondition(eqs, negcmp.matchLabel);
 			guard.add(new Instruction(Instruction.NOT, negcmp.matchLabel));
 			if (varcount < negcmp.varcount)  varcount = negcmp.varcount;
 		}
