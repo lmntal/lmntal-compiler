@@ -1,0 +1,10 @@
+red(L1).
+blue(L1,L2).
+{
+	blue(L2).
+	green(L3).
+	{
+		green(L3).
+		orange.
+	}.
+}

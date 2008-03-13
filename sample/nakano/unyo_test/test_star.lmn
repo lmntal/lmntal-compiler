@@ -1,0 +1,3 @@
+a(b,b,b).
+b(X),b(Y),b(Z) :- a(X, c),a(Y, c),a(Z, c).
+c(X),c(Y),c(Z) :- a(X, b),a(Y, b),a(Z, b).

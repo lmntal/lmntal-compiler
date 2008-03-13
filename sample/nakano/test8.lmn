@@ -1,4 +1,0 @@
-# a(b, c).
- gen(integer.set(1,340)).
- a(b).
-b(A),gen(X) :- int(X)|b(a(A)). 

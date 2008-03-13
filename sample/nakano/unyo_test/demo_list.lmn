@@ -1,0 +1,2 @@
+list([a,a,a,a]).
+list(X) :- list('.'(a,X)).	

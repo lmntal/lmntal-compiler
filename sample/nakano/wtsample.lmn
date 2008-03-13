@@ -1,0 +1,13 @@
+{
+	window.
+	name("test").
+	size(300, 300).
+	killer.
+	sys.perpetual(on).
+	{textarea.
+	id(1).
+	text("hoge").
+	position(0, 0).
+	}.
+	{text("moge"), $p} :- {text("ok"), $p}.
+}

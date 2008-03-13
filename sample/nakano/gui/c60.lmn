@@ -1,0 +1,16 @@
+/* Fullerenes (C60)
+   Kazunori Ueda, 2005-11-06
+*/
+
+/* icosahedron */
+dome(L0,L1,L2,L3,L4,L5,L6,L7,L8,L9) :-
+   p(T0,T1,T2,T3,T4), p(L0,L1,H0,T0,H4), p(L2,L3,H1,T1,H0), 
+   p(L4,L5,H2,T2,H1), p(L6,L7,H3,T3,H2), p(L8,L9,H4,T4,H3).
+
+dome(E0,E1,E2,E3,E4,E5,E6,E7,E8,E9), /* top half */
+dome(E0,E9,E8,E7,E6,E5,E4,E3,E2,E1). /* bottom half */ 
+
+/* icosahedron -> fullerene */
+p(L0,L1,L2,L3,L4) :- X=c(L0,c(L1,c(L2,c(L3,c(L4,X))))).
+
+c(L50,c(L64,c(L61,c(L58,c(L55,L53)))),L53), c(L65,c(L79,c(L76,c(L73,c(L64,L68)))),L68), c(L61,c(L73,c(L94,c(L91,c(L88,L86)))),L86), c(L88,c(L109,c(L106,c(L103,c(L58,L98)))),L98), c(L55,c(L103,c(L124,c(L121,c(L118,L116)))),L116), c(L50,c(L118,c(L139,c(L136,c(L65,L131)))),L131), c(L178,c(L175,c(L170,c(L184,c(L181,L179)))),L179), c(L193,c(L184,c(L185,c(L79,c(L136,L194)))),L194), c(L181,c(L193,c(L139,c(L121,c(L208,L206)))),L206), c(L208,c(L124,c(L106,c(L223,c(L178,L218)))),L218), c(L109,c(L91,c(L238,c(L175,c(L223,L231)))),L231), c(L238,c(L94,c(L76,c(L185,c(L170,L248)))),L248).

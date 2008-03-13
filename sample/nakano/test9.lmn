@@ -1,9 +1,3 @@
-graphic.use.
-go :-
-{window, name("LMNtal Typing"), size(800,600), killer, keyCode, timer(10), bgcolor(255,255,255).
-{draw, getpic("rect"), position(30,90), color(100,0,0), size(100,30),
-{draw, getpic(string("X 
-",10)), position(0,0), color(0,0,0) 
-}. 
-}.
-} 
+{a. a. a.}.
+{a. a. a.}.
+{a. a. a.}.
