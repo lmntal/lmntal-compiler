@@ -236,6 +236,7 @@ public class Task implements Runnable {
 		Atom a = mem.popReadyAtom();
 		Iterator it = mem.rulesetIterator();
 		boolean flag = false;
+		
 		if(!nondeterministic && Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null && !Env.memtestonly){ // 実行アトムスタックが空でないとき
 			if(Env.profile == Env.PROFILE_BYDRIVEN){
 		        start = Util.getTime();
@@ -249,13 +250,17 @@ public class Task implements Runnable {
 					//そのまま処理を続けてもいいと思う。 2005/12/08 mizuno
 				}
 			}
-			
+
+//			if(Env.fUNYO){
+//				unyo.Mediator.sync(root);
+//			}
 			if(flag){
 				if (Env.debugOption) {//by inui
 					if (Debug.isBreakPoint()) Debug.inputCommand();
-				} else  if(Env.fUNYO){
-					unyo.Mediator.sync(root);
 				} else {
+					if(Env.fUNYO){
+						unyo.Mediator.sync(root);
+					}
 					if (!guiTrace()) return false;
 				}
 			} else {
@@ -282,11 +287,13 @@ public class Task implements Runnable {
 					}
 				}
 			}
-			
 			if(flag){
 				if (Env.debugOption) {//by inui
 					if (Debug.isBreakPoint()) Debug.inputCommand();
 				} else {
+					if(Env.fUNYO){
+						unyo.Mediator.sync(root);
+					}
 					if (!guiTrace()) return false;
 				}
 			} else if (!nondeterministic){
@@ -306,11 +313,13 @@ public class Task implements Runnable {
 					}
 				}
 			}
+
 			if(Env.profile == Env.PROFILE_BYDRIVEN){
 		        stop = Util.getTime();
 		        memtime+=(stop>start)?(stop-start):0;
 			}
 		}
+		
 		return true;
 	}
 	
@@ -327,9 +336,9 @@ public class Task implements Runnable {
 		}
 		
 		LMNtalRuntime r = runtime;
-		if(Env.fUNYO){
-			unyo.Mediator.sync(root);
-		}
+//		if(Env.fUNYO){
+//			unyo.Mediator.sync(root);
+//		}
 		while (!r.isTerminated()) {
 			Membrane mem;
 			//本膜をロック

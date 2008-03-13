@@ -1,0 +1,2 @@
+{a(X). a(Y). a. a(a). a(A) :- b(A). b(A) :- a(A).}. a(X).
+{a(XX). a(Y). a. a(a).}. a(XX).

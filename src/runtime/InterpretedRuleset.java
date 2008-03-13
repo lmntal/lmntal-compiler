@@ -729,6 +729,7 @@ class InterpretiveReactor {
 
 				case Instruction.ALLOCATOMINDIRECT : //[-dstatom, func]
 					atoms[inst.getIntArg1()] = new Atom(null, (Functor)(vars.get(inst.getIntArg2())));
+
 					break; //nakajima 2003-12-27, 2004-01-03, n-kato
 
 				case Instruction.COPYATOM :
@@ -1180,6 +1181,7 @@ class InterpretiveReactor {
 //					int isground_ret = ((Link)vars.get(inst.getIntArg2())).isGround((Set)vars.get(inst.getIntArg3()));
 					if(isground_ret == -1)return false;
 					vars.set(inst.getIntArg1(),new IntegerFunctor(isground_ret));
+
 					break; //kudo 2004-12-03
 					
 				case Instruction.ISUNARY: // [atom]

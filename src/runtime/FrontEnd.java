@@ -785,6 +785,7 @@ public class FrontEnd {
 
 			
 			if(Env.fGUI) Env.gui.setRootMem(root);
+
 //			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
 //			root.asyncLock();
 			boolean t = Env.fTrace;
@@ -802,6 +803,10 @@ public class FrontEnd {
 			}
 
 			boolean ready = true;
+
+			if(Env.fUNYO){
+				unyo.Mediator.sync(root);
+			}
 			
 			if (Env.gui != null) {
 				Env.gui.onTrace();
@@ -830,6 +835,11 @@ public class FrontEnd {
 					Env.p( Dumper.dump(rt.getGlobalRoot()) );
 				}
 				if(Env.getExtendedOption("chorus") != ""){ Output.out(Env.getExtendedOption("chorus"), rt.getGlobalRoot()); }
+
+				if(Env.fUNYO){
+					unyo.Mediator.sync(root);
+				}
+				
 				if (Env.gui != null) {
 					Env.gui.onTrace();
 				}
