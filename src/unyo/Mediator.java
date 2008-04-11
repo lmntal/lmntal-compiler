@@ -12,6 +12,9 @@ import runtime.SymbolFunctor;
 
 public class Mediator {
 
+	final static
+	private long SLEEP_TIME = 50;
+	
 	// <削除された膜のID, 親膜のID>
 	static
 	private HashMap<String, String> removedMembrane_;
@@ -40,6 +43,9 @@ public class Mediator {
 	
 	static
 	private Method setState_;
+	
+	static
+	private Method end_;
 	
 	static
 	private Method print_;
@@ -98,6 +104,8 @@ public class Mediator {
 					HashMap.class,
 					HashSet.class,
 					HashSet.class);
+			
+			end_ = unyoClass_.getMethod("end");
 			
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -184,6 +192,19 @@ public class Mediator {
 		print(msg.toString());
 	}
 	
+	static
+	public void end(){
+		try {
+			end_.invoke(unyoObj_);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	static 
 	public void sync(Membrane root) {
 		try {
@@ -205,7 +226,7 @@ public class Mediator {
 			
 			while((Boolean)sync_.invoke(unyoObj_)){
 				try {
-					Thread.sleep(50);
+					Thread.sleep(SLEEP_TIME);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

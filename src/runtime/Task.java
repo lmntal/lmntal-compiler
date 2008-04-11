@@ -14,6 +14,7 @@ import java.util.Map;
 
 import debug.Debug;
 
+import unyo.Mediator;
 import util.Stack;
 import util.Util;
 
@@ -282,6 +283,9 @@ public class Task implements Runnable {
 				while(it.hasNext()){ // 膜主導テストを行う
 					if(((Ruleset)it.next()).react(mem, nondeterministic)) {
 						flag = true;
+						if(Env.fUNYO){
+							unyo.Mediator.sync(root);
+						}
 						//if (memStack.peek() != mem) break;
 						break; // ルールセットが変わっているかもしれないため
 					}

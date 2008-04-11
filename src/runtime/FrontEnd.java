@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 
 import type.TypeException;
 import type.TypeInferer;
+import unyo.Mediator;
 import util.StreamDumper;
 import util.Util;
 import chorus.Output;
@@ -863,6 +864,9 @@ public class FrontEnd {
 		} catch (Exception e) {
 			e.printStackTrace();
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
+		}
+		if(Env.fUNYO){
+			Mediator.end();
 		}
 	}
 	/**

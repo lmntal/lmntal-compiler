@@ -1,0 +1,14 @@
+%root(X,Y), a(X), a(Y).
+%a(X) :- a(X, Y, Z), b(Z),b(Y).
+%b(X) :- b(X, Y, Z), c(Z),c(Y).
+%c(A),c(B),c(C),c(D),c(E),c(F),c(G),c(H) :- hoge(A),c(B),c(C),c(D),c(E),c(F),c(G),c(H)
+%c(X) :- c(X, Y, Z), d(Z),d(Y).
+
+%root2(X1,Y1), d(X1), d(Y1).
+%d(X) :- d(X, Y, Z), e(Z),e(Y).
+%e(X) :- e(X, Y, Z), f(Z),f(Y).
+
+root(X,Y,Z), a(X), a(Y), a(Z).
+a(X) :- a(X, Y, Z, S), b(Z),b(Y),b(S).
+b(X) :- b(X, Y, Z, S), c(Z),c(Y),c(S).
+c(X) :- c(X, Y, Z, S), d(Z),d(Y),d(S).

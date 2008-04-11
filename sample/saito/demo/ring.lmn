@@ -1,0 +1,5 @@
+kid(hand,hand), kid(hand,hand), kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand), kid(hand,hand), kid(hand,hand),
+kid(hand,hand), kid(hand,hand), kid(hand,hand).
+
+kid(A,B),hand(B),hand(C),kid(C,D) :- kid(A,X),kid(X,D).
