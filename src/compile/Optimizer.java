@@ -262,6 +262,7 @@ public class Optimizer {
 		ArrayList list;
 		HashMap listn = new HashMap();
 		int i=locate;
+		int insert_index = 0;
 		ff:
 		for(; i>=0; i--){
 			list = inst.getVarArgs(listn);
@@ -323,8 +324,9 @@ public class Optimizer {
 				if(list2.contains(inst.getArg1())){
 //						System.out.println("match2 " + inst);
 					moveok = max(moveok, 1);
-					i--;
-					break ff;
+					insert_index = i;
+//					i--;
+//					break ff;
 				}
 			}
 			else {
@@ -335,6 +337,7 @@ public class Optimizer {
 						if(list.get(j).equals(inst2.getArg1())) {
 //							System.out.println("match1 " + inst);
 							moveok = max(moveok, 1);
+							insert_index = i+1;
 							break ff;
 						}
 //							System.out.println("unmatch1 " + list.get(j) + "neq" + inst2.getArg1() + inst);
@@ -342,6 +345,7 @@ public class Optimizer {
 					else if(list2.contains(list.get(j))){
 //						System.out.println("match2 " + inst);
 						moveok = max(moveok, 1);
+						insert_index = i+1;
 						break ff;
 					}
 //					System.out.println("unmatch2 " + inst);
@@ -351,9 +355,9 @@ public class Optimizer {
 		}
 //		System.out.println(moveok);
 		if(moveok > 0){
-			if(i!=-1){
-//				System.out.println("add\t" + inst + "to "+(i+1));
-				insts.add(i+1, inst);
+			if(insert_index != 0){
+//				System.out.println("add\t" + inst + "to "+insert_index);
+				insts.add(insert_index, inst);
 			}
 			return moveok;
 		}
@@ -381,7 +385,7 @@ public class Optimizer {
 				} else if (judge == 1){
 //					System.out.println("remove1\t"+insts.get(i+1));
 					insts.remove(i+1);
-				} 
+				}
 			default:
 				continue;
 			}
