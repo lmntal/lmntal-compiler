@@ -1,0 +1,38 @@
+{
+/* 右回りを正方向とする */
+/////////////[問題ここから]/////////////
+r=dial([2,-3,4]).
+//r=dial([3,2,-6,1]).
+first_val(3).
+/////////////[問題ここまで]/////////////
+
+/* 初期状態を生成する種 */
+R=dial(Q), first_val(C) :- C>=1, C=<6 |
+  R=dial_calc(6,Q,V1), '.'(V1,E1,E6), E1=[1,2,3,4,5|E6], rotator(C).
+first_val(C) :- C<1 | unsolvable.
+first_val(C) :- C>6 | unsolvable.
+
+/* ダイヤルをX目盛分だけ右回転させる */
+rotator(X) :- X<0 | Y=6+X, rotator(Y). /* 横着実装 */
+rotator(X), R=dial_calc(C,Q,V1), '.'(V1,E1,E6), '.'(V6,E6,E5)
+  :- X>0 | Y=X-1, rotator(Y),
+           R=dial_calc(V6,Q,V6_0), '.'(C,E1,E6), '.'(V6_0,E6,E5).
+rotator(X), R=dial_calc(C,Q,V), $n[C]
+  :- X=:=0, int($n)
+      | R0=dial_calc(C0,Q,V), $n[C0], '.'(A,R0,R), $n[A].
+}.
+
+/* 初期化 */
+{$p, @p}/ :- $p, @p.
+
+/* rotator/1 が順番通りに処理されるために回転数を1つ取得するごとに
+ * stopper/2 を挿入する */
+R=dial_calc(C,Q0,V), '.'(X,Q1,Q0)
+  :- int(X) | R=dial_calc(C,Q0,V), stopper(Q0,Q1), rotator(X).
+/* ある rotator/1 の処理が終了したならば, stopper/2 を除去する */
+rotator(X), R=dial_calc(C,Q0,V), $n[C], stopper(Q0,Q1)
+  :- X=:=0, int($n)
+      | R0=dial_calc(C0,Q1,V), $n[C0], '.'(A,R0,R), $n[A].
+
+/* 終了条件 */
+R=dial_calc(C,[],V) :- C=V, R='[]'.
