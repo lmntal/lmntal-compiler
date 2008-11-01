@@ -410,14 +410,14 @@ public final class Env {
 	/**
 	 * Better list dumper : No comma output
 	 */
-	public static String parray(Collection l, String delim) {
+	public static<E> String parray(Collection<E> l, String delim) {
 		StringBuffer s = new StringBuffer();
-		for(Iterator i=l.iterator();i.hasNext();) {
+		for(Iterator<E> i=l.iterator();i.hasNext();) {
 			s.append( i.next().toString()+(i.hasNext() ? delim:"") );
 		}
 		return s.toString();
 	}
-	public static String parray(Collection l) {
+	public static<E> String parray(Collection<E> l) {
 		return parray(l, " ");
 	}
 	
@@ -450,10 +450,10 @@ public final class Env {
 	/**
 	 * 拡張コマンドライン引数をこれに格納する
 	 */
-	public static Map extendedOption = new HashMap();
-	public static String getExtendedOption(Object key) {
+	public static Map<String, String> extendedOption = new HashMap<String, String>();
+	public static String getExtendedOption(String key) {
 		if(!extendedOption.containsKey(key)) return "";
-		return extendedOption.get(key).toString();
+		return extendedOption.get(key);
 	}
 	
 	////////////////////////////////////////////////////////////////

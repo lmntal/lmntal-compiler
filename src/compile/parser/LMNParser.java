@@ -7,7 +7,6 @@ package compile.parser;
 
 import java_cup.runtime.Scanner;
 import java.io.Reader;
-//import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.HashSet;
@@ -15,10 +14,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
 
+import compile.structure.Atom;
+import compile.structure.Atomic;
+import compile.structure.Context;
+import compile.structure.ContextDef;
+import compile.structure.LinkOccurrence;
+import compile.structure.Membrane;
+import compile.structure.ProcessContext;
+import compile.structure.ProcessContextEquation;
+import compile.structure.RuleContext;
+import compile.structure.RuleStructure;
+
 import runtime.Functor;
 import runtime.SpecialFunctor;
 import runtime.Env;
-import compile.structure.*;
 
 
 public class LMNParser {
@@ -102,7 +111,7 @@ public class LMNParser {
 	////////////////////////////////////////////////////////////////
 
 	/** ルールのテキスト表現を決定する */
-	void setRuleText(LinkedList process) {
+	private void setRuleText(LinkedList process) {
 		ListIterator it = process.listIterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
@@ -386,12 +395,11 @@ public class LMNParser {
 	 *  @param sNegatives ガード否定条件の中間形式[$p,[Q]]のリスト[in]
 	 *  @param rule ルール構造[in,out]
 	 *  @param names 左辺およびガード型制約に出現した$p（と*X）からその定義（と出現）へのマップ[in] */
-	private void addGuardNegatives(LinkedList sNegatives, RuleStructure rule, HashMap names) throws ParseException {
-		Iterator it = sNegatives.iterator();
-		while (it.hasNext()) {
-			LinkedList neg = new LinkedList();
-			ListIterator it2 = ((LinkedList)it.next()).listIterator();
-			while (it2.hasNext()) {
+	private void addGuardNegatives(LinkedList<List> sNegatives, RuleStructure rule, HashMap names) throws ParseException {
+		for(List<List> list1 : sNegatives){
+			List<ProcessContextEquation> neg = new LinkedList<ProcessContextEquation>();
+			ListIterator it2 = list1.listIterator();
+			while(it2.hasNext()){
 				LinkedList sPair = (LinkedList)it2.next();
 				String cxtname = ((SrcProcessContext)sPair.getFirst()).getQualifiedName();
 				if (!names.containsKey(cxtname)) {
@@ -421,10 +429,8 @@ public class LMNParser {
 	/** 子膜に対して再帰的にプロキシを追加する。
 	 * @return この膜の更新された自由リンクマップ mem.freeLinks */
 	private HashMap addProxies(Membrane mem) {
-		HashSet proxyLinkNames = new HashSet();	// memとその子膜の間に作成した膜間リンク名の集合
-		Iterator it = mem.mems.iterator();
-		while (it.hasNext()) {
-			Membrane submem = (Membrane)it.next();
+		HashSet<String> proxyLinkNames = new HashSet<String>();	// memとその子膜の間に作成した膜間リンク名の集合
+		for(Membrane submem : mem.mems){
 			HashMap freeLinks = addProxies(submem);
 			// 子膜の自由リンクに対してプロキシを追加する
 			HashMap newFreeLinks = new HashMap();
@@ -523,7 +529,7 @@ public class LMNParser {
 	 * 指定されたリンク出現を記録する。同じ名前で2回目の出現ならばリンクの結合を行う。
 	 * @param lnk 記録するリンク出現
 	 */
-	private void addLinkOccurrence(HashMap links, LinkOccurrence lnk) {
+	private void addLinkOccurrence(HashMap<String, LinkOccurrence> links, LinkOccurrence lnk) {
 		// 3回以上の出現
 		if (links.get(lnk.name) == CLOSED_LINK) {
 			error("SYNTAX ERROR: link " + lnk.name + " appears more than twice at line " + lnk.atom.line);
@@ -539,7 +545,7 @@ public class LMNParser {
 		}
 		// 2回目の出現
 		else {
-			LinkOccurrence buddy = (LinkOccurrence)links.get(lnk.name);
+			LinkOccurrence buddy = links.get(lnk.name);
 			lnk.buddy = buddy;
 			buddy.buddy = lnk;
 			links.put(lnk.name, CLOSED_LINK);
@@ -548,9 +554,9 @@ public class LMNParser {
 	
 	/** 膜memの自由リンクを膜内で閉じる（構文エラーからの復帰用） */
 	public void closeFreeLinks(Membrane mem) {
-		Iterator it = mem.freeLinks.keySet().iterator();
+		Iterator<String> it = mem.freeLinks.keySet().iterator();
 		while (it.hasNext()) {
-			LinkOccurrence link = (LinkOccurrence)mem.freeLinks.get(it.next());
+			LinkOccurrence link = mem.freeLinks.get(it.next());
 			warning("WARNING: global singleton link: " + link.name + " at line " + link.atom.line);
 			LinkedList process = new LinkedList();
 			process.add(new SrcLink(link.name));

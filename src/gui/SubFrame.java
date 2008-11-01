@@ -78,7 +78,7 @@ public class SubFrame extends JPanel {
 	public int ATTRACTION_MAX = 10000;
 	
 	final static
-	private int ATTRACTION_DEFAULT = 100;
+	private int ATTRACTION_DEFAULT = 1000;
 	
 	final static
 	private int SPRING_DEFAULT = 20;
@@ -89,6 +89,15 @@ public class SubFrame extends JPanel {
 	final static
 	private int SPRING_MIN = 0;
 	
+	final static
+	private int REPULSIVE_MIN = 0;
+	
+	final static
+	private int REPULSIVE_MAX = 100;
+	
+	final static
+	private int REPULSIVE_DEFAULT = 50;
+
 	/////////////////////////////////////////////////////////////////
 	
 	// 倍率
@@ -135,6 +144,9 @@ public class SubFrame extends JPanel {
 	private JCheckBox linkNumCheck_ = new JCheckBox("Show Link Number");
 	
 	static
+	private JCheckBox atomSizeCheck_ = new JCheckBox("Change Atom Size");
+	
+	static
 	private JCheckBox historyCheck_ = new JCheckBox("Take History");
 	
 	static
@@ -164,6 +176,10 @@ public class SubFrame extends JPanel {
 	static
 	private JSlider angleSlider_ =
 		new JSlider(ANGLE_MIN, ANGLE_MAX, ANGLE_DEFAULT);
+	
+	static
+	private JSlider repulsiveSlider_ =
+		new JSlider(REPULSIVE_MIN, REPULSIVE_MAX, REPULSIVE_DEFAULT);
 
 	static
 	private JCheckBox attractionCheck_ = new JCheckBox("Calc Attraction");
@@ -242,6 +258,8 @@ public class SubFrame extends JPanel {
 		angleSlider_.setPreferredSize(preferredSize);
 		linkNumCheck_.addItemListener(new LinkNumAdapter());
 		linkNumCheck_.setSelected(false);
+		atomSizeCheck_.addItemListener(new AtomSizeAdapter());
+		atomSizeCheck_.setSelected(false);
 		historyCheck_.addItemListener(new HistoryAdapter());
 		historyCheck_.setSelected(false);
 		richCheck_.addItemListener(new RichAdapter());
@@ -258,6 +276,8 @@ public class SubFrame extends JPanel {
 		springSlider_.setPreferredSize(preferredSize);
 		repulsiveCheck_.addItemListener(new RepulsiveAdapter());
 		repulsiveCheck_.setSelected(true);
+		repulsiveSlider_.addChangeListener(new RepulsiveSliderChanged());
+		repulsiveSlider_.setPreferredSize(preferredSize);
 		attractionCheck_.addItemListener(new AttractionAdapter());
 		attractionCheck_.setSelected(false);
 		attractionSlider_.addChangeListener(new AttractionSliderChanged());
@@ -270,6 +290,7 @@ public class SubFrame extends JPanel {
 //		menuPanel_.add(richCheck_);
 		menuPanel_.add(historyCheck_);
 		menuPanel_.add(linkNumCheck_);
+		menuPanel_.add(atomSizeCheck_);
 		menuPanel_.add(showFullNameCheck_);
 		menuPanel_.add(showRulesCheck_);
 		menuPanel_.add(angleCheck_);
@@ -277,6 +298,7 @@ public class SubFrame extends JPanel {
 		menuPanel_.add(attractionCheck_);
 		menuPanel_.add(attractionSlider_);
 		menuPanel_.add(repulsiveCheck_);
+		menuPanel_.add(repulsiveSlider_);
 		menuPanel_.add(springCheck_);
 		menuPanel_.add(springSlider_);
 		menuPanel_.add(breakPointCheck_);
@@ -284,6 +306,7 @@ public class SubFrame extends JPanel {
 		angleSlider_.setVisible(false);
 		springSlider_.setVisible(false);
 		attractionSlider_.setVisible(false);
+		repulsiveSlider_.setVisible(false);
 		
 		menuScroll_ = new JScrollPane(menuPanel_);
 		///////////////////////////////////////////////////////////////////////
@@ -371,10 +394,12 @@ public class SubFrame extends JPanel {
 		angleSlider_.setVisible(flag);
 		springSlider_.setVisible(flag);
 		attractionSlider_.setVisible(flag);
+		repulsiveSlider_.setVisible(flag);
 		if(!flag){
 			angleSlider_.setValue(ANGLE_DEFAULT);
 			springSlider_.setValue(SPRING_DEFAULT);
 			attractionSlider_.setValue(ATTRACTION_DEFAULT);
+			repulsiveSlider_.setValue(REPULSIVE_DEFAULT);
 		}
 	}
 	
@@ -512,7 +537,6 @@ public class SubFrame extends JPanel {
 	private class GoActionAdapter implements ActionListener {
 		public GoActionAdapter() { }
 		public void actionPerformed(ActionEvent e) {
-			
 			try{
 				mainFrame_.setStep(Integer.parseInt(stepBox_.getText()));
 			} catch (NumberFormatException e1) {
@@ -555,6 +579,19 @@ public class SubFrame extends JPanel {
 		
 		public void itemStateChanged(ItemEvent e) {
 			LinkView.setShowLinkNum(linkNumCheck_.isSelected());
+		}
+	}
+	/**
+	 * アトムサイズをリンク数によって変える
+	 * @author wakako
+	 *
+	 */
+	static
+	private class AtomSizeAdapter implements ItemListener {
+		public AtomSizeAdapter() { } 
+		
+		public void itemStateChanged(ItemEvent e) {
+			Node.changeAtomSize(atomSizeCheck_.isSelected());
 		}
 	}
 	static
@@ -646,6 +683,14 @@ public class SubFrame extends JPanel {
 		public void stateChanged(ChangeEvent e) {
 			JSlider source = (JSlider)e.getSource();
 			AttractionForce.setConstantAttraction(source.getValue());
+		}
+	}
+	
+	static
+	private class RepulsiveSliderChanged implements ChangeListener {
+		public void stateChanged(ChangeEvent e) {
+			JSlider source = (JSlider)e.getSource();
+			RepulsiveForce.setConstantRepulsive(source.getValue());
 		}
 	}
 

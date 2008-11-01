@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import util.MultiMapIterator;
@@ -27,13 +28,13 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	/** atoms内のアトムの数。整合性要注意 */
 	private int size = 0;
 	/** 実際にアトムの集合を管理している変数 */
-	private Map atoms = null;
+	private Map<Functor, List<Atom>> atoms = null;
 	/** メモリ利用量削減のため、データアトムはまとめて管理 */
-	private ArrayList dataAtoms = null;
+	private List<Atom> dataAtoms = null;
 	/** OUTSIDE_PROXYの集合を管理している変数 */
-	private Map outs = null;
+	private Map<Functor, List<Atom>> outs = null;
 	
-	private ArrayList startAtoms = null; 
+	private List<Atom> startAtoms = null; 
 
 	/** アトム数の取得 */
 	public int size() {
@@ -47,14 +48,14 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	/** 指定されたFunctorを持つアトムの数の取得 */
 	public int getAtomCountOfFunctor(Functor f) {
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-			ArrayList l = (ArrayList)(f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
+			List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
 			if (l == null) {
 				return 0;
 			} else {
 				return l.size();
 			}
 		} else {
-			Iterator it = new DataAtomIterator(f);
+			Iterator<Atom> it = new DataAtomIterator(f);
 			int size = 0;
 			while (it.hasNext()) {
 				size++;
@@ -64,10 +65,10 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	}
 	/** OUTSIDE_PROXYの数の取得 */
 	public int getOutCount() {
-		Iterator i = getOuts().values().iterator();
+		Iterator<List<Atom>> i = getOuts().values().iterator();
 		int k=0;
 		while(i.hasNext()){
-			k += ((ArrayList)i.next()).size();
+			k += i.next().size();
 		}
 		return k;
 	}
@@ -75,21 +76,25 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	public boolean isEmpty() {
 		return size == 0;
 	}
-	/** この集合内にあるアトムの反復子を返す */
-	public Iterator iterator() {
-		return new NestedIterator(new Iterator[] {getDataAtoms().iterator(),
-													new MultiMapIterator(getOuts()),
-													new MultiMapIterator(getAtoms())});
+	/** この集合内にあるア	トムの反復子を返す */
+
+	@SuppressWarnings("unchecked")
+	public Iterator<Atom> iterator() {
+		return new NestedIterator<Atom>(new Iterator[] {getDataAtoms().iterator(),
+				new MultiMapIterator<Atom>(getOuts()),
+				new MultiMapIterator<Atom>(getAtoms())});
+		 
 	}
 	
+	
 	/** 与えられた名前を持つアトムの反復子を返す */
-	public Iterator iteratorOfFunctor(Functor f) {
+	public Iterator<Atom> iteratorOfFunctor(Functor f) {
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-			ArrayList l = (ArrayList)(f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
+			List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
 			if (l == null) {
 				return Util.NULL_ITERATOR;
 			} else {
-				if (Env.shuffle >= Env.SHUFFLE_ATOMS) return new RandomIterator(l);
+				if (Env.shuffle >= Env.SHUFFLE_ATOMS) return new RandomIterator<Atom>(l);
 				else return l.iterator();
 			}
 		} else {
@@ -97,8 +102,8 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		}
 	}
 	/** OUTSIDE_PROXYの反復氏を返す */
-	public Iterator iteratorOfOUTSIDE_PROXY() {
-		return new MultiMapIterator(getOuts());
+	public Iterator<Atom> iteratorOfOUTSIDE_PROXY() {
+		return new MultiMapIterator<Atom>(getOuts());
 	}
 	/** 
 	 * アクティブアトムのFunctorの反復子を返す。
@@ -109,7 +114,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	 * (n-kato) 膜のgcメソッド（コピーGCによるローカルidの振り直しを行う予定）に任せて放置していいと思います。
 	 * ただし、gcメソッドは現在呼ばれませんけど。
 	 */
-	public Iterator activeFunctorIterator() {
+	public Iterator<Functor> activeFunctorIterator() {
 		return getAtoms().keySet().iterator();
 	}
 	/**
@@ -119,7 +124,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	public Object[] toArray() {
 		Object[] ret = new Atom[size];
 		int index = 0;
-		Iterator it = iterator();
+		Iterator<Atom> it = iterator();
 		while (it.hasNext()) {
 			ret[index++] = it.next();
 		}
@@ -137,7 +142,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 			a = (Object[])Array.newInstance(a.getClass().getComponentType(), size);
 		}
 		int index = 0;
-		Iterator it = iterator();
+		Iterator<Atom> it = iterator();
 		while (it.hasNext()) {
 			a[index++] = it.next();
 		}
@@ -150,21 +155,21 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	 * 指定されたアトムを追加する。
 	 * @return この集合が変更された場合はtrue
 	 */
-	public boolean add(Object o) {
-		Functor f = ((Atom)o).getFunctor();
-		ArrayList l;
+	public boolean add(Atom atom) {
+		Functor f = atom.getFunctor();
+		List<Atom> l;
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-			Map map = f.isOutsideProxy() ? getOuts() : getAtoms();
-			l = (ArrayList)map.get(f);
+			Map<Functor, List<Atom>> map = f.isOutsideProxy() ? getOuts() : getAtoms();
+			l = map.get(f);
 			if (l == null) {
-				l = new ArrayList();
+				l = new ArrayList<Atom>();
 				map.put(f, l);
 			}
 		} else {
 			l = getDataAtoms();
 		}
-		l.add(o);
-		((Atom)o).index = l.size() - 1;
+		l.add(atom);
+		atom.index = l.size() - 1;
 		size++;
 		return true;
 	}
@@ -172,13 +177,13 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	 * 指定されたアトムがあれば除去する。
 	 * @return この集合が変更された場合はtrue
 	 */
-	public boolean remove(Object o) {
-		Atom a = (Atom)o;
+	public boolean remove(Atom atom) {
+		Atom a = atom;
 		Functor f = a.getFunctor();
-		ArrayList l;
+		List<Atom> l;
 		
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-			l = (ArrayList)(f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
+			l = f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f);
 		} else {
 			l = getDataAtoms();
 		}
@@ -186,7 +191,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 			l.remove(l.size() - 1);
 			if(l.isEmpty()){ l = null; }
 		} else {
-			Atom t = (Atom)l.remove(l.size() - 1);
+			Atom t = l.remove(l.size() - 1);
 			l.set(a.index, t);
 			t.index = a.index;
 		}
@@ -200,9 +205,9 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	 * <p>現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
 	 * @return この集合が変更された場合はtrue
 	 */
-	public boolean addAll(Collection c) {
+	public boolean addAll(Collection<Atom> c) {
 		boolean ret = false;
-		Iterator it = c.iterator();
+		Iterator<Atom> it = c.iterator();
 		while (it.hasNext()) {
 			if (add(it.next())) {
 				ret = true;
@@ -216,9 +221,9 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	 * <p>現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。 
 	 * @return この集合が変更された場合はtrue
 	 */
-	public boolean removeAll(Collection c) {
+	public boolean removeAll(Collection<Atom> c) {
 		boolean ret = false;
-		Iterator it = c.iterator();
+		Iterator<Atom> it = c.iterator();
 		while (it.hasNext()) {
 			ret |= remove(it.next());
 			//removeメソッドの中でsizeは変更している
@@ -236,7 +241,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	/** sizeの整合性を検査する。デバッグ用。*/
 	public boolean verify() {
 		int n = 0;
-		Iterator it = getAtoms().values().iterator();
+		Iterator<List<Atom>> it = getAtoms().values().iterator();
 		while (it.hasNext()) {
 			n += ((RandomSet)it.next()).size();
 		}
@@ -245,7 +250,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	/**デバッグ用出力*/
 	public void print() {
 		Util.println("AtomSet: ");
-		Iterator it = iterator();
+		Iterator<Atom> it = iterator();
 		while (it.hasNext()) {
 			Util.println(it.next());
 		}
@@ -253,8 +258,8 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	}
 	
 	/** dataAtoms 中の特定のファンクタだけを返す反復子 */
-	private class DataAtomIterator implements Iterator {
-		private Iterator it;
+	private class DataAtomIterator implements Iterator<Atom> {
+		private Iterator<Atom> it;
 		private Atom next;
 		private Functor functor;
 		DataAtomIterator(Functor functor) {
@@ -268,7 +273,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 					next = null;
 					break;
 				}
-				next = (Atom)it.next();
+				next = it.next();
 				if (next.getFunctor().equals(functor)) {
 					break;
 				}
@@ -277,7 +282,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		public boolean hasNext() {
 			return next != null;
 		}
-		public Object next() {
+		public Atom next() {
 			Atom ret = next;
 			setNext();
 			return ret;
@@ -288,10 +293,10 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	}
 	
 	public void gc() {
-		Iterator it = getAtoms().keySet().iterator();
+		Iterator<Functor> it = getAtoms().keySet().iterator();
 		while (it.hasNext()) {
-			Functor f = (Functor)it.next();
-			if (((ArrayList)atoms.get(f)).size() == 0)
+			Functor f = it.next();
+			if (atoms.get(f).size() == 0)
 				it.remove();
 		}
 	}
@@ -304,34 +309,34 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		gc();
 		/////////////////////////////////
 		// non deterministic LMNtal
-		Comparator sizeComparator = new Comparator() {
-			public int compare(Object f0, Object f1) {
-				return ((ArrayList)getAtoms().get(f0)).size() - ((ArrayList)atoms.get(f1)).size();
+		Comparator<Functor> sizeComparator = new Comparator<Functor>() {
+			public int compare(Functor f0, Functor f1) {
+				return getAtoms().get(f0).size() - atoms.get(f1).size();
 			}
 		};
 		//比較のための準備
-		ArrayList funcs = new ArrayList();
+		List<Functor> funcs = new ArrayList<Functor>();
 		funcs.addAll(getAtoms().keySet());
 		Collections.sort(funcs, sizeComparator);
-		HashSet checked = new HashSet();
-		startAtoms = new ArrayList();
+		HashSet<Atom> checked = new HashSet<Atom>();
+		startAtoms = new ArrayList<Atom>();
 		for (int i = 0; i < funcs.size(); i++) {
-			searchAtomGroup((ArrayList)atoms.get(funcs.get(i)), checked);
+			searchAtomGroup(atoms.get(funcs.get(i)), checked);
 		}
 		searchAtomGroup(getDataAtoms(), checked);
 
 		calcHashCode();
 	}
-	private void searchAtomGroup(ArrayList l, HashSet checked) {
-		for (int j = 0; j < l.size(); j++) {
-			Atom a = (Atom)l.get(j);
+	private void searchAtomGroup(List<Atom> name, HashSet<Atom> checked) {
+		for (int j = 0; j < name.size(); j++) {
+			Atom a = name.get(j);
 			if (!checked.contains(a)) {
 				searchAtomGroup(a, checked);
 				startAtoms.add(a);
 				}
 		}
 	}
-	private void searchAtomGroup(Atom a, HashSet checked) {
+	private void searchAtomGroup(Atom a, HashSet<Atom> checked) {
 		checked.add(a);
 		for (int i = 0; i < a.getArity(); i++) {
 			Atom a2 = a.nthAtom(i);
@@ -346,15 +351,15 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		if (getAtoms().size() != s.atoms.size()) return false;
 		if (getDataAtoms().size() != s.dataAtoms.size()) return false;
 
-		HashSet checked2 = new HashSet();
-		HashMap map = new HashMap();
+		HashSet<Atom> checked2 = new HashSet<Atom>();
+		HashMap<Atom, Atom> map = new HashMap<Atom, Atom>();
 		for (int i = 0; i < startAtoms.size(); i++) {
 			Atom a1 = (Atom)startAtoms.get(i);
 			Functor f = a1.getFunctor();
-			ArrayList l2;
+			List<Atom> l2;
 			if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-				l2 = (ArrayList)s.atoms.get(f);
-				if (l2 == null || ((ArrayList)atoms.get(f)).size() != l2.size()) return false;
+				l2 = s.atoms.get(f);
+				if (l2 == null || atoms.get(f).size() != l2.size()) return false;
 			} else {
 				l2 = s.dataAtoms;
 			}
@@ -362,7 +367,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 			for (int j = 0; j < l2.size(); j++) {
 				if (checked2.contains(l2.get(j))) continue;
 				map.clear();
-				if (compare(a1, (Atom)l2.get(j), map, checked2)) {
+				if (compare(a1, l2.get(j), map, checked2)) {
 					flg = true;
 					checked2.addAll(map.values());
 					break;
@@ -372,7 +377,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		}
 		return true;
 	}
-	private boolean compare(Atom a1, Atom a2, HashMap map, HashSet checked2) {
+	private boolean compare(Atom a1, Atom a2, HashMap<Atom, Atom> map, HashSet<Atom> checked2) {
 		if (!a1.getFunctor().equals(a2.getFunctor()))
 			return false;
 		if (map.containsKey(a1)) {
@@ -391,11 +396,11 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	private int hashCode;
 	private void calcHashCode() {
 		hashCode = 0;
-		Iterator it = getAtoms().values().iterator();
+		Iterator<List<Atom>> it = getAtoms().values().iterator();
 		while (it.hasNext()) {
-			ArrayList l = (ArrayList)it.next();
+			List<Atom> l = it.next();
 			for (int i = 0; i < l.size(); i++) {
-				Atom a = (Atom)l.get(i);
+				Atom a = l.get(i);
 				int t = a.getFunctor().hashCode();
 				for (int j = 0; j < a.getArity(); j++) {
 					t = t * 31 + a.nthAtom(j).getFunctor().hashCode();
@@ -407,16 +412,16 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 	public int hashCode() {
 		return hashCode;
 	}
-	private Map getOuts() {
-		if(null == outs){ outs = new HashMap(); }
+	private Map<Functor, List<Atom>> getOuts() {
+		if(null == outs){ outs = new HashMap<Functor, List<Atom>>(); }
 		return outs;
 	}
-	private Map getAtoms() {
-		if(null == atoms){ atoms = new HashMap(); }
+	private Map<Functor, List<Atom>> getAtoms() {
+		if(null == atoms){ atoms = new HashMap<Functor, List<Atom>>(); }
 		return atoms;
 	}
-	private ArrayList getDataAtoms() {
-		if(null == dataAtoms){ dataAtoms = new ArrayList(); }
+	private List<Atom> getDataAtoms() {
+		if(null == dataAtoms){ dataAtoms = new ArrayList<Atom>(); }
 		return dataAtoms;
 	}
 }

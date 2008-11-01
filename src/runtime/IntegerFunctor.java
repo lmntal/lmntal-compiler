@@ -16,6 +16,8 @@ public class IntegerFunctor extends DataFunctor {
 		return (o instanceof IntegerFunctor) && ((IntegerFunctor)o).value == value;
 	}
 	
+	public boolean isNumber() { return true; }
+	
 	public String toString() {
 		return getAbbrName() + "_" + getArity();
 	}

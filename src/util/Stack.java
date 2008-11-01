@@ -77,7 +77,7 @@ public final class Stack {
 //		entity.remove();
 //	}
 	public String toString() {
-		ArrayList list = new ArrayList();
+		ArrayList<QueuedEntity> list = new ArrayList<QueuedEntity>();
 		QueuedEntity entity = head.next;
 		while (entity != tail) {
 			list.add(entity);

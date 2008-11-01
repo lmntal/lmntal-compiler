@@ -82,6 +82,14 @@ public class SymbolFunctor extends Functor {
 	}
 	
 	/**
+	 * このファンクタが数値かどうかを取得する。
+	 * @return false
+	 */
+	public boolean isNumber(){
+		return false;
+	}
+	
+	/**
 	 * ファンクタの値を返す
 	 * @return ファンクタの名前
 	 */

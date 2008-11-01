@@ -26,7 +26,7 @@ public class LMNtalRuntime{
 	}
 	
 	/** 全てのタスク */
-	List tasks = new ArrayList();
+	private List<Task> tasks = new ArrayList<Task>();
 	
 	////////////////////////////////////////////////////////////////	
 
@@ -71,9 +71,9 @@ public class LMNtalRuntime{
 	 * 各タスクのルールスレッドが終わるまで待つ。*/
 	synchronized public void terminate() {
 		terminated = true;
-		Iterator it = tasks.iterator();
+		Iterator<Task> it = tasks.iterator();
 		while (it.hasNext()) {
-			Task task = (Task)it.next();
+			Task task = it.next();
 			synchronized(task) {
 				task.notifyAll();
 			}

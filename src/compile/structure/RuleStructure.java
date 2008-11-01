@@ -2,7 +2,8 @@ package compile.structure;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Iterator;
+import java.util.List;
+
 
 /** 
  * ソースコード中のルールの構造を表すクラス
@@ -37,13 +38,13 @@ public final class RuleStructure {
 	public LinkedList guardNegatives = new LinkedList();
 	
 	/** プロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef) */
-	public HashMap processContexts = new HashMap();
+	public HashMap<String, ContextDef> processContexts = new HashMap<String, ContextDef>();
 
 	/** ルール文脈の限定名 ("@p"などのString) -> 文脈の定義 (ContextDef) */
-	public HashMap ruleContexts = new HashMap();
+	public HashMap<String, ContextDef> ruleContexts = new HashMap<String, ContextDef>();
 
 	/** 型付きプロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef) */
-	public HashMap typedProcessContexts = new HashMap();
+	public HashMap<String, ContextDef> typedProcessContexts = new HashMap<String, ContextDef>();
 	
 	/** 行番号 2006.1.22 by inui */
 	public int lineno;

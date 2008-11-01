@@ -71,6 +71,9 @@ public class Node implements Cloneable{
 	private boolean showAll_ = false;
 	
 	static
+	private boolean changeAtomSize_ = false;
+	
+	static
 	private Set<Node> bezierSet_ = new HashSet<Node>(); 
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -192,12 +195,14 @@ public class Node implements Cloneable{
 		if(null != parent_){
 			setInvisibleRootNode(null);
 			setVisible(showAll_, true);
+			/*
 			if(showAll_){
 				rect_.setFrameFromCenter(rect_.getCenterX(),
 						rect_.getCenterY(),
 						rect_.getCenterX() - ATOM_SIZE,
 						rect_.getCenterY() - ATOM_SIZE);
 			}
+			*/
 //			resetAllLink();
 		} else {
 			rootMembrane_ = true;
@@ -215,6 +220,11 @@ public class Node implements Cloneable{
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
+	
+	static
+	public void changeAtomSize(boolean change){
+		changeAtomSize_ = change;
+	}
 	
 	public void addBezier(Node node){
 		if(bezierMap_.containsKey(node)){
@@ -792,7 +802,9 @@ public class Node implements Cloneable{
 		if(!Membrane.class.isInstance(myObject_)){
 			return;
 		}
-		rect_.setFrameFromCenter(rect_.getCenterX(), rect_.getCenterY(), rect_.getCenterX() - 40, rect_.getCenterY() - 40);
+		if(!showAll_){
+			rect_.setFrameFromCenter(rect_.getCenterX(), rect_.getCenterY(), rect_.getCenterX() - 40, rect_.getCenterY() - 40);
+		}
 		LinkSet.addLink(this);
 		
 	}
@@ -1066,7 +1078,10 @@ public class Node implements Cloneable{
 			
 		if(0 < atom.getEdgeCount()){
 			LinkSet.addLink(this);
-			double atomSize = ATOM_SIZE + ((ATOM_SIZE / 8) * atom.getEdgeCount());
+			double atomSize = ATOM_SIZE;
+			if(changeAtomSize_){
+				atomSize = ATOM_SIZE + ((ATOM_SIZE / 8) * atom.getEdgeCount());
+			}
 			rect_.width = atomSize;
 			rect_.height = atomSize;
 			rect_.archeight = atomSize;

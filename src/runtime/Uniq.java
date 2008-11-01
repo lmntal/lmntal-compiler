@@ -9,8 +9,8 @@ public class Uniq {
 	 * 型付きプロセス文脈に束縛された構造へのリンクを保存する配列。
 	 * 要素は Link[] 型
 	 */
-	public ArrayList history = new ArrayList();
-	public HashSet historyH = new HashSet();
+	public ArrayList<Link[]> history = new ArrayList<Link[]>();
+	public HashSet<String> historyH = new HashSet<String>();
 	
 	/**
 	 * 型付きプロセス文脈に束縛された構造の実体を保存する膜。タスク==null
@@ -29,7 +29,7 @@ public class Uniq {
 		for(int i=0;i<history.size();i++) {
 			int NG=0;
 			for(int j=0;j<el.length;j++) {
-				Link[] aH = (Link[])history.get(i);
+				Link[] aH = history.get(i);
 				if(aH[j].eqGround(el[j])) NG++;
 			}
 			if(NG==el.length) return false;
@@ -70,7 +70,7 @@ public class Uniq {
 //		historyH.add(curI);
 //		return true;
 //	}
-	public boolean check(List[] el) {
+	public boolean check(List<Link>[] el) {
 		// O(1) のはず
 		StringBuffer cur=new StringBuffer();
 		for(int j=0;j<el.length;j++) {

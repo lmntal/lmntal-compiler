@@ -12,13 +12,13 @@ import java.util.*;
  * この生成されたコメントの挿入されるテンプレートを変更するため
  * ウィンドウ > 設定 > Java > コード生成 > コードとコメント
  */
-public final class RandomIterator implements Iterator {
+public final class RandomIterator<E> implements Iterator<E> {
 	private static Random random = new Random();
 	private int[] index;
-	private List list;
+	private List<E> list;
 	private int size;
 	
-	public RandomIterator(List list) {
+	public RandomIterator(List<E> list) {
 		this.list = list;
 		size = list.size();
 		index = new int[size];
@@ -43,7 +43,7 @@ public final class RandomIterator implements Iterator {
 	/* (非 Javadoc)
 	 * @see java.util.Iterator#next()
 	 */
-	public Object next() {
+	public E next() {
 		int i = random.nextInt(size);
 		int i2 = index[i];
 		index[i] = index[size-1];

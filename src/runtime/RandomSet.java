@@ -20,10 +20,10 @@ import util.Util;
  *
  * O(1)での追加・削除とランダムアクセスができるセット。
  */
-public class RandomSet implements Set {
-	private ArrayList array = new ArrayList();
-	private HashMap map = new HashMap();
-	
+public class RandomSet<E> implements Set<E> {
+	private ArrayList<E> array = new ArrayList<E>();
+	private HashMap<E, Integer> map = new HashMap<E, Integer>();
+
 	public int size() {
 		return array.size();
 	}
@@ -41,7 +41,7 @@ public class RandomSet implements Set {
 		return array.toArray();
 	}
 
-	public boolean add(Object o) {
+	public boolean add(E o) {
 		if (map.containsKey(o)) {
 			return false;
 		}
@@ -62,17 +62,17 @@ public class RandomSet implements Set {
 		if (pos == array.size() - 1) {
 			array.remove(pos);
 		} else {
-			Object last = array.remove(array.size() - 1);
+			E last = array.remove(array.size() - 1);
 			array.set(pos, last);
-			map.put(last, new Integer(pos));
+			map.put(last, pos);
 		}
 		map.remove(o);
 		return true;
 	}
 
-	public boolean addAll(Collection c) {
+	public boolean addAll(Collection<? extends E> c) {
 		boolean ret = false;
-		Iterator i = c.iterator();
+		Iterator<? extends E> i = c.iterator();
 		while (i.hasNext()) {
 			if (add(i.next())) {
 				ret = true;
@@ -81,13 +81,13 @@ public class RandomSet implements Set {
 		return ret;
 	}
 
-	public boolean containsAll(Collection c) {
+	public boolean containsAll(Collection<?> c) {
 		return map.keySet().containsAll(c);
 	}
 
-	public boolean removeAll(Collection c) {
+	public boolean removeAll(Collection <?>c) {
 		boolean ret = false;
-		Iterator i = c.iterator();
+		Iterator<?> i = c.iterator();
 		while (i.hasNext()) {
 			if (remove(i.next())) {
 				ret = true;
@@ -96,17 +96,17 @@ public class RandomSet implements Set {
 		return ret;
 	}
 
-	public boolean retainAll(Collection c) {
+	public boolean retainAll(Collection<?> c) {
 		throw new UnsupportedOperationException();
 	}
 
-	public Iterator iterator() {
-//2005/10/23 Mizuno
-//ランダムにしたくないときは、このクラスのインスタンスは利用しない
-		return new RandomIterator(array);
+	public Iterator<E> iterator() {
+//		2005/10/23 Mizuno
+//		ランダムにしたくないときは、このクラスのインスタンスは利用しない
+		return new RandomIterator<E>(array);
 	}
 
-	public Object[] toArray(Object[] a) {
+	public <T> T[] toArray(T[] a) {
 		return array.toArray(a);
 	}
 
@@ -115,10 +115,10 @@ public class RandomSet implements Set {
 		if (array.size() != map.size()) {
 			return false;
 		}
-		Iterator i = map.keySet().iterator();
+		Iterator<E> i = map.keySet().iterator();
 		while (i.hasNext()) {
-			Object o = i.next();
-			Object o2 = array.get(((Integer)map.get(o)).intValue());
+			E o = i.next();
+			E o2 = array.get(map.get(o).intValue());
 			if (o == null) {
 				if (o2 != null) {
 					return false;
@@ -131,12 +131,12 @@ public class RandomSet implements Set {
 		}
 		return true;
 	}
-	
+
 	public boolean equals(Object o) {
 		if (!(o instanceof Set)) {
 			return false;
 		}
-		Set s = (Set)o;
+		Set<E> s = (Set)o;
 		if (s.size() != size()) {
 			return false;
 		}
@@ -147,7 +147,7 @@ public class RandomSet implements Set {
 		}
 		return true;
 	}
-	
+
 	public int hashCode() {
 		int ret = 0;
 		for (int i = 0; i < size(); i++) {
@@ -159,16 +159,17 @@ public class RandomSet implements Set {
 	}
 
 	//このクラスのテスト
-	
+
 	private static final int N = 5;	
 	public static void main(String[] args) {
+
 		HashSet h = new HashSet();
 		RandomSet r = new RandomSet();
 		Integer[] data = new Integer[N];
 		for (int i = 0; i < N; i++) {
 			data[i] = new Integer(i);
 		}
-		
+
 		assertTrue(h.size() == r.size());
 		assertTrue(h.isEmpty() == r.isEmpty());
 		assertTrue(h.contains(data[0]) == r.contains(data[0]));
@@ -202,8 +203,7 @@ public class RandomSet implements Set {
 		assertTrue(r.equals(h));
 		assertTrue(h.hashCode() == r.hashCode());
 		assertTrue(r.verify());
-		r.clear();
-		h.clear();
+
 		assertTrue(r.size() == 0);
 		assertTrue(h.add(o) == r.add(o));
 		assertTrue(h.remove(o) == r.remove(o));
@@ -217,6 +217,7 @@ public class RandomSet implements Set {
 		assertTrue(!r.equals(h));
 		assertTrue(r.verify());
 		Util.println("ok");
+
 	}
 	private static void assertTrue(boolean b) {
 		if (!b) {

@@ -2,7 +2,6 @@ package runtime;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,38 +41,38 @@ import util.Util;
  */
 public class Inline {
 	// InlineUnit.name -> InlineUnit
-	public static Map inlineSet = new HashMap();
-	
+	public static Map<String, InlineUnit> inlineSet = new HashMap<String, InlineUnit>();
+
 	/** コンパイルプロセス。 */
 	static Process cp;
-	
+
 	/** LMntal ライブラリを探すパス */
-	static List classPath = new ArrayList();
+	static List<File> classPath = new ArrayList<File>();
 	static {
 		classPath.add(new File(System.getProperty("java.class.path")));
 //		classPath.add(new File("."));
 //		classPath.add(new File("lmntal.jar"));
 	}
-	
+
 	/**
 	 * ほかにコンパイルすべきファイル。
 	 * //# 行により別ファイルに出力されたjavaファイルがこれに入る。
 	 */
-	public static ArrayList othersToCompile = new ArrayList();
-	
+	public static ArrayList<String> othersToCompile = new ArrayList<String>();
+
 	/****** コンパイル時に使う ******/
-	
+
 	/**
 	 * InlineUnit の名前とクラスファイルの組を出力する。
 	 */
 	public static void showInlineList() {
 		Util.println("Inline");
-		Iterator it = inlineSet.keySet().iterator();
+		Iterator<String> it = inlineSet.keySet().iterator();
 		while (it.hasNext()) {
-			Util.println(Util.quoteString((String)it.next(), '"'));
+			Util.println(Util.quoteString(it.next(), '"'));
 		}
 	}
-	
+
 	/**
 	 * コンパイルされたインラインコードを読み込んで InlineUnit に関連付ける
 	 */
@@ -98,12 +97,12 @@ public class Inline {
 		} catch (Exception e) {
 			Env.d(e);
 		}
-		for(Iterator ui = inlineSet.values().iterator();ui.hasNext();) {
-			InlineUnit u = (InlineUnit)ui.next();
+		for(Iterator<InlineUnit> ui = inlineSet.values().iterator();ui.hasNext();) {
+			InlineUnit u = ui.next();
 			u.attach();
 		}
 	}
-	
+
 	/**
 	 * 指定したファンクタ名を持つコードID を返す。
 	 * @param codeStr
@@ -111,9 +110,9 @@ public class Inline {
 	 */
 	public static int getCodeID(String unitName, String codeStr) {
 		if(!inlineSet.containsKey(unitName)) return -1;
-		return ((InlineUnit)inlineSet.get(unitName)).getCodeID(codeStr);
+		return inlineSet.get(unitName).getCodeID(codeStr);
 	}
-	
+
 	/**
 	 * ここで必要に応じてインライン命令を登録する。
 	 * すべてのアトムに対してこれを呼ぶべき。
@@ -122,7 +121,7 @@ public class Inline {
 	 */
 	public static void register(String unitName, String funcName) {
 		if(funcName==null) return;
-		
+
 		int type=0;
 		if(funcName.startsWith("/*inline*/")) {
 			type = InlineUnit.EXEC;
@@ -133,37 +132,37 @@ public class Inline {
 		}
 		//登録
 		if(!inlineSet.containsKey(unitName)) inlineSet.put(unitName, new InlineUnit(unitName));
-		((InlineUnit)inlineSet.get(unitName)).register(funcName, type);
+		inlineSet.get(unitName).register(funcName, type);
 	}
-	
+
 	public static void terminate() {
 		if(cp!=null) cp.destroy();
 	}
-	
+
 	public static String getCode(int atomID, String unitName, int codeID) {
 		if(!Inline.inlineSet.containsKey(unitName)) return null;
-		InlineUnit iu = (InlineUnit)Inline.inlineSet.get(unitName);
+		InlineUnit iu = Inline.inlineSet.get(unitName);
 		return iu.getCode(codeID);
 	}
-	
-	static List compileCommand = new ArrayList();
+
+	static List<String> compileCommand = new ArrayList<String>();
 	/**
 	 * 必要に応じてコードの生成とコンパイルを行う。
 	 */
 	public static void makeCode() {
-		Iterator it = inlineSet.values().iterator();
+		Iterator<InlineUnit> it = inlineSet.values().iterator();
 		while(it.hasNext()) {
-			InlineUnit u = (InlineUnit)it.next();
+			InlineUnit u = it.next();
 			u.makeCode();
 		}
-		
+
 		try {
-			
+
 			// 非同期。別プロセスでコンパイルしながら、現在のプロセスでほかの事をやる。
 			// OS とかによってクラスパスの区切り文字が ; だったり : だったりするので動的に取得
 			StringBuffer path = new StringBuffer("");
 			String sep = System.getProperty("path.separator");
-			for(Iterator ci=classPath.iterator();ci.hasNext();) {
+			for(Iterator<File> ci=classPath.iterator();ci.hasNext();) {
 				path.append(ci.next());
 				path.append(sep);
 			}
@@ -171,14 +170,13 @@ public class Inline {
 //			compileCommand.add("javaca");	// hara
 			compileCommand.add("javac");	// n-kato
 			compileCommand.add("-classpath");
-			compileCommand.add(path);
-			
-			StringBuffer srcs = new StringBuffer("");
+			compileCommand.add(path.toString());
+
 			boolean do_compile = false;
-			for(Iterator iu = inlineSet.values().iterator();iu.hasNext();) {
-				InlineUnit u = (InlineUnit)iu.next();
+			for(Iterator<InlineUnit> iu = inlineSet.values().iterator();iu.hasNext();) {
+				InlineUnit u = iu.next();
 				if(!u.isCached()) {
-					compileCommand.add(InlineUnit.srcFile(u.name));
+					compileCommand.add(InlineUnit.srcFile(u.name).toString());
 					InlineUnit.classFile(u.name).delete();
 					do_compile = true;
 				}
@@ -188,7 +186,7 @@ public class Inline {
 				Env.d("Compile command line: "+compileCommand);
 				String cmd[] = new String[compileCommand.size()];
 				for(int i=0;i<compileCommand.size();i++) {
-					cmd[i] = compileCommand.get(i).toString();
+					cmd[i] = compileCommand.get(i);
 				}
 				cp = Runtime.getRuntime().exec(cmd);
 			}
@@ -197,9 +195,9 @@ public class Inline {
 			Env.d(e);
 		}
 	}
-	
+
 	/****** 実行時に使う ******/
-	
+
 	/**
 	 * インライン命令を実行する。
 	 * @param atom 実行すべきアトム名を持つアトム
@@ -208,7 +206,7 @@ public class Inline {
 		Env.d("=> call Inline "+unitName);
 //		System.out.println(inlineSet);
 		if(inlineSet.containsKey(unitName)) {
-			((InlineUnit)inlineSet.get(unitName)).callInline(atom, codeID);
+			inlineSet.get(unitName).callInline(atom, codeID);
 		}
 	}
 	/**
@@ -218,11 +216,11 @@ public class Inline {
 	 */
 	public static boolean callGuardInline(String guardID, Membrane mem, Object obj) {
 //		System.out.println(Inline.inlineSet);
-		Iterator it = Inline.inlineSet.values().iterator();
+		Iterator<InlineUnit> it = Inline.inlineSet.values().iterator();
 		boolean res = false;
 		while(it.hasNext()) {
-			InlineUnit iu = (InlineUnit)it.next();
-//System.out.println("iu.name "+iu.name);
+			InlineUnit iu = it.next();
+//			System.out.println("iu.name "+iu.name);
 			try {
 //				res = iu.inlineCode.runGuard(guardID, mem, obj);
 				if(iu.customGuard!=null) {

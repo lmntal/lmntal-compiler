@@ -4,6 +4,8 @@
 package compile;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
 import runtime.Env;
 import util.Util;
 
@@ -12,7 +14,7 @@ class RuleConverter {
 	private int[] anyreduct;
 	private int memuse = 0;
 	
-    public Iterator convert(String rule){
+    public Iterator<String> convert(String rule){
 
         submems = new String[128];
         name = new String[128];
@@ -143,7 +145,7 @@ class RuleConverter {
 	            System.out.println(body[k]);
 		 	}
 */
-	 	ArrayList lst = new ArrayList();
+	 	List<String> lst = new ArrayList<String>();
 	 	for(int k=0; k<=memuse; k++){
 //	 		if(k!=0 || memuse==0){
 	 			if(!name[k].trim().equals(""))

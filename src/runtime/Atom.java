@@ -12,7 +12,7 @@ import util.QueuedEntity;
  * @author Mizuno
  */
 public final class Atom extends QueuedEntity implements Serializable {
-	
+
 	/** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。
 	 * ただし値を変更するときはindexも同時に更新すること。(mem,index)==(null, -1)は所属膜なしを表す。
 	 */

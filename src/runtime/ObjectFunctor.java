@@ -38,4 +38,6 @@ public class ObjectFunctor extends DataFunctor {
 	public String getName() {
 		return data.toString();
 	}
+	
+	public boolean isNumber() { return false; }
 }

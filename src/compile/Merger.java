@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import runtime.Env;
 import runtime.Functor;
@@ -25,14 +25,14 @@ public class Merger {
 	//todo?　膜主導テスト部の編み上げ
 	/** 編み上げ後のルールの実引数 */
 	/** ファンクタ⇒命令列のマップ */
-	HashMap instsMap;
+	HashMap<Functor, List<Instruction>> instsMap;
 	/** 変数番号⇒ファンクタのマップ*/
 	HashMap var2funcMap;
 	int maxLocals;
 	
 	public Merger(){
 		maxLocals = 0;
-		instsMap = new HashMap();
+		instsMap = new HashMap<Functor, List<Instruction>>();
 		var2funcMap = new HashMap();
 	}
 	
@@ -47,48 +47,46 @@ public class Merger {
 	 * @param rules ルールセット内のルール群
 	 * @return ファンクタ⇒命令列のマップ
 	 */
-	public MergedBranchMap Merging(ArrayList rules, boolean system){
-		Iterator it = rules.iterator();
-		while(it.hasNext()){
-			Rule rule = (Rule)it.next();
-			List atomMatch = (ArrayList)rule.atomMatch;
-			List guard = (ArrayList)rule.guard;
+	public MergedBranchMap Merging(ArrayList<Rule> rules, boolean system){
+		for(Rule rule : rules){
+			List<Instruction> atomMatch = rule.atomMatch;
+			List<Instruction> guard = rule.guard;
 			//if(Env.fTrace || Env.debugOption)(rule.body).add(1, new Instruction(Instruction.GETCURRENTRULE, rule));
 			if(guard != null){
 				//uniq命令がある場合は編み上げ中止。todo なんとかする
 				for(int i=0; i<guard.size(); i++) {
-					Instruction inst = (Instruction)guard.get(i);
+					Instruction inst = guard.get(i);
 					if(inst.getKind() == Instruction.UNIQ
 						|| inst.getKind() == Instruction.NOT_UNIQ) return null;
 				}
 			}
 			for(int i=0; i<atomMatch.size(); i++){
-				Instruction inst = (Instruction)atomMatch.get(i);
+				Instruction inst = atomMatch.get(i);
 				switch(inst.getKind()){
 				case Instruction.SPEC:
 					if(inst.getIntArg2() > maxLocals) maxLocals = inst.getIntArg2();
 					break;
 				case Instruction.BRANCH:
 					InstructionList label = (InstructionList)inst.getArg1();
-					List branchInsts = label.insts;
+					List<Instruction> branchInsts = label.insts;
 					maxLocals = 0;
 					//uniq関係の応急処置
 					for(int u=0; u<branchInsts.size(); u++) {
-						Instruction uniq = (Instruction)branchInsts.get(u);
+						Instruction uniq = branchInsts.get(u);
 						if(uniq.getKind() == Instruction.UNIQ
 							|| uniq.getKind() == Instruction.NOT_UNIQ) return null;
 					}
 					Functor func = null;
 					for(int j=1; j<branchInsts.size(); j++){
-						Instruction funcInst = (Instruction)branchInsts.get(j);
+						Instruction funcInst = branchInsts.get(j);
 						if(funcInst.getKind() == Instruction.FUNC){
 							func = (Functor)funcInst.getArg2();
 							break;
 						}
 					}
 					if(instsMap.containsKey(func)){ //先頭のfunc命令が同じbranch命令を探す
-						List existInsts = (ArrayList)instsMap.get(func);
-						List mergedInsts = new ArrayList();
+						List<Instruction> existInsts = instsMap.get(func);
+						List<Instruction> mergedInsts = new ArrayList<Instruction>();
 						mergedInsts = mergeInsts(branchInsts, existInsts);
 						Instruction spec = Instruction.spec(2, maxLocals);
 						mergedInsts.add(0, spec);
@@ -103,8 +101,8 @@ public class Merger {
 					//for(int j=i+1; j<atomMatch.size(); j++) insts2.add((Instruction)atomMatch.get(j));
 					func = (Functor)inst.getArg2();
 					if(instsMap.containsKey(func)){
-						List existInsts = (ArrayList)instsMap.get(func);
-						List mergedInsts = new ArrayList();
+						List<Instruction> existInsts = instsMap.get(func);
+						List<Instruction> mergedInsts = new ArrayList<Instruction>();
 						mergedInsts = mergeInsts(atomMatch, existInsts);
 						Instruction spec = Instruction.spec(2, maxLocals);
 						mergedInsts.add(0, spec);
@@ -118,12 +116,12 @@ public class Merger {
 				}
 			}
 		}
-		Set set = instsMap.entrySet();
-		Iterator it2 = set.iterator();
-		HashMap optimizedmap= new HashMap();
+		Set<Entry<Functor, List<Instruction>>> set = instsMap.entrySet();
+		Iterator<Entry<Functor, List<Instruction>>> it2 = set.iterator();
+		HashMap<Functor, List<Instruction>> optimizedmap= new HashMap<Functor, List<Instruction>>();
 		while(it2.hasNext()){
-			Map.Entry mapentry = (Map.Entry)it2.next();
-			ArrayList insts = (ArrayList)mapentry.getValue();
+			Entry<Functor, List<Instruction>> mapentry = it2.next();
+			List<Instruction> insts = mapentry.getValue();
 			//if(Optimizer.fGuardMove) Optimizer.guardMove(insts);
 			//stackOrderChange(insts);
 			optimizedmap.put(mapentry.getKey(), insts);
@@ -137,12 +135,12 @@ public class Merger {
 	 * 生成したマップの表示　デバッグ用
 	 * param map マップ
 	 */
-	private static void viewMap(HashMap map){
-		Set set = map.entrySet();
-		Iterator it1 = set.iterator();
+	private static void viewMap(HashMap<Functor, List<Instruction>> map){
+		Set<Entry<Functor, List<Instruction>>> set = map.entrySet();
+		Iterator<Entry<Functor, List<Instruction>>> it1 = set.iterator();
 		while(it1.hasNext()){
-			Map.Entry mapentry = (Map.Entry)it1.next();
-			ArrayList branchinststest = (ArrayList)mapentry.getValue();
+			Entry<Functor, List<Instruction>> mapentry = it1.next();
+			List<Instruction> branchinststest = mapentry.getValue();
 
 			Util.println(mapentry.getKey() + " ⇒ ");
 			viewInsts(branchinststest, 1);
@@ -155,15 +153,15 @@ public class Merger {
 	 * @param insts 命令列
 	 * @param tabs 表示する際のタブ
 	 */
-	private static void viewInsts(ArrayList insts, int tabs){
+	private static void viewInsts(List<Instruction> insts, int tabs){
 		for(int i=0; i<insts.size(); i++){
-			Instruction inst = (Instruction)insts.get(i);
+			Instruction inst = insts.get(i);
 			for(int j=0; j<tabs; j++) System.out.print("    ");
 			//引数に命令列を持つ命令
 			if(inst.getKind() == Instruction.BRANCH){
 				Util.println("branch\t[");
 				InstructionList label = (InstructionList) inst.getArg1();
-				viewInsts((ArrayList)label.insts, tabs+1);
+				viewInsts(label.insts, tabs+1);
 				for(int j=0; j<tabs; j++) System.out.print("    ");
 				Util.println("]");
 			}
@@ -177,17 +175,17 @@ public class Merger {
 	 * @param insts2 2つ目の命令列
 	 * @return 2つの命令列の共通部分
 	 */
-	private ArrayList mergeInsts(List insts1, List insts2){
-		List mergedInsts = new ArrayList();
+	private List<Instruction> mergeInsts(List<Instruction> insts1, List<Instruction> insts2){
+		List<Instruction> mergedInsts = new ArrayList<Instruction>();
 		int differenceIndex = insts1.size()+insts2.size();
-		List branchInsts1 = new ArrayList();
-		List branchInsts2 = new ArrayList();
-		List branchInsts3 = new ArrayList();
+		List<Instruction> branchInsts1 = new ArrayList<Instruction>();
+		List<Instruction> branchInsts2 = new ArrayList<Instruction>();
+		List<Instruction> branchInsts3 = new ArrayList<Instruction>();
 		int formal = 0;
 		int local = 0;
 		for(int i=0, j=0; i<insts1.size() &&  j<insts2.size(); i++, j++){
-			Instruction inst1 = (Instruction)insts1.get(i);
-			Instruction inst2 = (Instruction)insts2.get(j);
+			Instruction inst1 = insts1.get(i);
+			Instruction inst2 = insts2.get(j);
 			if(i==0 || j==0){
 				if(inst1.getIntArg1() > inst2.getIntArg1())formal = inst1.getIntArg1();
 				else formal = inst2.getIntArg1();
@@ -210,28 +208,28 @@ public class Merger {
 				if(inst2.getKind() == Instruction.BRANCH){
 					//insts2のj番目以降はBRANNCH命令
 					for(int k=j; k<insts2.size(); k++){
-						Instruction instb = (Instruction)insts2.get(k);
+						Instruction instb = insts2.get(k);
 						InstructionList label = (InstructionList)instb.getArg1();
-						List instsb = label.insts;
-						List tmpinsts = mergeInBranchInsts(insts1, i, instsb);
+						List<Instruction> instsb = label.insts;
+						List<Instruction> tmpinsts = mergeInBranchInsts(insts1, i, instsb);
 						if (tmpinsts != null){
 							mergedInsts.addAll(branchInsts3);
-							if(tmpinsts.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)tmpinsts)));
+							if(tmpinsts.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList(tmpinsts)));
 							//mergedInsts.addAll((ArrayList)tmpinsts);
-							return (ArrayList)mergedInsts;
+							return mergedInsts;
 						}
 						else {branchInsts3.add(instb); continue;}
 					}
 					for(int k=j; k<insts2.size(); k++)
 						mergedInsts.add(insts2.get(k));
 					for(int k=i; k<insts1.size(); k++)
-						branchInsts1.add((Instruction)insts1.get(k));
+						branchInsts1.add(insts1.get(k));
 					if (branchInsts1.size() > 0){
-						Instruction spec = (Instruction)branchInsts1.get(0);
+						Instruction spec = branchInsts1.get(0);
 						if (spec.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC, formal, local));
 					}
-					if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
-					return (ArrayList)mergedInsts;
+					if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList(branchInsts1)));
+					return mergedInsts;
 				}
 				else {
 					differenceIndex = i;
@@ -241,20 +239,20 @@ public class Merger {
 		}
 		
 		for(int i=differenceIndex; i<insts1.size(); i++)
-			branchInsts1.add((Instruction)insts1.get(i));
+			branchInsts1.add(insts1.get(i));
 		for(int i=differenceIndex; i<insts2.size(); i++)
-			branchInsts2.add((Instruction)insts2.get(i));
+			branchInsts2.add(insts2.get(i));
 		if (branchInsts1.size() > 0){
-			Instruction inst1 = (Instruction)branchInsts1.get(0);
+			Instruction inst1 = branchInsts1.get(0);
 			if (inst1.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC,formal, local));
 		}
 		if (branchInsts2.size() > 0){
-			Instruction inst2 = (Instruction)branchInsts2.get(0);
+			Instruction inst2 = branchInsts2.get(0);
 			if (inst2.getKind() != Instruction.SPEC) branchInsts2.add(0, new Instruction(Instruction.SPEC,formal,local));
 		}
-		if(branchInsts2.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
-		if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
-		return (ArrayList)mergedInsts;
+		if(branchInsts2.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList(branchInsts2)));
+		if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList(branchInsts1)));
+		return mergedInsts;
 	}
 	
 	/**
@@ -263,14 +261,14 @@ public class Merger {
 	 * @param insts2 2つ目の命令列
 	 * @return 2つの命令列の共通部分
 	 */
-	private ArrayList mergeInBranchInsts(List insts1, int index, List insts2){
-		List mergedInsts = new ArrayList();
+	private List<Instruction> mergeInBranchInsts(List<Instruction> insts1, int index, List<Instruction> insts2){
+		List<Instruction> mergedInsts = new ArrayList<Instruction>();
 		int differenceIndex1 = insts1.size()+insts2.size();
 		int differenceIndex2 = insts1.size()+insts2.size();
-		List branchInsts1 = new ArrayList();
-		List branchInsts2 = new ArrayList();
-		List branchInsts3 = new ArrayList();
-		Instruction spec = (Instruction)insts2.get(0);
+		List<Instruction> branchInsts1 = new ArrayList<Instruction>();
+		List<Instruction> branchInsts2 = new ArrayList<Instruction>();
+		List<Instruction> branchInsts3 = new ArrayList<Instruction>();
+		Instruction spec = insts2.get(0);
 		int formal = 0;
 		int local = 0;
 		if(spec.getKind() != Instruction.SPEC) return null;
@@ -282,8 +280,8 @@ public class Merger {
 		
 		int startsize = mergedInsts.size();	
 		for(int i=index, j=1; i<insts1.size() && j<insts2.size(); i++, j++){
-			Instruction inst1 = (Instruction)insts1.get(i);
-			Instruction inst2 = (Instruction)insts2.get(j);
+			Instruction inst1 = insts1.get(i);
+			Instruction inst2 = insts2.get(j);
 			if (inst1.equalsInst(inst2)){
 				mergedInsts.add(inst1);
 				continue;
@@ -292,15 +290,15 @@ public class Merger {
 				if(inst2.getKind() == Instruction.BRANCH){
 					//insts2のj番目以降はBRANNCH命令
 					for(int k=j; k<insts2.size(); k++){
-						Instruction instb = (Instruction)insts2.get(k);
+						Instruction instb = insts2.get(k);
 						InstructionList label = (InstructionList)instb.getArg1();
-						List instsb = label.insts;
-						List tmpinsts = mergeInBranchInsts(insts1, i, instsb);
+						List<Instruction> instsb = label.insts;
+						List<Instruction> tmpinsts = mergeInBranchInsts(insts1, i, instsb);
 						if (tmpinsts != null){
 							mergedInsts.addAll(branchInsts3);
-							if(tmpinsts.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)tmpinsts)));
+							if(tmpinsts.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList(tmpinsts)));
 							//mergedInsts.addAll((ArrayList)tmpinsts);
-							return (ArrayList)mergedInsts;
+							return mergedInsts;
 						}
 						else {branchInsts3.add(instb); continue;}
 					}
@@ -320,27 +318,27 @@ public class Merger {
 			return null;
 		}
 		for(int i=differenceIndex1; i<insts1.size(); i++)
-			branchInsts1.add((Instruction)insts1.get(i));
+			branchInsts1.add(insts1.get(i));
 		for(int i=differenceIndex2; i<insts2.size(); i++)
-			branchInsts2.add((Instruction)insts2.get(i));
+			branchInsts2.add(insts2.get(i));
 		if (branchInsts1.size() > 0){
-			Instruction inst1 = (Instruction)branchInsts1.get(0);
+			Instruction inst1 = branchInsts1.get(0);
 			if (inst1.getKind() != Instruction.SPEC) branchInsts1.add(0, new Instruction(Instruction.SPEC, formal, local));
 		}
 		if (branchInsts2.size() > 0){
-			Instruction inst2 = (Instruction)branchInsts2.get(0);
+			Instruction inst2 = branchInsts2.get(0);
 			if (inst2.getKind() != Instruction.SPEC) branchInsts2.add(0, new Instruction(Instruction.SPEC, formal, local));
 		}
-		if(branchInsts2.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts2)));
-		if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList((ArrayList)branchInsts1)));
+		if(branchInsts2.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList(branchInsts2)));
+		if(branchInsts1.size()>0)mergedInsts.add(new Instruction(Instruction.BRANCH, new InstructionList(branchInsts1)));
 		
-		return (ArrayList)mergedInsts;
+		return mergedInsts;
 	}
 	
 	//システムルールセットのマップを生成する
 	public MergedBranchMap createSystemRulesetsMap(){
 		MergedBranchMap systemmbm;
-		ArrayList systemrules = new ArrayList();
+		ArrayList<Rule> systemrules = new ArrayList<Rule>();
 		
 //		自由リンク管理アトム関連はとりあえず保留		
 //		ArrayList insts = new ArrayList();
@@ -387,22 +385,22 @@ public class Merger {
 //		rule2.atomMatch = insts2;
 //		systemrules.add(rule2);
 		
-		systemrules.add((Rule)buildUnaryPlusOpRule("+", Instruction.ISINT));
-		systemrules.add((Rule)buildUnaryPlusOpRule("+.", Instruction.ISFLOAT));
-		systemrules.add((Rule)buildUnaryOpRule("-", Instruction.ISINT, Instruction.INEG));
-		systemrules.add((Rule)buildUnaryOpRule("-.", Instruction.ISFLOAT, Instruction.FNEG));
-		systemrules.add((Rule)buildUnaryOpRule("int", Instruction.ISFLOAT, Instruction.FLOAT2INT));
-		systemrules.add((Rule)buildUnaryOpRule("float", Instruction.ISINT, Instruction.INT2FLOAT));
+		systemrules.add(buildUnaryPlusOpRule("+", Instruction.ISINT));
+		systemrules.add(buildUnaryPlusOpRule("+.", Instruction.ISFLOAT));
+		systemrules.add(buildUnaryOpRule("-", Instruction.ISINT, Instruction.INEG));
+		systemrules.add(buildUnaryOpRule("-.", Instruction.ISFLOAT, Instruction.FNEG));
+		systemrules.add(buildUnaryOpRule("int", Instruction.ISFLOAT, Instruction.FLOAT2INT));
+		systemrules.add(buildUnaryOpRule("float", Instruction.ISINT, Instruction.INT2FLOAT));
 		
-		systemrules.add((Rule)buildBinOpRule("+", Instruction.ISINT, Instruction.IADD));
-		systemrules.add((Rule)buildBinOpRule("-", Instruction.ISINT, Instruction.ISUB));
-		systemrules.add((Rule)buildBinOpRule("*", Instruction.ISINT, Instruction.IMUL));
-		systemrules.add((Rule)buildBinOpRule("/", Instruction.ISINT, Instruction.IDIV));
-		systemrules.add((Rule)buildBinOpRule("mod", Instruction.ISINT, Instruction.IMOD));
-		systemrules.add((Rule)buildBinOpRule("+.", Instruction.ISFLOAT, Instruction.FADD));
-		systemrules.add((Rule)buildBinOpRule("-.", Instruction.ISFLOAT, Instruction.FSUB));
-		systemrules.add((Rule)buildBinOpRule("*.", Instruction.ISFLOAT, Instruction.FMUL));
-		systemrules.add((Rule)buildBinOpRule("/.", Instruction.ISFLOAT, Instruction.FDIV));
+		systemrules.add(buildBinOpRule("+", Instruction.ISINT, Instruction.IADD));
+		systemrules.add(buildBinOpRule("-", Instruction.ISINT, Instruction.ISUB));
+		systemrules.add(buildBinOpRule("*", Instruction.ISINT, Instruction.IMUL));
+		systemrules.add(buildBinOpRule("/", Instruction.ISINT, Instruction.IDIV));
+		systemrules.add(buildBinOpRule("mod", Instruction.ISINT, Instruction.IMOD));
+		systemrules.add(buildBinOpRule("+.", Instruction.ISFLOAT, Instruction.FADD));
+		systemrules.add(buildBinOpRule("-.", Instruction.ISFLOAT, Instruction.FSUB));
+		systemrules.add(buildBinOpRule("*.", Instruction.ISFLOAT, Instruction.FMUL));
+		systemrules.add(buildBinOpRule("/.", Instruction.ISFLOAT, Instruction.FDIV));
 		
 //		Iterator it = (Iterator)systemrules.iterator();
 //		while(it.hasNext()) System.out.println(it.next());
@@ -415,8 +413,8 @@ public class Merger {
 	//システムルール生成用メソッド
 	private Rule buildUnaryPlusOpRule(String name, int typechecker){
 		Rule rule = new Rule(name);
-		ArrayList insts =  new ArrayList();
-		ArrayList insts2 = new ArrayList();
+		ArrayList<Instruction> insts =  new ArrayList<Instruction>();
+		ArrayList<Instruction> insts2 = new ArrayList<Instruction>();
 
 		insts.add(new Instruction(Instruction.SPEC,        2,5));
 		insts.add(new Instruction(Instruction.FUNC,  1,new SymbolFunctor(name,2)));
@@ -426,9 +424,9 @@ public class Merger {
 		insts.add(new Instruction(Instruction.GETFUNC,   4,2));
 		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
 
-		ArrayList mems = new ArrayList();
+		ArrayList<Integer> mems = new ArrayList<Integer>();
 		mems.add(new Integer(0));
-		ArrayList atoms = new ArrayList();
+		ArrayList<Integer> atoms = new ArrayList<Integer>();
 		atoms.add(new Integer(1));
 		atoms.add(new Integer(2));
 		atoms.add(new Integer(3));
@@ -444,7 +442,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.FREEATOM,      2));
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
-		rule.bodyLabel = new InstructionList((ArrayList)insts2); rule.body = rule.bodyLabel.insts;
+		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		rule.atomMatch = insts;
 		return rule;
@@ -452,8 +450,8 @@ public class Merger {
 	
 	private Rule buildUnaryOpRule(String name, int typechecker, int op){
 		Rule rule = new Rule(name);
-		ArrayList insts = new ArrayList();
-		ArrayList insts2 = new ArrayList();
+		ArrayList<Instruction> insts = new ArrayList<Instruction>();
+		ArrayList<Instruction> insts2 = new ArrayList<Instruction>();
 
 		insts.add(new Instruction(Instruction.SPEC,        2,5));
 		insts.add(new Instruction(Instruction.FUNC,  1,new SymbolFunctor(name,2)));
@@ -463,9 +461,9 @@ public class Merger {
 		insts.add(new Instruction(Instruction.GETFUNC,   4,2));
 		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
 
-		ArrayList mems = new ArrayList();
+		ArrayList<Integer> mems = new ArrayList<Integer>();
 		mems.add(new Integer(0));
-		ArrayList atoms = new ArrayList();
+		ArrayList<Integer> atoms = new ArrayList<Integer>();
 		atoms.add(new Integer(1));
 		atoms.add(new Integer(2));
 		atoms.add(new Integer(3));
@@ -481,7 +479,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.FREEATOM,      2));
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
-		rule.bodyLabel = new InstructionList((ArrayList)insts2); rule.body = rule.bodyLabel.insts;
+		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		rule.atomMatch = insts;
 		return rule;
@@ -489,8 +487,8 @@ public class Merger {
 	
 	private Rule buildBinOpRule(String name, int typechecker, int op){
 		Rule rule = new Rule(name);
-		ArrayList insts = new ArrayList();
-		ArrayList insts2 = new ArrayList();
+		ArrayList<Instruction> insts = new ArrayList<Instruction>();
+		ArrayList<Instruction> insts2 = new ArrayList<Instruction>();
 
 		insts.add(new Instruction(Instruction.SPEC,        2,5));
 		insts.add(new Instruction(Instruction.FUNC,  1,new SymbolFunctor(name,3)));
@@ -500,9 +498,9 @@ public class Merger {
 		insts.add(new Instruction(Instruction.DEREFATOM, 3,1,1));
 		insts.add(new Instruction(typechecker,             3));
 		insts.add(new Instruction(op,                    4,2,3));
-		ArrayList mems = new ArrayList();
+		ArrayList<Integer> mems = new ArrayList<Integer>();
 		mems.add(new Integer(0));
-		ArrayList atoms = new ArrayList();
+		ArrayList<Integer> atoms = new ArrayList<Integer>();
 		atoms.add(new Integer(1));
 		atoms.add(new Integer(2));
 		atoms.add(new Integer(3));
@@ -521,7 +519,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.FREEATOM,      3));
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
-		rule.bodyLabel = new InstructionList((ArrayList)insts2); rule.body = rule.bodyLabel.insts;
+		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		rule.atomMatch = insts;
 		return rule;

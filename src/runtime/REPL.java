@@ -189,7 +189,7 @@ public class REPL {
 							String s[] = nline.split(" ");
 							if(s.length==1) Env.p("rm [ruleset number ...]");
 							for(int i=1;i<s.length;i++) {
-								Iterator it=Env.remainedRuntime.getGlobalRoot().rulesets.iterator();
+								Iterator<Ruleset> it=Env.remainedRuntime.getGlobalRoot().rulesets.iterator();
 								while(it.hasNext()) {
 									InterpretedRuleset rs = (InterpretedRuleset)it.next();
 									if(rs.toString().matches(".*?"+s[i]+".*")) {
@@ -243,13 +243,13 @@ public class REPL {
 	 */
 	public static void showRules() {
 		if(Env.remainedRuntime!=null) {
-			Iterator it=Env.remainedRuntime.getGlobalRoot().rulesets.iterator();
+			Iterator<Ruleset> it=Env.remainedRuntime.getGlobalRoot().rulesets.iterator();
 			while(it.hasNext()) {
 				InterpretedRuleset rs = (InterpretedRuleset)it.next();
 				Env.p(rs);
-				Iterator it2 = rs.rules.iterator();
+				Iterator<Rule> it2 = rs.rules.iterator();
 				while(it2.hasNext()) {
-					Rule r = (Rule)it2.next();
+					Rule r = it2.next();
 					if(r.name!=null) Env.p("  "+r.name+"@@");
 					else Env.p("  "+r.text);
 					r.showDetail();

@@ -36,7 +36,6 @@ import runtime.IntegerFunctor;
 import runtime.InterpretedRuleset;
 import runtime.ObjectFunctor;
 import runtime.Rule;
-import runtime.Ruleset;
 import runtime.StringFunctor;
 import runtime.SystemRulesets;
 import util.Util;
@@ -80,7 +79,7 @@ public class Translator {
 		File transDir = new File(outDir, "translated");
 		if (!transDir.exists()) transDir.mkdir();
 		
-		ArrayList l = new ArrayList();
+		List<String> l = new ArrayList<String>();
 		l.add(null);
 
 		String[] files = publicDir.list();
@@ -236,7 +235,7 @@ public class Translator {
 		}
 
 		//利用しているモジュールに対して再帰呼び出し
-		ArrayList modules = new ArrayList();
+		List<String> modules = new ArrayList<String>();
 		Module.getNeedModules(m, modules);
 		for (int i = 0; i < modules.size(); i++) {
 			writer.write("		loadSystemRulesetFromModule(\"" + modules.get(i) + "\");\n");
@@ -284,9 +283,7 @@ public class Translator {
 	 * @throws IOException IOエラーが発生した場合
 	 */
 	public static void genModules(compile.structure.Membrane m) throws IOException {
-		Iterator moduleIterator = Module.memNameTable.keySet().iterator();
-		while (moduleIterator.hasNext()) {
-			String moduleName = (String)moduleIterator.next();
+		for(String moduleName : Module.memNameTable.keySet()){
 			if (Env.fLibrary && !moduleName.equals(sourceName)) {
 				continue;
 			}
@@ -300,7 +297,7 @@ public class Translator {
 			writer.write("public class Module_" + moduleName + "{\n");
 			writer.write("	private static Ruleset[] rulesets = {");
 			boolean first = true;
-			Iterator rulesetIterator = ((compile.structure.Membrane)Module.memNameTable.get(moduleName)).rulesets.iterator();
+			Iterator rulesetIterator = Module.memNameTable.get(moduleName).rulesets.iterator();
 			while (rulesetIterator.hasNext()) {
 				if (!first) writer.write(", ");
 				writer.write(getClassName((InterpretedRuleset)rulesetIterator.next()) + ".getInstance()");
@@ -326,16 +323,12 @@ public class Translator {
 			Env.e("Translator supports only one InlineUnit.");
 			return false;
 		}
-		Iterator it = Inline.inlineSet.values().iterator();
-		if (it.hasNext()) {
-			InlineUnit iu = (InlineUnit)it.next();
+		for(InlineUnit iu : Inline.inlineSet.values()){
 			File f = new File(dir, InlineUnit.className(sourceName + ".lmn") + ".java");
 			iu.makeCode(packageName, InlineUnit.className(sourceName + ".lmn"), f, false);
 			
 			// ガードインラインのコンパイル hara
-			Iterator it2 = Inline.othersToCompile.iterator();
-			while(it2.hasNext()) {
-				String fname = (String)it2.next();
+			for(String fname : Inline.othersToCompile){
 				compile(new File(fname), true);
 			}
 			//エラーメッセージを出力するため、インラインコードは先にコンパイルする。
@@ -355,9 +348,7 @@ public class Translator {
 				return;
 			}
 		}
-		Iterator moduleIterator = Module.memNameTable.keySet().iterator();
-		while (moduleIterator.hasNext()) {
-			String moduleName = (String)moduleIterator.next();
+		for(String moduleName : Module.memNameTable.keySet()){
 			if (Env.fLibrary && !moduleName.equals(sourceName)) {
 				continue;
 			}
@@ -483,15 +474,15 @@ public class Translator {
 	private TranslatorWriter writer;
 	private InterpretedRuleset ruleset;
 	/**出力する InstructionList の集合。重複を防ぐために利用する。*/
-	private HashSet instLists = new HashSet();
+	private HashSet<InstructionList> instLists = new HashSet<InstructionList>();
 	/**処理すべき InstructionList*/
-	private ArrayList instListsToTranslate = new ArrayList();
+	private ArrayList<InstructionList> instListsToTranslate = new ArrayList<InstructionList>();
 	/**この Ruleset 内で利用している Functor についての、Functor -> 変数名*/
-	private HashMap funcVarMap = new HashMap();
+	private HashMap<Functor, String> funcVarMap = new HashMap<Functor, String>();
 	/**命令列 -> ルールオブジェクト*/
-	private HashMap insts2rule = new HashMap();
+	private HashMap<InstructionList, Rule> insts2rule = new HashMap<InstructionList, Rule>();
 	/**ルールオブジェクト -> Uniqの変数名 */
-	private HashMap uniqVarName = new HashMap();
+	private HashMap<Rule, String> uniqVarName = new HashMap<Rule, String>();
 	private int nextUniqVarNum = 0;
 
 	private boolean globalSystemRuleset = false;
@@ -574,9 +565,7 @@ public class Translator {
 		int rulenum = 0;
 		if(Env.profile >= Env.PROFILE_BYRULE) {
 			writer.write("	public void setCompiledRules() {\n");
-			Iterator it = ruleset.rules.iterator();
-				while (it.hasNext()) {
-					Rule rule = (Rule) it.next();
+			for(Rule rule : ruleset.rules){
 					writer.write("		Rule rule" + rulenum + ";\n");
 					writer.write("		rule" + rulenum + " = new Rule();\n");
 					if(rule.name == null)
@@ -632,7 +621,7 @@ public class Translator {
 		//アトム手動テスト
 		writer.write("	public boolean react(Membrane mem, Atom atom) {\n");
 		writer.write("		boolean result = false;\n");
-		Iterator it = ruleset.rules.iterator();
+		Iterator<Rule> it_r = ruleset.rules.iterator();
 		if(Env.profile >= Env.PROFILE_BYRULE) {
 			writer.write("		long start,stop;\n");
 			if(Env.profile >= Env.PROFILE_BYRULEDETAIL)
@@ -648,7 +637,7 @@ public class Translator {
 			writer.write("		}\n");
 			writer.write("		Object[] argVar;");
 			for (int i=0; i<rulenum; i++){
-				Rule rule = (Rule) it.next();
+				Rule rule = it_r.next();
 				writer.write("		rule = (Rule)compiledRules.get(" + i + ");\n");
 				writer.write("		success = false;\n");			
 				writer.write("		start = Util.getTime();\n");
@@ -679,8 +668,8 @@ public class Translator {
 				writer.write("		if(success) return success;\n");
 			}
 		} else {
-			while (it.hasNext()) {
-				Rule rule = (Rule) it.next();
+			while (it_r.hasNext()) {
+				Rule rule = it_r.next();
 				writer.write("		{\n");
 				writer.write("		Object[] argVar = new Object[2];\n");
 				writer.write("		argVar[0] = mem;\n");
@@ -703,7 +692,7 @@ public class Translator {
 		writer.write("	}\n");
 		writer.write("	public boolean react(Membrane mem, boolean nondeterministic) {\n");
 		writer.write("		boolean result = false;\n");
-		it = ruleset.rules.iterator();
+		it_r = ruleset.rules.iterator();
 		if(Env.profile >= Env.PROFILE_BYRULE) {
 			writer.write("		long start,stop;\n");
 			if(Env.profile >= Env.PROFILE_BYRULEDETAIL)
@@ -719,7 +708,7 @@ public class Translator {
 			writer.write("		}\n");
 			writer.write("		Object[] argVar;");
 			for (int i=0; i<rulenum; i++){
-				Rule rule = (Rule) it.next();
+				Rule rule = it_r.next();
 				writer.write("		rule = (Rule) compiledRules.get(" + i + ");\n");
 				writer.write("		success = false;\n");			
 				writer.write("		argVar = new Object[1];\n");
@@ -747,8 +736,8 @@ public class Translator {
 				writer.write("		if(success) return success;\n");
 			}
 		} else {
-			while (it.hasNext()) {
-				Rule rule = (Rule) it.next();
+			while (it_r.hasNext()) {
+				Rule rule = it_r.next();
 				writer.write("		{\n");
 				writer.write("		Object[] argVar = new Object[1];\n");
 				writer.write("		argVar[0] = mem;\n");
@@ -766,9 +755,9 @@ public class Translator {
 		writer.write("	}\n");
 
 		//InstructionList をメソッドに変換
-		it = ruleset.rules.iterator();
-		while (it.hasNext()) {
-			Rule rule = (Rule)it.next();
+		it_r = ruleset.rules.iterator();
+		while (it_r.hasNext()) {
+			Rule rule = it_r.next();
 			add(rule.atomMatchLabel, rule);
 			add(rule.memMatchLabel, rule);
 		}
@@ -779,11 +768,11 @@ public class Translator {
 
 		//Functor の生成。毎回 new するのを防ぐため、クラス変数にする。
 		//この方法だと Ruleset 毎に作られるので、Functors クラスみたいな物を作った方がよいかもしれない。
-		it = funcVarMap.keySet().iterator();
+		Iterator<Functor> it_f = funcVarMap.keySet().iterator();
 		writer.write("	private static final Functor[] f = new Functor[" + funcVarMap.size() + "];\n");
 		writer.write("	static{\n");
-		while (it.hasNext()) {
-			Functor func = (Functor)it.next();
+		while (it_f.hasNext()) {
+			Functor func = it_f.next();
 			writer.write("	" + funcVarMap.get(func));
 			if (func instanceof StringFunctor) {
 				writer.write(" = new StringFunctor(" + Util.quoteString((String)func.getValue(), '"') + ");\n");
@@ -908,7 +897,7 @@ public class Translator {
 		writer.write("		boolean ret = false;\n");
 		writer.write(instList.label + ":\n");
 		writer.write("		{\n");
-		Iterator it = instList.insts.iterator();
+		Iterator<Instruction> it = instList.insts.iterator();
 		translate(it, "			", 1, locals, instList.label, (Rule)insts2rule.get(instList));
 		writer.write("		}\n");
 		writer.write("		return ret;\n");
@@ -927,7 +916,7 @@ public class Translator {
 	 * @return return 文を出力して終了した場合には true。コンパイルエラーを防ぐため、true を返した場合は直後に"}"以外のコードを出力してはならない。
 	 * @throws IOException Java ソースの出力に失敗した場合
 	 */
-	private void translate(Iterator it, String tabs, int iteratorNo, int varnum, String breakLabel, Rule rule) throws IOException {
+	private void translate(Iterator<Instruction> it, String tabs, int iteratorNo, int varnum, String breakLabel, Rule rule) throws IOException {
 		Ejector ejector = new Ejector(className, dir, packageName);
 		writer.setEjector(ejector);
 

@@ -15,6 +15,8 @@ public class FloatingFunctor extends DataFunctor {
 		return (o instanceof FloatingFunctor) && ((FloatingFunctor)o).value == value;
 	}
 	
+	public boolean isNumber() { return true; }
+	
 	public String getName() {
 		return Double.toString(value);
 	}

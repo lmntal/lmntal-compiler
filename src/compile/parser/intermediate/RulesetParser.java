@@ -31,8 +31,10 @@ public class RulesetParser {
 	public static Ruleset parse(Reader reader) throws ParseException {
 		Lexer lexer = new Lexer(reader);
 		parser parser = new parser(lexer);
-		ArrayList rulesets, modules, inlines;	
-		
+		List<InterpretedRuleset> rulesets;
+		List modules;
+		List<String> inlines;	
+
 		try {
 			Object[] t = (Object[])parser.parse().value;
 			rulesets = (ArrayList)t[0];
@@ -47,28 +49,22 @@ public class RulesetParser {
 		}
 
 		// id -> 実体のマップ生成
-		HashMap rulesetMap = new HashMap();
-		Iterator rsIt = rulesets.iterator();
-		while (rsIt.hasNext()) {
-			InterpretedRuleset rs = (InterpretedRuleset)rsIt.next();
-			rulesetMap.put(new Integer(rs.getId()), rs);
+		HashMap<Integer, InterpretedRuleset> rulesetMap = new HashMap<Integer, InterpretedRuleset>();
+		for(InterpretedRuleset rs : rulesets){
+			rulesetMap.put(rs.getId(), rs);
 		}
-		
+
 		// RulesetRef を、実際のルールセットに置き換える
-		rsIt = rulesets.iterator();
-		while (rsIt.hasNext()) {
-			InterpretedRuleset rs = (InterpretedRuleset)rsIt.next();
-			Iterator ruleIt = rs.rules.iterator();
-			while (ruleIt.hasNext()) {
-				Rule rule = (Rule)ruleIt.next();
+		for(InterpretedRuleset rs : rulesets){
+			for(Rule rule : rs.rules){
 				updateRef(rule.atomMatch, rulesetMap, rule.guardLabel, rule.bodyLabel);
 				updateRef(rule.memMatch, rulesetMap, rule.guardLabel, rule.bodyLabel);
 				updateRef(rule.guard, rulesetMap, rule.guardLabel, rule.bodyLabel);
 				updateRef(rule.body, rulesetMap, rule.guardLabel, rule.bodyLabel);
 			}
 		}
-		
-		// モジュールの処理
+
+		// モジュールの処理 //キャストエラーが起きそうなんですが・・・ 2008.6.27 iwasawa
 		Iterator it = modules.iterator();
 		while (it.hasNext()) {
 			Membrane mem = (Membrane)it.next();
@@ -79,28 +75,24 @@ public class RulesetParser {
 			}
 			Module.regMemName(mem.name, mem);
 		}
-		
+
 		// インラインの処理
-		it = inlines.iterator();
-		while (it.hasNext()) {
-			String name = (String)it.next();
+		for(String name : inlines){
 			InlineUnit iu = new InlineUnit(name);
 			iu.attach();
 			Inline.inlineSet.put(name, iu);
 		}
 
-		return (Ruleset)rulesets.get(0);
+		return rulesets.get(0);
 	}
-	
-	private static void updateRef(List insts, Map map, InstructionList guard, InstructionList body) {
+
+	private static void updateRef(List<Instruction> insts, Map<Integer, InterpretedRuleset> map, InstructionList guard, InstructionList body) {
 		if (insts == null) return;
 		Integer guardLabel, bodyLabel;
 		guardLabel = (guard == null) ? null : Integer.valueOf(guard.label.substring(1));
 		bodyLabel = (body == null) ? null : Integer.valueOf(body.label.substring(1));
 
-		Iterator it = insts.iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
+		for(Instruction inst : insts){
 			for (int i = 0; i < inst.data.size(); i++) {
 				Object data = inst.data.get(i);
 				if (data instanceof RulesetRef) {

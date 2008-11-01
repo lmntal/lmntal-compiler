@@ -23,6 +23,7 @@ abstract public class Util {
 	public static Functor DOT = new SymbolFunctor(".", 3);
 	public static Functor NIL = new SymbolFunctor("[]", 1);
 	public static final Iterator NULL_ITERATOR = Collections.EMPTY_SET.iterator();
+	private Util(){}
 	public static void systemError(String msg) {
 		System.err.println(msg);
 		System.exit(-1);

@@ -1,6 +1,8 @@
 package runtime;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 
 /**
  * 編み上げ後の命令列を扱うクラス

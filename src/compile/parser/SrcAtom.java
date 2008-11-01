@@ -1,7 +1,6 @@
 package compile.parser;
 import java.util.LinkedList;
 
-import util.Util;
 
 /** ソースファイル中のアトム表現 */
 class SrcAtom {

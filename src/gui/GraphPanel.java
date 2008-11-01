@@ -742,6 +742,9 @@ public class GraphPanel extends JPanel {
 	 *
 	 */
 	public void showAll(){
+		if(rootNode_ == null){
+			return;
+		}
 		rootNode_.setVisible(true, true);
 		rootNode_.setInvisibleRootNode(null);
 	}

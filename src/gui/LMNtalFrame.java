@@ -106,6 +106,7 @@ public class LMNtalFrame extends JFrame {
 	 *
 	 */
 	public void hideAll(){
+		Node.setShowAll(false);
 		panel_.hideAll();
 	}
 	
@@ -213,6 +214,7 @@ public class LMNtalFrame extends JFrame {
 	 *
 	 */
 	public void showAll(){
+		Node.setShowAll(true);
 		panel_.showAll();
 	}
 	

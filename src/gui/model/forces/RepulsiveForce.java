@@ -85,8 +85,8 @@ public class RepulsiveForce {
 //						boolean calcX = (((intersectionRect.getBounds2D().getWidth() / 2) - Math.abs(dx)) < ((intersectionRect.getBounds2D().getHeight() / 2) - Math.abs(dy)));
 						boolean calcX = (intersectionRect.getBounds2D().getWidth() < intersectionRect.getBounds2D().getHeight());
 
-						double ddx = (calcX) ? fx * dx: 0;
-						double ddy = (!calcX) ? fy * dy: 0;
+						double ddx = (calcX) ? fx * dx * divergenceFource: 0;
+						double ddy = (!calcX) ? fy * dy * divergenceFource: 0;
 
 //						System.out.println(sourceNode.getID());
 //						System.out.println(targetNode.getID());
@@ -111,7 +111,12 @@ public class RepulsiveForce {
 
 	static boolean repulsiveFlag_ = true;
 	/** ÀÍÎÏÄê¿ô */
-	final static double CONSTANT_REPULSIVE = 0.0005;
+	static double CONSTANT_REPULSIVE = 0.1;
+	
+	static
+	public void setConstantRepulsive(double value){
+		CONSTANT_REPULSIVE = value / 500;
+	}
 
 	final static double ALFA_DIST = 5;
 

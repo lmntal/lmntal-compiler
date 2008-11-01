@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
+import runtime.Ruleset;
 import util.Util;
 
 import compile.parser.LMNParser;
@@ -108,9 +109,8 @@ public class Module {
 	public static void resolveModules(Membrane m) {
 		List<String> need = new ArrayList<String>();
 		getNeedModules(m, need);
-		Iterator i = need.iterator();
-		while(i.hasNext()) {
-			loadModule(m, (String)i.next());
+		for(String s : need){
+			loadModule(m, s);
 		}
 	}
 	
@@ -120,10 +120,9 @@ public class Module {
 	 * @param need 出力引数。モジュール一覧が入る。
 	 */
 	static void getNeedModules(Membrane m, List<String> need) {
-		Iterator i;
-		i = m.atoms.listIterator();
-		while(i.hasNext()) {
-			Atom a = (Atom)i.next();
+		Iterator<Atom> i_a = m.atoms.listIterator();
+		while(i_a.hasNext()) {
+			Atom a = i_a.next();
 			String path = a.getPath();
 			if(path == null) continue;
 			if(path.equals(m.name)) continue;
@@ -131,15 +130,15 @@ public class Module {
 				need.add(path);
 			}
 		}
-		i = m.rules.listIterator();
-		while(i.hasNext()) {
-			RuleStructure rs = (RuleStructure)i.next();
+		Iterator<RuleStructure>i_r = m.rules.listIterator();
+		while(i_r.hasNext()) {
+			RuleStructure rs = i_r.next();
 			getNeedModules(rs.leftMem, need);
 			getNeedModules(rs.rightMem, need);
 		}
-		i = m.mems.listIterator();
-		while(i.hasNext()) {
-			getNeedModules((Membrane)i.next(), need);
+		Iterator<Membrane> i_m = m.mems.listIterator();
+		while(i_m.hasNext()) {
+			getNeedModules(i_m.next(), need);
 		}
 	}
 	
@@ -148,10 +147,10 @@ public class Module {
 		if (memNameTable.size() == 0) return;
 		
 		Util.println("Module");
-		Iterator it = memNameTable.keySet().iterator();
+		Iterator<String> it = memNameTable.keySet().iterator();
 		while (it.hasNext()) {
-			String name = (String)it.next();
-			Membrane mem = (Membrane)memNameTable.get(name);
+			String name = it.next();
+			Membrane mem = memNameTable.get(name);
 			name = name.replaceAll("\\\\", "\\\\\\\\");
 			name = name.replaceAll("'", "\\\\'");
 			name = name.replaceAll("\r", "\\\\r");
@@ -159,7 +158,7 @@ public class Module {
 			Util.print("'" + name + "'");
 			Util.print(" {");
 			if (mem.rulesets.size() > 0) {
-				Iterator it2 = mem.rulesets.iterator();
+				Iterator<Ruleset> it2 = mem.rulesets.iterator();
 				Util.print(it2.next());
 				while (it2.hasNext()) {
 					System.out.print(", " + it2.next());

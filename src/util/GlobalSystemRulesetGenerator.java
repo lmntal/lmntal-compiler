@@ -1,9 +1,9 @@
 package util;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import runtime.Functor;
@@ -33,7 +33,7 @@ public final class GlobalSystemRulesetGenerator {
 		//    1:$outside(B,A), 3:{2:$inside(B,C), 4:$inside(D,C), $p,@p}, 5:$outside(D,E)
 		// :-                  3:{                                $p,@p}, A=E.
 		Rule rule = new Rule("proxy");
-		List insts = rule.memMatch;
+		List<Instruction> insts = rule.memMatch;
 		// match
 		insts.add(new Instruction(Instruction.SPEC,        1,6));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,Functor.OUTSIDE_PROXY));
@@ -140,10 +140,7 @@ public final class GlobalSystemRulesetGenerator {
 		// todo 下記コードは明らかに不自然なので、InterpretedRuleset（のリストまたはそれを持つ
 		// コンパイル時膜構造）を生成するだけのメソッドをRulesetCompilerに作る。
 		InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
-		Rule rule = (Rule)ir.rules.get(0);
-		Iterator it = rule.body.iterator();
-		while (it.hasNext()) {
-			Instruction loadruleset = (Instruction)it.next();
+		for(Instruction loadruleset : ir.rules.get(0).body){
 			if (loadruleset.getKind() == Instruction.LOADRULESET) {
 				InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
 				ruleset.rules.addAll(ir2.rules);
@@ -161,7 +158,7 @@ public final class GlobalSystemRulesetGenerator {
 		rule.bodyLabel = new InstructionList();
 		rule.body = rule.bodyLabel.insts;
 		
-		List insts = rule.memMatch, insts2 = rule.body;
+		List<Instruction> insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,5));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new SymbolFunctor(name,3)));
@@ -170,9 +167,9 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.DEREFATOM, 3,1,1));
 		insts.add(new Instruction(typechecker,             3));
 		insts.add(new Instruction(op,                    4,2,3));
-		ArrayList mems = new ArrayList();
+		ArrayList<Integer> mems = new ArrayList<Integer>();
 		mems.add(new Integer(0));
-		ArrayList atoms = new ArrayList();
+		ArrayList<Integer> atoms = new ArrayList<Integer>();
 		atoms.add(new Integer(1));
 		atoms.add(new Integer(2));
 		atoms.add(new Integer(3));
@@ -195,7 +192,7 @@ public final class GlobalSystemRulesetGenerator {
 	}
 	static Rule f() {
 		Rule rule = new Rule();
-		List insts = rule.memMatch;
+		List<Instruction> insts = rule.memMatch;
 		insts.add(new Instruction(Instruction.SPEC,      1, 0));
 		insts.add(new Instruction(Instruction.FINDATOM,  1, 0, new SymbolFunctor("+",2)));
 		insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 0));
@@ -214,7 +211,7 @@ public final class GlobalSystemRulesetGenerator {
 		rule.bodyLabel = new InstructionList();
 		rule.body = rule.bodyLabel.insts;
 
-		List insts = rule.memMatch, insts2 = rule.body;
+		List<Instruction> insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,5));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new SymbolFunctor(name,2)));
@@ -223,9 +220,9 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.GETFUNC,   4,2));
 		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
 
-		ArrayList mems = new ArrayList();
+		ArrayList<Integer> mems = new ArrayList<Integer>();
 		mems.add(new Integer(0));
-		ArrayList atoms = new ArrayList();
+		ArrayList<Integer> atoms = new ArrayList<Integer>();
 		atoms.add(new Integer(1));
 		atoms.add(new Integer(2));
 		atoms.add(new Integer(3));
@@ -253,7 +250,7 @@ public final class GlobalSystemRulesetGenerator {
 		rule.bodyLabel = new InstructionList();
 		rule.body = rule.bodyLabel.insts;
 
-		List insts = rule.memMatch, insts2 = rule.body;
+		List<Instruction> insts = rule.memMatch, insts2 = rule.body;
 		// match		
 		insts.add(new Instruction(Instruction.SPEC,        1,4));
 		insts.add(new Instruction(Instruction.FINDATOM,  1,0,new SymbolFunctor(name,2)));
@@ -261,9 +258,9 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(typechecker,             2));
 		insts.add(new Instruction(op,                    3,2));
 
-		ArrayList mems = new ArrayList();
+		ArrayList<Integer> mems = new ArrayList<Integer>();
 		mems.add(new Integer(0));
-		ArrayList atoms = new ArrayList();
+		ArrayList<Integer> atoms = new ArrayList<Integer>();
 		atoms.add(new Integer(1));
 		atoms.add(new Integer(2));
 		atoms.add(new Integer(3));
@@ -283,9 +280,7 @@ public final class GlobalSystemRulesetGenerator {
 	}
 	
 	/** */
-	static void loadBuiltInRules(InterpretedRuleset ruleset) {
-		Rule rule;
-		List insts;		
+	static void loadBuiltInRules(InterpretedRuleset ruleset) {	
 		
 		ruleset.rules.add(buildBinOpRule("+",	Instruction.ISINT,Instruction.IADD));
 		ruleset.rules.add(buildBinOpRule("-",	Instruction.ISINT,Instruction.ISUB));

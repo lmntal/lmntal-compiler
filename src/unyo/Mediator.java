@@ -4,9 +4,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import runtime.Atom;
 import runtime.Env;
+import runtime.Functor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
 
@@ -17,23 +20,23 @@ public class Mediator {
 	
 	// <削除された膜のID, 親膜のID>
 	static
-	private HashMap<String, String> removedMembrane_;
+	private LinkedHashMap<String, String> removedMembrane_;
 	
 	static
-	private HashSet<Membrane> addedMembrane_;
+	private LinkedList<Membrane> addedMembrane_;
 	
 	static
-	private HashSet<Membrane> modifiedMembrane_;
+	private LinkedList<Membrane> modifiedMembrane_;
 	
 	// <削除されたアトムのID, 親膜のID>
 	static
-	private HashMap<String, String> removedAtom_;
+	private LinkedHashMap<String, String> removedAtom_;
 	
 	static
-	private HashSet<Atom> addedAtom_;
+	private LinkedList<Atom> addedAtom_;
 	
 	static
-	private HashSet<Atom> modifiedAtom_;
+	private LinkedList<Atom> modifiedAtom_;
 	
 	static
 	private Object unyoObj_;
@@ -57,30 +60,40 @@ public class Mediator {
 	private Method sync_;
 	
 	static
+	public boolean releasing = false;
+	
+	static
+	public boolean unyoWait_ = false;
+	
+	static
 	public void release(){
-//		if(Env.theRuntime != null){
-//			Env.theRuntime.terminate();
-//		}
+		//if(Env.theRuntime != null){
+		//	Env.theRuntime.terminate();
+		//}
+		//System.out.println("release : terminate end");
+		releasing = true;
 //		Env.fUNYO = false;
 		Env.srcs.clear();
 //		doNext_ = false;
-//		removedMembrane_.clear();
-//		addedMembrane_.clear();
-//		modifiedMembrane_.clear();
-//		removedAtom_.clear();
-//		addedAtom_.clear();
-//		modifiedAtom_.clear();
+		removedMembrane_.clear();
+		addedMembrane_.clear();
+		modifiedMembrane_.clear();
+		removedAtom_.clear();
+		addedAtom_.clear();
+		modifiedAtom_.clear();
 	}
 	
 	static
 	public void init(){
 
-		removedMembrane_ = new HashMap<String, String>();
-		addedMembrane_ = new HashSet<Membrane>();
-		modifiedMembrane_ = new HashSet<Membrane>();
-		removedAtom_ = new HashMap<String, String>();
-		addedAtom_ = new HashSet<Atom>();
-		modifiedAtom_ = new HashSet<Atom>();
+		releasing = false;
+		
+		removedMembrane_ = new LinkedHashMap<String, String>();
+		addedMembrane_ = new LinkedList<Membrane>();
+		modifiedMembrane_ = new LinkedList<Membrane>();
+		removedAtom_ = new LinkedHashMap<String, String>();
+		addedAtom_ = new LinkedList<Atom>();
+		modifiedAtom_ = new LinkedList<Atom>();
 		try {
 			unyoClass_ = Class.forName("jp.ac.waseda.info.ueda.unyo.mediator.Synchronizer");
 			unyoObj_ = unyoClass_.newInstance();
@@ -98,12 +111,12 @@ public class Mediator {
 			setState_ 
 			= unyoClass_.getMethod("setState",
 					Object.class,
-					HashMap.class,
-					HashSet.class,
-					HashSet.class,
-					HashMap.class,
-					HashSet.class,
-					HashSet.class);
+					LinkedHashMap.class,
+					LinkedList.class,
+					LinkedList.class,
+					LinkedHashMap.class,
+					LinkedList.class,
+					LinkedList.class);
 			
 			end_ = unyoClass_.getMethod("end");
 			
@@ -150,6 +163,55 @@ public class Mediator {
 		newMem.setName(name);
 		targetMem.addMem(newMem);
 		return newMem;
+	}
+	
+	static
+	public HashSet addLink(Object source,
+			Object sourcem,
+			String sourceName,
+			int sl,
+			Object target,
+			Object targetm,
+			String targetName,
+			int tl){
+		HashSet<Object> newLinkSet = new HashSet<Object>();
+
+		Atom sourceAtom = (Atom) source;
+		Atom targetAtom = (Atom) target;
+		Membrane sourceMem = (Membrane) sourcem;
+		Membrane targetMem = (Membrane) targetm;
+
+		Functor newSourceFunctor;
+		Functor newTargetFunctor;
+
+		newSourceFunctor =
+			new SymbolFunctor(sourceName, sl + 1);
+		newTargetFunctor =
+			new SymbolFunctor(targetName, tl + 1);
+
+		Atom newSourceAtom = new Atom(sourceMem, newSourceFunctor);
+		Atom newTargetAtom = new Atom(targetMem, newTargetFunctor);
+		sourceAtom.getMem().addAtom(newSourceAtom);
+		targetAtom.getMem().addAtom(newTargetAtom);
+
+		for(int i = 0; i < sl; i++){
+			sourceMem.relink(newSourceAtom, i, sourceAtom, i);
+		}
+		sourceAtom.remove();
+
+		for(int i = 0; i < tl; i++){
+			targetMem.relink(newTargetAtom, i, targetAtom, i);
+		}
+		targetAtom.remove();
+
+		newSourceAtom.getMem().newLink(newSourceAtom,
+				newSourceAtom.getEdgeCount() - 1,
+				newTargetAtom,
+				newTargetAtom.getEdgeCount() - 1);
+		newLinkSet.add(newSourceAtom);
+		newLinkSet.add(newTargetAtom);
+
+		return newLinkSet;
 	}
 	
 	public static void errPrintln(String msg){
@@ -206,7 +268,12 @@ public class Mediator {
 	}
 	
 	static 
-	public void sync(Membrane root) {
+	public boolean sync(Membrane root) {
+		
+		if(releasing){
+			return false;
+		}
+		
 		try {
 			setState_.invoke(unyoObj_,
 					root,
@@ -224,7 +291,7 @@ public class Mediator {
 			addedAtom_.clear();
 			modifiedAtom_.clear();
 			
-			while((Boolean)sync_.invoke(unyoObj_)){
+			while((Boolean)sync_.invoke(unyoObj_)&&!releasing){
 				try {
 					Thread.sleep(SLEEP_TIME);
 				} catch (InterruptedException e) {
@@ -239,6 +306,12 @@ public class Mediator {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
+		
+		if(releasing){
+			return false;
+		}
+		
+		return true;
 		
 	}
 
@@ -272,5 +345,10 @@ public class Mediator {
 	static
 	public void addModifiedAtom(Atom atom){
 		modifiedAtom_.add(atom);
+	}
+	
+	static
+	public boolean getWait(){
+		return unyoWait_;
 	}
 }

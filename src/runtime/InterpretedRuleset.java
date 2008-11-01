@@ -203,9 +203,9 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		Env.counter++;
     	Thread thread = Thread.currentThread();
 		boolean result = false;
-		Iterator it = rules.iterator();
+		Iterator<Rule> it = rules.iterator();
 		while (it.hasNext()) {
-			Rule r = currentRule = (Rule) it.next();
+			Rule r = currentRule = it.next();
 			boolean success;
 			if(Env.profile >= Env.PROFILE_BYRULE){
 				long start,stop;
@@ -304,10 +304,10 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	
 	public String[] encodeRulesIndividually(){
 		String[] result = new String[rules.size()];
-		Iterator it = rules.iterator();
+		Iterator<Rule> it = rules.iterator();
 		int i = 0;
 		while(it.hasNext()) {
-			result[i] = ((Rule)it.next()).getFullText().
+			result[i] = it.next().getFullText().
 					replaceAll("\\n","").replaceAll("\\r","");
 			if(2 < result[i].length()){
 				result[i] = result[i].substring(1, result[i].length() - 1);
@@ -323,10 +323,9 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 				Env.p("Compiled SystemRuleset @" + id + dumpRules());
 			else
 				Env.p("Compiled Ruleset @" + id + dumpRules());
-		Iterator l;
-		l = rules.listIterator();
+		Iterator<Rule> l = rules.listIterator();
 		while (l.hasNext()) {
-			Rule r = ((Rule) l.next());
+			Rule r = l.next();
 			r.showDetail();
 		}
 		if(Env.slimcode)

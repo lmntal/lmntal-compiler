@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class FileClassLoader extends ClassLoader {
 	// 読み込むパス : File -> null   重複をなくしたいのでこうした。
-	static Map path = new HashMap();
+	static Map<File, Object> path = new HashMap<File, Object>();
 	static {
 		path.put(new File("."), null);
 	}
@@ -34,10 +34,10 @@ public class FileClassLoader extends ClassLoader {
 	 * クラスを読み込んで返す
 	 * @param className クラス名
 	 */
-	public Class findClass(String className) {
+	public Class<?> findClass(String className) {
 //		System.out.println("TRY   to load " + className);
-		for(Iterator i=path.keySet().iterator();i.hasNext();) {
-			File path = (File)i.next();
+		for(Iterator<File> i=path.keySet().iterator();i.hasNext();) {
+			File path = i.next();
 			try {
 				File filename = new File(path + "/" + className + ".class");
 //				System.out.println("path "+path);

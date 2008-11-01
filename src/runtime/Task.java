@@ -10,11 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import debug.Debug;
 
-import unyo.Mediator;
+//import unyo.Mediator;
 import util.Stack;
 import util.Util;
 
@@ -164,7 +165,6 @@ public class Task implements Runnable {
 	 * 実行が終了するまで戻らない。
 	 * <p>マスタタスクのルールスレッドを実行するために使用される。*/
 	public void execAsMasterTask() {
-		
 		switch (Env.ndMode) {
 		case Env.ND_MODE_D:
 			thread.start();
@@ -235,7 +235,7 @@ public class Task implements Runnable {
 	}
 	boolean exec(Membrane mem, boolean nondeterministic) {
 		Atom a = mem.popReadyAtom();
-		Iterator it = mem.rulesetIterator();
+		Iterator<Ruleset> it = mem.rulesetIterator();
 		boolean flag = false;
 		
 		if(!nondeterministic && Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null && !Env.memtestonly){ // 実行アトムスタックが空でないとき
@@ -243,7 +243,7 @@ public class Task implements Runnable {
 		        start = Util.getTime();
 			}
 			while(it.hasNext()){ // 本膜のもつルールをaに適用
-				if (((Ruleset)it.next()).react(mem, a)) {
+				if (it.next().react(mem, a)) {
 					flag = true;
 					//if (memStack.peek() != mem) break;
 					break; // ルールセットが変わっているかもしれないため
@@ -260,7 +260,8 @@ public class Task implements Runnable {
 					if (Debug.isBreakPoint()) Debug.inputCommand();
 				} else {
 					if(Env.fUNYO){
-						unyo.Mediator.sync(root);
+						//unyo.Mediator.sync(root);
+						if(!unyo.Mediator.sync(root)){ return false; }
 					}
 					if (!guiTrace()) return false;
 				}
@@ -283,9 +284,12 @@ public class Task implements Runnable {
 				while(it.hasNext()){ // 膜主導テストを行う
 					if(((Ruleset)it.next()).react(mem, nondeterministic)) {
 						flag = true;
+						/*
 						if(Env.fUNYO){
-							unyo.Mediator.sync(root);
+							//unyo.Mediator.sync(root);
+							if(!unyo.Mediator.sync(root)){ return false; }
 						}
+						*/
 						//if (memStack.peek() != mem) break;
 						break; // ルールセットが変わっているかもしれないため
 					}
@@ -296,7 +300,8 @@ public class Task implements Runnable {
 					if (Debug.isBreakPoint()) Debug.inputCommand();
 				} else {
 					if(Env.fUNYO){
-						unyo.Mediator.sync(root);
+						//unyo.Mediator.sync(root);
+						if(!unyo.Mediator.sync(root)){ return false; }
 					}
 					if (!guiTrace()) return false;
 				}
@@ -304,10 +309,10 @@ public class Task implements Runnable {
 				memStack.pop(); // 本膜をpop
 				if (!mem.isNondeterministic() && !mem.perpetual) {
 					// 子膜が全てstableなら、この膜をstableにする。
-					it = mem.memIterator();
+					Iterator<Membrane> it_m = mem.memIterator();
 					flag = false;
-					while(it.hasNext()){
-						if(!((Membrane)it.next()).isStable()) {
+					while(it_m.hasNext()){
+						if(!it_m.next().isStable()) {
 							flag = true;
 							break;
 						}
@@ -367,12 +372,18 @@ public class Task implements Runnable {
 			//実行
 			exec(mem);
 	        mem.unlock(true);
-
+	        
 			//このタスクの停止を待っているスレッドを全て起こす。
 			synchronized(this) {
 				running = false;
 				notifyAll();
 			}
+			
+			//releaseが呼び出されていたらUNYO終了 (ayano)
+			if(Env.fUNYO){
+				if(unyo.Mediator.releasing) break;
+			}
+			
 			//グローバルルート膜であり、本膜のルール適用を終了していたら、実行終了
 			if (root != null && root.isStable()) break;
 //			if (root != null && root.isStable() && !perpetual) break;
@@ -417,9 +428,9 @@ public class Task implements Runnable {
 	 */
 	static public void activatePerpetualMem(Membrane mem) {
 		if(mem.perpetual) doAsyncLock(mem);
-		Iterator it = mem.memIterator();
+		Iterator<Membrane> it = mem.memIterator();
 		while(it.hasNext()) {
-			final Membrane m = (Membrane)it.next();
+			final Membrane m = it.next();
 			if(m.perpetual) doAsyncLock(m);
 			activatePerpetualMem(m);
 		}
@@ -542,7 +553,7 @@ public class Task implements Runnable {
 			//複製
 			Membrane memResult = memGraph.newMem();
 			Membrane memResult2 = memResult.newMem(Membrane.KIND_ND);
-			Map atomMap = memResult2.copyCellsFrom(memExec2); // 帰り値はコピー元のアトム->コピー先のアトムというMap
+			Map<Atom, Atom> atomMap = memResult2.copyCellsFrom(memExec2); // 帰り値はコピー元のアトム->コピー先のアトムというMap
 			memResult2.copyRulesFrom(memExec2);
 			//適用
 			// memResult2: 複製で作成された膜
@@ -621,7 +632,7 @@ public class Task implements Runnable {
 		//				w++;
 						//複製
 						Membrane mem2 = new Membrane(this);
-						Map map = mem2.copyCellsFrom(mem);
+						Map<Atom, Atom> map = mem2.copyCellsFrom(mem);
 						//mem2.memToCopyMap = null;
 						mem2.copyRulesFrom(mem);
 						//適用
@@ -674,7 +685,7 @@ public class Task implements Runnable {
 	 * 重複除去の対象は、先祖とその兄弟のみ
 	 */
 	void nondeterministicExec2() {
-		HashMap idMap = new HashMap();
+		HashMap<AtomSet, Integer> idMap = new HashMap<AtomSet, Integer>();
 		nextId = 0;
 
 		Membrane mem = (Membrane)getRoot();
@@ -692,7 +703,7 @@ public class Task implements Runnable {
 			Env.d(e);
 		}
 	}
-	boolean nondeterministicExec2(HashMap idMap, Membrane mem, BufferedReader reader) throws IOException {
+	boolean nondeterministicExec2(HashMap<AtomSet, Integer> idMap, Membrane mem, BufferedReader reader) throws IOException {
 		//ルール適用の全可能性を検査
 		if (mem != getRoot())
 			memStack.push(mem);
@@ -703,7 +714,7 @@ public class Task implements Runnable {
 		if (!Env.fInteractive)
 			Util.println(idMap.get(mem.getAtoms()) + " : " + Dumper.dump(mem));
 		//適用した結果を作成
-		ArrayList children = new ArrayList();
+		List<Membrane> children = new ArrayList<Membrane>();
 		if (Env.fInteractive && states.size() == 0) {
 			Util.print(Dumper.dump(mem) + " ? ");
 			String str = reader.readLine();
@@ -718,7 +729,7 @@ public class Task implements Runnable {
 		while (it.hasNext()) {
 			//複製
 			Membrane mem2 = new Membrane(this);
-			Map map = mem2.copyCellsFrom(mem);
+			Map<Atom, Atom> map = mem2.copyCellsFrom(mem);
 			//mem2.memToCopyMap = null;
 			mem2.copyRulesFrom(mem);
 			//適用
@@ -743,7 +754,7 @@ public class Task implements Runnable {
 			Util.println("");
 		
 		for (int i = 0; i < children.size(); i++) {
-			if (nondeterministicExec2(idMap, (Membrane)children.get(i), reader))
+			if (nondeterministicExec2(idMap, children.get(i), reader))
 				return true;
 		}
 		idMap.remove(mem.getAtoms());
@@ -758,11 +769,11 @@ public class Task implements Runnable {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		int nextId = 1, nowId = 0;
 //long t = 0;
-		LinkedList queue = new LinkedList();
+		LinkedList<Membrane> queue = new LinkedList<Membrane>();
 		queue.addLast(getRoot());
 		try {
 			while (queue.size() > 0) {
-				Membrane mem = (Membrane)queue.removeFirst();
+				Membrane mem = queue.removeFirst();
 				//ルール適用の全可能性を検査
 				if (mem != getRoot())
 					memStack.push(mem);
@@ -778,7 +789,7 @@ public class Task implements Runnable {
 					while (it.hasNext()) {
 						//複製
 						Membrane mem2 = new Membrane(this);
-						Map map = mem2.copyCellsFrom(mem);
+						Map<Atom, Atom> map = mem2.copyCellsFrom(mem);
 						//mem2.memToCopyMap = null;
 						mem2.copyRulesFrom(mem);
 						//適用
@@ -821,7 +832,7 @@ public class Task implements Runnable {
 	 * @param atomMap origMem 内のアトムから mem 内のアトムへのマップ。state 内のアトムはこのマップにしたがって書き換えられる。
 	 * @return 適用したルールの名前
 	 */
-	static String react(Membrane mem, Object[] state, Membrane origMem, Map atomMap) {
+	static String react(Membrane mem, Object[] state, Membrane origMem, Map<Atom, Atom> atomMap) {
 		Ruleset rs = (Ruleset)state[0];
 		String name = (String)state[1];
 		String label = (String)state[2];

@@ -615,6 +615,10 @@ public class FrontEnd {
 				System.exit(-1);
 			}
 		}
+
+    if (Env.slimcode) {
+      Optimizer.fReuseAtom = false;
+    }
 	}
 	
 	/**
@@ -735,7 +739,7 @@ public class FrontEnd {
 				//ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
 				for (String libName : Module.loaded) {
 					compile.structure.Membrane mem = (compile.structure.Membrane)Module.memNameTable.get(libName);
-					Iterator it2 = mem.rulesets.iterator();
+					Iterator<Ruleset> it2 = mem.rulesets.iterator();
 					while (it2.hasNext()) {
 						((InterpretedRuleset)it2.next()).showDetail();
 					}
@@ -806,7 +810,8 @@ public class FrontEnd {
 			boolean ready = true;
 
 			if(Env.fUNYO){
-				unyo.Mediator.sync(root);
+				//unyo.Mediator.sync(root);
+				if(!unyo.Mediator.sync(root)){ Mediator.end(); return; }
 			}
 			
 			if (Env.gui != null) {
@@ -838,7 +843,8 @@ public class FrontEnd {
 				if(Env.getExtendedOption("chorus") != ""){ Output.out(Env.getExtendedOption("chorus"), rt.getGlobalRoot()); }
 
 				if(Env.fUNYO){
-					unyo.Mediator.sync(root);
+					//unyo.Mediator.sync(root);
+					if(!unyo.Mediator.sync(root)){ Mediator.end(); return; }
 				}
 				
 				if (Env.gui != null) {

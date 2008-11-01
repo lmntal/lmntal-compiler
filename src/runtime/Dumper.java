@@ -1,6 +1,12 @@
 package runtime;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 
 final class Unlexer {
 	private StringBuffer buf = new StringBuffer();
@@ -104,11 +110,11 @@ public class Dumper {
 		// #1 - アトムの出力
 
 		// Set atoms = new HashSet(mem.getAtomCount());
-		Set atoms = new HashSet(mem.atoms.size()); // 今はproxyを表示しているため。いずれ上に戻す
+		Set<Atom> atoms = new HashSet<Atom>(mem.atoms.size()); // 今はproxyを表示しているため。いずれ上に戻す
 
-		Iterator it = mem.atomIterator();
-		while (it.hasNext()) {
-			Atom a = (Atom) it.next();
+		Iterator<Atom> it_a = mem.atomIterator();
+		while (it_a.hasNext()) {
+			Atom a = it_a.next();
 			if (Env.hideProxy && !a.isVisible()) {
 				// PROXYを表示させない 2005/02/03 T.Nagata
 				continue;
@@ -116,9 +122,9 @@ public class Dumper {
 			atoms.add(a);
 		}
 		if (Env.verbose >= Env.VERBOSE_EXPANDATOMS) {
-			it = mem.atomIterator();
-			while (it.hasNext()) {
-				Atom a = (Atom)it.next();
+			it_a = mem.atomIterator();
+			while (it_a.hasNext()) {
+				Atom a = it_a.next();
 				if(!atoms.contains(a))continue;
 				if (commaFlag)
 					buf.append(", ");
@@ -140,9 +146,9 @@ public class Dumper {
 			// 通常でないアトム名（起点にしないアトムの名前）:
 			// - $in,$out,[],整数,実数,およびA-Zで始まるアトム
 
-			it = mem.atomIterator();
-			while (it.hasNext()) {
-				Atom a = (Atom) it.next();
+			it_a = mem.atomIterator();
+			while (it_a.hasNext()) {
+				Atom a = it_a.next();
 				if (a.getArity() == 0
 						|| a.getLastArg().getAtom().getMem() != mem) {
 					predAtoms[0].add(a);
@@ -174,9 +180,9 @@ public class Dumper {
 
 			// predAtoms内のアトムを起点に出力
 			for (int phase = 0; phase < predAtoms.length; phase++) {
-				it = predAtoms[phase].iterator();
-				while (it.hasNext()) {
-					Atom a = (Atom) it.next();
+				it_a = predAtoms[phase].iterator();
+				while (it_a.hasNext()) {
+					Atom a = it_a.next();
 					if (atoms.contains(a)) { // まだ出力されていない場合
 						if (commaFlag)
 							buf.append(", ");
@@ -209,9 +215,9 @@ public class Dumper {
 			boolean changed;
 			do {
 				changed = false;
-				it = atoms.iterator();
-				while (it.hasNext()) {
-					Atom a = (Atom) it.next();
+				it_a = atoms.iterator();
+				while (it_a.hasNext()) {
+					Atom a = it_a.next();
 					// 演算子表示できるときは、データができるだけ引数に来るようにする
 					if (Env.verbose < Env.VERBOSE_EXPANDOPS) {
 						// todo コードが気持ち悪いのでなんとかする (2)
@@ -251,9 +257,9 @@ public class Dumper {
 			// ただしリンク先が自由リンク管理アトムのときに限る
 			do {
 				changed = false;
-				it = atoms.iterator();
-				while (it.hasNext()) {
-					Atom a = (Atom) it.next();
+				it_a = atoms.iterator();
+				while (it_a.hasNext()) {
+					Atom a = it_a.next();
 					if (a.getArity() == 1) {
 						if (a.getLastArg().getAtom().getFunctor() == Functor.INSIDE_PROXY
 								|| a.getLastArg().getAtom().getFunctor()
@@ -272,8 +278,8 @@ public class Dumper {
 
 			// 残ったアトムを s=t の形式で出力する。
 			while (!atoms.isEmpty()) {
-				it = atoms.iterator();
-				Atom a = (Atom) it.next();
+				it_a = atoms.iterator();
+				Atom a = it_a.next();
 				if (commaFlag)
 					buf.append(", ");
 				else
@@ -286,9 +292,9 @@ public class Dumper {
 		}
 
 		// #2 - 子膜の出力
-		it = mem.memIterator();
-		while (it.hasNext()) {
-			Membrane m = (Membrane) it.next();
+		Iterator<Membrane> it_m = mem.memIterator();
+		while (it_m.hasNext()) {
+			Membrane m = it_m.next();
 			if (commaFlag) {
 				buf.append(", ");
 				if (Env.getExtendedOption("dump").equals("1"))
@@ -315,30 +321,31 @@ public class Dumper {
 				Env.indent--;
 		}
 
+		Iterator<Ruleset> it_r;
 		// #3 - ルールの出力
 		if(Env.showruleset){
-			it = mem.rulesetIterator();
-			while (it.hasNext()) {
+			it_r = mem.rulesetIterator();
+			while (it_r.hasNext()) {
 				if (commaFlag)
 					buf.append(", ");
 				else
 					commaFlag = true;
-				buf.append(((Ruleset) it.next()).toString());
+				buf.append(it_r.next().toString());
 			}
 		}
 		if(Env.showrule){
-			it = mem.rulesetIterator();
-			while (it.hasNext()) {
-				Ruleset rs = (Ruleset) it.next();
-				List rules;
+			it_r = mem.rulesetIterator();
+			while (it_r.hasNext()) {
+				Ruleset rs = it_r.next();
+				List<Rule> rules;
 				if(rs instanceof InterpretedRuleset)
 					rules = ((InterpretedRuleset)rs).rules;
 				else
 					rules = rs.compiledRules;
 				if(rules != null){
-					Iterator it2 = rules.iterator();
+					Iterator<Rule> it2 = rules.iterator();
 					while (it2.hasNext()) {
-						Rule r = (Rule) it2.next();
+						Rule r = it2.next();
 						if (r.name != null) {
 							if (commaFlag)
 								buf.append(", ");
@@ -353,9 +360,9 @@ public class Dumper {
 								buf.append("_" + (r.atomsucceed+r.memsucceed) + "/" + (r.atomapply+r.memapply) +
 										"(" + r.backtracks + "," + r.lockfailure + ")" + "(" + times + "msec)");
 							} else if (Env.profile == Env.PROFILE_ALL) {
-								Iterator its = r.bench.values().iterator();
+								Iterator<Benchmark> its = r.bench.values().iterator();
 								while(its.hasNext()) {
-									Benchmark b = (Benchmark)its.next();
+									Benchmark b = its.next();
 									long atomtimes = (Env.majorVersion == 1 && Env.minorVersion > 4) ? b.atomtime/1000000 : b.atomtime;
 									long memtimes = (Env.majorVersion == 1 && Env.minorVersion > 4) ? b.memtime/1000000 : b.memtime;
 									pbuf.append(r.toString() + ",\t" + b.threadid + ",\t" + 
@@ -408,11 +415,11 @@ public class Dumper {
 		// #1 - アトムの出力
 
 			// proxyを表示しないのでこれで十分
-			Set atoms = new HashSet(mem.getAtomCount());
+			Set<Atom> atoms = new HashSet<Atom>(mem.getAtomCount());
 
-			Iterator it = mem.atomIterator();
-			while (it.hasNext()) {
-				Atom a = (Atom) it.next();
+			Iterator<Atom> it_a = mem.atomIterator();
+			while (it_a.hasNext()) {
+				Atom a = it_a.next();
 				if (!a.isVisible()) {
 					// PROXYを表示させない
 					continue;
@@ -433,9 +440,9 @@ public class Dumper {
 			// 通常でないアトム名（起点にしないアトムの名前）:
 			// - $in,$out,[],整数,実数,およびA-Zで始まるアトム
 
-			it = mem.atomIterator();
-			while (it.hasNext()) {
-				Atom a = (Atom) it.next();
+			it_a = mem.atomIterator();
+			while (it_a.hasNext()) {
+				Atom a = it_a.next();
 				if (a.getArity() == 0
 						|| a.getLastArg().getAtom().getMem() != mem) {
 					predAtoms[0].add(a);
@@ -467,9 +474,9 @@ public class Dumper {
 
 			// predAtoms内のアトムを起点に出力
 			for (int phase = 0; phase < predAtoms.length; phase++) {
-				it = predAtoms[phase].iterator();
-				while (it.hasNext()) {
-					Atom a = (Atom) it.next();
+				it_a = predAtoms[phase].iterator();
+				while (it_a.hasNext()) {
+					Atom a = it_a.next();
 					if (atoms.contains(a)) { // まだ出力されていない場合
 						if (commaFlag)
 							buf.append(", ");
@@ -498,9 +505,9 @@ public class Dumper {
 			boolean changed;
 			do {
 				changed = false;
-				it = atoms.iterator();
-				while (it.hasNext()) {
-					Atom a = (Atom) it.next();
+				it_a = atoms.iterator();
+				while (it_a.hasNext()) {
+					Atom a = it_a.next();
 					// todo コードが気持ち悪いのでなんとかする (2)
 					if (!a.getFunctor().isSymbol())
 						continue;
@@ -529,9 +536,9 @@ public class Dumper {
 			// ただしリンク先が自由リンク管理アトムのときに限る
 			do {
 				changed = false;
-				it = atoms.iterator();
-				while (it.hasNext()) {
-					Atom a = (Atom) it.next();
+				it_a = atoms.iterator();
+				while (it_a.hasNext()) {
+					Atom a = it_a.next();
 					if (a.getArity() == 1) {
 						if (a.getLastArg().getAtom().getFunctor() == Functor.INSIDE_PROXY
 								|| a.getLastArg().getAtom().getFunctor()
@@ -550,8 +557,8 @@ public class Dumper {
 
 			// 残ったアトムを s=t の形式で出力する。
 			while (!atoms.isEmpty()) {
-				it = atoms.iterator();
-				Atom a = (Atom) it.next();
+				it_a = atoms.iterator();
+				Atom a = it_a.next();
 				if (commaFlag)
 					buf.append(", ");
 				else
@@ -564,9 +571,9 @@ public class Dumper {
 		}
 
 		// #2 子膜の出力
-		Iterator it = mem.memIterator();
-		while (it.hasNext()) {
-			Membrane m = (Membrane) it.next();
+		Iterator<Membrane> it_m = mem.memIterator();
+		while (it_m.hasNext()) {
+			Membrane m = it_m.next();
 			if (commaFlag) {
 				buf.append(", ");
 			} else
@@ -580,14 +587,14 @@ public class Dumper {
 
 		if(mode <= 1) {
 		// #3 ルールの出力
-			it = mem.rulesetIterator();
-			while (it.hasNext()) {
+			Iterator<Ruleset> it_r = mem.rulesetIterator();
+			while (it_r.hasNext()) {
 				if (commaFlag)
 					buf.append(", ");
 				else
 					commaFlag = true;
 				// Translator が作成したファイルのencode()メソッドを呼び出す
-				buf.append(((Ruleset) it.next()).encode());
+				buf.append(it_r.next().encode());
 			}
 		}
 		

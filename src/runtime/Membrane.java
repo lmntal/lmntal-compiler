@@ -61,11 +61,11 @@ public final class Membrane extends QueuedEntity {
 
 	private static int nextId = 0;
 	private int id;
-	
+
 	/** 子膜->(コピー元のアトムin子膜->コピー先のアトムinコピーされた子膜)
 	 * TODO 膜のメンバ変数でいいのかどうか */
-	HashMap memToCopyMap = null; 
-	
+	HashMap<Membrane, Map<Atom, Atom>> memToCopyMap = null; 
+
 	/** この膜の名前（internされた文字列またはnull） */
 	String name = null;
 	public boolean equalName(String s){
@@ -76,20 +76,20 @@ public final class Membrane extends QueuedEntity {
 	}
 	public String getName() { return name; }
 	public void setName(String name) { this.name = name; } // 仕様が固まったらコンストラクタで渡すようにすべきかも
-	
+
 	/** 実行アトムスタック。
 	 * 操作する際にこの膜のロックを取得している必要はない。
 	 * 排他制御には、Stack インスタンスに関する synchronized 節を利用している。 */
 	private Stack ready = null;
-	
+
 //	/** リモートホストとの通信でこの膜のアトムを同定するときに使用されるatomidの表。
-//	 * <p>atomid (String) -> Atom
-//	 * <p>この膜のキャッシュ送信後、この膜の連続するロック期間中のみ有効。
-//	 * キャッシュ送信時に初期化され、引き続くリモートホストからの要求を解釈するために使用される。
-//	 * リモートホストからの要求で新しくアトムが作成されると、受信したNEW_をキーとするエントリが追加される。
-//	 * $inside_proxyアトムの場合、命令ブロックの返答のタイミングでローカルIDで上書きされる。
-//	 * $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
-//	 * @see Atom.remoteid */
+//	* <p>atomid (String) -> Atom
+//	* <p>この膜のキャッシュ送信後、この膜の連続するロック期間中のみ有効。
+//	* キャッシュ送信時に初期化され、引き続くリモートホストからの要求を解釈するために使用される。
+//	* リモートホストからの要求で新しくアトムが作成されると、受信したNEW_をキーとするエントリが追加される。
+//	* $inside_proxyアトムの場合、命令ブロックの返答のタイミングでローカルIDで上書きされる。
+//	* $inside_proxy以外のアトムの場合、ロック解除までNEW_のまま放置される。
+//	* @see Atom.remoteid */
 //	protected HashMap atomTable = null;
 
 	///////////////////////////////
@@ -98,10 +98,10 @@ public final class Membrane extends QueuedEntity {
 	/** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
 	private Membrane(Task task, Membrane parent) {
 		if (Env.shuffle >= Env.SHUFFLE_MEMS)
-			mems = new RandomSet();
+			mems = new RandomSet<Membrane>();
 		else
 			mems = new HashSet<Membrane>();
-		
+
 		this.task = task;
 		this.parent = parent;
 		id = nextId++;
@@ -132,9 +132,9 @@ public final class Membrane extends QueuedEntity {
 	// 061028 okabe ランタイムは唯一つなのでGlobal/Local の区別は必要ない
 //	/** この膜のローカルIDを取得する */
 //	public String getLocalID() {  //publicなのはLMNtalDaemonから呼んでいるから→呼ばなくなったのでprotectedでよい
-//		return Integer.toString(id);
+//	return Integer.toString(id);
 //	}
-	
+
 	/** この膜を管理するタスクの取得 */
 	public Task getTask() {
 		return task;
@@ -143,11 +143,11 @@ public final class Membrane extends QueuedEntity {
 	public Membrane getParent() {
 		return parent;
 	}
-	
+
 	/** AtomSetを配列形式で取得 */
 	// 使ってる場所がないのでコメントアウト
 //	public Atom[] getAtomSet() {
-//		return (Atom[])atoms.toArray();
+//	return (Atom[])atoms.toArray();
 //	}
 	/** 060727 */
 	/** ルールセット数を取得 */
@@ -197,11 +197,11 @@ public final class Membrane extends QueuedEntity {
 	}
 //	/** 永続フラグをOFFにする */
 //	public void makeNotPerpetual() {
-//		AbstractLMNtalRuntime machine = getTask().getMachine();
-//		synchronized(machine) {
-//			perpetual = false;
-//			machine.notify();
-//		}
+//	AbstractLMNtalRuntime machine = getTask().getMachine();
+//	synchronized(machine) {
+//	perpetual = false;
+//	machine.notify();
+//	}
 //	}
 	/** この膜にルールがあればtrue */
 	public boolean hasRules() {
@@ -213,9 +213,9 @@ public final class Membrane extends QueuedEntity {
 	public boolean isNondeterministic() {
 		return kind == KIND_ND;
 	}
-	
+
 	// 反復子
-	
+
 	public Object[] getAtomArray() {
 		return atoms.toArray();
 	}
@@ -229,8 +229,8 @@ public final class Membrane extends QueuedEntity {
 		return al;
 	}
 	/** 子膜のコピーを取得 */
-	public HashSet getMemCopy() {
-		return new HashSet(mems);
+	public HashSet<Membrane> getMemCopy() {
+		return new HashSet<Membrane>(mems);
 		//RandomSet s = new RandomSet();
 		//s.addAll(mems);
 		//return s;
@@ -244,13 +244,13 @@ public final class Membrane extends QueuedEntity {
 		return mems.iterator();
 	}
 	/** 名前funcを持つアトムの反復子を取得する */
-	public Iterator atomIteratorOfFunctor(Functor functor) {
+	public Iterator<Atom> atomIteratorOfFunctor(Functor functor) {
 		return atoms.iteratorOfFunctor(functor);
 	}
 	/** この膜にあるルールセットの反復子を返す */
-	public Iterator rulesetIterator() {
+	public Iterator<Ruleset> rulesetIterator() {
 		if (Env.shuffle >= Env.SHUFFLE_RULES) {
-			return new RandomIterator(rulesets);
+			return new RandomIterator<Ruleset>(rulesets);
 		} else {
 			return rulesets.iterator();
 		}
@@ -260,7 +260,7 @@ public final class Membrane extends QueuedEntity {
 	// ボディ操作（RemoteMembraneではオーバーライドされる）
 
 	// ボディ操作1 - ルールの操作
-	
+
 	/** ルールを全て消去する */
 	public void clearRules() {
 		if(Env.profile == Env.PROFILE_ALL)
@@ -298,7 +298,7 @@ public final class Membrane extends QueuedEntity {
 	}
 	/** 指定されたアトムの名前を変える */
 	public void alterAtomFunctor(Atom atom, Functor func) {
-		
+
 		atoms.remove(atom);
 		atom.setFunctor(func);
 		atoms.add(atom);
@@ -349,7 +349,7 @@ public final class Membrane extends QueuedEntity {
 				continue; // それ以上走査しない
 			}
 			if(a.getFunctor().equals(Functor.INSIDE_PROXY)||
-				a.getFunctor().isOutsideProxy()) // 自由リンク管理アトムに到達
+					a.getFunctor().isOutsideProxy()) // 自由リンク管理アトムに到達
 				return -1; // 失敗
 			c++;
 			srcSet.add(a);
@@ -363,7 +363,7 @@ public final class Membrane extends QueuedEntity {
 			else return -1; // 未到達の根があれば失敗
 		return c;
 	}
-	
+
 	/**
 	 * 同じ構造を持った基底項プロセスかどうか検査する
 	 * ( Stackを使うように修正 2005/07/27 )
@@ -415,7 +415,7 @@ public final class Membrane extends QueuedEntity {
 	 * @param srcGround コピー元の基底項プロセス の根のリスト
 	 * @return 2要素のリスト ( 第一要素 : コピー先の基底項プロセス の根のリスト, 第二要素 : コピー元のアトムからコピー先のアトムへのマップ)
 	 */
-	public List<Link> copyGroundFrom(List<Link> srclinks){
+	public List copyGroundFrom(List<Link> srclinks){
 		java.util.Stack<Link> s = new java.util.Stack<Link>();
 		Map<Atom,Atom> map = new HashMap<Atom,Atom>();
 		Link first = (Link)srclinks.get(0);
@@ -434,7 +434,7 @@ public final class Membrane extends QueuedEntity {
 			if(!map.containsKey(l.getAtom())){
 				cpAtom = newAtom(l.getAtom().getFunctor());
 				map.put(l.getAtom(),cpAtom);
-				Atom a = ((Atom)map.get(l.getAtom().getArg(l.getPos()).getAtom())); //リンクの根
+				Atom a = map.get(l.getAtom().getArg(l.getPos()).getAtom()); //リンクの根
 				a.args[l.getAtom().getArg(l.getPos()).getPos()]=new Link(cpAtom,l.getPos());
 				for(int i=0;i<cpAtom.getArity();i++){
 					s.push(l.getAtom().getArg(i));
@@ -456,7 +456,7 @@ public final class Membrane extends QueuedEntity {
 		ret_list.add(map);
 		return ret_list;//		return new Link(((Atom)map.get(srcGround.getAtom())),srcGround.getPos());
 	}
-	
+
 	/** 1引数の基底項プロセスを複製する */
 	public Link copyGroundFrom(Link srcGround){
 		List<Link> srclinks = new ArrayList<Link>();
@@ -464,7 +464,7 @@ public final class Membrane extends QueuedEntity {
 		List dstlinks = copyGroundFrom(srclinks);
 		return (Link)dstlinks.get(0);
 	}
-	
+
 	/** 指定された基底項プロセスをこの膜から除去する。 by kudo
 	 * ( java.util.Stackを使うように修正し，伴って引数を修正 2005/08/01 )
 	 * ( 2引数以上に対応 2006/09/13 )
@@ -494,15 +494,15 @@ public final class Membrane extends QueuedEntity {
 			l.getAtom().dequeue();
 		}
 	}
-	
+
 	/** 1引数の基底項プロセスをこの膜から除去する */
 	public void removeGround(Link srcGround){
 		List<Link> srclinks = new ArrayList<Link>();
 		srclinks.add(srcGround);
 		removeGround(srclinks);
 	}
-	
-	
+
+
 	/** [final] 1引数のnewAtomを呼び出すマクロ */
 	final Atom newAtom(String name, int arity) {
 		return newAtom(new SymbolFunctor(name, arity));
@@ -511,26 +511,26 @@ public final class Membrane extends QueuedEntity {
 	protected final void onAddAtom(Atom atom) {
 		atoms.add(atom);
 //		if (atom.getFunctor().isActive()) {
-//			enqueueAtom(atom);
+//		enqueueAtom(atom);
 //		}
 	}
 	/** [final] removeAtomを呼び出すマクロ */
-	final void removeAtoms(List atomlist) {
+	final void removeAtoms(List<Atom> atomlist) {
 		// atoms.removeAll(atomlist);
-		Iterator it = atomlist.iterator();
+		Iterator<Atom> it = atomlist.iterator();
 		while (it.hasNext()) {
-			removeAtom((Atom)it.next());
+			removeAtom(it.next());
 		}
 	}
 
 //	/** 
-//	 * この膜にあるアトムatomがこの計算ノードが実行するタスクにある膜の実行アトムスタック内にあれば、除去する。
-//	 * 他の計算ノードが実行するタスクにある膜の実行アトムスタック内のとき（システムコール）は、この膜は
-//	 * ロックされていないので何もしないでよいが、その場合は実行アトムスタック内にないので既に対応できている。*/
+//	* この膜にあるアトムatomがこの計算ノードが実行するタスクにある膜の実行アトムスタック内にあれば、除去する。
+//	* 他の計算ノードが実行するタスクにある膜の実行アトムスタック内のとき（システムコール）は、この膜は
+//	* ロックされていないので何もしないでよいが、その場合は実行アトムスタック内にないので既に対応できている。*/
 //	public final void dequeueAtom(Atom atom) {
-//		if (atom.isQueued()) {
-//			atom.dequeue();
-//		}
+//	if (atom.isQueued()) {
+//	atom.dequeue();
+//	}
 //	}
 
 	// ボディ操作3 - 子膜の操作
@@ -539,7 +539,7 @@ public final class Membrane extends QueuedEntity {
 	public final void addMem(Membrane mem) {
 		mems.add(mem);
 		mem.parent = this;
-		
+
 		if(Env.fUNYO){
 			unyo.Mediator.addAddedMembrane(mem);
 		}
@@ -555,7 +555,7 @@ public final class Membrane extends QueuedEntity {
 		mems.remove(mem);
 		mem.dequeue();
 		mem.parent = null;
-		
+
 	}
 	/** 指定されたノードで実行されるロックされたkind==kのルート膜を作成し、この膜の子膜にし、活性化する。
 	 * @param nodedesc ノード名を表す文字列
@@ -570,7 +570,7 @@ public final class Membrane extends QueuedEntity {
 		}
 		//(nakajima 2004-10-25) 分散。とりあえずコンストラクタで登録する時にしたのでコメントアウト。
 		//daemon.IDConverter.registerGlobalMembrane(this.getGlobalMemID(),this);
-		
+
 		// ↓todo (効率改善【除去可能であることを確かめる】)connectRuntimeはガードですでに呼ばれているので冗長かもしれない
 //		AbstractLMNtalRuntime machine = LMNtalRuntimeManager.connectRuntime(nodedesc);
 //		AbstractMembrane mem = machine.newTask(this).getRoot();
@@ -586,9 +586,9 @@ public final class Membrane extends QueuedEntity {
 	public Membrane newRoot(String nodedesc) {
 		return newRoot(nodedesc, 0);
 	}
-	
+
 	// ボディ操作4 - リンクの操作
-	
+
 	/**
 	 * atom1の第pos1引数と、atom2の第pos2引数を接続する。
 	 * 接続するアトムは、
@@ -626,6 +626,10 @@ public final class Membrane extends QueuedEntity {
 	public void unifyAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(atom1);
+			unyo.Mediator.addModifiedAtom(atom2);
+		}
 	}
 	/** atom1の第pos1引数と、atom2の第pos2引数を交換する。--ueda */
 	public void swapAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
@@ -634,10 +638,14 @@ public final class Membrane extends QueuedEntity {
 		atom2.args[pos2] = tmp;											
 		atom1.args[pos1].getBuddy().set(atom1,pos1);
 		atom2.args[pos2].getBuddy().set(atom2,pos2);
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(atom1);
+			unyo.Mediator.addModifiedAtom(atom2);
+		}
 	}
-	
+
 	// 拡張
-	
+
 	/** deprecated */
 	public void relink(Atom atom1, int pos1, Atom atom2, int pos2) {
 
@@ -650,16 +658,24 @@ public final class Membrane extends QueuedEntity {
 		//link2.getBuddy().set(link1);
 		link1.getAtom().args[link1.getPos()] = link2;
 		link2.getAtom().args[link2.getPos()] = link1;
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(link1.getAtom());
+			unyo.Mediator.addModifiedAtom(link2.getAtom());
+		}
 	}
 	/** atom1の第pos1引数と、リンクlink2のリンク先を接続する。
 	 * <p>link2は再利用されるため、実行後link2の参照を使用してはならない。*/
 	public void inheritLink(Atom atom1, int pos1, Link link2) {
 		link2.getBuddy().set(atom1, pos1);
 		atom1.args[pos1] = link2;
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(atom1);
+			unyo.Mediator.addModifiedAtom(link2.getAtom());
+		}
 	}
 
 	// 以下は AbstractMembrane の final メソッド
-	
+
 	/** [final] atom2の第pos2引数に格納されたリンクオブジェクトへの参照を取得する。*/
 	public final Link getAtomArg(Atom atom2, int pos2) {
 		return atom2.args[pos2];
@@ -676,11 +692,11 @@ public final class Membrane extends QueuedEntity {
 	}
 
 	// ボディ操作5 - 膜自身や移動に関する操作
-	
+
 //	/** この膜を親膜から除去する
-//	 * @deprecated */
+//	* @deprecated */
 //	public void remove() {
-//		parent.removeMem(this);
+//	parent.removeMem(this);
 //	}
 
 	/** （親膜を持たない）膜srcMemにある全てのアトムと子膜（ロックを取得していない）をこの膜に移動する。
@@ -690,21 +706,26 @@ public final class Membrane extends QueuedEntity {
 	public void moveCellsFrom(Membrane srcMem) {
 		if (this == srcMem) return;
 		// アトムの移動
-		Iterator it = srcMem.atomIterator();
-		while (it.hasNext()) {
-			addAtom((Atom)it.next());
+		Iterator<Atom> it_a = srcMem.atomIterator();
+		while (it_a.hasNext()) {
+			addAtom(it_a.next());
 		}
-		
+
 		// 子膜の移動
 		if (srcMem.task.getMachine() instanceof LMNtalRuntime) {
 			// ローカル膜からの移動
+			//Iterator<Membrane> it_m = srcMem.memIterator();
+			//while (it_m.hasNext()) {
+				//Membrane subSrcMem = (Membrane) it_m.next();
+				//addMem(subSrcMem);
+			//}
 			mems.addAll(srcMem.mems);
 		}
 		else {
 			// リモート膜から（ローカル膜へ）の移動
-			it = srcMem.memIterator();
-			while (it.hasNext()) {
-				Membrane subSrcMem = (Membrane)it.next();
+			Iterator<Membrane>it_m = srcMem.memIterator();
+			while (it_m.hasNext()) {
+				Membrane subSrcMem = it_m.next();
 				if (subSrcMem.isRoot()) {
 					subSrcMem.moveTo(this);
 				}
@@ -720,9 +741,10 @@ public final class Membrane extends QueuedEntity {
 				}
 			}
 		}
-		it = srcMem.memIterator();
-		while (it.hasNext()) {
-			Membrane subSrcMem = (Membrane)it.next();
+		
+		Iterator<Membrane> it_m = srcMem.memIterator();
+		while (it_m.hasNext()) {
+			Membrane subSrcMem = it_m.next();
 			subSrcMem.parent = this;
 			if (subSrcMem.task != task) subSrcMem.setTask(task);
 		}
@@ -757,7 +779,7 @@ public final class Membrane extends QueuedEntity {
 //		activate();
 		//enqueueAllAtoms();
 	}
-	
+
 	/** この膜とその子孫を管理するタスクを更新するために呼ばれる内部命令。
 	 * ただしルート膜以下のタスクは変更しない。つまりルート膜に対して呼ばれた場合は何もしない。*/
 	protected void setTask(Task newTask) {
@@ -776,140 +798,140 @@ public final class Membrane extends QueuedEntity {
 		task = newTask;
 		if (queued)
 			activate();
-		Iterator it = memIterator();
+		Iterator<Membrane> it = memIterator();
 		while (it.hasNext()) {
-			((Membrane)it.next()).setTask(newTask);
+			it.next().setTask(newTask);
 		}
 		if (locked)
 			unlock();
 		// TODO (A) ホスト間移動時にGlobalMembraneIDは変更しなくて大丈夫か調べる
 	}
 //	/** この膜（ルート膜）の親膜を変更する。LocalLMNtalRuntime（計算ノード）のみが呼ぶことができる。
-//	 * <p>いずれ、
-//	 * AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
-//	 * AbstractMembrane#moveToを使って親膜を変更することにより、
-//	 * todo この問題のあるメソッドは廃止しなければならない */
+//	* <p>いずれ、
+//	* AbstractMembrane#newRootおよびAbstractMachine#newTaskの引数に親膜を渡すようにし、
+//	* AbstractMembrane#moveToを使って親膜を変更することにより、
+//	* todo この問題のあるメソッドは廃止しなければならない */
 //	void setParent(AbstractMembrane mem) {
-//		if (!isRoot()) {
-//			throw new RuntimeException("setParent requires this be a root membrane");
-//		}
-//		parent = mem;
+//	if (!isRoot()) {
+//	throw new RuntimeException("setParent requires this be a root membrane");
+//	}
+//	parent = mem;
 //	}
 
 	//////////////////////////////////////////////////////////////
 	// kudo
-	
+
 	/** この膜の複製を生成する <strike>明示的でない自由リンクが無いものと仮定</strile>
 	 * */
 //	public HashMap copyFrom(AbstractMembrane srcMem) {
-//		int atomsize = srcMem.atoms.size(); //アトムの数
-//		int memsize = srcMem.mems.size(); //子膜の数
-//		List linkatom[] = new LinkedList[atomsize]; //リンク先のアトムのリスト
-//		List linkpos[] = new LinkedList[atomsize]; //リンク先のポジションのリスト
-//		//初期化
-//		for (int i = 0; i < linkatom.length; i++) {
-//			linkatom[i] = new LinkedList();
-//			linkpos[i] = new LinkedList();
-//		}
-//
-//		//子膜に繋がるリンクに関して（$outのみか→Yes (n-kato 2004-10-24)）。下で振った番号で使えるようにしておく。
-//		//どの子膜の、どのアトムに繋がっているのかを示す。id番号。
-//		int  glmemid[] = new int[atomsize];
-//		int glatomid[] = new int[atomsize];
-//		
-//		//アトムにとりあえず番号を振る。Atom.idとは別。名前がよくないな。
-//		Map atomId = new HashMap(); //Atom -> int
-//		Atom idAtom[] = new Atom[atomsize]; //int -> Atom
-//		int varcount = 0;
-//		
-//		//子膜にも番号を振る
-//		Map memId = new HashMap(); // Mem -> int
-//		AbstractMembrane idMem[] = new AbstractMembrane[memsize]; //int -> Mem
-//		int memvarcount = 0;
-//		
-//		//リンク情報を取得
-//		Iterator it = srcMem.atomIterator();
-//		while (it.hasNext()) {
-//			//リンク元アトム
-//			Atom atomo = (Atom) it.next();//リンク元
-//			if (!atomId.containsKey(atomo)) {
-//				atomId.put(atomo, new Integer(varcount));
-//				idAtom[varcount++] = atomo;
-//			}
-//			int o = ((Integer) atomId.get(atomo)).intValue();
-//			//リンクを辿る
-//			for (int i = 0; i < atomo.args.length; i++) {
-//				Atom atoml = atomo.nthAtom(i);
-//				if (atoml.mem == srcMem) { //局所リンク
-//					if (!atomId.containsKey(atoml)) {
-//						atomId.put(atoml, new Integer(varcount));
-//						idAtom[varcount++] = atoml;
-//					}
-//					linkatom[o].add(i, atomId.get(atoml));
-//					linkpos[o].add(i, new Integer(atomo.getArg(i).getPos()));
-//				}else if(atoml.mem != null && atoml.mem.parent == srcMem){//子膜へのリンク
-//					if(!memId.containsKey(atoml.mem)){
-//						memId.put(atoml.mem,new Integer(memvarcount));
-//						idMem[memvarcount++] = atoml.mem;
-//					}
-//					glmemid[o] = ((Integer)memId.get(atoml.mem)).intValue();
-//					glatomid[o] = atoml.id; 
-//					linkatom[o].add(i,null);
-//					linkpos[o].add(i,new Integer(atomo.getArg(i).getPos()));
-//				}else{//親膜ないしどこにも繋がっていない
-//					linkatom[o].add(i,null);
-//					linkpos[o].add(i,null);
-//				}
-//			}
-//		}
-//
-//		//子膜のmap情報を得る
-//		it = srcMem.memIterator();
-//		while(it.hasNext()){
-//			AbstractMembrane itm = (AbstractMembrane)it.next();
-//			if(!memId.containsKey(itm)){
-//				memId.put(itm,new Integer(memvarcount));
-//				idMem[memvarcount++] = itm;
-//			}
-//		}
-//
-//
-//		//子膜を再帰的にコピー(上と同時進行にすると同膜間コピーができない)
-//		Map[] oldIdToNewAtom = new Map[memsize];
-//		for(int i=0;i<memvarcount;i++){
-//			oldIdToNewAtom[i] = newMem().copyFrom(idMem[i]);
-//		}
-//
-//		HashMap retHashMap = new HashMap();//コピー元の$inのid -> コピー先の$inアトム
-//
-//		//アトムのコピーを作成
-//		Atom[] idAtomCopied = new Atom[varcount];
-//		for (int i = 0; i < varcount; i++) {
-//			idAtomCopied[i] = newAtom(idAtom[i].getFunctor());
-//		}
-//
-//		//リンクの貼りなおし
-//		for (int i = 0; i < varcount; i++) {
-//			for (int j = 0; j < linkatom[i].size();j++) {
-//				if(linkatom[i].get(j) != null){
-//					int l = ((Integer) linkatom[i].get(j)).intValue();
-//					int lp = ((Integer) linkpos[i].get(j)).intValue();
-//					newLink(idAtomCopied[i], j, idAtomCopied[l], lp);
-//				}else{//リンク先が同じ膜に無い場合
-//					if(idAtom[i].nthAtom(j).mem != null && idAtom[i].nthAtom(j).mem.parent == srcMem){//子膜に繋がっていた場合
-//						Atom na = (Atom)oldIdToNewAtom[glmemid[i]].get(new Integer(glatomid[i]));
-//						int lp = ((Integer) linkpos[i].get(j)).intValue();
-//						newLink(idAtomCopied[i],j,na,lp);
-//					}else{//親膜ないしどこにも繋がっていない、mapに追加
-//						retHashMap.put(new Integer(idAtom[i].id),idAtomCopied[i]);
-//					}
-//				}
-//			}
-//		}
-//		return retHashMap;
+//	int atomsize = srcMem.atoms.size(); //アトムの数
+//	int memsize = srcMem.mems.size(); //子膜の数
+//	List linkatom[] = new LinkedList[atomsize]; //リンク先のアトムのリスト
+//	List linkpos[] = new LinkedList[atomsize]; //リンク先のポジションのリスト
+//	//初期化
+//	for (int i = 0; i < linkatom.length; i++) {
+//	linkatom[i] = new LinkedList();
+//	linkpos[i] = new LinkedList();
 //	}
-	
-	
+
+//	//子膜に繋がるリンクに関して（$outのみか→Yes (n-kato 2004-10-24)）。下で振った番号で使えるようにしておく。
+//	//どの子膜の、どのアトムに繋がっているのかを示す。id番号。
+//	int  glmemid[] = new int[atomsize];
+//	int glatomid[] = new int[atomsize];
+
+//	//アトムにとりあえず番号を振る。Atom.idとは別。名前がよくないな。
+//	Map atomId = new HashMap(); //Atom -> int
+//	Atom idAtom[] = new Atom[atomsize]; //int -> Atom
+//	int varcount = 0;
+
+//	//子膜にも番号を振る
+//	Map memId = new HashMap(); // Mem -> int
+//	AbstractMembrane idMem[] = new AbstractMembrane[memsize]; //int -> Mem
+//	int memvarcount = 0;
+
+//	//リンク情報を取得
+//	Iterator it = srcMem.atomIterator();
+//	while (it.hasNext()) {
+//	//リンク元アトム
+//	Atom atomo = (Atom) it.next();//リンク元
+//	if (!atomId.containsKey(atomo)) {
+//	atomId.put(atomo, new Integer(varcount));
+//	idAtom[varcount++] = atomo;
+//	}
+//	int o = ((Integer) atomId.get(atomo)).intValue();
+//	//リンクを辿る
+//	for (int i = 0; i < atomo.args.length; i++) {
+//	Atom atoml = atomo.nthAtom(i);
+//	if (atoml.mem == srcMem) { //局所リンク
+//	if (!atomId.containsKey(atoml)) {
+//	atomId.put(atoml, new Integer(varcount));
+//	idAtom[varcount++] = atoml;
+//	}
+//	linkatom[o].add(i, atomId.get(atoml));
+//	linkpos[o].add(i, new Integer(atomo.getArg(i).getPos()));
+//	}else if(atoml.mem != null && atoml.mem.parent == srcMem){//子膜へのリンク
+//	if(!memId.containsKey(atoml.mem)){
+//	memId.put(atoml.mem,new Integer(memvarcount));
+//	idMem[memvarcount++] = atoml.mem;
+//	}
+//	glmemid[o] = ((Integer)memId.get(atoml.mem)).intValue();
+//	glatomid[o] = atoml.id; 
+//	linkatom[o].add(i,null);
+//	linkpos[o].add(i,new Integer(atomo.getArg(i).getPos()));
+//	}else{//親膜ないしどこにも繋がっていない
+//	linkatom[o].add(i,null);
+//	linkpos[o].add(i,null);
+//	}
+//	}
+//	}
+
+//	//子膜のmap情報を得る
+//	it = srcMem.memIterator();
+//	while(it.hasNext()){
+//	AbstractMembrane itm = (AbstractMembrane)it.next();
+//	if(!memId.containsKey(itm)){
+//	memId.put(itm,new Integer(memvarcount));
+//	idMem[memvarcount++] = itm;
+//	}
+//	}
+
+
+//	//子膜を再帰的にコピー(上と同時進行にすると同膜間コピーができない)
+//	Map[] oldIdToNewAtom = new Map[memsize];
+//	for(int i=0;i<memvarcount;i++){
+//	oldIdToNewAtom[i] = newMem().copyFrom(idMem[i]);
+//	}
+
+//	HashMap retHashMap = new HashMap();//コピー元の$inのid -> コピー先の$inアトム
+
+//	//アトムのコピーを作成
+//	Atom[] idAtomCopied = new Atom[varcount];
+//	for (int i = 0; i < varcount; i++) {
+//	idAtomCopied[i] = newAtom(idAtom[i].getFunctor());
+//	}
+
+//	//リンクの貼りなおし
+//	for (int i = 0; i < varcount; i++) {
+//	for (int j = 0; j < linkatom[i].size();j++) {
+//	if(linkatom[i].get(j) != null){
+//	int l = ((Integer) linkatom[i].get(j)).intValue();
+//	int lp = ((Integer) linkpos[i].get(j)).intValue();
+//	newLink(idAtomCopied[i], j, idAtomCopied[l], lp);
+//	}else{//リンク先が同じ膜に無い場合
+//	if(idAtom[i].nthAtom(j).mem != null && idAtom[i].nthAtom(j).mem.parent == srcMem){//子膜に繋がっていた場合
+//	Atom na = (Atom)oldIdToNewAtom[glmemid[i]].get(new Integer(glatomid[i]));
+//	int lp = ((Integer) linkpos[i].get(j)).intValue();
+//	newLink(idAtomCopied[i],j,na,lp);
+//	}else{//親膜ないしどこにも繋がっていない、mapに追加
+//	retHashMap.put(new Integer(idAtom[i].id),idAtomCopied[i]);
+//	}
+//	}
+//	}
+//	}
+//	return retHashMap;
+//	}
+
+
 	/**
 	 * 指定された膜より,その子膜及びアトムをこの膜にコピーする.
 	 * 子膜のコピー時の戻り値のマップは,memToCopyMapに登録され
@@ -922,20 +944,21 @@ public final class Membrane extends QueuedEntity {
 	 * @param srcmem コピー元の膜
 	 * @return コピー元のアトム->コピー先のアトムというMap
 	 */
-	public Map copyCellsFrom(Membrane srcmem){
-		memToCopyMap = new HashMap();
-		Iterator it = srcmem.memIterator();
-		while(it.hasNext()){
-			Membrane omem = (Membrane)it.next();
+	public Map<Atom, Atom> copyCellsFrom(Membrane srcmem){
+		memToCopyMap = new HashMap<Membrane, Map<Atom, Atom>>();
+
+		Iterator<Membrane> it_m = srcmem.memIterator();
+		while(it_m.hasNext()){
+			Membrane omem = it_m.next();
 			Membrane nmem = newMem();
 			nmem.setName(omem.getName());
-			memToCopyMap.put(omem,nmem.copyCellsFrom(omem));
+			memToCopyMap.put(omem, nmem.copyCellsFrom(omem));
 			nmem.copyRulesFrom(omem);
 		}
-		it = srcmem.atomIterator();
-		Map oldAtomToNewAtom = new HashMap();
-		while(it.hasNext()){
-			Atom oatom = (Atom)it.next();
+		Iterator<Atom>it_a = srcmem.atomIterator();
+		Map<Atom, Atom> oldAtomToNewAtom = new HashMap<Atom, Atom>();
+		while(it_a.hasNext()){
+			Atom oatom = it_a.next();
 			if(oldAtomToNewAtom.containsKey(oatom))continue;
 			oldAtomToNewAtom.put(oatom,newAtom(oatom.getFunctor()));
 			//0引数アトムならば引数走査なし　(2006/05/26 kudo)
@@ -943,24 +966,24 @@ public final class Membrane extends QueuedEntity {
 		}
 		return oldAtomToNewAtom;
 	}
-	
-	public Map copyCellsFrom2(Membrane srcmem){
-		memToCopyMap = new HashMap();
-		Iterator it = srcmem.memIterator();
-		while(it.hasNext()){
-			Membrane omem = (Membrane)it.next();
+
+	public Map<Atom, Atom> copyCellsFrom2(Membrane srcmem){
+		memToCopyMap = new HashMap<Membrane, Map<Atom, Atom>>();
+		Iterator<Membrane> it_m = srcmem.memIterator();
+		while(it_m.hasNext()){
+			Membrane omem = it_m.next();
 			Membrane nmem = newMem();
 			nmem.setName(omem.getName());
-			memToCopyMap.put(omem,nmem.copyCellsFrom(omem));
+			memToCopyMap.put(omem, nmem.copyCellsFrom(omem));
 			nmem.copyRulesFrom(omem);
 		}
-		it = srcmem.atomIterator();
-		Map oldAtomToNewAtom = new HashMap();
-		while(it.hasNext()){
-			Atom oatom = (Atom)it.next();
+		Iterator<Atom> it_a = srcmem.atomIterator();
+		Map<Atom, Atom> oldAtomToNewAtom = new HashMap<Atom, Atom>();
+		while(it_a.hasNext()){
+			Atom oatom = it_a.next();
 			if(oldAtomToNewAtom.containsKey(oatom))continue;
 			if(oatom.getFunctor().getName()!="+" && !oatom.getFunctor().isInsideProxy()){
-			    oldAtomToNewAtom.put(oatom,newAtom(oatom.getFunctor()));
+				oldAtomToNewAtom.put(oatom,newAtom(oatom.getFunctor()));
 				//0引数アトムならば引数走査なし　(2006/05/26 kudo)
 				if(oatom.getArity()>0)
 					oldAtomToNewAtom = copyAtoms(oatom,oldAtomToNewAtom);
@@ -968,7 +991,7 @@ public final class Membrane extends QueuedEntity {
 		}
 		return oldAtomToNewAtom;
 	}
-	
+
 	/**
 	 * 指定されたアトムより,辿れるアトムを全てこの膜にコピーする.
 	 * リンク構造も再現する.
@@ -982,83 +1005,85 @@ public final class Membrane extends QueuedEntity {
 	 * @param map
 	 * @return 更新された（かもしれない）Map
 	 */
-	public Map copyAtoms(Atom atom,Map map){
+	public Map<Atom, Atom> copyAtoms(Atom atom,Map<Atom, Atom>map){
 		for(int i=0;i<atom.args.length;i++){
 			if(map.containsKey(atom.args[i].getAtom())){
-				newLink(((Atom)map.get(atom)),i,
-				((Atom)map.get(atom.args[i].getAtom())),atom.args[i].getPos());
+				newLink(map.get(atom),
+						i,
+						map.get(atom.args[i].getAtom())
+						,atom.args[i].getPos());
 			}
 			else{
 				if(atom.args[i].getAtom().mem != atom.mem){//リンク先がこの膜でない
 					if(atom.args[i].getAtom().mem != null &&
-					atom.args[i].getAtom().mem.parent == atom.mem){//子膜へ繋がっている
+							atom.args[i].getAtom().mem.parent == atom.mem){//子膜へ繋がっている
 						//AbstractMembrane copiedmem = (AbstractMembrane)memToCopiedMem.get(atom.args[i].getAtom().mem);
-						Map copymap = (Map)memToCopyMap.get(atom.args[i].getAtom().mem);
-						Atom copiedatom = (Atom)copymap.get(atom.args[i].getAtom());
-						newLink(((Atom)map.get(atom)),i,
-						copiedatom,atom.args[i].getPos());
+						Map<Atom, Atom> copymap = memToCopyMap.get(atom.args[i].getAtom().mem);
+						Atom copiedatom = copymap.get(atom.args[i].getAtom());
+						newLink(map.get(atom), i,
+								copiedatom,atom.args[i].getPos());
 					}
 					else continue;
 				}
 				else{
 					Atom natom = newAtom(atom.args[i].getAtom().getFunctor());
 					map.put(atom.args[i].getAtom(),natom);
-					newLink(((Atom)map.get(atom)),i,
-					natom,atom.args[i].getPos());
+					newLink(map.get(atom), i,
+							natom,atom.args[i].getPos());
 					map = copyAtoms(atom.args[i].getAtom(),map);
 				}
 			}
 		}
 		return map;
 	}
-	
+
 	public void drop(){
 		if (isRoot()) {
 			// TODO kill this task
 		}
-		Iterator it = atomIterator();
-		while(it.hasNext()){
-			Atom atom = (Atom)it.next();
+		Iterator<Atom> it_a = atomIterator();
+		while(it_a.hasNext()){
+			Atom atom = it_a.next();	
 			atom.dequeue();
 			// atom.free();
 			// it.remove();
 		}
 		atoms.clear();
-		it = memIterator();
-		while(it.hasNext()){
-			Membrane mem = (Membrane)it.next();
+		Iterator<Membrane> it_m = memIterator();
+		while(it_m.hasNext()){
+			Membrane mem = it_m.next();
 			mem.drop();
 			mem.free();
 		}
 	}
 
 //	/**
-//	 * by kudo
-//	 * 基底項プロセスを破棄する(検査は済んでいる)
-//	 * @param srcGround 破棄する基底項プロセス
-//	 */
+//	* by kudo
+//	* 基底項プロセスを破棄する(検査は済んでいる)
+//	* @param srcGround 破棄する基底項プロセス
+//	*/
 //	public void dropGround(Link srcGround, Set srcSet){
-//		if(srcSet.contains(srcGround.getAtom()))return;
-//		srcSet.add(srcGround.getAtom());
-//		for(int i=0;i<srcGround.getAtom().getArity();i++){
-//			if(i==srcGround.getPos())continue;
-//			dropGround(srcGround.getAtom().getArg(i),srcSet);
-//		}
-//		srcGround.getAtom().dequeue();
+//	if(srcSet.contains(srcGround.getAtom()))return;
+//	srcSet.add(srcGround.getAtom());
+//	for(int i=0;i<srcGround.getAtom().getArity();i++){
+//	if(i==srcGround.getPos())continue;
+//	dropGround(srcGround.getAtom().getArg(i),srcSet);
 //	}
-	
+//	srcGround.getAtom().dequeue();
+//	}
+
 	////////////////////////////////////////////////////////////////
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される
-	
+
 	/**
 	 * 現在この膜をロックしているスレッドを取得する。
 	 */
 	public Thread getLockThread() {
 		return lockThread;
 	}
-	
+
 	// - ガード命令
-	
+
 	// - ボディ命令
 
 
@@ -1068,9 +1093,9 @@ public final class Membrane extends QueuedEntity {
 	// キューはLinkedListオブジェクトとし、react内を生存期間とし、star関連のメソッドの引数に渡される。
 	// $pを含む全ての膜の本膜からの相対関係がルール適用で不変な場合、
 	// $pの先祖の全ての膜をうまく再利用することによって、star関連の処理を全く呼ぶ必要がなくなる。
-	
+
 	// todo （効率改善）LinkedListオブジェクトに対してcontainsを呼んでいるのを何とかする
-	
+
 	/** この膜がremoveされた直後に呼ばれる。
 	 * なおremoveProxiesは、ルール左辺に書かれたアトムを除去した後、
 	 * ルール左辺に書かれた膜のうち$pを持つものに対して内側の膜から呼ばれる。
@@ -1105,11 +1130,11 @@ public final class Membrane extends QueuedEntity {
 	public void removeProxies() {
 		// NOTE atomsへの操作が必要になるので、Setのクローンを取得してその反復子を使った方が
 		//      読みやすい＆効率が良いかもしれない ←リモートの場合に適用するのは難しいかも知れない
-		LinkedList changeList = new LinkedList();	// star化するアトムのリスト
-		LinkedList removeList = new LinkedList();
-		Iterator it = atoms.iteratorOfOUTSIDE_PROXY();
+		LinkedList<Atom> changeList = new LinkedList<Atom>();	// star化するアトムのリスト
+		LinkedList<Atom> removeList = new LinkedList<Atom>();
+		Iterator<Atom> it = atoms.iteratorOfOUTSIDE_PROXY();
 		while (it.hasNext()) {
-			Atom outside = (Atom)it.next();
+			Atom outside = it.next();
 			Atom a0 = outside.args[0].getAtom();
 			// outsideのリンク先が子膜でない場合【この検査のためにremoveで parent=null; が必要】			
 			if (a0.getMem().getParent() != this) {
@@ -1123,7 +1148,7 @@ public final class Membrane extends QueuedEntity {
 				else {
 					// この膜を通過して無関係な膜に入っていくリンクを除去
 					if (a1.getFunctor().isOutsideProxy()
-					 && a1.args[0].getAtom().getMem().getParent() != this) {
+							&& a1.args[0].getAtom().getMem().getParent() != this) {
 						if (!removeList.contains(outside)) {
 							unifyLocalAtomArgs(outside, 0, a1, 0);
 							removeList.add(outside);
@@ -1146,7 +1171,7 @@ public final class Membrane extends QueuedEntity {
 		// star化を実行する
 		it = changeList.iterator();
 		while (it.hasNext()) {
-			alterAtomFunctor((Atom)it.next(), Functor.STAR);
+			alterAtomFunctor(it.next(), Functor.STAR);
 		}
 	}
 	/** 左辺に$pが2個以上あるルールで、左辺の全てのremoveProxiesが呼ばれた後に
@@ -1165,19 +1190,19 @@ public final class Membrane extends QueuedEntity {
 	 */
 	public void removeToplevelProxies() {
 		// (*) は ( {$p[i(A)]},{$q[|*V]},E=o(A) :- ... ) でEが*Vに含まれる場合などへの対策（安全側に近似）
-		ArrayList removeList = new ArrayList();
-		Iterator it = atoms.iteratorOfOUTSIDE_PROXY();
+		List<Atom> removeList = new ArrayList<Atom>();
+		Iterator<Atom> it = atoms.iteratorOfOUTSIDE_PROXY();
 		while (it.hasNext()) {
-			Atom outside = (Atom)it.next();
+			Atom outside = it.next();
 			// outsideの第1引数のリンク先が子膜でない場合			
 			if (outside.args[0].getAtom().getMem() != null // 追加 n-kato 2004-10-30 (*)
-			 && outside.args[0].getAtom().getMem().getParent() != this) {
+					&& outside.args[0].getAtom().getMem().getParent() != this) {
 				// outsideの第2引数のリンク先がoutsideの場合
 				Atom a1 = outside.args[1].getAtom();
 				if (a1.getFunctor().isOutsideProxy()) {
 					// 2つめのoutsideの第1引数のリンク先が子膜でない場合
 					if (a1.args[0].getAtom().getMem() != null // 追加 n-kato 2004-10-30 (*)
-					 && a1.args[0].getAtom().getMem().getParent() != this) {
+							&& a1.args[0].getAtom().getMem().getParent() != this) {
 						if (!removeList.contains(outside)) {
 							unifyLocalAtomArgs(outside, 0, a1, 0);
 							removeList.add(outside);
@@ -1236,11 +1261,11 @@ public final class Membrane extends QueuedEntity {
 	 * </pre>
 	 */
 	public void insertProxies(Membrane childMemWithStar) {
-		LinkedList changeList = new LinkedList();	// inside_proxy化するアトムのリスト
-		LinkedList removeList = new LinkedList();
-		Iterator it = childMemWithStar.atomIteratorOfFunctor(Functor.STAR);
-		while (it.hasNext()) {
-			Atom star = (Atom)it.next(); // n
+		List<Atom> changeList = new LinkedList<Atom>();	// inside_proxy化するアトムのリスト
+		List<Atom> removeList = new LinkedList<Atom>();
+		Iterator<Atom> it_a = childMemWithStar.atomIteratorOfFunctor(Functor.STAR);
+		while (it_a.hasNext()) {
+			Atom star = it_a.next(); // n
 			Atom oldstar = star.args[0].getAtom();
 			if (oldstar.getMem() == childMemWithStar) { // 膜内の新しい局所リンクの場合
 				if (!removeList.contains(star)) {
@@ -1265,9 +1290,9 @@ public final class Membrane extends QueuedEntity {
 				}
 			}
 		}
-		it = changeList.iterator();
-		while (it.hasNext()) {
-			childMemWithStar.alterAtomFunctor((Atom)it.next(), Functor.INSIDE_PROXY);
+		it_a = changeList.iterator();
+		while (it_a.hasNext()) {
+			childMemWithStar.alterAtomFunctor(it_a.next(), Functor.INSIDE_PROXY);
 		}
 		childMemWithStar.removeAtoms(removeList);		
 	}
@@ -1288,10 +1313,10 @@ public final class Membrane extends QueuedEntity {
 	 * </pre>
 	 */
 	public void removeTemporaryProxies() {
-		LinkedList removeList = new LinkedList();
-		Iterator it = atomIteratorOfFunctor(Functor.STAR);
+		LinkedList<Atom> removeList = new LinkedList<Atom>();
+		Iterator<Atom> it = atomIteratorOfFunctor(Functor.STAR);
 		while (it.hasNext()) {
-			Atom star = (Atom)it.next();
+			Atom star = it.next();
 			Atom outside = star.args[0].getAtom();
 			if (!removeList.contains(star)) {
 				unifyLocalAtomArgs(star,1,outside,1);
@@ -1301,7 +1326,7 @@ public final class Membrane extends QueuedEntity {
 		}
 		removeAtoms(removeList);
 	}
-	
+
 	/**
 	 * {} なしで出力する。
 	 * 
@@ -1314,7 +1339,7 @@ public final class Membrane extends QueuedEntity {
 	public String toStringWithoutBrace() {
 		return Dumper.dump(this);		
 	}
-	
+
 	public String toString() {
 		return "{ " + toStringWithoutBrace() + " }";
 	}
@@ -1340,7 +1365,7 @@ public final class Membrane extends QueuedEntity {
 	public String encodeProcess() {
 		return "{" + Dumper.encode(this, true, 2) + "}";
 	}
-		
+
 	////////////////////////////////////////
 	// non deterministic LMNtal
 	AtomSet getAtoms() {
@@ -1350,41 +1375,41 @@ public final class Membrane extends QueuedEntity {
 	// ボディ操作
 
 	// ボディ操作1 - ルールの操作
-	
+
 //	/** ルールを全て消去する */
 //	public void clearRules() {
-//		if (remote == null) super.clearRules();
-//		else remote.send("CLEARRULES",this);
+//	if (remote == null) super.clearRules();
+//	else remote.send("CLEARRULES",this);
 //	}
 //	/** srcMemにあるルールをこの膜にコピーする。 */
 //	public void copyRulesFrom(AbstractMembrane srcMem) {
-//		if (remote == null) super.copyRulesFrom(srcMem);
-//		else remote.send("COPYRULESFROM",this,srcMem.getGlobalMemID());
-//		// todo RemoteMembraneのやり方（最初の段階でLOADRULESETに展開する方式）に合わせる
+//	if (remote == null) super.copyRulesFrom(srcMem);
+//	else remote.send("COPYRULESFROM",this,srcMem.getGlobalMemID());
+//	// todo RemoteMembraneのやり方（最初の段階でLOADRULESETに展開する方式）に合わせる
 //	}
 //	/** ルールセットを追加 */
 //	public void loadRuleset(Ruleset srcRuleset) {
-//		if (remote == null) super.loadRuleset(srcRuleset);
-//		else remote.send("LOADRULESET",this,srcRuleset.getGlobalRulesetID());
+//	if (remote == null) super.loadRuleset(srcRuleset);
+//	else remote.send("LOADRULESET",this,srcRuleset.getGlobalRulesetID());
 //	}
 
 	// ボディ操作2 - アトムの操作
 
 //	/** 新しいアトムを作成し、この膜に追加する。*/
 //	public Atom newAtom(Functor functor) {
-//		if (remote == null) return super.newAtom(functor);
-//		else remote.send("NEWATOM",this,functor.toString());
-//		return null;	// todo なんとかする（local-remote-local 問題）
+//	if (remote == null) return super.newAtom(functor);
+//	else remote.send("NEWATOM",this,functor.toString());
+//	return null;	// todo なんとかする（local-remote-local 問題）
 //	}
 //	/** （所属膜を持たない）アトムをこの膜に追加する。*/
 //	public void addAtom(Atom atom) {
-//		if (remote == null) super.addAtom(atom);
-//		else remote.send("ADDATOM", this);
+//	if (remote == null) super.addAtom(atom);
+//	else remote.send("ADDATOM", this);
 //	}
 //	/** 指定されたアトムの名前を変える */
 //	public void alterAtomFunctor(Atom atom, Functor func) {
-//		if (remote == null) super.alterAtomFunctor(atom,func);
-//		else remote.send("ALTERATOMFUNCTOR", this, atom + " " + func.serialize());
+//	if (remote == null) super.alterAtomFunctor(atom,func);
+//	else remote.send("ALTERATOMFUNCTOR", this, atom + " " + func.serialize());
 //	}
 
 	/** 
@@ -1405,46 +1430,45 @@ public final class Membrane extends QueuedEntity {
 	 * 移動された後、この膜のアクティブアトムを実行アトムスタックに入れるために呼び出される。
 	 * <p><b>注意</b>　Ruby版のmovedtoと異なり、子孫の膜にあるアトムに対しては何もしない。*/
 	public void enqueueAllAtoms() {
-		Iterator i = atoms.activeFunctorIterator();
+		Iterator<Functor> i = atoms.activeFunctorIterator();
 		while (i.hasNext()) {
-			Functor f = (Functor)i.next();
+			Functor f = i.next();
 			if (f.isActive()) {
-				Iterator i2 = atoms.iteratorOfFunctor(f);
+				Iterator<Atom> i2 = atoms.iteratorOfFunctor(f);
 				while (i2.hasNext()) {
 					if(null == ready){ ready = new Stack(); }
-					Atom a = (Atom)i2.next();
+					Atom a = i2.next();
 					a.dequeue();
 					ready.push(a);
 				}
 			}
 		}
 	}
-//
+
 //	/** 指定されたアトムをこの膜から除去する。
-//	 * <strike>実行アトムスタックに入っている場合、スタックから取り除く。</strike>*/
+//	* <strike>実行アトムスタックに入っている場合、スタックから取り除く。</strike>*/
 //	public void removeAtom(Atom atom) {
-//		if(Env.fGUI) {
-//			Env.gui.lmnPanel.getGraphLayout().removedAtomPos.add(atom.getPosition());
-//		}
-//		atoms.remove(atom);
-//		atom.mem = null;
+//	if(Env.fGUI) {
+//	Env.gui.lmnPanel.getGraphLayout().removedAtomPos.add(atom.getPosition());
+//	}
+//	atoms.remove(atom);
+//	atom.mem = null;
 //	}
 
 	// ボディ操作3 - 子膜の操作
 
 	/** 新しいタイプがkの子膜を作成し、活性化する */
 	public Membrane newMem(int k){
-	//		if (remote != null) {
-	//		remote.send("NEWMEM",this);
-	//		return null; // todo
-	//	}
+		//		if (remote != null) {
+		//		remote.send("NEWMEM",this);
+		//		return null; // todo
+		//	}
 		Membrane m = new Membrane(task, this);
 		m.changeKind(k);
 		mems.add(m);
 		// 親膜と同じ実行膜スタックに積む
 		if (k != KIND_ND)
 			stack.push(m);
-
 		if(Env.fUNYO){
 			unyo.Mediator.addAddedMembrane(m);
 		}
@@ -1454,24 +1478,24 @@ public final class Membrane extends QueuedEntity {
 	public Membrane newMem() {
 		return newMem(0);
 	}
-	
+
 //	/** 指定された子膜をこの膜から除去する。
-//	 * <strike>実行膜スタックは操作しない。</strike>
-//	 * 実行膜スタックに積まれていれば取り除く。 */
+//	* <strike>実行膜スタックは操作しない。</strike>
+//	* 実行膜スタックに積まれていれば取り除く。 */
 //	public void removeMem(AbstractMembrane mem) {
-//		if (remote == null) super.removeMem(mem);
-//		else remote.send("REMOVEMEM", this, mem.getGlobalMemID());
+//	if (remote == null) super.removeMem(mem);
+//	else remote.send("REMOVEMEM", this, mem.getGlobalMemID());
 //	}
 //	/** 指定されたノードで実行されるロックされたルート膜を作成し、この膜の子膜にし、活性化する。
-//	 * @param node ノード名を表す文字列
-//	 * @return 作成されたルート膜
-//	 */
+//	* @param node ノード名を表す文字列
+//	* @return 作成されたルート膜
+//	*/
 //	public AbstractMembrane newRoot(String node) {
-//		if (remote == null) return super.newRoot(node);
-//		else remote.send("NEWROOT", this, node);
-//		return null;	// todo なんとかする（local-remote-local 問題）
+//	if (remote == null) return super.newRoot(node);
+//	else remote.send("NEWROOT", this, node);
+//	return null;	// todo なんとかする（local-remote-local 問題）
 //	}
-	
+
 	// ボディ操作5 - 膜自身や移動に関する操作
 
 	/** 活性化する。
@@ -1528,11 +1552,11 @@ public final class Membrane extends QueuedEntity {
 			return s;
 		}
 	}	
-	
+
 	// ロックに関する操作 - ガード命令は管理するtaskに直接転送される
-	
+
 	// - ガード命令
-	
+
 	/**
 	 * この膜のロック取得を試みる。
 	 * <p>ルールスレッドまたはdumperがこの膜のロックを取得するときに使用する。
@@ -1588,7 +1612,7 @@ public final class Membrane extends QueuedEntity {
 	}
 	/**
 	 * この膜からこの膜を管理するタスクのルート膜までの全ての膜のロックをブロッキングで取得し、実行膜スタックから除去する。
-     * ルート膜ならばblockingLock()と同じになる
+	 * ルート膜ならばblockingLock()と同じになる
 	 * <p>ルールスレッド以外のスレッドがこの膜のロックを最初のロックとして取得するときに使用する。
 	 * <p>成功したらリモートをnullに設定する。
 	 * <p>ロック解放にはasyncUnlock()を使用すること。
@@ -1608,7 +1632,7 @@ public final class Membrane extends QueuedEntity {
 						root.unlock();
 					}
 					t.resume();
-	
+
 					if (parent == null) {
 						//この膜が除去された
 						return false;
@@ -1643,11 +1667,11 @@ public final class Membrane extends QueuedEntity {
 	 * <p>ロック解放にはrecursiveUnlock()を使用すること。
 	 * @return ロックの取得に成功したかどうか */
 	public boolean recursiveLock() {
-		Iterator it = memIterator();
-		LinkedList lockedmems = new LinkedList();
+		Iterator<Membrane> it = memIterator();
+		LinkedList<Membrane> lockedmems = new LinkedList<Membrane>();
 		boolean result = true;
 		while (it.hasNext()) {
-			Membrane mem = (Membrane)it.next();
+			Membrane mem = it.next();
 			if (!mem.blockingLock()) {
 				result = false;
 				break;
@@ -1662,7 +1686,7 @@ public final class Membrane extends QueuedEntity {
 		if (result) return true;
 		it = lockedmems.iterator();
 		while (it.hasNext()) {
-			Membrane mem = (Membrane)it.next();
+			Membrane mem = it.next();
 			mem.recursiveUnlock();
 			mem.unlock();
 		}
@@ -1694,7 +1718,7 @@ public final class Membrane extends QueuedEntity {
 			}
 		}
 	}
-	
+
 	/**
 	 * 取得したこの膜のロックを解放する。ルート膜の場合、
 	 * 仮の実行膜スタックの内容を実行膜スタックの底に転送し、
@@ -1705,7 +1729,7 @@ public final class Membrane extends QueuedEntity {
 	public void unlock() {
 		unlock(false);
 	}
-	
+
 	public void unlock(boolean changed) {
 		Task task = (Task)getTask();
 		if (isRoot()) {
@@ -1743,9 +1767,9 @@ public final class Membrane extends QueuedEntity {
 	}
 	/** 取得したこの膜の全ての子孫の膜のロックを再帰的に解放する。*/
 	public void recursiveUnlock() {
-		Iterator it = memIterator();
+		Iterator<Membrane> it = memIterator();
 		while (it.hasNext()) {
-			Membrane mem = (Membrane)it.next();
+			Membrane mem = it.next();
 			mem.recursiveUnlock();
 			mem.unlock();
 		}
@@ -1753,10 +1777,10 @@ public final class Membrane extends QueuedEntity {
 
 	///////////////////////////////	
 	// Membrane で定義されるメソッド
-	
+
 //	// 本膜かどうか
 //	boolean isCurrent() { return getTask().memStack.peek() == this; }
-	
+
 	/** デバッグ用 */
 	String getReadyStackStatus() { return ready.toString(); }
 
@@ -1769,91 +1793,91 @@ public final class Membrane extends QueuedEntity {
 	}
 
 //	/** 膜の活性化。ただしこの膜はルート膜ではなく、スタックに積まれておらず、
-//	 * しかも親膜は仮でない実行膜スタックに積まれている。
-//	 * → newMem / newLocalMembrane に移動しました */
+//	* しかも親膜は仮でない実行膜スタックに積まれている。
+//	* → newMem / newLocalMembrane に移動しました */
 //	public void activateThis() {
-//		((Task)task).memStack.push(this);
+//	((Task)task).memStack.push(this);
 //	}
 
 //	/** この膜のキャッシュを表すバイト列を取得する。
-//	 * @see RemoteMembrane#updateCache(byte[]) */
+//	* @see RemoteMembrane#updateCache(byte[]) */
 //	public byte[] cache() {
-//		if(null == atomTable){ atomTable = new HashMap(); }
-//		
-//		// atomTableを更新する // 子膜の自由リンクについては要検討
-//		atomTable.clear();
-//		Iterator it = atomIterator();
-//		while (it.hasNext()) {
-//			Atom atom = (Atom)it.next();
-//			atomTable.put(atom.getLocalID(), atom);
-//		}
-//		if(atomTable.isEmpty()){atomTable = null; }
-//
-//		try {
-//			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-//			ObjectOutputStream out = new ObjectOutputStream(bout);
-//
-//			//子膜
-//			out.writeInt(mems.size());
-//			it = memIterator();
-//			while (it.hasNext()) {
-//				Membrane m = (Membrane)it.next();
-//				out.writeObject(m.getTask().getMachine().hostname);
-//				out.writeObject(m.getLocalID());
-//				out.writeObject(new Boolean(m.isRoot()));
-//			}
-//			//アトム
-//			out.writeInt(atoms.size());
-//			it = atomIterator();
-//			while (it.hasNext()) {
-//				Atom a = (Atom)it.next();
-//				out.writeObject(a);
-//			}
-//			//ルールセット
-//			out.writeInt(rulesets.size());
-//			it = rulesetIterator();
-//			while (it.hasNext()) {
-//				Ruleset r = (Ruleset)it.next();
-//				out.writeObject(r.getGlobalRulesetID());
-//			}
-//			//todo nameは不要？
-//			//out.writeObject(name);
-//			out.writeObject(new Boolean(stable));
-//
-//			out.close();
-//			return bout.toByteArray();
-//		} catch (IOException e) {
-//			//ByteArrayOutputStreamなので、発生するはずがない
-//			throw new RuntimeException("Unexpected Exception", e);
-//		}
+//	if(null == atomTable){ atomTable = new HashMap(); }
+
+//	// atomTableを更新する // 子膜の自由リンクについては要検討
+//	atomTable.clear();
+//	Iterator it = atomIterator();
+//	while (it.hasNext()) {
+//	Atom atom = (Atom)it.next();
+//	atomTable.put(atom.getLocalID(), atom);
+//	}
+//	if(atomTable.isEmpty()){atomTable = null; }
+
+//	try {
+//	ByteArrayOutputStream bout = new ByteArrayOutputStream();
+//	ObjectOutputStream out = new ObjectOutputStream(bout);
+
+//	//子膜
+//	out.writeInt(mems.size());
+//	it = memIterator();
+//	while (it.hasNext()) {
+//	Membrane m = (Membrane)it.next();
+//	out.writeObject(m.getTask().getMachine().hostname);
+//	out.writeObject(m.getLocalID());
+//	out.writeObject(new Boolean(m.isRoot()));
+//	}
+//	//アトム
+//	out.writeInt(atoms.size());
+//	it = atomIterator();
+//	while (it.hasNext()) {
+//	Atom a = (Atom)it.next();
+//	out.writeObject(a);
+//	}
+//	//ルールセット
+//	out.writeInt(rulesets.size());
+//	it = rulesetIterator();
+//	while (it.hasNext()) {
+//	Ruleset r = (Ruleset)it.next();
+//	out.writeObject(r.getGlobalRulesetID());
+//	}
+//	//todo nameは不要？
+//	//out.writeObject(name);
+//	out.writeObject(new Boolean(stable));
+
+//	out.close();
+//	return bout.toByteArray();
+//	} catch (IOException e) {
+//	//ByteArrayOutputStreamなので、発生するはずがない
+//	throw new RuntimeException("Unexpected Exception", e);
+//	}
 //	}
 
 //	/** アトムIDに対応するアトムを取得する */
 //	public Atom lookupAtom(String atomid) {
-//		return (Atom)atomTable.get(atomid);
+//	return (Atom)atomTable.get(atomid);
 //	}
 //	/** アトムIDに対応するアトムを登録する */
 //	public void registerAtom(String atomid, Atom atom) {
-//		if(null == atomTable){ atomTable = new HashMap(); }
-//		atomTable.put(atomid, atom);
+//	if(null == atomTable){ atomTable = new HashMap(); }
+//	atomTable.put(atomid, atom);
 //	}
-	
+
 	/** この膜を削除する(子膜が無い時にのみ呼んで良い) 
 	 * デーモンを除去したため実体はない
 	 */
 	public void free() {
 //		IDConverter.unregisterGlobalMembrane(getGlobalMemID());
 	}
-	
-	
+
+
 	/** インライン用マクロ Any=_old/1 :- Any=_new/1 */
 	public void replace1by1(Atom _old, Atom _new) {
 		relink(_old, 0, _new, 0);
 		removeAtom(_old);
 	}
-	
+
 	// XML <-> Mem ここから
-	
+
 	// Membrane -> XML
 	private static int lastLinkId;
 
@@ -1921,8 +1945,8 @@ public final class Membrane extends QueuedEntity {
 		sb.append("</mem>");
 		return sb.toString();
 	}
-	
-	
+
+
 	// XML -> Membrane
 	public void xmlDeserialize(String src) {
 		try {
@@ -1938,7 +1962,7 @@ public final class Membrane extends QueuedEntity {
 			e.printStackTrace();
 		}
 	}
-	
+
 	class LMNtalSax extends DefaultHandler {
 		Membrane rootMem = null;
 
@@ -2036,16 +2060,16 @@ public final class Membrane extends QueuedEntity {
 			}
 		}
 	}
-	
+
 	// XML <-> Mem ここまで
-	
+
 	// hash ここから
-	
+
 	/* 膜のハッシュコードを返す */
 	static int calculate(Membrane m) {
 		return calculate(m, new HashMap<Membrane, Integer>());
 	}
-	
+
 	/*
 	 * 膜のハッシュコードを返す
 	 * @param m ハッシュコード算出対象の膜
@@ -2060,63 +2084,63 @@ public final class Membrane extends QueuedEntity {
 		 */
 		long add = 3412;        // 3412は適当な初期値
 		long mult = 3412;
-		
+
 		/* 一時変数 */
 		Atom a = null;
 		Membrane mm = null;
 		QueuedEntity q = null;
-		
+
 		/*
 		 * contents:この膜内のアトムと子膜全体の集合
 		 * toCalculate:現在計算中の分子内の未処理アトムまたは子膜の集合
 		 * calculated:現在計算中の分子内の処理済アトムまたは子膜の集合
 		 */
 		Set<QueuedEntity> contents = new HashSet<QueuedEntity>(), 
-							toCalculate = new HashSet<QueuedEntity>(), 
-							calculated = new HashSet<QueuedEntity>();
-		
-		for (Iterator i = m.atomIterator(); i.hasNext(); ) {
-			a = (Atom) i.next();
+		toCalculate = new HashSet<QueuedEntity>(), 
+		calculated = new HashSet<QueuedEntity>();
+
+		for (Iterator<Atom> i = m.atomIterator(); i.hasNext(); ) {
+			a = i.next();
 			if (a.getFunctor().isOutsideProxy() || a.getFunctor().isInsideProxy()) {
 				continue;
 			}
 			contents.add(a);
 		}
-		
-		for (Iterator i = m.memIterator(); i.hasNext(); ) {
-			mm = (Membrane) i.next();
+
+		for (Iterator<Membrane> i = m.memIterator(); i.hasNext(); ) {
+			mm = i.next();
 			contents.add(mm);
 			m2hc.put(mm, calculate(mm, m2hc));
 		}
-		
+
 		while (!contents.isEmpty()) {
 			//System.out.println("uncalculated:" + contents);
 			q = contents.iterator().next();
 			contents.remove(q);
-			
+
 			/*
 			 * mol: この分子のハッシュコードを保持する
 			 * mol_add: 基本計算単位のハッシュコードが加算されていく変数
 			 * mol_mult: 基本計算単位のハッシュコードが乗算されていく変数
 			 * temp: 基本計算単位のハッシュコードを保持する
 			 */
-			 
+
 			long mol = -1, mol_add = 0, mol_mult = 41, temp = 0;
-			
+
 			toCalculate.clear();
 			calculated.clear();
 			toCalculate.add(q);
-				
+
 			// 分子のハッシュコードの計算
 			while (!toCalculate.isEmpty()) {
 				q = toCalculate.iterator().next();
 				calculated.add(q);
 				toCalculate.remove(q);
-				
+
 				if (q instanceof Atom) {
 					a = (Atom) q;
 					temp = a.getFunctor().hashCode();
-								
+
 					// このアトムのリンクを処理する
 					int arity = a.getFunctor().getArity();
 					for (int k = 0; k < arity; k++) {
@@ -2144,7 +2168,7 @@ public final class Membrane extends QueuedEntity {
 								t += m2hc.get(mm);
 								t *= 13;
 							}
-							
+
 							t *= link.getAtom().getFunctor().hashCode();
 							t *= link.getPos() + 1;
 							temp += t;
@@ -2162,15 +2186,15 @@ public final class Membrane extends QueuedEntity {
 					Membrane mt = (Membrane) q;
 					final int thisMembsHC = m2hc.get(mt);
 					temp = thisMembsHC;
-					
+
 					// この膜から膜の外部へのリンクを処理する
 					Link link = null;
-					for (Iterator i = mt.atomIteratorOfFunctor(Functor.INSIDE_PROXY); i.hasNext(); ) {
-						Atom inside = (Atom) i.next();
+					for (Iterator<Atom> i = mt.atomIteratorOfFunctor(Functor.INSIDE_PROXY); i.hasNext(); ) {
+						Atom inside =  i.next();
 						// この膜外部の（プロキシでない）リンク先アトムまでトレース
 						int s = 0;
 						link = inside.nthAtom(0).getArg(1);
-						
+
 						if (link.getAtom().getFunctor().isOutsideProxy()) { // この膜のリンク先が膜のとき
 							mm = link.getAtom().nthAtom(0).getMem();
 							if (!calculated.contains(mm)) {
@@ -2182,7 +2206,7 @@ public final class Membrane extends QueuedEntity {
 								toCalculate.add(a);
 							}
 						}
-							
+
 						while (link.getAtom().getFunctor().isOutsideProxy()) {
 							link = link.getAtom().nthAtom(0).getArg(1);
 							s += m2hc.get(link.getAtom().getMem());
@@ -2190,7 +2214,7 @@ public final class Membrane extends QueuedEntity {
 						}
 						s += link.getAtom().getFunctor().hashCode();
 						s *= link.getPos() + 1;
-							
+
 						// この膜内部の（プロキシでない）リンク元アトムまでトレース
 						int t = 0;
 						link = inside.getArg(1);
@@ -2204,7 +2228,7 @@ public final class Membrane extends QueuedEntity {
 						temp += thisMembsHC^t * s;
 					}
 				}
-				
+
 				mol_add += temp;
 				mol_add %= MAX_VALUE;
 				mol_mult *= temp;
@@ -2214,13 +2238,13 @@ public final class Membrane extends QueuedEntity {
 			//System.out.println("molecule: " + calculated + " = " + mol);
 			/* ハッシュコードを算出した分子を計算対象から取り除く */
 			contents.removeAll(calculated);
-			
+
 			add += mol;
 			add %= MAX_VALUE;
 			mult *= mol;
 			mult %= MAX_VALUE;
 		}
-		
+
 		//System.out.println("membrane:" + m + " = " + (mult^add) + " (mult=" + mult + ", add=" + add + ")");
 		return (int) (mult^add);
 	}

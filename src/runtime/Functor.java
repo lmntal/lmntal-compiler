@@ -242,6 +242,12 @@ public abstract class Functor implements Serializable {
 	public abstract boolean isActive();
 	
 	/**
+	 * このファンクタが数値アトムかどうかを判定する。
+	 * @return 数値アトムなら true
+	 */
+	public abstract boolean isNumber();
+	
+	/**
 	 * このファンクタの値を返す
 	 * @return ファンクタの値
 	 */

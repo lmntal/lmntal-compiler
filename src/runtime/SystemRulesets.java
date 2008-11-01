@@ -10,8 +10,8 @@ import runtime.systemRuleset.GlobalSystemRuleset;
  * @author Mizuno
  */
 public final class SystemRulesets {
-	private static ArrayList all = new ArrayList();
-	private static ArrayList userDefined = new ArrayList();
+	private static ArrayList<Ruleset> all = new ArrayList<Ruleset>();
+	private static ArrayList<Ruleset> userDefined = new ArrayList<Ruleset>();
 	static {
 		clear();
 	}
@@ -33,7 +33,7 @@ public final class SystemRulesets {
 	 * ユーザー定義システムルールセットのイテレータを取得する
 	 * @return ユーザー定義システムルールセットのイテレータ
 	 */
-	public static Iterator userDefinedSystemRulesetIterator() {
+	public static Iterator<Ruleset> userDefinedSystemRulesetIterator() {
 		return userDefined.iterator();
 	}
 	
@@ -41,7 +41,7 @@ public final class SystemRulesets {
 	 * システムルールセットのイテレータを取得する
 	 * @return システムルールセットのイテレータ
 	 */
-	public static Iterator iterator() {
+	public static Iterator<Ruleset> iterator() {
 		return all.iterator();
 	}
 
@@ -53,9 +53,9 @@ public final class SystemRulesets {
 		boolean flag = false;
 		int debugvalue = Env.debug; // todo spy機能を実装する
 		if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
-		Iterator itsys = SystemRulesets.iterator();
+		Iterator<Ruleset> itsys = SystemRulesets.iterator();
 		while (itsys.hasNext()) {
-			if (((Ruleset)itsys.next()).react(mem, nondeterministic)) {
+			if (itsys.next().react(mem, nondeterministic)) {
 				flag = true;
 				break;
 			}

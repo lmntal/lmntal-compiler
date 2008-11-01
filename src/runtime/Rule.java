@@ -38,7 +38,7 @@ public final class Rule implements Serializable {
 	public String fullText ="";
 	
 	/** スレッドごとのベンチマーク結果 **/
-	public HashMap bench;
+	public HashMap<Thread, Benchmark> bench;
 	
 	/** ルール名 */
 	public String name;
@@ -62,7 +62,7 @@ public final class Rule implements Serializable {
 		memMatchLabel = new InstructionList();
 		atomMatch = atomMatchLabel.insts;
 		memMatch = memMatchLabel.insts;
-		bench = new HashMap();
+		bench = new HashMap<Thread, Benchmark>();
 	}
 	/**
 	 * ルール文字列つきコンストラクタ
@@ -102,7 +102,7 @@ public final class Rule implements Serializable {
 	public void showDetail() {
 		if (Env.debug == 0 && !Env.compileonly) return;
 		
-		Iterator l;
+		Iterator<Instruction> l;
 		Env.p("Compiled Rule " + this);
 		
 		l = atomMatch.listIterator();
@@ -164,7 +164,7 @@ public final class Rule implements Serializable {
 	
 	public void incAtomApply(Thread thread){
 		if(bench.containsKey(thread))
-			((Benchmark)bench.get(thread)).atomapply ++;
+			bench.get(thread).atomapply ++;
 		else {
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.atomapply ++;
@@ -173,7 +173,7 @@ public final class Rule implements Serializable {
 	}
 	public void incAtomSucceed(Thread thread){
 		if(bench.containsKey(thread))
-			((Benchmark)bench.get(thread)).atomsucceed ++;
+			bench.get(thread).atomsucceed ++;
 		else {
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.atomsucceed ++;
@@ -182,7 +182,7 @@ public final class Rule implements Serializable {
 	}
 	public void setAtomTime(long value, Thread thread){
 		if(bench.containsKey(thread))
-			((Benchmark)bench.get(thread)).atomtime += value;
+			bench.get(thread).atomtime += value;
 		else {
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.atomtime += value;
@@ -191,7 +191,7 @@ public final class Rule implements Serializable {
 	}
 	public void incMemApply(Thread thread){
 		if(bench.containsKey(thread))
-			((Benchmark)bench.get(thread)).memapply ++;
+			bench.get(thread).memapply ++;
 		else {
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.memapply ++;
@@ -200,7 +200,7 @@ public final class Rule implements Serializable {
 	}
 	public void incMemSucceed(Thread thread){
 		if(bench.containsKey(thread))
-			((Benchmark)bench.get(thread)).memsucceed ++;
+			bench.get(thread).memsucceed ++;
 		else {
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.memsucceed ++;
@@ -209,7 +209,7 @@ public final class Rule implements Serializable {
 	}
 	public void setMemTime(long value, Thread thread){
 		if(bench.containsKey(thread))
-			((Benchmark)bench.get(thread)).memtime += value;
+			bench.get(thread).memtime += value;
 		else {
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.memtime += value;
@@ -218,7 +218,7 @@ public final class Rule implements Serializable {
 	}
 	public void setBackTracks(long value, Thread thread){
 		if(bench.containsKey(thread))
-			((Benchmark)bench.get(thread)).backtracks += value;
+			bench.get(thread).backtracks += value;
 		else {
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.backtracks += value;
@@ -227,7 +227,7 @@ public final class Rule implements Serializable {
 	}
 	public void setLockFailure(long value, Thread thread){
 		if(bench.containsKey(thread))
-			((Benchmark)bench.get(thread)).lockfailure += value;
+			bench.get(thread).lockfailure += value;
 		else {
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.lockfailure += value;
@@ -236,59 +236,59 @@ public final class Rule implements Serializable {
 	}
 	
 	public long allAtomApplys() {
-		Iterator its = bench.values().iterator();
+		Iterator<Benchmark> its = bench.values().iterator();
 		long apply = 0;
 		while(its.hasNext()) {
-			Benchmark bench = (Benchmark)its.next();
+			Benchmark bench = its.next();
 			apply += bench.atomapply;
 		}
 		return apply;
 	}
 	public long allMemApplys() {
-		Iterator its = bench.values().iterator();
+		Iterator<Benchmark> its = bench.values().iterator();
 		long apply = 0;
 		while(its.hasNext()) {
-			Benchmark bench = (Benchmark)its.next();
+			Benchmark bench = its.next();
 			apply += bench.memapply;
 		}
 		return apply;
 	}
 	
 	public long allAtomSucceeds() {
-		Iterator its = bench.values().iterator();
+		Iterator<Benchmark> its = bench.values().iterator();
 		long succeed = 0;
 		while(its.hasNext()) {
-			Benchmark bench = (Benchmark)its.next();
+			Benchmark bench = its.next();
 			succeed += bench.atomsucceed;
 		}
 		return succeed;
 	}
 	
 	public long allMemSucceeds() {
-		Iterator its = bench.values().iterator();
+		Iterator<Benchmark> its = bench.values().iterator();
 		long succeed = 0;
 		while(its.hasNext()) {
-			Benchmark bench = (Benchmark)its.next();
+			Benchmark bench = its.next();
 			succeed += bench.memsucceed;
 		}
 		return succeed;
 	}
 	
 	public long allAtomTimes() {
-		Iterator its = bench.values().iterator();
+		Iterator<Benchmark> its = bench.values().iterator();
 		long time = 0;
 		while(its.hasNext()) {
-			Benchmark bench = (Benchmark)its.next();
+			Benchmark bench = its.next();
 			time += bench.atomtime;
 		}
 		return time;
 	}
 
 	public long allMemTimes() {
-		Iterator its = bench.values().iterator();
+		Iterator<Benchmark> its = bench.values().iterator();
 		long time = 0;
 		while(its.hasNext()) {
-			Benchmark bench = (Benchmark)its.next();
+			Benchmark bench = its.next();
 			time += bench.memtime;
 		}
 		return time;
@@ -305,19 +305,19 @@ public final class Rule implements Serializable {
 	}
 	
 	public long allBackTracks() {
-		Iterator its = bench.values().iterator();
+		Iterator<Benchmark> its = bench.values().iterator();
 		long backtracks = 0;
 		while(its.hasNext()) {
-			Benchmark bench = (Benchmark)its.next();
+			Benchmark bench = its.next();
 			backtracks += bench.backtracks;
 		}
 		return backtracks;
 	}
 	public long allLockFailures() {
-		Iterator its = bench.values().iterator();
+		Iterator<Benchmark> its = bench.values().iterator();
 		long lockfailure = 0;
 		while(its.hasNext()) {
-			Benchmark bench = (Benchmark)its.next();
+			Benchmark bench = its.next();
 			lockfailure += bench.lockfailure;
 		}
 		return lockfailure;

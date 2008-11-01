@@ -1,6 +1,6 @@
 package runtime;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * 特殊なファンクタ (inside_proxy, outside_proxy, star) を表すクラス
@@ -99,6 +99,14 @@ public class SpecialFunctor extends Functor {
 	 * @return false
 	 */
 	public boolean isActive() {
+		return false;
+	}
+	
+	/**
+	 * このファンクタが数値かどうかを取得する。
+	 * @return false
+	 */
+	public boolean isNumber() {
 		return false;
 	}
 	

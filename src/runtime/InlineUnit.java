@@ -22,12 +22,12 @@ public class InlineUnit {
 	public CustomGuard customGuard;
 	
 	/** Hash { インラインコード文字列 => 一意な連番 } */
-	public Map codes = new HashMap(); 
+	public Map<String, Integer> codes = new HashMap<String, Integer>(); 
 	/** codes の逆 */
-	public List code_of_id = new ArrayList(); 
+	public List<String> code_of_id = new ArrayList<String>(); 
 	
 	/** List インライン宣言コード文字列 */
-	public List defs = new ArrayList(); 
+	public List<String> defs = new ArrayList<String>(); 
 	
 	/** 一意な連番。インラインコード文字列と1対1 */
 	int codeCount = 0;
@@ -121,7 +121,7 @@ public class InlineUnit {
 	 */
 	public void makeCode(String packageName, String className, File outputFile, boolean interpret) throws IOException {
 		if(codes.isEmpty() && defs.isEmpty()) return;
-		Iterator i;
+		Iterator<String> i;
 		PrintWriter p = new PrintWriter(new FileOutputStream(outputFile));
 
 		//p.println("package runtime;");
@@ -134,7 +134,7 @@ public class InlineUnit {
 		i = defs.iterator();
 		PrintWriter defaultPW = p;
 		while(i.hasNext()) {
-			String s = (String)i.next();
+			String s = i.next();
 			s = s.replaceAll("\\/\\*__UNITNAME__\\*\\/", className(name));
 			if (packageName != null) {
 				s = s.replaceAll("\\/\\*__PACKAGE__\\*\\/", "package " + packageName + ";");

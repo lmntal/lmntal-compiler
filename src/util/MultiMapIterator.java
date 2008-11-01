@@ -1,6 +1,6 @@
 package util;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -10,23 +10,23 @@ import java.util.NoSuchElementException;
  * 複数要素を格納するマップを実現するために、値にコレクションを挿入するマップに対して利用する。
  * @author Mizuno
  */
-public class MultiMapIterator implements Iterator{
-	private Iterator setIterator;
-	private Iterator dataIterator;
-	private Object next;
+public class MultiMapIterator<E> implements Iterator<E>{
+	private Iterator<List<E>> setIterator;
+	private Iterator<E> dataIterator;
+	private E next;
 	private void setNext() {
 		while (!dataIterator.hasNext()) {
 			if (!setIterator.hasNext()) {
 				next = null;
 				return;
 			}
-			dataIterator = ((Collection)setIterator.next()).iterator();
+			dataIterator = setIterator.next().iterator();
 		}
 		next = dataIterator.next();
 	}
 
 	/** 指定されたMap内にあるデータを列挙する反復子を生成する */
-	public MultiMapIterator(Map map) {
+	public <K> MultiMapIterator(Map<K, List<E>> map) {
 		setIterator = map.values().iterator();
 		dataIterator = Util.NULL_ITERATOR;
 		setNext();
@@ -34,10 +34,10 @@ public class MultiMapIterator implements Iterator{
 	public boolean hasNext() {
 		return next != null;
 	}
-	public Object next() {
+	public E next() {
 		if (next == null)
 			throw new NoSuchElementException();
-		Object ret = next;
+		E ret = next;
 		setNext();
 		return ret;
 	}

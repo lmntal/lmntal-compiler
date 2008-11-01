@@ -6,9 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 //import java.util.ArrayList;
@@ -111,8 +109,8 @@ public final class Link implements Cloneable, Serializable {
 //		}
 //		return c;
 //	}
-	public int isGround(Set avoSet){
-		List srclinks = new ArrayList();
+	public int isGround(Set<Atom> avoSet){
+		List<Link> srclinks = new ArrayList<Link>();
 		srclinks.add(this);
 		return Membrane.isGround(srclinks,avoSet);
 	}
@@ -147,8 +145,8 @@ public final class Link implements Cloneable, Serializable {
 //		return true;
 //	}
 	public boolean eqGround(Link srcLink){
-		List srclinks = new ArrayList();
-		List dstlinks = new ArrayList();
+		List<Link> srclinks = new ArrayList<Link>();
+		List<Link> dstlinks = new ArrayList<Link>();
 		srclinks.add(srcLink);
 		dstlinks.add(this);
 		return Membrane.eqGround(srclinks,dstlinks);
@@ -163,22 +161,22 @@ public final class Link implements Cloneable, Serializable {
 	 * 
 	 * @return
 	 */
-	public static String groundString(List linklist){
+	public static String groundString(List<Link> linklist){
 		// 2引数で、ただのリンクにマッチする場合"Link"を特別に返す
 		if(linklist.size() == 2){
-			Link l1 = (Link)linklist.get(0);
-			Link l2 = (Link)linklist.get(1);
+			Link l1 = linklist.get(0);
+			Link l2 = linklist.get(1);
 			if(l1 == l2.getBuddy())return "Link";
 		}
-		Set srcSet = new HashSet(); // 辿ったアトム
-		Stack s = new Stack(); //リンクを積むスタック
-		HashMap linkStr = new HashMap(); // リンク -> リンク名
+		Set<Atom> srcSet = new HashSet<Atom>(); // 辿ったアトム
+		Stack<Link> s = new Stack<Link>(); //リンクを積むスタック
+		HashMap<Link, String> linkStr = new HashMap<Link, String>(); // リンク -> リンク名
 		StringBuffer sb = new StringBuffer();
 		int linkNo=0;
 		s.push(linklist.get(0)); // 第1引数から辿る
 //		s.push(this);
 		while(!s.isEmpty()){
-			Link l = (Link)s.pop();
+			Link l = s.pop();
 			Atom a = l.getAtom();
 			if(srcSet.contains(a))continue; //既に辿ったアトム
 			sb.append(a.getFunctor().getName());
@@ -206,7 +204,7 @@ public final class Link implements Cloneable, Serializable {
 		return sb.toString();
 	}
 	public String groundString(){
-		List linklist = new ArrayList();
+		List<Link> linklist = new ArrayList<Link>();
 		linklist.add(this);
 		return Link.groundString(linklist);
 	}

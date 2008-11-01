@@ -7,11 +7,11 @@ import java.util.NoSuchElementException;
  * 指定された配列中の反復子が返す値を順に返す反復子
  * @author Mizuno
  */
-public class NestedIterator implements Iterator {
-	private Iterator[] its;
+public class NestedIterator<T> implements Iterator<T> {
+	private Iterator<T>[] its;
 	private int nextIndex;
-	private Iterator it;
-	private Object next;
+	private Iterator<T> it;
+	private T next;
 	private void setNext() {
 		while (!it.hasNext()) {
 			if (nextIndex == its.length) {
@@ -24,7 +24,7 @@ public class NestedIterator implements Iterator {
 	}
 
 	/** 指定されたMap内にあるデータを列挙する反復子を生成する */
-	public NestedIterator(Iterator[] its) {
+	public NestedIterator(Iterator<T>[] its) {
 		if (its.length == 0) {
 			next = null;
 		} else {
@@ -37,10 +37,10 @@ public class NestedIterator implements Iterator {
 	public boolean hasNext() {
 		return next != null;
 	}
-	public Object next() {
+	public T next() {
 		if (next == null)
 			throw new NoSuchElementException();
-		Object ret = next;
+		T ret = next;
 		setNext();
 		return ret;
 	}

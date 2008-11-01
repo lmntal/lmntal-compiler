@@ -52,12 +52,12 @@ public class InstructionList implements Cloneable, Serializable {
 	}
 
 	/** パーザーで利用するコンストラクタ */
-	public InstructionList(ArrayList insts) {
+	public InstructionList(List<Instruction> insts) {
 		this();
 		this.insts = insts;
 	}
 	/** パーザーで利用するコンストラクタ */
-	public InstructionList(int id, ArrayList insts) {
+	public InstructionList(int id, List<Instruction> insts) {
 		this(insts);
 		setLabel(id);
 	}
@@ -79,12 +79,12 @@ public class InstructionList implements Cloneable, Serializable {
 	/** 指定された命令列（InstructionのList）のクローンを作成する。
 	 * @param insts クローンを作成する命令列
 	 * @return 作成したクローン */
-	public static List cloneInstructions(List insts) {
-		List ret = new ArrayList();
-		Iterator it = insts.iterator();
+	public static List<Instruction> cloneInstructions(List<Instruction> insts) {
+		List<Instruction> ret = new ArrayList<Instruction>();
+		Iterator<Instruction> it = insts.iterator();
 		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
-			ret.add(inst.clone());
+			Instruction inst = it.next();
+			ret.add((Instruction)inst.clone());
 		}
 		return ret;
 	}
@@ -96,7 +96,7 @@ public class InstructionList implements Cloneable, Serializable {
 	public void add(int index, Instruction inst) {
 		insts.add(index, inst);
 	}
-	public List getInstructions() {
+	public List<Instruction> getInstructions() {
 		return insts;
 	}
 	public String toString() {

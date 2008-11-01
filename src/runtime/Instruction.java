@@ -48,7 +48,7 @@ import util.Util;
  */
 public class Instruction implements Cloneable, Serializable {
 	/** 命令毎の引数情報を入れるテーブル */
-	private static HashMap argTypeTable = new HashMap();
+	private static HashMap<Integer, ArgType> argTypeTable = new HashMap<Integer, ArgType>();
 	/**アトム*/
 	public static final int ARG_ATOM = 0;
 	/**膜*/
@@ -1850,7 +1850,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * 出力引数でない引数のリストを返す
 	 * @return 引数のリスト
 	 */
-	public ArrayList getVarArgs(HashMap listn) {
+	public ArrayList getVarArgs(HashMap<Integer, Integer> listn) {
 		ArrayList ret = new ArrayList();
 		listn.clear();
 		ArgType argtype = (ArgType)argTypeTable.get(new Integer(getKind()));
@@ -1897,10 +1897,8 @@ public class Instruction implements Cloneable, Serializable {
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void changeAtomVar(List list, Map map) {
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
+	public static void changeAtomVar(List<Instruction> list, Map<Integer, Integer> map) {
+		for(Instruction inst : list){
 			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
 			for (int i = 0; i < inst.data.size(); i++) {
 				switch (argtype.type[i]) {
@@ -1918,10 +1916,8 @@ public class Instruction implements Cloneable, Serializable {
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void changeMemVar(List list, Map map) {
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
+	public static void changeMemVar(List<Instruction> list, Map<Integer, Integer> map) {
+		for(Instruction inst : list){
 			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
 			for (int i = 0; i < inst.data.size(); i++) {
 				switch (argtype.type[i]) {
@@ -1939,10 +1935,8 @@ public class Instruction implements Cloneable, Serializable {
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void changeOtherVar(List list, Map map) {
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
+	public static void changeOtherVar(List<Instruction> list, Map<Integer, Integer> map) {
+		for(Instruction inst : list){
 			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
 			for (int i = 0; i < inst.data.size(); i++) {
 				switch (argtype.type[i]) {
@@ -1960,10 +1954,8 @@ public class Instruction implements Cloneable, Serializable {
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void applyVarRewriteMap(List list, Map map) {
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
+	public static void applyVarRewriteMap(List<Instruction> list, Map<Integer, Integer> map) {
+		for(Instruction inst : list){
 			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
 			for (int i = 0; i < inst.data.size(); i++) {
 				switch (argtype.type[i]) {
@@ -1979,7 +1971,7 @@ public class Instruction implements Cloneable, Serializable {
 					case ARG_INSTS:
 						if(inst.getKind() == Instruction.SYSTEMRULESETS)
 							applyVarRewriteMap( ((InstructionList)inst.data.get(i)).insts, map);
-						else applyVarRewriteMap( (List)inst.data.get(i), map);
+						else applyVarRewriteMap( (List<Instruction>)inst.data.get(i), map);
 						break;
 					case ARG_VARS:
 						ListIterator li = ((List)inst.data.get(i)).listIterator();
@@ -1994,7 +1986,7 @@ public class Instruction implements Cloneable, Serializable {
 		}
 	}
 	/** 命令列後半部分に対して変数番号を付け替える */
-	public static void applyVarRewriteMapFrom(List list, Map map, int start) {
+	public static void applyVarRewriteMapFrom(List<Instruction> list, Map<Integer, Integer> map, int start) {
 		applyVarRewriteMap( list.subList(start, list.size()), map );
 	}
 
@@ -2006,7 +1998,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * @param pos 書き換える引数番号
 	 * @param map 書き換えマップ
 	 */
-	private static void changeArg(Instruction inst, int pos, Map map) {
+	private static void changeArg(Instruction inst, int pos, Map<Integer, Integer> map) {
 		Integer id = (Integer)inst.data.get(pos - 1);
 		if (map.containsKey(id)) {
 			inst.data.set(pos - 1, map.get(id));
@@ -2017,11 +2009,9 @@ public class Instruction implements Cloneable, Serializable {
 	 * @param list   命令列
 	 * @param varnum 変数番号
 	 * @author n-kato */
-	public static int getVarUseCount(List list, Integer varnum) {
+	public static int getVarUseCount(List<Instruction> list, Integer varnum) {
 		int count = 0;
-		Iterator it = list.iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next();
+		for(Instruction inst : list){
 			if (inst.getKind() == RESETVARS || inst.getKind() == CHANGEVARS) {
 				// (n-kato 2008.01.15) TODO 誰かがこれを実装する↓
 				/* if (inst contains varnum) varnum = lookupNewVarnum(inst,varnum);
@@ -2063,7 +2053,7 @@ public class Instruction implements Cloneable, Serializable {
 	 * @param varnum 変数番号
 	 * @param start  開始位置
 	 * @see getVarUseCount */
-	public static int getVarUseCountFrom(List list, Integer varnum, int start) {
+	public static int getVarUseCountFrom(List<Instruction> list, Integer varnum, int start) {
 		return getVarUseCount( list.subList(start, list.size()), varnum );
 	}
 	
@@ -2173,7 +2163,7 @@ public class Instruction implements Cloneable, Serializable {
 
 	/** Integerでラップされた命令番号から命令名へのハッシュ。
 	 * <p>処理系開発が収束した頃に、もっと効率のよい別の構造で置き換えてもよい。 */
-	static Hashtable instructionTable = new Hashtable();
+	static Hashtable<Integer, String> instructionTable = new Hashtable<Integer, String>();
 	
 	//インスタンス生成時にスタックオーバーフローを起こしたので修正しました。 by Mizuno
 	//ExceptionInInitializerError がおきてたので修正 by hara
@@ -2214,7 +2204,7 @@ public class Instruction implements Cloneable, Serializable {
 	 */
 	public static String getInstructionString(int kind){
 		String answer = "";
-		answer = (String)instructionTable.get(new Integer(kind));
+		answer = instructionTable.get(kind);
 		return answer;
     }
 

@@ -14,16 +14,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
 import runtime.Dumper;
 import runtime.Env;
 import runtime.InterpretedRuleset;
-import runtime.LMNtalRuntime;
 import runtime.Membrane;
 import runtime.Rule;
+import runtime.Ruleset;
 import util.Util;
 
 /**
@@ -82,22 +81,19 @@ public class Debug {
 	 * @param mem ルート膜
 	 */
 	private static void collectAllRules(Membrane mem) {
-		Iterator itr = mem.rulesetIterator();
+		Iterator<Ruleset> itr = mem.rulesetIterator();
 		while (itr.hasNext()) {
 			Object o = itr.next();
 			if (!(o instanceof InterpretedRuleset)) continue;
 			InterpretedRuleset ruleset = (InterpretedRuleset)o;
-			List rules = ruleset.rules;
-			Iterator ruleIterator = rules.iterator();
-			while (ruleIterator.hasNext()) {
-				Rule rule = (Rule)ruleIterator.next();
+			for(Rule rule : ruleset.rules){
 				Debug.rules.add(rule);
 			}
 		}
 		
-		Iterator memIterator = mem.memIterator();
+		Iterator<Membrane> memIterator = mem.memIterator();
 		while (memIterator.hasNext()) {
-			collectAllRules((Membrane)memIterator.next());
+			collectAllRules(memIterator.next());
 		}
 	}
 	
@@ -196,7 +192,7 @@ public class Debug {
 	 * セットされているブレークポイントのiteratorを返します。
 	 * @return iterator
 	 */
-	public static Iterator breakPointIterator() {
+	public static Iterator<Integer> breakPointIterator() {
 		return breakPoints.iterator();
 	}
 	
@@ -228,7 +224,7 @@ public class Debug {
 	/**
 	 * ルールのイテレータを返します
 	 */
-	public static Iterator ruleIterator() {
+	public static Iterator<Rule> ruleIterator() {
 		if (rules == null) return null;
 		return rules.iterator();
 	}

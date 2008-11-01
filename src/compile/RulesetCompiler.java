@@ -10,13 +10,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import runtime.Env;
-import runtime.Functor;
 import runtime.InlineUnit;
 import runtime.InterpretedRuleset;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRulesets;
-import runtime.Instruction;
 import runtime.MergedBranchMap;
 
 import compile.parser.*;
@@ -42,7 +40,7 @@ public class RulesetCompiler {
 	 * @return (:-m)というルール1つだけからなるルールセット
 	 */
 	public static Ruleset compileMembrane(Membrane m, String unitName) {
-		return (Ruleset)compileMembraneToGeneratingMembrane(m, unitName).rulesets.get(0);
+		return compileMembraneToGeneratingMembrane(m, unitName).rulesets.get(0);
 	}
 	
 	public static Ruleset compileMembrane(Membrane m) {
@@ -86,16 +84,16 @@ public class RulesetCompiler {
 	public static void processMembrane(Membrane mem, String unitName) {
 		Env.c("RulesetCompiler.processMembrane");
 		// 子膜にあるルールをルールセットにコンパイルする
-		Iterator it = mem.mems.listIterator();
-		while (it.hasNext()) {
-			Membrane submem = (Membrane)it.next();
+		for(Membrane submem : mem.mems){
 			processMembrane(submem, unitName);
 		}
 		// この膜にあるルール構造をルールオブジェクトにコンパイルする
 		ArrayList<Rule> rules = new ArrayList<Rule>();
-		it = mem.rules.listIterator();
+		/*it = mem.rules.listIterator();
 		while (it.hasNext()) {
 			RuleStructure rs = (RuleStructure)it.next();
+		*/
+		for(RuleStructure rs : mem.rules){
 			// ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
 			processMembrane(rs.leftMem, unitName); // 一応左辺も
 			processMembrane(rs.rightMem, unitName);
@@ -113,9 +111,9 @@ public class RulesetCompiler {
 			}
 			if(Env.fThread && rc.theRule.getFullText().matches(".*thread.*") && !recursived){
 				RuleConverter conv = new RuleConverter();
-				Iterator ite = conv.convert(rc.theRule.getFullText());
+				Iterator<String> ite = conv.convert(rc.theRule.getFullText());
 				while(ite.hasNext()){
-					String s = (String)ite.next();
+					String s = ite.next();
 					try {
 						LMNParser lp = new LMNParser(new StringReader(s));
 						Membrane m = lp.parse();
@@ -166,9 +164,8 @@ public class RulesetCompiler {
 		}
 		// 必要ならシステムルールセットに登録
 		boolean is_system_ruleset = false;
-		it = mem.atoms.iterator();
-		while (it.hasNext()) {
-			if (((Atom)it.next()).functor.getName().equals("system_ruleset")) {
+		for(Atom atom : mem.atoms){
+			if(atom.functor.getName().equals("system_ruleset")){
 				is_system_ruleset = true;
 				break;
 			}
