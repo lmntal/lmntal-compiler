@@ -1,0 +1,16 @@
+H=productlist([],M) :- ground(M) | H=[].
+H=productlist([L|Ls],M) :- ground(M) |
+   pl(L,M,H,productlist(Ls,M)).
+
+pl(L,[],H0,H) :- ground(L) | H0=H.
+pl(L,[M|Ms],H0,H) :- ground(L) | H0=[(L,M)|H1], pl(L,Ms,H1,H).
+
+H=map(F,[]) :- ground(F) | H=[].
+H=map((X,Y),[A|As]), $g[X,Y] :- ground($g) |
+   $g[A,Y1], H=[Y1|map((X2,Y2),As)], $g[X2,Y2].
+
+% res=map((X,3+X),[1,2,3,4,5]).
+
+res=map((X,f(X,integer.set(1,4))),productlist([1,2,3],[1,2])).
+Y=f((A,B),N) :- Y=100*A+10*B+N.
+

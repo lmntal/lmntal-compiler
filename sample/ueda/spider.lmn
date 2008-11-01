@@ -1,0 +1,54 @@
+input{
+  edge(d,a).  edge(d,b).   edge(d,c). 
+  edge(d,e).  edge(a,x).   edge(b,y).
+  edge(c,z).  edge(a,b).   edge(y,c).
+}.
+
+input{$e[]}, nodes{@r} :- edges{$e[]}, nodes{$e[],@r}.
+
+nodes{
+  edge($a,$b) :- unary($a), unary($b) | node($a), node($b).
+  node($p), node($q) :- $p==$q | node($p).
+}.
+
+nodes{$p[],@p}/ :- size({$p[],@p},N), main(N).
+
+size({@q}/, N) :- N=0.
+size({node($p),$q,@q}/, N) :- ground($p) | size({$q,@q},N0), N=N0+1.
+
+main($n), edges{$e} :- int($n) | 
+   size($n), subsets($n-1,{$e},Ss), check_spiders(Ss).
+
+check_spiders({}) :- fail.
+check_spiders({{$p},$q}) :- check_spider({$p},R), css2(R,{$q}).
+css2(fail,S) :- check_spiders(S).
+
+check_spider({$p[]},R) :- nodes({$p[]},Ns), size(Ns,N), cs2(N,R,{$p[]}).
+
+nodes({$p},Ns) :-
+  Ns={
+    $p.
+    edge($a,$b) :- unary($a), unary($b) | node($a), node($b).
+    node($p), node($q) :- $p==$q | node($p).
+  }.  
+
+size(N0), cs2(N,{$s,@s},R,{$p}) :- N0=\=N |
+   size(N0), R=fail, fail{size(N),$s,{$p}}.
+size(N0), cs2(N,{$s,@s},R,{$p}) :- N0=:=N | size(N0), R=maybe, maybe{$s,{$p}}.
+
+// choose N elements from a multiset
+subsets(0, {$p[],@p},P) :- P={{}}.
+subsets($n,{@p},P) :- $n>0 | P={}.
+subsets($n,{edge($e1,$e2),$p[],@p},P) :- $n>0, unary($e1), unary($e2) |
+   subsets($n,{$p[],@p},P1),
+   subsets($n-1,{$p[],@p},P2),
+   add(edge($e1,$e2),P2,{},P3),
+   P=union(P1,P3).
+
+add(edge($e1,$e2),{},P0,P) :- unary($e1), unary($e2) | P=P0.
+add(edge($e1,$e2),{{$s},$p},{$q[]},P) :- unary($e1), unary($e2) |
+   add(edge($e1,$e2),{$p},{{edge($e1,$e2),$s},$q[]},P).
+
+union({$a},{$b},U) :- U = {$a,$b}.
+
+// subsets(3,{elem(a),elem(b),elem(c),elem(d)},res).

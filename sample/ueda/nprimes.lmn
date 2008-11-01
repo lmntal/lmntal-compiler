@@ -2,8 +2,11 @@
    Kazunori Ueda, 2004-12-16
 */
 
-gen(300).
+/*
+gen(50).
 gen(N) :- N>=2 | n(N), gen(N-1).
 gen(N) :- N<2  | .
+*/
+n=integer.set(2,50).
 
 n(M), n(N) :- M mod N =:= 0 | n(N).

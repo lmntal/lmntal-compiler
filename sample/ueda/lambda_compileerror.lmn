@@ -1,0 +1,161 @@
+/*
+-----------------------------------------------------------
+Lambda calculus (nondeterministic, flat version)
+                                       Kazunori Ueda
+                                       2008-01-13, 22:00
+-----------------------------------------------------------
+*/
+
+{ module(lambda).
+
+lambda.use :- next_color(1).
+get_new_color($p,N1,N2), next_color($n) :- int($p), int($n), $n1=:=$n+1 |
+    N1= -$n, N2=$n, color_count(-$n,1),
+    super_sub($p,$n), next_color($n1).
+/* note: color_count must be explicitly updated by the client */
+
+beta@@
+  H=apply(lambda(A, B), C) :- H=B, A=C.
+l_c@@
+  lambda(A,B)=cp(C,D,L) /*, {+L,$q}*/ :-
+    get_new_color(L,L1,L2),
+    C=lambda(E,F), D=lambda(G,H), A=cp(E,G,L1), B=cp(F,H,L2).
+/*    {{+L1},+L2,sub(S)}, {super(S),$q}. */
+a_c@@
+  apply(A,B)=cp(C,D,L) /*, {+L,$q}*/ :- int(L) /* , L1=:=L, L2=:=L */ |
+    C= apply(E,F), D= apply(G,H), A=cp(E,G,L), B=cp(F,H,L).
+/*    {+L1,+L2,$q}. */
+
+c_c1@@
+  cp(A,B,L1)=cp(C,D,L2), color_count(L3,$m) /*, {{+L1,$p},+L2,$q}*/ :-
+    L1=:= -L2, L3=:=L1, int($m) |
+    color_count(L3,$m-1), A=C, B=D /*, {{$p},$q} */.
+c_c2@@
+  cp(A,B,L1)=cp(C,D,0), color_count(L5,$m)
+  /*, {{+L1,$p},$q}, {+L2,top,$r} */ :-
+    int(L1), L5=:=L1, int($m), $m1=:=$m+1 /* , L3=:=L1, L4=:=L1 */ |
+    color_count(L5,$m1),
+    C=cp(E,F,L1), D=cp(G,H,L1), /* {{+L3,+L4,$p},$q}, */
+    A=cp(E,G,0), B=cp(F,H,0) /*, {+L5,+L6,top,$r}*/.
+f_c@@
+  fv($u)=cp(A,B,L) /*, {+L,$q}*/ :- unary($u), int(L) |
+    A=fv($u), B=fv($u) /*, {$q}*/.
+
+l_r@@  lambda(A,B)=rm :- A=rm, B=rm.
+a_r@@  apply(A,B)=rm :- A=rm, B=rm.
+c_r1@@ cp(A,B,L)=rm /*, {+L,$q}*/ :- int(L) | A=rm, B=rm /*, {$q}*/.
+c_r2@@ cp(A,B,L)=rm, color_count(L2,$m) /*, {{+L,$p},$q}*/ :-
+         int(L), L2=:=L, int($m) |
+         color_count(L2,$m-1), A=rm, B=rm /*, {{$p},$q}*/.
+c_r3@@ A=cp(B,rm,L) /*, {+L,$p}*/ :- int(L) | A=B /*, {$p}*/.
+c_r4@@ A=cp(rm,B,L) /*, {+L,$p}*/ :- int(L) | A=B /*, {$p}*/.
+r_r@@  rm=rm :- .
+f_r@@  fv($u)=rm :- unary($u) | .
+
+promote@@ /* {{},$p,sub(S)}, {$q,super(S)} :- {$p,$q}.*/
+       color_count(L1,0), cp(A,B,L2), super_sub($p,$c) :-
+       L1=:= -L2, L2=:=$c, int($p) |
+       color_count(L1,0), cp(A,B,$p), color_count(L1,0), super_sub($p,$c).
+c2c@@  A=cp(B,C) :- A=cp(B,C,0) /*, {+L,top}*/.
+/* gc@@   {top} :- . */
+}.
+
+// examples
+/*
+{ lambda.use. example1.
+  // (lambda y . y y) a => a a
+  r=apply(lambda(cp(Y0,Y1), apply(Y0,Y1)), fv(a)).
+}.
+
+{ lambda.use. example2.
+  // (lambda f . (lambda x . f (f x) ) ) succ 0
+  r=apply(apply(lambda(cp(F0,F1),
+                lambda(X, apply(F0,apply(F1,X)))),
+    fv(succ)), fv(0)).
+  // H=apply(succ, I) :- int(I) | H=I+1.
+}.
+
+{ lambda.use. example3.
+  // (lambda mul . (lambda sqr . sqr 5) (lambda x . mul x x)) 
+  //     (lambda x . (lambda y . * x y) ) 
+  r=apply(
+     lambda(Mul,
+       apply(lambda(Sqr, apply(Sqr,fv(5))),
+         lambda(cp(X0,X1), apply(apply(Mul,X0),X1)))),
+     lambda(A, lambda(B, fv('*'(A,B))))).
+}. 
+*/
+{ lambda.use. example4.
+  // exponentiation of natural numbers in Church encoding
+  // n is encoded as f^n x
+  // then n^m is encoded as lambda n m -> m n
+
+  N=zero  :- N=lambda(rm, lambda(X, X)).
+  N=one   :- N=lambda(F, lambda(X, apply(F,X))).
+  N=two   :- N=lambda(cp(F0,F1), lambda(X,
+               apply(F0,apply(F1,X)))).
+  N=three :- N=lambda(cp(F0,cp(F1,F2)), lambda(X,
+               apply(F0,apply(F1,apply(F2,X))))).
+// r=apply(apply(apply(two, three),fv(succ)),fv(0)).
+// r=apply(apply(apply(apply(two, two),three),succ),0).
+// r=apply(apply(two, two),three).
+r=apply(two, two).
+// r=apply(two, three).
+// r=apply(apply(apply(two,apply(two,three)),fv(succ)),fv(0)).
+// r=apply(two,apply(two,three)).
+H=apply(fv(succ), fv(I)) :- int(I) | H=fv(I+1).
+}.
+
+/*
+{ lambda.use. example5.
+  // taken from Ian Mackie, RTA 2004
+  r=lambda(X, lambda(Y,
+      apply(
+        lambda(cp(Z1,Z2), apply(Z1, apply(Z2,Y))),
+        lambda(W, apply(X,W)))))
+}. */
+
+
+/*
+{ lambda.use. example10.
+  // taken from Asperti book, 1997, Fig. 3.1
+  r = lambda(X, lambda(Y, 
+        apply(lambda(F, 
+          apply(
+            lambda(cp(H0,H1), apply(H0, lambda(P, apply(H1, lambda(rm, P))))),
+            lambda(L,apply(apply(apply(F,lambda(N,apply(L,N))),X),Y)))),
+          lambda(cp(G0,G1),lambda(U,lambda(V,
+            apply(apply(G0,U),apply(G1,V)))))))).
+}. 
+
+{ lambda.use. example11.
+  // taken from Asperti book, 1997, Fig. 3.1
+  r = lambda(X, lambda(Y, 
+        apply(lambda(F, 
+          apply(
+            lambda(cp(H0,H1), apply(H0, lambda(rm, apply(H1, lambda(Q, Q))))),
+            lambda(L,apply(apply(apply(F,lambda(N,apply(L,N))),X),Y)))),
+          lambda(cp(G0,G1),lambda(U,lambda(V,
+            apply(apply(G0,U),apply(G1,V)))))))).
+}. 
+
+
+{ lambda.use. example12.
+  // taken from Asperti book, 1997, Fig. 3.1
+  r = lambda(F, 
+          apply(
+            lambda(cp(H0,H1), apply(H0, lambda(P, apply(H1, lambda(rm, P))))),
+            lambda(L,apply(apply(apply(F,lambda(N,apply(L,N))),fv(x)),fv(y))))).
+}. 
+
+{ lambda.use. example13.
+  // taken from Asperti book, 1997, Fig. 3.1
+  r = lambda(F, 
+          apply(
+            lambda(cp(H0,H1), apply(H0, lambda(rm, apply(H1, lambda(Q, Q))))),
+            lambda(L,apply(apply(apply(F,lambda(N,apply(L,N))),fv(x)),fv(y))))).
+}.
+*/
+
+{$p[A,B,C|*D], A=cp(B,C,L), {+L,top,$q},@p}/ :-
+    {$p[A,B,C|*D], A=c(B,C), {top,$q},@p}.

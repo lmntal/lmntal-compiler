@@ -1,0 +1,38 @@
+{ tocnf.
+  R=imp(A,B) :- R=or(not(A),B).
+  R=iff(A,B) :- ground(A), ground(B) | R=and(imp(A,B),imp(B,A)).
+
+  R=not(and(P,Q)) :- R=or(not(P),not(Q)).
+  R=not(or(P,Q)) :- R=and(not(P),not(Q)).
+  R=or(and(A,B),C) :- ground(C) | R=and(or(A,C),or(B,C)).
+  R=or(A,and(B,C)) :- ground(A) | R=and(or(A,B),or(A,C)).
+
+  wff=iff(1,and(11,13)).
+% iff(b,and(not(bb),not(aa))).
+% iff(c,or(aa,ee)).
+% iff(d,or(bb,ee)).
+% iff(e,or(cc,dd)).
+}.
+
+{ tocnf. $p[]. @p}/ :- {tolist. $p[].
+  wff=W :- toclauses(W,list,[]).
+  toclauses(and(A,B),H0,H2) :- toclauses(A,H0,H1), toclauses(B,H1,H2).
+  toclauses(or(A,B),H0,H) :- H0=[C|H], clause(or(A,B),C,[]).
+  toclauses(not(A),H0,H) :- H0=[[-A]|H].
+  toclauses(A,H0,H) :- unary(A) | H0=[[A]|H].
+  clause(or(A,B),H0,H2) :- clause(A,H0,H1), clause(B,H1,H2).
+  clause(not(A),H0,H) :- H0=[-A|H].
+  clause(A,H0,H) :- H0=[A|H].
+}.
+
+{ tolist. list=$p[]. @p}/ :- io.use, printclauses($p[],H,[]), rew=io.lprint(H).
+  printclauses([],H0,H2) :- H0=H2.
+  printclauses([C|Cs],H0,H2) :- printclause(C,H0,H1), printclauses(Cs,H1,H2).
+  printclause([],H0,H) :- H0=[" 0\n"|H].
+  printclause([L|Ls],H0,H2) :- H0=[" ",L|H1], printclause(Ls,H1,H2).
+
+
+
+
+
+

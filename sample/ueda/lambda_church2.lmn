@@ -1,0 +1,127 @@
+/*
+-----------------------------------------------------------
+Lambda calculus (nondeterministic, flat version)
+with atomic color promotion
+                                       Kazunori Ueda
+                                       2008-01-14, 12:00
+-----------------------------------------------------------
+*/
+
+next_color(1).
+color_count(0,0).
+
+gnc@@
+get_new_color($p,N1,N2), next_color($n) :-
+    int($p), int($n), $n1=$n+1, $nn=-$n |
+    N1= $nn, N2=$n, color_count($nn,1), color_count($n,1),
+    super_sub($p,$n), next_color($n1).
+/* note: color_count must be explicitly updated by the client */
+
+beta@@
+  H=apply(lambda(A, B), C) :- H=B, A=C.
+l_c@@
+  lambda(A,B)=cp(C,D,L), color_count(L3,$m) /*, {+L,$q}*/ :-
+    L3=:=L, int($m), $m1=$m-1 |
+    color_count(L3,$m1), get_new_color(L,L1,L2),
+    C=lambda(E,F), D=lambda(G,H), A=cp(E,G,L1), B=cp(F,H,L2).
+/*    {{+L1},+L2,sub(S)}, {super(S),$q}. */
+a_c@@
+  apply(A,B)=cp(C,D,L), color_count(L3,$m) /*, {+L,$q}*/ :-
+    int(L), L3=:=L, int($m), $m1=$m+1 /* , L1=:=L, L2=:=L */ |
+    color_count(L3,$m1),
+    C= apply(E,F), D= apply(G,H), A=cp(E,G,L), B=cp(F,H,L).
+/*    {+L1,+L2,$q}. */
+
+c_c1@@
+  cp(A,B,L1)=cp(C,D,L2), color_count(L3,$m), color_count(L4,$m2)
+  /*, {{+L1,$p},+L2,$q}*/ :-
+    L1=:= -L2, L3=:=L1, L4=:=L2, int($m), int($m2), $m1=$m-1, $m3=$m2-1 |
+    color_count(L3,$m1), color_count(L4,$m3), A=C, B=D /*, {{$p},$q} */.
+c_c2@@
+  cp(A,B,L1)=cp(C,D,0), color_count(L5,$m), color_count(0,$m2)
+  /*, {{+L1,$p},$q}, {+L2,top,$r} */ :-
+    int(L1), L5=:=L1, int($m), int($m2), $m1=$m+1, $m3=$m2+1
+    /* , L3=:=L1, L4=:=L1 */ |
+    color_count(L5,$m1), color_count(0,$m3),
+    C=cp(E,F,L1), D=cp(G,H,L1), /* {{+L3,+L4,$p},$q}, */
+    A=cp(E,G,0), B=cp(F,H,0) /*, {+L5,+L6,top,$r}*/.
+f_c@@
+  fv($u)=cp(A,B,L), color_count(L2,$m) /*, {+L,$q}*/ :-
+    unary($u), int(L), L2=:=L, int($m), $m1=$m-1 |
+    color_count(L2,$m1),
+    A=fv($u), B=fv($u) /*, {$q}*/.
+
+l_r@@  lambda(A,B)=rm :- A=rm, B=rm.
+a_r@@  apply(A,B)=rm :- A=rm, B=rm.
+c_r1@@ cp(A,B,L)=rm, color_count(L2,$m) /*, {+L,$q}*/ :-
+         int(L), L2=:=L, int($m), $m1=$m-1 |
+         color_count(L2,$m1), A=rm, B=rm /*, {$q}*/.
+c_r2@@ cp(A,B,L)=rm, color_count(L2,$m) /*, {{+L,$p},$q}*/ :-
+         int(L), L2=:=L, int($m), $m1=$m-1 |
+         color_count(L2,$m1), A=rm, B=rm /*, {{$p},$q}*/.
+c_r3@@ A=cp(B,rm,L), color_count(L2,$m) /*, {+L,$p}*/ :-
+         int(L), L2=:=L, int($m), $m1=$m-1 |
+         color_count(L2,$m1), A=B /*, {$p}*/.
+c_r4@@ A=cp(rm,B,L), color_count(L2,$m) /*, {+L,$p}*/ :-
+         int(L), L2=:=L, int($m), $m1=$m-1 |
+         color_count(L2,$m1), A=B /*, {$p}*/.
+r_r@@  rm=rm :- .
+f_r@@  fv($u)=rm :- unary($u) | .
+
+promote@@ /* {{},$p,sub(S)}, {$q,super(S)} :- {$p,$q}.*/
+       color_count(L1,0), Z=cp(A,B,L2), super_sub($p,$c),
+       color_count(L3,$m), color_count(L4,$m2) :-
+       L1=:= -L2, L3=:=L2, L2=:=$c, L4=:=$p,
+       int($m), $m1=$m-1, int($m2), $m3=$m2+1 |
+       color_count(L1,0), Z=cp(A,B,$p), super_sub($p,$c),
+       color_count(L3,$m1), color_count($p,$m3).
+c2c@@  A=cp(B,C), color_count(0,$m) :- int($m), $m1=$m+1 |
+         color_count(0,$m1), A=cp(B,C,0) /*, {+L,top}*/.
+/* gc@@   {top} :- . */
+
+
+// examples
+/*
+{ lambda.use. example1.
+  // (lambda y . y y) a => a a
+  r=apply(lambda(cp(Y0,Y1), apply(Y0,Y1)), fv(a)).
+}.
+
+{ lambda.use. example2.
+  // (lambda f . (lambda x . f (f x) ) ) succ 0
+  r=apply(apply(lambda(cp(F0,F1),
+                lambda(X, apply(F0,apply(F1,X)))),
+    fv(succ)), fv(0)).
+  // H=apply(succ, I) :- int(I) | H=I+1.
+}.
+
+{ lambda.use. example3.
+  // (lambda mul . (lambda sqr . sqr 5) (lambda x . mul x x)) 
+  //     (lambda x . (lambda y . * x y) ) 
+  r=apply(
+     lambda(Mul,
+       apply(lambda(Sqr, apply(Sqr,fv(5))),
+         lambda(cp(X0,X1), apply(apply(Mul,X0),X1)))),
+     lambda(A, lambda(B, fv('*'(A,B))))).
+}. 
+*/
+
+  // exponentiation of natural numbers in Church encoding
+  // n is encoded as f^n x
+  // then n^m is encoded as lambda n m -> m n
+
+  N=zero  :- N=lambda(rm, lambda(X, X)).
+  N=one   :- N=lambda(F, lambda(X, apply(F,X))).
+  N=two   :- N=lambda(cp(F0,F1), lambda(X,
+               apply(F0,apply(F1,X)))).
+  N=three :- N=lambda(cp(F0,cp(F1,F2)), lambda(X,
+               apply(F0,apply(F1,apply(F2,X))))).
+// r=apply(apply(apply(two, three),fv(succ)),fv(0)).
+// r=apply(apply(apply(apply(two, two),three),succ),0).
+// r=apply(apply(two, two),three).
+// r=apply(two, two).
+// r=apply(three, two).
+r=apply(two, three).
+// r=apply(apply(apply(two,apply(two,three)),fv(succ)),fv(0)).
+// r=apply(two,apply(two,three)).
+H=apply(fv(succ), fv(I)) :- int(I) | H=fv(I+1).

@@ -1,0 +1,27 @@
+VarUnify @@
+  {name(_UName0),$e0}, {name(_UName1),$e1} :- _UName0=_UName1 |
+      {name(_UName0),$e0,$e1}.
+VarDeclare @@
+  H=var(_UName) :- H=v({name(_UName)}).
+
+Reflexivity @@
+  v(X0) =< v(X1), {+X0,+X1,$e} :- {$e}.
+Antisymmetry @@
+  v(X0) =< v(Y0), v(Y1) =< v(X1), {+X0,+X1,$e0}, {+Y0,+Y1,$e1} :-
+      {$e0, $e1}.
+Transitivity @@
+  v(X0) =< v(Y0), v(Y1) =< v(Z0),
+  {name(_UX),+X0,$e0},
+  {name(_UY),+Y0,+Y1,$e2},
+  {name(_UZ),+Z0,$e1} :- uniq(_UX,_UY,_UZ) |
+      v(X0) =< v(Y0), v(Y1) =< v(Z0), v(NX) =< v(NZ),
+      {name(_UX),+X0,+NX,$e0},
+      {name(_UY),+Y0,+Y1,$e2}, 
+      {name(_UZ),+Z0,+NZ,$e1}.
+
+% var.use.
+
+var(a) =< var(b).
+var(b) =< var(c).
+var(c) =< var(a).
+

@@ -1,0 +1,23 @@
+cell2list({},L) :- L=[].
+cell2list({element($e),$p},L0) :- ground($e) |
+    L0=[element($e)|L], cell2list({$p},L).
+
+list2cell(
+  [element(a),element(b),element(c),element(d),element(e)], C).
+// cell2list(C,res).
+
+list2cell(L,C) :- list2cell(L,{},C).
+list2cell([],C0,C) :- C=C0.
+list2cell([element($e)|Es],{$p},C) :- ground($e) |
+    list2cell(Es,{element($e),$p},C).
+
+/*
+factory{ arrow($x,$y), $p, @p } :- unary($x), unary($y) |
+  f{arrow($x,$y),path([$x|$y]),$p,@p}.
+
+f{path(P),$p,@p} :- 
+    \+($p={path([$x,$y]),$q[|*Z]}) |
+    factory{ arrow($x,$y), $p, @p, candidate([$x,$y]) }.
+*/
+
+

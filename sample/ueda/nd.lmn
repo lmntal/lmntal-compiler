@@ -1,0 +1,29 @@
+// nd.exec({{r([a,a]). a(X) :- b(X). r([b,b]) :- r([a,a]).}*}).
+// nd.exec({{a. a:-b. a:-c. b:-c.}*}).
+// nd.exec({{a, (a:-a)}*}).
+// nd.exec({{r=1+2+3}* }).
+
+/*
+nd.exec({{
+c(X010,Y010,X00,Y00 ), c(X02,n,X010,Y10),
+c(n,   Y02, X10,Y010) :-
+        c(X01,Y01,X00,Y00), c(X02,Y11,X01,Y10),
+        c(X11,Y02,X10,Y01), c(n,  n,  X11,Y11).
+
+c(A,E,n,n),c(B,n,A,n),c(C,n,B,n),c(D,n,C,n),c(n,n,D,n),
+c(n,G,n,E),
+c(n,H,n,G),
+c(n,I,n,H),
+c(n,n,n,I).}* }).
+*/
+
+// nd.exec({{r([a,a,a,a]). a(X) :- b(X).}*}).
+// r([a,a,a,a]). a(X) :- b(X).
+
+// nd.exec({{
+append(a,b,[1,2,3,4,5]).
+append(X,Y,Z) :- X=[], Y=Z.
+append(X0,Y,[A|Z]) :- X0=[A|X], append(X,Y,Z).
+// }*}).
+
+// X0=[A|X1] :- uniq(A) | X0=[A], r=X1.

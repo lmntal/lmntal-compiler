@@ -1,0 +1,37 @@
+input{
+   arrow(a,b). arrow(b,c). arrow(c,c). arrow(a,d). arrow(c,a). arrow(c,b).
+}.
+
+factory{
+   arrows{{start(a)}, {start(b)}, {start(c)}, {start(d)}}.
+   paths{
+      path([$x|$xs]) :- unary($x), ground($xs) | member($x,$xs,[$x|$xs]).
+      member($x,[],          Rs) :- unary($x) | open(Rs).
+      member($x,[$y],        Rs) :- $x==$y | closed_rev(Rs,[]).
+         closed_rev([],    Ys) :- closed(Ys).
+         closed_rev([X|Xs],Ys) :- closed_rev(Xs,[X|Ys]).
+      member($x,[$y,$y2|$ys],Rs) :- $x==$y, unary($y2), ground($ys) |
+         lasso_rev(Rs).
+      member($x,[$y|Ys],     Rs) :- $x\=$y | member($x,Ys,Rs).
+   }.
+
+   doing($x0), arrows{{arrow($x,$y),$p},$s}, paths{$q,@q} :-
+      $x0==$x, uniq($x,$y) |
+      doing($x0), arrows{{arrow($x,$y),$p},$s}, paths{path([$y,$x]),$q,@q}.
+   arrows{{arrow($x0,$y),$p},$s}, paths{open([$x|$xs]),$q,@q} :-
+      $x0==$x, uniq($y,$x,$xs) |
+      arrows{{arrow($x0,$y),$p},$s}, 
+      paths{open([$x|$xs]), path([$y,$x|$xs]),$q,@q}.
+}.
+
+input{arrow($x0,$y),$p}, factory{arrows{{start($x),$q},$s},$r,@r} :-
+   $x0==$x, unary($y) |
+   input{$p}, factory{arrows{{start($x),arrow($x0,$y),$q},$s},$r,@r}.
+
+input{}, factory{$q, @q} :- factory{pausing, $q, @q}.
+factory{pausing, arrows{}, paths{$p,@p},@q}/ :-
+   output{ $p, (open(L):-ground(L)|), (lasso_rev(L):-ground(L)|) }.
+factory{pausing, arrows{{start($x),$p},$s}, $q, @q} :- unary($x) |
+   factory{doing($x), arrows{{start($x),$p},$s}, $q, @q}.
+factory{doing($x), arrows{{start($y),$p[]},$s}, $q, @q}/ :- $x==$y |
+   factory{pausing, arrows{$s}, $q, @q}.  // discards $p[]

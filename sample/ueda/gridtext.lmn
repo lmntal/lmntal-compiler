@@ -1,0 +1,114 @@
+/*
+NAME
+	Gridtext module
+
+SYNOPSIS
+	gridtext.gridtext
+	
+AUTHOR
+	Kazunori Ueda
+
+HISTORY
+	2004/02/11(Wed)
+
+*/
+
+
+{
+module(gridtext).
+
+[:/*inline_define*/ import java.io.*;:].
+
+/* convert a textfile into a list of atoms representing lines */
+gridtext.stdin(X,Y) :- [:/*inline*/
+   try {
+      BufferedReader reader =
+         new BufferedReader(new InputStreamReader(System.in));
+//      AbstractMembrane mem = me.getMem(); 
+//      me.dequeue();
+      mem.removeAtom(me);
+      String s = reader.readLine();
+      if (s == null) mem.unifyAtomArgs(me, 0, me, 1);
+      else {
+            Atom a0 = mem.newAtom(new SymbolFunctor(s, 1));
+            Atom current = mem.newAtom(new SymbolFunctor(".", 3)); 
+            mem.newLink(current, 0, a0, 0);
+            mem.relinkAtomArgs(current, 2, me, 0);
+	    while ((s = reader.readLine()) != null) {
+	      Atom a = mem.newAtom(new SymbolFunctor(s, 1));
+	      Atom cons = mem.newAtom(new SymbolFunctor(".", 3));
+	      mem.newLink(cons, 0, a, 0);
+	      mem.newLink(cons, 2, current, 1);
+	      current = cons;
+	    }
+	    mem.relinkAtomArgs(current, 1, me, 1);
+       }
+       reader.close();
+   } catch (IOException e) {
+       System.out.println(e);
+   }
+:](X,Y).
+
+/* expand an atom into a circular list of characters */
+gridtext.expand(X,Y), $p[X] :- unary($p)  | [:/*inline*/ 
+
+   me.setName("expanded");
+
+//   AbstractMembrane mem = me.getMem(); 
+   Atom target = me.nthAtom(0);
+   String s = target.toString();
+//   target.dequeue();
+   mem.removeAtom(target);
+   Atom head = mem.newAtom(new SymbolFunctor("string", 3));
+   mem.newLink(head, 0, head, 1);
+   mem.newLink(me, 0, head, 2);
+   int n = s.length();
+   if (n != 0) {
+     Atom a0 = mem.newAtom(new SymbolFunctor(s.substring(0,1), 1));
+     Atom current = mem.newAtom(new SymbolFunctor("..", 3));
+     mem.newLink(current, 0, a0, 0);
+     mem.relinkAtomArgs(current, 2, head, 1);
+     for (int i = 1; i < n; i++) {
+       Atom a = mem.newAtom(new SymbolFunctor(s.substring(i,i+1), 1));
+       Atom cons = mem.newAtom(new SymbolFunctor("..", 3));
+       mem.newLink(cons, 0, a, 0);
+       mem.newLink(cons, 2, current, 1);
+       current = cons;
+     }
+     mem.newLink(current, 1, head, 1);
+   }
+:](X,Y), $p[X].
+
+/* main program -- read a textfile from stdin and build a 2D grid (mesh) 
+   of one-character atoms corresponding to the textfile */
+gridtext.gridtext :-
+   gridtext.stdin(X0,Y), gridtext.expand_line(X0,X), gridtext.ans(X,Y).
+
+gridtext.expand_line(X,X) :- .
+gridtext.expand_line([L|Ls],Xs0) :-
+    Xs0 = [gridtext.expand(L)|Xs], gridtext.expand_line(Ls,Xs). 
+
+gridtext.ans(Z,X), gridtext.expand_line(X,Y) :- gridtext.ans(Z,Y).
+
+string(H,T,X), expanded(X,Y) :- n(T), H=Y.
+
+'..'(Val,East,West) :- q(Val,East,West,n,n).
+
+/* creating a 2-D grid */
+gridtext.ans(A0,A3),
+'.'(X0,A1,A0), q(V0,E0,X0,N,n), 
+'.'(X1,A2,A1), q(V1,E1,X1,n,S) :-
+gridtext.ans(A0,A3),    q(V0,E0,n, N,M),
+'.'(X1,A2,A0), q(V1,E1,X1,M,S).
+
+gridtext.ans(A0,A1), '.'(X,A1,A0) :- n(X).
+
+q(V00,W0,WW0,N0,M0), q(V0,E0,W0,N,n), 
+q(V11,W1,WW1,M0,S0), q(V1,E1,W1,n,S) :-
+  q(V00,W0,WW0,N0,M0), q(V0,E0,W0,N,M), 
+  q(V11,W1,WW1,M0,S0), q(V1,E1,W1,M,S).
+
+}.
+
+res=gridtext.expand("this is a pen.").
+

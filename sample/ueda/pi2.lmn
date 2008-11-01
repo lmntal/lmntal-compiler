@@ -1,0 +1,8 @@
+  snd@@ snd({$y[|*V]},X) :- {$y[|*V], m(X)}.
+  get@@ get({m(X),$y[|*V]},Z), {$body[Z|*V]} :- {$y[|*V]}, $body[X|*V].
+  cp@@ {name(N),$p[N|*Y],+Z}, Z=cp(Z0,Z1) :- {name(N),$p[N|*Y],+Z0,+Z1}.
+  rm@@ {name(N),$p[N|*Y],+Z}, Z=rm :- {name(N),$p[N|*Y]}.
+
+  (get(A0,Z), {get(B0,Y), {snd(Z,Y)}}).
+  snd(A1,C).  snd(B1,D).
+  {name(a),+A0,+A1}, {name(b),+B0,+B1}, {name(c),+C}, {name(d),+D}.

@@ -43,6 +43,7 @@ u_r@@ U=rm      :- unary(U) | .
   r=apply(lambda(cp(Y0,Y1), apply(Y0,Y1)), a).
 }
 
+/*
 { lambda.use. example2.
   // (lambda f . (lambda x . f (f x) ) ) succ 0
   r=apply(apply(lambda(cp(F0,F1),
@@ -77,4 +78,4 @@ u_r@@ U=rm      :- unary(U) | .
   r=apply(apply(apply(n(4), n(3)), s), 0).  
   H=apply(s, I) :- int(I) | H=I+1.
  }
- 
+ */

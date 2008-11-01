@@ -1,0 +1,17 @@
+or=r(integer.set(1,3),[3,4],integer.set(1,2)).
+
+r1@@ H=r(R,[],N) :- int(R), int(N) | H=[].
+r2@@ H=r(R,[C|Cs],N) :- int(R), int(C), int(N) | H=[C|r(R,Cs,N)].
+
+r3@@ or(L) :- conv(L,R), or_spaced(R).
+r4@@ conv([],R):- R=[0,"\n"].
+% conv([X|Xs],Ys0) :- Ys0=[X," "|Ys], conv(Xs,Ys).
+r5@@ conv([X|Xs],Ys0) :- Ys0=[X|Ys], conv(Xs,Ys).
+
+io.use.
+res(done).
+r6@@ res(done), or_spaced(R) :- res=io.lprint(R).
+% or_spaced(R) :- ground(R) | ors, res=done.
+% or_spaced(R) :- ors(R), res.
+% or(R) :- end(R), res.
+

@@ -1,0 +1,32 @@
+{ module(set).
+
+// compute S U {e} as a set operation
+set.add(E,S,U) :- set.a(E,S,{},U).
+set.a($x,{},{$s[]},U) :- ground($x) | U={e($x),$s[]}.
+set.a($x,{e($y),$s0[]},U0,U) :- $x=$y | set.a($x,{$s0[]},U0,U).
+set.a($x,{e($y),$s0[]},{$s[]},U) :- $x\=$y | u3($x,{$s0[]},{e($y),$s[]},U).
+
+// membership test
+set.in($a,{},R) :- ground($a) | R=false.
+set.in($a,{e($b),$p[]},R) :- $a=$b | R=true.
+set.in($a,{e($b),$p[]},R) :- $a\=$b | set.in($a,{$p[]},R).
+
+// nonmembership test
+set.notin($a,{},R) :- ground($a) | R=true.
+set.notin($a,{e($b),$p[]},R) :- $a=$b | R=false.
+set.notin($a,{e($b),$p[]},R) :- $a\=$b | set.notin($a,{$p[]},R).
+
+/* (old version)
+add($e,{$s[]},U) :- ground($e) |
+   in($e,{$s[]},R), u2(R,$e,{$s[]},U).
+
+u2(true,$e,S,U) :- ground($e) | U=S.
+u2(false,$e,{$s[]},U) :- ground($e) | U={e($e),$s[]}.
+*/
+
+}.
+
+set.notin(e,{e(a),e(b),e(c),e(d),e(e)},res).
+
+
+

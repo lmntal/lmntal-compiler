@@ -1,0 +1,3 @@
+leq(X,Y1), leq(Y2,Z):- Y1=Y2, uniq(X,Y1,Y2,Z) |
+   leq(X,Y1), leq(Y2,Z), leq(X,Z).
+leq(a,b), leq(b,c).

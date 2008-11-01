@@ -1,0 +1,5 @@
+ { module(acc).
+   acc.add(A),   acc.value(N) :- acc.value(A+N).
+   acc.get(Res), acc.value(N) :- int(N) | Res=N, acc.value(N).
+   acc.new                    :- acc.value(0) }.
+ { acc.new, acc.add(3), acc.add(4), acc.get(N) }

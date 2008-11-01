@@ -1,0 +1,19 @@
+n(integer.set(1,9), integer.set(1,9)).
+n(A,B) :- n(100*A+10*B).
+n(A) :- int(A) | or([A+1,A+2,A+3,A+4,A+5,A+6,A+7,A+8,A+9]).
+
+{ diff_table_creating. 
+  diff(integer.set(0,9), integer.set(0,9)).
+  diff(A,B) :- A>=B | .
+}.
+
+{ diff_table_creating, $p, @p }/ :- { diff_table, $p, @p }.
+m(integer.set(1,9), integer.set(1,9)).
+m(A,B) :- m(100*A+10*B).
+m(M), { diff_table, $p[], @p } :- int(M) | { diff_table, $p[], @p },
+    { m(M), $p[]. 
+      m(M), diff(A,B) :- int(M) | m(M), or([-(M+A),-(M+B)]).
+    }.
+{ m(M), $p, @p }/ :- int(M) | $p.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
