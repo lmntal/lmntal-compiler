@@ -298,10 +298,12 @@ public final class Membrane extends QueuedEntity {
 	}
 	/** 指定されたアトムの名前を変える */
 	public void alterAtomFunctor(Atom atom, Functor func) {
-
 		atoms.remove(atom);
 		atom.setFunctor(func);
 		atoms.add(atom);
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(atom);
+		}
 	}
 
 	/** 指定されたアトムをこの膜から除去する。
@@ -489,6 +491,9 @@ public final class Membrane extends QueuedEntity {
 				s.push(l.getAtom().getArg(i));
 			}
 
+//			if(Env.fUNYO){
+//				unyo.Mediator.addRemovedAtom(l.getAtom(), getMemID());
+//			}
 			atoms.remove(l.getAtom());
 			l.getAtom().mem = null;
 			l.getAtom().dequeue();
@@ -539,9 +544,19 @@ public final class Membrane extends QueuedEntity {
 	public final void addMem(Membrane mem) {
 		mems.add(mem);
 		mem.parent = this;
-
 		if(Env.fUNYO){
 			unyo.Mediator.addAddedMembrane(mem);
+			Iterator<Atom> it_a = mem.atomIterator();
+			while (it_a.hasNext()) {
+				Atom a = it_a.next();
+				unyo.Mediator.addAddedAtom(a);
+			}
+//			Iterator<Membrane> it_m = mem.memIterator();
+//			while (it_m.hasNext()) {
+//				Membrane m = it_m.next();
+//				System.out.println("mem"+m);
+//				unyo.Mediator.addAddedMembrane(m);
+//			}
 		}
 	}
 	/** 指定された子膜をこの膜から除去する。
@@ -551,7 +566,10 @@ public final class Membrane extends QueuedEntity {
 		if(Env.LMNgraphic != null && !mem.isRoot())
 			Env.LMNgraphic.removeGraphicMem(mem);
 		if(Env.LMNtool != null && !mem.isRoot())
-			Env.LMNtool.addRemovedMem(mem);		
+			Env.LMNtool.addRemovedMem(mem);	
+		if(Env.fUNYO){
+			unyo.Mediator.addRemovedMembrane(mem.getMemID(), mem.parent.getMemID());
+		}
 		mems.remove(mem);
 		mem.dequeue();
 		mem.parent = null;
@@ -669,8 +687,8 @@ public final class Membrane extends QueuedEntity {
 		link2.getBuddy().set(atom1, pos1);
 		atom1.args[pos1] = link2;
 		if(Env.fUNYO){
-			unyo.Mediator.addModifiedAtom(atom1);
 			unyo.Mediator.addModifiedAtom(link2.getAtom());
+			unyo.Mediator.addModifiedAtom(atom1);
 		}
 	}
 
@@ -684,11 +702,19 @@ public final class Membrane extends QueuedEntity {
 	protected final void relinkLocalAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
 		atom2.args[pos2].getBuddy().set(atom1, pos1);
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(atom1);
+			unyo.Mediator.addModifiedAtom(atom2);
+		}
 	}
 	/** [final] unifyAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。*/
 	protected final void unifyLocalAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
+		if(Env.fUNYO){
+			unyo.Mediator.addModifiedAtom(atom1);
+			unyo.Mediator.addModifiedAtom(atom2);
+		}
 	}
 
 	// ボディ操作5 - 膜自身や移動に関する操作
@@ -714,11 +740,13 @@ public final class Membrane extends QueuedEntity {
 		// 子膜の移動
 		if (srcMem.task.getMachine() instanceof LMNtalRuntime) {
 			// ローカル膜からの移動
-			//Iterator<Membrane> it_m = srcMem.memIterator();
-			//while (it_m.hasNext()) {
-				//Membrane subSrcMem = (Membrane) it_m.next();
-				//addMem(subSrcMem);
-			//}
+			if(Env.fUNYO){
+				Iterator<Membrane> it_m = srcMem.memIterator();
+				while (it_m.hasNext()) {
+					Membrane subSrcMem = (Membrane) it_m.next();
+					unyo.Mediator.addAddedMembrane(subSrcMem);
+				}
+			}
 			mems.addAll(srcMem.mems);
 		}
 		else {
