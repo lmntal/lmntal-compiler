@@ -1,0 +1,94 @@
+{
+module(utf8).
+
+R=c_horizontal_tab :- R=9.
+R=c_line_feed :- R=10.
+R=c_form_feed :- R=12.
+R=c_carriage_return :- R=13.
+R=c_space :- R=32.
+
+
+R=c_dollar :- R=36.
+R=c_apostrophe :- R=39.
+R=c_lparen :- R=40.
+R=c_rparen :- R=41.
+R=c_asterisk :- R=42.
+R=c_plus :- R=43.
+R=c_comma :- R=44.
+R=c_hyphen :- R=45.
+R=c_period :- R=46.
+R=c_slash :- R=47.
+R=c_colon :- R=58.
+R=c_at :- R=64.
+R=c_lbracket :- R=91.
+R=c_rbracket :- R=93.
+R=c_lbrace :- R=123.
+R=c_vert :- R=124.
+R=c_rbrace :- R=125.
+
+R=c_A :- R=65.
+R=c_B :- R=66.
+R=c_C :- R=67.
+R=c_D :- R=68.
+R=c_E :- R=69.
+R=c_F :- R=70.
+R=c_G :- R=71.
+R=c_H :- R=72.
+R=c_I :- R=73.
+R=c_J :- R=74.
+R=c_K :- R=75.
+R=c_L :- R=76.
+R=c_M :- R=77.
+R=c_N :- R=78.
+R=c_O :- R=79.
+R=c_P :- R=80.
+R=c_Q :- R=81.
+R=c_R :- R=82.
+R=c_S :- R=83.
+R=c_T :- R=84.
+R=c_U :- R=85.
+R=c_V :- R=86.
+R=c_W :- R=87.
+R=c_X :- R=88.
+R=c_Y :- R=89.
+R=c_Z :- R=90.
+
+R=c_a :- R=97.
+R=c_b :- R=98.
+R=c_c :- R=99.
+R=c_d :- R=100.
+R=c_e :- R=101.
+R=c_f :- R=102.
+R=c_g :- R=103.
+R=c_h :- R=104.
+R=c_i :- R=105.
+R=c_j :- R=106.
+R=c_k :- R=107.
+R=c_l :- R=108.
+R=c_m :- R=109.
+R=c_n :- R=110.
+R=c_o :- R=111.
+R=c_p :- R=112.
+R=c_q :- R=113.
+R=c_r :- R=114.
+R=c_s :- R=115.
+R=c_t :- R=116.
+R=c_u :- R=117.
+R=c_v :- R=118.
+R=c_w :- R=119.
+R=c_x :- R=120.
+R=c_y :- R=121.
+R=c_z :- R=122.
+
+R=c_0 :- R=48.
+R=c_1 :- R=49.
+R=c_2 :- R=50.
+R=c_3 :- R=51.
+R=c_4 :- R=52.
+R=c_5 :- R=53.
+R=c_6 :- R=54.
+R=c_7 :- R=55.
+R=c_8 :- R=56.
+R=c_9 :- R=57.
+
+}.

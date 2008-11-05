@@ -1,0 +1,335 @@
+%%% LMNtal Parser
+
+utf8.use.
+string.use.
+peg.use.
+
+R=lower :- R={p=p_or([p_char(c_a),
+                      p_char(c_b),
+                      p_char(c_c),
+                      p_char(c_d),
+                      p_char(c_e),
+                      p_char(c_f),
+                      p_char(c_g),
+                      p_char(c_h),
+                      p_char(c_i),
+                      p_char(c_j),
+                      p_char(c_k),
+                      p_char(c_l),
+                      p_char(c_m),
+                      p_char(c_n),
+                      p_char(c_o),
+                      p_char(c_p),
+                      p_char(c_q),
+                      p_char(c_r),
+                      p_char(c_s),
+                      p_char(c_t),
+                      p_char(c_u),
+                      p_char(c_v),
+                      p_char(c_w),
+                      p_char(c_x),
+                      p_char(c_y),
+                      p_char(c_z)])}.
+
+R=upper :- R={p=p_or([p_char(c_A),
+                      p_char(c_B),
+                      p_char(c_C),
+                      p_char(c_D),
+                      p_char(c_E),
+                      p_char(c_F),
+                      p_char(c_G),
+                      p_char(c_H),
+                      p_char(c_I),
+                      p_char(c_J),
+                      p_char(c_K),
+                      p_char(c_L),
+                      p_char(c_M),
+                      p_char(c_N),
+                      p_char(c_O),
+                      p_char(c_P),
+                      p_char(c_Q),
+                      p_char(c_R),
+                      p_char(c_S),
+                      p_char(c_T),
+                      p_char(c_U),
+                      p_char(c_V),
+                      p_char(c_W),
+                      p_char(c_X),
+                      p_char(c_Y),
+                      p_char(c_Z)])}.
+
+R=number :- R={p=p_or([p_char(c_0),
+                      p_char(c_1),
+                      p_char(c_2),
+                      p_char(c_3),
+                      p_char(c_4),
+                      p_char(c_5),
+                      p_char(c_6),
+                      p_char(c_7),
+                      p_char(c_8),
+                      p_char(c_9)])}.
+                                    
+R=hex_number :- R={p=p_or([number,
+                           p_char(c_a),
+                           p_char(c_b),
+                           p_char(c_c),
+                           p_char(c_d),
+                           p_char(c_e),
+                           p_char(c_f),
+                           p_char(c_A),
+                           p_char(c_B),
+                           p_char(c_C),
+                           p_char(c_D),
+                           p_char(c_E),
+                           p_char(c_F)])}.
+
+R=alpha :- R={p=p_or([lower, upper])}.
+R=alpha_num :- R={p=p_or([alpha, number])}.
+R=lowers :- R={p=p_many(lower)}.
+
+
+R=line_terminator :- R={p=p_or([p_string([c_carriage_return, c_line_feed]),
+                               p_char(c_carriage_return),
+                               p_char(c_line_feed),
+                               p_char(c_form_feed)])}.
+R=ws :- R={p=p_many(p_or([line_terminator,
+                          p_char(c_space),
+                          p_char(c_horizontal_tab)]))}.
+
+R=comma :- R={p=p_between(ws, p_char(c_comma), ws)}.
+R=period :- R={p=p_between(ws, p_char(c_period), ws)}.
+R=comma_period :- R={p=p_between(ws, p_or([p_char(c_comma),p_char(c_period)]), ws)}.
+R=lparen :- R={p=p_between(ws, p_char(c_lparen), ws)}.
+R=rparen :- R={p=p_between(ws, p_char(c_rparen), ws)}.
+R=lbrace :- R={p=p_between(ws, p_char(c_lbrace), ws)}.
+R=rbrace :- R={p=p_between(ws, p_char(c_rbrace), ws)}.
+R=lbracket :- R={p=p_between(ws, p_char(c_lbracket), ws)}.
+R=rbracket :- R={p=p_between(ws, p_char(c_rbracket), ws)}.
+R=vert :- R={p=p_between(ws, p_char(c_vert), ws)}.
+R=rule_name_sep :- R={p=p_between(ws, p_string([c_at,c_at]), ws)}.
+R=rule_arrow :- R={p=p_between(ws, p_string([c_colon,c_hyphen]), ws)}.
+R=asterisk :- R={p=p_between(ws, p_char(c_asterisk), ws)}.
+R=dollar :- R={p=p_between(ws, p_char(c_dollar), ws)}.
+
+R=number_name :-
+  R={p=p_or([p_do([p_string([c_0, c_x]),
+                   bind(Int3, p_many(hex_number)),
+                   p_return(int(str_to_int(Int3, 16)))]),
+             p_do([bind(Int2, p_many(number)),
+                   p_char(c_period),
+                   bind(Frac2, p_many(number, 1)),
+                   p_or([p_char(c_E), p_char(c_e)]),
+                   bind(Sign, p_or([p_do([p_char(c_plus), p_return(1)]),
+                                    p_do([p_char(c_hyphen), p_return(-1)])])),
+                   bind(Exp, p_many(number, 1)),
+                   p_return(float(str_to_float(Int2, Frac2, Sign, Exp)))]),
+             p_do([bind(Int, p_many(number)),
+                   p_char(c_period),
+                   bind(Frac, p_many(number, 1)),
+                   p_return(float(str_to_float(Int, Frac)))]),
+             p_do([bind(Int1, p_many(number, 1)),
+                   p_return(int(str_to_int(Int1)))])
+             ])}.
+
+R=atom_name :-
+  R={p=p_or([p_do([bind(H, lower), bind(T, p_many(alpha_num)),
+                   p_return([H|T])]),
+             p_do([p_char(c_apostrophe),
+                   p_char(c_apostrophe),
+                   p_return(string_empty)]),
+             p_do([p_char(c_apostrophe),
+                   bind(Name, p_many_till(p_or([p_do([p_string([c_apostrophe,
+                                                                c_apostrophe]),
+                                                      p_return(c_apostrophe)]),
+                                                p_any]),
+                                          p_do([p_not(p_string([c_apostrophe,
+                                                                c_apostrophe])),
+                                                p_char(c_apostrophe)]))),
+                   p_char(c_apostrophe),
+                   p_return(Name)]),
+             p_do([p_string([c_lbracket, c_colon]),
+                   bind(Name0, p_many_till(p_any, p_string([c_colon, c_rbracket]))),
+                   p_string([c_colon, c_rbracket]),
+                   p_return(Name0)])
+             ])}.
+
+R=link_name :-
+  R={p=p_do([bind(H, upper),
+             bind(T, p_many(alpha_num)),
+             p_return(string_cons(H,T))])}.
+
+R=link :-
+  R={p=p_do([bind(LinkName, link_name),
+             p_return(link(LinkName))]).}.
+
+R=atom(AtomArg) :-
+  R={dup(AtomArg, AtomArg0, AtomArg1), 
+     p=p_or([p_do([bind(Num, number_name), p_return(atom(data, Num))]),
+             list_(AtomArg0),
+             p_do([bind(Name0, atom_name),
+                   bind(OptArgs, p_optional(
+                     p_between(lparen,p_sep_by(AtomArg1, comma), rparen))),
+                   p_return(atom(symbol, Name0, opt_default(OptArgs,[])))])])}.
+
+R=atom :- R=atom(arg).
+R=atom_template :- R=atom(arg_template).
+
+R=list_(Arg) :-
+  R={dup(Arg, Arg0, Arg1),
+     p=p_between(
+          lbracket,
+          p_do([bind(ListEls, p_sep_by(Arg0, comma)),
+                bind(OptListTail, p_optional(p_do([vert, Arg1]))),
+                p_return(list(ListEls, none, opt_default(OptListTail, [])))]),
+          rbracket)}.
+
+R=membrane_name :- R=atom_name.
+
+R=membrane(Ps) :-
+  R={p=p_do([bind(MemName ,p_optional(membrane_name)),
+             lbrace,
+             bind(Procs1, Ps),
+             rbrace,
+             bind(Stable, p_optional(p_char(c_slash))),
+             p_return(membrane(opt_get(MemName), Procs1, is_some(Stable)))])}.
+
+R=membrane :- R={p=membrane(processes_nonterm)}.
+R=membrane_template :- R={p=membrane(process_templates_nonterm)}.
+
+R=rule_name :- R={p=p_or([atom_name, link_name])}.
+
+R=rule :-
+  R={p=p_do([bind(RuleName0, p_optional(
+               p_end_by1(rule_name, rule_name_sep))),
+             bind(Head0, p_sep_by(process_template, comma)),
+             rule_arrow,
+             bind(GuardOpt, p_optional(
+               p_end_by1(guard, vert))),
+             bind(Body0, p_sep_by(process_template, comma)),
+             p_return(rule(RuleName0, Head0, opt_default(GuardOpt,[]), Body0))])}.
+
+R=guard :- R={p=p_sep_by(guard_exp, comma)}.
+  
+R=guard_exp :-
+  R={p=p_do([bind(Name0, atom_name),
+             bind(OptArgs, p_optional(
+               p_between(lparen, p_sep_by(guard_arg, comma), rparen))),
+             p_return(guard_exp(symbol, Name0, opt_default(OptArgs,[])))])}.
+
+R=guard_arg :-
+  R={p=p_or([link,
+             p_do([dollar,
+                   bind(ProcessCtxName1, atom_name),
+                   p_return(process_context(ProcessCtxName1))])])}.
+
+R=rule_context :-
+  R={p=p_do([p_char(c_at),
+             bind(RuleCtxName0, atom_name),
+             p_return(rule_context(RuleCtxName0))])}.
+
+R=process_context :-
+  R={p=p_do([dollar,
+             bind(ProcessCtxName0, atom_name),
+             bind(OptPCEl, p_optional(p_between(
+               lbracket,
+                 p_do([bind(Links0, p_sep_by(link, comma)),
+                       bind(OptBundle,
+                         p_optional(p_seq([vert, asterisk, link_name]))),
+                       p_return(t(Links0, OptBundle))]),
+               rbracket))),
+             p_return(mk_process_context(ProcessCtxName0,
+                                         OptPCEl))])}.
+
+R=mk_process_context(Name, none) :- R=process_context(Name, [], none).
+R=mk_process_context(Name, some(t(Links, Bundle))) :-
+  R=process_context(Name, Links, opt_default(Bundle, none)).
+
+R=process :-
+  R={p=p_or([p_between(lparen, processes, rparen),
+             rule,
+             membrane,
+             atom])}.
+R=process_template :-
+  R={p=p_or([p_between(lparen, p_sep_by(process_template_in,comma), rparen),
+             membrane_template,
+             atom_template,
+             process_context,
+             rule_context
+             ])}.
+R=process_template_in :- R={p=p_or([rule, process_template])}.
+
+R=processes :- R={p=p_sep_by(process, comma)}.
+R=processes_nonterm :- R={p=p_sep_end_by(process, comma_period)}.
+R=process_templates :- R={p=p_sep_by(process_template, comma)}.
+R=process_templates_nonterm :-
+  R={p=p_sep_end_by(process_template, comma_period)}.
+
+R=arg :- R={p=p_or([link, membrane, atom])}.
+R=arg_template :- R={p=p_or([link, membrane_template, atom_template])}.
+
+// result=parse_list(number_name, [c_0, c_x, c_A, c_0, c_B]).
+// -> result(int(2571))
+// result=parse_list(number_name, [50,49,c_period,50,48,49,c_e,c_plus,50]).
+// -> result(float(2120.1))
+// result=parse_list(number_name, [50,49,c_period,50,48,49]).
+// -> result(float(21.201))
+
+// result=parse_list(p_many({a(number_name)}), [50,49,c_period,50,48,49]).
+// -> result(float(21.201))
+
+// result=parse_list(atom_name, [c_apostrophe, c_apostrophe, 0]).
+// -> result(atom([]))
+
+// result=parse_list(atom_name, [c_apostrophe, 97,c_apostrophe, c_apostrophe, 98,99,c_apostrophe, 0]).
+// -> result([97,39,98,99])
+
+// result=parse_list(atom_name, [c_apostrophe, 97, 98,99,c_apostrophe, 0]).
+// -> result([97,98,99])
+
+// result=parse_list(atom_name, [c_lbracket, c_colon, c_a, c_lbracket, c_colon, c_b, c_colon, c_rbracket]).
+// result([97,91,58,98])
+
+// result=parse_list(p_do([bind(hoge,p_ground(a)), p_ground(a)]), [a,a]).
+// result=parse_list(p_do([p_ground(a), p_ground(b)]), [a,b]).
+
+// result=parse_list(link_name, [c_A, c_b, c_C, c_0,c_plus]).
+// -> result(link([65,98,67,48]))
+
+// result=parse_list(atom, [c_a,c_b,c_c]).
+// -> result(atom(symbol,[97,98,99]))
+
+// result=parse_list(atom, [c_1, c_2]).
+// -> result(atom(data,int(12)))
+
+// result=parse_list(atom, [c_a, c_lparen, c_rparen]).
+// result(oatom(symbol,[97],[]))
+
+// result=parse_list(atom, [c_a, c_lparen, c_A, c_rparen]).
+// -> result(atom(symbol,[97],[[65]]))
+
+// result=parse_list(atom, [c_a, c_lparen, c_A, c_comma, c_B, c_rparen]).
+// result(atom(symbol,[97],[[65],[66]]))
+
+//result=parse_list(atom, [c_a, c_lparen, c_a, c_comma, c_B, c_rparen]).
+// -> result(atom(symbol,[97],[atom(symbol,[97],[]),link([66])]))
+
+// result=parse_list(atom, [c_a, c_lparen, c_lbrace, c_rbrace, c_comma, c_B, c_rparen]).
+// -> result(atom(symbol,[97],[membrane(none,[atom(symbol,[97],[])]),link([66])]))
+
+// result=parse_list(membrane, [c_a, c_b, c_lbrace, c_a, c_rbrace, c_comma, c_B, c_rparen]).
+// -> result(membrane([97,98],[atom(symbol,[97],[])]))
+
+// result=parse_list(rule, [c_a, c_at, c_at, c_a, c_colon, c_hyphen, c_a, c_period]).
+
+//stdin2charlist.in(input, []).
+
+// input(L) :- result=parse_list(atom, L).
+// input(L) :- result=parse_list(rule, L).
+// input(L) :- result=parse_list(membrane, L).
+// input(L) :- result=parse_list(process_context, L).
+
+// input(L) :- result=parse_list(process, L).
+// input(L) :- result=parse_list(membrane, L).
+//input(L) :- result=parse_list(processes_nonterm, L).
+// input(L) :- result=parse_list(membrane_template, L).
+

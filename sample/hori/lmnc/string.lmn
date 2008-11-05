@@ -1,0 +1,46 @@
+%%% string module
+
+{
+module(string).
+
+general.use.
+utf8.use.
+
+R=char_to_int(C) :- R=char_to_int_sub(C, c_0, c_a, c_A).
+R=char_to_int_sub(C, Zero, Low, Up) :-
+  C>=Zero, C<Zero+10, N=C-Zero, int(Low), int(Up) |
+  R=N.
+R=char_to_int_sub(C, Zero, Low, Up) :-
+  C>=Low, C<Low+26, N=C-Low+10, int(Zero), int(Up) |
+  R=N.
+R=char_to_int_sub(C, Zero, Low, Up) :-
+  C>=Up, C<Up+26, N=C-Up+10, int(Zero), int(Low) |
+  R=N.
+
+R=string_empty :- R=[].
+
+R=string_cons(H,T) :- R=[H|T].
+
+R=str_to_int(L) :- R=str_to_int(L, 10).
+R=str_to_int(L, Base) :- R=str_to_int_sub(L, 0, Base).
+R=str_to_int_sub([], N, Base) :- int(Base) | R=N.
+R=str_to_int_sub([X|T], N, Base) :- int(Base) |
+    R=str_to_int_sub(T, Base*N+char_to_int(X), Base).
+
+R=str_to_float(IntPart, FracPart) :-
+  R=int_to_float(str_to_int(IntPart)) +.
+    int_to_float(str_to_int(FracPart0)) /.
+    int_to_float(integer.power(10,Len)),
+  t(FracPart0, Len) = length(FracPart).
+
+R=str_to_float(IntPart, FracPart, Sign, ExpPart) :-
+  E = exp_part(Sign, str_to_int(ExpPart)),
+  R = E * str_to_float(IntPart, FracPart).
+
+R=exp_part(Sign, Exp) :- R=exp_part(Sign, Exp, 1).
+R=exp_part(-1, 0, N) :- R=1.0 /. int_to_float(N).
+R=exp_part(1,  0, N) :- R=int_to_float(N).
+R=exp_part(Sign, $exp, $n) :- $exp>0, $exp0=$exp-1, $n0=$n*10 |
+  R=exp_part(Sign, $exp0, $n0).
+
+}.
