@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+
+i=1
+while [ -e $i.in ]
+do
+  echo $i
+  lmntal.bat -O0 -d --compileonly $i.in > $i.out
+  diff $i.sam $i.out
+  i=`expr $i + 1`
+done
