@@ -1,6 +1,7 @@
 package compile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -20,11 +21,21 @@ import compile.structure.RuleStructure;
  *
  */
 class GroupingForRuleStructure {
-	List<AtomicLink<Atom>> atomLinks;
-	List<AtomicLink<Membrane>> memLinks;
-	List<AtomicLink<ProcessContext>> typedProcessContextLinks;
-	List<AtomicLink<ProcessContext>> processContextLinks;
+	private List<AtomicLink<Atom>> atomLinks;
+	private List<AtomicLink<Membrane>> memLinks;
+	private List<AtomicLink<ProcessContext>> typedProcessContextLinks;
+	private List<AtomicLink<ProcessContext>> processContextLinks;
 	private RuleStructure rs;
+	
+	private List<List<Atom>> atomGroupList;
+	private List<List<Membrane>> memGroupList;
+	private List<List<ProcessContext>> typedProcessContextGroupList;
+	private	List<List<ProcessContext>> processContextGroupList;
+
+	private Set<Atom> visitedAtoms;
+	private Set<Membrane> visitedMembranes;
+	private Set<ProcessContext> visitedTypedProcessContexts;
+	private Set<ProcessContext> visitedProcessContexts;
 
 	GroupingForRuleStructure(RuleStructure rs){
 		atomLinks = new LinkedList<AtomicLink<Atom>>();
@@ -35,32 +46,98 @@ class GroupingForRuleStructure {
 
 		makeLinkGraph();
 	}
-
-	void makeGroup(){
+	
+	void showGraph(){
+		Util.println("show Graph : " + rs);
 		Util.println(atomLinks);
 		Util.println(memLinks);
 		Util.println(typedProcessContextLinks);
 		Util.println(processContextLinks);
-
-		List<List<Atom>> atomGroupList = new ArrayList<List<Atom>>();
-		List<List<Membrane>> memGroupList = new ArrayList<List<Membrane>>();
-		List<List<ProcessContext>> typedProcessContextGroupList = new ArrayList<List<ProcessContext>>();
-		List<List<ProcessContext>> processContextGroupList = new ArrayList<List<ProcessContext>>();
-
-		List<Object> visited = new ArrayList<Object>();
-
-		for(AtomicLink<Atom> atomLink : atomLinks){
-			Atom atom = atomLink.atomic;
-
-			//	makeGroupAtom(Atom atom, visited, )
-		}
-
-//		List<Atom> atomGroup = new LinkedList<Atom>();
-		//	List<Membrane> membraneGroup = new 
+	}
+	
+	void showGroup(){
+		Util.println("show Group : " + rs);
+		Util.println(atomGroupList);
+		Util.println(memGroupList);
+		Util.println(typedProcessContextGroupList);
+		Util.println(processContextGroupList);
+	}
+	
+	private void addGroupList(){
+		atomGroupList.add(new LinkedList<Atom>());
+		memGroupList.add(new LinkedList<Membrane>());
+		typedProcessContextGroupList.add(new LinkedList<ProcessContext>());
+		processContextGroupList.add(new LinkedList<ProcessContext>());
 	}
 
-	void makeGroupAtom(Atom atom, List<Object> visited){
+	void makeGroup(){
+		atomGroupList = new ArrayList<List<Atom>>();
+		memGroupList = new ArrayList<List<Membrane>>();
+		typedProcessContextGroupList = new ArrayList<List<ProcessContext>>();
+		processContextGroupList = new ArrayList<List<ProcessContext>>();
 
+		visitedAtoms = new HashSet<Atom>();
+		visitedMembranes = new HashSet<Membrane>();
+		visitedTypedProcessContexts = new HashSet<ProcessContext>();
+		visitedProcessContexts = new HashSet<ProcessContext>();
+		
+		for(AtomicLink<Atom> atomLink : atomLinks){
+			Atom atom = atomLink.atomic;
+			if(visitedAtoms.contains(atom)) continue;
+			visitedAtoms.add(atom);
+			addGroupList();
+			makeGroupAtomic(atomLink);
+		}
+		for(AtomicLink<Membrane> memLink : memLinks){
+			Membrane m = memLink.atomic;
+			if(visitedMembranes.contains(m)) continue;
+			visitedMembranes.add(m);
+			addGroupList();
+			makeGroupAtomic(memLink);
+		}
+		for(AtomicLink<ProcessContext> tpcLink : typedProcessContextLinks){
+			ProcessContext tpc = tpcLink.atomic;
+			if(visitedTypedProcessContexts.contains(tpc)) continue;
+			visitedTypedProcessContexts.contains(tpc);
+			addGroupList();
+			makeGroupAtomic(tpcLink);
+		}
+		for(AtomicLink<ProcessContext> pcLink : processContextLinks){
+			ProcessContext pc = pcLink.atomic;
+			if(visitedProcessContexts.contains(pc)) continue;
+			visitedProcessContexts.add(pc);
+			addGroupList();
+			makeGroupAtomic(pcLink);
+		}
+	}
+	
+	
+	
+	
+	private <E> void makeGroupAtomic(AtomicLink<E> atomicLink){
+		for(Atom a : atomicLink.atomList){
+			atomGroupList.get(atomGroupList.size()-1).add(a);
+			makeGroupAtomic(a, visitedAtoms, atomLinks);
+		}
+		for(Membrane m : atomicLink.memList){
+			memGroupList.get(memGroupList.size()-1).add(m);
+			makeGroupAtomic(m, visitedMembranes, memLinks);
+		}
+		for(ProcessContext tpc : atomicLink.typedProcessContextList){
+			typedProcessContextGroupList.get(typedProcessContextGroupList.size()-1).add(tpc);
+			makeGroupAtomic(tpc, visitedTypedProcessContexts, typedProcessContextLinks);
+		}
+		for(ProcessContext pc : atomicLink.processContextList){
+			processContextGroupList.get(processContextGroupList.size()-1).add(pc);
+			makeGroupAtomic(pc, visitedProcessContexts, processContextLinks);
+		}
+
+	}
+	
+	private <E> void makeGroupAtomic(E atomic, Set<E> visited, List<AtomicLink<E>> atomicLinks){
+		if(visited.contains(atomic)) return;
+		visited.add(atomic);
+		makeGroupAtomic(get(atomicLinks, atomic));
 	}
 
 	private void makeLinkGraph(){
@@ -79,6 +156,12 @@ class GroupingForRuleStructure {
 			if(atomicLink.atomic == e) return true;
 		}
 		return false;
+	}
+	private <E> AtomicLink<E> get(List<AtomicLink<E>> atomicLinkList, E e){
+		for(AtomicLink<E> atomicLink : atomicLinkList){
+			if(atomicLink.atomic == e) return atomicLink;
+		}
+		throw new RuntimeException();
 	}
 	private void makeLinkGraphForAtom(){
 		for(AtomicLink<Atom> atomLink : atomLinks){
