@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
@@ -323,6 +324,23 @@ public class Mediator {
 	static
 	public void addAddedMembrane(Membrane mem){
 		addedMembrane_.add(mem);
+		addChildrenOfMembrane(mem);
+	}
+	
+	static
+	private void addChildrenOfMembrane(Membrane mem){
+		Iterator<Atom> it_a = mem.atomIterator();
+		/* 膜の中身も追加 */
+		while (it_a.hasNext()) {
+			Atom a = it_a.next();
+			unyo.Mediator.addAddedAtom(a);
+		}
+		Iterator<Membrane> it_m = mem.memIterator();
+		while (it_m.hasNext()) {
+			Membrane m = it_m.next();
+			unyo.Mediator.addAddedMembrane(m);
+//			addChildrenOfMembrane(m);
+		}
 	}
 	
 	static

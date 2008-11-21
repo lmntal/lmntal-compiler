@@ -491,9 +491,9 @@ public final class Membrane extends QueuedEntity {
 				s.push(l.getAtom().getArg(i));
 			}
 
-//			if(Env.fUNYO){
-//				unyo.Mediator.addRemovedAtom(l.getAtom(), getMemID());
-//			}
+			if(Env.fUNYO){
+				unyo.Mediator.addRemovedAtom(l.getAtom(), getMemID());
+			}
 			atoms.remove(l.getAtom());
 			l.getAtom().mem = null;
 			l.getAtom().dequeue();
@@ -546,17 +546,6 @@ public final class Membrane extends QueuedEntity {
 		mem.parent = this;
 		if(Env.fUNYO){
 			unyo.Mediator.addAddedMembrane(mem);
-			Iterator<Atom> it_a = mem.atomIterator();
-			while (it_a.hasNext()) {
-				Atom a = it_a.next();
-				unyo.Mediator.addAddedAtom(a);
-			}
-//			Iterator<Membrane> it_m = mem.memIterator();
-//			while (it_m.hasNext()) {
-//				Membrane m = it_m.next();
-//				System.out.println("mem"+m);
-//				unyo.Mediator.addAddedMembrane(m);
-//			}
 		}
 	}
 	/** 指定された子膜をこの膜から除去する。
