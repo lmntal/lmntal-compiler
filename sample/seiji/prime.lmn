@@ -1,0 +1,44 @@
+/*
+
+{
+
+num{
+
+  limit(50).
+  
+  limit(L) :- int(L), uniq(L) | limit(L), count(L).
+  count(C) :- C>1 | count(C-1), n(C). 
+}.
+
+i(2).
+
+i(I), num{n(N), $p, @q}/ :- N mod I =:= 0 | i(I), num{$p, @q}.
+
+}.
+
+{i(I), $p, @q, num{limit(L), $r, @s}}/ :- I=<L | {i(I+1), $p, @q, num{limit(L), $r, @s}}.
+
+*/
+
+limit(20).
+list=[head, tail].
+
+limit(L) :- int(L), uniq(L) | limit(L), slimit(L).
+list=[head| Rest], slimit(S) :- S>=2 | list=[head, S| Rest], slimit(S-1).
+slimit(S) :- S=:=1 | i(2).
+
+%% リストの先頭要素Xに対して、2からXまでで割れる値(i)があるかを調べる。
+% 先頭要素Xの値を割り切れないなら、iをインクリメント
+i(I),  limit(L), list=[head, X| Rest] :- int(I), ((X mod I) =\= 0), (I=<L), I2 = I + 1 |
+i(I2), limit(L), list=[head, X| Rest].
+
+% 先頭要素Xを割れるiが、Xとなるなら、素数である。⇒Listから吐き出す。
+i(I),  limit(L), list=[head, X| Rest] :- int(I), int(X), ((X mod I) =:= 0),  I=:=X, (I=<L) |
+i(2),  limit(L), list=[head | Rest], p(X).
+
+% 先頭要素Xを割り切れる値iがあり、X等しくないならば、素数ではない。削除。
+i(I),  limit(L), list=[head, X| Rest] :- int(I), int(X), ((X mod I) =:= 0),  I=\=X, (I=<L) |
+i(2),  limit(L), list=[head | Rest].
+ 
+% ゴミ消し
+list([head, tail]), i(2), limit(L) :- int(L) | .
