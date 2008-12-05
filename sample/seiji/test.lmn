@@ -1,0 +1,59 @@
+//a.
+//a :- a = '+'(22, 11).
+//a :- a = mod(22, 11).
+//a :- a = b(22, 11).
+
+comp({n}, {m}).
+
+/*
+a(1, 2), a(1, 3), a(1, 2), a(1, 3).
+
+a(A, B) :- uniq(A),uniq(B) | b(A, B).
+*/
+//a(A, B) :- uniq(A, B) | b(A, B).
+
+
+/*
+mhash.use.
+
+
+Mem1 = {a}.
+Mem2 = {b, c}.
+Mem3 = {a}.
+
+hc1 = mhash.hashCode(Mem1, 0).
+hc2 = mhash.hashCode(Mem2, 0).
+hc3 = mhash.hashCode(Mem3, 0).
+/*
+
+/*
+hc0 = mhash.hashCode(Memb0).
+hc1 = mhash.hashCode(Memb1).
+hc2 = mhash.hashCode(Memb2).
+hc3 = mhash.hashCode(Memb3).
+hc4 = mhash.hashCode(Memb4).
+hc5 = mhash.hashCode(Memb5).
+hc6 = mhash.hashCode(Memb6).
+hc7 = mhash.hashCode(Memb7).
+hc8 = mhash.hashCode(Memb8).
+hc9 = mhash.hashCode(Memb9).
+hc10 = mhash.hashCode(Memb10).
+hc11 = mhash.hashCode(Memb11).
+hc12 = mhash.hashCode(Memb12).
+hc13 = mhash.hashCode(Memb13).
+Memb0 = {aaa. bbb. ccc.}.
+Memb1 = {{aaa. bbb. ccc}. {}.}.
+Memb2 = {{}. {ccc. aaa. bbb}.}.   // アトムの順番が変ったとき
+Memb3 = {{aaa. bbb. ccc}. }.      // {}の有無
+Memb4 = {{aaa. bbb.}. {ccc.}.}.
+Memb5 = {{ccc.}. {aaa. bbb.}.}.
+Memb6 = {{aaa. ccc.}. {bbb.}.}.
+Memb7 = {{bbb. ccc.}. {aaa.}.}.
+Memb8 = {{aaa.}. {bbb.}. {ccc.}.}.
+Memb9 = {aaa.}.
+Memb10 = {{aaa.}.}.
+Memb11 = {{{aaa.}.}.}.
+Memb12 = {a = {w, c}. b = {g}}.
+Memb13 = {a = {w, g}. b = {c}}.
+*/
+

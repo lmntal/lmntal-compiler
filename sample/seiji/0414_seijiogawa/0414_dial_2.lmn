@@ -1,0 +1,10 @@
+start(3), D=[cur(3), right(3), right(2), left(6), right(1)].
+
+current(X) :- X=<0 | current(X+6).
+'.'(cur(X),A,B) :- X=<0 | '.'(cur(X+6),A,B).
+
+'.'(cur(X),A,B), '.'(left(N),C,A) :- X>0, N>0 |
+	current((X+N) mod 6), '.'(cur((X+N) mod 6),C,B).
+'.'(cur(X),A,B), '.'(right(N),C,A) :- X>0, N>0 |
+	current((X-N) mod 6), '.'(cur((X-N) mod 6),C,B).
+'D'=[cur(X)] :- X>0 |.

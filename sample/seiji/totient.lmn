@@ -1,0 +1,12 @@
+/*
+	トーティエント関数。
+*/
+
+
+n = io.inputInteger([: phi(n) | n=? :]), i(2), count(1).
+
+n(N), i(I), count(C) :- N>I, mod(N,I)=0  , int(C) | n(N), i(I+1), count(C).
+n(N), i(I), count(C) :- N>I, mod(N,I)=\=0, int(C) | n(N), i(I+1), count(C+1).
+
+n(N), i(I), count(C) :- N=<I, int(C) | totient(C).
+

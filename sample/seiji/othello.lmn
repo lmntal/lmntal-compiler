@@ -1,0 +1,141 @@
+io.use.
+
+empty(1, 1, D1, A1, "", ""), empty(2, 1, D2, B1, "", A1), empty(3, 1, D3, C1, "", B1), empty(4, 1, D4, C1, "", ""),
+empty(1, 2, E1, A2, D1, ""), black(2, 2, E2, B2, D2, A2), white(3, 2, E3, C2, D3, B2), empty(4, 2, E4, "", D4, C2),
+empty(1, 3, F1, A3, E1, ""), white(2, 3, F2, B3, E2, A3), black(3, 3, F3, C3, E3, B3), empty(4, 3, F4, "", E4, C3), 
+empty(1, 4, A4, F1, "", ""), empty(2, 4, "", B4, F2, A4), empty(3, 4, "", C4, F3, B4), empty(4, 4, "", "", F4, C4).
+
+/* black or white */
+turn(1).
+
+/* done生成 */
+io.popup("othello start!").
+
+/* io.popup()後は必ずここに来る */
+done :- x = io.inputInteger([:x=x?:]), y = io.inputInteger([:y=y?:]), set.
+
+
+/* empty以外のところを指定した場合、done生成 */
+set, black(U, V, W, X, Y, Z), x(A), y(B), turn(C) :- U=A, V=B | 
+					black(U, V, W, X, Y, Z), turn(C), io.popup("It is not empty!").
+set, white(U, V, W, X, Y, Z), x(A), y(B), turn(C) :- U=A, V=B | 
+					white(U, V, W, X, Y, Z), turn(C), io.popup("It is not empty!").
+
+/* emptyのところを指定した場合、check生成 */
+
+/* turn=0 */
+set, empty(U, V, W, X, Y, Z), x(A), y(B), turn(C) :- U=A, V=B, C=1 | 
+					black(U, V, W, X, Y, Z), turn(-C), io.popup("It is a white turn!").
+set, empty(U, V, W, X, Y, Z), x(A), y(B), turn(C) :- U=A, V=B, C=-1 | 
+					white(U, V, W, X, Y, Z), turn(-C), io.popup("It is a black turn!").
+
+
+/* 指定した場所の周りに反対の色(white)があれば反転 */
+//checkW, white(A, B, C, D, E, F), x(G), y(H) :- G-1=<A, A=<G+1, H-1=<B, B=<H+1 | black(A, B, C, D, E, F), checkW.
+
+/*
+turn(C), checkW, white(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H-1, C=0 | turn(C), black(A, B, C, D, E, F), checkW.
+turn(C), checkW, white(A, B, C, D, E, F), x(G), y(H) :- A=G,   B=H-1, C=0 | turn(C), black(A, B, C, D, E, F), checkW.
+turn(C), checkW, white(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H-1, C=0 | turn(C), black(A, B, C, D, E, F), checkW.
+turn(C), checkW, white(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H  , C=0 | turn(C), black(A, B, C, D, E, F), checkW.
+checkW, white(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H   | black(A, B, C, D, E, F), checkW.
+checkW, white(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H+1 | black(A, B, C, D, E, F), checkW.
+checkW, white(A, B, C, D, E, F), x(G), y(H) :- A=G  , B=H+1 | black(A, B, C, D, E, F), checkW.
+checkW, white(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H+1 | black(A, B, C, D, E, F), checkW.
+*/
+
+/* 指定した場所の周りに反対の色(black)があれば反転 */
+/*
+checkB, black(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H-1 | white(A, B, C, D, E, F), checkB.
+checkB, black(A, B, C, D, E, F), x(G), y(H) :- A=G,   B=H-1 | white(A, B, C, D, E, F), checkB.
+checkB, black(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H-1 | white(A, B, C, D, E, F), checkB.
+checkB, black(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H   | white(A, B, C, D, E, F), checkB.
+checkB, black(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H   | white(A, B, C, D, E, F), checkB.
+checkB, black(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H+1 | white(A, B, C, D, E, F), checkB.
+checkB, black(A, B, C, D, E, F), x(G), y(H) :- A=G  , B=H+1 | white(A, B, C, D, E, F), checkB.
+checkB, black(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H+1 | white(A, B, C, D, E, F), checkB.
+*/
+
+/*
+turn(C), checkW :- C=\=0 | turn(-C), io.popup("It is a white turn!").
+turn(C), checkB :- C=\=0 | turn(-C), io.popup("It is a black turn!").
+*/
+
+/* --------------------------------------------------------------- */
+
+/*
+set, empty(U, V, W, X, Y, Z), x(A), y(B), turn(C) :- U=A, V=B, C=1 | black(U, V, W, X, Y, Z), x(A), y(B), check.
+set, empty(U, V, W, X, Y, Z), x(A), y(B), turn(C) :- U=A, V=B, C=-1 | white(U, V, W, X, Y, Z), x(A), y(B), check.
+
+mm(x-1, y-1), mz(x-1, y  ), mp(x-1, y+1), 
+zm(x  , y-1), zz(x  , y  ), zp(x  , y+1), 
+pm(x+1, y-1), pz(x+1, y  ), pp(x+1, y+1).
+
+*/
+
+/*  */
+//check, white(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H-1, A>0, B>0 | line(A, B), x(G), y(H).
+//	line(X, Y), white(A, B, C, D, E, F) :-  A=X-1, B=Y-1, A>0, B>0 | line(A, B), x(), y(H).
+
+/*
+check, white(A, B, C, D, E, F), x(G), y(H) :- A=G  , B=H   | black(A, B, C, D, E, F), check.
+
+
+check, white(A, B, C, D, E, F), x(G), y(H) :- A=G,   B=H-1 | black(A, B, C, D, E, F), check.
+check, white(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H-1 | black(A, B, C, D, E, F), check.
+check, white(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H   | black(A, B, C, D, E, F), check.
+
+check, white(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H   | black(A, B, C, D, E, F), check.
+check, white(A, B, C, D, E, F), x(G), y(H) :- A=G-1, B=H+1 | black(A, B, C, D, E, F), check.
+check, white(A, B, C, D, E, F), x(G), y(H) :- A=G  , B=H+1 | black(A, B, C, D, E, F), check.
+check, white(A, B, C, D, E, F), x(G), y(H) :- A=G+1, B=H+1 | black(A, B, C, D, E, F), .
+*/
+
+/*
+io.popup("chage turn!"), turn(-C),
+io.popup("chage turn!"), turn(-C),
+*/
+
+//check, white(A, B, C, D, E, F), x(G), y(H) :- A=G  , B=H   | black(A, B, C, D, E, F), check.
+
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------- */
+
+
+
+
+
+
+
+
+/*
+set, white(U, V, W, X, Y, Z), x(A), y(B), count(C) :- U=A, V=B, C=1 | white(U, V, W, X, Y, Z), io.popup("It is not empty!"), count(-C), done.
+set, white(U, V, W, X, Y, Z), x(A), y(B), count(C) :- U=A, V=B, C=-1 | white(U, V, W, X, Y, Z), io.popup("It is not empty!"), count(-C), done.
+*/
+
+/*
+check, black(U, V, W, X, Y, Z), white(D, E, F) :- A>0, B>0, D>0, E>0, A=B | black(A, B, C), black(D, E, F)
+
+
+check, empty(X, Y, Z, U, V, W), x(A), y(B) :- X=A, Y=B
+*/
+
+/*
+ans(X), x(Y) :- X=Y | ok.
+ans(X), ret(Y) :- X<Y | ans(X), io.popup("too big!").
+ans(X), ret(Y) :- X>Y | ans(X), io.popup("too small!").
+U, V, W, X, Y, Z
+
+*/
+
+/*
+empty({A, B}), ret(Y) :- X=Y | ok.
+*/
+/*print("abcde")*/
+

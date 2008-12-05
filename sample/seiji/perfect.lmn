@@ -1,0 +1,15 @@
+/* limit : 探索上限値 */
+limit(28).
+
+m(1), n(1), get(0).
+
+/* 上限値に達したら終了 */
+m(M), n(N), limit(L), get(G) :- M>L, N>0, G>=0 |.
+
+/* 各数の検査の開始位置 */
+m(M), n(N), get(G) :- M=<N, M=\=G | m(M+1), n(1), get(0).
+m(M), n(N), get(G) :- M=<N, M=G | m(M+1), n(1), get(0), perfect(G).
+
+/* 約数を見つけたら加算 */
+m(M), n(N), get(G) :- M>N, mod(M,N)=0 | m(M), n(N+1), get(N+G).
+m(M), n(N), get(G) :- M>N, mod(M,N)>0 | m(M), n(N+1), get(G).

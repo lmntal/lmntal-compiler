@@ -1,0 +1,35 @@
+/*
+	ルース=アーロンペアを求める。
+	実行はlimit(200)程度までが無難。
+	
+	limit(1000)の場合の実行結果：
+		Warning : LMNTAL_HOME is not set. Using relative path.
+		pair(5,6), pair(8,9), pair(15,16), pair(77,78), pair(125,126),
+		 pair(714,715), pair(948,949), @601
+	
+*/
+
+limit(200), count(2), start.
+
+a(0), getA(0), getB(0), n(2), min(2).
+
+
+/* limitの値まで探索したら終了 */
+start, limit(L), count(C), a(A), getA(GA), getB(GB), n(N), min(M) :- L<C, int(A), int(GA), int(GB), int(N), int(M) | .
+
+
+start, a(A), count(C) :- int(A), int(C) | a(C), count(C+1), compare.
+
+/* 素因数分解 */
+compare, a(A), getA(GA), n(N), min(M) :- A>=N, mod(A,N)=0, int(M) 
+		| compare, a(A/N), getA(GA+N), n(M), min(M).
+compare, a(A), getA(GA), n(N), min(M) :- A>=N, mod(A,N)=\=0, int(M) 
+		| compare, a(A), getA(GA), n(N+1), min(M+1).
+compare, a(A), n(N), min(M) :- A=1, int(N), int(M) | check, a(A), n(2), min(2).		
+
+
+/* ペアでない場合 */
+check, getA(GA), getB(GB), count(C) :- GA=\=GB, int(C) | start, getA(0), getB(GA), count(C).
+
+/* ペアだった場合 */
+check, getA(GA), getB(GB), count(C) :- GA=GB, int(C) | start, getA(0), getB(GA), count(C), pair(C-2, C-1).
