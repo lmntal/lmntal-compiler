@@ -1,0 +1,37 @@
+/* Dekker's algorithm */
+init{
+want(1)=false.  want(2)=false.  turn=1.
+cs(1)=false.  cs(2)=false.
+
+p(K) :- p(K,do1).
+
+p(K,do1), want(K2)=$x :- unary($x), K2=:=K |
+  want(K)=true, p(K,do2).
+
+p(K,do2), want(K2)=false :- K2=\=K |
+  p(K,cs1), want(K2)=false.
+p(K,do2), want(K2)=true  :- K2=\=K |
+  p(K,if),  want(K2)=true.
+
+p(K,if), turn=K2 :- K2=:=K | p(K,do2), turn=K.
+p(K,if), want(K2)=$x, turn=K3 :-
+  K2=:=K, K3=\=K, unary($x) |
+  p(K,wait), want(K)=false, turn=K2.
+
+p(K,wait), want(K2)=$x, turn=K3 :-
+  unary($x), K2=:=K, K3=:=K |
+  p(K,do2), want(K)=true, turn=K.
+
+p(K,cs1), cs(K2)=$x :- unary($x), K2=:=K |
+  p(K,cs2), cs(K)=true.
+
+p(K,cs2), cs(K2)=$x, want(K3)=$y, turn=$z :-
+  K2=:=K, K3=:=K, unary($x), unary($y), int($z), $z1=1-$z |
+  p(K,do2), cs(K)=false, want(K)=false, turn=$z1.
+
+p(0), p(1).
+}.
+
+init{$p,@p} :- init{$p,@p}.
+init{cs(1)=true, cs(2)=true, $p,@p} :-
+   accept_end{$p,@p}.
