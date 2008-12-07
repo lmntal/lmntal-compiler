@@ -1,4 +1,4 @@
-/* four queens */
+/* four queens, naive version */
 
 init{
 q{
