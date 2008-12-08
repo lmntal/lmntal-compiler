@@ -67,7 +67,7 @@ SymbolName = "'" [^'\r\n]+ "'" | "'" [^'\r\n]* ("''" [^'\r\n]*)+ "'"
 // ¢≠Inline§œ<QUOTEd>§À∞‹¥…§∑§ø§ø§·«—ªﬂ
 // Inline = "[[" [^*] ~"]]"
 
-%state QUOTED STRING COMMENT
+%state QUOTED STRING COMMENT COMMENT_INNER
 
 ////////////////////////////////////////////////////////////////
 
@@ -158,11 +158,17 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 												
 <COMMENT> {
 	[^*\n]*             {}
-	[^*\n]*\n           {}
-	"*"+[^*/\n]*        {}
-	"*"+[^*/\n]*\n      {}
+	"\n"                {}
+	"*"          { yybegin(COMMENT_INNER); }
 	<<EOF>>      { throw new Error("EOF in comment"); }
-	"*/"         { yybegin(YYINITIAL); }
+}
+
+<COMMENT_INNER> {
+	"*"                 {}
+	[^*/\n]      { yybegin(COMMENT); }
+	"\n"         { yybegin(COMMENT); }
+	"/"          { yybegin(YYINITIAL); }
+	<<EOF>>      { throw new Error("EOF in comment"); }
 }
 
 /* No token was found for the input so through an error.  Print out an
