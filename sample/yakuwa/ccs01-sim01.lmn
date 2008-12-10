@@ -1,0 +1,137 @@
+//  rules of ccs01-sim01
+//  module未使用、system_ruleset未使用
+
+//  事前処理
+ccs{$r, @r} :- 
+  //  外部に送信
+  ( system{{{send(C1, {$q1}), $p1}, $q2}, 
+    {name(CN), +C1, $c}, $r, @r}/, '[]'(T) :- 
+      unary(CN) | 
+      system{memkill({$p1}, killed), {name(CN), $c}, 
+      {$q1, $q2}, $r, @r}, T = [send(CN)]
+  ), 
+  
+  //  外部から受信
+  ( system{{{receive(C1, {$q1}), $p1}, $q2}, 
+    {name(CN), +C1, $c}, $r, @r}/, '[]'(T) :- 
+      unary(CN) | 
+      system{memkill({$p1}, killed), {name(CN), $c}, 
+      {$q1, $q2}, $r, @r}, T = [receive(CN)]
+  ), 
+  
+  //  明示的な内部動作
+  ( system{{{internal({$q1}), $p1}, $q2}, $r, @r}/, '[]'(T) :- 
+      system{memkill({$p1}, killed), {$q1, $q2}, $r, @r}, 
+      T = [internal(t)]
+  ), 
+  
+  //  異なるRestriction膜内で大域チャネルによる送受信
+  ( system{{{send(C1, {$q1}), $p1}, $q2}, 
+    {{receive(C2, {$q3}), $p2}, $q4}, 
+    {name(CN), +C1, +C2, $c}, $r, @r}/, '[]'(T) :- 
+      unary(CN) | 
+      system{memkill({$p1, $p2}, killed), {name(CN), $c}, 
+      {$q1, $q2}, {$q3, $q4}, $r, @r}, T = [internal(CN)]
+  ), 
+  
+  //  同一Restriction膜内で大域チャネルによる送受信
+  ( system{{{send(C1, {$q1}), $p1}, {receive(C2, {$q2}), $p2}, $q3}, 
+    {name(CN), +C1, +C2, $c}, $r, @r}/, '[]'(T) :- 
+      unary(CN) | 
+      system{memkill({$p1, $p2}, killed), {name(CN), $c}, 
+      {$q1, $q2, $q3}, $r, @r}, T = [internal(CN)]
+  ), 
+  
+  //  同一Restriction膜内で局所チャネルによる送受信
+  ( system{{{send(C1, {$q1}), $p1}, {receive(C2, {$q2}), $p2}, 
+    {name(CN), +C1, +C2, $c}, $q3}, $r, @r}/, '[]'(T) :- 
+      unary(CN) | 
+      system{memkill({$p1, $p2}, killed), 
+      {{name(CN), $c}, $q1, $q2, $q3}, $r, @r}, T = [internal(CN)]
+  ), 
+  
+  ( system{@r}, '[]'(T) :- T = [end] ), 
+  
+  system{
+    //  選択されなかった動作の削除
+    memkill({$p, @p}) :- memkill({$p, @p}, killed).
+    memkill({$p[], @p}, KillTag) :- 
+      unary(KillTag) | .
+    memkill({$p[X|*Z], @p}, KillTag) :- 
+      unary(KillTag) | 
+      memkill({$p[Y|*Z], killing(Y), @p}, KillTag), X = KillTag.
+      
+    //  同一チャネル膜の併合
+    {name(CN1), $c1}, {name(CN2), $c2} :- 
+      CN1 = CN2 | {name(CN1), $c1, $c2}.
+    {{name(CN1), $c1}, {name(CN2), $c2}, $q} :- 
+      CN1 = CN2 | {{name(CN1), $c1, $c2}, $q}.
+      
+    //  使用済みチャネル膜の削除
+    {name(CN)} :- unary(CN) | .
+    {{name(CN)}, $q} :- unary(CN) | {$q}.
+    
+    //  killedアトムと接続子の削除
+    killed({$c}) :- {$c}.
+    killed(C), {{+C, $c}, $q} :- {{$c}, $q}.
+    
+    //  動作終了
+    {} :- .
+    {{}, $q} :- {$q}.
+    {{nil, $p}, $q} :- {{$p}, $q}.
+    $r, @r
+  }, 
+  action([]).
+
+
+
+ccs{
+
+/*
+//  proc P = 'a.('b.c.nil | (b.nil + t.nil))\{b}
+{{p, $p}, $q} :- 
+  {
+    { send(A1, 
+      {
+        { send(B1, 
+          {
+            { receive(C1, {{ nil }}) }
+          })
+        }, 
+        { receive(B2, {{ nil }}), 
+          internal({{ nil }})
+        }
+      }), 
+      $p
+    }, 
+    {name(b), +B1, +B2}, 
+    $q
+  }, 
+  {name(a), +A1}, {name(c), +C1}.
+*/
+
+//  proc P = 'a.('b.c.nil | (b.nil + d.nil) | nil)\{b, d}
+{{p, $p}, $q} :- 
+  {
+    { send(A1, 
+      {
+        { send(B1, 
+          {
+            { receive(C1, {{ nil }}) }
+          })
+        }, 
+        { receive(B2, {{ nil }}), 
+          receive(D1, {{ nil }})
+        }, 
+        { nil }
+      }), 
+      $p
+    }, 
+    {name(b), +B1, +B2}, {name(d), +D1}, 
+    $q
+  }, 
+  {name(a), +A1}, {name(c), +C1}.
+  
+{{p}}
+
+}.

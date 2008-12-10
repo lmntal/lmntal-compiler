@@ -1,0 +1,265 @@
+//  rules of ccs01-nd02
+//  module未使用、system_ruleset未使用
+
+input{$i, @i}, generator{$g, @g} :- 
+  factory{
+    //  状態のコピー
+    generator{system{copyFlag(0, 0), $r[], @r}, $g, @g}/ :- 
+      generator{
+        system{copyFlag(0, 1), $r[], @r}, 
+        system{copyFlag(1, 1), $r[], @r}, $g, @g
+      }.
+      
+    generator{
+      ccs{$i, @i}, $g, @g
+    }
+  }.
+
+factory{generator{transitions{$t}, $g[], @g}, $f[], @f}/ :- result{$t}.
+
+generator{
+  //  rules of ccs101-mc
+  //  module未使用、system_ruleset未使用
+  
+  //  事前処理
+  ccs{$r, @r} :- 
+    //  actionIDを付与
+    //  安定版
+    ( system{
+        {{send(C1, {$q1}), $p1}, $q2}, {name(CN), +C1, $c}, $r1, @r1
+      }/, 
+      nextActionID(N1) :- 
+        int(CN), N2 = N1 + 1 | 
+        system{
+          {{send(N1, C2, {$q1}), $p1}, $q2}, 
+          {name(CN), +C2, $c}, $r1, @r1
+        }, 
+        nextActionID(N2)
+    ), 
+    ( system{
+        {{send(C1, {$q1}), $p1}, {name(CN), +C1, $c}, $q2}, $r1, @r1
+      }/, 
+      nextActionID(N1) :- 
+        int(CN), N2 = N1 + 1 | 
+        system{
+          {{send(N1, C2, {$q1}), $p1}, {name(CN), +C2, $c}, $q2}, 
+          $r1, @r1
+        }, 
+        nextActionID(N2)
+    ), 
+    ( system{
+        {{receive(C1, {$q1}), $p1}, $q2}, {name(CN), +C1, $c}, $r1, @r1
+      }/, 
+      nextActionID(N1) :- 
+        int(CN), N2 = N1 + 1 | 
+        system{
+          {{receive(N1, C2, {$q1}), $p1}, $q2}, 
+          {name(CN), +C2, $c}, $r1, @r1
+        }, 
+        nextActionID(N2)
+    ), 
+    ( system{
+        {{receive(C1, {$q1}), $p1}, {name(CN), +C1, $c}, $q2}, $r1, @r1
+      }/, 
+      nextActionID(N1) :- 
+        int(CN), N2 = N1 + 1 | 
+        system{
+          {{receive(N1, C2, {$q1}), $p1}, {name(CN), +C2, $c}, $q2}, 
+          $r1, @r1
+        }, 
+        nextActionID(N2)
+    ), 
+    ( system{{{internal({$q1}), $p1}, $q2}, $r1, @r1}/, 
+      nextActionID(N1) :- 
+        N2 = N1 + 1 | 
+        system{{{internal(N1, {$q1}), $p1}, $q2}, $r1, @r1}, 
+        nextActionID(N2)
+    ), 
+    
+    //  外部に送信
+    ( system{
+        {{send(A_ID1, C1, {$q1}), $p1}, $q2}, 
+        {name(CN), +C1, $c}, stateID(S_ID1), copyFlag(1, 1), $r1, @r1
+      }/, 
+      system{stateID(S_ID2), copyFlag(0, 1), $r2, @r2}, 
+      transitions{$t}, nextStateID(N1) :- 
+        int(A_ID1), int(CN), T = CN, S_ID1 = S_ID2, N2 = N1 + 1, 
+        uniq(A_ID1, S_ID1) | 
+        system{
+          memkill({$p1}, killed), {name(CN), $c}, {$q1, $q2}, 
+          stateID(N1), copyFlag(0, 0), $r1, @r1
+        }, 
+        system{stateID(S_ID2), copyFlag(0, 0), $r2, @r2}, 
+        transitions{transition(S_ID1, T, N1), $t}, nextStateID(N2)
+    ), 
+    
+    //  外部から受信
+    ( system{
+        {{receive(A_ID1, C1, {$q1}), $p1}, $q2}, 
+        {name(CN), +C1, $c}, stateID(S_ID1), copyFlag(1, 1), $r1, @r1
+      }/, 
+      system{stateID(S_ID2), copyFlag(0, 1), $r2, @r2}, 
+      transitions{$t}, nextStateID(N1) :- 
+        int(A_ID1), int(CN), T = -CN, S_ID1 = S_ID2, N2 = N1 + 1, 
+        uniq(A_ID1, S_ID1) | 
+        system{
+          memkill({$p1}, killed), {name(CN), $c}, {$q1, $q2}, 
+          stateID(N1), copyFlag(0, 0), $r1, @r1
+        }, 
+        system{stateID(S_ID2), copyFlag(0, 0), $r2, @r2}, 
+        transitions{transition(S_ID1, T, N1), $t}, nextStateID(N2)
+    ), 
+    
+    //  明示的な内部動作
+    ( system{
+        {{internal(A_ID1, {$q1}), $p1}, $q2}, 
+        stateID(S_ID1), copyFlag(1, 1), $r1, @r1
+      }/, 
+      system{stateID(S_ID2), copyFlag(0, 1), $r2, @r2}, 
+      transitions{$t}, nextStateID(N1) :- 
+        int(A_ID1), S_ID1 = S_ID2, N2 = N1 + 1, uniq(A_ID1, S_ID1) | 
+        system{
+          memkill({$p1}, killed), {$q1, $q2}, 
+          stateID(N1), copyFlag(0, 0), $r1, @r1
+        }, 
+        system{stateID(S_ID2), copyFlag(0, 0), $r2, @r2}, 
+        transitions{transition(S_ID1, 0, N1), $t}, nextStateID(N2)
+    ), 
+    
+    //  異なるRestriction膜内で大域チャネルによる送受信
+    ( system{
+        {{send(A_ID1, C1, {$q1}), $p1}, $q2}, 
+        {{receive(A_ID2, C2, {$q3}), $p2}, $q4}, 
+        {name(CN), +C1, +C2, $c}, 
+        stateID(S_ID1), copyFlag(1, 1), $r1, @r1
+      }/, 
+      system{stateID(S_ID2), copyFlag(0, 1), $r2, @r2}, 
+      transitions{$t}, nextStateID(N1) :- 
+        int(A_ID1), int(A_ID2), int(CN), S_ID1 = S_ID2, N2 = N1 + 1, 
+        uniq(A_ID1, A_ID2, S_ID1) | 
+        system{
+          memkill({$p1, $p2}, killed), {name(CN), $c}, 
+          {$q1, $q2}, {$q3, $q4}, stateID(N1), copyFlag(0, 0), $r1, @r1
+        }, 
+        system{stateID(S_ID2), copyFlag(0, 0), $r2, @r2}, 
+        transitions{transition(S_ID1, 0, N1), $t}, nextStateID(N2)
+    ), 
+    
+    //  同一Restriction膜内で大域チャネルによる送受信
+    ( system{
+        {
+          {send(A_ID1, C1, {$q1}), $p1}, 
+          {receive(A_ID2, C2, {$q2}), $p2}, $q3
+        }, 
+        {name(CN), +C1, +C2, $c}, 
+        stateID(S_ID1), copyFlag(1, 1), $r1, @r1
+      }/, 
+      system{stateID(S_ID2), copyFlag(0, 1), $r2, @r2}, 
+      transitions{$t}, nextStateID(N1) :- 
+        int(A_ID1), int(A_ID2), int(CN), S_ID1 = S_ID2, N2 = N1 + 1, 
+        uniq(A_ID1, A_ID2, S_ID1) | 
+        system{
+          memkill({$p1, $p2}, killed), {name(CN), $c}, 
+          {$q1, $q2, $q3}, stateID(N1), copyFlag(0, 0), $r1, @r1
+        }, 
+        system{stateID(S_ID2), copyFlag(0, 0), $r2, @r2}, 
+        transitions{transition(S_ID1, 0, N1), $t}, nextStateID(N2)
+    ), 
+    
+    //  同一Restriction膜内で局所チャネルによる送受信
+    ( system{
+        {
+          {send(A_ID1, C1, {$q1}), $p1}, 
+          {receive(A_ID2, C2, {$q2}), $p2}, 
+          {name(CN), +C1, +C2, $c}, $q3
+        }, 
+        stateID(S_ID1), copyFlag(1, 1), $r1, @r1
+      }/, 
+      system{stateID(S_ID2), copyFlag(0, 1), $r2, @r2}, 
+      transitions{$t}, nextStateID(N1) :- 
+        int(A_ID1), int(A_ID2), int(CN), S_ID1 = S_ID2, N2 = N1 + 1, 
+        uniq(A_ID1, A_ID2, S_ID1) | 
+        system{
+          memkill({$p1, $p2}, killed), 
+          {{name(CN), $c}, $q1, $q2, $q3}, 
+          stateID(N1), copyFlag(0, 0), $r1, @r1
+        }, 
+        system{stateID(S_ID2), copyFlag(0, 0), $r2, @r2}, 
+        transitions{transition(S_ID1, 0, N1), $t}, nextStateID(N2)
+    ), 
+    
+    ( system{@r}, action(A) :- ground(A) | action(end) ), 
+    
+    system{
+      //  選択されなかった動作の削除
+      memkill({$p, @p}) :- memkill({$p, @p}, killed).
+      memkill({$p[], @p}, KillTag) :- 
+        unary(KillTag) | .
+      memkill({$p[X|*Z], @p}, KillTag) :- 
+        unary(KillTag) | 
+        memkill({$p[Y|*Z], killing(Y), @p}, KillTag), X = KillTag.
+        
+      //  同一チャネル膜の併合
+      {name(CN1), $c1}, {name(CN2), $c2} :- 
+        CN1 = CN2 | {name(CN1), $c1, $c2}.
+      {{name(CN1), $c1}, {name(CN2), $c2}, $q} :- 
+        CN1 = CN2 | {{name(CN1), $c1, $c2}, $q}.
+        
+      //  使用済みチャネル膜の削除
+      {name(CN)} :- unary(CN) | .
+      {{name(CN)}, $q} :- unary(CN) | {$q}.
+      
+      //  killedアトムと接続子の削除
+      killed({$c}) :- {$c}.
+      killed(C), {{+C, $c}, $q} :- {{$c}, $q}.
+      
+      //  動作終了
+      {} :- .
+      {{}, $q} :- {$q}.
+      {{nil, $p}, $q} :- {{$p}, $q}.
+      stateID(0), copyFlag(0, 0), $r, @r
+    }.
+    
+  transitions{}, nextActionID(0), nextStateID(1).
+}.
+
+input{
+/*
+//  proc P = '1.('2.3.nil | (2.nil + t.nil))
+{{p}}.
+{{p, $p}, $q} :- 
+  {
+    { send(C11, 
+      {
+        { send(C21, 
+          {
+            { receive(C31, {{ nil }}) }
+          })
+        }, 
+        { receive(C22, {{ nil }}), 
+          internal({{ nil }})
+        }
+      }), 
+      $p
+    }, 
+    $q
+  }, 
+  {name(1), +C11}, {name(2), +C21, +C22}, {name(3), +C31}.
+*/
+
+
+//  proc P = ('1.nil + 2.nil) | (1.nil + t.nil)\{1}
+{q}.
+{q, $q} :- 
+  {
+    { send(C11, {{ nil }}), 
+      receive(C21, {{ nil }})
+    }, 
+    { receive(C12, {{ nil }}), 
+      internal({{ nil }})
+    }, 
+    $q
+  }, 
+  {name(1), +C11, +C12}, {name(2), +C21}.
+
+}.
