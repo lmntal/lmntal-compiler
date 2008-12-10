@@ -1,4 +1,0 @@
-r = gcd(208,117).
-
-R = gcd(M,N) :- M mod N = L, L=:=0 | R = M.
-R = gcd(M,N) :- M mod N = L, L=\=0 | R = gcd(N,L).
