@@ -251,6 +251,8 @@ public final class Env {
 	 * UNYOモード
 	 */
 	public static boolean fUNYO = false;
+	/** UNYO用dumpモード */
+	public static boolean fUNYO_d = false;
 	
 	/**
 	 * 新 GUI モード。

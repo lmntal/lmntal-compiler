@@ -330,7 +330,12 @@ public class Dumper {
 					buf.append(", ");
 				else
 					commaFlag = true;
-				buf.append(it_r.next().toString());
+				if(Env.fUNYO_d){
+					buf.append(it_r.next().encode());
+					Env.showrule = false;
+				}else{
+					buf.append(it_r.next().toString());
+				}
 			}
 		}
 		if(Env.showrule){
@@ -570,34 +575,36 @@ public class Dumper {
 			}
 		}
 
-		// #2 子膜の出力
-		Iterator<Membrane> it_m = mem.memIterator();
-		while (it_m.hasNext()) {
-			Membrane m = it_m.next();
-			if (commaFlag) {
-				buf.append(", ");
-			} else
-				commaFlag = true;
-			buf.append("{");
-			buf.append(encode(m, true, mode));
-			buf.append("}");
-			if (m.kind == 1)
-				buf.append("_");
-		}
+		// #2 子膜の出力 
+			Iterator<Membrane> it_m = mem.memIterator();
+			while (it_m.hasNext()) {
+				Membrane m = it_m.next();
+				if (commaFlag) {
+					buf.append(", ");
+				} else
+					commaFlag = true;
+				if (m.name != null)
+					buf.append(m.name);
+				buf.append("{");
+				buf.append(encode(m, true, mode));
+				buf.append("}");
+				if (m.kind == 1)
+					buf.append("_");
+			}
 
 		if(mode <= 1) {
 		// #3 ルールの出力
 			Iterator<Ruleset> it_r = mem.rulesetIterator();
 			while (it_r.hasNext()) {
 				if (commaFlag)
-					buf.append(", ");
+					buf.append(",");
 				else
 					commaFlag = true;
 				// Translator が作成したファイルのencode()メソッドを呼び出す
 				buf.append(it_r.next().encode());
 			}
 		}
-		
+
 		if (locked) {
 			mem.quietUnlock();
 		}
