@@ -1358,7 +1358,8 @@ public final class Membrane extends QueuedEntity {
 	}
 
 	public String toString() {
-		return "{ " + toStringWithoutBrace() + " }";
+		String name = this.name == null ? "" : this.name;
+		return name + "{ " + toStringWithoutBrace() + " }";
 	}
 
 	/**
@@ -1366,21 +1367,31 @@ public final class Membrane extends QueuedEntity {
 	 * @return String 膜のコンパイル可能な文字列表現
 	 */
 	public String encode() {
-		return "{" + Dumper.encode(this, true, 0) + "}";
+		String name = this.name == null ? "" : this.name;
+		return name + "{" + Dumper.encode(this, true, 0) + "}";
+	}
+	/**
+	 * 膜の中身をエンコードする．
+	 * @return String 膜のコンパイル可能な文字列表現
+	 */
+	public String encodeContents() {
+		return Dumper.encode(this, true, 0);
 	}
 	/**
 	 * 膜をエンコードする．ただしルールセットのみ．
 	 * @return String 膜のコンパイル可能な文字列表現
 	 */
 	public String encodeRulesets() {
-		return "{" + Dumper.encode(this, true, 1) + "}";
+		String name = this.name == null ? "" : this.name;
+		return name + "{" + Dumper.encode(this, true, 1) + "}";
 	}
 	/**
 	 * 膜をエンコードする．ただしルールセットは除く．
 	 * @return String 膜のコンパイル可能な文字列表現
 	 */
 	public String encodeProcess() {
-		return "{" + Dumper.encode(this, true, 2) + "}";
+		String name = this.name == null ? "" : this.name;
+		return name + "{" + Dumper.encode(this, true, 2) + "}";
 	}
 
 	////////////////////////////////////////
