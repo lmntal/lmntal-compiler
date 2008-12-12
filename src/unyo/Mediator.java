@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import runtime.Atom;
+import runtime.Dumper;
 import runtime.Env;
 import runtime.Functor;
 import runtime.Membrane;
@@ -53,6 +54,9 @@ public class Mediator {
 	
 	static
 	private Method print_;
+	
+	static
+	private Method printRoot_;
 	
 	static
 	private Method errPrint_;
@@ -105,6 +109,9 @@ public class Mediator {
 			
 			print_ 
 			= unyoClass_.getMethod("print", String.class);
+			
+			printRoot_ 
+			= unyoClass_.getMethod("printRoot", String.class);
 			
 			errPrint_ 
 			= unyoClass_.getMethod("errPrint", String.class);
@@ -250,9 +257,32 @@ public class Mediator {
 			e.printStackTrace();
 		}
 	}
+	public static void printRoot(String msg){
+		try {
+			printRoot_.invoke(unyoObj_, msg);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public static void print(Object msg){
 		print(msg.toString());
+	}
+	
+	public static void printRoot(){
+		Membrane root = Env.theRuntime.getGlobalRoot();
+		printRoot(Dumper.dump(root) + System.getProperty("line.separator"));
+	}
+	/* ルールもfulltext出力する */
+	public static void printRootAll(){
+		Membrane root = Env.theRuntime.getGlobalRoot();
+		Env.fUNYO_d = true;
+		println(Dumper.dump(root));
+		Env.fUNYO_d = false;
 	}
 	
 	static
@@ -274,7 +304,8 @@ public class Mediator {
 		if(releasing){
 			return false;
 		}
-		
+		printRoot();
+//		printRootAll();
 		try {
 			setState_.invoke(unyoObj_,
 					root,
@@ -311,7 +342,6 @@ public class Mediator {
 		if(releasing){
 			return false;
 		}
-		
 		return true;
 		
 	}
