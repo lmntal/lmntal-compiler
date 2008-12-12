@@ -31,7 +31,8 @@ public class SrcDumper {
 	}
 	
 	public static String dumpMembrane(SrcMembrane mem) {
-		String s = "{";
+		String name = mem.name == null ? "" : mem.name;
+		String s = name + "{";
 		if (mem.getProcess().size() > 0)
 			s += dumpLinkedList(mem.getProcess());
 		s += "}";
