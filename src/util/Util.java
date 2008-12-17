@@ -51,7 +51,7 @@ abstract public class Util {
 	
 	public static void println(String msg){
 		if(Env.fUNYO){
-			Mediator.println(msg);
+			Mediator.println(msg, 0);
 			return;
 		}
 		System.out.println(msg);
@@ -63,7 +63,7 @@ abstract public class Util {
 	
 	public static void print(String msg){
 		if(Env.fUNYO){
-			Mediator.print(msg);
+			Mediator.print(msg, 0);
 			return;
 		}
 		System.out.print(msg);

@@ -56,9 +56,6 @@ public class Mediator {
 	private Method print_;
 	
 	static
-	private Method printRoot_;
-	
-	static
 	private Method errPrint_;
 	
 	static
@@ -108,10 +105,7 @@ public class Mediator {
 			= unyoClass_.getMethod("sync");
 			
 			print_ 
-			= unyoClass_.getMethod("print", String.class);
-			
-			printRoot_ 
-			= unyoClass_.getMethod("printRoot", String.class);
+			= unyoClass_.getMethod("print", String.class, int.class);
 			
 			errPrint_ 
 			= unyoClass_.getMethod("errPrint", String.class);
@@ -238,28 +232,17 @@ public class Mediator {
 		}
 	}
 	
-	public static void println(String msg){
-		print(msg  + System.getProperty("line.separator"));
+	public static void println(String msg, int mode){
+		print(msg  + System.getProperty("line.separator"), mode);
 	}
 	
-	public static void println(Object msg){
-		println(msg.toString());
+	public static void println(Object msg, int mode){
+		println(msg.toString(), mode);
 	}
 	
-	public static void print(String msg){
+	public static void print(String msg,int mode){
 		try {
-			print_.invoke(unyoObj_, msg);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		}
-	}
-	public static void printRoot(String msg){
-		try {
-			printRoot_.invoke(unyoObj_, msg);
+			print_.invoke(unyoObj_, msg, mode);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -269,19 +252,22 @@ public class Mediator {
 		}
 	}
 	
-	public static void print(Object msg){
-		print(msg.toString());
+	public static void print(Object msg, int mode){
+		print(msg.toString(), mode);
 	}
 	
+	public static void printRule(String rule){
+		print(rule + System.getProperty("line.separator"), 1);
+	}
 	public static void printRoot(){
 		Membrane root = Env.theRuntime.getGlobalRoot();
-		printRoot(Dumper.dump(root) + System.getProperty("line.separator"));
+		print(Dumper.dump(root) + System.getProperty("line.separator"), 2);
 	}
 	/* ルールもfulltext出力する */
 	public static void printRootAll(){
 		Membrane root = Env.theRuntime.getGlobalRoot();
 		Env.fUNYO_d = true;
-		println(Dumper.dump(root));
+		print(Dumper.dump(root), 2);
 		Env.fUNYO_d = false;
 	}
 	

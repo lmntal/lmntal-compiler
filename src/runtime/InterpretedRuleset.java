@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import compile.parser.SrcDumper;
+
+import unyo.Mediator;
 import util.Util;
 import debug.Debug;
 
@@ -1035,6 +1038,10 @@ class InterpretiveReactor {
 
 					//====制御命令====ここから====
 				case Instruction.COMMIT :
+					String rule1 = currentInterpretedRuleset.encode();
+					if(Env.fUNYO){
+						Mediator.printRule(rule1);
+					}
 					if (Env.fTrace) Task.trace("-->", "@" + currentInterpretedRuleset.getId(), (String)inst.getArg1());
 					if (Env.debugOption) {//2006.1.26 by inui
 						Debug.breakPoint(inst.getIntArg2(), Debug.ATOM);
