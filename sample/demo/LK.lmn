@@ -56,4 +56,10 @@ sequent({+implies($a,$b),$gamma[]},{$delta[]}) :-
 // sequent({+implies(and(p,not(q)),r), +not(r), +p},{+q}).
 
 // Example 3:  |- ((A=>B)=>A)=>A
-sequent({},{+implies(implies(implies(a,b),a),a)}).
+// sequent({},{+implies(implies(implies(a,b),a),a)}).
+
+// Example 4:  ~A or ~R => ~(T & C) => (~O & S) |- ~R & ~T => S
+// (Chang and Lee, 1973)
+sequent({+implies(or(not(a),not(r)),
+                  implies(not(and(t,c)),and(not(o),s)))},
+        {+implies(and(not(r),not(t)),s)}).
