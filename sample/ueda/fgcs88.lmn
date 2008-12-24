@@ -1,0 +1,51 @@
+/* Two examples of process fusion           */
+/* (cf. Ueda and Furukawa, Proc. FGCS'88)   */
+
+/* EXAMPLE 1 */
+/* Computing a sequence of the partial sums */
+/* of an integer sequence from I to N       */
+
+/* Original */
+integerSums1(I,N,Sums) :- integers(I,N,Is), sums(Is,Sums).
+integers(I,N,Is) :- I>N | Is=[].
+integers(I,N,Is) :- I=<N, I1=I+1 |
+    Is=[I|Is1], integers(I1,N,Is1).
+
+sums(Is,Sums) :- sums1(Is,0,Sums).
+
+sums1([],     S,Sums) :- int(S) | Sums=[].
+sums1([I|Is1],S,Sums) :- S1=I+S |
+     Sums=[S1|Sums1], sums1(Is1,S1,Sums1).
+
+/* Fused */
+integerSums2(I,N,Sums) :- fused_integerSums(I,N,0,Sums).
+
+fused_integerSums(I,N,S,Sums) :- I >N, int(S) | Sums=[].
+fused_integerSums(I,N,S,Sums) :- I=<N, I1=I+1, S1=I+S |
+    Sums=[S1|Sums1], fused_integerSums(I1,N,S1,Sums1).
+
+/* Test programs */
+integerSums1(1,10,is1).
+integerSums2(1,10,is2).
+
+
+/* EXAMPLE 2 */
+/* Stream transformer that may absorb some of the input elements */
+
+/* Original */
+evenSquare1(Xs,Ys) :-
+    evenseq(Xs,Es), squareseq(Es,Ys).
+evenseq([X|Xs1],Es) :- X mod 2=:=0 |
+    Es=[X|Es1], evenseq(Xs1,Es1).
+evenseq([X|Xs1],Es) :- X mod 2=\=0 | evenseq(Xs1,Es).
+squareseq([E|Es1],Ys) :- Y=E*E |
+    Ys=[Y|Ys1], squareseq(Es1,Ys1).
+
+/* Fused */
+evenSquare2([X|Xs1],Ys) :- X mod 2=:=0, Y=X*X |
+    Ys=[Y|Ys1], evenSquare2(Xs1,Ys1).
+evenSquare2([X|Xs1],Ys) :- X mod 2=\=0 | evenSquare2(Xs1,Ys).
+
+/* Test programs */
+evenSquare1([1,3,4,6,8,9,10,12],es1).
+evenSquare2([1,3,4,6,8,9,10,12],es2).
