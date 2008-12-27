@@ -1,0 +1,51 @@
+t0_init{
+is_parent_of(pam,bob).
+is_parent_of(tom,bob).
+is_parent_of(tom,liz).
+is_parent_of(bob,ann).
+is_parent_of(bob,pat).
+is_parent_of(pat,jim).
+/*
+female(pam).
+female(liz).
+female(pat).
+female(ann).
+male(tom).
+male(bob).
+male(jim).
+*/
+/*
+is_mother_of(X,Y) :- is_parent_of(X,Y), female(X).
+
+is_sister_of(X,Y) :- is_parent_of(Z,X), is_parent_of(Z,Y), female(X), X\==Y.
+
+has_a_child(X) :- is_parent_of(X,_).
+
+is_ancestor_of(X,Y) :- is_parent_of(X,Y).
+is_ancestor_of(X,Y) :- is_parent_of(X,Z), is_ancestor_of(Z,Y).
+*/
+/*
+is_parent_of($p, $q), female($r) :-
+ unary($p), unary($q), unary($r), $q = $r |
+ is_mother_of($p,$q).
+ */
+
+//female($p) :- unary($p) |.
+//male($p) :- unary($p) |.
+is_parent_of($p,$q) :- unary($p), unary($q) |.
+
+ 
+is_parent_of($p, $q) :- unary($p), unary($q) | is_ancestor_of($p,$q).
+
+is_parent_of($p, $q), is_ancestor_of($r, $s) :-
+ unary($p), unary($q), unary($r), unary($s) ,$q = $r |
+ is_ancestor_of($p, $s).
+
+}.
+
+t0_init{$p,@p} :- t0_init{$p, @p}.
+//t0_init{is_mother_of(X,Y), @p} :-
+// unary(X), unary(Y) | accept_all_end{is_mother_of(X,Y),@p}.
+t0_init{is_ancestor_of($p, $q), @p} :-
+ unary($p), unary($q) |
+  accept_all_end{is_ancestor_of($p, $q) ,@p}.
