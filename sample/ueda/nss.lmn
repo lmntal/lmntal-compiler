@@ -1,0 +1,79 @@
+/*
+ * simplified Needham-Schroeder
+ * 2007/12/27(Thu) by okabe
+ *
+ * A->B : Na
+ * B->A : Na,Nb
+ * A->B : Nb
+ *
+ * @see
+ *   I. Cervesato, N.A. Durgin, P.D. Lincoln, J.C. Mitchell, A. Scedrov.
+ *   A Meta-notation for Protocol Analysis, 1999
+ */
+
+% system rule
+t0_init{
+
+initiator(alice,bob), responder(bob).
+snd1(1), snd2(1), gen(1).
+
+% initiator
+i1@@ initiator(A,B) :- unary(A), unary(B) |
+       net(NA1), l1(A,NA2),  n{+NA1, +NA2}.
+i2@@ net(NA1,NB1), l1(A,NA2),
+     n{+NA1,+NA2,$na}, n{+NB1,$nb} :- unary(A) |
+       net(NB2), l2(A,NA3,NB3),
+       n{+NA3,$na}, n{+NB2,+NB3,$nb}.
+
+% responder
+r1@@ responder(B), net(NA1), n{+NA1,$na} :- unary(B) |
+       net(NA2, NB1), l1(B,NA3,NB2),
+       n{+NA2,+NA3,$na}, n{+NB1,+NB2}.
+r2@@ net(NB1), l1(B,NA1,NB2),
+     n{+NA1,$na}, n{+NB1,+NB2,$nb} :- unary(B) |
+       l2(B,NA2,NB3), n{+NA2,$na}, n{+NB3,$nb}.
+
+% intruder
+rec1@@ net(X) :- m(X).
+rec2@@ net(X,Y) :- m(X), m(Y).
+
+snd1@@ snd1(N1), m(X), n{+X,$n} :- N1>0, N2=N1-1 |
+         snd1(N2), net(X1), m(X2), n{+X1,+X2,$n}.
+snd2@@ snd2(N1), m(X), m(Y),
+       n{+X,$nx}, n{+Y,$ny} :- N1>0, N2=N1-1 |
+         snd2(N2), net(X1,Y1), m(X2), m(Y2),
+         n{+X1,+X2,$nx}, n{+Y1,+Y2,$ny}.
+
+gen@@ gen(N1) :- N1>0, N2=N1-1 | gen(N2), m(N), n{+N}.
+
+}.
+
+% property rule
+ltl_1@@
+t0_init{$p,@p} :- t0_init{$p,@p}.
+ltl_2@@
+t0_init{ m(NI1),m(NI2),m(NI3),l2(alice,NA1,NA2),l2(bob,NB1,NB2),
+  n{+NI1,+NB1,$n1},n{+NI3,+NA1,$n2},n{+NI2,+NA2,+NB2,$n3},$p,@p } :-
+accept_all_end{ m(NI1),m(NI2),m(NI3),l2(alice,NA1,NA2),l2(bob,NB1,NB2),
+  n{+NI1,+NB1,$n1},n{+NI3,+NA1,$n2},n{+NI2,+NA2,+NB2,$n3},$p,@p }.
+
+/* ltl2ba output (never claim)
+> ~/workspace/mc/ltl2ba-1.0/ltl2ba -f '!([]!(p))'
+never {
+T0_init:
+        if
+        :: (1) -> goto T0_init
+        :: (p) -> goto accept_all
+        fi;
+accept_all:
+        skip
+}
+*/
+
+/* literal definition
+p@@
+{ m(NI1),m(NI2),m(NI3),l2(alice,NA1,NA2),l2(bob,NB1,NB2),
+  n{+NI1,+NB1,$n1},n{+NI3,+NA1,$na},n{+NI2,+NA2,+NB2,$n2},$p,@p } :-
+{ m(NI1),m(NI2),m(NI3),l2(alice,NA1,NA2),l2(bob,NB1,NB2),
+  n{+NI1,+NB1,$n1},n{+NI3,+NA1,$na},n{+NI2,+NA2,+NB2,$n2},$p,@p }.
+*/
