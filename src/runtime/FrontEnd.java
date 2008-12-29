@@ -529,7 +529,12 @@ public class FrontEnd {
 							// 060804 safe mode
 							Env.safe = true;
 							Env.maxStep = Integer.parseInt(args[++i]);
-						} else {
+						} else if (args[i].equals("--compile-rule")) {
+              // -- --compile-rule
+              // compile one rule (for SLIM model checking mode)
+              Env.compileRule = true;
+							Env.compileonly = true;
+            } else {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util.errPrintln("Use option --help to see a long list of options.");
 							System.exit(-1);
@@ -618,6 +623,7 @@ public class FrontEnd {
 
     if (Env.slimcode) {
       Optimizer.fReuseAtom = false;
+//       Env.findatom2 = true;
     }
 	}
 	
@@ -674,8 +680,8 @@ public class FrontEnd {
 			compile.structure.Membrane m;
 			Env.clearErrors();
 			try {
-				LMNParser lp = new LMNParser(src);
-				m = lp.parse();
+        LMNParser lp = new LMNParser(src);
+        m = lp.parse();
 			}	
 			catch (ParseException e) {
 				Env.p("Compilation Failed");
@@ -732,9 +738,22 @@ public class FrontEnd {
 					Translator.deleteTemporaryFiles();
 				}
 			}
-			
-			((InterpretedRuleset)rs).showDetail();
-			m.showAllRules();
+
+      if (Env.compileRule) {
+        try {
+          List<Ruleset> rulesets = m.rulesets;
+          runtime.InterpretedRuleset r = (runtime.InterpretedRuleset)rulesets.get(0);
+          r.rules.get(0).showDetail();
+        } catch (Exception e) {
+            Env.e("Compilation Failed: no rule");
+        }
+        return;
+      }
+			else {
+        ((InterpretedRuleset)rs).showDetail();
+        m.showAllRules();
+      }
+
 			if (Env.compileonly) {
 				//ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
 				for (String libName : Module.loaded) {

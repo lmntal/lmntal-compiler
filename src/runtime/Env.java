@@ -502,4 +502,7 @@ public final class Env {
 	
 	//編み上げ
 	public static boolean fMerging = false;
+
+  /** 一つのルールのコンパイルを行う (for SLIM model checking mode) */
+  public static boolean compileRule = false;
 }
