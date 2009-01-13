@@ -220,6 +220,9 @@ public final class Membrane extends QueuedEntity {
 		return atoms.toArray();
 	}
 	public Object[] getMemArray() {
+		if(mems.isEmpty()){
+			return null;
+		}
 		return mems.toArray();
 	}
 	/** 06/07/27 */
