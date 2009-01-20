@@ -1,0 +1,98 @@
+/*
+ * CHR(SWI-Prolog)にならったX=Yの振る舞いを提供(できてるつもり)
+ * 各階層で定義
+ * 
+ * X=Y <=> eq(X, Y)
+ * 変数 X <=> var(X)
+ * (X;Y) <=> ";"(X, Y)
+ *   X,Yに=式でないものがくる場合には対応していない。しかし=式でない場合は、モジュール使わないで簡単に書けるのでユーザ頑張れ。
+ * 複数true, falseの整理
+ * 
+ */
+	
+{
+
+module(eq).
+
+%eq($p, $q) :- $p=:=$q | true.
+%eq($p, $q) :- $p=\=$q | false.
+
+eq(X, Y), $p[X], $q[Y] :- unary($p), unary($q), $p=$q | true.
+eq(X, Y), $p[X], $q[Y] :- unary($p), unary($q), $p\=$q | false.
+
+true, true   :- true. 
+false, false :- false.
+false, true  :- false.
+
+//";"(X, Y), $x[X], $y[Y] :- ground($x)|";"(X, Y, r1, r2), $x[X], $y[Y].
+/*
+";"(eq(A, B), C, r1, D), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($a), unary($b), $a=$b  | ";"(eq(A, B), C, true, D), $a[A], $b[B], $c[C], $d[D].
+";"(eq(A, B), C, r1, D), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($a), unary($b), $a\=$b | ";"(eq(A, B), C, false, D), $a[A], $b[B], $c[C], $d[D].
+";"(A, eq(B, C), D, r2), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($b), unary($c), $b=$c  | ";"(A, eq(B, C), D, true), $a[A], $b[B], $c[C], $d[D].
+";"(A, eq(B, C), D, r2), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($b), unary($c), $b\=$c | ";"(A, eq(B, C), D, false), $a[A], $b[B], $c[C], $d[D].
+*/
+
+";"(X, Y) :- ";"(X, Y, r1, r2).
+
+%var型無し
+";"(eq(A, B), C, r1, D) :- unary(A), unary(B), A=B  | ";"(eq(A, B), C, true,  D).
+";"(eq(A, B), C, r1, D) :- unary(A), unary(B), A\=B | ";"(eq(A, B), C, false, D).
+";"(A, eq(B, C), D, r2) :- unary(B), unary(C), B=C  | ";"(A, eq(B, C), D, true ).
+";"(A, eq(B, C), D, r2) :- unary(B), unary(C), B\=C | ";"(A, eq(B, C), D, false).
+
+%EQ1がvar型を含むときは、EQ2の結果に関わらずEQ1を出力
+";"(eq(var(A), B), EQ2, R1,    R2) :- ground(EQ2), unary(R1) , unary(R2) | eq(var(A), B).
+";"(eq(A, var(B)), EQ2, R1,    R2) :- ground(EQ2), unary(R1) , unary(R2) | eq(A, var(B)).
+%EQ1がfalse、EQ2がvar型を含むときは、EQ2を出力
+";"(EQ1, eq(var(C), D), false, R2) :- ground(EQ1),             unary(R2) | eq(var(C), D).
+";"(EQ1, eq(C, var(D)), false, R2) :- ground(EQ1),             unary(R2) | eq(C, var(D)).
+
+%EQ1がtrueならEQ1, EQ1がfalseかつEQ2がtrueならEQ2, どちらもfalseならfalseを出力
+";"(eq(A, B), EQ2, true , R2)    :- ground(EQ2), unary(R2)   | eq(A, B).
+";"(EQ1, eq(C, D), false, true)  :- ground(EQ1)	 		     | eq(C, D).
+";"(EQ1, EQ2     , false, false) :- ground(EQ1), ground(EQ2) | false.
+
+
+/*
+";"(eq(A, B), eq(C, D)), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($a), unary($b), unary($c), unary($d), $a=$b, $c=$d | 
+  ";"(eq(A, B), eq(C, D), true, true), $a[A], $b[B], $c[C], $d[D].
+";"(eq(A, B), eq(C, D)), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($a), unary($b), unary($c), unary($d), $a\=$b, $c=$d | 
+  ";"(eq(A, B), eq(C, D), false, true), $a[A], $b[B], $c[C], $d[D].
+";"(eq(A, B), eq(C, D)), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($a), unary($b), unary($c), unary($d), $a=$b, $c\=$d | 
+  ";"(eq(A, B), eq(C, D), true, false), $a[A], $b[B], $c[C], $d[D].
+";"(eq(A, B), eq(C, D)), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($a), unary($b), unary($c), unary($d), $a\=$b, $c\=$d | 
+  ";"(eq(A, B), eq(C, D), false, false), $a[A], $b[B], $c[C], $d[D].
+*/
+
+ /*
+";"(eq(A, B), eq(C, D), true, R), $a[A], $b[B], $c[C], $d[D], $r[R] :- 
+  unary($a), unary($b), unary($c), unary($d), unary($r) | eq(A, B), $a[A], $b[B].
+";"(eq(A, B), eq(C, D), false, true), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($a), unary($b), unary($c), unary($d) | eq(C, D), $c[C], $d[D].
+";"(eq(A, B), eq(C, D), false, false), $a[A], $b[B], $c[C], $d[D] :- 
+  unary($a), unary($b), unary($c), unary($d) | eq(C, D), $c[C], $d[D].
+*/
+  
+  //";"(eq(var(a), b), eq(c, c)).
+  //";"(eq(a, b), eq(c, c)).
+  //";"(eq(a, var(b)), eq(c, c)).
+  //";"(eq(a, b), eq(c, var(d))).
+//  ";"(c, d, true, 1).
+
+  
+%%TEST
+/*
+eq(1, 1).
+eq(1, 2).
+eq(a, a).
+*/
+
+}.

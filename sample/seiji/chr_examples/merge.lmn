@@ -1,0 +1,25 @@
+/* merge */
+
+/*
+%% SAMPLE QUERIES
+Q: sort(6), sort(2), sort(1), sort(4), sort(1).
+A: 1 <<< 2, 2 <<< 4, 4 <<< 6,  merge(0,1),merge(2,1).
+
+Q: sort(1.4), sort(-3), sort(3.3), sort(3.3), sort(0).
+A: -3 <<< 0, 0 <<< 1.4, 1.4 <<< 3.3,  merge(2,-3),merge(0,3.3).
+*/
+
+%start   @ sort(X)                <=> merge(0,X).
+%dupl    @ A <<< B \ A <<< B      <=> true.
+%sort    @ X <<< A \ X <<< B      <=> A<B | A <<< B.
+%merge   @ merge(N,A), merge(N,B) <=> A<B | M is N+1, merge(M,A), A <<< B.
+start @@ sort(X):- merge(0, X).
+dupl  @@ '<<<'(A1, B1) \ '<<<'(A2, B2) :- A1=A2, B1=B2 | true.
+sort  @@ '<<<'(X1, A) \ '<<<'(X2, B)   :- X1=X2, A<B | '<<<'(A, B).
+merge @@ merge(N1, A), merge(N2, B) :- N1=N2, A<B | M = N1+1, merge(M, A), '<<<'(A, B).
+
+%%QUERY
+%sort(1), sort(2), sort(3), sort(5), sort(10).
+sort(6), sort(2), sort(1), sort(4), sort(1).
+//上の1~10のクエリーだと、10がソートされない。
+//サンプルの上の方のクエリーも、-s3だと6がソートされないときがある。いいのか？？

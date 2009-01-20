@@ -1,0 +1,13 @@
+fe(0), wo(0), go(0), ca(0).
+
+w@@ wo(W), fe(F) :-
+ W=:=F, W2=1-W | wo(W2), fe(W2).
+g@@ go(G), fe(F) :-
+ G=:=F, G2=1-G | go(G2), fe(G2).
+c@@ ca(C), fe(F) :-
+ C=:=F, C2=1-C | ca(C2), fe(C2).
+f@@ fe(F) :-
+ F2=1-F | fe(F2).
+
+ca(C), go(G), wo(W), fe(F) 
+:- C=:=1, G=:=1, W=:=1, F=:=1 | ok.

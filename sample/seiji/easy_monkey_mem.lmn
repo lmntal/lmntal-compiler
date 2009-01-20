@@ -1,0 +1,74 @@
+{
+
+/* 
+
+%%膜を用いたmonkey and banana
+
+%受理状態
+position{goal, monkey(stick, box), object(box, monkey)}
+
+*/
+
+functor_1(nothing).
+
+position{goal}.
+position{a, object(box)}.
+
+%stick有り
+position{b, object(stick)}.
+
+%monkeyの数だけpositionを増やす
+position{c, monkey(nothing, floor)}.
+position{d, monkey(nothing, floor)}.
+//position{e, monkey(nothing, floor)}.
+//position{f, monkey(nothing, floor)}.
+
+%同一positionにmonkeyが複数いることを許す
+//position{c, monkey(nothing, floor), monkey(nothing, floor)}.
+
+
+
+
+%同一positionに複数のmonkeyが存在できない
+/*
+move@@
+position{monkey(Mobj, floor), $p}, position{$q} :- 
+	\+($q=(monkey(X,Y), $pp)), unary(Mobj) |
+		position{$p}, position{monkey(Mobj, floor), $q}. 
+*/
+%同一positionに複数のmonkeyが存在できる
+move@@
+position{monkey(Mobj, floor), $p}, position{$q} :- 
+	unary(Mobj) |
+		position{$p}, position{monkey(Mobj, floor), $q}.
+
+
+hold@@
+position{monkey(nothing, floor), object(Oobj), $p} :- 
+	unary(Oobj) |
+		position{monkey(Oobj, floor), $p}. 
+
+put@@
+position{monkey(Mobj, floor), $p}, functor_1(Func) :- 
+	\+($p=(object(X), $pp)), unary(Mobj), Mobj\=Func |
+		position{monkey(nothing, floor), object(Mobj), $p}, functor_1(Func).
+
+get_on@@ 
+position{monkey(Mobj, floor), object(box), $p} :- 
+	unary(Mobj) |
+		position{monkey(Mobj, box), object(box, monkey), $p}. 
+
+come_down@@
+position{monkey(Mobj, box), object(box, monkey), $p} :- 
+	unary(Mobj) |
+		position{monkey(Mobj, floor), object(box), $p}. 
+
+goal@@
+%stick有り
+position{goal, monkey(stick, box), object(box, monkey)} :- got_banana.
+%stick無し
+//position{goal, monkey(nothing, box), object(box, monkey)} :- got_banana.
+
+}.
+
+{got_banana, $p[], @q} :- got_banana.

@@ -1,0 +1,192 @@
+
+{
+
+module(branch).
+
+/* 実行後のbranch膜の消去 */
+branch{match, match, $rest} :- branch{match, $rest}.
+branch{match} :- .
+branch{} :- .
+
+/* 一度でもマッチした条件があれば、matchを生成 */
+branch{{case=[], $p}, $rest} :- branch{$rest, match}, $p.
+
+/* matchとelseがある場合、elseを消去 */
+branch{{else, $e[]}, match, $rest} :- branch{match, $rest}.
+
+/* elseが複数ある場合、結合 */
+branch{{else, $e1}, {else, $e2}, $rest} :- branch{{else, $e1, $e2}, $rest}.
+
+/* elseがあり、caseとmatchが無ければelse条件を実行 */
+branch{{else, $e[]}} :- | $e[].
+
+
+/* 比較制約 */
+branch{{case=['='(A, B)  | Next], $p}, $rest}   :- A=B  , ground(Next) | branch{{case=Next, $p}, $rest}.
+branch{{case=['='(A, B)  | Next], $p[]}, $rest} :- A\=B , ground(Next) | branch{$rest}.
+
+branch{{case=['\='(A, B) | Next], $p}, $rest}   :- A\=B , ground(Next) | branch{{case=Next, $p}, $rest}.
+branch{{case=['\='(A, B) | Next], $p[]}, $rest} :- A=B  , ground(Next) | branch{$rest}.
+
+
+
+/* int型比較制約 */
+branch{{case=['=:='(A, B) | Next], $p}, $rest}   :- A=:=B , ground(Next) 			   | branch{{case=Next, $p}, $rest}.
+branch{{case=['=:='(A, B) | Next], $p[]}, $rest} :- A=\=B , ground(Next) 			   | branch{$rest}.
+branch{{case=['=:='(A, B) | Next], $p[]}, $rest} :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['=:='(A, B) | Next], $p[]}, $rest} :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['=:='(A, B) | Next], $p[]}, $rest} :- float(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['=:='(A, B) | Next], $p[]}, $rest} :- float(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['=\='(A, B) | Next], $p}, $rest}   :- A=\=B , ground(Next) 			   | branch{{case=Next, $p}, $rest}.
+branch{{case=['=\='(A, B) | Next], $p[]}, $rest} :- A=:=B , ground(Next) 			   | branch{$rest}.
+branch{{case=['=\='(A, B) | Next], $p[]}, $rest} :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['=\='(A, B) | Next], $p[]}, $rest} :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['=\='(A, B) | Next], $p[]}, $rest} :- float(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['=\='(A, B) | Next], $p[]}, $rest} :- float(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['>'(A, B) | Next], $p}, $rest}     :- A>B  , ground(Next)  			   | branch{{case=Next, $p}, $rest}.
+branch{{case=['>'(A, B) | Next], $p[]}, $rest}   :- A=<B , ground(Next)		           | branch{$rest}.
+branch{{case=['>'(A, B) | Next], $p[]}, $rest}   :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['>'(A, B) | Next], $p[]}, $rest}   :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['>'(A, B) | Next], $p[]}, $rest}   :- float(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['>'(A, B) | Next], $p[]}, $rest} 	 :- float(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['<'(A, B) | Next], $p}, $rest}     :- A<B   , ground(Next) 			   | branch{{case=Next, $p}, $rest}.
+branch{{case=['<'(A, B) | Next], $p[]}, $rest}   :- A>=B  , ground(Next)			   | branch{$rest}.
+branch{{case=['<'(A, B) | Next], $p[]}, $rest}   :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['<'(A, B) | Next], $p[]}, $rest}   :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['<'(A, B) | Next], $p[]}, $rest}   :- float(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['<'(A, B) | Next], $p[]}, $rest}   :- float(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['>='(A, B) | Next], $p}, $rest}    :- A>=B  , ground(Next)			   | branch{{case=Next, $p}, $rest}.
+branch{{case=['>='(A, B) | Next], $p[]}, $rest}  :- A<B   , ground(Next)			   | branch{$rest}.
+branch{{case=['>='(A, B) | Next], $p[]}, $rest}  :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['>='(A, B) | Next], $p[]}, $rest}  :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['>='(A, B) | Next], $p[]}, $rest}  :- float(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['>='(A, B) | Next], $p[]}, $rest}  :- float(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['=<'(A, B) | Next], $p}, $rest}    :- A=<B  , ground(Next)			   | branch{{case=Next, $p}, $rest}.
+branch{{case=['=<'(A, B) | Next], $p[]}, $rest}  :- A>B   , ground(Next)			   | branch{$rest}.
+branch{{case=['=<'(A, B) | Next], $p[]}, $rest}  :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['=<'(A, B) | Next], $p[]}, $rest}  :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['=<'(A, B) | Next], $p[]}, $rest}  :- float(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['=<'(A, B) | Next], $p[]}, $rest}  :- float(B), ground(A), ground(Next)  | branch{$rest}.
+
+
+
+/* float型比較制約 */
+branch{{case=['=:=.'(A, B) | Next], $p}, $rest}   :- A=:=.B , ground(Next) 			    | branch{{case=Next, $p}, $rest}.
+branch{{case=['=:=.'(A, B) | Next], $p[]}, $rest} :- A=\=.B , ground(Next) 			    | branch{$rest}.
+branch{{case=['=:=.'(A, B) | Next], $p[]}, $rest} :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['=:=.'(A, B) | Next], $p[]}, $rest} :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['=:=.'(A, B) | Next], $p[]}, $rest} :- int(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['=:=.'(A, B) | Next], $p[]}, $rest} :- int(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['=\=.'(A, B) | Next], $p}, $rest}   :- A=\=.B , ground(Next) 			    | branch{{case=Next, $p}, $rest}.
+branch{{case=['=\=.'(A, B) | Next], $p[]}, $rest} :- A=:=.B , ground(Next) 			    | branch{$rest}.
+branch{{case=['=\=.'(A, B) | Next], $p[]}, $rest} :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['=\=.'(A, B) | Next], $p[]}, $rest} :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['=\=.'(A, B) | Next], $p[]}, $rest} :- int(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['=\=.'(A, B) | Next], $p[]}, $rest} :- int(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['>.'(A, B) | Next], $p}, $rest}     :- A>.B  , ground(Next)  			    | branch{{case=Next, $p}, $rest}.
+branch{{case=['>.'(A, B) | Next], $p[]}, $rest}   :- A=<.B , ground(Next)		        | branch{$rest}.
+branch{{case=['>.'(A, B) | Next], $p[]}, $rest}   :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['>.'(A, B) | Next], $p[]}, $rest}   :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['>.'(A, B) | Next], $p[]}, $rest}   :- int(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['>.'(A, B) | Next], $p[]}, $rest}   :- int(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['<.'(A, B) | Next], $p}, $rest}     :- A<.B   , ground(Next) 		   	    | branch{{case=Next, $p}, $rest}.
+branch{{case=['<.'(A, B) | Next], $p[]}, $rest}   :- A>=.B  , ground(Next)			    | branch{$rest}.
+branch{{case=['<.'(A, B) | Next], $p[]}, $rest}   :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['<.'(A, B) | Next], $p[]}, $rest}   :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['<.'(A, B) | Next], $p[]}, $rest}   :- int(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['<.'(A, B) | Next], $p[]}, $rest}   :- int(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['>=.'(A, B) | Next], $p}, $rest}    :- A>=.B  , ground(Next)			    | branch{{case=Next, $p}, $rest}.
+branch{{case=['>=.'(A, B) | Next], $p[]}, $rest}  :- A<.B   , ground(Next)			    | branch{$rest}.
+branch{{case=['>=.'(A, B) | Next], $p[]}, $rest}  :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['>=.'(A, B) | Next], $p[]}, $rest}  :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['>=.'(A, B) | Next], $p[]}, $rest}  :- int(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['>=.'(A, B) | Next], $p[]}, $rest}  :- int(B), ground(A), ground(Next)  | branch{$rest}.
+branch{{case=['=<.'(A, B) | Next], $p}, $rest}    :- A=<.B  , ground(Next)			    | branch{{case=Next, $p}, $rest}.
+branch{{case=['=<.'(A, B) | Next], $p[]}, $rest}  :- A>.B   , ground(Next)			    | branch{$rest}.
+branch{{case=['=<.'(A, B) | Next], $p[]}, $rest}  :- string(A), ground(B), ground(Next) | branch{$rest}.
+branch{{case=['=<.'(A, B) | Next], $p[]}, $rest}  :- string(B), ground(A), ground(Next) | branch{$rest}.
+branch{{case=['=<.'(A, B) | Next], $p[]}, $rest}  :- int(A), ground(B), ground(Next)  | branch{$rest}.
+branch{{case=['=<.'(A, B) | Next], $p[]}, $rest}  :- int(B), ground(A), ground(Next)  | branch{$rest}.
+
+
+
+/* int(I) */
+branch{{case=[int(I) | Next], $p}, $rest} :- ground(Next) ,ground(I) | branch{{case('.'(
+	result = [:/*inline*/
+		Atom result;
+		try{
+			int x = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
+			result = mem.newAtom(new IntegerFunctor(1));
+		} catch(ClassCastException e) {
+			result = mem.newAtom(new IntegerFunctor(0));
+		}
+		mem.relink(result, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+		:](I), Next)), $p}, $rest}.
+
+
+/* float(F) */
+branch{{case=[float(F) | Next], $p}, $rest} :- ground(Next) ,unary(F) | branch{{case('.'(
+	result=[:/*inline*/
+		Atom result;
+		try{
+			double x = ((FloatingFunctor)me.nthAtom(0).getFunctor()).floatValue();
+			result = mem.newAtom(new IntegerFunctor(1));
+		} catch(ClassCastException e) {
+			result = mem.newAtom(new IntegerFunctor(0));
+		}
+		mem.relink(result, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+		:](F), Next)), $p}, $rest}.
+
+
+/* string(S) */
+branch{{case=[string(S) | Next], $p}, $rest} :- ground(Next) ,unary(S) | branch{{case('.'(
+	result=[:/*inline*/
+		Atom result;
+		try{
+			String x = ((StringFunctor)me.nthAtom(0).getFunctor()).stringValue();
+			result = mem.newAtom(new IntegerFunctor(1));
+		} catch(ClassCastException e) {
+			result = mem.newAtom(new IntegerFunctor(0));
+		}
+		mem.relink(result, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+		:](S), Next)), $p}, $rest}.
+
+
+/* unary(U) */
+branch{{case=[unary($u) | Next], $p}, $rest} :- ground(Next), ground($u)|
+	branch{{case_unary=Next, $p}, $rest}, check_unary($u).
+branch{{case_unary=Next, $p}, $rest}, check_unary(U) :- ground(Next) |
+	branch{{case_unary=Next, $p}, $rest}, result_unary 
+ 	= [:/*inline*/
+		Set<Atom> avoSet = new HashSet<Atom>();
+		List<Membrane> mems = new LinkedList<Membrane>();
+		Iterator<Membrane> itm = mems.iterator();
+		Membrane submem = null;
+		int isground_ret = (me.getArg(0).getBuddy()).isGround(avoSet);
+		Atom result = mem.newAtom(new IntegerFunctor(isground_ret));
+		mem.relink(result, 0, me, 1);
+		me.nthAtom(0).remove();
+		me.remove();
+		:](U).
+branch{{case_unary=Next, $p}, $rest},   result_unary(U) :- ground(Next), U = 1  | branch{{case=Next, $p}, $rest}.
+branch{{case_unary=Next, $p[]}, $rest}, result_unary(U) :- ground(Next), U \= 1 | branch{$rest}.
+
+
+/* 型制約の判定 */
+branch{{case=['='(result, R) | Next], $p}, $rest}   :- ground(Next) ,R >= 1  | branch{{case=Next, $p}, $rest}.
+branch{{case=['='(result, R) | Next], $p[]}, $rest} :- ground(Next) ,R < 1 | branch{$rest}.
+
+
+/* int(float型) :- [float型](ガウス関数)の自動置き換えを解消 */
+branch{{case=[Int | Next], $p[]}, $rest}  :- int(Int), ground(Next)  | branch{$rest}.
+
+/* float(int型) :- int型.0 の自動置き換えを解消 */
+branch{{case=[Float | Next], $p[]}, $rest}  :- float(Float), ground(Next)  | branch{$rest}.
+
+}.	

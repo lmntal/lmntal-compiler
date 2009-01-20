@@ -1,0 +1,66 @@
+/* Propositional Sequent Calculus
+   Kazunori Ueda, 2005-12-29
+*/
+
+axiom@@
+sequent({+$a,$gamma[]},{+$b,$delta[]},done,D) :-
+    ground($a), ground($b), $a=$b | D=done.
+
+notR@@
+sequent({$gamma[]},{$delta[],+not($a)},done,D) :-
+    ground($a) |
+    sequent({+$a,$gamma[]},{$delta[]},done,D).
+
+notL@@
+sequent({+not($a),$gamma[]},{$delta[]},done,D) :-
+    ground($a) |
+    sequent({$gamma[]},{$delta[],+$a},done,D).
+
+andR@@
+sequent({$gamma[]},{$delta[],+and($a,$b)},done,D) :-
+    ground($a), ground($b) |
+    sequent({$gamma[]},{$delta[],+$a},done,D1),
+    sequent({$gamma[]},{$delta[],+$b},D1,D).
+
+andL@@
+sequent({+and($a,$b),$gamma[]},{$delta[]},done,D) :-
+    ground($a), ground($b) |
+    sequent({+$a,+$b,$gamma[]},{$delta[]},done,D).
+
+orR@@
+sequent({$gamma[]},{$delta[],+or($a,$b)},done,D) :-
+    ground($a), ground($b) |
+    sequent({$gamma[]},{$delta[],+$a,+$b},done,D).
+
+orL@@
+sequent({+or($a,$b),$gamma[]},{$delta[]},done,D) :-
+    ground($a), ground($b) |
+    sequent({+$a,$gamma[]},{$delta[]},done,D1),
+    sequent({+$b,$gamma[]},{$delta[]},D1,D).
+
+impliesR@@
+sequent({$gamma[]},{$delta[],+implies($a,$b)},done,D) :-
+    ground($a), ground($b) |
+    sequent({+$a,$gamma[]},{$delta[],+$b},done,D).
+
+impliesL@@
+sequent({+implies($a,$b),$gamma[]},{$delta[]},done,D) :-
+    ground($a), ground($b) |
+    sequent({$gamma[]},{$delta[],+$a},done,D1),
+    sequent({+$b,$gamma[]},{$delta[]},D1,D).
+
+// Example 1:  A, A=>B |- B
+// sequent({+a,+implies(a,b)},{+b}).
+
+// Example 2:  P&~Q=>R, ~R, P |- Q.
+// sequent({+implies(and(p,not(q)),r), +not(r), +p},{+q},done,d).
+
+// Example 3:  |- ((A=>B)=>A)=>A
+// sequent({},{+implies(implies(implies(a,b),a),a)}).
+
+// Example 4:  ~A or ~R => ~(T & C) => (~O & S) |- ~R & ~T => S
+// (Chang and Lee, 1973)
+
+sequent({+implies(or(not(a),not(r)),
+                  implies(not(and(t,c)),and(not(o),s)))},
+        {+implies(and(not(r),not(t)),s)},done,d).

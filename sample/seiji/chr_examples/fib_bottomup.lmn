@@ -1,0 +1,14 @@
+/* fib_bottomup */
+
+
+%% SAMPLE QUERIES
+%Q: upto(8).
+%A: upto(8), fib(0,1), fib(1,1), .., fib(7,21), fib(8,34).
+
+%start @ upto(_) ==> fib(0,1), fib(1,1).
+%next  @ upto(Max), fib(N1,M1), fib(N2,M2) ==> Max>N2, N2=:=N1+1 | 
+%            N is N2+1, M is M1+M2, fib(N,M).
+
+start @@ upto(U) :- uniq | upto(U), fib(0, 1), fib(1, 1).
+next  @@ upto(Max), fib(N1, M1), fib(N2, M2) :- Max>N2, N2=:=N1+1, uniq(Max, N1, N2, M1, M2) | 
+						upto(Max), fib(N1, M1), fib(N2, M2), N = N2+1, M = M1+M2, fib(N, M).

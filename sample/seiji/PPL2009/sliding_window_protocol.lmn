@@ -1,0 +1,92 @@
+/*
+ * Sliding Window Protocol
+ * Takayuki AYANO
+*/
+
+t0_init{
+ {
+  wSize(4).     // ウィンドウサイズ
+  nMAX(10).      // 再送処理などの制御に利用するナンバーnの上限値(wSize+1以上でないと正しく動かない)
+  idMAX(3).     // 送信データの正当さをチェックするidの上限値(3以上)
+  error(false). // エラー検出フラグ
+  
+  sender{ n(0), nextId(0), sucId(0), c(0). }. // データ送信者
+  ss=rr.                                      // データが通るチャネル
+  rs=sr.                                      // ACKが通るチャネル
+  receiver{ n(0), expId(0). }.                // データ受信者
+  
+  //データの送信 sender -> [data]
+  sd@@ sender{ n(N), nextId(ID), sucId(SucID), c(C) }, nMAX(NMAX), idMAX(IDMAX), wSize(W), ss=SC
+    :- C<W, C_=C+1, DN=(N+C) mod NMAX, ID_=(ID+1) mod IDMAX, int(SucID)
+    |  sender{ n(N), nextId(ID_),sucId(SucID), c(C_)}, nMAX(NMAX), idMAX(IDMAX), wSize(W), ss=[data(DN,ID)|SC].
+  
+  //送信データの損失 [data] -> []
+  ld@@ X=[data(DN,ID)|Y] :- int(DN),int(ID) | X=Y.
+  
+  
+  //データ受信、ACKの返送(予期していたデータ) [data] -> receiver -> [ack]
+  rs@@ receiver{ n(N), expId(EID) }, nMAX(NMAX), idMAX(IDMAX), SC=[data(DN,ID)|rr], rs=RC
+    :- N=:=DN, EID=:=ID, N_=(N+1) mod NMAX, EID_=(EID+1) mod IDMAX
+     | receiver{ n(N_),expId(EID_)}, nMAX(NMAX), idMAX(IDMAX), SC=rr, rs=[ack(DN)|RC].
+  
+  //データ受信、ACKの返送(損失検出) [data] -> receiver -> [ack]
+  ru@@ receiver{ n(N), expId(EID) }, SC=[data(DN,ID)|rr], rs=RC
+    :- N=\=DN, int(ID), int(EID), ground(SC)
+     | receiver{ n(N), expId(EID) }, ss=rr, rs=[ack(DN)|RC].
+  
+  //データ受信(正しいメッセージでない) [data] -> receiver -> error
+  re@@ error(false), receiver{ n(N), expId(EID) }, SC=[data(DN,ID)|rr], rs=RC, sender{ $p[] }
+    :- N=:=DN, EID=\=ID, ground(SC), ground(RC)
+     | error(true).
+  
+  //ACKの損失 [ack] -> []
+  la@@ X=[ack(ACK)|Y] :- int(ACK) | X=Y .
+  
+  
+  //ACKの受信(予期していたACK) [ack] -> slide
+  s@@ sender{ n(N), nextId(NextID), sucId(SucID), c(C) }, nMAX(NMAX), idMAX(IDMAX), RC=[ack(ACK)|sr]
+   :- N=:=ACK, C>0, N_=(N+1) mod NMAX, SucID_=(SucID+1) mod IDMAX, C_=C-1, int(NextID)
+    | sender{ n(N_),nextId(NextID), sucId(SucID_),c(C_)}, nMAX(NMAX), idMAX(IDMAX), RC=sr.
+  
+  //ACKの受信(損失検出) [ack] -> reset
+  r@@ sender{ n(N), nextId(NextID),sucId(SucID), c(C) }, SC=rr, RC=[ack(ACK)|sr]
+   :- N=\=ACK, int(NextID), int(SucID), int(C), int(ACK), ground(SC), ground(RC)
+    | sender{ n(N), nextId(SucID), sucId(SucID), c(0) }, ss=rr, rs=sr.
+  
+  //タイムアウト [timeout] -> reset
+  t@@ sender{ n(N), nextId(NextID),sucId(SucID), c(C) }, timeout
+   :- int(N), int(NextID), int(SucID), int(C)
+    | sender{ n(N), nextId(SucID), sucId(SucID), c(0) }.
+  
+ }.
+ //タイムアウト検出 [] -> [timeout]
+ o@@ { error(false), $p, @p }/ :- { timeout, error(false), $p, @p }.
+ 
+}.
+
+/*
+ltl1@@ t0_init{$p,@p} :- t0_init{$p,@p}.
+ltl2@@ t0_init{{error(true),$p2,@p2},$p1,@p1} :- 
+  accept_all_end{{error(true),$p2,@p2},$p1,@p1}.
+*/
+
+/* !([]<>(r -> <>p))
+never {
+T0_init:
+	if
+	:: (! ((p)) && (r)) -> goto accept_S2
+	:: (1) -> goto T0_init
+	fi;
+accept_S2:
+	if
+	:: (! ((p)) && (r)) -> goto accept_S2
+	fi;
+}
+*/
+/*
+t0_init{$p,@p} :- t0_init{$p,@p}.
+t0_init{{sender{ sucId(ID),$s },C=ack(ACK),$p,@p2},@p1}
+ :- int(ID),ID=\=5,ground(C),int(ACK) | accept_s4{{sender{ sucId(ID),$s },C=ack(ACK),$p,@p2},@p1}.
+accept_s4{{sender{ sucId(ID),$s },C=ack(ACK),$p,@p2},@p1}
+ :- int(ID),ID=\=5,ground(C),int(ACK) | accept_s4{{sender{ sucId(ID),$s },C=ack(ACK),$p,@p2},@p1}.
+*/

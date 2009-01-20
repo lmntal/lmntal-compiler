@@ -1,2 +1,64 @@
-a(1).
-a(A) :- uniq(A) | b(A).
+//";"(A, B, true, X) :- ground(A), ground(B), ground(X) | true.
+//";"(A, B, X, true) :- ground(A), ground(B), ground(X) | false.
+
+//";"(a, b, true, 1).
+//";"(c, d, true, 1).
+
+//a(A), $a[A] :- A.//$a[A].
+
+/*
+";"(eq(var(A), B)) :- unary(A), unary(B) | ok.
+
+";"(eq(var(a), b)).
+";"(eq(a, var(b))).
+*/
+
+
+//a(A), $a[A] :- unary($a) | {$a[A]}.
+
+//a(b(c(d))), a(b(c(d))).
+
+//a(b(c(d), e, f)).
+//a(b(c(d), e, f)).
+
+//b(a, c), b(c, a).
+//b(a, a), b(a, a).
+
+//a(A), c(C), $p[A, C] :- uniq($p) | ok.
+//a(X, X) :- uniq(X) | b(X, X).
+//a(A, A), a(B, B).
+//a(b(c), d(e))//, a(1, 2).
+
+a(b(c, d, e(f))).
+a(A) :- uniq(A) | ok(A).
+/*
+a(A, A).
+a(X, Y) :- uniq(X, Y) | b(X, Y).
+
+a(X, Y) :- b(X, Y).
+*/
+
+//a :- uniq | a, b.
+//a(A) \ :- uniq(A) | b(A).
+//a(1).
+
+//a(A, A), a(B, B).
+//a(X, Y) :- uniq(X, Y) | ok(X, Y).
+//a(A) \ :- uniq(A) | b(A).
+//a(A) :- uniq(A) | b(A).
+
+//a(b(c(d), e, f)), a(b(c(d), e, f)).
+//a(A) :- uniq(A) | ok(A).
+
+/*
+a(in, out, hatena), b(hatena).
+
+a(A, B, C), b(X) :- C=X | ok(A, B, C), ok(X).
+*/
+/*
+io.use.
+
+a(okokoko).
+a(A) :- ground(A) | io.print("ok is ", res), io.print(A, res),
+b(A).
+*/

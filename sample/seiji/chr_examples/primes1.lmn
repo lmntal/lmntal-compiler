@@ -1,0 +1,30 @@
+/* primes1 */
+
+/*
+%% SAMPLE QUERIES
+Q: prime(12).
+A: prime(11), prime(7), prime(5), prime(3), prime(2).
+
+Q: prime(2).
+A: prime(2).
+
+Q: prime(-1).
+A: no.
+*/
+
+
+eq.use.
+
+
+%fail @ prime(N) <=> N<2 | false.
+%gen  @ prime(N) ==> N>2 | M is N-1, prime(M).
+%sift @ prime(X) \ prime(Y) <=> Y mod X =:= 0 | true.
+
+fail @@ prime(N) :- N<2 | false.
+gen  @@ prime(N) :- N>2, uniq(N) | prime(N), M = N-1, prime(M).
+sift @@ prime(X) \ prime(Y) :- Y mod X =:= 0 | true.
+
+%%QUERY
+prime(12).
+
+

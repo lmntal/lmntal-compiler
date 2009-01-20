@@ -1,0 +1,41 @@
+/* uniq無いため途中 */
+
+/*
+
+%% SAMPLE QUERIES
+Q: dfsearch(node(0,node(1,leaf(2),leaf(3)),leaf(4)), 0).
+A: yes.
+
+Q: dfsearch(node(0,node(1,leaf(2),leaf(3)),leaf(4)), 4).
+A: yes.
+
+Q: dfsearch(node(0,node(1,leaf(2),leaf(3)),leaf(4)), 5).
+A: no.
+*/
+
+% leaf        @ dfsearch(leaf(Val),X) <=> X == Val.
+% node_found  @ dfsearch(node(Val,_,_),Val) <=> true.
+% node_search @ dfsearch(node(Val,L,R),X) <=> X \== Val | 
+%                 (dfsearch(L,X) ; dfsearch(R,X)).
+
+{
+
+leaf 				@@ dfsearch(leaf(Val), X) :- '=='(X, Val).
+node_found  @@ dfsearch(node(Val1, X, Y), Val2) :- Val1=Val2, ground(X), ground(Y) | true.
+//node_search @@ dfsearch(node(Val,L,R),X) :- X \= Val | dfsearch(L, X), dfsearch(R, X).
+node_search @@ dfsearch(node(Val,L,R),X) :- X \= Val, ground(R) | dfsearch(L, X).
+node_search @@ dfsearch(node(Val,L,R),X) :- X = Val, ground(L) | dfsearch(R, X).
+
+
+Additional1 @@ '=='(X, Val) :- X=:=Val | true. 
+Additional2 @@ '=='(X, Val) :- X=\=Val | false.
+
+%%QUERY
+//dfsearch(node(0,node(1,leaf(2),leaf(3)),leaf(4)), 0).
+dfsearch(node(0,node(1,leaf(2),leaf(3)),leaf(4)), 3).
+
+
+}.
+
+{false, $p[], @q}/ :- false.
+{$p, @q}/ :- \+($p=(false, $pp)) | $p.
