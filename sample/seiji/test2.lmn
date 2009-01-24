@@ -1,64 +1,77 @@
-//";"(A, B, true, X) :- ground(A), ground(B), ground(X) | true.
-//";"(A, B, X, true) :- ground(A), ground(B), ground(X) | false.
-
-//";"(a, b, true, 1).
-//";"(c, d, true, 1).
-
-//a(A), $a[A] :- A.//$a[A].
+//var.use.
 
 /*
-";"(eq(var(A), B)) :- unary(A), unary(B) | ok.
+VarDeclare @@
+H=var(_GName) :- H=v({name=_GName}).
 
-";"(eq(var(a), b)).
-";"(eq(a, var(b))).
+VarUnify @@
+{name=_GName0, $e0}, {name=_GName1, $e1} :- _GName0=_GName1 | {name=_GName0, $e0, $e1}.
+
+VarBind @@
+var.bind(_GName0, _GValue), {name=_GName1, $e} :- {name=_GName1, value=_GValue, $e}.
+
+VarBindEach @@
+H=v({name=_GName1, value=_GValue, $e}) :- H=_GValue, {name=_GName1, value=_GValue, $e}.
+
+VarUnify @@
+var.unify(_GName0, _GName1), {name=_GName2, $e0}, {name=_GName3, $e1} :- _GName0=_GName2, _GName1=_GName3 |
+{name=_GName3, $e0, $e1}.
+*/
+
+//a(var(x)), b(var(y)).
+//var.bind(x, 5).
+//var.unify(x, y).
+/*
+reflexivity  @@ leq(var(X1), var(X2)) :- X1=X2 | unify(X1, X2).
+
+antisymmetry @@ leq(var(X1), var(Y1)), leq(var(Y2), var(X2)) 
+						:- X1=X2, Y1=Y2 | unify(X1, Y1).
+
+transitivity @@ leq(var(X), var(Y1)), leq(var(Y2), var(Z)) \ 
+						:- Y1=Y2, uniq(X, Y1, Z) | leq(var(X), var(Z)).
+
+idempotence  @@ leq(var(X1), var(Y1)) \ leq(var(X2), var(Y2)) 
+						:- X1=X2, Y1=Y2 |.
+\*/
+
+
+
+						
+/*
+reflexivity  @@ leq(var(X1), var(X2)) :- X1=X2 | var.unify(X1, X2).
+
+antisymmetry @@ leq(var(X1), var(Y1)), leq(var(Y2), var(X2)) 
+						:- X1=X2, Y1=Y2 | var.unify(X1, Y1).
+
+transitivity @@ leq(var(X), var(Y1)), leq(var(Y2), var(Z)) \ 
+						:- Y1=Y2, uniq(X, Y1, Z) | leq(X, Z).
+
+idempotence  @@ leq(var(X1), var(Y1)) \ leq(var(X2), var(Y2)) 
+						:- X1=X2, Y1=Y2 |.
 */
 
 
-//a(A), $a[A] :- unary($a) | {$a[A]}.
+//leq(var(a), var(b)).leq(var(b), var(c)), leq(var(c), var(a)).
+leq(var(a), var(b)).
+leq(var(b), var(c)).
+leq(var(c), var(a)).
 
-//a(b(c(d))), a(b(c(d))).
 
-//a(b(c(d), e, f)).
-//a(b(c(d), e, f)).
 
-//b(a, c), b(c, a).
-//b(a, a), b(a, a).
+eq.use.
 
-//a(A), c(C), $p[A, C] :- uniq($p) | ok.
-//a(X, X) :- uniq(X) | b(X, X).
-//a(A, A), a(B, B).
-//a(b(c), d(e))//, a(1, 2).
+%%モジュールeq使用
+reflexivity  @@ leq(X1, X2) :- X1=X2 | true.
+transitivity @@ leq(X, Y1), leq(Y2, Z) \:- Y1=Y2, uniq(X, Y1, Z) | leq(X, Z).
+antisymmetry @@ leq(X1, Y1) , leq(Y2, X2) :- X1=X2, Y1=Y2 | eq(X1, Y1).
+idempotence  @@ leq(X1, Y1) \ leq(X2, Y2) :- X1=X2, Y1=Y2 | true.
 
-a(b(c, d, e(f))).
-a(A) :- uniq(A) | ok(A).
-/*
-a(A, A).
-a(X, Y) :- uniq(X, Y) | b(X, Y).
-
-a(X, Y) :- b(X, Y).
-*/
-
-//a :- uniq | a, b.
-//a(A) \ :- uniq(A) | b(A).
-//a(1).
-
-//a(A, A), a(B, B).
-//a(X, Y) :- uniq(X, Y) | ok(X, Y).
-//a(A) \ :- uniq(A) | b(A).
-//a(A) :- uniq(A) | b(A).
-
-//a(b(c(d), e, f)), a(b(c(d), e, f)).
-//a(A) :- uniq(A) | ok(A).
 
 /*
-a(in, out, hatena), b(hatena).
-
-a(A, B, C), b(X) :- C=X | ok(A, B, C), ok(X).
+reflexivity  @ X leq X <=> true.
+antisymmetry @ X leq Y , Y leq X <=> X=Y.
+idempotence  @ X leq Y \ X leq Y <=> true.
+transitivity @ X leq Y , Y leq Z ==> X leq Z.
 */
-/*
-io.use.
 
-a(okokoko).
-a(A) :- ground(A) | io.print("ok is ", res), io.print(A, res),
-b(A).
-*/
+

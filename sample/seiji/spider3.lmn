@@ -1,0 +1,145 @@
+{
+
+
+input{
+  edge(d,a).  edge(d,b).   edge(d,c). 
+  edge(d,e).  edge(a,x).   edge(b,y).
+  edge(c,z).  edge(a,b).   edge(y,c).
+}.
+
+
+size{
+	edge_num(0).
+	node_num(0).
+	edge(X, Y) \ edge_num(N) :- uniq(X, Y) | edge_num(N+1).
+	edge(X, Y) \ :- uniq(X, Y) | node(X, 1), node(Y, 1).
+	node(X1, N1), node(X2, N2) :- X1=X2 | node(X1, N1+N2).
+	node(X, N) \ node_num(M) :- uniq(X) | node_num(M+1).
+}.
+size{edge(X, Y), $p, @p}/ :- unary(X), unary(Y) | size{$p, @p}.
+
+/*いらないかも
+graph_rule{
+
+edge(X1, Y1) \ sub{edge(X2, Y2), $p} :- X1=X2, Y1=Y2 | sub{$p}.
+
+}.
+*/
+
+
+input{$p[]}, size{$q[], @p} :- uniq | 
+input{$p[]}, size{$p[], $q[], @p}, sub{anc_index(-1), index(0), $p[]}.
+
+times(0).
+//times(T) :- T>100 | .
+
+//第I世代から次世代のgraph生成
+sub{anc_index(A), index(I), edge(X, Y), $q[]} \ times(T):- int(A), int(T), uniq(X, Y, I) | 
+times(T+1), graph{edge(X, Y), sub{anc_index(I), index(T+1), $q[]}}.
+
+graph{sub{$p[]}, $q[]} :- \+($p=(edge(X, Y), $pp)) |.
+
+
+next_graph{edge(X, Y), sub{anc_index(A), $q}} :- uniq(X, Y, A) | sub{anc_index(A), $q}.
+
+
+/*
+sub{gen(G), index(I), edge(X, Y), $q[]} \ times(T):- int(T), uniq(X, Y, G) | 
+graph{edge(X, Y), sub{gen(G+1), index(T+1), $q[]}}, times(T+1).
+*/
+//graph{edge(X, Y), sub{index(I), $p}, @p}/ :- uniq(I) | sub{gen(G), $p}.
+//graph{sub{index(I), $p}, $q}/ :- uniq(I) | graph{$q}, sub{index(I), $p}.
+
+/*
+input{$p[]}, graph_rule{@p}, sub{index(I), edge(X, Y), $q[]} :- uniq(X, Y, I) | 
+input{$p[]}, graph_rule{@p}, sub{index(I), edge(X, Y), $q[]}, 
+graph{edge(X, Y), sub{index(I+1), $q[]}, @p}.
+
+graph{edge(X, Y), sub{index(I), $p}, @p}/ :- unary(X), unary(Y), unary(I), uniq| sub{index(I), $p}.
+*/
+
+
+
+
+
+
+
+
+//sub{graph{sub{$p}, $q[], @q}, $r}/ :- check{graph{sub{$p}, $q[], @q}, $r}
+
+}.
+
+{graph{sub{edge(X, Y), $p}, $q[]}, $r, @r}/ :- unary(X), unary(Y) | 
+{sub{edge(X, Y), $p}, $r, @r}.
+
+/*
+{sub{graph{sub{$p[], @p}, $q[], @q}, $r[], @r}, $s[], @s}/ :- 
+{{sub{$p[], @p}, $s[], @s}.
+*/
+/*
+{sub{graph{sub{$p}, $q[], @q}, $r}, $s[], @s}/ :- 
+ok{sub{$p}, check_spider{$r}, $s[], @s}.
+*/
+
+
+
+/*
+input{$p[]}, graph_rule{@p}, sub{index(I), edge(X, Y), $q[]} :- int(I), uniq(X, Y) | 
+input{$p[]}, graph_rule{@p}, sub{index(I), edge(X, Y), $q[], graph{edge(X, Y), sub{$p[]}, @p}}.
+*/
+
+
+
+
+
+
+
+
+//size{}
+
+
+
+//sub{edge(X, Y), $p[]} \ index(I) :- uniq(X, Y, I) | 
+//index(I), graph{edge(X, Y), sub{edge(X, Y), $p[]}}.
+
+
+/**/
+//graph{edge(X1, Y1), sub{edge(X2, Y2), $p}} :- X1=X2, Y1=Y2 | 
+//graph{edge(X1, Y1), sub{$p}}.
+
+
+
+/*
+input{edge(X1, Y1), $p}, graph{edge(X2, Y2), sub{$q}} :- 
+unary(X1), unary(X2), unary(Y1), unary(Y2), X1\=X2, Y1\=Y2, uniq(X1, X2, Y1, Y2) |
+input{edge(X1, Y1), $p}, graph{edge(X2, Y2), sub{edge(X1, Y1), $q}}.
+*/
+
+/*
+i(0).
+
+{a(1), a(1). a(2), a(2).}.
+{a(1), a(1). a(2), a(2).}.
+
+rule{a(1). a(A) :- uniq(A) | b(A).}.
+
+i(I), {$q}, rule{$p, @p}/ :- I<2 | i(I+1), {$q, @p}, rule{$p, @p}.
+*/
+
+/*
+{a(1), a(1).}.
+{a(1), a(1).}.
+
+rule{name1 @@ a(A):-uniq(A)|b(A).}.
+name2 @@ {$a}, rule{ @p} :- {$a, @p}, rule{ @p}, @p.
+name3 @@ c:-d.
+*/
+
+/*
+first{a:-b.}. second{a:-b.}, third{}.
+
+//first{@p} \ second{} :- second{@p}.
+//first{@p}, second{} :- first{@p}, second{@p}.
+//first{@p}, second{} :- first{}, second{@p}.
+first{@p} \ second{@q}, third{} :- second{@q}.
+*/

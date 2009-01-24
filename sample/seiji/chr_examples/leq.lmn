@@ -11,18 +11,23 @@ leq(X, Y1), leq(Y2, Z) :- Y1=Y2, uniq(X, Y1, Y2, Z) | leq(X, Z).
 eq.use.
 	
 %%モジュールeq使用
-leq(X1, X2) :- X1=X2 | true.
-leq(X1, Y1) , leq(Y2, X2) :- X1=X2, Y1=Y2 | eq(X1, Y1).
-leq(X1, Y1) \ leq(X2, Y2) :- X1=X2, Y1=Y2 | true.
-leq(X, Y1), leq(Y2, Z) :- Y1=Y2, uniq(X, Y1, Y2, Z) | leq(X, Z).
+reflexivity  @@ leq(X1, X2) :- X1=X2 | .
+transitivity @@ leq(X, Y1), leq(Y2, Z) \ :- Y1=Y2, uniq(X, Y1, Y2, Z) | leq(X, Z).
+antisymmetry @@ leq(X1, Y1) , leq(Y2, X2) :- X1=X2, Y1=Y2 | eq(X1, Y1).
+idempotence  @@ leq(X1, Y1) \ leq(X2, Y2) :- X1=X2, Y1=Y2 | .
+
 
 %%SAMPLE QUERY
 %leq(var(a), 3) , leq(3, var(a)).
-leq(2, 5) , leq(5, 2).
+%leq(2, 5) , leq(5, 2).
+
+leq(var(a), var(b)).
+leq(var(b), var(c)).
+leq(var(c), var(a)).
 
 /*
 {false, $p[], @q}/ :- false.
 {true, true, $p} :- {true, $p}.
 {$p, @q}/ :- \+($p=(false, $pp)) | $p.
 */
-io.use.
+%io.use.

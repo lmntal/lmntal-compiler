@@ -20,22 +20,19 @@ module(eq).
 eq(X, Y), $p[X], $q[Y] :- unary($p), unary($q), $p=$q | true.
 eq(X, Y), $p[X], $q[Y] :- unary($p), unary($q), $p\=$q | false.
 
+
 true, true   :- true. 
 false, false :- false.
 false, true  :- false.
 
-//";"(X, Y), $x[X], $y[Y] :- ground($x)|";"(X, Y, r1, r2), $x[X], $y[Y].
-/*
-";"(eq(A, B), C, r1, D), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($a), unary($b), $a=$b  | ";"(eq(A, B), C, true, D), $a[A], $b[B], $c[C], $d[D].
-";"(eq(A, B), C, r1, D), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($a), unary($b), $a\=$b | ";"(eq(A, B), C, false, D), $a[A], $b[B], $c[C], $d[D].
-";"(A, eq(B, C), D, r2), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($b), unary($c), $b=$c  | ";"(A, eq(B, C), D, true), $a[A], $b[B], $c[C], $d[D].
-";"(A, eq(B, C), D, r2), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($b), unary($c), $b\=$c | ";"(A, eq(B, C), D, false), $a[A], $b[B], $c[C], $d[D].
-*/
 
+/*
+ * (X ; Y)は今のところ使わない
+ * 
+ */
+
+
+/*
 ";"(X, Y) :- ";"(X, Y, r1, r2).
 
 %var型無し
@@ -55,44 +52,7 @@ false, true  :- false.
 ";"(eq(A, B), EQ2, true , R2)    :- ground(EQ2), unary(R2)   | eq(A, B).
 ";"(EQ1, eq(C, D), false, true)  :- ground(EQ1)	 		     | eq(C, D).
 ";"(EQ1, EQ2     , false, false) :- ground(EQ1), ground(EQ2) | false.
-
-
-/*
-";"(eq(A, B), eq(C, D)), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($a), unary($b), unary($c), unary($d), $a=$b, $c=$d | 
-  ";"(eq(A, B), eq(C, D), true, true), $a[A], $b[B], $c[C], $d[D].
-";"(eq(A, B), eq(C, D)), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($a), unary($b), unary($c), unary($d), $a\=$b, $c=$d | 
-  ";"(eq(A, B), eq(C, D), false, true), $a[A], $b[B], $c[C], $d[D].
-";"(eq(A, B), eq(C, D)), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($a), unary($b), unary($c), unary($d), $a=$b, $c\=$d | 
-  ";"(eq(A, B), eq(C, D), true, false), $a[A], $b[B], $c[C], $d[D].
-";"(eq(A, B), eq(C, D)), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($a), unary($b), unary($c), unary($d), $a\=$b, $c\=$d | 
-  ";"(eq(A, B), eq(C, D), false, false), $a[A], $b[B], $c[C], $d[D].
 */
 
- /*
-";"(eq(A, B), eq(C, D), true, R), $a[A], $b[B], $c[C], $d[D], $r[R] :- 
-  unary($a), unary($b), unary($c), unary($d), unary($r) | eq(A, B), $a[A], $b[B].
-";"(eq(A, B), eq(C, D), false, true), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($a), unary($b), unary($c), unary($d) | eq(C, D), $c[C], $d[D].
-";"(eq(A, B), eq(C, D), false, false), $a[A], $b[B], $c[C], $d[D] :- 
-  unary($a), unary($b), unary($c), unary($d) | eq(C, D), $c[C], $d[D].
-*/
-  
-  //";"(eq(var(a), b), eq(c, c)).
-  //";"(eq(a, b), eq(c, c)).
-  //";"(eq(a, var(b)), eq(c, c)).
-  //";"(eq(a, b), eq(c, var(d))).
-//  ";"(c, d, true, 1).
-
-  
-%%TEST
-/*
-eq(1, 1).
-eq(1, 2).
-eq(a, a).
-*/
 
 }.

@@ -1,0 +1,39 @@
+//acker(X, Y, A1) \ acker(X, Y, A2) :- A1 = A2.
+
+//acker(0, Y, A) :- uniq(Y, A) | Y1=Y+1, A = Y1.
+//acker(0, 1, 2).
+
+acker(0, Y, A) :- uniq(Y, A) | ok.
+acker(0, 1, 2).
+
+//acker(X, 0, A) ==> X1 is X-1, acker(X1, 1, A).
+
+//acker(X, Y, A) ==> X>0, Y>0 |
+  //  Y1 is Y-1, acker(X, Y1, A1), X1 is X-1, acker(X1, A1, A).
+
+
+/*
+acker(X, Y, A1) \ acker(X, Y, A2) <=> A1 = A2.
+
+acker(0, Y, A) ==> Y1 is Y+1, A = Y1.
+
+acker(X, 0, A) ==> X1 is X-1, acker(X1, 1, A).
+
+acker(X, Y, A) ==> X>0, Y>0 |
+    Y1 is Y-1, acker(X, Y1, A1), X1 is X-1, acker(X1, A1, A).
+*/
+
+
+
+
+
+
+
+
+/*
+reflexivity @ X leq X <=> true.
+antisymmetry @ X leq Y , Y leq X <=> X=Y.
+idempotence @ X leq Y \ X leq Y <=> true.
+transitivity @ X leq Y , Y leq Z ==> X leq Z.
+leq(A, B), leq(B, C), leq(C, A).
+*/
