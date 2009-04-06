@@ -373,11 +373,13 @@ public class Mediator {
 	
 	static
 	public void addAddedAtom(Atom atom){
+		if(atom.getFunctor().equals(Functor.STAR))	return;
 		addedAtom_.add(atom);
 	}
 	
 	static
 	public void addModifiedAtom(Atom atom){
+		if(atom.getFunctor().equals(Functor.STAR))	return;
 		modifiedAtom_.add(atom);
 	}
 	
