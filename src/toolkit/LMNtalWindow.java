@@ -11,9 +11,11 @@ import javax.swing.JFrame;
 
 import runtime.Atom;
 import runtime.Dumper;
+import runtime.Env;
 import runtime.Functor;
 import runtime.Membrane;
 import runtime.SymbolFunctor;
+import unyo.Mediator;
 import util.Util;
 
 public class LMNtalWindow extends JFrame {

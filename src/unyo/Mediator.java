@@ -308,15 +308,15 @@ public class Mediator {
 			removedAtom_.clear();
 			addedAtom_.clear();
 			modifiedAtom_.clear();
-			
 			while((Boolean)sync_.invoke(unyoObj_)&&!releasing){
+				setWait(true);
 				try {
 					Thread.sleep(SLEEP_TIME);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
-			
+			setWait(false);			
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -334,11 +334,13 @@ public class Mediator {
 
 	static
 	public void addRemovedMembrane(String removeMemID, String parentMemID){
+//		System.out.println("removeMem/" + removeMemID);
 		removedMembrane_.put(removeMemID, parentMemID);
 	}
 	
 	static
 	public void addAddedMembrane(Membrane mem){
+//		System.out.println("addMem/" + mem.getMemID());
 		addedMembrane_.add(mem);
 		addChildrenOfMembrane(mem);
 	}
@@ -361,11 +363,13 @@ public class Mediator {
 	
 	static
 	public void addModifiedMembrane(Membrane mem){
+//		System.out.println("addModMem/" + mem.getMemID());
 		modifiedMembrane_.add(mem);
 	}
 	
 	static
 	public void addRemovedAtom(Atom removeAtom, String parentMemID){
+//		System.out.println("addRemAtom/" + removeAtom.getid());
 		String id = ((Integer)removeAtom.getid()).toString();
 		removedAtom_.put(id, parentMemID);
 		addedAtom_.remove(removeAtom);
@@ -374,17 +378,23 @@ public class Mediator {
 	static
 	public void addAddedAtom(Atom atom){
 		if(atom.getFunctor().equals(Functor.STAR))	return;
+//		System.out.println("addAddAtom/" + atom.getid());
 		addedAtom_.add(atom);
 	}
 	
 	static
 	public void addModifiedAtom(Atom atom){
 		if(atom.getFunctor().equals(Functor.STAR))	return;
+//		System.out.println("addModeAtom/" + atom.getid());
 		modifiedAtom_.add(atom);
 	}
 	
 	static
-	public boolean getWait(){
+	private void setWait(boolean wait){
+		unyoWait_ = wait;
+	}
+	static
+	public boolean isWait(){
 		return unyoWait_;
 	}
 }

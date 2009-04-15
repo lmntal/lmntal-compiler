@@ -301,6 +301,9 @@ public final class Membrane extends QueuedEntity {
 	}
 	/** 指定されたアトムの名前を変える */
 	public void alterAtomFunctor(Atom atom, Functor func) {
+		if(Env.fUNYO){
+			unyo.Mediator.addRemovedAtom(atom, getMemID());
+		}
 		atoms.remove(atom);
 		atom.setFunctor(func);
 		atoms.add(atom);
@@ -694,19 +697,11 @@ public final class Membrane extends QueuedEntity {
 	protected final void relinkLocalAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1] = (Link)atom2.args[pos2].clone();
 		atom2.args[pos2].getBuddy().set(atom1, pos1);
-		if(Env.fUNYO){
-			unyo.Mediator.addModifiedAtom(atom1);
-			unyo.Mediator.addModifiedAtom(atom2);
-		}
 	}
 	/** [final] unifyAtomArgsと同じ内部命令。ただしローカルのデータ構造のみ更新する。*/
 	protected final void unifyLocalAtomArgs(Atom atom1, int pos1, Atom atom2, int pos2) {
 		atom1.args[pos1].getBuddy().set(atom2.args[pos2]);
 		atom2.args[pos2].getBuddy().set(atom1.args[pos1]);
-		if(Env.fUNYO){
-			unyo.Mediator.addModifiedAtom(atom1);
-			unyo.Mediator.addModifiedAtom(atom2);
-		}
 	}
 
 	// ボディ操作5 - 膜自身や移動に関する操作

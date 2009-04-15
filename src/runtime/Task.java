@@ -16,6 +16,7 @@ import java.util.Map;
 import debug.Debug;
 
 //import unyo.Mediator;
+import unyo.Mediator;
 import util.Stack;
 import util.Util;
 
@@ -237,7 +238,6 @@ public class Task implements Runnable {
 		Atom a = mem.popReadyAtom();
 		Iterator<Ruleset> it = mem.rulesetIterator();
 		boolean flag = false;
-		
 		if(!nondeterministic && Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS && a != null && !Env.memtestonly){ // 実行アトムスタックが空でないとき
 			if(Env.profile == Env.PROFILE_BYDRIVEN){
 		        start = Util.getTime();
@@ -261,7 +261,7 @@ public class Task implements Runnable {
 				} else {
 					if(Env.fUNYO){
 						//unyo.Mediator.sync(root);
-						if(!unyo.Mediator.sync(root)){ return false; }
+						if(!unyo.Mediator.sync(root)){ Mediator.end();return false; }
 					}
 					if (!guiTrace()) return false;
 				}
