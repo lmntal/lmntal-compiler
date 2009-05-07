@@ -1,0 +1,77 @@
+{
+//グラフ生成ここから
+make_graph{
+
+	input{
+		//edge(a,b), edge(b,c), edge(d,b), edge(c,d), edge(a,c), edge(d,f), edge(b,e).
+		//edge(a,b), edge(a,c), edge(a,d), edge(a,e), edge(e,d).
+		//edge(a,b), edge(a,c),edge(a,d),edge(a,e),edge(c,f),edge(f,b).
+  	
+  	edge(d,a).  edge(d,b).   edge(d,c). 
+  	edge(d,e).  edge(a,x).   edge(b,y).
+  	edge(c,z).  edge(a,b).   edge(c,y).  
+  	
+	}.
+
+	//第何世代までサブグラフを生成するか決める
+	number{
+		edge_num(0).
+		node_num(0).
+	
+		edge(X, Y) \ edge_num(N) :- uniq(X, Y) | edge_num(N+1).
+		edge(X, Y) \ :- uniq(X, Y) | node(X, 1), node(Y, 1).
+		node(X1, N1), node(X2, N2) :- X1=X2 | node(X1, N1+N2).
+		node(X, N) \ node_num(M) :- uniq(X) | node_num(M+1).
+	}.
+
+	//init
+	input{$p[]}, number{$q, @q} :- uniq | number{input{$p[]}, $p[], $q, @q}.
+	number{edge_num(E), node_num(N), $p, @p}/ :- int(E), int(N) | number{num(E-(N-1)), $p, @p}.
+	number{input{$p}, num(N), $q[], @q}/ :- unary(N) | graph{edges{$p}, num(N)}.
+
+	//サブグラフ生成ルール
+	make_rule{
+		edges{edge(X, Y), $p[]}, num(N) \:- 
+			unary(X), unary(Y), N>0, uniq(X, Y) |	graph{edges{$p[]}, num(N-1)}.
+	}.
+	
+	//サブグラフ生成ルール：make_rule内のルールと合わせて4ルールで完了
+	graph{$p}, make_rule{@p} :- graph{$p, @p}, make_rule{@p}.
+	graph{graph{$p[]}, $q, @q}/ :- graph{$q, @q}, graph{$p[]}.
+	graph{edges{}, @p}/ :- .
+}.
+
+//検査ここから
+check_graph{
+
+	check_rule{
+		//閉路探索
+		check{edge(X, Y), $p} :- unary(X), unary(Y), uniq | 
+			check{visit(X), visit(Y), node(X, 1), node(Y, 1), $p}.
+		check{visit(X1), edge(X2, Y), $p} :- X1=X2, unary(Y) | 
+			check{visit(X1), visit(Y), node(X2, 1), node(Y, 1), $p}.
+		check{visit(Y1), edge(X, Y2), $p} :- unary(X), Y1=Y2 | 
+			check{visit(Y1), visit(X), node(X, 1), node(Y2, 1), $p}.
+		check{visit(X1), visit(X2), $p[]} :- X1=X2 | .	
+		
+		//クモ探索
+		check{node(X1, N1), node(X2, N2), $p} :- 
+			X1=X2, unary(N1), unary(N2) | check{node(X1, N1+N2), $p}.
+		check{node(X, N), $p[]} :- unary(X), N>=3, uniq(X) |		check{$p[], spider}.
+		check{spider, spider, $p[]} :- .
+	}.
+
+	graph{$p}, check_rule{@p} :- graph{$p, @p}, check_rule{@p}.
+}.
+
+//make→check
+check_graph{$c, @c}, make_graph{graph{edges{$p[]}, num(0), $q[], @q}, $r, @r}/ :- 
+	check_graph{graph{$p[], check{$p[]}}, $c, @c}, make_graph{$r, @r}.
+
+//検査終了後
+output{}.
+output{$o}, check_graph{graph{check{spider, $p[]}, $q, @q}, $r, @r}/ :-
+	output{$o, graph{$q}}, check_graph{$r, @r}
+}.
+
+{output{$p}, $q[], @q}/ :- output{$p}.
