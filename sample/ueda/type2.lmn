@@ -1,0 +1,86 @@
+/*
+(var)      ----------------
+           忙, x:而 |- x:而
+                 
+(con)      ---------------
+            忙 |- c^而:而
+
+           忙 |- M_1:而   忙 |- M_2: list(而)
+(list)     --------------------------------
+               忙 |- M_1::M_2 : list(而)
+
+(nil)      ------------------------
+              忙 |- nil : list(而)
+
+        忙 |- L:bool  忙 |- M:而  忙 |- N:而
+(if)    ------------------------------------
+           忙 |- (if L then M else N): 而
+
+                 忙, x:而' |- M:而
+(abs)      -----------------------------
+              忙 |- (竹x.M): 而' ◥ 而
+
+           忙 |- M: 而'◥而  忙 |- N: 而'
+(app)      -----------------------------
+                  忙 |- (M N): 而
+
+           忙 |- N:而'  忙, x:而' |- M:而
+(let)      ------------------------------
+              忙 |- (let x=N in M):而
+*/
+
+% variables are tagged with '+' except for formals
+s1@@sequent({$g[],type(+$x,$t1)},type(+$y,T2)) :-
+    $x==$y, ground($t1) |
+    unify($t1,T2).
+s2@@sequent({$g[]},type($x,T)) :- int($x) | unify(T,int).
+s3@@sequent({$g[]},type([],T)), tnum($n) :- $n1=$n+1 |
+    unify(T,list(t($n))), tnum($n1).
+s4@@sequent({$g[]},type([X|Xs],$t)), tnum($n) :-
+    ground($t), $n1=$n+1 |
+    sequent({$g[]},type(X,t($n))), sequent({$g[]},type(Xs,$t)),
+    unify(list(t($n)),$t), tnum($n1).
+/* no if yet */
+s5@@sequent({$g[]},type(abs($x,M),T)), tnum($n) :-
+    unary($x), $n1=$n+1, $n2=$n+2 | 
+    sequent({$g[],type(+$x,t($n))}, type(M,t($n1))),
+    unify(T,arrow(t($n),t($n1))), tnum($n2).
+s6@@sequent({$g[]},type(app(M,N),T)), tnum($n) :-
+    $n1=$n+1 |
+    sequent({$g[]},type(M,arrow(t($n),T))),
+    sequent({$g[]},type(N,t($n))), tnum($n1).
+
+/* no occurs check yet */
+/* u1@@unify(t($m),$t), X=t($n) :- $m=:=$n, ground($t) |
+    unify(t($m),$t), X=$t. */
+u1a@@unify(t($m),$t), X=t($n), lock :- $m=:=$n, ground($t) |
+    member(t2($m),$t,Res), unify(Res,$m,$t,X).
+u1b@@unify(false,$m,$t,X) :- int($m), ground($t) |
+        unify(t($m),$t), X=$t, lock.
+u1c@@unify(true,$m,$t,X) :- int($m), ground($t) |
+        unify(t($m),$t), X=t($m), occurs_check_failed.
+m1a@@member(t2($m),t($n),Res) :- $m=:=$n | Res=true.
+m1b@@member(t2($m),t($n),Res) :- $m=\=$n | Res=false.
+m1c@@member($x,int,Res) :- ground($x) | Res=false.
+m1d@@member(X,list(Y),Res) :- member(X,Y,Res).
+m1e@@member($x,arrow(Y,Z),Res) :- ground($x) |
+    member($x,Y,Res1), member($x,Z,Res2), or(Res1,Res2,Res).
+    or(false,false,Res) :- Res=false.
+    or(true,Y,Res) :- unary(Y) | Res=true.
+    or(X,true,Res) :- unary(X) | Res=true.   
+u2@@unify(int,t(T)) :- unify(t(T),int).
+u2@@unify(list(S),t(T)) :- unify(t(T),list(S)).
+u2@@unify(arrow(T1,T2),t(T)) :- unify(t(T),arrow(T1,T2)).
+u3@@unify(int,int) :-.
+u3@@unify(list(S),list(T)) :- unify(S,T).
+u3@@unify(arrow(S1,T1),arrow(S2,T2)) :-
+    unify(S1,S2), unify(T1,T2).
+
+//sequent({},type(abs(x,+x),t(0))), tnum(1), lock.
+// sequent({},type([+x,+y,+z],t(0))), tnum(1).
+sequent({},type([+x,+x],t(0))), tnum(1), lock.
+// sequent({}, type(abs(f,abs(x,app(+f,app(+f,+x)))),t(0))), tnum(1).
+// sequent({}, type(abs(x,app(+x,+x)),t(0))), tnum(1), lock.
+/* test(X,Y) :- X==Y | tested.
+test(a(b),a(b)). */
+ //unify(t(1),arrow(t(1),t(2))), lock, x=t(1).

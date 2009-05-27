@@ -1,0 +1,67 @@
+% ancestor
+   is_parent_of(pam, bob).
+   is_parent_of(tom, bob).
+   is_parent_of(tom, liz).
+   is_parent_of(bob, ann).
+   is_parent_of(bob, pat).
+   is_parent_of(pat, jim).
+/* is_ancestor_of(X,Y) :- is_parent_of(X,Y).
+   is_ancestor_of(X,Y) :- is_parent_of(X,Z), is_ancestor_of(Z,Y).
+*/
+
+/* cf. CPS */
+// is_ancestor_of(pam,r).
+is_ancestor_of(A0,B0), is_parent_of(A,B) :- A0=A, unary(B) |
+    B0=B, is_parent_of(A,B).
+is_ancestor_of(A0,B0), is_parent_of(A,B) :- A0=A, unary(B) |
+    is_ancestor_of(B,B0), is_parent_of(A,B).
+
+% add, add3
+/*  add(0,Y,Y).
+    add(s(X),Y,s(Z)) :- add(X,Y,Z).
+*/
+add(X,Y,Z) :- X=0, Y=Z.
+add(X0,Y,s(Z)) :- X0=s(X), add(X,Y,Z).
+
+% append
+% reverse
+% path
+% blocks
+/*  table([y],[],[r,g]) --> table([],[],[r,y,g])
+    reach(move(X,2), table([X|A],B,C), table(A,[X|B],C)).
+    reach(move(X,3), table([X|A],B,C), table(A,B,[X|C])).
+    reach(move(X,1), table(A,[X|B],C), table([X|A],B,C)).
+    reach(move(X,3), table(A,[X|B],C), table(A,B,[X|C])).
+    reach(move(X,1), table(A,B,[X|C]), table([X|A],B,C)).
+    reach(move(X,2), table(A,B,[X|C]), table(A,[X|B],C)).
+    actions(L,S0,S) :- actions_r(Lr,S0,S), reverse(Lr,L).
+    actions_r([],    S, S).
+    actions_r([M|Lr],S0,S) :- actions_r(Lr,S0,S1), reach(M,S1,S).
+*/
+/*
+% solution generating infinite states
+    table([X|A],B,C), moves(M) :- table(A,[X|B],C), moves([move(X,2)|M]).
+    table([X|A],B,C), moves(M) :- table(A,B,[X|C]), moves([move(X,3)|M]).
+    table(A,[X|B],C), moves(M) :- table([X|A],B,C), moves([move(X,1)|M]).
+    table(A,[X|B],C), moves(M) :- table(A,B,[X|C]), moves([move(X,3)|M]).
+    table(A,B,[X|C]), moves(M) :- table([X|A],B,C), moves([move(X,1)|M]).
+    table(A,B,[X|C]), moves(M) :- table(A,[X|B],C), moves([move(X,2)|M]).
+*/
+% paths could be considered separately from state space!
+// table([y],[],[r,g]).
+    table([X|A],B,C) :- table(A,[X|B],C).
+    table([X|A],B,C) :- table(A,B,[X|C]).
+    table(A,[X|B],C) :- table([X|A],B,C).
+    table(A,[X|B],C) :- table(A,B,[X|C]).
+    table(A,B,[X|C]) :- table([X|A],B,C).
+    table(A,B,[X|C]) :- table(A,[X|B],C).
+
+% permutation
+// r=[1,2,3,4,5,6].
+X=[A,B|Y] :- X=[B,A|Y].
+
+% NLP
+
+% typecheker
+
+% linearlogic
