@@ -511,6 +511,9 @@ public class RuleCompiler {
 
 		//次の2つは右辺の構造の生成以降ならいつでもよい
 		addInline();
+		if (Env.slimcode) {
+      addCCallback();
+    }
 		addRegAndLoadModules();
 
 		// 左辺の残ったプロセスを解放する
@@ -1176,6 +1179,15 @@ public class RuleCompiler {
 				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
 			}
 		}
+	}
+  /** Cコールバックを実行する命令を生成する */
+	private void addCCallback() {
+		for(Atom atom : rhsatoms){
+      if (atom.getName() == "$c_callback") {
+        int atomID = rhsatomToPath(atom);
+        body.add( new Instruction(Instruction.CCALLBACK, atomID));
+      }
+    }
 	}
 	/** インラインコードを実行する命令を生成する */
 	private void addInline() {
