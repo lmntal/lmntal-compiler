@@ -79,11 +79,11 @@ rem2@@remove({type($x,L),$g}), {+L,$v} :- unary($x) |
     remove({$g}), {$v}.
     
 //sequent({},type(abs(x,x),{u,+A})), A=ans, lock.
-sequent({},type([7],{u,+A})), A=ans, lock.
+//sequent({},type([7],{u,+A})), A=ans, lock.
 //sequent({},type([[]],{u,+A})), A=ans, lock.
 //sequent({},type([y],{u,+A})), A=ans, lock.
 //sequent({}, type(abs(f,abs(x,app(f,app(f,x)))),{u,+A})), A=ans, lock.
-//sequent({}, type(abs(f,abs(x,app(f,x))),{u,+A})), A=ans, lock.
+sequent({}, type(abs(f,abs(x,app(f,x))),{u,+A})), A=ans, lock.
 //sequent({}, type(abs(x,app(x,x)),{u,+A})), A=ans, lock.
 }.
 
@@ -109,8 +109,8 @@ u_oc@@unify_vt({u,$v},T1) :-
 u2_no@@unify2(no,{u,$v1},T2) :- fail({u,$v1},T2), lock.
 u2_ok1@@unify2(ok,V,T), {u,+V} :- rm=T, lock.
 u2_ok2@@unify2(ok,V,T), {u,+V,+V1} :- V1=T, lock.
-u2_ok3@@unify2(ok,V,T), {u,+V,+V1,$v} :-
-    cp(T1,T2)=T, V1=T1, unify2(ok,{u,$v},T2).
+u2_ok3@@unify2(ok,V,T), {u,+V,+V1,+V2,$v} :-
+    cp(T1,T2)=T, V1=T1, unify2(ok,{u,+V2,$v},T2).
 
 rm1@@rm=int :- .
 rm2@@rm=list(V) :- rm=V.
