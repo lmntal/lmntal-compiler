@@ -79,8 +79,8 @@ rem2@@remove({type($x,L),$g}), {+L,$v} :- unary($x) |
     remove({$g}), {$v}.
     
 //sequent({},type(abs(x,x),{u,+A})), A=ans, lock.
-//sequent({},type([7],{u,+A})), A=ans, lock.
-sequent({},type([[]],{u,+A})), A=ans, lock.
+sequent({},type([7],{u,+A})), A=ans, lock.
+//sequent({},type([[]],{u,+A})), A=ans, lock.
 //sequent({},type([y],{u,+A})), A=ans, lock.
 //sequent({}, type(abs(f,abs(x,app(f,app(f,x)))),{u,+A})), A=ans, lock.
 //sequent({}, type(abs(f,abs(x,app(f,x))),{u,+A})), A=ans, lock.
@@ -150,3 +150,11 @@ oc_no@@T2=occurs_check(no,V2,V1,Res,V) :- T2=V1, Res=no, V=V2.
 //unify({u},arrow({u,+V},V)), lock.
 //unify(arrow(A0,B0),arrow(B,A)), {u,+A0,+A}, {u,+B0,+B}, lock.
 //unify({u},{u}), lock.
+/*
+lock, ans(L3),
+list(L87,unify(L43)),
+list(L97,unify(L48)),
+unify(list(L51),L55), unify(L57,L4),
+{u, +L3, +L4}, {u, +L51, +L43},
+{u, +L55, +L57, +L48}, {u, +L87}, {u, +L97}
+*/
