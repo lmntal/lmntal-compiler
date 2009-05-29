@@ -1185,7 +1185,7 @@ public class RuleCompiler {
 		for(Atom atom : rhsatoms){
       if (atom.getName() == "$c_callback") {
         int atomID = rhsatomToPath(atom);
-        body.add( new Instruction(Instruction.CCALLBACK, atomID));
+        body.add( new Instruction(Instruction.CCALLBACK, rhsmemToPath(atom.mem), atomID));
       }
     }
 	}
