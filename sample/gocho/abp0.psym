@@ -1,0 +1,2 @@
+p= sender{exp(M,N), @s} :- int(M),int(N) |
+q= sender{exp(M,N), ack(0,A), @s} :- int(M), A=:=N |

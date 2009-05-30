@@ -1,0 +1,17 @@
+
+a.
+
+a2c@@ a:-c.
+a2b@@ a:-b.
+b2d@@ b:-d.
+b2e@@ b:-e.
+d2e@@ d:-e.
+c2e@@ c:-e.
+e2c@@ e:-c.
+c2z@@ c:-z.
+
+/*
+ltl1_1@@ init{$p, @p}	:- init{$p, @p}.
+ltl1_2@@ init{$p, @p, d}	:- init2{$p, @p, d}.
+ltl2_1@@ init2{$p, @p}	:- init2{$p, @p}.
+ltl2_2@@ init2{$p, @p, c}	:- end{$p, @p, end}.*/

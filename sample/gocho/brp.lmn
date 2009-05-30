@@ -1,0 +1,26 @@
+% brp.lmn 書きかけ
+
+prod_n=0.
+
+producer{
+	result=0.
+	n=0.
+	ready       @@ prod_n=X :- X=<5, X>0 | prod_n=X, start_send.
+	start_send  @@ start_send, prod_n(X) :- sin(prod_n(X)).
+	wait_result @@ sout(result(X)) :- result(X), check.
+	check_1     @@ result(1) :- shakePC(0).
+	check_2or3  @@ result(X) :- X>=2, X=<3 | start_send.
+}.
+
+consumer{
+	m=0, n=0.
+	ready       @@ rout(m(X)), n(N) :- N2=N+1 | m(X), n(N2), get_msg.
+	get_msg_4or5@@ get_msg, m(X) :- X>=4, X=<5 | ready.
+	get_msg_2   @@ get_msg, m(2), n=0 :- 
+	get_msg_1   @@ get_msg, m(1) :- check.
+	check       @@ 
+}.
+sender{}.
+receiver{}.
+k{}.
+l{}.

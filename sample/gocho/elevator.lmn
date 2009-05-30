@@ -1,0 +1,103 @@
+% elevator.lmn
+% 	2009.01.14
+% エレベーターモデル
+
+% elevator.lmn
+% 		2009.01.14
+%
+% the Modeling of Elevator System
+% 
+
+nf(3).					% number of floors
+np(2).					% number of passengers
+ctl{call([])}.	% ctl manage the request to visit the floors.
+elv{}.					% 
+flr([]).
+
+
+set_nf@@	% The floor is initialized.
+nf(NF), elv{$e[]},flr(A)						:-	int(NF), NF > 0, _NF = NF - 1	|
+nf(_NF),elv{$e[], button(NF)},
+flr=L1, '.'((NF, L0), L2, L1), L2=A, flr{+L0, button, door(close)}.
+
+
+set_np@@	% Passenger's position is initialized.
+nf(0), np(NP), flr{$f, @f}					:-	int(NP), NP > 0, _NP = NP - 1 |
+nf(0), np(_NP),flr{p,$f,@f}.
+
+
+set_elv@@	% Elevator's position is initialized.
+elv{$e[], @e},      flr{$f, @f}, np(0), nf(0)				:-
+elv{$e[], @e, +L1}, flr{$f, @f, +L1}.
+
+
+push_f@@	% The passenger on the floor calls the elevator.
+ctl{$c[C], @c, '[]'(C)},
+elv{$e, @e, button(B)},
+flr{$f, @f, p, button, door(close), +L0},	L=[(X, L0) |R]
+																	:- int(X), int(B), X=:=B	|
+ctl{$c[C], @c, C=L1, '.'(X, L2, L1), L2='[]'},
+elv{$e, @e},
+flr{$f, @f, p, door(close), +L0},	L=[(X, L0) |R].
+
+
+push_e@@	% The passenger in the elevator requests the visit floor.
+ctl{$c[C], @c, '[]'(C)},
+elv{$e, @e, p, button(B)},
+flr{$f, @f, button, +L0},	L=[(X, L0) |R]
+															:- int(X), int(B), X=:=B	|
+ctl{$c[C], @c, C=L1, '.'(X, L2, L1), L2='[]'},
+elv{$e, @e, p},
+flr{$f, @f, +L0},	L=[(X, L0) |R].
+
+
+move1@@		% The elevator moves in the direction of the destination.
+ctl{$c[F], @c, call=[C |F]}, 
+elv{$e, @e, +L1},
+flr{$f, @f, +L1, door(close), +L0}, L=[(X, L0), (X2, L3) |R],
+flr{$p, @p, +L3}
+															:-	int(C), int(X), int(X2), C > X	|
+ctl{$c[F], @c, call=[C |F]},
+elv{$e, @e, +L1},
+flr{$f, @f, door(close), +L0}, L=[(X, L0), (X2, L3) |R],
+flr{$p, @p, +L1, +L3}.
+
+
+move2@@		% The elevator moves in the direction of the destination. 
+ctl{$c[F], @c, call=[C |F]}, 
+elv{$e, @e, +L1},
+flr{$f, @f, +L1, door(close), +L0}, L=[(X, L3), (X2, L0) |R],
+flr{$p, @p, +L3}
+															:-	int(C), int(X), int(X2), C < X2	|
+ctl{$c[F], @c, call=[C |F]},
+elv{$e, @e, +L1},
+flr{$f, @f, door(close), +L0}, L=[(X, L3), (X2, L0) |R],
+flr{$p, @p, +L1, +L3}.
+
+
+open@@		% The door opens if a current floor calls the elevator. 
+ctl{$c[E,F], @c, E=[C |F]},
+elv{$e, @e, +L1},
+flr{$f, @f, +L1, door(close), +L0}, L=[(X, L0) |R]
+															:-	int(X), int(C), X=:=C		|
+ctl{$c[E,F], @c, E=F},
+elv{$e, @e, +L1, button(C)},
+flr{$f, @f, +L1, door(open), button, +L0}, L=[(X, L0) |R].
+
+
+goto_e@@	% The passenger gets on the elevator.
+elv{$e, @e, +L1},    flr{$f, @f, +L1, door(open), p}	:-
+elv{$e, @e, +L1, p}, flr{$f, @f, +L1, door(open)}.
+
+
+goto_f@@	% The passenger gets off the elevator.
+elv{$e, @e, +L1, p}, flr{$f, @f, +L1, door(open)}			:-
+elv{$e, @e, +L1},    flr{$f, @f, +L1, door(open), p}.
+
+
+close@@		% The door closes.
+elv{$e, @e, +L1}, flr{$f, @f, +L1, door(open)}				:-
+elv{$e, @e, +L1}, flr{$f, @f, +L1, door(close)}.
+
+%% 性質記述
+% 0. 1階の2人にいたら、以降いつか3階に2人いる

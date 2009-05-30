@@ -1,0 +1,39 @@
+% abp.lmn
+% 		2008.10.20
+%
+% Altenertive Bit Protocol
+% 
+
+% msg(Message, Bit).
+sender{
+  msg(0,0).
+	s_OK @@ exp(I,B), ack(0,A) :- A=:=B,J=(I+1) mod 5, C=1-B	| msg(J,C).	
+}.
+
+% ack(0, Ack)  key(ExpectedBit).
+recver{	
+  key(0).
+  r_OK @@ key(K), msg(I,B) :- int(I), K=:=B, A=1-K	| key(A), ack(0,B).
+  r_NG @@ key(K), msg(I,B) :- int(I), K=\=B, A=1-B	| key(K), ack(0,A).
+}.
+
+daemon{
+  d_PASm @@ msg(I,B) :- m2r(I,B).
+  d_LOSm @@ msg(I,B) :- int(I), int(B) | .
+  d_ERRm @@ msg(I,B) :- Z=1-B | m2r(I,B).
+  d_PASa @@ ack(0,A) :- r2s(0,A).
+  d_PASa @@ ack(0,A) :- int(A) | .
+  d_PASa @@ ack(0,A) :- int(A), B=1-A | r2s(0,B).
+}.
+
+% プロセス間通信
+s2d @@ sender{$s,@s, msg(M,N)}, daemon{$d,@d} :- int(M),int(N) |
+       sender{$s,@s, exp(M,N)}, daemon{$d,@d, msg(M,N)}.
+d2r @@ daemon{$d,@d, m2r(M,N)}, recver{$r,@r} :- int(M),int(N) |
+       recver{$r,@r, msg(M,N)}, daemon{$d,@d}.
+r2d @@ recver{$r,@r, ack(0,A)}, daemon{$d,@d} :-	int(A)	|
+       daemon{$d,@d, ack(0,A)}, recver{$r,@r}.
+d2s @@ daemon{$d,@d, r2s(0,A)}, sender{$s,@s} :-	int(A)	|
+		   sender{$s,@s, ack(0,A)}, daemon{$d,@d}.
+t_o @@ daemon{@d}, recver{key(K),@r}, sender{exp(M,N),@s,$s[]}/ :- int(M),int(N),int(K) |
+       daemon{@d}, recver{key(K),@r}, sender{msg(M,N),@s}.

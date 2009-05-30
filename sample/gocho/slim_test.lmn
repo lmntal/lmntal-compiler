@@ -1,0 +1,113 @@
+
+
+t0_init{
+
+data([10, 1, 5, 20, 3, 4, 0, 30, 8, 1]).
+leng(0).
+
+% sort膜
+sort{
+	merg([]).
+			% sort膜に割ったデータを投げ、空のsort膜のコピーを作る。
+	throw@@	sort{merg([]), @d},
+			'.'(init(I1), leng(L11, L12))	:-	ground(I1),
+												int(L11), int(L12),
+												L11 > 1, L12 > 1			|
+   			sort{merg([]), @d, 
+   				 data(I1), leng(L11, L12),
+   				 sort{merg([]), @d}	},
+   			sort{merg([]), @d}. 	
+			
+			% 投げられたデータの要素が2つ以上なら、割る。
+	div0@@	data(D), leng(L1, L2)			:-	int(L1), int(L2),
+												L1 > 1, L2 > 1				|
+			init=(D, []), leng(L1, L2).
+		
+	div1@@	F=([X |R], Z), leng(L1, L2)		:-	int(L1), int(L2),
+												L1 > 1, L2 > 1, 
+												(L1 * 2) > L2,
+												(L3 = L1 - 1)				|
+			F=[X |(R, Z)], leng(L3, L2).
+	
+	div2@@	F=(X, Y), leng(L1, L2)			:-	int(L1), int(L2),
+												(L1 * 2) =< L2,
+												(L3 = L2 - L1),
+												ground(Y)					|
+			F=Y, leng(L3, L3),
+			init2(X), leng2(L1, L1).
+			
+			% 割れた要素を投げる形に変更する。
+	div3@@	init(I1),  leng(L1, L2),
+			init2(I2), leng2(L3, L4)		:-	int(L1), int(L2), int(L3),
+												int(L4)						|
+			'.'(init(I1), leng(L1, L2)),
+			'.'(init(I2), leng(L3, L4)).
+				
+			% 投げられたデータがもう割れないときは、投げる形に変更。
+	div3@@	data(I), leng(L1, L2)			:-	int(L1), int(L2), L1 =< 1	|
+			'.'(init(I), leng(L1, L2)).
+			
+			% 反応が止まったら･･･。indexを消す。mergeの準備
+	mrg0@@	sort{'.'(init(I), leng(L1, L2)), $p[I], @p}/,
+											:-	int(L1), int(L2)			|
+			sort{mrg0(I), $p[I], @p}.
+
+			/* マージ */
+	mrg1@@	sort{merg([]), @s},
+			mrg0([X |M1]), mrg0([Y |M2]), merg(R)
+											:-	X >= Y						|
+			sort{merg([]), @s},
+			mrg0(M1), mrg0([Y |M2]), merg=append(R, [X]).
+			
+			/* 片方余ったら、お尻にappend */
+	mrg2@@	sort{merg([]), @s},
+			mrg0([X |M0]), mrg0([]), merg(R)	:-
+			sort{merg([]), @s},
+			mrg0(M0), mrg0([]), merg=append(R, [X]).
+
+  append@@	R=append([H |T],L)	:- R=[H |append(T, L)].
+			R=append([], L)		:- R=(L).			
+	
+			/* mergeが終わったら、1つ上の膜に投げる。 */
+	mrg3@@	sort{	sort{merg([]), @ss},
+					mrg0('[]'), mrg0('[]'),
+					merg(R), $s[],
+					@s	}
+										:-	ground(R)						|
+			mrg0(R).
+
+}.
+
+		% initilize: appendしていくことで、リストの要素数を取得する。
+init0@@	data(D), leng(0)				:-
+		init=(D, []), leng(0).
+		
+init1@@	F=([X |R], Z), leng(L)			:-	int(L), (L2 = L + 1)			|
+		F=[X  |(R, Z)], leng(L2).
+
+init2@@	F=([], Z), leng(L)				:-	int(L)							|
+		F=Z, leng(L, L).
+
+init3@@	init(S), leng(L1, L2)			:-	int(L1), int(L2)				|
+		'.'(init(S), leng(L1, L2)).
+
+		% 膜の中に、データと膜自身のコピーを投げる。
+throw@@	sort{merg([]), @d},
+		'.'(init(S), leng(L1, L2))
+										:-	ground(S), int(L1), int(L2)	|
+   		sort{merg([]), @d,
+   			{merg([]), @d, 
+   			 data(S), leng(L1, L2),
+   			 sort{merg([]), @d}	}}.
+
+		/* mergeが終わったら、1つ上の膜に投げる。 */
+output@@
+		sort{{	sort{merg([]), @sss},
+				mrg0([]), mrg0([]),
+				merg(R),
+				@ss, $ss[]	},
+				merg([]), @s}/
+										:-	ground(R)						|
+		sorted(R).
+
+}.

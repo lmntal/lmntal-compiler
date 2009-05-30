@@ -1,0 +1,1 @@
+p={$p,@p,ready{$r,@r,task{p(P1),$t1}},schej{$s,@s,task{p(P2),$t2},c1_time(T)}} :- int(T),P1>P2|

@@ -1,0 +1,10 @@
+% gcd.lmn
+% 		2008.09.10
+%
+% ユーグリッドの互除方で最大公約数を求める。
+
+n(12), n(9), n(15).
+
+gcd0@@  n(X), n(Y) 	:- X >= Y	| gcd(X,Y).
+gcd1@@  gcd(X,Y)	:- (X mod Y)=\=0,	Y2= X mod Y	| gcd(Y,Y2).		
+gcd2@@	gcd(X,Y)  :- (X mod Y)=:=0 | n(Y).

@@ -1,0 +1,49 @@
+pair(1).
+alone.
+null([]).
+'.'(3, 2, 1).
+1=[1,2,3].
+int([2 |3]).
+int([1, 2, 3]).
+int([1]).
+unary([a, b, c, d]).
+unary([a]).
+unary([a, 1, 2 |tail]).
+ground([a(a(a(a)),a), d(d(d(d)))]).
+ground([a(a)]).
+ground([a(a(a)) |tail]).
+NULL=[NULL].
+INT1=[1,2,3,4|INT1].
+INT2=[1 |INT2].
+UNARY1=[a,b,c,d|UNARY1].
+UNARY2=[a|UNARY2].
+GROUND1=[a(a(a(a)),a), d(d(d(d))) |GROUND1].
+GROUND2=[a(a) |GROUND2].
+else(else, else).
+else(else(else), else).
+{  RING=[1,2,3,4|RING].
+   list([1,2]).
+   null([]).
+   unary([a]).
+   unary([L1, L2, L3 |nil]).
+   a(L1), a(L2), d(L3).
+   list([a, c(d)]).
+   RING2=[a,b  |RING2].
+   {  unko([1,2]),
+      a(b, c, d(e),e).
+      {  li([1]),
+         null([]),
+         a, lmn(tal),
+         +X
+      },
+      flink([(X, 3), (3, 2)]).
+      RING3=[a(1,2,3), b(b) |RING3].
+   }.
+}.
+
+/*
+list=[a(1),2,3,4], a, {}.
+rule@@ F=[A |R], {$p, @p}
+:- ground(A) |
+			F=R, {'.'(A, head, nil), $p, @p}.
+			*/

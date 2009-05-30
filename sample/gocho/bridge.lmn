@@ -1,0 +1,17 @@
+% bridge.lmn
+% 		2008.07.10
+%			2009.01.16 modified
+%
+% Crossing the Bridge
+% 
+
+p(l,1), p(l,2), p(l,5), p(l,10), light(l), time(0).
+
+go_1 @@ p(l,P), light(l), time(T) :- T2=T+P |
+        p(r,P), light(r), time(T2).
+
+go_2 @@ p(l,P), p(l,Q), light(l), time(T)	:- P=<Q, T2=T+Q |
+        p(r,P), p(r,Q), light(r), time(T2).
+
+back @@ p(r,P), p(l,Q), light(r), time(T)	:- T2=T+P	|
+        p(l,P), p(l,Q), light(l), time(T2).

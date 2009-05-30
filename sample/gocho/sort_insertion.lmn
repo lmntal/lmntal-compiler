@@ -1,0 +1,36 @@
+%	sort_insertion.lmn
+%	
+%	挿入整列法
+%
+%	検証項目：必ず降順に整列済みとなる。
+
+
+{data([10, 1, 5, 20, 3, 19, 7, 8,  0, 2]).}.
+sort([]).
+
+init@@	sort(S), 		   {data([X1, X2 |R]), $p[R], @p}	:-	X1<X2	|
+		sort([X2, X1 |S]), {sort(R), $p[R], @p}.
+	
+else@@	sort(S), 		   {data([X1, X2 |R]), $p[R], @p}	:-	X1>=X2	|
+		sort([X1, X2 |S]), {sort(R), $p[R], @p}.
+
+sort@@	F=[X1, X2 |S], 	  {sort([Y |R]), $p[R], @p}	:-	X1>=Y, X2=<Y |
+		F=[X1, Y, X2 |S], {sort(R), $p[R], @p}.
+
+else@@	sort([X |S]),	 {sort([Y |R]), $p[R], @p}	:-	X<Y |
+		sort([Y, X |S]), {sort(R), $p[R], @p}.
+
+else@@	F=[X |[]],	  {sort([Y |R]), $p[R], @p}		:-	X>Y |
+		F=[X, Y |[]], {sort(R), $p[R], @p}.
+
+
+%% 性質ルール
+% <>[]p. p:左＞右
+/*
+ltl1@@	t0_init{$p, @p} :- t0_init{$p, @p}.
+
+ltl2@@	t0_init{L=[X1, X2 |R], $p[L, R], @p}	:-	(X1 > X2)	|
+	  	 accept{L=[X1, X2 |R], $p[L, R], @p}.
+
+ltl3@@	 accept{L=[X1, X2 |R], $p[L, R], @p}	:-	(X1 > X2)	|
+	  	 accept{L=[X1, X2 |R], $p[L, R], @p}.*/

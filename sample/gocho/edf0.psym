@@ -1,0 +1,1 @@
+p = {$p, @p, death{}, endtime(T)} :- int(T) |

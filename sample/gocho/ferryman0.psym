@@ -1,0 +1,4 @@
+ gcwf = go(G), ca(C), wo(W), fe(F) :- G=:=1, C=:=1, W=:=1, F=:=1 |
+ gc   = go(G), ca(C) :- G=:=C |
+ gw   = go(G), wo(W) :- G=:=W |
+ gf   = go(G), fe(F) :- G=:=F |

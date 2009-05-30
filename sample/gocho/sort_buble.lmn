@@ -1,0 +1,17 @@
+%  sort_buble.lmn
+%  buble sort
+
+data([10,1,5,20,3,19,7,8,0,2]).
+
+sort@@	L=[X1, X2 |R]	:- (X1 < X2) |	L=[X2, X1 |R].
+
+/*
+%dfs1
+ltl1@@ init{$p, @p} :- init{$p, @p}.
+
+ltl2@@ init{L=[X1, X2 |R], $p[L, R], @p}	:-	(X1 > X2)	|
+	   accept{L=[X1, X2 |R], $p[L, R], @p}.
+%dfs2
+ltl3@@ accept{L=[X1, X2 |R], $p[L, R], @p}	:-	(X1 > X2)	|
+	   accept{L=[X1, X2 |R], $p[L, R], @p}.
+	   */

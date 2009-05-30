@@ -1,0 +1,19 @@
+% rabbits.lmn
+%       2009.05.11
+%
+% The Hopping Rabbits Game
+
+/*
+{n(5), init=[free].
+ init @@ n(N), E=[free |F] :- N>0, M=N-1 |
+         n(M), E=[x,free,o |F],
+}.
+{$p,@p}/ :- $p.
+*/
+list=[x,x,x,x,x,x,free,o,o,o,o,o,o].
+xAdvances @@ E=[x,free   |F] :- E=[free,x | F].
+xJumps    @@ E=[x,o,free |F] :- E=[free,o,x |F].
+oAdvances @@ E=[free,o   |F] :- E=[o,free | F].
+oJumps    @@ E=[free,x,o |F] :- E=[o,x,free |F].
+
+list=[o,o,o,free,x,x,x] :- ok .

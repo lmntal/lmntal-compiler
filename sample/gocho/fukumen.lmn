@@ -1,0 +1,34 @@
+% hukumen.lmn
+%
+%   覆面算、send+more=money
+%    ジャンプに載ってた問題
+%  send
+%+ more
+%-------
+% money
+
+m(1),o(0),r(null),e(null).
+s(9),n(null), d(null).
+y(null).
+
+data([2,3,4,5,6,7,8]), more.
+
+init @@	null(A), F=[X |R]	:- X=A, F=R.
+more @@ m(M), o(O), r(R), e(E), more :- MORE=1000*M+100*O+10*R+E	|
+        m(M), o(O), r(R), e(E), more(MORE), send.
+send @@ s(S), e(E), n(N), d(D), send :-	SEND = 1000*S + 100*E + 10*N + D			|
+        s(S), e(E), n(N), d(D), send(SEND), money.
+
+mony @@ more(A), send(B), money      :- C=A+B, C>10000 |
+       {more(A), send(B)}, money(C).
+
+divd @@ money(C), {$p} :- M=C/10000, O=(C-10000*M)/1000,
+                          N=(C-10000*M-1000*O)/100,
+                          E=(C-10000*M-1000*O-100*N)/10,
+                          Y=(C-10000*M-1000*O-100*N-10*E) |
+        money{m(M), o(O), n(N), e(E), y(Y)}, {money(C), $p}.
+
+_end @@ money{m(M1), o(O1), n(N1), e(E1), y(Y1), $m},
+							m(M2), o(O2), n(N2), e(E2), y(Y2)
+                       :- M1=:=M2, O1=:=O2, N1=:=N2, E1=:=E2, Y1=:=Y2			|
+				ok, $m.	

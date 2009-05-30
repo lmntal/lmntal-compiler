@@ -1,0 +1,34 @@
+% knighttour.lmn
+% Knight Tour Problem
+
+% board(N): board is initialized size N 
+board(5).
+k_position(null).
+
+ini@@ board(B) :- int(B) | board(B, B, fin(B)).
+ini@@ board(A,  B,  fin(F)) :- int(B), A=\=0, A2=A-1	|
+       board(A2, B, fin(F)), p(A, B).
+ini@@ board(A,  B, fin(F))  :- int(F), A=:=0, B>1,	B2=B-1	|
+       board(F,  B2, fin(F)).			
+		
+%
+% ¡ý¢£¢¢¢£¢¢
+% ¢¡¢¢¢¢¢¢¢¡
+% ¢¢¢¢£Ë¢¢¢¢
+% ¢¡¢¢¢¢¢¢¢¡    £Ë¡Äknight
+% ¢¢¢£¢¢¢£¢¢    ¢£¡Ämove:set1@@
+%               ¢¡¡Ämove:set2@@
+%               ¡ý¡Äinit:set0@@
+
+set0@@ k_position(null), p(1, 1), board(0, 1, fin(F)) :- int(F)	|
+			 k_position(1, 1).
+
+set1@@ k_position(X, Y), p(M, N) :- X=\=M, Y=\=N,
+                                    ((X-M) mod 2)=:=0, (X-M)=<2, (X-M)>=-2, 
+                                    (Y-N)=<1, (Y-N)>=-1	|
+			 k_position(M, N).
+
+set2@@ k_position(X, Y), p(M, N) :- X=\=M, Y=\=N,
+																		(X-M)=<1, (X-M)>=-1, 
+                                    ((Y-N) mod 2)=:=0, (Y-N)=<2, (Y-N)>=-2		|
+			 k_position(M, N).
