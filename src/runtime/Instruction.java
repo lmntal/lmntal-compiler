@@ -980,6 +980,12 @@ public class Instruction implements Cloneable, Serializable {
 	public static final int GUARD_INLINE = 212;
 	static {setArgType(GUARD_INLINE, new ArgType(false, ARG_OBJ, ARG_VARS, ARG_VARS));}
 
+	/** ccallback [srcmem, atom]
+	 * <br>ボディ命令<br>
+	 * 所属膜がsrcmemのアトム$atomに対して、Cのコールバック関数を呼び出す */
+	public static final int CCALLBACK = 213;
+	static {setArgType(CCALLBACK, new ArgType(false, ARG_MEM, ARG_ATOM));}
+
 	///////////////////////////////////////////////////////////////////////
 
 	// 型付きプロセス文脈を扱うための追加命令 (214--215)	
