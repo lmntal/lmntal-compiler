@@ -512,7 +512,7 @@ public class RuleCompiler {
 		//次の2つは右辺の構造の生成以降ならいつでもよい
 		addInline();
 		if (Env.slimcode) {
-      addCCallback();
+      addCallback();
     }
 		addRegAndLoadModules();
 
@@ -1181,11 +1181,11 @@ public class RuleCompiler {
 		}
 	}
   /** Cコールバックを実行する命令を生成する */
-	private void addCCallback() {
+	private void addCallback() {
 		for(Atom atom : rhsatoms){
-      if (atom.getName() == "$c_callback") {
+      if (atom.getName() == "$callback") {
         int atomID = rhsatomToPath(atom);
-        body.add( new Instruction(Instruction.CCALLBACK, rhsmemToPath(atom.mem), atomID));
+        body.add( new Instruction(Instruction.CALLBACK, rhsmemToPath(atom.mem), atomID));
       }
     }
 	}
