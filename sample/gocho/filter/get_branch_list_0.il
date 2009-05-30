@@ -1,0 +1,18 @@
+
+		branch[[
+			findatom    	 [2, 0, '[]'_1]
+			derefatom   	 [3, 2, 0]
+			isunary        [3]
+			commit         ["list0", 0]
+			copyatom       [4, 1, 2]
+			copyatom			 [5, 1, 3]
+			newlink        [4, 0, 5, 0, 1]
+			enqueueatom    [4]
+			enqueueatom    [5]
+			removeatom     [2, 0]
+			removeatom     [3, 0]
+			freeatom       [2]
+			freeatom       [3]
+			unlockmem      [1]
+			proceed        []
+		]]

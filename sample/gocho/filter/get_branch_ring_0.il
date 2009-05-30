@@ -1,0 +1,23 @@
+
+		branch[[
+			findatom       [2, 0, '.'_3]
+			derefatom      [3, 2, 0]
+			derefatom   	 [4, 2, 1]
+			derefatom      [5, 2, 2]
+			func        	 [4, '[]'_1]
+			eqatom    	   [3, 5]
+			
+			commit         ["ring0", 0]
+			copyatom       [6, 1, 2]
+			copyatom       [7, 1, 4]
+			alloclink      [8, 6, 0]
+			alloclink      [9, 6, 2]
+			newlink        [6, 1, 7, 0, 1]
+			newlink        [6, 0, 6, 2, 1]
+			removeatom     [2, 0]
+			removeatom     [3, 0]
+			freeatom       [2]
+			freeatom       [3]
+			unlockmem      [1]
+			proceed        []
+		]]
