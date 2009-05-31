@@ -1,0 +1,1113 @@
+desc: (none)
+cmd: slim --ltl --psym rabbits3.psym rabbits3.nc rabbits-5.il
+time_unit: i
+#-----------
+snapshot=0
+#-----------
+time=0
+mem_heap_B=0
+mem_heap_extra_B=0
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=1
+#-----------
+time=160239
+mem_heap_B=16
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=2
+#-----------
+time=161521
+mem_heap_B=60
+mem_heap_extra_B=20
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=3
+#-----------
+time=161874
+mem_heap_B=516
+mem_heap_extra_B=68
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=4
+#-----------
+time=164149
+mem_heap_B=520
+mem_heap_extra_B=80
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=5
+#-----------
+time=164310
+mem_heap_B=536
+mem_heap_extra_B=88
+mem_stacks_B=0
+heap_tree=detailed
+n5: 536 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n1: 336 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n3: 48 0x805BA2B: st_init_table (st.c:149)
+   n1: 16 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 16 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 16 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 16 0x80496A3: init_internal (main.c:244)
+     n0: 16 0x80496EE: main (main.c:274)
+ n1: 16 0x805BE6E: st_add_direct (st.c:278)
+  n1: 16 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 16 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 16 0x80496A3: init_internal (main.c:244)
+     n0: 16 0x80496EE: main (main.c:274)
+ n0: 4 in 1 place, below massif's threshold (01.00%)
+#-----------
+snapshot=6
+#-----------
+time=164661
+mem_heap_B=584
+mem_heap_extra_B=112
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=7
+#-----------
+time=164936
+mem_heap_B=589
+mem_heap_extra_B=123
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=8
+#-----------
+time=165109
+mem_heap_B=605
+mem_heap_extra_B=131
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=9
+#-----------
+time=165460
+mem_heap_B=653
+mem_heap_extra_B=155
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=10
+#-----------
+time=165857
+mem_heap_B=672
+mem_heap_extra_B=176
+mem_stacks_B=0
+heap_tree=detailed
+n6: 672 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n2: 368 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 32 0x805C92D: register_functor (functor.c:168)
+   n1: 32 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 32 0x80496A3: init_internal (main.c:244)
+     n0: 32 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n2: 80 0x805BE6E: st_add_direct (st.c:278)
+  n1: 48 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 48 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 48 0x80496A3: init_internal (main.c:244)
+     n0: 48 0x80496EE: main (main.c:274)
+  n1: 32 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 32 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 32 0x80496A3: init_internal (main.c:244)
+     n0: 32 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n3: 48 0x805BA2B: st_init_table (st.c:149)
+   n1: 16 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 16 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 16 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 16 0x80496A3: init_internal (main.c:244)
+     n0: 16 0x80496EE: main (main.c:274)
+ n1: 32 0x805BD70: st_insert (st.c:264)
+  n1: 32 0x805C972: register_functor (functor.c:175)
+   n1: 32 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 32 0x80496A3: init_internal (main.c:244)
+     n0: 32 0x80496EE: main (main.c:274)
+ n1: 12 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 12 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 12 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 12 0x80496A3: init_internal (main.c:244)
+     n0: 12 0x80496EE: main (main.c:274)
+#-----------
+snapshot=11
+#-----------
+time=166208
+mem_heap_B=720
+mem_heap_extra_B=200
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=12
+#-----------
+time=166580
+mem_heap_B=738
+mem_heap_extra_B=222
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=13
+#-----------
+time=166931
+mem_heap_B=786
+mem_heap_extra_B=246
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=14
+#-----------
+time=167296
+mem_heap_B=804
+mem_heap_extra_B=268
+mem_stacks_B=0
+heap_tree=detailed
+n6: 804 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n2: 400 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 64 0x805C92D: register_functor (functor.c:168)
+   n1: 64 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 64 0x80496A3: init_internal (main.c:244)
+     n0: 64 0x80496EE: main (main.c:274)
+ n2: 144 0x805BE6E: st_add_direct (st.c:278)
+  n1: 80 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 80 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 80 0x80496A3: init_internal (main.c:244)
+     n0: 80 0x80496EE: main (main.c:274)
+  n1: 64 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 64 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 64 0x80496A3: init_internal (main.c:244)
+     n0: 64 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 64 0x805BD70: st_insert (st.c:264)
+  n1: 64 0x805C972: register_functor (functor.c:175)
+   n1: 64 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 64 0x80496A3: init_internal (main.c:244)
+     n0: 64 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n3: 48 0x805BA2B: st_init_table (st.c:149)
+   n1: 16 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 16 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 16 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 16 0x80496A3: init_internal (main.c:244)
+     n0: 16 0x80496EE: main (main.c:274)
+ n1: 16 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 16 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 16 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 16 0x80496A3: init_internal (main.c:244)
+     n0: 16 0x80496EE: main (main.c:274)
+#-----------
+snapshot=15
+#-----------
+time=167647
+mem_heap_B=852
+mem_heap_extra_B=292
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=16
+#-----------
+time=168036
+mem_heap_B=871
+mem_heap_extra_B=313
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=17
+#-----------
+time=168387
+mem_heap_B=919
+mem_heap_extra_B=337
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=18
+#-----------
+time=168665
+mem_heap_B=924
+mem_heap_extra_B=348
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=19
+#-----------
+time=168844
+mem_heap_B=940
+mem_heap_extra_B=356
+mem_stacks_B=0
+heap_tree=detailed
+n6: 940 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n2: 432 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 96 0x805C92D: register_functor (functor.c:168)
+   n1: 96 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 96 0x80496A3: init_internal (main.c:244)
+     n0: 96 0x80496EE: main (main.c:274)
+ n2: 208 0x805BE6E: st_add_direct (st.c:278)
+  n1: 112 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 112 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 112 0x80496A3: init_internal (main.c:244)
+     n0: 112 0x80496EE: main (main.c:274)
+  n1: 96 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 96 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 96 0x80496A3: init_internal (main.c:244)
+     n0: 96 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 96 0x805BD70: st_insert (st.c:264)
+  n1: 96 0x805C972: register_functor (functor.c:175)
+   n1: 96 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 96 0x80496A3: init_internal (main.c:244)
+     n0: 96 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n3: 48 0x805BA2B: st_init_table (st.c:149)
+   n1: 16 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 16 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 16 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 16 0x80496A3: init_internal (main.c:244)
+     n0: 16 0x80496EE: main (main.c:274)
+ n1: 24 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 24 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 24 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 24 0x80496A3: init_internal (main.c:244)
+     n0: 24 0x80496EE: main (main.c:274)
+#-----------
+snapshot=20
+#-----------
+time=169195
+mem_heap_B=988
+mem_heap_extra_B=380
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=21
+#-----------
+time=169428
+mem_heap_B=990
+mem_heap_extra_B=394
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=22
+#-----------
+time=169786
+mem_heap_B=1038
+mem_heap_extra_B=418
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=23
+#-----------
+time=169929
+mem_heap_B=1054
+mem_heap_extra_B=426
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=24
+#-----------
+time=170298
+mem_heap_B=1072
+mem_heap_extra_B=448
+mem_stacks_B=0
+heap_tree=detailed
+n6: 1072 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n2: 464 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 128 0x805C92D: register_functor (functor.c:168)
+   n1: 128 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 128 0x80496A3: init_internal (main.c:244)
+     n0: 128 0x80496EE: main (main.c:274)
+ n2: 272 0x805BE6E: st_add_direct (st.c:278)
+  n1: 144 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 144 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 144 0x80496A3: init_internal (main.c:244)
+     n0: 144 0x80496EE: main (main.c:274)
+  n1: 128 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 128 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 128 0x80496A3: init_internal (main.c:244)
+     n0: 128 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 128 0x805BD70: st_insert (st.c:264)
+  n1: 128 0x805C972: register_functor (functor.c:175)
+   n1: 128 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 128 0x80496A3: init_internal (main.c:244)
+     n0: 128 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n3: 48 0x805BA2B: st_init_table (st.c:149)
+   n1: 16 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 16 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 16 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 16 0x804969E: init_internal (main.c:243)
+      n0: 16 0x80496EE: main (main.c:274)
+   n1: 16 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 16 0x80496A3: init_internal (main.c:244)
+     n0: 16 0x80496EE: main (main.c:274)
+ n1: 28 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 28 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 28 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 28 0x80496A3: init_internal (main.c:244)
+     n0: 28 0x80496EE: main (main.c:274)
+#-----------
+snapshot=25
+#-----------
+time=170649
+mem_heap_B=1120
+mem_heap_extra_B=472
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=26
+#-----------
+time=170871
+mem_heap_B=1122
+mem_heap_extra_B=486
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=27
+#-----------
+time=171229
+mem_heap_B=1170
+mem_heap_extra_B=510
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=28
+#-----------
+time=171372
+mem_heap_B=1186
+mem_heap_extra_B=518
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=29
+#-----------
+time=171752
+mem_heap_B=1204
+mem_heap_extra_B=540
+mem_stacks_B=0
+heap_tree=detailed
+n6: 1204 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n2: 496 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 160 0x805C92D: register_functor (functor.c:168)
+   n1: 160 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 160 0x80496A3: init_internal (main.c:244)
+     n0: 160 0x80496EE: main (main.c:274)
+ n2: 336 0x805BE6E: st_add_direct (st.c:278)
+  n1: 176 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 176 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 176 0x80496A3: init_internal (main.c:244)
+     n0: 176 0x80496EE: main (main.c:274)
+  n1: 160 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 160 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 160 0x80496A3: init_internal (main.c:244)
+     n0: 160 0x80496EE: main (main.c:274)
+ n1: 160 0x805BD70: st_insert (st.c:264)
+  n1: 160 0x805C972: register_functor (functor.c:175)
+   n1: 160 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 160 0x80496A3: init_internal (main.c:244)
+     n0: 160 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n1: 48 0x805BA2B: st_init_table (st.c:149)
+   n0: 48 in 3 places, all below massif's threshold (01.00%)
+ n1: 32 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 32 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 32 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 32 0x80496A3: init_internal (main.c:244)
+     n0: 32 0x80496EE: main (main.c:274)
+#-----------
+snapshot=30
+#-----------
+time=172103
+mem_heap_B=1252
+mem_heap_extra_B=564
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=31
+#-----------
+time=172544
+mem_heap_B=1272
+mem_heap_extra_B=584
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=32
+#-----------
+time=172906
+mem_heap_B=1320
+mem_heap_extra_B=608
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=33
+#-----------
+time=173295
+mem_heap_B=1339
+mem_heap_extra_B=629
+mem_stacks_B=0
+heap_tree=detailed
+n6: 1339 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n2: 528 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 192 0x805C92D: register_functor (functor.c:168)
+   n1: 192 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 192 0x80496A3: init_internal (main.c:244)
+     n0: 192 0x80496EE: main (main.c:274)
+ n2: 400 0x805BE6E: st_add_direct (st.c:278)
+  n1: 208 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 208 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 208 0x80496A3: init_internal (main.c:244)
+     n0: 208 0x80496EE: main (main.c:274)
+  n1: 192 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 192 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 192 0x80496A3: init_internal (main.c:244)
+     n0: 192 0x80496EE: main (main.c:274)
+ n1: 192 0x805BD70: st_insert (st.c:264)
+  n1: 192 0x805C972: register_functor (functor.c:175)
+   n1: 192 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 192 0x80496A3: init_internal (main.c:244)
+     n0: 192 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n1: 48 0x805BA2B: st_init_table (st.c:149)
+   n0: 48 in 3 places, all below massif's threshold (01.00%)
+ n1: 39 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 39 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 39 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 39 0x80496A3: init_internal (main.c:244)
+     n0: 39 0x80496EE: main (main.c:274)
+#-----------
+snapshot=34
+#-----------
+time=173657
+mem_heap_B=1387
+mem_heap_extra_B=653
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=35
+#-----------
+time=174087
+mem_heap_B=1406
+mem_heap_extra_B=674
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=36
+#-----------
+time=174449
+mem_heap_B=1454
+mem_heap_extra_B=698
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=37
+#-----------
+time=174740
+mem_heap_B=1457
+mem_heap_extra_B=711
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=38
+#-----------
+time=174891
+mem_heap_B=1473
+mem_heap_extra_B=719
+mem_stacks_B=0
+heap_tree=detailed
+n6: 1473 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n2: 560 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 224 0x805C92D: register_functor (functor.c:168)
+   n1: 224 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 224 0x80496A3: init_internal (main.c:244)
+     n0: 224 0x80496EE: main (main.c:274)
+ n2: 464 0x805BE6E: st_add_direct (st.c:278)
+  n1: 240 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 240 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 240 0x80496A3: init_internal (main.c:244)
+     n0: 240 0x80496EE: main (main.c:274)
+  n1: 224 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 224 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 224 0x80496A3: init_internal (main.c:244)
+     n0: 224 0x80496EE: main (main.c:274)
+ n1: 224 0x805BD70: st_insert (st.c:264)
+  n1: 224 0x805C972: register_functor (functor.c:175)
+   n1: 224 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 224 0x80496A3: init_internal (main.c:244)
+     n0: 224 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n1: 48 0x805BA2B: st_init_table (st.c:149)
+   n0: 48 in 3 places, all below massif's threshold (01.00%)
+ n1: 45 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 45 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 45 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 45 0x80496A3: init_internal (main.c:244)
+     n0: 45 0x80496EE: main (main.c:274)
+#-----------
+snapshot=39
+#-----------
+time=175242
+mem_heap_B=1521
+mem_heap_extra_B=743
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=40
+#-----------
+time=175639
+mem_heap_B=1540
+mem_heap_extra_B=764
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=41
+#-----------
+time=176001
+mem_heap_B=1588
+mem_heap_extra_B=788
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=42
+#-----------
+time=177547
+mem_heap_B=1604
+mem_heap_extra_B=796
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=43
+#-----------
+time=177943
+mem_heap_B=1636
+mem_heap_extra_B=812
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=44
+#-----------
+time=178098
+mem_heap_B=1652
+mem_heap_extra_B=820
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=45
+#-----------
+time=178454
+mem_heap_B=1659
+mem_heap_extra_B=829
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=46
+#-----------
+time=178650
+mem_heap_B=1675
+mem_heap_extra_B=837
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=47
+#-----------
+time=179024
+mem_heap_B=1723
+mem_heap_extra_B=861
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=48
+#-----------
+time=179302
+mem_heap_B=1728
+mem_heap_extra_B=872
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=49
+#-----------
+time=179598
+mem_heap_B=1760
+mem_heap_extra_B=888
+mem_stacks_B=0
+heap_tree=detailed
+n6: 1760 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n2: 640 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 304 0x805C92D: register_functor (functor.c:168)
+   n1: 304 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 304 0x80496A3: init_internal (main.c:244)
+     n0: 304 0x80496EE: main (main.c:274)
+ n2: 576 0x805BE6E: st_add_direct (st.c:278)
+  n1: 288 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 288 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 288 0x80496A3: init_internal (main.c:244)
+     n0: 288 0x80496EE: main (main.c:274)
+  n1: 288 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 288 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 288 0x80496A3: init_internal (main.c:244)
+     n0: 288 0x80496EE: main (main.c:274)
+ n1: 304 0x805BD70: st_insert (st.c:264)
+  n1: 304 0x805C972: register_functor (functor.c:175)
+   n1: 304 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 304 0x80496A3: init_internal (main.c:244)
+     n0: 304 0x80496EE: main (main.c:274)
+ n1: 132 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 132 0x805BA2B: st_init_table (st.c:149)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 60 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 60 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 60 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 60 0x80496A3: init_internal (main.c:244)
+     n0: 60 0x80496EE: main (main.c:274)
+ n1: 48 0x805B9D4: st_init_table_with_size (st.c:138)
+  n1: 48 0x805BA2B: st_init_table (st.c:149)
+   n0: 48 in 3 places, all below massif's threshold (01.00%)
+#-----------
+snapshot=50
+#-----------
+time=179855
+mem_heap_B=1792
+mem_heap_extra_B=904
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=51
+#-----------
+time=180211
+mem_heap_B=1798
+mem_heap_extra_B=914
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=52
+#-----------
+time=180395
+mem_heap_B=1814
+mem_heap_extra_B=922
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=53
+#-----------
+time=180614
+mem_heap_B=1846
+mem_heap_extra_B=938
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=54
+#-----------
+time=180769
+mem_heap_B=1862
+mem_heap_extra_B=946
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=55
+#-----------
+time=180943
+mem_heap_B=2126
+mem_heap_extra_B=962
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=56
+#-----------
+time=182341
+mem_heap_B=2142
+mem_heap_extra_B=970
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=57
+#-----------
+time=182544
+mem_heap_B=2242
+mem_heap_extra_B=998
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=58
+#-----------
+time=183005
+mem_heap_B=2262
+mem_heap_extra_B=1010
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=59
+#-----------
+time=183253
+mem_heap_B=2302
+mem_heap_extra_B=1034
+mem_stacks_B=0
+heap_tree=detailed
+n6: 2302 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n6: 1052 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 336 0x805C92D: register_functor (functor.c:168)
+   n1: 336 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 336 0x80496A3: init_internal (main.c:244)
+     n0: 336 0x80496EE: main (main.c:274)
+  n1: 256 0x804CE55: init_ruleset_table (rule.c:216)
+   n1: 256 0x804D0D0: init_rules (rule.c:315)
+    n1: 256 0x80496A8: init_internal (main.c:245)
+     n0: 256 0x80496EE: main (main.c:274)
+  n1: 60 0x804CB74: make_rule (rule.c:67)
+   n1: 60 0x804CBF7: lmn_rule_make_translated (rule.c:87)
+    n0: 60 in 3 places, all below massif's threshold (01.00%)
+  n1: 40 0x804D20C: lmn_calloc (alloc.c:116)
+   n1: 40 0x804CD0C: lmn_ruleset_make (rule.c:161)
+    n1: 40 0x804D007: init_system_rulset (rule.c:265)
+     n1: 40 0x804D0DA: init_rules (rule.c:317)
+      n1: 40 0x80496A8: init_internal (main.c:245)
+       n0: 40 0x80496EE: main (main.c:274)
+  n0: 24 in 2 places, all below massif's threshold (01.00%)
+ n2: 608 0x805BE6E: st_add_direct (st.c:278)
+  n1: 304 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 304 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 304 0x80496A3: init_internal (main.c:244)
+     n0: 304 0x80496EE: main (main.c:274)
+  n1: 304 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 304 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 304 0x80496A3: init_internal (main.c:244)
+     n0: 304 0x80496EE: main (main.c:274)
+ n1: 336 0x805BD70: st_insert (st.c:264)
+  n1: 336 0x805C972: register_functor (functor.c:175)
+   n1: 336 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 336 0x80496A3: init_internal (main.c:244)
+     n0: 336 0x80496EE: main (main.c:274)
+ n1: 176 0x805BA05: st_init_table_with_size (st.c:142)
+  n3: 176 0x805BA2B: st_init_table (st.c:149)
+   n2: 88 0x805BA3F: st_init_numtable (st.c:154)
+    n1: 44 0x805C5EF: sym_tbl_init (symbol.c:57)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+    n1: 44 0x804D04B: init_module_table (rule.c:288)
+     n1: 44 0x804D0D5: init_rules (rule.c:316)
+      n1: 44 0x80496A8: init_internal (main.c:245)
+       n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805BA6E: st_init_strtable (st.c:164)
+    n1: 44 0x805C5E5: sym_tbl_init (symbol.c:56)
+     n1: 44 0x804969E: init_internal (main.c:243)
+      n0: 44 0x80496EE: main (main.c:274)
+   n1: 44 0x805C7E0: lmn_functor_tbl_init (functor.c:123)
+    n1: 44 0x80496A3: init_internal (main.c:244)
+     n0: 44 0x80496EE: main (main.c:274)
+ n1: 66 0x40B534E: strdup (in /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 66 0x805C6B0: lmn_intern (symbol.c:91)
+   n1: 66 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 66 0x80496A3: init_internal (main.c:244)
+     n0: 66 0x80496EE: main (main.c:274)
+ n1: 64 0x805B9D4: st_init_table_with_size (st.c:138)
+  n1: 64 0x805BA2B: st_init_table (st.c:149)
+   n0: 64 in 3 places, all below massif's threshold (01.00%)
+#-----------
+snapshot=60
+#-----------
+time=183501
+mem_heap_B=2342
+mem_heap_extra_B=1058
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=61
+#-----------
+time=183749
+mem_heap_B=2382
+mem_heap_extra_B=1082
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=62
+#-----------
+time=183997
+mem_heap_B=2422
+mem_heap_extra_B=1106
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=63
+#-----------
+time=184245
+mem_heap_B=2462
+mem_heap_extra_B=1130
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=64
+#-----------
+time=185565
+mem_heap_B=2502
+mem_heap_extra_B=1130
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=65
+#-----------
+time=185772
+mem_heap_B=6618
+mem_heap_extra_B=1150
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=66
+#-----------
+time=185938
+mem_heap_B=12762
+mem_heap_extra_B=1174
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=67
+#-----------
+time=194705
+mem_heap_B=13114
+mem_heap_extra_B=1182
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=68
+#-----------
+time=195204
+mem_heap_B=13130
+mem_heap_extra_B=1190
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=69
+#-----------
+time=195618
+mem_heap_B=13278
+mem_heap_extra_B=1226
+mem_stacks_B=0
+heap_tree=detailed
+n6: 13278 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n9: 11432 0x804D250: lmn_malloc (alloc.c:129)
+  n1: 4096 0x804D392: task_init (task.c:149)
+   n1: 4096 0x80496B2: init_internal (main.c:248)
+    n0: 4096 0x80496EE: main (main.c:274)
+  n1: 4096 0x804D3A7: task_init (task.c:150)
+   n1: 4096 0x80496B2: init_internal (main.c:248)
+    n0: 4096 0x80496EE: main (main.c:274)
+  n1: 1024 0x804D3CB: task_init (task.c:152)
+   n1: 1024 0x80496B2: init_internal (main.c:248)
+    n0: 1024 0x80496EE: main (main.c:274)
+  n1: 1024 0x804D3B9: task_init (task.c:151)
+   n1: 1024 0x80496B2: init_internal (main.c:248)
+    n0: 1024 0x80496EE: main (main.c:274)
+  n1: 336 0x805C7FD: lmn_functor_tbl_init (functor.c:126)
+   n1: 336 0x80496A3: init_internal (main.c:244)
+    n0: 336 0x80496EE: main (main.c:274)
+  n1: 336 0x805C92D: register_functor (functor.c:168)
+   n1: 336 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 336 0x80496A3: init_internal (main.c:244)
+     n0: 336 0x80496EE: main (main.c:274)
+  n1: 256 0x804CE55: init_ruleset_table (rule.c:216)
+   n1: 256 0x804D0D0: init_rules (rule.c:315)
+    n1: 256 0x80496A8: init_internal (main.c:245)
+     n0: 256 0x80496EE: main (main.c:274)
+  n1: 240 0x804CB74: make_rule (rule.c:67)
+   n1: 240 0x804CBF7: lmn_rule_make_translated (rule.c:87)
+    n0: 240 in 12 places, all below massif's threshold (01.00%)
+  n0: 24 in 3 places, all below massif's threshold (01.00%)
+ n2: 608 0x805BE6E: st_add_direct (st.c:278)
+  n1: 304 0x805C6CF: lmn_intern (symbol.c:92)
+   n1: 304 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 304 0x80496A3: init_internal (main.c:244)
+     n0: 304 0x80496EE: main (main.c:274)
+  n1: 304 0x805C6EB: lmn_intern (symbol.c:93)
+   n1: 304 0x805C83F: lmn_functor_tbl_init (functor.c:132)
+    n1: 304 0x80496A3: init_internal (main.c:244)
+     n0: 304 0x80496EE: main (main.c:274)
+ n1: 352 0x409D9CD: (within /lib/tls/i686/cmov/libc-2.9.so)
+  n1: 352 0x409DA9A: fopen (in /lib/tls/i686/cmov/libc-2.9.so)
+   n1: 352 0x8061980: load_file (load.c:631)
+    n0: 352 0x8049763: main (main.c:287)
+ n1: 336 0x805BD70: st_insert (st.c:264)
+  n1: 336 0x805C972: register_functor (functor.c:175)
+   n1: 336 0x805C870: lmn_functor_tbl_init (functor.c:132)
+    n1: 336 0x80496A3: init_internal (main.c:244)
+     n0: 336 0x80496EE: main (main.c:274)
+ n0: 330 in 4 places, all below massif's threshold (01.00%)
+ n1: 220 0x805BA05: st_init_table_with_size (st.c:142)
+  n1: 220 0x805BA2B: st_init_table (st.c:149)
+   n0: 220 in 3 places, all below massif's threshold (01.00%)
+#-----------
+snapshot=70
+#-----------
+time=195789
+mem_heap_B=29712
+mem_heap_extra_B=1248
+mem_stacks_B=0
+heap_tree=empty

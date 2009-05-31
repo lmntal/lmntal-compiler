@@ -1,0 +1,2 @@
+p = p(crit, 1)
+q = p(crit, N) :- N=\=1 |

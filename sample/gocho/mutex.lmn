@@ -1,25 +1,16 @@
-/*{ np(10).
-  init @@ np(N) :- N>0, M=N-1 | np(M), p(wait,N).
-}.
-{np(0), $p,@p}/ :- $p.
-*/
-p(wait,1),
-p(wait,2),
-p(wait,3),
-p(wait,4),
-p(wait,5),/*
-p(wait,6),
-p(wait,7),
-p(wait,8),
-p(wait,9),
-p(wait,10),
-p(wait,11),
-p(wait,12),
-p(wait,13),
-p(wait,14),
-p(wait,15),*/
-mutex.
+% mutex.lmn
+%     2009.05.26
+%
+% Maude2LMNtal
 
-request @@ X=wait :- X=rqst .
-get_mtx @@ X=rqst, mutex :- X=crit .
-release @@ X=crit :- X=wait, mutex .
+'$'.
+a(wait), b(wait).
+
+a_enter @@ a(wait), '$' :- a(crit) .
+b_enter @@ b(wait), '*' :- b(crit) .
+a_exit  @@ a(crit) :- a(wait), '*' .
+b_exit  @@ b(crit) :- b(wait), '$' .
+
+% property0: []!(crit(a)&&crit(b))
+% prpoerty1: ([]<>wait(a)) -> ([]<>crit(a))
+% property2: []wait(b)

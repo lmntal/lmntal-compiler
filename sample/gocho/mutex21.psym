@@ -1,0 +1,2 @@
+p = p(wait, 1)
+q = p(crit, 1)

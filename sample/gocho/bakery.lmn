@@ -1,0 +1,23 @@
+% bakery.lmn
+%    2009.05.28
+%
+%  Maude2LMNtal
+
+% 要デバッグ：クリティカルセクション中にp1_sleep1の実行で
+%　優先度idが壊れる
+p1(sleep, 0), p2(sleep, 0).
+
+p1_sleep1 @@ p1(sleep,X), p2(Q,Y) :- Y>=3,int(X) |
+             p1(wait,1), p2(Q,0).
+p1_sleep2 @@ p1(sleep,X), p2(Q,Y) :- Y<3,Z=Y+1,int(X) |
+             p1(wait,Z), p2(Q,Y).
+p1_wait1_ @@ p1(wait,X), p2(Q,0)  :- p1(crit,X), p2(Q,0).
+p1_wait2_ @@ p1(wait,X), p2(Q,Y)  :- Y>=X  | p1(crit,X), p2(Q,Y).
+p1_crit__ @@ p1(crit,X), p2(Q,Y)  :- int(X)| p1(sleep,0), p2(Q,Y).
+p2_sleep1 @@ p1(P,X), p2(sleep,Y) :- X>=3,int(Y) |
+             p1(P,0), p2(sleep,1).
+p2_sleep2 @@ p1(P,X), p2(sleep,Y) :- X<3, Z=X+1, int(Y) |
+             p1(P,X), p2(wait,Z).
+p2_wait1_ @@ p1(P,0), p2(wait,Y)  :- p1(P,0), p2(crit,Y).
+p2_wait2_ @@ p1(P,X), p2(wait,Y)  :- Y<X   | p1(P,X), p2(crit,Y).
+p2_crit__ @@ p1(P,X), p2(crit,Y)  :- int(Y)| p1(P,X), p2(sleep,0).
