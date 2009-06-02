@@ -2,10 +2,6 @@
 % 		2009.03.19
 %
 % Tower of Hanoi
-% 
-% towerA膜にあるリスト(先頭を上とする)の中身を
-% towerB膜を経由してtowerC膜へ移動させる.
-% リストの要素は常に昇順でなければならない。
 
 towerA{disk([1,2,3,4])}.
 towerB{disk([])}.

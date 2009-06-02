@@ -99,5 +99,5 @@ close@@		% The door closes.
 elv{$e, @e, +L1}, flr{$f, @f, +L1, door(open)}				:-
 elv{$e, @e, +L1}, flr{$f, @f, +L1, door(close)}.
 
-%% 性質記述
-% 0. 1階の2人にいたら、以降いつか3階に2人いる
+%% property
+% 0. two men at floor1, eventually there is them at floor3

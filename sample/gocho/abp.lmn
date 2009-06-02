@@ -26,7 +26,7 @@ daemon{
   d_PASa @@ ack(0,A) :- int(A), B=1-A | r2s(0,B).
 }.
 
-% プロセス間通信
+% communication between processes
 s2d @@ sender{$s,@s, msg(M,N)}, daemon{$d,@d} :- int(M),int(N) |
        sender{$s,@s, exp(M,N)}, daemon{$d,@d, msg(M,N)}.
 d2r @@ daemon{$d,@d, m2r(M,N)}, recver{$r,@r} :- int(M),int(N) |
