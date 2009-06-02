@@ -3,12 +3,9 @@
 %
 % Earliest Deadline First Scheduling
 % 
-% デッドラインに最も近いタスクに高い優先度を与える
-% ※タスクのデッドラインが実行周期より短い条件で、Rate Monotonicより優れている。
-%
-% rm :静的な優先度割り当て
-% edf:動的な優先度割り当て
-%
+% dynamic allocation priority to task
+%    that have deadline nearset of all tasks.
+
 
 {
 input{
@@ -20,24 +17,15 @@ task{r(0), c(4), d(10), t(12),name(c)}.
 init@@	task{r(R),    c(C),    d(D),    t(T), $t}
 										:-  int(R), int(C), int(D), int(T)					|
 				task{r(R, R), c(C, C), d(D, D), t(T, T), $t}, n(T).
-
-		% 実行周期の最小公倍数を求める。moduleは状態数が増えるため、使用しない		
 lcm0@@  n(X), n(Y)	  :- X >= Y               | lcm(X, Y).
 lcm1@@	lcm(X, Y)		  :- X >= Y, P = X * Y    | gcd(X, Y), lcm(P).
 gcd1@@  gcd(X, Y)		  :- Y2 = X mod Y, Y2=\=0 | gcd(Y, Y2).		
 gcd2@@	gcd(X, Y)	  	:- (X mod Y) =:=0       | gcd(Y).
 lcm2@@  gcd(X),lcm(Y)	:- D = Y / X            |	n(D).
 }.
-
-				%% 初期化終了フラグ
 output@@	spawn{@r}, input{$p, @p, n(N)}/		:-  int(N)	|
 					spawn{@r, $p, time(0)}, limit(N).
 
-
-
-
-%%% 初期プロセス  taskの遷移 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% schej膜.	taskを処理する。
 schej{
 	run1@@ time(T),  task{c(C1, C2), d(D1, D2), $t}
 	 											:-	int(T),  int(C1), int(C2), int(D1), int(D2),
@@ -51,37 +39,30 @@ schej{
 	 													C1 =\= 0		|
 			 d_time(T), dead{c(C1, C2), d(D1, D2), $t}.
 }.
-		 		% 処理の完了したtaskはsleep膜へ移動。
 output@@ schej{$p, @p, time(T), task{c(C1, C2), $t}}/,
 		 		 sleep{$s, @s}
 												:-	int(T), int(C1), int(C2)		|
 				 schej{$p, @p, time(T)},
 				 sleep{$s, @s, task{c(C2, C2), $t}}.
-
-				% 実行中に、deadline越えしたもの。
 output@@ schej{$p, @p, d_time(T), dead{$t}}/,
 		 		 death{$s, @s}
 												:-	int(T)							|
 		 		 schej{$p, @p},
 		 		 death{$s, @s, time(T), task{$t}}.
 
-%% spawn膜.	taskのrelease timeの監視
 spawn{
 	rel@@ time(T),   task{r(R1, R2), $t}
 												:-	int(T), int(R1), int(R2), (T >= R1)	|
 		  r_time(T), r_task{r(R1, R2), $t}.
 }.
-				% release時間が経過したタスクをready膜へ吐き出す。
+
 output@@ spawn{$s, @s, r_time(T), r_task{$t}}/,
 				 ready{$r, @r}
 												:-	int(T)	|
 		 		 spawn{$s, @s, time(T)},
 		 		 ready{$r, @r, task{$t}}.
 
-
-%% ready膜. taskのデッドラインを監視。
 ready{
-		  	% デッドラインの監視を行う。
 	ch1@@ time(T), task{d(D1, D2), $t}
 												:-	int(T), int(D1), int(D2), (D1 =< T)		|
 			d_time(T), dead{d(D1, D2), $t}
@@ -94,8 +75,6 @@ output@@ ready{$r, @r, d_time(T), dead{$d}}/,
 
 death{}.
 
-
-%% sleep膜.	taskの実行周期を監視。
 sleep{
 	ch2@@ task{r(R1, R2), t(T1, T2), d(D1, D2), $t},
 		  	time(P)
@@ -107,17 +86,12 @@ sleep{
 			  wake{r(R3, R2), t(T3, T2), d(D3, D2), $t},
 			w_time(P).
 }.
-		 % 目覚めたtaskを、spawn膜へ吐き出す。
 output@@ sleep{$s, @s, w_time(T), wake{$w}}/,
 				 spawn{$r, @r}
 												:-	int(T)	|
 		 		 sleep{$s, @s, time(T)},
 		 		 spawn{$r, @r, task{$w}}.
 
-
-%%%  timeの遷移  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-				%% ready膜内の、よりデッドラインに近いtaskをschej膜へ吐き出す。
 select@@ ready{task{$t}, $r, @r},
 				 schej{time(T), @s}
 												:-  int(T)	|
@@ -132,37 +106,28 @@ select@@ ready{task{$t}, $r, @r},
 				ready{$r, @r,  task{d(D11, D12), c(C1, C2), $w}},
 				schej{time(T), wait{d(D01, D02), $t}, @s}.
 
-
-				 %% 1単位時間が経過したら、timeをready膜へ吐き出す。
 s2ready@@	schej{$s, @s, c1_time(T)},
 					ready{$p, @p}
 												:-	int(T)	|
 					schej{$s, @s},
 					ready{$p, @p, time(T)}.
 			
-				
-				 %% デッドライン検査が終了したら、timeをsleep膜へ吐き出す。
 r2sleep@@	ready{$r, @r, time(T)}/,
 					sleep{$s, @s}
 												:-	int(T)	|
 					ready{$r, @r},
 					sleep{$s, @s, time(T)}.
 			
-				
-			%% 実行周期検査が終了したら、timeをspawn膜へ吐き出す。
 s2spawn@@	sleep{$s, @s, time(T)}/,
 					spawn{$r, @r}
 												:-	int(T)	|
 					sleep{$s, @s},
 					spawn{$r, @r, time(T)}.
-				
-			%% release待ち検査が終了したら、timeを膜外へ吐き出す。
+
 s2schej@@	spawn{$sp, @sp, time(T)}/
 												:-	int(T)	|
 					spawn{$sp, @sp}, time(T).
 			
-				
-			%% 実行終了時間を監視。
 control@@
 			time(T), limit(L)	:-	int(T), T >= L | end_time(T).		
 			time(T), limit(L), schej{@s} :-	int(T), T <  L |
@@ -172,21 +137,12 @@ control@@
 									:-	int(T), T <  L |
 			limit(L), schej{time(T), wait{$t}, @s}.
 
-% else
-				% 全てのタスクがsleep状態かrelease待ちの場合
 passed@@ schej{time(T), @t},
 				 ready{@r}
 										:-	int(T), T2 = (T + 1)	|
 				 schej{c1_time(T2), @t},
 				 ready{@r}.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 }.
 
-					% ルールselectに対応。最も高優先度タスクになると反応が止まる。
 emptive@@	{schej{wait{$w}, $s, @s}, $p, @p}/	:-
 					{schej{task{$w}, $s, @s}, $p, @p}.
-					
-%%性質記述
-% 1. スケジューリング可能性判定
-% 2. デッドロック検出
