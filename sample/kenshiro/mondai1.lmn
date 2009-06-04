@@ -1,0 +1,4 @@
+x(0).
+rule1 @@ x(N):- uniq(N), N=\=0, N2=N-2 | x(N2).
+rule2 @@ x(N):- uniq(N), N=\=0, N2=N-3 | x(N2).
+rule3 @@ x(N):- uniq(N), N=:=0, N2=N+5 | x(N2).
