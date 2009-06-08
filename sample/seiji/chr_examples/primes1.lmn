@@ -25,6 +25,5 @@ gen  @@ prime(N) :- N>2, uniq(N) | prime(N), M = N-1, prime(M).
 sift @@ prime(X) \ prime(Y) :- Y mod X =:= 0 | true.
 
 %%QUERY
-prime(12).
-
+prime(100).
 
