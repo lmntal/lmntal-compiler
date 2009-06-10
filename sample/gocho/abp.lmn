@@ -8,6 +8,7 @@
 sender{
   msg(0,0).
 	s_OK @@ exp(I,B), ack(0,A) :- A=:=B,J=(I+1) mod 5, C=1-B	| msg(J,C).	
+	s_NG @@ exp(I,B), ack(0,A) :- A=\=B | msg(I,B).
 }.
 
 % ack(0, Ack)  key(ExpectedBit).
@@ -20,10 +21,10 @@ recver{
 daemon{
   d_PASm @@ msg(I,B) :- m2r(I,B).
   d_LOSm @@ msg(I,B) :- int(I), int(B) | .
-  d_ERRm @@ msg(I,B) :- Z=1-B | m2r(I,B).
+  d_ERRm @@ msg(I,B) :- int(I), Z=1-B | m2r(I,Z).
   d_PASa @@ ack(0,A) :- r2s(0,A).
-  d_PASa @@ ack(0,A) :- int(A) | .
-  d_PASa @@ ack(0,A) :- int(A), B=1-A | r2s(0,B).
+  d_LOSa @@ ack(0,A) :- int(A) | .
+  d_ERRa @@ ack(0,A) :- int(A), B=1-A | r2s(0,B).
 }.
 
 % communication between processes

@@ -5,13 +5,14 @@
 % Crossing the Bridge
 % 
 
+p(l,12), p(l,7),
 p(l,1), p(l,2), p(l,5), p(l,10), light(l), time(0).
 
-go_1 @@ p(l,P), light(l), time(T) :- T2=T+P |
+go_1 @@ p(l,P), light(l), time(T) :- T2=T+P, T<30 |
         p(r,P), light(r), time(T2).
 
-go_2 @@ p(l,P), p(l,Q), light(l), time(T)	:- P=<Q, T2=T+Q |
+go_2 @@ p(l,P), p(l,Q), light(l), time(T)	:- P=<Q, T2=T+Q, T<30 |
         p(r,P), p(r,Q), light(r), time(T2).
 
-back @@ p(r,P), p(l,Q), light(r), time(T)	:- T2=T+P	|
+back @@ p(r,P), p(l,Q), light(r), time(T)	:- T<30, T2=T+P	|
         p(l,P), p(l,Q), light(l), time(T2).

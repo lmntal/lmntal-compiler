@@ -20,4 +20,4 @@ p2_sleep2 @@ p1(P,X), p2(sleep,Y) :- X<3, Z=X+1, int(Y) |
              p1(P,X), p2(wait,Z).
 p2_wait1_ @@ p1(P,0), p2(wait,Y)  :- p1(P,0), p2(crit,Y).
 p2_wait2_ @@ p1(P,X), p2(wait,Y)  :- Y<X   | p1(P,X), p2(crit,Y).
-p2_crit__ @@ p1(P,X), p2(crit,Y)  :- int(Y)| p1(P,X), p2(sleep,0).
+p2_crit__ @@ p1(P,X), p2(crit,Y)  :- int(Y)| p1(P,X), p2(sleep,0).cd

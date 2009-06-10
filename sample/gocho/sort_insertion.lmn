@@ -1,36 +1,21 @@
 %	sort_insertion.lmn
 %	
-%	ÁÞÆþÀ°ÎóË¡
-%
-%	¸¡¾Ú¹àÌÜ¡§É¬¤º¹ß½ç¤ËÀ°ÎóºÑ¤ß¤È¤Ê¤ë¡£
+%	insertion sort program
 
 
-{data([10, 1, 5, 20, 3, 19, 7, 8,  0, 2]).}.
-sort([]).
+{ n(20), data([]).
+  s0_init @@ n(N), data=X :- N>=0, M=N-1 | n(M), data=Y, '.'(N,X,Y).
+}.
+{n(-1), $p,@p}/ :- {$p}, sort([]).
 
-init@@	sort(S), 		   {data([X1, X2 |R]), $p[R], @p}	:-	X1<X2	|
-		sort([X2, X1 |S]), {sort(R), $p[R], @p}.
-	
-else@@	sort(S), 		   {data([X1, X2 |R]), $p[R], @p}	:-	X1>=X2	|
-		sort([X1, X2 |S]), {sort(R), $p[R], @p}.
-
-sort@@	F=[X1, X2 |S], 	  {sort([Y |R]), $p[R], @p}	:-	X1>=Y, X2=<Y |
-		F=[X1, Y, X2 |S], {sort(R), $p[R], @p}.
-
-else@@	sort([X |S]),	 {sort([Y |R]), $p[R], @p}	:-	X<Y |
-		sort([Y, X |S]), {sort(R), $p[R], @p}.
-
-else@@	F=[X |[]],	  {sort([Y |R]), $p[R], @p}		:-	X>Y |
-		F=[X, Y |[]], {sort(R), $p[R], @p}.
-
-
-%% À­¼Á¥ë¡¼¥ë
-% <>[]p. p:º¸¡ä±¦
-/*
-ltl1@@	t0_init{$p, @p} :- t0_init{$p, @p}.
-
-ltl2@@	t0_init{L=[X1, X2 |R], $p[L, R], @p}	:-	(X1 > X2)	|
-	  	 accept{L=[X1, X2 |R], $p[L, R], @p}.
-
-ltl3@@	 accept{L=[X1, X2 |R], $p[L, R], @p}	:-	(X1 > X2)	|
-	  	 accept{L=[X1, X2 |R], $p[L, R], @p}.*/
+s1_chng @@ {data([X,Y |R]), $p[R]}, sort(S)     :- X<Y |
+           {sort(R), $p[R]}, sort([Y,X |S]).
+s1_else @@ {data([X,Y |R]), $p[R]}, sort(S)     :- X>=Y |
+           {sort(R), $p[R]}, sort([X,Y |S]).
+s2_sort @@ {sort([Z |R]), $p[R]}, F=[X,Y |S]    :-	X>=Z, Y=<Z |
+           {sort(R), $p[R]}, 	F=[X,Z,Y |S].
+s2_els1 @@ {sort([Z |R]), $p[R]}, sort([X |S])  :-	X<Z |
+           {sort(R), $p[R]}, sort([Z,X |S]).
+s2_els2 @@ {sort([Z |R]), $p[R]}, F=[X |[]]     :-	X>Z |
+           {sort(R), $p[R]}, F=[X,Z |[]].
+q

@@ -1,50 +1,7 @@
-/*
 
-NAME
-  append and sort (LTL version)
 
-SYNOPSIS
-  run under SLIM LTL mode
-  
-AUTHOR
-  Ryo Okabe
+l=append([7,6,5], [4,3,2,1]).
 
-HISTORY
-  2007/01/11(Fri)
-
-*/
-
-% system rule
-init{
-
-l=append([3,2,5],[1,4]).
-
-a@@ R=append([H|T],L) :- R=[H|append(T,L)].
-a@@ R=append([],L) :- R=(L).
-sort@@ R=[X,Y|T] :- X>Y | R=[Y,X|T].
-
-}.
-
-% property rule
-ltl1@@ init{$p,@p} :- init{$p,@p}.
-ltl2@@ init{R=[X,Y|T],$p[R,T],@p} :- X<Y | accept{R=[X,Y|T],$p[R,T],@p}.
-ltl3@@ accept{R=[X,Y|T],$p[R,T],@p} :- X<Y | accept{R=[X,Y|T],$p[R,T],@p}.
-
-/* ltl2ba output (never claim)
-> ~/workspace/mc/ltl2ba-1.0/ltl2ba -f '(<>[]p)'
-never {
-T0_init:
-      if
-      :: (1) -> goto T0_init
-      :: (p) -> goto accept_S2
-      fi;
-accept_S2:
-      if
-      :: (p) -> goto accept_S2
-      fi;
-}
-*/
-
-/* literal definition
-p@@ R=[X,Y|T] :- X>Y | R=[X,Y|T].
-*/
+app1 @@ R=append([H|T],L) :- R=[H|append(T,L)].
+app2 @@ R=append([],L) :- R=(L).
+sort @@ R=[X,Y|T] :- X>Y | R=[Y,X|T].
