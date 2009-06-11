@@ -1,0 +1,8 @@
+{a(X), b(Y), $p[X,Y]} :- a(X), b(Y), $p[X,Y].
+//{a(X), b(Y), $p[X,Y|*Z]} :- a(X), b(Y), $p[X,Y|*Z].
+/* [NG] {a(X), b(Y), $p[X,Y]} :- unary($p) | a(X), b(Y), $p[X,Y].*/
+//{a(X), b(Y), $p[X], $q[Y]} :- unary($p),unary($q) | a(X), b(Y), $p[X], $q[Y].
+//{a(X), b(Y), $p[X,Y]} :- ground($p) | a(X), b(Y), $p[X,Y].
+
+
+{a(1),b(2)}, {b(9)}, {a(8)}, {a(5),b(4),c(3)}.
