@@ -7,12 +7,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Set;
+
+import debug.Debug;
 
 import runtime.Atom;
 import runtime.Dumper;
 import runtime.Env;
 import runtime.Functor;
+import runtime.InterpretedRuleset;
 import runtime.Membrane;
+import runtime.Rule;
+import runtime.Ruleset;
 import runtime.SymbolFunctor;
 
 public class Mediator {
@@ -39,6 +45,12 @@ public class Mediator {
 	
 	static
 	private LinkedList<Atom> modifiedAtom_;
+	
+	static
+	private Rule currentRule_;
+
+	static
+	private HashMap<Rule, String> rules_;
 	
 	static
 	private Object unyoObj_;
@@ -83,6 +95,7 @@ public class Mediator {
 		removedAtom_.clear();
 		addedAtom_.clear();
 		modifiedAtom_.clear();
+		rules_.clear();
 	}
 	
 	static
@@ -96,6 +109,9 @@ public class Mediator {
 		removedAtom_ = new LinkedHashMap<String, String>();
 		addedAtom_ = new LinkedList<Atom>();
 		modifiedAtom_ = new LinkedList<Atom>();
+		currentRule_ = new Rule();
+		rules_ = new HashMap<Rule, String>();
+		
 		try {
 			unyoClass_ = Class.forName("jp.ac.waseda.info.ueda.unyo.mediator.Synchronizer");
 			unyoObj_ = unyoClass_.newInstance();
@@ -113,12 +129,15 @@ public class Mediator {
 			setState_ 
 			= unyoClass_.getMethod("setState",
 					Object.class,
+					HashMap.class,
 					LinkedHashMap.class,
 					LinkedList.class,
 					LinkedList.class,
 					LinkedHashMap.class,
 					LinkedList.class,
-					LinkedList.class);
+					LinkedList.class,
+					Object.class,
+					String.class);
 			
 			end_ = unyoClass_.getMethod("end");
 			
@@ -251,14 +270,17 @@ public class Mediator {
 			e.printStackTrace();
 		}
 	}
-	
+	/**
+	 * mode 0-->LogPanelに出力
+	 * 1-->ProcessPanelにルール出力
+	 * 2-->ProcessPanelに結果出力
+	 * @param msg
+	 * @param mode
+	 */
 	public static void print(Object msg, int mode){
 		print(msg.toString(), mode);
 	}
 	
-	public static void printRule(String rule){
-		print(rule + System.getProperty("line.separator"), 1);
-	}
 	public static void printRoot(){
 		Membrane root = Env.theRuntime.getGlobalRoot();
 		print(Dumper.dump(root) + System.getProperty("line.separator"), 2);
@@ -284,23 +306,49 @@ public class Mediator {
 		}
 	}
 	
+	/**
+	 * 全膜のルールを再帰的に収集する
+	 * @param mem ルート膜
+	 */
+	private static void collectAllRules(Membrane mem) {
+		Iterator<Ruleset> itr = mem.rulesetIterator();
+		while (itr.hasNext()) {
+			Object o = itr.next();
+			if (!(o instanceof InterpretedRuleset)) continue;
+			InterpretedRuleset ruleset = (InterpretedRuleset)o;
+			for(Rule rule : ruleset.rules){
+				rules_.put(rule, rule.getFullText());
+			}
+		}
+		
+		Iterator<Membrane> memIterator = mem.memIterator();
+		while (memIterator.hasNext()) {
+			collectAllRules(memIterator.next());
+		}
+	}
+	
 	static 
 	public boolean sync(Membrane root) {
-		
 		if(releasing){
 			return false;
 		}
 		printRoot();
-//		printRootAll();
+		if(rules_.isEmpty()){
+			collectAllRules(root);
+		}
+
 		try {
 			setState_.invoke(unyoObj_,
 					root,
+					rules_,
 					removedMembrane_,
 					addedMembrane_,
 					modifiedMembrane_,
 					removedAtom_,
 					addedAtom_,
-					modifiedAtom_);
+					modifiedAtom_,
+					(Object)currentRule_,
+					currentRule_.fullText);
 
 			removedMembrane_.clear();
 			addedMembrane_.clear();
@@ -316,7 +364,7 @@ public class Mediator {
 					e.printStackTrace();
 				}
 			}
-			setWait(false);			
+			setWait(false);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -324,18 +372,33 @@ public class Mediator {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
-		
+
 		if(releasing){
 			return false;
 		}
 		return true;
-		
+
 	}
 
 	static
-	public void addRemovedMembrane(String removeMemID, String parentMemID){
+	public void addRemovedMembrane(Membrane removeMem, String parentMemID){
 //		System.out.println("removeMem/" + removeMemID);
-		removedMembrane_.put(removeMemID, parentMemID);
+		removeChildrenOfMembrane(removeMem);
+		removedMembrane_.put(removeMem.getMemID(), parentMemID);
+	}
+	static
+	private void removeChildrenOfMembrane(Membrane mem){
+		Iterator<Atom> it_a = mem.atomIterator();
+		/* 膜の中身も追加 */
+		while (it_a.hasNext()) {
+			Atom a = it_a.next();
+			unyo.Mediator.addRemovedAtom(a, mem.getMemID());
+		}
+		Iterator<Membrane> it_m = mem.memIterator();
+		while (it_m.hasNext()) {
+			Membrane m = it_m.next();
+			unyo.Mediator.addRemovedMembrane(m, mem.getMemID());
+		}
 	}
 	
 	static
@@ -369,23 +432,42 @@ public class Mediator {
 	
 	static
 	public void addRemovedAtom(Atom removeAtom, String parentMemID){
-//		System.out.println("addRemAtom/" + removeAtom.getid());
+		if(removeAtom.getFunctor().equals(Functor.STAR) ||
+				removeAtom.getFunctor().equals(Functor.INSIDE_PROXY) ||
+				removeAtom.getFunctor().equals(Functor.OUTSIDE_PROXY)||
+				removeAtom.getFunctor().getName().startsWith("/*inline*/")){
+			return;
+		}
+//		System.out.println("addRemAtom/" + removeAtom.getid() + removeAtom.getName());
 		String id = ((Integer)removeAtom.getid()).toString();
 		removedAtom_.put(id, parentMemID);
-		addedAtom_.remove(removeAtom);
+//		addedAtom_.remove(removeAtom);
 	}
 	
 	static
 	public void addAddedAtom(Atom atom){
-		if(atom.getFunctor().equals(Functor.STAR))	return;
-//		System.out.println("addAddAtom/" + atom.getid());
+		if(atom.getFunctor().equals(Functor.STAR) ||
+				atom.getFunctor().equals(Functor.INSIDE_PROXY) ||
+				atom.getFunctor().equals(Functor.OUTSIDE_PROXY) ||
+				atom.getFunctor().getName().startsWith("/*inline*/")){
+			return;
+		}
+//		System.out.println("addAddAtom/" + atom.getid()+atom.getName());
 		addedAtom_.add(atom);
 	}
 	
 	static
 	public void addModifiedAtom(Atom atom){
-		if(atom.getFunctor().equals(Functor.STAR))	return;
-//		System.out.println("addModeAtom/" + atom.getid());
+		if(atom.getFunctor().equals(Functor.STAR) ||
+				atom.getFunctor().equals(Functor.INSIDE_PROXY) ||
+				atom.getFunctor().equals(Functor.OUTSIDE_PROXY) ||
+				atom.getFunctor().getName().startsWith("/*inline*/")){
+			return;
+		}
+		if(addedAtom_.contains(atom)){
+			return;
+		}
+//		System.out.println("addModeAtom/" + atom.getid() + atom.getName());
 		modifiedAtom_.add(atom);
 	}
 	
@@ -396,5 +478,10 @@ public class Mediator {
 	static
 	public boolean isWait(){
 		return unyoWait_;
+	}
+	
+	static
+	public void setCurrentRule(Rule rule){
+		currentRule_ = rule;
 	}
 }

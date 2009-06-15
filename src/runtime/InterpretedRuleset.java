@@ -756,7 +756,7 @@ class InterpretiveReactor {
 				case Instruction.REMOVEMEM :
 					//[srcmem, parentmem]
 					if(Env.fUNYO){
-						unyo.Mediator.addRemovedMembrane(mems[inst.getIntArg1()].getMemID(), mems[inst.getIntArg1()].getParent().getMemID());
+						unyo.Mediator.addRemovedMembrane(mems[inst.getIntArg1()], mems[inst.getIntArg1()].getParent().getMemID());
 					}
 					mem = mems[inst.getIntArg1()];
 					mem.parent.removeMem(mem);
@@ -1040,7 +1040,7 @@ class InterpretiveReactor {
 				case Instruction.COMMIT :
 					String rule1 = currentInterpretedRuleset.encode();
 					if(Env.fUNYO){
-						Mediator.printRule(rule1);
+						Mediator.setCurrentRule(currentInterpretedRuleset.currentRule);
 					}
 					if (Env.fTrace) Task.trace("-->", "@" + currentInterpretedRuleset.getId(), (String)inst.getArg1());
 					if (Env.debugOption) {//2006.1.26 by inui

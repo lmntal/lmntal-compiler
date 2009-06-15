@@ -563,7 +563,7 @@ public final class Membrane extends QueuedEntity {
 		if(Env.LMNtool != null && !mem.isRoot())
 			Env.LMNtool.addRemovedMem(mem);	
 		if(Env.fUNYO){
-			unyo.Mediator.addRemovedMembrane(mem.getMemID(), mem.parent.getMemID());
+			unyo.Mediator.addRemovedMembrane(mem, mem.parent.getMemID());
 		}
 		mems.remove(mem);
 		mem.dequeue();
