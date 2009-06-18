@@ -1,0 +1,5 @@
+count(3).
+n(a,out),n(b,out),n(c,out),n(d,out),n(e,out).
+
+n(X,out), count(N) :- N>0, M=N-1 | n(X,in), count(M).
+n(X,in), count(N) :- M=N+1 | n(X,out), count(M).
