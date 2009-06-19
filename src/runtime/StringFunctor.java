@@ -18,6 +18,12 @@ public class StringFunctor extends ObjectFunctor {
 	public String getQuotedFunctorName() { return getQuotedAtomName(); }
 	
 	public String stringValue() {return getName();}
+
+  public String toString() {
+		if (Env.compileonly)
+			return Util.quoteString(getName(), '\"') + "_" + getArity();
+		return getQuotedFunctorName() + "_" + getArity();
+  }
 	
 	// 2006/06/28 by kudo
 	public boolean equals(Object o){
