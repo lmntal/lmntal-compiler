@@ -1,4 +1,4 @@
-% ひろったやつ
+% Dining Philosophers
 
 {
 p(L1, R1), c{o(L1), o(R2)},

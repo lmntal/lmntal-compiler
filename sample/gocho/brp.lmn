@@ -1,26 +1,24 @@
-% brp.lmn 書きかけ
+% brp.lmn
+%   2009.06.16
+%
+% Bounded Retransmission Protocol
 
-prod_n=0.
+s(0), r(0), sb(0), rb(0), k{f=[nil]}, l{f=[nil]}, label(none). 
+msg=[fst, '0', '1', last].
 
-producer{
-	result=0.
-	n=0.
-	ready       @@ prod_n=X :- X=<5, X>0 | prod_n=X, start_send.
-	start_send  @@ start_send, prod_n(X) :- sin(prod_n(X)).
-	wait_result @@ sout(result(X)) :- result(X), check.
-	check_1     @@ result(1) :- shakePC(0).
-	check_2or3  @@ result(X) :- X>=2, X=<3 | start_send.
-}.
-
-consumer{
-	m=0, n=0.
-	ready       @@ rout(m(X)), n(N) :- N2=N+1 | m(X), n(N2), get_msg.
-	get_msg_4or5@@ get_msg, m(X) :- X>=4, X=<5 | ready.
-	get_msg_2   @@ get_msg, m(2), n=0 :- 
-	get_msg_1   @@ get_msg, m(1) :- check.
-	check       @@ 
-}.
-sender{}.
-receiver{}.
-k{}.
-l{}.
+req__ @@ label(LA),  s(0), sb(A), rb(0), k{f=[nil]}, l{f=[nil]} :- int(A), unary(LA) |
+         label(req), s(1), sb(0), rb(0), k{f=[nil]}, l{f=[nil]}.
+kS1st @@ label(LA),  s(1), k{$p[D], D=[X|[]]}    :- unary(LA),unary(X) |
+         label(none),s(2), k{$p[D], D=[X, fst|[]]}.
+kS1re @@ label(LA),  s(2), k{$p[D], D=[X|[]]}, msg=[Y |P] :- unary(LA),X=Y |
+         label(none),s(2), k{$p[D], D=[X|[]]}, msg=[Y |P].
+lR1st @@ label(LA),  s(2), l{$p[D], f=[nil,fst |D]}     :- unary(LA) |
+         label(none),s(3), l{$p[D], f=[nil |D]}.
+lR1ng @@ label(LA),  s(2), l{$p[D], f=[nil,M |D]}, msg=[Y |P] :- unary(LA), M\=Y |
+         label(none),s(2), l{$p[D], f=[nil |D]}, msg=[Y |P].
+kS0__ @@ label(LA),  s(3), k{$p[D], D=[X |[]]}   :- unary(LA), unary(X) |
+         label(none),s(4), k{$p[D], D=[X, 0|[]]}.
+lR0ng @@ label(LA),  s(4), l{$p[D], f=[nil,M |D]}, P=[fst,Y |Q] :- unary(LA),M\=Y |
+         label(none),s(4), l{$p[D], f=[nil |D]},   P=[fst,Y |Q].
+lR0lo @@ label(LA),  s(4), l{$p[D], f=[nil,'0' |D]} :- unary(LA) |
+         label(none),s(5), l{$p[D], f=[nil |D]}.

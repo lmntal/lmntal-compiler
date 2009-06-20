@@ -1,0 +1,31 @@
+% philo.lmn
+%    2009.06.15
+%
+%   Dining Philosophers
+%     Maude2LMNtal
+
+{phi=1, state=thinking, noOfSticks=0}.
+{phi=2, state=thinking, noOfSticks=0}.
+{phi=3, state=thinking, noOfSticks=0}.
+{phi=4, state=thinking, noOfSticks=0}.
+{phi=5, state=thinking, noOfSticks=0}.
+
+chopstick(1).
+chopstick(2).
+chopstick(3).
+chopstick(4).
+chopstick(5).
+
+hungry__ @@ {phi=I, state=thinking, $p} :- int(I) |
+            {phi=I, state=hungry, $p}.
+
+grab1stL @@ {phi=I, state=hungry, noOfSticks=0}, chopstick(J) :- J==I |
+            {phi=I, state=hungry, noOfSticks=1}.
+grab1stR @@ {phi=I, state=hungry, noOfSticks=0}, chopstick(J) :- J==I mod 5 + 1 |
+            {phi=I, state=hungry, noOfSticks=1}.
+grab2ndL @@ {phi=I, state=hungry, noOfSticks=1}, chopstick(J) :- J==I |
+            {phi=I, state=eating, noOfSticks=2}.
+grab2ndR @@ {phi=I, state=hungry, noOfSticks=1}, chopstick(J) :- J==I mod 5 + 1 |
+            {phi=I, state=eating, noOfSticks=2}.
+stopEat_ @@ {phi=I, state=eating, noOfSticks=J} :- int(I), int(J), C=I mod 5 + 1 |
+            {phi=I, state=thinking, noOfSticks=0}, chopstick(I), chopstick(C).

@@ -1,0 +1,39 @@
+heap profile:      4:     2408 [7864339: 16106132650] @
+     1:     2048 [7864320: 16106127360] @ 0x0804855a 0xb7ee1775 0x080484a1
+     1:      352 [    15:     5280] @ 0xb7f2a9cf 0xb7f2aa9c 0xb8043dfd 0xb80441aa 0xb8054ca6 0x0804855a 0xb7ee1775 0x080484a1
+     1:        4 [     1:        4] @ 0xb803edad 0xb805455d 0xb8038d54 0xb8099404 0xb8099534 0xb808b84f
+     1:        4 [     1:        4] @ 0xb80400de 0xb8041466 0xb804015a 0xb803edc0 0xb805455d 0xb8038d54 0xb8099404 0xb8099534 0xb808b84f
+     0:        0 [     1:        1] @ 0xb803ed99 0xb805455d 0xb8038d54 0xb8099404 0xb8099534 0xb808b84f
+     0:        0 [     1:        1] @ 0xb803ed80 0xb805455d 0xb8038d54 0xb8099404 0xb8099534 0xb808b84f
+
+MAPPED_LIBRARIES:
+08048000-08049000 r-xp 00000000 00:00 2598734     /home/gocho/lmntal/devel/sample/gocho/tc_test
+08049000-0804a000 r--p 00000000 00:00 2598734     /home/gocho/lmntal/devel/sample/gocho/tc_test
+0804a000-0804b000 rw-p 00001000 00:00 2598734     /home/gocho/lmntal/devel/sample/gocho/tc_test
+09934000-09ab4000 rw-p 09934000 00:00 0           [heap]
+b7bd5000-b7da6000 rw-p b7bd5000 00:00 0           
+b7da6000-b7db3000 r-xp 00000000 00:00 1466501     /lib/libgcc_s.so.1
+b7db3000-b7db4000 r--p 0000c000 00:00 1466501     /lib/libgcc_s.so.1
+b7db4000-b7db5000 rw-p 0000d000 00:00 1466501     /lib/libgcc_s.so.1
+b7db5000-b7dd9000 r-xp 00000000 00:00 1482789     /lib/tls/i686/cmov/libm-2.9.so
+b7dd9000-b7dda000 r--p 00023000 00:00 1482789     /lib/tls/i686/cmov/libm-2.9.so
+b7dda000-b7ddb000 rw-p 00024000 00:00 1482789     /lib/tls/i686/cmov/libm-2.9.so
+b7ddb000-b7ebf000 r-xp 00000000 00:00 1843545     /usr/lib/libstdc++.so.6.0.10
+b7ebf000-b7ec3000 r--p 000e3000 00:00 1843545     /usr/lib/libstdc++.so.6.0.10
+b7ec3000-b7ec4000 rw-p 000e7000 00:00 1843545     /usr/lib/libstdc++.so.6.0.10
+b7ec4000-b7ecb000 rw-p b7ec4000 00:00 0           
+b7ecb000-b8027000 r-xp 00000000 00:00 1482785     /lib/tls/i686/cmov/libc-2.9.so
+b8027000-b8028000 ---p 0015c000 00:00 1482785     /lib/tls/i686/cmov/libc-2.9.so
+b8028000-b802a000 r--p 0015c000 00:00 1482785     /lib/tls/i686/cmov/libc-2.9.so
+b802a000-b802b000 rw-p 0015e000 00:00 1482785     /lib/tls/i686/cmov/libc-2.9.so
+b802b000-b802e000 rw-p b802b000 00:00 0           
+b802e000-b8061000 r-xp 00000000 00:00 1491086     /usr/lib/libtcmalloc.so.0.0.0
+b8061000-b8062000 r--p 00032000 00:00 1491086     /usr/lib/libtcmalloc.so.0.0.0
+b8062000-b8063000 rw-p 00033000 00:00 1491086     /usr/lib/libtcmalloc.so.0.0.0
+b8063000-b8077000 rw-p b8063000 00:00 0           
+b8078000-b808a000 rw-p b8078000 00:00 0           
+b808a000-b808b000 r-xp b808a000 00:00 0           [vdso]
+b808b000-b80a7000 r-xp 00000000 00:00 1466475     /lib/ld-2.9.so
+b80a7000-b80a8000 r--p 0001b000 00:00 1466475     /lib/ld-2.9.so
+b80a8000-b80a9000 rw-p 0001c000 00:00 1466475     /lib/ld-2.9.so
+bfd94000-bfda9000 rw-p bffeb000 00:00 0           [stack]
