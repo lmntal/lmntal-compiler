@@ -7,7 +7,7 @@
 % msg(Message, Bit).
 sender{
   msg(0,0).
-	s_OK @@ exp(I,B), ack(0,A) :- A=:=B,J=(I+1) mod 5, C=1-B	| msg(J,C).	
+	s_OK @@ exp(I,B), ack(0,A) :- A=:=B,J=(I+1) mod 10000, C=1-B	| msg(J,C).
 	s_NG @@ exp(I,B), ack(0,A) :- A=\=B | msg(I,B).
 }.
 

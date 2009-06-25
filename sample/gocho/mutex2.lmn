@@ -10,7 +10,7 @@ p(wait,1),
 p(wait,2),
 p(wait,3),
 p(wait,4),
-p(wait,5),/*
+p(wait,5),
 p(wait,6),
 p(wait,7),
 p(wait,8),
@@ -20,7 +20,12 @@ p(wait,11),
 p(wait,12),
 p(wait,13),
 p(wait,14),
-p(wait,15),*/
+p(wait,15),
+p(wait,16),
+p(wait,17),
+p(wait,18),
+p(wait,19),
+p(wait,20),/**/
 mutex.
 
 request @@ X=wait :- X=rqst .

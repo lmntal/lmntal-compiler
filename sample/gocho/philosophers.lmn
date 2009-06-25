@@ -16,5 +16,5 @@ rule2@@ p(L, R), c{u(L), o(X)}, c{o(R), o(Y)} 	:-
 rule3@@ c{o(X), u(L)}, p(L, R), c{u(R), o(Y)}  :-
 				c{o(X), o(L)}, p(L, R), c{o(R), o(Y)}.
 }.
-error@@ {$p, @p}/  :-  \+($p=(error, $pp)) |
-			 	{$p, @p, error}.
+/*error@@ {$p, @p}/  :-  \+($p=(error, $pp)) |
+			 	{$p, @p, error}.*/
