@@ -1,0 +1,8 @@
+ //中川君のプログラムを改変
+ {root, num(0), +X, +Y}, {+X},{+Y}.
+ num(1). num(2). num(3). num(4). num(5).
+ 
+ {+A}, num($x) :- int($x) | {+A, num($x), +B, +C}, {+B}, {+C}.
+ {+A, $p}, num($x) :- int($x), ground(A) | {+A, $p, num($x), +B, +C,  +B}, {+C}.
+ 
+ 

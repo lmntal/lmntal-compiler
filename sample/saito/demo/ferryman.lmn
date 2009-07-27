@@ -1,0 +1,70 @@
+/*
+
+NAME
+	Wolf, Goat, and Cabbage (nondeterministic LMNtal version)
+
+SYNOPSIS
+	A wolf, a goat and a cabbage are on the left side of the river.
+	A ferryman, also on the left side, can carry them to the other side
+	with his ferry. 
+	However, if the wolf and the goat are on the same side without the ferryman,
+	the goat will be eaten by the wolf.
+	Also, the goat and the cabbage are, too.
+	Now, can you move all but the ferryman to the right side of the river?
+
+AUTHOR
+	Ryo Okabe
+
+HISTORY
+	2006/09/13(Wed)
+	2007/07/02(Mon) add typedef
+	2009
+
+*/
+
+% initial state
+fe(0), wo(0), go(0), ca(0), step(0,ok).
+
+% move
+wo(W), fe(F), step(S,ok) :- W=:=F, int(W2), W2=1-W, int(S2), S2=S+1 | wo(W2), fe(W2), step(S2,check).
+go(G), fe(F), step(S,ok) :- G=:=F, int(G2), G2=1-G, int(S2), S2=S+1 | go(G2), fe(G2), step(S2,check).
+ca(C), fe(F), step(S,ok) :- C=:=F, int(C2), C2=1-C, int(S2), S2=S+1 | ca(C2), fe(C2), step(S2,check).
+fe(F), step(S,ok) :- int(F2), F2=1-F, int(S2), S2=S+1 | fe(F2), step(S2,check).
+
+% terminal condition
+fail@@
+fe(X),wo(Y),go(Z) :- X=\=Y,Y=:=Z | false.
+
+fail@@
+fe(X),go(Y),ca(Z) :- X=\=Y,Y=:=Z | false.
+
+goal@@
+wo(1),go(1),ca(1),fe(F) :- int(F) | true.
+
+init@@
+false, wo(W), step(S1,S2) :- unary(W), unary(S1), unary(S2) | fe(0), wo(0), go(0), ca(0), step(0,ok).
+init@@
+false, ca(C), step(S1,S2) :- unary(C), unary(S1), unary(S2) | fe(0), wo(0), go(0), ca(0), step(0,ok).
+
+/*
+check@@
+fe(X),wo(Y),go(Z), step(S,check) :- X=\=Y,Y=\=Z | fe(X),wo(Y),go(Z), step(S,ok) .
+
+check@@
+fe(X),go(Y),ca(Z), step(S,check) :- X=\=Y,Y=\=Z | fe(X),go(Y),ca(Z), step(S,ok) .
+
+*/
+
+check@@
+fe(X),wo(Y),go(Z),ca(C), step(S,check) :- X=:=Y,C=\=Z | fe(X),wo(Y),go(Z),ca(C),step(S,ok).
+
+check@@
+fe(X),wo(Y),go(Z),ca(C), step(S,check) :- Y=\=Z,C=:=X | fe(X),wo(Y),go(Z),ca(C),step(S,ok).
+
+check@@
+fe(X),wo(Y),go(Z),ca(C), step(S,check) :- X=:=Z| fe(X),wo(Y),go(Z),ca(C),step(S,ok).
+
+
+check@@
+fe(0),go(0),ca(0), wo(0), step(S,check) :- fe(0),go(0),ca(0),wo(0),step(S,ok) .
+
