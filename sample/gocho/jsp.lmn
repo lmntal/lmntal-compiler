@@ -14,16 +14,27 @@
 %--------------------------------
 %     J3 |(M2, 2)|(M3, 6)|(M1, 1)
 
-j{id(1), m=[(1,3), (2,3), (3,2)]}.
-j{id(2), m=[(1,2), (3,5), (2,3)]}.
-j{id(3), m=[(2,2), (3,6), (1,1)]}.
+% idが小さいjobの方が優先度が高い
+% m=[(Machine No, Elapse Time, Finish Time),...]
 
-m=[id(1)].
-m=[id(2)].
-m=[id(3)].
+job{id(1), task=[m(1,0,3), m(2,0,3), m(3,0,2)]}.
+job{id(2), task=[m(1,0,2), m(3,0,5), m(2,0,3)]}.
+job{id(3), task=[m(2,0,2), m(3,0,6), m(1,0,1)]}.
 
+machine(1, free).
+machine(2, free).
+machine(3, free).
+makespan(0).
 
-//リストに処理するjobを並べてから、処理
-queue @@  F=[id(MI)], j{id(JI), m=[(M1,M2) |R]}
-                   :- MI=:=JI, MI=:=M1, ground(R) |
-          F=[id(MI)], j{id(JI), m=[ |]}
+get_machine @@
+job{id(I), task=[m(N,X,Y) |F]}, machine(M,St)
+  :- ground(F),int(I),int(X),int(Y),N=:=M,unary(St) |
+job{id(I), task=[m(N,X,Y,L0) |F]}, machine(M,L0).
+
+pre_emptive @@
+job{id(I2), task=[m(N,X,Y,L0) |F],$p}, machine(M,L0),
+job{id(I1), task=[m(N2,X2,Y2) |F2],$q}
+  :- ground(F),ground(F2),int(X),int(Y),int(X2),int(Y2),
+     N=:=M,N=:=N2,I2>I1 |
+job{id(I2), task=[m(N,X,Y) |F], $p}, machine(M,L0),
+job{id(I1), task=[m(N2,X2,Y2,L0) |F2],$q}.

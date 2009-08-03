@@ -1,16 +1,43 @@
 % josephus.lmn
-%			2009.01.xx
+%			2009.08.03
 %
-% incompleteness
+% The Josephus Problem
 %
 
+init{
+  nMax(10).
+  n(0).
+  dagger(0).
+ 
+  % random initialize
+  rand1 @@ nMax(M), n(X) :- N=M-1, N>1, int(X) | nMax(N), n(M).
+  rand2 @@ nMax(M), dagger(X) :- M=\=X | nMax(M), dagger(M).
+}.
+init{n(N), dagger(D), $i[],@i} :- N=\=0,D=\=0 |
+n(N), dagger(D).
 
-n(5).
-k(2).
-me(1).
-init.
+//n(41).
+//dagger(3).
 
-ini1 @@  n(N),init     :- N>1,M=N-1 | n(M), F=[N |F].
-ini2 @@  n(N),L=[X |R] :- N>0,M=N-1 | n(M), L=[X,N |R].
+list([null]).
 
-out @@ 
+ini1 @@ % List Generator
+n(N), list=[X |F]   :- N>0, M=N-1 |
+n(M), list=[N,X |F].
+
+ini2 @@ % Setting Dagger & Ring
+n(0), dagger(D), list=E, F=[null |[]] :- int(D) |
+      F=[dagger(D,D) |E].
+
+%%%% Josephuse Start...
+kill  @@ % die
+E=[dagger(1,D), I, M |F] :- int(I),int(M),int(D) |
+E=[dagger(D,D), M |F].
+
+next  @@ % move dagger.
+E=[dagger(N,D), I, M |F] :- N>1, P=N-1 |
+E=[I, dagger(P,D), M |F].
+
+last  @@ % safe position is..
+E=[dagger(N,D), I |E] :- int(N),int(D) |
+safe(I).
