@@ -24,7 +24,7 @@ import util.Util;
  */
 public final class Env {
 
-	public static final String LMNTAL_VERSION = "1.01.20080226";
+	public static final String LMNTAL_VERSION = "1.02.20090619";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
