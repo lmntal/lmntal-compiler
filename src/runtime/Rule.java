@@ -49,6 +49,9 @@ public final class Rule implements Serializable {
 	/** 履歴 */
 	public Uniq uniq;
 	
+	/** uniq制約を持つかどうか */
+	public boolean hasUniq = false;//seiji
+	
 	// todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 	
 	/**
@@ -103,8 +106,8 @@ public final class Rule implements Serializable {
 		if (Env.debug == 0 && !Env.compileonly) return;
 		
 		Iterator<Instruction> l;
-		Env.p("Compiled Rule " + this);
-		
+		if (!hasUniq) Env.p("Compiled Rule " + this);
+		else Env.p("Compiled Uniq Rule " + this);//seiji
 		l = atomMatch.listIterator();
 		Env.p("--atommatch:", 1);
 		while(l.hasNext()) Env.p((Instruction)l.next(), 2);

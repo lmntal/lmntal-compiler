@@ -327,6 +327,7 @@ class GuardCompiler extends HeadCompiler {
 						} else {
 							match.add(new Instruction(Instruction.NOT_UNIQ, uniqVars));
 						}
+						rc.theRule.hasUniq = true;//seiji
 					}
 					else if (func.equals(new SymbolFunctor("\\=",2))) {
 						// NSAMEFUNC を作るか？
