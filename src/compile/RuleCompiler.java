@@ -156,7 +156,10 @@ public class RuleCompiler {
 		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;
 		theRule.body      = body;
-		theRule.body.add(1, Instruction.commit(theRule.name, theRule.lineno));
+		if(theRule.name != null) 
+			 theRule.body.add(1, Instruction.commit(theRule.name, theRule.lineno));
+		else theRule.body.add(1, Instruction.commit(rs.toString(), theRule.lineno));
+
 		if(debug2){
 			Util.println("compile return theRule is\n");
 			theRule.showDetail();
