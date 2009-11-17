@@ -330,12 +330,7 @@ public class Dumper {
 					buf.append(", ");
 				else
 					commaFlag = true;
-				if(Env.fUNYO_d){
-					buf.append(it_r.next().encode());
-					Env.showrule = false;
-				}else{
 					buf.append(it_r.next().toString());
-				}
 			}
 		}
 		if(Env.showrule){
