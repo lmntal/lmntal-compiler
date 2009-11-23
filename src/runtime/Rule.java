@@ -106,8 +106,9 @@ public final class Rule implements Serializable {
 		if (Env.debug == 0 && !Env.compileonly) return;
 		
 		Iterator<Instruction> l;
-		if (!hasUniq) Env.p("Compiled Rule " + this);
-		else Env.p("Compiled Uniq Rule " + this);
+		if (hasUniq && Env.slimcode) Env.p("Compiled Uniq Rule " + this);
+		else Env.p("Compiled Rule " + this);
+		
 		l = atomMatch.listIterator();
 		Env.p("--atommatch:", 1);
 		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
