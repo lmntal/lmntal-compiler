@@ -167,6 +167,8 @@ public class RuleCompiler {
 				if(('0'<=c&&c<='9')||('a'<=c&&c<='z')||('A'<=c&&c<='Z')||c=='_'){
 					ruleName += c;
 				}
+				//1+4文字で打ち切り
+				if(!Env.showlongrulename&&ruleName.length()>=5){ break; }
 			}
 			theRule.body.add(1, Instruction.commit(ruleName, theRule.lineno));
 		}

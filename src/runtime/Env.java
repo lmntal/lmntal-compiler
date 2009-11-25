@@ -34,15 +34,15 @@ public final class Env {
 	static final int DEBUG_SYSTEMRULESET = 7;
 	/** Debug level. */
 	public static int debug = 0;
-	
+
 	////////////////////////////////////////////////////////////////
 
 	/** 中間命令列を出力するモード。Java への変換や実行は行わない。 */
 	public static boolean compileonly = false;
-	
+
 	/** SLIM用の中間命令列を出力するモード。 */
 	public static boolean slimcode = false;
-	
+
 	/** 履歴つきfindatomを含む中間命令列を出力するモード。 */
 	public static boolean findatom2 = false;
 
@@ -64,11 +64,11 @@ public final class Env {
 	public static int ndMode = ND_MODE_D;
 	/** 非決定的LMNtalにおけるインタラクティブモード*/
 	public static boolean fInteractive = false;
-	
+
 	public static boolean fThread = true;
-	
+
 	////////////////////////////////////////////////////////////////
-	
+
 	/** リンクの表示をL[数字]で表示する冗長表示レベル　<pre> a(_2) --> a(L2) </pre> */
 	public static final int VERBOSE_SIMPLELINK = 1;
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/
@@ -88,17 +88,19 @@ public final class Env {
 	public static final int VERBOSE_DEFAULT = 5;
 	/** verbose level. */
 	public static int verbose = VERBOSE_INIT;
-	
+
 	public static int indent = 0;
-	
+
 	public static boolean showrule = true;
 
 	public static boolean showruleset = true;
 
+	public static boolean showlongrulename = false;
+
 	// PROXY を表示させない 2005/02/03 T.Nagata オプション --hideproxy
 	// デフォルトで有効 2005/10/14 mizuno
 	public static boolean hideProxy = true;
-	
+
 	////////////////////////////////////////////////////////////////
 
 	/** 実行アトムスタックを使わないランダム実行レベル */
@@ -123,19 +125,19 @@ public final class Env {
 	public static final int SHUFFLE_DEFAULT = 3;
 	/** ランダム実行レベル */
 	public static int shuffle = SHUFFLE_INIT;
-	
+
 	////////////////////////////////////////////////////////////////
-	
+
 	/**
 	 * プログラムに与える引数
 	 */
 	public static List<String> argv = new ArrayList<String>();
-	
+
 	/**
 	 * ソースファイル
 	 */
 	public static List<String> srcs = new ArrayList<String>();
-	
+
 	/**
 	 * 解釈実行
 	 */
@@ -145,26 +147,26 @@ public final class Env {
 	 * ライブラリ用Jarファイル生成
 	 */
 	public static boolean fLibrary = false;
-	
+
 	/**
 	 * 未コンパイルライブラリを利用する
 	 */
 	public static boolean fUseSourceLibrary = false;
-	
+
 	/**
 	 * トレース実行
 	 */
 	public static boolean fTrace = false;
-	
+
 	/** デバッグ実行オプションの有無 by inui */
 	public static boolean debugOption = false;
-	
+
 	/** 標準入力から LMNtal プログラムを読み込むオプション 2006.07.11 inui */
 	public static boolean stdinLMN = false;
-	
+
 	/** 標準入力から 中間命令列を読み込むオプション 2006.07.11 inui */
 	public static boolean stdinTAL = false;
-		
+
 	/**
 	 * REPL で、文を実行するためのアクション
 	 *  null_line : null 行がきたときに実行（Enter を２回押すことになる）
@@ -172,24 +174,24 @@ public final class Env {
 	 * hara
 	 */
 	public static String replTerm = "null_line";
-	
+
 	/**
 	 * REPL で、特殊コマンドにつけるべきプレフィックス
 	 * 例：この値 + "q" で終了
 	 * hara
 	 */
 	public static String replCommandPrefix = ":";
-	
+
 	/**
 	 * one liner
 	 */
 	public static String oneLiner;
-	
+
 	/** dumpをカラーにするモード */
 	public static boolean colorMode = false;//2006.11.13 inui
-	
+
 	////////////////////////////////////////////////////////////////
-	
+
 	/** スレッドごとのアトム主導テスト、膜主導テストの実行時間測定 */
 	public static final int PROFILE_BYDRIVEN = 0;
 	/** ルールごとの実行時間、試行回数、適用回数を測定 */
@@ -210,50 +212,50 @@ public final class Env {
 
 	public static int majorVersion = 0;
 	public static int minorVersion = 0;
-	
+
 	/**
 	 * ルール左辺に出現する、スレッド数の上限を設定
 	 */
 	public static int threadMax = 128;
-	
+
 	/**
 	 * スレッド曖昧指定を使用したときの、変換後のルールをダンプ
 	 */
 	public static boolean dumpConvertedRules = false;
-	
-	
-	
+
+
+
 	/**
 	 * tool kit ON
 	 */
 	public static boolean fTool = false;
 	public static LMNtalTFrame LMNtool;
-	
+
 	public static void initTool(){
 		if(!Env.fTool) return;
 		LMNtool = new LMNtalTFrame();
 	}
-	
-	
-	
+
+
+
 	/**
-	 * Graphic Mode 有効　nakano 
+	 * Graphic Mode 有効　nakano
 	 */
 	public static boolean fGraphic = false;
 	public static LMNtalGFrame LMNgraphic;
-	
+
 	public static void initGraphic(){
 		if(!Env.fGraphic) return;
 		LMNgraphic = new LMNtalGFrame();
 	}
-	
+
 	/**
 	 * UNYOモード
 	 */
 	public static boolean fUNYO = false;
 	/** UNYO用dumpモード */
 	public static boolean fUNYO_d = false;
-	
+
 	/**
 	 * 新 GUI モード。
 	 */
@@ -275,35 +277,35 @@ public final class Env {
 
 		gui = new gui.LMNtalFrame();
 	}
-	
+
 	/**
 	 * CGI モード
 	 */
 	public static boolean fCGI = false;
-	
+
 	/**
 	 * REMAIN モード
 	 */
 	public static boolean fREMAIN = false;
 	public static LMNtalRuntime remainedRuntime;
-	
+
 	/**
 	 * REPL モード
 	 */
 	public static boolean fREPL = false;
-	
+
 	/**
 	 * 060804
 	 * safe mode
 	 */
 	public static boolean safe = false;
-	
+
 	/**
 	 * 060804
 	 * safe mode
 	 */
 	public static int maxStep = 1000;
-	
+
 	/**
 	 * 060804
 	 * safe mode
@@ -311,27 +313,27 @@ public final class Env {
 	public static int counter = 0;
 
 	public static boolean preProcess0 = false;
-	
+
 	/** アトム名の表示する長さ */
 	public static int printLength = 14;
-	
+
 	////////////////////////////////////////////////////////////////
 	// 分散
-	
+
 	/** start LMNtalDaemon.*/
 	public static boolean startDaemon = false;
-	
+
 	/**The debug level of LMNtalDaemon.*/
 	public static int debugDaemon = 0;
-	
+
 	/** The default port number that LMNtalDaemon listens on.*/
 	static final int DAEMON_DEFAULT_LISTENPORT = 60000;
-	
+
 	/** The port number that LMNtalDaemon listens on.*/
 	public static int daemonListenPort = DAEMON_DEFAULT_LISTENPORT;
-	
+
 	////////////////////////////////////////////////////////////////
-	
+
 	/**
 	 * General error report
 	 * @param o
@@ -339,7 +341,7 @@ public final class Env {
 	public static void e(Object o) {
 		e(o, 0);
 	}
-	
+
 	/**
 	 * General error report with indent
 	 * @param o
@@ -351,7 +353,7 @@ public final class Env {
 	public static void e(Exception e) {
 		e.printStackTrace(System.err);
 	}
-	
+
 	/**
 	 * General dumper for debug
 	 * @param o Object to print
@@ -359,7 +361,7 @@ public final class Env {
 	public static void d(Object o) {
 		d(o, 0);
 	}
-	
+
 	/**
 	 * Exception dumper for debug
 	 * @param e
@@ -367,7 +369,7 @@ public final class Env {
 	public static void d(Exception e) {
 		if(debug > 0) e.printStackTrace();
 	}
-	
+
 	/**
 	 * General dumper for debug with indent
 	 * @param o
@@ -376,7 +378,7 @@ public final class Env {
 	public static void d(Object o, int depth) {
 		if(debug > 0) Util.println(getIndent(depth) + o);
 	}
-	
+
 	/**
 	 * General dumper
 	 * @param o Object to print
@@ -384,7 +386,7 @@ public final class Env {
 	public static void p(Object o) {
 		p(o, 0);
 	}
-	
+
 	/**
 	 * General dumper with indent
 	 * @param o
@@ -393,7 +395,7 @@ public final class Env {
 	public static void p(Object o, int depth) {
 		Util.println(getIndent(depth) + o);
 	}
-	
+
 	/**
 	 * Debug output when some method called
 	 * @param o method name
@@ -408,7 +410,7 @@ public final class Env {
 	public static void n(Object o) {
 		d(">>> new "+o);
 	}
-	
+
 	/**
 	 * Better list dumper : No comma output
 	 */
@@ -422,7 +424,7 @@ public final class Env {
 	public static<E> String parray(Collection<E> l) {
 		return parray(l, " ");
 	}
-	
+
 	/**
 	 * 指定した数のインデントを返す
 	 * @param depth
@@ -435,7 +437,7 @@ public final class Env {
 		}
 		return indent;
 	}
-	
+
 	/** LMNtalRuntimeのインスタンス */
 	public static LMNtalRuntime theRuntime;
 
@@ -445,7 +447,7 @@ public final class Env {
 		if(null != gui){
 			gui.onTrace();
 		}
-		
+
 		return true;
 	}
 
@@ -457,12 +459,12 @@ public final class Env {
 		if(!extendedOption.containsKey(key)) return "";
 		return extendedOption.get(key);
 	}
-	
+
 	////////////////////////////////////////////////////////////////
 	/* type inference 関係 by kudo */
 	/** 型システム on/off */
 	public static boolean fType = false;
-	
+
 	/** 各推論の有効／無効 */
 	public static boolean flgOccurrenceInference = false;
 	public static boolean flgQuantityInference = true;
@@ -476,15 +478,15 @@ public final class Env {
 	public static final int COUNT_APPLYANDMERGEDETAIL = 2;
 	/** default */
 	public static final int COUNT_DEFAULT = COUNT_APPLYANDMERGEDETAIL;
-	
+
 	/** 個数の解析のレベル */
 	public static int quantityInferenceLevel = COUNT_DEFAULT;
-	
+
 	/** 推論結果を表示 */
 	public static boolean flgShowConstraints = false;
-	
+
 	////////////////////////////////////////////////////////////////
-	
+
 	public static int nErrors = 0;
 	public static int nWarnings = 0;
 	public static void clearErrors() {
@@ -499,7 +501,7 @@ public final class Env {
 		Util.errPrintln(text);
 		nWarnings++;
 	}
-	
+
 	//編み上げ
 	public static boolean fMerging = false;
 

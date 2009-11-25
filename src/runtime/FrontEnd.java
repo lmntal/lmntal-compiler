@@ -37,18 +37,18 @@ import debug.Debug;
 
 /**
  * LMNtal のメイン
- * 
- * 
+ *
+ *
  * 作成日: 2003/10/22
  */
 public class FrontEnd {
 	/**
 	 * 全ての始まり。
 	 * @param args
-	 * 
+	 *
 	 */
 	public static void main(String[] args) {
-		
+
 		checkVersion();
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
@@ -66,7 +66,7 @@ public class FrontEnd {
 
 		processOptions(args);
 		if (Env.debugOption) Debug.openSocket(); //2006.4.27 by inui
-		
+
 		// 実行
 
 		if(Env.oneLiner!=null) {
@@ -87,12 +87,12 @@ public class FrontEnd {
 				if(Env.fREMAIN) REPL.run();
 			}
 		}
-		
+
 		if(Env.fREPL) {
 			REPL.run();
 		}
 	}
-	
+
 	/**
 	 * Javaのバージョンをチェックする
 	 * <p>java1.4以上を使っていないとエラー出力する</p>
@@ -114,9 +114,9 @@ public class FrontEnd {
 		} catch (SecurityException e) {
 		} catch (NoSuchElementException e) {
 		} catch (NumberFormatException e) {
-		}		
+		}
 	}
-	
+
 	/**
 	 * コマンドライン引数の処理
 	 * @param args 引数
@@ -170,9 +170,9 @@ public class FrontEnd {
 						break;
 					case 'I':
 						/// -I <path>
-						/// Additional path for LMNtal library. 
+						/// Additional path for LMNtal library.
 						/// This option is available only when --use-source-library option is specified.
-						/// Otherwise, LMNtal library must be in your CLASSPATH environment variable. 
+						/// Otherwise, LMNtal library must be in your CLASSPATH environment variable.
 						/// The default path is ./lib and ../lib
 						compile.Module.libPath.add(args[++i]);
 						break;
@@ -194,7 +194,7 @@ public class FrontEnd {
 							level = 1;
 						else if (args[i].length() == 3)
 							level = args[i].charAt(2) - '0';
-						
+
 						if (level >= 0 && level <= 9) {
 							Optimizer.setLevel(level);
 							break;
@@ -253,7 +253,7 @@ public class FrontEnd {
 						/// Profiling program.
 						/// Profile level.  Select a detail levels of profiling.
 						///   0: execution times of atom driven tests and membrane driven tests for each thread
-						///   1: test counts and applying counts and execution times for each rule 
+						///   1: test counts and applying counts and execution times for each rule
 						///   2: 1 + backtrack counts and lockfailure counts for each rule
 						///   3: profiles each rule for each test and for each thread
 						///      output by CSV
@@ -263,10 +263,10 @@ public class FrontEnd {
 							Env.profile = Env.PROFILE_DEFAULT;
 						}
 						if(Env.profile != Env.PROFILE_ALL) Util.errPrintln("profile level " + Env.profile);
-						if (Env.profile == Env.PROFILE_ALL) 
+						if (Env.profile == Env.PROFILE_ALL)
 							Env.p( Dumper.PROFILE_TABS );
 						break;
-					case '-': // 文字列オプション						
+					case '-': // 文字列オプション
 						if(args[i].equals("--gui")){
 							Env.fGUI = true;
 						} else if (args[i].equals("--color")) {//2006.11.13 inui
@@ -294,7 +294,7 @@ public class FrontEnd {
 							// dump debug message of LMNtalDaemon
 							Env.debugDaemon = Env.DEBUG_DEFAULT;
 					    } else if (args[i].matches("--event-port")) {//2006.4.27 by inui
-					    	Debug.setEventPort(Integer.parseInt(args[i+1]));	
+					    	Debug.setEventPort(Integer.parseInt(args[i+1]));
 							i++;
 						} else if(args[i].equals("--graphic")){
 							/// --graphic
@@ -309,7 +309,7 @@ public class FrontEnd {
 							/// Show usage (this).
 							Util.println("usage: java -jar lmntal.jar [options...] [filenames...]");
 							// usage: FrontEnd [options...] [filenames...]
-							
+
 							// commandline: perl src/help_gen.pl < src/runtime/FrontEnd.java > src/runtime/Help.java
 							Help.show();
 					        System.exit(-1);
@@ -380,14 +380,14 @@ public class FrontEnd {
 							Optimizer.fReuseMem = true;
 						} else if(args[i].matches("--port")){
 							/// --port portnumber
-							/// Specifies the port number that LMNtalDaemon listens on. The default is 60000. 
-							/// Only dynamic and private ports defined by IANA is usable: port 49152 through 65535. 
-							
+							/// Specifies the port number that LMNtalDaemon listens on. The default is 60000.
+							/// Only dynamic and private ports defined by IANA is usable: port 49152 through 65535.
+
 							if (args[i+1].matches("\\d*")) {
-								try{ 
+								try{
 									/*
 									 * http://www.iana.org/assignments/port-numbers
-									 * 
+									 *
 									 * DYNAMIC AND/OR PRIVATE PORTS
 									 *  The Dynamic and/or Private Ports are those from 49152 through 65535
 									 */
@@ -408,7 +408,7 @@ public class FrontEnd {
 								Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
 								System.exit(-1);
 							}
-							
+
 							i++;
 						} else if (args[i].equals("--pp0")) {
 							// 暫定オプション
@@ -446,7 +446,7 @@ public class FrontEnd {
 						} else if(args[i].equals("--start-daemon")){
 							/// --start-daemon
 							/// Start LMNtalDaemon
-							Env.startDaemon = true;			
+							Env.startDaemon = true;
 						} else if(args[i].equals("--showproxy")){
 							/// --showproxy
 							/// Show proxy atoms
@@ -459,6 +459,8 @@ public class FrontEnd {
 							/// --hiderule
 							/// Hide rule names
 							Env.showrule = false;
+						} else if(args[i].equals("--showlongrulename")){
+							Env.showlongrulename = true;
 						} else if(args[i].equals("--dump-converted-rules")){
 							/// --show-converted_rules
 							/// Dump converted rules
@@ -569,12 +571,12 @@ public class FrontEnd {
 		if (Env.oneLiner != null || Env.srcs.isEmpty()) {
 			Env.fInterpret = true;
 		}
-		
+
 		if(Env.fCGI) {
 			System.setErr(System.out);
 			Util.println("Content-type: text/html\n");
 		}
-		
+
 		//start LMNtalDaemon
 		if(Env.startDaemon){
 			String classpath = System.getProperty("java.class.path");
@@ -589,15 +591,15 @@ public class FrontEnd {
 						+ Env.debugDaemon
 						+ " "
 						+ Env.daemonListenPort
-						); 
-			
+						);
+
 			//System.out.println(newCmdLine);
 			try {
 				Process daemon = Runtime.getRuntime().exec(newCmdLine);
 
 				//daemonが起動するまで待つ
 				//TODO 既にLMNtalDaemonが起動していたら起動しない
-				InputStreamReader daemonStdout =new InputStreamReader(daemon.getInputStream()); 
+				InputStreamReader daemonStdout =new InputStreamReader(daemon.getInputStream());
 				for(int i = 0;  i < 10; i++){ //ネットワークインタフェースがあがってない時は永久にready()はfalseなので
 					if(daemonStdout.ready()) break;
 					try {
@@ -627,10 +629,10 @@ public class FrontEnd {
 //       Env.findatom2 = true;
     }
 	}
-	
+
 	/**
 	 * 与えられた名前のファイルたちをくっつけたソースについて、一連の実行を行う。
-	 * 
+	 *
 	 * @param files ソースファイル
 	 */
 	public static void run(List<String> files) {
@@ -669,7 +671,7 @@ public class FrontEnd {
 	public static void run(Reader src) {
 		run(src, InlineUnit.DEFAULT_UNITNAME);
 	}
-	
+
 	/**
 	 * 与えられたソースについて、一連の実行を行う。
 	 * @param src Reader 型で表されたソース
@@ -683,11 +685,11 @@ public class FrontEnd {
 			try {
         LMNParser lp = new LMNParser(src);
         m = lp.parse();
-			}	
+			}
 			catch (ParseException e) {
 				Env.p("Compilation Failed");
 				Env.e(e.getMessage());
-				return;	
+				return;
 			}
 
 			/* 2006/06/09 by kudo */
@@ -703,7 +705,7 @@ public class FrontEnd {
 					return;
 				}
 			}
-			
+
 			Ruleset rs;
 			if (Env.fInterpret) {
 				rs = RulesetCompiler.compileMembrane(m, unitName);
@@ -771,7 +773,7 @@ public class FrontEnd {
 				Inline.showInlineList();
 				return;
 			}
-			
+
 			if (Env.fInterpret) {
 				Debug.setUnitName(unitName);
 				run(rs);
@@ -794,21 +796,21 @@ public class FrontEnd {
 //			LMNtalRuntimeManager.init();
 
 			Membrane root = rt.getGlobalRoot();
-			
+
 			if(Env.fREMAIN) {
 				if(Env.remainedRuntime!=null) {
 					root.moveCellsFrom(Env.remainedRuntime.getGlobalRoot());
 					root.rulesets.addAll(Env.remainedRuntime.getGlobalRoot().rulesets);
 				}
 			}
-			
+
 			Env.initGUI();
 			Env.initGraphic();
 			Env.initTool();
 
-			
 
-			
+
+
 			if(Env.fGUI) Env.gui.setRootMem(root);
 
 //			if(Env.f3D) Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
@@ -819,7 +821,7 @@ public class FrontEnd {
 			Env.fTrace = t;
 //			root.asyncUnlock();
 //			rt.asyncFlag = false;
-			
+
 			//by inui
 			if (Env.debugOption) {
 				Task.initTrace();
@@ -833,7 +835,7 @@ public class FrontEnd {
 				//unyo.Mediator.sync(root);
 				if(!unyo.Mediator.sync(root)){ Mediator.end(); return; }
 			}
-			
+
 			if (Env.gui != null) {
 				Env.gui.onTrace();
 			}
@@ -841,7 +843,7 @@ public class FrontEnd {
 //			if(Env.fUNYO){
 //				unyo.Mediator.sync(root);
 //			}
-			
+
 			/*TODO:3d calc*/
 			/*nakano*
 			if (Env.threed != null) {
@@ -866,7 +868,7 @@ public class FrontEnd {
 					//unyo.Mediator.sync(root);
 					if(!unyo.Mediator.sync(root)){ Mediator.end(); return; }
 				}
-				
+
 				if (Env.gui != null) {
 					Env.gui.onTrace();
 				}
@@ -875,18 +877,18 @@ public class FrontEnd {
 				Env.remainedRuntime = rt;
 			}
 			if (Env.LMNgraphic != null)  Env.LMNgraphic = null;
-			
+
 //			LMNtalRuntimeManager.terminateAll();
 //			LMNtalRuntimeManager.terminateAllThreaded();
 			//if(true) System.out.println("FrontEnd: terminateAll() finished!");
 //			LMNtalRuntimeManager.disconnectFromDaemon();
-			
+
 			if (Env.debugOption) //2006.4.26 by inui
 				Debug.terminate();
-			
+
 			// 060831 okabe
 			Env.theRuntime.terminate();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
@@ -897,20 +899,20 @@ public class FrontEnd {
 	}
 	/**
 	 * プリプロセッサ0
-	 * 
+	 *
 	 * リンク<u> ... :- ...  ==> リンク ... :- unary(リンク) | ...
-	 * 
+	 *
 	 * 同様に、
 	 *   u -> unary
 	 *   g -> ground
 	 *   s -> string
 	 *   i -> int
-	 * 
+	 *
 	 * 例：
 	 *   a(Hah<u>), b(A<g>):-rhs.
 	 *  ==>
 	 *   a(Hah), b(A):-ground(A), unary(Hah), |rhs.
-	 * 
+	 *
 	 * @param r
 	 * @return
 	 */
@@ -925,7 +927,7 @@ public class FrontEnd {
 			s = sb.toString();
 			s = s.replaceAll(":\\-([^|.]*)\\.", ":-|$1.");
 //			System.out.println(s);
-			
+
 			String b=s, a;
 			{
 				for(a=b;;b=a) {
