@@ -15,7 +15,6 @@ import java.util.Map;
 
 import debug.Debug;
 
-//import unyo.Mediator;
 import unyo.Mediator;
 import util.Stack;
 import util.Util;
@@ -381,7 +380,10 @@ public class Task implements Runnable {
 			
 			//releaseが呼び出されていたらUNYO終了 (ayano)
 			if(Env.fUNYO){
-				if(unyo.Mediator.releasing) break;
+				if(unyo.Mediator.releasing){
+					unyo.Mediator.endTask(true);
+					break;
+				}
 			}
 			
 			//グローバルルート膜であり、本膜のルール適用を終了していたら、実行終了

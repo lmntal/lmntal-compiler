@@ -20,6 +20,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import unyo.Mediator;
 import util.QueuedEntity;
 import util.RandomIterator;
 import util.Stack;
@@ -116,6 +117,8 @@ public final class Membrane extends QueuedEntity {
 
 	/** この膜のグローバルIDを取得する */
 	public String getMemID() { return Integer.toString(id); }
+	
+	
 //	/** この膜が所属する計算ノードにおける、この膜の指定されたアトムのIDを取得する */
 //	public String getAtomID(Atom atom) { return atom.getLocalID(); }
 
@@ -1005,6 +1008,38 @@ public final class Membrane extends QueuedEntity {
 			}
 		}
 		return oldAtomToNewAtom;
+	}
+	
+	/**
+	 * not copy rules
+	 * by wakako
+	 * @param srcmem
+	 * @return
+	 */
+	public Map<Atom, Atom> copyCellsFrom3(Membrane srcmem,
+			Map<Atom, Atom> oldAtomToNewAtom,
+			Map<Membrane, Membrane> oldMemToNewMem){
+		memToCopyMap = new HashMap<Membrane, Map<Atom, Atom>>();
+
+		Iterator<Membrane> it_m = srcmem.memIterator();
+		while(it_m.hasNext()){
+			Membrane omem = it_m.next();
+			Membrane nmem = newMem();
+			nmem.setName(omem.getName());
+			oldMemToNewMem.put(omem, nmem);
+			memToCopyMap.put(omem, nmem.copyCellsFrom3(omem, oldAtomToNewAtom, oldMemToNewMem));
+//			nmem.copyRulesFrom(omem);
+		}
+		Iterator<Atom>it_a = srcmem.atomIterator();
+		Map<Atom, Atom> tempOldAtomToNewAtom = new HashMap<Atom, Atom>();
+		while(it_a.hasNext()){
+			Atom oatom = it_a.next();
+			if(oldAtomToNewAtom.containsKey(oatom))continue;
+			oldAtomToNewAtom.put(oatom,newAtom(oatom.getFunctor()));
+			//0引数アトムならば引数走査なし　(2006/05/26 kudo)
+			if(oatom.getArity()>0)oldAtomToNewAtom = copyAtoms(oatom,oldAtomToNewAtom);
+		}
+		return tempOldAtomToNewAtom;
 	}
 
 	/**

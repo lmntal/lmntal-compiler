@@ -95,6 +95,10 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 	public boolean react(Membrane mem, boolean nondeterministic) {
 		if (nondeterministic) {
 			Env.e("Nondeterministic execution is not supported by interpreter.");
+			if(Env.fUNYO){
+				Mediator.end();
+				return false;
+			}
 			System.exit(-1);
 			return false;
 		} else {
@@ -755,10 +759,10 @@ class InterpretiveReactor {
 					//====膜を操作する基本ボディ命令====ここから====
 				case Instruction.REMOVEMEM :
 					//[srcmem, parentmem]
-					if(Env.fUNYO){
-						unyo.Mediator.addRemovedMembrane(mems[inst.getIntArg1()], mems[inst.getIntArg1()].getParent().getMemID());
-					}
 					mem = mems[inst.getIntArg1()];
+					if(Env.fUNYO){
+						unyo.Mediator.addRemovedMembrane(mem, mem.getParent().getMemID());
+					}
 					mem.parent.removeMem(mem);
 					break; //n-kato
 				case Instruction.NEWMEM: //[-dstmem, srcmem, memtype]

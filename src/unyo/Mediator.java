@@ -1,25 +1,29 @@
 package unyo;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Set;
 
-import debug.Debug;
+import com.sun.net.httpserver.Authenticator.Success;
 
 import runtime.Atom;
 import runtime.Dumper;
 import runtime.Env;
 import runtime.Functor;
 import runtime.InterpretedRuleset;
+import runtime.LMNtalRuntime;
 import runtime.Membrane;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SymbolFunctor;
+import runtime.Task;
 
 public class Mediator {
 
@@ -75,9 +79,21 @@ public class Mediator {
 
 	static
 	public boolean releasing = false;
+	
+	static
+	public boolean taskEnd = false;
 
 	static
 	public boolean unyoWait_ = false;
+	
+	static
+	private Membrane root_ = null;
+	
+	static
+	private HashSet<InterpretedRuleset> breakpointRuleset_ = null;
+	
+	static
+	private boolean error_ = false;
 
 	static
 	public void release(){
@@ -102,6 +118,7 @@ public class Mediator {
 	public void init(){
 
 		releasing = false;
+		taskEnd = false;
 
 		removedMembrane_ = new LinkedHashMap<String, String>();
 		addedMembrane_ = new LinkedList<Membrane>();
@@ -111,6 +128,7 @@ public class Mediator {
 		modifiedAtom_ = new LinkedList<Atom>();
 		currentRule_ = new Rule();
 		rules_ = new HashMap<Rule, String>();
+//		setBreakPoint("{{a}},{{a}},{{a}},{{a}},{{a}},{{a}} :- .");
 
 		try {
 			unyoClass_ = Class.forName("jp.ac.waseda.info.ueda.unyo.mediator.Synchronizer");
@@ -240,6 +258,7 @@ public class Mediator {
 	}
 
 	public static void errPrint(String msg){
+		error_ = true;
 		try {
 			errPrint_.invoke(unyoObj_, msg);
 		} catch (IllegalArgumentException e) {
@@ -295,6 +314,7 @@ public class Mediator {
 
 	static
 	public void end(){
+		if(!taskEnd) return;
 		try {
 			end_.invoke(unyoObj_);
 		} catch (IllegalArgumentException e) {
@@ -304,6 +324,11 @@ public class Mediator {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	static
+	public void endTask(boolean b){
+		taskEnd = b;
 	}
 
 	/**
@@ -332,11 +357,21 @@ public class Mediator {
 		if(releasing){
 			return false;
 		}
-		printRoot();
+		root_ = root;
 		if(rules_.isEmpty()){
 			collectAllRules(root);
 		}
-
+		boolean breakpoint = false;
+		if(breakpointRuleset_ != null){
+			for(InterpretedRuleset r : breakpointRuleset_){
+				breakpoint = isBreakPoint(r);
+				if(breakpoint){
+					System.out.println("break");
+					break;
+				}
+			}
+		}
+		printRoot();
 		try {
 			setState_.invoke(unyoObj_,
 					root,
@@ -349,14 +384,15 @@ public class Mediator {
 					modifiedAtom_,
 					(Object)currentRule_,
 					currentRule_.fullText);
-
+			
 			removedMembrane_.clear();
 			addedMembrane_.clear();
 			modifiedMembrane_.clear();
 			removedAtom_.clear();
 			addedAtom_.clear();
 			modifiedAtom_.clear();
-			while((Boolean)sync_.invoke(unyoObj_)&&!releasing){
+
+			while(((Boolean)sync_.invoke(unyoObj_)&&!releasing)){
 				setWait(true);
 				try {
 					Thread.sleep(SLEEP_TIME);
@@ -372,13 +408,183 @@ public class Mediator {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
-
+		
 		if(releasing){
 			return false;
 		}
+		taskEnd = false;
 		return true;
 
 	}
+	
+	/**
+	 * parentMem以下の全てのアトムと膜を得る
+	 * @param parentMem
+	 * @param allNodes
+	 */
+	static
+	private void getAllNodes(
+			Membrane parentMem,
+			HashSet<Object> allNodes){
+		Iterator<Atom> it_a = parentMem.atomIterator();
+		while (it_a.hasNext()) {
+			Atom a = it_a.next();
+			allNodes.add(a);
+		}
+		Iterator<Membrane> it_m = parentMem.memIterator();
+		while (it_m.hasNext()) {
+			Membrane m = it_m.next();
+			allNodes.add(m);
+			getAllNodes(m, allNodes);
+		}
+	}
+	
+	/**
+	 * parentMem以下の全てのアトムと膜をclear
+	 * @param parentMem
+	 * @param allNodes
+	 */
+	static
+	private void clearAllNodes(Membrane parentMem, ArrayList<Object> clearNodeList){
+		Iterator<Atom> it_a = parentMem.atomIterator();
+		while (it_a.hasNext()) {
+			Atom a = it_a.next();
+			clearNodeList.add(a);
+			a.remove();
+		}
+		Iterator<Membrane> it_m = parentMem.memIterator();
+		while (it_m.hasNext()) {
+			Membrane m = it_m.next();
+			clearNodeList.add(m);
+			clearAllNodes(m, clearNodeList);
+		}
+	}
+	
+	static
+	public boolean isBreakPoint(InterpretedRuleset r){
+//		Env.fUNYO = false;
+//		LMNtalRuntime srcRuntime = Env.theRuntime;
+//		try {
+//			LMNtalRuntime runtime = new LMNtalRuntime();
+//			Membrane root = runtime.getGlobalRoot();
+//			HashMap<Membrane, Membrane> memMap = new HashMap<Membrane, Membrane>();
+//			HashMap<Atom, Atom> atomMap = new HashMap<Atom, Atom>();
+//			root.copyCellsFrom3(root_, atomMap, memMap);
+//			 r.react(root);
+//			 Env.fUNYO_b = true;
+//			 ((Task)root.getTask()).execAsMasterTask();
+//			 System.out.println(root);
+//			 Env.theRuntime = srcRuntime;
+//			 Env.fUNYO = true;
+//			 return Env.fUNYO_b;
+//		}catch (Exception e) {
+//		}
+//		Env.theRuntime = srcRuntime;
+//		Env.fUNYO = true;
+		if(getMachedNodes(r).isEmpty()) return false;
+		return false;
+	}
+	
+	static
+	private InterpretedRuleset compileRuleset(String text){
+		Reader src = new StringReader(text);
+		compile.parser.LMNParser lp = new compile.parser.LMNParser(src);
+		compile.structure.Membrane tempMem = null;
+		InterpretedRuleset r = null;
+		try {
+			tempMem = lp.parse();
+		} catch(Exception e){}
+		if(error_){
+			error_ = false;
+			return null;
+		}
+		try {
+			r = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(tempMem);
+		} catch (Exception e) {
+			return null;
+		}
+		if(error_){
+			error_ = false;
+			return null;
+		}
+		return r;
+	}
+	
+	static
+	public void setBreakPoint(String text){
+		InterpretedRuleset r = compileRuleset(text);
+		if(r == null) return;
+		if(breakpointRuleset_ == null){
+			breakpointRuleset_ = new HashSet<InterpretedRuleset>();
+		}
+		breakpointRuleset_.add(r);
+	}
+	
+	static
+	private HashSet<String> getMachedNodes(InterpretedRuleset r){
+		Env.fUNYO = false;
+		HashSet<String> matchNodes = new HashSet<String>();
+		LMNtalRuntime srcRuntime = Env.theRuntime;
+		try {
+			LMNtalRuntime runtime = new LMNtalRuntime();
+			Membrane root = runtime.getGlobalRoot();
+			HashMap<Membrane, Membrane> memMap = new HashMap<Membrane, Membrane>();
+			HashMap<Atom, Atom> atomMap = new HashMap<Atom, Atom>();
+			root.copyCellsFrom3(root_, atomMap, memMap);
+			r.react(root);
+			((Task)root.getTask()).execAsMasterTask();
+			HashSet<Object> allNodes = new HashSet<Object>();
+			getAllNodes(root, allNodes);
+			
+			for(Atom srcAtom : atomMap.keySet()){
+				Atom copyAtom = atomMap.get(srcAtom);
+//				System.out.println("srcAtom : " + srcAtom.getid() + "/ copyAtom : " + copyAtom.getid());
+				if(allNodes.contains(copyAtom)) continue;
+				if(!srcAtom.isVisible()|| srcAtom.getFunctor().getName().startsWith("/*inline*/")){
+					continue;
+				}
+				matchNodes.add("atom_" + srcAtom.getid());
+			}
+			for(Membrane srcMem : memMap.keySet()){
+				Membrane copyMem = memMap.get(srcMem);
+//				System.out.println("srcMem : " + srcMem.getMemID() + "/ copyMem : " + copyMem.getMemID());
+				if(allNodes.contains(copyMem)) continue;
+				matchNodes.add("membrane_" + srcMem.getMemID());
+			}
+//			System.out.println(matchNodes);
+//			System.out.println(root);
+//			ArrayList<Object> clearNodeList = new ArrayList<Object>();
+//			clearAllNodes(root, clearNodeList);
+//			java.util.ListIterator<Object> it = clearNodeList.listIterator(clearNodeList.size());
+//			while(it.hasPrevious()){
+//				Object o = it.previous();
+//				if(o instanceof Atom){
+//					Atom a = (Atom)o;
+//					if(a.getMem() != null){
+//						a.remove();
+//					}
+//				}else{
+//					Membrane m = (Membrane)o;
+//					if((m.getParent()) !=null){
+//						(m.getParent()).removeMem(m);
+//					}
+//				}
+//			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Env.theRuntime = srcRuntime;
+		Env.fUNYO = true;
+		return matchNodes;
+	}
+	
+	static
+	public HashSet<String> searchGraphs(String text){
+		InterpretedRuleset r = compileRuleset(text);
+		if(r == null) return null;
+		return getMachedNodes(r);
+	}
+
 
 	static
 	public void addRemovedMembrane(Membrane removeMem, String parentMemID){
@@ -432,13 +638,10 @@ public class Mediator {
 
 	static
 	public void addRemovedAtom(Atom removeAtom, String parentMemID){
-		if(removeAtom.getFunctor().equals(Functor.STAR) ||
-				removeAtom.getFunctor().equals(Functor.INSIDE_PROXY) ||
-				removeAtom.getFunctor().equals(Functor.OUTSIDE_PROXY)||
-				removeAtom.getFunctor().getName().startsWith("/*inline*/")){
+		if(!removeAtom.isVisible() || removeAtom.getFunctor().getName().startsWith("/*inline*/")){
 			return;
 		}
-//		System.out.println("addRemAtom/" + removeAtom.getid() + removeAtom.getName());
+//		System.out.println("addRemAtom/" + removeAtom.getid() + ":" + parentMemID);
 		String id = ((Integer)removeAtom.getid()).toString();
 		removedAtom_.put(id, parentMemID);
 //		addedAtom_.remove(removeAtom);
@@ -446,22 +649,16 @@ public class Mediator {
 
 	static
 	public void addAddedAtom(Atom atom){
-		if(atom.getFunctor().equals(Functor.STAR) ||
-				atom.getFunctor().equals(Functor.INSIDE_PROXY) ||
-				atom.getFunctor().equals(Functor.OUTSIDE_PROXY) ||
-				atom.getFunctor().getName().startsWith("/*inline*/")){
+		if(!atom.isVisible() || atom.getFunctor().getName().startsWith("/*inline*/")){
 			return;
 		}
-//		System.out.println("addAddAtom/" + atom.getid()+atom.getName());
+//		System.out.println("addAddAtom/" + atom.getid()+"/"+atom.getName()+ ":" + (atom.getMem()).getMemID());
 		addedAtom_.add(atom);
 	}
 
 	static
 	public void addModifiedAtom(Atom atom){
-		if(atom.getFunctor().equals(Functor.STAR) ||
-				atom.getFunctor().equals(Functor.INSIDE_PROXY) ||
-				atom.getFunctor().equals(Functor.OUTSIDE_PROXY) ||
-				atom.getFunctor().getName().startsWith("/*inline*/")){
+		if(!atom.isVisible() || atom.getFunctor().getName().startsWith("/*inline*/")){
 			return;
 		}
 		if(addedAtom_.contains(atom)){

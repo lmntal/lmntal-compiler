@@ -131,7 +131,8 @@ public class FrontEnd {
 			if(isSrcs && (args[i].length()>0) && (args[i].charAt(0) == '-')){
 				if(args[i].length() < 2){ // '-'のみの時
 					Util.errPrintln("不明なオプション:" + args[i]);
-					System.exit(-1);
+					if(Env.fUNYO){Mediator.end();}
+					else System.exit(-1);
 				} else { // オプション解釈部
 					switch(args[i].charAt(1)){
 					case 'c':
@@ -200,7 +201,8 @@ public class FrontEnd {
 							break;
 						} else {
 							Util.errPrintln("Invalid option: " + args[i]);
-							System.exit(-1);
+							if(Env.fUNYO){Mediator.end();}
+							else System.exit(-1);
 						}
 						break;
 					case 's':
@@ -312,7 +314,8 @@ public class FrontEnd {
 
 							// commandline: perl src/help_gen.pl < src/runtime/FrontEnd.java > src/runtime/Help.java
 							Help.show();
-					        System.exit(-1);
+							if(Env.fUNYO){Mediator.end();}
+					        else System.exit(-1);
 						} else if(args[i].equals("--immediate")){
 							/// --immediate
 							/// Use a single newline (rather than two newlines)
@@ -395,18 +398,21 @@ public class FrontEnd {
 									if(portnum < 49152 || portnum > 65535){
 										Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
 										Util.errPrintln("only port 49152 through 65535 is available");
-										System.exit(-1);
+										if(Env.fUNYO){Mediator.end();}
+										else System.exit(-1);
 									}
 									Env.daemonListenPort = portnum;
 								} catch (NumberFormatException e){
 									//e.printStackTrace();
 									Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
 									Util.errPrintln("Cannot parse as integer: " + args[i+1]);
-									System.exit(-1);
+									if(Env.fUNYO){Mediator.end();}
+									else System.exit(-1);
 								}
 							} else {
 								Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
-								System.exit(-1);
+								if(Env.fUNYO){Mediator.end();}
+								else System.exit(-1);
 							}
 
 							i++;
@@ -540,13 +546,15 @@ public class FrontEnd {
             } else {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util.errPrintln("Use option --help to see a long list of options.");
-							System.exit(-1);
+							if(Env.fUNYO){Mediator.end();}
+							else System.exit(-1);
 						}
 						break;
 					default:
 						Util.errPrintln("Invalid option: " + args[i]);
 					Util.errPrintln("Use option --help to see a long list of options.");
-						System.exit(-1);
+					if(Env.fUNYO){Mediator.end();}
+						else System.exit(-1);
 					}
 				}
 			}else{ // '-'以外で始まるものは (実行ファイル名, argv[0], arg[1], ...) とみなす
@@ -561,7 +569,8 @@ public class FrontEnd {
 		if (Env.ndMode != Env.ND_MODE_D) {
 			if (Env.fInterpret) {
 				Util.errPrintln("Non Deterministic execution is not supported in interpreted mode");
-				System.exit(-1);
+				if(Env.fUNYO){Mediator.end();}
+				else System.exit(-1);
 			}
 			if (Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS)
 				Env.shuffle = Env.SHUFFLE_DONTUSEATOMSTACKS;
@@ -620,7 +629,8 @@ public class FrontEnd {
 				}
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				System.exit(-1);
+				if(Env.fUNYO){Mediator.end();}
+				else System.exit(-1);
 			}
 		}
 
@@ -646,10 +656,12 @@ public class FrontEnd {
 		} catch(FileNotFoundException e) {
 			// e.printStackTrace();
 			Util.println(e.getMessage());
-			System.exit(-1);
+			if(Env.fUNYO){Mediator.end();}
+			else System.exit(-1);
 		} catch(SecurityException e) {
 			e.printStackTrace();
-			System.exit(-1);
+			if(Env.fUNYO){Mediator.end();}
+			else System.exit(-1);
 		}
 		// 複数のファイルのときはファイル名が１つに決められない。
 		String unitName = files.size()==1 ? (String)files.get(0) : InlineUnit.DEFAULT_UNITNAME;
@@ -773,7 +785,7 @@ public class FrontEnd {
 				Inline.showInlineList();
 				return;
 			}
-
+			
 			if (Env.fInterpret) {
 				Debug.setUnitName(unitName);
 				run(rs);
@@ -833,7 +845,11 @@ public class FrontEnd {
 
 			if(Env.fUNYO){
 				//unyo.Mediator.sync(root);
-				if(!unyo.Mediator.sync(root)){ Mediator.end(); return; }
+				if(!unyo.Mediator.sync(root)){
+					Mediator.endTask(true);
+					Mediator.end();
+					return;
+				}
 			}
 
 			if (Env.gui != null) {

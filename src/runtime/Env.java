@@ -255,6 +255,8 @@ public final class Env {
 	public static boolean fUNYO = false;
 	/** UNYO用dumpモード */
 	public static boolean fUNYO_d = false;
+	/** UNYO用breakpointモード */
+	public static boolean fUNYO_b = false;
 
 	/**
 	 * 新 GUI モード。
