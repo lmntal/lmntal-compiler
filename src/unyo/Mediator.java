@@ -81,7 +81,7 @@ public class Mediator {
 	public boolean releasing = false;
 	
 	static
-	public boolean taskEnd = false;
+	private boolean taskEnd = false;
 
 	static
 	public boolean unyoWait_ = false;

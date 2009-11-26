@@ -910,6 +910,7 @@ public class FrontEnd {
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 		if(Env.fUNYO){
+			Mediator.endTask(true);
 			Mediator.end();
 		}
 	}
