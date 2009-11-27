@@ -846,7 +846,6 @@ public class FrontEnd {
 			if(Env.fUNYO){
 				//unyo.Mediator.sync(root);
 				if(!unyo.Mediator.sync(root)){
-					Mediator.endTask(true);
 					Mediator.end();
 					return;
 				}
@@ -910,7 +909,6 @@ public class FrontEnd {
 //			Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()), "\n"));
 		}
 		if(Env.fUNYO){
-			Mediator.endTask(true);
 			Mediator.end();
 		}
 	}

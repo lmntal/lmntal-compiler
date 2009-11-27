@@ -260,7 +260,7 @@ public class Task implements Runnable {
 				} else {
 					if(Env.fUNYO){
 						//unyo.Mediator.sync(root);
-						if(!unyo.Mediator.sync(root)){ Mediator.end();return false; }
+						if(!unyo.Mediator.sync(root)){ return false; }
 					}
 					if (!guiTrace()) return false;
 				}
@@ -381,7 +381,6 @@ public class Task implements Runnable {
 			//releaseが呼び出されていたらUNYO終了 (ayano)
 			if(Env.fUNYO){
 				if(unyo.Mediator.releasing){
-					unyo.Mediator.endTask(true);
 					break;
 				}
 			}

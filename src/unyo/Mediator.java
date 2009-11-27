@@ -79,9 +79,6 @@ public class Mediator {
 
 	static
 	public boolean releasing = false;
-	
-	static
-	private boolean taskEnd = false;
 
 	static
 	public boolean unyoWait_ = false;
@@ -118,7 +115,6 @@ public class Mediator {
 	public void init(){
 
 		releasing = false;
-		taskEnd = false;
 
 		removedMembrane_ = new LinkedHashMap<String, String>();
 		addedMembrane_ = new LinkedList<Membrane>();
@@ -314,7 +310,6 @@ public class Mediator {
 
 	static
 	public void end(){
-		if(!taskEnd) return;
 		try {
 			end_.invoke(unyoObj_);
 		} catch (IllegalArgumentException e) {
@@ -324,11 +319,6 @@ public class Mediator {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	static
-	public void endTask(boolean b){
-		taskEnd = b;
 	}
 
 	/**
@@ -412,7 +402,6 @@ public class Mediator {
 		if(releasing){
 			return false;
 		}
-		taskEnd = false;
 		return true;
 
 	}
