@@ -109,6 +109,13 @@ public class SpecialFunctor extends Functor {
 	public boolean isNumber() {
 		return false;
 	}
+	/**
+	 * このファンクタが int 型かどうかを取得する。
+	 * @return false
+	 */
+	public boolean isInteger() {
+		return false;
+	}
 	
 	/**
 	 * ファンクタの値を返す

@@ -90,6 +90,14 @@ public class SymbolFunctor extends Functor {
 	}
 	
 	/**
+	 * このファンクタが int 型かどうかを取得する。
+	 * @return false
+	 */
+	public boolean isInteger(){
+		return false;
+	}
+	
+	/**
 	 * ファンクタの値を返す
 	 * @return ファンクタの名前
 	 */

@@ -17,6 +17,7 @@ public class IntegerFunctor extends DataFunctor {
 	}
 	
 	public boolean isNumber() { return true; }
+	public boolean isInteger() { return true; }
 	
 	public String toString() {
 		return getAbbrName() + "_" + getArity();
@@ -30,4 +31,5 @@ public class IntegerFunctor extends DataFunctor {
 		if (Env.colorMode) return "\033[0;34m"+getName()+"\033[0m";
 		return getName();
 	}
+
 }

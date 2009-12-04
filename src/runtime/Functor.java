@@ -248,6 +248,12 @@ public abstract class Functor implements Serializable {
 	public abstract boolean isNumber();
 	
 	/**
+	 * このファンクタが int 型のアトムかどうかを判定する。
+	 * @return int 型のアトムなら true
+	 */
+	public abstract boolean isInteger();
+	
+	/**
 	 * このファンクタの値を返す
 	 * @return ファンクタの値
 	 */
@@ -258,4 +264,6 @@ public abstract class Functor implements Serializable {
 
 	/** アリティを取得する。 */
 	public abstract int getArity();
+
+
 }

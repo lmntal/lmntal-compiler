@@ -40,4 +40,5 @@ public class ObjectFunctor extends DataFunctor {
 	}
 	
 	public boolean isNumber() { return false; }
+	public boolean isInteger() { return false; }
 }
