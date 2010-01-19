@@ -304,9 +304,6 @@ public final class Membrane extends QueuedEntity {
 	}
 	/** 指定されたアトムの名前を変える */
 	public void alterAtomFunctor(Atom atom, Functor func) {
-		if(Env.fUNYO){
-			unyo.Mediator.addRemovedAtom(atom, getMemID());
-		}
 		atoms.remove(atom);
 		atom.setFunctor(func);
 		atoms.add(atom);

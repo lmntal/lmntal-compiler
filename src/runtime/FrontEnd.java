@@ -131,7 +131,7 @@ public class FrontEnd {
 			if(isSrcs && (args[i].length()>0) && (args[i].charAt(0) == '-')){
 				if(args[i].length() < 2){ // '-'のみの時
 					Util.errPrintln("不明なオプション:" + args[i]);
-					if(Env.fUNYO){Mediator.end();}
+					if(Env.fUNYO){Mediator.exit("Invalid option: " + args[i]);}
 					else System.exit(-1);
 				} else { // オプション解釈部
 					switch(args[i].charAt(1)){
@@ -201,7 +201,7 @@ public class FrontEnd {
 							break;
 						} else {
 							Util.errPrintln("Invalid option: " + args[i]);
-							if(Env.fUNYO){Mediator.end();}
+							if(Env.fUNYO){Mediator.exit("Invalid option: " + args[i]);}
 							else System.exit(-1);
 						}
 						break;
@@ -314,7 +314,7 @@ public class FrontEnd {
 
 							// commandline: perl src/help_gen.pl < src/runtime/FrontEnd.java > src/runtime/Help.java
 							Help.show();
-							if(Env.fUNYO){Mediator.end();}
+							if(Env.fUNYO){Mediator.exit("");}
 					        else System.exit(-1);
 						} else if(args[i].equals("--immediate")){
 							/// --immediate
@@ -398,7 +398,8 @@ public class FrontEnd {
 									if(portnum < 49152 || portnum > 65535){
 										Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
 										Util.errPrintln("only port 49152 through 65535 is available");
-										if(Env.fUNYO){Mediator.end();}
+										if(Env.fUNYO){Mediator.exit("Invalid option: " + args[i] + " " + args[i+1] +
+												"only port 49152 through 65535 is available");}
 										else System.exit(-1);
 									}
 									Env.daemonListenPort = portnum;
@@ -406,12 +407,13 @@ public class FrontEnd {
 									//e.printStackTrace();
 									Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
 									Util.errPrintln("Cannot parse as integer: " + args[i+1]);
-									if(Env.fUNYO){Mediator.end();}
+									if(Env.fUNYO){Mediator.exit("Invalid option: " + args[i] + " " + args[i+1]+". " +
+											"Cannot parse as integer: " + args[i+1]);}
 									else System.exit(-1);
 								}
 							} else {
 								Util.errPrintln("Invalid option: " + args[i] + " " + args[i+1]);
-								if(Env.fUNYO){Mediator.end();}
+								if(Env.fUNYO){Mediator.exit("Invalid option: " + args[i] + " " + args[i+1]);}
 								else System.exit(-1);
 							}
 
@@ -546,14 +548,16 @@ public class FrontEnd {
             } else {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util.errPrintln("Use option --help to see a long list of options.");
-							if(Env.fUNYO){Mediator.end();}
+							if(Env.fUNYO){Mediator.exit("Invalid option: " + args[i] + ". " +
+									"Use option --help to see a long list of options.");}
 							else System.exit(-1);
 						}
 						break;
 					default:
 						Util.errPrintln("Invalid option: " + args[i]);
 					Util.errPrintln("Use option --help to see a long list of options.");
-					if(Env.fUNYO){Mediator.end();}
+					if(Env.fUNYO){Mediator.exit("Invalid option: " + args[i] + ". " +
+							"Use option --help to see a long list of options.");}
 						else System.exit(-1);
 					}
 				}
@@ -569,7 +573,7 @@ public class FrontEnd {
 		if (Env.ndMode != Env.ND_MODE_D) {
 			if (Env.fInterpret) {
 				Util.errPrintln("Non Deterministic execution is not supported in interpreted mode");
-				if(Env.fUNYO){Mediator.end();}
+				if(Env.fUNYO){Mediator.exit("Non Deterministic execution is not supported in interpreted mode");}
 				else System.exit(-1);
 			}
 			if (Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS)
@@ -629,7 +633,7 @@ public class FrontEnd {
 				}
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				if(Env.fUNYO){Mediator.end();}
+				if(Env.fUNYO){Mediator.exit("");}
 				else System.exit(-1);
 			}
 		}
@@ -656,11 +660,11 @@ public class FrontEnd {
 		} catch(FileNotFoundException e) {
 			// e.printStackTrace();
 			Util.println(e.getMessage());
-			if(Env.fUNYO){Mediator.end();}
+			if(Env.fUNYO){Mediator.exit(e.getMessage());}
 			else System.exit(-1);
 		} catch(SecurityException e) {
 			e.printStackTrace();
-			if(Env.fUNYO){Mediator.end();}
+			if(Env.fUNYO){Mediator.exit(e.getMessage());}
 			else System.exit(-1);
 		}
 		// 複数のファイルのときはファイル名が１つに決められない。
@@ -701,6 +705,11 @@ public class FrontEnd {
 			catch (ParseException e) {
 				Env.p("Compilation Failed");
 				Env.e(e.getMessage());
+				if(Env.fUNYO){
+					Mediator.exit("Compilation Failed. " +
+							System.getProperty("line.separator") +
+							e.getMessage());
+				}
 				return;
 			}
 

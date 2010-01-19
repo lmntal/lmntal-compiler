@@ -96,7 +96,7 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		if (nondeterministic) {
 			Env.e("Nondeterministic execution is not supported by interpreter.");
 			if(Env.fUNYO){
-				Mediator.end();
+				Mediator.exit("Nondeterministic execution is not supported by interpreter.");
 				return false;
 			}
 			System.exit(-1);
