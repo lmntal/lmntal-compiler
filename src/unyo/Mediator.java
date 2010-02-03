@@ -67,6 +67,9 @@ public class Mediator {
 
 	static
 	private Method end_;
+	
+	static
+	private Method exit_;
 
 	static
 	private Method print_;
@@ -154,6 +157,7 @@ public class Mediator {
 					String.class);
 
 			end_ = unyoClass_.getMethod("end");
+			exit_ = unyoClass_.getMethod("exit", String.class);
 
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -362,6 +366,7 @@ public class Mediator {
 			}
 		}
 		printRoot();
+
 		try {
 			setState_.invoke(unyoObj_,
 					root,
@@ -669,5 +674,18 @@ public class Mediator {
 	static
 	public void setCurrentRule(Rule rule){
 		currentRule_ = rule;
+	}
+	
+	static
+	public void exit(String error){
+		try {
+			exit_.invoke(unyoObj_, error);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
 	}
 }

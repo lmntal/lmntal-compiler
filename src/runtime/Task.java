@@ -251,9 +251,6 @@ public class Task implements Runnable {
 				}
 			}
 
-//			if(Env.fUNYO){
-//				unyo.Mediator.sync(root);
-//			}
 			if(flag){
 				if (Env.debugOption) {//by inui
 					if (Debug.isBreakPoint()) Debug.inputCommand();
