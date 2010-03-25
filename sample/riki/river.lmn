@@ -1,38 +1,38 @@
-// 農夫,狼,山羊,キャベツの川渡り問題
-// a(農夫がどちらにいるか,狼がどちらにいるか,山羊が...,キャベツが...)
+% 農夫,狼,山羊,キャベツの川渡り問題
+% a(農夫がどちらにいるか,狼がどちらにいるか,山羊が...,キャベツが...)
 
-// 全状態を作る
+% 全状態を作る
 a(integer.set(0,1),integer.set(0,1),integer.set(0,1),integer.set(0,1)).
 
-// 駄目な状態を消す,ありうる状態を膜に入れる
+% 駄目な状態を消す,ありうる状態を膜に入れる
 a(W,X,Y,Z) :- int(W), int(X), int(Y), int(Z), W=\=X, X=Y | .
 a(W,X,Y,Z) :- int(W), int(X), int(Y), int(Z), W=\=Y, Y=Z | .
 a(W,X,Y,Z) :- int(W), int(X), int(Y), int(Z), W=X, Y=\=Z | {s(W,X,Y,Z)}.
 a(W,X,Y,Z) :- int(W), int(X), int(Y), int(Z), W=Y | {s(W,X,Y,Z)}.
 
-// 一度の移動で遷移できる状態をつなぐ
-// 農夫のみが移動する場合
+% 一度の移動で遷移できる状態をつなぐ
+% 農夫のみが移動する場合
 {s(W,X,Y,Z),$p}, {s(P,Q,R,S),$q} :-
 	int(W), int(X), int(Y), int(Z), int(P), int(Q), int(R), int(S),
 	W=\=P, X=Q, Y=R, Z=S, \+(($p=('+'(M),$pp)),($q=('+'(M),$qq)))
 		| {s(W,X,Y,Z),$p,'+'(L)}, {s(P,Q,R,S),$q,'+'(L)}.
 
-// 農夫と狼が移動する場合
+% 農夫と狼が移動する場合
 {s(W,X,Y,Z),$p}, {s(P,Q,R,S),$q} :-
 	int(W), int(X), int(Y), int(Z), int(P), int(Q), int(R), int(S),
 	W=\=P, X=\=Q, Y=R, Z=S, \+(($p=('+'(M),$pp)),($q=('+'(M),$qq)))
 		| {s(W,X,Y,Z),$p,'+'(L)}, {s(P,Q,R,S),$q,'+'(L)}.
 
-// 農夫と山羊が移動する場合
+% 農夫と山羊が移動する場合
 {s(W,X,Y,Z),$p}, {s(P,Q,R,S),$q} :-
 	int(W), int(X), int(Y), int(Z), int(P), int(Q), int(R), int(S),
 	W=\=P, X=Q, Y=\=R, Z=S, \+(($p=('+'(M),$pp)),($q=('+'(M),$qq)))
 		| {s(W,X,Y,Z),$p,'+'(L)}, {s(P,Q,R,S),$q,'+'(L)}.
 
-// 農夫とキャベツが移動する場合
+% 農夫とキャベツが移動する場合
 {s(W,X,Y,Z),$p}, {s(P,Q,R,S),$q} :-
 	int(W), int(X), int(Y), int(Z), int(P), int(Q), int(R), int(S),
 	W=\=P, X=Q, Y=R, Z=\=S, \+(($p=('+'(M),$pp)),($q=('+'(M),$qq)))
 		| {s(W,X,Y,Z),$p,'+'(L)}, {s(P,Q,R,S),$q,'+'(L)}.
 
-// 後は人間が見て判断する
+% 後は人間が見て判断する

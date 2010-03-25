@@ -1,0 +1,21 @@
+//a(N) = sigma(i=1, N/2, a(i)*a(N-i)).
+//a(1) = 1.
+
+{max(1), a(1)=1, a(0)=1}.
+R=get($p), {max($q),$r} :- $p>$q  | R=wait($p), {max($p), calc($q+1,$p), $r}.
+R=get($p), {max($q),$r} :- $p=<$q | R=wait($p), {max($q), $r}.
+R=wait($p), {a($q)=$r,$s} :- int($p),int($q),int($r),$p==$q | R=$r, {a($q)=$r,$s}.
+R=input($p), {$q[R|*Z]} :- int($p) | {$q[R|*Z], R=$p}.
+
+{calc($p,$q),$r} :- $p=<$q | {calc($p), calc($p+1,$q), $r}.
+{calc($p,$q),$r} :- $p>$q  | {$r}.
+
+{calc($p),$q} :- int($p) | {a($p)=sum(expand(0,$p)),$q}.
+{R=expand($p,$q),$r[R|*Z]} :- $p<$q  | P=input(get($p)),Q=input(get($q-$p-1)), {R=[P*Q|expand($p+1,$q)],$r[R|*Z]}.
+{R=expand($p,$q),$r[R|*Z]} :- $p>=$q | {R=[],$r[R|*Z]}.
+
+{R=sum([$p|T]),$q[R,T|*Z]} :- int($p) | {R=$p+sum(T),$q[R,T|*Z]}.
+{R=sum([]),$q[R|*Z]} :- {R=0,$q[R|*Z]}.
+
+%r = get(1).
+r = get(10).

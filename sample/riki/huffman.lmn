@@ -1,0 +1,59 @@
+# huffman encoding (input is 8-bit digit)
+
+# root declaration
+R=huffman_enc(X) :- R=token_enc(huffman_bits(X,X1),X1).
+
+# get bitpatterns for each charactor 
+R=huffman_bits(X,X1) :- R=make_bit_pattern(make_huffman_tree(count_token(X,X1))).
+
+# count each charactors occurrence
+count_token(In,Out,CountOut) :- count_token(In,Out,[],CountOut).
+count_token([],Out,Count,CountOut) :- Out=[], CountOut=Count.
+count_token([$p|T],Out,Count,CountOut) :- int($p) | Out=[$p|TOut], count_token(T,TOut,countup($p,Count),CountOut).
+R=countup(Token,[]) :- R=[entry(Token,1)].
+R=countup($p,[entry($q,Times)|T]) :- $p=\=$q | R=[entry($q,Times)|countup($p,T)].
+R=countup($p,[entry($q,$times)|T]) :- $p=:=$q, $times1=$times+1 | R=[entry($q,$times1)|T].
+
+# get bitpatterns from codingtree
+R=make_bit_pattern(X) :- R=make_bit_pattern_inner([],X,[]).
+R=make_bit_pattern_inner(P,$p,T) :- int($p) | R=[entry($p,reverse(P))|T].
+R=make_bit_pattern_inner(P,[LHS,RHS],T) :- copy_list(P,P1,P2), R=make_bit_pattern_inner([0|P1],LHS,make_bit_pattern_inner([1|P2],RHS,T)).
+
+# get codingtree from counts (this is main haffman coding)
+R=make_huffman_tree(X) :- R=make_huffman_tree_inner(sort_entries(X)).
+R=make_huffman_tree_inner([entry(X,$p)]) :- int($p) | R=X.
+R=make_huffman_tree_inner([entry(X,$p),entry(Y,$q)|T]) :- $r=$p+$q | R=make_huffman_tree_inner(insert(entry([X,Y],$r),T)).
+
+# sort
+R=sort_entries([]) :- R=[].
+R=sort_entries([H|T]) :- R=insert(H,sort_entries(T)).
+R=insert(X,[]) :- R=[X].
+R=insert(entry(X,$p),[entry(Y,$q)|T]) :- $p>$q  | R=[entry(Y,$q)|insert(entry(X,$p),T)].
+R=insert(entry(X,$p),[entry(Y,$q)|T]) :- $p=<$q | R=[entry(X,$p),entry(Y,$q)|T].
+
+# convert each charactor to bitpattern
+R=token_enc(B,X) :- R=token_enc(B,X,O,O).
+R=token_enc(B,[],O,E) :- R=[B,O], E=[].
+R=token_enc(B,[H|T],O,E) :- E=copy_pattern(B,H,B1,M), R=token_enc(B1,T,O,M).
+
+# copy bitpattern
+R=copy_pattern([entry($p,L)|T],$q,B1,C) :- $p=:=$q | R=copy_sublist(L,L1,C), B1=[entry($p,L1)|T].
+R=copy_pattern([entry($p,L)|T],$q,B1,C) :- $p=\=$q | B1=[entry($p,L)|BM], R=copy_pattern(T,$q,BM,C).
+
+# copy list
+R=copy_sublist([],L1,C) :- R=C, L1=[].
+R=copy_sublist([$p|T],L1,C) :- int($p) | R=[$p|copy_sublist(T,LM,C)], L1=[$p|LM].
+R=copy_list(L,L1) :- R=copy_sublist(L,L1,[]).
+
+delete_entries([]) :- .
+delete_entries([entry($p,P)|T]) :- int($p) | delete_list(P), delete_entries(T).
+delete_list([]) :- .
+delete_list([$p|T]) :- int($p) | delete_list(T).
+
+# reverse list
+R=reverse(X) :- R=reverse(X,[]).
+R=reverse([H|T],X) :- R=reverse(T,[H|X]).
+R=reverse([],X) :- R=X.
+
+# user program
+res=huffman_enc([2,2,3,4,5,5,5,6,7,7]).

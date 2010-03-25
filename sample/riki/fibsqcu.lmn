@@ -1,0 +1,26 @@
+fibsqcu(100, r).
+
+fibsqcu(N, R) :-
+	sum(T,0,R), merge(SQ,CU,T),
+	square(F1,SQ), cube(F2,CU),
+	copy(F,F1,F2), fibonacci(1,0,N,F).
+
+sum([],S,R) :- S=R.
+sum([T|X],S,R) :- U=S+T | sum(X,U,R).
+
+merge([],S2,R) :- S2=R.
+merge(S1,[],R) :- S1=R.
+merge([T|X],S2,R) :- R=[T|N], merge(X,S2,N).
+merge(S1,[T|X],R) :- R=[T|N], merge(S1,X,N).
+
+square([],R) :- R=[].
+square([T|X],R) :- U=T*T | R=[U|N], square(X,N).
+
+cube([],R) :- R=[].
+cube([T|X],R) :- U=T*T*T | R=[U|N], cube(X,N).
+
+copy([],R,S) :- R=[], S=[].
+copy([T|X],R,S) :- int(T) | R=[T|P], S=[T|Q], copy(X,P,Q).
+
+fibonacci(A,B,Z,R) :- A+B>=Z | R=[].
+fibonacci(A,B,Z,R) :- A+B=<Z,C=A+B | R=[C|N], fibonacci(B,C,Z,N).

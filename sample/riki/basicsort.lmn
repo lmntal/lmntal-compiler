@@ -1,0 +1,54 @@
+R=insertionsort([]) :- R=[].
+R=insertionsort([H|T]) :- R=insert(H,insertionsort(T)).
+
+R=insert(X,[]) :- R=[X].
+R=insert(X,[H|T]) :- X >H | R=[H|insert(X,T)].
+R=insert(X,[H|T]) :- X=<H | R=[X,H|T].
+
+R=bubblesort([]) :- R=[].
+R=bubblesort(end(T)) :- R=T.
+R=bubblesort([H|T]) :- R=bubblesort(bubble(H,T)).
+
+R=bubble(X,[]) :- R=end([X]).
+R=bubble(X,end(T)) :- R=end([X|T]).
+R=bubble(X,[H|T]) :- X >H | R=[H|bubble(X,T)].
+R=bubble(X,[H|T]) :- X=<H | R=[X|bubble(H,T)].
+
+R=selectionsort([]) :- R=[].
+R=selectionsort([H|T]) :- R=[select(H,T,L)|selectionsort(L)].
+
+R=select(X,[],L) :- R=X, L=[].
+R=select(X,[H|T],L) :- X=<H | R=select(X,T,M), L=[H|M].
+R=select(X,[H|T],L) :- X >H | R=select(H,T,M), L=[X|M].
+
+R=quicksort(L) :- quicksort(L,R,[]).
+
+quicksort([],R,Z) :- R=Z.
+quicksort([H|T],R,Z) :- pivot(H,T,[],[],R,Z).
+
+pivot(P,[]   ,H2,H3,R,Z) :- quicksort(H2,R,N), N=[P|M], quicksort(H3,M,Z).
+pivot(P,[H|T],H2,H3,R,Z) :- H=<P | pivot(P,T,M,H3,R,Z), M=[H|H2].
+pivot(P,[H|T],H2,H3,R,Z) :- H>=P | pivot(P,T,H2,M,R,Z), M=[H|H3].
+
+R=mergesort([]) :- R=[].
+R=mergesort([H1]) :- R=[H1].
+R=mergesort([H1,H2|T]) :- split([H1,H2|T],R1,R2), R=merge(mergesort(R1),mergesort(R2)).
+
+split([],R1,R2) :- R1=[], R2=[].
+split([H1],R1,R2) :- R1=[H1], R2=[].
+split([H1,H2|T],R1,R2) :- R1=[H1|T1], R2=[H2|T2], split(T,T1,T2).
+
+R=merge([],H2) :- R=H2.
+R=merge(H1,[]) :- R=H1.
+R=merge([H1|T1],[H2|T2]) :- H1=<H2 | R=[H1|merge(T1,[H2|T2])].
+R=merge([H1|T1],[H2|T2]) :- H1>=H2 | R=[H2|merge([H1|T1],T2)].
+
+
+R=testdata :- R=[3,7,4,5,8,0,5,9,2,2,4].
+
+r_ins = insertionsort(testdata).
+r_bub = bubblesort(testdata).
+r_sel = selectionsort(testdata).
+r_qui = quicksort(testdata).
+r_mer = mergesort(testdata).
+

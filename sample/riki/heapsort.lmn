@@ -1,0 +1,81 @@
+% gen
+R=gen(0 ,$s) :- int($s) | R=[].
+R=gen($i,$s) :- $i>0, $i1=$i-1, $j=($s*71+29) mod 100 | R=[$j|gen($i1,$j)].
+R=gen($n) :- int($n) | R=gen($n,$n).
+
+
+% Xのビット表現を返す R=bits(7) :- R=[1,1,1]
+R=bits(X) :- R=reverse(make_bits(X)).
+
+R=make_bits($p) :- $p==0 | R=[].
+R=make_bits($p) :- $p=\=0, $q=$p/2, $r=$p mod 2 | R=[$r|make_bits($q)].
+R=reverse(X) :- R=reverse(X,[]).
+R=reverse([],Y) :- R=Y.
+R=reverse([H|T],Y) :- R=reverse(T,[H|Y]).
+
+
+% find(ID,ヒープてっぺん,新ヒープてっぺん,見つけたノードの親側,見つけたノード)
+% ルートを1とし,幅優先でIDを振った場合,IDのビット表現がそのノードの場所へのルートになっている
+% 3=11:右, 10=1010:左右左, 14=1110:右右左 のように先頭の1を外し,2ビット目から読む
+find(X,W,NT,RP,RC) :- trace(cut_first_1(bits(X)),W,NT,RP,RC).
+
+% ツリーをたどっていく
+R=cut_first_1([1|T]) :- R=T.
+trace([],W,NT,RP,RC) :- RP=NT, RC=W.
+trace([0|T],node(X,LHS,RHS),NT,RP,RC) :- NT=node(X,M,RHS), trace(T,LHS,M,RP,RC).
+trace([1|T],node(X,LHS,RHS),NT,RP,RC) :- NT=node(X,LHS,M), trace(T,RHS,M,RP,RC).
+
+
+% 末尾にノードを追加,親ノードと比較,修正が必要ならひっくり返していく
+% 新規ノードの追加なのでfindしてきたノードは必ずnil
+% 追加中はロックが必要
+add(X,heap(1,nil),NH) :- NH=heap(2,node(X,nil,nil)).
+add(X,heap($p,W),NH) :- $p=\=1,$q=$p+1 | NH=heap($q,lock(F,NW)), find($p,W,NW,adding(F,node(X,nil,nil)),delnil).
+
+delnil(nil) :- .
+R=lock(free,X) :- R=X.
+M=adding(F,N), P=lock(F,M) :- P=N. % 一番上までひっくり返って上がってきた場合
+M=adding(F,node($p,LHS,RHS)), P=node($q,PL,M) :- $p<$q | P=adding(F,node($p,PL,node($q,LHS,RHS))).
+M=adding(F,node($p,LHS,RHS)), P=node($q,M,PR) :- $p<$q | P=adding(F,node($p,node($q,LHS,RHS),PR)).
+M=adding(F,node($p,LHS,RHS)), P=node($q,PL,M) :- $p>=$q | P=node($q,PL,node($p,LHS,RHS)), F=free.
+M=adding(F,node($p,LHS,RHS)), P=node($q,M,PR) :- $p>=$q | P=node($q,node($p,LHS,RHS),PR), F=free.
+
+
+% てっぺんのノードのデータを取り出して返し, 末尾のノードを持ってきててっぺんに置く,
+% 更にヒープとして整合するように小さいほうの子ノードと比較,修正が必要ならひっくり返していく
+% 子ノードは 両方nil/右側のみnil の可能性がある
+% findしてきたノードの親側の断点(末尾の場所)にはnilをつなぐ(データが一個減ったので)
+% findしてきたノードはもう一度マッチングしなおさないとデータが読めない(replaceでやっている)
+% ルートから順に整合していくのでロックは必要なし
+pop(heap(2,node(X,nil,nil)),NH,R) :- NH=heap(1,nil), R=X.
+pop(heap($p,W),NH,R) :- $p=\=2,$q=$p-1 | find($q,W,NW,nil,RC), replace(RC,NW,R,NNW), NH=heap($q,NNW).
+
+% replace(末尾から持ってきたノード,ヒープ,ポップした元ルートのデータを返す,新しいヒープを返す)
+replace(node(X,nil,nil),node(Y,RL,RR),R,NH) :- R=Y, NH=popping(node(X,RL,RR)).
+
+% 左<右,修正が必要なら,左と交換
+R=popping(node($p,node($q,LL,LR),node($r,RL,RR))) :- $q=<$r, $p>$q | R=node($q,popping(node($p,LL,LR)),node($r,RL,RR)).
+% 左>右,修正が必要なら,右と交換
+R=popping(node($p,node($q,LL,LR),node($r,RL,RR))) :- $q>=$r, $p>$r | R=node($r,node($q,LL,LR),popping(node($p,RL,RR))).
+% 左<右,修正終わり
+R=popping(node($p,node($q,LL,LR),node($r,RL,RR))) :- $q=<$r, $p=<$q | R=node($p,node($q,LL,LR),node($r,RL,RR)).
+% 左>右,修正終わり
+R=popping(node($p,node($q,LL,LR),node($r,RL,RR))) :- $q>=$r, $p=<$r | R=node($p,node($q,LL,LR),node($r,RL,RR)).
+
+% 片側がnilの場合 子が欠けているので当然孫はいない
+R=popping(node($p,node($q,LL,LR),nil)) :- $p>$q | R=node($q,node($p,LL,LR),nil).
+R=popping(node($p,node($q,LL,LR),nil)) :- $p=<$q | R=node($p,node($q,LL,LR),nil).
+% 両方nilの場合
+R=popping(node(X,nil,nil)) :- R=node(X,nil,nil).
+
+
+% 以上のヒープの実装を使ったヒープソート
+R=heapsort(X) :- R=heapsort(0,X,heap(1,nil)).
+R=heapsort($p,[H|T],W) :- $q=$p+1 | R=heapsort($q,T,add(H,W)).
+R=heapsort(X,[],W) :- R=pop_all(X,W).
+R=pop_all($p,W) :- $p==0 | R=[], del(W).
+R=pop_all($p,W) :- $p=\=0,$q=$p-1 | R=[pop(W,NW)|pop_all($q,NW)].
+del(heap(1,nil)) :- .
+
+% r = heapsort([3,7,4,5,8,0,5,9,2,2,4,3,7,4,5,8,0,5,9,2,2,3,7,4,5,8,0,5,9,2,2]).
+r = heapsort(gen(3000)).

@@ -1,0 +1,13 @@
+{
+q{n(2),n(3),n(3),/*n(5),n(5),/*n(7),n(7),*/ +X,+Y,+Z}.
+w{n($p),n($q):-$r=$p+$q|n($r). +X}.
+w{n($p),n($q):-$r=$p*$q|n($r). +Y}.
+w{n($p),n($q):-$r=$p-$q|n($r). +Z}.
+
+q{n($p),n($q), $restq, +X}, w{+X,$restw,@w} :- int($p),int($q) | q{$restq, +X}, w{+X, n($p),n($q), $restw,@w}.
+q{$restq, +X}, w{+X, n($r), $restw,@w} :- int($r) | q{$restq, n($r), +X}, w{+X, $restw,@w}.
+}.
+
+{$p,@p}/ :- done{$p}.
+
+# slim --nd test.lmn | grep "done" | ruby -e 'p $stdin.read.scan(/n\(([\-0-9]+)\)/).flatten.map{|x| x.to_i}.sort'

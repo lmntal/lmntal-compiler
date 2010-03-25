@@ -1,0 +1,15 @@
+#runlength coding
+
+R=runlength_enc([]) :- R=[].
+R=runlength_enc([Token|T]) :- R=runlength_enc(Token,1,T).
+R=runlength_enc(Token,Times,[]) :- R=[Token,Times].
+R=runlength_enc($token,$times,[$x|T]) :- $token=:=$x, $times1=$times+1 | R=runlength_enc($token,$times1,T).
+R=runlength_enc($token,Times,[$x|T]) :- $token=\=$x | R=[$token,Times|runlength_enc($x,1,T)].
+
+R=runlength_dec([Token,Times|T]) :- R=ntimes(Token,Times,runlength_dec(T)).
+R=runlength_dec([]) :- R=[].
+
+R=ntimes($token,0,X) :- int($token) | R=X.
+R=ntimes($token,$times,X) :- int($token), $times=\=0, $times1=$times-1 | R=[$token|ntimes($token,$times1,X)].
+
+res=runlength_dec(runlength_enc([2,2,3,4,5,5,5,6,7,7])).
