@@ -1,0 +1,86 @@
+
+outputInitRule1{
+
+outport(io.stdout).
+
+outport(X) , ruleset($n)
+  :-  int($n)
+  |  outport = io.print_line( io.print(X, "Compiled Ruleset @"), str.from($n)).
+
+}.
+outputInitRule2{
+outport(X),  compiledRule = M
+:- outport = io.print( X, 
+   "Compiled Rule \n\t--atommatch:\n\t--memmatch:\n\t--body:L0:\n"),
+   head = M.
+}.
+
+outputRule1{
+outport(X), ruleset($n)
+  :- int($n)
+  |  outport = io.print_line( io.print(X, "Compiled Ruleset @"), str.from($n)).
+}.
+
+outputRule2{
+outport(X), compiledRule = M
+ :- outport = io.print(X, "Compiled Rule \n\t--atommatch:\n\t--memmatch:\n"),
+    head = M.
+}.
+
+outputInsts{
+outport(X), head = [[$inst, OpList] | T ]
+  :- unary($inst)
+  | outport = io.print_line(
+    	      io.print(
+	      io.print(
+              io.print(X, "\t\t"),
+	      		  str.from($inst) ),
+			  "\t" ), 
+			  list_to_string(OpList) ),
+    head = T.
+
+Ret = list_to_string( [] ) :- Ret = "[]".
+Ret = list_to_string( [X | T] )
+ :- Ret = str.concat("[", inner_list_to_string([ X | T ])).
+
+
+Ret = inner_list_to_string([]) :- Ret = "]".
+Ret = inner_list_to_string([ $i, $j | T])
+ :- ground($i), ground($j)
+ | Ret = str.concat( str.concat(elm_to_string($i), ", "),
+   inner_list_to_string([$j | T])).
+
+Ret = inner_list_to_string([ $i | [] ])
+ :- ground($i)
+ | Ret = str.concat( elm_to_string($i), inner_list_to_string([]) ).
+
+Ret = elm_to_string(null) :- Ret = "null".
+Ret = elm_to_string($i) :- int($i) | Ret = str.from($i).
+Ret = elm_to_string(rulesetNum($i))
+ :- int($i)
+ | Ret = str.concat("@", str.from($i)).
+Ret = elm_to_string(functor($f, $i))
+ :- unary($f), int($i)
+| Ret = str.concat(str.concat(str.concat("'", str.from($f)), "'_"), str.from($i)).
+
+}.
+
+outputSlash{
+do.
+do, outport(X) :- outport = io.print(X, "\nInline\n//").
+}.
+
+seq.use.
+io.use.
+str.use.
+
+initRuleset{$p[]} , 
+opt({$rules}),
+
+outputInitRule1{$q[], @q}, outputInitRule2{@q2},
+outputRule1{@r}, outputRule2{@r2},
+outputInsts{@insts},
+outputSlash{$slash[], @slash}
+ :- ret = seq.run({$p[]}, 
+         [ {$q[], @q}, {@q2, @insts}, {$rules, @r}, {@r2, @insts},
+	 {$slash[], @slash} ]).
