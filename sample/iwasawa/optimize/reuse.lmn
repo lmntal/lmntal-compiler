@@ -1,50 +1,87 @@
+/*
+ lmntal --slimcode -O3 hoge.lmn > hoge.il
+ ./conv.rb < hoge.il > hogeIL.lmn
+ lmntal ( -ON ) --slimcode hogeIL.lmn > hogeIL.il
+ slim hogeIL.il reuse.il outputIL.il > optimized_hoge.il
+ 
+ 2010.08.01 時点でバグのため lmntal コンパイラを使って
+ reuse.lmn を reuse.il に変換すると実行時にバグが出ます。
+ 付属の reuse.il を使用するようにしてください。
+*/
+optimize{
+
+reuseInit{
+reuseInit@@ compiledRule(X) :- optimizingRule({}, X).
+
+}.
+
 reuse1{
 // 再利用するアトムを特定する
+reuse1@@
+optimizingRule({$reuses[]}, L),
+$insts0[L, L0],
 L0 = [[removeatom, [$i0, $j0 , functor( F0, $k0)]] | M0 ],
+$insts1[M0, L1],
 L1 = [[newatom, [$i1, $j1 , functor( F1, $k1)]] | M1 ],
+$insts2[M1, L3],
 L3 = [[freeatom, [$i3]] | M3 ]
 :- int($i0), int($j0), unary(F0), int($k0), 
    int($i1), int($j1), unary(F1), int($k1),
    int($i3),
+   ground($insts0), ground($insts1), ground($insts2),
    F0 = F1,
    $i1 = $i2,
    $j1 = $j2
 | 
-L0 = M0, L1 = M1, L3 = M3,
-reuse($i0, $i1).
+optimizingRule({reuse($i0, $i1), $reuses[]}, N0),
+$insts0[N0, N1], $insts1[N1, N2], $insts2[N2, M3].
 
 
 // 再利用のルールに従って番号を付け替える
-L = [[relink, [$i, $j, $k, $l, $m]] | M],
-reuse($i1, $j1)
+reuse2@@
+optimizingRule({reuse($i1, $j1), $reuses[]}, L0),
+$insts[L0, L1],
+L1 = [[relink, [$i, $j, $k, $l, $m]] | M],
 :- int($i), int($j), int($k), int($l), int($m),
    int($i1), int($j1),
+   ground($insts),
    $i = $j1
 |
-L = [[relink, [$i1, $j, $k, $l, $m]] | M],
-reuse($i1, $j1).
+optimizingRule({reuse($i1, $j1), $reuses[]}, L0),
+$insts[L0, L1],
+L1 = [[relink, [$i1, $j, $k, $l, $m]] | M].
 
-L = [[newlink, [$i, $j, $k, $l, $m]] | M],
-reuse($i1, $j1)
+
+reuse3@@
+optimizingRule({reuse($i1, $j1), $reuses[]}, L0),
+$insts[L0, L1],
+L1 = [[newlink, [$i, $j, $k, $l, $m]] | M],
 :- int($i), int($j), int($k), int($l), int($m),
    int($i1), int($j1),
+   ground($insts),
    $i = $j1
 |
-L = [[newlink, [$i1, $j, $k, $l, $m]] | M],
-reuse($i1, $j1).
+optimizingRule({reuse($i1, $j1), $reuses[]}, L0),
+$insts[L0, L1],
+L1 = [[newlink, [$i1, $j, $k, $l, $m]] | M].
 
-L = [[newlink, [$i, $j, $k, $l, $m]] | M],
-reuse($i1, $j1)
+reuse4@@
+optimizingRule({reuse($i1, $j1), $reuses[]}, L0),
+$insts[L0, L1],
+L1 = [[newlink, [$i, $j, $k, $l, $m]] | M],
 :- int($i), int($j), int($k), int($l), int($m),
    int($i1), int($j1),
+   ground($insts),
    $k = $j1
 |
-L = [[newlink, [$i, $j, $i1, $l, $m]] | M],
-reuse($i1, $j1).
+optimizingRule({reuse($i1, $j1), $reuses[]}, L0),
+$insts[L0, L1],
+L1 = [[newlink, [$i, $j, $i1, $l, $m]] | M].
 
 
 
 // 不要な relink を削除する
+reuse5@@
 L = [[relink, [$i, $j, $k, $l, $m]] | M]
 :- int($i), int($j), int($k), int($l), int($m),
    $i = $k,
@@ -52,59 +89,81 @@ L = [[relink, [$i, $j, $k, $l, $m]] | M]
 |  L = M.
 
 // newlink は relink より後ろに移動
-L = [[newlink, [$i0, $j0, $k0, $l0, $m0]],
-     [relink, [$i1, $j1, $k1, $l1, $m1]]  | M]
+reuse6@@
+L0 = [[newlink, [$i0, $j0, $k0, $l0, $m0]] | M0],
+$insts[M0, L1],
+L1 = [[relink, [$i1, $j1, $k1, $l1, $m1]] | M1]
 :- int($i0), int($j0), int($k0), int($l0), int($m0),
-   int($i1), int($j1), int($k1), int($l1), int($m1)
+   int($i1), int($j1), int($k1), int($l1), int($m1),
+   ground($insts)
 |
-L = [[relink, [$i1, $j1, $k1, $l1, $m1]],
-     [newlink, [$i0, $j0, $k0, $l0, $m0]] | M].
+L0 = [[relink, [$i1, $j1, $k1, $l1, $m1]] | M0],
+$insts[M0, L1],
+L1 = [[newlink, [$i0, $j0, $k0, $l0, $m0]] | M1].
 }.
 
 reuse2{
 // 依存関係が崩れている場合を特定する
-
+reuse7@@
 L = [[spec, [1, $n]] | M],
-L0 = [[relink, [$i0, $j0, $k0, $l0, $m0]],
-      [relink, [$i1, $j1, $k1, $l1, $m1]]  | M0]
+$insts0[M, L0],
+L0 = [[relink, [$i0, $j0, $k0, $l0, $m0]]  | M0],
+$insts1[M0, L1],
+L1 = [[relink, [$i1, $j1, $k1, $l1, $m1]]  | M1]
 :-  int($n), $nn = $n+1,
    int($i0), int($j0), int($k0), int($l0), int($m0),
    int($i1), int($j1), int($k1), int($l1), int($m1),
+   ground($insts0), ground($insts1),
    $i0 = $k1,
    $j0 = $l1
 |
 L = [[spec, [1, $nn]] | M],
+$insts0[M, L0],
 L0 = [[getlink, [$n, $i0, $j0]],
-      [relink, [$i0, $j0, $k0, $l0, $m0]],
-      [inheritlink, [$i1, $j1, $n, $m1]]  | M0].
+      [relink, [$i0, $j0, $k0, $l0, $m0]] | M0],
+$insts1[M0, L1],
+L1 = [[inheritlink, [$i1, $j1, $n, $m1]]  | M1].
+
 }.
+
+reuseExit{
+reuseExit@@
+optimizingRule({$reuses[]}, X) :- optimizedRule(X).
+}.
+
 
 removeDeqEnq{
 
 // dequeueatom を削除する
+removeDeq@@
 L = [[dequeueatom, [$n]] | M]
 :- int($n)
 | L = M.
 
 // enqueueatom を削除する
+removeEnq@@
 L = [[enqueueatom, [$n]] | M]
 :- int($n)
 | L = M.
 
 }.
 
+
 seq.use.
 
-reuse1{@p1}, reuse2{@p2},  removeDeqEnq{@q}, ruleset{ $p[] }
+reuseInit{@p0},reuse1{@p1}, reuse2{@p2}, reuseExit{@p3},
+removeDeqEnq{@q}, 
+ruleset{ $p[] }
 :-
-reuse1{@p1}, reuse2{@p2}, removeDeqEnq{@q},
-opt = seq.run({$p[]}, [ {@q},  {@p1}, {@p2} ]).
+reuseInit{@p0},reuse1{@p1}, reuse2{@p2}, reuseExit{@p3},
+removeDeqEnq{@q},
+optimized_ruleset 
+  = seq.run({$p[]}, [ {@q},  {@p0}, {@p1}, {@p2}, {@p3} ]).
+
+}.
+
+do.
+do, optimize{$opt[], @opt}, rulesets{$r[]}
+  :- optimize{$opt[], @opt}, rulesets{$r[], $opt[],@opt}.
 
 
-/*
-reuse{@p}, ruleset{ $p[] }
-:- reuse{@p}, ruleset{ reuseRule. $p[], @p }.
-
-ruleset{ reuseRule, $p[], @p }/
-:- opt_ruleset{ $p[] }.
-*/

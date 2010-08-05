@@ -3,84 +3,144 @@ outputInitRule1{
 
 outport(io.stdout).
 
-outport(X) , ruleset($n)
+outputInit1@@
+outport(X), initRuleset{ ruleset($n), $p[], @p }
   :-  int($n)
-  |  outport = io.print_line( io.print(X, "Compiled Ruleset @"), str.from($n)).
+  |   $p[],
+      outport = 
+       io.print_line(
+       io.print(X, "Compiled Ruleset @"), str.from($n)).
 
 }.
+
+
 outputInitRule2{
-outport(X),  compiledRule = M
-:- outport = io.print( X, 
-   "Compiled Rule \n\t--atommatch:\n\t--memmatch:\n\t--body:L0:\n"),
-   head = M.
-}.
 
-outputRule1{
-outport(X), ruleset($n)
-  :- int($n)
-  |  outport = io.print_line( io.print(X, "Compiled Ruleset @"), str.from($n)).
-}.
-
-outputRule2{
+outputInit2@@
 outport(X), compiledRule = M
- :- outport = io.print(X, "Compiled Rule \n\t--atommatch:\n\t--memmatch:\n"),
-    head = M.
+:- outport = 
+     print_insts(
+     io.print( X, 
+          "Compiled Rule\n\t--atommatch:\n\t--memmatch:\n\t--body:L0:\n"),
+	  M).
+
+}.
+
+outputRuleSet{
+
+outputRuleSet@@
+outport(X), optimized_ruleset({ruleset($n), $rules})
+  :- int($n)
+  |  outport =
+       print_ruleset(
+       io.print_line(
+       io.print(X, "Compiled Ruleset @"), str.from($n))
+       , optimized_ruleset({$rules}) ).
+
+printRuleset1@@
+R = print_ruleset(X, optimized_ruleset({})) :- R = X.
+printRuleset2@@
+R = print_ruleset(X, 
+  optimized_ruleset({optimizedRule($insts). $rules[], @rules}))
+  :- ground($insts)
+  |  R = print_ruleset(
+         print_insts(
+	 io.print(X, "Compiled Rule \n\t--atommatch:\n\t--memmatch:\n"),
+                      $insts),
+	              optimized_ruleset({$rules[]})).
 }.
 
 outputInsts{
-outport(X), head = [[$inst, OpList] | T ]
+
+print_insts_nil@@
+R = print_insts(X, []) :- R = X.
+
+print_insts@@
+R = print_insts(X, [[$inst, OpList] | T ])
   :- unary($inst)
-  | outport = io.print_line(
+  | R = print_insts(
+              io.print_line(
     	      io.print(
 	      io.print(
               io.print(X, "\t\t"),
 	      		  str.from($inst) ),
 			  "\t" ), 
-			  list_to_string(OpList) ),
-    head = T.
+			  list_to_string(OpList)),
+			  T).
 
+list_to_string1@@
 Ret = list_to_string( [] ) :- Ret = "[]".
+list_to_string2@@
 Ret = list_to_string( [X | T] )
  :- Ret = str.concat("[", inner_list_to_string([ X | T ])).
 
 
+inner_list_to_string1@@
 Ret = inner_list_to_string([]) :- Ret = "]".
+
+inner_list_to_string2@@
 Ret = inner_list_to_string([ $i, $j | T])
  :- ground($i), ground($j)
  | Ret = str.concat( str.concat(elm_to_string($i), ", "),
    inner_list_to_string([$j | T])).
 
+inner_list_to_string3@@
 Ret = inner_list_to_string([ $i | [] ])
  :- ground($i)
  | Ret = str.concat( elm_to_string($i), inner_list_to_string([]) ).
 
+
+elm_to_string1@@
 Ret = elm_to_string(null) :- Ret = "null".
+
+elm_to_string2@@
 Ret = elm_to_string($i) :- int($i) | Ret = str.from($i).
 Ret = elm_to_string(rulesetNum($i))
  :- int($i)
  | Ret = str.concat("@", str.from($i)).
+
+elm_to_string3@@
+Ret = elm_to_string(intFunctor($f, $i))
+ :- int($f), int($i)
+| Ret = str.concat( str.concat(str.from($f), "_"), str.from($i)).
+
+elm_to_string4@@
 Ret = elm_to_string(functor($f, $i))
  :- unary($f), int($i)
-| Ret = str.concat(str.concat(str.concat("'", str.from($f)), "'_"), str.from($i)).
+| Ret = str.concat(str.concat(str.concat("'", str.from($f)), "'_"),
+  str.from($i)).
+
+elm_to_string5@@
+Ret = elm_to_string($i) :- string($i) 
+  | Ret = str.concat( str.concat("\"", $i), "\"").
+
 
 }.
 
 outputSlash{
 do.
+printslash@@
 do, outport(X) :- outport = io.print(X, "\nInline\n//").
+}.
+
+deleteIO{
+freeIO@@
+outport(X) :- io.free_port(io.close_port(X)).
 }.
 
 seq.use.
 io.use.
 str.use.
 
-initRuleset{$p[]} , 
-opt({$rules}),
 
+rulesets{$p[], @p}, 
 outputInitRule1{$q[], @q}, outputInitRule2{@q2},
-outputRule1{@r}, outputRule2{@r2},
+outputRuleSet{@r},
 outputInsts{@insts},
-outputSlash{$slash[], @slash}
- :- ret = seq.run({$p[]}, 
-         [ {$q[], @q}, {@q2, @insts}, {$rules, @r}, {@r2, @insts},
-	 {$slash[], @slash} ]).
+outputSlash{$slash[], @slash},
+deleteIO{@dio}
+ :- ret = seq.run({seq_run, $p[]}, 
+         [ {$q[], @q}, {@q2, @insts}, {@r,  @insts},
+	 {$slash[], @slash}, {@dio} ]).
+
+
