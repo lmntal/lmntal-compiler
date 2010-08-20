@@ -61,7 +61,7 @@ public abstract class Functor implements Serializable {
 	}
 
 	private String quoteFunctorName(String text) {
-		if (Env.verbose > Env.VERBOSE_SIMPLELINK) {
+		if (Env.verbose > Env.VERBOSE_SIMPLELINK || ( Env.dump2 && (!Dumper2.isInfixNotation()||!Dumper2.isAbbrAtom() )) ) {
 			if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 				text = quoteName(text);
 			}

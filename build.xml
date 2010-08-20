@@ -12,6 +12,7 @@
 	<!-- tool properties -->
 	<property name="flex"  location="${lib}/JFlex.jar"/>
 	<property name="bison"  location="${lib}/java_cup.jar"/>
+	<property name="jpp" location="${lib}/jpplib-0.6.jar"/>
 	
 	<!-- properties -->
 	<property name="encoding" value="euc-jp"/>
@@ -62,7 +63,7 @@
 			<sysproperty key="LMNTAL_HOME" value="${basedir}"/>
 		</java>
 	</target>
-	
+	 
 	<!-- java compile -->
 	<target name="compile" depends="mkdir" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
@@ -75,6 +76,7 @@
 			<manifest>
 				<attribute name="Main-Class" value="runtime.FrontEnd"/>
 			</manifest>
+			<zipfileset src="${jpp}"/>
 		</jar>
 	</target>
 
@@ -96,7 +98,7 @@
 	<target name="archive">
 		<tar destfile="lmntal.tgz" compression="gzip">
 			<tarfileset dir="${bin}" excludes="set_cp*,*.bat,lmntal.jar" prefix="bin" mode="755"/>
-			<tarfileset dir="${bin}" includes="*.bat,lmntal.jar" excludes="set_cp*" prefix="bin"/>
+			<tarfileset dir="${bin}" includes="*.bat,lmntal.jar,prettyprinter.properties" excludes="set_cp*" prefix="bin"/>
 			<tarfileset file="${bin}/set_cp_jar.bat" fullpath="bin/set_cp.bat"/>
 			<tarfileset file="${bin}/set_cp_jar.sh" fullpath="bin/set_cp.sh" mode="755"/>
 			<tarfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>
@@ -107,7 +109,7 @@
 	<target name="zip">
 		<zip destfile="lmntal.zip" >
 			<zipfileset dir="${bin}" excludes="set_cp*,*.bat,lmntal.jar" prefix="bin" filemode="755"/>
-			<zipfileset dir="${bin}" includes="*.bat,lmntal.jar" excludes="set_cp*" prefix="bin"/>
+			<zipfileset dir="${bin}" includes="*.bat,lmntal.jar,prettyprinter.properties" excludes="set_cp*" prefix="bin"/>
 			<zipfileset file="${bin}/set_cp_jar.bat" fullpath="bin/set_cp.bat"/>
 			<zipfileset file="${bin}/set_cp_jar.sh" fullpath="bin/set_cp.sh" filemode="755"/>
 			<zipfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>

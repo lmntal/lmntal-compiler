@@ -16,6 +16,7 @@ import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import type.TypeException;
@@ -237,16 +238,32 @@ public class FrontEnd {
 					case 'x':
 						/// -x <name> <value>
 						/// User defined option.
-						/// <name>    <value>    description
+						/// <name>    <value>        description
 						/// ===========================================================
-						/// screen    max        full screen mode
-						/// auto      on         reaction auto proceed mode when GUI on
-						/// dump      1          indent mem (etc...)
-						/// chorus    filename   output chorus file
+						/// screen    max            full screen mode
+						/// auto      on             reaction auto proceed mode when GUI on
+						/// dump      1              indent mem (etc...)
+						/// dump2     propertyfile   apply LMNtal prettyprinter to output 
+						/// chorus    filename       output chorus file
 						if (i + 2 < args.length) {
 							String name  = i+1<args.length ? args[i+1] : "";
 							String value = i+2<args.length ? args[i+2] : "";
 							Env.extendedOption.put(name, value);
+						}
+						if(Env.getExtendedOption("dump2") != ""){
+							Env.dump2 = true;
+					        Properties prop = new Properties();
+					        try{
+					        	prop.load(new FileInputStream(Env.getExtendedOption("dump2")));
+					        	Dumper2.setPropertiesPath(Env.getExtendedOption("dump2"));
+					        	Dumper2.getProperties();
+					        }catch(FileNotFoundException e) {
+								Env.e("Property file is not found.");
+								Env.dump2 = false;
+						    }catch(IOException e){
+						    	e.printStackTrace();
+								Env.dump2 = false;
+								}
 						}
 						i+=2;
 						break;
@@ -880,11 +897,19 @@ public class FrontEnd {
 
 				if (Env.profile == Env.PROFILE_ALL) {
 					Env.d( "Execution Result:" );
-					Env.p( Dumper.dump(rt.getGlobalRoot()) );
+					if(Env.dump2){
+						Env.p( Dumper2.dump(rt.getGlobalRoot()));
+					}else{
+						Env.p( Dumper.dump(rt.getGlobalRoot()) );
+					}
 				} //else if (!Env.fTrace && Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
 					else if (Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
 					Env.d( "Execution Result:" );
-					Env.p( Dumper.dump(rt.getGlobalRoot()) );
+					if(Env.dump2){
+						Env.p( Dumper2.dump(rt.getGlobalRoot()));
+					}else{
+						Env.p( Dumper.dump(rt.getGlobalRoot()) );
+					}
 				}
 				if(Env.getExtendedOption("chorus") != ""){ Output.out(Env.getExtendedOption("chorus"), rt.getGlobalRoot()); }
 

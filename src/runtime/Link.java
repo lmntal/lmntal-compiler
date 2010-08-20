@@ -77,6 +77,10 @@ public final class Link implements Cloneable, Serializable {
 	boolean isFuncRef() {
 		return atom.getArity() - 1 == pos;
 	}
+	/** リンクのidを取得する */
+	public int getID() {
+		return id;
+	}
 	
 	/** 
 	 * 基底項プロセスかどうかを検査する．(Stackを使うように修正 2005/07/26)
