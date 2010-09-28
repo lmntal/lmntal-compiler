@@ -1,29 +1,51 @@
-
-outputInitRule1{
-
+outputInit{
 outport(io.stdout).
 
-outputInit1@@
-outport(X), initRuleset{ ruleset($n), $p[], @p }
-  :-  int($n)
-  |   $p[],
-      outport = 
-       io.print_line(
-       io.print(X, "Compiled Ruleset @"), str.from($n)).
+outport(X), rulesetList(Y) :- outport = print_rulesetList (X, Y).
 
-}.
+printRulesetListNil@@
+R = print_rulesetList(X, []) :- R = X.
+
+printRulesetListInit@@
+R = print_rulesetList(X, 
+  [initRuleset{ ruleset($n), 
+  ruleList = [ rule{ compiledRule($insts) } ] } | T])
+  :- int($n) 
+  |  R = print_rulesetList(
+       	 print_insts(
+	 io.print_line(
+       	 io.print_line(
+       	 io.print(X, "Compiled Ruleset @"), str.from($n)),
+	 	     "Compiled Rule\n\t--atommatch:\n\t--memmatch:\n\t--body:L0:"),	 
+	 	     $insts),
+	 	     T ).
+
+printRulesetList@@
+R = print_rulesetList(X, 
+  [ruleset{ ruleset($n), ruleList($initRS), @initRS } | T])
+  :- int($n) 
+  |  R = print_rulesetList(
+       	 print_ruleList(
+       	 io.print_line(
+       	 io.print(X, "Compiled Ruleset @"), str.from($n)),
+	   	     $initRS),
+	   	     T).
 
 
-outputInitRule2{
+printRuleListNil@@
+R = print_ruleList(X, []) :- R = X.
 
-outputInit2@@
-outport(X), compiledRule = M
-:- outport = 
-     print_insts(
-     io.print( X, 
-          "Compiled Rule\n\t--atommatch:\n\t--memmatch:\n\t--body:L0:\n"),
-	  M).
 
+printRuleList@@
+R = print_ruleList(X, 
+  [ { optimizedRule($insts), +A } | T]),
+  optimized_rule(A)
+  :- R = print_ruleList(
+         print_insts(
+	 io.print(X, "Compiled Rule\n\t--atommatch:\n\t--memmatch:\n"),
+	 	     $insts),
+		     T).	     
+	 
 }.
 
 outputRuleSet{
@@ -52,6 +74,7 @@ R = print_ruleset(X,
 
 outputInsts{
 
+
 print_insts_nil@@
 R = print_insts(X, []) :- R = X.
 
@@ -68,6 +91,8 @@ R = print_insts(X, [[$inst, OpList] | T ])
 			  list_to_string(OpList)),
 			  T).
 
+
+
 list_to_string1@@
 Ret = list_to_string( [] ) :- Ret = "[]".
 list_to_string2@@
@@ -79,15 +104,13 @@ inner_list_to_string1@@
 Ret = inner_list_to_string([]) :- Ret = "]".
 
 inner_list_to_string2@@
-Ret = inner_list_to_string([ $i, $j | T])
- :- ground($i), ground($j)
- | Ret = str.concat( str.concat(elm_to_string($i), ", "),
-   inner_list_to_string([$j | T])).
+Ret = inner_list_to_string([ I, J | T])
+ :- Ret = str.concat( str.concat(elm_to_string(I), ", "),
+   inner_list_to_string([J | T])).
 
 inner_list_to_string3@@
-Ret = inner_list_to_string([ $i | [] ])
- :- ground($i)
- | Ret = str.concat( elm_to_string($i), inner_list_to_string([]) ).
+Ret = inner_list_to_string([ I | [] ])
+ :- Ret = str.concat( elm_to_string(I), inner_list_to_string([]) ).
 
 
 elm_to_string1@@
@@ -103,6 +126,19 @@ elm_to_string3@@
 Ret = elm_to_string(intFunctor($f, $i))
  :- int($f), int($i)
 | Ret = str.concat( str.concat(str.from($f), "_"), str.from($i)).
+
+elm_to_string_stringFunctor@@
+Ret = elm_to_string(stringFunctor($f, $i))
+ :- unary($f), int($i)
+ | Ret = str.concat( str.concat( str.concat("\"", str.from($f)),
+ "\"_"), str.from($i)).
+
+elm_to_string_moduleFunctor@@
+Ret = elm_to_string(moduleFunctor($f1, $f2, $i))
+ :- unary($f1), unary($f2), int($i)
+ | Ret = str.concat( str.concat( str.concat( str.concat(
+     str.concat( "'", str.from($f1)), "'.'"), str.from($f2)),
+     "'_"), str.from($i)).
 
 elm_to_string4@@
 Ret = elm_to_string(functor($f, $i))
@@ -128,11 +164,11 @@ freeIO@@
 outport(X) :- io.free_port(io.close_port(X)).
 }.
 
-seq.use.
+//seq.use.
 io.use.
 str.use.
 
-
+/*
 rulesets{$p[], @p}, 
 outputInitRule1{$q[], @q}, outputInitRule2{@q2},
 outputRuleSet{@r},
@@ -143,4 +179,31 @@ deleteIO{@dio}
          [ {$q[], @q}, {@q2, @insts}, {@r,  @insts},
 	 {$slash[], @slash}, {@dio} ]).
 
+*/
 
+/*
+rulesets{$p[], @p}, 
+outputInitRule1{$q[], @q}, outputInitRule2{@q2},
+outputRuleSet{@r},
+outputInsts{@insts},
+outputSlash{$slash[], @slash},
+deleteIO{@dio}
+ :- ret = seq_run({seq_run, $p[]}, 
+         [ {$q[], @q}, {@q2, @insts}, {@r,  @insts},
+	 {$slash[], @slash}, {@dio} ]).
+*/
+
+rulesets{$p[], @p},
+outputInit{$q, @q},
+outputInsts{@insts},
+outputSlash{$slash[], @slash},
+deleteIO{@dio}
+:- ret = seq_run( {$p[], @p, $q, @q, @insts}, 
+   [{$slash[], @slash}, {@dio}] ).
+
+H=seq_run({$p, @r}/, [ {$z, @p} | Rest ]) :- \+($p = (stop_seq, $pp))|
+	H=seq_run({$p, $z, @p}, Rest).
+
+H=seq_run({$p, stop_seq, @r}/, Rest) :- H=cancelled({$p}), cancelled_seq=Rest.
+
+H=seq_run({@p. $p.}/, []) :- H={$p}.
