@@ -127,6 +127,12 @@ Ret = elm_to_string(intFunctor($f, $i))
  :- int($f), int($i)
 | Ret = str.concat( str.concat(str.from($f), "_"), str.from($i)).
 
+elm_to_string_proxyFunctor@@
+Ret = elm_to_string(proxyFunctor($f, $i))
+ :- unary($f), int($i)
+ | Ret = str.concat( str.concat( $f, "_"), str.from($i)).
+
+
 elm_to_string_stringFunctor@@
 Ret = elm_to_string(stringFunctor($f, $i))
  :- unary($f), int($i)

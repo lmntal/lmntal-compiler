@@ -1,5 +1,5 @@
 #!/bin/sh
 
-lmntal --slimcode -O3 $1 > $1.il
-./conv.rb < $1.il > $1.il.lmn
-slim -O3 $1.il.lmn reuse.lmn outputIL.lmn > $1opt.il
+lmntal --slimcode -O3 $1.lmn > $1.il
+./conv.rb < $1.il > $1IL.lmn
+slim -O3 $1IL.lmn reuse.lmn outputIL.lmn > $1_opt.il

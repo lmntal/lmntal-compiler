@@ -40,7 +40,8 @@ STDIN.each do | line |
   elsif flag
     op = line.sub(/\'\[\]\'_([0-9]+)/, 'functor(\'listnil\', \1)') # [] アトムは先に特別扱い
     op = op.sub(/\'(\w+)\'.\'(\w+)\'_([0-9]+)/, 'moduleFunctor(\1, \2, \3)') # io.use を特別扱い
-    op = op.sub(/\'(\w+)\'_([0-9]+)/, 'functor(\1, \2)') # ファンクタを lmntal syntax に
+    op = op.sub(/\'([\w\$]+)\'_([0-9]+)/, 'functor(\1, \2)') # ファンクタを lmntal syntax に
+    op = op.sub(/(\$\w+)_([0-9]+)/, 'proxyFunctor("\1", \2)') # ファンクタを lmntal syntax に
     op = op.sub(/([0-9]+)_([0-9]+)/, 'intFunctor(\1, \2)') #　int アトムを特別扱い
     op = op.sub(/\"([\w\s@]+)\"_([0-9]+)/, 'stringFunctor(\1, \2)') # string アトムを特別扱い
     op = op.sub(/\'.\'+_([0-9]+)/, 'functor(\'.\', \1)')  # . アトムの場合を特別扱い
@@ -61,7 +62,7 @@ end
 
 i = 1;
 print "ruleList = [ RuleIndex#{rulesetIndex}_0"
-while i < rulesetIndex
+while i < ruleIndex
   print ", RuleIndex#{rulesetIndex}_#{i}"
   i += 1;
 end
