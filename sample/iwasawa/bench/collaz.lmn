@@ -1,0 +1,6 @@
+r=gen_term(400).
+R=gen_term(N) :- N=:=0 | R=[].
+R=gen_term(N) :- N=\=0, M=N-1 | R=[term(0,N)|gen_term(M)].
+R=term(C,N) :- N=:=1 | R=C.
+R=term(C,N) :- N=\=1, N mod 2=0, M=N/2, D=C+1 | R=term(D,M).
+R=term(C,N) :- N=\=1, N mod 2=1, M=3*N+1, D=C+1 | R=term(D,M).

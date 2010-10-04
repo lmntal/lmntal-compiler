@@ -1,0 +1,17 @@
+n(2000).
+
+
+appendcons@@  Z=append([A|X],Y) :- Z=[A|append(X,Y)].
+appendnil@@   Z=append([],Y) :-  Y = Z, loopend .
+
+loopstart@@ loopend, n($n),  list = X  :- $n > 0, $m = $n - 1 | n($m),
+list = append( X,  [] ). 
+
+{
+ list = gen_list(10000).
+  L = gen_list(0) :- L = [].
+  L = gen_list($i) :- $i > 0, $ii = $i - 1 | L = [a | gen_list($ii)].
+  }.
+
+{$p, @p}/ :- $p, loopend.
+
