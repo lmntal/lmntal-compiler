@@ -80,7 +80,8 @@ public class ArgumentInferer {
 	private void processLinksOfProcessContexts()throws TypeException{
 		for(ContextDef def : defs)
 			for(ProcessContext rhsOcc : (List<ProcessContext>)def.rhsOccs)
-				processExplicitLinks((ProcessContext)def.lhsOcc, rhsOcc);
+				if( def.lhsOcc != null)
+					processExplicitLinks((ProcessContext)def.lhsOcc, rhsOcc);
 	}
 
 	/**
