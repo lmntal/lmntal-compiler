@@ -67,7 +67,7 @@
 	<!-- java compile -->
 	<target name="compile" depends="mkdir" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" classpath="${classpath}" 
+		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp}" 
 				encoding="${encoding}" target="${java_ver}" source="${java_ver}"/>
 	</target>
 	<target name="jar" depends="mkdir,compile">
