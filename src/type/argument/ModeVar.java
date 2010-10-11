@@ -80,6 +80,10 @@ public class ModeVar {
 	public String shortString(){
 		return (value == 0? "<" + (sign == 1 ? "" : "-") + name + ">" : (value == 1 ? "+" : "-"));
 	}
+	
+	public String shortStringLMNSyntax() {
+		return (value == 0? "(" + (sign == 1 ? "" : "-") + name + ")" : (value == 1 ? "+" : "-"));
+	}
 
 	public boolean equals(Object o) {
 		if (o instanceof ModeVar) {

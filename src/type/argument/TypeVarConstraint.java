@@ -60,6 +60,10 @@ public class TypeVarConstraint {
 		return mv.shortString() + tv.shortString();
 	}
 	
+	public String shortStringLMNSyntax(){
+		return mv.shortStringLMNSyntax() + tv.shortStringLMNSyntax();
+	}
+	
 	private String fixLength(String orig, int length){
 		for(int s = orig.length();s<length;s++)
 			orig += " ";

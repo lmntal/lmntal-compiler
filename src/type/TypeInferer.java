@@ -82,7 +82,9 @@ public class TypeInferer {
 			TypePrinter tp;
 //			if(Env.flgArgumentInference && Env.flgQuantityInference){
 				tp = new TypePrinter(ai,qi);
-				tp.printAll();
+				// printAll が使われていたが LMNtal Syntax で表示する printAllLMNSyntax メソッドに切り替え
+				//tp.printAll();
+				tp.printAllLMNSyntax();
 //			}
 		}
 		

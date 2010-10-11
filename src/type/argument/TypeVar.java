@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import runtime.Env;
+
 import runtime.Functor;
 import type.TypeEnv;
-import type.TypeException;
+
 
 /**
  * 型変数を表す
@@ -79,7 +79,7 @@ public class TypeVar {
 				if(dataTypes.contains(tn))continue;
 				else dataTypes.add(tn);
 			}
-			Iterator itd = dataTypes.iterator();
+			Iterator<String> itd = dataTypes.iterator();
 			ret += itd.next();
 			while(itd.hasNext()){
 				ret += ", "+ itd.next();
@@ -120,6 +120,10 @@ public class TypeVar {
 	
 	public String shortString(){
 		return "(" + (self().passiveFunctors==null?("'t" + self().id):stringOfPassiveFunctors()) + ")";
+	}
+	
+	public String shortStringLMNSyntax() {
+		return "(" + (self().passiveFunctors == null ? ("t" + self().id) : stringOfPassiveFunctors()) + ")";
 	}
 	
 	private String typeNameOfFunctor(Functor f){
