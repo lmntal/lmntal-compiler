@@ -128,7 +128,7 @@ class TypePrinter {
 						TypeVarConstraint[] argtypes = functorToArgumentTypes.get(f);
 						for (int i = 0; i < argtypes.length; i++) {
 							if (i != 0) texp.append(", ");
-							texp.append(argtypes[i].shortString());
+							texp.append(argtypes[i].shortStringLMNSyntax());
 						}
 					} else {
 						for (int i = 0; i < f.getArity(); i++) {

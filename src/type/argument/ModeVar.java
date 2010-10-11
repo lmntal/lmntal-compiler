@@ -82,7 +82,7 @@ public class ModeVar {
 	}
 	
 	public String shortStringLMNSyntax() {
-		return (value == 0? "(" + (sign == 1 ? "" : "-") + name + ")" : (value == 1 ? "+" : "-"));
+		return (value == 0? "" + (sign == 1 ? "" : "-") + name + "" : (value == 1 ? "+" : "-"));
 	}
 
 	public boolean equals(Object o) {
