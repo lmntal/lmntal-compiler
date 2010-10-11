@@ -87,7 +87,7 @@ class TypePrinter {
 	 * printAll メソッドを修正したもの
 	 */
 	void printAllLMNSyntax() {
-		Env.p("TypeInformation{ ");
+		Env.p("typeInformation{ ");
 		
 		for (String memname : sortedMemNames) {
 			FixedCounts fcs = memnameToCounts.get(memname);
