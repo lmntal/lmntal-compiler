@@ -13,6 +13,7 @@ import type.argument.ArgumentInferer;
 import type.argument.ConstraintSet;
 import type.argument.Path;
 import type.argument.TypeVarConstraint;
+import type.connect.ConnectInferer;
 import type.quantity.FixedCounts;
 import type.quantity.IntervalCount;
 import type.quantity.NumCount;
@@ -34,7 +35,7 @@ class TypePrinter {
 	/** 膜名 -> アトム／子膜の子数のセット */
 	private final Map<String, FixedCounts> memnameToCounts;
 
-	TypePrinter(ArgumentInferer ai, QuantityInferer qi) {
+	TypePrinter(ArgumentInferer ai, QuantityInferer qi, ConnectInferer ci) {
 
 		sortedMemNames = new TreeSet<String>();
 		sortedFunctors = new TreeSet<Functor>(new FunctorComparator());
@@ -79,8 +80,13 @@ class TypePrinter {
 					sortedFunctors.add(f);
 				}
 			}
-		} else
+		} else {
 			memnameToCounts = new HashMap<String, FixedCounts>();
+		}
+		
+		if (ci != null) {
+			
+		}
 	}
 	/**
 	 * LMNtal syntax での型情報の表示

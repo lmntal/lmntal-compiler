@@ -5,6 +5,7 @@ import java.util.List;
 
 import runtime.Env;
 import type.argument.ArgumentInferer;
+import type.connect.ConnectInferer;
 import type.quantity.QuantityInferer;
 
 import compile.structure.Membrane;
@@ -55,6 +56,11 @@ public class TypeInferer {
 //			if(Env.flgShowConstraints)
 //				oi.printAll();
 //		}
+		
+		ConnectInferer ci = new ConnectInferer(root);
+		if (false) {
+			ci.infer();
+		}
 
 		QuantityInferer qi = new QuantityInferer(root);
 		// 個数制約を推論する
@@ -81,7 +87,7 @@ public class TypeInferer {
 		if(Env.flgShowConstraints){
 			TypePrinter tp;
 //			if(Env.flgArgumentInference && Env.flgQuantityInference){
-				tp = new TypePrinter(ai,qi);
+				tp = new TypePrinter(ai, qi, ci);
 				// printAll が使われていたが LMNtal Syntax で表示する printAllLMNSyntax メソッドに切り替え
 				//tp.printAll();
 				tp.printAllLMNSyntax();
