@@ -16,8 +16,9 @@ public class IntegerFunctor extends DataFunctor {
 		return (o instanceof IntegerFunctor) && ((IntegerFunctor)o).value == value;
 	}
 	
-	public boolean isNumber() { return true; }
-	public boolean isInteger() { return true; }
+	@Override public boolean isNumber() { return true; }
+	@Override public boolean isInteger() { return true; }
+	@Override public boolean isString() { return false; }
 	
 	public String toString() {
 		return getAbbrName() + "_" + getArity();

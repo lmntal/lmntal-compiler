@@ -98,6 +98,14 @@ public class SymbolFunctor extends Functor {
 	}
 	
 	/**
+	 * このファンクタが String 型かどうかを取得する。
+	 * @return false
+	 */
+	public boolean isString() {
+		return false;
+	}
+	
+	/**
 	 * ファンクタの値を返す
 	 * @return ファンクタの名前
 	 */

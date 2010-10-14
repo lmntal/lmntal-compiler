@@ -15,8 +15,10 @@ public class FloatingFunctor extends DataFunctor {
 		return (o instanceof FloatingFunctor) && ((FloatingFunctor)o).value == value;
 	}
 	
-	public boolean isNumber() { return true; }
-	public boolean isInteger() { return false; }
+	@Override public boolean isNumber() { return true; }
+	@Override public boolean isInteger() { return false; }
+	@Override public boolean isString() { return false;	}
+	
 	
 	public String getName() {
 		return Double.toString(value);
@@ -26,5 +28,6 @@ public class FloatingFunctor extends DataFunctor {
 		if (Env.colorMode) return "\033[0;34m"+getName()+"\033[0m";
 		return getName();
 	}
+
 
 }

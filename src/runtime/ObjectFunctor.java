@@ -39,6 +39,8 @@ public class ObjectFunctor extends DataFunctor {
 		return data.toString();
 	}
 	
-	public boolean isNumber() { return false; }
-	public boolean isInteger() { return false; }
+	@Override public boolean isNumber() { return false; }
+	@Override public boolean isInteger() { return false; }
+	@Override public boolean isString() { return false; }
+	
 }

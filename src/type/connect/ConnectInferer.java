@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import runtime.Functor;
+
 import compile.structure.Atom;
 import compile.structure.Atomic;
 import compile.structure.LinkOccurrence;
@@ -18,13 +20,13 @@ public class ConnectInferer {
 	/**
 	 * Functor の引数に繋がる可能性のある Functor の引数への set
 	 */
-	private Multimap<FunctorAndArgument, FunctorAndArgument> functorConnect;
+	private FunctorKindAndArgumentMap functorConnect;
 
 	/**
 	 * a(X) :- b(X). のようなルールにおいて
 	 * (a_0, 0) -> (b_0, 0) のようなものが集まった multimap 
 	 */
-	private Multimap<FunctorAndArgument, FunctorAndArgument> functorTrans;
+	private FunctorKindAndArgumentMap functorTrans;
 
 
 	@SuppressWarnings("unused")
@@ -32,8 +34,8 @@ public class ConnectInferer {
 
 	public ConnectInferer(Membrane root) {
 		this.root = root;
-		functorConnect = new Multimap<FunctorAndArgument, FunctorAndArgument>();
-		functorTrans = new Multimap<FunctorAndArgument, FunctorAndArgument>();
+		functorConnect = new FunctorKindAndArgumentMap();
+		functorTrans = new FunctorKindAndArgumentMap();
 
 	}
 
@@ -66,18 +68,41 @@ public class ConnectInferer {
 			}
 		}
 	}
+	
+	private Atomic getBuddyAtom(LinkOccurrence lo) {
+		Atomic otherSideAtom = lo.buddy.atom;
+		int otherSideAtompos = lo.buddy.pos;
+		if (otherSideAtom instanceof Atom && ((Atom)otherSideAtom).functor == Functor.UNIFY) {
+			int j = otherSideAtompos ^ 1;
+			return getBuddyAtom(otherSideAtom.args[j]);
+		}
+		return otherSideAtom;
+	}
+	private int getBuddyAtomPos(LinkOccurrence lo) {
+		Atomic otherSideAtom = lo.buddy.atom;
+		int otherSideAtompos = lo.buddy.pos;
+		if (otherSideAtom instanceof Atom && ((Atom)otherSideAtom).functor == Functor.UNIFY) {
+			int j = otherSideAtompos ^ 1;
+			return getBuddyAtomPos(otherSideAtom.args[j]);
+		}
+		return otherSideAtompos;
+	}
 
 	private void makeFunctorConnect(Membrane mem) {
 		for (Atomic atomic : mem.atoms) {
 			if (atomic instanceof ProcessContext) {
 				continue;
 			}
+			if (!((Atom)atomic).functor.isSymbol()) {
+				continue;
+			}
 			for(LinkOccurrence otherSide : atomic.args){
-				Atomic a = otherSide.buddy.atom;
+				Atomic a = getBuddyAtom(otherSide);
+				int j = getBuddyAtomPos(otherSide);
 				if(a instanceof Atom) {
 					functorConnect.add(
 							new FunctorAndArgument(((Atom) atomic).functor, otherSide.pos),
-							new FunctorAndArgument(((Atom) a).functor, otherSide.buddy.pos)
+							new FunctorAndArgument(((Atom) a).functor, j)
 					);
 				}
 			}
@@ -105,9 +130,14 @@ public class ConnectInferer {
 			if (atomic instanceof ProcessContext) {
 				continue;
 			}
+			if (!((Atom)atomic).functor.isSymbol()) {
+				continue;
+			}
 			Atom atom = (Atom) atomic;
-			for(LinkOccurrence otherSide : atomic.args) {
-				if (!isFreeLink(otherSide, rule) && !(otherSide.buddy.atom instanceof Atom)) {
+			for (LinkOccurrence otherSide : atomic.args) {
+				
+				// 前者もコネクタを考慮するべき？
+				if (!isFreeLink(otherSide, rule) && !(getBuddyAtom(otherSide) instanceof Atom)) {
 					continue;
 				}
 				Atom a = (Atom)otherSide.buddy.atom;
@@ -127,6 +157,9 @@ public class ConnectInferer {
 	private void makeFunctorConnectRuleRightMem(Membrane rightMem, RuleStructure rule) {
 		for (Atomic atomic : rightMem.atoms) {
 			if (atomic instanceof ProcessContext) {
+				continue;
+			}
+			if (!((Atom)atomic).functor.isSymbol()) {
 				continue;
 			}
 			Atom atom = (Atom) atomic;

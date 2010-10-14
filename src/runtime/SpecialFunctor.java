@@ -22,6 +22,7 @@ public class SpecialFunctor extends Functor {
 		this.kind = kind;
 	}
 	public boolean equals(Object o) {
+		if (this == o) return true;
 		if(o instanceof SpecialFunctor) {
 			SpecialFunctor f = (SpecialFunctor)o;
 			return name == f.name && kind == f.kind;
@@ -114,6 +115,13 @@ public class SpecialFunctor extends Functor {
 	 * @return false
 	 */
 	public boolean isInteger() {
+		return false;
+	}
+	/**
+	 * このファンクタが String 型かどうかを取得する。
+	 * @return false
+	 */
+	public boolean isString() {
 		return false;
 	}
 	

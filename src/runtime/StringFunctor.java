@@ -30,4 +30,8 @@ public class StringFunctor extends ObjectFunctor {
 		if(!(o instanceof StringFunctor))return false;
 		return ((StringFunctor)o).data.equals(this.data);
 	}
+	
+	@Override public boolean isString() {
+		return true;
+	}
 }

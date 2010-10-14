@@ -19,7 +19,7 @@ class FunctorAndArgument {
 			return false;
 		}
 		FunctorAndArgument faa = (FunctorAndArgument) o;
-		if (!this.functor.equals(faa)){
+		if (!this.functor.equals(faa.functor)){
 			return false;
 		}
 		if (this.i != faa.i){
@@ -36,6 +36,6 @@ class FunctorAndArgument {
 	}
 	
 	@Override public String toString() {
-		return functor.toString() + " " + i;
+		return "(" + functor.toString() + " " + i + ")";
 	}
 }
