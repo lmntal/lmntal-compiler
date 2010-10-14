@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.FloatingFunctor;
+import runtime.Functor;
 import runtime.IntegerFunctor;
 import runtime.StringFunctor;
 
@@ -16,6 +17,7 @@ class FunctorKindAndArgumentMap {
 		= new FunctorAndArgument(new StringFunctor(""), 0);
 	private static FunctorAndArgument FLOATING
 		= new FunctorAndArgument(new FloatingFunctor(0), 0);
+	
 	
 	FunctorKindAndArgumentMap() {
 		map = new Multimap<FunctorAndArgument, FunctorAndArgument>();
@@ -35,11 +37,13 @@ class FunctorKindAndArgumentMap {
 
 	void addAll(FunctorAndArgument faa, Set<FunctorAndArgument> set) {
 		if (!faa.functor.isSymbol()) return;
+		if (faa.functor.getName().equals("=")) return;
 		map.addAll(faa, set);
 	}
 
 	void add(FunctorAndArgument faa, FunctorAndArgument faa2) {
 		if (!faa.functor.isSymbol()) return;
+		if (faa.functor.getName().equals("=")) return;
 		
 		if (faa2.functor.isInteger()) {
 			map.add(faa, INTEGER);

@@ -34,6 +34,8 @@ class TypePrinter {
 
 	/** 膜名 -> アトム／子膜の子数のセット */
 	private final Map<String, FixedCounts> memnameToCounts;
+	
+	private ConnectInferer ci;
 
 	TypePrinter(ArgumentInferer ai, QuantityInferer qi, ConnectInferer ci) {
 
@@ -85,7 +87,7 @@ class TypePrinter {
 		}
 		
 		if (ci != null) {
-			
+			this.ci = ci;
 		}
 	}
 	/**
@@ -94,6 +96,8 @@ class TypePrinter {
 	 */
 	void printAllLMNSyntax() {
 		Env.p("typeInformation{ ");
+		
+		ci.printLMNSyntax();
 		
 		for (String memname : sortedMemNames) {
 			FixedCounts fcs = memnameToCounts.get(memname);

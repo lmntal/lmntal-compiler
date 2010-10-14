@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import runtime.Env;
 import runtime.Functor;
 
 import compile.structure.Atom;
@@ -68,11 +69,11 @@ public class ConnectInferer {
 			}
 		}
 	}
-	
+
 	private Atomic getBuddyAtom(LinkOccurrence lo) {
 		Atomic otherSideAtom = lo.buddy.atom;
 		int otherSideAtompos = lo.buddy.pos;
-		if (otherSideAtom instanceof Atom && ((Atom)otherSideAtom).functor == Functor.UNIFY) {
+		if (otherSideAtom instanceof Atom && ((Atom)otherSideAtom).functor.getName().equals("=")) {
 			int j = otherSideAtompos ^ 1;
 			return getBuddyAtom(otherSideAtom.args[j]);
 		}
@@ -81,7 +82,7 @@ public class ConnectInferer {
 	private int getBuddyAtomPos(LinkOccurrence lo) {
 		Atomic otherSideAtom = lo.buddy.atom;
 		int otherSideAtompos = lo.buddy.pos;
-		if (otherSideAtom instanceof Atom && ((Atom)otherSideAtom).functor == Functor.UNIFY) {
+		if (otherSideAtom instanceof Atom && ((Atom)otherSideAtom).functor.getName().equals("=")) {
 			int j = otherSideAtompos ^ 1;
 			return getBuddyAtomPos(otherSideAtom.args[j]);
 		}
@@ -135,15 +136,16 @@ public class ConnectInferer {
 			}
 			Atom atom = (Atom) atomic;
 			for (LinkOccurrence otherSide : atomic.args) {
-				
+
 				// 前者もコネクタを考慮するべき？
 				if (!isFreeLink(otherSide, rule) && !(getBuddyAtom(otherSide) instanceof Atom)) {
 					continue;
 				}
-				Atom a = (Atom)otherSide.buddy.atom;
+				Atom a = (Atom)getBuddyAtom(otherSide);
+				int j = getBuddyAtomPos(otherSide);
 				functorTrans.add(
 						new FunctorAndArgument(atom.functor, otherSide.pos),
-						new FunctorAndArgument(a.functor, otherSide.buddy.pos)
+						new FunctorAndArgument(a.functor, j)
 				);
 			}
 		}
@@ -167,13 +169,14 @@ public class ConnectInferer {
 				if (isFreeLink(otherSide, rule)) {
 					continue;
 				}
-				Atomic a = otherSide.buddy.atom;
+				Atomic a = getBuddyAtom(otherSide);
+				int j = getBuddyAtomPos(otherSide);
 				if (!(a instanceof Atom)) {
 					continue;
 				}
 				functorConnect.add(
 						new FunctorAndArgument(atom.functor, otherSide.pos),
-						new FunctorAndArgument(((Atom) a).functor, otherSide.buddy.pos)
+						new FunctorAndArgument(((Atom) a).functor, j)
 				);
 			}
 		}
@@ -193,4 +196,21 @@ public class ConnectInferer {
 		|| rs.rightMem.freeLinks.containsValue(lo) ;
 	}
 
+	public void printLMNSyntax() {
+		Env.p("connect{");
+		for (Map.Entry<FunctorAndArgument, Set<FunctorAndArgument>> mapEntry : 
+			functorTrans.entrySet()) {
+			if (mapEntry.getValue().size() != 1) {
+				continue;
+			}
+			for (FunctorAndArgument value : mapEntry.getValue()) {
+				if (!value.functor.isInteger()) {
+					continue;
+				}
+				Env.p("\tonly(" + mapEntry.getKey().functor.getName() + ", " 
+						 + "integer)") ;
+			}
+		}
+		Env.p("}.");
+	}
 }
