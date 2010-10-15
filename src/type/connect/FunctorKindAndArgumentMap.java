@@ -10,15 +10,15 @@ import runtime.StringFunctor;
 
 class FunctorKindAndArgumentMap {
 	Multimap<FunctorAndArgument, FunctorAndArgument> map;
-	
+
 	private static FunctorAndArgument INTEGER 
-		= new FunctorAndArgument(new IntegerFunctor(0), 0);
+	= new FunctorAndArgument(new IntegerFunctor(0), 0);
 	private static FunctorAndArgument STRING
-		= new FunctorAndArgument(new StringFunctor(""), 0);
+	= new FunctorAndArgument(new StringFunctor(""), 0);
 	private static FunctorAndArgument FLOATING
-		= new FunctorAndArgument(new FloatingFunctor(0), 0);
-	
-	
+	= new FunctorAndArgument(new FloatingFunctor(0), 0);
+
+
 	FunctorKindAndArgumentMap() {
 		map = new Multimap<FunctorAndArgument, FunctorAndArgument>();
 	}
@@ -44,7 +44,7 @@ class FunctorKindAndArgumentMap {
 	void add(FunctorAndArgument faa, FunctorAndArgument faa2) {
 		if (!faa.functor.isSymbol()) return;
 		if (faa.functor.getName().equals("=")) return;
-		
+
 		if (faa2.functor.isInteger()) {
 			map.add(faa, INTEGER);
 		}
@@ -57,6 +57,10 @@ class FunctorKindAndArgumentMap {
 		else {
 			map.add(faa, faa2);
 		}
-		
+
+	}
+
+	@Override public String toString() {
+		return map.toString();
 	}
 }

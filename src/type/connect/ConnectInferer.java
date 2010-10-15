@@ -199,7 +199,7 @@ public class ConnectInferer {
 	public void printLMNSyntax() {
 		Env.p("connect{");
 		for (Map.Entry<FunctorAndArgument, Set<FunctorAndArgument>> mapEntry : 
-			functorTrans.entrySet()) {
+			functorConnect.entrySet()) {
 			if (mapEntry.getValue().size() != 1) {
 				continue;
 			}
@@ -207,10 +207,12 @@ public class ConnectInferer {
 				if (!value.functor.isInteger()) {
 					continue;
 				}
-				Env.p("\tonly(" + mapEntry.getKey().functor.getName() + ", " 
-						 + "integer)") ;
+				Env.p("\tconnect_only(" + mapEntry.getKey().functor.getName() + ", " 
+						 + mapEntry.getKey().i + ", integer)") ;
 			}
 		}
+		
+		Env.p("\tmisc(\"" + functorConnect + "\").");
 		Env.p("}.");
 	}
 }
