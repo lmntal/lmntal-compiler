@@ -102,7 +102,7 @@ class TypePrinter {
 		for (String memname : sortedMemNames) {
 			FixedCounts fcs = memnameToCounts.get(memname);
 			String memNameLMN = memname.equals("??") ? "" : memname;
-			Env.p(memNameLMN + "{");
+			Env.p(" " + memNameLMN + "{");
 			// アクティブアトムの情報を出力
 			for (Functor f: sortedFunctors){
 				// データアトム、コネクタは無視する
@@ -176,7 +176,7 @@ class TypePrinter {
 				}
 			}
 
-			Env.p("}.");
+			Env.p(" }.");
 		}
 		
 		Env.p("}.");

@@ -197,7 +197,7 @@ public class ConnectInferer {
 	}
 
 	public void printLMNSyntax() {
-		Env.p("connect{");
+		Env.p(" connect{");
 		for (Map.Entry<FunctorAndArgument, Set<FunctorAndArgument>> mapEntry : 
 			functorConnect.entrySet()) {
 			if (mapEntry.getValue().size() != 1) {
@@ -213,6 +213,6 @@ public class ConnectInferer {
 		}
 		
 		Env.p("\tmisc(\"" + functorConnect + "\").");
-		Env.p("}.");
+		Env.p(" }.");
 	}
 }

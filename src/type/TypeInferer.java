@@ -58,7 +58,7 @@ public class TypeInferer {
 //		}
 		
 		ConnectInferer ci = new ConnectInferer(root);
-		if (false) {
+		if (true) {
 			ci.infer();
 		}
 
