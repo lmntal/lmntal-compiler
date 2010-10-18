@@ -1,12 +1,9 @@
 package type.connect;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
-import runtime.Functor;
 
 import compile.structure.Atom;
 import compile.structure.Atomic;
@@ -208,11 +205,11 @@ public class ConnectInferer {
 					continue;
 				}
 				Env.p("\tconnect_only(" + mapEntry.getKey().functor.getName() + ", " 
-						 + mapEntry.getKey().i + ", integer)") ;
+						 + mapEntry.getKey().i + ", integer).") ;
 			}
 		}
 		
-		Env.p("\tmisc(\"" + functorConnect + "\").");
+		Env.p("\tdump(\"" + functorConnect + "\").");
 		Env.p(" }.");
 	}
 }
