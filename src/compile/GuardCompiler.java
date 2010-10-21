@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Util;
+
 import runtime.Env;
 import runtime.Functor;
 import runtime.Instruction;
@@ -53,10 +55,14 @@ class GuardCompiler extends HeadCompiler {
 		return groundSrcs.get(def).intValue();
 	}
 
-	private static final int ISINT    = Instruction.ISINT;	// 型制約の引数が整数型であることを表す
-	private static final int ISFLOAT  = Instruction.ISFLOAT;	// 〃 浮動小数点数型
+	private static final int ISINT    = Instruction.ISINT;		// 型制約の引数が整数型であることを表す
+	private static final int ISFLOAT  = Instruction.ISFLOAT;		// 〃 浮動小数点数型
 	private static final int ISSTRING = Instruction.ISSTRING;	// 〃 文字列型
-	private static final int ISMEM    = Instruction.ANYMEM;	// 〃 膜（getRuntime専用）
+	private static final int ISMEM    = Instruction.ANYMEM;		// 〃 膜（getRuntime専用）
+	private static final int ISNAME    = Instruction.ISNAME;   	// 〃 name型 (SLIM専用) //seiji
+	private static final int ISCONAME  = Instruction.ISCONAME; 	// 〃 coname型 (SLIM専用) //seiji
+	private static final int ISHLINK   = Instruction.ISHLINK; 	// 〃 hlink型 (SLIM専用) //seiji
+	private static HashMap<Functor, int[]> guardLibrary0 = new HashMap<Functor, int[]>(); // 0入力ガード型制約名//seiji
 	private static HashMap<Functor, int[]> guardLibrary1 = new HashMap<Functor, int[]>(); // 1入力ガード型制約名
 	private static HashMap<Functor, int[]> guardLibrary2 = new HashMap<Functor, int[]>(); // 2入力ガード型制約名
 	static {
@@ -89,6 +95,24 @@ class GuardCompiler extends HeadCompiler {
 		guardLibrary1.put(new SymbolFunctor("-.",    2), new int[]{ISFLOAT,        Instruction.FNEG,      ISFLOAT});
 		guardLibrary1.put(new SymbolFunctor("float", 2), new int[]{ISINT,          Instruction.INT2FLOAT, ISFLOAT});
 		guardLibrary1.put(new SymbolFunctor("int",   2), new int[]{ISFLOAT,        Instruction.FLOAT2INT, ISINT});
+		if (Env.slimcode && Env.hyperLink) {
+			guardLibrary0.put(new SymbolFunctor("new", 1), new int[]{Instruction.NEWHLINK, ISINT});
+			guardLibrary1.put(new SymbolFunctor("make", 2), new int[]{ISINT, Instruction.MAKEHLINK, ISINT});
+			guardLibrary1.put(new SymbolFunctor("name",   1), new int[]{ISNAME});
+			guardLibrary1.put(new SymbolFunctor("coname", 1), new int[]{ISCONAME});
+			guardLibrary1.put(new SymbolFunctor("hlink", 1), new int[]{ISHLINK});
+//			guardLibrary1.put(new SymbolFunctor("setconame", 2), new int[]{ISNAME, Instruction.SETCONAME, ISINT});
+			guardLibrary1.put(new SymbolFunctor("!", 2), new int[]{ISNAME, Instruction.SETCONAME, ISINT});
+			guardLibrary1.put(new SymbolFunctor("hasconame", 1), new int[]{ISNAME, Instruction.HASCONAME});
+			guardLibrary1.put(new SymbolFunctor("nhasconame", 1), new int[]{ISNAME, Instruction.NHASCONAME});
+//			guardLibrary1.put(new SymbolFunctor("getconame", 2), new int[]{ISNAME, Instruction.GETCONAME, ISINT});
+			guardLibrary1.put(new SymbolFunctor("getname", 2), new int[]{ISCONAME, Instruction.GETNAME, ISINT});
+			guardLibrary1.put(new SymbolFunctor("num", 2), new int[]{ISHLINK, Instruction.GETNUM, ISINT});
+//			guardLibrary2.put(new SymbolFunctor("><",  3), new int[]{ISNAME, ISNAME, Instruction.UNIFYHLINK, ISINT});
+			guardLibrary2.put(new SymbolFunctor("and",  3), new int[]{ISNAME, ISNAME, Instruction.UNIFYCONAMEAND, ISINT});
+			guardLibrary2.put(new SymbolFunctor("or",  3), new int[]{ISNAME, ISNAME, Instruction.UNIFYCONAMEOR, ISINT});
+			
+		}
 	}
 
 	//
@@ -416,10 +440,48 @@ class GuardCompiler extends HeadCompiler {
 						}
 						processEquivalenceConstraint(def1,def2);
 					}
-					else if (func.equals(new SymbolFunctor("==",2))) { // (+X == +Y)
+//					else if (func.equals(new SymbolFunctor("==",2))) { // (+X == +Y)
+//						if (!identifiedCxtdefs.contains(def1)) continue;
+//						if (!identifiedCxtdefs.contains(def2)) continue;
+//						processEquivalenceConstraint(def1,def2);
+//					}
+					else if (func.equals(new SymbolFunctor("==",2))) { // (+X == +Y) //seiji
+						/* unary用比較演算子 (10/07/07 seiji) */
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						if (!identifiedCxtdefs.contains(def2)) continue;
-						processEquivalenceConstraint(def1,def2);
+						int atomid1 = loadUnaryAtom(def1);
+						match.add(new Instruction(Instruction.ISUNARY, atomid1));
+						int atomid2 = loadUnaryAtom(def2);
+						match.add(new Instruction(Instruction.ISUNARY, atomid2));
+						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
+					}
+//					else if (func.equals(new SymbolFunctor("===",2))) { // (+X === +Y) //seiji
+//						/* hlink用比較演算子 (10/07/07 seiji) */
+//						if (!identifiedCxtdefs.contains(def1)) continue;
+//						if (!identifiedCxtdefs.contains(def2)) continue;
+//						int atomid1 = loadUnaryAtom(def1);
+//						match.add(new Instruction(Instruction.ISHLINK, atomid1));
+//						int atomid2 = loadUnaryAtom(def2);
+//						match.add(new Instruction(Instruction.ISHLINK, atomid2));
+//						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
+//					}
+					else if (guardLibrary0.containsKey(func)) { // 0入力制約//seiji
+						int[] desc = guardLibrary0.get(func);
+						int atomid = varCount++;
+						match.add(new Instruction(desc[0], atomid));
+						bindToUnaryAtom(def1, atomid);
+						typedCxtDataTypes.put(def1, new Integer(desc[1]));
+						if (identifiedCxtdefs.contains(def1)) {
+							 int funcid2 = varCount++;
+							 match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid));
+							 int atomid1 = varCount++;
+							 match.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
+							 typedCxtSrcs.put(def1, new Integer(atomid1));
+							 typedCxtDefs.add(def1);
+							 identifiedCxtdefs.add(def1);
+							 typedCxtTypes.put(def1, UNARY_ATOM_TYPE);
+
+						}						
 					}
 					else if (guardLibrary1.containsKey(func)) { // 1入力制約
 						int[] desc = guardLibrary1.get(func);
@@ -430,11 +492,12 @@ class GuardCompiler extends HeadCompiler {
 							typedCxtDataTypes.put(def1, new Integer(desc[0]));
 						}
 						if (func.getArity() == 1) { // {t1,inst} --> p(+X1)
-							// 060831okabe
-							// 以下をコメントアウト．
-							// つまりconnectruntime はput してget されるだけ．
-							// TODO よってconnectruntime はいらないので何とかする．（ライブラリを使った分散を作るときまで放置でよい）
-//							if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
+							// // 060831okabe
+							// // 以下をコメントアウト．
+							// // つまりconnectruntime はput してget されるだけ．
+							// // TODO よってconnectruntime はいらないので何とかする．（ライブラリを使った分散を作るときまで放置でよい）
+							// hyperlinkのためにコメントアウト解除 (2010/07/07 seiji)
+							if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
 						}
 						else { // {t1,inst,t2} --> p(+X1,-X2)
 							int atomid2;
@@ -442,6 +505,8 @@ class GuardCompiler extends HeadCompiler {
 								atomid2 = atomid1;
 								//bindToUnaryAtom 内で、実際に使うアトムを生成している。
 							} else {
+								if (func.equals(new SymbolFunctor("getconame", 2))) // getconame制約のための処理
+									match.add(new Instruction(Instruction.HASCONAME, atomid1));
 								atomid2 = varCount++;
 								match.add(new Instruction(desc[1], atomid2, atomid1));
 							}

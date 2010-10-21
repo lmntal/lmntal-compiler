@@ -644,6 +644,18 @@ public class FrontEnd {
 							// compile one rule (for SLIM model checking mode)
 							Env.compileRule = true;
 							Env.compileonly = true;
+						} else if (args[i].equals("--hl") || args[i].equals("--hl-opt")) { //seiji
+						  boolean slimcode = false;
+						  for (int j = 0; j < args.length; j++)
+						    if (args[j].equals("--slimcode")) slimcode = true;
+						  if (slimcode) {
+						    Env.hyperLink = true;
+						    if (args[i].equals("--hl-opt")) 
+						      Env.hyperLinkOpt = true;
+						  } else {
+						    Util.errPrintln("Can't use option " + args[i] + " without option --slimcode.");
+						    System.exit(-1);
+						  }
 						} else {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util

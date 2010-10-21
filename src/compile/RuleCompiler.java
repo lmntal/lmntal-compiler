@@ -286,6 +286,10 @@ public class RuleCompiler {
 				}
 			}
 			hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
+			
+			if (Env.hyperLinkOpt) 
+			  hc.compileSameProcessContext(rs.leftMem, hc.matchLabel);//seiji
+			
 			if (hc.match == memMatch) {
 				hc.match.add(0, Instruction.spec(1, hc.maxVarCount));
 				hc.tempMatch.add(0, Instruction.spec(1, hc.maxVarCount));
@@ -528,8 +532,9 @@ public class RuleCompiler {
 		//次の2つは右辺の構造の生成以降ならいつでもよい
 		addInline();
 		if (Env.slimcode) {
-      addCallback();
-    }
+			if (Env.hyperLink) addHyperlink();//seiji
+			addCallback();
+		}
 		addRegAndLoadModules();
 
 		// 左辺の残ったプロセスを解放する
@@ -1196,7 +1201,26 @@ public class RuleCompiler {
 			}
 		}
 	}
-  /** Cコールバックを実行する命令を生成する */
+    /** hyperlink関連の命令列を生成する */
+	private void addHyperlink() { //seiji
+		for(Atom atom : rhsatoms){
+			int atomID = rhsatomToPath(atom);
+			if (atom.functor.equals(new SymbolFunctor("-", 2))) {
+				body.add( new Instruction(Instruction.REVERSEHLINK, rhsmemToPath(atom.mem), atomID));
+			} else if (atom.functor.equals(new SymbolFunctor("><", 2)))
+				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+			else if (atom.functor.equals(new SymbolFunctor(">*<", 2)))
+				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+			else if (atom.functor.equals(new SymbolFunctor(">+<", 2)))
+				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+			else if (atom.functor.equals(new SymbolFunctor(">>", 2)))
+				body.add( new Instruction(Instruction.UNIFYNAMECONAME, rhsmemToPath(atom.mem), atomID));
+			else if (atom.functor.equals(new SymbolFunctor("<<", 2)))
+				;
+			
+		}
+	}
+	/** Cコールバックを実行する命令を生成する */
 	private void addCallback() {
 		for(Atom atom : rhsatoms){
       if (atom.getName() == "$callback") {

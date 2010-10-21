@@ -9,6 +9,10 @@ class SrcProcessContext extends SrcContext {
 	public LinkedList args = null;
 	/** リンク束 */
 	public SrcLinkBundle bundle = null;
+	/** 分離した同名型付きプロセス文脈の名前を格納 */
+	public LinkedList sameNameList = null;//seiji
+	/** リンク名 */
+	public String linkName = null;//seiji
 	
 	/**
 	 * 指定された名前をもつ引数無しのプロセスコンテキストを作成する
@@ -30,5 +34,15 @@ class SrcProcessContext extends SrcContext {
 	}
 	public String getQualifiedName() {
 		return "$" + name;
+	}
+	public LinkedList getSameNameList() {//seiji
+		return sameNameList;
+	}
+	public boolean hasSameNameList() {//seiji
+		if (sameNameList != null) return true;
+		else return false;
+	}
+	public String getLinkName() {//seiji
+		return linkName;
 	}
 }

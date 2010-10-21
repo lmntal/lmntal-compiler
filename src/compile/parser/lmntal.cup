@@ -31,10 +31,11 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				COLON, PERIOD, BACKSLASH, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
-				ASTERISK, SLASH, PLUS, MINUS, RULENAMESEP;
+				ASTERISK, SLASH, PLUS, MINUS, EXCLA, RULENAMESEP;//, HLUNIFY, AND, OR;//seiji
 terminal Integer	RULE;
 terminal		QUOTED_STRING;
 terminal String RELOP, STRING;
+terminal String HL;//seiji
 terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
 terminal String CHAR_CODE_LITERAL;
 
@@ -89,6 +90,10 @@ FuncName	::=   ATOM_NAME:name
 					{: RESULT = new SrcName(name); :}
 				| MOD
 					{: RESULT = new SrcName("mod"); :}
+//				| AND
+//					{: RESULT = new SrcName("and"); :}//seiji
+//				| OR
+//					{: RESULT = new SrcName("or"); :}//seiji
 				| QUOTED_STRING:name
 					{: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
 				| SYMBOL_NAME:name
@@ -104,6 +109,10 @@ AtomName    ::= ATOM_NAME:name
 					{: RESULT = name.toString(); :}
 				| MOD
 					{: RESULT = "mod"; :};
+//				| AND
+//					{: RESULT = "and"; :}
+//				| OR
+//					{: RESULT = "or"; :};//seiji
 
 RuleName    ::= 
 				  ATOM_NAME:name
@@ -173,6 +182,10 @@ UnaryOpAtom	::=	  UnitAtom:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom);
 					   RESULT = new SrcAtom("-", list); :}
+				| EXCLA UnitAtom:atom//seiji
+					{: LinkedList list = new LinkedList();
+					   list.add(atom);
+					   RESULT = new SrcAtom("!", list); :}
 				| PLUS_DOT UnitAtom:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom);
@@ -196,10 +209,22 @@ Atom300		::=   Atom200:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("mod", list); :}
+//				| Atom200:atom1 AND Atom200:atom2
+//					{: LinkedList list = new LinkedList();
+//					   list.add(atom1); list.add(atom2);
+//					   RESULT = new SrcAtom("and", list); :}//seiji
+//				| Atom200:atom1 OR Atom200:atom2
+//					{: LinkedList list = new LinkedList();
+//					   list.add(atom1); list.add(atom2);
+//					   RESULT = new SrcAtom("or", list); :}//seiji
 				| Atom300:atom1 ASTERISK_ASTERISK Atom200:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("**", list); :};
+//   				| Atom300:atom1 HLUNIFY Atom200:atom2
+//					{: LinkedList list = new LinkedList();
+//					   list.add(atom1); list.add(atom2);
+//					   RESULT = new SrcAtom("><", list); :};//seiji
 
 Atom400		::=   Atom300:atom
 					{: RESULT = atom; :}
@@ -234,6 +259,10 @@ Atom500		::=   Atom400:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("-", list); :}
+				| Atom500:atom1 EXCLA Atom400:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom("!", list); :}
 				| Atom500:atom1 PLUS Atom400:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
@@ -241,6 +270,10 @@ Atom500		::=   Atom400:atom
 
 Atom700		::=   Atom500:atom
 					{: RESULT = atom; :}
+				| Atom500:atom1 HL:op Atom500:atom2
+					{: LinkedList list = new LinkedList();
+					   list.add(atom1); list.add(atom2);
+					   RESULT = new SrcAtom(op, list); :}
 				| Atom500:atom1 RELOP:op Atom500:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
@@ -262,6 +295,7 @@ Atom		::=   Atom800:atom
 QuotedOperatorAtom ::=
 				  PLUS			{: RESULT = new SrcAtom("+");	:}
 				| MINUS			{: RESULT = new SrcAtom("-");	:}
+				| EXCLA			{: RESULT = new SrcAtom("!");	:}
 				| ASTERISK		{: RESULT = new SrcAtom("*");	:}
 				| SLASH			{: RESULT = new SrcAtom("/");	:}
 				| PLUS_DOT		{: RESULT = new SrcAtom("+.");	:}
@@ -270,10 +304,14 @@ QuotedOperatorAtom ::=
 				| SLASH_DOT		{: RESULT = new SrcAtom("/.");	:}
 //				| MOD			{: RESULT = new SrcAtom("mod");	:} //通常のアトム名として処理
 				| RELOP:op		{: RESULT = new SrcAtom(op);	:}
+				| HL:op			{: RESULT = new SrcAtom(op);	:} //seiji
 				| HAT			{: RESULT = new SrcAtom("^");	:}
 				| TILDE			{: RESULT = new SrcAtom("~");	:}
 				| COLON			{: RESULT = new SrcAtom(":");	:}
 				| ASTERISK_ASTERISK	{: RESULT = new SrcAtom("**");	:}
+//				| HLUNIFY		{: RESULT = new SrcAtom("><");  :}//seiji
+//				| AND			{: RESULT = new SrcAtom("and");  :}//seiji
+//				| OR			{: RESULT = new SrcAtom("or");  :}//seiji
 				;
 					   
 List        ::=   LBRACKET RBRACKET

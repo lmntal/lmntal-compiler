@@ -1170,6 +1170,64 @@ public class Instruction implements Cloneable, Serializable {
 
 	///////////////////////////////////////////////////////////////////////
 
+	// hyperlink用命令 (250--) //seiji
+	/** 
+	 * 
+	 * 
+	 */
+	public static final int NEWHLINK = 250;
+	static {setArgType(NEWHLINK, new ArgType(true, ARG_VAR));};
+	public static final int MAKEHLINK = 251;
+	static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));};
+	
+	public static final int ISNAME = 255;
+	static {setArgType(ISNAME, new ArgType(false, ARG_VAR));};
+	public static final int ISCONAME = 256;
+	static {setArgType(ISCONAME, new ArgType(false, ARG_VAR));};
+	public static final int ISHLINK = 257;
+	static {setArgType(ISHLINK, new ArgType(false, ARG_VAR));};
+	public static final int SETCONAME = 258;
+	static {setArgType(SETCONAME, new ArgType(true, ARG_VAR, ARG_VAR));};
+	public static final int HASCONAME = 259;
+	static {setArgType(HASCONAME, new ArgType(false, ARG_VAR));};
+	public static final int NHASCONAME = 260;
+	static {setArgType(NHASCONAME, new ArgType(false, ARG_VAR));};
+	public static final int GETCONAME = 261;
+	static {setArgType(GETCONAME, new ArgType(true, ARG_VAR, ARG_VAR));};
+	public static final int GETNAME = 262;
+	static {setArgType(GETNAME, new ArgType(true, ARG_VAR, ARG_VAR));};
+	public static final int REVERSEHLINK = 263;
+	static {setArgType(REVERSEHLINK, new ArgType(false, ARG_VAR, ARG_VAR));};
+	public static final int GETNUM = 264;
+	static {setArgType(GETNUM, new ArgType(true, ARG_VAR, ARG_VAR));};
+	
+	public static final int UNIFYHLINK = 265;
+	static {setArgType(UNIFYHLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
+	public static final int UNIFYCONAMEAND = 266;
+	static {setArgType(UNIFYCONAMEAND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
+	public static final int UNIFYCONAMEOR = 267;
+	static {setArgType(UNIFYCONAMEOR, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
+	/** unifyhlink2 [mem, atom1, atom2, atom3]
+	 * 
+	 * 
+	 */
+	public static final int UNIFYHLINKS = 268;
+	static {setArgType(UNIFYHLINKS, new ArgType(false, ARG_VAR, ARG_VAR));};
+	public static final int UNIFYNAMECONAME = 269;
+	public static final int UNIFYCONAMENAME = 270;
+	static {setArgType(UNIFYNAMECONAME, new ArgType(false, ARG_VAR, ARG_VAR));};
+	static {setArgType(UNIFYCONAMENAME, new ArgType(false, ARG_VAR, ARG_VAR));};
+	/** findproccxt [atom1, length1, arg1, atom2, length2, arg2]
+	 * アトム番号atom1(価数=lenght1)の第arg1引数の型付きプロセス文脈が、
+	 * アトム番号atom2(価数=lenght2)の第arg2引数の型付きプロセス文脈と同名であることを示す
+	 * 必ず(atom1,arg1)がオリジナル、(atom2,arg2)が新たに生成された名前になるよう配置されている
+	 */
+	public static final int FINDPROCCXT= 300;
+	static {setArgType(FINDPROCCXT, new ArgType(false, ARG_ATOM, ARG_INT,  ARG_INT, ARG_ATOM, ARG_INT, ARG_INT));};
+
+	
+	///////////////////////////////////////////////////////////////////////
+
 	// 整数用の組み込みボディ命令 (400--419+OPT)
 	/** iadd [-dstintatom, intatom1, intatom2]
 	 * <br>整数用の組み込み命令<br>
@@ -1774,6 +1832,15 @@ public class Instruction implements Cloneable, Serializable {
 		add(arg4);
 		add(arg5);
 	}
+	public Instruction(int kind, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {//seiji
+		this.kind = kind;
+		add(arg1);
+		add(arg2);
+		add(arg3);
+		add(arg4);
+		add(arg5);
+		add(arg6);
+	}
 	
 	/** パーザー用コンストラクタ */
 	public Instruction(String name, List data) {
@@ -2033,6 +2100,7 @@ public class Instruction implements Cloneable, Serializable {
 					case ARG_MEM:
 					case ARG_ATOM:
 					case ARG_VAR:
+						if (inst.getKind() == FINDPROCCXT) break; // FINDPROCCXT命令が持つ引数はただのラベルなので除外
 						if (inst.data.get(i).equals(varnum)) count++;
 						break;
 					case ARG_LABEL:

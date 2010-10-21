@@ -1,10 +1,17 @@
 package compile.structure;
 
+import java.util.LinkedList;
+
 /** ソースコード中のプロセス文脈出現を表すクラス */
 
 final public class ProcessContext extends Context {
 	/** 引数のリンク束 */
 	public LinkOccurrence bundle = null;
+	/** 分離した同名型付きプロセス文脈の名前を格納 */
+	public LinkedList sameNameList = null;//seiji
+	/** リンク名 */
+	public String linkName = null;//seiji
+	
 	/** コンストラクタ
 	 * @param mem 所属膜
 	 * @param qualifiedName 限定名
@@ -27,5 +34,17 @@ final public class ProcessContext extends Context {
 			argstext += "]";		
 		}
 		return getQualifiedName() + argstext;
+	}
+	/** 同名プロセス文脈の分離により新たに生成された名前を格納しているリストを返す */
+	public LinkedList getSameNameList() {//seiji
+		return sameNameList;
+	}
+	/** 同名プロセス文脈の分離を行なっているか否か */
+	public boolean hasSameName() {//seiji
+		if (sameNameList != null) return true;
+		else return false;
+	}
+	public String getLinkName() {//seiji
+		return linkName;
 	}
 }

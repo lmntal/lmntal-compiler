@@ -346,6 +346,16 @@ public class LMNParser {
 				pc.args[i] = new LinkOccurrence(linkname,pc,i);
 			}
 			if (sProc.bundle != null) pc.setBundleName(sProc.bundle.getQualifiedName());
+			if (Env.hyperLinkOpt) {/*seiji--*/
+  			pc.linkName = sProc.getLinkName();
+  			if (sProc.hasSameNameList()) {
+  				if (pc.getSameNameList() == null) 
+  					pc.sameNameList = new LinkedList();		
+  				for (int i = 0; i < sProc.getSameNameList().size(); i++)
+  					pc.getSameNameList().add((String)sProc.getSameNameList().get(i));
+  				ListIterator itt = pc.sameNameList.listIterator();
+  			}
+			}/*--seiji*/
 		}
 		mem.processContexts.add(pc);
 	}
@@ -1157,6 +1167,11 @@ class SyntaxExpander {
 		// - 構造代入
 		// 左辺に2回以上$pが出現した場合に、新しい名前$qにして $p=$qを型制約に追加する
 		// todo 実装する
+		// // 実装しました。便宜上、"同名型付きプロセス文脈の分離"と呼んでいます
+		// // 現状では、SLIMでのみ(--slimcodeと-hl系を併用した場合のみ)使用可能 (10/09/29 seiji)
+		HashMap ruleProcNameMap = new HashMap();
+		if (Env.hyperLink) 
+  		sameTypedProcessContext(sRule.getHead(), typeConstraints, ruleProcNameMap);
 
 		// - 構造比較
 		// 型制約の同じアトムに2回以上$pが出現した場合に、新しい名前$qにして $p==$qを型制約に追加する
@@ -1173,6 +1188,10 @@ class SyntaxExpander {
 		expandTypedProcessContexts(guardNegatives);
 		expandTypedProcessContexts(sRule.getBody());
 		
+		// - 中間命令findproccxt用の処理(--hl, --hl-opt限定) //seiji
+		if (Env.hyperLink && Env.hyperLinkOpt)
+		  procCxtNameToLinkName(sRule.getHead(), typeConstraints, ruleProcNameMap);
+		
 		// 終わると：
 		// - ガード否定条件は[$p,[Q]]のリストという中間表現に変換されている
 		// - 数値の正負号の取り込まれている ( -(3) -> -3 )
@@ -1183,7 +1202,8 @@ class SyntaxExpander {
 		// - ガードのアトム引数にプロセス文脈へのリンクのみが存在するようになっている
 		// - リンク文字を使って表されていた型付きプロセス文脈が$pに置換されている
 		// - アトムの引数は全てリンクになっている ( ? ) -> なっていない ( @p, ルール等 )
-
+		// - 同名型付きプロセス文脈の分離 ( a($p), a($p) :- ... → a($p), a($q) :- $p = $q | ... )
+		
 	}
 
 	/** ガード否定条件の根本的な構文エラーを訂正し、各否定条件を[$p,[Q]]のリストという中間形式に変換する。
@@ -1553,6 +1573,109 @@ class SyntaxExpander {
 		}
 	}
 	
+	/** 同名型付きプロセス文脈の分離：
+	 *  　左辺に2回以上$pが出現した場合に、新しい名前$qにして $p=$qを型制約に追加する
+	 * <pre> a($p), a($p) :- ... → a($p), a($q) :- $p = $q | ...
+	 * </pre>
+	 */
+	private void sameTypedProcessContext(LinkedList head, LinkedList cons, HashMap ruleProcNameMap) {//seiji
+
+		HashMap usedProcNameMap = new HashMap(); // 既に出現しているプロセス文脈名
+		int j = 0;
+		
+		/* ガード制約で出現するプロセス文脈の名前表を作成 */
+		processContextNameMap(head, ruleProcNameMap);
+		processContextNameMap(cons, ruleProcNameMap);
+
+		/* ヘッドに同名のプロセス文脈が出現する場合には、ユニークな名前に変更する */
+		separateProcessContext(head, cons, ruleProcNameMap, usedProcNameMap);
+
+	}
+	/** 型付きプロセス文脈の名前表を作成する */ //seiji
+	private void processContextNameMap(LinkedList list, HashMap ruleProcNameMap) {
+		ListIterator it = list.listIterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcAtom) {
+				SrcAtom sAtom = (SrcAtom)obj;
+				for (int i = 0; i < sAtom.getProcess().size(); i++) {
+					Object  subobj = sAtom.getProcess().get(i);
+					if (subobj instanceof SrcProcessContext) {
+						SrcProcessContext srcProcessContext = (SrcProcessContext)subobj;
+						String name = srcProcessContext.getName();
+						if (!ruleProcNameMap.containsKey(name))
+							ruleProcNameMap.put(name, srcProcessContext);
+					}
+				}
+			} else if (obj instanceof SrcMembrane) {
+				SrcMembrane sMem = (SrcMembrane)obj;
+				processContextNameMap(sMem.getProcess(), ruleProcNameMap);
+			}
+		}
+	}
+	/** ヘッドに同名のプロセス文脈が出現する場合には、ユニークな名前に変更する */
+	private void separateProcessContext(LinkedList head, LinkedList cons, 
+			HashMap ruleProcNameMap, HashMap usedProcNameMap) {//seiji
+		ListIterator it = head.listIterator();
+		int j = 0;
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcAtom) {
+				SrcAtom sAtom = (SrcAtom)obj;
+				for (int i = 0; i < sAtom.getProcess().size(); i++) {
+					Object subobj = sAtom.getProcess().get(i);
+					if (subobj instanceof SrcProcessContext) {
+						SrcProcessContext srcProcessContext = (SrcProcessContext)subobj;
+						String name = srcProcessContext.getName();
+						if (usedProcNameMap.containsKey(name)) {
+							
+							/* name の後ろに数字をつけることで、新しい名前とする */
+							String newName = name + j;
+							while (ruleProcNameMap.containsKey((newName))) {
+								j++;
+								newName = name + j;
+							}
+							srcProcessContext.name = newName;
+							usedProcNameMap.put(newName, srcProcessContext);
+							ruleProcNameMap.put(newName, srcProcessContext);
+							
+							LinkedList<SrcProcessContext> procList = new LinkedList();
+							procList.add(new SrcProcessContext(name));
+							procList.add(new SrcProcessContext(newName));
+							SrcAtom sa = new SrcAtom("=", procList);
+							cons.add(sa);
+	            
+				            /* --hl-optではガードにhlink型チェックを追加して、構造比較にかかる時間を短縮している */
+				            if (Env.hyperLinkOpt) {
+	  							LinkedList<SrcProcessContext> procList2 = new LinkedList();
+	  							procList2.add(new SrcProcessContext(name));
+	  							SrcAtom sa2 = new SrcAtom("unary", procList2);
+	  							cons.add(sa2);
+	  							LinkedList<SrcProcessContext> procList3 = new LinkedList();
+	  							procList3.add(new SrcProcessContext(newName));
+	  							SrcAtom sa3 = new SrcAtom("unary", procList3);
+	  							cons.add(sa3);
+				            }
+
+							/* オリジナルの名前を持つ型付きプロセス文脈に、新しい名前を記憶させる */
+							SrcProcessContext oriProcessContext = (SrcProcessContext)ruleProcNameMap.get(name);
+							if (oriProcessContext.getSameNameList() == null) {
+								oriProcessContext.sameNameList = new LinkedList();
+							}
+							oriProcessContext.getSameNameList().add(newName);
+							
+						}else{
+							usedProcNameMap.put(name, srcProcessContext);
+						}
+					}
+				}
+			} else if (obj instanceof SrcMembrane) {
+				SrcMembrane sMem = (SrcMembrane)obj;
+				separateProcessContext(sMem.getProcess(), cons, ruleProcNameMap, usedProcNameMap);
+			}
+		}
+	}
+	
 	/** アトム展開後のプロセス構造（子ルール外）のアトム引数に出現するプロセス文脈を展開する。
 	 * <pre> p(s1,$p,sn) → p(s1,X,sn), $p[X]
 	 * </pre>
@@ -1572,6 +1695,7 @@ class SyntaxExpander {
 						String name = srcProcessContext.getQualifiedName();
 						String newlinkname = generateNewLinkName();
 						sAtom.getProcess().set(i, new SrcLink(newlinkname));
+						srcProcessContext.linkName = newlinkname;//seiji
 						it.add(srcProcessContext);
 						// アトム引数に$p[...]を許すように構文拡張された場合のみ args!=null となる
 						if (srcProcessContext.args == null)
@@ -1585,7 +1709,35 @@ class SyntaxExpander {
 			}
 		}
 	}
-	
+	/** 中間命令findproccxt用の処理(--hl, --hl-opt限定)
+	 * プロセス文脈名($p, $q, ...)から
+	 * 内部的なプロセス文脈名(~5, ~6, ...)に変換し、
+	 * SrcProcessContextに保持させる
+	 * */
+	private void procCxtNameToLinkName(LinkedList head, LinkedList cons, HashMap ruleProcNameMap) {//seiji
+		ListIterator it = head.listIterator();
+		while (it.hasNext()) {
+			Object obj = it.next();
+			if (obj instanceof SrcProcessContext) {
+				SrcProcessContext spc = (SrcProcessContext)obj;
+				if (spc.hasSameNameList()) {
+					LinkedList temp = new LinkedList();
+					SrcProcessContext subspc;
+					for (int j = 0; j < spc.getSameNameList().size(); j++) {
+						subspc = (SrcProcessContext)ruleProcNameMap.get(spc.getSameNameList().get(j));
+						temp.add(subspc.linkName);
+					}
+					spc.getSameNameList().clear();
+					for (int j = 0; j < temp.size(); j++)
+						spc.getSameNameList().add(temp.get(j));
+
+				}
+			} else if (obj instanceof SrcMembrane) {
+				SrcMembrane sMem = (SrcMembrane)obj;
+				procCxtNameToLinkName(sMem.getProcess(), cons, ruleProcNameMap);
+			}
+		}
+	}
 	
 	/* アトム展開後のプロセス構造（子ルール外）に出現する型付きプロセス文脈にtypedマークを行う。
 	 * @param typedNames 型付きプロセス文脈の限定名 "$p" (String) をキーとする写像

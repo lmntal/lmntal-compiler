@@ -81,6 +81,8 @@ Comment = {EndOfLineComment}
 //TraditionalComment = "/*" [^*] ~"*/"
 EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 
+HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<" | "and" | "or" //seiji
+
 %% 
 
 /* ------------------------Lexical Rules Section---------------------- */
@@ -119,11 +121,16 @@ EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 	"/"					{ return symbol(sym.SLASH); }
 	"+"					{ return symbol(sym.PLUS); }
 	"-"					{ return symbol(sym.MINUS); }
+	"!"					{ return symbol(sym.EXCLA); }//seiji
 	"["					{ return symbol(sym.LBRACKET); }
 	"]"					{ return symbol(sym.RBRACKET); }
 	"mod" 				{ return symbol(sym.MOD); }
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
+//	"><"				{ return symbol(sym.HLUNIFY); }//seiji
+	{HyperLinkOp}		{ return symbol(sym.HL, yytext()); }//seiji
+//	"and"				{ return symbol(sym.AND); }//seiji
+//	"or"				{ return symbol(sym.OR); }//seiji
 	"[:" 				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(QUOTED); }
 	"\""				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(STRING); }
 	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext(), yytext(), yyline, yycolumn); }

@@ -513,4 +513,9 @@ public final class Env {
 
   /** 一つのルールのコンパイルを行う (for SLIM model checking mode) */
   public static boolean compileRule = false;
+  
+  /** hyperlink */
+  public static boolean hyperLink    = false;//seiji
+  public static boolean hyperLinkOpt = false;//seiji
+
 }

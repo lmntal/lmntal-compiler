@@ -542,12 +542,15 @@ class HeadCompiler {
 		}
 		int thismempath = memToPath(mem);
 		for(Atom atom : mem.atoms){
+
 			if (!atom.functor.isActive() && !fFindDataAtoms) continue;
 			if (atomToPath(atom) != UNBOUND) continue;
 			// 見つかったアトムを変数に取得する
 			int atompath = varCount++;
 			insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 //			insts.add(Instruction.findatom2(atompath, thismempath, findatomcount, atom.functor));
+
+//				
 			// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
 			emitNeqAtoms(mem, atom, atompath, insts);
 			atomPaths.put(atom, new Integer(atompath));
@@ -575,14 +578,70 @@ class HeadCompiler {
 				}
 				memPaths.put(submem, new Integer(submempath));
 			}
+			
+			
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 			compileMembrane(submem, list);
+
 		}
 		if(varCount > maxVarCount)
 			maxVarCount = varCount;
 		if(debug2)Util.println("\ncompileMembrane return\n inst:");
 		if(debug2)Util.println(insts);
 	}
+	
+	void makeSameNameMap(Membrane mem, HashMap sameNameMap, HashMap linkNameToAtomMap) {
+		for (ProcessContext pc : mem.typedProcessContexts) {
+			if (pc.hasSameName()) {
+				for (int i = 0; i < pc.getSameNameList().size(); i++) 
+					 sameNameMap.put(pc.getSameNameList().get(i).toString(), pc.linkName);
+			}	
+		}
+		for (Atom atom : mem.atoms) {
+			for (int i = 0; i < atom.args.length; i++) 
+				linkNameToAtomMap.put(atom.args[i].name, atom);
+		}
+		for (Membrane submem : mem.mems)
+			makeSameNameMap(submem, sameNameMap, linkNameToAtomMap);
+	}
+	
+	/* 同名型付きプロセス文脈の分離に伴い、中間命令findproccxtを追加する */
+	void compileSameProcessContext(Membrane mem, InstructionList list) {//seiji
+		List<Instruction> insts = list.insts;
+		HashMap<String, String> sameNameMap = new HashMap<String, String>();
+		HashMap<String, Atom> linkNameToAtomMap = new HashMap<String, Atom>();
+		makeSameNameMap(mem, sameNameMap, linkNameToAtomMap);
+
+		sameProcessContext(mem, list, sameNameMap, linkNameToAtomMap);
+
+	}
+	void sameProcessContext(Membrane mem, InstructionList list, HashMap sameNameMap, HashMap linkNameToAtomMap) {//seiji
+		List<Instruction> insts = list.insts;
+		String newname = null;
+		
+		for (Atom newatom : mem.atoms){
+			for (int i = 0; i < newatom.args.length; i++) {
+				newname = newatom.args[i].name;
+				
+				if (sameNameMap.containsKey(newname)){
+					String oriname = (String)sameNameMap.get(newname);
+					Atom oriatom = (Atom)linkNameToAtomMap.get(oriname);
+					for (int j = 0; j < oriatom.args.length; j++) {
+						if (oriatom.args[j].name.equals(oriname)) {
+//							insts.add(0, new Instruction(Instruction.FINDPROCCXT, atomToPath(oriatom), j, atomToPath(newatom), i));
+//							if (atomToPath(oriatom) < atomToPath(newatom))
+							insts.add(new Instruction(Instruction.FINDPROCCXT, 
+									atomToPath(oriatom), oriatom.args.length, j, atomToPath(newatom), newatom.args.length, i));
+						}
+					}
+				}
+			}
+		}
+		for (Membrane submem : mem.mems) {
+			sameProcessContext(submem, list, sameNameMap, linkNameToAtomMap);
+		}
+	}
+	
 	/** すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する 
 	 * (n-kato 2008.01.15) TODO 誰かがこのメソッドを拡張または参考にしてガードunary等のコンパイルバグを修正する
 	 * テスト用プログラム-->   5($seven),7($five) :- $seven=$five+2 |. 5=7.
@@ -611,6 +670,7 @@ class HeadCompiler {
 	void setContLabel(InstructionList contLabel){
 		this.contLabel = contLabel;
 	}
+
 
 	void compileMembraneForSlimcode(Membrane mem, InstructionList list, boolean rireki) {
 		Env.c("compileMembrane");
@@ -775,8 +835,8 @@ class HeadCompiler {
 //							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 							insts.add(Instruction.findatom2(atompath, thismempath, findAtomCount, atom.functor));
 							findAtomCount++;
-						} else
-							insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
+						} else {
+							insts.add(Instruction.findatom(atompath, thismempath, atom.functor));}
 						emitNeqAtoms(mem, atom, atompath, insts);
 						atomPaths.put(atom, new Integer(atompath));
 
@@ -822,8 +882,8 @@ class HeadCompiler {
 //							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 							subinst.insts.add(Instruction.findatom2(atompath, thismempath, findAtomCount, atom.functor));
 							findAtomCount++;
-						} else
-							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
+						} else{
+							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));}
 						emitNeqAtoms(mem, atom, atompath, subinst.insts);
 						atomPaths.put(atom, new Integer(atompath));
 
