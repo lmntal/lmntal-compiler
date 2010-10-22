@@ -1,0 +1,134 @@
+type{
+
+det_type{
+type01@@
+compiledRule = [[spec, [$i, $j]] | L1]
+:- int($i), int($j), $j1 = $j - 1
+|  typingRule = [[spec, [$i, $j]] | L1],
+   untype(integer.set(0, $j1)).
+
+rootmem@@
+untype(0) :- type(0, membrane).
+
+findatom@@
+untype($t),
+L = [[findatom, [$i, $j, functor($f, $k)]] | L1]
+:- int($t), int($i), int($j), int($k), unary($f),
+   $t =:= $i
+|  type($t, functor($f, $k)),
+   L = [[findatom, [$i, $j, functor($f, $k)]] | L1].
+
+func_int@@
+untype($t),
+L = [[func, [$i, intFunctor($j, $k)]] | L1]
+:- int($t), int($i), int($j), int($k),
+   $t =:= $i
+|  type($t, integer),
+   L = [[func, [$i, intFunctor($j, $k)]] | L1].
+
+func_functor@@
+untype($t),
+L = [[func, [$i, functor($f, $j)]] | L1]
+:- int($t), int($i), int($j), unary($f),
+   $t =:= $i
+|  type($t, functor($f, $j)),
+   L = [[func, [$i, functor($f, $j)]] | L1].
+
+anymem@@
+untype($t),
+L = [[anymem, [$i, $j, $k, $name]] | L1]
+:- int($t), int($i), int($j), int($k), unary($name),
+   $t =:= $i
+|  type($t, membrane($name)),
+   L = [[anymem, [$i, $j, $k, $name]] | L1].
+
+allocatom@@
+untype($t),
+L = [[allocatom, [$i, intFunctor($j, $k)]] | L1]
+:- int($t), int($i), int($j), int($k),
+   $t =:= $i
+|  type($t, integer),
+   L = [[allocatom, [$i, intFunctor($j, $k)]] | L1].
+
+isint@@
+untype($t),
+L = [[isint, [$i]] | L1]
+:- int($t), int($i), $t =:= $i
+|  type($t, integer),
+   L = [[isint, [$i]] | L1].
+
+}.
+
+deleteIsInt{
+
+deleteIsInt@@
+connect{ connect_only($tf, $ti, integer), $c[] },
+type($i, functor($f, $j)),
+L = [[derefatom, [$i0, $j0, $k0]] | L1],
+$inst[L1, L2],
+L2 = [[isint, [$i1]] | L3]
+:- int($ti), int($i), int($j), int($i0), int($j0),
+   int($k0), int($i1), unary($tf), unary($f), ground($inst),
+   $tf = $f, $ti =:= $k0, $i =:= $j0, $ti =:= $k0, $i0 =:= $i1
+|  connect_only{ connect_only($tf, $ti, integer), $c[] },
+   type($i, functor($f, $j)),
+   L = [[derefatom, [$i0, $j0, $k0]] | L1],
+   $inst[L1, L3].
+}.
+
+deleteTypeUntype{
+deleteType@@
+type($a, $b) :- int($a), ground($b) | .
+
+deleteUntype@@
+untype($a) :- int($a) | .
+
+}.
+
+deleteConnectMem{
+deleteConnectMem@@
+connect{$c[]} :- .
+}.
+
+
+typing2output{
+//t2o@@
+//typingRule(X) :- ruleForOutput(X).
+}.
+
+copy@@
+ruleset{ $p, @p, rule{$r} },
+det_type{@t},
+typeInformation{connect{$c[]}, $ti[]},
+deleteIsInt{@dii},
+deleteTypeUntype{@dtu},
+deleteConnectMem{@dcm},
+typing2output{@t2o},
+seq{@seq},
+:-
+det_type{@t}, deleteIsInt{@dii},
+deleteTypeUntype{@dtu},
+typeInformation{connect{$c[]}, $ti[]},
+deleteConnectMem{@dcm},
+typing2output{@t2o},
+seq{@seq},
+ruleset{ $p, @p, @seq, 
+typed_rule = seq_run( {$r, connect{$c[]}, @t}, [{@dii}, {@dtu, @dcm, @t2o}]) }.
+
+
+seq{
+H=seq_run({$p, @r}/, [ {$z, @p} | Rest ]) :- 
+	H=seq_run({$p, $z, @p}, Rest).
+
+H=seq_run({@p. $p.}/, []) :- H={$p}.
+}.
+
+}.
+
+
+
+init.
+
+typeInitialize@@
+init, type{$t[], @t}, typeInformation{$ti[]}, rulesets{$r[]}
+:- type{$t[], @t}, rulesets{typeInformation{$ti[]}, $r[], $t[], @t}.
