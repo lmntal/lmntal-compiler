@@ -1,5 +1,6 @@
 package type.connect;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +39,9 @@ class FunctorKindAndArgumentMap {
 	void addAll(FunctorAndArgument faa, Set<FunctorAndArgument> set) {
 		if (!faa.functor.isSymbol()) return;
 		if (faa.functor.getName().equals("=")) return;
+		if (set == null) {
+			set = new HashSet<FunctorAndArgument>(); 
+		}
 		map.addAll(faa, set);
 	}
 
