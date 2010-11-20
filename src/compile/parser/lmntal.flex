@@ -81,7 +81,7 @@ Comment = {EndOfLineComment}
 //TraditionalComment = "/*" [^*] ~"*/"
 EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 
-HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<" | "and" | "or" //seiji
+HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<" 
 
 %% 
 
@@ -127,10 +127,7 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<" | "and" | "or" //seiji
 	"mod" 				{ return symbol(sym.MOD); }
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
-//	"><"				{ return symbol(sym.HLUNIFY); }//seiji
 	{HyperLinkOp}		{ return symbol(sym.HL, yytext()); }//seiji
-//	"and"				{ return symbol(sym.AND); }//seiji
-//	"or"				{ return symbol(sym.OR); }//seiji
 	"[:" 				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(QUOTED); }
 	"\""				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(STRING); }
 	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext(), yytext(), yyline, yycolumn); }
