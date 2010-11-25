@@ -706,13 +706,11 @@ public class Optimizer {
 		HashMap<Integer, List<Integer>> pourMap = new HashMap<Integer, List<Integer>>();
 		HashSet pourMems = new HashSet(); // pour命令の第２引数に含まれる膜
 		HashMap<Integer, List<Integer>> copyRulesMap = new HashMap<Integer, List<Integer>>();
+		
+		HashMap<Integer, String> headMemName = new HashMap<Integer, String>(); // head に関する膜から膜名への map
+		HashMap<Integer, String> bodyMemName = new HashMap<Integer, String>(); // body に関する膜から膜名への map
 
 		//再利用する膜の組み合わせを決定する
-		/*
-		Iterator it = body.iterator();
-		while (it.hasNext()) {
-			Instruction inst = (Instruction)it.next(); 
-		 */
 		for(Instruction inst : body){
 			switch (inst.getKind()) {
 			case Instruction.REMOVEMEM:
@@ -732,6 +730,32 @@ public class Optimizer {
 				break;
 			}
 		}
+		
+		// 膜名を記憶する
+		for(Instruction inst: head){
+			switch(inst.getKind()){
+			case Instruction.LOCKMEM:
+				headMemName.put((Integer)inst.getArg1(), (String)inst.getArg3());
+				break;
+			case Instruction.ANYMEM:
+				headMemName.put((Integer)inst.getArg1(), (String)inst.getArg4());
+				break;
+			case Instruction.ANYMEM2:
+				headMemName.put((Integer)inst.getArg1(), (String)inst.getArg5());
+				break;
+			case Instruction.GETMEM:
+				headMemName.put((Integer)inst.getArg1(), (String)inst.getArg4());
+				break;
+			}
+		}
+		for(Instruction inst: body){
+			switch(inst.getKind()){
+			case Instruction.SETMEMNAME:
+				bodyMemName.put((Integer)inst.getArg1(), (String)inst.getArg2());
+
+			}
+		}
+		
 
 		createReuseMap(reuseMap, reuseMems, parent, removedChildren, createdChildren,
 				pourMap, pourMems, new Integer(0));
@@ -827,7 +851,12 @@ public class Optimizer {
 					if (!set.contains(arg1)) {
 						lit.add(new Instruction(Instruction.ADDMEM, inst.getIntArg2(), m)); 
 					}
-					lit.add(new Instruction(Instruction.ENQUEUEMEM, m)); 
+					lit.add(new Instruction(Instruction.ENQUEUEMEM, m));
+					
+					// null でない膜名から null な膜名へ再利用するときには setmemname が必要 (バグ/090207_-O2膜の複製バグ)
+					if(bodyMemName.get(arg1) == null && headMemName.get(m) != null){
+						lit.add(new Instruction(Instruction.SETMEMNAME, m, null));
+					}
 				}
 				break;
 			case Instruction.MOVECELLS:
