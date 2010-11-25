@@ -6,4 +6,29 @@ if [ -x /usr/bin/cygpath ]; then
 	LMNTAL_HOME=`cygpath -wp "$LMNTAL_HOME"`
 fi
 
-java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret "$@"
+level5=false
+slimcode=false
+for arg in $*
+do
+    if [ $arg = -O5 ]; then
+	level5=true
+    fi
+    if [ $arg = --slimcode ]; then
+	slimcode=true;
+    fi
+    if [ ${arg%%.lmn} != $arg ];then
+	lmnfile=${arg%%.lmn}
+    fi
+done
+
+optlibpath=$LMNTAL_HOME/sample/iwasawa/optimize
+if [ $level5 = true -a $slimcode = true ]; then
+    
+    ( java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret "$@" | \
+    ${optlibpath}/conv.rb ) > ${lmnfile}IL.lmn
+    java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret --slimcode -O3 \
+    ${lmnfile}IL.lmn ${optlibpath}/reuse.lmn ${optlibpath}/outputIL.lmn  |  slim  -
+
+else
+    java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret "$@"  
+fi
