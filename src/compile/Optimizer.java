@@ -787,7 +787,7 @@ public class Optimizer {
 			return;
 		}
 		int i = 0;
-		List args = (List)react.getArg2();
+		ArrayList args = (ArrayList)react.getArg2();
 		for(Iterator it = args.iterator(); it.hasNext();){
 			varInBody.put((Integer)it.next(), new Integer(i++));
 		}
@@ -854,7 +854,7 @@ public class Optimizer {
 					lit.add(new Instruction(Instruction.ENQUEUEMEM, m));
 					
 					// null でない膜名から null な膜名へ再利用するときには setmemname が必要 (バグ/090207_-O2膜の複製バグ)
-					if(bodyMemName.get(arg1) == null && headMemName.get(m) != null){
+					if(bodyMemName.get(arg1) == null && headMemName.get(args.get(m)) != null){
 						lit.add(new Instruction(Instruction.SETMEMNAME, m, null));
 					}
 				}
