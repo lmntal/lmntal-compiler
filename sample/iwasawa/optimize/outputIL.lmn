@@ -1,3 +1,5 @@
+output{
+
 printseq{
 
 printseq1@@
@@ -11,6 +13,7 @@ outputInit{
 io.use.
 outport(stdout(io.stdout)).
 
+connectOutport@@
 outport(X), rulesetList(Y) :- outport = print_rulesetList (X, Y).
 
 printRulesetListNil@@
@@ -18,8 +21,9 @@ R = print_rulesetList(X, []) :- R = X.
 
 printRulesetListInit@@
 R = print_rulesetList(X, 
-  [initRuleset{ ruleset($n), 
-  ruleList = [ rule{ compiledRule($insts) } ] } | T])
+  [{+IRS, ruleset($n), rule(Rule), @rs,
+  ruleList = [ {+Rule, compiledRule($insts) } ] } | T]),
+  initRuleset(IRS)
   :- int($n) 
   |  R = print_rulesetList(
        	 print_insts(
@@ -32,13 +36,14 @@ R = print_rulesetList(X,
 
 printRulesetList@@
 R = print_rulesetList(X, 
-  [ruleset{ ruleset($n), ruleList($initRS), @initRS } | T])
+  [{+RS, ruleset, ruleset($n), ruleList($rl), @rl } | T]),
+  ruleset(RS)
   :- int($n) 
   |  R = print_rulesetList(
        	 print_ruleList(
        	 io_print_line(
        	 io_print(X, "Compiled Ruleset @"), str.from($n)),
-	   	     $initRS),
+	   	     $rl),
 	   	     T).
 
 
@@ -48,8 +53,8 @@ R = print_ruleList(X, []) :- R = X.
 
 printRuleList@@
 R = print_ruleList(X, 
-  [ { optimizedRule($insts), +A } | T]),
-  optimized_rule(A)
+  [ {+Rule, compiledRule($insts)} | T]),
+  rule(Rule)
   :- R = print_ruleList(
          print_insts(
 	 io_print(X, "Compiled Rule\n\t--atommatch:\n\t--memmatch:\n"),
@@ -58,37 +63,32 @@ R = print_ruleList(X,
 	 
 }.
 
-/*
-outputRuleSet{
-
-outputRuleSet@@
-outport(X), optimized_ruleset({ruleset($n), $rules})
-  :- int($n)
-  |  outport =
-       print_ruleset(
-       io_print_line(
-       io_print(X, "Compiled Ruleset @"), str.from($n))
-       , optimized_ruleset({$rules}) ).
-
-printRuleset1@@
-R = print_ruleset(X, optimized_ruleset({})) :- R = X.
-printRuleset2@@
-R = print_ruleset(X, 
-  optimized_ruleset({optimizedRule($insts). $rules[], @rules}))
-  :- ground($insts)
-  |  R = print_ruleset(
-         print_insts(
-	 io_print(X, "Compiled Rule \n\t--atommatch:\n\t--memmatch:\n"),
-                      $insts),
-	              optimized_ruleset({$rules[]})).
-}.
-*/
 
 outputInsts{
 
 
 print_insts_nil@@
 R = print_insts(X, []) :- R = X.
+
+print_insts_branch_end@@
+R = print_insts(X, [[[branch, Insts]], [stop, []] | T ])
+  :- R = print_insts(
+         io_print_line(
+	 print_insts(
+	 io_print_line(X, "\t\tbranch [["),
+	 Insts),
+	 "\t\t]]"),
+	 [[stop, []] | T ]).
+
+print_insts_branch@@
+R = print_insts(X, [[[branch, Insts]], [[branch, NextInsts ]] | T ])
+  :- R = print_insts(
+         io_print_line(
+	 print_insts(
+	 io_print_line(X, "\t\tbranch [["),
+	 Insts),
+	 "\t\t]]"),
+	 [ [[branch, NextInsts]] | T] ).
 
 print_insts@@
 R = print_insts(X, [[$inst, OpList] | T ])
@@ -191,32 +191,30 @@ stdout(X, Y) :- X = Y.
 
 
 
-//seq.use.
 io.use.
 str.use.
 
+outputILMain@@
+rulesets(RS), {+RS, $rs, @rs},
+outputInit{$oi, @oi},
+outputInsts{@insts},
+outputSlash{$slash, @slash},
+deleteIO{@dio},
+printseq{@printseq}
+:- ret = myseq.run({$rs, @rs, @printseq, $oi, @oi, @insts},
+                   [{$slash, @slash}, {@dio}]).
+
+
 
 /*
-rulesets{$p[], @p}, 
-outputInitRule1{$q[], @q}, outputInitRule2{@q2},
-outputRuleSet{@r},
-outputInsts{@insts},
-outputSlash{$slash[], @slash},
-deleteIO{@dio}
- :- ret = seq_run({seq_run, $p[]}, 
-         [ {$q[], @q}, {@q2, @insts}, {@r,  @insts},
-	 {$slash[], @slash}, {@dio} ]).
-*/
-
 rulesets{$p[], @p},
 outputInit{$q, @q},
 outputInsts{@insts},
 outputSlash{$slash[], @slash},
 deleteIO{@dio},
 printseq{@printseq}
-:- ret = seq_run( {$p[], @printseq, @p, $q, @q, @insts }, 
+:- ret = myseq.run( {$p[], @printseq, @p, $q, @q, @insts }, 
    [{$slash[], @slash}, {@dio}] ).
+*/
+}.
 
-H=seq_run({$p, @r}/, [ {$z, @p} | Rest ]) :- H=seq_run({$p, $z, @p}, Rest).
-
-H=seq_run({@p. $p.}/, []) :- H={$p}.

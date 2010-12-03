@@ -1,4 +1,6 @@
-optimize{
+reuse{
+
+reuseInitialize{
 
 reuseInit{
 reuseInit@@ compiledRule(X) :- optimizingRule({}, X).
@@ -6,7 +8,7 @@ reuseInit@@ compiledRule(X) :- optimizingRule({}, X).
 }.
 
 reuse1_1{
-// å†åˆ©ç”¨ã™ã‚‹ã‚¢ãƒˆãƒ ã‚’ç‰¹å®šã™ã‚‹
+// ºÆÍøÍÑ¤¹¤ë¥¢¥È¥à¤òÆÃÄê¤¹¤ë
 reuse1@@
 optimizingRule({$reuses[]}, L),
 $insts0[L, L0],
@@ -28,7 +30,7 @@ $insts0[N0, N1], $insts1[N1, N2], $insts2[N2, M3].
 }.
 
 reuse1_2{
-// å†åˆ©ç”¨ã®ãƒ«ãƒ¼ãƒ«ã«å¾“ã£ã¦ç•ªå·ã‚’ä»˜ã‘æ›¿ãˆã‚‹
+// ºÆÍøÍÑ¤Î¥ë¡¼¥ë¤Ë½¾¤Ã¤ÆÈÖ¹æ¤òÉÕ¤±ÂØ¤¨¤ë
 reuse2@@
 optimizingRule({reuse($i1, $j1), $reuses[]}, L0),
 $insts[L0, L1],
@@ -71,7 +73,7 @@ L1 = [[newlink, [$i, $j, $i1, $l, $m]] | M].
 
 
 
-// ä¸è¦ãª relink ã‚’å‰Šé™¤ã™ã‚‹
+// ÉÔÍ×¤Ê relink ¤òºï½ü¤¹¤ë
 reuse5@@
 L = [[relink, [$i, $j, $k, $l, $m]] | M]
 :- int($i), int($j), int($k), int($l), int($m),
@@ -79,7 +81,7 @@ L = [[relink, [$i, $j, $k, $l, $m]] | M]
    $j =:= $l
 |  L = M.
 
-// newlink ã¯ relink ã‚ˆã‚Šå¾Œã‚ã«ç§»å‹•
+// newlink ¤Ï relink ¤è¤ê¸å¤í¤Ë°ÜÆ°
 reuse6@@
 L0 = [[newlink, [$i0, $j0, $k0, $l0, $m0]] | M0],
 $insts[M0, L1],
@@ -94,7 +96,7 @@ L1 = [[newlink, [$i0, $j0, $k0, $l0, $m0]] | M1].
 }.
 
 reuse2{
-// ä¾å­˜é–¢ä¿‚ãŒå´©ã‚Œã¦ã„ã‚‹å ´åˆã‚’ç‰¹å®šã™ã‚‹
+// °ÍÂ¸´Ø·¸¤¬Êø¤ì¤Æ¤¤¤ë¾ì¹ç¤òÆÃÄê¤¹¤ë
 reuse7@@
 L = [[spec, [1, $n]] | M],
 $insts0[M, L0],
@@ -119,19 +121,19 @@ L1 = [[inheritlink, [$i1, $j1, $n, $m1]]  | M1].
 
 reuseExit{
 reuseExit@@
-optimizingRule({$reuses[]}, X) :- optimizedRule(X).
+optimizingRule({$reuses[]}, X) :- compiledRule(X).
 }.
 
 
 removeDeqEnq{
 
-// dequeueatom ã‚’å‰Šé™¤ã™ã‚‹
+// dequeueatom ¤òºï½ü¤¹¤ë
 removeDeq@@
 L = [[dequeueatom, [$n]] | M]
 :- int($n)
 | L = M.
 
-// enqueueatom ã‚’å‰Šé™¤ã™ã‚‹
+// enqueueatom ¤òºï½ü¤¹¤ë
 removeEnq@@
 L = [[enqueueatom, [$n]] | M]
 :- int($n)
@@ -140,48 +142,37 @@ L = [[enqueueatom, [$n]] | M]
 }.
 
 
-/*
-ruleset{ $p[] },
-reuseInit{@p0},reuse1_1{@p1_1}, reuse1_2{@p1_2}, reuse2{@p2}, reuseExit{@p3},
-removeDeqEnq{@q} 
-:-
-reuseInit{@p0},reuse1_1{@p1_1}, reuse1_2{@p1_2}, reuse2{@p2}, reuseExit{@p3},
-removeDeqEnq{@q},
-optimized_ruleset 
-  = seq_run({ $p[] }, [ {@q},  {@p0}, {@p1_1}, {@p1_2}, {@p2}, {@p3} ]).
-*/
-
 copyRules@@
-ruleset{ $p, @p, rule{ $r} },
+{ $rs, @rs,  rule(R), {+R, $r}},
 reuseInit{@p0},reuse1_1{@p1_1}, reuse1_2{@p1_2}, reuse2{@p2}, reuseExit{@p3},
 removeDeqEnq{@q},
-seq{ @seq }
 :-
 reuseInit{@p0},reuse1_1{@p1_1}, reuse1_2{@p1_2}, reuse2{@p2}, reuseExit{@p3},
 removeDeqEnq{@q},
-seq{ @seq },
-ruleset{ $p, @seq, 
- optimized_rule = seq_run( {$r}, 
-               [ {@q},  {@p0}, {@p1_1}, {@p1_2},{@p2}, {@p3} ]). 
+{  reused_rule = myseq.run( {$r},
+                     [ {@q},  {@p0}, {@p1_1}, {@p1_2}, {@p2}, {@p3} ]),
+  $rs, @rs
 }.
-
-
-seq{
-H=seq_run({$p, @r}/, [ {$z, @p} | Rest ]) :- 
-	H=seq_run({$p, $z, @p}, Rest).
-
-H=seq_run({@p. $p.}/, []) :- H={$p}.
-}.
-
-
 
 }.
 
+reuseEnd{
+reuseEnd@@
+{ $rs, @rs, reused_rule(X), {+X, $r, @r}}
+:-  
+{ $rs, @rs, rule(X), {+X, $r, @r}}
+}.
 
-init.
 
-initialize@@
-init, optimize{$opt[], @opt}, rulesets{$r[]}
-  :- optimize{$opt[], @opt}, rulesets{$r[], $opt[],@opt}.
+reuseMain@@
+rulesets(RS), {+RS, $rs, @rs},
+reuseInitialize{$ri, @ri},
+reuseEnd{$re, @re}
+:-
+rulesets = myseq.run( {$rs, $ri, @ri}, [{$re, @re}] ).
+
+}.
+
+
 
 

@@ -12,7 +12,7 @@ print "rulesets{\n\n"
 STDIN.each do | line |
   line.chomp!
   if line == "" || line =~ /Inline/ 
-  elsif /Compiled\sRuleset\s*@([0-9]+)/ =~line # ruleset ã®é–‹å§‹
+  elsif /Compiled\sRuleset\s*@([0-9]+)/ =~line # ruleset ¤Î³«»Ï
     if isInit
       print "initRuleset{ +RulesetIndex#{rulesetIndex}, ruleset(#{$1}), \n"
     else
@@ -28,7 +28,7 @@ STDIN.each do | line |
       print "}.\n"
       print "ruleset{ +RulesetIndex#{rulesetIndex}, ruleset(#{$1}), \n"
     end
-  elsif line == "Compiled Rule " # rule ã®é–‹å§‹
+  elsif line == "Compiled Rule " # rule ¤Î³«»Ï
     print "rule{\n+RuleIndex#{rulesetIndex}_#{ruleIndex}, compiledRule = [\n"
     ruleIndex += 1;
   elsif line =~ /atommatch/
@@ -38,19 +38,20 @@ STDIN.each do | line |
   elsif !isInit && line =~ /memmatch/
     flag = true
   elsif flag
-    op = line.sub(/\'\[\]\'_([0-9]+)/, 'functor(\'listnil\', \1)') # [] ã‚¢ãƒˆãƒ ã¯å…ˆã«ç‰¹åˆ¥æ‰±ã„
-    op = op.sub(/\'(\w+)\'.\'(\w+)\'_([0-9]+)/, 'moduleFunctor(\1, \2, \3)') # io.use ã‚’ç‰¹åˆ¥æ‰±ã„
-    op = op.sub(/\'([\w\$]+)\'_([0-9]+)/, 'functor(\1, \2)') # ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’ lmntal syntax ã«
-    op = op.sub(/(\$\w+)_([0-9]+)/, 'proxyFunctor("\1", \2)') # ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’ lmntal syntax ã«
-    op = op.sub(/([0-9]+)_([0-9]+)/, 'intFunctor(\1, \2)') #ã€€int ã‚¢ãƒˆãƒ ã‚’ç‰¹åˆ¥æ‰±ã„
-    op = op.sub(/\"([\w\s@]+)\"_([0-9]+)/, 'stringFunctor(\1, \2)') # string ã‚¢ãƒˆãƒ ã‚’ç‰¹åˆ¥æ‰±ã„
-    op = op.sub(/\'.\'+_([0-9]+)/, 'functor(\'.\', \1)')  # . ã‚¢ãƒˆãƒ ã®å ´åˆã‚’ç‰¹åˆ¥æ‰±ã„
-    op = op.sub(/@([0-9]+)/, 'rulesetNum(\1)') # ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆç•ªå·ã‚’ lmntal syntax ã«
+    op = line.sub(/\'\[\]\'_([0-9]+)/, 'functor(\'listnil\', \1)') # [] ¥¢¥È¥à¤ÏÀè¤ËÆÃÊÌ°·¤¤
+    op = op.sub(/\'(\w+)\'.\'(\w+)\'_([0-9]+)/, 'moduleFunctor(\1, \2, \3)') # io.use ¤òÆÃÊÌ°·¤¤
+    op = op.sub(/\'([\w\$]+)\'_([0-9]+)/, 'functor(\1, \2)') # ¥Õ¥¡¥ó¥¯¥¿¤ò lmntal syntax ¤Ë
+    op = op.sub(/(\$\w+)_([0-9]+)/, 'proxyFunctor("\1", \2)') # ¥Õ¥¡¥ó¥¯¥¿¤ò lmntal syntax ¤Ë
+    op = op.sub(/(-[0-9]+)_([0-9]+)/, 'intFunctor(\1, \2)') #¡¡int ¥¢¥È¥à¤òÆÃÊÌ°·¤¤
+    op = op.sub(/([0-9]+)_([0-9]+)/, 'intFunctor(\1, \2)') #¡¡int ¥¢¥È¥à¤òÆÃÊÌ°·¤¤
+    op = op.sub(/\"([\w\s@]+)\"_([0-9]+)/, 'stringFunctor(\1, \2)') # string ¥¢¥È¥à¤òÆÃÊÌ°·¤¤
+    op = op.sub(/\'.\'+_([0-9]+)/, 'functor(\'.\', \1)')  # . ¥¢¥È¥à¤Î¾ì¹ç¤òÆÃÊÌ°·¤¤
+    op = op.sub(/@([0-9]+)/, 'rulesetNum(\1)') # ¥ë¡¼¥ë¥»¥Ã¥ÈÈÖ¹æ¤ò lmntal syntax ¤Ë
 
-    op = op.sub(/([a-z]+)\s*(\[[^\]]*\])/, '[\1, \2]') # å‘½ä»¤ã¨å¼•æ•°ã‚’ãƒªã‚¹ãƒˆã¸
+    op = op.sub(/([a-z]+)\s*(\[[^\]]*\])/, '[\1, \2]') # Ì¿Îá¤È°ú¿ô¤ò¥ê¥¹¥È¤Ø
 
-    op = op.sub(/listnil/, '[]') # ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã—ãŸ [] ã‚’æˆ»ã™
-    if op =~ /\s*\[\s*proceed\s*,\s*\[\s*\]\s*\]$/ # rule ã®çµ‚äº†
+    op = op.sub(/listnil/, '[]') # ¥¨¥¹¥±¡¼¥×¤·¤¿ [] ¤òÌá¤¹
+    if op =~ /\s*\[\s*proceed\s*,\s*\[\s*\]\s*\]$/ # rule ¤Î½ªÎ»
       isInit = false
       print "#{op}].\n}.\n"
     else

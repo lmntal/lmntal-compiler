@@ -1,0 +1,55 @@
+merge{
+
+mergeInitialize{
+mergeInitialize@@
+ruleset(X), {+X, $ruleset, {$ruleA}, {$ruleB}, @r},
+merge_init{@mi}, merge_body{@mb}
+:- merged_ruleset = myseq.run( {ruleset, $ruleset, {$ruleA}, {$ruleB}, @mi}, [{@mb}] ),
+   merge_init{@mi}, merge_body{@mb}.
+
+merge_init{
+merge_init@@
+ruleList = List :-
+  merge ({compiledRule(L, L)},  List).
+}.
+
+merge_body{
+merge_nil@@
+merge ( {compiledRule(L, T),  $insts[L, T]}, [] ) :-
+  ruleList = [{+R, compiledRule(L), $insts[L, T], T = [[stop, []]]}],
+  rule(R).
+
+merge_opt@@
+merge( {compiledRule(InstH, InstT), $insts[InstH, InstT]},
+       [ {compiledRule($p),  @p, +R } | T] ),
+rule(R) 
+:-
+  merge( { compiledRule(InstL, InstT), $insts[InstL, L1],
+   L1 = [[[branch, $p]] |  InstT] }, T).
+
+}.
+}.
+
+mergeEnd{
+mergeEnd@@
+merged_ruleset(X), {+X, $rs, @rs} :-
+ruleset(X), {+X, $rs}.
+}.
+
+mergeMain@@
+rulesets(RS), {+RS, $rs, @rs},
+mergeInitialize{$mi, @mi},
+mergeEnd{$me, @me}
+:-
+rulesets = myseq.run( {$rs, $mi, @mi}, [{$me, @me}] ).
+
+
+}.
+
+/*
+init.
+
+mergeInitialize@@
+init, merge{$m[], @m}, rulesets{$r[], @r}
+:- merge{$m[], @m}, rulesets{$r[], $m[], @m}.
+*/

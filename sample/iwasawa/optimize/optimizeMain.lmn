@@ -1,0 +1,49 @@
+arrange{
+
+rulesets(X), {$rs[X]},
+arrangeRuleMem{@arm},
+arrangeRuleSetMem{@arsm}
+:- uniq | 
+arrangeRuleMem{@arm},
+arrangeRuleSetMem{@arsm},
+rulesets = myseq.run(X, [{@arsm}, {@arm}]),
+{$rs[X]}.
+
+
+arrangeRuleMem{
+arrangeRuleMem@@
+{ rule{$r}, $rs} :- { rule(X), { +X, $r}, $rs}.
+}.
+
+arrangeRuleSetMem{
+arrangeInitRuleSetMem@@
+initRuleset{ $rs } :- initRuleset(X), {+X, $rs}.
+arrangeRuleSetMem@@
+ruleset{ $rs } :- ruleset(X), {+X, $rs }.
+}.
+
+}.
+
+seq{
+module(myseq).
+seq_end@@
+H = myseq.run({$p, @p}/, []) :- H = {$p}.
+seq_run@@
+H = myseq.run({$p, @r}/, [ {$z, @p} | Rest ]) :-
+  H = myseq.run({$p, $z, @p}, Rest).
+}.
+
+
+main@@
+rulesets{ $rss[] },
+arrange{$arrange, @arrange},
+reuse{$reuse, @reuse},
+merge{$merge, @merge},
+output{$output, @output},
+:-
+main = myseq.run({ rulesets(X), {+X, $rss[]}},
+	 [{$arrange, @arrange},
+	  {$reuse, @reuse},
+	  {$merge, @merge},
+	  {$output, @output}
+	 ]).
