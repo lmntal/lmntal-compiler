@@ -1,39 +1,89 @@
+{
+module(mymax).
+
+}.
+
 merge{
 
 mergeInitialize{
 mergeInitialize@@
 ruleset(X), {+X, $ruleset, {$ruleA}, {$ruleB}, @r},
-merge_init{@mi}, merge_body{@mb}
-:- merged_ruleset = myseq.run( {ruleset, $ruleset, {$ruleA}, {$ruleB}, @mi}, [{@mb}] ),
-   merge_init{@mi}, merge_body{@mb}.
+merge_init{$mi[], @mi}, merge_body{@mb}, merge_common{$mc[], @mc},
+merge_common_end{@mce}
+:- merged_ruleset = myseq.run(
+ {ruleset, $ruleset, {$ruleA}, {$ruleB}, $mi[], @mi}, 
+ [{@mb}, {$mc[], @mc}, {@mce}] ),
+   merge_init{$mi[], @mi}, merge_body{@mb}, merge_common{$mc[], @mc},
+   merge_common_end{@mce}.
 
 merge_init{
 merge_init@@
-ruleList = List :-
-  merge ({compiledRule(L, L)},  List).
+ruleList = List, max{@max}
+ :-
+  merge ({compiledRule(Insts, L),
+  Insts = [A | L], A = [spec, [1, 0]], @max },  List).
+
+max{
+max_a@@
+R = max($a, $b) :- int($a), int($b), $a >= $b | R = $a.
+max_b@@
+R = max($a, $b) :- int($a), int($b), $a =< $b | R = $b.
+}.
 }.
 
 merge_body{
 merge_nil@@
-merge ( {compiledRule(L, T),  $insts[L, T]}, [] ) :-
+merge ( {compiledRule(L, T),  $insts[L, T], @p}, [] ) :-
   ruleList = [{+R, compiledRule(L), $insts[L, T], T = [[stop, []]]}],
   rule(R).
 
 merge_opt@@
-merge( {compiledRule(InstH, InstT), $insts[InstH, InstT]},
-       [ {compiledRule($p),  @p, +R } | T] ),
+merge( {compiledRule([[spec, [1, SpecB]] | InstH], InstT), 
+          $insts[InstH, InstT, SpecB], @p },
+       [ {compiledRule = [[spec, [SA, SB]] | L ], $p[L], 
+       $sa[SA], $sb[SB],  +R } | T] ),
 rule(R) 
-:-
-  merge( { compiledRule(InstL, InstT), $insts[InstL, L1],
-   L1 = [[[branch, $p]] |  InstT] }, T).
+:- int($sa), int($sb) |
+  merge( { compiledRule([[spec, [1, MAX]] | InstL], InstT), 
+            $insts[InstL, L1, SpecB], MAX = max(SpecB, $sb),
+   L1 = [[[branch, $p]] |  InstT], @p}, T).
 
 }.
+
+merge_common{
+
+merge_common@@
+merge_spec{@ms}, rule(R), {+R, $l, @l}
+ :- merge_spec{@ms}, common(R), {+R, $l, @l, @ms}.
+
+merge_spec{
+merge_spec@@
+L = [[[branch,  ListA]], [[branch,  ListB]] | Tail],
+  ListA = [[findatom, [$a0, $a1, functor($af, $a2)]] | TailA],
+  ListB = [[findatom, [$b0, $b1, functor($bf, $b2)]] | TailB],
+//  $tail[Tail], $tailA[TailA], $tailB[TailB]
+:-  int($a0), int($a1), unary($af), int($a2),
+    int($b0), int($b1), unary($bf), int($b2),
+//    ground($tail), ground($tailA), ground($tailB)
+    $a0 =:= $b0, $a1 =:= $b1, $af = $bf, $a2 =:= $b2
+|   L = [[[branch, List]] | Tail],
+    List = [[findatom, [$a0, $a1, functor($af, $a2)]],
+           [[branch , TailA]], [[branch , TailB]], [stop, []]].
+}.
+
+}.
+
+merge_common_end{
+merge_common_end@@
+common(R), {+R, $l, @l} :- rule(R), {+R, $l}.
+}
+
 }.
 
 mergeEnd{
 mergeEnd@@
-merged_ruleset(X), {+X, $rs, @rs} :-
-ruleset(X), {+X, $rs}.
+merged_ruleset(X), {+X,  $rs, @rs} :-
+ruleset(X), {+X,  $rs}.
 }.
 
 mergeMain@@
@@ -46,10 +96,3 @@ rulesets = myseq.run( {$rs, $mi, @mi}, [{$me, @me}] ).
 
 }.
 
-/*
-init.
-
-mergeInitialize@@
-init, merge{$m[], @m}, rulesets{$r[], @r}
-:- merge{$m[], @m}, rulesets{$r[], $m[], @m}.
-*/

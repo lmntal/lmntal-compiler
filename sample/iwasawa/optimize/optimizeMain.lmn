@@ -42,8 +42,8 @@ merge{$merge, @merge},
 output{$output, @output},
 :-
 main = myseq.run({ rulesets(X), {+X, $rss[]}},
-	 [{$arrange, @arrange},
-	  {$reuse, @reuse},
-	  {$merge, @merge},
-	  {$output, @output}
+	 [{$arrange, @arrange}
+	  ,{$reuse, @reuse}
+	  ,{$merge, @merge}
+	  ,{$output, @output}
 	 ]).
