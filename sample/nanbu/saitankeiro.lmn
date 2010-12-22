@@ -65,7 +65,7 @@
      :- int($id), int($fromID), int($toID),
          $id =\= $fromID
       | {+Nexts, id($id), $s,  @s}.
-           {+Nexts, id($id), trans(init, $toID), $s, @s}
+     {+Nexts, id($id), trans(init, $toID), $s, @s}
      :- int($id), int($toID)
       | {+Nexts, id($id), $s,  @s}.
    }.
@@ -124,68 +124,31 @@
  statespace{$ss, @ss}
  :- uniq 
  | statespace{$ss, @ss, +Next},
-   initialStateID = getInitialStateID(Next).
+   initState = getInitialStateID(Next).
    
- initialStateID($id), statespace{$ss, @ss},
+ initState($id)
  :- int($id)
- | return1 = getNextStatesFromID($id, statespace{$ss, @ss}).
+ |  call($id), cost($id, 0).
+ 
+  cost($idA, $costA), cost($idB, $costB)
+ :- int($idA), int($costA), int($idB), int($costB),
+    $idA =:= $idB, $costA =< $costB
+ |  cost($idA, $costA).
+ 
+ 
+ call($id), statespace{$ss, @ss}
+ :- int($id), uniq($id)
+ | transitions = getNextStatesFromID($id, statespace{$ss, @ss}).
+ 
+ transitions({trans($from, $to), $t, @t})
+ :- int($from), int($to), uniq($to)
+ | transitions({trans($from, $to), $t, @t}), call($to).
+ 
+ cost($id, $cost), transitions({trans($from, $to), $t, @t})
+ :- int($id), int($cost), int($from), int($to),
+    $id =:= $from, $nextCost = $cost + 1,
+    uniq($id, $cost, $from, $to)
+ | cost($id, $cost), transitions({trans($from, $to), $t, @t}),
+   cost($to, $nextCost).
+   
 
- return1({$p}) :- $p.
-
- trans(init,$out1):-int($out1)|trans(). //コスト１を付ける
- trans($in1,$out1):- int($in1), int($out1)| trans($in1,$out1,cost(1)).
- 
- //コスト１の次の状態を取得
- trans($in1,$out1,cost(1))  \ statespace{$ss, @ss} 
-  :- uniq($in1),uniq($out1)
- |return2 = getNextStatesFromID($out1, statespace{$ss, @ss}).
- 
- 
- 
- //コスト2を付ける                                                      
- return2({trans($in1,$out1),$p[]}) \ trans($in2,$out2,cost(1)) 
- :- uniq($in1,$out1),int($in2),int($out2), $out2 == $in1, $out1 \= $in2 |   
- trans($in2,$out2,cost(1)), trans($in1,$out1,cost(2)).
- 
- 
-  //コスト付け 
-   return2({trans($in1,$out1),$p[]}), trans($in2,$out2,cost(A)) :-
-  C = A+1,  $in1 == $out2, $out1 \= $in2, $out1\=$out2,  uniq($in1,$out1),
-  $out1 \= 256
- |trans($in1,$out1,cost(C)),
- return2({trans($in1,$out1),$p[]}), trans($in2,$out2,cost(A)) .
- 
- 
-   //取得したコストの付いたアトムの淘汰
- trans($in1,$out1,cost(A)), trans($in2,$out2,cost(B)) :-
- int($in1),int($in2), $out1==$out2 , A=<B |
- trans($in1,$out1,cost(A)).
- 
- 
- //次の状態の取得
- trans($in1,$out1,cost(A)),   statespace{$ss, @ss} 
-  :- int($in1),  uniq($out1), int(A)
- |return2 = getNextStatesFromID($out1, statespace{$ss, @ss})
- ,trans($in1,$out1,cost(A)).
- 
- 
-  //取得した状態の淘汰
- return2({trans($in1,$out1),$p[]}), return2({trans($in2,$out2),$q[]}):-
-  $in1 == $in2,int($out1),int($out2) |return2({trans($in1,$out1),$p[]}).
- 
- /*
- start(256).
- end(13824).
- 
- end(GOAL):- uniq(GOAL) | route=[GOAL].//リスト作成
-
- //トラックバック
-  start(S), trans(A,B,cost(P)) \ route=[R|RNext] :-
- S\=R, B==R ,int(A) ,int(P)| route=[A,R|RNext].
- 
- }.
- 
- out{}.//出力を探索結果のみを表示
- in{route=R, $q[], @q}, out{$p}
- :- ground(R) | out{$p, route=R}, ing{}.
- */ 
