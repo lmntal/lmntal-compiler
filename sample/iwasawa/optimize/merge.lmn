@@ -6,7 +6,7 @@ ruleset(X), {+X, $ruleset, {$ruleA}, {$ruleB}, @r},
 merge_init{$mi[], @mi}, merge_body{@mb}, merge_common{$mc[], @mc},
 merge_common_end{@mce}
 :- merged_ruleset = myseq.run(
- {ruleset, $ruleset, {$ruleA}, {$ruleB}, $mi[], @mi}, 
+ {$ruleset, {$ruleA}, {$ruleB}, $mi[], @mi}, 
  [{@mb}, {$mc[], @mc}, {@mce}] ),
    merge_init{$mi[], @mi}, merge_body{@mb}, merge_common{$mc[], @mc},
    merge_common_end{@mce}.

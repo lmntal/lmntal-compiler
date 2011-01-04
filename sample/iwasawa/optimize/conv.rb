@@ -39,13 +39,14 @@ STDIN.each do | line |
     flag = true
   elsif flag
     op = line.sub(/\'\[\]\'_([0-9]+)/, 'functor(\'listnil\', \1)') # [] アトムは先に特別扱い
-    op = op.sub(/\'(\w+)\'.\'(\w+)\'_([0-9]+)/, 'moduleFunctor(\1, \2, \3)') # io.use を特別扱い
-    op = op.sub(/\'([\w\$]+)\'_([0-9]+)/, 'functor(\1, \2)') # ファンクタを lmntal syntax に
+    op = op.sub(/\'(\w+)\'\.\'(\w+)\'_([0-9]+)/, 'moduleFunctor(\1, \2, \3)') # io.use を特別扱い
+    op = op.sub(/\'([\w\$\+\-]+)\'_([0-9]+)/, 'functor(\'\1\', \2)') # ファンクタを lmntal syntax に
     op = op.sub(/(\$\w+)_([0-9]+)/, 'proxyFunctor("\1", \2)') # ファンクタを lmntal syntax に
     op = op.sub(/(-[0-9]+)_([0-9]+)/, 'intFunctor(\1, \2)') #　int アトムを特別扱い
     op = op.sub(/([0-9]+)_([0-9]+)/, 'intFunctor(\1, \2)') #　int アトムを特別扱い
     op = op.sub(/\"([\w\s@]+)\"_([0-9]+)/, 'stringFunctor(\1, \2)') # string アトムを特別扱い
-    op = op.sub(/\'.\'+_([0-9]+)/, 'functor(\'.\', \1)')  # . アトムの場合を特別扱い
+    op = op.sub(/\'\.\'_([0-9]+)/, 'functor(\'.\', \1)')  # . アトムの場合を特別扱い
+    op = op.sub(/\'\,\'_([0-9]+)/, 'functor(\'.\', \1)')  # , アトムの場合を特別扱い
     op = op.sub(/@([0-9]+)/, 'rulesetNum(\1)') # ルールセット番号を lmntal syntax に
 
     op = op.sub(/([a-z]+)\s*(\[[^\]]*\])/, '[\1, \2]') # 命令と引数をリストへ

@@ -24,6 +24,7 @@ L3 = [[freeatom, [$i3]] | M3 ]
    F0 = F1,
    $k0 =:= $k1,
    $i0 =:= $i3,
+   $j0 =:= $j1
 | 
 optimizingRule({reuse($i0, $i1), $reuses[]}, N0),
 $insts0[N0, N1], $insts1[N1, N2], $insts2[N2, M3].

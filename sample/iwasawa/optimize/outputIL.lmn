@@ -36,7 +36,7 @@ R = print_rulesetList(X,
 
 printRulesetList@@
 R = print_rulesetList(X, 
-  [{+RS, ruleset, ruleset($n), ruleList($rl), @rl } | T]),
+  [{+RS, ruleset($n), ruleList($rl), @rl } | T]),
   ruleset(RS)
   :- int($n) 
   |  R = print_rulesetList(
@@ -167,6 +167,10 @@ Ret = elm_to_string(functor($f, $i))
 elm_to_string5@@
 Ret = elm_to_string($i) :- string($i) 
   | Ret = str.concat( str.concat("\"", $i), "\"").
+
+elm_to_string_intList@@
+Ret = elm_to_string([H | T]) 
+  :-  Ret = list_to_string([H | T]).
 
 
 }.
