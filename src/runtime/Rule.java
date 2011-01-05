@@ -7,7 +7,7 @@ import java.util.List;
 
 public final class Rule implements Serializable {
 	// Instruction のリスト
-	
+
 	/** アトム主導ルール適用の命令列（atomMatchLabel.insts）
 	 * 先頭の命令はspec[2,*]でなければならない。*/
 	public List<Instruction> atomMatch;
@@ -16,14 +16,14 @@ public final class Rule implements Serializable {
 	public List<Instruction> memMatch;
 	/** コンパイル時専用膜主導ルール適用の命令列 */
 	public List<Instruction> tempMatch;
-	
+
 	/** ガード命令列（guardLabel.insts）またはnull。
 	 * 先頭の命令はspec[*,*]でなければならない。*/
 	public List<Instruction> guard;
 	/** ボディ命令列（bodyLabel.insts）またはnull。
 	 * 先頭の命令はspec[*,*]でなければならない。*/
 	public List<Instruction> body;
-	
+
 	/** ラベル付きアトム主導ルール適用命令列 */
 	public InstructionList atomMatchLabel;
 	/** ラベル付き膜主導ルール適用命令列 */
@@ -36,31 +36,31 @@ public final class Rule implements Serializable {
 	public String text = "";
 	/** このルールの表示用文字列（省略なし） */
 	public String fullText ="";
-	
+
 	/** スレッドごとのベンチマーク結果 **/
 	public HashMap<Thread, Benchmark> bench;
-	
+
 	/** ルール名 */
 	public String name;
-	
+
 	/** 行番号 by inui */
 	public int lineno;
-	
+
 	/** 履歴 */
 	public Uniq uniq;
-	
+
 	/** uniq制約を持つかどうか */
 	public boolean hasUniq = false;
-	
+
 	// todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
-	
+
 	/**
 	 * ふつうのコンストラクタ。
 	 *
 	 */
 	public Rule() {
-//		atomMatch = new ArrayList();
-//		memMatch  = new ArrayList();
+		//		atomMatch = new ArrayList();
+		//		memMatch  = new ArrayList();
 		atomMatchLabel = new InstructionList();
 		memMatchLabel = new InstructionList();
 		atomMatch = atomMatchLabel.insts;
@@ -97,18 +97,18 @@ public final class Rule implements Serializable {
 		if (bodyLabel != null)
 			body = bodyLabel.insts;
 	}
-	
+
 	/**
 	 * 命令列の詳細を出力する
 	 *
 	 */
 	public void showDetail() {
 		if (Env.debug == 0 && !Env.compileonly) return;
-		
+
 		Iterator<Instruction> l;
 		if (hasUniq && Env.slimcode) Env.p("Compiled Uniq Rule " + this);
 		else Env.p("Compiled Rule " + this);
-		
+
 		l = atomMatch.listIterator();
 		Env.p("--atommatch:", 1);
 		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
@@ -116,37 +116,60 @@ public final class Rule implements Serializable {
 		l = memMatch.listIterator();
 		Env.p("--memmatch:", 1);
 		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
-		
+
 		if (guard != null) {
 			l = guard.listIterator();
 			Env.p("--guard:" + guardLabel + ":", 1);
 			while(l.hasNext()) Env.p((Instruction)l.next(), 2);
 		}
-		
+
 		if (body != null) {
 			l = body.listIterator();
 			Env.p("--body:" + bodyLabel + ":", 1);
 			while(l.hasNext()) Env.p((Instruction)l.next(), 2);
 		}
-			
+
 		Env.p("");
 	}
-	
-	public String toString() {
-//		return text;
-		if (Env.compileonly) return "";
-//		if (Env.compileonly) return (name!=null) ? name : "";
-		return name!=null && !name.equals("") ? name : text;
-//		return name;
+	/**
+	 * 命令列の詳細を　LMNtal syntax で出力する
+	 *
+	 */
+	public void showDetailLMNtalSyntax(int rulesetIndex, int ruleIndex) {
+		if (Env.debug == 0 && !Env.compileonly) return;
+
+		if (hasUniq && Env.slimcode) Env.p("Compiled Uniq Rule " + this);
+		else Env.p("rule{ +RuleIndex" + rulesetIndex + "_" + ruleIndex + ", " + this);
+
+		
+		Env.p("compiledRule = [\n");
+		if (body != null) {
+			Iterator<Instruction> l = body.listIterator();
+			while(l.hasNext()) Env.p(((Instruction)l.next()).toStringLMNtalSyntax(), 2);
+		} else {
+			Iterator<Instruction> l = memMatch.listIterator();
+			while(l.hasNext()) Env.p(((Instruction)l.next()).toStringLMNtalSyntax(), 2);
+		}
+		Env.p("].", 2);
+
+		Env.p("\n}.");
 	}
-	
+
+	public String toString() {
+		//		return text;
+		if (Env.compileonly) return "";
+		//		if (Env.compileonly) return (name!=null) ? name : "";
+		return name!=null && !name.equals("") ? name : text;
+		//		return name;
+	}
+
 	/**
 	 * @return fullText ルールのコンパイル可能な文字列表現
 	 */
 	public String getFullText() {
 		return fullText;
 	}
-	
+
 	///////////////////////////////////////////////////////////////////
 
 	/* アトム手動テストの試行回数 */
@@ -165,7 +188,7 @@ public final class Rule implements Serializable {
 	public long backtracks = 0;
 	/* ルール適用時の膜ロック失敗の回数 */
 	public long lockfailure = 0;
-	
+
 	public void incAtomApply(Thread thread){
 		if(bench.containsKey(thread))
 			bench.get(thread).atomapply ++;
@@ -238,7 +261,7 @@ public final class Rule implements Serializable {
 			bench.put(thread, benchmark);
 		}
 	}
-	
+
 	public long allAtomApplys() {
 		Iterator<Benchmark> its = bench.values().iterator();
 		long apply = 0;
@@ -257,7 +280,7 @@ public final class Rule implements Serializable {
 		}
 		return apply;
 	}
-	
+
 	public long allAtomSucceeds() {
 		Iterator<Benchmark> its = bench.values().iterator();
 		long succeed = 0;
@@ -267,7 +290,7 @@ public final class Rule implements Serializable {
 		}
 		return succeed;
 	}
-	
+
 	public long allMemSucceeds() {
 		Iterator<Benchmark> its = bench.values().iterator();
 		long succeed = 0;
@@ -277,7 +300,7 @@ public final class Rule implements Serializable {
 		}
 		return succeed;
 	}
-	
+
 	public long allAtomTimes() {
 		Iterator<Benchmark> its = bench.values().iterator();
 		long time = 0;
@@ -297,7 +320,7 @@ public final class Rule implements Serializable {
 		}
 		return time;
 	}
-	
+
 	public long allApplys() {
 		return allAtomApplys() + allMemApplys();
 	}
@@ -307,7 +330,7 @@ public final class Rule implements Serializable {
 	public long allTimes() {
 		return allAtomTimes() + allMemTimes();
 	}
-	
+
 	public long allBackTracks() {
 		Iterator<Benchmark> its = bench.values().iterator();
 		long backtracks = 0;
@@ -329,7 +352,7 @@ public final class Rule implements Serializable {
 }
 
 class Benchmark {
-	
+
 	/* スレッドのID */
 	public long threadid;
 	/* アトム手動テストの試行回数 */
@@ -351,6 +374,6 @@ class Benchmark {
 
 	Benchmark(Thread thread) {
 		this.threadid = (Env.majorVersion == 1 && Env.minorVersion > 4) 
-						? thread.getId() : thread.hashCode();
+		? thread.getId() : thread.hashCode();
 	}
 }

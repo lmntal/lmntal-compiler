@@ -274,9 +274,9 @@ public class FrontEnd {
 						// / chorus filename output chorus file
 						if (i + 2 < args.length) {
 							String name = i + 1 < args.length ? args[i + 1]
-									: "";
+							                                         : "";
 							String value = i + 2 < args.length ? args[i + 2]
-									: "";
+							                                          : "";
 							Env.extendedOption.put(name, value);
 						}
 						if (Env.getExtendedOption("dump2") != "") {
@@ -325,7 +325,7 @@ public class FrontEnd {
 						if (args[i].equals("--gui")) {
 							Env.fGUI = true;
 						} else if (args[i].equals("--color")) {// 2006.11.13
-																// inui
+							// inui
 							// / --color
 							// / color dump
 							Env.colorMode = true;
@@ -337,6 +337,11 @@ public class FrontEnd {
 							// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.slimcode = true;
+						} else if (args[i].equals("--slimcodelmnsyntax")) {
+							// コンパイル後の中間命令列を LMNtal syntax で出力するモード
+							Env.compileonly = true;
+							Env.slimcode = true;
+							Env.slimcodelmnsyntax = true;
 						} else if (args[i].equals("--use-findatom2")) {
 							// Env.compileonly = true;
 							Env.slimcode = true;
@@ -350,8 +355,8 @@ public class FrontEnd {
 							// dump debug message of LMNtalDaemon
 							Env.debugDaemon = Env.DEBUG_DEFAULT;
 						} else if (args[i].matches("--event-port")) {// 2006.4.27
-																		// by
-																		// inui
+							// by
+							// inui
 							Debug.setEventPort(Integer.parseInt(args[i + 1]));
 							i++;
 						} else if (args[i].equals("--graphic")) {
@@ -366,7 +371,7 @@ public class FrontEnd {
 							// / --help
 							// / Show usage (this).
 							Util
-									.println("usage: java -jar lmntal.jar [options...] [filenames...]");
+							.println("usage: java -jar lmntal.jar [options...] [filenames...]");
 							// usage: FrontEnd [options...] [filenames...]
 
 							// commandline: perl src/help_gen.pl <
@@ -397,12 +402,12 @@ public class FrontEnd {
 							// / Generate library.
 							Env.fLibrary = true;
 						} else if (args[i].startsWith("--max-string-length=")) { // 2006.07.02
-																					// inui
+							// inui
 							// / --max-string-length=<integer>
 							// / Set <integer> as translator's maxStringLength
 							// (0 <= integer <= 65534)
 							Translator.maxStringLength = Integer
-									.parseInt(args[i].substring(20));
+							.parseInt(args[i].substring(20));
 						} else if (args[i].equals("--nd")) {
 							// / --nd
 							// / Nondeterministic mode. Execute the all
@@ -431,7 +436,7 @@ public class FrontEnd {
 							Optimizer.fMerging = true;
 							Env.fMerging = true;
 						} else if (args[i]
-								.equals("--optimize-systemrulesetsinlining")) {
+						                .equals("--optimize-systemrulesetsinlining")) {
 							Optimizer.fSystemRulesetsInlining = true;
 						} else if (args[i].equals("--optimize-inlining")) {
 							// / --optimize-inlining
@@ -470,14 +475,14 @@ public class FrontEnd {
 										Util.errPrintln("Invalid option: "
 												+ args[i] + " " + args[i + 1]);
 										Util
-												.errPrintln("only port 49152 through 65535 is available");
+										.errPrintln("only port 49152 through 65535 is available");
 										if (Env.fUNYO) {
 											Mediator
-													.exit("Invalid option: "
-															+ args[i]
-															+ " "
-															+ args[i + 1]
-															+ "only port 49152 through 65535 is available");
+											.exit("Invalid option: "
+													+ args[i]
+													       + " "
+													       + args[i + 1]
+													              + "only port 49152 through 65535 is available");
 										} else
 											System.exit(-1);
 									}
@@ -491,18 +496,18 @@ public class FrontEnd {
 									if (Env.fUNYO) {
 										Mediator.exit("Invalid option: "
 												+ args[i] + " " + args[i + 1]
-												+ ". "
-												+ "Cannot parse as integer: "
-												+ args[i + 1]);
+												                       + ". "
+												                       + "Cannot parse as integer: "
+												                       + args[i + 1]);
 									} else
 										System.exit(-1);
 								}
 							} else {
 								Util.errPrintln("Invalid option: " + args[i]
-										+ " " + args[i + 1]);
+								                                          + " " + args[i + 1]);
 								if (Env.fUNYO) {
 									Mediator.exit("Invalid option: " + args[i]
-											+ " " + args[i + 1]);
+									                                        + " " + args[i + 1]);
 								} else
 									System.exit(-1);
 							}
@@ -526,17 +531,17 @@ public class FrontEnd {
 							// Env.fREPL = true;
 							// Env.fREMAIN = true;
 						} else if (args[i].matches("--request-port")) {// 2006.4.27
-																		// by
-																		// inui
+							// by
+							// inui
 							Debug.setRequestPort(Integer.parseInt(args[i + 1]));
 							i++;
 						} else if (args[i].equals("--stdin-lmn")) { // 2006.07.11
-																	// inui
+							// inui
 							// / --stdin-lmn
 							// / read LMNtal program from standard input
 							Env.stdinLMN = true;
 						} else if (args[i].equals("--stdin-tal")) { // 2006.07.11
-																	// inui
+							// inui
 							// / --stdin-tal
 							// / read LMNtal intermediate instruction list from
 							// standard input
@@ -573,7 +578,7 @@ public class FrontEnd {
 							// / set <integer> as the upper limit of threads
 							// occured in leftside rules.
 							Env.threadMax = Integer.parseInt(args[i]
-									.substring(13));
+							                                      .substring(13));
 						} else if (args[i].startsWith("--temporary-dir=")) {
 							// / --temporary-dir=<path>
 							// / use <path> as temporary directory
@@ -603,7 +608,7 @@ public class FrontEnd {
 							int ctlevel = 0;
 							try {
 								ctlevel = Integer.parseInt(args[i]
-										.substring(19));
+								                                .substring(19));
 							} catch (NumberFormatException e) {
 								ctlevel = Env.COUNT_DEFAULT; // 最大限
 							}
@@ -645,43 +650,43 @@ public class FrontEnd {
 							Env.compileRule = true;
 							Env.compileonly = true;
 						} else if (args[i].equals("--hl") || args[i].equals("--hl-opt")) { //seiji
-						  boolean slimcode = false;
-						  for (int j = 0; j < args.length; j++)
-						    if (args[j].equals("--slimcode")) slimcode = true;
-						  if (slimcode) {
-						    Env.hyperLink = true;
-						    if (args[i].equals("--hl-opt")) 
-						      Env.hyperLinkOpt = true;
-						  } else {
-						    Util.errPrintln("Can't use option " + args[i] + " without option --slimcode.");
-						    System.exit(-1);
-						  }
+							boolean slimcode = false;
+							for (int j = 0; j < args.length; j++)
+								if (args[j].equals("--slimcode")) slimcode = true;
+							if (slimcode) {
+								Env.hyperLink = true;
+								if (args[i].equals("--hl-opt")) 
+									Env.hyperLinkOpt = true;
+							} else {
+								Util.errPrintln("Can't use option " + args[i] + " without option --slimcode.");
+								System.exit(-1);
+							}
 						} else {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util
-									.errPrintln("Use option --help to see a long list of options.");
+							.errPrintln("Use option --help to see a long list of options.");
 							if (Env.fUNYO) {
 								Mediator
-										.exit("Invalid option: "
-												+ args[i]
-												+ ". "
-												+ "Use option --help to see a long list of options.");
+								.exit("Invalid option: "
+										+ args[i]
+										       + ". "
+										       + "Use option --help to see a long list of options.");
 							} else
 								System.exit(-1);
 						}
 						break;
 					default:
 						Util.errPrintln("Invalid option: " + args[i]);
-						Util
-								.errPrintln("Use option --help to see a long list of options.");
-						if (Env.fUNYO) {
-							Mediator
-									.exit("Invalid option: "
-											+ args[i]
-											+ ". "
-											+ "Use option --help to see a long list of options.");
-						} else
-							System.exit(-1);
+					Util
+					.errPrintln("Use option --help to see a long list of options.");
+					if (Env.fUNYO) {
+						Mediator
+						.exit("Invalid option: "
+								+ args[i]
+								       + ". "
+								       + "Use option --help to see a long list of options.");
+					} else
+						System.exit(-1);
 					}
 				}
 			} else { // '-'以外で始まるものは (実行ファイル名, argv[0], arg[1], ...) とみなす
@@ -696,10 +701,10 @@ public class FrontEnd {
 		if (Env.ndMode != Env.ND_MODE_D) {
 			if (Env.fInterpret) {
 				Util
-						.errPrintln("Non Deterministic execution is not supported in interpreted mode");
+				.errPrintln("Non Deterministic execution is not supported in interpreted mode");
 				if (Env.fUNYO) {
 					Mediator
-							.exit("Non Deterministic execution is not supported in interpreted mode");
+					.exit("Non Deterministic execution is not supported in interpreted mode");
 				} else
 					System.exit(-1);
 			}
@@ -748,10 +753,10 @@ public class FrontEnd {
 				if (Env.debugDaemon > 0) {
 					Thread dumpErr = new Thread(new StreamDumper(
 							"LMNtalDaemon.stderr", daemon.getErrorStream()),
-							"StreamDumper");
+					"StreamDumper");
 					Thread dumpOut = new Thread(new StreamDumper(
 							"LMNtalDaemon.stdout", daemon.getInputStream()),
-							"StreamDumper");
+					"StreamDumper");
 					dumpErr.start();
 					dumpOut.start();
 				}
@@ -910,22 +915,22 @@ public class FrontEnd {
 				try {
 					List<Ruleset> rulesets = m.rulesets;
 					runtime.InterpretedRuleset r = (runtime.InterpretedRuleset) rulesets
-							.get(0);
+					.get(0);
 					r.rules.get(0).showDetail();
 				} catch (Exception e) {
 					Env.e("Compilation Failed: no rule");
 				}
 				return;
 			} else {
-				((InterpretedRuleset) rs).showDetail();
-				m.showAllRules();
+				showIL((InterpretedRuleset)rs, m);
+
 			}
 
 			if (Env.compileonly) {
 				// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
 				for (String libName : Module.loaded) {
 					compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
-							.get(libName);
+					.get(libName);
 					Iterator<Ruleset> it2 = mem.rulesets.iterator();
 					while (it2.hasNext()) {
 						((InterpretedRuleset) it2.next()).showDetail();
@@ -951,6 +956,40 @@ public class FrontEnd {
 	}
 
 	/**
+	 * 中間命令列を出力する
+	 * @param rs　初期化ルールのみを含むルールセット
+	 * @param m グローバル膜
+	 */
+	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m) {
+		if (!Env.slimcodelmnsyntax) {
+			rs.showDetail();
+			m.showAllRules();
+		} else {
+			int rulesetIndex = 0;
+			Env.p("rulesets{");
+			Env.p("initRuleset{");
+			rs.showDetailLMNtalSyntax(rulesetIndex);
+			rulesetIndex++;
+			Env.p("}.");
+			
+			rulesetIndex = m.showAllRulesLMNtalSyntax(rulesetIndex);
+			StringBuffer sb = new StringBuffer();
+			sb.append("rulesetList = [");
+			String pre = "";
+			for (int i = 0; i < rulesetIndex; i++) {
+				sb.append(pre);
+				sb.append("RulesetIndex" + i);
+				pre = ",";
+			}
+			sb.append("].");
+			Env.p(sb.toString());
+			Env.p("}.");
+			
+			System.out.print("//");
+		}
+	}
+
+	/**
 	 * 与えられた初期データ生成ルールセットを元に、一連の実行を行う。
 	 * 
 	 * @param rs
@@ -970,7 +1009,7 @@ public class FrontEnd {
 				if (Env.remainedRuntime != null) {
 					root.moveCellsFrom(Env.remainedRuntime.getGlobalRoot());
 					root.rulesets
-							.addAll(Env.remainedRuntime.getGlobalRoot().rulesets);
+					.addAll(Env.remainedRuntime.getGlobalRoot().rulesets);
 				}
 			}
 
@@ -1033,7 +1072,7 @@ public class FrontEnd {
 						Env.p(Dumper.dump(rt.getGlobalRoot()));
 					}
 				} // else if (!Env.fTrace && Env.verbose > 0 && Env.ndMode ==
-					// Env.ND_MODE_D) {
+				// Env.ND_MODE_D) {
 				else if (Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
 					Env.d("Execution Result:");
 					if (Env.dump2) {
@@ -1117,19 +1156,19 @@ public class FrontEnd {
 				for (a = b;; b = a) {
 					a = a.replaceAll(
 							"([A-Z][0-9a-zA-Z]*)<u>(.*?)\\:\\-(.*?)\\|",
-							"$1$2:-unary($1), $3|");
+					"$1$2:-unary($1), $3|");
 					a = a.replaceAll(
 							"([A-Z][0-9a-zA-Z]*)<s>(.*?)\\:\\-(.*?)\\|",
-							"$1$2:-string($1), $3|");
+					"$1$2:-string($1), $3|");
 					a = a.replaceAll(
 							"([A-Z][0-9a-zA-Z]*)<i>(.*?)\\:\\-(.*?)\\|",
-							"$1$2:-int($1), $3|");
+					"$1$2:-int($1), $3|");
 					a = a.replaceAll(
 							"([A-Z][0-9a-zA-Z]*)<g>(.*?)\\:\\-(.*?)\\|",
-							"$1$2:-ground($1), $3|");
+					"$1$2:-ground($1), $3|");
 					if (b.equals(a))
 						break; // "stable"
-						// System.out.println(a);
+					// System.out.println(a);
 				}
 			}
 			Util.println(a);

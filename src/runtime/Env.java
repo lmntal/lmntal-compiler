@@ -42,6 +42,9 @@ public final class Env {
 
 	/** SLIM用の中間命令列を出力するモード。 */
 	public static boolean slimcode = false;
+	
+	/** SLIM用の中間命令列を LMNtal syntax で出力するモード */
+	public static boolean slimcodelmnsyntax = false;
 
 	/** 履歴つきfindatomを含む中間命令列を出力するモード。 */
 	public static boolean findatom2 = false;

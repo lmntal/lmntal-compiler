@@ -338,6 +338,32 @@ public final class InterpretedRuleset extends Ruleset implements Serializable {
 		if(Env.slimcode)
 			Env.p("");
 	}
+	public void showDetailLMNtalSyntax(int rulesetIndex) {
+		int ruleIndex = 0;
+		if (Env.verbose >= Env.VERBOSE_SHOWRULES || Env.compileonly)
+			if(isSystemRuleset)
+				Env.p("systemRuleset(" + id + ")." + "+RulesetIndex" + rulesetIndex + ", " + dumpRules());
+			else
+				Env.p("ruleset(" + id + ")." + "+RulesetIndex" + rulesetIndex + ", " +  dumpRules());
+		Iterator<Rule> l = rules.listIterator();
+		while (l.hasNext()) {
+			Rule r = l.next();
+			r.showDetailLMNtalSyntax(rulesetIndex, ruleIndex);
+			ruleIndex++;
+		}
+		StringBuffer sb = new StringBuffer();
+		sb.append("ruleList = [");
+		String pre = "";
+		for (int i = 0; i < ruleIndex; i++) {
+			sb.append(pre);
+			sb.append("RuleIndex" + rulesetIndex + "_" + i);
+			pre = ", ";
+		}
+		sb.append("].");
+		Env.p(sb.toString());
+		if(Env.slimcode)
+			Env.p("");
+	}
 	
 	public void serialize(ObjectOutputStream out) throws IOException {
 		super.serialize(out);

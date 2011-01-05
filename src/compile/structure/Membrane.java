@@ -188,6 +188,43 @@ public final class Membrane {
 		while(it.hasNext()) ((Membrane)it.next()).showAllRules();
 	}
 
+	/**
+	 * この膜の中にあるルールを LMNtal syntax で全て表示する。
+	 * 
+	 * <pre>
+	 * 「この膜の中にあるルール」とは、以下の３種類。
+	 * 　[1]この膜のルールセットに含まれる全てのルール
+	 * 　[2] [1]の左辺膜の中にあるルール
+	 * 　[3] [1]の右辺膜の中にあるルール
+	 * </pre>
+	 */
+	public int showAllRulesLMNtalSyntax(int rulesetIndex) {
+		Env.c("Membrane.showAllRules " + this);
+		Iterator it = rulesets.iterator();
+		while (it.hasNext()) {
+			Env.p("ruleset{");
+			((InterpretedRuleset)it.next()).showDetailLMNtalSyntax(rulesetIndex);
+			rulesetIndex++;
+			Env.p("}.");
+		}
+
+		// 直属のルールそれぞれについて、その左辺膜と右辺膜のルールセットを表示
+		it = rules.iterator();
+		while (it.hasNext()) {
+			RuleStructure rs = (RuleStructure)it.next();
+			//Env.p("");
+			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
+			rs.leftMem.showAllRulesLMNtalSyntax(rulesetIndex);
+			//Env.p("About rule structure (RIGHT): "+rs.rightMem+" of "+rs);
+			rs.rightMem.showAllRulesLMNtalSyntax(rulesetIndex);
+		}
+		// 子膜それぞれ
+		it = mems.iterator();
+		while(it.hasNext()){
+			((Membrane)it.next()).showAllRulesLMNtalSyntax(rulesetIndex);
+		}
+		return rulesetIndex;
+	}
 	/*
 	 * okabe
 	 * この膜に含まれるアトムのうち一番最初のアトムのアトム名を返す
