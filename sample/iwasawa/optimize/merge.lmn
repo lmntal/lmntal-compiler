@@ -15,7 +15,7 @@ merge_init{
 merge_init@@
 ruleList = List, max{@max}
  :-
-  merge ({compiledRule(Insts, L),
+  merge ({compiledRule(Insts, L), hasUniq(false)
   Insts = [A | L], A = [spec, [1, 0]], @max },  List).
 
 max{
@@ -23,6 +23,13 @@ max_a@@
 R = max($a, $b) :- int($a), int($b), $a >= $b | R = $a.
 max_b@@
 R = max($a, $b) :- int($a), int($b), $a =< $b | R = $b.
+
+or_false@@
+R = or(false, false) :- R = false.
+or_a@@
+R = or(true, $b) :- unary($b) | R = true.
+or_b@@
+R = or($a, true) :- unary($a) | R = true.
 }.
 }.
 
@@ -34,14 +41,14 @@ merge ( {compiledRule(L, T),  $insts[L, T], @p}, [] ) :-
 
 merge_opt@@
 merge( {compiledRule([[spec, [1, SpecB]] | InstH], InstT), 
-          $insts[InstH, InstT, SpecB], @p },
-       [ {compiledRule = [[spec, [SA, SB]] | L ], $p[L], 
+          $insts[InstH, InstT, SpecB], hasUniq($uniqA), @p },
+       [ {compiledRule = [[spec, [SA, SB]] | L ], hasUniq($uniqB), $p[L], 
        $sa[SA], $sb[SB],  +R } | T] ),
 rule(R) 
-:- int($sa), int($sb) |
+:- int($sa), int($sb), unary($uniqA), unary($uniqB) |
   merge( { compiledRule([[spec, [1, MAX]] | InstL], InstT), 
             $insts[InstL, L1, SpecB], MAX = max(SpecB, $sb),
-   L1 = [[[branch, $p]] |  InstT], @p}, T).
+   L1 = [[[branch, $p]] |  InstT], hasUniq(or($uniqA, $uniqB)), @p}, T).
 
 }.
 

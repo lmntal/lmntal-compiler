@@ -53,13 +53,24 @@ R = print_ruleList(X, []) :- R = X.
 
 printRuleList@@
 R = print_ruleList(X, 
-  [ {+Rule, compiledRule($insts)} | T]),
+  [ {+Rule, hasUniq(false), compiledRule($insts)} | T]),
   rule(Rule)
   :- R = print_ruleList(
          print_insts(
 	 io_print(X, "Compiled Rule\n\t--atommatch:\n\t--memmatch:\n"),
 	 	     $insts),
-		     T).	     
+		     T).
+
+printRuleListUniq@@
+R = print_ruleList(X, 
+  [ {+Rule, hasUniq(true), compiledRule($insts)} | T]),
+  rule(Rule)
+  :- R = print_ruleList(
+         print_insts(
+	 io_print(X, "Compiled Uniq Rule\n\t--atommatch:\n\t--memmatch:\n"),
+	 	     $insts),
+		     T).
+
 	 
 }.
 
