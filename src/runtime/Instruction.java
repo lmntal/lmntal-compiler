@@ -2491,7 +2491,7 @@ public class Instruction implements Cloneable, Serializable {
 		str = str.replaceFirst("(\\$\\w+)_(\\d+)", "proxyFunctor(\"$1\", $2)"); // プロキシを lmn syntax に
 		str = str.replaceFirst("(-\\d+)_(\\d+)", "intFunctor($1, $2)"); // 負の int アトムを特別扱い
 		str = str.replaceFirst("(\\d+)_(\\d+)", "intFunctor($1, $2)"); // 非負の int アトムを特別扱い
-		str = str.replaceFirst("\"([\\w\\s\\+\\-\\\\\\[\\]\\(\\)\\$\\,\\.@_:;]|\\\\\"+)\"_(\\d+)", "stringFunctor('$1', $2)"); // string アトムを特別扱い
+		str = str.replaceFirst("\"(([\\w\\s\\+\\-\\\\\\[\\]\\(\\)\\$\\,\\.@_:;]|\\\\\")+)\"_(\\d+)", "stringFunctor('$1', $3)"); // string アトムを特別扱い
 		str = str.replaceFirst("'\\.'_(\\d+)", "functor('.', $1)"); // . アトムを特別扱い
 		str = str.replaceFirst("'\\,'_(\\d+)", "functor(',', $1)"); // , アトムを特別扱い
 		str = str.replaceFirst("@(\\d+)", "rulesetNum($1)"); // ルールセット番号を lmntal syntax に
