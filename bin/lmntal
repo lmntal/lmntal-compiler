@@ -24,8 +24,8 @@ done
 optlibpath=$LMNTAL_HOME/sample/iwasawa/optimize
 if [ $level5 = true -a $slimcode = true ]; then
     
-    ( java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret "$@" | \
-    ${optlibpath}/conv.rb ) > ${lmnfile}IL.lmn
+    java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --slimcodelmnsyntax --interpret "$@" > ${lmnfile}IL.lmn
+   
     java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret --slimcode -O3 \
     ${lmnfile}IL.lmn ${optlibpath}/optimizeMain.lmn ${optlibpath}/reuse.lmn ${optlibpath}/merge.lmn ${optlibpath}/outputIL.lmn  |  slim  -
 
