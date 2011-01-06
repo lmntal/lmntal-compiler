@@ -214,14 +214,14 @@ public final class Membrane {
 			RuleStructure rs = (RuleStructure)it.next();
 			//Env.p("");
 			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
-			rs.leftMem.showAllRulesLMNtalSyntax(rulesetIndex);
+			rulesetIndex = rs.leftMem.showAllRulesLMNtalSyntax(rulesetIndex);
 			//Env.p("About rule structure (RIGHT): "+rs.rightMem+" of "+rs);
-			rs.rightMem.showAllRulesLMNtalSyntax(rulesetIndex);
+			rulesetIndex = rs.rightMem.showAllRulesLMNtalSyntax(rulesetIndex);
 		}
 		// 子膜それぞれ
 		it = mems.iterator();
 		while(it.hasNext()){
-			((Membrane)it.next()).showAllRulesLMNtalSyntax(rulesetIndex);
+			rulesetIndex = ((Membrane)it.next()).showAllRulesLMNtalSyntax(rulesetIndex);
 		}
 		return rulesetIndex;
 	}

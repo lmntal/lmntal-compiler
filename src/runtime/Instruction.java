@@ -2494,6 +2494,7 @@ public class Instruction implements Cloneable, Serializable {
 		str = str.replaceFirst("\"([\\w\\s@]+)\"_(\\d+)", "stringFunctor($1, $2)"); // string アトムを特別扱い
 		str = str.replaceFirst("'\\.'_(\\d+)", "functor('.', $1)"); // . アトムを特別扱い
 		str = str.replaceFirst("'\\,'_(\\d+)", "functor(',', $1)"); // , アトムを特別扱い
+		str = str.replaceFirst("@(\\d+)", "rulesetNum($1)"); // ルールセット番号を lmntal syntax に
 		
 		str = str.replaceFirst("listnilfunctor_escape", "[]"); // エスケープした [] を戻す
 
