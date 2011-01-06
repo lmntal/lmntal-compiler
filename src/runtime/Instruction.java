@@ -2492,7 +2492,7 @@ public class Instruction implements Cloneable, Serializable {
 		str = str.replaceFirst("(-\\d+)_(\\d+)", "intFunctor($1, $2)"); // 負の int アトムを特別扱い
 		str = str.replaceFirst("(\\d+)_(\\d+)", "intFunctor($1, $2)"); // 非負の int アトムを特別扱い
 		str = str.replaceFirst("\"(([\\w\\s\\+\\-\\\\\\[\\]\\(\\)\\$\\,\\.@_:;']|\\\\\")+)\"_(\\d+)", "stringFunctor(\"$1\", $3)"); // string アトムを特別扱い
-		str = str.replaceFirst("(stringFunctor\\(\".*)(')(.*\",)", "$1\\\\'$2");
+		str = str.replaceFirst("(stringFunctor\\(\".*)'(.*\",)", "$1\\\\'$2");
 		str = str.replaceFirst("stringFunctor\\(\"(.*)\",", "stringFunctor('$1',"); // stringFunctor の第一引数を string 型ではなく、 symbol 型に
 		str = str.replaceFirst("'\\.'_(\\d+)", "functor('.', $1)"); // . アトムを特別扱い
 		str = str.replaceFirst("'\\,'_(\\d+)", "functor(',', $1)"); // , アトムを特別扱い
