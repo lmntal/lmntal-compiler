@@ -138,8 +138,8 @@ public final class Rule implements Serializable {
 	public void showDetailLMNtalSyntax(int rulesetIndex, int ruleIndex) {
 		if (Env.debug == 0 && !Env.compileonly) return;
 
-		if (hasUniq && Env.slimcode) Env.p("Compiled Uniq Rule " + this);
-		else Env.p("rule{ +RuleIndex" + rulesetIndex + "_" + ruleIndex + ", " + this);
+		if (hasUniq && Env.slimcode) Env.p("rule{ hasUniq(false), +RuleIndex" + rulesetIndex + "_" + ruleIndex + ", " + this);
+		else Env.p("rule{ hasUniq(true), +RuleIndex" + rulesetIndex + "_" + ruleIndex + ", " + this);
 
 		
 		Env.p("compiledRule = [\n");
