@@ -15,7 +15,7 @@ merge_init{
 merge_init@@
 ruleList = List, max{@max}
  :-
-  merge ({compiledRule(Insts, L), hasUniq(false)
+  merge ({compiledRule(Insts, L), hasUniq(false),
   Insts = [A | L], A = [spec, [1, 0]], @max },  List).
 
 max{

@@ -179,6 +179,10 @@ elm_to_string5@@
 Ret = elm_to_string($i) :- string($i) 
   | Ret = str.concat( str.concat("\"", $i), "\"").
 
+elm_to_string_listnil@@
+Ret = elm_to_string([])
+  :-  Ret = list_to_string([]).
+
 elm_to_string_intList@@
 Ret = elm_to_string([H | T]) 
   :-  Ret = list_to_string([H | T]).
