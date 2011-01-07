@@ -18,16 +18,21 @@ do
     fi
     if [ ${arg%%.lmn} != $arg ];then
 	lmnfile=${arg%%.lmn}
+	lmntal_syntax_il=${lmnfile}_lmntal_syntax_il.lmn
     fi
 done
+
+
 
 optlibpath=$LMNTAL_HOME/sample/iwasawa/optimize
 if [ $level5 = true -a $slimcode = true ]; then
     
-    java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --slimcodelmnsyntax --interpret "$@" > ${lmnfile}IL.lmn
+    java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --slimcodelmnsyntax --interpret "$@" > ${lmntal_syntax_il}
    
     java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret --slimcode -O3 \
-    ${lmnfile}IL.lmn ${optlibpath}/optimizeMain.lmn ${optlibpath}/reuse.lmn ${optlibpath}/merge.lmn ${optlibpath}/outputIL.lmn  |  slim  -
+    ${lmntal_syntax_il} ${optlibpath}/optimizeMain.lmn ${optlibpath}/reuse.lmn ${optlibpath}/merge.lmn ${optlibpath}/outputIL.lmn  |  slim  -
+
+    rm ${lmntal_syntax_il}
 
 else
     java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret "$@"  
