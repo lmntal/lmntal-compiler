@@ -619,6 +619,15 @@ public class RuleCompiler {
 	 * uniq 命令を一つにまとめてガード命令列の最後に移動する。
 	 * uniq 命令は、全ての失敗しうるガード命令のうち最後尾にないといけない。
 	 * hara
+	 *   
+	 *   newhlinkなど, シンボルアトムを生成するガード命令を追加したため、
+	 *   以下のように、"全ての失敗しうるガード命令"の最後尾であり、
+	 *   ”シンボルアトム生成命令”よりも前に挿入される 2011/01/10 seiji
+	 *        ....
+	 *     [全ての失敗しうるガード命令列]
+	 *      [uniq] <-- ここに挿入する
+	 *     [newhlinkなどのシンボルアトム生成命令列]
+	 *        ....
 	 */
 	void fixUniqOrder() {
 		boolean found = false;
@@ -632,7 +641,25 @@ public class RuleCompiler {
 				it.remove();
 			}
 		}
-		if(found) guard.add(new Instruction(Instruction.UNIQ, vars));
+		
+//		if(found) guard.add(new Instruction(Instruction.UNIQ, vars));
+		if (found) {
+			boolean guardallocs = false;
+			Iterator<Instruction> it2 = guard.iterator();
+			int i = 0;
+			while (it2.hasNext()) {
+				Instruction inst2 = it2.next();
+				/* シンボルアトムを生成する命令に出会うまでループ */
+				if (inst2.getKind() == Instruction.NEWHLINK
+						|| inst2.getKind() == Instruction.MAKEHLINK) {
+					guardallocs = true;
+					break;
+				}
+				i++;
+			}
+			if (guardallocs) guard.add(i, new Instruction(Instruction.UNIQ, vars));
+			else guard.add(new Instruction(Instruction.UNIQ, vars));
+		}
 	}
 
 	/** 否定条件をコンパイルする */
