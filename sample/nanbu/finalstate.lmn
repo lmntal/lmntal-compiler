@@ -1,4 +1,4 @@
-
+in{
  statespace{
  
   18944::{el{pota(5), potb(0)}, '@5'},
@@ -22,7 +22,7 @@
   16384::{el{pota(7), potb(1)}, '@5'},
   3840::{el{pota(3), potb(3)}, '@5'},
   2304::{el{pota(7), potb(3)}, '@5'}.
-  913::{el{pota(7), potb(3)}, '@5'}.
+  913::{el{pota(7), potb(7)}, '@5'}.
   
   trans(init, 256).
   trans(18944,1024),trans(18944,17664),trans(18944,256),trans(18944,20480),trans(18944,20736),
@@ -133,12 +133,21 @@
   int($id),int($id2),$id == $id2 ,uniq($id,$id2)|
  finalstateID($id),call($id),$id2 = ({}).
  
-
+ //最終状態の情報を取得
  finalstateID($id),statespace{$ss, @ss}:-
  int($id),uniq($id)|
   finalstate = getStateFromID($id,statespace{$ss, @ss}).
-
-  out{}.
+ 
+ final{}.
   
- finalstate({$p[]}),out{$q}
- :- out{finalstate{$p[]},$q}.
+ finalstate({$p[]}),final{$q}
+ :- final{finalstate{$p[]},$q}.
+ 
+ }.
+ //最終状態のみを表示
+ out{}.
+ 
+ in{final{$p[]},$aa[],@aa},out{$q}
+ :-
+ out{final{$p[]},$q}.
+
