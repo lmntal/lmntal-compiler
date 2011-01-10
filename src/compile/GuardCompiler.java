@@ -244,7 +244,7 @@ class GuardCompiler extends HeadCompiler {
 					tmpFirst.add(a);
 					it.remove();
 				}
-				if(a.functor.getName().startsWith("custom")) {
+				if(a.functor.getName().startsWith("custom") || a.functor.getName().equals("new")) {
 					tmpLast.add(a);
 					it.remove();
 				}
