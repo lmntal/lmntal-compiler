@@ -9,6 +9,7 @@ fi
 level5=false
 slimcode=false
 lmnfile=initial_lmntal_file_name
+lmntal_syntax_il=${lmnfile}_lmntal_syntax_il.lmn
 for arg in $*
 do
     if [ $arg = -O5 ]; then
