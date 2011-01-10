@@ -1206,7 +1206,7 @@ public class RuleCompiler {
 		for(Atom atom : rhsatoms){
 			int atomID = rhsatomToPath(atom);
 			if (atom.functor.equals(new SymbolFunctor("-", 2))) {
-				body.add( new Instruction(Instruction.REVERSEHLINK, rhsmemToPath(atom.mem), atomID));
+				; //body.add( new Instruction(Instruction.REVERSEHLINK, rhsmemToPath(atom.mem), atomID));
 			} else if (atom.functor.equals(new SymbolFunctor("><", 2)))
 				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
 			else if (atom.functor.equals(new SymbolFunctor(">*<", 2)))
@@ -1214,7 +1214,7 @@ public class RuleCompiler {
 			else if (atom.functor.equals(new SymbolFunctor(">+<", 2)))
 				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
 			else if (atom.functor.equals(new SymbolFunctor(">>", 2)))
-				body.add( new Instruction(Instruction.UNIFYNAMECONAME, rhsmemToPath(atom.mem), atomID));
+				; //body.add( new Instruction(Instruction.UNIFYNAMECONAME, rhsmemToPath(atom.mem), atomID));
 			else if (atom.functor.equals(new SymbolFunctor("<<", 2)))
 				;
 			

@@ -1171,52 +1171,61 @@ public class Instruction implements Cloneable, Serializable {
 	///////////////////////////////////////////////////////////////////////
 
 	// hyperlink用命令 (250--) //seiji
-	/** 
-	 * 
-	 * 
+	/** newhlink [link]
+	 * 新たなhyperlinkを生成し, link先に接続することを示す
 	 */
 	public static final int NEWHLINK = 250;
 	static {setArgType(NEWHLINK, new ArgType(true, ARG_VAR));};
+	/** makehlink [ID, link]
+	 * 過去に生成されたhyperlinkのうち, 識別子IDを持つhyperlinkを生成し, link先に接続することを示す
+	 * （未実装、hyperlinkへの値の代入などに使用できるかも？）
+	 */
 	public static final int MAKEHLINK = 251;
 	static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));};
 	
-	public static final int ISNAME = 255;
-	static {setArgType(ISNAME, new ArgType(false, ARG_VAR));};
-	public static final int ISCONAME = 256;
-	static {setArgType(ISCONAME, new ArgType(false, ARG_VAR));};
+//	public static final int ISNAME = 255;
+//	static {setArgType(ISNAME, new ArgType(false, ARG_VAR));};
+//	public static final int ISCONAME = 256;
+//	static {setArgType(ISCONAME, new ArgType(false, ARG_VAR));};
+	/** ishlink [link]
+	 * link先に接続する構造がhyperlinkであることをチェックすることを示す
+	 */
 	public static final int ISHLINK = 257;
 	static {setArgType(ISHLINK, new ArgType(false, ARG_VAR));};
-	public static final int SETCONAME = 258;
-	static {setArgType(SETCONAME, new ArgType(true, ARG_VAR, ARG_VAR));};
-	public static final int HASCONAME = 259;
-	static {setArgType(HASCONAME, new ArgType(false, ARG_VAR));};
-	public static final int NHASCONAME = 260;
-	static {setArgType(NHASCONAME, new ArgType(false, ARG_VAR));};
-	public static final int GETCONAME = 261;
-	static {setArgType(GETCONAME, new ArgType(true, ARG_VAR, ARG_VAR));};
-	public static final int GETNAME = 262;
-	static {setArgType(GETNAME, new ArgType(true, ARG_VAR, ARG_VAR));};
-	public static final int REVERSEHLINK = 263;
-	static {setArgType(REVERSEHLINK, new ArgType(false, ARG_VAR, ARG_VAR));};
+//	public static final int SETCONAME = 258;
+//	static {setArgType(SETCONAME, new ArgType(true, ARG_VAR, ARG_VAR));};
+//	public static final int HASCONAME = 259;
+//	static {setArgType(HASCONAME, new ArgType(false, ARG_VAR));};
+//	public static final int NHASCONAME = 260;
+//	static {setArgType(NHASCONAME, new ArgType(false, ARG_VAR));};
+//	public static final int GETCONAME = 261;
+//	static {setArgType(GETCONAME, new ArgType(true, ARG_VAR, ARG_VAR));};
+//	public static final int GETNAME = 262;
+//	static {setArgType(GETNAME, new ArgType(true, ARG_VAR, ARG_VAR));};
+//	public static final int REVERSEHLINK = 263;
+//	static {setArgType(REVERSEHLINK, new ArgType(false, ARG_VAR, ARG_VAR));};
+	/** getnum [hyperlink, atom]
+	 * hyperlinkの要素数をatomに返すことを示す
+	 */
 	public static final int GETNUM = 264;
 	static {setArgType(GETNUM, new ArgType(true, ARG_VAR, ARG_VAR));};
 	
-	public static final int UNIFYHLINK = 265;
-	static {setArgType(UNIFYHLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
-	public static final int UNIFYCONAMEAND = 266;
-	static {setArgType(UNIFYCONAMEAND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
-	public static final int UNIFYCONAMEOR = 267;
-	static {setArgType(UNIFYCONAMEOR, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
-	/** unifyhlink2 [mem, atom1, atom2, atom3]
-	 * 
-	 * 
+//	public static final int UNIFYHLINK = 265;
+//	static {setArgType(UNIFYHLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
+//	public static final int UNIFYCONAMEAND = 266;
+//	static {setArgType(UNIFYCONAMEAND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
+//	public static final int UNIFYCONAMEOR = 267;
+//	static {setArgType(UNIFYCONAMEOR, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
+	/** unifyhlinks [mem, unify_atom]
+	 * 膜memにあるunify_atom"><"に対してhyperlinkの併合操作を行なうことを示す
 	 */
 	public static final int UNIFYHLINKS = 268;
 	static {setArgType(UNIFYHLINKS, new ArgType(false, ARG_VAR, ARG_VAR));};
-	public static final int UNIFYNAMECONAME = 269;
-	public static final int UNIFYCONAMENAME = 270;
-	static {setArgType(UNIFYNAMECONAME, new ArgType(false, ARG_VAR, ARG_VAR));};
-	static {setArgType(UNIFYCONAMENAME, new ArgType(false, ARG_VAR, ARG_VAR));};
+//	public static final int UNIFYNAMECONAME = 269;
+//	public static final int UNIFYCONAMENAME = 270;
+//	static {setArgType(UNIFYNAMECONAME, new ArgType(false, ARG_VAR, ARG_VAR));};
+//	static {setArgType(UNIFYCONAMENAME, new ArgType(false, ARG_VAR, ARG_VAR));};
+	
 	/** findproccxt [atom1, length1, arg1, atom2, length2, arg2]
 	 * アトム番号atom1(価数=lenght1)の第arg1引数の型付きプロセス文脈が、
 	 * アトム番号atom2(価数=lenght2)の第arg2引数の型付きプロセス文脈と同名であることを示す
