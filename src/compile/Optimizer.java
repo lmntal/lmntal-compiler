@@ -229,6 +229,7 @@ public class Optimizer {
 			case Instruction.UNIQ:
 			case Instruction.NOT_UNIQ:
 			case Instruction.GUARD_INLINE:
+			case Instruction.ADDTOLIST:
 				continue;
 				//引数に命令列を持つ命令
 			case Instruction.GROUP:
