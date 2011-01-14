@@ -628,10 +628,12 @@ class HeadCompiler {
 					Atom oriatom = (Atom)linkNameToAtomMap.get(oriname);
 					for (int j = 0; j < oriatom.args.length; j++) {
 						if (oriatom.args[j].name.equals(oriname)) {
-//							insts.add(0, new Instruction(Instruction.FINDPROCCXT, atomToPath(oriatom), j, atomToPath(newatom), i));
-//							if (atomToPath(oriatom) < atomToPath(newatom))
-							insts.add(new Instruction(Instruction.FINDPROCCXT, 
-									atomToPath(oriatom), oriatom.args.length, j, atomToPath(newatom), newatom.args.length, i));
+							if (atomToPath(oriatom) <= atomToPath(newatom))
+								insts.add(new Instruction(Instruction.FINDPROCCXT, 
+										atomToPath(oriatom), oriatom.args.length, j, atomToPath(newatom), newatom.args.length, i));
+							else 
+								insts.add(new Instruction(Instruction.FINDPROCCXT, 
+										atomToPath(newatom), newatom.args.length, i, atomToPath(oriatom), oriatom.args.length, j));
 						}
 					}
 				}
