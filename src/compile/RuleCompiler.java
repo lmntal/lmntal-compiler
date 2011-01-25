@@ -882,6 +882,7 @@ public class RuleCompiler {
 			if (func.equals(new SymbolFunctor("unary",1)))  { lists[0].add(cstr); it.remove(); }
 			if (func.equals(Functor.UNIFY))                 { lists[1].add(cstr); it.remove(); }
 			if (func.equals(new SymbolFunctor("==",2)))     { lists[1].add(cstr); it.remove(); }
+			if (func.equals(new SymbolFunctor("\\==",2)))   { lists[1].add(cstr); it.remove(); }
 			if (func.equals(new SymbolFunctor("ground",1))) { lists[2].add(cstr); it.remove(); }
 		}
 		typeConstraints.addAll(lists[0]);

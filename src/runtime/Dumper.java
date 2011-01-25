@@ -53,6 +53,7 @@ public class Dumper {
 		binops.put("-.", new int[] { yfx, 500 });
 		binops.put("=", new int[] { xfx, 700 });
 		binops.put("==", new int[] { xfx, 700 });
+		binops.put("\\==", new int[] { xfx, 700 });//seiji
 		binops.put("=:=", new int[] { xfx, 700 });
 		binops.put("=\\=", new int[] { xfx, 700 });
 		binops.put(">", new int[] { xfx, 700 });

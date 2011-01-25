@@ -71,7 +71,7 @@ SymbolName = "'" [^'\r\n]+ "'" | "'" [^'\r\n]* ("''" [^'\r\n]*)+ "'"
 
 ////////////////////////////////////////////////////////////////
 
-RelativeOp = "=" | "==" | "!=" | "\\=" | "::" | "?" | {IntegerRelativeOp} | {FloatingRelativeOp}
+RelativeOp = "=" | "\\==" | "==" | "!=" | "\\=" | "::" | "?" | {IntegerRelativeOp} | {FloatingRelativeOp}//seiji
 IntegerRelativeOp  = "<" | ">" | ">=" | "=<" | "=:=" | "=\\="
 FloatingRelativeOp = "<."| ">."| ">=."| "=<."| "=:=."| "=\\=."
 

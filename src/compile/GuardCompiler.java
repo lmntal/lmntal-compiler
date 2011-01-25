@@ -456,6 +456,20 @@ class GuardCompiler extends HeadCompiler {
 						match.add(new Instruction(Instruction.ISUNARY, atomid2));
 						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
 					}
+					else if (func.equals(new SymbolFunctor("\\==",2))) { // (+X \== +Y) //seiji
+						/* unaryÍÑÈæ³Ó±é»»»Ò (11/01/25 seiji) */
+						if (!identifiedCxtdefs.contains(def1)) continue;
+						if (!identifiedCxtdefs.contains(def2)) continue;
+						int atomid1 = loadUnaryAtom(def1);
+						match.add(new Instruction(Instruction.ISUNARY, atomid1));
+						int atomid2 = loadUnaryAtom(def2);
+						match.add(new Instruction(Instruction.ISUNARY, atomid2));
+						int funcid1 = varCount++;
+						int funcid2 = varCount++;
+						match.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
+						match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+						match.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
+					}
 //					else if (func.equals(new SymbolFunctor("===",2))) { // (+X === +Y) //seiji
 //						/* hlinkÍÑÈæ³Ó±é»»»Ò (10/07/07 seiji) */
 //						if (!identifiedCxtdefs.contains(def1)) continue;
