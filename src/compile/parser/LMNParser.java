@@ -1642,7 +1642,7 @@ class SyntaxExpander {
 							LinkedList<SrcProcessContext> procList = new LinkedList();
 							procList.add(new SrcProcessContext(name));
 							procList.add(new SrcProcessContext(newName));
-							SrcAtom sa = new SrcAtom("=", procList);
+							SrcAtom sa = new SrcAtom("==", procList);
 							cons.add(sa);
 	            
 				            /* --hl-optではガードにhlink型チェックを追加して、構造比較にかかる時間を短縮している */
