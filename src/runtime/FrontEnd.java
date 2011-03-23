@@ -454,6 +454,8 @@ public class FrontEnd {
 							// / --optimize-reuse-mem
 							// / Reuse mems.
 							Optimizer.fReuseMem = true;
+						} else if (args[i].equals("--optimize-slimoptimizer")) {
+
 						} else if (args[i].matches("--port")) {
 							// / --port portnumber
 							// / Specifies the port number that LMNtalDaemon
