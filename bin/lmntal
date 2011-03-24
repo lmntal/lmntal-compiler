@@ -26,7 +26,7 @@ done
 
 
 
-optlibpath=$LMNTAL_HOME/sample/iwasawa/optimize
+optlibpath=$LMNTAL_HOME/lib/slimoptimizer
 if [ $slimoptimizer = true -a $slimcode = true ]; then
     
     java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --slimcodelmnsyntax --interpret -O3 "$@" > ${lmntal_syntax_il}

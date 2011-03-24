@@ -1,0 +1,128 @@
+loop{
+
+loopInitialize{
+
+loopInit{
+
+loopInit@@
+compiledRule(X) :- loopingRule(X).
+}.
+
+loopBody{
+loopbody@@
+loopingRule = [[spec, [$i0, $i1]] | $list ]
+:-
+int($i0), int($i1), ground($list)
+|
+compiledRule = [[spec, [$i0, $i1]], [[loop, $list]]].
+}.
+
+/*
+allocatomMove{
+allocatomdetect@@
+compiledlRule = [[spec, [$i0, $i1]] | L0],
+$list[L0, L1],
+L1 = [[allocatom, [$j0, intFunctor($j1, $j2)]] | L2]
+:- int($i0), int($i1), int($j0), int($j1), int($j2),
+   $newIndex = $i1 + 1,
+   ground($list)
+|
+compiledRule = [[spec, [$i0, $newIndex]],
+                [moved_allocatom, [$i1, intFunctor($j1, $j2)]]
+                | L0],
+$list[L0, L1],
+L1 = [reindex($j0, $i1) | L2].
+
+allocatommerge@@
+L0 = [[moved_allocatom, [$i0, intFunctor($i1, $i2)]] | T0],
+L1 = [[moved_allocatom, [$j0, intFunctor($j1, $j2)]] | T1],
+L2 = [reindex($k0, $k1) | T2]
+:- int($i0), int($i1), int($i2),
+   int($j0), int($j1), int($j2),
+   int($k0), int($k1),
+   $i1 =:= $j1, $i2 =:= $j2,
+   $j0 =:= $k1
+|
+L0 = [[moved_allocatom, [$i0, intFunctor($i1, $i2)]] | T0],
+L1 = T1,
+L2 = [reindex($k0, $i0) | T2].
+
+}.
+
+
+allocatomReindex{
+allocatom_reindex_nil@@
+L = [reindex($i0, $i1) | []]
+:- int($i0), int($i1)
+| L = [].
+
+allocatom_reindex@@
+L = [reindex($i0, $i1), 
+     [Instruction, Param]  | T]
+:- int($i0), int($i1)
+|  L = [[Instruction, [reindex_p($i0, $i1) | Param]],
+        reindex($i0, $i1) | T].
+
+reindex_p_nil@@
+L = [reindex_p($i0, $i1)] 
+:- int($i0), int($i1) 
+|  L = [].
+
+reindex_p_true@@
+L = [reindex_p($i0, $i1), $j | T]
+:- int($i0), int($i1), int($j),
+   $i0 =:= $j
+|  L = [$i1, reindex_p($i0, $i1) | T].
+
+reindex_p_false@@
+L = [reindex_p($i0, $i1), $j | T]
+:- int($i0), int($i1), int($j),
+   $i0 =\= $j
+|  L = [$j, reindex_p($i0, $i1) | T].
+
+}.
+
+allocatomEnd{
+allocatom_end@@
+moved_allocatom(R) :- allocatom(R).
+}.
+*/
+
+
+copyRules@@
+ruleset(RS), {+RS, $rs, @rs, rule(R), {+R, $r}},
+loopInit{@li}, loopBody{@l}, 
+//allocatomMove{@a}, allocatomReindex{@ar}, allocatomEnd{@ae}
+:-
+loopInit{@li}, loopBody{@l},
+//allocatomMove{@a}, allocatomReindex{@ar}, allocatomEnd{@ae},
+ruleset(RS),
+{ +RS, 
+  looped_rule = myseq.run( {$r},
+                  [ {@li}, {@l}
+//                   ,{@a}, {@ar}, {@ae}
+		   ]),
+  $rs, @rs
+}.
+
+
+
+}.
+
+loopEnd{
+loopEnd@@
+{$rs, @rs, looped_rule({$r, @r})}
+:-
+{$rs, @rs, rule({$r, @r})}.
+
+}.
+
+loopMain@@
+rulesets(RS), {+RS, $rs, @rs},
+loopInitialize{$li, @li},
+loopEnd{@le}
+:-
+rulesets = myseq.run( {$rs, $li, @li}, [{@le}] ).
+
+
+}.

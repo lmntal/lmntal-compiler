@@ -1,0 +1,160 @@
+merge{
+
+mergeInitialize{
+mergeInitialize@@
+ruleset(X), {+X, $ruleset, {$ruleA}, {$ruleB}, @r},
+merge_init{$mi[], @mi}, merge_body{@mb}, merge_common{$mc[], @mc},
+merge_common_end{@mce}
+:- merged_ruleset = myseq.run(
+ {$ruleset, {$ruleA}, {$ruleB}, $mi[], @mi}, 
+ [{@mb}, {$mc[], @mc}, {@mce}] ),
+   merge_init{$mi[], @mi}, merge_body{@mb}, merge_common{$mc[], @mc},
+   merge_common_end{@mce}.
+
+merge_init{
+merge_init@@
+ruleList = List, max{@max}
+ :-
+  merge ({compiledRule(Insts, L), hasUniq(false),
+  Insts = [A | L], A = [spec, [1, 0]], @max },  List).
+
+max{
+max_a@@
+R = max($a, $b) :- int($a), int($b), $a >= $b | R = $a.
+max_b@@
+R = max($a, $b) :- int($a), int($b), $a =< $b | R = $b.
+
+or_false@@
+R = or(false, false) :- R = false.
+or_a@@
+R = or(true, $b) :- unary($b) | R = true.
+or_b@@
+R = or($a, true) :- unary($a) | R = true.
+}.
+}.
+
+merge_body{
+merge_nil@@
+merge ( {compiledRule(L, T),  $insts[L, T], @p}, [] ) :-
+  ruleList = [{+R, compiledRule(L), $insts[L, T], T = [[stop, []]]}],
+  rule(R).
+
+merge_opt@@
+merge( {compiledRule([[spec, [1, SpecB]] | InstH], InstT), 
+          $insts[InstH, InstT, SpecB], hasUniq($uniqA), @p },
+       [ {compiledRule = [[spec, [SA, SB]] | L ], hasUniq($uniqB), $p[L], 
+       $sa[SA], $sb[SB],  +R } | T] ),
+rule(R) 
+:- int($sa), int($sb), unary($uniqA), unary($uniqB) |
+  merge( { compiledRule([[spec, [1, MAX]] | InstL], InstT), 
+            $insts[InstL, L1, SpecB], MAX = max(SpecB, $sb),
+   L1 = [[[branch, $p]] |  InstT], hasUniq(or($uniqA, $uniqB)), @p}, T).
+
+}.
+
+merge_common{
+
+merge_common@@
+merge_common_body{@ms}, rule(R), {+R, $l, @l}
+ :- merge_common_body{@ms}, common(R), {+R, $l, @l, @ms}.
+
+merge_common_body{
+merge_spec@@
+L = [[[branch,  ListA]], [[branch,  ListB]] | Tail],
+  ListA = [[findatom, [$a0, $a1, functor($af, $a2)]] | TailA],
+  ListB = [[findatom, [$b0, $b1, functor($bf, $b2)]] | TailB],
+//  $tail[Tail], $tailA[TailA], $tailB[TailB]
+:-  int($a0), int($a1), unary($af), int($a2),
+    int($b0), int($b1), unary($bf), int($b2),
+//    ground($tail), ground($tailA), ground($tailB)
+    $a0 =:= $b0, $a1 =:= $b1, $af = $bf, $a2 =:= $b2
+|   L = [[[branch, List]] | Tail],
+    List = [[findatom, [$a0, $a1, functor($af, $a2)]],
+            [[branch , TailA]], [[branch , TailB]], [stop, []]].
+
+merge_deref@@
+L = [[[branch, ListA]], [[branch, ListB]] | Tail],
+  ListA = [[deref, [$a0, $a1, $a2, $a3]] | TailA],
+  ListB = [[deref, [$b0, $b1, $b2, $b3]] | TailB],
+:- int($a0), int($a1), int($a2), int($a3),
+   int($b0), int($b1), int($b2), int($b3),
+   $a0 =:= $b0, $a1 =:= $b1, $a2 =:= $b2, $a3 =:= $b3
+|  L = [[[branch, List]] | Tail],
+   List = [[deref, [$a0, $a1, $a2, $a3]],
+           [[branch, TailA]], [[branch, TailB]], [stop, []]].
+
+merge_func@@
+L = [[[branch, ListA]], [[branch, ListB]] | Tail],
+  ListA = [[func, [$a0, functor($af, $a1)]] | TailA],
+  ListB = [[func, [$b0, functor($bf, $b1)]] | TailB],
+:- int($a0), unary($af), int($a1),
+   int($b0), unary($bf), int($b1),
+   $a0 =:= $b0, $af = $bf, $a1 =:= $b1
+|  L = [[[branch, List]] | Tail],
+   List = [[func, [$a0, functor($af, $a1)]],
+           [[branch, TailA]], [[branch, TailB]], [stop, []]].
+
+merge_isint@@
+L = [[[branch, ListA]], [[branch, ListB]] | Tail],
+  ListA = [[isint, [$a0]] | TailA],
+  ListB = [[isint, [$b0]] | TailB],
+:- int($a0), int($b0), $a0 =:= $b0
+|  L = [[[branch, List]] | Tail],
+   List = [[isint, [$a0]],
+           [[branch, TailA]], [[branch, TailB]], [stop, []]].
+
+merge_derefatom@@
+L = [[[branch, ListA]], [[branch, ListB]] | Tail],
+  ListA = [[derefatom, [$a0, $a1, $a2]] | TailA],
+  ListB = [[derefatom, [$b0, $b1, $b2]] | TailB],
+:- int($a0), int($a1), int($a2),
+   int($b0), int($b1), int($b2),
+   $a0 =:= $b0, $a1 =:= $b1, $a2 =:= $b2
+|  L = [[[branch, List]] | Tail],
+   List = [[derefatom, [$a0, $a1, $a2]],
+           [[branch, TailA]], [[branch, TailB]], [stop, []]].
+
+
+
+merge_branch@@
+L = [[[branch, [[stop, []]] ]] | Tail]
+:- L = Tail.
+
+merge_branch@@
+L = [[[branch, ListA]] | Tail],
+  ListA = [[[branch, ListB]] | TailA]
+:- L = [[[branch, ListB]], [[branch, TailA]] | Tail].
+
+merge_branch@@
+L = [[Inst, Param], [[branch, List]], [stop, []]]
+:- L = [[Inst, Param] | List].
+
+
+}.
+
+
+}.
+
+merge_common_end{
+merge_common_end@@
+common(R), {+R, $l, @l} :- rule(R), {+R, $l}.
+}
+
+}.
+
+mergeEnd{
+mergeEnd@@
+merged_ruleset(X), {+X,  $rs, @rs} :-
+ruleset(X), {+X,  $rs}.
+}.
+
+mergeMain@@
+rulesets(RS), {+RS, $rs, @rs},
+mergeInitialize{$mi, @mi},
+mergeEnd{$me, @me}
+:-
+rulesets = myseq.run( {$rs, $mi, @mi}, [{$me, @me}] ).
+
+
+}.
+
