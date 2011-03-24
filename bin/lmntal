@@ -32,7 +32,7 @@ if [ $slimoptimizer = true -a $slimcode = true ]; then
     java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --slimcodelmnsyntax --interpret -O3 "$@" > ${lmntal_syntax_il}
    
     java -DLMNTAL_HOME="$LMNTAL_HOME" runtime.FrontEnd --interpret --slimcode -O3 \
-    ${lmntal_syntax_il} ${optlibpath}/optimizeMain.lmn ${optlibpath}/reuse.lmn ${optlibpath}/merge.lmn ${optlibpath}/outputIL.lmn  |  slim  -
+    ${lmntal_syntax_il} ${optlibpath}/optimizeMain.lmn ${optlibpath}/reuse.lmn ${optlibpath}/merge.lmn ${optlibpath}/loop.lmn ${optlibpath}/outputIL.lmn  |  slim  -
 
     rm ${lmntal_syntax_il}
 
