@@ -496,7 +496,10 @@ public class RuleCompiler {
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
 		if (removeLHSMem(rs.leftMem) >= 2) {
+		    //2011/01/23 slimでは必要なくなったので挿入しないように修正 by meguro
+		    if(!Env.slimcode){
 			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
+		    }
 		}
 
 		recursiveLockLHSNonlinearProcessContextMems();
