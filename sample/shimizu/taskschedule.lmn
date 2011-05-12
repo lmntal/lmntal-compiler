@@ -1,0 +1,30 @@
+//タスクt(state,ID,period,exec)
+t(ready,0,2,1,exec(0)), t(ready,1,5,2,exec(0)), cpu(100), dispatcher(wait).
+timer(0,ub(2),lb(0)).//task1
+timer(1,ub(5),lb(0)).//task2
+timer(d,ub(1000),lb(0)).//diapatcher用
+
+//ディスパッチ
+t(ready,I,P,E,exec(T)), cpu(I0), disp(I):-
+int(T1),int(I), int(I0)|
+t(run,I,P,E,exec(T)), cpu(I), dispatched.
+
+//プリエンプ
+t(run,I,P,E,exec(T)), timer(I,ub(T1),lb(T2)), preemp(I) :-
+T3=P-T1, T3>=1, T4=T2+T3, int(I)|
+t(ready,I,P,E,exec(T4)), timer(I, ub(T1), lb(T2)), preempted.
+
+//実行終了
+t(run,I,P,E,exec(T)):-
+E=:=T|
+t(end).
+
+//ディスパッチャ
+cpu(I1), t(ready,I,P,E,exec(T)),dispatcher(wait), timer(d,ub(T1),lb(T2)):-
+cpuI1>I|
+cpu(I1), t(ready,I,P,E,exec(T)), dispatcher(exec), timer(d,ub(1),lb(0)), disp(I), preemp(I1)
+
+dispatcher(exec), dispatched, preempted ,timer(d,ub(T1),lb(T2)) :-
+dispatcher(wait), timer(d,ub(1000),lb(0)).
+
+

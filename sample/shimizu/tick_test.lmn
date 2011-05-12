@@ -1,0 +1,27 @@
+ t(0,u(3),l(0)). 
+ t(1,u(2),l(0)). count(0). num(2).
+
+Tick@@
+ t(L,u(T1),l(T2)),count(C1),num(N)
+ :-
+ T1>1, C1 =:= L, C1<N, C2=C1+1  
+  |
+ t(L,u(T1),l(T2)) ,count(C2),num(N).
+
+Tick@@
+ t(L,u(T1),l(T2)),count(0), num(N)
+ :-
+ T3=T2-1
+ |
+ t(L,u(tu(T1)),l(tl(T3,0))) ,count(0), num(N).
+//timer.lb
+ H=tl(M,N) :-  M >= N | H=M.
+ H=tl(M,N) :-  N > M | H=N.
+ 
+ //timer.ub
+ H=tu(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+  H=tu(N) :- N =:= 1000 | H=N.
+count@@
+count(N):-int(N)|count(0).
+
+

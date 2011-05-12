@@ -1,0 +1,194 @@
+ //スレッド
+ //無限の実数を表すinfinityは1000とおく
+ t(1,0,ubTimer(1000),lbTimer(0)).
+ t(2,0,ubTimer(1000),lbTimer(0)).
+ //t(3,0,ubTimer(1000),lbTimer(0)).
+ //t(4,0,ubTimer(1000),lbTimer(0)).
+ x(-1). //クリティカルセクションにあるスレッド
+ delta(2),gamma(3). //パラメータ
+ ok. //ルールNCS_1〜StmtDを発生させるフラグ  
+ assignToX(0). //x=-1になったとき-1,IDがわりあてられれば1，変化なしで0
+ 
+ NCS_1@@ //non critical section x=-1
+ t(L1,0,ubTimer(T1),lbTimer(T2)),x(N),ok,delta(D):-
+ int(L1),int(T1), int(T2), N=:=-1,int(D)| 
+ t(L1, 1, ubTimer(D),lbTimer(0)), x(N),checkUbT(L1),delta(D).
+ 
+ NCS_2@@ // x!=-1
+ t(L1,0,ubTimer(T1),lbTimer(T2)) ,x(N),ok:-
+ int(L1),int(T1), int(T2), N=\=-1| 
+ t(L1, 1, ubTimer(1000),lbTimer(0)), x(N),checkUbT(L1).
+
+ stmtA@@ //statementA wait until x = NotAThread
+ x(-1), t(L1,1,ubTimer(T1),lbTimer(T2)),ok,delta(D) :-
+ int(L1),int(T1),int(T2),int(D)|
+ x(-1), t(L1,2,ubTimer(D),lbTimer(0)),checkUbT(L1),delta(D).
+ 
+ stmtB@@// x := t
+ x(N), t(L1,2,ubTimer(T1),lbTimer(T2)),ok,gamma(G),delta(D),assignToX(0):-
+ int(L1), int(T1), int(T2), unary(N), int(L1),int(G),int(D)|
+ x(L1), t(L1,3,ubTimer(G),lbTimer(D)),checkUbT(L1),gamma(G),delta(D),assignToX(1).
+
+ stmtC_A_1@@// if x =\= t then goto a (x!=-1)
+ x(N), t(L1,3,ubTimer(T1),lbTimer(0)),ok:-
+ int(L1), int(T1), N=\=L1, N=\=-1|
+ x(N), t(L1,1,ubTimer(1000),lbTimer(0)),checkUbT(L1).
+ 
+ stmtC_A_2@@// if x =\= t then goto a (x==-1)
+ x(N), t(L1,3,ubTimer(T1),lbTimer(0)),ok,delta(D):-
+ int(L1), int(T1),L1=\=N, N=:=-1,int(D)|
+ x(N), t(L1,1,ubTimer(D),lbTimer(0)),checkUbT(L1),delta(D).
+
+ stmtC_CS@@ //else goto cs
+ x(N), t(L1,3,ubTimer(T1), lbTimer(0)),ok:-
+ int(L1),int(T1), L1=:=N|
+ x(N), t(L1,4,ubTimer(1000),lbTimer(0)),checkUbT(L1).
+ 
+ CS@@// critical section;
+ t(L1,4,ubTimer(T1),lbTimer(T2)),ok,delta(D):-
+ int(L1), int(T1), int(T2),int(D)|
+ t(L1,5,ubTimer(D),lbTimer(0)),checkUbT(L1),delta(D).
+ 
+ StmtD@@//d : x := NotAThread; goto ncs;
+ x(N), t(L1,5,ubTimer(T1),lbTimer(T2)),ok,assignToX(0):-
+ int(L1), int(T1), int(T2), int(N)|
+ x(-1), t(L1,0,ubTimer(1000),lbTimer(0)),checkUbT(L1),assignToX(-1).
+
+ //他スレッドのタイマーをセットするためのルール．
+ //ステートメントのルール実行直後に適用される（はず）
+ cUbT_1@@//Delta if thread at statement a and the action changes the value of x = -1.
+ checkUbT(N2),assignToX(-1),
+ t(L1,1,ubTimer(T1),lbTimer(T2)),delta(D):- 
+ int(T1),int(T2),L1=\=N2,int(D)|
+ t(L1,1,ubTimer(D),lbTimer(T2)),delta(D),ok,assignToX(0).
+  
+ cUbT_2@@//Delta if thread at statement a and the action changes the value of x Thread identifer.
+ checkUbT(N2),assignToX(1),
+ t(L1,1,ubTimer(T1),lbTimer(T2)):- 
+ int(T1), int(T2), L1=\=N2|
+ t(L1,1,ubTimer(1000),lbTimer(T2)),ok, assignToX(0).
+
+ cUbT_3@@//otherwise current value(thread at statement a)
+ checkUbT(N2),assignToX(0),
+ t(L1,1,ubTimer(T1),lbTimer(T2)):- 
+ int(T1), int(T2), L1=\=N2|
+ t(L1,1,ubTimer(T1),lbTimer(T2)),ok,assignToX(0).
+
+ cUbT_4@@//otherwise current value
+ checkUbT(N2),assignToX(N),
+ t(L1,L2,ubTimer(T1),lbTimer(T2)):- 
+ int(T1), int(T2), int(N),L2=\=1, L1=\=N2|
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),ok,assignToX(0).
+ {
+ '$callback'('atomic_ruleset', 2).
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)), ok
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+  |
+ t(L1,L2,ubTimer(timerub1(T1)),lbTimer(timerlb1(T3,0))),
+ t(L3,L4,ubTimer(timerub2(T4)),lbTimer(timerlb2(T6,0))), 
+ ok.
+ 
+ //以下Tickの仕様を実装するためのルール
+ //timer.lb
+ tlb_1@@
+ H=timerlb1(M,N) :-  M >= N | H=M.
+ tlb_2@@
+ H=timerlb1(M,N) :-  N > M | H=N.
+ tlb_1@@
+ H=timerlb2(M,N) :-  M >= N | H=M.
+ tlb_2@@
+ H=timerlb2(M,N) :-  N > M | H=N.
+/*
+ tlb_1@@
+ H=timerlb3(M,N) :-  M >= N | H=M.
+ tlb_2@@
+ H=timerlb3(M,N) :-  N > M | H=N.
+ tlb_1@@
+ H=timerlb4(M,N) :-  M >= N | H=M.
+ tlb_2@@
+ H=timerlb4(M,N) :-  N > M | H=N.
+*/
+
+ //timer.ub
+ tub_1@@//if N>1 N=N-1
+ H=timerub1(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_2@@//N=inf
+ H=timerub1(N) :- N =:= 1000 | H=N.
+ tub_1@@//if N>1 N=N-1
+ H=timerub2(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_2@@//N=inf
+ H=timerub2(N) :- N =:= 1000 | H=N.
+/*
+ tub_1@@//if N>1 N=N-1
+ H=timerub3(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_2@@//N=inf
+ H=timerub3(N) :- N =:= 1000 | H=N.
+ tub_1@@//if N>1 N=N-1
+ H=timerub4(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_2@@//N=inf
+ H=timerub4(N) :- N =:= 1000 | H=N.
+*/
+ }.
+
+
+/*
+ cUbT@@
+ checkUbT(N2),t(L1,L2,ubTimer(T1),lbTimer(T2)):-
+ int(N2),int(T1),int(T2)|
+ ok,t(L1,L2,ubTimer(T1),lbTimer(T2)).
+*/ 
+
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2))
+ :-
+ T1>1, T3=T2-1
+  |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+*/
+/*
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)), ok
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+  |
+ t(L1,L2,ubTimer(timerub1(T1)),lbTimer(timerlb1(T3,0))),
+ t(L3,L4,ubTimer(timerub2(T4)),lbTimer(timerlb2(T6,0))), ok.
+*/
+
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)),
+ t(L7,L8,ubTimer(T10),lbTimer(T11))
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1,
+ T10>1, T12=T11-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))),
+ t(L7,L8,ubTimer(timerub(T10)),lbTimer(timerlb(T12,0))).
+*/
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8))
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))).
+*/ 

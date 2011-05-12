@@ -1,0 +1,94 @@
+ /*プロセス*/
+ machine(ini). 
+ person(ini). 
+ observer(ini).
+ 
+ /*クロック変数*/
+ /*cl(ID, 名前, upper bound timer, lower bound timer).*/
+ cl(0, z, ub(1000),lb(0)). cl(1, m ,ub(1000),lb(0)).
+ cl(3, x ,ub(1000),lb(0)).
+ cl(2, y ,ub(1000),lb(0)).
+ 
+ count(0).//クロック変数用カウンタ
+ num(4). //クロック変数の数
+ 
+ /*Template Machine*/
+ //machine:ini->brew person:ini->wait
+ machine(ini), cl(I1, z, ub(T1),L2), person(ini), cl(I2, y,ub(T2), lb(T3)):-
+ int(T1),int(T2),int(T3)|
+ machine(brew), cl(I1, z, ub(6),L2), person(wait1), cl(I2, y, ub(3), lb(3)).
+ 
+ //machine: brew->dispense
+ machine(brew), cl(I1, z ,ub(T1),L2), cl(I2, m ,L3, lb(T2)):-
+ T1=<3, int(T2)|
+ machine(dispense), cl(I1, z ,ub(1000),L2), cl(I2, m, L3, lb(2)).
+ 
+ //machine:dispense->ini left transition person:ready->wait2
+ machine(dispense), cl(I1, m, L2, lb(0)), person(ready), cl(I2, y, ub(T1), lb(T2)):-
+ int(T1), int(T2)|
+ machine(ini), cl(I1, m ,L2, lb(0)), person(wait2), cl(I2 ,y ,ub(2),lb(2)).
+ 
+ //dispense->ini right transition ,person:ready->wait2
+ machine(dispense), person(ready), cl(I1, y ,ub(T1), lb(T2)):-
+ int(T1), int(T2)|
+ machine(ini), person(wait2), cl(I1, y ,ub(2),lb(2)).
+ 
+ /*Template Person*/
+ //wait1->ready
+ person(wait1), cl(I1, y ,ub(T1), lb(0)):-
+ int(T1)|
+ person(ready), cl(I1, y ,ub(1000), lb(0)).
+ 
+ //wait2->go
+ person(wait2), cl(I1, y ,ub(T1), lb(0)):-
+ int(T1)|
+ person(go), cl(I1, y ,ub(1000), lb(0)).
+ 
+ //person:go->ini observer:ini->observ
+ person(go), observer(ini), cl(I1, x ,L2, lb(T1)):-
+ int(T1)|
+ person(ini), observer(observ), cl(I1, x ,L2, lb(8)).
+ 
+ //person:go->ini observer:observ->observ
+ person(go), observer(observ), cl(I1, x ,L2, lb(T1)):-
+ int(T1)|
+ person(ini), observer(observ), cl(I1, x ,L2, lb(8)).
+ 
+ //observer:observ->complain
+ observer(observ), cl(I1, x ,L1, lb(0)):-
+ observer(complain), cl(I1, x ,L1, lb(0)).
+ 
+ //observer:comolain->ini
+ observer(complain) :- observer(ini).
+ 
+ /*クロック変数の制御。以下のルールをアトミックに実行する*/
+ /*
+ Tick@@//全てのスレッドでT1>=1(にしたけどいいのだろうか)かをチェック
+ cl(L1, L2, ub(T1), L4),count(C1),num(N):-
+ T1>=1, C1 =:= L1, C1<N, C2=C1+1|
+ cl(L1, L2, ub(T1), L4), count(C2), num(N).
+ 
+ Tick2@@//countをもどしてタイマーをデクリメント
+ cl(L1, L2, ub(T1), lb(T2)),count(C),num(N):-
+ T3=T2-1, N=:=C|
+ cl(L1, L2, ub(calUb(T1)), lb(calLb(T3,0))),count(0),num(N).
+ 
+ Tick3@@//デクリメント
+ cl(L1, L2, ub(T1), lb(T2)):-
+ T3=T2-1|
+ cl(L1, L2, ub(calUb(T1)), lb(calLb(T3,0))).
+ 
+ lb1@@
+ H=calLb(M,N) :-  M >= N | H=M.
+ lb2@@
+ H=calLb(M,N) :-  M < N | H=N.
+ 
+ ub1@@
+ H=calUb(N) :- N=\=1000, N >= 1 ,N1=N-1| H=N1.
+ ub2@@
+ H=calUb(N) :- N =:= 1000 | H=N.
+
+ count@@
+ count(N):-int(N)|count(0).
+ */
+ 

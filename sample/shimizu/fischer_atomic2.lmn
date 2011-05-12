@@ -1,0 +1,169 @@
+  //スレッド
+ //無限の実数を表すinfinityは1000とおく
+ t(1,ncs,ubTimer(1000),lbTimer(0)).
+ t(2,ncs,ubTimer(1000),lbTimer(0)).
+ t(3,ncs,ubTimer(1000),lbTimer(0)).
+ t(4,ncs,ubTimer(1000),lbTimer(0)).
+ t(5,ncs,ubTimer(1000),lbTimer(0)).
+ x(-1). //クリティカルセクションにあるスレッド
+ //now(0). //現在の時刻を表すnowはいらない 
+ 
+ 
+ NCS@@
+ t(L1,ncs,ubTimer(T1),lbTimer(T2)) :-
+ int(T1), int(T2)| 
+ t(L1, a, ubTimer(T1),lbTimer(T2)).
+ 
+ stmtA@@ //statement A  wait until x = NotAThread
+ x(-1), t(L1,a,ubTimer(T1),lbTimer(T2)) :-
+ int(T1),int(T2)|
+ x(-1), t(L1,b,ubTimer(1),lbTimer(T2)).
+ 
+ stmtB@@// x := t
+ x(N), t(L1,b,ubTimer(T1),lbTimer(T2)):-
+ int(T1), int(T2), unary(N), int(L1)|
+ x(L1), t(L1,c,ubTimer(1000),lbTimer(1)).
+ 
+ stmtC_A@@// if x =\= t then goto a
+ x(N), t(L1,c,ubTimer(T1),lbTimer(0)):-
+ int(T1),L1=\=N|
+ x(N), t(L1,a,ubTimer(T1),lbTimer(0)).
+ 
+ stmtC_CS@@ //else goto cs
+ x(N), t(L1,c,ubTimer(T1), lbTimer(0)):-
+ int(T1), L1=:=N|
+ x(N), t(L1,cs,ubTimer(T1),lbTimer(0)).
+ 
+ CS@@// critical section;
+ t(L1,cs,ubTimer(T1),lbTimer(T2)):-
+ int(T1), int(T2)|
+ t(L1,d,ubTimer(T1),lbTimer(T2)).
+ 
+ StmtD@@//d : x := NotAThread; goto ncs;
+ x(N), t(L1,d,ubTimer(T1),lbTimer(T2)):-
+ int(T1), int(T2), int(N)|
+ x(-1), t(L1,ncs,ubTimer(T1),lbTimer(T2)).
+ 
+ //全てのスレッドのタイマーをカウントダウンする
+ //ubTimer...infinityのときinfinityを返し，T1>1であればデクリメント
+ //lbTimer...ｍax(0,T2-1)
+/*
+{
+ '$callback'('atomic_ruleset', 2).
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)),
+ t(L7,L8,ubTimer(T10),lbTimer(T11)),
+ t(L9,L10,ubTimer(T13),lbTimer(T14))
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1,
+ T10>1, T12=T11-1,
+ T13>1, T15=T14-1
+ |
+ t(L1,L2,ubTimer(timerub1(T1)),lbTimer(timerlb1(T3,0))),
+ t(L3,L4,ubTimer(timerub2(T4)),lbTimer(timerlb2(T6,0))),
+ t(L5,L6,ubTimer(timerub3(T7)),lbTimer(timerlb3(T9,0))),
+ t(L7,L8,ubTimer(timerub4(T10)),lbTimer(timerlb4(T12,0))),
+ t(L9,L10,ubTimer(timerub5(T13)),lbTimer(timerlb5(T15,0))).
+ 
+ //timer.lb
+ tlb_1@@
+ H=timerlb1(M,N) :-  M >= N  | H=M.
+ tlb_2@@
+ H=timerlb1(M,N) :-  N > M| H=N.
+ tlb_1@@
+ H=timerlb2(M,N) :-  M >= N  | H=M.
+ tlb_2@@
+ H=timerlb2(M,N) :-  N > M| H=N.
+ tlb_1@@
+ H=timerlb3(M,N) :-  M >= N  | H=M.
+ tlb_2@@
+ H=timerlb3(M,N) :-  N > M| H=N.
+ tlb_1@@
+ H=timerlb4(M,N) :-  M >= N  | H=M.
+ tlb_2@@
+ H=timerlb4(M,N) :-  N > M| H=N.
+ tlb_1@@
+ H=timerlb5(M,N) :-  M >= N  | H=M.
+ tlb_2@@
+ H=timerlb5(M,N) :-  N > M| H=N.
+ 
+ //timer.ub
+ tub_1@@//if N>1 N=N-1
+ H=timerub1(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_3@@//N=inf
+ H=timerub1(N) :- N =:= 1000 | H=N.
+ tub_1@@//if N>1 N=N-1
+ H=timerub2(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_3@@//N=inf
+ H=timerub2(N) :- N =:= 1000 | H=N.
+ tub_1@@//if N>1 N=N-1
+ H=timerub3(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_3@@//N=inf
+ H=timerub3(N) :- N =:= 1000 | H=N.
+ tub_1@@//if N>1 N=N-1
+ H=timerub4(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_3@@//N=inf
+ H=timerub4(N) :- N =:= 1000 | H=N.
+ tub_1@@//if N>1 N=N-1
+ H=timerub5(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+ tub_3@@//N=inf
+ H=timerub5(N) :- N =:= 1000 | H=N.
+ }.
+*/
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)),
+ t(L7,L8,ubTimer(T10),lbTimer(T11)),
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1,
+ T10>1, T12=T11-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))),
+ t(L7,L8,ubTimer(timerub(T10)),lbTimer(timerlb(T12,0))).
+*/
+
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)).
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))).
+*/
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5))
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1
+  |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))). 
+*/
+
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2))
+ :-
+ T1>1, T3=T2-1
+  |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))).
+*/ 
+ 

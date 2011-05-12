@@ -1,0 +1,105 @@
+ /*
+ ノード数3つ
+ 
+ 　／２
+  １　｜
+ 　＼３
+ 
+ */ 
+ //パラメータ
+ nbrs(1)=(2,3), nbrs(2)=(1,3), nbrs(3)=(1,2).//隣のノードか
+ msgDelay=2.
+ toDelay=1.
+ period=3.
+ 
+ //ldr(N) Nがリーダだと思っているノード
+ ldr(1)=1,ldr(2)=2,ldr(3)=3.
+ //dist(N) Nがldr(N)まであると思っている距離
+ dist(1)=0, dist(2)=0, dist(3)=0.
+ /*ノードNのカウントダウンタイマー
+ 簡潔のため上限用タイマーと下限用タイマーを一本化
+ 0>timer(N)>-todelayの間にアクションTimeoutが起こるべき
+ */
+ timer(1)=3,timer(2)=3,timer(3)=3.//初期値period
+ 
+ /*
+ msgs:転送中のメッセージを表す
+  メッセージのフィールド
+   src...送信元
+   dest...宛先ノード
+   ldr...もとのメッセージのリーダー
+   hops...転送回数
+   rcvTimer...メッセージ送信時間の上限を表すカウントダウンタイマー
+ 同じメッセージの複数のコピーを同時に持つ可能性がある
+ →マルチセットで表現
+ */
+ msgs{}.
+ 
+ MsgsSent@@
+ msgsSent(N1,S1),msgs{$p}, ldr(N2)=L1,dist(N3)=L2, msgDelay(T):-
+ N1=:=N2,N1=:=N3, int(S1), int(L1), int(L2), int(T)|
+ msgs{ $p, ms(src(N1),dest(S1),ldr(L1),hops(L2),rcvTimer(T))}, ldr(N2)=L1, dist(N3)=L2, msgDelay(T).
+ 
+ TimeOut@@
+ timer(N1)=T1, ldr(N2)=L1, dist(N3)=D1, period(T2), nbrs(N4)=(Nb1,Nb2):-
+ N1=:=N2, N1=:=N3, T1<0, int(L1), int(D1), int(T2), int(Nb1), int(Nb2)|
+ timer(N1)=T2, ldr(N2)=N1, dist(N3)=0, msgsSent(N1,Nb1),msgsSent(N1,Nb2), period(T2), nbrs(N4)=(Nb1,Nb2).
+ 
+ //本当は多重集合の中の同じ元は一度に消えなくてはならない
+ RcvMsg_1@@
+ msgs{ms(src(N1),dest(D),ldr(L),hops(H),rcvTimer(T)), $p},
+ ldr(N2)=L1, dist(N3)=L2, timer(N4)=L3, 
+ nbrs(N5)=(Nb1,Nb2), period(T1), toDelay(T2), msgDelay(T3):-
+ D=:=N2, D=:=N3,D=:=N4, D=:=N5, L<L1, int(N1), int(T), int(L1), int(L2), int(L3), int(Nb1), int(Nb2),  H1=H+1 ,T4=T1+T2+H1*T3 |
+ msgs{$p}, msgsSent(D, Nb1) , msgsSent(D, Nb2), 
+ ldr(N2)=L, dist(N3)=H1 ,timer(N4)=T4, 
+ nbrs(N5)=(Nb1,Nb2), period(T1), toDelay(T2), msgDelay(T3).
+ 
+ RcvMsg_2@@
+ msgs{ms(src(N1),dest(D),ldr(L),hops(H),rcvTimer(T)), $p}
+ ,ldr(N2)=L1 , dist(N3)=L2, timer(N4)=L3, 
+ nbrs(N5)=(Nb1,Nb2), period(T1), toDelay(T2), msgDelay(T3):-
+ D=:=N2,  D=:=N3, D=:=N4, D=:=N5, L=:=L1, int(T), int(L3), int(N1), int(Nb1), int(Nb2), H1=H+1, H1=<L2, T4=T1+T2+H1*T3 |
+ msgs{$p}, msgsSent(D, Nb1) ,msgsSent(D, Nb2),
+ ldr(N2)=L, dist(N3)=H1,  timer(N4)=T4, 
+ nbrs(N5)=(Nb1,Nb2), period(T1), toDelay(T2), msgDelay(T3).
+ 
+ RcvMsg_3@@
+ msgs{ms(src(N1),dest(D),ldr(L),hops(H),rcvTimer(T)), $p} ,ldr(N2)=L1:-
+ D=:=N2, L>L1, int(N1), int(H), int(T),  |
+ msgs{$p}, ldr(N2)=L1.
+ 
+ RcvMsg_4@@
+ msgs{ms(src(N1),dest(D),ldr(L),hops(H),rcvTimer(T)), $p} ,ldr(N2)=L1 ,dist(N3)=L2:-
+ D=:=N2, D=:=N3, L=:=L1, H+1>L2, int(N1), int(T)|
+ msgs{$p}, ldr(N2)=L1, dist(N3)=L2.
+ 
+ //rcvTimerのカウントダウンをどうにかしないと
+ Tick@@
+ timer(1)=T1,timer(2)=T2,timer(3)=T3, toDelay(D):-
+ T1+D>=1,T2+D>=1,T3+D>=1|
+ timer(1)=T1, timer(2)=T2, timer(3)=T3, toDelay(D).
+ //branch[[
+ //loop[[
+ msgs{rcvTimer(T1,X),$p}:-
+ T1>=1, ground(X)|
+ msgs{check(rcvTimer(T1,X)),$p}.
+ //]]
+ //loop[[
+ msgs{check(rcvTimer(T1,X)),$p}:-
+ T2=T1-1, ground(X)|
+ msgs{rcvTimer(T2,X),$p}.
+ //]]
+ timer(1)=T1, timer(2)=T2, timer(3)=T3:-
+ T4=T1-1, T5=T2-1, T6=T3-1|
+ timer(1)=T4, timer(2)=T5, timer(3)=T6.
+ //]]
+ //branch[[
+ //loop[[
+ msgs{check(rcvTimer(T1,X)),$p}:-
+ int(T1), ground(X)|
+ msgs{rcvTimer(T1,X),$p}.
+ //]]
+ //]]
+ 
+ 

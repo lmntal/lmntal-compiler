@@ -1,0 +1,149 @@
+ /*fishcer.lmnのプロセスの構造を変えて書いてみる試み*/
+ //スレッド
+ //無限の実数を表すinfinityは1000とおく
+ t(0,ncs,ubTimer(1000),lbTimer(0)).
+ t(1,ncs,ubTimer(1000),lbTimer(0)).
+ t(2,ncs,ubTimer(1000),lbTimer(0)).
+ t(3,ncs,ubTimer(1000),lbTimer(0)).
+ //t(5,ncs,ubTimer(1000),lbTimer(0)).
+ x(-1). //クリティカルセクションにあるスレッド
+ //now(0). //現在の時刻を表すnowはいらない
+ //count(0). num(4).
+ ubTimer(0)=
+ 
+ 
+ NCS@@
+ t(L1,ncs,ubTimer(T1),lbTimer(T2)) :-
+ int(T1), int(T2)| 
+ t(L1, a, ubTimer(T1),lbTimer(T2)).
+ 
+ stmtA@@ //statement A
+ x(-1), t(L1,a,ubTimer(T1),lbTimer(T2)), :-
+ int(T1),int(T2)|
+ x(-1), t(L1,b,ubTimer(3),lbTimer(T2)).
+ 
+ stmtB@@
+ x(N), t(L1,b,ubTimer(T1),lbTimer(T2)):-
+ int(T1), int(T2), unary(N), int(L1)|
+ x(L1), t(L1,c,ubTimer(1000),lbTimer(3)).
+ 
+ stmtC_A@@
+ x(N), t(L1,c,ubTimer(T1),lbTimer(0)):-
+ int(T1),L1=\=N|
+ x(N), t(L1,a,ubTimer(T1),lbTimer(0)).
+ 
+ stmtC_CS@@
+ x(N), t(L1,c,ubTimer(T1), lbTimer(0)):-
+ int(T1), L1=:=N|
+ x(N), t(L1,cs,ubTimer(T1),lbTimer(0)).
+ 
+ CS@@
+ t(L1,cs,ubTimer(T1),lbTimer(T2)):-
+ int(T1), int(T2)|
+ t(L1,d,ubTimer(T1),lbTimer(T2)).
+ 
+ StmtD@@
+ x(N), t(L1,d,ubTimer(T1),lbTimer(T2)):-
+ int(T1), int(T2), int(N)|
+ x(-1), t(L1,ncs,ubTimer(T1),lbTimer(T2)).
+ 
+ //全てのスレッドのタイマーをカウントダウンする
+ //ubTimer...infinityのときinfinityを返し，T1>1であればデクリメント
+ //lbTimer...ｍax(0,T2-1)
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)),
+ t(L7,L8,ubTimer(T10),lbTimer(T11))
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1,
+ T10>1, T12=T11-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))),
+ t(L7,L8,ubTimer(timerub(T10)),lbTimer(timerlb(T12,0))).
+*/
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)),
+ t(L7,L8,ubTimer(T10),lbTimer(T11)),
+ t(L9,L10,ubTimer(T13),lbTimer(T14))
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1,
+ T10>1, T12=T11-1,
+ T13>1, T15=T14-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))),
+ t(L7,L8,ubTimer(timerub(T10)),lbTimer(timerlb(T12,0))),
+ t(L9,L10,ubTimer(timerub(T13)),lbTimer(timerlb(T15,0))).
+
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5))
+  :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1
+  |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))). 
+*/ 
+/*
+//Tick@@
+//loop[[
+	 //全てのスレッドのついてT1>1であることを検査
+	 t(L1,L2,ubTimer(T1),lbTimer(T2)),count(C1),num(N)
+	 :-
+	 T1>1, C1 =:= L1, C1<N, C2=C1+1
+	  |
+	 t(L1,L2,ubTimer(T1),lbTimer(T2)), count(C2), num(N).
+//]]
+//branch[[
+	 Tick2@@//countを戻す，タイマーをデクリメント
+	 t(L1,L2,ubTimer(T1),lbTimer(T2)), count(C), num(N)
+	 :-
+	 T3=T2-1, N=:=C
+	  |
+	 t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),count(0), num(N).
+//	loop[[
+		 Tick3@@//タイマーをデクリメント
+		 t(L1,L2,ubTimer(T1),lbTimer(T2))
+		 :-
+		 T3=T2-1
+		  |
+		 t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))).
+//	 ]]
+//	 loop[[
+		//timer.lb
+//	 	branch[[
+			 H=timerlb(M,N) :-  M >= N | H=M.
+//		]]
+//		branch[[
+			 H=timerlb(M,N) :-  N > M | H=N.
+//		 ]]
+//	 ]]
+	 //loop[[
+		//timer.ub
+//	 	branch[[	 
+			 H=timerub(N) :- N=\=1000, N > 1 ,N1=N-1| H=N1.
+//		 ]]
+//		 branch[[
+			 H=timerub(N) :- N =:= 1000 | H=N.
+//		]]
+//	]]
+//]]
+//branch[[
+	count@@
+	count(N):-int(N)|count(0).
+//]]
+*/
+

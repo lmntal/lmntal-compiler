@@ -1,0 +1,48 @@
+ t(0,a,timer(0)).
+ t(1,a,timer(0)).
+ t(2,a,timer(0)).
+ t(3,a,timer(0)).
+
+turn(-1).
+count(0),num(4).
+
+stmtA@@
+turn(-1), t(L1,a,timer(T1)) :-
+int(T1)|
+turn(-1), t(L1,b,timer(2)).
+
+stmtB_C@@
+t(L1, b, timer(T1)), turn(N) :-
+T1 > 0, int(N),int(L1) |
+t(L1, c, timer(3)), turn(L1).
+
+stmtB_A@@
+t(L1, b, timer(T1)) :-
+T1 =< 0|
+t(L1, a, timer(T1)).
+
+stmtC_CS@@
+turn(P), t(L1, c, timer(0)):-
+P=:=L1 |
+turn(P), t(L1, cs, timer(0)).
+
+stmtC_A@@
+turn(P), t(L1, c, timer(0)):-
+P=\=L1 |
+turn(P), t(L1, a, timer(0)).
+
+stmtCS_A@@
+turn(P), t(L1, cs, timer(T1)):-
+int(P) |
+turn(0), t(L1, a, timer(T1)).
+
+//以下1stepで実行する
+clock@@
+//全てのスレッドのついてタイマーをデクリメント
+ t(L1,L2,timer(T2)),count(C1),num(N):-
+ C1 =:= L1, T2>0, C1<N, C2=C1+1, T3=T2-1|
+ t(L1,L2,timer(T3)), count(C2), num(N).
+
+//clock2@@//countを戻す
+count(N) :- int(N) | count(0).
+

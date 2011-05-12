@@ -1,0 +1,90 @@
+ /*fischerのコントロール４つversion
+  Lamportの論文版．uppaalのエンコードしたものよりシンプルに？
+ */
+ //スレッド
+ //無限の実数を表すinfinityは1000とおく
+ t(0,a).
+ t(1,a).
+ t(2,a).
+ t(3,a).
+ t(4,a).
+ t(5,a).
+ 
+ //ubTimer[N],lbTimer[N]
+ ubTimer(0)=1000. ubTimer(1)=1000. ubTimer(2)=1000. ubTimer(3)=1000. ubTimer(4)=1000. ubTimer(5)=1000.
+ lbTimer(0)=0. lbTimer(1)=0. lbTimer(2)=0. lbTimer(3)=0. lbTimer(4)=0. lbTimer(5)=0.
+ 
+ x(-1). //クリティカルセクションにあるスレッド
+ count(0). num(6).
+ 
+ stmtA@@ //statement A
+ t(L1,a), ubTimer(L2)=T1, x(-1):-
+ L1=:=L2, int(T1)|
+ t(L1,b), ubTimer(L2)=3, x(-1).
+ 
+ stmtB@@
+ x(N), t(L1,b), ubTimer(L2)=T1, lbTimer(L3)=T2:-
+ L1=:=L2, L1=:=L3, int(T1), int(T2), int(N)|
+ x(L1), t(L1,c), ubTimer(L2)=1000, lbTimer(L3)=3.
+ 
+ stmtC_A@@
+ x(N), t(L1,c), lbTimer(L2)=0:-
+ L1=\=N, L1=:=L2|
+ x(N),t(L1,a), lbTimer(L2)=0.
+ 
+ stmtC_CS@@
+ x(N), t(L1,c), lbTimer(L2)=0:-
+ L1=:=N, L1=:=L2|
+ x(N), t(L1,cs), lbTimer(L2)=0.
+ 
+ CS@@
+ x(N), t(L1,cs):-
+ int(N)|
+ x(-1), t(L1,a).
+ /*
+//Tick@@
+//loop[[
+	 //全てのスレッドのついてT1>1であることを検査
+	 Tick1@@
+	 ubTimer(L1)=T1, count(C1),num(N)
+	 :-
+	 T1>1, C1 =:= L1, C1<N, C2=C1+1
+	  |
+	 ubTimer(L1)=T1, count(C2), num(N).
+//]]
+//branch[[
+	 Tick2@@//countを戻す，タイマーをデクリメント
+	 count(C), num(N) :-
+	 N=:=C|
+	 count(0), num(N).
+//loop[[
+	 Tick3@@//タイマーをデクリメント
+	 ubTimer(L1)=T1, lbTimer(L2)=T2 :-
+	 L1=:=L2, int(T1), int(T2)|
+	 decreUbT(L1,T1), decreLbT(L2,T2).
+//]]
+//lbTimer
+//loop[[
+//	 	branch[[
+		 decreLbT(L1)=T1 :- T1>0, T2=T1-1  | lbTimer(L1)=T2.
+//		]]
+//		branch[[
+		 decreLbT(L1)=T1 :- T1=<0 | lbTimer(L1)=T1.
+//		 ]]
+//]]
+//ubTimer
+//loop[[
+//	 	branch[[	 
+		 decreUbT(L1)=T1 :- T1=\=1000, T2=T1-1| ubTimer(L1)=T2.
+//		 ]]
+//		branch[[
+		 decreUbT(L1)=T1 :- T1 =:= 1000 | ubTimer(L1)=T1.
+//		 ]]
+//]]
+//]]
+//branch[[
+	count@@
+	count(N):-int(N)|count(0).
+//]]
+*/
+

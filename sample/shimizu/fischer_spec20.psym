@@ -1,0 +1,2 @@
+ assert= t(L1,4,ubTimer(T1), lbTimer(T2)), t(L2,4,ubTimer(T3), lbTimer(T4)):-int(T1),int(T2),int(T3),int(T4)
+

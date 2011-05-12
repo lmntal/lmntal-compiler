@@ -1,0 +1,62 @@
+ /*
+ fischerのアルゴリズム
+ 4スレッド パラメタ(デルタ)3
+ */
+ //スレッドt(id,current position)
+ t(0,a).
+ t(1,a).
+ t(2,a).
+ t(3,a).
+ t(4,a).
+ t(5,a).
+ 
+ num(6).
+ 
+ //ubTimer[N],lbTimer[N] 1000は無限を表す
+ ubTimer(0)=1000. ubTimer(1)=1000. ubTimer(2)=1000. ubTimer(3)=1000. ubTimer(4)=1000. ubTimer(5)=1000.
+ lbTimer(0)=0. lbTimer(1)=0. lbTimer(2)=0. lbTimer(3)=0. lbTimer(4)=0. lbTimer(5)=0.
+ 
+ x(-1). //クリティカルセクションにあるスレッド
+ 
+ stmtA@@
+ t(L1,a), ubTimer(L2)=T1, x(-1):-
+ L1=:=L2, int(T1)|
+ t(L1,b), ubTimer(L2)=3, x(-1).
+ 
+ stmtB@@
+ x(N), t(L1,b), ubTimer(L2)=T1, lbTimer(L3)=T2:-
+ L1=:=L2, L1=:=L3, int(T1), int(T2), int(N)|
+ x(L1), t(L1,c), ubTimer(L2)=1000, lbTimer(L3)=3.
+ 
+ stmtC_A@@
+ x(N), t(L1,c), lbTimer(L2)=0:-
+ L1=\=N, L1=:=L2|
+ x(N),t(L1,a), lbTimer(L2)=0.
+ 
+ stmtC_CS@@
+ x(N), t(L1,c), lbTimer(L2)=0:-
+ L1=:=N, L1=:=L2|
+ x(N), t(L1,cs), lbTimer(L2)=0.
+ 
+ CS@@
+ x(N), t(L1,cs):-
+ int(N)|
+ x(-1), t(L1,a).
+ 
+ //以下のルールを.ilで連結して一本のルールにしている
+ Tick1@@
+ ubTimer(0)=T1,ubTimer(1)=T2,ubTimer(2)=T3,ubTimer(3)=T4,ubTimer(4)=T5,ubTimer(5)=T6
+ :-
+ T1>1,T2>1,T3>1,T4>1,T5>1,T6>1
+  |
+ ubTimer(0)=T1,ubTimer(1)=T2,ubTimer(2)=T3,ubTimer(3)=T4,ubTimer(4)=T5,ubTimer(5)=T6,count(-1).
+//loop[[
+	 count(C), num(N) :- C<N-1, C1=C+1| count(C1), num(N).
+//	branch[[
+	 count(C), lbTimer(L1)=T1 :- C=:=L1, T1>0, T2=T1-1  | count(C), lbTimer(L1)=T2.
+//	]]
+//	branch[[		
+	 count(C), ubTimer(L1)=T1 :- C=:=L1, T1=\=1000, T2=T1-1| count(C), ubTimer(L1)=T2.
+//		]]
+//]]
+	count(C) :-int(C)| .

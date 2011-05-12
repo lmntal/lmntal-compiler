@@ -1,0 +1,162 @@
+  //スレッド
+ //無限の実数を表すinfinityは1000とおく
+ t(1,ncs,ubTimer(1000),lbTimer(0)).
+// t(2,ncs,ubTimer(1000),lbTimer(0)).
+// t(3,ncs,ubTimer(1000),lbTimer(0)).
+//t(4,ncs,ubTimer(1000),lbTimer(0)).
+// t(5,ncs,ubTimer(1000),lbTimer(0)).
+ x(-1). //クリティカルセクションにあるスレッド
+ //now(0). //現在の時刻を表すnowはいらない
+ next(1).
+
+ 
+ 
+ 
+ NCS@@
+ t(L1,ncs,ubTimer(T1),lbTimer(T2)),next(1) :-
+ int(T1), int(T2)| 
+ t(L1, a, ubTimer(T1),lbTimer(T2)),next(1).
+ 
+ stmtA@@ //statement A  wait until x = NotAThread
+ x(-1), t(L1,a,ubTimer(T1),lbTimer(T2)),next(1) :-
+ int(T1),int(T2)|
+ x(-1), t(L1,b,ubTimer(2),lbTimer(T2)),next(1).
+ 
+ stmtB@@// x := t
+ x(N), t(L1,b,ubTimer(T1),lbTimer(T2)),next(1):-
+ int(T1), int(T2), unary(N), int(L1)|
+ x(L1), t(L1,c,ubTimer(1000),lbTimer(2)), next(1).
+ 
+ stmtC_A@@// if x =\= t then goto a
+ x(N), t(L1,c,ubTimer(T1),lbTimer(0)),next(1):-
+ int(T1),L1=\=N|
+ x(N), t(L1,a,ubTimer(T1),lbTimer(0)),next(1).
+ 
+ stmtC_CS@@ //else goto cs
+ x(N), t(L1,c,ubTimer(T1), lbTimer(0)),next(1):-
+ int(T1), L1=:=N|
+ x(N), t(L1,cs,ubTimer(T1),lbTimer(0)),next(1).
+ 
+ CS@@// critical section;
+ t(L1,cs,ubTimer(T1),lbTimer(T2)),next(1):-
+ int(T1), int(T2)|
+ t(L1,d,ubTimer(T1),lbTimer(T2)),next(1).
+ 
+ StmtD@@//d : x := NotAThread; goto ncs;
+ x(N), t(L1,d,ubTimer(T1),lbTimer(T2)),next(1):-
+ int(T1), int(T2), int(N)|
+ x(-1), t(L1,ncs,ubTimer(T1),lbTimer(T2)),next(1).
+ 
+ //全てのスレッドのタイマーをカウントダウンする
+ //ubTimer...infinityのときinfinityを返し，T1>1であればデクリメント
+ //lbTimer...ｍax(0,T2-1)
+
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)),
+ t(L7,L8,ubTimer(T10),lbTimer(T11)),
+ t(L9,L10,ubTimer(T13),lbTimer(T14))
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1,
+ T10>1, T12=T11-1,
+ T13>1, T15=T14-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))),
+ t(L7,L8,ubTimer(timerub(T10)),lbTimer(timerlb(T12,0))),
+ t(L9,L10,ubTimer(timerub(T13)),lbTimer(timerlb(T15,0))).
+*/
+
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)),
+ t(L7,L8,ubTimer(T10),lbTimer(T11)),
+ valid(1)
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1,
+ T10>1, T12=T11-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))),
+ t(L7,L8,ubTimer(timerub(T10)),lbTimer(timerlb(T12,0))),
+ valid(0).
+*/
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ t(L5,L6,ubTimer(T7),lbTimer(T8)),
+ valid(1)
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1,
+ T7>1, T9=T8-1
+ |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ t(L5,L6,ubTimer(timerub(T7)),lbTimer(timerlb(T9,0))),
+ valid(0).
+*/
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ t(L3,L4,ubTimer(T4),lbTimer(T5)),
+ valid(1)
+ :-
+ T1>1, T3=T2-1,
+ T4>1, T6=T5-1
+  |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ t(L3,L4,ubTimer(timerub(T4)),lbTimer(timerlb(T6,0))),
+ valid(0). 
+*/
+
+/*
+ Tick@@
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ valid(1)
+ :-
+ T1>1, T3=T2-1
+  |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ valid(0).
+*/ 
+
+ //Tick@@
+ {
+ '$callback'('atomic_ruleset', 1).
+ t(L1,L2,ubTimer(T1),lbTimer(T2)),
+ next(1)
+ :-
+ T1>1, T3=T2-1
+  |
+ t(L1,L2,ubTimer(timerub(T1)),lbTimer(timerlb(T3,0))),
+ next(0),fut(1),flt(1).
+ 
+ //timer.lb
+ tlb_1@@
+ H=timerlb(M,N),flt(C0) :-  M >= N ,C1=C0-1 | H=M,flt(C1).
+ tlb_2@@
+ H=timerlb(M,N),flt(C0) :-  N > M ,C1=C0-1| H=N,flt(C1).
+ 
+ //timer.ub
+ tub_1@@//if N>1 N=N-1
+ H=timerub(N),fut(C0) :- N=\=1000, N > 1 ,N1=N-1,C1=C0-1| H=N1, fut(C1).
+ tub_3@@//N=inf
+ H=timerub(N),fut(C0) :- N =:= 1000,C1=C0-1 | H=N,fut(C1).
+ }.
+ 
+ next_on@@
+ fut(0),flt(0),next(0):-next(1).
+ 
+ 

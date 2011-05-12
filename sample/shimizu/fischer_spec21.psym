@@ -1,0 +1,5 @@
+a=t(L1,1,ubTimer(T1),lbTimer(T2))
+b=t(L1,2,ubTimer(T1),lbTimer(T2))
+c=t(L1,3,ubTimer(T1),lbTimer(T2))
+cs=t(L1,4,ubTimer(T1),lbTimer(T2))
+
