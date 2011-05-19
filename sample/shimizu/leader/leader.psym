@@ -1,0 +1,6 @@
+c2=now(TIME)| TIME>6.
+c3=now(TIME)| TIME>6.
+c1=now(TIME)|TIME>4.
+n1=ldr(1)=1.
+n2=ldr(2)=1.
+n3=ldr(3)=1.

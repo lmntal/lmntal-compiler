@@ -1,6 +1,7 @@
  /*
  fischerのアルゴリズム
- 4スレッド パラメタ(デルタ)3
+ 6スレッド パラメタ(δ)3
+ explicit-time-approach ver.
  */
  //スレッドt(id,current position)
  t(0,a).
