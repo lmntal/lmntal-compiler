@@ -258,18 +258,22 @@ public class FrontEnd {
 						//@ User defined option.
 						//@ <name> <value> description
 						//@ ===========================================================
-						//@ screen  max     : full screen mode
-						//@ auto    on      : reaction auto proceed mode when GUI on
-						//@ dump    1       : indent mem (etc...)
-						//@ dump    2       : propertyfile apply LMNtal prettyprinter
-						//@                   to output
-						//@ chorus  filename: output chorus file
+						//@ screen max         : full screen mode
+						//@ auto   on          : reaction auto proceed mode when GUI on
+						//@ dump   1           : indent mem (etc...)
+						//@ dump2  propertyfile: apply LMNtal prettyprinter
+						//@                      to output
+						//@ chorus filename    : output chorus file
 						if (i + 2 < args.length) {
 							String name = i + 1 < args.length ? args[i + 1] : "";
 							String value = i + 2 < args.length ? args[i + 2] : "";
 							Env.extendedOption.put(name, value);
 						}
-						if (Env.getExtendedOption("dump2") != "") {
+						
+						// 2011-10-05: revised (shinobu)
+						// if (Env.getExtendedOption("dump2") != "")
+						if (!Env.getExtendedOption("dump2").isEmpty())
+						{
 							Env.dump2 = true;
 							Properties prop = new Properties();
 							try {
