@@ -4,7 +4,6 @@
 package runtime;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,9 +58,9 @@ public class FrontEnd {
 			}
 		});
 
-		//@/TODO REPL で LMNtal プログラムを実行中の場合は、実行を中止してプロンプトに戻るようにする。
-		//@/注意 : ハンドラを追加しても、標準入力には EOF が送られてくるので、EOF を読んでも終了しないように変更する必要がある。
-		//@/Ctrl-C のハンドラ
+		// //TODO REPL で LMNtal プログラムを実行中の場合は、実行を中止してプロンプトに戻るようにする。
+		// //注意 : ハンドラを追加しても、標準入力には EOF が送られてくるので、EOF を読んでも終了しないように変更する必要がある。
+		// //Ctrl-C のハンドラ
 		// Signal.handle(new Signal("INT"), new SignalHandler () {
 		// public void handle(Signal sig) {
 		// }
@@ -130,7 +129,7 @@ public class FrontEnd {
 	/**
 	 * コマンドライン引数の処理
 	 * 2011-10-04 追記 (shinobu): コマンドラインオプションのHelp用文字列の記述は
-	 * 行コメントの冒頭を //@ とするように統一しました（help_gen.plも修正済み）
+	 * 行コメントの冒頭を "//@ " とするように統一しました（help_gen.plも修正済み）
 	 * @param args
 	 *            引数
 	 */
@@ -266,10 +265,8 @@ public class FrontEnd {
 						//@                   to output
 						//@ chorus  filename: output chorus file
 						if (i + 2 < args.length) {
-							String name = i + 1 < args.length ? args[i + 1]
-							                                         : "";
-							String value = i + 2 < args.length ? args[i + 2]
-							                                          : "";
+							String name = i + 1 < args.length ? args[i + 1] : "";
+							String value = i + 2 < args.length ? args[i + 2] : "";
 							Env.extendedOption.put(name, value);
 						}
 						if (Env.getExtendedOption("dump2") != "") {
@@ -670,8 +667,7 @@ public class FrontEnd {
 						break;
 					default:
 						Util.errPrintln("Invalid option: " + args[i]);
-					Util
-					.errPrintln("Use option --help to see a long list of options.");
+						Util.errPrintln("Use option --help to see a long list of options.");
 					if (Env.fUNYO) {
 						Mediator
 						.exit("Invalid option: "
@@ -682,7 +678,7 @@ public class FrontEnd {
 						System.exit(-1);
 					}
 				}
-			} else { // '-'以外で始まるものは (実行ファイル名, argv[0], arg[1], ...) とみなす
+			} else { // '-'以外で始まるものは (実行ファイル名, argv[0], argv[1], ...) とみなす
 				if (isSrcs) {
 					Env.srcs.add(args[i]);
 				} else {
