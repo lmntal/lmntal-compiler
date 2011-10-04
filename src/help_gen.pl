@@ -10,7 +10,7 @@ class Help {
 END
 
 while(<>) {
-	next unless m|//@ ([^\n\r]*)|;
+	next unless m|^\s*//@ ([^\n\r]*)|;
 	$v = $1; #chomp $v;
 	print <<END;
 			+"@{[ $v =~ /^\-/ ? "" : "                " ]}    $v\\n"
