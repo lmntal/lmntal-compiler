@@ -4,6 +4,7 @@
 package runtime;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -58,9 +59,9 @@ public class FrontEnd {
 			}
 		});
 
-		// //TODO REPL で LMNtal プログラムを実行中の場合は、実行を中止してプロンプトに戻るようにする。
-		// //注意 : ハンドラを追加しても、標準入力には EOF が送られてくるので、EOF を読んでも終了しないように変更する必要がある。
-		// //Ctrl-C のハンドラ
+		//@/TODO REPL で LMNtal プログラムを実行中の場合は、実行を中止してプロンプトに戻るようにする。
+		//@/注意 : ハンドラを追加しても、標準入力には EOF が送られてくるので、EOF を読んでも終了しないように変更する必要がある。
+		//@/Ctrl-C のハンドラ
 		// Signal.handle(new Signal("INT"), new SignalHandler () {
 		// public void handle(Signal sig) {
 		// }
@@ -128,7 +129,8 @@ public class FrontEnd {
 
 	/**
 	 * コマンドライン引数の処理
-	 * 
+	 * 2011-10-04 追記 (shinobu): コマンドラインオプションのHelp用文字列の記述は
+	 * 行コメントの冒頭を //@ とするように統一しました（help_gen.plも修正済み）
 	 * @param args
 	 *            引数
 	 */
@@ -156,8 +158,8 @@ public class FrontEnd {
 						}
 						break;
 					case 'd':
-						// / -d[<0-9>]
-						// / Debug output level.
+						//@ -d[<0-9>]
+						//@ Debug output level.
 						if (args[i].matches("-d[0-9]")) {
 							Env.debug = args[i].charAt(2) - '0';
 						} else {
@@ -166,50 +168,46 @@ public class FrontEnd {
 						// System.out.println("debug level " + Env.debug);
 						break;
 					case 'e':
-						// / -e <LMNtal program>
-						// / One liner code execution like Perl.
-						// / Example: -e 'a,(a:-b)'
+						//@ -e <LMNtal program>
+						//@ One liner code execution like Perl.
+						//@ Example: -e 'a,(a:-b)'
 						if (++i < args.length)
 							Env.oneLiner = args[i];
 						break;
 					case 'g':
-						// / -g
-						// / GUI mode. Atoms, membranes and links are drawn
-						// graphically.
-						// / Click button to proceed reaction. Close the window
-						// to quit.
+						//@ -g
+						//@ GUI mode. Atoms, membranes and links are drawn graphically.
+						//@ Click button to proceed reaction. Close the window to quit.
 						Env.fGUI = true;
 						break;
 					case 'o':
-						// / -o <file>
-						// / Specify the output JAR file name.
+						//@ -o <file>
+						//@ Specify the output JAR file name.
 						Translator.outputName = args[++i];
 						break;
 					case 'I':
-						// / -I <path>
-						// / Additional path for LMNtal library.
-						// / This option is available only when
-						// --use-source-library option is specified.
-						// / Otherwise, LMNtal library must be in your CLASSPATH
-						// environment variable.
-						// / The default path is ./lib and ../lib
+						//@ -I <path>
+						//@ Additional path for LMNtal library.
+						//@ This option is available only when --use-source-library
+						//@ option is specified.
+						//@ Otherwise, LMNtal library must be in your CLASSPATH
+						//@ environment variable.
+						//@ The default path is ./lib and ../lib
 						compile.Module.libPath.add(args[++i]);
 						break;
 					case 'L':
-						// / -L <path>
-						// / Additional path for classpath (inline code compile
-						// time)
+						//@ -L <path>
+						//@ Additional path for classpath (inline code compile time)
 						Inline.classPath.add(0, new File(args[++i]));
 						break;
 					case 'O':
-						// / -O[<0-9>] (-O=-O1)
-						// / Optimization level.
-						// / Intermediate instruction sequences are optimized.
-						// / -O1 is equivalent to --optimize-reuse-atom
-						// --optimize-reuse-mem,
-						// / --optimize-guard-move.
-						// / -O2 is equivalent to -O1 now.
-						// / -O3 is equivalent to --O2 --optimize-inlining
+						//@ -O[<0-9>]  (-O=-O1)
+						//@ Optimization level.
+						//@ Intermediate instruction sequences are optimized.
+						//@ -O1 is equivalent to --optimize-reuse-atom, --optimize-reuse-mem,
+						//@  --optimize-guard-move.
+						//@ -O2 is equivalent to -O1 now.
+						//@ -O3 is equivalent to --O2 --optimize-inlining
 						int level = -1;
 						if (args[i].length() == 2)
 							level = 1;
@@ -228,16 +226,12 @@ public class FrontEnd {
 						}
 						break;
 					case 's':
-						// / -s[<0-9>] (-s=-s3)
-						// / Shuffle level. Select a strategy of rule
-						// application.
-						// / 0: default. use an atom stack for each membrane
-						// (LIFO)
-						// / 1: atoms are selected in some arbitrary manner
-						// / 2: select atoms and membranes randomly from a
-						// membrane
-						// / 3: select atoms, mems and rules randomly from a
-						// membrane
+						//@ -s[<0-9>]  (-s=-s3)
+						//@ Shuffle level. Select a strategy of rule application.
+						//@   0: default. use an atom stack for each membrane (LIFO)
+						//@   1: atoms are selected in some arbitrary manner
+						//@   2: select atoms and membranes randomly from a membrane
+						//@   3: select atoms, mems and rules randomly from a membrane
 						if (args[i].matches("-s[0-9]")) {
 							Env.shuffle = args[i].charAt(2) - '0';
 						} else {
@@ -246,13 +240,13 @@ public class FrontEnd {
 						Util.errPrintln("shuffle level " + Env.shuffle);
 						break;
 					case 't':
-						// / -t
-						// / Trace mode.
+						//@ -t
+						//@ Trace mode.
 						Env.fTrace = true;
 						break;
 					case 'v':
-						// / -v[<0-9>]
-						// / Verbose output level.
+						//@ -v[<0-9>]
+						//@ Verbose output level.
 						if (args[i].matches("-v[0-9]")) {
 							Env.verbose = args[i].charAt(2) - '0';
 						} else {
@@ -261,17 +255,16 @@ public class FrontEnd {
 						// System.out.println("verbose level " + Env.verbose);
 						break;
 					case 'x':
-						// / -x <name> <value>
-						// / User defined option.
-						// / <name> <value> description
-						// /
-						// ===========================================================
-						// / screen max full screen mode
-						// / auto on reaction auto proceed mode when GUI on
-						// / dump 1 indent mem (etc...)
-						// / dump2 propertyfile apply LMNtal prettyprinter to
-						// output
-						// / chorus filename output chorus file
+						//@ -x <name> <value>
+						//@ User defined option.
+						//@ <name> <value> description
+						//@ ===========================================================
+						//@ screen  max     : full screen mode
+						//@ auto    on      : reaction auto proceed mode when GUI on
+						//@ dump    1       : indent mem (etc...)
+						//@ dump    2       : propertyfile apply LMNtal prettyprinter
+						//@                   to output
+						//@ chorus  filename: output chorus file
 						if (i + 2 < args.length) {
 							String name = i + 1 < args.length ? args[i + 1]
 							                                         : "";
@@ -299,19 +292,18 @@ public class FrontEnd {
 						i += 2;
 						break;
 					case 'p':
-						// / -p[<0-3>] (-p=-p0)
-						// / Profiling program.
-						// / Profile level. Select a detail levels of profiling.
-						// / 0: execution times of atom driven tests and
-						// membrane driven tests for each thread
-						// / 1: test counts and applying counts and execution
-						// times for each rule
-						// / 2: 1 + backtrack counts and lockfailure counts for
-						// each rule
-						// / 3: profiles each rule for each test and for each
-						// thread
-						// / output by CSV
-						if (args[i].matches("-p[0-3	]")) {
+						//@ -p[<0-3>] (-p=-p0)
+						//@ Profiling program.
+						//@ Profile level. Select a detail levels of profiling.
+						//@ 0: execution times of atom driven tests and membrane driven
+						//@    tests for each thread
+						//@ 1: test counts and applying counts and execution times
+						//@    for each rule
+						//@ 2: 1 + backtrack counts and lockfailure counts
+						//@    for each rule
+						//@ 3: profiles each rule for each test and for each thread
+						//@    output by CSV
+						if (args[i].matches("-p[0-3]")) {
 							Env.profile = args[i].charAt(2) - '0';
 						} else {
 							Env.profile = Env.PROFILE_DEFAULT;
@@ -326,8 +318,8 @@ public class FrontEnd {
 							Env.fGUI = true;
 						} else if (args[i].equals("--color")) {// 2006.11.13
 							// inui
-							// / --color
-							// / color dump
+							//@ --color
+							//@ color dump
 							Env.colorMode = true;
 						} else if (args[i].equals("--compileonly")) {
 							// コンパイル後の中間命令列を出力するモード
@@ -360,16 +352,16 @@ public class FrontEnd {
 							Debug.setEventPort(Integer.parseInt(args[i + 1]));
 							i++;
 						} else if (args[i].equals("--graphic")) {
-							// / --graphic
-							// / Graphic LMNtal mode.
+							//@ --graphic
+							//@ Graphic LMNtal mode.
 							Env.fGraphic = true;
 						} else if (args[i].equals("--wt")) {
-							// / --wt
-							// / tool mode. Use tools.
+							//@ --wt
+							//@ tool mode. Use tools.
 							Env.fTool = true;
 						} else if (args[i].equals("--help")) {
-							// / --help
-							// / Show usage (this).
+							//@ --help
+							//@ Show usage (this).
 							Util
 							.println("usage: java -jar lmntal.jar [options...] [filenames...]");
 							// usage: FrontEnd [options...] [filenames...]
@@ -382,86 +374,86 @@ public class FrontEnd {
 							} else
 								System.exit(-1);
 						} else if (args[i].equals("--immediate")) {
-							// / --immediate
-							// / Use a single newline (rather than two newlines)
-							// / to start execution in the REPL mode
+							//@ --immediate
+							//@ Use a single newline (rather than two newlines)
+							//@ to start execution in the REPL mode
 							Env.replTerm = "immediate";
 						} else if (args[i].equals("--interpret")) {
-							// / --interpret
-							// / Interpret intermediate instruction sequences
-							// without translating into Java.
-							// / In REPL mode and one-liner, alwas interpret.
+							//@ --interpret
+							//@ Interpret intermediate instruction sequences
+							//@ without translating into Java.
+							//@ In REPL mode and one-liner, alwas interpret.
 							Env.fInterpret = true;
 							// } else if
 							// (args[i].equals("--keep-temporary-files")) {
-							// // --keep-temporary-files
-							// // Do not delete the translated Java source.
+							// --keep-temporary-files
+							// Do not delete the translated Java source.
 							// Translator.fKeepSource = true;
 						} else if (args[i].equals("--library")) {
-							// / --library
-							// / Generate library.
+							//@ --library
+							//@ Generate library.
 							Env.fLibrary = true;
 						} else if (args[i].startsWith("--max-string-length=")) { // 2006.07.02
 							// inui
-							// / --max-string-length=<integer>
-							// / Set <integer> as translator's maxStringLength
-							// (0 <= integer <= 65534)
+							//@ --max-string-length=<integer>
+							//@ Set <integer> as translator's maxStringLength
+							//@ (0 <= integer <= 65534)
 							Translator.maxStringLength = Integer
 							.parseInt(args[i].substring(20));
 						} else if (args[i].equals("--nd")) {
-							// / --nd
-							// / Nondeterministic mode. Execute the all
-							// reduction paths.
+							//@ --nd
+							//@ Nondeterministic mode. Execute the all
+							//@ reduction paths.
 							Env.ndMode = Env.ND_MODE_ND_ALL;
 						} else if (args[i].equals("--nd2")) {
 							Env.ndMode = Env.ND_MODE_ND_ANSCESTOR;
 						} else if (args[i].equals("--nd3")) {
 							Env.ndMode = Env.ND_MODE_ND_NOTHING;
 						} else if (args[i].equals("--interactive")) {
-							// / --interactive
-							// / Interactive mode. This option is available only
-							// in the nondeterministic mode.
+							//@ --interactive
+							//@ Interactive mode. This option is available only
+							//@ in the nondeterministic mode.
 							Env.fInteractive = true;
 						} else if (args[i].equals("--optimize-grouping")) {
-							// / --optimize-grouping
-							// / Group the head instructions. (EXPERIMENTAL)
+							//@ --optimize-grouping
+							//@ Group the head instructions. (EXPERIMENTAL)
 							Optimizer.fGrouping = true;
 						} else if (args[i].equals("--optimize-guard-move")) {
-							// / --optimize-guard-move
-							// / Move up the guard instructions.
+							//@ --optimize-guard-move
+							//@ Move up the guard instructions.
 							Optimizer.fGuardMove = true;
 						} else if (args[i].equals("--optimize-merging")) {
-							// / --optimize-merging
-							// / Merge instructions.
+							//@ --optimize-merging
+							//@ Merge instructions.
 							Optimizer.fMerging = true;
 							Env.fMerging = true;
 						} else if (args[i]
 						                .equals("--optimize-systemrulesetsinlining")) {
 							Optimizer.fSystemRulesetsInlining = true;
 						} else if (args[i].equals("--optimize-inlining")) {
-							// / --optimize-inlining
-							// / Inlining tail jump.
+							//@ --optimize-inlining
+							//@ Inlining tail jump.
 							Optimizer.fInlining = true;
 						} else if (args[i].equals("--optimize-loop")) {
-							// / --optimize-loop
-							// / Use loop instruction. (EXPERIMENTAL)
+							//@ --optimize-loop
+							//@ Use loop instruction. (EXPERIMENTAL)
 							Optimizer.fLoop = true;
 						} else if (args[i].equals("--optimize-reuse-atom")) {
-							// / --optimize-reuse-atom
-							// / Reuse atoms.
+							//@ --optimize-reuse-atom
+							//@ Reuse atoms.
 							Optimizer.fReuseAtom = true;
 						} else if (args[i].equals("--optimize-reuse-mem")) {
-							// / --optimize-reuse-mem
-							// / Reuse mems.
+							//@ --optimize-reuse-mem
+							//@ Reuse mems.
 							Optimizer.fReuseMem = true;
 						} else if (args[i].equals("--optimize-slimoptimizer")) {
 
 						} else if (args[i].matches("--port")) {
-							// / --port portnumber
-							// / Specifies the port number that LMNtalDaemon
-							// listens on. The default is 60000.
-							// / Only dynamic and private ports defined by IANA
-							// is usable: port 49152 through 65535.
+							//@ --port portnumber
+							//@ Specifies the port number that LMNtalDaemon listens on.
+							//@ The default is 60000.
+							//@ Only dynamic and private ports
+							//@ defined by IANA is usable: port 49152 through 65535.
 
 							if (args[i + 1].matches("\\d*")) {
 								try {
@@ -524,12 +516,12 @@ public class FrontEnd {
 							// use <dir> as public directory
 							Translator.publicDirName = args[i].substring(13);
 						} else if (args[i].equals("--remain")) {
-							// / --remain
-							// / Processes remain in REPL mode
+							//@ --remain
+							//@ Processes remain in REPL mode
 							Env.fREMAIN = true;
 							// } else if(args[i].equals("--REPL")){
-							// /// --REPL
-							// /// REPL(Read-Eval-Print-Loop) mode
+							//@ --REPL
+							//@ REPL(Read-Eval-Print-Loop) mode
 							// Env.fREPL = true;
 							// Env.fREMAIN = true;
 						} else if (args[i].matches("--request-port")) {// 2006.4.27
@@ -539,14 +531,14 @@ public class FrontEnd {
 							i++;
 						} else if (args[i].equals("--stdin-lmn")) { // 2006.07.11
 							// inui
-							// / --stdin-lmn
-							// / read LMNtal program from standard input
+							//@ --stdin-lmn
+							//@ read LMNtal program from standard input
 							Env.stdinLMN = true;
 						} else if (args[i].equals("--stdin-tal")) { // 2006.07.11
 							// inui
-							// / --stdin-tal
-							// / read LMNtal intermediate instruction list from
-							// standard input
+							//@ --stdin-tal
+							//@ read LMNtal intermediate instruction list from standard
+							//@ input
 							Env.stdinTAL = true;
 						} else if (args[i].startsWith("--stdlib-name=")) {
 							// 開発者用オプション
@@ -554,45 +546,45 @@ public class FrontEnd {
 							// use <name> as standard library name
 							Translator.stdlibName = args[i].substring(14);
 						} else if (args[i].equals("--start-daemon")) {
-							// / --start-daemon
-							// / Start LMNtalDaemon
+							//@ --start-daemon
+							//@ Start LMNtalDaemon
 							Env.startDaemon = true;
 						} else if (args[i].equals("--showproxy")) {
-							// / --showproxy
-							// / Show proxy atoms
+							//@ --showproxy
+							//@ Show proxy atoms
 							Env.hideProxy = false;
 						} else if (args[i].equals("--hideruleset")) {
-							// / --hideruleset
-							// / Hide ruleset
+							//@ --hideruleset
+							//@ Hide ruleset
 							Env.showruleset = false;
 						} else if (args[i].equals("--hiderule")) {
-							// / --hiderule
-							// / Hide rule names
+							//@ --hiderule
+							//@ Hide rule names
 							Env.showrule = false;
 						} else if (args[i].equals("--showlongrulename")) {
 							Env.showlongrulename = true;
 						} else if (args[i].equals("--dump-converted-rules")) {
-							// / --show-converted_rules
-							// / Dump converted rules
+							//@ --show-converted_rules
+							//@ Dump converted rules
 							Env.dumpConvertedRules = true;
 						} else if (args[i].startsWith("--thread-max=")) {
-							// / --thread-max=<integer>
-							// / set <integer> as the upper limit of threads
-							// occured in leftside rules.
+							//@ --thread-max=<integer>
+							//@ set <integer> as the upper limit of threads occured
+							//@ in leftside rules.
 							Env.threadMax = Integer.parseInt(args[i]
 							                                      .substring(13));
 						} else if (args[i].startsWith("--temporary-dir=")) {
-							// / --temporary-dir=<path>
-							// / use <path> as temporary directory
+							//@ --temporary-dir=<path>
+							//@ use <path> as temporary directory
 							Translator.baseDirName = args[i].substring(16);
 							Translator.fKeepSource = true;
 						} else if (args[i].equals("--use-source-library")) {
-							// / --use-source-library
-							// / Use source libraries in lib/src and lib/public.
+							//@ --use-source-library
+							//@ Use source libraries in lib/src and lib/public.
 							Env.fUseSourceLibrary = true;
 						} else if (args[i].equals("--debug")) {
-							// / --debug
-							// / run command-line debugger.
+							//@ --debug
+							//@ run command-line debugger.
 							Env.debugOption = true;
 							Env.fInterpret = true;
 						} else if (args[i].equals("--nothread")) {
@@ -638,9 +630,8 @@ public class FrontEnd {
 							Env.fType = true;
 							Env.flgShowConstraints = true;
 						} else if (args[i].equals("--args")) {
-							// / --args
-							// / give command-line options after this to LMNtal
-							// program.
+							//@ --args
+							//@ give command-line options after this to LMNtal program.
 							isSrcs = false;
 						} else if (args[i].equals("--safe")) {
 							// 060804 safe mode
@@ -823,7 +814,7 @@ public class FrontEnd {
 			run(new BufferedReader(new InputStreamReader(is)), unitName);
 		}
 	}
-
+	
 	/**
 	 * 与えられたソースについて、一連の実行を行う。
 	 * 
