@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.TreeMap;
 
 import runtime.Env;
 import runtime.Functor;
@@ -125,7 +126,7 @@ public class Optimizer {
 		}
 		if (fReuseAtom) {
 			if (changeOrder(body)) {
-				reuseAtom(head, body);
+				reuseAtom2(head, body);
 				removeUnnecessaryRelink(body);
 			}
 		}
@@ -1265,6 +1266,251 @@ public class Optimizer {
 					Link l1 = new Link(a1.intValue(), inst.getIntArg2());
 					Link l2 = new Link(a2.intValue(), inst.getIntArg4());
 					if (l2.equals(links.get(l1))) {
+						lit.remove();
+					}
+				}
+				break;
+			}
+		}
+		//TO DO enqueueatom命令を生成 → 元の命令列にあるものが使えるので不要
+
+		Instruction.changeAtomVar(body, reuseMap);
+
+	}
+
+	// ========================================================================
+	// テスト実装
+	// ========================================================================
+	private static void reuseAtom2(List<Instruction> head, List<Instruction> body)
+	{
+		List<Instruction> getlinks = new ArrayList<Instruction>();
+		List<Instruction> inhlinks = new ArrayList<Instruction>();
+		for (int i = 0; i < body.size(); i++)
+		{
+			Instruction inst = body.get(i);
+			if (inst.getKind() == Instruction.GETLINK)
+			{
+				getlinks.add(inst);
+				body.remove(i);
+				i--;
+			}
+			else if (inst.getKind() == Instruction.INHERITLINK)
+			{
+				inhlinks.add(inst);
+				body.remove(i);
+				i--;
+			}
+		}
+		//for (Instruction inst : getlinks) { System.out.println(inst); }
+		
+		//* ======== reuse getlink ========
+		class GLPair
+		{
+			public Instruction inst;
+			public int atom, link;
+			public GLPair(Instruction ins, int a, int l) { inst = ins; atom = a; link = l; };
+			public boolean equals(Object o)
+			{
+				return o instanceof GLPair &&
+					((GLPair)o).atom == atom && ((GLPair)o).link == link;
+			}
+			public int hashCode() { return 17 * atom * link; }
+		}
+		HashMap<GLPair, GLPair> gl = new HashMap<GLPair, GLPair>();
+		TreeMap<Integer, Integer> rewriteMap = new TreeMap<Integer, Integer>();
+		for (int i = 0; i < getlinks.size(); i++)
+		{
+			Instruction ins = getlinks.get(i);
+			GLPair p = new GLPair(ins, ins.getIntArg2(), ins.getIntArg3());
+			if (gl.containsKey(p))
+			{
+				rewriteMap.put(ins.getIntArg1(), gl.get(p).inst.getIntArg1());
+			}
+			else
+			{
+				gl.put(p, p);
+			}
+		}
+		//System.out.println(rewriteMap);
+		Instruction.applyVarRewriteMap(body, rewriteMap);
+		//for (GLPair g : gl.keySet()) { System.out.println(g); }
+		getlinks.clear();
+		for (GLPair g : gl.keySet()) { getlinks.add(g.inst); }
+		//*/
+		
+		int pos = 0;
+		for (pos = 0; pos < body.size(); pos++)
+		{
+			if (body.get(pos).getKind() == Instruction.COMMIT) break;
+		}
+		pos++;
+		body.addAll(pos, getlinks);
+		for (pos = 0; pos < body.size(); pos++)
+		{
+			if (body.get(pos).getKind() == Instruction.NEWATOM) break;
+		}
+		while (pos < body.size() && body.get(pos).getKind() == Instruction.NEWATOM) pos++;
+		body.addAll(pos, inhlinks);
+		
+		//for (Instruction inst : body) { System.out.println(inst); }
+		//*/
+		
+		/////////////////////////////////////////////////
+		//
+		// 再利用するアトムの組み合わせを決定する
+		//
+		
+
+		// removeatom/newatom命令の情報を調べる
+		AtomSet removedAtoms = new AtomSet();
+		AtomSet createdAtoms = new AtomSet();
+		for(Instruction inst : body)
+		{
+			switch (inst.getKind())
+			{
+			case Instruction.REMOVEATOM:
+				try
+				{
+					int atom = inst.getIntArg1();
+					Functor functor = (Functor)inst.getArg3();
+					int mem = inst.getIntArg2();
+					removedAtoms.add(mem, functor, atom);
+					//System.out.println("remov: " + inst);
+				}
+				catch (IndexOutOfBoundsException e)
+				{
+					//System.err.println("inst: " + inst);
+					//e.printStackTrace();
+				}
+				break;
+			case Instruction.NEWATOM:
+				int atom = inst.getIntArg1();
+				Functor functor = (Functor)inst.getArg3();
+				int mem = inst.getIntArg2();
+				createdAtoms.add(mem, functor, atom);
+				break;
+			}
+		}
+
+		//再利用するアトムの組み合わせを決定
+
+		//再利用前のアトムID -> 再利用後のアトムID
+		HashMap<Integer, Integer> reuseMap = new HashMap<Integer, Integer>();
+		//再利用されるアトムのID（reuseMapの値に設定されているIDの集合）
+		HashSet<Integer> reuseAtoms = new HashSet<Integer>(); 
+
+		//同じ膜にある、同じ名前のアトムを再利用する
+		for (Iterator<Integer> memIterator = removedAtoms.memIterator(); memIterator.hasNext(); )
+		{
+			int mem = memIterator.next();
+			
+			for(Iterator<Functor> functorIterator = removedAtoms.functorIterator(mem); functorIterator.hasNext(); )
+			{
+				Functor functor = functorIterator.next();
+				//removeproxies・insertproxiesがあるので、再利用できない
+				if (functor instanceof runtime.SpecialFunctor)
+				{
+					continue;
+				}
+				Iterator<Integer> removedAtomIterator = removedAtoms.iterator(mem, functor);
+				Iterator<Integer> createdAtomIterator = createdAtoms.iterator(mem, functor);
+				while (removedAtomIterator.hasNext() && createdAtomIterator.hasNext())
+				{
+					int createAtom = createdAtomIterator.next();
+					int removeAtom = removedAtomIterator.next();
+					reuseMap.put(createAtom, removeAtom);
+					reuseAtoms.add(removeAtom);
+					//再利用の組み合わせが決まったものは削除する
+					//（この後に続く、アトム名が異なる場合などの再利用の組み合わせを決定する処理のため。）
+					removedAtomIterator.remove();
+					createdAtomIterator.remove();
+				}
+			}
+		}
+		
+		//System.out.println("remain: " + removedAtomSet);
+		//System.out.println("created: " + createdAtomSet);
+		
+		//TODO 膜・アトム名が異なるものの再利用の組み合わせを決定するコードをここに書く
+
+
+		//////////////////////////////////////////////////
+		//
+		// アトムを再利用するような命令列を生成する
+		//
+
+		//情報取得
+		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ヘッドでの変数名→ボディでの変数名
+
+		Instruction react = head.get(head.size() - 1);
+		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP)
+		{
+			return;
+		}
+		int i = ((List)react.getArg2()).size();
+		List<Integer> args = (List)react.getArg3();
+		for(Iterator<Integer> it = args.iterator(); it.hasNext(); )
+		{
+			varInBody.put(it.next(), i++);
+		}
+
+		HashMap<Link, Link> links = new HashMap<Link, Link>();
+		for (Instruction inst : head)
+		{
+			if (inst.getKind() == Instruction.DEREF)
+			{
+				if (!varInBody.containsKey(inst.getArg2()) || !varInBody.containsKey(inst.getArg1()))
+				{
+					//ボディ命令列に渡されない変数に関する情報。
+					//リンク構造が循環している場合に現れる。
+					//無駄が発生する場合があるが、バグにはならないのでとりあえず放置。
+					//TODO 適切に処理する
+					continue;
+				}
+				int atom1, atom2;
+				atom1 = varInBody.get(inst.getArg2());
+				atom2 = varInBody.get(inst.getArg1());
+				Link l1 = new Link(atom1, inst.getIntArg3());
+				Link l2 = new Link(atom2, inst.getIntArg4());
+				links.put(l1, l2);
+				links.put(l2, l1);
+			}
+		}
+		
+
+		//System.out.println("=====before");
+		//for (Instruction inst : body) { System.out.println(inst); }
+		//System.out.println("=====");
+		
+		//不要になったremoveatom/freeatom/newatom命令を除去
+		for (ListIterator<Instruction> lit = body.listIterator(1); lit.hasNext(); )
+		{
+			Instruction inst = lit.next();
+			int atomId;
+			
+			switch (inst.getKind())
+			{
+			case Instruction.REMOVEATOM:
+			case Instruction.FREEATOM:
+				atomId = inst.getIntArg1();
+				if (reuseAtoms.contains(atomId)) lit.remove();
+				break;
+			case Instruction.NEWATOM:
+				atomId = inst.getIntArg1();
+				if (reuseMap.containsKey(atomId)) lit.remove();
+				break;
+			case Instruction.NEWLINK:
+				int arg1 = inst.getIntArg1(), arg3 = inst.getIntArg3();
+				if (reuseMap.containsKey(arg1) && reuseMap.containsKey(arg3))
+				{
+					// 再利用されたアトムがnewlinkで繋がれるが、既につながっている場合
+					int a1 = reuseMap.get(arg1);
+					int a2 = reuseMap.get(arg3);
+					Link l1 = new Link(a1, inst.getIntArg2());
+					Link l2 = new Link(a2, inst.getIntArg4());
+					if (l2.equals(links.get(l1)))
+					{
+						//System.out.println("test");
 						lit.remove();
 					}
 				}
