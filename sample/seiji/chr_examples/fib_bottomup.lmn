@@ -10,7 +10,9 @@
 %            N is N2+1, M is M1+M2, fib(N,M).
 
 start @@ upto(U) :- uniq | upto(U), fib(0, 1), fib(1, 1).
-next  @@ upto(Max), fib(N1, M1), fib(N2, M2) :- Max>N2, N2=:=N1+1, uniq(Max, N1, N2, M1, M2) | 
-						upto(Max), fib(N1, M1), fib(N2, M2), N = N2+1, M = M1+M2, fib(N, M).
+next  @@ upto(Max), fib(N1, M1), fib(N2, M2) :-
+  Max>N2, N2=:=N1+1, uniq(Max, N1, N2, M1, M2) | 
+	upto(Max), fib(N1, M1), fib(N2, M2), N = N2+1, M = M1+M2, fib(N, M).
+Z0=X+Y :- Z=X+Y | Z0=Z.
 						
-						upto(8).
+upto(8).

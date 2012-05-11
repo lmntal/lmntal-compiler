@@ -15,8 +15,3 @@ add(elem($e),{{$s},$p},{$q[]},P) :- unary($e) |
 union({$a},{$b},U) :- U = {$a,$b}.
 
 subsets(3,{elem(a),elem(b),elem(c),elem(d)},res).
-
-
-
-
-  

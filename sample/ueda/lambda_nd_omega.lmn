@@ -6,11 +6,10 @@ Lambda calculus (nondeterministic)
 -----------------------------------------------------------
 */
 
-{ module(lambda).
-
 beta@@
   H=apply(lambda(A, B), C) :- H=B, A=C.
 l_c@@
+  c,
   lambda(A,B)=cp(C,D,L), {+L,$q} :-
     C=lambda(E,F), D=lambda(G,H), A=cp(E,G,L1), B=cp(F,H,L2),
     {{+L1},+L2,sub(S)}, {super(S),$q}.
@@ -38,18 +37,16 @@ c_r4@@ A=cp(rm,B,L), {+L,$p} :- A=B, {$p}.
 r_r@@  rm=rm :- .
 f_r@@  fv($u)=rm :- unary($u) | .
 
-promote@@ {{},$p,sub(S)}, {$q,super(S)} :- {$p,$q}.
-c2c@@  A=cp(B,C) :- A=cp(B,C,L), {+L,top}.
+promote@@ {{},$p,sub(S)}, {$q,super(S)} :- {$p,$q}, c.
+// c2c@@  A=cp(B,C) :- A=cp(B,C,L), {+L,top}.
 gc@@   {top} :- .
-}.
 
 // examples
 
-{ lambda.use. example_omega.
 // (lambda x . x x)(lambda x . x x)
-r=apply(lambda(cp(X0,X1),apply(X0,X1)),
-        lambda(cp(X2,X3),apply(X2,X3)))
-}.
+r=apply(lambda(cp(X0,X1,{top}),apply(X0,X1)),
+        lambda(cp(X2,X3,{top}),apply(X2,X3))),        
+c.  // controller token for color creation
 
 /*
 { lambda.use. example1.
@@ -146,5 +143,8 @@ H=apply(fv(succ), fv(I)) :- int(I) | H=fv(I+1).
 }.
 */
 
+/*
 {$p[A,B,C|*D], A=cp(B,C,L), {+L,top,$q},@p}/ :-
     {$p[A,B,C|*D], A=c(B,C), {top,$q},@p}.
+    */
+    

@@ -1,0 +1,21 @@
+add_env($x,tenv{$g},E) :-
+   unary($x) |
+   E=tenv{$g,type($x)}.
+add_env(3,tenv{},env).    
+//a_e2@@add_env(2,tenv{type(2)},tenv{},E) :- |
+//    E=tenv{type(2)}.
+//a_e3@@add_env($x,tenv{type($y),$g0},tenv{$g},E) :- $x\=$y |
+//    add_env($x,tenv{$g0},tenv{$g},E).
+
+/*
+c_e1@@copy_env(G,G1,G2) :- copy_env(G,tenv{},G1,tenv{},G2).
+c_e2@@copy_env(tenv{},G10,G1,G20,G2) :- G1=G10, G2=G20.
+c_e3@@copy_env(tenv{type($x,L),$g},tenv{$g1},G1,tenv{$g2},G2), v{+L,$v} :-
+    unary($x) |
+    copy_env(tenv{$g},tenv{type($x,L1),$g1},G1,tenv{type($x,L2),$g2},G2),
+    v{+L1,+L2,$v}.
+rem1@@remove(tenv{}) :- .
+rem2@@remove(tenv{type($x,L),$g}), v{+L,$v} :- unary($x) |
+    remove(tenv{$g}), v{$v}.
+    */
+    

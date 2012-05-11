@@ -1,0 +1,17 @@
+// choose N elements from a multiset
+
+subsets(0, m{$p[]},P) :- P=s{m{}}.
+subsets($n,m{},P) :- $n>0 | P=s{}.
+subsets($n,m{elem($e),$p[]},P) :- $n>0, unary($e) |
+   subsets($n,m{$p[]},P1),
+   subsets($n-1,m{$p[]},P2),
+   add(elem($e),P2,s{},P3),
+   P=union(P1,P3).
+
+add(elem($e),s{},P0,P) :- unary($e) | P=P0.
+add(elem($e),s{m{$s},$p},s{$q[]},P) :- unary($e) |
+   add(elem($e),s{$p},s{m{elem($e),$s},$q[]},P).
+
+union(s{$a},s{$b},U) :- U = s{$a,$b}.
+
+subsets(3,m{elem(a),elem(b),elem(c),elem(d)},res).

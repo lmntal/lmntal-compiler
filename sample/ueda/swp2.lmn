@@ -1,0 +1,45 @@
+{
+ wSize(2). // ウィンドウサイズ
+ nMAX(4).  // 再送処理などの制御に利用するナンバーnの上限値
+ 
+ sender{ n(0), c(0). }. // データ送信者
+ ss=rr.                 // データが通る通信路
+ rs=sr.                 // ACKが通る通信路
+ receiver{ n(0). }.     // データ受信者
+ 
+ // 送信者 : データの送信 sender -> [data]
+ sd@@ sender{ n(N), c(C) }, nMAX(NMAX), wSize(W), ss=SC
+   :- C<W, C_=C+1, DN=(N+C) mod NMAX
+   |  sender{ n(N), c(C_)}, nMAX(NMAX), wSize(W), ss=[data(DN)|SC].
+
+ // 受信者 : データ受信，ACKの返送(予期していたデータ) [data] -> receiver -> [ack]
+ rs@@ receiver{ n(N) }, nMAX(NMAX), SC=[data(DN)|rr], rs=RC
+   :- N=:=DN, N_=(N+1) mod NMAX
+    | receiver{ n(N_) }, nMAX(NMAX), SC=rr, rs=[ack(DN)|RC].
+ 
+// 受信者 : データ受信，ACKの返送(受信するはずのデータの消失検出) [data] ->  receiver -> [ack]
+ ru@@ receiver{ n(N) }, SC=[data(DN)|rr], rs=RC
+   :- N=\=DN, ground(SC)
+    | receiver{ n(N) }, ss=rr, rs=[ack(DN)|RC].
+ 
+ // 送信者 : ACKの受信(予期していたACK) [ack] -> slide
+ s@@ sender{ n(N), c(C) }, nMAX(NMAX), RC=[ack(ACK)|sr]
+  :- N=:=ACK, C>0, N_=(N+1) mod NMAX, C_=C-1
+   | sender{ n(N_), c(C_)}, nMAX(NMAX), RC=sr.
+ 
+ // 送信者 : ACKの受信(データかACKの消失検出) [ack] -> reset
+ r@@ sender{ n(N), c(C) }, SC=rr, RC=[ack(ACK)|sr]
+  :- N=\=ACK, int(C), int(ACK), ground(SC), ground(RC)
+   | sender{ n(N), c(0) }, ss=rr, rs=sr.
+ 
+ // 送信者 : タイムアウトの検出 [timeout] -> reset
+ t@@ sender{ n(N), c(C) }, timeout
+  :- int(N), int(C)
+   | sender{ n(N), c(0) }.
+ 
+ // 通信路 : データ,ACKの消失 [data] -> [], [ack] -> []
+ ld@@ X=[data(DN)|Y] :- int(DN) | X=Y.
+ la@@ X=[ack(ACK)|Y] :- int(ACK) | X=Y .
+}.
+// タイムアウトの発生 [] -> [timeout]
+o@@ { $p, @p }/ :- { timeout, $p, @p }

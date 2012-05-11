@@ -1,21 +1,22 @@
-/* the (synchronous) pi-calculus
-   Kazunori Ueda, 2006-05-20
+/*****************************************************************
+                   The (synchronous) pi-calculus
+                      Kazunori Ueda, 2006-05-20
 
-   Examples are taken from 
-   [1] Milner, R., The Polyadic pi-Calculus, a Tutorial
-       ECS-LFCS-91-180
-   [2] Milner, R., Communicating and Mobile Systems: the Pi-Calculus
-       Cambridge Univ. Press, 1999.
+  Examples are taken from 
+  [1] Milner, R., The Polyadic pi-Calculus, a Tutorial
+      ECS-LFCS-91-180
+  [2] Milner, R., Communicating and Mobile Systems: the Pi-Calculus
+      Cambridge Univ. Press, 1999.
                 _
-   p ::= x(y) | xy
+  p ::= x(y) | xy
 
-   R ::= \Sigma_j p_j.P_j   (e.g., p1.P1 + p2.P2 + ...)
+  R ::= \Sigma_j p_j.P_j   (e.g., p1.P1 + p2.P2 + ...)
          
-   P ::= new a P
-      |  P1 | P2
-      |  R
-      |  !R
-*/
+  P ::= new a P
+     |  P1 | P2
+     |  R
+     |  !R
+*****************************************************************/
 
 { module(pi).
   comm@@ {$x,+C1,+C2}, {once, get(C1,Y,{$b1[Y|*V1]}), $c1},

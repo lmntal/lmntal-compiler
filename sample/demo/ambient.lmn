@@ -1,10 +1,17 @@
-/*
----------------------------------------------------
- Ambient Calculus
-                                      Kazunori Ueda
-                                         2006-08-05
----------------------------------------------------
-*/
+/*****************************************************************
+                      The Ambient Calculus
+                    Kazunori Ueda, 2006-08-05
+
+ For details, see:
+ Kazunori Ueda, Encoding Distributed Process Calculi into  LMNtal.
+ Electronic Notes in Theoretical Computer Science, Vol.209
+ (2008), pp.187-200.
+
+ Examples are taken from:
+ Cardelli, L. and Gordon, A. D., Mobile Ambients,
+ in Foundations of Software Science and Computational Structures,
+ Nivat, M. (ed.), LNCS 1378, Springer-Verlag, 1998, 140-155.
+*****************************************************************/
 
 { module(amb).
 
@@ -142,11 +149,11 @@ release(N1,{acquire(M1,{qq})}),
   mv_in(N,{$p}) :- {id,+K}, {id,name(enter),+E},
     {amb.use. amb(K0), {id,+K0,+K9,-K}, {id,+N0,-N}, {id,+E1,-E},
        in(N0,{{amb(E0), {id,+E0,-E1}, {id,+K1,+K2,-K9},
-		 out(K1,{open(K2,{$p})})}})}.
+                 out(K1,{open(K2,{$p})})}})}.
   mv_out(N,{$p}) :- {id,+K}, {id,name(exit),+E},
     {amb.use. amb(K0), {id,+K0,+K9,-K}, {id,+N0,-N}, {id,+E1,-E},
        out(N0,{{amb(E0), {id,+E0,-E1}, {id,+K1,+K2,-K9},
-		 out(K1,{open(K2,{$p})})}})}.
+                 out(K1,{open(K2,{$p})})}})}.
   // n_dn(N,{$p}) :- {id,name(enter),+E},
   //   {amb.use. b.use. amb(N0), {id,+N0,-N}, {id,+E0,-E}, $p, allow(E0)}.
   // n_up(N,{$p}) :- {id,name(exit),+E},

@@ -8,30 +8,30 @@ proof{
 % (var)      ----------------
 %            忙, x:而 |- x:而
 %
-var@@sequent(tenv{$g,type($x,T1)},type($y,T2)) :- $x==$y |
-    unify(T1,T2), remove(tenv{$g}).
+var@@sequent(tenv{$g,type($x,T1)},type($y,T2)), U=ut :- $x==$y |
+    U=[unify(T1,T2)|ut], remove(tenv{$g}).
 
 % (con)      ---------------
 %             忙 |- c^而:而
 %
-con@@sequent(G,type($x,T)) :- int($x) |
-    unify(T,int), remove(G).
+con@@sequent(G,type($x,T)), U=ut :- int($x) |
+    U=[unify(T,int)|ut], remove(G).
 
 % (nil)      ------------------------
 %               忙 |- nil : list(而)
 %
-nil@@sequent(G,type([],T)) :-
-    unify(T,list(v{})), remove(G).
+nil@@sequent(G,type([],T)), U=ut :-
+    U=[unify(T,list(v{}))|ut], remove(G).
 
 %            忙 |- M_1:而   忙 |- M_2: list(而)
 % (list)     --------------------------------
 %                忙 |- M_1::M_2 : list(而)
 %
-list@@sequent(G,type([X|Xs],T)) :-
+list@@sequent(G,type([X|Xs],T)), U=ut :-
     copy_env(G,G1,G2),
     sequent(G1,type(X,v{+T1})),
     sequent(G2,type(Xs,v{+T2,+T3})),
-    unify(list(T1),T2), unify(T3,T).
+    U=[unify(list(T1),T2), unify(T3,T)|ut].
 
 %         忙 |- L:bool  忙 |- M:而  忙 |- N:而
 % (if)    ------------------------------------
@@ -42,10 +42,10 @@ list@@sequent(G,type([X|Xs],T)) :-
 % (abs)      -----------------------------
 %               忙 |- (竹x.M): 而' ◥ 而
 %
-abs@@sequent(G,type(abs($x,M),T)) :- unary($x) |
+abs@@sequent(G,type(abs($x,M),T)), U=ut :- unary($x) |
     add_env($x,G,tenv{},E,T1),
     sequent(E,type(M,T2)), v{+T1,+T3}, v{+T2,+T4},
-    unify(T,arrow(T3,T4)).    
+    U=[unify(T,arrow(T3,T4))|ut].    
 
 %            忙 |- M: 而'◥而  忙 |- N: 而'
 % (app)      -----------------------------
@@ -67,7 +67,7 @@ a_e1@@add_env($x,tenv{},tenv{$g},E,T1) :- unary($x) |
 a_e2@@add_env($x,tenv{type($y,T0),$g0},tenv{$g},E,T1) :- $x=$y |
     E=tenv{$g,type($x,T1),$g0}, remove(tenv{type($y,T0)}).
 a_e3@@add_env($x,tenv{type($y,T0),$g0},tenv{$g},E,T1) :- $x\=$y |
-   add_env($x,tenv{$g0},tenv{type($y,T0),$g},E,T1).
+    add_env($x,tenv{$g0},tenv{type($y,T0),$g},E,T1).
 
 c_e1@@copy_env(G,G1,G2) :- copy_env(G,tenv{},G1,tenv{},G2).
 c_e2@@copy_env(tenv{},G10,G1,G20,G2) :- G1=G10, G2=G20.
@@ -79,13 +79,14 @@ rem1@@remove(tenv{}) :- .
 rem2@@remove(tenv{type($x,L),$g}), v{+L,$v} :- unary($x) |
     remove(tenv{$g}), v{$v}.
     
-//sequent(tenv{},type(abs(x,x),v{+A1})), A1=ans, lock.
-//sequent(tenv{},type([7],v{+A2})), A2=ans, lock.
-sequent(tenv{},type([[]],v{+A3})), A3=ans, lock.
-//sequent(tenv{},type([y],v{+A4})), A4=ans, lock.
-//sequent(tenv{}, type(abs(f,abs(x,app(f,app(f,x)))),v{+A5})), A5=ans, lock.
-//sequent(tenv{}, type(abs(f,abs(x,app(f,x))),v{+A6})), A6=ans, lock.
-//sequent(tenv{}, type(abs(x,app(x,x)),v{+A7})), A7=ans, lock.
+//sequent(tenv{},type(abs(x,x),v{+A})), A=ans, lock.
+sequent(tenv{},type([7],v{+A})), A=ans, lock.
+//sequent(tenv{},type([[]],v{+A})), A=ans, lock.
+//sequent(tenv{},type([y,z],v{+A})), A=ans, lock.
+//sequent(tenv{}, type(abs(f,abs(x,app(f,app(f,x)))),v{+A})), A=ans, lock.
+//sequent(tenv{}, type(abs(f,abs(x,app(f,x))),v{+A})), A=ans, lock.
+//sequent(tenv{}, type(abs(x,app(x,x)),v{+A})), A=ans, lock.
+uh=ut
 }.
 
 proof{$p,@p}/ :- $p.
@@ -94,13 +95,13 @@ proof{$p,@p}/ :- $p.
 % v: typevar, t: type
 
 % v=v; simply remove it
-u_vv@@unify(V1,V2), v{+V1,+V2,$v} :- v{$v}.
+u_vv@@uh=[unify(V1,V2)|U], v{+V1,+V2,$v} :- v{$v}, uh=U.
 
 % v=t (t\=v); occurs check, then replace v's other occurrences with t
-u_vt1@@unify(v{$v1},v{$v2}) :- v{$v1,$v2}.   % needs no occurs check
-u_vt2@@unify(v{$v1},int), lock :- unify_vt(v{$v1},int).
-u_vt3@@unify(v{$v1},list(T1)), lock :- unify_vt(v{$v1},list(T1)).
-u_vt4@@unify(v{$v1},arrow(S,T1)), lock :- unify_vt(v{$v1},arrow(S,T1)).
+u_vt1@@uh=[unify(v{$v1},v{$v2})|U] :- v{$v1,$v2}, uh=U.   % needs no occurs check
+u_vt2@@uh=[unify(v{$v1},int)|U], lock :- unify_vt(v{$v1},int), uh=U.
+u_vt3@@uh=[unify(v{$v1},list(T1))|U], lock :- unify_vt(v{$v1},list(T1)), uh=U.
+u_vt4@@uh=[unify(v{$v1},arrow(S,T1))|U], lock :- unify_vt(v{$v1},arrow(S,T1)), uh=U.
 
 % needs locking during the occurs check
 % Res is ok({$v}) or fail({$v})
@@ -125,30 +126,28 @@ cp3@@cp(T1,T2)=arrow(U,V) :-
     T1=arrow(U1,V1), T2=arrow(U2,V2), cp(U1,U2)=U, cp(V1,V2)=V.
 cp4@@cp(V1,V2)=v{$v} :- v{+V1,+V2,$v}.
 
-u_tv1@@unify(int,v{$v}) :- unify(v{$v},int).
-u_tv2@@unify(list(S),v{$v}) :- unify(v{$v},list(S)).
-u_tv3@@unify(arrow(T1,T2),v{$v}) :- unify(v{$v},arrow(T1,T2)).
+u_tv1@@uh=[unify(int,v{$v})|U] :- uh=[unify(v{$v},int)|U].
+u_tv2@@uh=[unify(list(S),v{$v})|U] :- uh=[unify(v{$v},list(S))|U].
+u_tv3@@uh=[unify(arrow(T1,T2),v{$v})|U] :-
+    uh=[unify(v{$v},arrow(T1,T2))|U].
 
-u_cc@@unify(int,int) :- .
-u_ll@@unify(list(T1),list(T2)) :- unify(T1,T2).
-u_aa@@unify(arrow(S1,T1),arrow(S2,T2)) :-
-    unify(S1,S2), unify(T1,T2).
+u_cc@@uh=[unify(int,int)|U] :- uh=U.
+u_ll@@uh=[unify(list(T1),list(T2))|U] :- uh=[unify(T1,T2)|U].
+u_aa@@uh=[unify(arrow(S1,T1),arrow(S2,T2))|U] :-
+    uh=[unify(S1,S2), unify(T1,T2)|U].
 
 oc_vv@@T2=occurs_check(V0,V1,Res,V), v{+V0,+V1,$v} :-
     Res=no, V=v{+T2,$v}.
 oc_vw@@T2=occurs_check(v{$v1},v{$v2},Res,V) :-
     T2=v{$v2}, Res=ok, V=v{$v1}.
-oc_vc@@T2=occurs_check(v{$v1},int,Res,V) :-
-    T2=int, Res=ok, V=v{$v1}.
+oc_vc@@T2=occurs_check(v{$v1},int,Res,V) :- T2=int, Res=ok, V=v{$v1}.
 oc_vl@@T2=occurs_check(v{$v1},list(V0),Res,V) :-
     T2=list(occurs_check(v{$v1},V0,Res,V)).
 oc_va@@T2=occurs_check(v{$v1},arrow(V0,V1),Res,V) :-
     T2=arrow(occurs_check(v{$v1},V0,Res0,V2), 
              occurs_check(Res0,V2,V1,Res,V)).
-oc_ok@@T2=occurs_check(ok,V2,V1,Res,V) :-
-    T2=occurs_check(V2,V1,Res,V).
-oc_no@@T2=occurs_check(no,V2,V1,Res,V) :-
-    T2=V1, Res=no, V=V2.
+oc_ok@@T2=occurs_check(ok,V2,V1,Res,V) :- T2=occurs_check(V2,V1,Res,V).
+oc_no@@T2=occurs_check(no,V2,V1,Res,V) :- T2=V1, Res=no, V=V2.
 
 
 //unify({u},arrow({u,+V},V)), lock.
