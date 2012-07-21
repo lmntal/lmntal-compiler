@@ -50,7 +50,7 @@ class SrcRule {
 		this.guard = guard;
 		this.guardNegatives = new LinkedList();
 		this.body = body;
-		addTypeConstraint(head);
+		addHyperLinkConstraint(head, body);
 	}
 	
 	//2006.1.22 by inui
@@ -77,10 +77,78 @@ class SrcRule {
 	 * @param lineno 行番号
 	 */
 	public SrcRule(String name, LinkedList head, List head2, LinkedList guard, LinkedList body, int lineno){
-		this(name, head, (guard==null?new LinkedList():guard), body, lineno);
+		this.name = name;
+		this.head = head;
+		this.guard = (guard==null? new LinkedList() : guard);
+		this.guardNegatives = new LinkedList();
+		this.body = body;
 		if(head2 != null)unSimpagationize(head2);
+		LinkedList head3 = this.head;
+		LinkedList body2 = this.body;
+		addTypeConstraint(head3);
+		addHyperLinkConstraint(head3, body2);
 	}
-	
+
+	/**
+	 *	 Head部, Body部に!Xが出現した場合，Guard部にhlink(X)もしくはnew(X)を追加する.
+	 *	 meguro
+	 */	
+	public void addHyperLinkConstraint(LinkedList head, LinkedList body) {
+		LinkedList headhl = new LinkedList();
+		addHyperLinkConstraintSub(head, body, headhl);	
+	}
+
+	private LinkedList addHyperLinkConstraintSub(LinkedList head, LinkedList body, LinkedList headhl) {
+		if (head!=null)	{
+			for (int i = 0; i < head.size(); i++) {
+				Object o = head.get(i);
+				if (o instanceof SrcHyperLink) {
+					SrcHyperLink shl = (SrcHyperLink)o;
+					LinkedList newl = new LinkedList();
+					SrcLink name = new SrcLink(shl.name);
+					newl.add(name);
+					headhl.add(name.toString());	
+					SrcAtom newg = new SrcAtom("hlink", newl);
+					this.guard.add(newg);
+				}
+				else if (o instanceof SrcAtom) {
+					SrcAtom sa = (	SrcAtom)o;
+					headhl = addHyperLinkConstraintSub(	sa.process, null, headhl);
+				} 
+				else if (o instanceof SrcMembrane)	 {
+					SrcMembrane sm = (	SrcMembrane)o;
+					headhl = addHyperLinkConstraintSub(sm.process, null, headhl);
+				}
+			}
+		}
+ 
+		if (body!=null) {
+			for (int i = 0; i < body.size(); i++) {
+				Object o = body.get(i);
+				if(o instanceof SrcHyperLink) {
+					SrcHyperLink shl = (SrcHyperLink)o;
+					SrcLink name = new SrcLink(shl.name);
+					if (headhl.contains(name.toString())==false) {
+						LinkedList newl = new LinkedList();
+						newl.add(name);
+						headhl.add(name.toString());
+						SrcAtom newg = new SrcAtom("new", newl);
+						this.guard.add(newg);
+					}
+				}
+				else if (o instanceof SrcAtom) {
+					SrcAtom sa = (	SrcAtom)o;
+					headhl = addHyperLinkConstraintSub(	null, sa.process, headhl);
+				}
+				else if (o instanceof SrcMembrane) {
+					SrcMembrane sm = (	SrcMembrane)o;
+					headhl = addHyperLinkConstraintSub(	null, sm.process, headhl);
+				}
+			}
+		}
+		return headhl;
+	}
+
 	/**
 	 * リンク名が_IXなど、頭に_Iがつくと自動でガードにint(_IX)を加える.
 	 * hara. nakano.

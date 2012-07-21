@@ -293,6 +293,10 @@ public class LMNParser {
 				if (obj instanceof SrcLinkBundle) { alllinks = false; }
 				else { allbundles = false; }
 			}
+			else if (obj instanceof SrcHyperLink) {
+				setLinkToAtomArg((SrcLink)obj, atom, i);
+			}
+
 //			// еве╚ер
 //			else if (obj instanceof SrcAtom) {
 //				String newlinkname = generateNewLinkName();

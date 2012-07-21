@@ -40,6 +40,7 @@ terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME
 terminal String CHAR_CODE_LITERAL;
 
 non terminal SrcLink			Link;
+non terminal SrcHyperLink       HyperLink;
 non terminal SrcName			FuncName;
 non terminal String				AtomName;
 non terminal String				RuleName;
@@ -84,6 +85,9 @@ start with WorldProcessList;
 
 Link		::=   LINK_NAME:name
 					{: RESULT = new SrcLink(name.toString(), nameleft); :};
+
+HyperLink		::=   EXCLA LINK_NAME:name
+					{: RESULT = new SrcHyperLink(name.toString(), -1); :};
 
 // 引数なしまたは引数ありのアトムの名前として使用できるリテラル
 FuncName	::=   ATOM_NAME:name
@@ -160,6 +164,8 @@ UnitAtom	::=	  NUMBER_NAME:name
 //					{: RESULT = atom; :}
 				| Link:link
 					{: RESULT = link; :}
+				| HyperLink:link
+					{: RESULT = link; :}
 				| Membrane:mem
 					{: RESULT = mem; :}
 				;
@@ -174,10 +180,6 @@ UnaryOpAtom	::=	  UnitAtom:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom);
 					   RESULT = new SrcAtom("-", list); :}
-				| EXCLA UnitAtom:atom//seiji
-					{: LinkedList list = new LinkedList();
-					   list.add(atom);
-					   RESULT = new SrcAtom("!", list); :}
 				| PLUS_DOT UnitAtom:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom);
@@ -239,10 +241,6 @@ Atom500		::=   Atom400:atom
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom("-", list); :}
-				| Atom500:atom1 EXCLA Atom400:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("!", list); :}
 				| Atom500:atom1 PLUS Atom400:atom2
 					{: LinkedList list = new LinkedList();
 					   list.add(atom1); list.add(atom2);
