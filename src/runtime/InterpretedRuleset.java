@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import compile.parser.SrcDumper;
-
 import unyo.Mediator;
 import util.Util;
 import debug.Debug;
@@ -910,6 +908,95 @@ class InterpretiveReactor {
 						unyo.Mediator.addModifiedAtom(((Link)vars.get(inst.getIntArg2())).getAtom());
 					}
 					break; //mizuno
+
+				case Instruction.SWAPLINK: // [a1, pos1, a2, pos2]
+				{
+					Atom a1 = atoms[inst.getIntArg1()], a2 = atoms[inst.getIntArg3()];
+					int p1 = inst.getIntArg2(), p2 = inst.getIntArg4();
+
+					//System.err.printf("a1 = %s.%d -> %s.%d\n", a1, p1, a1.args[p1].getAtom(), a1.args[p1].getPos());
+					//System.err.printf("a2 = %s.%d -> %s.%d\n", a2, p2, a2.args[p2].getAtom(), a2.args[p2].getPos());
+
+					Link l1 = a1.args[p1], l2 = a2.args[p2];
+
+					if (l2 != null)
+					{
+						a1.args[p1] = new Link(l2.getAtom(), l2.getPos());
+						l2.getAtom().args[l2.getPos()] = new Link(a1, p1);
+					}
+					else
+					{
+						a1.args[p1] = null;
+					}
+
+					if (l1 != null)
+					{
+						a2.args[p2] = new Link(l1.getAtom(), l1.getPos());
+						l1.getAtom().args[l1.getPos()] = new Link(a2, p2);
+					}
+					else
+					{
+						a2.args[p2] = null;
+					}
+
+					//System.err.printf("a1 = %s.%d -> %s.%d\n", a1, p1, a1.args[p1].getAtom(), a1.args[p1].getPos());
+					//System.err.printf("a2 = %s.%d -> %s.%d\n", a2, p2, a2.args[p2].getAtom(), a2.args[p2].getPos());
+
+					if(Env.fUNYO)
+					{
+						Mediator.addModifiedAtom(a1);
+						Mediator.addModifiedAtom(a2);
+					}
+					break;
+				}
+				case Instruction.CYCLELINKS: // [atomlist, poslist]
+				{
+					@SuppressWarnings("unchecked")
+					List<Integer> alist = (List<Integer>)inst.getArg1();
+
+					@SuppressWarnings("unchecked")
+					List<Integer> plist = (List<Integer>)inst.getArg2();
+
+					Atom a0 = atoms[alist.get(0)], aSave = null;
+					int p0 = plist.get(0), pSave = -1;
+					if (a0.args[p0] != null)
+					{
+						aSave = a0.args[p0].getAtom();
+						pSave = a0.args[p0].getPos();
+					}
+					for (int i = 1; i < alist.size(); i++)
+					{
+						Atom a1 = atoms[alist.get(i - 1)], a2 = atoms[alist.get(i)];
+						int p1 = plist.get(i - 1), p2 = plist.get(i);
+
+						if (a2.args[p2] != null)
+						{
+							a1.args[p1] = new Link(a2.args[p2].getAtom(), a2.args[p2].getPos());
+							a2.args[p2].getAtom().args[a2.args[p2].getPos()] = new Link(a1, p1);
+						}
+						else
+						{
+							a1.args[p1] = null;
+						}
+					}
+					if (aSave != null)
+					{
+						Atom af = atoms[alist.get(alist.size() - 1)];
+						int pf = plist.get(plist.size() - 1);
+						af.args[pf] = new Link(aSave, pSave);
+						aSave.args[pSave] = new Link(af, pf);
+					}
+					else
+					{
+						atoms[alist.get(alist.size() - 1)].args[plist.get(plist.size() - 1)] = null;
+					}
+					if(Env.fUNYO)
+					{
+						for (int ai : alist)
+							Mediator.addModifiedAtom(atoms[ai]);
+					}
+					break;
+				}
 
 					//====リンクを操作するボディ命令====ここまで====
 

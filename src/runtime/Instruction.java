@@ -1461,6 +1461,20 @@ public class Instruction implements Cloneable, Serializable {
      */
     public static final int ISBUDDY = 7000;
     static {setArgType(ISBUDDY, new ArgType(false, ARG_VAR, ARG_VAR));}	
+
+    /**
+     * swaplink [atom1, pos1, atom2, pos2]
+     * アトム $atom1 の第 $pos1 引数の接続先とアトム $atom2 の第 $pos2 引数の接続先を交換する
+     */
+    public static final int SWAPLINK = 88;
+    static {setArgType(SWAPLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT));}	
+
+    /**
+     * cyclelinks [alist, plist]
+     * アトムリスト $alist と番号リスト $plist によって表されるアトム引数列について、その接続先に対して巡回置換を行う
+     */
+    public static final int CYCLELINKS = 89;
+    static {setArgType(CYCLELINKS, new ArgType(false, ARG_VARS, ARG_VARS));}
 	
     /** 命令の種類を取得する。*/
 	public int getKind() {
@@ -2275,6 +2289,72 @@ public class Instruction implements Cloneable, Serializable {
 		catch(java.lang.SecurityException e)		{ e.printStackTrace(); }
 		catch(java.lang.IllegalAccessException e)	{ e.printStackTrace(); }
     }
+    
+	// 命令リスト出力用 main
+	/*
+	public static void main(String[] args)
+	{
+		SortedMap<Integer, String> idToName = new TreeMap<Integer, String>();
+		SortedMap<String, Integer> nameToId = new TreeMap<String, Integer>();
+		try
+		{
+			Field[] fields = Instruction.class.getDeclaredFields();
+			for (Field f : fields)
+			{
+				Class<?> type = f.getType();
+				String name = f.getName();
+				if (
+					!Modifier.isStatic(f.getModifiers()) ||
+					!type.getName().equals("int") ||
+					name.startsWith("ARG_") ||
+					name.equals("depth") ||
+					name.equals("OPT")
+				) continue;
+				
+				try
+				{
+					int id = f.getInt(null);
+					name = name.toLowerCase();
+					if (idToName.containsKey(id))
+					{
+						System.err.printf("conflict(Name:%s) - ID %d is already defined as %s.\n", name, id, idToName.get(id));
+					}
+					else if (nameToId.containsKey(name))
+					{
+						System.err.printf("conflict(ID:%d) - Name %s is already used for ID %d.\n", id, name, nameToId.get(name));
+					}
+					else
+					{
+						idToName.put(id, name);
+						nameToId.put(name, id);
+					}
+				}
+				catch (IllegalArgumentException e)
+				{
+					e.printStackTrace();
+				}
+				catch (IllegalAccessException e)
+				{
+					e.printStackTrace();
+				}
+			}
+			System.out.printf("\"ID\",\"Name\",\"Ordered by ID\"\n");
+			for (Map.Entry<Integer, String> entry : idToName.entrySet())
+			{
+				System.out.printf("%d,\"%s\"\n", entry.getKey(), entry.getValue());
+			}
+			System.out.printf("\n\"Name\",\"ID\",\"Ordered by Name\"\n");
+			for (Map.Entry<String, Integer> entry : nameToId.entrySet())
+			{
+				System.out.printf("\"%s\",%d\n", entry.getKey(), entry.getValue());
+			}
+		}
+		catch (SecurityException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	//*/
 
 
 	/**
