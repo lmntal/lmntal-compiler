@@ -39,4 +39,20 @@ public final class LinkOccurrence {
 	public String toString() {
 		return name.replaceAll("~", "_");
 	}
+
+	public boolean equals(Object o)
+	{
+		return o == this
+			|| o instanceof LinkOccurrence && eq((LinkOccurrence)o);
+	}
+
+	public boolean eq(LinkOccurrence l)
+	{
+		return atom == l.atom && pos == l.pos;
+	}
+
+	public int hashCode()
+	{
+		return atom.hashCode() ^ (17 * pos);
+	}
 }

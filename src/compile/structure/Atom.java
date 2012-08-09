@@ -61,4 +61,8 @@ public class Atom extends Atomic {
 		return functor.getName();
 	}
 
+	public int hashCode()
+	{
+		return functor.hashCode();
+	}
 }

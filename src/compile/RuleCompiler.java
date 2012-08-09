@@ -1,12 +1,15 @@
 package compile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import runtime.Env;
 import runtime.Functor;
@@ -16,6 +19,7 @@ import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.Rule;
 import runtime.SymbolFunctor;
+import util.Util;
 
 import compile.structure.Atom;
 import compile.structure.Atomic;
@@ -27,8 +31,6 @@ import compile.structure.ProcessContext;
 import compile.structure.ProcessContextEquation;
 import compile.structure.RuleContext;
 import compile.structure.RuleStructure;
-
-import util.*;
 
 /**
  * コンパイル時ルール構造（compile.structure.RuleStructure）を
@@ -57,7 +59,9 @@ public class RuleCompiler {
 	boolean hasISGROUND = true;
 
 	List<Atom> rhsatoms;
+	//List<Atomic> rhsAtomics;				// プロセス文脈拡張用
 	Map<Atom, Integer>  rhsatompath;		// 右辺のアトム (Atomic) -> 変数番号 (Integer)
+	//Map<Atomic, Integer> rhsAtomicPath;		// プロセス文脈拡張用
 	Map<Membrane, Integer>  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)
 	Map<LinkOccurrence, Integer>  rhslinkpath;		// 右辺のリンク出現(LinkOccurence) -> 変数番号(Integer)
 	//List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り血にした
@@ -149,28 +153,45 @@ public class RuleCompiler {
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
 		compile_l();
 		compile_g();
-		compile_r();
+
+		if (isSwapLinkUsable() && (Env.useSwapLink || Env.useCycleLinks))
+		{
+			compile_r_swaplink();
+		}
+		else
+		{
+			if (Env.useSwapLink || Env.useCycleLinks)
+			{
+				System.err.println("WARNING: swaplink/cyclelinks was suppressed.");
+			}
+			compile_r();
+		}
 
 		theRule.memMatch  = memMatch;
 		theRule.tempMatch = tempMatch;
 		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;
 		theRule.body      = body;
-		if(theRule.name != null){
+		if (theRule.name != null)
+		{
 			 theRule.body.add(1, Instruction.commit(theRule.name, theRule.lineno));
-		}else{
+		}
+		else
+		{
 			//ルール名を生成
-			String ruleName = "_";
+			StringBuilder ruleName = new StringBuilder("_");
 			String orgName = rs.toString();
-			for(int i=0;i<orgName.length();++i){
+			for (int i = 0; i < orgName.length(); ++i)
+			{
 				char c = orgName.charAt(i);
-				if(('0'<=c&&c<='9')||('a'<=c&&c<='z')||('A'<=c&&c<='Z')||c=='_'){
-					ruleName += c;
+				if (isAlphabetOrDigit(c) || c == '_')
+				{
+					ruleName.append(c);
 				}
 				//1+4文字で打ち切り
-				if(!Env.showlongrulename&&ruleName.length()>=5){ break; }
+				if (!Env.showlongrulename && ruleName.length() >= 5) break;
 			}
-			theRule.body.add(1, Instruction.commit(ruleName, theRule.lineno));
+			theRule.body.add(1, Instruction.commit(ruleName.toString(), theRule.lineno));
 		}
 
 		if(debug2){
@@ -180,6 +201,40 @@ public class RuleCompiler {
 		}
 		optimize();
 		return theRule;
+	}
+	
+	/**
+	 * <p>
+	 * swaplink/cyclelinks が使用可能か判定します。
+	 * 現状の実装で未対応だと分かっているケースについて、通常のパスでコード生成をするための判断に必要です。
+	 * ただし、この判定を通過しても上手くコード生成ができないケースがあるかも知れません。
+	 * </p>
+	 */
+	private boolean isSwapLinkUsable()
+	{
+		// 1. 型無しプロセス文脈が存在しない
+		// 2. 型付きプロセス文脈が存在しない
+		// 3. 単一化アトムが存在しない
+		return rs.processContexts.isEmpty()
+			&& rs.typedProcessContexts.isEmpty()
+			&& !containsUnify();
+	}
+
+	/**
+	 * <p>右辺膜中に単一化アトム '='/2 が存在するか調べます。</p>
+	 */
+	private boolean containsUnify()
+	{
+		Set<Atom> ratoms = new HashSet<Atom>();
+		getAllAtoms(ratoms, rs.rightMem);
+		for (Atom a : ratoms)
+		{
+			if (a.functor.equals(Functor.UNIFY))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** 左辺膜をコンパイルする */
@@ -559,6 +614,180 @@ public class RuleCompiler {
 //		body.add(new Instruction(Instruction.CONTINUE));
 //		} else
 		body.add(new Instruction(Instruction.PROCEED));
+	}
+
+	/**
+	 * <p>右辺膜コンパイル処理の {@code swaplink/cyclelinks} 拡張版。</p>
+	 */
+	private void compile_r_swaplink() throws CompileException
+	{
+		Env.c("compile_r_swaplink");
+		int formals = varcount;
+		inc_guard();
+
+		if (rhsatoms == null)
+			rhsatoms = new ArrayList<Atom>();
+		else
+			rhsatoms.clear();
+
+		if (rhsatompath == null)
+			rhsatompath = new HashMap<Atom, Integer>();
+		else
+			rhsatompath.clear();
+
+		/*
+		if (rhsAtomics == null)
+			rhsAtomics = new ArrayList<Atomic>();
+		else
+			rhsAtomics.clear();
+
+		if (rhsAtomicPath == null)
+			rhsAtomicPath = new HashMap<Atomic, Integer>();
+		else
+			rhsAtomicPath.clear();
+		*/
+
+		if (rhsmempath == null)
+			rhsmempath = new HashMap<Membrane, Integer>();
+		else
+			rhsmempath.clear();
+
+		int toplevelmemid = lhsmemToPath(rs.leftMem);
+		rhsmempath.put(rs.rightMem, toplevelmemid);
+
+		Set<Atom> rhsAtomSet = new HashSet<Atom>();
+		getAllAtoms(rhsAtomSet, rs.rightMem);
+		rhsatoms.addAll(rhsAtomSet);
+		//rhsAtomics.addAll(rhsatoms);
+
+		/*
+		 * 左辺の明示的なプロセスを除去(所属膜との関係を絶つ)する
+		 * 非線形$pの全ての子膜を再帰的にlockする
+		 * 非線形$pの自由リンクにコネクタを挿入する
+		 *
+		 * 終わると：
+		 * 左辺のアトム(明示的な自由リンク管理アトムを含む)/unaryは変数番号にバインドされ，所属膜からは除去され，実行アトムスタックからも除去されている
+		 * 左辺の膜は変数番号にバインドされ，親膜および実行膜スタックから除去され，ロックされている
+		 * 左辺のgroundは根が変数番号にバインドされ，所属膜からは除去されている
+		 * 型なし$pはマッチしたプロセスの全ての明示的でない自由リンクはstarの第1引数に出現するようになっている
+		 * 非線形型なし$pの場合更に明示的な自由リンクに=/2が挿入され，明示的な自由リンクのリストへのマップが生成されている
+		 * 非線形$pの子膜は再帰的にロックされている
+		 */
+		dequeueLHSAtoms();
+		removeLHSTypedProcesses();
+		if (removeLHSMem(rs.leftMem) >= 2)
+		{
+			//2011/01/23 slimでは必要なくなったので挿入しないように修正 by meguro
+			if (!Env.slimcode)
+			{
+				body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
+			}
+		}
+
+		recursiveLockLHSNonlinearProcessContextMems();
+		insertconnectors();
+
+		// insertconnectorsの後でなければうまくいかないので再発行 ( 2006/09/15 kudo)
+		getGroundLinkPaths();
+
+		// 右辺の構造と$pの内容，を再帰的に生成する
+		// $pの明示的でないリンクをはる
+
+		buildRHSMem(rs.rightMem); // 右辺にある膜の変数番号確定
+		/* 右辺の$pが配置された直後。このタイミングでなければならない筈 */
+		if (!rs.rightMem.processContexts.isEmpty()) {
+			body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
+		}
+		copyRules(rs.rightMem);
+		loadRulesets(rs.rightMem);
+		buildRHSTypedProcesses();
+		
+		Set<Atomic> noModified = getInvariantAtomics();
+		Map<Atom, Atom> reusable = getReusableAtomics(noModified);
+		Set<Atomic> removed = getRemovedAtomics(noModified, reusable);
+		Set<Atomic> created = getCreatedAtomics(noModified, reusable);
+
+		removeLHSAtoms_swaplink(removed);
+		
+		buildRHSAtoms_swaplink(rs.rightMem, created, reusable);
+		// ここでvarcountの最終値が確定することになっている。変更時は適切に下に移動すること。
+
+
+		//右辺の明示的なリンクを貼る
+		//getLHSLinks();
+		if (Env.useCycleLinks)
+		{
+			compileCycleLinks(removed, created, reusable);
+		}
+		else
+		{
+			compileLinkOperations(removed, created, reusable);
+		}
+		deleteconnectors();
+
+		//右辺のアトムを実行アトムスタックに積む
+		enqueueRHSAtoms_swaplink(created, reusable.keySet());
+
+		//次の2つは右辺の構造の生成以降ならいつでもよい
+		addInline();
+		if (Env.slimcode) {
+			if (Env.hyperLink) addHyperlink();//seiji
+			addCallback();
+		}
+		addRegAndLoadModules();
+
+		// 左辺の残ったプロセスを解放する
+		freeLHSNonlinearProcessContexts();
+		freeLHSMem(rs.leftMem);
+		freeLHSAtoms_swaplink(removed);
+		freeLHSTypedProcesses();
+
+		// 膜をunlockする
+
+		recursiveUnlockLHSNonlinearProcessContextMems();
+		unlockReusedOrNewRootMem(rs.rightMem);
+		body.add(0, Instruction.spec(formals, varcount));
+
+		body.add(new Instruction(Instruction.PROCEED));
+	}
+
+	/**
+	 * <p>膜{@code mem}以下に含まれるすべてのアトムを再帰的に取得します。</p>
+	 * @param destAtoms 取得したアトムの格納先
+	 * @param mem 探索する膜
+	 */
+	private void getAllAtoms(Set<Atom> destAtoms, Membrane mem)
+	{
+		for (Membrane submem : mem.mems) getAllAtoms(destAtoms, submem);
+		for (Atom a : mem.atoms) destAtoms.add(a);
+	}
+
+	/**
+	 * <p>2つのアトムが同型アトムであるかを調べます。</p>
+	 * <p>2つのアトムが同型であるとは、当該アトム対について以下の条件
+	 * <ol>
+	 * <li>価数が等しい</li>
+	 * <li>名前が等しい</li>
+	 * </ol>
+	 * が成立することを表します。同型であるアトム対はルール中で再利用されます。</p>
+	 * @param a1 アトム1
+	 * @param a2 アトム2
+	 * @return アトム{@code a1}とアトム{@code a2}が同型である場合に{@code true}、そうでない場合に{@code false}を返します。
+	 */
+	private boolean isIsomorphic(Atom a1, Atom a2)
+	{
+		return a1.getArity() == a2.getArity() && a1.getName().equals(a2.getName());
+	}
+
+	/**
+	 * <p>アトミックの集合{@code atomics}が持つリンクの本数を数えます。</p>
+	 * TODO: 無理矢理な実装なので、後でもっとまともな実装を考える。
+	 */
+	private int countLinkOccurrence(Collection<? extends Atomic> atomics)
+	{
+		int count = 0;
+		for (Atomic a : atomics) count += a.getArity();
+		return count;
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -979,6 +1208,18 @@ public class RuleCompiler {
 					lhsmemToPath(atom.mem), atom.functor ));
 		}
 	}
+
+	private void removeLHSAtoms_swaplink(Set<Atomic> removedAtoms)
+	{
+		for (Atomic a : removedAtoms)
+		{
+			if (!(a instanceof Atom)) continue;
+			body.add(Instruction.removeatom(
+				lhsatomToPath(a),
+				lhsmemToPath(a.mem), ((Atom)a).functor));
+		}
+	}
+
 	/** 左辺のアトムを実行アトムスタックから除去する。*/
 	private void dequeueLHSAtoms() {
 		for (int i = 0; i < lhsatoms.size(); i++) {
@@ -1070,6 +1311,67 @@ public class RuleCompiler {
 		return procvarcount;
 	}
 
+	/**
+	 * プロセス文脈をアトミックとして扱う。
+	 */
+	/*
+	private int buildRHSMem_AtomicPC(Membrane mem) throws CompileException
+	{
+		Env.c("RuleCompiler::buildRHSMem" + mem);
+		int procvarcount = mem.processContexts.size();
+		for (ProcessContext pc : mem.processContexts)
+		{
+			if (pc.def.lhsOcc.mem == null)
+			{
+				systemError("SYSTEM ERROR: ProcessContext.def.lhsOcc.mem is not set");
+			}
+			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.lhsOcc.mem))
+			{
+				System.err.println("ProcessContext: " + pc + " (copied from " + pc.def.lhsOcc + " in mem " + lhsmemToPath(pc.def.lhsOcc.mem) + ")");
+				if (!lhsatoms.contains(pc.def.lhsOcc))
+				{
+					lhsatoms.add(pc.def.lhsOcc);
+					lhsatompath.put(pc.def.lhsOcc, procvarcount++);
+				}
+				rhsAtomics.add(pc);
+				rhsAtomicPath.put(pc, procvarcount++);
+				body.add(new Instruction(Instruction.COPYATOM, rhsAtomicPath.get(pc), lhsatompath.get(pc.def.lhsOcc)));
+			}
+		}
+		for (Membrane submem : mem.mems)
+		{
+			int submempath = varcount++;
+			rhsmempath.put(submem, new Integer(submempath));
+			if (submem.pragmaAtHost != null) // 右辺で＠指定されている場合
+			{
+				if (submem.pragmaAtHost.def == null) {
+					systemError("SYSTEM ERROR: pragmaAtHost.def is not set: " + submem.pragmaAtHost.getQualifiedName());
+				}
+				int nodedescatomid = typedcxtToSrcPath(submem.pragmaAtHost.def);
+				body.add( new Instruction(Instruction.NEWROOT, submempath, rhsmemToPath(mem),
+						nodedescatomid, submem.kind) );
+			}
+			else // 通常の右辺膜の場合
+			{
+				body.add( Instruction.newmem(submempath, rhsmemToPath(mem), submem.kind ) );
+			}
+			if (submem.name != null)
+			{
+				body.add(new Instruction( Instruction.SETMEMNAME, submempath, submem.name.intern() ));
+			}
+			int subcount = buildRHSMem_AtomicPC(submem);
+			// 子膜内のプロセスが空でない場合、insertproxies命令を発行
+			if (subcount > 0)
+			{
+				body.add(new Instruction(Instruction.INSERTPROXIES,
+						rhsmemToPath(mem), rhsmemToPath(submem)));
+			}
+			procvarcount += subcount;
+		}
+		return procvarcount;
+	}
+	*/
+
 	/** 右辺の膜内のルール文脈の内容を生成する */
 	private void copyRules(Membrane mem) {
 		Env.c("RuleCompiler::copyRules");
@@ -1116,6 +1418,70 @@ public class RuleCompiler {
 				body.add( Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
 			}
 		}
+	}
+
+	private void buildRHSAtoms_swaplink(Membrane mem, Set<Atomic> created, Map<Atom, Atom> reused)
+	{
+		for (Membrane submem : mem.mems)
+		{
+			buildRHSAtoms_swaplink(submem, created, reused);
+		}
+		for (Atom atom : mem.atoms)
+		{
+			if (atom.functor.equals(Functor.UNIFY))
+			{
+				LinkOccurrence link1 = atom.args[0].buddy;
+				LinkOccurrence link2 = atom.args[1].buddy;
+				body.add(new Instruction(Instruction.UNIFY,
+					lhsatomToPath(link1.atom), link1.pos,
+					lhsatomToPath(link2.atom), link2.pos, rhsmemToPath(mem)));
+			}
+			else
+			{
+				int atomid;
+				if (reused.containsKey(atom))
+				{
+					atomid = lhsatomToPath(reused.get(atom));
+				}
+				else
+				{
+					atomid = varcount++;
+				}
+				rhsatompath.put(atom, atomid);
+				//rhsAtomicPath.put(atom, atomid);
+				if (created.contains(atom))
+				{
+					body.add(Instruction.newatom(rhsatomToPath(atom), rhsmemToPath(mem), atom.functor));
+				}
+			}
+		}
+	}
+
+	/**
+	 * <p>ルールの左辺と右辺で組になっているリンク出現の集合を得る。</p>
+	 */
+	private Set<LinkOccurrence> getFreeLinkOccurrence()
+	{
+		Set<LinkOccurrence> freeLinks = new HashSet<LinkOccurrence>();
+		for (Atomic a1 : lhsatoms)
+		{
+			for (Atomic a2 : rhsatoms)
+			{
+				for (int i = 0; i < a1.getArity(); i++)
+				{
+					for (int j = 0; j < a2.getArity(); j++)
+					{
+						if (a1.args[i].buddy == a2.args[j])
+						{
+							freeLinks.add(a1.args[i]);
+							freeLinks.add(a2.args[j]);
+							break;
+						}
+					}
+				}
+			}
+		}
+		return freeLinks;
 	}
 
 	/** プロセス文脈定義->setの変数番号 */
@@ -1223,6 +1589,440 @@ public class RuleCompiler {
 			}
 		}
 	}
+
+	/**
+	 * <p>リンク互換命令{@code swaplink}を使用してリンク操作をコンパイルします。</p>
+	 */
+	private void compileLinkOperations(Set<Atomic> removed, Set<Atomic> created, Map<Atom, Atom> reusable)
+	{
+		Env.c("RuleCompiler::compileLinkOperations");
+		
+		System.err.println("Compiling: " + lhsatoms + " :- " + rhsatoms);
+		
+		Set<LinkOccurrence> freeLinks = getFreeLinkOccurrence();
+		//System.err.println("FreeLinks      : " + freeLinks);
+		
+		// ファンクタが同じものには最低限同じ順序数を割り当てる
+		//System.err.println("Correspondings : " + reusable);
+		//System.err.println("Removed        : " + removed);
+		//System.err.println("Created        : " + created);
+		
+		int linkCount = countLinkOccurrence(reusable.keySet()) / 2
+			+ countLinkOccurrence(removed)
+			+ countLinkOccurrence(created);
+		
+		// リンク名 -> 順序数
+		Map<LinkOccurrence, Integer> order = new HashMap<LinkOccurrence, Integer>();
+		LinkOccurrence[] links1 = new LinkOccurrence[linkCount];
+		LinkOccurrence[] links2 = new LinkOccurrence[linkCount];
+		int id = 0;
+		for (Map.Entry<Atom, Atom> entry : reusable.entrySet())
+		{
+			Atom al = entry.getKey(), ar = entry.getValue();
+			if (!lhsatoms.contains(al)) continue;
+			for (int i = 0; i < al.getArity(); i++)
+			{
+				LinkOccurrence l1 = al.args[i];
+				LinkOccurrence l2 = ar.args[i];
+				if (freeLinks.contains(l1))
+				{
+					links1[id + i] = l1;
+					order.put(l1, id + i);
+				}
+				else
+				{
+					links1[id + i] = new LinkOccurrence(".", l1.atom, l1.pos);
+				}
+				if (freeLinks.contains(l2))
+				{
+					links2[id + i] = l2;
+				}
+				else
+				{
+					links2[id + i] = new LinkOccurrence(".", l2.atom, l2.pos);
+				}
+			}
+			id += al.getArity();
+		}
+		for (Atomic a : removed)
+		{
+			for (LinkOccurrence link : a.args)
+			{
+				if (freeLinks.contains(link))
+				{
+					links1[id] = link;
+					order.put(link, id);
+				}
+				else
+				{
+					links1[id] = new LinkOccurrence(".", link.atom, link.pos);
+				}
+				links2[id] = new LinkOccurrence(".", link.atom, link.pos);
+				id++;
+			}
+		}
+		for (Atomic a : created)
+		{
+			for (LinkOccurrence link : a.args)
+			{
+				links1[id] = new LinkOccurrence(".", link.atom, link.pos);
+				order.put(link, id);
+				if (freeLinks.contains(link))
+				{
+					links2[id] = link;
+				}
+				else
+				{
+					links2[id] = new LinkOccurrence(".", link.atom, link.pos);
+				}
+				id++;
+			}
+		}
+		//System.err.println("Links1  : " + Arrays.toString(links1));
+		//System.err.println("Links2  : " + Arrays.toString(links2));
+		
+		// 置換
+		System.err.println(Arrays.toString(links1));
+		for (int i = 0; i < links2.length; i++)
+		{
+			LinkOccurrence link = links2[i].buddy;
+			Integer j = order.get(link);
+			if (freeLinks.contains(link) && i != j)
+			{
+				Atomic a1 = links1[i].atom;
+				Atomic a2 = links1[j].atom;
+				
+				/*
+				System.err.printf("swap: %s.%d <-> %s.%d\n", links1[i].atom, links1[i].pos, links1[j].atom, links1[j].pos);
+				System.err.println(i + " <-> " + j);
+				//*/
+				
+				if (created.contains(a1))
+				{
+					body.add(swaplink(
+						rhsatompath.get(a1), links1[i].pos,
+						lhsatompath.get(a2), links1[j].pos));
+				}
+				else if (created.contains(a2))
+				{
+					body.add(swaplink(
+						lhsatompath.get(a1), links1[i].pos,
+						rhsatompath.get(a2), links1[j].pos));
+				}
+				else
+				{
+					body.add(swaplink(
+						lhsatompath.get(a1), links1[i].pos,
+						lhsatompath.get(a2), links1[j].pos));
+				}
+				LinkOccurrence buddy1 = links1[i].buddy;
+				LinkOccurrence buddy2 = links1[j].buddy;
+				
+				links1[i].buddy = buddy2;
+				if (buddy2 != null) buddy2.buddy = links1[i];
+				
+				links1[j].buddy = buddy1;
+				if (buddy1 != null) buddy1.buddy = links1[j];
+				
+				String tmpName = links1[i].name;
+				links1[i].name = links1[j].name;
+				links1[j].name = tmpName;
+				
+				System.err.println(Arrays.toString(links1));
+			}
+		}
+		//System.err.println("E Links    : " + Arrays.toString(links1));
+		for (Atomic a : created)
+		{
+			for (LinkOccurrence l1 : a.args)
+			{
+				if (!freeLinks.contains(l1))
+				{
+					LinkOccurrence l2 = l1.buddy;
+					Instruction inst = Instruction.newlink(
+						rhsatompath.get(l1.atom), l1.pos,
+						rhsatompath.get(l2.atom), l2.pos,
+						rhsmempath.get(l1.atom.mem));
+					body.add(inst);
+					freeLinks.add(l1);
+					freeLinks.add(l2);
+				}
+			}
+		}
+	}
+
+	/**
+	 * <p>リンク巡回置換命令{@code cyclelinks}を使用してリンク操作をコンパイルします。</p>
+	 */
+	private void compileCycleLinks(Set<Atomic> removed, Set<Atomic> created, Map<Atom, Atom> reusable)
+	{
+		Env.c("RuleCompiler::compileCycleLinks");
+		
+		System.err.println(lhsatoms + " :- " + rhsatoms);
+		
+		Set<LinkOccurrence> freeLinks = getFreeLinkOccurrence();
+		
+		//System.err.println("Correspondings : " + reusable);
+		//System.err.println("Removed        : " + removed);
+		//System.err.println("Created        : " + created);
+		
+		// ルール両辺のリンク出現の和集合の要素数
+		int linkCount = countLinkOccurrence(reusable.keySet()) / 2
+			+ countLinkOccurrence(removed)
+			+ countLinkOccurrence(created);
+		
+		// リンク名 -> 順序数
+		Map<LinkOccurrence, Integer> order = new HashMap<LinkOccurrence, Integer>();
+		LinkOccurrence[] links1 = new LinkOccurrence[linkCount];
+		LinkOccurrence[] links2 = new LinkOccurrence[linkCount];
+		int id = 0;
+		for (Map.Entry<Atom, Atom> entry : reusable.entrySet())
+		{
+			Atom al = entry.getKey(), ar = entry.getValue();
+			if (!lhsatoms.contains(al)) continue;
+			for (int i = 0; i < al.getArity(); i++)
+			{
+				LinkOccurrence l1 = al.args[i];
+				if (freeLinks.contains(l1))
+				{
+					order.put(l1, id + i);
+					links1[id + i] = l1;
+				}
+				else
+				{
+					links1[id + i] = new LinkOccurrence(".", l1.atom, l1.pos);
+				}
+				LinkOccurrence l2 = ar.args[i];
+				if (freeLinks.contains(l2))
+				{
+					links2[id + i] = l2;
+				}
+				else
+				{
+					links2[id + i] = new LinkOccurrence(".", l2.atom, l2.pos);
+				}
+			}
+			id += al.getArity();
+		}
+		for (Atomic a : removed)
+		{
+			for (LinkOccurrence link : a.args)
+			{
+				if (freeLinks.contains(link))
+				{
+					order.put(link, id);
+					links1[id] = link;
+				}
+				else
+				{
+					links1[id] = new LinkOccurrence(".", link.atom, link.pos);
+				}
+				links2[id] = new LinkOccurrence(".", link.atom, link.pos);
+				id++;
+			}
+		}
+		for (Atomic a : created)
+		{
+			for (LinkOccurrence link : a.args)
+			{
+				links1[id] = new LinkOccurrence(".", link.atom, link.pos);
+				if (freeLinks.contains(link))
+				{
+					links2[id] = link;
+				}
+				else
+				{
+					links2[id] = new LinkOccurrence(".", link.atom, link.pos);
+				}
+				id++;
+			}
+		}
+		
+		//System.err.println(Arrays.toString(links1));
+		//System.err.println(Arrays.toString(links2));
+		
+		// 巡回置換
+		boolean[] checked = new boolean[links1.length];
+		for (int i = 0; i < links1.length; i++)
+		{
+			if (links1[i].name.equals(".") || links1[i].buddy == links2[i] || checked[i]) continue;
+			
+			//System.err.println(Arrays.toString(checked));
+			
+			List<Integer> alist = new ArrayList<Integer>();
+			List<Integer> plist = new ArrayList<Integer>();
+			
+			int j = i;
+			//System.err.print("( ");
+			do
+			{
+				checked[j] = true;
+				//System.err.print(links1[j] + " <- " + links2[j] + " ");
+				//System.err.print(links1[j] + " ");
+				//System.err.print(j + " ");
+				
+				if (links1[j].name.equals("."))
+				{
+					alist.add(rhsatompath.get(links1[j].atom));
+				}
+				else
+				{
+					alist.add(lhsatompath.get(links1[j].atom));
+				}
+				
+				plist.add(links1[j].pos);
+				
+				if (links2[j].name.equals("."))
+				{
+					for (j = 0; j < links1.length; j++)
+					{
+						if (!checked[j] && links1[j].name.equals(".") && !links2[j].name.equals("."))
+						{
+							break;
+						}
+					}
+				}
+				else
+				{
+					j = order.get(links2[j].buddy);
+				}
+			}
+			while (j != i && j < links1.length);
+			//System.err.println(")");
+			body.add(new Instruction(Instruction.CYCLELINKS, alist, plist));
+		}
+		
+		for (Atomic a : created)
+		{
+			for (LinkOccurrence l1 : a.args)
+			{
+				if (!freeLinks.contains(l1))
+				{
+					LinkOccurrence l2 = l1.buddy;
+					body.add(newlink(
+						rhsatompath.get(l1.atom), l1.pos,
+						rhsatompath.get(l2.atom), l2.pos,
+						rhsmempath.get(l1.atom.mem)));
+					freeLinks.add(l1);
+					freeLinks.add(l2);
+				}
+			}
+		}
+	}
+
+	/**
+	 * ルール中で変化しないアトムを求める。
+	 * このアルゴリズムは初等的で、ほぼ自明なものしか検出できない。
+	 */
+	private Set<Atomic> getInvariantAtomics()
+	{
+		Set<Atomic> nomodified = new HashSet<Atomic>();
+		for (Atomic al : lhsatoms)
+		{
+			if (!(al instanceof Atom) || !((Atom)al).functor.isSymbol()) continue;
+			
+			for (Atom ar : rhsatoms)
+			{
+				if (!ar.functor.isSymbol()) continue;
+				
+				if (al.getName().equals(ar.getName()) && al.getArity() == ar.getArity())
+				{
+					boolean eq = true;
+					for (int i = 0; i < al.getArity(); i++)
+					{
+						if (al.args[i].buddy != ar.args[i])
+						{
+							eq = false;
+							break;
+						}
+					}
+					if (eq)
+					{
+						int m1 = lhsmemToPath(al.mem);
+						int m2 = rhsmemToPath(ar.mem);
+						if (m1 != m2)
+						{
+							body.add(Instruction.removeatom(lhsatomToPath(al), m1, ((Atom)al).functor));
+							body.add(new Instruction(Instruction.ADDATOM, m2, lhsatomToPath(al)));
+						}
+						nomodified.add(al);
+						nomodified.add(ar);
+						break;
+					}
+				}
+			}
+		}
+		return nomodified;
+	}
+
+	/**
+	 * <p>再利用可能なアトム（同型アトム対）を求めます。</p>
+	 */
+	private Map<Atom, Atom> getReusableAtomics(Set<Atomic> noModified)
+	{
+		Map<Atom, Atom> reusable = new HashMap<Atom, Atom>();
+		for (Atomic al : lhsatoms)
+		{
+			//if (!(al instanceof Atom) || !((Atom)al).functor.isSymbol() || noModified.contains(al)) continue;
+			if (!(al instanceof Atom) || noModified.contains(al)) continue;
+			
+			for (Atom ar : rhsatoms)
+			{
+				//if (!ar.functor.isSymbol() || noModified.contains(ar)) continue;
+				if (noModified.contains(ar)) continue;
+				
+				if (!reusable.containsValue(ar) && isIsomorphic((Atom)al, ar))
+				{
+					int m1 = lhsmemToPath(al.mem);
+					int m2 = rhsmemToPath(ar.mem);
+					if (m1 != m2)
+					{
+						// TODO: moveatom命令を実装し、ここで生成
+						body.add(new Instruction(Instruction.REMOVEATOM, lhsatomToPath(al), m1, ((Atom)al).functor));
+						body.add(new Instruction(Instruction.ADDATOM, m2, lhsatomToPath(al)));
+					}
+					reusable.put((Atom)al, ar);
+					reusable.put(ar, (Atom)al);
+					break;
+				}
+			}
+		}
+		return reusable;
+	}
+
+	private Set<Atomic> getRemovedAtomics(Set<Atomic> noModified, Map<Atom, Atom> reused)
+	{
+		return getChangedAtomics(lhsatoms, noModified, reused);
+	}
+
+	private Set<Atomic> getCreatedAtomics(Set<Atomic> noModified, Map<Atom, Atom> reused)
+	{
+		return getChangedAtomics(rhsatoms, noModified, reused);
+	}
+
+	private Set<Atomic> getChangedAtomics(List<? extends Atomic> atoms, Set<Atomic> noModified, Map<Atom, Atom> reused)
+	{
+		Set<Atomic> set = new HashSet<Atomic>();
+		for (Atomic a : atoms)
+		{
+			if (!noModified.contains(a) && !reused.containsKey(a))
+			{
+				set.add(a);
+			}
+		}
+		return set;
+	}
+
+	private static Instruction swaplink(int a1, int pos1, int a2, int pos2)
+	{
+		return new Instruction(Instruction.SWAPLINK, a1, pos1, a2, pos2);
+	}
+
+	private static Instruction newlink(int a1, int pos1, int a2, int pos2, int memi)
+	{
+		return new Instruction(Instruction.NEWLINK, a1, pos1, a2, pos2, memi);
+	}
+
 	/** 右辺のアトムを実行アトムスタックに積む */
 	private void enqueueRHSAtoms() {
 		int index = body.size(); // 末尾再帰最適化の効果を最大化するため、逆順に積む（コードがセコい）
@@ -1232,6 +2032,35 @@ public class RuleCompiler {
 			}
 		}
 	}
+	
+	/**
+	 * 右辺のアトムを実行アトムスタックに積む(swaplink版)
+	 */
+	private void enqueueRHSAtoms_swaplink(Set<Atomic> created, Set<Atom> reused)
+	{
+		int index = body.size();
+		
+		// 生成されたアトム
+		for(Atomic a : created)
+		{
+			Atom atom = (Atom)a;
+			if (atom.functor.isSymbol() && atom.functor.isActive())
+			{
+				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(a)));
+			}
+		}
+		
+		// 再利用されたアトム
+		for(Atom atom : reused)
+		{
+			if (!lhsatoms.contains(atom)) continue;
+			if (atom.functor.isSymbol() && atom.functor.isActive())
+			{
+				body.add(index, new Instruction(Instruction.ENQUEUEATOM, lhsatomToPath(atom)));
+			}
+		}
+	}
+	
     /** hyperlink関連の命令列を生成する */
 	private void addHyperlink() { //seiji
 		for(Atom atom : rhsatoms){
@@ -1316,6 +2145,18 @@ public class RuleCompiler {
 		}
 	}
 
+	/**
+	 * 左辺のアトムを破棄する(swaplink版)
+	 */
+	private void freeLHSAtoms_swaplink(Set<Atomic> removed)
+	{
+		for (Atomic a : removed)
+		{
+			int i = lhsatompath.get(a);
+			body.add(new Instruction(Instruction.FREEATOM, i));
+		}
+	}
+
 	/** デバッグ用表示 */
 	private void showInstructions() {
 		Iterator<Instruction> it;
@@ -1337,5 +2178,18 @@ public class RuleCompiler {
 	private void systemError(String text) throws CompileException {
 		Env.error(text);
 		throw new CompileException("SYSTEM ERROR");
+	}
+
+	/**
+	 * <p>文字{@code c}が英数字であるか調べます。</p>
+	 * @param c 調べる文字
+	 * @return 文字{@code c}が英数字の場合{@code true}、そうでない場合{@code false}を返します。
+	 * TODO: このメソッドはここにあるべきではない
+	 */
+	private static boolean isAlphabetOrDigit(char c)
+	{
+		return '0' <= c && c <= '9'
+			|| 'A' <= c && c <= 'Z'
+			|| 'a' <= c && c <= 'z';
 	}
 }
