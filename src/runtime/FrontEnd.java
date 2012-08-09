@@ -655,6 +655,10 @@ public class FrontEnd {
 								Util.errPrintln("Can't use option " + args[i] + " without option --slimcode.");
 								System.exit(-1);
 							}
+						} else if (args[i].equals("--use-swaplink")) {
+							Env.useSwapLink = true;
+						} else if (args[i].equals("--use-cyclelinks")) {
+							Env.useCycleLinks = true;
 						} else {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util

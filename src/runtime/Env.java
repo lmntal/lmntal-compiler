@@ -70,6 +70,16 @@ public final class Env {
 
 	public static boolean fThread = true;
 
+	/**
+	 * <p>リンク操作に{@code swaplink}命令を使用する。</p>
+	 */
+	public static boolean useSwapLink = false;
+
+	/**
+	 * <p>リンク操作に{@code cyclelinks}命令を使用する。</p>
+	 */
+	public static boolean useCycleLinks = false;
+
 	////////////////////////////////////////////////////////////////
 
 	/** リンクの表示をL[数字]で表示する冗長表示レベル　<pre> a(_2) --> a(L2) </pre> */
