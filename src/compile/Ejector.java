@@ -4,10 +4,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import compile.Translator.TranslatorWriter;
+import java.io.PrintWriter;
 
 import runtime.Env;
+
+import compile.Translator.TranslatorWriter;
 
 /**
  * Translatorが吐くソースが一定以上になった場合に外部クラスとして
@@ -20,15 +21,17 @@ import runtime.Env;
  * @author Nakano
  *
  */
-public class Ejector{
+public class Ejector
+{
 	///////////////////////////////////////////////////////////////////////////
 	// 定数宣言
-	
+
 	/** 外部ファイルの上限サイズ */
-	static final
-	private int MAX_BUF = 51200;
-	
+	private static final int MAX_BUF = 51200;
+
 	///////////////////////////////////////////////////////////////////////////
+
+	private static int serial;
 
 	/** 変換したファイルをおくディレクトリ */
 	private File dir;
@@ -36,27 +39,26 @@ public class Ejector{
 	private String packageName;
 	private String className;
 	private File outputFile;
-	static
-	private int serial;
-	private StringBuffer buf = new StringBuffer(MAX_BUF);
-	private StringBuffer tmpbuf = new StringBuffer(MAX_BUF);
-	
+	private StringBuilder buf = new StringBuilder(MAX_BUF);
+	private StringBuilder tmpbuf = new StringBuilder(MAX_BUF);
+
 	///////////////////////////////////////////////////////////////////////////
 	// コンストラクタ
-	
+
 	/**
 	 * @param cn 生成するクラス名
 	 * @param d ファイルを生成するディレクトリ
 	 * @param p 生成するクラスのパッケージ名
 	 */
-	public Ejector(String cn, File d, String p){
+	public Ejector(String cn, File d, String p)
+	{
 		packageName = p;
 		className = cn;
 		dir = d;
 	}
-	
+
 	///////////////////////////////////////////////////////////////////////////
-	
+
 	/**
 	 * 出力(分離)する命令に一旦区切りを付ける。
 	 * @param myWriter 分離される元のファイルへ記述するためのwriter。
@@ -67,22 +69,23 @@ public class Ejector{
 	 * 出力し、次の入力を受け付ける準備を行う。
 	 * </p>
 	 */
-	public void commit(TranslatorWriter myWriter){
-		/** サイズが上限に達してなければバッファに追加 */
-		if(buf.length() + tmpbuf.length() < MAX_BUF){
+	public void commit(TranslatorWriter myWriter)
+	{
+		if (buf.length() + tmpbuf.length() < MAX_BUF)
+		{
+			// サイズが上限に達してなければバッファに追加
 			buf.append(tmpbuf);
-			tmpbuf = new StringBuffer(MAX_BUF / 10);
+			tmpbuf = new StringBuilder(MAX_BUF / 10);
 		}
-		/** サイズが上限に達してれば外部ファイル生成後バッファに追加 */
-		else{
+		else
+		{
+			// サイズが上限に達してれば外部ファイル生成後バッファに追加
 			makeOutput(myWriter);
-			buf = new StringBuffer(MAX_BUF);
+			buf = new StringBuilder(MAX_BUF);
 			commit(myWriter);
 		}
-		
 	}
-	
-	
+
 	/**
 	 * 書き出したい情報を渡す。
 	 * @param data 書き出したい情報
@@ -92,86 +95,98 @@ public class Ejector{
 	 * 命令を受け取る。
 	 * </p>
 	 */
-	public void write(String data){
+	public void write(String data)
+	{
 		tmpbuf.append(data);
 	}
-	
+
 	/**
 	 * 外部ファイルを生成する
 	 */
-	private void makeOutput(TranslatorWriter myWriter){
-		if(buf.length() == 0){ return; }
-		
-		try {
+	private void makeOutput(TranslatorWriter myWriter)
+	{
+		if (buf.length() == 0)
+		{
+			return;
+		}
+
+		try
+		{
 			serial++;
-			myWriter.superWrite("			//"+ className + "_" + serial +"\n");
-			myWriter.superWrite("			" + className + "_" + serial + ".exec(var, f);\n");
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
+			myWriter.superWrite("\t\t\t//"+ className + "_" + serial +"\n");
+			myWriter.superWrite("\t\t\t" + className + "_" + serial + ".exec(var, f);\n");
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
-		
+
 		outputFile = new File(dir, className + "_" + serial + ".java");
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile), MAX_BUF);
-			writer.write("package " + packageName + ";\n");
-			writer.write("import runtime.*;\n");
-			writer.write("import java.util.*;\n");
-			writer.write("import java.io.*;\n");
-//			writer.write("import daemon.IDConverter;\n");
-			writer.write("import module.*;\n");
-			if(Env.profile == Env.PROFILE_ALL){ writer.write("import util.Util;\n"); }
-			writer.write("public class " + className + "_" + serial + " {\n");
-			writer.write("	static public void exec(Object[] var, Functor[] f) {\n");
-			writer.write("		Atom atom;\n");
-			writer.write("		Functor func;\n");
-			writer.write("		Link link;\n");
-			writer.write("		Membrane mem;\n");
-			writer.write("		int x, y;\n");
-			writer.write("		double u, v;\n");
-			writer.write("		int isground_ret;\n");
-			writer.write("		boolean eqground_ret;\n");
-			writer.write("		boolean guard_inline_ret;\n");
-			writer.write("		ArrayList guard_inline_gvar2;\n");
-			writer.write("		Iterator it_guard_inline;\n");
-			writer.write("		Set insset;\n");
-			writer.write("		Set delset;\n");
-			writer.write("		Map srcmap;\n");
-			writer.write("		Map delmap;\n");
-			writer.write("		Atom orig;\n");
-			writer.write("		Atom copy;\n");
-			writer.write("		Link a;\n");
-			writer.write("		Link b;\n");
-			writer.write("		Iterator it_deleteconnectors;\n");
-			
+		try
+		{
+			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(outputFile), MAX_BUF));
+			writer.println("package " + packageName + ";");
+			writer.println("import runtime.*;");
+			writer.println("import java.util.*;");
+			writer.println("import java.io.*;");
+//			writer.println("import daemon.IDConverter;\n");
+			writer.println("import module.*;");
+			if (Env.profile == Env.PROFILE_ALL)
+			{
+				writer.println("import util.Util;");
+			}
+			writer.println("@SuppressWarnings(\"unused\")");
+			writer.println("public class " + className + "_" + serial + " {");
+			writer.println("\tstatic public void exec(Object[] var, Functor[] f) {");
+			writer.println("\t\tAtom atom;");
+			writer.println("\t\tFunctor func;");
+			writer.println("\t\tLink link;");
+			writer.println("\t\tMembrane mem;");
+			writer.println("\t\tint x, y;");
+			writer.println("\t\tdouble u, v;");
+			writer.println("\t\tint isground_ret;");
+			writer.println("\t\tboolean eqground_ret;");
+			writer.println("\t\tboolean guard_inline_ret;");
+			writer.println("\t\tArrayList guard_inline_gvar2;");
+			writer.println("\t\tIterator it_guard_inline;");
+			writer.println("\t\tSet insset;");
+			writer.println("\t\tSet delset;");
+			writer.println("\t\tMap srcmap;");
+			writer.println("\t\tMap delmap;");
+			writer.println("\t\tAtom orig;");
+			writer.println("\t\tAtom copy;");
+			writer.println("\t\tLink a;");
+			writer.println("\t\tLink b;");
+			writer.println("\t\tIterator it_deleteconnectors;");
+
 			writer.flush();
 			// データ書き出し
-			writer.write(buf.toString(), 0, buf.length());
+			writer.write(buf.toString());
 			writer.flush();
-			
-			writer.write("	}\n");
-			writer.write("}\n");
+
+			writer.println("\t}");
+			writer.println("}");
 			writer.flush();
 			writer.close();
-			
-		} catch (IOException e) {
-			// TODO 自動生成された catch ブロック
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * 最後の処理。
 	 * バッファに残っているデータを書き出す。
-	 *
 	 */
-	public void close(TranslatorWriter myWriter){
-		if(buf.length() <= 0){
+	public void close(TranslatorWriter myWriter)
+	{
+		if (buf.length() <= 0)
+		{
 			return;
 		}
 		makeOutput(myWriter);
-		buf = new StringBuffer(MAX_BUF);
-		tmpbuf = new StringBuffer(MAX_BUF / 10);
-		
+		buf = new StringBuilder(MAX_BUF);
+		tmpbuf = new StringBuilder(MAX_BUF / 10);
 	}
 }
