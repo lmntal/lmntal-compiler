@@ -5,7 +5,7 @@
 	<property name="bin"  location="bin"/>
 	<property name="lib"  location="tools"/>
 	<property name="docs" location="doc"/>
-	<property name="classpath"  value=""/>
+	<property name="classpath"  value="C:/eclipse/eclipse3.7.2/plugins/org.junit_4.8.2.v4_8_2_v20110321-1705/junit.jar" />
 	<property name="lmntal_lib" location="lib"/>
 	<property name="java_ver" value="1.6"/>
 	
@@ -50,14 +50,14 @@
 		</exec>
 	</target>
 
-<target name="mkdir">
-<mkdir dir="${build}"/>
-</target>
+	<target name="mkdir">
+		<mkdir dir="${build}" />
+	</target>
 
 	<target name="system_ruleset" depends="mkdir" description="generate Global system ruleset">
 		<javac srcdir="${src}" destdir="${build}" classpath="${classpath}" 
 				encoding="${encoding}" target="${java_ver}" source="${java_ver}"
-				includes="util/GlobalSystemRulesetGenerator.java"/>
+				includes="util/GlobalSystemRulesetGenerator.java" includeantruntime="false" />
 		<java classname="util.GlobalSystemRulesetGenerator" 
 				classpath="${build}" output="${src}/runtime/GlobalSystemRuleset.java" fork="true">
 			<sysproperty key="LMNTAL_HOME" value="${basedir}"/>
@@ -67,8 +67,8 @@
 	<!-- java compile -->
 	<target name="compile" depends="mkdir" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp}" 
-				encoding="${encoding}" target="${java_ver}" source="${java_ver}"/>
+		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp}"
+				encoding="${encoding}" target="${java_ver}" source="${java_ver}" includeantruntime="false" />
 	</target>
 	<target name="jar" depends="mkdir,compile">
 		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
