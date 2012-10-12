@@ -1,7 +1,0 @@
-timer:benchmark(X,"Elapsed Time").
-{ +X.
-  gen(1) :- .
-  gen(N) :- N>1 | p(N),gen(N-1).
-  p(A),p(B) :- B mod A =:= 0 | p(A). 
-  go :- gen(200).
-}

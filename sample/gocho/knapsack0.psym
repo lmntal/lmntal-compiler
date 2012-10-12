@@ -1,1 +1,0 @@
-p = output{total_p(P), $o} :- P >= 230 |

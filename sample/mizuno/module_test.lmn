@@ -1,4 +1,0 @@
-{module(hoge).
-hoge.hoge :- ok.
-}.
-hoge.hoge.

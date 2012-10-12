@@ -1,6 +1,0 @@
-var.use.
-area = var(width) * var(height).
-var.bind(width, 3).
-var.unify(width, height).
-
-

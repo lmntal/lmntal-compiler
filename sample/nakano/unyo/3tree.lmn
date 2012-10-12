@@ -1,4 +1,0 @@
-%b(c(d(e,e,e),d(e,e,e),d(e,e,e)),c(d(e,e,e),d(e,e,e),d(e,e,e)),c(d(e,e,e),d(e,e,e),d(e,e,e))),b(c(d(e,e,e),d(e,e,e),d(e,e,e)),c(d(e,e,e),d(e,e,e),d(e,e,e)),c(d(e,e,e),d(e,e,e),d(e,e,e))),b(c(d(e,e,e),d(e,e,e),d(e,e,e)),c(d(e,e,e),d(e,e,e),d(e,e,e)),c(d(e,e,e),d(e,e,e),d(e,e,e)))).
-
-a(1), a(1).
-a(X), a(Y) :- a(X+Y).

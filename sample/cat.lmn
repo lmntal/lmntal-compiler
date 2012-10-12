@@ -1,9 +1,0 @@
-/**
- * 標準入力を標準出力に書き出すサンプル
- * @author hara
- */
-io.use.
-
-o=done.
-o=done:-i=io.readline(data).
-i=done, data(D):-o=io.print(D).

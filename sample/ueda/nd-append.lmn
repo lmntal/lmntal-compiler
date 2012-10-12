@@ -1,5 +1,0 @@
-append(X,Y,Z) :- X=[], Y=Z.
-append(X0,Y,[A|Z]) :- X0=[A|X], append(X,Y,Z).
-res(X,Y),append(X,Y,[1,2,3,4,5]).
-
-

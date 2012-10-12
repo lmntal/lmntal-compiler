@@ -1,3 +1,0 @@
-{edge(1,4). edge(1,9). edge(2,8). edge(3,10). edge(5,1). edge(5,8). edge(7,4). edge(7,5). edge(7,10). edge(8,3). edge(8,9). edge(9,3). edge(10,7).}.
-
-{edge(A,B),edge(B1,C),edge(C1,D),edge(D1,E),edge(E1,A1),$p} :-A=A1,B=B1,C=C1,D=D1,E=E1| {edge(A,B),edge(B1,C),edge(C1,D),edge(D1,E),edge(E1,A1),loop([A,B,C,D,E]),$p}.

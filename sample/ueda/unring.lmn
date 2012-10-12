@@ -1,4 +1,0 @@
-kid(kid(kid(kid(kid(kid(kid(kid(kid(kid(kid(kid(kid(kid(kid(kid(_105))))))))))))))),_105).
-
-kid(A,X),kid(X,D) :-
-    kid(A,B),hand(B),hand(C),kid(C,D).

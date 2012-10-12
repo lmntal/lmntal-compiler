@@ -1,9 +1,0 @@
-/*
- * 多倍長整数で階乗を計算するプログラム
- */
-bigint.use.
-
-H=fact(N) :- custom_ii_bigint_gt(N, "0") | H=bigint.multiply(N, fact(bigint.subtract(N, bigint.one))).
-H=fact(N) :- custom_ii_bigint_eq(N, "0") | H=bigint.one.
-	//H=fact(bigint.zero) :- だと反応しない
-ret=fact(bigint.new("100")).

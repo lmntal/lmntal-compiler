@@ -1,3 +1,0 @@
-not(1,x).
-not(IN,OUT) :- IN = 0 | OUT=1.
-not(IN,OUT) :- IN = 1 | OUT=0.

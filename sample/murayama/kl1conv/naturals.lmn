@@ -1,6 +1,0 @@
-%自然数を次々と発生させ、その自然数を足しあわせる
-
-naturals(5). sum([]).
-naturals(X), sum(B):- int(X),X>0| naturals(X-1), sum([X|B]).
-
-sum([F,S|B]) :- sum([F+S|B]).

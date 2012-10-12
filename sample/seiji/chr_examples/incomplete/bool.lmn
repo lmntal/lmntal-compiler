@@ -1,8 +1,0 @@
-/* boolean.chr */
-
-boolean(0) :- true.
-boolean(1) :- true.
-
-labeling \ boolean(A) :- 
-
-

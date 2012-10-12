@@ -1,3 +1,0 @@
-//先にbob.lmnを実行しておく
-socket=getOutputStream(java_net_Socket.new("localhost", 10000), OS).
-pw=flush(write(java_io_PrintWriter.new(OS), "hello")).

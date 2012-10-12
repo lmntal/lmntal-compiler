@@ -1,9 +1,0 @@
-% 次々と数字を作成する生産者と、その数字を食べていく消費者
-% -sをつけるとつけないとで終了時間が変わる
-
-generator(100000,Stream), consumer(Stream).
-
-generator(N,Stream) :- N =\=0 | Stream = [N | NextStream],
-											  generator(N-1, NextStream).
-
-consumer([N|Stream]) :- int(N) | consumer(Stream).

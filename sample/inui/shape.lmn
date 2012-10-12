@@ -1,7 +1,0 @@
-{
-module(shape).
-H=shape.new(Color) :- unary(Color) | H={color(Color)}.
-H=getColor({color(Color), $p}, ResColor) :- unary(Color) | H={color(Color), $p}, ResColor=Color.
-H=setColor({color(Color), $p}, NewColor) :- unary(Color), unary(NewColor) |
-	H={color(NewColor), $p}.
-}.

@@ -1,4 +1,0 @@
-//bob.lmnに続いてalice.lmnを実行する
-server=accept(java_net_ServerSocket.new(10000), Socket).
-socket=getInputStream(Socket, IS).
-br=readLine(java_io_BufferedReader.new(java_io_InputStreamReader.new(IS)), s).

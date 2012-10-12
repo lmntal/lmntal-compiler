@@ -1,4 +1,0 @@
-search([4,6,2,8,3,7],0).
-search([H|B],X) :- int(X),int(H),ground(B),X=H | found(X).
-search([H|B],X) :- int(X),int(H),X=\=H | search(B,X).
-search([],X) :- int(X) | notfound(X).

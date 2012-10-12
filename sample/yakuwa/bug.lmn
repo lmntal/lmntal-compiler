@@ -1,8 +1,0 @@
-process{
-  factory{}. 
-  sMsg{list([{c}])}.
-  working(0).
-  
-  factory{$f, @f}, rMsg{list([{$msg}|$rm])}, working(0) :- 
-    factory{$f, $msg, @f}, rMsg{list($rm)}, working(1).
-}.

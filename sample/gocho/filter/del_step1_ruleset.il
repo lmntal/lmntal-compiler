@@ -1,2 +1,0 @@
-Compiled Ruleset @650
-

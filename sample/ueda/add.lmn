@@ -1,5 +1,0 @@
-Z=add(0,Y) :- Y=Z.
-Z=add(s(X),Y) :- Z=s(add(X,Y)).
-
-ans=add(s(s(s(0))),s(s(0))).
-

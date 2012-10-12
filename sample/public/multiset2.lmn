@@ -1,5 +1,0 @@
-/* hierarchical multiset rewriting (2)
-   2005-11-21, Kazunori Ueda
-*/
-
-{out,a,b,c}, d, {e,f}, ({out,$p[]} :- $p[]).

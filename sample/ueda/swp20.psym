@@ -1,2 +1,0 @@
-send = { C=data(DN),$p,@p } :- int(DN), ground(C) |
-ack = { C=ack(ACK),$p,@p } :- int(ACK), ground(C) |

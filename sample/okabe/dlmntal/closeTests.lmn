@@ -1,9 +1,0 @@
-% dlmntal.close, dlmntal.terminate のテスト
-
-dlmntal.bind(50000,[accept(times(X,2),X),close]).
-
-% timesフィルタ
-Ret=times([H|T],N) :- int(N),string(H) |
-  Ret=[string.times(H,N),close|times(T,N)], dlmntal.terminate.
-
-closed(S,R) :- terminated(S,R), dlmntal.terminate.

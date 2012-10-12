@@ -1,9 +1,0 @@
-person(tommy,male), 
-person(jenny,female),
-person(danny,male),
-
-getout(male).
-
-getout($g), person($n,$s) :-
-    unary($g), unary($n), unary($s), $g=$s |
-    getout($g).

@@ -1,7 +1,0 @@
-/* multiset rewriting -- compute factorials
-   Kazunori Ueda, 2004-11-14
-*/
-
-n(I), n(J) :- n(I*J).
-
-n(1), n(2), n(3), n(4), n(5), n(6), n(7), n(8), n(9), n(10).

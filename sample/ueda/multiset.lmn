@@ -1,5 +1,0 @@
-/* hierarchical multiset rewriting (1)
-   2005-11-21, Kazunori Ueda
-*/
-
-1,1,1, {1,1,1,1,1, {1,1,1}, (1,1:-2)}.

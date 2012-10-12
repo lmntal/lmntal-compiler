@@ -1,6 +1,0 @@
-//最大公約数を求める
-gcd(37*11*11*7*3), gcd(11*7*5*3), gcd(37*11*5).
-
-gcd(N), gcd(M) :- N<M, (M mod N)>0 | gcd(N), gcd(M mod N).
-gcd(N), gcd(M) :- N<M, (M mod N)=:=0 | gcd(N).
-

@@ -1,4 +1,4 @@
-<project name="LMNtal" default="dist" basedir=".">
+<project name="LMNtal" default="jar" basedir=".">
 	<!-- directory properties -->
 	<property name="src" location="src"/>
 	<property name="build" location="classes"/>
@@ -8,41 +8,29 @@
 	<property name="classpath"  value="C:/eclipse/eclipse3.7.2/plugins/org.junit_4.8.2.v4_8_2_v20110321-1705/junit.jar" />
 	<property name="lmntal_lib" location="lib"/>
 	<property name="java_ver" value="1.6"/>
-	
+
 	<!-- tool properties -->
 	<property name="flex"  location="${lib}/JFlex.jar"/>
 	<property name="bison"  location="${lib}/java_cup.jar"/>
 	<property name="jpp" location="${lib}/jpplib-0.6.jar"/>
-	
+
 	<!-- properties -->
 	<property name="encoding" value="euc-jp"/>
-	
+
 	<!-- flex compile -->
 	<target name="flex_lmntal">
 		<java jar="${flex}" dir="${src}/compile/parser" fork="true">
 			<arg value="lmntal.flex"/>
 		</java>
 	</target>
-	<target name="flex_intermediate">
-		<java jar="${flex}" dir="${src}/compile/parser/intermediate" fork="true">
-			<arg value="intermediate.flex"/>
-		</java>
-	</target>
-	<target name="flex_all" depends="flex_lmntal,flex_intermediate" />
-	
+
 	<!-- bison compile, clean -->
 	<target name="bison_lmntal">
 		<java jar="${bison}" dir="${src}/compile/parser" fork="true">
 			<arg value="lmntal.cup"/>
 		</java>
 	</target>
-	<target name="bison_intermediate">
-		<java jar="${bison}" dir="${src}/compile/parser/intermediate" fork="true">
-			<arg value="intermediate.cup"/>
-		</java>
-	</target>
-	<target name="bison_all" depends="bison_lmntal,bison_intermediate" />
-	
+
 	<!-- generate java sources -->
 	<target name="help" description="generate Help.java from comment of FrontEnd.java">
 		<exec executable="perl" input="${src}/runtime/FrontEnd.java" output="${src}/runtime/Help.java">
@@ -54,22 +42,13 @@
 		<mkdir dir="${build}" />
 	</target>
 
-	<target name="system_ruleset" depends="mkdir" description="generate Global system ruleset">
-		<javac srcdir="${src}" destdir="${build}" classpath="${classpath}" 
-				encoding="${encoding}" target="${java_ver}" source="${java_ver}"
-				includes="util/GlobalSystemRulesetGenerator.java" includeantruntime="false" />
-		<java classname="util.GlobalSystemRulesetGenerator" 
-				classpath="${build}" output="${src}/runtime/GlobalSystemRuleset.java" fork="true">
-			<sysproperty key="LMNTAL_HOME" value="${basedir}"/>
-		</java>
-	</target>
-	 
 	<!-- java compile -->
 	<target name="compile" depends="mkdir" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
 		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp}"
 				encoding="${encoding}" target="${java_ver}" source="${java_ver}" includeantruntime="false" />
 	</target>
+
 	<target name="jar" depends="mkdir,compile">
 		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
 		<jar jarfile="${bin}/lmntal.jar" basedir="${build}">
@@ -78,20 +57,6 @@
 			</manifest>
 			<zipfileset src="${jpp}"/>
 		</jar>
-	</target>
-
-	<!-- lmntal library -->
-	<target name="lib" depends="mkdir,compile" description="compile lmntal libraries">
-		<java classname="compile.Translator" dir="${lmntal_lib}" classpath="${build}" fork="true">
-			<sysproperty key="LMNTAL_HOME" value="${basedir}"/>
-			<arg value="-O" />
-		</java>
-	</target>
-	<target name="lib_clean" description="delete compiled lmntal libraries">
-		<delete>
-			<fileset dir="${lmntal_lib}" includes="*.jar" />
-			<fileset dir="${lmntal_lib}/public/translated" includes="*.class" />
-		</delete>
 	</target>
 
 	<!-- distribution -->
@@ -106,6 +71,7 @@
 			<tarfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
 		</tar>
 	</target>
+
 	<target name="zip">
 		<zip destfile="lmntal.zip" >
 			<zipfileset dir="${bin}" excludes="set_cp*,*.bat,lmntal.jar" prefix="bin" filemode="755"/>
@@ -119,8 +85,7 @@
 	</target>
 	<target name="dist" depends="help,jar,archive" description="generate the distribution"/>
 
-	
-	<target name="clean" depends="mkdir,lib_clean" description="clean up">
+	<target name="clean" depends="mkdir" description="clean up">
 		<!-- Delete the ${build} and ${dist} directory trees -->
 		<delete>
 			<fileset dir="${build}" includes="**"/>
@@ -128,13 +93,7 @@
 			<fileset file="lmntal.tgz"/>
 		</delete>
 	</target>
-	
-	<target name="run">
-		<java jar="${bin}/lmntal.jar" fork="true">
-			<sysproperty key="LMNTAL_HOME" value="${basedir}"/>
-		</java>
-	</target>
-	
+
 	<target name="doc">
 		<javadoc destdir="${docs}" author="true" version="true" use="true" windowtitle="LMNtal API" encoding="${encoding}" charset="${encoding}">
 			<fileset dir="${src}" defaultexcludes="yes"/>

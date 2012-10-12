@@ -1,7 +1,0 @@
-
-
-l=append([7,6,5], [4,3,2,1]).
-
-app1 @@ R=append([H|T],L) :- R=[H|append(T,L)].
-app2 @@ R=append([],L) :- R=(L).
-sort @@ R=[X,Y|T] :- X>Y | R=[Y,X|T].

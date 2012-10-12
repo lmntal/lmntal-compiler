@@ -1,5 +1,0 @@
-#!/home/hara/lmn
-
-io.print([:Hello, world:]).
-print(hoge).
-io.use.

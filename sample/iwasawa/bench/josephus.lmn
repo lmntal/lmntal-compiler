@@ -1,9 +1,0 @@
-del(j(60, p(gen(48000, X), X))).
-del([H|T]) :- int(H) | del(T).
-gen(0, L, R) :- L=R.
-gen(N, L, R) :- N=\=0,M=N-1 | R=n(N, gen(M, L)).
-j(N, P, R), p(n(X,A),B,P) :- j(N, 0, p(n(X,A),B), R).
-j(N, P, R), p(A,A,P) :- int(N) | R=[].
-j(N, M, P, R), p(n(X,A),B,P) :- N=:=M | R=[X|j(N, p(A,B))].
-j(N, M, P, R), p(n(X,A),B,P) :-
-N=\=M,O=M+1 | j(N, O, p(A,L), R), n(X,L,B).

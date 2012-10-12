@@ -1,7 +1,0 @@
-% benzene.lmn
-% 		2009.04
-
-c(L0,X0,X1,Y0), c(L1,X2,X0,Y0), c(L2,X3,X2,Y1),
-c(L3,X4,X3,Y1), c(L4,X5,X4,Y2), c(L5,X1,X5,Y2),
-h(L0), h(L1), h(L2),
-h(L3), h(L4), h(L5).

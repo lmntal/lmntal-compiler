@@ -1,3 +1,0 @@
-a(0). b(1).
-a(N), b(M) :- int(N), int(M), N =< 100,  N =< M | num(N), a(M), b(N+M).
-a(N), b(M) :- int(N), int(M) | .

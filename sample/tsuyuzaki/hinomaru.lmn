@@ -1,2 +1,0 @@
-{{white(A,B,E)},{black(A,D,C)},{white(B,D,F)},{black(C,E,F)}}.
-{{black(X1,X2,X3)}, $p}:-{{white(X1,X2,X3,X4)},{white(X4)}, $p}.

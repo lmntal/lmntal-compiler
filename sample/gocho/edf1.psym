@@ -1,1 +1,0 @@
-p = {$p, @p, endtime(T)} :- int(T) |

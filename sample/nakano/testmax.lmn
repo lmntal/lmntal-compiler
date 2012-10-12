@@ -1,8 +1,0 @@
-a(_IX) :-
-	[:/*inline*/
-		Atom result = mem.newAtom(new SymbolFunctor("a", 1));
-		System.out.println(me.nthAtom(0));
-		mem.relink(result, 0, me, 1);
-		me.remove();
-	:](_IX + 1) , b.
-a(1).

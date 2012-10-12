@@ -1,4 +1,0 @@
-var.use.
-leq(var(1), var(1)).
-
-leq(var(X1), var(X2)) :- X1=X2 | var.unify(X1, X2).

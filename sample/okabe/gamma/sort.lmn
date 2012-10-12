@@ -1,6 +1,0 @@
-/* Sorting */
-
-array(I,V), array(J,W) :- I>J, V<W | array(I,W), array(J,V).
-
-array(1,8),array(2,7),array(3,13),array(4,2),array(5,1),
-array(6,4),array(7,9),array(8,3),array(9,10),array(10,4).

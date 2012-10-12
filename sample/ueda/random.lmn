@@ -1,8 +1,0 @@
-H = random(N) :- int(N) | H=[:/*inline*/
-     int n = ((IntegerFunctor)me.nthAtom(0).getFunctor()).intValue();
-      Random rand = new Random();
-      int rn = (int)(n*Math.random());
-      Atom result = mem.newAtom(new IntegerFunctor(rn));
-      mem.relink(result, 0, me, 1);
-      me.nthAtom(0).remove(); me.remove();
- :](N).

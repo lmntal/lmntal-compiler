@@ -1,3 +1,0 @@
-br=java_io_BufferedReader.new(java_io_FileReader.new("hoge")).
-H=java_io_BufferedReader.new(E) :- class(E, "java.io.FileNotFoundException") |
-	H=java_io_InputStreamReader.new(java_lang_System.in).

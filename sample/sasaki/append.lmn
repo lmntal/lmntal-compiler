@@ -1,4 +1,0 @@
-r = append([1,2],[3,4,5]).
-
-R=append([],L) :- R=L.
-R=append([H|T],L) :- R0=append(T,L), '.'(H,R0,R).

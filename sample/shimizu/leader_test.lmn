@@ -1,5 +1,0 @@
-msgs{check(rcvTimer(2,ms(src(2),dest(1),ldr(1),hops(1)))). check(rcvTimer(2,ms(src(2),dest(3),ldr(1),hops(1)))).  }. 
-
- msgs{check(rcvTimer(T1,X)),$p}:-
- int(T1), ground(X)|
- msgs{rcvTimer(T1,X),$p}.

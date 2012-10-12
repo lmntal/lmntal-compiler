@@ -1,1 +1,0 @@
-p = p(X,Y),p(P,Q) :- int(X),int(Y),int(P),int(Q) |

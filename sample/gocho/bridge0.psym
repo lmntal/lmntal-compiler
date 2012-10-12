@@ -1,2 +1,0 @@
-p = p(l, P1) :- int(P1) |
-q = time(T)  :- T < 18

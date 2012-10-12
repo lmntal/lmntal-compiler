@@ -1,3 +1,0 @@
-a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free),a(free,free).
-
-free(A),free(B),a(A,C),a(D,B) :- a(X,C),a(D,X).

@@ -1,1 +1,0 @@
-p= m(n(NI1)),m(n(NI2)),m(n(NI3)),l2(alice,n(NA1),n(NA2)),l2(bob,n(NB1),n(NB2)), nonce{'+'(NI1),'+'(NB1),$n1},nonce{'+'(NI3),'+'(NA1),$n2},nonce{'+'(NI2),'+'(NA2),'+'(NB2),$n3}

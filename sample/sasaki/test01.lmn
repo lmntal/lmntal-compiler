@@ -1,5 +1,0 @@
-mkelements@@
-e(N) :- N =< 10 | n(N*N),e(N+1).
-fin@@
-e(N) :- N > 10 |.
-e(1).

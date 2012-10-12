@@ -1,8 +1,0 @@
-provider=oo.ref(simpleBuffer.new, consumer([])).
-i(0), j(0).
-provide@@
-i(I), provider(P) :- I < 5 |
-	provider=put(P, I), i(I+1).
-consume@@
-j(J), consumer(Objects, C) :- J < 5 |
-	consumer([O|Objects], get(C, O)), j(J+1).

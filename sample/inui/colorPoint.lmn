@@ -1,7 +1,0 @@
-//色つきの二次元座標
-{
-module(colorPoint).
-H=colorPoint.new(X, Y, Color) :- H={x(X), y(Y), color(Color)}.
-H=getColor({color(Color), $p}, ResColor) :- H={$p}, ResColor=Color.
-H=setColor({$p}, NewColor) :- H={color(NewColor), $p}.
-}.

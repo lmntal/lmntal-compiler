@@ -1,7 +1,0 @@
-//l=line.new(point.new(1, 2), point.new(3, 4)).
-//p=translate(getX(point.new(1, 2), x), 3, 4).
-//l1=length(line.new(point.new(1, 2), point.new(3, 4)), len1).
-//l2=length(line.new(1, 2, 3, 4), len2).
-
-point.use.
-p=getColor(translate(colorPoint.new(1, 2, 0), 3, 4), color).

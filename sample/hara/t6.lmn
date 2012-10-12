@@ -1,8 +1,0 @@
-ListMaxMin @@ 
-dummy(_GA), list(L) :- ground(L), custom_io_list_max(L, Max), custom_io_list_min(L, Min), custom_i_test(_GA) |
-dummy(_GA), list_ok(L, Max, Min).
-
-dummy(a).
-list=integer.rndList(100, 10).
-
-list.use_guard.

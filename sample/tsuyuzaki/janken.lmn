@@ -1,7 +1,0 @@
-gu(A,B).
-choki(A,C).
-pa(B,C).
-
-choki(A,C),pa(B,C):- choki(A,C),pa(C),{trash(B)}.
-gu(A,B),choki(A,C):- gu(A,B),choki(A),{trash(C)}.
-

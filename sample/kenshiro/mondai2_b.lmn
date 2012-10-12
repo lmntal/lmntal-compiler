@@ -1,4 +1,0 @@
-x(10), y(0), flag_2_1(0), flag_2_2(0).
-rule1 @@ x(A), y(B):- A=\=B, A2=A-1, B2=B+1 | x(A2), y(B2).
-rule2_1 @@ x(A), y(B), flag_2_1(M), flag_2_2(N):- M=:=0, N=:=0, A=:=B | x(8), y(B), flag_2_1(1), flag_2_2(N).
-rule2_2 @@ y(B), flag_2_1(M), flag_2_2(N):- M=:=1, N=:=0, unary(B) | y(2), flag2_1(M), flag_2_2(1).

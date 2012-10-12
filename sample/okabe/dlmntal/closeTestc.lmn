@@ -1,8 +1,0 @@
-% dlmntal.close, dlmntal.terminate のテスト
-
-dlmntal.connect("127.0.0.1",50000,["lmntal?"],ret).
-
-dlmntal.socket(Send,Recv,Obj),Ret=[H|Recv] :- string(H) |
-  dlmntal.socket([close|Send],Recv,Obj),Ret=[H|Recv].
-
-closed(S,R) :- terminated(S,R), dlmntal.terminate.
